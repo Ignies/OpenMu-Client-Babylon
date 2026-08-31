@@ -1,21 +1,21 @@
 # OpenMuJSClient
 One Client to rule them all.
-
+## Main server selection screen:
 https://github.com/user-attachments/assets/3e5d8266-ea30-4f6a-990d-44006c4b6639
 
-
+## Character movement + combat:
 https://github.com/user-attachments/assets/94b1529d-322d-4655-9fef-e48d447796f0
 
-
+## Guild creation:
 https://github.com/user-attachments/assets/ed5daea2-f9fd-4370-a884-442dfa20843a
 
-
+## Translation system:
 https://github.com/user-attachments/assets/fb16b2db-ec7a-4060-bf26-f0d8cf7d95be
 
-
+## Item upgrades and new effects:
 https://github.com/user-attachments/assets/465fa86a-1a7b-4c26-9794-aba5297c5e19
 
-
+## Emote wheel:
 https://github.com/user-attachments/assets/35c67fab-1c7c-4c41-b5a0-97cc0c90fd6a
 
 
