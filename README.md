@@ -19,10 +19,10 @@ https://github.com/user-attachments/assets/465fa86a-1a7b-4c26-9794-aba5297c5e19
 https://github.com/user-attachments/assets/35c67fab-1c7c-4c41-b5a0-97cc0c90fd6a
 
 
-This is a client for OpenMU made in BabylonJS, the system is being developed to work with any version available and connect on the go to different kind of servers either stored in this repo's serverlist.md or added manually to the list.
+Client for OpenMU made in BabylonJS based of afrokick's JSClient, the client is being developed to work with any version available and connect on the go to different servers either stored in this repo's serverlist.md or added manually to the list.
 
-Current working version is S6EP3, more to be added down the line.
 
+Current working ~somewhat version is S6EP3, more to be added down the line.
 
 ## Installing
 
