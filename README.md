@@ -10,16 +10,16 @@ https://github.com/user-attachments/assets/94b1529d-322d-4655-9fef-e48d447796f0
 https://github.com/user-attachments/assets/ed5daea2-f9fd-4370-a884-442dfa20843a
 
 
-
 https://github.com/user-attachments/assets/fb16b2db-ec7a-4060-bf26-f0d8cf7d95be
 
 
+https://github.com/user-attachments/assets/465fa86a-1a7b-4c26-9794-aba5297c5e19
 
 
+https://github.com/user-attachments/assets/35c67fab-1c7c-4c41-b5a0-97cc0c90fd6a
 
 
-
-This is a client for OpenMU made in Javascript, the system is being developed to work with any version available and connect on the go to different kind of servers either stored in this repo's serverlist.md or added manually to the list.
+This is a client for OpenMU made in BabylonJS, the system is being developed to work with any version available and connect on the go to different kind of servers either stored in this repo's serverlist.md or added manually to the list.
 
 Current working version is S6EP3, more to be added down the line.
 
