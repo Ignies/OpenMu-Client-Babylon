@@ -1,0 +1,61 @@
+@import (reference) '../muText/style.less';
+// `CNewUIBuffWindow`: icons at absolute 640×480 positions; the component
+// supplies the numbers, this file only says how a cell behaves.
+.buff-bar {
+  position: absolute;
+  transform-origin: 0 0;
+  pointer-events: auto;
+  user-select: none;
+
+  .buff {
+    position: absolute;
+    cursor: default;
+    image-rendering: pixelated;
+
+    // The icons are drawn without a frame in the original; a hair of red
+    // under a debuff is ours, so the two kinds read apart at a glance.
+    &.debuff {
+      box-shadow: 0 1px 0 rgba(255, 60, 60, 0.9);
+    }
+
+    .buff-text {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .mu-font();
+      font-size: 8px;
+      color: #fff;
+      background: rgba(40, 60, 120, 0.75);
+      border: 1px solid rgba(255, 230, 160, 0.8);
+      box-sizing: border-box;
+    }
+  }
+
+  // `RenderBuffTooltip`: a tip box hanging under the icon, name bold blue.
+  .buff-tip {
+    position: absolute;
+    z-index: 2;
+    transform: translateX(-50%);
+    padding: 2px 5px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #000;
+    .mu-font();
+    font-size: 11px;
+    line-height: 13px;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+
+    .buff-tip-name {
+      color: #80b3ff;
+      font-weight: bold;
+    }
+
+    .buff-tip-debuff {
+      color: #ff6a6a;
+    }
+  }
+}

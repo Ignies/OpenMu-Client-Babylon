@@ -1,0 +1,36 @@
+@import (reference) '../../../../components/muText/style.less';
+// Party invite / guild join question. Not modal like `CMsgWin`: the original
+// lets the hero keep playing while the box waits, so the layer lets clicks
+// through and only the box itself catches them.
+.social-prompt-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 600; // WINDOW_Z_MODAL: over the windows and the sheets
+  .mu-font();
+  user-select: none;
+}
+
+.social-prompt {
+  position: absolute;
+  left: 50%;
+  top: 25%;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  flex: none;
+
+  .social-prompt-text {
+    position: absolute;
+    left: 25px;
+    right: 25px;
+    top: 32px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    font-size: 11px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}

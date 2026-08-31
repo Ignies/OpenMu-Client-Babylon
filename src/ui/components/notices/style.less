@@ -1,0 +1,21 @@
+// RenderNotices: centred lines, 13 px apart in the 640×480 layout.
+.notices {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  z-index: 5;
+
+  .notice-line {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    .mu-text {
+      padding: 0 1px;
+    }
+  }
+}

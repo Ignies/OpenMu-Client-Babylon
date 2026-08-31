@@ -1,0 +1,100 @@
+@import (reference) '../../components/muText/style.less';
+.characters-page {
+  position: absolute;
+  inset: 0;
+  .mu-font();
+  user-select: none;
+}
+
+// `UIMng.cpp:264` places it at x = 22 and
+//   y = (567 / 600) * screenHeight - height - 11
+// which measured from the bottom is (33 / 600) * screenHeight + 11.
+.char-sel-bar {
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: calc(5.5% + 11px);
+}
+
+.char-sel-info {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+// `CCharMakeWin`. `UIMng.cpp:269` puts it at
+//   ((screenWidth - 454) / 2, (screenHeight - 406) / 2)
+// i.e. dead centre. Everything inside is absolutely positioned from the
+// window's top-left, exactly as `SetPosition` does it - MU's UI is authored at
+// fixed pixel sizes and must never reflow.
+.char-make-win {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  pointer-events: auto;
+}
+
+// The 410x335 hole `RenderCreateCharacter` draws the class model into. It has
+// no background of its own; it only has to not swallow clicks meant for the
+// scene behind it.
+.char-make-preview {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+
+// `m_asprBack[CMW_SPR_STAT]` and `[CMW_SPR_DESC]`: untextured quads, black at
+// alpha 143/255, drawn by the sprite pipeline with no border or gradient.
+.char-make-panel {
+  position: absolute;
+  pointer-events: none;
+}
+
+// `RenderControls` switches to `g_hFixFont` for the stats and the description,
+// so both are monospaced in the original.
+.char-make-stat,
+.char-make-desc {
+  position: absolute;
+  color: #ffffff;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+}
+
+// `CLRDW_ORANGE` = ARGB(255, 255, 180, 0) (`UIBaseDef.h:16`).
+.char-make-stat-value {
+  color: #ffb400;
+}
+
+// The `cha_id` plate is the field's background, so the input itself is
+// invisible chrome sitting on top of it, sized to `InputTextWidth`.
+.char-make-input {
+  position: absolute;
+  height: 14px;
+  padding: 0;
+  box-sizing: border-box;
+  pointer-events: auto;
+
+  background: transparent;
+  border: none;
+  outline: none;
+
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1;
+}

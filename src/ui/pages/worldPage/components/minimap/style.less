@@ -1,0 +1,121 @@
+// CNewUIMiniMap. Every coordinate lives in the original's 640×480 UI space on
+// the `.minimap-stage`; the overlay itself darkens the whole viewport.
+@edge-width: 35px;
+@edge-height: 6px;
+@corner-size: 35px;
+
+.minimap-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  user-select: none;
+  overflow: hidden;
+  z-index: 500; // WINDOW_Z_SHEETS: a full-screen sheet over every window
+}
+
+.minimap-stage {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform-origin: 0 0;
+  // `scale()` is applied inline; the translate keeps the stage centred.
+  margin-left: -320px;
+}
+
+.minimap-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.minimap-map {
+  position: absolute;
+  background-size: 100% 100%;
+  // The map picture is a 1024² painting scaled down: smooth it, unlike the
+  // pixel-art widgets.
+  image-rendering: auto;
+  pointer-events: none;
+}
+
+.minimap-sprite {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.minimap-marker-hit {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+
+.minimap-edge {
+  position: absolute;
+  background-repeat: repeat;
+  pointer-events: none;
+}
+
+.minimap-edge-top {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: @edge-height;
+  // `RenderImage(..., 0.f, 1.f, uvxy, -uvxy_Line)`: the top strip is drawn
+  // upside down.
+  transform: scaleY(-1);
+}
+
+.minimap-edge-bottom {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: @edge-height;
+}
+
+// The side strips are the top strip turned 90° about its top-left corner
+// (`RenderBitmapRotate(..., ±90.f, ...)`).
+.minimap-edge-side {
+  top: 0;
+  width: 430px;
+  height: @edge-height;
+  transform-origin: 0 0;
+}
+
+.minimap-corner {
+  position: absolute;
+  width: @corner-size;
+  height: @corner-size;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.minimap-corner-tl {
+  left: 0;
+  top: 0;
+}
+
+.minimap-corner-tr {
+  right: 0;
+  top: 0;
+  transform: scaleX(-1);
+}
+
+.minimap-corner-bl {
+  left: 0;
+  bottom: 0;
+  transform: scaleY(-1);
+}
+
+.minimap-corner-br {
+  right: 0;
+  bottom: 0;
+  transform: scale(-1, -1);
+}
+
+.minimap-close {
+  position: absolute;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  pointer-events: auto;
+}

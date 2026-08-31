@@ -1,0 +1,121 @@
+// The four quest windows (`CNewUINPCQuest`, the NPC quest list,
+// `CNewUIQuestProgress`, `CNewUIMyQuestInfoWindow`). Coordinates live in
+// layout.ts; this is only how each piece looks.
+.quest-window {
+  font-size: 11px;
+
+  .window-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .quest-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .quest-line.left {
+    text-align: left;
+  }
+
+  // `UpdateSelTextMouseEvent`: an answer turns red under the mouse.
+  .quest-answer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    text-shadow: 1px 1px 0 #000;
+
+    &:hover {
+      color: rgb(255, 0, 0) !important;
+    }
+
+    &.disabled {
+      pointer-events: none;
+      opacity: 0.5;
+    }
+  }
+
+  // `RenderSelTextBlock`: (0.5, 0.7, 0.3, 0.5) behind the hovered answer.
+  .quest-answer.block:hover {
+    background: rgba(128, 179, 77, 0.5);
+    color: rgb(255, 230, 210) !important;
+  }
+
+  .quest-list {
+    position: absolute;
+    overflow-y: auto;
+    overflow-x: hidden;
+    pointer-events: auto;
+
+    .row {
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 1px 4px;
+      text-shadow: 1px 1px 0 #000;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      &.selected {
+        background: rgba(128, 179, 77, 0.5);
+      }
+
+      &.header {
+        font-weight: bold;
+        cursor: default;
+        margin-top: 4px;
+      }
+    }
+  }
+
+  .table-fill {
+    position: absolute;
+    background-color: #0000004d;
+  }
+
+  // The tab art is 48 / 72 px wide whatever the language, so the label
+  // shrinks to fit (`tabFontSize`) and is cut here instead of wrapping onto
+  // a second line over the tab next to it.
+  .quest-tab {
+    position: absolute;
+    cursor: pointer;
+    text-shadow: 1px 1px 0 #000;
+
+    span {
+      position: absolute;
+      left: 0;
+      right: 0;
+      padding: 0 2px;
+      text-align: center;
+      font-size: 10px;
+      // A fixed line box so a shrunk label keeps the sprite's baseline.
+      line-height: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  .quest-button {
+    position: absolute;
+  }
+}

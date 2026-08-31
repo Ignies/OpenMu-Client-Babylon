@@ -1,0 +1,20 @@
+import type { EventLayer } from './layer';
+import { matchNoticesLayer } from './matchNotices';
+import { bloodCastleLayer } from './bloodCastle';
+import { devilSquareLayer } from './devilSquare';
+import { chaosCastleLayer } from './chaosCastle';
+
+/**
+ * THE list. Every event in the game is one entry here, and adding an event
+ * is adding one line. Nothing else in the codebase enumerates them.
+ *
+ * Order is update order. Nothing reads another entry today, so it is only
+ * the order the HUD's readers settle in: the shared countdown line first,
+ * then the three events.
+ */
+export const EVENT_LAYERS: readonly EventLayer[] = [
+  matchNoticesLayer, // the 30 s state line + invasion banners, every map
+  bloodCastleLayer,
+  devilSquareLayer,
+  chaosCastleLayer,
+];

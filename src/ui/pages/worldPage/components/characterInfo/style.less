@@ -1,0 +1,110 @@
+// `CNewUICharacterInfoWindow` draws every line at an absolute coordinate
+// inside the window, so this file only describes how a line behaves - the
+// component supplies the original's numbers.
+.character-info {
+  font-size: 11px;
+
+  // `SetPlayerColor(Hero->PK)` - white for a character with no kills, which is
+  // the only state the client tracks.
+  .character-name {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  // The original cross-fades this with the selected server's name on a sine;
+  // there is no server name to alternate with until the world knows which
+  // game server it is on.
+  .character-class {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  // `glColor4f(0, 0, 0, 0.3f); RenderColor(x + 12, y + 48, 160, 66)`.
+  .table-fill {
+    position: absolute;
+    background-color: #0000004d;
+  }
+
+  .table-text {
+    position: absolute;
+    font-weight: bold;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+
+    // A line that has to sit inside a slot is given the slot's height and
+    // centred in it, rather than being placed by its top - see
+    // `LEVEL_FIELD_Y` in `layout.ts`.
+    &.centred {
+      display: flex;
+      align-items: center;
+      line-height: 1;
+    }
+
+    // `SetFont(g_hFont)` rather than `g_hFontBold` - the experience and fruit
+    // lines are the only ones in the table that are not bold.
+    &.thin {
+      font-weight: normal;
+    }
+  }
+
+  // Both halves of a stat row are centred in the plate in both directions:
+  // across their own half of it, which is why they are given a width rather
+  // than being laid out as a pair, and down its 19 drawn pixels.
+  .stat-label {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    line-height: 1;
+    color: #e6e600;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .stat-detail {
+    position: absolute;
+    white-space: nowrap;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .stat-button {
+    position: absolute;
+  }
+
+  .window-button {
+    position: absolute;
+
+    .button-tooltip {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 2px;
+      padding: 1px 4px;
+      background-color: #000000cc;
+      border: 1px solid #6a6a6a;
+      color: #fff;
+      font-size: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    &:hover .button-tooltip {
+      display: block;
+    }
+  }
+}

@@ -1,0 +1,34 @@
+// CUISlideHelp: a band across the very top of the screen with text sliding
+// in from the right. Both lanes share the same strip; only one is lit.
+.slide-help {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.slide-help-lane {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  overflow: hidden;
+  // The strip pauses the scroll while the mouse rests on it.
+  pointer-events: auto;
+}
+
+.slide-help-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.slide-help-text {
+  position: absolute;
+  transform-origin: 0 0;
+  white-space: pre;
+  // `SetBgColor(0)`: no box behind the glyphs.
+  background: none;
+}

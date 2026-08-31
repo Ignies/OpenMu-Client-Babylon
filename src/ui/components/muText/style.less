@@ -1,0 +1,57 @@
+// The original's GDI faces (Winmain.cpp:1251-1254), at the 640×480 sizes the
+// windows are laid out in; window scaling multiplies them like everything
+// else on the window.
+@mu-font-family:
+  // `--mu-script-font` is set by `i18n` to the faces the active language needs
+  // (CJK, Thai) and removed for every script Tahoma already covers (Latin,
+  // Cyrillic, Greek) — hence the `Tahoma` fallback inside `var()`, which keeps
+  // the declaration valid when the property is not set at all. The named CJK /
+  // Thai faces behind it catch a browser with no preference of its own.
+  var(--mu-script-font, Tahoma), Tahoma, Verdana, 'Malgun Gothic',
+  'Microsoft YaHei', 'Yu Gothic UI', 'Leelawadee UI', sans-serif;
+
+// The one place a window says which face it is set in. Windows call this
+// (`.mu-font();` after an `@import (reference)` of this file) instead of
+// spelling the family out themselves.
+.mu-font() {
+  font-family: @mu-font-family;
+}
+
+.mu-text {
+  font-family: @mu-font-family;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 13px;
+  color: #fff;
+  white-space: pre;
+  // ClearType text on a texture: no subpixel tricks, crisp at every scale.
+  -webkit-font-smoothing: antialiased;
+}
+
+.mu-text-bold {
+  font-weight: 600;
+}
+
+.mu-text-big {
+  font-size: 22px;
+  line-height: 26px;
+  font-weight: 600;
+}
+
+.mu-text-fix {
+  font-size: 13px;
+  line-height: 15px;
+}
+
+// RenderTipText: black outline, black(0.8) fill, 1-2 px of padding.
+.mu-tip-text {
+  font-family: @mu-font-family;
+  font-size: 11px;
+  line-height: 13px;
+  color: #fff;
+  padding: 1px 2px;
+  border: 1px solid #000;
+  white-space: pre;
+  pointer-events: none;
+  z-index: 1;
+}

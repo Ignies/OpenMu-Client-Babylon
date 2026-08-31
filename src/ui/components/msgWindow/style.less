@@ -1,0 +1,63 @@
+@import (reference) '../muText/style.less';
+// `CMsgWin`. The layer exists so the window is modal: `CursorInWin` reports
+// the message window under the cursor for every area but `WA_MOVE`, so while
+// it is up nothing behind it - including the staged characters - can be
+// clicked.
+.msg-window-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  z-index: 600; // WINDOW_Z_MODAL: over the windows and the sheets
+
+  .mu-font();
+  user-select: none;
+}
+
+// `UIMng.cpp:203` and `:247`:
+//   x = (screenWidth  - 352) / 2
+//   y = (screenHeight - 113) / 2
+// i.e. dead centre on both axes, in the login scene and the character scene
+// alike.
+.msg-window {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  // MU's UI is authored at fixed pixel sizes; the window must be positioned,
+  // never stretched or reflowed.
+  flex: none;
+}
+
+.msg-window-text {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  color: #ffffff;
+  font-size: 11px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+}
+
+// The box art is the input's background, so the field itself is invisible
+// chrome sitting exactly on top of it.
+.msg-window-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  pointer-events: auto;
+
+  background: transparent;
+  border: none;
+  outline: none;
+
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.2em;
+}

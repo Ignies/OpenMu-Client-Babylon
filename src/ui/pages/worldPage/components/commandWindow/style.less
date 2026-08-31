@@ -1,0 +1,40 @@
+// `CNewUICommandWindow`. Coordinates live in the component; this is only how
+// the title, the entries and the cursor's id tag are drawn.
+.command-window {
+  .command-title {
+    position: absolute;
+    display: block;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .command-entry {
+    // `m_BtnCommand[i].SetFont(g_hFontBold)` for the armed one.
+    &.armed span {
+      color: #fff;
+    }
+  }
+}
+
+// `RenderBitmap(BITMAP_COMMAND_WINDOW_BEGIN, MouseX + 5, MouseY + 5, 128, 32)`
+// with the name in `g_hFontBig` on a (20, 20, 20, 0) background.
+.command-id-tag {
+  position: fixed;
+  z-index: 1100;
+  pointer-events: none;
+  image-rendering: pixelated;
+
+  .command-id-name {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 3px;
+    display: block;
+    text-align: center;
+    text-shadow: 1px 1px 0 #000;
+  }
+}

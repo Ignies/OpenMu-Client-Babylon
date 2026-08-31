@@ -1,0 +1,55 @@
+{
+  "name": "OpenMuJSClient",
+  "module": "src/server/main.ts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "APP_ENV=dev vite --force",
+    "build": "APP_ENV=prod vite build && bun run tools/copyData.ts",
+    "copy-data": "bun run tools/copyData.ts",
+    "preview": "vite preview --port 4173 --strictPort",
+    "proxy": "bun run --watch proxy/main.ts",
+    "generate": "bun run src/common/packets/generate.ts",
+    "tsc": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=100000",
+    "lint:count": "eslint . -f json | bun run tools/lintCounts.ts"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "4.2.0",
+    "@gltf-transform/extensions": "4",
+    "@gltf-transform/functions": "4",
+    "@lunapaint/tga-codec": "0.1.0",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "4.3.1",
+    "bun-types": "1.1.21",
+    "eslint": "9",
+    "eslint-plugin-mobx": "^0.0.14",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.11.0",
+    "less": "4.3.0",
+    "meshoptimizer": "^1.2.0",
+    "pngjs": "7.0.0",
+    "sharp": "0.34.2",
+    "typescript": "5.8.3",
+    "typescript-eslint": "^8.68.0",
+    "vite": "5.3.5",
+    "vitest": "2.1.9"
+  },
+  "dependencies": {
+    "@babylonjs/core": "7.51.1",
+    "@babylonjs/loaders": "7.51.1",
+    "@babylonjs/materials": "7.51.1",
+    "miniplex": "2.0.0",
+    "mitt": "3.0.1",
+    "mobx": "6.13.1",
+    "mobx-react-lite": "4.0.7",
+    "nanoid": "5.1.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "engines": {
+    "node": "20"
+  }
+}

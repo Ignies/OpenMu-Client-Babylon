@@ -1,0 +1,327 @@
+@import (reference) '../../components/muText/style.less';
+
+.preloader-page {
+  position: absolute;
+  inset: 0;
+  .mu-font();
+  user-select: none;
+
+  // MU's loading artwork, holding the screen until the login scene is drawn.
+  // It is the page's own backdrop, not the loading screen component: that one
+  // is an opaque cover, and this has a menu sitting on top of it.
+  .preloader-back {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: #000;
+    transition: opacity 1s ease-out;
+  }
+
+  .preloader-back-gone {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  // `UIMng.cpp:226` puts the login window horizontally centred and two thirds
+  // of the way down; the menu takes the same frame and the same place, so
+  // nothing moves when the player goes on to log in.
+  .preloader-win {
+    position: absolute;
+    left: 50%;
+    top: calc((100% - 245px) * 2 / 3);
+    transform: translateX(-50%);
+    flex: none;
+  }
+
+  // The two lines under the buttons: the chosen server and its address.
+  .preloader-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // The setup window replaces the menu rather than covering it - the logo goes
+  // with it, so a 327px window has the whole stage to sit in.
+  .setup-win {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    flex: none;
+    pointer-events: auto;
+  }
+
+  // Same plate as the Option window's title, for the same reason: the mirrored
+  // top caps meet at the centre, so the title needs a backing to stay legible.
+  .setup-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 16px;
+    border-radius: 2px;
+    background: rgba(12, 10, 8, 0.72);
+    color: #ffffff;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+
+  .setup-label {
+    position: absolute;
+    color: #ffffff;
+    font-size: 11px;
+    line-height: 13px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+  }
+
+  .setup-check-label {
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  // The plate art is the field's background, so the input itself is invisible
+  // chrome sitting exactly on top of it.
+  .setup-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0 6px;
+    pointer-events: auto;
+
+    background: transparent;
+    border: none;
+    outline: none;
+
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 1;
+
+    &:disabled {
+      color: #a0a0a0;
+    }
+
+    &::placeholder {
+      color: #6d6d6d;
+    }
+
+    // The spinner would sit on top of the plate's bevel.
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      appearance: none;
+      margin: 0;
+    }
+  }
+
+  // A published row's language tag, pinned to the row's right edge — the mark
+  // that tells a listed server from a saved one at a glance.
+  .setup-row-tag {
+    position: absolute;
+    right: 8px;
+    font-size: 10px;
+    color: #b9a06a;
+  }
+
+  .setup-line {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    text-align: center;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// The worlds grid. A card is a banner with a list row bolted under it; the
+// selected one is ringed in the same gold its name is written in.
+.preloader-page {
+  .world-card {
+    position: absolute;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .world-card-art {
+    position: relative;
+    display: block;
+    object-fit: cover;
+    border: 1px solid #3a3128;
+    border-bottom: none;
+    box-sizing: border-box;
+    // The art is dimmed until the card is the one chosen, so a grid of bright
+    // banners does not shout over the choice the player already made.
+    filter: brightness(0.72) saturate(0.85);
+    transition:
+      filter 0.15s ease-out,
+      opacity 0.2s ease-out,
+      border-color 0.15s ease-out,
+      box-shadow 0.15s ease-out;
+  }
+
+  // A banner is fetched from whatever host published it, so they arrive one at
+  // a time and in no order. Held at nothing until the bytes are in, then faded
+  // up, so the grid settles instead of flickering into place. Only an `img`
+  // does this: the stone tile is already decoded and has nothing to wait for.
+  img.world-card-art {
+    opacity: 0;
+  }
+
+  img.world-card-art-in {
+    opacity: 1;
+  }
+
+  .world-card:hover .world-card-art {
+    filter: brightness(0.92);
+  }
+
+  // The selected card is also the one the arrow keys are on, so this is a focus
+  // ring as much as a selection: 1px of gold across six cards is not something
+  // the eye finds at speed.
+  .world-card-on .world-card-art {
+    filter: none;
+    border-width: 2px 2px 0;
+    border-color: #b9a06a;
+    box-shadow: inset 0 0 12px rgba(185, 160, 106, 0.45);
+  }
+
+  // The world last entered, folded into the banner's top-left corner — a mark,
+  // not a label: the name row's tag slot is already spoken for.
+  .world-last {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    border-top: 17px solid #b9a06a;
+    border-right: 17px solid transparent;
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
+  }
+
+  // Does it answer? Top-right of the banner, where nothing else sits, and dark
+  // enough at the rim to read over a bright title card as well as over stone.
+  .world-dot {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.75);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+  }
+
+  .world-dot-up {
+    background: #57c257;
+  }
+
+  .world-dot-down {
+    background: #c04a4a;
+  }
+
+  // Still dialling: the same amber the window's own notes are written in,
+  // breathing so it does not read as a third verdict.
+  .world-dot-checking {
+    background: #c9a227;
+    animation: world-dot-pulse 1.1s ease-in-out infinite;
+  }
+
+  @keyframes world-dot-pulse {
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  // The player's own worlds wear this where a published one wears its language.
+  .world-tag-mine {
+    color: #8fa8c0;
+  }
+
+  // A world this build cannot enter: greyed out and left that way on hover,
+  // because hovering it is not going to help.
+  .world-card-off {
+    cursor: default;
+
+    .world-card-art,
+    &:hover .world-card-art {
+      filter: grayscale(1) brightness(0.45);
+    }
+  }
+
+  // The client that world is published for, bottom-left of its banner: the
+  // corner opposite the reach dot, clear of the fold in the other one.
+  .world-version {
+    position: absolute;
+    left: 5px;
+    // The card is exactly as tall as its banner (the name row is absolutely
+    // placed under it), so this is 5px up from the banner's own bottom edge.
+    bottom: 5px;
+    padding: 1px 4px;
+    border: 1px solid #6a5c46;
+    border-radius: 2px;
+    background: rgba(12, 10, 8, 0.8);
+    color: #b9a06a;
+    font-size: 10px;
+    line-height: 12px;
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+
+  // A version this client does not carry: the label becomes the reason the
+  // card is grey and Enter will not press.
+  .world-version-off {
+    border-color: #7a4a4a;
+    color: #d98a8a;
+  }
+
+  // The line above the grid: what is being shown, and how to ask for it again.
+  .world-head {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 16px;
+    pointer-events: auto;
+  }
+
+  .world-filter {
+    display: flex;
+    gap: 4px;
+  }
+
+  .world-chip {
+    padding: 1px 5px;
+    border: 1px solid #3a3128;
+    border-radius: 2px;
+    background: rgba(12, 10, 8, 0.55);
+    color: #8d8d8d;
+    font-size: 10px;
+    line-height: 12px;
+    cursor: pointer;
+
+    &:hover {
+      color: #ffffff;
+      border-color: #6a5c46;
+    }
+  }
+
+  .world-chip-on {
+    color: #b9a06a;
+    border-color: #b9a06a;
+  }
+
+  // Mid-fetch: the link is still there, just not worth clicking again.
+  .world-chip-busy {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}

@@ -1,0 +1,103 @@
+@import (reference) '../../../../components/muText/style.less';
+
+// CNewUIMasterLevel: a 640×428 sheet in the original's UI space, scaled like
+// the minimap so the art stays square on any window.
+.master-skills-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  user-select: none;
+  overflow: hidden;
+  z-index: 500; // WINDOW_Z_SHEETS: over every window
+  .mu-font();
+  font-size: 11px;
+  color: #fff;
+}
+
+.master-skills-stage {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform-origin: 0 0;
+  margin-left: -320px;
+
+  > * {
+    position: absolute;
+  }
+
+  .master-text {
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .master-close {
+    cursor: pointer;
+  }
+
+  .master-node {
+    > * {
+      position: absolute;
+    }
+
+    .master-node-icon {
+      cursor: pointer;
+    }
+
+    .master-node-level {
+      white-space: nowrap;
+      text-shadow: 1px 1px 0 #000;
+    }
+  }
+
+  .master-tip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #000;
+    padding: 2px 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 2;
+
+    &.master-tip-up {
+      transform: translateY(-100%);
+    }
+
+    .master-tip-line {
+      line-height: 13px;
+      min-height: 13px;
+    }
+  }
+}
+
+.master-dialog-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  z-index: 501; // its dialog sits on the sheet
+  .mu-font();
+  font-size: 11px;
+  color: #fff;
+  user-select: none;
+}
+
+.master-dialog {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  .master-dialog-text {
+    position: absolute;
+    left: 25px;
+    right: 25px;
+    top: 24px;
+    text-align: center;
+    line-height: 15px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}
+
+.master-exp-fill {
+  position: absolute;
+  pointer-events: auto;
+}

@@ -1,0 +1,269 @@
+@import (reference) '../muText/style.less';
+.options-window-page {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  // No z-index of its own: the window joins the stack (muWindow/windowState).
+
+  // `Create` centres it on screen (`OptionWin.cpp:71`).
+  .options-window {
+    position: relative;
+    flex: none;
+    .mu-font();
+    user-select: none;
+    pointer-events: auto;
+  }
+
+  // The mirrored top caps meet at the window's centre, so the title sits over
+  // an ornament rather than the plain bar it had in the original 213px
+  // window. The backing plate keeps it legible without moving it off-centre.
+  .options-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 16px;
+    border-radius: 2px;
+    background: rgba(12, 10, 8, 0.72);
+    text-align: center;
+    color: #ffffff;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+
+  .options-label {
+    position: absolute;
+    color: #ffffff;
+    font-size: 11px;
+    line-height: 1;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+  }
+
+  .options-clickable {
+    cursor: pointer;
+  }
+
+  // Section heading: gold, with a rule running out to the column's width so
+  // the two columns read as separate groups rather than one wrapped list.
+  .options-section {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #e8c877;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(
+        to right,
+        rgba(232, 200, 119, 0.55),
+        rgba(232, 200, 119, 0)
+      );
+    }
+  }
+
+  // Sits in the same box as the slider's label and right-aligns inside it.
+  .options-value {
+    text-align: right;
+    color: #e8c877;
+  }
+
+  .options-tab {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1px solid rgba(232, 200, 119, 0.28);
+    // Only the active tab joins the content below it, so the strip reads as a
+    // row of folders rather than a row of buttons.
+    border-bottom-color: rgba(232, 200, 119, 0.28);
+    border-radius: 2px 2px 0 0;
+    background: rgba(0, 0, 0, 0.35);
+    color: #b9a87e;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    cursor: pointer;
+    pointer-events: auto;
+
+    &:hover {
+      color: #e8c877;
+      background: rgba(232, 200, 119, 0.1);
+    }
+
+    &.is-active {
+      border-color: rgba(232, 200, 119, 0.6);
+      border-bottom-color: transparent;
+      background: rgba(232, 200, 119, 0.16);
+      color: #ffffff;
+      font-weight: bold;
+    }
+  }
+
+  .options-slider {
+    position: absolute;
+  }
+
+  // Invisible, but still the thing being dragged - the sprites above are
+  // painted from its value.
+  .options-range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+// The window is moved by its title bar and resized by the corner grip, both
+// shared with the item windows (`muWindow/useWindowChrome.tsx`).
+.options-window-page .mu-resize-grip {
+  opacity: 0.25;
+}
+
+.options-window-page .options-window:hover .mu-resize-grip {
+  opacity: 0.8;
+}
+
+.options-window-page {
+  // Keys tab: the bound key sits in a small plate; clicking it waits for
+  // the next key press.
+  .options-keybox {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1px solid rgba(232, 200, 119, 0.45);
+    border-radius: 2px;
+    background: rgba(12, 10, 8, 0.72);
+    color: #ffffff;
+    font-size: 11px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    cursor: pointer;
+    pointer-events: auto;
+
+    &:hover {
+      border-color: #e8c877;
+    }
+
+    &.is-active {
+      border-color: #ffffff;
+      background: rgba(232, 200, 119, 0.25);
+    }
+  }
+}
+
+.options-window-page {
+  // Language picker (Game tab). The closed plate matches the key box; the
+  // list that drops out of it matches the tab strip, so the window keeps one
+  // vocabulary of gold-on-black plates.
+  .options-language {
+    position: absolute;
+  }
+
+  .options-combo {
+    position: absolute;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-sizing: border-box;
+    padding: 0 6px;
+    border: 1px solid rgba(232, 200, 119, 0.45);
+    border-radius: 2px;
+    background: rgba(12, 10, 8, 0.72);
+    color: #ffffff;
+    font-size: 11px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    cursor: pointer;
+    pointer-events: auto;
+
+    &:hover,
+    &.is-open {
+      border-color: #e8c877;
+    }
+  }
+
+  .options-combo-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .options-combo-arrow {
+    color: #e8c877;
+    font-size: 8px;
+    line-height: 1;
+  }
+
+  // Over the rows below it, not pushing them down: the column's heights are
+  // laid out once, the way every other row is.
+  .options-combo-list {
+    position: absolute;
+    left: 0;
+    z-index: 2;
+    box-sizing: border-box;
+    padding: 2px;
+    border: 1px solid rgba(232, 200, 119, 0.6);
+    border-radius: 2px;
+    background: rgba(8, 7, 5, 0.96);
+    overflow-y: auto;
+    pointer-events: auto;
+  }
+
+  .options-combo-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 4px;
+    color: #b9a87e;
+    font-size: 11px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      color: #ffffff;
+      background: rgba(232, 200, 119, 0.16);
+    }
+
+    &.is-active {
+      color: #e8c877;
+      font-weight: bold;
+    }
+  }
+
+  .mu-flag {
+    flex: none;
+    display: block;
+  }
+}
+
+.options-window-page {
+  // Marks a language that also ships the game's own `Data/Local/` pack —
+  // quest text, NPC dialogue and monster names, not just the interface.
+  .options-combo-mark {
+    flex: none;
+    color: #e8c877;
+    font-size: 9px;
+    line-height: 1;
+    opacity: 0.85;
+  }
+}

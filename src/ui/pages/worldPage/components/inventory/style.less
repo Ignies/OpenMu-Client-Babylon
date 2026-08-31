@@ -1,0 +1,219 @@
+// `CNewUIMyInventory` draws every piece at an absolute coordinate inside the
+// window, so the layout here is absolute positioning too - the component
+// supplies the original's numbers and this file only says how a piece behaves.
+.inventory {
+  font-size: 11px;
+
+  .window-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  // `RenderSetOption` greys these out when the option is not active, which is
+  // always, until set and socket options are parsed off the wire.
+  //
+  // 9px, and clipped: the original draws these with its own compact font in a
+  // box 57px wide, and Tahoma at the size the rest of the window uses spills
+  // out of it and over the head art.
+  .inventory-option {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    color: #646464;
+    font-size: 9px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .equipment-slot {
+    position: absolute;
+    cursor: pointer;
+    pointer-events: auto;
+
+    // The silhouette the original always draws under the socket.
+    .equipment-slot-back {
+      position: absolute;
+      inset: 0;
+    }
+
+    .equipment-slot-item {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .item-icon {
+        max-width: 100%;
+        max-height: 100%;
+        pointer-events: none;
+        user-select: none;
+      }
+    }
+
+    // `glColor4f(0.9f, 0.1f, 0.1f, 0.4f)` over a socket the held item cannot
+    // go into (`NewUIMyInventory.cpp:1294`); the green is ours, marking the one
+    // it can.
+    &.can-equip::after,
+    &.blocked::after {
+      content: '';
+      position: absolute;
+      left: 1px;
+      top: 0;
+      right: 3px;
+      bottom: 4px;
+    }
+
+    &.can-equip::after {
+      background-color: #33cc3366;
+    }
+
+    &.blocked::after {
+      background-color: #e61a1a66;
+    }
+  }
+
+  // The squares are laid out by absolute position rather than by a CSS grid:
+  // the pixel maths that decides where a carried item lands is ported straight
+  // from `CNewUIInventoryCtrl`, and it assumes a gapless pitch of exactly one
+  // square. A `gap` would silently put every calculation half a cell out.
+  .inventory-items {
+    position: absolute;
+
+    // Blocked while a move is in flight to the server, so a second request
+    // cannot race the first.
+    &.busy {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+  }
+
+  // 21x21 art on a 20px pitch, so each socket overlaps its neighbour by a
+  // pixel - which is how the original's grid gets a single shared edge.
+  .inventory-square {
+    position: absolute;
+
+    // `m_pdwItemCheckBox[i] > 1` tints every square an item covers, not just
+    // the one it is anchored to (`NewUIInventoryCtrl.cpp:891-934`), with
+    // `glColor4f(0.3f, 0.5f, 0.5f, 0.6f)`.
+    &.used::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 20px;
+      height: 20px;
+      background-color: #4d808099;
+    }
+  }
+
+  .inventory-item {
+    position: absolute;
+    // The squares underneath are the click targets; hit-testing is done from
+    // pixel coordinates, so the icons must not intercept anything.
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .item-icon {
+      max-width: 100%;
+      max-height: 100%;
+      user-select: none;
+    }
+
+    .stack {
+      position: absolute;
+      right: 1px;
+      bottom: 0;
+      font-size: 10px;
+      line-height: 10px;
+      color: #ffd700;
+      text-shadow: 1px 1px 0 #000;
+    }
+  }
+
+  // The green/red rectangle the original draws under a carried item to show
+  // whether it would fit (`NewUIInventoryCtrl.cpp:1019-1033`).
+  .drop-target {
+    position: absolute;
+    pointer-events: none;
+    background-color: #33cc3366;
+
+    &.warning {
+      background-color: #ff333366;
+    }
+  }
+
+  // `ConvertGold` - the amount, in the well the money sprite paints.
+  .inventory-money {
+    position: absolute;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  // REPAIR_MODE_ON: the squares under worn items answer to the hammer
+  // cursor; a faint tint says the window is in that mode.
+  &.repair-mode .inventory-items,
+  &.repair-mode .equipment-slot {
+    cursor: inherit;
+  }
+
+  &.repair-mode .inventory-square.used::after {
+    background-color: #b3803399;
+  }
+
+  .window-button {
+    position: absolute;
+
+    // `ChangeToolTipText` on every one of these buttons; the original renders
+    // it below the cursor, this hangs it under the button.
+    .button-tooltip {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 2px;
+      padding: 1px 4px;
+      background-color: #000000cc;
+      border: 1px solid #6a6a6a;
+      color: #fff;
+      font-size: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    &:hover .button-tooltip {
+      display: block;
+    }
+  }
+
+}
+
+// The carried item is portalled onto the body - see the note at its JSX - so
+// its rule cannot live inside `.inventory`.
+.inventory-picked-item {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  image-rendering: pixelated;
+
+  .item-icon {
+    max-width: 100%;
+    max-height: 100%;
+  }
+}

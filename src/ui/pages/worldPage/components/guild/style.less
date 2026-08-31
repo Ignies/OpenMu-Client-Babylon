@@ -1,0 +1,359 @@
+@import (reference) '../../../../components/muText/style.less';
+// `CNewUIGuildInfoWindow` and the guild master NPC dialogs. Coordinates live
+// in the component; this is the look of the tab strip, the three tabs and the
+// lists inside them.
+.guild-window {
+  font-size: 11px;
+
+  .guild-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .table-fill {
+    position: absolute;
+    background-color: #0000004d;
+  }
+
+  // `%ls ( Score:%d )` in GuildConstants::Colors::YELLOW (200, 255, 100).
+  .guild-name-line {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    color: rgb(200, 255, 100);
+    text-shadow: 1px 1px 0 #000;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .guild-tab-strip {
+    position: absolute;
+  }
+
+  // `Render_Text`: the unselected tab labels are drawn at 0.6 brightness.
+  .guild-tab {
+    position: absolute;
+    cursor: pointer;
+    color: #999;
+    text-shadow: 1px 1px 0 #000;
+
+    span {
+      position: absolute;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 10px;
+    }
+
+    &.active {
+      color: #fff;
+    }
+  }
+
+  // Sized inline from MARK_PX: `.app img { width: 100%; height: 100% }`
+  // (style.less) would otherwise stretch it over the whole window.
+  .guild-mark {
+    position: absolute;
+    image-rendering: pixelated;
+  }
+
+  .guild-stat {
+    position: absolute;
+    color: #fff;
+    font-size: 10px;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+  }
+
+  // GlobalText 1323 on `newui_guild_tab03`.
+  .guild-notice-head {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    span {
+      color: rgb(255, 185, 1);
+      font-size: 10px;
+      text-shadow: 1px 1px 0 #000;
+    }
+  }
+
+  .guild-notice {
+    position: absolute;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .guild-war {
+    color: #ff6a4a;
+    font-weight: bold;
+  }
+
+  .guild-war-score {
+    color: #ffeec1;
+    font-size: 13px;
+  }
+
+  .guild-col-head {
+    position: absolute;
+    color: #fff;
+    font-size: 10px;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+  }
+
+  .guild-list {
+    position: absolute;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .guild-hint {
+    color: #a8a8a8;
+    font-size: 10px;
+    line-height: 13px;
+  }
+
+  .guild-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 17px;
+    padding: 0 2px;
+    cursor: pointer;
+    color: #e2e2e2;
+
+    &:hover {
+      background-color: #ffffff14;
+    }
+    &.selected {
+      background-color: #ffffff26;
+      color: #fff;
+    }
+    &.offline {
+      opacity: 0.5;
+    }
+  }
+
+  .guild-row-mark {
+    flex: none;
+    width: 12px;
+    height: 12px;
+    image-rendering: pixelated;
+  }
+
+  .guild-row-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    &.me {
+      color: #ffeec1;
+    }
+  }
+
+  .guild-row-role {
+    flex: none;
+    color: #a8d8ff;
+    font-size: 10px;
+  }
+
+  .guild-row-server {
+    flex: none;
+    width: 22px;
+    text-align: right;
+    color: #a8a8a8;
+    font-size: 10px;
+  }
+
+  .guild-list button {
+    height: 15px;
+    padding: 0 4px;
+    border: 1px solid #7a6b45;
+    background: #2a2518;
+    color: #e2e2e2;
+    font: inherit;
+    font-size: 10px;
+    line-height: 13px;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      color: #fff;
+      border-color: #c8b87a;
+    }
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  }
+}
+
+// The NPC dialogs are modal like `CMsgWin`.
+.guild-dialog-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  z-index: 600; // WINDOW_Z_MODAL: over the windows and the sheets
+  .mu-font();
+  user-select: none;
+  color: #fff;
+  font-size: 11px;
+}
+
+.guild-dialog {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  flex: none;
+
+  .guild-dialog-text {
+    position: absolute;
+    left: 25px;
+    right: 25px;
+    top: 28px;
+    text-align: center;
+    line-height: 17px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}
+
+// The creation dialog has no sprite in this client's set; a plain panel in the
+// item-window palette.
+.guild-create {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  background: rgba(20, 16, 10, 0.95);
+  border: 1px solid #8a7a4f;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .guild-create-title {
+    text-align: center;
+    color: #ffd927;
+    font-weight: bold;
+  }
+
+  .guild-create-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    input {
+      flex: 1;
+      height: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid #4a4232;
+      outline: none;
+      color: #fff;
+      font: inherit;
+      padding: 0 4px;
+      &:focus {
+        border-color: #c8b87a;
+      }
+    }
+  }
+
+  .guild-create-editor {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .guild-create-grid {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid #5a4a2a;
+    background: #000;
+    cursor: crosshair;
+  }
+  .guild-create-cell {
+    flex: none;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .guild-create-palette {
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(4, 16px);
+    gap: 2px;
+  }
+  .guild-create-swatch {
+    width: 16px;
+    height: 16px;
+    box-sizing: border-box;
+    border: 1px solid #5a4a2a;
+    cursor: pointer;
+    background-image: linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%),
+      linear-gradient(45deg, #333 25%, transparent 25%, transparent 75%, #333 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 4px 4px;
+    &.active {
+      border-color: #fff;
+      outline: 1px solid #ffd927;
+    }
+  }
+
+  .guild-create-preview {
+    flex: none;
+    image-rendering: pixelated;
+    border: 1px solid #5a4a2a;
+    margin-left: auto;
+  }
+
+  .guild-create-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    button {
+      height: 20px;
+      padding: 0 12px;
+      border: 1px solid #7a6b45;
+      background: #2a2518;
+      color: #e2e2e2;
+      font: inherit;
+      cursor: pointer;
+      &:hover:not(:disabled) {
+        color: #fff;
+        border-color: #c8b87a;
+      }
+      &:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+    }
+  }
+}
+
+// `CGuildBreakPasswordMsgBoxLayout`: the same panel as the creation dialog,
+// narrower, with the two GlobalText lines over the code input.
+.guild-password {
+  width: 250px;
+
+  .guild-password-text {
+    text-align: center;
+    line-height: 15px;
+    color: #e2e2e2;
+  }
+}

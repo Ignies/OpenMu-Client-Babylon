@@ -1,0 +1,109 @@
+// `CNewUIPartyInfoWindow`. Coordinates live in the component; this is the
+// look of a member row and the reachable-player list.
+.party-window {
+  font-size: 11px;
+
+  .party-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .table-fill {
+    position: absolute;
+    background-color: #0000004d;
+  }
+
+  .party-empty {
+    position: absolute;
+    color: #a8a8a8;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .party-row {
+    position: absolute;
+    height: 26px;
+    text-shadow: 1px 1px 0 #000;
+
+    .party-flag {
+      position: absolute;
+      left: -4px;
+      top: 1px;
+    }
+    .party-name {
+      position: absolute;
+      left: 12px;
+      top: 0;
+      &.me {
+        color: #ffeec1;
+      }
+    }
+    .party-x {
+      position: absolute;
+      right: 0;
+      top: 2px;
+      cursor: pointer;
+      opacity: 0.8;
+      &:hover {
+        opacity: 1;
+      }
+    }
+    // `newui_party_lifebar01/02`: the trough and the fill, both the original
+    // art. The width is the tenth the server sent through PartyHealthUpdate.
+    .party-hp {
+      position: absolute;
+      left: 0;
+      top: 15px;
+    }
+    .party-hp-fill {
+      position: absolute;
+    }
+  }
+
+  .party-nearby {
+    position: absolute;
+    text-shadow: 1px 1px 0 #000;
+
+    .party-nearby-title {
+      color: #ffd927;
+      margin-bottom: 4px;
+    }
+    .party-nearby-empty {
+      color: #a8a8a8;
+      font-size: 10px;
+    }
+    .party-nearby-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 18px;
+    }
+    button {
+      height: 16px;
+      padding: 0 5px;
+      border: 1px solid #7a6b45;
+      background: #2a2518;
+      color: #e2e2e2;
+      font: inherit;
+      font-size: 10px;
+      line-height: 14px;
+      cursor: pointer;
+      &:hover:not(:disabled) {
+        color: #fff;
+        border-color: #c8b87a;
+      }
+      &:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+    }
+  }
+}

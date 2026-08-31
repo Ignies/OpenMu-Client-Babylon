@@ -1,0 +1,49 @@
+// `RenderText(320, 2, ...)` and `ScreenX = 320 - totalWidth / 2`: everything
+// here is centred on the middle of the screen, so the pieces are placed with a
+// half-width translate rather than the original's absolute x.
+.target-health-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+
+  .target-name {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0 3px;
+    // `SetTextColor(255, 230, 200, 255)` on `SetBgColor(100, 0, 0, 255)`.
+    color: rgb(255, 230, 200);
+    background-color: rgb(100, 0, 0);
+    font-size: 12px;
+    line-height: 13px;
+    white-space: nowrap;
+  }
+
+  .target-bar {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  // `glColor4f(0, 0, 0, 0.5f)` one pixel down and right of the frame.
+  .bar-shadow {
+    position: absolute;
+    left: 1px;
+    top: 1px;
+    right: -1px;
+    bottom: -1px;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  .bar-frame {
+    position: absolute;
+    inset: 0;
+  }
+
+  .bar-track,
+  .bar-step {
+    position: absolute;
+  }
+}

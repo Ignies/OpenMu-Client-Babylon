@@ -1,0 +1,119 @@
+// `CNewUIMyShopInventory::RenderFrame` / `RenderTextInfo`: the title in the
+// pale blue the original uses (0xFF49B0FF), the "open for business" line in
+// amber and the rules block in gold with two red lines at the bottom.
+.personal-shop {
+  font-size: 11px;
+
+  .window-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #49b0ff;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .shop-name-input {
+    position: absolute;
+    height: 14px;
+    padding: 0 2px;
+    border: none;
+    outline: none;
+    background-color: #00000040;
+    color: #ffe6d2;
+    font: inherit;
+    font-size: 11px;
+
+    &:disabled {
+      color: #a08e80;
+    }
+  }
+
+  .shop-browse-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #00ff00;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .shop-selling {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #d78a00;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  // `RenderTextInfo` draws these at a fixed y with no width; here they flow
+  // inside the frame so a long line (any translation of them, and half the
+  // English ones) wraps instead of running out over the border.
+  .shop-info {
+    position: absolute;
+    overflow: hidden;
+  }
+
+  .shop-info-title {
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 10px;
+    line-height: 10px;
+    color: #ff2d2f;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .shop-info-line {
+    font-size: 8px;
+    line-height: 10px;
+    color: #f7ce4d;
+    text-shadow: 1px 1px 0 #000;
+    overflow-wrap: break-word;
+
+    &.warn {
+      font-weight: bold;
+      color: #ff2d2f;
+    }
+
+    // GlobalText[1134] starts a block of its own (298 → 320 in the original).
+    &:not(.warn) + .warn {
+      margin-top: 8px;
+    }
+  }
+
+  .window-button {
+    position: absolute;
+
+    .button-tooltip {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 2px;
+      padding: 1px 4px;
+      background-color: #000000cc;
+      border: 1px solid #6a6a6a;
+      color: #fff;
+      font-size: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    &:hover .button-tooltip {
+      display: block;
+    }
+  }
+}

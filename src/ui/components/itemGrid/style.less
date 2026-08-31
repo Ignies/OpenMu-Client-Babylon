@@ -1,0 +1,98 @@
+// The shared square sheet (`CNewUIInventoryCtrl`): a gapless 20px pitch, the
+// hit-test maths in index.tsx assume it.
+.mu-item-grid {
+  position: absolute;
+
+  &.busy {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  // `SetSquareColorNormal(0.1, 0.4, 0.8)` while a carried item may land here,
+  // `(1, 0, 0)` when the storage refuses it.
+  &.drop-ok::after,
+  &.drop-ban::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  &.drop-ok::after {
+    background-color: #1a66cc55;
+  }
+
+  &.drop-ban::after {
+    background-color: #ff000055;
+  }
+}
+
+.mu-grid-square {
+  position: absolute;
+
+  &.used::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    background-color: #4d808099;
+  }
+
+  &.hovered::after {
+    background-color: #80b3ff99;
+  }
+}
+
+.mu-grid-item {
+  position: absolute;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .item-icon {
+    max-width: 100%;
+    max-height: 100%;
+    user-select: none;
+  }
+
+  // An item whose icon PNG is missing altogether (itemIcon/index.tsx): an
+  // empty square rather than the browser's broken-image glyph.
+  .item-icon-missing {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// The asking price the personal shop paints under each square.
+.mu-grid-price {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  font-size: 8px;
+  line-height: 9px;
+  color: #ffd700;
+  background-color: #000000aa;
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+
+  &.unset {
+    color: #ff6060;
+  }
+}
+
+.mu-grid-drop-target {
+  position: absolute;
+  pointer-events: none;
+  border: 1px solid #78c8ff;
+  background-color: #1a66cc4d;
+
+  &.warning {
+    border-color: #ff6060;
+    background-color: #ff00004d;
+  }
+}

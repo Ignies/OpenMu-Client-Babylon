@@ -1,0 +1,103 @@
+// The events UI: entry windows on the item-window frame, the timer figure,
+// the countdown line and the result boxes. Coordinates live in layout.ts.
+.event-window {
+  font-size: 11px;
+
+  .event-title {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  // One fixed-height row per line (15 / 20 px, `m_EnterUITextPos`): a line
+  // never wraps into the next; the component shrinks the font, then cuts.
+  .event-intro {
+    position: absolute;
+    text-align: center;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .event-button {
+    position: absolute;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+}
+
+// `CNewUIBloodCastle::Render`: the figure with three centred lines.
+.event-timer {
+  position: absolute;
+  transform-origin: top left;
+  pointer-events: none;
+
+  .event-timer-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
+
+// `CSBaseMatch::RenderTime`.
+.event-countdown {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+// `RenderMatchResult`: plain lines over a dark box.
+.event-result {
+  position: absolute;
+  transform-origin: top left;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 8px 0;
+  pointer-events: none;
+  font-size: 11px;
+
+  .event-result-line {
+    position: relative;
+    height: 16px;
+    line-height: 16px;
+  }
+
+  .event-result-cell {
+    position: absolute;
+    top: 0;
+    white-space: nowrap;
+  }
+}
+
+// `CChaosCastleTimeCheckMsgBoxLayout`: the message box with OK / Cancel.
+.event-prompt {
+  position: absolute;
+  transform-origin: top left;
+  pointer-events: auto;
+
+  .event-prompt-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  .event-prompt-button {
+    position: absolute;
+  }
+}

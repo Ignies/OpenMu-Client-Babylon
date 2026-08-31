@@ -1,0 +1,104 @@
+// `CNewUIMixInventory::RenderFrame`: the title block, the recipe/result text
+// on its dark plate and the mix list that replaces the `mix.bmd` recipe
+// matcher.
+.chaos-machine {
+  font-size: 11px;
+
+  .window-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #dcdcdc;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .chaos-subtitle {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 10px;
+    color: #ffff30;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .chaos-recipe {
+    position: absolute;
+    padding: 3px 4px;
+    font-size: 10px;
+    line-height: 13px;
+    color: #d2e6ff;
+    background-color: #28282880;
+    text-shadow: 1px 1px 0 #000;
+    overflow: hidden;
+
+    .hint {
+      color: #dcdcdc;
+    }
+
+    &.success {
+      color: #ffff30;
+    }
+
+    &.failed {
+      color: #ff3214;
+    }
+  }
+
+  .chaos-menu {
+    position: absolute;
+    overflow-y: auto;
+    font-size: 10px;
+    line-height: 14px;
+    color: #d2e6ff;
+    background-color: #14141480;
+  }
+
+  .chaos-menu-row {
+    padding: 0 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+
+    &:hover {
+      color: #fff;
+      background-color: #4d666699;
+    }
+
+    &.active {
+      color: #ffff30;
+      background-color: #4d808099;
+    }
+  }
+
+  .window-button {
+    position: absolute;
+
+    .button-tooltip {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 2px;
+      padding: 1px 4px;
+      background-color: #000000cc;
+      border: 1px solid #6a6a6a;
+      color: #fff;
+      font-size: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    &:hover .button-tooltip {
+      display: block;
+    }
+  }
+}

@@ -1,0 +1,82 @@
+@import (reference) '../../../../components/muText/style.less';
+
+.skill-list-window {
+  .mu-font();
+  font-size: 11px;
+  color: #dcdcdc;
+  user-select: none;
+
+  .window-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #dcdcdc;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .skill-list {
+    position: absolute;
+    overflow-y: auto;
+    overflow-x: hidden;
+    pointer-events: auto;
+    scrollbar-width: thin;
+  }
+
+  .skill-list-empty {
+    padding: 8px 4px;
+    color: #909090;
+    text-align: center;
+  }
+
+  .skill-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 3px;
+    cursor: pointer;
+    border-radius: 2px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    &.skill-row-selected {
+      background: rgba(255, 200, 80, 0.18);
+      outline: 1px solid rgba(255, 200, 80, 0.5);
+    }
+
+    &.skill-row-blocked {
+      opacity: 0.45;
+      filter: grayscale(1);
+    }
+
+    .skill-row-icon {
+      flex: none;
+      overflow: hidden;
+    }
+
+    .skill-row-text {
+      min-width: 0;
+      line-height: 13px;
+    }
+
+    .skill-row-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: 1px 1px 0 #000;
+    }
+
+    .skill-row-meta {
+      color: #a0a0a0;
+      font-size: 10px;
+    }
+  }
+
+  .skill-list-master {
+    position: absolute;
+    pointer-events: auto;
+  }
+}

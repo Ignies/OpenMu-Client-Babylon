@@ -1,0 +1,93 @@
+@import (reference) '../muText/style.less';
+// `RenderTipTextList` (ZzzInventory.cpp:282): a 1px black frame around a
+// black 80% box, every line centred, the name in the bold font, "\n" entries
+// half a line tall. Colours are the `glColor3f` table in the same function.
+.mu-item-tooltip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1200;
+  pointer-events: none;
+  user-select: none;
+
+  box-sizing: border-box;
+  padding: 2px 5px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid #000;
+
+  .mu-font();
+  font-size: 11px;
+  line-height: 13px;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 1px 1px 0 #000;
+
+  .mu-item-tooltip-gap {
+    height: 6px;
+  }
+
+  .mu-item-tooltip-line {
+    // `SetBgColor` lines (dark red / blue / yellow, green-blue) paint a
+    // background behind the glyphs only.
+    display: inline-block;
+    padding: 0 1px;
+
+    &.bold {
+      font-weight: bold;
+    }
+
+    &.color-white {
+      color: #fff;
+    }
+    &.color-blue {
+      color: #80b3ff;
+    }
+    &.color-red {
+      color: #ff331a;
+    }
+    &.color-yellow {
+      color: #ffcc1a;
+    }
+    &.color-green {
+      color: #1aff80;
+    }
+    &.color-purple {
+      color: #ff1aff;
+    }
+    &.color-gray {
+      color: #666;
+    }
+    &.color-redPurple {
+      color: #cc80cc;
+    }
+    &.color-violet {
+      color: #b366ff;
+    }
+    &.color-orange {
+      color: #e66b0a;
+    }
+    &.color-darkRed {
+      color: #fff;
+      background-color: #a00000;
+    }
+    &.color-darkBlue {
+      color: #fff;
+      background-color: #0000a0;
+    }
+    &.color-darkYellow {
+      color: #fff;
+      background-color: #a06600;
+    }
+    &.color-greenBlue {
+      color: #00ff00;
+      background-color: #3c3cc8;
+    }
+  }
+
+  // Block lines so each sits on its own row even though they are inline boxes.
+  .mu-item-tooltip-line,
+  .mu-item-tooltip-gap {
+    display: block;
+  }
+}

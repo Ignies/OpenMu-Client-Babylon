@@ -1,0 +1,127 @@
+// `CNewUINPCShop` renders at absolute coordinates inside the 190×429 item
+// frame, like the inventory; the numbers live in layout.ts, this file only
+// says how each piece behaves.
+.npc-shop {
+  font-size: 11px;
+
+  .window-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #dcdcdc;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .shop-tax {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #dcdcdc;
+    font-size: 10px;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  // Same gapless 20px pitch as the inventory; the hit-test maths assume it.
+  .shop-items {
+    position: absolute;
+
+    &.busy {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    // `SetSquareColorNormal(0.1, 0.4, 0.8)`: the grid turns blue under a
+    // carried item - drop it here to sell - and red when it cannot be sold.
+    &.selling::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-color: #1a66cc66;
+      pointer-events: none;
+    }
+
+    &.selling-banned::after {
+      background-color: #ff000066;
+    }
+  }
+
+  .shop-square {
+    position: absolute;
+
+    &.used::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 20px;
+      height: 20px;
+      background-color: #4d808099;
+    }
+
+    &.hovered::after {
+      background-color: #80b3ff99;
+    }
+  }
+
+  .shop-item {
+    position: absolute;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .item-icon {
+      max-width: 100%;
+      max-height: 100%;
+      user-select: none;
+    }
+  }
+
+  // `RenderRepairMoney`: "Repair all" in bold on the money well, the amount
+  // in gold-coloured text (`getGoldColor`).
+  .shop-repair-label,
+  .shop-repair-money {
+    position: absolute;
+    font-weight: bold;
+    color: #ffdc96;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+  }
+
+  .shop-repair-money {
+    color: #ffd700;
+  }
+
+  .window-button {
+    position: absolute;
+
+    .button-tooltip {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 2px;
+      padding: 1px 4px;
+      background-color: #000000cc;
+      border: 1px solid #6a6a6a;
+      color: #fff;
+      font-size: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    &:hover .button-tooltip {
+      display: block;
+    }
+  }
+}

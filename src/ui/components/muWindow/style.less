@@ -1,0 +1,65 @@
+@import (reference) '../muText/style.less';
+// Window furniture. Both components are pure positioning: every coordinate
+// comes from the C++ and is passed in, so this file only says that the pieces
+// stack absolutely and that the art must not be smoothed.
+.mu-item-window {
+  position: absolute;
+  pointer-events: auto;
+  user-select: none;
+  image-rendering: pixelated;
+  color: #fff;
+  .mu-font();
+  // The root takes focus on open (Escape scopes to the focused window); the
+  // art is the frame, not a focus ring.
+  outline: none;
+}
+
+.mu-table-frame {
+  position: absolute;
+  pointer-events: none;
+}
+
+// The corner grip. Deliberately unobtrusive until the cursor is near it: it is
+// an addition to the original's chrome, not part of the art.
+.mu-resize-grip {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+  pointer-events: auto;
+  opacity: 0.25;
+  background: linear-gradient(
+    135deg,
+    transparent 0 45%,
+    #d8c89a 45% 55%,
+    transparent 55% 70%,
+    #d8c89a 70% 80%,
+    transparent 80%
+  );
+}
+
+.mu-item-window:hover .mu-resize-grip {
+  opacity: 0.8;
+}
+
+// A window is grabbed by its frame, so the frame advertises it. Anything
+// interactive inside opts out with `data-no-drag` and takes its own cursor.
+.mu-item-window {
+  cursor: move;
+}
+
+.mu-item-window [data-no-drag] {
+  cursor: auto;
+}
+
+// `user-select: none` on the root keeps a drag by the frame from painting the
+// window's labels blue. A text field inside one still has to be selectable:
+// without this the caret can be placed but nothing can be selected, dragged
+// over, double-clicked or copied out of it.
+.mu-item-window input,
+.mu-item-window textarea {
+  user-select: text;
+  cursor: text;
+}

@@ -1,0 +1,70 @@
+// `CNewUIStorageInventory::RenderText`: the title turns red once a pin is
+// set, the stored zen is gold-coloured and the fee line is red + gold.
+.vault {
+  font-size: 11px;
+
+  .window-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #d8d8d8;
+    text-shadow: 1px 1px 0 #000;
+
+    &.locked {
+      color: #f02020;
+    }
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .vault-money,
+  .vault-fee {
+    position: absolute;
+    text-align: right;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+  }
+
+  .vault-fee {
+    color: #ffdc96;
+  }
+
+  .vault-fee-label {
+    position: absolute;
+    font-weight: bold;
+    color: #f04040;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+  }
+
+  .window-button {
+    position: absolute;
+
+    .button-tooltip {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 2px;
+      padding: 1px 4px;
+      background-color: #000000cc;
+      border: 1px solid #6a6a6a;
+      color: #fff;
+      font-size: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    &:hover .button-tooltip {
+      display: block;
+    }
+  }
+}

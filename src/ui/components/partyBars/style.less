@@ -1,0 +1,47 @@
+// `RenderPartyHP` (ZzzInterface.cpp:8724). The colours are the original's
+// `glColor3f` values: a black drop shadow, a dark red trough, an even darker
+// rail and bright red pips.
+.party-bars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.party-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-10000px, -10000px);
+  will-change: transform;
+
+  .party-bar-back {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: rgb(51, 0, 0);
+    box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .party-bar-rail {
+    position: absolute;
+    background-color: rgb(50, 10, 0);
+  }
+
+  .party-bar-pip {
+    position: absolute;
+    background-color: rgb(250, 10, 0);
+  }
+
+  // `HP : %d0%%` in (255, 230, 210), six pixels above the bar.
+  .party-bar-label {
+    position: absolute;
+    left: 0;
+    bottom: 6px;
+    white-space: nowrap;
+    font-size: 11px;
+    line-height: 12px;
+    color: rgb(255, 230, 210);
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}

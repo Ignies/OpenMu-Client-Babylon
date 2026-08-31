@@ -1,0 +1,36 @@
+.damage-numbers {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+// The anchor. `usePositionOnScreen` owns its `transform`, and parks it far
+// off-screen until the entity has a projected position - the same arrangement
+// `.world-label` uses.
+.damage-number {
+  position: absolute;
+  transform: translate(-10000px, -10000px);
+  contain: layout;
+
+  // Everything the animation touches: the rise, the fade and the shrink are
+  // one transform and one opacity write per frame.
+  .glyphs {
+    position: absolute;
+    width: max-content;
+    will-change: transform, opacity;
+  }
+
+  .digits {
+    position: relative;
+  }
+
+  // A glyph is a solid colour cut out by the atlas, which is how the original
+  // gets its tint (a white texture modulated by `glColor4f`).
+  .digit {
+    position: absolute;
+    top: 0;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+  }
+}

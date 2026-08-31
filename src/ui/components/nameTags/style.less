@@ -1,0 +1,61 @@
+// `RenderBoolean`: each line is a box of the balloon's full width (the
+// widest line, the name +3px), text left-aligned, one `FontHeight` (12px at
+// 480 lines) tall. The balloon's bottom sits on the owner's anchor.
+.name-tags {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+
+  .name-tag {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    transform: translate(-10000px, -10000px);
+    contain: layout;
+    white-space: nowrap;
+
+    .line {
+      padding: 0 3px 0 2px;
+      font-size: 12px;
+      line-height: 13px;
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+    }
+
+    // The 8x8 guild mark in front of the name, the size the guild lists draw
+    // it at (`RenderBitmap(BITMAP_GUILD, x, y, 8, 8)`, UIControls.cpp:1214).
+    // Sized here, not on the tag: `.app img { width: 100%; height: 100% }`
+    // (style.less) outranks the width/height attributes.
+    .line .name-tag-mark {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 3px;
+      vertical-align: baseline;
+      image-rendering: pixelated;
+    }
+
+    // `g_pRenderText->SetFont(g_hFontBold)`: the GM name and a shop title.
+    .line.bold {
+      font-weight: bold;
+    }
+
+    // The safe-zone hover blink of `RenderBoolean`: the name swaps its text
+    // and background colours. The original flips on `WorldTime % 24 < 12`,
+    // i.e. every ~12 ms; that samples down to a per-frame strobe, so the swap
+    // is slowed to 480 ms here.
+    .line.blink {
+      animation: name-tag-blink 0.48s steps(1, end) infinite;
+    }
+  }
+}
+
+@keyframes name-tag-blink {
+  50% {
+    color: var(--tag-bg);
+    background-color: var(--tag-text);
+  }
+}

@@ -1,0 +1,91 @@
+@import (reference) '../../components/muText/style.less';
+.login-page {
+  position: absolute;
+  inset: 0;
+
+  // `UIMng.cpp:226` places the window at
+  //   x = (screenWidth  - 329) / 2
+  //   y = (screenHeight - 245) * 2 / 3
+  // i.e. horizontally centred and two thirds of the way down, which is where
+  // MU actually puts it - not dead centre.
+  .login-win {
+    position: absolute;
+    left: 50%;
+    top: calc((100% - 245px) * 2 / 3);
+    transform: translateX(-50%);
+
+    // MU's UI is authored at fixed pixel sizes; the window must be positioned,
+    // never stretched or reflowed.
+    flex: none;
+
+    .mu-font();
+    user-select: none;
+  }
+
+  form {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .login-label {
+    position: absolute;
+    color: #ffffff;
+    font-size: 11px;
+    line-height: 1;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+  }
+
+  // `RenderText(baseX + 111, baseY + 80, szServerName)` in `g_hFixFont`.
+  .login-server-line {
+    position: absolute;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+
+  .login-remember {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  // The box art is the input's background, so the field itself is invisible
+  // chrome sitting exactly on top of it.
+  .login-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    pointer-events: auto;
+
+    background: transparent;
+    border: none;
+    outline: none;
+
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  .login-submit {
+    position: absolute;
+    width: 0;
+    height: 0;
+    padding: 0;
+    border: none;
+    opacity: 0;
+  }
+
+  .login-error {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 205px;
+    margin: 0;
+    text-align: center;
+    color: #ff5a5a;
+    font-size: 11px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}

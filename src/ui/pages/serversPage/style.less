@@ -1,0 +1,40 @@
+@import (reference) '../../components/muText/style.less';
+.servers-page {
+  display: grid;
+  place-content: center;
+
+  // The original centres the window on screen
+  // (`UIMng.cpp:220`), over whatever 3D scene is behind it.
+  .server-sel-win {
+    position: relative;
+
+    // MU's UI is authored at fixed pixel sizes and its art is 1:1, so the
+    // window must not be scaled or reflowed - only centred.
+    flex: none;
+
+    .mu-font();
+    user-select: none;
+  }
+
+  .servers-loading {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    color: #e2e2e2;
+    font-size: 13px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}
+
+// `Store.connectionLost`: the game server dropped us and we are back here.
+.servers-page .servers-notice {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -28px;
+  text-align: center;
+  color: #ff6a6a;
+  font-size: 12px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+}

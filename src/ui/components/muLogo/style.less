@@ -1,0 +1,39 @@
+// The MU logo of `LoginScene::Render`: glow under mark, centred on x,
+// `g_fMULogoAlpha` += 0.02 a frame ≈ 0.8 s to full at 60 fps.
+.mu-logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  animation: mu-logo-in 0.8s linear both;
+
+  .mu-logo-glow,
+  .mu-logo-mark {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  // `glColor4f(alpha - 0.3)` on the glow: it trails the mark.
+  .mu-logo-glow {
+    opacity: 0.7;
+    background-size: 100% 100%;
+    // Luminance self-mask: the JPEG's black is fully transparent, its bright
+    // glow fully opaque - the additive look without needing to blend against
+    // the canvas.
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-mode: luminance;
+    mask-mode: luminance;
+  }
+}
+
+@keyframes mu-logo-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,210 @@
+@import (reference) '../../../../components/muText/style.less';
+// `CNewUIMainFrameWindow` draws every piece of the bar at an absolute
+// coordinate inside a virtual 640x480 screen, so the layout here is absolute
+// positioning too - the component supplies the original's numbers and this
+// file only says how a piece behaves, never where it goes.
+.bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  // The transform (centring + the player's scale) is set inline by the
+  // component, because the scale is state.
+  pointer-events: auto;
+  user-select: none;
+
+  // The grip lives on the bar's bottom-right corner - over the exp number, so
+  // it is kept faint until the bar is hovered.
+  .mu-resize-grip {
+    z-index: 1;
+  }
+
+  &:hover .mu-resize-grip {
+    opacity: 0.8;
+  }
+
+  .frame-piece {
+    position: absolute;
+  }
+
+  // The well is cut into the background art; this only clips the fill.
+  .gauge {
+    position: absolute;
+    overflow: hidden;
+
+    // Anchored to the bottom so shrinking the height crops the top of the
+    // sprite, which is what the original's UV maths does.
+    .gauge-fill {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+    }
+  }
+
+  .consumable-item {
+    position: absolute;
+    cursor: pointer;
+
+    // A carried potion can be dropped here to bind the key to its kind.
+    &.can-bind {
+      box-shadow: inset 0 0 0 1px rgba(120, 255, 140, 0.9);
+    }
+
+    .item-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+  }
+
+  // The recess is part of the bar art; IMAGE_SKILLBOX / IMAGE_SKILLBOX_USE
+  // (`.skill-box-art`) is what the original lays over a lit or fan box.
+  .skill-slot {
+    position: absolute;
+    cursor: pointer;
+
+    .skill-box-art {
+      position: absolute;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+    }
+
+    // The box the fan is picking a skill for, while the fan is open.
+    &.picking {
+      box-shadow: inset 0 0 0 1px rgba(120, 255, 140, 0.9);
+    }
+
+    .skill-icon {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .skill-hotkey {
+      position: absolute;
+      right: 2px;
+      bottom: 1px;
+      font-size: 8px;
+      line-height: 8px;
+      color: #ffe08a;
+      text-shadow: 0 0 2px #000;
+      pointer-events: none;
+    }
+
+    .skill-icon-text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    // RenderSkillDelay: the running delay rises from the slot's floor; the
+    // tint itself is state, set inline by the component.
+    .skill-delay {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+
+    // bCantSkill: the icon comes off the greyed newui_non_* sheet; the slot
+    // itself only stops advertising a click.
+    &.unusable {
+      cursor: default;
+    }
+
+    // The current-skill box while a dragged skill hovers it.
+    &.drop-target {
+      box-shadow: inset 0 0 0 1px rgba(120, 255, 140, 0.9);
+    }
+
+    // The learned-skill fan above the bar draws its own IMAGE_SKILLBOX.
+    &.fan {
+      z-index: 2;
+
+      &:hover {
+        box-shadow: inset 0 0 0 1px rgba(255, 220, 120, 0.9);
+      }
+    }
+
+    // The fan's last box: picking it leaves the hot key empty.
+    &.clear span {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #ffb0b0;
+      text-shadow: 0 0 2px #000;
+      pointer-events: none;
+    }
+  }
+
+  // The 1..9,0 strip shown over the slots while a skill is dragged: drop on
+  // a digit to bind it, the way Ctrl+digit does.
+  .skill-hotkey-target {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .mu-font();
+    font-size: 9px;
+    line-height: 9px;
+    color: #ffe08a;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 220, 120, 0.6);
+    box-sizing: border-box;
+    cursor: pointer;
+
+    &.drop-target {
+      background: rgba(60, 90, 40, 0.9);
+      border-color: rgba(120, 255, 140, 0.9);
+    }
+  }
+
+  .bar-button {
+    position: absolute;
+  }
+
+  .exp-fill {
+    position: absolute;
+  }
+}
+
+// The skill hanging off the cursor while it is dragged off the bar; on the
+// body like `.mu-picked-item`, so the bar's own scale does not apply.
+.skill-drag-ghost {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0.85;
+  image-rendering: pixelated;
+}
+
+// `RenderPetSkill`: the four Dark Raven command boxes above the skill slots;
+// the sprite and the lit state come from the component.
+.bottom-bar .pet-command {
+  position: absolute;
+  cursor: pointer;
+
+  span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 13px;
+    text-align: center;
+    font-size: 9px;
+    font-weight: bold;
+    color: #ffe08a;
+    text-shadow: 0 0 2px #000;
+    pointer-events: none;
+  }
+
+  &.selected span {
+    color: #fff;
+  }
+}

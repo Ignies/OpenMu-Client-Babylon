@@ -1,0 +1,15 @@
+// `CNewUIPickedItem::Render`: drawn on top of every window, never hit-tested.
+.mu-picked-item {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  image-rendering: pixelated;
+
+  .item-icon {
+    max-width: 100%;
+    max-height: 100%;
+  }
+}

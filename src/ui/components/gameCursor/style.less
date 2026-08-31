@@ -1,0 +1,22 @@
+// MU has one cursor for the whole client, so nothing underneath gets to ask
+// for its own - not a button's `pointer`, not a text field's caret. The class
+// is only put on `body` once the art is loaded and the pointer has been seen
+// at least once (see `index.tsx`), so a page never ends up with neither
+// cursor.
+body.mu-cursor-hidden,
+body.mu-cursor-hidden * {
+  cursor: none !important;
+}
+
+.mu-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  // Above everything, including the carried inventory item (1000) and the
+  // loading screen (100): `RenderCursor` is the last call in MU's frame.
+  z-index: 2000;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  will-change: transform;
+}

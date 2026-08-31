@@ -1,0 +1,51 @@
+@import (reference) '../muText/style.less';
+// `RenderTipTextList` (ZzzInventory.cpp:282), the same box the item tooltip
+// uses: 1px black frame, black 80% fill, centred lines, bold name.
+.mu-skill-tooltip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1200;
+  pointer-events: none;
+  user-select: none;
+
+  box-sizing: border-box;
+  padding: 2px 5px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid #000;
+
+  .mu-font();
+  font-size: 11px;
+  line-height: 13px;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 1px 1px 0 #000;
+
+  .mu-skill-tooltip-gap {
+    height: 6px;
+  }
+
+  .mu-skill-tooltip-line {
+    display: block;
+    padding: 0 1px;
+
+    &.bold {
+      font-weight: bold;
+    }
+    &.color-white {
+      color: #fff;
+    }
+    &.color-blue {
+      color: #80b3ff;
+    }
+    &.color-gray {
+      color: #999;
+    }
+    // TEXT_COLOR_DARKRED: white glyphs on a dark red box.
+    &.color-darkRed {
+      color: #fff;
+      background-color: #a00000;
+    }
+  }
+}

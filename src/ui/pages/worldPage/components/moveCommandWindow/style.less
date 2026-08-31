@@ -1,0 +1,56 @@
+@import (reference) '../../../../components/muText/style.less';
+// `CNewUIMoveCommandWindow`: a black(0.8) panel in the top-left corner, the
+// chat-log scrollbar sprites down its right edge and a red(0.6) close bar
+// along the bottom. Coordinates live in the component; this is the look.
+.move-window {
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  transform-origin: top left;
+  pointer-events: auto;
+  user-select: none;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.8);
+  font-size: 11px;
+
+  .move-label {
+    position: absolute;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+    // `RT3_WRITE_CENTER`: the x given is the centre of the text.
+    transform: translateX(-50%);
+  }
+
+  .move-row {
+    position: absolute;
+    cursor: default;
+
+    &.can-move {
+      cursor: pointer;
+    }
+
+    // `_bSelected`: the yellow(0.8, 0.8, 0.1, 0.6) box under the hovered row.
+    &.can-move:hover {
+      background: rgba(204, 204, 26, 0.6);
+    }
+  }
+
+  .move-scrollbar {
+    position: absolute;
+  }
+
+  .move-scroll-thumb {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  // `RenderColor` at (0.6, 0, 0, 1) with GlobalText[1002] centred on it.
+  .move-close {
+    position: absolute;
+    background: rgba(153, 0, 0, 1);
+    cursor: pointer;
+    text-align: center;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+  }
+}

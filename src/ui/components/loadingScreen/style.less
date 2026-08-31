@@ -1,0 +1,134 @@
+.loading-screen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+
+  // Opaque and above everything: the whole point is that nothing behind it is
+  // visible until the scene is finished.
+  background: #000;
+  z-index: 100;
+
+  // Swallow clicks so a button underneath can't be hit through the screen.
+  pointer-events: auto;
+}
+
+.loading-art {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// The copy behind the readable one, scaled to cover and blurred. Fills a
+// widescreen window without cropping the map or leaving black bars, and echoes
+// the blurred backdrop the artwork already has baked into it.
+.loading-art-blur {
+  filter: blur(28px) brightness(0.45) saturate(0.8);
+
+  // Blur samples past the element's edge and fades out there, which would show
+  // as a bright rim against the black. Overscaling pushes that rim off screen.
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+// Centres with grid rather than `translateX(-50%)` on purpose. A transform
+// creates a stacking context, which isolates blending - the glow inside would
+// then composite against this wrapper instead of the artwork behind it.
+.loading-bar-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9%;
+  display: grid;
+  place-items: center;
+}
+
+// Both layers share one grid cell so they sit exactly on top of each other.
+.loading-bar-wrap > * {
+  grid-area: 1 / 1;
+}
+
+// The light the bar throws onto the map. Blurred well past the bar's own
+// edges, additive, and outside the bar's isolated group so it actually
+// reaches the artwork.
+.loading-bar-glow {
+  position: relative;
+  mix-blend-mode: screen;
+  filter: blur(9px);
+  pointer-events: none;
+}
+
+.loading-bar-glow-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 186, 64, 0.5) 0%,
+    rgba(255, 214, 120, 0.7) 70%,
+    rgba(255, 240, 190, 0.95) 100%
+  );
+  transition: width 0.25s ease-out;
+}
+
+.loading-bar {
+  position: relative;
+
+  // Keeps the fill's blend inside the bar, so it lights up the bronze trough
+  // instead of punching through to the map. The trough itself stays opaque -
+  // blending it as well washed it out against the parchment and the bar lost
+  // its background.
+  isolation: isolate;
+}
+
+// Clips the fill sprite rather than scaling it, so the art keeps its
+// proportions as the bar grows.
+.loading-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  overflow: hidden;
+
+  // Additive, within the bar's group. `Progress.OZJ` is a gold line on black;
+  // screen makes the black vanish and the gold glow over the trough, which is
+  // how the original draws it. Without this the fill is a black slab - which
+  // is exactly what it looked like.
+  mix-blend-mode: screen;
+
+  // Only the leading edge moves per frame, so animating the width directly
+  // would step visibly at low progress.
+  transition: width 0.25s ease-out;
+}
+
+.loading-bar-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 232, 160, 0) 35%,
+    rgba(255, 240, 190, 0.75) 50%,
+    rgba(255, 232, 160, 0) 65%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+  animation: loading-bar-sweep 1.5s linear infinite;
+}
+
+@keyframes loading-bar-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+// Respect the OS setting - a looping sweep is exactly the kind of motion this
+// is meant to suppress.
+@media (prefers-reduced-motion: reduce) {
+  .loading-bar-shimmer {
+    animation: none;
+  }
+}

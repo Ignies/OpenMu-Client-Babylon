@@ -1,0 +1,278 @@
+// `CNewUIFriendWindow`. Coordinates live in the component; this is the look
+// of the tab strip, the two lists and the letter sheet.
+.messenger-window {
+  font-size: 11px;
+
+  .messenger-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .table-fill {
+    position: absolute;
+    background-color: #0000004d;
+  }
+
+  .messenger-tab-strip {
+    position: absolute;
+  }
+
+  // `RenderTabButton`: the unselected tabs are drawn at 0.6 brightness.
+  .messenger-tab {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #999;
+    text-shadow: 1px 1px 0 #000;
+
+    span {
+      position: relative;
+    }
+
+    &.active {
+      color: #fff;
+    }
+  }
+
+  .messenger-body {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .messenger-head {
+    color: #ffd927;
+    margin-bottom: 3px;
+  }
+
+  .messenger-unread {
+    color: #ff8a3c;
+  }
+
+  .messenger-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+  }
+
+  .messenger-empty {
+    color: #a8a8a8;
+    font-size: 10px;
+  }
+
+  .messenger-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 16px;
+    padding: 0 2px;
+    cursor: pointer;
+    color: #e2e2e2;
+
+    &:hover {
+      background-color: #ffffff14;
+    }
+    &.selected {
+      background-color: #ffffff26;
+      color: #fff;
+    }
+    &.offline {
+      color: #8c8c8c;
+    }
+    &.unread .messenger-subject {
+      color: #ffeec1;
+      font-weight: bold;
+    }
+
+    &.letter {
+      height: 18px;
+    }
+  }
+
+  .messenger-dot {
+    flex: none;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: #4a4a4a;
+
+    &.on {
+      background-color: #46e04a;
+    }
+  }
+
+  .messenger-name {
+    flex: none;
+    max-width: 62px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .messenger-subject {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .messenger-meta {
+    flex: none;
+    margin-left: auto;
+    font-size: 9px;
+    color: #a8a8a8;
+  }
+
+  .messenger-add {
+    display: flex;
+    gap: 3px;
+    margin-top: 4px;
+
+    input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .messenger-buttons {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+
+  .messenger-hide {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    color: #c8c8c8;
+    font-size: 10px;
+    cursor: pointer;
+
+    input {
+      width: 11px;
+      height: 11px;
+      margin: 0;
+    }
+  }
+
+  input[type='text'],
+  input:not([type]),
+  textarea {
+    border: 1px solid #7a6b45;
+    background: #14110a;
+    color: #e2e2e2;
+    font: inherit;
+    font-size: 10px;
+    padding: 0 3px;
+    height: 16px;
+    outline: none;
+
+    &:focus {
+      border-color: #c8b87a;
+    }
+  }
+
+  button {
+    flex: 1;
+    height: 17px;
+    padding: 0 4px;
+    border: 1px solid #7a6b45;
+    background: #2a2518;
+    color: #e2e2e2;
+    font: inherit;
+    font-size: 10px;
+    line-height: 15px;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      color: #fff;
+      border-color: #c8b87a;
+    }
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  }
+}
+
+// The read / write sheet sits over the list, like the original's child window.
+.messenger-window .letter-sheet {
+  position: absolute;
+  left: 12px;
+  top: 96px;
+  width: 166px;
+  height: 285px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px;
+  box-sizing: border-box;
+  background-color: #0b0906f2;
+  border: 1px solid #7a6b45;
+  text-shadow: 1px 1px 0 #000;
+
+  .letter-sheet-title {
+    color: #ffd927;
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .letter-sheet-meta {
+    font-size: 9px;
+    color: #a8a8a8;
+  }
+
+  .letter-sheet-body {
+    flex: 1;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #e2e2e2;
+    font-size: 10px;
+    line-height: 13px;
+  }
+
+  .letter-field {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #c8c8c8;
+
+    input {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .letter-text {
+    flex: 1;
+    height: auto;
+    padding: 3px;
+    resize: none;
+    line-height: 13px;
+  }
+
+  .letter-sheet-buttons {
+    display: flex;
+    gap: 3px;
+  }
+}

@@ -1,0 +1,28 @@
+.world-label {
+  display: flex;
+  position: absolute;
+  transform: translate(-10000px, -10000px);
+  contain: layout;
+
+  .text {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.1rem;
+    font-size: 0.75rem;
+    transform: translate(-50%, -50%);
+  }
+}
+
+// Drop names are targets: the ALT overlay lets a player click one name out
+// of a loot pile, so it takes the pointer back from the canvas underneath.
+.world-label.drop .text {
+  pointer-events: auto;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+    text-decoration: underline;
+  }
+}

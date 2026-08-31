@@ -1,0 +1,80 @@
+// The economy message boxes (zen in/out, the vault pin, a shop price, a
+// purchase and the trade invitation). One at a time, centred, modal.
+.economy-prompt-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #00000066;
+  pointer-events: auto;
+}
+
+.economy-prompt {
+  min-width: 300px;
+  max-width: 380px;
+  padding: 14px 18px;
+  background-color: #14100cf2;
+  border: 1px solid #6a5a44;
+  box-shadow: 0 4px 16px #000000aa;
+  color: #e6dccc;
+  font-size: 12px;
+
+  .economy-prompt-title {
+    margin-bottom: 6px;
+    font-weight: bold;
+    font-size: 13px;
+    color: #ffd700;
+  }
+
+  .economy-prompt-hint {
+    margin-bottom: 10px;
+    color: #c8bca8;
+    line-height: 16px;
+  }
+
+  .economy-prompt-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    input {
+      flex: 1;
+      padding: 3px 6px;
+      background-color: #00000066;
+      border: 1px solid #6a5a44;
+      outline: none;
+      color: #ffe6d2;
+      font: inherit;
+      text-align: right;
+    }
+  }
+
+  .economy-prompt-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+
+    button {
+      padding: 3px 14px;
+      background-color: #2a2118;
+      border: 1px solid #6a5a44;
+      color: #e6dccc;
+      font: inherit;
+      cursor: pointer;
+
+      &:hover:not(:disabled) {
+        background-color: #3c2f22;
+        color: #fff;
+      }
+
+      &:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+    }
+  }
+}

@@ -1,0 +1,92 @@
+// `CNewUITrade::RenderText`: the partner's name in pale blue on its plate,
+// the level band beside it, both zen amounts gold and the red warning block
+// between the two halves.
+.trade {
+  font-size: 11px;
+
+  .window-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #d8d8d8;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .trade-partner-name,
+  .trade-my-name {
+    position: absolute;
+    font-weight: bold;
+    color: #d2e6ff;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .trade-partner-level {
+    position: absolute;
+    font-weight: bold;
+    font-size: 10px;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+  }
+
+  .trade-money {
+    position: absolute;
+    text-align: right;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+  }
+
+  // GlobalText[370]: the label pulses in the original; a steady red reads
+  // better at this size.
+  .trade-warn-title {
+    position: absolute;
+    font-weight: bold;
+    font-size: 10px;
+    color: #d20000;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .trade-warn-line {
+    position: absolute;
+    font-size: 9px;
+    color: #ffdc96;
+    text-shadow: 1px 1px 0 #000;
+    white-space: nowrap;
+  }
+
+  .window-button {
+    position: absolute;
+
+    .button-tooltip {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 2px;
+      padding: 1px 4px;
+      background-color: #000000cc;
+      border: 1px solid #6a6a6a;
+      color: #fff;
+      font-size: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    &:hover .button-tooltip {
+      display: block;
+    }
+  }
+}

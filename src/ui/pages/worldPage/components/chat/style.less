@@ -1,0 +1,183 @@
+@import (reference) '../../../../components/muText/style.less';
+// `CNewUIChatInputBox` / `CNewUIChatLogWindow`. Every coordinate comes from
+// the C++ and is passed in by the component; this file is only how the
+// pieces stack and how text is drawn.
+.chat-window {
+  position: absolute;
+  left: 0;
+  pointer-events: auto;
+  user-select: none;
+  .mu-font();
+  font-size: 11px;
+  color: #fff;
+  image-rendering: pixelated;
+
+  .mu-resize-grip {
+    opacity: 0;
+  }
+  &:hover .mu-resize-grip {
+    opacity: 0.6;
+  }
+}
+
+// The log hangs above the input box's position (`m_WndPos.y - m_WndSize.cy`).
+.chat-log {
+  position: absolute;
+  left: 0;
+  overflow: visible;
+
+  .chat-log-drag {
+    position: absolute;
+    left: 0;
+    cursor: ns-resize;
+  }
+
+  .chat-log-part {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .chat-log-thumb {
+    position: absolute;
+    &.idle {
+      opacity: 0.6;
+    }
+  }
+  .chat-log-thumb-hit {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+  }
+}
+
+// `RenderText` with a background colour: the box hugs the text.
+.chat-line {
+  position: absolute;
+  display: inline-block;
+  box-sizing: border-box;
+  height: 15px;
+  line-height: 15px;
+  padding: 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  text-shadow: none;
+  cursor: default;
+}
+
+// `newui_chat_back` is the box; everything else is laid on top of it.
+.chat-input {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+
+  .chat-strip-button {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  // `RenderTooltip`: white on black(180), just above the strip.
+  .chat-tooltip {
+    position: absolute;
+    top: -15px;
+    padding: 0 3px;
+    height: 14px;
+    line-height: 14px;
+    white-space: nowrap;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    pointer-events: none;
+  }
+
+  .chat-field {
+    position: absolute;
+    box-sizing: border-box;
+    padding: 0 1px;
+    margin: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+    font: inherit;
+    line-height: 13px;
+    caret-color: #fff;
+  }
+
+  .chat-whisper-off {
+    position: absolute;
+    background: rgba(128, 51, 51, 0.2);
+    cursor: pointer;
+  }
+
+  .chat-prefix-hint {
+    position: absolute;
+    pointer-events: none;
+    color: rgba(255, 255, 255, 0.45);
+    line-height: 13px;
+    padding-left: 1px;
+  }
+}
+
+// The `/` completion list: white-on-black(180) like the strip tooltip, one
+// row per command, the selected row brighter. Ours - the original has no
+// The filter tabs over the framed log: four sprite buttons and a text "All".
+.chat-filter-tabs {
+  position: absolute;
+  pointer-events: auto;
+}
+
+.chat-filter-all {
+  position: absolute;
+  top: 0;
+  line-height: 26px;
+  text-align: center;
+  color: #a0a0a0;
+  background: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+
+  &.active {
+    color: #fff;
+  }
+}
+
+// command help beyond the server's `/help`.
+.chat-input .chat-completion {
+  position: absolute;
+  width: 260px;
+  padding: 2px 0;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  pointer-events: auto;
+  z-index: 2;
+
+  .chat-completion-row {
+    display: flex;
+    gap: 5px;
+    padding: 0 4px;
+    height: 14px;
+    line-height: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    color: rgb(205, 220, 239);
+
+    &.selected,
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+  }
+  .chat-completion-name {
+    color: rgb(255, 200, 50);
+  }
+  .chat-completion-usage {
+    color: rgb(150, 200, 255);
+  }
+  .chat-completion-help {
+    flex: 1;
+    text-align: right;
+    color: rgba(255, 255, 255, 0.6);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
