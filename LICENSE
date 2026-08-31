@@ -1,21 +1,990 @@
-MIT License
+# OpenMU JavaScript Client
 
-Copyright (c) 2026 Ignies
+## NON-COMMERCIAL SOURCE-AVAILABLE LICENSE
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+### Version 1.0 — 2026
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+**Copyright © 2026 Ignies/OpenMuJSClient**
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+All rights reserved, except for the permissions expressly granted
+by this License.
+
+---
+
+## 1. Definitions
+
+For the purposes of this License, the following terms have the
+meanings set forth below.
+
+### 1.1 "Project"
+
+"Project" means the OpenMU JavaScript Client project commonly
+identified as **OpenMuJSClient**, including its source repository,
+source code, documentation, original artwork, original
+configuration, build systems, scripts and other materials
+identified by the Copyright Holder as part of the Project.
+
+### 1.2 "Covered Materials"
+
+"Covered Materials" means the original materials contained within
+the Project that:
+
+1. are authored by the Copyright Holder or its contributors; and
+2. are expressly distributed under this License.
+
+Covered Materials include, without limitation:
+
+* source code;
+* compiled code;
+* scripts;
+* configuration files;
+* documentation;
+* original artwork;
+* original interface elements;
+* build files;
+* deployment files;
+* and other original project materials.
+
+### 1.3 "Third-Party Materials"
+
+"Third-Party Materials" means any material included in,
+distributed with, referenced by, or required by the Project that
+is not owned by the Copyright Holder.
+
+Third-Party Materials include, without limitation:
+
+* third-party software;
+* libraries;
+* fonts;
+* artwork;
+* music;
+* sounds;
+* models;
+* textures;
+* game data;
+* trademarks;
+* logos;
+* and other intellectual property belonging to third parties.
+
+Third-Party Materials are **not automatically licensed under this
+License**.
+
+### 1.4 "Derivative Work"
+
+"Derivative Work" means a work based upon, incorporating,
+modifying, adapting, translating or otherwise substantially
+incorporating the Covered Materials.
+
+Examples include:
+
+* modified versions of the Project;
+* forks;
+* ports;
+* modified builds;
+* modified clients;
+* translations;
+* substantial rewrites;
+* and software incorporating substantial portions of the
+  Covered Materials.
+
+Mere interoperability with the Project, without copying or
+incorporating protected portions of the Covered Materials, does
+not by itself create a Derivative Work.
+
+### 1.5 "Distribution"
+
+"Distribution" means making the Covered Materials or a Derivative
+Work available to another person or entity by any means.
+
+This includes:
+
+* downloading;
+* uploading;
+* publishing;
+* mirroring;
+* packaging;
+* bundling;
+* application stores;
+* websites;
+* repositories;
+* game launchers;
+* physical media;
+* file-sharing services;
+* or any other method of making a copy or access available.
+
+### 1.6 "Commercial Use"
+
+"Commercial Use" means any use of the Covered Materials or a
+Derivative Work that is intended, directly or indirectly, to
+obtain monetary compensation, financial gain, commercial
+advantage, economic benefit, or revenue from users or third
+parties.
+
+Commercial Use includes, without limitation:
+
+1. selling the Covered Materials;
+
+2. selling a Derivative Work;
+
+3. charging for access to the Project;
+
+4. charging for access to a server using the Project;
+
+5. selling game accounts;
+
+6. selling characters;
+
+7. selling virtual currency;
+
+8. selling virtual items;
+
+9. selling equipment;
+
+10. selling cosmetics;
+
+11. selling ranks;
+
+12. selling VIP status;
+
+13. selling gameplay advantages;
+
+14. selling premium features;
+
+15. selling subscriptions;
+
+16. selling memberships;
+
+17. selling priority access;
+
+18. accepting donations from users;
+
+19. accepting tips from users;
+
+20. accepting Patreon payments;
+
+21. accepting Ko-fi payments;
+
+22. accepting PayPal contributions;
+
+23. accepting sponsorships;
+
+24. operating crowdfunding campaigns;
+
+25. displaying advertising intended to generate revenue from users
+    of a service materially based upon the Project;
+
+26. using affiliate or referral programs to generate revenue from
+    users of a service materially based upon the Project;
+
+27. charging for server hosting;
+
+28. charging for managed server services;
+
+29. providing paid SaaS services;
+
+30. charging for installation or configuration;
+
+31. charging for support where the support is materially tied to
+    the Project;
+
+32. charging for downloads;
+
+33. charging for distribution;
+
+34. charging for bandwidth or access;
+
+35. commercially licensing a Derivative Work;
+
+36. incorporating the Covered Materials into a commercial
+    product or service; or
+
+37. otherwise obtaining financial gain from users through the
+    Covered Materials or a service materially based upon them.
+
+For the avoidance of doubt, **calling a payment a "donation",
+"tip", "support", "contribution", "sponsorship", "membership",
+"gift", or any similar term does not prevent that payment from
+constituting Commercial Use.**
+
+### 1.7 "Non-Commercial Use"
+
+"Non-Commercial Use" means use of the Covered Materials that does
+not constitute Commercial Use.
+
+Examples include:
+
+* personal use;
+* private use;
+* education;
+* academic research;
+* experimentation;
+* testing;
+* hobby development;
+* non-commercial development;
+* free community projects;
+* free and non-monetized game servers;
+* free redistribution;
+* and free Derivative Works.
+
+### 1.8 "MU Online Rights Holder"
+
+"MU Online Rights Holder" means **Webzen Inc.**, together with
+any legal entity that lawfully owns, controls, administers or is
+otherwise legally authorized to exercise the relevant
+intellectual-property rights associated with **MU Online**.
+
+This definition includes any lawful:
+
+* successor;
+* assignee;
+* transferee;
+* purchaser;
+* parent entity;
+* subsidiary where legally appropriate; or
+* successor-in-interest
+
+to the relevant MU Online intellectual-property rights.
+
+If ownership or control of the relevant MU Online rights is
+transferred, the recipient of those rights shall qualify as a MU
+Online Rights Holder for purposes of this License.
+
+---
+
+# 2. License Grant to the Public
+
+Subject to the terms and conditions of this License, the
+Copyright Holder grants you a worldwide, royalty-free,
+non-exclusive license to:
+
+1. use the Covered Materials for Non-Commercial Use;
+
+2. inspect and study the source code;
+
+3. copy the Covered Materials;
+
+4. modify the Covered Materials;
+
+5. create Derivative Works;
+
+6. compile and execute the Software;
+
+7. distribute the Covered Materials free of charge; and
+
+8. distribute Derivative Works free of charge.
+
+This license does **not** grant the general public permission for
+Commercial Use.
+
+---
+
+# 3. Absolute Non-Commercial Requirement
+
+Except where expressly permitted by Section 4, Commercial Use of
+the Covered Materials is prohibited.
+
+A person or entity may not monetize the Project, a Derivative Work,
+a server using the Project, or a service materially based upon
+the Project.
+
+This restriction applies regardless of whether:
+
+* the Software itself is free;
+* the source code is publicly available;
+* the server is free to download;
+* payment is voluntary;
+* payment is mandatory;
+* payment is collected outside the Software;
+* payment is collected through another website;
+* payment is collected by another person;
+* payment is collected by another company;
+* payment is processed through a third-party payment provider;
+* the payment is called a donation;
+* or the payment allegedly provides no gameplay advantage.
+
+The purpose of this restriction is to ensure that ordinary users
+of the Project are not commercially exploited through a service
+based upon the Project.
+
+---
+
+# 4. Special Commercial License for the MU Online Rights Holder
+
+Notwithstanding anything else in this License, the Copyright
+Holder hereby grants the **MU Online Rights Holder** a worldwide,
+perpetual, irrevocable, royalty-free, fully-paid,
+non-exclusive, transferable and sublicensable license to use,
+reproduce, modify, adapt, create Derivative Works from, distribute,
+publish, commercialize, sublicense, sell, incorporate, relicense
+and otherwise exploit the Covered Materials for any lawful
+purpose.
+
+This special license includes, without limitation, the right to:
+
+1. use the Covered Materials commercially;
+
+2. modify the Covered Materials;
+
+3. rewrite the Covered Materials;
+
+4. replace any part of the Covered Materials;
+
+5. create proprietary Derivative Works;
+
+6. incorporate the Covered Materials into MU Online;
+
+7. incorporate the Covered Materials into successor versions of
+   MU Online;
+
+8. incorporate the Covered Materials into other products;
+
+9. incorporate the Covered Materials into other services;
+
+10. combine the Covered Materials with proprietary software;
+
+11. combine the Covered Materials with proprietary game assets;
+
+12. distribute the Covered Materials;
+
+13. distribute modified versions;
+
+14. sell the Covered Materials;
+
+15. sell products incorporating the Covered Materials;
+
+16. operate commercial game servers;
+
+17. charge users for access;
+
+18. sell subscriptions;
+
+19. sell memberships;
+
+20. sell accounts;
+
+21. sell characters;
+
+22. sell virtual currency;
+
+23. sell virtual items;
+
+24. sell equipment;
+
+25. sell cosmetics;
+
+26. sell VIP memberships;
+
+27. sell gameplay privileges;
+
+28. sell gameplay advantages;
+
+29. accept donations;
+
+30. accept sponsorships;
+
+31. display advertising;
+
+32. provide paid hosting;
+
+33. provide managed services;
+
+34. provide SaaS services;
+
+35. sublicense the Covered Materials;
+
+36. relicense the Covered Materials;
+
+37. distribute the Covered Materials under proprietary terms;
+
+38. close-source modified versions;
+
+39. remove or modify attribution;
+
+40. assign the rights granted under this Section; and
+
+41. authorize third parties to exercise any of the rights granted
+    under this Section.
+
+The MU Online Rights Holder is **expressly exempt from all
+Non-Commercial restrictions contained elsewhere in this License**.
+
+The MU Online Rights Holder may therefore use the Covered
+Materials in any commercial or proprietary manner permitted by
+applicable law.
+
+No royalty, payment, accounting obligation, reporting obligation
+or other compensation is owed to the Copyright Holder solely as a
+result of the MU Online Rights Holder exercising the rights
+granted by this Section.
+
+This provision is intentionally designed to allow the lawful owner
+or controller of MU Online to adopt the Project as an official
+product, technology component, commercial product or other asset
+if it determines that doing so is appropriate.
+
+---
+
+# 5. Effect of Transfer of MU Online Rights
+
+If Webzen Inc. or another MU Online Rights Holder transfers,
+assigns, sells or otherwise lawfully disposes of the relevant
+intellectual-property rights associated with MU Online, the
+special license granted under Section 4 shall continue for the
+benefit of the successor or transferee with respect to those
+rights.
+
+The purpose of this provision is to ensure that the lawful owner
+or controller of MU Online may benefit from the Project regardless
+of future changes in ownership or corporate structure.
+
+---
+
+# 6. Commercial Use by Other Parties
+
+A person or entity that is not a MU Online Rights Holder may only
+engage in Commercial Use if the Copyright Holder has granted
+explicit written permission.
+
+No commercial permission shall be implied by:
+
+* public availability of the source code;
+* publication on GitHub or another repository;
+* contributions to the Project;
+* participation in development;
+* submitting pull requests;
+* submitting issues;
+* communicating with contributors;
+* previous use;
+* or failure by the Copyright Holder to enforce the License
+  immediately.
+
+Any commercial permission must be granted explicitly in writing.
+
+---
+
+# 7. Game Servers
+
+A third party may operate a server using the Project only for
+Non-Commercial Use.
+
+A third-party server may not obtain money, monetary compensation,
+commercial advantage or financial benefit from its users.
+
+Without limitation, it may not charge users for:
+
+* server access;
+* accounts;
+* characters;
+* virtual currency;
+* virtual items;
+* equipment;
+* cosmetics;
+* ranks;
+* VIP status;
+* gameplay advantages;
+* premium features;
+* priority access;
+* subscriptions;
+* memberships;
+* exclusive content;
+* donations;
+* sponsorships;
+* tips;
+* or any other service, feature or benefit.
+
+The MU Online Rights Holder is exempt from these restrictions.
+
+---
+
+# 8. Donations, Tips and Sponsorships
+
+For purposes of this License, donations, tips, sponsorships,
+support payments and similar monetary contributions associated
+with a service materially based upon the Project constitute
+Commercial Use.
+
+Third parties therefore may not request, solicit, accept or
+collect such payments from users in connection with a service
+using the Project.
+
+This includes, without limitation:
+
+* PayPal;
+* Patreon;
+* Ko-fi;
+* Buy Me a Coffee;
+* recurring donations;
+* one-time donations;
+* crowdfunding;
+* sponsorships;
+* tips;
+* supporter packages;
+* paid memberships;
+* and equivalent systems.
+
+This prohibition applies even where the payment provides no
+gameplay advantage.
+
+The MU Online Rights Holder is expressly exempt from this Section.
+
+---
+
+# 9. Paid Hosting and Managed Services
+
+No person or entity other than the MU Online Rights Holder may
+charge money for:
+
+* hosting;
+* operating;
+* maintaining;
+* configuring;
+* managing;
+* monitoring;
+* or providing access to
+
+a server or service materially based upon the Project.
+
+The MU Online Rights Holder is expressly exempt from this
+restriction.
+
+---
+
+# 10. Distribution
+
+The Covered Materials and Derivative Works must be made available
+free of charge by third parties.
+
+Third parties may not charge for:
+
+* downloads;
+* installation packages;
+* physical copies;
+* repositories;
+* mirrors;
+* bandwidth;
+* launchers;
+* updates;
+* distribution;
+* access;
+* or any other method of obtaining the Project.
+
+The MU Online Rights Holder is expressly exempt from this
+restriction.
+
+---
+
+# 11. Derivative Works
+
+Derivative Works are permitted for Non-Commercial Use.
+
+You may:
+
+* modify the Project;
+* fork the Project;
+* redesign the interface;
+* add features;
+* remove features;
+* port the Project;
+* translate the Project;
+* optimize the Project;
+* integrate other technologies;
+* and create substantially modified versions.
+
+However, a Derivative Work may not be:
+
+* sold;
+* commercially licensed;
+* monetized;
+* used in a paid service;
+* or otherwise commercially exploited
+
+without written permission from the Copyright Holder.
+
+The MU Online Rights Holder may commercially exploit, sublicense,
+relicense and distribute Derivative Works under Section 4.
+
+---
+
+# 12. Forks
+
+Forks are expressly permitted for Non-Commercial Use.
+
+A fork may use:
+
+* a different name;
+* different branding;
+* a different interface;
+* different architecture;
+* different features;
+* different server integrations;
+* different documentation;
+* and original additional assets.
+
+A fork may not impose a commercial license on the Covered
+Materials or commercially exploit the Covered Materials.
+
+---
+
+# 13. Redistribution Requirements
+
+You may redistribute the Covered Materials or a Derivative Work
+provided that:
+
+1. this License accompanies the distribution;
+
+2. existing copyright notices are preserved;
+
+3. substantial modifications are identified;
+
+4. the original authorship is not falsely claimed;
+
+5. no endorsement by the Copyright Holder is implied;
+
+6. no payment is required to obtain the Covered Materials;
+
+7. no Commercial Use is made of the Covered Materials; and
+
+8. recipients receive the rights granted by this License.
+
+These requirements do not restrict the MU Online Rights Holder.
+
+---
+
+# 14. No Sublicensing by Third Parties
+
+A third party may not sublicense or commercially relicense the
+Covered Materials.
+
+A third party may not replace this License with a license that
+permits Commercial Use of the Covered Materials.
+
+The MU Online Rights Holder is expressly permitted to sublicense
+and relicense the Covered Materials under Section 4.
+
+---
+
+# 15. Third-Party Software and Materials
+
+The Project may contain or depend upon Third-Party Materials.
+
+Third-Party Materials are not automatically covered by this
+License.
+
+Each third-party component remains subject to its own applicable
+license or legal terms.
+
+Nothing in this License grants rights that the Copyright Holder
+does not possess.
+
+A list of known third-party dependencies and their applicable
+licenses should be maintained in:
+
+```
+THIRD-PARTY-NOTICES.md
+```
+
+Where the terms of a third-party license conflict with this
+License, the applicable third-party license governs that
+third-party component.
+
+---
+
+# 16. MU Online and Webzen Intellectual Property
+
+The Copyright Holder claims copyright only in materials that it
+actually owns or is authorized to license.
+
+This License does **not** grant ownership of, or general rights
+to use:
+
+* MU Online;
+* MU Online characters;
+* character models;
+* artwork;
+* textures;
+* maps;
+* sounds;
+* music;
+* animations;
+* visual effects;
+* game data;
+* logos;
+* trademarks;
+* service marks;
+* names;
+* proprietary assets;
+* or other intellectual property belonging to Webzen Inc. or
+  another third party.
+
+Such materials remain subject to the rights of their respective
+owners.
+
+The presence of third-party material in a particular distribution
+of the Project does not mean that such material is licensed under
+this License.
+
+Nothing in this License should be interpreted as a representation
+that Ignies/OpenMuJSClient owns Webzen's intellectual property.
+
+---
+
+# 17. No Trademark License
+
+This License grants no trademark rights.
+
+Nothing in this License grants permission to use:
+
+* Webzen trademarks;
+* MU Online trademarks;
+* Webzen logos;
+* MU Online logos;
+* or any other third-party marks
+
+except where such use is independently permitted by applicable
+law or by the relevant rights holder.
+
+---
+
+# 18. No Affiliation or Endorsement
+
+The Project is an independent community project unless explicitly
+stated otherwise.
+
+Nothing in this License represents that the Project is:
+
+* an official Webzen product;
+* an official MU Online product;
+* endorsed by Webzen;
+* sponsored by Webzen;
+* operated by Webzen;
+* or otherwise officially affiliated with Webzen.
+
+The MU Online Rights Holder may nevertheless adopt or officially
+integrate the Project under the rights granted by Section 4.
+
+---
+
+# 19. Copyright and Attribution
+
+The following notice shall remain associated with the Covered
+Materials:
+
+```
+Copyright © 2026 Ignies/OpenMuJSClient
+```
+
+Contributors may retain separate copyright in their original
+contributions where applicable.
+
+Nothing in this License transfers ownership of a contributor's
+original work unless a separate written agreement provides
+otherwise.
+
+By contributing material to the Project, a contributor represents
+that they have the necessary rights to contribute that material
+under this License or under terms accepted by the Copyright
+Holder.
+
+---
+
+# 20. No Circumvention
+
+No person may intentionally circumvent, assist in circumventing,
+or knowingly structure an arrangement for the purpose of avoiding
+the Commercial Use restrictions of this License.
+
+This includes, without limitation:
+
+* routing payments through another person;
+* routing payments through another company;
+* using an intermediary;
+* separating payment from access;
+* providing a paid benefit through another service;
+* calling a sale a donation;
+* calling a subscription a membership;
+* calling a payment a tip;
+* providing paid access through a third-party website;
+* or otherwise disguising Commercial Use.
+
+The substance of an arrangement, rather than the terminology used
+to describe it, determines whether Commercial Use has occurred.
+
+---
+
+# 21. Termination
+
+The rights granted under this License automatically terminate
+upon a material violation of its terms.
+
+Upon termination, the violating party must immediately cease:
+
+* use;
+* distribution;
+* monetization;
+* and other activities requiring a license under this
+  agreement.
+
+The Copyright Holder may restore rights to a violating party by
+express written permission.
+
+The special rights granted to the MU Online Rights Holder under
+Section 4 are perpetual and irrevocable and are not terminated by
+violations committed by unrelated parties.
+
+---
+
+# 22. Reservation of Rights
+
+All rights not expressly granted by this License are reserved by
+the Copyright Holder.
+
+In particular, no general commercial rights are granted.
+
+The special commercial license granted to the MU Online Rights
+Holder under Section 4 is an intentional exception to the general
+Commercial Use prohibition.
+
+---
+
+# 23. No Warranty
+
+THE SOFTWARE AND COVERED MATERIALS ARE PROVIDED "AS IS", WITHOUT
+WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE COPYRIGHT
+HOLDER AND CONTRIBUTORS DISCLAIM ALL WARRANTIES, INCLUDING
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+NON-INFRINGEMENT, ACCURACY, RELIABILITY, AVAILABILITY AND
+SECURITY.
+
+---
+
+# 24. Limitation of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE COPYRIGHT
+HOLDER AND CONTRIBUTORS SHALL NOT BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES
+ARISING FROM OR RELATING TO THE SOFTWARE OR ITS USE.
+
+THIS INCLUDES, WITHOUT LIMITATION:
+
+* LOSS OF DATA;
+* LOSS OF PROFITS;
+* LOSS OF REVENUE;
+* LOSS OF BUSINESS;
+* SERVER DOWNTIME;
+* SECURITY INCIDENTS;
+* ACCOUNT LOSS;
+* OR CLAIMS ARISING FROM THIRD-PARTY SOFTWARE OR SERVICES.
+
+NOTHING IN THIS LICENSE EXCLUDES OR LIMITS LIABILITY WHERE SUCH
+EXCLUSION OR LIMITATION IS PROHIBITED BY APPLICABLE LAW.
+
+---
+
+# 25. Severability
+
+If any provision of this License is found to be invalid,
+unlawful or unenforceable, that provision shall be modified only
+to the minimum extent necessary to make it enforceable.
+
+The remaining provisions shall remain in full force and effect.
+
+---
+
+# 26. No Waiver
+
+Failure to enforce any provision of this License does not
+constitute a waiver of that provision.
+
+Any waiver must be expressly provided in writing by the Copyright
+Holder.
+
+---
+
+# 27. Entire Agreement
+
+This License constitutes the complete license governing the
+Covered Materials unless a separate written agreement expressly
+states otherwise.
+
+Third-Party Materials may be subject to additional licenses and
+terms.
+
+---
+
+# 28. Commercial Licensing
+
+The Copyright Holder may grant separate commercial licenses to
+other parties at its sole discretion.
+
+Commercial Use must not begin until explicit written permission
+has been obtained.
+
+The Copyright Holder may impose any terms, conditions, fees,
+royalties or restrictions it considers appropriate in such a
+commercial license.
+
+The special license granted to the MU Online Rights Holder under
+Section 4 does not require a separate commercial agreement.
+
+---
+
+# 29. Contact
+
+**Copyright Holder:**
+Ignies/OpenMuJSClient
+
+**Licensing Contact:**
+Create an Issue with the License label.
+
+Requests for commercial licensing should be directed to the
+Copyright Holder.
+
+---
+
+# 30. Final Notice
+
+Copyright © 2026 **Ignies/OpenMuJSClient**
+
+**OpenMU JavaScript Client**
+**Non-Commercial Source-Available License**
+**Version 1.0**
+
+The Project is provided to the community for free
+Non-Commercial Use.
+
+Third parties may not:
+
+* sell the Software;
+* sell Derivative Works;
+* charge users;
+* charge for server access;
+* sell game items;
+* sell accounts;
+* sell virtual currency;
+* sell VIP privileges;
+* operate paid servers;
+* provide paid hosting;
+* solicit or accept donations;
+* operate Patreon or equivalent monetization;
+* charge distribution fees;
+* monetize advertising associated with the Project;
+* or otherwise obtain financial gain from users through the
+  Project.
+
+**Webzen Inc. and the lawful successor, assignee or other legal
+holder of the relevant MU Online intellectual-property rights are
+expressly granted unrestricted commercial rights under Section 4.**
+
+This exception is intentional and is intended to permit the lawful
+MU Online rights holder to adopt, modify, commercialize, integrate,
+relicense, close-source or otherwise exploit the Project as an
+official or commercial asset.
+
+This License is a **Source-Available, Non-Commercial License** and
+is **not an OSI-approved Open Source license**.
+
+Nothing in this License grants ownership of or general rights to
+use MU Online, Webzen intellectual property, trademarks, artwork,
+game assets or other Third-Party Materials.
