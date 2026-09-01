@@ -4,6 +4,7 @@ import {
   APPEARANCE_EXTENDED_LENGTH,
   deserializeAppearance,
   deserializeAppearanceExtended,
+  itemLevelFromGlow,
   emptyAppearance,
   isAppearanceBlank,
   withAppearanceClass,
@@ -991,8 +992,8 @@ function addCharacterToScope(world: World, char: ScopeCharacter) {
     cApp.pants = appearance.pants;
     cApp.gloves = appearance.gloves;
     cApp.boots = appearance.boots;
-    // Only the extended layout carries them; the legacy one has no room
-    // for a wing or pet slot, so they stay null there.
+    // Both layouts carry them — the legacy one in the wing / pet bits of the
+    // preview (`deserializeAppearance`), the extended one in its own slots.
     cApp.wings = appearance.wings ?? null;
     cApp.pet = appearance.pet ?? null;
 
@@ -3484,8 +3485,10 @@ EventBus.on('AppearanceChanged', packet => {
   }
 
   const item = ItemSerializer.DeserializeItem(bytes);
-  // Byte 1 carries the slot, not the level: take the glow nibble as level.
-  item.lvl = bytes[1] & 0x0f;
+  // Byte 1 does not carry the item level here: the server overwrites it with
+  // `slot << 4 | GetGlowLevel()` (AppearanceChangedPlugIn), so the low nibble
+  // is the same three-bit glow the scope preview sends, not a +0..+15.
+  item.lvl = itemLevelFromGlow(bytes[1] & 0x0f);
   applyAppearanceChange(p.ChangedPlayerId, slot, item);
 });
 
