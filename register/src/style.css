@@ -1,0 +1,128 @@
+/*
+ * Mirrors the client's login window styling (`ui/pages/loginPage/style.less`).
+ * MU's UI is authored at fixed pixel sizes: the window is positioned, never
+ * stretched or reflowed, so every rule here is absolute placement over the art.
+ */
+
+@font-face {
+  font-family: 'Segoe UI';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  /*
+   * The client's font, referenced where it already lives rather than copied.
+   * Vite resolves these at build time and emits hashed copies into the register
+   * bundle, so the path holds wherever the output is served from.
+   */
+  src:
+    url('../../public/fonts/segoeuib.woff2') format('woff2'),
+    url('../../public/fonts/segoeuib.woff') format('woff'),
+    url('../../public/fonts/segoeuib.ttf') format('truetype');
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #000;
+  font-family: 'Segoe UI', sans-serif, Arial;
+}
+
+.register-page {
+  position: absolute;
+  inset: 0;
+  /*
+   * The client draws a 3D scene behind its login box. There is no engine here,
+   * so a dark wash stands in — dim enough that the window art carries the page.
+   */
+  background:
+    radial-gradient(ellipse at 50% 40%, #2a2118 0%, #0b0907 70%, #000 100%);
+}
+
+/*
+ * `UIMng.cpp:226` centres the window horizontally and puts it two thirds of the
+ * way down, which is where MU actually places it — not dead centre.
+ */
+.register-win {
+  position: absolute;
+  left: 50%;
+  top: calc((100% - 245px) * 2 / 3);
+  transform: translateX(-50%);
+  flex: none;
+  user-select: none;
+}
+
+.register-win form {
+  position: absolute;
+  inset: 0;
+  /* The art is the backdrop; only the fields themselves take input. */
+  pointer-events: none;
+}
+
+.register-label {
+  position: absolute;
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 1;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+}
+
+/*
+ * The box art *is* the input's background, so the field is invisible chrome
+ * sitting exactly on top of it.
+ */
+.register-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  pointer-events: auto;
+
+  background: transparent;
+  border: none;
+  outline: none;
+
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* Enter submits the form; the visible OK button is a sprite. */
+.register-submit {
+  position: absolute;
+  width: 0;
+  height: 0;
+  padding: 0;
+  border: none;
+  opacity: 0;
+}
+
+.register-message {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 222px;
+  margin: 0;
+  text-align: center;
+  font-size: 11px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+}
+
+.register-error {
+  color: #ff5a5a;
+}
+
+.register-ok {
+  color: #7dff7d;
+}
