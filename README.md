@@ -47,7 +47,6 @@ OpenMU's admin panel comes up on <http://localhost:80>. Create an account there 
 ### 2. The client
 
 ```bash
-cd client
 bun install
 bun run dev        # http://localhost:5173/online
 bun run proxy      # ws<->tcp bridge, in a second shell
