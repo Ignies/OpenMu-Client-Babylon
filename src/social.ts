@@ -19,6 +19,11 @@ import {
   type ChatLine,
 } from './common/chat';
 import { matchEmoteWord } from './common/emotes';
+import {
+  emojiBubbleToken,
+  matchEmojiBubbleWord,
+  type EmojiBubbleId,
+} from './common/emojiBubbles';
 import { localCommandOf } from './common/chatCommands';
 import { Commands } from './commands';
 import {
@@ -408,6 +413,15 @@ export const Social = new (class _Social {
     if (!text.startsWith('/')) {
       const emote = matchEmoteWord(text);
       if (emote && Store.world) Store.world.emoteRequest = emote;
+
+      // A line that is nothing but an emoji token pops the bubble here too.
+      // Everyone else gets it from this very message (the ChatMessage handler
+      // in logic.ts), and waiting for the server to echo it back would show
+      // the sender their own bubble a round trip late. Public chat only: a
+      // party line reaches members three maps away, where a bubble would hang
+      // over nobody.
+      const bubble = prefix ? null : matchEmojiBubbleWord(text);
+      if (bubble && Store.world) Store.world.emojiRequest = bubble;
     }
 
     const packet = PublicChatMessagePacket.createPacket(
@@ -418,6 +432,37 @@ export const Social = new (class _Social {
     Store.sendToGS(packet.buffer);
 
     this.remember(this.chatHistory, text);
+    return true;
+  }
+
+  /**
+   * The radial menu picked an emoji bubble: send it as the plain chat line its
+   * token stands for (common/emojiBubbles.ts). Always public chat, never the
+   * prefix of the current input mode - the bubble is drawn over a body in the
+   * world, so it has to go to the players who can see that body.
+   *
+   * It is not routed through `sendChat`: that one whispers when a whisper
+   * target is set, and a heart popped from the wheel is not a whisper.
+   *
+   * Returns false when the cooldown refuses the line, so the caller can drop
+   * the whole thing rather than show the sender a bubble nobody else gets.
+   */
+  broadcastEmojiBubble(id: EmojiBubbleId): boolean {
+    // Offline there is nothing to send to, and the local bubble is the point.
+    if (Store.isOffline) return true;
+
+    const now = performance.now();
+    if (now - this.lastChatTime < CHAT_COOLDOWN_MS) return false;
+    this.lastChatTime = now;
+
+    const token = emojiBubbleToken(id);
+    const packet = PublicChatMessagePacket.createPacket(
+      PublicChatMessagePacket.getRequiredSize(10 + token.length)
+    );
+    packet.setCharacter(Store.playerData.name);
+    packet.setMessage(token);
+    Store.sendToGS(packet.buffer);
+
     return true;
   }
 
