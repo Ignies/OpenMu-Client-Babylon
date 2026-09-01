@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "muonlinejs-client",
+      "name": "OpenMuJSClient",
       "dependencies": {
         "@babylonjs/core": "7.51.1",
         "@babylonjs/loaders": "7.51.1",
