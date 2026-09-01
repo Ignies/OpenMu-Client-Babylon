@@ -1,2 +1,8 @@
 node_modules/
 dist
+dist-register
+
+# Build-time endpoints and the OpenMU admin credentials. `.env.example` files
+# are committed in their place. Note `dist` above does not cover
+# `dist-register`: gitignore matches whole path segments, not prefixes.
+.env
