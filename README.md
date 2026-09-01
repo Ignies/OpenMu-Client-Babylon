@@ -1,4 +1,4 @@
-# OpenMuJSClient
+# Open Mu Client Babylon
 One Client to rule them all.
 ## Main server selection screen:
 https://github.com/user-attachments/assets/3e5d8266-ea30-4f6a-990d-44006c4b6639
