@@ -4,6 +4,7 @@ import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../../../store';
+import { Social } from '../../../../../social';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import { useWindowStackEntry } from '../../../../components/muWindow/useWindowChrome';
 import { playUiSound } from '../../../../../libs/sfx';
@@ -34,17 +35,24 @@ const RING_DEPTH = [66, 76, 62];
 const WEDGE_GAP_DEG = 1.6;
 
 /**
- * A wedge is either an animated emote (plays a clip, told to the server) or an
- * emoji bubble (overlay only) — see common/emojiBubbles.ts for why those are
- * separate things.
+ * A wedge is either an animated emote (plays a clip, sent as an animation
+ * request) or an emoji bubble (an overlay, sent as its chat token) — see
+ * common/emojiBubbles.ts for why those are separate things and why the
+ * bubbles travel over chat.
  */
 type RadialEntry =
   | { kind: 'emote'; id: string; glyph: string; emote: EmoteDefinition }
   | { kind: 'emoji'; id: string; label: string; glyph: string; emoji: EmojiBubbleDefinition };
 
-/** The hub caption. Emote names are translated; emoji keep their own label. */
+/**
+ * The hub caption. Emote names are translated; emoji keep their own label and
+ * carry their chat token, which is both what goes out on the wire and what a
+ * player can type to pop the same bubble.
+ */
 function entryLabel(entry: RadialEntry): string {
-  return entry.kind === 'emote' ? t(entry.emote.labelKey) : entry.label;
+  return entry.kind === 'emote'
+    ? t(entry.emote.labelKey)
+    : `${entry.label}  ${entry.emoji.words[0]}`;
 }
 
 const ENTRIES: RadialEntry[] = [
@@ -194,6 +202,14 @@ export const EmoteMenu = observer(() => {
       // Bubbles are an overlay, not a clip: they can be popped while walking
       // or mid-action, so they skip the standing-idle gate the emotes need.
       if (!hero || hero.dying) {
+        playUiSound('error');
+        return;
+      }
+
+      // The bubble rides on a chat line, so it is refused while the chat
+      // cooldown is up - popping it locally then would show it to nobody but
+      // the player who clicked.
+      if (!Social.broadcastEmojiBubble(entry.emoji.id)) {
         playUiSound('error');
         return;
       }

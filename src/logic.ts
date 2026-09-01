@@ -213,6 +213,11 @@ import { Notices } from './common/notices';
 import { SlideHelp } from './common/slideHelp';
 import { ChatLineType, classifyInboundChat, cleanName } from './common/chat';
 import {
+  matchEmojiBubbleWord,
+  type EmojiBubbleId,
+} from './common/emojiBubbles';
+import { startEmojiBubble } from './ecs/systems/emojiBubbleSystem';
+import {
   chooseAttackAction,
   resolveGenderedAction,
   ServerToClientActionMap,
@@ -1110,6 +1115,21 @@ EventBus.on('ChatMessage', packet => {
   const { type, text, balloon } = classifyInboundChat(message);
   Social.addChatLine(sender, text, type);
 
+  // A plain chat line that is nothing but an emoji token is a bubble, not
+  // speech (common/emojiBubbles.ts): pop it over the sender and drop the
+  // balloon, or the glyph and the text it stands for would sit on top of each
+  // other. The log line stays - it is what a client that draws no bubbles
+  // shows, and it is what the player actually sent.
+  //
+  // Only `Chat`: party / guild / gens lines reach members anywhere on the
+  // server, and a GM shout is an announcement that has to stay readable.
+  const bubble =
+    type === ChatLineType.Chat ? matchEmojiBubbleWord(text) : null;
+  if (bubble) {
+    popEmojiBubble(sender, bubble);
+    return;
+  }
+
   // `bGmMode` (RenderBoolean): the original reads `CtlCode` off its character
   // structure, which OpenMU never sends. A `#` shout is the one GM signal it
   // does give, so the sender's balloon turns into the GM one from here on.
@@ -1118,6 +1138,24 @@ EventBus.on('ChatMessage', packet => {
   if (!balloon) return;
   EventBus.emit('chatMessage', { sender, message: text, whisper: false });
 });
+
+/**
+ * Play an inbound emoji bubble over the player with this name.
+ *
+ * The hero is skipped: the bubble was popped the moment the wheel was clicked
+ * (or the token typed), and the server echoes our own chat back, which would
+ * restart the pop-in a round trip late - the same reason ObjectAnimation
+ * ignores its own echo.
+ */
+function popEmojiBubble(name: string, id: EmojiBubbleId): void {
+  const world = Store.world;
+  if (!world) return;
+  const obj = world.netObjsQuery.entities.find(
+    e => e.playerAnimation && e.objectNameInWorld === name
+  );
+  if (!obj || obj.localPlayer || obj.objOutOfScope) return;
+  startEmojiBubble(world, obj, id);
+}
 
 /** Raise the GM flag on the player in scope with this name, if any. */
 function markAsGm(name: string): void {
