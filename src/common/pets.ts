@@ -33,6 +33,7 @@ import {
   HORN_OF_UNIRIA,
   HORN_OF_DINORANT,
   DARK_HORSE,
+  DARK_RAVEN,
   HORN_OF_FENRIR,
 } from './petConstants';
 
@@ -42,7 +43,7 @@ export const IMP_BONE = 34;
 /** MU units → world units. */
 const MU_UNIT = 1 / 100;
 
-export type PetKind = 'angel' | 'imp' | 'mount';
+export type PetKind = 'angel' | 'imp' | 'mount' | 'raven';
 
 export type PetSpec = {
   readonly kind: PetKind;
@@ -105,6 +106,16 @@ const PETS: Readonly<Record<number, PetSpec>> = {
     scale: 1,
     riderClips: 'horse',
     moveAction: 1,
+  },
+  // `CSPetDarkSpirit` (CSPetSystem.cpp:291-303): the Dark Raven is worn in
+  // the *left hand*, not the pet slot - a world object flying a boid orbit
+  // ~250 units above its owner (FlyRange 150) and perching in safe zones.
+  [DARK_RAVEN]: {
+    kind: 'raven',
+    model: 'Skill/darkspirit.glb',
+    scale: 0.7,
+    playSpeed: 0.4,
+    flyRange: 150,
   },
 };
 

@@ -272,13 +272,14 @@ export type Entity = Partial<{
   };
   /**
    * A pet or mount object owned by another entity: the free-flying Guardian
-   * Angel and the two ridden mounts (`Mounts[]` in the original, GOBoid.cpp).
-   * Created and driven by PetSystem; the Imp is not one of these — it is a
-   * bone-linked child of its owner's PlayerObject.
+   * Angel, the two ridden mounts (`Mounts[]` in the original, GOBoid.cpp) and
+   * the Dark Raven (`CSPetDarkSpirit`). Created and driven by PetSystem; the
+   * Imp is not one of these — it is a bone-linked child of its owner's
+   * PlayerObject.
    */
   petActor: {
     owner: Entity;
-    kind: 'angel' | 'mount';
+    kind: 'angel' | 'mount' | 'raven';
     /** `o->Angle[2]` in radians (MU yaw convention, like `transform.rot.y`). */
     yaw: number;
     /** `o->Direction` in MU units per 25 Hz tick. */
