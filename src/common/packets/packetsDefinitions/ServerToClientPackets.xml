@@ -12446,6 +12446,226 @@
         </Structure>
       </Structures>
     </Packet>
+    <!-- The Crywolf answers (0xBD) are not defined by OpenMU; layouts are the
+         S6E3 client's PMSG_ANS_CRYWOLF_* structs (WSclient.h). -->
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>00</SubCode>
+      <Name>CrywolfStateInfo</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The state of the crywolf event changed, or a player requested it with CrywolfInfoRequest.</SentWhen>
+      <CausedReaction>The client updates the crywolf map staging and interface.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Enum</Type>
+          <TypeName>OccupationState</TypeName>
+          <Name>Occupation</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Enum</Type>
+          <TypeName>EventState</TypeName>
+          <Name>State</Name>
+        </Field>
+      </Fields>
+      <Enums>
+        <Enum>
+          <Name>OccupationState</Name>
+          <Description>Who holds the fortress.</Description>
+          <Values>
+            <EnumValue>
+              <Name>Peace</Name>
+              <Description>The fortress is held by the defenders.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Occupied</Name>
+              <Description>The fortress fell to the Balgass forces.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>War</Name>
+              <Description>The battle is in progress.</Description>
+              <Value>2</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+        <Enum>
+          <Name>EventState</Name>
+          <Description>The phase of the event cycle.</Description>
+          <Values>
+            <EnumValue>
+              <Name>None</Name>
+              <Description>No event running.</Description>
+              <Value>0</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify1</Name>
+              <Description>First announcement.</Description>
+              <Value>1</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Notify2</Name>
+              <Description>Second announcement.</Description>
+              <Value>2</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Ready</Name>
+              <Description>Contract phase before the battle.</Description>
+              <Value>3</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Started</Name>
+              <Description>The battle is running.</Description>
+              <Value>4</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>Ended</Name>
+              <Description>The battle ended; the result stands.</Description>
+              <Value>5</Value>
+            </EnumValue>
+            <EnumValue>
+              <Name>EndCycle</Name>
+              <Description>The cycle is over.</Description>
+              <Value>6</Value>
+            </EnumValue>
+          </Values>
+        </Enum>
+      </Enums>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>02</SubCode>
+      <Name>CrywolfAltarInfo</Name>
+      <Length>13</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The statue hitpoints or an altar state changed during the crywolf event.</SentWhen>
+      <CausedReaction>The client updates the statue shield and the five altar displays.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>StatueHp</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Byte</Type>
+          <Name>AltarState1</Name>
+        </Field>
+        <Field>
+          <Index>9</Index>
+          <Type>Byte</Type>
+          <Name>AltarState2</Name>
+        </Field>
+        <Field>
+          <Index>10</Index>
+          <Type>Byte</Type>
+          <Name>AltarState3</Name>
+        </Field>
+        <Field>
+          <Index>11</Index>
+          <Type>Byte</Type>
+          <Name>AltarState4</Name>
+        </Field>
+        <Field>
+          <Index>12</Index>
+          <Type>Byte</Type>
+          <Name>AltarState5</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>03</SubCode>
+      <Name>CrywolfContractResult</Name>
+      <Length>8</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server answers a CrywolfContractRequest.</SentWhen>
+      <CausedReaction>The client shows whether the contract with the altar was made.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Result</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>AltarState</Name>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>ShortBigEndian</Type>
+          <Name>AltarId</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>04</SubCode>
+      <Name>CrywolfLeftTime</Name>
+      <Length>6</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>Periodically during the crywolf battle.</SentWhen>
+      <CausedReaction>The client resyncs the remaining-time clock of the interface bar.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Hour</Name>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>Minute</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>05</SubCode>
+      <Name>CrywolfBossMonsterInfo</Name>
+      <Length>9</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>Balgass or his dark elves appear or take damage during the crywolf battle.</SentWhen>
+      <CausedReaction>The client updates the Balgass hitpoint bar and the dark elf count.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>IntegerLittleEndian</Type>
+          <Name>BossHp</Name>
+        </Field>
+        <Field>
+          <Index>8</Index>
+          <Type>Byte</Type>
+          <Name>DarkElfCount</Name>
+        </Field>
+      </Fields>
+    </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>BD</Code>
+      <SubCode>09</SubCode>
+      <Name>CrywolfBenefit</Name>
+      <Length>5</Length>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>The server answers a CrywolfChaosRateBenefitRequest.</SentWhen>
+      <CausedReaction>The client adds the percentage to the displayed chaos machine success rates.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>ChaosRatePlus</Name>
+        </Field>
+      </Fields>
+    </Packet>
   </Packets>
   <Enums>
     <Enum>
