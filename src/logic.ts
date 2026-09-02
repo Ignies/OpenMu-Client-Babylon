@@ -17,6 +17,7 @@ import {
   itemRestPose,
   itemRestRotation,
 } from './common/itemAngle';
+import { dropModelProxy } from './common/dropModelProxy';
 import { prefetchItemIcons } from './common/itemIconPack';
 import { ItemSerializer } from './common/itemSerializer';
 import { isFemaleClass } from './common/mapPlayerNetClassToModelClass';
@@ -2596,10 +2597,15 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
     }
 
     removeNetObject(world, maskedId);
+    // CreateItem's per-level model swap (common/dropModelProxy.ts): the
+    // shown model and its pose may come from another item's row.
+    const proxy = parsed ? dropModelProxy(group, id, parsed.lvl ?? 0) : null;
+    const poseGroup = proxy?.group ?? group;
+    const poseNum = proxy?.num ?? id;
     // ItemAngle (common/itemAngle.ts): the resting pose and height for this
     // item's class — armour face-down, a sword leaning back, everything 30 cm
     // (a weapon 70) off the terrain.
-    const rot = itemRestRotation(group, id);
+    const rot = itemRestRotation(poseGroup, poseNum);
     world.add({
       netId: maskedId,
       worldIndex: world.mapIndex,
@@ -2607,14 +2613,15 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
         pos: new Vector3(
           item.PositionX,
           world.getTerrainHeight(item.PositionX, item.PositionY) +
-            itemRestHeight(group),
+            itemRestHeight(poseGroup),
           item.PositionY
         ),
         rot: new Vector3(rot.x, rot.y, rot.z),
-        scale: itemRestPose(group, id).scale,
+        scale: itemRestPose(poseGroup, poseNum).scale,
       },
       modelFactory: ModelObject,
-      modelFilePath: itemConfig.szModelFolder + itemConfig.szModelName,
+      modelFilePath:
+        proxy?.modelFilePath ?? itemConfig.szModelFolder + itemConfig.szModelName,
       visibility: {
         state: 'hidden',
         lastChecked: 0,
@@ -2626,8 +2633,8 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
         isMoney,
         item: parsed,
         fresh: !!item.IsFreshDrop,
-        group,
-        num: id,
+        group: poseGroup,
+        num: poseNum,
       },
       objectNameInWorld: dropName(isMoney, amount, itemConfig.ItemName, parsed),
     });
