@@ -17,6 +17,7 @@ import {
   ARC_MOTES,
   BLOOD_CHIPS,
   BLOOD_MIST,
+  BOMB_SPARKS,
   DUST,
   ENERGY_CHIPS,
   FIRE_PUFF,
@@ -336,6 +337,46 @@ const spiritBurst = (colour: RGB): Step =>
     streamerFan(18, (Math.PI * 2) / 18, { velocity: perTick(50), seconds: ticks(20), maxTails: 3, width: 0.6, colour, pitch: (10 * Math.PI) / 180, texture: TEX.jointSpirit }),
     magicGround(colour, ticks(40), 3)
   );
+
+/**
+ * The Summoner book cast (SummonSystem.cpp CreateCastingEffect): BITMAP_MAGIC
+ * sub10 white + sub9 tinted at the feet, then the SUMMONER_CASTING_EFFECT
+ * models tinted `core` (not converted here - motes stand in).
+ */
+const summonerCast = (circle: RGB, core: RGB): Step =>
+  atCaster(seq(
+    ring({ texture: TEX.magicGround, colour: RGBS.white, seconds: ticks(20), scale: 2.5, spin: 40, growFrom: 0.6 }),
+    ring({ texture: TEX.magicGround, colour: circle, seconds: ticks(25), scale: 2, spin: -50 }),
+    particles({ recipe: { ...SHADE_MOTES, colour: core }, count: 16, height: 0.5 })
+  ), 0);
+
+/** CreateBomb (ZzzEffect.cpp:6394): 20 BITMAP_SPARK chips + one grey BITMAP_EXPLOTION card. */
+const bomb = (colour: RGB = [0.5, 0.5, 0.5]): Step =>
+  seq(explosion(colour), particles({ recipe: BOMB_SPARKS, count: 20 }));
+
+/**
+ * The MODEL_MULTI_SHOT volley (WSclient.cpp AT_SKILL_MULTI_SHOT, Dragon Kick):
+ * 3× sub1 at the hands, 2× sub2 and 2× sub3 twenty cm ahead, Light (0.8,0.9,1.6),
+ * fired along the facing.
+ */
+const multiShotVolley: Step = (_at, c) => {
+  const tint: RGB = [0.8, 0.9, 1];
+  const volley = (m: string, fwd: number, n: number): void => {
+    for (let i = 0; i < n; i++) {
+      const turn = (i - (n - 1) / 2) * 0.14;
+      effects.spawn('model', c.scene, entityPos(c.caster, 0.9, new Vector3()), { model: m, seconds: ticks(20), scale: 1, colour: tint, follow: flying(c, 0.9, perTick(45), turn, fwd), yaw: entityYaw(c.caster) + turn });
+    }
+  };
+  volley(MODEL.multishot3, cm(20), 2);
+  volley(MODEL.multishot, 0, 3);
+  volley(MODEL.multishot2, cm(20), 2);
+};
+
+/** Expansion of Wizardry: MODEL_SWELL_OF_MAGICPOWER on the caster, Light (0.3,0.2,0.9). */
+const swellOfMagic: Step = atCaster((at, c) => {
+  effects.spawn('model', c.scene, at, { model: MODEL.magicPowerUp, seconds: ticks(40), scale: 1, colour: [0.3, 0.2, 0.9], fadeIn: 0.2, fadeTail: 0.3, yaw: entityYaw(c.caster) });
+  particles({ recipe: SOUL_MOTES, count: 24, height: 0.5 })(at, c);
+}, 0.05);
 
 // ---- travel ------------------------------------------------------------------
 
@@ -995,7 +1036,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 79 Explosion (monster)
   79: { impact: seq(fireHit, shockRing(RGBS.fire, 3)) },
-  // 200–204 potions / immunities: a soft shiny flash.
+  // 200 Summon Monster (a monster calling reinforcements): the summon circle, like rows 30-36.
+  200: { impact: summonCircle, area: summonCircle },
+  // 201-204 potions / immunities: a soft shiny flash.
   201: { impact: flash(TEX.shiny, RGBS.soul, 1.2, 0.5) },
   202: { impact: flash(TEX.shiny, RGBS.gold, 1.2, 0.5) },
   203: { impact: seq(flash(TEX.shiny, RGBS.holy, 1.3, 0.6), particles({ recipe: HOLY_MOTES, count: 16, height: 0.4 })) },
@@ -1030,10 +1073,55 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // (LT 30; 1.0/0.2/0.1) + SUMMONER_CASTING_EFFECT2 + SHINY+6 0.5 + PIN_LIGHT 1.0. Light (2,0.1,0.1)/(2,0.4,0.3) and (0.25,1,0.7).
   221: { impact: zinCurse([2, 0.1, 0.1], [2, 0.4, 0.3]) },
   222: { impact: zinCurse([0.25, 1, 0.7], [0.25, 1, 0.7]) },
-  // 223 Explosion (curse), 224 Requiem, 225 Pollution: dark bursts on the area.
-  223: { area: seq(explosion(RGBS.shade, 0.8), particles({ recipe: SHADE_MOTES, count: 30 }), shockRing(RGBS.shade, 3)) },
-  224: { area: seq(scatter(sprite({ texture: TEX.skull, colour: RGBS.shade, size: 0.8, seconds: 1, rise: 1, grow: 1.5 }), 6, 2, 0.05), ring({ texture: TEX.magicGround2, colour: RGBS.shade, seconds: 1.2, scale: 4, spin: 30 })) },
-  225: { area: seq(particles({ recipe: VENOM_MOTES, rate: 100, seconds: 1.2 }), ring({ texture: TEX.magicGround2, colour: RGBS.decay, seconds: 1.5, scale: 4 })) },
+  // 223 Explosion: MODEL_SUMMONER_SUMMON_SAHAMUTT LT 80 from 1.5-4.5 tiles beside the caster onto the point,
+  // CreateBomb3 on landing (SummonSystem.cpp CreateSummonObject); cast circle tints (1,0.6,0.4)/(1,0.5,0).
+  223: {
+    cast: summonerCast([1, 0.6, 0.4], [1, 0.5, 0]),
+    area: (at, c) => {
+      const from = entityPos(c.caster, 0.4, new Vector3());
+      from.x += (Math.random() < 0.5 ? 1 : -1) * (1.5 + Math.random() * 3);
+      from.z += (Math.random() < 0.5 ? 1 : -1) * (1.5 + Math.random() * 3);
+      const to = at.clone();
+      to.y += 0.3;
+      effects.spawn('projectile', c.scene, from, {
+        to,
+        speed: 6,
+        model: { model: MODEL.summonSahamutt, colour: RGBS.white, scale: 0.5, fadeIn: 0.3 },
+        trail: { recipe: FIRE_PUFF, rate: 25 },
+        onArrive: p => seq(bomb([1, 0.5, 0]), particles({ recipe: FIRE_SPARKS, count: 16 }), scorch(1))(p, c),
+      });
+    },
+  },
+  // 224 Requiem: MODEL_SUMMONER_SUMMON_NEIL LT 80 one tile before the caster fading in to 0.7; frame 8 the
+  // NEIL_NIFE knives at the target, frame 10 the NEIL_GROUND rings, all (0,0.7,1) (ZzzEffect.cpp:7995).
+  224: {
+    cast: summonerCast([0.7, 0.7, 1], [0, 0.7, 1]),
+    area: (at, c) => {
+      const front = entityPos(c.caster, 0, new Vector3());
+      const f = facing(c);
+      front.x += f.x;
+      front.z += f.z;
+      effects.spawn('model', c.scene, front, { model: MODEL.summonNeil, seconds: ticks(80), scale: 1, colour: RGBS.white, alpha: 0.7, fadeIn: 0.25, fadeTail: 0.25, yaw: entityYaw(c.caster), loop: false });
+      // The knife models are not converted - a pierce flash stands in for each.
+      after(0.9, seq(flash(TEX.pierce, [0, 0.7, 1], 1.3, 0.4), hitSparks(STEEL_GLINTS, 12)))(at, c);
+      after(1.15, seq(
+        ring({ texture: TEX.magicGround2, colour: [0, 0.7, 1], seconds: ticks(50), scale: 2.5, spin: 40, growFrom: 0.6 }),
+        particles({ recipe: { ...SOUL_MOTES, colour: [0, 0.7, 1] }, count: 16, height: 0.4 })
+      ))(at, c);
+    },
+  },
+  // 225 Pollution: MODEL_SUMMONER_SUMMON_LAGUL LT 160 at the point + 4 JOINT_SPIRIT pairs (width 100/20) at
+  // 90 deg steps; purple BITMAP_CLOUD (0.6,0.1,1) and smoke raining over +-2.5 tiles for its life.
+  225: {
+    cast: summonerCast([0.6, 0.6, 0.9], [0.6, 0.3, 0.9]),
+    area: (at, c) => {
+      effects.spawn('model', c.scene, at, { model: MODEL.summonLagul, seconds: 4, scale: 1, colour: RGBS.white, fadeIn: 0.2, fadeTail: 0.15 });
+      streamerFan(4, Math.PI / 2, { velocity: perTick(24), seconds: ticks(40), maxTails: 8, width: 1, colour: RGBS.shade, turn: 0.9, texture: TEX.jointSpirit })(at, c);
+      streamerFan(4, Math.PI / 2, { velocity: perTick(24), seconds: ticks(40), maxTails: 8, width: 0.2, colour: RGBS.dark, turn: 0.9, texture: TEX.jointSpirit })(at, c);
+      repeat(10, 0.35, scatter(sprite({ texture: TEX.cloud, colour: [0.6, 0.1, 1], size: 2, seconds: 1.2, grow: 1.5, height: 0.4, rise: 0.3 }), 1, 2.2))(at, c);
+      effects.spawn('particles', c.scene, at, { recipe: SHADE_MOTES, rate: 12, seconds: 4 });
+    },
+  },
   // 230 Lightning Shock: MODEL_LIGHTNING_SHOCK sub0 at the caster (LT 20, z+280, falling); sub1 LT 12 →
   // 2× BITMAP_DAMAGE_01_MONO, 5× BITMAP_MAGIC sub12 on a r=150 ring (Light (1,0.2,0.05)), 3× KNIGHT_PLANCRACK_A (1.0–1.3).
   230: {
@@ -1047,11 +1135,33 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       ))
     ), 0.05),
   },
-  // 232 Strike of Destruction: MODEL_BLOW_OF_DESTRUCTION sub0 (LT 40, Light 1.2) chaining sub1 (LT 40, z 150, Scale 5) —
-  // no such model here: an ice shockwave + shards + the sword blur stand in.
-  232: { area: seq(slash(RGBS.ice, TEX.swordEff2), shockRing(RGBS.ice, 4), scatter(iceHit, 5, 1.5, 0.04), particles({ recipe: SNOWFALL, rate: 100, seconds: 0.8, height: 2 })) },
-  // 233 Expansion of Wizardry
-  233: { impact: seq(flash(TEX.magicCircle, RGBS.energy, 1.5, 0.7), particles({ recipe: SOUL_MOTES, count: 24, height: 0.5 })), area: atCaster(flash(TEX.magicCircle, RGBS.energy, 1.5, 0.7), 0.8) },
+  // 232 Strike of Destruction: MODEL_BLOW_OF_DESTRUCTION sub0 (LT 40, Light 1.2) is not converted - the ice
+  // shockwave + shards + sword blur stand in; its LT 23 ground burst is (ZzzEffect.cpp:15014): KNIGHT_PLANCRACK_A
+  // scale 1.2 tinted (0.3,0.3,1) and a PLANCRACK_B trail every 55 cm back to the caster, yaws jittered +-10-30 deg.
+  232: {
+    area: seq(
+      slash(RGBS.ice, TEX.swordEff2),
+      shockRing(RGBS.ice, 4),
+      scatter(iceHit, 5, 1.5, 0.04),
+      particles({ recipe: SNOWFALL, rate: 100, seconds: 0.8, height: 2 }),
+      after(ticks(17), (at, c) => {
+        const tint: RGB = [0.3, 0.3, 1];
+        model({ model: MODEL.knightPlanCrack, seconds: ticks(30), scale: 1.2, colour: tint, flat: true })(at, c);
+        const from = entityPos(c.caster, 0, new Vector3());
+        const dir = toward(at, from);
+        const dist = Math.min(4, Math.hypot(from.x - at.x, from.z - at.z));
+        const n = Math.floor(dist / 0.55) + 1;
+        for (let i = 1; i < n; i++) {
+          const p = new Vector3(at.x + dir.x * 0.55 * i, at.y, at.z + dir.z * 0.55 * i);
+          const jitter = ((10 + Math.random() * 20) * Math.PI) / 180 * (i % 2 === 0 ? 1 : -1);
+          model({ model: MODEL.knightPlanCrack2, seconds: ticks(25), scale: 1, colour: tint, flat: true, yaw: entityYaw(c.caster) + jitter })(p, c);
+        }
+      })
+    ),
+  },
+  // 233 Expansion of Wizardry: MODEL_SWELL_OF_MAGICPOWER at the caster, Light (0.3,0.2,0.9) (WSclient.cpp
+  // AT_SKILL_SWELL_OF_MAGICPOWER cast).
+  233: { impact: swellOfMagic, area: swellOfMagic },
   // 234 Recover: cast — BITMAP_IMPACT at caster (0,−220,130), Light (0.7,0.6,0), LT 80, Scale 0→; target — 19× JOINT
   // FLARE sub47 width 40 + MODEL_SUMMON (LT 60, Scale 0.7) + BITMAP_TWLIGHT sub0/1/2 + 2× FLARE sub3 on random bones.
   234: {
@@ -1065,23 +1175,75 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       effects.spawn('sprite', c.scene, feet, { texture: TEX.flareBig, colour: RGBS.holy, size: 0.5, seconds: ticks(30), count: 2, spread: 0.4, height: 1, rise: 0.5 });
     },
   },
-  // 235 Multi-Shot: five arrows at ±5/10/20.
-  235: { area: (at, c) => fanArrows(at, c, 5, MODEL.arrow, RGBS.steel, FIVE_SPREAD), impact: steelHit },
+  // 235 Multi-Shot: five arrows at ±5/10/20; the muzzle volley is 3× MODEL_MULTI_SHOT1 at the caster and
+  // 2× MULTI_SHOT2 / MULTI_SHOT3 20 cm ahead, Light (0.8,0.9,1.6) (WSclient.cpp AT_SKILL_MULTI_SHOT).
+  235: {
+    area: (at, c) => {
+      fanArrows(at, c, 5, MODEL.arrow, RGBS.steel, FIVE_SPREAD);
+      multiShotVolley(at, c);
+    },
+    impact: steelHit,
+  },
   // 236 Flame Strike: MODEL_EFFECT_FLAME_STRIKE sub0 at the caster — Alpha 0→, LT 35, Vel = the clip's speed.
   236: { area: atCaster(model({ model: MODEL.flameStrike, seconds: ticks(35), colour: RGBS.fire, scale: 1, fadeIn: 0.3, loop: false }), 0.05) },
   // 237 Gigantic Storm: 5× CreateEffect(BITMAP_JOINT_THUNDER) on a r=200 ring, LT 20, StartPos.z += 800.
   237: { area: seq(ringOf(seq(skyBolt(8, 0.35), arcHit), 5, 2, 0.05), particles({ recipe: WIND_STREAKS, rate: 80, seconds: 1 })) },
-  // 238 Chaotic Diseier: a dark shockwave.
-  238: { area: seq(shockRing(RGBS.shade, 5), scatter(flash(TEX.forcePillar, RGBS.shade, 1.2, 0.5), 6, 2, 0.04), particles({ recipe: SHADE_MOTES, count: 30 })) },
+  // 238 Chaotic Diseier: 5× BITMAP_SHINY+6 sub3 (Light 0.5, Scale 0.5) at the caster and 8× JOINT
+  // BITMAP_2LINE_GHOST from ±1.2 tiles / +0.5-1.1 z pulled into the body; CreateBomb at the target
+  // (WSclient.cpp AT_SKILL_GAOTIC).
+  238: {
+    cast: atCaster((at, c) => {
+      sprite({ texture: TEX.shiny5, colour: [0.5, 0.5, 0.5], size: 1.2, seconds: ticks(20), count: 5, spread: 0.3, grow: 1.5 })(at, c);
+      for (let i = 0; i < 8; i++) {
+        const from = new Vector3(at.x - 1.19 + Math.random() * 2.4, at.y - 0.4 + Math.random() * 0.6, at.z - 1.19 + Math.random() * 2.4);
+        effects.spawn('joint', c.scene, from, { to: followEntity(c.caster, 0.9), colour: RGBS.shade, seconds: ticks(20), width: 0.2, jitter: 0.08, texture: TEX.ghost });
+      }
+    }, 0.9),
+    area: seq(bomb(), particles({ recipe: SHADE_MOTES, count: 20 })),
+  },
   // 239 Doppelganger self explosion
   239: { impact: seq(fireHit, shockRing(RGBS.fire, 4)) },
-  // 260–270 Rage Fighter: fists and beasts.
-  260: { cast: slash(RGBS.gold, TEX.motionBlur, 0.7), impact: seq(steelHit, flash(TEX.impact, RGBS.gold, 1, 0.3)) },
-  261: { cast: slash(RGBS.gold, TEX.motionBlur, 0.7), impact: seq(steelHit, model({ model: MODEL.wolfHead, seconds: 0.6, colour: RGBS.gold, grow: 1.5 })) },
-  262: { cast: slash(RGBS.arc, TEX.motionBlur, 0.7), impact: seq(arcHit, after(0.12, arcHit), after(0.24, arcHit)) },
-  263: { cast: slash(RGBS.shade, TEX.motionBlur, 0.8), impact: seq(flash(TEX.flare, RGBS.shade, 1.3, 0.4), particles({ recipe: SHADE_MOTES, count: 20 })) },
+  // 260-270 Rage Fighter (MonkSystem.cpp RageCreateEffect).
+  // 260 Killing Blow: MODEL_WOLF_HEAD_EFFECT at the caster aimed at the target + BITMAP_SBUMB Scale 2.1 there.
+  260: {
+    cast: seq(
+      slash(RGBS.gold, TEX.motionBlur, 0.7),
+      (_at, c) => effects.spawn('model', c.scene, entityPos(c.caster, 0.9, new Vector3()), { model: MODEL.wolfHead, seconds: 0.6, colour: RGBS.gold, grow: 1.4, yaw: entityYaw(c.caster) })
+    ),
+    impact: seq(steelHit, explosion(RGBS.gold, 0.9)),
+  },
+  // 261 Beast Uppercut: MODEL_DOWN_ATTACK_DUMMY_R is not converted - a rising gold burst stands in.
+  261: { cast: slash(RGBS.gold, TEX.motionBlur, 0.7), impact: seq(steelHit, sprite({ texture: TEX.impact, colour: RGBS.gold, size: 1, seconds: 0.4, rise: 2, grow: 1.6 })) },
+  // 262 Chain Drive: BITMAP_SWORDEFF at the caster; the giant-swing MODEL_SHOCKWAVE01 wave runs at the target.
+  262: {
+    cast: seq(
+      slash(RGBS.arc, TEX.motionBlur, 0.7),
+      atCaster(sprite({ texture: TEX.swordEff, colour: RGBS.arc, size: 1.6, seconds: 0.5, spin: 4, grow: 1.6 }), 0.9),
+      (_at, c) => effects.spawn('model', c.scene, entityPos(c.caster, 0.05, new Vector3()), { model: MODEL.shockwave, seconds: ticks(15), scale: 0.8, colour: RGBS.arc, follow: flying(c, 0.05, perTick(40)), yaw: entityYaw(c.caster) })
+    ),
+    impact: seq(arcHit, after(0.12, arcHit), after(0.24, arcHit)),
+  },
+  // 263 Dark Side: MODEL_SHOCKWAVE01 sub3 dark wave (Light 0.2) chasing the target + BITMAP_DAMAGE2 bursts.
+  263: {
+    cast: seq(
+      slash(RGBS.shade, TEX.motionBlur, 0.8),
+      (_at, c) => effects.spawn('model', c.scene, entityPos(c.caster, 0.05, new Vector3()), { model: MODEL.shockwave, seconds: ticks(12), scale: 0.8, colour: [0.25, 0.2, 0.3], follow: flying(c, 0.05, perTick(60)), yaw: entityYaw(c.caster) })
+    ),
+    impact: seq(flash(TEX.damage2, RGBS.shade, 1.3, 0.4), particles({ recipe: SHADE_MOTES, count: 20 })),
+  },
   264: { area: seq(model({ model: MODEL.dragonHead, seconds: 1, colour: RGBS.fire, grow: 1.5, scale: 1.5 }), shockRing(RGBS.fire, 5), scatter(fireHit, 5, 2, 0.05)) },
-  265: { cast: slash(RGBS.fire, TEX.motionBlur, 1), impact: seq(fireHit, model({ model: MODEL.dragonKick, seconds: 0.6, colour: RGBS.fire, grow: 1.4 })) },
+  // 265 Dragon Slasher (AT_SKILL_DRAGON_KICK): MODEL_DRAGON_KICK_DUMMY (0.7,0.7,1) at the caster plus the
+  // MULTI_SHOT1/2/3 volley fired forward, Light (0.8,0.9,1.6).
+  265: {
+    cast: seq(
+      slash(RGBS.steel, TEX.motionBlur, 1),
+      (at, c) => {
+        effects.spawn('model', c.scene, entityPos(c.caster, 0.1, new Vector3()), { model: MODEL.dragonKick, seconds: 0.8, colour: [0.7, 0.7, 1], grow: 1.3, yaw: entityYaw(c.caster) });
+        multiShotVolley(at, c);
+      }
+    ),
+    impact: steelHit,
+  },
   266: { impact: flash(TEX.shiny, RGBS.blood, 1.3, 0.6) },
   267: { impact: flash(TEX.shiny, RGBS.holy, 1.3, 0.6), area: atCaster(flash(TEX.shiny, RGBS.holy, 1.3, 0.6), 0.8) },
   268: { impact: flash(TEX.shiny, RGBS.steel, 1.3, 0.6), area: atCaster(flash(TEX.shiny, RGBS.steel, 1.3, 0.6), 0.8) },
