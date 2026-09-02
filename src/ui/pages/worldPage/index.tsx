@@ -37,6 +37,7 @@ import { MasterSkillsWindow } from '@version/ui';
 import { SkillListWindow } from './components/skills';
 import { EventWindows } from './components/events';
 import { Notices } from '../../components/notices';
+import { MapNameBanner } from './components/mapNameBanner';
 import { SlideHelpBar } from '../../components/slideHelp';
 import { DebugMenuWindow } from '../../components/debugMenu';
 
@@ -44,6 +45,7 @@ const HUD = observer(() => {
   return (
     <div className="hud">
       <TargetHealthBar />
+      <MapNameBanner />
       <Notices />
       <SlideHelpBar />
       <BuffBar />
