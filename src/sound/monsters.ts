@@ -27,7 +27,8 @@ export type MonsterVoice = 'idle' | 'attack' | 'death';
  * Key: monster model number (MONSTER_MODEL_x = MODEL_x - MODEL_MONSTER01).
  * Slots (ZzzCharacter.cpp): [0..1] idle / walk (random), [2..3] attack & hit
  * (2 + rand % 2), [4] death. Values are catalogue keys (`recipes.ts`), null = silent.
- * GENERATED — do not edit by hand.
+ * GENERATED - do not edit by hand, except the boss rows marked hand-ported
+ * (their voices live outside the OpenMonsterModel switch).
  */
 export type MonsterSoundSlots = readonly [
   string | null,
@@ -164,8 +165,8 @@ export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
   62: ['Sound/mMagicSkull', null, null, null, 'Sound/mMagicSkull'],
   // DEATH_ANGEL
   63: ['Sound/mDAngelIdle', 'Sound/mDAngelIdle', 'Sound/mDAngelAttack', 'Sound/mDAngelAttack', 'Sound/mDAngelDeath'],
-  // ILLUSION_OF_KUNDUN
-  64: [null, null, null, null, null],
+  // ILLUSION_OF_KUNDUN - hand-ported: SetMonsterSound 232, 232, 233, 234, -1 (ZzzOpenData.cpp:3587-3592)
+  64: ['Sound/mKundunIdle', 'Sound/mKundunIdle', 'Sound/mKundunAttack1', 'Sound/mKundunAttack2', null],
   // BLOOD_SOLDIER
   65: ['Sound/mBSoldierIdle1', 'Sound/mBSoldierIdle2', 'Sound/mBSoldierAttack1', 'Sound/mBSoldierAttack2', 'Sound/mBSoldierDeath'],
   // AEGIS
@@ -192,8 +193,8 @@ export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
   79: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
   // LIFE_STONE
   86: [null, null, null, null, null],
-  // BALGASS
-  89: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  // BALGASS - hand-ported: MapManager.cpp:224-230, played per action in GMCrywolf1st.cpp:1618-1652
+  89: ['Sound/w35/balga_idle1', 'Sound/w35/balga_idle2', 'Sound/w35/balga_at1', 'Sound/w35/balga_at2', 'Sound/w35/balga_death'],
   // DARK_ELF_1
   92: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
   // SORAM
@@ -288,8 +289,8 @@ export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
   148: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
   // IRON_KNIGHT
   149: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
-  // SELUPAN
-  150: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  // SELUPAN - hand-ported: ZzzOpenData.cpp:3767-3776 (word / rage / cure lines are event staged)
+  150: [null, null, 'Sound/w58w59/Selupan_attack1', 'Sound/w58w59/Selupan_attack2', null],
   // SPIDER_EGGS_1
   151: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
   // SPIDER_EGGS_2
