@@ -32,8 +32,24 @@ import { resetTerrainMask } from './terrainMask';
 import { setShadowWorld } from '../../common/objectShadow';
 import { setCycleContext } from '../../scenes/sceneLook';
 
-/** Bumped per map change; a warp whose serial is stale abandons its result. */
+/** Bumped per warp request; a load whose serial is stale abandons its work. */
 let warpSerial = 0;
+
+/**
+ * The map whose terrain and entities are actually in the scene - the map the
+ * next load has to tear down. `world.mapIndex` is the newest destination and
+ * runs ahead of this while a load is in flight.
+ */
+let sceneMap = ENUM_WORLD.WD_55LOGINSCENE;
+
+/**
+ * Loads run strictly one at a time. Two warps used to run concurrently (a
+ * second `MapChanged` while the first was still downloading): the second
+ * computed its "old map" from the optimistic `world.mapIndex`, so the map
+ * really on screen was never unloaded, and the first load finished anyway,
+ * overwriting the terrain and tagging its objects with the wrong map.
+ */
+let loadQueue: Promise<void> = Promise.resolve();
 
 /**
  * The map's own setup: `SetWorldClearColor` from the entry's declared bytes
@@ -166,12 +182,31 @@ function failWarp(
   EventBus.emit('warpFailed', { map, error });
 }
 
-export async function loadMapIntoScene(
+export function loadMapIntoScene(
   world: World,
   map: ENUM_WORLD,
   pos?: { x: number; y: number }
+): Promise<void> {
+  const serial = ++warpSerial;
+  loadQueue = loadQueue
+    .then(() => runLoad(world, map, pos, serial))
+    // Unexpected failures (a map entry's `create`, object creation) used to
+    // be unhandled rejections that also left the loading screen up: same
+    // recovery as a failed terrain build.
+    .catch(error => failWarp(world, map, sceneMap, error));
+  return loadQueue;
+}
+
+async function runLoad(
+  world: World,
+  map: ENUM_WORLD,
+  pos: { x: number; y: number } | undefined,
+  serial: number
 ) {
-  const oldMap = world.mapIndex;
+  // Superseded while queued: the newest request does the whole job itself.
+  if (serial !== warpSerial) return;
+
+  const oldMap = sceneMap;
   world.mapIndex = map;
 
   // Before anything loads: a shadowless world (Icarus) must not build blob
@@ -179,8 +214,6 @@ export async function loadMapIntoScene(
   setShadowWorld(map);
 
   if (oldMap !== map) {
-    const serial = ++warpSerial;
-
     // Download and parse first, while the old map is still whole: every
     // failure that can be recovered from happens here.
     let prepared: PreparedTerrain;
@@ -240,6 +273,15 @@ export async function loadMapIntoScene(
       return;
     }
 
+    // Superseded during the terrain build: nothing of this map has reached
+    // the world yet, so only the build's own mesh has to go. The newer load
+    // starts from the already torn-down scene.
+    if (serial !== warpSerial) {
+      built.terrain.material?.dispose(true, true);
+      built.terrain.dispose(false, true);
+      return;
+    }
+
     const {
       objects,
       terrain,
@@ -287,6 +329,14 @@ export async function loadMapIntoScene(
 
     !DISABLE_OBJECTS_LOADING && createObjects(world, filteredObjects);
   }
+
+  sceneMap = map;
+
+  // A newer warp was requested while this map's own setup ran: it owns the
+  // hero's position and the ready handshake, and tears this scene down once
+  // its files are in. Saying the warp completed here would send the server's
+  // `ClientReadyAfterMapChange` for the wrong map.
+  if (serial !== warpSerial) return;
 
   if (world.playerEntity) {
     world.playerEntity.worldIndex = map;
