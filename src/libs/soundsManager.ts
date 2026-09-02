@@ -19,9 +19,6 @@ import { LocalStorage } from './localStorage';
 
 const getSoundUrls = (key: Sounds) => soundUrl(key);
 
-export const MUSIC_TRACK_ID = 1000;
-export const SOUND_TRACK_ID = 1001;
-
 /** Seconds a track fades out under the next one (and the next fades in). */
 export const MUSIC_CROSSFADE_SECONDS = 0.5;
 
@@ -116,16 +113,16 @@ export class SoundsManager {
     if (this.musicTrack) {
       this.musicTrack.dispose();
     }
+    // `SoundTrack.id` is the track's index into `scene.soundTracks`;
+    // `Sound.dispose` looks the track up by it. Never overwrite it.
     this.musicTrack = new SoundTrack(scene, {
       volume: ENABLE_BG_MUSIC ? this.musicVolume : 0,
     });
-    this.musicTrack.id = MUSIC_TRACK_ID;
 
     if (this.effectsTrack) {
       this.effectsTrack.dispose();
     }
     this.effectsTrack = new SoundTrack(scene, { volume: this.effectsVolume });
-    this.effectsTrack.id = SOUND_TRACK_ID;
     this.syncTrackGains();
 
     if (
