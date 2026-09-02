@@ -183,6 +183,7 @@ export const EN_TEXT = {
   'options.effectLevel': '+Effect limitation',
   'options.shadows': 'Object shadows',
   'options.dynamicLights': 'Dynamic lights',
+  'options.dayNightCycle': 'Day/night cycle',
   'options.postProcessing': 'Post-processing',
   'options.toneMapping': 'Filmic tone map',
   'options.ambientParticles': 'Ambient particles',

@@ -43,6 +43,9 @@ export const icarusLayer: MapLayer = {
   tiles: TILES,
   spawn: SPAWN,
   outdoor: OUTDOOR,
+  // Above the clouds the navy void is the map's identity; the cycle only
+  // breathes over it rather than repainting it.
+  dayCycle: 0.4,
   clearColor: CLEAR_COLOR,
   // `ICARUS_EFFECT_ONLY_TYPES` (the six cloud boxes) is bound by `create` as
   // `IcarusCloudObject`, which skips the model itself — not an effect-only row.

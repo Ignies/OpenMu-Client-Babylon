@@ -152,6 +152,7 @@ export const italianLayer: LanguageLayer = {
     'options.effectLevel': 'Limite dei +effetti',
     'options.shadows': 'Ombre degli oggetti',
     'options.dynamicLights': 'Luci dinamiche',
+    'options.dayNightCycle': 'Ciclo giorno/notte',
     'options.postProcessing': 'Post-elaborazione',
     'options.toneMapping': 'Tone mapping filmico',
     'options.ambientParticles': 'Particelle ambientali',

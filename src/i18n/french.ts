@@ -152,6 +152,7 @@ export const frenchLayer: LanguageLayer = {
     'options.effectLevel': 'Limite des +effets',
     'options.shadows': 'Ombres des objets',
     'options.dynamicLights': 'Lumières dynamiques',
+    'options.dayNightCycle': 'Cycle jour/nuit',
     'options.postProcessing': 'Post-traitement',
     'options.toneMapping': 'Mappage tonal filmique',
     'options.ambientParticles': 'Particules d’ambiance',

@@ -152,6 +152,7 @@ export const germanLayer: LanguageLayer = {
     'options.effectLevel': '+Effekt-Grenze',
     'options.shadows': 'Objektschatten',
     'options.dynamicLights': 'Dynamische Lichter',
+    'options.dayNightCycle': 'Tag/Nacht-Zyklus',
     'options.postProcessing': 'Nachbearbeitung',
     'options.toneMapping': 'Filmisches Tone Mapping',
     'options.ambientParticles': 'Umgebungspartikel',
