@@ -145,6 +145,7 @@ import {
   FriendOnlineStateUpdatePacket,
   FriendRequestPacket,
   FriendInvitationResultPacket,
+  ChatRoomConnectionInfoPacket,
   AddLetterPacket,
   AddLetterLetterStateEnum,
   OpenLetterPacket,
@@ -216,6 +217,7 @@ import { Social } from './social';
 import { events } from './events';
 import { Economy, type ShopStock } from './economy';
 import { Messenger } from './messenger';
+import { ChatRooms } from './chatRooms';
 import { FRIEND_OFFLINE } from './common/messenger';
 import {
   PERSONAL_SHOP_SLOTS,
@@ -1774,9 +1776,31 @@ EventBus.on('FriendRequest', packet => {
   });
 });
 
+/**
+ * FriendInvitationResult (C3 0xCB): the answer to ChatRoomInvitationRequest,
+ * echoing the RequestId the invite went out with. Anything with an unknown
+ * id is kept on the old friend-request path.
+ */
 EventBus.on('FriendInvitationResult', packet => {
   const p = new FriendInvitationResultPacket(packet);
+  if (ChatRooms.inviteResult(p.Success, p.RequestId)) return;
   if (!p.Success) Social.errorMessage('The friend request could not be sent.');
+});
+
+/**
+ * ChatRoomConnectionInfo (C3 0xCA): the game server brokered a chat room on
+ * the separate chat server and hands over host, room id and token. The
+ * packet carries no port; OpenMU's chat server listens on 55980.
+ */
+EventBus.on('ChatRoomConnectionInfo', packet => {
+  const p = new ChatRoomConnectionInfoPacket(packet);
+  ChatRooms.onConnectionInfo({
+    host: cleanName(p.ChatServerIp),
+    roomId: p.ChatRoomId,
+    token: p.AuthenticationToken,
+    friendName: cleanName(p.FriendName),
+    success: p.Success,
+  });
 });
 
 /** AddLetter (C3 0xC6): one row of the letter box. */
