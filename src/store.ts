@@ -36,6 +36,7 @@ import {
   BuyItemFromNpcRequestPacket,
   SellItemToNpcRequestPacket,
   RepairItemRequestPacket,
+  ServerChangeAuthenticationPacket,
 } from './common/packets/ClientToServerPackets';
 import {
   ConnectionInfoRequestPacket,
@@ -124,6 +125,9 @@ const CONFIG_KEY = '_mu_key';
  * dead login screen is not what tells them.
  */
 const GS_ANSWER_TIMEOUT = 4000;
+
+/** `ServerChangeAuthentication`'s XOR3 name fields are 12 bytes each. */
+const SERVER_CHANGE_NAME_LENGTH = 12;
 
 const xor32 = new Xor32Encryptor();
 xor32.xor32Key = gameVersion.protocol.encryption.xor32Key;
@@ -722,6 +726,11 @@ export const Store = new (class _Store {
 
   /** `PetInfoResponse` (A9): level / exp / life of the pet the tooltip asked about. */
   petInfo: PetInfo | null = null;
+  /**
+   * `Hero->GetEquipedPetInfo`: the last answer per pet type, so the pet
+   * window's two tabs each keep theirs when both pets are equipped.
+   */
+  petInfoByPet: Partial<Record<number, PetInfo>> = {};
   /** `PetMode` (A7): the Dark Raven's command mode (`PetCommandModeEnum`). */
   petMode = 0;
   /** `PetMode`: the raven's target while in AttackTarget mode; 0xFFFF = none. */
@@ -729,6 +738,7 @@ export const Store = new (class _Store {
 
   setPetInfo(info: PetInfo) {
     this.petInfo = info;
+    this.petInfoByPet = { ...this.petInfoByPet, [info.pet]: info };
   }
 
   setPetMode(mode: number, targetId: number) {
@@ -1020,6 +1030,7 @@ export const Store = new (class _Store {
       currentSkill: observable,
       skillHotkeys: observable,
       petInfo: observable,
+      petInfoByPet: observable,
       petMode: observable,
       petTargetId: observable,
       muHelper: observable,
@@ -1461,6 +1472,66 @@ export const Store = new (class _Store {
     this.gsAttempt = null;
     this.gsSocket?.close();
     this.gsSocket = undefined;
+  }
+
+  /**
+   * Join auth codes of a pending map-server switch. The original learns them
+   * from C1 B1 00 (`ReceiveChangeMapServerInfo`); consumed by the next
+   * `GameServerEntered`.
+   */
+  private pendingServerChange: {
+    authCode1: number;
+    authCode2: number;
+    authCode3: number;
+    authCode4: number;
+  } | null = null;
+
+  /**
+   * `CSMServer::ConnectChangeMapServer`: drop the current game server on
+   * purpose and dial the one hosting the destination map; `GameServerEntered`
+   * then re-authenticates instead of opening the login form.
+   */
+  switchToMapServer(
+    host: string,
+    port: number,
+    auth: NonNullable<typeof this.pendingServerChange>
+  ): void {
+    this.pendingServerChange = { ...auth };
+    this.disconnectFromGameServer();
+    this.connectToGameServer(host, port);
+  }
+
+  /**
+   * `CSMServer::SendChangeMapServer` - C3 B1 01 with the XOR3 account and
+   * character names, the join auth codes, tick count, version and serial.
+   * Returns false when no switch is pending.
+   */
+  sendServerChangeAuthentication(): boolean {
+    const pending = this.pendingServerChange;
+    if (!pending) return false;
+    this.pendingServerChange = null;
+
+    const account = stringToBytes(this.username, SERVER_CHANGE_NAME_LENGTH);
+    const character = stringToBytes(
+      this.playerData.name,
+      SERVER_CHANGE_NAME_LENGTH
+    );
+    Xor3Byte(account);
+    Xor3Byte(character);
+
+    const p = ServerChangeAuthenticationPacket.createPacket();
+    p.setAccountXor3(account, SERVER_CHANGE_NAME_LENGTH);
+    p.setCharacterNameXor3(character, SERVER_CHANGE_NAME_LENGTH);
+    p.AuthCode1 = pending.authCode1;
+    p.AuthCode2 = pending.authCode2;
+    p.AuthCode3 = pending.authCode3;
+    p.AuthCode4 = pending.authCode4;
+    p.TickCount = Math.floor(performance.now()) >>> 0;
+    p.setClientVersion(CLIENT_VERSION);
+    p.setClientSerial(CLIENT_SERIAL);
+
+    this.sendToGS(p.buffer);
+    return true;
   }
 
   updateServerListRequest(): void {

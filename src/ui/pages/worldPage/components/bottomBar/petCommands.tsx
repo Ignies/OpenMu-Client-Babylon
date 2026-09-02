@@ -49,7 +49,8 @@ export function ravenEquipped(): boolean {
   return !!item && item.group === PET_GROUP && item.num === DARK_RAVEN_INDEX;
 }
 
-function sendCommand(mode: PetCommandModeEnum): void {
+/** Shared with the pet info window's command boxes. */
+export function sendRavenCommand(mode: PetCommandModeEnum): void {
   let target = NO_TARGET;
   if (mode === PetCommandModeEnum.AttackTarget) {
     target = Store.world?.attackTarget?.netId ?? NO_TARGET;
@@ -79,7 +80,7 @@ export const PetCommandBar = observer(() => {
             height: BOX_HEIGHT,
           }}
           onPointerDown={e => e.stopPropagation()}
-          onClick={uiClick(() => sendCommand(command.mode))}
+          onClick={uiClick(() => sendRavenCommand(command.mode))}
         >
           <MuSpriteFrame
             file={current === command.mode ? BOX_USE_SPRITE : BOX_SPRITE}

@@ -198,6 +198,7 @@ const TABS: Tab[] = [
             check('autoAttack', 386, 'options.autoAttack'),
             check('whisperBeep', 387, 'options.whisperBeep'),
             check('slideHelp', 919, 'options.slideHelp'),
+            check('cameraControl', -1, 'options.cameraControl'),
           ],
         },
         {

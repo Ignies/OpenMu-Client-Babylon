@@ -316,6 +316,14 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       if (!req) return;
 
+      // Ctrl force cast is an attack gesture: inside a safe zone it is
+      // refused outright, the same way `isAttackableEntity` already refuses
+      // the plain attack click there (attackSystem).
+      if (req.forced && hero.attributeSystem?.isAboveZero('inSafeZone')) {
+        world.castRequest = null;
+        return;
+      }
+
       const def = skillDefinition(Store.currentSkill);
       if (!def) {
         // No skill selected: the right button behaves like a plain attack click.
@@ -384,7 +392,9 @@ export const SkillCastSystem: ISystemFactory = world => {
       if (target) {
         tx = target.transform!.pos.x;
         ty = target.transform!.pos.z;
-      } else if (area && req.point) {
+      } else if ((area || req.forced) && req.point) {
+        // Forced cast with nothing near the cursor still fires at the
+        // ground point instead of silently returning.
         tx = req.point.x;
         ty = req.point.y;
       }
@@ -412,7 +422,9 @@ export const SkillCastSystem: ISystemFactory = world => {
       const dist = Math.sqrt(dx * dx + dz * dz);
       const range = def.distance > 0 ? def.distance + 0.5 : DEFAULT_RANGE;
 
-      if (target !== hero && dist > range) {
+      // Force cast (Ctrl) fires in place like the original's force attack -
+      // it never walks the hero into range first.
+      if (target !== hero && dist > range && !req.forced) {
         if (approachDelay <= 0) {
           approachDelay = APPROACH_INTERVAL;
           const moveTo = hero.playerMoveTo;
@@ -452,7 +464,12 @@ export const SkillCastSystem: ISystemFactory = world => {
       skills.startCooldown(def.num);
 
       if (!Store.isOffline) {
-        if (combat.isDarkSide(def.num)) {
+        if (!area && !target) {
+          // Forced cast with nothing near the cursor: the clip whiffs
+          // toward the ground point and nothing goes on the wire. The hero
+          // key must not stand in here — a targeted packet naming the
+          // caster lands the skill on the character, not at the cursor.
+        } else if (combat.isDarkSide(def.num)) {
           // Dark Side: 0x4B asks the server for the targets, 0x4A lands the
           // first blow (ZzzInterface.cpp:2841-2842).
           const targetId = target?.netId ?? Store.playerId ?? 0;

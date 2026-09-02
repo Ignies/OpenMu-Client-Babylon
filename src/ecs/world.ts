@@ -46,6 +46,10 @@ export type Item = {
   isAncient?: boolean;
   /** Socket slots the item carries (0 for unsocketed gear). */
   socketCount?: number;
+  /** Socket bytes 7-11 as sent (option number, 0xFE = empty slot). */
+  sockets?: number[];
+  /** Socket bonus / 380 option byte 6. */
+  socketBonus?: number;
   hasSkill?: boolean;
   /** Luck: +5% critical, +25% Jewel of Soul (byte 1, bit 2). */
   luck?: boolean;
@@ -100,6 +104,8 @@ export type Entity = Partial<{
   worldIndex: ENUM_WORLD;
   modelFilePath: string;
   npcType: number;
+  /** AddSummonedMonstersToScope: name of the player who summoned this monster. */
+  summonedBy: string;
   localPlayer: true;
   transform: {
     pos: IVector3Like;
@@ -266,13 +272,14 @@ export type Entity = Partial<{
   };
   /**
    * A pet or mount object owned by another entity: the free-flying Guardian
-   * Angel and the two ridden mounts (`Mounts[]` in the original, GOBoid.cpp).
-   * Created and driven by PetSystem; the Imp is not one of these — it is a
-   * bone-linked child of its owner's PlayerObject.
+   * Angel, the two ridden mounts (`Mounts[]` in the original, GOBoid.cpp) and
+   * the Dark Raven (`CSPetDarkSpirit`). Created and driven by PetSystem; the
+   * Imp is not one of these — it is a bone-linked child of its owner's
+   * PlayerObject.
    */
   petActor: {
     owner: Entity;
-    kind: 'angel' | 'mount';
+    kind: 'angel' | 'mount' | 'raven';
     /** `o->Angle[2]` in radians (MU yaw convention, like `transform.rot.y`). */
     yaw: number;
     /** `o->Direction` in MU units per 25 Hz tick. */

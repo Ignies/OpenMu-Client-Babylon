@@ -1,13 +1,22 @@
 import { Vector3, type ArcRotateCamera } from '../../libs/babylon/exports';
 import type { ISystemFactory } from '../world';
+import { Store, UIState } from '../../store';
+import { installCameraControl, updateGameCamera } from '../../camera';
 
 const v3Temp = Vector3.Zero();
 
 export const CameraFollowSystem: ISystemFactory = world => {
   const scene = world.scene;
 
+  // At factory time nothing has moved the camera yet, so the classic framing
+  // the module captures is the constructor's.
+  installCameraControl(
+    scene.defaultCamera,
+    () => Store.uiState === UIState.World
+  );
+
   return {
-    update: () => {
+    update: dt => {
       const camera = scene.activeCamera as ArcRotateCamera;
 
       if (!camera) return;
@@ -26,6 +35,16 @@ export const CameraFollowSystem: ISystemFactory = world => {
       }
 
       camera.target.copyFrom(v3Temp);
+
+      // The login/character screens keep their own camera (loginSceneSystem).
+      if (Store.uiState !== UIState.World) return;
+
+      updateGameCamera(
+        camera,
+        world.mapIndex,
+        world.keyboardInput.pressedKeys,
+        dt
+      );
     },
   };
 };

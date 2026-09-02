@@ -503,7 +503,7 @@ export const FootprintSystem: ISystemFactory = world => {
    * did not move, or that leaves nothing, is free.
    */
   function walk(map: ENUM_WORLD, entity: Entity, lane: PrintLane): boolean {
-    const { transform, modelObject } = entity;
+    const { transform, modelObject, attributeSystem } = entity;
     if (!transform) return false;
 
     const track = trackFor(entity.npcType);
@@ -528,13 +528,21 @@ export const FootprintSystem: ISystemFactory = world => {
     walker.lastX = x;
     walker.lastZ = z;
 
-    // Off the ground: a hovering Budge Dragon, a Dinorant rider. The position
-    // is still banked — the trail is picked up where they land, and not with a
-    // trench dragged across everywhere they flew.
+    // Off the ground: a hovering Budge Dragon, a Dinorant rider, a winged
+    // character in flight. The lift only covers the first two; wings run the
+    // FLY clips with no HoverHeight at all, so they are read off `isFlying`
+    // (animationSystem, the original's `c->Wing.Type != -1 && !SafeZone`) -
+    // which also keeps the boots dry over a puddle. The position is still
+    // banked - the trail is picked up where they land, and not with a trench
+    // dragged across everywhere they flew.
     //
     // A gate, a knock-back or a respawn is the same case for the same reason:
     // it is not a stride.
-    if (moved > TELEPORT || (modelObject?.HoverHeight ?? 0) > HOVERING) {
+    if (
+      moved > TELEPORT ||
+      (modelObject?.HoverHeight ?? 0) > HOVERING ||
+      attributeSystem?.isAboveZero('isFlying')
+    ) {
       walker.travelled = 0;
       walker.havePrev = false;
       return false;
@@ -610,7 +618,8 @@ export const FootprintSystem: ISystemFactory = world => {
               ? 'dying'
               : track.shape === 'none' && track.dragWidth <= 0
                 ? 'recipe leaves nothing'
-                : (modelObject?.HoverHeight ?? 0) > HOVERING
+                : (modelObject?.HoverHeight ?? 0) > HOVERING ||
+                    entity.attributeSystem?.isAboveZero('isFlying')
                   ? 'off the ground'
                   : entity !== hero && range > PRINT_RANGE
                     ? 'out of range'

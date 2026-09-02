@@ -14,8 +14,10 @@
  * Driven by: `effects.spawn('model', …)`, `projectile.ts`. Read by: nobody.
  */
 import {
+  Constants,
   Material,
   Quaternion,
+  StandardMaterial,
   TransformNode,
   Vector3,
   type AbstractMesh,
@@ -27,7 +29,7 @@ import { getMaterial, loadGLTF } from '../common/modelLoader';
 import { BlendState } from '../common/objects/enum';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
-import { LiveList, additiveMaterial, fadeOut, lerp, pointSource, type PointSource, type RGB } from './core';
+import { LiveList, additiveMaterial, fadeOut, lerp, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
 
@@ -85,6 +87,14 @@ export interface ModelOptions {
    * MODEL_FIRE's lava core under its additive tail. Default: every mesh bright.
    */
   blendMesh?: number;
+  /**
+   * `add` (default) is the bright meshes' usual look; `subtract` is
+   * `RENDER_DARK` — `EnableAlphaBlendMinus`, `dst × (1 − src)`
+   * (ZzzBMD.cpp:1606) — the dark spirit stamps of Evil Spirit's MODEL_LASER.
+   */
+  blend?: EffectBlend;
+  /** Yaw follows the direction `follow` moves the node (the original re-stamps along the joint's `Angle`). */
+  aim?: boolean;
 }
 
 export interface ModelHandle extends EffectHandle {
@@ -105,6 +115,29 @@ const tmp = new Vector3();
 const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
 const FLAT = Quaternion.FromEulerAngles(0, 0, 0);
 
+/**
+ * `RENDER_DARK`'s mesh material: the sheet × tint under `EnableAlphaBlendMinus`
+ * (ZzzBMD.cpp:1606). Owned by the spawn, never core.ts's shared cache: under
+ * `(ZERO, ONE_MINUS_SRC_COLOR)` fragment alpha never reaches the blend, so the
+ * fade must scale *this* material's emissive, and a cache entry is shared.
+ */
+function subtractMaterial(scene: Scene, tex: Texture, colour: RGB, owned: StandardMaterial[]): StandardMaterial {
+  const mat = new StandardMaterial('fxModelMinus', scene);
+  mat.diffuseColor.set(0, 0, 0);
+  mat.specularColor.set(0, 0, 0);
+  mat.ambientColor.set(0, 0, 0);
+  mat.emissiveColor.set(colour[0], colour[1], colour[2]);
+  mat.disableLighting = true;
+  mat.alphaMode = Constants.ALPHA_SUBTRACT;
+  mat.transparencyMode = Material.MATERIAL_ALPHABLEND;
+  mat.backFaceCulling = false;
+  mat.disableDepthWrite = true;
+  mat.fogEnabled = false;
+  mat.diffuseTexture = tex;
+  owned.push(mat);
+  return mat;
+}
+
 /** Spawn helper other entries call directly (projectile heads). */
 export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): ModelHandle {
   const world = Store.world;
@@ -119,6 +152,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const fadeIn = opts.fadeIn ?? 0;
   const source = opts.follow ?? pointSource(at);
   const colour = opts.colour ?? RGBS.white;
+  const subtract = opts.blend === 'subtract';
 
   const node = new TransformNode('fxModel', scene);
   node.rotationQuaternion = null;
@@ -127,8 +161,11 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   if (world) node.setParent(world.mapParent);
   source(tmp);
   node.position.set(tmp.x, tmp.y + height, tmp.z);
+  let prevX = tmp.x;
+  let prevZ = tmp.z;
 
   let meshes: AbstractMesh[] = [];
+  const fadeMats: StandardMaterial[] = [];
   let clip: AnimationGroup | null = null;
   let disposed = false;
   let t = 0;
@@ -167,7 +204,13 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           // original's `Alpha` and the tint is its `Light`. Cached per
           // (texture, colour) in core.ts; the texture stays the GLB cache's.
           const tex = mesh.metadata.diffuseTexture as Texture | undefined;
-          mesh.material = isBright ? (tex ? additiveMaterial(scene, tex, colour) : brightFallback) : solid;
+          mesh.material = isBright
+            ? tex
+              ? subtract
+                ? subtractMaterial(scene, tex, colour, fadeMats)
+                : additiveMaterial(scene, tex, colour)
+              : brightFallback
+            : solid;
           (scene as TestScene).look?.glow.addExcludedMesh(mesh as never);
         });
         clip = gltf.animationGroups[0] ?? null;
@@ -189,17 +232,29 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       node.position.set(tmp.x, tmp.y + height + rise * t, tmp.z);
       node.scaling.setAll(scale * lerp(1, grow, p));
       if (spin) node.rotation.y += spin * dt;
+      if (opts.aim) {
+        const dx = tmp.x - prevX;
+        const dz = tmp.z - prevZ;
+        if (dx * dx + dz * dz > 1e-8) node.rotation.y = Math.atan2(dx, dz);
+        prevX = tmp.x;
+        prevZ = tmp.z;
+      }
       const vis = fadeOut(p, tail) * alpha * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1);
-      for (const m of meshes) m.visibility = vis;
+      // A subtractive mesh fades through its own material's emissive —
+      // `visibility` is alpha, which its blend never reads.
+      if (subtract) for (const m of fadeMats) m.emissiveColor.set(colour[0] * vis, colour[1] * vis, colour[2] * vis);
+      else for (const m of meshes) m.visibility = vis;
       return true;
     },
     release() {
       disposed = true;
       clip?.stop();
-      // Never the materials and textures: the bright / solid materials are
-      // shared caches (core.ts, modelLoader.ts) and the textures the GLB
+      // Never the shared materials and textures: the bright / solid materials
+      // are shared caches (core.ts, modelLoader.ts) and the textures the GLB
       // cache's — `dispose(false, true)` used to take them down with the
-      // first Meteorite to land .
+      // first Meteorite to land. The subtractive materials are this spawn's
+      // own (their emissive is mutated per frame) and go with it.
+      for (const m of fadeMats) m.dispose(false, false);
       node.dispose(false, false);
     },
   });

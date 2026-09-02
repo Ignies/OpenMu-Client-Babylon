@@ -17,6 +17,7 @@ import {
   itemRestPose,
   itemRestRotation,
 } from './common/itemAngle';
+import { dropModelProxy } from './common/dropModelProxy';
 import { prefetchItemIcons } from './common/itemIconPack';
 import { ItemSerializer } from './common/itemSerializer';
 import { isFemaleClass } from './common/mapPlayerNetClassToModelClass';
@@ -42,6 +43,8 @@ import {
   AddCharactersToScopePacket,
   AddCharacterToScopeExtendedPacket,
   AddNpcsToScopePacket,
+  AddSummonedMonstersToScopePacket,
+  SummonHealthUpdatePacket,
   CharacterClassCreationUnlockPacket,
   CharacterCreationSuccessfulPacket,
   CharacterDeleteResponseCharacterDeleteResultEnum,
@@ -163,7 +166,15 @@ import {
   PetModePacket,
   MuHelperStatusUpdatePacket,
   MuHelperConfigurationDataPacket,
+  RageAttackPacket,
+  BaseStatsExtendedPacket,
+  ChainLightningHitInfoPacket,
+  ServerCommandPacket,
+  ShowFireworksPacket,
+  ShowChristmasFireworksPacket,
 } from './common/packets/ServerToClientPackets';
+import { ChangeMapServerInfoPacket } from './common/packets';
+import { spawnFireworks } from './common/fireworks';
 import { InventoryConstants } from './common/inventoryConstants';
 import {
   ItemBoughtPacket,
@@ -199,6 +210,7 @@ import {
   ClientReadyAfterMapChangePacket,
   CloseNpcRequestPacket,
   GuildInfoRequestPacket,
+  PingPacket,
 } from './common/packets/ClientToServerPackets';
 import { Social } from './social';
 import { events } from './events';
@@ -357,9 +369,17 @@ EventBus.on('GameServerEntered', bytes => {
   const id = p.PlayerId & 0x7fff;
   runInAction(() => {
     Store.playerId = id;
-    Store.uiState = UIState.Login;
   });
   console.log(`PlayerID: ${Store.playerId}`);
+
+  // A map-server switch re-authenticates on the new server instead of
+  // showing the login form (CSMServer::SendChangeMapServer); the server
+  // answers with the character state and the world carries on.
+  if (Store.sendServerChangeAuthentication()) return;
+
+  runInAction(() => {
+    Store.uiState = UIState.Login;
+  });
 });
 
 EventBus.on('ServerListResponse', bytes => {
@@ -775,100 +795,157 @@ onLanguageChanged(() => {
     if (!world) return;
 
     for (const e of world.with('npcType', 'objectNameInWorld')) {
-      e.objectNameInWorld = monsterDisplayName(e.npcType, 'NPC');
+      e.objectNameInWorld = e.summonedBy
+        ? summonDisplayName(e.npcType, e.summonedBy)
+        : monsterDisplayName(e.npcType, 'NPC');
     }
   });
 });
 
+/**
+ * ReceiveCreateSummonViewport (WSclient.cpp:2718-2727): the tag is the
+ * monster name plus "Of" + owner (GlobalText 485); the Castle Siege
+ * gates/statues (types 152-158) keep their plain name.
+ */
+function summonDisplayName(type: number, owner: string): string {
+  const base = monsterDisplayName(type, 'NPC');
+  if (type >= 152 && type <= 158) return base;
+  return `${base} of ${owner}`;
+}
+
+type ScopeNpc = {
+  Id: number;
+  TypeNumber: number;
+  CurrentPositionX: number;
+  CurrentPositionY: number;
+  Rotation: number;
+  /** AddSummonedMonstersToScope only: name of the summoning player. */
+  OwnerCharacterName?: string;
+};
+
+function addNpcToScope(world: World, npc: ScopeNpc) {
+  const id = npc.Id & 0x7fff;
+
+  removeNetObject(world, id);
+
+  if (!isKnownObjectType(npc.TypeNumber)) {
+    console.warn(
+      `No model mapping for NPC type ${npc.TypeNumber} (${
+        monsterDisplayName(npc.TypeNumber, 'unnamed')
+      }). Falling back to the Bull Fighter, as the original's default: arm does.`
+    );
+  }
+
+  const modelFactory = resolveModelFactory(npc.TypeNumber);
+  const owner = npc.OwnerCharacterName;
+
+  const npcEntity = world.add({
+    netId: id,
+    worldIndex: world.mapIndex,
+    npcType: npc.TypeNumber,
+    transform: {
+      pos: new Vector3(
+        npc.CurrentPositionX,
+        world.getTerrainHeight(npc.CurrentPositionX, npc.CurrentPositionY),
+        npc.CurrentPositionY
+      ),
+      rot: new Vector3(0, convertDirectionToAngle(npc.Rotation), 0),
+      scale: modelFactory.OverrideScale >= 0 ? modelFactory.OverrideScale : 1,
+    },
+    modelFactory,
+    pathfinding: {
+      from: { x: 0, y: 0 },
+      to: { x: 0, y: 0 },
+      path: [],
+      calculated: true,
+    },
+    playerMoveTo: {
+      point: { x: 0, y: 0 },
+      handled: true as boolean,
+    },
+    movement: {
+      velocity: { x: 0, y: 0 },
+    },
+    monsterAnimation: {
+      action: MonsterActionType.Stop1,
+    },
+    attributeSystem: createAttributeSystem(),
+    visibility: {
+      lastChecked: 0,
+      state: 'hidden',
+    },
+    screenPosition: {
+      worldOffsetZ: 2.5,
+      x: 0,
+      y: 0,
+    },
+    objectNameInWorld: owner
+      ? summonDisplayName(npc.TypeNumber, owner)
+      : monsterDisplayName(npc.TypeNumber, 'NPC'),
+    interactable: true,
+  });
+
+  if (owner) world.addComponent(npcEntity, 'summonedBy', owner);
+
+  // Player-rig NPCs (the Elf Soldier, the guards) carry a class; monsters
+  // do not. Hard-zeroing isFemale here made every one of them animate male.
+  const npcClass = npcClassOf(modelFactory);
+  npcEntity.attributeSystem.setValue(
+    'isFemale',
+    npcClass !== null && isFemaleClass(npcClass) ? 1 : 0
+  );
+  npcEntity.attributeSystem.setValue('isFlying', 0);
+  // Original: every character starts with MoveSpeed = 10 units per 25-fps
+  // frame (ZzzCharacter.cpp:11530, MoveCharacterPosition:6259) and monsters
+  // never change it -> 10 * 25 / 100 = 2.5 tiles/s. The server sends no
+  // monster speed; without this the attribute reads 0 and the walk stalls.
+  npcEntity.attributeSystem.setValue(
+    'totalMovementSpeed',
+    MONSTER_WALK_TILES_PER_SECOND
+  );
+
+  const monsterHP = MonstersDatabase.get(npc.TypeNumber)?.HP ?? 0;
+  npcEntity.attributeSystem.setValue('maxHealth', monsterHP);
+  npcEntity.attributeSystem.setValue('currentHealth', monsterHP);
+}
+
 EventBus.on('AddNpcsToScope', packet => {
   const p = new AddNpcsToScopePacket(packet);
-  const npcs = p.getNPCs();
 
   const world = Store.world;
   if (!world) return;
 
-  const worldIndex = world.mapIndex;
+  p.getNPCs().forEach(npc => addNpcToScope(world, npc));
+});
 
-  npcs.forEach(npc => {
-    const id = npc.Id & 0x7fff;
+// 0x1F (ReceiveCreateSummonViewport): a player's summons enter scope. Same
+// spawn path as monsters, with the owner's name carried on the entity.
+EventBus.on('AddSummonedMonstersToScope', packet => {
+  const p = new AddSummonedMonstersToScopePacket(packet);
 
-    removeNetObject(world, id);
+  const world = Store.world;
+  if (!world) return;
 
-    if (!isKnownObjectType(npc.TypeNumber)) {
-      console.warn(
-        `No model mapping for NPC type ${npc.TypeNumber} (${
-          monsterDisplayName(npc.TypeNumber, 'unnamed')
-        }). Falling back to the Bull Fighter, as the original's default: arm does.`
-      );
+  p.getSummonedMonsters().forEach(m => addNpcToScope(world, m));
+});
+
+// F3 20 (ReceiveSummonLife): percent health of the hero's own summon. The
+// original shows it as a gauge in the endurance panel; here it drives the
+// summon's health bar directly.
+EventBus.on('SummonHealthUpdate', packet => {
+  const p = new SummonHealthUpdatePacket(packet);
+
+  const world = Store.world;
+  if (!world) return;
+
+  const owner = Store.playerData.name;
+  for (const e of world.with('summonedBy', 'attributeSystem')) {
+    if (e.summonedBy !== owner || e.objOutOfScope) continue;
+    const max = e.attributeSystem.getValue('maxHealth');
+    if (max > 0) {
+      e.attributeSystem.setValue('currentHealth', (max * p.HealthPercent) / 100);
     }
-
-    const modelFactory = resolveModelFactory(npc.TypeNumber);
-
-    const npcEntity = world.add({
-      netId: id,
-      worldIndex,
-      npcType: npc.TypeNumber,
-      transform: {
-        pos: new Vector3(
-          npc.CurrentPositionX,
-          world.getTerrainHeight(npc.CurrentPositionX, npc.CurrentPositionY),
-          npc.CurrentPositionY
-        ),
-        rot: new Vector3(0, convertDirectionToAngle(npc.Rotation), 0),
-        scale: modelFactory.OverrideScale >= 0 ? modelFactory.OverrideScale : 1,
-      },
-      modelFactory,
-      pathfinding: {
-        from: { x: 0, y: 0 },
-        to: { x: 0, y: 0 },
-        path: [],
-        calculated: true,
-      },
-      playerMoveTo: {
-        point: { x: 0, y: 0 },
-        handled: true as boolean,
-      },
-      movement: {
-        velocity: { x: 0, y: 0 },
-      },
-      monsterAnimation: {
-        action: MonsterActionType.Stop1,
-      },
-      attributeSystem: createAttributeSystem(),
-      visibility: {
-        lastChecked: 0,
-        state: 'hidden',
-      },
-      screenPosition: {
-        worldOffsetZ: 2.5,
-        x: 0,
-        y: 0,
-      },
-      objectNameInWorld: monsterDisplayName(npc.TypeNumber, 'NPC'),
-      interactable: true,
-    });
-
-    // Player-rig NPCs (the Elf Soldier, the guards) carry a class; monsters
-    // do not. Hard-zeroing isFemale here made every one of them animate male.
-    const npcClass = npcClassOf(modelFactory);
-    npcEntity.attributeSystem.setValue(
-      'isFemale',
-      npcClass !== null && isFemaleClass(npcClass) ? 1 : 0
-    );
-    npcEntity.attributeSystem.setValue('isFlying', 0);
-    // Original: every character starts with MoveSpeed = 10 units per 25-fps
-    // frame (ZzzCharacter.cpp:11530, MoveCharacterPosition:6259) and monsters
-    // never change it -> 10 * 25 / 100 = 2.5 tiles/s. The server sends no
-    // monster speed; without this the attribute reads 0 and the walk stalls.
-    npcEntity.attributeSystem.setValue(
-      'totalMovementSpeed',
-      MONSTER_WALK_TILES_PER_SECOND
-    );
-
-    const monsterHP = MonstersDatabase.get(npc.TypeNumber)?.HP ?? 0;
-    npcEntity.attributeSystem.setValue('maxHealth', monsterHP);
-    npcEntity.attributeSystem.setValue('currentHealth', monsterHP);
-  });
+  }
 });
 
 function removeNetObject(world: World, netId: number) {
@@ -2323,11 +2400,35 @@ EventBus.on('PlayFanfareSound', packet => {
       EventBus.emit('fanfare', { effectType: p.EffectType, x: p.X, y: p.Y });
       return;
     }
-    default:
-      // Fireworks / server commands: no client-side handling yet.
+    case 0: {
+      const p = new ShowFireworksPacket(packet);
+      spawnFireworksAt(p.X, p.Y, false);
       return;
+    }
+    case 59: {
+      const p = new ShowChristmasFireworksPacket(packet);
+      spawnFireworksAt(p.X, p.Y, true);
+      return;
+    }
+    default: {
+      // The other command types open GlobalText message boxes the client has
+      // no texts for (ReceiveServerCommand, WSclient.cpp:7744).
+      const p = new ServerCommandPacket(packet);
+      console.warn(
+        `unhandled ServerCommand ${p.CommandType} (${p.Parameter1}, ${p.Parameter2})`
+      );
+      return;
+    }
   }
 });
+
+/** ShowFireworks / ShowChristmasFireworks: the burst at the given tile. */
+function spawnFireworksAt(x: number, y: number, christmas: boolean) {
+  const world = Store.world;
+  if (!world) return;
+  const at = new Vector3(x, world.getTerrainHeight(x, y), y);
+  spawnFireworks(world.scene, at, christmas);
+}
 
 // ReceivePlaySoundEffect (WSclient.cpp:9680-9697): 0 ready / 1 start / 2 end.
 const FANFARE_SOUNDS = [
@@ -2496,10 +2597,15 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
     }
 
     removeNetObject(world, maskedId);
+    // CreateItem's per-level model swap (common/dropModelProxy.ts): the
+    // shown model and its pose may come from another item's row.
+    const proxy = parsed ? dropModelProxy(group, id, parsed.lvl ?? 0) : null;
+    const poseGroup = proxy?.group ?? group;
+    const poseNum = proxy?.num ?? id;
     // ItemAngle (common/itemAngle.ts): the resting pose and height for this
     // item's class — armour face-down, a sword leaning back, everything 30 cm
     // (a weapon 70) off the terrain.
-    const rot = itemRestRotation(group, id);
+    const rot = itemRestRotation(poseGroup, poseNum);
     world.add({
       netId: maskedId,
       worldIndex: world.mapIndex,
@@ -2507,14 +2613,15 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
         pos: new Vector3(
           item.PositionX,
           world.getTerrainHeight(item.PositionX, item.PositionY) +
-            itemRestHeight(group),
+            itemRestHeight(poseGroup),
           item.PositionY
         ),
         rot: new Vector3(rot.x, rot.y, rot.z),
-        scale: itemRestPose(group, id).scale,
+        scale: itemRestPose(poseGroup, poseNum).scale,
       },
       modelFactory: ModelObject,
-      modelFilePath: itemConfig.szModelFolder + itemConfig.szModelName,
+      modelFilePath:
+        proxy?.modelFilePath ?? itemConfig.szModelFolder + itemConfig.szModelName,
       visibility: {
         state: 'hidden',
         lastChecked: 0,
@@ -2526,8 +2633,8 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
         isMoney,
         item: parsed,
         fresh: !!item.IsFreshDrop,
-        group,
-        num: id,
+        group: poseGroup,
+        num: poseNum,
       },
       objectNameInWorld: dropName(isMoney, amount, itemConfig.ItemName, parsed),
     });
@@ -3591,6 +3698,102 @@ EventBus.on('MuHelperConfigurationData', packet => {
     new Uint8Array(data.buffer, data.byteOffset, data.byteLength).slice()
   );
 });
+
+/**
+ * F3 32 - `BaseStatsExtended`: the server set the base stats outright (set
+ * stats command, reset). Same store fields the character information fills.
+ */
+EventBus.on('BaseStatsExtended', packet => {
+  if (packet.byteLength < BaseStatsExtendedPacket.Length!) return;
+  const p = new BaseStatsExtendedPacket(packet);
+  runInAction(() => {
+    const pd = Store.playerData;
+    pd.str = p.Strength;
+    pd.agi = p.Agility;
+    pd.sta = p.Vitality;
+    pd.eng = p.Energy;
+    pd.leadership = p.Command;
+  });
+});
+
+/**
+ * BF 0A - `ChainLightningHitInfo`: the server-picked hops of Chain Lightning
+ * (skill 215). The cast came through the usual skill animation packet; here
+ * only the bolt is drawn caster -> target -> target.
+ */
+EventBus.on('ChainLightningHitInfo', packet => {
+  const p = new ChainLightningHitInfoPacket(packet);
+  const world = Store.world;
+  if (!world) return;
+  let from = world.getByNetId(p.PlayerId & 0x7fff);
+  if (!from) return;
+  const maxTargets = Math.max(0, Math.floor((packet.byteLength - 10) / 2));
+  for (const t of p.getTargets(Math.min(p.TargetCount, maxTargets))) {
+    const target = world.getByNetId(t.TargetId & 0x7fff);
+    if (!target) continue;
+    playTargetedSkillVisual(world.scene, p.SkillNumber, from, target);
+    from = target;
+  }
+});
+
+/**
+ * C3 4A - `RageAttack`: a rage fighter's Dark Side blow on one target, shown
+ * to everyone in scope like a targeted skill animation.
+ */
+EventBus.on('RageAttack', packet => {
+  if (packet.byteLength < RageAttackPacket.Length!) return;
+  const p = new RageAttackPacket(packet);
+  const world = Store.world;
+  if (!world) return;
+  const caster = world.getByNetId(p.SourceId & 0x7fff);
+  if (!caster) return;
+  const target = world.getByNetId(p.TargetId & 0x7fff) ?? null;
+
+  if (target && target !== caster && !caster.localPlayer) {
+    const dx = target.transform.pos.x - caster.transform.pos.x;
+    const dz = target.transform.pos.z - caster.transform.pos.z;
+    if (dx * dx + dz * dz > 0.01) {
+      caster.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
+    }
+  }
+  playCastAnimation(caster, p.SkillId);
+  playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
+});
+
+/**
+ * C1 B1 00 - `ReceiveChangeMapServerInfo` (WSclient.cpp:10328): move to the
+ * game server hosting the destination map. Port 0 means the move was
+ * cancelled (`LoadingWorld = 0`). OpenMU's protocol has no packet for this
+ * (one game server per connection), so only split-deployment servers send it.
+ */
+EventBus.on('ChangeMapServerInfo', packet => {
+  if (packet.byteLength < ChangeMapServerInfoPacket.MinimumSize) return;
+  const p = new ChangeMapServerInfoPacket(packet);
+  if (!p.Port) return;
+  console.log(`map server move: ${p.IpAddress}:${p.Port}`);
+  Store.switchToMapServer(p.IpAddress, p.Port, {
+    authCode1: p.AuthCode1,
+    authCode2: p.AuthCode2,
+    authCode3: p.AuthCode3,
+    authCode4: p.AuthCode4,
+  });
+});
+
+/**
+ * C3 0E - `Ping`: the keep-alive the original client sends every few seconds
+ * with its tick count and attack speed (the original server's speed-hack
+ * check). OpenMU only documents it, but sending it keeps idle NAT/proxy
+ * paths warm. The reverse `PingResponse` (C1 71) answers a server ping
+ * request, which OpenMU's protocol has no packet for - nothing to respond to.
+ */
+const PING_INTERVAL_MS = 5000;
+setInterval(() => {
+  if (Store.uiState !== UIState.World || !Store.gsSocket) return;
+  const p = PingPacket.createPacket();
+  p.TickCount = Math.floor(performance.now()) >>> 0;
+  p.AttackSpeed = Store.playerData.attackSpeed ?? 0;
+  Store.sendToGS(p.buffer);
+}, PING_INTERVAL_MS);
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
