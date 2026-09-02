@@ -160,6 +160,10 @@ export const PointerInputSystem: ISystemFactory = world => {
       return;
     }
 
+    // Left button only: the middle button belongs to the camera (drag
+    // rotate) and must never move or attack.
+    if (ev.event.button !== 0) return;
+
     if (ev.type === PointerEventTypes.POINTERDOWN) {
       world.pointerPressed = true;
 

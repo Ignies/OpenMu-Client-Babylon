@@ -384,7 +384,9 @@ export const SkillCastSystem: ISystemFactory = world => {
       if (target) {
         tx = target.transform!.pos.x;
         ty = target.transform!.pos.z;
-      } else if (area && req.point) {
+      } else if ((area || req.forced) && req.point) {
+        // Forced cast with nothing near the cursor still fires at the
+        // ground point instead of silently returning.
         tx = req.point.x;
         ty = req.point.y;
       }
@@ -412,7 +414,9 @@ export const SkillCastSystem: ISystemFactory = world => {
       const dist = Math.sqrt(dx * dx + dz * dz);
       const range = def.distance > 0 ? def.distance + 0.5 : DEFAULT_RANGE;
 
-      if (target !== hero && dist > range) {
+      // Force cast (Ctrl) fires in place like the original's force attack -
+      // it never walks the hero into range first.
+      if (target !== hero && dist > range && !req.forced) {
         if (approachDelay <= 0) {
           approachDelay = APPROACH_INTERVAL;
           const moveTo = hero.playerMoveTo;
@@ -472,7 +476,9 @@ export const SkillCastSystem: ISystemFactory = world => {
           Store.sendToGS(packet.buffer);
           sendAreaHit(def, ~~tx, ~~ty);
         } else {
-          sendTargeted(def.num, target!.netId ?? Store.playerId ?? 0);
+          // Forced cast can have no target; the hero key stands in, as the
+          // original does for targetless magic.
+          sendTargeted(def.num, target?.netId ?? Store.playerId ?? 0);
         }
       }
 
