@@ -24,6 +24,9 @@ export const defaultScaleOf = (id: string): number =>
 /** At least this many screen pixels of a window stay reachable on every side. */
 export const EDGE_MARGIN = 32;
 
+/** Screen pixels kept free around a window when fitting its scale to the viewport. */
+export const FIT_MARGIN = 12;
+
 /**
  * z-index of the bottom window. Every stacked window sits at base + its
  * position in `order`, so the windows always lie in `[WINDOW_Z_BASE,
@@ -50,13 +53,20 @@ export const MuWindows = new (class _MuWindows {
   order: string[] = [];
   private closers = new Map<string, WindowCloser>();
   private sizes = new Map<string, WindowSize>();
+  /** Observable mirror of the stage size, so scales re-fit on resize. */
+  private viewport = getUiViewport();
 
   constructor() {
     makeAutoObservable(this, {
       order: true,
     });
     this.load();
-    onUiViewportChanged(() => this.clampAll());
+    onUiViewportChanged(() => {
+      runInAction(() => {
+        this.viewport = { ...getUiViewport() };
+      });
+      this.clampAll();
+    });
   }
 
   placement(id: string): WindowPlacement {
@@ -65,8 +75,24 @@ export const MuWindows = new (class _MuWindows {
     );
   }
 
+  /**
+   * The largest scale at which the whole window still fits on screen (with
+   * `FIT_MARGIN` left on each side). Unknown sizes fit anything.
+   */
+  fitScaleOf(id: string): number {
+    const size = this.sizes.get(id);
+    if (!size) return MAX_SCALE;
+    const { width, height } = this.viewport;
+    const fit = Math.min(
+      (width - FIT_MARGIN * 2) / size.width,
+      (height - FIT_MARGIN * 2) / size.height
+    );
+    return Math.min(MAX_SCALE, Math.max(fit, 0.25));
+  }
+
+  /** The scale the window is drawn at: the saved scale, capped so it fits. */
   scaleOf(id: string): number {
-    return this.placement(id).scale;
+    return Math.min(this.placement(id).scale, this.fitScaleOf(id));
   }
 
   // ---- the stack ----------------------------------------------------------
@@ -140,14 +166,19 @@ export const MuWindows = new (class _MuWindows {
 
   setScale(id: string, scale: number): void {
     const current = this.placement(id);
+    // A viewport smaller than MIN_SCALE * size wins: fitting beats the floor.
+    const max = Math.min(MAX_SCALE, this.fitScaleOf(id));
+    const min = Math.min(MIN_SCALE, max);
 
     runInAction(() => {
       this.placements[id] = {
         ...current,
-        scale: Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale)),
+        scale: Math.max(min, Math.min(max, scale)),
       };
     });
 
+    // Growing a window near the right/bottom edge must not push it out.
+    this.clamp(id);
     this.save();
   }
 
@@ -160,18 +191,24 @@ export const MuWindows = new (class _MuWindows {
   }
 
   /**
-   * Keeps a window's grab-able part on screen: the left `EDGE_MARGIN` (or
-   * the whole width when it is known) never leaves the viewport, the top edge
-   * never goes above it. Restored placements from a bigger monitor and
+   * Keeps the whole window inside the viewport when its size is known (the
+   * fit-capped scale guarantees it can fit); otherwise keeps the top-left
+   * `EDGE_MARGIN` reachable. Restored placements from a bigger monitor and
    * windows left near an edge before a resize both land back in reach.
    */
   private clamped(id: string, x: number, y: number): { x: number; y: number } {
-    const { width, height } = getUiViewport();
+    const { width, height } = this.viewport;
     const size = this.sizes.get(id);
-    const drawnWidth = size ? size.width * this.scaleOf(id) : EDGE_MARGIN;
+    if (!size) {
+      return {
+        x: Math.min(Math.max(x, 0), width - EDGE_MARGIN),
+        y: Math.min(Math.max(y, 0), height - EDGE_MARGIN),
+      };
+    }
+    const scale = this.scaleOf(id);
     return {
-      x: Math.min(Math.max(x, EDGE_MARGIN - drawnWidth), width - EDGE_MARGIN),
-      y: Math.min(Math.max(y, 0), height - EDGE_MARGIN),
+      x: Math.min(Math.max(x, 0), Math.max(0, width - size.width * scale)),
+      y: Math.min(Math.max(y, 0), Math.max(0, height - size.height * scale)),
     };
   }
 
