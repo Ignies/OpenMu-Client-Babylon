@@ -46,6 +46,10 @@ export type Item = {
   isAncient?: boolean;
   /** Socket slots the item carries (0 for unsocketed gear). */
   socketCount?: number;
+  /** Socket bytes 7-11 as sent (option number, 0xFE = empty slot). */
+  sockets?: number[];
+  /** Socket bonus / 380 option byte 6. */
+  socketBonus?: number;
   hasSkill?: boolean;
   /** Luck: +5% critical, +25% Jewel of Soul (byte 1, bit 2). */
   luck?: boolean;
