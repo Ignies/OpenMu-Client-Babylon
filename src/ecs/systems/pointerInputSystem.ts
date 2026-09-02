@@ -127,7 +127,12 @@ export const PointerInputSystem: ISystemFactory = world => {
     // own pointer-down handlers.
     if (ev.type === PointerEventTypes.POINTERDOWN) applyTarget(resolveTarget());
 
-    if (ev.event.button === 2) {
+    // A move event reports button -1, so a right-button drag is recognised
+    // by the held state, not by the button field.
+    const rightDrag =
+      ev.type === PointerEventTypes.POINTERMOVE && world.rightPointerPressed;
+
+    if (ev.event.button === 2 || rightDrag) {
       // `CNewUICommandWindow::RunCommand`: with an entry armed the right
       // click runs it on the player under the cursor instead of casting.
       if (
@@ -140,7 +145,7 @@ export const PointerInputSystem: ISystemFactory = world => {
       // every move while held so the cast follows the cursor.
       if (ev.type === PointerEventTypes.POINTERDOWN) world.rightPointerPressed = true;
       else if (ev.type === PointerEventTypes.POINTERUP) world.rightPointerPressed = false;
-      if (ev.type === PointerEventTypes.POINTERDOWN || (ev.type === PointerEventTypes.POINTERMOVE && world.rightPointerPressed)) {
+      if (ev.type === PointerEventTypes.POINTERDOWN || rightDrag) {
         const ground = scene.pick(
           ev.event.clientX,
           ev.event.clientY,
