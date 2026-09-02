@@ -18,6 +18,7 @@ import {
   GuildRelation,
   HERO_BG,
   HERO_TEXT,
+  SELF_DEFENSE_COLOUR,
   SHOP_TITLE_PREFIX,
   chatLineBg,
   guildLine,
@@ -119,9 +120,17 @@ function buildLines(entity: TagEntity): Line[] {
   }
 
   const ownMark = entity.guild ? Store.guilds.get(entity.guild.id)?.logo : undefined;
+  // Self-defense outranks the PK tint for its 60s: the aggressor is marked
+  // to the victim (violet in the official client; the state itself comes
+  // from OpenMU's blue message, social.ts trackSelfDefense).
+  const nameColour = isGm
+    ? GM_NAME_TEXT
+    : Social.isSelfDefenseActive(entity.objectNameInWorld)
+      ? SELF_DEFENSE_COLOUR
+      : pkTextColour(tag.color);
   lines.push({
     text: entity.objectNameInWorld ?? '',
-    colour: isGm ? GM_NAME_TEXT : pkTextColour(tag.color),
+    colour: nameColour,
     bg: box.bg,
     bold: isGm,
     isName: true,

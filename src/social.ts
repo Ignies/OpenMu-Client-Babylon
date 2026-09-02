@@ -51,7 +51,11 @@ import {
   WhisperMessagePacket,
 } from './common/packets/ClientToServerPackets';
 import { GuildMemberRoleEnum } from './common/packets/ServerToClientPackets';
-import { GuildRelation } from './common/nameTags';
+import {
+  GuildRelation,
+  parseSelfDefense,
+  SELF_DEFENSE_MS,
+} from './common/nameTags';
 import { playUiSound } from './libs/sfx';
 
 export type PartyMember = {
@@ -184,6 +188,12 @@ export const Social = new (class _Social {
   /** `CGuildBreakPasswordMsgBoxLayout`: whose kick the code is asked for. */
   guildKickPrompt: { name: string; self: boolean } | null = null;
 
+  // ---- self-defense -------------------------------------------------------
+
+  /** Attackers the hero may fight back at, name -> end time (ms). Polled by
+   * the name tags every frame, so it needs no observability or timer. */
+  private selfDefense = new Map<string, number>();
+
   constructor() {
     makeObservable(this, {
       chatLines: observable.shallow,
@@ -256,6 +266,32 @@ export const Social = new (class _Social {
     this.guildCreationDialog = false;
     this.guildCreationPending = false;
     this.guildKickPrompt = null;
+    this.selfDefense.clear();
+  }
+
+  // ---- self-defense -------------------------------------------------------
+
+  /** `SelfDefensePlugIn.cs` announces begin/end only in a blue message;
+   * track the pairs where the hero is the defender. */
+  trackSelfDefense(text: string): void {
+    const parsed = parseSelfDefense(text);
+    if (!parsed || parsed.defender !== Store.playerData.name) return;
+    if (parsed.active) {
+      this.selfDefense.set(parsed.attacker, Date.now() + SELF_DEFENSE_MS);
+    } else {
+      this.selfDefense.delete(parsed.attacker);
+    }
+  }
+
+  isSelfDefenseActive(name: string | undefined): boolean {
+    if (!name) return false;
+    const until = this.selfDefense.get(name);
+    if (until === undefined) return false;
+    if (until <= Date.now()) {
+      this.selfDefense.delete(name);
+      return false;
+    }
+    return true;
   }
 
   // ---- chat ---------------------------------------------------------------
