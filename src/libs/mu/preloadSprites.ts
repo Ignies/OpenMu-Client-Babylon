@@ -171,6 +171,7 @@ const HUD_SPRITES = [
   'newui_btn_empty.OZT',
   'newui_btn_empty_big.OZT',
   'newui_btn_empty_small.OZT',
+  'newui_btn_empty_very_small.OZT',
   'newui_cha_textbox02.OZT',
   'newui_chainfo_btn_level.OZT',
   'newui_chainfo_btn_master.OZT',

@@ -51,6 +51,28 @@ export const BUTTON_COLOR_ENABLED = 'rgb(255,255,255)';
 export const EXIT_BUTTON = { x: 13, y: 392, width: 36, height: 29 };
 export const EXIT_SPRITE = 'newui_exit_00.OZT';
 
+/**
+ * `CNewUIDoppelGangerWindow` (NewUIDoppelGangerWindow.cpp): same 190x429
+ * frame; text block from y 50 in 15 px rows, the Mirror of Dimensions
+ * render, one 53x23 `newui_btn_empty_very_small` Enter button at
+ * (190/2 - 27, 190), the quest-line separator, the Entry Time block and
+ * the Close button at y 360.
+ */
+export const DG_INTRO_Y = 50;
+export const DG_INTRO_STEP = 15;
+export const DG_ITEM = { x: (190 - 40) / 2, y: 108, size: 40 };
+export const DG_MIRROR_Y = 170;
+export const DG_ENTER_Y = 190;
+export const DG_LINE_Y = 220;
+export const DG_LINE = { width: 188, height: 21 };
+export const DG_ENTRY_TIME_Y = 260;
+export const DG_TIME_Y = 280;
+export const DG_CLOSE_Y = 360;
+export const DG_BUTTON_X = 190 / 2 - 27;
+export const DG_BUTTON = { width: 53, height: 23 };
+export const DG_BUTTON_SPRITE = 'newui_btn_empty_very_small.OZT';
+export const DG_LINE_SPRITE = 'newui_myquest_Line.OZT';
+
 export const TIMER_SPRITE = 'newui_Figure_blood.OZT';
 export const TIMER = { x: 640 - 127, y: 480 - 132, width: 124, height: 81 };
 export const TIMER_COUNT_Y = 13;
@@ -74,4 +96,10 @@ export const RESULT_MINE_COLOR = 'rgb(200,120,0)';
 /** Column starts, `xPos[2..5]` relative to the box. */
 export const RESULT_COLUMNS = [15, 75, 125, 163] as const;
 
-export const EVENT_SPRITES = [BUTTON_SPRITE, EXIT_SPRITE, TIMER_SPRITE];
+export const EVENT_SPRITES = [
+  BUTTON_SPRITE,
+  EXIT_SPRITE,
+  TIMER_SPRITE,
+  DG_BUTTON_SPRITE,
+  DG_LINE_SPRITE,
+];

@@ -25,6 +25,12 @@ import {
   openDuelWatch,
   quitDuelChannel,
 } from './duel';
+import {
+  closeDoppelganger,
+  doppelgangerWindow,
+  enterDoppelganger,
+  openDoppelganger,
+} from './doppelganger';
 import { matchCountdownLine } from './matchNotices';
 
 export type { EventLayer, EventEntryState } from './layer';
@@ -141,10 +147,19 @@ class Events {
     quitDuelChannel();
   }
 
+  /** `NpcWindowResponse` LugardDoppelgangerEntry: Lugard's gate window. */
+  openDoppelganger(): void {
+    openDoppelganger();
+  }
+
+  enterDoppelganger(): void {
+    enterDoppelganger();
+  }
+
   /**
-   * `HideAll` for this layer: every entry window and prompt. The two entry
-   * windows are opened by an NPC (`NpcWindowResponse` from Charon / the
-   * Archangel messenger), so closing one is `SendCloseNpcRequest` as well
+   * `HideAll` for this layer: every entry window and prompt. The NPC entry
+   * windows (`NpcWindowResponse` from Charon, the Archangel messenger or
+   * Lugard) make closing one `SendCloseNpcRequest` as well
    * (`ProcessClosing`, like the shop / quest windows): OpenMU keeps the
    * character in `NpcDialogOpened` until `C1 03 31` arrives, and every later
    * `TalkToNpcRequest` is refused without an answer while it does. The
@@ -155,11 +170,15 @@ class Events {
     // `DuelStatus` only while the dialog is open, so closing it must send
     // `CloseNpcRequest` to stop the loop (`ClosingProcess`, NewUIDuelWatchWindow.cpp).
     const npcWindowOpen =
-      bloodCastleWindow().open || devilSquareWindow().open || duelWatchWindow().open;
+      bloodCastleWindow().open ||
+      devilSquareWindow().open ||
+      duelWatchWindow().open ||
+      doppelgangerWindow().open;
     closeBloodCastle();
     closeDevilSquare();
     closeChaosCastlePrompt();
     closeDuelWatch();
+    closeDoppelganger();
     if (!npcWindowOpen) return;
     if (!Store.isOffline) {
       Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);

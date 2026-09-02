@@ -646,6 +646,15 @@ export const EN_TEXT = {
   'event.monsterKills': 'Monster Kill count: %d',
   'event.playerKills': 'Players Kill count: %d',
   'event.whenHour': 'when %d ',
+  'event.lugard': 'Lugard',
+  'event.dgIntro1': 'Only those in possession of a Mirror of Dimensions',
+  'event.dgIntro2': 'may pass through the Doppelganger gate.',
+  'event.dgIntro3': 'Will you show me your mirror?',
+  'event.dgMirror': 'Mirror of Dimensions',
+  'event.dgEntryTime': 'Entry Time',
+  'event.dgEnterNow': 'You may now enter.',
+  'event.dgEnterAfter': 'Enter after %d minutes',
+  'event.enter': 'Enter',
 
   // ---- duel (DuelMgr.cpp, NewUIDuelWindow.cpp, NewUIDuelWatch*.cpp) -------
   'duel.request': '{name} has challenged you to a duel.',
