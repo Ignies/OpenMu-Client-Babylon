@@ -29,7 +29,7 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import type { TestScene } from '../scenes/testScene';
-import { LiveList, fadeOut, hash, pointSource, type PointSource, type RGB } from './core';
+import { LiveList, fadeOut, hash, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
 
@@ -94,6 +94,13 @@ export interface JointOptions {
   forks?: number;
   /** Tiles above both points. */
   height?: number;
+  /**
+   * `add` (default) is `EnableAlphaBlend`; `subtract` is
+   * `EnableAlphaBlendMinus` (`dst × (1 − src)`, ZzzOpenglUtil.cpp:444) — the
+   * dark ribbons of `RENDER_TYPE_ALPHA_BLEND_MINUS` joints (Evil Spirit's
+   * JOINT_SPIRIT sub0, ZzzEffectJoint.cpp:602).
+   */
+  blend?: EffectBlend;
   /** Ends it early when true (the wearer left, the charge released). */
   until?: () => boolean;
 }
@@ -137,7 +144,7 @@ function park(points: number[]): void {
   }
 }
 
-function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number): GreasedLineMesh {
+function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, blend: EffectBlend = 'add'): GreasedLineMesh {
   const mesh = CreateGreasedLine(
     'fxJoint',
     { points: lines, updatable: true },
@@ -155,11 +162,15 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number): 
   const material = mesh.material as GreasedLineSimpleMaterial | null;
   if (material) {
     material.alpha = 0.99;
-    material.alphaMode = Constants.ALPHA_ADD;
+    material.alphaMode = blend === 'subtract' ? Constants.ALPHA_SUBTRACT : Constants.ALPHA_ADD;
     material.disableDepthWrite = true;
     material.backFaceCulling = false;
   }
-  (scene as TestScene).look?.glow.referenceMeshToUseItsOwnMaterial(mesh);
+  // A subtractive ribbon darkens what is behind it; blooming it would re-add
+  // the light it just took away.
+  if (blend !== 'subtract') {
+    (scene as TestScene).look?.glow.referenceMeshToUseItsOwnMaterial(mesh);
+  }
   return mesh;
 }
 
@@ -188,7 +199,7 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
 
   const lines: number[][] = [];
   for (let i = 0; i < 1 + forks; i++) lines.push(new Array<number>((segments + 1) * 3).fill(0));
-  const mesh = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH);
+  const mesh = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts.blend);
   const material = mesh.material as GreasedLineSimpleMaterial | null;
 
   let t = 0;
@@ -260,7 +271,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
     line[i * 3 + 2] = head.z;
   }
   const lines = [line];
-  const mesh = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH);
+  const mesh = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts.blend);
   const material = mesh.material as GreasedLineSimpleMaterial | null;
 
   let t = 0;

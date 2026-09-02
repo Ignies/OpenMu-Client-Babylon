@@ -316,7 +316,7 @@ const skyBolt = (height: number, width = 0.3, seconds = ticks(20)): Step => (at,
 const streamerFan = (
   n: number,
   step: number,
-  o: { velocity: number; seconds: number; maxTails: number; width: number; colour: RGB; pitch?: number; turn?: number; gravity?: number }
+  o: { velocity: number; seconds: number; maxTails: number; width: number; colour: RGB; pitch?: number; turn?: number; gravity?: number; blend?: JointOptions['blend'] }
 ): Step => (at, c) => {
   const base = entityYaw(c.caster);
   const pitch = o.pitch ?? 0;
@@ -556,8 +556,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   9: {
     area: atCaster(
       seq(
-        streamerFan(4, Math.PI / 2, { velocity: perTick(70), seconds: ticks(49), maxTails: 6, width: 0.8, colour: RGBS.shade, turn: 1.2 }),
-        streamerFan(4, Math.PI / 2, { velocity: perTick(70), seconds: ticks(49), maxTails: 6, width: 0.2, colour: RGBS.dark, turn: 1.2 }),
+        streamerFan(4, Math.PI / 2, { velocity: perTick(70), seconds: ticks(49), maxTails: 6, width: 0.8, colour: RGBS.shade, turn: 1.2, blend: 'subtract' }),
+        streamerFan(4, Math.PI / 2, { velocity: perTick(70), seconds: ticks(49), maxTails: 6, width: 0.2, colour: RGBS.dark, turn: 1.2, blend: 'subtract' }),
         particles({ recipe: SHADE_MOTES, count: 20 })
       ),
       1
