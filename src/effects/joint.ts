@@ -11,9 +11,18 @@
  *    (JOINT_SPIRIT streamers, the FLASH ribbon dropping from the sky, the
  *    five MODEL_SPEARSKILL ribbons that orbit a Soul Barrier).
  *
- * One `GreasedLine` per joint, additive, in the joint's colour, glow-layer
- * referenced so it blooms like the item crackle. Both ends of a bolt may
- * move, and `forks` grows side branches for Lightning.
+ * One `GreasedLine` per joint in the joint's colour, glow-layer referenced so
+ * it blooms like the item crackle. Both ends of a bolt may move, and `forks`
+ * grows side branches for Lightning.
+ *
+ * A joint with a `texture` is drawn the way `RenderJoints` draws its tail
+ * quads: the BITMAP_JOINT_* sheet runs U along the ribbon (per tail slot, not
+ * per world distance — ZzzEffectJoint.cpp:7036), V across it, × the joint's
+ * `Light`. The sheets are black at the edges, so under the additive blend only
+ * the bright filament in the middle shows — an untextured ribbon is a solid
+ * band of colour the full width of the quad strip, which is what every bolt
+ * looked like (issue #4). Untextured stays supported for the plain glow
+ * ribbons (aura's orbit lines).
  *
  * Driven by: `effects.spawn('joint', …)`; `aura.ts` spawns the persistent
  * orbit ribbons through `spawnJoint`. Read by: nobody.
@@ -23,13 +32,16 @@ import {
   Constants,
   CreateGreasedLine,
   GreasedLineMeshMaterialType,
+  Material,
+  StandardMaterial,
+  Texture,
   Vector3,
   type GreasedLineMesh,
-  type GreasedLineSimpleMaterial,
+  type IGreasedLineMaterial,
   type Scene,
 } from '../libs/babylon/exports';
 import type { TestScene } from '../scenes/testScene';
-import { LiveList, fadeOut, hash, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
+import { LiveList, effectTexture, fadeOut, fxNow, hash, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
 
@@ -101,6 +113,16 @@ export interface JointOptions {
    * JOINT_SPIRIT sub0, ZzzEffectJoint.cpp:602).
    */
   blend?: EffectBlend;
+  /**
+   * `Effect/Joint*` sheet run along the ribbon (recipes.ts `TEX.joint*`) —
+   * the original's `BindTexture(o->Type)` per joint. Without it the ribbon is
+   * a flat band of `colour`.
+   */
+  texture?: string;
+  /** U lengths of the sheet along the ribbon (JOINT_THUNDER maps 2). */
+  textureRepeats?: number;
+  /** U scroll in sheet lengths/s (`Light -= Scroll`, thunder only: 1). */
+  textureScroll?: number;
   /** Ends it early when true (the wearer left, the charge released). */
   until?: () => boolean;
 }
@@ -144,45 +166,148 @@ function park(points: number[]): void {
   }
 }
 
-function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, blend: EffectBlend = 'add'): GreasedLineMesh {
+interface Line {
+  mesh: GreasedLineMesh;
+  /** Set the ribbon's fade 0…1 (the original's `Alpha` on the tail quads). */
+  fade(vis: number): void;
+  /** Step the thunder scroll; a no-op without `textureScroll`. */
+  scroll(): void;
+}
+
+/**
+ * The U along the ribbon per point slot — the original's
+ * `(NumTails − j) / (MaxTails − 1)`: the head end at `repeats`, the oldest
+ * tail at 0 (ZzzEffectJoint.cpp:7036). Four floats per point, matching the
+ * two side vertices GreasedLine builds per point; explicit because the
+ * auto-UVs divide by the line's *initial* length, and every joint here is
+ * born with all points on one spot.
+ */
+function rampUVs(lines: number[][], repeats: number): number[] {
+  const uvs: number[] = [];
+  for (const line of lines) {
+    const points = line.length / 3;
+    for (let i = 0; i < points; i++) {
+      const u = (1 - i / (points - 1)) * repeats;
+      uvs.push(u, 0, u, 1);
+    }
+  }
+  return uvs;
+}
+
+function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, opts: JointOptions): Line {
+  const blend = opts.blend ?? 'add';
+  const sheetFile = opts.texture;
+  const textured = !!sheetFile;
+  const repeats = opts.textureRepeats ?? 1;
+  const alphaMode = blend === 'subtract' ? Constants.ALPHA_SUBTRACT : Constants.ALPHA_ADD;
   const mesh = CreateGreasedLine(
     'fxJoint',
-    { points: lines, updatable: true },
+    { points: lines, updatable: true, ...(textured ? { uvs: rampUVs(lines, repeats) } : {}) },
     {
-      color: new Color3(colour[0], colour[1], colour[2]),
+      // With a texture the colour rides in `emissiveColor` below — the plugin's
+      // own colour would *replace* the sampled texel (COLOR_MODE_SET).
+      ...(textured ? {} : { color: new Color3(colour[0], colour[1], colour[2]) }),
       width,
       sizeAttenuation: false,
-      materialType: GreasedLineMeshMaterialType.MATERIAL_TYPE_SIMPLE,
+      materialType: textured
+        ? GreasedLineMeshMaterialType.MATERIAL_TYPE_STANDARD
+        : GreasedLineMeshMaterialType.MATERIAL_TYPE_SIMPLE,
     },
     scene
   ) as GreasedLineMesh;
   mesh.isPickable = false;
   mesh.doNotSyncBoundingInfo = true;
   mesh.alwaysSelectAsActiveMesh = true;
-  const material = mesh.material as GreasedLineSimpleMaterial | null;
-  if (material) {
-    material.alpha = 0.99;
-    material.alphaMode = blend === 'subtract' ? Constants.ALPHA_SUBTRACT : Constants.ALPHA_ADD;
-    material.disableDepthWrite = true;
-    material.backFaceCulling = false;
+
+  // The length-cutoff uniform lives on the greased-line side of either
+  // material type; it is a reveal, not a fade, so it only gates load state.
+  const glMat = mesh.greasedLineMaterial as IGreasedLineMaterial | undefined;
+  let sheet: Texture | null = null;
+  let fade: (vis: number) => void;
+
+  if (sheetFile) {
+    // The sheet × `Light` under the joint's blend — the same Standard set-up
+    // as core.ts `additiveMaterial` (texel × emissive tint, lighting off).
+    const std = mesh.material as StandardMaterial;
+    std.diffuseColor.set(0, 0, 0);
+    std.specularColor.set(0, 0, 0);
+    std.ambientColor.set(0, 0, 0);
+    std.emissiveColor.set(colour[0], colour[1], colour[2]);
+    std.disableLighting = true;
+    std.alphaMode = alphaMode;
+    std.transparencyMode = Material.MATERIAL_ALPHABLEND;
+    std.backFaceCulling = false;
+    std.disableDepthWrite = true;
+    std.fogEnabled = false;
+    // Hold the line unseen until the sheet is in — a texture-less Standard
+    // ribbon is exactly the solid band this is here to remove.
+    if (glMat) glMat.visibility = -1;
+    void effectTexture(scene, sheetFile).then(tex => {
+      if (mesh.isDisposed()) return;
+      // Thunder scrolls and tiles along U (loaded GL_REPEAT in the original);
+      // the shared texture's wrap only matters to other joints of the same
+      // sheet, which want the same thing.
+      if (repeats !== 1 || opts.textureScroll) tex.wrapU = Texture.WRAP_ADDRESSMODE;
+      sheet = tex;
+      std.diffuseTexture = tex;
+      if (glMat) glMat.visibility = 1;
+    });
+    // A real brightness fade: the emissive tint toward black fades an
+    // additive ribbon out and a subtractive one to no-op alike.
+    fade = vis => std.emissiveColor.set(colour[0] * vis, colour[1] * vis, colour[2] * vis);
+  } else {
+    const std = mesh.material;
+    if (std) {
+      std.alpha = 0.99;
+      std.alphaMode = alphaMode;
+      std.disableDepthWrite = true;
+      std.backFaceCulling = false;
+    }
+    // The simple material has no per-fragment alpha; the length cutoff is
+    // the closest thing to the original's die-out.
+    fade = vis => {
+      if (glMat) glMat.visibility = vis;
+    };
   }
+
   // A subtractive ribbon darkens what is behind it; blooming it would re-add
   // the light it just took away.
   if (blend !== 'subtract') {
     (scene as TestScene).look?.glow.referenceMeshToUseItsOwnMaterial(mesh);
   }
-  return mesh;
+
+  const scrollRate = opts.textureScroll ?? 0;
+  return {
+    mesh,
+    fade,
+    scroll:
+      scrollRate > 0
+        ? () => {
+            // The original's global `WorldTime % 1000 * 0.001` — every thunder
+            // joint writes the same value, so sharing the texture is safe.
+            if (sheet) sheet.uOffset = -((fxNow() * scrollRate) % 1);
+          }
+        : () => {},
+  };
 }
 
-function disposeLine(scene: Scene, mesh: GreasedLineMesh, lines: number[][]): void {
+function disposeLine(scene: Scene, line: Line, lines: number[][]): void {
+  const mesh = line.mesh;
   for (const l of lines) park(l);
   (scene as TestScene).look?.glow.unReferenceMeshFromUsingItsOwnMaterial(mesh);
-  // Never dispose the shared empty-colours texture: itemCrackle.ts documents the trap.
-  const m = mesh.material as unknown as { _colorsTexture?: unknown; dispose(): void } | null;
-  if (m) {
-    m._colorsTexture = null;
-    m.dispose();
+  // Never dispose the shared empty-colours texture: itemCrackle.ts documents
+  // the trap, and the plugin variant's dispose() takes `colorsTexture` down
+  // with it too.
+  const gl = mesh.greasedLineMaterial as unknown as
+    | { colorsTexture?: unknown; _colorsTexture?: unknown }
+    | undefined;
+  if (gl) {
+    gl.colorsTexture = null;
+    gl._colorsTexture = null;
   }
+  // `dispose()` without flags leaves textures alone — the sheet is
+  // loadEffectTexture's shared cache.
+  mesh.material?.dispose();
   mesh.dispose();
 }
 
@@ -199,8 +324,8 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
 
   const lines: number[][] = [];
   for (let i = 0; i < 1 + forks; i++) lines.push(new Array<number>((segments + 1) * 3).fill(0));
-  const mesh = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts.blend);
-  const material = mesh.material as GreasedLineSimpleMaterial | null;
+  const line = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const mesh = line.mesh;
 
   let t = 0;
   let sinceRoll = REROLL_SECONDS;
@@ -236,11 +361,12 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
         }
         mesh.setPoints(lines);
       }
-      if (material) material.visibility = fadeOut(prog, 0.3) * (0.6 + 0.4 * hash(t * 97));
+      line.scroll();
+      line.fade(fadeOut(prog, 0.3) * (0.6 + 0.4 * hash(t * 97)));
       return true;
     },
     release() {
-      disposeLine(scene, mesh, lines);
+      disposeLine(scene, line, lines);
     },
   });
 }
@@ -271,8 +397,8 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
     line[i * 3 + 2] = head.z;
   }
   const lines = [line];
-  const mesh = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts.blend);
-  const material = mesh.material as GreasedLineSimpleMaterial | null;
+  const ribbon = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const mesh = ribbon.mesh;
 
   let t = 0;
   let sinceSample = 0;
@@ -303,11 +429,12 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
       line[1] = head.y;
       line[2] = head.z;
       mesh.setPoints(lines);
-      if (material) material.visibility = fadeOut(prog, 0.3);
+      ribbon.scroll();
+      ribbon.fade(fadeOut(prog, 0.3));
       return true;
     },
     release() {
-      disposeLine(scene, mesh, lines);
+      disposeLine(scene, ribbon, lines);
     },
   });
 }

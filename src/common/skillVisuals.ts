@@ -310,13 +310,13 @@ const skyBolt = (height: number, width = 0.3, seconds = ticks(20)): Step => (at,
   top.y += height;
   top.x += (Math.random() - 0.5) * 2;
   top.z += (Math.random() - 0.5) * 2;
-  effects.spawn('joint', c.scene, top, { to: at, colour: RGBS.arc, seconds, width, forks: 2, jitter: 0.1 });
+  effects.spawn('joint', c.scene, top, { to: at, colour: RGBS.arc, seconds, width, forks: 2, jitter: 0.1, texture: TEX.jointThunder, textureRepeats: 2, textureScroll: 1 });
 };
 /** `n` streamers fanning around the up axis, `i*step` radians apart, from `at`. */
 const streamerFan = (
   n: number,
   step: number,
-  o: { velocity: number; seconds: number; maxTails: number; width: number; colour: RGB; pitch?: number; turn?: number; gravity?: number; blend?: JointOptions['blend'] }
+  o: { velocity: number; seconds: number; maxTails: number; width: number; colour: RGB; pitch?: number; turn?: number; gravity?: number; blend?: JointOptions['blend']; texture?: string }
 ): Step => (at, c) => {
   const base = entityYaw(c.caster);
   const pitch = o.pitch ?? 0;
@@ -333,7 +333,7 @@ const streamerFan = (
  */
 const spiritBurst = (colour: RGB): Step =>
   seq(
-    streamerFan(18, (Math.PI * 2) / 18, { velocity: perTick(50), seconds: ticks(20), maxTails: 3, width: 0.6, colour, pitch: (10 * Math.PI) / 180 }),
+    streamerFan(18, (Math.PI * 2) / 18, { velocity: perTick(50), seconds: ticks(20), maxTails: 3, width: 0.6, colour, pitch: (10 * Math.PI) / 180, texture: TEX.jointSpirit }),
     magicGround(colour, ticks(40), 3)
   );
 
@@ -430,7 +430,7 @@ const addCritical: Step = (_at, c) => {
 const flashDrop = (colour: RGB): Step => (at, c) => {
   const top = at.clone();
   top.y += 12;
-  effects.spawn('joint', c.scene, top, { heading: new Vector3(0, -1, 0), velocity: perTick(70), seconds: ticks(40), maxTails: 10, width: 1.2, colour });
+  effects.spawn('joint', c.scene, top, { heading: new Vector3(0, -1, 0), velocity: perTick(70), seconds: ticks(40), maxTails: 10, width: 1.2, colour, texture: TEX.flash });
   after(0.6, seq(flash(TEX.flash, colour, 1.4, 0.4), particles({ recipe: SOUL_MOTES, count: 16, height: 0.4 })))(at, c);
 };
 
@@ -448,7 +448,7 @@ function spiralRibbons(n: number, colour: RGB, width: number, tails: number, sec
         const a = phase + t * 4;
         return out.set(at.x + Math.cos(a) * cm(80), at.y + 0.2 + t * 1.2, at.z + Math.sin(a) * cm(80));
       };
-      effects.spawn('joint', c.scene, at, { head, maxTails: tails, width, colour, seconds });
+      effects.spawn('joint', c.scene, at, { head, maxTails: tails, width, colour, seconds, texture: TEX.jointEnergy });
     }
   };
 }
@@ -499,7 +499,7 @@ const novaCharge: Step = (_at, c) => {
       const a = Math.random() * Math.PI * 2;
       const e = Math.random() * 0.8;
       const from = new Vector3(centre.x + Math.cos(a) * 5, centre.y + e * 3, centre.z + Math.sin(a) * 5);
-      effects.spawn('joint', c.scene, from, { to, colour: [0.3, 0.3, 1], seconds: ticks(17), width: 0.1, segments: 6, jitter: 0.08, until: done });
+      effects.spawn('joint', c.scene, from, { to, colour: [0.3, 0.3, 1], seconds: ticks(17), width: 0.1, segments: 6, jitter: 0.08, until: done, texture: TEX.jointEnergy });
     }
     delay(ticks(17), force);
   };
@@ -525,8 +525,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     impact: (at, c) => {
       const from = weaponBone(c.caster);
       const to = c.target ? followEntity(c.target, IMPACT_HEIGHT) : at;
-      effects.spawn('joint', c.scene, at, { from, to, colour: RGBS.arc, seconds: ticks(10), width: cm(50), segments: 24, forks: 2, jitter: 0.1 });
-      effects.spawn('joint', c.scene, at, { from, to, colour: RGBS.white, seconds: ticks(10), width: cm(10), segments: 24, jitter: 0.12 });
+      effects.spawn('joint', c.scene, at, { from, to, colour: RGBS.arc, seconds: ticks(10), width: cm(50), segments: 24, forks: 2, jitter: 0.1, texture: TEX.jointThunder, textureRepeats: 2, textureScroll: 1 });
+      effects.spawn('joint', c.scene, at, { from, to, colour: RGBS.white, seconds: ticks(10), width: cm(10), segments: 24, jitter: 0.12, texture: TEX.jointThunder, textureRepeats: 2, textureScroll: 1 });
       effects.spawn('particles', c.scene, at, { recipe: ENERGY_CHIPS, rate: 25, seconds: ticks(10), follow: from });
       arcHit(at, c);
     },
@@ -556,8 +556,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   9: {
     area: atCaster(
       seq(
-        streamerFan(4, Math.PI / 2, { velocity: perTick(70), seconds: ticks(49), maxTails: 6, width: 0.8, colour: RGBS.shade, turn: 1.2, blend: 'subtract' }),
-        streamerFan(4, Math.PI / 2, { velocity: perTick(70), seconds: ticks(49), maxTails: 6, width: 0.2, colour: RGBS.dark, turn: 1.2, blend: 'subtract' }),
+        streamerFan(4, Math.PI / 2, { velocity: perTick(70), seconds: ticks(49), maxTails: 6, width: 0.8, colour: RGBS.shade, turn: 1.2, blend: 'subtract', texture: TEX.jointSpirit }),
+        streamerFan(4, Math.PI / 2, { velocity: perTick(70), seconds: ticks(49), maxTails: 6, width: 0.2, colour: RGBS.dark, turn: 1.2, blend: 'subtract', texture: TEX.jointSpirit }),
         particles({ recipe: SHADE_MOTES, count: 20 })
       ),
       1
@@ -591,8 +591,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       from.x += dir.x * 0.9 - dir.z * 0.2;
       from.z += dir.z * 0.9 + dir.x * 0.2;
       const to = new Vector3(from.x + dir.x * 6, from.y, from.z + dir.z * 6);
-      effects.spawn('joint', c.scene, from, { to, colour: [0.5, 0.7, 1], seconds: ticks(20), width: 1.6, jitter: 0, segments: 4 });
-      effects.spawn('joint', c.scene, from, { to, colour: RGBS.white, seconds: ticks(20), width: 0.4, jitter: 0.01, segments: 8 });
+      effects.spawn('joint', c.scene, from, { to, colour: [0.5, 0.7, 1], seconds: ticks(20), width: 1.6, jitter: 0, segments: 4, texture: TEX.jointLaser });
+      effects.spawn('joint', c.scene, from, { to, colour: RGBS.white, seconds: ticks(20), width: 0.4, jitter: 0.01, segments: 8, texture: TEX.jointLaser });
     },
   },
   // 13 Cometfall @SkillXY: 2× MODEL_SKILL_BLAST LT 30, Scale 1.0–1.7, Pos += (200–300, ±50, 300–800),
@@ -646,7 +646,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
           const a = Math.random() * Math.PI * 2;
           const e = Math.random() * Math.PI - Math.PI / 2;
           const from = new Vector3(p.x + Math.cos(a) * Math.cos(e) * 2, p.y + Math.sin(e) * 2 + 0.5, p.z + Math.sin(a) * Math.cos(e) * 2);
-          effects.spawn('joint', cc.scene, from, { to, colour: RGBS.holy, seconds: ticks(12), width: cm(5), segments: 2, jitter: 0.05 });
+          effects.spawn('joint', cc.scene, from, { to, colour: RGBS.holy, seconds: ticks(12), width: cm(5), segments: 2, jitter: 0.05, texture: TEX.jointEnergy });
         }
       })(at, c);
     },
@@ -685,7 +685,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     impact: atCaster(
       seq(
         model({ model: MODEL.circle, seconds: ticks(45), colour: [0.3, 0.3, 1], flat: true, scale: 1, grow: 1.5 }),
-        streamerFan(24, (Math.PI * 2) / 24, { velocity: perTick(70), seconds: ticks(20), maxTails: 5, width: 0.6, colour: RGBS.soul }),
+        streamerFan(24, (Math.PI * 2) / 24, { velocity: perTick(70), seconds: ticks(20), maxTails: 5, width: 0.6, colour: RGBS.soul, texture: TEX.jointSpirit }),
         particles({ recipe: NOVA_MOTES, count: 40, height: 0.8 })
       ),
       0.05
@@ -926,8 +926,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   65: {
     area: atCaster(offset(seq(
       sprite({ texture: TEX.flareForce, colour: RGBS.arc, size: 2.5, seconds: ticks(10), grow: 2, growFrom: 0.3 }),
-      streamerFan(1, 0, { velocity: perTick(80), seconds: ticks(12), maxTails: 8, width: 2.5, colour: RGBS.arc }),
-      streamerFan(4, Math.PI / 6, { velocity: perTick(80), seconds: ticks(12), maxTails: 8, width: 1, colour: RGBS.spark, pitch: 0.15 }),
+      streamerFan(1, 0, { velocity: perTick(80), seconds: ticks(12), maxTails: 8, width: 2.5, colour: RGBS.arc, texture: TEX.flareForce }),
+      streamerFan(4, Math.PI / 6, { velocity: perTick(80), seconds: ticks(12), maxTails: 8, width: 1, colour: RGBS.spark, pitch: 0.15, texture: TEX.flareForce }),
       particles({ recipe: ARC_MOTES, count: 24 })
     ), 0.9, 0.5), 0.5),
   },
