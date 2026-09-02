@@ -3,9 +3,10 @@
  * `cameraControl` option. Copy `_template.ts` to add a map override.
  *
  * Ported from CameraUtility.cpp / SceneCommon.cpp: Ctrl+wheel steps the
- * discrete distance levels, Insert/Delete rotate the heading (Home is taken
- * by the MU Helper hot key, so the heading resets on warp instead), pitch
- * -48.5, vertical FOV 30. `layers.ts` holds the per-map overrides.
+ * discrete distance levels, Insert/Delete or Ctrl+middle-button drag rotate
+ * the heading (Home is taken by the MU Helper hot key, so the heading resets
+ * on warp instead), pitch -48.5, vertical FOV 30. `layers.ts` holds the
+ * per-map overrides.
  *
  * Single writer of alpha/beta/radius/fov while the option is on and the
  * game is in the World state; `cameraFollowSystem` is the only caller.
@@ -29,6 +30,7 @@ import {
   MAX_CAMERA_LEVEL,
   MU_SCALE,
   REFERENCE_FPS,
+  ROTATE_DRAG_DEG_PER_PX,
   ROTATE_STEP_DEG,
 } from './recipes';
 
@@ -99,6 +101,37 @@ export function installCameraControl(
     },
     { passive: true }
   );
+
+  // Ctrl + middle-button drag rotates the heading. Ctrl is only needed to
+  // start the drag; pointer capture keeps it alive off-canvas until release.
+  let dragPointer: number | null = null;
+  let dragLastX = 0;
+
+  if (canvas) {
+    canvas.addEventListener('pointerdown', ev => {
+      if (ev.button !== 1 || !ev.ctrlKey) return;
+      if (!GameOptions.cameraControl || !isActive()) return;
+
+      dragPointer = ev.pointerId;
+      dragLastX = ev.clientX;
+      canvas.setPointerCapture(ev.pointerId);
+      // Middle-button autoscroll would swallow the drag.
+      ev.preventDefault();
+    });
+
+    canvas.addEventListener('pointermove', ev => {
+      if (ev.pointerId !== dragPointer) return;
+
+      headingDeg -= (ev.clientX - dragLastX) * ROTATE_DRAG_DEG_PER_PX;
+      dragLastX = ev.clientX;
+    });
+
+    const endDrag = (ev: PointerEvent) => {
+      if (ev.pointerId === dragPointer) dragPointer = null;
+    };
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+  }
 
   // World change resets the level (WSclient.cpp:600); heading and distance
   // snap with it so the new map opens on the default frame.

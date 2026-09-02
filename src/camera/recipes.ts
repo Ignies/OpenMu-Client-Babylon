@@ -34,5 +34,12 @@ export const DEFAULT_HEADING_DEG = -45;
 /** Insert/Delete rotate step, degrees per reference frame while held. */
 export const ROTATE_STEP_DEG = 15;
 
+/**
+ * Ctrl + middle-button drag rotate, degrees of heading per pixel dragged.
+ * Not in the original client (it had no mouse rotate); sign matches
+ * Babylon's default orbit feel - drag right, camera orbits clockwise.
+ */
+export const ROTATE_DRAG_DEG_PER_PX = 0.25;
+
 /** Camera sits `CameraDistance - 150` above its base height. */
 export const HEIGHT_BACKOFF = 150;
