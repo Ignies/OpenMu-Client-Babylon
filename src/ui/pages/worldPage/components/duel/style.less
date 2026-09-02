@@ -1,0 +1,154 @@
+@import (reference) '../../../../components/muText/style.less';
+
+// The duel UI: the challenge prompt, the duelist score panel, the Titus
+// channel window, the spectator bar + name list and the winner box.
+// Coordinates live in layout.ts.
+
+.duel-prompt-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 600; // WINDOW_Z_MODAL, like the social prompts
+  .mu-font();
+  user-select: none;
+}
+
+.duel-prompt {
+  position: absolute;
+  left: 50%;
+  top: 25%;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  flex: none;
+
+  .duel-prompt-text {
+    position: absolute;
+    left: 25px;
+    right: 25px;
+    top: 32px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    font-size: 11px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}
+
+// `CNewUIDuelWindow`: two name + score lines over the figure ground.
+.duel-score {
+  position: absolute;
+  transform-origin: top left;
+  pointer-events: none;
+
+  .duel-score-line {
+    position: absolute;
+    height: 14px;
+    line-height: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}
+
+// `CNewUIDuelWatchWindow`: title, four channel blocks, a join button each.
+.duel-watch {
+  font-size: 11px;
+
+  .duel-watch-title {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    color: #dcdcdc;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .duel-watch-line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .duel-watch-button {
+    position: absolute;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+}
+
+// `CNewUIDuelWatchMainFrameWindow`: the bottom bar. Gauges are plain divs;
+// the width transition stands in for the original's per-frame glide.
+.duel-bar {
+  position: absolute;
+  transform-origin: top left;
+  pointer-events: none;
+  font-size: 11px;
+
+  .duel-bar-back {
+    position: absolute;
+    top: 0;
+  }
+
+  .duel-bar-name {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+
+  .duel-bar-gauge {
+    position: absolute;
+    transition: width 0.3s linear, left 0.3s linear;
+  }
+
+  .duel-bar-exit {
+    position: absolute;
+    pointer-events: auto;
+  }
+}
+
+// `CNewUIDuelWatchUserListWindow`: black rows growing upward.
+.duel-spectators {
+  position: absolute;
+  transform-origin: top left;
+  pointer-events: none;
+
+  .duel-spectator-row {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 10px;
+  }
+}
+
+// `CDuelResultMsgBox`: one line over a dark box, self-clearing.
+.duel-result {
+  position: absolute;
+  transform-origin: top left;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 8px 12px;
+  pointer-events: none;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+}
