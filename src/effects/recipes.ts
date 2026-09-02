@@ -362,7 +362,12 @@ export const FIRE_PUFF: ParticleRecipe = {
   endScale: 1.6,
 };
 
-/** A dark smoke roll (alpha blended) behind a stone or under a flame. */
+/**
+ * A smoke roll behind a stone or under a flame. Additive like the original:
+ * RenderParticles forces EnableAlphaBlend for every JPEG (Components == 3)
+ * sheet (ZzzEffectParticle.cpp:8919), and smoke01 has no alpha channel -
+ * alpha-blending it drew each particle as an opaque black square.
+ */
 export const SMOKE: ParticleRecipe = {
   texture: TEX.smoke,
   colour: [0.25, 0.22, 0.2],
@@ -375,7 +380,7 @@ export const SMOKE: ParticleRecipe = {
   dir2: [0.3, 1, 0.3],
   endScale: 2.2,
   spin: 0.8,
-  blend: 'alpha',
+  blend: 'add',
 };
 
 /** Ice shards / snow motes: BITMAP_FLARE tinted, slow, falling. */
@@ -528,7 +533,7 @@ export const STEEL_GLINTS: ParticleRecipe = {
   spin: 8,
 };
 
-/** Dust kicked up by an earth skill (alpha). */
+/** Dust kicked up by an earth skill. Additive - same smoke01 rule as SMOKE. */
 export const DUST: ParticleRecipe = {
   texture: TEX.smoke,
   colour: [0.5, 0.42, 0.3],
@@ -540,7 +545,7 @@ export const DUST: ParticleRecipe = {
   dir1: [-1, 0.3, -1],
   dir2: [1, 0.8, 1],
   endScale: 2.5,
-  blend: 'alpha',
+  blend: 'add',
 };
 
 /** Wind streaks for cyclone/twister skills. */
