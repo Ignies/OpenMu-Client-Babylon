@@ -31,6 +31,7 @@ import {
 } from './components/guild';
 import { QuestWindows } from './components/quests';
 import { FriendWindow } from './components/friends';
+import { ChatRoomWindow } from './components/chatRoom';
 import { SocialPrompts } from './components/socialPrompts';
 import { Minimap } from './components/minimap';
 import { MasterSkillsWindow } from '@version/ui';
@@ -69,6 +70,7 @@ const HUD = observer(() => {
       <MasterSkillsWindow />
       <QuestWindows />
       <FriendWindow />
+      <ChatRoomWindow />
       <SocialPrompts />
       <TradePrompt />
       <EconomyPrompts />
