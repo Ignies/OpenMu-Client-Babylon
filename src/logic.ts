@@ -2942,6 +2942,10 @@ EventBus.on('NpcWindowResponse', packet => {
       Store.dropNpcTalk();
       events.openBloodCastle();
       break;
+    case NpcWindowResponseNpcWindowEnum.DoorkeeperTitusDuelWatch:
+      Store.dropNpcTalk();
+      events.openDuelWatch();
+      break;
     default:
       // A legacy quest NPC (Sebina, Marlon, Apostle Devin…): the dialog is
       // client-side, from Quest_eng.bmd (quests/legacyQuests.ts).

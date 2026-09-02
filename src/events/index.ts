@@ -17,6 +17,14 @@ import {
   openDevilSquare,
 } from './devilSquare';
 import { closeChaosCastlePrompt, enterChaosCastle } from './chaosCastle';
+import {
+  answerDuelRequest,
+  closeDuelWatch,
+  duelWatchWindow,
+  joinDuelChannel,
+  openDuelWatch,
+  quitDuelChannel,
+} from './duel';
 import { matchCountdownLine } from './matchNotices';
 
 export type { EventLayer, EventEntryState } from './layer';
@@ -113,6 +121,26 @@ class Events {
     enterChaosCastle();
   }
 
+  /** `NpcWindowResponse` DoorkeeperTitusDuelWatch: the channel window. */
+  openDuelWatch(): void {
+    openDuelWatch();
+  }
+
+  /** The duel challenge prompt's OK / Cancel. */
+  answerDuelRequest(accepted: boolean): void {
+    answerDuelRequest(accepted);
+  }
+
+  /** A watch-window join button. */
+  joinDuelChannel(channel: number): void {
+    joinDuelChannel(channel);
+  }
+
+  /** The spectator bar's exit. */
+  quitDuelChannel(): void {
+    quitDuelChannel();
+  }
+
   /**
    * `HideAll` for this layer: every entry window and prompt. The two entry
    * windows are opened by an NPC (`NpcWindowResponse` from Charon / the
@@ -123,10 +151,15 @@ class Events {
    * Chaos Castle prompt comes from a ticket, not an NPC.
    */
   closeAll(): void {
-    const npcWindowOpen = bloodCastleWindow().open || devilSquareWindow().open;
+    // The Titus duel-watch window is an NPC window too: OpenMU pushes
+    // `DuelStatus` only while the dialog is open, so closing it must send
+    // `CloseNpcRequest` to stop the loop (`ClosingProcess`, NewUIDuelWatchWindow.cpp).
+    const npcWindowOpen =
+      bloodCastleWindow().open || devilSquareWindow().open || duelWatchWindow().open;
     closeBloodCastle();
     closeDevilSquare();
     closeChaosCastlePrompt();
+    closeDuelWatch();
     if (!npcWindowOpen) return;
     if (!Store.isOffline) {
       Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);

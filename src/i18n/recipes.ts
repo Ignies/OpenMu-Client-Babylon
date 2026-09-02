@@ -647,6 +647,24 @@ export const EN_TEXT = {
   'event.playerKills': 'Players Kill count: %d',
   'event.whenHour': 'when %d ',
 
+  // ---- duel (DuelMgr.cpp, NewUIDuelWindow.cpp, NewUIDuelWatch*.cpp) -------
+  'duel.request': '{name} has challenged you to a duel.',
+  'duel.started': 'The duel against {name} has started.',
+  'duel.refused': '{name} has refused the duel.',
+  'duel.failedLevel': 'The duel needs level 30 on both sides.',
+  'duel.failedZen': 'Not enough Zen for the duel.',
+  'duel.failedRoom': 'No free duel room. Try again later.',
+  'duel.failedError': 'The duel could not be started.',
+  'duel.ended': 'The duel has ended.',
+  'duel.wins': '{winner} has won the duel against {loser}.',
+  'duel.score': 'Score',
+  'duel.watchTitle': 'Duel Status',
+  'duel.channel': 'Duel Channel {number}',
+  'duel.emptyChannel': 'Empty channel',
+  'duel.join': 'Watch',
+  'duel.vs': 'VS',
+  'duel.leaveWatch': 'Leave the duel channel',
+
   // ---- item tooltip ------------------------------------------------------
   'item.thisItem': 'this item',
   'item.excellentPrefix': 'Excellent {name}',

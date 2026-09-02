@@ -3,6 +3,7 @@ import { matchNoticesLayer } from './matchNotices';
 import { bloodCastleLayer } from './bloodCastle';
 import { devilSquareLayer } from './devilSquare';
 import { chaosCastleLayer } from './chaosCastle';
+import { duelLayer } from './duel';
 
 /**
  * THE list. Every event in the game is one entry here, and adding an event
@@ -17,4 +18,5 @@ export const EVENT_LAYERS: readonly EventLayer[] = [
   bloodCastleLayer,
   devilSquareLayer,
   chaosCastleLayer,
+  duelLayer,
 ];
