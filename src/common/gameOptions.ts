@@ -51,6 +51,11 @@ export type GameOptions = {
   sceneDarkening: boolean;
   saturation: number;
   dynamicLights: boolean;
+  /**
+   * The day/night cycle on outdoor maps (scenes/dayCycle.ts). Off is a
+   * permanent noon — the authored per-map look, bit for bit.
+   */
+  dayNightCycle: boolean;
   /** 0 Classic (blob shadows) · 1 Enhanced (CSM + SSAO + height fog) · 2 Ultra. */
   lightingQuality: number;
   /**
@@ -128,6 +133,7 @@ const DEFAULTS: GameOptions = {
   sceneDarkening: true,
   saturation: 0,
   dynamicLights: true,
+  dayNightCycle: true,
   lightingQuality: 0,
   materialQuality: 0,
   materialDetail: 6,

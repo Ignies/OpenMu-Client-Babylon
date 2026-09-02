@@ -118,6 +118,19 @@ export function csmActive(): boolean {
  */
 export const DYNAMIC_LIGHT_GAIN = 1;
 
+/**
+ * The day/night cycle's multiplier on the dynamic layer: 1 at noon, higher
+ * after dark, so torches and candles carry the scene at night without any
+ * recipe changing (day_night architecture, seam 4). Pushed by `sceneLook`'s
+ * cycle tick — the one consumer of the clock — rather than read from the
+ * cycle here, because the per-map damping lives with the mood writer.
+ */
+let cycleGain = 1;
+
+export function setCycleLightGain(gain: number): void {
+  cycleGain = Number.isFinite(gain) && gain > 0 ? gain : 1;
+}
+
 export function dynamicLightGain(): number {
-  return DYNAMIC_LIGHT_GAIN;
+  return DYNAMIC_LIGHT_GAIN * cycleGain;
 }

@@ -155,6 +155,7 @@ export const thaiLayer: LanguageLayer = {
     'options.effectLevel': 'จำกัด +เอฟเฟกต์',
     'options.shadows': 'เงาของวัตถุ',
     'options.dynamicLights': 'แสงแบบไดนามิก',
+    'options.dayNightCycle': 'วัฏจักรกลางวัน/กลางคืน',
     'options.postProcessing': 'โพสต์โปรเซสซิ่ง',
     'options.toneMapping': 'โทนแมปแบบฟิล์ม',
     'options.ambientParticles': 'อนุภาคบรรยากาศ',

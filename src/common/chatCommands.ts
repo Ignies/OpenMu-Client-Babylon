@@ -55,6 +55,9 @@ export const CHAT_COMMANDS: readonly ChatCommand[] = [
   { name: '/whisper', help: 'Whisper to the player under the cursor', local: 'whisper' },
   { name: '/addfriend', help: 'Add the player under the cursor to your friend list', local: 'addFriend' },
   { name: '/follow', help: 'Walk after the player under the cursor', local: 'follow' },
+  // Handled in social.ts (it drives scenes/dayCycle.ts, which the completion
+  // data must not import) - a debug freeze, never sent to the server.
+  { name: '/time', usage: '<dawn|noon|dusk|night|0..1|off>', help: 'Freeze or release the time of day (this client only)' },
   // ---- server (OpenMU) ---------------------------------------------------
   { name: '/post', usage: '<message>', help: 'Shout to everyone on the server' },
   { name: '/help', usage: '[command]', help: 'Server help for a command' },
