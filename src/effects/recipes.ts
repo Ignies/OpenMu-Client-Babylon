@@ -97,6 +97,8 @@ export const TEX = {
   shiny5: 'Effect/shiny05.OZJ',
   /** BITMAP_DAMAGE_01_MONO: LightningShock's ground scar. */
   damageMono: 'Effect/damage01mono.OZJ',
+  /** BITMAP_DAMAGE2: Dark Side's hit burst. */
+  damage2: 'Effect/Damage2.OZJ',
   /** BITMAP_TWLIGHT (Skill/twlighthik01.jpg): Recover's halo. */
   twilight: 'Skill/twlighthik01.OZJ',
   /** BITMAP_ORORA (hikorora.jpg). */
@@ -210,6 +212,8 @@ export const MODEL = {
   elShieldRing2: 'Effect/elshildring2.glb',
   /** MODEL_KNIGHT_PLANCRACK_A: Lightning Shock's ground cracks. */
   knightPlanCrack: 'Effect/knight_plancrack_a.glb',
+  /** MODEL_KNIGHT_PLANCRACK_B: Strike of Destruction's crack trail. */
+  knightPlanCrack2: 'Effect/knight_plancrack_b.glb',
   waveForce: 'Skill/WaveForce.glb',
   swordForce: 'Skill/SwordForce.glb',
   piercing: 'Skill/Piercing.glb',
