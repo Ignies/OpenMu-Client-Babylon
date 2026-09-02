@@ -11,7 +11,7 @@ import {
 } from './terrainOverlay';
 import type { TileTextureArray } from './tileTextureArray';
 import { getTerrainLightTexture } from '../../common/terrainDynamicLight';
-import { UNIFIED_LIGHT_MODEL } from '../../common/lightModel';
+import { linearBufferActive } from '../../common/lightModel';
 import {
   terrainBakeTint,
   terrainInteriorAmbient,
@@ -361,12 +361,7 @@ ${terrainOverlayReflectGlsl(overlays, 'f', 'sunShadow')}
       terrainBakeTint[1],
       terrainBakeTint[2]
     );
-    effect.setFloat(
-      'linearOut',
-      UNIFIED_LIGHT_MODEL && scene.imageProcessingConfiguration.applyByPostProcess
-        ? 1
-        : 0
-    );
+    effect.setFloat('linearOut', linearBufferActive(scene) ? 1 : 0);
     effect.setFloat3(
       'interiorAmbient',
       terrainInteriorAmbient[0],

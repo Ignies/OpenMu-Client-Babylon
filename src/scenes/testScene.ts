@@ -2,15 +2,14 @@ import { ArcRotateCamera, HighlightLayer } from '../libs/babylon/exports';
 import {
   Color3,
   Color4,
-  DirectionalLight,
   Engine,
-  HemisphericLight,
   Scene,
   Vector3,
 } from '../libs/babylon/exports';
 import { addInspectorForScene } from '../libs/babylon/utils';
 import { applySceneLook, type SceneLook } from './sceneLook';
 import { initPointLightPool } from '../common/pointLightPool';
+import { createKeyRig } from '../lighting/keyRig';
 
 export class TestScene extends Scene {
   defaultCamera: ArcRotateCamera;
@@ -75,15 +74,7 @@ this.fogEnabled = false;
 
     addInspectorForScene(this);
 
-    const sky = new HemisphericLight('skyLight', new Vector3(0, 1, 0), this);
-    sky.specular = Color3.Black();
-
-    const sun = new DirectionalLight(
-      'sunLight',
-      new Vector3(0.4, -1, 0.6),
-      this
-    );
-    sun.specular = Color3.Black();
+    createKeyRig(this);
 
     initPointLightPool(this);
 

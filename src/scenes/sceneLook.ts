@@ -5,11 +5,14 @@ import {
   ImageProcessingConfiguration,
   type AbstractMesh,
   type ArcRotateCamera,
-  type HemisphericLight,
-  type DirectionalLight,
   type Scene,
   type Texture,
 } from '../libs/babylon/exports';
+import {
+  setKey,
+  setSunDirection,
+  syncSpecular,
+} from '../lighting/keyRig';
 import { ENUM_WORLD } from '../common/types';
 import {
   GameOptions,
@@ -50,11 +53,7 @@ import {
 import { pbrMapsIfReady } from '../common/pbrMaps';
 import { syncMaterialQuality } from '../common/modelLoader';
 import { syncPbrDetail } from '../common/itemMaterial';
-import {
-  UNIFIED_EXPOSURE_LIFT,
-  UNIFIED_LIGHT_MODEL,
-  bodyLightTint,
-} from '../common/lightModel';
+import { UNIFIED_LIGHT_MODEL, bodyLightTint } from '../common/lightModel';
 import { installMaterialDebug } from './materialDebug';
 import {
   NO_FOG,
@@ -126,6 +125,12 @@ type SplitTone = {
 };
 
 export type SceneMood = {
+  /**
+   * Graded for the unified light model (lightModel.ts): objects carry the
+   * bake and the terrain lands linear, which sits the raw frame ~1 stop
+   * under the pre-unified look — so these run well above 1. Each map was
+   * measured back to its old frame average (tools/screenshot/avg.mjs).
+   */
   readonly exposure: number;
   readonly contrast: number;
   readonly splitTone: SplitTone;
@@ -197,7 +202,7 @@ const OUTDOOR_FOG: FogSettings = {
 };
 
 const DEFAULT_MOOD: SceneMood = {
-  exposure: 0.95,
+  exposure: 2.1,
   contrast: 1.12,
   splitTone: {
     highlightsHue: 45,
@@ -221,7 +226,7 @@ const DEFAULT_MOOD: SceneMood = {
 };
 
 const INDOOR_MOOD: SceneMood = {
-  exposure: 0.95,
+  exposure: 1.95,
   contrast: 1.2,
   splitTone: {
     highlightsHue: 34,
@@ -244,7 +249,7 @@ const INDOOR_MOOD: SceneMood = {
 };
 
 const CHARACTER_MOOD: SceneMood = {
-  exposure: 1.0,
+  exposure: 2.1,
   contrast: 1.15,
   splitTone: {
     highlightsHue: 48,
@@ -267,7 +272,7 @@ const CHARACTER_MOOD: SceneMood = {
 };
 
 const LORENCIA_MOOD: SceneMood = {
-  exposure: 1.0,
+  exposure: 2.63,
   contrast: 1.2,
   splitTone: {
     highlightsHue: 32,
@@ -317,7 +322,7 @@ const LORENCIA_MOOD: SceneMood = {
  * DEVIAS_TAVERN_MOOD is the warm island inside this.
  */
 const DEVIAS_MOOD: SceneMood = {
-  exposure: 1.04,
+  exposure: 1.15,
   contrast: 1.08,
   splitTone: {
     highlightsHue: 205,
@@ -359,7 +364,7 @@ const DEVIAS_MOOD: SceneMood = {
  * here would be hiding a framing problem rather than solving one.
  */
 const DUNGEON_MOOD: SceneMood = {
-  exposure: 0.9,
+  exposure: 1.85,
   contrast: 1.34,
   splitTone: {
     highlightsHue: 30,
@@ -398,7 +403,7 @@ const DUNGEON_MOOD: SceneMood = {
  * and the bake has to carry the foliage on its own.
  */
 const NORIA_MOOD: SceneMood = {
-  exposure: 1.02,
+  exposure: 2.59,
   contrast: 1.14,
   splitTone: {
     highlightsHue: 52,
@@ -435,7 +440,7 @@ const NORIA_MOOD: SceneMood = {
  * colour left to lose.
  */
 const LOST_TOWER_MOOD: SceneMood = {
-  exposure: 0.92,
+  exposure: 1.95,
   contrast: 1.26,
   splitTone: {
     highlightsHue: 240,
@@ -470,7 +475,7 @@ const LOST_TOWER_MOOD: SceneMood = {
  * the stands still recede.
  */
 const STADIUM_MOOD: SceneMood = {
-  exposure: 1,
+  exposure: 2.2,
   contrast: 1.1,
   splitTone: {
     highlightsHue: 44,
@@ -509,7 +514,7 @@ const STADIUM_MOOD: SceneMood = {
  * framing. This is not framing - it is the defining property of the map.
  */
 const ATLANS_MOOD: SceneMood = {
-  exposure: 1.06,
+  exposure: 2.15,
   contrast: 1.12,
   splitTone: {
     highlightsHue: 186,
@@ -551,7 +556,7 @@ const ATLANS_MOOD: SceneMood = {
  * it turned the sand itself orange.
  */
 const TARKAN_MOOD: SceneMood = {
-  exposure: 1.1,
+  exposure: 2.41,
   contrast: 1.04,
   splitTone: {
     highlightsHue: 40,
@@ -590,7 +595,7 @@ const TARKAN_MOOD: SceneMood = {
  * put a floor back under the map.
  */
 const ICARUS_MOOD: SceneMood = {
-  exposure: 1,
+  exposure: 0.95,
   contrast: 1.24,
   splitTone: {
     highlightsHue: 208,
@@ -614,7 +619,7 @@ const ICARUS_MOOD: SceneMood = {
   vignetteWeight: 0.75,
 };
 const LORENCIA_TAVERN_MOOD: SceneMood = {
-  exposure: 1.0,
+  exposure: 2.1,
   contrast: 1.2,
   splitTone: {
     highlightsHue: 32,
@@ -645,7 +650,7 @@ const LORENCIA_TAVERN_MOOD: SceneMood = {
  * the snow outside the door still reads as snow.
  */
 const DEVIAS_TAVERN_MOOD: SceneMood = {
-  exposure: 0.95,
+  exposure: 2.0,
   contrast: 1.22,
   splitTone: {
     highlightsHue: 34,
@@ -716,6 +721,21 @@ type PhaseModifier = {
   readonly bloomThresholdShift: number;
   readonly fogTint: readonly [number, number, number];
   readonly fogDensityScale: number;
+  /**
+   * On the mood's map-gradient strength. The gradients are authored as the
+   * map's *noon* colour cast (Lorencia's is warm amber); after dark that
+   * cast fights the phase tints — khaki instead of blue night — so the dark
+   * phases pull it down.
+   */
+  readonly gradientScale: number;
+  /**
+   * A full-frame multiply in the gradient pass — the one phase lever that
+   * does not ride the `colorTint` option (the split-tone does, and that
+   * slider defaults to 0). This is what makes night *read blue*: blue light
+   * on brown ground multiplies out to olive, so the air itself must be
+   * graded, the way the reference night is.
+   */
+  readonly sceneTint: readonly [number, number, number];
   /** On the map's authored clear colour — the sky itself. */
   readonly clearTint: readonly [number, number, number];
   /** On the GlowLayer, so emissives pop after dark. */
@@ -742,6 +762,8 @@ const NOON_MODIFIER: PhaseModifier = {
   bloomThresholdShift: 0,
   fogTint: [1, 1, 1],
   fogDensityScale: 1,
+  gradientScale: 1,
+  sceneTint: [1, 1, 1],
   clearTint: [1, 1, 1],
   glowBoost: 1,
 };
@@ -763,6 +785,8 @@ const DAWN_MODIFIER: PhaseModifier = {
   shadowsDensityShift: 6,
   bloomThresholdShift: -0.05,
   fogTint: [1, 0.85, 0.7],
+  gradientScale: 0.9,
+  sceneTint: [1, 0.93, 0.86],
   clearTint: [1.15, 0.9, 0.72],
 };
 
@@ -783,6 +807,8 @@ const DUSK_MODIFIER: PhaseModifier = {
   saturationShift: -6,
   bloomThresholdShift: -0.08,
   fogTint: [0.9, 0.7, 0.8],
+  gradientScale: 0.8,
+  sceneTint: [0.98, 0.85, 0.95],
   clearTint: [0.75, 0.5, 0.65],
   glowBoost: 1.15,
 };
@@ -794,20 +820,35 @@ const DUSK_MODIFIER: PhaseModifier = {
  */
 const NIGHT_MODIFIER: PhaseModifier = {
   ...NOON_MODIFIER,
-  keyScale: 0.3,
-  skyTint: [0.55, 0.7, 0.95],
-  sunTint: [0.7, 0.8, 1],
-  bakeScale: 0.45,
-  bakeTint: [0.6, 0.72, 0.95],
-  exposureShift: -0.08,
+  keyScale: 0.46,
+  // Pushed well past neutral: Lorencia's warm bake × a mild blue tint lands
+  // on grey-brown, and the reference night is unmistakably teal-blue air.
+  // The blue has to win the multiply, not split it — but the frame must
+  // stay legible (a moonlit ground, not a black one).
+  skyTint: [0.42, 0.58, 1.0],
+  sunTint: [0.6, 0.74, 1],
+  bakeScale: 0.78,
+  bakeTint: [0.44, 0.6, 1.02],
+  exposureShift: 0,
   highlightsSaturationShift: -20,
+  // The blue must survive the grade: several maps author their shadow
+  // saturation well below zero (Lorencia -25), which turns the night's
+  // blue split-tone grey - the shift wins it back, and the density leans
+  // on the whole shadow half. Highlights stay untouched so torch pools
+  // keep their warmth against the cool air.
   shadowsHue: 215,
-  shadowsPush: 0.7,
-  shadowsDensityShift: 14,
-  saturationShift: -4,
+  shadowsPush: 0.85,
+  shadowsDensityShift: 24,
+  shadowsSaturationShift: 22,
+  saturationShift: 0,
   bloomThresholdShift: -0.12,
-  fogTint: [0.55, 0.7, 0.95],
-  fogDensityScale: 0.8,
+  // The fog must sit *under* a keyScale-0.3 scene, not on top of it: the
+  // reference night (dawn_dusk_noon_night.jpg) is deep blue air with the
+  // torches and item glows carrying the frame, no grey veil.
+  fogTint: [0.22, 0.3, 0.42],
+  fogDensityScale: 0.55,
+  gradientScale: 0.35,
+  sceneTint: [0.6, 0.75, 1.0],
   clearTint: [0.15, 0.21, 0.3],
   glowBoost: 1.4,
 };
@@ -858,9 +899,6 @@ export function installCycleUrlOverride(search: string): void {
 
 /** How often the modulation recomputes outside a mood blend, seconds. */
 const CYCLE_TICK = 0.2;
-
-/** The original sun direction (testScene.ts), restored when the cycle is off. */
-const DEFAULT_SUN_DIRECTION: readonly [number, number, number] = [0.4, -1, 0.6];
 
 const cycleState: CycleState = cycleStateAt(0, {
   t: 0,
@@ -916,6 +954,8 @@ const blendedModifier = {
   bloomThresholdShift: 0,
   fogTint: [1, 1, 1] as [number, number, number],
   fogDensityScale: 1,
+  gradientScale: 1,
+  sceneTint: [1, 1, 1] as [number, number, number],
   clearTint: [1, 1, 1] as [number, number, number],
   glowBoost: 1,
 };
@@ -935,6 +975,7 @@ function blendPhaseModifiers(strength: number): void {
   m.keyScale = 0;
   m.bakeScale = 0;
   m.fogDensityScale = 0;
+  m.gradientScale = 0;
   m.glowBoost = 0;
   m.exposureShift = 0;
   m.contrastShift = 0;
@@ -948,6 +989,7 @@ function blendPhaseModifiers(strength: number): void {
   m.sunTint[0] = m.sunTint[1] = m.sunTint[2] = 0;
   m.bakeTint[0] = m.bakeTint[1] = m.bakeTint[2] = 0;
   m.fogTint[0] = m.fogTint[1] = m.fogTint[2] = 0;
+  m.sceneTint[0] = m.sceneTint[1] = m.sceneTint[2] = 0;
   m.clearTint[0] = m.clearTint[1] = m.clearTint[2] = 0;
 
   for (const phase of Object.keys(PHASE_MODIFIERS) as CyclePhase[]) {
@@ -960,6 +1002,7 @@ function blendPhaseModifiers(strength: number): void {
     m.keyScale += w * p.keyScale;
     m.bakeScale += w * p.bakeScale;
     m.fogDensityScale += w * p.fogDensityScale;
+    m.gradientScale += w * p.gradientScale;
     m.glowBoost += w * p.glowBoost;
     m.exposureShift += w * p.exposureShift;
     m.contrastShift += w * p.contrastShift;
@@ -987,6 +1030,7 @@ function blendPhaseModifiers(strength: number): void {
       m.sunTint[i] += w * p.sunTint[i];
       m.bakeTint[i] += w * p.bakeTint[i];
       m.fogTint[i] += w * p.fogTint[i];
+      m.sceneTint[i] += w * p.sceneTint[i];
       m.clearTint[i] += w * p.clearTint[i];
     }
   }
@@ -997,6 +1041,7 @@ function blendPhaseModifiers(strength: number): void {
   m.keyScale = 1 + (m.keyScale - 1) * s;
   m.bakeScale = 1 + (m.bakeScale - 1) * s;
   m.fogDensityScale = 1 + (m.fogDensityScale - 1) * s;
+  m.gradientScale = 1 + (m.gradientScale - 1) * s;
   m.glowBoost = 1 + (m.glowBoost - 1) * s;
   m.exposureShift *= s;
   m.contrastShift *= s;
@@ -1014,6 +1059,7 @@ function blendPhaseModifiers(strength: number): void {
     m.sunTint[i] = 1 + (m.sunTint[i] - 1) * s;
     m.bakeTint[i] = 1 + (m.bakeTint[i] - 1) * s;
     m.fogTint[i] = 1 + (m.fogTint[i] - 1) * s;
+    m.sceneTint[i] = 1 + (m.sceneTint[i] - 1) * s;
     m.clearTint[i] = 1 + (m.clearTint[i] - 1) * s;
   }
 }
@@ -1095,12 +1141,7 @@ function trimEmissive(mesh: AbstractMesh) {
  * material reads specular off it, the Standard one ignores it either way.
  */
 function syncKeyLightSpecular(scene: Scene) {
-  const sun = scene.getLightByName('sunLight');
-  if (!sun) return;
-
-  if (pbrMaterialsOn()) {
-    sun.specular.copyFrom(sun.diffuse).scaleInPlace(specularLightScale());
-  } else sun.specular.set(0, 0, 0);
+  syncSpecular(scene, pbrMaterialsOn() ? specularLightScale() : 0);
 }
 
 export function applySceneLook(
@@ -1378,6 +1419,7 @@ function modulateShownMood(): void {
   out.contrast += m.contrastShift;
   out.bloomThreshold += m.bloomThresholdShift;
   out.fog.density *= m.fogDensityScale;
+  out.gradient *= m.gradientScale;
 
   const st = out.splitTone;
 
@@ -1405,39 +1447,15 @@ function modulateShownMood(): void {
 /**
  * The sun's direction from the cycle's angles — or the authored constant
  * when the cycle is off. Damped maps lerp between the two, so Atlans' sun
- * only drifts. The CSM refreshes every frame with stabilized cascades, so a
- * slowly rotating light costs nothing extra; the elevation floor that keeps
- * the cascades sane lives in `dayCycle.ts`.
+ * only drifts. The rig owns the light and the maths (keyRig.ts); this is the
+ * cycle's one consumer seam.
  */
 function applyCycleSun(scene: Scene, strength: number): void {
-  const sun = scene.getLightByName('sunLight') as DirectionalLight | null;
-
-  if (!sun) return;
-
-  const [dx, dy, dz] = DEFAULT_SUN_DIRECTION;
-
-  if (strength <= 0) {
-    sun.direction.set(dx, dy, dz);
-    return;
-  }
-
-  const el = cycleState.sunElevation;
-  const az = cycleState.sunAzimuth;
-  const cos = Math.cos(el);
-
-  // Unit vector from the sky point toward the ground; the default is scaled
-  // to unit length so a partial-strength lerp stays near-normalized.
-  const cx = -cos * Math.sin(az);
-  const cy = -Math.sin(el);
-  const cz = -cos * Math.cos(az);
-
-  const norm = 1 / Math.hypot(dx, dy, dz);
-  const s = strength;
-
-  sun.direction.set(
-    dx * norm * (1 - s) + cx * s,
-    dy * norm * (1 - s) + cy * s,
-    dz * norm * (1 - s) + cz * s
+  setSunDirection(
+    scene,
+    cycleState.sunAzimuth,
+    cycleState.sunElevation,
+    strength
   );
 }
 
@@ -1452,10 +1470,18 @@ function applyCycleClear(scene: Scene): void {
 
   const tint = blendedModifier.clearTint;
 
+  // The sky bytes are authored at screen brightness (original client data);
+  // divide out the unified regrade's exposure the same way compensateFog
+  // does, or the raised grade re-exposes the sky.
+  const scale =
+    UNIFIED_LIGHT_MODEL && moodEffective.exposure > 0
+      ? 1 / moodEffective.exposure
+      : 1;
+
   scene.clearColor.set(
-    base[0] * tint[0],
-    base[1] * tint[1],
-    base[2] * tint[2],
+    base[0] * tint[0] * scale,
+    base[1] * tint[1] * scale,
+    base[2] * tint[2] * scale,
     1
   );
 }
@@ -1674,14 +1700,18 @@ function writeMood(
 ): void {
   applyMapGradient(
     appliedWorld,
-    GameOptions.postProcessing ? mapGradientStrength() * mood.gradient : 0
+    GameOptions.postProcessing ? mapGradientStrength() * mood.gradient : 0,
+    mood.exposure,
+    GameOptions.postProcessing ? blendedModifier.sceneTint : undefined
   );
 
   [terrainBakeTint[0], terrainBakeTint[1], terrainBakeTint[2]] =
     mood.terrainBake;
   [bodyLightTint[0], bodyLightTint[1], bodyLightTint[2]] = mood.terrainBake;
 
-  setEnhancedFog(mood.fog ?? NO_FOG);
+  // The mood exposure rides along so the fog pass can divide the unified
+  // regrade back out of its authored display-space colour (enhancedLighting).
+  setEnhancedFog(mood.fog ?? NO_FOG, mood.exposure);
 
   // Key-light shaping belongs to the Enhanced/Ultra tiers: the directional
   // sun (lambert shape + CSM) and the sky/ground hemisphere split. Classic is
@@ -1708,25 +1738,13 @@ function writeMood(
   terrainInteriorAmbient[1] = groundKey * mood.skyDiffuse[1];
   terrainInteriorAmbient[2] = groundKey * mood.skyDiffuse[2];
 
-  const sky = scene.getLightByName('skyLight') as HemisphericLight | null;
-
-  if (sky) {
-    sky.intensity = skyIntensity;
-    sky.diffuse.set(...(mood.skyDiffuse as [number, number, number]));
-
-    if (shaped) {
-      sky.groundColor.set(...(mood.skyGround as [number, number, number]));
-    } else {
-      sky.groundColor.copyFrom(sky.diffuse);
-    }
-  }
-
-  const sun = scene.getLightByName('sunLight') as DirectionalLight | null;
-
-  if (sun) {
-    sun.intensity = shaped ? sunShare * directLightGain() : 0;
-    sun.diffuse.set(...(mood.sunDiffuse as [number, number, number]));
-  }
+  setKey(scene, {
+    skyIntensity,
+    skyDiffuse: mood.skyDiffuse as [number, number, number],
+    skyGround: shaped ? (mood.skyGround as [number, number, number]) : null,
+    sunIntensity: shaped ? sunShare * directLightGain() : 0,
+    sunDiffuse: mood.sunDiffuse as [number, number, number],
+  });
 
   // What the PBR material has to make up on its own when the lights are left
   // at Classic intensities because the world is still Standard-lit.
@@ -1768,7 +1786,13 @@ function writeMood(
   const bloom = post ? Math.max(0, GameOptions.bloom) : 0;
 
   pipeline.bloomEnabled = bloom > 0;
-  pipeline.bloomThreshold = mood.bloomThreshold;
+  // Authored against the old buffer, which the same content now reaches at
+  // 1/exposure of the old value (the unified regrade multiplies it back in
+  // image processing, after bloom has already sampled) - so the threshold
+  // divides by the mood exposure or bloom goes half-dead everywhere.
+  pipeline.bloomThreshold = UNIFIED_LIGHT_MODEL
+    ? mood.bloomThreshold / mood.exposure
+    : mood.bloomThreshold;
   pipeline.bloomWeight =
     mood.bloomWeight * (bloom / GRAIN_MAX) * LOOK_INTENSITY;
   pipeline.bloomKernel = mood.bloomKernel;
@@ -1803,11 +1827,8 @@ function writeMood(
   const moodExposure =
     1 + (mood.exposure - 1) * gradeScale(GameOptions.exposure);
 
-  // The unified light model's provisional lift is part of the model, not the
-  // grade, so it applies whether or not scene darkening is on (lightModel.ts).
   ip.exposure =
-    (post && GameOptions.sceneDarkening ? moodExposure * darken : 1) *
-    (UNIFIED_LIGHT_MODEL ? UNIFIED_EXPOSURE_LIFT : 1);
+    post && GameOptions.sceneDarkening ? moodExposure * darken : 1;
   // The mood contrast is a lift over neutral, so the slider scales the lift
   // rather than the value - at 0 the frame comes through at a flat 1.0.
   ip.contrast = post

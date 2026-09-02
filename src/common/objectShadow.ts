@@ -11,6 +11,7 @@ import {
   GlowLayer,
 } from '../libs/babylon/exports';
 import { getEmptyTexture } from '../libs/babylon/emptyTexture';
+import { sunLightOf } from '../lighting/keyRig';
 import { TERRAIN_SIZE, TILE_CM } from './terrain/consts';
 import { ENUM_WORLD } from './types';
 import { GameOptions } from './gameOptions';
@@ -34,8 +35,13 @@ const GROUND_OFFSET = 5 / TILE_CM;
  * grey smudge — most visibly on snow, where the ground is the brightest thing
  * on screen. The stencil below still means overlaps never deepen it, so this
  * is the shadow's one and only value.
+ *
+ * Derived from the one shadow-depth rule (lighting_rework.md §5.2): a shadow
+ * leaves 35 % of what it cuts — the terrain bake floor and the CSM object
+ * darkness are the same 0.35 (enhancedLighting.ts). A blob cuts everything
+ * under it, so its alpha is 1 - 0.35.
  */
-const SHADOW_ALPHA = 0.62;
+const SHADOW_ALPHA = 0.65;
 
 /**
  * `EnableAlphaTest` — glAlphaFunc(GL_GREATER, 0.25), ZzzOpenglUtil.cpp:395.
@@ -184,6 +190,10 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
 
   material.AddUniform('shadowOrigin', 'vec3', undefined);
   material.AddUniform('shadowParams', 'vec4', undefined);
+  // The lean axis, from the key rig's sun (lighting_rework.md §5.2): the
+  // unit horizontal direction the projection folds the caster along. (1, 0)
+  // reproduces the old hardcoded +X formula exactly.
+  material.AddUniform('shadowSunDir', 'vec2', undefined);
   material.AddUniform('terrainHeightMap', 'sampler2D', undefined);
 
   // The silhouette dilation (SHADOW_DILATE) needs the caster's normals, and
@@ -235,14 +245,22 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
 
     float shadowCasterY = worldPos.y;
 
-    vec2 shadowSun = vec2(
-      shadowOrigin.x + shadowRel.x
-        + (shadowRel.y * (shadowRel.x + shadowParams.x)) / shadowDenom,
-      worldPos.z
-    );
+    // The original's projection folds the caster along a single horizontal
+    // axis (RenderBodyShadow hardcodes +X). Rotate into the sun frame
+    // instead: shadowA runs along the lean axis and takes the original's
+    // perspective fold, shadowB runs across it and passes through. With
+    // shadowSunDir = (1, 0) this is bit-for-bit the old formula, and with
+    // the rig's sun every tier's blobs lean the same way the CSM projects.
+    vec2 shadowAcross = vec2(-shadowSunDir.y, shadowSunDir.x);
+    float shadowA = dot(shadowRel.xz, shadowSunDir);
+    float shadowB = dot(shadowRel.xz, shadowAcross);
 
-    worldPos.x = shadowSun.x;
-    worldPos.z = shadowSun.y;
+    shadowA += (shadowRel.y * (shadowA + shadowParams.x)) / shadowDenom;
+
+    worldPos.x = shadowOrigin.x
+      + shadowSunDir.x * shadowA + shadowAcross.x * shadowB;
+    worldPos.z = shadowOrigin.z
+      + shadowSunDir.y * shadowA + shadowAcross.y * shadowB;
 
     vec2 shadowUV = (vec2(worldPos.x, worldPos.z) + 0.5) / ${TERRAIN_SIZE}.0;
 
@@ -314,6 +332,24 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
       GROUND_OFFSET,
       TERRAIN_HEIGHT_SCALE
     );
+
+    // Lean axis from the rig's sun. The fold above pushes toward -axis for
+    // a caster above its origin, so the axis is the *negated* horizontal of
+    // the light's travel direction — the blob then extends away from the
+    // sun, the same way the CSM projects. No rig (login scenes) keeps the
+    // old +X-formula lean.
+    const sun = sunLightOf(mesh.getScene());
+    let axisX = 1;
+    let axisZ = 0;
+    if (sun) {
+      const d = sun.direction;
+      const len = Math.hypot(d.x, d.z);
+      if (len > 1e-4) {
+        axisX = -d.x / len;
+        axisZ = -d.z / len;
+      }
+    }
+    effect.setFloat2('shadowSunDir', axisX, axisZ);
 
     effect.setTexture('terrainHeightMap', heightMap);
   });

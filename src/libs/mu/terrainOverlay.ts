@@ -1,9 +1,5 @@
-import {
-  Vector3,
-  type DirectionalLight,
-  type Effect,
-  type Scene,
-} from '../babylon/exports';
+import { Vector3, type Effect, type Scene } from '../babylon/exports';
+import { sunLightOf } from '../../lighting/keyRig';
 import { ENUM_WORLD } from '../../common/types';
 import { GameOptions } from '../../common/gameOptions';
 import { snowCover } from '../../weather/snowCover';
@@ -502,7 +498,7 @@ let sunDir = new Vector3(-0.4, 1, -0.6).normalize();
 function sunDirection(scene: Scene): Vector3 {
   if (scene === sunScene) return sunDir;
 
-  const sun = scene.getLightByName('sunLight') as DirectionalLight | null;
+  const sun = sunLightOf(scene);
   if (!sun) return sunDir;
 
   const d = sun.direction;

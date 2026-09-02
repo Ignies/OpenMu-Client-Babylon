@@ -597,6 +597,72 @@ function offlineMapFromUrl(): ENUM_WORLD {
   return ENUM_WORLD.WD_0LORENCIA;
 }
 
+/**
+ * `?offline&class=elf` / `?class=20`: the offline test character's class, by
+ * `CharacterClassNumber` value or name prefix (`fairy` → FairyElf,
+ * `rage` → RageFighter). A screenshot-harness seam like `?map=`; null when
+ * absent or unknown (Dark Knight).
+ */
+function offlineClassFromUrl(): CharacterClassNumber | null {
+  let raw: string | null = null;
+  try {
+    raw = new URLSearchParams(location.search).get('class');
+  } catch {
+    raw = null;
+  }
+  if (!raw) return null;
+
+  if (/^\d+$/.test(raw)) {
+    const n = Number(raw) as CharacterClassNumber;
+    return CharacterClassNumber[n] !== undefined ? n : null;
+  }
+
+  const want = raw.toLowerCase();
+  for (const key of Object.keys(CharacterClassNumber)) {
+    if (/^\d+$/.test(key)) continue;
+    if (key.toLowerCase().startsWith(want)) {
+      return CharacterClassNumber[key as keyof typeof CharacterClassNumber];
+    }
+  }
+  return null;
+}
+
+/**
+ * `?hand1=0,14` / `?hand2=none`: overrides the offline test loadout's hand
+ * slots (`group,num[,level]`; `none` empties the slot), for the weapon
+ * stow/draw screenshot matrix (lighting_rework.md §4). Slot 0 draws in the
+ * right hand (Weapon1), slot 1 in the left (Weapon2).
+ */
+function applyOfflineHandOverrides(items: (Item | null)[]): void {
+  const read = (name: string, slot: number) => {
+    let raw: string | null = null;
+    try {
+      raw = new URLSearchParams(location.search).get(name);
+    } catch {
+      raw = null;
+    }
+    if (!raw) return;
+
+    if (raw === 'none') {
+      items[slot] = null;
+      return;
+    }
+
+    const [group, num, lvl] = raw.split(',').map(Number);
+    if (Number.isFinite(group) && Number.isFinite(num)) {
+      items[slot] = {
+        group,
+        num,
+        lvl: Number.isFinite(lvl) ? lvl : 0,
+        isExcellent: false,
+      };
+    }
+  };
+
+  read('hand1', InventoryConstants.LeftHandSlot);
+  read('hand2', InventoryConstants.RightHandSlot);
+}
+
 export const Store = new (class _Store {
   csSocket?: WebSocket;
   gsSocket?: WebSocket;
@@ -1028,20 +1094,32 @@ export const Store = new (class _Store {
     if (!this.world) return;
 
     const map = offlineMapFromUrl();
+    const cls = offlineClassFromUrl() ?? CharacterClassNumber.DarkKnight;
 
     // Keep the query: a dev-server reload must land on the same map.
     history.replaceState(null, '', '/offline' + location.search);
     this.isOffline = true;
     this.uiState = UIState.World;
-    this.setTestItems();
+    // `?bare` skips the test loadout: the per-class close-up shots need the
+    // default body (class gear masks the class), and the weapon matrix
+    // wants exactly the `?hand1=`/`?hand2=` items and nothing else.
+    let bare = false;
+    try {
+      bare = new URLSearchParams(location.search).has('bare');
+    } catch {
+      bare = false;
+    }
+    if (!bare) this.setTestItems();
+    applyOfflineHandOverrides(this.playerData.items);
 
-    const testPlayer = spawnPlayer(this.world);
+    const testPlayer = spawnPlayer(this.world, { cls });
     this.world.addComponent(testPlayer, 'localPlayer', true);
     this.world.addComponent(testPlayer, 'worldIndex', map);
     testPlayer.objectNameInWorld = 'TestPlayer';
 
     this.playerData.name = 'TestPlayer';
-    this.playerData.charClass = CharacterClassNumber.DarkKnight;
+    this.playerData.charClass = cls;
+    this.syncPlayerAppearance();
     EventBus.emit('requestWarp', { map });
   }
 

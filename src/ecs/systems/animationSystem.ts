@@ -273,8 +273,13 @@ export const AnimationSystem: ISystemFactory = world => {
             playerAnimation.action === PlayerAction.PLAYER_WALK_SWIM ||
             playerAnimation.action === PlayerAction.PLAYER_RUN_SWIM);
         if (attributeSystem.isAboveZero('weaponsOnBack') !== bindBack) {
-          attributeSystem.setValue('weaponsOnBack', bindBack ? 1 : 0);
+          // Latch the flag only once the attachments were actually applied:
+          // a character spawning already in a safe zone hits this before its
+          // PlayerObject exists, and consuming the flip then would leave the
+          // weapons on the hand links forever (the original re-evaluates
+          // every frame, ZzzCharacter.cpp:14953).
           if ((modelObject as PlayerObject).Weapon1) {
+            attributeSystem.setValue('weaponsOnBack', bindBack ? 1 : 0);
             applyWeaponAttachments(
               modelObject as PlayerObject,
               entity.charAppearance,

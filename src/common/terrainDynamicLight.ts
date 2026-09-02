@@ -319,12 +319,19 @@ export function updateTerrainDynamicLight(
   }
 }
 
+/**
+ * Samples `primary` — the bake plus this frame's dynamic emitters (torches,
+ * +9…+15 item lamps, skills), the original's `PrimaryTerrainLight`. This is
+ * what BodyLight reads, so a character standing by a torch or next to a
+ * glowing drop warms up on every tier, exactly like the ground under them.
+ * When the dynamic layer is idle `primary` equals `baked` (resetTouched).
+ */
 export function requestTerrainLight(
   x: number,
   y: number,
   out: { x: number; y: number; z: number }
 ): boolean {
-  if (!baked) return false;
+  if (!primary) return false;
 
   const xi = Math.floor(x);
   const yi = Math.floor(y);
@@ -342,8 +349,8 @@ export function requestTerrainLight(
   const yd = y - yi;
 
   const channel = (c: number) => {
-    const left = baked![i1 + c] + (baked![i4 + c] - baked![i1 + c]) * yd;
-    const right = baked![i2 + c] + (baked![i3 + c] - baked![i2 + c]) * yd;
+    const left = primary![i1 + c] + (primary![i4 + c] - primary![i1 + c]) * yd;
+    const right = primary![i2 + c] + (primary![i3 + c] - primary![i2 + c]) * yd;
 
     return left + (right - left) * xd;
   };

@@ -132,6 +132,15 @@ export function getMaterial(
   material.transparencyMode = transparencyMode;
   material.alphaMode = alphaMode;
 
+  // MU's DisableCullFace draws every alpha-keyed mesh double-sided; without
+  // two-sided lighting the back faces of robes, capes, wings and trim shade
+  // with the *front* normal and collapse to the hemisphere's ground colour.
+  // Flip the normal instead (lighting_rework.md §3.2). Glow cards and
+  // flat-lit models override the lit colour anyway.
+  if (!backFaceCulling && !bright && !flatLit) {
+    material.twoSidedLighting = true;
+  }
+
   if (bright) {
     material.disableDepthWrite = true;
   }
@@ -200,6 +209,11 @@ export function getScrollMaterial(
   material.backFaceCulling = backFaceCulling;
   material.transparencyMode = transparencyMode;
   material.alphaMode = alphaMode;
+
+  // Same rule as getMaterial: double-sided lit surfaces flip the normal.
+  if (!backFaceCulling && !bright && !flatLit) {
+    material.twoSidedLighting = true;
+  }
 
   if (bright) material.disableDepthWrite = true;
 

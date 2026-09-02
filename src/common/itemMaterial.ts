@@ -25,6 +25,7 @@ import {
 
 const glowScratch = { r: 0, g: 0, b: 0, a: 1 };
 import { resolveDataUrl } from '../libs/mu/dataFolder';
+import { sunLightOf } from '../lighting/keyRig';
 import {
   SNOW_CAP_COLOUR,
   SNOW_CAP_KNEE_FULL,
@@ -120,6 +121,89 @@ export function syncPbrDetail(): void {
     // like it should work and silently does not.
     material.markDirty(true);
   }
+}
+
+/**
+ * Half-lambert sun response (lighting_rework.md §3.1).
+ *
+ * The original's character shading is `Luminosity = dot·0.8 + 0.4`, clamped
+ * ≥ 0.2 (`ZzzBMD.cpp:255-257`): side faces get 0.4, back faces never drop
+ * below 0.2. The port's raw `max(N·L, 0)` is why limbs read thin and dark —
+ * a near-vertical sun cannot reach a limb's side at all.
+ *
+ * Implemented as a fill term added on top of the light sum the shader already
+ * computed: `sunColor × (wrap(dot) - max(dot, 0))`, with the wrap normalized
+ * by 1.2 so a fully sun-facing surface is unchanged and the frame does not
+ * re-expose. The fill is clamped ≥ 0, and everything scales with the sun's
+ * intensity — Classic parks the sun at 0, so the term is inert there by
+ * construction. The CSM does not attenuate the fill: like the original's
+ * clamp, the floor holds in shadow.
+ *
+ * Dev overrides: `?halfLambert=0` disables, `?hlWrap=scale,bias,floor` tunes
+ * (values are the already-normalized shader constants).
+ */
+const SUN_DIR_UNIFORM = 'muSunDir';
+const SUN_COLOR_UNIFORM = 'muSunColor';
+const SUN_WRAP_UNIFORM = 'muSunWrap';
+
+const HALF_LAMBERT_DEFAULT: [number, number, number] = [
+  0.8 / 1.2,
+  0.4 / 1.2,
+  0.2 / 1.2,
+];
+
+function halfLambertParams(): [number, number, number] | null {
+  try {
+    const q = new URLSearchParams(location.search);
+    if (q.get('halfLambert') === '0') return null;
+    const wrap = q.get('hlWrap')?.split(',').map(Number);
+    if (wrap?.length === 3 && wrap.every(n => !isNaN(n))) {
+      return wrap as [number, number, number];
+    }
+  } catch {
+    /* no location (tests) — use the default */
+  }
+  return HALF_LAMBERT_DEFAULT;
+}
+
+const halfLambert = halfLambertParams();
+
+/**
+ * `target` is the running lit sum the fill lands on: `diffuseBase` on the
+ * Standard path (the UNCLAMP recompute multiplies it by the texel after
+ * this), `finalColor.rgb` on the PBR path — there the albedo has to be
+ * applied by hand, the diffuse composition is already done.
+ */
+const halfLambertGlsl = (target: string, albedo: string) => `
+  if (${SUN_COLOR_UNIFORM}.r + ${SUN_COLOR_UNIFORM}.g + ${SUN_COLOR_UNIFORM}.b > 0.0) {
+    float hlDot = dot(normalW, -${SUN_DIR_UNIFORM});
+    float hlFill = max(
+      max(hlDot * ${SUN_WRAP_UNIFORM}.x + ${SUN_WRAP_UNIFORM}.y, ${SUN_WRAP_UNIFORM}.z) - max(hlDot, 0.0),
+      0.0);
+    ${target} += ${SUN_COLOR_UNIFORM} * hlFill${albedo ? ` * ${albedo}` : ''};
+  }
+`;
+
+/** Per-draw sun uniforms for the half-lambert fill; zero colour = off. */
+function bindSunWrap(effect: Effect, mesh: AbstractMesh) {
+  const wrap = halfLambert;
+  const sun = wrap ? sunLightOf(mesh.getScene()) : null;
+
+  if (!wrap || !sun || sun.intensity <= 0) {
+    effect.setFloat3(SUN_COLOR_UNIFORM, 0, 0, 0);
+    return;
+  }
+
+  const d = sun.direction;
+  const norm = 1 / (Math.hypot(d.x, d.y, d.z) || 1);
+  effect.setFloat3(SUN_DIR_UNIFORM, d.x * norm, d.y * norm, d.z * norm);
+  effect.setFloat3(
+    SUN_COLOR_UNIFORM,
+    sun.diffuse.r * sun.intensity,
+    sun.diffuse.g * sun.intensity,
+    sun.diffuse.b * sun.intensity
+  );
+  effect.setFloat3(SUN_WRAP_UNIFORM, wrap[0], wrap[1], wrap[2]);
 }
 
 /** itemFx bit layout (float-packed, read with int() in the shader). */
@@ -316,6 +400,9 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
 
   material.AddUniform(ITEM_FX_UNIFORM, 'float', 0);
   material.AddUniform(SNOW_CAP_UNIFORM, 'float', 0);
+  material.AddUniform(SUN_DIR_UNIFORM, 'vec3', null);
+  material.AddUniform(SUN_COLOR_UNIFORM, 'vec3', null);
+  material.AddUniform(SUN_WRAP_UNIFORM, 'vec3', null);
   material.AddUniform('time', 'float', 0);
   material.AddUniform('chromeColor', 'vec3', null);
   material.AddUniform('chrome2Color', 'vec3', null);
@@ -333,6 +420,8 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
  */
 function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
   effect.setFloat('time', time + (mesh.metadata?.timeOffset ?? 0));
+
+  bindSunWrap(effect, mesh);
 
   const tier = mesh.metadata?.itemTier as ItemVisualTier | null | undefined;
 
@@ -553,10 +642,12 @@ ${bright || flatLit ? '' : snowCapGlsl('baseColor')}
 
   simpleMaterial.Fragment_Before_FragColor(legacyPasses(STANDARD_VARS));
 
+  // The half-lambert fill lands on `diffuseBase` before the UNCLAMP
+  // recompute reads it; glow cards and flat-lit models take neither.
   simpleMaterial.Fragment_Before_Fog(`
-${bright || flatLit ? '' : UNCLAMP}${bright ? BRIGHT_OVERRIDE : ''}${
-    flatLit ? FLAT_LIT_OVERRIDE : ''
-  }
+${bright || flatLit ? '' : halfLambertGlsl('diffuseBase', '') + UNCLAMP}${
+    bright ? BRIGHT_OVERRIDE : ''
+  }${flatLit ? FLAT_LIT_OVERRIDE : ''}
 `);
 
   trackTime(scene, now => {
@@ -671,6 +762,7 @@ ${snowCapGlsl('surfaceAlbedo')}
 
   material.Fragment_Before_Fog(`
     finalColor.rgb += texture2D(muEmissiveSampler, vAlbedoUV).rgb * ${PBR_EMISSIVE_GAIN} * ${DETAIL_UNIFORM};
+${halfLambertGlsl('finalColor.rgb', 'surfaceAlbedo')}
   `);
 
   material.Fragment_Before_FragColor(legacyPasses(PBR_VARS));

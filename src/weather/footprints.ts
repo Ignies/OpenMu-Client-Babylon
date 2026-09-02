@@ -10,10 +10,10 @@ import {
   Vector2,
   Vector3,
   Vector4,
-  type DirectionalLight,
   type Mesh,
   type Scene,
 } from '../libs/babylon/exports';
+import { sunLightOf } from '../lighting/keyRig';
 
 /**
  * Footprints left on the ground: boot marks pressed into settled snow, or
@@ -1322,11 +1322,10 @@ void main() {
 }
 `;
 
-/** World-space direction toward the sun, from the scene's own light. */
+/** World-space direction toward the sun, from the key rig. */
 function sunDirection(scene: Scene): Vector3 {
-  const sun = scene.getLightByName('sunLight') as DirectionalLight | null;
-  // testScene.ts creates it pointing (0.4, -1, 0.6); we want the other way.
-  const d = sun?.direction ?? new Vector3(0.4, -1, 0.6);
+  // The rig creates it pointing (0.4, -1, 0.6); we want the other way.
+  const d = sunLightOf(scene)?.direction ?? new Vector3(0.4, -1, 0.6);
   return new Vector3(-d.x, -d.y, -d.z).normalize();
 }
 

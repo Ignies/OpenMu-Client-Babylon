@@ -5,6 +5,7 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { ENUM_WORLD } from '../common/types';
+import { linearBufferActive } from '../common/lightModel';
 
 export type MapGradient = {
   readonly top: readonly [number, number, number];
@@ -236,11 +237,25 @@ Effect.ShadersStore[`${SHADER_NAME}FragmentShader`] = `
   uniform vec3 shadowLift;
   uniform float strength;
 
+  // The grade was authored against the old buffer, which the same content
+  // now reaches at 1/exposure of the old value (the unified light model;
+  // sceneLook). The luma knees and the additive shadow lift only make sense
+  // in that domain - on the raw linear buffer "dark" covers nearly the
+  // whole frame and the lift becomes a full-frame veil - so the pass scales
+  // in, works in old-buffer terms, and scales back out. 1 outside the model.
+  uniform float gradExposure;
+
+  // The day/night cycle's full-frame grade (identity at noon / cycle off).
+  // Lives here and not in the light tints because a blue *light* on brown
+  // ground multiplies to olive - night has to grade the air, like the
+  // reference does.
+  uniform vec3 phaseTint;
+
   const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 
   void main(void) {
     vec4 scene = texture2D(textureSampler, vUV);
-    vec3 col = scene.rgb;
+    vec3 col = scene.rgb * gradExposure;
 
     vec3 tint = vUV.y > 0.5
       ? mix(gradMid, gradTop, (vUV.y - 0.5) * 2.0)
@@ -276,22 +291,27 @@ Effect.ShadersStore[`${SHADER_NAME}FragmentShader`] = `
     float gray = dot(col, LUMA);
     col = mix(vec3(gray), col, 1.0 + envelope.w * strength);
 
-gl_FragColor = vec4(max(col, 0.0), scene.a);
+gl_FragColor = vec4(max(col * phaseTint, 0.0) / gradExposure, scene.a);
   }
 `;
 
 let pass: PostProcess | null = null;
 let passCamera: Camera | null = null;
+let passScene: Scene | null = null;
 let attached = false;
 
 let current: MapGradient = NEUTRAL_GRADIENT;
 let currentGlow: readonly [number, number, number] = DEFAULT_GLOW;
 let currentStrength = 0;
+let currentExposure = 1;
+/** The day/night cycle's full-frame grade (sceneLook `sceneTint`). */
+const currentPhaseTint: [number, number, number] = [1, 1, 1];
 
 export function createMapGradient(scene: Scene, camera: Camera): void {
   if (pass) return;
 
   passCamera = camera;
+  passScene = scene;
 
   pass = new PostProcess(
     SHADER_NAME,
@@ -305,6 +325,8 @@ export function createMapGradient(scene: Scene, camera: Camera): void {
       'glowShape',
       'shadowLift',
       'strength',
+      'gradExposure',
+      'phaseTint',
     ],
     null,
     1,
@@ -347,6 +369,11 @@ export function createMapGradient(scene: Scene, camera: Camera): void {
     );
 
     effect.setFloat('strength', currentStrength);
+    effect.setFloat(
+      'gradExposure',
+      passScene && linearBufferActive(passScene) ? currentExposure : 1
+    );
+    effect.setFloat3('phaseTint', ...currentPhaseTint);
   };
 }
 
@@ -359,12 +386,26 @@ function setAttached(next: boolean): void {
   else passCamera.detachPostProcess(pass);
 }
 
-export function applyMapGradient(world: ENUM_WORLD, strength: number): void {
+export function applyMapGradient(
+  world: ENUM_WORLD,
+  strength: number,
+  moodExposure = 1,
+  phaseTint?: readonly [number, number, number]
+): void {
   const gradient = MAP_GRADIENTS[world];
 
   current = gradient ?? NEUTRAL_GRADIENT;
   currentGlow = MAP_GLOW[world] ?? DEFAULT_GLOW;
   currentStrength = Math.max(0, strength);
+  currentExposure = Math.max(moodExposure, 0.01);
+  currentPhaseTint[0] = phaseTint?.[0] ?? 1;
+  currentPhaseTint[1] = phaseTint?.[1] ?? 1;
+  currentPhaseTint[2] = phaseTint?.[2] ?? 1;
 
-  setAttached(gradient !== undefined && currentStrength > 0);
+  const tinted =
+    currentPhaseTint[0] !== 1 ||
+    currentPhaseTint[1] !== 1 ||
+    currentPhaseTint[2] !== 1;
+
+  setAttached((gradient !== undefined && currentStrength > 0) || tinted);
 }
