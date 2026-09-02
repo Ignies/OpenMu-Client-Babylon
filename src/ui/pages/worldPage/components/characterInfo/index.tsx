@@ -7,6 +7,7 @@ import { Store } from '../../../../../store';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { toggleMasterSkillsWindow } from '../masterSkills/windowState';
+import { togglePetInfoWindow } from '../petInfo/windowState';
 import {
   MuItemWindow,
   MuTableFrame,
@@ -565,11 +566,12 @@ export const CharacterInfo = observer(() => {
         tooltip={t(QUEST_TOOLTIP)}
         disabled
       />
+      {/* `m_BtnPet` — `Toggle(INTERFACE_PET)`. */}
       <WindowButton
         x={PET_BUTTON_X}
         file={PET_SPRITE}
         tooltip={t(PET_TOOLTIP)}
-        disabled
+        onClick={() => togglePetInfoWindow()}
       />
       <WindowButton
         x={MASTER_BUTTON_X}

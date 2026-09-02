@@ -660,6 +660,11 @@ export const Store = new (class _Store {
 
   /** `PetInfoResponse` (A9): level / exp / life of the pet the tooltip asked about. */
   petInfo: PetInfo | null = null;
+  /**
+   * `Hero->GetEquipedPetInfo`: the last answer per pet type, so the pet
+   * window's two tabs each keep theirs when both pets are equipped.
+   */
+  petInfoByPet: Partial<Record<number, PetInfo>> = {};
   /** `PetMode` (A7): the Dark Raven's command mode (`PetCommandModeEnum`). */
   petMode = 0;
   /** `PetMode`: the raven's target while in AttackTarget mode; 0xFFFF = none. */
@@ -667,6 +672,7 @@ export const Store = new (class _Store {
 
   setPetInfo(info: PetInfo) {
     this.petInfo = info;
+    this.petInfoByPet = { ...this.petInfoByPet, [info.pet]: info };
   }
 
   setPetMode(mode: number, targetId: number) {
@@ -958,6 +964,7 @@ export const Store = new (class _Store {
       currentSkill: observable,
       skillHotkeys: observable,
       petInfo: observable,
+      petInfoByPet: observable,
       petMode: observable,
       petTargetId: observable,
       muHelper: observable,

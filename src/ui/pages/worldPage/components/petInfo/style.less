@@ -1,0 +1,85 @@
+// `CNewUIPetInfoWindow`. Coordinates live in the component; this is the look
+// of the text lines, the life bar and the command rows.
+.pet-info-window {
+  font-size: 11px;
+
+  .pet-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .pet-name {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .table-fill {
+    position: absolute;
+    background-color: #0000004d;
+  }
+
+  // The yellow bold group-box title (`SetTextColor(255, 255, 0, 255)`).
+  .pet-level {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    color: #ffff00;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .pet-row {
+    position: absolute;
+    text-align: center;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .pet-waiting {
+    position: absolute;
+    text-align: center;
+    color: #a8a8a8;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  // `SetTextColor(0xFF0000FF)` — the red "not equipped" line.
+  .pet-not-equipped {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    color: #ff3232;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .pet-lifebar {
+    position: absolute;
+  }
+  .pet-lifebar-fill {
+    position: absolute;
+  }
+
+  .pet-cmd-slot {
+    position: absolute;
+    cursor: pointer;
+    &:hover {
+      filter: brightness(1.2);
+    }
+  }
+
+  .pet-cmd-label {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    text-shadow: 1px 1px 0 #000;
+  }
+}
