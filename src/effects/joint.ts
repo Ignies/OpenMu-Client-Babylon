@@ -40,6 +40,7 @@ import {
   type IGreasedLineMaterial,
   type Scene,
 } from '../libs/babylon/exports';
+import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
 import { LiveList, effectTexture, fadeOut, fxNow, hash, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
 import { RGBS } from './recipes';
@@ -74,6 +75,13 @@ const MAX_FORKS = 3;
 /** Where an inactive line is parked. */
 const PARKED_Y = -1000;
 
+/** Steering wander damping per tick: the original's `Direction *= 0.6 / 0.8`. */
+const WANDER_DAMP_PITCH = 0.6;
+const WANDER_DAMP_YAW = 0.8;
+
+/** Pitch forced when a steered head leaves its terrain band (`Angle[0] = ±5`). */
+const BAND_ESCAPE_PITCH = (5 * Math.PI) / 180;
+
 // ---- 2. state + readers ----------------------------------------------------
 
 export interface JointOptions {
@@ -91,6 +99,29 @@ export interface JointOptions {
   turn?: number;
   /** Trail: tiles/s² pulling the free head down. */
   gravity?: number;
+  /**
+   * Trail: steer like JOINT_SPIRIT sub0 (ZzzEffectJoint.cpp:3732-3772) — per
+   * tick, home the heading on `seek` by up to `seekRate` radians
+   * (MoveHumming's 10°/frame), kick damped angular velocities with uniform
+   * impulses in ±`wander.pitch` / ±`wander.yaw` (the ±3.2°/±12.8° rolls,
+   * damped ×0.6/×0.8), and keep the head `band` tiles above the terrain (an
+   * excursion zeroes the pitch momentum and pitches 5° back in). Wins over
+   * `turn`/`gravity`.
+   */
+  steer?: {
+    seek?: PointSource;
+    seekRate?: number;
+    wander?: { pitch: number; yaw: number };
+    band?: { floor: number; ceiling: number };
+  };
+  /**
+   * Trail: the head's position, once a tick — the per-frame `CreateEffect`
+   * stamp at a joint's head (Evil Spirit's MODEL_LASER). Read-only: copy it,
+   * never keep it.
+   */
+  trace?: (head: Vector3) => void;
+  /** Fade fraction at end of life (default 0.3). Evil Spirit's `Light = LifeTime * 0.1` is 10/49. */
+  fadeTail?: number;
   /** Trail: segments kept behind the head (C++ `MaxTails`). */
   maxTails?: number;
   colour?: RGB;
@@ -365,7 +396,7 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
         mesh.setPoints(lines);
       }
       line.scroll();
-      line.fade(fadeOut(prog, 0.3) * (0.6 + 0.4 * hash(t * 97)));
+      line.fade(fadeOut(prog, opts.fadeTail ?? 0.3) * (0.6 + 0.4 * hash(t * 97)));
       return true;
     },
     release() {
@@ -383,10 +414,15 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
   const velocity = opts.velocity ?? 0;
   const turn = opts.turn ?? 0;
   const gravity = opts.gravity ?? 0;
+  const steer = opts.steer;
   const heading = opts.heading ? opts.heading.clone().normalize() : new Vector3(0, 0, 1);
   let yaw = Math.atan2(heading.x, heading.z);
-  const pitch = Math.asin(Math.max(-1, Math.min(1, heading.y)));
+  let pitch = Math.asin(Math.max(-1, Math.min(1, heading.y)));
   let vy = velocity * Math.sin(pitch);
+  // Wander momentum, radians per tick (the original's `Direction[0]`/`[2]`).
+  let wanderPitch = 0;
+  let wanderYaw = 0;
+  const seekPoint = new Vector3();
 
   const head = new Vector3(at.x, at.y + height, at.z);
   if (opts.head) {
@@ -414,6 +450,13 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
       if (opts.head) {
         opts.head(head);
         head.y += height;
+      } else if (steer) {
+        // Flight from the live angles; the angles themselves step at tick
+        // cadence below, like the original's 25 Hz frames.
+        const flat = velocity * Math.cos(pitch);
+        head.x += Math.sin(yaw) * flat * dt;
+        head.z += Math.cos(yaw) * flat * dt;
+        head.y += velocity * Math.sin(pitch) * dt;
       } else {
         yaw += turn * dt;
         const flat = velocity * Math.cos(pitch);
@@ -425,15 +468,53 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
       sinceSample += dt;
       if (sinceSample >= TAIL_SAMPLE_SECONDS) {
         sinceSample = 0;
+        if (steer) {
+          if (steer.seek) {
+            // MoveHumming: turn toward the target by at most `seekRate`.
+            steer.seek(seekPoint);
+            const dx = seekPoint.x - head.x;
+            const dy = seekPoint.y - head.y;
+            const dz = seekPoint.z - head.z;
+            const rate = steer.seekRate ?? (10 * Math.PI) / 180;
+            const dYaw = Math.atan2(dx, dz) - yaw;
+            yaw += Math.max(-rate, Math.min(rate, Math.atan2(Math.sin(dYaw), Math.cos(dYaw))));
+            const dPitch = Math.atan2(dy, Math.hypot(dx, dz) || 1) - pitch;
+            pitch += Math.max(-rate, Math.min(rate, dPitch));
+          }
+          const w = steer.wander;
+          if (w) {
+            wanderPitch += (Math.random() * 2 - 1) * w.pitch;
+            wanderYaw += (Math.random() * 2 - 1) * w.yaw;
+            pitch += wanderPitch;
+            yaw += wanderYaw;
+            wanderPitch *= WANDER_DAMP_PITCH;
+            wanderYaw *= WANDER_DAMP_YAW;
+          }
+          const band = steer.band;
+          if (band) {
+            // -9999 until the map's height data is in; skip the clamp then.
+            const ground = Store.world?.getTerrainHeight(head.x, head.z) ?? -9999;
+            if (ground > -9000) {
+              if (head.y < ground + band.floor) {
+                wanderPitch = 0;
+                pitch = BAND_ESCAPE_PITCH;
+              } else if (head.y > ground + band.ceiling) {
+                wanderPitch = 0;
+                pitch = -BAND_ESCAPE_PITCH;
+              }
+            }
+          }
+        }
         // Shift the history back one slot; slot 0 is the head.
         line.copyWithin(3, 0, tails * 3);
+        opts.trace?.(head);
       }
       line[0] = head.x;
       line[1] = head.y;
       line[2] = head.z;
       mesh.setPoints(lines);
       ribbon.scroll();
-      ribbon.fade(fadeOut(prog, 0.3));
+      ribbon.fade(fadeOut(prog, opts.fadeTail ?? 0.3));
       return true;
     },
     release() {
