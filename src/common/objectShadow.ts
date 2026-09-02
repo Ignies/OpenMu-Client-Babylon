@@ -439,6 +439,30 @@ export function createObjectShadow(
   return createOneShadow(root, parent, originNode, slot, rules);
 }
 
+/**
+ * Whether one of the caster's meshes belongs in the silhouette.
+ *
+ * `AddMeshShadowTriangles` (ZzzBMD.cpp:2295) walks every mesh of the body
+ * and skips exactly two: the one the object nominated as `BlendMesh` —
+ * an additive glow card, which is light, not matter — and `HiddenMesh`,
+ * which is not drawn at all. Everything else casts, alpha-keyed or not.
+ *
+ * The rule here used to drop every mesh whose material needed alpha
+ * blending, which after `modelLoader`'s TGA → ALPHATESTANDBLEND promotion
+ * is most of what a character wears: the shadow lost the armour's keyed
+ * trim and its robes, all of a BLEND-textured weapon, and every wing —
+ * which is why it read as a thin, naked body. It survives for map objects
+ * only, as `rules.keyed`.
+ */
+function meshCasts(mesh: AbstractMesh, rules: ShadowMeshRules): boolean {
+  const blendMesh = mesh.metadata?.brightMesh === true;
+  const hidden =
+    mesh.metadata?.hiddenByScript === true || mesh.isVisible === false;
+  const keyed = mesh.material?.needAlphaBlending() === true;
+
+  return !hidden && (!blendMesh || rules.blendMesh) && (!keyed || rules.keyed);
+}
+
 function createOneShadow(
   root: Mesh,
   parent: TransformNode,
@@ -446,6 +470,16 @@ function createOneShadow(
   slot: number,
   rules: ShadowMeshRules
 ): AbstractMesh | null {
+  // Decide on the caster before paying for a clone. A map object built
+  // entirely of alpha cards (Noria's fairy-forest foliage) has nothing to
+  // cast, and cloning its hierarchy just to strip every mesh and dispose the
+  // rest was the dominant frame cost of the whole map — see issue #6.
+  const casts = [root, ...root.getChildMeshes(false)].some(
+    mesh => meshCasts(mesh, rules) && mesh.getTotalVertices() > 0
+  );
+
+  if (!casts) return null;
+
   const clone = root.clone(`${root.name}_shadow${slot}`, parent, false);
   if (!clone) return null;
 
@@ -454,23 +488,7 @@ function createOneShadow(
   let hasGeometry = false;
 
   for (const mesh of [clone, ...clone.getChildMeshes(false)]) {
-    // `AddMeshShadowTriangles` (ZzzBMD.cpp:2295) walks every mesh of the body
-    // and skips exactly two: the one the object nominated as `BlendMesh` —
-    // an additive glow card, which is light, not matter — and `HiddenMesh`,
-    // which is not drawn at all. Everything else casts, alpha-keyed or not.
-    //
-    // The rule here used to drop every mesh whose material needed alpha
-    // blending, which after `modelLoader`'s TGA → ALPHATESTANDBLEND promotion
-    // is most of what a character wears: the shadow lost the armour's keyed
-    // trim and its robes, all of a BLEND-textured weapon, and every wing —
-    // which is why it read as a thin, naked body. It survives for map objects
-    // only, as `rules.keyed`.
-    const blendMesh = mesh.metadata?.brightMesh === true;
-    const hidden =
-      mesh.metadata?.hiddenByScript === true || mesh.isVisible === false;
-    const keyed = mesh.material?.needAlphaBlending() === true;
-
-    if (hidden || (blendMesh && !rules.blendMesh) || (keyed && !rules.keyed)) {
+    if (!meshCasts(mesh, rules)) {
       if (mesh !== clone) mesh.dispose(false, false);
       continue;
     }
