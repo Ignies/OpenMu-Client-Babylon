@@ -597,8 +597,10 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // (MoveHumming 10°/frame) under damped random steering (±3.2° pitch ×0.6, ±12.8° yaw ×0.8 a frame)
   // between terrain +100 and +400; each width-80 joint stamps MODEL_LASER (Scale 1.3, LT 1,
   // RENDER_DARK) at its head every frame — the visible spirits (ZzzCharacter.cpp:4468,
-  // ZzzEffectJoint.cpp:3698, ZzzEffect.cpp:1890). A one-frame stamp at the head each frame is one
-  // model riding the head, so a single Laser01 follows each wide joint's traced position.
+  // ZzzEffectJoint.cpp:3698, ZzzEffect.cpp:1890). Stamps land a tick apart and each holds its spot
+  // for a tick, so the screen shows the newest one plus the just-expired ones still inside display
+  // persistence: a short trail of spirit shadows. Three tick-lagged models per wide joint, dimming
+  // toward the tail, instead of ~50 one-tick spawns per cast.
   9: {
     area: atCaster((at, c) => {
       const seconds = ticks(49);
@@ -609,12 +611,21 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
         band: { floor: 1, ceiling: 4 },
       };
       const fadeTail = 10 / 49;
+      const shades: RGB[] = [[1, 1, 1], [0.65, 0.65, 0.65], [0.4, 0.4, 0.4]];
       for (let i = 0; i < 4; i++) {
         const heading = facing(c, (i * Math.PI) / 2);
-        const head = at.clone();
-        effects.spawn('joint', c.scene, at, { velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.8, colour: RGBS.shade, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail, trace: h => head.copyFrom(h) });
+        const trail = shades.map(() => at.clone());
+        effects.spawn('joint', c.scene, at, {
+          velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.8, colour: RGBS.shade, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail,
+          trace: h => {
+            for (let k = trail.length - 1; k > 0; k--) trail[k].copyFrom(trail[k - 1]);
+            trail[0].copyFrom(h);
+          },
+        });
         effects.spawn('joint', c.scene, at, { velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.2, colour: RGBS.dark, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail });
-        effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: RGBS.white, blend: 'subtract', aim: true, fadeTail, follow: out => out.copyFrom(head) });
+        shades.forEach((shade, k) => {
+          effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: shade, blend: 'subtract', aim: true, fadeTail, follow: out => out.copyFrom(trail[k]) });
+        });
       }
       particles({ recipe: SHADE_MOTES, count: 20 })(at, c);
     }, 1),
