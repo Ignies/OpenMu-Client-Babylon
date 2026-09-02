@@ -2,6 +2,7 @@ import type { Entity, World } from '../ecs/world';
 import { loadGLTF } from './modelLoader';
 import { ModelObject } from './modelObject';
 import type { Item } from '../ecs/world';
+import { PlayerAction } from './objects/enum';
 
 /**
  * `c->Helper` — the pet / mount slot of the appearance (group 13, indices
@@ -63,13 +64,16 @@ export type PetSpec = {
   /**
    * Which rider clip family the mount puts its owner in. The horns use
    * `PLAYER_*_RIDE`; the Dark Horse has its own `PLAYER_*_RIDE_HORSE` pair
-   * (SetPlayerStop:189-195, SetPlayerWalk:477-480).
+   * (SetPlayerStop:189-195, SetPlayerWalk:477-480); a Fenrir the weapon-split
+   * `PLAYER_FENRIR_*` families (SetPlayerStop:164-187, SetAction_Fenrir_*).
    */
-  readonly riderClips?: 'ride' | 'horse';
+  readonly riderClips?: 'ride' | 'horse' | 'fenrir';
   /** `SetAction(o, n)` while the mount stands. Defaults to MOUNT_ACTION_STAND. */
   readonly standAction?: number;
   /** `SetAction(o, n)` while the mount moves. Defaults to MOUNT_ACTION_MOVE. */
   readonly moveAction?: number;
+  /** Fenrir only: the variant's lightning tint (ZzzObject.cpp:869-893). */
+  readonly thunder?: readonly [number, number, number];
 };
 
 const PETS: Readonly<Record<number, PetSpec>> = {
@@ -119,8 +123,47 @@ const PETS: Readonly<Record<number, PetSpec>> = {
   },
 };
 
+export type FenrirVariant = 'red' | 'blue' | 'black' | 'gold';
+
+/**
+ * `GetFenrirType` (ZzzCharacter.cpp:98-108): the horn's option bits, carried
+ * in `Helper.ExcellentFlags` - 0x01 black (Destruction), 0x02 blue
+ * (Protection), 0x04 gold (Illusion), none red.
+ */
+export function fenrirVariant(item: Item | null | undefined): FenrirVariant {
+  const flags = item?.excellentFlags ?? 0;
+  if (flags & 0x01) return 'black';
+  if (flags & 0x02) return 'blue';
+  if (flags & 0x04) return 'gold';
+  return 'red';
+}
+
+function fenrirSpec(
+  variant: FenrirVariant,
+  thunder: readonly [number, number, number]
+): PetSpec {
+  // CreateMountSub: Scale 0.9; pinned to the rider like the Dark Horse
+  // (MoveMount, GOBoid.cpp:174-266), clips driven by fenrirMountAction.
+  return {
+    kind: 'mount',
+    model: `Skill/fenril_${variant}.glb`,
+    scale: 0.9,
+    riderClips: 'fenrir',
+    thunder,
+  };
+}
+
+/** The lightning tints of ZzzObject.cpp:869-893 (black flashes yellow). */
+const FENRIRS: Readonly<Record<FenrirVariant, PetSpec>> = {
+  red: fenrirSpec('red', [0.8, 0, 0]),
+  blue: fenrirSpec('blue', [0.1, 0.1, 0.8]),
+  black: fenrirSpec('black', [1.0, 1.0, 0.2]),
+  gold: fenrirSpec('gold', [0.8, 0.8, 0.1]),
+};
+
 export function petSpec(item: Item | null | undefined): PetSpec | null {
   if (!item || item.group !== PET_GROUP) return null;
+  if (item.num === HORN_OF_FENRIR) return FENRIRS[fenrirVariant(item)];
   return PETS[item.num] ?? null;
 }
 
@@ -160,6 +203,67 @@ export function mountKind(
 /** Mount clip indices (`SetAction(o, n)` in GOBoid.cpp:494-556). */
 export const MOUNT_ACTION_STAND = 0;
 export const MOUNT_ACTION_MOVE = 2;
+
+/** fenril_*.bmd clips (_define.h:508-513). */
+export const FENRIR_ACTION_STAND = 0;
+export const FENRIR_ACTION_WALK = 1;
+export const FENRIR_ACTION_RUN = 2;
+export const FENRIR_ACTION_ATTACK = 3;
+export const FENRIR_ACTION_SKILL = 4;
+export const FENRIR_ACTION_DAMAGE = 5;
+
+/**
+ * The Fenrir half of `MoveMount` (GOBoid.cpp:200-266): which of its own six
+ * clips the wolf plays under a given rider action, and the `o->Velocity` it
+ * runs it at - attack / skill / damage mirror the rider, anything else falls
+ * back to standing.
+ */
+export function fenrirMountAction(rider: number): {
+  action: number;
+  playSpeed: number;
+} {
+  const A = PlayerAction;
+  if (
+    (rider >= A.PLAYER_FENRIR_ATTACK && rider <= A.PLAYER_FENRIR_ATTACK_BOW) ||
+    rider === A.PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR ||
+    rider === A.PLAYER_SKILL_LIGHTNING_ORB_FENRIR ||
+    rider === A.PLAYER_SKILL_DRAIN_LIFE_FENRIR ||
+    rider === A.PLAYER_RAGE_FENRIR_ATTACK_RIGHT
+  ) {
+    return { action: FENRIR_ACTION_ATTACK, playSpeed: 0.4 };
+  }
+  if (
+    (rider >= A.PLAYER_FENRIR_SKILL &&
+      rider <= A.PLAYER_FENRIR_SKILL_ONE_LEFT) ||
+    (rider >= A.PLAYER_RAGE_FENRIR && rider <= A.PLAYER_RAGE_FENRIR_ONE_LEFT)
+  ) {
+    return { action: FENRIR_ACTION_SKILL, playSpeed: 0.4 };
+  }
+  if (
+    (rider >= A.PLAYER_FENRIR_DAMAGE &&
+      rider <= A.PLAYER_FENRIR_DAMAGE_ONE_LEFT) ||
+    (rider >= A.PLAYER_RAGE_FENRIR_DAMAGE &&
+      rider <= A.PLAYER_RAGE_FENRIR_DAMAGE_ONE_LEFT)
+  ) {
+    return { action: FENRIR_ACTION_DAMAGE, playSpeed: 0.4 };
+  }
+  if (
+    (rider >= A.PLAYER_FENRIR_WALK && rider <= A.PLAYER_FENRIR_WALK_ONE_LEFT) ||
+    (rider >= A.PLAYER_RAGE_FENRIR_WALK &&
+      rider <= A.PLAYER_RAGE_FENRIR_WALK_TWO_SWORD)
+  ) {
+    return { action: FENRIR_ACTION_WALK, playSpeed: 1.0 };
+  }
+  if (
+    (rider >= A.PLAYER_FENRIR_RUN &&
+      rider <= A.PLAYER_FENRIR_RUN_ONE_LEFT_ELF) ||
+    (rider >= A.PLAYER_RAGE_FENRIR_RUN &&
+      rider <= A.PLAYER_RAGE_FENRIR_RUN_ONE_LEFT)
+  ) {
+    return { action: FENRIR_ACTION_RUN, playSpeed: 0.6 };
+  }
+  return { action: FENRIR_ACTION_STAND, playSpeed: 0.4 };
+}
 
 const factories = new Map<string, typeof ModelObject>();
 

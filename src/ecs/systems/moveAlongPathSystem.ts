@@ -73,8 +73,9 @@ function runningMovementSpeed(entity: Entity, world: number): number {
     speed = Math.max(speed, isFastWing(wings) ? FAST_WING_MOVEMENT_SPEED : DEFAULT_WING_MOVEMENT_SPEED);
   }
   if (pet) {
-    if (isRidingMount(pet)) speed = Math.max(speed, BASIC_MOUNT_MOVEMENT_SPEED);
-    else if (pet.num === DARK_HORSE || pet.num === HORN_OF_FENRIR) speed = Math.max(speed, HORSE_OR_FENRIR_MOVEMENT_SPEED);
+    // Horse and Fenrir first: both count as riding mounts, at 17 not 15.
+    if (pet.num === DARK_HORSE || pet.num === HORN_OF_FENRIR) speed = Math.max(speed, HORSE_OR_FENRIR_MOVEMENT_SPEED);
+    else if (isRidingMount(pet)) speed = Math.max(speed, BASIC_MOUNT_MOVEMENT_SPEED);
   }
   return speed;
 }

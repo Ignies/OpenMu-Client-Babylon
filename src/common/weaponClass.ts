@@ -317,3 +317,122 @@ export function chooseRunAction(pose: CharacterPose): PlayerAction {
 export function isSocialAction(action: PlayerAction): boolean {
   return action >= PlayerAction.PLAYER_GREETING1 && action <= PlayerAction.PLAYER_SALUTE1;
 }
+
+// ---- Fenrir rider clips ----------------------------------------------------
+// The Fenrir branch of SetPlayerStop (ZzzCharacter.cpp:164-187) and
+// SetAction_Fenrir_Walk / _Run (ZzzAI.cpp:308-390): a two-hands weapon split,
+// with arrows in slot 0 / bolts in slot 1 counting as an empty hand, and the
+// run family picked per base class (Elf / Magic Gladiator / Rage Fighter).
+
+function isArrows(item: Item | null): boolean {
+  return !!item && item.group === GROUP_BOW && item.num === ARROWS_INDEX;
+}
+
+function isBolts(item: Item | null): boolean {
+  return !!item && item.group === GROUP_BOW && item.num === BOLT_INDEX;
+}
+
+export function chooseFenrirIdleAction(pose: CharacterPose): PlayerAction {
+  const [main, off] = weapons(pose);
+  const rage = pose.baseClass === BaseClass.RageFighter;
+
+  if (main && off) {
+    return rage
+      ? PlayerAction.PLAYER_RAGE_FENRIR_STAND_TWO_SWORD
+      : PlayerAction.PLAYER_FENRIR_STAND_TWO_SWORD;
+  }
+  if (main) {
+    return rage
+      ? PlayerAction.PLAYER_RAGE_FENRIR_STAND_ONE_RIGHT
+      : PlayerAction.PLAYER_FENRIR_STAND_ONE_RIGHT;
+  }
+  if (off) {
+    return rage
+      ? PlayerAction.PLAYER_RAGE_FENRIR_STAND_ONE_LEFT
+      : PlayerAction.PLAYER_FENRIR_STAND_ONE_LEFT;
+  }
+  return rage
+    ? PlayerAction.PLAYER_RAGE_FENRIR_STAND
+    : PlayerAction.PLAYER_FENRIR_STAND;
+}
+
+export function chooseFenrirWalkAction(pose: CharacterPose): PlayerAction {
+  const [main, off] = weapons(pose);
+
+  if (pose.baseClass === BaseClass.RageFighter) {
+    if (main && off) return PlayerAction.PLAYER_RAGE_FENRIR_WALK_TWO_SWORD;
+    if (main) return PlayerAction.PLAYER_RAGE_FENRIR_WALK_ONE_RIGHT;
+    if (off) return PlayerAction.PLAYER_RAGE_FENRIR_WALK_ONE_LEFT;
+    return PlayerAction.PLAYER_RAGE_FENRIR_WALK;
+  }
+
+  if (main && off && !isArrows(main) && !isBolts(off)) {
+    return PlayerAction.PLAYER_FENRIR_WALK_TWO_SWORD;
+  }
+  if (main && (!off || isBolts(off))) {
+    return PlayerAction.PLAYER_FENRIR_WALK_ONE_RIGHT;
+  }
+  if (off && (!main || isArrows(main))) {
+    return PlayerAction.PLAYER_FENRIR_WALK_ONE_LEFT;
+  }
+  return PlayerAction.PLAYER_FENRIR_WALK;
+}
+
+export function chooseFenrirRunAction(pose: CharacterPose): PlayerAction {
+  const [main, off] = weapons(pose);
+
+  const pick = (
+    plain: PlayerAction,
+    elf: PlayerAction,
+    magom: PlayerAction,
+    rage: PlayerAction
+  ): PlayerAction => {
+    switch (pose.baseClass) {
+      case BaseClass.Elf:
+        return elf;
+      case BaseClass.MagicGladiator:
+        return magom;
+      case BaseClass.RageFighter:
+        return rage;
+      default:
+        return plain;
+    }
+  };
+
+  if (main && off && !isArrows(main) && !isBolts(off)) {
+    return pick(
+      PlayerAction.PLAYER_FENRIR_RUN_TWO_SWORD,
+      PlayerAction.PLAYER_FENRIR_RUN_TWO_SWORD_ELF,
+      PlayerAction.PLAYER_FENRIR_RUN_TWO_SWORD_MAGOM,
+      PlayerAction.PLAYER_RAGE_FENRIR_RUN_TWO_SWORD
+    );
+  }
+  if (main && !off) {
+    return pick(
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_RIGHT,
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_RIGHT_ELF,
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_RIGHT_MAGOM,
+      PlayerAction.PLAYER_RAGE_FENRIR_RUN_ONE_RIGHT
+    );
+  }
+  if (main && off && isBolts(off)) {
+    return PlayerAction.PLAYER_FENRIR_RUN_ONE_RIGHT_ELF;
+  }
+  if (!main && off) {
+    return pick(
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_LEFT,
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_LEFT_ELF,
+      PlayerAction.PLAYER_FENRIR_RUN_ONE_LEFT_MAGOM,
+      PlayerAction.PLAYER_RAGE_FENRIR_RUN_ONE_LEFT
+    );
+  }
+  if (main && off && isArrows(main)) {
+    return PlayerAction.PLAYER_FENRIR_RUN_ONE_LEFT_ELF;
+  }
+  return pick(
+    PlayerAction.PLAYER_FENRIR_RUN,
+    PlayerAction.PLAYER_FENRIR_RUN_ELF,
+    PlayerAction.PLAYER_FENRIR_RUN_MAGOM,
+    PlayerAction.PLAYER_RAGE_FENRIR_RUN
+  );
+}
