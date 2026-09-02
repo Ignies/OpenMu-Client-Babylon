@@ -24,7 +24,7 @@ import {
 } from '../common/gameOptions';
 import { applyMapGradient, createMapGradient } from './mapGradient';
 import {
-  itemEmissiveAt,
+  itemHaloAt,
   itemGlowClock,
   type ItemVisualTier,
 } from '../common/itemVisualTier';
@@ -736,6 +736,14 @@ type PhaseModifier = {
    * graded, the way the reference night is.
    */
   readonly sceneTint: readonly [number, number, number];
+  /**
+   * Full-frame resaturation in the gradient pass, after `sceneTint`. The
+   * phase tints are multiplies and a multiply can only remove colour — on
+   * warm textures a cool tint cancels into grey. This wins the richness
+   * back where the reference phases are saturated, and unlike the
+   * split-tone it is not gated behind the user's colorTint slider.
+   */
+  readonly sceneSat: number;
   /** On the map's authored clear colour — the sky itself. */
   readonly clearTint: readonly [number, number, number];
   /** On the GlowLayer, so emissives pop after dark. */
@@ -764,6 +772,7 @@ const NOON_MODIFIER: PhaseModifier = {
   fogDensityScale: 1,
   gradientScale: 1,
   sceneTint: [1, 1, 1],
+  sceneSat: 1,
   clearTint: [1, 1, 1],
   glowBoost: 1,
 };
@@ -787,6 +796,7 @@ const DAWN_MODIFIER: PhaseModifier = {
   fogTint: [1, 0.85, 0.7],
   gradientScale: 0.9,
   sceneTint: [1, 0.93, 0.86],
+  sceneSat: 1.12,
   clearTint: [1.15, 0.9, 0.72],
 };
 
@@ -809,6 +819,7 @@ const DUSK_MODIFIER: PhaseModifier = {
   fogTint: [0.9, 0.7, 0.8],
   gradientScale: 0.8,
   sceneTint: [0.98, 0.85, 0.95],
+  sceneSat: 1.15,
   clearTint: [0.75, 0.5, 0.65],
   glowBoost: 1.15,
 };
@@ -821,14 +832,16 @@ const DUSK_MODIFIER: PhaseModifier = {
 const NIGHT_MODIFIER: PhaseModifier = {
   ...NOON_MODIFIER,
   keyScale: 0.46,
-  // Pushed well past neutral: Lorencia's warm bake × a mild blue tint lands
-  // on grey-brown, and the reference night is unmistakably teal-blue air.
-  // The blue has to win the multiply, not split it — but the frame must
-  // stay legible (a moonlit ground, not a black one).
-  skyTint: [0.42, 0.58, 1.0],
-  sunTint: [0.6, 0.74, 1],
-  bakeScale: 0.78,
-  bakeTint: [0.44, 0.6, 1.02],
+  // The light tints stay MILD on purpose: a hard blue multiplied onto warm
+  // textures cancels channel-wise into grey — with post off there is
+  // nothing downstream to win the colour back, so every texture reads pale
+  // and bland. Darkness comes from the scales; the blue *richness* comes
+  // from the post path (sceneTint plus the sceneSat resaturation in the
+  // gradient pass).
+  skyTint: [0.68, 0.76, 1.0],
+  sunTint: [0.75, 0.84, 1],
+  bakeScale: 0.6,
+  bakeTint: [0.74, 0.8, 1.0],
   exposureShift: 0,
   highlightsSaturationShift: -20,
   // The blue must survive the grade: several maps author their shadow
@@ -849,6 +862,7 @@ const NIGHT_MODIFIER: PhaseModifier = {
   fogDensityScale: 0.55,
   gradientScale: 0.35,
   sceneTint: [0.6, 0.75, 1.0],
+  sceneSat: 1.35,
   clearTint: [0.15, 0.21, 0.3],
   glowBoost: 1.4,
 };
@@ -956,6 +970,7 @@ const blendedModifier = {
   fogDensityScale: 1,
   gradientScale: 1,
   sceneTint: [1, 1, 1] as [number, number, number],
+  sceneSat: 1,
   clearTint: [1, 1, 1] as [number, number, number],
   glowBoost: 1,
 };
@@ -976,6 +991,7 @@ function blendPhaseModifiers(strength: number): void {
   m.bakeScale = 0;
   m.fogDensityScale = 0;
   m.gradientScale = 0;
+  m.sceneSat = 0;
   m.glowBoost = 0;
   m.exposureShift = 0;
   m.contrastShift = 0;
@@ -1003,6 +1019,7 @@ function blendPhaseModifiers(strength: number): void {
     m.bakeScale += w * p.bakeScale;
     m.fogDensityScale += w * p.fogDensityScale;
     m.gradientScale += w * p.gradientScale;
+    m.sceneSat += w * p.sceneSat;
     m.glowBoost += w * p.glowBoost;
     m.exposureShift += w * p.exposureShift;
     m.contrastShift += w * p.contrastShift;
@@ -1042,6 +1059,7 @@ function blendPhaseModifiers(strength: number): void {
   m.bakeScale = 1 + (m.bakeScale - 1) * s;
   m.fogDensityScale = 1 + (m.fogDensityScale - 1) * s;
   m.gradientScale = 1 + (m.gradientScale - 1) * s;
+  m.sceneSat = 1 + (m.sceneSat - 1) * s;
   m.glowBoost = 1 + (m.glowBoost - 1) * s;
   m.exposureShift *= s;
   m.contrastShift *= s;
@@ -1174,7 +1192,10 @@ export function applySceneLook(
       return;
     }
 
-    itemEmissiveAt(tier, itemGlowClock(), result);
+    // The capped halo ladder, not the surface intensity: the layer floods
+    // the whole silhouette, and at surface strength it drowns the armor
+    // into one bright blob.
+    itemHaloAt(tier, itemGlowClock(), result);
   };
 
   // A tier glow covers the whole mesh, so the trim map only stands in when
@@ -1702,7 +1723,8 @@ function writeMood(
     appliedWorld,
     GameOptions.postProcessing ? mapGradientStrength() * mood.gradient : 0,
     mood.exposure,
-    GameOptions.postProcessing ? blendedModifier.sceneTint : undefined
+    GameOptions.postProcessing ? blendedModifier.sceneTint : undefined,
+    GameOptions.postProcessing ? blendedModifier.sceneSat : 1
   );
 
   [terrainBakeTint[0], terrainBakeTint[1], terrainBakeTint[2]] =

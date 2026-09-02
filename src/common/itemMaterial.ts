@@ -281,13 +281,17 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
     bool fxSpecials = (fx & ${FX_SPECIALS}) != 0;
     bool fxChrome2Light = (fx & ${FX_CHROME2_FROM_LIGHT}) != 0;
 
-    // Improved look: the GlowLayer does the halo; this is the in-surface part —
-    // a soft sheen plus a view-dependent rim so the metal reads as lit from
-    // within instead of just bloomed.
+    // Improved look: the GlowLayer draws a soft capped halo (itemHaloAt);
+    // this is the in-surface part. Two rules keep the armor readable at high
+    // levels: the sheen rides the texel's own brightness squared, so the
+    // tint lands on trim and metal detail while dark leather keeps its
+    // texture (a flat add drowned everything into one bright shape), and
+    // the view-dependent rim stays a thin edge light.
     if (itemGlow.r + itemGlow.g + itemGlow.b > 0.0) {
       float rim = 1.0 - clamp(dot(normalize(viewDirectionW), normalW), 0.0, 1.0);
       rim = rim * rim * rim;
-      ${color}.rgb += itemGlow * (0.12 + 0.7 * rim);
+      float texLum = dot(${texel}.rgb, vec3(0.299, 0.587, 0.114));
+      ${color}.rgb += itemGlow * (0.3 * texLum * texLum + 0.35 * rim);
     }
 
     if (fxLegacy) {

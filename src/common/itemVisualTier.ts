@@ -47,6 +47,15 @@ export type ItemVisualTier = {
   readonly emissive: RGB;
   /** Emissive strength at the pulse peak (0 = no level glow). */
   readonly intensity: number;
+  /**
+   * GlowLayer halo amplitude — deliberately a much gentler ladder than
+   * `intensity`. The layer paints the *whole mesh silhouette* and blurs it,
+   * so anything near the surface intensity floods the armor into one bright
+   * shape and every texel of detail drowns (the "reflective blob"). The
+   * halo stays a soft aura; the level reads through the crackle/aura
+   * density, the pooled light and the in-surface sheen instead.
+   */
+  readonly halo: number;
   /** Fraction of `intensity` that breathes, and the breath rate (rad/s). */
   readonly pulse: number;
   readonly pulseRate: number;
@@ -135,6 +144,7 @@ export function itemVisualTier(item: Item | null | undefined): ItemVisualTier {
 
   let emissive: RGB = NONE;
   let intensity = 0;
+  let halo = 0;
   let pulse = 0;
   let pulseRate = 0;
 
@@ -145,6 +155,7 @@ export function itemVisualTier(item: Item | null | undefined): ItemVisualTier {
     case 1:
       emissive = colour;
       intensity = 0.35;
+      halo = 0.18;
       pulse = 0.35;
       pulseRate = 2;
       break;
@@ -153,6 +164,7 @@ export function itemVisualTier(item: Item | null | undefined): ItemVisualTier {
       // a visible step between the two so the level reads at a glance.
       emissive = colour;
       intensity = level === 9 ? 1.1 : 1.3;
+      halo = level === 9 ? 0.32 : 0.38;
       pulse = 0.45;
       pulseRate = 3;
       auraRate = level === 9 ? 18 : 24;
@@ -162,6 +174,7 @@ export function itemVisualTier(item: Item | null | undefined): ItemVisualTier {
       // +11 / +12: dense motes, sparks, forked arcs and an orbit ring.
       emissive = colour;
       intensity = level === 11 ? 1.6 : 1.8;
+      halo = level === 11 ? 0.48 : 0.54;
       pulse = 0.45;
       pulseRate = 3.5;
       auraRate = level === 11 ? 34 : 42;
@@ -170,6 +183,7 @@ export function itemVisualTier(item: Item | null | undefined): ItemVisualTier {
     case 4:
       emissive = colour;
       intensity = 2.1 + (level - 13) * 0.3;
+      halo = 0.62 + (level - 13) * 0.08;
       pulse = 0.4;
       pulseRate = 4;
       auraRate = 52 + (level - 13) * 8;
@@ -199,6 +213,7 @@ export function itemVisualTier(item: Item | null | undefined): ItemVisualTier {
     glow,
     emissive,
     intensity,
+    halo,
     pulse,
     pulseRate,
     lightGain,
@@ -326,6 +341,73 @@ export function itemEmissiveAt<T extends ColorOut & { a?: number }>(
   }
 
   // With the legacy wash underneath, the halo in the same colour doubles up.
+  const k = legacyItemEffectsOn() ? BOTH_SCALE : 1;
+
+  out.r = r * k;
+  out.g = g * k;
+  out.b = b * k;
+  out.a = 1;
+
+  return out;
+}
+
+/**
+ * Colour handed to the GlowLayer's emissive selector: the tier tint at the
+ * capped `halo` amplitude, breathing on the shared clock. Separate from
+ * `itemEmissiveAt` on purpose — the layer floods the whole silhouette, so it
+ * gets the soft-aura ladder while the surface sheen keeps the full ladder.
+ * The excellent / ancient / socket shimmers ride along at half gain so their
+ * colour still reads in the aura without re-flooding it.
+ */
+export function itemHaloAt<T extends ColorOut & { a?: number }>(
+  tier: ItemVisualTier,
+  t: number,
+  out: T
+): T {
+  let r = 0;
+  let g = 0;
+  let b = 0;
+
+  if (tier.halo > 0) {
+    const breath = 1 - tier.pulse * (0.5 - 0.5 * Math.sin(t * tier.pulseRate));
+    const k = tier.halo * breath;
+
+    r += tier.emissive[0] * k;
+    g += tier.emissive[1] * k;
+    b += tier.emissive[2] * k;
+  }
+
+  const specials = legacyRenderLevel() > 0;
+
+  if (tier.isExcellent && specials) {
+    const m = 0.5 + 0.5 * Math.sin(t * EXC_RATE);
+    const e = EXC_GAIN * 0.5;
+
+    r += (EXC_A[0] + (EXC_B[0] - EXC_A[0]) * m) * e;
+    g += (EXC_A[1] + (EXC_B[1] - EXC_A[1]) * m) * e;
+    b += (EXC_A[2] + (EXC_B[2] - EXC_A[2]) * m) * e;
+  }
+
+  if (tier.isAncient && specials) {
+    const k =
+      (ANCIENT_BASE + ANCIENT_PULSE * (0.5 + 0.5 * Math.sin(t * ANCIENT_RATE))) *
+      0.5;
+
+    r += ANCIENT[0] * k;
+    g += ANCIENT[1] * k;
+    b += ANCIENT[2] * k;
+  }
+
+  if (tier.sockets > 0) {
+    const k =
+      SOCKET_GAIN *
+      (0.5 + 0.5 * Math.sin(t * SOCKET_RATE * (1 + tier.sockets * 0.15)));
+
+    r += SOCKET[0] * k;
+    g += SOCKET[1] * k;
+    b += SOCKET[2] * k;
+  }
+
   const k = legacyItemEffectsOn() ? BOTH_SCALE : 1;
 
   out.r = r * k;

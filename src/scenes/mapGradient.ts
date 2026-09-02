@@ -251,6 +251,11 @@ Effect.ShadersStore[`${SHADER_NAME}FragmentShader`] = `
   // reference does.
   uniform vec3 phaseTint;
 
+  // Resaturation after the phase tint (sceneLook sceneSat): a tint multiply
+  // can only remove colour - cool light on warm ground cancels into grey -
+  // so the dark phases pull their richness back here. 1 = untouched.
+  uniform float phaseSat;
+
   const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 
   void main(void) {
@@ -291,7 +296,10 @@ Effect.ShadersStore[`${SHADER_NAME}FragmentShader`] = `
     float gray = dot(col, LUMA);
     col = mix(vec3(gray), col, 1.0 + envelope.w * strength);
 
-gl_FragColor = vec4(max(col * phaseTint, 0.0) / gradExposure, scene.a);
+    col *= phaseTint;
+    col = mix(vec3(dot(col, LUMA)), col, phaseSat);
+
+gl_FragColor = vec4(max(col, 0.0) / gradExposure, scene.a);
   }
 `;
 
@@ -306,6 +314,7 @@ let currentStrength = 0;
 let currentExposure = 1;
 /** The day/night cycle's full-frame grade (sceneLook `sceneTint`). */
 const currentPhaseTint: [number, number, number] = [1, 1, 1];
+let currentPhaseSat = 1;
 
 export function createMapGradient(scene: Scene, camera: Camera): void {
   if (pass) return;
@@ -327,6 +336,7 @@ export function createMapGradient(scene: Scene, camera: Camera): void {
       'strength',
       'gradExposure',
       'phaseTint',
+      'phaseSat',
     ],
     null,
     1,
@@ -374,6 +384,7 @@ export function createMapGradient(scene: Scene, camera: Camera): void {
       passScene && linearBufferActive(passScene) ? currentExposure : 1
     );
     effect.setFloat3('phaseTint', ...currentPhaseTint);
+    effect.setFloat('phaseSat', currentPhaseSat);
   };
 }
 
@@ -390,7 +401,8 @@ export function applyMapGradient(
   world: ENUM_WORLD,
   strength: number,
   moodExposure = 1,
-  phaseTint?: readonly [number, number, number]
+  phaseTint?: readonly [number, number, number],
+  phaseSat = 1
 ): void {
   const gradient = MAP_GRADIENTS[world];
 
@@ -401,11 +413,13 @@ export function applyMapGradient(
   currentPhaseTint[0] = phaseTint?.[0] ?? 1;
   currentPhaseTint[1] = phaseTint?.[1] ?? 1;
   currentPhaseTint[2] = phaseTint?.[2] ?? 1;
+  currentPhaseSat = Math.max(0, phaseSat);
 
   const tinted =
     currentPhaseTint[0] !== 1 ||
     currentPhaseTint[1] !== 1 ||
-    currentPhaseTint[2] !== 1;
+    currentPhaseTint[2] !== 1 ||
+    currentPhaseSat !== 1;
 
   setAttached((gradient !== undefined && currentStrength > 0) || tinted);
 }
