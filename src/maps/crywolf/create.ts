@@ -1,23 +1,22 @@
 import type { World } from '../../ecs/world';
-import { AlphaObject } from '../shared/objectVariants';
+import { CrywolfDomeObject, CrywolfVentObject } from './eventObjects';
 
 /**
  * Crywolf Fortress (`WD_34CRYWOLF_1ST`, `World35`/`Object35`).
  *
  * `MoveCryWolf1stObject` (GMCrywolf1st.cpp:330-372) is the whole runtime:
- * three lights and three hidden markers (`spec.ts`) and one alpha —
- * **81** (×1, 120.9/31.9), `o->Alpha = 0.2f`, the altar's energy dome.
+ * three lights and three hidden markers (`spec.ts`), plus the event staging
+ * in `eventObjects.ts` - the energy dome **81** (×1, 120.9/31.9) and the
+ * smoke vents **74** and **84**, all reading `events/crywolf.ts`.
  *
  * Not built:
  *  - The three-state map: `EncTerrain351.att` / `352.att` and
  *    `TerrainLight1/2.jpg` for the occupied / at-war states (MapManager.cpp
  *    :1241-1256, :1341-1356) and `ChangeBackGroundMusic`'s
- *    `crywolf_before/ready/back` stingers (:268-320) — all driven by
- *    `M34CryWolf1st::IsCryWolf1stMVPStart()`, i.e. server state the clone
- *    does not receive. The peace state is staged: `EncTerrain35.att`,
- *    `TerrainLight.OZJ`, `Music/crywolf1st`.
+ *    `crywolf_before/ready/back` stingers (:268-320). The peace state is
+ *    staged: `EncTerrain35.att`, `TerrainLight.OZJ`, `Music/crywolf1st`.
+ *    OpenMU never runs the event, so the swaps would be dead paths today.
  *  - `M34CryWolf1st::CreateMist` (weather 2 only) — a weather recipe.
- *  - The MVP interface and the notice board (:224, :2188+).
  *
  * `SOUND_CRY1ST_AMBIENT` (`w35/crywolf_ambi.wav`, loaded looping at
  * MapManager.cpp:193) is the bed in `ambientBeds.ts`.
@@ -28,6 +27,7 @@ export async function createCrywolf(world: World) {
 
   const tiles = terrain.MapTileObjects;
 
-  // GMCrywolf1st.cpp:358-360.
-  tiles[81] = AlphaObject.at(0.2);
+  tiles[74] = CrywolfVentObject;
+  tiles[81] = CrywolfDomeObject;
+  tiles[84] = CrywolfVentObject;
 }

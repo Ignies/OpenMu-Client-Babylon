@@ -17,15 +17,13 @@ export const CRYWOLF_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
  * `MoveCryWolf1stObject` :363-366 hides 82 (×5), 83 (none placed) and 84
- * (×4); `RenderCryWolf1stObjectVisual` :420-426 gives 84 a `BITMAP_SMOKE`
- * SubType 21 puff. 82 has no effect in the C++.
+ * (×4); 82 has no effect in the C++. 84's occupied-state smoke puff lives in
+ * `eventObjects.ts` (state-gated), not in the emissions table.
  */
 export const CRYWOLF_EFFECT_ONLY_TYPES: readonly number[] = [82, 83, 84];
 
-/** Type 84, the smoke vents by the altar (94.6/26.6). */
-export const CRYWOLF_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
-  84: [{ kinds: ['smoke21'], every: 3 }],
-};
+/** No unconditional emissions; the vents (74/84) are event-staged. */
+export const CRYWOLF_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {};
 
 /**
  * `MoveCryWolf1stObject`:
