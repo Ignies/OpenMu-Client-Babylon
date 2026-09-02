@@ -153,6 +153,7 @@ export const russianLayer: LanguageLayer = {
     'options.effectLevel': 'Предел +эффектов',
     'options.shadows': 'Тени объектов',
     'options.dynamicLights': 'Динамический свет',
+    'options.dayNightCycle': 'Смена дня и ночи',
     'options.postProcessing': 'Постобработка',
     'options.toneMapping': 'Плёночный тонмаппинг',
     'options.ambientParticles': 'Частицы окружения',

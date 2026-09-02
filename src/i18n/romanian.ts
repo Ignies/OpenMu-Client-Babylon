@@ -152,6 +152,7 @@ export const romanianLayer: LanguageLayer = {
     'options.effectLevel': 'Limita de +efecte',
     'options.shadows': 'Umbrele obiectelor',
     'options.dynamicLights': 'Lumini dinamice',
+    'options.dayNightCycle': 'Ciclu zi/noapte',
     'options.postProcessing': 'Post-procesare',
     'options.toneMapping': 'Tone mapping filmic',
     'options.ambientParticles': 'Particule de ambient',

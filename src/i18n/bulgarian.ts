@@ -153,6 +153,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.effectLevel': 'Ограничение на +ефекти',
     'options.shadows': 'Сенки на обектите',
     'options.dynamicLights': 'Динамични светлини',
+    'options.dayNightCycle': 'Цикъл ден/нощ',
     'options.postProcessing': 'Постобработка',
     'options.toneMapping': 'Филмов тонмапинг',
     'options.ambientParticles': 'Частици на средата',

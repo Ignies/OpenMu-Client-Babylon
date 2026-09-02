@@ -156,6 +156,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.effectLevel': '+エフェクト上限',
     'options.shadows': 'オブジェクトの影',
     'options.dynamicLights': '動的ライト',
+    'options.dayNightCycle': '昼夜サイクル',
     'options.postProcessing': 'ポストプロセス',
     'options.toneMapping': 'フィルム調トーンマッピング',
     'options.ambientParticles': '環境パーティクル',

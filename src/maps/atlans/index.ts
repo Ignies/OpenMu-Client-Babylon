@@ -51,6 +51,9 @@ export const atlansLayer: MapLayer = {
   tiles: TILES,
   spawn: SPAWN,
   outdoor: OUTDOOR,
+  // Underwater: a sun twenty metres down is a rumour, so the day/night
+  // cycle only drifts the depths instead of driving them.
+  dayCycle: 0.3,
   blendMeshes: ATLANS_BLEND_MESHES,
   effectOnly: ATLANS_EFFECT_ONLY_TYPES,
   emissions: ATLANS_EMISSIONS,

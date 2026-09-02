@@ -25,6 +25,7 @@ import {
   type EmojiBubbleId,
 } from './common/emojiBubbles';
 import { localCommandOf } from './common/chatCommands';
+import { runTimeCommand } from './scenes/sceneLook';
 import { Commands } from './commands';
 import {
   CancelGuildCreationPacket,
@@ -390,6 +391,21 @@ export const Social = new (class _Social {
       // The original logs an outgoing whisper under the hero's name.
       this.addChatLine(heroName, text, ChatLineType.Whisper);
       this.remember(this.whisperHistory, whisperTo);
+      return true;
+    }
+
+    // `/time` freezes the day/night clock on this client for testing and
+    // screenshots; it never reaches the server.
+    if (text.trim().split(' ')[0].toLowerCase() === '/time') {
+      const arg = text.trim().split(' ').slice(1).join(' ').trim();
+
+      if (arg && runTimeCommand(arg)) {
+        this.systemMessage(`Time of day: ${arg}`);
+      } else {
+        this.errorMessage('Usage: /time <dawn|noon|dusk|night|0..1|off>');
+      }
+
+      this.remember(this.chatHistory, text);
       return true;
     }
 

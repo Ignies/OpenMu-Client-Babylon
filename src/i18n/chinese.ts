@@ -154,6 +154,7 @@ export const chineseLayer: LanguageLayer = {
     'options.effectLevel': '+特效上限',
     'options.shadows': '物体阴影',
     'options.dynamicLights': '动态光源',
+    'options.dayNightCycle': '昼夜循环',
     'options.postProcessing': '后期处理',
     'options.toneMapping': '电影色调映射',
     'options.ambientParticles': '环境粒子',
