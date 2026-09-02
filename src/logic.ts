@@ -42,6 +42,8 @@ import {
   AddCharactersToScopePacket,
   AddCharacterToScopeExtendedPacket,
   AddNpcsToScopePacket,
+  AddSummonedMonstersToScopePacket,
+  SummonHealthUpdatePacket,
   CharacterClassCreationUnlockPacket,
   CharacterCreationSuccessfulPacket,
   CharacterDeleteResponseCharacterDeleteResultEnum,
@@ -792,100 +794,157 @@ onLanguageChanged(() => {
     if (!world) return;
 
     for (const e of world.with('npcType', 'objectNameInWorld')) {
-      e.objectNameInWorld = monsterDisplayName(e.npcType, 'NPC');
+      e.objectNameInWorld = e.summonedBy
+        ? summonDisplayName(e.npcType, e.summonedBy)
+        : monsterDisplayName(e.npcType, 'NPC');
     }
   });
 });
 
+/**
+ * ReceiveCreateSummonViewport (WSclient.cpp:2718-2727): the tag is the
+ * monster name plus "Of" + owner (GlobalText 485); the Castle Siege
+ * gates/statues (types 152-158) keep their plain name.
+ */
+function summonDisplayName(type: number, owner: string): string {
+  const base = monsterDisplayName(type, 'NPC');
+  if (type >= 152 && type <= 158) return base;
+  return `${base} of ${owner}`;
+}
+
+type ScopeNpc = {
+  Id: number;
+  TypeNumber: number;
+  CurrentPositionX: number;
+  CurrentPositionY: number;
+  Rotation: number;
+  /** AddSummonedMonstersToScope only: name of the summoning player. */
+  OwnerCharacterName?: string;
+};
+
+function addNpcToScope(world: World, npc: ScopeNpc) {
+  const id = npc.Id & 0x7fff;
+
+  removeNetObject(world, id);
+
+  if (!isKnownObjectType(npc.TypeNumber)) {
+    console.warn(
+      `No model mapping for NPC type ${npc.TypeNumber} (${
+        monsterDisplayName(npc.TypeNumber, 'unnamed')
+      }). Falling back to the Bull Fighter, as the original's default: arm does.`
+    );
+  }
+
+  const modelFactory = resolveModelFactory(npc.TypeNumber);
+  const owner = npc.OwnerCharacterName;
+
+  const npcEntity = world.add({
+    netId: id,
+    worldIndex: world.mapIndex,
+    npcType: npc.TypeNumber,
+    transform: {
+      pos: new Vector3(
+        npc.CurrentPositionX,
+        world.getTerrainHeight(npc.CurrentPositionX, npc.CurrentPositionY),
+        npc.CurrentPositionY
+      ),
+      rot: new Vector3(0, convertDirectionToAngle(npc.Rotation), 0),
+      scale: modelFactory.OverrideScale >= 0 ? modelFactory.OverrideScale : 1,
+    },
+    modelFactory,
+    pathfinding: {
+      from: { x: 0, y: 0 },
+      to: { x: 0, y: 0 },
+      path: [],
+      calculated: true,
+    },
+    playerMoveTo: {
+      point: { x: 0, y: 0 },
+      handled: true as boolean,
+    },
+    movement: {
+      velocity: { x: 0, y: 0 },
+    },
+    monsterAnimation: {
+      action: MonsterActionType.Stop1,
+    },
+    attributeSystem: createAttributeSystem(),
+    visibility: {
+      lastChecked: 0,
+      state: 'hidden',
+    },
+    screenPosition: {
+      worldOffsetZ: 2.5,
+      x: 0,
+      y: 0,
+    },
+    objectNameInWorld: owner
+      ? summonDisplayName(npc.TypeNumber, owner)
+      : monsterDisplayName(npc.TypeNumber, 'NPC'),
+    interactable: true,
+  });
+
+  if (owner) world.addComponent(npcEntity, 'summonedBy', owner);
+
+  // Player-rig NPCs (the Elf Soldier, the guards) carry a class; monsters
+  // do not. Hard-zeroing isFemale here made every one of them animate male.
+  const npcClass = npcClassOf(modelFactory);
+  npcEntity.attributeSystem.setValue(
+    'isFemale',
+    npcClass !== null && isFemaleClass(npcClass) ? 1 : 0
+  );
+  npcEntity.attributeSystem.setValue('isFlying', 0);
+  // Original: every character starts with MoveSpeed = 10 units per 25-fps
+  // frame (ZzzCharacter.cpp:11530, MoveCharacterPosition:6259) and monsters
+  // never change it -> 10 * 25 / 100 = 2.5 tiles/s. The server sends no
+  // monster speed; without this the attribute reads 0 and the walk stalls.
+  npcEntity.attributeSystem.setValue(
+    'totalMovementSpeed',
+    MONSTER_WALK_TILES_PER_SECOND
+  );
+
+  const monsterHP = MonstersDatabase.get(npc.TypeNumber)?.HP ?? 0;
+  npcEntity.attributeSystem.setValue('maxHealth', monsterHP);
+  npcEntity.attributeSystem.setValue('currentHealth', monsterHP);
+}
+
 EventBus.on('AddNpcsToScope', packet => {
   const p = new AddNpcsToScopePacket(packet);
-  const npcs = p.getNPCs();
 
   const world = Store.world;
   if (!world) return;
 
-  const worldIndex = world.mapIndex;
+  p.getNPCs().forEach(npc => addNpcToScope(world, npc));
+});
 
-  npcs.forEach(npc => {
-    const id = npc.Id & 0x7fff;
+// 0x1F (ReceiveCreateSummonViewport): a player's summons enter scope. Same
+// spawn path as monsters, with the owner's name carried on the entity.
+EventBus.on('AddSummonedMonstersToScope', packet => {
+  const p = new AddSummonedMonstersToScopePacket(packet);
 
-    removeNetObject(world, id);
+  const world = Store.world;
+  if (!world) return;
 
-    if (!isKnownObjectType(npc.TypeNumber)) {
-      console.warn(
-        `No model mapping for NPC type ${npc.TypeNumber} (${
-          monsterDisplayName(npc.TypeNumber, 'unnamed')
-        }). Falling back to the Bull Fighter, as the original's default: arm does.`
-      );
+  p.getSummonedMonsters().forEach(m => addNpcToScope(world, m));
+});
+
+// F3 20 (ReceiveSummonLife): percent health of the hero's own summon. The
+// original shows it as a gauge in the endurance panel; here it drives the
+// summon's health bar directly.
+EventBus.on('SummonHealthUpdate', packet => {
+  const p = new SummonHealthUpdatePacket(packet);
+
+  const world = Store.world;
+  if (!world) return;
+
+  const owner = Store.playerData.name;
+  for (const e of world.with('summonedBy', 'attributeSystem')) {
+    if (e.summonedBy !== owner || e.objOutOfScope) continue;
+    const max = e.attributeSystem.getValue('maxHealth');
+    if (max > 0) {
+      e.attributeSystem.setValue('currentHealth', (max * p.HealthPercent) / 100);
     }
-
-    const modelFactory = resolveModelFactory(npc.TypeNumber);
-
-    const npcEntity = world.add({
-      netId: id,
-      worldIndex,
-      npcType: npc.TypeNumber,
-      transform: {
-        pos: new Vector3(
-          npc.CurrentPositionX,
-          world.getTerrainHeight(npc.CurrentPositionX, npc.CurrentPositionY),
-          npc.CurrentPositionY
-        ),
-        rot: new Vector3(0, convertDirectionToAngle(npc.Rotation), 0),
-        scale: modelFactory.OverrideScale >= 0 ? modelFactory.OverrideScale : 1,
-      },
-      modelFactory,
-      pathfinding: {
-        from: { x: 0, y: 0 },
-        to: { x: 0, y: 0 },
-        path: [],
-        calculated: true,
-      },
-      playerMoveTo: {
-        point: { x: 0, y: 0 },
-        handled: true as boolean,
-      },
-      movement: {
-        velocity: { x: 0, y: 0 },
-      },
-      monsterAnimation: {
-        action: MonsterActionType.Stop1,
-      },
-      attributeSystem: createAttributeSystem(),
-      visibility: {
-        lastChecked: 0,
-        state: 'hidden',
-      },
-      screenPosition: {
-        worldOffsetZ: 2.5,
-        x: 0,
-        y: 0,
-      },
-      objectNameInWorld: monsterDisplayName(npc.TypeNumber, 'NPC'),
-      interactable: true,
-    });
-
-    // Player-rig NPCs (the Elf Soldier, the guards) carry a class; monsters
-    // do not. Hard-zeroing isFemale here made every one of them animate male.
-    const npcClass = npcClassOf(modelFactory);
-    npcEntity.attributeSystem.setValue(
-      'isFemale',
-      npcClass !== null && isFemaleClass(npcClass) ? 1 : 0
-    );
-    npcEntity.attributeSystem.setValue('isFlying', 0);
-    // Original: every character starts with MoveSpeed = 10 units per 25-fps
-    // frame (ZzzCharacter.cpp:11530, MoveCharacterPosition:6259) and monsters
-    // never change it -> 10 * 25 / 100 = 2.5 tiles/s. The server sends no
-    // monster speed; without this the attribute reads 0 and the walk stalls.
-    npcEntity.attributeSystem.setValue(
-      'totalMovementSpeed',
-      MONSTER_WALK_TILES_PER_SECOND
-    );
-
-    const monsterHP = MonstersDatabase.get(npc.TypeNumber)?.HP ?? 0;
-    npcEntity.attributeSystem.setValue('maxHealth', monsterHP);
-    npcEntity.attributeSystem.setValue('currentHealth', monsterHP);
-  });
+  }
 });
 
 function removeNetObject(world: World, netId: number) {
