@@ -6,6 +6,7 @@ import { TargetHealthBar } from '../../components/targetHealthBar';
 import { MoveCommandWindow } from './components/moveCommandWindow';
 import { BottomBar } from './components/bottomBar';
 import { CharacterInfo } from './components/characterInfo';
+import { PetInfoWindow } from './components/petInfo';
 import { Inventory } from './components/inventory';
 import { NpcShop } from './components/npcShop';
 import { Vault } from './components/vault';
@@ -57,6 +58,7 @@ const HUD = observer(() => {
       <MyShop />
       <ShopBrowser />
       <CharacterInfo />
+      <PetInfoWindow />
       <MoveCommandWindow />
       <EmoteMenu />
       <ChatWindow />
