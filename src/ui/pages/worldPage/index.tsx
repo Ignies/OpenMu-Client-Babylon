@@ -36,6 +36,7 @@ import { Minimap } from './components/minimap';
 import { MasterSkillsWindow } from '@version/ui';
 import { SkillListWindow } from './components/skills';
 import { EventWindows } from './components/events';
+import { SoccerScoreHud } from './components/soccerScore';
 import { Notices } from '../../components/notices';
 import { SlideHelpBar } from '../../components/slideHelp';
 import { DebugMenuWindow } from '../../components/debugMenu';
@@ -76,6 +77,7 @@ const HUD = observer(() => {
       <GuildCreationDialog />
       <GuildKickPasswordDialog />
       <EventWindows />
+      <SoccerScoreHud />
       <Minimap />
       {/* Offline only: renders null online (F9). */}
       <DebugMenuWindow />
