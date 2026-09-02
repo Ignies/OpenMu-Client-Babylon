@@ -13772,8 +13772,8 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
-    "szModelFolder": "Empty",
-    "szModelName": "Empty"
+    "szModelFolder": "Item/",
+    "szModelName": "rs.glb"
   },
   {
     "Group": 12,
@@ -15996,8 +15996,8 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
-    "szModelFolder": "Empty",
-    "szModelName": "Empty"
+    "szModelFolder": "Item/",
+    "szModelName": "MagicRing00.glb"
   },
   {
     "Group": 13,
