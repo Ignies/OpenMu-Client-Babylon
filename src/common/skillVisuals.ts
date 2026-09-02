@@ -601,6 +601,11 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // for a tick, so the screen shows the newest one plus the just-expired ones still inside display
   // persistence: a short trail of spirit shadows. Three tick-lagged models per wide joint, dimming
   // toward the tail, instead of ~50 one-tick spawns per cast.
+  //
+  // A subtract tint is what gets REMOVED: `dst × (1 − texel × colour)` — a violet tint leaves a
+  // *green* residue. The tints below are complements, chosen so what survives is purple. The
+  // additive violet glow + mote trail on each head are a deliberate stylisation on top of the
+  // original (the subtractive pass alone washes out under tone mapping), requested 2026-09-02.
   9: {
     area: atCaster((at, c) => {
       const seconds = ticks(49);
@@ -611,21 +616,24 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
         band: { floor: 1, ceiling: 4 },
       };
       const fadeTail = 10 / 49;
-      const shades: RGB[] = [[1, 1, 1], [0.65, 0.65, 0.65], [0.4, 0.4, 0.4]];
+      // Complement tints: subtracting green-heavy leaves violet. Echoes dim ×0.65 / ×0.4.
+      const shades: RGB[] = [[0.65, 1, 0.45], [0.42, 0.65, 0.29], [0.26, 0.4, 0.18]];
       for (let i = 0; i < 4; i++) {
         const heading = facing(c, (i * Math.PI) / 2);
         const trail = shades.map(() => at.clone());
         effects.spawn('joint', c.scene, at, {
-          velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.8, colour: RGBS.shade, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail,
+          velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.8, colour: [0.3, 0.75, 0.15], blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail,
           trace: h => {
             for (let k = trail.length - 1; k > 0; k--) trail[k].copyFrom(trail[k - 1]);
             trail[0].copyFrom(h);
           },
         });
-        effects.spawn('joint', c.scene, at, { velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.2, colour: RGBS.dark, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail });
+        effects.spawn('joint', c.scene, at, { velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.2, colour: [0.45, 0.85, 0.3], blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail });
         shades.forEach((shade, k) => {
           effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: shade, blend: 'subtract', aim: true, fadeTail, follow: out => out.copyFrom(trail[k]) });
         });
+        effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: RGBS.shade, size: 0.9, seconds, follow: out => out.copyFrom(trail[0]), fadeTail });
+        effects.spawn('particles', c.scene, at, { recipe: SHADE_MOTES, rate: 12, seconds, follow: out => out.copyFrom(trail[0]) });
       }
       particles({ recipe: SHADE_MOTES, count: 20 })(at, c);
     }, 1),
