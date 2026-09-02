@@ -11,7 +11,6 @@ import {
   DuelStartResponsePacket,
 } from '../common/packets/ClientToServerPackets';
 import {
-  DuelEndPacket,
   DuelFinishedPacket,
   DuelHealthUpdatePacket,
   DuelInitPacket,
@@ -290,8 +289,7 @@ EventBus.on('DuelHealthUpdate', packet => {
 });
 
 /** `ReceiveDuelEnd`: OpenMU always sends Result 0 and no name - just clear. */
-EventBus.on('DuelEnd', packet => {
-  new DuelEndPacket(packet);
+EventBus.on('DuelEnd', () => {
   if (state.duel && !state.duel.watching) {
     Store.addNotification(t('duel.ended'), 'info', MESSAGE_MS);
   }
