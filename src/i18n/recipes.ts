@@ -179,6 +179,7 @@ export const EN_TEXT = {
   'options.autoAttack': 'Automatic Attack',
   'options.whisperBeep': 'Beep sound for whispering',
   'options.slideHelp': 'Slide Help',
+  'options.cameraControl': 'Camera control (Ctrl+wheel, Ins/Del)',
   'options.volume': 'Volume',
   'options.effectLevel': '+Effect limitation',
   'options.shadows': 'Object shadows',
