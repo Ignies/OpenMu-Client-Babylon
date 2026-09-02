@@ -39,6 +39,13 @@ export interface EventLayer {
    * item is this event's ticket and the request was taken over.
    */
   useTicket?(slot: number, item: Item): boolean;
+
+  /**
+   * The hero reached and clicked an NPC. Return true when the NPC belongs to
+   * this event (the Crywolf statue) and the talk was taken over, so no
+   * `TalkToNpcRequest` goes out.
+   */
+  useNpc?(npc: { netId: number; name: string; npcType: number }): boolean;
 }
 
 export type EventEntryState = {

@@ -1,5 +1,6 @@
 import { PointerEventTypes } from '../../libs/babylon/exports';
 import { Store } from '../../store';
+import { events } from '../../events';
 import type { Entity, ISystemFactory } from '../world';
 import { isNpcOrTrapType } from './attackSystem';
 
@@ -188,11 +189,14 @@ export const NpcTalkSystem: ISystemFactory = world => {
         Math.PI / 2;
 
       world.talkTarget = null;
-      Store.talkToNpc({
+      const npc = {
         netId: target.netId!,
         name: target.objectNameInWorld ?? 'NPC',
         npcType: target.npcType!,
-      });
+      };
+      // An event NPC (the Crywolf statue) never opens a server window.
+      if (events.useNpc(npc)) return;
+      Store.talkToNpc(npc);
     },
   };
 };

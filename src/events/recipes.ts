@@ -125,7 +125,29 @@ export const EVENT_TEXT = textTable({
   dgEnterNow: 'event.dgEnterNow',
   dgEnterAfter: 'event.dgEnterAfter',
   enter: 'event.enter',
+
+  // ---- Crywolf (NewUICryWolf.cpp) -----------------------------------------
+  /** GlobalText[1948] / [1949]: the interface bar's icon lines. */
+  cwDarkElves: 'event.cwDarkElves',
+  cwBalgass: 'event.cwBalgass',
+  /** GlobalText[1953] / [2004]: the contract answer. */
+  cwContractMade: 'event.cwContractMade',
+  cwContractRefused: 'event.cwContractRefused',
+  /** Ours: the original folds the rate into the mix window's percentages. */
+  cwBenefit: 'event.cwBenefit',
 });
+
+/**
+ * GlobalText[1957..1972] as `RenderNoticesCryWolf` pages them: four lines
+ * every ten seconds during the READY state (1971 is empty in the table, so
+ * the last page has three).
+ */
+export const CRYWOLF_NOTICE_KEYS: readonly (readonly TextKey[])[] = [
+  ['event.cwNotice1a', 'event.cwNotice1b', 'event.cwNotice1c', 'event.cwNotice1d'],
+  ['event.cwNotice2a', 'event.cwNotice2b', 'event.cwNotice2c', 'event.cwNotice2d'],
+  ['event.cwNotice3a', 'event.cwNotice3b', 'event.cwNotice3c', 'event.cwNotice3d'],
+  ['event.cwNotice4a', 'event.cwNotice4b', 'event.cwNotice4c'],
+];
 
 /** GlobalText[670..675]: the six lines under the Devil Square title. */
 export const DEVIL_SQUARE_INTRO_KEYS: readonly TextKey[] = [

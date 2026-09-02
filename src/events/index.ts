@@ -104,6 +104,17 @@ class Events {
     return false;
   }
 
+  /**
+   * The hero clicked an NPC. Returns true when an entry took the talk over
+   * (the Crywolf statue), so no `TalkToNpcRequest` goes out.
+   */
+  useNpc(npc: { netId: number; name: string; npcType: number }): boolean {
+    for (const layer of this.layers) {
+      if (layer.useNpc?.(npc)) return true;
+    }
+    return false;
+  }
+
   /** `NpcWindowResponse` BloodCastle: the Archangel messenger window. */
   openBloodCastle(): void {
     openBloodCastle();
