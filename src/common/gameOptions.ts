@@ -87,6 +87,12 @@ export type GameOptions = {
   autoAttack: boolean;
   whisperBeep: boolean;
   slideHelp: boolean;
+  /**
+   * The original client's camera: Ctrl+wheel zoom levels, Insert/Delete
+   * rotate, 30-degree frustum, per-map overrides (`src/camera/`). Off is
+   * today's fixed framing.
+   */
+  cameraControl: boolean;
 };
 
 export const GRADE_NOMINAL = 5;
@@ -146,6 +152,7 @@ const DEFAULTS: GameOptions = {
   autoAttack: false,
   whisperBeep: true,
   slideHelp: true,
+  cameraControl: true,
 };
 
 type Listener = (options: GameOptions) => void;
