@@ -132,6 +132,8 @@ import {
   GuildWarEndedPacket,
   GuildWarEndedGuildWarResultEnum,
   GuildWarTypeEnum,
+  GuildSoccerScoreUpdatePacket,
+  GuildSoccerTimeUpdatePacket,
   GuildRelationshipRequestPacket,
   GuildRelationshipRequestTypeEnum,
   GuildRelationshipTypeEnum,
@@ -621,6 +623,13 @@ EventBus.on('MapChanged', packet => {
   });
 
   const p = new MapChangedPacket(packet);
+
+  // The soccer scoreboard does not survive a warp off the stadium.
+  if (p.IsMapChange && p.MapNumber !== ENUM_WORLD.WD_6STADIUM) {
+    runInAction(() => {
+      Social.battleSoccer = null;
+    });
+  }
 
   const pos = { x: p.PositionX, y: p.PositionY };
 
@@ -1305,6 +1314,7 @@ function leaveGuild(guildId: number, disbanded: boolean): void {
     Social.guildMembers = [];
     Social.allianceGuilds = [];
     Social.guildWar = null;
+    Social.battleSoccer = null;
     Social.guildRivalName = '';
     Social.guildTotalScore = 0;
     Social.guildCurrentScore = 0;
@@ -1601,6 +1611,31 @@ EventBus.on('GuildWarScoreUpdate', packet => {
   });
 });
 
+/**
+ * GuildSoccerScoreUpdate (F3 23): at the start of the match and on every
+ * goal. Also reaches observers on the stadium, who have no `guildWar`.
+ */
+EventBus.on('GuildSoccerScoreUpdate', packet => {
+  const p = new GuildSoccerScoreUpdatePacket(packet);
+  runInAction(() => {
+    Social.battleSoccer = {
+      redTeam: cleanName(p.RedTeamName),
+      blueTeam: cleanName(p.BlueTeamName),
+      redGoals: p.RedTeamGoals,
+      blueGoals: p.BlueTeamGoals,
+      seconds: Social.battleSoccer?.seconds ?? -1,
+    };
+  });
+});
+
+/** GuildSoccerTimeUpdate (F3 22): every second while the match runs. */
+EventBus.on('GuildSoccerTimeUpdate', packet => {
+  const p = new GuildSoccerTimeUpdatePacket(packet);
+  runInAction(() => {
+    if (Social.battleSoccer) Social.battleSoccer.seconds = p.Seconds;
+  });
+});
+
 const GUILD_WAR_ENDINGS: Record<GuildWarEndedGuildWarResultEnum, string> = {
   [GuildWarEndedGuildWarResultEnum.Won]: 'Your guild has won the war.',
   [GuildWarEndedGuildWarResultEnum.Lost]: 'Your guild has lost the war.',
@@ -1614,6 +1649,7 @@ EventBus.on('GuildWarEnded', packet => {
   const p = new GuildWarEndedPacket(packet);
   runInAction(() => {
     Social.guildWar = null;
+    Social.battleSoccer = null;
     Social.guildWarRequest = null;
   });
   Social.systemMessage(GUILD_WAR_ENDINGS[p.Result] ?? 'The guild war has ended.');
