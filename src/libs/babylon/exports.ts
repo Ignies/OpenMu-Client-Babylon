@@ -179,4 +179,5 @@ export { CreateGreasedLine } from '@babylonjs/core/Meshes/Builders/greasedLineBu
 export type { GreasedLineMesh } from '@babylonjs/core/Meshes/GreasedLine/greasedLineMesh';
 export type { GreasedLineSimpleMaterial } from '@babylonjs/core/Materials/GreasedLine/greasedLineSimpleMaterial';
 export { GreasedLineMeshMaterialType } from '@babylonjs/core/Materials/GreasedLine/greasedLineMaterialInterfaces';
+export type { IGreasedLineMaterial } from '@babylonjs/core/Materials/GreasedLine/greasedLineMaterialInterfaces';
 export { GreasedLineMaterialDefaults } from '@babylonjs/core/Materials/GreasedLine/greasedLineMaterialDefaults';
