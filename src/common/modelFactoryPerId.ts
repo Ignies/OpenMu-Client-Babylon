@@ -6,8 +6,32 @@ import {
   MONSTER_MODEL_TABLE,
 } from './monsters/monsterModelTable';
 import { ModelObject } from './modelObject';
+import { Balgass } from './monsters/balgass';
 import { BudgeDragon } from './monsters/budgeDragon';
+import {
+  GoldenBudgeDragon,
+  GoldenCrust,
+  GoldenDarkKnight,
+  GoldenDerkon,
+  GoldenDevil,
+  GoldenGoblin,
+  GoldenIronKnight,
+  GoldenLizardKing,
+  GoldenNapin,
+  GoldenRabbit,
+  GoldenSatyros,
+  GoldenSoldier,
+  GoldenStoneGolem,
+  GoldenTantallos,
+  GoldenTitan,
+  GoldenTwinTail,
+  GoldenVepar,
+  GoldenWheel,
+  GreatGoldenDragon,
+} from './monsters/goldenMonsters';
 import { Hound } from './monsters/hound';
+import { Kundun } from './monsters/kundun';
+import { Selupan } from './monsters/selupan';
 import {
   DeathBone,
   DeathKing,
@@ -72,6 +96,32 @@ export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   [55]: DeathKing,
   [56]: DeathBone,
   [236]: GoldenArcher,
+
+  // The golden invasion line; 44 (Golden Dragon) stays generic - the
+  // original gives it no gold pass (ZzzCharacter.cpp:13549-13554).
+  [43]: GoldenBudgeDragon,
+  [53]: GoldenTitan,
+  [54]: GoldenSoldier,
+  [78]: GoldenGoblin,
+  [79]: GoldenDerkon,
+  [80]: GoldenVepar,
+  [81]: GoldenLizardKing,
+  [82]: GoldenTantallos,
+  [83]: GoldenWheel,
+  [493]: GoldenDarkKnight,
+  [494]: GoldenDevil,
+  [495]: GoldenStoneGolem,
+  [496]: GoldenCrust,
+  [497]: GoldenSatyros,
+  [498]: GoldenTwinTail,
+  [499]: GoldenIronKnight,
+  [500]: GoldenNapin,
+  [501]: GreatGoldenDragon,
+  [502]: GoldenRabbit,
+
+  [275]: Kundun,
+  [349]: Balgass,
+  [459]: Selupan,
 
   [34]: PlateNpc,
   [229]: PlateNpc,
