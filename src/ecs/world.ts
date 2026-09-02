@@ -104,6 +104,8 @@ export type Entity = Partial<{
   worldIndex: ENUM_WORLD;
   modelFilePath: string;
   npcType: number;
+  /** AddSummonedMonstersToScope: name of the player who summoned this monster. */
+  summonedBy: string;
   localPlayer: true;
   transform: {
     pos: IVector3Like;
