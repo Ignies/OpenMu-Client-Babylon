@@ -226,6 +226,9 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
   let fade: (vis: number) => void;
 
   if (sheetFile) {
+    // The plugin defaults to white + COLOR_MODE_SET when no color is given,
+    // overwriting the shaded texel with a flat band; null keeps ours.
+    if (glMat) glMat.color = null;
     // The sheet × `Light` under the joint's blend — the same Standard set-up
     // as core.ts `additiveMaterial` (texel × emissive tint, lighting off).
     const std = mesh.material as StandardMaterial;
