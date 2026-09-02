@@ -489,6 +489,16 @@ export class ModelObject {
   private _shadows: (AbstractMesh | null)[] = [];
 
   /**
+   * Slots whose `createObjectShadow` came back null — a caster none of whose
+   * meshes pass the shadow rules (a map object made entirely of alpha cards,
+   * like Noria's foliage). Null in `_shadows` means "not built yet" and is
+   * retried, so without this memo such an object re-attempted the build every
+   * frame it was on screen — issue #6. Reset with `_shadows` on (re)load: a
+   * new gltf means new meshes and a fresh verdict.
+   */
+  private _shadowSlotsBarren: boolean[] = [];
+
+  /**
    * The model's own meshes as of `load()`, kept so the per-frame frustum test
    * does not allocate a child list. Bone-linked children are not in here —
    * they hang off this model's bones, so they are covered by their owner's
@@ -1067,10 +1077,10 @@ export class ModelObject {
     if (this._shadows.length === 0) return;
 
     for (let slot = 0; slot < this._shadows.length; slot++) {
-      if (this._shadows[slot] || !blobShadowsActive()) continue;
-      if (!this._castsBlobShadow) continue;
+      if (this._shadows[slot] || this._shadowSlotsBarren[slot]) continue;
+      if (!blobShadowsActive() || !this._castsBlobShadow) continue;
 
-      this._shadows[slot] = createObjectShadow(
+      const shadow = createObjectShadow(
         this.gltf!.mesh,
         this._node,
         this.rootObject.node,
@@ -1081,6 +1091,12 @@ export class ModelObject {
         }
       );
 
+      if (!shadow) {
+        this._shadowSlotsBarren[slot] = true;
+        continue;
+      }
+
+      this._shadows[slot] = shadow;
       this._shadowsVisible = null;
     }
 
@@ -1119,6 +1135,7 @@ export class ModelObject {
     for (const shadow of this._shadows) shadow?.dispose(false, false);
 
     this._shadows = [];
+    this._shadowSlotsBarren = [];
     this._shadowsVisible = null;
     this._shadowsSerial = -1;
 
@@ -1328,6 +1345,7 @@ export class ModelObject {
 
     for (const shadow of this._shadows) shadow?.dispose(false, false);
     this._shadows = [];
+    this._shadowSlotsBarren = [];
     this._shadowsVisible = null;
     this._shadowsSerial = -1;
 
