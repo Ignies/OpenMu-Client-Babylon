@@ -36,14 +36,36 @@ export const DAY_LENGTH_MIN = 60;
 const DAY_MS = DAY_LENGTH_MIN * 60 * 1000;
 
 /**
- * Keyframe centres as fractions of the day, in circle order. The gaps are
- * deliberately uneven: noon and night are the plateaus players live on
- * (day:night screen time ~65:35 — night is the expensive-to-read state),
- * dawn and dusk are short transitions (~6 real minutes at 60-minute days).
+ * The day *is* the 24-hour clock the debug tab shows (`t × 24h`), and each
+ * phase holds a real plateau on it — weight 1 across the whole span, a
+ * smoothstep only in the gaps between plateaus. Centre-to-centre ramps (the
+ * first design) meant midnight sat two-thirds into the night→dawn blend:
+ * morning light at 00:00. Now the night→dawn handover *begins* at 06:00
+ * sharp, and midnight is plain night.
  */
 const PHASES: readonly CyclePhase[] = ['dawn', 'noon', 'dusk', 'night'];
 
-const CENTRES: readonly number[] = [0.08, 0.35, 0.62, 0.85];
+/**
+ * Plateau [start, end] per phase, as day fractions (night wraps midnight):
+ * dawn 06:45–07:30, noon 09:30–17:30, dusk 18:45–19:30, night 21:00–06:00.
+ * The gaps are the transitions: 06:00→06:45 night fades into dawn, etc.
+ */
+const PLATEAUS: readonly (readonly [number, number])[] = [
+  [0.281, 0.3125],
+  [0.396, 0.729],
+  [0.781, 0.8125],
+  [0.875, 0.25],
+];
+
+/**
+ * Where `/time dawn` etc. freeze the clock: a representative point inside
+ * each plateau (07:00, 12:30, 19:00, 00:00).
+ */
+const CENTRES: readonly number[] = [0.292, 0.52, 0.792, 0];
+
+/** Day arc endpoints for the sun path: the dawn and dusk plateau middles. */
+const DAY_START = 0.297;
+const DAY_END = 0.797;
 
 /**
  * The sun's path. The noon direction reproduces the authored constant the
@@ -137,19 +159,26 @@ export function cycleStateAt(nowMs: number, out: CycleState = shared): CycleStat
 
   out.t = t;
 
-  // Phase weights: between two consecutive centres the weight smoothsteps
-  // from the earlier phase to the later one; elsewhere both are 0. The
-  // smoothstep's flat ends are what makes noon and night read as plateaus.
+  // Phase weights: 1 across a phase's plateau; in the gap between one
+  // plateau's end and the next one's start, a smoothstep hands over.
   const w = out.weights;
   w.dawn = w.noon = w.dusk = w.night = 0;
 
   let gain = 1;
+  let placed = false;
+
+  // `x % 1` of a value a hair below a boundary wraps to ~1 in fp; snap it
+  // back to 0 so exact boundary times land in a segment instead of nowhere.
+  const wrap = (x: number) => {
+    const v = ((x % 1) + 1) % 1;
+    return v > 1 - 1e-9 ? 0 : v;
+  };
 
   for (let i = 0; i < PHASES.length; i++) {
     const j = (i + 1) % PHASES.length;
-    const from = CENTRES[i];
-    const span = (CENTRES[j] - from + 1) % 1 || 1;
-    const into = ((t - from) % 1 + 1) % 1;
+    const gapFrom = PLATEAUS[i][1];
+    const span = (PLATEAUS[j][0] - gapFrom + 1) % 1 || 1;
+    const into = wrap(t - gapFrom);
 
     if (into >= span) continue;
 
@@ -157,10 +186,28 @@ export function cycleStateAt(nowMs: number, out: CycleState = shared): CycleStat
 
     w[PHASES[i]] = 1 - k;
     w[PHASES[j]] = k;
-    gain =
-      LIGHT_GAIN[PHASES[i]] * (1 - k) + LIGHT_GAIN[PHASES[j]] * k;
+    gain = LIGHT_GAIN[PHASES[i]] * (1 - k) + LIGHT_GAIN[PHASES[j]] * k;
+    placed = true;
     break;
   }
+
+  if (!placed) {
+    // Inside a plateau.
+    for (let i = 0; i < PHASES.length; i++) {
+      const [start, end] = PLATEAUS[i];
+      const len = (end - start + 1) % 1;
+
+      if (wrap(t - start) <= len + 1e-9) {
+        w[PHASES[i]] = 1;
+        gain = LIGHT_GAIN[PHASES[i]];
+        placed = true;
+        break;
+      }
+    }
+  }
+
+  // Unreachable when the tables cover the circle; night beats a black frame.
+  if (!placed) w.night = 1;
 
   out.lightGain = gain;
 
@@ -172,20 +219,20 @@ export function cycleStateAt(nowMs: number, out: CycleState = shared): CycleStat
   // blue-white by then (sceneLook's phase table).
   if (w.night >= 0.5) {
     // Night progress: 0 at the dusk-side crossing, 1 at the dawn-side one.
-    const rise = ((t - CENTRES[2]) % 1 + 1) % 1;
-    const span = (CENTRES[0] - CENTRES[2] + 1) % 1;
+    const rise = ((t - DAY_END) % 1 + 1) % 1;
+    const span = (DAY_START - DAY_END + 1) % 1;
     const v = Math.min(1, Math.max(0, rise / span));
 
     out.sunAzimuth =
       SUN_NOON_AZIMUTH + MOON_AZIMUTH_OFFSET + MOON_SWEEP * (v - 0.5);
     out.sunElevation = MOON_ELEVATION;
   } else {
-    // Day progress: 0 at the dawn centre, 1 at the dusk centre. In the dark
+    // Day progress: 0 at the dawn plateau's middle, 1 at dusk's. In the dark
     // stretch outside them the sun waits at its 15° floor on whichever end
     // is nearer — after dusk it parks west, before dawn it parks east, so
     // neither crossing into the day arc can snap the azimuth.
-    const into = ((t - CENTRES[0]) % 1 + 1) % 1;
-    const span = (CENTRES[2] - CENTRES[0] + 1) % 1;
+    const into = ((t - DAY_START) % 1 + 1) % 1;
+    const span = (DAY_END - DAY_START + 1) % 1;
     const u = into >= span ? (into >= (span + 1) / 2 ? 0 : 1) : into / span;
 
     out.sunAzimuth = SUN_NOON_AZIMUTH + SUN_SWEEP * (u - 0.5);
