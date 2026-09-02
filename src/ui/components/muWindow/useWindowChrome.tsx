@@ -117,16 +117,20 @@ export function useWindowChrome(
 
   const anchored = placement.x === null || placement.y === null;
 
+  // The saved scale capped so the whole window fits the viewport, so a
+  // resized window can never leave the screen bounds.
+  const scale = MuWindows.scaleOf(id);
+
   const style: CSSProperties = {
     width,
     height,
     zIndex: MuWindows.zIndexOf(id),
-    transform: `scale(${placement.scale})`,
+    transform: `scale(${scale})`,
     transformOrigin: anchored ? '100% 100%' : '0 0',
     ...(anchored ? {} : { left: placement.x!, top: placement.y!, right: 'auto', bottom: 'auto' }),
   };
 
-  return { style, onPointerDown, ref, scale: placement.scale, anchored };
+  return { style, onPointerDown, ref, scale, anchored };
 }
 
 export const MuResizeGrip = observer(

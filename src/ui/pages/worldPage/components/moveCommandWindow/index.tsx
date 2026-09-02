@@ -1,7 +1,6 @@
 import './style.less';
 import { t } from '../../../../../i18n';
 import { useEffect, useRef, useState, type WheelEvent } from 'react';
-import { useUiViewport } from '../../../../components/uiStage';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '../../../../../store';
@@ -75,15 +74,6 @@ const THUMB_X = SCROLLBAR.x - (THUMB.width / 2 - SCROLLBAR.width / 2);
 
 /** `RenderColor(m_StartMapNamePos.x, h - font - 6, w - 5, font)`. */
 const CLOSE_BAR = { x: ROWS.x, y: HEIGHT - ROW_HEIGHT - 6, width: WIDTH - 5, height: ROW_HEIGHT };
-
-/**
- * The panel is anchored at the stage's top-left and 463 px tall, so the
- * default 1.5 window scale needs a ~700 px viewport. Below that the drawn
- * scale is capped to `(innerHeight - FIT_MARGIN) / HEIGHT` so the close bar
- * stays on screen; the user's own scale is kept whenever it fits. Pixels
- * left free under the panel at the cap.
- */
-const FIT_MARGIN = 24;
 
 const SCROLL_TOP_SPRITE = 'newui_scrollbar_up.OZT';
 const SCROLL_MIDDLE_SPRITE = 'newui_scrollbar_m.OZT';
@@ -211,9 +201,8 @@ export const MoveCommandWindow = observer(() => {
       playUiSound('click');
     },
   });
-  const viewportHeight = useUiViewport().height;
-  /** The user's scale, capped so the whole panel fits the viewport. */
-  const scale = Math.min(chrome.scale, (viewportHeight - FIT_MARGIN) / HEIGHT);
+  // Fit-capped by the window state, so the close bar always stays on screen.
+  const scale = chrome.scale;
 
   useEventBus('keyPressed', key => {
     if (!Store.world?.playerEntity) return;
