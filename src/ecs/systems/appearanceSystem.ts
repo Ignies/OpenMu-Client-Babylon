@@ -3,6 +3,7 @@ import { itemVisualTier } from '../../common/itemVisualTier';
 import type { ModelObject } from '../../common/modelObject';
 import type { PlayerObject } from '../../common/playerObject';
 import { applyWeaponAttachments } from '../../common/weaponAttachment';
+import { isBook } from '../../common/weaponClass';
 import type { ISystemFactory, Item } from '../world';
 
 function loadPart(
@@ -62,13 +63,18 @@ export const AppearanceSystem: ISystemFactory = world => {
         void playerObject.setWingsAsync(charAppearance.wings);
         void playerObject.setBodyPetAsync(charAppearance.pet);
 
-        loadPart(charAppearance.leftHand, playerObject, playerObject.Weapon1) ||
+        // Summoner books are never drawn on the character (`RenderLinkObject`
+        // returns before them, ZzzCharacter.cpp:6453-6456).
+        const mainHand = isBook(charAppearance.leftHand)
+          ? null
+          : charAppearance.leftHand;
+        const offHand = isBook(charAppearance.rightHand)
+          ? null
+          : charAppearance.rightHand;
+        loadPart(mainHand, playerObject, playerObject.Weapon1) ||
           playerObject.Weapon1.Unload();
-        loadPart(
-          charAppearance.rightHand,
-          playerObject,
-          playerObject.Weapon2
-        ) || playerObject.Weapon2.Unload();
+        loadPart(offHand, playerObject, playerObject.Weapon2) ||
+          playerObject.Weapon2.Unload();
 
         if (attributeSystem) {
           // Kept for consumers of the flag; reset properly on unequip and

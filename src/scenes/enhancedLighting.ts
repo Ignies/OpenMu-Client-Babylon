@@ -28,6 +28,8 @@ import {
 // SSAO pipeline is built in a session. See `patchSsaoCombine`.
 import '@babylonjs/core/Shaders/ssaoCombine.fragment.js';
 import { GameOptions } from '../common/gameOptions';
+import { linearBufferActive } from '../common/lightModel';
+import { skyLightOf, sunLightOf } from '../lighting/keyRig';
 import {
   blobShadowRefresh,
   csmState,
@@ -72,21 +74,61 @@ const CSM_BIAS = 0.004;
 const CSM_NORMAL_BIAS = 0.03;
 const CSM_BLEND = 0.08;
 
-/** Shadow floor on objects: only the sun's own share of the light is cut. */
-const CSM_OBJECT_DARKNESS = 0.1;
+/**
+ * One shadow-depth rule for every receiver (lighting_rework.md §5.2):
+ * whatever a shadow cuts, it leaves 35 % of it. The terrain floor below is
+ * the anchor (that darkening is the art); this applies the same rule to the
+ * sun share the CSM cuts on objects, and `SHADOW_ALPHA` (objectShadow.ts)
+ * derives the blobs from it. The old 0.1 was a third, darker answer in the
+ * same frame — and one of the stacked darkenings behind the wall halos.
+ */
+const CSM_OBJECT_DARKNESS = 0.35;
 
 /**
  * Terrain: the bake never drops below this fraction of its authored value
- * under a sun shadow. The projected blob shadows sit at 0.5 alpha, so this
- * is the same darkness the Classic look already accepts on the ground.
+ * under a sun shadow. The anchor of the shadow-depth rule above.
  */
 const TERRAIN_BAKE_SHADOW_FLOOR = 0.35;
 
-const SSAO_RADIUS = 0.9;
-const SSAO_STRENGTH = 1.1;
-const SSAO_BASE = 0.05;
+/**
+ * The sun share of the key budget the 0.35 floors were tuned at (sceneLook's
+ * SHAPED_SUN_SHARE). Object shadows fade with the sun automatically — the
+ * CSM only cuts the sun's own lambert term — but the terrain fakes its sun
+ * shadow by darkening the bake, so its cut must follow the live sun share
+ * too: full depth at noon, gone when the cycle takes the sun away. Without
+ * this, night shadows stay pitch black on the ground while every object's
+ * shadow has already faded — the tiers disagree in one frame.
+ */
+const NOON_SUN_SHARE = 0.45;
+
+/**
+ * Contact-scale AO, not ambient-scale (lighting_rework.md §5.1). The old
+ * 0.9-tile radius at half resolution was a soft-blob generator, and it landed
+ * on top of the baked lightmap's own near-wall darkening (that darkening *is*
+ * the art) and the CSM — three darkenings of the same crease made the halos
+ * that hug walls and objects. AO should read as contact tightening, never as
+ * a visible halo at gameplay zoom.
+ *
+ * Dev override: `?ssao=radius,strength,base` for live tuning.
+ */
+const SSAO_RADIUS = 0.35;
+const SSAO_STRENGTH = 0.75;
+const SSAO_BASE = 0.15;
 const SSAO_MAX_Z = 45;
 const SSAO_MIN_Z_ASPECT = 0.25;
+
+function ssaoOverride(): [number, number, number] | null {
+  try {
+    const raw = new URLSearchParams(location.search).get('ssao');
+    if (!raw) return null;
+    const parts = raw.split(',').map(Number);
+    return parts.length === 3 && parts.every(n => !isNaN(n))
+      ? (parts as [number, number, number])
+      : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * The effect mask: where the additive half of the frame actually landed.
@@ -175,6 +217,8 @@ const fogShown = {
   falloff: 1,
   base: 0,
   maxOpacity: 0,
+  /** The mood's regraded exposure, divided out of the colour at bind. */
+  exposure: 1,
 };
 
 /**
@@ -362,10 +406,20 @@ export function bindTerrainCsm(effect: Effect): void {
 
   const pcf = csm.filter === ShadowGenerator.FILTER_PCF;
 
+  // Terrain shadow depth follows the live sun share (see NOON_SUN_SHARE).
+  const sun = csm.getLight();
+  const sky = skyLightOf(sun.getScene());
+  let sunFactor = 1;
+  if (sky) {
+    const total = sun.intensity + sky.intensity;
+    sunFactor =
+      total > 0 ? Math.min(1, sun.intensity / total / NOON_SUN_SHARE) : 0;
+  }
+
   effect.setFloat4(
     'csmParams',
     pcf ? 1 : 2,
-    TERRAIN_BAKE_SHADOW_FLOOR,
+    1 - (1 - TERRAIN_BAKE_SHADOW_FLOOR) * sunFactor,
     count,
     CSM_OBJECT_DARKNESS
   );
@@ -759,9 +813,14 @@ function createSsao(
     true
   );
 
-  ssao.radius = SSAO_RADIUS;
-  ssao.totalStrength = SSAO_STRENGTH;
-  ssao.base = SSAO_BASE;
+  const [radius, strength, base] = ssaoOverride() ?? [
+    SSAO_RADIUS,
+    SSAO_STRENGTH,
+    SSAO_BASE,
+  ];
+  ssao.radius = radius;
+  ssao.totalStrength = strength;
+  ssao.base = base;
   ssao.samples = tier.ssaoSamples;
   ssao.expensiveBlur = tier.ssaoRatio >= 1;
   ssao.maxZ = SSAO_MAX_Z;
@@ -823,7 +882,12 @@ function registerFogShader(): void {
   uniform vec4 fogParams;  // density, falloff, base height, max opacity
 
   // Scene value below which the fog fades out (see the knee comment below).
+  // Compared against *display-space* luma, the domain it was tuned in.
   const float FOG_BLACK_KNEE = 0.3;
+
+  // The mood's regraded exposure while the buffer is linear (unified light
+  // model + post), 1 otherwise - see the blend comment below.
+  uniform float fogExposure;
 
   // …and the mask that says this pixel is an additive pass rather than a
   // surface. See EFFECT_MASK_LO; the fog's own, lower knee is explained at
@@ -921,11 +985,19 @@ function registerFogShader(): void {
     // A *dark* blend mesh, that is. The bright ones are handled further up,
     // by the effect mask, and they need the opposite treatment: this knee
     // would only ever have cancelled fog on the ones that are barely lit.
-    float luma = max(color.r, max(color.g, color.b));
+    // The fog was authored against the old buffer, which image processing
+    // consumed as-is - so an old buffer value and today's linear value for
+    // the same content differ exactly by the mood's regraded exposure
+    // (fogExposure; 1 outside the unified model). Scaling the scene up by
+    // it, blending with the authored colour, and dividing back reproduces
+    // the authored veil and knee bit for bit under any regrade.
+    vec3 scaled = color.rgb * fogExposure;
+
+    float luma = max(scaled.r, max(scaled.g, scaled.b));
 
     f *= smoothstep(0.0, FOG_BLACK_KNEE, luma);
 
-    gl_FragColor = vec4(mix(color.rgb, fogColor, f), color.a);
+    gl_FragColor = vec4(mix(scaled, fogColor, f) / fogExposure, color.a);
   }
   `;
 }
@@ -940,7 +1012,7 @@ function createFog(
   const fog = new PostProcess(
     'enhancedHeightFog',
     FOG_SHADER,
-    ['invView', 'viewport', 'fogColor', 'fogParams'],
+    ['invView', 'viewport', 'fogColor', 'fogParams', 'fogExposure'],
     ['depthSampler', EFFECT_MASK_SAMPLER],
     1,
     null,
@@ -972,6 +1044,10 @@ function createFog(
     );
 
     effect.setFloat3('fogColor', ...fogShown.color);
+    effect.setFloat(
+      'fogExposure',
+      linearBufferActive(scene) ? fogShown.exposure : 1
+    );
     effect.setFloat4(
       'fogParams',
       fogShown.density,
@@ -1131,7 +1207,7 @@ function syncCsm(): void {
   }
 
   if (want) {
-    const sun = scene.getLightByName('sunLight') as DirectionalLight | null;
+    const sun = sunLightOf(scene);
     if (sun) runtime.csm = createCsm(scene, sun, tier);
   }
 
@@ -1146,8 +1222,14 @@ export function enhancedLightingActive(): boolean {
   return runtime !== null;
 }
 
-/** Mood hand-off (sceneLook): the fog colour/density the map asks for. */
-export function setEnhancedFog(fog: FogSettings): void {
+/**
+ * Mood hand-off (sceneLook): the fog colour/density the map asks for, plus
+ * the mood's exposure. The colours are authored at screen brightness against
+ * the old ~1.0 exposures; the unified regrade raised each mood's exposure
+ * ~a stop to pay for the linear terrain and the bake multiply — neither
+ * applies to fog, so the bind divides it back out again.
+ */
+export function setEnhancedFog(fog: FogSettings, moodExposure = 1): void {
   fogShown.color[0] = fog.color[0];
   fogShown.color[1] = fog.color[1];
   fogShown.color[2] = fog.color[2];
@@ -1155,6 +1237,7 @@ export function setEnhancedFog(fog: FogSettings): void {
   fogShown.falloff = fog.falloff;
   fogShown.base = fog.base;
   fogShown.maxOpacity = fog.maxOpacity;
+  fogShown.exposure = Math.max(moodExposure, 0.01);
 }
 
 /**

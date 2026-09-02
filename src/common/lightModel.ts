@@ -17,21 +17,14 @@
  *  2. objects multiply their albedo by BodyLight (bake at the tile × the
  *     mood's `terrainBake` tint + SelfLight) on **both** material paths, via a
  *     non-UBO uniform (`itemMaterial.ts`);
- *  3. the grade gets a provisional exposure lift so the frame lands near where
- *     it was while every mood is regraded .
+ *  3. every mood's `exposure` is graded for it — objects carry the bake
+ *     (≈0.5–0.8 outdoors) and the terrain arrives in linear space (`x^2.2`),
+ *     so each mood holds its map's frame average where the old model had it
+ *     (measured with tools/screenshot/avg.mjs, within ~5%).
  *
- * The flag exists for A/B against the old look. Remove it, and the lift, once
- * the moods are regraded.
+ * The flag stays for A/B against the old look; the moods are graded for `true`.
  */
-export const UNIFIED_LIGHT_MODEL = false;
-
-/**
- * Provisional. Objects now carry the bake (≈0.5–0.8 outdoors) and the terrain
- * arrives in linear space (`x^2.2`), so the untouched moods read ~1 stop dark.
- * This multiplies `ip.exposure` under the flag until slice 3 sets each mood's
- * own `exposure` against the reference set — then it goes to 1 and is deleted.
- */
-export const UNIFIED_EXPOSURE_LIFT = 1.6;
+export const UNIFIED_LIGHT_MODEL = true;
 
 /**
  * The mood's `terrainBake` tint, mirrored here for the object materials so
@@ -39,3 +32,18 @@ export const UNIFIED_EXPOSURE_LIFT = 1.6;
  * Written by `sceneLook` beside `terrainBakeTint`; read per draw.
  */
 export const bodyLightTint: [number, number, number] = [1, 1, 1];
+
+/**
+ * Whether the frame buffer holds linear values (image processing runs in
+ * post and the unified model is on). The terrain shader keys its output
+ * decode on this. Colours that skip the material fragments entirely — the
+ * clear colour, the height-fog colour — are NOT decoded: they were authored
+ * at screen brightness against ~1.0 exposures, so `sceneLook` divides the
+ * regraded mood exposure back out of them instead (`compensateFog`,
+ * `applyCycleClear`).
+ */
+export function linearBufferActive(scene: {
+  imageProcessingConfiguration: { applyByPostProcess: boolean };
+}): boolean {
+  return UNIFIED_LIGHT_MODEL && scene.imageProcessingConfiguration.applyByPostProcess;
+}

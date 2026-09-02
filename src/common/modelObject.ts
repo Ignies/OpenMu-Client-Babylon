@@ -49,6 +49,9 @@ import type { MapObjectLights } from './mapObjectLights';
 
 const BoundingUpdateInterval = 5;
 
+/** The original's default `PlaySpeed` for an idle clip (playSpeed.ts tables). */
+const DEFAULT_ANIMATION_SPEED = 0.28;
+
 type Int = number;
 
 const EmptyBone = Matrix.Identity();
@@ -358,7 +361,7 @@ export class ModelObject {
    * Play speed in the original's units (BMD keys per 25 Hz tick, e.g. idle
    * 0.28, walk 0.30). See common/playSpeed.ts for the tables.
    */
-  AnimationSpeed = 0.28;
+  AnimationSpeed = DEFAULT_ANIMATION_SPEED;
   /** Per-action PlaySpeed overrides (the original's `Actions[i].PlaySpeed` edits). */
   readonly ActionPlaySpeeds = new Map<number, number>();
 
@@ -482,6 +485,58 @@ export class ModelObject {
     if (link) this.BoneLinkMatrix.copyFrom(link);
     else Matrix.IdentityToRef(this.BoneLinkMatrix);
     this._linkedBone = -1;
+  }
+
+  /**
+   * Stowed-part animation override (`RenderCharacterBackItem`,
+   * ZzzCharacter.cpp:15044-15065): a back-bound item holds frame 0 of clip 0
+   * with PlaySpeed 0 instead of running the auto-started idle clip; the
+   * Stinger Bow loops clip 2 at 0.25 instead. `null` = in hand, the
+   * auto-started loop runs. Kept as state (not applied fire-and-forget) so a
+   * part whose GLB is still streaming picks it up in `load()`.
+   */
+  BackPose: { action: number; speed: number } | null = null;
+
+  /** True while the animation groups actually hold a stowed pose. */
+  private _backPoseActive = false;
+
+  /** Pushes `BackPose` into the animation groups; no-op before load(). */
+  applyBackPose() {
+    const groups = this.gltf?.animationGroups;
+    if (!groups?.length) return;
+
+    const pose = this.BackPose;
+    if (!pose) {
+      // Back in the hands: resume the clip-0 loop loadGLTF auto-starts.
+      // Only ever undoes a stowed pose — load()-time calls on models that
+      // were never stowed must not touch their clips.
+      if (!this._backPoseActive) return;
+      this._backPoseActive = false;
+      for (const group of groups) {
+        if (group.isStarted) group.stop(true);
+      }
+      const first = groups[0];
+      if (first) {
+        this.AnimationSpeed = DEFAULT_ANIMATION_SPEED;
+        first.start(true, this.speedRatioFor(0), first.from);
+      }
+      return;
+    }
+
+    this._backPoseActive = true;
+    for (const group of groups) {
+      if (group.isStarted) group.stop(true);
+    }
+    const group = groups[pose.action] ?? groups[0];
+    if (!group) return;
+    if (pose.speed > 0) {
+      this.AnimationSpeed = pose.speed;
+      group.start(true, this.speedRatioFor(pose.action), group.from);
+    } else {
+      group.start(true, group.speedRatio, group.from);
+      group.goToFrame(group.from);
+      group.pause();
+    }
   }
   loadSeq = 0;
   private _node: TransformNode;
@@ -673,6 +728,10 @@ export class ModelObject {
 
     if (paused && !this.LoopAction) return;
 
+    // A frozen back item (BackPose, speed 0) is started-and-paused on
+    // purpose; coming back into view must not restart it.
+    if (!paused && this.BackPose && this.BackPose.speed === 0) return;
+
     for (const group of groups) {
       if (!group.isStarted) continue;
       if (paused) group.pause();
@@ -840,6 +899,10 @@ export class ModelObject {
     this.applyWholeBodyHide();
 
     this.attachShadow();
+
+    // A part loaded while already stowed (spawn in a safe zone) freezes now;
+    // the flag was set before its GLB arrived.
+    this.applyBackPose();
 
     this.Ready = true;
   }

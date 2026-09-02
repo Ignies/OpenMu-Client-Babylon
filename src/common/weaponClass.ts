@@ -47,16 +47,45 @@ export function isShield(item: Item | null): boolean {
   return !!item && item.group === GROUP_SHIELD;
 }
 
-export function isSummonerStickOrBook(item: Item): boolean {
-  return item.group === GROUP_STAFF && item.num >= MISTERY_STICK;
+/**
+ * Summoner books (staff 21-29). `RenderLinkObject` returns before drawing
+ * them (ZzzCharacter.cpp:6453-6456): a book is never rendered on the
+ * character at all, in hand or on the back.
+ */
+export function isBook(item: Item | null): boolean {
+  return (
+    !!item &&
+    item.group === GROUP_STAFF &&
+    item.num >= BOOK_OF_SAHAMUTT &&
+    item.num <= 29
+  );
 }
 
+/** `IsBowModel` (CharacterManager.cpp:68): 0-6, Celestial 17, Viper…Stinger 20-23, Air Lyn 24. */
 export function isBow(item: Item | null): boolean {
-  return !!item && item.group === GROUP_BOW && !isAmmo(item) && item.num < 8;
+  if (!item || item.group !== GROUP_BOW) return false;
+  const n = item.num;
+  return n <= 6 || n === 17 || (n >= 20 && n <= 24);
 }
 
+/** `IsCrossbowModel` (CharacterManager.cpp:76): 8-14, Saint 16, Divine CB…Great Reign 18-19. */
 export function isCrossbow(item: Item | null): boolean {
-  return !!item && item.group === GROUP_BOW && !isAmmo(item) && item.num >= 8;
+  if (!item || item.group !== GROUP_BOW) return false;
+  const n = item.num;
+  return (n >= 8 && n <= 14) || n === 16 || n === 18 || n === 19;
+}
+
+/**
+ * `GetEquipedBowType` (CharacterManager.cpp:267): a bow only counts from
+ * weapon slot 1 (appearance "rightHand"), a crossbow only from slot 0.
+ */
+export function equippedBowType(
+  hands: Hands | undefined
+): 'bow' | 'crossbow' | null {
+  if (!hands) return null;
+  if (isBow(hands.rightHand)) return 'bow';
+  if (isCrossbow(hands.leftHand)) return 'crossbow';
+  return null;
 }
 
 /**
@@ -84,9 +113,14 @@ export function isTwoHanded(item: Item): boolean {
   }
 }
 
-/** `IsBackItem`: anything sword…shield except the summoner books/sticks. */
-export function isBackItem(item: Item): boolean {
-  return item.group <= GROUP_SHIELD && !isSummonerStickOrBook(item);
+/**
+ * `IsBackItem` (ZzzCharacter.cpp:14937): with a bow or crossbow equipped
+ * everything rides the back; otherwise anything sword…shield except the
+ * summoner books — the sticks (staff 14-20) do go to the back.
+ */
+export function isBackItem(item: Item, hands?: Hands): boolean {
+  if (equippedBowType(hands) !== null) return true;
+  return item.group <= GROUP_SHIELD && !isBook(item);
 }
 
 function equippedBow(hands: Hands): Item | null {
