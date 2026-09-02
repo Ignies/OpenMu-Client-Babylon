@@ -592,17 +592,32 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       after(0.5, stones(3, 1))(at, c);
     },
   },
-  // 9 Evil Spirit: impact@caster+100z — 4× JOINT_SPIRIT at Angle(0,0,i*90), width 80 + width 20:
-  // ALPHA_BLEND_MINUS, Vel 70, LT 49, MaxTails 6.
+  // 9 Evil Spirit: impact@caster+100z — 4× JOINT_SPIRIT sub0 pairs at Angle(0,0,i*90), width 80 + 20:
+  // ALPHA_BLEND_MINUS, Vel 70, LT 49, MaxTails 6, Light = LifeTime×0.1, homing the *caster*+80z
+  // (MoveHumming 10°/frame) under damped random steering (±3.2° pitch ×0.6, ±12.8° yaw ×0.8 a frame)
+  // between terrain +100 and +400; each width-80 joint stamps MODEL_LASER (Scale 1.3, LT 1,
+  // RENDER_DARK) at its head every frame — the visible spirits (ZzzCharacter.cpp:4468,
+  // ZzzEffectJoint.cpp:3698, ZzzEffect.cpp:1890). A one-frame stamp at the head each frame is one
+  // model riding the head, so a single Laser01 follows each wide joint's traced position.
   9: {
-    area: atCaster(
-      seq(
-        streamerFan(4, Math.PI / 2, { velocity: perTick(70), seconds: ticks(49), maxTails: 6, width: 0.8, colour: RGBS.shade, turn: 1.2, blend: 'subtract', texture: TEX.jointSpirit }),
-        streamerFan(4, Math.PI / 2, { velocity: perTick(70), seconds: ticks(49), maxTails: 6, width: 0.2, colour: RGBS.dark, turn: 1.2, blend: 'subtract', texture: TEX.jointSpirit }),
-        particles({ recipe: SHADE_MOTES, count: 20 })
-      ),
-      1
-    ),
+    area: atCaster((at, c) => {
+      const seconds = ticks(49);
+      const steer: JointOptions['steer'] = {
+        seek: followEntity(c.caster, 0.8),
+        seekRate: (10 * Math.PI) / 180,
+        wander: { pitch: (3.2 * Math.PI) / 180, yaw: (12.8 * Math.PI) / 180 },
+        band: { floor: 1, ceiling: 4 },
+      };
+      const fadeTail = 10 / 49;
+      for (let i = 0; i < 4; i++) {
+        const heading = facing(c, (i * Math.PI) / 2);
+        const head = at.clone();
+        effects.spawn('joint', c.scene, at, { velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.8, colour: RGBS.shade, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail, trace: h => head.copyFrom(h) });
+        effects.spawn('joint', c.scene, at, { velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.2, colour: RGBS.dark, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail });
+        effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: RGBS.white, blend: 'subtract', aim: true, fadeTail, follow: out => out.copyFrom(head) });
+      }
+      particles({ recipe: SHADE_MOTES, count: 20 })(at, c);
+    }, 1),
   },
   // 10 Hellfire: impact@caster — MODEL_CIRCLE LT 45 + MODEL_CIRCLE_LIGHT LT 40 (BlendMesh 0), stones, EarthQuake shake.
   10: {
