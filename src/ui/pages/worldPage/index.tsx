@@ -37,6 +37,7 @@ import { SkillListWindow } from './components/skills';
 import { EventWindows } from './components/events';
 import { Notices } from '../../components/notices';
 import { SlideHelpBar } from '../../components/slideHelp';
+import { DebugMenuWindow } from '../../components/debugMenu';
 
 const HUD = observer(() => {
   return (
@@ -74,6 +75,8 @@ const HUD = observer(() => {
       <GuildKickPasswordDialog />
       <EventWindows />
       <Minimap />
+      {/* Offline only: renders null online (F9). */}
+      <DebugMenuWindow />
       {}
       <PickedItemCursor />
     </div>
