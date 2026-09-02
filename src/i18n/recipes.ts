@@ -834,6 +834,7 @@ export const EN_TEXT = {
   'notify.helperStarted': 'MU Helper started',
   'notify.helperStopped': 'MU Helper stopped',
   'notify.helperSafeZone': 'MU Helper cannot start in a safe zone',
+  'notify.helperCost': 'MU Helper has consumed {total} Zen',
   'notify.zenCap': 'You cannot carry more than 2,000,000,000 Zen',
   'notify.cannotSell': 'This item cannot be sold',
   'notify.merchantRefuses': 'The merchant does not want that item',

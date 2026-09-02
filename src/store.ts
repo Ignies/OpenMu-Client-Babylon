@@ -774,13 +774,15 @@ export const Store = new (class _Store {
     this.sendToGS(packet.buffer);
   }
 
-  // ---- MU Helper (`MUHelper::g_MuHelper`): state only, no UI yet ----
+  // ---- MU Helper (`MUHelper::g_MuHelper`) ----
 
   muHelper = {
     /** Running (`Start`) vs paused (`Stop`). */
     active: false,
     /** The last zen the server charged for it (`ConsumeMoney`). */
     lastMoneyConsumed: 0,
+    /** Zen charged since the helper last started (`m_iTotalCost`). */
+    totalMoneyConsumed: 0,
     /** The saved config blob (`MuHelperConfigurationData`, 257 bytes). */
     config: null as Uint8Array | null,
   };
@@ -788,7 +790,19 @@ export const Store = new (class _Store {
   setMuHelperStatus(active: boolean, moneyConsumed: number) {
     const changed = this.muHelper.active !== active;
     this.muHelper.active = active;
-    if (moneyConsumed > 0) this.muHelper.lastMoneyConsumed = moneyConsumed;
+    if (changed && active) this.muHelper.totalMoneyConsumed = 0;
+    if (moneyConsumed > 0) {
+      this.muHelper.lastMoneyConsumed = moneyConsumed;
+      // The running-total line of `ReceiveMuHelperStatusUpdate`
+      // (WSclient.cpp:1199-1207, GlobalText 3586).
+      this.muHelper.totalMoneyConsumed += moneyConsumed;
+      this.addNotification(
+        t('notify.helperCost', {
+          total: this.muHelper.totalMoneyConsumed.toLocaleString('en-US'),
+        }),
+        'info'
+      );
+    }
     // `[MU Helper] Started` / `Stopped` (MuHelper.cpp:116/122) go to the console log.
     if (changed) {
       this.addNotification(
@@ -805,8 +819,17 @@ export const Store = new (class _Store {
    * server answers with `MuHelperStatusUpdate`, which flips `muHelper.active`.
    */
   toggleMuHelper() {
-    if (this.isOffline) return;
     const active = this.muHelper.active;
+    if (this.isOffline) {
+      // No server to answer: flip locally so the loop can be exercised
+      // against the test scene.
+      if (!active && this.world?.playerEntity?.attributeSystem?.isAboveZero('inSafeZone')) {
+        this.addNotification(t('notify.helperSafeZone'), 'error');
+        return;
+      }
+      this.setMuHelperStatus(!active, 0);
+      return;
+    }
     if (!active && this.world?.playerEntity?.attributeSystem?.isAboveZero('inSafeZone')) {
       this.addNotification(t('notify.helperSafeZone'), 'error');
       return;
