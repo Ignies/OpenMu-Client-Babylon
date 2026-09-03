@@ -674,6 +674,28 @@ export const EN_TEXT = {
   'duel.vs': 'VS',
   'duel.leaveWatch': 'Leave the duel channel',
 
+  'event.cwDarkElves': 'Dark Elf (%d/12)',
+  'event.cwBalgass': 'Balgass',
+  'event.cwContractMade':
+    'You have been registered to be a guardian to protect the wolf.',
+  'event.cwContractRefused': 'Disqualified for the contract requirement.',
+  'event.cwBenefit': 'Chaos machine success rate +%d%% (Crywolf benefit).',
+  'event.cwNotice1a': '< Mission Point : 1. Defend the Wolf statue >',
+  'event.cwNotice1b': 'Make a contract with the altar to protect the wolf statue!',
+  'event.cwNotice1c': 'Only the Elf can be a guardian to give power to the Wolf statue!',
+  'event.cwNotice1d': 'You have to protect elves when the contract is being made!',
+  'event.cwNotice2a': '< Mission Point : 2. Defeat Balgass >',
+  'event.cwNotice2b': 'Fortress of Crywolf will not be safe unless Balgass is defeated!',
+  'event.cwNotice2c': 'Balgass can only show up for 5 minutes around the Fortress of Crywolf!',
+  'event.cwNotice2d': 'Defeat Balgass within the given time!',
+  'event.cwNotice3a': '< Success reparation >',
+  'event.cwNotice3b': '10%% monster strength decrease (maintain during the event)',
+  'event.cwNotice3c': '5%% decrease in castle and arena invitation combine rate',
+  'event.cwNotice3d': 'Above reparation is valid till the next Crywolf battle.',
+  'event.cwNotice4a': '< Failure penalty >',
+  'event.cwNotice4b': 'Delete all the NPC within Crywolf',
+  'event.cwNotice4c': 'Above penalty is valid till the next Crywolf battle.',
+
   // ---- item tooltip ------------------------------------------------------
   'item.thisItem': 'this item',
   'item.excellentPrefix': 'Excellent {name}',

@@ -96,6 +96,63 @@ export const RESULT_MINE_COLOR = 'rgb(200,120,0)';
 /** Column starts, `xPos[2..5]` relative to the box. */
 export const RESULT_COLUMNS = [15, 75, 125, 163] as const;
 
+/**
+ * `CNewUICryWolf::Render` (NewUICryWolf.cpp:131-478): the MVP interface bar
+ * on the same 640×480 stage. Crops are the original's u/v rectangles of the
+ * `Interface\in_*` sheets, drawn 1:1 (the original stretches them by 1-2 px).
+ */
+export const CW_SPRITES = {
+  main: 'in_main-New.OZT',
+  /** Idle altar numbers, by low-nibble grade 1 / 2. */
+  number: ['in_main_number1.OZT', 'in_main_number2.OZT'],
+  /** Contracted altar numbers, grade 1 / 2 / other. */
+  numberContracted: [
+    'in_main_number1_1.OZT',
+    'in_main_number2_1.OZT',
+    'in_main_number0_2.OZT',
+  ],
+  darkElf: 'in_main_icon_dl1.OZT',
+  darkElfEmpty: 'in_main_icon_dl2.OZT',
+  balgass: 'in_main_icon_bal1.OZT',
+  balgassBar: 'in_bar.OZT',
+  statueBar: 'in_main2-New.OZT',
+  timePanel: 't_main-New.OZT',
+  success: 'icon_success.OZT',
+  failure: 'icon_failure.OZT',
+} as const;
+
+export const CW_MAIN = { x: 518, y: 278, width: 120, height: 118 };
+/** The five altar number slots along the bar's arc. */
+export const CW_ALTARS: readonly { x: number; y: number }[] = [
+  { x: 565, y: 280 },
+  { x: 582, y: 282 },
+  { x: 598, y: 286 },
+  { x: 613, y: 294 },
+  { x: 625, y: 306 },
+];
+export const CW_ALTAR_SIZE = 12;
+export const CW_ICON_SIZE = 14;
+export const CW_DARK_ELF_ICON = { x: 623, y: 358 };
+export const CW_DARK_ELF_TEXT = { x: 522, y: 353, width: 120 };
+export const CW_BALGASS_ICON = { x: 623, y: 379 };
+export const CW_BALGASS_TEXT = { x: 540, y: 374, width: 120 };
+/** `Render(548, 388, nx, 8, …)`: 68 px at full boss health. */
+export const CW_BALGASS_BAR = { x: 548, y: 388, width: 68, height: 8 };
+/** `RenderImage(IMAGE+9, 548+nx, 323, 89-nx, 30, …)`: erodes from the left. */
+export const CW_STATUE_BAR = { x: 548, y: 323, width: 88, height: 29 };
+export const CW_TIME_PANEL = { x: 538, y: 392, width: 104, height: 36 };
+export const CW_CLOCK = { x: 552, y: 399, width: 78 };
+/** `RenderNoticesCryWolf`: four 13 px rows from (190, 63). */
+export const CW_NOTICE = { x: 190, y: 63, step: 13 };
+export const CW_NOTICE_HEAD_COLOR = 'rgb(100,200,255)';
+export const CW_NOTICE_COLOR = 'rgb(100,150,255)';
+export const CW_NOTICE_BACKGROUND = 'rgba(0,0,0,0.67)';
+export const CW_TEXT_COLOR = 'rgb(255,148,21)';
+export const CW_CLOCK_COLOR = 'rgb(255,255,255)';
+export const CW_CLOCK_COLOR_BALGASS = 'rgb(255,77,77)';
+/** The success / failure banner crop, parked at its slide-in rest point. */
+export const CW_RESULT = { x: 150, y: 50, width: 328, height: 93 };
+
 export const EVENT_SPRITES = [
   BUTTON_SPRITE,
   EXIT_SPRITE,

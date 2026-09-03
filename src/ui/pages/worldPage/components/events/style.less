@@ -100,6 +100,28 @@
   }
 }
 
+// `CNewUICryWolf::Render`: the MVP bar on the 640x480 stage, scaled whole.
+.crywolf-bar {
+  position: absolute;
+  width: 640px;
+  height: 480px;
+  transform-origin: top left;
+  pointer-events: none;
+  font-size: 10px;
+
+  .crywolf-line {
+    position: absolute;
+    text-align: center;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .crywolf-clock {
+    position: absolute;
+    text-align: center;
+  }
+}
+
 // `CChaosCastleTimeCheckMsgBoxLayout`: the message box with OK / Cancel.
 .event-prompt {
   position: absolute;

@@ -22,6 +22,14 @@ import {
 } from '../../../../../events/chaosCastle';
 import { doppelgangerWindow } from '../../../../../events/doppelganger';
 import {
+  CrywolfState,
+  crywolfBarVisible,
+  crywolfHud,
+  crywolfNoticePage,
+  crywolfResult,
+} from '../../../../../events/crywolf';
+import {
+  CRYWOLF_NOTICE_KEYS,
   DEVIL_SQUARE_INTRO_KEYS,
   EVENT_TEXT,
   RANK_HEADERS,
@@ -57,6 +65,27 @@ import {
   BLOOD_INTRO_STEP,
   BLOOD_INTRO_Y,
   BUTTON,
+  CW_ALTARS,
+  CW_ALTAR_SIZE,
+  CW_BALGASS_BAR,
+  CW_BALGASS_ICON,
+  CW_BALGASS_TEXT,
+  CW_CLOCK,
+  CW_CLOCK_COLOR,
+  CW_CLOCK_COLOR_BALGASS,
+  CW_DARK_ELF_ICON,
+  CW_DARK_ELF_TEXT,
+  CW_ICON_SIZE,
+  CW_MAIN,
+  CW_NOTICE,
+  CW_NOTICE_BACKGROUND,
+  CW_NOTICE_COLOR,
+  CW_NOTICE_HEAD_COLOR,
+  CW_RESULT,
+  CW_SPRITES,
+  CW_STATUE_BAR,
+  CW_TEXT_COLOR,
+  CW_TIME_PANEL,
   BUTTON_COLOR_DISABLED,
   BUTTON_COLOR_ENABLED,
   BUTTON_FRAMES,
@@ -687,6 +716,159 @@ const EventRankTable = observer(() => {
   return <RankTable result={result} at={stage.at(RESULT.x, RESULT.y)} />;
 });
 
+// ---- Crywolf interface bar -------------------------------------------------
+
+/** Which number sheet an altar's packed state byte gets, or null for none. */
+function altarSprite(packed: number): string | null {
+  const contracted = (packed & 0xf0) >> 4 === 1;
+  const grade = packed & 0x0f;
+  if (contracted) {
+    return CW_SPRITES.numberContracted[grade === 1 ? 0 : grade === 2 ? 1 : 2];
+  }
+  if (grade === 1) return CW_SPRITES.number[0];
+  if (grade === 2) return CW_SPRITES.number[1];
+  return null;
+}
+
+/**
+ * `CNewUICryWolf::Render`: the MVP bar in the lower right (statue shield,
+ * the five altars, dark elf count, remaining time, Balgass strip), the READY
+ * notices and the end-of-war banner. No window state: everything reads
+ * `events/crywolf.ts`.
+ */
+const CrywolfBar = observer(() => {
+  const hud = crywolfHud();
+  const result = crywolfResult();
+  const page = crywolfNoticePage();
+  const map = Store.world?.mapIndex;
+  const stage = useStage();
+  if (map === undefined || !crywolfBarVisible(map)) return null;
+
+  const statueDamage = Math.min(100, Math.max(0, 100 - hud.statueHp));
+  const statueOffset = Math.round((CW_STATUE_BAR.width * statueDamage) / 100);
+  const balgassUp = hud.balgassHp > 0;
+  const balgassWidth = Math.round(
+    (CW_BALGASS_BAR.width * Math.min(100, hud.balgassHp)) / 100
+  );
+  const notices =
+    hud.state === CrywolfState.Ready ? CRYWOLF_NOTICE_KEYS[page] ?? [] : [];
+
+  return (
+    <div className="crywolf-bar" style={stage.at(0, 0)}>
+      <MuSpriteFrame
+        file={CW_SPRITES.main}
+        width={CW_MAIN.width}
+        height={CW_MAIN.height}
+        style={{ position: 'absolute', left: CW_MAIN.x, top: CW_MAIN.y }}
+      />
+
+      {/* The statue shield, eroding from the left as it takes damage. */}
+      {statueOffset < CW_STATUE_BAR.width && (
+        <MuSpriteFrame
+          file={CW_SPRITES.statueBar}
+          x={statueOffset}
+          width={CW_STATUE_BAR.width - statueOffset}
+          height={CW_STATUE_BAR.height}
+          style={{
+            position: 'absolute',
+            left: CW_STATUE_BAR.x + statueOffset,
+            top: CW_STATUE_BAR.y,
+          }}
+        />
+      )}
+
+      {CW_ALTARS.map((slot, i) => {
+        const file = altarSprite(hud.altars[i] ?? 0);
+        if (!file) return null;
+        return (
+          <MuSpriteFrame
+            key={i}
+            file={file}
+            width={CW_ALTAR_SIZE}
+            height={CW_ALTAR_SIZE}
+            style={{ position: 'absolute', left: slot.x, top: slot.y }}
+          />
+        );
+      })}
+
+      <MuSpriteFrame
+        file={hud.darkElves > 0 ? CW_SPRITES.darkElf : CW_SPRITES.darkElfEmpty}
+        width={CW_ICON_SIZE}
+        height={CW_ICON_SIZE}
+        style={{ position: 'absolute', left: CW_DARK_ELF_ICON.x, top: CW_DARK_ELF_ICON.y }}
+      />
+      <div
+        className="crywolf-line"
+        style={{ ...CW_DARK_ELF_TEXT, color: CW_TEXT_COLOR }}
+      >
+        {formatText(EVENT_TEXT.cwDarkElves, hud.darkElves)}
+      </div>
+
+      {balgassUp && (
+        <>
+          <MuSpriteFrame
+            file={CW_SPRITES.balgass}
+            width={CW_ICON_SIZE}
+            height={CW_ICON_SIZE}
+            style={{ position: 'absolute', left: CW_BALGASS_ICON.x, top: CW_BALGASS_ICON.y }}
+          />
+          <div
+            className="crywolf-line"
+            style={{ ...CW_BALGASS_TEXT, color: CW_TEXT_COLOR }}
+          >
+            {EVENT_TEXT.cwBalgass}
+          </div>
+          <MuSpriteFrame
+            file={CW_SPRITES.balgassBar}
+            width={balgassWidth}
+            height={CW_BALGASS_BAR.height}
+            style={{ position: 'absolute', left: CW_BALGASS_BAR.x, top: CW_BALGASS_BAR.y }}
+          />
+        </>
+      )}
+
+      <MuSpriteFrame
+        file={CW_SPRITES.timePanel}
+        width={CW_TIME_PANEL.width}
+        height={CW_TIME_PANEL.height}
+        style={{ position: 'absolute', left: CW_TIME_PANEL.x, top: CW_TIME_PANEL.y }}
+      />
+      <MuText
+        className="crywolf-clock"
+        face="big"
+        text={clock(hud.state === CrywolfState.Started ? hud.seconds : 0)}
+        color={balgassUp ? CW_CLOCK_COLOR_BALGASS : CW_CLOCK_COLOR}
+        style={{ left: CW_CLOCK.x, top: CW_CLOCK.y, width: CW_CLOCK.width }}
+      />
+
+      {notices.map((key, i) => (
+        <div
+          key={key}
+          className="crywolf-line"
+          style={{
+            left: CW_NOTICE.x,
+            top: CW_NOTICE.y + i * CW_NOTICE.step,
+            color: i === 0 ? CW_NOTICE_HEAD_COLOR : CW_NOTICE_COLOR,
+            background: CW_NOTICE_BACKGROUND,
+            textAlign: 'left',
+          }}
+        >
+          {formatText(text(key))}
+        </div>
+      ))}
+
+      {result !== null && (
+        <MuSpriteFrame
+          file={result ? CW_SPRITES.success : CW_SPRITES.failure}
+          width={CW_RESULT.width}
+          height={CW_RESULT.height}
+          style={{ position: 'absolute', left: CW_RESULT.x, top: CW_RESULT.y }}
+        />
+      )}
+    </div>
+  );
+});
+
 // ---- the one line the world page mounts -----------------------------------
 
 export const EventWindows = observer(() => (
@@ -696,6 +878,7 @@ export const EventWindows = observer(() => (
     <DoppelgangerWindow />
     <ChaosCastlePrompt />
     <EventTimer />
+    <CrywolfBar />
     <EventCountdown />
     <BloodCastleResult />
     <EventRankTable />
