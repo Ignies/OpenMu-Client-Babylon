@@ -6,6 +6,10 @@
 import { asciiBytes, type GameVersion } from '../../src/version/contract';
 import { season6Data } from './data';
 
+// The packet lists ride along in the version chunk; UI does not (it reaches
+// app code and loads through the registry's loadUi, after this module).
+export * as packets from './packets';
+
 /** OpenMU `SimpleModulusEncryptor.DefaultClientKey` / `SimpleModulusDecryptor.DefaultClientKey`. */
 const CLIENT_TO_SERVER_KEYS = [128079, 164742, 70235, 106898, 23489, 11911, 19816, 13647, 48413, 46165, 15171, 37433];
 const SERVER_TO_CLIENT_KEYS = [73326, 109989, 98843, 171058, 18035, 30340, 24701, 11141, 62004, 64409, 35374, 64599];

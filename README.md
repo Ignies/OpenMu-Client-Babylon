@@ -186,10 +186,11 @@ single-player offline demo.
                   Duel + spectators (9 unhandled), Guild Soccer, Crywolf event logic,
                   Kanturu event logic. Those maps load; the events don't run.
 
-[▓▓▓░░░░░░░] Multi-version Support (3/10):
+[▓▓▓▓░░░░░░] Multi-version Support (4/10):
      [ Contract ]: Version seam exists — GameVersion contract, protocol/data/encryption/
                    features split, _template folder ready.
-     [ Shipped ]: Only season6. @version is a build-time alias, so one build = one version.
+     [ Shipped ]: Only season6, but selection is runtime: versions/registry.ts picks the
+                  version per server-list entry, one build carries every version.
      [ Gap ]: The stated goal is all versions in one client; the seam is there,
               the second version is not.
 ```

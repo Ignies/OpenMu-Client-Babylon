@@ -185,8 +185,8 @@ export function sanitizeProfile(
 
 /**
  * Can this client enter that world? It can when it carries the version the
- * world asked for — `GAME_VERSIONS`, which is where the versions this client
- * ships are enumerated and where the answer widens as `versions/` grows.
+ * world asked for - `versions/registry.ts`, which is where the versions this
+ * client ships are enumerated and where the answer widens as `versions/` grows.
  *
  * A world that named no version is always played: the older list lines say
  * nothing, and neither does an address the player typed themselves.
