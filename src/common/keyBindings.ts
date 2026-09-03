@@ -24,7 +24,8 @@ export type KeyAction =
   | 'command'
   | 'masterSkills'
   | 'skillList'
-  | 'muHelper';
+  | 'muHelper'
+  | 'muHelperConfig';
 
 export type KeyBindings = Record<KeyAction, string>;
 
@@ -45,6 +46,7 @@ export const KEY_ACTION_LABEL_KEYS: Record<KeyAction, TextKey> = {
   masterSkills: 'keys.masterSkills',
   skillList: 'keys.skillList',
   muHelper: 'keys.muHelper',
+  muHelperConfig: 'keys.muHelperConfig',
 };
 
 export const KEY_ACTIONS = Object.keys(KEY_ACTION_LABEL_KEYS) as KeyAction[];
@@ -68,6 +70,9 @@ const DEFAULTS: KeyBindings = {
   // The retail client's Home key; this C++ port only has the Start / Stop
   // button on `CNewUIHeroPositionInfo`.
   muHelper: 'Home',
+  // The original opens the config from the position panel's button; a key
+  // stands in for the panel here.
+  muHelperConfig: 'End',
 };
 
 /** Keys that cannot be bound: they already mean something else. */
