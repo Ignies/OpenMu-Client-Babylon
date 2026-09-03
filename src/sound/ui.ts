@@ -35,6 +35,8 @@ export const UI_SOUNDS = {
   whisper: 'Sound/iWhisper',
   mix: 'Sound/eMix',
   mixFailed: 'Sound/eBreak',
+  duelWindow: 'Sound/iDuel_Window',
+  duelStart: 'Sound/iDuelStart',
 } as const satisfies Record<string, Sounds>;
 
 export type UiSound = keyof typeof UI_SOUNDS;

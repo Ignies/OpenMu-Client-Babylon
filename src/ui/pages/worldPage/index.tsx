@@ -37,6 +37,7 @@ import { MasterSkillsWindow } from '@version/ui';
 import { SkillListWindow } from './components/skills';
 import { EventWindows } from './components/events';
 import { SoccerScoreHud } from './components/soccerScore';
+import { DuelWindows } from './components/duel';
 import { Notices } from '../../components/notices';
 import { SlideHelpBar } from '../../components/slideHelp';
 import { DebugMenuWindow } from '../../components/debugMenu';
@@ -78,6 +79,7 @@ const HUD = observer(() => {
       <GuildKickPasswordDialog />
       <EventWindows />
       <SoccerScoreHud />
+      <DuelWindows />
       <Minimap />
       {/* Offline only: renders null online (F9). */}
       <DebugMenuWindow />
