@@ -37,6 +37,7 @@ import { LoginSceneSystem } from './systems/loginSceneSystem';
 import { CharacterSelectSystem } from './systems/characterSelectSystem';
 import { SceneReadySystem } from './systems/sceneReadySystem';
 import { AttackSystem } from './systems/attackSystem';
+import { MuHelperSystem } from './systems/muHelperSystem';
 import { SkillCastSystem } from './systems/skillCastSystem';
 import { SkillSystem } from './systems/skillSystem';
 import { ObjectEffectSystem } from './systems/objectEffectSystem';
@@ -65,6 +66,9 @@ const factories: ISystemFactory[] = [
   ItemPickupSystem,
   NpcTalkSystem,
   PlayerControllerSystem,
+  // Before AttackSystem/SkillCastSystem: the helper's cast and pickup
+  // requests are consumed the same frame; player input always wins.
+  MuHelperSystem,
   AttackSystem,
   // Skill layer: steps delays / buff clocks before the cast system asks canUse.
   SkillSystem,
