@@ -1,5 +1,3 @@
-import { reaction } from 'mobx';
-import { Store } from '../store';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { playSfx } from './listener';
@@ -60,25 +58,8 @@ export function uiClick<T extends unknown[]>(
   };
 }
 
-/**
- * Window open / close chime (UIWindows.cpp:657-687, UIManager.cpp:311 —
- * SOUND_INTERFACE01 whenever an interface window is shown or hidden).
- * Button clicks live in MuButton / `uiClick`; this only watches window state.
- *
- * Installed from main.tsx rather than at import time: `store` → `logic` →
- * here → `store` is a cycle, and a module-level reaction evaluated `Store`
- * before its initialiser ran (TDZ ReferenceError on every page load).
- */
-export function installUiWindowChime(): void {
-  reaction(
-    () => [
-      Store.inventoryEnabled,
-      Store.characterInfoEnabled,
-      Store.optionsEnabled,
-    ],
-    () => playUiSound('window')
-  );
-}
+// The window open / close chime lives in `windowChime.ts`: it reads `Store`,
+// and this module must stay out of the store cycle (see there).
 
 // ---- 3. the layer ----------------------------------------------------------
 
