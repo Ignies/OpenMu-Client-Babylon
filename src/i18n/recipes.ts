@@ -332,6 +332,10 @@ export const EN_TEXT = {
   'chaos.succeeded': 'The combination succeeded.',
   'chaos.failed': 'The combination failed.',
 
+  'chaosCard.title': 'Chaos Card',
+  'chaosCard.hint1': 'Put a Chaos Card into the tray',
+  'chaosCard.hint2': 'and press combine to open it.',
+
   // ---- character info / skills -------------------------------------------
   'characterInfo.title': 'Character',
   'characterInfo.close': 'Close (C)',
@@ -702,6 +706,14 @@ export const EN_TEXT = {
   'event.ccQuestDone': 'survived the Chaos Castle!',
   'event.ccQuestFailed': 'to survive the Chaos Castle.',
   'event.chaosCastlePoint': 'Chaos Castle Point: %d',
+  'goldenArcher.title': 'Golden Archer',
+  'goldenArcher.intro1': 'Bring me your Rena',
+  'goldenArcher.intro2': 'and I will register it.',
+  'goldenArcher.intro3': 'Rewards await the diligent.',
+  'goldenArcher.renaLabel': 'Rena in inventory',
+  'goldenArcher.registeredLabel': 'Registered Rena',
+  'goldenArcher.register': 'Register',
+  'goldenArcher.noRena': 'You have no Rena to register.',
   'event.ccSpiritPurified': 'The spirit of the guard has been purified',
   'event.ccTheQuest': 'The quest',
   'event.ccTryAgain': 'Try again next time',

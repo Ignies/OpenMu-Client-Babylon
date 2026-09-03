@@ -223,6 +223,7 @@ import { Messenger } from './messenger';
 import { ChatRooms } from './chatRooms';
 import { FRIEND_OFFLINE } from './common/messenger';
 import {
+  CHAOS_CARD_WIRE_STORAGE,
   PERSONAL_SHOP_SLOTS,
   StorageKind,
   localIndexOf,
@@ -2833,7 +2834,13 @@ const KNOWN_STORAGES: number[] = [
 EventBus.on('ItemMoved', packet => {
   const p = new ItemMovedPacket(packet);
 
-  const storage = p.TargetStorageType as StorageKind;
+  // The Chaos Card Master's tray is the same local grid as the chaos
+  // machine; only the wire byte differs (itemStorage.ts).
+  const storage = (
+    p.TargetStorageType === CHAOS_CARD_WIRE_STORAGE
+      ? StorageKind.ChaosMachine
+      : p.TargetStorageType
+  ) as StorageKind;
 
   if (!KNOWN_STORAGES.includes(storage)) {
     console.warn(`ItemMoved into unknown storage ${storage}`);
@@ -2957,6 +2964,10 @@ EventBus.on('NpcWindowResponse', packet => {
     case NpcWindowResponseNpcWindowEnum.ChaosMachine:
       Store.dropNpcTalk();
       Economy.openMix();
+      break;
+    case NpcWindowResponseNpcWindowEnum.ChaosCardCombination:
+      Store.dropNpcTalk();
+      Economy.openMix('chaosCard');
       break;
     case NpcWindowResponseNpcWindowEnum.DevilSquare:
       Store.dropNpcTalk();

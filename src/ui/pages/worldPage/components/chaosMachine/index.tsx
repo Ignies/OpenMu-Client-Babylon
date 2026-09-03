@@ -51,7 +51,13 @@ export const ChaosMachine = observer(() => {
   if (!Economy.mixOpen) return null;
 
   const picked = Store.pickedItem;
-  const selected = MIX_MENU.find(entry => entry.type === Economy.mixType);
+  // The Chaos Card Master shares this window (`MIXTYPE_CHAOS_CARD` in the
+  // original's CNewUIMixInventory): no recipe menu, its own title and hint.
+  const cardMode = Economy.mixKind === 'chaosCard';
+  const selected = cardMode
+    ? undefined
+    : MIX_MENU.find(entry => entry.type === Economy.mixType);
+  const title = cardMode ? t('chaosCard.title') : t(TITLE);
 
   const column = 1 + (Store.inventoryEnabled ? 1 : 0) + (Store.characterInfoEnabled ? 1 : 0);
 
@@ -60,11 +66,11 @@ export const ChaosMachine = observer(() => {
       id={WINDOW_ID}
       className="chaos-machine"
       column={column}
-      label={t(TITLE)}
+      label={title}
       onClose={() => Economy.closeMix()}
     >
       <div className="window-title" style={{ top: TITLE_Y }}>
-        {t(TITLE)}
+        {title}
       </div>
       <div className="chaos-subtitle" style={{ top: SUBTITLE_Y }}>
         {Economy.mixPending ? 'Combining…' : selected?.label ?? ''}
@@ -94,7 +100,13 @@ export const ChaosMachine = observer(() => {
       >
         {Economy.mixResult === 'success' && <div>The combination succeeded.</div>}
         {Economy.mixResult === 'failed' && <div>The combination failed.</div>}
-        {!Economy.mixResult && <div className="hint">{selected?.hint ?? ''}</div>}
+        {!Economy.mixResult && (
+          <div className="hint">
+            {cardMode
+              ? `${t('chaosCard.hint1')} ${t('chaosCard.hint2')}`
+              : selected?.hint ?? ''}
+          </div>
+        )}
       </div>
 
       <ItemGrid
@@ -116,29 +128,32 @@ export const ChaosMachine = observer(() => {
         }
       />
 
-      {}
-      <MuTableFrame
-        left={MENU_X - 4}
-        top={MENU_Y - 3}
-        width={MENU_WIDTH + 9}
-        height={MENU_HEIGHT + 9}
-      />
-      <div
-        className="chaos-menu"
-        data-no-drag="true"
-        style={{ left: MENU_X, top: MENU_Y, width: MENU_WIDTH, height: MENU_HEIGHT }}
-      >
-        {MIX_MENU.map(entry => (
+      {!cardMode && (
+        <>
+          <MuTableFrame
+            left={MENU_X - 4}
+            top={MENU_Y - 3}
+            width={MENU_WIDTH + 9}
+            height={MENU_HEIGHT + 9}
+          />
           <div
-            key={entry.type}
-            className={`chaos-menu-row${entry.type === Economy.mixType ? ' active' : ''}`}
-            title={entry.hint}
-            onClick={uiClick(() => Economy.setMixType(entry.type))}
+            className="chaos-menu"
+            data-no-drag="true"
+            style={{ left: MENU_X, top: MENU_Y, width: MENU_WIDTH, height: MENU_HEIGHT }}
           >
-            {entry.label}
+            {MIX_MENU.map(entry => (
+              <div
+                key={entry.type}
+                className={`chaos-menu-row${entry.type === Economy.mixType ? ' active' : ''}`}
+                title={entry.hint}
+                onClick={uiClick(() => Economy.setMixType(entry.type))}
+              >
+                {entry.label}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
       <div
         className="window-button"

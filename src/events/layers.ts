@@ -7,6 +7,7 @@ import { chaosCastleLayer } from './chaosCastle';
 import { duelLayer } from './duel';
 import { doppelgangerLayer } from './doppelganger';
 import { crywolfLayer } from './crywolf';
+import { goldenArcherLayer } from './goldenArcher';
 
 /**
  * THE list. Every event in the game is one entry here, and adding an event
@@ -25,4 +26,5 @@ export const EVENT_LAYERS: readonly EventLayer[] = [
   duelLayer,
   doppelgangerLayer,
   crywolfLayer,
+  goldenArcherLayer, // Rena registration dialog, no match of its own
 ];

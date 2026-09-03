@@ -19,6 +19,16 @@ export const StorageKind = {
 
 export type StorageKind = (typeof StorageKind)[keyof typeof StorageKind];
 
+/**
+ * `STORAGE_TYPE::CHAOS_CARD_MIX` (_define.h:180) / OpenMU
+ * `Storages.ChaosCardMaster`: the Chaos Card Master's tray on the wire.
+ * Server-side it is the same temporary storage as the Chaos Machine
+ * (MoveItemAction.cs), so the client keeps it as `StorageKind.ChaosMachine`
+ * locally and only the move packets carry this byte while the card window
+ * is the open one (economy.ts `mixWireStorage`).
+ */
+export const CHAOS_CARD_WIRE_STORAGE = 9;
+
 /** `COLUMN_*_INVENTORY` / `ROW_*_INVENTORY` (_define.h:150-155). */
 export const VAULT_COLUMNS = InventoryConstants.RowSize;
 export const VAULT_ROWS = InventoryConstants.WarehouseRows;
