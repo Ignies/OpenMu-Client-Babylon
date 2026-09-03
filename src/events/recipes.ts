@@ -113,6 +113,18 @@ export const EVENT_TEXT = textTable({
    * `Hour == 0` ("when 0 After 30 minutes ..."); we drop it under an hour.
    */
   whenHour: 'event.whenHour',
+
+  // ---- Doppelganger (NewUIDoppelGangerWindow.cpp) -------------------------
+  /** GlobalText[2756..2762], [1593], [2164]. */
+  lugard: 'event.lugard',
+  dgIntro1: 'event.dgIntro1',
+  dgIntro2: 'event.dgIntro2',
+  dgIntro3: 'event.dgIntro3',
+  dgMirror: 'event.dgMirror',
+  dgEntryTime: 'event.dgEntryTime',
+  dgEnterNow: 'event.dgEnterNow',
+  dgEnterAfter: 'event.dgEnterAfter',
+  enter: 'event.enter',
 });
 
 /** GlobalText[670..675]: the six lines under the Devil Square title. */

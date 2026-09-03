@@ -2946,6 +2946,10 @@ EventBus.on('NpcWindowResponse', packet => {
       Store.dropNpcTalk();
       events.openDuelWatch();
       break;
+    case NpcWindowResponseNpcWindowEnum.LugardDoppelgangerEntry:
+      Store.dropNpcTalk();
+      events.openDoppelganger();
+      break;
     default:
       // A legacy quest NPC (Sebina, Marlon, Apostle Devin…): the dialog is
       // client-side, from Quest_eng.bmd (quests/legacyQuests.ts).

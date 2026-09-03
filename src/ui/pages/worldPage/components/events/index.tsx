@@ -20,6 +20,7 @@ import {
   chaosCastleTimer,
   inChaosCastle,
 } from '../../../../../events/chaosCastle';
+import { doppelgangerWindow } from '../../../../../events/doppelganger';
 import {
   DEVIL_SQUARE_INTRO_KEYS,
   EVENT_TEXT,
@@ -29,6 +30,7 @@ import {
 // Aliased: this file already binds `t` to a timer record in two components.
 import { t as text } from '../../../../../i18n';
 import { MuButton } from '../../../../components/muButton';
+import { ItemIcon } from '../../../../components/itemIcon';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow } from '../../../../components/muWindow';
 import { DEFAULT_SCALE } from '../../../../components/muWindow/windowState';
@@ -67,6 +69,20 @@ import {
   DEVIL_BUTTON_Y,
   DEVIL_INTRO_STEP,
   DEVIL_INTRO_Y,
+  DG_BUTTON,
+  DG_BUTTON_SPRITE,
+  DG_BUTTON_X,
+  DG_CLOSE_Y,
+  DG_ENTER_Y,
+  DG_ENTRY_TIME_Y,
+  DG_INTRO_STEP,
+  DG_INTRO_Y,
+  DG_ITEM,
+  DG_LINE,
+  DG_LINE_SPRITE,
+  DG_LINE_Y,
+  DG_MIRROR_Y,
+  DG_TIME_Y,
   EXIT_BUTTON,
   EXIT_SPRITE,
   HEAD_CLOSE,
@@ -93,7 +109,7 @@ import {
 } from './layout';
 
 /**
- * Everything the events layer draws : the two NPC
+ * Everything the events layer draws : the NPC
  * entry windows, the Chaos Castle prompt, the match timer on the event
  * maps, the 30 s countdown line and the result boxes. This folder only
  * reads the entry files and calls `events.*` commands; it owns no state.
@@ -286,6 +302,129 @@ const DevilSquareWindow = observer(() => {
       onEnter={grade => events.enterDevilSquare(grade)}
       onClose={() => events.closeAll()}
     />
+  );
+});
+
+// ---- Doppelganger window ---------------------------------------------------
+
+/** The Mirror of Dimensions the window renders (`RenderItem3D`, 14 * 512 + 111). */
+const DG_MIRROR_ITEM = { group: 14, num: 111 };
+
+/** The wrap widths of `CutStr(GlobalText[2757 / 2758], .., 140 / 100, 2, ..)`. */
+const DG_INTRO1_CHARS = 26;
+const DG_INTRO2_CHARS = 20;
+
+/** Each intro sentence keeps its two fixed 15 px rows even when it fits one. */
+function dgIntroRows(): string[] {
+  const first = wrapLines(EVENT_TEXT.dgIntro1, DG_INTRO1_CHARS);
+  const second = wrapLines(EVENT_TEXT.dgIntro2, DG_INTRO2_CHARS);
+  while (first.length < 2) first.push('');
+  while (second.length < 2) second.push('');
+  return [...first.slice(0, 2), ...second.slice(0, 2), EVENT_TEXT.dgIntro3];
+}
+
+/** `CNewUIDoppelGangerWindow::Render`: Lugard's gate window. */
+const DoppelgangerWindow = observer(() => {
+  const w = doppelgangerWindow();
+  if (!w.open) return null;
+
+  const locked = w.remainMinutes !== 0;
+  const timeLine = locked
+    ? formatText(EVENT_TEXT.dgEnterAfter, w.remainMinutes)
+    : EVENT_TEXT.dgEnterNow;
+
+  const button = (label: string, top: number, disabled: boolean, onClick: () => void) => (
+    <div className="event-button" data-no-drag="true" style={{ left: DG_BUTTON_X, top }}>
+      <MuButton
+        file={DG_BUTTON_SPRITE}
+        width={DG_BUTTON.width}
+        height={DG_BUTTON.height}
+        frames={{ up: 0, active: 1, down: 2 }}
+        label={label}
+        color={disabled ? BUTTON_COLOR_DISABLED : BUTTON_COLOR_ENABLED}
+        activeColor={BUTTON_COLOR_ENABLED}
+        disabled={disabled}
+        onClick={onClick}
+        labelStyle={{ fontWeight: 'bold', fontSize: 11 }}
+      />
+    </div>
+  );
+
+  return (
+    <MuItemWindow
+      id="doppelganger-enter"
+      className="event-window"
+      label={EVENT_TEXT.lugard}
+      onClose={() => events.closeAll()}
+    >
+      <div
+        className="event-title"
+        style={{ left: TITLE_X, top: TITLE_Y, width: TITLE_WIDTH }}
+      >
+        {EVENT_TEXT.lugard}
+      </div>
+      <div
+        className="head-close"
+        data-no-drag="true"
+        style={HEAD_CLOSE}
+        onClick={() => events.closeAll()}
+      />
+
+      {dgIntroRows().map((line, i) => (
+        <div
+          key={i}
+          className="event-intro"
+          style={{
+            left: INTRO_X,
+            top: DG_INTRO_Y + i * DG_INTRO_STEP,
+            width: INTRO_WIDTH,
+            height: DG_INTRO_STEP,
+            lineHeight: `${DG_INTRO_STEP}px`,
+            fontSize: introFontSize(line),
+          }}
+          title={line}
+        >
+          {line}
+        </div>
+      ))}
+
+      <div
+        className="event-dg-item"
+        style={{ left: DG_ITEM.x, top: DG_ITEM.y, width: DG_ITEM.size, height: DG_ITEM.size }}
+      >
+        <ItemIcon item={DG_MIRROR_ITEM} />
+      </div>
+      <div
+        className="event-intro event-dg-bold"
+        style={{ left: INTRO_X, top: DG_MIRROR_Y, width: INTRO_WIDTH }}
+      >
+        {EVENT_TEXT.dgMirror}
+      </div>
+
+      {button(EVENT_TEXT.enter, DG_ENTER_Y, locked, () => events.enterDoppelganger())}
+
+      <MuSpriteFrame
+        file={DG_LINE_SPRITE}
+        width={DG_LINE.width}
+        height={DG_LINE.height}
+        style={{ position: 'absolute', left: 1, top: DG_LINE_Y }}
+      />
+
+      <div
+        className="event-intro"
+        style={{ left: INTRO_X, top: DG_ENTRY_TIME_Y, width: INTRO_WIDTH }}
+      >
+        {EVENT_TEXT.dgEntryTime}
+      </div>
+      <div
+        className="event-intro"
+        style={{ left: INTRO_X, top: DG_TIME_Y, width: INTRO_WIDTH }}
+      >
+        {timeLine}
+      </div>
+
+      {button(EVENT_TEXT.close, DG_CLOSE_Y, false, () => events.closeAll())}
+    </MuItemWindow>
   );
 });
 
@@ -554,6 +693,7 @@ export const EventWindows = observer(() => (
   <>
     <BloodCastleWindow />
     <DevilSquareWindow />
+    <DoppelgangerWindow />
     <ChaosCastlePrompt />
     <EventTimer />
     <EventCountdown />
