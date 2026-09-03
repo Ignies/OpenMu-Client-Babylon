@@ -1,5 +1,6 @@
 import type { EventLayer } from './layer';
 import { matchNoticesLayer } from './matchNotices';
+import { invasionLayer } from './invasion';
 import { bloodCastleLayer } from './bloodCastle';
 import { devilSquareLayer } from './devilSquare';
 import { chaosCastleLayer } from './chaosCastle';
@@ -15,6 +16,7 @@ import { duelLayer } from './duel';
  */
 export const EVENT_LAYERS: readonly EventLayer[] = [
   matchNoticesLayer, // the 30 s state line + invasion banners, every map
+  invasionLayer, // dragon invasion sky FX and sounds, every map
   bloodCastleLayer,
   devilSquareLayer,
   chaosCastleLayer,
