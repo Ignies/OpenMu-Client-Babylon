@@ -3,10 +3,11 @@
  * `cameraControl` option. Copy `_template.ts` to add a map override.
  *
  * Ported from CameraUtility.cpp / SceneCommon.cpp: Ctrl+wheel steps the
- * discrete distance levels, Insert/Delete or Ctrl+middle-button drag rotate
- * the heading (Home is taken by the MU Helper hot key, so the heading resets
- * on warp instead), pitch -48.5, vertical FOV 30. `layers.ts` holds the
- * per-map overrides.
+ * discrete distance levels (opening mid-range), Insert/Delete rotate the
+ * heading, pitch -48.5, vertical FOV 30. Ctrl+middle-button drag is the web
+ * client's addition: left/right rotates the heading, up/down pitches the
+ * view. Home is taken by the MU Helper hot key, so the frame resets on warp
+ * instead. `layers.ts` holds the per-map overrides.
  *
  * Single writer of alpha/beta/radius/fov while the option is on and the
  * game is in the World state; `cameraFollowSystem` is the only caller.
@@ -23,12 +24,16 @@ import { CAMERA_LAYERS } from './layers';
 import {
   CAMERA_FOV_DEG,
   CAMERA_PITCH_DEG,
+  DEFAULT_CAMERA_LEVEL,
   DEFAULT_HEADING_DEG,
   DISTANCE_BY_LEVEL,
   DISTANCE_EASE,
   HEIGHT_BACKOFF,
   MAX_CAMERA_LEVEL,
   MU_SCALE,
+  PITCH_DRAG_DEG_PER_PX,
+  PITCH_OFFSET_MAX_DEG,
+  PITCH_OFFSET_MIN_DEG,
   REFERENCE_FPS,
   ROTATE_DRAG_DEG_PER_PX,
   ROTATE_STEP_DEG,
@@ -45,13 +50,19 @@ for (const layer of CAMERA_LAYERS) {
 }
 
 /** `g_shCameraLevel`, 0..4. */
-let level = 0;
+let level = DEFAULT_CAMERA_LEVEL;
 
 /** `CameraAngle[2]`, degrees. */
 let headingDeg = DEFAULT_HEADING_DEG;
 
+/**
+ * Drag pitch, degrees added to the ported frame's tilt. Zero is the
+ * original's fixed pitch; positive looks toward the horizon.
+ */
+let pitchOffsetDeg = 0;
+
 /** `CameraDistance`, original units, eased toward the level's target. */
-let distance = DISTANCE_BY_LEVEL[0];
+let distance = DISTANCE_BY_LEVEL[DEFAULT_CAMERA_LEVEL];
 
 let wroteCamera = false;
 
@@ -102,10 +113,12 @@ export function installCameraControl(
     { passive: true }
   );
 
-  // Ctrl + middle-button drag rotates the heading. Ctrl is only needed to
-  // start the drag; pointer capture keeps it alive off-canvas until release.
+  // Ctrl + middle-button drag: left/right rotates the heading, up/down
+  // pitches. Ctrl is only needed to start the drag; pointer capture keeps
+  // it alive off-canvas until release.
   let dragPointer: number | null = null;
   let dragLastX = 0;
+  let dragLastY = 0;
 
   if (canvas) {
     canvas.addEventListener('pointerdown', ev => {
@@ -114,6 +127,7 @@ export function installCameraControl(
 
       dragPointer = ev.pointerId;
       dragLastX = ev.clientX;
+      dragLastY = ev.clientY;
       canvas.setPointerCapture(ev.pointerId);
       // Middle-button autoscroll would swallow the drag.
       ev.preventDefault();
@@ -123,7 +137,14 @@ export function installCameraControl(
       if (ev.pointerId !== dragPointer) return;
 
       headingDeg -= (ev.clientX - dragLastX) * ROTATE_DRAG_DEG_PER_PX;
+      // Drag up (clientY shrinks) pitches up toward the horizon.
+      pitchOffsetDeg -= (ev.clientY - dragLastY) * PITCH_DRAG_DEG_PER_PX;
+      pitchOffsetDeg = Math.max(
+        PITCH_OFFSET_MIN_DEG,
+        Math.min(PITCH_OFFSET_MAX_DEG, pitchOffsetDeg)
+      );
       dragLastX = ev.clientX;
+      dragLastY = ev.clientY;
     });
 
     const endDrag = (ev: PointerEvent) => {
@@ -133,11 +154,12 @@ export function installCameraControl(
     canvas.addEventListener('pointercancel', endDrag);
   }
 
-  // World change resets the level (WSclient.cpp:600); heading and distance
-  // snap with it so the new map opens on the default frame.
+  // World change resets the level (WSclient.cpp:600); heading, pitch and
+  // distance snap with it so the new map opens on the default frame.
   EventBus.on('warpCompleted', ({ map }) => {
-    level = 0;
+    level = DEFAULT_CAMERA_LEVEL;
     headingDeg = DEFAULT_HEADING_DEG;
+    pitchOffsetDeg = 0;
     distance = targetDistanceFor(map);
   });
 }
@@ -187,8 +209,10 @@ export function updateGameCamera(
     vertical += layer.groundHeight - camera.target.y * MU_SCALE;
   }
 
+  // The drag pitch orbits the ported frame around the target: same radius,
+  // tilt added to beta, so offset 0 is the original's camera exactly.
   camera.radius = Math.hypot(horizontal, vertical) / MU_SCALE;
-  camera.beta = Math.atan2(horizontal, vertical);
+  camera.beta = Math.atan2(horizontal, vertical) + pitchOffsetDeg * RAD;
   camera.alpha = headingDeg * RAD;
   camera.fov = CAMERA_FOV_DEG * RAD;
   wroteCamera = true;
