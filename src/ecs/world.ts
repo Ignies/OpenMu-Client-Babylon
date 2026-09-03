@@ -293,6 +293,12 @@ export type Entity = Partial<{
     /** `SetAction(o, n)` while standing / moving — mounts differ. */
     standAction: number;
     moveAction: number;
+    /**
+     * A Fenrir mount: its clips mirror the rider's `PLAYER_FENRIR_*` action
+     * instead of the stand/move pair, and its body arcs the variant's
+     * lightning tint (`fenrirMountAction` / PetSystem).
+     */
+    fenrirThunder?: readonly [number, number, number];
   };
   highlighted: {
     color: Color3;

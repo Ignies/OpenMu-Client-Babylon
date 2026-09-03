@@ -7,6 +7,8 @@ type Item = {
   lvl: number;
   isExcellent?: boolean;
   isAncient?: boolean;
+  /** The Fenrir colour bits, mirrored from `c->Helper.ExcellentFlags`. */
+  excellentFlags?: number;
 };
 
 const APPEARANCE_LENGTH = 18;
@@ -97,7 +99,7 @@ export function classFromAppearance(app: DataView): CharacterClassNumber {
  *   11     ancient per armor slot (high 5 bits) + full ancient set (bit 0)
  *   12, 13 left / right hand group (bits 5-7); byte 12 bit 0/2 = horse/Fenrir
  *   13-15  armor index bits 5-8, one nibble per slot
- *   16     transform pet flags
+ *   16     transform pet flags (high 3 bits) + black/blue Fenrir (bits 0/1)
  *   17     small-wing flags (high 3 bits) + gold Fenrir (bit 0)
  *
  * Everything the wearer's own gear can show — level glow, excellent and
@@ -294,8 +296,15 @@ function petFromAppearance(app: DataView): Item | null {
   // 0 Guardian Angel, 1 Imp, 2 Horn of Uniria.
   if (bits !== 0x03) return { num: bits, group: 13, lvl: 0 };
 
-  // Fenrir first: it clears the Dinorant and Dark Horse bits as it sets its own.
-  if (app.getUint8(12) & 0x04) return { num: 37, group: 13, lvl: 0 };
+  // Fenrir first: it clears the Dinorant and Dark Horse bits as it sets its
+  // own. Its colour rides bytes 16/17 (the client reads Equipment[15] & 3 and
+  // Equipment[16] & 1, ZzzCharacter.cpp:12455-12500) and is carried as the
+  // item's excellent flags, exactly like `c->Helper.ExcellentFlags`.
+  if (app.getUint8(12) & 0x04) {
+    const flags =
+      app.getUint8(17) & 0x01 ? 0x04 : app.getUint8(16) & 0x03;
+    return { num: 37, group: 13, lvl: 0, excellentFlags: flags };
+  }
   if (app.getUint8(12) & 0x01) return { num: 4, group: 13, lvl: 0 };
   if (app.getUint8(10) & 0x01) return { num: 3, group: 13, lvl: 0 };
 

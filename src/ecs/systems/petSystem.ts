@@ -5,12 +5,16 @@ import {
   MOUNT_ACTION_MOVE,
   MOUNT_ACTION_STAND,
   PET_GROUP,
+  fenrirMountAction,
   petFactoryFor,
   petSpec,
   type PetSpec,
 } from '../../common/pets';
 import { createAngleDeg, turnAngle } from '../../common/turnAngle';
 import { inChaosCastle } from '../../common/locomotion';
+import { effects } from '../../effects';
+import { boneLocalPos, bonePos } from '../../effects/core';
+import { MODEL, TEX } from '../../effects/recipes';
 import type { Entity, ISystemFactory, Item } from '../world';
 
 /**
@@ -36,9 +40,11 @@ import type { Entity, ISystemFactory, Item } from '../world';
  *    The perch is an approximation: the original glues it to bone 37, which
  *    a world object here cannot reach.
  *
- * **Not ported:** the Dark Horse and the four Fenrirs, which need the Dark
- * Lord / Rage Fighter ride clip families the player model in this tree has
- * no actions for.
+ *  - **Dark Horse / Fenrir**: pinned like the horns. The horse walks on
+ *    clip 1; a Fenrir mirrors its rider's `PLAYER_FENRIR_*` clip family
+ *    (`fenrirMountAction`, MoveMount GOBoid.cpp:200-266) and carries the
+ *    eye / jaw glow and the variant-coloured body lightning of
+ *    ZzzObject.cpp:855-895.
  */
 
 const MU_UNIT = 1 / 100;
@@ -81,6 +87,26 @@ const RAVEN_PERCH_SIDE = 0.25;
 /** `o->Angle[2] -= 120` while perched. */
 const RAVEN_PERCH_YAW = -120 * (Math.PI / 180);
 
+/**
+ * Fenrir glow cadence. The original re-creates its sprites and lightning
+ * every render frame (ZzzObject.cpp:855-895); stepping at 12.5 Hz with
+ * lifetimes that bridge the gap draws the same picture for a fraction of the
+ * spawns.
+ */
+const FENRIR_GLOW_TICK = 0.08;
+/** Eye and jaw anchors: `TransformPosition(BoneTransform[11 / 13], …)`. */
+const FENRIR_HEAD_BONE = 11;
+const FENRIR_JAW_BONE = 13;
+const FENRIR_EYE_LOCALS = [
+  new Vector3(0.5, 0.02, 0.11),
+  new Vector3(0.5, 0.02, -0.11),
+];
+const FENRIR_JAW_LOCAL = new Vector3(0.4, 0.15, 0);
+const FENRIR_EYE_RGB = [0.9, 0.2, 0.1] as const;
+const FENRIR_JAW_RGB = [1.0, 0.3, 0.2] as const;
+/** Bones the body lightning rolls over (ZzzEffect.cpp:4380-4410). */
+const FENRIR_THUNDER_BONES = [2, 10, 14, 50, 51, 53];
+
 const DEG = Math.PI / 180;
 
 const rand = (n: number) => Math.floor(Math.random() * n);
@@ -111,6 +137,7 @@ export const PetSystem: ISystemFactory = world => {
     for (const actor of [...actors.entities]) {
       if (actor.petActor.owner !== owner) continue;
       if ((actor.petActor.kind === 'raven') !== raven) continue;
+      glowClocks.delete(actor);
       world.remove(actor);
       actor.modelObject?.dispose();
     }
@@ -156,6 +183,7 @@ export const PetSystem: ISystemFactory = world => {
         drop: spec.mountDrop ?? 0,
         standAction: spec.standAction ?? MOUNT_ACTION_STAND,
         moveAction: spec.moveAction ?? MOUNT_ACTION_MOVE,
+        fenrirThunder: spec.thunder,
       },
     });
 
@@ -307,7 +335,66 @@ export const PetSystem: ISystemFactory = world => {
     actor.modelObject?.playAction(RAVEN_ACTION_STAND, true);
   }
 
-  function updateMount(actor: Entity) {
+  /** Per-actor clock for the Fenrir glow spawns. */
+  const glowClocks = new Map<Entity, number>();
+
+  const tmpGlow = new Vector3();
+
+  /**
+   * The per-frame eye / jaw sprites and the variant-coloured body lightning
+   * of the original's Fenrir render branch (ZzzObject.cpp:855-895), as
+   * periodic effect spawns. Not called in a safe zone - the mount is faded
+   * out there and the original skips the branch with it.
+   */
+  function updateFenrirGlow(actor: Entity, dt: number) {
+    const clock = (glowClocks.get(actor) ?? 0) + dt;
+    if (clock < FENRIR_GLOW_TICK) {
+      glowClocks.set(actor, clock);
+      return;
+    }
+    glowClocks.set(actor, clock % FENRIR_GLOW_TICK);
+
+    const scene = world.scene;
+    if (!scene || !actor.modelObject?.gltf) return;
+
+    for (const local of FENRIR_EYE_LOCALS) {
+      boneLocalPos(actor, FENRIR_HEAD_BONE, local, tmpGlow);
+      effects.spawn('sprite', scene, tmpGlow, {
+        texture: TEX.flare,
+        colour: FENRIR_EYE_RGB,
+        size: 0.35,
+        seconds: 0.16,
+        fadeTail: 0.6,
+      });
+    }
+    boneLocalPos(actor, FENRIR_JAW_BONE, FENRIR_JAW_LOCAL, tmpGlow);
+    effects.spawn('sprite', scene, tmpGlow, {
+      texture: TEX.flare,
+      colour: FENRIR_JAW_RGB,
+      size: 0.8,
+      seconds: 0.16,
+      fadeTail: 0.6,
+    });
+
+    // MODEL_FENRIR_THUNDER: lightning_type01 flickers on a random bone, a
+    // third of the rolls discarded (ZzzEffect.cpp:4363-4415).
+    if (Math.random() < 0.85) {
+      const bone =
+        FENRIR_THUNDER_BONES[(Math.random() * FENRIR_THUNDER_BONES.length) | 0];
+      bonePos(actor, bone, tmpGlow, 0.6);
+      effects.spawn('model', scene, tmpGlow, {
+        model: MODEL.lightningType,
+        colour: actor.petActor!.fenrirThunder!,
+        seconds: 0.28,
+        scale: 0.3 + Math.random() * 0.2,
+        yaw: Math.random() * Math.PI * 2,
+        fadeIn: 0.4,
+        fadeTail: 0.5,
+      });
+    }
+  }
+
+  function updateMount(actor: Entity, dt: number) {
     const state = actor.petActor!;
     const target = state.owner.transform?.pos;
     if (!target) return;
@@ -317,6 +404,17 @@ export const PetSystem: ISystemFactory = world => {
     pos.y = target.y - state.drop;
     pos.z = target.z;
     actor.transform!.rot.y = state.owner.transform!.rot.y;
+
+    // A Fenrir mirrors its rider's clip family instead of the stand/move
+    // pair, at the per-clip velocities of MoveMount.
+    if (state.fenrirThunder) {
+      const rider = state.owner.modelObject?.CurrentAction ?? -1;
+      const mirrored = fenrirMountAction(rider);
+      actor.modelObject?.setAnimationSpeed(mirrored.playSpeed);
+      actor.modelObject?.playAction(mirrored.action, true);
+      updateFenrirGlow(actor, dt);
+      return;
+    }
 
     const velocity = state.owner.movement?.velocity;
     const moving = !!velocity && (velocity.x !== 0 || velocity.y !== 0);
@@ -373,7 +471,7 @@ export const PetSystem: ISystemFactory = world => {
         if (inSafeZone) continue;
 
         if (state.kind === 'angel') updateAngel(actor, dt);
-        else updateMount(actor);
+        else updateMount(actor, dt);
       }
     },
   };

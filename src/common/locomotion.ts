@@ -21,6 +21,9 @@ import { isFastWing } from './wings';
 /** `c->Run >= 40` is the run threshold (ZzzCharacter.cpp:387, :544). */
 export const RUN_THRESHOLD = 40;
 
+/** A Fenrir rider breaks into the run clips at 20 (`FENRIR_RUN_DELAY`). */
+export const FENRIR_RUN_DELAY = 20;
+
 /** `c->Run += FPS_ANIMATION_FACTOR` once per frame → 25 units per second. */
 export const RUN_UNITS_PER_SECOND = REFERENCE_FPS;
 
@@ -80,9 +83,9 @@ export function isSwimWorld(world: number): boolean {
 
 /**
  * `SetPlayerWalk`'s gate on the run accumulator (ZzzCharacter.cpp:387-408).
- * Knights, Dark Lords and Rage Fighters always run; everyone else needs +5
- * boots — or +5 gloves in the swim worlds, where the "run" is a swim stroke
- * driven by the arms.
+ * Knights, Dark Lords, Rage Fighters and anyone on a Fenrir always run;
+ * everyone else needs +5 boots — or +5 gloves in the swim worlds, where the
+ * "run" is a swim stroke driven by the arms.
  *
  * The original ORs the equipped-item level with the *rendered* body-part
  * level; here there is one source for both, so a single check covers it.
@@ -91,8 +94,11 @@ export function canAccumulateRun(
   cls: CharacterClassNumber,
   boots: Item | null | undefined,
   gloves: Item | null | undefined,
-  world: number
+  world: number,
+  ridingFenrir = false
 ): boolean {
+  if (ridingFenrir) return true;
+
   const base = getBaseClass(cls);
   if (
     base === BaseClass.Knight ||
@@ -128,6 +134,10 @@ export type MoveSpeedInput = {
   wings: Item | null | undefined;
   /** `c->Helper` is a Horn of Uniria / Dinorant (they move at wing speed). */
   riding: boolean;
+  /** `c->Helper` is a Horn of Fenrir: its own walk-up and speed ladder. */
+  fenrir?: boolean;
+  /** A Fenrir with an option (`Helper.ExcellentFlags > 0`) tops out at 19. */
+  fenrirUpgraded?: boolean;
   world: number;
 };
 
@@ -137,20 +147,32 @@ export type MoveSpeedInput = {
  * Castle (ZzzCharacter.cpp:6200-6215, :6232-6236).
  */
 export function forcesRun(
-  input: Pick<MoveSpeedInput, 'wings' | 'riding' | 'inSafeZone' | 'world'>
+  input: Pick<
+    MoveSpeedInput,
+    'wings' | 'riding' | 'fenrir' | 'inSafeZone' | 'world'
+  >
 ): boolean {
+  // A Fenrir keeps the walk-up: its branch of CharacterMoveSpeed (:6182-6194)
+  // reads c->Run instead of pinning it to 40.
+  if (input.fenrir && !input.inSafeZone) return inChaosCastle(input.world);
   if ((input.wings || input.riding) && !input.inSafeZone) return true;
   return inChaosCastle(input.world);
 }
 
 /**
- * `CharacterMoveSpeed` (ZzzCharacter.cpp:6165-6250) minus Fenrir, the Dark
- * Horse and the Cursed Temple holy item, in tiles per second.
+ * `CharacterMoveSpeed` (ZzzCharacter.cpp:6165-6250) minus the Dark Horse and
+ * the Cursed Temple holy item, in tiles per second.
  */
 export function characterMoveSpeed(input: MoveSpeedInput): number {
   let speed: number;
 
-  if ((input.wings || input.riding) && !input.inSafeZone) {
+  if (input.fenrir && !input.inSafeZone) {
+    // The Fenrir ladder (:6182-6194): 15 while walking, 16 through the
+    // walk-up's back half, then 17 - or 19 on a coloured one.
+    if (input.run < FENRIR_RUN_DELAY / 2) speed = 15;
+    else if (input.run < FENRIR_RUN_DELAY) speed = 16;
+    else speed = input.fenrirUpgraded ? 19 : 17;
+  } else if ((input.wings || input.riding) && !input.inSafeZone) {
     speed = isFastWing(input.wings) ? SPEED_FAST_WINGS : SPEED_WINGS;
   } else {
     speed = input.run >= RUN_THRESHOLD ? SPEED_RUN : SPEED_WALK;

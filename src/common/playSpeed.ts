@@ -118,6 +118,43 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_WALK_TWO_HAND_SWORD_TWO) return 0.3;
   if (action === A.PLAYER_RUN_TWO_HAND_SWORD_TWO) return 0.3;
 
+  // --- Fenrir rider clips: 0.45 base over the whole block, run 0.71 and
+  // stand 0.40 on top (ZzzOpenData.cpp:388-401), attacks per SetAttackSpeed
+  // (ZzzCharacter.cpp:873-882).
+  if (action >= A.PLAYER_FENRIR_ATTACK && action <= A.PLAYER_FENRIR_WALK_ONE_LEFT) {
+    switch (action) {
+      case A.PLAYER_FENRIR_ATTACK:
+      case A.PLAYER_FENRIR_ATTACK_TWO_SWORD:
+      case A.PLAYER_FENRIR_ATTACK_SPEAR:
+      case A.PLAYER_FENRIR_ATTACK_ONE_SWORD:
+      case A.PLAYER_FENRIR_ATTACK_DARKLORD_SWORD:
+        return 0.25 + f;
+      case A.PLAYER_FENRIR_ATTACK_CROSSBOW:
+      case A.PLAYER_FENRIR_ATTACK_BOW:
+        return 0.3 + f;
+      case A.PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE:
+        return 0.2 + f;
+      case A.PLAYER_FENRIR_ATTACK_MAGIC:
+        return 0.37 + magicSpeedFactor(magicSpeed);
+      case A.PLAYER_FENRIR_ATTACK_DARKLORD_FLASH:
+        return 0.4 + magicSpeedFactor(magicSpeed);
+      case A.PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT:
+        return 0.3;
+    }
+    if (action >= A.PLAYER_FENRIR_RUN && action <= A.PLAYER_FENRIR_RUN_ONE_LEFT_ELF) return 0.71;
+    if (action >= A.PLAYER_FENRIR_STAND && action <= A.PLAYER_FENRIR_STAND_ONE_LEFT) return 0.4;
+    return 0.45;
+  }
+  // --- Rage Fighter Fenrir clips (ZzzOpenData.cpp:411-427).
+  if (action >= A.PLAYER_RAGE_FENRIR && action <= A.PLAYER_RAGE_FENRIR_ATTACK_RIGHT) {
+    if (action === A.PLAYER_RAGE_FENRIR_ATTACK_RIGHT) return 0.25 + f;
+    if (action >= A.PLAYER_RAGE_FENRIR_TWO_SWORD && action <= A.PLAYER_RAGE_FENRIR_ONE_LEFT) return 0.225;
+    if (action === A.PLAYER_RAGE_FENRIR_STAND) return 0.21;
+    if (action >= A.PLAYER_RAGE_FENRIR_STAND_TWO_SWORD && action <= A.PLAYER_RAGE_FENRIR_STAND_ONE_LEFT) return 0.2;
+    if (action >= A.PLAYER_RAGE_FENRIR_RUN && action <= A.PLAYER_RAGE_FENRIR_RUN_ONE_LEFT) return 0.355;
+    return 0.45;
+  }
+
   // --- reactions
   if (action >= A.PLAYER_DEFENSE1 && action <= A.PLAYER_SHOCK) return 0.32;
   if (action === A.PLAYER_DIE1 || action === A.PLAYER_DIE2) return 0.45;

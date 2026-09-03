@@ -3,6 +3,9 @@ import type { ISystemFactory } from '../world';
 import type { PlayerObject } from '../../common/playerObject';
 import { isOneShotPlayerAction } from '../../common/playerActionMapper';
 import {
+  chooseFenrirIdleAction,
+  chooseFenrirRunAction,
+  chooseFenrirWalkAction,
   chooseIdleAction,
   chooseRunAction,
   chooseWalkAction,
@@ -25,6 +28,7 @@ import { attackSpeedOf, magicSpeedOf } from '../../common/characterStats';
 import { BaseClass, getBaseClass } from '../../common/characterStats';
 import { isFemaleClass } from '../../common/mapPlayerNetClassToModelClass';
 import {
+  FENRIR_RUN_DELAY,
   RUN_THRESHOLD,
   RUN_UNITS_PER_SECOND,
   canAccumulateRun,
@@ -80,9 +84,9 @@ export const AnimationSystem: ISystemFactory = world => {
   );
 
   /**
-   * SetPlayerStop / SetPlayerWalk (ZzzCharacter.cpp:157-679) minus Fenrir, the
-   * Dark Horse and the Dark Spirit. The order is the original's and it
-   * matters: ride, then wings, then the swim worlds, and only then the weapon
+   * SetPlayerStop / SetPlayerWalk (ZzzCharacter.cpp:157-679) minus the Dark
+   * Spirit. The order is the original's and it matters: Fenrir, then the
+   * horse, the horns, wings, the swim worlds, and only then the weapon
    * switch — a winged character in Atlans flies, it does not swim.
    */
   function calculateAnimation(ctx: {
@@ -94,11 +98,23 @@ export const AnimationSystem: ISystemFactory = world => {
     riding: boolean;
     /** The rider is on a Dark Horse, which has its own clip pair. */
     ridingHorse: boolean;
+    /** The rider is on a Fenrir: weapon-split clips, run break at 20. */
+    ridingFenrir: boolean;
     swimWorld: boolean;
   }): PlayerAction {
     const armed = isArmed(ctx.pose.hands);
     const crossbow = equippedCrossbow(ctx.pose.hands);
     const running = ctx.run >= RUN_THRESHOLD;
+
+    // The Fenrir is tested first (SetPlayerStop:164-187, SetPlayerWalk:
+    // 466-476): its own weapon-split families, breaking into the run clips
+    // at FENRIR_RUN_DELAY instead of the usual 40.
+    if (ctx.ridingFenrir && !ctx.inSafeZone) {
+      if (!ctx.isMoving) return chooseFenrirIdleAction(ctx.pose);
+      return ctx.run < FENRIR_RUN_DELAY
+        ? chooseFenrirWalkAction(ctx.pose)
+        : chooseFenrirRunAction(ctx.pose);
+    }
 
     // The Dark Horse is tested before the horns and ignores the weapon
     // split — both arms of the original pick the same clip
@@ -206,6 +222,7 @@ export const AnimationSystem: ISystemFactory = world => {
         const mount = petSpec(hands?.pet);
         const riding = isRidingMount(hands?.pet);
         const ridingHorse = riding && mount?.riderClips === 'horse';
+        const ridingFenrir = riding && mount?.riderClips === 'fenrir';
 
         // `c->Wing.Type != -1 && !SafeZone` (SetPlayerStop:213,
         // SetPlayerWalk:535). The swim worlds also set the original’s local
@@ -222,6 +239,8 @@ export const AnimationSystem: ISystemFactory = world => {
           inSafeZone,
           wings,
           riding,
+          fenrir: ridingFenrir,
+          fenrirUpgraded: (hands?.pet?.excellentFlags ?? 0) > 0,
           world: mapIndex,
         };
 
@@ -243,7 +262,8 @@ export const AnimationSystem: ISystemFactory = world => {
             hands?.charClass ?? Store.playerData.charClass,
             hands?.boots,
             hands?.gloves,
-            mapIndex
+            mapIndex,
+            ridingFenrir
           )
         ) {
           playerAnimation.run = Math.min(
@@ -340,6 +360,7 @@ export const AnimationSystem: ISystemFactory = world => {
           wings: !!wings,
           riding,
           ridingHorse,
+          ridingFenrir,
           swimWorld,
         });
       }

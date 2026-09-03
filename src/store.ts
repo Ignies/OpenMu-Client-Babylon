@@ -639,9 +639,13 @@ function offlineClassFromUrl(): CharacterClassNumber | null {
  * slots (`group,num[,level]`; `none` empties the slot), for the weapon
  * stow/draw screenshot matrix (lighting_rework.md §4). Slot 0 draws in the
  * right hand (Weapon1), slot 1 in the left (Weapon2).
+ *
+ * `?pet=13,37` fills the pet slot the same way; its third number is the
+ * item's option bits instead of a level (the Fenrir colours: 1 black,
+ * 2 blue, 4 gold).
  */
 function applyOfflineHandOverrides(items: (Item | null)[]): void {
-  const read = (name: string, slot: number) => {
+  const read = (name: string, slot: number, thirdIsFlags = false) => {
     let raw: string | null = null;
     try {
       raw = new URLSearchParams(location.search).get(name);
@@ -655,19 +659,21 @@ function applyOfflineHandOverrides(items: (Item | null)[]): void {
       return;
     }
 
-    const [group, num, lvl] = raw.split(',').map(Number);
+    const [group, num, third] = raw.split(',').map(Number);
     if (Number.isFinite(group) && Number.isFinite(num)) {
       items[slot] = {
         group,
         num,
-        lvl: Number.isFinite(lvl) ? lvl : 0,
+        lvl: !thirdIsFlags && Number.isFinite(third) ? third : 0,
         isExcellent: false,
+        excellentFlags: thirdIsFlags && Number.isFinite(third) ? third : 0,
       };
     }
   };
 
   read('hand1', InventoryConstants.LeftHandSlot);
   read('hand2', InventoryConstants.RightHandSlot);
+  read('pet', InventoryConstants.PetSlot, true);
 }
 
 export const Store = new (class _Store {
