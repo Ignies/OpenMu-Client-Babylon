@@ -189,6 +189,7 @@ export const EN_TEXT = {
   'options.toneMapping': 'Filmic tone map',
   'options.ambientParticles': 'Ambient particles',
   'options.weatherEffects': 'Weather',
+  'options.animatedWater': 'Animated water',
   'options.advancedEffects': 'Advanced effects',
   'options.lightingQuality': 'Lighting',
   'options.materialQuality': 'Materials',

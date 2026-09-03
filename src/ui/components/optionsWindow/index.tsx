@@ -249,6 +249,7 @@ const TABS: Tab[] = [
             check('toneMapping', -1, 'options.toneMapping', true),
             check('ambientParticles', -1, 'options.ambientParticles'),
             check('weatherEffects', -1, 'options.weatherEffects'),
+            check('animatedWater', -1, 'options.animatedWater'),
             check('advancedEffects', -1, 'options.advancedEffects'),
             slider({
               key: 'lightingQuality',
