@@ -23,7 +23,7 @@ import {
 } from './common/packets/ClientToServerPackets';
 import { playUiSound } from './libs/sfx';
 
-export type MessengerTab = 'friends' | 'letters';
+export type MessengerTab = 'friends' | 'letters' | 'rooms';
 
 /** The window the letter box opens on top of itself: read or write. */
 export type LetterView =

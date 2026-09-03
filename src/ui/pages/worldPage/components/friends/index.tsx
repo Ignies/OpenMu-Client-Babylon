@@ -5,6 +5,7 @@ import { observer } from 'mobx-react-lite';
 import { isKey } from '../../../../../common/keyBindings';
 import { Store } from '../../../../../store';
 import { Messenger, type MessengerTab } from '../../../../../messenger';
+import { ChatRooms } from '../../../../../chatRooms';
 import {
   MAX_FRIENDS,
   MAX_LETTER_TEXT,
@@ -20,13 +21,11 @@ import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
 /**
  * `CNewUIFriendWindow` (NewUIFriendWindow.cpp) - the friend list and the
  * letter box, in the original's item-window frame with the `newui_guild_tab`
- * strip on top.
- *
- * **Choice:** the original has a third tab, the chat-room list, which drives
- * MU's separate chat server through `CUIChatRoomListTabWindow`. OpenMU ships
- * no chat server and defines no chat-room packets, so that tab is left out
- * and the Talk button whispers through the ordinary chat box instead - which
- * is what the original's Talk button falls back to when no chat server is up.
+ * strip on top, plus the third tab: the chat-room list
+ * (`CUIChatRoomListTabWindow`), listing the rooms open on MU's separate chat
+ * server (chatRooms.ts). Talk on an online friend opens a chat room, like
+ * the original's button 3; on an offline friend it falls back to the chat
+ * box's whisper field.
  */
 
 const WINDOW_ID = 'friend-window';
@@ -38,7 +37,7 @@ const HEAD_CLOSE = { left: 169, top: 7, width: 13, height: 12 };
 
 // GuildConstants::UILayout, shared with the guild window's tab strip.
 const TAB = { x: 12, y: 68, width: 166, height: 22 };
-const TAB_WIDTH = 56;
+const TAB_WIDTH = 55;
 const LIST = { x: 12, y: 96, width: 166, height: 250 };
 const BUTTONS_Y = 352;
 const EXIT_BUTTON = { x: 13, y: 392, width: 36, height: 29 };
@@ -50,6 +49,7 @@ const EXIT_SPRITE = 'newui_exit_00.OZT';
 const TABS: { key: MessengerTab; labelKey: TextKey }[] = [
   { key: 'friends', labelKey: 'friends.tab.friends' },
   { key: 'letters', labelKey: 'friends.tab.letters' },
+  { key: 'rooms', labelKey: 'friends.tab.rooms' },
 ];
 
 const TabStrip = observer(() => (
@@ -82,6 +82,13 @@ const TabStrip = observer(() => (
     ))}
   </>
 ));
+
+/** The original's button 3: chat room when online, whisper otherwise. */
+function talkTo(name: string): void {
+  const friend = Messenger.friends.find(f => f.name === name);
+  if (friend && isFriendOnline(friend)) ChatRooms.openRoomWith(name);
+  else Messenger.whisperFriend(name);
+}
 
 const FriendsTab = observer(() => {
   const [name, setName] = useState('');
@@ -116,7 +123,7 @@ const FriendsTab = observer(() => {
                 online ? '' : ' offline'
               }`}
               onClick={uiClick(() => Messenger.selectFriend(friend.name))}
-              onDoubleClick={() => Messenger.whisperFriend(friend.name)}
+              onDoubleClick={() => talkTo(friend.name)}
             >
               <span className={`messenger-dot${online ? ' on' : ''}`} />
               <span className="messenger-name">{friend.name}</span>
@@ -155,7 +162,7 @@ const FriendsButtons = observer(() => {
 
   return (
     <div className="messenger-buttons" data-no-drag="true" style={{ top: BUTTONS_Y }}>
-      <button type="button" disabled={!has} onClick={uiClick(() => Messenger.whisperFriend(selected))}>
+      <button type="button" disabled={!has} onClick={uiClick(() => talkTo(selected))}>
         {t('friends.talk')}
       </button>
       <button type="button" disabled={!has} onClick={uiClick(() => Messenger.composeLetter(selected))}>
@@ -172,6 +179,68 @@ const FriendsButtons = observer(() => {
         />
         {t('friends.hide')}
       </label>
+    </div>
+  );
+});
+
+/**
+ * `CUIChatRoomListTabWindow`: the open chat-room windows by name;
+ * double-click brings one up (or puts it away when it is already on top).
+ */
+const RoomsTab = observer(() => (
+  <div
+    className="messenger-body"
+    data-no-drag="true"
+    style={{ left: LIST.x + 8, top: LIST.y + 8, width: LIST.width - 16, height: LIST.height - 16 }}
+  >
+    <div className="messenger-head">
+      {t('friends.roomsCount', { count: ChatRooms.rooms.length })}
+    </div>
+    <div className="messenger-list">
+      {ChatRooms.rooms.length === 0 && (
+        <div className="messenger-empty">{t('friends.roomsEmpty')}</div>
+      )}
+      {ChatRooms.rooms.map(room => (
+        <div
+          key={room.key}
+          className={`messenger-row${ChatRooms.activeKey === room.key ? ' selected' : ''}`}
+          onClick={uiClick(() => ChatRooms.setActiveRoom(room.key))}
+          onDoubleClick={() => ChatRooms.openWindow(room.key)}
+        >
+          <span className={`messenger-dot${room.state === 'open' ? ' on' : ''}`} />
+          <span className="messenger-name">{room.friendName}</span>
+          <span className="messenger-meta">
+            {room.unread
+              ? t('friends.roomAlert')
+              : room.state === 'closed'
+                ? t('common.offline')
+                : ''}
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+));
+
+const RoomsButtons = observer(() => {
+  const room = ChatRooms.activeRoom;
+
+  return (
+    <div className="messenger-buttons" data-no-drag="true" style={{ top: BUTTONS_Y }}>
+      <button
+        type="button"
+        disabled={!room}
+        onClick={uiClick(() => room && ChatRooms.openWindow(room.key))}
+      >
+        {t('friends.open')}
+      </button>
+      <button
+        type="button"
+        disabled={!room}
+        onClick={uiClick(() => room && ChatRooms.leaveRoom(room.key))}
+      >
+        {t('chatRoom.leave')}
+      </button>
     </div>
   );
 });
@@ -349,7 +418,7 @@ export const FriendWindow = observer(() => {
 
   if (!Messenger.windowEnabled) return null;
 
-  const letters = Messenger.tab === 'letters';
+  const tab = Messenger.tab;
 
   return (
     <MuItemWindow
@@ -377,8 +446,8 @@ export const FriendWindow = observer(() => {
       />
       <MuTableFrame left={LIST.x} top={LIST.y} width={LIST.width} height={LIST.height} />
 
-      {letters ? <LettersTab /> : <FriendsTab />}
-      {letters ? <LettersButtons /> : <FriendsButtons />}
+      {tab === 'letters' ? <LettersTab /> : tab === 'rooms' ? <RoomsTab /> : <FriendsTab />}
+      {tab === 'letters' ? <LettersButtons /> : tab === 'rooms' ? <RoomsButtons /> : <FriendsButtons />}
 
       <LetterSheet />
 

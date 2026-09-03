@@ -1,0 +1,147 @@
+// `CUIChatWindow`: a dark chat panel; one tab per open room across the top.
+.chat-room-window {
+  position: absolute;
+  left: 60px;
+  top: 120px;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  user-select: none;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid #444;
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
+
+  .chat-room-tabs {
+    display: flex;
+    align-items: stretch;
+    background: rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid #444;
+  }
+
+  .chat-room-tab {
+    padding: 4px 10px;
+    cursor: pointer;
+    color: #999;
+    border-right: 1px solid #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90px;
+
+    &.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    // The original's new-chat alert on a hidden room window.
+    &.unread {
+      color: #ffd927;
+    }
+  }
+
+  .chat-room-close {
+    margin-left: auto;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: #999;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+
+  .chat-room-members {
+    padding: 4px 8px;
+    color: #ffd927;
+    border-bottom: 1px solid #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chat-room-lines {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    user-select: text;
+  }
+
+  .chat-room-line {
+    word-break: break-word;
+
+    .sender {
+      color: #7fb2ff;
+    }
+
+    &.system {
+      color: #999;
+    }
+  }
+
+  .chat-room-invite-list {
+    max-height: 90px;
+    overflow-y: auto;
+    border-top: 1px solid #333;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .chat-room-invite-row {
+    padding: 3px 8px;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(204, 204, 26, 0.4);
+    }
+  }
+
+  .chat-room-invite-empty {
+    padding: 3px 8px;
+    color: #999;
+  }
+
+  .chat-room-input {
+    display: flex;
+    gap: 4px;
+    padding: 5px 6px;
+    border-top: 1px solid #444;
+
+    input {
+      flex: 1;
+      min-width: 0;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid #555;
+      color: #fff;
+      font-size: 11px;
+      padding: 3px 5px;
+      outline: none;
+
+      &:disabled {
+        opacity: 0.5;
+      }
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid #555;
+      color: #ddd;
+      font-size: 11px;
+      padding: 3px 8px;
+      cursor: pointer;
+
+      &:hover:not(:disabled) {
+        color: #fff;
+        border-color: #888;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+    }
+  }
+}

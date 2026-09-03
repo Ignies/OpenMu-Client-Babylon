@@ -423,6 +423,22 @@ export const EN_TEXT = {
   'friends.subject': 'Subject',
   'friends.replyPrefix': 'Re: {subject}',
 
+  'friends.tab.rooms': 'Chat',
+  'friends.roomsEmpty': 'No open chat rooms.',
+  'friends.roomsCount': 'Chat rooms ({count})',
+  'friends.roomAlert': 'New',
+  'friends.open': 'Open',
+
+  'chatRoom.title': 'Chat Room',
+  'chatRoom.connecting': 'Connecting to the chat server...',
+  'chatRoom.closed': 'Disconnected',
+  'chatRoom.members': 'Members ({count})',
+  'chatRoom.invite': 'Invite',
+  'chatRoom.inviteEmpty': 'No other friends are online.',
+  'chatRoom.leave': 'Leave',
+  'chatRoom.inputPlaceholder': 'Type a message',
+  'chatRoom.waiting': 'Waiting for {name} to join...',
+
   'guild.title': 'Guild',
   'guild.tab.info': 'Guild',
   'guild.tab.members': 'Members',
