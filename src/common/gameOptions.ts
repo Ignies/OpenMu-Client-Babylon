@@ -74,6 +74,12 @@ export type GameOptions = {
   /** Rain driven by the server weather packet. */
   weatherEffects: boolean;
   /**
+   * Animated water terrain: wave deformation and the caustics flipbook on
+   * the maps that have them (Atlans). Read at map load, like the ground
+   * weather - off, the terrain compiles the shader it always had.
+   */
+  animatedWater: boolean;
+  /**
    * Ground-contact weather: settled snow and rain wetness on the terrain,
    * puddles, footprints and the snow a boot kicks up.
    *
@@ -148,6 +154,7 @@ const DEFAULTS: GameOptions = {
   itemEffects: 2,
   ambientParticles: true,
   weatherEffects: true,
+  animatedWater: true,
   advancedEffects: true,
   autoAttack: false,
   whisperBeep: true,

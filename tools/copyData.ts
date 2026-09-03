@@ -52,6 +52,8 @@ const RULES: Rule[] = [
   { dir: 'PBR', ext: null },
   // minimap.ts → World*/mini_map.OZT + Minimap.bmd; weather → World*/leaf*.OZ?
   { dir: 'World', ext: [], names: ['mini_map.ozt', 'minimap.bmd', 'leaf01.ozt', 'leaf01.ozj', 'leaf02.ozj', 'leaf02.ozt'], numbered: true },
+  // libs/mu/terrainWater.ts → Object8/wt00..wt31.OZJ (Atlans caustics flipbook)
+  { dir: 'Object8', ext: [], names: Array.from({ length: 32 }, (_, i) => `wt${String(i).padStart(2, '0')}.ozj`) },
 ];
 
 function arg(name: string, fallback: string): string {

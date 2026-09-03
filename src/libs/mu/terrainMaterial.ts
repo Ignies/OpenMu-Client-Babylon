@@ -23,6 +23,18 @@ import {
   terrainCsmDefines,
   terrainCsmGlsl,
 } from '../../scenes/enhancedLighting';
+import {
+  bindTerrainWater,
+  disposeTerrainWaterFrames,
+  terrainWaterAlphaSkipGlsl,
+  terrainWaterCausticsGlsl,
+  terrainWaterGrassWindGlsl,
+  terrainWaterSamplers,
+  terrainWaterUniforms,
+  terrainWaterVertexDeclarationsGlsl,
+  terrainWaterVertexGlsl,
+  type TerrainWaterRuntime,
+} from './terrainWater';
 
 const FINAL_COLOR_VAR_NAME = `finalColor`;
 
@@ -112,9 +124,12 @@ export function createTerrainMaterial(
     tileArray?: TileTextureArray | null;
     /** Ground-contact weather layers for this map; empty = shader unchanged. */
     overlays?: readonly TerrainOverlay[];
+    /** Animated water for this map (terrainWater.ts); null = shader unchanged. */
+    water?: TerrainWaterRuntime | null;
   }
 ) {
   const tileArray = USE_TILE_TEXTURE_ARRAY ? config.tileArray ?? null : null;
+  const water = config.water ?? null;
   // The ploughed-trail map is one more sampler, and the per-tile fallback
   // path already spends every one of WebGL's guaranteed 16 fragment units
   // (13 tiles + the light map + two cascades). On that path the trail is
@@ -152,9 +167,12 @@ export function createTerrainMaterial(
   varying vec3 vNormal;
   varying float vViewZ;
 
+${water ? terrainWaterVertexDeclarationsGlsl() : ''}
+
   void main() {
       vec4 p = vec4(position, 1.);
       vec4 worldPosition = world * p;
+${water ? terrainWaterVertexGlsl(water.spec) : ''}
       vUV = uv;
       vOpaqueTexture = uv2.x;
       vAlphaTexture = uv2.y;
@@ -184,6 +202,7 @@ ${
     : `  uniform sampler2D textures[${config.texturesData.length}];`
 }
   uniform sampler2D dynamicLight;
+${water && water.frames.length ? `  uniform sampler2D waterFlip;` : ''}
   varying vec2 vUV;
   flat varying float vOpaqueTexture;
   flat varying float vAlphaTexture;
@@ -206,7 +225,7 @@ ${terrainOverlayDeclarationsGlsl(overlays)}
 
     float WaterMove = float(int(time*50.0) % 20000) * 0.0005;
     float WindSpeed = float(int(time*200.0) % 72000) * 0.004;
-    float GrassWind = 0.0;
+    float GrassWind = ${water ? terrainWaterGrassWindGlsl() : '0.0'};
   
     vec4 ${FINAL_COLOR_VAR_NAME} = vec4(0.0);
 
@@ -214,7 +233,7 @@ ${terrainOverlayDeclarationsGlsl(overlays)}
     vec3 alphaColor = vec3(0.0);
 
     ${finalColorStr}
-
+${water ? terrainWaterAlphaSkipGlsl(water) : ''}
     ${FINAL_COLOR_VAR_NAME} = vec4(opaqueColor, 1.0);
 
     if(alphaRendered){
@@ -286,6 +305,7 @@ ${terrainOverlayLitGlsl(
     // Standing water reflects the sky and the torches - light the ground
     // under it never had, so it is added after the lighting.
 ${terrainOverlayReflectGlsl(overlays, 'f', 'sunShadow')}
+${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
 
     // When image processing runs in post the buffer is linear, and
     // Babylon's Standard fragment ends with toLinearSpace(color) — the same
@@ -317,6 +337,7 @@ ${terrainOverlayReflectGlsl(overlays, 'f', 'sunShadow')}
         'interiorAmbient',
         ...(tileArray ? ['tileScales'] : []),
         ...terrainOverlayUniforms(overlays),
+        ...(water ? terrainWaterUniforms() : []),
         ...TERRAIN_CSM_UNIFORMS,
       ],
       // `textures[N]` is expanded to N consecutive units starting at its own
@@ -328,6 +349,7 @@ ${terrainOverlayReflectGlsl(overlays, 'f', 'sunShadow')}
       samplers: [
         'dynamicLight',
         ...(hasTrail(overlays) ? ['ovTrail'] : []),
+        ...(water ? terrainWaterSamplers(water) : []),
         'csmShadowMap',
         'csmShadowMapF',
         ...(tileArray ? ['tileTextures'] : ['textures']),
@@ -376,6 +398,7 @@ ${terrainOverlayReflectGlsl(overlays, 'f', 'sunShadow')}
     }
     effect.setTexture('dynamicLight', dynamicLight);
     bindTerrainOverlays(effect, overlays, scene);
+    if (water) bindTerrainWater(effect, water, et, scene);
     bindTerrainCsm(effect);
   });
 
@@ -388,6 +411,7 @@ ${terrainOverlayReflectGlsl(overlays, 'f', 'sunShadow')}
       t.dispose();
     });
     tileArray?.texture.dispose();
+    if (water) disposeTerrainWaterFrames(water.frames);
   });
 
   return terrainMaterial;

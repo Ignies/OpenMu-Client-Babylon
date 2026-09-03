@@ -11,6 +11,12 @@ import { createTileTextureArray } from './tileTextureArray';
 import { updateTerrainHeightMap } from './terrainHeightMap';
 import { createTerrainMaterial } from './terrainMaterial';
 import { terrainOverlaysFor } from './terrainOverlay';
+import {
+  createTerrainWaterRuntime,
+  disposeTerrainWaterFrames,
+  loadTerrainWaterFlipbook,
+  terrainWaterFor,
+} from './terrainWater';
 import { ENUM_WORLD } from '../../common';
 import {
   createOZJTexture,
@@ -123,12 +129,29 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
     return null;
   });
 
-  return { worldNum, bulk, terrainLight, terrainTextures, tileArray };
+  // Animated water (terrainWater.ts): the option and the registry are read
+  // here, at load, so a map without water - or the option off - hands the
+  // material nothing and the shader compiles exactly as before.
+  const waterSpec = terrainWaterFor(map);
+  const waterFrames = waterSpec
+    ? await loadTerrainWaterFlipbook(scene, waterSpec)
+    : [];
+
+  return {
+    worldNum,
+    bulk,
+    terrainLight,
+    terrainTextures,
+    tileArray,
+    waterSpec,
+    waterFrames,
+  };
 }
 
 export function disposePreparedTerrain(prepared: PreparedTerrain): void {
   for (const texture of prepared.terrainTextures) texture.dispose();
   prepared.tileArray?.texture.dispose();
+  disposeTerrainWaterFrames(prepared.waterFrames);
 }
 
 export async function getTerrainData(
@@ -137,8 +160,15 @@ export async function getTerrainData(
   prepared?: PreparedTerrain
 ) {
   const scene = world.scene;
-  const { worldNum, bulk, terrainLight, terrainTextures, tileArray } =
-    prepared ?? (await prepareTerrain(scene, map));
+  const {
+    worldNum,
+    bulk,
+    terrainLight,
+    terrainTextures,
+    tileArray,
+    waterSpec,
+    waterFrames,
+  } = prepared ?? (await prepareTerrain(scene, map));
 
   const terrainHeight = bulk.height;
   const terrainAttrs = bulk.attributes;
@@ -193,6 +223,10 @@ export async function getTerrainData(
       // Lorencia and Noria, settled snow on Devias. Empty everywhere else,
       // and the shader is then exactly what it always was.
       overlays: terrainOverlaysFor(map),
+      // Animated water: Atlans' wave deformation and caustics flipbook.
+      water: waterSpec
+        ? createTerrainWaterRuntime(waterSpec, waterFrames)
+        : null,
     }
   );
 
