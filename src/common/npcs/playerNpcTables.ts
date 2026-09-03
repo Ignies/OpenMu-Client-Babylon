@@ -24,6 +24,7 @@ const LIGHT_CROSSBOW: Item = { group: GROUP_BOW, num: 11 };
 const RUNE_BLADE: Item = { group: GROUP_SWORD, num: 31 };
 const SPIKED_SHIELD: Item = { group: GROUP_SHIELD, num: 7 };
 const SWORD_OF_DESTRUCTION: Item = { group: GROUP_SWORD, num: 16 };
+const WINGS_OF_HEAVEN: Item = { group: 12, num: 1 };
 
 /** Armour sets by items.json index, named as the original's `MODEL_*` are. */
 const DARK_STEEL = 27;
@@ -33,6 +34,7 @@ const PLATE = 9;
 const RED_WING = 40;
 const SPIRIT = 13;
 const STORM_CROW = 15;
+const VENOM_MIST = 30;
 
 /**
  * NPCs the original builds as `MODEL_PLAYER` plus a fixed `c->BodyPart[]` /
@@ -106,6 +108,15 @@ export const GEARED_NPC_TABLE: Readonly<Record<number, NpcGear>> = {
     set: RED_WING,
     mainHand: DEMONIC_STICK,
     scale: 1.0,
+  },
+  // Chaos Card Master (ZzzCharacter.cpp:14347-14367): Venom Mist +9 with
+  // MODEL_WINGS_OF_HEAVEN (group 12, index 1) and no weapon.
+  375: {
+    charClass: CharacterClassNumber.Summoner,
+    playerClass: PlayerClass.Summoner,
+    set: VENOM_MIST,
+    level: 9,
+    wings: WINGS_OF_HEAVEN,
   },
 };
 

@@ -29,6 +29,8 @@ export type NpcGear = {
   readonly mainHand?: Item | null;
   /** `c->Weapon[1]` — the off hand. */
   readonly offHand?: Item | null;
+  /** `c->Wing` (group 12). */
+  readonly wings?: Item | null;
   /** `c->Helper` (group 13): the Dark Lord's mount. */
   readonly pet?: Item | null;
   readonly scale?: number;
@@ -69,7 +71,7 @@ export function gearedNpcFactory(gear: NpcGear): typeof PlayerObject {
         boots: part(ItemGroups.Boots),
         leftHand: gear.mainHand ?? null,
         rightHand: gear.offHand ?? null,
-        wings: null,
+        wings: gear.wings ?? null,
         pet: gear.pet ?? null,
         changed: true,
       });

@@ -42,7 +42,6 @@ import {
 import { Spider } from './monsters/spider';
 import { Baz } from './npcs/baz';
 import { BerdyshGuard } from './npcs/berdyshGuard';
-import { ChaosCardMaster } from './npcs/chaosCardMaster';
 import { CrossbowGuard } from './npcs/crossbowGuard';
 import { ElfSoldier } from './npcs/elfSoldier';
 import { Girl } from './npcs/girl';
@@ -83,7 +82,7 @@ export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   [258]: PlateNpc,
   [371]: Leo,
   [414]: PlateNpc,
-  [375]: ChaosCardMaster,
+  // 375 Chaos Card Master renders through GEARED_NPC_TABLE (playerNpcTables.ts).
   [543]: ElfSoldier,
   [568]: Zyro,
 

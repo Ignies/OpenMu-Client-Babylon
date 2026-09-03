@@ -2188,10 +2188,15 @@ export const Store = new (class _Store {
     toSlot: number,
     item: Item
   ): void {
+    // The mix tray's wire byte depends on the NPC that owns it: 3 for the
+    // goblin, 9 for the Chaos Card Master (economy.ts `mixWireStorage`).
+    const wireStorage = (storage: StorageKind): number =>
+      storage === StorageKind.ChaosMachine ? Economy.mixWireStorage : storage;
+
     const packet = ItemMoveRequestPacket.createPacket();
-    packet.FromStorage = fromStorage;
+    packet.FromStorage = wireStorage(fromStorage);
     packet.FromSlot = wireSlotOf(fromStorage, fromSlot);
-    packet.ToStorage = toStorage;
+    packet.ToStorage = wireStorage(toStorage);
     packet.ToSlot = wireSlotOf(toStorage, toSlot);
     packet.setItemData(serializeItemBytes(item), 12);
 

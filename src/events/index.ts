@@ -31,6 +31,7 @@ import {
   enterDoppelganger,
   openDoppelganger,
 } from './doppelganger';
+import { closeGoldenArcher } from './goldenArcher';
 import { matchCountdownLine } from './matchNotices';
 
 export type { EventLayer, EventEntryState } from './layer';
@@ -190,6 +191,8 @@ class Events {
     closeChaosCastlePrompt();
     closeDuelWatch();
     closeDoppelganger();
+    // The Golden Archer dialog closes with its own packet (EventChipExitDialog).
+    closeGoldenArcher();
     if (!npcWindowOpen) return;
     if (!Store.isOffline) {
       Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
