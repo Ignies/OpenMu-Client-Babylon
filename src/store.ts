@@ -388,6 +388,9 @@ class PlayerData {
   attackSpeed: number | null = null;
   magicSpeed: number | null = null;
 
+  /** CharacterHeroState byte (the original's `Hero->PK`); 3 is Normal. */
+  heroState = 3;
+
   exp = 50;
   currentLvlExp = 0;
   expToNextLvl = 100;

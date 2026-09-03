@@ -56,12 +56,63 @@ export const PK_TEXT_COLOURS: Record<number, string> = {
 export const PK_MURDERER2_COLOUR = 'rgb(255, 0, 0)';
 
 /** `PVP_*` of the original, the values the HeroState byte carries. */
+export const PVP_NEUTRAL = 3;
 export const PVP_CAUTION = 4;
 export const PVP_MURDERER1 = 5;
 export const PVP_MURDERER2 = 6;
 
 export function pkTextColour(pk: number): string {
   return PK_TEXT_COLOURS[pk] ?? PK_MURDERER2_COLOUR;
+}
+
+/**
+ * `ReceivePK` (WSclient.cpp:6609): a hero-state change is announced in the
+ * system log as "<name> : <state>", GlobalText 487-491 ("Hero", "Commoner",
+ * "Outlaw Warning", "1st/2nd Stage Outlaw"). State 0 (New) prints nothing;
+ * `error` mirrors the original's TYPE_SYSTEM/TYPE_ERROR split.
+ */
+export function heroStateMessage(
+  name: string,
+  state: number
+): { text: string; error: boolean } | null {
+  switch (state) {
+    case 1:
+    case 2:
+      return { text: `${name} : Hero`, error: false };
+    case PVP_NEUTRAL:
+      return { text: `${name} : Commoner`, error: true };
+    case PVP_CAUTION:
+      return { text: `${name} : Outlaw Warning`, error: false };
+    case PVP_MURDERER1:
+      return { text: `${name} : 1st Stage Outlaw`, error: true };
+    case PVP_MURDERER2:
+      return { text: `${name} : 2nd Stage Outlaw`, error: true };
+    default:
+      return null;
+  }
+}
+
+/**
+ * OpenMU has no self-defense packet: `SelfDefensePlugIn.cs` announces begin
+ * and end only through a blue ServerMessage built from `PlayerMessage.resx`.
+ * Parsed here so the client can keep the state for its 60s default lifetime.
+ */
+export const SELF_DEFENSE_MS = 60_000;
+
+/**
+ * The reference client has no self-defense display; the official client marks
+ * the aggressor's name violet to the victim while the state runs.
+ */
+export const SELF_DEFENSE_COLOUR = 'rgb(255, 110, 255)';
+
+export function parseSelfDefense(
+  text: string
+): { active: boolean; attacker: string; defender: string } | null {
+  let m = /^Self defense is initiated by (.+)'s attack to (.+)!$/.exec(text);
+  if (m) return { active: true, attacker: m[1], defender: m[2] };
+  m = /^Self defense of (.+) against (.+) diminishes\.$/.exec(text);
+  if (m) return { active: false, defender: m[1], attacker: m[2] };
+  return null;
 }
 
 /** `c->Owner == Hero` (ZzzInterface.cpp:883). */

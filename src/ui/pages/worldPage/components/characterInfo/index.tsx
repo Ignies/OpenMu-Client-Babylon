@@ -14,6 +14,7 @@ import {
   MuTableRule,
 } from '../../../../components/muWindow';
 import { InventoryConstants } from '../../../../../common/inventoryConstants';
+import { pkTextColour, PVP_NEUTRAL } from '../../../../../common/nameTags';
 import {
   BaseClass,
   deriveCharacterStats,
@@ -421,7 +422,17 @@ export const CharacterInfo = observer(() => {
       }}
     >
       {}
-      <div className="character-name" style={{ top: NAME_Y }}>
+      {/* `SetPlayerColor(Hero->PK)` (NewUICharacterInfoWindow.cpp:272); the
+          default look is kept for the neutral state. */}
+      <div
+        className="character-name"
+        style={{
+          top: NAME_Y,
+          ...(playerData.heroState !== PVP_NEUTRAL
+            ? { color: pkTextColour(playerData.heroState) }
+            : {}),
+        }}
+      >
         {playerData.name}
       </div>
       <div className="character-class" style={{ top: CLASS_Y }}>

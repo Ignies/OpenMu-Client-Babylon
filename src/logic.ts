@@ -215,6 +215,7 @@ import {
   PingPacket,
 } from './common/packets/ClientToServerPackets';
 import { Social } from './social';
+import { heroStateMessage } from './common/nameTags';
 import { events } from './events';
 import { Economy, type ShopStock } from './economy';
 import { Messenger } from './messenger';
@@ -594,6 +595,9 @@ function applyCharacterInformation(p: CharacterInformationView) {
     // Only the extended packet carries the server's speed values.
     playerData.attackSpeed = p.AttackSpeed ?? null;
     playerData.magicSpeed = p.MagicSpeed ?? null;
+
+    // No HeroState in this packet; neutral until the scope add carries it.
+    playerData.heroState = 3;
 
     Store.uiState = UIState.World;
     // Lazy: preloadSprites pulls the window layouts in, and logic.ts sits under them.
@@ -1065,6 +1069,7 @@ function addCharacterToScope(world: World, char: ScopeCharacter) {
       console.log(`Local player spawned: ${maskedId} - ${char.Name}`);
       if (char.attackSpeed != null) Store.playerData.attackSpeed = char.attackSpeed;
       if (char.magicSpeed != null) Store.playerData.magicSpeed = char.magicSpeed;
+      if (char.HeroState != null) Store.playerData.heroState = char.HeroState;
     }
 
     if (char.effects?.length) {
@@ -2412,7 +2417,17 @@ EventBus.on('HeroStateChanged', packet => {
   if (!world) return;
   const maskedId = p.PlayerId & 0x7fff;
   const obj = world.getByNetId(maskedId);
-  if (obj) obj.heroState = p.NewState;
+  if (!obj) return;
+  obj.heroState = p.NewState;
+  if (obj.localPlayer) Store.playerData.heroState = p.NewState;
+  // `ReceivePK` (WSclient.cpp:6609): the change is announced in the log.
+  const msg = obj.objectNameInWorld
+    ? heroStateMessage(obj.objectNameInWorld, p.NewState)
+    : null;
+  if (msg) {
+    if (msg.error) Social.errorMessage(msg.text);
+    else Social.systemMessage(msg.text);
+  }
 });
 
 EventBus.on('ObjectMessage', packet => {
@@ -2739,6 +2754,9 @@ EventBus.on('ServerMessage', packet => {
       Notices.create(text);
       break;
     case 1:
+      // OpenMU's only self-defense signal is this blue line
+      // (SelfDefensePlugIn.cs); keep the state alongside showing it.
+      Social.trackSelfDefense(text);
       Social.systemMessage(text);
       break;
     case 2:
