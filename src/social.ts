@@ -94,6 +94,19 @@ export type GuildWar = {
   enemyScore: number;
 };
 
+/**
+ * GuildSoccerScoreUpdate (F3 23): the stadium scoreboard the original's
+ * `CNewUIBattleSoccerScore` draws. Sent to players and observers alike.
+ */
+export type SoccerScore = {
+  redTeam: string;
+  blueTeam: string;
+  redGoals: number;
+  blueGoals: number;
+  /** GuildSoccerTimeUpdate (F3 22): remaining seconds, -1 until the first tick. */
+  seconds: number;
+};
+
 /** A yes/no question from another player (party invite, guild join). */
 export type SocialRequest = {
   requesterId: number;
@@ -167,6 +180,8 @@ export const Social = new (class _Social {
   allianceGuilds: AllianceGuild[] = [];
   /** `EnableGuildWar`: null while no war is running. */
   guildWar: GuildWar | null = null;
+  /** The Battle Soccer scoreboard: null while no match runs on the stadium. */
+  battleSoccer: SoccerScore | null = null;
   /** GuildWarRequest: another master asks for a war, yes/no. */
   guildWarRequest: { guildName: string; soccer: boolean } | null = null;
   /** GuildRelationshipRequest: an alliance / hostility offer, yes/no. */
@@ -217,6 +232,7 @@ export const Social = new (class _Social {
       guildTab: observable,
       allianceGuilds: observable,
       guildWar: observable,
+      battleSoccer: observable,
       guildWarRequest: observable,
       guildRelationRequest: observable,
       guildMasterDialog: observable,
@@ -250,6 +266,7 @@ export const Social = new (class _Social {
     this.guildTab = 'info';
     this.allianceGuilds = [];
     this.guildWar = null;
+    this.battleSoccer = null;
     this.guildWarRequest = null;
     this.guildRelationRequest = null;
     this.guildMasterDialog = false;

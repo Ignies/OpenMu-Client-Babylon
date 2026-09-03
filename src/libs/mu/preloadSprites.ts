@@ -180,6 +180,7 @@ const HUD_SPRITES = [
   'newui_Account_title.OZT',
   'newui_Box_openTitle.OZT',
   'newui_Figure_blood.OZT',
+  'newui_Figure_ground.OZT',
   'newui_expansion_btn.OZT',
   'newui_exit_00.OZT',
   'newui_repair_00.OZT',

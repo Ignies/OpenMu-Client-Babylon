@@ -1,0 +1,35 @@
+// `CNewUIBattleSoccerScore`: the Battle Soccer scoreboard figure.
+.soccer-score {
+  position: absolute;
+  transform-origin: top left;
+  pointer-events: none;
+
+  .soccer-clock {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .soccer-row {
+    position: absolute;
+
+    .soccer-goals {
+      position: absolute;
+      left: 0;
+      white-space: nowrap;
+    }
+
+    .soccer-mark {
+      position: absolute;
+      top: 1px;
+      image-rendering: pixelated;
+    }
+
+    .soccer-name {
+      position: absolute;
+      white-space: nowrap;
+    }
+  }
+}
