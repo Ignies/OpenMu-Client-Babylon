@@ -39,6 +39,7 @@ import { EventWindows } from './components/events';
 import { SoccerScoreHud } from './components/soccerScore';
 import { DuelWindows } from './components/duel';
 import { Notices } from '../../components/notices';
+import { MapNameBanner } from './components/mapNameBanner';
 import { SlideHelpBar } from '../../components/slideHelp';
 import { DebugMenuWindow } from '../../components/debugMenu';
 
@@ -46,6 +47,7 @@ const HUD = observer(() => {
   return (
     <div className="hud">
       <TargetHealthBar />
+      <MapNameBanner />
       <Notices />
       <SlideHelpBar />
       <BuffBar />
