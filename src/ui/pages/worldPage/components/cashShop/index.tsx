@@ -12,6 +12,7 @@ import { ItemIcon } from '../../../../components/itemIcon';
 import { ItemTooltip } from '../../../../components/itemTooltip';
 import { GridSquares, hoveredMask, usedMask } from '../../../../components/itemGrid';
 import { JEWEL, JEWEL_GROUP } from '../../../../../common/jewelUpgrade';
+import { t, type TextKey } from '../../../../../i18n';
 import {
   CashShopState,
   rollGacha,
@@ -69,11 +70,11 @@ import {
  */
 
 /** The API's labels are written for a web page; four tabs across 148px are not. */
-const TAB_LABEL: Record<string, string> = {
-  wings: 'Wings',
-  quest: 'Quest',
-  boxes: 'Box',
-  gacha: 'Gacha',
+const TAB_LABEL: Record<string, TextKey> = {
+  wings: 'cashShop.tab.wings',
+  quest: 'cashShop.tab.quest',
+  boxes: 'cashShop.tab.boxes',
+  gacha: 'cashShop.tab.gacha',
 };
 
 const WINDOW_ID = 'cash-shop';
@@ -199,7 +200,8 @@ const GachaStage = observer(() => {
           </div>
 
           <div className="cash-prize-name">
-            Excellent {roll.name} <span className="cash-prize-level">+{roll.level}</span>
+            {t('item.excellentPrefix', { name: roll.name })}{' '}
+            <span className="cash-prize-level">+{roll.level}</span>
           </div>
 
           <ul className="cash-prize-options">
@@ -210,7 +212,9 @@ const GachaStage = observer(() => {
         </div>
       )}
 
-      {!roll && !rolling && <p className="cash-gacha-hint">Always excellent, +1 to +12.</p>}
+      {!roll && !rolling && (
+        <p className="cash-gacha-hint">{t('cashShop.gachaHint')}</p>
+      )}
     </div>
   );
 });
@@ -239,12 +243,12 @@ export const CashShop = observer(() => {
   return (
     <MuItemWindow
       id={WINDOW_ID}
-      label="cash shop"
+      label={t('cashShop.title')}
       className="cash-shop"
       onClose={() => toggleCashShopWindow(false)}
     >
       <div className="cash-title" style={{ top: TITLE_Y }}>
-        Cash Shop
+        {t('cashShop.title')}
       </div>
 
       <div className="cash-tabs" data-no-drag="true" style={{ left: TAB_X, top: TAB_Y }}>
@@ -258,7 +262,7 @@ export const CashShop = observer(() => {
             style={{ position: 'absolute', left: index * (TAB_WIDTH + 1), top: 0 }}
             onClick={uiClick(() => runInAction(() => (CashShopState.tab = line.id)))}
           >
-            <span>{TAB_LABEL[line.id] ?? line.label}</span>
+            <span>{TAB_LABEL[line.id] ? t(TAB_LABEL[line.id]) : line.label}</span>
           </MuSpriteFrame>
         ))}
       </div>
@@ -270,7 +274,7 @@ export const CashShop = observer(() => {
         height={GRID_FRAME_HEIGHT}
       />
 
-      {status === 'loading' && <p className="cash-note">Loading the shop...</p>}
+      {status === 'loading' && <p className="cash-note">{t('cashShop.loading')}</p>}
       {status === 'failed' && <p className="cash-note is-bad">{error}</p>}
 
       {isGacha ? (
@@ -358,7 +362,7 @@ export const CashShop = observer(() => {
           frames={{ up: 0, active: 1, down: 2 }}
           disabled={rolling}
           onClick={uiClick(() => void rollGacha())}
-          label={rolling ? '...' : 'Roll'}
+          label={rolling ? '...' : t('cashShop.roll')}
           style={{ position: 'absolute', left: ROLL.x, top: ROLL.y }}
         />
       )}

@@ -1,5 +1,6 @@
 import { observable, runInAction } from 'mobx';
 import { JEWEL, JEWEL_GROUP } from '../common/jewelUpgrade';
+import { t } from '../i18n';
 import type { Item } from '../ecs/world';
 
 /**
@@ -112,7 +113,8 @@ export async function ensureCatalogue(): Promise<void> {
   } catch (error) {
     runInAction(() => {
       CashShopState.status = 'failed';
-      CashShopState.error = error instanceof Error ? error.message : 'Shop is unreachable.';
+      CashShopState.error =
+        error instanceof Error ? error.message : t('cashShop.unreachable');
     });
   }
 }
@@ -155,7 +157,8 @@ export async function rollGacha(): Promise<void> {
   } catch (error) {
     runInAction(() => {
       CashShopState.rolling = false;
-      CashShopState.error = error instanceof Error ? error.message : 'Shop is unreachable.';
+      CashShopState.error =
+        error instanceof Error ? error.message : t('cashShop.unreachable');
     });
   }
 }
