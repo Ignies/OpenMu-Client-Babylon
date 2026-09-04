@@ -3,6 +3,7 @@ import { t } from '../../../../../i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../../../store';
+import { toggleCashShopWindow } from '../../../../../cashShop/state';
 import { Messenger } from '../../../../../messenger';
 import { ItemIcon } from '../../../../components/itemIcon';
 import { MuSpriteFrame } from '../../../../components/muSprite';
@@ -753,6 +754,7 @@ export const BottomBar = observer(() => {
         index={0}
         file="partCharge1/newui_menu_Bt05.OZJ"
         title={t('bottomBar.itemShop')}
+        onClick={() => toggleCashShopWindow()}
       />
       <BarButton
         index={1}

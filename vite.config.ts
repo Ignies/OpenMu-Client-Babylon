@@ -7,6 +7,19 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   base: './',
   plugins: [],
+  /**
+   * The cash shop window talks to the shop service, which is its own process.
+   * Proxied here so it is same-origin in dev; in production Caddy does the
+   * same on the client host.
+   */
+  server: {
+    proxy: {
+      '/api': {
+        target: `http://127.0.0.1:${process.env.CASHSHOP_API_PORT ?? 3200}`,
+        changeOrigin: false,
+      },
+    },
+  },
   build: {
     target: 'es2022',
     assetsInlineLimit: 0, //disable
