@@ -55,6 +55,12 @@ export const MuButton = ({
       y={frame * height}
       width={width}
       height={height}
+      // A button is never a drag handle. Without this the window's own
+      // pointerdown starts a drag and captures the pointer, and the click
+      // lands on the window root instead of here - the button looks alive and
+      // does nothing. Every caller used to wrap itself in a `data-no-drag`
+      // div to avoid that; the ones that forgot were simply broken.
+      noDrag
       style={{
         position: 'relative',
         pointerEvents: 'auto',

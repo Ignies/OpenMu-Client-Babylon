@@ -73,6 +73,13 @@ type MuSpriteFrameProps = {
   style?: CSSProperties;
   title?: string;
   onClick?: () => void;
+  /**
+   * Marks the frame as something the window drag must not start on. The drag
+   * takes a pointer capture on the window root (`useWindowChrome`), which
+   * retargets the rest of the pointer sequence away from whatever was pressed
+   * - so an interactive frame without this never sees its own click.
+   */
+  noDrag?: boolean;
   children?: React.ReactNode;
 };
 
@@ -92,6 +99,7 @@ export const MuSpriteFrame = memo(function MuSpriteFrame({
   style,
   title,
   onClick,
+  noDrag,
   children,
 }: MuSpriteFrameProps) {
   const sprite = useMuSprite(file);
@@ -101,6 +109,7 @@ export const MuSpriteFrame = memo(function MuSpriteFrame({
       className={className}
       title={title}
       onClick={onClick}
+      data-no-drag={noDrag ? 'true' : undefined}
       style={{
         ...(width !== undefined && { width }),
         ...(height !== undefined && { height }),
