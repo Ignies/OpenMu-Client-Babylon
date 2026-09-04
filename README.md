@@ -22,7 +22,7 @@ https://github.com/user-attachments/assets/35c67fab-1c7c-4c41-b5a0-97cc0c90fd6a
 Client for OpenMU made in BabylonJS based of afrokick's JSClient, the client is being developed to work with any version available and connect on the go to different servers either stored in this repo's serverlist.md or added manually to the list.
 
 
-Current working ~somewhat version is S6EP3, more to be added down the line.
+Current working ~somewhat version is S6EP3; 0.97d ships beside it (tag V097D) and more are to be added down the line.
 
 ## Installing
 
@@ -186,13 +186,15 @@ single-player offline demo.
                   Duel + spectators (9 unhandled), Guild Soccer, Crywolf event logic,
                   Kanturu event logic. Those maps load; the events don't run.
 
-[▓▓▓▓░░░░░░] Multi-version Support (4/10):
+[▓▓▓▓▓▓░░░░] Multi-version Support (6/10):
      [ Contract ]: Version seam exists — GameVersion contract, protocol/data/encryption/
                    features split, _template folder ready.
-     [ Shipped ]: Only season6, but selection is runtime: versions/registry.ts picks the
-                  version per server-list entry, one build carries every version.
-     [ Gap ]: The stated goal is all versions in one client; the seam is there,
-              the second version is not.
+     [ Shipped ]: season6 and 0.97d, selected at runtime: versions/registry.ts picks the
+                  version per server-list entry (or ?version=), one build carries both.
+                  0.97d brings its own encryption, packet-variant ranking, feature flags
+                  and asset tree (Data-v097d + converted Lorencia).
+     [ Gap ]: Outbound packets are still the Season 6 layouts, the window chrome is
+              still Season 6 art, and 11 of the 12 0.97d worlds are unconverted.
 ```
 
 
