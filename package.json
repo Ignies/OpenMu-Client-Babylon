@@ -17,7 +17,8 @@
     "test": "vitest run",
     "tsc": "tsc --noEmit",
     "lint": "eslint . --max-warnings=100000",
-    "lint:count": "eslint . -f json | bun run tools/lintCounts.ts"
+    "lint:count": "eslint . -f json | bun run tools/lintCounts.ts",
+    "cashshop-api": "bun run --watch cashshop/server/main.ts"
   },
   "devDependencies": {
     "@gltf-transform/core": "4.2.0",
