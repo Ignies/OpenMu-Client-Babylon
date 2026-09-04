@@ -12,6 +12,12 @@ import {
   characterCameraTarget,
 } from '../../common/characterSelect';
 import { prefetchWorldTerrain } from '../../libs/mu/prefetchWorld';
+import { loadVersionUi, versionUi } from '../../version';
+import type {
+  PregameBackdrop,
+  PregamePhase,
+  PregameScene,
+} from '../../version/uiContract';
 
 const MU_SCALE = 100;
 
@@ -24,23 +30,41 @@ const TOUR_RADIUS_SCALE = 1.1;
 
 const TOUR_FOV = (65 * Math.PI) / 180;
 
-function backdropFor(uiState: UIState): ENUM_WORLD | null {
+/**
+ * Which pre-game screen the backdrop is standing behind, or null in the
+ * world. The start menu sits on the same backdrop the server list does: the
+ * original never shows a bare screen, and it is what the next click needs
+ * anyway, so putting it up here costs nothing later.
+ */
+function phaseFor(uiState: UIState): PregamePhase | null {
   switch (uiState) {
-    // The start menu sits on the same scene the server list does: the original
-    // never shows a bare screen, and this is the map the next click needs
-    // anyway, so loading it here costs nothing later.
     case UIState.Preloader:
     case UIState.Servers:
     case UIState.Login:
-      return ENUM_WORLD.WD_73NEW_LOGIN_SCENE;
+      return 'login';
     case UIState.Characters:
-      return ENUM_WORLD.WD_74NEW_CHARACTER_SCENE;
+      return 'characters';
     default:
       return null;
   }
 }
 
 export const LoginSceneSystem: ISystemFactory = world => {
+  /**
+   * The version's backdrop plan. Not available on the first frames - the UI
+   * chunk loads after the app graph is up - so until it lands the system
+   * does nothing, which is what it did anyway while the backdrop terrain
+   * downloaded.
+   */
+  let backdropPlan: PregameBackdrop | null =
+    versionUi()?.pregame.backdrop ?? null;
+
+  if (!backdropPlan) {
+    void loadVersionUi().then(ui => {
+      backdropPlan = ui.pregame.backdrop;
+    });
+  }
+
   let requestedBackdrop: ENUM_WORLD | null = null;
 
   let waypoints: CameraWaypoint[] | null = null;
@@ -58,6 +82,9 @@ export const LoginSceneSystem: ISystemFactory = world => {
     fov: number;
   } | null = null;
   let cameraIsOurs = false;
+
+  /** The standalone set piece, for a version whose backdrop is not a world. */
+  let setPiece: PregameScene | null = null;
 
   const resetTour = () => {
     leg = 0;
@@ -113,10 +140,16 @@ export const LoginSceneSystem: ISystemFactory = world => {
         };
       }
 
-      const backdrop = backdropFor(Store.uiState);
+      const plan = backdropPlan;
+      const phase = plan ? phaseFor(Store.uiState) : null;
 
-      if (backdrop === null) {
+      if (phase === null) {
         requestedBackdrop = null;
+
+        if (setPiece) {
+          setPiece.dispose();
+          setPiece = null;
+        }
 
         if (cameraIsOurs) {
           camera.alpha = gameFraming.alpha;
@@ -129,6 +162,15 @@ export const LoginSceneSystem: ISystemFactory = world => {
         return;
       }
 
+      if (plan!.kind === 'scene') {
+        setPiece ??= plan!.create(world);
+        cameraIsOurs = true;
+        setPiece.update(deltaTime, phase);
+        return;
+      }
+
+      const backdrop = phase === 'login' ? plan!.login : plan!.characters;
+
       if (requestedBackdrop !== backdrop) {
         requestedBackdrop = backdrop;
         resetTour();
@@ -140,8 +182,8 @@ export const LoginSceneSystem: ISystemFactory = world => {
 
       if (world.mapIndex !== backdrop || !world.terrain) return;
 
-      if (backdrop === ENUM_WORLD.WD_73NEW_LOGIN_SCENE) {
-        prefetchWorldTerrain(ENUM_WORLD.WD_74NEW_CHARACTER_SCENE);
+      if (backdrop === plan!.login) {
+        prefetchWorldTerrain(plan!.characters);
       }
 
       const worldNum = backdrop + 1;

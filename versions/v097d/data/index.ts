@@ -15,6 +15,7 @@
  * subfolder yet), so the locale is the empty string.
  */
 import type { VersionData } from '../../../src/version/contract';
+import { V097D_DATA_FILES } from './inventory';
 
 function withTrailingSlash(url: string): string {
   return url.endsWith('/') ? url : `${url}/`;
@@ -24,4 +25,5 @@ export const v097dData: VersionData = {
   folder: withTrailingSlash(import.meta.env.VITE_DATA_URL_V097D || './Data-v097d/'),
   assets: './game-assets-v097d/',
   locale: '',
+  inventory: new Set(V097D_DATA_FILES),
 };

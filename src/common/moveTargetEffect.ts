@@ -13,7 +13,7 @@ import {
   type AbstractMesh,
   type Scene,
 } from '../libs/babylon/exports';
-import { downloadDataFile } from '../libs/mu/dataFolder';
+import { downloadDataFile, hasDataFile } from '../libs/mu/dataFolder';
 import { loadMuSprite } from '../libs/mu/sprites';
 import { getMaterial, loadGLTF } from './modelLoader';
 import { BlendState } from './objects/enum';
@@ -42,7 +42,10 @@ export function loadEffectTexture(scene: Scene, file: string): Promise<Texture> 
   if (cached) return cached;
 
   const pending = (async () => {
-    if (/\.ozt$/i.test(file)) {
+    // A file this version's tree does not have goes through the sprite
+    // loader too: it hands back a 1x1 transparent pixel, so the effect draws
+    // nothing instead of retrying a 404 every frame (`hasDataFile`).
+    if (/\.ozt$/i.test(file) || !hasDataFile(file)) {
       // OZT (TGA with alpha): decoded through the sprite loader.
       const sprite = await loadMuSprite(file);
       return await new Promise<Texture>((resolve, reject) => {

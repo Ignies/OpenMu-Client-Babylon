@@ -62,6 +62,18 @@ export interface VersionData {
   readonly assets: string;
   /** `Data/Local/<locale>/` subfolder used for language tables. */
   readonly locale: string;
+  /**
+   * Every path `folder` contains, lower-cased and relative to it. A period
+   * tree is a subset of the Season 6 one, so base code routinely asks it for
+   * files it never shipped - Season 6 window chrome, post-0.97 effect
+   * textures. That is a feature the version does not have, not a fault, so
+   * `hasDataFile` answers from this list and the sprite / effect loaders draw
+   * nothing rather than logging a miss per frame.
+   *
+   * Omit it and every path is attempted, which is what Season 6 does and has
+   * always done.
+   */
+  readonly inventory?: ReadonlySet<string>;
 }
 
 /**

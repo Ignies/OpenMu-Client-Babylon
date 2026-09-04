@@ -1,0 +1,158 @@
+@import (reference) '../../../../src/ui/components/muText/style.less';
+
+// The 0.97d pre-game plates. Authored at fixed pixel sizes like every MU
+// window: positioned, never stretched or reflowed.
+.v097d-login-page,
+.v097d-characters-page {
+  position: absolute;
+  inset: 0;
+
+  .mu-font();
+  user-select: none;
+}
+
+.v097d-login-page {
+  .v097d-login-plate {
+    position: absolute;
+    left: 50%;
+    top: calc((100% - 216px) * 2 / 3);
+    transform: translateX(-50%);
+    flex: none;
+  }
+
+  form {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .v097d-login-label {
+    position: absolute;
+    color: #e6ddc8;
+    font-size: 11px;
+    line-height: 16px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+  }
+
+  // The engraved well is the input's background; the field itself is
+  // invisible chrome sitting exactly on top of it.
+  .v097d-login-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0 4px;
+    pointer-events: auto;
+
+    background: transparent;
+    border: none;
+    outline: none;
+
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  .v097d-login-submit {
+    position: absolute;
+    width: 0;
+    height: 0;
+    padding: 0;
+    border: none;
+    opacity: 0;
+  }
+
+  .v097d-login-server {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d7c9a4;
+    font-size: 10px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .v097d-login-error {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 202px;
+    margin: 0;
+    text-align: center;
+    color: #ff5a5a;
+    font-size: 11px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}
+
+.v097d-characters-page {
+  .v097d-characters-plate {
+    position: absolute;
+    left: 50%;
+    top: calc((100% - 333px) / 2);
+    width: 256px;
+    height: 333px;
+    transform: translateX(-50%);
+  }
+
+  .v097d-characters-note {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 110px;
+    margin: 0;
+    text-align: center;
+    color: #d7c9a4;
+    font-size: 11px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+
+  .v097d-characters-row {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    box-sizing: border-box;
+
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    color: #d7c9a4;
+    font-family: inherit;
+    font-size: 12px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+
+    &.is-selected {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .v097d-characters-level {
+    font-size: 10px;
+  }
+
+  .v097d-characters-code {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0 4px;
+
+    background: transparent;
+    border: none;
+    outline: none;
+
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 12px;
+  }
+}

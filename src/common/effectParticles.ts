@@ -6,7 +6,7 @@ import {
   SpriteManager,
   type Scene,
 } from '../libs/babylon/exports';
-import { downloadDataFile } from '../libs/mu/dataFolder';
+import { downloadDataFile, hasDataFile } from '../libs/mu/dataFolder';
 import { maps } from '../maps';
 
 const TICKS_PER_SECOND = 25;
@@ -599,6 +599,11 @@ async function getPool(
   if (!inFlight) {
     inFlight = (async () => {
       const { file, size } = TEXTURES[texture];
+
+      // A sheet this version never shipped: no pool, no particles, and no
+      // fetch per emission for the rest of the session (`hasDataFile`).
+      if (!hasDataFile(file)) return null;
+
       const ozj = await downloadDataFile(file);
 
       const blob = new Blob([ozj.slice(OZJ_HEADER_SIZE)], {

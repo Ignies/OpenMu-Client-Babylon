@@ -66,16 +66,30 @@ export async function loadGameVersion(id: string): Promise<void> {
 }
 
 let uiPromise: Promise<VersionUi> | null = null;
+let ui: VersionUi | null = null;
 
 /**
  * The active version's UI module, loaded on first use (React.lazy in
- * worldPage). Never before boot: version UI re-exports app components, and
- * evaluating those ahead of the app graph reorders module init.
+ * worldPage, the sprite preloader, the login-scene system). Never before
+ * boot: version UI re-exports app components, and evaluating those ahead of
+ * the app graph reorders module init.
  */
 export function loadVersionUi(): Promise<VersionUi> {
-  uiPromise ??= VERSION_REGISTRY.find(v => v.id === gameVersion.id)!.loadUi();
+  uiPromise ??= VERSION_REGISTRY.find(v => v.id === gameVersion.id)!
+    .loadUi()
+    .then(loaded => (ui = loaded));
 
   return uiPromise;
+}
+
+/**
+ * The UI module if it is already there, for callers that run every frame and
+ * cannot await (the login-scene system) or that render before it lands (the
+ * shared pre-game chrome). Null until `loadVersionUi` resolves; `boot.tsx`
+ * starts that load as soon as the app graph is up.
+ */
+export function versionUi(): VersionUi | null {
+  return ui;
 }
 
 /**

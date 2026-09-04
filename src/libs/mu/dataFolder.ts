@@ -24,3 +24,18 @@ export function resolveDataUrl(path: string): string {
 export function downloadDataFile(path: string): Promise<Uint8Array> {
   return downloadBytesBuffer(resolveDataUrl(path));
 }
+
+/**
+ * Does the active version's `Data/` tree contain this path? A version that
+ * declares no inventory (Season 6) answers yes to everything, so nothing
+ * about it changes; a period tree answers no for the Season 6 chrome and the
+ * post-0.97 effect textures it never shipped, and its loaders draw nothing
+ * instead of fetching a 404 per frame (`versions/<id>/data/inventory.ts`).
+ */
+export function hasDataFile(path: string): boolean {
+  const inventory = gameVersion.data.inventory;
+
+  if (!inventory) return true;
+
+  return inventory.has(path.replace(/^[./]+/, '').toLowerCase());
+}

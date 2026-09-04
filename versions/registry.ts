@@ -14,8 +14,8 @@
  * after `load()` resolved; version UI reaches app code, which is why it
  * sits behind the separate `loadUi()`.
  */
-import type { ComponentType } from 'react';
 import type { GameVersion, GameVersionId } from '../src/version/contract';
+import type { VersionUi } from '../src/version/uiContract';
 
 /**
  * The three packet lists a version exports. Typed against the season6 set
@@ -35,14 +35,7 @@ export type VersionModule = {
   packets: VersionPackets;
 };
 
-/**
- * What `versions/<id>/ui/index.tsx` exports: every window of the richest
- * version, by name; a version without one exports a null-rendering
- * component (versions/_template/ui).
- */
-export type VersionUi = {
-  MasterSkillsWindow: ComponentType;
-};
+export type { VersionUi };
 
 export type VersionEntry = {
   readonly id: GameVersionId;
