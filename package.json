@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "APP_ENV=dev vite --force",
-    "build": "APP_ENV=prod vite build && bun run tools/copyData.ts",
-    "copy-data": "bun run tools/copyData.ts",
+    "build": "APP_ENV=prod vite build && bun run copy-data",
+    "copy-data": "bun run tools/copyData.ts && bun run tools/copyData.ts --src Data-v097d --out dist/Data-v097d",
     "preview": "vite preview --port 4173 --strictPort",
     "proxy": "bun run --watch proxy/main.ts",
     "dev:register": "vite --config register/vite.config.ts",
