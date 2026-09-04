@@ -178,8 +178,8 @@ const GachaStage = observer(() => {
       style={{ left: STAGE_X, top: STAGE_Y, width: STAGE_WIDTH, height: STAGE_HEIGHT }}
     >
       <div className="cash-orb">
-        <span className="cash-ring ring-1" />
-        <span className="cash-ring ring-2" />
+        <span className="cash-ring cash-ring-1" />
+        <span className="cash-ring cash-ring-2" />
         <span className="cash-core" />
       </div>
 

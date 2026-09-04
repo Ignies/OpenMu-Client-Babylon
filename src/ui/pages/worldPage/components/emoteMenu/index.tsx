@@ -265,7 +265,7 @@ export const EmoteMenu = observer(() => {
             return (
               <g
                 key={w.entry.id}
-                className={`emote-wedge ring-${w.ring}${hot ? ' hot' : ''}${
+                className={`emote-wedge emote-ring-${w.ring}${hot ? ' hot' : ''}${
                   w.entry.kind === 'emoji' ? ' emoji' : ''
                 }`}
                 onPointerEnter={() => setHovered(w.entry)}
