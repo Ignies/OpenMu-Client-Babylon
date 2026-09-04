@@ -750,6 +750,28 @@ export function createItemPbrMaterial(scene: Scene) {
   material.usePhysicalLightFalloff = false;
   material.enableSpecularAntiAliasing = true;
   material.environmentIntensity = 0;
+
+  // Dielectric F0 off, so only the metalness map decides what glints.
+  //
+  // The PBR fragment builds every light's specular from that light's
+  // *diffuse* colour, never its `specular` one (`lightFragment`:
+  // `computeSpecularLighting(..., diffuse{X}.rgb)`) - so parking
+  // `sky.specular` on the rig, which is what keeps the Standard path clean,
+  // buys nothing here. The sky key is a full hemisphere at intensity 1 that
+  // nothing can occlude, so its highlight is not a reflection of anything: it
+  // is a constant 0.04 of white laid over every pixel of every lit surface.
+  // That is a veil, and it lands hardest exactly where the art has the least
+  // headroom. Measured on Lorencia against the Classic tier, same frame: the
+  // 5th-percentile black lifted 0.042 -> 0.086, saturation fell 0.50 -> 0.40
+  // and texture detail dropped 9%, which is the greyed-out shading the
+  // Enhanced tier was reported with.
+  //
+  // Zeroing the factor drops F0 for dielectrics only. A texel the derived
+  // metal-rough map calls metal still reflects, at `metallic x albedo`, so
+  // plate and gems keep their glint under a torch while oak and stone stop
+  // being sheened. With it, the tier is pixel-identical to Classic wherever
+  // the art is not metal, and everything it adds on top is relief.
+  material.metallicF0Factor = 0;
   material.ambientColor.setAll(0);
 
   addItemUniforms(material, scene);
