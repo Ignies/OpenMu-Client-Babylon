@@ -1,4 +1,5 @@
 import type { Item } from '../ecs/world';
+import { gameVersion } from '../version';
 import {
   capItemLevel,
   legacyItemEffectsOn,
@@ -127,8 +128,13 @@ export function itemVisualTier(item: Item | null | undefined): ItemVisualTier {
   const rawLevel = Math.max(0, Math.min(15, item?.lvl ?? 0));
   const level = capItemLevel(rawLevel);
   const isExcellent = item?.isExcellent === true;
-  const isAncient = item?.isAncient === true;
-  const sockets = Math.max(0, Math.min(5, item?.socketCount ?? 0));
+  // Ancient sets and sockets are later additions; a version without them has
+  // no such item, so neither pass may draw (versions/<id> `features`).
+  const isAncient =
+    item?.isAncient === true && gameVersion.features.ancientItems;
+  const sockets = gameVersion.features.socketItems
+    ? Math.max(0, Math.min(5, item?.socketCount ?? 0))
+    : 0;
   const group = item?.group ?? -1;
   const num = item?.num ?? -1;
 
