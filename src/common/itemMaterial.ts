@@ -9,7 +9,11 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { pbrMapsFor, pbrPlaceholders } from './pbrMaps';
-import { pbrDetailStrength, pbrKeyGain } from './materialQuality';
+import {
+  pbrDetailStrength,
+  pbrKeyGain,
+  specularLightScale,
+} from './materialQuality';
 import { UNIFIED_LIGHT_MODEL, bodyLightTint } from './lightModel';
 import { pointLightPoolSize } from './pointLightPool';
 import {
@@ -196,12 +200,22 @@ function bindSunWrap(effect: Effect, mesh: AbstractMesh) {
 
   const d = sun.direction;
   const norm = 1 / (Math.hypot(d.x, d.y, d.z) || 1);
+
+  // `sun.intensity` carries `directLightGain` - a π the PBR material needs to
+  // undo Burley's 1/π on its *diffuse*. This fill is neither: it is a
+  // hand-written additive term that never had the 1/π to undo, so it takes
+  // the sun's plain intensity. Left alone it came out π× too strong on the
+  // Enhanced tier, a flat wash over every lit surface that pushed shaded
+  // sides up to the lit ones - the same mistake `specularLightScale` already
+  // corrects for the highlight, which is why it is the same factor.
+  const fill = sun.intensity * specularLightScale();
+
   effect.setFloat3(SUN_DIR_UNIFORM, d.x * norm, d.y * norm, d.z * norm);
   effect.setFloat3(
     SUN_COLOR_UNIFORM,
-    sun.diffuse.r * sun.intensity,
-    sun.diffuse.g * sun.intensity,
-    sun.diffuse.b * sun.intensity
+    sun.diffuse.r * fill,
+    sun.diffuse.g * fill,
+    sun.diffuse.b * fill
   );
   effect.setFloat3(SUN_WRAP_UNIFORM, wrap[0], wrap[1], wrap[2]);
 }

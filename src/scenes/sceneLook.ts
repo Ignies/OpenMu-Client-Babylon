@@ -1003,8 +1003,11 @@ function applyClearColour(scene: Scene): void {
 
   if (!base) return;
 
-  const scale =
-    UNIFIED_LIGHT_MODEL && moodShown.exposure > 0 ? 1 / moodShown.exposure : 1;
+  // Only while the grade actually runs: ungraded there is no exposure to
+  // divide back out, and dividing by one that never ran darkens the sky.
+  const exposure = moodGradeActive() ? moodShown.exposure : 1;
+
+  const scale = UNIFIED_LIGHT_MODEL && exposure > 0 ? 1 / exposure : 1;
 
   scene.clearColor.set(base[0] * scale, base[1] * scale, base[2] * scale, 1);
 }
@@ -1171,39 +1174,82 @@ export function applySceneMood(
   applyClearColour(scene);
 }
 
+/**
+ * Whether the mood's authored grade runs this frame.
+ *
+ * The grade is one unit split across two stages that live in different
+ * places: a pre-multiply in the materials (`terrainBake` on every bake and
+ * body light, plus the key's colour and level) and the payback in post
+ * (`exposure`). Run only one of the two and the frame keeps the darkening
+ * with nothing to pay it back - Lorencia's [0.8, 0.68, 0.52] bake over a
+ * 0.94 orange key lands the map 1.78x under its own art with a hard orange
+ * cast, which is what "the game should not be this dark" was.
+ *
+ * Both stages read this one predicate, so the pre-multiply can never outlive
+ * its payback. Classic is excluded outright: it is the reference client's
+ * light, and the reference has no grade - the ground is `texel x
+ * PrimaryTerrainLight` (ZzzLodTerrain.cpp:481-505) and an object is `texel x
+ * BodyLight` (ZzzBMD.cpp:255-257), with nothing else on top.
+ */
+function moodGradeActive(): boolean {
+  return lightingTier() !== null && GameOptions.postProcessing;
+}
+
+/** Stands in for a graded mood colour while the grade is off. */
+const NEUTRAL_TINT: readonly [number, number, number] = [1, 1, 1];
+
 function writeMood(
   scene: Scene,
   look: SceneLook | undefined,
   mood: SceneMood
 ): void {
+  // Key-light shaping belongs to the Enhanced/Ultra tiers: the directional
+  // sun (lambert shape + CSM) and the sky/ground hemisphere split. Classic is
+  // the original flat look - an object's whole light is its BodyLight, so the
+  // sun is parked and the key is a flat (ground = sky) hemisphere. The torch
+  // pool keeps adding on both.
+  const shaped = lightingTier() !== null;
+  const graded = moodGradeActive();
+
+  // The exposure the grade pays the pre-multiply back with, and 1 whenever
+  // there is no pre-multiply to pay back. Every consumer that divides the
+  // regrade out of an authored display-space colour reads this, not
+  // `mood.exposure`, or it divides by a grade that never ran.
+  const exposure = graded ? mood.exposure : 1;
+
   applyMapGradient(
     appliedWorld,
-    GameOptions.postProcessing ? mapGradientStrength() * mood.gradient : 0,
-    mood.exposure
+    graded ? mapGradientStrength() * mood.gradient : 0,
+    exposure
   );
 
-  [terrainBakeTint[0], terrainBakeTint[1], terrainBakeTint[2]] =
-    mood.terrainBake;
-  [bodyLightTint[0], bodyLightTint[1], bodyLightTint[2]] = mood.terrainBake;
+  const bake = graded ? mood.terrainBake : NEUTRAL_TINT;
+
+  [terrainBakeTint[0], terrainBakeTint[1], terrainBakeTint[2]] = bake;
+  [bodyLightTint[0], bodyLightTint[1], bodyLightTint[2]] = bake;
 
   // The mood exposure rides along so the fog pass can divide the unified
   // regrade back out of its authored display-space colour (enhancedLighting).
-  setEnhancedFog(mood.fog ?? NO_FOG, mood.exposure);
+  setEnhancedFog(mood.fog ?? NO_FOG, exposure);
 
-  // Key-light shaping belongs to the Enhanced/Ultra tiers: the directional
-  // sun (lambert shape + CSM) and the sky/ground hemisphere split. Classic is
-  // the original flat look — objects are the texture × the terrain light, so
-  // the sun is parked and its energy folded into a flat (ground = sky)
-  // hemisphere. The moods' key sums are preserved either way, and the torch
-  // pool keeps adding on both.
-  const shaped = lightingTier() !== null;
+  // Ungraded, the key is unity white: an object is then exactly its texture
+  // times its BodyLight, which is the reference client's formula. Graded, the
+  // mood's own key budget applies and `exposure` pays for it.
+  const keyTotal = graded ? mood.sky + mood.sun : 1;
 
-  // Same key budget either way; the shaped tiers hand the sun a larger share
-  // of it so the lambert shape and the cascaded shadow actually read.
-  const keyTotal = mood.sky + mood.sun;
-  const sunShare = Math.max(mood.sun, keyTotal * SHAPED_SUN_SHARE);
+  // The shaped tiers hand the sun a larger share of that budget so the
+  // lambert shape and the cascaded shadow actually read.
+  const sunShare = shaped
+    ? Math.max(graded ? mood.sun : 0, keyTotal * SHAPED_SUN_SHARE)
+    : 0;
 
-  const skyIntensity = shaped ? keyTotal - sunShare : keyTotal;
+  const skyIntensity = keyTotal - sunShare;
+
+  const skyDiffuse = (graded ? mood.skyDiffuse : NEUTRAL_TINT) as [
+    number,
+    number,
+    number,
+  ];
 
   // The ground's share of that key, for roofed tiles only — see
   // INTERIOR_GROUND_KEY. An up-facing surface takes a hemispheric light's
@@ -1211,21 +1257,27 @@ function writeMood(
   // if it were an object, scaled down.
   const groundKey = INTERIOR_GROUND_KEY * skyIntensity;
 
-  terrainInteriorAmbient[0] = groundKey * mood.skyDiffuse[0];
-  terrainInteriorAmbient[1] = groundKey * mood.skyDiffuse[1];
-  terrainInteriorAmbient[2] = groundKey * mood.skyDiffuse[2];
+  terrainInteriorAmbient[0] = groundKey * skyDiffuse[0];
+  terrainInteriorAmbient[1] = groundKey * skyDiffuse[1];
+  terrainInteriorAmbient[2] = groundKey * skyDiffuse[2];
 
   setKey(scene, {
     skyIntensity,
-    skyDiffuse: mood.skyDiffuse as [number, number, number],
-    skyGround: shaped ? (mood.skyGround as [number, number, number]) : null,
-    sunIntensity: shaped ? sunShare * directLightGain() : 0,
-    sunDiffuse: mood.sunDiffuse as [number, number, number],
+    skyDiffuse,
+    skyGround: shaped
+      ? ((graded ? mood.skyGround : NEUTRAL_TINT) as [number, number, number])
+      : null,
+    sunIntensity: sunShare * directLightGain(),
+    sunDiffuse: (graded ? mood.sunDiffuse : NEUTRAL_TINT) as [
+      number,
+      number,
+      number,
+    ],
   });
 
   // What the PBR material has to make up on its own when the lights are left
   // at Classic intensities because the world is still Standard-lit.
-  setPbrKeyGain(skyIntensity, shaped ? sunShare : 0);
+  setPbrKeyGain(skyIntensity, sunShare);
 
   syncKeyLightSpecular(scene);
 
@@ -1278,45 +1330,74 @@ function writeMood(
 
   pipeline.fxaaEnabled = post && GameOptions.fxaa;
 
-  // With post-processing off the image-processing pass is bypassed outright
-  // rather than left running with neutral values: an identity pass is still a
-  // full-screen resolve, and "off" should mean the pipeline contributes
-  // nothing at all.
+  // With post-processing off the image-processing *pass* is bypassed
+  // outright rather than left running with neutral values: an identity pass
+  // is still a full-screen resolve, and "off" should mean the pipeline
+  // contributes nothing at all.
   pipeline.imageProcessingEnabled = post;
 
-  if (!pipeline.imageProcessingEnabled) return;
+  // The *configuration*, though, is the scene's, not the pass's - and every
+  // material that composes image processing in its own fragment reads it
+  // whenever the pass is not doing it. The PBR material does exactly that,
+  // unconditionally (`pbrBlockImageProcessing` has no IMAGEPROCESSING guard
+  // on its else branch); the Standard material does not. So bailing out here
+  // while the pass was off did not disable the grade, it moved it onto the
+  // Enhanced material tier alone: Lorencia measured a clean S-curve between
+  // the two tiers, blacks x2.96 and highlights x0.75 with the midpoint
+  // pinned, which is a stale ACES curve and nothing else.
+  //
+  // Read through the scene so the values still land with no pass to hold
+  // them (`pipeline.imageProcessing` is null while the pass is disposed),
+  // and let "off" mean neutral rather than stale. Every write below is
+  // already gated on `post` or `graded`.
+  const ip = scene.imageProcessingConfiguration;
 
-  const ip = pipeline.imageProcessing;
-
+  // The filmic curve is part of the grade, not a separate switch on top of
+  // it: the mood exposure is what lifts the frame into the range ACES was
+  // shaped for, so a tone mapper running without it crushes the midtones -
+  // Lorencia lost a third of its level that way. Ungraded (Classic, or with
+  // post off) the frame is already the reference client's display-space
+  // image, and a curve over it is exactly the deviation Classic must not
+  // have.
   ip.toneMappingEnabled =
-    TONE_MAPPING_ENABLED && post && GameOptions.toneMapping;
+    TONE_MAPPING_ENABLED && graded && GameOptions.toneMapping;
 
-  const darken =
-    1 - (Math.max(0, Math.min(GRADE_MAX, GameOptions.darkness)) / GRADE_MAX) *
-      MAX_DARKEN;
+  // `darkness` and the vignette are the darkening, and they are what the
+  // "scene darkening" switch turns off.
+  const darken = GameOptions.sceneDarkening
+    ? 1 -
+      (Math.max(0, Math.min(GRADE_MAX, GameOptions.darkness)) / GRADE_MAX) *
+        MAX_DARKEN
+    : 1;
 
+  // The mood exposure is not a look control - it is the payback for the
+  // grade's own material-side pre-multiply, so it is gated on `graded` and
+  // on nothing else. Hanging it off `sceneDarkening` is what made turning
+  // *darkening* off darken the frame by a stop and a half.
+  //
   // Same shape as the contrast slider: the mood value is a lift over neutral,
   // so the slider scales the lift and 0 lands on a flat 1.0.
-  const moodExposure =
-    1 + (mood.exposure - 1) * gradeScale(GameOptions.exposure);
+  const moodExposure = graded
+    ? 1 + (mood.exposure - 1) * gradeScale(GameOptions.exposure)
+    : 1;
 
-  ip.exposure =
-    post && GameOptions.sceneDarkening ? moodExposure * darken : 1;
+  ip.exposure = post ? moodExposure * darken : 1;
   // The mood contrast is a lift over neutral, so the slider scales the lift
   // rather than the value - at 0 the frame comes through at a flat 1.0.
-  ip.contrast = post
+  ip.contrast = graded
     ? 1 + (mood.contrast - 1) * gradeScale(GameOptions.contrast)
     : 1;
 
-  const vignette = GameOptions.sceneDarkening
-    ? mood.vignetteWeight * gradeScale(GameOptions.vignette)
-    : 0;
+  const vignette =
+    graded && GameOptions.sceneDarkening
+      ? mood.vignetteWeight * gradeScale(GameOptions.vignette)
+      : 0;
 
   ip.vignetteEnabled = post && vignette > 0;
   ip.vignetteWeight = vignette;
   ip.vignetteColor.set(0, 0, 0, 0);
 
-  const tint = gradeScale(GameOptions.colorTint);
+  const tint = graded ? gradeScale(GameOptions.colorTint) : 0;
 
   curves.highlightsHue = mood.splitTone.highlightsHue;
   curves.highlightsDensity = clampCurve(
