@@ -1,5 +1,6 @@
 import { observable, runInAction } from 'mobx';
 import { JEWEL, JEWEL_GROUP } from '../common/jewelUpgrade';
+import { shopApiUrl } from '../common/serverServices';
 import { t } from '../i18n';
 import type { Item } from '../ecs/world';
 
@@ -65,18 +66,10 @@ export const CashShopState = observable({
   roll: null as Roll | null,
 });
 
-/**
- * Where the shop service answers.
- *
- * Relative by default: Caddy publishes the service under `/api` on the
- * client's own host, so there is no second origin and no CORS. Point it at a
- * host of its own (`https://api.example.net/api`) and that service has to
- * name this origin in `CORS_ORIGIN`.
- */
-const API = import.meta.env.VITE_CASHSHOP_API || '/api';
-
 async function get<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API}${path}`, {
+  // Read per call, not once at load: which world is being played decides whose
+  // shop this is, and that is not known when this module is first evaluated.
+  const response = await fetch(`${shopApiUrl()}${path}`, {
     // Nothing here is cookie-authenticated, and asking for credentials on a
     // cross-origin call would only add a CORS requirement for no gain.
     credentials: 'omit',

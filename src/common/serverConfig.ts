@@ -48,6 +48,12 @@ export type ServerProfile = {
   gsAddress: GameServerPolicy;
   /** From the published list (`serverList.ts`): shown, selectable, not editable. */
   listed?: boolean;
+  /**
+   * The world's own domain, when it published one. Everything else the world
+   * has hangs off it by convention - the proxy, its signup page, its shop -
+   * which is what `serverServices.ts` reads it for.
+   */
+  domain?: string;
   /** The published list's blurb, language tag and banner. Display only. */
   description?: string;
   language?: string;
@@ -170,6 +176,9 @@ export function sanitizeProfile(
     wsUrl: normalizeWsUrl(patch.wsUrl ?? base.wsUrl) || base.wsUrl,
     gsAddress: patch.gsAddress ?? base.gsAddress,
     ...((patch.listed ?? base.listed) && { listed: true }),
+    ...((patch.domain ?? base.domain) && {
+      domain: patch.domain ?? base.domain,
+    }),
     ...((patch.description ?? base.description) && {
       description: patch.description ?? base.description,
     }),
@@ -528,6 +537,10 @@ class ServerConfigStore {
         ...from,
         id: `s${Date.now().toString(36)}`,
         listed: false,
+        // The domain goes with the row it came from: this copy is an address
+        // the player owns and may point anywhere, and a world's services must
+        // not follow it there.
+        domain: '',
         description: '',
         language: '',
         image: '',
@@ -612,8 +625,8 @@ export function connectServerAddress(): { host: string; port: number } {
  * A published world's `csHost` is the connect server as its own proxy reaches
  * it, and a world whose proxy shares a box with the game server publishes
  * `127.0.0.1` there — correct, and meaningless on a player's screen. So a
- * listed world shows the proxy that carries it, which is the address the
- * browser really opens and the only one that means anything from outside.
+ * listed world shows what it is known by: its domain, or failing that the
+ * proxy that carries it, which is the address the browser really opens.
  *
  * A saved profile shows its endpoint unchanged: the player typed it, and it is
  * the field they are checking when they read this line.
@@ -625,7 +638,7 @@ export function displayAddress(
 
   if (!profile.listed) return `${csHost}:${csPort}`;
 
-  return normalizeHost(wsUrl) || `${csHost}:${csPort}`;
+  return profile.domain || normalizeHost(wsUrl) || `${csHost}:${csPort}`;
 }
 
 /**
