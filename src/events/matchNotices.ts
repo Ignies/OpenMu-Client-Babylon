@@ -10,6 +10,7 @@ import {
 } from '../common/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
 import { EVENT_TEXT, formatText } from './recipes';
+import { t, type TextKey } from '../i18n';
 
 /**
  * The lines every event shares: the 30-second state countdown
@@ -98,9 +99,9 @@ const COUNTDOWN_TEXT: Readonly<
  * Ours: OpenMU's `MapEventState` has no text of its own in the original
  * (it only lit the dragon effects), so the banner wording is the clone's.
  */
-const MAP_EVENT_TEXT: Readonly<Record<number, string>> = {
-  [MapEventStateEventsEnum.RedDragon]: 'The Red Dragon is invading!',
-  [MapEventStateEventsEnum.GoldenDragon]: 'The Golden Dragon is invading!',
+const MAP_EVENT_TEXT: Readonly<Record<number, TextKey>> = {
+  [MapEventStateEventsEnum.RedDragon]: 'event.redDragon',
+  [MapEventStateEventsEnum.GoldenDragon]: 'event.goldenDragon',
 };
 
 // ---- 2. state + readers ----------------------------------------------------
@@ -157,8 +158,8 @@ EventBus.on('UpdateMiniGameState', packet => {
 
 EventBus.on('MapEventState', packet => {
   const p = new MapEventStatePacket(packet);
-  const text = MAP_EVENT_TEXT[p.Event];
-  if (p.Enable && text) Notices.create(text);
+  const key = MAP_EVENT_TEXT[p.Event];
+  if (p.Enable && key) Notices.create(t(key));
 });
 
 // ---- 3. the layer ----------------------------------------------------------

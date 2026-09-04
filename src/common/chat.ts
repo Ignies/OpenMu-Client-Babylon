@@ -3,6 +3,8 @@
  * prefix routing of `ReceiveChat` (WSclient.cpp:1435).
  */
 
+import type { TextKey } from '../i18n';
+
 /** `MESSAGE_TYPE` (NewUIChatLogWindow.h:18). */
 export enum ChatLineType {
   All = 0,
@@ -92,32 +94,32 @@ export const CHAT_LINE_STYLE: Record<
 /** The log's filter tabs (`newui_Bt_Chat_*`): which types each one shows. */
 export const CHAT_FILTERS: {
   key: 'all' | 'normal' | 'party' | 'guild' | 'system';
-  label: string;
+  labelKey: TextKey;
   sprite: string;
   types: ChatLineType[] | null;
 }[] = [
-  { key: 'all', label: 'All', sprite: '', types: null },
+  { key: 'all', labelKey: 'chat.tab.all', sprite: '', types: null },
   {
     key: 'normal',
-    label: 'Chat',
+    labelKey: 'chat.tab.chat',
     sprite: 'newui_Bt_Chat_normal.OZJ',
     types: [ChatLineType.Chat, ChatLineType.Whisper, ChatLineType.GM],
   },
   {
     key: 'party',
-    label: 'Party',
+    labelKey: 'chat.party',
     sprite: 'newui_Bt_Chat_party.OZJ',
     types: [ChatLineType.Party],
   },
   {
     key: 'guild',
-    label: 'Guild',
+    labelKey: 'chat.guild',
     sprite: 'newui_Bt_Chat_guild.OZJ',
     types: [ChatLineType.Guild, ChatLineType.Union],
   },
   {
     key: 'system',
-    label: 'System',
+    labelKey: 'chat.tab.system',
     sprite: 'newui_Bt_Chat_system.OZJ',
     types: [ChatLineType.System, ChatLineType.Error],
   },

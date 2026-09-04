@@ -30,6 +30,8 @@
  *    projects it).
  */
 
+import type { TextKey } from '../i18n';
+
 export type EmojiBubbleId =
   | 'anger'
   | 'love'
@@ -43,7 +45,7 @@ export type EmojiBubblePlacement = 'head' | 'side';
 
 export type EmojiBubbleDefinition = {
   id: EmojiBubbleId;
-  label: string;
+  labelKey: TextKey;
   glyph: string;
   placement: EmojiBubblePlacement;
   /** Seconds the bubble stays up, fade included. */
@@ -64,7 +66,7 @@ const DEFAULT_DURATION = 2.6;
 export const EMOJI_BUBBLES: readonly EmojiBubbleDefinition[] = [
   {
     id: 'anger',
-    label: 'Anger',
+    labelKey: 'emoji.anger',
     glyph: '💢',
     placement: 'side',
     duration: DEFAULT_DURATION,
@@ -72,7 +74,7 @@ export const EMOJI_BUBBLES: readonly EmojiBubbleDefinition[] = [
   },
   {
     id: 'love',
-    label: 'Love',
+    labelKey: 'emoji.love',
     glyph: '❤️',
     placement: 'head',
     duration: DEFAULT_DURATION,
@@ -80,7 +82,7 @@ export const EMOJI_BUBBLES: readonly EmojiBubbleDefinition[] = [
   },
   {
     id: 'sleep',
-    label: 'Sleepy',
+    labelKey: 'emoji.sleepy',
     glyph: '💤',
     placement: 'head',
     duration: DEFAULT_DURATION,
@@ -88,7 +90,7 @@ export const EMOJI_BUBBLES: readonly EmojiBubbleDefinition[] = [
   },
   {
     id: 'exclaim',
-    label: 'Alert',
+    labelKey: 'emoji.alert',
     glyph: '❗',
     placement: 'head',
     duration: DEFAULT_DURATION,
@@ -96,7 +98,7 @@ export const EMOJI_BUBBLES: readonly EmojiBubbleDefinition[] = [
   },
   {
     id: 'question',
-    label: 'Question',
+    labelKey: 'emoji.question',
     glyph: '❓',
     placement: 'head',
     duration: DEFAULT_DURATION,
@@ -104,7 +106,7 @@ export const EMOJI_BUBBLES: readonly EmojiBubbleDefinition[] = [
   },
   {
     id: 'interrobang',
-    label: 'What?!',
+    labelKey: 'emoji.what',
     glyph: '⁉️',
     placement: 'head',
     duration: DEFAULT_DURATION,
@@ -112,7 +114,7 @@ export const EMOJI_BUBBLES: readonly EmojiBubbleDefinition[] = [
   },
   {
     id: 'dizzy',
-    label: 'Dizzy',
+    labelKey: 'emoji.dizzy',
     glyph: '💫',
     placement: 'head',
     duration: DEFAULT_DURATION,

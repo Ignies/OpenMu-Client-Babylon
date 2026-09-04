@@ -200,7 +200,9 @@ const leftGroups = groups.slice(0, LEFT_GROUP_MAX);
               {activeGroup?.servers.slice(0, SERVER_MAX).map((server, i) => (
                 <ServerItem
                   key={server.ServerId}
-                  name={`Server ${(server.ServerId & 0xff) + 1}`}
+                  name={t('servers.serverName', {
+                    number: (server.ServerId & 0xff) + 1,
+                  })}
                   load={server.LoadPercentage}
                   top={SERVER_BTN_HEIGHT * i}
                   onClick={() => onConnectClick(server.ServerId)}

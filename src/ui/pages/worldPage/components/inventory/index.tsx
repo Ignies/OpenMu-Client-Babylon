@@ -565,7 +565,7 @@ export const Inventory = observer(() => {
           width: WINDOW_WIDTH * OPTION_WIDTH,
         }}
       >
-        {SET_OPTION_TEXT}
+        {t(SET_OPTION_TEXT)}
       </div>
       <div
         className="inventory-option"
@@ -575,7 +575,7 @@ export const Inventory = observer(() => {
           width: WINDOW_WIDTH * OPTION_WIDTH,
         }}
       >
-        {SOCKET_OPTION_TEXT}
+        {t(SOCKET_OPTION_TEXT)}
       </div>
 
       {EQUIPMENT_SLOTS.map(info => (

@@ -35,8 +35,8 @@ export const OPTION_Y = 25;
 export const OPTION_WIDTH = 0.3;
 export const SET_OPTION_X = 0.2;
 export const SOCKET_OPTION_X = 0.5;
-export const SET_OPTION_TEXT = '[Set option]';
-export const SOCKET_OPTION_TEXT = '[Socket option]';
+export const SET_OPTION_TEXT: TextKey = 'inventory.setOption';
+export const SOCKET_OPTION_TEXT: TextKey = 'inventory.socketOption';
 
 export const MONEY_SPRITE = 'newui_item_money.OZT';
 export const MONEY_X = 11;

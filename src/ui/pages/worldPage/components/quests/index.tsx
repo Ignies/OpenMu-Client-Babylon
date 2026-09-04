@@ -176,7 +176,8 @@ const S6_LINE_CHARS = 30;
 /** `QUEST_ITEM` dialog state: every item has been brought. */
 const DIALOG_STATE_ITEM = 4;
 
-const monsterName = (type: number) => monsterDisplayName(type, `NPC ${type}`);
+const monsterName = (type: number) =>
+  monsterDisplayName(type, t('quest.npcFallback', { type }));
 
 const lineColor = (line: QuestRequirementLine) =>
   line.kind === 'header' ? COLOR.yellow : line.kind === 'request' ? (line.done ? COLOR.done : COLOR.missing) : COLOR.text;
@@ -230,7 +231,7 @@ const RequirementList = ({ lines, top, height }: { lines: readonly QuestRequirem
     <div className="quest-list" data-no-drag="true" style={{ left: 14, top: top + 4, width: 163, height: height - 8 }}>
       {lines.length === 0 && (
         <div className="row" style={{ color: COLOR.tabOff, cursor: 'default' }}>
-          Waiting for the server…
+          {t('quest.waitingServer')}
         </div>
       )}
       {lines.map((line, i) => (
@@ -289,7 +290,14 @@ const NpcQuestWindow = observer(() => {
             const label =
               act.kind === QuestActKind.Monster
                 ? `${monsterName(act.itemType)}  ${Math.min(legacyKillCount(act.itemType), act.itemNum)} / ${act.itemNum}`
-                : `${ItemsDatabase.getItem(act.itemType, act.itemSubType)?.ItemName ?? `Item ${act.itemType * MAX_ITEM_INDEX + act.itemSubType}`} x${act.itemNum}`;
+                : t('quest.reward.item', {
+                    name:
+                      ItemsDatabase.getItem(act.itemType, act.itemSubType)?.ItemName ??
+                      t('quest.itemFallback', {
+                        id: act.itemType * MAX_ITEM_INDEX + act.itemSubType,
+                      }),
+                    count: act.itemNum,
+                  });
             return (
               <Line
                 key={i}
@@ -559,7 +567,11 @@ const NpcDialogueWindow = observer(() => {
             className="table-fill"
             style={{ left: ND_CONTRIBUTE_BOX.x, top: ND_CONTRIBUTE_BOX.y, width: ND_CONTRIBUTE_BOX.width, height: ND_CONTRIBUTE_BOX.height }}
           />
-          <Line y={ND_CONTRIBUTE_Y} text={`Contribution: ${contribution.toLocaleString()}`} color={COLOR.text} />
+          <Line
+            y={ND_CONTRIBUTE_Y}
+            text={t('quest.contribution', { value: contribution.toLocaleString() })}
+            color={COLOR.text}
+          />
         </>
       )}
 
@@ -770,7 +782,12 @@ const JobChangeTab = observer(() => {
   const quest = questDefinition(index);
   const lines = quest
     ? wrapDialogText(
-        `Talk to ${monsterName(quest.npcType)} to ${state === LegacyQuestState.InProgress ? 'continue' : 'start'} this quest.`,
+        t(
+          state === LegacyQuestState.InProgress
+            ? 'quest.talkToContinue'
+            : 'quest.talkToStart',
+          { npc: monsterName(quest.npcType) }
+        ),
         3,
         S6_LINE_CHARS
       )

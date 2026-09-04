@@ -141,7 +141,7 @@ export const LoginPage = observer(() => {
             style={{ left: 130, top: 159 }}
             onClick={uiClick(() => (Store.rememberLogin = !Store.rememberLogin))}
           >
-            Remember me?
+            {t('login.rememberMe')}
           </span>
 
           <MuButton

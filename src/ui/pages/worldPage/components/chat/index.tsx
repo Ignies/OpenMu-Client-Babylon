@@ -148,7 +148,7 @@ const CompletionRow = ({
   >
     <span className="chat-completion-name">{command.name}</span>
     {command.usage && <span className="chat-completion-usage">{command.usage}</span>}
-    <span className="chat-completion-help">{command.help}</span>
+    <span className="chat-completion-help">{t(command.helpKey)}</span>
   </div>
 );
 
@@ -193,7 +193,7 @@ const FilterTabs = observer(() => {
             style={{ left: i * BUTTON_WIDTH, width: BUTTON_WIDTH, height: BUTTON_HEIGHT }}
             onClick={uiClick(() => Social.setChatFilter(filter.key))}
           >
-            {filter.label}
+            {t(filter.labelKey)}
           </div>
         )
       )}

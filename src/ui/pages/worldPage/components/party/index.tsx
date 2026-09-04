@@ -221,7 +221,7 @@ export const PartyWindow = observer(() => {
       <MuTableFrame {...{ left: TABLE.x, top: TABLE.y, width: TABLE.width, height: TABLE.height }} />
       {Social.partyMembers.length === 0 && (
         <div className="party-empty" style={{ left: ROW_X, top: ROW_Y0 + 6, width: ROW_WIDTH }}>
-          Not in a party.
+          {t('party.notInParty')}
         </div>
       )}
       {Array.from({ length: MAX_PARTY_MEMBERS }, (_, i) => (
