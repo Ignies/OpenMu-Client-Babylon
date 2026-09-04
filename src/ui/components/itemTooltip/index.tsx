@@ -8,6 +8,7 @@ import { buildItemTooltip, type TooltipLine } from '../../../common/itemTooltip'
 import type { HeroStats } from '../../../common/itemStats';
 import { PET_GROUP } from '../../../common/pets';
 import { PetTypeEnum } from '../../../common/packets/ClientToServerPackets';
+import { t } from '../../../i18n';
 import {
   isRepairBanned,
   isSellingBanned,
@@ -49,7 +50,10 @@ function priceLines(
   // `CNewUIPurchaseShopInventory`: the seller's asking price, in gold.
   if (context === 'playerShop') {
     lines.push({
-      text: price !== undefined && price > 0 ? `Price: ${zen(price)}` : 'No price set',
+      text:
+        price !== undefined && price > 0
+          ? t('shop.price', { amount: zen(price) })
+          : t('shop.noPrice'),
       color,
       bold: true,
     });
@@ -61,17 +65,24 @@ function priceLines(
     const price = itemValue(item, 0);
     const taxed = withTax(price, shop.taxRate);
     lines.push({
-      text: shop.taxRate > 0 ? `Price: ${zen(taxed)} (${zen(price)})` : `Price: ${zen(price)}`,
+      text:
+        shop.taxRate > 0
+          ? t('shop.priceTaxed', { taxed: zen(taxed), base: zen(price) })
+          : t('shop.price', { amount: zen(price) }),
       color,
       bold: false,
     });
   } else if (context === 'inventory' && shop && !isSellingBanned(item)) {
-    lines.push({ text: `Sell price: ${zen(itemValue(item, 1))}`, color, bold: false });
+    lines.push({
+      text: t('shop.sellPrice', { amount: zen(itemValue(item, 1)) }),
+      color,
+      bold: false,
+    });
   }
 
   if (context === 'inventory' && Store.repairMode && !isRepairBanned(item)) {
     const cost = needsRepair(item) ? repairCost(item, Store.isSelfRepair) : 0;
-    lines.push({ text: `Repair: ${zen(cost)}`, color, bold: true });
+    lines.push({ text: t('shop.repairCost', { amount: zen(cost) }), color, bold: true });
   }
 
   if (lines.length > 0) lines.push({ text: '', color, bold: false, blank: true });
@@ -102,9 +113,22 @@ function petLines(pet: PetTypeEnum, slot: number): TooltipLine[] {
   if (!info || info.pet !== pet || info.slot !== slot) return [];
   return [
     { text: '\n', color: 'white', bold: false, blank: true },
-    { text: `Level : ${info.level}`, color: 'white', bold: false },
-    { text: `Experience : ${info.experience.toLocaleString('en-US')}`, color: 'white', bold: false },
-    { text: `Life : ${Math.min(info.health, PET_MAX_LIFE)} / ${PET_MAX_LIFE}`, color: 'white', bold: false },
+    { text: t('petInfo.tipLevel', { level: info.level }), color: 'white', bold: false },
+    {
+      text: t('petInfo.tipExperience', {
+        value: info.experience.toLocaleString('en-US'),
+      }),
+      color: 'white',
+      bold: false,
+    },
+    {
+      text: t('petInfo.tipLife', {
+        current: Math.min(info.health, PET_MAX_LIFE),
+        max: PET_MAX_LIFE,
+      }),
+      color: 'white',
+      bold: false,
+    },
   ];
 }
 

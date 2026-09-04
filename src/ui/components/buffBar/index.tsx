@@ -5,6 +5,7 @@ import { MuSpriteFrame } from '../muSprite';
 import { useUiStageScale } from '../uiStage';
 import { skills, type ActiveBuff } from '../../../skills';
 import { BUFF_ICON_HEIGHT, BUFF_ICON_WIDTH, buffIconCell } from '../../../skills/recipes';
+import { t } from '../../../i18n';
 
 /** `CNewUIBuffWindow::SetPos(640)`: the row starts at (220, 15). */
 const BAR_X = 220;
@@ -18,7 +19,9 @@ const TICK_MS = 500;
 function formatRemaining(seconds: number): string {
   const s = Math.ceil(seconds);
   const m = Math.floor(s / 60);
-  return m > 0 ? `${m} min ${s % 60} sec` : `${s} sec`;
+  return m > 0
+    ? t('buff.remainingMin', { minutes: m, seconds: s % 60 })
+    : t('buff.remainingSec', { seconds: s });
 }
 
 /**
@@ -38,7 +41,7 @@ const BuffTip = ({ buff, x, y }: { buff: ActiveBuff; x: number; y: number }) => 
     <div className="buff-tip" style={{ left: x, top: y }}>
       <div className="buff-tip-name">{buff.name}</div>
       {remaining !== null && <div>{formatRemaining(remaining)}</div>}
-      {buff.kind === 'debuff' && <div className="buff-tip-debuff">Debuff</div>}
+      {buff.kind === 'debuff' && <div className="buff-tip-debuff">{t('buff.debuff')}</div>}
     </div>
   );
 };

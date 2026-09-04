@@ -1,4 +1,5 @@
 import { runInAction } from 'mobx';
+import { t, type TextKey } from './i18n';
 import { CharacterClassNumber, ENUM_WORLD } from './common';
 import {
   APPEARANCE_EXTENDED_LENGTH,
@@ -1343,11 +1344,11 @@ EventBus.on('GuildMemberLeftGuild', packet => {
     const mine = Social.myGuild;
     if (!mine) return;
     leaveGuild(mine.id, p.IsGuildMaster);
-    Social.errorMessage(
-      p.IsGuildMaster ? 'The guild has been disbanded.' : 'You have left the guild.'
-    );
+    Social.errorMessage(t(p.IsGuildMaster ? 'guild.disbanded' : 'guild.youLeft'));
   } else if (obj?.objectNameInWorld && Social.myGuild) {
-    Social.systemMessage(`${obj.objectNameInWorld} left the guild.`);
+    Social.systemMessage(
+      t('guild.memberLeft', { name: obj.objectNameInWorld })
+    );
     if (Social.guildWindowEnabled) Social.requestGuildList();
   }
 });
@@ -1388,7 +1389,7 @@ EventBus.on('PartyList', packet => {
     }))
   );
   if (!wasInParty && Social.inParty) {
-    Social.systemMessage('You have joined the party.');
+    Social.systemMessage(t('party.joined'));
     runInAction(() => {
       Social.partyWindowEnabled = true;
     });
@@ -1421,27 +1422,21 @@ EventBus.on('GuildJoinRequest', packet => {
   });
 });
 
-const GUILD_JOIN_RESULTS: Record<GuildJoinResponseGuildJoinRequestResultEnum, string> = {
-  [GuildJoinResponseGuildJoinRequestResultEnum.Refused]:
-    'The guild master refused your request.',
-  [GuildJoinResponseGuildJoinRequestResultEnum.Accepted]:
-    'You have joined the guild.',
-  [GuildJoinResponseGuildJoinRequestResultEnum.GuildFull]: 'The guild is full.',
-  [GuildJoinResponseGuildJoinRequestResultEnum.Disconnected]:
-    'The guild master is not available.',
-  [GuildJoinResponseGuildJoinRequestResultEnum.NotTheGuildMaster]:
-    'That player is not a guild master.',
-  [GuildJoinResponseGuildJoinRequestResultEnum.AlreadyHaveGuild]:
-    'You already belong to a guild.',
+const GUILD_JOIN_RESULTS: Record<GuildJoinResponseGuildJoinRequestResultEnum, TextKey> = {
+  [GuildJoinResponseGuildJoinRequestResultEnum.Refused]: 'guild.joinRefused',
+  [GuildJoinResponseGuildJoinRequestResultEnum.Accepted]: 'guild.joined',
+  [GuildJoinResponseGuildJoinRequestResultEnum.GuildFull]: 'guild.isFull',
+  [GuildJoinResponseGuildJoinRequestResultEnum.Disconnected]: 'guild.masterUnavailable',
+  [GuildJoinResponseGuildJoinRequestResultEnum.NotTheGuildMaster]: 'guild.notGuildMaster',
+  [GuildJoinResponseGuildJoinRequestResultEnum.AlreadyHaveGuild]: 'guild.alreadyInGuild',
   [GuildJoinResponseGuildJoinRequestResultEnum.GuildMasterOrRequesterIsBusy]:
-    'The guild master is busy. Try again later.',
-  [GuildJoinResponseGuildJoinRequestResultEnum.MinimumLevel6]:
-    'You must be at least level 6 to join a guild.',
+    'guild.masterBusy',
+  [GuildJoinResponseGuildJoinRequestResultEnum.MinimumLevel6]: 'guild.needLevel6',
 };
 
 EventBus.on('GuildJoinResponse', packet => {
   const p = new GuildJoinResponseS2CPacket(packet);
-  const text = GUILD_JOIN_RESULTS[p.Result] ?? 'The guild request failed.';
+  const text = t(GUILD_JOIN_RESULTS[p.Result] ?? 'guild.requestFailed');
   if (p.Result === GuildJoinResponseGuildJoinRequestResultEnum.Accepted) {
     Social.systemMessage(text);
   } else {
@@ -1479,7 +1474,7 @@ EventBus.on('GuildKickResponse', packet => {
       // `myGuild` and printed "You have left the guild" (verified live) -
       // only the master, still in the guild, gets the removal line.
       if (Social.myGuild) {
-        Social.systemMessage('The member was removed from the guild.');
+        Social.systemMessage(t('guild.memberRemoved'));
         if (Social.guildWindowEnabled) Social.requestGuildList();
       }
       break;
@@ -1492,7 +1487,7 @@ EventBus.on('GuildKickResponse', packet => {
       const mine = Social.myGuild;
       if (!mine) break;
       leaveGuild(mine.id, true);
-      Social.errorMessage('The guild has been disbanded.');
+      Social.errorMessage(t('guild.disbanded'));
       break;
     }
     case GuildKickResponseGuildKickSuccessEnum.GuildMemberWithdrawn:
@@ -1500,13 +1495,13 @@ EventBus.on('GuildKickResponse', packet => {
       Social.requestGuildList();
       break;
     case GuildKickResponseGuildKickSuccessEnum.KickFailedBecausePlayerIsNotGuildMaster:
-      Social.errorMessage('Only the guild master can remove members.');
+      Social.errorMessage(t('guild.onlyMasterRemoves'));
       break;
     case GuildKickResponseGuildKickSuccessEnum.FailedPasswordIncorrect:
-      Social.errorMessage('The password you have entered is incorrect.');
+      Social.errorMessage(t('guild.wrongPassword'));
       break;
     default:
-      Social.errorMessage('The guild request failed.');
+      Social.errorMessage(t('guild.requestFailed'));
       break;
   }
 });
@@ -1538,13 +1533,15 @@ EventBus.on('GuildCreationResult', packet => {
     runInAction(() => {
       Social.guildCreationDialog = false;
     });
-    Social.systemMessage('The guild has been created.');
+    Social.systemMessage(t('guild.created'));
     return;
   }
   Social.errorMessage(
-    p.Error === GuildCreationResultGuildCreationErrorTypeEnum.GuildNameAlreadyTaken
-      ? 'That guild name is already taken.'
-      : 'The guild could not be created.'
+    t(
+      p.Error === GuildCreationResultGuildCreationErrorTypeEnum.GuildNameAlreadyTaken
+        ? 'guild.nameTaken'
+        : 'guild.createFailed'
+    )
   );
 });
 
@@ -1567,22 +1564,20 @@ EventBus.on('GuildWarRequest', packet => {
   });
 });
 
-const GUILD_WAR_RESULTS: Record<GuildWarRequestResultRequestResultEnum, string> = {
-  [GuildWarRequestResultRequestResultEnum.GuildNotFound]: 'That guild does not exist.',
+const GUILD_WAR_RESULTS: Record<GuildWarRequestResultRequestResultEnum, TextKey> = {
+  [GuildWarRequestResultRequestResultEnum.GuildNotFound]: 'guild.warNotFound',
   [GuildWarRequestResultRequestResultEnum.RequestSentToGuildMaster]:
-    'The war request was sent to the guild master.',
-  [GuildWarRequestResultRequestResultEnum.GuildMasterOffline]:
-    'That guild master is not online.',
-  [GuildWarRequestResultRequestResultEnum.NotInGuild]: 'You do not belong to a guild.',
-  [GuildWarRequestResultRequestResultEnum.Failed]: 'The war request failed.',
-  [GuildWarRequestResultRequestResultEnum.NotTheGuildMaster]:
-    'Only the guild master can declare a war.',
-  [GuildWarRequestResultRequestResultEnum.AlreadyInWar]: 'Your guild is already at war.',
+    'guild.warRequestSent',
+  [GuildWarRequestResultRequestResultEnum.GuildMasterOffline]: 'guild.warMasterOffline',
+  [GuildWarRequestResultRequestResultEnum.NotInGuild]: 'guild.warNotInGuild',
+  [GuildWarRequestResultRequestResultEnum.Failed]: 'guild.warRequestFailed',
+  [GuildWarRequestResultRequestResultEnum.NotTheGuildMaster]: 'guild.warOnlyMaster',
+  [GuildWarRequestResultRequestResultEnum.AlreadyInWar]: 'guild.warAlready',
 };
 
 EventBus.on('GuildWarRequestResult', packet => {
   const p = new GuildWarRequestResultPacket(packet);
-  const text = GUILD_WAR_RESULTS[p.Result] ?? 'The war request failed.';
+  const text = t(GUILD_WAR_RESULTS[p.Result] ?? 'guild.warRequestFailed');
   if (p.Result === GuildWarRequestResultRequestResultEnum.RequestSentToGuildMaster) {
     Social.systemMessage(text);
   } else {
@@ -1604,9 +1599,9 @@ EventBus.on('GuildWarDeclared', packet => {
     };
   });
   Social.systemMessage(
-    p.Type === GuildWarTypeEnum.Soccer
-      ? `Battle Soccer against ${enemy} has started.`
-      : `Guild war against ${enemy} has started.`
+    t(p.Type === GuildWarTypeEnum.Soccer ? 'guild.soccerStarted' : 'guild.warStarted', {
+      name: enemy,
+    })
   );
 });
 
@@ -1644,12 +1639,12 @@ EventBus.on('GuildSoccerTimeUpdate', packet => {
   });
 });
 
-const GUILD_WAR_ENDINGS: Record<GuildWarEndedGuildWarResultEnum, string> = {
-  [GuildWarEndedGuildWarResultEnum.Won]: 'Your guild has won the war.',
-  [GuildWarEndedGuildWarResultEnum.Lost]: 'Your guild has lost the war.',
-  [GuildWarEndedGuildWarResultEnum.CancelledWar]: 'The guild war was cancelled.',
+const GUILD_WAR_ENDINGS: Record<GuildWarEndedGuildWarResultEnum, TextKey> = {
+  [GuildWarEndedGuildWarResultEnum.Won]: 'guild.warWon',
+  [GuildWarEndedGuildWarResultEnum.Lost]: 'guild.warLost',
+  [GuildWarEndedGuildWarResultEnum.CancelledWar]: 'guild.warCancelled',
   [GuildWarEndedGuildWarResultEnum.OtherGuildMasterCancelledWar]:
-    'The other guild master cancelled the war.',
+    'guild.warCancelledByOther',
 };
 
 /** `InitGuildWar`: the war state goes and every GuildTeam is recomputed. */
@@ -1660,7 +1655,7 @@ EventBus.on('GuildWarEnded', packet => {
     Social.battleSoccer = null;
     Social.guildWarRequest = null;
   });
-  Social.systemMessage(GUILD_WAR_ENDINGS[p.Result] ?? 'The guild war has ended.');
+  Social.systemMessage(t(GUILD_WAR_ENDINGS[p.Result] ?? 'guild.warEnded'));
 });
 
 /** GuildRelationshipRequest (0xE5): an alliance or hostility offer. */
@@ -1680,36 +1675,36 @@ EventBus.on('GuildRelationshipRequest', packet => {
 
 /** The failure reasons the original prints (GlobalText 1313 / 1326-1333). */
 const RELATIONSHIP_ERRORS: Partial<
-  Record<GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum, string>
+  Record<GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum, TextKey>
 > = {
-  [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.Failed]: 'Failed',
+  [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.Failed]:
+    'guild.relFailed',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.GuildNotFound]:
-    'That guild does not exist.',
+    'guild.relNotFound',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.NoAuthorization]:
-    'You are not allowed to do that.',
+    'guild.relNoAuthorization',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.AlreadyInAlliance]:
-    'Already belongs to guild alliance',
+    'guild.relAlreadyAlliance',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.AlreadyInHostility]:
-    'The two guilds are already hostile.',
+    'guild.relAlreadyHostile',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.GuildAllianceExists]:
-    'That guild already has an alliance.',
+    'guild.relAllianceExists',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.HostileGuildExists]:
-    'That guild is already hostile to someone.',
+    'guild.relHostileExists',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.GuildAllianceDoesNotExist]:
-    'There is no alliance to leave.',
+    'guild.relNoAlliance',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.HostileGuildDoesNotExist]:
-    'There is no hostility to end.',
+    'guild.relNoHostility',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.NotMasterOfGuildAlliance]:
-    'Not a master of guild alliance',
+    'guild.relNotAllianceMaster',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.NotGuildRival]:
-    'That guild is not your rival.',
+    'guild.relNotRival',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum
-    .IncompleteRequirementsToCreateAlliance]:
-    'Incomplete requirements for creating a guild alliance',
+    .IncompleteRequirementsToCreateAlliance]: 'guild.relIncomplete',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum
-    .MaximumNumberOfGuildsInAllianceReached]: 'The alliance is full.',
+    .MaximumNumberOfGuildsInAllianceReached]: 'guild.relAllianceFull',
   [GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.RequestCancelled]:
-    'The request was cancelled.',
+    'guild.relCancelled',
 };
 
 EventBus.on('GuildRelationshipChangeResult', packet => {
@@ -1722,13 +1717,15 @@ EventBus.on('GuildRelationshipChangeResult', packet => {
     GuildRelationshipChangeResultGuildRelationshipChangeResultTypeEnum.Success
   ) {
     Social.systemMessage(
-      alliance
-        ? joining
-          ? 'The guild alliance was formed.'
-          : 'The guild alliance was dissolved.'
-        : joining
-          ? 'The guilds are now hostile.'
-          : 'The hostility has ended.'
+      t(
+        alliance
+          ? joining
+            ? 'guild.allianceFormed'
+            : 'guild.allianceDissolved'
+          : joining
+            ? 'guild.nowHostile'
+            : 'guild.hostilityEnded'
+      )
     );
     // The `<Alliance>` line over every head comes out of GuildInformation,
     // and the alliance name in it has just changed for both guilds.
@@ -1738,7 +1735,7 @@ EventBus.on('GuildRelationshipChangeResult', packet => {
     return;
   }
 
-  Social.errorMessage(RELATIONSHIP_ERRORS[p.Result] ?? 'The guild request failed.');
+  Social.errorMessage(t(RELATIONSHIP_ERRORS[p.Result] ?? 'guild.requestFailed'));
 });
 
 /** `ReceiveUnionList` (WSclient.cpp:7502). */
@@ -1758,11 +1755,11 @@ EventBus.on('AllianceList', packet => {
 EventBus.on('RemoveAllianceGuildResult', packet => {
   const p = new RemoveAllianceGuildResultPacket(packet);
   if (p.Result) {
-    Social.systemMessage('The guild was removed from the alliance.');
+    Social.systemMessage(t('guild.allianceRemoved'));
     Store.guilds.clear();
     Social.requestAllianceList();
   } else {
-    Social.errorMessage('That guild could not be removed from the alliance.');
+    Social.errorMessage(t('guild.allianceRemoveFailed'));
   }
 });
 
@@ -1796,7 +1793,7 @@ EventBus.on('FriendAdded', packet => {
   const p = new FriendAddedPacket(packet);
   const name = cleanName(p.FriendName);
   Messenger.addFriend(name, friendServer(p.ServerId));
-  Social.systemMessage(`${name} was added to your friend list.`);
+  Social.systemMessage(t('friends.added', { name }));
 });
 
 EventBus.on('FriendDeleted', packet => {
@@ -1826,7 +1823,7 @@ EventBus.on('FriendRequest', packet => {
 EventBus.on('FriendInvitationResult', packet => {
   const p = new FriendInvitationResultPacket(packet);
   if (ChatRooms.inviteResult(p.Success, p.RequestId)) return;
-  if (!p.Success) Social.errorMessage('The friend request could not be sent.');
+  if (!p.Success) Social.errorMessage(t('friends.requestFailed'));
 });
 
 /**
@@ -1860,7 +1857,9 @@ EventBus.on('AddLetter', packet => {
   // `New` means it landed while the hero was online, so it is announced.
   if (isNew) {
     playUiSound('whisper');
-    Social.systemMessage(`A letter arrived from ${cleanName(p.SenderName)}.`);
+    Social.systemMessage(
+      t('friends.letterArrived', { name: cleanName(p.SenderName) })
+    );
   }
 });
 
@@ -1873,31 +1872,29 @@ EventBus.on('OpenLetter', packet => {
 EventBus.on('RemoveLetter', packet => {
   const p = new RemoveLetterPacket(packet);
   if (p.RequestSuccessful) Messenger.removeLetter(p.LetterIndex);
-  else Social.errorMessage('The letter could not be deleted.');
+  else Social.errorMessage(t('friends.letterDeleteFailed'));
 });
 
 const LETTER_SEND_RESULTS: Record<
   LetterSendResponseLetterSendRequestResultEnum,
-  string
+  TextKey
 > = {
-  [LetterSendResponseLetterSendRequestResultEnum.Success]: 'The letter was sent.',
-  [LetterSendResponseLetterSendRequestResultEnum.TryAgain]:
-    'The letter could not be sent. Try again.',
-  [LetterSendResponseLetterSendRequestResultEnum.MailboxFull]:
-    'That mailbox is full.',
+  [LetterSendResponseLetterSendRequestResultEnum.Success]: 'friends.letterSent',
+  [LetterSendResponseLetterSendRequestResultEnum.TryAgain]: 'friends.letterTryAgain',
+  [LetterSendResponseLetterSendRequestResultEnum.MailboxFull]: 'friends.mailboxFull',
   [LetterSendResponseLetterSendRequestResultEnum.ReceiverNotExists]:
-    'There is no character with that name.',
+    'friends.noSuchCharacter',
   [LetterSendResponseLetterSendRequestResultEnum.CantSendToYourself]:
-    'You cannot send a letter to yourself.',
+    'friends.cannotLetterSelf',
   [LetterSendResponseLetterSendRequestResultEnum.NotEnoughMoney]:
-    'You do not have enough zen to send a letter.',
+    'friends.letterNeedsZen',
 };
 
 EventBus.on('LetterSendResponse', packet => {
   const p = new LetterSendResponsePacket(packet);
   const ok = p.Result === LetterSendResponseLetterSendRequestResultEnum.Success;
   Messenger.sendFinished(ok);
-  const text = LETTER_SEND_RESULTS[p.Result] ?? 'The letter could not be sent.';
+  const text = t(LETTER_SEND_RESULTS[p.Result] ?? 'friends.letterFailed');
   if (ok) Social.systemMessage(text);
   else Social.errorMessage(text);
 });
@@ -2880,7 +2877,7 @@ function storeStorageOf(storage: StorageKind, wireSlot: number): StorageKind {
 EventBus.on('ItemMoveRequestFailed', () => {
   console.warn('ItemMoveRequestFailed - rolling the item back');
   Store.rollbackItemMove();
-  Store.addNotification(`Can't move that item there`, 'error');
+  Store.addNotification(t('notify.cannotMoveItem'), 'error');
 });
 
 EventBus.on('ItemAddedToInventory', packet => {
@@ -2931,7 +2928,7 @@ EventBus.on('InventoryItemUpgraded', packet => {
  */
 EventBus.on('ItemConsumptionFailed', () => {
   Store.consumptionFailed();
-  Store.addNotification('That item cannot be used like that', 'error');
+  Store.addNotification(t('notify.cannotUseItem'), 'error');
 });
 
 EventBus.on('ItemDurabilityChanged', packet => {
@@ -2992,7 +2989,7 @@ EventBus.on('NpcWindowResponse', packet => {
       // Lahap, the refineries…: not ported yet.
       console.warn(`NpcWindowResponse: window ${p.Window} is not supported yet`);
       Store.dropNpcTalk();
-      Store.addNotification('This NPC has nothing for you yet', 'info');
+      Store.addNotification(t('notify.npcNothingYet'), 'info');
       // OpenMU keeps the player in NpcDialogOpened after opening ANY window
       // (TalkNpcAction.cs) — without this reset it ignores every later
       // TalkToNpcRequest until relogin (the "one refusal bricks all NPCs" bug).
@@ -3047,7 +3044,7 @@ EventBus.on('ItemBought', packet => {
 
 EventBus.on('NpcItemBuyFailed', () => {
   Store.finishShopBuy();
-  Store.addNotification('You cannot buy that item', 'error');
+  Store.addNotification(t('notify.cannotBuy'), 'error');
 });
 
 EventBus.on('NpcItemSellResult', packet => {
@@ -3098,7 +3095,7 @@ EventBus.on('TradeRequestAnswer', packet => {
   const p = new TradeRequestAnswerPacket(packet);
 
   if (!p.Accepted) {
-    Social.errorMessage('The trade was refused.');
+    Social.errorMessage(t('trade.refused'));
     return;
   }
 
@@ -3143,19 +3140,19 @@ EventBus.on('PlayerShopSetItemPriceResponse', packet => {
   const p = new PlayerShopSetItemPriceResponsePacket(packet);
   const E = PlayerShopSetItemPriceResponseItemPriceSetResultEnum;
 
-  const reason: Partial<Record<number, string>> = {
-    [E.Failed]: 'Personal shops are switched off on this server.',
-    [E.ItemSlotOutOfRange]: 'That slot is not part of the shop.',
-    [E.ItemNotFound]: 'That item is gone.',
-    [E.PriceNegative]: 'The price cannot be negative.',
-    [E.ItemIsBlocked]: 'That item cannot be sold in a shop.',
-    [E.CharacterLevelTooLow]: 'A personal shop needs character level 6.',
+  const reason: Partial<Record<number, TextKey>> = {
+    [E.Failed]: 'personalShop.disabled',
+    [E.ItemSlotOutOfRange]: 'personalShop.slotNotInShop',
+    [E.ItemNotFound]: 'personalShop.itemGone',
+    [E.PriceNegative]: 'notify.negativePrice',
+    [E.ItemIsBlocked]: 'personalShop.cannotSell',
+    [E.CharacterLevelTooLow]: 'personalShop.needLevel',
   };
 
   Economy.itemPriceResult(
     p.InventorySlot,
     p.Result === E.Success,
-    reason[p.Result] ?? 'The price could not be set.'
+    t(reason[p.Result] ?? 'personalShop.priceNotSet')
   );
 });
 
@@ -3213,7 +3210,7 @@ EventBus.on('PlayerShopItemList', packet => {
   const p = new PlayerShopItemListPacket(packet);
 
   if (!p.Success) {
-    Social.errorMessage('That shop could not be opened.');
+    Social.errorMessage(t('personalShop.openFailed'));
     return;
   }
 
@@ -3257,7 +3254,7 @@ EventBus.on('ItemDropResponse', packet => {
   if (!p.Success) {
     console.warn(`Drop of slot ${p.InventorySlot} refused`);
     Store.rollbackItemMove();
-    Store.addNotification(`Can't drop that item`, 'error');
+    Store.addNotification(t('notify.cannotDropItem'), 'error');
     return;
   }
 
@@ -3282,8 +3279,8 @@ EventBus.on('ItemPickUpRequestFailed', packet => {
   Store.addNotification(
     reason ===
       ItemPickUpRequestFailedItemPickUpFailReasonEnum.__MaximumInventoryMoneyReached
-      ? 'You are carrying too much zen'
-      : `Can't pick that up`,
+      ? t('notify.carryingTooMuchZen')
+      : t('notify.cannotPickUp'),
     'error'
   );
 });
@@ -3292,7 +3289,7 @@ EventBus.on('CharacterStatIncreaseResponse', packet => {
   const p = new CharacterStatIncreaseResponsePacket(packet);
 
   if (!p.Success) {
-    Store.addNotification(`Could not add the point`, 'error');
+    Store.addNotification(t('notify.pointNotAdded'), 'error');
     return;
   }
 
@@ -3362,7 +3359,7 @@ function applyLevelUpdate(p: LevelUpdateView) {
     }
   });
 
-  Store.addNotification(`Level ${p.Level}`);
+  Store.addNotification(t('notify.levelUp', { level: p.Level }));
 }
 
 EventBus.on('CharacterLevelUpdate', packet =>
@@ -3377,7 +3374,7 @@ EventBus.on('MasterCharacterLevelUpdate', packet => {
   runInAction(() => {
     Store.playerData.masterLevel = p.MasterLevel;
   });
-  Store.addNotification(`Master level ${p.MasterLevel}`);
+  Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
 });
 
 // C3 16 — sent for every kill share. Without this handler the exp bar only
@@ -3511,7 +3508,7 @@ EventBus.on('CharacterStatIncreaseResponseExtended', packet => {
   const added = p.AddedAmount;
 
   if (added === 0) {
-    Store.addNotification(`Could not add the point`, 'error');
+    Store.addNotification(t('notify.pointNotAdded'), 'error');
     return;
   }
 
@@ -3560,7 +3557,7 @@ EventBus.on('MasterCharacterLevelUpdateExtended', packet => {
     Store.playerData.maxSD = p.MaximumShield;
     Store.playerData.maxAG = p.MaximumAbility;
   });
-  Store.addNotification(`Master level ${p.MasterLevel}`);
+  Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
 });
 
 /**
@@ -3627,31 +3624,31 @@ EventBus.on('FruitConsumptionResponse', packet => {
   switch (p.Result) {
     case R.PlusSuccess:
       move(1);
-      Store.addNotification(`${statName} +${points} (fruit)`);
+      Store.addNotification(t('notify.fruitAdd', { stat: statName, points }));
       break;
     case R.MinusSuccess:
     case R.MinusSuccessCashShopFruit:
       move(-1);
-      Store.addNotification(`${statName} -${points} (fruit)`);
+      Store.addNotification(t('notify.fruitRemove', { stat: statName, points }));
       break;
     case R.PlusFailed:
     case R.MinusFailed:
-      Store.addNotification('The fruit had no effect', 'error');
+      Store.addNotification(t('notify.fruitNoEffect'), 'error');
       break;
     case R.PlusPreventedByMaximum:
     case R.MinusPreventedByMaximum:
-      Store.addNotification('You cannot use any more fruits today', 'error');
+      Store.addNotification(t('notify.fruitLimit'), 'error');
       break;
     case R.MinusPreventedByDefault:
-      Store.addNotification(`${statName} cannot go any lower`, 'error');
+      Store.addNotification(t('notify.fruitFloor', { stat: statName }), 'error');
       break;
     case R.PreventedByEquippedItems:
-      Store.addNotification('Take off the items that need this stat first', 'error');
+      Store.addNotification(t('notify.fruitEquipped'), 'error');
       break;
     case R.PlusPrevented:
     case R.MinusPrevented:
     default:
-      Store.addNotification('You cannot use this fruit now', 'error');
+      Store.addNotification(t('notify.fruitNotNow'), 'error');
       break;
   }
 });

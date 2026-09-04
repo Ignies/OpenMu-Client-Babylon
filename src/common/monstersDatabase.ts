@@ -1,5 +1,6 @@
 import monsters from './monsters.json';
 import { localisedNpcName } from '../libs/mu/npcNameFile';
+import { t } from '../i18n';
 
 export const MonstersDatabase = new (class _MonstersDatabase {
   cache = new Map<number, (typeof monsters)[number]>();
@@ -30,6 +31,6 @@ export function monsterDisplayName(type: number, fallback?: string): string {
     localisedNpcName(type) ??
     MonstersDatabase.get(type)?.Name ??
     fallback ??
-    `Monster ${type}`
+    t('item.monsterFallback', { type })
   );
 }

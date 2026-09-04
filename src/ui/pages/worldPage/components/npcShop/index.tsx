@@ -53,7 +53,7 @@ import {
   TAX_Y,
   TITLE,
   TITLE_Y,
-  taxText,
+  TAX,
 } from './layout';
 
 const WINDOW_ID = 'npc-shop';
@@ -189,7 +189,7 @@ export const NpcShop = observer(() => {
       </div>
       {shop.taxRate > 0 && (
         <div className="shop-tax" style={{ top: TAX_Y }}>
-          {taxText(shop.taxRate)}
+          {t(TAX, { rate: shop.taxRate })}
         </div>
       )}
 

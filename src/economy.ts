@@ -1,4 +1,4 @@
-import { t } from './i18n';
+import { t, type TextKey } from './i18n';
 import { makeObservable, observable, action, runInAction } from 'mobx';
 import { prefetchItemIcons } from './common/itemIconPack';
 import { Store } from './store';
@@ -115,8 +115,8 @@ const MIX_NUMBER = {
 /** `CChaosMixMenuMsgBox`: what the goblin will attempt with what is inside. */
 export type MixMenuEntry = {
   type: ChaosMachineMixRequestChaosMachineMixTypeEnum;
-  label: string;
-  hint: string;
+  labelKey: TextKey;
+  hintKey: TextKey;
 };
 
 /**
@@ -131,158 +131,158 @@ export type MixMenuEntry = {
 export const MIX_MENU: MixMenuEntry[] = [
   {
     type: ChaosMachineMixRequestChaosMachineMixTypeEnum.ChaosWeapon,
-    label: 'Chaos weapon',
-    hint: 'Weapon + Jewel of Chaos (+ Bless / Soul)',
+    labelKey: 'mix.chaosWeapon',
+    hintKey: 'mix.chaosWeapon.hint',
   },
   {
     type: ChaosMachineMixRequestChaosMachineMixTypeEnum.FruitCreation,
-    label: 'Fruit',
-    hint: 'Jewel of Creation + Jewel of Life',
+    labelKey: 'mix.fruit',
+    hintKey: 'mix.fruit.hint',
   },
   {
     type: MIX_NUMBER.dinorant,
-    label: 'Dinorant',
-    hint: '10 Horns of Uniria + Jewel of Chaos',
+    labelKey: 'mix.dinorant',
+    hintKey: 'mix.dinorant.hint',
   },
   {
     type: ChaosMachineMixRequestChaosMachineMixTypeEnum.PotionOfBless,
-    label: 'Potion of Bless',
-    hint: 'Jewel of Bless',
+    labelKey: 'mix.potionOfBless',
+    hintKey: 'mix.potionOfBless.hint',
   },
   {
     type: ChaosMachineMixRequestChaosMachineMixTypeEnum.PotionOfSoul,
-    label: 'Potion of Soul',
-    hint: 'Jewel of Soul',
+    labelKey: 'mix.potionOfSoul',
+    hintKey: 'mix.potionOfSoul.hint',
   },
   {
     type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo10,
-    label: 'Upgrade to +10',
-    hint: '+9 item + Chaos + Bless + Soul',
+    labelKey: 'mix.upgrade10',
+    hintKey: 'mix.upgrade10.hint',
   },
   {
     type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo11,
-    label: 'Upgrade to +11',
-    hint: '+10 item + Chaos + Bless + Soul',
+    labelKey: 'mix.upgrade11',
+    hintKey: 'mix.upgrade11.hint',
   },
   {
     type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo12,
-    label: 'Upgrade to +12',
-    hint: '+11 item + Chaos + Bless + Soul + Creation',
+    labelKey: 'mix.upgrade12',
+    hintKey: 'mix.upgrade12.hint',
   },
   {
     type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo13,
-    label: 'Upgrade to +13',
-    hint: '+12 item + Chaos + Bless + Soul + Creation',
+    labelKey: 'mix.upgrade13',
+    hintKey: 'mix.upgrade13.hint',
   },
   {
     type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo14,
-    label: 'Upgrade to +14',
-    hint: '+13 item + Chaos + Bless + Soul + Creation',
+    labelKey: 'mix.upgrade14',
+    hintKey: 'mix.upgrade14.hint',
   },
   {
     type: ChaosMachineMixRequestChaosMachineMixTypeEnum.UpgradeItemLevelTo15,
-    label: 'Upgrade to +15',
-    hint: '+14 item + Chaos + Bless + Soul + Creation',
+    labelKey: 'mix.upgrade15',
+    hintKey: 'mix.upgrade15.hint',
   },
   {
     type: MIX_NUMBER.bloodCastleTicket,
-    label: 'Cloak of Invisibility',
-    hint: 'Blood Bone + Scroll of Archangel + Jewel of Chaos',
+    labelKey: 'mix.cloak',
+    hintKey: 'mix.cloak.hint',
   },
   {
     type: MIX_NUMBER.devilSquareTicket,
-    label: "Devil's Invitation",
-    hint: "Devil's Eye + Devil's Key + Jewel of Chaos",
+    labelKey: 'mix.devilInvitation',
+    hintKey: 'mix.devilInvitation.hint',
   },
   {
     type: MIX_NUMBER.illusionTempleTicket,
-    label: 'Illusion Temple ticket',
-    hint: 'Old Scroll + Illusion Sorcerer Covenant + Jewel of Chaos',
+    labelKey: 'mix.illusionTicket',
+    hintKey: 'mix.illusionTicket.hint',
   },
   {
     type: MIX_NUMBER.lifeStone,
-    label: 'Life Stone',
-    hint: '5 Guardian + 5 Bless + 5 Soul + Chaos + Creation',
+    labelKey: 'mix.lifeStone',
+    hintKey: 'mix.lifeStone.hint',
   },
   {
     type: MIX_NUMBER.shieldPotionSmall,
-    label: 'Small Shield Potion',
-    hint: '3 Small Healing Potions + Jewel of Bless',
+    labelKey: 'mix.shieldSmall',
+    hintKey: 'mix.shieldSmall.hint',
   },
   {
     type: MIX_NUMBER.shieldPotionMedium,
-    label: 'Medium Shield Potion',
-    hint: '3 Healing Potions + Jewel of Bless',
+    labelKey: 'mix.shieldMedium',
+    hintKey: 'mix.shieldMedium.hint',
   },
   {
     type: MIX_NUMBER.shieldPotionLarge,
-    label: 'Large Shield Potion',
-    hint: '3 Large Healing Potions + Jewel of Bless',
+    labelKey: 'mix.shieldLarge',
+    hintKey: 'mix.shieldLarge.hint',
   },
   {
     type: MIX_NUMBER.fenrirStage1,
-    label: 'Fenrir, stage 1',
-    hint: '20 Pieces of Horn + 5 Claws of Beast + Jewel of Chaos',
+    labelKey: 'mix.fenrir1',
+    hintKey: 'mix.fenrir1.hint',
   },
   {
     type: MIX_NUMBER.fenrirStage2,
-    label: 'Fenrir, stage 2',
-    hint: '10 Broken Horns + 5 Claws of Beast + Jewel of Chaos',
+    labelKey: 'mix.fenrir2',
+    hintKey: 'mix.fenrir2.hint',
   },
   {
     type: MIX_NUMBER.fenrirStage3,
-    label: 'Fenrir, stage 3',
-    hint: 'Broken Horn + 3 Jewels of Life + Jewel of Chaos',
+    labelKey: 'mix.fenrir3',
+    hintKey: 'mix.fenrir3.hint',
   },
   {
     type: MIX_NUMBER.fenrirUpgrade,
-    label: 'Fenrir upgrade',
-    hint: 'Horn of Fenrir + 5 Bless + 5 Soul + Chaos + weapon / armour',
+    labelKey: 'mix.fenrirUpgrade',
+    hintKey: 'mix.fenrirUpgrade.hint',
   },
   {
     type: MIX_NUMBER.firstWings,
-    label: '1st level wings',
-    hint: 'Chaos weapon (+4 or better) + Jewel(s) of Chaos',
+    labelKey: 'mix.wings1',
+    hintKey: 'mix.wings1.hint',
   },
   {
     type: MIX_NUMBER.cape,
-    label: 'Cape of Lord / Fighter',
-    hint: '1st wings + Crest of Monarch + Jewel of Chaos',
+    labelKey: 'mix.cape',
+    hintKey: 'mix.cape.hint',
   },
   {
     type: MIX_NUMBER.secondWings,
-    label: '2nd level wings',
-    hint: "1st wings + Loch's Feather + Jewel of Chaos (+ excellent item)",
+    labelKey: 'mix.wings2',
+    hintKey: 'mix.wings2.hint',
   },
   {
     type: MIX_NUMBER.thirdWingsStage1,
-    label: '3rd level wings, stage 1',
-    hint: '2nd wings / cape + ancient item + Chaos + 5 Bless + 5 Soul',
+    labelKey: 'mix.wings3a',
+    hintKey: 'mix.wings3a.hint',
   },
   {
     type: MIX_NUMBER.thirdWingsStage2,
-    label: '3rd level wings, stage 2',
-    hint: 'Flame of Condor + Feather of Condor + excellent item + Chaos',
+    labelKey: 'mix.wings3b',
+    hintKey: 'mix.wings3b.hint',
   },
   {
     type: MIX_NUMBER.guardianOption,
-    label: 'Guardian option (level 380)',
-    hint: 'Level 380 item + Jewel of Harmony + Jewel of Guardian',
+    labelKey: 'mix.guardian',
+    hintKey: 'mix.guardian.hint',
   },
   {
     type: MIX_NUMBER.secromicon,
-    label: 'Complete Secromicon',
-    hint: 'The six Secromicon fragments + Jewel of Chaos',
+    labelKey: 'mix.secromicon',
+    hintKey: 'mix.secromicon.hint',
   },
   {
     type: MIX_NUMBER.darkHorse,
-    label: 'Dark Horse',
-    hint: 'Spirit of Dark Horse + 5 Bless + 5 Soul + Chaos + Creation',
+    labelKey: 'mix.darkHorse',
+    hintKey: 'mix.darkHorse.hint',
   },
   {
     type: MIX_NUMBER.darkRaven,
-    label: 'Dark Raven',
-    hint: 'Spirit of Dark Raven + 5 Bless + 5 Soul + Chaos + Creation',
+    labelKey: 'mix.darkRaven',
+    hintKey: 'mix.darkRaven.hint',
   },
 ];
 
@@ -712,7 +712,7 @@ export const Economy = new (class _Economy {
     // cursor, say) is not the goblin's business.
     const pickedFromTray = Store.pickedItem?.fromStorage === StorageKind.ChaosMachine;
     if (notify && (this.mixItems.some(Boolean) || pickedFromTray)) {
-      Social.errorMessage('Take your items out of the chaos machine first.');
+      Social.errorMessage(t('chaos.takeItemsOut'));
       return false;
     }
 
@@ -734,7 +734,7 @@ export const Economy = new (class _Economy {
     if (!this.mixOpen || this.mixPending) return;
 
     if (!this.mixItems.some(Boolean)) {
-      Social.errorMessage('Put the items to combine into the chaos machine.');
+      Social.errorMessage(t('chaos.putItemsIn'));
       return;
     }
 
@@ -776,26 +776,26 @@ export const Economy = new (class _Economy {
 
     if (result === E.Success) {
       playUiSound('mix');
-      Social.systemMessage('The combination succeeded.');
+      Social.systemMessage(t('chaos.succeeded'));
       return;
     }
 
     playUiSound('mixFailed');
 
-    const reason: Partial<Record<ItemCraftingResultCraftingResultEnum, string>> = {
-      [E.Failed]: 'The combination failed.',
-      [E.NotEnoughMoney]: 'Not enough Zen for the combination.',
-      [E.TooManyItems]: 'Too many items in the chaos machine.',
-      [E.CharacterLevelTooLow]: 'Your level is too low for this combination.',
-      [E.LackingMixItems]: 'Some items for this combination are missing.',
-      [E.IncorrectMixItems]: 'These items cannot be combined that way.',
-      [E.InvalidItemLevel]: 'The item level is wrong for this combination.',
-      [E.CharacterClassTooLow]: 'Your class cannot make this combination.',
-      [E.IncorrectBloodCastleItems]: 'The Blood Castle items are not correct.',
-      [E.NotEnoughMoneyForBloodCastle]: 'Not enough Zen for the invitation.',
+    const reason: Partial<Record<ItemCraftingResultCraftingResultEnum, TextKey>> = {
+      [E.Failed]: 'chaos.failed',
+      [E.NotEnoughMoney]: 'chaos.notEnoughZen',
+      [E.TooManyItems]: 'chaos.tooManyItems',
+      [E.CharacterLevelTooLow]: 'chaos.levelTooLow',
+      [E.LackingMixItems]: 'chaos.lackingItems',
+      [E.IncorrectMixItems]: 'chaos.incorrectItems',
+      [E.InvalidItemLevel]: 'chaos.invalidItemLevel',
+      [E.CharacterClassTooLow]: 'chaos.classTooLow',
+      [E.IncorrectBloodCastleItems]: 'chaos.bloodCastleItems',
+      [E.NotEnoughMoneyForBloodCastle]: 'chaos.bloodCastleZen',
     };
 
-    Social.errorMessage(reason[result] ?? 'The combination failed.');
+    Social.errorMessage(t(reason[result] ?? 'chaos.failed'));
   }
 
   // =========================================================================
@@ -820,19 +820,19 @@ export const Economy = new (class _Economy {
   /** `SendTradeRequest`: ask the player under the cursor for a trade. */
   requestTrade(target: { netId: number; name: string }): void {
     if (this.tradeOpen) {
-      Social.errorMessage('You are already trading.');
+      Social.errorMessage(t('trade.alreadyTrading'));
       return;
     }
     if (this.vaultOpen || this.mixOpen || this.myShopOpen) {
       // `IsImpossibleTradeInterface`.
-      Social.errorMessage('Close the other windows before trading.');
+      Social.errorMessage(t('trade.closeWindows'));
       return;
     }
 
     const packet = TradeRequestPacket.createPacket();
     packet.PlayerId = target.netId;
     Store.sendToGS(packet.buffer);
-    Social.systemMessage(`Trade request sent to ${target.name}.`);
+    Social.systemMessage(t('trade.requestSent', { name: target.name }));
   }
 
   /** `ProcessToReceiveTradeRequest`. */
@@ -969,20 +969,20 @@ export const Economy = new (class _Economy {
 
     switch (result) {
       case E.Success:
-        Social.systemMessage('The trade was completed.');
+        Social.systemMessage(t('trade.completed'));
         playUiSound('getItem');
         break;
       case E.Cancelled:
-        Social.errorMessage('The trade was cancelled.');
+        Social.errorMessage(t('trade.cancelled'));
         break;
       case E.FailedByFullInventory:
-        Social.errorMessage('The trade failed: not enough room.');
+        Social.errorMessage(t('trade.noRoom'));
         break;
       case E.TimedOut:
-        Social.errorMessage('The trade timed out.');
+        Social.errorMessage(t('trade.timedOut'));
         break;
       case E.FailedByItemsNotAllowedToTrade:
-        Social.errorMessage('The trade failed: an item may not be traded.');
+        Social.errorMessage(t('trade.itemNotTradable'));
         break;
     }
 
@@ -1003,7 +1003,7 @@ export const Economy = new (class _Economy {
     }
 
     if (Store.playerData.level < 6) {
-      Social.errorMessage('A personal shop needs character level 6.');
+      Social.errorMessage(t('personalShop.needLevel'));
       return;
     }
 
@@ -1040,7 +1040,7 @@ export const Economy = new (class _Economy {
     if (!item) return;
 
     if (isPersonalShopBanned(item)) {
-      Social.errorMessage('This item cannot be sold in a shop.');
+      Social.errorMessage(t('personalShop.cannotSell'));
       return;
     }
 
@@ -1104,15 +1104,15 @@ export const Economy = new (class _Economy {
     const title = name.trim().slice(0, MAX_SHOP_TITLE);
 
     if (!title) {
-      Social.errorMessage('Give your shop a name first.');
+      Social.errorMessage(t('personalShop.needName'));
       return;
     }
     if (!this.myShopItems.some(Boolean)) {
-      Social.errorMessage('Put something up for sale first.');
+      Social.errorMessage(t('personalShop.needItems'));
       return;
     }
     if (this.shopHasUnpricedItems) {
-      Social.errorMessage('Every item in the shop needs a price.');
+      Social.errorMessage(t('personalShop.needPrices'));
       return;
     }
 
@@ -1173,7 +1173,7 @@ export const Economy = new (class _Economy {
   /** `PlayerShopOpenSuccessful` (0x3F 0x02). */
   sellingStarted(success: boolean): void {
     if (!success) {
-      Social.errorMessage('The shop could not be opened.');
+      Social.errorMessage(t('personalShop.openFailed'));
       return;
     }
 
@@ -1185,7 +1185,7 @@ export const Economy = new (class _Economy {
       this.myShopSelling = true;
     });
     this.showHeroShopTitle();
-    Social.systemMessage('Your shop is open.');
+    Social.systemMessage(t('personalShop.opened'));
   }
 
   /** `PlayerShopItemSoldToPlayer` (0x3F 0x08). */
@@ -1200,7 +1200,7 @@ export const Economy = new (class _Economy {
     });
 
     playUiSound('dropMoney');
-    Social.systemMessage(`${buyer} bought an item from your shop.`);
+    Social.systemMessage(t('personalShop.itemSold', { buyer }));
   }
 
   /** `PlayerShops` (0x3F 0x00) / `PlayerShopClosed` (0x3F 0x03). */
@@ -1266,7 +1266,7 @@ export const Economy = new (class _Economy {
     if (!entry) return;
 
     if (entry.price > Store.playerData.money) {
-      Social.errorMessage('You do not have enough Zen.');
+      Social.errorMessage(t('personalShop.notEnoughZen'));
       return;
     }
 
@@ -1286,18 +1286,18 @@ export const Economy = new (class _Economy {
       return;
     }
 
-    const reason: Partial<Record<PlayerShopBuyResultResultKindEnum, string>> = {
-      [E.NotAvailable]: 'The seller is not available.',
-      [E.ShopNotOpened]: 'That shop is closed.',
-      [E.InTransaction]: 'The seller is busy with someone else.',
-      [E.InvalidShopSlot]: 'That item is gone.',
-      [E.NameMismatchOrPriceMissing]: 'That item has no price.',
-      [E.LackOfMoney]: 'You do not have enough Zen.',
-      [E.MoneyOverflowOrNotEnoughSpace]: 'There is no room for that item.',
-      [E.ItemBlock]: 'The seller has item trading blocked.',
+    const reason: Partial<Record<PlayerShopBuyResultResultKindEnum, TextKey>> = {
+      [E.NotAvailable]: 'personalShop.sellerUnavailable',
+      [E.ShopNotOpened]: 'personalShop.shopClosed',
+      [E.InTransaction]: 'personalShop.sellerBusy',
+      [E.InvalidShopSlot]: 'personalShop.itemGone',
+      [E.NameMismatchOrPriceMissing]: 'personalShop.itemNoPrice',
+      [E.LackOfMoney]: 'personalShop.notEnoughZen',
+      [E.MoneyOverflowOrNotEnoughSpace]: 'personalShop.noRoomForItem',
+      [E.ItemBlock]: 'personalShop.tradingBlocked',
     };
 
-    Social.errorMessage(reason[result] ?? 'The purchase failed.');
+    Social.errorMessage(t(reason[result] ?? 'personalShop.purchaseFailed'));
   }
 })();
 

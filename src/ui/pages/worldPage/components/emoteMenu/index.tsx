@@ -42,17 +42,16 @@ const WEDGE_GAP_DEG = 1.6;
  */
 type RadialEntry =
   | { kind: 'emote'; id: string; glyph: string; emote: EmoteDefinition }
-  | { kind: 'emoji'; id: string; label: string; glyph: string; emoji: EmojiBubbleDefinition };
+  | { kind: 'emoji'; id: string; glyph: string; emoji: EmojiBubbleDefinition };
 
 /**
- * The hub caption. Emote names are translated; emoji keep their own label and
- * carry their chat token, which is both what goes out on the wire and what a
- * player can type to pop the same bubble.
+ * The hub caption. An emoji also carries its chat token, which is both what
+ * goes out on the wire and what a player can type to pop the same bubble.
  */
 function entryLabel(entry: RadialEntry): string {
   return entry.kind === 'emote'
     ? t(entry.emote.labelKey)
-    : `${entry.label}  ${entry.emoji.words[0]}`;
+    : `${t(entry.emoji.labelKey)}  ${entry.emoji.words[0]}`;
 }
 
 const ENTRIES: RadialEntry[] = [
@@ -68,7 +67,6 @@ const ENTRIES: RadialEntry[] = [
     (emoji): RadialEntry => ({
       kind: 'emoji',
       id: `emoji_${emoji.id}`,
-      label: emoji.label,
       glyph: emoji.glyph,
       emoji,
     })

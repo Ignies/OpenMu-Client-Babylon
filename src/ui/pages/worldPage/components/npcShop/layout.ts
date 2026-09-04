@@ -37,7 +37,7 @@ export const TITLE_Y = 12;
 export const TITLE: TextKey = 'shop.title';
 export const TAX_Y = 27;
 /** GlobalText[1623]. */
-export const taxText = (rate: number) => `Sales tax: ${rate}%`;
+export const TAX: TextKey = 'shop.tax';
 
 export const REPAIR_MONEY_SPRITE = 'newui_item_money2.OZT';
 export const REPAIR_MONEY_X = 10;

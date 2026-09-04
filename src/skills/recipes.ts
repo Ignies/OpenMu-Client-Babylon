@@ -15,6 +15,9 @@
  * BUX records, `Delay` at offset 44, milliseconds) — every non-zero entry.
  */
 
+import { MAGIC_EFFECTS } from '../common/magicEffects';
+import { t } from '../i18n';
+
 export type BuffKind = 'buff' | 'debuff';
 
 export interface BuffRecipe {
@@ -197,8 +200,12 @@ const DURATIONS: Record<number, (energy: number) => number> = {
 };
 
 export function buffRecipe(effectId: number): BuffRecipe {
+  // The catalogue covers the effects the client itself names; the rest of
+  // BuffEffect.bmd is only in NAMES and stays English until the pack is read.
+  const key = MAGIC_EFFECTS[effectId]?.nameKey;
+
   return {
-    name: NAMES[effectId] ?? `Effect ${effectId}`,
+    name: key ? t(key) : (NAMES[effectId] ?? t('buff.unnamed', { number: effectId })),
     kind: DEBUFF_IDS.has(effectId) ? 'debuff' : 'buff',
     durationSeconds: DURATIONS[effectId],
   };

@@ -2021,7 +2021,7 @@ export const Store = new (class _Store {
   private buyOffline(item: Item): void {
     const price = itemValue(item, 0);
     if (this.playerData.money < price) {
-      this.addNotification('Not enough Zen', 'error');
+      this.addNotification(t('common.notEnoughZen'), 'error');
       return;
     }
 
@@ -2055,7 +2055,7 @@ export const Store = new (class _Store {
 
     if (repaired.length === 0) return;
     if (this.playerData.money < cost) {
-      this.addNotification('Not enough Zen', 'error');
+      this.addNotification(t('common.notEnoughZen'), 'error');
       return;
     }
 

@@ -73,7 +73,7 @@ export const ChaosMachine = observer(() => {
         {title}
       </div>
       <div className="chaos-subtitle" style={{ top: SUBTITLE_Y }}>
-        {Economy.mixPending ? 'Combining…' : selected?.label ?? ''}
+        {Economy.mixPending ? t('chaos.combining') : selected ? t(selected.labelKey) : ''}
       </div>
 
       <div
@@ -98,13 +98,15 @@ export const ChaosMachine = observer(() => {
           height: RECIPE_HEIGHT,
         }}
       >
-        {Economy.mixResult === 'success' && <div>The combination succeeded.</div>}
-        {Economy.mixResult === 'failed' && <div>The combination failed.</div>}
+        {Economy.mixResult === 'success' && <div>{t('chaos.succeeded')}</div>}
+        {Economy.mixResult === 'failed' && <div>{t('chaos.failed')}</div>}
         {!Economy.mixResult && (
           <div className="hint">
             {cardMode
               ? `${t('chaosCard.hint1')} ${t('chaosCard.hint2')}`
-              : selected?.hint ?? ''}
+              : selected
+                ? t(selected.hintKey)
+                : ''}
           </div>
         )}
       </div>
@@ -145,10 +147,10 @@ export const ChaosMachine = observer(() => {
               <div
                 key={entry.type}
                 className={`chaos-menu-row${entry.type === Economy.mixType ? ' active' : ''}`}
-                title={entry.hint}
+                title={t(entry.hintKey)}
                 onClick={uiClick(() => Economy.setMixType(entry.type))}
               >
-                {entry.label}
+                {t(entry.labelKey)}
               </div>
             ))}
           </div>

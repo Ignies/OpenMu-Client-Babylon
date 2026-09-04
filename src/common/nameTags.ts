@@ -1,4 +1,5 @@
 import { GuildMemberRoleEnum } from './packets/ServerToClientPackets';
+import { t, type TextKey } from '../i18n';
 
 /**
  * The original's name/chat "balloons" (`CHAT`, ZzzInterface.cpp:703). A
@@ -65,6 +66,15 @@ export function pkTextColour(pk: number): string {
   return PK_TEXT_COLOURS[pk] ?? PK_MURDERER2_COLOUR;
 }
 
+const pkState = (name: string, state: TextKey) =>
+  t('nameTag.pkState', { name, state: t(state) });
+
+const guildRole = (name: string, role: TextKey) =>
+  t('nameTag.guildRole', { name, role: t(role) });
+
+const union = (name: string, word: TextKey) =>
+  t('nameTag.union', { name, word: t(word) });
+
 /**
  * `ReceivePK` (WSclient.cpp:6609): a hero-state change is announced in the
  * system log as "<name> : <state>", GlobalText 487-491 ("Hero", "Commoner",
@@ -78,15 +88,15 @@ export function heroStateMessage(
   switch (state) {
     case 1:
     case 2:
-      return { text: `${name} : Hero`, error: false };
+      return { text: pkState(name, 'pk.hero'), error: false };
     case PVP_NEUTRAL:
-      return { text: `${name} : Commoner`, error: true };
+      return { text: pkState(name, 'pk.commoner'), error: true };
     case PVP_CAUTION:
-      return { text: `${name} : Outlaw Warning`, error: false };
+      return { text: pkState(name, 'pk.outlawWarning'), error: false };
     case PVP_MURDERER1:
-      return { text: `${name} : 1st Stage Outlaw`, error: true };
+      return { text: pkState(name, 'pk.outlaw1'), error: true };
     case PVP_MURDERER2:
-      return { text: `${name} : 2nd Stage Outlaw`, error: true };
+      return { text: pkState(name, 'pk.outlaw2'), error: true };
     default:
       return null;
   }
@@ -199,15 +209,15 @@ export function chatLineBg(guildTeam: number, isGm: boolean): string {
 export function guildLine(name: string, role: GuildMemberRoleEnum): string {
   switch (role) {
     case GuildMemberRoleEnum.GuildMaster:
-      return `[${name}] Master`;
+      return guildRole(name, 'guild.role.master');
     case GuildMemberRoleEnum.AssistantMaster:
-      return `[${name}] Assist. M.`;
+      return guildRole(name, 'guild.role.assistant');
     case GuildMemberRoleEnum.BattleMaster:
-      return `[${name}] Battle M.`;
+      return guildRole(name, 'guild.role.battleMaster');
     case GuildMemberRoleEnum.NormalMember:
-      return `[${name}] Members`;
+      return guildRole(name, 'guild.role.member');
     default:
-      return `[${name}]`;
+      return t('nameTag.guildPlain', { name });
   }
 }
 
@@ -224,12 +234,12 @@ export function unionLine(
   isGuildMaster: boolean
 ): string {
   if (relation === GuildRelation.Union) {
-    return `<${allianceName}> ${isGuildMaster ? 'Alliance master' : 'Alliance'}`;
+    return union(allianceName, isGuildMaster ? 'guild.allianceMaster' : 'guild.alliance');
   }
   if (relation === GuildRelation.Rival) {
-    return `<${allianceName}> ${isGuildMaster ? 'Opposing master' : 'Oppose'}`;
+    return union(allianceName, isGuildMaster ? 'guild.opposingMaster' : 'guild.oppose');
   }
-  return `<${allianceName}>`;
+  return t('nameTag.unionPlain', { name: allianceName });
 }
 
 /** GlobalText 1104: the prefix in front of a personal-store title. */

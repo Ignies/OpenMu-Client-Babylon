@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx';
+import type { TextKey } from '../i18n';
 
 /**
  * The golden server notice (ZzzInterface.cpp:491-603). `ReceiveNotice`
@@ -45,7 +46,7 @@ export const NOTICE_STYLE: Record<number, { color: string; blink: boolean }> = {
 export const NOTICE_BACKGROUND = 'rgba(0,0,0,0.5)';
 
 /** `GlobalText[483]`. */
-export const GUILD_NOTICE_FORMAT = 'Guild Notice : %s';
+export const GUILD_NOTICE_FORMAT: TextKey = 'guild.notice.prefix';
 
 let measureContext: CanvasRenderingContext2D | null | undefined;
 

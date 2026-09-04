@@ -20,7 +20,7 @@ export const TITLE_Y = 13;
 export const TITLE: TextKey = 'chaos.title';
 export const SUBTITLE_Y = 25;
 /** GlobalText[1623]. */
-export const taxText = (rate: number) => `Chaos tax: ${rate}%`;
+export const TAX: TextKey = 'chaos.tax';
 
 export const RECIPE_X = 15;
 export const RECIPE_Y = 45;

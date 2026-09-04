@@ -429,7 +429,7 @@ export const FriendWindow = observer(() => {
       onClose={onClose}
     >
       <div className="messenger-title" style={{ top: TITLE_Y }}>
-        Friend List
+        {t('friends.title')}
       </div>
       <div
         className="head-close"

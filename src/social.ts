@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import { action, computed, makeObservable, observable, runInAction } from 'mobx';
 import { Store } from './store';
 import {
@@ -556,7 +557,7 @@ export const Social = new (class _Social {
     const me = this.partyMembers.find(m => m.name === Store.playerData.name);
     if (!me || me.index === index) {
       this.partyMembers = [];
-      this.errorMessage('You have left the party.');
+      this.errorMessage(t('party.left'));
       return;
     }
     this.partyMembers = this.partyMembers.filter(m => m.index !== index);
@@ -572,17 +573,17 @@ export const Social = new (class _Social {
   /** `SendPartyInviteRequest` after the leader-only check (CommandParty). */
   partyInvite(target: { netId: number; name: string }): void {
     if (this.inParty && !this.isPartyLeader) {
-      this.errorMessage('Only the party leader can invite.');
+      this.errorMessage(t('party.onlyLeaderInvites'));
       return;
     }
     if (this.partyMembers.length >= MAX_PARTY_MEMBERS) {
-      this.errorMessage('The party is full.');
+      this.errorMessage(t('party.full'));
       return;
     }
     const packet = PartyInviteRequestPacket.createPacket();
     packet.TargetPlayerId = target.netId;
     Store.sendToGS(packet.buffer);
-    this.systemMessage(`Party invitation sent to ${target.name}.`);
+    this.systemMessage(t('party.invitationSent', { name: target.name }));
   }
 
   /** The `CPartyMsgBoxLayout` answer. */
@@ -631,17 +632,17 @@ export const Social = new (class _Social {
     role: GuildMemberRoleEnum | undefined;
   }): void {
     if (this.myGuild) {
-      this.systemMessage('You already belong to a guild.');
+      this.systemMessage(t('guild.alreadyInGuild'));
       return;
     }
     if (master.role !== GuildMemberRoleEnum.GuildMaster) {
-      this.systemMessage('That player is not a guild master.');
+      this.systemMessage(t('guild.notGuildMaster'));
       return;
     }
     const packet = GuildJoinRequestPacket.createPacket();
     packet.GuildMasterPlayerId = master.netId;
     Store.sendToGS(packet.buffer);
-    this.systemMessage(`Guild join request sent to ${master.name}.`);
+    this.systemMessage(t('guild.joinRequestSent', { name: master.name }));
   }
 
   guildJoinRespond(accepted: boolean): void {
@@ -761,7 +762,7 @@ export const Social = new (class _Social {
    */
   guildAssignRole(name: string, role: GuildMemberRoleEnum): void {
     if (!this.isGuildMaster) {
-      this.errorMessage('Only the guild master can appoint members.');
+      this.errorMessage(t('guild.onlyMasterAppoints'));
       return;
     }
     const packet = GuildRoleAssignRequestPacket.createPacket();
@@ -790,7 +791,7 @@ export const Social = new (class _Social {
     join: boolean
   ): void {
     if (!this.isGuildMaster) {
-      this.errorMessage('Only the guild master can do that.');
+      this.errorMessage(t('guild.onlyMasterCan'));
       return;
     }
     const packet = GuildRelationshipChangeRequestPacket.createPacket();
@@ -800,8 +801,8 @@ export const Social = new (class _Social {
     Store.sendToGS(packet.buffer);
     this.systemMessage(
       relationship === GuildRelationshipTypeEnum.Alliance
-        ? `Alliance request sent to ${target.name}.`
-        : `Hostility request sent to ${target.name}.`
+        ? t('guild.allianceRequestSent', { name: target.name })
+        : t('guild.hostilityRequestSent', { name: target.name })
     );
   }
 

@@ -10,7 +10,6 @@ import { PVP_MURDERER1 } from '../../../../../common/nameTags';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import { EventBus } from '../../../../../libs/eventBus';
 import { ENUM_WORLD } from '../../../../../common';
-import { LL } from '../../../../../libs/localization';
 import { playUiSound, uiClick } from '../../../../../libs/sfx';
 import { loadMoveReqList, type MoveReqEntry } from '../../../../../libs/mu/moveReqFile';
 import { MuSpriteFrame } from '../../../../components/muSprite';
@@ -301,12 +300,12 @@ export const MoveCommandWindow = observer(() => {
         className="move-label"
         color={TITLE_COLOR}
         style={{ left: WIDTH / 2, top: TITLE_Y }}
-        text={LL('warp-window.title')}
+        text={t('warp.title')}
       />
       {/* GlobalText 934 / 935 / 936 in (127, 178, 255). */}
-      <MuText className="move-label" color={HEADER_COLOR} style={{ left: COL.map, top: HEADER_Y }} text={LL('warp-window.map')} />
-      <MuText className="move-label" color={HEADER_COLOR} style={{ left: COL.level, top: HEADER_Y }} text={LL('warp-window.min-lvl')} />
-      <MuText className="move-label" color={HEADER_COLOR} style={{ left: COL.zen, top: HEADER_Y }} text={LL('warp-window.cost')} />
+      <MuText className="move-label" color={HEADER_COLOR} style={{ left: COL.map, top: HEADER_Y }} text={t('warp.map')} />
+      <MuText className="move-label" color={HEADER_COLOR} style={{ left: COL.level, top: HEADER_Y }} text={t('warp.minLevel')} />
+      <MuText className="move-label" color={HEADER_COLOR} style={{ left: COL.zen, top: HEADER_Y }} text={t('warp.cost')} />
 
       {visible.map((entry, i) => (
         <Row
@@ -362,7 +361,7 @@ export const MoveCommandWindow = observer(() => {
         style={{ left: CLOSE_BAR.x, top: CLOSE_BAR.y, width: CLOSE_BAR.width, height: CLOSE_BAR.height, lineHeight: `${CLOSE_BAR.height}px` }}
         onClick={uiClick(closeMoveWindow)}
       >
-        <MuText text={LL('warp-window.close')} />
+        <MuText text={t('common.close')} />
       </div>
     </div>
   );

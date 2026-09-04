@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import { action, makeObservable, observable, runInAction } from 'mobx';
 import { Store } from './store';
 import { Social } from './social';
@@ -175,21 +176,21 @@ export const Messenger = new (class _Messenger {
     const target = name.trim();
     if (!target) return false;
     if (target === Store.playerData.name) {
-      Social.errorMessage('You cannot add yourself as a friend.');
+      Social.errorMessage(t('friends.cannotAddSelf'));
       return false;
     }
     if (this.friends.some(f => f.name === target)) {
-      Social.errorMessage(`${target} is already on your friend list.`);
+      Social.errorMessage(t('friends.alreadyOnList', { name: target }));
       return false;
     }
     if (this.friends.length >= MAX_FRIENDS) {
-      Social.errorMessage('Your friend list is full.');
+      Social.errorMessage(t('friends.listFull'));
       return false;
     }
     const packet = FriendAddRequestPacket.createPacket();
     packet.setFriendName(target);
     Store.sendToGS(packet.buffer);
-    Social.systemMessage(`Friend request sent to ${target}.`);
+    Social.systemMessage(t('friends.requestSent', { name: target }));
     return true;
   }
 
@@ -316,7 +317,7 @@ export const Messenger = new (class _Messenger {
       return false;
     }
     if (to === Store.playerData.name) {
-      Social.errorMessage('You cannot send a letter to yourself.');
+      Social.errorMessage(t('friends.cannotLetterSelf'));
       return false;
     }
 

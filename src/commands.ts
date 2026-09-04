@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import { action, makeObservable, observable, runInAction } from 'mobx';
 import { Store } from './store';
 import { Social, INVITE_RANGE_TILES } from './social';
@@ -93,14 +94,15 @@ export const Commands = new (class _Commands {
    */
   targetOf(entity: Entity | null | undefined): CommandTarget | string {
     const hero = Store.world?.playerEntity;
-    if (!entity || !hero) return 'No player under the cursor.';
+    if (!entity || !hero) return t('command.noPlayerUnderCursor');
     if (entity.localPlayer || !entity.playerAnimation || entity.netId === undefined) {
-      return 'That is not a player.';
+      return t('command.notAPlayer');
     }
-    if (entity.dying) return 'That player is dead.';
+    if (entity.dying) return t('command.playerDead');
     const dx = Math.abs(Math.floor(entity.transform!.pos.x) - Math.floor(hero.transform!.pos.x));
     const dy = Math.abs(Math.floor(entity.transform!.pos.z) - Math.floor(hero.transform!.pos.z));
-    if (dx > MAX_DISTANCE_TILE || dy > MAX_DISTANCE_TILE) return 'That player is too far away.';
+    if (dx > MAX_DISTANCE_TILE || dy > MAX_DISTANCE_TILE)
+      return t('command.playerTooFar');
     return {
       netId: entity.netId,
       name: entity.objectNameInWorld ?? `#${entity.netId}`,
@@ -137,7 +139,9 @@ export const Commands = new (class _Commands {
     switch (kind) {
       case 'trade':
         if (Store.playerData.level < TRADE_LIMIT_LEVEL) {
-          Social.systemMessage(`You cannot trade below level ${TRADE_LIMIT_LEVEL}.`);
+          Social.systemMessage(
+            t('command.tradeLevel', { level: TRADE_LIMIT_LEVEL })
+          );
           return;
         }
         Economy.requestTrade(target);
@@ -174,7 +178,7 @@ export const Commands = new (class _Commands {
         runInAction(() => {
           this.following = target.entity;
         });
-        Social.systemMessage(`Following ${target.name}.`);
+        Social.systemMessage(t('command.following', { name: target.name }));
         return;
       case 'battle':
         this.duel(target);
@@ -185,11 +189,11 @@ export const Commands = new (class _Commands {
   /** `CommandGuildUnion` / `CommandGuildRival`: both sides must be masters (GlobalText 1320 / 507). */
   private masterCheck(target: CommandTarget): boolean {
     if (!Social.isGuildMaster) {
-      Social.systemMessage('Only a guild master can do that.');
+      Social.systemMessage(t('command.onlyGuildMaster'));
       return false;
     }
     if (target.guildRole !== GuildMemberRoleEnum.GuildMaster) {
-      Social.systemMessage('That player is not a guild master.');
+      Social.systemMessage(t('command.notGuildMaster'));
       return false;
     }
     return true;
@@ -198,14 +202,14 @@ export const Commands = new (class _Commands {
   /** `CommandDual`: start a duel, or stop the one running. */
   private duel(target: CommandTarget): void {
     if (Store.playerData.level < DUEL_LIMIT_LEVEL) {
-      Social.errorMessage(`You need level ${DUEL_LIMIT_LEVEL} to duel.`);
+      Social.errorMessage(t('command.duelLevel', { level: DUEL_LIMIT_LEVEL }));
       return;
     }
     const packet = DuelStartRequestPacket.createPacket();
     packet.PlayerId = target.netId;
     packet.setPlayerName(target.name);
     Store.sendToGS(packet.buffer);
-    Social.systemMessage(`Duel request sent to ${target.name}.`);
+    Social.systemMessage(t('command.duelRequestSent', { name: target.name }));
   }
 
   /** `/duelend`: `SendDuelStopRequest`. */

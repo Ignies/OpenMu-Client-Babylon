@@ -56,9 +56,15 @@ const SkillRow = observer(({ number, level }: { number: number; level: number })
         <SkillIcon number={number} disabled={!usable} />
       </div>
       <div className="skill-row-text">
-        <div className="skill-row-name">{def?.name ?? `Skill ${number}`}</div>
+        <div className="skill-row-name">
+          {def?.name ?? t('skills.unnamed', { number })}
+        </div>
         <div className="skill-row-meta">
-          {masterLevel > 0 ? `Master Lv ${masterLevel}` : level > 0 ? `Lv ${level}` : ''}
+          {masterLevel > 0
+            ? t('skills.masterLevelShort', { level: masterLevel })
+            : level > 0
+              ? t('skills.levelShort', { level })
+              : ''}
           {cost ? (masterLevel > 0 || level > 0 ? ` · ${cost}` : cost) : ''}
         </div>
       </div>

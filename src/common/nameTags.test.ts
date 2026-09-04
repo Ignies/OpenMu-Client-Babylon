@@ -1,10 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import {
   heroStateMessage,
   parseSelfDefense,
   pkTextColour,
   PK_MURDERER2_COLOUR,
 } from './nameTags';
+import { i18n } from '../i18n';
+
+// The line is translated, so it follows the selector; the run's own locale
+// would otherwise decide what these read.
+beforeAll(() => i18n.setLanguage('en'));
 
 describe('heroStateMessage', () => {
   it('is silent for the New state', () => {

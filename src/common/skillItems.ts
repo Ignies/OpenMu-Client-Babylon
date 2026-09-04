@@ -1,6 +1,7 @@
 import type { Item } from '../ecs/world';
 import { classCanUse, type HeroStats, type ItemStats } from './itemStats';
 import { skillDefinition } from './skillsDatabase';
+import { t } from '../i18n';
 
 /**
  * Learning skills from orbs, scrolls and crystals: right-click the item in
@@ -138,17 +139,17 @@ export function learnSkillError(
   known: readonly number[]
 ): string | null {
   const number = learnableSkill(item);
-  if (number === undefined) return 'This item teaches no skill';
+  if (number === undefined) return t('skills.teachesNothing');
 
-  const name = skillDefinition(number)?.name ?? 'this skill';
+  const name = skillDefinition(number)?.name ?? t('skills.thisSkill');
 
   if (!classCanUse(stats.def, hero)) {
-    return `Your class cannot learn ${name}`;
+    return t('skills.classCannotLearn', { name });
   }
-  if (known.includes(number)) return `You already know ${name}`;
+  if (known.includes(number)) return t('skills.alreadyKnown', { name });
 
   const short = (label: string, required: number, have: number) =>
-    `${label} ${required} required to learn ${name} (${required - have} more needed)`;
+    t('skills.needMore', { label, required, name, more: required - have });
 
   if (hero.level < stats.reqLvl) return short('Level', stats.reqLvl, hero.level);
   if (hero.str < stats.reqStr) return short('Strength', stats.reqStr, hero.str);

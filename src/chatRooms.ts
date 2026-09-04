@@ -1,3 +1,4 @@
+import { t } from './i18n';
 import { action, makeObservable, observable, reaction, runInAction } from 'mobx';
 import { Store, UIState } from './store';
 import { Social } from './social';
@@ -161,7 +162,7 @@ export const ChatRooms = new (class _ChatRooms {
     if (!room || room.state !== 'open') return;
     if (room.clients.some(c => c.name === friendName)) return;
     if (room.clients.length >= MAX_ROOM_CLIENTS) {
-      Social.errorMessage('That chat room is full.');
+      Social.errorMessage(t('chatRoom.full'));
       return;
     }
     const requestId = this.nextRequestId++;
@@ -178,7 +179,7 @@ export const ChatRooms = new (class _ChatRooms {
     const name = this.pendingInvites.get(requestId);
     if (name === undefined) return false;
     this.pendingInvites.delete(requestId);
-    if (!success) Social.errorMessage(`${name} could not be invited to the chat room.`);
+    if (!success) Social.errorMessage(t('chatRoom.inviteFailed', { name }));
     return true;
   }
 
@@ -206,8 +207,8 @@ export const ChatRooms = new (class _ChatRooms {
     if (!info.success) {
       Social.errorMessage(
         info.friendName
-          ? `The chat room with ${info.friendName} could not be opened.`
-          : 'The chat room could not be opened.'
+          ? t('chatRoom.openFailedWith', { name: info.friendName })
+          : t('chatRoom.openFailed')
       );
       return;
     }
@@ -240,7 +241,7 @@ export const ChatRooms = new (class _ChatRooms {
       this.openWindow(room.key);
     } else {
       room.unread = true;
-      Social.systemMessage(`${info.friendName} opened a chat room with you.`);
+      Social.systemMessage(t('chatRoom.opened', { name: info.friendName }));
       playUiSound('whisper');
     }
   }
@@ -268,11 +269,19 @@ export const ChatRooms = new (class _ChatRooms {
               if (!room.clients.some(c => c.index === event.index)) {
                 room.clients.push({ index: event.index, name: event.name });
               }
-              this.addLine(room, { sender: '', text: `${event.name} joined.`, system: true });
+              this.addLine(room, {
+                sender: '',
+                text: t('chatRoom.joined', { name: event.name }),
+                system: true,
+              });
               break;
             case 'left':
               room.clients = room.clients.filter(c => c.index !== event.index);
-              this.addLine(room, { sender: '', text: `${event.name} left.`, system: true });
+              this.addLine(room, {
+                sender: '',
+                text: t('chatRoom.left', { name: event.name }),
+                system: true,
+              });
               break;
             case 'message': {
               const sender =
@@ -300,12 +309,12 @@ export const ChatRooms = new (class _ChatRooms {
           this.addLine(room, {
             sender: '',
             text: everOpened
-              ? 'The chat room connection was lost.'
-              : 'The chat server could not be reached.',
+              ? t('chatRoom.connectionLost')
+              : t('chatRoom.unreachable'),
             system: true,
           });
         });
-        if (!everOpened) Social.errorMessage('The chat server could not be reached.');
+        if (!everOpened) Social.errorMessage(t('chatRoom.unreachable'));
       },
     });
     this.sockets.set(key, socket);

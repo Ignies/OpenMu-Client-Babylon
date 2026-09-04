@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { MuWindows, type WindowCloser } from './windowState';
+import { t } from '../../../i18n';
 
 export type WindowChrome = {
   style: CSSProperties;
@@ -182,7 +183,7 @@ export const MuResizeGrip = observer(
       <div
         className="mu-resize-grip"
         data-no-drag="true"
-        title="Drag to resize, double-click to reset"
+        title={t('window.resizeHint')}
         onPointerDown={onPointerDown}
         onDoubleClick={() => MuWindows.reset(id)}
       />

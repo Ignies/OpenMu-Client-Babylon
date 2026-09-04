@@ -1,5 +1,6 @@
 import type { Item } from '../ecs/world';
 import { InventoryConstants } from './inventoryConstants';
+import { t } from '../i18n';
 
 /**
  * Item upgrading with jewels: pick a jewel, click it onto an item
@@ -98,28 +99,28 @@ export function jewelTargetError(jewel: Item, target: Item, targetSlot: number):
     return 'Take the item off before upgrading it';
   }
 
-  if (!isJewelTarget(target)) return 'That item cannot be upgraded';
+  if (!isJewelTarget(target)) return t('item.jewelNotUpgradable');
 
   const level = target.lvl ?? 0;
 
   switch (jewel.num) {
     case JEWEL.bless:
-      if (level > BLESS_MAX_TARGET_LEVEL) return 'Jewel of Bless only works up to +6';
+      if (level > BLESS_MAX_TARGET_LEVEL) return t('item.jewelBlessLimit');
       return null;
     case JEWEL.soul:
-      if (level > SOUL_MAX_TARGET_LEVEL) return 'Jewel of Soul only works up to +9';
+      if (level > SOUL_MAX_TARGET_LEVEL) return t('item.jewelSoulLimit');
       return null;
     case JEWEL.life:
       return null;
     case JEWEL.harmony:
-      if (target.isAncient) return 'Jewel of Harmony cannot be applied to ancient items';
-      if ((target.socketCount ?? 0) > 0) return 'Jewel of Harmony cannot be applied to socket items';
+      if (target.isAncient) return t('item.jewelHarmonyAncient');
+      if ((target.socketCount ?? 0) > 0) return t('item.jewelHarmonySocket');
       return null;
     case JEWEL.lowerRefineStone:
     case JEWEL.higherRefineStone:
-      if ((target.socketCount ?? 0) > 0) return 'Refining stones cannot be applied to socket items';
+      if ((target.socketCount ?? 0) > 0) return t('item.refineStoneSocket');
       return null;
     default:
-      return 'That item cannot be used on another item';
+      return t('item.jewelWrongTarget');
   }
 }

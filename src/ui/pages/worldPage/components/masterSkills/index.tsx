@@ -7,6 +7,7 @@ import { useEventBus } from '../../../../../hooks/useEventBus';
 import { useWindowStackEntry } from '../../../../components/muWindow/useWindowChrome';
 import { playUiSound } from '../../../../../libs/sfx';
 import { skillDefinition } from '../../../../../common/skillsDatabase';
+import { t } from '../../../../../i18n';
 import { skills, type MasterTreeEntry } from '../../../../../skills';
 import {
   formatMasterText,
@@ -244,9 +245,15 @@ const MasterDialog = ({
   const text =
     dialog.kind === 'notice'
       ? dialog.text
-      : `Spend ${dialog.entry.requiredPoints} master point${
-          dialog.entry.requiredPoints === 1 ? '' : 's'
-        } on ${skillDefinition(dialog.entry.skill)?.name ?? `skill ${dialog.entry.skill}`}?`;
+      : t(
+          dialog.entry.requiredPoints === 1 ? 'master.spendPoint' : 'master.spendPoints',
+          {
+            points: dialog.entry.requiredPoints,
+            skill:
+              skillDefinition(dialog.entry.skill)?.name ??
+              t('master.skillFallback', { number: dialog.entry.skill }),
+          }
+        );
   const buttons = { up: 0, active: 1, down: 2 };
 
   return (
@@ -432,7 +439,7 @@ export const MasterSkillsWindow = observer(() => {
 
         {!loaded && (
           <Text x={SHEET_WIDTH / 2} y={SHEET_HEIGHT / 2} center>
-            Loading…
+            {t('common.loading')}
           </Text>
         )}
       </div>
