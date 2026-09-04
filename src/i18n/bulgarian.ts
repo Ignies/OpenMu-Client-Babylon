@@ -73,7 +73,7 @@ export const bulgarianLayer: LanguageLayer = {
     'servers.serverName': 'Сървър {number}',
 
     'login.enterCredentials': 'Въведи име на акаунт и парола',
-    'login.createAccount': 'Създай акаунт',
+    'login.createAccount': 'Регистрация',
     'login.rememberMe': 'Запомни ме?',
 
     'characters.loading': 'Зареждат се героите...',

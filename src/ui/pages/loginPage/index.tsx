@@ -39,12 +39,16 @@ const CHECK_Y = 156;
 const LABEL_X = 30;
 
 /**
- * The signup link, on the button row and to the left of OK. The buttons start
- * at x=150, so that half of the row is empty art, and text rather than a third
- * button keeps it what it is: the way out of this window, not another thing to
- * press before logging in.
+ * The signup link, on the checkbox row and left of it. That band is the only
+ * flat art left in the window - the frame's dragons take both bottom corners,
+ * so the space beside the buttons is not the empty half it looks like - and
+ * text rather than a button keeps it what it is: the way out of this window,
+ * not another thing to press before logging in.
+ *
+ * It leaves about 85px before the checkbox, which is what caps how long the
+ * translations of it may be.
  */
-const REGISTER = { x: LABEL_X, y: 187 };
+const REGISTER = { x: 22, y: CHECK_Y + 3 };
 
 /** `CLoginWin::Render`: the server line in `g_hFixFont` at (111, 80). */
 const SERVER_LINE = { x: 111, y: 80 };
