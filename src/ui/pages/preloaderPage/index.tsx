@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../store';
 import { ENUM_WORLD } from '../../../common';
-import { effective, ServerConfig } from '../../../common/serverConfig';
+import { displayAddress, ServerConfig } from '../../../common/serverConfig';
+import { ServerList } from '../../../common/serverList';
 import { useEventBus } from '../../../hooks/useEventBus';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { MuButton } from '../../components/muButton';
@@ -51,7 +52,6 @@ export const PreloaderPage = observer(() => {
   });
 
   const profile = ServerConfig.active;
-  const live = effective(profile);
 
   // Nothing is drawn before the interface sprites are decoded: every frame of
   // this page is a piece of MU art, and unstyled text over the map is not a
@@ -120,20 +120,38 @@ export const PreloaderPage = observer(() => {
               />
             ))}
 
-            {/* Which server the next click connects to, and where that is. */}
-            <MuText
-              face="fix"
-              className="preloader-line"
-              color={TEXT_COLOR.brightYellow}
-              style={{ top: MENU_SERVER_LINE_Y }}
-              text={profile.name.trim() || t('server.unnamed')}
-            />
-            <MuText
-              className="preloader-line"
-              color={TEXT_COLOR.brightGray}
-              style={{ top: MENU_ENDPOINT_LINE_Y }}
-              text={`${live.csHost}:${live.csPort}`}
-            />
+            {/* Which server the next click connects to, and where that is —
+                or, with nothing to name yet, what the list is doing. */}
+            {ServerConfig.isEmpty ? (
+              <MuText
+                className="preloader-line"
+                color={TEXT_COLOR.brightGray}
+                style={{ top: MENU_SERVER_LINE_Y }}
+                text={
+                  ServerList.state === 'error'
+                    ? t('server.listOffline')
+                    : ServerList.state === 'ok'
+                      ? t('worlds.empty')
+                      : t('servers.loading')
+                }
+              />
+            ) : (
+              <>
+                <MuText
+                  face="fix"
+                  className="preloader-line"
+                  color={TEXT_COLOR.brightYellow}
+                  style={{ top: MENU_SERVER_LINE_Y }}
+                  text={profile.name.trim() || t('server.unnamed')}
+                />
+                <MuText
+                  className="preloader-line"
+                  color={TEXT_COLOR.brightGray}
+                  style={{ top: MENU_ENDPOINT_LINE_Y }}
+                  text={displayAddress(profile)}
+                />
+              </>
+            )}
           </MuSpriteFrame>
         </>
       )}
