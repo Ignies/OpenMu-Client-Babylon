@@ -89,8 +89,6 @@ export const devilsquareLayer: MapLayer = {
   tiles: TILES,
   spawn: SPAWN,
   outdoor: OUTDOOR,
-  // Event set-piece: the arena is an authored moment, not a place with days.
-  dayCycle: 0,
   blendMeshes: DEVIL_SQUARE_BLEND_MESHES,
   effectOnly: DEVIL_SQUARE_EFFECT_ONLY_TYPES,
   emissions: DEVIL_SQUARE_EMISSIONS,

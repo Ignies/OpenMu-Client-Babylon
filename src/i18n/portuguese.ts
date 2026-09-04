@@ -162,7 +162,6 @@ export const portugueseLayer: LanguageLayer = {
     'options.effectLevel': 'Limite de +efeitos',
     'options.shadows': 'Sombras dos objetos',
     'options.dynamicLights': 'Luzes dinâmicas',
-    'options.dayNightCycle': 'Ciclo dia/noite',
     'options.postProcessing': 'Pós-processamento',
     'options.toneMapping': 'Mapeamento tonal fílmico',
     'options.ambientParticles': 'Partículas de ambiente',

@@ -155,7 +155,6 @@ export const koreanLayer: LanguageLayer = {
     'options.effectLevel': '+효과 제한',
     'options.shadows': '오브젝트 그림자',
     'options.dynamicLights': '동적 조명',
-    'options.dayNightCycle': '낮/밤 주기',
     'options.postProcessing': '후처리',
     'options.toneMapping': '필름 톤 매핑',
     'options.ambientParticles': '환경 파티클',

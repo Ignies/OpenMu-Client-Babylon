@@ -126,17 +126,6 @@ class Maps {
     return this.layerFor(world)?.snow === true;
   }
 
-  /**
-   * How much of the day/night cycle a world takes, 0..1: the entry's
-   * `dayCycle`, else 1 where it is outdoor (the flag already means "has a
-   * sky") and 0 everywhere else.
-   */
-  cycleScaleFor(world: ENUM_WORLD): number {
-    const layer = this.layerFor(world);
-    if (!layer) return 0;
-    return layer.dayCycle ?? (layer.outdoor === true ? 1 : 0);
-  }
-
   /** `SetWorldClearColor` bytes, or undefined for black. */
   clearColorFor(
     world: ENUM_WORLD

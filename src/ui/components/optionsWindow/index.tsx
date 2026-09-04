@@ -244,7 +244,6 @@ const TABS: Tab[] = [
           rows: [
             check('shadows', -1, 'options.shadows'),
             check('dynamicLights', -1, 'options.dynamicLights'),
-            check('dayNightCycle', -1, 'options.dayNightCycle'),
             check('postProcessing', -1, 'options.postProcessing'),
             check('toneMapping', -1, 'options.toneMapping', true),
             check('ambientParticles', -1, 'options.ambientParticles'),
