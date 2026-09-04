@@ -1,0 +1,393 @@
+// `CNewUICashShop` renders at absolute coordinates inside the 190x429 item
+// frame, like the NPC shop and the inventory; the numbers live in layout.ts,
+// this file only says how each piece behaves.
+.cash-shop {
+  font-size: 11px;
+
+  .cash-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #dcdcdc;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .cash-note {
+    position: absolute;
+    left: 15px;
+    top: 120px;
+    width: 160px;
+    margin: 0;
+    text-align: center;
+    color: #b9ad94;
+    text-shadow: 1px 1px 0 #000;
+
+    &.is-bad {
+      color: #ff8080;
+    }
+  }
+
+  // ---- tabs ----
+
+  .cash-tabs {
+    position: absolute;
+    height: 22px;
+  }
+
+  .cash-tab {
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: #9c8f78;
+    font-size: 9px;
+    text-shadow: 1px 1px 0 #000;
+
+    &:hover {
+      color: #dcdcdc;
+    }
+
+    &.is-active {
+      color: #ffd88a;
+    }
+
+    span {
+      // The tab art already carries the inset; keep the label off its edges.
+      padding-bottom: 2px;
+      pointer-events: none;
+    }
+  }
+
+  // ---- the stock grid ----
+
+  // Same gapless 20px pitch as the inventory; the hit-test maths assume it.
+  .cash-grid {
+    position: absolute;
+  }
+
+  .cash-item {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+
+    .item-icon {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  }
+
+  // ---- jewels ----
+
+  .cash-jewel {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: #dcdcdc;
+    text-shadow: 1px 1px 0 #000;
+
+    &.is-short {
+      color: #ff8080;
+    }
+  }
+
+  // The icon pack pads every file by a constant 80x84 plus 40x42 per grid
+  // cell, so a 1x1 jewel is 21 opaque pixels in a 120px frame and renders as a
+  // speck. That is right inside the stock grid, where the squares carry the
+  // scale and the inventory does exactly the same - but the money bar is
+  // chrome, and a balance has to be readable. Both jewel files measure the
+  // same, so one clipped zoom serves both.
+  .cash-jewel-icon {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    overflow: hidden;
+
+    .item-icon {
+      max-width: 100%;
+      max-height: 100%;
+      transform: scale(4.2);
+    }
+  }
+
+  .cash-wallet {
+    position: absolute;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    pointer-events: none;
+  }
+
+  // The price rides just under the item tooltip, which owns its own z-index.
+  .cash-hover-price {
+    position: absolute;
+    left: 15px;
+    top: 331px;
+    width: 160px;
+    display: flex;
+    justify-content: space-around;
+  }
+}
+
+// ---- the gacha stage ----
+
+.cash-gacha {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+
+  --rarity: #79a9d8;
+
+  &.rarity-rare {
+    --rarity: #b183e8;
+  }
+
+  &.rarity-epic {
+    --rarity: #e8bc5c;
+  }
+
+  &.rarity-legendary {
+    --rarity: #ff7a4d;
+  }
+
+  .cash-gacha-hint {
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    right: 0;
+    margin: 0;
+    text-align: center;
+    color: #9c8f78;
+    font-size: 10px;
+    text-shadow: 1px 1px 0 #000;
+  }
+}
+
+.cash-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 90px;
+  height: 90px;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.cash-core {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #fff8e6 0%, var(--rarity) 44%, rgba(0, 0, 0, 0.65) 100%);
+  box-shadow: 0 0 22px var(--rarity);
+  animation: cash-breathe 3.2s ease-in-out infinite;
+}
+
+.cash-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--rarity);
+  opacity: 0.5;
+}
+
+.ring-1 {
+  inset: 8px;
+  border-style: dashed;
+  animation: cash-spin 9s linear infinite;
+}
+
+.ring-2 {
+  inset: 0;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  animation: cash-spin 14s linear infinite reverse;
+}
+
+@keyframes cash-breathe {
+  50% {
+    transform: scale(1.07);
+  }
+}
+
+@keyframes cash-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cash-gacha.is-rolling {
+  .ring-1 {
+    animation-duration: 0.7s;
+  }
+
+  .ring-2 {
+    animation-duration: 1.1s;
+  }
+
+  .cash-orb {
+    animation: cash-shake 0.3s ease-in-out infinite;
+  }
+
+  .cash-core {
+    animation: cash-charge 1.9s ease-in forwards;
+  }
+}
+
+@keyframes cash-shake {
+  25% {
+    transform: translate(1px, -1px);
+  }
+  75% {
+    transform: translate(-1px, 1px);
+  }
+}
+
+@keyframes cash-charge {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  72% {
+    transform: scale(0.72);
+    filter: brightness(1.9);
+  }
+  100% {
+    transform: scale(1.5);
+    filter: brightness(3.2);
+    opacity: 0;
+  }
+}
+
+.cash-gacha.is-revealed .cash-orb {
+  opacity: 0;
+  transform: scale(1.3);
+}
+
+.cash-reveal {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.cash-burst {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid var(--rarity);
+  animation: cash-burst 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cash-burst {
+  0% {
+    width: 20px;
+    height: 20px;
+    opacity: 1;
+    box-shadow: 0 0 40px 14px var(--rarity);
+  }
+  100% {
+    width: 220px;
+    height: 220px;
+    opacity: 0;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.cash-ray {
+  position: absolute;
+  width: 2px;
+  height: 90px;
+  background: linear-gradient(to top, transparent, var(--rarity));
+  transform-origin: 50% 100%;
+  opacity: 0;
+  animation: cash-ray 0.85s ease-out forwards;
+}
+
+@keyframes cash-ray {
+  0% {
+    opacity: 0;
+    height: 0;
+  }
+  30% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    height: 130px;
+  }
+}
+
+.cash-prize {
+  display: grid;
+  place-items: center;
+  animation: cash-prize-in 0.65s cubic-bezier(0.2, 1.4, 0.4, 1) 0.15s both;
+
+  .item-icon {
+    max-width: 100%;
+    max-height: 100%;
+    filter: drop-shadow(0 0 10px var(--rarity));
+  }
+}
+
+@keyframes cash-prize-in {
+  from {
+    transform: scale(0.2) rotate(-12deg);
+    opacity: 0;
+  }
+}
+
+.cash-prize-name {
+  max-width: 100%;
+  text-align: center;
+  color: #dcdcdc;
+  font-size: 10px;
+  text-shadow: 1px 1px 0 #000;
+  animation: cash-fade-up 0.4s ease-out 0.5s both;
+}
+
+.cash-prize-level {
+  color: var(--rarity);
+}
+
+.cash-prize-options {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+
+  li {
+    color: #9fd3ff;
+    font-size: 9px;
+    line-height: 1.4;
+    text-shadow: 1px 1px 0 #000;
+    animation: cash-fade-up 0.4s ease-out both;
+
+    &:nth-child(1) {
+      animation-delay: 0.6s;
+    }
+    &:nth-child(2) {
+      animation-delay: 0.72s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.84s;
+    }
+  }
+}
+
+@keyframes cash-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cash-gacha * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
