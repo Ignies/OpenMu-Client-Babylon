@@ -7,7 +7,7 @@ import { MuText } from '../../components/muText';
 import { DECO, SPRITE as SERVERS_SPRITE, TEXT_COLOR } from '../serversPage/layout';
 import { t, type TextKey } from '../../../i18n';
 import {
-  effective,
+  displayAddress,
   playableHere,
   ServerConfig,
   type ServerProfile,
@@ -252,7 +252,6 @@ export const WorldSelect = observer(
 
     const all = ServerConfig.all;
     const selected = ServerConfig.active;
-    const live = effective(selected);
 
     // A saved world carries no language, so it belongs to no tag but `All` —
     // where it is always the first thing in the grid anyway.
@@ -293,6 +292,10 @@ export const WorldSelect = observer(
      * a broken client rather than the wrong one.
      */
     const enter = (id = selected.id) => {
+      // Nothing to enter: `active` is the placeholder, and connecting with it
+      // would dial the build defaults at a world nobody published.
+      if (ServerConfig.isEmpty) return;
+
       const world = ServerConfig.all.find(w => w.id === id);
 
       if (world && !playableHere(world)) return;
@@ -525,13 +528,15 @@ export const WorldSelect = observer(
           style={{ top: metrics.descY }}
           text={listError || blurb}
         />
-        <MuText
-          face="fix"
-          className="setup-line"
-          color={TEXT_COLOR.brightYellow}
-          style={{ top: metrics.addressY }}
-          text={`${selected.name.trim() || t('server.unnamed')} — ${live.csHost}:${live.csPort}`}
-        />
+        {!ServerConfig.isEmpty && (
+          <MuText
+            face="fix"
+            className="setup-line"
+            color={TEXT_COLOR.brightYellow}
+            style={{ top: metrics.addressY }}
+            text={`${selected.name.trim() || t('server.unnamed')} — ${displayAddress(selected)}`}
+          />
+        )}
 
         <MuButton
           file={SPRITE.button}
@@ -541,7 +546,7 @@ export const WorldSelect = observer(
           color={TEXT_COLOR.brightGray}
           activeColor={TEXT_COLOR.white}
           label={t('worlds.enter')}
-          disabled={!playable}
+          disabled={!playable || ServerConfig.isEmpty}
           onClick={() => enter()}
           style={{ position: 'absolute', left: WORLD_PLAY_X, top: metrics.buttonsY }}
           labelStyle={{ fontSize: 11 }}

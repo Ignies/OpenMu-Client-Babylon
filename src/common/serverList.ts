@@ -8,6 +8,11 @@ import {
   ServerConfig,
   type ServerProfile,
 } from './serverConfig';
+import {
+  CONVENTION_CS_HOST,
+  CONVENTION_CS_PORT,
+  conventionProxyUrl,
+} from './serverServices';
 
 /**
  * The published server list — a markdown file in the project's repository, one
@@ -24,6 +29,10 @@ import {
  *
  * Version, banner and proxy are all optional; a line carrying none of them is
  * the original three-field form and still parses.
+ *
+ * The target is either `host:port` — the connect server as the world's proxy
+ * reaches it — or the world's domain on its own, which leaves the addresses to
+ * the convention in `serverServices.ts`.
  *
  * Fetched once per launch so a player who has never edited a setting still has
  * somewhere to play, and cached so the launch after that shows the same list
@@ -42,7 +51,7 @@ import {
 const CACHE_KEY = 'mu_serverlist';
 
 const DEFAULT_LIST_URL =
-  'https://raw.githubusercontent.com/Ignies/OpenMuJSClient/main/serverlist.md';
+  'https://raw.githubusercontent.com/Ignies/OpenMu-Client-Babylon/main/serverlist.md';
 
 /** Refuse to parse a list that is not a list — a login page, an error blob. */
 const MAX_BYTES = 64 * 1024;
@@ -60,12 +69,29 @@ const MAX_FIELD = 60;
 const LINE_RE = /^\s*\[([^\]]+)\]\(\s*([^)\s]+)\s*\)\s*$/;
 
 /**
- * The target: `host:port`, and optionally `@` and the proxy that reaches it.
- * The proxy is a URL with colons of its own, so a colon cannot also be what
- * separates it from the server — `@` reads as "this server, at that proxy" and
- * cannot be mistaken for part of either address.
+ * The target, in either of two forms.
+ *
+ * `host:port`, and optionally `@` and the proxy that reaches it. The proxy is
+ * a URL with colons of its own, so a colon cannot also be what separates it
+ * from the server — `@` reads as "this server, at that proxy" and cannot be
+ * mistaken for part of either address.
+ *
+ * Or the world's domain alone, which says all of it at once through the
+ * convention in `serverServices.ts`: the proxy is `ws.<domain>`, and the
+ * connect server is where that proxy reaches it. A world publishing itself to
+ * strangers should not have to spell out its own internals, and a client that
+ * plays any world cannot have been built knowing them.
  */
-const TARGET_RE = /^([^:\s@]+):(\d{1,5})(?:@(.+))?$/;
+const TARGET_RE = /^([^:\s@]+)(?::(\d{1,5}))?(?:@(.+))?$/;
+
+/**
+ * A domain, for the short form. Two labels at least, ending in a real TLD:
+ * a single label is a name on somebody's own network and `ws.mybox` is not a
+ * world anyone else can reach, and an IP has no labels to hang services off at
+ * all. `localhost:44405` and `1.2.3.4:44405` still parse — as the long form,
+ * which is what they are.
+ */
+const DOMAIN_RE = /^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
 
 /**
  * A proxy address and nothing else: a ws scheme, a host, an optional port. No
@@ -165,27 +191,42 @@ export function parseServerLine(line: string): ServerProfile | null {
 
   if (!target) return null;
 
-  const host = normalizeHost(target[1]);
-  const port = Number(target[2]);
   const proxy = (target[3] ?? '').trim();
+  // No port is the short form: the field is the world's domain, and the
+  // convention fills in the rest of it.
+  const domain = target[2] ? '' : normalizeHost(target[1]).toLowerCase();
+
+  if (domain && !DOMAIN_RE.test(domain)) return null;
+
+  const host = domain ? CONVENTION_CS_HOST : normalizeHost(target[1]);
+  const port = domain ? CONVENTION_CS_PORT : Number(target[2]);
 
   if (!name || !isUsableHost(host)) return null;
   if (!Number.isInteger(port) || port < 1 || port > 65535) return null;
 
   return {
     // Stable across refreshes, so a selected server stays selected: the list
-    // has no ids of its own, and its host and port are what identify a server.
-    id: `list:${host}:${port}`,
+    // has no ids of its own, so a world is identified by what it published —
+    // its domain, or the address it named.
+    id: domain ? `list:${domain}` : `list:${host}:${port}`,
     name,
     csHost: host,
     csPort: port,
-    // The proxy the line names, or this client's own (the build default, or
-    // whatever the deployment set) when it names none. A published world is
-    // reached through the proxy it was published with — the older two-field
-    // target simply says nothing about one.
-    wsUrl: normalizeWsUrl(WS_RE.test(proxy) ? proxy : `${WS_HOST}:${WS_PORT}`),
+    // The proxy the line names, the convention's when it named a domain, and
+    // this client's own (the build default, or whatever the deployment set)
+    // when it gave neither. A published world is reached through the proxy it
+    // was published with — the older two-field target simply says nothing
+    // about one.
+    wsUrl: normalizeWsUrl(
+      WS_RE.test(proxy)
+        ? proxy
+        : domain
+          ? conventionProxyUrl(domain)
+          : `${WS_HOST}:${WS_PORT}`
+    ),
     gsAddress: 'auto',
     listed: true,
+    ...(domain && { domain }),
     ...(version && { version }),
     ...(description && { description }),
     ...(language && { language }),

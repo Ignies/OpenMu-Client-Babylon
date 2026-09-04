@@ -3,11 +3,8 @@ import { uiClick } from '../../../libs/sfx';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store, UIState } from '../../../store';
-import {
-  MAX_PASSWORD_LENGTH,
-  MAX_USERNAME_LENGTH,
-  REGISTER_URL,
-} from '../../../consts';
+import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../../../consts';
+import { registerUrl } from '../../../common/serverServices';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { MuText } from '../../components/muText';
 import { MuLogo } from '../../components/muLogo';
@@ -54,6 +51,10 @@ const REGISTER = { x: 22, y: CHECK_Y + 3 };
 const SERVER_LINE = { x: 111, y: 80 };
 
 export const LoginPage = observer(() => {
+  // The world being logged into, not the build: a client plays any world, and
+  // each one has its own signup page.
+  const signup = registerUrl();
+
   const onLoginClicked = () => {
     if (Store.loginProcessing) return;
 
@@ -185,13 +186,13 @@ export const LoginPage = observer(() => {
             style={{ position: 'absolute', left: CANCEL_X, top: BUTTON_Y }}
           />
 
-          {/* Only when the build names a signup page (`VITE_REGISTER_URL`).
-              A new tab, not this one: leaving would drop the connection and
-              cost the player the scene they just waited for. */}
-          {!!REGISTER_URL && (
+          {/* Only when there is a page to send them to. A new tab, not this
+              one: leaving would drop the connection and cost the player the
+              scene they just waited for. */}
+          {!!signup && (
             <a
               className="login-register"
-              href={REGISTER_URL}
+              href={signup}
               target="_blank"
               rel="noopener noreferrer"
               style={{ left: REGISTER.x, top: REGISTER.y }}

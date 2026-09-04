@@ -15,14 +15,6 @@ export const CS_PORT = Number(env.VITE_CS_PORT) || 44405;
 export const WS_HOST = env.VITE_WS_HOST || 'ws://localhost';
 export const WS_PORT = Number(env.VITE_WS_PORT) || 3000;
 
-/**
- * Where the login window's "Create account" link goes — the signup page this
- * deployment publishes, set with `VITE_REGISTER_URL` (`register/` is one such
- * page). Empty by default, and the link is not drawn when it is: a build that
- * has nowhere to send people must not offer to send them anywhere.
- */
-export const REGISTER_URL = env.VITE_REGISTER_URL || '';
-
 export const DISABLE_OBJECTS_LOADING = false;
 export const DEBUG_PATHFINDING = false;
 export const DEBUG_SHOW_TERRAIN_ATTRIBUTES = false;
