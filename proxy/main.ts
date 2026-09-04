@@ -1,6 +1,7 @@
 import type { ServerWebSocket, Socket } from "bun";
 import { CLEAR, currentWeather, weatherForced, weatherPacket, weatherSlotSeconds, type WeatherState } from "./weather";
 import { ConnectionPresence, startPresenceServer } from "./presence";
+import { parseAllowTargets, targetAllowed } from "./allowTargets";
 
 const PORT = process.env.PORT || "3000";
 const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
@@ -30,29 +31,23 @@ const WEATHER_TICK_MS = Number(process.env.WEATHER_TICK ?? 5000);
 const WEATHER_HEARTBEAT_MS = Number(process.env.WEATHER_HEARTBEAT ?? 20000);
 
 /**
- * Which servers this proxy is allowed to dial. Unset (the default) means any
- * host the client asks for, which is what a local dev box wants; a proxy put
- * on the internet must be pinned, or it is an open relay anyone can point at
- * any TCP port. Comma-separated `host` or `host:port`, `*` allowed as a
- * leading label — `ALLOW_TARGETS="play.example.com,*.example.net:55901"`.
+ * Which servers this proxy is allowed to dial (see allowTargets.ts). Unset means
+ * any host the client asks for, which is what a local dev box wants; a proxy on
+ * the internet must be pinned to the game ports, or it is an open relay - and an
+ * internal target (127.0.0.1 and the like) must be pinned to an exact port, or a
+ * bare-host rule turns the relay into a way to reach every loopback service on
+ * the box, e.g. `ALLOW_TARGETS="127.0.0.1:44405,127.0.0.1:55901"`.
  */
-const ALLOW_TARGETS = (process.env.ALLOW_TARGETS ?? "")
-  .split(",")
-  .map(rule => rule.trim().toLowerCase())
-  .filter(Boolean);
+const ALLOW_RULES = parseAllowTargets(process.env.ALLOW_TARGETS ?? "");
 
-function targetAllowed(host: string, port: number): boolean {
-  if (!ALLOW_TARGETS.length) return true;
-
-  return ALLOW_TARGETS.some(rule => {
-    const [pattern, rulePort] = rule.split(":");
-
-    if (rulePort && Number(rulePort) !== port) return false;
-
-    return pattern.startsWith("*.")
-      ? host === pattern.slice(2) || host.endsWith(pattern.slice(1))
-      : host === pattern;
-  });
+if (!ALLOW_RULES.length) {
+  console.warn(
+    "ALLOW_TARGETS is unset: this proxy will dial ANY host:port a client names. Fine on localhost, an open relay in public - set it to the game ports, e.g. ALLOW_TARGETS=127.0.0.1:44405,127.0.0.1:55901"
+  );
+} else {
+  console.log(
+    `allowed targets: ${ALLOW_RULES.map(r => (r.port === null ? r.host : `${r.host}:${r.port}`)).join(", ")}`
+  );
 }
 
 /** The per-packet hex dump. Priceless locally, far too loud against a real server. */
@@ -142,7 +137,7 @@ Bun.serve<WebSocketData>({
       });
     }
 
-    if (!targetAllowed(targetHost, targetPort)) {
+    if (!targetAllowed(ALLOW_RULES, targetHost, targetPort)) {
       console.warn(
         `refused target ${targetHost}:${targetPort} (ALLOW_TARGETS)`
       );
