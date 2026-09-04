@@ -1,4 +1,5 @@
-import { castToByte, getPacketHeaderSize } from "../utils";
+import { castToByte } from "../binaryUtils";
+import { getPacketHeaderSize } from "../wireUtils";
 import { DefaultKeys } from "./keys";
 
 export class Xor32Decryptor {

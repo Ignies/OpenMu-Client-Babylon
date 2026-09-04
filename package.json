@@ -12,6 +12,7 @@
     "dev:register": "vite --config register/vite.config.ts",
     "build:register": "APP_ENV=prod vite build --config register/vite.config.ts",
     "register-api": "bun run --watch register/server/main.ts",
+    "cashshop-gate": "bun run cashshop/server/gateCli.ts",
     "generate": "bun run src/common/packets/generate.ts",
     "test": "vitest run",
     "tsc": "tsc --noEmit",

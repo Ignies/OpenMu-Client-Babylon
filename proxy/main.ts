@@ -1,5 +1,6 @@
 import type { ServerWebSocket, Socket } from "bun";
 import { CLEAR, currentWeather, weatherForced, weatherPacket, weatherSlotSeconds, type WeatherState } from "./weather";
+import { ConnectionPresence, startPresenceServer } from "./presence";
 
 const PORT = process.env.PORT || "3000";
 const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
@@ -119,7 +120,10 @@ type WebSocketData = {
   targetHost: string;
   targetPort: number;
   tcpSocket?: Socket;
+  presence: ConnectionPresence;
 };
+
+startPresenceServer();
 
 Bun.serve<WebSocketData>({
   port: PORT,
@@ -151,6 +155,7 @@ Bun.serve<WebSocketData>({
         data: {
           targetHost,
           targetPort,
+          presence: new ConnectionPresence(),
         },
       })
     ) {
@@ -217,12 +222,21 @@ Bun.serve<WebSocketData>({
       if (socket) {
         if (LOG_PACKETS) console.log("data from ws:", stringifyPacket(message));
 
-        socket.write(asBufferSource(message));
+        const forwarded = asBufferSource(message);
+
+        socket.write(forwarded);
         socket.flush();
+
+        // After the write, and on its own copy: the sniffer decrypts in place
+        // and must never touch what goes to the game server.
+        if (typeof forwarded !== "string") {
+          ws.data.presence.feed(new Uint8Array(forwarded));
+        }
       }
     },
     close(ws, code, message) {
       clients.delete(ws);
+      ws.data.presence.close();
 
       const socket = ws.data.tcpSocket;
       if (socket) {
