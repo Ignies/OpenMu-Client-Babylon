@@ -8,11 +8,11 @@
  * shared code.
  *
  * Another version generates into *its own* `versions/<id>/packets/` and never
- * touches these files. `src/common/packets/index.ts` re-exports this module,
- * so every `from '../common/packets'` / `from '../common'` importer (the
- * dispatcher in createSocket.ts among them) already goes through the version;
- * the 49 direct imports of the generated class files are listed as remaining
- * work in `docs/VERSIONING.md`.
+ * touches these files. `src/common/packets/index.ts` hands out the active
+ * version's lists, so every `from '../common/packets'` / `from '../common'`
+ * importer (the dispatcher in createSocket.ts among them) already goes
+ * through the version; the ~49 direct imports of the generated class files
+ * are remaining work (Phase 7 step c).
  *
  * Only the three packet lists are exported: the class modules share a few
  * names (GuildJoinRequestPacket, TradeRequestPacket, ...) in both directions,

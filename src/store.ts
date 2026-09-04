@@ -51,16 +51,15 @@ import {
 import { classFromAppearance } from './common/deserializeAppearance';
 import { formatMsgWinText, MsgWinCode } from './common/msgWin';
 import { stringToBytes } from './common/utils';
+import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from './consts';
 import {
-  CLIENT_SERIAL,
-  CLIENT_VERSION,
-  MAX_PASSWORD_LENGTH,
-  MAX_USERNAME_LENGTH,
-} from './consts';
-import { connectServerAddress, wsAddress } from './common/serverConfig';
+  connectServerAddress,
+  ServerConfig,
+  wsAddress,
+} from './common/serverConfig';
 import { LocalStorage } from './libs/localStorage';
 import { createSocket } from './libs/sockets/createSocket';
-import { gameVersion } from './version';
+import { ensureActiveVersion, gameVersion } from './version';
 import {
   makeObservable,
   observable,
@@ -1418,6 +1417,10 @@ export const Store = new (class _Store {
   }
 
   connectToConnectServer() {
+    // A world that needs another carried version is entered by reloading
+    // into it; the selection is already persisted.
+    if (!ensureActiveVersion(ServerConfig.active.version)) return;
+
     const { host, port } = connectServerAddress();
 
     const { socket } = createSocket({
@@ -1559,8 +1562,8 @@ export const Store = new (class _Store {
     p.AuthCode3 = pending.authCode3;
     p.AuthCode4 = pending.authCode4;
     p.TickCount = Math.floor(performance.now()) >>> 0;
-    p.setClientVersion(CLIENT_VERSION);
-    p.setClientSerial(CLIENT_SERIAL);
+    p.setClientVersion(gameVersion.clientVersionBytes);
+    p.setClientSerial(gameVersion.serialBytes);
 
     this.sendToGS(p.buffer);
     return true;
@@ -1589,8 +1592,8 @@ export const Store = new (class _Store {
     const loginShortPasswordPacket = LoginShortPasswordPacket.createPacket();
     loginShortPasswordPacket.setUsername(usernameBytes, usernameBytes.length);
     loginShortPasswordPacket.setPassword(passwordBytes, passwordBytes.length);
-    loginShortPasswordPacket.setClientVersion(CLIENT_VERSION);
-    loginShortPasswordPacket.setClientSerial(CLIENT_SERIAL);
+    loginShortPasswordPacket.setClientVersion(gameVersion.clientVersionBytes);
+    loginShortPasswordPacket.setClientSerial(gameVersion.serialBytes);
 
     console.log(`send login`);
     this.sendToGS(loginShortPasswordPacket.buffer);

@@ -15,12 +15,6 @@
     "allowJs": true,
     "noEmit": true,
     "baseUrl": ".",
-    // `@version` -> the selected game version folder.
-    // Keep in step with vite.config.ts; tsconfig.<id>.json overrides it.
-    "paths": {
-      "@version": ["./versions/season6"],
-      "@version/*": ["./versions/season6/*"]
-    },
     "types": [
       "bun-types" // add Bun global
     ]

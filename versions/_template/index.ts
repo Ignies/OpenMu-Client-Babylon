@@ -1,8 +1,9 @@
 /**
  * COPY-ME skeleton for a new game version. `cp -r versions/_template
- * versions/<id>`, then fill every `TODO`. It compiles as-is so the base game
- * can be typechecked against any version folder; it is never selected
- * (`VITE_GAME_VERSION=_template` would connect with all-zero bytes).
+ * versions/<id>`, fill every `TODO`, then add the entry to
+ * `versions/registry.ts`. It compiles as-is so the base game can be
+ * typechecked against any version folder; it has no registry entry, so it
+ * is never selected (it would connect with all-zero bytes).
  *
  * Where each value comes from (OpenMU = c:\MuDev\OpenMU\src):
  * - openMu.*            Persistence/Initialization/<Version075|Version095d|VersionSeasonSix>/DataInitialization.cs
@@ -18,6 +19,11 @@
  */
 import { asciiBytes, type GameVersion } from '../../src/version/contract';
 import { templateData } from './data';
+
+// Keep this export: the registry's load() hands the base game the packet
+// lists through it. Never import app code from this file - it evaluates
+// before the resolved version is assigned (versions/registry.ts).
+export * as packets from './packets';
 
 // TODO: SimpleModulus keys. Every version 0.95+ uses these S6 defaults
 // (OpenMU PreSeason6NetworkEncryptionFactoryPlugIn remarks); 0.75 has its own.
