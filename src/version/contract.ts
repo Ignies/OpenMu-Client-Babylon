@@ -1,17 +1,18 @@
 /**
- * THE CONTRACT for a game version — the one object the base game (`src/`)
+ * THE CONTRACT for a game version - the one object the base game (`src/`)
  * reads to learn which MU / OpenMU version it is talking to. One folder per
- * version under `versions/<id>/` exports it as `gameVersion` from `index.ts`;
- * Vite's `@version` alias (vite.config.ts / tsconfig `paths`) picks the folder
- * from `VITE_GAME_VERSION` (default `season6`).
+ * version under `versions/<id>/` exports it as `gameVersion` from `index.ts`,
+ * listed in `versions/registry.ts` and loaded at runtime by the bootstrap
+ * (src/main.tsx -> src/version/index.ts `loadGameVersion`).
  *
- * Base code never says `if (version === …)`: it reads `features.*` and the
+ * Base code never says `if (version === ...)`: it reads `features.*` and the
  * protocol / data fields below. Everything a version can differ in must be a
  * field here, or a module under the version folder (`packets/`, `tables/`,
- * `data/`, `ui/`) that the base imports through `@version/…`.
+ * `data/`, `ui/`) that the base reaches through the resolved handles in
+ * `src/version/index.ts`.
  */
 
-/** Folder name under `versions/`; the value of `VITE_GAME_VERSION`. */
+/** Folder name under `versions/`; the registry entry's `id`. */
 export type GameVersionId = string;
 
 /** The 12-number list `SimpleModulusKeys.Create*Keys` takes: 4 modulus, 4 crypt, 4 xor. */
@@ -43,7 +44,7 @@ export interface VersionProtocol {
    * from. `season6` = the un-suffixed definitions; older sets use the
    * `…075` / `…095` variants OpenMU keeps beside them.
    */
-  readonly packetSet: 'season6' | '0.95' | '0.75';
+  readonly packetSet: 'season6' | '0.97d' | '0.95' | '0.75';
   /**
    * Name-suffix rank the dispatcher should prefer when several generated
    * packets share a code (`AddCharactersToScope` / `…075` / `…095` /
@@ -101,13 +102,13 @@ export interface GameVersion {
   readonly label: string;
   /**
    * The token a published server line puts first to say which client it wants
-   * (`[S6EP3:Name:…](…)`) — see `common/serverList.ts`. A field rather than
+   * (`[S6EP3:Name:…](…)`) - see `common/serverList.ts`. A field rather than
    * something derived from `openMu`, because a version that is not a season
    * and an episode still has to name itself in one short word.
    *
-   * This is the only thing that tells a picker a world is playable: the base
-   * game is compiled against exactly one version (`@version`, a build-time
-   * alias), so a world asking for another is a world this build cannot enter.
+   * This is what tells the picker a world is playable: a world asking for a
+   * tag no registry entry carries is a world this client cannot enter. Must
+   * match the `versions/registry.ts` entry's `listTag`.
    */
   readonly listTag: string;
   /** How OpenMU identifies this client (`GameClientDefinition`). */

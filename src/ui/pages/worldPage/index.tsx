@@ -1,4 +1,5 @@
 import './style.less';
+import { lazy, Suspense } from 'react';
 import { observer } from 'mobx-react-lite';
 import { WorldObjects } from '../../components/worldObjects';
 import { DamageNumbers } from '../../components/damageNumbers';
@@ -35,7 +36,7 @@ import { FriendWindow } from './components/friends';
 import { ChatRoomWindow } from './components/chatRoom';
 import { SocialPrompts } from './components/socialPrompts';
 import { Minimap } from './components/minimap';
-import { MasterSkillsWindow } from '@version/ui';
+import { loadVersionUi } from '../../../version';
 import { SkillListWindow } from './components/skills';
 import { EventWindows } from './components/events';
 import { SoccerScoreHud } from './components/soccerScore';
@@ -44,6 +45,12 @@ import { Notices } from '../../components/notices';
 import { MapNameBanner } from './components/mapNameBanner';
 import { SlideHelpBar } from '../../components/slideHelp';
 import { DebugMenuWindow } from '../../components/debugMenu';
+
+// The active version's take on the windows that differ per version. Lazy so
+// the version UI chunk evaluates after the core app modules, not before.
+const MasterSkillsWindow = lazy(async () => ({
+  default: (await loadVersionUi()).MasterSkillsWindow,
+}));
 
 const HUD = observer(() => {
   return (
@@ -73,7 +80,9 @@ const HUD = observer(() => {
       <PartyWindow />
       <GuildWindow />
       <SkillListWindow />
-      <MasterSkillsWindow />
+      <Suspense fallback={null}>
+        <MasterSkillsWindow />
+      </Suspense>
       <QuestWindows />
       <FriendWindow />
       <ChatRoomWindow />

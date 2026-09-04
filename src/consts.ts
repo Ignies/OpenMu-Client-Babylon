@@ -1,11 +1,5 @@
 export const MAX_USERNAME_LENGTH = 10;
 export const MAX_PASSWORD_LENGTH = 10;
-import { gameVersion } from './version';
-
-/** Login `ClientVersion` bytes of the selected game version . */
-export const CLIENT_VERSION: readonly number[] = gameVersion.clientVersionBytes;
-/** Login `ClientSerial` bytes of the selected game version. */
-export const CLIENT_SERIAL: readonly number[] = gameVersion.serialBytes;
 
 // Connect-server and ws-proxy endpoints — the DEFAULTS only. They seed the
 // first server profile on a fresh install; from then on `common/serverConfig.ts`

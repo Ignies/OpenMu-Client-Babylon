@@ -11,7 +11,7 @@
  * - jewels:   the jewel rules that exist in that version (`jewelUpgrade.ts` shape)
  * - NPC ids / shops / gates: `<ver>/Maps/*.cs`, that version's `gate.bmd`
  *
- * Keep the export names: the base imports `@version/tables` by these names.
+ * Keep the export names: the base imports the version's tables by these names.
  */
 export { ItemsDatabase } from '../../../src/common/itemsDatabase';
 export { SKILL_DEFINITIONS, skillDefinition } from '../../../src/common/skillsDatabase';

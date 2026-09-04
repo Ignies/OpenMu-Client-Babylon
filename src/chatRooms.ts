@@ -54,6 +54,7 @@ export const ChatRooms = new (class _ChatRooms {
   private pendingInvites = new Map<number, string>();
   private nextKey = 1;
   private nextRequestId = 1;
+  private stopWatching: (() => void) | null = null;
 
   constructor() {
     makeObservable(this, {
@@ -67,10 +68,18 @@ export const ChatRooms = new (class _ChatRooms {
       leaveRoom: action,
       reset: action,
     });
+  }
 
-    // Rooms live on their own connections but belong to the character: gone
-    // with the world (relog, lost server, back to the server list).
-    reaction(
+  /**
+   * Rooms live on their own connections but belong to the character: gone
+   * with the world (relog, lost server, back to the server list). Armed
+   * lazily, not in the constructor: store.ts imports this module through
+   * logic.ts, so at module-evaluation time `Store` is still in its temporal
+   * dead zone and a top-level reaction throws (same as skills/buffs.ts).
+   */
+  private ensureWatching(): void {
+    if (this.stopWatching) return;
+    this.stopWatching = reaction(
       () => Store.uiState,
       state => {
         if (state !== UIState.World) this.reset();
@@ -128,6 +137,7 @@ export const ChatRooms = new (class _ChatRooms {
    * for a new one and wait for ChatRoomConnectionInfo.
    */
   openRoomWith(friendName: string): void {
+    this.ensureWatching();
     const existing = this.rooms.find(
       r => r.friendName === friendName && r.state !== 'closed'
     );
@@ -185,6 +195,7 @@ export const ChatRooms = new (class _ChatRooms {
     friendName: string;
     success: boolean;
   }): void {
+    this.ensureWatching();
     const pending = this.pendingCreates.get(info.friendName);
     const initiated = pending !== undefined;
     if (pending !== undefined) {

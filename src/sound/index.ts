@@ -44,8 +44,8 @@ export {
   UI_SOUND_KEYS,
   playUiSound,
   uiClick,
-  installUiWindowChime,
 } from './ui';
+export { installUiWindowChime } from './windowChime';
 export {
   SKILL_SOUNDS,
   hitSound,

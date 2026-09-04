@@ -6,6 +6,10 @@
 import { asciiBytes, type GameVersion } from '../../src/version/contract';
 import { season6Data } from './data';
 
+// The packet lists ride along in the version chunk; UI does not (it reaches
+// app code and loads through the registry's loadUi, after this module).
+export * as packets from './packets';
+
 /** OpenMU `SimpleModulusEncryptor.DefaultClientKey` / `SimpleModulusDecryptor.DefaultClientKey`. */
 const CLIENT_TO_SERVER_KEYS = [128079, 164742, 70235, 106898, 23489, 11911, 19816, 13647, 48413, 46165, 15171, 37433];
 const SERVER_TO_CLIENT_KEYS = [73326, 109989, 98843, 171058, 18035, 30340, 24701, 11141, 62004, 64409, 35374, 64599];
@@ -19,11 +23,13 @@ const XOR3_KEY = new Uint8Array([0xfc, 0xcf, 0xab]);
 
 /**
  * Packets that share a code with no sub-code: prefer the classic S6 layout over
- * the `…075` / `…095` and the `…Extended` (open-source client >= 106.3) variants.
+ * the `…075` / `…095` / `…097` and the `…Extended` (open-source client >= 106.3)
+ * variants. The `097` case only makes explicit what the generated order was
+ * already doing (`CharacterInformation` is emitted before its variants).
  */
 function variantRank(name: string): number {
   if (/Extended$/.test(name)) return 2;
-  if (/0(75|95)$/.test(name)) return 1;
+  if (/0(75|95|97)$/.test(name)) return 1;
   return 0;
 }
 

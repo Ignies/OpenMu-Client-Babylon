@@ -185,8 +185,8 @@ export function sanitizeProfile(
 
 /**
  * Can this client enter that world? It can when it carries the version the
- * world asked for — `GAME_VERSIONS`, which is where the versions this client
- * ships are enumerated and where the answer widens as `versions/` grows.
+ * world asked for - `versions/registry.ts`, which is where the versions this
+ * client ships are enumerated and where the answer widens as `versions/` grows.
  *
  * A world that named no version is always played: the older list lines say
  * nothing, and neither does an address the player typed themselves.
@@ -289,8 +289,9 @@ function load(): StoredState {
 }
 
 /**
- * The URL override, parsed once. `?cs=` / `?ws=` build a profile of their own;
- * `?server=` only selects a saved one, by id or (case-insensitive) name.
+ * The URL override, parsed once. `?cs=` / `?ws=` / `?version=` build a profile
+ * of their own; `?server=` only selects a saved one, by id or
+ * (case-insensitive) name.
  */
 function urlOverride(saved: StoredState): {
   profile: ServerProfile | null;
@@ -301,6 +302,10 @@ function urlOverride(saved: StoredState): {
   const params = new URLSearchParams(location.search);
   const cs = params.get('cs');
   const ws = params.get('ws');
+  // The client version tag (`versions/registry.ts` listTag). A world the
+  // published list has not tagged yet, or a version being tried out, can be
+  // entered with it; an unknown tag falls back to the default version.
+  const version = params.get('version');
   const wanted = params.get('server')?.trim().toLowerCase();
 
   const selectId =
@@ -308,7 +313,7 @@ function urlOverride(saved: StoredState): {
       p => p.id === wanted || p.name.toLowerCase() === wanted
     )?.id ?? null;
 
-  if (!cs && !ws) return { profile: null, selectId };
+  if (!cs && !ws && !version) return { profile: null, selectId };
 
   const base = saved.profiles.find(p => p.id === selectId) ?? saved.profiles[0];
   const [csHost, csPort] = (cs ?? '').split(':');
@@ -321,6 +326,7 @@ function urlOverride(saved: StoredState): {
         csHost: cs ? csHost : undefined,
         csPort: cs ? clampPort(csPort, DEFAULT_CS_PORT) : undefined,
         wsUrl: ws ?? undefined,
+        version: version ?? undefined,
         gsAddress: params.get('gs') === 'cs' ? 'csHost' : base.gsAddress,
       },
       base

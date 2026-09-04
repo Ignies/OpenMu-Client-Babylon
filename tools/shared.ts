@@ -1,3 +1,5 @@
+import { resolve } from 'path';
+
 export const BMD_EXT = '.bmd';
 export const MP3_EXT = '.mp3';
 export const WAV_EXT = '.wav';
@@ -8,7 +10,15 @@ export const OZT_EXT = '.ozt';
 export const TGA_EXT = '.tga';
 
 export const PROJECT_ROOT = __dirname + `/../`;
-export const DATA_FOLDER = PROJECT_ROOT + `Data/`;
+/**
+ * The original client tree the converters read. Overridable so a second game
+ * version's tree (`Data-v097d`) can go through the same pipeline:
+ *
+ *   MU_DATA=Data-v097d GLB_OUTPUT=public/game-assets-v097d bun run tools/bmdToGlb.ts Object1
+ */
+export const DATA_FOLDER = process.env.MU_DATA
+  ? resolve(PROJECT_ROOT, process.env.MU_DATA).replaceAll('\\', '/') + '/'
+  : PROJECT_ROOT + `Data/`;
 
 /**
  * Where the converted GLBs land. Overridable so a pipeline change can be
