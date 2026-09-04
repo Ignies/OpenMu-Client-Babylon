@@ -209,6 +209,32 @@ function defaultProfile(): ServerProfile {
 }
 
 /**
+ * Whether a fresh install gets that profile at all.
+ *
+ * It is seeded when the build names a connect server of its own, and when the
+ * page is being served off the machine it describes — a developer's checkout,
+ * where `127.0.0.1:44405` is a server that is really there.
+ *
+ * A client served from a host gets neither: its worlds come from the published
+ * list, and seeding the loopback default there puts a row in front of every
+ * player that none of them can play and only the owner understands.
+ */
+function seedsDefaultProfile(): boolean {
+  if (!isLoopback(CS_HOST)) return true;
+  if (typeof location === 'undefined') return true;
+
+  return isLoopback(location.hostname) || location.protocol === 'file:';
+}
+
+/**
+ * What `active` answers when there is nothing to be active — no saved profile,
+ * no published world, no URL. It is never saved and never shown: the screens
+ * ask `isEmpty` first. It exists so the sockets and the picker keep reading a
+ * profile instead of a null.
+ */
+const NO_WORLD = defaultProfile();
+
+/**
  * The endpoints the pre-profile client kept in its config blob. Carried over
  * so an existing install keeps connecting where it did, then left alone —
  * store.ts no longer writes those four keys.
@@ -256,9 +282,12 @@ type StoredState = {
 
 function load(): StoredState {
   const fallback = (): StoredState => {
-    const profile = legacyProfile() ?? defaultProfile();
+    const profile =
+      legacyProfile() ?? (seedsDefaultProfile() ? defaultProfile() : null);
 
-    return { profiles: [profile], activeId: profile.id };
+    return profile
+      ? { profiles: [profile], activeId: profile.id }
+      : { profiles: [], activeId: '' };
   };
 
   const stored = LocalStorage.load(SERVERS_KEY);
@@ -272,10 +301,14 @@ function load(): StoredState {
       .filter((p): p is ServerProfile => !!p && typeof p === 'object')
       .map(p => sanitizeProfile(p, { ...base, id: p.id || base.id }));
 
-    if (!profiles.length) return fallback();
-
+    // Saving nothing is a state of its own on a client whose worlds come from
+    // the published list, so an empty array is kept rather than re-seeded — and
+    // the selection is kept as written, because it may name a listed world that
+    // this launch has not fetched yet. `active` falls back until it arrives.
     const activeId =
-      profiles.find(p => p.id === data.activeId)?.id ?? profiles[0].id;
+      typeof data.activeId === 'string'
+        ? data.activeId
+        : (profiles[0]?.id ?? '');
 
     // Kept as written even when nothing here matches it: the world last played
     // may be a listed one, and the list has not been fetched yet.
@@ -393,8 +426,19 @@ class ServerConfigStore {
     return (
       this.urlProfile ??
       this.all.find(p => p.id === this.activeId) ??
-      this.profiles[0]
+      this.all[0] ??
+      NO_WORLD
     );
+  }
+
+  /**
+   * There is nowhere to play: nothing saved, nothing published, no URL. A
+   * hosted client is in this state until its list arrives, and stays there if
+   * the list cannot be read — so the screens say so rather than offering the
+   * placeholder `active` hands them.
+   */
+  get isEmpty(): boolean {
+    return !this.urlProfile && this.all.length === 0;
   }
 
   /** True while the URL pins the endpoints, so the picker shows them read-only. */
@@ -407,9 +451,14 @@ class ServerConfigStore {
     return !!this.active.listed;
   }
 
-  /** True when the fields belong to something the player may not edit. */
+  /**
+   * True when the fields belong to something the player may not edit — a URL
+   * override, a published row, or, with nothing to play at all, the placeholder
+   * standing in for one. Typing into that last one would write nowhere; Add is
+   * the way out of it, and makes a profile that does save.
+   */
   get readOnly(): boolean {
-    return this.lockedByUrl || this.activeIsListed;
+    return this.lockedByUrl || this.activeIsListed || this.isEmpty;
   }
 
   /**
@@ -554,6 +603,29 @@ export function connectServerAddress(): { host: string; port: number } {
   const { csHost, csPort } = effective();
 
   return { host: csHost, port: csPort };
+}
+
+/**
+ * The address to *show* for a world, which is not always the one it is dialled
+ * at.
+ *
+ * A published world's `csHost` is the connect server as its own proxy reaches
+ * it, and a world whose proxy shares a box with the game server publishes
+ * `127.0.0.1` there — correct, and meaningless on a player's screen. So a
+ * listed world shows the proxy that carries it, which is the address the
+ * browser really opens and the only one that means anything from outside.
+ *
+ * A saved profile shows its endpoint unchanged: the player typed it, and it is
+ * the field they are checking when they read this line.
+ */
+export function displayAddress(
+  profile: ServerProfile = ServerConfig.active
+): string {
+  const { csHost, csPort, wsUrl } = effective(profile);
+
+  if (!profile.listed) return `${csHost}:${csPort}`;
+
+  return normalizeHost(wsUrl) || `${csHost}:${csPort}`;
 }
 
 /**

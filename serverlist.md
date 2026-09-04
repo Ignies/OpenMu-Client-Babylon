@@ -1,1 +1,14 @@
-[S6EP3:Test-Server:Testing the description of the local test - server!:en:https://imgs.search.brave.com/e677VKp2zBLZnnUmtFaba-j3r65Ue8QrWNz_J-LMRMY/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMtd2l4bXAtZWQz/MGE4NmI4YzRjYTg4/Nzc3MzU5NGMyLndp/eG1wLmNvbS9mL2Qw/MGJkNWRmLWQyYTEt/NDM3MS1iYWQ0LTk5/ZWMyMDM5ZDU3Yy9k/Y2p3MDRkLTBjYzQ1/NjQ2LTdlMDctNDgy/OS05NDAwLWUwNzky/MWZmZDc0Ni5qcGcv/djEvZmlsbC93XzU2/MCxoXzM1MCxxXzcw/LHN0cnAvcHJldmll/d19sb2FkaW5nX3Bh/cmFfbXVfb25saW5l/X190ZW1hdGljYV9t/Z195X2JtX2J5X2th/dGhlcmluZV9sZW11/c19kY2p3MDRkLTM1/MHQuanBnP3Rva2Vu/PWV5SjBlWEFpT2lK/S1YxUWlMQ0poYkdj/aU9pSklVekkxTmlK/OS5leUp6ZFdJaU9p/SjFjbTQ2WVhCd09q/ZGxNR1F4T0RnNU9E/SXlOalF6TnpOaE5X/WXdaRFF4TldWaE1H/UXlObVV3SWl3aWFY/TnpJam9pZFhKdU9t/RndjRG8zWlRCa01U/ZzRPVGd5TWpZME16/Y3pZVFZtTUdRME1U/VmxZVEJrTWpabE1D/SXNJbTlpYWlJNlcx/dDdJbkJoZEdnaU9p/SXZaaTlrTURCaVpE/VmtaaTFrTW1FeExU/UXpOekV0WW1Ga05D/MDVPV1ZqTWpBek9X/UTFOMk12WkdOcWR6/QTBaQzB3WTJNME5U/WTBOaTAzWlRBM0xU/UTRNamt0T1RRd01D/MWxNRGM1TWpGbVpt/UTNORFl1YW5Cbklp/d2lhR1ZwWjJoMElq/b2lQRDB6TnpVaUxD/SjNhV1IwYUNJNklq/dzlOakF3SW4xZFhT/d2lZWFZrSWpwYklu/VnlianB6WlhKMmFX/TmxPbWx0WVdkbExu/ZGhkR1Z5YldGeWF5/SmRMQ0ozYldzaU9u/c2ljR0YwYUNJNklp/OTNiUzlrTURCaVpE/VmtaaTFrTW1FeExU/UXpOekV0WW1Ga05D/MDVPV1ZqTWpBek9X/UTFOMk12YTJGMGFH/VnlhVzVsTFd4bGJY/VnpMVFF1Y0c1bklp/d2liM0JoWTJsMGVT/STZPVFVzSW5CeWIz/QnZjblJwYjI1eklq/b3dMalExTENKbmNt/RjJhWFI1SWpvaVky/VnVkR1Z5SW4xOS50/NG9idTRYNlFIQmdp/djlObHVfSTRlbG5k/bkxGRGczYXZBanVv/V2tWaFQw](161.97.111.107@ws://161.97.111.107)
+# Server list
+
+The worlds this client offers on its start screen, one per line:
+
+`[VERSION:NAME:DESCRIPTION:LANGUAGE:IMAGE](host:port@WSPROXY)`
+
+`VERSION`, `IMAGE` and `@WSPROXY` are optional. `host:port` is the connect
+server **as the proxy reaches it**, not as a player would: a browser cannot
+open a TCP socket, so the proxy dials the server on the player's behalf, and a
+world whose proxy shares a machine with its game server is `127.0.0.1` here.
+
+Lines that do not parse are dropped, so the prose around them costs nothing.
+
+[S6EP3:Ignies:Season 6 Episode 3, played in the browser:es](127.0.0.1:44405@wss://ws.ignies.net:443)
