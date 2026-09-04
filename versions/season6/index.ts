@@ -23,11 +23,13 @@ const XOR3_KEY = new Uint8Array([0xfc, 0xcf, 0xab]);
 
 /**
  * Packets that share a code with no sub-code: prefer the classic S6 layout over
- * the `…075` / `…095` and the `…Extended` (open-source client >= 106.3) variants.
+ * the `…075` / `…095` / `…097` and the `…Extended` (open-source client >= 106.3)
+ * variants. The `097` case only makes explicit what the generated order was
+ * already doing (`CharacterInformation` is emitted before its variants).
  */
 function variantRank(name: string): number {
   if (/Extended$/.test(name)) return 2;
-  if (/0(75|95)$/.test(name)) return 1;
+  if (/0(75|95|97)$/.test(name)) return 1;
   return 0;
 }
 

@@ -64,4 +64,11 @@ export const VERSION_REGISTRY: readonly VersionEntry[] = [
     load: () => import('./season6'),
     loadUi: () => import('./season6/ui'),
   },
+  {
+    id: 'v097d',
+    label: 'MU 0.97d',
+    listTag: 'V097D',
+    load: () => import('./v097d'),
+    loadUi: () => import('./v097d/ui'),
+  },
 ];

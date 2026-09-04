@@ -44,7 +44,7 @@ export interface VersionProtocol {
    * from. `season6` = the un-suffixed definitions; older sets use the
    * `…075` / `…095` variants OpenMU keeps beside them.
    */
-  readonly packetSet: 'season6' | '0.95' | '0.75';
+  readonly packetSet: 'season6' | '0.97d' | '0.95' | '0.75';
   /**
    * Name-suffix rank the dispatcher should prefer when several generated
    * packets share a code (`AddCharactersToScope` / `…075` / `…095` /
