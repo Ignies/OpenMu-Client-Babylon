@@ -28,7 +28,7 @@ import {
 } from './itemEffectMode';
 
 const glowScratch = { r: 0, g: 0, b: 0, a: 1 };
-import { resolveDataUrl } from '../libs/mu/dataFolder';
+import { loadMuSprite } from '../libs/mu/sprites';
 import { sunLightOf } from '../lighting/keyRig';
 import {
   SNOW_CAP_COLOUR,
@@ -380,13 +380,21 @@ let chromeTextures: { chrome: Texture; shiny: Texture; chrome2: Texture } | null
   null;
 let chromeScene: Scene | null = null;
 
-/** Effect/Chrome01 (repeat), Effect/Shiny01, Effect/Chrome02 (clamp, nearest). */
+/**
+ * Effect/Chrome01 (repeat), Effect/Shiny01, Effect/Chrome02 (clamp, nearest).
+ *
+ * Read from the packed `.OZJ` every version's `Data/` tree ships, through the
+ * shared sprite decoder - the decoded `.jpg` siblings exist only beside the
+ * Season 6 data. A URL Babylon cannot fetch is answered with its own solid
+ * red placeholder, which the additive passes then smear over the whole mesh,
+ * so the texture starts URL-less and stays black until the real image lands.
+ */
 function getChromeTextures(scene: Scene) {
   if (chromeTextures && chromeScene === scene) return chromeTextures;
 
   const load = (file: string, clamp: boolean, nearest: boolean) => {
     const texture = new Texture(
-      resolveDataUrl(`Effect/${file}`),
+      null,
       scene,
       false,
       false,
@@ -397,14 +405,20 @@ function getChromeTextures(scene: Scene) {
       texture.wrapU = Texture.CLAMP_ADDRESSMODE;
       texture.wrapV = Texture.CLAMP_ADDRESSMODE;
     }
+
+    void loadMuSprite(`Effect/${file}`).then(
+      sprite => texture.updateURL(sprite.url),
+      error => console.error(`Could not load item chrome map ${file}:`, error)
+    );
+
     return texture;
   };
 
   chromeScene = scene;
   chromeTextures = {
-    chrome: load('Chrome01.jpg', false, false),
-    shiny: load('Shiny01.jpg', true, false),
-    chrome2: load('Chrome02.jpg', true, true),
+    chrome: load('Chrome01.OZJ', false, false),
+    shiny: load('Shiny01.OZJ', true, false),
+    chrome2: load('Chrome02.OZJ', true, true),
   };
 
   return chromeTextures;
