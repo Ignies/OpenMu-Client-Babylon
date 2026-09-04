@@ -31,10 +31,52 @@ import { GACHA_POOL, newSeed, roll } from './gacha';
 const PORT = Number(process.env.PORT || 3200);
 const HOSTNAME = process.env.HOSTNAME || '127.0.0.1';
 
-function json(body: unknown, status = 200): Response {
+/**
+ * Origins allowed to call this from a browser, comma separated, matched
+ * exactly.
+ *
+ * Unset by default, which is the same-origin deployment: Caddy publishes the
+ * service under `/api` on the client's own host, the window fetches a relative
+ * path, and no CORS header is involved at all.
+ *
+ * Set it when the service gets a host of its own (`api.example.net`), and
+ * build the client with `VITE_CASHSHOP_API` pointing there. Exact origins
+ * only, never `*`: nothing here is secret today, but ordering will carry a
+ * ticket, and a wildcard that outlives the reason it was harmless is how that
+ * goes wrong.
+ */
+const ALLOWED_ORIGINS = new Set(
+  (process.env.CORS_ORIGIN ?? '')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean)
+);
+
+/** The CORS headers for this caller, or nothing when it is same-origin. */
+function corsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('origin');
+
+  if (!origin || !ALLOWED_ORIGINS.has(origin)) return {};
+
+  return {
+    'Access-Control-Allow-Origin': origin,
+    // The answer differs by origin, so a shared cache must not reuse one for
+    // another.
+    Vary: 'Origin',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
+function json(
+  body: unknown,
+  status = 200,
+  extra: Record<string, string> = {}
+): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...extra },
   });
 }
 
@@ -43,10 +85,22 @@ Bun.serve({
   hostname: HOSTNAME,
   fetch(req) {
     const path = new URL(req.url).pathname;
+    const cors = corsHeaders(req);
+
+    // The preflight a browser sends before a cross-origin POST. Answered here
+    // rather than falling through to the 404 below.
+    if (req.method === 'OPTIONS') {
+      const allowed = cors['Access-Control-Allow-Origin'] !== undefined;
+      return new Response(null, { status: allowed ? 204 : 403, headers: cors });
+    }
 
     try {
       if (path === '/api/catalog' && req.method === 'GET') {
-        return json({ lines: LINES, products: CATALOG, gachaPoolSize: GACHA_POOL.length });
+        return json(
+          { lines: LINES, products: CATALOG, gachaPoolSize: GACHA_POOL.length },
+          200,
+          cors
+        );
       }
 
       if (path === '/api/gacha/preview' && req.method === 'POST') {
@@ -60,19 +114,19 @@ Bun.serve({
          * Unauthenticated on purpose - it costs nothing and tells the caller
          * nothing about any player.
          */
-        return json({ preview: true, roll: roll(newSeed()) });
+        return json({ preview: true, roll: roll(newSeed()) }, 200, cors);
       }
 
       if (path === '/api/orders' && req.method === 'GET') {
         // The queue lands with order placement. Until then the window's
         // delivery tab is honestly empty rather than absent.
-        return json({ orders: [], acceptingOrders: false });
+        return json({ orders: [], acceptingOrders: false }, 200, cors);
       }
 
-      return json({ error: 'Not found' }, 404);
+      return json({ error: 'Not found' }, 404, cors);
     } catch (error) {
       console.error(`${req.method} ${path} failed:`, error);
-      return json({ error: 'Something went wrong. Please try again.' }, 500);
+      return json({ error: 'Something went wrong. Please try again.' }, 500, cors);
     }
   },
 });

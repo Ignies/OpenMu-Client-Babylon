@@ -65,15 +65,20 @@ export const CashShopState = observable({
 });
 
 /**
- * Where the shop service answers. Same origin by default, so a client served
- * beside it needs no configuration; a client on its own host points at the
- * shop and that host allows it.
+ * Where the shop service answers.
+ *
+ * Relative by default: Caddy publishes the service under `/api` on the
+ * client's own host, so there is no second origin and no CORS. Point it at a
+ * host of its own (`https://api.example.net/api`) and that service has to
+ * name this origin in `CORS_ORIGIN`.
  */
 const API = import.meta.env.VITE_CASHSHOP_API || '/api';
 
 async function get<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API}${path}`, {
-    credentials: 'same-origin',
+    // Nothing here is cookie-authenticated, and asking for credentials on a
+    // cross-origin call would only add a CORS requirement for no gain.
+    credentials: 'omit',
     headers: { 'Content-Type': 'application/json' },
     ...init,
   });
