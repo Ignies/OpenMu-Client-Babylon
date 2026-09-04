@@ -1,13 +1,6 @@
 import postgres from 'postgres';
 import bcrypt from 'bcryptjs';
-import {
-  claimKey,
-  forgetSignupsBefore,
-  recordSignup,
-  releaseKey,
-  seedKeys,
-  signupsSince,
-} from './db';
+import { forgetSignupsBefore, recordSignup, signupsSince } from './db';
 
 /**
  * The account-creation endpoint behind `register.ignies.net`.
@@ -47,9 +40,6 @@ const RATE_WINDOW_MS = Number(
   process.env.RATE_WINDOW_MS || 24 * 60 * 60 * 1000
 );
 
-/** How many invite keys to mint the first time this ever runs. */
-const SEED_KEYS = Number(process.env.SEED_KEYS || 50);
-
 /**
  * A separate, much looser cap on *attempts* rather than successes, so a client
  * that has spent its daily account cannot sit there hammering the endpoint.
@@ -65,9 +55,6 @@ const MIN_PASSWORD_LENGTH = 4;
 const MAX_PASSWORD_LENGTH = 10;
 
 const USERNAME_RE = /^[A-Za-z0-9]+$/;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-/** `MU-XXXXX-XXXXX-XXXXX` over the ambiguity-free alphabet in `db.ts`. */
-const KEY_RE = /^MU-[23456789ABCDEFGHJKMNPQRSTVWXYZ]{5}(-[23456789ABCDEFGHJKMNPQRSTVWXYZ]{5}){2}$/;
 
 const sql = postgres(DATABASE_URL);
 
@@ -76,17 +63,6 @@ setInterval(
   () => forgetSignupsBefore(Date.now() - RATE_WINDOW_MS),
   60 * 60 * 1000
 ).unref();
-
-/**
- * First run only. Printed rather than written to a file so they land in the
- * journal, which is already where you would look:
- *   journalctl -u mu-register | grep MU-
- */
-const seeded = seedKeys(SEED_KEYS);
-
-if (seeded.length) {
-  console.log(`minted ${seeded.length} invite keys:\n${seeded.join('\n')}`);
-}
 
 /**
  * Expand an IPv6 address and return its first four groups — the /64.
@@ -182,22 +158,11 @@ function hammering(bucket: string): boolean {
 function validate(body: {
   username?: unknown;
   password?: unknown;
-  key?: unknown;
 }): string | null {
-  const { username, password, key } = body;
+  const { username, password } = body;
 
-  if (
-    typeof username !== 'string' ||
-    typeof password !== 'string' ||
-    typeof key !== 'string'
-  ) {
+  if (typeof username !== 'string' || typeof password !== 'string') {
     return 'Malformed request.';
-  }
-
-  // Shape only — whether it exists and is unspent is decided by the atomic
-  // claim, which is the only check that can be trusted under concurrency.
-  if (!KEY_RE.test(key.trim().toUpperCase())) {
-    return 'That key is not valid.';
   }
 
   if (
@@ -258,20 +223,13 @@ async function hashPassword(password: string): Promise<string> {
   return BCRYPT_VARIANT + hash.slice(hash.indexOf('$', 1) + 1);
 }
 
-/**
- * Creates the account, or returns why it could not be.
- *
- * Order matters. The key is claimed *before* the account is written, because
- * the claim is the only thing serialising concurrent requests — two people
- * submitting the same key together must not both get through, and only the
- * atomic UPDATE can decide that. The cost is that a claim followed by a failed
- * INSERT would eat the key, so the write is wrapped and the key handed back on
- * any failure.
- */
+/** Postgres `unique_violation`: the name was taken between the check and the write. */
+const UNIQUE_VIOLATION = '23505';
+
+/** Creates the account, or returns why it could not be. */
 async function createAccount(
   username: string,
-  password: string,
-  key: string
+  password: string
 ): Promise<string | null> {
   const existing = await sql`
     SELECT 1 FROM data."Account" WHERE lower("LoginName") = lower(${username}) LIMIT 1
@@ -279,22 +237,14 @@ async function createAccount(
 
   if (existing.length > 0) return 'That ID is already taken.';
 
-  if (!claimKey(key, username)) {
-    return 'That key is not valid, or has already been used.';
-  }
-
   try {
     const passwordHash = await hashPassword(password);
 
     // Column list mirrors every NOT NULL column on `data."Account"` that has no
     // default. `VaultId` stays null: OpenMU creates the vault storage itself on
     // first use, and inventing one here would mean writing `ItemStorage` too.
-    // `EMail` is NOT NULL but the form does not ask for one — the invite key
-    // already says who this is — so it takes the empty string.
-    //
-    // The unique index on `LoginName` is what actually prevents duplicates —
-    // the check above races, and loses to two submissions of the same name
-    // landing together. A violation throws, and the key goes back.
+    // `EMail` is NOT NULL but the form does not ask for one, so it takes the
+    // empty string.
     await sql`
       INSERT INTO data."Account" (
         "Id", "LoginName", "PasswordHash", "SecurityCode", "EMail",
@@ -305,7 +255,13 @@ async function createAccount(
       )
     `;
   } catch (err) {
-    releaseKey(key);
+    // The unique index on `LoginName` is what actually prevents duplicates: the
+    // check above races, and loses to two submissions of the same name landing
+    // together. The loser gets the same answer the check would have given it.
+    if ((err as { code?: string }).code === UNIQUE_VIOLATION) {
+      return 'That ID is already taken.';
+    }
+
     throw err;
   }
 
@@ -358,19 +314,16 @@ Bun.serve({
 
     if (problem) return json({ error: problem }, 400);
 
-    const key = (body.key as string).trim().toUpperCase();
-
     try {
       const rejection = await createAccount(
         body.username as string,
-        body.password as string,
-        key
+        body.password as string
       );
 
       if (rejection) return json({ error: rejection }, 409);
 
       recordSignup(bucket);
-      console.log(`registered ${body.username} with ${key} from ${ip}`);
+      console.log(`registered ${body.username} from ${ip}`);
       return json({ ok: true });
     } catch (err) {
       // Never surface the database error itself: it would leak the schema, and

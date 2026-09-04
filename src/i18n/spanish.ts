@@ -82,6 +82,7 @@ export const spanishLayer: LanguageLayer = {
     'servers.serverName': 'Servidor {number}',
 
     'login.enterCredentials': 'Escribe tu cuenta y tu contraseña',
+    'login.createAccount': 'Crear cuenta',
     'login.rememberMe': '¿Recordarme?',
 
     'characters.loading': 'Cargando personajes...',

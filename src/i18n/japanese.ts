@@ -76,6 +76,7 @@ export const japaneseLayer: LanguageLayer = {
     'servers.serverName': 'サーバー {number}',
 
     'login.enterCredentials': 'アカウント名とパスワードを入力してください',
+    'login.createAccount': 'アカウント作成',
     'login.rememberMe': 'ログイン情報を保存しますか？',
 
     'characters.loading': 'キャラクターを読み込んでいます...',

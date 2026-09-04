@@ -76,6 +76,7 @@ export const thaiLayer: LanguageLayer = {
     'servers.serverName': 'เซิร์ฟเวอร์ {number}',
 
     'login.enterCredentials': 'กรอกชื่อบัญชีและรหัสผ่าน',
+    'login.createAccount': 'สร้างบัญชี',
     'login.rememberMe': 'จำฉันไว้ไหม',
 
     'characters.loading': 'กำลังโหลดตัวละคร...',

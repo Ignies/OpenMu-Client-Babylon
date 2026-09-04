@@ -12,7 +12,7 @@ import { MuButton } from './muButton';
  * against the art and must never reflow.
  *
  * The coordinates below were derived from the client's login window
- * (`ui/pages/loginPage`, inputs at y=106/131) and re-spaced to fit four rows.
+ * (`ui/pages/loginPage`, inputs at y=106/131) and re-spaced to fit three rows.
  * They are a starting point: nudge them against the actual art rather than
  * trusting the arithmetic.
  */
@@ -26,7 +26,7 @@ const INPUT_X = 109;
 const LABEL_X = 22;
 
 /** First row, then one row every `ROW_STEP` px. */
-const FIRST_ROW_Y = 88;
+const FIRST_ROW_Y = 100;
 const ROW_STEP = 24;
 
 /** The label sits a few px below the input's top edge to look centred. */
@@ -54,24 +54,18 @@ const API = import.meta.env.VITE_REGISTER_API || '/api/register';
 const USERNAME_RE = /^[A-Za-z0-9]+$/;
 
 /**
- * Four rows is what `login_back.OZT` holds without crowding the art — it is a
- * login window with two. The invite key replaces the e-mail field that would
- * otherwise sit here: registration is invite-only, so the key already
- * identifies who this is, and asking for an address on top of it buys nothing.
+ * The login window's two rows, plus the confirmation a password needs when it
+ * is being set rather than typed back. No e-mail: nothing sends one, and a
+ * field the server stores as the empty string is a field that asks for a
+ * stranger's address for nothing.
  */
 const ROWS = [
-  { key: 'key', label: 'Key', type: 'text' },
   { key: 'username', label: 'ID', type: 'text' },
   { key: 'password', label: 'Password', type: 'password' },
   { key: 'confirm', label: 'Confirm', type: 'password' },
 ] as const;
 
 type Field = (typeof ROWS)[number]['key'];
-
-/** `MU-XXXXX-XXXXX-XXXXX`, matching the alphabet the server mints from. */
-const KEY_RE =
-  /^MU-[23456789ABCDEFGHJKMNPQRSTVWXYZ]{5}(-[23456789ABCDEFGHJKMNPQRSTVWXYZ]{5}){2}$/;
-const KEY_LENGTH = 20;
 
 type Status =
   | { kind: 'idle' }
@@ -80,7 +74,6 @@ type Status =
   | { kind: 'done' };
 
 const EMPTY: Record<Field, string> = {
-  key: '',
   username: '',
   password: '',
   confirm: '',
@@ -92,14 +85,10 @@ const EMPTY: Record<Field, string> = {
  * trip.
  */
 function validate(values: Record<Field, string>): string | null {
-  const { key, username, password, confirm } = values;
+  const { username, password, confirm } = values;
 
-  if (!key || !username || !password || !confirm) {
+  if (!username || !password || !confirm) {
     return 'Please fill in every field.';
-  }
-
-  if (!KEY_RE.test(key)) {
-    return 'That key does not look right. Check it and try again.';
   }
 
   if (username.length < MIN_USERNAME_LENGTH) {
@@ -124,11 +113,7 @@ export const RegisterPage = () => {
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
 
   const set = (field: Field, value: string) =>
-    setValues(current => ({
-      ...current,
-      // Keys are minted uppercase and get typed however they get typed.
-      [field]: field === 'key' ? value.toUpperCase() : value,
-    }));
+    setValues(current => ({ ...current, [field]: value }));
 
   const submit = async () => {
     if (status.kind === 'sending') return;
@@ -147,7 +132,6 @@ export const RegisterPage = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          key: values.key,
           username: values.username,
           password: values.password,
         }),
@@ -212,13 +196,10 @@ export const RegisterPage = () => {
                     value={values[row.key]}
                     onChange={e => set(row.key, e.target.value)}
                     maxLength={
-                      row.key === 'key'
-                        ? KEY_LENGTH
-                        : row.key === 'username'
-                          ? MAX_USERNAME_LENGTH
-                          : MAX_PASSWORD_LENGTH
+                      row.key === 'username'
+                        ? MAX_USERNAME_LENGTH
+                        : MAX_PASSWORD_LENGTH
                     }
-                    placeholder={row.key === 'key' ? 'MU-XXXXX-XXXXX-XXXXX' : undefined}
                     style={{
                       paddingLeft: TEXT_INSET_X,
                       paddingTop: TEXT_INSET_Y,

@@ -72,6 +72,7 @@ export const germanLayer: LanguageLayer = {
     'servers.serverName': 'Server {number}',
 
     'login.enterCredentials': 'Gib deinen Kontonamen und dein Passwort ein',
+    'login.createAccount': 'Registrieren',
     'login.rememberMe': 'Angemeldet bleiben?',
 
     'characters.loading': 'Charaktere werden geladen...',
