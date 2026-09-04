@@ -17,6 +17,7 @@ import {
   repairCost,
   withTax,
 } from '../../../common/itemValue';
+import { place } from './placement';
 
 /** The hero as `RenderItemInfo` compares against (`CharacterAttribute`). */
 export function heroStats(): HeroStats {
@@ -132,40 +133,6 @@ function petLines(pet: PetTypeEnum, slot: number): TooltipLine[] {
   ];
 }
 
-// ---- placement --------------------------------------------------------------
-
-const MARGIN = 2;
-const BELOW_CURSOR = 16;
-const ABOVE_CURSOR = 8;
-
-/**
- * `RenderItemInfo` placement: centred on the cursor's x, hanging below it,
- * flipped above when it would leave the bottom, kept inside the viewport.
- * Pure arithmetic on a measured size so it can run per pointer move without
- * touching layout.
- */
-function place(
-  x: number,
-  y: number,
-  width: number,
-  height: number
-): { left: number; top: number } {
-  let left = x - width / 2;
-  let top = y + BELOW_CURSOR;
-
-  if (left + width > window.innerWidth - MARGIN) {
-    left = window.innerWidth - MARGIN - width;
-  }
-  if (left < MARGIN) left = MARGIN;
-
-  if (top + height > window.innerHeight - MARGIN) {
-    top = y - ABOVE_CURSOR - height;
-  }
-  if (top < MARGIN) top = MARGIN;
-
-  return { left: Math.round(left), top: Math.round(top) };
-}
-
 /**
  * `RenderItemInfo` + `RenderTipTextList`: the black 80% box with the
  * coloured text lines, centred on the cursor's x and hanging below it, kept
@@ -243,7 +210,8 @@ export const ItemTooltip = observer(
         clientX,
         clientY,
         size.current.width,
-        size.current.height
+        size.current.height,
+        { width: window.innerWidth, height: window.innerHeight }
       );
       box.style.transform = `translate(${left}px, ${top}px)`;
     };
