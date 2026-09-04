@@ -41,8 +41,8 @@ const RULES: Rule[] = [
   { dir: '', ext: [], names: ['gate.bmd'] },
   // libs/mu/sprites.ts → loadInterfaceSprite('…') = Interface/**
   { dir: 'Interface', ext: SPRITE },
-  // effect textures, item chrome maps (Chrome01/Shiny01/Chrome02 .jpg)
-  { dir: 'Effect', ext: SPRITE, names: ['chrome01.jpg', 'shiny01.jpg', 'chrome02.jpg'] },
+  // effect textures, item chrome maps (Chrome01/Shiny01/Chrome02 .OZJ)
+  { dir: 'Effect', ext: SPRITE },
   // loginPage → Logo/MU-logo*.OZ?
   { dir: 'Logo', ext: SPRITE },
   // masterTree / questFiles / moveReqFile / minimap markers → Local/**/*.bmd,
