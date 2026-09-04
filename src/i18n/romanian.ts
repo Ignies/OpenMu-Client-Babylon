@@ -72,6 +72,7 @@ export const romanianLayer: LanguageLayer = {
     'servers.serverName': 'Server {number}',
 
     'login.enterCredentials': 'Introdu contul și parola',
+    'login.createAccount': 'Creează cont',
     'login.rememberMe': 'Ține-mă minte?',
 
     'characters.loading': 'Se încarcă personajele...',

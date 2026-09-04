@@ -80,6 +80,7 @@ export const EN_TEXT = {
   'servers.serverName': 'Server {number}',
 
   'login.enterCredentials': 'Enter your account name and password',
+  'login.createAccount': 'Create account',
   'login.rememberMe': 'Remember me?',
 
   'characters.loading': 'Loading characters...',
