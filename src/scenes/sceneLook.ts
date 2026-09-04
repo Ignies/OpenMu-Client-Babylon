@@ -10,7 +10,6 @@ import {
 } from '../libs/babylon/exports';
 import {
   setKey,
-  setSunDirection,
   syncSpecular,
 } from '../lighting/keyRig';
 import { ENUM_WORLD } from '../common/types';
@@ -37,19 +36,7 @@ import {
   pbrMaterialsOn,
   specularLightScale,
 } from '../common/materialQuality';
-import {
-  lightingTier,
-  pipelineSamples,
-  setCycleLightGain,
-} from '../common/lightingQuality';
-import { serverNow } from '../common/serverTime';
-import {
-  cycleStateAt,
-  parseCycleTime,
-  setCycleOverride,
-  type CycleState,
-  type CyclePhase,
-} from './dayCycle';
+import { lightingTier, pipelineSamples } from '../common/lightingQuality';
 import { pbrMapsIfReady } from '../common/pbrMaps';
 import { syncMaterialQuality } from '../common/modelLoader';
 import { syncPbrDetail } from '../common/itemMaterial';
@@ -681,417 +668,6 @@ const AREA_MOODS = {
 
 export type AreaMoodName = keyof typeof AREA_MOODS;
 
-// --- day/night cycle -------------------------------------------------------
-//
-// Time-of-day is a modulation *on top of* the per-map mood, never a second
-// mood table: global per-phase modifiers scale and tint whatever mood the map
-// resolves to, so Devias stays Devias at night and Tarkan stays Tarkan at
-// dawn. The clock itself lives in `dayCycle.ts` (a pure producer); this file
-// is its one consumer, because it is already the single writer of moods and
-// key lights. See documentation/day_night/ARCHITECTURE.md.
-
-/**
- * One phase's deltas over the authored mood, which is the **noon** anchor.
- * Scales default to 1 and shifts to 0 — the noon row is all identity.
- *
- * The dungeon lesson applies verbatim ("darkness belongs to the lights, not
- * the grade"): night darkens by cutting `keyScale` and the bake, exposure
- * moves only slightly. `keyScale` never drops below ~0.25 so an unlit field
- * still reads.
- */
-type PhaseModifier = {
-  /** On `sky` + `sun` — the key budget. */
-  readonly keyScale: number;
-  readonly skyTint: readonly [number, number, number];
-  readonly sunTint: readonly [number, number, number];
-  readonly bakeScale: number;
-  readonly bakeTint: readonly [number, number, number];
-  readonly exposureShift: number;
-  readonly contrastShift: number;
-  /** Split-tone: pull each end's hue toward a target, by a 0..1 push. */
-  readonly highlightsHue: number;
-  readonly highlightsPush: number;
-  readonly highlightsDensityShift: number;
-  readonly highlightsSaturationShift: number;
-  readonly shadowsHue: number;
-  readonly shadowsPush: number;
-  readonly shadowsDensityShift: number;
-  readonly shadowsSaturationShift: number;
-  readonly saturationShift: number;
-  readonly bloomThresholdShift: number;
-  readonly fogTint: readonly [number, number, number];
-  readonly fogDensityScale: number;
-  /**
-   * On the mood's map-gradient strength. The gradients are authored as the
-   * map's *noon* colour cast (Lorencia's is warm amber); after dark that
-   * cast fights the phase tints — khaki instead of blue night — so the dark
-   * phases pull it down.
-   */
-  readonly gradientScale: number;
-  /**
-   * A full-frame multiply in the gradient pass — the one phase lever that
-   * does not ride the `colorTint` option (the split-tone does, and that
-   * slider defaults to 0). This is what makes night *read blue*: blue light
-   * on brown ground multiplies out to olive, so the air itself must be
-   * graded, the way the reference night is.
-   */
-  readonly sceneTint: readonly [number, number, number];
-  /**
-   * Full-frame resaturation in the gradient pass, after `sceneTint`. The
-   * phase tints are multiplies and a multiply can only remove colour — on
-   * warm textures a cool tint cancels into grey. This wins the richness
-   * back where the reference phases are saturated, and unlike the
-   * split-tone it is not gated behind the user's colorTint slider.
-   */
-  readonly sceneSat: number;
-  /** On the map's authored clear colour — the sky itself. */
-  readonly clearTint: readonly [number, number, number];
-  /** On the GlowLayer, so emissives pop after dark. */
-  readonly glowBoost: number;
-};
-
-const NOON_MODIFIER: PhaseModifier = {
-  keyScale: 1,
-  skyTint: [1, 1, 1],
-  sunTint: [1, 1, 1],
-  bakeScale: 1,
-  bakeTint: [1, 1, 1],
-  exposureShift: 0,
-  contrastShift: 0,
-  highlightsHue: 0,
-  highlightsPush: 0,
-  highlightsDensityShift: 0,
-  highlightsSaturationShift: 0,
-  shadowsHue: 0,
-  shadowsPush: 0,
-  shadowsDensityShift: 0,
-  shadowsSaturationShift: 0,
-  saturationShift: 0,
-  bloomThresholdShift: 0,
-  fogTint: [1, 1, 1],
-  fogDensityScale: 1,
-  gradientScale: 1,
-  sceneTint: [1, 1, 1],
-  sceneSat: 1,
-  clearTint: [1, 1, 1],
-  glowBoost: 1,
-};
-
-/** Warm rose-amber wash, long soft light raking in from the east. */
-const DAWN_MODIFIER: PhaseModifier = {
-  ...NOON_MODIFIER,
-  keyScale: 0.75,
-  skyTint: [1, 0.78, 0.62],
-  sunTint: [1, 0.7, 0.5],
-  bakeScale: 0.85,
-  bakeTint: [1, 0.86, 0.74],
-  exposureShift: -0.02,
-  highlightsHue: 25,
-  highlightsPush: 0.5,
-  highlightsDensityShift: 6,
-  shadowsHue: 300,
-  shadowsPush: 0.4,
-  shadowsDensityShift: 6,
-  bloomThresholdShift: -0.05,
-  fogTint: [1, 0.85, 0.7],
-  gradientScale: 0.9,
-  sceneTint: [1, 0.93, 0.86],
-  sceneSat: 1.12,
-  clearTint: [1.15, 0.9, 0.72],
-};
-
-/** Deep mauve/magenta grade, the scene noticeably darker, glows reading. */
-const DUSK_MODIFIER: PhaseModifier = {
-  ...NOON_MODIFIER,
-  keyScale: 0.55,
-  skyTint: [0.95, 0.7, 0.75],
-  sunTint: [1, 0.6, 0.45],
-  bakeScale: 0.65,
-  bakeTint: [0.9, 0.72, 0.8],
-  exposureShift: -0.05,
-  highlightsHue: 320,
-  highlightsPush: 0.5,
-  shadowsHue: 280,
-  shadowsPush: 0.5,
-  shadowsDensityShift: 8,
-  saturationShift: -6,
-  bloomThresholdShift: -0.08,
-  fogTint: [0.9, 0.7, 0.8],
-  gradientScale: 0.8,
-  sceneTint: [0.98, 0.85, 0.95],
-  sceneSat: 1.15,
-  clearTint: [0.75, 0.5, 0.65],
-  glowBoost: 1.15,
-};
-
-/**
- * Deep teal-blue moonlight — the darkest frame, but fully legible: a moonlit
- * key at ~30 %, not a crushed grade. Torches and glows carry the scene (the
- * light-gain boost lives in `dayCycle.ts`; the glow boost here).
- */
-const NIGHT_MODIFIER: PhaseModifier = {
-  ...NOON_MODIFIER,
-  keyScale: 0.46,
-  // The light tints stay MILD on purpose: a hard blue multiplied onto warm
-  // textures cancels channel-wise into grey — with post off there is
-  // nothing downstream to win the colour back, so every texture reads pale
-  // and bland. Darkness comes from the scales; the blue *richness* comes
-  // from the post path (sceneTint plus the sceneSat resaturation in the
-  // gradient pass).
-  skyTint: [0.68, 0.76, 1.0],
-  sunTint: [0.75, 0.84, 1],
-  bakeScale: 0.6,
-  bakeTint: [0.74, 0.8, 1.0],
-  exposureShift: 0,
-  highlightsSaturationShift: -20,
-  // The blue must survive the grade: several maps author their shadow
-  // saturation well below zero (Lorencia -25), which turns the night's
-  // blue split-tone grey - the shift wins it back, and the density leans
-  // on the whole shadow half. Highlights stay untouched so torch pools
-  // keep their warmth against the cool air.
-  shadowsHue: 215,
-  shadowsPush: 0.85,
-  shadowsDensityShift: 24,
-  shadowsSaturationShift: 22,
-  saturationShift: 0,
-  bloomThresholdShift: -0.12,
-  // The fog must sit *under* a keyScale-0.3 scene, not on top of it: the
-  // reference night (dawn_dusk_noon_night.jpg) is deep blue air with the
-  // torches and item glows carrying the frame, no grey veil.
-  fogTint: [0.22, 0.3, 0.42],
-  fogDensityScale: 0.55,
-  gradientScale: 0.35,
-  sceneTint: [0.6, 0.75, 1.0],
-  sceneSat: 1.35,
-  clearTint: [0.15, 0.21, 0.3],
-  glowBoost: 1.4,
-};
-
-const PHASE_MODIFIERS: Record<CyclePhase, PhaseModifier> = {
-  dawn: DAWN_MODIFIER,
-  noon: NOON_MODIFIER,
-  dusk: DUSK_MODIFIER,
-  night: NIGHT_MODIFIER,
-};
-
-/**
- * What the current map allows the cycle to do: the entry's `dayCycle` scale
- * (0 for interiors and event set-pieces, damped for Atlans) and the authored
- * clear colour the retint anchors on. Set by `loadMapIntoScene` per warp —
- * per-map decisions live on the map entry, not here.
- */
-const cycleContext = {
-  scale: 0,
-  baseClear: null as readonly [number, number, number] | null,
-};
-
-export function setCycleContext(
-  scale: number,
-  baseClear: readonly [number, number, number] | null
-): void {
-  cycleContext.scale = Math.max(0, Math.min(1, scale));
-  cycleContext.baseClear = baseClear;
-}
-
-/** `/time <dawn|noon|dusk|night|0..1|off>` — freeze or release the clock. */
-export function runTimeCommand(arg: string): boolean {
-  const t = parseCycleTime(arg);
-
-  if (t === undefined) return false;
-
-  setCycleOverride(t);
-  requestCycleRefresh();
-  return true;
-}
-
-/** The `?tod=` URL override, for deterministic screenshots. Call once. */
-export function installCycleUrlOverride(search: string): void {
-  const tod = new URLSearchParams(search).get('tod');
-
-  if (tod) runTimeCommand(tod);
-}
-
-/** How often the modulation recomputes outside a mood blend, seconds. */
-const CYCLE_TICK = 0.2;
-
-const cycleState: CycleState = cycleStateAt(0, {
-  t: 0,
-  sunAzimuth: 0,
-  sunElevation: 0,
-  weights: { dawn: 0, noon: 1, dusk: 0, night: 0 },
-  lightGain: 1,
-});
-
-let cycleTimer = 0;
-
-/**
- * The cycle strength on screen: map scale × option × the area fade. The area
- * fade eases toward 0 while an area mood (tavern) is active, on the mood
- * fade's own clock, so stepping through the door cannot pop the grade — a
- * candle-lit room looks the same at noon and midnight.
- */
-let cycleAreaFade = 1;
-let cycleStrengthShown = 0;
-
-/** Forces the next `updateSceneMood` to rewrite (override changed, etc.). */
-let cycleDirty = false;
-
-function requestCycleRefresh(): void {
-  cycleDirty = true;
-}
-
-function cycleTargetStrength(): number {
-  if (!GameOptions.dayNightCycle) return 0;
-  return cycleContext.scale * cycleAreaFade;
-}
-
-/** The phase modifiers blended by the cycle weights, scaled by strength. */
-const blendedModifier = {
-  keyScale: 1,
-  skyTint: [1, 1, 1] as [number, number, number],
-  sunTint: [1, 1, 1] as [number, number, number],
-  bakeScale: 1,
-  bakeTint: [1, 1, 1] as [number, number, number],
-  exposureShift: 0,
-  contrastShift: 0,
-  highlightsHueX: 0,
-  highlightsHueY: 0,
-  highlightsPush: 0,
-  highlightsDensityShift: 0,
-  highlightsSaturationShift: 0,
-  shadowsHueX: 0,
-  shadowsHueY: 0,
-  shadowsPush: 0,
-  shadowsDensityShift: 0,
-  shadowsSaturationShift: 0,
-  saturationShift: 0,
-  bloomThresholdShift: 0,
-  fogTint: [1, 1, 1] as [number, number, number],
-  fogDensityScale: 1,
-  gradientScale: 1,
-  sceneTint: [1, 1, 1] as [number, number, number],
-  sceneSat: 1,
-  clearTint: [1, 1, 1] as [number, number, number],
-  glowBoost: 1,
-};
-
-const RAD = Math.PI / 180;
-const DEG = 180 / Math.PI;
-
-/**
- * Sum the four phase rows by the cycle weights (they sum to 1), then damp
- * the result toward identity by `strength`. Hues accumulate as push-weighted
- * vectors so 320° and 280° blend to 300° instead of through the far side of
- * the wheel.
- */
-function blendPhaseModifiers(strength: number): void {
-  const m = blendedModifier;
-
-  m.keyScale = 0;
-  m.bakeScale = 0;
-  m.fogDensityScale = 0;
-  m.gradientScale = 0;
-  m.sceneSat = 0;
-  m.glowBoost = 0;
-  m.exposureShift = 0;
-  m.contrastShift = 0;
-  m.highlightsHueX = m.highlightsHueY = m.highlightsPush = 0;
-  m.highlightsDensityShift = m.highlightsSaturationShift = 0;
-  m.shadowsHueX = m.shadowsHueY = m.shadowsPush = 0;
-  m.shadowsDensityShift = m.shadowsSaturationShift = 0;
-  m.saturationShift = 0;
-  m.bloomThresholdShift = 0;
-  m.skyTint[0] = m.skyTint[1] = m.skyTint[2] = 0;
-  m.sunTint[0] = m.sunTint[1] = m.sunTint[2] = 0;
-  m.bakeTint[0] = m.bakeTint[1] = m.bakeTint[2] = 0;
-  m.fogTint[0] = m.fogTint[1] = m.fogTint[2] = 0;
-  m.sceneTint[0] = m.sceneTint[1] = m.sceneTint[2] = 0;
-  m.clearTint[0] = m.clearTint[1] = m.clearTint[2] = 0;
-
-  for (const phase of Object.keys(PHASE_MODIFIERS) as CyclePhase[]) {
-    const w = cycleState.weights[phase];
-
-    if (w <= 0) continue;
-
-    const p = PHASE_MODIFIERS[phase];
-
-    m.keyScale += w * p.keyScale;
-    m.bakeScale += w * p.bakeScale;
-    m.fogDensityScale += w * p.fogDensityScale;
-    m.gradientScale += w * p.gradientScale;
-    m.sceneSat += w * p.sceneSat;
-    m.glowBoost += w * p.glowBoost;
-    m.exposureShift += w * p.exposureShift;
-    m.contrastShift += w * p.contrastShift;
-    m.saturationShift += w * p.saturationShift;
-    m.bloomThresholdShift += w * p.bloomThresholdShift;
-    m.highlightsDensityShift += w * p.highlightsDensityShift;
-    m.highlightsSaturationShift += w * p.highlightsSaturationShift;
-    m.shadowsDensityShift += w * p.shadowsDensityShift;
-    m.shadowsSaturationShift += w * p.shadowsSaturationShift;
-
-    const hiPush = w * p.highlightsPush;
-
-    m.highlightsPush += hiPush;
-    m.highlightsHueX += hiPush * Math.cos(p.highlightsHue * RAD);
-    m.highlightsHueY += hiPush * Math.sin(p.highlightsHue * RAD);
-
-    const shPush = w * p.shadowsPush;
-
-    m.shadowsPush += shPush;
-    m.shadowsHueX += shPush * Math.cos(p.shadowsHue * RAD);
-    m.shadowsHueY += shPush * Math.sin(p.shadowsHue * RAD);
-
-    for (let i = 0; i < 3; i++) {
-      m.skyTint[i] += w * p.skyTint[i];
-      m.sunTint[i] += w * p.sunTint[i];
-      m.bakeTint[i] += w * p.bakeTint[i];
-      m.fogTint[i] += w * p.fogTint[i];
-      m.sceneTint[i] += w * p.sceneTint[i];
-      m.clearTint[i] += w * p.clearTint[i];
-    }
-  }
-
-  // Damp toward identity: scales lerp to 1, shifts and pushes to 0.
-  const s = strength;
-
-  m.keyScale = 1 + (m.keyScale - 1) * s;
-  m.bakeScale = 1 + (m.bakeScale - 1) * s;
-  m.fogDensityScale = 1 + (m.fogDensityScale - 1) * s;
-  m.gradientScale = 1 + (m.gradientScale - 1) * s;
-  m.sceneSat = 1 + (m.sceneSat - 1) * s;
-  m.glowBoost = 1 + (m.glowBoost - 1) * s;
-  m.exposureShift *= s;
-  m.contrastShift *= s;
-  m.saturationShift *= s;
-  m.bloomThresholdShift *= s;
-  m.highlightsDensityShift *= s;
-  m.highlightsSaturationShift *= s;
-  m.shadowsDensityShift *= s;
-  m.shadowsSaturationShift *= s;
-  m.highlightsPush *= s;
-  m.shadowsPush *= s;
-
-  for (let i = 0; i < 3; i++) {
-    m.skyTint[i] = 1 + (m.skyTint[i] - 1) * s;
-    m.sunTint[i] = 1 + (m.sunTint[i] - 1) * s;
-    m.bakeTint[i] = 1 + (m.bakeTint[i] - 1) * s;
-    m.fogTint[i] = 1 + (m.fogTint[i] - 1) * s;
-    m.sceneTint[i] = 1 + (m.sceneTint[i] - 1) * s;
-    m.clearTint[i] = 1 + (m.clearTint[i] - 1) * s;
-  }
-}
-
-/** Wrap-aware pull of `hue` toward the accumulated target, by `push`. */
-function pushHue(hue: number, x: number, y: number, push: number): number {
-  if (push <= 0) return hue;
-
-  const target = Math.atan2(y, x) * DEG;
-  const delta = ((target - hue + 540) % 360) - 180;
-
-  return hue + delta * push;
-}
-
 export const terrainBakeTint: [number, number, number] = [1, 1, 1];
 
 /**
@@ -1247,10 +823,6 @@ export function applySceneLook(
 createMapGradient(scene, camera);
 
   const look = { pipeline, glow };
-
-  installCycleUrlOverride(
-    typeof window === 'undefined' ? '' : window.location.search
-  );
 
   applySceneMood(scene, look, ENUM_WORLD.WD_0LORENCIA);
 
@@ -1408,122 +980,33 @@ let moodTarget: SceneMood = DEFAULT_MOOD;
 let moodBlend = 1;
 
 /**
- * The mood actually written to the frame: `moodShown` (the blend output)
- * with the cycle's phase modifiers applied on top. One writer of
- * `moodShown` (the blend), one modulation over its *output* — the tavern
- * fade and the cycle compose instead of fighting. Identical to `moodShown`
- * whenever the cycle is off.
+ * The map's authored sky bytes, handed over by `loadMapIntoScene` on each
+ * warp. Null for maps that declare none - those stay black.
  */
-const moodEffective = cloneMood(DEFAULT_MOOD);
+let mapClearColour: readonly [number, number, number] | null = null;
 
-/** `moodShown` × the blended phase modifier → `moodEffective`. */
-function modulateShownMood(): void {
-  lerpMood(moodShown, moodShown, 0, moodEffective);
-
-  if (cycleStrengthShown <= 0) return;
-
-  const m = blendedModifier;
-  const out = moodEffective;
-
-  out.sky *= m.keyScale;
-  out.sun *= m.keyScale;
-
-  for (let i = 0; i < 3; i++) {
-    out.skyDiffuse[i] *= m.skyTint[i];
-    out.skyGround[i] *= m.skyTint[i];
-    out.sunDiffuse[i] *= m.sunTint[i];
-    out.terrainBake[i] *= m.bakeScale * m.bakeTint[i];
-    out.fog.color[i] *= m.fogTint[i];
-  }
-
-  out.exposure += m.exposureShift;
-  out.contrast += m.contrastShift;
-  out.bloomThreshold += m.bloomThresholdShift;
-  out.fog.density *= m.fogDensityScale;
-  out.gradient *= m.gradientScale;
-
-  const st = out.splitTone;
-
-  st.highlightsHue = pushHue(
-    st.highlightsHue,
-    m.highlightsHueX,
-    m.highlightsHueY,
-    m.highlightsPush
-  );
-  st.shadowsHue = pushHue(
-    st.shadowsHue,
-    m.shadowsHueX,
-    m.shadowsHueY,
-    m.shadowsPush
-  );
-  st.highlightsDensity += m.highlightsDensityShift;
-  st.shadowsDensity += m.shadowsDensityShift;
-  st.saturation += m.saturationShift;
-  st.highlightsSaturation =
-    (st.highlightsSaturation ?? 0) + m.highlightsSaturationShift;
-  st.shadowsSaturation =
-    (st.shadowsSaturation ?? 0) + m.shadowsSaturationShift;
+export function setMapClearColour(
+  base: readonly [number, number, number] | null
+): void {
+  mapClearColour = base;
 }
 
 /**
- * The sun's direction from the cycle's angles — or the authored constant
- * when the cycle is off. Damped maps lerp between the two, so Atlans' sun
- * only drifts. The rig owns the light and the maths (keyRig.ts); this is the
- * cycle's one consumer seam.
+ * The sky is the clear colour (no skybox): the map’s authored bytes, set
+ * by `loadMapIntoScene`. Those bytes are authored at screen brightness
+ * (original client data), so the unified regrade’s exposure is divided
+ * back out the same way `compensateFog` does, or the raised grade
+ * re-exposes the sky.
  */
-function applyCycleSun(scene: Scene, strength: number): void {
-  setSunDirection(
-    scene,
-    cycleState.sunAzimuth,
-    cycleState.sunElevation,
-    strength
-  );
-}
-
-/**
- * The sky is the clear colour (no skybox), so the cycle retints the map's
- * authored bytes. Maps that declare none stay black — nothing to tint.
- */
-function applyCycleClear(scene: Scene): void {
-  const base = cycleContext.baseClear;
+function applyClearColour(scene: Scene): void {
+  const base = mapClearColour;
 
   if (!base) return;
 
-  const tint = blendedModifier.clearTint;
-
-  // The sky bytes are authored at screen brightness (original client data);
-  // divide out the unified regrade's exposure the same way compensateFog
-  // does, or the raised grade re-exposes the sky.
   const scale =
-    UNIFIED_LIGHT_MODEL && moodEffective.exposure > 0
-      ? 1 / moodEffective.exposure
-      : 1;
+    UNIFIED_LIGHT_MODEL && moodShown.exposure > 0 ? 1 / moodShown.exposure : 1;
 
-  scene.clearColor.set(
-    base[0] * tint[0] * scale,
-    base[1] * tint[1] * scale,
-    base[2] * tint[2] * scale,
-    1
-  );
-}
-
-/**
- * Recompute everything the cycle touches and write the frame: state from the
- * shared clock, modifiers, the modulated mood, sun direction, clear colour,
- * and the dynamic-light gain. Also the identity write-back that restores
- * today's look when the strength has just reached 0.
- */
-function refreshCycle(scene: Scene, look: SceneLook | undefined): void {
-  const s = cycleStrengthShown;
-
-  if (s > 0) cycleStateAt(serverNow(), cycleState);
-
-  blendPhaseModifiers(s);
-  modulateShownMood();
-  setCycleLightGain(1 + (cycleState.lightGain - 1) * s);
-  writeMood(scene, look, moodEffective);
-  applyCycleSun(scene, s);
-  applyCycleClear(scene);
+  scene.clearColor.set(base[0] * scale, base[1] * scale, base[2] * scale, 1);
 }
 
 const resolveMood = (world: ENUM_WORLD): SceneMood =>
@@ -1632,9 +1115,9 @@ function syncGlowEnabled(scene: Scene, look: SceneLook | undefined): void {
 const skyLightShown: [number, number, number] = [0, 0, 0];
 
 export function shownSkyLight(): readonly [number, number, number] {
-  skyLightShown[0] = moodEffective.skyDiffuse[0] * moodEffective.sky;
-  skyLightShown[1] = moodEffective.skyDiffuse[1] * moodEffective.sky;
-  skyLightShown[2] = moodEffective.skyDiffuse[2] * moodEffective.sky;
+  skyLightShown[0] = moodShown.skyDiffuse[0] * moodShown.sky;
+  skyLightShown[1] = moodShown.skyDiffuse[1] * moodShown.sky;
+  skyLightShown[2] = moodShown.skyDiffuse[2] * moodShown.sky;
   return skyLightShown;
 }
 
@@ -1648,14 +1131,7 @@ export function updateSceneMood(
 
   const dt = scene.getEngine().getDeltaTime() / 1000;
 
-  // Inside an area mood (tavern) the cycle eases out on the mood fade's own
-  // clock, so both cross the door as one transition.
-  const areaTarget = areaMood ? 0 : 1;
   const step = dt / MOOD_FADE_SECONDS;
-
-  cycleAreaFade +=
-    Math.sign(areaTarget - cycleAreaFade) *
-    Math.min(step, Math.abs(areaTarget - cycleAreaFade));
 
   const blending = moodBlend < 1;
 
@@ -1667,27 +1143,12 @@ export function updateSceneMood(
     lerpMood(moodFrom, moodTarget, t, moodShown);
   }
 
-  cycleTimer -= dt;
+  // Only a mood blend can move the frame now: the grade is the map's
+  // authored mood, so there is nothing to re-evaluate between transitions.
+  if (!blending) return;
 
-  const strength = cycleTargetStrength();
-
-  // Rewrite when the blend moved, the strength moved (fades, toggles - the
-  // last step to 0 restores today's look bit for bit), the override changed,
-  // or the slow clock ticked. The cycle crawls (a game day is an hour), so
-  // ~5 Hz between blends is plenty and writeMood is uniform writes only.
-  const dirty =
-    blending ||
-    cycleDirty ||
-    strength !== cycleStrengthShown ||
-    (strength > 0 && cycleTimer <= 0);
-
-  if (!dirty) return;
-
-  cycleDirty = false;
-  cycleTimer = CYCLE_TICK;
-  cycleStrengthShown = strength;
-
-  refreshCycle(scene, look);
+  writeMood(scene, look, moodShown);
+  applyClearColour(scene);
 }
 
 export function applySceneMood(
@@ -1706,12 +1167,8 @@ export function applySceneMood(
   lerpMood(mood, mood, 0, moodShown);
   lerpMood(mood, mood, 0, moodFrom);
 
-  // A snap, not a fade: the warp screen covers it, and the options path
-  // wants the new values now.
-  cycleAreaFade = areaMood ? 0 : 1;
-  cycleStrengthShown = cycleTargetStrength();
-
-  refreshCycle(scene, look);
+  writeMood(scene, look, moodShown);
+  applyClearColour(scene);
 }
 
 function writeMood(
@@ -1722,9 +1179,7 @@ function writeMood(
   applyMapGradient(
     appliedWorld,
     GameOptions.postProcessing ? mapGradientStrength() * mood.gradient : 0,
-    mood.exposure,
-    GameOptions.postProcessing ? blendedModifier.sceneTint : undefined,
-    GameOptions.postProcessing ? blendedModifier.sceneSat : 1
+    mood.exposure
   );
 
   [terrainBakeTint[0], terrainBakeTint[1], terrainBakeTint[2]] =
@@ -1784,15 +1239,11 @@ function writeMood(
   // without post-processing — otherwise "Improved" is invisible.
   const glowLive = post || improvedItemEffectsOn();
 
-  // The cycle's dark-hours boost rides on top of the slider: emissives
-  // (wings, item tiers, trim) pop at night as in the reference, and the
-  // night modifier's lower bloom threshold pulls the same direction.
   glow.intensity =
     glowLive
       ? (Math.max(0, GameOptions.glow) / GRAIN_MAX) *
         GLOW_MAX_INTENSITY *
-        LOOK_INTENSITY *
-        blendedModifier.glowBoost
+        LOOK_INTENSITY
       : 0;
 
   const sharpness = post ? Math.max(0, GameOptions.sharpness) : 0;

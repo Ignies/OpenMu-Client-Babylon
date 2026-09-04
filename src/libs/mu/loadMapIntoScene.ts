@@ -30,7 +30,7 @@ import { skills } from '../../skills';
 import { combat } from '../../combat';
 import { resetTerrainMask } from './terrainMask';
 import { setShadowWorld } from '../../common/objectShadow';
-import { setCycleContext } from '../../scenes/sceneLook';
+import { setMapClearColour } from '../../scenes/sceneLook';
 
 /** Bumped per warp request; a load whose serial is stale abandons its work. */
 let warpSerial = 0;
@@ -69,11 +69,9 @@ async function loadWorld(world: World) {
     ? new Color4(clear[0] / 256, clear[1] / 256, clear[2] / 256, 1)
     : new Color4(0, 0, 0, 1);
 
-  // The day/night cycle: the entry's scale and the authored clear colour it
-  // retints (the clear colour *is* the sky). Zero scale = the cycle's seams
-  // are identity and the write above is final.
-  setCycleContext(
-    maps.cycleScaleFor(map),
+  // The clear colour *is* the sky; the mood writer re-applies it with the
+  // linear-buffer exposure divided back out.
+  setMapClearColour(
     clear ? [clear[0] / 256, clear[1] / 256, clear[2] / 256] : null
   );
 

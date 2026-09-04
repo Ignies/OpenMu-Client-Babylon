@@ -54,8 +54,6 @@ export const doppelganger1Layer: MapLayer = {
   tiles: FULL_TILES,
   spawn: SPAWN,
   outdoor: OUTDOOR,
-  // Event set-piece: an authored moment, not a place with days.
-  dayCycle: 0,
   clearColor: CLEAR_COLOR,
   blendMeshes: DOPPELGANGER1_BLEND_MESHES,
   effectOnly: DOPPELGANGER1_EFFECT_ONLY_TYPES,

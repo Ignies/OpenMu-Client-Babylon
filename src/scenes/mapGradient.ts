@@ -249,12 +249,10 @@ Effect.ShadersStore[`${SHADER_NAME}FragmentShader`] = `
   // Lives here and not in the light tints because a blue *light* on brown
   // ground multiplies to olive - night has to grade the air, like the
   // reference does.
-  uniform vec3 phaseTint;
 
   // Resaturation after the phase tint (sceneLook sceneSat): a tint multiply
   // can only remove colour - cool light on warm ground cancels into grey -
   // so the dark phases pull their richness back here. 1 = untouched.
-  uniform float phaseSat;
 
   const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 
@@ -296,8 +294,6 @@ Effect.ShadersStore[`${SHADER_NAME}FragmentShader`] = `
     float gray = dot(col, LUMA);
     col = mix(vec3(gray), col, 1.0 + envelope.w * strength);
 
-    col *= phaseTint;
-    col = mix(vec3(dot(col, LUMA)), col, phaseSat);
 
 gl_FragColor = vec4(max(col, 0.0) / gradExposure, scene.a);
   }
@@ -312,9 +308,6 @@ let current: MapGradient = NEUTRAL_GRADIENT;
 let currentGlow: readonly [number, number, number] = DEFAULT_GLOW;
 let currentStrength = 0;
 let currentExposure = 1;
-/** The day/night cycle's full-frame grade (sceneLook `sceneTint`). */
-const currentPhaseTint: [number, number, number] = [1, 1, 1];
-let currentPhaseSat = 1;
 
 export function createMapGradient(scene: Scene, camera: Camera): void {
   if (pass) return;
@@ -335,8 +328,6 @@ export function createMapGradient(scene: Scene, camera: Camera): void {
       'shadowLift',
       'strength',
       'gradExposure',
-      'phaseTint',
-      'phaseSat',
     ],
     null,
     1,
@@ -383,8 +374,6 @@ export function createMapGradient(scene: Scene, camera: Camera): void {
       'gradExposure',
       passScene && linearBufferActive(passScene) ? currentExposure : 1
     );
-    effect.setFloat3('phaseTint', ...currentPhaseTint);
-    effect.setFloat('phaseSat', currentPhaseSat);
   };
 }
 
@@ -400,9 +389,7 @@ function setAttached(next: boolean): void {
 export function applyMapGradient(
   world: ENUM_WORLD,
   strength: number,
-  moodExposure = 1,
-  phaseTint?: readonly [number, number, number],
-  phaseSat = 1
+  moodExposure = 1
 ): void {
   const gradient = MAP_GRADIENTS[world];
 
@@ -410,16 +397,6 @@ export function applyMapGradient(
   currentGlow = MAP_GLOW[world] ?? DEFAULT_GLOW;
   currentStrength = Math.max(0, strength);
   currentExposure = Math.max(moodExposure, 0.01);
-  currentPhaseTint[0] = phaseTint?.[0] ?? 1;
-  currentPhaseTint[1] = phaseTint?.[1] ?? 1;
-  currentPhaseTint[2] = phaseTint?.[2] ?? 1;
-  currentPhaseSat = Math.max(0, phaseSat);
 
-  const tinted =
-    currentPhaseTint[0] !== 1 ||
-    currentPhaseTint[1] !== 1 ||
-    currentPhaseTint[2] !== 1 ||
-    currentPhaseSat !== 1;
-
-  setAttached((gradient !== undefined && currentStrength > 0) || tinted);
+  setAttached(gradient !== undefined && currentStrength > 0);
 }

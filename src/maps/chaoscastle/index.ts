@@ -53,8 +53,6 @@ export const chaoscastleLayer: MapLayer = {
   tiles: TILES,
   spawn: SPAWN,
   outdoor: OUTDOOR,
-  // Event set-piece: the castle is an authored moment, not a place with days.
-  dayCycle: 0,
   blendMeshes: CHAOS_CASTLE_BLEND_MESHES,
   effectOnly: CHAOS_CASTLE_EFFECT_ONLY_TYPES,
   emissions: CHAOS_CASTLE_EMISSIONS,
