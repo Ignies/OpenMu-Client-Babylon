@@ -66,6 +66,27 @@
     position: absolute;
   }
 
+  // `GridSquares` gives every square its left/top inline, which does nothing
+  // until the square is taken out of flow. Without this they stack vertically
+  // and spill out of the window.
+  .cash-square {
+    position: absolute;
+
+    &.used::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 20px;
+      height: 20px;
+      background-color: #4d808099;
+    }
+
+    &.hovered::after {
+      background-color: #80b3ff99;
+    }
+  }
+
   .cash-item {
     position: absolute;
     display: grid;
