@@ -21,7 +21,7 @@
  * through `MoveCharacterCamera(origin 0,0,0, position, angle)` at FOV 45.
  */
 import type { ArcRotateCamera } from '../../../../src/libs/babylon/exports';
-import { Texture, Vector3 } from '../../../../src/libs/babylon/exports';
+import { Color4, Texture, Vector3 } from '../../../../src/libs/babylon/exports';
 import { ModelObject } from '../../../../src/common/modelObject';
 import { loadGLTF } from '../../../../src/common/modelLoader';
 import { toRadians } from '../../../../src/common/utils';
@@ -79,11 +79,21 @@ type Piece = {
   readonly scale: number;
   readonly light: readonly [number, number, number];
   /**
-   * Where the piece sits, in MU units. The sea and the sky are authored
-   * around the world origin the scene is built on; the ship, the wordmark
-   * and the sun are placed. The 0.97d client's own `CreateLogInScene` is not
-   * in the reference tree (Season 4 replaced it), so these three are framed
-   * to the original's camera rather than copied from it.
+   * Where the piece sits, in MU units.
+   *
+   * `MoveCamera` passes Origin (0,0,0) to `MoveCharacterCamera`, so the
+   * waypoints are absolute world positions: the settled login camera stands
+   * *on* the ship, at its stern, looking forward down the deck. The ship is
+   * placed to make that true rather than the camera moved to frame the ship.
+   * Measured in the scene (the BMD's raw extents ignore the bone transforms):
+   * at scale 0.8 the hull is 1489 units long on the MU Y axis, bow already
+   * pointing +Y at yaw 0, origin 939 back from the stern - so at y -420 the
+   * transom sits about 260 behind the camera.
+   *
+   * The sky and the water are authored around the origin and stay there. The
+   * 0.97d `CreateLogInScene` is not in the reference tree (Season 4 replaced
+   * it), so the placements here are framed to the original's camera rather
+   * than copied from it.
    */
   readonly at?: readonly [number, number, number];
   /** Yaw in degrees. */
@@ -125,15 +135,14 @@ const PIECES: readonly Piece[] = [
     file: 'Object1/Ship01.glb',
     scale: 0.8,
     light: [1, 1, 1],
-    at: [420, 1500, -60],
-    yaw: 28,
+    at: [0, -420, 0],
   },
   {
     file: 'Logo/Logo03.glb',
     scale: 1.5,
     light: [1, 1, 1],
     blendMesh: 1,
-    at: [-560, 1560, 640],
+    at: [-520, 1560, 520],
     loginOnly: true,
   },
   {
@@ -153,8 +162,19 @@ function scrollV(elapsedMs: number): number {
 const ORIGIN = { x: 0, y: 0, z: 0 };
 const NO_ROTATION = { x: 0, y: 0, z: 0 };
 
+/**
+ * The sky shell is open at the top and sized for the original's 4:3 viewport;
+ * on a 16:9 canvas its rim comes into frame at the character-select pitch.
+ * Clearing to the dusk it fades into hides the seam without touching the
+ * source's scale.
+ */
+const SKY_CLEAR = new Color4(0.07, 0.045, 0.04, 1);
+
 export function createShipScene(world: World): PregameScene {
   const scene = world.scene;
+
+  const previousClear = scene.clearColor.clone();
+  scene.clearColor = SKY_CLEAR;
 
   const parts: { piece: Piece; object: ModelObject }[] = [];
   /** The sheets `BlendMeshTexCoordV` runs on: the clouds and the water. */
@@ -260,6 +280,7 @@ export function createShipScene(world: World): PregameScene {
     dispose() {
       disposed = true;
       scrolling.length = 0;
+      scene.clearColor = previousClear;
 
       for (const { object } of parts) object.dispose();
 
