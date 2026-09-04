@@ -2877,7 +2877,7 @@ function storeStorageOf(storage: StorageKind, wireSlot: number): StorageKind {
 EventBus.on('ItemMoveRequestFailed', () => {
   console.warn('ItemMoveRequestFailed - rolling the item back');
   Store.rollbackItemMove();
-  Store.addNotification(`Can't move that item there`, 'error');
+  Store.addNotification(t('notify.cannotMoveItem'), 'error');
 });
 
 EventBus.on('ItemAddedToInventory', packet => {
@@ -3210,7 +3210,7 @@ EventBus.on('PlayerShopItemList', packet => {
   const p = new PlayerShopItemListPacket(packet);
 
   if (!p.Success) {
-    Social.errorMessage('That shop could not be opened.');
+    Social.errorMessage(t('personalShop.openFailed'));
     return;
   }
 
@@ -3254,7 +3254,7 @@ EventBus.on('ItemDropResponse', packet => {
   if (!p.Success) {
     console.warn(`Drop of slot ${p.InventorySlot} refused`);
     Store.rollbackItemMove();
-    Store.addNotification(`Can't drop that item`, 'error');
+    Store.addNotification(t('notify.cannotDropItem'), 'error');
     return;
   }
 
@@ -3279,8 +3279,8 @@ EventBus.on('ItemPickUpRequestFailed', packet => {
   Store.addNotification(
     reason ===
       ItemPickUpRequestFailedItemPickUpFailReasonEnum.__MaximumInventoryMoneyReached
-      ? 'You are carrying too much zen'
-      : `Can't pick that up`,
+      ? t('notify.carryingTooMuchZen')
+      : t('notify.cannotPickUp'),
     'error'
   );
 });
@@ -3289,7 +3289,7 @@ EventBus.on('CharacterStatIncreaseResponse', packet => {
   const p = new CharacterStatIncreaseResponsePacket(packet);
 
   if (!p.Success) {
-    Store.addNotification(`Could not add the point`, 'error');
+    Store.addNotification(t('notify.pointNotAdded'), 'error');
     return;
   }
 
@@ -3359,7 +3359,7 @@ function applyLevelUpdate(p: LevelUpdateView) {
     }
   });
 
-  Store.addNotification(`Level ${p.Level}`);
+  Store.addNotification(t('notify.levelUp', { level: p.Level }));
 }
 
 EventBus.on('CharacterLevelUpdate', packet =>
@@ -3374,7 +3374,7 @@ EventBus.on('MasterCharacterLevelUpdate', packet => {
   runInAction(() => {
     Store.playerData.masterLevel = p.MasterLevel;
   });
-  Store.addNotification(`Master level ${p.MasterLevel}`);
+  Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
 });
 
 // C3 16 — sent for every kill share. Without this handler the exp bar only
@@ -3508,7 +3508,7 @@ EventBus.on('CharacterStatIncreaseResponseExtended', packet => {
   const added = p.AddedAmount;
 
   if (added === 0) {
-    Store.addNotification(`Could not add the point`, 'error');
+    Store.addNotification(t('notify.pointNotAdded'), 'error');
     return;
   }
 
@@ -3557,7 +3557,7 @@ EventBus.on('MasterCharacterLevelUpdateExtended', packet => {
     Store.playerData.maxSD = p.MaximumShield;
     Store.playerData.maxAG = p.MaximumAbility;
   });
-  Store.addNotification(`Master level ${p.MasterLevel}`);
+  Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
 });
 
 /**
@@ -3624,31 +3624,31 @@ EventBus.on('FruitConsumptionResponse', packet => {
   switch (p.Result) {
     case R.PlusSuccess:
       move(1);
-      Store.addNotification(`${statName} +${points} (fruit)`);
+      Store.addNotification(t('notify.fruitAdd', { stat: statName, points }));
       break;
     case R.MinusSuccess:
     case R.MinusSuccessCashShopFruit:
       move(-1);
-      Store.addNotification(`${statName} -${points} (fruit)`);
+      Store.addNotification(t('notify.fruitRemove', { stat: statName, points }));
       break;
     case R.PlusFailed:
     case R.MinusFailed:
-      Store.addNotification('The fruit had no effect', 'error');
+      Store.addNotification(t('notify.fruitNoEffect'), 'error');
       break;
     case R.PlusPreventedByMaximum:
     case R.MinusPreventedByMaximum:
-      Store.addNotification('You cannot use any more fruits today', 'error');
+      Store.addNotification(t('notify.fruitLimit'), 'error');
       break;
     case R.MinusPreventedByDefault:
-      Store.addNotification(`${statName} cannot go any lower`, 'error');
+      Store.addNotification(t('notify.fruitFloor', { stat: statName }), 'error');
       break;
     case R.PreventedByEquippedItems:
-      Store.addNotification('Take off the items that need this stat first', 'error');
+      Store.addNotification(t('notify.fruitEquipped'), 'error');
       break;
     case R.PlusPrevented:
     case R.MinusPrevented:
     default:
-      Store.addNotification('You cannot use this fruit now', 'error');
+      Store.addNotification(t('notify.fruitNotNow'), 'error');
       break;
   }
 });
