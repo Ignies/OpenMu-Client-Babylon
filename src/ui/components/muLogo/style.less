@@ -15,7 +15,12 @@
     height: 100%;
   }
 
-  // `glColor4f(alpha - 0.3)` on the glow: it trails the mark.
+  // `glColor4f(alpha - 0.3)` on the glow: it trails the mark. A version whose
+  // tree has only the JPEG draws it alone, at full strength.
+  .mu-logo-glow.is-only {
+    opacity: 1;
+  }
+
   .mu-logo-glow {
     opacity: 0.7;
     background-size: 100% 100%;

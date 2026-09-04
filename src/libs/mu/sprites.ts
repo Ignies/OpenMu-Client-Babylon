@@ -1,5 +1,17 @@
-import { downloadDataFile } from './dataFolder';
+import { downloadDataFile, hasDataFile } from './dataFolder';
 import { decodeTGA } from './tga';
+
+/**
+ * What a path the active version's tree does not contain decodes to: a 1x1
+ * transparent pixel, so a frame drawn from it is empty rather than an error
+ * per paint. A data URL and not a blob, so `clearSpriteCache` has nothing to
+ * revoke. See `hasDataFile`.
+ */
+const ABSENT_SPRITE: MuSprite = {
+  url: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+  width: 1,
+  height: 1,
+};
 
 const OZJ_HEADER_SIZE = 24;
 const OZT_HEADER_SIZE = 4;
@@ -71,6 +83,8 @@ export function clearSpriteCache(filter?: (path: string) => boolean): void {
 }
 
 async function loadSprite(path: string): Promise<MuSprite> {
+  if (!hasDataFile(path)) return ABSENT_SPRITE;
+
   const buffer = await downloadDataFile(path);
   const ext = path.split('.').pop()?.toLowerCase();
 

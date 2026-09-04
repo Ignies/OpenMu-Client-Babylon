@@ -22,6 +22,7 @@ import {
 } from './libs/mu/preloadSprites';
 import { installPerfOverlay, recordFrame } from './libs/perfOverlay';
 import { refreshServerList } from './common/serverList';
+import { loadVersionUi } from './version';
 
 if (APP_STAGE === 'dev' || QA_ENABLED) {
   import('@babylonjs/core/Legacy/legacy');
@@ -151,13 +152,25 @@ window.addEventListener('resize', onResize);
 
 onResize();
 
-const PREGAME_WORLDS: ReadonlySet<ENUM_WORLD> = new Set([
-  ENUM_WORLD.WD_73NEW_LOGIN_SCENE,
-  ENUM_WORLD.WD_74NEW_CHARACTER_SCENE,
-]);
+/**
+ * The version's two menu worlds, so stepping from the login backdrop to the
+ * character one does not flash the loading screen. Empty for a version whose
+ * pre-game backdrop is a standalone set piece instead of a world.
+ */
+let pregameWorlds: ReadonlySet<ENUM_WORLD> = new Set();
+
+void loadVersionUi().then(({ pregame }) => {
+  if (pregame.backdrop.kind !== 'world') return;
+
+  pregameWorlds = new Set([
+    pregame.backdrop.login,
+    pregame.backdrop.characters,
+  ]);
+});
 
 EventBus.on('requestWarp', ({ map, pos }) => {
-  const betweenMenus = PREGAME_WORLDS.has(map) && PREGAME_WORLDS.has(world.mapIndex);
+  const betweenMenus =
+    pregameWorlds.has(map) && pregameWorlds.has(world.mapIndex);
 
   if (!betweenMenus) {
     Store.setSceneLoading(true);
