@@ -48,6 +48,24 @@
     cursor: pointer;
   }
 
+  // Same type as the labels around it; the colour is what marks it clickable,
+  // since MU has no underlined link anywhere in its interface.
+  .login-register {
+    position: absolute;
+    pointer-events: auto;
+    cursor: pointer;
+    color: #b3b3b3;
+    font-size: 11px;
+    line-height: 1;
+    text-decoration: none;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+
+    &:hover {
+      color: #ffffff;
+    }
+  }
+
   // The box art is the input's background, so the field itself is invisible
   // chrome sitting exactly on top of it.
   .login-input {

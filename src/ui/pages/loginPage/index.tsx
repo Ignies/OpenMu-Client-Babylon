@@ -3,7 +3,11 @@ import { uiClick } from '../../../libs/sfx';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store, UIState } from '../../../store';
-import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../../../consts';
+import {
+  MAX_PASSWORD_LENGTH,
+  MAX_USERNAME_LENGTH,
+  REGISTER_URL,
+} from '../../../consts';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { MuText } from '../../components/muText';
 import { MuLogo } from '../../components/muLogo';
@@ -33,6 +37,14 @@ const CHECK_X = 109;
 const CHECK_Y = 156;
 
 const LABEL_X = 30;
+
+/**
+ * The signup link, on the button row and to the left of OK. The buttons start
+ * at x=150, so that half of the row is empty art, and text rather than a third
+ * button keeps it what it is: the way out of this window, not another thing to
+ * press before logging in.
+ */
+const REGISTER = { x: LABEL_X, y: 187 };
 
 /** `CLoginWin::Render`: the server line in `g_hFixFont` at (111, 80). */
 const SERVER_LINE = { x: 111, y: 80 };
@@ -168,6 +180,22 @@ export const LoginPage = observer(() => {
             }}
             style={{ position: 'absolute', left: CANCEL_X, top: BUTTON_Y }}
           />
+
+          {/* Only when the build names a signup page (`VITE_REGISTER_URL`).
+              A new tab, not this one: leaving would drop the connection and
+              cost the player the scene they just waited for. */}
+          {!!REGISTER_URL && (
+            <a
+              className="login-register"
+              href={REGISTER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ left: REGISTER.x, top: REGISTER.y }}
+              onClick={uiClick()}
+            >
+              {t('login.createAccount')}
+            </a>
+          )}
 
           {}
           <button type="submit" className="login-submit" tabIndex={-1} />

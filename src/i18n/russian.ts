@@ -73,6 +73,7 @@ export const russianLayer: LanguageLayer = {
     'servers.serverName': 'Сервер {number}',
 
     'login.enterCredentials': 'Введите имя аккаунта и пароль',
+    'login.createAccount': 'Создать аккаунт',
     'login.rememberMe': 'Запомнить меня?',
 
     'characters.loading': 'Загрузка персонажей...',

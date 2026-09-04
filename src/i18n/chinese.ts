@@ -75,6 +75,7 @@ export const chineseLayer: LanguageLayer = {
     'servers.serverName': '服务器 {number}',
 
     'login.enterCredentials': '请输入账号和密码',
+    'login.createAccount': '创建账号',
     'login.rememberMe': '记住我？',
 
     'characters.loading': '正在加载角色...',
