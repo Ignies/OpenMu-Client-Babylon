@@ -22,8 +22,6 @@ import {
 } from './libs/mu/preloadSprites';
 import { installPerfOverlay, recordFrame } from './libs/perfOverlay';
 import { refreshServerList } from './common/serverList';
-// The cycle's tab in the offline debug menu; imported for the registration.
-import './scenes/dayCycleDebug';
 
 if (APP_STAGE === 'dev' || QA_ENABLED) {
   import('@babylonjs/core/Legacy/legacy');

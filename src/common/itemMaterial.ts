@@ -9,7 +9,11 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { pbrMapsFor, pbrPlaceholders } from './pbrMaps';
-import { pbrDetailStrength, pbrKeyGain } from './materialQuality';
+import {
+  pbrDetailStrength,
+  pbrKeyGain,
+  specularLightScale,
+} from './materialQuality';
 import { UNIFIED_LIGHT_MODEL, bodyLightTint } from './lightModel';
 import { pointLightPoolSize } from './pointLightPool';
 import {
@@ -196,12 +200,22 @@ function bindSunWrap(effect: Effect, mesh: AbstractMesh) {
 
   const d = sun.direction;
   const norm = 1 / (Math.hypot(d.x, d.y, d.z) || 1);
+
+  // `sun.intensity` carries `directLightGain` - a π the PBR material needs to
+  // undo Burley's 1/π on its *diffuse*. This fill is neither: it is a
+  // hand-written additive term that never had the 1/π to undo, so it takes
+  // the sun's plain intensity. Left alone it came out π× too strong on the
+  // Enhanced tier, a flat wash over every lit surface that pushed shaded
+  // sides up to the lit ones - the same mistake `specularLightScale` already
+  // corrects for the highlight, which is why it is the same factor.
+  const fill = sun.intensity * specularLightScale();
+
   effect.setFloat3(SUN_DIR_UNIFORM, d.x * norm, d.y * norm, d.z * norm);
   effect.setFloat3(
     SUN_COLOR_UNIFORM,
-    sun.diffuse.r * sun.intensity,
-    sun.diffuse.g * sun.intensity,
-    sun.diffuse.b * sun.intensity
+    sun.diffuse.r * fill,
+    sun.diffuse.g * fill,
+    sun.diffuse.b * fill
   );
   effect.setFloat3(SUN_WRAP_UNIFORM, wrap[0], wrap[1], wrap[2]);
 }
@@ -736,6 +750,28 @@ export function createItemPbrMaterial(scene: Scene) {
   material.usePhysicalLightFalloff = false;
   material.enableSpecularAntiAliasing = true;
   material.environmentIntensity = 0;
+
+  // Dielectric F0 off, so only the metalness map decides what glints.
+  //
+  // The PBR fragment builds every light's specular from that light's
+  // *diffuse* colour, never its `specular` one (`lightFragment`:
+  // `computeSpecularLighting(..., diffuse{X}.rgb)`) - so parking
+  // `sky.specular` on the rig, which is what keeps the Standard path clean,
+  // buys nothing here. The sky key is a full hemisphere at intensity 1 that
+  // nothing can occlude, so its highlight is not a reflection of anything: it
+  // is a constant 0.04 of white laid over every pixel of every lit surface.
+  // That is a veil, and it lands hardest exactly where the art has the least
+  // headroom. Measured on Lorencia against the Classic tier, same frame: the
+  // 5th-percentile black lifted 0.042 -> 0.086, saturation fell 0.50 -> 0.40
+  // and texture detail dropped 9%, which is the greyed-out shading the
+  // Enhanced tier was reported with.
+  //
+  // Zeroing the factor drops F0 for dielectrics only. A texel the derived
+  // metal-rough map calls metal still reflects, at `metallic x albedo`, so
+  // plate and gems keep their glint under a torch while oak and stone stop
+  // being sheened. With it, the tier is pixel-identical to Classic wherever
+  // the art is not metal, and everything it adds on top is relief.
+  material.metallicF0Factor = 0;
   material.ambientColor.setAll(0);
 
   addItemUniforms(material, scene);

@@ -40,8 +40,6 @@ export const empireguardianLayer: MapLayer = {
   tiles: FULL_TILES,
   spawn: SPAWN,
   outdoor: OUTDOOR,
-  // Event set-piece: an authored moment, not a place with days.
-  dayCycle: 0,
   blendMeshes: EMPIRE_GUARDIAN_BLEND_MESHES,
   effectOnly: EMPIRE_GUARDIAN_EFFECT_ONLY_TYPES,
   emissions: EMPIRE_GUARDIAN_EMISSIONS,

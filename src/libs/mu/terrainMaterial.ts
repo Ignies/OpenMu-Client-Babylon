@@ -295,7 +295,14 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
 ${terrainOverlayLitGlsl(
   overlays,
   'lit',
-  'vColor.rgb * bakeTint * bakeShadow + dynLight + roomKey',
+  // `bakeTint` is the mood grade's material-side pre-multiply and the
+  // post-side `exposure` is what pays it back, so it has to cover the whole
+  // ground light rather than the baked half alone. With the torches added
+  // outside it they never paid the tint but still took the payback, landing
+  // 1/luma(bakeTint) - 1.44x on Lorencia - over everything they lit. That is
+  // the molten-orange wash torch-lit ground came out with on the graded
+  // tiers. Ungraded the tint is white and this is a no-op.
+  '(vColor.rgb * bakeShadow + dynLight) * bakeTint + roomKey',
   'vColor',
   'sunShadow',
   'dynLight + roomKey'

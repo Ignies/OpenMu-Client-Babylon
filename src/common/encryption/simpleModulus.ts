@@ -1,4 +1,5 @@
-import { castToByte, integerDevision, castToUInt, castToUShort, getPacketHeaderSize, getPacketSize, setPacketSize, ArrayCopy } from "../utils";
+import { castToByte, ArrayCopy } from "../binaryUtils";
+import { integerDevision, castToUInt, castToUShort, getPacketHeaderSize, getPacketSize, setPacketSize } from "../wireUtils";
 
 export class SimpleModulusKeys {
   public ModulusKey: number[] = [0, 0, 0, 0];

@@ -59,14 +59,6 @@ export interface MapLayer {
   readonly outdoor?: boolean;
 
   /**
-   * How much of the day/night cycle this map takes, 0..1. Defaults to 1
-   * where `outdoor` is set and 0 everywhere else. Declare it to opt out
-   * (event set-pieces are authored moments: 0) or to damp (Atlans: a sun
-   * twenty metres down is a rumour). Read through `maps.cycleScaleFor`.
-   */
-  readonly dayCycle?: number;
-
-  /**
    * The sky belongs to snow: rain never falls here however the weather byte
    * reads (`CreateDeviasSnow` gates on the world alone), objects carry snow
    * caps, footsteps read as snow. Read through `weather/ambientWeather.ts`'s
