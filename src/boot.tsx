@@ -47,6 +47,25 @@ try {
 // Keyboard: every keydown guard (page scroll keys, Tab, Alt, IME, the
 // window stack) lives in `ecs/systems/keyboardInputSystem.ts`.
 const ignoredIds = ['scene-explorer-host', 'inspector-host'];
+
+// The right button is the cast button (`Attack()` with MouseRButton), and
+// the browser's context menu carries "Reload" — one right click that lands
+// on a HUD element, a window, a name tag or the page margin instead of the
+// canvas used to open it, and a slip from there reloaded the game. The
+// canvas already swallowed its own `contextmenu`; this covers everything
+// else on the page. Text fields keep theirs: an input's menu has no reload
+// entry and is how some players paste into chat.
+window.addEventListener('contextmenu', ev => {
+  let p = ev.target as HTMLElement | null;
+  while (p) {
+    if (p.isContentEditable) return;
+    const tag = p.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (p.classList && ignoredIds.includes(p.id)) return;
+    p = p.parentElement;
+  }
+  ev.preventDefault();
+});
 window.addEventListener(
   'wheel',
   ev => {
