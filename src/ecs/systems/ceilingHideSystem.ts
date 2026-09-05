@@ -1,5 +1,7 @@
 import type { AbstractMesh } from '../../libs/babylon/exports';
 import { ENUM_WORLD } from '../../common/types';
+import { lookDirector } from '../../lighting/director';
+import type { AreaRect } from '../../lighting/profiles';
 import type { ISystemFactory } from '../world';
 
 /**
@@ -15,10 +17,15 @@ import type { ISystemFactory } from '../world';
  * mesh is "a ceiling piece" when its world AABB is a thin slab above head
  * height. The piece over the hero seeds a flood fill through touching pieces
  * at about the same height, so the whole roof of that building fades, not
- * just the tile above him.
+ * just the tile above him. While a room is the active area its frame seeds
+ * the set instead: every slab whose centre lies inside it, whole roof, however
+ * long the room (§13 F11).
  */
 
-const ENABLED_WORLDS = new Set<ENUM_WORLD>([ENUM_WORLD.WD_2DEVIAS]);
+const ENABLED_WORLDS = new Set<ENUM_WORLD>([
+  ENUM_WORLD.WD_0LORENCIA,
+  ENUM_WORLD.WD_2DEVIAS,
+]);
 
 /** Slab bottom must be this far (tiles) above the hero's feet: clears his head. */
 const ABOVE_HEAD = 1.0;
@@ -89,9 +96,21 @@ export const CeilingHideSystem: ISystemFactory = world => {
   let lastTileX = NaN;
   let lastTileZ = NaN;
   let lastMapIndex: ENUM_WORLD | null = null;
+  let lastRoom = '';
   let sinceRescan = RESCAN_INTERVAL;
 
-  function collectSlabs(heroY: number, hx: number, hz: number) {
+  const roomKey = (room: AreaRect | null) =>
+    room ? `${room.minX},${room.minY},${room.maxX},${room.maxY}` : '';
+
+  /** Whether the slab's centre lies inside the room's frame. */
+  function inRoom(s: Slab, room: AreaRect): boolean {
+    const cx = (s.minX + s.maxX) * 0.5;
+    const cz = (s.minZ + s.maxZ) * 0.5;
+
+    return cx >= room.minX && cx <= room.maxX && cz >= room.minY && cz <= room.maxY;
+  }
+
+  function collectSlabs(heroY: number, hx: number, hz: number, room: AreaRect | null) {
     slabs.length = 0;
 
     for (const e of query) {
@@ -99,8 +118,13 @@ export const CeilingHideSystem: ISystemFactory = world => {
       if (e.visibility.state !== 'visible') continue;
 
       const { pos } = e.transform;
-      if (Math.abs(pos.x - hx) > OBJECT_REACH) continue;
-      if (Math.abs(pos.z - hz) > OBJECT_REACH) continue;
+      if (room) {
+        if (pos.x < room.minX - OBJECT_REACH || pos.x > room.maxX + OBJECT_REACH) continue;
+        if (pos.z < room.minY - OBJECT_REACH || pos.z > room.maxY + OBJECT_REACH) continue;
+      } else {
+        if (Math.abs(pos.x - hx) > OBJECT_REACH) continue;
+        if (Math.abs(pos.z - hz) > OBJECT_REACH) continue;
+      }
 
       const mo = e.modelObject;
       if (!mo.Ready || !mo.gltf) continue;
@@ -118,7 +142,7 @@ export const CeilingHideSystem: ISystemFactory = world => {
 
         const cx = (min.x + max.x) * 0.5 - hx;
         const cz = (min.z + max.z) * 0.5 - hz;
-        if (cx * cx + cz * cz > ROOF_RADIUS * ROOF_RADIUS) continue;
+        if (!room && cx * cx + cz * cz > ROOF_RADIUS * ROOF_RADIUS) continue;
 
         slabs.push({
           mesh,
@@ -163,51 +187,66 @@ export const CeilingHideSystem: ISystemFactory = world => {
 
         const tileX = Math.floor(hx / RESCAN_TILE);
         const tileZ = Math.floor(hz / RESCAN_TILE);
+        const room = lookDirector()?.state().area?.rect ?? null;
+        const roomNow = roomKey(room);
 
         // Gate: re-derive the roof only when the hero changes tile, the map
-        // changes, or the fallback interval expires. Everything else in this
-        // system is the per-frame fade, which is O(faded meshes).
+        // or the room changes, or the fallback interval expires. Everything
+        // else in this system is the per-frame fade, which is O(faded meshes).
         if (
           tileX !== lastTileX ||
           tileZ !== lastTileZ ||
           world.mapIndex !== lastMapIndex ||
+          roomNow !== lastRoom ||
           sinceRescan >= RESCAN_INTERVAL
         ) {
           lastTileX = tileX;
           lastTileZ = tileZ;
           lastMapIndex = world.mapIndex;
+          lastRoom = roomNow;
           sinceRescan = 0;
 
-          collectSlabs(hy, hx, hz);
+          collectSlabs(hy, hx, hz, room);
 
-          // Seeds: slabs directly over the hero.
           const roof: Slab[] = [];
           const inRoof = new Set<Slab>();
-          for (const s of slabs) {
-            if (
-              hx >= s.minX - FOOTPRINT_MARGIN &&
-              hx <= s.maxX + FOOTPRINT_MARGIN &&
-              hz >= s.minZ - FOOTPRINT_MARGIN &&
-              hz <= s.maxZ + FOOTPRINT_MARGIN
-            ) {
-              roof.push(s);
-              inRoof.add(s);
-            }
-          }
 
-          // Flood fill through touching pieces: the rest of this building's roof.
-          for (let i = 0; i < roof.length; i++) {
-            const a = roof[i];
-            for (const b of slabs) {
-              if (inRoof.has(b)) continue;
-              if (!touches(a, b)) continue;
-              roof.push(b);
-              inRoof.add(b);
+          if (room) {
+            // The room's whole roof: every slab over its frame.
+            for (const s of slabs) {
+              if (inRoom(s, room)) {
+                roof.push(s);
+                inRoof.add(s);
+              }
+            }
+          } else {
+            // Seeds: slabs directly over the hero.
+            for (const s of slabs) {
+              if (
+                hx >= s.minX - FOOTPRINT_MARGIN &&
+                hx <= s.maxX + FOOTPRINT_MARGIN &&
+                hz >= s.minZ - FOOTPRINT_MARGIN &&
+                hz <= s.maxZ + FOOTPRINT_MARGIN
+              ) {
+                roof.push(s);
+                inRoof.add(s);
+              }
+            }
+
+            // Flood fill through touching pieces: the rest of this building's roof.
+            for (let i = 0; i < roof.length; i++) {
+              const a = roof[i];
+              for (const b of slabs) {
+                if (inRoof.has(b)) continue;
+                if (!touches(a, b)) continue;
+                roof.push(b);
+                inRoof.add(b);
+              }
             }
           }
 
           roofMeshes = roof.map(s => s.mesh);
-          heroUnderRoof = roofMeshes.length > 0;
+          heroUnderRoof = roofMeshes.length > 0 || room !== null;
         }
 
         // Re-assert the hide flag every frame from the carried set: the fade
@@ -229,6 +268,7 @@ export const CeilingHideSystem: ISystemFactory = world => {
         lastTileX = NaN;
         lastTileZ = NaN;
         lastMapIndex = null;
+        lastRoom = '';
         heroUnderRoof = false;
       }
 
@@ -244,9 +284,15 @@ export const CeilingHideSystem: ISystemFactory = world => {
 
         if (entry.hide) {
           mesh.visibility = Math.max(0, mesh.visibility - step);
+          // A faded slab must leave the depth passes too (G-buffer, room
+          // mask, cascades): they test isVisible, not visibility, and a
+          // roof gone from the frame but present in the depth would black
+          // out the floor under it.
+          if (mesh.visibility <= 0) mesh.isVisible = false;
           // Re-evaluated next frame; anything no longer part of the roof fades back.
           entry.hide = false;
         } else {
+          mesh.isVisible = true;
           mesh.visibility = Math.min(1, mesh.visibility + step);
           if (mesh.visibility >= 1) fading.delete(mesh);
         }

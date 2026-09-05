@@ -39,8 +39,11 @@ const LIGHT_RANGE = 6;
  */
 const INTENSITY = 1.1;
 
+/** The map's level and the room's emitter gain, one product (`AreaLook.candles`, 1 outside a room). */
 function keyGain(): number {
-  return lookDirector()?.state().keyGain ?? 1;
+  const look = lookDirector()?.state();
+
+  return look ? look.keyGain * look.key.emitterGain : 1;
 }
 
 const HEIGHT_OFFSET = 0.6;

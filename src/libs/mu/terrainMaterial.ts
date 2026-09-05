@@ -204,9 +204,7 @@ ${water ? terrainWaterVertexGlsl(water.spec) : ''}
   uniform float linearOut;
   uniform float linearLight;
   uniform float keyGain;
-  uniform vec3 interiorAmbient;
-  uniform vec4 roomRect; // tiles: minX, minY, maxX, maxY
-  uniform float roomShadow;
+  uniform vec2 roomParams; // x: a room is the active area, y: gain on the delta (AreaLook.candles)
 ${
   tileArray
     ? `  uniform highp sampler2DArray tileTextures;
@@ -260,7 +258,7 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
     // roof mask the ground overlays need (terrainMask.ts). Sampled before the
     // overlay so skyOpen is in scope for it.
     vec4 dynSample = texture2D(dynamicLight, (vWorldXZ + 0.5) / 256.0);
-    vec3 dynLight = dynSample.rgb * 2.0;
+    vec3 dynLight = dynSample.rgb * 2.0 * roomParams.y;
     float skyOpen = dynSample.a;
 
     ${terrainOverlayGlsl(overlays, FINAL_COLOR_VAR_NAME, 'skyOpen')}
@@ -272,26 +270,20 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
     // the authority and the bake keeps the room it was authored for - until
     // the room itself is the active area (roomShadow): then its furniture
     // and figures cast on the floor under the roof as well.
-    float sunShadow = mix(1.0, csmShadow(vWorldPos, vViewZ), max(skyOpen, roomShadow));
+    float sunShadow = mix(1.0, csmShadow(vWorldPos, vViewZ), max(skyOpen, roomParams.x));
 
     // The one shadow rule: a shadow removes the sun and leaves the sky share
     // (csmParams.y, the policy floor). 1 while Classic (no cascades).
     float bakeShadow = mix(csmParams.y, 1.0, sunShadow);
 
-    // Indoors the ground gets a share of the hemispheric key back (the
-    // director's interiorGround): under a roof the bake is the room's own
-    // dark value and this shader has no key term, so without it the candles
-    // are the floor's entire light and it takes all of their hue. Weighted by
-    // the mask, so it stops at the door.
-    vec3 roomKey = interiorAmbient * (1.0 - skyOpen);
-
     // The ground light sum. Tiers >= 1 (linearLight): lin(bake) x floor +
-    // delta + key, the delta linear-authored and added after the decode.
-    // Classic: the original's gamma-space bake + delta (ZzzLodTerrain.cpp:
-    // 481-505), untouched.
+    // delta, the delta linear-authored and added after the decode. Classic:
+    // the original's gamma-space bake + delta (ZzzLodTerrain.cpp:481-505),
+    // untouched. Under a roof the bake is the room's own dark value and the
+    // delta its candles; the ground takes no key term there either (§13 F14).
     vec3 bake = max(vColor.rgb, vec3(0.0));
     vec3 bakeLit = mix(bake, pow(bake, vec3(2.2)), linearLight) * bakeShadow;
-    vec3 groundLight = max(bakeLit + dynLight + roomKey, vec3(0.0));
+    vec3 groundLight = max(bakeLit + dynLight, vec3(0.0));
 
     // The original clamps glColor at 1.0 per channel; tiers >= 1 bend the
     // sum toward the asymptote above the knee so a torch core keeps its hue.
@@ -310,7 +302,7 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
     // space; the linear sum is re-encoded for them and the final decode
     // lands the product exactly at lin(texel) x groundLight.
     vec3 groundLit = mix(groundLight, pow(groundLight, vec3(1.0 / 2.2)), linearLight);
-    vec3 extraLit = mix(dynLight + roomKey, pow(max(dynLight + roomKey, vec3(0.0)) * keyGain, vec3(1.0 / 2.2)), linearLight);
+    vec3 extraLit = mix(dynLight, pow(dynLight * keyGain, vec3(1.0 / 2.2)), linearLight);
 
     // A ground overlay that is its own material (snow) takes over its share
     // of this term - see terrainOverlayLitGlsl.
@@ -334,11 +326,6 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
     // pow(2.2). linearOut is 0 whenever the objects skip the decode too.
     f = mix(f, pow(max(f, vec3(0.0)), vec3(2.2)), linearOut);
 
-    // An active room owns the frame: nothing past its walls is drawn.
-    if (roomShadow > 0.5 && (vWorldXZ.x < roomRect.x || vWorldXZ.y < roomRect.y || vWorldXZ.x > roomRect.z || vWorldXZ.y > roomRect.w)) {
-      f = vec3(0.0);
-    }
-
     gl_FragColor = vec4(f, 1.0);
   }
   `,
@@ -360,9 +347,7 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
         'linearOut',
         'linearLight',
         'keyGain',
-        'interiorAmbient',
-        'roomRect',
-        'roomShadow',
+        'roomParams',
         ...(tileArray ? ['tileScales'] : []),
         ...terrainOverlayUniforms(overlays),
         ...(water ? terrainWaterUniforms() : []),
@@ -408,18 +393,8 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
     effect.setFloat('linearOut', linearBufferActive(scene) ? 1 : 0);
     effect.setFloat('linearLight', linearLightActive(scene) ? 1 : 0);
     const look = lookDirector()?.state();
-    const room = look?.key.interiorGround;
-    if (room) effect.setFloat3('interiorAmbient', room[0], room[1], room[2]);
-    else effect.setFloat3('interiorAmbient', 0, 0, 0);
     effect.setFloat('keyGain', look?.keyGain ?? 1);
-    const rect = look?.area?.rect;
-    if (rect) {
-      effect.setFloat4('roomRect', rect.minX, rect.minY, rect.maxX, rect.maxY);
-      effect.setFloat('roomShadow', 1);
-    } else {
-      effect.setFloat4('roomRect', 0, 0, 0, 0);
-      effect.setFloat('roomShadow', 0);
-    }
+    effect.setFloat2('roomParams', look?.area ? 1 : 0, look?.key.emitterGain ?? 1);
     if (tileArray) {
       effect.setTexture('tileTextures', tileArray.texture);
       effect.setFloatArray('tileScales', tileArray.scales);

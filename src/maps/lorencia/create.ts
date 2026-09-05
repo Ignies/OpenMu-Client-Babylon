@@ -1,5 +1,9 @@
 import { ElfSoldier } from '../../common/npcs/elfSoldier';
 import {
+  MODEL_HOUSE_WALL01,
+  MODEL_HOUSE_WALL02,
+  MODEL_HOUSE_WALL03,
+  MODEL_HOUSE_WALL04,
   MODEL_HOUSE_WALL05,
   MODEL_HOUSE_WALL06,
   MonsterActionType,
@@ -7,7 +11,15 @@ import {
 import { World } from '../../ecs/world';
 import { mapMusic, sound } from '../../sound';
 import { setAreaMood } from '../../scenes/sceneLook';
-import { areaRectOf } from '../../lighting/profiles';
+import type { Room } from '../layer';
+import {
+  enumerateRooms,
+  loadRoomRecords,
+  registerRooms,
+  sameRoom,
+  type RoomHooks,
+  type RoomSpec,
+} from '../rooms';
 import { createAttributeSystem } from '../../libs/attributeSystem';
 import { Vector3 } from '../../libs/babylon/exports';
 import { Store } from '../../store';
@@ -52,54 +64,77 @@ import { WellObject } from './wellObject';
 
 const DISABLE = false;
 
+/** Measured on the pub: walls 1.65-4.29 and roof slabs from 4.3 over a 1.65 floor; the wall body stands inside its line. */
+const LORENCIA_ROOM_SPEC: RoomSpec = {
+  roofTypes: [MODEL_HOUSE_WALL05, MODEL_HOUSE_WALL06],
+  roofHalf: 2.3,
+  wallTypes: [
+    MODEL_HOUSE_WALL01,
+    MODEL_HOUSE_WALL02,
+    MODEL_HOUSE_WALL03,
+    MODEL_HOUSE_WALL04,
+  ],
+  floorFromWallLine: 0.5,
+  wallHeight: 2.65,
+  roofHeight: 2.65,
+};
+
+/** The pub floor (x 121-129, y 121-137); the cabin across the river is the other roofed room. */
+const PUB: Room = {
+  min: { x: 121, y: 121 },
+  max: { x: 129, y: 137 },
+  centre: { x: 125, z: 129 },
+};
+
 /**
- * The pub floor (x 120-129, y 120-136): pub music, the tavern mood and the
- * two house-wall types lifted out of the way while the hero is inside.
- * `AmbientParticleSystem`'s `LORENCIA_TAVERN` room matches this footprint.
- * The walls stand on x 120.5 / 129.5 and y 120.5 / 137.5 with their inner
- * faces at 121 / 129 and 121 / 137; the room's frame is that inner box.
+ * The rooms: pub music and the two roof types lifted out of the way while the
+ * hero is in the pub (the original never hides roofs; the lift predates the
+ * ceiling fade and keeps Classic's pub frame as it was), the shared room row
+ * for the cabin. `AmbientParticleSystem`'s `LORENCIA_TAVERN` room matches the
+ * pub footprint.
  */
-function createTavern(world: World) {
+async function createRooms(world: World) {
   const map = world.mapIndex;
-  const walls = [MODEL_HOUSE_WALL05, MODEL_HOUSE_WALL06];
-  const liftWalls = (offset: { x: number; y: number; z: number } | undefined) => {
+  const roofs = [MODEL_HOUSE_WALL05, MODEL_HOUSE_WALL06];
+  const liftRoof = (offset: { x: number; y: number; z: number } | undefined) => {
     const query = world.with('transform', 'modelId', 'worldIndex');
     for (const e of query) {
       if (e.worldIndex !== map) continue;
-      if (walls.includes(e.modelId)) e.transform.posOffset = offset;
+      if (roofs.includes(e.modelId)) e.transform.posOffset = offset;
     }
   };
 
-  const pub = { min: { x: 120, y: 120 }, max: { x: 129, y: 136 } };
-  const floor = { min: { x: 121, y: 121 }, max: { x: 129, y: 137 } };
+  const pub: RoomHooks = {
+    look: 'lorenciaTavern',
+    onEnter: () => {
+      sound.playMusic('Music/Pub');
+      liftRoof({ x: 0, y: 100, z: 0 });
+    },
+    onLeave: () => {
+      sound.playMusic(mapMusic(map) ?? 'Music/main_theme');
+      liftRoof(undefined);
+    },
+  };
 
   world.add({
     worldIndex: map,
-    interactiveArea: {
-      ...pub,
-      onEnter: () => {
-        sound.playMusic('Music/Pub');
-        setAreaMood('lorenciaTavern', areaRectOf(floor.min, floor.max));
-        liftWalls({ x: 0, y: 100, z: 0 });
-      },
-      onLeave: () => {
-        sound.playMusic(mapMusic(map) ?? 'Music/main_theme');
-        setAreaMood(null);
-        liftWalls(undefined);
-      },
-    },
     onDispose: () => {
       sound.stop('Music/Pub');
       setAreaMood(null);
     },
   });
+
+  const rooms = enumerateRooms(await loadRoomRecords(map), LORENCIA_ROOM_SPEC);
+  registerRooms(world, rooms, LORENCIA_ROOM_SPEC, room =>
+    sameRoom(room, PUB) ? pub : { look: 'lorenciaCabin' }
+  );
 }
 
 export async function createLorencia(world: World) {
   const terrain = world.terrain;
   if (!terrain) return;
 
-  createTavern(world);
+  await createRooms(world);
 
   if (DISABLE) return;
 

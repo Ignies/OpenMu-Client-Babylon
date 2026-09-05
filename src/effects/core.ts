@@ -12,9 +12,12 @@ import {
   type Texture,
 } from '../libs/babylon/exports';
 import { loadEffectTexture } from '../common/moveTargetEffect';
+import { linearBufferActive } from '../common/lightModel';
+import { lookDirector } from '../lighting/director';
 import type { Entity } from '../ecs/world';
 import type { TestScene } from '../scenes/testScene';
 import type { EffectHandle } from './layer';
+import { FIRE_TEXTURES } from './recipes';
 
 /**
  * Shared plumbing for the effect entries (one entry per file next to this
@@ -202,6 +205,37 @@ function colourKey(c: RGB): string {
   return `${(c[0] * 255) | 0},${(c[1] * 255) | 0},${(c[2] * 255) | 0}`;
 }
 
+/**
+ * Effects draw after every group-0 mesh, the alpha-keyed ones included.
+ * Babylon draws sprites and particles before the transparent queue, and an
+ * alpha-tested mesh in that queue writes depth, so a flame in group 0 was
+ * painted over by the fireplace behind it. Group 1 keeps group 0's depth
+ * (`setRenderingAutoClearDepthStencil` below), so the cards still hide
+ * behind what is in front of them.
+ */
+export const EFFECT_RENDERING_GROUP = 1;
+
+export function keepDepthForEffects(scene: Scene): void {
+  scene.setRenderingAutoClearDepthStencil(EFFECT_RENDERING_GROUP, false);
+}
+
+/**
+ * The multiplier a flame's tint takes so the card lands at `keyGain` x its
+ * authored value in the buffer: a flame is light and follows the map's level
+ * like the torches (ARCHITECTURE F12). The material's colour is decoded once
+ * downstream when the buffer is linear, so the gain enters pre-decoded there.
+ * 1 for any other card, and on Classic.
+ */
+export function lightCardGain(scene: Scene, light: boolean): number {
+  if (!light) return 1;
+  const gain = lookDirector()?.state().keyGain ?? 1;
+  return linearBufferActive(scene) ? gain ** (1 / 2.2) : gain;
+}
+
+export function isFireTexture(texture: string | Texture): boolean {
+  return typeof texture === 'string' && FIRE_TEXTURES.has(texture);
+}
+
 /** MU's two effect blends: `EnableAlphaBlend` (ONE, ONE) and `EnableAlphaBlendMinus` (ZERO, ONE_MINUS_SRC_COLOR). */
 export type EffectBlend = 'add' | 'subtract';
 
@@ -236,15 +270,18 @@ export function additiveMaterial(
   scene: Scene,
   texture: string | Texture,
   colour: RGB,
-  blend: EffectBlend = 'add'
+  blend: EffectBlend = 'add',
+  light = isFireTexture(texture)
 ): StandardMaterial {
   let byKey = materials.get(scene);
   if (!byKey) {
     byKey = new Map();
     materials.set(scene, byKey);
   }
+  const gain = blend === 'add' ? lightCardGain(scene, light) : 1;
+  const tint: RGB = gain === 1 ? colour : [colour[0] * gain, colour[1] * gain, colour[2] * gain];
   const texKey = typeof texture === 'string' ? texture : `#${texture.uniqueId}`;
-  const key = `${texKey}|${colourKey(colour)}|${blend}`;
+  const key = `${texKey}|${colourKey(tint)}|${blend}`;
   let m = byKey.get(key);
   if (m) return m;
 
@@ -252,7 +289,7 @@ export function additiveMaterial(
   mat.diffuseColor.set(0, 0, 0);
   mat.specularColor.set(0, 0, 0);
   mat.ambientColor.set(0, 0, 0);
-  mat.emissiveColor.set(colour[0], colour[1], colour[2]);
+  mat.emissiveColor.set(tint[0], tint[1], tint[2]);
   mat.disableLighting = true;
   mat.alphaMode = blend === 'subtract' ? Constants.ALPHA_SUBTRACT : ADDITIVE_ALPHA_MODE;
   mat.transparencyMode = Material.MATERIAL_ALPHABLEND;
@@ -316,6 +353,8 @@ export function acquireCard(scene: Scene, material: StandardMaterial, billboard 
     card.alwaysSelectAsActiveMesh = true;
     card.receiveShadows = false;
     card.doNotSyncBoundingInfo = true;
+    card.renderingGroupId = EFFECT_RENDERING_GROUP;
+    keepDepthForEffects(scene);
     // Never a glow-layer contributor — additive already is the glow.
     (scene as TestScene).look?.glow.addExcludedMesh(card);
   }
@@ -400,8 +439,8 @@ export interface ParticleRecipe {
 }
 
 const systems = new Map<Scene, Map<string, ParticleSystem>>();
-/** Recipe identity → system, so a table row's burst never re-stringifies its recipe. */
-const systemsByRecipe = new Map<Scene, WeakMap<ParticleRecipe, ParticleSystem>>();
+/** Recipe identity → system, so a table row's burst never re-stringifies its recipe; a flame's system is keyed with its gain. */
+const systemsByRecipe = new Map<Scene, WeakMap<ParticleRecipe, { ps: ParticleSystem; gain: number }>>();
 
 /**
  * Where the next manually emitted particles start. `emitBurst` / `Emitter`
@@ -483,8 +522,9 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
     byRecipe = new WeakMap();
     systemsByRecipe.set(scene, byRecipe);
   }
-  let ps = byRecipe.get(r);
-  if (ps) return ps;
+  const gain = r.blend === 'alpha' ? 1 : lightCardGain(scene, FIRE_TEXTURES.has(r.texture));
+  const known = byRecipe.get(r);
+  if (known && known.gain === gain) return known.ps;
 
   let map = systems.get(scene);
   if (!map) {
@@ -492,10 +532,10 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
     systems.set(scene, map);
   }
   // An inline `{ ...recipe }` spread is a new identity with an old shape.
-  const k = JSON.stringify(r);
-  ps = map.get(k);
+  const k = gain === 1 ? JSON.stringify(r) : `${JSON.stringify(r)}|g${gain.toFixed(3)}`;
+  let ps = map.get(k);
   if (ps) {
-    byRecipe.set(r, ps);
+    byRecipe.set(r, { ps, gain });
     return ps;
   }
 
@@ -503,6 +543,8 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   ps.emitter = Vector3.Zero();
   ps.isLocal = false;
   ps.forceDepthWrite = false;
+  ps.renderingGroupId = EFFECT_RENDERING_GROUP;
+  keepDepthForEffects(scene);
   // BLENDMODE_ADD is (SRC_ALPHA, ONE): the colour × alpha is added, so the
   // gradients below fade a sprite toward black under it.
   ps.blendMode =
@@ -516,7 +558,7 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   const key = (rgb: RGB, k: number): Color4 =>
     r.blend === 'alpha'
       ? new Color4(rgb[0], rgb[1], rgb[2], k)
-      : new Color4(rgb[0] * k, rgb[1] * k, rgb[2] * k, 1);
+      : new Color4(rgb[0] * k * gain, rgb[1] * k * gain, rgb[2] * k * gain, 1);
   const start = key(c, 1);
   ps.color1 = start;
   ps.color2 = start.scale(0.85);
@@ -579,7 +621,7 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
 
   ps.start();
   map.set(k, ps);
-  byRecipe.set(r, ps);
+  byRecipe.set(r, { ps, gain });
   return ps;
 }
 

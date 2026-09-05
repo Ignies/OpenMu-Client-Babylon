@@ -2,6 +2,7 @@ import { Vector3, type Effect, type Scene } from '../babylon/exports';
 import { sunLightOf } from '../../lighting/keyRig';
 import { ENUM_WORLD } from '../../common/types';
 import { GameOptions } from '../../common/gameOptions';
+import { maps } from '../../maps';
 import { snowCover } from '../../weather/snowCover';
 import { snowTrailPainted, snowTrailTexture } from '../../weather/snowTrail';
 import { MELT_EDGE, MELT_SPOTS, snowMeltUniform } from '../../weather/snowMelt';
@@ -223,7 +224,7 @@ export const OVERLAY_LIGHT = {
 };
 
 /**
- * Settled snow on Devias.
+ * Settled snow on the snow maps.
  *
  * Deliberately not pure white: fresh snow lit by the map's cold bake reads as
  * blown-out paper at 1.0, and Devias' bake is already blue. Slightly under
@@ -244,8 +245,8 @@ export const SNOW_COVER: TerrainOverlay = {
   // Solid at full cover on the snow tiles; the bed table alone thins it on
   // cobbles and flagstones.
   headroom: 0.25,
-  // Where on Devias' ground snow can lie, by tile texture (World3/Tile*.jpg,
-  // in getTilesList order):
+  // Where snow can lie, by tile texture (the snow maps share one slot list,
+  // FULL_TILES, in getTilesList order; the names below are Devias' World3):
   //   0 TileGrass01, 1 TileGrass02, 7 TileRock01 - painted snow: full.
   //   4 TileGround03 - cobbles with snow packed between; 6 TileWood01 -
   //     frosted blue stone: snow sits in the gaps, so a good part.
@@ -753,13 +754,40 @@ const OVERLAYS_BY_WORLD: Partial<Record<ENUM_WORLD, readonly TerrainOverlay[]>> 
   {
     [ENUM_WORLD.WD_0LORENCIA]: [WET_GROUND, PUDDLES],
     [ENUM_WORLD.WD_3NORIA]: [WET_GROUND, PUDDLES],
-    [ENUM_WORLD.WD_2DEVIAS]: [SNOW_COVER],
   };
 
 const NONE: readonly TerrainOverlay[] = [];
 
 /**
+ * Where snow lies on the other snow maps, by tile slot (Data/World58 and
+ * World63 share Devias' slot list, not its art): Ice City's clear ice (2, 4,
+ * 8) and Santa Town's embers (4) stay bare, its dark rock and the grey stone
+ * take snow between them, the painted snow and white ice are solid.
+ */
+const SNOW_BEDS: Partial<Record<ENUM_WORLD, TerrainOverlay['bed']>> = {
+  [ENUM_WORLD.WD_57ICECITY]: { 0: 1, 3: 1, 7: 1, 10: 1, 1: 0.55, 6: 0.55, 9: 0.55, 5: 0, 13: 0 },
+  [ENUM_WORLD.WD_62SANTA_TOWN]: { 0: 1, 1: 1, 2: 1, 3: 1, 7: 1, 10: 1, 6: 0.55, 9: 0.55, 4: 0, 5: 0, 13: 0 },
+};
+
+const snowCovers = new Map<ENUM_WORLD, TerrainOverlay>();
+
+/** The settled-snow layer as this map draws it: `SNOW_COVER` with the map's bed table. */
+export function snowCoverFor(map: ENUM_WORLD): TerrainOverlay {
+  const bed = SNOW_BEDS[map];
+  if (!bed) return SNOW_COVER;
+  let own = snowCovers.get(map);
+  if (!own) {
+    own = { ...SNOW_COVER, bed };
+    snowCovers.set(map, own);
+  }
+  return own;
+}
+
+/**
  * The layers this map draws, or nothing if the player has ground weather off.
+ * Settled snow follows the map's `snow` flag under an open sky (Devias, Ice
+ * City, Santa Town; not the boss cave), the set the caps and the prints read
+ * (`weather/snowCover.ts` SNOW_GROUND_MAPS).
  *
  * Read at *map load*, so switching the option off and walking through a gate
  * gets a terrain shader with no overlay branch in it at all. Switching it off
@@ -769,7 +797,9 @@ const NONE: readonly TerrainOverlay[] = [];
  */
 export function terrainOverlaysFor(map: ENUM_WORLD): readonly TerrainOverlay[] {
   if (!GameOptions.advancedEffects) return NONE;
-  return OVERLAYS_BY_WORLD[map] ?? NONE;
+  const own = OVERLAYS_BY_WORLD[map];
+  if (!maps.isSnow(map) || !maps.isOutdoor(map)) return own ?? NONE;
+  return [...(own ?? NONE), snowCoverFor(map)];
 }
 
 /** Whether any layer on this map needs the roof mask built. */

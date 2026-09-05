@@ -7,6 +7,8 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { downloadDataFile } from '../libs/mu/dataFolder';
+import { lookDirector, type LookDirector } from '../lighting/director';
+import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../effects/core';
 
 /**
  * Flare cards: the additive `flare01` sprite the original draws over a
@@ -14,6 +16,11 @@ import { downloadDataFile } from '../libs/mu/dataFolder';
  * nothing. The light a flame throws is the lighting layer's
  * (`src/lighting/mapObjectLights.ts`), whose `LightEmitter.sprite` block is
  * the `FlareSpec` a host hands to `createEffectLight`.
+ *
+ * A flare is the glow of a light, so it sits at the map's level: its colour
+ * is `spec x luminosity x keyGain` (ARCHITECTURE F12), repainted when the
+ * director's state changes. Sprites are not decoded on their way into the
+ * buffer, so the gain is applied as is.
  *
  * One `SpriteManager` per scene, shared by every flare on the map.
  */
@@ -36,6 +43,23 @@ export type FlareSpec = {
 let manager: SpriteManager | null = null;
 let managerScene: Scene | null = null;
 let pending: Promise<SpriteManager | null> | null = null;
+
+/** Every live flare's repaint, run when the director publishes a new state. */
+const repaints = new Set<() => void>();
+let watched: LookDirector | null = null;
+
+function keyGain(): number {
+  return lookDirector()?.state().keyGain ?? 1;
+}
+
+function watchLook(): void {
+  const director = lookDirector();
+  if (!director || director === watched) return;
+  watched = director;
+  director.onChange.add(() => {
+    for (const repaint of repaints) repaint();
+  });
+}
 
 async function getManager(scene: Scene): Promise<SpriteManager | null> {
   if (manager && managerScene === scene) return manager;
@@ -69,6 +93,11 @@ async function getManager(scene: Scene): Promise<SpriteManager | null> {
 
     created.isPickable = false;
 
+    // After the alpha-keyed meshes, which write depth in the transparent
+    // queue: a flare drawn before them was painted over by the hearth behind it.
+    created.renderingGroupId = EFFECT_RENDERING_GROUP;
+    keepDepthForEffects(scene);
+
     manager = created;
     managerScene = scene;
 
@@ -83,6 +112,7 @@ export function disposeEffectLights(): void {
   manager = null;
   managerScene = null;
   pending = null;
+  repaints.clear();
 }
 
 export type EffectLight = {
@@ -94,6 +124,33 @@ export type MovableFlare = {
   setLuminosity(lumi: number): void;
   dispose(): void;
 };
+
+/** Paints `color x lumi x keyGain` and keeps repainting it while the flare lives. */
+function paintFlare(
+  sprite: Sprite,
+  color: readonly [number, number, number]
+): { setLuminosity(lumi: number): void; release(): void } {
+  const [r, g, b] = color;
+  let lumi = 1;
+  const repaint = () => {
+    const k = lumi * keyGain();
+    sprite.color.set(r * k, g * k, b * k, 1);
+  };
+  sprite.color = new Color4(r, g, b, 1);
+  repaint();
+  repaints.add(repaint);
+  watchLook();
+
+  return {
+    setLuminosity(next) {
+      lumi = next;
+      repaint();
+    },
+    release() {
+      repaints.delete(repaint);
+    },
+  };
+}
 
 export async function createMovableFlare(
   scene: Scene,
@@ -113,14 +170,15 @@ export async function createMovableFlare(
   sprite.width = size;
   sprite.height = size;
 
-  const [r, g, b] = color;
-
-  sprite.color = new Color4(r, g, b, 1);
+  const paint = paintFlare(sprite, color);
 
   return {
     moveTo: (x, y, z) => sprite.position.set(x, y, z),
-    setLuminosity: lumi => sprite.color.set(r * lumi, g * lumi, b * lumi, 1),
-    dispose: () => sprite.dispose(),
+    setLuminosity: lumi => paint.setLuminosity(lumi),
+    dispose: () => {
+      paint.release();
+      sprite.dispose();
+    },
   };
 }
 
@@ -144,9 +202,7 @@ export async function createEffectLight(
   sprite.width = size;
   sprite.height = size;
 
-  const [r, g, b] = spec.color;
-
-  sprite.color = new Color4(r, g, b, 1);
+  const paint = paintFlare(sprite, spec.color);
 
   let observer: ReturnType<Scene['onBeforeRenderObservable']['add']> | null =
     null;
@@ -159,15 +215,14 @@ export async function createEffectLight(
     observer = scene.onBeforeRenderObservable.add(() => {
       elapsed += scene.getEngine().getDeltaTime();
 
-      const lumi = (Math.sin(elapsed * speed) + 1) * amount + base;
-
-      sprite.color.set(r * lumi, g * lumi, b * lumi, 1);
+      paint.setLuminosity((Math.sin(elapsed * speed) + 1) * amount + base);
     });
   }
 
   return {
     dispose: () => {
       if (observer) scene.onBeforeRenderObservable.remove(observer);
+      paint.release();
       sprite.dispose();
     },
   };

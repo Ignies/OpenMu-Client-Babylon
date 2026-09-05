@@ -50,7 +50,6 @@ import { CursorSystem } from './systems/cursorSystem';
 import { EmoteSystem } from './systems/emoteSystem';
 import { MapDoorSystem } from './systems/mapDoorSystem';
 import { CeilingHideSystem } from './systems/ceilingHideSystem';
-import { AreaVisibilitySystem } from './systems/areaVisibilitySystem';
 import { EmojiBubbleSystem } from './systems/emojiBubbleSystem';
 import { QuestSystem } from './systems/questSystem';
 import { PetSystem } from './systems/petSystem';
@@ -138,9 +137,6 @@ const factories: ISystemFactory[] = [
   // RenderSystem so the new pose is drawn this frame.
   MapDoorSystem,
   CeilingHideSystem,
-  // After the director tick and before the draw: the active room decides
-  // what is drawn this frame.
-  AreaVisibilitySystem,
   RenderSystem,
   SceneReadySystem,
 ];

@@ -3,7 +3,7 @@ import type { WeatherLayer } from './layer';
 import { GameOptions } from '../common/gameOptions';
 import { isTileOpen } from '../libs/mu/terrainMask';
 import type { TerrainLayers, World } from '../ecs/world';
-import { SNOW_COVER, overlayBedShare } from '../libs/mu/terrainOverlay';
+import { overlayBedShare, snowCoverFor } from '../libs/mu/terrainOverlay';
 import { SNOW_GROUND_MAPS, snowCover } from './snowCover';
 import { snowMeltAt } from './snowMelt';
 import { FOOTPRINT_TUNING } from './footprints';
@@ -86,11 +86,12 @@ const layers: TerrainLayers = { layer1: 0, layer2: 255, alpha: 0 };
  */
 function snowTileShare(world: World, x: number, z: number): number {
   world.getTerrainLayers(~~x, ~~z, layers);
+  const snow = snowCoverFor(world.mapIndex);
 
-  const under = overlayBedShare(SNOW_COVER, layers.layer1);
+  const under = overlayBedShare(snow, layers.layer1);
   if (layers.alpha <= 0) return under;
 
-  const over = overlayBedShare(SNOW_COVER, layers.layer2);
+  const over = overlayBedShare(snow, layers.layer2);
   return under + (over - under) * layers.alpha;
 }
 

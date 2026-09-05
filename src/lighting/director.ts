@@ -30,6 +30,7 @@ import {
   type AreaRect,
   type LookProfile,
   type Rgb,
+  type RoomVolume,
 } from './profiles';
 import {
   CLASSIC_SHADOW_POLICY,
@@ -40,6 +41,7 @@ import { syncSkyDome } from './skyDome';
 import { syncShadows } from '../scenes/shadows';
 import { syncAmbientOcclusion } from '../scenes/ambientOcclusion';
 import { syncHeightFog, updateHeightFog } from '../scenes/heightFog';
+import { syncRoomMask } from '../scenes/roomMask';
 import {
   createPostChain,
   TONE_MAPPER_NAMES,
@@ -64,16 +66,6 @@ const SKY_GROUND = 0.68;
 
 const WHITE: Rgb = [1, 1, 1];
 
-/**
- * How much of the hemispheric key the ground gets back under a roof, as a
- * fraction of what an object standing on it receives. The terrain has no key
- * term (outdoors the bake *is* the sky's contribution); indoors the bake is
- * the room's own dark value while the hemisphere still lights the furniture,
- * so without this the candles are the floor's entire light and it takes all
- * of their hue.
- */
-const INTERIOR_GROUND_KEY = 0.6;
-
 /** Area (tavern) blend, seconds. */
 const BLEND_SECONDS = 0.7;
 
@@ -82,9 +74,14 @@ const WHOLE_MAP: AreaRect = { minX: 0, minY: 0, maxX: 255, maxY: 255 };
 
 export type LookArea = {
   readonly name: AreaLookName;
-  /** The room's footprint in tiles; the terrain draws nothing outside it. */
+  /** The room's footprint in tiles: the roof lift's seed and the mask's frame. */
   readonly rect: AreaRect;
+  /** The frame with its heights, when the map gave one; the room mask draws nothing without it. */
+  readonly volume: RoomVolume | null;
 };
+
+const areaKey = (a: LookArea | null): string =>
+  a ? `${a.name}:${a.rect.minX},${a.rect.minY},${a.rect.maxX},${a.rect.maxY}` : '';
 
 export type LookState = {
   readonly engine: 'polish';
@@ -99,8 +96,8 @@ export type LookState = {
     readonly skyGround: Rgb;
     readonly sunIntensity: number;
     readonly direction: readonly [number, number, number];
-    /** The roofed-tile ground key the terrain shader adds (`INTERIOR_GROUND_KEY`), key units. */
-    readonly interiorGround: Rgb;
+    /** Gain on the pool lights and the terrain delta: the room's `candles` on tiers >= 1, 1 otherwise. */
+    readonly emitterGain: number;
   };
   readonly shadow: ShadowPolicy;
   /** Stops over unity after the player's brightness trim; 0 on Classic. */
@@ -121,7 +118,7 @@ export type LookState = {
 
 export interface LookDirector {
   setMap(world: ENUM_WORLD): void;
-  setArea(name: AreaLookName | null, rect?: AreaRect): void;
+  setArea(name: AreaLookName | null, rect?: AreaRect | RoomVolume): void;
   tick(dt: number): void;
   state(): Readonly<LookState>;
   readonly onChange: Observable<Readonly<LookState>>;
@@ -136,6 +133,8 @@ export function lookDirector(): LookDirector | null {
 
 type Blendable = {
   ev: number;
+  /** Gain on the room's emitters (`AreaLook.candles`); 1 outside. */
+  candles: number;
   whiteBalance: [number, number, number];
   fog: {
     start: number;
@@ -148,9 +147,10 @@ type Blendable = {
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-function blendable(p: LookProfile): Blendable {
+function blendable(p: LookProfile, candles = 1): Blendable {
   return {
     ev: p.ev,
+    candles,
     whiteBalance: [...p.whiteBalance],
     fog: { ...p.fog, color: p.fog.color ? [...p.fog.color] : null },
   };
@@ -162,6 +162,7 @@ function lerpBlendable(a: Blendable, b: Blendable, t: number): Blendable {
 
   return {
     ev: lerp(a.ev, b.ev, t),
+    candles: lerp(a.candles, b.candles, t),
     whiteBalance: [
       lerp(a.whiteBalance[0], b.whiteBalance[0], t),
       lerp(a.whiteBalance[1], b.whiteBalance[1], t),
@@ -184,8 +185,10 @@ export function createLookDirector(
   const postChain: PostChain = createPostChain(scene, camera);
   const onChange = new Observable<Readonly<LookState>>();
 
-  // Dev seams: `?ev=` adds stops, `?wb=r,g,b` replaces the balance, `?tm=0..3` the mapper.
+  // Dev seams: `?ev=` adds stops, `?wb=r,g,b` replaces the balance, `?tm=0..3`
+  // the mapper, `?candles=` replaces the room's emitter gain.
   const evDev = devQueryNumber('ev') ?? 0;
+  const candlesDev = devQueryNumber('candles');
   const wbDev = devQueryNumbers('wb', 3) as Rgb | null;
   const tmDev = devQueryNumber('tm');
 
@@ -194,6 +197,7 @@ export function createLookDirector(
   let base: LookProfile = profileFor(world);
   let target: LookProfile = base;
 
+  let targetCandles = 1;
   let from = blendable(base);
   let shown = blendable(base);
   let blend = 1;
@@ -203,11 +207,13 @@ export function createLookDirector(
   let mapReady = true;
 
   const retarget = (): void => {
-    const next = area ? applyArea(base, areaProfile(area.name)) : base;
+    const look = area ? areaProfile(area.name) : null;
+    const next = look ? applyArea(base, look) : base;
     if (next === target) return;
 
     from = shown;
     target = next;
+    targetCandles = look?.candles ?? 1;
     blend = 0;
   };
 
@@ -215,7 +221,7 @@ export function createLookDirector(
     if (blend < 1) {
       blend = Math.min(1, blend + dt / BLEND_SECONDS);
       const t = blend * blend * (3 - 2 * blend);
-      shown = lerpBlendable(from, blendable(target), t);
+      shown = lerpBlendable(from, blendable(target, targetCandles), t);
     }
 
     const tier = tierIndex() as 0 | 1 | 2;
@@ -231,8 +237,11 @@ export function createLookDirector(
       fog: shown.fog,
     };
 
-    // 1. key
+    // 1. key. A room's row lowers the ev by about two stops (F14): the key,
+    // the pools and the terrain delta all follow it, so the candles keep
+    // their ratio to a floor that is now the bake alone.
     const keyGain = shaped ? 2 ** (profile.ev + evDev) : 1;
+    const emitterGain = shaped ? candlesDev ?? shown.candles : 1;
     const sunShare = shaped ? profile.sun.share : 0;
     const skyIntensity = shaped ? 1 - sunShare : 1;
     const skyGround: Rgb = shaped
@@ -279,6 +288,10 @@ export function createLookDirector(
       reordered;
     updateHeightFog(camera, dt);
 
+    // The room mask (F8): after the haze, before the post chain.
+    const roomMask = syncRoomMask(scene, camera, lightTier, room?.volume ?? null, reordered);
+    reordered = roomMask.changed || reordered;
+
     if (reordered) postChain.moveToEnd();
 
     // 6. post: the viewer's brightness only; the map's level is in the key.
@@ -300,10 +313,10 @@ export function createLookDirector(
     const passes = [
       ...(shaped && post ? ['ssao'] : []),
       ...(shaped && post && profile.fog.density > 0 ? ['haze'] : []),
+      ...(roomMask.live ? ['roomMask'] : []),
       ...postChain.passes(),
     ];
 
-    const groundKey = INTERIOR_GROUND_KEY * skyIntensity;
     const ev = shaped ? profile.ev + evDev + brightness : 0;
 
     state = {
@@ -318,7 +331,7 @@ export function createLookDirector(
         skyGround: shaped ? [skyGround[0] * skyIntensity, skyGround[1] * skyIntensity, skyGround[2] * skyIntensity] : WHITE,
         sunIntensity: sunShare,
         direction: shadow.direction,
-        interiorGround: [groundKey, groundKey, groundKey],
+        emitterGain,
       },
       shadow,
       ev,
@@ -332,7 +345,7 @@ export function createLookDirector(
     const next = [
       tier,
       world,
-      room ? `${room.name}:${room.rect.minX},${room.rect.minY},${room.rect.maxX},${room.rect.maxY}` : '',
+      areaKey(room),
       ev.toFixed(3),
       shadow.casters,
       toneMapperIndex,
@@ -363,8 +376,16 @@ export function createLookDirector(
       mapReady = false;
     },
     setArea(name, rect) {
-      if (name === (area?.name ?? null)) return;
-      area = name ? { name, rect: rect ?? WHOLE_MAP } : null;
+      const next: LookArea | null = name
+        ? {
+            name,
+            rect: rect ?? WHOLE_MAP,
+            volume: rect && 'floorY' in rect ? rect : null,
+          }
+        : null;
+      // A new frame under the same name is a new room.
+      if (areaKey(next) === areaKey(area)) return;
+      area = next;
       retarget();
       EventBus.emit('look.areaChanged', { name });
     },

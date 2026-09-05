@@ -52,8 +52,11 @@ export function lightingTier(): LightingTier | null {
  * whether or not the light reaches the surface (Babylon builds a mesh's
  * `lightSources` from layer masks and include/exclude lists, never from
  * range), so an unused slot is not a free slot.
+ *
+ * None on Classic: the original has no per-pixel lights, BodyLight already
+ * carries the torch through the terrain delta (§11.5).
  */
-const POINT_LIGHT_BUDGETS: readonly number[] = [6, 8, 8];
+const POINT_LIGHT_BUDGETS: readonly number[] = [0, 8, 8];
 
 /**
  * MSAA sample count on the rendering pipeline's HDR target, per tier. The

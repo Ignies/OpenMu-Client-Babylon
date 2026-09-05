@@ -75,7 +75,11 @@ export function syncSkyDome(scene: Scene, look: SkyLook): void {
   const bytes = look.bytes;
 
   if (bytes) {
-    scene.clearColor.set(bytes[0] / 256, bytes[1] / 256, bytes[2] / 256, 1);
+    // Display-authored like the horizon (SetWorldClearColor bytes): one decode
+    // for the linear buffer, so the void lands where the map put it.
+    const c: Rgb = [bytes[0] / 256, bytes[1] / 256, bytes[2] / 256];
+    const lin = look.linear ? toLinear(c) : c;
+    scene.clearColor.set(lin[0], lin[1], lin[2], 1);
   } else {
     scene.clearColor.set(0, 0, 0, 1);
   }

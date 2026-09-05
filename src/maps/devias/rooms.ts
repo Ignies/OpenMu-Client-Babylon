@@ -1,14 +1,15 @@
 /**
- * The lit interiors by the Devias spawn (219, 24), footprints read off
- * EncTerrain3.obj (tiles). Plain data so the ambient particle system can
+ * The lit interiors of Devias, footprints as `maps/rooms.ts` enumerates them
+ * from EncTerrain3.obj (tiles). Plain data so the ambient particle system can
  * import it without pulling the map module (and its scene imports) along.
  *
  * Every Devias building is tiled the same way: a type-76 corner post on each
  * corner, wall pieces (77/78/79) whose origin sits on the post line with the
  * body one tile outward, and roof slabs (81/82) over the lot. A room's bounds
- * are its floor: the inner wall faces, half a tile inside the post line. The
- * same box is the area's frame (create.ts), the roof mask's fallback paint
- * (terrainMaskSystem) and the dust volume, so the three cannot disagree.
+ * are the post line widened by half a tile, so the wall body is inside the
+ * frame. The same box is the area's frame (create.ts), the roof mask's
+ * fallback paint (terrainMaskSystem) and the dust volume, so the three cannot
+ * disagree.
  *
  *  - Tavern: posts (225.5,20.5)-(236.5,27.5). Bar counter with the bottle
  *    shelves on the north wall, barrels in the west corner, the fireplace (36
@@ -20,8 +21,19 @@
  *    rows of benches (22) and tables (25), the door (88/65) on the x 216 wall.
  */
 import type { Room } from '../layer';
+import type { RoomSpec } from '../roomEnumeration';
 
 export type { Room } from '../layer';
+
+/** Measured on the tavern: walls 1.7-4.34, roof slabs 4.39-5.29 over a 1.69 floor. */
+export const DEVIAS_ROOM_SPEC: RoomSpec = {
+  roofTypes: [81, 82],
+  roofHalf: 2.3,
+  wallTypes: [76, 77, 78, 79],
+  floorFromWallLine: -0.5,
+  wallHeight: 2.65,
+  roofHeight: 2.7,
+};
 
 export const DEVIAS_TAVERN: Room = {
   min: { x: 225, y: 20 },
@@ -59,15 +71,23 @@ export const DEVIAS_EAST_HEARTH_HOUSE: Room = {
   centre: { x: 228, z: 41 },
 };
 
+/** The guard room west of the spawn: posts (186.5,43.5)-(193.5,50.5), guards, barrels, round shields on the walls. */
+export const DEVIAS_GUARD_ROOM: Room = {
+  min: { x: 186, y: 43 },
+  max: { x: 194, y: 51 },
+  centre: { x: 190, z: 47 },
+};
+
 /**
- * Every enumerated Devias interior. The ambient dust picks rooms out of this
- * individually (each has its own recipe); the terrain mask paints all of them
- * as roofed, so settled snow stops at their doors even before the buildings'
- * own geometry has streamed in.
+ * Every Devias interior with a row of its own. The ambient dust picks rooms
+ * out of this individually (each has its own recipe); the terrain mask paints
+ * all of them as roofed, so settled snow stops at their doors even before
+ * the buildings' own geometry has streamed in.
  */
 export const DEVIAS_ROOMS: readonly Room[] = [
   DEVIAS_TAVERN,
   DEVIAS_READING_ROOM,
   DEVIAS_WEST_HEARTH_HOUSE,
   DEVIAS_EAST_HEARTH_HOUSE,
+  DEVIAS_GUARD_ROOM,
 ];

@@ -1035,6 +1035,10 @@ export class ModelObject {
     mesh.metadata ??= {};
     mesh.metadata.brightMesh = true;
     mesh.metadata.blendMeshLight = this.BlendMeshLight;
+    // The card of an object that throws light is a flame, and a flame is
+    // light: the BodyLight bind gives it the map's `keyGain` (F12). Painted
+    // glass on a dark object stays at its authored value (F4).
+    mesh.metadata.lightCard = this.Lights?.emitsLight === true;
 
     if (this.GlowBlendMesh) {
       storeRef().world?.scene.look?.glow.referenceMeshToUseItsOwnMaterial(
