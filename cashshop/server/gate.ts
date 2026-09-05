@@ -258,13 +258,30 @@ function candidatesOf(spec: TableSpec): string[] {
 
 export async function resolveSchema(sql: Sql): Promise<ResolvedSchema> {
   const specs = Object.values(TABLES) as TableSpec[];
-  const wanted = specs.flatMap(spec =>
-    candidatesOf(spec).map(table => [spec.schema, table] as [string, string])
-  );
+  const schemas = [...new Set(specs.map(spec => spec.schema))];
+  const tables = [...new Set(specs.flatMap(candidatesOf))];
+
+  /**
+   * Two ordinary array parameters, not a row-constructor `IN` over pairs.
+   *
+   * postgres.js renders an array of pairs as `($1,$2),($3,$4)` - the shape an
+   * INSERT's VALUES wants - and `IN` needs one more pair of parentheses around
+   * that. The pair form is therefore a syntax error the moment it reaches
+   * Postgres, and nothing before that point can catch it: it type-checks, and
+   * the fragment is only assembled inside the driver. This resolver runs once
+   * at boot and is the first thing that talks to OpenMU, so it took the whole
+   * shop down with it.
+   *
+   * The cost of asking this way is that a table name that also exists in the
+   * other schema comes back too. Every consumer keys on `schema.table`, so
+   * those rows are read by nobody. `::text` because these columns are
+   * `information_schema.sql_identifier`, a domain over `name`, and comparing
+   * one to a text array should not depend on an implicit cast.
+   */
   const rows = await sql<ColumnRow[]>`
     SELECT table_schema, table_name, column_name, is_nullable, column_default
     FROM information_schema.columns
-    WHERE (table_schema, table_name) IN ${sql(wanted)}
+    WHERE table_schema::text = ANY(${schemas}) AND table_name::text = ANY(${tables})
   `;
 
   const present = new Map<string, ColumnRow[]>();
