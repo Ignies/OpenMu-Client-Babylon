@@ -44,10 +44,24 @@ export const PointerInputSystem: ISystemFactory = world => {
   const paddedMax = new Vector3();
   const centre = new Vector3();
 
-  /** The selectable under `tmpCameraRay`, nearest to the camera first. */
+  /**
+   * The selectable under `tmpCameraRay`, nearest to the camera first.
+   *
+   * Bodies (players, monsters, NPCs) win over drops: the original's pick
+   * pass runs `SelectCharacter` for characters and monsters, then NPCs, and
+   * only asks `SelectItem` when both came back empty (ZzzInterface.cpp
+   * :8117-8130), so a monster standing on a pile of loot is the click target
+   * and not the loot. Holding Alt flips the order — items first, then NPCs,
+   * then monsters (:8048-8058) — which is how loot under a monster is still
+   * reachable. Without that rule a drop's padded box (every selectable is
+   * at least a character tall) could steal the click from the monster on
+   * top of it and turn an attack into a walk-to-pick-up under its blows.
+   */
   function resolveTarget(): Selectable | null {
     let best: Selectable | null = null;
     let bestDistance = Number.MAX_VALUE;
+    let bestDrop: Selectable | null = null;
+    let bestDropDistance = Number.MAX_VALUE;
 
     for (const e of query) {
       const { modelObject, visibility, attributeSystem } = e;
@@ -83,13 +97,20 @@ export const PointerInputSystem: ISystemFactory = world => {
 
       paddedMin.addToRef(paddedMax, centre).scaleInPlace(0.5);
       const distance = Vector3.DistanceSquared(tmpCameraRay.origin, centre);
-      if (distance < bestDistance) {
+      if (e.droppedItem) {
+        if (distance < bestDropDistance) {
+          bestDropDistance = distance;
+          bestDrop = e;
+        }
+      } else if (distance < bestDistance) {
         bestDistance = distance;
         best = e;
       }
     }
 
-    return best;
+    const keys = world.keyboardInput.pressedKeys;
+    const itemsFirst = keys.has('AltLeft') || keys.has('AltRight');
+    return itemsFirst ? (bestDrop ?? best) : (best ?? bestDrop);
   }
 
   function applyTarget(target: Selectable | null): void {
