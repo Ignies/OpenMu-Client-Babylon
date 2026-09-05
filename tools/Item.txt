@@ -732,8 +732,8 @@ end
 16	-1	0	1	2	1	1	1	"Scroll of Decay"		96	0	243	345000	2	0	0	0	0	0
 17	-1	0	1	2	1	1	1	"Scroll of Ice Storm"		93	0	223	315000	2	0	0	0	0	0
 18	-1	0	1	2	1	1	1	"Scroll of Nova"		100	0	258	410000	2	0	0	0	0	0
-19	-1	0	1	2	1	1	1	"Scroll of Drain Life"		75	0	75	175000	1	0	0	0	0	1
-20	-1	0	1	2	1	1	1	"Scroll of Chain Lighting"	35	0	93	100000	1	0	0	0	0	1
+19	-1	0	1	2	1	1	1	"Scroll of Chain Lightning"	75	0	75	175000	1	0	0	0	0	1
+20	-1	0	1	2	1	1	1	"Scroll of Drain Life"		35	0	93	100000	1	0	0	0	0	1
 21	-1	0	1	2	1	1	1	"Scroll of Electric Surge"	93	0	216	315000	1	0	0	0	0	1
 22	-1	0	1	2	1	1	1	"Scroll of Reflex"		80	0	111	245000	1	0	0	0	0	1
 23	-1	0	1	2	1	1	1	"Scroll of Sword Power"		83	0	181	265000	1	0	0	0	0	1

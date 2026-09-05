@@ -47,6 +47,25 @@ try {
 // Keyboard: every keydown guard (page scroll keys, Tab, Alt, IME, the
 // window stack) lives in `ecs/systems/keyboardInputSystem.ts`.
 const ignoredIds = ['scene-explorer-host', 'inspector-host'];
+
+// The right button is the cast button (`Attack()` with MouseRButton), and
+// the browser's context menu carries "Reload" — one right click that lands
+// on a HUD element, a window, a name tag or the page margin instead of the
+// canvas used to open it, and a slip from there reloaded the game. The
+// canvas already swallowed its own `contextmenu`; this covers everything
+// else on the page. Text fields keep theirs: an input's menu has no reload
+// entry and is how some players paste into chat.
+window.addEventListener('contextmenu', ev => {
+  let p = ev.target as HTMLElement | null;
+  while (p) {
+    if (p.isContentEditable) return;
+    const tag = p.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (p.classList && ignoredIds.includes(p.id)) return;
+    p = p.parentElement;
+  }
+  ev.preventDefault();
+});
 window.addEventListener(
   'wheel',
   ev => {
@@ -130,20 +149,48 @@ installPerfOverlay(scene);
  */
 const MAX_FRAME_DELTA = 0.1;
 
+/**
+ * Babylon queues the next animation frame only after the render function
+ * returns: an exception out of a frame ends the render loop for good, and
+ * the game "hangs" in the worst possible way — the canvas freezes while the
+ * socket keeps delivering packets and the sounds keep playing (that is what
+ * a Summoner saw when a Drain Life tether expired). A frame that throws is
+ * logged and skipped; the next one runs. Logging is throttled so a fault
+ * that repeats every frame does not bury the console.
+ */
+const FRAME_ERROR_LOG_INTERVAL_MS = 5000;
+let lastFrameErrorAt = -Infinity;
+let frameErrorsSinceLog = 0;
+
 let lastTime = performance.now();
 engine.runRenderLoop(() => {
   const now = performance.now();
 
-  const deltaTime = Math.min((now - lastTime) / 1000, MAX_FRAME_DELTA);
-  world.gameTime.TotalGameTime.TotalSeconds += deltaTime;
-
-  const updateStarted = performance.now();
-  updateSystems(deltaTime);
-  recordFrame(performance.now() - updateStarted, now - lastTime);
-
-  scene.render();
-
+  const frameMs = now - lastTime;
+  const deltaTime = Math.min(frameMs / 1000, MAX_FRAME_DELTA);
+  // Advanced before the frame runs, so a frame that throws is not replayed
+  // as a double-length one by the next.
   lastTime = now;
+
+  try {
+    world.gameTime.TotalGameTime.TotalSeconds += deltaTime;
+
+    const updateStarted = performance.now();
+    updateSystems(deltaTime);
+    recordFrame(performance.now() - updateStarted, frameMs);
+
+    scene.render();
+  } catch (err) {
+    frameErrorsSinceLog++;
+    if (now - lastFrameErrorAt >= FRAME_ERROR_LOG_INTERVAL_MS) {
+      console.error(
+        `frame threw (${frameErrorsSinceLog} since last report), continuing:`,
+        err
+      );
+      lastFrameErrorAt = now;
+      frameErrorsSinceLog = 0;
+    }
+  }
 });
 
 const onResize = () => engine.resize();
