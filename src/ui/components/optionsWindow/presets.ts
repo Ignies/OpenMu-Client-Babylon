@@ -7,11 +7,11 @@ import { LIGHTING_QUALITY_LABEL_KEYS } from '../../../common/lightingQuality';
 import type { TextKey } from '../../../i18n';
 
 /**
- * One click per tier: both quality tiers plus the Image group at the
- * defaults the tier ships with (ARCHITECTURE §6). Classic builds no bloom and
- * no image-processing pass, so its row stores those at 0 and the window reads
- * back exactly what the frame does. The Rendering checks are left alone: they
- * are the player's own costs, not part of a look.
+ * One click per tier: both quality tiers plus the Image group at the §6
+ * defaults. Classic ignores the tone mapper and bloom (no image-processing
+ * pass, no bloom on tier 0), so its row keeps the shared defaults rather
+ * than zeros that would follow the player up to Enhanced. The Rendering
+ * checks are left alone: they are the player's own costs, not part of a look.
  */
 export type TierPreset = Pick<
   GameOptionsType,
@@ -42,14 +42,7 @@ const IMAGE_DEFAULTS = {
 } as const;
 
 export const TIER_PRESETS: readonly TierPreset[] = [
-  {
-    ...IMAGE_DEFAULTS,
-    lightingQuality: 0,
-    materialQuality: 0,
-    materialDetail: 6,
-    toneMapper: 0,
-    bloom: 0,
-  },
+  { ...IMAGE_DEFAULTS, lightingQuality: 0, materialQuality: 0, materialDetail: 6 },
   { ...IMAGE_DEFAULTS, lightingQuality: 1, materialQuality: 1, materialDetail: 6 },
   { ...IMAGE_DEFAULTS, lightingQuality: 2, materialQuality: 2, materialDetail: 6 },
 ];

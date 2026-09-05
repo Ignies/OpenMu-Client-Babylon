@@ -1,7 +1,7 @@
 import type { World } from '../../ecs/world';
 import { mapMusic, sound } from '../../sound';
 import { setAreaMood } from '../../scenes/sceneLook';
-import { areaRectOf } from '../../lighting/profiles';
+import { areaRectOf, type AreaLookName } from '../../lighting/profiles';
 import { LeanBoxObject } from '../../common/operateBoxObject';
 import { DeviasCandleObject } from './candleObject';
 import {
@@ -28,7 +28,7 @@ export async function createDevias(world: World) {
   tiles[54] = DeviasCandleObject;
   tiles[56] = DeviasCandleObject;
   // Devias 91: CreateOperate + HiddenMesh = -2 + the fixed (40,40,160) box
-  // (ZzzObject.cpp:4652-4655) — the shared operate-box recipe, on Object92.
+  // (ZzzObject.cpp:4652-4655) - the shared operate-box recipe, on Object92.
   tiles[91] = LeanBoxObject;
 
   world.add({
@@ -54,22 +54,22 @@ export async function createDevias(world: World) {
     },
   });
 
-  // Reading room and the two fireplace houses share one treatment: step in,
-  // the cold grade gives way to the warm interior one. The tavern keeps its
-  // extra pub-music trigger above; these three are lit by their hearth alone.
-  const warmRooms: Room[] = [
-    DEVIAS_READING_ROOM,
-    DEVIAS_WEST_HEARTH_HOUSE,
-    DEVIAS_EAST_HEARTH_HOUSE,
+  // Reading room and the two fireplace houses: step in, the cold grade gives
+  // way to the room's own. The tavern keeps its extra pub-music trigger
+  // above; these three are lit by their candles and hearths alone.
+  const warmRooms: [Room, AreaLookName][] = [
+    [DEVIAS_READING_ROOM, 'deviasReadingRoom'],
+    [DEVIAS_WEST_HEARTH_HOUSE, 'deviasHearthHouse'],
+    [DEVIAS_EAST_HEARTH_HOUSE, 'deviasHearthHouse'],
   ];
 
-  for (const room of warmRooms) {
+  for (const [room, look] of warmRooms) {
     world.add({
       worldIndex: map,
       interactiveArea: {
         min: room.min,
         max: room.max,
-        onEnter: () => setAreaMood('deviasTavern', areaRectOf(room.min, room.max)),
+        onEnter: () => setAreaMood(look, areaRectOf(room.min, room.max)),
         onLeave: () => setAreaMood(null),
       },
       onDispose: () => setAreaMood(null),

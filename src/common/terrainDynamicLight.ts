@@ -58,10 +58,7 @@ const emitterTiles = new Map<TerrainLightEmitter, number>();
 let touched: Int32Array | null = null;
 let touchedDirty = true;
 
-/**
- * Tiles past the footprint radius kept in the touched set, so the reset that
- * precedes each rebuild always covers what a moving emitter wrote last frame.
- */
+/** Tiles past the footprint radius kept in the touched set. */
 const TOUCHED_MARGIN = 1;
 
 const tileKey = (x: number, y: number): number =>
@@ -183,10 +180,9 @@ function rebuildTouched(): void {
   touchedDirty = false;
 }
 
+/** Clears the set last written; the rebuild that follows never precedes it. */
 function resetTouched(): void {
-  if (!primary || !baked) return;
-  if (touchedDirty) rebuildTouched();
-  if (!touched) return;
+  if (!primary || !baked || !touched) return;
 
   for (let i = 0; i < touched.length; i++) {
     const o = touched[i] * CHANNELS;
@@ -271,8 +267,6 @@ export function updateTerrainDynamicLight(
 
   wasActive = true;
 
-  // Clear last frame's tiles first: the touched set is rebuilt only after
-  // every emitter that crossed a tile edge has been reset from its old one.
   resetTouched();
 
   for (const emitter of emitters) {

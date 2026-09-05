@@ -56,6 +56,8 @@ const DISABLE = false;
  * The pub floor (x 120-129, y 120-136): pub music, the tavern mood and the
  * two house-wall types lifted out of the way while the hero is inside.
  * `AmbientParticleSystem`'s `LORENCIA_TAVERN` room matches this footprint.
+ * The walls stand on x 120.5 / 129.5 and y 120.5 / 137.5 with their inner
+ * faces at 121 / 129 and 121 / 137; the room's frame is that inner box.
  */
 function createTavern(world: World) {
   const map = world.mapIndex;
@@ -69,6 +71,7 @@ function createTavern(world: World) {
   };
 
   const pub = { min: { x: 120, y: 120 }, max: { x: 129, y: 136 } };
+  const floor = { min: { x: 121, y: 121 }, max: { x: 129, y: 137 } };
 
   world.add({
     worldIndex: map,
@@ -76,7 +79,7 @@ function createTavern(world: World) {
       ...pub,
       onEnter: () => {
         sound.playMusic('Music/Pub');
-        setAreaMood('lorenciaTavern', areaRectOf(pub.min, pub.max));
+        setAreaMood('lorenciaTavern', areaRectOf(floor.min, floor.max));
         liftWalls({ x: 0, y: 100, z: 0 });
       },
       onLeave: () => {

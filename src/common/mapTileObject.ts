@@ -31,6 +31,9 @@ export class MapTileObject extends ModelObject {
 
   #disposed = false;
 
+  /** False while the active room's frame excludes this object (areaVisibilitySystem). */
+  #roomVisible = true;
+
   async init(world: World, entity: Entity) {
     await super.init(world, entity);
 
@@ -209,6 +212,12 @@ export class MapTileObject extends ModelObject {
     ]);
   }
 
+  /** Drawn or not by the room the hero is in: the node and, for an effect-only object, its emitter. */
+  setRoomVisible(visible: boolean): void {
+    this.#roomVisible = visible;
+    this.node.setEnabled(visible);
+  }
+
   dispose(): void {
     this.#disposed = true;
     this.#light?.dispose();
@@ -226,7 +235,7 @@ export class MapTileObject extends ModelObject {
   Update(gameTime: World['gameTime']): void {
     super.Update(gameTime);
 
-    if (!this.Ready) return;
+    if (!this.Ready || !this.#roomVisible) return;
 
     this.#emitter?.update();
     this.#boneEmitter?.update();

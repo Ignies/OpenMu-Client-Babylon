@@ -22,7 +22,11 @@ import {
   createItemPbrMaterial,
   useMeshAlphaTestTexture,
 } from './itemMaterial';
-import { isCharacterAsset, pbrCovers } from './materialQuality';
+import {
+  isCharacterAsset,
+  pbrCovers,
+  textureFiltering,
+} from './materialQuality';
 import { textureSourceName } from './pbrMaps';
 import { getEmptyTexture } from '../libs/babylon/emptyTexture';
 import { BlendState } from './objects/enum';
@@ -310,15 +314,33 @@ export function syncMaterialQuality(scene: Scene): void {
     );
     if (mesh.material !== material) mesh.material = material;
   }
+
+  syncTextureFiltering();
 }
 
 const texturesCache: Map<string, Texture> = new Map();
+
+/**
+ * The model textures' samplers follow the lighting tier (`textureFiltering`).
+ * The GLBs declare no sampler filter, so the loader builds the mip chain on
+ * every tier; Classic's nearest mode reads level 0 only.
+ */
+function applyTextureFiltering(texture: Texture): void {
+  const { sampling, anisotropy } = textureFiltering();
+
+  texture.updateSamplingMode(sampling);
+  texture.anisotropicFilteringLevel = anisotropy;
+}
+
+function syncTextureFiltering(): void {
+  for (const texture of texturesCache.values()) applyTextureFiltering(texture);
+}
 
 function getTexture(key: string, fallback: Texture) {
   if (texturesCache.has(key)) return texturesCache.get(key)!;
 
   fallback.isBlocking = true;
-  fallback.updateSamplingMode(Texture.NEAREST_NEAREST);
+  applyTextureFiltering(fallback);
 
   texturesCache.set(key, fallback);
 

@@ -6,6 +6,7 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { resolveDataUrl } from '../libs/mu/dataFolder';
+import { FILTER_ANISOTROPY } from './materialQuality';
 
 /**
  * PBR map sets for the Enhanced material ("authored maps").
@@ -56,15 +57,16 @@ const NORMAL_STRENGTH = 1.4;
 const SOBEL_NORM = 1 / 8;
 
 /**
- * Cap on derived metalness — no environment map, so full metal reads black.
- * The palette heuristic cannot tell gold from warm-lit oak, and every texel
- * it gets wrong costs diffuse and pays it back as a highlight the surface
- * should not have, so the cap stays well under a real metal.
+ * Cap on derived metalness. The palette heuristic cannot tell gold from
+ * warm-lit oak, and every texel it gets wrong costs diffuse (up to 17 %) and
+ * pays it back as a highlight nobody sees without an environment map, so
+ * derived metal is 0: metal comes from authored `Data/PBR` maps only
+ * (ARCHITECTURE §4.7).
  */
-const METAL_MAX = 0.25;
+const METAL_MAX = 0;
 /** Saturation below which a texel may read as metal (1 / this slope). */
 const METAL_SAT_SLOPE = 5;
-const ROUGH_MIN = 0.45;
+const ROUGH_MIN = 0.55;
 const ROUGH_MAX = 0.95;
 /** Share of the texture that must be emissive before a map is worth binding. */
 const EMISSIVE_MIN_COVERAGE = 0.002;
@@ -187,11 +189,12 @@ const placeholders = new WeakMap<Scene, Placeholders>();
 
 /**
  * `nearest` marks the 1×1 placeholders, which have nothing to filter. Every
- * real derived map gets mipmaps and trilinear filtering: it is the same size
- * as the albedo, which *is* mipped, so leaving these unmipped meant a floor
- * seen at a grazing angle sampled full-resolution normal and roughness texels
- * under a minified albedo. That aliases into a crawling, smeared sheen —
- * exactly where Enhanced looked worst next to Classic.
+ * real derived map gets mipmaps, trilinear filtering and the albedo's
+ * anisotropy: it is the same size as the albedo, which *is* mipped, so
+ * leaving these unmipped meant a floor seen at a grazing angle sampled
+ * full-resolution normal and roughness texels under a minified albedo. That
+ * aliases into a crawling, smeared sheen. The maps are only ever bound on the
+ * PBR variant, which is a tier >= 1 material, so they take no Classic mode.
  */
 function raw(
   name: string,
@@ -215,6 +218,7 @@ function raw(
   );
   texture.name = name;
   texture.gammaSpace = false;
+  texture.anisotropicFilteringLevel = nearest ? 1 : FILTER_ANISOTROPY;
   return texture;
 }
 
@@ -282,6 +286,7 @@ function authored(file: string, scene: Scene): Texture {
   );
   texture.name = `pbr_${file}`;
   texture.gammaSpace = false;
+  texture.anisotropicFilteringLevel = FILTER_ANISOTROPY;
   return texture;
 }
 

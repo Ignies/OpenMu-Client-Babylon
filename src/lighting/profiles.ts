@@ -185,7 +185,7 @@ export type AreaLook = {
   readonly sun: SunSpec;
 };
 
-/** A room's footprint in tiles: the interactive area plus its margin. */
+/** A room's frame in tiles: its floor plus half the wall, so the doorway keeps its ground. */
 export type AreaRect = {
   readonly minX: number;
   readonly minY: number;
@@ -193,11 +193,15 @@ export type AreaRect = {
   readonly maxY: number;
 };
 
-/** The map's `interactiveArea` bounds widened by `margin` tiles on every side. */
+/**
+ * The room's floor (inner wall faces) widened by `margin` tiles on every side.
+ * Half a tile reaches the wall line: a door standing in it keeps its ground,
+ * and what leans on the outside of a wall stays out.
+ */
 export function areaRectOf(
   min: { x: number; y: number },
   max: { x: number; y: number },
-  margin = 1
+  margin = 0.5
 ): AreaRect {
   return {
     minX: min.x - margin,
@@ -207,15 +211,47 @@ export function areaRectOf(
   };
 }
 
-const TAVERN: AreaLook = {
-  evDelta: -0.4,
-  whiteBalance: [1.03, 1.0, 0.96],
-  sun: sun(215, 70),
+/** Steep enough that a bench's shadow ends on the floor, low enough to read as one. */
+const ROOM_ELEVATION = 65;
+
+/** The side the room's light is on: 90 puts it at -x, 180 at +z, 270 at +x, 0 at -z (measured on the pub's chairs). */
+const roomSun = (azimuthDeg: number) => sun(azimuthDeg, ROOM_ELEVATION);
+
+const WARM_ROOM: Rgb = [1.03, 1.0, 0.96];
+
+/** Lorencia pub: the windows are on the x 120.5 wall. Floor p50 0.361 at -0.4 (Classic 0.247). */
+const LORENCIA_TAVERN: AreaLook = {
+  evDelta: -0.2,
+  whiteBalance: WARM_ROOM,
+  sun: roomSun(90),
+};
+
+/** Devias tavern: the hearth is on the y 27.5 wall (232, 27.5). Floor p50 0.278 at +0.8, 0.310 at +1.1 (Classic 0.176). */
+const DEVIAS_TAVERN: AreaLook = {
+  evDelta: 0.9,
+  whiteBalance: WARM_ROOM,
+  sun: roomSun(180),
+};
+
+/** Devias reading room: candelabra along the x 204.5 wall, the desk beside them. Carpet p50 0.25-0.30 at +0.9..+1.2 (Classic 0.184). */
+const DEVIAS_READING_ROOM: AreaLook = {
+  evDelta: 1.0,
+  whiteBalance: WARM_ROOM,
+  sun: roomSun(90),
+};
+
+/** The two Devias hearth houses: one fire on the low-x wall, nothing else lit. Unmeasured: the tavern's level. */
+const DEVIAS_HEARTH_HOUSE: AreaLook = {
+  evDelta: 0.9,
+  whiteBalance: WARM_ROOM,
+  sun: roomSun(90),
 };
 
 const AREAS = {
-  lorenciaTavern: TAVERN,
-  deviasTavern: TAVERN,
+  lorenciaTavern: LORENCIA_TAVERN,
+  deviasTavern: DEVIAS_TAVERN,
+  deviasReadingRoom: DEVIAS_READING_ROOM,
+  deviasHearthHouse: DEVIAS_HEARTH_HOUSE,
 } satisfies Record<string, AreaLook>;
 
 export type AreaLookName = keyof typeof AREAS;

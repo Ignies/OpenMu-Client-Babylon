@@ -12,6 +12,7 @@ import {
   specularLightScale,
 } from './materialQuality';
 import { dynamicLightGain, pointLightBudget } from './lightingQuality';
+import { devQueryNumber } from './devSeams';
 import { lookDirector } from '../lighting/director';
 import type { TerrainLightColor } from './terrainDynamicLight';
 
@@ -20,7 +21,11 @@ import type { TerrainLightColor } from './terrainDynamicLight';
  * for why it is fixed at startup and what it costs per pixel.
  */
 export function pointLightPoolSize(): number {
-  return pointLightBudget();
+  const budget = pointLightBudget();
+  // Dev seam `?pool=<n>`: fewer slots this session, 0 = no pool.
+  const dev = devQueryNumber('pool');
+
+  return dev === null ? budget : Math.max(0, Math.min(budget, Math.floor(dev)));
 }
 
 const LIGHT_RANGE = 6;

@@ -1,5 +1,6 @@
-import type { AbstractMesh } from '../libs/babylon/exports';
+import { Texture, type AbstractMesh } from '../libs/babylon/exports';
 import { GameOptions } from './gameOptions';
+import { lightingTier } from './lightingQuality';
 import type { TextKey } from '../i18n';
 
 /**
@@ -107,6 +108,29 @@ export function pbrDetailStrength(): number {
   );
 
   return value / MATERIAL_DETAIL_MAX;
+}
+
+/** Anisotropy on the art's samplers on tiers >= 1 (ARCHITECTURE §4.7). */
+export const FILTER_ANISOTROPY = 16;
+
+export type TextureFiltering = { sampling: number; anisotropy: number };
+
+/**
+ * Sampler state for the art, per lighting tier. Classic reads level 0 with
+ * nearest filtering, the way the original binds every texture
+ * (GlobalBitmap.cpp:680: one level, no mip chain); tiers >= 1 filter
+ * trilinear with anisotropy. Mip chains are built at load on every tier so
+ * the flip is a sampler write, not a reload; Classic's mode never reads them.
+ */
+export function textureFiltering(): TextureFiltering {
+  if (lightingTier() === null) {
+    return { sampling: Texture.NEAREST_NEAREST, anisotropy: 1 };
+  }
+
+  return {
+    sampling: Texture.TRILINEAR_SAMPLINGMODE,
+    anisotropy: FILTER_ANISOTROPY,
+  };
 }
 
 /**
