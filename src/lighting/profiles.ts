@@ -91,6 +91,11 @@ const ENCLOSED_PROFILE: LookProfile = {
   sun: INTERIOR_SUN,
 };
 
+const PREGAME_PROFILE: LookProfile = {
+  ...ENCLOSED_PROFILE,
+  ev: 1.0,
+};
+
 const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
   [ENUM_WORLD.WD_0LORENCIA]: {
     // Measured (wave 1, Standard mapper): 1.6 lands p50 0.424, 1.8 lands 0.451.
@@ -140,10 +145,20 @@ const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
   [ENUM_WORLD.WD_7ATLANSE]: {
     ev: 1.2,
     whiteBalance: [0.94, 1.0, 1.04],
+    // Skyless: the haze is the water's own murk, in its colour, and it
+    // starts past the hero like every other map's (a 4-tile start veiled the
+    // whole frame: lrms 0.012).
     sky: null,
-    fog: { start: 4, density: 0.04, cap: 0.7, height: 0.02, color: [0.2, 0.46, 0.54] },
+    fog: { start: 25, density: 0.03, cap: 0.85, height: 0.02, color: [0.2, 0.46, 0.54] },
     sun: sun(0, 80, ENCLOSED_SUN_SHARE),
   },
+  // The login and character-select backdrops: the Fortress set at night,
+  // torch-lit under its own roofs, seen by a flying camera far enough for
+  // any open haze cap. No haze, no sky, the room key.
+  [ENUM_WORLD.WD_73NEW_LOGIN_SCENE]: PREGAME_PROFILE,
+  [ENUM_WORLD.WD_74NEW_CHARACTER_SCENE]: PREGAME_PROFILE,
+  [ENUM_WORLD.WD_77NEW_LOGIN_SCENE]: PREGAME_PROFILE,
+  [ENUM_WORLD.WD_78NEW_CHARACTER_SCENE]: PREGAME_PROFILE,
   [ENUM_WORLD.WD_10ICARUS]: {
     // The map has an authored clear colour and no ground (MainScene.cpp:402).
     ev: 0.6,

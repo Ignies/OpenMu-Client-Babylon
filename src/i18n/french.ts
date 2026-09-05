@@ -145,6 +145,8 @@ export const frenchLayer: LanguageLayer = {
     'options.section.windows': 'Fenêtres',
     'options.section.actions': 'Actions',
     'options.section.language': 'Langue',
+    'options.section.quality': 'Qualité',
+    'options.preset': 'Préréglage',
     'options.autoAttack': 'Attaque automatique',
     'options.whisperBeep': 'Bip à la réception d’un chuchotement',
     'options.slideHelp': 'Aide glissante',
@@ -170,17 +172,11 @@ export const frenchLayer: LanguageLayer = {
     'options.chromatic': 'Ab. chromatique',
     'options.fxaa': 'FXAA',
     'options.vignette': 'Vignettage',
-
     'options.toneMapper': 'Mappage tonal',
-
     'options.brightness': 'Luminosité',
-
     'options.toneMapper.none': 'Aucun',
-
     'options.toneMapper.standard': 'Standard',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': 'Neutre',
     'options.resetKeys': 'Valeurs par défaut',
     'options.keyHint': 'Cliquez, puis appuyez sur une touche. Échap annule.',

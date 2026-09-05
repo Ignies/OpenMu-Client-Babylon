@@ -147,6 +147,8 @@ export const chineseLayer: LanguageLayer = {
     'options.section.windows': '窗口',
     'options.section.actions': '动作',
     'options.section.language': '语言',
+    'options.section.quality': '质量',
+    'options.preset': '预设',
     'options.autoAttack': '自动攻击',
     'options.whisperBeep': '收到密语时提示音',
     'options.slideHelp': '滑动提示',
@@ -171,17 +173,11 @@ export const chineseLayer: LanguageLayer = {
     'options.chromatic': '色差',
     'options.fxaa': 'FXAA',
     'options.vignette': '暗角',
-
     'options.toneMapper': '色调映射',
-
     'options.brightness': '亮度',
-
     'options.toneMapper.none': '无',
-
     'options.toneMapper.standard': '标准',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': '中性',
     'options.resetKeys': '恢复默认',
     'options.keyHint': '点击后按下一个键。Esc 取消。',

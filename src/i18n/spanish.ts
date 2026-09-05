@@ -155,6 +155,8 @@ export const spanishLayer: LanguageLayer = {
     'options.section.windows': 'Ventanas',
     'options.section.actions': 'Acciones',
     'options.section.language': 'Idioma',
+    'options.section.quality': 'Calidad',
+    'options.preset': 'Preajuste',
     'options.autoAttack': 'Ataque automático',
     'options.whisperBeep': 'Pitido al recibir un susurro',
     'options.slideHelp': 'Ayuda deslizante',
@@ -179,17 +181,11 @@ export const spanishLayer: LanguageLayer = {
     'options.chromatic': 'Ab. cromática',
     'options.fxaa': 'FXAA',
     'options.vignette': 'Viñeta',
-
     'options.toneMapper': 'Mapeo de tonos',
-
     'options.brightness': 'Brillo',
-
     'options.toneMapper.none': 'Ninguno',
-
     'options.toneMapper.standard': 'Estándar',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': 'Neutro',
     'options.resetKeys': 'Restaurar valores',
     'options.keyHint': 'Haz clic y pulsa una tecla. Esc cancela.',

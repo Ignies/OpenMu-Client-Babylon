@@ -11,8 +11,12 @@ import { dynamicLightGain } from './lightingQuality';
 export type TerrainLightColor = { r: number; g: number; b: number };
 
 export type TerrainLightEmitter = {
-  readonly x: number;
-  readonly y: number;
+  /**
+   * World position, held by reference and read every frame: the footprint is
+   * measured from the float x / z like the original's `AddTerrainLight`, so a
+   * carried light slides with the body instead of stepping per tile.
+   */
+  readonly position: { readonly x: number; readonly y: number; readonly z: number };
   readonly range: number;
   readonly falloff?: number;
   readonly floorGain?: number;
@@ -48,8 +52,20 @@ let deltaDirty = false;
 
 const emitters = new Set<TerrainLightEmitter>();
 
+/** Tile each emitter last wrote from; a change rebuilds the touched set. */
+const emitterTiles = new Map<TerrainLightEmitter, number>();
+
 let touched: Int32Array | null = null;
 let touchedDirty = true;
+
+/**
+ * Tiles past the footprint radius kept in the touched set, so the reset that
+ * precedes each rebuild always covers what a moving emitter wrote last frame.
+ */
+const TOUCHED_MARGIN = 1;
+
+const tileKey = (x: number, y: number): number =>
+  Math.floor(x) * TERRAIN_SIZE * 4 + Math.floor(y);
 
 export function initTerrainDynamicLight(liftedBaked: Float32Array): void {
   baked = liftedBaked;
@@ -64,6 +80,7 @@ export function initTerrainDynamicLight(liftedBaked: Float32Array): void {
   }
   deltaDirty = true;
   emitters.clear();
+  emitterTiles.clear();
   touched = null;
   touchedDirty = true;
 }
@@ -74,6 +91,7 @@ export function disposeTerrainDynamicLight(): void {
   floor = null;
   deltaBytes = null;
   emitters.clear();
+  emitterTiles.clear();
   touched = null;
   touchedDirty = true;
 }
@@ -138,6 +156,7 @@ export function registerTerrainLight(emitter: TerrainLightEmitter): () => void {
     resetTouched();
 
     emitters.delete(emitter);
+    emitterTiles.delete(emitter);
     touchedDirty = true;
   };
 }
@@ -146,9 +165,12 @@ function rebuildTouched(): void {
   const indices = new Set<number>();
 
   for (const emitter of emitters) {
-    const xi = Math.floor(emitter.x);
-    const yi = Math.floor(emitter.y);
-    const range = emitter.range;
+    const { x, z } = emitter.position;
+    const xi = Math.floor(x);
+    const yi = Math.floor(z);
+    const range = Math.ceil(emitter.range) + TOUCHED_MARGIN;
+
+    emitterTiles.set(emitter, tileKey(x, z));
 
     for (let y = yi - range; y <= yi + range; y++) {
       for (let x = xi - range; x <= xi + range; x++) {
@@ -249,14 +271,24 @@ export function updateTerrainDynamicLight(
 
   wasActive = true;
 
+  // Clear last frame's tiles first: the touched set is rebuilt only after
+  // every emitter that crossed a tile edge has been reset from its old one.
   resetTouched();
+
+  for (const emitter of emitters) {
+    const { x, z } = emitter.position;
+
+    if (emitterTiles.get(emitter) !== tileKey(x, z)) touchedDirty = true;
+  }
+
+  if (touchedDirty) rebuildTouched();
 
   for (const emitter of emitters) {
     const { r, g, b } = emitter.color(elapsedMs);
 
     addTerrainLight(
-      emitter.x,
-      emitter.y,
+      emitter.position.x,
+      emitter.position.z,
       r,
       g,
       b,

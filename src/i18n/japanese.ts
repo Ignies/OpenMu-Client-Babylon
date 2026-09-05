@@ -149,6 +149,8 @@ export const japaneseLayer: LanguageLayer = {
     'options.section.windows': 'ウィンドウ',
     'options.section.actions': '操作',
     'options.section.language': '言語',
+    'options.section.quality': '品質',
+    'options.preset': 'プリセット',
     'options.autoAttack': '自動攻撃',
     'options.whisperBeep': 'ささやき受信時に音を鳴らす',
     'options.slideHelp': 'スライドヘルプ',
@@ -173,17 +175,11 @@ export const japaneseLayer: LanguageLayer = {
     'options.chromatic': '色収差',
     'options.fxaa': 'FXAA',
     'options.vignette': 'ビネット',
-
     'options.toneMapper': 'トーンマッピング',
-
     'options.brightness': '明るさ',
-
     'options.toneMapper.none': 'なし',
-
     'options.toneMapper.standard': '標準',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': 'ニュートラル',
     'options.resetKeys': '既定に戻す',
     'options.keyHint': 'クリックしてからキーを押してください。Esc で中止。',

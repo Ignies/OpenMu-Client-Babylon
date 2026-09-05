@@ -148,6 +148,8 @@ export const koreanLayer: LanguageLayer = {
     'options.section.windows': '창',
     'options.section.actions': '동작',
     'options.section.language': '언어',
+    'options.section.quality': '품질',
+    'options.preset': '프리셋',
     'options.autoAttack': '자동 공격',
     'options.whisperBeep': '귓속말 수신음',
     'options.slideHelp': '슬라이드 도움말',
@@ -172,17 +174,11 @@ export const koreanLayer: LanguageLayer = {
     'options.chromatic': '색수차',
     'options.fxaa': 'FXAA',
     'options.vignette': '비네트',
-
     'options.toneMapper': '톤 매핑',
-
     'options.brightness': '밝기',
-
     'options.toneMapper.none': '없음',
-
     'options.toneMapper.standard': '표준',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': '뉴트럴',
     'options.resetKeys': '기본값으로',
     'options.keyHint': '클릭한 뒤 키를 누르세요. Esc로 취소합니다.',

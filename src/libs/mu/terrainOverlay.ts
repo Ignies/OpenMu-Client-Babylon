@@ -160,8 +160,8 @@ export type TerrainOverlay = {
   /**
    * How much of the map's baked light this layer replaces with its own,
    * 0…1. A layer that LIES ON the ground (snow) is a different material
-   * from the ground, and the lightmap was baked for grass and stone under
-   * a blue grade: through it white snow comes out cyan, and every dark
+   * from the ground, and the lightmap was baked for grass and stone with a
+   * cold cast: through it white snow comes out cyan, and every dark
    * patch in the bake becomes a stain on the snow. At 1 the layer keeps
    * only the bake's SHADING, as luminance, and is lit white with pale
    * blue-grey shadows (OVERLAY_LIGHT); at 0 it is lit like the ground.
@@ -226,24 +226,20 @@ export const OVERLAY_LIGHT = {
  * Settled snow on Devias.
  *
  * Deliberately not pure white: fresh snow lit by the map's cold bake reads as
- * blown-out paper at 1.0, and Devias' grade is already blue. Slightly under
+ * blown-out paper at 1.0, and Devias' bake is already blue. Slightly under
  * white, faintly warm, lets the lightmap do the colouring.
  */
 export const SNOW_COVER: TerrainOverlay = {
   name: 'snowCover',
-  // Near-white, a hair warm. The blue cast the field used to have was never
-  // this colour: it was the old mood's blue bake tint multiplied in
-  // afterwards, and no albedo survives a 1.16 blue-over-red gain on top of a
-  // blue bake. The bake is untinted now and the snow takes its own light
-  // through `lightNeutral` below, so this can be what snow actually is; the
-  // residual warmth only keeps it off dead paper-white in full sun.
+  // Near-white, a hair warm: the snow takes its own light through
+  // `lightNeutral` below, so this can be what snow actually is; the residual
+  // warmth only keeps it off dead paper-white in full sun.
   colour: [0.985, 0.98, 0.965],
   blend: 'mix',
   coverage: snowCover,
   // Snow is lit as snow, not as the grass the lightmap was baked for: the
   // bake keeps its shading and loses its hue (see `lightNeutral` on the
-  // type). The remaining tenth is what still ties a drift to the map's
-  // grade so it does not float over the ground like a decal.
+  // type).
   lightNeutral: 1,
   // Solid at full cover on the snow tiles; the bed table alone thins it on
   // cobbles and flagstones.
@@ -919,11 +915,9 @@ const SHADE_FLOOR = 0.55;
  * Baked rather than exposed — it is gated by `SNOW_SHADE.cavity`, so it
  * cannot fail into anything on its own.
  */
-// Paler than the 0.66/0.74/0.93 it was: that is the right HUE but at full
-// saturation it needs the grade's desaturation (-28 on shadows) to read as
-// blue-grey, and with post-processing off it reads as blue paint. Same hue,
-// half the chroma, so it lands blue-grey either way; `cavity` was raised to
-// keep the same amount of colour in the troughs.
+// Half the chroma of the 0.66/0.74/0.93 it was: the same hue at full
+// saturation reads as blue paint rather than blue-grey; `cavity` was raised
+// to keep the same amount of colour in the troughs.
 const CAVITY_TINT = 'vec3(0.72, 0.75, 0.83)';
 
 /**
@@ -1376,12 +1370,18 @@ function hasLightNeutral(overlays: readonly TerrainOverlay[]): boolean {
  * only when a layer asks for it, a mix toward the layer's own light:
  *
  *   white where the bake is bright and the sun reaches, OVERLAY_LIGHT.shadow
- *   where either is cut. The bake contributes its luminance only — its hue
- *   is the map's grade, and the whole point is that snow does not take it.
+ *   where either is cut. The bake contributes its luminance only - its hue
+ *   is the map's own, and the whole point is that snow does not take it.
  *
  * `bakeVar` is the lightmap colour (0…1), `sunVar` the cascaded sun factor
  * (1 = lit), `extraExpr` the light that applies to ground and layer alike
- * (torches, room key). Must run after `terrainOverlayGlsl`.
+ * (torches, room key) in the same space as `mapLitExpr`. Reads the
+ * material's `linearLight` uniform the way the overlay body reads main()'s
+ * locals: on the linear tiers the constants are decoded once, the delta is
+ * added in linear and the cap applied there (a re-encoded delta is what
+ * turned a lamp's footprint into a white diamond on the snow), and the sum is
+ * encoded once for the material's final decode, which lands the product
+ * exactly at lin(texel) x the linear sum. Must run after `terrainOverlayGlsl`.
  */
 export function terrainOverlayLitGlsl(
   overlays: readonly TerrainOverlay[],
@@ -1394,16 +1394,24 @@ export function terrainOverlayLitGlsl(
   if (!hasLightNeutral(overlays)) return `    vec3 ${outVar} = ${mapLitExpr};`;
   const s = OVERLAY_LIGHT.shadow;
   const l = OVERLAY_LIGHT.lit;
+  const lin = (c: readonly [number, number, number]) =>
+    `vec3(${f(c[0] ** 2.2)}, ${f(c[1] ** 2.2)}, ${f(c[2] ** 2.2)})`;
   return `
     vec3 ${outVar} = ${mapLitExpr};
     {
       float ovBakeLum = dot(${bakeVar}.rgb, vec3(0.299, 0.587, 0.114));
       float ovKey = smoothstep(0.0, 1.0, ovBakeLum * ${f(OVERLAY_LIGHT.gain)}) * ${sunVar};
+      vec3 ovExtra = max(${extraExpr}, vec3(0.0));
       vec3 ovLayerLit =
         min(
           mix(vec3(${f(s[0])}, ${f(s[1])}, ${f(s[2])}),
-              vec3(${f(l[0])}, ${f(l[1])}, ${f(l[2])}), ovKey) + ${extraExpr},
+              vec3(${f(l[0])}, ${f(l[1])}, ${f(l[2])}), ovKey) + ovExtra,
           vec3(${f(OVERLAY_LIGHT.cap)}));
+      vec3 ovLayerLin =
+        min(
+          mix(${lin(s)}, ${lin(l)}, ovKey) + pow(ovExtra, vec3(2.2)),
+          vec3(${f(OVERLAY_LIGHT.cap ** 2.2)}));
+      ovLayerLit = mix(ovLayerLit, pow(ovLayerLin, vec3(1.0 / 2.2)), linearLight);
       ${outVar} = mix(${outVar}, ovLayerLit, ovNeutral);
     }`;
 }

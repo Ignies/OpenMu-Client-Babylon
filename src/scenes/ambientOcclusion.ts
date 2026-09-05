@@ -1,11 +1,14 @@
 import {
   Color4,
+  GeometryBufferRenderer,
+  Material,
   PostProcess,
   RenderTargetTexture,
   SSAO2RenderingPipeline,
   ShaderStore,
   SmartArray,
   Texture,
+  Vector3,
   type AbstractMesh,
   type ArcRotateCamera,
   type MultiRenderTarget,
@@ -19,6 +22,7 @@ import {
 // cached module, and does *not* re-run the registration over the top of ours.
 import '@babylonjs/core/Shaders/ssaoCombine.fragment.js';
 import { pipelineSamples, type LightingTier } from '../common/lightingQuality';
+import { devQuery, devQueryNumbers } from '../common/devSeams';
 import { drawsSolidGeometry } from './shadows';
 
 /**
@@ -30,7 +34,8 @@ import { drawsSolidGeometry } from './shadows';
  * near-wall darkening (that darkening is the art) and the CSM the sun, so the
  * AO reads as contact tightening, never as a halo at gameplay zoom.
  *
- * Dev override: `?ssao=radius,strength,base` for live tuning.
+ * Dev seams: `?ssao=radius,strength,base` for live tuning; `?ssao=0` builds
+ * none of it (G-buffer and effect mask included).
  */
 const SSAO_RADIUS = 0.35;
 const SSAO_STRENGTH = 0.75;
@@ -39,16 +44,11 @@ const SSAO_MAX_Z = 45;
 const SSAO_MIN_Z_ASPECT = 0.25;
 
 function ssaoOverride(): [number, number, number] | null {
-  try {
-    const raw = new URLSearchParams(location.search).get('ssao');
-    if (!raw) return null;
-    const parts = raw.split(',').map(Number);
-    return parts.length === 3 && parts.every(n => !isNaN(n))
-      ? (parts as [number, number, number])
-      : null;
-  } catch {
-    return null;
-  }
+  return devQueryNumbers('ssao', 3) as [number, number, number] | null;
+}
+
+function ssaoForcedOff(): boolean {
+  return devQuery('ssao') === '0';
 }
 
 /**
@@ -110,6 +110,17 @@ function occludes(mesh: AbstractMesh): boolean {
   // otherwise poison.
   if (meta.depthOccluder !== true || meta.brightMesh) return false;
 
+  // A map object's alpha-keyed cards (Noria's canopies, grass, every fence
+  // and bar) are the bulk of the G-buffer's cost and occlude nothing worth
+  // the pass; the haze reads the depth behind them (§4.8 step 1). A figure's
+  // keyed trim stays in: it is the body's own silhouette.
+  if (
+    meta.mapObject === true &&
+    mesh.material?.transparencyMode === Material.MATERIAL_ALPHATESTANDBLEND
+  ) {
+    return false;
+  }
+
   return drawsSolidGeometry(mesh);
 }
 
@@ -154,8 +165,17 @@ function depthWriteAlphaKeyed(gbuffer: MultiRenderTarget): void {
  * frame, glow cards included; wherever the effect mask says an additive pass
  * landed, the AO is faded out (a pixel that is itself a light source has
  * nothing to occlude).
+ *
+ * The ground keeps a floor (§4.8 step 1): the lightmap already carries the
+ * near-wall darkening, so on an up-facing surface the AO is contact
+ * tightening only. "Ground" is read off the G-buffer normal (view space, so
+ * it is compared against the camera's up).
  */
 const SSAO_COMBINE_SHADER = 'ssaoCombinePixelShader';
+
+const GROUND_AO_FLOOR = 0.8;
+const GROUND_NORMAL_SAMPLER = 'gbufferNormal';
+const GROUND_UP_UNIFORM = 'upView';
 
 let ssaoCombinePatched = false;
 
@@ -168,11 +188,14 @@ function patchSsaoCombine(): void {
   uniform sampler2D textureSampler;
   uniform sampler2D originalColor;
   uniform sampler2D ${EFFECT_MASK_SAMPLER};
+  uniform sampler2D ${GROUND_NORMAL_SAMPLER};
   uniform vec4 viewport;
+  uniform vec3 ${GROUND_UP_UNIFORM};
   varying vec2 vUV;
 
   const float EFFECT_MASK_LO = ${EFFECT_MASK_LO.toFixed(3)};
   const float EFFECT_MASK_HI = ${EFFECT_MASK_HI.toFixed(3)};
+  const float GROUND_AO_FLOOR = ${GROUND_AO_FLOOR.toFixed(3)};
 
   void main(void) {
     vec2 uv = viewport.xy + vUV * viewport.zw;
@@ -186,7 +209,11 @@ function patchSsaoCombine(): void {
     float lit = smoothstep(EFFECT_MASK_LO, EFFECT_MASK_HI,
       max(effect.r, max(effect.g, effect.b)));
 
+    vec3 normalV = texture2D(${GROUND_NORMAL_SAMPLER}, uv).xyz;
+    float ground = smoothstep(0.7, 0.9, dot(normalV, ${GROUND_UP_UNIFORM}));
+
     vec3 ao = mix(ssaoColor.rgb, vec3(1.0), lit);
+    ao = max(ao, vec3(ground * GROUND_AO_FLOOR));
 
     gl_FragColor = vec4(sceneColor.rgb * ao, sceneColor.a * ssaoColor.a);
   }
@@ -233,15 +260,17 @@ function createEffectMask(
 }
 
 /**
- * Hand Babylon's combine pass the sampler its patched shader declares. An
- * `Effect` binds textures by the names it was *compiled* with, so the
- * post-process is recompiled with the extra name; `onApplyObservable`
+ * Hand Babylon's combine pass the samplers and the uniform its patched shader
+ * declares. An `Effect` binds by the names it was *compiled* with, so the
+ * post-process is recompiled with the extra names; `onApplyObservable`
  * because the pipeline has already spent `onApply` on `viewport` and
  * `originalColor`.
  */
-function bindEffectMask(
+function bindCombine(
   ssao: SSAO2RenderingPipeline,
-  mask: RenderTargetTexture
+  camera: ArcRotateCamera,
+  mask: RenderTargetTexture,
+  normals: Texture | null
 ): void {
   const combine = (
     ssao as unknown as { _ssaoCombinePostProcess: PostProcess | null }
@@ -249,15 +278,20 @@ function bindEffectMask(
 
   if (!combine) return;
 
-  combine.updateEffect(null, null, [
-    'textureSampler',
-    'originalColor',
-    'viewport',
-    EFFECT_MASK_SAMPLER,
-  ]);
+  combine.updateEffect(
+    null,
+    ['viewport', GROUND_UP_UNIFORM],
+    ['textureSampler', 'originalColor', EFFECT_MASK_SAMPLER, GROUND_NORMAL_SAMPLER]
+  );
+
+  const upView = new Vector3();
 
   combine.onApplyObservable.add(effect => {
     effect.setTexture(EFFECT_MASK_SAMPLER, mask);
+    if (normals) effect.setTexture(GROUND_NORMAL_SAMPLER, normals);
+
+    Vector3.TransformNormalToRef(Vector3.UpReadOnly, camera.getViewMatrix(), upView);
+    effect.setFloat3(GROUND_UP_UNIFORM, upView.x, upView.y, upView.z);
   });
 }
 
@@ -270,12 +304,16 @@ function createSsao(
   patchSsaoCombine();
 
   const gbuffer = scene.enableGeometryBufferRenderer(tier.ssaoRatio);
+  let normals: Texture | null = null;
 
   if (gbuffer) {
     const target = gbuffer.getGBuffer();
 
     target.renderListPredicate = occludes;
     depthWriteAlphaKeyed(target);
+    normals = target.textures[
+      gbuffer.getTextureIndex(GeometryBufferRenderer.NORMAL_TEXTURE_TYPE)
+    ] ?? null;
   }
 
   const ssao = new SSAO2RenderingPipeline(
@@ -300,7 +338,7 @@ function createSsao(
   ssao.minZAspect = SSAO_MIN_Z_ASPECT;
   ssao.textureSamples = pipelineSamples();
 
-  bindEffectMask(ssao, mask);
+  bindCombine(ssao, camera, mask, normals);
 
   return ssao;
 }
@@ -331,7 +369,7 @@ export function syncAmbientOcclusion(
   tier: LightingTier | null,
   post: boolean
 ): boolean {
-  const want = tier !== null && post;
+  const want = tier !== null && post && !ssaoForcedOff();
 
   if (runtime && (!want || runtime.tier !== tier || runtime.scene !== scene)) {
     disposeAmbientOcclusion();

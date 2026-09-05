@@ -152,8 +152,12 @@ type Listener = (options: GameOptions) => void;
 
 const listeners = new Set<Listener>();
 
-/** One-time schema migration of a stored options blob; true when it changed. */
-function migrate(stored: Record<string, unknown>): boolean {
+/**
+ * One-time schema migration of a stored options blob; true when it changed.
+ * Stored tiers are kept as they are: a returning player's Classic stays
+ * Classic, the new default reaches fresh installs only.
+ */
+export function migrate(stored: Record<string, unknown>): boolean {
   const present = DROPPED_KEYS.filter(key => key in stored);
 
   if (present.length === 0) return false;

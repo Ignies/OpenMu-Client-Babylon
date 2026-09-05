@@ -7,6 +7,7 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
+import { devQueryNumber } from '../common/devSeams';
 import type { LookProfile, Rgb } from '../lighting/profiles';
 
 /**
@@ -55,13 +56,16 @@ type Runtime = {
 
 let runtime: Runtime | null = null;
 
+const hazeDev = devQueryNumber('haze');
+
 /**
- * Why an empty pixel is left alone: the G-buffer holds no blend or
- * alpha-blended mesh, so a bush against the void carries depth 0 and there is
- * no way from inside this shader to tell "empty sky" from "a bush against
- * empty sky". Hazing depth 0 to a horizon distance turned every card against
- * the sky into a flat grey quad and Icarus uniformly white. The sky dome
- * (wave 2c) puts a depth behind the horizon and makes the case benign.
+ * Why a pixel without depth is left alone: the G-buffer holds no blend or
+ * alpha-blended mesh and no sky dome, so a card against the sky carries depth
+ * 0 and there is no way from inside this shader to tell "sky" from "a card
+ * against the sky". Hazing depth 0 to a horizon distance turned every card
+ * against the sky into a flat grey quad and Icarus uniformly white. The dome
+ * behind such a card is already the colour the haze fades to, so the card
+ * blends over the horizon and nothing is missing from it.
  */
 function registerFogShader(): void {
   if (ShaderStore.ShadersStore[`${FOG_SHADER}FragmentShader`]) return;
@@ -189,15 +193,18 @@ export function syncHeightFog(
   colorLinear: Rgb,
   post: boolean
 ): boolean {
+  // Dev seam: `?haze=<density>` replaces the profile's density (0 = no pass).
+  const density = hazeDev ?? fog.density;
+
   shown.color[0] = colorLinear[0];
   shown.color[1] = colorLinear[1];
   shown.color[2] = colorLinear[2];
   shown.start = fog.start;
-  shown.density = fog.density;
+  shown.density = density;
   shown.cap = fog.cap;
   shown.height = fog.height;
 
-  const want = post && fog.density > 0 && effectMask() !== null;
+  const want = post && density > 0 && effectMask() !== null;
 
   if (runtime && (!want || runtime.scene !== scene)) {
     disposeHeightFog();

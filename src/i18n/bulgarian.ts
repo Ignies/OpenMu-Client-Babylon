@@ -146,6 +146,8 @@ export const bulgarianLayer: LanguageLayer = {
     'options.section.windows': 'Прозорци',
     'options.section.actions': 'Действия',
     'options.section.language': 'Език',
+    'options.section.quality': 'Качество',
+    'options.preset': 'Предварителна настройка',
     'options.autoAttack': 'Автоматична атака',
     'options.whisperBeep': 'Звук при получен шепот',
     'options.slideHelp': 'Плъзгаща помощ',
@@ -170,17 +172,11 @@ export const bulgarianLayer: LanguageLayer = {
     'options.chromatic': 'Хром. аберация',
     'options.fxaa': 'FXAA',
     'options.vignette': 'Винетка',
-
     'options.toneMapper': 'Тонално картографиране',
-
     'options.brightness': 'Яркост',
-
     'options.toneMapper.none': 'Без',
-
     'options.toneMapper.standard': 'Стандартно',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': 'Неутрално',
     'options.resetKeys': 'Върни по подразбиране',
     'options.keyHint': 'Щракни, после натисни клавиш. Esc отказва.',

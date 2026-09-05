@@ -145,6 +145,8 @@ export const romanianLayer: LanguageLayer = {
     'options.section.windows': 'Ferestre',
     'options.section.actions': 'Acțiuni',
     'options.section.language': 'Limbă',
+    'options.section.quality': 'Calitate',
+    'options.preset': 'Presetare',
     'options.autoAttack': 'Atac automat',
     'options.whisperBeep': 'Sunet la primirea unei șoapte',
     'options.slideHelp': 'Ajutor glisant',
@@ -169,17 +171,11 @@ export const romanianLayer: LanguageLayer = {
     'options.chromatic': 'Ab. cromatică',
     'options.fxaa': 'FXAA',
     'options.vignette': 'Vinietă',
-
     'options.toneMapper': 'Mapare tonală',
-
     'options.brightness': 'Luminozitate',
-
     'options.toneMapper.none': 'Niciunul',
-
     'options.toneMapper.standard': 'Standard',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': 'Neutru',
     'options.resetKeys': 'Revino la valorile implicite',
     'options.keyHint': 'Dă clic, apoi apasă o tastă. Esc anulează.',

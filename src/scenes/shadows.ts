@@ -9,6 +9,7 @@ import {
   type ShaderMaterial,
 } from '../libs/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
+import { devQueryNumber } from '../common/devSeams';
 import { sunLightOf } from '../lighting/keyRig';
 import {
   blobShadowRefresh,
@@ -35,11 +36,27 @@ export const CSM_MAX_CASCADES = 3;
  */
 const CSM_MAX_Z = 32;
 
+/**
+ * The reach inside a room (`casters: 'all'`): the far wall of the pub or the
+ * reading room is under 20 tiles from the camera, so the three cascades are
+ * spent on the room instead of on the black past its walls.
+ */
+const CSM_ROOM_MAX_Z = 20;
+
 const CSM_LAMBDA = 0.1;
 
-const CSM_BIAS = 0.004;
+/**
+ * Constant bias is a fraction of a cascade's depth range (~20 tiles for the
+ * first), so 0.004 was 8 cm and lifted every shadow off its caster's feet;
+ * the normal bias (world units) carries the self-shadowing instead.
+ */
+const CSM_BIAS = 0.0006;
 const CSM_NORMAL_BIAS = 0.03;
 const CSM_BLEND = 0.08;
+
+const biasDev = devQueryNumber('csmBias');
+const normalBiasDev = devQueryNumber('csmNormalBias');
+const softnessDev = devQueryNumber('csmSoftness');
 
 type Runtime = {
   scene: Scene;
@@ -286,6 +303,10 @@ export function drawsSolidGeometry(mesh: AbstractMesh, allowBlend = false): bool
   );
 }
 
+function reachFor(who: ShadowCasters): number {
+  return who === 'all' ? CSM_ROOM_MAX_Z : CSM_MAX_Z;
+}
+
 /** Frozen materials skip the light-dirty pass; force the rebuild once. */
 function rebuildFrozenMaterials(scene: Scene): void {
   for (const material of scene.materials) {
@@ -305,16 +326,16 @@ function createCsm(
 
   csm.numCascades = tier.cascades;
   csm.lambda = CSM_LAMBDA;
-  csm.shadowMaxZ = CSM_MAX_Z;
+  csm.shadowMaxZ = reachFor(policy.casters);
   csm.stabilizeCascades = true;
   csm.depthClamp = true;
   csm.filter = tier.pcss
     ? ShadowGenerator.FILTER_PCSS
     : ShadowGenerator.FILTER_PCF;
   csm.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
-  csm.contactHardeningLightSizeUVRatio = policy.softness;
-  csm.bias = CSM_BIAS;
-  csm.normalBias = CSM_NORMAL_BIAS;
+  csm.contactHardeningLightSizeUVRatio = softnessDev ?? policy.softness;
+  csm.bias = biasDev ?? CSM_BIAS;
+  csm.normalBias = normalBiasDev ?? CSM_NORMAL_BIAS;
   csm.cascadeBlendPercentage = CSM_BLEND;
   csm.darkness = 0;
   csm.frustumEdgeFalloff = 0.2;
@@ -392,8 +413,10 @@ export function syncShadows(
 ): void {
   terrainFloor = 1 - policy.strength;
   // The predicate runs on the next refresh; a room switching the set does not
-  // need a rebuild.
+  // need a rebuild, and the reach is a re-split, not a rebuild either.
   casters = policy.casters;
+
+  if (runtime?.csm) runtime.csm.shadowMaxZ = reachFor(casters);
 
   if (!tier) {
     disposeShadows();

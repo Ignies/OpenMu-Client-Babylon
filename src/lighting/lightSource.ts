@@ -172,10 +172,6 @@ export class LightSource {
 
   #color: TerrainLightColor = { r: 0, g: 0, b: 0 };
 
-  #tileX = 0;
-
-  #tileY = 0;
-
   #offTerrain: () => void = () => {};
 
   #offPoint: () => void = () => {};
@@ -239,10 +235,17 @@ export class LightSource {
     live.delete(this);
   }
 
+  /** Both sinks hold `position` by reference and read it every frame. */
   #register(): void {
     const { recipe, position } = this;
 
-    this.#registerTerrain();
+    this.#offTerrain = registerTerrainLight({
+      position,
+      range: recipe.range,
+      falloff: recipe.falloff,
+      floorGain: recipe.floorGain,
+      color: () => this.#color,
+    });
 
     this.#offPoint = registerPointLightEmitter({
       position,
@@ -252,23 +255,6 @@ export class LightSource {
       wander: recipe.wander,
       priority: recipe.priority ?? PRIORITY_EFFECT,
       instant: recipe.instant ?? true,
-      color: () => this.#color,
-    });
-  }
-
-  /** The terrain footprint is baked at registration; redo it per tile. */
-  #registerTerrain(): void {
-    const { recipe, position } = this;
-
-    this.#tileX = Math.floor(position.x);
-    this.#tileY = Math.floor(position.z);
-
-    this.#offTerrain = registerTerrainLight({
-      x: position.x,
-      y: position.z,
-      range: recipe.range,
-      falloff: recipe.falloff,
-      floorGain: recipe.floorGain,
       color: () => this.#color,
     });
   }
@@ -351,14 +337,6 @@ export class LightSource {
       }
     } else if (anchor.follow) {
       anchor.follow(position);
-    }
-
-    const tileX = Math.floor(position.x);
-    const tileY = Math.floor(position.z);
-
-    if (tileX !== this.#tileX || tileY !== this.#tileY) {
-      this.#offTerrain();
-      this.#registerTerrain();
     }
 
     if (recipe.flicker) {

@@ -167,6 +167,18 @@
       background: rgba(232, 200, 119, 0.25);
     }
   }
+
+  // Video tab: the tier presets share the key box's plate; the one every
+  // stored value matches is lit.
+  .options-preset {
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.is-active {
+      color: #e8c877;
+      font-weight: bold;
+    }
+  }
 }
 
 .options-window-page {

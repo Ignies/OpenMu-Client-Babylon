@@ -155,6 +155,8 @@ export const portugueseLayer: LanguageLayer = {
     'options.section.windows': 'Janelas',
     'options.section.actions': 'Ações',
     'options.section.language': 'Idioma',
+    'options.section.quality': 'Qualidade',
+    'options.preset': 'Predefinição',
     'options.autoAttack': 'Ataque automático',
     'options.whisperBeep': 'Bipe ao receber sussurro',
     'options.slideHelp': 'Ajuda deslizante',
@@ -179,17 +181,11 @@ export const portugueseLayer: LanguageLayer = {
     'options.chromatic': 'Ab. cromática',
     'options.fxaa': 'FXAA',
     'options.vignette': 'Vinheta',
-
     'options.toneMapper': 'Mapeamento de tons',
-
     'options.brightness': 'Brilho',
-
     'options.toneMapper.none': 'Nenhum',
-
     'options.toneMapper.standard': 'Padrão',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': 'Neutro',
     'options.resetKeys': 'Restaurar padrões',
     'options.keyHint': 'Clique e depois pressione uma tecla. Esc cancela.',

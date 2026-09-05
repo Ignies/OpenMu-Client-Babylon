@@ -84,6 +84,15 @@ export const EMPIRE_GUARDIAN_4_EMISSIONS: Partial<
   ],
 };
 
+/**
+ * Types EncTerrain74.obj places whose model `Data/Object74` never had:
+ * the folder stops at `Object160.bmd` in every client (Season 6 data,
+ * `references/MuOnlineClient/src/bin/Data/Object74`), so 160, 162 and 164
+ * would ask for Object161/163/165 and get the dev server's index.html back.
+ * The original loads nothing for them and draws nothing.
+ */
+export const LOGIN_SCENE_ABSENT_MODELS: readonly number[] = [160, 162, 164];
+
 /** The 79 torch, as the login scene lights it. */
 export const EMPIRE_GUARDIAN_LIGHTS: Partial<
   Record<number, readonly LightEmitter[]>

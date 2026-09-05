@@ -146,6 +146,8 @@ export const russianLayer: LanguageLayer = {
     'options.section.windows': 'Окна',
     'options.section.actions': 'Действия',
     'options.section.language': 'Язык',
+    'options.section.quality': 'Качество',
+    'options.preset': 'Предустановка',
     'options.autoAttack': 'Автоатака',
     'options.whisperBeep': 'Звук при получении шёпота',
     'options.slideHelp': 'Всплывающая подсказка',
@@ -170,17 +172,11 @@ export const russianLayer: LanguageLayer = {
     'options.chromatic': 'Хром. аберрация',
     'options.fxaa': 'FXAA',
     'options.vignette': 'Виньетка',
-
     'options.toneMapper': 'Тональная компрессия',
-
     'options.brightness': 'Яркость',
-
     'options.toneMapper.none': 'Нет',
-
     'options.toneMapper.standard': 'Стандарт',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': 'Нейтральная',
     'options.resetKeys': 'Сбросить по умолчанию',
     'options.keyHint': 'Нажмите, затем нажмите клавишу. Esc — отмена.',

@@ -145,6 +145,8 @@ export const italianLayer: LanguageLayer = {
     'options.section.windows': 'Finestre',
     'options.section.actions': 'Azioni',
     'options.section.language': 'Lingua',
+    'options.section.quality': 'Qualità',
+    'options.preset': 'Preimpostazione',
     'options.autoAttack': 'Attacco automatico',
     'options.whisperBeep': 'Bip quando ricevi un sussurro',
     'options.slideHelp': 'Aiuto scorrevole',
@@ -169,17 +171,11 @@ export const italianLayer: LanguageLayer = {
     'options.chromatic': 'Ab. cromatica',
     'options.fxaa': 'FXAA',
     'options.vignette': 'Vignettatura',
-
     'options.toneMapper': 'Mappatura toni',
-
     'options.brightness': 'Luminosità',
-
     'options.toneMapper.none': 'Nessuno',
-
     'options.toneMapper.standard': 'Standard',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': 'Neutro',
     'options.resetKeys': 'Ripristina i valori',
     'options.keyHint': 'Fai clic, poi premi un tasto. Esc annulla.',

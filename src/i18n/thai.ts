@@ -148,6 +148,8 @@ export const thaiLayer: LanguageLayer = {
     'options.section.windows': 'หน้าต่าง',
     'options.section.actions': 'การกระทำ',
     'options.section.language': 'ภาษา',
+    'options.section.quality': 'คุณภาพ',
+    'options.preset': 'พรีเซ็ต',
     'options.autoAttack': 'โจมตีอัตโนมัติ',
     'options.whisperBeep': 'เสียงเตือนเมื่อได้รับข้อความกระซิบ',
     'options.slideHelp': 'คำแนะนำแบบเลื่อน',
@@ -172,17 +174,11 @@ export const thaiLayer: LanguageLayer = {
     'options.chromatic': 'ความคลาดสี',
     'options.fxaa': 'FXAA',
     'options.vignette': 'ขอบมืด',
-
     'options.toneMapper': 'โทนแมปปิง',
-
     'options.brightness': 'ความสว่าง',
-
     'options.toneMapper.none': 'ไม่มี',
-
     'options.toneMapper.standard': 'มาตรฐาน',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': 'เป็นกลาง',
     'options.resetKeys': 'คืนค่าเริ่มต้น',
     'options.keyHint': 'คลิกแล้วกดปุ่มที่ต้องการ กด Esc เพื่อยกเลิก',

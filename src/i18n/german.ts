@@ -145,6 +145,8 @@ export const germanLayer: LanguageLayer = {
     'options.section.windows': 'Fenster',
     'options.section.actions': 'Aktionen',
     'options.section.language': 'Sprache',
+    'options.section.quality': 'Qualität',
+    'options.preset': 'Voreinstellung',
     'options.autoAttack': 'Automatischer Angriff',
     'options.whisperBeep': 'Signalton beim Flüstern',
     'options.slideHelp': 'Gleithilfe',
@@ -169,17 +171,11 @@ export const germanLayer: LanguageLayer = {
     'options.chromatic': 'Chrom. Aberration',
     'options.fxaa': 'FXAA',
     'options.vignette': 'Vignette',
-
     'options.toneMapper': 'Tone Mapping',
-
     'options.brightness': 'Helligkeit',
-
     'options.toneMapper.none': 'Keins',
-
     'options.toneMapper.standard': 'Standard',
-
     'options.toneMapper.aces': 'ACES',
-
     'options.toneMapper.neutral': 'Neutral',
     'options.resetKeys': 'Standard wiederherstellen',
     'options.keyHint': 'Klicken, dann eine Taste drücken. Esc bricht ab.',
