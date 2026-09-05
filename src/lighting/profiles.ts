@@ -27,9 +27,28 @@ export type LookProfile = {
     readonly height: number;
     readonly color: Rgb | null;
   };
-  /** Sun direction for the shaped key. */
-  readonly sun: { readonly azimuthDeg: number; readonly elevationDeg: number };
+  /**
+   * Sun direction for the shaped key and its share of the key total; the sky
+   * takes the rest, and a shadow removes exactly the share (§3.2).
+   */
+  readonly sun: SunSpec;
 };
+
+export type SunSpec = {
+  readonly azimuthDeg: number;
+  readonly elevationDeg: number;
+  readonly share: number;
+};
+
+/** Open sky. Under a roof the bake carries the room, so the key is mostly sky. */
+export const OPEN_SUN_SHARE = 0.45;
+export const ENCLOSED_SUN_SHARE = 0.15;
+
+const sun = (
+  azimuthDeg: number,
+  elevationDeg: number,
+  share = OPEN_SUN_SHARE
+): SunSpec => ({ azimuthDeg, elevationDeg, share });
 
 export const NO_FOG: LookProfile['fog'] = {
   start: 0,
@@ -52,10 +71,10 @@ const OPEN_HAZE: LookProfile['fog'] = {
   color: null,
 };
 
-const NOON_SUN = { azimuthDeg: 215, elevationDeg: 48 };
+const NOON_SUN = sun(215, 48);
 
 /** The interior key: the roof takes the sun, what is left comes from the bake. */
-const INTERIOR_SUN = { azimuthDeg: 0, elevationDeg: 60 };
+const INTERIOR_SUN = sun(0, 60, ENCLOSED_SUN_SHARE);
 
 export const DEFAULT_PROFILE: LookProfile = {
   ev: 1.3,
@@ -93,21 +112,21 @@ const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
     whiteBalance: [0.97, 0.99, 1.04],
     sky: { zenith: [0.62, 0.72, 0.86], horizon: [0.7, 0.76, 0.86] },
     fog: { start: 20, density: 0.012, cap: 0.9, height: 0.02, color: null },
-    sun: { azimuthDeg: 200, elevationDeg: 35 },
+    sun: sun(200, 35),
   },
   [ENUM_WORLD.WD_8TARKAN]: {
     ev: 1.2,
     whiteBalance: [1.04, 1.0, 0.94],
     sky: { zenith: [0.6, 0.7, 0.84], horizon: [0.86, 0.8, 0.66] },
     fog: { start: 25, density: 0.01, cap: 0.9, height: 0, color: null },
-    sun: { azimuthDeg: 220, elevationDeg: 55 },
+    sun: sun(220, 55),
   },
   [ENUM_WORLD.WD_6STADIUM]: {
     ev: 1.4,
     whiteBalance: [1, 1, 1],
     sky: OPEN_SKY,
     fog: { start: 25, density: 0.006, cap: 0.8, height: 0, color: null },
-    sun: { azimuthDeg: 215, elevationDeg: 50 },
+    sun: sun(215, 50),
   },
   [ENUM_WORLD.WD_1DUNGEON]: {
     ...ENCLOSED_PROFILE,
@@ -123,7 +142,7 @@ const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
     whiteBalance: [0.94, 1.0, 1.04],
     sky: null,
     fog: { start: 4, density: 0.04, cap: 0.7, height: 0.02, color: [0.2, 0.46, 0.54] },
-    sun: { azimuthDeg: 0, elevationDeg: 80 },
+    sun: sun(0, 80, ENCLOSED_SUN_SHARE),
   },
   [ENUM_WORLD.WD_10ICARUS]: {
     // The map has an authored clear colour and no ground (MainScene.cpp:402).
@@ -131,7 +150,7 @@ const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
     whiteBalance: [0.97, 0.99, 1.04],
     sky: null,
     fog: NO_FOG,
-    sun: { azimuthDeg: 200, elevationDeg: 40 },
+    sun: sun(200, 40),
   },
 };
 
@@ -147,11 +166,36 @@ export type AreaLook = {
   /** Stops relative to the map's `ev`. */
   readonly evDelta: number;
   readonly whiteBalance: Rgb;
+  /** The room's key direction: steep, so the furniture's shadows stay on the floor. */
+  readonly sun: SunSpec;
 };
+
+/** A room's footprint in tiles: the interactive area plus its margin. */
+export type AreaRect = {
+  readonly minX: number;
+  readonly minY: number;
+  readonly maxX: number;
+  readonly maxY: number;
+};
+
+/** The map's `interactiveArea` bounds widened by `margin` tiles on every side. */
+export function areaRectOf(
+  min: { x: number; y: number },
+  max: { x: number; y: number },
+  margin = 1
+): AreaRect {
+  return {
+    minX: min.x - margin,
+    minY: min.y - margin,
+    maxX: max.x + margin,
+    maxY: max.y + margin,
+  };
+}
 
 const TAVERN: AreaLook = {
   evDelta: -0.4,
   whiteBalance: [1.03, 1.0, 0.96],
+  sun: sun(215, 70),
 };
 
 const AREAS = {
@@ -173,6 +217,7 @@ export function applyArea(base: LookProfile, area: AreaLook): LookProfile {
     whiteBalance: area.whiteBalance,
     sky: null,
     fog: NO_FOG,
+    sun: area.sun,
   };
 }
 

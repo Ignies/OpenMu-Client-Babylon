@@ -15,7 +15,7 @@ import {
   csmState,
   type LightingTier,
 } from '../common/lightingQuality';
-import type { ShadowPolicy } from '../lighting/shadowPolicy';
+import type { ShadowCasters, ShadowPolicy } from '../lighting/shadowPolicy';
 
 /**
  * The cascaded shadow map on the sun: sole owner of the
@@ -41,13 +41,6 @@ const CSM_BIAS = 0.004;
 const CSM_NORMAL_BIAS = 0.03;
 const CSM_BLEND = 0.08;
 
-/**
- * PCSS light size (Ultra), in shadow-map UV. Babylon's 0.1 default blurs a
- * figure's shadow to twice the PCF tier's width, which put Ultra 6 % off
- * Enhanced on p5/p50 for the same frame; wave 2d tunes it by eye.
- */
-const PCSS_LIGHT_SIZE = 0.04;
-
 type Runtime = {
   scene: Scene;
   tier: LightingTier;
@@ -60,6 +53,9 @@ let runtime: Runtime | null = null;
 
 /** The terrain's bake floor under a sun shadow: the sky share, linear. */
 let terrainFloor = 1;
+
+/** Who the render-list predicate admits; the policy's, as of the last sync. */
+let casters: ShadowCasters = 'dynamic';
 
 // --- terrain hook ----------------------------------------------------------
 
@@ -243,6 +239,10 @@ function castsSunShadow(mesh: AbstractMesh): boolean {
 
   if (!meta || meta.csmCaster !== true) return false;
 
+  // The lightmap already bakes every static object's shadow (§13 F1): under
+  // `dynamic` a map object never enters the map, so nothing is shadowed twice.
+  if (casters === 'dynamic' && meta.mapObject === true) return false;
+
   // The blend mesh is an additive glow card - light, not matter - with one
   // exception: the objects that say the card *is* their body (wings,
   // `ModelObject.ShadowBlendMeshCasts`). A caster only; `occludes` in
@@ -298,7 +298,8 @@ function rebuildFrozenMaterials(scene: Scene): void {
 function createCsm(
   scene: Scene,
   sun: DirectionalLight,
-  tier: LightingTier
+  tier: LightingTier,
+  policy: ShadowPolicy
 ): CascadedShadowGenerator {
   const csm = new CascadedShadowGenerator(tier.shadowMapSize, sun, true);
 
@@ -311,7 +312,7 @@ function createCsm(
     ? ShadowGenerator.FILTER_PCSS
     : ShadowGenerator.FILTER_PCF;
   csm.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
-  csm.contactHardeningLightSizeUVRatio = PCSS_LIGHT_SIZE;
+  csm.contactHardeningLightSizeUVRatio = policy.softness;
   csm.bias = CSM_BIAS;
   csm.normalBias = CSM_NORMAL_BIAS;
   csm.cascadeBlendPercentage = CSM_BLEND;
@@ -390,6 +391,9 @@ export function syncShadows(
   policy: ShadowPolicy
 ): void {
   terrainFloor = 1 - policy.strength;
+  // The predicate runs on the next refresh; a room switching the set does not
+  // need a rebuild.
+  casters = policy.casters;
 
   if (!tier) {
     disposeShadows();
@@ -414,7 +418,7 @@ export function syncShadows(
 
   if (want) {
     const sun = sunLightOf(scene);
-    if (sun) runtime.csm = createCsm(scene, sun, tier);
+    if (sun) runtime.csm = createCsm(scene, sun, tier, policy);
   }
 
   invalidate(scene);

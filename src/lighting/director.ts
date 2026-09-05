@@ -12,19 +12,31 @@ import {
   pbrMaterialsOn,
   specularLightScale,
 } from '../common/materialQuality';
+import { devQueryNumber, devQueryNumbers } from '../common/devSeams';
 import { maps } from '../maps';
 import { EventBus } from '../libs/eventBus';
-import { setKey, setSunDirection, syncSpecular } from './keyRig';
+import {
+  DEFAULT_SUN_DIRECTION,
+  setKey,
+  setSunDirection,
+  syncSpecular,
+} from './keyRig';
 import {
   applyArea,
   areaProfile,
   profileFor,
   toLinear,
   type AreaLookName,
+  type AreaRect,
   type LookProfile,
   type Rgb,
 } from './profiles';
-import { shadowPolicyFor, type ShadowPolicy } from './shadowPolicy';
+import {
+  CLASSIC_SHADOW_POLICY,
+  shadowPolicyFor,
+  type ShadowPolicy,
+} from './shadowPolicy';
+import { syncSkyDome } from './skyDome';
 import { syncShadows } from '../scenes/shadows';
 import { syncAmbientOcclusion } from '../scenes/ambientOcclusion';
 import { syncHeightFog, updateHeightFog } from '../scenes/heightFog';
@@ -38,17 +50,16 @@ import {
 /**
  * The look director (ARCHITECTURE §4.3): the one composer. Reads the map's
  * `LookProfile` and `GameOptions`, computes `LookState`, and hands each
- * writer its slice - key rig, shadows, AO, haze, post chain - in a fixed
- * order once a frame. Nothing else writes a light, the pipeline, the fog or
- * the image-processing configuration.
+ * writer its slice - key rig, shadows, sky, AO, haze, post chain - in a fixed
+ * order once a frame. It writes no Babylon state itself.
  */
 
 /**
- * The key budget (§3.2): sky share S with the ground at 0.68 S, the sun the
- * rest, so an up-facing surface in the open takes 1.0 - what the bake gives
- * the ground. Colours are neutral; warmth comes from the white balance.
+ * The key budget (§3.2): the sun takes the profile's share, the sky the rest
+ * with the ground at 0.68 of it, so an up-facing surface in the open takes
+ * 1.0 - what the bake gives the ground. Colours are neutral; warmth comes
+ * from the white balance.
  */
-const SKY_SHARE = 0.55;
 const SKY_GROUND = 0.68;
 
 const WHITE: Rgb = [1, 1, 1];
@@ -66,11 +77,20 @@ const INTERIOR_GROUND_KEY = 0.6;
 /** Area (tavern) blend, seconds. */
 const BLEND_SECONDS = 0.7;
 
+/** An area named without a footprint masks nothing. */
+const WHOLE_MAP: AreaRect = { minX: 0, minY: 0, maxX: 255, maxY: 255 };
+
+export type LookArea = {
+  readonly name: AreaLookName;
+  /** The room's footprint in tiles; the terrain draws nothing outside it. */
+  readonly rect: AreaRect;
+};
+
 export type LookState = {
   readonly engine: 'polish';
   readonly tier: 0 | 1 | 2;
   readonly world: ENUM_WORLD;
-  readonly area: AreaLookName | null;
+  readonly area: LookArea | null;
   /** After the area override and blend. */
   readonly profile: LookProfile;
   readonly key: {
@@ -79,13 +99,19 @@ export type LookState = {
     readonly skyGround: Rgb;
     readonly sunIntensity: number;
     readonly direction: readonly [number, number, number];
-    /** The roofed-tile ground key the terrain shader adds (`INTERIOR_GROUND_KEY`). */
+    /** The roofed-tile ground key the terrain shader adds (`INTERIOR_GROUND_KEY`), key units. */
     readonly interiorGround: Rgb;
   };
   readonly shadow: ShadowPolicy;
   /** Stops over unity after the player's brightness trim; 0 on Classic. */
   readonly ev: number;
-  /** Linear, `2^ev`. */
+  /**
+   * `2^(profile ev)`: the level of the light (§13 F4). Every lit path
+   * multiplies by it once - key rig, ground light sum, point-light pool -
+   * and emissive art never does. 1 on Classic.
+   */
+  readonly keyGain: number;
+  /** The frame's effective level, `keyGain x post exposure`. */
   readonly exposure: number;
   readonly toneMapper: ToneMapperName;
   readonly fogColorLinear: Rgb;
@@ -95,7 +121,7 @@ export type LookState = {
 
 export interface LookDirector {
   setMap(world: ENUM_WORLD): void;
-  setArea(name: AreaLookName | null): void;
+  setArea(name: AreaLookName | null, rect?: AreaRect): void;
   tick(dt: number): void;
   state(): Readonly<LookState>;
   readonly onChange: Observable<Readonly<LookState>>;
@@ -106,18 +132,6 @@ let active: LookDirector | null = null;
 /** The scene's director, for the readers (terrain, water, area hand-off). */
 export function lookDirector(): LookDirector | null {
   return active;
-}
-
-/** Dev seam: `?ev=<stops>` adds to the map's exposure for live tuning. */
-function evOverride(): number {
-  if (!import.meta.env.DEV) return 0;
-  try {
-    const raw = new URLSearchParams(location.search).get('ev');
-    const n = raw === null ? NaN : Number(raw);
-    return Number.isFinite(n) ? n : 0;
-  } catch {
-    return 0;
-  }
 }
 
 type Blendable = {
@@ -169,10 +183,14 @@ export function createLookDirector(
 ): LookDirector {
   const postChain: PostChain = createPostChain(scene, camera);
   const onChange = new Observable<Readonly<LookState>>();
-  const evDev = evOverride();
+
+  // Dev seams: `?ev=` adds stops, `?wb=r,g,b` replaces the balance, `?tm=0..3` the mapper.
+  const evDev = devQueryNumber('ev') ?? 0;
+  const wbDev = devQueryNumbers('wb', 3) as Rgb | null;
+  const tmDev = devQueryNumber('tm');
 
   let world = ENUM_WORLD.WD_0LORENCIA;
-  let area: AreaLookName | null = null;
+  let area: LookArea | null = null;
   let base: LookProfile = profileFor(world);
   let target: LookProfile = base;
 
@@ -185,33 +203,12 @@ export function createLookDirector(
   let mapReady = true;
 
   const retarget = (): void => {
-    const next = area ? applyArea(base, areaProfile(area)) : base;
+    const next = area ? applyArea(base, areaProfile(area.name)) : base;
     if (next === target) return;
 
     from = shown;
     target = next;
     blend = 0;
-  };
-
-  /**
-   * The clear colour is the sky until the dome exists (wave 2c owns it from
-   * then on). Tiers >= 1 clear to the map's horizon, decoded once when the
-   * buffer is linear; Classic and skyless maps keep the authored bytes or
-   * black, exactly as before. The map's own sky, not the area's: a tavern
-   * has no sky of its own but the doorway still shows the one outside.
-   */
-  const writeClearColour = (shaped: boolean): void => {
-    const horizon = shaped ? base.sky?.horizon ?? null : null;
-
-    if (horizon) {
-      const c = linearBufferActive(scene) ? toLinear(horizon) : horizon;
-      scene.clearColor.set(c[0], c[1], c[2], 1);
-      return;
-    }
-
-    const bytes = maps.clearColorFor(world);
-    if (bytes) scene.clearColor.set(bytes[0] / 256, bytes[1] / 256, bytes[2] / 256, 1);
-    else scene.clearColor.set(0, 0, 0, 1);
   };
 
   const tick = (dt: number): void => {
@@ -225,40 +222,52 @@ export function createLookDirector(
     const lightTier = lightingTier();
     const shaped = lightTier !== null;
     const post = GameOptions.postProcessing;
+    const room = shaped ? area : null;
 
     const profile: LookProfile = {
       ...target,
       ev: shown.ev,
-      whiteBalance: shown.whiteBalance,
+      whiteBalance: wbDev ?? shown.whiteBalance,
       fog: shown.fog,
     };
 
     // 1. key
-    const skyIntensity = shaped ? SKY_SHARE : 1;
-    const sunShare = shaped ? 1 - SKY_SHARE : 0;
+    const keyGain = shaped ? 2 ** (profile.ev + evDev) : 1;
+    const sunShare = shaped ? profile.sun.share : 0;
+    const skyIntensity = shaped ? 1 - sunShare : 1;
     const skyGround: Rgb = shaped
       ? [SKY_GROUND, SKY_GROUND, SKY_GROUND]
       : WHITE;
 
     setKey(scene, {
-      skyIntensity,
+      skyIntensity: skyIntensity * keyGain,
       skyDiffuse: WHITE,
       skyGround: shaped ? skyGround : null,
-      sunIntensity: sunShare * directLightGain(),
+      sunIntensity: sunShare * keyGain * directLightGain(),
       sunDiffuse: WHITE,
     });
 
-    // 2. shadow policy
-    const shadow = shadowPolicyFor(profile, sunShare, lightTier?.pcss ?? false);
+    // 2. shadow policy. Classic never moves the rig: the blobs and the snow
+    // relief read its direction and keep the lean they always had.
+    const shadow = lightTier
+      ? shadowPolicyFor(profile, lightTier.pcss, room ? 'all' : 'dynamic')
+      : CLASSIC_SHADOW_POLICY;
 
-    setSunDirection(scene, shadow.direction);
+    setSunDirection(scene, shaped ? shadow.direction : DEFAULT_SUN_DIRECTION);
     syncSpecular(scene, pbrMaterialsOn() ? specularLightScale() : 0);
 
     // 3. shadows (CSM + terrain hook + the blobs' re-park)
     syncShadows(scene, lightTier, shadow);
 
-    // 4. sky (clear colour until the dome exists)
-    writeClearColour(shaped);
+    // 4. sky. The map's own horizon, not the area's: a tavern has no sky of
+    // its own but the doorway still shows the one outside - unless the room
+    // owns the frame and nothing past its walls is drawn.
+    syncSkyDome(scene, {
+      horizon: shaped ? base.sky?.horizon ?? null : null,
+      linear: linearBufferActive(scene),
+      bytes: maps.clearColorFor(world),
+      black: room !== null,
+    });
 
     // 5. haze and AO
     const fogSource = profile.fog.color ?? base.sky?.horizon ?? null;
@@ -272,14 +281,17 @@ export function createLookDirector(
 
     if (reordered) postChain.moveToEnd();
 
-    // 6. post
-    const ev = shaped ? profile.ev + GameOptions.brightness / 10 + evDev : 0;
-    const exposure = 2 ** ev;
-    const toneMapperIndex = shaped && post ? Math.max(0, Math.min(3, Math.round(GameOptions.toneMapper))) : 0;
+    // 6. post: the viewer's brightness only; the map's level is in the key.
+    const brightness = shaped ? GameOptions.brightness / 10 : 0;
+    const postExposure = 2 ** brightness;
+    const toneMapperIndex =
+      shaped && post
+        ? Math.max(0, Math.min(3, Math.round(tmDev ?? GameOptions.toneMapper)))
+        : 0;
 
     postChain.set({
       shaped,
-      exposure,
+      exposure: postExposure,
       toneMapper: toneMapperIndex,
       whiteBalance: profile.whiteBalance,
     });
@@ -292,12 +304,13 @@ export function createLookDirector(
     ];
 
     const groundKey = INTERIOR_GROUND_KEY * skyIntensity;
+    const ev = shaped ? profile.ev + evDev + brightness : 0;
 
     state = {
       engine: 'polish',
       tier,
       world,
-      area,
+      area: room,
       profile,
       key: {
         skyIntensity,
@@ -309,7 +322,8 @@ export function createLookDirector(
       },
       shadow,
       ev,
-      exposure,
+      keyGain,
+      exposure: keyGain * postExposure,
       toneMapper: TONE_MAPPER_NAMES[toneMapperIndex],
       fogColorLinear,
       passes,
@@ -318,8 +332,9 @@ export function createLookDirector(
     const next = [
       tier,
       world,
-      area,
+      room ? `${room.name}:${room.rect.minX},${room.rect.minY},${room.rect.maxX},${room.rect.maxY}` : '',
       ev.toFixed(3),
+      shadow.casters,
       toneMapperIndex,
       profile.whiteBalance.map(v => v.toFixed(3)).join(),
       profile.fog.density.toFixed(4),
@@ -347,9 +362,9 @@ export function createLookDirector(
       blend = 1;
       mapReady = false;
     },
-    setArea(name) {
-      if (name === area) return;
-      area = name;
+    setArea(name, rect) {
+      if (name === (area?.name ?? null)) return;
+      area = name ? { name, rect: rect ?? WHOLE_MAP } : null;
       retarget();
       EventBus.emit('look.areaChanged', { name });
     },

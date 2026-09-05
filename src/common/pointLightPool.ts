@@ -12,6 +12,7 @@ import {
   specularLightScale,
 } from './materialQuality';
 import { dynamicLightGain, pointLightBudget } from './lightingQuality';
+import { lookDirector } from '../lighting/director';
 import type { TerrainLightColor } from './terrainDynamicLight';
 
 /**
@@ -27,9 +28,15 @@ const LIGHT_RANGE = 6;
 /**
  * Key units (ARCHITECTURE §4.5): a torch's peak on a wall beside it is about
  * 1.2x the key on an open tile. Lands identically on every tier - the pi
- * gain on the PBR tiers is cancelled by Burley's 1/pi.
+ * gain on the PBR tiers is cancelled by Burley's 1/pi. The map's level
+ * (`keyGain`, 2^ev) scales it with the key so a torch keeps its ratio to
+ * the daylight; 1 on Classic.
  */
 const INTENSITY = 1.1;
+
+function keyGain(): number {
+  return lookDirector()?.state().keyGain ?? 1;
+}
 
 const HEIGHT_OFFSET = 0.6;
 
@@ -242,6 +249,7 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
     light.intensity =
       peak *
       INTENSITY *
+      keyGain() *
       (emitter.gain ?? 1) *
       slot.fade *
       directLightGain() *

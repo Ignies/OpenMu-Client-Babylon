@@ -26,7 +26,8 @@ import {
 
 const glowScratch = { r: 0, g: 0, b: 0, a: 1 };
 import { loadMuSprite } from '../libs/mu/sprites';
-import { skyLightOf, sunLightOf } from '../lighting/keyRig';
+import { sunLightOf } from '../lighting/keyRig';
+import { devQuery, devQueryNumbers } from './devSeams';
 import {
   SNOW_CAP_COLOUR,
   SNOW_CAP_KNEE_FULL,
@@ -131,12 +132,15 @@ export function syncPbrDetail(): void {
  * below 0.2. A raw `max(N.L, 0)` is why limbs read thin and dark.
  *
  * Implemented as a fill term added on top of the light sum the shader already
- * computed: `keyTotal x (wrap(dot) - max(dot, 0))`, with the wrap normalized
- * by 1.2 so a fully sun-facing surface is unchanged. It is scaled by the
- * whole key, not the sun share, so a back face keeps at least 0.2 of the key
- * whatever its normal; Classic parks the sun at 0 and the term is inert
- * there. The CSM does not attenuate the fill: like the original's clamp, the
- * floor holds in shadow. The `MU_WRAP` define refactor is wave 2b.
+ * computed: `sun x (wrap(dot) - max(dot, 0)) x shadow`, with the wrap
+ * normalized by 1.2 so a fully sun-facing surface is unchanged. It is the
+ * sun's diffuse response (§3.2), so it carries the sun share alone and the
+ * cascades cut it with the rest of the sun; the sky hemisphere is what a back
+ * face keeps. Classic parks the sun at 0 and the term is inert there.
+ *
+ * The sun's shadow factor is recovered from Babylon's per-light aggregate:
+ * every light adds its factor to `aggShadow` and 1 to `numLights`, and the
+ * sun is the only light with a generator, so `agg x n - (n - 1)` is its own.
  *
  * Dev overrides: `?halfLambert=0` disables, `?hlWrap=scale,bias,floor` tunes
  * (values are the already-normalized shader constants).
@@ -152,17 +156,11 @@ const HALF_LAMBERT_DEFAULT: [number, number, number] = [
 ];
 
 function halfLambertParams(): [number, number, number] | null {
-  try {
-    const q = new URLSearchParams(location.search);
-    if (q.get('halfLambert') === '0') return null;
-    const wrap = q.get('hlWrap')?.split(',').map(Number);
-    if (wrap?.length === 3 && wrap.every(n => !isNaN(n))) {
-      return wrap as [number, number, number];
-    }
-  } catch {
-    /* no location (tests) — use the default */
-  }
-  return HALF_LAMBERT_DEFAULT;
+  if (devQuery('halfLambert') === '0') return null;
+
+  const wrap = devQueryNumbers('hlWrap', 3);
+
+  return wrap ? (wrap as [number, number, number]) : HALF_LAMBERT_DEFAULT;
 }
 
 const halfLambert = halfLambertParams();
@@ -179,7 +177,8 @@ const halfLambertGlsl = (target: string, albedo: string) => `
     float hlFill = max(
       max(hlDot * ${SUN_WRAP_UNIFORM}.x + ${SUN_WRAP_UNIFORM}.y, ${SUN_WRAP_UNIFORM}.z) - max(hlDot, 0.0),
       0.0);
-    ${target} += ${SUN_COLOR_UNIFORM} * hlFill${albedo ? ` * ${albedo}` : ''};
+    float hlShadow = numLights > 0.0 ? clamp(aggShadow * numLights - (numLights - 1.0), 0.0, 1.0) : 1.0;
+    ${target} += ${SUN_COLOR_UNIFORM} * hlFill * hlShadow${albedo ? ` * ${albedo}` : ''};
   }
 `;
 
@@ -199,10 +198,8 @@ function bindSunWrap(effect: Effect, mesh: AbstractMesh) {
   // `sun.intensity` carries `directLightGain` - a pi the PBR material needs
   // to undo Burley's 1/pi on its *diffuse*. This fill is a hand-written
   // additive term that never had the 1/pi to undo, so it takes the plain
-  // intensity; the sky's is plain already.
-  const sky = skyLightOf(mesh.getScene());
-  const fill =
-    sun.intensity * specularLightScale() + (sky ? sky.intensity : 0);
+  // intensity (the sun share x the map's key gain).
+  const fill = sun.intensity * specularLightScale();
 
   effect.setFloat3(SUN_DIR_UNIFORM, d.x * norm, d.y * norm, d.z * norm);
   effect.setFloat3(

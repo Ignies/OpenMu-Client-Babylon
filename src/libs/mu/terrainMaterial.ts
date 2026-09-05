@@ -203,7 +203,10 @@ ${water ? terrainWaterVertexGlsl(water.spec) : ''}
   uniform float time;
   uniform float linearOut;
   uniform float linearLight;
+  uniform float keyGain;
   uniform vec3 interiorAmbient;
+  uniform vec4 roomRect; // tiles: minX, minY, maxX, maxY
+  uniform float roomShadow;
 ${
   tileArray
     ? `  uniform highp sampler2DArray tileTextures;
@@ -266,8 +269,10 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
     // interiors take their roof *out* of the shadow map on purpose so the
     // camera can see in (Lorencia lifts HOUSE_WALL05/06 past the caster
     // range, Devias fades its ceiling), so under a roof the cascades are not
-    // the authority and the bake keeps the room it was authored for.
-    float sunShadow = mix(1.0, csmShadow(vWorldPos, vViewZ), skyOpen);
+    // the authority and the bake keeps the room it was authored for - until
+    // the room itself is the active area (roomShadow): then its furniture
+    // and figures cast on the floor under the roof as well.
+    float sunShadow = mix(1.0, csmShadow(vWorldPos, vViewZ), max(skyOpen, roomShadow));
 
     // The one shadow rule: a shadow removes the sun and leaves the sky share
     // (csmParams.y, the policy floor). 1 while Classic (no cascades).
@@ -297,11 +302,15 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
     vec3 softCeil = peak > 0.0 ? groundLight * (bent / peak) : groundLight;
     groundLight = mix(min(groundLight, vec3(1.0)), softCeil, linearLight);
 
+    // The map's level (2^ev) is the light's, applied after the clamps so
+    // they keep the original's units; 1.0 on Classic.
+    groundLight *= keyGain;
+
     // The overlays and the reflections below work in the art's display
     // space; the linear sum is re-encoded for them and the final decode
     // lands the product exactly at lin(texel) x groundLight.
     vec3 groundLit = mix(groundLight, pow(groundLight, vec3(1.0 / 2.2)), linearLight);
-    vec3 extraLit = mix(dynLight + roomKey, pow(max(dynLight + roomKey, vec3(0.0)), vec3(1.0 / 2.2)), linearLight);
+    vec3 extraLit = mix(dynLight + roomKey, pow(max(dynLight + roomKey, vec3(0.0)) * keyGain, vec3(1.0 / 2.2)), linearLight);
 
     // A ground overlay that is its own material (snow) takes over its share
     // of this term - see terrainOverlayLitGlsl.
@@ -325,6 +334,11 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
     // pow(2.2). linearOut is 0 whenever the objects skip the decode too.
     f = mix(f, pow(max(f, vec3(0.0)), vec3(2.2)), linearOut);
 
+    // An active room owns the frame: nothing past its walls is drawn.
+    if (roomShadow > 0.5 && (vWorldXZ.x < roomRect.x || vWorldXZ.y < roomRect.y || vWorldXZ.x > roomRect.z || vWorldXZ.y > roomRect.w)) {
+      f = vec3(0.0);
+    }
+
     gl_FragColor = vec4(f, 1.0);
   }
   `,
@@ -345,7 +359,10 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
         'time',
         'linearOut',
         'linearLight',
+        'keyGain',
         'interiorAmbient',
+        'roomRect',
+        'roomShadow',
         ...(tileArray ? ['tileScales'] : []),
         ...terrainOverlayUniforms(overlays),
         ...(water ? terrainWaterUniforms() : []),
@@ -390,9 +407,19 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
     effect.setFloat('time', et);
     effect.setFloat('linearOut', linearBufferActive(scene) ? 1 : 0);
     effect.setFloat('linearLight', linearLightActive(scene) ? 1 : 0);
-    const room = lookDirector()?.state().key.interiorGround;
+    const look = lookDirector()?.state();
+    const room = look?.key.interiorGround;
     if (room) effect.setFloat3('interiorAmbient', room[0], room[1], room[2]);
     else effect.setFloat3('interiorAmbient', 0, 0, 0);
+    effect.setFloat('keyGain', look?.keyGain ?? 1);
+    const rect = look?.area?.rect;
+    if (rect) {
+      effect.setFloat4('roomRect', rect.minX, rect.minY, rect.maxX, rect.maxY);
+      effect.setFloat('roomShadow', 1);
+    } else {
+      effect.setFloat4('roomRect', 0, 0, 0, 0);
+      effect.setFloat('roomShadow', 0);
+    }
     if (tileArray) {
       effect.setTexture('tileTextures', tileArray.texture);
       effect.setFloatArray('tileScales', tileArray.scales);

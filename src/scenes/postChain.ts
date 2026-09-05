@@ -26,9 +26,9 @@ import type { Rgb } from '../lighting/profiles';
 
 /** What the post chain needs from the look; the director hands it over. */
 export type PostLook = {
-  /** Enhanced/Ultra: the grade runs. Classic: exposure 1, no curve. */
+  /** Enhanced/Ultra: the grade runs. Classic: no image-processing pass at all. */
   readonly shaped: boolean;
-  /** Linear exposure multiplier, `2^ev`. */
+  /** The viewer's brightness trim, `2^(brightness/10)`; the map's level is in the key. */
   readonly exposure: number;
   /** 0 none / 1 standard / 2 aces / 3 neutral. */
   readonly toneMapper: number;
@@ -147,8 +147,15 @@ export function createPostChain(
 
     pipeline.samples = pipelineSamples();
 
+    // No image-processing pass on Classic (§3.1, K1): with it the buffer goes
+    // linear and the blobs and effect cards blend there, lifting every dark
+    // pixel; without it the terrain and the materials encode themselves and
+    // the frame is post-off plus sharpen and glow. With post off the pass is
+    // bypassed outright on every tier: an identity pass is still a resolve.
+    const graded = post && shaped;
+
     // Bloom samples the linear buffer before exposure. Off on Classic (§6).
-    const bloom = post && shaped ? Math.max(0, GameOptions.bloom) : 0;
+    const bloom = graded ? Math.max(0, GameOptions.bloom) : 0;
 
     pipeline.bloomEnabled = bloom > 0;
     pipeline.bloomThreshold = BLOOM_THRESHOLD;
@@ -156,30 +163,27 @@ export function createPostChain(
     pipeline.bloomKernel = BLOOM_KERNEL;
     if (bloom > 0) live.push('bloom');
 
-    // With post off the image-processing *pass* is bypassed outright rather
-    // than left running with neutral values: an identity pass is still a
-    // full-screen resolve.
-    pipeline.imageProcessingEnabled = post;
+    pipeline.imageProcessingEnabled = graded;
 
     const ip = scene.imageProcessingConfiguration;
 
-    const exposure = shaped ? look.exposure : 1;
+    const exposure = graded ? look.exposure : 1;
     ip.exposure = exposure;
-    if (post && exposure !== 1) live.push('exposure');
+    if (exposure !== 1) live.push('exposure');
 
-    const toneMapper = shaped && post ? look.toneMapper : 0;
+    const toneMapper = graded ? look.toneMapper : 0;
     ip.toneMappingEnabled = toneMapper > 0;
     ip.toneMappingType = TONE_MAPPING_TYPES[toneMapper];
     if (toneMapper > 0) live.push(`toneMapper:${TONE_MAPPER_NAMES[toneMapper]}`);
 
     ip.contrast = 1;
 
-    const balanced = shaped && post && whiteBalanceToCurves(curves, look.whiteBalance);
+    const balanced = graded && whiteBalanceToCurves(curves, look.whiteBalance);
     ip.colorCurves = curves;
     ip.colorCurvesEnabled = balanced;
     if (balanced) live.push('whiteBalance');
 
-    const vignette = post ? Math.max(0, GameOptions.vignette) : 0;
+    const vignette = graded ? Math.max(0, GameOptions.vignette) : 0;
     ip.vignetteEnabled = vignette > 0;
     ip.vignetteWeight = (vignette / SLIDER_MAX) * VIGNETTE_MAX_WEIGHT;
     ip.vignetteBlendMode = ImageProcessingConfiguration.VIGNETTEMODE_MULTIPLY;
@@ -194,12 +198,12 @@ export function createPostChain(
     pipeline.sharpen.edgeAmount = (sharpness / SLIDER_MAX) * SHARPEN_MAX_EDGE_AMOUNT;
     if (sharpness > 0) live.push('sharpen');
 
-    const grain = post ? Math.max(0, GameOptions.filmGrain) : 0;
+    const grain = graded ? Math.max(0, GameOptions.filmGrain) : 0;
     pipeline.grainEnabled = grain > 0;
     pipeline.grain.intensity = (grain / SLIDER_MAX) * GRAIN_INTENSITY;
     if (grain > 0) live.push('grain');
 
-    const chromatic = post ? Math.max(0, GameOptions.chromatic) : 0;
+    const chromatic = graded ? Math.max(0, GameOptions.chromatic) : 0;
     pipeline.chromaticAberrationEnabled = chromatic > 0;
     pipeline.chromaticAberration.aberrationAmount =
       (chromatic / SLIDER_MAX) * CHROMATIC_MAX;

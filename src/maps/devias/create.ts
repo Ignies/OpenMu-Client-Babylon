@@ -1,6 +1,7 @@
 import type { World } from '../../ecs/world';
 import { mapMusic, sound } from '../../sound';
 import { setAreaMood } from '../../scenes/sceneLook';
+import { areaRectOf } from '../../lighting/profiles';
 import { LeanBoxObject } from '../../common/operateBoxObject';
 import { DeviasCandleObject } from './candleObject';
 import {
@@ -37,7 +38,10 @@ export async function createDevias(world: World) {
       max: DEVIAS_TAVERN.max,
       onEnter: () => {
         sound.playMusic('Music/Pub');
-        setAreaMood('deviasTavern');
+        setAreaMood(
+          'deviasTavern',
+          areaRectOf(DEVIAS_TAVERN.min, DEVIAS_TAVERN.max)
+        );
       },
       onLeave: () => {
         sound.playMusic(mapMusic(map) ?? 'Music/Devias');
@@ -65,7 +69,7 @@ export async function createDevias(world: World) {
       interactiveArea: {
         min: room.min,
         max: room.max,
-        onEnter: () => setAreaMood('deviasTavern'),
+        onEnter: () => setAreaMood('deviasTavern', areaRectOf(room.min, room.max)),
         onLeave: () => setAreaMood(null),
       },
       onDispose: () => setAreaMood(null),

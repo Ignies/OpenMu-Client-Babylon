@@ -876,6 +876,10 @@ export class ModelObject {
       mesh.metadata.csmCaster =
         this.CastsShadow && !this.Lights?.emitsLight;
 
+      // A map object's shadow is already in the lightmap; the cascades read
+      // this to keep it out of the shadow map (scenes/shadows.ts).
+      mesh.metadata.mapObject = this.IsMapObject;
+
       // Lets the cascades keep this object's blend mesh as a caster, the same
       // exception `createObjectShadow` makes for the blobs.
       mesh.metadata.shadowBlendCaster = this.ShadowBlendMeshCasts;

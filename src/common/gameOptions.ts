@@ -166,9 +166,19 @@ function migrate(stored: Record<string, unknown>): boolean {
     stored.brightness = 0;
   }
 
+  // The vignette was 0..25 with a default of 13 nobody chose; it is 0..9
+  // now, opt-in (§6). The old default resets, a chosen value is rescaled.
+  const vignette = stored.vignette;
+  let vignetteNote = '';
+
+  if (typeof vignette === 'number') {
+    stored.vignette = vignette === 13 ? 0 : Math.round((vignette * 9) / 25);
+    vignetteNote = `, vignette ${vignette}/25 -> ${stored.vignette}/9`;
+  }
+
   for (const key of present) delete stored[key];
 
-  console.info(`[options] retired keys removed: ${present.join(', ')}`);
+  console.info(`[options] retired keys removed: ${present.join(', ')}${vignetteNote}`);
 
   return true;
 }

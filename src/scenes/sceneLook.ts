@@ -22,7 +22,7 @@ import { syncMaterialQuality } from '../common/modelLoader';
 import { syncPbrDetail } from '../common/itemMaterial';
 import { installMaterialDebug } from './materialDebug';
 import { lookDirector } from '../lighting/director';
-import type { AreaLookName } from '../lighting/profiles';
+import type { AreaLookName, AreaRect } from '../lighting/profiles';
 
 /**
  * The glow layer and the item-tier emissive selectors, plus the area
@@ -122,9 +122,12 @@ function syncGlowIntensity(look: SceneLook): void {
     : 0;
 }
 
-/** Area (tavern) hand-off: the map's `create` calls this at the door. */
-export function setAreaMood(name: AreaMoodName | null): void {
-  lookDirector()?.setArea(name);
+/**
+ * Area (tavern) hand-off: the map's `create` calls this at the door with the
+ * room's footprint (`areaRectOf` of its interactive area).
+ */
+export function setAreaMood(name: AreaMoodName | null, rect?: AreaRect): void {
+  lookDirector()?.setArea(name, rect);
 }
 
 /**

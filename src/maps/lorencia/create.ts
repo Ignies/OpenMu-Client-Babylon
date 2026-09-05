@@ -7,6 +7,7 @@ import {
 import { World } from '../../ecs/world';
 import { mapMusic, sound } from '../../sound';
 import { setAreaMood } from '../../scenes/sceneLook';
+import { areaRectOf } from '../../lighting/profiles';
 import { createAttributeSystem } from '../../libs/attributeSystem';
 import { Vector3 } from '../../libs/babylon/exports';
 import { Store } from '../../store';
@@ -67,14 +68,15 @@ function createTavern(world: World) {
     }
   };
 
+  const pub = { min: { x: 120, y: 120 }, max: { x: 129, y: 136 } };
+
   world.add({
     worldIndex: map,
     interactiveArea: {
-      min: { x: 120, y: 120 },
-      max: { x: 129, y: 136 },
+      ...pub,
       onEnter: () => {
         sound.playMusic('Music/Pub');
-        setAreaMood('lorenciaTavern');
+        setAreaMood('lorenciaTavern', areaRectOf(pub.min, pub.max));
         liftWalls({ x: 0, y: 100, z: 0 });
       },
       onLeave: () => {
