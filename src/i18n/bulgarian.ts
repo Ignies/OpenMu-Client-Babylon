@@ -135,7 +135,6 @@ export const bulgarianLayer: LanguageLayer = {
     'options.title': 'Настройки',
     'options.tab.game': 'Игра',
     'options.tab.video': 'Видео',
-    'options.tab.colour': 'Цвят',
     'options.tab.keys': 'Клавиши',
     'options.tab.language': 'Език',
     'options.section.gameplay': 'Игрови процес',
@@ -144,8 +143,6 @@ export const bulgarianLayer: LanguageLayer = {
     'options.section.rendering': 'Изчертаване',
     'options.section.items': 'Предмети',
     'options.section.image': 'Картина',
-    'options.section.grade': 'Цветокорекция',
-    'options.section.atmosphere': 'Атмосфера',
     'options.section.windows': 'Прозорци',
     'options.section.actions': 'Действия',
     'options.section.language': 'Език',
@@ -158,7 +155,6 @@ export const bulgarianLayer: LanguageLayer = {
     'options.shadows': 'Сенки на обектите',
     'options.dynamicLights': 'Динамични светлини',
     'options.postProcessing': 'Постобработка',
-    'options.toneMapping': 'Филмов тонмапинг',
     'options.ambientParticles': 'Частици на средата',
     'options.weatherEffects': 'Време',
     'options.animatedWater': 'Анимирана вода',
@@ -173,14 +169,19 @@ export const bulgarianLayer: LanguageLayer = {
     'options.glow': 'Сияние',
     'options.chromatic': 'Хром. аберация',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': 'Затъмняване на сцената',
-    'options.darkness': 'Тъмнина',
-    'options.exposure': 'Експозиция',
-    'options.contrast': 'Контраст',
-    'options.colorTint': 'Оттенък на слънцето',
-    'options.saturation': 'Наситеност',
     'options.vignette': 'Винетка',
-    'options.mapGradient': 'Градиент на картата',
+
+    'options.toneMapper': 'Тонално картографиране',
+
+    'options.brightness': 'Яркост',
+
+    'options.toneMapper.none': 'Без',
+
+    'options.toneMapper.standard': 'Стандартно',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': 'Неутрално',
     'options.resetKeys': 'Върни по подразбиране',
     'options.keyHint': 'Щракни, после натисни клавиш. Esc отказва.',
     'options.packMark': '★',

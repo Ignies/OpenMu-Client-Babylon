@@ -136,7 +136,6 @@ export const chineseLayer: LanguageLayer = {
     'options.title': '选项',
     'options.tab.game': '游戏',
     'options.tab.video': '画面',
-    'options.tab.colour': '色彩',
     'options.tab.keys': '按键',
     'options.tab.language': '语言',
     'options.section.gameplay': '玩法',
@@ -145,8 +144,6 @@ export const chineseLayer: LanguageLayer = {
     'options.section.rendering': '渲染',
     'options.section.items': '物品',
     'options.section.image': '图像',
-    'options.section.grade': '调色',
-    'options.section.atmosphere': '氛围',
     'options.section.windows': '窗口',
     'options.section.actions': '动作',
     'options.section.language': '语言',
@@ -159,7 +156,6 @@ export const chineseLayer: LanguageLayer = {
     'options.shadows': '物体阴影',
     'options.dynamicLights': '动态光源',
     'options.postProcessing': '后期处理',
-    'options.toneMapping': '电影色调映射',
     'options.ambientParticles': '环境粒子',
     'options.weatherEffects': '天气',
     'options.animatedWater': '水面动画',
@@ -174,14 +170,19 @@ export const chineseLayer: LanguageLayer = {
     'options.glow': '辉光',
     'options.chromatic': '色差',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': '场景变暗',
-    'options.darkness': '暗度',
-    'options.exposure': '曝光',
-    'options.contrast': '对比度',
-    'options.colorTint': '阳光色调',
-    'options.saturation': '饱和度',
     'options.vignette': '暗角',
-    'options.mapGradient': '地图渐变',
+
+    'options.toneMapper': '色调映射',
+
+    'options.brightness': '亮度',
+
+    'options.toneMapper.none': '无',
+
+    'options.toneMapper.standard': '标准',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': '中性',
     'options.resetKeys': '恢复默认',
     'options.keyHint': '点击后按下一个键。Esc 取消。',
     'options.packMark': '★',

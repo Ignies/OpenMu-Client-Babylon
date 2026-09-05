@@ -37,17 +37,27 @@ export class OperateBoxObject extends ModelObject {
       max: new Vector3(BOX_HALF, height, BOX_HALF),
     };
 
-    // A missing model must not strand the trigger — the box is what the click
+    const model = this.modelName();
+
+    if (model === null) {
+      this.Ready = true;
+      return;
+    }
+
+    // A missing model must not strand the trigger - the box is what the click
     // ray actually hits, so it stays live either way.
     try {
-      await this.loadSpecificModel(this.modelName());
+      await this.loadSpecificModel(model);
     } catch {
       this.Ready = true;
     }
   }
 
-  /** File inside `objectDir`; the numbered default suits every map but Lorencia. */
-  protected modelName(): string {
+  /**
+   * File inside `objectDir`; the numbered default suits every map but
+   * Lorencia. Null for a type whose model the data does not ship.
+   */
+  protected modelName(): string | null {
     return `Object${(this.Type + 1).toString().padStart(2, '0')}.glb`;
   }
 

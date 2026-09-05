@@ -9,12 +9,9 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { pbrMapsFor, pbrPlaceholders } from './pbrMaps';
-import {
-  pbrDetailStrength,
-  pbrKeyGain,
-  specularLightScale,
-} from './materialQuality';
-import { UNIFIED_LIGHT_MODEL, bodyLightTint } from './lightModel';
+import { pbrDetailStrength, specularLightScale } from './materialQuality';
+import { UNIFIED_LIGHT_MODEL, linearLightActive } from './lightModel';
+import { lightingTier } from './lightingQuality';
 import { pointLightPoolSize } from './pointLightPool';
 import {
   itemEmissiveAt,
@@ -29,7 +26,7 @@ import {
 
 const glowScratch = { r: 0, g: 0, b: 0, a: 1 };
 import { loadMuSprite } from '../libs/mu/sprites';
-import { sunLightOf } from '../lighting/keyRig';
+import { skyLightOf, sunLightOf } from '../lighting/keyRig';
 import {
   SNOW_CAP_COLOUR,
   SNOW_CAP_KNEE_FULL,
@@ -65,11 +62,10 @@ const f = (n: number) => n.toFixed(3);
 const BODY_LIGHT_UNIFORM = `muBodyLight`;
 
 /**
- * Diffuse lift that stands in for the π the lights are not carrying while the
- * world is still on the Standard path — see `pbrKeyGain`. 1 on the Enhanced
- * tier, where the lights carry it themselves.
+ * Standard variant: 1 while the structured light budget composes the frame
+ * (`linearLightActive`), 0 on Classic so that tier stays byte-identical.
  */
-const KEY_GAIN_UNIFORM = `muKeyGain`;
+const LINEAR_LIGHT_UNIFORM = `muLinearLight`;
 
 /**
  * Detail strength as the shader sees it. The emissive map is *added* on top
@@ -128,20 +124,19 @@ export function syncPbrDetail(): void {
 }
 
 /**
- * Half-lambert sun response (lighting_rework.md §3.1).
+ * Half-lambert response (ARCHITECTURE §3.2 `wrap`).
  *
- * The original's character shading is `Luminosity = dot·0.8 + 0.4`, clamped
- * ≥ 0.2 (`ZzzBMD.cpp:255-257`): side faces get 0.4, back faces never drop
- * below 0.2. The port's raw `max(N·L, 0)` is why limbs read thin and dark —
- * a near-vertical sun cannot reach a limb's side at all.
+ * The original's character shading is `Luminosity = dot*0.8 + 0.4`, clamped
+ * >= 0.2 (`ZzzBMD.cpp:255-257`): side faces get 0.4, back faces never drop
+ * below 0.2. A raw `max(N.L, 0)` is why limbs read thin and dark.
  *
  * Implemented as a fill term added on top of the light sum the shader already
- * computed: `sunColor × (wrap(dot) - max(dot, 0))`, with the wrap normalized
- * by 1.2 so a fully sun-facing surface is unchanged and the frame does not
- * re-expose. The fill is clamped ≥ 0, and everything scales with the sun's
- * intensity — Classic parks the sun at 0, so the term is inert there by
- * construction. The CSM does not attenuate the fill: like the original's
- * clamp, the floor holds in shadow.
+ * computed: `keyTotal x (wrap(dot) - max(dot, 0))`, with the wrap normalized
+ * by 1.2 so a fully sun-facing surface is unchanged. It is scaled by the
+ * whole key, not the sun share, so a back face keeps at least 0.2 of the key
+ * whatever its normal; Classic parks the sun at 0 and the term is inert
+ * there. The CSM does not attenuate the fill: like the original's clamp, the
+ * floor holds in shadow. The `MU_WRAP` define refactor is wave 2b.
  *
  * Dev overrides: `?halfLambert=0` disables, `?hlWrap=scale,bias,floor` tunes
  * (values are the already-normalized shader constants).
@@ -201,14 +196,13 @@ function bindSunWrap(effect: Effect, mesh: AbstractMesh) {
   const d = sun.direction;
   const norm = 1 / (Math.hypot(d.x, d.y, d.z) || 1);
 
-  // `sun.intensity` carries `directLightGain` - a π the PBR material needs to
-  // undo Burley's 1/π on its *diffuse*. This fill is neither: it is a
-  // hand-written additive term that never had the 1/π to undo, so it takes
-  // the sun's plain intensity. Left alone it came out π× too strong on the
-  // Enhanced tier, a flat wash over every lit surface that pushed shaded
-  // sides up to the lit ones - the same mistake `specularLightScale` already
-  // corrects for the highlight, which is why it is the same factor.
-  const fill = sun.intensity * specularLightScale();
+  // `sun.intensity` carries `directLightGain` - a pi the PBR material needs
+  // to undo Burley's 1/pi on its *diffuse*. This fill is a hand-written
+  // additive term that never had the 1/pi to undo, so it takes the plain
+  // intensity; the sky's is plain already.
+  const sky = skyLightOf(mesh.getScene());
+  const fill =
+    sun.intensity * specularLightScale() + (sky ? sky.intensity : 0);
 
   effect.setFloat3(SUN_DIR_UNIFORM, d.x * norm, d.y * norm, d.z * norm);
   effect.setFloat3(
@@ -242,12 +236,23 @@ const BRIGHT_OVERRIDE = `
 /**
  * Babylon's Standard fragment clamps the lighting sum before the texture
  * multiply; this re-derives the colour without the clamp so warm light stays
- * warm past 1.0 (clamped lighting is why warm light reads
- * green"). `muBodyLight` stands where `vDiffuseColor` did — that one lives
- * in the Material UBO and never took a per-mesh write.
+ * warm past 1.0. `muBodyLight` stands where `vDiffuseColor` did - that one
+ * lives in the Material UBO and never took a per-mesh write.
+ *
+ * Two compositions (ARCHITECTURE §3.2, §4.7). Classic: the original's
+ * `texel x BodyLight x light`, decoded whole by Babylon's trailing
+ * `toLinearSpace`. Tiers >= 1: `lin(texel x body) x light`, the one decode on
+ * the display-authored art and the light sum kept linear - re-encoded here so
+ * the trailing decode lands it exactly.
  */
 const UNCLAMP = `
-  color.rgb = diffuseBase * ${BODY_LIGHT_UNIFORM}.rgb * baseColor.rgb * baseAmbientColor;
+  {
+    vec3 muLight = diffuseBase * baseAmbientColor;
+    vec3 muArt = max(baseColor.rgb * ${BODY_LIGHT_UNIFORM}.rgb, vec3(0.0));
+    vec3 muClassic = muArt * muLight;
+    vec3 muLinear = pow(pow(muArt, vec3(2.2)) * muLight, vec3(1.0 / 2.2));
+    color.rgb = mix(muClassic, muLinear, ${LINEAR_LIGHT_UNIFORM});
+  }
 `;
 
 const FLAT_LIT_OVERRIDE = `
@@ -508,10 +513,15 @@ function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
 }
 
 /**
- * BodyLight × BlendMeshLight × the mood's bake tint (or the explicit per-mesh
- * colour), alpha = visibility. The caller has already written the neutral
- * (1, 1, 1, visibility); without the unified model the bake is left out and
- * only the explicit colour lands, which is the older behaviour.
+ * BodyLight x BlendMeshLight (or the explicit per-mesh colour), alpha =
+ * visibility. The caller has already written the neutral (1, 1, 1,
+ * visibility); without the unified model the bake is left out and only the
+ * explicit colour lands, which is the older behaviour.
+ *
+ * BodyLight is capped before it meets the texel (§4.5): the original's
+ * `glColor` clamps it at 1.0 per channel (ZzzBMD.cpp:255-257), which Classic
+ * keeps byte for byte; tiers >= 1 divide by the peak instead so a torch's
+ * hue survives the cap.
  */
 function bindBodyLight(effect: Effect, mesh: AbstractMesh, uniform: string) {
   const bodyLight = mesh.metadata?.bodyLight;
@@ -519,13 +529,22 @@ function bindBodyLight(effect: Effect, mesh: AbstractMesh, uniform: string) {
   if (bodyLight && UNIFIED_LIGHT_MODEL) {
     const blend = mesh.metadata?.blendMeshLight ?? 1;
 
-    effect.setFloat4(
-      uniform,
-      bodyLight.x * blend * bodyLightTint[0],
-      bodyLight.y * blend * bodyLightTint[1],
-      bodyLight.z * blend * bodyLightTint[2],
-      mesh.visibility
-    );
+    let r = bodyLight.x;
+    let g = bodyLight.y;
+    let b = bodyLight.z;
+
+    if (lightingTier()) {
+      const peak = Math.max(1, r, g, b);
+      r /= peak;
+      g /= peak;
+      b /= peak;
+    } else {
+      r = Math.min(1, r);
+      g = Math.min(1, g);
+      b = Math.min(1, b);
+    }
+
+    effect.setFloat4(uniform, r * blend, g * blend, b * blend, mesh.visibility);
   }
 
   if (mesh.metadata?.diffuseColor) {
@@ -657,10 +676,10 @@ export function createItemMaterial(
   simpleMaterial.maxSimultaneousLights = 2 + pointLightPoolSize();
 
   addItemUniforms(simpleMaterial, scene);
-  // Outside the Material UBO, so the per-mesh write below actually lands —
-  // see bindBodyLight and the Standard path never applied
-  // BodyLight".
+  // Outside the Material UBO, so the per-mesh write below actually lands -
+  // see bindBodyLight.
   simpleMaterial.AddUniform(BODY_LIGHT_UNIFORM, 'vec4', null);
+  simpleMaterial.AddUniform(LINEAR_LIGHT_UNIFORM, 'float', 0);
 
   // Glow cards and flat-lit UI models never take a cap; the uniform is
   // still declared for them (addItemUniforms) and simply unread.
@@ -695,6 +714,8 @@ ${bright || flatLit ? '' : halfLambertGlsl('diffuseBase', '') + UNCLAMP}${
         const scroll = mesh.metadata!.uvScroll as UvScroll | undefined;
         effect.setFloat2(UV_SCROLL_UNIFORM, scroll?.u ?? 0, scroll?.v ?? 0);
       }
+
+      effect.setFloat(LINEAR_LIGHT_UNIFORM, linearLightActive(scene) ? 1 : 0);
 
       effect.setFloat4(BODY_LIGHT_UNIFORM, 1, 1, 1, mesh.visibility);
       bindBodyLight(effect, mesh, BODY_LIGHT_UNIFORM);
@@ -790,18 +811,15 @@ export function createItemPbrMaterial(scene: Scene) {
 
   addItemUniforms(material, scene);
   material.AddUniform(BODY_LIGHT_UNIFORM, 'vec4', null);
-  material.AddUniform(KEY_GAIN_UNIFORM, 'float', null);
   material.AddUniform(DETAIL_UNIFORM, 'float', null);
   material.AddUniform('muEmissiveSampler', 'sampler2D', flat.black);
 
-  // BodyLight: the bake's flat per-object light (the unified model).
-  // The Standard path takes it as (texel × light)^2.2 through
-  // `toLinearSpace` at the end of its fragment, so the bake — a display-
-  // domain value, like the texel — is decoded here the same way before it
-  // meets the linear albedo; otherwise a 0.5 bake is a stop lighter on
-  // Enhanced than on Classic. Applied to `surfaceAlbedo` only: with
-  // metallic 0 the dielectric F0 does not read the albedo, so the highlight
-  // and the emissive trim added after it keep their calibrated strength.
+  // BodyLight: the bake's flat per-object light (the unified model). The
+  // albedo texel is already decoded (GAMMAALBEDO); the bake - a display-
+  // domain value like the texel - is decoded the same way before it meets
+  // it, so the product is `lin(texel x body)` (§3.2). Applied to
+  // `surfaceAlbedo` only: with metallic 0 the dielectric F0 does not read
+  // the albedo, so the highlight and the emissive trim keep their strength.
   // Alpha carries mesh visibility on both paths.
   material.Fragment_Custom_Albedo(`
     ${
@@ -809,7 +827,6 @@ export function createItemPbrMaterial(scene: Scene) {
         ? `surfaceAlbedo *= pow(max(${BODY_LIGHT_UNIFORM}.rgb, vec3(0.0)), vec3(2.2));`
         : ''
     }
-    surfaceAlbedo *= ${KEY_GAIN_UNIFORM};
     alpha *= ${BODY_LIGHT_UNIFORM}.a;
 ${snowCapGlsl('surfaceAlbedo')}
   `);
@@ -831,7 +848,6 @@ ${halfLambertGlsl('finalColor.rgb', 'surfaceAlbedo')}
       const diffuse = mesh.metadata!.diffuseTexture as Texture;
       const maps = pbrMapsFor(diffuse, scene);
 
-      effect.setFloat(KEY_GAIN_UNIFORM, pbrKeyGain());
       effect.setFloat(DETAIL_UNIFORM, pbrDetailStrength());
 
       effect.setTexture('albedoSampler', diffuse);

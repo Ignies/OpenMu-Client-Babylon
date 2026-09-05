@@ -135,7 +135,6 @@ export const russianLayer: LanguageLayer = {
     'options.title': 'Настройки',
     'options.tab.game': 'Игра',
     'options.tab.video': 'Видео',
-    'options.tab.colour': 'Цвет',
     'options.tab.keys': 'Клавиши',
     'options.tab.language': 'Язык',
     'options.section.gameplay': 'Игровой процесс',
@@ -144,8 +143,6 @@ export const russianLayer: LanguageLayer = {
     'options.section.rendering': 'Отрисовка',
     'options.section.items': 'Предметы',
     'options.section.image': 'Изображение',
-    'options.section.grade': 'Цветокоррекция',
-    'options.section.atmosphere': 'Атмосфера',
     'options.section.windows': 'Окна',
     'options.section.actions': 'Действия',
     'options.section.language': 'Язык',
@@ -158,7 +155,6 @@ export const russianLayer: LanguageLayer = {
     'options.shadows': 'Тени объектов',
     'options.dynamicLights': 'Динамический свет',
     'options.postProcessing': 'Постобработка',
-    'options.toneMapping': 'Плёночный тонмаппинг',
     'options.ambientParticles': 'Частицы окружения',
     'options.weatherEffects': 'Погода',
     'options.animatedWater': 'Анимированная вода',
@@ -173,14 +169,19 @@ export const russianLayer: LanguageLayer = {
     'options.glow': 'Ореол',
     'options.chromatic': 'Хром. аберрация',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': 'Затемнение сцены',
-    'options.darkness': 'Темнота',
-    'options.exposure': 'Экспозиция',
-    'options.contrast': 'Контраст',
-    'options.colorTint': 'Оттенок солнца',
-    'options.saturation': 'Насыщенность',
     'options.vignette': 'Виньетка',
-    'options.mapGradient': 'Градиент карты',
+
+    'options.toneMapper': 'Тональная компрессия',
+
+    'options.brightness': 'Яркость',
+
+    'options.toneMapper.none': 'Нет',
+
+    'options.toneMapper.standard': 'Стандарт',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': 'Нейтральная',
     'options.resetKeys': 'Сбросить по умолчанию',
     'options.keyHint': 'Нажмите, затем нажмите клавишу. Esc — отмена.',
     'options.packMark': '★',

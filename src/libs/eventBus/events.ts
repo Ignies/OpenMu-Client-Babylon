@@ -23,6 +23,10 @@ export type Events = CSEvents &
     warpCompleted: { map: ENUM_WORLD };
     /** The terrain of `map` could not be loaded; the previous map is still up. */
     warpFailed: { map: ENUM_WORLD; error: unknown };
+    /** The look director composed its first frame on a new map. */
+    'look.mapReady': { world: ENUM_WORLD };
+    /** A lit interior (tavern) was entered or left. */
+    'look.areaChanged': { name: string | null };
     objectDamaged: {
       entity: With<Entity, 'transform' | 'screenPosition'>;
       healthDamage: number;

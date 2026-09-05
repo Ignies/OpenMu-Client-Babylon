@@ -134,7 +134,6 @@ export const frenchLayer: LanguageLayer = {
     'options.title': 'Options',
     'options.tab.game': 'Jeu',
     'options.tab.video': 'Vidéo',
-    'options.tab.colour': 'Couleur',
     'options.tab.keys': 'Touches',
     'options.tab.language': 'Langue',
     'options.section.gameplay': 'Jouabilité',
@@ -143,8 +142,6 @@ export const frenchLayer: LanguageLayer = {
     'options.section.rendering': 'Rendu',
     'options.section.items': 'Objets',
     'options.section.image': 'Image',
-    'options.section.grade': 'Étalonnage',
-    'options.section.atmosphere': 'Atmosphère',
     'options.section.windows': 'Fenêtres',
     'options.section.actions': 'Actions',
     'options.section.language': 'Langue',
@@ -158,7 +155,6 @@ export const frenchLayer: LanguageLayer = {
     'options.shadows': 'Ombres des objets',
     'options.dynamicLights': 'Lumières dynamiques',
     'options.postProcessing': 'Post-traitement',
-    'options.toneMapping': 'Mappage tonal filmique',
     'options.ambientParticles': 'Particules d’ambiance',
     'options.weatherEffects': 'Météo',
     'options.animatedWater': 'Eau animée',
@@ -173,14 +169,19 @@ export const frenchLayer: LanguageLayer = {
     'options.glow': 'Lueur',
     'options.chromatic': 'Ab. chromatique',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': 'Assombrir la scène',
-    'options.darkness': 'Obscurité',
-    'options.exposure': 'Exposition',
-    'options.contrast': 'Contraste',
-    'options.colorTint': 'Teinte du soleil',
-    'options.saturation': 'Saturation',
     'options.vignette': 'Vignettage',
-    'options.mapGradient': 'Dégradé de la carte',
+
+    'options.toneMapper': 'Mappage tonal',
+
+    'options.brightness': 'Luminosité',
+
+    'options.toneMapper.none': 'Aucun',
+
+    'options.toneMapper.standard': 'Standard',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': 'Neutre',
     'options.resetKeys': 'Valeurs par défaut',
     'options.keyHint': 'Cliquez, puis appuyez sur une touche. Échap annule.',
     'options.packMark': '★',

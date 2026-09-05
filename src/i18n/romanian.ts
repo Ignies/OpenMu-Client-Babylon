@@ -134,7 +134,6 @@ export const romanianLayer: LanguageLayer = {
     'options.title': 'Opțiuni',
     'options.tab.game': 'Joc',
     'options.tab.video': 'Video',
-    'options.tab.colour': 'Culoare',
     'options.tab.keys': 'Taste',
     'options.tab.language': 'Limbă',
     'options.section.gameplay': 'Jucabilitate',
@@ -143,8 +142,6 @@ export const romanianLayer: LanguageLayer = {
     'options.section.rendering': 'Randare',
     'options.section.items': 'Obiecte',
     'options.section.image': 'Imagine',
-    'options.section.grade': 'Corecție de culoare',
-    'options.section.atmosphere': 'Atmosferă',
     'options.section.windows': 'Ferestre',
     'options.section.actions': 'Acțiuni',
     'options.section.language': 'Limbă',
@@ -157,7 +154,6 @@ export const romanianLayer: LanguageLayer = {
     'options.shadows': 'Umbrele obiectelor',
     'options.dynamicLights': 'Lumini dinamice',
     'options.postProcessing': 'Post-procesare',
-    'options.toneMapping': 'Tone mapping filmic',
     'options.ambientParticles': 'Particule de ambient',
     'options.weatherEffects': 'Vreme',
     'options.animatedWater': 'Apă animată',
@@ -172,14 +168,19 @@ export const romanianLayer: LanguageLayer = {
     'options.glow': 'Aură',
     'options.chromatic': 'Ab. cromatică',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': 'Întunecarea scenei',
-    'options.darkness': 'Întuneric',
-    'options.exposure': 'Expunere',
-    'options.contrast': 'Contrast',
-    'options.colorTint': 'Nuanța soarelui',
-    'options.saturation': 'Saturație',
     'options.vignette': 'Vinietă',
-    'options.mapGradient': 'Degradeul hărții',
+
+    'options.toneMapper': 'Mapare tonală',
+
+    'options.brightness': 'Luminozitate',
+
+    'options.toneMapper.none': 'Niciunul',
+
+    'options.toneMapper.standard': 'Standard',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': 'Neutru',
     'options.resetKeys': 'Revino la valorile implicite',
     'options.keyHint': 'Dă clic, apoi apasă o tastă. Esc anulează.',
     'options.packMark': '★',

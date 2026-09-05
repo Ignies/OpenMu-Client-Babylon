@@ -11,18 +11,18 @@ import {
 } from './terrainOverlay';
 import type { TileTextureArray } from './tileTextureArray';
 import { getTerrainLightTexture } from '../../common/terrainDynamicLight';
-import { linearBufferActive } from '../../common/lightModel';
 import {
-  terrainBakeTint,
-  terrainInteriorAmbient,
-} from '../../scenes/sceneLook';
+  linearBufferActive,
+  linearLightActive,
+} from '../../common/lightModel';
+import { lookDirector } from '../../lighting/director';
 import {
   TERRAIN_CSM_UNIFORMS,
   bindTerrainCsm,
   registerTerrainMaterial,
   terrainCsmDefines,
   terrainCsmGlsl,
-} from '../../scenes/enhancedLighting';
+} from '../../scenes/shadows';
 import {
   bindTerrainWater,
   disposeTerrainWaterFrames,
@@ -39,7 +39,7 @@ import {
 const FINAL_COLOR_VAR_NAME = `finalColor`;
 
 /**
- * Index of the animated water tile in `getTilesList` — the one layer whose UV
+ * Index of the animated water tile in `getTilesList` - the one layer whose UV
  * scrolls. Kept as the same magic 5 the branch chain used.
  */
 const WATER_LAYER = 5;
@@ -51,6 +51,15 @@ const WATER_LAYER = 5;
  * turns out to sample differently on some driver.
  */
 const USE_TILE_TEXTURE_ARRAY = true;
+
+/**
+ * The hue-preserving soft ceiling on the ground light sum, tiers >= 1
+ * (ARCHITECTURE §4.5): linear below the knee, bent toward the asymptote
+ * above it, so a torch core keeps its hue where the original's per-channel
+ * clamp would have gone white.
+ */
+const GROUND_CEIL_KNEE = 0.85;
+const GROUND_CEIL_ASYMPTOTE = 1.1;
 
 /**
  * The old path: `textures[i]` cannot be indexed by a per-fragment value in
@@ -81,7 +90,7 @@ function branchChainGlsl(
 /**
  * The packed path: two array fetches, layer picked by the splat index.
  *
- * The `valid` tests reproduce what the branch chain did by omission — a tile
+ * The `valid` tests reproduce what the branch chain did by omission - a tile
  * index the map references but the world has no texture for matched no branch
  * and left the colour black. Here the same index would read past
  * `tileScales`, which is undefined behaviour, so it is tested rather than
@@ -192,8 +201,8 @@ ${water ? terrainWaterVertexGlsl(water.spec) : ''}
       fragmentSource: `
   precision highp float;
   uniform float time;
-  uniform vec3 bakeTint;
   uniform float linearOut;
+  uniform float linearLight;
   uniform vec3 interiorAmbient;
 ${
   tileArray
@@ -213,6 +222,9 @@ ${water && water.frames.length ? `  uniform sampler2D waterFlip;` : ''}
   varying vec3 vNormal;
   varying float vViewZ;
 
+  const float GROUND_CEIL_KNEE = ${GROUND_CEIL_KNEE.toFixed(3)};
+  const float GROUND_CEIL_ROOM = ${(GROUND_CEIL_ASYMPTOTE - GROUND_CEIL_KNEE).toFixed(3)};
+
 ${terrainOverlayDeclarationsGlsl(overlays)}
 
   ${terrainCsmGlsl()}
@@ -226,7 +238,7 @@ ${terrainOverlayDeclarationsGlsl(overlays)}
     float WaterMove = float(int(time*50.0) % 20000) * 0.0005;
     float WindSpeed = float(int(time*200.0) % 72000) * 0.004;
     float GrassWind = ${water ? terrainWaterGrassWindGlsl() : '0.0'};
-  
+
     vec4 ${FINAL_COLOR_VAR_NAME} = vec4(0.0);
 
     vec3 opaqueColor = vec3(0.0);
@@ -250,62 +262,56 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
 
     ${terrainOverlayGlsl(overlays, FINAL_COLOR_VAR_NAME, 'skyOpen')}
 
-    // Enhanced lighting: the sun's cascaded shadow takes the bake
-    // only down to csmParams.y of its authored value — the lightmap stays
-    // the art direction. The dynamic layer is the torches' radial light, not
-    // sunlight, so a roof or a wall between the ground and the sun must not
-    // touch it (indoors everything sits in the sun's shadow).
-    //
-    // …and indoors is exactly where the cascades stop being the authority on
-    // that, because both interiors take their roof *out* of the shadow map on
-    // purpose so the camera can see in:
-    //
-    //  - Lorencia lifts HOUSE_WALL05/06 by 100 units (loadMapIntoScene),
-    //    which puts them past CSM_CASTER_RANGE_SQ and out of the cascades
-    //    entirely. What is left casting into the room is the *walls*, so the
-    //    pub floor takes the outside walls' sun shadows in bands — a hard
-    //    diagonal edge across a floor that has no sky over any of it.
-    //  - Devias fades its ceiling with CeilingHideSystem, which only touches
-    //    visibility; the slab still renders into the shadow map, so the
-    //    room is uniformly shadowed and the bake is cut to csmParams.y (0.35)
-    //    a second time — on top of a lightmap that already spent its light
-    //    being an interior. That doubling is the near-black reading-room
-    //    floor: 2.9× darker than the same floor on Classic, under furniture
-    //    the hemispheric key still lights at full strength.
-    //
-    // The openness mask answers what the cascades no longer can — no sky over
-    // this tile, no sun to shadow it — and it is already in scope for the
-    // overlays. Indoors the bake keeps the room, which is what it was
-    // authored to do.
+    // The sun's cascaded shadow, weighted by the openness mask: both
+    // interiors take their roof *out* of the shadow map on purpose so the
+    // camera can see in (Lorencia lifts HOUSE_WALL05/06 past the caster
+    // range, Devias fades its ceiling), so under a roof the cascades are not
+    // the authority and the bake keeps the room it was authored for.
     float sunShadow = mix(1.0, csmShadow(vWorldPos, vViewZ), skyOpen);
+
+    // The one shadow rule: a shadow removes the sun and leaves the sky share
+    // (csmParams.y, the policy floor). 1 while Classic (no cascades).
     float bakeShadow = mix(csmParams.y, 1.0, sunShadow);
 
-    // Indoors the ground gets a share of the hemispheric key back
-    // (INTERIOR_GROUND_KEY in sceneLook). Under a roof the bake is the room's
-    // own dark authored value and this shader has no key term at all, so the
-    // candles end up being the *entire* light on the floor and it takes all
-    // of their hue — while the benches standing on it, which the hemispheric
-    // light reaches whatever is overhead, read as warm wood. This is the base
-    // that lets the candles tint the floor instead of defining it. Weighted
-    // by the mask, so it stops at the door and no open ground ever sees it.
+    // Indoors the ground gets a share of the hemispheric key back (the
+    // director's interiorGround): under a roof the bake is the room's own
+    // dark value and this shader has no key term, so without it the candles
+    // are the floor's entire light and it takes all of their hue. Weighted by
+    // the mask, so it stops at the door.
     vec3 roomKey = interiorAmbient * (1.0 - skyOpen);
 
+    // The ground light sum. Tiers >= 1 (linearLight): lin(bake) x floor +
+    // delta + key, the delta linear-authored and added after the decode.
+    // Classic: the original's gamma-space bake + delta (ZzzLodTerrain.cpp:
+    // 481-505), untouched.
+    vec3 bake = max(vColor.rgb, vec3(0.0));
+    vec3 bakeLit = mix(bake, pow(bake, vec3(2.2)), linearLight) * bakeShadow;
+    vec3 groundLight = max(bakeLit + dynLight + roomKey, vec3(0.0));
+
+    // The original clamps glColor at 1.0 per channel; tiers >= 1 bend the
+    // sum toward the asymptote above the knee so a torch core keeps its hue.
+    float peak = max(groundLight.r, max(groundLight.g, groundLight.b));
+    float bent = peak > GROUND_CEIL_KNEE
+      ? GROUND_CEIL_KNEE + GROUND_CEIL_ROOM * (1.0 - exp(-(peak - GROUND_CEIL_KNEE) / GROUND_CEIL_ROOM))
+      : peak;
+    vec3 softCeil = peak > 0.0 ? groundLight * (bent / peak) : groundLight;
+    groundLight = mix(min(groundLight, vec3(1.0)), softCeil, linearLight);
+
+    // The overlays and the reflections below work in the art's display
+    // space; the linear sum is re-encoded for them and the final decode
+    // lands the product exactly at lin(texel) x groundLight.
+    vec3 groundLit = mix(groundLight, pow(groundLight, vec3(1.0 / 2.2)), linearLight);
+    vec3 extraLit = mix(dynLight + roomKey, pow(max(dynLight + roomKey, vec3(0.0)), vec3(1.0 / 2.2)), linearLight);
+
     // A ground overlay that is its own material (snow) takes over its share
-    // of this term — see terrainOverlayLitGlsl.
+    // of this term - see terrainOverlayLitGlsl.
 ${terrainOverlayLitGlsl(
   overlays,
   'lit',
-  // `bakeTint` is the mood grade's material-side pre-multiply and the
-  // post-side `exposure` is what pays it back, so it has to cover the whole
-  // ground light rather than the baked half alone. With the torches added
-  // outside it they never paid the tint but still took the payback, landing
-  // 1/luma(bakeTint) - 1.44x on Lorencia - over everything they lit. That is
-  // the molten-orange wash torch-lit ground came out with on the graded
-  // tiers. Ungraded the tint is white and this is a no-op.
-  '(vColor.rgb * bakeShadow + dynLight) * bakeTint + roomKey',
+  'groundLit',
   'vColor',
   'sunShadow',
-  'dynLight + roomKey'
+  'extraLit'
 )}
     vec3 f = ${FINAL_COLOR_VAR_NAME}.rgb * max(lit, 0.0);
 
@@ -315,10 +321,8 @@ ${terrainOverlayReflectGlsl(overlays, 'f', 'sunShadow')}
 ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
 
     // When image processing runs in post the buffer is linear, and
-    // Babylon's Standard fragment ends with toLinearSpace(color) — the same
-    // pow(2.2) of texel × light. Without it the floor arrived gamma-encoded
-    // and read ~x^(1/2.2) lighter than the objects on it — a gamma
-    // off. linearOut is 0 whenever the objects skip the decode too.
+    // Babylon's Standard fragment ends with toLinearSpace(color) - the same
+    // pow(2.2). linearOut is 0 whenever the objects skip the decode too.
     f = mix(f, pow(max(f, vec3(0.0)), vec3(2.2)), linearOut);
 
     gl_FragColor = vec4(f, 1.0);
@@ -339,8 +343,8 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
         'world',
         'viewProjection',
         'time',
-        'bakeTint',
         'linearOut',
+        'linearLight',
         'interiorAmbient',
         ...(tileArray ? ['tileScales'] : []),
         ...terrainOverlayUniforms(overlays),
@@ -349,7 +353,7 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
       ],
       // `textures[N]` is expanded to N consecutive units starting at its own
       // slot; if it comes first, the shadow-map array samplers land on units
-      // the 2D array already uses — two sampler types on one unit is a GL
+      // the 2D array already uses - two sampler types on one unit is a GL
       // draw error and the terrain renders flat. Keep the array last. The
       // packed path has no sampler array at all, but the ordering rule costs
       // nothing to keep.
@@ -384,19 +388,11 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
 
     const et = (Date.now() - st) / 1000;
     effect.setFloat('time', et);
-    effect.setFloat3(
-      'bakeTint',
-      terrainBakeTint[0],
-      terrainBakeTint[1],
-      terrainBakeTint[2]
-    );
     effect.setFloat('linearOut', linearBufferActive(scene) ? 1 : 0);
-    effect.setFloat3(
-      'interiorAmbient',
-      terrainInteriorAmbient[0],
-      terrainInteriorAmbient[1],
-      terrainInteriorAmbient[2]
-    );
+    effect.setFloat('linearLight', linearLightActive(scene) ? 1 : 0);
+    const room = lookDirector()?.state().key.interiorGround;
+    if (room) effect.setFloat3('interiorAmbient', room[0], room[1], room[2]);
+    else effect.setFloat3('interiorAmbient', 0, 0, 0);
     if (tileArray) {
       effect.setTexture('tileTextures', tileArray.texture);
       effect.setFloatArray('tileScales', tileArray.scales);

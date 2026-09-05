@@ -13,7 +13,7 @@ import {
 import { applyMapObjectFixups } from './mapObjectFixups';
 import { evictContainers } from '../../common/modelLoader';
 import { assetWorldNum } from '../../common/worldAssets';
-import { Color4, Vector3 } from '../babylon/exports';
+import { Vector3 } from '../babylon/exports';
 import { toRadians } from '../../common/utils';
 import { MapTileObject } from '../../common/mapTileObject';
 import { IVector3Like } from '../babylon/exports';
@@ -30,7 +30,7 @@ import { skills } from '../../skills';
 import { combat } from '../../combat';
 import { resetTerrainMask } from './terrainMask';
 import { setShadowWorld } from '../../common/objectShadow';
-import { setMapClearColour } from '../../scenes/sceneLook';
+import { lookDirector } from '../../lighting/director';
 
 /** Bumped per warp request; a load whose serial is stale abandons its work. */
 let warpSerial = 0;
@@ -52,28 +52,17 @@ let sceneMap = ENUM_WORLD.WD_55LOGINSCENE;
 let loadQueue: Promise<void> = Promise.resolve();
 
 /**
- * The map's own setup: `SetWorldClearColor` from the entry's declared bytes
- * (SceneManager.cpp:336-365; black for every map that declares none), then
- * the entry's `create` — which binds the map's object classes into
- * `MapTileObjects` and adds whatever entities the map owns. Every per-map
- * decision lives on the entry (`src/maps/<name>/index.ts`); nothing here
- * tests the world number.
+ * The map's own setup: the look director takes the map (its profile, and
+ * with it the clear colour - `SetWorldClearColor` bytes on Classic,
+ * SceneManager.cpp:336-365), then the entry's `create` - which binds the
+ * map's object classes into `MapTileObjects` and adds whatever entities the
+ * map owns. Every per-map decision lives on the entry
+ * (`src/maps/<name>/index.ts`); nothing here tests the world number.
  */
 async function loadWorld(world: World) {
   if (!world.terrain) return;
 
-  const map = world.mapIndex;
-
-  const clear = maps.clearColorFor(map);
-  world.scene.clearColor = clear
-    ? new Color4(clear[0] / 256, clear[1] / 256, clear[2] / 256, 1)
-    : new Color4(0, 0, 0, 1);
-
-  // The clear colour *is* the sky; the mood writer re-applies it with the
-  // linear-buffer exposure divided back out.
-  setMapClearColour(
-    clear ? [clear[0] / 256, clear[1] / 256, clear[2] / 256] : null
-  );
+  lookDirector()?.setMap(world.mapIndex);
 
   await maps.create(world);
 }

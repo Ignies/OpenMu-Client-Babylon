@@ -24,7 +24,12 @@ export function pointLightPoolSize(): number {
 
 const LIGHT_RANGE = 6;
 
-const INTENSITY = 3;
+/**
+ * Key units (ARCHITECTURE §4.5): a torch's peak on a wall beside it is about
+ * 1.2x the key on an open tile. Lands identically on every tier - the pi
+ * gain on the PBR tiers is cancelled by Burley's 1/pi.
+ */
+const INTENSITY = 1.1;
 
 const HEIGHT_OFFSET = 0.6;
 

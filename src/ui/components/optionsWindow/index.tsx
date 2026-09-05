@@ -9,9 +9,9 @@ import { MuButton } from '../muButton';
 import { MuResizeGrip, useWindowChrome } from '../muWindow/useWindowChrome';
 import { TEXT_COLOR } from '../../pages/serversPage/layout';
 import {
-  MAP_GRADIENT_MAX,
-  SATURATION_MAX,
-  SATURATION_MIN,
+  BRIGHTNESS_MAX,
+  BRIGHTNESS_MIN,
+  TONE_MAPPER_MAX,
   GameOptions,
   setGameOption,
   type GameOptions as GameOptionsType,
@@ -46,6 +46,14 @@ import { t, type TextKey } from '../../../i18n';
 import { LanguageSelect } from './languageSelect';
 
 const WINDOW_ID = 'options';
+
+/** The tone mapper names, as text keys - the slider prints `t()` of these. */
+const TONE_MAPPER_LABEL_KEYS: readonly TextKey[] = [
+  'options.toneMapper.none',
+  'options.toneMapper.standard',
+  'options.toneMapper.aces',
+  'options.toneMapper.neutral',
+];
 
 const ART_WIDTH = 213;
 
@@ -130,13 +138,9 @@ type SliderRow = {
     | 'bloom'
     | 'glow'
     | 'chromatic'
-    | 'exposure'
-    | 'contrast'
-    | 'colorTint'
-    | 'mapGradient'
-    | 'vignette'
-    | 'saturation'
-    | 'darkness';
+    | 'toneMapper'
+    | 'brightness'
+    | 'vignette';
   textId: number;
   labelKey: TextKey;
   max: number;
@@ -162,12 +166,7 @@ const gradeSlider = (
     | 'bloom'
     | 'glow'
     | 'chromatic'
-    | 'exposure'
-    | 'contrast'
-    | 'colorTint'
-    | 'mapGradient'
-    | 'vignette'
-    | 'darkness',
+    | 'vignette',
   labelKey: TextKey,
   max = 25
 ): Row =>
@@ -245,7 +244,6 @@ const TABS: Tab[] = [
             check('shadows', -1, 'options.shadows'),
             check('dynamicLights', -1, 'options.dynamicLights'),
             check('postProcessing', -1, 'options.postProcessing'),
-            check('toneMapping', -1, 'options.toneMapping', true),
             check('ambientParticles', -1, 'options.ambientParticles'),
             check('weatherEffects', -1, 'options.weatherEffects'),
             check('animatedWater', -1, 'options.animatedWater'),
@@ -290,48 +288,32 @@ const TABS: Tab[] = [
         {
           titleKey: 'options.section.image',
           rows: [
-            gradeSlider('sharpness', 'options.sharpness', 9),
-            gradeSlider('filmGrain', 'options.filmGrain', 9),
-            gradeSlider('bloom', 'options.bloom', 9),
-            gradeSlider('glow', 'options.glow', 9),
-            gradeSlider('chromatic', 'options.chromatic', 9),
-            check('fxaa', -1, 'options.fxaa', true),
-          ],
-        },
-      ],
-    ],
-  },
-  {
-    id: 'colour',
-    labelKey: 'options.tab.colour',
-    columns: [
-      [
-        {
-          titleKey: 'options.section.grade',
-          rows: [
-            check('sceneDarkening', -1, 'options.sceneDarkening'),
-            gradeSlider('darkness', 'options.darkness'),
-            gradeSlider('exposure', 'options.exposure'),
-            gradeSlider('contrast', 'options.contrast'),
-            gradeSlider('colorTint', 'options.colorTint'),
             slider({
-              key: 'saturation',
+              key: 'toneMapper',
               textId: -1,
-              labelKey: 'options.saturation',
-              min: SATURATION_MIN,
-              max: SATURATION_MAX,
-              display: v =>
-                v === 0 ? t('common.off') : v > 0 ? `+${v}` : v,
+              labelKey: 'options.toneMapper',
+              max: TONE_MAPPER_MAX,
+              display: v => t(TONE_MAPPER_LABEL_KEYS[v]) ?? v,
               needsPostProcessing: true,
             }),
-            gradeSlider('vignette', 'options.vignette'),
+            slider({
+              key: 'brightness',
+              textId: -1,
+              labelKey: 'options.brightness',
+              min: BRIGHTNESS_MIN,
+              max: BRIGHTNESS_MAX,
+              display: v =>
+                v === 0 ? t('common.off') : v > 0 ? `+${v}` : `-${-v}`,
+              needsPostProcessing: true,
+            }),
+            gradeSlider('bloom', 'options.bloom', 9),
+            gradeSlider('glow', 'options.glow', 9),
+            gradeSlider('sharpness', 'options.sharpness', 9),
+            gradeSlider('filmGrain', 'options.filmGrain', 9),
+            gradeSlider('chromatic', 'options.chromatic', 9),
+            gradeSlider('vignette', 'options.vignette', 9),
+            check('fxaa', -1, 'options.fxaa', true),
           ],
-        },
-      ],
-      [
-        {
-          titleKey: 'options.section.atmosphere',
-          rows: [gradeSlider('mapGradient', 'options.mapGradient', MAP_GRADIENT_MAX)],
         },
       ],
     ],

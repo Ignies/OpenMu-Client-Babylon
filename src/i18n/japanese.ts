@@ -138,7 +138,6 @@ export const japaneseLayer: LanguageLayer = {
     'options.title': 'オプション',
     'options.tab.game': 'ゲーム',
     'options.tab.video': '映像',
-    'options.tab.colour': '色',
     'options.tab.keys': 'キー',
     'options.tab.language': '言語',
     'options.section.gameplay': 'ゲームプレイ',
@@ -147,8 +146,6 @@ export const japaneseLayer: LanguageLayer = {
     'options.section.rendering': '描画',
     'options.section.items': 'アイテム',
     'options.section.image': '画質',
-    'options.section.grade': '色調補正',
-    'options.section.atmosphere': '雰囲気',
     'options.section.windows': 'ウィンドウ',
     'options.section.actions': '操作',
     'options.section.language': '言語',
@@ -161,7 +158,6 @@ export const japaneseLayer: LanguageLayer = {
     'options.shadows': 'オブジェクトの影',
     'options.dynamicLights': '動的ライト',
     'options.postProcessing': 'ポストプロセス',
-    'options.toneMapping': 'フィルム調トーンマッピング',
     'options.ambientParticles': '環境パーティクル',
     'options.weatherEffects': '天候',
     'options.animatedWater': '水面のアニメーション',
@@ -176,14 +172,19 @@ export const japaneseLayer: LanguageLayer = {
     'options.glow': 'グロー',
     'options.chromatic': '色収差',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': 'シーンを暗くする',
-    'options.darkness': '暗さ',
-    'options.exposure': '露出',
-    'options.contrast': 'コントラスト',
-    'options.colorTint': '陽光の色味',
-    'options.saturation': '彩度',
     'options.vignette': 'ビネット',
-    'options.mapGradient': 'マップのグラデーション',
+
+    'options.toneMapper': 'トーンマッピング',
+
+    'options.brightness': '明るさ',
+
+    'options.toneMapper.none': 'なし',
+
+    'options.toneMapper.standard': '標準',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': 'ニュートラル',
     'options.resetKeys': '既定に戻す',
     'options.keyHint': 'クリックしてからキーを押してください。Esc で中止。',
     'options.packMark': '★',

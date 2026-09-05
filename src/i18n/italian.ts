@@ -134,7 +134,6 @@ export const italianLayer: LanguageLayer = {
     'options.title': 'Opzioni',
     'options.tab.game': 'Gioco',
     'options.tab.video': 'Video',
-    'options.tab.colour': 'Colore',
     'options.tab.keys': 'Tasti',
     'options.tab.language': 'Lingua',
     'options.section.gameplay': 'Giocabilità',
@@ -143,8 +142,6 @@ export const italianLayer: LanguageLayer = {
     'options.section.rendering': 'Resa grafica',
     'options.section.items': 'Oggetti',
     'options.section.image': 'Immagine',
-    'options.section.grade': 'Correzione colore',
-    'options.section.atmosphere': 'Atmosfera',
     'options.section.windows': 'Finestre',
     'options.section.actions': 'Azioni',
     'options.section.language': 'Lingua',
@@ -157,7 +154,6 @@ export const italianLayer: LanguageLayer = {
     'options.shadows': 'Ombre degli oggetti',
     'options.dynamicLights': 'Luci dinamiche',
     'options.postProcessing': 'Post-elaborazione',
-    'options.toneMapping': 'Tone mapping filmico',
     'options.ambientParticles': 'Particelle ambientali',
     'options.weatherEffects': 'Meteo',
     'options.animatedWater': 'Acqua animata',
@@ -172,14 +168,19 @@ export const italianLayer: LanguageLayer = {
     'options.glow': 'Alone',
     'options.chromatic': 'Ab. cromatica',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': 'Scurire la scena',
-    'options.darkness': 'Oscurità',
-    'options.exposure': 'Esposizione',
-    'options.contrast': 'Contrasto',
-    'options.colorTint': 'Tinta del sole',
-    'options.saturation': 'Saturazione',
     'options.vignette': 'Vignettatura',
-    'options.mapGradient': 'Sfumatura della mappa',
+
+    'options.toneMapper': 'Mappatura toni',
+
+    'options.brightness': 'Luminosità',
+
+    'options.toneMapper.none': 'Nessuno',
+
+    'options.toneMapper.standard': 'Standard',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': 'Neutro',
     'options.resetKeys': 'Ripristina i valori',
     'options.keyHint': 'Fai clic, poi premi un tasto. Esc annulla.',
     'options.packMark': '★',

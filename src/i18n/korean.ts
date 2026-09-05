@@ -137,7 +137,6 @@ export const koreanLayer: LanguageLayer = {
     'options.title': '옵션',
     'options.tab.game': '게임',
     'options.tab.video': '영상',
-    'options.tab.colour': '색상',
     'options.tab.keys': '단축키',
     'options.tab.language': '언어',
     'options.section.gameplay': '게임 플레이',
@@ -146,8 +145,6 @@ export const koreanLayer: LanguageLayer = {
     'options.section.rendering': '렌더링',
     'options.section.items': '아이템',
     'options.section.image': '화질',
-    'options.section.grade': '색보정',
-    'options.section.atmosphere': '분위기',
     'options.section.windows': '창',
     'options.section.actions': '동작',
     'options.section.language': '언어',
@@ -160,7 +157,6 @@ export const koreanLayer: LanguageLayer = {
     'options.shadows': '오브젝트 그림자',
     'options.dynamicLights': '동적 조명',
     'options.postProcessing': '후처리',
-    'options.toneMapping': '필름 톤 매핑',
     'options.ambientParticles': '환경 파티클',
     'options.weatherEffects': '날씨',
     'options.animatedWater': '물 애니메이션',
@@ -175,14 +171,19 @@ export const koreanLayer: LanguageLayer = {
     'options.glow': '글로우',
     'options.chromatic': '색수차',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': '장면 어둡게',
-    'options.darkness': '어둡기',
-    'options.exposure': '노출',
-    'options.contrast': '대비',
-    'options.colorTint': '햇빛 색조',
-    'options.saturation': '채도',
     'options.vignette': '비네트',
-    'options.mapGradient': '맵 그라데이션',
+
+    'options.toneMapper': '톤 매핑',
+
+    'options.brightness': '밝기',
+
+    'options.toneMapper.none': '없음',
+
+    'options.toneMapper.standard': '표준',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': '뉴트럴',
     'options.resetKeys': '기본값으로',
     'options.keyHint': '클릭한 뒤 키를 누르세요. Esc로 취소합니다.',
     'options.packMark': '★',

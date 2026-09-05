@@ -39,8 +39,10 @@ import {
 import {
   initTerrainDynamicLight,
   packBakedTerrainLight,
+  requestBakedTerrainLight,
   requestTerrainLight,
 } from '../../common/terrainDynamicLight';
+import { lightingTier } from '../../common/lightingQuality';
 import { World, type TerrainLayers } from '../../ecs/world';
 import { DEBUG_SHOW_TERRAIN_ATTRIBUTES } from '../../consts';
 import { assetWorldNum } from '../../common/worldAssets';
@@ -392,7 +394,13 @@ const xd = xf - xi;
       return Vector3.OneReadOnly;
     }
 
-    if (requestTerrainLight(x, y, lightScratch)) return lightScratch;
+    // Classic: PrimaryTerrainLight (bake + delta), the original's BodyLight.
+    // Tiers >= 1: the bake alone - the pool lights reach the figure per pixel.
+    const lit = lightingTier()
+      ? requestBakedTerrainLight(x, y, lightScratch)
+      : requestTerrainLight(x, y, lightScratch);
+
+    if (lit) return lightScratch;
 
     const light = terrainLight[GetTerrainIndex(~~x, ~~y)];
 

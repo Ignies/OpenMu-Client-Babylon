@@ -2,20 +2,28 @@ import {
   registerDebugModule,
   type DebugRow,
 } from '../../../../common/debugMenu';
-import { GameOptions, setGameOption } from '../../../../common/gameOptions';
+import {
+  BRIGHTNESS_MAX,
+  BRIGHTNESS_MIN,
+  GameOptions,
+  TONE_MAPPER_MAX,
+  setGameOption,
+} from '../../../../common/gameOptions';
 import { invalidateShadowState } from '../../../../common/objectShadow';
+import { lookDirector } from '../../../../lighting/director';
 
 /**
  * Lighting: the lighting knobs of `GameOptions`, written through
  * `setGameOption` - the exact writes the Options window makes, so this tab
- * adds no writer of its own. Shadows re-validate the blob-shadow slots the
- * way the Options window does.
+ * adds no writer of its own - and a read-out of the director's `LookState`.
  */
 
 const TIER_NAMES = ['Classic', 'Enhanced', 'Ultra'];
 
+const TONE_MAPPER_LABELS = ['None', 'Standard', 'ACES', 'Neutral'];
+
 const check = (
-  key: 'dynamicLights' | 'shadows' | 'postProcessing' | 'toneMapping' | 'sceneDarkening',
+  key: 'dynamicLights' | 'shadows' | 'postProcessing',
   label: string
 ): DebugRow => ({
   kind: 'check',
@@ -29,7 +37,7 @@ const check = (
 });
 
 const slider = (
-  key: 'glow' | 'darkness' | 'exposure' | 'contrast',
+  key: 'glow' | 'bloom' | 'vignette',
   label: string,
   max: number
 ): DebugRow => ({
@@ -41,6 +49,15 @@ const slider = (
   set: value => setGameOption(key, value),
   display: value => (value === 0 ? 'off' : String(value)),
 });
+
+const signed = (value: number): string =>
+  value === 0 ? 'off' : value > 0 ? `+${value}` : String(value);
+
+const stateLine = (): string => {
+  const s = lookDirector()?.state();
+  if (!s) return 'no director';
+  return `ev ${s.ev.toFixed(2)} tm ${s.toneMapper} shadow ${s.shadow.strength.toFixed(2)} [${s.passes.join(' ')}]`;
+};
 
 registerDebugModule({
   id: 'lighting',
@@ -59,13 +76,30 @@ registerDebugModule({
     },
     check('dynamicLights', 'Dynamic lights'),
     check('shadows', 'Shadows'),
-    check('sceneDarkening', 'Scene darkening'),
-    { kind: 'section', id: 'grade', label: 'Grade' },
+    { kind: 'section', id: 'image', label: 'Image' },
     check('postProcessing', 'Post-processing'),
-    check('toneMapping', 'Tone mapping'),
+    {
+      kind: 'slider',
+      id: 'toneMapper',
+      label: 'Tone mapper',
+      max: TONE_MAPPER_MAX,
+      get: () => GameOptions.toneMapper,
+      set: value => setGameOption('toneMapper', value),
+      display: value => TONE_MAPPER_LABELS[value] ?? String(value),
+    },
+    {
+      kind: 'slider',
+      id: 'brightness',
+      label: 'Brightness',
+      min: BRIGHTNESS_MIN,
+      max: BRIGHTNESS_MAX,
+      get: () => GameOptions.brightness,
+      set: value => setGameOption('brightness', value),
+      display: signed,
+    },
+    slider('bloom', 'Bloom', 9),
     slider('glow', 'Glow', 9),
-    slider('darkness', 'Darkness', 25),
-    slider('exposure', 'Exposure', 25),
-    slider('contrast', 'Contrast', 25),
+    slider('vignette', 'Vignette', 9),
+    { kind: 'section', id: 'state', label: stateLine() },
   ],
 });

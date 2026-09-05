@@ -134,7 +134,6 @@ export const germanLayer: LanguageLayer = {
     'options.title': 'Optionen',
     'options.tab.game': 'Spiel',
     'options.tab.video': 'Video',
-    'options.tab.colour': 'Farbe',
     'options.tab.keys': 'Tasten',
     'options.tab.language': 'Sprache',
     'options.section.gameplay': 'Spielweise',
@@ -143,8 +142,6 @@ export const germanLayer: LanguageLayer = {
     'options.section.rendering': 'Darstellung',
     'options.section.items': 'Gegenstände',
     'options.section.image': 'Bild',
-    'options.section.grade': 'Farbkorrektur',
-    'options.section.atmosphere': 'Atmosphäre',
     'options.section.windows': 'Fenster',
     'options.section.actions': 'Aktionen',
     'options.section.language': 'Sprache',
@@ -157,7 +154,6 @@ export const germanLayer: LanguageLayer = {
     'options.shadows': 'Objektschatten',
     'options.dynamicLights': 'Dynamische Lichter',
     'options.postProcessing': 'Nachbearbeitung',
-    'options.toneMapping': 'Filmisches Tone Mapping',
     'options.ambientParticles': 'Umgebungspartikel',
     'options.weatherEffects': 'Wetter',
     'options.animatedWater': 'Animiertes Wasser',
@@ -172,14 +168,19 @@ export const germanLayer: LanguageLayer = {
     'options.glow': 'Leuchten',
     'options.chromatic': 'Chrom. Aberration',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': 'Szene abdunkeln',
-    'options.darkness': 'Dunkelheit',
-    'options.exposure': 'Belichtung',
-    'options.contrast': 'Kontrast',
-    'options.colorTint': 'Sonnenfärbung',
-    'options.saturation': 'Sättigung',
     'options.vignette': 'Vignette',
-    'options.mapGradient': 'Kartenverlauf',
+
+    'options.toneMapper': 'Tone Mapping',
+
+    'options.brightness': 'Helligkeit',
+
+    'options.toneMapper.none': 'Keins',
+
+    'options.toneMapper.standard': 'Standard',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': 'Neutral',
     'options.resetKeys': 'Standard wiederherstellen',
     'options.keyHint': 'Klicken, dann eine Taste drücken. Esc bricht ab.',
     'options.packMark': '★',

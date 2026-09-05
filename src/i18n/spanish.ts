@@ -144,7 +144,6 @@ export const spanishLayer: LanguageLayer = {
     'options.title': 'Opciones',
     'options.tab.game': 'Juego',
     'options.tab.video': 'Vídeo',
-    'options.tab.colour': 'Color',
     'options.tab.keys': 'Teclas',
     'options.tab.language': 'Idioma',
     'options.section.gameplay': 'Jugabilidad',
@@ -153,8 +152,6 @@ export const spanishLayer: LanguageLayer = {
     'options.section.rendering': 'Renderizado',
     'options.section.items': 'Objetos',
     'options.section.image': 'Imagen',
-    'options.section.grade': 'Gradación',
-    'options.section.atmosphere': 'Atmósfera',
     'options.section.windows': 'Ventanas',
     'options.section.actions': 'Acciones',
     'options.section.language': 'Idioma',
@@ -167,7 +164,6 @@ export const spanishLayer: LanguageLayer = {
     'options.shadows': 'Sombras de objetos',
     'options.dynamicLights': 'Luces dinámicas',
     'options.postProcessing': 'Posprocesado',
-    'options.toneMapping': 'Mapeo tonal fílmico',
     'options.ambientParticles': 'Partículas ambientales',
     'options.weatherEffects': 'Clima',
     'options.animatedWater': 'Agua animada',
@@ -182,14 +178,19 @@ export const spanishLayer: LanguageLayer = {
     'options.glow': 'Resplandor',
     'options.chromatic': 'Ab. cromática',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': 'Oscurecer la escena',
-    'options.darkness': 'Oscuridad',
-    'options.exposure': 'Exposición',
-    'options.contrast': 'Contraste',
-    'options.colorTint': 'Tinte del sol',
-    'options.saturation': 'Saturación',
     'options.vignette': 'Viñeta',
-    'options.mapGradient': 'Degradado del mapa',
+
+    'options.toneMapper': 'Mapeo de tonos',
+
+    'options.brightness': 'Brillo',
+
+    'options.toneMapper.none': 'Ninguno',
+
+    'options.toneMapper.standard': 'Estándar',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': 'Neutro',
     'options.resetKeys': 'Restaurar valores',
     'options.keyHint': 'Haz clic y pulsa una tecla. Esc cancela.',
     'options.packMark': '★',

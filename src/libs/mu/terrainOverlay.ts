@@ -8,8 +8,8 @@ import { MELT_EDGE, MELT_SPOTS, snowMeltUniform } from '../../weather/snowMelt';
 import { puddleCover, wetness } from '../../weather/wetness';
 import { rainStrength } from '../../weather/rainState';
 import { pointLightPoolLights } from '../../common/pointLightPool';
-import { shownFogColor } from '../../scenes/enhancedLighting';
-import { shownSkyLight } from '../../scenes/sceneLook';
+import { linearBufferActive } from '../../common/lightModel';
+import { lookDirector } from '../../lighting/director';
 
 /**
  * Terrain overlays: masked layers mixed into the ground's albedo before it is
@@ -231,13 +231,12 @@ export const OVERLAY_LIGHT = {
  */
 export const SNOW_COVER: TerrainOverlay = {
   name: 'snowCover',
-  // Near-white, a hair warm. The blue cast the field used to have with
-  // post-processing off was never this colour: it was the lightmap ×
-  // DEVIAS_MOOD.terrainBake [1.02, 1.08, 1.18] multiplied in afterwards, and
-  // no albedo survives a 1.16 blue-over-red gain on top of a blue bake. That
-  // is now taken out of the snow's share of the light by `lightNeutral`
-  // below, so this can be what snow actually is; the residual warmth only
-  // keeps it off dead paper-white in full sun.
+  // Near-white, a hair warm. The blue cast the field used to have was never
+  // this colour: it was the old mood's blue bake tint multiplied in
+  // afterwards, and no albedo survives a 1.16 blue-over-red gain on top of a
+  // blue bake. The bake is untinted now and the snow takes its own light
+  // through `lightNeutral` below, so this can be what snow actually is; the
+  // residual warmth only keeps it off dead paper-white in full sun.
   colour: [0.985, 0.98, 0.965],
   blend: 'mix',
   coverage: snowCover,
@@ -658,7 +657,7 @@ const TORCH_GLOW_GLOSS = 5;
  *     pool and grazing at the near one, so the far edge shows zenith and
  *     the near edge shows horizon. `ovSky` is the horizon (the fog colour,
  *     which is literally what the map's distance fades to) and `ovSkyHi`
- *     the zenith (the mood's own sky light, `shownSkyLight`).
+ *     the zenith (the key's sky light, `LookState.key`).
  *  2. **Structure that parallaxes.** A cloud deck `CLOUD_HEIGHT` tiles up,
  *     hit by that same mirrored ray. Because the ray's elevation changes
  *     across the pool, the deck is sampled *further away* at the grazing
@@ -911,11 +910,10 @@ const SHADE_FLOOR = 0.55;
 /**
  * What survives in the troughs: skylight, once the warm direct sun is gone.
  *
- * Devias' own blue, not a neutral grey. `DEVIAS_MOOD` in sceneLook grades the
- * map at `shadowsHue: 232` and bakes the terrain at [1.02, 1.08, 1.18], so the
- * map's shadows are already blue-violet; a desaturated `skyGround` grey here
- * was fighting the grade rather than joining it, and read as "dark" instead of
- * as shade. This is hue 232 at half saturation - the same blue the map's own
+ * Devias' own blue, not a neutral grey. The map's shadows read blue-violet
+ * (snow under an overcast sky); a desaturated grey here was fighting that
+ * rather than joining it, and read as "dark" instead of as shade. This is
+ * hue 232 at half saturation - the same blue the map's own
  * shadows are, so snow in shade matches stone in shade.
  *
  * Baked rather than exposed — it is gated by `SNOW_SHADE.cavity`, so it
@@ -1891,16 +1889,19 @@ function bindReflect(
     effect.setFloat3('ovSunDir', sun.x, sun.y, sun.z);
   }
 
-  // The HORIZON the water reflects. The fog colour is what the map's own
-  // distance fades to, so it is the horizon by construction; with no fog
-  // running, the clear colour is the sky. Black either way is "reflects
-  // nothing", which is safe.
-  const fog = shownFogColor();
-  const hasFog = fog[0] + fog[1] + fog[2] > 0;
+  // The HORIZON the water reflects: the director's haze colour, which is
+  // what the map's own distance fades to; with no haze, the clear colour is
+  // the sky. Both arrive linear when the buffer is, and this term is added
+  // in the shader's display-space sum ahead of the final decode, so they are
+  // re-encoded here. Black either way is "reflects nothing", which is safe.
+  const look = lookDirector()?.state();
+  const linear = linearBufferActive(scene);
+  const encode = (v: number) => (linear ? Math.pow(Math.max(v, 0), 1 / 2.2) : v);
+  const fog = look && look.profile.fog.density > 0 ? look.fogColorLinear : null;
   const clear = scene.clearColor;
-  const horizon: readonly [number, number, number] = hasFog
-    ? [fog[0], fog[1], fog[2]]
-    : [clear.r, clear.g, clear.b];
+  const horizon: readonly [number, number, number] = fog
+    ? [encode(fog[0]), encode(fog[1]), encode(fog[2])]
+    : [encode(clear.r), encode(clear.g), encode(clear.b)];
 
   effect.setFloat3(
     'ovSky',
@@ -1909,19 +1910,19 @@ function bindReflect(
     on ? horizon[2] : 0
   );
 
-  // The ZENITH: the mood's own sky light, which is the colour everything on
-  // the map is already being lit from above by, so the water agrees with the
+  // The ZENITH: the key's sky light, which is the colour everything on the
+  // map is already being lit from above by, so the water agrees with the
   // scene rather than inventing a second sky.
   //
   // Held apart from the horizon by at least ZENITH_SEPARATION, and never
-  // above it: a map whose sky light and fog happen to match would otherwise
-  // reflect a flat colour again — the exact failure the gradient exists to
-  // fix — and the sky is darker overhead than at the horizon in every grade
-  // this project has.
-  const zenith = shownSkyLight();
+  // above it: a map whose sky light and haze happen to match would otherwise
+  // reflect a flat colour again - the exact failure the gradient exists to
+  // fix - and the sky is darker overhead than at the horizon.
+  const key = look?.key;
   for (let i = 0; i < 3; i++) {
+    const zenith = key ? key.skyColor[i] * key.skyIntensity : 0;
     skyHi[i] = on
-      ? Math.min(zenith[i], horizon[i] * (1 - ZENITH_SEPARATION))
+      ? Math.min(zenith, horizon[i] * (1 - ZENITH_SEPARATION))
       : 0;
   }
   effect.setFloat3('ovSkyHi', skyHi[0], skyHi[1], skyHi[2]);

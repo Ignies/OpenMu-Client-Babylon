@@ -144,7 +144,6 @@ export const portugueseLayer: LanguageLayer = {
     'options.title': 'Opções',
     'options.tab.game': 'Jogo',
     'options.tab.video': 'Vídeo',
-    'options.tab.colour': 'Cor',
     'options.tab.keys': 'Teclas',
     'options.tab.language': 'Idioma',
     'options.section.gameplay': 'Jogabilidade',
@@ -153,8 +152,6 @@ export const portugueseLayer: LanguageLayer = {
     'options.section.rendering': 'Renderização',
     'options.section.items': 'Itens',
     'options.section.image': 'Imagem',
-    'options.section.grade': 'Gradação',
-    'options.section.atmosphere': 'Atmosfera',
     'options.section.windows': 'Janelas',
     'options.section.actions': 'Ações',
     'options.section.language': 'Idioma',
@@ -167,7 +164,6 @@ export const portugueseLayer: LanguageLayer = {
     'options.shadows': 'Sombras dos objetos',
     'options.dynamicLights': 'Luzes dinâmicas',
     'options.postProcessing': 'Pós-processamento',
-    'options.toneMapping': 'Mapeamento tonal fílmico',
     'options.ambientParticles': 'Partículas de ambiente',
     'options.weatherEffects': 'Clima',
     'options.animatedWater': 'Água animada',
@@ -182,14 +178,19 @@ export const portugueseLayer: LanguageLayer = {
     'options.glow': 'Resplendor',
     'options.chromatic': 'Ab. cromática',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': 'Escurecer a cena',
-    'options.darkness': 'Escuridão',
-    'options.exposure': 'Exposição',
-    'options.contrast': 'Contraste',
-    'options.colorTint': 'Tom do sol',
-    'options.saturation': 'Saturação',
     'options.vignette': 'Vinheta',
-    'options.mapGradient': 'Gradiente do mapa',
+
+    'options.toneMapper': 'Mapeamento de tons',
+
+    'options.brightness': 'Brilho',
+
+    'options.toneMapper.none': 'Nenhum',
+
+    'options.toneMapper.standard': 'Padrão',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': 'Neutro',
     'options.resetKeys': 'Restaurar padrões',
     'options.keyHint': 'Clique e depois pressione uma tecla. Esc cancela.',
     'options.packMark': '★',

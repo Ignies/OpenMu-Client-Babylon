@@ -15,7 +15,7 @@ import {
 import { lightAreaSkill, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
-import { moodFor, type SceneMood } from '../scenes/sceneLook';
+import { lookDirector, type LookState } from './director';
 
 export type { LightingLayer } from './layer';
 export type { LightRecipe, LightAnchor } from './lightSource';
@@ -92,13 +92,12 @@ class Lighting {
   }
 
   /**
-   * The key lights and grade a map resolves to right now — the area override
-   * (a tavern) if one is set, else the world's mood. The tables and the
-   * blend stay in `scenes/sceneLook.ts` with the pipeline they drive; this
-   * is the read.
+   * The look the director composed this frame - key, shadow policy,
+   * exposure, haze colour (`lighting/director.ts`). Null before the scene
+   * exists.
    */
-  moodFor(map: ENUM_WORLD): SceneMood {
-    return moodFor(map);
+  look(): Readonly<LookState> | null {
+    return lookDirector()?.state() ?? null;
   }
 
   // ---- commands ----------------------------------------------------------

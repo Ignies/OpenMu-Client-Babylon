@@ -10,6 +10,7 @@ import { addInspectorForScene } from '../libs/babylon/utils';
 import { applySceneLook, type SceneLook } from './sceneLook';
 import { initPointLightPool } from '../common/pointLightPool';
 import { createKeyRig } from '../lighting/keyRig';
+import { createLookDirector, type LookDirector } from '../lighting/director';
 
 export class TestScene extends Scene {
   defaultCamera: ArcRotateCamera;
@@ -17,6 +18,8 @@ export class TestScene extends Scene {
   readonly hl: HighlightLayer;
 
   readonly look: SceneLook | undefined;
+
+  readonly director: LookDirector;
 
   constructor(engine: Engine) {
     super(engine);
@@ -41,7 +44,7 @@ export class TestScene extends Scene {
     camera.maxZ = 5000;
     camera.position.set(135, 10, 130);
 
-this.fogEnabled = false;
+    this.fogEnabled = false;
     this.fogStart = 1;
     this.fogEnd = 25;
 
@@ -52,20 +55,19 @@ this.fogEnabled = false;
     this.skipFrustumClipping = false;
 
     this.autoClearDepthAndStencil = true;
-    // autoClear stays on. This scene has no skybox — the sky *is* the clear
-    // colour (set per map in loadMapIntoScene) — so skipping the colour clear
-    // smears the previous frame wherever the terrain does not cover.
+    // autoClear stays on. This scene has no skybox yet - the sky *is* the
+    // clear colour (the look director writes it per map) - so skipping the
+    // colour clear smears the previous frame wherever the terrain does not
+    // cover.
     //
-    // That is also why `performancePriority = Intermediate` is not set here
-    // (todo C14). The enum is exactly two assignments (Babylon scene.js:105):
+    // That is also why `performancePriority = Intermediate` is not set here.
+    // The enum is exactly two assignments (Babylon scene.js:105):
     // `skipPointerMovePicking = true` and `autoClear = false`. The second is
     // the bug above; the first is already a no-op, because the input manager
     // only picks on pointer-move when `_registeredActions > 0` or
-    // `constantlyUpdateMeshUnderPointer` is set (scene.inputManager.js:635),
-    // and this scene registers no ActionManager. It is set explicitly anyway
-    // so that adding one later cannot silently turn every mouse-move into a
-    // full-scene pick: nothing here reads `ev.pickInfo` on a move (the ray
-    // consumers build their own via `createPickingRayToRef`).
+    // `constantlyUpdateMeshUnderPointer` is set, and this scene registers no
+    // ActionManager. It is set explicitly anyway so that adding one later
+    // cannot silently turn every mouse-move into a full-scene pick.
     this.autoClear = true;
     this.skipPointerMovePicking = true;
 
@@ -79,5 +81,9 @@ this.fogEnabled = false;
     initPointLightPool(this);
 
     this.look = applySceneLook(this, camera);
+
+    // After the rig and the pool: the director writes the rig on its first
+    // tick and the post chain sits behind the pool's lights.
+    this.director = createLookDirector(this, camera);
   }
 }

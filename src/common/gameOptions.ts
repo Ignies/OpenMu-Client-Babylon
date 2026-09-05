@@ -7,62 +7,44 @@ export type GameOptions = {
   shadows: boolean;
   postProcessing: boolean;
   /**
-   * ACES filmic tone mapping.
-   *
-   * Split out of `postProcessing` because it is the one pass that rewrites
-   * every pixel whether or not a single grade slider is dialled in — the
-   * highlight rolloff and the warm shoulder are what read as "a filter is
-   * on" over the classic look. Enhanced/Ultra lighting wants it (it is what
-   * keeps a hot key light from clipping); Classic does not, so it is a
-   * choice rather than a consequence of enabling post-processing at all.
+   * 0 none / 1 standard (`1 - exp(-1.59 x)`) / 2 ACES / 3 Khronos PBR
+   * Neutral. Runs on the Enhanced/Ultra tiers only: Classic is the
+   * reference client's display-space frame and takes no curve.
    */
-  toneMapping: boolean;
-  /**
-   * Scales the per-map mood contrast. `GRADE_NOMINAL` is the authored
-   * value, 0 is a flat 1.0 — the untouched frame.
-   */
-  contrast: number;
+  toneMapper: number;
+  /** Player exposure trim in tenths of a stop over the map's own, -10..10. */
+  brightness: number;
   /** Film grain strength; 0 disables the pass. */
   filmGrain: number;
   /** Fast approximate anti-aliasing (pipeline pass). */
   fxaa: boolean;
-  /** Bloom weight; 0 disables the pass. */
+  /** Bloom weight; 0 disables the pass. Emitters only (threshold at scene white). */
   bloom: number;
   /** GlowLayer strength for item and effect halos; 0 disables the layer. */
   glow: number;
   /** Chromatic aberration; 0 disables the pass. */
   chromatic: number;
   /**
-   * Scales the per-map mood exposure, the way `contrast` does for contrast.
-   * `GRADE_NOMINAL` is the authored value, 0 is a flat 1.0.
-   */
-  exposure: number;
-  /**
-   * How hard the Enhanced/Characters materials lean on their derived normal
-   * and metalness maps. `MATERIAL_DETAIL_MAX` is the full derivation, 0 is the
-   * flat placeholders — PBR lighting with none of the derived relief.
+   * How hard the PBR materials lean on their derived normal and metalness
+   * maps. `MATERIAL_DETAIL_MAX` is the full derivation, 0 is the flat
+   * placeholders.
    */
   materialDetail: number;
   sharpness: number;
-  colorTint: number;
-  mapGradient: number;
+  /** Multiply vignette; 0 disables the pass. */
   vignette: number;
-  darkness: number;
-  sceneDarkening: boolean;
-  saturation: number;
   dynamicLights: boolean;
-  /** 0 Classic (blob shadows) · 1 Enhanced (CSM + SSAO + height fog) · 2 Ultra. */
+  /** 0 Classic (blob shadows) / 1 Enhanced (CSM + SSAO + haze) / 2 Ultra. */
   lightingQuality: number;
   /**
-   * 0 Classic (flat Standard materials) · 1 Characters (PBR everywhere, but
-   * derived maps only on the figures and their gear) · 2 Enhanced (derived
-   * maps on the whole world). See `materialQuality.ts` for why the tier
-   * scopes the maps rather than the material.
+   * 0 Classic (flat Standard materials) / 1 PBR on every lit mesh with
+   * derived maps on the figures and their gear / 2 derived maps on the whole
+   * world. See `materialQuality.ts`.
    */
   materialQuality: number;
   volume: number;
   effectLevel: number;
-  /** Item effect style: 0 off · 1 legacy · 2 legacy + improved · 3 improved. */
+  /** Item effect style: 0 off / 1 legacy / 2 legacy + improved / 3 improved. */
   itemEffects: number;
   /** Leaves, snow, tavern dust (GPU particle backbone). */
   ambientParticles: boolean;
@@ -79,7 +61,7 @@ export type GameOptions = {
    * puddles, footprints and the snow a boot kicks up.
    *
    * Separate from `weatherEffects` because it is a different cost and a
-   * different taste. `weatherEffects` is the sky — particles falling past the
+   * different taste. `weatherEffects` is the sky - particles falling past the
    * camera. This is everything the weather does to the ground, which means a
    * branch in the terrain shader, a mask upload, a decal pass and a parallax
    * march. Off, the terrain compiles the shader it always had.
@@ -96,52 +78,44 @@ export type GameOptions = {
   cameraControl: boolean;
 };
 
-export const GRADE_NOMINAL = 5;
+export const TONE_MAPPER_MAX = 3;
 
-export const MAP_GRADIENT_MAX = 10;
+export const BRIGHTNESS_MIN = -10;
+export const BRIGHTNESS_MAX = 10;
 
-export const SATURATION_MIN = -10;
-export const SATURATION_MAX = 10;
-
-const CLAMPS: Partial<Record<keyof GameOptions, number>> = {
-  mapGradient: MAP_GRADIENT_MAX,
-  saturation: SATURATION_MAX,
-  effectLevel: 4,
-  itemEffects: 3,
-  lightingQuality: 2,
-  materialQuality: 2,
+const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
+  toneMapper: [0, TONE_MAPPER_MAX],
+  brightness: [BRIGHTNESS_MIN, BRIGHTNESS_MAX],
+  effectLevel: [0, 4],
+  itemEffects: [0, 3],
+  lightingQuality: [0, 2],
+  materialQuality: [0, 2],
   // Literal rather than `MATERIAL_DETAIL_MAX`: materialQuality.ts imports
   // this module, so naming it here would close an import cycle.
-  materialDetail: 9,
-  contrast: 25,
-  filmGrain: 9,
-  bloom: 9,
-  glow: 9,
-  chromatic: 9,
-  exposure: 25,
+  materialDetail: [0, 9],
+  filmGrain: [0, 9],
+  bloom: [0, 9],
+  glow: [0, 9],
+  chromatic: [0, 9],
+  sharpness: [0, 9],
+  vignette: [0, 9],
 };
 
 const DEFAULTS: GameOptions = {
   shadows: true,
   postProcessing: true,
-  toneMapping: true,
-  contrast: GRADE_NOMINAL,
+  toneMapper: 3,
+  brightness: 0,
   filmGrain: 0,
   fxaa: false,
-  bloom: 0,
+  bloom: 3,
   glow: 5,
   chromatic: 0,
-  exposure: GRADE_NOMINAL,
   sharpness: 2,
-  colorTint: 0,
-  mapGradient: 3,
-  vignette: 13,
-  darkness: 8,
-  sceneDarkening: true,
-  saturation: 0,
+  vignette: 0,
   dynamicLights: true,
-  lightingQuality: 0,
-  materialQuality: 0,
+  lightingQuality: 1,
+  materialQuality: 1,
   materialDetail: 6,
   volume: 5,
   effectLevel: 4,
@@ -156,9 +130,46 @@ const DEFAULTS: GameOptions = {
   cameraControl: true,
 };
 
+/**
+ * Keys the structured look retired. The grade they drove (darkness, contrast,
+ * split-tone tint, saturation, the map gradient) no longer exists; the two
+ * that survive in another shape are mapped in `migrate`.
+ */
+const DROPPED_KEYS = [
+  'darkness',
+  'sceneDarkening',
+  'contrast',
+  'colorTint',
+  'saturation',
+  'mapGradient',
+  'toneMapping',
+  'exposure',
+] as const;
+
 type Listener = (options: GameOptions) => void;
 
 const listeners = new Set<Listener>();
+
+/** One-time schema migration of a stored options blob; true when it changed. */
+function migrate(stored: Record<string, unknown>): boolean {
+  const present = DROPPED_KEYS.filter(key => key in stored);
+
+  if (present.length === 0) return false;
+
+  if ('toneMapping' in stored && !('toneMapper' in stored)) {
+    stored.toneMapper = stored.toneMapping ? 3 : 0;
+  }
+
+  if ('exposure' in stored && !('brightness' in stored)) {
+    stored.brightness = 0;
+  }
+
+  for (const key of present) delete stored[key];
+
+  console.info(`[options] retired keys removed: ${present.join(', ')}`);
+
+  return true;
+}
 
 function load(): GameOptions {
   const stored = LocalStorage.load(OPTIONS_KEY);
@@ -166,18 +177,26 @@ function load(): GameOptions {
   if (!stored) return { ...DEFAULTS };
 
   try {
+    const parsed = JSON.parse(stored) as Record<string, unknown>;
+    const migrated = migrate(parsed);
+
     const loaded = {
       ...DEFAULTS,
-      ...(JSON.parse(stored) as Partial<GameOptions>),
+      ...(parsed as Partial<GameOptions>),
     };
 
-    for (const [key, max] of Object.entries(CLAMPS)) {
+    for (const [key, [min, max]] of Object.entries(RANGES)) {
       const value = loaded[key as keyof GameOptions];
 
-      if (typeof value === 'number' && value > max) {
-        (loaded as Record<string, unknown>)[key] = max;
+      if (typeof value === 'number') {
+        (loaded as Record<string, unknown>)[key] = Math.max(
+          min,
+          Math.min(max, value)
+        );
       }
     }
+
+    if (migrated) LocalStorage.save(OPTIONS_KEY, JSON.stringify(loaded));
 
     return loaded;
   } catch {
@@ -187,7 +206,7 @@ function load(): GameOptions {
 
 /**
  * The live options. Observable (every field a MobX observable) so the
- * Options window and any observer that reads a field re-render on change —
+ * Options window and any observer that reads a field re-render on change -
  * the window used to force itself with a counter bump. Reads outside a
  * reaction (the per-frame material / lighting checks) cost a getter call.
  */

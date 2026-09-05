@@ -137,7 +137,6 @@ export const thaiLayer: LanguageLayer = {
     'options.title': 'ตัวเลือก',
     'options.tab.game': 'เกม',
     'options.tab.video': 'ภาพ',
-    'options.tab.colour': 'สี',
     'options.tab.keys': 'ปุ่ม',
     'options.tab.language': 'ภาษา',
     'options.section.gameplay': 'การเล่น',
@@ -146,8 +145,6 @@ export const thaiLayer: LanguageLayer = {
     'options.section.rendering': 'การแสดงผล',
     'options.section.items': 'ไอเทม',
     'options.section.image': 'ภาพ',
-    'options.section.grade': 'ปรับสี',
-    'options.section.atmosphere': 'บรรยากาศ',
     'options.section.windows': 'หน้าต่าง',
     'options.section.actions': 'การกระทำ',
     'options.section.language': 'ภาษา',
@@ -160,7 +157,6 @@ export const thaiLayer: LanguageLayer = {
     'options.shadows': 'เงาของวัตถุ',
     'options.dynamicLights': 'แสงแบบไดนามิก',
     'options.postProcessing': 'โพสต์โปรเซสซิ่ง',
-    'options.toneMapping': 'โทนแมปแบบฟิล์ม',
     'options.ambientParticles': 'อนุภาคบรรยากาศ',
     'options.weatherEffects': 'สภาพอากาศ',
     'options.animatedWater': 'น้ำเคลื่อนไหว',
@@ -175,14 +171,19 @@ export const thaiLayer: LanguageLayer = {
     'options.glow': 'เรืองแสง',
     'options.chromatic': 'ความคลาดสี',
     'options.fxaa': 'FXAA',
-    'options.sceneDarkening': 'ทำให้ฉากมืดลง',
-    'options.darkness': 'ความมืด',
-    'options.exposure': 'ค่าแสง',
-    'options.contrast': 'คอนทราสต์',
-    'options.colorTint': 'โทนสีแสงอาทิตย์',
-    'options.saturation': 'ความอิ่มสี',
     'options.vignette': 'ขอบมืด',
-    'options.mapGradient': 'ไล่สีของแผนที่',
+
+    'options.toneMapper': 'โทนแมปปิง',
+
+    'options.brightness': 'ความสว่าง',
+
+    'options.toneMapper.none': 'ไม่มี',
+
+    'options.toneMapper.standard': 'มาตรฐาน',
+
+    'options.toneMapper.aces': 'ACES',
+
+    'options.toneMapper.neutral': 'เป็นกลาง',
     'options.resetKeys': 'คืนค่าเริ่มต้น',
     'options.keyHint': 'คลิกแล้วกดปุ่มที่ต้องการ กด Esc เพื่อยกเลิก',
     'options.packMark': '★',

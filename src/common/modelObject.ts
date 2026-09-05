@@ -884,7 +884,7 @@ export class ModelObject {
       // not the same set as the sun's casters: an object the map marks
       // `CastsShadow = false`, or one carrying a light, still stands in front
       // of the camera and still has to be fogged by its own depth rather than
-      // by whatever is behind it. See `occludes` in enhancedLighting.
+      // by whatever is behind it. See `occludes` in scenes/ambientOcclusion.
       mesh.metadata.depthOccluder = true;
 
       fixSkinnedLocalBounds(mesh);

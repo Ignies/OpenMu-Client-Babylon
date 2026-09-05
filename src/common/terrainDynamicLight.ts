@@ -331,8 +331,29 @@ export function requestTerrainLight(
   y: number,
   out: { x: number; y: number; z: number }
 ): boolean {
-  if (!primary) return false;
+  return primary ? sampleBilinear(primary, x, y, out) : false;
+}
 
+/**
+ * Samples the **baked** lightmap alone (`ZzzLodTerrain.cpp:1011-1012`), no
+ * torch delta. The tiers >= 1 body light reads this: there the pool point
+ * lights reach a figure per pixel, so the delta would be the same torch a
+ * second time (ARCHITECTURE §3.2 `bake_baked_only`).
+ */
+export function requestBakedTerrainLight(
+  x: number,
+  y: number,
+  out: { x: number; y: number; z: number }
+): boolean {
+  return baked ? sampleBilinear(baked, x, y, out) : false;
+}
+
+function sampleBilinear(
+  field: Float32Array,
+  x: number,
+  y: number,
+  out: { x: number; y: number; z: number }
+): boolean {
   const xi = Math.floor(x);
   const yi = Math.floor(y);
 
@@ -349,8 +370,8 @@ export function requestTerrainLight(
   const yd = y - yi;
 
   const channel = (c: number) => {
-    const left = primary![i1 + c] + (primary![i4 + c] - primary![i1 + c]) * yd;
-    const right = primary![i2 + c] + (primary![i3 + c] - primary![i2 + c]) * yd;
+    const left = field[i1 + c] + (field[i4 + c] - field[i1 + c]) * yd;
+    const right = field[i2 + c] + (field[i3 + c] - field[i2 + c]) * yd;
 
     return left + (right - left) * xd;
   };

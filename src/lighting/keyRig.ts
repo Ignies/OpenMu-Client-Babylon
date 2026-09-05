@@ -8,19 +8,18 @@ import {
 
 /**
  * The key-light rig: single owner of the two scene-wide key lights, the
- * hemispheric sky and the directional sun (lighting_rework.md §2.3).
+ * hemispheric sky and the directional sun (ARCHITECTURE §4.1).
  *
  * Contracts:
- *  - `sceneLook` (the mood writer) is the only caller of `setKey` /
- *    `syncSpecular` — the moods stay the one source of light values.
- *  - The day/night cycle is the only caller of `setSunDirection`.
+ *  - `lighting/director.ts` is the only caller of `setKey` /
+ *    `setSunDirection` / `syncSpecular`.
  *  - Everyone else (CSM, blob shadows, footprints, terrain overlay) *reads*
  *    the rig via `sunLightOf` / `skyLightOf` and never writes it.
  */
 
-/** The authored sun direction, restored whenever the cycle is off. */
+/** The authored sun direction: azimuth as before, elevation 48 deg. */
 export const DEFAULT_SUN_DIRECTION: readonly [number, number, number] = [
-  0.4, -1, 0.6,
+  0.5, -1, 0.75,
 ];
 
 const rigs = new WeakMap<
@@ -52,9 +51,8 @@ export function sunLightOf(scene: Scene): DirectionalLight | null {
 }
 
 /**
- * The mood-derived key values, written by `sceneLook.writeMood` only.
- * `skyGround = null` collapses the hemisphere (ground = sky), which is the
- * Classic flat look.
+ * The key values, written by the director only. `skyGround = null`
+ * collapses the hemisphere (ground = sky), which is the Classic flat look.
  */
 export function setKey(
   scene: Scene,
@@ -83,6 +81,17 @@ export function setKey(
   sun.diffuse.set(...params.sunDiffuse);
 }
 
+/** The direction the sun travels; the profile's, via the director. */
+export function setSunDirection(
+  scene: Scene,
+  direction: readonly [number, number, number]
+): void {
+  const sun = rigs.get(scene)?.sun;
+  if (!sun) return;
+
+  sun.direction.set(direction[0], direction[1], direction[2]);
+}
+
 /**
  * The sun's highlight strength: the sun is the only key light that throws a
  * specular (the PBR material reads it, the Standard one ignores it). 0 turns
@@ -98,4 +107,3 @@ export function syncSpecular(scene: Scene, scale: number): void {
     sun.specular.set(0, 0, 0);
   }
 }
-
