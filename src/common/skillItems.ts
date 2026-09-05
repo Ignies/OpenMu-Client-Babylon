@@ -78,15 +78,20 @@ const SCROLL_SKILLS: Readonly<Record<number, number>> = {
   16: 38, // ITEM_SCROLL_OF_DECAY
   17: 39, // ITEM_SCROLL_OF_ICE_STORM
   18: 40, // ITEM_SCROLL_OF_NOVA
-  19: 214, // Drain Life
-  20: 215, // Chain Lightning
-  21: 230, // Lightning Shock ("Electric Surge")
-  22: 217, // Damage Reflection ("Reflex")
-  23: 218, // Berserker ("Sword Power")
-  24: 219, // Sleep
-  25: 221, // Weakness ("Magic Speed Up")
-  26: 222, // Innovation ("Magic Defense Up")
-  27: 223, // Explosion ("Red Storm")
+  // OpenMU's Scrolls.cs seeds 19 as the Chain Lightning Parchment and 20 as
+  // the Drain Life Parchment (the original's ITEM_CHAIN_LIGHTNING_PARCHMENT
+  // = ITEM_ETC + 19 / ITEM_DRAIN_LIFE_PARCHMENT = ITEM_ETC + 20). The two
+  // rows used to be swapped here, so the Chain Lightning scroll's tooltip
+  // promised Drain Life and the requirement check read the wrong skill.
+  19: 215, // ITEM_CHAIN_LIGHTNING_PARCHMENT
+  20: 214, // ITEM_DRAIN_LIFE_PARCHMENT
+  21: 230, // ITEM_LIGHTNING_SHOCK_PARCHMENT ("Electric Surge")
+  22: 217, // ITEM_DAMAGE_REFLECTION_PARCHMENT ("Reflex")
+  23: 218, // ITEM_BERSERKER_PARCHMENT ("Sword Power")
+  24: 219, // ITEM_SLEEP_PARCHMENT
+  // 25 is unused in the original enum and in Scrolls.cs.
+  26: 221, // ITEM_WEAKNESS_PARCHMENT
+  27: 222, // ITEM_INNOVATION_PARCHMENT
   28: 233, // ITEM_SCROLL_OF_WIZARDRY_ENHANCE -> Expansion of Wizardry
   29: 237, // ITEM_SCROLL_OF_GIGANTIC_STORM
 };
