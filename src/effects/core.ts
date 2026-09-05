@@ -95,7 +95,7 @@ export class LiveList {
         live[i] = live[live.length - 1];
         live.pop();
         e.alive = false;
-        e.release();
+        release(e);
       }
     }
   }
@@ -103,9 +103,24 @@ export class LiveList {
   clear(): void {
     for (const e of this.#live) {
       e.alive = false;
-      e.release();
+      release(e);
     }
     this.#live.length = 0;
+  }
+}
+
+/**
+ * An effect's release runs from the frame loop, and a throw there does not
+ * stop at the effect: it climbs through `effects.update` and the ECS into
+ * Babylon's render loop, which never queues another frame after an exception
+ * — the picture freezes while the socket and the audio carry on. `update`
+ * already drops a throwing effect; its release gets the same treatment.
+ */
+function release(e: LiveEffect): void {
+  try {
+    e.release();
+  } catch (err) {
+    console.warn('[effects] effect release threw', err);
   }
 }
 

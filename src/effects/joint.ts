@@ -43,6 +43,7 @@ import {
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
 import { LiveList, effectTexture, fadeOut, fxNow, hash, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
+import { releaseGreasedLineMaterial } from './greasedLineRelease';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
 
@@ -329,19 +330,9 @@ function disposeLine(scene: Scene, line: Line, lines: number[][]): void {
   const mesh = line.mesh;
   for (const l of lines) park(l);
   (scene as TestScene).look?.glow.unReferenceMeshFromUsingItsOwnMaterial(mesh);
-  // Never dispose the shared empty-colours texture: itemCrackle.ts documents
-  // the trap, and the plugin variant's dispose() takes `colorsTexture` down
-  // with it too.
-  const gl = mesh.greasedLineMaterial as unknown as
-    | { colorsTexture?: unknown; _colorsTexture?: unknown }
-    | undefined;
-  if (gl) {
-    gl.colorsTexture = null;
-    gl._colorsTexture = null;
-  }
-  // `dispose()` without flags leaves textures alone — the sheet is
-  // loadEffectTexture's shared cache.
-  mesh.material?.dispose();
+  // Never dispose the shared empty-colours texture, and never through the
+  // public `colorsTexture` setter — greasedLineRelease.ts documents both traps.
+  releaseGreasedLineMaterial(mesh);
   mesh.dispose();
 }
 

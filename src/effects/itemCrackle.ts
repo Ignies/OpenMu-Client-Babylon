@@ -2,7 +2,6 @@ import {
   Color3,
   Constants,
   CreateGreasedLine,
-  GreasedLineMaterialDefaults,
   GreasedLineMeshMaterialType,
   type GreasedLineMesh,
   type GreasedLineSimpleMaterial,
@@ -11,6 +10,7 @@ import {
 } from '../libs/babylon/exports';
 import type { ItemVisualTier } from '../common/itemVisualTier';
 import type { TestScene } from '../scenes/testScene';
+import { releaseGreasedLineMaterial } from './greasedLineRelease';
 import type { ItemAuraKind } from './itemAura';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
@@ -126,52 +126,6 @@ function toSurface(body: Body, p: Vector3): void {
   p.x *= k;
   p.z *= k;
   p.y = Math.min(body.top, Math.max(body.bottom, p.y));
-}
-
-/**
- * Releases a crackle's material **without** taking the shared empty-colours
- * texture with it.
- *
- * A GreasedLine material that carries no per-point colours — ours never does,
- * the whole line is one `color` — is handed the process-wide singleton that
- * `GreasedLineTools.PrepareEmptyColorsTexture` caches in
- * `GreasedLineMaterialDefaults.EmptyColorsTexture`. That helper rebuilds the
- * texture only when its static is *null*, and
- * `GreasedLineSimpleMaterial.dispose()` disposes whatever sits in
- * `_colorsTexture` without ever nulling it. So the first crackle released
- * destroys that texture for **every** GreasedLine material in the game, the
- * ones already on screen included, for the rest of the session.
- *
- * The failure is completely silent. A material holding a disposed texture
- * never gets past the texture loop in `ShaderMaterial.isReady()`, so it never
- * builds an effect, and Babylon skips the mesh every frame while it still
- * reports `isEnabled`, `isVisible` and a live position — nothing renders and
- * nothing is logged. It looked like a teleport bug only because a warp always
- * releases *some* crackle (a player leaving scope, the wearer's lamp being
- * rebuilt for the new map); picking up a +9 drop does it just as well.
- *
- * itemAura.ts carries the same trap for the shared flare01 texture, and solves
- * it the way Babylon allows there — `ps.dispose(false)`. `GreasedLineSimpleMaterial`
- * exposes no such flag, so the shared texture is taken off the material first.
- */
-function disposeCrackleMaterial(mesh: GreasedLineMesh): void {
-  // Cast through `unknown`: `_colorsTexture` is private on the real class, so
-  // an intersection with it collapses to `never`.
-  const material = mesh.material as unknown as
-    | { _colorsTexture?: unknown; dispose(): void }
-    | null;
-
-  if (!material) return;
-
-  const shared: unknown = GreasedLineMaterialDefaults.EmptyColorsTexture;
-
-  // Only ever detach the shared one: a material that owns its colours texture
-  // must still take it with it.
-  if (shared && material._colorsTexture === shared) {
-    material._colorsTexture = null;
-  }
-
-  material.dispose();
 }
 
 export function createItemCrackle(
@@ -377,7 +331,8 @@ export function createItemCrackle(
       (scene as TestScene).look?.glow.unReferenceMeshFromUsingItsOwnMaterial(
         mesh
       );
-      disposeCrackleMaterial(mesh);
+      // The shared empty-colours texture must survive this — see greasedLineRelease.ts.
+      releaseGreasedLineMaterial(mesh);
       mesh.dispose();
     },
   };
