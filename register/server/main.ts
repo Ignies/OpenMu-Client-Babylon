@@ -1,6 +1,7 @@
 import postgres from 'postgres';
 import bcrypt from 'bcryptjs';
 import { forgetSignupsBefore, recordSignup, signupsSince } from './db';
+import { BurstLimit, bucketFor, clientIp } from '../../src/common/rateLimit';
 
 /**
  * The account-creation endpoint behind `register.ignies.net`.
@@ -64,92 +65,12 @@ setInterval(
   60 * 60 * 1000
 ).unref();
 
-/**
- * Expand an IPv6 address and return its first four groups — the /64.
- *
- * A single IPv6 address is worthless as an identity: a residential allocation
- * is a /64 and every one of its 18 quintillion addresses is free to use, so
- * counting per-address counts nobody. The /64 is the unit actually handed to a
- * subscriber, so that is the unit that gets counted.
- */
-function ipv6Prefix(address: string): string {
-  const [head, tail = ''] = address.split('::');
-  const headGroups = head ? head.split(':') : [];
-  const tailGroups = tail ? tail.split(':') : [];
-  const gap = Math.max(8 - headGroups.length - tailGroups.length, 0);
-
-  return [...headGroups, ...Array(gap).fill('0'), ...tailGroups]
-    .slice(0, 4)
-    .map(group => group.padStart(4, '0'))
-    .join(':');
-}
-
-/** What counts as "one person" for the limit. */
-function bucketFor(ip: string): string {
-  const bare = ip.replace(/^\[|\]$/g, '').split('%')[0];
-
-  // Plain IPv4, or IPv4-mapped IPv6 (`::ffff:1.2.3.4`) — which must not fall
-  // through to the prefix path, or every mapped client shares one all-zero
-  // bucket. IPv4 is scarce enough to count whole.
-  if (bare.includes('.')) return bare.slice(bare.lastIndexOf(':') + 1);
-  if (!bare.includes(':')) return bare;
-
-  return `${ipv6Prefix(bare)}::/64`;
-}
-
-/**
- * The caller's address, as far as it can be trusted.
- *
- * Caddy *appends* to `X-Forwarded-For`, so a client that sends a header of its
- * own arrives as `spoofed, real`: the entry Caddy added is the last one, and
- * everything before it is attacker-controlled. Reading `[0]` — the usual
- * shorthand — would let anyone mint a fresh identity per request and walk
- * straight through the limit.
- */
-// Structurally typed rather than `Bun.Server`: the pinned `bun-types` does not
-// export that name, and this is the only member needed.
-function clientIp(
-  req: Request,
-  server: { requestIP(req: Request): { address: string } | null }
-): string {
-  const forwarded = req.headers.get('x-forwarded-for');
-
-  if (forwarded) {
-    const hops = forwarded.split(',');
-    const nearest = hops[hops.length - 1]?.trim();
-
-    if (nearest) return nearest;
-  }
-
-  return server.requestIP(req)?.address || 'unknown';
-}
-
 /** Has this network already used its allowance for the window? */
 function quotaSpent(bucket: string): boolean {
   return signupsSince(bucket, Date.now() - RATE_WINDOW_MS) >= RATE_LIMIT;
 }
 
-/** bucket -> attempt timestamps inside the burst window. */
-const bursts = new Map<string, number[]>();
-
-function hammering(bucket: string): boolean {
-  const now = Date.now();
-  const recent = (bursts.get(bucket) ?? []).filter(
-    at => now - at < BURST_WINDOW_MS
-  );
-
-  recent.push(now);
-  bursts.set(bucket, recent);
-
-  // Buckets that stopped knocking would otherwise accumulate forever.
-  if (bursts.size > 10_000) {
-    for (const [key, times] of bursts) {
-      if (!times.some(at => now - at < BURST_WINDOW_MS)) bursts.delete(key);
-    }
-  }
-
-  return recent.length > BURST_LIMIT;
-}
+const bursts = new BurstLimit(BURST_LIMIT, BURST_WINDOW_MS);
 
 /**
  * Everything the form checks, checked again. The form's copy exists to save a
@@ -285,11 +206,12 @@ Bun.serve({
     if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
     // Caddy is in front, so the socket address is always loopback — the real
-    // client is in the forwarded header.
+    // client is in the forwarded header, which `clientIp` believes for exactly
+    // that reason and no other.
     const ip = clientIp(req, server);
     const bucket = bucketFor(ip);
 
-    if (hammering(bucket)) {
+    if (bursts.hammering(bucket)) {
       return json({ error: 'Too many requests. Please slow down.' }, 429);
     }
 

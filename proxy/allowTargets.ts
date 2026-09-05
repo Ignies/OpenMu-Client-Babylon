@@ -77,7 +77,47 @@ export function isInternalHost(host: string): boolean {
   return false;
 }
 
-export function targetAllowed(rules: AllowRule[], host: string, port: number): boolean {
+/** A `host:port` the relay refuses whatever the rules say. */
+export interface ReservedTarget {
+  host: string;
+  port: number;
+}
+
+/**
+ * Whether `host:port` lands on a reserved socket.
+ *
+ * The presence server is the one that is reserved (see `presence.ts`): it
+ * answers `/ticket/<nonce>` with the account behind the nonce to whoever can
+ * reach it, and being loopback-only is its entire authentication. An unset
+ * `ALLOW_TARGETS` - right on a dev box, one forgotten variable on a public
+ * one - or a rule that happened to name its port would otherwise let a
+ * browser speak HTTP to it through the relay, and the shop's identity would
+ * be anyone's for the asking.
+ *
+ * An internal reservation covers every internal host at that port, not just
+ * the literal it binds: `localhost`, `::1` and `::ffff:127.0.0.1` all reach a
+ * socket bound to `127.0.0.1`, and a server bound to `0.0.0.0` answers on
+ * every address the box has.
+ */
+export function targetReserved(reserved: ReservedTarget[], host: string, port: number): boolean {
+  const wanted = host.trim().toLowerCase();
+
+  return reserved.some(target => {
+    if (target.port !== port) return false;
+
+    const bound = target.host.trim().toLowerCase();
+
+    return bound === wanted || (isInternalHost(bound) && isInternalHost(wanted));
+  });
+}
+
+export function targetAllowed(
+  rules: AllowRule[],
+  host: string,
+  port: number,
+  reserved: ReservedTarget[] = []
+): boolean {
+  if (targetReserved(reserved, host, port)) return false;
   if (!rules.length) return true;
 
   const internal = isInternalHost(host);

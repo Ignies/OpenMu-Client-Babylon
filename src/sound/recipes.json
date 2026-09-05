@@ -32,6 +32,8 @@
   "Sound/eCombo": "Sound/eCombo.ogg",
   "Sound/aChaos": "Sound/aChaos.ogg",
   "Sound/iDuelStart": "Sound/iDuelStart.ogg",
+  "Sound/coin": "Sound/coin.wav",
+  "Sound/win": "Sound/win.mp3",
   "Sound/jaikan1": "Sound/jaikan1.ogg",
   "Sound/xmasjumpsasum": "Sound/xmasjumpsasum.ogg",
   "Sound/mScorpionAttack2": "Sound/mScorpionAttack2.ogg",
