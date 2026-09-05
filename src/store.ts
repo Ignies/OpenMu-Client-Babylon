@@ -72,6 +72,7 @@ import { Item, World } from './ecs/world';
 import { EventBus } from './libs/eventBus';
 import { Scalar } from './libs/babylon/exports';
 import { InventoryConstants } from './common/inventoryConstants';
+import { findFreeSlot, type Footprint } from './common/inventoryFit';
 import { isJewel, jewelTargetError } from './common/jewelUpgrade';
 import { ItemGroups } from './common/objects/enum';
 import { ItemsDatabase } from './common/itemsDatabase';
@@ -184,43 +185,20 @@ function itemSize(item: Item): { w: number; h: number } {
  * `FindEmptySlot`); -1 when the inventory is full.
  */
 function findFreeInventorySlot(items: (Item | null)[], item: Item): number {
-  const columns = InventoryConstants.RowSize;
   const first = InventoryConstants.LastEquippableItemSlotIndex + 1;
-  const rows = Math.floor((items.length - first) / columns);
+  const rows = Math.floor((items.length - first) / InventoryConstants.RowSize);
+  const occupied: Footprint[] = [];
+
+  for (let slot = first; slot < items.length; slot++) {
+    const placed = items[slot];
+    if (!placed) continue;
+    const { w, h } = itemSize(placed);
+    occupied.push({ slot, width: w, height: h });
+  }
+
   const { w, h } = itemSize(item);
 
-  const used = new Uint8Array(columns * rows);
-  for (let square = 0; square < columns * rows; square++) {
-    const placed = items[first + square];
-    if (!placed) continue;
-    const size = itemSize(placed);
-    const column = square % columns;
-    const row = (square - column) / columns;
-    for (let y = 0; y < size.h; y++) {
-      for (let x = 0; x < size.w; x++) {
-        if (column + x < columns && row + y < rows) {
-          used[(row + y) * columns + column + x] = 1;
-        }
-      }
-    }
-  }
-
-  for (let row = 0; row + h <= rows; row++) {
-    for (let column = 0; column + w <= columns; column++) {
-      let fits = true;
-      for (let y = 0; y < h && fits; y++) {
-        for (let x = 0; x < w; x++) {
-          if (used[(row + y) * columns + column + x]) {
-            fits = false;
-            break;
-          }
-        }
-      }
-      if (fits) return first + row * columns + column;
-    }
-  }
-
-  return -1;
+  return findFreeSlot(occupied, rows, w, h);
 }
 
 /** What the offline merchant sells: a Lorencia weapon-and-potion stall. */

@@ -1,6 +1,12 @@
+@import (reference) '../../../../components/muText/style.less';
 // `CNewUICashShop` renders at absolute coordinates inside the 190x429 item
 // frame, like the NPC shop and the inventory; the numbers live in layout.ts,
 // this file only says how each piece behaves.
+//
+// Everything is under `.cash-shop` except the two things that are not inside
+// the window: the purchase question and the light the gacha throws past the
+// frame, both portalled to the body. Every stylesheet here is bundled into one
+// global sheet, so a bare name is a collision waiting to happen.
 .cash-shop {
   font-size: 11px;
 
@@ -14,6 +20,15 @@
     text-shadow: 1px 1px 0 #000;
   }
 
+  // The X painted into the frame art. Without a hotspot it starts a drag.
+  .head-close {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  // Catalogue loading / failed. It sits inside the grid rect and the grid or
+  // the stage paints over it once there is one, which is the point: it is
+  // the catalogue's line, never a roll's.
   .cash-note {
     position: absolute;
     left: 15px;
@@ -36,27 +51,14 @@
     height: 22px;
   }
 
+  // A label is clipped inside its own 33px rather than drawn over the next
+  // tab: MuButton centres it in the plate and clips nothing.
   .cash-tab {
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    color: #9c8f78;
-    font-size: 9px;
+    position: absolute;
+    top: 0;
+    overflow: hidden;
+    white-space: nowrap;
     text-shadow: 1px 1px 0 #000;
-
-    &:hover {
-      color: #dcdcdc;
-    }
-
-    &.is-active {
-      color: #ffd88a;
-    }
-
-    span {
-      // The tab art already carries the inset; keep the label off its edges.
-      padding-bottom: 2px;
-      pointer-events: none;
-    }
   }
 
   // ---- the stock grid ----
@@ -64,6 +66,7 @@
   // Same gapless 20px pitch as the inventory; the hit-test maths assume it.
   .cash-grid {
     position: absolute;
+    cursor: pointer;
   }
 
   // `GridSquares` gives every square its left/top inline, which does nothing
@@ -99,6 +102,15 @@
     }
   }
 
+  // The chosen item, in the tab colour, over its own squares.
+  .cash-selected {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px solid #ffd88a;
+    box-shadow: inset 0 0 6px #ffd88a80;
+    pointer-events: none;
+  }
+
   // ---- jewels ----
 
   .cash-jewel {
@@ -111,14 +123,26 @@
     &.is-short {
       color: #ff8080;
     }
+
+    // On a button plate and in the queue, where 20px is too much icon.
+    &.is-small {
+      gap: 2px;
+      font-size: 9px;
+
+      .cash-jewel-icon {
+        width: 14px;
+        height: 14px;
+      }
+    }
   }
 
   // The icon pack pads every file by a constant 80x84 plus 40x42 per grid
   // cell, so a 1x1 jewel is 21 opaque pixels in a 120px frame and renders as a
   // speck. That is right inside the stock grid, where the squares carry the
   // scale and the inventory does exactly the same - but the money bar is
-  // chrome, and a balance has to be readable. Both jewel files measure the
-  // same, so one clipped zoom serves both.
+  // chrome, and a balance has to be readable. The Jewel of Chaos file
+  // measures the same 120x126 as the Bless and Soul ones did, so the clipped
+  // zoom is unchanged, and it scales with the box it is in.
   .cash-jewel-icon {
     display: grid;
     place-items: center;
@@ -142,193 +166,764 @@
     pointer-events: none;
   }
 
-  // The price rides just under the item tooltip, which owns its own z-index.
-  .cash-hover-price {
+  .cash-wallet-held {
+    font-size: 9px;
+    color: #9c8f78;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  // ---- the selection band ----
+
+  // Between the grid and the money bar: the item under the pointer or the
+  // one picked, its price, and on the second line what stands between the
+  // player and it. Two lines of 10px in 31px; anything longer is clipped
+  // rather than pushed into the bar.
+  .cash-selection {
     position: absolute;
-    left: 15px;
-    top: 331px;
-    width: 160px;
     display: flex;
-    justify-content: space-around;
-  }
-}
-
-// ---- the gacha stage ----
-
-.cash-gacha {
-  position: absolute;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-
-  --rarity: #79a9d8;
-
-  &.rarity-rare {
-    --rarity: #b183e8;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    overflow: hidden;
+    color: #dcdcdc;
+    font-size: 10px;
+    text-shadow: 1px 1px 0 #000;
   }
 
-  &.rarity-epic {
-    --rarity: #e8bc5c;
+  .cash-selection-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    white-space: nowrap;
+
+    &.is-dim {
+      color: #9c8f78;
+    }
+
+    &.is-bad {
+      color: #ff8080;
+    }
+
+    &.is-good {
+      color: #80ff80;
+    }
   }
 
-  &.rarity-legendary {
-    --rarity: #ff7a4d;
+  .cash-selection-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .cash-gacha-hint {
+  // ---- the delivery queue ----
+
+  .cash-orders {
     position: absolute;
-    bottom: 8px;
+    box-sizing: border-box;
+    padding: 4px 4px 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    color: #b9ad94;
+    font-size: 9px;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .cash-orders-title {
+    margin-bottom: 3px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: #ffd88a;
+  }
+
+  .cash-orders-why {
+    margin: 0 0 6px;
+    line-height: 1.3;
+    color: #9c8f78;
+  }
+
+  .cash-orders-note {
+    margin: 0;
+    text-align: center;
+
+    &.is-bad {
+      color: #ff8080;
+    }
+  }
+
+  .cash-order-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cash-order {
+    padding: 4px 0;
+    border-top: 1px solid #3a3227;
+
+    &.is-delivered {
+      opacity: 0.55;
+    }
+
+    &.is-failed .cash-order-badge {
+      color: #ff8080;
+    }
+  }
+
+  .cash-order-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    color: #dcdcdc;
+  }
+
+  .cash-order-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .cash-order-state {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1px;
+  }
+
+  .cash-order-badge {
+    color: #9fd3ff;
+  }
+
+  .cash-order-cancel {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: #9c8f78;
+    text-shadow: inherit;
+    cursor: pointer;
+
+    &:hover {
+      color: #ff8080;
+    }
+  }
+
+  .cash-order-reason {
+    line-height: 1.3;
+    color: #9c8f78;
+  }
+
+  // ---- the gacha stage ----
+
+  // The stage is the grid rect with the grid taken away. `overflow: hidden`
+  // is the only clip in the window: the box enters from behind the frame art
+  // and the shockwaves reach past the edges because of it. The tier colour
+  // and every per-tier number arrive inline from TIERS; nothing here knows a
+  // tier by name except the drop light, which has no stage to read from.
+  .cash-gacha {
+    position: absolute;
+    overflow: hidden;
+    --tier: #79a9d8;
+    transition: filter 120ms linear;
+
+    // The slam: one filter kills box, shafts and aura in the same frame.
+    &.phase-slam,
+    &.phase-hush {
+      filter: brightness(0.4) saturate(0.55);
+    }
+  }
+
+  .cash-gacha-status {
+    position: absolute;
     left: 0;
     right: 0;
+    bottom: 8px;
     margin: 0;
     text-align: center;
     color: #9c8f78;
     font-size: 10px;
     text-shadow: 1px 1px 0 #000;
+
+    &.is-bad {
+      color: #ff8080;
+    }
+  }
+
+  // The box. Placed with left/top and never a transform, so reduced motion's
+  // `transform: none` leaves it on its mark.
+  .cash-box {
+    position: absolute;
+    transform-origin: 50% 100%;
+    will-change: transform;
+  }
+
+  // 14/11 is a 1x1 item: the pack pads it to a 120x126 frame around a 40x42
+  // cell, a third of the frame each way. Scaled to fill the box element the
+  // cell alone would be 25px, so the icon is zoomed 3x inside a clipped box -
+  // the money bar's own trick, tuned for a box rather than a jewel's smaller
+  // silhouette. It is drawn twice, clipped at the seam into a lid and a body,
+  // which is what lets the lid lift, knock and slam while the body sits.
+  .cash-box-face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+
+    .item-icon {
+      max-width: 100%;
+      max-height: 100%;
+      transform: scale(3);
+    }
+  }
+
+  .cash-box-body {
+    clip-path: inset(var(--seam) 0 0 0);
+  }
+
+  .cash-box-lid {
+    clip-path: inset(0 0 calc(100% - var(--seam)) 0);
+    transform-origin: 50% var(--seam);
+
+    // The knock rides on the lid, not the box, so it composes with the
+    // rattle instead of fighting its keyframes. The name comes inline and
+    // alternates between two identical sets: an animation only restarts when
+    // its name changes, and remounting the lid would re-decode the icon.
+    &.is-knock {
+      animation-duration: 90ms;
+      animation-timing-function: ease-out;
+    }
+  }
+
+  .cash-box-seam {
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    height: 2px;
+    transform: scaleX(0);
+    background: linear-gradient(90deg, transparent, var(--tier) 20%, #fff 50%, var(--tier) 80%, transparent);
+    box-shadow: 0 0 12px 3px var(--tier);
+    filter: blur(0.4px);
+    transition:
+      transform 240ms ease-out,
+      height 200ms,
+      box-shadow 200ms;
+  }
+
+  .cash-box-shaft {
+    position: absolute;
+    left: 50%;
+    width: 34px;
+    height: 70px;
+    margin-left: -17px;
+    clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
+    background: linear-gradient(to bottom, var(--tier), transparent);
+    mix-blend-mode: screen;
+    transform-origin: 50% 0;
+    transform: rotate(calc(var(--i) * 360deg / var(--n))) scaleY(0);
+    opacity: 0;
+    transition:
+      transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 200ms;
+    transition-delay: calc(var(--i) * 24ms);
+  }
+
+  .cash-box-aura {
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(circle, var(--tier) 0%, transparent 68%);
+    filter: blur(6px);
+    opacity: 0;
+    transition: opacity 240ms;
+  }
+
+  // The fall ends hanging 4px off the floor with its fill; the landing does
+  // the last 4px, so a slow answer reads as held breath, not a stall.
+  .phase-falling .cash-box {
+    animation: cash-fall 240ms cubic-bezier(0.55, 0.05, 0.9, 0.25) both;
+  }
+
+  .phase-landed .cash-box {
+    animation: cash-squash 180ms cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  }
+
+  .phase-rattling .cash-box,
+  .phase-seam .cash-box,
+  .phase-strain .cash-box {
+    animation: cash-rattle var(--rattle) linear infinite;
+  }
+
+  // The swallow: the jewel goes in and the box pops bright for a frame.
+  .phase-rattling .cash-box-face {
+    animation: cash-swallow 120ms;
+  }
+
+  .phase-seam,
+  .phase-strain {
+    .cash-box-seam {
+      transform: scaleX(1);
+    }
+
+    .cash-box-shaft {
+      transform: rotate(calc(var(--i) * 360deg / var(--n))) scaleY(1);
+      opacity: 0.75;
+    }
+  }
+
+  .phase-seam .cash-box-aura {
+    opacity: var(--aura);
+  }
+
+  .phase-strain {
+    .cash-box-lid {
+      transform: translateY(-3px);
+      transition: transform 200ms ease-out;
+    }
+
+    .cash-box-seam {
+      height: 4px;
+      box-shadow: 0 0 24px 6px var(--tier);
+    }
+
+    .cash-box-aura {
+      opacity: calc(var(--aura) * 1.5);
+      animation: cash-pulse 280ms ease-in-out infinite;
+    }
+  }
+
+  .phase-slam,
+  .phase-hush {
+    .cash-box-lid {
+      transform: none;
+      transition: transform 90ms cubic-bezier(0.7, 0, 1, 0.6);
+    }
+
+    .cash-box-seam {
+      transform: scaleX(0.15);
+      box-shadow: none;
+    }
+
+    .cash-box-aura {
+      opacity: 0.05;
+    }
+  }
+
+  // A 1px ember in the closed seam. The length of the silence is the tier.
+  .phase-hush .cash-box-seam {
+    opacity: 0.12;
+    animation: cash-ember var(--hush) ease-in-out infinite;
+  }
+
+  .phase-burst .cash-box {
+    animation: cash-shatter 140ms ease-in forwards;
+  }
+
+  .phase-refused .cash-box {
+    animation: cash-yank 180ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  // The dust ring along the floor on landing.
+  .cash-thud {
+    position: absolute;
+    left: 50%;
+    width: 8px;
+    height: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scaleY(0.35);
+    animation: cash-thud 260ms ease-out forwards;
+  }
+
+  // ---- the reveal ----
+
+  // Mounted at the burst and keyed on the seed; every delay below counts from
+  // that frame and arrives inline from BEAT (`--after-*`, `--option-step`),
+  // so the sounds in state.ts and the drawing here keep the one timeline.
+  .cash-reveal {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 4px;
+    pointer-events: none;
+  }
+
+  .cash-shock {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    transform: translate(-50%, -50%);
+    border: 2px solid var(--tier);
+    border-radius: 50%;
+    animation: cash-shock 800ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: calc(var(--i) * 90ms);
+  }
+
+  .cash-ray {
+    position: absolute;
+    left: calc(50% - 1px);
+    bottom: 50%;
+    width: 2px;
+    height: 0;
+    background: linear-gradient(to top, transparent, var(--tier));
+    transform-origin: 50% 100%;
+    transform: rotate(calc(var(--i) * 360deg / var(--n)));
+    opacity: 0;
+    animation: cash-ray 850ms ease-out forwards;
+  }
+
+  // Legendary only: a slow conic halo behind the settled prize, until the
+  // next roll. Prefixed like everything else here - the bare `.ring` names
+  // once matched the emote menu's SVG wedges.
+  .cash-halo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 150px;
+    height: 150px;
+    margin: -75px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent, var(--tier) 25%, transparent 45%, transparent 55%, var(--tier) 75%, transparent);
+    mask: radial-gradient(circle, transparent 54%, #000 58%, #000 70%, transparent 74%);
+    opacity: 0.5;
+    animation: cash-spin 9s linear infinite;
+  }
+
+  // Clipped and rounded so the shine sweeps inside the icon's box; safe for
+  // the glow because the pack pads the silhouette ~20px inside at this zoom.
+  .cash-prize {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 6px;
+    animation: cash-prize-in 650ms cubic-bezier(0.2, 1.4, 0.4, 1) var(--after-prize) both;
+
+    .item-icon {
+      max-width: 100%;
+      max-height: 100%;
+      filter: drop-shadow(0 0 var(--glow) var(--tier));
+    }
+  }
+
+  .phase-settled .cash-prize .item-icon {
+    animation: cash-idle-glow 3.4s ease-in-out infinite;
+  }
+
+  // The excellent gloss: once for rare and epic, twice for legendary, never
+  // for common - `--shimmer` is the iteration count.
+  .cash-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.85) 50%, transparent 58%);
+    mix-blend-mode: screen;
+    transform: translateX(-140%);
+    animation: cash-shine 620ms ease-in-out var(--after-shine) var(--shimmer, 0) forwards;
+  }
+
+  // Always drawn, at every tier and in every motion setting: the floor is a
+  // noun, not a hue.
+  .cash-prize-tier {
+    font-size: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--tier);
+    text-shadow: 1px 1px 0 #000;
+    border-bottom: 1px solid color-mix(in srgb, var(--tier) 45%, transparent);
+    animation: cash-fade-up 380ms ease-out var(--after-name) both;
+  }
+
+  // Name colour per nameColor (itemTooltip.ts:105): excellent green, +7 and
+  // up yellow, else white.
+  .cash-prize-name {
+    max-width: 100%;
+    text-align: center;
+    color: #dcdcdc;
+    font-size: 10px;
+    text-shadow: 1px 1px 0 #000;
+    animation: cash-fade-up 380ms ease-out var(--after-name) both;
+
+    &.is-green {
+      color: #80ff80;
+    }
+
+    &.is-yellow {
+      color: #ffd88a;
+    }
+  }
+
+  .cash-prize-level {
+    color: var(--tier);
+  }
+
+  // Each option writes itself in left to right, one step apart - the step
+  // the iButtonMove ticks in state.ts are spaced by. A common has no
+  // options, so the list is empty by construction rather than hidden.
+  .cash-prize-options {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-align: center;
+
+    li {
+      color: #9fd3ff;
+      font-size: 9px;
+      line-height: 1.4;
+      text-shadow: 1px 1px 0 #000;
+      clip-path: inset(0 100% 0 0);
+      animation: cash-write 260ms ease-out both;
+      animation-delay: calc(var(--after-option) + var(--i) * var(--option-step));
+    }
+  }
+
+  // A reveal that mounted already settled: the prize as it stands after the
+  // ceremony, with none of the entrances. The rings, rays and shine are not
+  // rendered at all in that case (index.tsx), so only what stays is here.
+  .cash-reveal.is-rest {
+    .cash-prize,
+    .cash-prize-tier,
+    .cash-prize-name {
+      animation: none;
+    }
+
+    .cash-prize-options li {
+      clip-path: none;
+      animation: none;
+    }
+  }
+
+  // ---- window level ----
+
+  // The fee: a Jewel of Chaos peeling off the wallet bar and arcing into the
+  // seam. Not inside the stage, which clips anything below y 240; the rise
+  // comes inline from layout.ts so the arc lands on the seam it was
+  // measured against.
+  .cash-fee {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    animation: cash-fee-arc 360ms ease-in both;
+  }
+
+  // The whole 190x429 frame lit in the tier colour at the burst, for epic
+  // and legendary: the cabinet lighting up, without touching the transform
+  // useWindowChrome puts on the root.
+  .cash-frame-flash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    animation: cash-frame-flash 420ms ease-out forwards;
   }
 }
 
-.cash-orb {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 90px;
-  height: 90px;
-  transition: opacity 0.3s, transform 0.3s;
-}
+// ---- the purchase question ----
 
-.cash-core {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #fff8e6 0%, var(--rarity) 44%, rgba(0, 0, 0, 0.65) 100%);
-  box-shadow: 0 0 22px var(--rarity);
-  animation: cash-breathe 3.2s ease-in-out infinite;
-}
-
-.cash-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid var(--rarity);
-  opacity: 0.5;
-}
-
-// Prefixed, not `.ring-1`/`.ring-2`: every stylesheet here is bundled into one
-// global sheet, and the bare names matched the emote menu's SVG wedges - which
-// then inherited this spin and orbited the corner of its viewBox.
-.cash-ring-1 {
-  inset: 8px;
-  border-style: dashed;
-  animation: cash-spin 9s linear infinite;
-}
-
-.cash-ring-2 {
+// The message box the social prompts use, on the body: the window is drawn
+// under `transform: scale()`, so anything fixed inside it is fixed to the
+// window. The layer lets clicks through; only the box catches them.
+.cash-confirm-layer {
+  position: fixed;
   inset: 0;
-  border-top-color: transparent;
-  border-bottom-color: transparent;
-  animation: cash-spin 14s linear infinite reverse;
+  z-index: 600; // WINDOW_Z_MODAL: over the windows and the sheets
+  pointer-events: none;
+  .mu-font();
+  user-select: none;
 }
 
-@keyframes cash-breathe {
-  50% {
-    transform: scale(1.07);
+.cash-confirm {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  flex: none;
+}
+
+.cash-confirm-text {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #ffffff;
+  font-size: 11px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+
+  .cash-confirm-note {
+    font-size: 10px;
+    color: #c8bca8;
   }
 }
 
-@keyframes cash-spin {
+// ---- the light that leaves the window ----
+
+// Portalled to the body and positioned against the viewport; `--cx`, `--cy`
+// and `--scale` are written every frame by the stage's anchor loop. Only the
+// glow and one shockwave live here, nothing the player can click.
+.cash-drop-light {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  contain: layout paint;
+  --scale: 1.5;
+  --cx: 50vw;
+  --cy: 50vh;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--cx) var(--cy), var(--tier) 0, transparent calc(var(--scale) * 260px));
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+  }
+
+  &.phase-strain::before {
+    opacity: 0.22;
+  }
+
+  &.phase-slam::before,
+  &.phase-hush::before {
+    opacity: 0.04;
+  }
+
+  &.phase-burst::before,
+  &.phase-prize::before {
+    opacity: 0.5;
+    animation: cash-light-fall 900ms ease-out forwards;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: var(--cx);
+    top: var(--cy);
+    width: calc(var(--scale) * 40px);
+    height: calc(var(--scale) * 40px);
+    transform: translate(-50%, -50%);
+    border: 2px solid var(--tier);
+    border-radius: 50%;
+    opacity: 0;
+  }
+
+  &.phase-burst::after,
+  &.phase-prize::after {
+    animation: cash-light-shock 700ms ease-out forwards;
+  }
+
+  // The one white viewport flash: legendary, once, 140ms, inside WCAG 2.3.1
+  // by construction.
+  &.tier-legendary.phase-burst {
+    animation: cash-flash 140ms ease-out;
+  }
+}
+
+// ---- keyframes ----
+
+@keyframes cash-fall {
+  from {
+    transform: translate3d(0, var(--fall), 0);
+  }
   to {
-    transform: rotate(360deg);
+    transform: translate3d(0, var(--hang), 0);
   }
 }
 
-.cash-gacha.is-rolling {
-  .cash-ring-1 {
-    animation-duration: 0.7s;
-  }
-
-  .cash-ring-2 {
-    animation-duration: 1.1s;
-  }
-
-  .cash-orb {
-    animation: cash-shake 0.3s ease-in-out infinite;
-  }
-
-  .cash-core {
-    animation: cash-charge 1.9s ease-in forwards;
-  }
-}
-
-@keyframes cash-shake {
-  25% {
-    transform: translate(1px, -1px);
-  }
-  75% {
-    transform: translate(-1px, 1px);
-  }
-}
-
-@keyframes cash-charge {
+@keyframes cash-squash {
   0% {
-    transform: scale(1);
-    filter: brightness(1);
-  }
-  72% {
-    transform: scale(0.72);
-    filter: brightness(1.9);
+    transform: translate3d(0, var(--hang), 0) scale(1.14, 0.78);
   }
   100% {
-    transform: scale(1.5);
-    filter: brightness(3.2);
+    transform: none;
+  }
+}
+
+@keyframes cash-thud {
+  from {
+    width: 8px;
+    opacity: 0.5;
+  }
+  to {
+    width: 70px;
     opacity: 0;
   }
 }
 
-.cash-gacha.is-revealed .cash-orb {
-  opacity: 0;
-  transform: scale(1.3);
+@keyframes cash-rattle {
+  25% {
+    transform: translate(2px, -1px) rotate(2.5deg);
+  }
+  75% {
+    transform: translate(-2px, 1px) rotate(-2.5deg);
+  }
 }
 
-.cash-reveal {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 4px;
-  pointer-events: none;
+@keyframes cash-swallow {
+  50% {
+    filter: brightness(1.45);
+  }
 }
 
-.cash-burst {
-  position: absolute;
-  border-radius: 50%;
-  border: 2px solid var(--rarity);
-  animation: cash-burst 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+@keyframes cash-knock {
+  50% {
+    transform: scale(1.06, 0.94);
+  }
 }
 
-@keyframes cash-burst {
+@keyframes cash-knock-b {
+  50% {
+    transform: scale(1.06, 0.94);
+  }
+}
+
+@keyframes cash-pulse {
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes cash-ember {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes cash-shatter {
+  to {
+    transform: scale(1.35);
+    opacity: 0;
+    filter: brightness(4);
+  }
+}
+
+@keyframes cash-yank {
+  to {
+    transform: translate3d(0, var(--fall), 0);
+    filter: grayscale(1) brightness(0.6);
+  }
+}
+
+@keyframes cash-shock {
   0% {
     width: 20px;
     height: 20px;
     opacity: 1;
-    box-shadow: 0 0 40px 14px var(--rarity);
+    box-shadow: 0 0 40px 14px var(--tier);
   }
   100% {
-    width: 220px;
-    height: 220px;
+    width: var(--burst);
+    height: var(--burst);
     opacity: 0;
     box-shadow: 0 0 0 0 transparent;
   }
-}
-
-.cash-ray {
-  position: absolute;
-  width: 2px;
-  height: 90px;
-  background: linear-gradient(to top, transparent, var(--rarity));
-  transform-origin: 50% 100%;
-  opacity: 0;
-  animation: cash-ray 0.85s ease-out forwards;
 }
 
 @keyframes cash-ray {
@@ -345,15 +940,9 @@
   }
 }
 
-.cash-prize {
-  display: grid;
-  place-items: center;
-  animation: cash-prize-in 0.65s cubic-bezier(0.2, 1.4, 0.4, 1) 0.15s both;
-
-  .item-icon {
-    max-width: 100%;
-    max-height: 100%;
-    filter: drop-shadow(0 0 10px var(--rarity));
+@keyframes cash-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -364,41 +953,15 @@
   }
 }
 
-.cash-prize-name {
-  max-width: 100%;
-  text-align: center;
-  color: #dcdcdc;
-  font-size: 10px;
-  text-shadow: 1px 1px 0 #000;
-  animation: cash-fade-up 0.4s ease-out 0.5s both;
+@keyframes cash-idle-glow {
+  50% {
+    filter: drop-shadow(0 0 calc(var(--glow) * 1.8) var(--tier));
+  }
 }
 
-.cash-prize-level {
-  color: var(--rarity);
-}
-
-.cash-prize-options {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  text-align: center;
-
-  li {
-    color: #9fd3ff;
-    font-size: 9px;
-    line-height: 1.4;
-    text-shadow: 1px 1px 0 #000;
-    animation: cash-fade-up 0.4s ease-out both;
-
-    &:nth-child(1) {
-      animation-delay: 0.6s;
-    }
-    &:nth-child(2) {
-      animation-delay: 0.72s;
-    }
-    &:nth-child(3) {
-      animation-delay: 0.84s;
-    }
+@keyframes cash-shine {
+  to {
+    transform: translateX(140%);
   }
 }
 
@@ -409,9 +972,121 @@
   }
 }
 
+@keyframes cash-write {
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes cash-fee-arc {
+  45% {
+    transform: translate(-26px, calc(var(--rise) * -0.65)) scale(0.85);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, calc(var(--rise) * -1)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes cash-frame-flash {
+  from {
+    box-shadow:
+      inset 0 0 0 2px var(--tier),
+      inset 0 0 26px var(--tier);
+  }
+  to {
+    box-shadow:
+      inset 0 0 0 2px transparent,
+      inset 0 0 26px transparent;
+  }
+}
+
+@keyframes cash-light-fall {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes cash-light-shock {
+  from {
+    width: calc(var(--scale) * 40px);
+    height: calc(var(--scale) * 40px);
+    opacity: 0.8;
+  }
+  to {
+    width: calc(var(--scale) * 640px);
+    height: calc(var(--scale) * 640px);
+    opacity: 0;
+  }
+}
+
+@keyframes cash-flash {
+  from {
+    background: rgba(255, 255, 255, 0.22);
+  }
+  to {
+    background: transparent;
+  }
+}
+
+// ---- reduced motion ----
+
+// Motion is removed by not rendering it, never by zeroing a duration: a
+// `forwards` animation collapsed to 0.01ms lands on its END state, which for
+// the shatter is a vanished box and for the slam a darkened stage. Opacity
+// is not vestibular, so a soft cross-fade stays. The clock in state.ts skips
+// the moving beats on its own; this sheet only has to agree with it.
 @media (prefers-reduced-motion: reduce) {
-  .cash-gacha * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+  .cash-shop .cash-gacha,
+  .cash-shop .cash-gacha *,
+  .cash-shop .cash-fee,
+  .cash-shop .cash-frame-flash,
+  .cash-drop-light {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+    transition: opacity 120ms linear !important;
+  }
+
+  // Whose entire existence is motion: absent, not instant.
+  .cash-shop .cash-box-shaft,
+  .cash-shop .cash-ray,
+  .cash-shop .cash-shock,
+  .cash-shop .cash-halo,
+  .cash-shop .cash-shine,
+  .cash-shop .cash-thud,
+  .cash-shop .cash-fee,
+  .cash-shop .cash-frame-flash,
+  .cash-drop-light {
+    display: none !important;
+  }
+
+  // Drawn at rest, in the position they hold at settle, so nothing jumps.
+  .cash-shop .cash-box-seam {
+    transform: scaleX(1) !important;
+  }
+
+  .cash-shop .cash-prize,
+  .cash-shop .cash-prize-tier,
+  .cash-shop .cash-prize-name,
+  .cash-shop .cash-prize-options li {
+    opacity: 1;
+    clip-path: none !important;
+  }
+
+  // Colours, not motion, re-asserted after the blanket rules above: the
+  // tier glow on the prize and the zoom that makes a 1x1 icon a box at all.
+  .cash-shop .cash-prize .item-icon {
+    filter: drop-shadow(0 0 var(--glow) var(--tier)) !important;
+  }
+
+  .cash-shop .cash-box-face .item-icon {
+    transform: scale(3) !important;
   }
 }

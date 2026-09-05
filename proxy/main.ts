@@ -1,7 +1,8 @@
 import type { ServerWebSocket, Socket } from "bun";
 import { CLEAR, currentWeather, weatherForced, weatherPacket, weatherSlotSeconds, type WeatherState } from "./weather";
-import { ConnectionPresence, startPresenceServer } from "./presence";
-import { parseAllowTargets, targetAllowed } from "./allowTargets";
+import { ConnectionPresence, PRESENCE_HOST, PRESENCE_PORT, startPresenceServer } from "./presence";
+import { parseAllowTargets, targetAllowed, type ReservedTarget } from "./allowTargets";
+import { SESSION_NONCE_RE } from "../src/common/sessionNonce";
 
 const PORT = process.env.PORT || "3000";
 const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
@@ -40,9 +41,20 @@ const WEATHER_HEARTBEAT_MS = Number(process.env.WEATHER_HEARTBEAT ?? 20000);
  */
 const ALLOW_RULES = parseAllowTargets(process.env.ALLOW_TARGETS ?? "");
 
+/**
+ * Where the presence server listens - the same variables and defaults
+ * `presence.ts` binds with. Named here so the relay can refuse to dial it
+ * (`targetReserved` in allowTargets.ts says why), which has to hold with
+ * `ALLOW_TARGETS` unset: that is the one setting a dev box runs with, and a
+ * dev box is one forgotten variable away from being the public one.
+ */
+const RESERVED_TARGETS: ReservedTarget[] = [
+  { host: PRESENCE_HOST, port: PRESENCE_PORT },
+];
+
 if (!ALLOW_RULES.length) {
   console.warn(
-    "ALLOW_TARGETS is unset: this proxy will dial ANY host:port a client names. Fine on localhost, an open relay in public - set it to the game ports, e.g. ALLOW_TARGETS=127.0.0.1:44405,127.0.0.1:55901"
+    "ALLOW_TARGETS is unset: this proxy will dial ANY host:port a client names (bar the presence server). Fine on localhost, an open relay in public - set it to the game ports, e.g. ALLOW_TARGETS=127.0.0.1:44405,127.0.0.1:55901"
   );
 } else {
   console.log(
@@ -137,25 +149,31 @@ Bun.serve<WebSocketData>({
       });
     }
 
-    if (!targetAllowed(ALLOW_RULES, targetHost, targetPort)) {
-      console.warn(
-        `refused target ${targetHost}:${targetPort} (ALLOW_TARGETS)`
-      );
+    if (!targetAllowed(ALLOW_RULES, targetHost, targetPort, RESERVED_TARGETS)) {
+      console.warn(`refused target ${targetHost}:${targetPort}`);
       return new Response("target not allowed", { status: 403 });
     }
 
+    // The page's session nonce (src/common/sessionNonce.ts), which lets the
+    // cash shop put an account to this socket through the presence server's
+    // /ticket/<nonce>. Absent or malformed is not a refusal: it only means
+    // this socket can never be named by ticket, and the game must connect
+    // with a broken shop. It is a bearer credential and is never logged.
+    const rawSession = searchParams.get("session") ?? "";
+    const session = SESSION_NONCE_RE.test(rawSession) ? rawSession : null;
+
+    // Built before the upgrade is known to have happened, so a request that
+    // turns out not to be a websocket handshake has to close it: otherwise it
+    // sits in the presence registry, and with a nonce in the ticket map, for
+    // the life of the process.
+    const presence = new ConnectionPresence(session);
+
     // upgrade the request to a WebSocket
-    if (
-      server.upgrade(req, {
-        data: {
-          targetHost,
-          targetPort,
-          presence: new ConnectionPresence(),
-        },
-      })
-    ) {
+    if (server.upgrade(req, { data: { targetHost, targetPort, presence } })) {
       return; // do not return a Response
     }
+
+    presence.close();
     return new Response("Upgrade failed :(", { status: 500 });
   },
   websocket: {
@@ -180,7 +198,17 @@ Bun.serve<WebSocketData>({
         socket: {
           data(socket, data) {
             if (LOG_PACKETS) console.log("data from tcp:", stringifyPacket(data));
-            ws.send(asBufferSource(data));
+
+            const forwarded = asBufferSource(data);
+
+            ws.send(forwarded);
+
+            // The server's side of the login: the sniffer names a socket only
+            // once the game server has said yes, never off the client's own
+            // claim. Same copy discipline as the other direction.
+            if (typeof forwarded !== "string") {
+              ws.data.presence.feedFromServer(new Uint8Array(forwarded));
+            }
           },
           open(socket) {
             ws.data.tcpSocket = socket;

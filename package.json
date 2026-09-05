@@ -13,12 +13,14 @@
     "build:register": "APP_ENV=prod vite build --config register/vite.config.ts",
     "register-api": "bun run --watch register/server/main.ts",
     "cashshop-gate": "bun run cashshop/server/gateCli.ts",
+    "cashshop-orders": "bun run cashshop/server/ordersCli.ts",
     "generate": "bun run src/common/packets/generate.ts",
     "test": "vitest run",
     "tsc": "tsc --noEmit",
     "lint": "eslint . --max-warnings=100000",
     "lint:count": "eslint . -f json | bun run tools/lintCounts.ts",
-    "cashshop-api": "bun run --watch cashshop/server/main.ts"
+    "cashshop-api": "bun run --watch cashshop/server/main.ts",
+    "cashshop-serve": "bun run cashshop/server/main.ts"
   },
   "devDependencies": {
     "@gltf-transform/core": "4.2.0",
