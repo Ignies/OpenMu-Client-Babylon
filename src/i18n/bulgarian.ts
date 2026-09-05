@@ -421,7 +421,6 @@ export const bulgarianLayer: LanguageLayer = {
     'cashShop.title': 'Cash магазин',
     'cashShop.tab.wings': 'Крила',
     'cashShop.tab.quest': 'Задача',
-    'cashShop.tab.boxes': 'Кутия',
     'cashShop.tab.gacha': 'Gacha',
     'cashShop.loading': 'Магазинът се зарежда...',
     'cashShop.unreachable': 'Магазинът не може да бъде достигнат.',

@@ -412,7 +412,6 @@ export const koreanLayer: LanguageLayer = {
     'cashShop.title': '캐시샵',
     'cashShop.tab.wings': '날개',
     'cashShop.tab.quest': '퀘스트',
-    'cashShop.tab.boxes': '상자',
     'cashShop.tab.gacha': '뽑기',
     'cashShop.loading': '상점을 불러오는 중...',
     'cashShop.unreachable': '상점에 연결할 수 없습니다.',

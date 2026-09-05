@@ -423,7 +423,6 @@ export const romanianLayer: LanguageLayer = {
     'cashShop.title': 'Magazin Cash',
     'cashShop.tab.wings': 'Aripi',
     'cashShop.tab.quest': 'Misiune',
-    'cashShop.tab.boxes': 'Cutie',
     'cashShop.tab.gacha': 'Gacha',
     'cashShop.loading': 'Se încarcă magazinul...',
     'cashShop.unreachable': 'Magazinul nu poate fi contactat.',

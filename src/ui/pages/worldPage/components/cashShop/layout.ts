@@ -41,15 +41,19 @@ export const TITLE_Y = 12;
 export const HEAD_CLOSE = { left: 169, top: 7, width: 13, height: 12 };
 
 /**
- * The tab strip, between the title and the grid. Five tabs - the four
+ * The tab strip, between the title and the grid. Four tabs - the three
  * product lines and the delivery queue - across the 167px between the frame
- * edges, so each is a 33px crop of `newui_guild_tab04.OZT`'s 56px art. The
+ * edges, so each is a 41px crop of `newui_guild_tab04.OZT`'s 56px art. The
  * sheet is two 22px frames, off and on; MuButton picks the second for the
  * checked tab.
+ *
+ * 41 rather than the 33 five tabs needed: the strip spans the same 164px
+ * either way, and the eight extra pixels are what let a translated label sit
+ * in the tab instead of being clipped by it.
  */
 export const TAB_Y = 46;
 export const TAB_X = 13;
-export const TAB_WIDTH = 33;
+export const TAB_WIDTH = 41;
 export const TAB_HEIGHT = 22;
 export const TAB_SPRITE = 'newui_guild_tab04.OZT';
 export const TAB_FRAMES = { up: 0, down: 1, check: 1 } as const;

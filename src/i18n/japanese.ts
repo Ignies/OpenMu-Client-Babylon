@@ -413,7 +413,6 @@ export const japaneseLayer: LanguageLayer = {
     'cashShop.title': 'キャッシュショップ',
     'cashShop.tab.wings': '翼',
     'cashShop.tab.quest': 'クエスト',
-    'cashShop.tab.boxes': 'ボックス',
     'cashShop.tab.gacha': 'ガチャ',
     'cashShop.loading': 'ショップを読み込んでいます...',
     'cashShop.unreachable': 'ショップに接続できません。',

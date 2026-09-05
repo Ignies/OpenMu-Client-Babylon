@@ -20,17 +20,18 @@ import items from '../../src/common/items.json';
  * mixes are done; a second use for it takes jewels out of the economy that
  * would otherwise sit or be dumped on the market for zen.
  *
- * That last point is also the ceiling on every price here. A jewel is one
- * inventory square and nothing stacks, and the wallet the service checks is
- * the database inventory plus vault - 64 squares (up to 192 extended) and
- * 120 - so prices are bounded by squares, not by value. The most expensive
- * product must be payable from a bag plus a banked vault; everyday products
- * from a bag alone. The old Bless-and-Soul prices converted at the client's
- * own sell-value table (`src/common/itemValue.ts`: Bless 9,000,000 zen, Soul
- * 6,000,000, Chaos 810,000) would put the gacha at 463 chaos, which nobody can
- * carry, so everything below is re-anchored to the square ceiling while
- * keeping the old relative shape: wings well above the box ladder, the box
- * ladder above the quest items.
+ * That last point bounds every price here. A jewel is one inventory square
+ * and nothing stacks, and the wallet the service checks is the database
+ * inventory plus vault - 64 squares (up to 192 extended) and 120 - so a
+ * price is paid in squares rather than in value, and a three-figure price is
+ * one nobody can carry.
+ *
+ * The prices below sit far under that ceiling: a session's pickups covers
+ * any single one of them. That is deliberate, and it moves the work of
+ * bounding what the shop gives away off the price and onto the daily caps -
+ * one pair of wings a day whatever the buyer has banked. A cap is the honest
+ * lever for that, because a rich player cannot defeat it, and it is the
+ * number to change first if the shop turns out to be too generous.
  */
 
 interface ItemRow {
@@ -47,7 +48,7 @@ for (const row of items as unknown as ItemRow[]) {
   byKey.set(`${row.Group}/${row.Index}`, row);
 }
 
-export type ProductLine = 'wings' | 'quest' | 'boxes' | 'gacha';
+export type ProductLine = 'wings' | 'quest' | 'gacha';
 
 export interface Product {
   id: string;
@@ -79,40 +80,34 @@ interface Spec {
 }
 
 const SPECS: Spec[] = [
-  // Level 1 wings. A Chaos Machine milestone - a chaos weapon mix and then the
-  // wing mix, 40-50M zen in expectation plus the failed ingredients - sold
-  // with certainty, so priced above what the mixes cost on average. One a
-  // day each: a flood of wings is the worst thing the shop could do to a
-  // server where wings are the first big goal. Big footprints, too - Wings of
-  // Angel is 5x3 in an 8-wide grid.
-  { line: 'wings', group: 12, number: 0, chaos: 90, dailyCap: 1 },
-  { line: 'wings', group: 12, number: 1, chaos: 120, dailyCap: 1 },
-  { line: 'wings', group: 12, number: 2, chaos: 120, dailyCap: 1 },
-  { line: 'wings', group: 13, number: 30, chaos: 120, dailyCap: 1 },
+  // Level 1 wings. A Chaos Machine milestone - a chaos weapon mix and then
+  // the wing mix, 40-50M zen in expectation plus the failed ingredients -
+  // sold here as a shortcut priced within a day's pickups rather than at what
+  // those mixes cost. The one a day is therefore what keeps wings from
+  // flooding a server where they are the first big goal: the cap is the lever
+  // on this line, not the number beside it. Fairy sits a step under the other
+  // three. Big footprints, too - Wings of Angel is 5x3 in an 8-wide grid.
+  { line: 'wings', group: 12, number: 0, chaos: 9, dailyCap: 1 },
+  { line: 'wings', group: 12, number: 1, chaos: 12, dailyCap: 1 },
+  { line: 'wings', group: 12, number: 2, chaos: 12, dailyCap: 1 },
+  { line: 'wings', group: 13, number: 30, chaos: 12, dailyCap: 1 },
 
   // The second and third quest chains: convenience buys for drops people
-  // otherwise farm for hours. Devil Eye, Devil Key and Symbol of Kundun are
-  // sold at level 0, and in Season 6 those are +1..+7 tickets - level 0 is
-  // not a ticket the game recognises. Repriced as they stand; the level is
-  // a separate decision. Five Symbols make a Lost Map, so ten is two maps.
-  { line: 'quest', group: 14, number: 23, chaos: 12, dailyCap: 5 },
-  { line: 'quest', group: 14, number: 24, chaos: 10, dailyCap: 5 },
-  { line: 'quest', group: 14, number: 25, chaos: 10, dailyCap: 5 },
-  { line: 'quest', group: 14, number: 26, chaos: 10, dailyCap: 5 },
-  { line: 'quest', group: 14, number: 17, chaos: 4, dailyCap: 10 },
-  { line: 'quest', group: 14, number: 18, chaos: 4, dailyCap: 10 },
-  { line: 'quest', group: 14, number: 29, chaos: 8, dailyCap: 10 },
-
-  // Box of Luck is level 0; levels 1-5 are Box of Kundun +1..+5. A ladder of
-  // roughly x1.7 a step, so Box of Luck stays an impulse buy and +5 (Kundun's
-  // own drop, excellent-tier loot) stays a real purchase; caps shrink up the
-  // ladder for the same reason the price grows.
-  { line: 'boxes', group: 14, number: 11, level: 0, chaos: 5, dailyCap: 20 },
-  { line: 'boxes', group: 14, number: 11, level: 1, name: 'Box of Kundun +1', chaos: 12, dailyCap: 20 },
-  { line: 'boxes', group: 14, number: 11, level: 2, name: 'Box of Kundun +2', chaos: 20, dailyCap: 15 },
-  { line: 'boxes', group: 14, number: 11, level: 3, name: 'Box of Kundun +3', chaos: 35, dailyCap: 10 },
-  { line: 'boxes', group: 14, number: 11, level: 4, name: 'Box of Kundun +4', chaos: 60, dailyCap: 5 },
-  { line: 'boxes', group: 14, number: 11, level: 5, name: 'Box of Kundun +5', chaos: 100, dailyCap: 3 },
+  // otherwise farm for hours, at a few jewels each so a session's pickups
+  // covers several. The second chain's pieces are each wanted once, which is
+  // what the cap of five is for; the third's are wanted in quantity, and five
+  // Symbols make a Lost Map.
+  //
+  // Devil Eye, Devil Key and Symbol of Kundun are sold at level 0, and in
+  // Season 6 those are +1..+7 tickets - level 0 is not a ticket the game
+  // recognises. Priced as they stand; the level is a separate decision.
+  { line: 'quest', group: 14, number: 23, chaos: 5, dailyCap: 5 },
+  { line: 'quest', group: 14, number: 24, chaos: 4, dailyCap: 5 },
+  { line: 'quest', group: 14, number: 25, chaos: 4, dailyCap: 5 },
+  { line: 'quest', group: 14, number: 26, chaos: 4, dailyCap: 5 },
+  { line: 'quest', group: 14, number: 17, chaos: 3, dailyCap: 10 },
+  { line: 'quest', group: 14, number: 18, chaos: 3, dailyCap: 10 },
+  { line: 'quest', group: 14, number: 29, chaos: 5, dailyCap: 10 },
 ];
 
 function build(spec: Spec): Product {
@@ -143,11 +138,14 @@ function build(spec: Spec): Product {
  * placed, so the outcome is bound to a stored seed before the player sees it
  * and cannot be shopped for by ordering and cancelling.
  *
- * Five chaos is five squares, always payable straight from the bag, about a
- * hunting session's pickups for a mid-level character; twelve a day is 60
- * chaos, a serious day of farming. The cap is shaped by the bag rather than
- * the wallet: every roll is a 2x2 or 2x3 piece delivered at logout into the
- * same inventory, and twelve of them need about 51 free squares of 64.
+ * Ten chaos is ten squares, still payable straight from the bag, and about a
+ * hunting session's pickups for a mid-level character. Twelve of them is 120
+ * chaos, which takes a banked vault as well - but the cap is shaped by the
+ * bag rather than the wallet: every roll is a 2x2 or 2x3 piece delivered at
+ * logout into the same inventory, and twelve need about 51 free squares of
+ * 64. This is the one line whose price does the bounding rather than its cap,
+ * because it is the only thing here bought for its own sake rather than for
+ * a fixed need.
  *
  * The 2x2 here is only the catalogue tile. The real footprint is the roll's
  * own width and height, known at placement, and that is what fulfilment fits
@@ -162,7 +160,7 @@ const GACHA: Product = {
   level: 0,
   width: 2,
   height: 2,
-  chaos: 5,
+  chaos: 10,
   dailyCap: 12,
   note: 'A random helm, armour, pants, gloves or boots, +0 to +12. Most are plain; some are excellent.',
 };
@@ -172,7 +170,6 @@ export const CATALOG: Product[] = [...SPECS.map(build), GACHA];
 export const LINES: { id: ProductLine; label: string }[] = [
   { id: 'wings', label: 'Wings' },
   { id: 'quest', label: 'Quest Items' },
-  { id: 'boxes', label: 'Boxes' },
   { id: 'gacha', label: 'Gacha' },
 ];
 

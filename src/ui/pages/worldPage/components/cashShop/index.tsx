@@ -143,11 +143,10 @@ import {
  * as a bug to anyone who has not been told.
  */
 
-/** The API's labels are written for a web page; five tabs across 165px are not. */
+/** The API's labels are written for a web page; four tabs across 164px are not. */
 const TAB_LABEL: Record<ProductLine, TextKey> = {
   wings: 'cashShop.tab.wings',
   quest: 'cashShop.tab.quest',
-  boxes: 'cashShop.tab.boxes',
   gacha: 'cashShop.tab.gacha',
 };
 

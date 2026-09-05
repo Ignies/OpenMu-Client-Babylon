@@ -432,7 +432,6 @@ export const spanishLayer: LanguageLayer = {
     'cashShop.title': 'Tienda Cash',
     'cashShop.tab.wings': 'Alas',
     'cashShop.tab.quest': 'Misión',
-    'cashShop.tab.boxes': 'Caja',
     'cashShop.tab.gacha': 'Gacha',
     'cashShop.loading': 'Cargando la tienda...',
     'cashShop.unreachable': 'No se puede contactar con la tienda.',

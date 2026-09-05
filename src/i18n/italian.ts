@@ -424,7 +424,6 @@ export const italianLayer: LanguageLayer = {
     'cashShop.title': 'Negozio Cash',
     'cashShop.tab.wings': 'Ali',
     'cashShop.tab.quest': 'Missione',
-    'cashShop.tab.boxes': 'Scrigno',
     'cashShop.tab.gacha': 'Gacha',
     'cashShop.loading': 'Caricamento del negozio...',
     'cashShop.unreachable': 'Il negozio non è raggiungibile.',

@@ -420,7 +420,6 @@ export const thaiLayer: LanguageLayer = {
     'cashShop.title': 'แคชช็อป',
     'cashShop.tab.wings': 'ปีก',
     'cashShop.tab.quest': 'เควสต์',
-    'cashShop.tab.boxes': 'กล่อง',
     'cashShop.tab.gacha': 'กาชา',
     'cashShop.loading': 'กำลังโหลดร้านค้า...',
     'cashShop.unreachable': 'ติดต่อร้านค้าไม่ได้',
