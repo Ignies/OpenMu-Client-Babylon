@@ -869,10 +869,10 @@ export class ModelObject {
       mesh.metadata.bodyLight = bodyLight;
       mesh.metadata.snowCap = this.SnowCap;
 
-      // Enhanced lighting: the sun's cascaded shadow map only
-      // attenuates the sun's own lambert term, so the bake and the point
-      // lights are untouched. Free while no shadow generator exists.
-      mesh.receiveShadows = true;
+      // Only the map receives the cascades. The original lights a character,
+      // monster or item by the BodyLight at its feet and nothing else, so an
+      // item effect reads the same in the open and in a shadow.
+      mesh.receiveShadows = this.IsMapObject;
       mesh.metadata.csmCaster =
         this.CastsShadow && !this.Lights?.emitsLight;
 
