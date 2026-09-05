@@ -46,6 +46,31 @@ export class Refusal extends Error {
   }
 }
 
+/**
+ * What the player may see of their own order.
+ *
+ * A gacha roll is drawn and committed when the order is placed - that is what
+ * stops an outcome being shopped for by ordering and cancelling - but the
+ * jewels for it are not taken until the account is offline and the delivery
+ * transaction runs. Between those two moments the roll is sealed, and this is
+ * where that is enforced: it never leaves the service.
+ *
+ * Showing it earlier is not a small leak, it is the whole line. A player who
+ * saw a roll they did not want could spend or trade their Jewels of Chaos
+ * before logging out; the delivery would then fail for want of them, and a
+ * failed order costs nothing and hands its daily-cap slot back
+ * (`spentTodayBy` counts neither). The roll could be re-drawn until it was
+ * liked, which is exactly the free re-roll the placement-time draw was
+ * supposed to prevent.
+ *
+ * The seed and the outcome are in the row throughout, so nothing is lost: an
+ * audit can replay any roll from the moment it was placed, and the player
+ * sees the same one the moment it is theirs.
+ */
+function forPlayer(order: Order): Order {
+  return order.line === 'gacha' && order.state !== 'delivered' ? { ...order, roll: null } : order;
+}
+
 /** What GET /api/orders answers: the queue, and what the window needs to explain it. */
 export interface OrdersView {
   orders: Order[];
@@ -109,7 +134,7 @@ export class Orders {
 
     if (!placed.ok) throw new Refusal(placed.reason, 409);
 
-    return placed.order;
+    return forPlayer(placed.order);
   }
 
   /**
@@ -149,7 +174,7 @@ export class Orders {
 
     const cancelled = cancelInStore(id, account);
 
-    if (cancelled.ok) return cancelled.order;
+    if (cancelled.ok) return forPlayer(cancelled.order);
 
     switch (cancelled.reason) {
       case 'notFound':
@@ -166,7 +191,7 @@ export class Orders {
     const wallet = await this.fulfilment.wallet(account);
 
     return {
-      orders: ordersFor(account),
+      orders: ordersFor(account).map(forPlayer),
       acceptingOrders: wallet !== null,
       wallet,
       spentToday: spentTodayBy(account),
