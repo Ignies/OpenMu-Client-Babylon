@@ -7,9 +7,11 @@ export type GameOptions = {
   shadows: boolean;
   postProcessing: boolean;
   /**
-   * 0 none / 1 standard (`1 - exp(-1.59 x)`) / 2 ACES / 3 Khronos PBR
+   * 0 none / 1 standard (`1 - exp2(-1.59 x)`) / 2 ACES / 3 Khronos PBR
    * Neutral. Runs on the Enhanced/Ultra tiers only: Classic is the
-   * reference client's display-space frame and takes no curve.
+   * reference client's display-space frame and takes no curve. Standard is
+   * the default by measurement (ARCHITECTURE §11.1): Neutral's black offset
+   * put Lorencia's saturation at 0.62 and its shadow B/R at 0.27.
    */
   toneMapper: number;
   /** Player exposure trim in tenths of a stop over the map's own, -10..10. */
@@ -104,7 +106,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
 const DEFAULTS: GameOptions = {
   shadows: true,
   postProcessing: true,
-  toneMapper: 3,
+  toneMapper: 1,
   brightness: 0,
   filmGrain: 0,
   fxaa: false,
@@ -157,7 +159,7 @@ function migrate(stored: Record<string, unknown>): boolean {
   if (present.length === 0) return false;
 
   if ('toneMapping' in stored && !('toneMapper' in stored)) {
-    stored.toneMapper = stored.toneMapping ? 3 : 0;
+    stored.toneMapper = stored.toneMapping ? 1 : 0;
   }
 
   if ('exposure' in stored && !('brightness' in stored)) {

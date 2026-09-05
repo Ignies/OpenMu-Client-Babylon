@@ -41,6 +41,13 @@ const CSM_BIAS = 0.004;
 const CSM_NORMAL_BIAS = 0.03;
 const CSM_BLEND = 0.08;
 
+/**
+ * PCSS light size (Ultra), in shadow-map UV. Babylon's 0.1 default blurs a
+ * figure's shadow to twice the PCF tier's width, which put Ultra 6 % off
+ * Enhanced on p5/p50 for the same frame; wave 2d tunes it by eye.
+ */
+const PCSS_LIGHT_SIZE = 0.04;
+
 type Runtime = {
   scene: Scene;
   tier: LightingTier;
@@ -304,6 +311,7 @@ function createCsm(
     ? ShadowGenerator.FILTER_PCSS
     : ShadowGenerator.FILTER_PCF;
   csm.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
+  csm.contactHardeningLightSizeUVRatio = PCSS_LIGHT_SIZE;
   csm.bias = CSM_BIAS;
   csm.normalBias = CSM_NORMAL_BIAS;
   csm.cascadeBlendPercentage = CSM_BLEND;

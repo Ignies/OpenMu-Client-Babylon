@@ -60,9 +60,11 @@ const POINT_LIGHT_BUDGETS: readonly number[] = [6, 8, 8];
  * engine itself is created without antialiasing (`main.tsx`), so this is the
  * only AA in the chain - and at 4x it is the most expensive single line in
  * the post setup on fill-rate-bound GPUs, because every pass in the chain
- * inherits the multisampled target.
+ * inherits the multisampled target. None on Classic: the original has no
+ * AA, and a linear-space resolve lifts every dark edge pixel (K1 measured
+ * +0.004 on every percentile with 2 samples).
  */
-const PIPELINE_SAMPLE_COUNTS: readonly number[] = [2, 4, 4];
+const PIPELINE_SAMPLE_COUNTS: readonly number[] = [1, 4, 4];
 
 export function pipelineSamples(): number {
   return PIPELINE_SAMPLE_COUNTS[tierIndex()] ?? 4;

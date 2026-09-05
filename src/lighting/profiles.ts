@@ -74,7 +74,8 @@ const ENCLOSED_PROFILE: LookProfile = {
 
 const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
   [ENUM_WORLD.WD_0LORENCIA]: {
-    ev: 1.6,
+    // Measured (wave 1, Standard mapper): 1.6 lands p50 0.424, 1.8 lands 0.451.
+    ev: 1.8,
     whiteBalance: [1.02, 1.0, 0.97],
     sky: OPEN_SKY,
     fog: OPEN_HAZE,
