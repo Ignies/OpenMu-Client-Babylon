@@ -420,7 +420,6 @@ export const russianLayer: LanguageLayer = {
     'cashShop.title': 'Cash-магазин',
     'cashShop.tab.wings': 'Крылья',
     'cashShop.tab.quest': 'Задание',
-    'cashShop.tab.boxes': 'Ящик',
     'cashShop.tab.gacha': 'Gacha',
     'cashShop.loading': 'Магазин загружается...',
     'cashShop.unreachable': 'Магазин недоступен.',

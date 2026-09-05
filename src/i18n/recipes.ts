@@ -459,7 +459,6 @@ export const EN_TEXT = {
   'cashShop.title': 'Cash Shop',
   'cashShop.tab.wings': 'Wings',
   'cashShop.tab.quest': 'Quest',
-  'cashShop.tab.boxes': 'Box',
   'cashShop.tab.gacha': 'Gacha',
   'cashShop.tab.orders': 'Orders',
   'cashShop.loading': 'Loading the shop...',

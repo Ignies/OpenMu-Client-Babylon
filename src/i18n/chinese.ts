@@ -408,7 +408,6 @@ export const chineseLayer: LanguageLayer = {
     'cashShop.title': '商城',
     'cashShop.tab.wings': '翅膀',
     'cashShop.tab.quest': '任务',
-    'cashShop.tab.boxes': '宝箱',
     'cashShop.tab.gacha': '抽奖',
     'cashShop.loading': '正在加载商城...',
     'cashShop.unreachable': '无法连接商城。',

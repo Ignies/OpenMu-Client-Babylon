@@ -428,7 +428,6 @@ export const germanLayer: LanguageLayer = {
     'cashShop.title': 'Cash-Shop',
     'cashShop.tab.wings': 'Flügel',
     'cashShop.tab.quest': 'Quest',
-    'cashShop.tab.boxes': 'Kiste',
     'cashShop.tab.gacha': 'Gacha',
     'cashShop.loading': 'Der Shop wird geladen...',
     'cashShop.unreachable': 'Der Shop ist nicht erreichbar.',

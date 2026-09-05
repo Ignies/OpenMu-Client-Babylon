@@ -41,7 +41,7 @@ export type { Phase, Tier } from './gacha';
  * never for an order the service refused.
  */
 
-export type ProductLine = 'wings' | 'quest' | 'boxes' | 'gacha';
+export type ProductLine = 'wings' | 'quest' | 'gacha';
 
 export interface Product {
   id: string;
