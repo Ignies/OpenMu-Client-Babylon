@@ -240,8 +240,17 @@ export const EN_TEXT = {
   'options.itemEffects.improved': 'Improved',
 
   'trade.offerChanged': 'The other side changed the offer',
+  // ---- session panel -----------------------------------------------------
+  'session.title': 'Session',
+  'session.time': 'Time',
+  'session.exp': 'Exp',
+  'session.kills': 'Kills',
+  'session.zen': 'Zen',
+  'session.toLevel': 'To level',
+  'session.reset': 'Reset',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
+  'keys.sessionStats': 'Session panel',
   'keys.emoteMenu': 'Emote menu',
   'keys.inventory': 'Inventory',
   'keys.characterInfo': 'Character',

@@ -44,6 +44,7 @@ import { SoccerScoreHud } from './components/soccerScore';
 import { DuelWindows } from './components/duel';
 import { Notices } from '../../components/notices';
 import { MapNameBanner } from './components/mapNameBanner';
+import { SessionStatsWindow } from './components/sessionStats';
 import { SlideHelpBar } from '../../components/slideHelp';
 import { DebugMenuWindow } from '../../components/debugMenu';
 
@@ -97,6 +98,7 @@ const HUD = observer(() => {
       <EventWindows />
       <SoccerScoreHud />
       <DuelWindows />
+      <SessionStatsWindow />
       <Minimap />
       {/* Offline only: renders null online (F9). */}
       <DebugMenuWindow />

@@ -1,0 +1,46 @@
+@import (reference) '../../../../components/muText/style.less';
+// The session panel: the move list's black plate, five rows and a reset bar.
+.session-window {
+  position: absolute;
+  left: 240px;
+  top: 8px;
+  transform-origin: top left;
+  pointer-events: auto;
+  user-select: none;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.8);
+  font-size: 11px;
+
+  .session-title {
+    position: absolute;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+    transform: translateX(-50%);
+  }
+
+  .session-label {
+    position: absolute;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .session-value {
+    position: absolute;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+    transform: translateX(-100%);
+  }
+
+  .session-reset {
+    position: absolute;
+    left: 2px;
+    right: 3px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(120, 0, 0, 0.6);
+
+    &:hover {
+      background: rgba(170, 0, 0, 0.7);
+    }
+  }
+}

@@ -1325,5 +1325,13 @@ export const chineseLayer: LanguageLayer = {
     'options.lootOther': '其他全部',
     'options.lootZen': 'Zen 起',
     'trade.offerChanged': '对方修改了交易内容',
+    'keys.sessionStats': '战绩面板',
+    'session.title': '本次游戏',
+    'session.time': '时长',
+    'session.exp': '经验',
+    'session.kills': '击杀',
+    'session.zen': 'Zen',
+    'session.toLevel': '升级还需',
+    'session.reset': '重置',
   },
 };

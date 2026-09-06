@@ -1357,5 +1357,13 @@ export const russianLayer: LanguageLayer = {
     'options.lootOther': 'Всё остальное',
     'options.lootZen': 'Zen от',
     'trade.offerChanged': 'Другая сторона изменила предложение',
+    'keys.sessionStats': 'Панель сессии',
+    'session.title': 'Сессия',
+    'session.time': 'Время',
+    'session.exp': 'Опыт',
+    'session.kills': 'Убийства',
+    'session.zen': 'Zen',
+    'session.toLevel': 'До уровня',
+    'session.reset': 'Сброс',
   },
 };

@@ -1363,5 +1363,13 @@ export const bulgarianLayer: LanguageLayer = {
     'options.lootOther': 'Всичко останало',
     'options.lootZen': 'Zen от',
     'trade.offerChanged': 'Другата страна промени предложението',
+    'keys.sessionStats': 'Панел на сесията',
+    'session.title': 'Сесия',
+    'session.time': 'Време',
+    'session.exp': 'Опит',
+    'session.kills': 'Убийства',
+    'session.zen': 'Zen',
+    'session.toLevel': 'До ниво',
+    'session.reset': 'Нулирай',
   },
 };

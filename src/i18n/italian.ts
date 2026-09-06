@@ -1377,5 +1377,13 @@ export const italianLayer: LanguageLayer = {
     'options.lootOther': 'Tutto il resto',
     'options.lootZen': 'Zen da',
     'trade.offerChanged': 'L’altra parte ha cambiato l’offerta',
+    'keys.sessionStats': 'Pannello sessione',
+    'session.title': 'Sessione',
+    'session.time': 'Tempo',
+    'session.exp': 'Exp',
+    'session.kills': 'Uccisioni',
+    'session.zen': 'Zen',
+    'session.toLevel': 'Al livello',
+    'session.reset': 'Azzera',
   },
 };

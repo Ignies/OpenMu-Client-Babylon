@@ -1333,5 +1333,13 @@ export const japaneseLayer: LanguageLayer = {
     'options.lootOther': 'その他すべて',
     'options.lootZen': 'Zen 以上',
     'trade.offerChanged': '相手が取引内容を変更しました',
+    'keys.sessionStats': 'セッションパネル',
+    'session.title': 'セッション',
+    'session.time': '時間',
+    'session.exp': '経験値',
+    'session.kills': '討伐',
+    'session.zen': 'Zen',
+    'session.toLevel': 'レベルまで',
+    'session.reset': 'リセット',
   },
 };
