@@ -1,14 +1,18 @@
 import {
   Constants,
+  Material,
   PostProcess,
   RawTexture,
   ShaderStore,
+  SmartArray,
   Texture,
   Vector3,
   type ArcRotateCamera,
   type BaseTexture,
   type DepthRenderer,
+  type RenderTargetTexture,
   type Scene,
+  type SubMesh,
 } from '../libs/babylon/exports';
 import { devQuery } from '../common/devSeams';
 import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
@@ -55,7 +59,7 @@ const FACE_SLACK = 0.02;
  */
 const EMIT_LIT = 0.002;
 
-/** Depth renders to wait for before the mask is allowed to black anything. */
+/** Drawn depth renders to wait for before the mask is allowed to black anything. */
 const READY_FRAMES = 2;
 
 type Runtime = {
@@ -255,6 +259,87 @@ function depthTexture(own: DepthRenderer | null): BaseTexture | null {
   return own?.getDepthMap() ?? null;
 }
 
+/** Stand-in for a bucket the depth pass is not meant to draw this time round. */
+const NO_SUBMESHES = new SmartArray<SubMesh>(0);
+
+/** The keyed matter pulled out of the transparent bucket, rebuilt per render. */
+const keyedMatter = new SmartArray<SubMesh>(64);
+const blendOnly = new SmartArray<SubMesh>(64);
+
+/**
+ * Whether the floor drew into the depth map on this render.
+ *
+ * `DepthRenderer.renderSubMesh` stamps the render id on a submesh it drew and
+ * silently skips one whose depth effect is still compiling, so a render is no
+ * proof the map holds anything: the pass's first frames in a room draw into an
+ * empty map, and a mask reading an empty map takes the depth-less branch
+ * everywhere and blacks the room down to its emitters. That is the flash on
+ * entering. The terrain is the one surface the mask cannot be wrong about and
+ * the one that always fills a room's floor, so it is what the gate waits for.
+ */
+function drewFloor(scene: Scene, bucket: SmartArray<SubMesh>): boolean {
+  const id = scene.getRenderId();
+
+  for (let i = 0; i < bucket.length; i++) {
+    const sub = bucket.data[i];
+
+    if (sub._renderId === id && sub.getMesh().metadata?.terrain === true) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Put the room's keyed props into the depth map, and report the renders that
+ * actually drew into it.
+ *
+ * `modelLoader` promotes every TGA-textured mesh to ALPHATESTANDBLEND, which
+ * Babylon files as *transparent*, and the depth renderer draws that bucket only
+ * under `forceDepthWriteTransparentMeshes` - which would take the additive
+ * effect cards with it. Every bottle, candle, stool and rack in a tavern is one
+ * of those keyed meshes, so they wrote no depth and the mask blacked them out
+ * of the room they stand in. They are drawn a second time round through the
+ * opaque slot, keyed by their own texture (`useMeshAlphaTestTexture`); a pure
+ * blend mesh is light rather than matter and still writes nothing.
+ */
+function takeKeyedMatter(
+  map: RenderTargetTexture,
+  scene: Scene,
+  drawn: () => void
+): void {
+  const inner = map.customRenderFunction;
+
+  if (!inner) return;
+
+  map.customRenderFunction = (
+    opaque,
+    alphaTest,
+    transparent,
+    depthOnly,
+    beforeTransparents
+  ) => {
+    keyedMatter.reset();
+    blendOnly.reset();
+
+    for (let i = 0; i < transparent.length; i++) {
+      const sub = transparent.data[i];
+
+      if (sub.getMaterial()?.transparencyMode === Material.MATERIAL_ALPHABLEND) {
+        blendOnly.push(sub);
+      } else {
+        keyedMatter.push(sub);
+      }
+    }
+
+    inner(opaque, alphaTest, NO_SUBMESHES, depthOnly, beforeTransparents);
+    inner(keyedMatter, NO_SUBMESHES, blendOnly, NO_SUBMESHES);
+
+    if (drewFloor(scene, opaque) || drewFloor(scene, alphaTest)) drawn();
+  };
+}
+
 function createPass(scene: Scene, camera: ArcRotateCamera): Runtime {
   registerShader();
 
@@ -266,13 +351,13 @@ function createPass(scene: Scene, camera: ArcRotateCamera): Runtime {
     true
   );
 
-  // The depth map is empty until the renderer has drawn into it at least
-  // once, and an empty map reads as "no depth" everywhere: for those frames
-  // the mask would black the entire room except its emitters, which is the
-  // flash of glowing discs on entering. The pass stays identity until then.
+  // The depth map is empty until the renderer has drawn into it, and an empty
+  // map reads as "no depth" everywhere: for those frames the mask would black
+  // the entire room except its emitters, which is the flash of glowing discs
+  // on entering. The pass stays identity until the floor is in the map.
   let ready = 0;
 
-  ownDepth.getDepthMap().onAfterRenderObservable.add(() => {
+  takeKeyedMatter(ownDepth.getDepthMap(), scene, () => {
     if (ready < READY_FRAMES) ready++;
   });
 

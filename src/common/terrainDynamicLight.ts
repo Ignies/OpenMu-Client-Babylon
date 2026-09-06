@@ -64,7 +64,20 @@ const TOUCHED_MARGIN = 1;
 const tileKey = (x: number, y: number): number =>
   Math.floor(x) * TERRAIN_SIZE * 4 + Math.floor(y);
 
+let generation = 0;
+
+/**
+ * Bumped whenever the lightmap is replaced. A reader that caches a decision
+ * taken from the bake keys it on this: the previous map's bake stays installed
+ * until the next one finishes loading, so an object created in that window
+ * would otherwise cache an answer read off the wrong map.
+ */
+export function bakedTerrainLightGeneration(): number {
+  return generation;
+}
+
 export function initTerrainDynamicLight(liftedBaked: Float32Array): void {
+  generation++;
   baked = liftedBaked;
   primary = liftedBaked.slice();
   floor = new Float32Array(liftedBaked.length);
@@ -83,6 +96,7 @@ export function initTerrainDynamicLight(liftedBaked: Float32Array): void {
 }
 
 export function disposeTerrainDynamicLight(): void {
+  generation++;
   baked = null;
   primary = null;
   floor = null;

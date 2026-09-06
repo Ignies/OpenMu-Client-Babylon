@@ -10,7 +10,10 @@ import {
 } from '../libs/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
 import { devQueryNumber } from '../common/devSeams';
-import { requestBakedTerrainLight } from '../common/terrainDynamicLight';
+import {
+  bakedTerrainLightGeneration,
+  requestBakedTerrainLight,
+} from '../common/terrainDynamicLight';
 import { TERRAIN_SIZE } from '../common/terrain/consts';
 import { sunLightOf } from '../lighting/keyRig';
 import {
@@ -302,9 +305,13 @@ function bakeLumaAt(x: number, z: number): number | null {
  */
 function bakeHoldsShadow(mesh: AbstractMesh): boolean | null {
   const meta = mesh.metadata;
+  const bake = bakedTerrainLightGeneration();
   const cached = meta.bakedShadow;
 
-  if (typeof cached === 'boolean') return cached;
+  // The answer is only worth keeping while the lightmap it was read off is
+  // still the one installed; a map change replaces it under a mesh that
+  // outlives the load.
+  if (typeof cached === 'boolean' && meta.bakedShadowFrom === bake) return cached;
 
   const box = mesh.getBoundingInfo().boundingBox;
   const min = box.minimumWorld;
@@ -369,6 +376,7 @@ function bakeHoldsShadow(mesh: AbstractMesh): boolean | null {
   }
 
   meta.bakedShadow = holds;
+  meta.bakedShadowFrom = bake;
 
   return holds;
 }
@@ -449,6 +457,23 @@ function rebuildFrozenMaterials(scene: Scene): void {
 
 // --- setup -----------------------------------------------------------------
 
+/**
+ * Who enters the map, and how often it is drawn. Both live on the shadow map
+ * itself, and Babylon builds a *new* one on every `numCascades` change
+ * (`recreateShadowMap`), carrying over the render list's contents but neither
+ * the predicate that fills it nor the refresh rate. Left un-hooked, the caster
+ * set freezes to whatever stood in it when the room was entered: nothing
+ * loaded afterwards ever casts, and nothing already in it ever leaves.
+ */
+function hookShadowMap(csm: CascadedShadowGenerator): void {
+  const map = csm.getShadowMap();
+
+  if (!map) return;
+
+  map.renderListPredicate = castsSunShadow;
+  map.refreshRate = refreshDev ?? 1;
+}
+
 function createCsm(
   scene: Scene,
   sun: DirectionalLight,
@@ -483,12 +508,7 @@ function createCsm(
   // They land in the alpha-tested depth pass, keyed by their own texture.
   csm.transparencyShadow = true;
 
-  const map = csm.getShadowMap();
-
-  if (map) {
-    map.renderListPredicate = castsSunShadow;
-    map.refreshRate = refreshDev ?? 1;
-  }
+  hookShadowMap(csm);
 
   // The object materials are shared and carry a placeholder diffuse; the
   // real texture is per mesh (`metadata.diffuseTexture`, see itemMaterial).
@@ -564,7 +584,11 @@ export function syncShadows(
     runtime.csm.shadowMaxZ = reachFor(casters);
     // A cascade count change recreates the map; once per room entered.
     const cascades = cascadesFor(casters, runtime.tier);
-    if (runtime.csm.numCascades !== cascades) runtime.csm.numCascades = cascades;
+
+    if (runtime.csm.numCascades !== cascades) {
+      runtime.csm.numCascades = cascades;
+      hookShadowMap(runtime.csm);
+    }
   }
 
   if (!tier) {
@@ -590,7 +614,11 @@ export function syncShadows(
 
   if (want) {
     const sun = sunLightOf(scene);
+
+    // No rig to hang the cascades on yet: leave the option unapplied so the
+    // next tick tries again instead of latching it as done.
     if (sun) runtime.csm = createCsm(scene, sun, tier, policy);
+    else runtime.shadows = false;
   }
 
   invalidate(scene);
