@@ -1,6 +1,24 @@
 // `CNewUIStorageInventory::RenderText`: the title turns red once a pin is
 // set, the stored zen is gold-coloured and the fee line is red + gold.
 .vault {
+  // The one-click jewel deposit beside the find box.
+  .vault-bulk {
+    position: absolute;
+    height: 14px;
+    line-height: 14px;
+    text-align: center;
+    font-size: 11px;
+    color: #ffe08a;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(120, 100, 70, 0.8);
+    cursor: pointer;
+    pointer-events: auto;
+
+    &:hover {
+      border-color: rgba(255, 204, 26, 0.9);
+    }
+  }
+
   font-size: 11px;
 
   .window-title {

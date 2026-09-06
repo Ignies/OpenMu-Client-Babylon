@@ -8,6 +8,9 @@ import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow } from '../../../../components/muWindow';
 import { ItemGrid } from '../../../../components/itemGrid';
+import { ItemSearchBox, useItemSearch } from '../../../../components/itemSearch';
+import { BulkMove } from '../../../../../common/bulkMove';
+import { isJewel, itemDef } from '../../../../../common/itemStats';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import {
   BUTTON_FRAMES,
@@ -21,8 +24,12 @@ import {
   FEE_LABEL,
   FEE_LABEL_X,
   FEE_TEXT_Y,
+  BULK_WIDTH,
   GRID_X,
   GRID_Y,
+  SEARCH_WIDTH,
+  SEARCH_X,
+  SEARCH_Y,
   HEAD_CLOSE_HEIGHT,
   HEAD_CLOSE_WIDTH,
   HEAD_CLOSE_X,
@@ -56,6 +63,8 @@ const WINDOW_ID = 'vault';
  * money buttons open the zen prompts and the padlock the pin ones.
  */
 export const Vault = observer(() => {
+  const search = useItemSearch();
+
   if (!Economy.vaultOpen) return null;
 
   const picked = Store.pickedItem;
@@ -108,6 +117,25 @@ export const Vault = observer(() => {
         onClick={() => Economy.closeVault()}
       />
 
+      <ItemSearchBox search={search} left={SEARCH_X} top={SEARCH_Y} width={SEARCH_WIDTH} />
+
+      {/* Everything the chaos machine eats, out of the way in one click. */}
+      <div
+        className="vault-bulk"
+        data-no-drag="true"
+        title={t('vault.depositJewelsHint')}
+        style={{ left: SEARCH_X + SEARCH_WIDTH + 4, top: SEARCH_Y, width: BULK_WIDTH }}
+        onClick={() => {
+          if (!unlock()) return;
+          BulkMove.start(StorageKind.Inventory, StorageKind.Vault, item => {
+            const def = itemDef(item.group, item.num);
+            return !!def && isJewel(def);
+          });
+        }}
+      >
+        {t('vault.depositJewels')}
+      </div>
+
       {}
       <ItemGrid
         items={Economy.vaultItems}
@@ -117,6 +145,7 @@ export const Vault = observer(() => {
         top={GRID_Y}
         disabled={!!Store.pendingItemMove}
         dropTint={picked ? (banned ? 'ban' : 'ok') : 'none'}
+        dimmed={search.active ? item => !search.matches(item) : undefined}
         onPick={square => {
           if (!unlock()) return;
           Store.pickItem(StorageKind.Vault, square);
