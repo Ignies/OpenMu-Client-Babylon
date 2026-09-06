@@ -1391,6 +1391,7 @@ export const frenchLayer: LanguageLayer = {
     'trade.offerChanged': 'L’autre côté a modifié l’offre',
     'keys.sortInventory': 'Ranger l’inventaire',
     'notify.inventorySorted': 'Inventaire rangé',
+    'keys.targetNearest': 'Cibler le monstre suivant',
     'warp.favouriteHint': 'Clic droit pour épingler cette carte en haut',
     'search.placeholder': 'Rechercher...',
     'search.hint': 'Tapez pour estomper ce qui ne correspond pas. Échap efface.',

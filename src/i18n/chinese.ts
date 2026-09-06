@@ -1338,6 +1338,7 @@ export const chineseLayer: LanguageLayer = {
     'trade.offerChanged': '对方修改了交易内容',
     'keys.sortInventory': '整理背包',
     'notify.inventorySorted': '背包已整理',
+    'keys.targetNearest': '选中下一个怪物',
     'warp.favouriteHint': '右键收藏此地图并置顶',
     'search.placeholder': '查找...',
     'search.hint': '输入以淡化不匹配的物品，Esc 清除。',

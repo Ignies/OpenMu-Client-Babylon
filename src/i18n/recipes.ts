@@ -259,6 +259,7 @@ export const EN_TEXT = {
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
   'keys.sortInventory': 'Arrange inventory',
+  'keys.targetNearest': 'Target next monster',
   'keys.replyWhisper': 'Reply to whisper',
   'keys.emoteMenu': 'Emote menu',
   'keys.inventory': 'Inventory',

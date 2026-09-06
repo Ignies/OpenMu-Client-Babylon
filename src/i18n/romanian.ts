@@ -1383,6 +1383,7 @@ export const romanianLayer: LanguageLayer = {
     'trade.offerChanged': 'Cealaltă parte a schimbat oferta',
     'keys.sortInventory': 'Aranjează inventarul',
     'notify.inventorySorted': 'Inventar aranjat',
+    'keys.targetNearest': 'Țintește următorul monstru',
     'warp.favouriteHint': 'Clic dreapta pentru a fixa harta în capul listei',
     'search.placeholder': 'Caută...',
     'search.hint': 'Scrie pentru a estompa ce nu se potrivește. Esc șterge.',

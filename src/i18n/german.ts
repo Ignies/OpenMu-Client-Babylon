@@ -1396,6 +1396,7 @@ export const germanLayer: LanguageLayer = {
     'trade.offerChanged': 'Die Gegenseite hat das Angebot geändert',
     'keys.sortInventory': 'Inventar ordnen',
     'notify.inventorySorted': 'Inventar geordnet',
+    'keys.targetNearest': 'Nächstes Monster anvisieren',
     'warp.favouriteHint': 'Rechtsklick markiert diese Karte und hält sie oben',
     'search.placeholder': 'Suchen...',
     'search.hint': 'Tippen, um alles Unpassende auszublenden. Esc löscht.',

@@ -1344,6 +1344,7 @@ export const koreanLayer: LanguageLayer = {
     'trade.offerChanged': '상대가 거래 내용을 바꿨습니다',
     'keys.sortInventory': '인벤토리 정리',
     'notify.inventorySorted': '인벤토리를 정리했습니다',
+    'keys.targetNearest': '다음 몬스터 지정',
     'warp.favouriteHint': '오른쪽 클릭으로 이 맵을 위에 고정',
     'search.placeholder': '찾기...',
     'search.hint': '입력하면 일치하지 않는 것이 흐려집니다. Esc로 지웁니다.',

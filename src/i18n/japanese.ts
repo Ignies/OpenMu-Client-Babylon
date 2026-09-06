@@ -1346,6 +1346,7 @@ export const japaneseLayer: LanguageLayer = {
     'trade.offerChanged': '相手が取引内容を変更しました',
     'keys.sortInventory': '所持品を整理',
     'notify.inventorySorted': '所持品を整理しました',
+    'keys.targetNearest': '次のモンスターを狙う',
     'warp.favouriteHint': '右クリックでこのマップを上に固定',
     'search.placeholder': '検索...',
     'search.hint': '入力すると一致しないものが薄くなります。Esc で消去。',

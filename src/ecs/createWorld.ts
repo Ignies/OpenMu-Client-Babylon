@@ -37,6 +37,7 @@ import { LoginSceneSystem } from './systems/loginSceneSystem';
 import { CharacterSelectSystem } from './systems/characterSelectSystem';
 import { SceneReadySystem } from './systems/sceneReadySystem';
 import { AttackSystem } from './systems/attackSystem';
+import { TargetCycleSystem } from './systems/targetCycleSystem';
 import { MuHelperSystem } from './systems/muHelperSystem';
 import { SkillCastSystem } from './systems/skillCastSystem';
 import { SkillSystem } from './systems/skillSystem';
@@ -66,6 +67,9 @@ const factories: ISystemFactory[] = [
   ItemPickupSystem,
   NpcTalkSystem,
   PlayerControllerSystem,
+  // Before AttackSystem: a key press this frame picks the target the swing
+  // loop then works on, exactly as a click would have.
+  TargetCycleSystem,
   // Before AttackSystem/SkillCastSystem: the helper's cast and pickup
   // requests are consumed the same frame; player input always wins.
   MuHelperSystem,

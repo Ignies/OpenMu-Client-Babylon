@@ -1393,6 +1393,7 @@ export const spanishLayer: LanguageLayer = {
     'trade.offerChanged': 'La otra parte cambió la oferta',
     'keys.sortInventory': 'Ordenar inventario',
     'notify.inventorySorted': 'Inventario ordenado',
+    'keys.targetNearest': 'Seleccionar el siguiente monstruo',
     'warp.favouriteHint': 'Clic derecho para marcar este mapa y mantenerlo arriba',
     'search.placeholder': 'Buscar...',
     'search.hint': 'Escribe para atenuar lo que no coincida. Esc borra.',

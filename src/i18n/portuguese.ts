@@ -1388,6 +1388,7 @@ export const portugueseLayer: LanguageLayer = {
     'trade.offerChanged': 'O outro lado mudou a oferta',
     'keys.sortInventory': 'Organizar inventário',
     'notify.inventorySorted': 'Inventário organizado',
+    'keys.targetNearest': 'Alvejar o próximo monstro',
     'warp.favouriteHint': 'Clique direito para fixar este mapa no topo',
     'search.placeholder': 'Buscar...',
     'search.hint': 'Digite para esmaecer o que não combina. Esc limpa.',

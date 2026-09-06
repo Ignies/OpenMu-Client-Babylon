@@ -1376,6 +1376,7 @@ export const bulgarianLayer: LanguageLayer = {
     'trade.offerChanged': 'Другата страна промени предложението',
     'keys.sortInventory': 'Подреди инвентара',
     'notify.inventorySorted': 'Инвентарът е подреден',
+    'keys.targetNearest': 'Насочи към следващото чудовище',
     'warp.favouriteHint': 'Десен бутон закача картата най-отгоре',
     'search.placeholder': 'Търсене...',
     'search.hint': 'Пишете, за да избледнее всичко, което не съвпада. Esc изчиства.',

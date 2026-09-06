@@ -1356,6 +1356,7 @@ export const thaiLayer: LanguageLayer = {
     'trade.offerChanged': 'อีกฝ่ายเปลี่ยนข้อเสนอ',
     'keys.sortInventory': 'จัดกระเป๋า',
     'notify.inventorySorted': 'จัดกระเป๋าเรียบร้อย',
+    'keys.targetNearest': 'เลือกมอนสเตอร์ถัดไป',
     'warp.favouriteHint': 'คลิกขวาเพื่อปักหมุดแผนที่นี้ไว้ด้านบน',
     'search.placeholder': 'ค้นหา...',
     'search.hint': 'พิมพ์เพื่อให้สิ่งที่ไม่ตรงจางลง กด Esc เพื่อล้าง',

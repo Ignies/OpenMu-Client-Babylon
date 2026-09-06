@@ -1370,6 +1370,7 @@ export const russianLayer: LanguageLayer = {
     'trade.offerChanged': 'Другая сторона изменила предложение',
     'keys.sortInventory': 'Упорядочить инвентарь',
     'notify.inventorySorted': 'Инвентарь упорядочен',
+    'keys.targetNearest': 'Выбрать следующего монстра',
     'warp.favouriteHint': 'Правый клик закрепит карту вверху списка',
     'search.placeholder': 'Поиск...',
     'search.hint': 'Введите текст, чтобы приглушить несовпадающее. Esc очищает.',

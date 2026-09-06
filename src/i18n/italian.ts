@@ -1390,6 +1390,7 @@ export const italianLayer: LanguageLayer = {
     'trade.offerChanged': 'L’altra parte ha cambiato l’offerta',
     'keys.sortInventory': 'Ordina inventario',
     'notify.inventorySorted': 'Inventario ordinato',
+    'keys.targetNearest': 'Bersaglia il mostro successivo',
     'warp.favouriteHint': 'Clic destro per fissare questa mappa in alto',
     'search.placeholder': 'Cerca...',
     'search.hint': 'Digita per sfumare ciò che non corrisponde. Esc cancella.',
