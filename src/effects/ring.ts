@@ -67,7 +67,8 @@ function acquire(texture: string, blend: 'additive' | 'alpha'): TerrainDecal | n
   return pool.pop() ?? new TerrainDecal(world, `fxRing${seq++}`, texture, MAX_SCALE, blend);
 }
 
-function spawn(_scene: Scene, at: Vector3, opts: RingOptions): EffectHandle {
+/** Spawn helper other entries call directly (the level-up circle in bursts.ts). */
+export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): EffectHandle {
   const texture = opts.texture ?? TEX.magicCircle;
   const blend = opts.blend ?? 'additive';
   const decal = acquire(texture, blend);
@@ -119,5 +120,5 @@ export const ringLayer: EffectLayer<RingOptions, 'ring'> = {
   name: 'ring',
   update,
   reset,
-  spawn,
+  spawn: spawnRing,
 };
