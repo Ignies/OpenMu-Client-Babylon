@@ -20,16 +20,14 @@ import type { LookProfile, Rgb } from '../lighting/profiles';
  * it; a small height term is allowed for the water and snow maps.
  */
 
-/** Mask value at which the haze treats a pixel as fully an effect. */
-const FOG_MASK_HI = 0.05;
-
 /**
- * The distance an effect pixel is hazed as if it were at, in tiles, when the
+ * The distance the additive half of a pixel is hazed at, in tiles, when the
  * depth behind it says further. A flame is drawn on top of its background so
  * it is never further away than the depth says; min() can only take haze
- * away. The knee is far lower than the AO's: a one-pixel rain streak lands in
- * the half-resolution mask at a tenth of its brightness and still deserves
- * the cap, or it takes the far water's forty tiles of haze.
+ * away. Roughly "standing where the player is": near fire keeps the haze it
+ * had, far fire is hazed as something at arm's length rather than as the
+ * water behind it. Cancelling it outright reads as a sticker laid over the
+ * frame - the atmosphere does real work softening MU's additive smears.
  */
 const EFFECT_FOG_DISTANCE = 12;
 
@@ -83,8 +81,15 @@ function registerFogShader(): void {
   uniform vec4 fogParams;  // start, density, cap, height density
   uniform float fogBaseY;
 
-  const float FOG_MASK_HI = ${FOG_MASK_HI.toFixed(3)};
   const float EFFECT_FOG_DISTANCE = ${EFFECT_FOG_DISTANCE.toFixed(1)};
+
+  float hazeAt(float dist, float camY, float rdY) {
+    float reach = max(0.0, dist - fogParams.x);
+    float y = camY + rdY * dist;
+    float amount = reach * (fogParams.y + fogParams.w * exp(-max(y - fogBaseY, 0.0)));
+
+    return fogParams.z * (1.0 - exp(-amount));
+  }
 
   void main(void) {
     vec4 color = texture2D(textureSampler, vUV);
@@ -108,19 +113,19 @@ function registerFogShader(): void {
     float dist = length(worldDir) * depth;
     vec3 rd = normalize(worldDir);
 
-    vec3 effect = texture2D(${EFFECT_MASK_SAMPLER}, vUV).rgb;
-    float lit = smoothstep(0.0, FOG_MASK_HI,
-      max(effect.r, max(effect.g, effect.b)));
+    // The depth belongs to the surface, so only the surface may be hazed by
+    // it. The mask holds the additive pass drawn over that surface, at the
+    // same pixels, so the rest of the pixel is the surface itself.
+    vec3 effect = min(texture2D(${EFFECT_MASK_SAMPLER}, vUV).rgb,
+      max(color.rgb, vec3(0.0)));
+    vec3 surface = color.rgb - effect;
 
-    dist = mix(dist, min(dist, EFFECT_FOG_DISTANCE), lit);
+    // Extinction only on the emissive half: the light scattered into the ray
+    // is already added once, by the surface term.
+    float f = hazeAt(dist, camPos.y, rd.y);
+    float fEffect = hazeAt(min(dist, EFFECT_FOG_DISTANCE), camPos.y, rd.y);
 
-    float reach = max(0.0, dist - fogParams.x);
-    float y = camPos.y + rd.y * dist;
-    float amount = reach * (fogParams.y + fogParams.w * exp(-max(y - fogBaseY, 0.0)));
-
-    float f = fogParams.z * (1.0 - exp(-amount));
-
-    gl_FragColor = vec4(mix(color.rgb, fogColor, f), color.a);
+    gl_FragColor = vec4(mix(surface, fogColor, f) + effect * (1.0 - fEffect), color.a);
   }
   `;
 }
