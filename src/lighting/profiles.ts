@@ -12,8 +12,8 @@ export type LookProfile = {
   readonly ev: number;
   /** Per-channel multiplier, each within [0.94, 1.06]. Applied luma-neutral. */
   readonly whiteBalance: Rgb;
-  /** Sky dome zenith and horizon, display sRGB 0..1. Horizon is also the haze colour. Null = enclosed. */
-  readonly sky: { readonly zenith: Rgb; readonly horizon: Rgb } | null;
+  /** The sky the dome draws and the haze reads (sky_atmospherics §3). Null = enclosed. */
+  readonly sky: SkyLook | null;
   /**
    * Distance-gated haze (§4.8): `cap x (1 - exp(-density x max(0, dist - start)))`,
    * in tiles; 0 density = no pass. `height` is the small extra density at
@@ -40,6 +40,29 @@ export type SunSpec = {
   readonly share: number;
 };
 
+/**
+ * A map's sky (sky_atmospherics ARCHITECTURE §3). `horizon` is also the haze
+ * colour, so moving a graded map's pair moves its whole far field: the five
+ * maps that were graded on their pair keep it and take only the new terms.
+ */
+export type SkyLook = {
+  readonly zenith: Rgb;
+  readonly horizon: Rgb;
+  /** Horizon-to-zenith exponent. 1 is the flat linear ramp; above it the horizon band tightens. */
+  readonly curve?: number;
+  /** The sun disc and its halo, display sRGB; null for an overcast map with no disc. */
+  readonly sun?: Rgb | null;
+  /** Halo strength around the sun. */
+  readonly halo?: number;
+  /** Base cloud coverage, 0..1. */
+  readonly clouds?: number;
+};
+
+export const SKY_CURVE_DEFAULT = 0.75;
+export const SKY_HALO_DEFAULT = 0.25;
+export const SKY_CLOUDS_DEFAULT = 0.4;
+export const SKY_SUN_DEFAULT: Rgb = [1.0, 0.96, 0.88];
+
 /** Open sky. Under a roof the bake carries the room, so the key is mostly sky. */
 export const OPEN_SUN_SHARE = 0.6;
 export const ENCLOSED_SUN_SHARE = 0.15;
@@ -58,9 +81,10 @@ export const NO_FOG: LookProfile['fog'] = {
   color: null,
 };
 
-const OPEN_SKY = {
-  zenith: [0.55, 0.68, 0.86] as Rgb,
-  horizon: [0.74, 0.76, 0.8] as Rgb,
+const OPEN_SKY: SkyLook = {
+  zenith: [0.34, 0.55, 0.87],
+  horizon: [0.72, 0.80, 0.90],
+  clouds: 0.4,
 };
 
 const OPEN_HAZE: LookProfile['fog'] = {
@@ -71,7 +95,32 @@ const OPEN_HAZE: LookProfile['fog'] = {
   color: null,
 };
 
+/**
+ * The haze colour the five graded maps were measured on. It used to be their
+ * sky's horizon, which tied the dome to the far field: a sky blue enough to
+ * read as sky would have moved every one of their section 8 rows. The haze
+ * keeps the pair it was graded with and the dome is free.
+ */
+const GRADED_HAZE: LookProfile['fog'] = { ...OPEN_HAZE, color: [0.74, 0.76, 0.8] };
+
 const NOON_SUN = sun(215, 48);
+
+/** Ruins under a heavy deck; Kanturu's two open floors share it. */
+const KANTURU_SKY: SkyLook = {
+  zenith: [0.46, 0.54, 0.66],
+  horizon: [0.7, 0.72, 0.76],
+  clouds: 0.7,
+  halo: 0.12,
+};
+
+/** Karutan: near-clear desert, the disc warm and the halo wide. */
+const DESERT_SKY: SkyLook = {
+  zenith: [0.56, 0.68, 0.84],
+  horizon: [0.88, 0.82, 0.68],
+  sun: [1.0, 0.93, 0.78],
+  halo: 0.35,
+  clouds: 0.2,
+};
 
 /** The interior key: the roof takes the sun, what is left comes from the bake. */
 const INTERIOR_SUN = sun(0, 60, ENCLOSED_SUN_SHARE);
@@ -96,43 +145,114 @@ const PREGAME_PROFILE: LookProfile = {
   ev: 1.0,
 };
 
+/** An open map that takes the default level and haze and only names its sky. */
+const openMap = (sky: SkyLook): LookProfile => ({ ...DEFAULT_PROFILE, sky });
+
 const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
   [ENUM_WORLD.WD_0LORENCIA]: {
     // Measured (wave 1, Standard mapper): 1.6 lands p50 0.424, 1.8 lands 0.451.
     ev: 1.8,
     whiteBalance: [1.02, 1.0, 0.97],
     sky: OPEN_SKY,
-    fog: OPEN_HAZE,
+    fog: GRADED_HAZE,
     sun: NOON_SUN,
   },
   [ENUM_WORLD.WD_3NORIA]: {
     ev: 1.5,
     whiteBalance: [0.98, 1.02, 0.98],
-    sky: { zenith: [0.5, 0.66, 0.84], horizon: [0.72, 0.78, 0.72] },
-    fog: OPEN_HAZE,
+    sky: { zenith: [0.30, 0.53, 0.85], horizon: [0.74, 0.83, 0.84], clouds: 0.35 },
+    fog: { ...OPEN_HAZE, color: [0.72, 0.78, 0.72] },
     sun: NOON_SUN,
   },
   [ENUM_WORLD.WD_2DEVIAS]: {
     ev: 0.8,
     whiteBalance: [0.97, 0.99, 1.04],
-    sky: { zenith: [0.62, 0.72, 0.86], horizon: [0.7, 0.76, 0.86] },
-    fog: { start: 20, density: 0.012, cap: 0.9, height: 0.02, color: null },
+    sky: { zenith: [0.44, 0.62, 0.88], horizon: [0.78, 0.85, 0.92], clouds: 0.7 },
+    fog: { start: 20, density: 0.012, cap: 0.9, height: 0.02, color: [0.7, 0.76, 0.86] },
     sun: sun(200, 35),
   },
   [ENUM_WORLD.WD_8TARKAN]: {
     ev: 1.2,
     whiteBalance: [1.04, 1.0, 0.94],
-    sky: { zenith: [0.6, 0.7, 0.84], horizon: [0.86, 0.8, 0.66] },
-    fog: { start: 25, density: 0.01, cap: 0.9, height: 0, color: null },
+    sky: {
+      zenith: [0.40, 0.58, 0.86],
+      horizon: [0.90, 0.84, 0.70],
+      sun: [1.0, 0.94, 0.8],
+      halo: 0.35,
+      clouds: 0.15,
+    },
+    fog: { start: 25, density: 0.01, cap: 0.9, height: 0, color: [0.86, 0.8, 0.66] },
     sun: sun(220, 55),
   },
   [ENUM_WORLD.WD_6STADIUM]: {
     ev: 1.4,
     whiteBalance: [1, 1, 1],
-    sky: OPEN_SKY,
-    fog: { start: 25, density: 0.006, cap: 0.8, height: 0, color: null },
+    sky: { ...OPEN_SKY, clouds: 0.3 },
+    fog: { start: 25, density: 0.006, cap: 0.8, height: 0, color: [0.74, 0.76, 0.8] },
     sun: sun(215, 50),
   },
+
+  // The remaining open maps (sky_atmospherics §7). Each keeps the ev, fog and
+  // sun it has today: only the sky is authored here, against the map's own
+  // art rather than against a Lorencia gate.
+  [ENUM_WORLD.WD_79UNITEDMARKETPLACE]: openMap({ ...OPEN_SKY, clouds: 0.45 }),
+  [ENUM_WORLD.WD_30BATTLECASTLE]: openMap({ ...OPEN_SKY, clouds: 0.4 }),
+  [ENUM_WORLD.WD_33AIDA]: openMap({
+    zenith: [0.34, 0.42, 0.62],
+    horizon: [0.62, 0.66, 0.72],
+    clouds: 0.55,
+    halo: 0.15,
+  }),
+  [ENUM_WORLD.WD_34CRYWOLF_1ST]: openMap({
+    zenith: [0.45, 0.56, 0.78],
+    horizon: [0.72, 0.72, 0.74],
+    clouds: 0.6,
+  }),
+  [ENUM_WORLD.WD_35CRYWOLF_2ND]: openMap({
+    zenith: [0.45, 0.56, 0.78],
+    horizon: [0.72, 0.72, 0.74],
+    clouds: 0.6,
+  }),
+  [ENUM_WORLD.WD_51ELBELAND]: openMap({
+    zenith: [0.48, 0.68, 0.86],
+    horizon: [0.76, 0.82, 0.76],
+    clouds: 0.35,
+  }),
+  [ENUM_WORLD.WD_37KANTURU_1ST]: openMap(KANTURU_SKY),
+  [ENUM_WORLD.WD_38KANTURU_2ND]: openMap(KANTURU_SKY),
+  [ENUM_WORLD.WD_80KARUTAN1]: openMap(DESERT_SKY),
+  [ENUM_WORLD.WD_81KARUTAN2]: openMap(DESERT_SKY),
+  [ENUM_WORLD.WD_57ICECITY]: openMap({
+    zenith: [0.52, 0.64, 0.84],
+    horizon: [0.74, 0.8, 0.88],
+    clouds: 0.5,
+  }),
+  [ENUM_WORLD.WD_62SANTA_TOWN]: openMap({
+    zenith: [0.5, 0.62, 0.82],
+    horizon: [0.8, 0.84, 0.9],
+    // A snowfall sky has no disc to show through it.
+    sun: null,
+    clouds: 0.75,
+  }),
+  [ENUM_WORLD.WD_56MAP_SWAMP_OF_QUIET]: openMap({
+    zenith: [0.4, 0.5, 0.6],
+    horizon: [0.68, 0.7, 0.64],
+    clouds: 0.65,
+    halo: 0.15,
+  }),
+  [ENUM_WORLD.WD_63PK_FIELD]: openMap({
+    zenith: [0.44, 0.44, 0.54],
+    horizon: [0.82, 0.66, 0.56],
+    sun: [1.0, 0.82, 0.62],
+    clouds: 0.6,
+  }),
+  [ENUM_WORLD.WD_31HUNTING_GROUND]: openMap(OPEN_SKY),
+  [ENUM_WORLD.WD_9DEVILSQUARE]: openMap(OPEN_SKY),
+  [ENUM_WORLD.WD_18CHAOS_CASTLE]: openMap(OPEN_SKY),
+  [ENUM_WORLD.WD_65DOPPLEGANGER1]: openMap(OPEN_SKY),
+  [ENUM_WORLD.WD_69EMPIREGUARDIAN1]: openMap({ ...OPEN_SKY, clouds: 0.45 }),
+  [ENUM_WORLD.WD_70EMPIREGUARDIAN2]: openMap({ ...OPEN_SKY, clouds: 0.45 }),
+  [ENUM_WORLD.WD_71EMPIREGUARDIAN3]: openMap({ ...OPEN_SKY, clouds: 0.45 }),
   [ENUM_WORLD.WD_1DUNGEON]: {
     ...ENCLOSED_PROFILE,
     ev: 1.0,

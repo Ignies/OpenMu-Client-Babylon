@@ -50,6 +50,11 @@ export type GameOptions = {
   itemEffects: number;
   /** Leaves, snow, tavern dust (GPU particle backbone). */
   ambientParticles: boolean;
+  /**
+   * The volumetric cloud deck and the shadows it casts, together: they are
+   * one field, and splitting them lets a shadow have no cloud above it.
+   */
+  clouds: boolean;
   /** Rain driven by the server weather packet. */
   weatherEffects: boolean;
   /**
@@ -123,6 +128,7 @@ const DEFAULTS: GameOptions = {
   effectLevel: 4,
   itemEffects: 2,
   ambientParticles: true,
+  clouds: true,
   weatherEffects: true,
   animatedWater: true,
   advancedEffects: true,

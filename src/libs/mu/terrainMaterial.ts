@@ -17,6 +17,13 @@ import {
 } from '../../common/lightModel';
 import { lookDirector } from '../../lighting/director';
 import {
+  bindClouds,
+  cloudFieldGlsl,
+  CLOUD_NOISE_SAMPLER,
+  CLOUD_UNIFORMS,
+} from '../../lighting/clouds';
+import { SKY_CLOUDS_DEFAULT } from '../../lighting/profiles';
+import {
   LIGHT_TINT_UNIFORM,
   lightTintGlsl,
   lightTintStrength,
@@ -234,6 +241,7 @@ ${water && water.frames.length ? `  uniform sampler2D waterFlip;` : ''}
 
 ${terrainOverlayDeclarationsGlsl(overlays)}
 ${lightTintGlsl()}
+${tileArray ? cloudFieldGlsl() : ''}
 
   ${terrainCsmGlsl()}
 
@@ -278,6 +286,11 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
     // the room itself is the active area (roomShadow): then its furniture
     // and figures cast on the floor under the roof as well.
     float sunShadow = mix(1.0, csmShadow(vWorldPos, vViewZ), max(skyOpen, roomParams.x));
+
+    // A cloud takes the sun and leaves the sky share, the same one rule, on
+    // the same openness mask the cascades use: a floor under a roof takes no
+    // cloud shadow.
+${tileArray ? '    sunShadow *= mix(1.0, muCloudShadow(vWorldPos), skyOpen);' : ''}
 
     // The one shadow rule: a shadow removes the sun and leaves the sky share
     // (csmParams.y, the policy floor). 1 while Classic (no cascades).
@@ -366,6 +379,7 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
         'keyGain',
         'roomParams',
         LIGHT_TINT_UNIFORM,
+        ...(tileArray ? CLOUD_UNIFORMS : []),
         ...(tileArray ? ['tileScales'] : []),
         ...terrainOverlayUniforms(overlays),
         ...(water ? terrainWaterUniforms() : []),
@@ -379,6 +393,9 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
       // nothing to keep.
       samplers: [
         'dynamicLight',
+        // The cloud field rides the packed path only: the per-tile fallback
+        // already spends every one of WebGL's guaranteed 16 fragment units.
+        ...(tileArray ? [CLOUD_NOISE_SAMPLER] : []),
         ...(hasTrail(overlays) ? ['ovTrail'] : []),
         ...(water ? terrainWaterSamplers(water) : []),
         'csmShadowMap',
@@ -414,6 +431,18 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
     effect.setFloat('keyGain', look?.keyGain ?? 1);
     effect.setFloat3('roomParams', look?.area ? 1 : 0, look?.key.emitterGain ?? 1, look?.key.roomShare ?? 1);
     effect.setFloat(LIGHT_TINT_UNIFORM, lightTintStrength());
+
+    if (tileArray) {
+      bindClouds(effect, scene, {
+        // Null while the map has no sky, and inside a room, where `applyArea`
+        // clears it: the deck is not overhead, so it casts nothing.
+        base: look?.profile.sky
+          ? look.profile.sky.clouds ?? SKY_CLOUDS_DEFAULT
+          : null,
+        sunDirection: look?.key.direction ?? [0, -1, 0],
+        sunElevationDeg: look?.profile.sun.elevationDeg ?? 45,
+      });
+    }
     if (tileArray) {
       effect.setTexture('tileTextures', tileArray.texture);
       effect.setFloatArray('tileScales', tileArray.scales);

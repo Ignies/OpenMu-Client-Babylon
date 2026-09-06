@@ -28,6 +28,14 @@ const glowScratch = { r: 0, g: 0, b: 0, a: 1 };
 import { loadMuSprite } from '../libs/mu/sprites';
 import { sunLightOf } from '../lighting/keyRig';
 import {
+  bindClouds,
+  cloudFieldGlsl,
+  CLOUD_NOISE_SAMPLER,
+  CLOUD_UNIFORMS,
+} from '../lighting/clouds';
+import { lookDirector } from '../lighting/director';
+import { SKY_CLOUDS_DEFAULT } from '../lighting/profiles';
+import {
   LIGHT_TINT_UNIFORM,
   lightTintGlsl,
   lightTintStrength,
@@ -198,13 +206,37 @@ const halfLambertGlsl = (target: string, albedo: string) => {
   #ifdef ${WRAP_DEFINE}
   {
     float hlDot = dot(normalW, -${SUN_DIR_UNIFORM});
-    float hlFill = max(max(hlDot * ${f(scale)} + ${f(bias)}, ${f(floor)}) - max(hlDot, 0.0), 0.0);
+    float hlWrap = max(max(hlDot * ${f(scale)} + ${f(bias)}, ${f(floor)}), 0.0);
+    float hlFill = max(hlWrap - max(hlDot, 0.0), 0.0);
     float hlShadow = numLights > 0.0 ? clamp(aggShadow * numLights - (numLights - 1.0), 0.0, 1.0) : 1.0;
     ${target} += ${SUN_COLOR_UNIFORM} * hlFill * hlShadow${albedo ? ` * ${albedo}` : ''};
+
+    // The block above leaves the sun's whole contribution at
+    // sunColor x hlWrap x hlShadow, so a cloud is one subtraction from it and
+    // identity at cloud 1. One rule with the terrain's: a cloud removes the
+    // sun and leaves the sky share.
+    ${target} -= ${SUN_COLOR_UNIFORM} * hlWrap * hlShadow *
+      (1.0 - muCloudShadow(vPositionW))${albedo ? ` * ${albedo}` : ''};
   }
   #endif
 `;
 };
+
+/**
+ * The cloud deck the wrap term subtracts. Null while the map has no sky and
+ * inside a room, so the shadow is identity there.
+ */
+function bindItemClouds(effect: Effect, scene: Scene): void {
+  const look = lookDirector()?.state();
+
+  bindClouds(effect, scene, {
+    base: look?.profile.sky
+      ? look.profile.sky.clouds ?? SKY_CLOUDS_DEFAULT
+      : null,
+    sunDirection: look?.key.direction ?? [0, -1, 0],
+    sunElevationDeg: look?.profile.sun.elevationDeg ?? 45,
+  });
+}
 
 /** Per-draw sun uniforms for the half-lambert term; unread without `MU_WRAP`. */
 function bindSunWrap(effect: Effect, mesh: AbstractMesh) {
@@ -510,6 +542,8 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
   material.AddUniform('ancientColor', 'vec3', null);
   material.AddUniform('itemGlow', 'vec3', null);
   material.AddUniform(LIGHT_TINT_UNIFORM, 'float', 0);
+  material.AddUniform(CLOUD_NOISE_SAMPLER, 'sampler2D', textures.chrome);
+  for (const name of CLOUD_UNIFORMS) material.AddUniform(name, 'vec4', null);
   material.AddUniform('chromeSampler', 'sampler2D', textures.chrome);
   material.AddUniform('shinySampler', 'sampler2D', textures.shiny);
   material.AddUniform('chrome2Sampler', 'sampler2D', textures.chrome2);
@@ -523,6 +557,7 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
 function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
   effect.setFloat('time', time + (mesh.metadata?.timeOffset ?? 0));
   effect.setFloat(LIGHT_TINT_UNIFORM, lightTintStrength());
+  bindItemClouds(effect, mesh.getScene());
 
   bindSunWrap(effect, mesh);
 
@@ -748,7 +783,7 @@ export function createItemMaterial(
 
   if (!bright && !flatLit) addLitDefines(simpleMaterial, scene);
 
-  simpleMaterial.Fragment_Definitions(lightTintGlsl());
+  simpleMaterial.Fragment_Definitions(lightTintGlsl() + cloudFieldGlsl(false));
 
   // Glow cards and flat-lit UI models never take a cap; the uniform is
   // still declared for them (addItemUniforms) and simply unread.
@@ -885,7 +920,7 @@ export function createItemPbrMaterial(scene: Scene) {
   material.AddUniform('muEmissiveSampler', 'sampler2D', flat.black);
   addLitDefines(material, scene);
 
-  material.Fragment_Definitions(lightTintGlsl());
+  material.Fragment_Definitions(lightTintGlsl() + cloudFieldGlsl(false));
 
   // BodyLight: the bake's flat per-object light (the unified model). The
   // albedo texel is already decoded (GAMMAALBEDO); the bake - a display-
