@@ -326,14 +326,18 @@ ${cloudFieldGlsl()}
     float t = k / (b + sqrt(b * b + k));
     vec2 p = cameraPosition.xz + rd.xz * t;
 
-    float d = muCloudCover(p);
+    // One read of the weather that groups the clouds, carried through the
+    // march: its cells are hundreds of tiles and the march's offsets are tens.
+    float cover = muCloudLocalCover(p);
+
+    float d = muCloudCover(p, cover);
     if (d <= 0.0) return vec4(0.0);
 
     float shadow = 0.0;
 
     for (int i = 1; i <= CLOUD_LIGHT_STEPS; i++) {
       float f = float(i) / float(CLOUD_LIGHT_STEPS);
-      shadow += muCloudCover(p + muCloudB.xy * muCloudB.w * f);
+      shadow += muCloudCover(p + muCloudB.xy * muCloudB.w * f, cover);
     }
 
     float lit = exp(-${CLOUD_SELF_SHADOW.toFixed(2)} * shadow / float(CLOUD_LIGHT_STEPS));

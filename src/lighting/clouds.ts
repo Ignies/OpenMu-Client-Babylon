@@ -56,8 +56,34 @@ const DETAIL_WIND = 1.15;
 /** What the detail octave adds to the shape octave, either way. */
 const CLOUD_DETAIL = 0.45;
 
-/** How wide the coverage threshold's soft edge is. */
+/** How wide the coverage threshold's soft edge is, on the dome. */
 const CLOUD_SOFT = 0.3;
+
+/**
+ * How wide it is for a shadow on the ground.
+ *
+ * The dome shows a cloud's silhouette, which is a crisp edge; the ground shows
+ * the shadow of a body 70 tiles thick, lit by a sun half a degree wide, and
+ * that edge is not crisp at all. Sharing one threshold gave the ground harder
+ * edges than the clouds casting them. The band is widened around the same
+ * midpoint, so the share of ground in shadow does not move.
+ */
+const CLOUD_SHADOW_SOFT = 0.75;
+
+/**
+ * How far local coverage swings around the map's base, as a share of the room
+ * it has on the nearer side of 0 or 1.
+ *
+ * An equalised field cut at one threshold covers the share of sky it promises,
+ * but it spreads it evenly: islands of much the same size, scattered at much
+ * the same spacing, which is popcorn rather than weather. Real skies clump -
+ * masses over here, open lanes over there. Rolling the threshold itself over a
+ * very coarse octave is what clumps them, and because that octave is flat
+ * around 0.5 the average coverage stays exactly what the map authored. Adding
+ * it to the field instead would have piled the sum back around the middle and
+ * cost the threshold its meaning.
+ */
+const CLOUD_CLUMP = 0.9;
 
 /**
  * Slow drift around the map's base coverage, and the slot it is rolled in.
@@ -93,6 +119,17 @@ export const CLOUD_UNIFORMS = ['muCloudA', 'muCloudB', 'muCloudC'] as const;
  * is in before it reads as one object rather than as texture.
  */
 const OCTAVE_SCALE = [0.0035, 0.0125] as const;
+
+/**
+ * UV per world tile for the octave that clumps the coverage: one wrap is about
+ * 1110 tiles and its coarsest cell about 280, so seven or eight of them span
+ * the sky from horizon to horizon. Any finer and it breaks the clouds up
+ * rather than grouping them.
+ */
+const CLUMP_SCALE = 0.0009;
+
+/** How much slower the weather drifts than the clouds it is grouping. */
+const CLUMP_WIND = 0.45;
 
 /** Wrapped into [0, 1): a scroll of epoch seconds is millions of UV units, and
  * a float there has no fractional resolution left, which quantises the whole
@@ -282,10 +319,11 @@ export function bindClouds(
   const cover = live ? coverage(look.base ?? 0) : 0;
   const t = serverNow() / 1000;
 
-  // Both octaves ride the same wind, so the deck drifts as one; the detail
-  // rides it slightly faster, so it also changes shape on the way. Each offset
-  // is handed over already in UV units and already wrapped - `WIND` is tiles a
-  // second and a UV unit is `1 / OCTAVE_SCALE` tiles.
+  // Every octave rides the same wind, so the deck drifts as one; the detail
+  // rides it slightly faster so the shape also changes on the way, and the
+  // weather that groups the clouds rides it slower than the clouds do. Each
+  // offset is handed over already in UV units and already wrapped - `WIND` is
+  // tiles a second and a UV unit is `1 / scale` tiles.
   effect.setFloat4(
     'muCloudA',
     wrapUv(WIND[0] * t * OCTAVE_SCALE[0]),
@@ -298,8 +336,8 @@ export function bindClouds(
     'muCloudC',
     wrapUv(WIND[0] * DETAIL_WIND * t * OCTAVE_SCALE[1]),
     wrapUv(WIND[1] * DETAIL_WIND * t * OCTAVE_SCALE[1]),
-    0,
-    0
+    wrapUv(WIND[0] * CLUMP_WIND * t * CLUMP_SCALE),
+    wrapUv(WIND[1] * CLUMP_WIND * t * CLUMP_SCALE)
   );
 
   // The light travels along `sunDirection`, so a point walks against it to
@@ -332,7 +370,7 @@ ${
     ? `  uniform sampler2D ${CLOUD_NOISE_SAMPLER};
   uniform vec4 muCloudA;   // octave 1 scroll uv, coverage, shadow strength
   uniform vec4 muCloudB;   // sun step x, sun step z, altitude, thickness
-  uniform vec4 muCloudC;   // octave 2 scroll uv`
+  uniform vec4 muCloudC;   // octave 2 scroll uv, clump octave scroll uv`
     : ''
 }
 
@@ -366,10 +404,39 @@ ${
     return clamp(a + (b - 0.5) * ${CLOUD_DETAIL.toFixed(3)}, 0.0, 1.0);
   }
 
-  float muCloudCover(vec2 p) {
-    float edge = 1.0 - muCloudA.z;
+  /**
+   * The map's base coverage, rolled over a very coarse octave so the sky has
+   * crowded stretches and open ones. That octave is flat around 0.5 like the
+   * shape one, and the swing is scaled by the room left on the nearer side of
+   * 0 or 1, so the average is the base the profile authored and neither end
+   * clips.
+   *
+   * Read once per fragment and passed along: the light march's offsets are
+   * tens of tiles and a clump cell is hundreds, so re-reading it at every step
+   * would cost four more fetches to arrive at the same number.
+   */
+  float muCloudLocalCover(vec2 p) {
+    float w = texture2D(${CLOUD_NOISE_SAMPLER}, muSmoothUV(fract(p * ${CLUMP_SCALE} + muCloudC.zw))).r;
+    float room = min(muCloudA.z, 1.0 - muCloudA.z);
 
-    return smoothstep(edge, edge + ${CLOUD_SOFT.toFixed(3)}, muCloudField(p));
+    return muCloudA.z + (w - 0.5) * 2.0 * ${CLOUD_CLUMP.toFixed(3)} * room;
+  }
+
+  /**
+   * The threshold, with the width of its soft edge left to the caller: the
+   * dome draws a silhouette and the ground receives a shadow, and those two
+   * edges are not the same edge. Widening is symmetric about the midpoint the
+   * dome's band already had, so no width moves the share of sky covered.
+   */
+  float muCloudThreshold(vec2 p, float cover, float soft) {
+    float mid = 1.0 - cover + ${CLOUD_SOFT.toFixed(3)} * 0.5;
+
+    return smoothstep(mid - soft * 0.5, mid + soft * 0.5, muCloudField(p));
+  }
+
+  /** The silhouette the dome draws, at a coverage it read once for itself. */
+  float muCloudCover(vec2 p, float cover) {
+    return muCloudThreshold(p, cover, ${CLOUD_SOFT.toFixed(3)});
   }
 
   /** 1 in the open, less under a cloud. Identity while the strength is 0. */
@@ -379,7 +446,7 @@ ${
     float rise = max(muCloudB.z - worldPos.y, 0.0);
     vec2 p = worldPos.xz + muCloudB.xy * rise;
 
-    return 1.0 - muCloudA.w * muCloudCover(p);
+    return 1.0 - muCloudA.w * muCloudThreshold(p, muCloudLocalCover(p), ${CLOUD_SHADOW_SOFT.toFixed(3)});
   }
 `;
 }
