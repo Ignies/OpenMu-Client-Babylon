@@ -17,6 +17,7 @@ import { ENUM_WORLD } from './common';
 import { EventBus } from './libs/eventBus';
 import { installLoginMusic } from './libs/loginMusic';
 import { setKeyProfile } from './common/keyBindings';
+import { SessionResume } from './common/sessionResume';
 import { reaction } from 'mobx';
 import { watchStateWarnings } from './common/stateWarnings';
 import {
@@ -34,6 +35,11 @@ if (APP_STAGE === 'dev' || QA_ENABLED) {
 installUiWindowChime();
 // Durability / full grid / last potion / buff ending, on the notice banner.
 watchStateWarnings();
+
+// What a lost game server socket does before falling back to the server
+// list. Wired here rather than in logic.ts, which the store's own module
+// graph reaches before `Store` exists.
+Store.resumeHook = () => SessionResume.retry() || SessionResume.begin();
 
 // Hot keys are per character: the shared set is what a new one starts from.
 reaction(

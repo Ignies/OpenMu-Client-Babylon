@@ -220,6 +220,7 @@ const TABS: Tab[] = [
               display: v => `${Math.round(uiScaleFactor(v) * 100)}%`,
             }),
             check('lockWindows', -1, 'options.lockWindows'),
+            check('autoReconnect', -1, 'options.autoReconnect'),
             {
               kind: 'button',
               id: 'reset-windows',
