@@ -1388,6 +1388,8 @@ export const italianLayer: LanguageLayer = {
     'warn.noPotions': 'Non ci sono più pozioni curative',
     'warn.buffEnding': '{name} sta per finire',
     'trade.offerChanged': 'L’altra parte ha cambiato l’offerta',
+    'keys.sortInventory': 'Ordina inventario',
+    'notify.inventorySorted': 'Inventario ordinato',
     'keys.targetNearest': 'Bersaglia il mostro successivo',
     'warp.favouriteHint': 'Clic destro per fissare questa mappa in alto',
     'search.placeholder': 'Cerca...',

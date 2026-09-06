@@ -1368,6 +1368,8 @@ export const russianLayer: LanguageLayer = {
     'warn.noPotions': 'Лечебные зелья закончились',
     'warn.buffEnding': '{name} скоро закончится',
     'trade.offerChanged': 'Другая сторона изменила предложение',
+    'keys.sortInventory': 'Упорядочить инвентарь',
+    'notify.inventorySorted': 'Инвентарь упорядочен',
     'keys.targetNearest': 'Выбрать следующего монстра',
     'warp.favouriteHint': 'Правый клик закрепит карту вверху списка',
     'search.placeholder': 'Поиск...',

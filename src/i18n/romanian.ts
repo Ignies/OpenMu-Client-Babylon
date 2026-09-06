@@ -1381,6 +1381,8 @@ export const romanianLayer: LanguageLayer = {
     'warn.noPotions': 'Nu mai sunt poțiuni de viață',
     'warn.buffEnding': '{name} este pe cale să se termine',
     'trade.offerChanged': 'Cealaltă parte a schimbat oferta',
+    'keys.sortInventory': 'Aranjează inventarul',
+    'notify.inventorySorted': 'Inventar aranjat',
     'keys.targetNearest': 'Țintește următorul monstru',
     'warp.favouriteHint': 'Clic dreapta pentru a fixa harta în capul listei',
     'search.placeholder': 'Caută...',

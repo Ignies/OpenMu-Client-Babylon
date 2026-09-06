@@ -1342,6 +1342,8 @@ export const koreanLayer: LanguageLayer = {
     'warn.noPotions': '회복 물약이 없습니다',
     'warn.buffEnding': '{name}이(가) 곧 끝납니다',
     'trade.offerChanged': '상대가 거래 내용을 바꿨습니다',
+    'keys.sortInventory': '인벤토리 정리',
+    'notify.inventorySorted': '인벤토리를 정리했습니다',
     'keys.targetNearest': '다음 몬스터 지정',
     'warp.favouriteHint': '오른쪽 클릭으로 이 맵을 위에 고정',
     'search.placeholder': '찾기...',
