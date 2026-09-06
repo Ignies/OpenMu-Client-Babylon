@@ -26,6 +26,7 @@ export type KeyAction =
   | 'skillList'
   | 'muHelper'
   | 'muHelperConfig'
+  | 'targetNearest';
   | 'replyWhisper';
 
 export type KeyBindings = Record<KeyAction, string>;
@@ -48,6 +49,7 @@ export const KEY_ACTION_LABEL_KEYS: Record<KeyAction, TextKey> = {
   skillList: 'keys.skillList',
   muHelper: 'keys.muHelper',
   muHelperConfig: 'keys.muHelperConfig',
+  targetNearest: 'keys.targetNearest',
   replyWhisper: 'keys.replyWhisper',
 };
 
@@ -76,6 +78,7 @@ const DEFAULTS: KeyBindings = {
   // stands in for the panel here.
   muHelperConfig: 'End',
   // No original analog: the arrange run is this client's own.
+  targetNearest: 'KeyN',
   replyWhisper: 'KeyY',
 };
 

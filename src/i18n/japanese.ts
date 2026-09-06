@@ -1344,6 +1344,7 @@ export const japaneseLayer: LanguageLayer = {
     'warn.noPotions': '回復ポーションがありません',
     'warn.buffEnding': '{name} がまもなく切れます',
     'trade.offerChanged': '相手が取引内容を変更しました',
+    'keys.targetNearest': '次のモンスターを狙う',
     'warp.favouriteHint': '右クリックでこのマップを上に固定',
     'search.placeholder': '検索...',
     'search.hint': '入力すると一致しないものが薄くなります。Esc で消去。',

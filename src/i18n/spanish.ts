@@ -1391,6 +1391,7 @@ export const spanishLayer: LanguageLayer = {
     'warn.noPotions': 'No quedan pociones de vida',
     'warn.buffEnding': '{name} está a punto de acabar',
     'trade.offerChanged': 'La otra parte cambió la oferta',
+    'keys.targetNearest': 'Seleccionar el siguiente monstruo',
     'warp.favouriteHint': 'Clic derecho para marcar este mapa y mantenerlo arriba',
     'search.placeholder': 'Buscar...',
     'search.hint': 'Escribe para atenuar lo que no coincida. Esc borra.',

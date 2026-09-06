@@ -1394,6 +1394,7 @@ export const germanLayer: LanguageLayer = {
     'warn.noPotions': 'Keine Heiltränke mehr',
     'warn.buffEnding': '{name} läuft gleich ab',
     'trade.offerChanged': 'Die Gegenseite hat das Angebot geändert',
+    'keys.targetNearest': 'Nächstes Monster anvisieren',
     'warp.favouriteHint': 'Rechtsklick markiert diese Karte und hält sie oben',
     'search.placeholder': 'Suchen...',
     'search.hint': 'Tippen, um alles Unpassende auszublenden. Esc löscht.',
