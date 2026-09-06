@@ -1344,5 +1344,10 @@ export const japaneseLayer: LanguageLayer = {
     'warn.noPotions': '回復ポーションがありません',
     'warn.buffEnding': '{name} がまもなく切れます',
     'trade.offerChanged': '相手が取引内容を変更しました',
+    'search.placeholder': '検索...',
+    'search.hint': '入力すると一致しないものが薄くなります。Esc で消去。',
+    'vault.depositJewels': '宝石',
+    'vault.depositJewelsHint': '所持品の宝石をすべて倉庫へ移す',
+    'notify.itemsMoved': '{count} 個のアイテムを移動しました',
   },
 };

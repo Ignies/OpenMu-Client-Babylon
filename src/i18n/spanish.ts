@@ -1391,5 +1391,10 @@ export const spanishLayer: LanguageLayer = {
     'warn.noPotions': 'No quedan pociones de vida',
     'warn.buffEnding': '{name} está a punto de acabar',
     'trade.offerChanged': 'La otra parte cambió la oferta',
+    'search.placeholder': 'Buscar...',
+    'search.hint': 'Escribe para atenuar lo que no coincida. Esc borra.',
+    'vault.depositJewels': 'Joyas',
+    'vault.depositJewelsHint': 'Mover todas las joyas del inventario al almacén',
+    'notify.itemsMoved': '{count} objetos movidos',
   },
 };

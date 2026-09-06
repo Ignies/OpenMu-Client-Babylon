@@ -1342,5 +1342,10 @@ export const koreanLayer: LanguageLayer = {
     'warn.noPotions': '회복 물약이 없습니다',
     'warn.buffEnding': '{name}이(가) 곧 끝납니다',
     'trade.offerChanged': '상대가 거래 내용을 바꿨습니다',
+    'search.placeholder': '찾기...',
+    'search.hint': '입력하면 일치하지 않는 것이 흐려집니다. Esc로 지웁니다.',
+    'vault.depositJewels': '보석',
+    'vault.depositJewelsHint': '인벤토리의 보석을 모두 창고로 옮깁니다',
+    'notify.itemsMoved': '아이템 {count}개를 옮겼습니다',
   },
 };

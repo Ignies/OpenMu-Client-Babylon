@@ -1394,5 +1394,10 @@ export const germanLayer: LanguageLayer = {
     'warn.noPotions': 'Keine Heiltränke mehr',
     'warn.buffEnding': '{name} läuft gleich ab',
     'trade.offerChanged': 'Die Gegenseite hat das Angebot geändert',
+    'search.placeholder': 'Suchen...',
+    'search.hint': 'Tippen, um alles Unpassende auszublenden. Esc löscht.',
+    'vault.depositJewels': 'Juwelen',
+    'vault.depositJewelsHint': 'Alle Juwelen aus dem Inventar ins Lager legen',
+    'notify.itemsMoved': '{count} Gegenstände verschoben',
   },
 };

@@ -1374,5 +1374,10 @@ export const bulgarianLayer: LanguageLayer = {
     'warn.noPotions': 'Няма лечебни отвари',
     'warn.buffEnding': '{name} скоро свършва',
     'trade.offerChanged': 'Другата страна промени предложението',
+    'search.placeholder': 'Търсене...',
+    'search.hint': 'Пишете, за да избледнее всичко, което не съвпада. Esc изчиства.',
+    'vault.depositJewels': 'Камъни',
+    'vault.depositJewelsHint': 'Премести всички камъни от инвентара в склада',
+    'notify.itemsMoved': 'Преместени предмета: {count}',
   },
 };

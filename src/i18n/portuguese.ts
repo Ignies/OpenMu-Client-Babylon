@@ -1386,5 +1386,10 @@ export const portugueseLayer: LanguageLayer = {
     'warn.noPotions': 'Sem poções de vida',
     'warn.buffEnding': '{name} está prestes a acabar',
     'trade.offerChanged': 'O outro lado mudou a oferta',
+    'search.placeholder': 'Buscar...',
+    'search.hint': 'Digite para esmaecer o que não combina. Esc limpa.',
+    'vault.depositJewels': 'Joias',
+    'vault.depositJewelsHint': 'Mover todas as joias do inventário para o baú',
+    'notify.itemsMoved': '{count} itens movidos',
   },
 };

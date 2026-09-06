@@ -1,0 +1,22 @@
+@import (reference) '../muText/style.less';
+// The find box over an item grid: a thin dark plate, the game's own font.
+.item-search {
+  position: absolute;
+  height: 14px;
+  padding: 0 4px;
+  border: 1px solid rgba(120, 100, 70, 0.8);
+  background: rgba(0, 0, 0, 0.6);
+  .mu-font();
+  font-size: 11px;
+  color: #fff;
+  outline: none;
+  pointer-events: auto;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  &:focus {
+    border-color: rgba(255, 204, 26, 0.9);
+  }
+}

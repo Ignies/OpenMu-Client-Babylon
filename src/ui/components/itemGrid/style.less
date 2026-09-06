@@ -46,12 +46,15 @@
 }
 
 .mu-grid-item {
-  }
-
   // A trade square that changed after we accepted: ringed until we read it.
   &.marked {
     box-shadow: inset 0 0 0 1px rgba(255, 80, 60, 0.95);
     animation: mu-grid-marked 0.9s ease-in-out infinite alternate;
+  }
+
+  // What the find box does not match.
+  &.dimmed {
+    opacity: 0.25;
   }
 
   position: absolute;

@@ -1389,5 +1389,10 @@ export const frenchLayer: LanguageLayer = {
     'warn.noPotions': 'Plus de potions de soin',
     'warn.buffEnding': '{name} va se terminer',
     'trade.offerChanged': 'L’autre côté a modifié l’offre',
+    'search.placeholder': 'Rechercher...',
+    'search.hint': 'Tapez pour estomper ce qui ne correspond pas. Échap efface.',
+    'vault.depositJewels': 'Joyaux',
+    'vault.depositJewelsHint': 'Envoyer tous les joyaux de l’inventaire au coffre',
+    'notify.itemsMoved': '{count} objets déplacés',
   },
 };

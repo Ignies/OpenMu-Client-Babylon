@@ -1388,5 +1388,10 @@ export const italianLayer: LanguageLayer = {
     'warn.noPotions': 'Non ci sono più pozioni curative',
     'warn.buffEnding': '{name} sta per finire',
     'trade.offerChanged': 'L’altra parte ha cambiato l’offerta',
+    'search.placeholder': 'Cerca...',
+    'search.hint': 'Digita per sfumare ciò che non corrisponde. Esc cancella.',
+    'vault.depositJewels': 'Gioielli',
+    'vault.depositJewelsHint': 'Sposta tutti i gioielli dall’inventario al deposito',
+    'notify.itemsMoved': '{count} oggetti spostati',
   },
 };
