@@ -18,6 +18,7 @@ import { EventBus } from './libs/eventBus';
 import { installLoginMusic } from './libs/loginMusic';
 import { setKeyProfile } from './common/keyBindings';
 import { reaction } from 'mobx';
+import { watchStateWarnings } from './common/stateWarnings';
 import {
   preloadPregameSprites,
   preloadWorldSprites,
@@ -31,6 +32,8 @@ if (APP_STAGE === 'dev' || QA_ENABLED) {
 }
 
 installUiWindowChime();
+// Durability / full grid / last potion / buff ending, on the notice banner.
+watchStateWarnings();
 
 // Hot keys are per character: the shared set is what a new one starts from.
 reaction(

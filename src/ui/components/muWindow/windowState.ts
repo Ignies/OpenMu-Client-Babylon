@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { LocalStorage } from '../../../libs/localStorage';
 import { getUiViewport, onUiViewportChanged } from '../uiStage';
+import { GameOptions, uiScaleFactor } from '../../../common/gameOptions';
 
 const STORAGE_KEY = 'mu-windows';
 
@@ -90,9 +91,21 @@ export const MuWindows = new (class _MuWindows {
     return Math.min(MAX_SCALE, Math.max(fit, 0.25));
   }
 
-  /** The scale the window is drawn at: the saved scale, capped so it fits. */
+  /**
+   * The scale the window is drawn at: the saved scale times the interface
+   * scale from the options, capped so the whole window still fits.
+   */
   scaleOf(id: string): number {
-    return Math.min(this.placement(id).scale, this.fitScaleOf(id));
+    const wanted = this.placement(id).scale * uiScaleFactor(GameOptions.uiScale);
+    return Math.min(wanted, this.fitScaleOf(id));
+  }
+
+  /** Every window back to its default corner and size. */
+  resetAll(): void {
+    runInAction(() => {
+      this.placements = {};
+    });
+    this.save();
   }
 
   // ---- the stack ----------------------------------------------------------

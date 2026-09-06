@@ -19,6 +19,12 @@ export const TITLE: TextKey = 'vault.title';
 export const TITLE_UNLOCKED: TextKey = 'vault.unlocked';
 export const TITLE_LOCKED: TextKey = 'vault.locked';
 
+/** The find box and the jewel button share the strip under the title. */
+export const SEARCH_X = GRID_X;
+export const SEARCH_Y = 21;
+export const SEARCH_WIDTH = 106;
+export const BULK_WIDTH = 46;
+
 export const MONEY_SPRITE = 'newui_item_money3.OZT';
 export const MONEY_X = 10;
 export const MONEY_Y = 342;

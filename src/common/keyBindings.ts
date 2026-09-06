@@ -27,6 +27,8 @@ export type KeyAction =
   | 'muHelper'
   | 'muHelperConfig'
   | 'hideUi';
+  | 'targetNearest';
+  | 'replyWhisper';
 
 export type KeyBindings = Record<KeyAction, string>;
 
@@ -49,6 +51,8 @@ export const KEY_ACTION_LABEL_KEYS: Record<KeyAction, TextKey> = {
   muHelper: 'keys.muHelper',
   muHelperConfig: 'keys.muHelperConfig',
   hideUi: 'keys.hideUi',
+  targetNearest: 'keys.targetNearest',
+  replyWhisper: 'keys.replyWhisper',
 };
 
 export const KEY_ACTIONS = Object.keys(KEY_ACTION_LABEL_KEYS) as KeyAction[];
@@ -77,6 +81,8 @@ const DEFAULTS: KeyBindings = {
   muHelperConfig: 'End',
   // No original analog: the arrange run is this client's own.
   hideUi: 'KeyH',
+  targetNearest: 'KeyN',
+  replyWhisper: 'KeyY',
 };
 
 /** Keys that cannot be bound: they already mean something else. */

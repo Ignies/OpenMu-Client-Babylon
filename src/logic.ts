@@ -1197,6 +1197,9 @@ EventBus.on('ChatMessage', packet => {
     if (Social.blockWhisper) return;
     playUiSound('whisper');
     Social.addChatLine(sender, message, ChatLineType.Whisper);
+    runInAction(() => {
+      Social.lastWhisperFrom = sender;
+    });
     if (!Social.whisperTarget) Social.setWhisperTarget(sender);
     return;
   }
