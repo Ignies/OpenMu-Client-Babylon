@@ -128,15 +128,21 @@ function fireKind(
     update(p, f) {
       if (p.lifeTime < opts.fadeBelow) {
         p.alpha -= f * 0.2;
+
+        // Only a particle on its way out is cut here. The ramp below starts
+        // at 0 and climbs by a frame-scaled step, so testing it against a
+        // fixed floor killed every particle whose first frame was shorter
+        // than the original's tick: half of them at 60 Hz (the step lands on
+        // 0.083 or 0.125), all of them past 120, which left a torch with
+        // nothing but its flare card.
+        if (p.alpha < 0.1) {
+          p.live = false;
+          return;
+        }
       } else if (p.alpha < 1) {
         p.alpha += f * (rand(2) + 2) * 0.1;
       } else {
         p.alpha = 1;
-      }
-
-      if (p.alpha < 0.1) {
-        p.live = false;
-        return;
       }
 
       p.lr = p.tr * p.alpha;

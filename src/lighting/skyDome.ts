@@ -74,6 +74,23 @@ const DISC_EDGE_DEG = 0.35;
 const CLOUD_STEPS = 5;
 
 /**
+ * The slab's tonal range, which is the whole of whether a cloud reads as a
+ * body or as a stain on the dome.
+ *
+ * `LIT_GAIN` lifts a sunlit top above the sky it sits in - a cloud that is not
+ * brighter than the sky behind it is a smudge - and `BASE_SHADE` is what the
+ * underside keeps, lit by the sky beneath it rather than by the sun.
+ * `SELF_SHADOW` is how hard the deck standing overhead cuts the sun on the way
+ * down, so the shading follows the shape instead of a fixed gradient.
+ */
+const CLOUD_LIT_GAIN = 1.35;
+const CLOUD_BASE_SHADE = 0.5;
+const CLOUD_SELF_SHADOW = 3.2;
+
+/** Optical depth a fully covered ray gathers: how solid a thick cloud reads. */
+const CLOUD_DENSITY = 5;
+
+/**
  * How far along a ray the deck is still drawn, in tiles. Past this the
  * intersection with the cloud plane grows without bound and one noise texel
  * would cover the whole skyline.
@@ -242,11 +259,17 @@ ${cloudFieldGlsl()}
   const int CLOUD_STEPS = ${CLOUD_STEPS};
 
   /**
-   * The deck as a slab rather than a painted band: the ray is intersected
-   * with the cloud plane at a few heights and the samples accumulated front
-   * to back, so the layer has a lit top, a shaded base and a silhouette that
-   * changes as the camera turns. Sky pixels only, and nothing at or below the
-   * horizon, where the plane intersection runs away.
+   * The deck as a slab the light is marched through, rather than a painted
+   * band. The ray is intersected with the cloud plane at a few heights, and at
+   * each one a second sample is taken a step up the *sun* ray: that is how
+   * much deck stands between this point and the sun, so the top of a cloud
+   * comes out lit and its underside sits in its own shadow. The samples are
+   * composited front to back (the camera is always under the deck, so the base
+   * is the near side), which is what gives an edge its translucency and a
+   * body its depth.
+   *
+   * Sky pixels only, and nothing at or below the horizon, where the plane
+   * intersection runs away.
    */
   vec4 muCloudSlab(vec3 rd, vec3 sunLit, vec3 base) {
     if (muCloudA.z <= 0.01) return vec4(0.0);
@@ -257,30 +280,38 @@ ${cloudFieldGlsl()}
     // into the horizon instead.
     float up = max(rd.y, 0.06);
     float thickness = muCloudB.w;
-    vec3 lit = mix(base, sunLit, 0.65);
 
-    float acc = 0.0;
-    float top = 0.0;
+    vec3 sunTop = sunLit * ${CLOUD_LIT_GAIN.toFixed(2)};
+    vec3 shade = base * ${CLOUD_BASE_SHADE.toFixed(2)};
+
+    vec3 colour = vec3(0.0);
+    float trans = 1.0;
 
     for (int i = 0; i < CLOUD_STEPS; i++) {
       float f = float(i) / float(CLOUD_STEPS - 1);
       float h = muCloudB.z + thickness * f;
       float t = min((h - cameraPosition.y) / up, ${CLOUD_FAR.toFixed(1)});
+      vec2 p = cameraPosition.xz + rd.xz * t;
 
-      float d = muCloudCover(cameraPosition.xz + rd.xz * t);
+      float d = muCloudCover(p);
+      if (d <= 0.0) continue;
 
-      acc += d;
-      top = mix(top, d, f);
+      // The deck left overhead along the sun ray: none at the top, the whole
+      // thickness at the base.
+      float rise = 1.0 - f;
+      float above = muCloudCover(p + muCloudB.xy * thickness * rise);
+      float lit = exp(-${CLOUD_SELF_SHADOW.toFixed(2)} * above * rise);
+
+      float a = 1.0 - exp(-${CLOUD_DENSITY.toFixed(2)} * d / float(CLOUD_STEPS));
+
+      colour += trans * a * mix(shade, sunTop, lit);
+      trans *= 1.0 - a;
     }
 
-    float density = acc / float(CLOUD_STEPS);
-    // Beer's law on what the ray gathered, so a thin edge stays translucent.
-    float alpha = 1.0 - exp(-5.0 * density);
+    float alpha = 1.0 - trans;
+    if (alpha <= 0.0) return vec4(0.0);
 
-    // The top of the slab sees the sun, the underside sees the sky below it.
-    vec3 body = mix(base * 0.72, lit, clamp(top * 1.6, 0.0, 1.0));
-
-    return vec4(body, alpha * smoothstep(0.006, 0.05, rd.y));
+    return vec4(colour / alpha, alpha * smoothstep(0.006, 0.05, rd.y));
   }
 
   void main(void) {

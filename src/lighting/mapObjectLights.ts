@@ -96,7 +96,14 @@ const EMPIRE_GUARDIAN_4_LIGHTS: Partial<
 > = {
   79: [
     {
-      sprite: { scale: 2, color: [1, 0.2, 0] },
+      // Breathing, like the wall torch below it. A flare card that holds one
+      // value while the plume moves is what makes a brazier read as a jet
+      // rather than as something burning.
+      sprite: {
+        scale: 2,
+        color: [1, 0.2, 0],
+        pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
+      },
       pointRange: 6,
       wander: 0.08,
       terrain: {
