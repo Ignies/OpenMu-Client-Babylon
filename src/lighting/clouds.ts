@@ -36,8 +36,18 @@ const NOISE_SIZE = 512;
 export const CLOUD_ALT = 60;
 export const CLOUD_THICK = 20;
 
-/** Tiles a second the deck drifts. */
-const WIND = [0.55, 0.32] as const;
+/**
+ * Tiles a second the deck drifts. One wrap of the shape octave is about 95
+ * tiles and the visible sky is roughly one wrap across, so this is a cloud
+ * crossing the sky in about a minute: read as moving without pulling the eye.
+ */
+const WIND = [1.6, 0.95] as const;
+
+/** How much faster the detail octave rides, so the deck evolves as it drifts. */
+const DETAIL_WIND = 1.15;
+
+/** What the detail octave adds to the shape octave, either way. */
+const CLOUD_DETAIL = 0.45;
 
 /** How wide the coverage threshold's soft edge is. */
 const CLOUD_SOFT = 0.3;
@@ -122,10 +132,15 @@ function cloudNoise(scene: Scene): RawTexture {
   octave(acc, 16, 0.15, 0x9cadbecf);
   octave(acc, 32, 0.08, 0xd0e1f203);
 
-  // Three averaged octaves of value noise pile up around the middle, so the
-  // raw field never reaches the coverage threshold and the sky stays empty.
-  // Stretching it onto its own range is what makes `coverage` mean the share
-  // of sky it says it is.
+  // Averaged octaves of value noise pile up around the middle whatever range
+  // they are stretched onto, and a coverage threshold read against that
+  // distribution has almost no travel: at 0.4 only the rare peaks clear the
+  // line and the sky is a field of specks, by 0.85 the whole field is over it
+  // and the sky is a white blanket. Nothing in between is a cloud.
+  //
+  // Flattening the histogram is what makes `coverage` mean the share of sky it
+  // says it is. The map is monotone, so it moves no shape - every texel keeps
+  // its rank, and only the values between them are respaced.
   let lo = Infinity;
   let hi = -Infinity;
   for (const v of acc) {
@@ -134,9 +149,24 @@ function cloudNoise(scene: Scene): RawTexture {
   }
   const span = hi - lo || 1;
 
+  const BINS = 4096;
+  const histogram = new Uint32Array(BINS);
+  const binOf = (v: number): number =>
+    Math.min(BINS - 1, Math.floor(((v - lo) / span) * BINS));
+
+  for (const v of acc) histogram[binOf(v)]++;
+
+  // The CDF: a texel's new value is the share of the field below it.
+  const cdf = new Float32Array(BINS);
+  let below = 0;
+  for (let i = 0; i < BINS; i++) {
+    below += histogram[i];
+    cdf[i] = below / acc.length;
+  }
+
   const bytes = new Uint8Array(NOISE_SIZE * NOISE_SIZE * 4);
   for (let i = 0; i < acc.length; i++) {
-    const v = Math.max(0, Math.min(255, Math.round(((acc[i] - lo) / span) * 255)));
+    const v = Math.round(cdf[binOf(acc[i])] * 255);
     bytes[i * 4] = v;
     bytes[i * 4 + 1] = v;
     bytes[i * 4 + 2] = v;
@@ -228,20 +258,22 @@ export function bindClouds(
   const cover = live ? coverage(look.base ?? 0) : 0;
   const t = serverNow() / 1000;
 
-  // The two octaves scroll at their own rates, and each offset is handed over
-  // already in UV units and already wrapped.
+  // Both octaves ride the same wind, so the deck drifts as one; the detail
+  // rides it slightly faster, so it also changes shape on the way. Each offset
+  // is handed over already in UV units and already wrapped - `WIND` is tiles a
+  // second and a UV unit is `1 / OCTAVE_SCALE` tiles.
   effect.setFloat4(
     'muCloudA',
-    wrapUv(WIND[0] * t * OCTAVE_SCALE[0] * 0.38),
-    wrapUv(WIND[1] * t * OCTAVE_SCALE[0] * 0.38),
+    wrapUv(WIND[0] * t * OCTAVE_SCALE[0]),
+    wrapUv(WIND[1] * t * OCTAVE_SCALE[0]),
     cover,
     live ? shadowStrength(look.sunElevationDeg) : 0
   );
 
   effect.setFloat4(
     'muCloudC',
-    wrapUv(-WIND[0] * t * OCTAVE_SCALE[1] * 0.34),
-    wrapUv(-WIND[1] * t * OCTAVE_SCALE[1] * 0.34),
+    wrapUv(WIND[0] * DETAIL_WIND * t * OCTAVE_SCALE[1]),
+    wrapUv(WIND[1] * DETAIL_WIND * t * OCTAVE_SCALE[1]),
     0,
     0
   );
@@ -296,11 +328,18 @@ ${
     return (i + f * f * (3.0 - 2.0 * f) - 0.5) / ${NOISE_SIZE}.0;
   }
 
+  /**
+   * The shape octave's values are flat across [0, 1] (the field's histogram is
+   * equalised when it is built), so a threshold on it cuts the share of sky it
+   * promises. The detail octave only pushes that value either way to break the
+   * edges up: averaging the two would pile the sum back around the middle,
+   * which is the one thing the threshold cannot work against.
+   */
   float muCloudField(vec2 p) {
     float a = texture2D(${CLOUD_NOISE_SAMPLER}, muSmoothUV(fract(p * ${OCTAVE_SCALE[0]} + muCloudA.xy))).r;
     float b = texture2D(${CLOUD_NOISE_SAMPLER}, muSmoothUV(fract(p * ${OCTAVE_SCALE[1]} + muCloudC.xy))).r;
 
-    return a * 0.65 + b * 0.35;
+    return clamp(a + (b - 0.5) * ${CLOUD_DETAIL.toFixed(3)}, 0.0, 1.0);
   }
 
   float muCloudCover(vec2 p) {
