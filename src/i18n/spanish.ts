@@ -1380,5 +1380,10 @@ export const spanishLayer: LanguageLayer = {
     'options.lootOther': 'Todo lo demás',
     'options.lootZen': 'Zen desde',
     'trade.offerChanged': 'La otra parte cambió la oferta',
+    'search.placeholder': 'Buscar...',
+    'search.hint': 'Escribe para atenuar lo que no coincida. Esc borra.',
+    'vault.depositJewels': 'Joyas',
+    'vault.depositJewelsHint': 'Mover todas las joyas del inventario al almacén',
+    'notify.itemsMoved': '{count} objetos movidos',
   },
 };

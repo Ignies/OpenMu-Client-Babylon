@@ -1343,5 +1343,10 @@ export const thaiLayer: LanguageLayer = {
     'options.lootOther': 'ที่เหลือทั้งหมด',
     'options.lootZen': 'Zen ตั้งแต่',
     'trade.offerChanged': 'อีกฝ่ายเปลี่ยนข้อเสนอ',
+    'search.placeholder': 'ค้นหา...',
+    'search.hint': 'พิมพ์เพื่อให้สิ่งที่ไม่ตรงจางลง กด Esc เพื่อล้าง',
+    'vault.depositJewels': 'อัญมณี',
+    'vault.depositJewelsHint': 'ย้ายอัญมณีทั้งหมดจากกระเป๋าไปที่คลัง',
+    'notify.itemsMoved': 'ย้ายไอเทม {count} ชิ้น',
   },
 };

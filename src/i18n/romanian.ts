@@ -1370,5 +1370,10 @@ export const romanianLayer: LanguageLayer = {
     'options.lootOther': 'Restul',
     'options.lootZen': 'Zen de la',
     'trade.offerChanged': 'Cealaltă parte a schimbat oferta',
+    'search.placeholder': 'Caută...',
+    'search.hint': 'Scrie pentru a estompa ce nu se potrivește. Esc șterge.',
+    'vault.depositJewels': 'Bijuterii',
+    'vault.depositJewelsHint': 'Mută toate bijuteriile din inventar în depozit',
+    'notify.itemsMoved': '{count} obiecte mutate',
   },
 };

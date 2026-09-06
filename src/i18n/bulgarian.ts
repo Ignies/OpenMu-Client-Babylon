@@ -1363,5 +1363,10 @@ export const bulgarianLayer: LanguageLayer = {
     'options.lootOther': 'Всичко останало',
     'options.lootZen': 'Zen от',
     'trade.offerChanged': 'Другата страна промени предложението',
+    'search.placeholder': 'Търсене...',
+    'search.hint': 'Пишете, за да избледнее всичко, което не съвпада. Esc изчиства.',
+    'vault.depositJewels': 'Камъни',
+    'vault.depositJewelsHint': 'Премести всички камъни от инвентара в склада',
+    'notify.itemsMoved': 'Преместени предмета: {count}',
   },
 };

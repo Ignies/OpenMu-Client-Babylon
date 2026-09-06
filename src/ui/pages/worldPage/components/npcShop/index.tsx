@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { useMemo, useRef, useState } from 'react';
 import { Store } from '../../../../../store';
 import { ItemIcon } from '../../../../components/itemIcon';
+import { ItemSearchBox, useItemSearch } from '../../../../components/itemSearch';
 import { ItemTooltip } from '../../../../components/itemTooltip';
 import { Item } from '../../../../../ecs/world';
 import {
@@ -52,6 +53,9 @@ import {
   SQUARES,
   TAX_Y,
   TITLE,
+  SEARCH_WIDTH,
+  SEARCH_X,
+  SEARCH_Y,
   TITLE_Y,
   TAX,
 } from './layout';
@@ -108,6 +112,7 @@ type HoverInfo = { entry: Placed; x: number; y: number };
  */
 export const NpcShop = observer(() => {
   const shop = Store.npcShop;
+  const search = useItemSearch();
   const gridRef = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<HoverInfo | null>(null);
 
@@ -205,6 +210,8 @@ export const NpcShop = observer(() => {
         onClick={() => Store.closeNpcShop()}
       />
 
+      <ItemSearchBox search={search} left={SEARCH_X} top={SEARCH_Y} width={SEARCH_WIDTH} />
+
       <MuTableFrame
         left={GRID_FRAME_X}
         top={GRID_FRAME_Y}
@@ -247,7 +254,11 @@ export const NpcShop = observer(() => {
         {placed.map(entry => (
           <div
             key={entry.slot}
-            className="shop-item"
+            className={
+              search.active && !search.matches(entry.item)
+                ? 'shop-item dimmed'
+                : 'shop-item'
+            }
             style={{
               left: entry.column * SQUARE,
               top: entry.row * SQUARE,

@@ -1357,5 +1357,10 @@ export const russianLayer: LanguageLayer = {
     'options.lootOther': 'Всё остальное',
     'options.lootZen': 'Zen от',
     'trade.offerChanged': 'Другая сторона изменила предложение',
+    'search.placeholder': 'Поиск...',
+    'search.hint': 'Введите текст, чтобы приглушить несовпадающее. Esc очищает.',
+    'vault.depositJewels': 'Камни',
+    'vault.depositJewelsHint': 'Переместить все камни из инвентаря в хранилище',
+    'notify.itemsMoved': 'Перемещено предметов: {count}',
   },
 };

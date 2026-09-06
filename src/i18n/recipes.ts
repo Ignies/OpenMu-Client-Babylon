@@ -240,6 +240,11 @@ export const EN_TEXT = {
   'options.itemEffects.improved': 'Improved',
 
   'trade.offerChanged': 'The other side changed the offer',
+  // ---- find box ----------------------------------------------------------
+  'search.placeholder': 'Find...',
+  'search.hint': 'Type to fade everything that does not match. Esc clears.',
+  'vault.depositJewels': 'Jewels',
+  'vault.depositJewelsHint': 'Move every jewel from the inventory into the vault',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
   'keys.emoteMenu': 'Emote menu',
@@ -1374,6 +1379,7 @@ export const EN_TEXT = {
   'notify.merchantRefuses': 'The merchant does not want that item',
   'notify.noInventoryRoom': 'There is no room in the inventory',
   'notify.noRoomForItem': 'There is no room for that item',
+  'notify.itemsMoved': '{count} items moved',
   'notify.learnedSkill': 'You have learned {name}',
   'notify.storageOpen': 'You cannot use items while the storage is open',
   'notify.upgradeNeedsServer': 'Upgrading needs a server',

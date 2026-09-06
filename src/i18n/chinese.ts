@@ -1325,5 +1325,10 @@ export const chineseLayer: LanguageLayer = {
     'options.lootOther': '其他全部',
     'options.lootZen': 'Zen 起',
     'trade.offerChanged': '对方修改了交易内容',
+    'search.placeholder': '查找...',
+    'search.hint': '输入以淡化不匹配的物品，Esc 清除。',
+    'vault.depositJewels': '宝石',
+    'vault.depositJewelsHint': '把背包里的所有宝石放入仓库',
+    'notify.itemsMoved': '已移动 {count} 件物品',
   },
 };

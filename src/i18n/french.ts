@@ -1378,5 +1378,10 @@ export const frenchLayer: LanguageLayer = {
     'options.lootOther': 'Tout le reste',
     'options.lootZen': 'Zen à partir de',
     'trade.offerChanged': 'L’autre côté a modifié l’offre',
+    'search.placeholder': 'Rechercher...',
+    'search.hint': 'Tapez pour estomper ce qui ne correspond pas. Échap efface.',
+    'vault.depositJewels': 'Joyaux',
+    'vault.depositJewelsHint': 'Envoyer tous les joyaux de l’inventaire au coffre',
+    'notify.itemsMoved': '{count} objets déplacés',
   },
 };
