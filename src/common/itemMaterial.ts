@@ -27,6 +27,11 @@ import {
 const glowScratch = { r: 0, g: 0, b: 0, a: 1 };
 import { loadMuSprite } from '../libs/mu/sprites';
 import { sunLightOf } from '../lighting/keyRig';
+import {
+  LIGHT_TINT_UNIFORM,
+  lightTintGlsl,
+  lightTintStrength,
+} from '../lighting/lightTint';
 import { devQuery, devQueryNumbers } from './devSeams';
 import {
   SNOW_CAP_COLOUR,
@@ -311,6 +316,7 @@ const UNCLAMP = `
   #else
     color.rgb = muArt * muLight;
   #endif
+    color.rgb = muLightTint(color.rgb, muLight);
   }
 `;
 
@@ -503,6 +509,7 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
   material.AddUniform('chrome2Color', 'vec3', null);
   material.AddUniform('ancientColor', 'vec3', null);
   material.AddUniform('itemGlow', 'vec3', null);
+  material.AddUniform(LIGHT_TINT_UNIFORM, 'float', 0);
   material.AddUniform('chromeSampler', 'sampler2D', textures.chrome);
   material.AddUniform('shinySampler', 'sampler2D', textures.shiny);
   material.AddUniform('chrome2Sampler', 'sampler2D', textures.chrome2);
@@ -515,6 +522,7 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
  */
 function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
   effect.setFloat('time', time + (mesh.metadata?.timeOffset ?? 0));
+  effect.setFloat(LIGHT_TINT_UNIFORM, lightTintStrength());
 
   bindSunWrap(effect, mesh);
 
@@ -740,6 +748,8 @@ export function createItemMaterial(
 
   if (!bright && !flatLit) addLitDefines(simpleMaterial, scene);
 
+  simpleMaterial.Fragment_Definitions(lightTintGlsl());
+
   // Glow cards and flat-lit UI models never take a cap; the uniform is
   // still declared for them (addItemUniforms) and simply unread.
   simpleMaterial.Fragment_Custom_Diffuse(`
@@ -875,6 +885,8 @@ export function createItemPbrMaterial(scene: Scene) {
   material.AddUniform('muEmissiveSampler', 'sampler2D', flat.black);
   addLitDefines(material, scene);
 
+  material.Fragment_Definitions(lightTintGlsl());
+
   // BodyLight: the bake's flat per-object light (the unified model). The
   // albedo texel is already decoded (GAMMAALBEDO); the bake - a display-
   // domain value like the texel - is decoded the same way before it meets
@@ -895,6 +907,7 @@ ${snowCapGlsl('surfaceAlbedo')}
   material.Fragment_Before_Fog(`
     finalColor.rgb += texture2D(muEmissiveSampler, vAlbedoUV).rgb * ${PBR_EMISSIVE_GAIN} * ${DETAIL_UNIFORM};
 ${halfLambertGlsl('finalColor.rgb', 'surfaceAlbedo')}
+    finalColor.rgb = muLightTint(finalColor.rgb, diffuseBase);
   `);
 
   material.Fragment_Before_FragColor(legacyPasses(PBR_VARS));

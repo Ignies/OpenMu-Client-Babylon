@@ -17,6 +17,11 @@ import {
 } from '../../common/lightModel';
 import { lookDirector } from '../../lighting/director';
 import {
+  LIGHT_TINT_UNIFORM,
+  lightTintGlsl,
+  lightTintStrength,
+} from '../../lighting/lightTint';
+import {
   TERRAIN_CSM_UNIFORMS,
   bindTerrainCsm,
   registerTerrainMaterial,
@@ -204,6 +209,7 @@ ${water ? terrainWaterVertexGlsl(water.spec) : ''}
   uniform float linearOut;
   uniform float linearLight;
   uniform float keyGain;
+  uniform float ${LIGHT_TINT_UNIFORM};
   uniform vec3 roomParams; // x: a room is the active area, y: gain on the delta (AreaLook.candles), z: the room's share of the key on the bake
 ${
   tileArray
@@ -227,6 +233,7 @@ ${water && water.frames.length ? `  uniform sampler2D waterFlip;` : ''}
   const float GROUND_CEIL_ROOM = ${(GROUND_CEIL_ASYMPTOTE - GROUND_CEIL_KNEE).toFixed(3)};
 
 ${terrainOverlayDeclarationsGlsl(overlays)}
+${lightTintGlsl()}
 
   ${terrainCsmGlsl()}
 
@@ -321,6 +328,11 @@ ${terrainOverlayLitGlsl(
 )}
     vec3 f = ${FINAL_COLOR_VAR_NAME}.rgb * max(lit, 0.0);
 
+    // A torch does not only brighten the stone beside it, it colours it. The
+    // light the texel was multiplied by is handed back in, so both arguments
+    // are in one space and a neutral bake tints nothing.
+    f = muLightTint(f, max(lit, 0.0));
+
     // Standing water reflects the sky and the torches - light the ground
     // under it never had, so it is added after the lighting.
 ${terrainOverlayReflectGlsl(overlays, 'f', 'sunShadow')}
@@ -353,6 +365,7 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
         'linearLight',
         'keyGain',
         'roomParams',
+        LIGHT_TINT_UNIFORM,
         ...(tileArray ? ['tileScales'] : []),
         ...terrainOverlayUniforms(overlays),
         ...(water ? terrainWaterUniforms() : []),
@@ -400,6 +413,7 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
     const look = lookDirector()?.state();
     effect.setFloat('keyGain', look?.keyGain ?? 1);
     effect.setFloat3('roomParams', look?.area ? 1 : 0, look?.key.emitterGain ?? 1, look?.key.roomShare ?? 1);
+    effect.setFloat(LIGHT_TINT_UNIFORM, lightTintStrength());
     if (tileArray) {
       effect.setTexture('tileTextures', tileArray.texture);
       effect.setFloatArray('tileScales', tileArray.scales);

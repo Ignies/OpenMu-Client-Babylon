@@ -31,13 +31,23 @@ export function pointLightPoolSize(): number {
 const LIGHT_RANGE = 6;
 
 /**
- * Key units (ARCHITECTURE §4.5): a torch's peak on a wall beside it is about
- * 1.2x the key on an open tile. Lands identically on every tier - the pi
- * gain on the PBR tiers is cancelled by Burley's 1/pi. The map's level
- * (`keyGain`, 2^ev) scales it with the key so a torch keeps its ratio to
- * the daylight; 1 on Classic.
+ * Key units (ARCHITECTURE §4.5), measured against Classic rather than derived:
+ * the pool is what carries a torch onto an object on tiers >= 1, where the
+ * object samples the baked lightmap without the delta. At 1.1 it gave a chair
+ * beside the pub candelabra a 1.10x lift where Classic's delta gives 1.22x,
+ * which is the whole "dynamic light does nothing on Ultra" report. 6.0 lands
+ * 1.21x and 1.35x on the two chairs against Classic's 1.22x and 1.33x, with
+ * the same lift in local contrast and saturation. It scales with the key, so
+ * the ratio to the terrain delta is the same indoors and out.
  */
-const INTENSITY = 1.1;
+const INTENSITY = 6.0;
+
+/** Dev seam `?poolI=<n>`: the peak in key units, for the tuning rounds. */
+const intensityDev = devQueryNumber('poolI');
+
+function poolIntensity(): number {
+  return intensityDev ?? INTENSITY;
+}
 
 /** The map's level and the room's emitter gain, one product (`AreaLook.candles`, 1 outside a room). */
 function keyGain(): number {
@@ -256,7 +266,7 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
     } else light.specular.set(0, 0, 0);
     light.intensity =
       peak *
-      INTENSITY *
+      poolIntensity() *
       keyGain() *
       (emitter.gain ?? 1) *
       slot.fade *
