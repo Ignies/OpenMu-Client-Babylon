@@ -167,6 +167,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.cameraFov': 'Зрително поле',
     'options.wsadMovement':
       'Движение с WSAD (оглеждане с мишката от първо лице)',
+    'options.thirdPersonMouseLook': 'Оглеждане с мишката и от трето лице',
     'options.volume': 'Сила на звука',
     'options.effectLevel': 'Ограничение на +ефекти',
     'options.shadows': 'Сенки на обектите',

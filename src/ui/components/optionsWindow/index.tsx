@@ -116,6 +116,8 @@ type CheckRow = {
   textId: number;
   labelKey: TextKey;
   needsPostProcessing?: boolean;
+  /** Dim while the walk keys, which the pointer lock leans on, are off. */
+  needsWsadMovement?: boolean;
 };
 
 type KeyRow = { action: KeyAction; labelKey: TextKey };
@@ -239,6 +241,13 @@ const TABS: Tab[] = [
               needsCameraControl: true,
             }),
             check('wsadMovement', -1, 'options.wsadMovement'),
+            {
+              kind: 'check',
+              key: 'thirdPersonMouseLook',
+              textId: -1,
+              labelKey: 'options.thirdPersonMouseLook',
+              needsWsadMovement: true,
+            },
             check('chatTimestamps', -1, 'options.chatTimestamps'),
             check('stateWarnings', -1, 'options.stateWarnings'),
           ],
@@ -678,8 +687,10 @@ export const OptionsWindow = observer(() => {
                     const checked = GameOptions[row.key] as boolean;
 
                     const dim =
-                      row.needsPostProcessing === true &&
-                      !GameOptions.postProcessing;
+                      (row.needsPostProcessing === true &&
+                        !GameOptions.postProcessing) ||
+                      (row.needsWsadMovement === true &&
+                        !GameOptions.wsadMovement);
 
                     return (
                       <div

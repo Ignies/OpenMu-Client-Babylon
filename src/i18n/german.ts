@@ -165,6 +165,8 @@ export const germanLayer: LanguageLayer = {
     'options.cameraControl': 'Kamerasteuerung (Strg+Rad, Einfg/Entf)',
     'options.cameraFov': 'Sichtfeld',
     'options.wsadMovement': 'WSAD-Bewegung (Mausblick in der Egoperspektive)',
+    'options.thirdPersonMouseLook':
+      'Mausblick auch in der Verfolgerperspektive',
     'options.volume': 'Lautstärke',
     'options.effectLevel': '+Effekt-Grenze',
     'options.shadows': 'Objektschatten',

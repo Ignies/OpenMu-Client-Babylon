@@ -169,6 +169,7 @@ export const thaiLayer: LanguageLayer = {
     'options.cameraFov': 'ระยะมุมมอง',
     'options.wsadMovement':
       'เดินด้วย WSAD (มุมมองบุคคลที่หนึ่งหันกล้องด้วยเมาส์)',
+    'options.thirdPersonMouseLook': 'หันกล้องด้วยเมาส์ในมุมมองบุคคลที่สามด้วย',
     'options.volume': 'ระดับเสียง',
     'options.effectLevel': 'จำกัด +เอฟเฟกต์',
     'options.shadows': 'เงาของวัตถุ',

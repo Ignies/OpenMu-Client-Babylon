@@ -166,6 +166,7 @@ export const russianLayer: LanguageLayer = {
     'options.cameraControl': 'Управление камерой (Ctrl+колесо, Ins/Del)',
     'options.cameraFov': 'Поле зрения',
     'options.wsadMovement': 'Движение на WSAD (обзор мышью от первого лица)',
+    'options.thirdPersonMouseLook': 'Обзор мышью и от третьего лица',
     'options.volume': 'Громкость',
     'options.effectLevel': 'Предел +эффектов',
     'options.shadows': 'Тени объектов',

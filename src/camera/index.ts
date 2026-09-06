@@ -14,7 +14,8 @@
  * steps below 1000 blend the ported geometry toward an eye-level shot and
  * the innermost one is first person, where the hero's body is hidden and,
  * with the `wsadMovement` option on, the mouse looks around under a pointer
- * lock (`mouseLook.ts`).
+ * lock (`mouseLook.ts`) - at every zoom level if `thirdPersonMouseLook` says
+ * so.
  *
  * Single writer of alpha/beta/radius/fov, and of the target's Y lift, while
  * the option is on and the game is in the World state; `cameraFollowSystem`
@@ -109,6 +110,20 @@ function targetDistanceFor(world: ENUM_WORLD): number {
  */
 export function isFirstPerson(): boolean {
   return GameOptions.cameraControl && distance < HERO_HIDE_MU;
+}
+
+/**
+ * Whether the frame is one the mouse may hold the pointer lock in. Tied to
+ * `wsadMovement` because the lock takes the cursor away and the walk keys are
+ * what is left to move with; first person only, unless the player asked for
+ * it in third person too. The World-state half of the gate is the caller's.
+ */
+function canMouseLook(): boolean {
+  if (!GameOptions.wsadMovement) return false;
+
+  return GameOptions.thirdPersonMouseLook
+    ? GameOptions.cameraControl
+    : isFirstPerson();
 }
 
 /**
@@ -208,12 +223,9 @@ export function installCameraControl(
     canvas.addEventListener('pointercancel', endDrag);
   }
 
-  // First person, with the walk keys on: the mouse looks around. Tied to
-  // `wsadMovement` because the lock takes the cursor away, and without the
-  // keys there would be nothing left to walk with.
   installMouseLook(
     canvas,
-    () => GameOptions.wsadMovement && isActive() && isFirstPerson(),
+    () => isActive() && canMouseLook(),
     (dx, dy) => applyLook(dx, dy, MOUSE_LOOK_DEG_PER_PX, MOUSE_LOOK_DEG_PER_PX)
   );
 
@@ -240,12 +252,11 @@ export function updateGameCamera(
   heroModel: TransformNode | null,
   dt: number
 ): void {
-  // Zoomed back out, or the option went off under the lock: hand the pointer
-  // back. Reads last frame's distance, which is a frame the player spends
-  // still holding the mouse.
-  if (isMouseLookActive() && !(GameOptions.wsadMovement && isFirstPerson())) {
-    releaseMouseLook();
-  }
+  // Zoomed back out, or an option went off under the lock: hand the pointer
+  // back. The World-state half of the gate is the wiring's, which releases
+  // the lock itself on the way out. Reads last frame's distance, which is a
+  // frame the player spends still holding the mouse.
+  if (isMouseLookActive() && !canMouseLook()) releaseMouseLook();
 
   if (!GameOptions.cameraControl) {
     if (wroteCamera && classic) {

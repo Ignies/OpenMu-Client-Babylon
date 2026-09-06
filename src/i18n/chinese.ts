@@ -167,6 +167,7 @@ export const chineseLayer: LanguageLayer = {
     'options.cameraControl': '镜头控制（Ctrl+滚轮，Ins/Del）',
     'options.cameraFov': '视野范围',
     'options.wsadMovement': 'WSAD 移动（第一人称用鼠标转视角）',
+    'options.thirdPersonMouseLook': '第三人称也用鼠标转视角',
     'options.volume': '音量',
     'options.effectLevel': '+特效上限',
     'options.shadows': '物体阴影',

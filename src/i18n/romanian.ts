@@ -166,6 +166,8 @@ export const romanianLayer: LanguageLayer = {
     'options.cameraFov': 'Câmp vizual',
     'options.wsadMovement':
       'Deplasare WSAD (privire cu mouse-ul la persoana întâi)',
+    'options.thirdPersonMouseLook':
+      'Privire cu mouse-ul și la persoana a treia',
     'options.volume': 'Volum',
     'options.effectLevel': 'Limita de +efecte',
     'options.shadows': 'Umbrele obiectelor',

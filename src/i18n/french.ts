@@ -167,6 +167,8 @@ export const frenchLayer: LanguageLayer = {
     'options.cameraFov': 'Champ de vision',
     'options.wsadMovement':
       'Déplacement WSAD (visée à la souris en vue subjective)',
+    'options.thirdPersonMouseLook':
+      'Visée à la souris aussi à la troisième personne',
     'options.volume': 'Volume',
     'options.effectLevel': 'Limite des +effets',
     'options.shadows': 'Ombres des objets',

@@ -168,6 +168,7 @@ export const koreanLayer: LanguageLayer = {
     'options.cameraControl': '카메라 조작 (Ctrl+휠, Ins/Del)',
     'options.cameraFov': '시야각',
     'options.wsadMovement': 'WSAD 이동 (1인칭에서 마우스로 시점 조작)',
+    'options.thirdPersonMouseLook': '3인칭에서도 마우스로 시점 조작',
     'options.volume': '음량',
     'options.effectLevel': '+효과 제한',
     'options.shadows': '오브젝트 그림자',

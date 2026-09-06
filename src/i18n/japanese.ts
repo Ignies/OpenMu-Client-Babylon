@@ -169,6 +169,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.cameraControl': 'カメラ操作（Ctrl+ホイール、Ins/Del）',
     'options.cameraFov': '視野角',
     'options.wsadMovement': 'WSAD移動（一人称視点ではマウスで視点操作）',
+    'options.thirdPersonMouseLook': '三人称視点でもマウスで視点操作',
     'options.volume': '音量',
     'options.effectLevel': '+エフェクト上限',
     'options.shadows': 'オブジェクトの影',

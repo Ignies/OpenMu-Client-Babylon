@@ -176,6 +176,8 @@ export const portugueseLayer: LanguageLayer = {
     'options.cameraFov': 'Campo de visão',
     'options.wsadMovement':
       'Movimento WSAD (mira com o mouse em primeira pessoa)',
+    'options.thirdPersonMouseLook':
+      'Mira com o mouse também em terceira pessoa',
     'options.volume': 'Volume',
     'options.effectLevel': 'Limite de +efeitos',
     'options.shadows': 'Sombras dos objetos',
