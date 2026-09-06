@@ -99,8 +99,29 @@ let classic: {
   minZ: number;
 } | null = null;
 
-function targetDistanceFor(world: ENUM_WORLD): number {
-  return byWorld.get(world)?.distance ?? DISTANCE_BY_LEVEL[level];
+/**
+ * The level a map opens on. A layer's distance is the frame the original
+ * client pinned that map to; here it only picks the opening step, so the
+ * wheel still works once the player is standing there. The ladder holds
+ * every pinned value exactly (1100 and 2000 are both steps), so the nearest
+ * step is that frame, not an approximation of it.
+ */
+function openingLevelFor(world: ENUM_WORLD): number {
+  const pinned = byWorld.get(world)?.distance;
+
+  if (pinned === undefined) return DEFAULT_CAMERA_LEVEL;
+
+  let best = DEFAULT_CAMERA_LEVEL;
+
+  for (let i = 0; i < DISTANCE_BY_LEVEL.length; i++) {
+    const closer =
+      Math.abs(DISTANCE_BY_LEVEL[i] - pinned) <
+      Math.abs(DISTANCE_BY_LEVEL[best] - pinned);
+
+    if (closer) best = i;
+  }
+
+  return best;
 }
 
 /**
@@ -230,12 +251,12 @@ export function installCameraControl(
   );
 
   // World change resets the level (WSclient.cpp:600); heading, pitch and
-  // distance snap with it so the new map opens on the default frame.
+  // distance snap with it so the new map opens on its own default frame.
   EventBus.on('warpCompleted', ({ map }) => {
-    level = DEFAULT_CAMERA_LEVEL;
+    level = openingLevelFor(map);
     headingDeg = DEFAULT_HEADING_DEG;
     pitchOffsetDeg = 0;
-    distance = targetDistanceFor(map);
+    distance = DISTANCE_BY_LEVEL[level];
   });
 }
 
@@ -280,7 +301,7 @@ export function updateGameCamera(
   headingDeg = ((headingDeg % 360) + 360) % 360 - 360;
 
   const layer = byWorld.get(world);
-  const target = layer?.distance ?? DISTANCE_BY_LEVEL[level];
+  const target = DISTANCE_BY_LEVEL[level];
 
   // CameraDistance += (target - CameraDistance) / 3 per 25 fps frame.
   distance += (target - distance) * (1 - Math.pow(1 - DISTANCE_EASE, dt * REFERENCE_FPS));
