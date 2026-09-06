@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../../i18n';
-import { useIsPortrait } from '../../../../../common/mobile';
+import { useUiViewport } from '../../../../components/uiStage';
 import {
   MAIN_FRAME_BUTTONS,
   MAIN_FRAME_BUTTON_FRAMES,
@@ -21,7 +21,9 @@ import { MENU_SCALE } from './consts';
  * tablet held sideways) and dropping them would leave five holes in the art.
  */
 export const MenuCluster = observer(() => {
-  const portrait = useIsPortrait();
+  // Rides the stage's own resize observer, so the cluster flips on rotate.
+  const { width, height } = useUiViewport();
+  const portrait = height >= width;
 
   return (
     <div className={`mobile-menu-cluster${portrait ? ' portrait' : ' landscape'}`}>

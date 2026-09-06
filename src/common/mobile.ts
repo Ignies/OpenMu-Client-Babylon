@@ -1,6 +1,3 @@
-import { useUiViewport } from '../ui/components/uiStage';
-import { LocalStorage } from '../libs/localStorage';
-
 /**
  * The one place the client decides it is being played with a thumb. Nothing
  * else may sniff the user agent or query `matchMedia` for this: the whole
@@ -10,25 +7,23 @@ import { LocalStorage } from '../libs/localStorage';
  * Coarse pointer *and* a touch point: a desktop with a touch monitor reports
  * coarse on its own, and a laptop trackpad reports touch points on its own.
  *
- * `?mobile=1` / `?mobile=0` overrides and is remembered, which is how the
- * screenshot harness and a reviewer on a desktop see the mobile HUD.
+ * `?mobile=1` / `?mobile=0` overrides for the life of the page, which is how
+ * the screenshot harness and a reviewer on a desktop see the mobile HUD. It
+ * is deliberately not remembered: a stored override would leave a desktop
+ * that once opened that URL on the touch HUD for good.
+ *
+ * Imported by `main.tsx` before the version loads, so it keeps no imports of
+ * its own - the app graph behind `boot.tsx` reads `gameVersion` at module
+ * scope and must not be pulled in early.
  */
 
-const OVERRIDE_KEY = 'mu_mobile';
 const ROOT_CLASS = 'mu-mobile';
 
 function readOverride(): boolean | null {
-  if (typeof window !== 'undefined') {
-    const param = new URLSearchParams(window.location.search).get('mobile');
-    if (param === '1' || param === '0') {
-      const value = param === '1';
-      LocalStorage.save(OVERRIDE_KEY, String(value));
-      return value;
-    }
-  }
-  const stored = LocalStorage.load(OVERRIDE_KEY);
-  if (stored === 'true') return true;
-  if (stored === 'false') return false;
+  if (typeof window === 'undefined') return null;
+  const param = new URLSearchParams(window.location.search).get('mobile');
+  if (param === '1') return true;
+  if (param === '0') return false;
   return null;
 }
 
@@ -54,10 +49,4 @@ export function isMobileDevice(): boolean {
 
 export function useIsMobile(): boolean {
   return mobile;
-}
-
-/** Rides the stage's own resize observer, so it re-renders on rotate. */
-export function useIsPortrait(): boolean {
-  const { width, height } = useUiViewport();
-  return height >= width;
 }
