@@ -52,12 +52,21 @@ const CLOUD_DETAIL = 0.45;
 /** How wide the coverage threshold's soft edge is. */
 const CLOUD_SOFT = 0.3;
 
-/** Slow drift around the map's base coverage, and the slot it is rolled in. */
-const DRIFT = 0.18;
+/**
+ * Slow drift around the map's base coverage, and the slot it is rolled in.
+ * Proportionate to the coverages the maps author: a fair-weather sky sits near
+ * 0.16, so a swing of 0.18 either way was the difference between a clear sky
+ * and an overcast one.
+ */
+const DRIFT = 0.07;
 const DRIFT_PERIOD_MS = 300_000;
 
-/** What a fully covered sky removes from the sun. */
-const SHADOW_STRENGTH = 0.55;
+/**
+ * What a fully covered sky removes from the sun. High enough that a cloud
+ * crossing overhead reads on the ground as it passes: at 0.55 it was a change
+ * you had to be told to look for.
+ */
+const SHADOW_STRENGTH = 0.85;
 
 export const CLOUD_NOISE_SAMPLER = 'muCloudNoise';
 
@@ -67,8 +76,16 @@ const cloudDev = devQueryNumber('cloudShadow');
 /** Uniform names the readers declare and `bindClouds` writes. */
 export const CLOUD_UNIFORMS = ['muCloudA', 'muCloudB', 'muCloudC'] as const;
 
-/** World tiles one wrap of the field covers, per octave. */
-const OCTAVE_SCALE = [0.0105, 0.031] as const;
+/**
+ * UV per world tile, per octave: one wrap of the shape octave is `1 / 0.0035`
+ * tiles, about 285.
+ *
+ * It was three times finer, and a sky is seen out to hundreds of tiles, so the
+ * field wrapped several times across one view: a regular mackerel pattern with
+ * the repeat plainly visible. A cloud has to be a good fraction of the sky it
+ * is in before it reads as one object rather than as texture.
+ */
+const OCTAVE_SCALE = [0.0035, 0.0125] as const;
 
 /** Wrapped into [0, 1): a scroll of epoch seconds is millions of UV units, and
  * a float there has no fractional resolution left, which quantises the whole
