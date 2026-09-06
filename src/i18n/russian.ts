@@ -1356,6 +1356,11 @@ export const russianLayer: LanguageLayer = {
     'options.lootHighLevel': 'Уровень +7 и выше',
     'options.lootOther': 'Всё остальное',
     'options.lootZen': 'Zen от',
+    'options.stateWarnings': 'Предупреждения',
+    'warn.durability': 'Прочность экипировки: {percent}%',
+    'warn.inventoryFull': 'Инвентарь заполнен',
+    'warn.noPotions': 'Лечебные зелья закончились',
+    'warn.buffEnding': '{name} скоро закончится',
     'trade.offerChanged': 'Другая сторона изменила предложение',
   },
 };

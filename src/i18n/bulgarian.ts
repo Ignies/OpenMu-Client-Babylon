@@ -1362,6 +1362,11 @@ export const bulgarianLayer: LanguageLayer = {
     'options.lootHighLevel': 'Ниво +7 и нагоре',
     'options.lootOther': 'Всичко останало',
     'options.lootZen': 'Zen от',
+    'options.stateWarnings': 'Предупреждения',
+    'warn.durability': 'Издръжливост на екипировката: {percent}%',
+    'warn.inventoryFull': 'Инвентарът е пълен',
+    'warn.noPotions': 'Няма лечебни отвари',
+    'warn.buffEnding': '{name} скоро свършва',
     'trade.offerChanged': 'Другата страна промени предложението',
   },
 };

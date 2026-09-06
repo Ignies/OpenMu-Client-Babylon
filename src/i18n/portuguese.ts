@@ -1374,6 +1374,11 @@ export const portugueseLayer: LanguageLayer = {
     'options.lootHighLevel': 'Nível +7 ou mais',
     'options.lootOther': 'Todo o resto',
     'options.lootZen': 'Zen a partir de',
+    'options.stateWarnings': 'Avisos',
+    'warn.durability': 'Durabilidade do equipamento em {percent}%',
+    'warn.inventoryFull': 'O inventário está cheio',
+    'warn.noPotions': 'Sem poções de vida',
+    'warn.buffEnding': '{name} está prestes a acabar',
     'trade.offerChanged': 'O outro lado mudou a oferta',
   },
 };
