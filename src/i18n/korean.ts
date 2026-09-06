@@ -1322,5 +1322,13 @@ export const koreanLayer: LanguageLayer = {
     'skills.classCannotLearn': '당신의 직업은 {name}을(를) 배울 수 없습니다',
     'skills.alreadyKnown': '{name}은(는) 이미 배웠습니다',
     'skills.needMore': '{name}을(를) 배우려면 {label} {required} 필요 ({more} 부족)',
+    'options.section.loot': '드롭 이름',
+    'options.lootFilter': '드롭 이름 거르기',
+    'options.lootJewels': '보석',
+    'options.lootExcellent': '엑설런트',
+    'options.lootAncient': '고대',
+    'options.lootHighLevel': '+7 이상',
+    'options.lootOther': '그 외 전부',
+    'options.lootZen': 'Zen 이상',
   },
 };

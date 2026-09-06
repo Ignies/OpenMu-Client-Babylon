@@ -42,6 +42,7 @@ import {
   MATERIAL_DETAIL_MAX,
   MATERIAL_QUALITY_MAX,
 } from '../../../common/materialQuality';
+import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
 import { t, type TextKey } from '../../../i18n';
 import { LanguageSelect } from './languageSelect';
 
@@ -136,7 +137,8 @@ type SliderRow = {
     | 'mapGradient'
     | 'vignette'
     | 'saturation'
-    | 'darkness';
+    | 'darkness'
+    | 'lootZen';
   textId: number;
   labelKey: TextKey;
   max: number;
@@ -228,6 +230,24 @@ const TABS: Tab[] = [
               labelKey: 'options.effectLevel',
               max: 4,
               display: v => v * 2 + 5,
+            }),
+          ],
+        },
+        {
+          titleKey: 'options.section.loot',
+          rows: [
+            check('lootFilter', -1, 'options.lootFilter'),
+            check('lootJewels', -1, 'options.lootJewels'),
+            check('lootExcellent', -1, 'options.lootExcellent'),
+            check('lootAncient', -1, 'options.lootAncient'),
+            check('lootHighLevel', -1, 'options.lootHighLevel'),
+            check('lootOther', -1, 'options.lootOther'),
+            slider({
+              key: 'lootZen',
+              textId: -1,
+              labelKey: 'options.lootZen',
+              max: LOOT_ZEN_MAX,
+              display: v => (v === 0 ? t('common.off') : lootZenThreshold(v)),
             }),
           ],
         },

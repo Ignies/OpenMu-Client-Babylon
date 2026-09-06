@@ -1368,5 +1368,13 @@ export const italianLayer: LanguageLayer = {
     'skills.alreadyKnown': 'Conosci già {name}',
     'skills.needMore':
       '{label} {required} per imparare {name} (ne mancano {more})',
+    'options.section.loot': 'Nomi a terra',
+    'options.lootFilter': 'Filtra i nomi a terra',
+    'options.lootJewels': 'Gioielli',
+    'options.lootExcellent': 'Excellent',
+    'options.lootAncient': 'Ancient',
+    'options.lootHighLevel': 'Livello +7 e oltre',
+    'options.lootOther': 'Tutto il resto',
+    'options.lootZen': 'Zen da',
   },
 };

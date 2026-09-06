@@ -94,6 +94,20 @@ export type GameOptions = {
    * today's fixed framing.
    */
   cameraControl: boolean;
+  /**
+   * Run the latched ALT drop names through `lootFilter.ts` instead of naming
+   * every pile on the ground. ALT held still shows all of them.
+   */
+  lootFilter: boolean;
+  lootJewels: boolean;
+  lootExcellent: boolean;
+  lootAncient: boolean;
+  /** Name +7 and up (`HIGH_DROP_LEVEL`, the gold tint). */
+  lootHighLevel: boolean;
+  /** Everything the rules above do not claim. */
+  lootOther: boolean;
+  /** Index into `LOOT_ZEN_STEPS`: the smallest zen pile that keeps its name. */
+  lootZen: number;
 };
 
 export const GRADE_NOMINAL = 5;
@@ -119,6 +133,7 @@ const CLAMPS: Partial<Record<keyof GameOptions, number>> = {
   glow: 9,
   chromatic: 9,
   exposure: 25,
+  lootZen: 9,
 };
 
 const DEFAULTS: GameOptions = {
@@ -154,6 +169,13 @@ const DEFAULTS: GameOptions = {
   whisperBeep: true,
   slideHelp: true,
   cameraControl: true,
+  lootFilter: false,
+  lootJewels: true,
+  lootExcellent: true,
+  lootAncient: true,
+  lootHighLevel: true,
+  lootOther: false,
+  lootZen: 0,
 };
 
 type Listener = (options: GameOptions) => void;

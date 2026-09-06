@@ -2704,6 +2704,7 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
       screenPosition: { worldOffsetZ: DROP_LABEL_HEIGHT, x: 0, y: 0 },
       droppedItem: {
         isMoney,
+        amount: isMoney ? amount : undefined,
         item: parsed,
         fresh: !!item.IsFreshDrop,
         group: poseGroup,

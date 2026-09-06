@@ -1354,5 +1354,13 @@ export const bulgarianLayer: LanguageLayer = {
     'skills.alreadyKnown': 'Вече знаеш {name}',
     'skills.needMore':
       '{label} {required}, за да научиш {name} (липсват още {more})',
+    'options.section.loot': 'Имена по земята',
+    'options.lootFilter': 'Филтър на имената по земята',
+    'options.lootJewels': 'Камъни',
+    'options.lootExcellent': 'Excellent',
+    'options.lootAncient': 'Ancient',
+    'options.lootHighLevel': 'Ниво +7 и нагоре',
+    'options.lootOther': 'Всичко останало',
+    'options.lootZen': 'Zen от',
   },
 };
