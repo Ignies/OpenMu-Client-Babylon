@@ -1367,5 +1367,6 @@ export const bulgarianLayer: LanguageLayer = {
     'warn.inventoryFull': 'Инвентарът е пълен',
     'warn.noPotions': 'Няма лечебни отвари',
     'warn.buffEnding': '{name} скоро свършва',
+    'trade.offerChanged': 'Другата страна промени предложението',
   },
 };

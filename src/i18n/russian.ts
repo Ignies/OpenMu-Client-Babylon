@@ -1361,5 +1361,6 @@ export const russianLayer: LanguageLayer = {
     'warn.inventoryFull': 'Инвентарь заполнен',
     'warn.noPotions': 'Лечебные зелья закончились',
     'warn.buffEnding': '{name} скоро закончится',
+    'trade.offerChanged': 'Другая сторона изменила предложение',
   },
 };

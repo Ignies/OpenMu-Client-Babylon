@@ -1347,5 +1347,6 @@ export const thaiLayer: LanguageLayer = {
     'warn.inventoryFull': 'กระเป๋าเต็ม',
     'warn.noPotions': 'ไม่มียาฟื้นพลังชีวิตแล้ว',
     'warn.buffEnding': '{name} กำลังจะหมด',
+    'trade.offerChanged': 'อีกฝ่ายเปลี่ยนข้อเสนอ',
   },
 };

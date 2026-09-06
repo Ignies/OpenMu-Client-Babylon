@@ -1374,5 +1374,6 @@ export const romanianLayer: LanguageLayer = {
     'warn.inventoryFull': 'Inventarul este plin',
     'warn.noPotions': 'Nu mai sunt poțiuni de viață',
     'warn.buffEnding': '{name} este pe cale să se termine',
+    'trade.offerChanged': 'Cealaltă parte a schimbat oferta',
   },
 };

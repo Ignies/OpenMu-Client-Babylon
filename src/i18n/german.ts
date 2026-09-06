@@ -1387,5 +1387,6 @@ export const germanLayer: LanguageLayer = {
     'warn.inventoryFull': 'Das Inventar ist voll',
     'warn.noPotions': 'Keine Heiltränke mehr',
     'warn.buffEnding': '{name} läuft gleich ab',
+    'trade.offerChanged': 'Die Gegenseite hat das Angebot geändert',
   },
 };

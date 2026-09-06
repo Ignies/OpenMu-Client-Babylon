@@ -244,6 +244,7 @@ export const EN_TEXT = {
   'warn.inventoryFull': 'The inventory is full',
   'warn.noPotions': 'No healing potions left',
   'warn.buffEnding': '{name} is about to end',
+  'trade.offerChanged': 'The other side changed the offer',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
   'keys.emoteMenu': 'Emote menu',

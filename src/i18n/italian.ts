@@ -1381,5 +1381,6 @@ export const italianLayer: LanguageLayer = {
     'warn.inventoryFull': 'L’inventario è pieno',
     'warn.noPotions': 'Non ci sono più pozioni curative',
     'warn.buffEnding': '{name} sta per finire',
+    'trade.offerChanged': 'L’altra parte ha cambiato l’offerta',
   },
 };

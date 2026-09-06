@@ -1382,5 +1382,6 @@ export const frenchLayer: LanguageLayer = {
     'warn.inventoryFull': 'L’inventaire est plein',
     'warn.noPotions': 'Plus de potions de soin',
     'warn.buffEnding': '{name} va se terminer',
+    'trade.offerChanged': 'L’autre côté a modifié l’offre',
   },
 };

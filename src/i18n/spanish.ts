@@ -1384,5 +1384,6 @@ export const spanishLayer: LanguageLayer = {
     'warn.inventoryFull': 'El inventario está lleno',
     'warn.noPotions': 'No quedan pociones de vida',
     'warn.buffEnding': '{name} está a punto de acabar',
+    'trade.offerChanged': 'La otra parte cambió la oferta',
   },
 };

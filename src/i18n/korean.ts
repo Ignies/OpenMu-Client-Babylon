@@ -1335,5 +1335,6 @@ export const koreanLayer: LanguageLayer = {
     'warn.inventoryFull': '인벤토리가 가득 찼습니다',
     'warn.noPotions': '회복 물약이 없습니다',
     'warn.buffEnding': '{name}이(가) 곧 끝납니다',
+    'trade.offerChanged': '상대가 거래 내용을 바꿨습니다',
   },
 };

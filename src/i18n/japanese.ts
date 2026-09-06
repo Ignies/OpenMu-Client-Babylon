@@ -1337,5 +1337,6 @@ export const japaneseLayer: LanguageLayer = {
     'warn.inventoryFull': '所持品がいっぱいです',
     'warn.noPotions': '回復ポーションがありません',
     'warn.buffEnding': '{name} がまもなく切れます',
+    'trade.offerChanged': '相手が取引内容を変更しました',
   },
 };

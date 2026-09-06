@@ -1329,5 +1329,6 @@ export const chineseLayer: LanguageLayer = {
     'warn.inventoryFull': '背包已满',
     'warn.noPotions': '没有治疗药水了',
     'warn.buffEnding': '{name} 即将结束',
+    'trade.offerChanged': '对方修改了交易内容',
   },
 };
