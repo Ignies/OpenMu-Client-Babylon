@@ -12,6 +12,12 @@ import {
 import type { TileTextureArray } from './tileTextureArray';
 import { getTerrainLightTexture } from '../../common/terrainDynamicLight';
 import {
+  bindTerrainDetail,
+  terrainDetailGlsl,
+  TERRAIN_DETAIL_SAMPLER,
+  TERRAIN_DETAIL_UNIFORM,
+} from './terrainDetail';
+import {
   linearBufferActive,
   linearLightActive,
 } from '../../common/lightModel';
@@ -242,6 +248,7 @@ ${water && water.frames.length ? `  uniform sampler2D waterFlip;` : ''}
 ${terrainOverlayDeclarationsGlsl(overlays)}
 ${lightTintGlsl()}
 ${tileArray ? cloudFieldGlsl() : ''}
+${tileArray ? terrainDetailGlsl() : ''}
 
   ${terrainCsmGlsl()}
 
@@ -268,6 +275,12 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
       ${FINAL_COLOR_VAR_NAME} *= (1.0 - vAlphaColor.a);
       ${FINAL_COLOR_VAR_NAME} += vec4(alphaColor, 1.0) * vAlphaColor.a;
     }
+
+    // On the art, before any light touches it: the ground keeps its colour and
+    // its level and only gains a grain to hold the eye at close range. Packed
+    // path only, like the cloud field - the per-tile fallback has no sampler
+    // unit left to spend.
+${tileArray ? `    ${FINAL_COLOR_VAR_NAME}.rgb *= muGroundGrain(vWorldXZ, vViewZ);` : ''}
 
     // One fetch, two jobs: rgb is the torches' radial light, and alpha is the
     // roof mask the ground overlays need (terrainMask.ts). Sampled before the
@@ -380,6 +393,7 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
         'roomParams',
         LIGHT_TINT_UNIFORM,
         ...(tileArray ? CLOUD_UNIFORMS : []),
+        ...(tileArray ? [TERRAIN_DETAIL_UNIFORM] : []),
         ...(tileArray ? ['tileScales'] : []),
         ...terrainOverlayUniforms(overlays),
         ...(water ? terrainWaterUniforms() : []),
@@ -395,7 +409,7 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
         'dynamicLight',
         // The cloud field rides the packed path only: the per-tile fallback
         // already spends every one of WebGL's guaranteed 16 fragment units.
-        ...(tileArray ? [CLOUD_NOISE_SAMPLER] : []),
+        ...(tileArray ? [CLOUD_NOISE_SAMPLER, TERRAIN_DETAIL_SAMPLER] : []),
         ...(hasTrail(overlays) ? ['ovTrail'] : []),
         ...(water ? terrainWaterSamplers(water) : []),
         'csmShadowMap',
@@ -450,6 +464,7 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
       effect.setTextureArray('textures', textures);
     }
     effect.setTexture('dynamicLight', dynamicLight);
+    if (tileArray) bindTerrainDetail(effect, scene);
     bindTerrainOverlays(effect, overlays, scene);
     if (water) bindTerrainWater(effect, water, et, scene);
     bindTerrainCsm(effect);
