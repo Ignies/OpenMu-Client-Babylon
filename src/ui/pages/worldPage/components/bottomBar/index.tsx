@@ -3,8 +3,6 @@ import { t } from '../../../../../i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../../../store';
-import { toggleCashShopWindow } from '../../../../../cashShop/state';
-import { Messenger } from '../../../../../messenger';
 import { ItemIcon } from '../../../../components/itemIcon';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
@@ -15,6 +13,12 @@ import { MuWindows } from '../../../../components/muWindow/windowState';
 import { SkillIcon } from '../../../../components/skillIcon';
 import { MasterExpBar } from '../masterSkills/masterExpBar';
 import { PetCommandBar } from './petCommands';
+import {
+  MAIN_FRAME_BUTTONS,
+  MAIN_FRAME_BUTTON_FRAMES,
+  MAIN_FRAME_BUTTON_HEIGHT,
+  MAIN_FRAME_BUTTON_WIDTH,
+} from './mainFrameButtons';
 import { isKey } from '../../../../../common/keyBindings';
 import { BOTTOM_BAR_ID } from '../../../../components/muWindow';
 import { skillDefinition } from '../../../../../common/skillsDatabase';
@@ -66,11 +70,11 @@ const CURRENT_SKILL_X = 385;
 
 const BUTTON_X = 489;
 const BUTTON_STEP = 30;
-const BUTTON_WIDTH = 30;
-const BUTTON_HEIGHT = 41;
+const BUTTON_WIDTH = MAIN_FRAME_BUTTON_WIDTH;
+const BUTTON_HEIGHT = MAIN_FRAME_BUTTON_HEIGHT;
 const BUTTON_Y = local(BAR_TOP);
 
-const BUTTON_FRAMES = { up: 0, active: 1, down: 2 } as const;
+const BUTTON_FRAMES = MAIN_FRAME_BUTTON_FRAMES;
 
 const EXP_X = 2;
 const EXP_Y = local(473);
@@ -770,42 +774,15 @@ export const BottomBar = observer(() => {
 
       <SkillSlots />
 
-      <BarButton
-        index={0}
-        file="partCharge1/newui_menu_Bt05.OZJ"
-        title={t('bottomBar.itemShop')}
-        onClick={() => toggleCashShopWindow()}
-      />
-      <BarButton
-        index={1}
-        file="partCharge1/newui_menu_Bt01.OZJ"
-        title={t('bottomBar.characterInfo')}
-        onClick={() => {
-          Store.characterInfoEnabled = !Store.characterInfoEnabled;
-        }}
-      />
-      <BarButton
-        index={2}
-        file="partCharge1/newui_menu_Bt02.OZJ"
-        title={t('bottomBar.inventory')}
-        onClick={() => {
-          Store.inventoryEnabled = !Store.inventoryEnabled;
-        }}
-      />
-      <BarButton
-        index={3}
-        file="partCharge1/newui_menu_Bt03.OZJ"
-        title={t('bottomBar.friendList')}
-        onClick={() => Messenger.toggleWindow()}
-      />
-      <BarButton
-        index={4}
-        file="partCharge1/newui_menu_Bt04.OZJ"
-        title={t('bottomBar.options')}
-        onClick={() => {
-          Store.optionsEnabled = !Store.optionsEnabled;
-        }}
-      />
+      {MAIN_FRAME_BUTTONS.map((button, index) => (
+        <BarButton
+          key={button.file}
+          index={index}
+          file={button.file}
+          title={t(button.titleKey)}
+          onClick={button.toggle}
+        />
+      ))}
 
       <ExpBar />
       <MasterExpBar />

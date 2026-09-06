@@ -1,0 +1,191 @@
+@import (reference) '../../../../components/muText/style.less';
+
+// The touch HUD. Anchored to the viewport, not to the 640x480 stage: these
+// are thumb targets and must keep their size on a small screen. Only ever
+// mounted on a touch client (`MobileControls` returns null otherwise), so
+// nothing here needs a `.mu-mobile` guard of its own.
+
+@edge-gap: 12px;
+@button-gap: 8px;
+@bar-clearance: 63px;
+
+.mobile-controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 400;
+  .mu-font();
+  image-rendering: pixelated;
+
+  // Every button opts back in; the layer stays transparent to taps.
+  .mobile-move-button,
+  .mobile-menu-button,
+  .mobile-skill-slot,
+  .mobile-picker-slot,
+  .mobile-picker-action {
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: none;
+  }
+
+  .mobile-scaled {
+    position: relative;
+    overflow: hidden;
+  }
+}
+
+// ---- the warp button, top left ---------------------------------------------
+
+.mobile-move-button {
+  position: absolute;
+  top: @edge-gap;
+  left: @edge-gap;
+
+  .mobile-move-glyph {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+}
+
+// ---- the five main-frame buttons, top right --------------------------------
+
+.mobile-menu-cluster {
+  position: absolute;
+  top: @edge-gap;
+  right: @edge-gap;
+  display: flex;
+  gap: @button-gap;
+
+  &.portrait {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  // Landscape has width to spare and no height: the column becomes a row.
+  &.landscape {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+// ---- the skill pad, bottom right above the bar -----------------------------
+
+.mobile-skill-pad {
+  position: absolute;
+  right: @edge-gap;
+  bottom: @bar-clearance;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+
+  .mobile-skill-slots {
+    display: flex;
+    flex-direction: row;
+    gap: @button-gap;
+  }
+}
+
+// What a skill is about to hit, so the pad is not fired blind.
+.mobile-target-label {
+  max-width: 60vw;
+  padding: 1px 5px;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.mobile-skill-slot,
+.mobile-picker-slot {
+  // `RenderSkillIcon(…, x + 6, y + 6)`: the icon inside the box.
+  .mobile-skill-art {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(1.5);
+    transform-origin: 50% 50%;
+  }
+
+  // RenderSkillDelay: red at half alpha rising from the slot's floor.
+  .mobile-skill-delay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 0;
+    background: rgba(255, 128, 128, 0.5);
+    pointer-events: none;
+  }
+}
+
+// ---- the picker ------------------------------------------------------------
+
+.mobile-skill-picker {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .mobile-picker-panel {
+    max-width: 92vw;
+    max-height: 82vh;
+    overflow-y: auto;
+    padding: 12px;
+    background: rgba(10, 8, 6, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mobile-picker-title {
+    color: rgb(255, 200, 50);
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .mobile-picker-empty {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    text-align: center;
+    padding: 12px 24px;
+  }
+
+  .mobile-picker-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: @button-gap;
+    justify-content: center;
+  }
+
+  .mobile-picker-actions {
+    display: flex;
+    gap: @button-gap;
+    justify-content: center;
+  }
+
+  .mobile-picker-action {
+    min-height: 40px;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #e2e2e2;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    text-align: center;
+  }
+}

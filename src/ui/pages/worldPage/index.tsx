@@ -51,6 +51,7 @@ import { MapNameBanner } from './components/mapNameBanner';
 import { SessionStatsWindow } from './components/sessionStats';
 import { SlideHelpBar } from '../../components/slideHelp';
 import { DebugMenuWindow } from '../../components/debugMenu';
+import { MobileControls } from './components/mobileControls';
 
 // The active version's take on the windows that differ per version. Lazy so
 // the version UI chunk evaluates after the core app modules, not before.
@@ -106,6 +107,9 @@ const HUD = observer(() => {
       <Minimap />
       {/* Offline only: renders null online (F9). */}
       <DebugMenuWindow />
+      {}
+      {/* Touch clients only: renders null on a mouse. */}
+      <MobileControls />
       {}
       <PickedItemCursor />
     </div>
