@@ -1356,5 +1356,9 @@ export const russianLayer: LanguageLayer = {
     'options.lootHighLevel': 'Уровень +7 и выше',
     'options.lootOther': 'Всё остальное',
     'options.lootZen': 'Zen от',
+    'options.uiScale': 'Размер',
+    'options.lockWindows': 'Закрепить окна',
+    'options.resetWindows': 'Сбросить',
+    'options.section.interface': 'Интерфейс',
   },
 };

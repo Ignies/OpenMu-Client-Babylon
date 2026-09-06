@@ -179,6 +179,7 @@ export const EN_TEXT = {
   'options.section.actions': 'Actions',
   'options.section.language': 'Language',
   'options.section.loot': 'Drop names',
+  'options.section.interface': 'Interface',
 
   'options.autoAttack': 'Automatic Attack',
   'options.whisperBeep': 'Beep sound for whispering',
@@ -191,6 +192,9 @@ export const EN_TEXT = {
   'options.lootHighLevel': 'Level +7 and up',
   'options.lootOther': 'Everything else',
   'options.lootZen': 'Zen from',
+  'options.uiScale': 'Interface size',
+  'options.lockWindows': 'Lock windows',
+  'options.resetWindows': 'Reset windows',
   'options.volume': 'Volume',
   'options.effectLevel': '+Effect limitation',
   'options.shadows': 'Object shadows',

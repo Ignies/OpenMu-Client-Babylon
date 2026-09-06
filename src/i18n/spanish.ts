@@ -1379,5 +1379,9 @@ export const spanishLayer: LanguageLayer = {
     'options.lootHighLevel': 'Nivel +7 o más',
     'options.lootOther': 'Todo lo demás',
     'options.lootZen': 'Zen desde',
+    'options.uiScale': 'Tamaño',
+    'options.lockWindows': 'Bloquear ventanas',
+    'options.resetWindows': 'Restablecer',
+    'options.section.interface': 'Interfaz',
   },
 };

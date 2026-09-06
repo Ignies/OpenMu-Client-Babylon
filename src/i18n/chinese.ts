@@ -1324,5 +1324,9 @@ export const chineseLayer: LanguageLayer = {
     'options.lootHighLevel': '+7 及以上',
     'options.lootOther': '其他全部',
     'options.lootZen': 'Zen 起',
+    'options.uiScale': '大小',
+    'options.lockWindows': '锁定窗口',
+    'options.resetWindows': '重置布局',
+    'options.section.interface': '界面',
   },
 };

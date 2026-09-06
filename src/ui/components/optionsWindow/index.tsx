@@ -12,6 +12,8 @@ import {
   MAP_GRADIENT_MAX,
   SATURATION_MAX,
   SATURATION_MIN,
+  UI_SCALE_MAX,
+  uiScaleFactor,
   GameOptions,
   setGameOption,
   type GameOptions as GameOptionsType,
@@ -43,6 +45,7 @@ import {
   MATERIAL_QUALITY_MAX,
 } from '../../../common/materialQuality';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
+import { MuWindows } from '../muWindow/windowState';
 import { t, type TextKey } from '../../../i18n';
 import { LanguageSelect } from './languageSelect';
 
@@ -138,7 +141,8 @@ type SliderRow = {
     | 'vignette'
     | 'saturation'
     | 'darkness'
-    | 'lootZen';
+    | 'lootZen'
+    | 'uiScale';
   textId: number;
   labelKey: TextKey;
   max: number;
@@ -201,6 +205,25 @@ const TABS: Tab[] = [
             check('whisperBeep', 387, 'options.whisperBeep'),
             check('slideHelp', 919, 'options.slideHelp'),
             check('cameraControl', -1, 'options.cameraControl'),
+          ],
+        },
+        {
+          titleKey: 'options.section.interface',
+          rows: [
+            slider({
+              key: 'uiScale',
+              textId: -1,
+              labelKey: 'options.uiScale',
+              max: UI_SCALE_MAX,
+              display: v => `${Math.round(uiScaleFactor(v) * 100)}%`,
+            }),
+            check('lockWindows', -1, 'options.lockWindows'),
+            {
+              kind: 'button',
+              id: 'reset-windows',
+              labelKey: 'options.resetWindows',
+              onClick: () => MuWindows.resetAll(),
+            },
           ],
         },
         {

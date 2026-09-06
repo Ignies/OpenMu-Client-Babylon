@@ -1369,5 +1369,9 @@ export const romanianLayer: LanguageLayer = {
     'options.lootHighLevel': 'Nivel +7 și peste',
     'options.lootOther': 'Restul',
     'options.lootZen': 'Zen de la',
+    'options.uiScale': 'Mărime',
+    'options.lockWindows': 'Blochează ferestrele',
+    'options.resetWindows': 'Resetează',
+    'options.section.interface': 'Interfață',
   },
 };

@@ -1374,5 +1374,9 @@ export const portugueseLayer: LanguageLayer = {
     'options.lootHighLevel': 'Nível +7 ou mais',
     'options.lootOther': 'Todo o resto',
     'options.lootZen': 'Zen a partir de',
+    'options.uiScale': 'Tamanho',
+    'options.lockWindows': 'Travar janelas',
+    'options.resetWindows': 'Redefinir',
+    'options.section.interface': 'Interface',
   },
 };

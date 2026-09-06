@@ -1382,5 +1382,9 @@ export const germanLayer: LanguageLayer = {
     'options.lootHighLevel': 'Stufe +7 und höher',
     'options.lootOther': 'Alles andere',
     'options.lootZen': 'Zen ab',
+    'options.uiScale': 'Größe',
+    'options.lockWindows': 'Fenster sperren',
+    'options.resetWindows': 'Zurücksetzen',
+    'options.section.interface': 'Oberfläche',
   },
 };
