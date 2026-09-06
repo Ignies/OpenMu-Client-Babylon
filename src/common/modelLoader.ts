@@ -312,15 +312,29 @@ export function syncMaterialQuality(scene: Scene): void {
   }
 }
 
-const texturesCache: Map<string, Texture> = new Map();
+/**
+ * The diffuse textures a GLB was parsed for, grouped by container path: a file
+ * that names one image on two meshes binds it once. Grouped by path because
+ * the textures belong to the `AssetContainer` they came out of, and
+ * `evictContainers` disposes that container - the entries have to go with it.
+ */
+const texturesCache: Map<string, Map<string, Texture>> = new Map();
 
-function getTexture(key: string, fallback: Texture) {
-  if (texturesCache.has(key)) return texturesCache.get(key)!;
+function getTexture(filePath: string, key: string, fallback: Texture) {
+  let byName = texturesCache.get(filePath);
+
+  if (!byName) {
+    byName = new Map();
+    texturesCache.set(filePath, byName);
+  }
+
+  const cached = byName.get(key);
+  if (cached) return cached;
 
   fallback.isBlocking = true;
   fallback.updateSamplingMode(Texture.NEAREST_NEAREST);
 
-  texturesCache.set(key, fallback);
+  byName.set(key, fallback);
 
   return fallback;
 }
@@ -363,6 +377,7 @@ const USE_MODEL_CONTAINER_CACHE = true;
 function prepareMeshes(
   meshes: AbstractMesh[],
   skeletons: Skeleton[],
+  filePath: string,
   fileName: string,
   scene: Scene,
   characterAsset: boolean
@@ -391,7 +406,8 @@ function prepareMeshes(
     const m = mesh.material as PBRBaseSimpleMaterial;
     if (m && !!m._albedoTexture) {
       const cached = getTexture(
-        fileName + m._albedoTexture.name,
+        filePath,
+        m._albedoTexture.name,
         m._albedoTexture as Texture
       );
       const diffuseTexture = cached;
@@ -465,6 +481,7 @@ function loadContainer(
       prepareMeshes(
         container.meshes,
         container.skeletons,
+        filePath,
         fileName,
         scene,
         characterAsset
@@ -563,6 +580,7 @@ export async function loadGLTF(
     prepareMeshes(
       own.meshes,
       own.skeletons,
+      filePath,
       fileName,
       scene,
       characterAsset
@@ -642,6 +660,12 @@ export function evictContainers(pathPrefix: string): void {
   for (const [key, pending] of containersCache) {
     if (!key.includes(pathPrefix)) continue;
     containersCache.delete(key);
+    // `AssetContainer.dispose` disposes the container's textures, so the
+    // diffuse textures parsed out of this file die with it. Dropping them
+    // here is what makes the map's next visit re-parse the GLB and keep the
+    // fresh texture; a kept entry would be handed out already disposed and
+    // the mesh would draw untextured until the page was reloaded.
+    texturesCache.delete(key);
     pending.then(
       container => container.dispose(),
       () => {}
