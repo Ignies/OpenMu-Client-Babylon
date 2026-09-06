@@ -36,10 +36,10 @@ import {
   DISTANCE_BY_LEVEL,
   DISTANCE_EASE,
   EYE_HEIGHT_MU,
-  FIRST_PERSON_FOV_DEG,
   FIRST_PERSON_MU,
   FIRST_PERSON_NEAR_MU,
   FIRST_PERSON_PITCH_LIMIT_DEG,
+  FIRST_PERSON_WIDEN_DEG,
   HEIGHT_BACKOFF,
   HERO_HIDE_MU,
   MAX_CAMERA_LEVEL,
@@ -262,11 +262,11 @@ export function updateGameCamera(
     Math.max(MIN_RADIUS_MU, Math.hypot(horizontal, vertical)) / MU_SCALE;
   camera.beta = Math.atan2(horizontal, vertical) + pitch * RAD;
   camera.alpha = headingDeg * RAD;
-  // The slider owns the third-person end only; the eye keeps its own
-  // frustum, so a narrow slider still opens up as the shot goes first person.
-  const wide = GameOptions.cameraFov;
-
-  camera.fov = (wide + (FIRST_PERSON_FOV_DEG - wide) * close) * RAD;
+  // The slider sets the frame the player picked and the eye widens over it,
+  // so first person moves with the slider and the default still lands on
+  // FIRST_PERSON_FOV_DEG.
+  camera.fov =
+    (GameOptions.cameraFov + FIRST_PERSON_WIDEN_DEG * close) * RAD;
 
   // Closing in walks the near plane out with the frame: at the eye it is what
   // keeps the hero's own aura and crackle - which emit around the body the
