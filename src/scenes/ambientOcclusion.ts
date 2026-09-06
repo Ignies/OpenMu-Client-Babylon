@@ -53,7 +53,8 @@ function ssaoForcedOff(): boolean {
 }
 
 /**
- * The effect mask: where the additive half of the frame landed.
+ * The effect mask: where the additive half of the frame landed, and how much
+ * of each pixel it is.
  *
  * The AO combine and the haze both describe a pixel by the *surface* under
  * it, read from the geometry buffer, which holds only matter. Over every
@@ -62,14 +63,30 @@ function ssaoForcedOff(): boolean {
  * buffer describes whatever stands behind the flame, and both passes would
  * apply it anyway. Nothing this early in the chain is HDR (SSAO2 builds its
  * passes at 8 bits), so a brightness knee cannot find them; the mask draws
- * them instead: one low-resolution target holding only the additive
- * geometry over black, and the two passes back off in proportion to it.
+ * them instead: one target holding only the additive geometry over black,
+ * composited with its own blend modes.
+ *
+ * Both readers *subtract* it rather than threshold it. An additive pass adds
+ * to the surface under it, so `surface = colour - mask` is that surface, and
+ * each half then takes its own treatment: the flame keeps its own haze
+ * distance and is never occluded, the water behind it keeps the haze and the
+ * AO it earned. A threshold cannot do that - it hands the whole pixel to
+ * whichever side won - and the sprite sheets are JPEG, so the "black" around
+ * a flame carries 1-12/255 of ringing and cleared any knee low enough to
+ * catch a rain streak. That is what stamped a flame's quad into the frame as
+ * an un-hazed dark rectangle.
+ *
+ * Hence full resolution and half float. At half resolution a one-pixel rain
+ * streak lands at a tenth of its brightness, and a subtraction would leave
+ * the other nine tenths to be hazed as far water; at 8 bits a flame brighter
+ * than white clamps to 1.0 and the surface left under it comes out too
+ * bright. Neither costs anything measurable: the pass is bound by the scene
+ * traversal it does, not by the pixels it fills, and its render list is a
+ * handful of cards, sprites and particles.
  */
-const EFFECT_MASK_LO = 0.02;
-const EFFECT_MASK_HI = 0.25;
 
 /** Mask resolution relative to the backbuffer. */
-const EFFECT_MASK_RATIO = 0.5;
+const EFFECT_MASK_RATIO = 1;
 
 export const EFFECT_MASK_SAMPLER = 'effectMask';
 
@@ -163,9 +180,9 @@ function depthWriteAlphaKeyed(gbuffer: MultiRenderTarget): void {
 
 /**
  * Babylon's combine pass is `sceneColor * ssaoColor` over the *finished*
- * frame, glow cards included; wherever the effect mask says an additive pass
- * landed, the AO is faded out (a pixel that is itself a light source has
- * nothing to occlude).
+ * frame, glow cards included; the effect mask is subtracted out of it first
+ * and added back unoccluded, because a pixel that is itself a light source
+ * has nothing to occlude.
  *
  * The ground keeps a floor (§4.8 step 1): the lightmap already carries the
  * near-wall darkening, so on an up-facing surface the AO is contact
@@ -194,8 +211,6 @@ function patchSsaoCombine(): void {
   uniform vec3 ${GROUND_UP_UNIFORM};
   varying vec2 vUV;
 
-  const float EFFECT_MASK_LO = ${EFFECT_MASK_LO.toFixed(3)};
-  const float EFFECT_MASK_HI = ${EFFECT_MASK_HI.toFixed(3)};
   const float GROUND_AO_FLOOR = ${GROUND_AO_FLOOR.toFixed(3)};
 
   void main(void) {
@@ -206,17 +221,16 @@ function patchSsaoCombine(): void {
 
     // The mask is rendered through the same camera viewport as the passes
     // above it, so it takes the same remapped uv rather than raw vUV.
-    vec3 effect = texture2D(${EFFECT_MASK_SAMPLER}, uv).rgb;
-    float lit = smoothstep(EFFECT_MASK_LO, EFFECT_MASK_HI,
-      max(effect.r, max(effect.g, effect.b)));
+    vec3 effect = min(texture2D(${EFFECT_MASK_SAMPLER}, uv).rgb,
+      max(sceneColor.rgb, vec3(0.0)));
+    vec3 surface = sceneColor.rgb - effect;
 
     vec3 normalV = texture2D(${GROUND_NORMAL_SAMPLER}, uv).xyz;
     float ground = smoothstep(0.7, 0.9, dot(normalV, ${GROUND_UP_UNIFORM}));
 
-    vec3 ao = mix(ssaoColor.rgb, vec3(1.0), lit);
-    ao = max(ao, vec3(ground * GROUND_AO_FLOOR));
+    vec3 ao = max(ssaoColor.rgb, vec3(ground * GROUND_AO_FLOOR));
 
-    gl_FragColor = vec4(sceneColor.rgb * ao, sceneColor.a * ssaoColor.a);
+    gl_FragColor = vec4(surface * ao + effect, sceneColor.a * ssaoColor.a);
   }
   `;
 }
@@ -244,6 +258,9 @@ function createEffectMask(
       generateDepthBuffer: false,
       generateMipMaps: false,
       samplingMode: Texture.BILINEAR_SAMPLINGMODE,
+      // Both readers subtract it from an HDR frame; 8 bits would clamp a
+      // flame brighter than white and leave a surface that is too bright.
+      type: Constants.TEXTURETYPE_HALF_FLOAT,
     }
   );
 
