@@ -70,17 +70,25 @@ export const CAMERA_FOV_DEG = 30;
 /**
  * Range the FOV slider offers around the original 30. The eye adds its own
  * widening on top, so the slider carries first person with it: the innermost
- * step runs 55 to 95 as the slider runs 20 to 60.
+ * step runs 45 to 85 as the slider runs 20 to 60.
  */
 export const CAMERA_FOV_MIN_DEG = 20;
 export const CAMERA_FOV_MAX_DEG = 60;
 
 /**
- * First-person frustum at the slider's default. 30 degrees is a telephoto
- * lens on a face; the original itself opens to 65 for its tour camera
- * (`SetCameraFOV`).
+ * First-person frustum at the slider's default, vertical degrees. 30 is a
+ * telephoto lens on a face, so the innermost step opens up.
+ *
+ * It opened to 65, the figure the original's own tour camera uses
+ * (`SetCameraFOV`). That is a vertical figure and Babylon reads it as one too,
+ * so on a 16:9 window it is a 97 degree frustum across - wider than the wide
+ * end of what an FPS ships, and the outer third of the frame is stretched
+ * along its own radius. On the near grass and foliage, which is card geometry
+ * a tile from the eye, that stretch is the smearing at the edges of the shot.
+ * 55 is about 86 across: still open for a subject this near, and short of
+ * where the stretch starts to show.
  */
-export const FIRST_PERSON_FOV_DEG = 65;
+export const FIRST_PERSON_FOV_DEG = 55;
 
 /**
  * What the eye adds to the third-person frustum. Held as a difference rather
