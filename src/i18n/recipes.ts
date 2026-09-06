@@ -250,6 +250,17 @@ export const EN_TEXT = {
   'warn.noPotions': 'No healing potions left',
   'warn.buffEnding': '{name} is about to end',
   'trade.offerChanged': 'The other side changed the offer',
+  // ---- session panel -----------------------------------------------------
+  'session.title': 'Session',
+  'session.time': 'Time',
+  'session.exp': 'Exp',
+  'session.kills': 'Kills',
+  'session.zen': 'Zen',
+  'session.toLevel': 'To level',
+  'session.reset': 'Reset',
+  // ---- key bindings ------------------------------------------------------
+  'keys.minimap': 'Minimap',
+  'keys.sessionStats': 'Session panel',
   'warp.favouriteHint': 'Right click to star this map and keep it on top',
   // ---- find box ----------------------------------------------------------
   'search.placeholder': 'Find...',
@@ -259,6 +270,7 @@ export const EN_TEXT = {
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
   'keys.hideUi': 'Hide interface',
+  'keys.sortInventory': 'Arrange inventory',
   'keys.targetNearest': 'Target next monster',
   'keys.replyWhisper': 'Reply to whisper',
   'keys.emoteMenu': 'Emote menu',
@@ -1393,6 +1405,7 @@ export const EN_TEXT = {
   'notify.merchantRefuses': 'The merchant does not want that item',
   'notify.noInventoryRoom': 'There is no room in the inventory',
   'notify.noRoomForItem': 'There is no room for that item',
+  'notify.inventorySorted': 'Inventory arranged',
   'notify.itemsMoved': '{count} items moved',
   'notify.learnedSkill': 'You have learned {name}',
   'notify.storageOpen': 'You cannot use items while the storage is open',

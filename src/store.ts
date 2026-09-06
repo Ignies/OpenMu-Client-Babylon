@@ -957,6 +957,9 @@ export const Store = new (class _Store {
 
   /** The hide-interface key: the HUD layer is not drawn while this is set. */
   hudHidden = false;
+  /** The session panel (exp / kills / zen per hour); this client's own. */
+  sessionStatsEnabled = false;
+
   sceneLoading = false;
 
   loadingProgress = 0;
@@ -1071,6 +1074,7 @@ export const Store = new (class _Store {
       minimapEnabled: observable,
       warpWindowEnabled: observable,
       hudHidden: observable,
+      sessionStatsEnabled: observable,
       sceneLoading: observable,
       loadingProgress: observable,
       spritesLoading: observable,
@@ -2159,6 +2163,37 @@ export const Store = new (class _Store {
       toSlot,
       picked.item
     );
+  }
+
+  /**
+   * Move an item to a named square of the same grid: the drag's lift and
+   * drop in one call, for the auto-arrange run (`common/inventorySort.ts`).
+   * Returns false when the move cannot be started.
+   */
+  moveItemToSquare(storage: StorageKind, fromSlot: number, toSlot: number): boolean {
+    if (this.pickedItem || this.pendingItemMove) return false;
+
+    const items = this.itemsOfStorage(storage);
+    const item = items[fromSlot];
+    if (!item || items[toSlot]) return false;
+
+    if (this.isOffline) {
+      runInAction(() => {
+        items[fromSlot] = null;
+        items[toSlot] = item;
+        this.syncPlayerAppearance();
+      });
+      return true;
+    }
+
+    runInAction(() => {
+      items[fromSlot] = null;
+      this.pickedItem = { item, fromSlot, fromStorage: storage };
+      if (storage === StorageKind.Inventory) this.syncPlayerAppearance();
+    });
+
+    this.moveItemRequest(storage, fromSlot, storage, toSlot, item);
+    return true;
   }
 
   /**
