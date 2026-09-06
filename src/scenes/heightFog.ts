@@ -33,6 +33,24 @@ const EFFECT_FOG_DISTANCE = 12;
 
 const FOG_SHADER = 'muDistanceHaze';
 
+/**
+ * Where the haze stops holding anything back, in tiles.
+ *
+ * The cap is 0.9 so mid-distance ground keeps a tenth of its own colour and
+ * does not wash out. A map is 256 tiles across, so its edge stands a couple of
+ * hundred tiles off: at 250 the curve has only reached 0.75 and a quarter of
+ * the far terrain survives. Under the ported camera that band is off the
+ * bottom of the frame; at eye level it is the map ending in a hard silhouette
+ * against the sky, plateau and all.
+ *
+ * Past this range the cap comes off and the ground goes into the sky it was
+ * already fading toward. The ported camera looks down 48.5 degrees and its
+ * topmost ray meets the ground about 20 tiles out, so no ported framing
+ * reaches into this at all.
+ */
+const FOG_CLOSE_NEAR = 160;
+const FOG_CLOSE_FAR = 320;
+
 /** How fast the height reference follows the camera target (per second). */
 const FOG_BASE_EASE = 2.5;
 
@@ -82,13 +100,18 @@ function registerFogShader(): void {
   uniform float fogBaseY;
 
   const float EFFECT_FOG_DISTANCE = ${EFFECT_FOG_DISTANCE.toFixed(1)};
+  const float FOG_CLOSE_NEAR = ${FOG_CLOSE_NEAR.toFixed(1)};
+  const float FOG_CLOSE_FAR = ${FOG_CLOSE_FAR.toFixed(1)};
 
   float hazeAt(float dist, float camY, float rdY) {
     float reach = max(0.0, dist - fogParams.x);
     float y = camY + rdY * dist;
     float amount = reach * (fogParams.y + fogParams.w * exp(-max(y - fogBaseY, 0.0)));
+    float f = fogParams.z * (1.0 - exp(-amount));
 
-    return fogParams.z * (1.0 - exp(-amount));
+    // Past the map's own scale the cap comes off, so the far edge dissolves
+    // into the sky instead of standing against it.
+    return mix(f, 1.0, smoothstep(FOG_CLOSE_NEAR, FOG_CLOSE_FAR, dist));
   }
 
   void main(void) {
