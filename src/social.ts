@@ -143,6 +143,9 @@ export const Social = new (class _Social {
   chatInputMode: ChatInputMode = 'normal';
   /** `m_pWhsprIDInputBox`: a name here turns the next line into a whisper. */
   whisperTarget = '';
+
+  /** Who whispered last: what the reply key answers. */
+  lastWhisperFrom = '';
   /** `m_bWhisperSend` (F3): the whisper field is shown and used. */
   whisperEnabled = true;
   /** `m_bBlockWhisper`: incoming whispers are dropped. */
@@ -217,6 +220,7 @@ export const Social = new (class _Social {
       chatInputOpen: observable,
       chatInputMode: observable,
       whisperTarget: observable,
+      lastWhisperFrom: observable,
       whisperEnabled: observable,
       blockWhisper: observable,
       showSystemMessages: observable,
@@ -315,7 +319,7 @@ export const Social = new (class _Social {
 
   /** `CNewUIChatLogWindow::AddText`. */
   addChatLine(sender: string, text: string, type: ChatLineType): void {
-    const line: ChatLine = { id: this.nextLineId++, sender, text, type };
+    const line: ChatLine = { id: this.nextLineId++, sender, text, type, at: Date.now() };
     const next = this.chatLines.concat(line);
     // `RemoveFrontLine` once MAX_NUMBER_OF_LINES is reached.
     this.chatLines =

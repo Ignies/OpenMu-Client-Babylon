@@ -12,6 +12,7 @@ import { EventBus } from '../../../../../libs/eventBus';
 import { ENUM_WORLD } from '../../../../../common';
 import { playUiSound, uiClick } from '../../../../../libs/sfx';
 import { loadMoveReqList, type MoveReqEntry } from '../../../../../libs/mu/moveReqFile';
+import { WarpFavourites } from '../../../../../common/warpFavourites';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuText } from '../../../../components/muText';
 import { useWindowChrome } from '../../../../components/muWindow/useWindowChrome';
@@ -86,6 +87,8 @@ const HEADER_COLOR = 'rgb(127, 178, 255)';
 const CAN_MOVE_COLOR = '#fff';
 const CANNOT_MOVE_COLOR = 'rgb(164, 39, 17)';
 const FAILING_COLOR = 'rgb(255, 51, 26)';
+/** The star on a favourite row. */
+const STAR_COLOR = 'rgb(255, 204, 26)';
 
 /**
  * `CharacterExtensions.GetEffectiveMoveLevelRequirement` (OpenMU):
@@ -159,16 +162,39 @@ export function closeMoveWindow(): void {
   });
 }
 
-const Row = ({ row, y, onClick }: { row: RowState; y: number; onClick: () => void }) => {
+const Row = observer(({
+  row,
+  y,
+  onClick,
+}: {
+  row: RowState;
+  y: number;
+  onClick: () => void;
+}) => {
   const base = row.canMove ? CAN_MOVE_COLOR : CANNOT_MOVE_COLOR;
   const failing = (ok: boolean) => (row.canMove || ok ? base : FAILING_COLOR);
+  const starred = WarpFavourites.has(row.entry.index);
   return (
     <div
       className={`move-row${row.canMove ? ' can-move' : ''}`}
       data-no-drag="true"
+      title={t('warp.favouriteHint')}
       style={{ left: ROWS.x, top: y - 1, width: ROW_WIDTH, height: ROW_HEIGHT }}
       onClick={row.canMove ? uiClick(onClick) : undefined}
+      onContextMenu={event => {
+        event.preventDefault();
+        event.stopPropagation();
+        WarpFavourites.toggle(row.entry.index);
+      }}
     >
+      {starred && (
+        <MuText
+          className="move-label move-star"
+          color={STAR_COLOR}
+          style={{ left: 4, top: 1 }}
+          text="*"
+        />
+      )}
       <MuText className="move-label" color={base} style={{ left: COL.map - ROWS.x, top: 1 }} text={row.entry.name} />
       <MuText
         className="move-label"
@@ -184,7 +210,7 @@ const Row = ({ row, y, onClick }: { row: RowState; y: number; onClick: () => voi
       />
     </div>
   );
-};
+});
 
 export const MoveCommandWindow = observer(() => {
   const [entries, setEntries] = useState<readonly MoveReqEntry[]>([]);
@@ -233,10 +259,17 @@ export const MoveCommandWindow = observer(() => {
   const cls = getBaseClass(charClass);
   const pk = Store.world?.playerEntity?.heroState ?? 3;
 
-  const total = entries.length;
+  const ordered = entries.some(entry => WarpFavourites.has(entry.index))
+    ? [
+        ...entries.filter(entry => WarpFavourites.has(entry.index)),
+        ...entries.filter(entry => !WarpFavourites.has(entry.index)),
+      ]
+    : entries;
+
+  const total = ordered.length;
   const maxFirst = Math.max(0, total - MAX_LINES);
   const start = Math.min(first, maxFirst);
-  const visible = entries.slice(start, start + MAX_LINES);
+  const visible = ordered.slice(start, start + MAX_LINES);
   const scrollable = maxFirst > 0;
   /** `m_iTotalMoveScrBtnPixel`: the thumb travels the track less its own height. */
   const thumbTravel = SCROLLBAR_HEIGHT - THUMB.height;
