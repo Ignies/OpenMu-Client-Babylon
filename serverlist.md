@@ -32,4 +32,4 @@ named a game server, not a domain.
 
 Lines that do not parse are dropped, so the prose around them costs nothing.
 
-[S6EP3:Ignies:Season 6 Episode 3, played in the browser:es](ignies.net)
+[S6EP3:Ignies:Season 6 Episode 3, played in the browser:es:https://github.com/Ignies/OpenMu-Client-Babylon/blob/main/2651842.jpg?raw=true](ignies.net)
