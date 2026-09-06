@@ -16,18 +16,25 @@ export type RoomSpec = {
   /** Object types whose origin sits on the wall line (posts and wall pieces). */
   readonly wallTypes: readonly number[];
   /**
-   * From the wall line to the room's floor edge, tiles: positive when the
-   * wall body stands inside its line (Lorencia), negative when it stands
-   * outside (Devias, body one tile outward of the post line).
+   * From the wall line to the inner wall face, tiles: positive when the wall
+   * body stands inside its line (Lorencia), negative when it stands outside
+   * (Devias, body one tile outward of the post line).
    */
   readonly floorFromWallLine: number;
-  /** Wall top and roof underside over the floor, tiles. */
+  /**
+   * Wall top and roof underside over the walls' base, tiles. The wall top
+   * sits a hair under the measured top face, so the face itself is outside
+   * the mask's wall box and never reads as a rim.
+   */
   readonly wallHeight: number;
   readonly roofHeight: number;
 };
 
 /** One object record, position in tiles. */
 export type RoomRecord = { id: number; x: number; y: number; z: number };
+
+/** A room with the height its walls stand at: floor, wall top and roof underside hang off it. */
+export type RoomFrame = Room & { readonly base: number };
 
 /** Slabs of one roof sit at one height; a piece on another storey is another roof. */
 const SAME_ROOF_HEIGHT = 0.6;
@@ -41,12 +48,12 @@ const round2 = (v: number) => Math.round(v * 2) / 2;
 export function enumerateRooms(
   records: readonly RoomRecord[],
   spec: RoomSpec
-): Room[] {
+): RoomFrame[] {
   const roofs = records.filter(r => spec.roofTypes.includes(r.id));
   const walls = records.filter(r => spec.wallTypes.includes(r.id));
   const reach = 2 * spec.roofHalf + TOUCH_MARGIN;
   const used = new Set<RoomRecord>();
-  const rooms: Room[] = [];
+  const rooms: RoomFrame[] = [];
 
   for (const seed of roofs) {
     if (used.has(seed)) continue;
@@ -77,11 +84,14 @@ export function enumerateRooms(
     }
 
     // The wall line: the extent of the wall origins under the roof. A roof
-    // with no walls under it is a shed, not a room.
+    // with no walls under it is a shed, not a room. The lowest wall sets the
+    // base: a wall top read off a higher one would let a ray over the low
+    // wall's top through.
     let wMinX = Infinity;
     let wMinY = Infinity;
     let wMaxX = -Infinity;
     let wMaxY = -Infinity;
+    let base = Infinity;
     for (const w of walls) {
       if (w.x < minX - WALL_REACH || w.x > maxX + WALL_REACH) continue;
       if (w.y < minY - WALL_REACH || w.y > maxY + WALL_REACH) continue;
@@ -89,6 +99,7 @@ export function enumerateRooms(
       wMaxX = Math.max(wMaxX, w.x);
       wMinY = Math.min(wMinY, w.y);
       wMaxY = Math.max(wMaxY, w.y);
+      base = Math.min(base, w.z);
     }
     if (wMinX === Infinity) continue;
 
@@ -100,6 +111,7 @@ export function enumerateRooms(
       min,
       max,
       centre: { x: (min.x + max.x) / 2, z: (min.y + max.y) / 2 },
+      base,
     });
   }
 

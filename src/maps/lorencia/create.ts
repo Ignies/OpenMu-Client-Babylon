@@ -64,7 +64,7 @@ import { WellObject } from './wellObject';
 
 const DISABLE = false;
 
-/** Measured on the pub: walls 1.65-4.29 and roof slabs from 4.3 over a 1.65 floor; the wall body stands inside its line. */
+/** Measured on the pub: wall body 0.46 thick inside its line, top face 2.64 over the base, roof slabs from 2.65. */
 const LORENCIA_ROOM_SPEC: RoomSpec = {
   roofTypes: [MODEL_HOUSE_WALL05, MODEL_HOUSE_WALL06],
   roofHalf: 2.3,
@@ -75,8 +75,8 @@ const LORENCIA_ROOM_SPEC: RoomSpec = {
     MODEL_HOUSE_WALL04,
   ],
   floorFromWallLine: 0.5,
-  wallHeight: 2.65,
-  roofHeight: 2.65,
+  wallHeight: 2.63,
+  roofHeight: 2.63,
 };
 
 /** The pub floor (x 121-129, y 121-137); the cabin across the river is the other roofed room. */

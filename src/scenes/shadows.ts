@@ -10,6 +10,8 @@ import {
 } from '../libs/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
 import { devQueryNumber } from '../common/devSeams';
+import { requestBakedTerrainLight } from '../common/terrainDynamicLight';
+import { TERRAIN_SIZE } from '../common/terrain/consts';
 import { sunLightOf } from '../lighting/keyRig';
 import {
   blobShadowRefresh,
@@ -38,10 +40,13 @@ const CSM_MAX_Z = 32;
 
 /**
  * The reach inside a room (`casters: 'all'`): the far wall of the pub or the
- * reading room is under 20 tiles from the camera, so the three cascades are
- * spent on the room instead of on the black past its walls.
+ * reading room is under 20 tiles from the camera, so the map is spent on the
+ * room instead of on the black past its walls. One cascade covers it: the
+ * room's furniture is drawn once into the map, not three times, and 20 tiles
+ * over 2048 texels is still 100 texels a tile.
  */
 const CSM_ROOM_MAX_Z = 20;
+const CSM_ROOM_CASCADES = 1;
 
 const CSM_LAMBDA = 0.1;
 
@@ -57,6 +62,10 @@ const CSM_BLEND = 0.08;
 const biasDev = devQueryNumber('csmBias');
 const normalBiasDev = devQueryNumber('csmNormalBias');
 const softnessDev = devQueryNumber('csmSoftness');
+const cascadesDev = devQueryNumber('csmCascades');
+const mapSizeDev = devQueryNumber('csmMapSize');
+const refreshDev = devQueryNumber('csmRefresh');
+const minCasterDev = devQueryNumber('csmMinCaster');
 
 type Runtime = {
   scene: Scene;
@@ -73,6 +82,10 @@ let terrainFloor = 1;
 
 /** Who the render-list predicate admits; the policy's, as of the last sync. */
 let casters: ShadowCasters = 'dynamic';
+
+/** The tile step a shadow takes from its caster: the policy's sun, horizontal. */
+let sunStepX = 1;
+let sunStepZ = 1;
 
 // --- terrain hook ----------------------------------------------------------
 
@@ -251,14 +264,137 @@ const CSM_CASTER_SLACK = 16;
 
 const CSM_CASTER_RANGE_SQ = (CSM_MAX_Z + CSM_CASTER_SLACK) ** 2;
 
+/**
+ * A baked shadow is at least this much darker than the ground around it; the
+ * blotch noise the Lorencia and Noria bakes carry where no shadow was
+ * authored stays under it.
+ */
+const BAKED_SHADOW_DROP = 0.1;
+
+/**
+ * Ground the bake holds below this (display units) is ground the artist
+ * darkened: Lorencia's town yards sit at 0.4 with the buildings' darkening
+ * spread too wide for a ring to see past, its plaza at 0.9, the forest and
+ * Noria's floor at 0.6-0.85. A cascade on such ground can only double.
+ */
+const BAKE_LIT_FLOOR = 0.55;
+
+/** The ring reaches this far (tiles) past the footprint. */
+const BAKE_RING = 2;
+
+/** Footprints wider than this (tiles) are cliffs and walls: never sampled. */
+const BAKE_TEST_MAX_SPAN = 32;
+
+/**
+ * A static caster under this height (tiles) is grass, a flower, a ground
+ * decal or a small mushroom: its shadow is a card's noise at gameplay zoom,
+ * and Noria stands 600 of them in one frame (22 -> 28 fps without them).
+ */
+const BAKE_TEST_MIN_HEIGHT = 1;
+
+const bakeSample = { x: 0, y: 0, z: 0 };
+
+function bakeLumaAt(x: number, z: number): number | null {
+  if (!requestBakedTerrainLight(x + 0.5, z + 0.5, bakeSample)) return null;
+
+  return (bakeSample.x + bakeSample.y + bakeSample.z) / 3;
+}
+
+/**
+ * Whether the lightmap already holds this map object's shadow (§13 F15),
+ * measured once per mesh: the mean bake under its footprint stepped one tile
+ * along the sun, against a ring of tiles around it and against
+ * `BAKE_LIT_FLOOR`. Lit ground with no local drop says the artist never baked
+ * it (Noria's trees, the forest pines), so it casts; the town's buildings
+ * measure baked and stay out (F1's doubled shadows). Null while the bake is
+ * not loaded yet.
+ */
+function bakeHoldsShadow(mesh: AbstractMesh): boolean | null {
+  const meta = mesh.metadata;
+  const cached = meta.bakedShadow;
+
+  if (typeof cached === 'boolean') return cached;
+
+  const box = mesh.getBoundingInfo().boundingBox;
+  const min = box.minimumWorld;
+  const max = box.maximumWorld;
+
+  const minX = Math.floor(min.x);
+  const maxX = Math.floor(max.x);
+  const minZ = Math.floor(min.z);
+  const maxZ = Math.floor(max.z);
+
+  let holds: boolean;
+
+  if (
+    maxX - minX >= BAKE_TEST_MAX_SPAN ||
+    maxZ - minZ >= BAKE_TEST_MAX_SPAN ||
+    max.y - min.y < (minCasterDev ?? BAKE_TEST_MIN_HEIGHT)
+  ) {
+    holds = true;
+  } else {
+    // The sampler answers false for an unloaded bake and for a tile off the
+    // map alike; the map's centre tells the two apart.
+    if (bakeLumaAt(TERRAIN_SIZE / 2, TERRAIN_SIZE / 2) === null) return null;
+
+    let under = 0;
+    let underN = 0;
+    let ring = 0;
+    let ringN = 0;
+
+    for (let x = minX - BAKE_RING; x <= maxX + BAKE_RING; x++) {
+      for (let z = minZ - BAKE_RING; z <= maxZ + BAKE_RING; z++) {
+        const shifted =
+          x >= minX + sunStepX &&
+          x <= maxX + sunStepX &&
+          z >= minZ + sunStepZ &&
+          z <= maxZ + sunStepZ;
+        const inside = x >= minX && x <= maxX && z >= minZ && z <= maxZ;
+
+        if (!shifted && inside) continue;
+
+        const luma = bakeLumaAt(x, z);
+        if (luma === null) continue;
+
+        if (shifted) {
+          under += luma;
+          underN++;
+        } else {
+          ring += luma;
+          ringN++;
+        }
+      }
+    }
+
+    const stepped = underN ? under / underN : 0;
+
+    holds =
+      !underN ||
+      !ringN ||
+      stepped < BAKE_LIT_FLOOR ||
+      stepped < (ring / ringN) * (1 - BAKED_SHADOW_DROP);
+  }
+
+  meta.bakedShadow = holds;
+
+  return holds;
+}
+
 function castsSunShadow(mesh: AbstractMesh): boolean {
   const meta = mesh.metadata;
 
   if (!meta || meta.csmCaster !== true) return false;
 
-  // The lightmap already bakes every static object's shadow (§13 F1): under
-  // `dynamic` a map object never enters the map, so nothing is shadowed twice.
-  if (casters === 'dynamic' && meta.mapObject === true) return false;
+  // The lightmap already bakes a static object's shadow (§13 F1) where the
+  // artist drew one: under `dynamic` such a map object never enters the map,
+  // so nothing is shadowed twice; one the bake has no shadow for casts (F15).
+  if (
+    casters === 'dynamic' &&
+    meta.mapObject === true &&
+    bakeHoldsShadow(mesh) !== false
+  ) {
+    return false;
+  }
 
   // The blend mesh is an additive glow card - light, not matter - with one
   // exception: the objects that say the card *is* their body (wings,
@@ -307,6 +443,10 @@ function reachFor(who: ShadowCasters): number {
   return who === 'all' ? CSM_ROOM_MAX_Z : CSM_MAX_Z;
 }
 
+function cascadesFor(who: ShadowCasters, tier: LightingTier): number {
+  return who === 'all' ? CSM_ROOM_CASCADES : cascadesDev ?? tier.cascades;
+}
+
 /** Frozen materials skip the light-dirty pass; force the rebuild once. */
 function rebuildFrozenMaterials(scene: Scene): void {
   for (const material of scene.materials) {
@@ -322,9 +462,13 @@ function createCsm(
   tier: LightingTier,
   policy: ShadowPolicy
 ): CascadedShadowGenerator {
-  const csm = new CascadedShadowGenerator(tier.shadowMapSize, sun, true);
+  const csm = new CascadedShadowGenerator(
+    mapSizeDev ?? tier.shadowMapSize,
+    sun,
+    true
+  );
 
-  csm.numCascades = tier.cascades;
+  csm.numCascades = cascadesFor(policy.casters, tier);
   csm.lambda = CSM_LAMBDA;
   csm.shadowMaxZ = reachFor(policy.casters);
   csm.stabilizeCascades = true;
@@ -350,7 +494,7 @@ function createCsm(
 
   if (map) {
     map.renderListPredicate = castsSunShadow;
-    map.refreshRate = 1;
+    map.refreshRate = refreshDev ?? 1;
   }
 
   // The object materials are shared and carry a placeholder diffuse; the
@@ -416,7 +560,19 @@ export function syncShadows(
   // need a rebuild, and the reach is a re-split, not a rebuild either.
   casters = policy.casters;
 
-  if (runtime?.csm) runtime.csm.shadowMaxZ = reachFor(casters);
+  const [dx, , dz] = policy.direction;
+  const horizontal = Math.hypot(dx, dz);
+  if (horizontal > 1e-4) {
+    sunStepX = Math.round(dx / horizontal);
+    sunStepZ = Math.round(dz / horizontal);
+  }
+
+  if (runtime?.csm) {
+    runtime.csm.shadowMaxZ = reachFor(casters);
+    // A cascade count change recreates the map; once per room entered.
+    const cascades = cascadesFor(casters, runtime.tier);
+    if (runtime.csm.numCascades !== cascades) runtime.csm.numCascades = cascades;
+  }
 
   if (!tier) {
     disposeShadows();

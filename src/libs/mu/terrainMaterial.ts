@@ -204,7 +204,7 @@ ${water ? terrainWaterVertexGlsl(water.spec) : ''}
   uniform float linearOut;
   uniform float linearLight;
   uniform float keyGain;
-  uniform vec2 roomParams; // x: a room is the active area, y: gain on the delta (AreaLook.candles)
+  uniform vec3 roomParams; // x: a room is the active area, y: gain on the delta (AreaLook.candles), z: the room's share of the key on the bake
 ${
   tileArray
     ? `  uniform highp sampler2DArray tileTextures;
@@ -276,13 +276,13 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
     // (csmParams.y, the policy floor). 1 while Classic (no cascades).
     float bakeShadow = mix(csmParams.y, 1.0, sunShadow);
 
-    // The ground light sum. Tiers >= 1 (linearLight): lin(bake) x floor +
-    // delta, the delta linear-authored and added after the decode. Classic:
-    // the original's gamma-space bake + delta (ZzzLodTerrain.cpp:481-505),
-    // untouched. Under a roof the bake is the room's own dark value and the
-    // delta its candles; the ground takes no key term there either (§13 F14).
+    // The ground light sum. Tiers >= 1 (linearLight): lin(bake) + delta, the
+    // delta linear-authored and added after the decode. Classic: the
+    // original's gamma-space bake + delta (ZzzLodTerrain.cpp:481-505),
+    // untouched. The bake is the ground's key: inside a room it takes the
+    // room's share of the level and the delta, the candles, does not (§13 F14).
     vec3 bake = max(vColor.rgb, vec3(0.0));
-    vec3 bakeLit = mix(bake, pow(bake, vec3(2.2)), linearLight) * bakeShadow;
+    vec3 bakeLit = mix(bake, pow(bake, vec3(2.2)), linearLight) * roomParams.z;
     vec3 groundLight = max(bakeLit + dynLight, vec3(0.0));
 
     // The original clamps glColor at 1.0 per channel; tiers >= 1 bend the
@@ -293,6 +293,11 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
       : peak;
     vec3 softCeil = peak > 0.0 ? groundLight * (bent / peak) : groundLight;
     groundLight = mix(min(groundLight, vec3(1.0)), softCeil, linearLight);
+
+    // The cascades cut the ceiled sum, not the bake under it (§13 F15): on
+    // open ground the ceiling compresses lit and shadowed alike, so a factor
+    // applied before it left a fraction of the policy's ratio. 1 on Classic.
+    groundLight *= bakeShadow;
 
     // The map's level (2^ev) is the light's, applied after the clamps so
     // they keep the original's units; 1.0 on Classic.
@@ -394,7 +399,7 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
     effect.setFloat('linearLight', linearLightActive(scene) ? 1 : 0);
     const look = lookDirector()?.state();
     effect.setFloat('keyGain', look?.keyGain ?? 1);
-    effect.setFloat2('roomParams', look?.area ? 1 : 0, look?.key.emitterGain ?? 1);
+    effect.setFloat3('roomParams', look?.area ? 1 : 0, look?.key.emitterGain ?? 1, look?.key.roomShare ?? 1);
     if (tileArray) {
       effect.setTexture('tileTextures', tileArray.texture);
       effect.setFloatArray('tileScales', tileArray.scales);

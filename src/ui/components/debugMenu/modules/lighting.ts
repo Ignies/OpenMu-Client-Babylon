@@ -39,8 +39,13 @@ const state = (label: string, read: (s: LookState) => string): DebugRow => ({
 
 const rect = (s: LookState): string =>
   s.area
-    ? `${s.area.name} [${s.area.rect.minX},${s.area.rect.minY} - ${s.area.rect.maxX},${s.area.rect.maxY}]`
+    ? `${s.area.name} [${s.area.rect.minX},${s.area.rect.minY} - ${s.area.rect.maxX},${s.area.rect.maxY}]${s.area.volume ? ' vol' : ''}`
     : 'none';
+
+const room = (s: LookState): string =>
+  s.area
+    ? `key ${s.key.roomShare.toFixed(2)} candles ${s.key.emitterGain.toFixed(2)}`
+    : '-';
 
 registerDebugModule({
   id: 'lighting',
@@ -70,6 +75,7 @@ registerDebugModule({
     { kind: 'section', id: 'state', label: 'Look state' },
     state('World', s => `${ENUM_WORLD[s.world]} (${s.world})`),
     state('Area', rect),
+    state('Room', room),
     state('Tier', s => `${TIER_NAMES[s.tier]} (${s.tier})`),
     state(
       'Level',

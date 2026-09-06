@@ -5,11 +5,10 @@ import { assetWorldNum } from '../common/worldAssets';
 import { setAreaMood } from '../scenes/sceneLook';
 import { roomVolumeOf, type AreaLookName } from '../lighting/profiles';
 import type { World } from '../ecs/world';
-import type { Room } from './layer';
-import type { RoomRecord, RoomSpec } from './roomEnumeration';
+import type { RoomFrame, RoomRecord, RoomSpec } from './roomEnumeration';
 
 export { enumerateRooms, sameRoom } from './roomEnumeration';
-export type { RoomRecord, RoomSpec } from './roomEnumeration';
+export type { RoomFrame, RoomRecord, RoomSpec } from './roomEnumeration';
 
 /**
  * The map's object records in tiles, from the same file the terrain loader
@@ -36,23 +35,23 @@ export type RoomHooks = {
 };
 
 /**
- * One trigger per room: the frame the mask and the roof lift read is the
- * trigger's own box, so a hero on any tile inside it - walked in, warped in,
- * stepped in across a corner - is in the room, and a step past the wall line
- * is out.
+ * One trigger per room: the box the mask and the roof lift read is the
+ * trigger's own, the floor between the inner wall faces, so a hero anywhere
+ * on it - walked in, warped in, stepped in across a corner - is in the room
+ * and a step into the doorway is out.
  */
 export function registerRooms(
   world: World,
-  rooms: readonly Room[],
+  rooms: readonly RoomFrame[],
   spec: RoomSpec,
-  hooksFor: (room: Room) => RoomHooks
+  hooksFor: (room: RoomFrame) => RoomHooks
 ): void {
   const map = world.mapIndex;
 
   for (const room of rooms) {
     const hooks = hooksFor(room);
     const volume = roomVolumeOf(room.min, room.max, {
-      floorY: world.getTerrainHeight(room.centre.x, room.centre.z),
+      floorY: room.base,
       wallHeight: spec.wallHeight,
       roofHeight: spec.roofHeight,
     });

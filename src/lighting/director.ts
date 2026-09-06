@@ -98,6 +98,12 @@ export type LookState = {
     readonly direction: readonly [number, number, number];
     /** Gain on the pool lights and the terrain delta: the room's `candles` on tiers >= 1, 1 otherwise. */
     readonly emitterGain: number;
+    /**
+     * The key's share of the map's level inside a room (`AreaLook.keyLevel /
+     * keyGain`, §13 F14): the rig and the ground bake take it, the emitters
+     * do not. 1 outside a room and on Classic.
+     */
+    readonly roomShare: number;
   };
   readonly shadow: ShadowPolicy;
   /** Stops over unity after the player's brightness trim; 0 on Classic. */
@@ -135,6 +141,8 @@ type Blendable = {
   ev: number;
   /** Gain on the room's emitters (`AreaLook.candles`); 1 outside. */
   candles: number;
+  /** The key's share of the map's level (`AreaLook.keyLevel / 2^ev`); 1 outside. */
+  roomShare: number;
   whiteBalance: [number, number, number];
   fog: {
     start: number;
@@ -147,10 +155,11 @@ type Blendable = {
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-function blendable(p: LookProfile, candles = 1): Blendable {
+function blendable(p: LookProfile, candles = 1, roomShare = 1): Blendable {
   return {
     ev: p.ev,
     candles,
+    roomShare,
     whiteBalance: [...p.whiteBalance],
     fog: { ...p.fog, color: p.fog.color ? [...p.fog.color] : null },
   };
@@ -163,6 +172,7 @@ function lerpBlendable(a: Blendable, b: Blendable, t: number): Blendable {
   return {
     ev: lerp(a.ev, b.ev, t),
     candles: lerp(a.candles, b.candles, t),
+    roomShare: lerp(a.roomShare, b.roomShare, t),
     whiteBalance: [
       lerp(a.whiteBalance[0], b.whiteBalance[0], t),
       lerp(a.whiteBalance[1], b.whiteBalance[1], t),
@@ -186,9 +196,11 @@ export function createLookDirector(
   const onChange = new Observable<Readonly<LookState>>();
 
   // Dev seams: `?ev=` adds stops, `?wb=r,g,b` replaces the balance, `?tm=0..3`
-  // the mapper, `?candles=` replaces the room's emitter gain.
+  // the mapper, `?candles=` the room's emitter gain, `?roomKey=` the room's
+  // key level in key units.
   const evDev = devQueryNumber('ev') ?? 0;
   const candlesDev = devQueryNumber('candles');
+  const roomKeyDev = devQueryNumber('roomKey');
   const wbDev = devQueryNumbers('wb', 3) as Rgb | null;
   const tmDev = devQueryNumber('tm');
 
@@ -198,6 +210,7 @@ export function createLookDirector(
   let target: LookProfile = base;
 
   let targetCandles = 1;
+  let targetShare = 1;
   let from = blendable(base);
   let shown = blendable(base);
   let blend = 1;
@@ -214,6 +227,7 @@ export function createLookDirector(
     from = shown;
     target = next;
     targetCandles = look?.candles ?? 1;
+    targetShare = look ? (roomKeyDev ?? look.keyLevel) / 2 ** base.ev : 1;
     blend = 0;
   };
 
@@ -221,7 +235,7 @@ export function createLookDirector(
     if (blend < 1) {
       blend = Math.min(1, blend + dt / BLEND_SECONDS);
       const t = blend * blend * (3 - 2 * blend);
-      shown = lerpBlendable(from, blendable(target, targetCandles), t);
+      shown = lerpBlendable(from, blendable(target, targetCandles, targetShare), t);
     }
 
     const tier = tierIndex() as 0 | 1 | 2;
@@ -237,11 +251,12 @@ export function createLookDirector(
       fog: shown.fog,
     };
 
-    // 1. key. A room's row lowers the ev by about two stops (F14): the key,
-    // the pools and the terrain delta all follow it, so the candles keep
-    // their ratio to a floor that is now the bake alone.
+    // 1. key. Inside a room the rig and the ground bake take the room's share
+    // of the map's level (F14); the emitters stay at the map's level and
+    // carry the room.
     const keyGain = shaped ? 2 ** (profile.ev + evDev) : 1;
     const emitterGain = shaped ? candlesDev ?? shown.candles : 1;
+    const roomShare = shaped ? shown.roomShare : 1;
     const sunShare = shaped ? profile.sun.share : 0;
     const skyIntensity = shaped ? 1 - sunShare : 1;
     const skyGround: Rgb = shaped
@@ -249,10 +264,10 @@ export function createLookDirector(
       : WHITE;
 
     setKey(scene, {
-      skyIntensity: skyIntensity * keyGain,
+      skyIntensity: skyIntensity * keyGain * roomShare,
       skyDiffuse: WHITE,
       skyGround: shaped ? skyGround : null,
-      sunIntensity: sunShare * keyGain * directLightGain(),
+      sunIntensity: sunShare * keyGain * roomShare * directLightGain(),
       sunDiffuse: WHITE,
     });
 
@@ -332,6 +347,7 @@ export function createLookDirector(
         sunIntensity: sunShare,
         direction: shadow.direction,
         emitterGain,
+        roomShare,
       },
       shadow,
       ev,
@@ -347,6 +363,7 @@ export function createLookDirector(
       world,
       areaKey(room),
       ev.toFixed(3),
+      roomShare.toFixed(3),
       shadow.casters,
       toneMapperIndex,
       profile.whiteBalance.map(v => v.toFixed(3)).join(),

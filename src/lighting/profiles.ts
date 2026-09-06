@@ -179,25 +179,20 @@ export function profileFor(world: ENUM_WORLD): LookProfile {
 /** A lit interior inside a map: what it changes over the map's own profile. */
 export type AreaLook = {
   /**
-   * Stops relative to the map's `ev`. A room sits about two stops under the
-   * open key (§13 F14): the bake is the room's own dark value and the
-   * candles, in key units, carry the rest at their authored ratio.
+   * The room's key in key units, where 1.0 is the bake at its authored value
+   * (Classic's level): a dim ambient of the map's sky, not a lift (§13 F14).
+   * The map's `ev` stays, so the candles - pool lights, terrain delta, flame
+   * cards - keep the level they have outdoors and carry the room.
    */
-  readonly evDelta: number;
+  readonly keyLevel: number;
   readonly whiteBalance: Rgb;
-  /**
-   * Gain on the room's emitters - the pool lights and the terrain delta
-   * alike - on tiers >= 1. The original adds its candle delta to the bake in
-   * display space and clamps (ZzzLodTerrain.cpp:481-505), which lands a pool
-   * well over its linear sum; this is what puts the linear pools back where
-   * Classic's read, without lifting the bake between them.
-   */
+  /** Gain on the room's emitters, the pool lights and the terrain delta alike, on tiers >= 1. */
   readonly candles: number;
   /** The room's key direction: near vertical, a low share, contact grounding only. */
   readonly sun: SunSpec;
 };
 
-/** A room's frame in tiles: its floor plus half the wall, so the doorway keeps its ground. */
+/** A room's floor in tiles, between the inner wall faces: the mask's frame and the roof lift's seed. */
 export type AreaRect = {
   readonly minX: number;
   readonly minY: number;
@@ -205,9 +200,9 @@ export type AreaRect = {
   readonly maxY: number;
 };
 
-/** The frame with its heights: what the room mask draws inside of (§13 F8). */
+/** The floor with its heights: what the room mask draws inside of (§13 F8). */
 export type RoomVolume = AreaRect & {
-  /** Terrain height at the room's centre. */
+  /** Height the walls stand at. */
   readonly floorY: number;
   /** Top of the walls: a ray through the wall box below this height sees through an opening. */
   readonly wallTop: number;
@@ -221,28 +216,13 @@ export function roomVolumeOf(
   heights: { floorY: number; wallHeight: number; roofHeight: number }
 ): RoomVolume {
   return {
-    ...areaRectOf(min, max),
+    minX: min.x,
+    minY: min.y,
+    maxX: max.x,
+    maxY: max.y,
     floorY: heights.floorY,
     wallTop: heights.floorY + heights.wallHeight,
     roofY: heights.floorY + heights.roofHeight,
-  };
-}
-
-/**
- * The room's floor (inner wall faces) widened by `margin` tiles on every side.
- * Half a tile reaches the wall line: a door standing in it keeps its ground,
- * and what leans on the outside of a wall stays out.
- */
-export function areaRectOf(
-  min: { x: number; y: number },
-  max: { x: number; y: number },
-  margin = 0.5
-): AreaRect {
-  return {
-    minX: min.x - margin,
-    minY: min.y - margin,
-    maxX: max.x + margin,
-    maxY: max.y + margin,
   };
 }
 
@@ -255,8 +235,8 @@ const ROOM_SUN = sun(0, 80, 0.3);
 
 const WARM_ROOM: Rgb = [1.03, 1.0, 0.96];
 
-const room = (evDelta: number, candles: number): AreaLook => ({
-  evDelta,
+const room = (keyLevel: number, candles: number): AreaLook => ({
+  keyLevel,
   whiteBalance: WARM_ROOM,
   candles,
   sun: ROOM_SUN,
@@ -264,15 +244,18 @@ const room = (evDelta: number, candles: number): AreaLook => ({
 
 /**
  * Lorencia rooms (map ev 1.8): the pub with candelabra on every table, the
- * cabin across the river. Measured on the pub against Classic: at -1.8 (the
- * bake alone at unity) the floor read 0.6x, at -1.0 0.79x with the chairs at
- * 0.95x; -0.8 lands the chairs at Classic and the floor's darkest twentieth
- * at 1.4x, where the doc's 1.3 gives way to the level.
+ * cabin across the river. Measured on the pub against Classic: p50 1.22x,
+ * pool over floor 0.90x, chairs' tex 1.17x; 0.7 moved the floor 5 % and the
+ * pool ratio not at all, the candles carry the room.
  */
-const LORENCIA_ROOM = room(-0.8, 1.5);
+const LORENCIA_ROOM = room(0.9, 1);
 
-/** Devias rooms (map ev 0.8): the tavern's hearth and door candelabra, the reading room's desk candelabra, the hearth houses, the guard room. Tavern p50 0.95x Classic at 0.0. */
-const DEVIAS_ROOM = room(0.2, 1.5);
+/**
+ * Devias rooms (map ev 0.8): the tavern's hearth and door candelabra, the
+ * reading room's desk candelabra, the hearth houses, the guard room. The
+ * reading room's dark planks sit at 0.97x Classic p50 at 0.9 and 1.03x here.
+ */
+const DEVIAS_ROOM = room(1.0, 1);
 
 const AREAS = {
   lorenciaTavern: LORENCIA_ROOM,
@@ -289,11 +272,10 @@ export function areaProfile(name: AreaLookName): AreaLook {
   return AREAS[name];
 }
 
-/** The map's profile with an area laid over it: no sky, no haze, its own ev and balance. */
+/** The map's profile with an area laid over it: no sky, no haze, its own balance and key direction; the map's ev stays. */
 export function applyArea(base: LookProfile, area: AreaLook): LookProfile {
   return {
     ...base,
-    ev: base.ev + area.evDelta,
     whiteBalance: area.whiteBalance,
     sky: null,
     fog: NO_FOG,

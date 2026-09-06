@@ -27,8 +27,14 @@ describe('enumerateRooms', () => {
     const rooms = enumerateRooms(TAVERN, DEVIAS);
 
     expect(rooms).toEqual([
-      { min: { x: 225, y: 20 }, max: { x: 237, y: 28 }, centre: { x: 231, z: 24 } },
+      { min: { x: 225, y: 20 }, max: { x: 237, y: 28 }, centre: { x: 231, z: 24 }, base: 1.7 },
     ]);
+  });
+
+  it('takes the base from the lowest wall', () => {
+    const [room] = enumerateRooms([...TAVERN, at(77, 234, 27.5, 1.62)], DEVIAS);
+
+    expect(room.base).toBe(1.62);
   });
 
   it('keeps two buildings apart when their slabs do not touch', () => {

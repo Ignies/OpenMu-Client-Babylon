@@ -17,10 +17,12 @@ import type { RoomVolume } from '../lighting/profiles';
  * black". One post pass on tiers >= 1 while an area with a volume is active,
  * after the haze and before the post chain, whatever the post-processing
  * option says. Per pixel the world position comes back from the shared depth
- * and is drawn iff it lies inside the room volume (the frame, floor to roof
- * underside) or the segment from the camera to it crosses the wall box (the
- * frame, floor to wall top): that is a view through a door or a window, and a
- * solid wall would have stopped the ray. Cards that write no depth take the
+ * and is drawn iff it lies inside the room volume (the floor between the inner
+ * wall faces, up to the roof underside) or the segment from the camera to it
+ * crosses the wall box (the same floor, up to the wall top): that is a view
+ * through a door or a window, and a solid wall would have stopped the ray.
+ * The box stops at the inner faces, so a wall's outer face and its top lie
+ * outside and go black with the exterior. Cards that write no depth take the
  * depth behind them, so a flame over the floor stays and a torch outside the
  * walls goes with the exterior behind it.
  *
@@ -35,6 +37,12 @@ const SHADER = 'muRoomMask';
 
 /** Slack under the floor for uneven ground and the terrain's own relief. */
 const FLOOR_SLACK = 1.0;
+/**
+ * Slack past the inner wall faces for the inside test, tiles: the depth's
+ * reconstruction error on a face that sits on the box, no more. The walls
+ * are 0.35-0.5 thick, so their outer half and their top stay outside.
+ */
+const FACE_SLACK = 0.02;
 
 type Runtime = {
   scene: Scene;
@@ -64,6 +72,7 @@ function registerShader(): void {
   uniform vec3 roomY;     // floor, wall top, roof underside
 
   const float FLOOR_SLACK = ${FLOOR_SLACK.toFixed(2)};
+  const float FACE_SLACK = ${FACE_SLACK.toFixed(3)};
 
   // Segment from o to o + d against the box; true when any part is inside.
   bool crossesBox(vec3 o, vec3 d, vec3 bmin, vec3 bmax) {
@@ -97,7 +106,8 @@ function registerShader(): void {
 
     vec3 volMin = vec3(roomXZ.x, roomY.x - FLOOR_SLACK, roomXZ.y);
     vec3 volMax = vec3(roomXZ.z, roomY.z, roomXZ.w);
-    bool inside = all(greaterThanEqual(p, volMin)) && all(lessThanEqual(p, volMax));
+    vec3 faceSlack = vec3(FACE_SLACK, 0.0, FACE_SLACK);
+    bool inside = all(greaterThanEqual(p, volMin - faceSlack)) && all(lessThanEqual(p, volMax + faceSlack));
 
     vec3 wallMax = vec3(roomXZ.z, roomY.y, roomXZ.w);
     bool seenThrough = inside || crossesBox(camPos, toPixel, volMin, wallMax);

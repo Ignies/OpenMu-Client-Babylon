@@ -6,8 +6,8 @@
  * Every Devias building is tiled the same way: a type-76 corner post on each
  * corner, wall pieces (77/78/79) whose origin sits on the post line with the
  * body one tile outward, and roof slabs (81/82) over the lot. A room's bounds
- * are the post line widened by half a tile, so the wall body is inside the
- * frame. The same box is the area's frame (create.ts), the roof mask's
+ * are the floor between the inner wall faces, half a tile out from the post
+ * line. The same box is the area's frame (create.ts), the roof mask's
  * fallback paint (terrainMaskSystem) and the dust volume, so the three cannot
  * disagree.
  *
@@ -25,13 +25,13 @@ import type { RoomSpec } from '../roomEnumeration';
 
 export type { Room } from '../layer';
 
-/** Measured on the tavern: walls 1.7-4.34, roof slabs 4.39-5.29 over a 1.69 floor. */
+/** Measured on the tavern: log wall 0.34 thick on a one-tile stone base, top face 2.64 over the base, roof underside 2.70. */
 export const DEVIAS_ROOM_SPEC: RoomSpec = {
   roofTypes: [81, 82],
   roofHalf: 2.3,
   wallTypes: [76, 77, 78, 79],
   floorFromWallLine: -0.5,
-  wallHeight: 2.65,
+  wallHeight: 2.62,
   roofHeight: 2.7,
 };
 
