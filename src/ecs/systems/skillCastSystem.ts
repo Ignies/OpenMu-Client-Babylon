@@ -138,8 +138,9 @@ export const SkillCastSystem: ISystemFactory = world => {
    * is not walkable, lies in a safe zone or is out of the skill's Distance
    * (`AT_SKILL_TELEPORT`, ZzzInterface.cpp); OpenMU adds that the caster
    * must stand outside a safe zone too, and Teleport Ally wants a party
-   * member as the target. The hero moves when the server's `MapChanged`
-   * says so — nothing is moved here.
+   * member as the target. The hero lands on the square as the cast goes out
+   * instead of a round trip later; the server's `MapChanged` confirms it, or
+   * puts him back on the old square when it refuses.
    */
   function castTeleport(
     hero: Entity,
@@ -167,6 +168,12 @@ export const SkillCastSystem: ISystemFactory = world => {
     if (!skills.canUse(def.num)) return false;
     skills.startCooldown(def.num);
 
+    // The original takes the facing before the teleport, while the hero is
+    // still on the old square (`o->Angle[2] = CreateAngle2D`).
+    const dx = x - heroPos.x;
+    const dz = y - heroPos.z;
+    if (dx * dx + dz * dz > 0.01) hero.transform!.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
+
     if (!Store.isOffline) {
       if (ally) {
         const packet = TeleportTargetPacket.createPacket();
@@ -181,11 +188,17 @@ export const SkillCastSystem: ISystemFactory = world => {
         packet.TeleportTargetY = y;
         Store.sendToGS(packet.buffer);
       }
-    } else if (!ally) {
-      // No server to answer: the swap the MapChanged handler would do.
+    }
+
+    if (!ally) {
+      // The swap the MapChanged handler would do, done here so the hero is
+      // not a round trip behind the click.
       heroPos.x = x;
       heroPos.z = y;
       heroPos.y = world.getTerrainHeight(x, y);
+      const pathfinding = hero.pathfinding!;
+      pathfinding.from = { x, y };
+      pathfinding.to = { x, y };
     }
     return true;
   }
@@ -351,11 +364,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         const point = req.point;
         if (castTeleport(hero, def, req.target ?? null, point)) {
           const heroPos = hero.transform.pos;
-          const dx = ~~point!.x - heroPos.x;
-          const dz = ~~point!.y - heroPos.z;
-          if (dx * dx + dz * dz > 0.01) hero.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
-          const { pathfinding } = hero;
-          pathfinding.path = null;
+          hero.pathfinding.path = null;
           const duration = playClip(hero, clipFor(hero, def));
           const sfx = skillSound(def.num);
           if (sfx) playSfx(sfx, heroPos);

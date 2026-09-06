@@ -76,6 +76,10 @@ export function playerPlaySpeed(
   if (action >= A.PLAYER_SKILL_HAND1 && action <= A.PLAYER_SKILL_WEAPON2) {
     return 0.29 + magicSpeedFactor(magicSpeed);
   }
+  // Teleport is set on its own line, past the loop above
+  // (ZzzCharacter.cpp:860), so it never got its magic speed here: the clip
+  // ran at the 0.28 default and held the cast for a full second.
+  if (action === A.PLAYER_SKILL_TELEPORT) return 0.3 + magicSpeedFactor(magicSpeed);
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {
