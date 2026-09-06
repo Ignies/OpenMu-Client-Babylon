@@ -271,14 +271,6 @@ const CSM_CASTER_RANGE_SQ = (CSM_MAX_Z + CSM_CASTER_SLACK) ** 2;
  */
 const BAKED_SHADOW_DROP = 0.1;
 
-/**
- * Ground the bake holds below this (display units) is ground the artist
- * darkened: Lorencia's town yards sit at 0.4 with the buildings' darkening
- * spread too wide for a ring to see past, its plaza at 0.9, the forest and
- * Noria's floor at 0.6-0.85. A cascade on such ground can only double.
- */
-const BAKE_LIT_FLOOR = 0.55;
-
 /** The ring reaches this far (tiles) past the footprint. */
 const BAKE_RING = 2;
 
@@ -303,11 +295,10 @@ function bakeLumaAt(x: number, z: number): number | null {
 /**
  * Whether the lightmap already holds this map object's shadow (§13 F15),
  * measured once per mesh: the mean bake under its footprint stepped one tile
- * along the sun, against a ring of tiles around it and against
- * `BAKE_LIT_FLOOR`. Lit ground with no local drop says the artist never baked
- * it (Noria's trees, the forest pines), so it casts; the town's buildings
- * measure baked and stay out (F1's doubled shadows). Null while the bake is
- * not loaded yet.
+ * along the sun against a ring of tiles around it. A local drop is an authored
+ * shadow and the object stays out of the cascades (F1's doubled shadows); no
+ * drop means the artist never baked one, however dim the ground is, and the
+ * object casts. Null while the bake is not loaded yet.
  */
 function bakeHoldsShadow(mesh: AbstractMesh): boolean | null {
   const meta = mesh.metadata;
@@ -368,11 +359,13 @@ function bakeHoldsShadow(mesh: AbstractMesh): boolean | null {
 
     const stepped = underN ? under / underN : 0;
 
+    // Only a *local* drop under the object, stepped along the sun, says the
+    // artist baked its shadow. The absolute floor used to rule out everything
+    // standing on dim ground as well, and a town yard bakes at 0.4, so in
+    // Lorencia almost no barrel, stall, cart or canopy cast anything while
+    // the hero beside it did. Dim ground is not a shadow.
     holds =
-      !underN ||
-      !ringN ||
-      stepped < BAKE_LIT_FLOOR ||
-      stepped < (ring / ringN) * (1 - BAKED_SHADOW_DROP);
+      !underN || !ringN || stepped < (ring / ringN) * (1 - BAKED_SHADOW_DROP);
   }
 
   meta.bakedShadow = holds;

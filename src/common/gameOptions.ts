@@ -33,6 +33,8 @@ export type GameOptions = {
    */
   materialDetail: number;
   sharpness: number;
+  /** Sun rays through whatever occludes the sun; 0 disables the pass. */
+  sunShafts: number;
   /** Multiply vignette; 0 disables the pass. */
   vignette: number;
   dynamicLights: boolean;
@@ -106,6 +108,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   chromatic: [0, 9],
   sharpness: [0, 9],
   vignette: [0, 9],
+  sunShafts: [0, 9],
 };
 
 const DEFAULTS: GameOptions = {
@@ -120,6 +123,7 @@ const DEFAULTS: GameOptions = {
   chromatic: 0,
   sharpness: 2,
   vignette: 0,
+  sunShafts: 3,
   dynamicLights: true,
   lightingQuality: 1,
   materialQuality: 1,

@@ -31,6 +31,7 @@ import {
   type LookProfile,
   type Rgb,
   type RoomVolume,
+  SKY_SUN_DEFAULT,
 } from './profiles';
 import {
   CLASSIC_SHADOW_POLICY,
@@ -43,6 +44,7 @@ import { syncAmbientOcclusion } from '../scenes/ambientOcclusion';
 import { syncHeightFog, updateHeightFog } from '../scenes/heightFog';
 import { syncRoomMask } from '../scenes/roomMask';
 import { syncToneMap } from '../scenes/toneMap';
+import { syncSunShafts, sunShaftsLive } from '../scenes/sunShafts';
 import {
   createPostChain,
   TONE_MAPPER_NAMES,
@@ -314,6 +316,26 @@ export function createLookDirector(
     const roomMask = syncRoomMask(scene, camera, lightTier, room?.volume ?? null, reordered);
     reordered = roomMask.changed || reordered;
 
+    // The shafts are scene light, so they run before the curve. The map's own
+    // sky, not the area's: a room owns the frame and shows none.
+    const shaftSky = room ? null : base.sky;
+    reordered =
+      syncSunShafts(
+        scene,
+        camera,
+        lightTier,
+        tier,
+        {
+          sunColor: shaftSky
+            ? toLinear(
+                shaftSky.sun === null ? shaftSky.zenith : shaftSky.sun ?? SKY_SUN_DEFAULT
+              )
+            : null,
+          direction: shadow.direction,
+        },
+        post
+      ) || reordered;
+
     // 6. post: the viewer's brightness only; the map's level is in the key.
     const brightness = shaped ? GameOptions.brightness / 10 : 0;
     const postExposure = 2 ** brightness;
@@ -341,6 +363,7 @@ export function createLookDirector(
       ...(shaped && post ? ['ssao'] : []),
       ...(shaped && post && profile.fog.density > 0 ? ['haze'] : []),
       ...(roomMask.live ? ['roomMask'] : []),
+      ...(sunShaftsLive() ? ['sunShafts'] : []),
       ...postChain.passes(),
     ];
 

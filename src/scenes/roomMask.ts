@@ -1,6 +1,5 @@
 import {
   Constants,
-  GeometryBufferRenderer,
   PostProcess,
   RawTexture,
   ShaderStore,
@@ -30,9 +29,10 @@ import type { RoomVolume } from '../lighting/profiles';
  * depth behind them, so a flame over the floor stays and a torch outside the
  * walls goes with the exterior behind it.
  *
- * The depth is the G-buffer's while the AO owns one; with the post option off
- * there is none, so the pass enables the scene depth renderer for the camera
- * and releases it when the area ends. Both store camera-space z.
+ * The depth is the pass's own renderer, enabled for the camera while a room
+ * is active and released when the area ends, storing camera-space z. Not the
+ * G-buffer: that one refuses a map object's alpha-keyed cards on purpose, and
+ * a tavern's barrels, stools and racks are all of them.
  *
  * Dev seam: `?roomMask=0` never builds the pass.
  */
@@ -55,11 +55,14 @@ const FACE_SLACK = 0.02;
  */
 const EMIT_LIT = 0.002;
 
+/** Depth renders to wait for before the mask is allowed to black anything. */
+const READY_FRAMES = 2;
+
 type Runtime = {
   scene: Scene;
   camera: ArcRotateCamera;
   pass: PostProcess;
-  /** The depth renderer this pass enabled itself, to release; null while the G-buffer serves. */
+  /** The depth renderer this pass enabled itself, to release when the room ends. */
   ownDepth: DepthRenderer | null;
 };
 
@@ -83,6 +86,7 @@ function registerShader(): void {
   uniform vec4 roomXZ;    // minX, minZ, maxX, maxZ
   uniform vec3 roomY;     // floor, wall top, roof underside
   uniform vec4 roomBox;   // the room's screen footprint in UV: minU, minV, maxU, maxV
+  uniform float ready;    // 0 until the depth map holds a rendered frame
 
   const float FLOOR_SLACK = ${FLOOR_SLACK.toFixed(2)};
   const float FACE_SLACK = ${FACE_SLACK.toFixed(3)};
@@ -102,15 +106,22 @@ function registerShader(): void {
 
   void main(void) {
     vec4 color = texture2D(textureSampler, vUV);
+
+    if (ready < 0.5) {
+      gl_FragColor = color;
+      return;
+    }
+
     float depth = texture2D(depthSampler, vUV).r;
 
-    if (depth <= 0.0) {
-      // No depth here, and that is not the same as "outside". The G-buffer
-      // refuses every bright mesh, so a candle's own flame quads, a lamp
-      // glass and a hearth's glow carry depth 0 and were being blacked
-      // inside the room they belong to. The effect mask is the one buffer
-      // that does hold them: an emitter pixel inside the room's screen
-      // footprint is the room's own and stays.
+    // The renderer clears to 1e8 where nothing was drawn, so both ends are
+    // "no depth here".
+    if (depth <= 0.0 || depth >= 1e7) {
+      // No depth here, and that is not the same as "outside". Additive
+      // geometry writes none, so a candle's own flame quads, a lamp glass and
+      // a hearth's glow were being blacked inside the room they belong to.
+      // The effect mask is the one buffer that does hold them: an emitter
+      // pixel inside the room's screen footprint is the room's own and stays.
       vec3 emit = texture2D(${EFFECT_MASK_SAMPLER}, vUV).rgb;
       float lit = max(emit.r, max(emit.g, emit.b));
       bool framed = all(greaterThanEqual(vUV, roomBox.xy))
@@ -233,29 +244,42 @@ function darkFallback(scene: Scene): RawTexture {
   return dark;
 }
 
-/** The camera-space z the frame was drawn with: the G-buffer's, else the pass's own renderer. */
-function depthTexture(scene: Scene, own: DepthRenderer | null): BaseTexture | null {
-  const gbuffer = scene.geometryBufferRenderer;
-
-  if (gbuffer) {
-    const index = gbuffer.getTextureIndex(GeometryBufferRenderer.DEPTH_TEXTURE_TYPE);
-    return gbuffer.getGBuffer().textures[index] ?? null;
-  }
-
+/**
+ * The camera-space z the mask decides on. It is the pass's own renderer, not
+ * the G-buffer: the G-buffer deliberately refuses a map object's alpha-keyed
+ * cards (`occludes`, the bulk of its cost), and every barrel, stool, crate and
+ * rack in a tavern is one, so reading it deleted them from the room they stand
+ * in. This renderer takes them.
+ */
+function depthTexture(own: DepthRenderer | null): BaseTexture | null {
   return own?.getDepthMap() ?? null;
 }
 
 function createPass(scene: Scene, camera: ArcRotateCamera): Runtime {
   registerShader();
 
-  const ownDepth = scene.geometryBufferRenderer
-    ? null
-    : scene.enableDepthRenderer(camera, false, true, Texture.NEAREST_SAMPLINGMODE, true);
+  const ownDepth = scene.enableDepthRenderer(
+    camera,
+    false,
+    true,
+    Texture.NEAREST_SAMPLINGMODE,
+    true
+  );
+
+  // The depth map is empty until the renderer has drawn into it at least
+  // once, and an empty map reads as "no depth" everywhere: for those frames
+  // the mask would black the entire room except its emitters, which is the
+  // flash of glowing discs on entering. The pass stays identity until then.
+  let ready = 0;
+
+  ownDepth.getDepthMap().onAfterRenderObservable.add(() => {
+    if (ready < READY_FRAMES) ready++;
+  });
 
   const pass = new PostProcess(
     'roomMask',
     SHADER,
-    ['invView', 'viewport', 'roomXZ', 'roomY', 'roomBox'],
+    ['invView', 'viewport', 'roomXZ', 'roomY', 'roomBox', 'ready'],
     ['depthSampler', EFFECT_MASK_SAMPLER],
     1,
     null,
@@ -267,7 +291,7 @@ function createPass(scene: Scene, camera: ArcRotateCamera): Runtime {
   );
 
   pass.onApply = effect => {
-    const depth = depthTexture(scene, runtime?.ownDepth ?? null);
+    const depth = depthTexture(runtime?.ownDepth ?? null);
     if (!depth || !shown) return;
 
     effect.setTexture('depthSampler', depth);
@@ -289,6 +313,7 @@ function createPass(scene: Scene, camera: ArcRotateCamera): Runtime {
     effect.setTexture(EFFECT_MASK_SAMPLER, mask ?? darkFallback(scene));
     screenBoxOf(shown, scene, camera, mask !== null, box);
     effect.setFloat4('roomBox', box[0], box[1], box[2], box[3]);
+    effect.setFloat('ready', ready >= READY_FRAMES ? 1 : 0);
   };
 
   camera.attachPostProcess(pass);
