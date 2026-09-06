@@ -1342,5 +1342,10 @@ export const thaiLayer: LanguageLayer = {
     'options.lootHighLevel': 'ระดับ +7 ขึ้นไป',
     'options.lootOther': 'ที่เหลือทั้งหมด',
     'options.lootZen': 'Zen ตั้งแต่',
+    'options.stateWarnings': 'ข้อความเตือน',
+    'warn.durability': 'ความทนทานของอุปกรณ์ {percent}%',
+    'warn.inventoryFull': 'กระเป๋าเต็ม',
+    'warn.noPotions': 'ไม่มียาฟื้นพลังชีวิตแล้ว',
+    'warn.buffEnding': '{name} กำลังจะหมด',
   },
 };

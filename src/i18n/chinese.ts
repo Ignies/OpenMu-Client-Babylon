@@ -1324,5 +1324,10 @@ export const chineseLayer: LanguageLayer = {
     'options.lootHighLevel': '+7 及以上',
     'options.lootOther': '其他全部',
     'options.lootZen': 'Zen 起',
+    'options.stateWarnings': '警告提示',
+    'warn.durability': '装备耐久度剩余 {percent}%',
+    'warn.inventoryFull': '背包已满',
+    'warn.noPotions': '没有治疗药水了',
+    'warn.buffEnding': '{name} 即将结束',
   },
 };

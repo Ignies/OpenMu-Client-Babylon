@@ -1376,5 +1376,10 @@ export const italianLayer: LanguageLayer = {
     'options.lootHighLevel': 'Livello +7 e oltre',
     'options.lootOther': 'Tutto il resto',
     'options.lootZen': 'Zen da',
+    'options.stateWarnings': 'Avvisi',
+    'warn.durability': 'Durabilità dell’equipaggiamento al {percent}%',
+    'warn.inventoryFull': 'L’inventario è pieno',
+    'warn.noPotions': 'Non ci sono più pozioni curative',
+    'warn.buffEnding': '{name} sta per finire',
   },
 };

@@ -1330,5 +1330,10 @@ export const koreanLayer: LanguageLayer = {
     'options.lootHighLevel': '+7 이상',
     'options.lootOther': '그 외 전부',
     'options.lootZen': 'Zen 이상',
+    'options.stateWarnings': '경고 알림',
+    'warn.durability': '장비 내구도 {percent}%',
+    'warn.inventoryFull': '인벤토리가 가득 찼습니다',
+    'warn.noPotions': '회복 물약이 없습니다',
+    'warn.buffEnding': '{name}이(가) 곧 끝납니다',
   },
 };

@@ -1377,5 +1377,10 @@ export const frenchLayer: LanguageLayer = {
     'options.lootHighLevel': 'Niveau +7 et plus',
     'options.lootOther': 'Tout le reste',
     'options.lootZen': 'Zen à partir de',
+    'options.stateWarnings': 'Avertissements',
+    'warn.durability': 'Durabilité de l’équipement à {percent}%',
+    'warn.inventoryFull': 'L’inventaire est plein',
+    'warn.noPotions': 'Plus de potions de soin',
+    'warn.buffEnding': '{name} va se terminer',
   },
 };

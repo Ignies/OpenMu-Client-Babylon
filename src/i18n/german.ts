@@ -1382,5 +1382,10 @@ export const germanLayer: LanguageLayer = {
     'options.lootHighLevel': 'Stufe +7 und höher',
     'options.lootOther': 'Alles andere',
     'options.lootZen': 'Zen ab',
+    'options.stateWarnings': 'Warnhinweise',
+    'warn.durability': 'Haltbarkeit der Ausrüstung bei {percent}%',
+    'warn.inventoryFull': 'Das Inventar ist voll',
+    'warn.noPotions': 'Keine Heiltränke mehr',
+    'warn.buffEnding': '{name} läuft gleich ab',
   },
 };

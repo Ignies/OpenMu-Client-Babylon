@@ -1332,5 +1332,10 @@ export const japaneseLayer: LanguageLayer = {
     'options.lootHighLevel': '+7 以上',
     'options.lootOther': 'その他すべて',
     'options.lootZen': 'Zen 以上',
+    'options.stateWarnings': '警告表示',
+    'warn.durability': '装備の耐久度が {percent}%',
+    'warn.inventoryFull': '所持品がいっぱいです',
+    'warn.noPotions': '回復ポーションがありません',
+    'warn.buffEnding': '{name} がまもなく切れます',
   },
 };
