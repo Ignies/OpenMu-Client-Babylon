@@ -7,6 +7,7 @@ import {
 } from '../../libs/babylon/exports';
 import type { EntityTypeFromQuery, ISystemFactory } from '../world';
 import { isAttackableEntity } from './attackSystem';
+import { isMobileDevice } from '../../common/mobile';
 import { Commands } from '../../commands';
 
 const COLOR_RED = new Color3(1, 0, 0);
@@ -216,6 +217,12 @@ export const PointerInputSystem: ISystemFactory = world => {
 
   return {
     update: dt => {
+      // Touch only: with no cursor hovering, the ray this would re-sample is
+      // just wherever the player last tapped, so a monster wandering across
+      // it would steal the selection they made. The tap itself resolves the
+      // target (POINTERDOWN above) and it stays until the next one.
+      if (isMobileDevice()) return;
+
       delay -= dt;
       if (delay > 0) return;
       delay = HOVER_INTERVAL;

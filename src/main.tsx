@@ -10,6 +10,9 @@
  */
 import { ServerConfig } from './common/serverConfig';
 import { loadGameVersion, versionIdForTag } from './version';
+// Imported for its one side effect: the `mu-mobile` root class has to be on
+// the document before the first paint, or a phone flashes the desktop rules.
+import './common/mobile';
 
 async function bootstrap() {
   await loadGameVersion(versionIdForTag(ServerConfig.active.version));

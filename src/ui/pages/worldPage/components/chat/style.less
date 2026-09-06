@@ -20,6 +20,29 @@
   }
 }
 
+// Touch only. The window and the log are one big invisible rectangle in the
+// bottom-left corner - 422x221 px of it on a 375 px phone, right where the
+// thumb taps to walk - and while the log is unframed there is nothing there
+// to press. So nothing takes a tap unless it is actually on screen: a log the
+// player opened the frame on, and the input box while it is up.
+.mu-mobile {
+  .chat-window,
+  .chat-log:not(.framed) {
+    pointer-events: none;
+  }
+
+  .chat-log.framed,
+  .chat-filter-tabs,
+  .chat-input {
+    pointer-events: auto;
+  }
+
+  // No cursor to reveal it with, and another 20 px of dead corner.
+  .chat-window .mu-resize-grip {
+    display: none;
+  }
+}
+
 // The log hangs above the input box's position (`m_WndPos.y - m_WndSize.cy`).
 .chat-log {
   position: absolute;

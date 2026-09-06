@@ -11,6 +11,8 @@ import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuWindows } from '../../../../components/muWindow/windowState';
 import { bottomBarScreenHeight } from '../../../../components/muWindow';
+import { useUiViewport } from '../../../../components/uiStage';
+import { useIsMobile } from '../../../../../common/mobile';
 import {
   MuResizeGrip,
   useWindowStackEntry,
@@ -708,7 +710,14 @@ const ChatInput = observer(() => {
 const NOTHING_TO_CLOSE = () => false;
 
 export const ChatWindow = observer(() => {
-  const scale = MuWindows.scaleOf(CHAT_ID);
+  const mobile = useIsMobile();
+  const viewport = useUiViewport();
+  // 281 px at the default 1.5 is 422 - wider than a phone, so the log hangs
+  // off the right edge. Capped for the draw only; the placement the player
+  // saved is untouched, so the same character on a desktop is unaffected.
+  const scale = mobile
+    ? Math.min(MuWindows.scaleOf(CHAT_ID), viewport.width / CHATBOX_WIDTH)
+    : MuWindows.scaleOf(CHAT_ID);
 
   useWindowStackEntry(CHAT_ID, true, NOTHING_TO_CLOSE);
 
