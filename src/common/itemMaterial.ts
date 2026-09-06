@@ -8,6 +8,7 @@ import {
   type Material,
   type Scene,
 } from '../libs/babylon/exports';
+import type { BodyShine } from './modelObject';
 import { pbrMapsFor, pbrPlaceholders } from './pbrMaps';
 import { pbrDetailStrength, specularLightScale } from './materialQuality';
 import { UNIFIED_LIGHT_MODEL, linearLightActive } from './lightModel';
@@ -315,6 +316,11 @@ const FX_ANCIENT = 0x20;
 const FX_LEGACY = 0x40;
 const FX_SPECIALS = 0x80; // render level > 0: excellent / ancient passes allowed
 const FX_CHROME2_FROM_LIGHT = 0x100; // PartObjectColor2 case 0: tint = scene light
+const FX_BODY_SHINE = 0x200; // golden bodies: metal + chrome over the model
+const FX_BODY_SHINE_STAR = 0x400; // ...or the single Shiny02 pass instead
+
+/** Tint of the body shine passes, per mesh (`ModelObject.BodyShine`). */
+const BODY_SHINE_UNIFORM = 'muBodyShine';
 
 /**
  * Weight of the legacy additive chrome passes. 1.0 is the original's math
@@ -410,6 +416,26 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
       ${color}.rgb += itemGlow * (0.3 * texLum * texLum + 0.35 * rim);
     }
 
+    // Golden monsters (modelObject.ts BodyShine): the original redraws the
+    // whole body over its lit pass, RENDER_METAL | RENDER_BRIGHT then
+    // RENDER_CHROME | RENDER_BRIGHT, both additive (ZzzCharacter.cpp:8560).
+    // Additive is the point - the gold has to land on top of the body
+    // texture, which is why tinting the light instead never read as gold.
+    if ((fx & ${FX_BODY_SHINE}) != 0) {
+      vec3 sN = vec3(normalW.x, normalW.z, normalW.y);
+      vec2 uvMetal = vec2(sN.z * 0.5 + 0.2, sN.y * 0.5 + 0.5);
+      vec3 shine;
+      if ((fx & ${FX_BODY_SHINE_STAR}) != 0) {
+        shine = texture2D(shiny2Sampler, uvMetal).rgb;
+      } else {
+        float sWave = mod(time * 1000.0, 10000.0) * 0.0001;
+        vec2 uvChrome = vec2(sN.z * 0.5 + sWave, sN.y * 0.5 + sWave * 2.0);
+        shine = texture2D(shinySampler, uvMetal).rgb +
+                texture2D(chromeSampler, uvChrome).rgb;
+      }
+      ${color}.rgb += shine * ${BODY_SHINE_UNIFORM} * ${LEGACY_GAIN};
+    }
+
     if (fxLegacy) {
       float tms = time * 1000.0;
       vec3 nm = vec3(normalW.x, normalW.z, normalW.y);
@@ -478,12 +504,17 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
     }
 `;
 
-let chromeTextures: { chrome: Texture; shiny: Texture; chrome2: Texture } | null =
-  null;
+let chromeTextures: {
+  chrome: Texture;
+  shiny: Texture;
+  shiny2: Texture;
+  chrome2: Texture;
+} | null = null;
 let chromeScene: Scene | null = null;
 
 /**
- * Effect/Chrome01 (repeat), Effect/Shiny01, Effect/Chrome02 (clamp, nearest).
+ * Effect/Chrome01 (repeat), Effect/Shiny01 and Shiny02, Effect/Chrome02
+ * (clamp, nearest).
  *
  * Read from the packed `.OZJ` every version's `Data/` tree ships, through the
  * shared sprite decoder - the decoded `.jpg` siblings exist only beside the
@@ -520,6 +551,7 @@ function getChromeTextures(scene: Scene) {
   chromeTextures = {
     chrome: load('Chrome01.OZJ', false, false),
     shiny: load('Shiny01.OZJ', true, false),
+    shiny2: load('Shiny02.OZJ', true, false),
     chrome2: load('Chrome02.OZJ', true, true),
   };
 
@@ -541,11 +573,13 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
   material.AddUniform('chrome2Color', 'vec3', null);
   material.AddUniform('ancientColor', 'vec3', null);
   material.AddUniform('itemGlow', 'vec3', null);
+  material.AddUniform(BODY_SHINE_UNIFORM, 'vec3', null);
   material.AddUniform(LIGHT_TINT_UNIFORM, 'float', 0);
   material.AddUniform(CLOUD_NOISE_SAMPLER, 'sampler2D', textures.chrome);
   for (const name of CLOUD_UNIFORMS) material.AddUniform(name, 'vec4', null);
   material.AddUniform('chromeSampler', 'sampler2D', textures.chrome);
   material.AddUniform('shinySampler', 'sampler2D', textures.shiny);
+  material.AddUniform('shiny2Sampler', 'sampler2D', textures.shiny2);
   material.AddUniform('chrome2Sampler', 'sampler2D', textures.chrome2);
 }
 
@@ -587,6 +621,17 @@ function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
       effect.setFloat3('chrome2Color', 1, 1, 1);
     }
     effect.setFloat3('ancientColor', ancient[0], ancient[1], ancient[2]);
+  }
+
+  // Same blend-mesh rule: the original's chrome passes skip NoneBlendMesh.
+  // `Bright` there rides o->Alpha, so a fading corpse loses its shine too.
+  const shine = mesh.metadata?.bodyShine as BodyShine | undefined;
+  const tint = shine?.tint;
+  if (tint && !mesh.metadata?.brightMesh && tint.x + tint.y + tint.z > 0) {
+    fx |= FX_BODY_SHINE;
+    if (shine.star) fx |= FX_BODY_SHINE_STAR;
+    const a = mesh.visibility;
+    effect.setFloat3(BODY_SHINE_UNIFORM, tint.x * a, tint.y * a, tint.z * a);
   }
 
   effect.setFloat(ITEM_FX_UNIFORM, fx);
