@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { MuWindows, type WindowCloser } from './windowState';
+import { GameOptions } from '../../../common/gameOptions';
 import { t } from '../../../i18n';
 
 export type WindowChrome = {
@@ -77,7 +78,7 @@ export function useWindowChrome(
   const onPointerDown = (event: PointerEvent) => {
     MuWindows.raise(id);
 
-    if (event.button !== 0) return;
+    if (event.button !== 0 || GameOptions.lockWindows) return;
 
     const target = event.target as HTMLElement;
     if (target.closest('[data-no-drag]')) return;
@@ -178,6 +179,8 @@ export const MuResizeGrip = observer(
       grip.addEventListener('pointerup', onUp);
       grip.addEventListener('pointercancel', onUp);
     };
+
+    if (GameOptions.lockWindows) return null;
 
     return (
       <div
