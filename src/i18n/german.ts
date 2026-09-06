@@ -176,6 +176,7 @@ export const germanLayer: LanguageLayer = {
     'options.weatherEffects': 'Wetter',
     'options.animatedWater': 'Animiertes Wasser',
     'options.advancedEffects': 'Erweiterte Effekte',
+    'options.renderDistance': 'Sichtweite',
     'options.lightingQuality': 'Beleuchtung',
     'options.materialQuality': 'Materialien',
     'options.materialDetail': 'Detail',

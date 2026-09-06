@@ -178,6 +178,7 @@ export const koreanLayer: LanguageLayer = {
     'options.weatherEffects': '날씨',
     'options.animatedWater': '물 애니메이션',
     'options.advancedEffects': '고급 효과',
+    'options.renderDistance': '렌더링 거리',
     'options.lightingQuality': '조명',
     'options.materialQuality': '재질',
     'options.materialDetail': '디테일',

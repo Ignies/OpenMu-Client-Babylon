@@ -223,6 +223,7 @@ export const EN_TEXT = {
   'options.weatherEffects': 'Weather',
   'options.animatedWater': 'Animated water',
   'options.advancedEffects': 'Advanced effects',
+  'options.renderDistance': 'Render distance',
   'options.lightingQuality': 'Lighting',
   'options.materialQuality': 'Materials',
   'options.materialDetail': 'Detail',

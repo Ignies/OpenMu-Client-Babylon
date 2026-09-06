@@ -187,6 +187,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.weatherEffects': 'Clima',
     'options.animatedWater': 'Água animada',
     'options.advancedEffects': 'Efeitos avançados',
+    'options.renderDistance': 'Distância de renderização',
     'options.lightingQuality': 'Iluminação',
     'options.materialQuality': 'Materiais',
     'options.materialDetail': 'Detalhe',
