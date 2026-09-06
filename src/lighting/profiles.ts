@@ -41,7 +41,7 @@ export type SunSpec = {
 };
 
 /** Open sky. Under a roof the bake carries the room, so the key is mostly sky. */
-export const OPEN_SUN_SHARE = 0.45;
+export const OPEN_SUN_SHARE = 0.6;
 export const ENCLOSED_SUN_SHARE = 0.15;
 
 const sun = (
@@ -179,14 +179,14 @@ export function profileFor(world: ENUM_WORLD): LookProfile {
 /** A lit interior inside a map: what it changes over the map's own profile. */
 export type AreaLook = {
   /**
-   * The room's key in key units, where 1.0 is the bake at its authored value
-   * (Classic's level): a dim ambient of the map's sky, not a lift (§13 F14).
-   * The map's `ev` stays, so the candles - pool lights, terrain delta, flame
-   * cards - keep the level they have outdoors and carry the room.
+   * The room's level in key units, where 1.0 is the bake at its authored
+   * value (§13 F14). It scales the rig, the ground bake and the room's
+   * emitters together, so the room keeps the bake's own colour under its
+   * candles instead of drowning in the delta at the map's outdoor level.
    */
   readonly keyLevel: number;
   readonly whiteBalance: Rgb;
-  /** Gain on the room's emitters, the pool lights and the terrain delta alike, on tiers >= 1. */
+  /** How much more than the room's own level its emitters get; 1 is Classic. */
   readonly candles: number;
   /** The room's key direction: near vertical, a low share, contact grounding only. */
   readonly sun: SunSpec;
@@ -244,18 +244,18 @@ const room = (keyLevel: number, candles: number): AreaLook => ({
 
 /**
  * Lorencia rooms (map ev 1.8): the pub with candelabra on every table, the
- * cabin across the river. Measured on the pub against Classic: p50 1.22x,
- * pool over floor 0.90x, chairs' tex 1.17x; 0.7 moved the floor 5 % and the
- * pool ratio not at all, the candles carry the room.
+ * cabin across the river. The room's share now scales the emitters as well as
+ * the bake, so the level is one number again: 1.4 lands the pub at p50 0.196
+ * against Classic's 0.200 with tex 0.203 against 0.162 (`w3_v2_pub_1.4`).
  */
-const LORENCIA_ROOM = room(0.9, 1);
+const LORENCIA_ROOM = room(1.4, 1);
 
 /**
  * Devias rooms (map ev 0.8): the tavern's hearth and door candelabra, the
- * reading room's desk candelabra, the hearth houses, the guard room. The
- * reading room's dark planks sit at 0.97x Classic p50 at 0.9 and 1.03x here.
+ * reading room's desk candelabra, the hearth houses, the guard room. The map
+ * sits 1.0 ev under Lorencia, so the same room level is a smaller share.
  */
-const DEVIAS_ROOM = room(1.0, 1);
+const DEVIAS_ROOM = room(1.3, 1);
 
 const AREAS = {
   lorenciaTavern: LORENCIA_ROOM,

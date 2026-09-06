@@ -7,6 +7,7 @@ import {
 } from '../libs/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
 import { pipelineSamples } from '../common/lightingQuality';
+import { toneMapLive } from './toneMap';
 import type { Rgb } from '../lighting/profiles';
 
 /**
@@ -53,6 +54,15 @@ const VIGNETTE_MAX_WEIGHT = 1.2;
  * blooms and emitters and torch cores do.
  */
 const BLOOM_THRESHOLD = 1.0;
+
+/**
+ * With the MU curve live the buffer reaching bloom is already rolled into
+ * [0, 1], so scene white is no longer 1.0: an emitter core lands near 0.95
+ * and lit ground near 0.35. The threshold moves with the curve so bloom
+ * still picks up emitters and nothing else.
+ */
+const BLOOM_THRESHOLD_TONED = 0.85;
+
 const BLOOM_KERNEL = 48;
 const BLOOM_MAX_WEIGHT = 0.6;
 
@@ -154,11 +164,16 @@ export function createPostChain(
     // bypassed outright on every tier: an identity pass is still a resolve.
     const graded = post && shaped;
 
+    // The MU curve (scenes/toneMap.ts) runs ahead of this pipeline and owns
+    // the exposure and the tone mapping when it is live; the pass here then
+    // does the white balance and the decoration only.
+    const filmic = graded && toneMapLive();
+
     // Bloom samples the linear buffer before exposure. Off on Classic (§6).
     const bloom = graded ? Math.max(0, GameOptions.bloom) : 0;
 
     pipeline.bloomEnabled = bloom > 0;
-    pipeline.bloomThreshold = BLOOM_THRESHOLD;
+    pipeline.bloomThreshold = filmic ? BLOOM_THRESHOLD_TONED : BLOOM_THRESHOLD;
     pipeline.bloomWeight = (bloom / SLIDER_MAX) * BLOOM_MAX_WEIGHT;
     pipeline.bloomKernel = BLOOM_KERNEL;
     if (bloom > 0) live.push('bloom');
@@ -167,14 +182,15 @@ export function createPostChain(
 
     const ip = scene.imageProcessingConfiguration;
 
-    const exposure = graded ? look.exposure : 1;
+    const exposure = graded && !filmic ? look.exposure : 1;
     ip.exposure = exposure;
     if (exposure !== 1) live.push('exposure');
 
-    const toneMapper = graded ? look.toneMapper : 0;
+    const toneMapper = graded && !filmic ? look.toneMapper : 0;
     ip.toneMappingEnabled = toneMapper > 0;
     ip.toneMappingType = TONE_MAPPING_TYPES[toneMapper];
     if (toneMapper > 0) live.push(`toneMapper:${TONE_MAPPER_NAMES[toneMapper]}`);
+    if (filmic) live.push('toneMapper:mu');
 
     ip.contrast = 1;
 

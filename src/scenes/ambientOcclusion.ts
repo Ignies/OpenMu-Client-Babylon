@@ -1,5 +1,6 @@
 import {
   Color4,
+  Constants,
   GeometryBufferRenderer,
   Material,
   PostProcess,
@@ -321,7 +322,10 @@ function createSsao(
     scene,
     { ssaoRatio: tier.ssaoRatio, blurRatio: tier.ssaoRatio },
     [camera],
-    true
+    true,
+    // The combine pass carries the scene colour on: 8-bit here quantises
+    // every linear value under display 0.05 to a hard zero.
+    Constants.TEXTURETYPE_HALF_FLOAT
   );
 
   const [radius, strength, base] = ssaoOverride() ?? [

@@ -1,4 +1,5 @@
 import {
+  Constants,
   GeometryBufferRenderer,
   PostProcess,
   ShaderStore,
@@ -135,7 +136,12 @@ function createFog(scene: Scene, camera: ArcRotateCamera): PostProcess {
     1,
     null,
     Texture.BILINEAR_SAMPLINGMODE,
-    scene.getEngine()
+    scene.getEngine(),
+    false,
+    null,
+    // The buffer is linear HDR: an 8-bit target here quantises everything
+    // under display 0.05 to zero before the tone mapper ever sees it.
+    Constants.TEXTURETYPE_HALF_FLOAT
   );
 
   fog.onApply = effect => {

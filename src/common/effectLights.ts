@@ -18,9 +18,9 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../effects/core';
  * the `FlareSpec` a host hands to `createEffectLight`.
  *
  * A flare is the glow of a light, so it sits at the map's level: its colour
- * is `spec x luminosity x keyGain` (ARCHITECTURE F12), repainted when the
- * director's state changes. Sprites are not decoded on their way into the
- * buffer, so the gain is applied as is.
+ * is `spec x luminosity x flareLevel` (ARCHITECTURE F12, §13 F14), repainted
+ * when the director's state changes. Sprites are not decoded on their way
+ * into the buffer, so the gain is applied as is.
  *
  * One `SpriteManager` per scene, shared by every flare on the map.
  */
@@ -48,8 +48,17 @@ let pending: Promise<SpriteManager | null> | null = null;
 const repaints = new Set<() => void>();
 let watched: LookDirector | null = null;
 
-function keyGain(): number {
-  return lookDirector()?.state().keyGain ?? 1;
+/**
+ * The level a flare is painted at. Outdoors and on Classic that is the map's
+ * own; inside a room it is the room's share of it, the same share the rig and
+ * the ground bake take (lighting_polish §13 F14). Without the share the flare
+ * runs at roughly four times the light of everything around it and saturates
+ * to a white ball with the candle bodies invisible inside it.
+ */
+function flareLevel(): number {
+  const look = lookDirector()?.state();
+
+  return look ? look.keyGain * look.key.roomShare : 1;
 }
 
 function watchLook(): void {
@@ -125,7 +134,7 @@ export type MovableFlare = {
   dispose(): void;
 };
 
-/** Paints `color x lumi x keyGain` and keeps repainting it while the flare lives. */
+/** Paints `color x lumi x flareLevel` and keeps repainting it while the flare lives. */
 function paintFlare(
   sprite: Sprite,
   color: readonly [number, number, number]
@@ -133,7 +142,7 @@ function paintFlare(
   const [r, g, b] = color;
   let lumi = 1;
   const repaint = () => {
-    const k = lumi * keyGain();
+    const k = lumi * flareLevel();
     sprite.color.set(r * k, g * k, b * k, 1);
   };
   sprite.color = new Color4(r, g, b, 1);

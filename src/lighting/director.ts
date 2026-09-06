@@ -42,6 +42,7 @@ import { syncShadows } from '../scenes/shadows';
 import { syncAmbientOcclusion } from '../scenes/ambientOcclusion';
 import { syncHeightFog, updateHeightFog } from '../scenes/heightFog';
 import { syncRoomMask } from '../scenes/roomMask';
+import { syncToneMap } from '../scenes/toneMap';
 import {
   createPostChain,
   TONE_MAPPER_NAMES,
@@ -96,12 +97,12 @@ export type LookState = {
     readonly skyGround: Rgb;
     readonly sunIntensity: number;
     readonly direction: readonly [number, number, number];
-    /** Gain on the pool lights and the terrain delta: the room's `candles` on tiers >= 1, 1 otherwise. */
+    /** Gain on the pool lights and the terrain delta: the room's `candles x roomShare` on tiers >= 1, 1 otherwise. */
     readonly emitterGain: number;
     /**
      * The key's share of the map's level inside a room (`AreaLook.keyLevel /
-     * keyGain`, §13 F14): the rig and the ground bake take it, the emitters
-     * do not. 1 outside a room and on Classic.
+     * keyGain`, §13 F14): the rig, the ground bake and the emitters all take
+     * it. 1 outside a room and on Classic.
      */
     readonly roomShare: number;
   };
@@ -255,8 +256,14 @@ export function createLookDirector(
     // of the map's level (F14); the emitters stay at the map's level and
     // carry the room.
     const keyGain = shaped ? 2 ** (profile.ev + evDev) : 1;
-    const emitterGain = shaped ? candlesDev ?? shown.candles : 1;
     const roomShare = shaped ? shown.roomShare : 1;
+    // The emitters take the room's share as well. Leaving them at the map's
+    // level put the pub floor at 94 % torch delta against Classic's half and
+    // half: the bake's own colour vanished under a uniform orange, which is
+    // what "the light no longer reads on the objects" looks like on a floor.
+    // `candles` is then what it says, how much more than the room's own level
+    // its emitters get, and 1 is Classic.
+    const emitterGain = shaped ? (candlesDev ?? shown.candles) * roomShare : 1;
     const sunShare = shaped ? profile.sun.share : 0;
     const skyIntensity = shaped ? 1 - sunShare : 1;
     const skyGround: Rgb = shaped
@@ -307,8 +314,6 @@ export function createLookDirector(
     const roomMask = syncRoomMask(scene, camera, lightTier, room?.volume ?? null, reordered);
     reordered = roomMask.changed || reordered;
 
-    if (reordered) postChain.moveToEnd();
-
     // 6. post: the viewer's brightness only; the map's level is in the key.
     const brightness = shaped ? GameOptions.brightness / 10 : 0;
     const postExposure = 2 ** brightness;
@@ -316,6 +321,13 @@ export function createLookDirector(
       shaped && post
         ? Math.max(0, Math.min(3, Math.round(tmDev ?? GameOptions.toneMapper)))
         : 0;
+
+    // The MU curve is what `toneMapper` 1 selects; it is the last scene-light
+    // pass, so it runs after the haze and the mask and before the chain.
+    reordered =
+      syncToneMap(scene, camera, toneMapperIndex === 1, postExposure) || reordered;
+
+    if (reordered) postChain.moveToEnd();
 
     postChain.set({
       shaped,
