@@ -1,4 +1,9 @@
 import { makeAutoObservable, runInAction } from 'mobx';
+import {
+  CAMERA_FOV_DEG,
+  CAMERA_FOV_MAX_DEG,
+  CAMERA_FOV_MIN_DEG,
+} from '../camera/recipes';
 import { LocalStorage } from '../libs/localStorage';
 
 const OPTIONS_KEY = 'mu_options';
@@ -86,6 +91,12 @@ export type GameOptions = {
    */
   cameraControl: boolean;
   /**
+   * Vertical field of view in degrees for the third-person frame,
+   * `CAMERA_FOV_DEG` being the original client's 30. The eye keeps its own
+   * frustum, and nothing reads this while `cameraControl` is off.
+   */
+  cameraFov: number;
+  /**
    * Run the latched ALT drop names through `lootFilter.ts` instead of naming
    * every pile on the ground. ALT held still shows all of them.
    */
@@ -150,6 +161,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   sunShafts: [0, 9],
   lootZen: [0, 9],
   uiScale: [0, UI_SCALE_MAX],
+  cameraFov: [CAMERA_FOV_MIN_DEG, CAMERA_FOV_MAX_DEG],
 };
 
 const DEFAULTS: GameOptions = {
@@ -181,6 +193,7 @@ const DEFAULTS: GameOptions = {
   whisperBeep: true,
   slideHelp: true,
   cameraControl: true,
+  cameraFov: CAMERA_FOV_DEG,
   autoReconnect: true,
   lootFilter: false,
   lootJewels: true,

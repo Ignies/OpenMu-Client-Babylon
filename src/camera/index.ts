@@ -4,7 +4,8 @@
  *
  * Ported from CameraUtility.cpp / SceneCommon.cpp: Ctrl+wheel steps the
  * discrete distance levels (opening mid-range), Insert/Delete rotate the
- * heading, pitch -48.5, vertical FOV 30. Ctrl+middle-button drag is the web
+ * heading, pitch -48.5, vertical FOV 30 unless the FOV slider says otherwise.
+ * Ctrl+middle-button drag is the web
  * client's addition: left/right rotates the heading, up/down pitches the
  * view. Home is taken by the MU Helper hot key, so the frame resets on warp
  * instead. `layers.ts` holds the per-map overrides.
@@ -28,7 +29,6 @@ import type { CameraLayer } from './layer';
 import { CAMERA_LAYERS } from './layers';
 import { hideHeroBody, showHeroBody } from './heroBody';
 import {
-  CAMERA_FOV_DEG,
   CAMERA_PITCH_DEG,
   CLOSE_BAND_MU,
   DEFAULT_CAMERA_LEVEL,
@@ -262,8 +262,11 @@ export function updateGameCamera(
     Math.max(MIN_RADIUS_MU, Math.hypot(horizontal, vertical)) / MU_SCALE;
   camera.beta = Math.atan2(horizontal, vertical) + pitch * RAD;
   camera.alpha = headingDeg * RAD;
-  camera.fov =
-    (CAMERA_FOV_DEG + (FIRST_PERSON_FOV_DEG - CAMERA_FOV_DEG) * close) * RAD;
+  // The slider owns the third-person end only; the eye keeps its own
+  // frustum, so a narrow slider still opens up as the shot goes first person.
+  const wide = GameOptions.cameraFov;
+
+  camera.fov = (wide + (FIRST_PERSON_FOV_DEG - wide) * close) * RAD;
 
   // Closing in walks the near plane out with the frame: at the eye it is what
   // keeps the hero's own aura and crackle - which emit around the body the

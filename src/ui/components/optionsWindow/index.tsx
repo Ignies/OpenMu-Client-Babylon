@@ -9,6 +9,10 @@ import { MuButton } from '../muButton';
 import { MuResizeGrip, useWindowChrome } from '../muWindow/useWindowChrome';
 import { TEXT_COLOR } from '../../pages/serversPage/layout';
 import {
+  CAMERA_FOV_MAX_DEG,
+  CAMERA_FOV_MIN_DEG,
+} from '../../../camera/recipes';
+import {
   BRIGHTNESS_MAX,
   BRIGHTNESS_MIN,
   TONE_MAPPER_MAX,
@@ -146,6 +150,7 @@ const check = (
 
 type SliderRow = {
   key:
+    | 'cameraFov'
     | 'volume'
     | 'effectLevel'
     | 'itemEffects'
@@ -170,6 +175,8 @@ type SliderRow = {
   needsPostProcessing?: boolean;
   /** Bloom and the image-processing pass exist on tiers >= 1 only. */
   needsTier?: boolean;
+  /** Dim and lock while the classic framing, not the facade, owns the camera. */
+  needsCameraControl?: boolean;
 };
 
 const slider = (row: SliderRow): Row => ({ kind: 'slider', ...row });
@@ -222,6 +229,15 @@ const TABS: Tab[] = [
             check('whisperBeep', 387, 'options.whisperBeep'),
             check('slideHelp', 919, 'options.slideHelp'),
             check('cameraControl', -1, 'options.cameraControl'),
+            slider({
+              key: 'cameraFov',
+              textId: -1,
+              labelKey: 'options.cameraFov',
+              min: CAMERA_FOV_MIN_DEG,
+              max: CAMERA_FOV_MAX_DEG,
+              display: v => `${v}°`,
+              needsCameraControl: true,
+            }),
             check('chatTimestamps', -1, 'options.chatTimestamps'),
             check('stateWarnings', -1, 'options.stateWarnings'),
           ],
@@ -814,7 +830,9 @@ export const OptionsWindow = observer(() => {
                   const inert =
                     (row.needsPostProcessing === true &&
                       !GameOptions.postProcessing) ||
-                    (row.needsTier === true && GameOptions.lightingQuality === 0);
+                    (row.needsTier === true && GameOptions.lightingQuality === 0) ||
+                    (row.needsCameraControl === true &&
+                      !GameOptions.cameraControl);
 
                   return (
                     <div
