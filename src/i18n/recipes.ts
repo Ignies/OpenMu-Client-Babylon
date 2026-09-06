@@ -185,6 +185,7 @@ export const EN_TEXT = {
   'options.whisperBeep': 'Beep sound for whispering',
   'options.slideHelp': 'Slide Help',
   'options.cameraControl': 'Camera control (Ctrl+wheel, Ins/Del)',
+  'options.autoReconnect': 'Reconnect automatically',
   'options.lootFilter': 'Filter drop names',
   'options.lootJewels': 'Jewels',
   'options.lootExcellent': 'Excellent',
@@ -245,6 +246,15 @@ export const EN_TEXT = {
   'options.itemEffects.both': 'Both',
   'options.itemEffects.improved': 'Improved',
 
+  // ---- session resume ----------------------------------------------------
+  'resume.title': 'Connection lost',
+  'resume.connecting': 'Reconnecting... (attempt {attempt})',
+  'resume.loggingIn': 'Signing back in...',
+  'resume.selecting': 'Entering the world...',
+  'resume.cancel': 'Cancel',
+  'resume.done': 'Back online',
+  'resume.failed': 'Could not reconnect',
+  'resume.cancelled': 'Reconnection cancelled',
   'warn.durability': 'Equipment durability at {percent}%',
   'warn.inventoryFull': 'The inventory is full',
   'warn.noPotions': 'No healing potions left',

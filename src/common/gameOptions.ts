@@ -119,6 +119,11 @@ export type GameOptions = {
   lockWindows: boolean;
   /** Durability, full grid, last potion and buff ending notices. */
   stateWarnings: boolean;
+  /**
+   * Walk the login flow again by ourselves when the game server socket
+   * drops, instead of sending the player back to the server list.
+   */
+  autoReconnect: boolean;
 };
 
 export const GRADE_NOMINAL = 5;
@@ -190,6 +195,7 @@ const DEFAULTS: GameOptions = {
   whisperBeep: true,
   slideHelp: true,
   cameraControl: true,
+  autoReconnect: true,
   lootFilter: false,
   lootJewels: true,
   lootExcellent: true,

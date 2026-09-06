@@ -657,6 +657,20 @@ export const Store = new (class _Store {
   csSocket?: WebSocket;
   gsSocket?: WebSocket;
 
+  /**
+   * Where the game server we are on lives, kept after the connection is
+   * established so a dropped socket can be dialled again without walking
+   * the connect server a second time (`common/sessionResume.ts`).
+   */
+  lastGameServer: { host: string; port: number; fallbackHost: string | null } | null = null;
+
+  /**
+   * Asked before a lost game-server socket sends the player back to the
+   * server list. Returns true when something else (the session resume) has
+   * taken the loss over. Set by `logic.ts`; the store stays unaware of it.
+   */
+  resumeHook: (() => boolean) | null = null;
+
   private encryptor?: SimpleModulusEncryptor;
 
   username = '';
@@ -1175,6 +1189,10 @@ export const Store = new (class _Store {
       // ordinary lost-connection path.
       if (this.retryGameServer('closed the connection')) return;
 
+      // The session resume takes the loss over when it can (and when the
+      // option is on); otherwise this is the old start-over path.
+      if (this.resumeHook?.()) return;
+
       runInAction(() => {
         this.connectionLost = true;
         this.loginProcessing = false;
@@ -1431,6 +1449,8 @@ export const Store = new (class _Store {
     runInAction(() => {
       this.connectionLost = false;
     });
+
+    this.lastGameServer = { host: ip, port, fallbackHost };
 
     const { socket } = createSocket({
       wsAddress: wsAddress(),
