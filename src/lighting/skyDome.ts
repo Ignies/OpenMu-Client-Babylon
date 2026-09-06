@@ -95,6 +95,13 @@ const CLOUD_SELF_SHADOW = 3.2;
 const CLOUD_DENSITY = 5;
 
 /**
+ * Where the deck fades out toward the horizon, as `rd.y`: gone below about 5
+ * degrees, full above about 17. Under that the ray-to-plane intersection runs
+ * away and one cloud smears across the whole skyline.
+ */
+const CLOUD_HORIZON_FADE = [0.09, 0.3] as const;
+
+/**
  * How far along a ray the deck is still drawn, in tiles. Past this the
  * intersection with the cloud plane grows without bound and one noise texel
  * would cover the whole skyline.
@@ -312,7 +319,12 @@ ${cloudFieldGlsl()}
 
     float alpha = 1.0 - exp(-${CLOUD_DENSITY.toFixed(2)} * d);
 
-    return vec4(body, alpha * smoothstep(0.006, 0.05, rd.y));
+    // The deck ends well above the horizon. A ray approaching level meets the
+    // cloud plane further and further out, so a single screen column spans an
+    // enormous stretch of the field: the last few degrees of sky smeared one
+    // cloud into the vertical bars that stood over every skyline. Nothing is
+    // drawn there now, which is also where a real sky has its haze.
+    return vec4(body, alpha * smoothstep(${CLOUD_HORIZON_FADE[0].toFixed(3)}, ${CLOUD_HORIZON_FADE[1].toFixed(3)}, rd.y));
   }
 
   void main(void) {

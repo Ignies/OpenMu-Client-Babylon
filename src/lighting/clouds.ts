@@ -32,9 +32,16 @@ import { serverNow } from '../common/serverTime';
  */
 const NOISE_SIZE = 512;
 
-/** Altitude of the cloud deck and its thickness, in tiles. */
+/**
+ * Altitude of the cloud deck and its thickness, in tiles.
+ *
+ * The thickness is what the light march walks, so it has to be of a size with
+ * the clouds themselves or the march samples the same value at both ends and
+ * every cloud shades flat. One cell of the shape octave is about 70 tiles
+ * across; a deck 20 thick under clouds that wide is a sheet, and read as one.
+ */
 export const CLOUD_ALT = 60;
-export const CLOUD_THICK = 20;
+export const CLOUD_THICK = 70;
 
 /**
  * Tiles a second the deck drifts. One wrap of the shape octave is about 95
