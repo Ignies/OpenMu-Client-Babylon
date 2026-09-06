@@ -10,11 +10,6 @@ import {
 } from '../libs/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
 import { devQueryNumber } from '../common/devSeams';
-import {
-  bakedTerrainLightGeneration,
-  requestBakedTerrainLight,
-} from '../common/terrainDynamicLight';
-import { TERRAIN_SIZE } from '../common/terrain/consts';
 import { sunLightOf } from '../lighting/keyRig';
 import {
   blobShadowRefresh,
@@ -85,10 +80,6 @@ let terrainFloor = 1;
 
 /** Who the render-list predicate admits; the policy's, as of the last sync. */
 let casters: ShadowCasters = 'dynamic';
-
-/** The tile step a shadow takes from its caster: the policy's sun, horizontal. */
-let sunStepX = 1;
-let sunStepZ = 1;
 
 // --- terrain hook ----------------------------------------------------------
 
@@ -268,134 +259,33 @@ const CSM_CASTER_SLACK = 16;
 const CSM_CASTER_RANGE_SQ = (CSM_MAX_Z + CSM_CASTER_SLACK) ** 2;
 
 /**
- * A baked shadow is at least this much darker than the ground around it; the
- * blotch noise the Lorencia and Noria bakes carry where no shadow was
- * authored stays under it.
+ * A map object under this height (tiles) is ground clutter - grass, a flower,
+ * a ground decal, a small mushroom - and its shadow is a card's noise at
+ * gameplay zoom, while Noria stands 600 of them in one frame (22 -> 28 fps
+ * without them). A cost rule, not a look one: inside a room the whole room is
+ * the frame and everything standing in it casts, however small.
+ *
+ * It is the only thing between a map object and the cascades. What stood here
+ * before was a bake test (§13 F1/F15): the lightmap was read for an authored
+ * shadow under each static object and the object kept out of the map wherever
+ * one seemed to be there. The premise does not hold - MU's bakes carry pockets
+ * of darkening, not object shadows - so what it removed was the object's only
+ * shadow, and half of a town cast nothing.
  */
-const BAKED_SHADOW_DROP = 0.1;
+const CLUTTER_HEIGHT = 1;
 
-/** The ring reaches this far (tiles) past the footprint. */
-const BAKE_RING = 2;
-
-/** Footprints wider than this (tiles) are cliffs and walls: never sampled. */
-const BAKE_TEST_MAX_SPAN = 32;
-
-/**
- * A static caster under this height (tiles) is grass, a flower, a ground
- * decal or a small mushroom: its shadow is a card's noise at gameplay zoom,
- * and Noria stands 600 of them in one frame (22 -> 28 fps without them).
- */
-const BAKE_TEST_MIN_HEIGHT = 1;
-
-const bakeSample = { x: 0, y: 0, z: 0 };
-
-function bakeLumaAt(x: number, z: number): number | null {
-  if (!requestBakedTerrainLight(x + 0.5, z + 0.5, bakeSample)) return null;
-
-  return (bakeSample.x + bakeSample.y + bakeSample.z) / 3;
-}
-
-/**
- * Whether the lightmap already holds this map object's shadow (§13 F15),
- * measured once per mesh: the mean bake under its footprint stepped one tile
- * along the sun against a ring of tiles around it. A local drop is an authored
- * shadow and the object stays out of the cascades (F1's doubled shadows); no
- * drop means the artist never baked one, however dim the ground is, and the
- * object casts. Null while the bake is not loaded yet.
- */
-function bakeHoldsShadow(mesh: AbstractMesh): boolean | null {
-  const meta = mesh.metadata;
-  const bake = bakedTerrainLightGeneration();
-  const cached = meta.bakedShadow;
-
-  // The answer is only worth keeping while the lightmap it was read off is
-  // still the one installed; a map change replaces it under a mesh that
-  // outlives the load.
-  if (typeof cached === 'boolean' && meta.bakedShadowFrom === bake) return cached;
-
+function isGroundClutter(mesh: AbstractMesh): boolean {
   const box = mesh.getBoundingInfo().boundingBox;
-  const min = box.minimumWorld;
-  const max = box.maximumWorld;
 
-  const minX = Math.floor(min.x);
-  const maxX = Math.floor(max.x);
-  const minZ = Math.floor(min.z);
-  const maxZ = Math.floor(max.z);
-
-  let holds: boolean;
-
-  if (
-    maxX - minX >= BAKE_TEST_MAX_SPAN ||
-    maxZ - minZ >= BAKE_TEST_MAX_SPAN ||
-    max.y - min.y < (minCasterDev ?? BAKE_TEST_MIN_HEIGHT)
-  ) {
-    holds = true;
-  } else {
-    // The sampler answers false for an unloaded bake and for a tile off the
-    // map alike; the map's centre tells the two apart.
-    if (bakeLumaAt(TERRAIN_SIZE / 2, TERRAIN_SIZE / 2) === null) return null;
-
-    let under = 0;
-    let underN = 0;
-    let ring = 0;
-    let ringN = 0;
-
-    for (let x = minX - BAKE_RING; x <= maxX + BAKE_RING; x++) {
-      for (let z = minZ - BAKE_RING; z <= maxZ + BAKE_RING; z++) {
-        const shifted =
-          x >= minX + sunStepX &&
-          x <= maxX + sunStepX &&
-          z >= minZ + sunStepZ &&
-          z <= maxZ + sunStepZ;
-        const inside = x >= minX && x <= maxX && z >= minZ && z <= maxZ;
-
-        if (!shifted && inside) continue;
-
-        const luma = bakeLumaAt(x, z);
-        if (luma === null) continue;
-
-        if (shifted) {
-          under += luma;
-          underN++;
-        } else {
-          ring += luma;
-          ringN++;
-        }
-      }
-    }
-
-    const stepped = underN ? under / underN : 0;
-
-    // Only a *local* drop under the object, stepped along the sun, says the
-    // artist baked its shadow. The absolute floor used to rule out everything
-    // standing on dim ground as well, and a town yard bakes at 0.4, so in
-    // Lorencia almost no barrel, stall, cart or canopy cast anything while
-    // the hero beside it did. Dim ground is not a shadow.
-    holds =
-      !underN || !ringN || stepped < (ring / ringN) * (1 - BAKED_SHADOW_DROP);
-  }
-
-  meta.bakedShadow = holds;
-  meta.bakedShadowFrom = bake;
-
-  return holds;
+  return (
+    box.maximumWorld.y - box.minimumWorld.y < (minCasterDev ?? CLUTTER_HEIGHT)
+  );
 }
 
 function castsSunShadow(mesh: AbstractMesh): boolean {
   const meta = mesh.metadata;
 
   if (!meta || meta.csmCaster !== true) return false;
-
-  // The lightmap already bakes a static object's shadow (§13 F1) where the
-  // artist drew one: under `dynamic` such a map object never enters the map,
-  // so nothing is shadowed twice; one the bake has no shadow for casts (F15).
-  if (
-    casters === 'dynamic' &&
-    meta.mapObject === true &&
-    bakeHoldsShadow(mesh) !== false
-  ) {
-    return false;
-  }
 
   // The blend mesh is an additive glow card - light, not matter - with one
   // exception: the objects that say the card *is* their body (wings,
@@ -405,7 +295,13 @@ function castsSunShadow(mesh: AbstractMesh): boolean {
 
   if (meta.brightMesh && !blendCaster) return false;
 
-  return drawsSolidGeometry(mesh, blendCaster);
+  if (!drawsSolidGeometry(mesh, blendCaster)) return false;
+
+  return !(
+    casters === 'dynamic' &&
+    meta.mapObject === true &&
+    isGroundClutter(mesh)
+  );
 }
 
 /**
@@ -572,13 +468,6 @@ export function syncShadows(
   // The predicate runs on the next refresh; a room switching the set does not
   // need a rebuild, and the reach is a re-split, not a rebuild either.
   casters = policy.casters;
-
-  const [dx, , dz] = policy.direction;
-  const horizontal = Math.hypot(dx, dz);
-  if (horizontal > 1e-4) {
-    sunStepX = Math.round(dx / horizontal);
-    sunStepZ = Math.round(dz / horizontal);
-  }
 
   if (runtime?.csm) {
     runtime.csm.shadowMaxZ = reachFor(casters);
