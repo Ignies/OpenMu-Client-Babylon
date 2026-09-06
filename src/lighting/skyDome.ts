@@ -70,8 +70,12 @@ const DISC_GAIN = 8;
 const DISC_RADIUS_DEG = 0.55;
 const DISC_EDGE_DEG = 0.35;
 
-/** Slab samples on Enhanced and on Ultra. */
-const CLOUD_STEPS = 5;
+/**
+ * Samples taken up the sun ray to shade a cloud. They are what the depth is
+ * made of, and they are all the marching there is: the shape itself is read
+ * once (see `muCloudSlab`).
+ */
+const CLOUD_LIGHT_STEPS = 4;
 
 /**
  * The slab's tonal range, which is the whole of whether a cloud reads as a
@@ -256,17 +260,22 @@ function registerDomeShader(): void {
 
 ${cloudFieldGlsl()}
 
-  const int CLOUD_STEPS = ${CLOUD_STEPS};
+  const int CLOUD_LIGHT_STEPS = ${CLOUD_LIGHT_STEPS};
 
   /**
-   * The deck as a slab the light is marched through, rather than a painted
-   * band. The ray is intersected with the cloud plane at a few heights, and at
-   * each one a second sample is taken a step up the *sun* ray: that is how
-   * much deck stands between this point and the sun, so the top of a cloud
-   * comes out lit and its underside sits in its own shadow. The samples are
-   * composited front to back (the camera is always under the deck, so the base
-   * is the near side), which is what gives an edge its translucency and a
-   * body its depth.
+   * A cloud's shape is read **once**, where the ray meets the middle of the
+   * deck. Marching the shape through the slab instead drew the same field at
+   * several different distances, and at anything but straight up those
+   * intersections land far apart: what it produced was five offset copies of
+   * one cloud, fanning out into the vertical streaks that made the sky look
+   * like a stack of transparencies.
+   *
+   * The depth comes from the light march. Samples are stepped up the *sun*
+   * ray from the cloud's base toward its top, which is how much of the deck
+   * stands between this point and the sun. Those offsets are small and all in
+   * one direction, so they shade the body rather than duplicating it: a face
+   * turned to the sun comes out bright, a deep interior dark, and the edges
+   * stay thin.
    *
    * Sky pixels only, and nothing at or below the horizon, where the plane
    * intersection runs away.
@@ -279,39 +288,31 @@ ${cloudFieldGlsl()}
     // capped, so the layer ends at a distance and the fade below carries it
     // into the horizon instead.
     float up = max(rd.y, 0.06);
-    float thickness = muCloudB.w;
+    float h = muCloudB.z + muCloudB.w * 0.5;
+    float t = min((h - cameraPosition.y) / up, ${CLOUD_FAR.toFixed(1)});
+    vec2 p = cameraPosition.xz + rd.xz * t;
 
-    vec3 sunTop = sunLit * ${CLOUD_LIT_GAIN.toFixed(2)};
-    vec3 shade = base * ${CLOUD_BASE_SHADE.toFixed(2)};
+    float d = muCloudCover(p);
+    if (d <= 0.0) return vec4(0.0);
 
-    vec3 colour = vec3(0.0);
-    float trans = 1.0;
+    float shadow = 0.0;
 
-    for (int i = 0; i < CLOUD_STEPS; i++) {
-      float f = float(i) / float(CLOUD_STEPS - 1);
-      float h = muCloudB.z + thickness * f;
-      float t = min((h - cameraPosition.y) / up, ${CLOUD_FAR.toFixed(1)});
-      vec2 p = cameraPosition.xz + rd.xz * t;
-
-      float d = muCloudCover(p);
-      if (d <= 0.0) continue;
-
-      // The deck left overhead along the sun ray: none at the top, the whole
-      // thickness at the base.
-      float rise = 1.0 - f;
-      float above = muCloudCover(p + muCloudB.xy * thickness * rise);
-      float lit = exp(-${CLOUD_SELF_SHADOW.toFixed(2)} * above * rise);
-
-      float a = 1.0 - exp(-${CLOUD_DENSITY.toFixed(2)} * d / float(CLOUD_STEPS));
-
-      colour += trans * a * mix(shade, sunTop, lit);
-      trans *= 1.0 - a;
+    for (int i = 1; i <= CLOUD_LIGHT_STEPS; i++) {
+      float f = float(i) / float(CLOUD_LIGHT_STEPS);
+      shadow += muCloudCover(p + muCloudB.xy * muCloudB.w * f);
     }
 
-    float alpha = 1.0 - trans;
-    if (alpha <= 0.0) return vec4(0.0);
+    float lit = exp(-${CLOUD_SELF_SHADOW.toFixed(2)} * shadow / float(CLOUD_LIGHT_STEPS));
 
-    return vec4(colour / alpha, alpha * smoothstep(0.006, 0.05, rd.y));
+    vec3 body = mix(
+      base * ${CLOUD_BASE_SHADE.toFixed(2)},
+      sunLit * ${CLOUD_LIT_GAIN.toFixed(2)},
+      lit
+    );
+
+    float alpha = 1.0 - exp(-${CLOUD_DENSITY.toFixed(2)} * d);
+
+    return vec4(body, alpha * smoothstep(0.006, 0.05, rd.y));
   }
 
   void main(void) {
