@@ -61,6 +61,28 @@
     text-shadow: 1px 1px 0 #000;
   }
 
+  // How many delivered rolls are still owed their opening. In the corner of
+  // the plate rather than in the label: MuButton fills the plate with an
+  // `inset: 0` flex row, which is this element's containing block, so the
+  // count floats over the label instead of pushing it off centre - and a
+  // digit is the same width in all thirteen languages the 41px has to hold.
+  .cash-tab-badge {
+    position: absolute;
+    right: 3px;
+    top: 2px;
+    box-sizing: border-box;
+    min-width: 11px;
+    height: 11px;
+    padding: 0 2px;
+    border-radius: 6px;
+    background: #ffd88a;
+    color: #2a2318;
+    font-size: 8px;
+    line-height: 11px;
+    text-align: center;
+    text-shadow: none;
+  }
+
   // ---- the stock grid ----
 
   // Same gapless 20px pitch as the inventory; the hit-test maths assume it.
@@ -270,6 +292,25 @@
     &.is-failed .cash-order-badge {
       color: #ff8080;
     }
+
+    // The one row in the queue worth pressing: a roll that is paid for, in
+    // the bag, and still owed its opening. Undims the delivered rule above -
+    // same specificity, later wins - because this one is not finished
+    // business.
+    &.is-waiting {
+      padding-left: 4px;
+      border-left: 2px solid #ffd88a;
+      opacity: 1;
+      cursor: pointer;
+    }
+
+    &.is-waiting:hover .cash-order-open {
+      color: #fff;
+    }
+  }
+
+  .cash-order-open {
+    color: #ffd88a;
   }
 
   .cash-order-head {
@@ -323,6 +364,11 @@
   // and the shockwaves reach past the edges because of it. The tier colour
   // and every per-tier number arrive inline from TIERS; nothing here knows a
   // tier by name except the drop light, which has no stage to read from.
+  //
+  // It is drawn in two halves, and only the second one knows the roll. Until
+  // the order is delivered the service does not send it (gacha.ts), so
+  // `--tier` is the neutral `--sealed` for the whole sealed half and every
+  // rule below `.phase-seam` is what the tier is allowed to touch.
   .cash-gacha {
     position: absolute;
     overflow: hidden;
@@ -410,6 +456,7 @@
     transition:
       transform 240ms ease-out,
       height 200ms,
+      opacity 200ms,
       box-shadow 200ms;
   }
 
@@ -460,6 +507,101 @@
   .phase-rattling .cash-box-face {
     animation: cash-swallow 120ms;
   }
+
+  // ---- the seal ----
+
+  // Where the sealed half ends, and everything a player is shown before their
+  // jewels have actually been taken. Every rule here paints in `--sealed` and
+  // runs to a fixed beat from SEAL: a hue, a duration or a particle that
+  // moved with the tier would be enough to shop for an outcome, because a
+  // player who disliked the tell could spend their jewels, fail the delivery,
+  // and get the daily-cap slot back to roll again. gacha.ts has the whole of
+  // it.
+  .cash-box-clasp {
+    position: absolute;
+    left: 50%;
+    box-sizing: border-box;
+    width: 12px;
+    height: 8px;
+    margin-left: -6px;
+    border: 1px solid var(--sealed);
+    border-radius: 2px;
+    background: linear-gradient(#00000066, #000000cc);
+    box-shadow: 0 0 3px #000000aa;
+  }
+
+  // The lid coming down, on the `repair` chime state.ts plays with it.
+  .phase-sealing {
+    .cash-box {
+      animation: cash-seal-shut 200ms cubic-bezier(0.7, 0, 0.4, 1.4) both;
+    }
+
+    .cash-box-clasp {
+      animation: cash-clasp-snap 200ms cubic-bezier(0.2, 1.6, 0.4, 1) both;
+    }
+  }
+
+  // Shut, and plainly so: a clasp on the front and the seam down to a thread
+  // of neutral light, which is the one thing the box is allowed to say - that
+  // there is something in it.
+  .phase-sealing,
+  .phase-sealed {
+    .cash-box-seam {
+      transform: scaleX(0.62);
+      opacity: 0.4;
+      box-shadow: 0 0 7px 1px var(--sealed);
+    }
+  }
+
+  // A box left standing on the stage for however long it takes the player to
+  // log out. It breathes so the stage is not a still frame, on the same slow
+  // ember the hush uses - infinite and unfilled, so nothing is stranded when
+  // the phase moves on.
+  .phase-sealed {
+    .cash-box {
+      animation: cash-breathe 2800ms ease-in-out infinite;
+    }
+
+    .cash-box-seam {
+      animation: cash-ember 2800ms ease-in-out infinite;
+    }
+  }
+
+  // The opening starts on the box the player watched lock, so it is the clasp
+  // breaking off it that says this one is being opened - never a second box
+  // arriving. The seam takes the tier's colour on the same frame, growing out
+  // of the thread that was already there.
+  .phase-seam,
+  .phase-strain,
+  .phase-slam,
+  .phase-hush,
+  .phase-burst {
+    .cash-box-clasp {
+      opacity: 0;
+      transform: translateY(-7px) scale(1.5) rotate(-12deg);
+      transition:
+        opacity 180ms ease-out,
+        transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+
+  // The dust the lid knocks off the floor. `cash-thud` is the drop's, white
+  // and thrown wide; this one is the seal's own colour and stays close to the
+  // box, because it is a lid coming down rather than a box coming down.
+  .cash-seal-dust {
+    position: absolute;
+    left: 50%;
+    width: 10px;
+    height: 18px;
+    border: 1px solid var(--sealed);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scaleY(0.3);
+    // Inside the 260ms `sealing` runs for (SEAL.shut to SEAL.sealed), so the
+    // ring is spent rather than cut off when the phase takes it away.
+    animation: cash-seal-dust 240ms ease-out forwards;
+  }
+
+  // ---- the opening ----
 
   .phase-seam,
   .phase-strain {
@@ -540,7 +682,7 @@
   // ---- the reveal ----
 
   // Mounted at the burst and keyed on the seed; every delay below counts from
-  // that frame and arrives inline from BEAT (`--after-*`, `--option-step`),
+  // that frame and arrives inline from OPEN (`--after-*`, `--option-step`),
   // so the sounds in state.ts and the drawing here keep the one timeline.
   .cash-reveal {
     position: absolute;
@@ -890,6 +1032,50 @@
   }
 }
 
+@keyframes cash-seal-shut {
+  0% {
+    transform: translate3d(0, -3px, 0);
+  }
+  35% {
+    transform: scale(1.06, 0.9);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes cash-clasp-snap {
+  0% {
+    transform: translateY(-9px) scaleY(2.4);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes cash-seal-dust {
+  from {
+    width: 10px;
+    opacity: 0.45;
+  }
+  to {
+    width: 46px;
+    opacity: 0;
+  }
+}
+
+// Barely a movement: enough that a box waiting for a logout is not a still.
+@keyframes cash-breathe {
+  50% {
+    transform: scale(1.015);
+  }
+}
+
 @keyframes cash-ember {
   50% {
     opacity: 0.35;
@@ -1061,6 +1247,7 @@
   .cash-shop .cash-halo,
   .cash-shop .cash-shine,
   .cash-shop .cash-thud,
+  .cash-shop .cash-seal-dust,
   .cash-shop .cash-fee,
   .cash-shop .cash-frame-flash,
   .cash-drop-light {
@@ -1068,6 +1255,11 @@
   }
 
   // Drawn at rest, in the position they hold at settle, so nothing jumps.
+  // The clasp needs nothing here: SEAL_CALM goes straight from `shut` to
+  // `sealed` with no beat of its own for the snap, and removing the animation
+  // outright - rather than zeroing it - leaves the lock simply there, which
+  // is where it belongs. It still comes off at the seam, from the phase rules
+  // above: those are a transition on opacity, and opacity is not vestibular.
   .cash-shop .cash-box-seam {
     transform: scaleX(1) !important;
   }

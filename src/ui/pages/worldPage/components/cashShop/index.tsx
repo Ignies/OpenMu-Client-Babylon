@@ -50,6 +50,7 @@ import {
   canRoll,
   chaosToSpend,
   committedChaos,
+  openSealed,
   rollGacha,
   setCashShopTab,
   toggleCashShopWindow,
@@ -60,11 +61,14 @@ import {
   type Roll,
 } from '../../../../../cashShop/state';
 import {
-  BEAT,
   GACHA_SOUNDS,
+  OPEN,
   RATTLE_MS,
+  SEALED_COLOUR,
+  SEALED_TINT,
   TIERS,
   TIER_KEYS,
+  isOpening,
   type Phase,
   type Tier,
   type TierLook,
@@ -141,6 +145,14 @@ import {
  * an order waits for the player to log out. The fifth tab says so, in one
  * sentence, above the queue, because a purchase that does not appear reads
  * as a bug to anyone who has not been told.
+ *
+ * A roll is drawn on the press but only sent once its order is delivered
+ * (cashshop/server/orders.ts `forPlayer`), so the gacha is drawn in two
+ * halves. Nothing in the sealed half may differ by tier - a single tell would
+ * let a player who dislikes what they see spend their jewels before logging
+ * out, fail the delivery, and get the daily-cap slot back to roll again - so
+ * everything the stage reads off a roll is behind `isOpening`, and a shut box
+ * wears `SEALED_TINT` and `SEALED_COLOUR` whatever is in it.
  */
 
 /** The API's labels are written for a web page; four tabs across 164px are not. */
@@ -351,7 +363,11 @@ const BuyPrompt = observer(({ product, onAnswer }: { product: Product; onAnswer:
 /** What the item on an order is: the roll's name for a gacha, the product's otherwise. */
 function orderItemName(order: Order): string {
   const { roll } = order;
-  if (!roll) return order.productName;
+
+  // A gacha carries no roll until its order is delivered, so there is no item
+  // to name and none may be guessed at: the queue says what it is - a sealed
+  // roll - rather than naming the box the player bought.
+  if (!roll) return order.line === 'gacha' ? t('cashShop.sealedRoll') : order.productName;
 
   const name = roll.excellent ? t('item.excellentPrefix', { name: roll.name }) : roll.name;
   return roll.level > 0 ? `${name} +${roll.level}` : name;
@@ -363,10 +379,11 @@ function orderItemName(order: Order): string {
  * the service's own reason, which for a queued order is the sentence at the
  * top: it is waiting for the player to log out.
  */
-const Deliveries = observer(() => {
-  const { orders, ordersError, account, unconfirmed, buyError } = CashShopState;
+const Deliveries = observer(({ onOpenRoll }: { onOpenRoll: () => void }) => {
+  const { orders, ordersError, account, unconfirmed, buyError, unopened } = CashShopState;
   const shown = orders.filter(order => order.state !== 'cancelled');
   const note = ordersError ?? buyError ?? (account ? null : unconfirmed);
+  const waiting = new Set(unopened.map(order => order.id));
 
   return (
     <div
@@ -381,31 +398,50 @@ const Deliveries = observer(() => {
       {!note && shown.length === 0 && <p className="cash-orders-note">{t('cashShop.noOrders')}</p>}
 
       <ul className="cash-order-list">
-        {shown.map(order => (
-          <li key={order.id} className={`cash-order is-${order.state}`}>
-            <div className="cash-order-head">
-              <span className="cash-order-name">{orderItemName(order)}</span>
-              <JewelCount count={order.chaos} small />
-            </div>
-            <div className="cash-order-state">
-              <span className="cash-order-badge">{t(STATE_LABEL[order.state])}</span>
-              {order.state === 'queued' && !order.roll && (
-                <button
-                  type="button"
-                  className="cash-order-cancel"
-                  onClick={uiClick(() => void cancelOrder(order.id))}
-                >
-                  {t('cashShop.cancel')}
-                </button>
-              )}
-            </div>
-            {order.state !== 'delivered' && (
-              <div className="cash-order-reason">
-                {order.reason ?? (order.state === 'queued' ? t('cashShop.waitingForLogout') : '')}
+        {shown.map(order => {
+          // A delivered roll this browser has not played the opening for is
+          // the one row worth pressing: it is paid for, in the bag, and still
+          // owed its ceremony.
+          const toOpen = waiting.has(order.id);
+
+          return (
+            <li
+              key={order.id}
+              className={`cash-order is-${order.state}${toOpen ? ' is-waiting' : ''}`}
+              onClick={toOpen ? uiClick(onOpenRoll) : undefined}
+            >
+              <div className="cash-order-head">
+                <span className="cash-order-name">{orderItemName(order)}</span>
+                <JewelCount count={order.chaos} small />
               </div>
-            )}
-          </li>
-        ))}
+              <div className="cash-order-state">
+                <span className="cash-order-badge">{t(STATE_LABEL[order.state])}</span>
+                {/*
+                  Never a roll: the service refuses to cancel one (db.ts)
+                  because the outcome is committed on the press, so taking the
+                  order back would be a free re-roll. Asked of the line rather
+                  than of the absent roll, which no longer says anything - a
+                  queued gacha carries none either way now.
+                */}
+                {order.state === 'queued' && order.line !== 'gacha' && (
+                  <button
+                    type="button"
+                    className="cash-order-cancel"
+                    onClick={uiClick(() => void cancelOrder(order.id))}
+                  >
+                    {t('cashShop.cancel')}
+                  </button>
+                )}
+                {toOpen && <span className="cash-order-open">{t('cashShop.openRoll')}</span>}
+              </div>
+              {order.state !== 'delivered' && (
+                <div className="cash-order-reason">
+                  {order.reason ?? (order.state === 'queued' ? t('cashShop.waitingForLogout') : '')}
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -415,13 +451,19 @@ const Deliveries = observer(() => {
 
 /** Phases in which the box is on the floor rather than gone. */
 const BOXED: ReadonlySet<Phase> = new Set<Phase>([
-  'falling', 'landed', 'rattling', 'seam', 'strain', 'slam', 'hush', 'burst', 'refused',
+  'falling', 'landed', 'rattling', 'sealing', 'sealed',
+  'seam', 'strain', 'slam', 'hush', 'burst', 'refused',
 ]);
 /** Phases from which the roll may be looked at. */
 const REVEALED: ReadonlySet<Phase> = new Set<Phase>(['burst', 'prize', 'settled']);
-/** Phases in which the tier is allowed to show. Withholding it is the design. */
-const TOLD: ReadonlySet<Phase> = new Set<Phase>([
-  'seam', 'strain', 'slam', 'hush', 'burst', 'prize', 'settled',
+/**
+ * Phases in which the box wears its clasp: from the lock that put it on until
+ * the seam splitting takes it off. The opening starts on a box that already
+ * has one, so it is the clasp breaking that says the box is being opened
+ * rather than a fresh one arriving.
+ */
+const CLASPED: ReadonlySet<Phase> = new Set<Phase>([
+  'sealing', 'sealed', 'seam', 'strain', 'slam', 'hush', 'burst',
 ]);
 /** Phases in which light is outside the window at all. */
 const LIT: ReadonlySet<Phase> = new Set<Phase>(['strain', 'slam', 'hush', 'burst', 'prize']);
@@ -494,7 +536,10 @@ const Reveal = observer(({ roll, look, phase }: { roll: Roll; look: TierLook; ph
 
 const GachaStage = observer(({ product, blocked }: { product: Product | null; blocked: string | null }) => {
   const { phase, roll, order, rollError, knock } = CashShopState;
-  const tier: Tier | null = TOLD.has(phase) && roll ? roll.tier : null;
+  // The one gate on everything the roll decides. `roll` is null for the whole
+  // sealed half anyway (state.ts), so this is the second lock on the same
+  // door rather than the only one.
+  const tier: Tier | null = isOpening(phase) && roll ? roll.tier : null;
   const look = TIERS[tier ?? 'common'];
   const stage = useRef<HTMLDivElement>(null);
 
@@ -504,18 +549,27 @@ const GachaStage = observer(({ product, blocked }: { product: Product | null; bl
   // a frame late - the frame the whole tell hangs on.
   useEffect(() => {
     for (const key of GACHA_SOUNDS) SoundsManager.loadSound(UI_SOUNDS[key]);
-    prefetchItemIcons([CHAOS_JEWEL, ...TIER_KEYS.map(key => boxItem(TIERS[key].tint))]);
+    prefetchItemIcons([
+      CHAOS_JEWEL,
+      boxItem(SEALED_TINT),
+      ...TIER_KEYS.map(key => boxItem(TIERS[key].tint)),
+    ]);
   }, []);
 
   // The counter in the state only ever climbs, so knocks are counted from
   // the press or a fresh box would knock on the way down. The knock has to
   // restart on a lid that stays mounted - remounting would re-decode the
   // icon - so two identical keyframe sets take turns.
+  //
+  // Both knocks are scored inside the rattle (SEAL.knockA/knockB), and the
+  // name is dropped with it: an inline `animation-name` outranks the
+  // stylesheet, so a name left on the lid would be played by the seal's own
+  // slam instead of its keyframes.
   const knockBase = useRef(knock);
   useEffect(() => {
     if (phase === 'falling') knockBase.current = knock;
   }, [phase, knock]);
-  const knocks = knock - knockBase.current;
+  const knocks = phase === 'rattling' ? knock - knockBase.current : 0;
   const knockStyle: CSSProperties | undefined = knocks > 0
     ? { animationName: knocks % 2 ? 'cash-knock' : 'cash-knock-b' }
     : undefined;
@@ -532,7 +586,11 @@ const GachaStage = observer(({ product, blocked }: { product: Product | null; bl
             top: STAGE_Y,
             width: STAGE_WIDTH,
             height: STAGE_HEIGHT,
-            '--tier': look.colour,
+            // A shut box is the same box whatever is in it, so until the
+            // opening the stage's one colour is the neutral one and every
+            // rule that paints in `--tier` paints in that instead.
+            '--tier': tier ? look.colour : SEALED_COLOUR,
+            '--sealed': SEALED_COLOUR,
             '--aura': look.aura,
             '--hush': `${look.hold}ms`,
             '--burst': `${look.burst}px`,
@@ -542,11 +600,11 @@ const GachaStage = observer(({ product, blocked }: { product: Product | null; bl
             '--fall': `${BOX_FALL_FROM}px`,
             '--hang': `${-BOX_HANG}px`,
             '--seam': `${SEAM_Y}px`,
-            '--after-prize': `${BEAT.afterPrize}ms`,
-            '--after-name': `${BEAT.afterName}ms`,
-            '--after-shine': `${BEAT.afterShine}ms`,
-            '--after-option': `${BEAT.afterOption}ms`,
-            '--option-step': `${BEAT.optionStep}ms`,
+            '--after-prize': `${OPEN.afterPrize}ms`,
+            '--after-name': `${OPEN.afterName}ms`,
+            '--after-shine': `${OPEN.afterShine}ms`,
+            '--after-option': `${OPEN.afterOption}ms`,
+            '--option-step': `${OPEN.optionStep}ms`,
           } as CSSProperties
         }
       >
@@ -554,12 +612,13 @@ const GachaStage = observer(({ product, blocked }: { product: Product | null; bl
           <div className="cash-box" style={{ left: BOX_X, top: BOX_REST_Y, width: BOX_SIZE, height: BOX_SIZE }}>
             <span className="cash-box-aura" />
             <span className="cash-box-face cash-box-body">
-              <ItemIcon item={boxItem(look.tint)} />
+              <ItemIcon item={boxItem(tier ? look.tint : SEALED_TINT)} />
             </span>
             <span className={`cash-box-face cash-box-lid${knockStyle ? ' is-knock' : ''}`} style={knockStyle}>
-              <ItemIcon item={boxItem(look.tint)} />
+              <ItemIcon item={boxItem(tier ? look.tint : SEALED_TINT)} />
             </span>
             <span className="cash-box-seam" style={{ top: SEAM_Y }} />
+            {CLASPED.has(phase) && <span className="cash-box-clasp" style={{ top: SEAM_Y - 3 }} />}
             {count(tier ? look.shafts : 0).map(i => (
               <span
                 key={i}
@@ -571,6 +630,8 @@ const GachaStage = observer(({ product, blocked }: { product: Product | null; bl
         )}
 
         {phase === 'landed' && <span className="cash-thud" style={{ top: BOX_REST_Y + BOX_SIZE }} />}
+        {/* The clasp's own dust, in the neutral colour: a lock, not a tier. */}
+        {phase === 'sealing' && <span className="cash-seal-dust" style={{ top: BOX_REST_Y + BOX_SIZE }} />}
 
         {REVEALED.has(phase) && roll && <Reveal key={roll.seed} roll={roll} look={look} phase={phase} />}
 
@@ -579,6 +640,13 @@ const GachaStage = observer(({ product, blocked }: { product: Product | null; bl
         {phase === 'idle' && !rollError && !blocked && (
           <p className="cash-gacha-status">{t('cashShop.gachaHint', { count: product?.chaos ?? 0 })}</p>
         )}
+        {/*
+          A box that has just locked, told what it is waiting for. The
+          opening starts from `sealed` too, but with the roll already in hand
+          (openSealed in state.ts), and that box is about to open rather than
+          waiting on anything - so the line follows the roll, not the phase.
+        */}
+        {phase === 'sealed' && !roll && <p className="cash-gacha-status">{t('cashShop.sealedWait')}</p>}
         {phase === 'settled' && order && <p className="cash-gacha-status">{orderStatus(order)}</p>}
       </div>
 
@@ -650,7 +718,7 @@ export const CashShop = observer(() => {
   /** The product whose order was just taken, so its band says so once. */
   const [justBought, setJustBought] = useState<string | null>(null);
 
-  const { windowOpen, tab, catalogue, lines, status, error, buying, buyError, phase, roll, calm } =
+  const { windowOpen, tab, catalogue, lines, status, error, buying, buyError, phase, roll, calm, unopened } =
     CashShopState;
 
   const shown = useMemo(() => catalogue.filter(product => product.line === tab), [catalogue, tab]);
@@ -735,6 +803,18 @@ export const CashShop = observer(() => {
     select(null);
   };
 
+  // A waiting roll pressed in the queue. `setCashShopTab` starts the opening
+  // itself, but returns early when the tab is already the one asked for - and
+  // a player who came to the queue from the gacha never left it, since the
+  // queue is not a line. That case has to start it here.
+  const openWaitingRoll = () => {
+    setOrdersOpen(false);
+    select(null);
+
+    if (tab === 'gacha') openSealed();
+    else setCashShopTab('gacha');
+  };
+
   const answer = (yes: boolean) => {
     const product = asking;
     setAsking(null);
@@ -774,7 +854,17 @@ export const CashShop = observer(() => {
               activeColor="#dcdcdc"
               labelStyle={{ fontSize: 9 }}
               onClick={() => openTab(line.id)}
-            />
+            >
+              {/*
+                Rolls that are paid for and still owed their opening. A count
+                in the corner rather than a word in the label: the tab is
+                41px and the label is already as long as thirteen languages
+                allow, and a digit reads the same in all of them.
+              */}
+              {line.id === 'gacha' && unopened.length > 0 && (
+                <span className="cash-tab-badge">{unopened.length}</span>
+              )}
+            </MuButton>
           </div>
         ))}
         <div className="cash-tab" style={{ left: lines.length * TAB_WIDTH }}>
@@ -799,7 +889,7 @@ export const CashShop = observer(() => {
       {status === 'loading' && !ordersOpen && <p className="cash-note">{t('cashShop.loading')}</p>}
       {status === 'failed' && !ordersOpen && <p className="cash-note is-bad">{error}</p>}
 
-      {ordersOpen && <Deliveries />}
+      {ordersOpen && <Deliveries onOpenRoll={openWaitingRoll} />}
 
       {isGacha && <GachaStage product={gachaProduct} blocked={gachaBlocked} />}
 

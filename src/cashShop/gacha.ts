@@ -3,13 +3,30 @@ import type { UiSound } from '../libs/sfx';
 /**
  * The drop: every number the gacha reveal is tuned by, in one place.
  *
- * A Box of Luck falls onto the stage, a Jewel of Chaos is fed into it, it
- * rattles, cracks open in the tier's colour, strains, slams shut on the Chaos
- * Machine's failure chime, goes silent, and bursts. `state.ts` runs that
- * schedule and plays the sounds; the window draws whatever phase it is told
- * and writes the per-tier numbers and the reveal's beats onto its stage as
- * custom properties, so the stylesheet's delays are these numbers and not
- * copies of them. The lengths of its animations are the stylesheet's own.
+ * It runs in two halves, and the seam between them is the payment.
+ *
+ * The shop cannot take jewels out of an account the game server holds in
+ * memory, so a roll is paid for at logout, not at the press. The roll itself
+ * is drawn and committed when the order is placed - that is what stops an
+ * outcome being shopped for by ordering and cancelling - but showing it then
+ * would be a look nobody has paid for yet, and a look is enough to break the
+ * line: a player who did not like what they saw could spend or trade their
+ * jewels before logging out, the delivery would fail for want of them, and a
+ * failed order costs nothing and hands its daily-cap slot back. The roll
+ * could be re-drawn until it was liked.
+ *
+ * So the first half is tier-blind by construction. A Box of Luck falls onto
+ * the stage, a Jewel of Chaos is fed into it, it rattles, and it locks - the
+ * same box, the same sounds, whatever is inside. The second half runs at the
+ * next login, once the jewels are actually gone: the seam cracks in the
+ * tier's colour, the lid strains, slams shut on the Chaos Machine's failure
+ * chime, goes silent, and bursts.
+ *
+ * `state.ts` runs both schedules and plays the sounds; the window draws
+ * whatever phase it is told and writes the per-tier numbers and the reveal's
+ * beats onto its stage as custom properties, so the stylesheet's delays are
+ * these numbers and not copies of them. The lengths of its animations are the
+ * stylesheet's own.
  *
  * Nothing here waits on `animationend`: every beat is a timer from these
  * tables, so an absent or zeroed animation can never strand the machine.
@@ -24,6 +41,8 @@ export type Phase =
   | 'falling'
   | 'landed'
   | 'rattling'
+  | 'sealing'
+  | 'sealed'
   | 'seam'
   | 'strain'
   | 'slam'
@@ -32,6 +51,19 @@ export type Phase =
   | 'prize'
   | 'settled'
   | 'refused';
+
+/** Phases that belong to the opening, so the stage knows which half it is in. */
+const OPENING: ReadonlySet<Phase> = new Set<Phase>([
+  'seam',
+  'strain',
+  'slam',
+  'hush',
+  'burst',
+  'prize',
+  'settled',
+]);
+
+export const isOpening = (phase: Phase): boolean => OPENING.has(phase);
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -48,21 +80,34 @@ export const REFUSED_MS = 600;
 export const RATTLE_MS = { shut: 420, split: 160 } as const;
 
 /**
- * The drop, beat by beat, in ms from the moment the box lands (L). Landing is
- * the first deterministic frame - the order response carries its committed
- * roll - so everything after it is fixed-length theatre. Negative = skipped.
- * `hush` runs for `TIERS[tier].hold`; the `after*` beats are from the burst.
+ * The seal, in ms from the moment the box lands (L). Landing is the first
+ * deterministic frame - the order response has come back and the roll is
+ * committed - so everything after it is fixed-length theatre.
+ *
+ * Every beat here is the same for every tier, and nothing in it may be read
+ * off the roll. That is not a style choice: it is the whole reason the roll
+ * is sealed, and a tell added here would hand back the free re-roll.
  */
-export const BEAT = {
+export const SEAL = {
   feed: 40,
   fed: 400,
   knockA: 540,
   knockB: 940,
-  seam: 1300,
-  announce: 1440,
-  strain: 1520,
-  slam: 1720,
-  hush: 1810,
+  shut: 1240,
+  sealed: 1500,
+} as const;
+
+/**
+ * The opening, in ms from the moment the sealed box is put back on the stage
+ * at the next login. `hush` runs for `TIERS[tier].hold`; the `after*` beats
+ * are from the burst. Negative = skipped.
+ */
+export const OPEN = {
+  seam: 320,
+  announce: 460,
+  strain: 540,
+  slam: 740,
+  hush: 830,
   afterPrize: 150,
   afterName: 300,
   afterShine: 420,
@@ -80,17 +125,22 @@ export const BEAT = {
 type Drawn = 'afterName' | 'afterShine';
 
 /**
- * The same roll with the motion taken out: sound and reading time only. The
- * knocks, the slam and the option ticks are scored to movements that no
+ * The same two halves with the motion taken out: sound and reading time only.
+ * The knocks, the slam and the option ticks are scored to movements that no
  * longer happen, so they are gone rather than early.
  */
-export const CALM: { [K in Exclude<keyof typeof BEAT, Drawn>]: number } = {
+export const SEAL_CALM: Record<keyof typeof SEAL, number> = {
   feed: 40,
   fed: 200,
   knockA: -1,
   knockB: -1,
-  seam: 300,
-  announce: 440,
+  shut: 300,
+  sealed: 460,
+};
+
+export const OPEN_CALM: { [K in Exclude<keyof typeof OPEN, Drawn>]: number } = {
+  seam: 200,
+  announce: 300,
   strain: -1,
   slam: -1,
   hush: -1,
@@ -100,7 +150,7 @@ export const CALM: { [K in Exclude<keyof typeof BEAT, Drawn>]: number } = {
   afterSettle: 300,
 };
 
-/** Under CALM the burst is a fixed beat after the seam, not hush + hold. */
+/** Under `OPEN_CALM` the burst is a fixed beat after the seam, not hush + hold. */
 export const CALM_BURST_MS = 700;
 
 export interface TierLook {
@@ -132,7 +182,7 @@ export interface TierLook {
   flash: boolean;
   /** The standing conic halo behind the settled prize. */
   halo: boolean;
-  /** Played at `BEAT.announce`, before the item exists. */
+  /** Played at `OPEN.announce`, before the item exists. */
   announce: UiSound | null;
 }
 
@@ -142,6 +192,10 @@ export interface TierLook {
  * window frame only from epic up, and the silence before the burst grows
  * with the tier. Six independent axes, so a colour-blind or muted player
  * still reads which one they got.
+ *
+ * None of it is drawn before the opening. `tint` in particular is the box's
+ * own art, and a sealed box is always `SEALED_TINT` regardless of what is in
+ * it.
  */
 export const TIERS: Record<Tier, TierLook> = {
   common: {
@@ -166,6 +220,10 @@ export const TIERS: Record<Tier, TierLook> = {
   },
 };
 
+/** The box every sealed roll wears, and the colour it wears while shut. */
+export const SEALED_TINT = 0;
+export const SEALED_COLOUR = '#b9ad94';
+
 /**
  * What plays after `win`, in ms from the burst (DSPlaySound.h: SOUND_JEWEL01,
  * SOUND_MIX_SUCCESS, SOUND_LEVEL_UP). Common gets nothing: the absence is the
@@ -186,6 +244,6 @@ export const TIER_STING: Record<Tier, { key: UiSound; at: number }[]> = {
  * two map changes.
  */
 export const GACHA_SOUNDS: readonly UiSound[] = [
-  'coin', 'win', 'dropItem', 'gemstone', 'window', 'mixFailed',
+  'coin', 'win', 'dropItem', 'gemstone', 'window', 'mixFailed', 'repair',
   'jewel', 'mix', 'levelUp', 'duelStart', 'menuMove', 'error',
 ];

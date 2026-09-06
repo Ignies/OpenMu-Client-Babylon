@@ -4,14 +4,17 @@ import { sessionNonce } from '../common/sessionNonce';
 import { shopApiUrl } from '../common/serverServices';
 import { t } from '../i18n';
 import { playSfx, playUiSound } from '../libs/sfx';
+import { LocalStorage } from '../libs/localStorage';
 import type { Item } from '../ecs/world';
 import {
-  BEAT,
-  CALM,
   CALM_BURST_MS,
   FALL_MS,
+  OPEN,
+  OPEN_CALM,
   PLACE_TIMEOUT_MS,
   REFUSED_MS,
+  SEAL,
+  SEAL_CALM,
   TIERS,
   TIER_STING,
   type Phase,
@@ -35,10 +38,19 @@ export type { Phase, Tier } from './gacha';
  *
  * Nothing here spends anything either. Every order is placed by the service,
  * against the ticket it minted for this page's game socket, and the order it
- * answers with is the truth about what was bought - for the gacha, including
- * the roll, which is committed in the same write that creates the order. This
- * module owns the clock the reveal runs on, so the sounds play from here and
- * never for an order the service refused.
+ * answers with is the truth about what was bought.
+ *
+ * A gacha roll is the one thing that answer withholds. It is drawn and
+ * committed when the order is placed, but the jewels for it are not taken
+ * until the account is offline and the delivery runs, so the service seals it
+ * until then (`cashshop/server/orders.ts`) and this module never sees it
+ * early. That splits the drop in two: `rollGacha` runs the tier-blind half
+ * that ends with the box locked, and `openSealed` runs the reveal at the
+ * next login, once the roll is paid for and the service is willing to say
+ * what it was.
+ *
+ * This module owns the clock both halves run on, so the sounds play from here
+ * and never for an order the service refused.
  */
 
 export type ProductLine = 'wings' | 'quest' | 'gacha';
@@ -141,10 +153,18 @@ export const CashShopState = observable({
   /** The service's reason for the last refusal, in its own words. */
   buyError: null as string | null,
 
-  /** The drop. `roll` is held from the landing and shown from the burst. */
+  /**
+   * The drop. `roll` is null for the whole sealed half - the service does not
+   * send it - and is set by `openSealed`, which shows it from the burst.
+   */
   phase: 'idle' as Phase,
   roll: null as Roll | null,
   order: null as Order | null,
+  /**
+   * Delivered rolls this browser has not played the opening for yet, oldest
+   * first. Filled by the queue read; emptied one ceremony at a time.
+   */
+  unopened: [] as Order[],
   /** The stage's own line, drawn in red while the stage is idle. */
   rollError: null as string | null,
   /** Bumped per knock from inside the box; the lid keys its animation on it. */
@@ -152,6 +172,45 @@ export const CashShopState = observable({
   /** `prefers-reduced-motion`, read once per roll. */
   calm: false,
 });
+
+/* ---------------------------------------------------------------- opened */
+
+/**
+ * The order ids whose opening this browser has already played.
+ *
+ * Local on purpose, and the one piece of shop state that is. The item is in
+ * the bag either way - the ceremony is the only thing at stake - so this is
+ * a convenience, not a record, and it is not worth a column in the service's
+ * database or a route to write it with. What it costs is that a player who
+ * logs in somewhere else sees the opening a second time, which is a better
+ * failure than never seeing it at all.
+ */
+const OPENED_KEY = 'mu_cashshop_opened';
+
+/** Ids kept before the oldest are dropped. Comfortably more than the daily cap. */
+const OPENED_KEEP = 200;
+
+function openedIds(): ReadonlySet<string> {
+  const raw = LocalStorage.load(OPENED_KEY);
+
+  if (!raw) return new Set();
+
+  try {
+    const stored: unknown = JSON.parse(raw);
+
+    return new Set(Array.isArray(stored) ? stored.filter((id): id is string => typeof id === 'string') : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function markOpened(id: string): void {
+  LocalStorage.save(OPENED_KEY, JSON.stringify([...openedIds(), id].slice(-OPENED_KEEP)));
+
+  runInAction(() => {
+    CashShopState.unopened = CashShopState.unopened.filter(order => order.id !== id);
+  });
+}
 
 /* ------------------------------------------------------------------- http */
 
@@ -395,11 +454,22 @@ async function readOrders(): Promise<void> {
   const before = new Map(CashShopState.orders.map(order => [order.id, order.state]));
   const justDelivered = view.orders.some(order => {
     const was = before.get(order.id);
-    return order.state === 'delivered' && was !== undefined && was !== 'delivered';
+
+    // A gacha's arrival is announced by its own opening, which has a whole
+    // score of its own; two sounds for one delivery is one too many.
+    return order.line !== 'gacha' && order.state === 'delivered' && was !== undefined && was !== 'delivered';
   });
+
+  // A roll is only ever sent once it is delivered, so anything here with a
+  // roll on it has been paid for and is the player's to see.
+  const opened = openedIds();
+  const unopened = view.orders
+    .filter(order => order.line === 'gacha' && order.state === 'delivered' && order.roll && !opened.has(order.id))
+    .reverse();
 
   runInAction(() => {
     CashShopState.orders = view.orders;
+    CashShopState.unopened = unopened;
     CashShopState.acceptingOrders = view.acceptingOrders;
     CashShopState.wallet = view.wallet;
     CashShopState.spentToday = view.spentToday;
@@ -526,7 +596,7 @@ export function toggleCashShopWindow(open?: boolean): void {
 
   if (CashShopState.windowOpen) {
     void ensureCatalogue();
-    void refreshOrders();
+    void refreshOrders().then(openOnSight);
 
     if (!poll) poll = setInterval(() => void refreshOrders(), ORDERS_POLL_MS);
   } else {
@@ -549,15 +619,33 @@ export function setCashShopTab(tab: ProductLine): void {
     CashShopState.tab = tab;
     CashShopState.buyError = null;
   });
+
+  if (tab === 'gacha') openSealed();
+}
+
+/**
+ * Once per window open: a roll that arrived while the player was away is the
+ * best reason the window has to be looked at, so the gacha tab is what opens.
+ * Only here, never on the poll - a tab pulled out from under someone
+ * mid-purchase would be a bug, however good the news.
+ */
+function openOnSight(): void {
+  if (!CashShopState.windowOpen || CashShopState.unopened.length === 0) return;
+
+  runInAction(() => {
+    CashShopState.tab = 'gacha';
+  });
+
+  openSealed();
 }
 
 /* ------------------------------------------------------------------ gacha */
 
 /**
  * The drop, run from here because this module is the only clock. Every beat
- * after the landing is a timer from `BEAT` (or `CALM`), held in `timers` so
- * closing the window can clear them all: no sound may fire at a stage nobody
- * is looking at.
+ * is a timer from `SEAL` / `OPEN` (or their calm tables), held in `timers`
+ * so closing the window can clear them all: no sound may fire at a stage
+ * nobody is looking at.
  *
  * `attempt` names the press each timer belongs to. A press, an abandon and a
  * refusal each bump it, so a request that answers after the window closed
@@ -589,7 +677,7 @@ function knock(): void {
 }
 
 /** Phases a new press is taken from. */
-const ARMED: ReadonlySet<Phase> = new Set<Phase>(['idle', 'prize', 'settled']);
+const ARMED: ReadonlySet<Phase> = new Set<Phase>(['idle', 'sealed', 'prize', 'settled']);
 
 /** Whether the Roll button should take a press right now. */
 export function canRoll(): boolean {
@@ -611,11 +699,16 @@ export function abandonRoll(): void {
 }
 
 /**
- * A paid roll. The press mounts the box and sends the order together; the
- * fall and the request are awaited as one, so a fast answer still gets the
- * full drop and a slow one leaves the box hanging over the floor rather
- * than desynchronising the reveal. Everything after the landing is
- * fixed-length theatre, because the order that came back carries the roll.
+ * A paid roll, up to the lock. The press mounts the box and sends the order
+ * together; the fall and the request are awaited as one, so a fast answer
+ * still gets the full drop and a slow one leaves the box hanging over the
+ * floor rather than desynchronising it. Everything after the landing is
+ * fixed-length theatre.
+ *
+ * What it is not is a reveal. The order that comes back carries no roll - the
+ * service seals it until the jewels have been taken - so there is nothing
+ * here to leak, and nothing in this half may be drawn from the outcome. The
+ * box locks, and `openSealed` finishes the story at the next login.
  */
 export async function rollGacha(): Promise<void> {
   if (!ARMED.has(CashShopState.phase)) return;
@@ -627,7 +720,6 @@ export async function rollGacha(): Promise<void> {
   const mine = ++attempt;
   const before = knownOrders();
   const calm = calmDown();
-  const B = calm ? CALM : BEAT;
   const at = (ms: number, run: () => void): void => {
     if (ms < 0) return;
     timers.push(
@@ -645,6 +737,7 @@ export async function rollGacha(): Promise<void> {
     CashShopState.calm = calm;
   });
 
+  const S = calm ? SEAL_CALM : SEAL;
   const control = new AbortController();
   const ceiling = setTimeout(() => control.abort(), PLACE_TIMEOUT_MS);
   const placed = placeOrder(product.id, control.signal);
@@ -692,8 +785,7 @@ export async function rollGacha(): Promise<void> {
     if (found) {
       runInAction(() => {
         CashShopState.order = found;
-        CashShopState.roll = found.roll;
-        CashShopState.phase = 'settled';
+        CashShopState.phase = 'sealed';
         CashShopState.rollError = null;
       });
     } else {
@@ -705,68 +797,115 @@ export async function rollGacha(): Promise<void> {
     clearTimeout(ceiling);
   }
 
-  const roll = order.roll;
-
-  if (attempt !== mine || !roll) {
-    // Committed while nobody was watching, or - should the service ever
-    // answer a gacha order without its roll - committed but not showable.
-    // Keep the order, skip the show: the stage settles on it unless a newer
-    // press already owns the stage.
+  if (attempt !== mine) {
+    // Committed while nobody was watching. Keep the order - the service has
+    // it either way - and play nothing.
     runInAction(() => {
       CashShopState.orders = [order, ...CashShopState.orders];
-      if (attempt === mine || CashShopState.phase === 'idle') {
-        CashShopState.order = order;
-        CashShopState.roll = roll;
-        CashShopState.phase = 'settled';
-      }
     });
 
     return;
   }
 
-  const look = TIERS[roll.tier];
-
-  // Landed. The roll is held from here and shown from the burst; the queue
-  // gains the order now, so the wallet bar's committed sum drops on this
-  // frame and never before.
+  // Landed. The queue gains the order now, so the wallet bar's committed sum
+  // drops on this frame and never before.
   runInAction(() => {
     CashShopState.order = order;
-    CashShopState.roll = roll;
     CashShopState.phase = 'landed';
     CashShopState.orders = [order, ...CashShopState.orders];
   });
   playUiSound('dropItem');
 
-  at(B.feed, () => playUiSound('coin'));
-  at(B.fed, () => {
+  at(S.feed, () => playUiSound('coin'));
+  at(S.fed, () => {
     setPhase('rattling');
     playUiSound('gemstone');
   });
   // Quieter than the thud it echoes; only `playSfx` takes a gain.
-  at(B.knockA, () => {
+  at(S.knockA, () => {
     knock();
     playSfx('Sound/pDropItem', null, 0.45);
   });
-  at(B.knockB, () => {
+  at(S.knockB, () => {
     knock();
     playSfx('Sound/pDropItem', null, 0.45);
   });
-  at(B.seam, () => {
+  // The clasp. The box is the same box whatever is in it, so this is the last
+  // thing the player is told until it is paid for.
+  at(S.shut, () => {
+    setPhase('sealing');
+    playUiSound('repair');
+  });
+  at(S.sealed, () => {
+    setPhase('sealed');
+    void refreshOrders();
+  });
+}
+
+/**
+ * The other half: a roll that has been delivered, opened at last.
+ *
+ * By the time this runs the jewels are gone and the item is in the bag - the
+ * service only sends a roll once its order is `delivered` - so there is
+ * nothing left to shop for and the whole tier can be spent on the reveal.
+ * The box comes back sealed, cracks in the tier's colour, slams shut on the
+ * Chaos Machine's failure chime, and bursts after a silence whose length is
+ * the tier.
+ */
+export function openSealed(): void {
+  if (!CashShopState.windowOpen || CashShopState.tab !== 'gacha') return;
+  if (!ARMED.has(CashShopState.phase)) return;
+
+  const order = CashShopState.unopened[0];
+  const roll = order?.roll;
+
+  if (!order || !roll) return;
+
+  cancelTimeline();
+  const mine = ++attempt;
+  const calm = calmDown();
+  const O = calm ? OPEN_CALM : OPEN;
+  const look = TIERS[roll.tier];
+  const at = (ms: number, run: () => void): void => {
+    if (ms < 0) return;
+    timers.push(
+      setTimeout(() => {
+        if (attempt === mine) run();
+      }, ms)
+    );
+  };
+
+  // Marked before a frame of it plays. A poll landing mid-ceremony must not
+  // queue the same box again, and a reveal the player walked out on is still
+  // a reveal they were given - replaying it on every window open would be
+  // worse than missing it once.
+  markOpened(order.id);
+
+  runInAction(() => {
+    CashShopState.order = order;
+    CashShopState.roll = roll;
+    CashShopState.phase = 'sealed';
+    CashShopState.rollError = null;
+    CashShopState.calm = calm;
+  });
+  playUiSound('dropItem');
+
+  at(O.seam, () => {
     setPhase('seam');
     playUiSound('window');
   });
   if (look.announce) {
     const announce = look.announce;
-    at(B.announce, () => playUiSound(announce));
+    at(O.announce, () => playUiSound(announce));
   }
-  at(B.strain, () => setPhase('strain'));
-  at(B.slam, () => {
+  at(O.strain, () => setPhase('strain'));
+  at(O.slam, () => {
     setPhase('slam');
     playUiSound('mixFailed');
   });
-  at(B.hush, () => setPhase('hush'));
+  at(O.hush, () => setPhase('hush'));
 
-  const burst = calm ? B.seam + CALM_BURST_MS : B.hush + look.hold;
+  const burst = calm ? O.seam + CALM_BURST_MS : O.hush + look.hold;
 
   at(burst, () => {
     setPhase('burst');
@@ -775,17 +914,18 @@ export async function rollGacha(): Promise<void> {
   for (const sting of TIER_STING[roll.tier]) {
     at(burst + sting.at, () => playUiSound(sting.key));
   }
-  // The Roll button re-arms here: a player on their fourth roll can pay again
-  // the instant they have seen what they got.
-  at(burst + B.afterPrize, () => setPhase('prize'));
+  // The Roll button re-arms here: a player can pay for the next box the
+  // instant they have seen what this one held.
+  at(burst + O.afterPrize, () => setPhase('prize'));
   if (!calm) {
     roll.options.forEach((_, index) =>
-      at(burst + B.afterOption + index * B.optionStep, () => playSfx('Sound/iButtonMove', null, 0.3))
+      at(burst + O.afterOption + index * O.optionStep, () => playSfx('Sound/iButtonMove', null, 0.3))
     );
   }
-  at(burst + B.afterSettle, () => {
+  // Straight on to the next, if more than one arrived while they were away.
+  at(burst + O.afterSettle, () => {
     setPhase('settled');
-    void refreshOrders();
+    openSealed();
   });
 }
 
