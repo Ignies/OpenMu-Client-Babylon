@@ -242,6 +242,7 @@ export const EN_TEXT = {
   'trade.offerChanged': 'The other side changed the offer',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
+  'keys.sortInventory': 'Arrange inventory',
   'keys.emoteMenu': 'Emote menu',
   'keys.inventory': 'Inventory',
   'keys.characterInfo': 'Character',
@@ -1374,6 +1375,7 @@ export const EN_TEXT = {
   'notify.merchantRefuses': 'The merchant does not want that item',
   'notify.noInventoryRoom': 'There is no room in the inventory',
   'notify.noRoomForItem': 'There is no room for that item',
+  'notify.inventorySorted': 'Inventory arranged',
   'notify.learnedSkill': 'You have learned {name}',
   'notify.storageOpen': 'You cannot use items while the storage is open',
   'notify.upgradeNeedsServer': 'Upgrading needs a server',

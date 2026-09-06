@@ -1380,5 +1380,7 @@ export const spanishLayer: LanguageLayer = {
     'options.lootOther': 'Todo lo demás',
     'options.lootZen': 'Zen desde',
     'trade.offerChanged': 'La otra parte cambió la oferta',
+    'keys.sortInventory': 'Ordenar inventario',
+    'notify.inventorySorted': 'Inventario ordenado',
   },
 };

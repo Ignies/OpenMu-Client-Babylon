@@ -1363,5 +1363,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.lootOther': 'Всичко останало',
     'options.lootZen': 'Zen от',
     'trade.offerChanged': 'Другата страна промени предложението',
+    'keys.sortInventory': 'Подреди инвентара',
+    'notify.inventorySorted': 'Инвентарът е подреден',
   },
 };

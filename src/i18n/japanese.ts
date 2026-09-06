@@ -1333,5 +1333,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.lootOther': 'その他すべて',
     'options.lootZen': 'Zen 以上',
     'trade.offerChanged': '相手が取引内容を変更しました',
+    'keys.sortInventory': '所持品を整理',
+    'notify.inventorySorted': '所持品を整理しました',
   },
 };
