@@ -95,18 +95,42 @@ const CLOUD_SELF_SHADOW = 3.2;
 const CLOUD_DENSITY = 5;
 
 /**
- * Where the deck fades out toward the horizon, as `rd.y`: gone below about 5
- * degrees, full above about 17. Under that the ray-to-plane intersection runs
- * away and one cloud smears across the whole skyline.
+ * Curvature the deck is bent onto, in tiles: the radius of the shell the view
+ * ray is intersected against.
+ *
+ * A flat deck meets a level ray at infinity, which is why the layer used to be
+ * cut off at a fixed distance and faded out below 17 degrees - and in first
+ * person, where the horizon sits mid-screen, that fade band is half the sky
+ * and the deck read as a ceiling ending in mid-air. A shell has a horizon of
+ * its own instead: the same deck is about 95 tiles away overhead and about
+ * 1050 at eye level, so the clouds compress into a band as they recede and the
+ * layer ends where the ground does.
+ *
+ * The value is not a planet's radius, which would put the deck's horizon
+ * further out than the map is wide and leave the compression invisible. It is
+ * picked for the 11:1 spread between the overhead and horizon distances, which
+ * is what the compression is made of.
  */
-const CLOUD_HORIZON_FADE = [0.09, 0.3] as const;
+const CLOUD_PLANET_RADIUS = 6000;
 
 /**
- * How far along a ray the deck is still drawn, in tiles. Past this the
- * intersection with the cloud plane grows without bound and one noise texel
- * would cover the whole skyline.
+ * Aerial perspective on the deck, in tiles: where the air starts taking the
+ * clouds, how fast it takes them, and how much it can take.
+ *
+ * The dome is outside the G-buffer so the distance haze never touches it, and
+ * without this a cloud on the skyline is drawn with the same body and contrast
+ * as one overhead - the layer reads as a flat texture rather than as a deck
+ * receding. Fading toward the sky already computed for that pixel is what the
+ * haze does to the far terrain, with the same colour, since the profile's
+ * horizon is both.
+ *
+ * It also stands in for a mip chain: the field is sampled with none (see
+ * `clouds.ts`), and the horizon is where a cell is thinnest on screen, which
+ * is exactly where this leaves the least contrast to alias.
  */
-const CLOUD_FAR = 700;
+const CLOUD_AERIAL_START = 150;
+const CLOUD_AERIAL_SCALE = 450;
+const CLOUD_AERIAL_MAX = 0.92;
 
 type Dome = {
   scene: Scene;
@@ -268,6 +292,7 @@ function registerDomeShader(): void {
 ${cloudFieldGlsl()}
 
   const int CLOUD_LIGHT_STEPS = ${CLOUD_LIGHT_STEPS};
+  const float CLOUD_R = ${CLOUD_PLANET_RADIUS.toFixed(1)};
 
   /**
    * A cloud's shape is read **once**, where the ray meets the middle of the
@@ -284,19 +309,21 @@ ${cloudFieldGlsl()}
    * turned to the sun comes out bright, a deep interior dark, and the edges
    * stay thin.
    *
-   * Sky pixels only, and nothing at or below the horizon, where the plane
-   * intersection runs away.
+   * Sky pixels only.
    */
   vec4 muCloudSlab(vec3 rd, vec3 sunLit, vec3 base) {
     if (muCloudA.z <= 0.01) return vec4(0.0);
 
-    // A ray at the horizon meets the deck at infinity, which smears one noise
-    // texel across the whole skyline. The rise is floored and the reach
-    // capped, so the layer ends at a distance and the fade below carries it
-    // into the horizon instead.
-    float up = max(rd.y, 0.06);
+    // Where the ray leaves a shell of radius CLOUD_R + h, the eye standing at
+    // CLOUD_R + cameraPosition.y. Written as k / (b + sqrt(b * b + k)) and not
+    // as -b + sqrt(b * b + k): same root, but the second subtracts two numbers
+    // around 6000 to arrive at a distance of 95 and spends the mantissa doing
+    // it.
     float h = muCloudB.z + muCloudB.w * 0.5;
-    float t = min((h - cameraPosition.y) / up, ${CLOUD_FAR.toFixed(1)});
+    float rise = max(h - cameraPosition.y, 1.0);
+    float k = rise * (2.0 * CLOUD_R + h + cameraPosition.y);
+    float b = (CLOUD_R + cameraPosition.y) * rd.y;
+    float t = k / (b + sqrt(b * b + k));
     vec2 p = cameraPosition.xz + rd.xz * t;
 
     float d = muCloudCover(p);
@@ -319,12 +346,15 @@ ${cloudFieldGlsl()}
 
     float alpha = 1.0 - exp(-${CLOUD_DENSITY.toFixed(2)} * d);
 
-    // The deck ends well above the horizon. A ray approaching level meets the
-    // cloud plane further and further out, so a single screen column spans an
-    // enormous stretch of the field: the last few degrees of sky smeared one
-    // cloud into the vertical bars that stood over every skyline. Nothing is
-    // drawn there now, which is also where a real sky has its haze.
-    return vec4(body, alpha * smoothstep(${CLOUD_HORIZON_FADE[0].toFixed(3)}, ${CLOUD_HORIZON_FADE[1].toFixed(3)}, rd.y));
+    // The dome is outside the G-buffer, so the distance haze never reaches it
+    // and the deck has to take its own. Fading a far cloud into the sky drawn
+    // behind it is what the haze does to the terrain below it, in the same
+    // colour: the profile's horizon is both.
+    float aerial = 1.0 - exp(
+      -max(t - ${CLOUD_AERIAL_START.toFixed(1)}, 0.0) / ${CLOUD_AERIAL_SCALE.toFixed(1)}
+    );
+
+    return vec4(mix(body, base, aerial * ${CLOUD_AERIAL_MAX.toFixed(2)}), alpha);
   }
 
   void main(void) {
