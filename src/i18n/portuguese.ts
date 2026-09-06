@@ -1378,5 +1378,11 @@ export const portugueseLayer: LanguageLayer = {
     'options.lockWindows': 'Travar janelas',
     'options.resetWindows': 'Redefinir',
     'options.section.interface': 'Interface',
+    'options.stateWarnings': 'Avisos',
+    'warn.durability': 'Durabilidade do equipamento em {percent}%',
+    'warn.inventoryFull': 'O inventário está cheio',
+    'warn.noPotions': 'Sem poções de vida',
+    'warn.buffEnding': '{name} está prestes a acabar',
+    'trade.offerChanged': 'O outro lado mudou a oferta',
   },
 };

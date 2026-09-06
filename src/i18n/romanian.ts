@@ -1373,5 +1373,11 @@ export const romanianLayer: LanguageLayer = {
     'options.lockWindows': 'Blochează ferestrele',
     'options.resetWindows': 'Resetează',
     'options.section.interface': 'Interfață',
+    'options.stateWarnings': 'Avertismente',
+    'warn.durability': 'Durabilitatea echipamentului la {percent}%',
+    'warn.inventoryFull': 'Inventarul este plin',
+    'warn.noPotions': 'Nu mai sunt poțiuni de viață',
+    'warn.buffEnding': '{name} este pe cale să se termine',
+    'trade.offerChanged': 'Cealaltă parte a schimbat oferta',
   },
 };

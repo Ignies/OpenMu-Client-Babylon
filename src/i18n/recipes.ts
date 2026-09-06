@@ -195,6 +195,7 @@ export const EN_TEXT = {
   'options.uiScale': 'Interface size',
   'options.lockWindows': 'Lock windows',
   'options.resetWindows': 'Reset windows',
+  'options.stateWarnings': 'Warning notices',
   'options.volume': 'Volume',
   'options.effectLevel': '+Effect limitation',
   'options.shadows': 'Object shadows',
@@ -243,6 +244,11 @@ export const EN_TEXT = {
   'options.itemEffects.both': 'Both',
   'options.itemEffects.improved': 'Improved',
 
+  'warn.durability': 'Equipment durability at {percent}%',
+  'warn.inventoryFull': 'The inventory is full',
+  'warn.noPotions': 'No healing potions left',
+  'warn.buffEnding': '{name} is about to end',
+  'trade.offerChanged': 'The other side changed the offer',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
   'keys.emoteMenu': 'Emote menu',

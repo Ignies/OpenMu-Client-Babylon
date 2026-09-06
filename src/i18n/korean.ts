@@ -1334,5 +1334,11 @@ export const koreanLayer: LanguageLayer = {
     'options.lockWindows': '창 고정',
     'options.resetWindows': '초기화',
     'options.section.interface': '인터페이스',
+    'options.stateWarnings': '경고 알림',
+    'warn.durability': '장비 내구도 {percent}%',
+    'warn.inventoryFull': '인벤토리가 가득 찼습니다',
+    'warn.noPotions': '회복 물약이 없습니다',
+    'warn.buffEnding': '{name}이(가) 곧 끝납니다',
+    'trade.offerChanged': '상대가 거래 내용을 바꿨습니다',
   },
 };

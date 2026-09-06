@@ -1386,5 +1386,11 @@ export const germanLayer: LanguageLayer = {
     'options.lockWindows': 'Fenster sperren',
     'options.resetWindows': 'Zurücksetzen',
     'options.section.interface': 'Oberfläche',
+    'options.stateWarnings': 'Warnhinweise',
+    'warn.durability': 'Haltbarkeit der Ausrüstung bei {percent}%',
+    'warn.inventoryFull': 'Das Inventar ist voll',
+    'warn.noPotions': 'Keine Heiltränke mehr',
+    'warn.buffEnding': '{name} läuft gleich ab',
+    'trade.offerChanged': 'Die Gegenseite hat das Angebot geändert',
   },
 };

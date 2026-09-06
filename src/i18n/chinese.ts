@@ -1328,5 +1328,11 @@ export const chineseLayer: LanguageLayer = {
     'options.lockWindows': '锁定窗口',
     'options.resetWindows': '重置布局',
     'options.section.interface': '界面',
+    'options.stateWarnings': '警告提示',
+    'warn.durability': '装备耐久度剩余 {percent}%',
+    'warn.inventoryFull': '背包已满',
+    'warn.noPotions': '没有治疗药水了',
+    'warn.buffEnding': '{name} 即将结束',
+    'trade.offerChanged': '对方修改了交易内容',
   },
 };

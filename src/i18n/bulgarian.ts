@@ -1366,5 +1366,11 @@ export const bulgarianLayer: LanguageLayer = {
     'options.lockWindows': 'Заключи прозорците',
     'options.resetWindows': 'Нулирай',
     'options.section.interface': 'Интерфейс',
+    'options.stateWarnings': 'Предупреждения',
+    'warn.durability': 'Издръжливост на екипировката: {percent}%',
+    'warn.inventoryFull': 'Инвентарът е пълен',
+    'warn.noPotions': 'Няма лечебни отвари',
+    'warn.buffEnding': '{name} скоро свършва',
+    'trade.offerChanged': 'Другата страна промени предложението',
   },
 };

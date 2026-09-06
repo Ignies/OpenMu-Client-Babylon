@@ -1360,5 +1360,11 @@ export const russianLayer: LanguageLayer = {
     'options.lockWindows': 'Закрепить окна',
     'options.resetWindows': 'Сбросить',
     'options.section.interface': 'Интерфейс',
+    'options.stateWarnings': 'Предупреждения',
+    'warn.durability': 'Прочность экипировки: {percent}%',
+    'warn.inventoryFull': 'Инвентарь заполнен',
+    'warn.noPotions': 'Лечебные зелья закончились',
+    'warn.buffEnding': '{name} скоро закончится',
+    'trade.offerChanged': 'Другая сторона изменила предложение',
   },
 };

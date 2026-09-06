@@ -1380,5 +1380,11 @@ export const italianLayer: LanguageLayer = {
     'options.lockWindows': 'Blocca finestre',
     'options.resetWindows': 'Reimposta',
     'options.section.interface': 'Interfaccia',
+    'options.stateWarnings': 'Avvisi',
+    'warn.durability': 'Durabilità dell’equipaggiamento al {percent}%',
+    'warn.inventoryFull': 'L’inventario è pieno',
+    'warn.noPotions': 'Non ci sono più pozioni curative',
+    'warn.buffEnding': '{name} sta per finire',
+    'trade.offerChanged': 'L’altra parte ha cambiato l’offerta',
   },
 };

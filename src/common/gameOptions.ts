@@ -115,6 +115,8 @@ export type GameOptions = {
   uiScale: number;
   /** Windows stay where they are: a drag raises them but does not move them. */
   lockWindows: boolean;
+  /** Durability, full grid, last potion and buff ending notices. */
+  stateWarnings: boolean;
 };
 
 export const GRADE_NOMINAL = 5;
@@ -195,6 +197,7 @@ const DEFAULTS: GameOptions = {
   lootZen: 0,
   uiScale: 3,
   lockWindows: false,
+  stateWarnings: true,
 };
 
 type Listener = (options: GameOptions) => void;

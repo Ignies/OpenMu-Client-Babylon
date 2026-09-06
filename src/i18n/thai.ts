@@ -1346,5 +1346,11 @@ export const thaiLayer: LanguageLayer = {
     'options.lockWindows': 'ล็อกหน้าต่าง',
     'options.resetWindows': 'รีเซ็ต',
     'options.section.interface': 'หน้าจอ',
+    'options.stateWarnings': 'ข้อความเตือน',
+    'warn.durability': 'ความทนทานของอุปกรณ์ {percent}%',
+    'warn.inventoryFull': 'กระเป๋าเต็ม',
+    'warn.noPotions': 'ไม่มียาฟื้นพลังชีวิตแล้ว',
+    'warn.buffEnding': '{name} กำลังจะหมด',
+    'trade.offerChanged': 'อีกฝ่ายเปลี่ยนข้อเสนอ',
   },
 };
