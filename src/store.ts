@@ -955,6 +955,9 @@ export const Store = new (class _Store {
   /** The Move command (warp list) window, M (`INTERFACE_MOVEMAP`). */
   warpWindowEnabled = false;
 
+  /** The session panel (exp / kills / zen per hour); this client's own. */
+  sessionStatsEnabled = false;
+
   sceneLoading = false;
 
   loadingProgress = 0;
@@ -1068,6 +1071,7 @@ export const Store = new (class _Store {
       emoteMenuEnabled: observable,
       minimapEnabled: observable,
       warpWindowEnabled: observable,
+      sessionStatsEnabled: observable,
       sceneLoading: observable,
       loadingProgress: observable,
       spritesLoading: observable,
