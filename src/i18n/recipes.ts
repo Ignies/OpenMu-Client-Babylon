@@ -192,6 +192,7 @@ export const EN_TEXT = {
   'options.lootHighLevel': 'Level +7 and up',
   'options.lootOther': 'Everything else',
   'options.lootZen': 'Zen from',
+  'options.chatTimestamps': 'Chat timestamps',
   'options.uiScale': 'Interface size',
   'options.lockWindows': 'Lock windows',
   'options.resetWindows': 'Reset windows',
@@ -251,6 +252,7 @@ export const EN_TEXT = {
   'trade.offerChanged': 'The other side changed the offer',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
+  'keys.replyWhisper': 'Reply to whisper',
   'keys.emoteMenu': 'Emote menu',
   'keys.inventory': 'Inventory',
   'keys.characterInfo': 'Character',

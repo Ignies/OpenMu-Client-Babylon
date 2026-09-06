@@ -108,6 +108,8 @@ export type GameOptions = {
   lootOther: boolean;
   /** Index into `LOOT_ZEN_STEPS`: the smallest zen pile that keeps its name. */
   lootZen: number;
+  /** A "14:03" column in front of every chat log line. */
+  chatTimestamps: boolean;
   /**
    * Index into `UI_SCALE_STEPS`: how big every window is drawn, on top of
    * the size it was dragged to. 4K screens want more than a 640x480 stage.
@@ -195,6 +197,7 @@ const DEFAULTS: GameOptions = {
   lootHighLevel: true,
   lootOther: false,
   lootZen: 0,
+  chatTimestamps: false,
   uiScale: 3,
   lockWindows: false,
   stateWarnings: true,

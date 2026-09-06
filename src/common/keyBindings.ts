@@ -25,7 +25,8 @@ export type KeyAction =
   | 'masterSkills'
   | 'skillList'
   | 'muHelper'
-  | 'muHelperConfig';
+  | 'muHelperConfig'
+  | 'replyWhisper';
 
 export type KeyBindings = Record<KeyAction, string>;
 
@@ -47,6 +48,7 @@ export const KEY_ACTION_LABEL_KEYS: Record<KeyAction, TextKey> = {
   skillList: 'keys.skillList',
   muHelper: 'keys.muHelper',
   muHelperConfig: 'keys.muHelperConfig',
+  replyWhisper: 'keys.replyWhisper',
 };
 
 export const KEY_ACTIONS = Object.keys(KEY_ACTION_LABEL_KEYS) as KeyAction[];
@@ -73,6 +75,8 @@ const DEFAULTS: KeyBindings = {
   // The original opens the config from the position panel's button; a key
   // stands in for the panel here.
   muHelperConfig: 'End',
+  // No original analog: the arrange run is this client's own.
+  replyWhisper: 'KeyY',
 };
 
 /** Keys that cannot be bound: they already mean something else. */

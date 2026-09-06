@@ -1377,6 +1377,8 @@ export const frenchLayer: LanguageLayer = {
     'options.lootHighLevel': 'Niveau +7 et plus',
     'options.lootOther': 'Tout le reste',
     'options.lootZen': 'Zen à partir de',
+    'options.chatTimestamps': 'Horodatage du chat',
+    'keys.replyWhisper': 'Répondre au chuchotement',
     'options.uiScale': 'Taille',
     'options.lockWindows': 'Verrouiller les fenêtres',
     'options.resetWindows': 'Réinitialiser',

@@ -1379,6 +1379,8 @@ export const spanishLayer: LanguageLayer = {
     'options.lootHighLevel': 'Nivel +7 o más',
     'options.lootOther': 'Todo lo demás',
     'options.lootZen': 'Zen desde',
+    'options.chatTimestamps': 'Hora en el chat',
+    'keys.replyWhisper': 'Responder al susurro',
     'options.uiScale': 'Tamaño',
     'options.lockWindows': 'Bloquear ventanas',
     'options.resetWindows': 'Restablecer',

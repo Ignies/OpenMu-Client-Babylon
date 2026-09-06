@@ -1330,6 +1330,8 @@ export const koreanLayer: LanguageLayer = {
     'options.lootHighLevel': '+7 이상',
     'options.lootOther': '그 외 전부',
     'options.lootZen': 'Zen 이상',
+    'options.chatTimestamps': '채팅 시각 표시',
+    'keys.replyWhisper': '귓속말 답장',
     'options.uiScale': '크기',
     'options.lockWindows': '창 고정',
     'options.resetWindows': '초기화',

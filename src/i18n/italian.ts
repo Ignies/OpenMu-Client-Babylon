@@ -1376,6 +1376,8 @@ export const italianLayer: LanguageLayer = {
     'options.lootHighLevel': 'Livello +7 e oltre',
     'options.lootOther': 'Tutto il resto',
     'options.lootZen': 'Zen da',
+    'options.chatTimestamps': 'Orario nella chat',
+    'keys.replyWhisper': 'Rispondi al sussurro',
     'options.uiScale': 'Dimensione',
     'options.lockWindows': 'Blocca finestre',
     'options.resetWindows': 'Reimposta',
