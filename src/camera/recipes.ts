@@ -68,6 +68,14 @@ export const CAMERA_PITCH_DEG = 48.5;
 export const CAMERA_FOV_DEG = 30;
 
 /**
+ * Range the FOV slider offers around the original 30. The slider moves the
+ * third-person frustum only - the eye keeps `FIRST_PERSON_FOV_DEG`, which is
+ * chosen for a face at arm's length rather than for taste.
+ */
+export const CAMERA_FOV_MIN_DEG = 20;
+export const CAMERA_FOV_MAX_DEG = 60;
+
+/**
  * First-person frustum. 30 degrees is a telephoto lens on a face; the
  * original itself opens to 65 for its tour camera (`SetCameraFOV`).
  */
@@ -117,11 +125,16 @@ export const HEIGHT_BACKOFF = 150;
 export const CLOSE_BAND_MU = PORTED_DISTANCES[0];
 
 /**
- * Hero eye height above the entity's ground position, original units. The
- * player model's local bounding box tops out at 1.2 tiles
- * (`playerObject.ts` constructor).
+ * Hero eye height above the entity's ground position, original units.
+ *
+ * Measured off the rig, not off `playerObject.ts`: that constructor's
+ * `BoundingBoxLocal` is a hand-drawn picking box that stops at 1.2 tiles,
+ * which is the hero's chest, and aiming the eye there put the camera in
+ * their ribcage. The skeleton's own head bone (`Bip01 Head`, bone 20 - the
+ * one headTrackingSystem drives) stands at 1.61 tiles in the male idle and
+ * 1.59 in the female one, dropping to about 1.52 in the weapon stances.
  */
-export const EYE_HEIGHT_MU = 115;
+export const EYE_HEIGHT_MU = 160;
 
 /**
  * Below this the camera is behind the hero's eyes rather than behind their
