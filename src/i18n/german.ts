@@ -75,6 +75,18 @@ export const germanLayer: LanguageLayer = {
     'login.createAccount': 'Registrieren',
     'login.rememberMe': 'Angemeldet bleiben?',
 
+    'register.id': 'ID',
+    'register.password': 'Passwort',
+    'register.confirm': 'Bestätigen',
+    'register.fillEveryField': 'Bitte fülle alle Felder aus.',
+    'register.idTooShort': 'Die ID muss mindestens {min} Zeichen haben.',
+    'register.idChars': 'Die ID darf nur Buchstaben und Zahlen enthalten.',
+    'register.passwordTooShort': 'Das Passwort muss mindestens {min} Zeichen haben.',
+    'register.mismatch': 'Die Passwörter stimmen nicht überein.',
+    'register.unreachable': 'Server nicht erreichbar.',
+    'register.failed': 'Registrierung fehlgeschlagen ({status}).',
+    'register.created': 'Konto erstellt. Du kannst dich jetzt anmelden.',
+
     'characters.loading': 'Charaktere werden geladen...',
     'characters.select': 'Wähle einen Charakter',
     'characters.create.minLength': 'Gib mehr als 4 Buchstaben ein',

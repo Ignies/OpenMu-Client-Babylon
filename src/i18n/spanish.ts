@@ -85,6 +85,18 @@ export const spanishLayer: LanguageLayer = {
     'login.createAccount': 'Crear cuenta',
     'login.rememberMe': '¿Recordarme?',
 
+    'register.id': 'ID',
+    'register.password': 'Contraseña',
+    'register.confirm': 'Confirmar',
+    'register.fillEveryField': 'Rellena todos los campos.',
+    'register.idTooShort': 'El ID debe tener al menos {min} caracteres.',
+    'register.idChars': 'El ID solo puede tener letras y números.',
+    'register.passwordTooShort': 'La contraseña debe tener al menos {min} caracteres.',
+    'register.mismatch': 'Las contraseñas no coinciden.',
+    'register.unreachable': 'No se pudo contactar con el servidor.',
+    'register.failed': 'No se pudo crear la cuenta ({status}).',
+    'register.created': 'Cuenta creada. Ya puedes iniciar sesión.',
+
     'characters.loading': 'Cargando personajes...',
     'characters.select': 'Elige un personaje',
     'characters.create.minLength': 'Escribe más de 4 letras',

@@ -79,6 +79,18 @@ export const japaneseLayer: LanguageLayer = {
     'login.createAccount': 'アカウント作成',
     'login.rememberMe': 'ログイン情報を保存しますか？',
 
+    'register.id': 'ID',
+    'register.password': 'パスワード',
+    'register.confirm': '確認',
+    'register.fillEveryField': 'すべての項目を入力してください。',
+    'register.idTooShort': 'IDは{min}文字以上にしてください。',
+    'register.idChars': 'IDに使えるのは英数字だけです。',
+    'register.passwordTooShort': 'パスワードは{min}文字以上にしてください。',
+    'register.mismatch': 'パスワードが一致しません。',
+    'register.unreachable': 'サーバーに接続できませんでした。',
+    'register.failed': '登録に失敗しました（{status}）。',
+    'register.created': 'アカウントを作成しました。ログインできます。',
+
     'characters.loading': 'キャラクターを読み込んでいます...',
     'characters.select': 'キャラクターを選んでください',
     'characters.create.minLength': '5 文字以上で入力してください',

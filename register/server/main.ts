@@ -13,7 +13,9 @@ import { BurstLimit, bucketFor, clientIp } from '../../src/common/rateLimit';
  * that table (see `docs` in README for the `\d` output it was written from).
  *
  * Listens on loopback only. Caddy publishes it under `/api` on the register
- * host, which keeps it same-origin with the form and means no CORS.
+ * host, which keeps it same-origin with the standalone page. The client's own
+ * register window is not same-origin - it is served from `play.<domain>` -
+ * which is what `CORS_ORIGIN` is for.
  */
 
 const PORT = Number(process.env.PORT || 3100);
@@ -56,6 +58,22 @@ const MIN_PASSWORD_LENGTH = 4;
 const MAX_PASSWORD_LENGTH = 10;
 
 const USERNAME_RE = /^[A-Za-z0-9]+$/;
+
+/**
+ * Origins allowed to post a signup from a browser, comma separated, matched
+ * exactly. As the cash shop's, and for the same reason: the standalone page is
+ * same-origin and needs none of this, but the client's login window is served
+ * from the world's play host and is not.
+ *
+ * Exact origins only, never `*`: this endpoint writes accounts, and a wildcard
+ * is an open invitation for any page anywhere to drive it.
+ */
+const ALLOWED_ORIGINS = new Set(
+  (process.env.CORS_ORIGIN ?? '')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean)
+);
 
 const sql = postgres(DATABASE_URL);
 
@@ -189,10 +207,31 @@ async function createAccount(
   return null;
 }
 
-function json(body: unknown, status = 200): Response {
+/** The CORS headers for this caller, or nothing when it is same-origin. */
+function corsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('origin');
+
+  if (!origin || !ALLOWED_ORIGINS.has(origin)) return {};
+
+  return {
+    'Access-Control-Allow-Origin': origin,
+    // The answer differs by origin, so a shared cache must not reuse one for
+    // another.
+    Vary: 'Origin',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
+function json(
+  body: unknown,
+  status = 200,
+  extra: Record<string, string> = {}
+): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...extra },
   });
 }
 
@@ -201,9 +240,22 @@ Bun.serve({
   hostname: HOSTNAME,
   async fetch(req, server) {
     const url = new URL(req.url);
+    const cors = corsHeaders(req);
 
-    if (url.pathname !== '/api/register') return json({ error: 'Not found' }, 404);
-    if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
+    if (url.pathname !== '/api/register') {
+      return json({ error: 'Not found' }, 404, cors);
+    }
+
+    // The preflight a browser sends before a cross-origin POST. An origin that
+    // is not on the list is refused here rather than after the work.
+    if (req.method === 'OPTIONS') {
+      const allowed = cors['Access-Control-Allow-Origin'] !== undefined;
+      return new Response(null, { status: allowed ? 204 : 403, headers: cors });
+    }
+
+    if (req.method !== 'POST') {
+      return json({ error: 'Method not allowed' }, 405, cors);
+    }
 
     // Caddy is in front, so the socket address is always loopback — the real
     // client is in the forwarded header, which `clientIp` believes for exactly
@@ -212,7 +264,7 @@ Bun.serve({
     const bucket = bucketFor(ip);
 
     if (bursts.hammering(bucket)) {
-      return json({ error: 'Too many requests. Please slow down.' }, 429);
+      return json({ error: 'Too many requests. Please slow down.' }, 429, cors);
     }
 
     // Checked before the work, so a spent quota costs a lookup rather than a
@@ -220,7 +272,8 @@ Bun.serve({
     if (quotaSpent(bucket)) {
       return json(
         { error: 'An account has already been created from this network today.' },
-        429
+        429,
+        cors
       );
     }
 
@@ -229,12 +282,12 @@ Bun.serve({
     try {
       body = await req.json();
     } catch {
-      return json({ error: 'Malformed request.' }, 400);
+      return json({ error: 'Malformed request.' }, 400, cors);
     }
 
     const problem = validate(body);
 
-    if (problem) return json({ error: problem }, 400);
+    if (problem) return json({ error: problem }, 400, cors);
 
     try {
       const rejection = await createAccount(
@@ -242,18 +295,26 @@ Bun.serve({
         body.password as string
       );
 
-      if (rejection) return json({ error: rejection }, 409);
+      if (rejection) return json({ error: rejection }, 409, cors);
 
       recordSignup(bucket);
       console.log(`registered ${body.username} from ${ip}`);
-      return json({ ok: true });
+      return json({ ok: true }, 200, cors);
     } catch (err) {
       // Never surface the database error itself: it would leak the schema, and
       // the player can do nothing with it either way.
       console.error('registration failed:', err);
-      return json({ error: 'Registration failed. Please try again.' }, 500);
+      return json({ error: 'Registration failed. Please try again.' }, 500, cors);
     }
   },
 });
 
 console.log(`register api listening on ${HOSTNAME}:${PORT}`);
+// As the cash shop's boot lines: the client's register window is refused
+// without this, and the only sign of it is a CORS error in the player's
+// console, which nobody is looking at.
+console.info(
+  `  cors            ${
+    ALLOWED_ORIGINS.size ? [...ALLOWED_ORIGINS].join(', ') : 'same-origin only'
+  }`
+);

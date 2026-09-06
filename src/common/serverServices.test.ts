@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { parseServerLine } from './serverList';
-import { registerUrl, shopApiUrl } from './serverServices';
+import { registerApiUrl, registerUrl, shopApiUrl } from './serverServices';
 import type { ServerProfile } from './serverConfig';
 
 const world = (line: string): ServerProfile => {
@@ -23,6 +23,27 @@ describe('registerUrl', () => {
   // player registering for one world to somebody else's.
   it('has nowhere to send a world that published only an address', () => {
     expect(registerUrl(addressed)).toBe('');
+  });
+});
+
+describe('registerApiUrl', () => {
+  // The fallback is a build-time variable, so a developer's own `.env` would
+  // otherwise decide what this test proves.
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("posts to a domain world's own register service", () => {
+    vi.stubEnv('VITE_REGISTER_API', 'https://somewhere.example/api/register');
+    expect(registerApiUrl(listed)).toBe('https://register.ignies.net/api/register');
+  });
+
+  it('has nowhere to post for a world that published only an address', () => {
+    vi.stubEnv('VITE_REGISTER_API', '');
+    expect(registerApiUrl(addressed)).toBe('');
+  });
+
+  it('falls back to the build for a world with no domain', () => {
+    vi.stubEnv('VITE_REGISTER_API', '/api/register');
+    expect(registerApiUrl(addressed)).toBe('/api/register');
   });
 });
 

@@ -76,6 +76,18 @@ export const russianLayer: LanguageLayer = {
     'login.createAccount': 'Регистрация',
     'login.rememberMe': 'Запомнить меня?',
 
+    'register.id': 'ID',
+    'register.password': 'Пароль',
+    'register.confirm': 'Повтор',
+    'register.fillEveryField': 'Заполните все поля.',
+    'register.idTooShort': 'ID должен быть не короче {min} символов.',
+    'register.idChars': 'ID может содержать только буквы и цифры.',
+    'register.passwordTooShort': 'Пароль должен быть не короче {min} символов.',
+    'register.mismatch': 'Пароли не совпадают.',
+    'register.unreachable': 'Не удалось связаться с сервером.',
+    'register.failed': 'Не удалось создать аккаунт ({status}).',
+    'register.created': 'Аккаунт создан. Теперь можно войти.',
+
     'characters.loading': 'Загрузка персонажей...',
     'characters.select': 'Выберите персонажа',
     'characters.create.minLength': 'Введите больше 4 букв',
