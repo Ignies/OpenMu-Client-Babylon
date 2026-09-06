@@ -1392,6 +1392,7 @@ export const frenchLayer: LanguageLayer = {
     'options.lootHighLevel': 'Niveau +7 et plus',
     'options.lootOther': 'Tout le reste',
     'options.lootZen': 'Zen à partir de',
+    'options.firstPersonBob': 'Balancement de la tête en vue subjective',
     'options.chatTimestamps': 'Horodatage du chat',
     'keys.replyWhisper': 'Répondre au chuchotement',
     'options.uiScale': 'Taille',

@@ -119,6 +119,12 @@ export type GameOptions = {
    */
   thirdPersonMouseLook: boolean;
   /**
+   * Let the eye rise and fall with the hero's stride in first person. Off is a
+   * camera that slides along at a fixed height; nothing outside the innermost
+   * zoom step reads it.
+   */
+  firstPersonBob: boolean;
+  /**
    * Run the latched ALT drop names through `lootFilter.ts` instead of naming
    * every pile on the ground. ALT held still shows all of them.
    */
@@ -220,6 +226,7 @@ const DEFAULTS: GameOptions = {
   cameraFov: CAMERA_FOV_DEG,
   wsadMovement: false,
   thirdPersonMouseLook: false,
+  firstPersonBob: true,
   autoReconnect: true,
   lootFilter: false,
   lootJewels: true,

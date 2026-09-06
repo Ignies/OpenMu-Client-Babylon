@@ -1345,6 +1345,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.lootHighLevel': '+7 以上',
     'options.lootOther': 'その他すべて',
     'options.lootZen': 'Zen 以上',
+    'options.firstPersonBob': '一人称視点の頭の揺れ',
     'options.chatTimestamps': 'チャットの時刻',
     'keys.replyWhisper': 'ささやきに返信',
     'options.uiScale': '大きさ',

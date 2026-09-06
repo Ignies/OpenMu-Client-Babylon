@@ -253,6 +253,7 @@ const TABS: Tab[] = [
               labelKey: 'options.thirdPersonMouseLook',
               needsWsadMovement: true,
             },
+            check('firstPersonBob', -1, 'options.firstPersonBob'),
             check('chatTimestamps', -1, 'options.chatTimestamps'),
             check('stateWarnings', -1, 'options.stateWarnings'),
           ],

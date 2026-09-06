@@ -183,5 +183,32 @@ export const FIRST_PERSON_NEAR_MU = 50;
  */
 export const MIN_RADIUS_MU = 2;
 
+/**
+ * First-person head bob: how far the eye rises and falls, and how far the hero
+ * covers between footfalls, in original units.
+ *
+ * The phase rides the distance walked rather than the clock, so it holds to
+ * the stride at any speed, stops dead when the hero does and cannot drift on a
+ * stutter. 70 units is about two thirds of a tile, which is a step at the
+ * scale a 160-unit eye implies. The rise is deliberately small: what sells the
+ * eye is not the movement, it is that the camera stops being a fixed point in
+ * space.
+ */
+export const BOB_RISE_MU = 3;
+export const BOB_STRIDE_MU = 70;
+
+/** Under this, in tiles a second, the hero counts as standing. */
+export const BOB_WALK_MIN = 0.35;
+
+/** How fast the bob comes and goes at the ends of a walk, per second. */
+export const BOB_EASE = 6;
+
+/**
+ * A step no hero takes: a warp, a teleport or a server correction moves the
+ * target this far in one frame, and walking it into the phase would put the
+ * bob wherever the jump happened to land.
+ */
+export const BOB_JUMP_MU = 200;
+
 /** How often a hidden hero's mesh list is re-scanned for streamed-in parts. */
 export const HERO_RESCAN_SECONDS = 0.25;

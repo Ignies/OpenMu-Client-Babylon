@@ -1394,6 +1394,7 @@ export const spanishLayer: LanguageLayer = {
     'options.lootHighLevel': 'Nivel +7 o más',
     'options.lootOther': 'Todo lo demás',
     'options.lootZen': 'Zen desde',
+    'options.firstPersonBob': 'Balanceo de la cabeza en primera persona',
     'options.chatTimestamps': 'Hora en el chat',
     'keys.replyWhisper': 'Responder al susurro',
     'options.uiScale': 'Tamaño',
