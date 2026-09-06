@@ -1383,5 +1383,6 @@ export const germanLayer: LanguageLayer = {
     'options.lootOther': 'Alles andere',
     'options.lootZen': 'Zen ab',
     'trade.offerChanged': 'Die Gegenseite hat das Angebot geändert',
+    'keys.hideUi': 'Oberfläche ausblenden',
   },
 };

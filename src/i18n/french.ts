@@ -1378,5 +1378,6 @@ export const frenchLayer: LanguageLayer = {
     'options.lootOther': 'Tout le reste',
     'options.lootZen': 'Zen à partir de',
     'trade.offerChanged': 'L’autre côté a modifié l’offre',
+    'keys.hideUi': 'Masquer l’interface',
   },
 };

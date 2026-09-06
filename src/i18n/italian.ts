@@ -1377,5 +1377,6 @@ export const italianLayer: LanguageLayer = {
     'options.lootOther': 'Tutto il resto',
     'options.lootZen': 'Zen da',
     'trade.offerChanged': 'L’altra parte ha cambiato l’offerta',
+    'keys.hideUi': 'Nascondi interfaccia',
   },
 };

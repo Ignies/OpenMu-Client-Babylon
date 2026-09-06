@@ -1,6 +1,10 @@
 import './style.less';
 import { lazy, Suspense } from 'react';
 import { observer } from 'mobx-react-lite';
+import { runInAction } from 'mobx';
+import { Store } from '../../../store';
+import { isKey } from '../../../common/keyBindings';
+import { useEventBus } from '../../../hooks/useEventBus';
 import { WorldObjects } from '../../components/worldObjects';
 import { DamageNumbers } from '../../components/damageNumbers';
 import { TargetHealthBar } from '../../components/targetHealthBar';
@@ -107,11 +111,18 @@ const HUD = observer(() => {
 });
 
 export const WorldPage = observer(() => {
+  // The screenshot key: the whole HUD layer off, the world untouched.
+  useEventBus('keyPressed', key => {
+    if (isKey('hideUi', key)) {
+      runInAction(() => (Store.hudHidden = !Store.hudHidden));
+    }
+  });
+
   return (
     <div className="world-page">
       <WorldObjects />
       <DamageNumbers />
-      <HUD />
+      {!Store.hudHidden && <HUD />}
     </div>
   );
 });

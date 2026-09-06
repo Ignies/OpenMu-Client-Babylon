@@ -242,6 +242,7 @@ export const EN_TEXT = {
   'trade.offerChanged': 'The other side changed the offer',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
+  'keys.hideUi': 'Hide interface',
   'keys.emoteMenu': 'Emote menu',
   'keys.inventory': 'Inventory',
   'keys.characterInfo': 'Character',

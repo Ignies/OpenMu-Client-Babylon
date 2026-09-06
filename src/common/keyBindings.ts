@@ -25,7 +25,8 @@ export type KeyAction =
   | 'masterSkills'
   | 'skillList'
   | 'muHelper'
-  | 'muHelperConfig';
+  | 'muHelperConfig'
+  | 'hideUi';
 
 export type KeyBindings = Record<KeyAction, string>;
 
@@ -47,6 +48,7 @@ export const KEY_ACTION_LABEL_KEYS: Record<KeyAction, TextKey> = {
   skillList: 'keys.skillList',
   muHelper: 'keys.muHelper',
   muHelperConfig: 'keys.muHelperConfig',
+  hideUi: 'keys.hideUi',
 };
 
 export const KEY_ACTIONS = Object.keys(KEY_ACTION_LABEL_KEYS) as KeyAction[];
@@ -73,6 +75,8 @@ const DEFAULTS: KeyBindings = {
   // The original opens the config from the position panel's button; a key
   // stands in for the panel here.
   muHelperConfig: 'End',
+  // No original analog: the arrange run is this client's own.
+  hideUi: 'KeyH',
 };
 
 /** Keys that cannot be bound: they already mean something else. */
@@ -105,12 +109,33 @@ type Listener = (bindings: KeyBindings) => void;
 
 const listeners = new Set<Listener>();
 
+/**
+ * Whose bindings are live: a character name, or '' for the shared set every
+ * character starts from. A Summoner and a Blade Knight want different keys,
+ * and before this they fought over one file.
+ */
+let profile = '';
+
+function storageKeyOf(name: string): string {
+  return name ? `${KEYS_STORAGE_KEY}:${name}` : KEYS_STORAGE_KEY;
+}
+
+function readStored(name: string): Partial<KeyBindings> | null {
+  const stored = LocalStorage.load(storageKeyOf(name));
+  if (!stored) return null;
+  try {
+    return JSON.parse(stored) as Partial<KeyBindings>;
+  } catch {
+    return null;
+  }
+}
+
 function load(): KeyBindings {
-  const stored = LocalStorage.load(KEYS_STORAGE_KEY);
-  if (!stored) return { ...DEFAULTS };
+  // The character's own set if it has one, else the shared one.
+  const parsed = (profile ? readStored(profile) : null) ?? readStored('');
+  if (!parsed) return { ...DEFAULTS };
 
   try {
-    const parsed = JSON.parse(stored) as Partial<KeyBindings>;
     const loaded = { ...DEFAULTS };
     for (const action of KEY_ACTIONS) {
       const code = parsed[action];
@@ -128,8 +153,24 @@ function load(): KeyBindings {
 export const KeyBindings: KeyBindings = makeAutoObservable(load());
 
 function save(): void {
-  LocalStorage.save(KEYS_STORAGE_KEY, JSON.stringify(KeyBindings));
+  LocalStorage.save(storageKeyOf(profile), JSON.stringify(KeyBindings));
   for (const listener of listeners) listener(KeyBindings);
+}
+
+/**
+ * Switch to a character's own bindings (or back to the shared set with an
+ * empty name). Called when a character enters the world.
+ */
+export function setKeyProfile(name: string): void {
+  if (profile === name) return;
+  profile = name;
+  runInAction(() => Object.assign(KeyBindings, load()));
+  for (const listener of listeners) listener(KeyBindings);
+}
+
+/** The character whose bindings are live, '' for the shared set. */
+export function keyProfile(): string {
+  return profile;
 }
 
 /** The code bound to `action`. */
