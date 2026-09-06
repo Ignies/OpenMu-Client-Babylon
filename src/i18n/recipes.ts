@@ -198,6 +198,7 @@ export const EN_TEXT = {
   'options.whisperBeep': 'Beep sound for whispering',
   'options.slideHelp': 'Slide Help',
   'options.cameraControl': 'Camera control (Ctrl+wheel, Ins/Del)',
+  'options.cameraFov': 'Field of view',
   'options.autoReconnect': 'Reconnect automatically',
   'options.lootFilter': 'Filter drop names',
   'options.lootJewels': 'Jewels',
