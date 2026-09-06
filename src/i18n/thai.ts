@@ -1356,6 +1356,7 @@ export const thaiLayer: LanguageLayer = {
     'options.lootHighLevel': 'ระดับ +7 ขึ้นไป',
     'options.lootOther': 'ที่เหลือทั้งหมด',
     'options.lootZen': 'Zen ตั้งแต่',
+    'options.firstPersonBob': 'การโยกศีรษะในมุมมองบุคคลที่หนึ่ง',
     'options.chatTimestamps': 'เวลาในแชท',
     'keys.replyWhisper': 'ตอบกระซิบ',
     'options.uiScale': 'ขนาด',

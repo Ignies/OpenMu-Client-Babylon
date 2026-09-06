@@ -1376,6 +1376,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.lootHighLevel': 'Ниво +7 и нагоре',
     'options.lootOther': 'Всичко останало',
     'options.lootZen': 'Zen от',
+    'options.firstPersonBob': 'Поклащане на главата от първо лице',
     'options.chatTimestamps': 'Час в чата',
     'keys.replyWhisper': 'Отговор на шепот',
     'options.uiScale': 'Размер',

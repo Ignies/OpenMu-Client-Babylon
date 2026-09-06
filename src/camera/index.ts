@@ -15,7 +15,8 @@
  * the innermost one is first person, where the hero's body is hidden and,
  * with the `wsadMovement` option on, the mouse looks around under a pointer
  * lock (`mouseLook.ts`) - at every zoom level if `thirdPersonMouseLook` says
- * so.
+ * so. The eye rises and falls with the hero's stride there too, unless
+ * `firstPersonBob` is off.
  *
  * Single writer of alpha/beta/radius/fov, and of the target's Y lift, while
  * the option is on and the game is in the World state; `cameraFollowSystem`
@@ -37,6 +38,11 @@ import {
   releaseMouseLook,
 } from './mouseLook';
 import {
+  BOB_EASE,
+  BOB_JUMP_MU,
+  BOB_RISE_MU,
+  BOB_STRIDE_MU,
+  BOB_WALK_MIN,
   CAMERA_PITCH_DEG,
   CLOSE_BAND_MU,
   DEFAULT_CAMERA_LEVEL,
@@ -260,6 +266,58 @@ export function installCameraControl(
   });
 }
 
+/** Distance walked into the current stride, and how much bob is showing. */
+let bobWalkedMu = 0;
+let bobLevel = 0;
+let bobLastX = 0;
+let bobLastZ = 0;
+let bobSeeded = false;
+
+/**
+ * The eye's rise and fall over a stride, in original units. Zero outside the
+ * close band, with the option off, and while the hero is standing.
+ *
+ * `camera.target` is the hero's own position for the frame - the follow system
+ * copies it in before this runs and only the Y lift below is ours - so the
+ * walk is read from how far it moved rather than from movement state plumbed
+ * through from the controller. That also means it covers every way the hero
+ * travels, keys or click.
+ */
+function headBob(camera: ArcRotateCamera, close: number, dt: number): number {
+  if (!GameOptions.firstPersonBob || close <= 0) {
+    bobSeeded = false;
+    bobLevel = 0;
+    return 0;
+  }
+
+  const { x, z } = camera.target;
+
+  if (!bobSeeded) {
+    bobLastX = x;
+    bobLastZ = z;
+    bobSeeded = true;
+  }
+
+  const moved = Math.hypot(x - bobLastX, z - bobLastZ) * MU_SCALE;
+  const walked = moved < BOB_JUMP_MU ? moved : 0;
+
+  bobLastX = x;
+  bobLastZ = z;
+
+  const standing = dt <= 0 || walked / MU_SCALE / dt < BOB_WALK_MIN;
+
+  bobLevel += ((standing ? 0 : 1) - bobLevel) * Math.min(1, BOB_EASE * dt);
+
+  // Kept inside one stride: the phase is a distance that would otherwise grow
+  // for the length of the session, and a float that large has no room left for
+  // the centimetres this is made of.
+  bobWalkedMu = (bobWalkedMu + walked) % BOB_STRIDE_MU;
+
+  const phase = (bobWalkedMu / BOB_STRIDE_MU) * 2 * Math.PI;
+
+  return Math.sin(phase) * BOB_RISE_MU * bobLevel * close;
+}
+
 /**
  * Per-frame write, after the follow target is set. `pressedKeys` is the
  * keyboard system's already-filtered set (no text-field keys in it);
@@ -329,7 +387,7 @@ export function updateGameCamera(
   // rises from the hero's feet to their eyes, so the shot ends up looking
   // out of the head instead of down at it.
   vertical *= 1 - close;
-  camera.target.y += (EYE_HEIGHT_MU * close) / MU_SCALE;
+  camera.target.y += (EYE_HEIGHT_MU * close + headBob(camera, close, dt)) / MU_SCALE;
 
   // The drag pitch orbits the ported frame around the target: same radius,
   // tilt added to beta, so offset 0 is the original's camera exactly. At the

@@ -1384,6 +1384,7 @@ export const romanianLayer: LanguageLayer = {
     'options.lootHighLevel': 'Nivel +7 și peste',
     'options.lootOther': 'Restul',
     'options.lootZen': 'Zen de la',
+    'options.firstPersonBob': 'Legănarea capului la persoana întâi',
     'options.chatTimestamps': 'Ora în chat',
     'keys.replyWhisper': 'Răspunde la șoaptă',
     'options.uiScale': 'Mărime',

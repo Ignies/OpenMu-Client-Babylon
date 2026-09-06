@@ -1396,6 +1396,7 @@ export const germanLayer: LanguageLayer = {
     'options.lootHighLevel': 'Stufe +7 und höher',
     'options.lootOther': 'Alles andere',
     'options.lootZen': 'Zen ab',
+    'options.firstPersonBob': 'Kopfbewegung in der Egoperspektive',
     'options.chatTimestamps': 'Uhrzeit im Chat',
     'keys.replyWhisper': 'Auf Flüstern antworten',
     'options.uiScale': 'Größe',
