@@ -1336,6 +1336,7 @@ export const chineseLayer: LanguageLayer = {
     'warn.noPotions': '没有治疗药水了',
     'warn.buffEnding': '{name} 即将结束',
     'trade.offerChanged': '对方修改了交易内容',
+    'warp.favouriteHint': '右键收藏此地图并置顶',
     'search.placeholder': '查找...',
     'search.hint': '输入以淡化不匹配的物品，Esc 清除。',
     'vault.depositJewels': '宝石',

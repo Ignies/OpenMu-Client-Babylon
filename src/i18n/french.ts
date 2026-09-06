@@ -1389,6 +1389,7 @@ export const frenchLayer: LanguageLayer = {
     'warn.noPotions': 'Plus de potions de soin',
     'warn.buffEnding': '{name} va se terminer',
     'trade.offerChanged': 'L’autre côté a modifié l’offre',
+    'warp.favouriteHint': 'Clic droit pour épingler cette carte en haut',
     'search.placeholder': 'Rechercher...',
     'search.hint': 'Tapez pour estomper ce qui ne correspond pas. Échap efface.',
     'vault.depositJewels': 'Joyaux',

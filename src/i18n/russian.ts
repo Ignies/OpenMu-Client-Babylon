@@ -1368,6 +1368,7 @@ export const russianLayer: LanguageLayer = {
     'warn.noPotions': 'Лечебные зелья закончились',
     'warn.buffEnding': '{name} скоро закончится',
     'trade.offerChanged': 'Другая сторона изменила предложение',
+    'warp.favouriteHint': 'Правый клик закрепит карту вверху списка',
     'search.placeholder': 'Поиск...',
     'search.hint': 'Введите текст, чтобы приглушить несовпадающее. Esc очищает.',
     'vault.depositJewels': 'Камни',

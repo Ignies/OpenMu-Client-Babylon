@@ -1388,6 +1388,7 @@ export const italianLayer: LanguageLayer = {
     'warn.noPotions': 'Non ci sono più pozioni curative',
     'warn.buffEnding': '{name} sta per finire',
     'trade.offerChanged': 'L’altra parte ha cambiato l’offerta',
+    'warp.favouriteHint': 'Clic destro per fissare questa mappa in alto',
     'search.placeholder': 'Cerca...',
     'search.hint': 'Digita per sfumare ciò che non corrisponde. Esc cancella.',
     'vault.depositJewels': 'Gioielli',

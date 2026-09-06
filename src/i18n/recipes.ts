@@ -250,6 +250,7 @@ export const EN_TEXT = {
   'warn.noPotions': 'No healing potions left',
   'warn.buffEnding': '{name} is about to end',
   'trade.offerChanged': 'The other side changed the offer',
+  'warp.favouriteHint': 'Right click to star this map and keep it on top',
   // ---- find box ----------------------------------------------------------
   'search.placeholder': 'Find...',
   'search.hint': 'Type to fade everything that does not match. Esc clears.',
