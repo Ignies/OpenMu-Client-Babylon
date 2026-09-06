@@ -1333,5 +1333,6 @@ export const japaneseLayer: LanguageLayer = {
     'options.lootOther': 'その他すべて',
     'options.lootZen': 'Zen 以上',
     'trade.offerChanged': '相手が取引内容を変更しました',
+    'warp.favouriteHint': '右クリックでこのマップを上に固定',
   },
 };

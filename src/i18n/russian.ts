@@ -1357,5 +1357,6 @@ export const russianLayer: LanguageLayer = {
     'options.lootOther': 'Всё остальное',
     'options.lootZen': 'Zen от',
     'trade.offerChanged': 'Другая сторона изменила предложение',
+    'warp.favouriteHint': 'Правый клик закрепит карту вверху списка',
   },
 };

@@ -1325,5 +1325,6 @@ export const chineseLayer: LanguageLayer = {
     'options.lootOther': '其他全部',
     'options.lootZen': 'Zen 起',
     'trade.offerChanged': '对方修改了交易内容',
+    'warp.favouriteHint': '右键收藏此地图并置顶',
   },
 };

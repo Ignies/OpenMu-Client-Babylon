@@ -1343,5 +1343,6 @@ export const thaiLayer: LanguageLayer = {
     'options.lootOther': 'ที่เหลือทั้งหมด',
     'options.lootZen': 'Zen ตั้งแต่',
     'trade.offerChanged': 'อีกฝ่ายเปลี่ยนข้อเสนอ',
+    'warp.favouriteHint': 'คลิกขวาเพื่อปักหมุดแผนที่นี้ไว้ด้านบน',
   },
 };

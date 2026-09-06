@@ -1370,5 +1370,6 @@ export const romanianLayer: LanguageLayer = {
     'options.lootOther': 'Restul',
     'options.lootZen': 'Zen de la',
     'trade.offerChanged': 'Cealaltă parte a schimbat oferta',
+    'warp.favouriteHint': 'Clic dreapta pentru a fixa harta în capul listei',
   },
 };

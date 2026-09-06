@@ -240,6 +240,7 @@ export const EN_TEXT = {
   'options.itemEffects.improved': 'Improved',
 
   'trade.offerChanged': 'The other side changed the offer',
+  'warp.favouriteHint': 'Right click to star this map and keep it on top',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
   'keys.emoteMenu': 'Emote menu',
