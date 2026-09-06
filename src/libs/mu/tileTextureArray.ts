@@ -5,10 +5,7 @@ import {
   type Scene,
 } from '../babylon/exports';
 import { onGameOptionsChanged } from '../../common/gameOptions';
-import {
-  materialQuality,
-  pbrDetailStrength,
-} from '../../common/materialQuality';
+import { textureFiltering } from '../../common/materialQuality';
 
 /**
  * Packs a map's tile textures into one `sampler2DArray`.
@@ -22,60 +19,47 @@ import {
  * never-culled mesh collapse into two.
  *
  * Tiles come in mixed sizes (256² and 128² in the shipped worlds), so the
- * smaller ones are nearest-upscaled to the largest. An integer nearest
- * upscale is exact under nearest sampling — the same texel is fetched either
- * way — which is why the blit is nearest even on Enhanced.
- *
- * **Filtering is quality-gated** ('terrain tile seams'). Classic
- * samples `NEAREST_NEAREST` with no mip chain, which is what the original
- * does and what every mood was graded against. Enhanced turns on trilinear
- * plus anisotropy, which is a *visible deviation*: it kills the shimmer the
- * tile grid throws at grazing angles, and it costs the crisp per-texel look
- * up close.
+ * smaller ones are upscaled to the largest. The upscale follows the sampler:
+ * Classic samples `NEAREST_NEAREST` with no mip chain, which is what the
+ * original does, and an integer nearest upscale is exact under it - the same
+ * texel is fetched either way. Tiers >= 1 filter trilinear with anisotropy
+ * (`textureFiltering`), and there the upscale is bilinear: a nearest 2x
+ * upscale leaves 2x2 plateaus that the linear sampler ramps between, so a
+ * magnified 128² tile still read as soft-edged blocks.
  *
  * The mip chain is built either way. It is a third of the array's memory and
- * nothing samples it in Classic, but having it there is what lets the two
- * modes be a live `updateSamplingMode` call instead of a map reload.
+ * nothing samples it in Classic, but having it there is what lets the sampler
+ * flip be a live `updateSamplingMode` call. The blit flip is one `update` of
+ * the array from the decoded tiles kept beside it, not a map reload.
  *
  * Per-layer filtering is safe on a `sampler2DArray`: layers are independent
  * for filtering and mip generation, so no tile can bleed into its neighbour
  * in the array the way it would in an atlas.
  */
 
-/** Anisotropy on Enhanced; 1 (off) on Classic. Capped by the engine. */
-const ENHANCED_ANISOTROPY = 8;
-
-function tileFiltering(): { sampling: number; anisotropy: number } {
-  // Two gates, both of which have to open.
-  //
-  // The tier gate: mipping the ground is not a character, so the Characters
-  // tier leaves it alone.
-  //
-  // The detail gate: at this camera height a mip chain over a 128² MU tile
-  // averages the grain out of it, and an averaged tile is a lighter, flatter,
-  // lower-contrast tile. The ground is most of the screen, so this is the
-  // largest single "the texture itself went pale" in the whole Enhanced tier —
-  // larger than anything the derived maps do — and it belongs on the same dial
-  // as the rest of the deviation rather than being welded to the tier.
-  const strength = materialQuality() >= 2 ? pbrDetailStrength() : 0;
-
-  if (strength <= 0) return { sampling: Texture.NEAREST_NEAREST, anisotropy: 1 };
-
-  return {
-    sampling: Texture.TRILINEAR_SAMPLINGMODE,
-    anisotropy: Math.max(1, Math.round(strength * ENHANCED_ANISOTROPY)),
-  };
-}
+type LiveArray = {
+  texture: RawTexture2DArray;
+  tiles: TilePixels[];
+  size: number;
+  /** Whether the layers were packed with the bilinear upscale. */
+  linear: boolean;
+};
 
 /** Every live tile array, so a quality flip can re-resolve all of them. */
-const liveArrays = new Set<RawTexture2DArray>();
+const liveArrays = new Map<RawTexture2DArray, LiveArray>();
 
 function syncTileFiltering(): void {
-  const { sampling, anisotropy } = tileFiltering();
+  const { sampling, anisotropy } = textureFiltering();
+  const linear = sampling !== Texture.NEAREST_NEAREST;
 
-  for (const texture of liveArrays) {
-    texture.updateSamplingMode(sampling);
-    texture.anisotropicFilteringLevel = anisotropy;
+  for (const live of liveArrays.values()) {
+    live.texture.updateSamplingMode(sampling);
+    live.texture.anisotropicFilteringLevel = anisotropy;
+
+    if (live.linear !== linear) {
+      live.linear = linear;
+      live.texture.update(packLayers(live.tiles, live.size, linear));
+    }
   }
 }
 
@@ -103,19 +87,21 @@ type TilePixels = {
 async function decodeJpeg(bytes: Uint8Array): Promise<TilePixels> {
   const blob = new Blob([bytes], { type: 'image/jpeg' });
   const bitmap = await createImageBitmap(blob);
+  // A closed ImageBitmap reports 0 x 0, so the size is taken first.
+  const { width, height } = bitmap;
 
   const canvas = document.createElement('canvas');
-  canvas.width = bitmap.width;
-  canvas.height = bitmap.height;
+  canvas.width = width;
+  canvas.height = height;
 
   const context = canvas.getContext('2d', { willReadFrequently: true })!;
   context.drawImage(bitmap, 0, 0);
 
-  const image = context.getImageData(0, 0, bitmap.width, bitmap.height);
+  const image = context.getImageData(0, 0, width, height);
 
   bitmap.close();
 
-  return { data: image.data, width: bitmap.width, height: bitmap.height };
+  return { data: image.data, width, height };
 }
 
 /** Nearest-neighbour resample of RGBA into a `size × size` block of `out`. */
@@ -146,6 +132,61 @@ function blitNearest(
 }
 
 /**
+ * Bilinear resample of RGBA into a `size × size` block of `out`, sampling at
+ * texel centres and wrapping at the edges (the tiles repeat). A tile already
+ * at `size` copies through unchanged.
+ */
+function blitLinear(
+  tile: TilePixels,
+  out: Uint8Array,
+  layer: number,
+  size: number
+): void {
+  const base = layer * size * size * 4;
+  const { width, height, data } = tile;
+
+  for (let y = 0; y < size; y++) {
+    const sy = ((y + 0.5) * height) / size - 0.5;
+    const y0 = Math.floor(sy);
+    const fy = sy - y0;
+    const row0 = (((y0 % height) + height) % height) * width * 4;
+    const row1 = ((((y0 + 1) % height) + height) % height) * width * 4;
+    const targetRow = base + y * size * 4;
+
+    for (let x = 0; x < size; x++) {
+      const sx = ((x + 0.5) * width) / size - 0.5;
+      const x0 = Math.floor(sx);
+      const fx = sx - x0;
+      const c0 = (((x0 % width) + width) % width) * 4;
+      const c1 = ((((x0 + 1) % width) + width) % width) * 4;
+      const t = targetRow + x * 4;
+
+      for (let c = 0; c < 4; c++) {
+        const top = data[row0 + c0 + c] * (1 - fx) + data[row0 + c1 + c] * fx;
+        const bottom =
+          data[row1 + c0 + c] * (1 - fx) + data[row1 + c1 + c] * fx;
+        out[t + c] = Math.round(top * (1 - fy) + bottom * fy);
+      }
+    }
+  }
+}
+
+function packLayers(
+  tiles: readonly TilePixels[],
+  size: number,
+  linear: boolean
+): Uint8Array {
+  const data = new Uint8Array(size * size * 4 * tiles.length);
+  const blit = linear ? blitLinear : blitNearest;
+
+  for (let layer = 0; layer < tiles.length; layer++) {
+    blit(tiles[layer], data, layer, size);
+  }
+
+  return data;
+}
+
+/**
  * `scale` mirrors what `getTerrainData` computed per texture: a 256² tile
  * repeats every 64 terrain tiles, everything else every `size` of them. It
  * has to stay keyed on the tile's *own* size, not the array's, so upscaling
@@ -173,15 +214,15 @@ export async function createTileTextureArray(
   if (size === 0) return null;
 
   const layers = tiles.length;
-  const data = new Uint8Array(size * size * 4 * layers);
   const scales = new Float32Array(layers);
 
   for (let layer = 0; layer < layers; layer++) {
-    blitNearest(tiles[layer], data, layer, size);
     scales[layer] = uvScaleFor(tiles[layer].height);
   }
 
-  const { sampling, anisotropy } = tileFiltering();
+  const { sampling, anisotropy } = textureFiltering();
+  const linear = sampling !== Texture.NEAREST_NEAREST;
+  const data = packLayers(tiles, size, linear);
 
   const texture = new RawTexture2DArray(
     data,
@@ -204,9 +245,9 @@ export async function createTileTextureArray(
   texture.wrapV = Texture.WRAP_ADDRESSMODE;
   texture.anisotropicFilteringLevel = anisotropy;
 
-  // A map change disposes the old array; without this the set would pin it
+  // A map change disposes the old array; without this the map would pin it
   // and the next quality flip would touch a dead texture.
-  liveArrays.add(texture);
+  liveArrays.set(texture, { texture, tiles, size, linear });
   texture.onDisposeObservable.add(() => liveArrays.delete(texture));
 
   return { texture, scales, layers };
@@ -214,5 +255,5 @@ export async function createTileTextureArray(
 
 /** Diagnostics: the live terrain tile arrays, for `window.muMat()`. */
 export function liveTileArrays(): RawTexture2DArray[] {
-  return [...liveArrays];
+  return [...liveArrays.keys()];
 }

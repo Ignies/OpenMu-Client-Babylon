@@ -55,10 +55,13 @@ export async function createDungeon(world: World) {
   // shared lean-pose trigger. Nine of them, all at scale 0.8, each paired
   // with a 59 cluster.
   //
-  // `Data/Object2/Object61.bmd` does not exist — Object2 stops at Object60,
-  // and the original never notices because it draws nothing here anyway.
-  // `OperateBoxObject.init()` already swallows a failed model load and keeps
-  // the pick box (the box is what the click ray hits, not the mesh), so
-  // `LeanBoxObject` is correct as-is and needs no Dungeon subclass.
-  tiles[60] = LeanBoxObject;
+  // `Data/Object2/Object61.bmd` does not exist - Object2 stops at Object60 in
+  // every client, and the original never notices because it draws nothing
+  // here anyway. The pick box is what the click ray hits, so the request is
+  // skipped up front rather than fetched and caught.
+  tiles[60] = class DungeonLeanBoxObject extends LeanBoxObject {
+    protected modelName(): string | null {
+      return null;
+    }
+  };
 }

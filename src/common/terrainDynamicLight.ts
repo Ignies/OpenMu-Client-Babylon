@@ -11,8 +11,12 @@ import { dynamicLightGain } from './lightingQuality';
 export type TerrainLightColor = { r: number; g: number; b: number };
 
 export type TerrainLightEmitter = {
-  readonly x: number;
-  readonly y: number;
+  /**
+   * World position, held by reference and read every frame: the footprint is
+   * measured from the float x / z like the original's `AddTerrainLight`, so a
+   * carried light slides with the body instead of stepping per tile.
+   */
+  readonly position: { readonly x: number; readonly y: number; readonly z: number };
   readonly range: number;
   readonly falloff?: number;
   readonly floorGain?: number;
@@ -48,8 +52,17 @@ let deltaDirty = false;
 
 const emitters = new Set<TerrainLightEmitter>();
 
+/** Tile each emitter last wrote from; a change rebuilds the touched set. */
+const emitterTiles = new Map<TerrainLightEmitter, number>();
+
 let touched: Int32Array | null = null;
 let touchedDirty = true;
+
+/** Tiles past the footprint radius kept in the touched set. */
+const TOUCHED_MARGIN = 1;
+
+const tileKey = (x: number, y: number): number =>
+  Math.floor(x) * TERRAIN_SIZE * 4 + Math.floor(y);
 
 export function initTerrainDynamicLight(liftedBaked: Float32Array): void {
   baked = liftedBaked;
@@ -64,6 +77,7 @@ export function initTerrainDynamicLight(liftedBaked: Float32Array): void {
   }
   deltaDirty = true;
   emitters.clear();
+  emitterTiles.clear();
   touched = null;
   touchedDirty = true;
 }
@@ -74,6 +88,7 @@ export function disposeTerrainDynamicLight(): void {
   floor = null;
   deltaBytes = null;
   emitters.clear();
+  emitterTiles.clear();
   touched = null;
   touchedDirty = true;
 }
@@ -138,6 +153,7 @@ export function registerTerrainLight(emitter: TerrainLightEmitter): () => void {
     resetTouched();
 
     emitters.delete(emitter);
+    emitterTiles.delete(emitter);
     touchedDirty = true;
   };
 }
@@ -146,9 +162,12 @@ function rebuildTouched(): void {
   const indices = new Set<number>();
 
   for (const emitter of emitters) {
-    const xi = Math.floor(emitter.x);
-    const yi = Math.floor(emitter.y);
-    const range = emitter.range;
+    const { x, z } = emitter.position;
+    const xi = Math.floor(x);
+    const yi = Math.floor(z);
+    const range = Math.ceil(emitter.range) + TOUCHED_MARGIN;
+
+    emitterTiles.set(emitter, tileKey(x, z));
 
     for (let y = yi - range; y <= yi + range; y++) {
       for (let x = xi - range; x <= xi + range; x++) {
@@ -161,10 +180,9 @@ function rebuildTouched(): void {
   touchedDirty = false;
 }
 
+/** Clears the set last written; the rebuild that follows never precedes it. */
 function resetTouched(): void {
-  if (!primary || !baked) return;
-  if (touchedDirty) rebuildTouched();
-  if (!touched) return;
+  if (!primary || !baked || !touched) return;
 
   for (let i = 0; i < touched.length; i++) {
     const o = touched[i] * CHANNELS;
@@ -252,11 +270,19 @@ export function updateTerrainDynamicLight(
   resetTouched();
 
   for (const emitter of emitters) {
+    const { x, z } = emitter.position;
+
+    if (emitterTiles.get(emitter) !== tileKey(x, z)) touchedDirty = true;
+  }
+
+  if (touchedDirty) rebuildTouched();
+
+  for (const emitter of emitters) {
     const { r, g, b } = emitter.color(elapsedMs);
 
     addTerrainLight(
-      emitter.x,
-      emitter.y,
+      emitter.position.x,
+      emitter.position.z,
       r,
       g,
       b,
@@ -331,8 +357,29 @@ export function requestTerrainLight(
   y: number,
   out: { x: number; y: number; z: number }
 ): boolean {
-  if (!primary) return false;
+  return primary ? sampleBilinear(primary, x, y, out) : false;
+}
 
+/**
+ * Samples the **baked** lightmap alone (`ZzzLodTerrain.cpp:1011-1012`), no
+ * torch delta. The tiers >= 1 body light reads this: there the pool point
+ * lights reach a figure per pixel, so the delta would be the same torch a
+ * second time (ARCHITECTURE §3.2 `bake_baked_only`).
+ */
+export function requestBakedTerrainLight(
+  x: number,
+  y: number,
+  out: { x: number; y: number; z: number }
+): boolean {
+  return baked ? sampleBilinear(baked, x, y, out) : false;
+}
+
+function sampleBilinear(
+  field: Float32Array,
+  x: number,
+  y: number,
+  out: { x: number; y: number; z: number }
+): boolean {
   const xi = Math.floor(x);
   const yi = Math.floor(y);
 
@@ -349,8 +396,8 @@ export function requestTerrainLight(
   const yd = y - yi;
 
   const channel = (c: number) => {
-    const left = primary![i1 + c] + (primary![i4 + c] - primary![i1 + c]) * yd;
-    const right = primary![i2 + c] + (primary![i3 + c] - primary![i2 + c]) * yd;
+    const left = field[i1 + c] + (field[i4 + c] - field[i1 + c]) * yd;
+    const right = field[i2 + c] + (field[i3 + c] - field[i2 + c]) * yd;
 
     return left + (right - left) * xd;
   };

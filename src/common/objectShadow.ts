@@ -36,10 +36,9 @@ const GROUND_OFFSET = 5 / TILE_CM;
  * on screen. The stencil below still means overlaps never deepen it, so this
  * is the shadow's one and only value.
  *
- * Derived from the one shadow-depth rule (lighting_rework.md §5.2): a shadow
- * leaves 35 % of what it cuts — the terrain bake floor and the CSM object
- * darkness are the same 0.35 (enhancedLighting.ts). A blob cuts everything
- * under it, so its alpha is 1 - 0.35.
+ * The Classic value of the one shadow rule (lighting_polish ARCHITECTURE
+ * §4.4): the blob keeps this alpha whatever the policy says, because Classic
+ * is the reference and does not move.
  */
 const SHADOW_ALPHA = 0.65;
 
@@ -411,7 +410,7 @@ export function setShadowWorld(world: ENUM_WORLD): void {
  * shadows read wrong, so the blob steps aside.
  *
  * `GameOptions.shadows` is the player's "Object shadows" toggle. It gates the
- * cascades too (`enhancedLighting`), so unchecking it removes every shadow in
+ * cascades too (`scenes/shadows.ts`), so unchecking it removes every shadow in
  * the scene rather than only the tier that happens to be running.
  */
 export function blobShadowsActive(): boolean {

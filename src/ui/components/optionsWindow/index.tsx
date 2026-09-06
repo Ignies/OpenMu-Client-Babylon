@@ -9,9 +9,9 @@ import { MuButton } from '../muButton';
 import { MuResizeGrip, useWindowChrome } from '../muWindow/useWindowChrome';
 import { TEXT_COLOR } from '../../pages/serversPage/layout';
 import {
-  MAP_GRADIENT_MAX,
-  SATURATION_MAX,
-  SATURATION_MIN,
+  BRIGHTNESS_MAX,
+  BRIGHTNESS_MIN,
+  TONE_MAPPER_MAX,
   UI_SCALE_MAX,
   uiScaleFactor,
   GameOptions,
@@ -48,8 +48,22 @@ import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
 import { MuWindows } from '../muWindow/windowState';
 import { t, type TextKey } from '../../../i18n';
 import { LanguageSelect } from './languageSelect';
+import {
+  TIER_PRESETS,
+  TIER_PRESET_LABEL_KEYS,
+  activeTierPreset,
+  applyTierPreset,
+} from './presets';
 
 const WINDOW_ID = 'options';
+
+/** The tone mapper names, as text keys - the slider prints `t()` of these. */
+const TONE_MAPPER_LABEL_KEYS: readonly TextKey[] = [
+  'options.toneMapper.none',
+  'options.toneMapper.standard',
+  'options.toneMapper.aces',
+  'options.toneMapper.neutral',
+];
 
 const ART_WIDTH = 213;
 
@@ -70,6 +84,9 @@ const CHECK_ROW_H = 24;
 const SLIDER_ROW_H = 40;
 const KEY_ROW_H = 24;
 const BUTTON_ROW_H = 30;
+/** Label plus the row of tier plates under it. */
+const PRESET_ROW_H = 40;
+const PRESET_GAP = 4;
 /** Label plus the closed selector plate under it. */
 const LANGUAGE_ROW_H = 30;
 const KEY_BOX_WIDTH = 64;
@@ -81,6 +98,8 @@ const CLOSE_HEIGHT = 30;
 
 const SLIDER_WIDTH = 98;
 const SLIDER_HEIGHT = 13;
+/** The value plate reaches past the slider: 'Tone mapper' + 'Standard' overrun 98. */
+const VALUE_WIDTH = 140;
 const THUMB_SIZE = 13;
 
 const GAUGE_INSET_X = 3;
@@ -102,12 +121,16 @@ type ButtonRow = { id: string; labelKey: TextKey; onClick: () => void };
 /** The language picker: one row, its own widget (`languageSelect.tsx`). */
 type LanguageRow = { id: 'language' };
 
+/** The tier presets: one plate per tier (`presets.ts`). */
+type PresetRow = { id: 'presets'; labelKey: TextKey };
+
 type Row =
   | ({ kind: 'check' } & CheckRow)
   | ({ kind: 'slider' } & SliderRow)
   | ({ kind: 'key' } & KeyRow)
   | ({ kind: 'button' } & ButtonRow)
-  | ({ kind: 'language' } & LanguageRow);
+  | ({ kind: 'language' } & LanguageRow)
+  | ({ kind: 'presets' } & PresetRow);
 
 type Section = {
   titleKey: TextKey;
@@ -134,13 +157,9 @@ type SliderRow = {
     | 'bloom'
     | 'glow'
     | 'chromatic'
-    | 'exposure'
-    | 'contrast'
-    | 'colorTint'
-    | 'mapGradient'
+    | 'toneMapper'
+    | 'brightness'
     | 'vignette'
-    | 'saturation'
-    | 'darkness'
     | 'lootZen'
     | 'uiScale';
   textId: number;
@@ -149,6 +168,8 @@ type SliderRow = {
   min?: number;
   display: (value: number) => number | string;
   needsPostProcessing?: boolean;
+  /** Bloom and the image-processing pass exist on tiers >= 1 only. */
+  needsTier?: boolean;
 };
 
 const slider = (row: SliderRow): Row => ({ kind: 'slider', ...row });
@@ -168,22 +189,18 @@ const gradeSlider = (
     | 'bloom'
     | 'glow'
     | 'chromatic'
-    | 'exposure'
-    | 'contrast'
-    | 'colorTint'
-    | 'mapGradient'
-    | 'vignette'
-    | 'darkness',
+    | 'vignette',
   labelKey: TextKey,
-  max = 25
+  needsTier: boolean
 ): Row =>
   slider({
     key,
     textId: -1,
     labelKey,
-    max,
+    max: 9,
     display: v => (v === 0 ? t('common.off') : v),
     needsPostProcessing: true,
+    needsTier,
   });
 
 type Tab = {
@@ -286,16 +303,9 @@ const TABS: Tab[] = [
     columns: [
       [
         {
-          titleKey: 'options.section.rendering',
+          titleKey: 'options.section.quality',
           rows: [
-            check('shadows', -1, 'options.shadows'),
-            check('dynamicLights', -1, 'options.dynamicLights'),
-            check('postProcessing', -1, 'options.postProcessing'),
-            check('toneMapping', -1, 'options.toneMapping', true),
-            check('ambientParticles', -1, 'options.ambientParticles'),
-            check('weatherEffects', -1, 'options.weatherEffects'),
-            check('animatedWater', -1, 'options.animatedWater'),
-            check('advancedEffects', -1, 'options.advancedEffects'),
+            { kind: 'presets', id: 'presets', labelKey: 'options.preset' },
             slider({
               key: 'lightingQuality',
               textId: -1,
@@ -320,6 +330,18 @@ const TABS: Tab[] = [
           ],
         },
         {
+          titleKey: 'options.section.rendering',
+          rows: [
+            check('shadows', -1, 'options.shadows'),
+            check('dynamicLights', -1, 'options.dynamicLights'),
+            check('postProcessing', -1, 'options.postProcessing'),
+            check('ambientParticles', -1, 'options.ambientParticles'),
+            check('weatherEffects', -1, 'options.weatherEffects'),
+            check('animatedWater', -1, 'options.animatedWater'),
+            check('advancedEffects', -1, 'options.advancedEffects'),
+          ],
+        },
+        {
           titleKey: 'options.section.items',
           rows: [
             slider({
@@ -336,48 +358,34 @@ const TABS: Tab[] = [
         {
           titleKey: 'options.section.image',
           rows: [
-            gradeSlider('sharpness', 'options.sharpness', 9),
-            gradeSlider('filmGrain', 'options.filmGrain', 9),
-            gradeSlider('bloom', 'options.bloom', 9),
-            gradeSlider('glow', 'options.glow', 9),
-            gradeSlider('chromatic', 'options.chromatic', 9),
+            slider({
+              key: 'toneMapper',
+              textId: -1,
+              labelKey: 'options.toneMapper',
+              max: TONE_MAPPER_MAX,
+              display: v => t(TONE_MAPPER_LABEL_KEYS[v]) ?? v,
+              needsPostProcessing: true,
+              needsTier: true,
+            }),
+            slider({
+              key: 'brightness',
+              textId: -1,
+              labelKey: 'options.brightness',
+              min: BRIGHTNESS_MIN,
+              max: BRIGHTNESS_MAX,
+              display: v =>
+                v === 0 ? t('common.off') : v > 0 ? `+${v}` : `-${-v}`,
+              needsPostProcessing: true,
+              needsTier: true,
+            }),
+            gradeSlider('bloom', 'options.bloom', true),
+            gradeSlider('glow', 'options.glow', false),
+            gradeSlider('sharpness', 'options.sharpness', false),
+            gradeSlider('filmGrain', 'options.filmGrain', true),
+            gradeSlider('chromatic', 'options.chromatic', true),
+            gradeSlider('vignette', 'options.vignette', true),
             check('fxaa', -1, 'options.fxaa', true),
           ],
-        },
-      ],
-    ],
-  },
-  {
-    id: 'colour',
-    labelKey: 'options.tab.colour',
-    columns: [
-      [
-        {
-          titleKey: 'options.section.grade',
-          rows: [
-            check('sceneDarkening', -1, 'options.sceneDarkening'),
-            gradeSlider('darkness', 'options.darkness'),
-            gradeSlider('exposure', 'options.exposure'),
-            gradeSlider('contrast', 'options.contrast'),
-            gradeSlider('colorTint', 'options.colorTint'),
-            slider({
-              key: 'saturation',
-              textId: -1,
-              labelKey: 'options.saturation',
-              min: SATURATION_MIN,
-              max: SATURATION_MAX,
-              display: v =>
-                v === 0 ? t('common.off') : v > 0 ? `+${v}` : v,
-              needsPostProcessing: true,
-            }),
-            gradeSlider('vignette', 'options.vignette'),
-          ],
-        },
-      ],
-      [
-        {
-          titleKey: 'options.section.atmosphere',
-          rows: [gradeSlider('mapGradient', 'options.mapGradient', MAP_GRADIENT_MAX)],
         },
       ],
     ],
@@ -424,6 +432,8 @@ function rowHeight(row: Row): number {
       return BUTTON_ROW_H;
     case 'language':
       return LANGUAGE_ROW_H;
+    case 'presets':
+      return PRESET_ROW_H;
     default:
       return SLIDER_ROW_H;
   }
@@ -755,6 +765,43 @@ export const OptionsWindow = observer(() => {
                     );
                   }
 
+                  if (row.kind === 'presets') {
+                    const active = activeTierPreset();
+                    const plateWidth = Math.floor(
+                      (COLUMN_WIDTH - PRESET_GAP * (TIER_PRESETS.length - 1)) /
+                        TIER_PRESETS.length
+                    );
+
+                    return (
+                      <div key={row.id}>
+                        <span
+                          className="options-label"
+                          style={{ left: x, top: rowY }}
+                        >
+                          {t(row.labelKey)}
+                        </span>
+                        {TIER_PRESETS.map((preset, i) => (
+                          <div
+                            key={TIER_PRESET_LABEL_KEYS[i]}
+                            className={`options-keybox options-preset${i === active ? ' is-active' : ''}`}
+                            style={{
+                              left: x + i * (plateWidth + PRESET_GAP),
+                              top: rowY + 16,
+                              width: plateWidth,
+                              height: KEY_BOX_HEIGHT,
+                            }}
+                            onClick={uiClick(() => {
+                              applyTierPreset(preset);
+                              invalidateShadowState();
+                            })}
+                          >
+                            {t(TIER_PRESET_LABEL_KEYS[i])}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
+
                   const min = row.min ?? 0;
                   const value = Math.min(
                     Math.max(min, GameOptions[row.key]),
@@ -765,8 +812,9 @@ export const OptionsWindow = observer(() => {
                   const ratio = span === 0 ? 0 : (value - min) / span;
 
                   const inert =
-                    row.needsPostProcessing === true &&
-                    !GameOptions.postProcessing;
+                    (row.needsPostProcessing === true &&
+                      !GameOptions.postProcessing) ||
+                    (row.needsTier === true && GameOptions.lightingQuality === 0);
 
                   return (
                     <div
@@ -782,7 +830,7 @@ export const OptionsWindow = observer(() => {
                       {}
                       <span
                         className="options-label options-value"
-                        style={{ left: x, top: rowY, width: SLIDER_WIDTH }}
+                        style={{ left: x, top: rowY, width: VALUE_WIDTH }}
                       >
                         {row.display(value)}
                       </span>

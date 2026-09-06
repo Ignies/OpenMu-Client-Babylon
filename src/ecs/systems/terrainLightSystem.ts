@@ -6,25 +6,22 @@ import {
 import { updatePointLightPool } from '../../common/pointLightPool';
 import { lighting } from '../../lighting';
 import { GameOptions } from '../../common/gameOptions';
-import { applySceneMood, updateSceneMood } from '../../scenes/sceneLook';
+import { updateSceneLook } from '../../scenes/sceneLook';
+import { lookDirector } from '../../lighting/director';
 
 /**
- * The lighting layer's per-frame call site : steps
- * `lighting` first, then the two sinks it registers into — the terrain delta
- * texture and the point-light pool — so everything a source wrote this frame
- * is what the terrain and the objects are lit by this frame.
+ * The lighting layer's per-frame call site: the look director composes the
+ * frame's look, then `lighting` steps every source, then the two sinks it
+ * registers into - the terrain delta texture and the point-light pool - so
+ * everything a source wrote this frame is what the terrain and the objects
+ * are lit by this frame.
  */
 export const TerrainLightSystem: ISystemFactory = world => {
-  let appliedMood: number | null = null;
-
   return {
     update: dt => {
-      if (appliedMood !== world.mapIndex) {
-        appliedMood = world.mapIndex;
-        applySceneMood(world.scene, world.scene.look, world.mapIndex);
-      }
+      lookDirector()?.tick(dt);
 
-      updateSceneMood(world.scene, world.scene.look);
+      updateSceneLook(world.scene, world.scene.look);
 
       lighting.update(world.mapIndex, dt);
 

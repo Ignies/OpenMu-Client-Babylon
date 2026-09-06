@@ -5,7 +5,6 @@ import {
   MATERIAL_QUALITY_LABEL_KEYS,
   materialQuality,
   pbrDetailStrength,
-  pbrKeyGain,
 } from '../common/materialQuality';
 import { livePbrMaterials } from '../common/itemMaterial';
 import { liveTileArrays } from '../libs/mu/tileTextureArray';
@@ -61,7 +60,6 @@ export function installMaterialDebug(scene: Scene): void {
         tier: t(MATERIAL_QUALITY_LABEL_KEYS[tier]),
         materialDetail: GameOptions.materialDetail,
         detailStrength: pbrDetailStrength(),
-        keyGain: pbrKeyGain(),
         lightingQuality: GameOptions.lightingQuality,
       },
       pbrMaterials: materials,

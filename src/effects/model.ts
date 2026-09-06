@@ -30,7 +30,7 @@ import { BlendState } from '../common/objects/enum';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
 import { LiveList, additiveMaterial, fadeOut, lerp, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
-import { RGBS } from './recipes';
+import { MODEL, RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -153,6 +153,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const source = opts.follow ?? pointSource(at);
   const colour = opts.colour ?? RGBS.white;
   const subtract = opts.blend === 'subtract';
+  // MODEL_FIRE's additive tail is a flame: light, at the map's level (F12).
+  const light = opts.model === MODEL.fire;
 
   const node = new TransformNode('fxModel', scene);
   node.rotationQuaternion = null;
@@ -208,7 +210,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
             ? tex
               ? subtract
                 ? subtractMaterial(scene, tex, colour, fadeMats)
-                : additiveMaterial(scene, tex, colour)
+                : additiveMaterial(scene, tex, colour, 'add', light)
               : brightFallback
             : solid;
           (scene as TestScene).look?.glow.addExcludedMesh(mesh as never);

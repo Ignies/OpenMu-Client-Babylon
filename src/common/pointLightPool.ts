@@ -12,6 +12,8 @@ import {
   specularLightScale,
 } from './materialQuality';
 import { dynamicLightGain, pointLightBudget } from './lightingQuality';
+import { devQueryNumber } from './devSeams';
+import { lookDirector } from '../lighting/director';
 import type { TerrainLightColor } from './terrainDynamicLight';
 
 /**
@@ -19,12 +21,40 @@ import type { TerrainLightColor } from './terrainDynamicLight';
  * for why it is fixed at startup and what it costs per pixel.
  */
 export function pointLightPoolSize(): number {
-  return pointLightBudget();
+  const budget = pointLightBudget();
+  // Dev seam `?pool=<n>`: fewer slots this session, 0 = no pool.
+  const dev = devQueryNumber('pool');
+
+  return dev === null ? budget : Math.max(0, Math.min(budget, Math.floor(dev)));
 }
 
 const LIGHT_RANGE = 6;
 
-const INTENSITY = 3;
+/**
+ * Key units (ARCHITECTURE §4.5), measured against Classic rather than derived:
+ * the pool is what carries a torch onto an object on tiers >= 1, where the
+ * object samples the baked lightmap without the delta. At 1.1 it gave a chair
+ * beside the pub candelabra a 1.10x lift where Classic's delta gives 1.22x,
+ * which is the whole "dynamic light does nothing on Ultra" report. 6.0 lands
+ * 1.21x and 1.35x on the two chairs against Classic's 1.22x and 1.33x, with
+ * the same lift in local contrast and saturation. It scales with the key, so
+ * the ratio to the terrain delta is the same indoors and out.
+ */
+const INTENSITY = 6.0;
+
+/** Dev seam `?poolI=<n>`: the peak in key units, for the tuning rounds. */
+const intensityDev = devQueryNumber('poolI');
+
+function poolIntensity(): number {
+  return intensityDev ?? INTENSITY;
+}
+
+/** The map's level and the room's emitter gain, one product (`AreaLook.candles`, 1 outside a room). */
+function keyGain(): number {
+  const look = lookDirector()?.state();
+
+  return look ? look.keyGain * look.key.emitterGain : 1;
+}
 
 const HEIGHT_OFFSET = 0.6;
 
@@ -236,7 +266,8 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
     } else light.specular.set(0, 0, 0);
     light.intensity =
       peak *
-      INTENSITY *
+      poolIntensity() *
+      keyGain() *
       (emitter.gain ?? 1) *
       slot.fade *
       directLightGain() *

@@ -2,14 +2,15 @@ import { Vector3, type Effect, type Scene } from '../babylon/exports';
 import { sunLightOf } from '../../lighting/keyRig';
 import { ENUM_WORLD } from '../../common/types';
 import { GameOptions } from '../../common/gameOptions';
+import { maps } from '../../maps';
 import { snowCover } from '../../weather/snowCover';
 import { snowTrailPainted, snowTrailTexture } from '../../weather/snowTrail';
 import { MELT_EDGE, MELT_SPOTS, snowMeltUniform } from '../../weather/snowMelt';
 import { puddleCover, wetness } from '../../weather/wetness';
 import { rainStrength } from '../../weather/rainState';
 import { pointLightPoolLights } from '../../common/pointLightPool';
-import { shownFogColor } from '../../scenes/enhancedLighting';
-import { shownSkyLight } from '../../scenes/sceneLook';
+import { linearBufferActive } from '../../common/lightModel';
+import { lookDirector } from '../../lighting/director';
 
 /**
  * Terrain overlays: masked layers mixed into the ground's albedo before it is
@@ -160,8 +161,8 @@ export type TerrainOverlay = {
   /**
    * How much of the map's baked light this layer replaces with its own,
    * 0…1. A layer that LIES ON the ground (snow) is a different material
-   * from the ground, and the lightmap was baked for grass and stone under
-   * a blue grade: through it white snow comes out cyan, and every dark
+   * from the ground, and the lightmap was baked for grass and stone with a
+   * cold cast: through it white snow comes out cyan, and every dark
    * patch in the bake becomes a stain on the snow. At 1 the layer keeps
    * only the bake's SHADING, as luminance, and is lit white with pale
    * blue-grey shadows (OVERLAY_LIGHT); at 0 it is lit like the ground.
@@ -223,34 +224,29 @@ export const OVERLAY_LIGHT = {
 };
 
 /**
- * Settled snow on Devias.
+ * Settled snow on the snow maps.
  *
  * Deliberately not pure white: fresh snow lit by the map's cold bake reads as
- * blown-out paper at 1.0, and Devias' grade is already blue. Slightly under
+ * blown-out paper at 1.0, and Devias' bake is already blue. Slightly under
  * white, faintly warm, lets the lightmap do the colouring.
  */
 export const SNOW_COVER: TerrainOverlay = {
   name: 'snowCover',
-  // Near-white, a hair warm. The blue cast the field used to have with
-  // post-processing off was never this colour: it was the lightmap ×
-  // DEVIAS_MOOD.terrainBake [1.02, 1.08, 1.18] multiplied in afterwards, and
-  // no albedo survives a 1.16 blue-over-red gain on top of a blue bake. That
-  // is now taken out of the snow's share of the light by `lightNeutral`
-  // below, so this can be what snow actually is; the residual warmth only
-  // keeps it off dead paper-white in full sun.
+  // Near-white, a hair warm: the snow takes its own light through
+  // `lightNeutral` below, so this can be what snow actually is; the residual
+  // warmth only keeps it off dead paper-white in full sun.
   colour: [0.985, 0.98, 0.965],
   blend: 'mix',
   coverage: snowCover,
   // Snow is lit as snow, not as the grass the lightmap was baked for: the
   // bake keeps its shading and loses its hue (see `lightNeutral` on the
-  // type). The remaining tenth is what still ties a drift to the map's
-  // grade so it does not float over the ground like a decal.
+  // type).
   lightNeutral: 1,
   // Solid at full cover on the snow tiles; the bed table alone thins it on
   // cobbles and flagstones.
   headroom: 0.25,
-  // Where on Devias' ground snow can lie, by tile texture (World3/Tile*.jpg,
-  // in getTilesList order):
+  // Where snow can lie, by tile texture (the snow maps share one slot list,
+  // FULL_TILES, in getTilesList order; the names below are Devias' World3):
   //   0 TileGrass01, 1 TileGrass02, 7 TileRock01 - painted snow: full.
   //   4 TileGround03 - cobbles with snow packed between; 6 TileWood01 -
   //     frosted blue stone: snow sits in the gaps, so a good part.
@@ -658,7 +654,7 @@ const TORCH_GLOW_GLOSS = 5;
  *     pool and grazing at the near one, so the far edge shows zenith and
  *     the near edge shows horizon. `ovSky` is the horizon (the fog colour,
  *     which is literally what the map's distance fades to) and `ovSkyHi`
- *     the zenith (the mood's own sky light, `shownSkyLight`).
+ *     the zenith (the key's sky light, `LookState.key`).
  *  2. **Structure that parallaxes.** A cloud deck `CLOUD_HEIGHT` tiles up,
  *     hit by that same mirrored ray. Because the ray's elevation changes
  *     across the pool, the deck is sampled *further away* at the grazing
@@ -758,13 +754,40 @@ const OVERLAYS_BY_WORLD: Partial<Record<ENUM_WORLD, readonly TerrainOverlay[]>> 
   {
     [ENUM_WORLD.WD_0LORENCIA]: [WET_GROUND, PUDDLES],
     [ENUM_WORLD.WD_3NORIA]: [WET_GROUND, PUDDLES],
-    [ENUM_WORLD.WD_2DEVIAS]: [SNOW_COVER],
   };
 
 const NONE: readonly TerrainOverlay[] = [];
 
 /**
+ * Where snow lies on the other snow maps, by tile slot (Data/World58 and
+ * World63 share Devias' slot list, not its art): Ice City's clear ice (2, 4,
+ * 8) and Santa Town's embers (4) stay bare, its dark rock and the grey stone
+ * take snow between them, the painted snow and white ice are solid.
+ */
+const SNOW_BEDS: Partial<Record<ENUM_WORLD, TerrainOverlay['bed']>> = {
+  [ENUM_WORLD.WD_57ICECITY]: { 0: 1, 3: 1, 7: 1, 10: 1, 1: 0.55, 6: 0.55, 9: 0.55, 5: 0, 13: 0 },
+  [ENUM_WORLD.WD_62SANTA_TOWN]: { 0: 1, 1: 1, 2: 1, 3: 1, 7: 1, 10: 1, 6: 0.55, 9: 0.55, 4: 0, 5: 0, 13: 0 },
+};
+
+const snowCovers = new Map<ENUM_WORLD, TerrainOverlay>();
+
+/** The settled-snow layer as this map draws it: `SNOW_COVER` with the map's bed table. */
+export function snowCoverFor(map: ENUM_WORLD): TerrainOverlay {
+  const bed = SNOW_BEDS[map];
+  if (!bed) return SNOW_COVER;
+  let own = snowCovers.get(map);
+  if (!own) {
+    own = { ...SNOW_COVER, bed };
+    snowCovers.set(map, own);
+  }
+  return own;
+}
+
+/**
  * The layers this map draws, or nothing if the player has ground weather off.
+ * Settled snow follows the map's `snow` flag under an open sky (Devias, Ice
+ * City, Santa Town; not the boss cave), the set the caps and the prints read
+ * (`weather/snowCover.ts` SNOW_GROUND_MAPS).
  *
  * Read at *map load*, so switching the option off and walking through a gate
  * gets a terrain shader with no overlay branch in it at all. Switching it off
@@ -774,7 +797,9 @@ const NONE: readonly TerrainOverlay[] = [];
  */
 export function terrainOverlaysFor(map: ENUM_WORLD): readonly TerrainOverlay[] {
   if (!GameOptions.advancedEffects) return NONE;
-  return OVERLAYS_BY_WORLD[map] ?? NONE;
+  const own = OVERLAYS_BY_WORLD[map];
+  if (!maps.isSnow(map) || !maps.isOutdoor(map)) return own ?? NONE;
+  return [...(own ?? NONE), snowCoverFor(map)];
 }
 
 /** Whether any layer on this map needs the roof mask built. */
@@ -911,21 +936,18 @@ const SHADE_FLOOR = 0.55;
 /**
  * What survives in the troughs: skylight, once the warm direct sun is gone.
  *
- * Devias' own blue, not a neutral grey. `DEVIAS_MOOD` in sceneLook grades the
- * map at `shadowsHue: 232` and bakes the terrain at [1.02, 1.08, 1.18], so the
- * map's shadows are already blue-violet; a desaturated `skyGround` grey here
- * was fighting the grade rather than joining it, and read as "dark" instead of
- * as shade. This is hue 232 at half saturation - the same blue the map's own
+ * Devias' own blue, not a neutral grey. The map's shadows read blue-violet
+ * (snow under an overcast sky); a desaturated grey here was fighting that
+ * rather than joining it, and read as "dark" instead of as shade. This is
+ * hue 232 at half saturation - the same blue the map's own
  * shadows are, so snow in shade matches stone in shade.
  *
  * Baked rather than exposed — it is gated by `SNOW_SHADE.cavity`, so it
  * cannot fail into anything on its own.
  */
-// Paler than the 0.66/0.74/0.93 it was: that is the right HUE but at full
-// saturation it needs the grade's desaturation (-28 on shadows) to read as
-// blue-grey, and with post-processing off it reads as blue paint. Same hue,
-// half the chroma, so it lands blue-grey either way; `cavity` was raised to
-// keep the same amount of colour in the troughs.
+// Half the chroma of the 0.66/0.74/0.93 it was: the same hue at full
+// saturation reads as blue paint rather than blue-grey; `cavity` was raised
+// to keep the same amount of colour in the troughs.
 const CAVITY_TINT = 'vec3(0.72, 0.75, 0.83)';
 
 /**
@@ -1378,12 +1400,18 @@ function hasLightNeutral(overlays: readonly TerrainOverlay[]): boolean {
  * only when a layer asks for it, a mix toward the layer's own light:
  *
  *   white where the bake is bright and the sun reaches, OVERLAY_LIGHT.shadow
- *   where either is cut. The bake contributes its luminance only — its hue
- *   is the map's grade, and the whole point is that snow does not take it.
+ *   where either is cut. The bake contributes its luminance only - its hue
+ *   is the map's own, and the whole point is that snow does not take it.
  *
  * `bakeVar` is the lightmap colour (0…1), `sunVar` the cascaded sun factor
  * (1 = lit), `extraExpr` the light that applies to ground and layer alike
- * (torches, room key). Must run after `terrainOverlayGlsl`.
+ * (torches, room key) in the same space as `mapLitExpr`. Reads the
+ * material's `linearLight` uniform the way the overlay body reads main()'s
+ * locals: on the linear tiers the constants are decoded once, the delta is
+ * added in linear and the cap applied there (a re-encoded delta is what
+ * turned a lamp's footprint into a white diamond on the snow), and the sum is
+ * encoded once for the material's final decode, which lands the product
+ * exactly at lin(texel) x the linear sum. Must run after `terrainOverlayGlsl`.
  */
 export function terrainOverlayLitGlsl(
   overlays: readonly TerrainOverlay[],
@@ -1396,16 +1424,24 @@ export function terrainOverlayLitGlsl(
   if (!hasLightNeutral(overlays)) return `    vec3 ${outVar} = ${mapLitExpr};`;
   const s = OVERLAY_LIGHT.shadow;
   const l = OVERLAY_LIGHT.lit;
+  const lin = (c: readonly [number, number, number]) =>
+    `vec3(${f(c[0] ** 2.2)}, ${f(c[1] ** 2.2)}, ${f(c[2] ** 2.2)})`;
   return `
     vec3 ${outVar} = ${mapLitExpr};
     {
       float ovBakeLum = dot(${bakeVar}.rgb, vec3(0.299, 0.587, 0.114));
       float ovKey = smoothstep(0.0, 1.0, ovBakeLum * ${f(OVERLAY_LIGHT.gain)}) * ${sunVar};
+      vec3 ovExtra = max(${extraExpr}, vec3(0.0));
       vec3 ovLayerLit =
         min(
           mix(vec3(${f(s[0])}, ${f(s[1])}, ${f(s[2])}),
-              vec3(${f(l[0])}, ${f(l[1])}, ${f(l[2])}), ovKey) + ${extraExpr},
+              vec3(${f(l[0])}, ${f(l[1])}, ${f(l[2])}), ovKey) + ovExtra,
           vec3(${f(OVERLAY_LIGHT.cap)}));
+      vec3 ovLayerLin =
+        min(
+          mix(${lin(s)}, ${lin(l)}, ovKey) + pow(ovExtra, vec3(2.2)),
+          vec3(${f(OVERLAY_LIGHT.cap ** 2.2)}));
+      ovLayerLit = mix(ovLayerLit, pow(ovLayerLin, vec3(1.0 / 2.2)), linearLight);
       ${outVar} = mix(${outVar}, ovLayerLit, ovNeutral);
     }`;
 }
@@ -1891,16 +1927,19 @@ function bindReflect(
     effect.setFloat3('ovSunDir', sun.x, sun.y, sun.z);
   }
 
-  // The HORIZON the water reflects. The fog colour is what the map's own
-  // distance fades to, so it is the horizon by construction; with no fog
-  // running, the clear colour is the sky. Black either way is "reflects
-  // nothing", which is safe.
-  const fog = shownFogColor();
-  const hasFog = fog[0] + fog[1] + fog[2] > 0;
+  // The HORIZON the water reflects: the director's haze colour, which is
+  // what the map's own distance fades to; with no haze, the clear colour is
+  // the sky. Both arrive linear when the buffer is, and this term is added
+  // in the shader's display-space sum ahead of the final decode, so they are
+  // re-encoded here. Black either way is "reflects nothing", which is safe.
+  const look = lookDirector()?.state();
+  const linear = linearBufferActive(scene);
+  const encode = (v: number) => (linear ? Math.pow(Math.max(v, 0), 1 / 2.2) : v);
+  const fog = look && look.profile.fog.density > 0 ? look.fogColorLinear : null;
   const clear = scene.clearColor;
-  const horizon: readonly [number, number, number] = hasFog
-    ? [fog[0], fog[1], fog[2]]
-    : [clear.r, clear.g, clear.b];
+  const horizon: readonly [number, number, number] = fog
+    ? [encode(fog[0]), encode(fog[1]), encode(fog[2])]
+    : [encode(clear.r), encode(clear.g), encode(clear.b)];
 
   effect.setFloat3(
     'ovSky',
@@ -1909,19 +1948,19 @@ function bindReflect(
     on ? horizon[2] : 0
   );
 
-  // The ZENITH: the mood's own sky light, which is the colour everything on
-  // the map is already being lit from above by, so the water agrees with the
+  // The ZENITH: the key's sky light, which is the colour everything on the
+  // map is already being lit from above by, so the water agrees with the
   // scene rather than inventing a second sky.
   //
   // Held apart from the horizon by at least ZENITH_SEPARATION, and never
-  // above it: a map whose sky light and fog happen to match would otherwise
-  // reflect a flat colour again — the exact failure the gradient exists to
-  // fix — and the sky is darker overhead than at the horizon in every grade
-  // this project has.
-  const zenith = shownSkyLight();
+  // above it: a map whose sky light and haze happen to match would otherwise
+  // reflect a flat colour again - the exact failure the gradient exists to
+  // fix - and the sky is darker overhead than at the horizon.
+  const key = look?.key;
   for (let i = 0; i < 3; i++) {
+    const zenith = key ? key.skyColor[i] * key.skyIntensity : 0;
     skyHi[i] = on
-      ? Math.min(zenith[i], horizon[i] * (1 - ZENITH_SEPARATION))
+      ? Math.min(zenith, horizon[i] * (1 - ZENITH_SEPARATION))
       : 0;
   }
   effect.setFloat3('ovSkyHi', skyHi[0], skyHi[1], skyHi[2]);

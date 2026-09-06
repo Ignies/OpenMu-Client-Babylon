@@ -869,12 +869,16 @@ export class ModelObject {
       mesh.metadata.bodyLight = bodyLight;
       mesh.metadata.snowCap = this.SnowCap;
 
-      // Enhanced lighting: the sun's cascaded shadow map only
-      // attenuates the sun's own lambert term, so the bake and the point
-      // lights are untouched. Free while no shadow generator exists.
-      mesh.receiveShadows = true;
+      // Only the map receives the cascades. The original lights a character,
+      // monster or item by the BodyLight at its feet and nothing else, so an
+      // item effect reads the same in the open and in a shadow.
+      mesh.receiveShadows = this.IsMapObject;
       mesh.metadata.csmCaster =
         this.CastsShadow && !this.Lights?.emitsLight;
+
+      // A map object's shadow is already in the lightmap; the cascades read
+      // this to keep it out of the shadow map (scenes/shadows.ts).
+      mesh.metadata.mapObject = this.IsMapObject;
 
       // Lets the cascades keep this object's blend mesh as a caster, the same
       // exception `createObjectShadow` makes for the blobs.
@@ -884,7 +888,7 @@ export class ModelObject {
       // not the same set as the sun's casters: an object the map marks
       // `CastsShadow = false`, or one carrying a light, still stands in front
       // of the camera and still has to be fogged by its own depth rather than
-      // by whatever is behind it. See `occludes` in enhancedLighting.
+      // by whatever is behind it. See `occludes` in scenes/ambientOcclusion.
       mesh.metadata.depthOccluder = true;
 
       fixSkinnedLocalBounds(mesh);
@@ -1031,6 +1035,10 @@ export class ModelObject {
     mesh.metadata ??= {};
     mesh.metadata.brightMesh = true;
     mesh.metadata.blendMeshLight = this.BlendMeshLight;
+    // The card of an object that throws light is a flame, and a flame is
+    // light: the BodyLight bind gives it the map's `keyGain` (F12). Painted
+    // glass on a dark object stays at its authored value (F4).
+    mesh.metadata.lightCard = this.Lights?.emitsLight === true;
 
     if (this.GlowBlendMesh) {
       storeRef().world?.scene.look?.glow.referenceMeshToUseItsOwnMaterial(

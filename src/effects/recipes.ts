@@ -147,6 +147,20 @@ export const TEX = {
 
 export type EffectTexture = (typeof TEX)[keyof typeof TEX];
 
+/**
+ * The fire family: a card drawn with one of these is a flame, and a flame is
+ * light - it takes the map's `keyGain` like the torches do. Every other sheet
+ * (a flare, a smoke roll, a spark) is authored art at its authored value.
+ */
+export const FIRE_TEXTURES: ReadonlySet<string> = new Set<string>([
+  TEX.fire,
+  TEX.fire2,
+  TEX.fire3,
+  TEX.fire5,
+  TEX.flame,
+  TEX.torch,
+]);
+
 // ---- models (Data/Skill/*.bmd → *.glb) -----------------------------------------
 
 export const MODEL = {

@@ -3,8 +3,7 @@ import type { WeatherLayer } from './layer';
 import { serverNow } from '../common/serverTime';
 import { ambientStrengthAt } from './ambientSchedule';
 import { DEVIAS_SNOW } from './ambientWeather';
-import { GameOptions } from '../common/gameOptions';
-import { SNOW_COVER, terrainOverlaysFor } from '../libs/mu/terrainOverlay';
+import { maps } from '../maps';
 
 /**
  * How much settled snow is lying on the ground, 0…1.
@@ -32,22 +31,16 @@ import { SNOW_COVER, terrainOverlaysFor } from '../libs/mu/terrainOverlay';
 // ---- 1. tuning -------------------------------------------------------------
 
 /**
- * Maps whose GROUND collects snow: the ones `terrainOverlay.ts` draws
- * `SNOW_COVER` on. Everything that sits on the settled snow — caps on the
- * props, prints, the sink underfoot, this accumulator — reads `snowCover()`,
- * and `snowCover()` is 0 off this set, so none of them can outrun the
- * ground they claim to stand on.
- *
- * Not the same set as `SNOW_MAPS` (`ambientWeather.ts`, from
- * `MapLayer.snow`): that is the SKY — flakes fall and rain never does on
- * Ice City, its hatchery and Santa Town too — but those three have no
- * `OVERLAYS_BY_WORLD` row yet, and a snow cap on a bare-ground map is the
- * split-brain this guards against. When a map gets its overlay row it joins
- * here; `updateSnowCover` warns once if the two ever disagree.
+ * Maps whose ground collects snow: the map's `snow` flag (`SNOW_MAPS`, the
+ * one the flakes read) where the map also has a sky. Snow settles under the
+ * open sky, so the Ice City boss cave keeps the original's flakes and no
+ * cover; the caps, the prints, the sink and the terrain's `SNOW_COVER`
+ * overlay all read this set, so nothing sitting on the settled snow can
+ * outrun the ground it claims to stand on. `snowCover()` is 0 off it.
  */
-export const SNOW_GROUND_MAPS: ReadonlySet<ENUM_WORLD> = new Set([
-  ENUM_WORLD.WD_2DEVIAS,
-]);
+export const SNOW_GROUND_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
+  maps.worldsWhere(layer => layer.snow === true && layer.outdoor === true)
+);
 
 /** Seconds of full-strength snowfall to go from bare ground to full cover. */
 const BUILD_SECONDS = 90;
@@ -73,22 +66,6 @@ const BASE_COVER = 0.85;
 
 let cover = 0;
 let lastMap: ENUM_WORLD | null = null;
-
-/** Maps already checked against the overlay table (warn once per map). */
-const checked = new Set<ENUM_WORLD>();
-
-/** `SNOW_GROUND_MAPS` mirrors the overlay table by hand; say so if it drifts. */
-function checkOverlayAgreement(map: ENUM_WORLD): void {
-  if (checked.has(map) || !GameOptions.advancedEffects) return;
-  checked.add(map);
-  const drawn = terrainOverlaysFor(map).includes(SNOW_COVER);
-  if (drawn !== SNOW_GROUND_MAPS.has(map)) {
-    console.warn(
-      `weather/snowCover: SNOW_GROUND_MAPS and terrainOverlay's SNOW_COVER rows disagree on map ${map}`
-    );
-  }
-}
-
 /**
  * Advances the ground cover; call once a frame. Returns the new value.
  *
@@ -97,8 +74,6 @@ function checkOverlayAgreement(map: ENUM_WORLD): void {
  * for it to whiten looks like a bug, not like weather.
  */
 export function updateSnowCover(map: ENUM_WORLD, dt: number): number {
-  if (map !== lastMap) checkOverlayAgreement(map);
-
   if (!SNOW_GROUND_MAPS.has(map)) {
     cover = 0;
     lastMap = map;

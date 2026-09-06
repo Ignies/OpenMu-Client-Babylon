@@ -1,11 +1,20 @@
 import type { World } from '../../ecs/world';
 import { mapMusic, sound } from '../../sound';
 import { setAreaMood } from '../../scenes/sceneLook';
+import type { AreaLookName } from '../../lighting/profiles';
 import { LeanBoxObject } from '../../common/operateBoxObject';
 import { DeviasCandleObject } from './candleObject';
 import {
+  enumerateRooms,
+  loadRoomRecords,
+  registerRooms,
+  sameRoom,
+  type RoomHooks,
+} from '../rooms';
+import {
   DEVIAS_EAST_HEARTH_HOUSE,
   DEVIAS_READING_ROOM,
+  DEVIAS_ROOM_SPEC,
   DEVIAS_TAVERN,
   DEVIAS_WEST_HEARTH_HOUSE,
 } from './rooms';
@@ -14,8 +23,8 @@ import type { Room } from './rooms';
 /**
  * Devias (World 3 / Object3). The original lights nothing indoors here;
  * the candelabra, hearth fire, warm interior grade, pub music and dust are
- * the Lorencia tavern treatment applied to the two rooms by the spawn
- * (see rooms.ts). Dust lives in AmbientParticleSystem.
+ * the Lorencia tavern treatment applied to every roofed building the hero
+ * can walk into (see rooms.ts). Dust lives in AmbientParticleSystem.
  */
 export async function createDevias(world: World) {
   const terrain = world.terrain;
@@ -27,48 +36,37 @@ export async function createDevias(world: World) {
   tiles[54] = DeviasCandleObject;
   tiles[56] = DeviasCandleObject;
   // Devias 91: CreateOperate + HiddenMesh = -2 + the fixed (40,40,160) box
-  // (ZzzObject.cpp:4652-4655) — the shared operate-box recipe, on Object92.
+  // (ZzzObject.cpp:4652-4655) - the shared operate-box recipe, on Object92.
   tiles[91] = LeanBoxObject;
+
+  const tavern: RoomHooks = {
+    look: 'deviasTavern',
+    onEnter: () => sound.playMusic('Music/Pub'),
+    onLeave: () => sound.playMusic(mapMusic(map) ?? 'Music/Devias'),
+  };
+
+  // The rooms someone tuned keep their rows; the rest take the shared one.
+  const tuned: [Room, AreaLookName][] = [
+    [DEVIAS_READING_ROOM, 'deviasReadingRoom'],
+    [DEVIAS_WEST_HEARTH_HOUSE, 'deviasHearthHouse'],
+    [DEVIAS_EAST_HEARTH_HOUSE, 'deviasHearthHouse'],
+  ];
+
+  const hooksFor = (room: Room): RoomHooks => {
+    if (sameRoom(room, DEVIAS_TAVERN)) return tavern;
+    const row = tuned.find(([known]) => sameRoom(room, known));
+
+    return { look: row ? row[1] : 'deviasGuardRoom' };
+  };
 
   world.add({
     worldIndex: map,
-    interactiveArea: {
-      min: DEVIAS_TAVERN.min,
-      max: DEVIAS_TAVERN.max,
-      onEnter: () => {
-        sound.playMusic('Music/Pub');
-        setAreaMood('deviasTavern');
-      },
-      onLeave: () => {
-        sound.playMusic(mapMusic(map) ?? 'Music/Devias');
-        setAreaMood(null);
-      },
-    },
     onDispose: () => {
       sound.stop('Music/Pub');
       setAreaMood(null);
     },
   });
 
-  // Reading room and the two fireplace houses share one treatment: step in,
-  // the cold grade gives way to the warm interior one. The tavern keeps its
-  // extra pub-music trigger above; these three are lit by their hearth alone.
-  const warmRooms: Room[] = [
-    DEVIAS_READING_ROOM,
-    DEVIAS_WEST_HEARTH_HOUSE,
-    DEVIAS_EAST_HEARTH_HOUSE,
-  ];
-
-  for (const room of warmRooms) {
-    world.add({
-      worldIndex: map,
-      interactiveArea: {
-        min: room.min,
-        max: room.max,
-        onEnter: () => setAreaMood('deviasTavern'),
-        onLeave: () => setAreaMood(null),
-      },
-      onDispose: () => setAreaMood(null),
-    });
-  }
+  const rooms = enumerateRooms(await loadRoomRecords(map), DEVIAS_ROOM_SPEC);
+  registerRooms(world, rooms, DEVIAS_ROOM_SPEC, hooksFor);
 }
