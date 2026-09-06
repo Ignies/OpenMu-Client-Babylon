@@ -314,6 +314,22 @@ function fixSkinnedLocalBounds(mesh: AbstractMesh): void {
  */
 export const HIDDEN_MESH_ALL = -2;
 
+/**
+ * The additive shine passes a body carries (`ModelObject.BodyShine`), read
+ * per mesh by the item material.
+ *
+ * The original redraws the whole model over its lit pass: RENDER_METAL |
+ * RENDER_BRIGHT with Shiny01 then RENDER_CHROME | RENDER_BRIGHT with
+ * Chrome01, both `glColor3fv(BodyLight)` and both GL_ONE / GL_ONE
+ * (ZzzCharacter.cpp:8560-8574, ZzzBMD.cpp `RenderMesh`). `star` is the Golden
+ * Titan / Golden Soldier variant: one metal pass on Shiny02 instead (:8715).
+ */
+export type BodyShine = {
+  /** Tint of the passes; black = no shine. */
+  tint: Vector3;
+  star: boolean;
+};
+
 export class ModelObject {
   static OverrideScale = -1;
 
@@ -445,6 +461,14 @@ export class ModelObject {
   Light = new Vector3(1, 1, 1);
 
   SelfLight = new Vector3(0, 0, 0);
+
+  /**
+   * The extra sphere-mapped passes drawn additively over this body - what
+   * makes the golden line gold. Every mesh of this model and of its parts
+   * carries it as `metadata.bodyShine`, shared by reference, so a writer can
+   * change it after the model is loaded.
+   */
+  readonly BodyShine: BodyShine = { tint: new Vector3(0, 0, 0), star: false };
 
   CastsShadow = true;
 
@@ -855,6 +879,8 @@ export class ModelObject {
     });
 
     const bodyLight = this.rootObject.Light;
+    // Parts shine with the body they hang on, the same way they light with it.
+    const bodyShine = this.rootObject.BodyShine;
 
     this._frustumMeshes = gltf.mesh.getChildMeshes(false);
     this._outOfViewFrames = 0;
@@ -867,6 +893,7 @@ export class ModelObject {
         this.SkipBoundingBox || mesh.metadata.hiddenByScript === true;
 
       mesh.metadata.bodyLight = bodyLight;
+      mesh.metadata.bodyShine = bodyShine;
       mesh.metadata.snowCap = this.SnowCap;
 
       // Only the map receives the cascades. The original lights a character,

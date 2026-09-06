@@ -13,21 +13,27 @@ import {
 } from './monsterModelTable';
 
 /**
- * The golden invasion line. The original draws every golden monster with
- * extra RENDER_METAL / RENDER_CHROME | RENDER_BRIGHT passes over the body
- * (ZzzCharacter.cpp:8505-8580 for 43, 78-83 and 493-502; :8715-8718 for the
- * Golden Titan and Golden Soldier). The clone's monster materials have no
- * chrome pass, so the gold reads through `SelfLight` instead - the S4 set's
- * golden body light (1, 0.6, 0.3) (:8517) at half strength, additive over
- * the terrain light.
+ * The golden invasion line. The original draws every golden monster with the
+ * extra additive body passes `ModelObject.BodyShine` runs here: Shiny01 +
+ * Chrome01 for 43, 78-83 and 493-502 (ZzzCharacter.cpp:8505-8575), and the
+ * single Shiny02 pass for the Golden Titan and Golden Soldier, which sit
+ * outside that block (:8715-8718).
  *
- * Not ported here (noted in the PR): the chrome/shiny texture passes
- * themselves (materials work), the BITMAP_JOINT_ENERGY mesh wraps of the
- * Golden Titan / Tantallos / Wheel (no mesh-wrap ribbon primitive), and the
- * `c->Weapon[]` kits - monster-rig weapons are deferred with the rest of the
+ * The tint is `PartObjectColor`'s case 0 (ZzzObject.cpp:6659), the fallback
+ * every monster model lands on. The per-index body lights the caller writes
+ * first - (1, 0.6, 0.3) at :8517, red at :8523 for the Great Golden Dragon -
+ * never reach the pass: `RenderPartObjectBodyColor` is called without an
+ * `iMonsterIndex`, so `PartObjectColor` overwrites them.
+ *
+ * Not ported here: the BITMAP_JOINT_ENERGY mesh wraps of the Golden Titan /
+ * Tantallos / Wheel (no mesh-wrap ribbon primitive), and the `c->Weapon[]`
+ * kits - monster-rig weapons are deferred with the rest of the
  * Setting_Monster weapon work (see monsterModelTable.ts).
  */
-const GOLD_SHINE = [0.5, 0.3, 0.15] as const;
+const GOLD_SHINE = [1, 0.5, 0] as const;
+
+/** The two that take the Shiny02 star pass instead of the metal/chrome pair. */
+const STAR_SHINE = new Set([53, 54]);
 
 abstract class GoldenMonster extends MonsterObject {
   protected abstract readonly npcType: number;
@@ -38,7 +44,8 @@ abstract class GoldenMonster extends MonsterObject {
     const model = MONSTER_MODEL_TABLE[this.npcType]?.[0] ?? 0;
     // Golden Budge Dragon shares MODEL_BUDGE_DRAGON and so shares the bob.
     this.BobsWhileMoving = model === BUDGE_DRAGON_MODEL;
-    this.SelfLight.set(GOLD_SHINE[0], GOLD_SHINE[1], GOLD_SHINE[2]);
+    this.BodyShine.tint.set(GOLD_SHINE[0], GOLD_SHINE[1], GOLD_SHINE[2]);
+    this.BodyShine.star = STAR_SHINE.has(this.npcType);
 
     this.load(await loadGLTF(monsterModelFile(model), world));
   }
@@ -207,8 +214,8 @@ const GREAT_DRAGON_FLAME_INTERVAL = 0.12;
 const GREAT_DRAGON_FLAME_HEIGHT = 1.2;
 
 // [NpcInfo(501, "Great Golden Dragon")] (ZzzCharacter.cpp:14656-14663) - the
-// one golden that burns: red body light (1, 0, 0) plus FIRE_HIK3_MONO flames
-// off the wing and neck bones (:8520-8563).
+// one golden that burns: FIRE_HIK3_MONO flames off the wing and neck bones
+// (:8520-8563), over the same gold as the rest of the line.
 export class GreatGoldenDragon extends GoldenMonster {
   static {
     GreatGoldenDragon.OverrideScale = monsterScaleOf(501);
@@ -223,7 +230,6 @@ export class GreatGoldenDragon extends GoldenMonster {
     this.#world = world;
     this.#entity = entity;
     await super.init(world, entity);
-    this.SelfLight.set(0.5, 0.05, 0.05);
   }
 
   Update(gameTime: World['gameTime']): void {
