@@ -9,8 +9,9 @@ import { useUiStageScale } from '../../../../components/uiStage';
 /**
  * `CUIMapName` (UIMapName.cpp): entering a map fades in that map's name
  * picture (`Local/<lang>/ImgsMapName/*.OZT`, the 166x90 top-left corner of a
- * 256x128 texture), holds it 5 s and fades it out. Centred horizontally,
- * top at line 220 of the 480-line virtual screen. A world with no entry in
+ * 256x128 texture), holds it 5 s and fades it out. Centred horizontally. The
+ * original puts it at line 220 of the 480-line virtual screen; here it sits
+ * near the top instead, just under the buff row. A world with no entry in
  * `InitImgPathMap` (the GM area, Crywolf 2nd) shows nothing.
  */
 
@@ -21,7 +22,8 @@ const START_ALPHA = 0.2;
 
 const IMG_WIDTH = 166;
 const IMG_HEIGHT = 90;
-const IMG_TOP = 220 / 480;
+// 640x480 UI space: at the top, clearing the buff row at y 15..48.
+const IMG_TOP = 50;
 
 const FADE_IN_MS = ((1 - START_ALPHA) / ALPHA_PER_SECOND) * 1000;
 const FADE_OUT_MS = (1 / ALPHA_PER_SECOND) * 1000;
@@ -140,7 +142,7 @@ export const MapNameBanner = () => {
         width: IMG_WIDTH * scale,
         height: IMG_HEIGHT * scale,
         marginLeft: (-IMG_WIDTH * scale) / 2,
-        top: `${IMG_TOP * 100}%`,
+        top: IMG_TOP * scale,
         // The original draws the 166x90 top-left corner of a 256x128 texture;
         // this Data folder ships the images already cropped to 166x90. Sizing
         // by the decoded picture keeps both layouts right.
