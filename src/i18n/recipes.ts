@@ -269,6 +269,8 @@ export const EN_TEXT = {
   'vault.depositJewelsHint': 'Move every jewel from the inventory into the vault',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
+  'keys.sortInventory': 'Arrange inventory',
+  'keys.targetNearest': 'Target next monster',
   'keys.replyWhisper': 'Reply to whisper',
   'keys.emoteMenu': 'Emote menu',
   'keys.inventory': 'Inventory',
@@ -1402,6 +1404,7 @@ export const EN_TEXT = {
   'notify.merchantRefuses': 'The merchant does not want that item',
   'notify.noInventoryRoom': 'There is no room in the inventory',
   'notify.noRoomForItem': 'There is no room for that item',
+  'notify.inventorySorted': 'Inventory arranged',
   'notify.itemsMoved': '{count} items moved',
   'notify.learnedSkill': 'You have learned {name}',
   'notify.storageOpen': 'You cannot use items while the storage is open',

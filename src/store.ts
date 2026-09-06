@@ -2163,6 +2163,37 @@ export const Store = new (class _Store {
   }
 
   /**
+   * Move an item to a named square of the same grid: the drag's lift and
+   * drop in one call, for the auto-arrange run (`common/inventorySort.ts`).
+   * Returns false when the move cannot be started.
+   */
+  moveItemToSquare(storage: StorageKind, fromSlot: number, toSlot: number): boolean {
+    if (this.pickedItem || this.pendingItemMove) return false;
+
+    const items = this.itemsOfStorage(storage);
+    const item = items[fromSlot];
+    if (!item || items[toSlot]) return false;
+
+    if (this.isOffline) {
+      runInAction(() => {
+        items[fromSlot] = null;
+        items[toSlot] = item;
+        this.syncPlayerAppearance();
+      });
+      return true;
+    }
+
+    runInAction(() => {
+      items[fromSlot] = null;
+      this.pickedItem = { item, fromSlot, fromStorage: storage };
+      if (storage === StorageKind.Inventory) this.syncPlayerAppearance();
+    });
+
+    this.moveItemRequest(storage, fromSlot, storage, toSlot, item);
+    return true;
+  }
+
+  /**
    * The raw `ItemMoveRequest` (0x24), with the pending-move guard. Slots go
    * in as local array indices; the packet carries the wire slots.
    */

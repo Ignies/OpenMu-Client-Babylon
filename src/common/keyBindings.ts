@@ -27,6 +27,8 @@ export type KeyAction =
   | 'muHelper'
   | 'muHelperConfig'
   | 'sessionStats';
+  | 'sortInventory';
+  | 'targetNearest';
   | 'replyWhisper';
 
 export type KeyBindings = Record<KeyAction, string>;
@@ -50,6 +52,8 @@ export const KEY_ACTION_LABEL_KEYS: Record<KeyAction, TextKey> = {
   muHelper: 'keys.muHelper',
   muHelperConfig: 'keys.muHelperConfig',
   sessionStats: 'keys.sessionStats',
+  sortInventory: 'keys.sortInventory',
+  targetNearest: 'keys.targetNearest',
   replyWhisper: 'keys.replyWhisper',
 };
 
@@ -79,6 +83,8 @@ const DEFAULTS: KeyBindings = {
   muHelperConfig: 'End',
   // No original analog: the arrange run is this client's own.
   sessionStats: 'KeyU',
+  sortInventory: 'KeyS',
+  targetNearest: 'KeyN',
   replyWhisper: 'KeyY',
 };
 
