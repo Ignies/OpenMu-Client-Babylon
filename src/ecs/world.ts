@@ -317,6 +317,8 @@ export type Entity = Partial<{
   };
   droppedItem: {
     isMoney: boolean;
+    /** Zen in the pile (`isMoney` drops only): what the loot filter weighs. */
+    amount?: number;
     /** Parsed item (level / excellent) for name tints and ground glow. */
     item?: Item;
     /** `IsFreshDrop`: it just left a hand or a corpse — falls and tumbles in (dropMotionSystem). */

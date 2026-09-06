@@ -1,6 +1,10 @@
 import './style.less';
 import { lazy, Suspense } from 'react';
 import { observer } from 'mobx-react-lite';
+import { runInAction } from 'mobx';
+import { Store } from '../../../store';
+import { isKey } from '../../../common/keyBindings';
+import { useEventBus } from '../../../hooks/useEventBus';
 import { WorldObjects } from '../../components/worldObjects';
 import { DamageNumbers } from '../../components/damageNumbers';
 import { TargetHealthBar } from '../../components/targetHealthBar';
@@ -44,8 +48,10 @@ import { SoccerScoreHud } from './components/soccerScore';
 import { DuelWindows } from './components/duel';
 import { Notices } from '../../components/notices';
 import { MapNameBanner } from './components/mapNameBanner';
+import { SessionStatsWindow } from './components/sessionStats';
 import { SlideHelpBar } from '../../components/slideHelp';
 import { DebugMenuWindow } from '../../components/debugMenu';
+import { MobileControls } from './components/mobileControls';
 
 // The active version's take on the windows that differ per version. Lazy so
 // the version UI chunk evaluates after the core app modules, not before.
@@ -97,9 +103,13 @@ const HUD = observer(() => {
       <EventWindows />
       <SoccerScoreHud />
       <DuelWindows />
+      <SessionStatsWindow />
       <Minimap />
       {/* Offline only: renders null online (F9). */}
       <DebugMenuWindow />
+      {}
+      {/* Touch clients only: renders null on a mouse. */}
+      <MobileControls />
       {}
       <PickedItemCursor />
     </div>
@@ -107,11 +117,18 @@ const HUD = observer(() => {
 });
 
 export const WorldPage = observer(() => {
+  // The screenshot key: the whole HUD layer off, the world untouched.
+  useEventBus('keyPressed', key => {
+    if (isKey('hideUi', key)) {
+      runInAction(() => (Store.hudHidden = !Store.hudHidden));
+    }
+  });
+
   return (
     <div className="world-page">
       <WorldObjects />
       <DamageNumbers />
-      <HUD />
+      {!Store.hudHidden && <HUD />}
     </div>
   );
 });

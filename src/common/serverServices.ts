@@ -73,6 +73,31 @@ export function registerUrl(
 }
 
 /**
+ * Where the login window's own register form posts, or empty when this world
+ * has no signup service the client may talk to.
+ *
+ * The signup page and the endpoint behind it are published together, so a
+ * world that has the one has the other. Note what this is *not*: a relative
+ * path, even for a world serving this very page. `/api` on the client's host
+ * is the cash shop, and a signup posted there lands on its 404 - the register
+ * service answers on `register.<domain>` and is reached by name from anywhere,
+ * which is what `CORS_ORIGIN` on that service exists to allow.
+ *
+ * A build that names a signup page but no endpoint gets nothing here on
+ * purpose: the window falls back to linking out to that page, which is what
+ * it did before it could ask itself.
+ */
+export function registerApiUrl(
+  profile: ServerProfile = ServerConfig.active
+): string {
+  if (profile.domain) {
+    return `https://${serviceHost('register', profile.domain)}/api/register`;
+  }
+
+  return (env.VITE_REGISTER_API as string) || '';
+}
+
+/**
  * Where the cash shop asks for its catalogue.
  *
  * A world being played from its own site keeps the relative path: that

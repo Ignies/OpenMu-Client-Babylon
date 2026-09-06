@@ -10,6 +10,7 @@ import { useRenderId } from '../../../hooks';
 import { useEventBus } from '../../../hooks/useEventBus';
 import { onScreenPosition } from '../../../libs/screenPositionBus';
 import { DROP_TIER_COLOURS, dropTier } from '../../../common/dropTier';
+import { dropPassesLootFilter } from '../../../common/lootFilter';
 import type { Entity } from '../../../ecs/world';
 import { stableKeyOf } from '../partyBars/stableKey';
 
@@ -20,7 +21,7 @@ const isAlt = (code: string) => code === 'AltLeft' || code === 'AltRight';
  * names over every drop on the ground, and they also show for as long as ALT
  * is held. Returns whether the overlay is on right now.
  */
-function useDropNamesOverlay(): boolean {
+function useDropNamesOverlay(): { overlay: boolean; showAll: boolean } {
   const [held, setHeld] = useState(false);
 
   useEventBus('keyPressed', code => {
@@ -32,7 +33,8 @@ function useDropNamesOverlay(): boolean {
     if (isAlt(code)) setHeld(false);
   });
 
-  return Store.showDropNames || held;
+  // Held ALT is the escape hatch: it names every drop, filter or not.
+  return { overlay: Store.showDropNames || held, showAll: held };
 }
 
 type DropEntity = With<Entity, 'transform' | 'screenPosition' | 'droppedItem'>;
@@ -42,12 +44,14 @@ type DropEntity = With<Entity, 'transform' | 'screenPosition' | 'droppedItem'>;
  * cursor is on the item (SelectedItem), and clickable — the original's
  * ALT-mode `SelectItem()` lets players pull one item out of a loot pile.
  */
-const DropLabel = ({
+const DropLabel = observer(({
   entity,
   overlay,
+  showAll,
 }: {
   entity: DropEntity;
   overlay: boolean;
+  showAll: boolean;
 }) => {
   const [hovered, setHovered] = useState(false);
   const hoveredRef = useRef(false);
@@ -66,7 +70,8 @@ const DropLabel = ({
     [entity]
   );
 
-  if (!overlay && !hovered) return null;
+  const named = overlay && (showAll || dropPassesLootFilter(entity.droppedItem));
+  if (!named && !hovered) return null;
 
   return (
     <WorldLabel
@@ -83,7 +88,7 @@ const DropLabel = ({
       }}
     />
   );
-};
+});
 
 /**
  * Drop names here; character and NPC names are the original's hover/chat
@@ -110,7 +115,7 @@ export const WorldObjects = observer(() => {
     };
   }, [query]);
 
-  const dropOverlay = useDropNamesOverlay();
+  const { overlay: dropOverlay, showAll: dropShowAll } = useDropNamesOverlay();
 
   return (
     <div className="world-objects">
@@ -119,6 +124,7 @@ export const WorldObjects = observer(() => {
           key={stableKeyOf(entity)}
           entity={entity as DropEntity}
           overlay={dropOverlay}
+          showAll={dropShowAll}
         />
       ))}
       <NameTags />

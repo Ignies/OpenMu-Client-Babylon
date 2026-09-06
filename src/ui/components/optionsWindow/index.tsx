@@ -12,6 +12,8 @@ import {
   BRIGHTNESS_MAX,
   BRIGHTNESS_MIN,
   TONE_MAPPER_MAX,
+  UI_SCALE_MAX,
+  uiScaleFactor,
   GameOptions,
   setGameOption,
   type GameOptions as GameOptionsType,
@@ -42,6 +44,8 @@ import {
   MATERIAL_DETAIL_MAX,
   MATERIAL_QUALITY_MAX,
 } from '../../../common/materialQuality';
+import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
+import { MuWindows } from '../muWindow/windowState';
 import { t, type TextKey } from '../../../i18n';
 import { LanguageSelect } from './languageSelect';
 import {
@@ -155,7 +159,9 @@ type SliderRow = {
     | 'chromatic'
     | 'toneMapper'
     | 'brightness'
-    | 'vignette';
+    | 'vignette'
+    | 'lootZen'
+    | 'uiScale';
   textId: number;
   labelKey: TextKey;
   max: number;
@@ -216,6 +222,28 @@ const TABS: Tab[] = [
             check('whisperBeep', 387, 'options.whisperBeep'),
             check('slideHelp', 919, 'options.slideHelp'),
             check('cameraControl', -1, 'options.cameraControl'),
+            check('chatTimestamps', -1, 'options.chatTimestamps'),
+            check('stateWarnings', -1, 'options.stateWarnings'),
+          ],
+        },
+        {
+          titleKey: 'options.section.interface',
+          rows: [
+            slider({
+              key: 'uiScale',
+              textId: -1,
+              labelKey: 'options.uiScale',
+              max: UI_SCALE_MAX,
+              display: v => `${Math.round(uiScaleFactor(v) * 100)}%`,
+            }),
+            check('lockWindows', -1, 'options.lockWindows'),
+            check('autoReconnect', -1, 'options.autoReconnect'),
+            {
+              kind: 'button',
+              id: 'reset-windows',
+              labelKey: 'options.resetWindows',
+              onClick: () => MuWindows.resetAll(),
+            },
           ],
         },
         {
@@ -245,6 +273,24 @@ const TABS: Tab[] = [
               labelKey: 'options.effectLevel',
               max: 4,
               display: v => v * 2 + 5,
+            }),
+          ],
+        },
+        {
+          titleKey: 'options.section.loot',
+          rows: [
+            check('lootFilter', -1, 'options.lootFilter'),
+            check('lootJewels', -1, 'options.lootJewels'),
+            check('lootExcellent', -1, 'options.lootExcellent'),
+            check('lootAncient', -1, 'options.lootAncient'),
+            check('lootHighLevel', -1, 'options.lootHighLevel'),
+            check('lootOther', -1, 'options.lootOther'),
+            slider({
+              key: 'lootZen',
+              textId: -1,
+              labelKey: 'options.lootZen',
+              max: LOOT_ZEN_MAX,
+              display: v => (v === 0 ? t('common.off') : lootZenThreshold(v)),
             }),
           ],
         },

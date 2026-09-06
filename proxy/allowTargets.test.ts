@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { isInternalHost, parseAllowTargets, targetAllowed } from './allowTargets';
+import { isInternalHost, parseAllowTargets, targetAllowed, targetReserved } from './allowTargets';
 
 const rules = (raw: string) => parseAllowTargets(raw);
+
+/** The presence server as proxy/main.ts reserves it by default. */
+const presence = [{ host: '127.0.0.1', port: 3001 }];
 
 describe('isInternalHost', () => {
   it('flags loopback, private, link-local and localhost', () => {
@@ -80,11 +83,35 @@ describe('targetAllowed', () => {
     expect(targetAllowed(r, 'db.localhost', 3001)).toBe(false);
   });
 
+  it('never dials the presence server, whatever ALLOW_TARGETS says', () => {
+    // Unset: every other target is open, this one is not.
+    expect(targetAllowed(rules(''), '127.0.0.1', 3001, presence)).toBe(false);
+    expect(targetAllowed(rules(''), '127.0.0.1', 44405, presence)).toBe(true);
+    // Named outright, or covered by a host-only rule, it still stays shut.
+    expect(targetAllowed(rules('127.0.0.1:3001'), '127.0.0.1', 3001, presence)).toBe(false);
+    expect(targetAllowed(rules('play.example.com'), 'play.example.com', 3001, [{ host: 'play.example.com', port: 3001 }])).toBe(false);
+  });
+
   it('keeps host-only and wildcard rules working for public hosts', () => {
     expect(targetAllowed(rules('play.example.com'), 'play.example.com', 55901)).toBe(true);
     expect(targetAllowed(rules('play.example.com'), 'play.example.com', 12345)).toBe(true);
     expect(targetAllowed(rules('*.example.net:55901'), 'gs1.example.net', 55901)).toBe(true);
     expect(targetAllowed(rules('*.example.net:55901'), 'gs1.example.net', 44405)).toBe(false);
     expect(targetAllowed(rules('*.example.net'), 'evil.com', 55901)).toBe(false);
+  });
+});
+
+describe('targetReserved', () => {
+  it('covers every internal spelling of a loopback reservation', () => {
+    for (const h of ['127.0.0.1', 'localhost', '::1', '::ffff:127.0.0.1', '[::1]', '0.0.0.0', '10.0.0.1']) {
+      expect(targetReserved(presence, h, 3001), h).toBe(true);
+    }
+  });
+
+  it('is exact on the port and does not reach public hosts', () => {
+    expect(targetReserved(presence, '127.0.0.1', 3002)).toBe(false);
+    expect(targetReserved(presence, 'example.com', 3001)).toBe(false);
+    expect(targetReserved([{ host: 'ws.example.net', port: 3001 }], 'ws.example.net', 3001)).toBe(true);
+    expect(targetReserved([{ host: 'ws.example.net', port: 3001 }], '127.0.0.1', 3001)).toBe(false);
   });
 });

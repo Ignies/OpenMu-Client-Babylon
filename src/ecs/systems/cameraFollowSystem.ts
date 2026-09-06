@@ -1,7 +1,11 @@
 import { Vector3, type ArcRotateCamera } from '../../libs/babylon/exports';
 import type { ISystemFactory } from '../world';
 import { Store, UIState } from '../../store';
-import { installCameraControl, updateGameCamera } from '../../camera';
+import {
+  installCameraControl,
+  showHeroBody,
+  updateGameCamera,
+} from '../../camera';
 
 const v3Temp = Vector3.Zero();
 
@@ -37,12 +41,18 @@ export const CameraFollowSystem: ISystemFactory = world => {
       camera.target.copyFrom(v3Temp);
 
       // The login/character screens keep their own camera (loginSceneSystem).
-      if (Store.uiState !== UIState.World) return;
+      if (Store.uiState !== UIState.World) {
+        // Leaving the world with the camera zoomed into the hero's head would
+        // strand the body hidden.
+        showHeroBody();
+        return;
+      }
 
       updateGameCamera(
         camera,
         world.mapIndex,
         world.keyboardInput.pressedKeys,
+        playerEntity.modelObject?.node ?? null,
         dt
       );
     },

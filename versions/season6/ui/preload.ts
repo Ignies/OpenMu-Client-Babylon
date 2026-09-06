@@ -15,6 +15,7 @@ import { VAULT_SPRITES } from '../../../src/ui/pages/worldPage/components/vault/
 import { CHAOS_MACHINE_SPRITES } from '../../../src/ui/pages/worldPage/components/chaosMachine/layout';
 import { TRADE_SPRITES } from '../../../src/ui/pages/worldPage/components/trade/layout';
 import { PERSONAL_SHOP_SPRITES } from '../../../src/ui/pages/worldPage/components/personalShop/layout';
+import { CASH_SHOP_SPRITES } from '../../../src/ui/pages/worldPage/components/cashShop/layout';
 import type { VersionPreload } from '../../../src/version/uiContract';
 
 const PREGAME_SPRITES = [
@@ -185,6 +186,7 @@ const WORLD_SPRITES = [
     ...CHAOS_MACHINE_SPRITES,
     ...TRADE_SPRITES,
     ...PERSONAL_SHOP_SPRITES,
+    ...CASH_SHOP_SPRITES,
     ...HUD_SPRITES,
   ]),
 ];

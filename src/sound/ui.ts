@@ -35,6 +35,10 @@ export const UI_SOUNDS = {
   mixFailed: 'Sound/eBreak',
   duelWindow: 'Sound/iDuel_Window',
   duelStart: 'Sound/iDuelStart',
+  // The cash shop's own, not the original client's, so the catalogue's only
+  // non-.ogg files: Babylon's end-of-string extension check takes .wav and .mp3.
+  coin: 'Sound/coin',
+  win: 'Sound/win',
 } as const satisfies Record<string, Sounds>;
 
 export type UiSound = keyof typeof UI_SOUNDS;

@@ -39,6 +39,11 @@ export const TAX_Y = 27;
 /** GlobalText[1623]. */
 export const TAX: TextKey = 'shop.tax';
 
+/** The find box sits in the strip between the tax line and the stock. */
+export const SEARCH_X = GRID_X;
+export const SEARCH_Y = 34;
+export const SEARCH_WIDTH = 152;
+
 export const REPAIR_MONEY_SPRITE = 'newui_item_money2.OZT';
 export const REPAIR_MONEY_X = 10;
 export const REPAIR_MONEY_Y = 355;

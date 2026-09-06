@@ -143,6 +143,7 @@ export const TradeWindow = observer(() => {
         left={YOUR_GRID_X}
         top={YOUR_GRID_Y}
         disabled
+        marked={square => Economy.yourTradeChanged.has(square)}
       />
 
       <MuSpriteFrame

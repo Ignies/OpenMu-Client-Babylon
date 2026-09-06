@@ -10,6 +10,7 @@ import { PreloaderPage } from './ui/pages/preloaderPage';
 import { LoadingScreen } from './ui/components/loadingScreen';
 import { OptionsWindow } from './ui/components/optionsWindow';
 import { GameCursor } from './ui/components/gameCursor';
+import { ReconnectOverlay } from './ui/components/reconnectOverlay';
 
 // The login and character screens are the version's own: Season 6 draws its
 // two windows over a login world, 0.97d draws period chrome over a ship at
@@ -62,6 +63,8 @@ export const App = observer(() => {
       <OptionsWindow />
       {}
       <LoadingScreen />
+      {}
+      <ReconnectOverlay />
       {}
       <GameCursor />
     </div>

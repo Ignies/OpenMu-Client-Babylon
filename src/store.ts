@@ -72,6 +72,7 @@ import { Item, World } from './ecs/world';
 import { EventBus } from './libs/eventBus';
 import { Scalar } from './libs/babylon/exports';
 import { InventoryConstants } from './common/inventoryConstants';
+import { findFreeSlot, type Footprint } from './common/inventoryFit';
 import { isJewel, jewelTargetError } from './common/jewelUpgrade';
 import { ItemGroups } from './common/objects/enum';
 import { ItemsDatabase } from './common/itemsDatabase';
@@ -184,43 +185,20 @@ function itemSize(item: Item): { w: number; h: number } {
  * `FindEmptySlot`); -1 when the inventory is full.
  */
 function findFreeInventorySlot(items: (Item | null)[], item: Item): number {
-  const columns = InventoryConstants.RowSize;
   const first = InventoryConstants.LastEquippableItemSlotIndex + 1;
-  const rows = Math.floor((items.length - first) / columns);
+  const rows = Math.floor((items.length - first) / InventoryConstants.RowSize);
+  const occupied: Footprint[] = [];
+
+  for (let slot = first; slot < items.length; slot++) {
+    const placed = items[slot];
+    if (!placed) continue;
+    const { w, h } = itemSize(placed);
+    occupied.push({ slot, width: w, height: h });
+  }
+
   const { w, h } = itemSize(item);
 
-  const used = new Uint8Array(columns * rows);
-  for (let square = 0; square < columns * rows; square++) {
-    const placed = items[first + square];
-    if (!placed) continue;
-    const size = itemSize(placed);
-    const column = square % columns;
-    const row = (square - column) / columns;
-    for (let y = 0; y < size.h; y++) {
-      for (let x = 0; x < size.w; x++) {
-        if (column + x < columns && row + y < rows) {
-          used[(row + y) * columns + column + x] = 1;
-        }
-      }
-    }
-  }
-
-  for (let row = 0; row + h <= rows; row++) {
-    for (let column = 0; column + w <= columns; column++) {
-      let fits = true;
-      for (let y = 0; y < h && fits; y++) {
-        for (let x = 0; x < w; x++) {
-          if (used[(row + y) * columns + column + x]) {
-            fits = false;
-            break;
-          }
-        }
-      }
-      if (fits) return first + row * columns + column;
-    }
-  }
-
-  return -1;
+  return findFreeSlot(occupied, rows, w, h);
 }
 
 /** What the offline merchant sells: a Lorencia weapon-and-potion stall. */
@@ -679,6 +657,20 @@ export const Store = new (class _Store {
   csSocket?: WebSocket;
   gsSocket?: WebSocket;
 
+  /**
+   * Where the game server we are on lives, kept after the connection is
+   * established so a dropped socket can be dialled again without walking
+   * the connect server a second time (`common/sessionResume.ts`).
+   */
+  lastGameServer: { host: string; port: number; fallbackHost: string | null } | null = null;
+
+  /**
+   * Asked before a lost game-server socket sends the player back to the
+   * server list. Returns true when something else (the session resume) has
+   * taken the loss over. Set by `logic.ts`; the store stays unaware of it.
+   */
+  resumeHook: (() => boolean) | null = null;
+
   private encryptor?: SimpleModulusEncryptor;
 
   username = '';
@@ -977,6 +969,11 @@ export const Store = new (class _Store {
   /** The Move command (warp list) window, M (`INTERFACE_MOVEMAP`). */
   warpWindowEnabled = false;
 
+  /** The hide-interface key: the HUD layer is not drawn while this is set. */
+  hudHidden = false;
+  /** The session panel (exp / kills / zen per hour); this client's own. */
+  sessionStatsEnabled = false;
+
   sceneLoading = false;
 
   loadingProgress = 0;
@@ -1090,6 +1087,8 @@ export const Store = new (class _Store {
       emoteMenuEnabled: observable,
       minimapEnabled: observable,
       warpWindowEnabled: observable,
+      hudHidden: observable,
+      sessionStatsEnabled: observable,
       sceneLoading: observable,
       loadingProgress: observable,
       spritesLoading: observable,
@@ -1189,6 +1188,10 @@ export const Store = new (class _Store {
       // wrong `ConnectionInfo` address usually lands. One retry, then the
       // ordinary lost-connection path.
       if (this.retryGameServer('closed the connection')) return;
+
+      // The session resume takes the loss over when it can (and when the
+      // option is on); otherwise this is the old start-over path.
+      if (this.resumeHook?.()) return;
 
       runInAction(() => {
         this.connectionLost = true;
@@ -1446,6 +1449,8 @@ export const Store = new (class _Store {
     runInAction(() => {
       this.connectionLost = false;
     });
+
+    this.lastGameServer = { host: ip, port, fallbackHost };
 
     const { socket } = createSocket({
       wsAddress: wsAddress(),
@@ -2178,6 +2183,37 @@ export const Store = new (class _Store {
       toSlot,
       picked.item
     );
+  }
+
+  /**
+   * Move an item to a named square of the same grid: the drag's lift and
+   * drop in one call, for the auto-arrange run (`common/inventorySort.ts`).
+   * Returns false when the move cannot be started.
+   */
+  moveItemToSquare(storage: StorageKind, fromSlot: number, toSlot: number): boolean {
+    if (this.pickedItem || this.pendingItemMove) return false;
+
+    const items = this.itemsOfStorage(storage);
+    const item = items[fromSlot];
+    if (!item || items[toSlot]) return false;
+
+    if (this.isOffline) {
+      runInAction(() => {
+        items[fromSlot] = null;
+        items[toSlot] = item;
+        this.syncPlayerAppearance();
+      });
+      return true;
+    }
+
+    runInAction(() => {
+      items[fromSlot] = null;
+      this.pickedItem = { item, fromSlot, fromStorage: storage };
+      if (storage === StorageKind.Inventory) this.syncPlayerAppearance();
+    });
+
+    this.moveItemRequest(storage, fromSlot, storage, toSlot, item);
+    return true;
   }
 
   /**

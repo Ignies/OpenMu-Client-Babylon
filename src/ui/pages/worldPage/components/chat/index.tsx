@@ -11,11 +11,15 @@ import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuWindows } from '../../../../components/muWindow/windowState';
 import { bottomBarScreenHeight } from '../../../../components/muWindow';
+import { useUiViewport } from '../../../../components/uiStage';
+import { useIsMobile } from '../../../../../common/mobile';
 import {
   MuResizeGrip,
   useWindowStackEntry,
 } from '../../../../components/muWindow/useWindowChrome';
 import { isTypingInField } from '../../../../../ecs/systems/keyboardInputSystem';
+import { GameOptions } from '../../../../../common/gameOptions';
+import { isKey } from '../../../../../common/keyBindings';
 import {
   CHAT_FILTERS,
   CHAT_INPUT_MODES,
@@ -23,6 +27,7 @@ import {
   CHAT_LINE_STYLE,
   CHATBOX_HEIGHT,
   CHATBOX_WIDTH,
+  chatTimestamp,
   ChatLineType,
   MAX_CHAT_LENGTH,
   type ChatInputMode,
@@ -318,6 +323,9 @@ const ChatLog = observer(() => {
               Social.openChatInput();
             }}
           >
+            {GameOptions.chatTimestamps && (
+              <span className="chat-line-time">{chatTimestamp(line.at)} </span>
+            )}
             {line.sender ? `${line.sender} : ${line.text}` : line.text}
           </div>
         );
@@ -702,7 +710,14 @@ const ChatInput = observer(() => {
 const NOTHING_TO_CLOSE = () => false;
 
 export const ChatWindow = observer(() => {
-  const scale = MuWindows.scaleOf(CHAT_ID);
+  const mobile = useIsMobile();
+  const viewport = useUiViewport();
+  // 281 px at the default 1.5 is 422 - wider than a phone, so the log hangs
+  // off the right edge. Capped for the draw only; the placement the player
+  // saved is untouched, so the same character on a desktop is unaffected.
+  const scale = mobile
+    ? Math.min(MuWindows.scaleOf(CHAT_ID), viewport.width / CHATBOX_WIDTH)
+    : MuWindows.scaleOf(CHAT_ID);
 
   useWindowStackEntry(CHAT_ID, true, NOTHING_TO_CLOSE);
 
@@ -710,10 +725,21 @@ export const ChatWindow = observer(() => {
   // while a message box is up (`isComposing` too), so this only fires for a
   // bare Enter.
   useEventBus('keyPressed', key => {
-    if (!OPEN_KEYS.has(key)) return;
     if (isTypingInField()) return;
     if (!Store.world?.playerEntity) return;
     if (Store.msgWin) return;
+
+    // The reply key: the box opens already addressed to whoever whispered
+    // last, which is otherwise a right click on their line in the log.
+    if (isKey('replyWhisper', key)) {
+      const name = Social.lastWhisperFrom;
+      if (!name) return;
+      Social.setWhisperTarget(name);
+      Social.openChatInput();
+      return;
+    }
+
+    if (!OPEN_KEYS.has(key)) return;
     Social.openChatInput();
   });
 

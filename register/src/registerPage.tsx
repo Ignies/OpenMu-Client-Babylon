@@ -1,4 +1,12 @@
 import { useState } from 'react';
+import {
+  MAX_ACCOUNT_LENGTH,
+  MAX_ACCOUNT_PASSWORD_LENGTH,
+  MIN_ACCOUNT_LENGTH,
+  MIN_ACCOUNT_PASSWORD_LENGTH,
+  validateSignup,
+  type SignupProblem,
+} from '../../src/common/registerRules';
 import { MuSpriteFrame } from './muSprite';
 import { MuButton } from './muButton';
 
@@ -41,17 +49,8 @@ const BUTTON_Y = 192;
 const OK_X = 150;
 const CANCEL_X = 211;
 
-/** `data."Account"."LoginName"` is `varchar(10)`; the client caps the same. */
-const MAX_USERNAME_LENGTH = 10;
-const MAX_PASSWORD_LENGTH = 10;
-const MIN_USERNAME_LENGTH = 4;
-const MIN_PASSWORD_LENGTH = 4;
-
 /** Where the account actually gets created. See `register/server/main.ts`. */
 const API = import.meta.env.VITE_REGISTER_API || '/api/register';
-
-/** MU account names are ASCII; the server rejects anything else anyway. */
-const USERNAME_RE = /^[A-Za-z0-9]+$/;
 
 /**
  * The login window's two rows, plus the confirmation a password needs when it
@@ -80,33 +79,17 @@ const EMPTY: Record<Field, string> = {
 };
 
 /**
- * Everything the form can reject without asking the server. The server
- * re-checks all of it — this exists so a typo costs a render, not a round
- * trip.
+ * The shared reasons, said in the English this page is written in. The client's
+ * own register window says the same things through `t()`; the service says them
+ * again for anything that POSTs without a form.
  */
-function validate(values: Record<Field, string>): string | null {
-  const { username, password, confirm } = values;
-
-  if (!username || !password || !confirm) {
-    return 'Please fill in every field.';
-  }
-
-  if (username.length < MIN_USERNAME_LENGTH) {
-    return `ID must be at least ${MIN_USERNAME_LENGTH} characters.`;
-  }
-
-  if (!USERNAME_RE.test(username)) {
-    return 'ID may contain only letters and numbers.';
-  }
-
-  if (password.length < MIN_PASSWORD_LENGTH) {
-    return `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
-  }
-
-  if (password !== confirm) return 'Passwords do not match.';
-
-  return null;
-}
+const PROBLEM_TEXT: Record<SignupProblem, string> = {
+  empty: 'Please fill in every field.',
+  idShort: `ID must be at least ${MIN_ACCOUNT_LENGTH} characters.`,
+  idChars: 'ID may contain only letters and numbers.',
+  passwordShort: `Password must be at least ${MIN_ACCOUNT_PASSWORD_LENGTH} characters.`,
+  mismatch: 'Passwords do not match.',
+};
 
 export const RegisterPage = () => {
   const [values, setValues] = useState<Record<Field, string>>(EMPTY);
@@ -118,10 +101,10 @@ export const RegisterPage = () => {
   const submit = async () => {
     if (status.kind === 'sending') return;
 
-    const problem = validate(values);
+    const problem = validateSignup(values);
 
     if (problem) {
-      setStatus({ kind: 'error', message: problem });
+      setStatus({ kind: 'error', message: PROBLEM_TEXT[problem] });
       return;
     }
 
@@ -197,8 +180,8 @@ export const RegisterPage = () => {
                     onChange={e => set(row.key, e.target.value)}
                     maxLength={
                       row.key === 'username'
-                        ? MAX_USERNAME_LENGTH
-                        : MAX_PASSWORD_LENGTH
+                        ? MAX_ACCOUNT_LENGTH
+                        : MAX_ACCOUNT_PASSWORD_LENGTH
                     }
                     style={{
                       paddingLeft: TEXT_INSET_X,

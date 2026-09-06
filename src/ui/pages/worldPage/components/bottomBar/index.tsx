@@ -3,8 +3,6 @@ import { t } from '../../../../../i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../../../store';
-import { toggleCashShopWindow } from '../../../../../cashShop/state';
-import { Messenger } from '../../../../../messenger';
 import { ItemIcon } from '../../../../components/itemIcon';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
@@ -15,6 +13,12 @@ import { MuWindows } from '../../../../components/muWindow/windowState';
 import { SkillIcon } from '../../../../components/skillIcon';
 import { MasterExpBar } from '../masterSkills/masterExpBar';
 import { PetCommandBar } from './petCommands';
+import {
+  MAIN_FRAME_BUTTONS,
+  MAIN_FRAME_BUTTON_FRAMES,
+  MAIN_FRAME_BUTTON_HEIGHT,
+  MAIN_FRAME_BUTTON_WIDTH,
+} from './mainFrameButtons';
 import { isKey } from '../../../../../common/keyBindings';
 import { BOTTOM_BAR_ID } from '../../../../components/muWindow';
 import { skillDefinition } from '../../../../../common/skillsDatabase';
@@ -66,11 +70,11 @@ const CURRENT_SKILL_X = 385;
 
 const BUTTON_X = 489;
 const BUTTON_STEP = 30;
-const BUTTON_WIDTH = 30;
-const BUTTON_HEIGHT = 41;
+const BUTTON_WIDTH = MAIN_FRAME_BUTTON_WIDTH;
+const BUTTON_HEIGHT = MAIN_FRAME_BUTTON_HEIGHT;
 const BUTTON_Y = local(BAR_TOP);
 
-const BUTTON_FRAMES = { up: 0, active: 1, down: 2 } as const;
+const BUTTON_FRAMES = MAIN_FRAME_BUTTON_FRAMES;
 
 const EXP_X = 2;
 const EXP_Y = local(473);
@@ -358,6 +362,7 @@ const SkillSlots = observer(() => {
   // on the cooldown layer's tick, so a running delay renders nothing. The
   // observable map only changes when a delay starts / ends (slot re-render).
   const delayRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const secondsRefs = useRef<(HTMLDivElement | null)[]>([]);
   const slotNumbers = useRef<number[]>([]);
   useEffect(() => {
     const sweep = () => {
@@ -368,6 +373,16 @@ const SkillSlots = observer(() => {
         const delay = numbers[i] >= 0 ? skills.cooldown(numbers[i]) : null;
         const css = delay ? Math.round(delay.fraction * SKILL_SLOT_HEIGHT) + 'px' : '0px';
         if (el.style.height !== css) el.style.height = css;
+        const seconds = secondsRefs.current[i];
+        if (!seconds) continue;
+        // Whole seconds under 10, one decimal above nothing: the same
+        // reading a player counts under their breath.
+        const text = delay
+          ? delay.remaining >= 1
+            ? String(Math.ceil(delay.remaining))
+            : delay.remaining.toFixed(1)
+          : '';
+        if (seconds.textContent !== text) seconds.textContent = text;
       }
     };
     sweep();
@@ -478,7 +493,12 @@ const SkillSlots = observer(() => {
     <>
       {page.map((slot, i) => {
         const number = Store.skillHotkeys[slot] ?? -1;
-        const usable = number >= 0 && skills.requirementsMet(number);
+        const state = number >= 0 ? skills.usability(number) : null;
+        const usable = !!state?.requirementsMet;
+        const shortOn =
+          usable && state
+            ? state.blocks.find(block => block === 'mana' || block === 'ag')
+            : undefined;
         // Tracked: a delay starting or ending re-renders the slot (the sweep itself is not React).
         const cooling = number >= 0 && skillCooldowns.has(number);
         const selected = number >= 0 && number === Store.currentSkill;
@@ -488,6 +508,7 @@ const SkillSlots = observer(() => {
         const classes = ['skill-slot'];
         if (selected) classes.push('selected');
         if (number >= 0 && !usable) classes.push('unusable');
+        if (shortOn) classes.push(shortOn === 'mana' ? 'no-mana' : 'no-ag');
         if (number < 0) classes.push('empty');
         if (picking) classes.push('picking');
         const events = boxEvents(number, false);
@@ -530,11 +551,14 @@ const SkillSlots = observer(() => {
               </div>
             )}
             {cooling && (
-              <div
-                ref={el => (delayRefs.current[i] = el)}
-                className="skill-delay"
-                style={{ height: 0, background: DELAY_TINT }}
-              />
+              <>
+                <div
+                  ref={el => (delayRefs.current[i] = el)}
+                  className="skill-delay"
+                  style={{ height: 0, background: DELAY_TINT }}
+                />
+                <div ref={el => (secondsRefs.current[i] = el)} className="skill-delay-left" />
+              </>
             )}
             {number >= 0 && <div className="skill-hotkey">{slot}</div>}
           </div>
@@ -750,42 +774,15 @@ export const BottomBar = observer(() => {
 
       <SkillSlots />
 
-      <BarButton
-        index={0}
-        file="partCharge1/newui_menu_Bt05.OZJ"
-        title={t('bottomBar.itemShop')}
-        onClick={() => toggleCashShopWindow()}
-      />
-      <BarButton
-        index={1}
-        file="partCharge1/newui_menu_Bt01.OZJ"
-        title={t('bottomBar.characterInfo')}
-        onClick={() => {
-          Store.characterInfoEnabled = !Store.characterInfoEnabled;
-        }}
-      />
-      <BarButton
-        index={2}
-        file="partCharge1/newui_menu_Bt02.OZJ"
-        title={t('bottomBar.inventory')}
-        onClick={() => {
-          Store.inventoryEnabled = !Store.inventoryEnabled;
-        }}
-      />
-      <BarButton
-        index={3}
-        file="partCharge1/newui_menu_Bt03.OZJ"
-        title={t('bottomBar.friendList')}
-        onClick={() => Messenger.toggleWindow()}
-      />
-      <BarButton
-        index={4}
-        file="partCharge1/newui_menu_Bt04.OZJ"
-        title={t('bottomBar.options')}
-        onClick={() => {
-          Store.optionsEnabled = !Store.optionsEnabled;
-        }}
-      />
+      {MAIN_FRAME_BUTTONS.map((button, index) => (
+        <BarButton
+          key={button.file}
+          index={index}
+          file={button.file}
+          title={t(button.titleKey)}
+          onClick={button.toggle}
+        />
+      ))}
 
       <ExpBar />
       <MasterExpBar />

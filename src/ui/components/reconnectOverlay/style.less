@@ -1,0 +1,48 @@
+@import (reference) '../muText/style.less';
+// The reconnect plate: over everything, dimming what is behind it.
+.reconnect-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+
+  .reconnect-plate {
+    min-width: 260px;
+    padding: 18px 24px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(120, 100, 70, 0.9);
+    .mu-font();
+    color: #fff;
+  }
+
+  .reconnect-title {
+    font-size: 15px;
+    color: rgb(255, 204, 26);
+    margin-bottom: 8px;
+  }
+
+  .reconnect-line {
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .reconnect-cancel {
+    display: inline-block;
+    padding: 3px 18px;
+    font-size: 12px;
+    color: #ffe08a;
+    border: 1px solid rgba(120, 100, 70, 0.9);
+    background: rgba(60, 0, 0, 0.6);
+    cursor: pointer;
+
+    &:hover {
+      border-color: rgba(255, 204, 26, 0.9);
+      background: rgba(120, 0, 0, 0.7);
+    }
+  }
+}

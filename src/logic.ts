@@ -263,6 +263,7 @@ import {
   usesMissileWeapon,
 } from './common/combatSounds';
 import { experienceForLevel } from './common/experience';
+import { SessionResume } from './common/sessionResume';
 import { WEATHER_RAIN } from './weather/rainState';
 import { combat } from './combat';
 import { COMBO_SOUND } from './combat/combo';
@@ -384,6 +385,9 @@ EventBus.on('GameServerEntered', bytes => {
   // answers with the character state and the world carries on.
   if (Store.sendServerChangeAuthentication()) return;
 
+  // A resume sends the login itself instead of showing the form.
+  if (SessionResume.onGameServerEntered()) return;
+
   runInAction(() => {
     Store.uiState = UIState.Login;
   });
@@ -441,12 +445,17 @@ EventBus.on('LoginResponse', bytes => {
       Store.loginError = undefined;
     });
     Store.saveLoginData();
+    // A resume picks the character back up instead of opening the list.
+    if (SessionResume.onLoginOk()) return;
     Store.disconnectFromConnectServer();
     runInAction(() => {
       Store.uiState = UIState.Characters;
     });
     return;
   }
+
+  // The server refused the login: the player takes over from the form.
+  SessionResume.onLoginFailed();
 
   runInAction(() => {
     Store.loginError = `Error: ${LoginResponseLoginResultEnum[p.Success]}`;
@@ -604,6 +613,8 @@ function applyCharacterInformation(p: CharacterInformationView) {
     playerData.heroState = 3;
 
     Store.uiState = UIState.World;
+    SessionResume.remember(playerData.name);
+    SessionResume.finish();
     // Lazy: preloadSprites pulls the window layouts in, and logic.ts sits under them.
     void import('./libs/mu/preloadSprites').then(m => m.preloadWorldSprites());
 
@@ -1197,6 +1208,9 @@ EventBus.on('ChatMessage', packet => {
     if (Social.blockWhisper) return;
     playUiSound('whisper');
     Social.addChatLine(sender, message, ChatLineType.Whisper);
+    runInAction(() => {
+      Social.lastWhisperFrom = sender;
+    });
     if (!Social.whisperTarget) Social.setWhisperTarget(sender);
     return;
   }
@@ -2704,6 +2718,7 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
       screenPosition: { worldOffsetZ: DROP_LABEL_HEIGHT, x: 0, y: 0 },
       droppedItem: {
         isMoney,
+        amount: isMoney ? amount : undefined,
         item: parsed,
         fresh: !!item.IsFreshDrop,
         group: poseGroup,
@@ -3472,6 +3487,8 @@ EventBus.on('ApplyKeyConfiguration', packet => {
 EventBus.on('LogoutResponse', packet => {
   if (packet.byteLength < LogoutResponsePacket.Length!) return;
   const p = new LogoutResponsePacket(packet);
+
+  SessionResume.forget();
 
   Store.closeNpcShop();
   quests.closeAll();

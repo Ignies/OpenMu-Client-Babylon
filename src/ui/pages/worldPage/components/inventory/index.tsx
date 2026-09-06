@@ -18,6 +18,7 @@ import { ItemsDatabase } from '../../../../../common/itemsDatabase';
 import { canRegisterItemHotkey } from '../../../../../common/itemHotkeys';
 import { isUpgradeJewel } from '../../../../../common/jewelUpgrade';
 import { InventoryConstants } from '../../../../../common/inventoryConstants';
+import { InventorySort } from '../../../../../common/inventorySort';
 import { StorageKind } from '../../../../../common/itemStorage';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MuSpriteFrame } from '../../../../components/muSprite';
@@ -307,6 +308,12 @@ export const Inventory = observer(() => {
       (key === ALT_HOT_KEY && !actionOfKey(key))
     ) {
       Store.inventoryEnabled = !Store.inventoryEnabled;
+    }
+
+    // The grid packs itself top-left, kind by kind; a second press stops a
+    // run that is still going.
+    if (isKey('sortInventory', key) && Store.inventoryEnabled) {
+      InventorySort.start();
     }
 
     // NewUIMyInventory.cpp:578: L toggles self-repair (level 50+), only

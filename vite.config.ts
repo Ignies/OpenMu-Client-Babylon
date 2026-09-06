@@ -8,12 +8,20 @@ export default defineConfig({
   base: './',
   plugins: [],
   /**
-   * The cash shop window talks to the shop service, which is its own process.
-   * Proxied here so it is same-origin in dev; in production Caddy does the
-   * same on the client host.
+   * The two services the UI talks to, each its own process. Proxied here so
+   * they are same-origin in dev; in production the shop is published under
+   * `/api` on the client host and the register service answers by name on
+   * `register.<domain>` (see `serverServices.ts`).
+   *
+   * `/api/register` is listed first: vite takes the first rule that matches,
+   * and `/api` matches it too.
    */
   server: {
     proxy: {
+      '/api/register': {
+        target: `http://127.0.0.1:${process.env.REGISTER_API_PORT ?? 3100}`,
+        changeOrigin: false,
+      },
       '/api': {
         target: `http://127.0.0.1:${process.env.CASHSHOP_API_PORT ?? 3200}`,
         changeOrigin: false,

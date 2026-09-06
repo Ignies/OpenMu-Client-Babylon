@@ -1,6 +1,7 @@
 import { PointerEventTypes } from '../../libs/babylon/exports';
 import type { ISystemFactory } from '../world';
 import { Store } from '../../store';
+import { isMobileDevice } from '../../common/mobile';
 import { MoveTargetEffect } from '../../common/moveTargetEffect';
 
 const MOVE_DELAY = 0.25;
@@ -14,11 +15,34 @@ export const PlayerControllerSystem: ISystemFactory = world => {
 
   let lastClientX = 0;
   let lastClientY = 0;
+  /**
+   * A press was seen and has not been walked on yet. The walk used to be
+   * driven purely by polling `world.pointerPressed` once a frame, which can
+   * only see a button that is still down when a frame runs: a measured touch
+   * tap is held ~29 ms and no render tick observed it at all, so the tap was
+   * dropped whole. Remembering the press instead makes it an edge, and the
+   * poll below still repeats the walk for as long as the button stays down.
+   */
+  let pressPending = false;
 
   scene.onPointerObservable.add(ev => {
-    if (ev.type === PointerEventTypes.POINTERMOVE) {
+    // The press counts as well as the move: a touch tap fires POINTERDOWN and
+    // POINTERUP with no POINTERMOVE between them, so on a phone this was the
+    // only sample there ever was and `tryMove` picked against the screen
+    // corner. A mouse always moves to where it clicks, so the down event
+    // carries the coordinates the move already wrote.
+    if (
+      ev.type === PointerEventTypes.POINTERMOVE ||
+      ev.type === PointerEventTypes.POINTERDOWN
+    ) {
       lastClientX = ev.event.clientX;
       lastClientY = ev.event.clientY;
+    }
+
+    // Left button only, the same button `pointerInputSystem` walks on: the
+    // middle one belongs to the camera and the right one casts.
+    if (ev.type === PointerEventTypes.POINTERDOWN && ev.event.button === 0) {
+      pressPending = true;
     }
   });
 
@@ -63,6 +87,12 @@ playerEntity.playerMoveTo.point.x = point.x;
     world.attackTarget = null;
     world.pickupTarget = null;
     world.talkTarget = null;
+    // Touch only: a skill fired from the mobile pad leaves a cast standing
+    // while the hero walks into range, the way a held right button does. With
+    // no button to let go of, a tap on the ground is how it is called off. On
+    // a mouse the right-drag repeat re-arms `castRequest` on every move event,
+    // so clearing it there would fight the desktop repeat cast.
+    if (isMobileDevice()) world.castRequest = null;
   }
 
   return {
@@ -71,9 +101,13 @@ playerEntity.playerMoveTo.point.x = point.x;
 
       moveTarget.update(dt);
 
-      if (world.pointerPressed) {
+      // A press that is still down repeats the walk on the throttle; a press
+      // already released walks once. Either way the throttle holds - a tap
+      // inside it waits its turn rather than being thrown away.
+      if (world.pointerPressed || pressPending) {
         if (delay <= 0) {
           delay = MOVE_DELAY;
+          pressPending = false;
           tryMove();
         }
       }

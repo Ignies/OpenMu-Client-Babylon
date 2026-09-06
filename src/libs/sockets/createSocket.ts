@@ -2,6 +2,7 @@ import { EventBus } from "../eventBus";
 import { ConnectServerPackets, ServerToClientPackets, SimpleModulusDecryptor, SimpleModulusKeys } from "../../common";
 import { gameVersion } from "../../version";
 import { byteToString, getPacketSize, getSizeOfPacketType } from "../../common/utils";
+import { sessionNonce } from "../../common/sessionNonce";
 
 type Options = {
   wsAddress: string;
@@ -80,8 +81,16 @@ export function createSocket({ wsAddress, tcpIP, tcpPort }: Options) {
   const decryptor = new SimpleModulusDecryptor();
   decryptor.decryptionKeys = SERVER_TO_CLIENT_KEYS;
 
+  // `&session=`: the page's nonce (src/common/sessionNonce.ts), so the proxy
+  // can put the login it reads off this socket to the cash shop's ticket
+  // route. Only the sockets built here carry it, because they are the ones a
+  // login travels on. `chatRoomSocket.ts` builds the same URL and does not: a
+  // chat socket never logs in, so the nonce would name nothing there and only
+  // be one more place a credential travels. `serverProbe.ts` must not: it
+  // dials other people's proxies two at a time, and a nonce handed to a
+  // stranger's proxy is a name their presence server gets to claim.
   const socket = new WebSocket(
-    `${wsAddress}?host=${tcpIP}&port=${tcpPort}`
+    `${wsAddress}?host=${tcpIP}&port=${tcpPort}&session=${sessionNonce()}`
   );
   socket.binaryType = "arraybuffer";
 

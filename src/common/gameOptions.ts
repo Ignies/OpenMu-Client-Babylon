@@ -85,12 +85,51 @@ export type GameOptions = {
    * today's fixed framing.
    */
   cameraControl: boolean;
+  /**
+   * Run the latched ALT drop names through `lootFilter.ts` instead of naming
+   * every pile on the ground. ALT held still shows all of them.
+   */
+  lootFilter: boolean;
+  lootJewels: boolean;
+  lootExcellent: boolean;
+  lootAncient: boolean;
+  /** Name +7 and up (`HIGH_DROP_LEVEL`, the gold tint). */
+  lootHighLevel: boolean;
+  /** Everything the rules above do not claim. */
+  lootOther: boolean;
+  /** Index into `LOOT_ZEN_STEPS`: the smallest zen pile that keeps its name. */
+  lootZen: number;
+  /** A "14:03" column in front of every chat log line. */
+  chatTimestamps: boolean;
+  /**
+   * Index into `UI_SCALE_STEPS`: how big every window is drawn, on top of
+   * the size it was dragged to. 4K screens want more than a 640x480 stage.
+   */
+  uiScale: number;
+  /** Windows stay where they are: a drag raises them but does not move them. */
+  lockWindows: boolean;
+  /** Durability, full grid, last potion and buff ending notices. */
+  stateWarnings: boolean;
+  /**
+   * Walk the login flow again by ourselves when the game server socket
+   * drops, instead of sending the player back to the server list.
+   */
+  autoReconnect: boolean;
 };
 
 export const TONE_MAPPER_MAX = 3;
 
 export const BRIGHTNESS_MIN = -10;
 export const BRIGHTNESS_MAX = 10;
+
+/** `uiScale` steps: the factor every window's own scale is multiplied by. */
+export const UI_SCALE_STEPS = [0.7, 0.8, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2] as const;
+
+export const UI_SCALE_MAX = UI_SCALE_STEPS.length - 1;
+
+export function uiScaleFactor(step: number): number {
+  return UI_SCALE_STEPS[Math.max(0, Math.min(UI_SCALE_MAX, step))] ?? 1;
+}
 
 const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   toneMapper: [0, TONE_MAPPER_MAX],
@@ -109,6 +148,8 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   sharpness: [0, 9],
   vignette: [0, 9],
   sunShafts: [0, 9],
+  lootZen: [0, 9],
+  uiScale: [0, UI_SCALE_MAX],
 };
 
 const DEFAULTS: GameOptions = {
@@ -140,6 +181,18 @@ const DEFAULTS: GameOptions = {
   whisperBeep: true,
   slideHelp: true,
   cameraControl: true,
+  autoReconnect: true,
+  lootFilter: false,
+  lootJewels: true,
+  lootExcellent: true,
+  lootAncient: true,
+  lootHighLevel: true,
+  lootOther: false,
+  lootZen: 0,
+  chatTimestamps: false,
+  uiScale: 3,
+  lockWindows: false,
+  stateWarnings: true,
 };
 
 /**
