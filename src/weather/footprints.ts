@@ -14,6 +14,7 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { sunLightOf } from '../lighting/keyRig';
+import { linearBufferActive } from '../common/lightModel';
 
 /**
  * Footprints left on the ground: boot marks pressed into settled snow, or
@@ -1138,6 +1139,10 @@ uniform vec3 soleTint;
 // These are uniforms rather than GLSL constants so FOOTPRINT_TUNING can move
 // them live without recompiling the effect.
 uniform vec4 soleParams;
+// 1 when the frame buffer holds linear values, 0 when it holds display ones.
+// The blend multiplies whatever the terrain already wrote, so it has to know
+// which of the two that is. Same signal the terrain keys its own decode on.
+uniform float linearOut;
 
 const int RELIEF_STEPS = 12;
 const int SHADOW_STEPS = 6;
@@ -1313,9 +1318,28 @@ void main() {
   float floorTint = min(tint.r, min(tint.g, tint.b));
   float keepScalar = clamp(keep * floorTint, 0.0, 1.0);
 
-  float alpha = (1.0 - keepScalar) * strength;
+  // How much of the ground survives, in DISPLAY space - the space every
+  // number above was tuned in, and the space the buffer is in only when
+  // post-processing is off.
+  float keepShown = 1.0 - (1.0 - keepScalar) * strength;
+
+  // With image processing in post the terrain writes pow(colour, 2.2)
+  // (terrainMaterial's linearOut), so a factor applied there comes back as
+  // its own 1/2.2 root once the frame is gamma-encoded again: a print tuned
+  // to take a fifth off the snow took a tenth of it. That is the whole of
+  // "the prints are barely there with post-processing on". Raising the factor
+  // into the buffer's own domain is exact and needs nothing from the grade -
+  // exposure and contrast hit the print and the snow beside it alike, so they
+  // cancel out of the ratio.
+  float alpha = 1.0 - mix(keepShown, pow(keepShown, 2.2), linearOut);
+
   vec3 hue = keep * (tint - vec3(floorTint)) * strength;
 
+  // The additive half goes in as authored either way. Its linear equivalent
+  // is the display add times the encode slope at the snow's own brightness
+  // (~2.0 at 0.93) over the mood exposure (~2.1), and those two cancel to
+  // within a few percent - unlike the multiply, which is out by a whole
+  // gamma.
   vec3 add = hue + vec3(rim + sss) * strength;
 
   gl_FragColor = vec4(add, alpha);
@@ -1398,6 +1422,7 @@ function atlasFor(scene: Scene, kind: PrintKind): SoleAtlas {
         'soleTint',
         'atlasSpan',
         'atlasEdge',
+        'linearOut',
       ],
       samplers: ['soleSampler'],
       needAlphaBlending: true,
@@ -1425,6 +1450,7 @@ function atlasFor(scene: Scene, kind: PrintKind): SoleAtlas {
 
   material.setTexture('soleSampler', texture);
   material.setVector3('sunDir', sunDirection(scene));
+  material.setFloat('linearOut', linearBufferActive(scene) ? 1 : 0);
   const tint = TINT[kind];
   material.setVector3('soleTint', new Vector3(tint[0], tint[1], tint[2]));
 
@@ -1800,6 +1826,16 @@ export function addDragMark(
 
 /** Ages every print and pushes the instance buffers. Call once a frame. */
 export function updateFootprints(dt: number): void {
+  // The post-processing toggle moves the buffer between linear and display
+  // without rebuilding anything here, so the domain is re-read rather than
+  // bound once at material creation.
+  for (const atlas of materials.values()) {
+    atlas.material.setFloat(
+      'linearOut',
+      linearBufferActive(atlas.material.getScene()) ? 1 : 0
+    );
+  }
+
   for (const pool of pools.values()) {
     const { prints, matrixData, colourData } = pool;
     let live = 0;
