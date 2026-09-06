@@ -191,6 +191,7 @@ export const EN_TEXT = {
   'options.lootHighLevel': 'Level +7 and up',
   'options.lootOther': 'Everything else',
   'options.lootZen': 'Zen from',
+  'options.chatTimestamps': 'Chat timestamps',
   'options.volume': 'Volume',
   'options.effectLevel': '+Effect limitation',
   'options.shadows': 'Object shadows',
@@ -241,6 +242,7 @@ export const EN_TEXT = {
 
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
+  'keys.replyWhisper': 'Reply to whisper',
   'keys.emoteMenu': 'Emote menu',
   'keys.inventory': 'Inventory',
   'keys.characterInfo': 'Character',

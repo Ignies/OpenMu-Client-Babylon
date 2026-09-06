@@ -1369,5 +1369,7 @@ export const romanianLayer: LanguageLayer = {
     'options.lootHighLevel': 'Nivel +7 și peste',
     'options.lootOther': 'Restul',
     'options.lootZen': 'Zen de la',
+    'options.chatTimestamps': 'Ora în chat',
+    'keys.replyWhisper': 'Răspunde la șoaptă',
   },
 };

@@ -24,7 +24,16 @@ export type ChatLine = {
   sender: string;
   text: string;
   type: ChatLineType;
+  /** Wall clock the line arrived, for the optional timestamp column. */
+  at: number;
 };
+
+/** "14:03" in the viewer's own locale-independent 24h form. */
+export function chatTimestamp(at: number): string {
+  const date = new Date(at);
+  const pad = (v: number) => String(v).padStart(2, '0');
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
 
 /** `MAX_NUMBER_OF_LINES` (NewUIChatLogWindow.h:88). */
 export const MAX_CHAT_LINES = 200;

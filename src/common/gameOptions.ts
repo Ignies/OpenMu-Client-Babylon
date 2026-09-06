@@ -108,6 +108,8 @@ export type GameOptions = {
   lootOther: boolean;
   /** Index into `LOOT_ZEN_STEPS`: the smallest zen pile that keeps its name. */
   lootZen: number;
+  /** A "14:03" column in front of every chat log line. */
+  chatTimestamps: boolean;
 };
 
 export const GRADE_NOMINAL = 5;
@@ -176,6 +178,7 @@ const DEFAULTS: GameOptions = {
   lootHighLevel: true,
   lootOther: false,
   lootZen: 0,
+  chatTimestamps: false,
 };
 
 type Listener = (options: GameOptions) => void;

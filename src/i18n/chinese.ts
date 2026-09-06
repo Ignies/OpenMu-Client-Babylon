@@ -1324,5 +1324,7 @@ export const chineseLayer: LanguageLayer = {
     'options.lootHighLevel': '+7 及以上',
     'options.lootOther': '其他全部',
     'options.lootZen': 'Zen 起',
+    'options.chatTimestamps': '聊天时间',
+    'keys.replyWhisper': '回复密语',
   },
 };
