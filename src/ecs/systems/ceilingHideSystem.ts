@@ -1,7 +1,7 @@
 import type { AbstractMesh } from '../../libs/babylon/exports';
 import { ENUM_WORLD } from '../../common/types';
 import { lookDirector } from '../../lighting/director';
-import type { AreaRect } from '../../lighting/profiles';
+import type { RoomVolume } from '../../lighting/profiles';
 import type { ISystemFactory } from '../world';
 
 /**
@@ -29,6 +29,18 @@ const ENABLED_WORLDS = new Set<ENUM_WORLD>([
 
 /** Slab bottom must be this far (tiles) above the hero's feet: clears his head. */
 const ABOVE_HEAD = 1.0;
+/**
+ * How far (tiles) under the room's roof underside a slab may still start and
+ * count as roof.
+ *
+ * Inside a room the frame says where the ceiling is, and only that height is
+ * ceiling. "Above the hero's head" is not: the Lorencia pub stands its
+ * candelabra, bottles and cups on tables between 2.7 and 3.6, its roof
+ * underside at 4.28, and the head-height rule faded all of them out of the
+ * room the moment it became the active area. Same slack as `SAME_ROOF_HEIGHT`,
+ * for pieces of one roof whose bases were measured off different walls.
+ */
+const ROOF_SLACK = 0.6;
 /** Footprint slack (tiles) for the hero-under test. */
 const FOOTPRINT_MARGIN = 0.25;
 /** Gap (tiles) across which two pieces still count as one roof. */
@@ -99,19 +111,23 @@ export const CeilingHideSystem: ISystemFactory = world => {
   let lastRoom = '';
   let sinceRescan = RESCAN_INTERVAL;
 
-  const roomKey = (room: AreaRect | null) =>
+  const roomKey = (room: RoomVolume | null) =>
     room ? `${room.minX},${room.minY},${room.maxX},${room.maxY}` : '';
 
   /** Whether the slab's centre lies inside the room's frame. */
-  function inRoom(s: Slab, room: AreaRect): boolean {
+  function inRoom(s: Slab, room: RoomVolume): boolean {
     const cx = (s.minX + s.maxX) * 0.5;
     const cz = (s.minZ + s.maxZ) * 0.5;
 
     return cx >= room.minX && cx <= room.maxX && cz >= room.minY && cz <= room.maxY;
   }
 
-  function collectSlabs(heroY: number, hx: number, hz: number, room: AreaRect | null) {
+  function collectSlabs(heroY: number, hx: number, hz: number, room: RoomVolume | null) {
     slabs.length = 0;
+
+    // A room knows where its ceiling is; outside one, head height is the only
+    // measure there is.
+    const slabFloor = room ? room.roofY - ROOF_SLACK : heroY + ABOVE_HEAD;
 
     for (const e of query) {
       if (e.worldIndex !== world.mapIndex) continue;
@@ -137,7 +153,7 @@ export const CeilingHideSystem: ISystemFactory = world => {
         const min = box.minimumWorld;
         const max = box.maximumWorld;
 
-        if (min.y < heroY + ABOVE_HEAD) continue;
+        if (min.y < slabFloor) continue;
         if (max.y - min.y > MAX_THICKNESS) continue;
 
         const cx = (min.x + max.x) * 0.5 - hx;
@@ -187,7 +203,11 @@ export const CeilingHideSystem: ISystemFactory = world => {
 
         const tileX = Math.floor(hx / RESCAN_TILE);
         const tileZ = Math.floor(hz / RESCAN_TILE);
-        const room = lookDirector()?.state().area?.rect ?? null;
+        // The frame, not the footprint: a room whose volume the map never
+        // measured cannot say where its roof is, so it falls back to the
+        // hero-seeded fill rather than fading everything standing in it.
+        const area = lookDirector()?.state().area ?? null;
+        const room = area?.volume ?? null;
         const roomNow = roomKey(room);
 
         // Gate: re-derive the roof only when the hero changes tile, the map
@@ -246,7 +266,7 @@ export const CeilingHideSystem: ISystemFactory = world => {
           }
 
           roofMeshes = roof.map(s => s.mesh);
-          heroUnderRoof = roofMeshes.length > 0 || room !== null;
+          heroUnderRoof = roofMeshes.length > 0 || area !== null;
         }
 
         // Re-assert the hide flag every frame from the carried set: the fade
