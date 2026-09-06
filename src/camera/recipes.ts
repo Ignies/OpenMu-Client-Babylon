@@ -118,6 +118,14 @@ export const PITCH_OFFSET_MIN_DEG = -25;
 export const PITCH_OFFSET_MAX_DEG = 25;
 
 /**
+ * First-person mouse look: degrees per pixel of raw mouse movement. Lower
+ * than the drag rates above - a drag moves the cursor across the screen once,
+ * a locked mouse keeps going, and 0.15 puts a full turn inside a mouse pad at
+ * a typical 800 dpi.
+ */
+export const MOUSE_LOOK_DEG_PER_PX = 0.15;
+
+/**
  * Pitch drag range at the eye, where the orbit clamp would leave the player
  * unable to look at the sky or their own feet.
  */

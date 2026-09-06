@@ -97,6 +97,13 @@ export type GameOptions = {
    */
   cameraFov: number;
   /**
+   * W/A/S/D walk the hero, camera-relative, and in first person the mouse
+   * looks around under a pointer lock. On, those four keys stop reaching the
+   * actions they carry (potion slot 2, master skills, sort, command window) -
+   * Ctrl + the key still does.
+   */
+  wsadMovement: boolean;
+  /**
    * Run the latched ALT drop names through `lootFilter.ts` instead of naming
    * every pile on the ground. ALT held still shows all of them.
    */
@@ -194,6 +201,7 @@ const DEFAULTS: GameOptions = {
   slideHelp: true,
   cameraControl: true,
   cameraFov: CAMERA_FOV_DEG,
+  wsadMovement: false,
   autoReconnect: true,
   lootFilter: false,
   lootJewels: true,

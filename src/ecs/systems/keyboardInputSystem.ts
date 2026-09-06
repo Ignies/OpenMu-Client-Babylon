@@ -1,6 +1,11 @@
 import { EventBus } from '../../libs/eventBus';
 import { Store } from '../../store';
-import { isCapturingKey, isKey } from '../../common/keyBindings';
+import {
+  isCapturingKey,
+  isKey,
+  WALK_KEY_CODES,
+} from '../../common/keyBindings';
+import { GameOptions } from '../../common/gameOptions';
 import { MuWindows } from '../../ui/components/muWindow/windowState';
 import type { ISystemFactory } from '../world';
 
@@ -72,7 +77,16 @@ export const KeyboardInputSystem: ISystemFactory = world => {
         return;
       }
     }
-    if (!pressedKeys.has(e.code)) {
+    // W/A/S/D walk the hero while the option is on, so the actions they
+    // carry (potion slot 2, master skills, sort, the command window) are not
+    // broadcast for them. Ctrl + the key still is: that is the way to those
+    // actions without rebinding anything, and nothing walks with Ctrl held.
+    // The key still joins `pressedKeys` either way - that set is what the
+    // walk polls.
+    const walks =
+      GameOptions.wsadMovement && !e.ctrlKey && WALK_KEY_CODES.has(e.code);
+
+    if (!walks && !pressedKeys.has(e.code)) {
       EventBus.emit('keyPressed', e.code);
     }
     pressedKeys.add(e.code);

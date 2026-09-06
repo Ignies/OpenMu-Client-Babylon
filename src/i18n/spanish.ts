@@ -173,6 +173,9 @@ export const spanishLayer: LanguageLayer = {
     'options.whisperBeep': 'Pitido al recibir un susurro',
     'options.slideHelp': 'Ayuda deslizante',
     'options.cameraControl': 'Control de cámara (Ctrl+rueda, Ins/Supr)',
+    'options.cameraFov': 'Campo de visión',
+    'options.wsadMovement':
+      'Movimiento WSAD (vista con el ratón en primera persona)',
     'options.volume': 'Volumen',
     'options.effectLevel': 'Límite de +efectos',
     'options.shadows': 'Sombras de objetos',

@@ -167,6 +167,8 @@ export const japaneseLayer: LanguageLayer = {
     'options.whisperBeep': 'ささやき受信時に音を鳴らす',
     'options.slideHelp': 'スライドヘルプ',
     'options.cameraControl': 'カメラ操作（Ctrl+ホイール、Ins/Del）',
+    'options.cameraFov': '視野角',
+    'options.wsadMovement': 'WSAD移動（一人称視点ではマウスで視点操作）',
     'options.volume': '音量',
     'options.effectLevel': '+エフェクト上限',
     'options.shadows': 'オブジェクトの影',

@@ -164,6 +164,8 @@ export const russianLayer: LanguageLayer = {
     'options.whisperBeep': 'Звук при получении шёпота',
     'options.slideHelp': 'Всплывающая подсказка',
     'options.cameraControl': 'Управление камерой (Ctrl+колесо, Ins/Del)',
+    'options.cameraFov': 'Поле зрения',
+    'options.wsadMovement': 'Движение на WSAD (обзор мышью от первого лица)',
     'options.volume': 'Громкость',
     'options.effectLevel': 'Предел +эффектов',
     'options.shadows': 'Тени объектов',

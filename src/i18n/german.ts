@@ -163,6 +163,8 @@ export const germanLayer: LanguageLayer = {
     'options.whisperBeep': 'Signalton beim Flüstern',
     'options.slideHelp': 'Gleithilfe',
     'options.cameraControl': 'Kamerasteuerung (Strg+Rad, Einfg/Entf)',
+    'options.cameraFov': 'Sichtfeld',
+    'options.wsadMovement': 'WSAD-Bewegung (Mausblick in der Egoperspektive)',
     'options.volume': 'Lautstärke',
     'options.effectLevel': '+Effekt-Grenze',
     'options.shadows': 'Objektschatten',

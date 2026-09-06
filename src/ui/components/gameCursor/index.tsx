@@ -1,6 +1,8 @@
 import './style.less';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Store } from '../../../store';
+import { useEventBus } from '../../../hooks/useEventBus';
+import { aimX, aimY } from '../../../camera';
 import { loadInterfaceSprite, type MuSprite } from '../../../libs/mu/sprites';
 import {
   CURSOR_FILES,
@@ -55,14 +57,22 @@ export const GameCursor = () => {
     const el = ref.current;
     if (!el) return;
 
+    // `aimX/aimY`: under the first-person pointer lock the browser freezes
+    // the pointer position, and the game aims at the middle of the canvas
+    // instead - so the cursor parks there too and reads as the crosshair,
+    // still showing what it is over (attack, talk, pick up).
     const { x, y } = pointer.current;
 
-    el.style.transform = `translate3d(${x - CURSOR_HOTSPOT}px, ${
-      y - CURSOR_HOTSPOT
+    el.style.transform = `translate3d(${aimX(x) - CURSOR_HOTSPOT}px, ${
+      aimY(y) - CURSOR_HOTSPOT
     }px, 0)`;
   };
 
   useLayoutEffect(applyTransform);
+
+  // Taking or giving back the lock moves the cursor without the pointer
+  // having moved.
+  useEventBus('mouseLookChanged', applyTransform);
 
   useEffect(() => {
     const onMove = (ev: PointerEvent) => {

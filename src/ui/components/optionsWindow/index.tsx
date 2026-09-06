@@ -238,6 +238,7 @@ const TABS: Tab[] = [
               display: v => `${v}°`,
               needsCameraControl: true,
             }),
+            check('wsadMovement', -1, 'options.wsadMovement'),
             check('chatTimestamps', -1, 'options.chatTimestamps'),
             check('stateWarnings', -1, 'options.stateWarnings'),
           ],

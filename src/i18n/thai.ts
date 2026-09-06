@@ -166,6 +166,9 @@ export const thaiLayer: LanguageLayer = {
     'options.whisperBeep': 'เสียงเตือนเมื่อได้รับข้อความกระซิบ',
     'options.slideHelp': 'คำแนะนำแบบเลื่อน',
     'options.cameraControl': 'ควบคุมกล้อง (Ctrl+ลูกกลิ้ง, Ins/Del)',
+    'options.cameraFov': 'ระยะมุมมอง',
+    'options.wsadMovement':
+      'เดินด้วย WSAD (มุมมองบุคคลที่หนึ่งหันกล้องด้วยเมาส์)',
     'options.volume': 'ระดับเสียง',
     'options.effectLevel': 'จำกัด +เอฟเฟกต์',
     'options.shadows': 'เงาของวัตถุ',

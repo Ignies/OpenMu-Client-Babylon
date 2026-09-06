@@ -164,6 +164,9 @@ export const frenchLayer: LanguageLayer = {
     'options.slideHelp': 'Aide glissante',
     'options.cameraControl':
       'Contrôle de la caméra (Ctrl+molette, Inser/Suppr)',
+    'options.cameraFov': 'Champ de vision',
+    'options.wsadMovement':
+      'Déplacement WSAD (visée à la souris en vue subjective)',
     'options.volume': 'Volume',
     'options.effectLevel': 'Limite des +effets',
     'options.shadows': 'Ombres des objets',

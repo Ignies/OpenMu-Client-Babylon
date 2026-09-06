@@ -173,6 +173,9 @@ export const portugueseLayer: LanguageLayer = {
     'options.whisperBeep': 'Bipe ao receber sussurro',
     'options.slideHelp': 'Ajuda deslizante',
     'options.cameraControl': 'Controle da câmera (Ctrl+roda, Ins/Del)',
+    'options.cameraFov': 'Campo de visão',
+    'options.wsadMovement':
+      'Movimento WSAD (mira com o mouse em primeira pessoa)',
     'options.volume': 'Volume',
     'options.effectLevel': 'Limite de +efeitos',
     'options.shadows': 'Sombras dos objetos',

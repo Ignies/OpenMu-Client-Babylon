@@ -163,6 +163,9 @@ export const romanianLayer: LanguageLayer = {
     'options.whisperBeep': 'Sunet la primirea unei șoapte',
     'options.slideHelp': 'Ajutor glisant',
     'options.cameraControl': 'Control cameră (Ctrl+rotiță, Ins/Del)',
+    'options.cameraFov': 'Câmp vizual',
+    'options.wsadMovement':
+      'Deplasare WSAD (privire cu mouse-ul la persoana întâi)',
     'options.volume': 'Volum',
     'options.effectLevel': 'Limita de +efecte',
     'options.shadows': 'Umbrele obiectelor',
