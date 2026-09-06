@@ -91,9 +91,9 @@ export type GameOptions = {
    */
   cameraControl: boolean;
   /**
-   * Vertical field of view in degrees for the third-person frame,
-   * `CAMERA_FOV_DEG` being the original client's 30. The eye keeps its own
-   * frustum, and nothing reads this while `cameraControl` is off.
+   * Vertical field of view in degrees, `CAMERA_FOV_DEG` being the original
+   * client's 30. First person rides on top of it (`FIRST_PERSON_WIDEN_DEG`).
+   * Nothing reads it while `cameraControl` is off.
    */
   cameraFov: number;
   /**

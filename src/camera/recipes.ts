@@ -68,18 +68,27 @@ export const CAMERA_PITCH_DEG = 48.5;
 export const CAMERA_FOV_DEG = 30;
 
 /**
- * Range the FOV slider offers around the original 30. The slider moves the
- * third-person frustum only - the eye keeps `FIRST_PERSON_FOV_DEG`, which is
- * chosen for a face at arm's length rather than for taste.
+ * Range the FOV slider offers around the original 30. The eye adds its own
+ * widening on top, so the slider carries first person with it: the innermost
+ * step runs 55 to 95 as the slider runs 20 to 60.
  */
 export const CAMERA_FOV_MIN_DEG = 20;
 export const CAMERA_FOV_MAX_DEG = 60;
 
 /**
- * First-person frustum. 30 degrees is a telephoto lens on a face; the
- * original itself opens to 65 for its tour camera (`SetCameraFOV`).
+ * First-person frustum at the slider's default. 30 degrees is a telephoto
+ * lens on a face; the original itself opens to 65 for its tour camera
+ * (`SetCameraFOV`).
  */
 export const FIRST_PERSON_FOV_DEG = 65;
+
+/**
+ * What the eye adds to the third-person frustum. Held as a difference rather
+ * than an absolute so the FOV slider moves both ends together - the reason
+ * the eye opens up is the near subject, which does not stop being true
+ * because the player widened their view.
+ */
+export const FIRST_PERSON_WIDEN_DEG = FIRST_PERSON_FOV_DEG - CAMERA_FOV_DEG;
 
 /** Main-scene heading, `CameraAngle[2] = -45` (MainScene.cpp:117). */
 export const DEFAULT_HEADING_DEG = -45;
