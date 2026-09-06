@@ -3,7 +3,8 @@ import type { CameraLayer } from './layer';
 
 /**
  * Doppelganger 1 and 2 force camera level 5 the way PK Field does
- * (CameraUtility.cpp:146-149): distance 2000 via CDirection.cpp:72.
+ * (CameraUtility.cpp:146-149): distance 2000 via CDirection.cpp:72, the
+ * opening frame rather than a lock.
  */
 export const doppelgangerLayer: CameraLayer = {
   name: 'doppelganger',

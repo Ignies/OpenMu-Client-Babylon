@@ -12,7 +12,7 @@ import type { CameraLayer } from './layer';
 // ---- 1. tuning -------------------------------------------------------------
 // Original-client units (100 per tile), cited against CameraUtility.cpp.
 
-/** Locked camera distance; omit to keep the wheel-zoom levels. */
+/** Distance this map opens on; omit to open on the default level. */
 const DISTANCE: number | undefined = undefined;
 
 /** Absolute camera base height; omit to follow the hero's ground. */

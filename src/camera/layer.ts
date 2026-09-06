@@ -19,8 +19,14 @@ export interface CameraLayer {
   readonly worlds: readonly ENUM_WORLD[];
 
   /**
-   * Locked camera distance, replacing the wheel-zoom levels on this map
+   * The distance this map opens on, replacing the default level
    * (`UpdateCameraDistance`: Battle Castle 1100, camera level 5 maps 2000).
+   *
+   * The original pinned these maps here and ignored the wheel entirely. This
+   * client keeps the frame but not the pin: the nearest step on the ladder is
+   * where the map opens, and the wheel goes on working from there. The ladder
+   * already runs from a first-person eye out to 2900, so a map that swallows
+   * the wheel is the odd one out rather than the faithful one.
    */
   readonly distance?: number;
 
