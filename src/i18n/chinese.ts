@@ -1324,5 +1324,6 @@ export const chineseLayer: LanguageLayer = {
     'options.lootHighLevel': '+7 及以上',
     'options.lootOther': '其他全部',
     'options.lootZen': 'Zen 起',
+    'trade.offerChanged': '对方修改了交易内容',
   },
 };

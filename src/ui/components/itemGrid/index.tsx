@@ -199,13 +199,15 @@ export function hoveredMask<T extends object>(
 const GridItem = memo(function GridItem({
   entry,
   price,
+  marked,
 }: {
   entry: Placed;
   price: number | undefined;
+  marked: boolean;
 }) {
   return (
     <div
-      className="mu-grid-item"
+      className={marked ? 'mu-grid-item marked' : 'mu-grid-item'}
       style={{
         left: entry.column * SQUARE,
         top: entry.row * SQUARE,
@@ -276,6 +278,8 @@ export type ItemGridProps = {
   tooltipContext?: TooltipContext;
   /** Personal-shop asking price shown in the tooltip and under the icon. */
   priceOf?: (square: number) => number | undefined;
+  /** Squares to ring: what changed in a trade after we had accepted. */
+  marked?: (square: number) => boolean;
   frame?: boolean;
 };
 
@@ -306,6 +310,7 @@ export const ItemGrid = observer(
     onUse,
     tooltipContext = 'plain',
     priceOf,
+    marked,
     frame = true,
   }: ItemGridProps) => {
     const gridRef = useRef<HTMLDivElement>(null);
@@ -536,6 +541,7 @@ export const ItemGrid = observer(
               key={entry.square}
               entry={entry}
               price={priceOf?.(entry.square)}
+              marked={marked?.(entry.square) ?? false}
             />
           ))}
 

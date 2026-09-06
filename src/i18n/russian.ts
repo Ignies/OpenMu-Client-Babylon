@@ -1356,5 +1356,6 @@ export const russianLayer: LanguageLayer = {
     'options.lootHighLevel': 'Уровень +7 и выше',
     'options.lootOther': 'Всё остальное',
     'options.lootZen': 'Zen от',
+    'trade.offerChanged': 'Другая сторона изменила предложение',
   },
 };

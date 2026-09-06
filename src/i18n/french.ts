@@ -1377,5 +1377,6 @@ export const frenchLayer: LanguageLayer = {
     'options.lootHighLevel': 'Niveau +7 et plus',
     'options.lootOther': 'Tout le reste',
     'options.lootZen': 'Zen à partir de',
+    'trade.offerChanged': 'L’autre côté a modifié l’offre',
   },
 };

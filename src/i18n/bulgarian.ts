@@ -1362,5 +1362,6 @@ export const bulgarianLayer: LanguageLayer = {
     'options.lootHighLevel': 'Ниво +7 и нагоре',
     'options.lootOther': 'Всичко останало',
     'options.lootZen': 'Zen от',
+    'trade.offerChanged': 'Другата страна промени предложението',
   },
 };
