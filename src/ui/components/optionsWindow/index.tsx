@@ -49,6 +49,10 @@ import {
   MATERIAL_QUALITY_MAX,
 } from '../../../common/materialQuality';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
+import {
+  RENDER_DISTANCE_MAX,
+  renderDistanceRanges,
+} from '../../../common/renderDistance';
 import { MuWindows } from '../muWindow/windowState';
 import { t, type TextKey } from '../../../i18n';
 import { LanguageSelect } from './languageSelect';
@@ -166,7 +170,8 @@ type SliderRow = {
     | 'brightness'
     | 'vignette'
     | 'lootZen'
-    | 'uiScale';
+    | 'uiScale'
+    | 'renderDistance';
   textId: number;
   labelKey: TextKey;
   max: number;
@@ -355,6 +360,13 @@ const TABS: Tab[] = [
             check('weatherEffects', -1, 'options.weatherEffects'),
             check('animatedWater', -1, 'options.animatedWater'),
             check('advancedEffects', -1, 'options.advancedEffects'),
+            slider({
+              key: 'renderDistance',
+              textId: -1,
+              labelKey: 'options.renderDistance',
+              max: RENDER_DISTANCE_MAX,
+              display: v => renderDistanceRanges(v).nearby,
+            }),
           ],
         },
         {

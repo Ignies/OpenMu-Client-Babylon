@@ -4,6 +4,7 @@ import {
   CAMERA_FOV_MAX_DEG,
   CAMERA_FOV_MIN_DEG,
 } from '../camera/recipes';
+import { RENDER_DISTANCE_MAX } from './renderDistance';
 import { LocalStorage } from '../libs/localStorage';
 
 const OPTIONS_KEY = 'mu_options';
@@ -81,6 +82,12 @@ export type GameOptions = {
    * march. Off, the terrain compiles the shader it always had.
    */
   advancedEffects: boolean;
+  /**
+   * Index into `RENDER_DISTANCE_STEPS`: how far from the hero map objects are
+   * kept loaded. Step 0 is the radius the client always had; the top step
+   * holds the whole map at once.
+   */
+  renderDistance: number;
   autoAttack: boolean;
   whisperBeep: boolean;
   slideHelp: boolean;
@@ -161,6 +168,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   sunShafts: [0, 9],
   lootZen: [0, 9],
   uiScale: [0, UI_SCALE_MAX],
+  renderDistance: [0, RENDER_DISTANCE_MAX],
   cameraFov: [CAMERA_FOV_MIN_DEG, CAMERA_FOV_MAX_DEG],
 };
 
@@ -189,6 +197,7 @@ const DEFAULTS: GameOptions = {
   weatherEffects: true,
   animatedWater: true,
   advancedEffects: true,
+  renderDistance: 0,
   autoAttack: false,
   whisperBeep: true,
   slideHelp: true,

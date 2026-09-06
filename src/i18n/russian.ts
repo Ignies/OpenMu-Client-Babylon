@@ -173,6 +173,7 @@ export const russianLayer: LanguageLayer = {
     'options.weatherEffects': 'Погода',
     'options.animatedWater': 'Анимированная вода',
     'options.advancedEffects': 'Расширенные эффекты',
+    'options.renderDistance': 'Дальность прорисовки',
     'options.lightingQuality': 'Освещение',
     'options.materialQuality': 'Материалы',
     'options.materialDetail': 'Детализация',

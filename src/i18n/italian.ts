@@ -172,6 +172,7 @@ export const italianLayer: LanguageLayer = {
     'options.weatherEffects': 'Meteo',
     'options.animatedWater': 'Acqua animata',
     'options.advancedEffects': 'Effetti avanzati',
+    'options.renderDistance': 'Distanza di rendering',
     'options.lightingQuality': 'Illuminazione',
     'options.materialQuality': 'Materiali',
     'options.materialDetail': 'Dettaglio',

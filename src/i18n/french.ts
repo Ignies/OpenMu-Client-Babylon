@@ -173,6 +173,7 @@ export const frenchLayer: LanguageLayer = {
     'options.weatherEffects': 'Météo',
     'options.animatedWater': 'Eau animée',
     'options.advancedEffects': 'Effets avancés',
+    'options.renderDistance': 'Distance d’affichage',
     'options.lightingQuality': 'Éclairage',
     'options.materialQuality': 'Matériaux',
     'options.materialDetail': 'Détail',
