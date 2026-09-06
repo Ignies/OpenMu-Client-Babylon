@@ -1382,5 +1382,6 @@ export const germanLayer: LanguageLayer = {
     'options.lootHighLevel': 'Stufe +7 und höher',
     'options.lootOther': 'Alles andere',
     'options.lootZen': 'Zen ab',
+    'trade.offerChanged': 'Die Gegenseite hat das Angebot geändert',
   },
 };

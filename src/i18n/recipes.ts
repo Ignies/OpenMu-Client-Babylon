@@ -239,6 +239,7 @@ export const EN_TEXT = {
   'options.itemEffects.both': 'Both',
   'options.itemEffects.improved': 'Improved',
 
+  'trade.offerChanged': 'The other side changed the offer',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
   'keys.emoteMenu': 'Emote menu',
