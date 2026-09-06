@@ -1386,6 +1386,7 @@ export const portugueseLayer: LanguageLayer = {
     'warn.noPotions': 'Sem poções de vida',
     'warn.buffEnding': '{name} está prestes a acabar',
     'trade.offerChanged': 'O outro lado mudou a oferta',
+    'keys.hideUi': 'Ocultar interface',
     'keys.sessionStats': 'Painel de sessão',
     'session.title': 'Sessão',
     'session.time': 'Tempo',

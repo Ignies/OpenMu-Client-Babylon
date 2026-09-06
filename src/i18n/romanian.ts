@@ -1381,6 +1381,7 @@ export const romanianLayer: LanguageLayer = {
     'warn.noPotions': 'Nu mai sunt poțiuni de viață',
     'warn.buffEnding': '{name} este pe cale să se termine',
     'trade.offerChanged': 'Cealaltă parte a schimbat oferta',
+    'keys.hideUi': 'Ascunde interfața',
     'keys.sessionStats': 'Panou de sesiune',
     'session.title': 'Sesiune',
     'session.time': 'Timp',

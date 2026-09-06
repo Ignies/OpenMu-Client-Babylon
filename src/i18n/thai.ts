@@ -1354,6 +1354,7 @@ export const thaiLayer: LanguageLayer = {
     'warn.noPotions': 'ไม่มียาฟื้นพลังชีวิตแล้ว',
     'warn.buffEnding': '{name} กำลังจะหมด',
     'trade.offerChanged': 'อีกฝ่ายเปลี่ยนข้อเสนอ',
+    'keys.hideUi': 'ซ่อนหน้าจอ',
     'keys.sessionStats': 'แผงข้อมูลรอบนี้',
     'session.title': 'รอบนี้',
     'session.time': 'เวลา',

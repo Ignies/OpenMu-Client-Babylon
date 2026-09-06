@@ -1368,6 +1368,7 @@ export const russianLayer: LanguageLayer = {
     'warn.noPotions': 'Лечебные зелья закончились',
     'warn.buffEnding': '{name} скоро закончится',
     'trade.offerChanged': 'Другая сторона изменила предложение',
+    'keys.hideUi': 'Скрыть интерфейс',
     'keys.sessionStats': 'Панель сессии',
     'session.title': 'Сессия',
     'session.time': 'Время',

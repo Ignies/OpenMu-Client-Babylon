@@ -1388,6 +1388,7 @@ export const italianLayer: LanguageLayer = {
     'warn.noPotions': 'Non ci sono più pozioni curative',
     'warn.buffEnding': '{name} sta per finire',
     'trade.offerChanged': 'L’altra parte ha cambiato l’offerta',
+    'keys.hideUi': 'Nascondi interfaccia',
     'keys.sessionStats': 'Pannello sessione',
     'session.title': 'Sessione',
     'session.time': 'Tempo',

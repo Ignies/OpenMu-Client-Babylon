@@ -1336,6 +1336,7 @@ export const chineseLayer: LanguageLayer = {
     'warn.noPotions': '没有治疗药水了',
     'warn.buffEnding': '{name} 即将结束',
     'trade.offerChanged': '对方修改了交易内容',
+    'keys.hideUi': '隐藏界面',
     'keys.sessionStats': '战绩面板',
     'session.title': '本次游戏',
     'session.time': '时长',

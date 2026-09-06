@@ -269,6 +269,7 @@ export const EN_TEXT = {
   'vault.depositJewelsHint': 'Move every jewel from the inventory into the vault',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
+  'keys.hideUi': 'Hide interface',
   'keys.sortInventory': 'Arrange inventory',
   'keys.targetNearest': 'Target next monster',
   'keys.replyWhisper': 'Reply to whisper',

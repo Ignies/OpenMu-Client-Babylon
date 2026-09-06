@@ -1394,6 +1394,7 @@ export const germanLayer: LanguageLayer = {
     'warn.noPotions': 'Keine Heiltränke mehr',
     'warn.buffEnding': '{name} läuft gleich ab',
     'trade.offerChanged': 'Die Gegenseite hat das Angebot geändert',
+    'keys.hideUi': 'Oberfläche ausblenden',
     'keys.sessionStats': 'Sitzungsfenster',
     'session.title': 'Sitzung',
     'session.time': 'Zeit',

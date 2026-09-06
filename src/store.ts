@@ -955,6 +955,8 @@ export const Store = new (class _Store {
   /** The Move command (warp list) window, M (`INTERFACE_MOVEMAP`). */
   warpWindowEnabled = false;
 
+  /** The hide-interface key: the HUD layer is not drawn while this is set. */
+  hudHidden = false;
   /** The session panel (exp / kills / zen per hour); this client's own. */
   sessionStatsEnabled = false;
 
@@ -1071,6 +1073,7 @@ export const Store = new (class _Store {
       emoteMenuEnabled: observable,
       minimapEnabled: observable,
       warpWindowEnabled: observable,
+      hudHidden: observable,
       sessionStatsEnabled: observable,
       sceneLoading: observable,
       loadingProgress: observable,

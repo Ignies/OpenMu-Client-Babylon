@@ -1389,6 +1389,7 @@ export const frenchLayer: LanguageLayer = {
     'warn.noPotions': 'Plus de potions de soin',
     'warn.buffEnding': '{name} va se terminer',
     'trade.offerChanged': 'L’autre côté a modifié l’offre',
+    'keys.hideUi': 'Masquer l’interface',
     'keys.sessionStats': 'Panneau de session',
     'session.title': 'Session',
     'session.time': 'Durée',

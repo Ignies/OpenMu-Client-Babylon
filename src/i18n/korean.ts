@@ -1342,6 +1342,7 @@ export const koreanLayer: LanguageLayer = {
     'warn.noPotions': '회복 물약이 없습니다',
     'warn.buffEnding': '{name}이(가) 곧 끝납니다',
     'trade.offerChanged': '상대가 거래 내용을 바꿨습니다',
+    'keys.hideUi': '인터페이스 숨기기',
     'keys.sessionStats': '세션 창',
     'session.title': '세션',
     'session.time': '시간',

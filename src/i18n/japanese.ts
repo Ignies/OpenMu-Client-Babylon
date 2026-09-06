@@ -1344,6 +1344,7 @@ export const japaneseLayer: LanguageLayer = {
     'warn.noPotions': '回復ポーションがありません',
     'warn.buffEnding': '{name} がまもなく切れます',
     'trade.offerChanged': '相手が取引内容を変更しました',
+    'keys.hideUi': 'UIを隠す',
     'keys.sessionStats': 'セッションパネル',
     'session.title': 'セッション',
     'session.time': '時間',

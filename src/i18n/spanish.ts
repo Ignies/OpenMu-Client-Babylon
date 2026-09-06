@@ -1391,6 +1391,7 @@ export const spanishLayer: LanguageLayer = {
     'warn.noPotions': 'No quedan pociones de vida',
     'warn.buffEnding': '{name} está a punto de acabar',
     'trade.offerChanged': 'La otra parte cambió la oferta',
+    'keys.hideUi': 'Ocultar interfaz',
     'keys.sessionStats': 'Panel de sesión',
     'session.title': 'Sesión',
     'session.time': 'Tiempo',

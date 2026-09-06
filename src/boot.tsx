@@ -16,6 +16,8 @@ import { createWorld } from './ecs/createWorld';
 import { ENUM_WORLD } from './common';
 import { EventBus } from './libs/eventBus';
 import { installLoginMusic } from './libs/loginMusic';
+import { setKeyProfile } from './common/keyBindings';
+import { reaction } from 'mobx';
 import { watchStateWarnings } from './common/stateWarnings';
 import {
   preloadPregameSprites,
@@ -32,6 +34,12 @@ if (APP_STAGE === 'dev' || QA_ENABLED) {
 installUiWindowChime();
 // Durability / full grid / last potion / buff ending, on the notice banner.
 watchStateWarnings();
+
+// Hot keys are per character: the shared set is what a new one starts from.
+reaction(
+  () => Store.playerData.name,
+  name => setKeyProfile(name)
+);
 
 const canvas = document.querySelector('canvas')!;
 

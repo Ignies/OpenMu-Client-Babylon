@@ -1374,6 +1374,7 @@ export const bulgarianLayer: LanguageLayer = {
     'warn.noPotions': 'Няма лечебни отвари',
     'warn.buffEnding': '{name} скоро свършва',
     'trade.offerChanged': 'Другата страна промени предложението',
+    'keys.hideUi': 'Скрий интерфейса',
     'keys.sessionStats': 'Панел на сесията',
     'session.title': 'Сесия',
     'session.time': 'Време',
