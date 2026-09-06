@@ -26,10 +26,10 @@ export type KeyAction =
   | 'skillList'
   | 'muHelper'
   | 'muHelperConfig'
-  | 'hideUi';
-  | 'sessionStats';
-  | 'sortInventory';
-  | 'targetNearest';
+  | 'hideUi'
+  | 'sessionStats'
+  | 'sortInventory'
+  | 'targetNearest'
   | 'replyWhisper';
 
 export type KeyBindings = Record<KeyAction, string>;
