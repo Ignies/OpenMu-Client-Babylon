@@ -79,6 +79,18 @@ export const thaiLayer: LanguageLayer = {
     'login.createAccount': 'สร้างบัญชี',
     'login.rememberMe': 'จำฉันไว้ไหม',
 
+    'register.id': 'ID',
+    'register.password': 'รหัสผ่าน',
+    'register.confirm': 'ยืนยัน',
+    'register.fillEveryField': 'กรุณากรอกทุกช่อง',
+    'register.idTooShort': 'ID ต้องมีอย่างน้อย {min} ตัวอักษร',
+    'register.idChars': 'ID ใช้ได้เฉพาะตัวอักษรและตัวเลข',
+    'register.passwordTooShort': 'รหัสผ่านต้องมีอย่างน้อย {min} ตัวอักษร',
+    'register.mismatch': 'รหัสผ่านไม่ตรงกัน',
+    'register.unreachable': 'ติดต่อเซิร์ฟเวอร์ไม่ได้',
+    'register.failed': 'สมัครไม่สำเร็จ ({status})',
+    'register.created': 'สร้างบัญชีแล้ว เข้าสู่ระบบได้เลย',
+
     'characters.loading': 'กำลังโหลดตัวละคร...',
     'characters.select': 'เลือกตัวละคร',
     'characters.create.minLength': 'พิมพ์มากกว่า 4 ตัวอักษร',

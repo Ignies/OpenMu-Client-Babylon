@@ -95,15 +95,52 @@
     opacity: 0;
   }
 
-  .login-error {
+  .login-error,
+  .login-notice,
+  .login-signup-message {
     position: absolute;
     left: 0;
     right: 0;
     top: 205px;
     margin: 0;
     text-align: center;
-    color: #ff5a5a;
     font-size: 11px;
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+
+  .login-error {
+    color: #ff5a5a;
+  }
+
+  // `g_pRenderText->SetBgColor`: MU paints a box behind text that would
+  // otherwise land on the frame's art, and the band under the buttons is
+  // dragons. Shrink-wrapped to the line, so the box is the text's and not
+  // the window's.
+  .login-notice,
+  .login-signup-message {
+    width: fit-content;
+    max-width: 290px;
+    margin: 0 auto;
+    padding: 1px 6px;
+    background: rgba(0, 0, 0, 0.65);
+    line-height: 1.3;
+  }
+
+  // "Account created" - the one thing this screen says that is good news.
+  .login-notice {
+    color: #7dff7d;
+  }
+
+  // The register window has a row where the login one has its checkbox, so
+  // its message goes above the buttons instead of across them.
+  .login-signup-message {
+    top: 162px;
+    color: #ff5a5a;
+  }
+
+  .login-signup-title {
+    left: 0;
+    right: 0;
+    text-align: center;
   }
 }

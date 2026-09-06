@@ -1,14 +1,16 @@
+import { useState } from 'react';
 import { t } from '../../../i18n';
 import { uiClick } from '../../../libs/sfx';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store, UIState } from '../../../store';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../../../consts';
-import { registerUrl } from '../../../common/serverServices';
+import { registerApiUrl, registerUrl } from '../../../common/serverServices';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { MuText } from '../../components/muText';
 import { MuLogo } from '../../components/muLogo';
 import { MuButton } from '../../components/muButton';
+import { RegisterWindow } from './registerWindow';
 import { TEXT_COLOR } from '../serversPage/layout';
 
 const WIN_WIDTH = 329;
@@ -36,7 +38,7 @@ const CHECK_Y = 156;
 const LABEL_X = 30;
 
 /**
- * The signup link, on the checkbox row and left of it. That band is the only
+ * The signup text, on the checkbox row and left of it. That band is the only
  * flat art left in the window - the frame's dragons take both bottom corners,
  * so the space beside the buttons is not the empty half it looks like - and
  * text rather than a button keeps it what it is: the way out of this window,
@@ -51,12 +53,27 @@ const REGISTER = { x: 22, y: CHECK_Y + 3 };
 const SERVER_LINE = { x: 111, y: 80 };
 
 export const LoginPage = observer(() => {
+  const [registering, setRegistering] = useState(false);
+  /** "Account created" - shown where the login error would be, in green. */
+  const [notice, setNotice] = useState('');
+
   // The world being logged into, not the build: a client plays any world, and
-  // each one has its own signup page.
-  const signup = registerUrl();
+  // each one has its own signup service.
+  const signupApi = registerApiUrl();
+  // Only for a build that named a page but no endpoint. Then this window
+  // cannot create the account itself and links out, as it always did.
+  const signupPage = signupApi ? '' : registerUrl();
+
+  const openRegister = () => {
+    setNotice('');
+    Store.loginError = undefined;
+    setRegistering(true);
+  };
 
   const onLoginClicked = () => {
     if (Store.loginProcessing) return;
+
+    setNotice('');
 
     if (!Store.username || !Store.password) {
       Store.loginError = t('login.enterCredentials');
@@ -68,6 +85,27 @@ export const LoginPage = observer(() => {
 
     Store.loginRequest(Store.username, Store.password);
   };
+
+  // One window swapped for another: the logo, the scene behind it and the
+  // music are outside this and never notice.
+  if (registering) {
+    return (
+      <div className="login-page">
+        <MuLogo />
+
+        <RegisterWindow
+          onCreated={username => {
+            Store.username = username;
+            Store.password = '';
+            Store.loginError = undefined;
+            setNotice(t('register.created'));
+            setRegistering(false);
+          }}
+          onCancel={() => setRegistering(false)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="login-page">
@@ -107,10 +145,12 @@ export const LoginPage = observer(() => {
             height={INPUT_HEIGHT}
             style={{ position: 'absolute', left: INPUT_X, top: ACCOUNT_Y }}
           >
+            {/* An ID is already there after a signup, or after "remember me":
+                the field still to fill is the password. */}
             <input
               className="login-input"
               type="text"
-              autoFocus
+              autoFocus={!Store.username}
               value={Store.username}
               onChange={e => {
                 Store.username = e.target.value;
@@ -129,6 +169,7 @@ export const LoginPage = observer(() => {
             <input
               className="login-input"
               type="password"
+              autoFocus={!!Store.username}
               value={Store.password}
               onChange={e => {
                 Store.password = e.target.value;
@@ -186,13 +227,24 @@ export const LoginPage = observer(() => {
             style={{ position: 'absolute', left: CANCEL_X, top: BUTTON_Y }}
           />
 
-          {/* Only when there is a page to send them to. A new tab, not this
-              one: leaving would drop the connection and cost the player the
-              scene they just waited for. */}
-          {!!signup && (
+          {/* Swaps this window for the register one. Nothing navigates: the
+              scene behind stays where it is, which is the point. */}
+          {!!signupApi && (
+            <span
+              className="login-register"
+              style={{ left: REGISTER.x, top: REGISTER.y }}
+              onClick={uiClick(openRegister)}
+            >
+              {t('login.createAccount')}
+            </span>
+          )}
+
+          {/* A build that knows a signup page but no endpoint. A new tab, not
+              this one: leaving would cost the scene the player waited for. */}
+          {!!signupPage && (
             <a
               className="login-register"
-              href={signup}
+              href={signupPage}
               target="_blank"
               rel="noopener noreferrer"
               style={{ left: REGISTER.x, top: REGISTER.y }}
@@ -209,6 +261,8 @@ export const LoginPage = observer(() => {
         {!!Store.loginError && (
           <p className="login-error">{Store.loginError}</p>
         )}
+
+        {!Store.loginError && !!notice && <p className="login-notice">{notice}</p>}
       </MuSpriteFrame>
     </div>
   );

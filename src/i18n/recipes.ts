@@ -83,6 +83,21 @@ export const EN_TEXT = {
   'login.createAccount': 'Create account',
   'login.rememberMe': 'Remember me?',
 
+  // The register window, which takes the login window's place on the same
+  // screen. Its rows are the login window's, plus the confirmation a password
+  // needs when it is being set rather than typed back.
+  'register.id': 'ID',
+  'register.password': 'Password',
+  'register.confirm': 'Confirm',
+  'register.fillEveryField': 'Please fill in every field.',
+  'register.idTooShort': 'ID must be at least {min} characters.',
+  'register.idChars': 'ID may contain only letters and numbers.',
+  'register.passwordTooShort': 'Password must be at least {min} characters.',
+  'register.mismatch': 'Passwords do not match.',
+  'register.unreachable': 'Could not reach the server.',
+  'register.failed': 'Registration failed ({status}).',
+  'register.created': 'Account created. You can log in now.',
+
   'characters.loading': 'Loading characters...',
   'characters.select': 'Select a character',
   'characters.create.minLength': 'Type more than 4 letters',

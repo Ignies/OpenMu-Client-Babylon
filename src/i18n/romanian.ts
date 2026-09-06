@@ -75,6 +75,18 @@ export const romanianLayer: LanguageLayer = {
     'login.createAccount': 'Creează cont',
     'login.rememberMe': 'Ține-mă minte?',
 
+    'register.id': 'ID',
+    'register.password': 'Parolă',
+    'register.confirm': 'Confirmă',
+    'register.fillEveryField': 'Completează toate câmpurile.',
+    'register.idTooShort': 'ID-ul trebuie să aibă cel puțin {min} caractere.',
+    'register.idChars': 'ID-ul poate conține doar litere și cifre.',
+    'register.passwordTooShort': 'Parola trebuie să aibă cel puțin {min} caractere.',
+    'register.mismatch': 'Parolele nu se potrivesc.',
+    'register.unreachable': 'Serverul nu poate fi contactat.',
+    'register.failed': 'Înregistrarea a eșuat ({status}).',
+    'register.created': 'Cont creat. Te poți conecta acum.',
+
     'characters.loading': 'Se încarcă personajele...',
     'characters.select': 'Alege un personaj',
     'characters.create.minLength': 'Scrie mai mult de 4 litere',
