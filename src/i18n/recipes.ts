@@ -179,6 +179,7 @@ export const EN_TEXT = {
   'options.section.actions': 'Actions',
   'options.section.language': 'Language',
   'options.section.loot': 'Drop names',
+  'options.section.interface': 'Interface',
 
   'options.autoAttack': 'Automatic Attack',
   'options.whisperBeep': 'Beep sound for whispering',
@@ -192,6 +193,10 @@ export const EN_TEXT = {
   'options.lootOther': 'Everything else',
   'options.lootZen': 'Zen from',
   'options.chatTimestamps': 'Chat timestamps',
+  'options.uiScale': 'Interface size',
+  'options.lockWindows': 'Lock windows',
+  'options.resetWindows': 'Reset windows',
+  'options.stateWarnings': 'Warning notices',
   'options.volume': 'Volume',
   'options.effectLevel': '+Effect limitation',
   'options.shadows': 'Object shadows',
@@ -240,6 +245,11 @@ export const EN_TEXT = {
   'options.itemEffects.both': 'Both',
   'options.itemEffects.improved': 'Improved',
 
+  'warn.durability': 'Equipment durability at {percent}%',
+  'warn.inventoryFull': 'The inventory is full',
+  'warn.noPotions': 'No healing potions left',
+  'warn.buffEnding': '{name} is about to end',
+  'trade.offerChanged': 'The other side changed the offer',
   // ---- key bindings ------------------------------------------------------
   'keys.minimap': 'Minimap',
   'keys.replyWhisper': 'Reply to whisper',

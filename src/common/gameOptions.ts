@@ -110,9 +110,27 @@ export type GameOptions = {
   lootZen: number;
   /** A "14:03" column in front of every chat log line. */
   chatTimestamps: boolean;
+  /**
+   * Index into `UI_SCALE_STEPS`: how big every window is drawn, on top of
+   * the size it was dragged to. 4K screens want more than a 640x480 stage.
+   */
+  uiScale: number;
+  /** Windows stay where they are: a drag raises them but does not move them. */
+  lockWindows: boolean;
+  /** Durability, full grid, last potion and buff ending notices. */
+  stateWarnings: boolean;
 };
 
 export const GRADE_NOMINAL = 5;
+
+/** `uiScale` steps: the factor every window's own scale is multiplied by. */
+export const UI_SCALE_STEPS = [0.7, 0.8, 0.9, 1, 1.15, 1.3, 1.5, 1.75, 2] as const;
+
+export const UI_SCALE_MAX = UI_SCALE_STEPS.length - 1;
+
+export function uiScaleFactor(step: number): number {
+  return UI_SCALE_STEPS[Math.max(0, Math.min(UI_SCALE_MAX, step))] ?? 1;
+}
 
 export const MAP_GRADIENT_MAX = 10;
 
@@ -136,6 +154,7 @@ const CLAMPS: Partial<Record<keyof GameOptions, number>> = {
   chromatic: 9,
   exposure: 25,
   lootZen: 9,
+  uiScale: UI_SCALE_MAX,
 };
 
 const DEFAULTS: GameOptions = {
@@ -179,6 +198,9 @@ const DEFAULTS: GameOptions = {
   lootOther: false,
   lootZen: 0,
   chatTimestamps: false,
+  uiScale: 3,
+  lockWindows: false,
+  stateWarnings: true,
 };
 
 type Listener = (options: GameOptions) => void;

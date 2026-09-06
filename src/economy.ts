@@ -5,6 +5,7 @@ import { Store } from './store';
 import { Social } from './social';
 import type { Item } from './ecs/world';
 import { playUiSound } from './libs/sfx';
+import { Notices } from './common/notices';
 import {
   CHAOS_CARD_WIRE_STORAGE,
   MIX_SLOTS,
@@ -354,6 +355,14 @@ export const Economy = new (class _Economy {
   tradeOpen = false;
   myTradeItems: (Item | null)[] = emptyGrid(TRADE_SLOTS);
   yourTradeItems: (Item | null)[] = emptyGrid(TRADE_SLOTS);
+
+  /**
+   * Squares of the partner's tray that changed after we had already ticked
+   * accept. The server drops both marks on any change, so the trade is
+   * safe either way - this is only so the eye finds *what* moved before
+   * ticking again. Cleared when the window closes or we accept afresh.
+   */
+  yourTradeChanged = new Set<number>();
   myTradeMoney = 0;
   yourTradeMoney = 0;
   myTradeConfirm = false;
@@ -401,6 +410,7 @@ export const Economy = new (class _Economy {
       tradeOpen: observable,
       myTradeItems: observable,
       yourTradeItems: observable,
+      yourTradeChanged: observable,
       myTradeMoney: observable,
       yourTradeMoney: observable,
       myTradeConfirm: observable,
@@ -807,6 +817,7 @@ export const Economy = new (class _Economy {
     this.tradeOpen = false;
     this.myTradeItems = emptyGrid(TRADE_SLOTS);
     this.yourTradeItems = emptyGrid(TRADE_SLOTS);
+    this.yourTradeChanged = new Set();
     this.myTradeMoney = 0;
     this.yourTradeMoney = 0;
     this.myTradeConfirm = false;
@@ -871,7 +882,9 @@ export const Economy = new (class _Economy {
     if (slot < 0 || slot >= TRADE_SLOTS) return;
 
     prefetchItemIcons([item]);
+    const afterAccept = this.myTradeConfirm;
     runInAction(() => {
+      if (afterAccept) this.yourTradeChanged = new Set([...this.yourTradeChanged, slot]);
       this.yourTradeItems[slot] = item;
       // Any change on either side clears both accept marks on the server;
       // mirror that so the button is not shown checked by mistake.
@@ -879,6 +892,7 @@ export const Economy = new (class _Economy {
       this.yourTradeConfirm = false;
     });
     playUiSound('getItem');
+    if (afterAccept) Notices.create(t('trade.offerChanged'));
   }
 
   /** The zen field (`CTradeZenMsgBoxLayout` → `SendSetTradeMoney`). */
@@ -908,11 +922,13 @@ export const Economy = new (class _Economy {
 
   /** `TradeMoneyUpdate` (0x3B): the partner's amount. */
   partnerTradeMoney(amount: number): void {
+    const afterAccept = this.myTradeConfirm;
     runInAction(() => {
       this.yourTradeMoney = amount;
       this.myTradeConfirm = false;
       this.yourTradeConfirm = false;
     });
+    if (afterAccept) Notices.create(t('trade.offerChanged'));
   }
 
   /** `AlertTrade`: our own accept checkbox. */
@@ -921,6 +937,9 @@ export const Economy = new (class _Economy {
 
     runInAction(() => {
       this.myTradeConfirm = checked;
+      // Accepting again is reading the offer again: the marks have done
+      // their job.
+      if (checked) this.yourTradeChanged = new Set();
     });
 
     const packet = TradeButtonStateChangePacket.createPacket();

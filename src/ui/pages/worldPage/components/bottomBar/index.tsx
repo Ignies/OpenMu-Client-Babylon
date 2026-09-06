@@ -358,6 +358,7 @@ const SkillSlots = observer(() => {
   // on the cooldown layer's tick, so a running delay renders nothing. The
   // observable map only changes when a delay starts / ends (slot re-render).
   const delayRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const secondsRefs = useRef<(HTMLDivElement | null)[]>([]);
   const slotNumbers = useRef<number[]>([]);
   useEffect(() => {
     const sweep = () => {
@@ -368,6 +369,16 @@ const SkillSlots = observer(() => {
         const delay = numbers[i] >= 0 ? skills.cooldown(numbers[i]) : null;
         const css = delay ? Math.round(delay.fraction * SKILL_SLOT_HEIGHT) + 'px' : '0px';
         if (el.style.height !== css) el.style.height = css;
+        const seconds = secondsRefs.current[i];
+        if (!seconds) continue;
+        // Whole seconds under 10, one decimal above nothing: the same
+        // reading a player counts under their breath.
+        const text = delay
+          ? delay.remaining >= 1
+            ? String(Math.ceil(delay.remaining))
+            : delay.remaining.toFixed(1)
+          : '';
+        if (seconds.textContent !== text) seconds.textContent = text;
       }
     };
     sweep();
@@ -478,7 +489,12 @@ const SkillSlots = observer(() => {
     <>
       {page.map((slot, i) => {
         const number = Store.skillHotkeys[slot] ?? -1;
-        const usable = number >= 0 && skills.requirementsMet(number);
+        const state = number >= 0 ? skills.usability(number) : null;
+        const usable = !!state?.requirementsMet;
+        const shortOn =
+          usable && state
+            ? state.blocks.find(block => block === 'mana' || block === 'ag')
+            : undefined;
         // Tracked: a delay starting or ending re-renders the slot (the sweep itself is not React).
         const cooling = number >= 0 && skillCooldowns.has(number);
         const selected = number >= 0 && number === Store.currentSkill;
@@ -488,6 +504,7 @@ const SkillSlots = observer(() => {
         const classes = ['skill-slot'];
         if (selected) classes.push('selected');
         if (number >= 0 && !usable) classes.push('unusable');
+        if (shortOn) classes.push(shortOn === 'mana' ? 'no-mana' : 'no-ag');
         if (number < 0) classes.push('empty');
         if (picking) classes.push('picking');
         const events = boxEvents(number, false);
@@ -530,11 +547,14 @@ const SkillSlots = observer(() => {
               </div>
             )}
             {cooling && (
-              <div
-                ref={el => (delayRefs.current[i] = el)}
-                className="skill-delay"
-                style={{ height: 0, background: DELAY_TINT }}
-              />
+              <>
+                <div
+                  ref={el => (delayRefs.current[i] = el)}
+                  className="skill-delay"
+                  style={{ height: 0, background: DELAY_TINT }}
+                />
+                <div ref={el => (secondsRefs.current[i] = el)} className="skill-delay-left" />
+              </>
             )}
             {number >= 0 && <div className="skill-hotkey">{slot}</div>}
           </div>

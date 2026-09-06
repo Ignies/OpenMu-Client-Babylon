@@ -116,6 +116,36 @@
       cursor: default;
     }
 
+    // The seconds left on the running delay, over the sweep.
+    .skill-delay-left {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      text-align: center;
+      font-size: 9px;
+      line-height: 9px;
+      color: #fff;
+      text-shadow: 0 0 2px #000, 0 0 2px #000;
+      pointer-events: none;
+    }
+
+    // Learned and legal, but the pool is too low to cast it right now: the
+    // icon keeps its colours and the slot takes the shortage's tint.
+    &.no-mana .skill-icon,
+    &.no-ag .skill-icon {
+      opacity: 0.45;
+    }
+
+    &.no-mana {
+      box-shadow: inset 0 0 0 1px rgba(60, 130, 255, 0.7);
+    }
+
+    &.no-ag {
+      box-shadow: inset 0 0 0 1px rgba(255, 190, 60, 0.7);
+    }
+
     // The current-skill box while a dragged skill hovers it.
     &.drop-target {
       box-shadow: inset 0 0 0 1px rgba(120, 255, 140, 0.9);
