@@ -42,6 +42,7 @@ import {
 } from '../effects/recipes';
 import { ItemsDatabase } from './itemsDatabase';
 import { skillDefinition, type SkillDefinition } from './skillsDatabase';
+import { storeRef } from './storeRef';
 
 /**
  * Skill → visual recipe. The **consumer** of the effects layer
@@ -91,6 +92,17 @@ const HIT_COUNT = 14;
 /** Triple Shot's fan: ±15°; the five-arrow masters ±5/10/20. */
 const TRIPLE_SPREAD = (15 * Math.PI) / 180;
 const FIVE_SPREAD = [-20, -10, 0, 10, 20].map(d => (d * Math.PI) / 180);
+/**
+ * Evil Spirit's spirit stamps, newest first. A subtract removes `texel x colour` and the material
+ * clamps that term at 1, so one stamp can never take more of the frame than its own sheet does -
+ * and the sheet is mid grey. The original gets its black spirits by stamping a fresh MODEL_LASER
+ * every frame along a path that moves 0.7 tiles a tick, so consecutive stamps overlap and the
+ * subtraction compounds; the echoes here do the same. The last two fade, which is the display
+ * persistence the stamps' one-tick life leans on.
+ */
+const SPIRIT_ECHOES = [1, 1, 1, 0.8, 0.55];
+/** The violet sheen over the black spirit: the same skull drawn additive on top of its own cut-out. */
+const SPIRIT_GLOW: RGB = [0.7, 0.18, 1];
 /** Persistent-buff ribbons: the original's five MODEL_SPEARSKILL joints. */
 const BUFF_RIBBONS = 5;
 
@@ -599,13 +611,16 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // RENDER_DARK) at its head every frame — the visible spirits (ZzzCharacter.cpp:4468,
   // ZzzEffectJoint.cpp:3698, ZzzEffect.cpp:1890). Stamps land a tick apart and each holds its spot
   // for a tick, so the screen shows the newest one plus the just-expired ones still inside display
-  // persistence: a short trail of spirit shadows. Three tick-lagged models per wide joint, dimming
-  // toward the tail, instead of ~50 one-tick spawns per cast.
+  // persistence: a short trail of spirit shadows. Five tick-lagged models per wide joint
+  // (`SPIRIT_ECHOES`) instead of ~50 one-tick spawns per cast.
   //
-  // A subtract tint is what gets REMOVED: `dst × (1 − texel × colour)` — a violet tint leaves a
-  // *green* residue. The tints below are complements, chosen so what survives is purple. The
-  // additive violet glow + mote trail on each head are a deliberate stylisation on top of the
-  // original (the subtractive pass alone washes out under tone mapping), requested 2026-09-02.
+  // The subtraction is NEUTRAL, like the original's `Light` (greyscale, `LifeTime * 0.1` clamped,
+  // ZzzEffectJoint.cpp:3773). A tinted subtract leaves a saturated residue at a low luminance, and
+  // the tone curve maps luminance with the chroma carried through unchanged, so that residue comes
+  // back out as a bright coloured smudge instead of a shadow. The violet is additive instead: the
+  // same skull drawn over its own cut-out, plus the mote trail and the ground wash in
+  // lighting/skills. A shadow alone cannot carry this skill on a tone-mapped frame - the ground
+  // sits near the top of the curve there, where even a deep subtraction moves only a little.
   9: {
     area: atCaster((at, c) => {
       const seconds = ticks(49);
@@ -616,26 +631,26 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
         band: { floor: 1, ceiling: 4 },
       };
       const fadeTail = 10 / 49;
-      // Complement tints: subtracting green-heavy leaves violet. Echoes dim ×0.65 / ×0.4.
-      const shades: RGB[] = [[0.65, 1, 0.45], [0.42, 0.65, 0.29], [0.26, 0.4, 0.18]];
+      const echoes = SPIRIT_ECHOES;
       for (let i = 0; i < 4; i++) {
         const heading = facing(c, (i * Math.PI) / 2);
-        const trail = shades.map(() => at.clone());
+        const trail = echoes.map(() => at.clone());
         effects.spawn('joint', c.scene, at, {
-          velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.8, colour: [0.3, 0.75, 0.15], blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail,
+          velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.8, colour: RGBS.white, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail,
           trace: h => {
             for (let k = trail.length - 1; k > 0; k--) trail[k].copyFrom(trail[k - 1]);
             trail[0].copyFrom(h);
           },
         });
-        effects.spawn('joint', c.scene, at, { velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.2, colour: [0.45, 0.85, 0.3], blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail });
-        shades.forEach((shade, k) => {
-          effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: shade, blend: 'subtract', aim: true, fadeTail, follow: out => out.copyFrom(trail[k]) });
+        effects.spawn('joint', c.scene, at, { velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.2, colour: RGBS.white, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail });
+        echoes.forEach((k, idx) => {
+          effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: [k, k, k], blend: 'subtract', aim: true, fadeTail, follow: out => out.copyFrom(trail[idx]) });
         });
-        effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: RGBS.shade, size: 0.9, seconds, follow: out => out.copyFrom(trail[0]), fadeTail });
-        effects.spawn('particles', c.scene, at, { recipe: SHADE_MOTES, rate: 12, seconds, follow: out => out.copyFrom(trail[0]) });
+        effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: SPIRIT_GLOW, alpha: 0.85, aim: true, fadeTail, follow: out => out.copyFrom(trail[0]) });
+        effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: RGBS.shade, size: 1.2, seconds, follow: out => out.copyFrom(trail[0]), fadeTail });
+        effects.spawn('particles', c.scene, at, { recipe: SHADE_MOTES, rate: 16, seconds, follow: out => out.copyFrom(trail[0]) });
       }
-      particles({ recipe: SHADE_MOTES, count: 20 })(at, c);
+      particles({ recipe: SHADE_MOTES, count: 24 })(at, c);
     }, 1),
   },
   // 10 Hellfire: impact@caster — MODEL_CIRCLE LT 45 + MODEL_CIRCLE_LIGHT LT 40 (BlendMesh 0), stones, EarthQuake shake.
@@ -1589,4 +1604,25 @@ export function clearBuffVisuals(entity: Entity): void {
   if (!byEffect) return;
   for (const h of byEffect.values()) h.stop();
   buffHandles.delete(entity);
+}
+
+// Dev hook for the live harness: no offline test character casts every skill,
+// so probes fire a row by hand (`window.__skillVisuals.area(9)`).
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  (window as unknown as { __skillVisuals: unknown }).__skillVisuals = {
+    area: (skill: number) => {
+      const world = storeRef().world;
+      const caster = world?.playerEntity;
+      if (!world || !caster?.transform) return false;
+      playAreaSkillVisual(world.scene, skill, caster, null, (x, y) => world.getTerrainHeight(x, y));
+      return true;
+    },
+    targeted: (skill: number) => {
+      const world = storeRef().world;
+      const caster = world?.playerEntity;
+      if (!world || !caster?.transform) return false;
+      playTargetedSkillVisual(world.scene, skill, caster, null);
+      return true;
+    },
+  };
 }
