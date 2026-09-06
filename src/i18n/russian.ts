@@ -1348,5 +1348,13 @@ export const russianLayer: LanguageLayer = {
     'skills.alreadyKnown': 'Вы уже знаете {name}',
     'skills.needMore':
       '{label} {required}, чтобы выучить {name} (не хватает {more})',
+    'options.section.loot': 'Названия на земле',
+    'options.lootFilter': 'Фильтр названий на земле',
+    'options.lootJewels': 'Камни',
+    'options.lootExcellent': 'Excellent',
+    'options.lootAncient': 'Ancient',
+    'options.lootHighLevel': 'Уровень +7 и выше',
+    'options.lootOther': 'Всё остальное',
+    'options.lootZen': 'Zen от',
   },
 };

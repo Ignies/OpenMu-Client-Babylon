@@ -1334,5 +1334,13 @@ export const thaiLayer: LanguageLayer = {
     'skills.alreadyKnown': 'คุณรู้ {name} อยู่แล้ว',
     'skills.needMore':
       'ต้องมี {label} {required} เพื่อเรียน {name} (ขาดอีก {more})',
+    'options.section.loot': 'ชื่อไอเทมที่ตก',
+    'options.lootFilter': 'กรองชื่อไอเทมที่ตก',
+    'options.lootJewels': 'อัญมณี',
+    'options.lootExcellent': 'Excellent',
+    'options.lootAncient': 'Ancient',
+    'options.lootHighLevel': 'ระดับ +7 ขึ้นไป',
+    'options.lootOther': 'ที่เหลือทั้งหมด',
+    'options.lootZen': 'Zen ตั้งแต่',
   },
 };

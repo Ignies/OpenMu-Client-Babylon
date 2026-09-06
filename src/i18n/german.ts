@@ -1374,5 +1374,13 @@ export const germanLayer: LanguageLayer = {
     'skills.alreadyKnown': 'Du kennst {name} bereits',
     'skills.needMore':
       '{label} {required} nötig, um {name} zu lernen ({more} fehlen)',
+    'options.section.loot': 'Namen am Boden',
+    'options.lootFilter': 'Namen am Boden filtern',
+    'options.lootJewels': 'Juwelen',
+    'options.lootExcellent': 'Excellent',
+    'options.lootAncient': 'Ancient',
+    'options.lootHighLevel': 'Stufe +7 und höher',
+    'options.lootOther': 'Alles andere',
+    'options.lootZen': 'Zen ab',
   },
 };

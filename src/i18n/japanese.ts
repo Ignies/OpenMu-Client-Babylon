@@ -1324,5 +1324,13 @@ export const japaneseLayer: LanguageLayer = {
     'skills.classCannotLearn': 'あなたの職業では{name}を習得できません',
     'skills.alreadyKnown': '{name}はすでに習得しています',
     'skills.needMore': '{name}の習得には{label} {required} が必要です（あと {more}）',
+    'options.section.loot': 'ドロップ名',
+    'options.lootFilter': 'ドロップ名を絞り込む',
+    'options.lootJewels': '宝石',
+    'options.lootExcellent': 'エクセレント',
+    'options.lootAncient': 'エンシェント',
+    'options.lootHighLevel': '+7 以上',
+    'options.lootOther': 'その他すべて',
+    'options.lootZen': 'Zen 以上',
   },
 };

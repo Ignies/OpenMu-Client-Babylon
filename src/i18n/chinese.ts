@@ -1316,5 +1316,13 @@ export const chineseLayer: LanguageLayer = {
     'skills.classCannotLearn': '你的职业无法学习{name}',
     'skills.alreadyKnown': '你已经学会了{name}',
     'skills.needMore': '学习{name}需要{label} {required}（还差 {more}）',
+    'options.section.loot': '掉落名称',
+    'options.lootFilter': '过滤掉落名称',
+    'options.lootJewels': '宝石',
+    'options.lootExcellent': '卓越',
+    'options.lootAncient': '太古',
+    'options.lootHighLevel': '+7 及以上',
+    'options.lootOther': '其他全部',
+    'options.lootZen': 'Zen 起',
   },
 };

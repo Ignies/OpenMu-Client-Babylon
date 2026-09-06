@@ -1371,5 +1371,13 @@ export const spanishLayer: LanguageLayer = {
     'skills.alreadyKnown': 'Ya conoces {name}',
     'skills.needMore':
       '{label} {required} para aprender {name} (faltan {more})',
+    'options.section.loot': 'Nombres en el suelo',
+    'options.lootFilter': 'Filtrar nombres en el suelo',
+    'options.lootJewels': 'Joyas',
+    'options.lootExcellent': 'Excellent',
+    'options.lootAncient': 'Ancient',
+    'options.lootHighLevel': 'Nivel +7 o más',
+    'options.lootOther': 'Todo lo demás',
+    'options.lootZen': 'Zen desde',
   },
 };

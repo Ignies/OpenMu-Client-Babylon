@@ -1361,5 +1361,13 @@ export const romanianLayer: LanguageLayer = {
     'skills.alreadyKnown': 'Știi deja {name}',
     'skills.needMore':
       '{label} {required} pentru a învăța {name} (mai lipsesc {more})',
+    'options.section.loot': 'Nume pe jos',
+    'options.lootFilter': 'Filtrează numele de pe jos',
+    'options.lootJewels': 'Bijuterii',
+    'options.lootExcellent': 'Excellent',
+    'options.lootAncient': 'Ancient',
+    'options.lootHighLevel': 'Nivel +7 și peste',
+    'options.lootOther': 'Restul',
+    'options.lootZen': 'Zen de la',
   },
 };
