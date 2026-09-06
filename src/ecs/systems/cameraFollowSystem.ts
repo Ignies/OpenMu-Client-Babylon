@@ -3,6 +3,7 @@ import type { ISystemFactory } from '../world';
 import { Store, UIState } from '../../store';
 import {
   installCameraControl,
+  releaseMouseLook,
   showHeroBody,
   updateGameCamera,
 } from '../../camera';
@@ -43,8 +44,9 @@ export const CameraFollowSystem: ISystemFactory = world => {
       // The login/character screens keep their own camera (loginSceneSystem).
       if (Store.uiState !== UIState.World) {
         // Leaving the world with the camera zoomed into the hero's head would
-        // strand the body hidden.
+        // strand the body hidden - and the pointer locked.
         showHeroBody();
+        releaseMouseLook();
         return;
       }
 

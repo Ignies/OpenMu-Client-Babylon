@@ -9,6 +9,7 @@ import type { EntityTypeFromQuery, ISystemFactory } from '../world';
 import { isAttackableEntity } from './attackSystem';
 import { isMobileDevice } from '../../common/mobile';
 import { Commands } from '../../commands';
+import { aimX, aimY } from '../../camera';
 
 const COLOR_RED = new Color3(1, 0, 0);
 
@@ -44,6 +45,24 @@ export const PointerInputSystem: ISystemFactory = world => {
   const paddedMin = new Vector3();
   const paddedMax = new Vector3();
   const centre = new Vector3();
+
+  let lastClientX = 0;
+  let lastClientY = 0;
+
+  /**
+   * Point `tmpCameraRay` where the player is aiming. `aimX/aimY`: the
+   * first-person look holds the pointer lock, which freezes
+   * `clientX/clientY` where it was taken, so the aim is the crosshair.
+   */
+  function aimRay(): void {
+    scene.createPickingRayToRef(
+      aimX(lastClientX),
+      aimY(lastClientY),
+      identity,
+      tmpCameraRay,
+      null
+    );
+  }
 
   /**
    * The selectable under `tmpCameraRay`, nearest to the camera first.
@@ -135,13 +154,9 @@ export const PointerInputSystem: ISystemFactory = world => {
     // testing it against each candidate's own box. `scene.pick` would
     // ray-intersect every pickable mesh in the scene (the terrain's 131k
     // triangles included) on every pointer event, move events included.
-    scene.createPickingRayToRef(
-      ev.event.clientX,
-      ev.event.clientY,
-      identity,
-      tmpCameraRay,
-      null
-    );
+    lastClientX = ev.event.clientX;
+    lastClientY = ev.event.clientY;
+    aimRay();
 
     // The click re-resolves against its own ray: the hover sample can be up
     // to HOVER_INTERVAL old, and the systems registered after this one
@@ -169,8 +184,8 @@ export const PointerInputSystem: ISystemFactory = world => {
       else if (ev.type === PointerEventTypes.POINTERUP) world.rightPointerPressed = false;
       if (ev.type === PointerEventTypes.POINTERDOWN || rightDrag) {
         const ground = scene.pick(
-          ev.event.clientX,
-          ev.event.clientY,
+          aimX(ev.event.clientX),
+          aimY(ev.event.clientY),
           m => m === world.terrain?.mesh,
           true
         ).pickedPoint;
@@ -227,6 +242,10 @@ export const PointerInputSystem: ISystemFactory = world => {
       if (delay > 0) return;
       delay = HOVER_INTERVAL;
 
+      // Re-aimed, not just re-tested: the camera moves without the mouse
+      // (Insert/Delete, and every step of a keyboard walk), and a ray built
+      // from where it used to stand hovers whatever used to be there.
+      aimRay();
       applyTarget(resolveTarget());
     },
   };

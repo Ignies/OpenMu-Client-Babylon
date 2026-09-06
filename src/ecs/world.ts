@@ -129,6 +129,12 @@ export type Entity = Partial<{
     point: IVector2Like;
     handled: boolean;
     sendToServer?: boolean;
+    /**
+     * No move-target marker on the ground for this one. Consumed with
+     * `handled`: a held walk key re-issues several times a second and would
+     * carpet the map in markers.
+     */
+    silent?: boolean;
   };
   movement: {
     velocity: IVector2Like;

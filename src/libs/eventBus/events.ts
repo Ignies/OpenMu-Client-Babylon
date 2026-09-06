@@ -50,5 +50,7 @@ export type Events = CSEvents &
     fanfare: { effectType: number; x: number; y: number };
     keyPressed: string;
     keyReleased: string;
+    /** First-person mouse look took (true) or gave back the pointer lock. */
+    mouseLookChanged: boolean;
     pageVisibilityChanged: boolean;
   };

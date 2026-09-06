@@ -117,6 +117,22 @@ export function isReservedKey(code: string): boolean {
   return RESERVED.has(code);
 }
 
+/**
+ * The four walk keys, live while the `wsadMovement` option is on. Not
+ * rebindable: they are the layout every game that walks on a keyboard uses,
+ * and the option itself is the way out of them.
+ */
+export const WALK_KEYS = {
+  forward: 'KeyW',
+  back: 'KeyS',
+  left: 'KeyA',
+  right: 'KeyD',
+} as const;
+
+export const WALK_KEY_CODES: ReadonlySet<string> = new Set(
+  Object.values(WALK_KEYS)
+);
+
 type Listener = (bindings: KeyBindings) => void;
 
 const listeners = new Set<Listener>();

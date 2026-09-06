@@ -8,6 +8,7 @@ import { ENUM_WORLD } from '../../common';
 import { MODEL_POSE_BOX } from '../../common/objects/enum';
 import { TWFlags } from '../../common/terrain/consts';
 import { isFlagInBinaryMask } from '../../common/utils';
+import { aimX, aimY } from '../../camera';
 import { findRestObject } from '../../libs/mu/restObjects';
 import { Store } from '../../store';
 import type { CursorHover } from '../../ui/components/gameCursor/cursors';
@@ -68,8 +69,8 @@ export const CursorSystem: ISystemFactory = world => {
 
   function hoveredRestObject(): CursorHover | null {
     scene.createPickingRayToRef(
-      lastClientX,
-      lastClientY,
+      aimX(lastClientX),
+      aimY(lastClientY),
       identity,
       tmpRay,
       null
@@ -123,8 +124,8 @@ export const CursorSystem: ISystemFactory = world => {
       if (!world.pointerPressed) return;
 
       const pickInfo = scene.pick(
-        lastClientX,
-        lastClientY,
+        aimX(lastClientX),
+        aimY(lastClientY),
         m => m === world.terrain?.mesh,
         true
       );

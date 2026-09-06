@@ -97,6 +97,21 @@ export type GameOptions = {
    */
   cameraFov: number;
   /**
+   * W/A/S/D walk the hero, camera-relative, and in first person the mouse
+   * looks around under a pointer lock. On, those four keys stop reaching the
+   * actions they carry (potion slot 2, master skills, sort, command window) -
+   * Ctrl + the key still does.
+   */
+  wsadMovement: boolean;
+  /**
+   * Let the first-person pointer lock be taken at any zoom level, so the
+   * mouse looks around in third person too - the camera behind the hero, the
+   * crosshair in the middle of the screen. Nothing reads it while
+   * `wsadMovement` is off, which is what supplies the walk once the lock has
+   * taken the cursor.
+   */
+  thirdPersonMouseLook: boolean;
+  /**
    * Run the latched ALT drop names through `lootFilter.ts` instead of naming
    * every pile on the ground. ALT held still shows all of them.
    */
@@ -194,6 +209,8 @@ const DEFAULTS: GameOptions = {
   slideHelp: true,
   cameraControl: true,
   cameraFov: CAMERA_FOV_DEG,
+  wsadMovement: false,
+  thirdPersonMouseLook: false,
   autoReconnect: true,
   lootFilter: false,
   lootJewels: true,

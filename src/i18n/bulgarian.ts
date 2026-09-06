@@ -164,6 +164,10 @@ export const bulgarianLayer: LanguageLayer = {
     'options.whisperBeep': 'Звук при получен шепот',
     'options.slideHelp': 'Плъзгаща помощ',
     'options.cameraControl': 'Управление на камерата (Ctrl+колелце, Ins/Del)',
+    'options.cameraFov': 'Зрително поле',
+    'options.wsadMovement':
+      'Движение с WSAD (оглеждане с мишката от първо лице)',
+    'options.thirdPersonMouseLook': 'Оглеждане с мишката и от трето лице',
     'options.volume': 'Сила на звука',
     'options.effectLevel': 'Ограничение на +ефекти',
     'options.shadows': 'Сенки на обектите',

@@ -163,6 +163,11 @@ export const italianLayer: LanguageLayer = {
     'options.whisperBeep': 'Bip quando ricevi un sussurro',
     'options.slideHelp': 'Aiuto scorrevole',
     'options.cameraControl': 'Controllo camera (Ctrl+rotella, Ins/Canc)',
+    'options.cameraFov': 'Campo visivo',
+    'options.wsadMovement':
+      'Movimento WSAD (mouse per guardarsi intorno in prima persona)',
+    'options.thirdPersonMouseLook':
+      'Mouse per guardarsi intorno anche in terza persona',
     'options.volume': 'Volume',
     'options.effectLevel': 'Limite dei +effetti',
     'options.shadows': 'Ombre degli oggetti',

@@ -12,7 +12,10 @@
  *
  * The ladder in `recipes.ts` extends past the ported five at both ends: the
  * steps below 1000 blend the ported geometry toward an eye-level shot and
- * the innermost one is first person, where the hero's body is hidden.
+ * the innermost one is first person, where the hero's body is hidden and,
+ * with the `wsadMovement` option on, the mouse looks around under a pointer
+ * lock (`mouseLook.ts`) - at every zoom level if `thirdPersonMouseLook` says
+ * so.
  *
  * Single writer of alpha/beta/radius/fov, and of the target's Y lift, while
  * the option is on and the game is in the World state; `cameraFollowSystem`
@@ -29,6 +32,11 @@ import type { CameraLayer } from './layer';
 import { CAMERA_LAYERS } from './layers';
 import { hideHeroBody, showHeroBody } from './heroBody';
 import {
+  installMouseLook,
+  isMouseLookActive,
+  releaseMouseLook,
+} from './mouseLook';
+import {
   CAMERA_PITCH_DEG,
   CLOSE_BAND_MU,
   DEFAULT_CAMERA_LEVEL,
@@ -44,6 +52,7 @@ import {
   HERO_HIDE_MU,
   MAX_CAMERA_LEVEL,
   MIN_RADIUS_MU,
+  MOUSE_LOOK_DEG_PER_PX,
   MU_SCALE,
   PITCH_DRAG_DEG_PER_PX,
   PITCH_OFFSET_MAX_DEG,
@@ -55,6 +64,7 @@ import {
 
 export type { CameraLayer } from './layer';
 export { showHeroBody } from './heroBody';
+export { aimX, aimY, isMouseLookActive, releaseMouseLook } from './mouseLook';
 
 const RAD = Math.PI / 180;
 
@@ -91,6 +101,49 @@ let classic: {
 
 function targetDistanceFor(world: ENUM_WORLD): number {
   return byWorld.get(world)?.distance ?? DISTANCE_BY_LEVEL[level];
+}
+
+/**
+ * The camera is at the hero's eyes rather than behind their back - the same
+ * band that hides the body, which is the point at which there is nothing left
+ * on screen to orbit and the frame reads as a first-person one.
+ */
+export function isFirstPerson(): boolean {
+  return GameOptions.cameraControl && distance < HERO_HIDE_MU;
+}
+
+/**
+ * Whether the frame is one the mouse may hold the pointer lock in. Tied to
+ * `wsadMovement` because the lock takes the cursor away and the walk keys are
+ * what is left to move with; first person only, unless the player asked for
+ * it in third person too. The World-state half of the gate is the caller's.
+ */
+function canMouseLook(): boolean {
+  if (!GameOptions.wsadMovement) return false;
+
+  return GameOptions.thirdPersonMouseLook
+    ? GameOptions.cameraControl
+    : isFirstPerson();
+}
+
+/**
+ * Turn the view by a mouse movement, in pixels. Right and down are positive,
+ * the way the browser reports them: right turns the view right, up pitches
+ * toward the horizon. Shared by the middle-button drag and the first-person
+ * look, which only differ in how many degrees a pixel is worth.
+ */
+function applyLook(
+  dx: number,
+  dy: number,
+  headingDegPerPx: number,
+  pitchDegPerPx: number
+): void {
+  headingDeg -= dx * headingDegPerPx;
+  pitchOffsetDeg -= dy * pitchDegPerPx;
+  pitchOffsetDeg = Math.max(
+    -FIRST_PERSON_PITCH_LIMIT_DEG,
+    Math.min(FIRST_PERSON_PITCH_LIMIT_DEG, pitchOffsetDeg)
+  );
 }
 
 /**
@@ -153,12 +206,11 @@ export function installCameraControl(
     canvas.addEventListener('pointermove', ev => {
       if (ev.pointerId !== dragPointer) return;
 
-      headingDeg -= (ev.clientX - dragLastX) * ROTATE_DRAG_DEG_PER_PX;
-      // Drag up (clientY shrinks) pitches up toward the horizon.
-      pitchOffsetDeg -= (ev.clientY - dragLastY) * PITCH_DRAG_DEG_PER_PX;
-      pitchOffsetDeg = Math.max(
-        -FIRST_PERSON_PITCH_LIMIT_DEG,
-        Math.min(FIRST_PERSON_PITCH_LIMIT_DEG, pitchOffsetDeg)
+      applyLook(
+        ev.clientX - dragLastX,
+        ev.clientY - dragLastY,
+        ROTATE_DRAG_DEG_PER_PX,
+        PITCH_DRAG_DEG_PER_PX
       );
       dragLastX = ev.clientX;
       dragLastY = ev.clientY;
@@ -170,6 +222,12 @@ export function installCameraControl(
     canvas.addEventListener('pointerup', endDrag);
     canvas.addEventListener('pointercancel', endDrag);
   }
+
+  installMouseLook(
+    canvas,
+    () => isActive() && canMouseLook(),
+    (dx, dy) => applyLook(dx, dy, MOUSE_LOOK_DEG_PER_PX, MOUSE_LOOK_DEG_PER_PX)
+  );
 
   // World change resets the level (WSclient.cpp:600); heading, pitch and
   // distance snap with it so the new map opens on the default frame.
@@ -194,6 +252,12 @@ export function updateGameCamera(
   heroModel: TransformNode | null,
   dt: number
 ): void {
+  // Zoomed back out, or an option went off under the lock: hand the pointer
+  // back. The World-state half of the gate is the wiring's, which releases
+  // the lock itself on the way out. Reads last frame's distance, which is a
+  // frame the player spends still holding the mouse.
+  if (isMouseLookActive() && !canMouseLook()) releaseMouseLook();
+
   if (!GameOptions.cameraControl) {
     if (wroteCamera && classic) {
       camera.alpha = classic.alpha;

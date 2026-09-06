@@ -199,6 +199,8 @@ export const EN_TEXT = {
   'options.slideHelp': 'Slide Help',
   'options.cameraControl': 'Camera control (Ctrl+wheel, Ins/Del)',
   'options.cameraFov': 'Field of view',
+  'options.wsadMovement': 'WSAD movement (mouse look in first person)',
+  'options.thirdPersonMouseLook': 'Mouse look in third person too',
   'options.autoReconnect': 'Reconnect automatically',
   'options.lootFilter': 'Filter drop names',
   'options.lootJewels': 'Jewels',
