@@ -110,6 +110,28 @@ const cloudDev = devQueryNumber('cloudShadow');
 export const CLOUD_UNIFORMS = ['muCloudA', 'muCloudB', 'muCloudC'] as const;
 
 /**
+ * The high sheet's own uniform, written by `bindCloudSheet`. Only the dome
+ * declares it: the sheet is thin enough that its shadow on the ground would be
+ * a percent or two, and leaving it off the sun receivers keeps their fetch
+ * count where it is.
+ */
+export const CLOUD_SHEET_UNIFORM = 'muCloudD';
+
+/**
+ * The sheet: altitude in tiles, UV per tile, how much faster than the deck it
+ * rides, and the width of its threshold.
+ *
+ * It sits well above the cumulus deck, so its shell is further out at every
+ * angle and it always composites behind. One octave and a wide threshold is
+ * the whole model - high cloud is a veil, not a body, and giving it the deck's
+ * shading would only produce a second deck.
+ */
+const SHEET_ALT = 220;
+const SHEET_SCALE = 0.0028;
+const SHEET_WIND = 2.2;
+const SHEET_SOFT = 0.5;
+
+/**
  * UV per world tile, per octave: one wrap of the shape octave is `1 / 0.0035`
  * tiles, about 285.
  *
@@ -356,6 +378,27 @@ export function bindClouds(
 }
 
 /**
+ * The high sheet's slice, bound by the dome alone. It rides the same option,
+ * tier and drift as the deck below it, so a map with no clouds has no sheet
+ * either.
+ */
+export function bindCloudSheet(
+  effect: Effect,
+  look: { base: number | null; sheet: number }
+): void {
+  const live = cloudsActive(look.base);
+  const t = serverNow() / 1000;
+
+  effect.setFloat4(
+    CLOUD_SHEET_UNIFORM,
+    wrapUv(WIND[0] * SHEET_WIND * t * SHEET_SCALE),
+    wrapUv(WIND[1] * SHEET_WIND * t * SHEET_SCALE),
+    live ? coverage(look.sheet) : 0,
+    SHEET_ALT
+  );
+}
+
+/**
  * The field and the shadow, shared verbatim by the sky and by every sun
  * receiver so the two can never disagree. `declare` is false where the host
  * already emits the uniforms itself (the item materials do, through
@@ -447,6 +490,24 @@ ${
     vec2 p = worldPos.xz + muCloudB.xy * rise;
 
     return 1.0 - muCloudA.w * muCloudThreshold(p, muCloudLocalCover(p), ${CLOUD_SHADOW_SOFT.toFixed(3)});
+  }
+`;
+}
+
+/**
+ * The high sheet, declared and read by the dome alone (§4). One fetch, one
+ * threshold: a veil has a silhouette and nothing else, and the dome gives it
+ * its colour.
+ */
+export function cloudSheetGlsl(): string {
+  return `
+  uniform vec4 ${CLOUD_SHEET_UNIFORM};  // scroll uv, coverage, altitude
+
+  float muCloudSheetCover(vec2 p) {
+    float v = texture2D(${CLOUD_NOISE_SAMPLER}, muSmoothUV(fract(p * ${SHEET_SCALE} + ${CLOUD_SHEET_UNIFORM}.xy))).r;
+    float edge = 1.0 - ${CLOUD_SHEET_UNIFORM}.z;
+
+    return smoothstep(edge, edge + ${SHEET_SOFT.toFixed(3)}, v);
   }
 `;
 }

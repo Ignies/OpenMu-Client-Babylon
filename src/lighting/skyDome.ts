@@ -9,8 +9,11 @@ import { linearBufferActive } from '../common/lightModel';
 import { lookDirector, type LookDirector, type LookState } from './director';
 import {
   bindClouds,
+  bindCloudSheet,
   cloudFieldGlsl,
+  cloudSheetGlsl,
   CLOUD_NOISE_SAMPLER,
+  CLOUD_SHEET_UNIFORM,
   CLOUD_UNIFORMS,
 } from './clouds';
 import {
@@ -19,6 +22,7 @@ import {
   SKY_CLOUDS_DEFAULT,
   SKY_CURVE_DEFAULT,
   SKY_HALO_DEFAULT,
+  SKY_SHEET_DEFAULT,
   SKY_SUN_DEFAULT,
   type Rgb,
   type SkyLook,
@@ -114,8 +118,8 @@ const CLOUD_DENSITY = 5;
 const CLOUD_PLANET_RADIUS = 6000;
 
 /**
- * Aerial perspective on the deck, in tiles: where the air starts taking the
- * clouds, how fast it takes them, and how much it can take.
+ * Aerial perspective on both cloud layers, in tiles: where the air starts
+ * taking them, how fast it takes them, and how much it can take.
  *
  * The dome is outside the G-buffer so the distance haze never touches it, and
  * without this a cloud on the skyline is drawn with the same body and contrast
@@ -131,6 +135,18 @@ const CLOUD_PLANET_RADIUS = 6000;
 const CLOUD_AERIAL_START = 150;
 const CLOUD_AERIAL_SCALE = 450;
 const CLOUD_AERIAL_MAX = 0.92;
+
+/**
+ * The high sheet's body: how far it moves from the sky it sits in toward the
+ * sunlit colour, and the most it can cover.
+ *
+ * Both are small on purpose. Cirrus is ice a few hundred metres thick with the
+ * sun straight through it, so it lightens the sky rather than standing in
+ * front of it; anything heavier here and the sheet stops reading as high and
+ * becomes a second deck.
+ */
+const CLOUD_SHEET_LIT = 0.8;
+const CLOUD_SHEET_OPACITY = 0.45;
 
 type Dome = {
   scene: Scene;
@@ -253,6 +269,11 @@ function bindDomeClouds(scene: Scene, state: Readonly<LookState> | null): void {
     sunDirection: state.key.direction,
     sunElevationDeg: state.profile.sun.elevationDeg,
   });
+
+  bindCloudSheet(effect, {
+    base: domeSky.clouds ?? SKY_CLOUDS_DEFAULT,
+    sheet: domeSky.sheet ?? SKY_SHEET_DEFAULT,
+  });
 }
 
 export function disposeSkyDome(): void {
@@ -290,9 +311,59 @@ function registerDomeShader(): void {
   uniform vec3 cameraPosition;
 
 ${cloudFieldGlsl()}
+${cloudSheetGlsl()}
 
   const int CLOUD_LIGHT_STEPS = ${CLOUD_LIGHT_STEPS};
   const float CLOUD_R = ${CLOUD_PLANET_RADIUS.toFixed(1)};
+
+  /**
+   * Where a view ray leaves the shell standing h tiles over the ground, the
+   * eye at CLOUD_R + cameraPosition.y. Written as k / (b + sqrt(b * b + k))
+   * and not as -b + sqrt(b * b + k): same root, but the second subtracts two
+   * numbers around 6000 to arrive at a distance of 95, and spends the mantissa
+   * doing it.
+   */
+  float muShellDistance(vec3 rd, float h) {
+    float rise = max(h - cameraPosition.y, 1.0);
+    float k = rise * (2.0 * CLOUD_R + h + cameraPosition.y);
+    float b = (CLOUD_R + cameraPosition.y) * rd.y;
+
+    return k / (b + sqrt(b * b + k));
+  }
+
+  /**
+   * What the air has taken out of a cloud t tiles away. The dome is outside
+   * the G-buffer, so the distance haze never reaches it and both layers take
+   * their own, fading into the sky drawn behind them - which is the colour the
+   * haze uses on the terrain below, the profile's horizon being both.
+   */
+  float muCloudAerial(float t) {
+    return ${CLOUD_AERIAL_MAX.toFixed(2)} * (1.0 - exp(
+      -max(t - ${CLOUD_AERIAL_START.toFixed(1)}, 0.0) / ${CLOUD_AERIAL_SCALE.toFixed(1)}
+    ));
+  }
+
+  /**
+   * The high sheet, composited behind the deck: its shell stands further out
+   * at every angle, so it is always the further of the two. A veil is lit
+   * almost flat - it has no body to shade - and what makes it read as high is
+   * that it barely moves against the deck crossing under it.
+   */
+  vec4 muCloudSheet(vec3 rd, vec3 sunLit, vec3 base) {
+    if (${CLOUD_SHEET_UNIFORM}.z <= 0.01) return vec4(0.0);
+
+    float t = muShellDistance(rd, ${CLOUD_SHEET_UNIFORM}.w);
+    float d = muCloudSheetCover(cameraPosition.xz + rd.xz * t);
+
+    if (d <= 0.0) return vec4(0.0);
+
+    vec3 body = mix(base, sunLit, ${CLOUD_SHEET_LIT.toFixed(2)});
+
+    return vec4(
+      mix(body, base, muCloudAerial(t)),
+      d * ${CLOUD_SHEET_OPACITY.toFixed(2)}
+    );
+  }
 
   /**
    * A cloud's shape is read **once**, where the ray meets the middle of the
@@ -314,16 +385,7 @@ ${cloudFieldGlsl()}
   vec4 muCloudSlab(vec3 rd, vec3 sunLit, vec3 base) {
     if (muCloudA.z <= 0.01) return vec4(0.0);
 
-    // Where the ray leaves a shell of radius CLOUD_R + h, the eye standing at
-    // CLOUD_R + cameraPosition.y. Written as k / (b + sqrt(b * b + k)) and not
-    // as -b + sqrt(b * b + k): same root, but the second subtracts two numbers
-    // around 6000 to arrive at a distance of 95 and spends the mantissa doing
-    // it.
-    float h = muCloudB.z + muCloudB.w * 0.5;
-    float rise = max(h - cameraPosition.y, 1.0);
-    float k = rise * (2.0 * CLOUD_R + h + cameraPosition.y);
-    float b = (CLOUD_R + cameraPosition.y) * rd.y;
-    float t = k / (b + sqrt(b * b + k));
+    float t = muShellDistance(rd, muCloudB.z + muCloudB.w * 0.5);
     vec2 p = cameraPosition.xz + rd.xz * t;
 
     // One read of the weather that groups the clouds, carried through the
@@ -350,15 +412,7 @@ ${cloudFieldGlsl()}
 
     float alpha = 1.0 - exp(-${CLOUD_DENSITY.toFixed(2)} * d);
 
-    // The dome is outside the G-buffer, so the distance haze never reaches it
-    // and the deck has to take its own. Fading a far cloud into the sky drawn
-    // behind it is what the haze does to the terrain below it, in the same
-    // colour: the profile's horizon is both.
-    float aerial = 1.0 - exp(
-      -max(t - ${CLOUD_AERIAL_START.toFixed(1)}, 0.0) / ${CLOUD_AERIAL_SCALE.toFixed(1)}
-    );
-
-    return vec4(mix(body, base, aerial * ${CLOUD_AERIAL_MAX.toFixed(2)}), alpha);
+    return vec4(mix(body, base, muCloudAerial(t)), alpha);
   }
 
   void main(void) {
@@ -373,6 +427,9 @@ ${cloudFieldGlsl()}
     // above scene white so bloom, and nothing else, gives it its glare.
     sky += sunColor * skyParams.y * pow(max(sd, 0.0), 120.0);
     sky += sunColor * ${DISC_GAIN.toFixed(1)} * smoothstep(skyParams.z, skyParams.w, sd);
+
+    vec4 sheet = muCloudSheet(rd, sunColor, sky);
+    sky = mix(sky, sheet.rgb, sheet.a);
 
     vec4 clouds = muCloudSlab(rd, sunColor, sky);
     sky = mix(sky, clouds.rgb, clouds.a);
@@ -405,6 +462,7 @@ function createDome(scene: Scene): Dome {
       'sunDir',
       'skyParams',
       ...CLOUD_UNIFORMS,
+      CLOUD_SHEET_UNIFORM,
     ],
     samplers: [CLOUD_NOISE_SAMPLER],
   });

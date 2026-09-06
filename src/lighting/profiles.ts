@@ -56,11 +56,14 @@ export type SkyLook = {
   readonly halo?: number;
   /** Base cloud coverage, 0..1. */
   readonly clouds?: number;
+  /** High sheet coverage, 0..1: the thin veil that sits above the deck. */
+  readonly sheet?: number;
 };
 
 export const SKY_CURVE_DEFAULT = 0.75;
 export const SKY_HALO_DEFAULT = 0.25;
 export const SKY_CLOUDS_DEFAULT = 0.4;
+export const SKY_SHEET_DEFAULT = 0.3;
 export const SKY_SUN_DEFAULT: Rgb = [1.0, 0.96, 0.88];
 
 /** Open sky. Under a roof the bake carries the room, so the key is mostly sky. */
@@ -120,6 +123,7 @@ const DESERT_SKY: SkyLook = {
   sun: [1.0, 0.93, 0.78],
   halo: 0.35,
   clouds: 0.08,
+  sheet: 0.12,
 };
 
 /** The interior key: the roof takes the sun, what is left comes from the bake. */
