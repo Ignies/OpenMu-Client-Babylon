@@ -26,9 +26,16 @@ import type { RoomVolume } from '../lighting/profiles';
  * option says. Per pixel the world position comes back from the shared depth
  * and is drawn iff it lies inside the room volume (the floor between the inner
  * wall faces, up to the roof underside) or the segment from the camera to it
- * crosses the wall box (the same floor, up to the wall top): that is a view
- * through a door or a window, and a solid wall would have stopped the ray.
- * The box stops at the inner faces, so a wall's outer face and its top lie
+ * leaves the wall box (the same floor, up to the wall top) through one of its
+ * four sides: that is a view through a door or a window, and a solid wall
+ * would have stopped the ray. The two faces that stop nothing are the roof,
+ * which is lifted out of the way while the hero is inside, and the floor,
+ * which is one-sided and writes no depth from below - so a ray over the wall
+ * top reaches the world outside and a ray up through the ground reaches all
+ * of it, and neither is an opening. Hence the two asymmetries: only the exit
+ * face has to be a wall (a camera above may drop its rays in through the
+ * missing roof), and a camera below the floor gets no crossing at all. The
+ * box stops at the inner faces, so a wall's outer face and its top lie
  * outside and go black with the exterior. Cards that write no depth take the
  * depth behind them, so a flame over the floor stays and a torch outside the
  * walls goes with the exterior behind it.
@@ -96,8 +103,14 @@ function registerShader(): void {
   const float FACE_SLACK = ${FACE_SLACK.toFixed(3)};
   const float EMIT_LIT = ${EMIT_LIT.toFixed(4)};
 
-  // Segment from o to o + d against the box; true when any part is inside.
-  bool crossesBox(vec3 o, vec3 d, vec3 bmin, vec3 bmax) {
+  // Segment from o to o + d against the box, true only where it leaves
+  // through a wall. Where it comes in is not the question: the roof is out of
+  // the way while the hero is inside, so a ray dropping into the room from
+  // the camera above is the view the mask exists to serve. What it reaches on
+  // the way out is: a door and a window are holes in a wall, and a ray that
+  // leaves over the wall top or down through the floor has left the room for
+  // the world outside, which is what goes black.
+  bool leavesThroughWall(vec3 o, vec3 d, vec3 bmin, vec3 bmax) {
     vec3 inv = 1.0 / (abs(d) + vec3(1e-6)) * sign(d + vec3(1e-9));
     vec3 t0 = (bmin - o) * inv;
     vec3 t1 = (bmax - o) * inv;
@@ -105,7 +118,14 @@ function registerShader(): void {
     vec3 tf = max(t0, t1);
     float tEnter = max(max(tn.x, tn.y), tn.z);
     float tExit = min(min(tf.x, tf.y), tf.z);
-    return tExit >= max(tEnter, 0.0) && tEnter <= 1.0;
+
+    if (tExit < max(tEnter, 0.0) || tEnter > 1.0) return false;
+
+    // The pixel is in the box: the segment never left it.
+    if (tExit >= 1.0) return true;
+
+    // Y crossed last on the way out is the wall top or the floor.
+    return tf.y > min(tf.x, tf.z);
   }
 
   void main(void) {
@@ -150,7 +170,15 @@ function registerShader(): void {
     bool inside = all(greaterThanEqual(p, volMin - faceSlack)) && all(lessThanEqual(p, volMax + faceSlack));
 
     vec3 wallMax = vec3(roomXZ.z, roomY.y, roomXZ.w);
-    bool seenThrough = inside || crossesBox(camPos, toPixel, volMin, wallMax);
+
+    // The see-through test rests on "a solid wall would have stopped the ray",
+    // and under the floor nothing does: the ground is one-sided, so seen from
+    // below it writes no depth, and every exterior object behind it comes back
+    // as a clear line of sight through the room. Below the floor the inside
+    // test stands alone.
+    bool underFloor = camPos.y < volMin.y;
+    bool seenThrough =
+      inside || (!underFloor && leavesThroughWall(camPos, toPixel, volMin, wallMax));
 
     gl_FragColor = seenThrough ? color : vec4(0.0, 0.0, 0.0, color.a);
   }
@@ -422,8 +450,8 @@ export function disposeRoomMask(): void {
  * Build or tear down the pass to match the tier and the active room. Returns
  * whether the chain changed (the director re-orders the post chain) and
  * whether the pass is live. `upstreamChanged` says the AO or the haze were
- * rebuilt this tick: the pass then re-attaches to stay behind them, and swaps
- * its depth source when the G-buffer came or went.
+ * rebuilt this tick: the pass then re-attaches to stay behind them, keeping
+ * the depth renderer and the readiness gate it already has.
  */
 export function syncRoomMask(
   scene: Scene,
@@ -442,7 +470,17 @@ export function syncRoomMask(
   }
 
   if (runtime && upstreamChanged) {
-    disposeRoomMask();
+    // Re-order, not rebuild. The AO and the haze attach at the end of the
+    // camera's list when they are built, so the mask has to move behind them
+    // again - but tearing it down takes the depth renderer and the readiness
+    // gate with it, and the frames the gate spends refilling are identity
+    // frames with the exterior back on screen. Entering a room ends with the
+    // haze being disposed (a room has none), so that flash fired on every
+    // entry, about a blend later.
+    runtime.camera.detachPostProcess(runtime.pass);
+    runtime.camera.attachPostProcess(runtime.pass);
+
+    return { changed: true, live: true };
   }
 
   if (!want) return { changed: false, live: false };
