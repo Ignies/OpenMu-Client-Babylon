@@ -42,7 +42,7 @@ import {
 } from '../libs/babylon/exports';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
-import { LiveList, effectTexture, fadeOut, fxNow, hash, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
+import { LiveList, darkCardGain, effectTexture, fadeOut, fxNow, hash, lightCardGain, luma, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
 import { releaseGreasedLineMaterial } from './greasedLineRelease';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
@@ -231,7 +231,12 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
   const sheetFile = opts.texture;
   const textured = !!sheetFile;
   const repeats = opts.textureRepeats ?? 1;
-  const alphaMode = blend === 'subtract' ? Constants.ALPHA_SUBTRACT : Constants.ALPHA_ADD;
+  const dark = blend === 'subtract' && textured;
+  const alphaMode = dark
+    ? Constants.ALPHA_COMBINE
+    : blend === 'subtract'
+      ? Constants.ALPHA_SUBTRACT
+      : Constants.ALPHA_ADD;
   const mesh = CreateGreasedLine(
     'fxJoint',
     { points: lines, updatable: true, ...(textured ? { uvs: rampUVs(lines, repeats) } : {}) },
@@ -263,11 +268,16 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
     if (glMat) glMat.color = null;
     // The sheet × `Light` under the joint's blend — the same Standard set-up
     // as core.ts `additiveMaterial` (texel × emissive tint, lighting off).
+    // A dark ribbon instead draws black with the sheet as its coverage, for
+    // the reason model.ts `subtractMaterial` gives: coverage is the only
+    // channel a gain can push past the sheet's own levels.
     const std = mesh.material as StandardMaterial;
+    const gain = dark ? luma(colour) * darkCardGain(scene) : lightCardGain(scene);
     std.diffuseColor.set(0, 0, 0);
     std.specularColor.set(0, 0, 0);
     std.ambientColor.set(0, 0, 0);
-    std.emissiveColor.set(colour[0], colour[1], colour[2]);
+    std.emissiveColor.set(dark ? 0 : colour[0] * gain, dark ? 0 : colour[1] * gain, dark ? 0 : colour[2] * gain);
+    std.alpha = dark ? gain : 1;
     std.disableLighting = true;
     std.alphaMode = alphaMode;
     std.transparencyMode = Material.MATERIAL_ALPHABLEND;
@@ -284,12 +294,19 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
       // sheet, which want the same thing.
       if (repeats !== 1 || opts.textureScroll) tex.wrapU = Texture.WRAP_ADDRESSMODE;
       sheet = tex;
-      std.diffuseTexture = tex;
+      if (dark) {
+        tex.getAlphaFromRGB = true;
+        std.opacityTexture = tex;
+      } else {
+        std.diffuseTexture = tex;
+      }
       if (glMat) glMat.visibility = 1;
     });
-    // A real brightness fade: the emissive tint toward black fades an
-    // additive ribbon out and a subtractive one to no-op alike.
-    fade = vis => std.emissiveColor.set(colour[0] * vis, colour[1] * vis, colour[2] * vis);
+    // A real brightness fade: the emissive tint toward black fades a bright
+    // ribbon out, the coverage toward zero a dark one.
+    fade = dark
+      ? vis => (std.alpha = gain * vis)
+      : vis => std.emissiveColor.set(colour[0] * gain * vis, colour[1] * gain * vis, colour[2] * gain * vis);
   } else {
     const std = mesh.material;
     if (std) {

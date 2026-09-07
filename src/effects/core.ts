@@ -17,7 +17,6 @@ import { lookDirector } from '../lighting/director';
 import type { Entity } from '../ecs/world';
 import type { TestScene } from '../scenes/testScene';
 import type { EffectHandle } from './layer';
-import { FIRE_TEXTURES } from './recipes';
 
 /**
  * Shared plumbing for the effect entries (one entry per file next to this
@@ -234,21 +233,52 @@ export function keepDepthForEffects(scene: Scene): void {
   scene.setRenderingAutoClearDepthStencil(EFFECT_RENDERING_GROUP, false);
 }
 
+/** The map's level, `2^ev` (lighting/director `keyGain`). 1 on Classic. */
+function mapKey(): number {
+  return lookDirector()?.state().keyGain ?? 1;
+}
+
+/** Rec709 luma of an effect tint - what a greyscale `Light` carries. */
+export function luma(c: RGB): number {
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+}
+
 /**
- * The multiplier a flame's tint takes so the card lands at `keyGain` x its
- * authored value in the buffer: a flame is light and follows the map's level
- * like the torches (ARCHITECTURE F12). The material's colour is decoded once
- * downstream when the buffer is linear, so the gain enters pre-decoded there.
- * 1 for any other card, and on Classic.
+ * The multiplier an emissive card's tint takes so it lands at `keyGain` x its
+ * authored value in the buffer: effect art is light and follows the map's
+ * level like the torches (ARCHITECTURE F12). The material's colour is decoded
+ * once downstream when the buffer is linear, so the gain enters pre-decoded
+ * there. 1 on Classic.
+ *
+ * This used to be the fire family's alone, on the reading that a flame is
+ * light and a flare is "authored art at its authored value". The art is
+ * authored *display-referred* though - these are the original client's
+ * sheets, drawn into a frame whose lit ground sat near 1 - and on the graded
+ * tiers the buffer is scene-referred, so that same ground sits at `keyGain`
+ * and a card at its authored value lands a stop or two *under* what it is
+ * drawn over. A lightning bolt went from a blown white core to a pale line
+ * the moment post processing came on, and so did every other skill
+ * (2026-09-07). Alpha art - blood, smoke, a scorch - is matter, not light,
+ * and keeps its authored value on every tier.
  */
-export function lightCardGain(scene: Scene, light: boolean): number {
-  if (!light) return 1;
-  const gain = lookDirector()?.state().keyGain ?? 1;
+export function lightCardGain(scene: Scene): number {
+  const gain = mapKey();
   return linearBufferActive(scene) ? gain ** (1 / 2.2) : gain;
 }
 
-export function isFireTexture(texture: string | Texture): boolean {
-  return typeof texture === 'string' && FIRE_TEXTURES.has(texture);
+/**
+ * The same rule for `RENDER_DARK`. A subtraction removes a *fraction of the
+ * frame*, and the original applied it to a display buffer; on a scene-referred
+ * one that fraction is worth far less by the time the tone curve has
+ * compressed what is left, so the coverage takes the map's level too and the
+ * silhouette saturates. Zero is the one value the curve cannot move.
+ *
+ * Coverage is alpha and alpha is never decoded, so no 1/2.2 here; and only
+ * the linear buffer needs it - with post off the frame is display-referred
+ * and the sheet's own levels are already right.
+ */
+export function darkCardGain(scene: Scene): number {
+  return linearBufferActive(scene) ? mapKey() : 1;
 }
 
 /** MU's two effect blends: `EnableAlphaBlend` (ONE, ONE) and `EnableAlphaBlendMinus` (ZERO, ONE_MINUS_SRC_COLOR). */
@@ -285,15 +315,14 @@ export function additiveMaterial(
   scene: Scene,
   texture: string | Texture,
   colour: RGB,
-  blend: EffectBlend = 'add',
-  light = isFireTexture(texture)
+  blend: EffectBlend = 'add'
 ): StandardMaterial {
   let byKey = materials.get(scene);
   if (!byKey) {
     byKey = new Map();
     materials.set(scene, byKey);
   }
-  const gain = blend === 'add' ? lightCardGain(scene, light) : 1;
+  const gain = blend === 'add' ? lightCardGain(scene) : 1;
   const tint: RGB = gain === 1 ? colour : [colour[0] * gain, colour[1] * gain, colour[2] * gain];
   const texKey = typeof texture === 'string' ? texture : `#${texture.uniqueId}`;
   const key = `${texKey}|${colourKey(tint)}|${blend}`;
@@ -537,7 +566,7 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
     byRecipe = new WeakMap();
     systemsByRecipe.set(scene, byRecipe);
   }
-  const gain = r.blend === 'alpha' ? 1 : lightCardGain(scene, FIRE_TEXTURES.has(r.texture));
+  const gain = r.blend === 'alpha' ? 1 : lightCardGain(scene);
   const known = byRecipe.get(r);
   if (known && known.gain === gain) return known.ps;
 

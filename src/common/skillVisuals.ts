@@ -100,9 +100,9 @@ const FIVE_SPREAD = [-20, -10, 0, 10, 20].map(d => (d * Math.PI) / 180);
  * subtraction compounds; the echoes here do the same. The last two fade, which is the display
  * persistence the stamps' one-tick life leans on.
  */
-const SPIRIT_ECHOES = [1, 1, 1, 0.8, 0.55];
+const SPIRIT_ECHOES = [1, 1, 0.85, 0.6];
 /** The violet sheen over the black spirit: the same skull drawn additive on top of its own cut-out. */
-const SPIRIT_GLOW: RGB = [0.7, 0.18, 1];
+const SPIRIT_GLOW: RGB = [0.3, 0.07, 0.45];
 /** Persistent-buff ribbons: the original's five MODEL_SPEARSKILL joints. */
 const BUFF_RIBBONS = 5;
 
@@ -1621,7 +1621,12 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
       const world = storeRef().world;
       const caster = world?.playerEntity;
       if (!world || !caster?.transform) return false;
-      playTargetedSkillVisual(world.scene, skill, caster, null);
+      // Whatever else is standing about, so bolts and beams have somewhere to go.
+      const target =
+        world.netObjsQuery.entities.find(e => e !== caster && e.transform && !e.dying) ??
+        world.playersQuery.entities.find(e => e !== caster && e.transform && !e.dying) ??
+        null;
+      playTargetedSkillVisual(world.scene, skill, caster, target);
       return true;
     },
   };
