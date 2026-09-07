@@ -94,6 +94,17 @@ const SNOW_SQUALLS: AmbientSchedule = {
   ramp: 9,
 };
 
+/**
+ * Which way the wind blows, on the ground, as a unit vector in world xz.
+ *
+ * The leaves have always blown along -x (the recipe below, from the
+ * original's own emitter). Exported because the grass has to lean the same
+ * way: a field whose waves cross it in one direction while the leaves over
+ * it fly in another is the kind of disagreement nobody can name but everyone
+ * sees. One wind, two readers.
+ */
+export const GROUND_WIND: readonly [number, number] = [-1, 0];
+
 export const LORENCIA_LEAVES: AmbientRecipe = {
   name: 'lorenciaLeaves',
   texture: 'World1/leaf01.OZT',

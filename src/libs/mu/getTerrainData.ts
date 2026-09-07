@@ -251,6 +251,7 @@ export async function getTerrainData(
     layer1: terrainMapping.layer1,
     layer2: terrainMapping.layer2,
     alpha: terrainMapping.alpha,
+    attributes: terrainAttrs,
     height: terrainHeight,
     light: terrainLight,
     cards: grassCards,

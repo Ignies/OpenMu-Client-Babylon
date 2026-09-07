@@ -7,14 +7,19 @@ import {
   type IVector3Like,
   type Scene,
 } from '../babylon/exports';
-import { TERRAIN_SIZE } from '../../common/terrain/consts';
+import { TERRAIN_SIZE, TWFlags } from '../../common/terrain/consts';
+import { isFlagInBinaryMask } from '../../common/utils';
 import { TERRAIN_INDEX } from '../../common/terrain/utils';
 import { registerTerrainMaterial } from '../../scenes/shadows';
 import { CLOUD_UNIFORMS } from '../../lighting/clouds';
 import { ENUM_WORLD } from '../../common/types';
 import { GameOptions } from '../../common/gameOptions';
-import { lightingTier } from '../../common/lightingQuality';
+import { tierIndex } from '../../common/lightingQuality';
 import { GRASS_CARD_SLOTS, type GrassCards } from './terrainGrassCards';
+import { SNOW_COVER } from './terrainOverlay';
+import { snowCover } from '../../weather/snowCover';
+import { GROUND_WIND } from '../../weather/ambientWeather';
+import { lookDirector } from '../../lighting/director';
 import {
   TERRAIN_CSM_SAMPLERS,
   TERRAIN_LIGHT_UNIFORMS,
@@ -56,7 +61,7 @@ const BLOCKS_PER_SIDE = TERRAIN_SIZE / BLOCK_TILES;
  * before it reads as ground cover. The default sits there and the curve runs
  * either side of it.
  */
-const BLADES_PER_TILE = [0, 6, 11, 18, 26, 36, 48, 62, 80, 100] as const;
+const BLADES_PER_TILE = [0, 8, 16, 26, 40, 56, 76, 102, 136, 180] as const;
 
 /**
  * Blade width at the root, world units (a tile is 1m). Real grass is nearer
@@ -86,19 +91,35 @@ const FADE_END = 34;
 const RESIDENT_RANGE = FADE_END + 4;
 
 /**
- * The travelling gust, ported: `sin(WindSpeed + xf * 5) * WindScale` with
- * `WindSpeed = WorldTime % 720000 * 0.002` and `WindScale = 10`
- * (ZzzLodTerrain.cpp:2385-2430). Centimetres there, so the scale is /100
- * here, and the rate is per second rather than per millisecond.
+ * The wind, as waves crossing the field.
+ *
+ * The first cut had the original's shape - `sin(WindSpeed + xf * 5)`,
+ * ZzzLodTerrain.cpp:2430 - with a per-blade phase added on top, and that is
+ * exactly what stops it reading as wind: a wave whose phase is randomised per
+ * blade is not a wave, it is jitter. Neighbours have to move *together* for
+ * the eye to see anything travel.
+ *
+ * So: a plane wave along `GROUND_WIND`, `sin(t*rate - dot(xz, dir)*freq)`,
+ * broad enough that a crest spans several tiles. The two-tone banding a real
+ * field shows comes free from that - blades leaning into the wind turn a
+ * different face to the sun than blades standing up, and the form shading
+ * above turns that into light and dark bands travelling with the crest.
+ *
+ * `CHOP` is a second, finer, faster wave carrying a small per-blade offset,
+ * so the field is not a rigid sheet. It is deliberately weak: it is texture
+ * on the wave, not the wave.
  */
-const WIND_RATE = 2.0;
-const WIND_FREQ = 5.0;
-const WIND_BEND = 0.1;
+const WAVE_RATE = 1.15;
+/** Radians per tile: 2*pi/0.42 is a crest about 15 tiles apart. */
+const WAVE_FREQ = 0.42;
+const WAVE_BEND = 0.26;
 
-/** A second, broader swell the original had no per-blade phase to carry. */
-const SWELL_RATE = 0.37;
-const SWELL_FREQ = 0.11;
-const SWELL_BEND = 0.06;
+const CHOP_RATE = 3.1;
+const CHOP_FREQ = 1.9;
+const CHOP_BEND = 0.05;
+
+/** How much the wave leans a blade even where it is not cresting. */
+const WIND_BIAS = 0.1;
 
 /**
  * Root and tip against the tile's own colour. The root is darkened as cheap
@@ -117,28 +138,227 @@ const TIP_TINT = 1.35;
 /** Per-blade brightness spread, so a field is not one flat tone. */
 const TINT_JITTER = 0.18;
 
-/** Blade geometry: 3 segments, 7 vertices, 5 triangles, unit height. */
-function bladeVertexData(): VertexData {
-  const widths = [1.0, 0.78, 0.46];
-  const vs = [0, 1 / 3, 2 / 3];
+/**
+ * Settled snow, on the grass as well as on the ground.
+ *
+ * The ground under a Devias blade is whitened by the `SNOW_COVER` overlay
+ * (terrainOverlay.ts) - which is the clone's own addition, not the original's.
+ * The grass took none of it, so blades measured 0.84 of the ground they stood
+ * in and read as dark blue streaks over a white field. Snow that lies on the
+ * ground lies on what grows out of it too: the blade takes the same coverage,
+ * whitening toward the overlay's own colour and shortening as it is buried.
+ *
+ * Following terrainOverlay's rule, the colour is a literal and only the
+ * coverage is a uniform, so a uniform that never reaches the GPU reads as
+ * zero and means *no snow* - the safe state, not a white field.
+ */
+const SNOW_COLOUR = SNOW_COVER.colour;
+/** How far toward snow-white a blade goes at full cover. */
+const SNOW_ON_GRASS = 0.85;
+/** What is left of a blade's height at full cover: the rest is buried. */
+const SNOW_BURY = 0.55;
+
+/**
+ * The detailed blade's resting arc: how far the tip leans out, as a fraction
+ * of the blade's height, from nearly upright to well over. The spread is the
+ * point - a field where every blade curves the same amount reads as combed.
+ */
+const ARC_MIN = 0.15;
+const ARC_MAX = 0.85;
+/** How much of the lean comes out of the blade's height (it cannot do both). */
+const ARC_DROOP = 0.45;
+
+/** Tufts per tile, and how far a blade strays from its tuft, in tiles. */
+const CLUMPS_PER_TILE = 4;
+const CLUMP_SPREAD = 0.34;
+
+/**
+ * Form shading on the detailed blade: how far a face turned toward the sun
+ * sits above one turned away.
+ *
+ * This is the difference between a field of curved shapes and a field of
+ * grass - without it every blade is the same value and the whole thing reads
+ * flat. It is written to be **albedo-preserving**: the term runs from
+ * `1 - FORM` to `1 + FORM` across `0.5 + 0.5 * dot(n, sun)`, and blade yaw is
+ * a uniform hash, so the field's mean is 1 and the layer neither brightens
+ * nor darkens the frame.
+ *
+ * That property is what keeps it out of the lighting model. It redistributes
+ * light across a blade's own two faces - which flat ground does not have and
+ * a lightmap cannot express - rather than adding a second opinion about how
+ * much light is here. `terrainLighting.ts` remains the only writer of that.
+ */
+const FORM_SHADE = 0.34;
+/** How far the fragment rounds the normal across the blade's width. */
+const BLADE_ROUND = 0.55;
+
+/**
+ * What walks through the grass and what flies over it.
+ *
+ * The cheapest thing that does this job: a short uniform array of the nearest
+ * actors, tested in the vertex shader. No second texture, no per-frame
+ * upload, no CPU pass over the field - the only cost is `GRASS_ACTORS`
+ * distance tests per vertex, on the detailed blade alone.
+ *
+ * The alternative was a trample map in the `terrainDynamicLight` mould: a
+ * texture actors stamp and grass samples. It buys a *trail* - grass that
+ * stays flat behind you and springs back - and unlimited actors, for one
+ * fetch instead of eight tests. It also costs a texture, a per-frame upload
+ * and a decay pass, and it needs a moving window to have the resolution a
+ * one-tile-wide character needs. Worth revisiting if the springback is
+ * wanted; not the cheapest way to get what was asked for.
+ */
+const GRASS_ACTORS = 16;
+
+/**
+ * Grass does not spring back the instant a foot leaves it, and a press that
+ * vanishes on the frame the player steps off pops.
+ *
+ * So the slots are not actors, they are *presses*: a body stamps one where it
+ * stands, keeps it alive while it is there, and every press fades over
+ * `PRESS_LIFE` once nothing is refreshing it. A body that moves further than
+ * `STAMP_STEP` from the nearest press stamps another, which leaves a short
+ * trail behind a run that recovers from the back.
+ *
+ * This is the trample map's springback for the price already being paid -
+ * the same uniform array, the same loop - because the persistence lives in
+ * ten CPU-side records rather than in a texture.
+ */
+const STAMP_STEP = 0.75;
+/** Seconds a press takes to recover once nothing stands on it. */
+const PRESS_LIFE = 4.5;
+
+/**
+ * How many bodies may stamp, out of `GRASS_ACTORS` slots. The rest of the
+ * slots are the trail they leave: with the budget equal to the slot count
+ * there was no room for one, and a crowd of monsters could take every slot
+ * from the player.
+ */
+const ACTOR_BUDGET = 4;
+
+/** The `n` entries closest to a point, without sorting or allocating. */
+function nearest(
+  actors: readonly GrassActor[],
+  cx: number,
+  cz: number,
+  n: number
+): GrassActor[] {
+  picked.length = 0;
+
+  for (const a of actors) {
+    const d = (a.x - cx) ** 2 + (a.z - cz) ** 2;
+
+    let at = picked.length;
+    while (at > 0 && picked[at - 1].d > d) at--;
+
+    if (at >= n) continue;
+
+    picked.splice(at, 0, { a, d });
+    if (picked.length > n) picked.length = n;
+  }
+
+  return picked.map(p => p.a);
+}
+
+const picked: { a: GrassActor; d: number }[] = [];
+/**
+ * Tiles from an actor at which the grass is untouched.
+ *
+ * A tile is a metre and a body is not: 1.6 cleared a 3-metre bubble around
+ * the player, which reads as a force field rather than as feet. This is a
+ * footprint plus the swing of a leg, and the falloff below starts at 0.6 of
+ * it so the edge is a press rather than a wall.
+ */
+const ACTOR_RADIUS = 0.9;
+/** Where the press begins, as a fraction of the radius. */
+const ACTOR_CORE = 0.35;
+/** How flat a blade goes directly under someone standing on it. */
+const TRAMPLE_FLATTEN = 0.8;
+/** How far a blade is shoved aside, as a fraction of its height. */
+const TRAMPLE_PUSH = 0.8;
+/** A flier's downwash reaches further and presses less. */
+const FLIER_RADIUS = 2.0;
+const FLIER_PUSH = 0.9;
+/** Above this height over the ground an actor is flying, not walking. */
+const FLYING_OVER = 0.9;
+
+const clamp01 = (v: number) => (v < 0 ? 0 : v > 0.999 ? 0.999 : v);
+
+/**
+ * The live actor slots, `GRASS_ACTORS` x (x, z, reach, press). Module state
+ * and reused every frame: the whole point of this approach is that it
+ * allocates nothing and uploads nothing per frame beyond 32 floats.
+ *
+ * A reach of 0 is an empty slot, so a frame that finds nobody - or a material
+ * whose array never binds - leaves the field standing.
+ */
+const actorSlots = new Float32Array(GRASS_ACTORS * 4);
+
+/**
+ * The two blades.
+ *
+ * `simple` is three segments tapering straight to a point, and at rest it is
+ * exactly that: a triangle. Cheap, and it is what the lower tiers draw.
+ *
+ * `detailed` keeps its width most of the way up and tapers late, over six
+ * segments, so the vertex shader has something to bend into a curve. The
+ * width profile is the half that stops it reading as a cone even before the
+ * curve: a blade of grass is a strap that narrows near the tip, not a spike.
+ */
+const BLADE_ROWS = {
+  simple: {
+    v: [0, 1 / 3, 2 / 3],
+    width: [1.0, 0.78, 0.46],
+  },
+  detailed: {
+    v: [0, 0.2, 0.4, 0.6, 0.78, 0.92],
+    width: [1.0, 0.99, 0.94, 0.83, 0.62, 0.33],
+  },
+} as const;
+
+export type BladeKind = keyof typeof BLADE_ROWS;
+
+function bladeVertexData(kind: BladeKind): VertexData {
+  const { v, width } = BLADE_ROWS[kind];
 
   const positions: number[] = [];
+  const uvs: number[] = [];
 
-  for (let i = 0; i < 3; i++) {
-    positions.push(-widths[i] * 0.5, vs[i], 0);
-    positions.push(widths[i] * 0.5, vs[i], 0);
+  for (let i = 0; i < v.length; i++) {
+    positions.push(-width[i] * 0.5, v[i], 0);
+    positions.push(width[i] * 0.5, v[i], 0);
+    // u runs -1..1 across the blade; the fragment rounds the normal with it.
+    uvs.push(-1, v[i], 1, v[i]);
   }
 
   positions.push(0, 1, 0);
+  uvs.push(0, 1);
+
+  const indices: number[] = [];
+
+  for (let i = 0; i + 1 < v.length; i++) {
+    const a = i * 2;
+    indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+  }
+
+  const last = (v.length - 1) * 2;
+  indices.push(last, last + 1, last + 2);
 
   const data = new VertexData();
   data.positions = positions;
-  data.indices = [0, 1, 2, 1, 3, 2, 2, 3, 4, 3, 5, 4, 4, 5, 6];
+  data.uvs = uvs;
+  data.indices = indices;
 
   return data;
 }
 
-function createGrassMaterial(scene: Scene, cards: GrassCards): ShaderMaterial {
+function createGrassMaterial(
+  scene: Scene,
+  cards: GrassCards,
+  kind: BladeKind
+): ShaderMaterial {
+  const detailed = kind === 'detailed';
+
   const material = new ShaderMaterial(
     'TerrainGrassMaterial',
     scene,
@@ -146,6 +366,7 @@ function createGrassMaterial(scene: Scene, cards: GrassCards): ShaderMaterial {
       vertexSource: `
   precision highp float;
   attribute vec3 position;
+  attribute vec2 uv;      // x: -1..1 across the blade, y: v along it
   attribute vec4 iRoot; // xyz root in world, w tile slot + placement hash
   attribute vec4 iTint; // rgb the tile's bake, a blade height
 
@@ -154,7 +375,10 @@ function createGrassMaterial(scene: Scene, cards: GrassCards): ShaderMaterial {
   uniform vec3 cameraPosition;
   uniform float time;
   uniform vec2 grassFade; // x start, y end
+  const vec2 windDir = vec2(${GROUND_WIND[0].toFixed(3)}, ${GROUND_WIND[1].toFixed(3)});
+  uniform float grassSnow; // settled-snow coverage, 0 = none
   uniform sampler2D grassRamp;
+${detailed ? `  uniform vec4 grassActors[${GRASS_ACTORS}];` : ''}
 
   varying vec2 vWorldXZ;
   varying vec3 vWorldPos;
@@ -162,6 +386,7 @@ function createGrassMaterial(scene: Scene, cards: GrassCards): ShaderMaterial {
   varying vec3 vBake;
   varying vec3 vAlbedo;
   varying float vV;
+${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;' : ''}
 
   void main() {
       float v = position.y;
@@ -174,23 +399,89 @@ function createGrassMaterial(scene: Scene, cards: GrassCards): ShaderMaterial {
       // block be dropped and rebuilt without the grass moving.
       float yaw = hash * 6.2831853;
       vec2 side = vec2(cos(yaw), sin(yaw));
+      // The blade is a flat strap: its width runs along the side vector, so
+      // the way it faces - and the way it bends - is across that.
+      vec2 facing = vec2(-side.y, side.x);
+
+      // The one hash, decorrelated. Cheaper than carrying more per-instance
+      // floats and just as unstructured at this scale.
+      float h2 = fract(hash * 37.13);
+      float h3 = fract(hash * 91.71);
 
       // A blade shrinks to nothing rather than fading: the layer is opaque
       // and an alpha ramp would cost it that.
       float dist = distance(iRoot.xz, cameraPosition.xz);
       float near = 1.0 - smoothstep(grassFade.x, grassFade.y, dist);
-      float height = iTint.a * near;
+      // Snow buries what it settles on, so a blade under full cover keeps
+      // only SNOW_BURY of its height.
+      float height = iTint.a * near * mix(1.0, ${SNOW_BURY.toFixed(2)}, grassSnow);
 
-      // The bend is weighted v*v so the root stays planted and the tip does
-      // the travelling.
-      float gust = sin(time * ${WIND_RATE.toFixed(2)} + iRoot.x * ${WIND_FREQ.toFixed(2)} + yaw) * ${WIND_BEND.toFixed(3)};
-      float swell = sin(time * ${SWELL_RATE.toFixed(2)} + dot(iRoot.xz, vec2(${SWELL_FREQ.toFixed(3)}))) * ${SWELL_BEND.toFixed(3)};
-      float bend = (gust + swell) * v * v * height;
+${
+  detailed
+    ? `
+      // Who is standing in this blade, or flying over it. xy world, z reach,
+      // w press: positive treads the blade down, negative is a flier's
+      // downwash, which shoves it aside without flattening it. z = 0 is an
+      // empty slot, so an unbound array leaves the field at rest.
+      vec2 shove = vec2(0.0);
+      float trodden = 0.0;
+
+      for (int i = 0; i < ${GRASS_ACTORS}; i++) {
+        vec4 a = grassActors[i];
+        if (a.z <= 0.0) continue;
+
+        vec2 away = iRoot.xz - a.xy;
+        float far = length(away);
+        float reach = 1.0 - smoothstep(a.z * ${ACTOR_CORE.toFixed(2)}, a.z, far);
+        if (reach <= 0.0) continue;
+
+        shove += (far > 0.0001 ? away / far : vec2(1.0, 0.0)) * reach * abs(a.w);
+        trodden += reach * max(a.w, 0.0);
+      }
+
+      height *= 1.0 - min(trodden, 1.0) * ${TRAMPLE_FLATTEN.toFixed(2)};`
+    : ''
+}
+
+      // The wave. One phase for the whole field, travelling along the wind,
+      // so neighbours crest together and the eye has something to follow.
+      // No per-blade term here on purpose - that is what made it jitter.
+      float along = dot(iRoot.xz, windDir);
+      float wave = sin(time * ${WAVE_RATE.toFixed(2)} - along * ${WAVE_FREQ.toFixed(2)});
+      float chop = sin(time * ${CHOP_RATE.toFixed(2)} - along * ${CHOP_FREQ.toFixed(2)} + yaw);
+
+      // Biased so the field leans downwind on the whole and the wave rides on
+      // top, rather than swinging symmetrically through upright.
+      float gust = ${WIND_BIAS.toFixed(2)}
+        + wave * ${WAVE_BEND.toFixed(3)}
+        + chop * ${CHOP_BEND.toFixed(3)};
+
+      // Weighted v*v so the root stays planted and the tip does the travelling.
+      float bend = gust * v * v * height;
 
       vec3 world = iRoot.xyz;
-      world.xz += side * (position.x * ${BLADE_WIDTH.toFixed(4)});
+      world.xz += side * (position.x * ${BLADE_WIDTH.toFixed(4)} * mix(0.75, 1.3, h3));
       world.y += v * height;
-      world.xz += vec2(0.86, 0.51) * bend;
+      world.xz += windDir * bend;
+${
+  detailed
+    ? `
+      // The arc. A blade at rest is not a spike standing straight up - it
+      // leans and curves over, and how far is the single thing that stops a
+      // field reading as a bed of nails. v^1.6 rather than v^2 so the curve
+      // starts low on the blade instead of only kinking at the tip.
+      float arc = mix(${ARC_MIN.toFixed(2)}, ${ARC_MAX.toFixed(2)}, h2);
+      float curve = arc * pow(v, 1.6);
+      world.xz += facing * (curve * height);
+      // What the blade spends going sideways it does not spend going up.
+      world.y -= curve * curve * height * ${ARC_DROOP.toFixed(2)};
+
+      // Trodden or blown, the blade bows from the root, so the same v*v the
+      // wind uses - the base stays where it grew.
+      world.xz += shove * (v * v * height);
+      world.y -= min(trodden, 1.0) * v * height * 0.25;`
+    : ''
+}
 
       vWorldXZ = world.xz;
       vWorldPos = world;
@@ -213,7 +504,27 @@ function createGrassMaterial(scene: Scene, cards: GrassCards): ShaderMaterial {
       vec3 card = texture2D(grassRamp, rampUV).rgb;
       float shade = mix(${ROOT_TINT.toFixed(2)}, ${TIP_TINT.toFixed(2)}, v)
         * (1.0 + (hash - 0.5) * ${TINT_JITTER.toFixed(3)});
-      vAlbedo = card * shade;
+
+      // Snow lies on the blade the way it lies on the ground it grows from,
+      // and it lies on the tip more than the root.
+      vec3 snowed = mix(
+        card,
+        vec3(${SNOW_COLOUR[0].toFixed(3)}, ${SNOW_COLOUR[1].toFixed(3)}, ${SNOW_COLOUR[2].toFixed(3)}),
+        grassSnow * ${SNOW_ON_GRASS.toFixed(2)} * mix(0.7, 1.0, v));
+
+      vAlbedo = snowed * shade;
+${
+  detailed
+    ? `
+      // The blade's own facing, tilted by however far it has curved over: a
+      // blade bent double presents its face to the sky, an upright one
+      // presents it sideways.
+      vec3 faceN = normalize(vec3(facing.x, curve * 1.6, facing.y));
+      vFace = faceN;
+      vSide = vec3(side.x, 0.0, side.y);
+      vU = uv.x;`
+    : ''
+}
 
       gl_Position = viewProjection * vec4(world, 1.0);
   }
@@ -227,6 +538,7 @@ function createGrassMaterial(scene: Scene, cards: GrassCards): ShaderMaterial {
   varying vec3 vBake;
   varying vec3 vAlbedo;
   varying float vV;
+${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;\n  uniform vec3 grassSun;' : ''}
 
 ${terrainLightDeclarationsGlsl(true)}
 
@@ -235,7 +547,21 @@ ${terrainLightDeclarationsGlsl(true)}
 ${terrainSkyLightGlsl()}
 ${terrainGroundLightGlsl({ bake: 'vBake', clouds: true })}
 
-    vec3 f = vAlbedo * groundLit;
+${
+  detailed
+    ? `
+    // Form shading: the blade's two faces, not a second light. Rounded across
+    // the width so a flat strip reads as a curved one, then run between
+    // 1 -/+ FORM_SHADE - mean 1 over a uniform yaw, so the field's average is
+    // untouched and only its variation changes.
+    vec3 n = normalize(vFace + vSide * (vU * ${BLADE_ROUND.toFixed(2)}));
+    float toSun = 0.5 + 0.5 * dot(n, grassSun);
+    vec3 albedo = vAlbedo * mix(${(1 - FORM_SHADE).toFixed(2)}, ${(1 + FORM_SHADE).toFixed(2)}, toSun);`
+    : `
+    vec3 albedo = vAlbedo;`
+}
+
+    vec3 f = albedo * groundLit;
     f = muLightTint(f, groundLit);
     f = mix(f, pow(max(f, vec3(0.0)), vec3(2.2)), linearOut);
 
@@ -251,6 +577,11 @@ ${terrainGroundLightGlsl({ bake: 'vBake', clouds: true })}
         'viewProjection',
         'cameraPosition',
         'grassFade',
+        'grassSnow',
+        // Both of these have to be *listed*, not just declared in the GLSL and
+        // bound: `setFloatArray4` resolves the name against this list, and a
+        // name that is not on it silently writes nowhere.
+        ...(detailed ? ['grassSun', 'grassActors'] : []),
         ...TERRAIN_LIGHT_UNIFORMS,
         ...CLOUD_UNIFORMS,
       ],
@@ -278,6 +609,16 @@ ${terrainGroundLightGlsl({ bake: 'vBake', clouds: true })}
 
     bindTerrainLight(effect, scene, true);
     effect.setFloat2('grassFade', FADE_START, FADE_END);
+    if (detailed) effect.setFloatArray4('grassActors', actorSlots);
+    // Zero on every map without settled snow, and zero with advancedEffects
+    // off - the same coverage the ground overlay reads.
+    effect.setFloat('grassSnow', GameOptions.advancedEffects ? snowCover() : 0);
+    if (detailed) {
+      // The key's direction, from the one place that owns it. Toward the
+      // surface, so the blade face turned into it is the lit one.
+      const d = lookDirector()?.state().key.direction ?? [0, -1, 0];
+      effect.setFloat3('grassSun', -d[0], -d[1], -d[2]);
+    }
     if (cards.ramp) effect.setTexture('grassRamp', cards.ramp);
   });
 
@@ -302,16 +643,34 @@ export type GrassSource = {
   readonly layer1: Uint8Array;
   readonly layer2: Uint8Array;
   readonly alpha: Uint8Array;
+  /** Terrain flags, for the `NoGround` test the mesh makes. */
+  readonly attributes: Uint16Array;
   readonly height: Float32Array;
   readonly light: readonly IVector3Like[];
   /** Which layer-1 slots grow grass here, and the map's authored grass colour. */
   readonly cards: GrassCards;
+  /** Which blade this tier draws. */
+  readonly blade: BladeKind;
   readonly density: number;
 };
+
+/** What the system offers each frame: a body that might be in the grass. */
+export type GrassActor = {
+  readonly x: number;
+  readonly y: number;
+  readonly z: number;
+};
+
+type Press = { x: number; z: number; life: number; flying: boolean };
 
 export type GrassField = {
   /** Where the camera is, in tiles; drives residency. */
   setCenter(x: number, z: number): void;
+  /**
+   * Who is in the field this frame. The nearest `GRASS_ACTORS` to the centre
+   * win the slots; everyone else is ignored, which is the whole budget.
+   */
+  setActors(actors: readonly GrassActor[], dt: number): void;
   /** One block of work, at most. Called once per frame. */
   step(): void;
   dispose(): void;
@@ -327,12 +686,16 @@ export function createGrassField(
   // none at all, and the original draws nothing there (terrainGrassCards.ts).
   if (perTile <= 0 || !src.cards.slots.size || !src.cards.ramp) return null;
 
-  const material = createGrassMaterial(scene, src.cards);
-  const blade = bladeVertexData();
+  const material = createGrassMaterial(scene, src.cards, src.blade);
+  const blade = bladeVertexData(src.blade);
+
   const blocks = new Map<number, Mesh | null>();
 
   let centerX = 0;
   let centerZ = 0;
+
+  /** Live presses, oldest-faintest first out. Never reallocated per frame. */
+  const presses: Press[] = [];
 
 
   /**
@@ -352,6 +715,18 @@ export function createGrassField(
   ): void {
     out.weight = 0;
     out.slot = 0;
+
+    // Before any of the original's rules: is there ground here at all?
+    //
+    // `CreateGroundFromHeightMap` drops a `NoGround` tile's four corners to
+    // -10000, which takes the quad out of sight; the height *array* it reads
+    // is untouched. Sampling that array, as `heightAt` does, put blades at
+    // the nominal height of tiles whose ground had been taken away - grass
+    // hanging in the air over Devias' precipices. Same flag, same index, same
+    // answer as the mesh (customGroundMesh.ts:96).
+    if (isFlagInBinaryMask(src.attributes[TERRAIN_INDEX(x, y)], TWFlags.NoGround)) {
+      return;
+    }
 
     // The original's rule, in its own order (ZzzLodTerrain.cpp:1611-1625).
     //
@@ -443,8 +818,15 @@ export function createGrassField(
           const hz = hash01(x, z, b * 3 + 1);
           const hh = hash01(x, z, b * 3 + 2);
 
-          const fx = x + hx;
-          const fz = z + hz;
+          // Grass grows in tufts, not on a Poisson disc. Each blade joins one
+          // of a few clumps in the tile and jitters around its centre, which
+          // is most of the difference between a field and a lawn.
+          const clump = b % CLUMPS_PER_TILE;
+          const cx = hash01(x, z, 901 + clump * 2);
+          const cz = hash01(x, z, 902 + clump * 2);
+
+          const fx = x + clamp01(cx + (hx - 0.5) * CLUMP_SPREAD);
+          const fz = z + clamp01(cz + (hz - 0.5) * CLUMP_SPREAD);
           const y = heightAt(fx, fz);
           const height = BLADE_MIN_H + hh * (BLADE_MAX_H - BLADE_MIN_H);
 
@@ -525,6 +907,102 @@ export function createGrassField(
     setCenter(x, z) {
       centerX = x;
       centerZ = z;
+    },
+
+    setActors(actors, dt) {
+      if (src.blade !== 'detailed') return;
+
+      // Everything fades first, so a press nothing refreshes this frame is
+      // already on its way back up.
+      for (let i = presses.length - 1; i >= 0; i--) {
+        presses[i].life -= dt / PRESS_LIFE;
+        if (presses[i].life <= 0) presses.splice(i, 1);
+      }
+
+      // Nearest to the centre first, and only that many stamp anything.
+      //
+      // Without this the slots went first-come: the hero, who is what the
+      // camera is looking at, lost all ten of them to whichever monsters the
+      // query happened to yield first, and the grass pressed itself down
+      // around bodies fifteen tiles away while the player walked through an
+      // untouched field. The budget is deliberately below the slot count so
+      // there is room left for the trail these actors leave behind them.
+      const near = nearest(actors, centerX, centerZ, ACTOR_BUDGET);
+
+      for (const a of near) {
+        // Flying is measured against the ground the blade grows from, not
+        // read off a state flag: anything far enough above it is overhead.
+        const flying = a.y - heightAt(a.x, a.z) > FLYING_OVER;
+
+        // Standing still refreshes the press underfoot; walking out of its
+        // reach stamps the next one, and the old one starts recovering.
+        let nearest: Press | null = null;
+        let nearestD = STAMP_STEP * STAMP_STEP;
+
+        for (const p of presses) {
+          if (p.flying !== flying) continue;
+
+          const d = (p.x - a.x) ** 2 + (p.z - a.z) ** 2;
+
+          if (d < nearestD) {
+            nearestD = d;
+            nearest = p;
+          }
+        }
+
+        if (nearest) {
+          // Refreshed, *not* moved. Dragging the press along with the body was
+          // the reason no trail ever formed: one press followed the player
+          // around and the grass behind them was never pressed at all. Left
+          // where it was stamped, it starts recovering the moment the body
+          // walks out of its reach, and the next step stamps the next one.
+          nearest.life = 1;
+          continue;
+        }
+
+        // Full: drop the faintest, and among equally faint ones the furthest
+        // away - so a fresh press near the camera never loses to a stale one
+        // at the edge of the field.
+        if (presses.length >= GRASS_ACTORS) {
+          let worst = 0;
+
+          for (let i = 1; i < presses.length; i++) {
+            const p = presses[i];
+            const q = presses[worst];
+
+            if (p.life < q.life - 0.01) {
+              worst = i;
+            } else if (p.life < q.life + 0.01) {
+              const dp = (p.x - centerX) ** 2 + (p.z - centerZ) ** 2;
+              const dq = (q.x - centerX) ** 2 + (q.z - centerZ) ** 2;
+              if (dp > dq) worst = i;
+            }
+          }
+
+          presses.splice(worst, 1);
+        }
+
+        presses.push({ x: a.x, z: a.z, life: 1, flying });
+      }
+
+      actorSlots.fill(0);
+
+      for (let s = 0; s < presses.length && s < GRASS_ACTORS; s++) {
+        const p = presses[s];
+        // Smootherstep, not smoothstep: zero first *and* second derivative at
+        // both ends, so the blade neither jumps as it starts lifting nor
+        // arrives at upright with any velocity left. Over `PRESS_LIFE` that
+        // is a press which holds, then rises, then settles.
+        const t = p.life;
+        const strength = t * t * t * (t * (t * 6 - 15) + 10);
+        const i = s * 4;
+
+        actorSlots[i] = p.x;
+        actorSlots[i + 1] = p.z;
+        actorSlots[i + 2] = p.flying ? FLIER_RADIUS : ACTOR_RADIUS;
+        actorSlots[i + 3] =
+          (p.flying ? -FLIER_PUSH : TRAMPLE_PUSH) * strength;
+      }
     },
 
     step() {
@@ -624,7 +1102,18 @@ function grassAllowed(map: ENUM_WORLD): boolean {
  * The tier is the gate; the slider is the taste.
  */
 function grassDensity(): number {
-  return lightingTier() ? GameOptions.grassDensity : 0;
+  return GameOptions.grassDensity;
+}
+
+/**
+ * Which blade the tier draws.
+ *
+ * The original had a grass pass, so Classic having grass is closer to the
+ * reference than having none - it just gets the cheap blade. Ultra gets the
+ * curved one. The slider is how much; the tier is how good.
+ */
+function bladeKind(): BladeKind {
+  return tierIndex() >= 2 ? 'detailed' : 'simple';
 }
 
 /**
@@ -635,31 +1124,41 @@ function grassDensity(): number {
  */
 type Installed = {
   readonly scene: Scene;
-  readonly src: GrassSource;
+  readonly src: Omit<GrassSource, 'density' | 'blade'>;
   field: GrassField | null;
   density: number;
+  blade: BladeKind;
 };
 
 let installed: Installed | null = null;
+
+function build(entry: Installed): void {
+  entry.field = createGrassField(entry.scene, {
+    ...entry.src,
+    density: entry.density,
+    blade: entry.blade,
+  });
+}
 
 /** Built at map load by `getTerrainData`; replaces whatever stood before. */
 export function installGrassField(
   scene: Scene,
   map: ENUM_WORLD,
-  src: Omit<GrassSource, 'density'>
+  src: Omit<GrassSource, 'density' | 'blade'>
 ): void {
   disposeGrassField();
 
   if (!grassAllowed(map)) return;
 
-  const density = grassDensity();
-
   installed = {
     scene,
-    src: { ...src, density },
-    field: createGrassField(scene, { ...src, density }),
-    density,
+    src,
+    field: null,
+    density: grassDensity(),
+    blade: bladeKind(),
   };
+
+  build(installed);
 }
 
 export function disposeGrassField(): void {
@@ -668,21 +1167,23 @@ export function disposeGrassField(): void {
 }
 
 /**
- * The field for this frame, rebuilt first if the density option moved. The
- * rebuild is a dispose and a re-create: blocks stream back in one per frame
- * from wherever the camera is, so the cost is spread the same way a warp's
- * is.
+ * The field for this frame, rebuilt first if the density option or the tier
+ * moved - the tier picks the blade, so changing it changes the geometry and
+ * the shader both. The rebuild is a dispose and a re-create: blocks stream
+ * back in one per frame from wherever the camera is, so the cost is spread
+ * the same way a warp's is.
  */
 export function grassFieldForFrame(): GrassField | null {
   if (!installed) return null;
 
-  if (installed.density !== grassDensity()) {
+  const density = grassDensity();
+  const blade = bladeKind();
+
+  if (installed.density !== density || installed.blade !== blade) {
     installed.field?.dispose();
-    installed.density = grassDensity();
-    installed.field = createGrassField(installed.scene, {
-      ...installed.src,
-      density: installed.density,
-    });
+    installed.density = density;
+    installed.blade = blade;
+    build(installed);
   }
 
   return installed.field;
