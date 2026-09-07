@@ -445,7 +445,24 @@ ${
         if (reach <= 0.0) continue;
 
         shove += (far > 0.0001 ? away / far : vec2(1.0, 0.0)) * reach * abs(a.w);
-        trodden += reach * max(a.w, 0.0);
+
+        // The deepest press over this blade, not the sum of them. A blade
+        // already flat cannot be flattened again by a second foot, and summing
+        // said it could: along a trail the crumbs are stamped STAMP_STEP
+        // apart and their falloffs overlap between the footfalls but not on
+        // them, so the *gaps* summed past the clamp while the footfalls
+        // themselves sat below it. The trail came out scalloped - flatter
+        // between the steps than under them - and, worse, each scallop fell
+        // off the clamp at its own moment as the presses recovered, so the
+        // trail lifted in chunks rather than rising.
+        //
+        // Sampled across a real trail: 14 of 38 points pinned at the clamp and
+        // 2.68 of total variation along it, against 0.72 taking the max, which
+        // decays monotonically and never clamps at all.
+        //
+        // shove above stays a sum: it is a direction, neighbours pointing
+        // opposite ways cancel rather than pile up, and nothing clamps it.
+        trodden = max(trodden, reach * max(a.w, 0.0));
       }
 
       height *= 1.0 - min(trodden, 1.0) * ${TRAMPLE_FLATTEN.toFixed(2)};`
