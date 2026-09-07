@@ -71,7 +71,9 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Meteorite: a falling fire model — warm impact (BITMAP_FIRE+1 range 2, :8092).
   2: { cast: ember(1, 0.3), impact: flame(2, 0.5) },
   // BITMAP_LIGHTNING: range 6 on the strike (ZzzEffectParticle.cpp:4298).
-  3: { impact: arc(6, 0.35, { gain: 1.4 }) },
+  // 0.4 s is the clip: the bolt is `ticks(10)` in skillVisuals, and a light
+  // that ends before its effect leaves the ground dark under a live bolt.
+  3: { impact: arc(6, 0.4, { gain: 1.4 }) },
   // Fire Ball: BITMAP_FIRE+1 range 2 in flight (:8092).
   4: { travel: { ...ember(2, 3), speed: BOLT_SPEED }, impact: flame(2, 0.45) },
   // Flame: BITMAP_FLAME range 3 while the column burns (:8649).
