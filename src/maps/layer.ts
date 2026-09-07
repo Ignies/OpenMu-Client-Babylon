@@ -79,6 +79,18 @@ export interface MapLayer {
   readonly underwater?: boolean;
 
   /**
+   * Desert: it does not rain here whatever the weather byte reads. The third
+   * climate after `snow` and `underwater`, and the plainest of them - the
+   * sky is clear because the map's whole look is built on air with nothing
+   * in it (Tarkan runs fog density 0.01 over a sand horizon, clouds 0.06).
+   *
+   * More faithful than the alternative, too: the original rains on seven
+   * named maps and Tarkan is not one of them - it does not appear in
+   * ZzzEffectFireLeave.cpp at all.
+   */
+  readonly desert?: boolean;
+
+  /**
    * `SetWorldClearColor` (SceneManager.cpp:336-365) as the original's 0…255
    * bytes; omit for black. Applied by `loadMapIntoScene` before `create`.
    */

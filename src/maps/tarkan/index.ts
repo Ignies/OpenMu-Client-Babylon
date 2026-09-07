@@ -22,8 +22,12 @@ const WORLDS: readonly ENUM_WORLD[] = [
 // OpenMU's spawn gate (VersionSeasonSix/Gates.cs, the `isSpawnGate: true` row), centred.
 const SPAWN = { x: 200, y: 58 } as const;
 
-// Open sky: rain falls here when the weather byte says so.
+// Open sky, and a cloudless one: the profile runs fog density 0.01 over a
+// sand horizon at 6% cloud. Nothing falls out of it - see DESERT.
 const OUTDOOR = true;
+
+// Desert: no rain whatever the weather byte says.
+const DESERT = true;
 
 // ---- 2. state + readers ----------------------------------------------------
 // None: the map's runtime state lives in the objects `create` binds.
@@ -36,6 +40,7 @@ export const tarkanLayer: MapLayer = {
   tiles: ROCK04_TILES,
   spawn: SPAWN,
   outdoor: OUTDOOR,
+  desert: DESERT,
   blendMeshes: TARKAN_BLEND_MESHES,
   effectOnly: TARKAN_EFFECT_ONLY_TYPES,
   emissions: TARKAN_EMISSIONS,
