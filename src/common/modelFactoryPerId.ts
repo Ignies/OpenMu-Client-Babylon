@@ -8,6 +8,7 @@ import {
 import { ModelObject } from './modelObject';
 import { Balgass } from './monsters/balgass';
 import { BudgeDragon } from './monsters/budgeDragon';
+import { DeathGorgon } from './monsters/deathGorgon';
 import {
   GoldenBudgeDragon,
   GoldenCrust,
@@ -94,6 +95,8 @@ export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   [16]: EliteSkeleton,
   [55]: DeathKing,
   [56]: DeathBone,
+  // Death Gorgon burns; the fire is what the floor light comes from.
+  [35]: DeathGorgon,
   [236]: GoldenArcher,
 
   // The golden invasion line; 44 (Golden Dragon) stays generic - the
