@@ -98,27 +98,59 @@ const FUEL_SAMPLES = 8;
  * texture and the size were right all along - it was the count.
  */
 const EMBER_EVERY = 0.3;
-const EMBER_SPARKS = 3;
+const EMBER_SPARKS = 2;
 
 /** Tongues of flame per burst, standing up out of the blades on the ring. */
-const FLAME_TONGUES_PER_BURST = 3;
+const FLAME_TONGUES_PER_BURST = 2;
+
+/**
+ * The flame standing in the grass.
+ *
+ * The skills' own `FLAME_TONGUES` is nearly a tile across, sized for a spell
+ * going off, and over blades a third of a tile tall it is a red blob sitting
+ * on the field rather than fire in it. A flame here has to be of a size with
+ * what is burning.
+ */
+const GRASS_FLAMES: ParticleRecipe = {
+  ...FLAME_TONGUES,
+  size: 0.28,
+  sizeJitter: 0.1,
+  life: 0.55,
+  power: 0.9,
+  endScale: 1.15,
+};
 
 /**
  * The ember off burning grass.
  *
  * `FIRE_SPARKS` is the skills' own, sized for a fireball going off at chest
  * height, and at a third of a tile it lies in the grass like an orange brick.
- * Same texture and the same colours, a third of the size, and it falls rather
+ * Same texture and the same colours, a fifth of the size, and it falls rather
  * than flying: this comes off a blade, not out of an explosion.
  */
 const GRASS_EMBERS: ParticleRecipe = {
   ...FIRE_SPARKS,
-  size: 0.05,
-  sizeJitter: 0.02,
+  size: 0.03,
+  sizeJitter: 0.012,
   life: 0.9,
   power: 0.7,
   gravity: -1.2,
 };
+
+/**
+ * How far the fire reaches off a perfect circle, per harmonic.
+ *
+ * The second harmonic gives a front a long axis, the third and fifth break
+ * that into lobes. Together they run the reach over roughly 0.57 to 1.43 of
+ * the nominal radius, which is enough that no two scars look alike and not so
+ * much that a fire tears into separate pieces.
+ */
+const LOBE_2 = 0.22;
+const LOBE_3 = 0.13;
+const LOBE_5 = 0.08;
+
+/** The most `reach` can return; the stamp box has to allow for it. */
+const MAX_REACH = 1 + LOBE_2 + LOBE_3 + LOBE_5;
 
 /** How black a texel goes when the fire passes over it. */
 const CHAR = 255;
@@ -153,7 +185,32 @@ type Fire = {
   burnt: number;
   vigour: number;
   sinceEmber: number;
+  /** Phases of this fire's own lobes; see `reach`. */
+  p1: number;
+  p2: number;
+  p3: number;
 };
+
+/**
+ * How far this fire has got in a given direction, as a fraction of its radius.
+ *
+ * A fire does not spread as a circle. Ours did, so every scar was a disc and a
+ * fight left a row of identical coins on the field - the one thing that says
+ * "stamped" rather than "burned".
+ *
+ * Three harmonics with the fire's own phases: the second gives it a long axis,
+ * the third and fifth break that up into lobes. Smooth, seamless at the wrap
+ * because they are all periodic in the angle, and no texture or noise lookup -
+ * the shape is three sines of a number the loop already has.
+ */
+function reach(fire: Fire, angle: number): number {
+  return (
+    1 +
+    LOBE_2 * Math.sin(angle * 2 + fire.p1) +
+    LOBE_3 * Math.sin(angle * 3 + fire.p2) +
+    LOBE_5 * Math.sin(angle * 5 + fire.p3)
+  );
+}
 
 const fires: Fire[] = [];
 
@@ -287,15 +344,16 @@ export function grassBurnAt(x: number, z: number): number {
 function stamp(fire: Fire, from: number, to: number): void {
   const map = ensureData();
 
-  const x0 = Math.max(0, Math.floor((fire.x - to) * BURN_RES));
-  const x1 = Math.min(BURN_SIZE - 1, Math.ceil((fire.x + to) * BURN_RES));
-  const z0 = Math.max(0, Math.floor((fire.z - to) * BURN_RES));
-  const z1 = Math.min(BURN_SIZE - 1, Math.ceil((fire.z + to) * BURN_RES));
+  // The box has to hold the longest lobe, not the nominal radius, or the
+  // shape is quietly cropped back to a square-cornered circle.
+  const span = to * MAX_REACH;
+  const x0 = Math.max(0, Math.floor((fire.x - span) * BURN_RES));
+  const x1 = Math.min(BURN_SIZE - 1, Math.ceil((fire.x + span) * BURN_RES));
+  const z0 = Math.max(0, Math.floor((fire.z - span) * BURN_RES));
+  const z1 = Math.min(BURN_SIZE - 1, Math.ceil((fire.z + span) * BURN_RES));
 
   if (x1 < x0 || z1 < z0) return;
 
-  const inner = from * from;
-  const outer = to * to;
   let touched = false;
 
   for (let tz = z0; tz <= z1; tz++) {
@@ -307,6 +365,13 @@ function stamp(fire: Fire, from: number, to: number): void {
       const wx = (tx + 0.5) / BURN_RES;
       const dx = wx - fire.x;
       const d2 = dx * dx + dz * dz;
+
+      // The front's own reach in this direction, not a radius. Both ends of
+      // the annulus take it, so the burnt inside and the advancing edge are
+      // the same shape and the ring does not cross itself as the fire grows.
+      const k = reach(fire, Math.atan2(dz, dx));
+      const inner = (from * k) ** 2;
+      const outer = (to * k) ** 2;
 
       if (d2 < inner || d2 > outer) continue;
       if (!hasFuel(wx, wz)) continue;
@@ -333,7 +398,9 @@ function ringHasFuel(fire: Fire): boolean {
   for (let i = 0; i < FUEL_SAMPLES; i++) {
     const a = (i / FUEL_SAMPLES) * Math.PI * 2;
 
-    if (hasFuel(fire.x + Math.cos(a) * fire.radius, fire.z + Math.sin(a) * fire.radius)) {
+    const r = fire.radius * reach(fire, a);
+
+    if (hasFuel(fire.x + Math.cos(a) * r, fire.z + Math.sin(a) * r)) {
       return true;
     }
   }
@@ -378,6 +445,11 @@ export function burnGrass(
     burnt: 0,
     vigour: strength,
     sinceEmber: 0,
+    // Its own shape. Rolled once, so a fire keeps the outline it started with
+    // as it grows rather than writhing.
+    p1: Math.random() * Math.PI * 2,
+    p2: Math.random() * Math.PI * 2,
+    p3: Math.random() * Math.PI * 2,
   };
 
   // Full: the one with least left to give makes way.
@@ -409,8 +481,9 @@ function embers(fire: Fire, dt: number): void {
   // On the ring, not over the scar. A burnt patch that keeps throwing sparks
   // for five minutes is a bonfire, not something that has been burnt.
   const a = Math.random() * Math.PI * 2;
-  const x = fire.x + Math.cos(a) * fire.radius;
-  const z = fire.z + Math.sin(a) * fire.radius;
+  const r = fire.radius * reach(fire, a);
+  const x = fire.x + Math.cos(a) * r;
+  const z = fire.z + Math.sin(a) * r;
 
   if (!hasFuel(x, z)) return;
 
@@ -422,7 +495,7 @@ function embers(fire: Fire, dt: number): void {
   // chips over ordinary grass. The tongues stand up out of the blades along
   // the ring and travel with it.
   effects.spawn('particles', scene, at, {
-    recipe: FLAME_TONGUES,
+    recipe: GRASS_FLAMES,
     count: FLAME_TONGUES_PER_BURST,
   });
 
