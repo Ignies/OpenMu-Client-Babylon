@@ -32,7 +32,18 @@ export const ember = (range: number, seconds: number): LightRecipe => ({
   flicker: { min: 0.6, max: 1, steps: 5 },
 });
 
-/** Blue-white electricity — strikes, sparks. Long tail: the afterimage. */
+/**
+ * Blue-white electricity — strikes, sparks.
+ *
+ * A strike holds and snaps: the tail is a quarter of the life, not the 0.7 it
+ * was. At 0.7 the light started falling a third of the way in and the ground
+ * was dark while the bolt was still at full strength, which is the whole
+ * length of a 10-tick clip.
+ *
+ * `floorGain` because a bolt is a line of light hanging over the ground, not
+ * a lamp standing in it — the same reading the fire family already has
+ * (Hellfire 1.3, Nova 1.4, Inferno 1.5).
+ */
 export const arc = (
   range: number,
   seconds: number,
@@ -42,7 +53,8 @@ export const arc = (
   range,
   seconds,
   flicker: { min: 0.5, max: 1, steps: 3 },
-  release: seconds * 0.7,
+  release: seconds * 0.25,
+  floorGain: 1.4,
   ...extra,
 });
 
