@@ -17,6 +17,7 @@ import { devQueryNumber } from '../common/devSeams';
 import { lookDirector } from '../lighting/director';
 import type { Entity } from '../ecs/world';
 import type { TestScene } from '../scenes/testScene';
+import { addEffectGlow, disposeEffectGlow, dropEffectGlow } from './glow';
 import type { EffectHandle } from './layer';
 
 /**
@@ -415,7 +416,9 @@ export function acquireCard(scene: Scene, material: StandardMaterial, billboard 
     card.doNotSyncBoundingInfo = true;
     card.renderingGroupId = EFFECT_RENDERING_GROUP;
     keepDepthForEffects(scene);
-    // Never a glow-layer contributor — additive already is the glow.
+    // Not the item halo layer: it draws every active mesh and a card carries
+    // no tier, so it would cost a draw to contribute nothing. The card's own
+    // halo is the effects layer's (glow.ts).
     (scene as TestScene).look?.glow.addExcludedMesh(card);
   }
   card.material = material;
@@ -425,12 +428,17 @@ export function acquireCard(scene: Scene, material: StandardMaterial, billboard 
   card.scaling.setAll(1);
   card.visibility = 1;
   card.setEnabled(true);
+  // Emissive art is light and blooms; a RENDER_DARK card removes light and a
+  // halo would add back what it just took.
+  if (material.alphaMode === ADDITIVE_ALPHA_MODE) addEffectGlow(scene, card);
+  else dropEffectGlow(card);
   return card;
 }
 
 export function releaseCard(scene: Scene, card: Card): void {
   card.setEnabled(false);
   card.parent = null;
+  dropEffectGlow(card);
   if (card.metadata?.cellUvs) {
     card.updateVerticesData(VertexBuffer.UVKind, WHOLE_SHEET_UVS);
     card.metadata.cellUvs = false;
@@ -765,6 +773,8 @@ export function clearTimers(): void {
 
 /** Dispose every shared pool (materials, cards, particle systems). The facade's reset. */
 export function disposePools(): void {
+  // The halo draws the pooled meshes, so it goes with them.
+  disposeEffectGlow();
   // Not the textures — a card's comes from loadEffectTexture's cache, a
   // skill mesh's from the GLB cache; both are shared with the map.
   for (const byKey of materials.values()) for (const m of byKey.values()) m.dispose(false, false);

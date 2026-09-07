@@ -30,6 +30,7 @@ import { BlendState } from '../common/objects/enum';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
 import { LiveList, additiveMaterial, darkCardGain, fadeOut, lerp, luma, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
+import { addEffectGlow, releaseEffectGlow } from './glow';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
 
@@ -239,6 +240,9 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
               : brightFallback
             : solid;
           (scene as TestScene).look?.glow.addExcludedMesh(mesh as never);
+          // Emissive skill art blooms; the opaque body of a blend-mesh model
+          // and a subtractive one do not (glow.ts).
+          if (isBright && !subtract) addEffectGlow(scene, mesh);
         });
         clip = gltf.animationGroups[0] ?? null;
         if (clip) {
@@ -282,6 +286,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       // first Meteorite to land. The subtractive materials are this spawn's
       // own (their emissive is mutated per frame) and go with it.
       for (const m of fadeMats) m.dispose(false, false);
+      for (const m of meshes) releaseEffectGlow(m);
       node.dispose(false, false);
     },
   });
