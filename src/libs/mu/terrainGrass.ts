@@ -26,6 +26,8 @@ import {
   setGroundProbe,
 } from '../../weather/grassBurn';
 import { lookDirector } from '../../lighting/director';
+import { devQueryNumber } from '../../common/devSeams';
+import { LUMA_GLSL } from '../../lighting/lightTint';
 import {
   TERRAIN_CSM_SAMPLERS,
   TERRAIN_LIGHT_UNIFORMS,
@@ -289,6 +291,37 @@ const CLUMP_SPREAD = 0.34;
 const FORM_SHADE = 0.34;
 /** How far the fragment rounds the normal across the blade's width. */
 const BLADE_ROUND = 0.55;
+
+/**
+ * How far a blade is pulled toward the colour of the light passing *through*
+ * it, at the tip where it is thinnest.
+ *
+ * A blade is `albedo x groundLit`, and a saturated green albedo has almost no
+ * blue in it: a violet spell can light the tile, the dirt path and the pale
+ * props around it and the field still reads green, because green is all the
+ * albedo can reflect. That is right for reflection and wrong for a blade,
+ * which is thin enough to pass light rather than only bounce it, and what
+ * comes through carries the emitter's colour and not the leaf's.
+ *
+ * Kept honest by three things: the pull is toward the emitter hue *at the
+ * blade's own luma*, so it recolours and never brightens; it is scaled by the
+ * emitters' share of the light on this tile, so daylight alone does nothing
+ * and the term is inert on a map with no dynamic light; and it runs to zero
+ * at the root, where a blade is thick and sits in its own shadow.
+ *
+ * `terrainLighting.ts` is still the only writer of how much light is here -
+ * this spends `extraLit`, it does not add to it. Dev seam: `?grasstransmit=`.
+ */
+const GRASS_TRANSMIT = 0.6;
+
+const transmitDev = devQueryNumber('grasstransmit');
+
+/** 0 on Classic, like `lightTintStrength`: that tier gets no modern term. */
+function grassTransmitStrength(): number {
+  if (transmitDev !== null) return Math.max(0, transmitDev);
+
+  return tierIndex() >= 1 ? GRASS_TRANSMIT : 0;
+}
 
 /**
  * What walks through the grass and what flies over it.
@@ -714,6 +747,7 @@ ${
   varying float vHeat;
   varying float vSeed;
 ${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;\n  uniform vec3 grassSun;' : ''}
+  uniform float grassTransmit;
 
 ${terrainLightDeclarationsGlsl(true)}
 
@@ -738,6 +772,15 @@ ${
 
     vec3 f = albedo * groundLit;
     f = muLightTint(f, groundLit);
+
+    // What passes through the blade rather than bouncing off it (GRASS_TRANSMIT).
+    float litLuma = dot(groundLit, ${LUMA_GLSL});
+    float dynLuma = dot(extraLit, ${LUMA_GLSL});
+    float through = litLuma > 1e-4
+      ? clamp(dynLuma / litLuma, 0.0, 1.0) * grassTransmit * vV
+      : 0.0;
+    f = mix(f, dot(f, ${LUMA_GLSL}) * (extraLit / max(dynLuma, 1e-4)), through);
+
     f = mix(f, pow(max(f, vec3(0.0)), vec3(2.2)), linearOut);
 
     // The blade being eaten, from the tip down.
@@ -788,6 +831,7 @@ ${
         'grassFade',
         'grassSnow',
         'grassBurnOn',
+        'grassTransmit',
         // Both of these have to be *listed*, not just declared in the GLSL and
         // bound: `setFloatArray4` resolves the name against this list, and a
         // name that is not on it silently writes nowhere.
@@ -819,6 +863,7 @@ ${
     if (!effect) return;
 
     bindTerrainLight(effect, scene, true);
+    effect.setFloat('grassTransmit', grassTransmitStrength());
     effect.setFloat2('grassFade', FADE_START, FADE_END);
     if (detailed) effect.setFloatArray4('grassActors', actorSlots);
     // Zero on every map without settled snow, and zero with advancedEffects
