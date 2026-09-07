@@ -1,6 +1,9 @@
 import { Vector3, type IVector3Like } from '../../libs/babylon/exports';
 import {
+  FADE_IN,
+  FADE_OUT,
   MAX_BOIDS,
+  SPAWN_INTERVAL,
   MU_UNIT,
   TICKS_PER_SECOND,
   boidFactoryFor,
@@ -80,6 +83,7 @@ export const BoidSystem: ISystemFactory = world => {
 
   let spec: BoidSpec | null = null;
   let map = world.mapIndex;
+  let sinceSpawn = 0;
 
   function despawnAll(): void {
     for (const e of [...boids]) {
@@ -114,6 +118,8 @@ export const BoidSystem: ISystemFactory = world => {
         timer: Math.random() * 3.14,
         leadX: x,
         leadZ: z,
+        alpha: 0,
+        leaving: false,
       },
     });
   }
@@ -319,22 +325,41 @@ export const BoidSystem: ISystemFactory = world => {
         // mirror, the same relationship every other object here has.
         e.transform!.rot.y = -rad0(s.yaw);
 
-        const gone =
-          Math.hypot(p.x - hero.x, p.z - hero.z) >= FLY_DISTANCE ||
-          rolled(512, ticks);
+        // Out of range, or its time is up. Either way it is told to leave
+        // rather than deleted: the original fades one in and out through
+        // `o->Alpha`, and popping a bird out of the middle of the sky is the
+        // one thing the eye is guaranteed to catch.
+        if (
+          !s.leaving &&
+          (Math.hypot(p.x - hero.x, p.z - hero.z) >= FLY_DISTANCE ||
+            rolled(512, ticks))
+        ) {
+          s.leaving = true;
+        }
 
-        if (gone) {
+        s.alpha = s.leaving
+          ? s.alpha - dt / FADE_OUT
+          : Math.min(1, s.alpha + dt / FADE_IN);
+
+        if (s.alpha <= 0) {
           world.remove(e);
           e.modelObject?.dispose();
           continue;
         }
 
+        e.modelObject?.setAlpha(s.alpha);
+
         live++;
       }
 
-      // One a tick at most, so a warp fills the sky over a second or two
-      // rather than in the frame it lands on.
-      if (live < MAX_BOIDS && rolled(2, ticks)) spawn(hero);
+      // Paced, not filled. Left ungated it reached the ceiling within a
+      // second of a warp and the flocking knotted the lot of them together.
+      sinceSpawn += dt;
+
+      if (live < MAX_BOIDS && sinceSpawn >= SPAWN_INTERVAL) {
+        sinceSpawn = 0;
+        spawn(hero);
+      }
     },
   };
 };

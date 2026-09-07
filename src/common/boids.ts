@@ -32,8 +32,26 @@ import type { Entity, World } from '../ecs/world';
  * not here yet.
  */
 
-/** `MAX_BOIDS` (_define.h:108). The original's ceiling, kept. */
-export const MAX_BOIDS = 40;
+/**
+ * How many are in the air at once.
+ *
+ * `MAX_BOIDS` is 40 (_define.h:108) and taking it literally was wrong. That
+ * is the size of the original's *array*, shared with the event dragons and
+ * the ground-crawlers, and its population settles well below it because a
+ * boid flies out of range in a couple of seconds. Filling it instead - which
+ * is what happens when the spawn is not rate-limited - put two dozen birds in
+ * one shot, and the flocking then pulled them into a single dense knot.
+ *
+ * A flock reads as a flock at about a dozen.
+ */
+export const MAX_BOIDS = 13;
+
+/** Seconds between spawns while there is room; the original has no gate. */
+export const SPAWN_INTERVAL = 0.55;
+
+/** Seconds a boid takes to fade in, and to fade out before it is dropped. */
+export const FADE_IN = 1.1;
+export const FADE_OUT = 0.7;
 
 /** Centimetres to world units: the original's positions are all in these. */
 export const MU_UNIT = 1 / 100;
