@@ -79,6 +79,8 @@ export const CLOUD_NOISE_SAMPLER = 'muCloudNoise';
 
 const coverDev = devQueryNumber('clouds');
 const cloudDev = devQueryNumber('cloudShadow');
+/** Forces the volumetric march back on, for measuring its replacement. */
+const volumeDev = devQueryNumber('volumetricClouds');
 
 /** Uniform names the readers declare and `bindClouds` writes. */
 export const CLOUD_UNIFORMS = ['muCloudA', 'muCloudB', 'muCloudC'] as const;
@@ -278,7 +280,28 @@ export function disposeClouds(): void {
  * The tier picks which sky, not how much of one.
  */
 export function volumetricClouds(): boolean {
-  return tierIndex() >= 2 && GameOptions.clouds;
+  if (tierIndex() < 2 || !GameOptions.clouds) return false;
+
+  // Held back until the field under the march is a volume.
+  //
+  // The march itself is sound; what it walks is not. The field is a 2D noise
+  // texture read as a cover map, and a cloud's ceiling is read from that same
+  // cover, so every dimension of the deck is a function of two coordinates.
+  // An oblique ray can predict its entire chord from where it entered and
+  // integrates one value the whole way, which draws each cloud as a stroke
+  // pointing along the view direction - over the whole sky, and worse the
+  // more the camera looks up, which is to say in the view a player actually
+  // uses.
+  //
+  // Measured at 0.39 coherence on the structure tensor looking up, and none
+  // of per-cloud domes, wind shear or a vertical slice moved it: reshaping a
+  // height field does not make it a volume
+  // (documentation/volumetric_clouds/ARCHITECTURE.md). Ultra draws the slab
+  // Enhanced draws until a 3D field lands, which is a sky with less contrast
+  // and no streaks.
+  //
+  // The march stays reachable so the fix can be measured against it.
+  return volumeDev !== null && volumeDev > 0;
 }
 
 export function cloudsActive(base: number | null): boolean {
