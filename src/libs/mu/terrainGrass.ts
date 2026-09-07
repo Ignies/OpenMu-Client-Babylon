@@ -196,7 +196,7 @@ const ARC_DROOP = 0.45;
  * keeps the edge soft at a scale finer than the map's 25 cm texel.
  */
 const BURN_MIN = 0.05;
-const BURN_SPREAD = 1.6;
+const BURN_SPREAD = 0.8;
 const BURN_WITHER = 0.25;
 
 /**
@@ -204,8 +204,8 @@ const BURN_WITHER = 0.25;
  * black: charred grass keeps a little brown, and true black against Lorencia's
  * ground reads as a hole in the terrain rather than as burnt.
  */
-const CHAR_COLOUR = [0.08, 0.06, 0.045] as const;
-const CHAR_TINT = 0.85;
+const CHAR_COLOUR = [0.045, 0.037, 0.032] as const;
+const CHAR_TINT = 0.96;
 
 /**
  * The dissolve edge travelling down a burning blade.
@@ -218,10 +218,50 @@ const CHAR_TINT = 0.85;
  * `WOBBLE` and `FREQ` bend the cut per blade off its own hash, so a burning
  * patch does not go as one straight line drawn across the field.
  */
+/**
+ * Burn value above which a cut still glows. The scar starts at 1 and decays
+ * over the five minutes it takes to grow back, so this is a time in disguise:
+ * 0.93 is about the first half minute after the fire went through.
+ */
+const HEAT_FROM = 0.965;
+
+/**
+ * Fraction of stubs that keep a lit tip while the scar is hot.
+ *
+ * Every cut glowing turns a burnt patch into a hillside of birthday candles -
+ * a field of identical orange points, one per blade, which is nothing like an
+ * ember. Real ones are scattered and few. Picked off the blade hash so the
+ * same stubs glow for as long as the heat lasts rather than twinkling.
+ */
+const EMBER_CHANCE = 0.13;
+
 const DISSOLVE_RIM = 0.055;
 const DISSOLVE_CHAR = 0.22;
 const DISSOLVE_WOBBLE = 0.045;
 const DISSOLVE_FREQ = 7;
+
+/**
+ * Burn at which a blade is fully blackened, whatever the dissolve is doing to
+ * it.
+ *
+ * This is separate from the dissolve threshold on purpose, and running them
+ * together was the mistake. A blade whose threshold the fire never reached was
+ * left standing at *full height and still green*, in the middle of a black
+ * patch - so a burnt field read as a field with some grass missing from it
+ * rather than as a burnt field. Every blade the fire touches goes black; the
+ * threshold only decides how much of its length it loses.
+ */
+const CHAR_AT = 0.3;
+
+/**
+ * How much of its length a blade can lose, least to most, spread per blade.
+ *
+ * Capped below 1: a blade that dissolves away entirely leaves nothing behind,
+ * and what a burnt field is made of is black stalks of uneven height. So the
+ * fire takes the top of each one and leaves the stub.
+ */
+const DISSOLVE_MIN = 0.45;
+const DISSOLVE_SPAN = 0.45;
 
 /** The ember line itself. Above 1 so the bloom pass has something to catch. */
 const EMBER_COLOUR = [2.6, 0.85, 0.18] as const;
@@ -456,6 +496,7 @@ ${detailed ? `  uniform vec4 grassActors[${GRASS_ACTORS}];` : ''}
   varying vec3 vAlbedo;
   varying float vV;
   varying float vBurn; // 0 whole, 1 taken by the fire
+  varying float vHeat; // 1 just burnt, 0 once the ember has gone out
   varying float vSeed; // the blade hash, so its dissolve is its own
 ${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;' : ''}
 
@@ -511,11 +552,17 @@ ${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;'
       // an *edge* - a line of ember travelling across it with the material
       // gone behind it - so that is what this is.
       vBurn = clamp((burnt - burnAt) / ${BURN_WITHER.toFixed(2)}, 0.0, 1.0);
+      // The scar decays from 255 over five minutes, so how near the burn is
+      // to full *is* how recently the fire went through: the ember cools over
+      // the first half minute and the stub is black after that. Without this
+      // every stub in the field kept a lit tip for the whole five minutes,
+      // which reads as a hillside of candles.
+      vHeat = smoothstep(${HEAT_FROM.toFixed(3)}, 1.0, burnt);
       vSeed = hash;
       // How far this one has charred on its way there. A blade blackens before
       // it goes, which is what makes the edge read as fire and not as an
       // eraser passing over the field.
-      float charred = smoothstep(0.0, burnAt, burnt);
+      float charred = smoothstep(0.0, ${CHAR_AT.toFixed(2)}, burnt);
 
 ${
   detailed
@@ -664,6 +711,7 @@ ${
   varying vec3 vAlbedo;
   varying float vV;
   varying float vBurn;
+  varying float vHeat;
   varying float vSeed;
 ${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;\n  uniform vec3 grassSun;' : ''}
 
@@ -706,7 +754,12 @@ ${
     if (vBurn > 0.0) {
       float wobble = ${DISSOLVE_WOBBLE.toFixed(3)}
         * sin(vV * ${DISSOLVE_FREQ.toFixed(1)} + vSeed * 40.0);
-      float edge = 1.0 - vBurn + wobble;
+      // How much of *this* blade the fire can take. Never all of it: what is
+      // left standing is the stub, and a field of uneven black stubs is what
+      // burnt grass looks like.
+      float take = ${DISSOLVE_MIN.toFixed(2)}
+        + fract(vSeed * 91.71) * ${DISSOLVE_SPAN.toFixed(2)};
+      float edge = 1.0 - vBurn * take + wobble;
       float past = vV - edge;
 
       if (past > 0.0) discard;
@@ -717,7 +770,8 @@ ${
       f = mix(f, vec3(${CHAR_COLOUR[0].toFixed(3)}, ${CHAR_COLOUR[1].toFixed(3)}, ${CHAR_COLOUR[2].toFixed(3)}),
         smoothstep(-${DISSOLVE_CHAR.toFixed(2)}, 0.0, past));
       f = mix(f, vec3(${EMBER_COLOUR[0].toFixed(2)}, ${EMBER_COLOUR[1].toFixed(2)}, ${EMBER_COLOUR[2].toFixed(2)}),
-        smoothstep(-${DISSOLVE_RIM.toFixed(3)}, 0.0, past));
+        smoothstep(-${DISSOLVE_RIM.toFixed(3)}, 0.0, past) * vHeat
+          * step(fract(vSeed * 13.73), ${EMBER_CHANCE.toFixed(2)}));
     }
 
     gl_FragColor = vec4(f, 1.0);

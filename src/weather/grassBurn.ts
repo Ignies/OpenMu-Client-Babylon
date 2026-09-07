@@ -98,10 +98,10 @@ const FUEL_SAMPLES = 8;
  * texture and the size were right all along - it was the count.
  */
 const EMBER_EVERY = 0.3;
-const EMBER_SPARKS = 3;
+const EMBER_SPARKS = 2;
 
 /** Tongues of flame per burst, standing up out of the blades on the ring. */
-const FLAME_TONGUES_PER_BURST = 3;
+const FLAME_TONGUES_PER_BURST = 2;
 
 /**
  * The ember off burning grass.
@@ -111,10 +111,27 @@ const FLAME_TONGUES_PER_BURST = 3;
  * Same texture and the same colours, a third of the size, and it falls rather
  * than flying: this comes off a blade, not out of an explosion.
  */
+/**
+ * The flame standing in the grass.
+ *
+ * The skills' own `FLAME_TONGUES` is nearly a tile across, sized for a spell
+ * going off, and over blades a third of a tile tall it is a red blob sitting
+ * on the field rather than fire in it. A flame here has to be of a size with
+ * what is burning.
+ */
+const GRASS_FLAMES: ParticleRecipe = {
+  ...FLAME_TONGUES,
+  size: 0.28,
+  sizeJitter: 0.1,
+  life: 0.55,
+  power: 0.9,
+  endScale: 1.15,
+};
+
 const GRASS_EMBERS: ParticleRecipe = {
   ...FIRE_SPARKS,
-  size: 0.05,
-  sizeJitter: 0.02,
+  size: 0.03,
+  sizeJitter: 0.012,
   life: 0.9,
   power: 0.7,
   gravity: -1.2,
@@ -422,7 +439,7 @@ function embers(fire: Fire, dt: number): void {
   // chips over ordinary grass. The tongues stand up out of the blades along
   // the ring and travel with it.
   effects.spawn('particles', scene, at, {
-    recipe: FLAME_TONGUES,
+    recipe: GRASS_FLAMES,
     count: FLAME_TONGUES_PER_BURST,
   });
 
