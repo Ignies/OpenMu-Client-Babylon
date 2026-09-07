@@ -8,6 +8,7 @@ import { snowCover } from './snowCover';
 import { snowSinkDepth, snowUnderfoot } from './snowSink';
 import { snowSprayBurst } from './snowSpray';
 import { meltSnow } from './snowMelt';
+import { burnGrass, grassBurnAt } from './grassBurn';
 import { snowCapAt } from './snowCaps';
 import { inPuddles, puddleCover, wetness } from './wetness';
 import { puddleUnderfoot } from './puddleUnderfoot';
@@ -112,6 +113,28 @@ class Weather {
    */
   meltSnow(x: number, z: number, radius: number, strength = 1): void {
     meltSnow(x, z, radius, strength);
+  }
+
+  /**
+   * Set the grass alight. `radius` in tiles is the hit itself; the fire
+   * spreads out from there under its own vigour until it runs out of that or
+   * out of grass to take. Called by the same fire rows of
+   * `common/skillVisuals.ts` that melt the snow, so every fire skill in the
+   * game reaches it; a no-op on a map with no grass.
+   */
+  burnGrass(
+    scene: Scene,
+    x: number,
+    z: number,
+    radius: number,
+    strength = 1
+  ): void {
+    burnGrass(scene, x, z, radius, strength);
+  }
+
+  /** How burnt the grass at a point is, 0…1, and 0 once it has grown back. */
+  grassBurnAt(x: number, z: number): number {
+    return grassBurnAt(x, z);
   }
 
   /** Throw a puff of snow at a foot. */

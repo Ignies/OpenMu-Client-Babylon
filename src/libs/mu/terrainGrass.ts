@@ -19,6 +19,12 @@ import { GRASS_CARD_SLOTS, type GrassCards } from './terrainGrassCards';
 import { SNOW_COVER } from './terrainOverlay';
 import { snowCover } from '../../weather/snowCover';
 import { GROUND_WIND } from '../../weather/ambientWeather';
+import {
+  grassBurnActive,
+  grassBurnTexture,
+  setGrassProbe,
+  setGroundProbe,
+} from '../../weather/grassBurn';
 import { lookDirector } from '../../lighting/director';
 import {
   TERRAIN_CSM_SAMPLERS,
@@ -167,6 +173,39 @@ const ARC_MIN = 0.15;
 const ARC_MAX = 0.85;
 /** How much of the lean comes out of the blade's height (it cannot do both). */
 const ARC_DROOP = 0.45;
+
+/**
+ * Fire, as the blade sees it (`weather/grassBurn.ts` owns the scar itself).
+ *
+ * Disintegration rather than a shrink. Each blade goes when the burn at its
+ * root passes *its own* threshold, drawn from the hash it already carries, so
+ * a patch thins out blade by blade instead of sinking like a sheet - and
+ * because the threshold is a pure function of the blade, the same blades
+ * always go first and the edge does not crawl about as the map decays.
+ *
+ * Thresholds run over MIN to MIN + SPREAD on the *cube* of the hash, and the
+ * curve is the point. SPREAD carries the top of the range past 1, so a fully
+ * burnt patch keeps the blades whose threshold the fire never reached and
+ * leaves them standing and charred - with every threshold under 1 a full burn
+ * took every blade and the scar was bare ground, which reads as a hole in the
+ * field rather than as something burnt. But spreading them evenly to get that
+ * stubble left a third of the field standing and the scar stopped reading at
+ * all. Cubed, about three quarters go outright and a sixth stay: a clear scar
+ * with something burnt still standing in it. `WITHER` is how much
+ * more burn it takes for a blade to go from whole to gone, which is what
+ * keeps the edge soft at a scale finer than the map's 25 cm texel.
+ */
+const BURN_MIN = 0.05;
+const BURN_SPREAD = 1.6;
+const BURN_WITHER = 0.25;
+
+/**
+ * What a blade chars toward on its way out, and how far it gets. Not quite
+ * black: charred grass keeps a little brown, and true black against Lorencia's
+ * ground reads as a hole in the terrain rather than as burnt.
+ */
+const CHAR_COLOUR = [0.08, 0.06, 0.045] as const;
+const CHAR_TINT = 0.85;
 
 /** Tufts per tile, and how far a blade strays from its tuft, in tiles. */
 const CLUMPS_PER_TILE = 4;
@@ -386,7 +425,9 @@ function createGrassMaterial(
   uniform vec2 grassFade; // x start, y end
   const vec2 windDir = vec2(${GROUND_WIND[0].toFixed(3)}, ${GROUND_WIND[1].toFixed(3)});
   uniform float grassSnow; // settled-snow coverage, 0 = none
+  uniform float grassBurnOn; // 0 = nothing is burnt anywhere, skip the fetch
   uniform sampler2D grassRamp;
+  uniform sampler2D grassBurn; // the world-space scar, one byte a texel
 ${detailed ? `  uniform vec4 grassActors[${GRASS_ACTORS}];` : ''}
 
   varying vec2 vWorldXZ;
@@ -424,6 +465,29 @@ ${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;'
       // Snow buries what it settles on, so a blade under full cover keeps
       // only SNOW_BURY of its height.
       float height = iTint.a * near * mix(1.0, ${SNOW_BURY.toFixed(2)}, grassSnow);
+
+      // Fire. Read in the *vertex* stage, and that is not a preference: a
+      // blade is one to three pixels wide, so a fragment-stage fetch gets
+      // derivatives from neighbours that are not on the same blade, lands on
+      // the smallest mip and returns garbage. That is the bug that made every
+      // blade tip black when the card ramp was first read per fragment.
+      //
+      // A texel is a quarter tile and the map covers all 256 of them, so the
+      // world position is the UV: texel n spans [n, n+1) quarter-tiles and its
+      // centre lands exactly on GL's.
+      float burnt = grassBurnOn > 0.0
+        ? texture2D(grassBurn, iRoot.xz / 256.0).r
+        : 0.0;
+
+      // This blade's own threshold, from the hash it already carries.
+      float burnAt = ${BURN_MIN.toFixed(2)} + h3 * h3 * h3 * ${BURN_SPREAD.toFixed(2)};
+      float gone = smoothstep(burnAt, burnAt + ${BURN_WITHER.toFixed(2)}, burnt);
+      // How far this one has charred on its way there. A blade blackens before
+      // it goes, which is what makes the edge read as fire and not as an
+      // eraser passing over the field.
+      float charred = smoothstep(0.0, burnAt, burnt);
+
+      height *= 1.0 - gone;
 
 ${
   detailed
@@ -538,7 +602,14 @@ ${
         vec3(${SNOW_COLOUR[0].toFixed(3)}, ${SNOW_COLOUR[1].toFixed(3)}, ${SNOW_COLOUR[2].toFixed(3)}),
         grassSnow * ${SNOW_ON_GRASS.toFixed(2)} * mix(0.7, 1.0, v));
 
-      vAlbedo = snowed * shade;
+      // Charred toward the root first: fire takes a blade from the bottom, and
+      // the tip is the last of it to go.
+      vec3 burnedOut = mix(
+        snowed,
+        vec3(${CHAR_COLOUR[0].toFixed(3)}, ${CHAR_COLOUR[1].toFixed(3)}, ${CHAR_COLOUR[2].toFixed(3)}),
+        charred * ${CHAR_TINT.toFixed(2)} * mix(1.0, 0.65, v));
+
+      vAlbedo = burnedOut * shade;
 ${
   detailed
     ? `
@@ -604,6 +675,7 @@ ${
         'cameraPosition',
         'grassFade',
         'grassSnow',
+        'grassBurnOn',
         // Both of these have to be *listed*, not just declared in the GLSL and
         // bound: `setFloatArray4` resolves the name against this list, and a
         // name that is not on it silently writes nowhere.
@@ -616,6 +688,7 @@ ${
         ...terrainLightSamplers(true),
         ...TERRAIN_CSM_SAMPLERS,
         'grassRamp',
+        'grassBurn',
       ],
       defines: terrainLightDefines(),
       needAlphaBlending: false,
@@ -646,6 +719,13 @@ ${
       effect.setFloat3('grassSun', -d[0], -d[1], -d[2]);
     }
     if (cards.ramp) effect.setTexture('grassRamp', cards.ramp);
+
+    // Always bound, even with nothing burnt: an unbound sampler is a draw
+    // error, and a draw error here takes the whole grass layer with it. The
+    // texture built from no data is all zero, which is an unburnt map, and
+    // `grassBurnOn` is what actually saves the fetch.
+    effect.setTexture('grassBurn', grassBurnTexture(scene));
+    effect.setFloat('grassBurnOn', grassBurnActive() ? 1 : 0);
   });
 
   registerTerrainMaterial(material);
@@ -928,6 +1008,19 @@ export function createGrassField(
     blocks.get(key)?.dispose();
     blocks.delete(key);
   }
+
+  // What the fire is allowed to take, and how high off the ground its embers
+  // sit. Handed over rather than imported back: `grassBurn.ts` is a leaf, and
+  // the weather module cycle that `snowMelt.ts:33-43` documents is not one to
+  // walk into a second time. Fire therefore crosses a field and stops at the
+  // flagstones, on the original's own rule for where grass grows, for free.
+  const fuel = { weight: 0, slot: 0 };
+
+  setGrassProbe((x, z) => {
+    grassAt(Math.floor(x), Math.floor(z), fuel);
+    return fuel.weight > 0;
+  });
+  setGroundProbe(heightAt);
 
   return {
     setCenter(x, z) {
