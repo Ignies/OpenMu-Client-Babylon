@@ -6,6 +6,7 @@ import {
   normalizeHost,
   normalizeWsUrl,
   ServerConfig,
+  type PublishedGameServer,
   type ServerProfile,
 } from './serverConfig';
 import {
@@ -29,6 +30,24 @@ import {
  *
  * Version, banner and proxy are all optional; a line carrying none of them is
  * the original three-field form and still parses.
+ *
+ * Directly under its line, a world may list names for its game servers and
+ * their channels, which the connect server's protocol has no room for:
+ *
+ *     [S6EP3:Somewhere:A world:en](example.net)
+ *     - 0: Valhalla
+ *       - 0: Peaceful
+ *       - 1: Hard
+ *
+ * The outer id is the server group (`ServerId >> 8`) and the inner one the id
+ * inside it (the low byte) - the number the game server was configured with,
+ * which for a world that never set up groups is the whole of its `ServerId`.
+ * Whatever is left unnamed keeps the numbered default.
+ *
+ * *Directly* is the whole rule: the first line that is not one of these ends
+ * the block. Names are indented bullets and this file is prose with examples
+ * in it, so a run that has to touch its own entry is a run that cannot drift
+ * onto somebody else's world.
  *
  * The target is either `host:port` — the connect server as the world's proxy
  * reaches it — or the world's domain on its own, which leaves the addresses to
@@ -117,6 +136,24 @@ const WS_RE = /^wss?:\/\/[A-Za-z0-9._-]+(?::\d{1,5})?\/?$/i;
  * than mis-addressed, and the fix is to publish the version field.
  */
 const VERSION_RE = /^(?=.*\d)[A-Za-z0-9.]{2,12}$/;
+
+/**
+ * A name line under a world: a bullet, an id, and what to call it. Flush left
+ * it names a game server; indented it names a channel of the game server above
+ * it, so the nesting the markdown already shows is the nesting that is read.
+ *
+ * The name may be empty, which opens a game server without renaming it: a
+ * world with one game server and several channels has nothing to say about the
+ * group itself and should not have to invent something.
+ */
+const NAME_RE = /^(\s*)-\s+(\d{1,3})\s*:[ \t]*(.*)$/;
+
+/** `ServerId` is a group byte and a channel byte: neither id passes one. */
+const MAX_ID = 255;
+
+/** What the picker has room for: ten game servers a side, sixteen channels. */
+const MAX_GAME_SERVERS = 20;
+const MAX_CHANNELS = 16;
 
 export type ServerListState = 'idle' | 'loading' | 'ok' | 'error';
 
@@ -234,19 +271,92 @@ export function parseServerLine(line: string): ServerProfile | null {
   };
 }
 
+/**
+ * A name line, or null. The id is range-checked here; where the name belongs
+ * is the caller's business, since only it knows what was written above.
+ */
+function parseNameLine(
+  line: string
+): { indented: boolean; id: number; name: string } | null {
+  const match = NAME_RE.exec(line);
+
+  if (!match) return null;
+
+  const id = Number(match[2]);
+
+  if (id > MAX_ID) return null;
+
+  return { indented: match[1].length > 0, id, name: trimField(match[3]) };
+}
+
 export function parseServerList(text: string): ServerProfile[] {
   const seen = new Set<string>();
   const entries: ServerProfile[] = [];
 
+  // The world the name lines are being read into, and the game server they
+  // nest under. A list is read top to bottom, and a name belongs to whatever
+  // it was written beneath.
+  let world: ServerProfile | null = null;
+  let gameServer: PublishedGameServer | null = null;
+
   for (const line of text.split(/\r?\n/)) {
     const profile = parseServerLine(line);
 
-    if (!profile || seen.has(profile.id)) continue;
+    if (profile) {
+      if (entries.length >= MAX_ENTRIES) break;
 
-    seen.add(profile.id);
-    entries.push(profile);
+      // A world dropped as a duplicate still ends the one before it: the names
+      // under this line were written for this line, not for that one.
+      world = null;
+      gameServer = null;
 
-    if (entries.length >= MAX_ENTRIES) break;
+      if (seen.has(profile.id)) continue;
+
+      seen.add(profile.id);
+      entries.push(profile);
+      world = profile;
+      continue;
+    }
+
+    const named = parseNameLine(line);
+
+    // Prose, a blank line, the end of a code fence: names run until the first
+    // line that is not one, so the ones written in this file's own examples
+    // stay examples.
+    if (!named) {
+      world = null;
+      gameServer = null;
+      continue;
+    }
+
+    if (!world) continue;
+
+    if (named.indented) {
+      if (!gameServer || !named.name) continue;
+      if (gameServer.channels.length >= MAX_CHANNELS) continue;
+      if (gameServer.channels.some(c => c.id === named.id)) continue;
+
+      gameServer.channels.push({ id: named.id, name: named.name });
+      continue;
+    }
+
+    const servers = (world.servers ??= []);
+    // Named twice: keep the first name, and keep taking channels for it rather
+    // than dropping the lines under the second one on the floor.
+    const existing = servers.find(s => s.id === named.id);
+
+    if (existing) {
+      gameServer = existing;
+      continue;
+    }
+
+    if (servers.length >= MAX_GAME_SERVERS) {
+      gameServer = null;
+      continue;
+    }
+
+    gameServer = { id: named.id, name: named.name, channels: [] };
+    servers.push(gameServer);
   }
 
   return entries;

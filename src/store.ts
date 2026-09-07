@@ -686,7 +686,12 @@ export const Store = new (class _Store {
   password = '';
   serverList: ReturnType<ServerListResponsePacket['getServers']> = [];
   /** `g_ServerListManager->GetSelectServerName()` / `Index`: the login window's server line. */
-  selectedServer: { name: string; channel: number } | null = null;
+  selectedServer: {
+    name: string;
+    channel: number;
+    /** Set when the world published a name for this channel, not a number. */
+    channelName?: string;
+  } | null = null;
   charactersList: ReturnType<CharacterListPacket['getCharacters']> = [];
   uiState = UIState.Preloader;
   playerId?: number;

@@ -123,7 +123,11 @@ export const LoginPage = observer(() => {
             face="fix"
             className="login-server-line"
             style={{ left: SERVER_LINE.x, top: SERVER_LINE.y }}
-            text={`${Store.selectedServer.name} Ch. ${Store.selectedServer.channel}`}
+            text={
+              Store.selectedServer.channelName
+                ? `${Store.selectedServer.name} - ${Store.selectedServer.channelName}`
+                : `${Store.selectedServer.name} Ch. ${Store.selectedServer.channel}`
+            }
           />
         )}
         <form

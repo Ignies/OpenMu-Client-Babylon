@@ -4,6 +4,10 @@ import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../store';
 import { ConnectionInfoRequestPacket } from '../../../common/packets/ConnectServerPackets';
+import {
+  ServerConfig,
+  type PublishedGameServer,
+} from '../../../common/serverConfig';
 import { MuButton } from '../../components/muButton';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { ServerItem } from './ServerItem';
@@ -31,13 +35,24 @@ import {
 
 type Server = { ServerId: number; LoadPercentage: number };
 
+/** `name` only when the world published one; the row numbers itself if not. */
+type Channel = Server & { name?: string };
+
 type ServerGroup = {
   id: number;
   name: string;
-  servers: Server[];
+  servers: Channel[];
 };
 
-function groupServers(servers: Server[]): ServerGroup[] {
+/**
+ * The connect server sends ids and load and no text at all, so every label on
+ * this screen is either a name the world published (`serverlist.md`, carried
+ * on the profile) or the numbered default the original client used.
+ */
+function groupServers(
+  servers: Server[],
+  published: PublishedGameServer[]
+): ServerGroup[] {
   const byGroup = new Map<number, Server[]>();
 
   for (const server of servers) {
@@ -50,19 +65,33 @@ function groupServers(servers: Server[]): ServerGroup[] {
 
   return [...byGroup.entries()]
     .sort((a, b) => a[0] - b[0])
-    .map(([id, list]) => ({
-      id,
-      name: `Server ${id + 1}`,
-      servers: list.sort((a, b) => a.ServerId - b.ServerId),
-    }));
+    .map(([id, list]) => {
+      const named = published.find(entry => entry.id === id);
+
+      return {
+        id,
+        name: named?.name || t('servers.serverName', { number: id + 1 }),
+        servers: list
+          .sort((a, b) => a.ServerId - b.ServerId)
+          .map(server => ({
+            ...server,
+            name: named?.channels.find(c => c.id === (server.ServerId & 0xff))
+              ?.name,
+          })),
+      };
+    });
 }
 
 export const ServersPage = observer(() => {
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
 
+  // The names the selected world published, which is nothing at all for an
+  // address the player typed in themselves.
+  const published = ServerConfig.active.servers;
+
   const groups = useMemo(
-    () => groupServers(Store.serverList),
-    [Store.serverList]
+    () => groupServers(Store.serverList, published ?? []),
+    [Store.serverList, published]
   );
 
   const activeGroup =
@@ -71,9 +100,14 @@ export const ServersPage = observer(() => {
   const onConnectClick = async (serverId: number) => {
     // `SetSelectServer`: what the login window prints under its title.
     const group = groups.find(g => g.servers.some(s => s.ServerId === serverId));
+    const channel = group?.servers.find(s => s.ServerId === serverId);
     Store.selectedServer = {
-      name: group?.name ?? `Server ${(serverId >> 8) + 1}`,
+      name:
+        group?.name ??
+        t('servers.serverName', { number: (serverId >> 8) + 1 }),
       channel: (group?.servers.findIndex(s => s.ServerId === serverId) ?? 0) + 1,
+      // A named channel replaces the "Ch. 2" the login line falls back to.
+      channelName: channel?.name,
     };
     const packet = ConnectionInfoRequestPacket.createPacket();
     packet.ServerId = serverId;
@@ -200,9 +234,12 @@ const leftGroups = groups.slice(0, LEFT_GROUP_MAX);
               {activeGroup?.servers.slice(0, SERVER_MAX).map((server, i) => (
                 <ServerItem
                   key={server.ServerId}
-                  name={t('servers.serverName', {
-                    number: (server.ServerId & 0xff) + 1,
-                  })}
+                  name={
+                    server.name ||
+                    t('servers.serverName', {
+                      number: (server.ServerId & 0xff) + 1,
+                    })
+                  }
                   load={server.LoadPercentage}
                   top={SERVER_BTN_HEIGHT * i}
                   onClick={() => onConnectClick(server.ServerId)}
