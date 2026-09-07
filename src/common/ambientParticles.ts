@@ -61,13 +61,33 @@ export type AmbientBlend = 'alpha' | 'add';
  * So the core is broadened here and the recipe draws it wider (`scaleX`).
  * Both halves are needed: widening the sprite alone just stretches the same
  * two lit texels' worth of light over more pixels.
+ *
+ * `proc:bubble` is the Atlans bubble, and it is here for the same kind of
+ * reason: the original's `Object8/drop01.jpg` is a nine-frame flipbook packed
+ * into a 4x4 UV grid at cells 0,1,2,4,5,6,8,9,10
+ * (ZzzEffectParticle.cpp:8945), and a recipe has no cell remap to read it
+ * with. A drawn ring costs nothing and needs no remap.
  */
 const procedural = new Map<string, RawTexture>();
 
-function proceduralTexture(scene: Scene, key: string): RawTexture {
-  const have = procedural.get(key);
-  if (have && have.getScene() === scene) return have;
+type Pixels = {
+  w: number;
+  h: number;
+  data: Uint8Array;
+  /** Mip the sprite: for one whose detail is finer than the pixels it lands on. */
+  mips?: boolean;
+};
 
+/** One greyscale value into RGB and A alike. */
+function put(data: Uint8Array, i: number, a: number): void {
+  const v = Math.round(255 * Math.min(1, Math.max(0, a)));
+  data[i] = v;
+  data[i + 1] = v;
+  data[i + 2] = v;
+  data[i + 3] = v;
+}
+
+function streakPixels(): Pixels {
   const w = 8;
   const h = 32;
   const data = new Uint8Array(w * h * 4);
@@ -86,21 +106,103 @@ function proceduralTexture(scene: Scene, key: string): RawTexture {
       const v = (y + 0.5) / h;
       const across = Math.exp(-(u * u) / ACROSS_VARIANCE);
       const along = Math.sin(v * Math.PI);
-      const a = Math.round(255 * across * Math.sqrt(along));
-      const i = (y * w + x) * 4;
-      data[i] = a;
-      data[i + 1] = a;
-      data[i + 2] = a;
-      data[i + 3] = a;
+      put(data, (y * w + x) * 4, across * Math.sqrt(along));
     }
   }
+
+  return { w, h, data };
+}
+
+/**
+ * A bubble, in four parts, all of them lit from the upper left so that one
+ * sprite reads as a shell of air and not as a ring:
+ *
+ *  - the **rim**, a thin bright silhouette where the shell turns away from
+ *    the camera and the eye looks through the most of it;
+ *  - the **sheen**, a gradient over the interior falling from the lit side to
+ *    the shaded one - this is the reflection, and it is what stops the middle
+ *    reading as a hole;
+ *  - the **gloss**, the small hard specular where the light source is;
+ *  - the **counter**, a soft arc inside the far rim: light that entered the
+ *    front of the bubble and came back off the inside of the back of it.
+ *
+ * The rim is thin on purpose and that is what sets the rest of the numbers.
+ * At 64 texels a band of this variance is ~2 px, and a bubble drawn 0.08-0.2
+ * tiles across is ~7-18 px on screen, so the rim lands under a pixel - it
+ * survives only because the texture is mipped (`mips`), which turns it into a
+ * softer thin ring at distance instead of the sparkling dotted one an
+ * unfiltered minification would give. The sheen carries the bubble at the
+ * sizes where the rim has thinned out to nothing.
+ *
+ * Because all four parts point at one light, the sprite has a direction, and
+ * the recipe must not spin it (no `angularSpeed` on `ATLANS_BUBBLES`): a
+ * rotating highlight reads as a spinning marble.
+ */
+function bubblePixels(): Pixels {
+  const size = 64;
+  const data = new Uint8Array(size * size * 4);
+
+  const RIM_AT = 0.88;
+  const RIM_VARIANCE = 0.0012;
+  const SHEEN = 0.42;
+  /** Falloff of the sheen across the bubble; >1 keeps it a gradient, not a wash. */
+  const SHEEN_POWER = 1.5;
+  const GLOSS = 1;
+  const GLOSS_AT = -0.38;
+  const GLOSS_VARIANCE = 0.006;
+  const COUNTER = 0.8;
+  const COUNTER_AT = 0.72;
+  const COUNTER_VARIANCE = 0.03;
+  /** Outer softening as a fraction of the radius; without it the disc is a cut-out. */
+  const EDGE = 0.07;
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const u = ((x + 0.5) / size - 0.5) * 2;
+      // Row 0 draws at the BOTTOM of the sprite (the quad is built with
+      // invertY off), so t as written here is already screen-space up: +1 at
+      // the top. Only a sprite with a light direction cares, and this is the
+      // one that has one.
+      const t = ((y + 0.5) / size - 0.5) * 2;
+      const r = Math.hypot(u, t);
+      if (r >= 1) continue;
+
+      // +1 at the lit corner (upper left), -1 at the shaded one.
+      const lit = (t - u) / Math.SQRT2;
+
+      const rim = Math.exp(-((r - RIM_AT) ** 2) / RIM_VARIANCE);
+      const sheen = SHEEN * (0.5 + 0.5 * lit) ** SHEEN_POWER * (1 - r * r);
+      const gloss =
+        GLOSS *
+        Math.exp(
+          -((u - GLOSS_AT) ** 2 + (t + GLOSS_AT) ** 2) / GLOSS_VARIANCE
+        );
+      const counter =
+        COUNTER *
+        Math.exp(-((r - COUNTER_AT) ** 2) / COUNTER_VARIANCE) *
+        Math.max(0, -lit) ** 2;
+
+      const edge = Math.min(1, (1 - r) / EDGE);
+      put(data, (y * size + x) * 4, (rim + sheen + gloss + counter) * edge);
+    }
+  }
+
+  return { w: size, h: size, data, mips: true };
+}
+
+function proceduralTexture(scene: Scene, key: string): RawTexture {
+  const have = procedural.get(key);
+  if (have && have.getScene() === scene) return have;
+
+  const { w, h, data, mips } =
+    key === 'proc:bubble' ? bubblePixels() : streakPixels();
 
   const texture = RawTexture.CreateRGBATexture(
     data,
     w,
     h,
     scene,
-    false,
+    mips === true,
     false,
     Texture.TRILINEAR_SAMPLINGMODE
   );
@@ -117,7 +219,10 @@ function proceduralTexture(scene: Scene, key: string): RawTexture {
 
 export type AmbientRecipe = {
   readonly name: string;
-  /** Data file, relative to the Data folder (`World1/leaf01.OZT`), or `proc:streak`. */
+  /**
+   * Data file, relative to the Data folder (`World1/leaf01.OZT`), or one of
+   * the generated sprites (`proc:streak`, `proc:bubble`).
+   */
   readonly texture: string;
   readonly blend: AmbientBlend;
   /** Particles per second and the capacity the GPU path gets. */

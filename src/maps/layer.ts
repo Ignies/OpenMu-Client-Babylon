@@ -67,6 +67,18 @@ export interface MapLayer {
   readonly snow?: boolean;
 
   /**
+   * The map is under water: rain never falls here however the weather byte
+   * reads, and the ambient particles are the sea's (marine snow on the
+   * current, bubbles off the seabed) rather than leaves. Read through
+   * `weather/ambientWeather.ts`'s `UNDERWATER_MAPS`.
+   *
+   * Orthogonal to `outdoor`, which stays true for Atlans: there is a surface
+   * far above it and god-rays coming through, it is just not a sky anything
+   * can fall out of.
+   */
+  readonly underwater?: boolean;
+
+  /**
    * `SetWorldClearColor` (SceneManager.cpp:336-365) as the original's 0…255
    * bytes; omit for black. Applied by `loadMapIntoScene` before `create`.
    */

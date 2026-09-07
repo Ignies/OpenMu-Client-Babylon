@@ -15,8 +15,12 @@ import { maps } from '../maps';
  *  - **Lorencia leaves** (`CreateLorenciaLeaf`): spawn x ±800, y −500…+899,
  *    z +50…+349 around the hero; velocity x −6.4…−12.7 u/tick (toward −x,
  *    flipped past the camera), y/z ±1.6; per-tick random walk ±0.8, tumble
- *    from `TurningForce`; die 447 units from the start. Noria / Atlans use
- *    the same leaf.
+ *    from `TurningForce`; die 447 units from the start. Noria uses the same
+ *    leaf.
+ *  - **Atlans drift / bubbles**: `CreateAtlanseLeaf` is the Lorencia leaf's
+ *    numbers copied line for line, but on World8's own round `leaf01` and
+ *    drawn additively (`RenderLeaves`:507). Marine snow on a current, plus a
+ *    bubble field the original leaves to its 845 vents. See `ATLANS_DRIFT`.
  *  - **Devias snow** (`CreateDeviasSnow`): z +200…+399, falling 8…23 u/tick
  *    tilted −30° about x, scale 5 (1 in 10 a big flake at 10, leaf02).
  *  - **Rain** (`CreateHeavenRain` / `CreateDevilSquareRain`): z +200…+399,
@@ -56,6 +60,20 @@ export const SNOW_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
   maps.worldsWhere(layer => layer.snow === true)
 );
 
+/**
+ * Maps under water. Rain must never fall on them for the same reason it never
+ * falls on a snow map: what the sky is doing is a property of the *map*, and
+ * the weather byte is global - the proxy computes one sky for every client
+ * and cannot know which map anyone is standing on. Twenty metres down the
+ * question does not arise, and the lighting profile already agrees
+ * (`lighting/profiles.ts` gives Atlans `sky: null`).
+ *
+ * The same flag is what puts the sea ambience on a map instead of leaves.
+ */
+export const UNDERWATER_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
+  maps.worldsWhere(layer => layer.underwater === true)
+);
+
 const v = (x: number, y: number, z: number) => new Vector3(x, y, z);
 
 const WHITE = new Color4(1, 1, 1, 1);
@@ -82,6 +100,21 @@ const LEAF_GUSTS: AmbientSchedule = {
   duration: [14, 34],
   strength: [0.4, 1],
   ramp: 4,
+};
+
+/**
+ * A current, not a gust. Water has too much inertia to blow in bursts: it
+ * swells and slackens over a couple of minutes and it is never quite still.
+ * So this rolls nine slots in ten, runs for most of the slot it rolls, and
+ * even its weakest episode peaks at three fifths of the rate.
+ */
+const SEA_CURRENTS: AmbientSchedule = {
+  key: 'seaCurrent',
+  period: 120,
+  chance: 0.9,
+  duration: [95, 120],
+  strength: [0.6, 1],
+  ramp: 12,
 };
 
 /** Snowfall is slower to arrive and outstays a gust. */
@@ -138,6 +171,110 @@ export const LORENCIA_LEAVES: AmbientRecipe = {
   ramp: 7,
   schedule: LEAF_GUSTS,
   skyBorne: true,
+};
+
+/**
+ * Atlans: what hangs in twenty metres of water, drifting on the current.
+ *
+ * The original wires Atlans into the leaf path (`CreateAtlanseLeaf`,
+ * ZzzEffectFireLeave.cpp:292-313) with the Lorencia leaf's own spawn box and
+ * velocity copied line for line, and this port copied the *recipe* too - so
+ * Atlans has been running Lorencia's `World1/leaf01.OZT`, a cream dandelion
+ * puff on a brown stem, blowing sideways across the seabed.
+ *
+ * Two things separate the original's Atlans from its Lorencia, and both were
+ * lost in that copy. The texture is per world: `BITMAP_LEAF1` is
+ * `<WorldName>/leaf01` (MapManager.cpp:1474-1476), and World8's is a soft
+ * round grey blob, not a leaf. And `RenderLeaves` (:507) puts WD_7ATLANSE
+ * on `EnableAlphaBlend()` - `glBlendFunc(GL_ONE, GL_ONE)`,
+ * ZzzOpenglUtil.cpp:426, i.e. ADDITIVE - where Lorencia gets
+ * `EnableAlphaTest()`. A dim round blob added over dark water is marine
+ * snow, which is what the map wanted all along.
+ *
+ * The motion is the one place this leaves the original behind. 1.6-3.2
+ * tiles/s is a gale, and water does not do gales: particulate is near enough
+ * neutrally buoyant that it goes where the water goes and no faster. At
+ * 0.35-0.9 tiles/s with a long life and a heavy wander, a mote crosses 3-10
+ * tiles over its 7-12 s and looks suspended rather than blown.
+ */
+export const ATLANS_DRIFT: AmbientRecipe = {
+  name: 'atlansDrift',
+  texture: 'World8/leaf01.OZJ',
+  blend: 'add',
+  // ~26/s over ~9.5 s is ~250 motes in the air, against the leaves' 80.
+  // They are half the size and a fraction of the brightness, so the number
+  // is what makes the water look thick rather than littered.
+  rate: 26,
+  capacity: 448,
+  // Taller than a leaf box. There is water above the hero as well as around
+  // them, and nothing to fall out of.
+  box: [v(-14, 0.2, -10), v(14, 6, 12)],
+  // With the current along -x, the same way the leaves blow, with a slight
+  // lift: what sinks has already sunk.
+  direction: [v(-1, -0.1, -0.4), v(-1, 0.35, 0.4)],
+  power: [0.35, 0.9],
+  life: [7, 12],
+  // 0.09-0.2 tiles is 8-18 px at the game camera. Smaller than this and an
+  // additive mote of a 0.53-white sprite is sampled away the same way the
+  // first cut of the rain was.
+  size: [0.09, 0.2],
+  angularSpeed: [-0.5, 0.5],
+  // Additive, so this is the light a mote ADDS. Pale and cold: down here the
+  // only light to catch is what the surface let through, and the map's grade
+  // (ev 1.2, whiteBalance [0.94, 1, 1.04]) is already pulling blue.
+  colour: [new Color4(0.85, 0.96, 1, 1), new Color4(0.5, 0.74, 0.88, 0.8)],
+  // Heavier than the leaves' random walk and on all three axes: this is the
+  // eddying that makes water read as water rather than as air.
+  noise: v(1, 0.7, 1),
+  fade: 0.3,
+  ramp: 12,
+  schedule: SEA_CURRENTS,
+};
+
+/**
+ * Atlans: bubbles coming up out of the seabed.
+ *
+ * The original has no ambient bubble field - it has 845 type-22 vents, each
+ * puffing for two seconds in four (`atlans/bubbleVentObject.ts`), and those
+ * stay. This is the rest of the water column: the map is a sea floor, and a
+ * sea floor gases off everywhere, not only where a vent was placed.
+ *
+ * Unscheduled, unlike the drift. A current swells and slackens; the seabed
+ * does not stop venting, so there is nothing for a schedule to say.
+ */
+export const ATLANS_BUBBLES: AmbientRecipe = {
+  name: 'atlansBubbles',
+  texture: 'proc:bubble',
+  blend: 'add',
+  // Sparse on purpose: ~5/s over ~6.5 s is ~33 bubbles across a 24x20 tile
+  // box. A bubble is an event you notice, and a field of them is a jacuzzi.
+  rate: 5,
+  capacity: 96,
+  // Spawns at and below the hero's feet so a bubble is already climbing when
+  // it enters the shot, and never appears in mid-frame.
+  box: [v(-12, -1, -9), v(12, 1.5, 11)],
+  direction: [v(-0.25, 1, -0.25), v(0.25, 1, 0.25)],
+  power: [0.8, 1.8],
+  life: [5, 8],
+  // Big, and that is what pays for the sprite. `proc:bubble` is a thin rim
+  // over a reflection gradient, and none of that survives being drawn at the
+  // size of a mote - under ~25 px a bubble is a faint circle and nothing
+  // more. 0.14-0.34 tiles is ~30-75 px at the game camera, where the rim,
+  // the sheen and the gloss all read. Fewer and larger is the trade, and it
+  // is the right way round: bubbles are things you can count.
+  size: [0.14, 0.34],
+  // Air accelerates as it rises. Small, but it is the difference between a
+  // bubble and a mote going the other way.
+  gravity: v(0, 0.25, 0),
+  // No angularSpeed: the sprite is lit from one corner (see `proc:bubble`),
+  // and a rotating highlight reads as a spinning marble.
+  colour: [new Color4(0.72, 0.88, 0.95, 1), new Color4(0.5, 0.72, 0.85, 0.85)],
+  // The wobble a climbing bubble has (`Position += (rand%20-10)*2.5*Scale`
+  // on X/Y per tick, ZzzEffectParticle.cpp:4145): lateral, never vertical -
+  // a bubble does not hesitate on its way up.
+  noise: v(1.1, 0, 1.1),
+  fade: 0.25,
+  ramp: 6,
 };
 
 export const DEVIAS_SNOW: AmbientRecipe = {

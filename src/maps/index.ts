@@ -126,6 +126,11 @@ class Maps {
     return this.layerFor(world)?.snow === true;
   }
 
+  /** Under water - no rain, and the sea's own ambience. */
+  isUnderwater(world: ENUM_WORLD): boolean {
+    return this.layerFor(world)?.underwater === true;
+  }
+
   /** `SetWorldClearColor` bytes, or undefined for black. */
   clearColorFor(
     world: ENUM_WORLD

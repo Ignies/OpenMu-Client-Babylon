@@ -37,8 +37,14 @@ const TILES: readonly string[] = [
 // OpenMU's spawn gate (VersionSeasonSix/Gates.cs, the `isSpawnGate: true` row), centred.
 const SPAWN = { x: 20, y: 20 } as const;
 
-// Open sky: rain falls here when the weather byte says so.
+// There is a surface far above, and god-rays (type 38) coming down through
+// it, so the map is not an interior. What it is not is a sky anything can
+// fall out of - see UNDERWATER.
 const OUTDOOR = true;
+
+// Twenty metres down: no rain whatever the weather byte says, and the
+// ambient particles are marine snow and bubbles instead of leaves.
+const UNDERWATER = true;
 
 // ---- 2. state + readers ----------------------------------------------------
 // None: the map's runtime state lives in the objects `create` binds.
@@ -51,7 +57,7 @@ export const atlansLayer: MapLayer = {
   tiles: TILES,
   spawn: SPAWN,
   outdoor: OUTDOOR,
-  // Underwater: a sun twenty metres down is a rumour, so the day/night
+  underwater: UNDERWATER,
   blendMeshes: ATLANS_BLEND_MESHES,
   effectOnly: ATLANS_EFFECT_ONLY_TYPES,
   emissions: ATLANS_EMISSIONS,
