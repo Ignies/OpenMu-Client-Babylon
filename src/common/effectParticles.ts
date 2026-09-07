@@ -102,7 +102,6 @@ function fireKind(
     shrinkRand: number;
     scaleBase?: number;
     gravityRand?: number;
-    drift?: boolean;
   }
 ): ParticleKind {
   return {
@@ -117,13 +116,6 @@ function fireKind(
 
       [p.tr, p.tg, p.tb] = light;
       p.lr = p.lg = p.lb = 0;
-
-      if (opts.drift) {
-        const r = rand(50) * 0.03;
-        p.vx = 2.5 + r;
-        p.vy = -5 - r;
-        p.vz = 0;
-      }
     },
     update(p, f) {
       if (p.lifeTime < opts.fadeBelow) {
@@ -212,14 +204,17 @@ const KINDS = {
     shrinkRand: 3,
   }),
 
+  // `BITMAP_FIRE_CURSEDLICH` SubType 4, the one every torch asks for
+  // (ZzzEffectParticle.cpp:317-326). SubType 6 is the only one that leans -
+  // `Velocity = (2.5 + r, -5 - r, 0)` - and no torch spawns it, so a fire2
+  // that carried it drew a second plume next to the flame.
   fire2: fireKind('fireHik2', {
-    lifeBase: 24,
+    lifeBase: 12,
     lifeRand: 5,
     fadeBelow: 10,
-    gravityBase: 100,
+    gravityBase: 64,
     shrinkBase: 6,
     shrinkRand: 3,
-    drift: true,
   }),
 
   fire157: fireKind('fireHik3Mono', {
