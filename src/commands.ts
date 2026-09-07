@@ -13,6 +13,7 @@ import {
   DuelStopRequestPacket,
 } from './common/packets/ClientToServerPackets';
 import { playUiSound } from './libs/sfx';
+import { isAttackablePlayer } from './ecs/systems/attackSystem';
 
 /**
  * `CNewUICommandWindow` (NewUICommandWindow.cpp) and the `/command` lines of
@@ -23,8 +24,14 @@ import { playUiSound } from './libs/sfx';
  * the next right click on a player runs it (`RunCommand`); a typed `/trade`
  * runs it at once on whoever is under the cursor.
  *
- * The window is the UI (ui/pages/worldPage/components/commandWindow); the
- * packets are the ones the social / economy / messenger stores already send.
+ * `CNewUIQuickCommandWindow` (NewUIQuickCommandWindow.cpp) is the shortcut
+ * for the same actions: a right click on another player opens a small menu
+ * at the cursor whose entries run those commands straight away, with no
+ * arming step.
+ *
+ * The windows are the UI (ui/pages/worldPage/components/commandWindow and
+ * quickCommandWindow); the packets are the ones the social / economy /
+ * messenger stores already send.
  */
 
 /** `MAX_DISTANCE_TILE` (_define.h:597): how far the target may stand, in tiles. */
@@ -33,6 +40,15 @@ const MAX_DISTANCE_TILE = 2;
 const TRADE_LIMIT_LEVEL = 6;
 /** `CommandDual`: the duel needs level 30 (GlobalText 2704). */
 const DUEL_LIMIT_LEVEL = 30;
+/**
+ * `CNewUIHotKey::UpdateMouseEvent`: the quick menu opens on a player less
+ * than 300 world units away - three tiles. Wider than `MAX_DISTANCE_TILE`
+ * on purpose, the way the original is: the menu opens, and the entry that
+ * needs two tiles is the one that refuses.
+ */
+const QUICK_RANGE_TILES = 3;
+/** `OpenQuickCommand(..., MouseX + 10, MouseY - 50)`. */
+const QUICK_OFFSET = { x: 10, y: -50 };
 
 export type CommandTarget = {
   netId: number;
@@ -48,16 +64,23 @@ export const Commands = new (class _Commands {
   pending: CommandKind | null = null;
   /** `g_iFollowCharacter`: the player the hero keeps walking after. */
   following: Entity | null = null;
+  /** `INTERFACE_QUICK_COMMAND`: the player the right-click menu is open on. */
+  quickTarget: Entity | null = null;
+  /** Where that menu sits, in screen pixels. */
+  quickPos = { x: 0, y: 0 };
 
   constructor() {
     makeObservable(this, {
       windowOpen: observable,
       pending: observable,
       following: observable.ref,
+      quickTarget: observable.ref,
+      quickPos: observable.ref,
       toggleWindow: action,
       closeWindow: action,
       arm: action,
       disarm: action,
+      closeQuick: action,
     });
   }
 
@@ -85,7 +108,56 @@ export const Commands = new (class _Commands {
       this.windowOpen = false;
       this.pending = null;
       this.following = null;
+      this.quickTarget = null;
     });
+  }
+
+  /**
+   * `OpenQuickCommand`: a right click on another player within reach opens
+   * the quick menu at the cursor instead of casting. Returns false when
+   * there is no such player under it, so the click falls through to the
+   * skill.
+   */
+  openQuickOn(
+    entity: Entity | null | undefined,
+    clientX: number,
+    clientY: number
+  ): boolean {
+    if (!this.isQuickTarget(entity)) return false;
+    runInAction(() => {
+      this.quickTarget = entity!;
+      this.quickPos = {
+        x: clientX + QUICK_OFFSET.x,
+        y: Math.max(0, clientY + QUICK_OFFSET.y),
+      };
+    });
+    return true;
+  }
+
+  closeQuick(): void {
+    this.quickTarget = null;
+  }
+
+  /**
+   * The quick menu's own target test. Stricter than `targetOf` about what
+   * counts as a player: the player-rig monsters (the skeletons, the Cursed
+   * Wizard) carry `playerAnimation` too, and a right click on one of those
+   * has to stay a skill cast.
+   */
+  isQuickTarget(entity: Entity | null | undefined): boolean {
+    const hero = Store.world?.playerEntity;
+    if (!entity || !hero) return false;
+    if (entity.localPlayer || entity.netId === undefined) return false;
+    if (!entity.playerAnimation || entity.npcType !== undefined) return false;
+    if (entity.dying || entity.objOutOfScope) return false;
+    const dx = entity.transform!.pos.x - hero.transform!.pos.x;
+    const dy = entity.transform!.pos.z - hero.transform!.pos.z;
+    return dx * dx + dy * dy <= QUICK_RANGE_TILES * QUICK_RANGE_TILES;
+  }
+
+  /** `Update`: the menu closes when its target dies, leaves scope or walks off. */
+  quickTick(): void {
+    if (this.quickTarget && !this.isQuickTarget(this.quickTarget)) this.closeQuick();
   }
 
   /**
@@ -130,6 +202,13 @@ export const Commands = new (class _Commands {
 
   /** A `/command` line or a window entry, on the player under the cursor. */
   run(kind: CommandKind, entity: Entity | null | undefined): void {
+    // Not a `RunCommand` entry: an attack order is the click the attack
+    // system already understands, so it keeps the reach of a swing instead
+    // of the two tiles the social commands share.
+    if (kind === 'attack') {
+      this.attack(entity);
+      return;
+    }
     const target = this.targetOf(entity);
     if (typeof target === 'string') {
       Social.errorMessage(target);
@@ -186,6 +265,21 @@ export const Commands = new (class _Commands {
     }
   }
 
+  /**
+   * The quick menu's attack entry. `isAttackableEntity` refuses every player
+   * so an ordinary click in a crowd never starts a fight; picking the entry
+   * is deliberate, so it gets the player-only test instead.
+   */
+  private attack(entity: Entity | null | undefined): void {
+    const world = Store.world;
+    if (!world || !entity || !isAttackablePlayer(world, entity)) {
+      Social.errorMessage(t('command.cannotAttack'));
+      playUiSound('error');
+      return;
+    }
+    world.attackTarget = entity;
+  }
+
   /** `CommandGuildUnion` / `CommandGuildRival`: both sides must be masters (GlobalText 1320 / 507). */
   private masterCheck(target: CommandTarget): boolean {
     if (!Social.isGuildMaster) {
@@ -227,7 +321,16 @@ export const Commands = new (class _Commands {
     const world = Store.world;
     const hero = world?.playerEntity;
     if (!target || !world || !hero) return;
-    if (target.dying || !world.playersQuery.has(target as never)) {
+    // The followed player is tested on its own components, not on
+    // `playersQuery.has`: a miniplex query only indexes entities once
+    // something has read its `entities` (`Query.connect`), and nothing
+    // reads that one on every map - so `has` answered false for every
+    // player and the first tick dropped the follow.
+    const gone =
+      target.dying ||
+      target.objOutOfScope ||
+      (target.worldIndex !== undefined && target.worldIndex !== world.mapIndex);
+    if (gone) {
       runInAction(() => {
         this.following = null;
       });

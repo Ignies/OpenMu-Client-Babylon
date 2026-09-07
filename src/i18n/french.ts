@@ -689,10 +689,12 @@ export const frenchLayer: LanguageLayer = {
     'command.addFriend': 'Ajouter un ami',
     'command.follow': 'Suivre',
     'command.battle': 'Combat',
+    'command.attack': 'Attaquer',
     'command.noPlayerUnderCursor': 'Aucun joueur sous le curseur.',
     'command.notAPlayer': 'Ce n’est pas un joueur.',
     'command.playerDead': 'Ce joueur est mort.',
     'command.playerTooFar': 'Ce joueur est trop loin.',
+    'command.cannotAttack': 'Vous ne pouvez pas attaquer ce joueur ici.',
     'command.tradeLevel':
       'Vous ne pouvez pas échanger en dessous du niveau {level}.',
     'command.following': 'Vous suivez {name}.',

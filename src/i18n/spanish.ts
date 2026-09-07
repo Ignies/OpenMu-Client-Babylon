@@ -697,10 +697,12 @@ export const spanishLayer: LanguageLayer = {
     'command.addFriend': 'Añadir amigo',
     'command.follow': 'Seguir',
     'command.battle': 'Combate',
+    'command.attack': 'Atacar',
     'command.noPlayerUnderCursor': 'No hay ningún jugador bajo el cursor.',
     'command.notAPlayer': 'Eso no es un jugador.',
     'command.playerDead': 'Ese jugador está muerto.',
     'command.playerTooFar': 'Ese jugador está demasiado lejos.',
+    'command.cannotAttack': 'No puedes atacar a ese jugador aquí.',
     'command.tradeLevel':
       'No puedes intercambiar por debajo del nivel {level}.',
     'command.following': 'Siguiendo a {name}.',
