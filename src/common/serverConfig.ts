@@ -35,6 +35,28 @@ export type GameServerPolicy =
   /** Ignore it and always reconnect to `csHost` (single-box setups). */
   | 'csHost';
 
+/**
+ * A channel inside a game server, as the published list named it. `id` is the
+ * low byte of the `ServerId` the connect server sends - the id that server was
+ * configured with, which is the whole of it in a single-group deployment.
+ */
+export type PublishedChannel = { id: number; name: string };
+
+/**
+ * One of a world's game servers, as the published list named it. `id` is the
+ * server group (`ServerId >> 8`), `0` for a world that never set one up.
+ *
+ * The connect server sends ids and load percentages and no text at all, so the
+ * published list is the only place a world can say what its game servers are
+ * called. Anything it does not name keeps the numbered default.
+ */
+export type PublishedGameServer = {
+  id: number;
+  /** Empty when the line only opened a group to hang channel names off. */
+  name: string;
+  channels: PublishedChannel[];
+};
+
 export type ServerProfile = {
   /** Stable key; `URL_PROFILE_ID` for the ephemeral URL override. */
   id: string;
@@ -58,6 +80,12 @@ export type ServerProfile = {
   description?: string;
   language?: string;
   image?: string;
+  /**
+   * What this world calls its game servers and their channels, taken from the
+   * lines the published entry carried under it. Absent on a saved profile: the
+   * player typed an address, not a world's own names.
+   */
+  servers?: PublishedGameServer[];
   /**
    * Which client this world expects (`gameVersion.listTag`, e.g. `S6EP3`), as
    * the published line gave it. Empty on a saved profile: the player typed the
@@ -186,6 +214,9 @@ export function sanitizeProfile(
       language: patch.language ?? base.language,
     }),
     ...((patch.image ?? base.image) && { image: patch.image ?? base.image }),
+    ...((patch.servers ?? base.servers)?.length && {
+      servers: patch.servers ?? base.servers,
+    }),
     ...((patch.version ?? base.version) && {
       version: patch.version ?? base.version,
     }),
@@ -544,6 +575,9 @@ class ServerConfigStore {
         description: '',
         language: '',
         image: '',
+        // Same reason: the names a world published belong to that world's own
+        // game servers, not to wherever this copy ends up pointing.
+        servers: [],
         // The copy is the player's own address, so it is whatever this build
         // is — not whatever the line it came from asked for.
         version: '',
