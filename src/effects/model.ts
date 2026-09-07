@@ -95,6 +95,15 @@ export interface ModelOptions {
   blend?: EffectBlend;
   /** Yaw follows the direction `follow` moves the node (the original re-stamps along the joint's `Angle`). */
   aim?: boolean;
+  /**
+   * Let the mesh into the sun cascades. Off by default: an effect mesh is
+   * light, not matter, and `scenes/shadows.ts castsSunShadow` drops every
+   * bright mesh for that reason. A spirit is the exception the wings already
+   * are (`shadowBlendCaster`) - the card *is* the body, so it should throw a
+   * shadow as it goes over the ground. The shadow layer still decides whether
+   * the tier runs cascades at all.
+   */
+  shadow?: boolean;
 }
 
 export interface ModelHandle extends EffectHandle {
@@ -211,6 +220,10 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           mesh.metadata ??= {};
           mesh.metadata.bodyLight = bodyLight;
           mesh.metadata.brightMesh = isBright;
+          if (opts.shadow) {
+            mesh.metadata.csmCaster = true;
+            mesh.metadata.shadowBlendCaster = true;
+          }
           mesh.isPickable = false;
           mesh.alwaysSelectAsActiveMesh = true;
           // A bright mesh takes the effects' own additive material — the

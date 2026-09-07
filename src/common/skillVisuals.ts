@@ -674,15 +674,24 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
         const heading = facing(c, (i * Math.PI) / 2);
         const trail = echoes.map(() => at.clone());
         effects.spawn('joint', c.scene, at, {
-          velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.8, colour: RGBS.white, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail,
+          velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.95, colour: RGBS.white, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail, taper: true,
           trace: h => {
             for (let k = trail.length - 1; k > 0; k--) trail[k].copyFrom(trail[k - 1]);
             trail[0].copyFrom(h);
           },
         });
-        effects.spawn('joint', c.scene, at, { velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.2, colour: RGBS.white, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail });
+        effects.spawn('joint', c.scene, at, { velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.2, colour: RGBS.white, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail, taper: true });
+        // Each spirit carries its own violet onto whatever it passes. Ultra
+        // only, and the lighting layer is the one that decides that.
+        lighting.skillTrail(c.scene, 9, out => {
+          out.x = trail[0].x;
+          out.y = trail[0].y;
+          out.z = trail[0].z;
+        });
+        // Only the newest stamp throws a shadow: the echoes stand a tick apart
+        // along the same path, so their shadows would land on top of its own.
         echoes.forEach((k, idx) => {
-          effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: [k, k, k], blend: 'subtract', aim: true, fadeTail, follow: out => out.copyFrom(trail[idx]) });
+          effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: [k, k, k], blend: 'subtract', aim: true, fadeTail, shadow: idx === 0, follow: out => out.copyFrom(trail[idx]) });
         });
         effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: SPIRIT_GLOW, alpha: 0.85, aim: true, fadeTail, follow: out => out.copyFrom(trail[0]) });
         effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: RGBS.shade, size: 1.2, seconds, follow: out => out.copyFrom(trail[0]), fadeTail });
