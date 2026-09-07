@@ -326,6 +326,14 @@ export type Entity = Partial<{
     /** Where the flock steering aims: `o->Direction[0..1]`, world units. */
     leadX: number;
     leadZ: number;
+    /**
+     * `o->Alpha` climbing to `o->AlphaTarget`: 0 on spawn, 1 in the air, and
+     * counting back down once the boid has been told to leave. The original
+     * fades one in and this did not, which is why they popped.
+     */
+    alpha: number;
+    /** On its way out. Nothing renews it, and at 0 alpha it is removed. */
+    leaving: boolean;
   };
   highlighted: {
     color: Color3;
