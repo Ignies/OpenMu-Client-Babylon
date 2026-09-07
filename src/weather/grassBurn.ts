@@ -9,7 +9,7 @@ import {
 import type { ThinEngine } from '@babylonjs/core/Engines/thinEngine';
 import { GameOptions } from '../common/gameOptions';
 import { effects } from '../effects';
-import { FIRE_SPARKS, FLAME_TONGUES } from '../effects/recipes';
+import { FIRE_SPARKS } from '../effects/recipes';
 import type { ParticleRecipe } from '../effects/core';
 
 /**
@@ -60,8 +60,15 @@ export const BURN_SIZE = 256 * BURN_RES;
  */
 const REGROW_SECONDS = 300;
 
-/** Seconds between decay passes; each walks the painted rectangle. */
-const DECAY_EVERY = 2;
+/**
+ * Seconds between decay passes; each walks the painted rectangle.
+ *
+ * One rather than two, so the freshness the flame front reads off this map
+ * steps about every 1.2 s instead of every 2.4. It is the resolution of the
+ * burning band, and it costs a second walk of a rectangle that is a few
+ * hundred texels.
+ */
+const DECAY_EVERY = 1;
 
 /** Fires alight at once. Past a handful they overlap into one blaze anyway. */
 const MAX_FIRES = 6;
@@ -116,26 +123,6 @@ const EMBER_SPARKS = 1;
  * single point.
  */
 const RIM_POINTS = 5;
-
-/** Tongues of flame per burst, standing up out of the blades on the ring. */
-const FLAME_TONGUES_PER_BURST = 1;
-
-/**
- * The flame standing in the grass.
- *
- * The skills' own `FLAME_TONGUES` is nearly a tile across, sized for a spell
- * going off, and over blades a third of a tile tall it is a red blob sitting
- * on the field rather than fire in it. A flame here has to be of a size with
- * what is burning.
- */
-const GRASS_FLAMES: ParticleRecipe = {
-  ...FLAME_TONGUES,
-  size: 0.28,
-  sizeJitter: 0.1,
-  life: 0.55,
-  power: 0.9,
-  endScale: 1.15,
-};
 
 /**
  * The ember off burning grass.
@@ -520,13 +507,12 @@ function embers(fire: Fire, dt: number): void {
 
     const at = new Vector3(x, groundAt(x, z), z);
 
-    // The flame standing in the grass, and the ember coming off it. Both at
-    // the same point, because an ember comes off a flame.
-    effects.spawn('particles', scene, at, {
-      recipe: GRASS_FLAMES,
-      count: FLAME_TONGUES_PER_BURST,
-    });
-
+    // Only the ember. The flame itself is drawn on the blades that are
+    // burning (see the vBurn block in terrainGrass.ts) rather than thrown as
+    // a sprite over them: a billboard is a picture of a fire standing near
+    // some grass, and at any size it hangs over the field instead of being
+    // the grass alight. What a sprite is still good for is the part that
+    // leaves the leaf and rides the air, which is this.
     effects.spawn('particles', scene, at, {
       recipe: GRASS_EMBERS,
       count: EMBER_SPARKS,
