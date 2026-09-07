@@ -222,10 +222,19 @@ const CHAR_TINT = 0.96;
  */
 /**
  * Burn value above which a cut still glows. The scar starts at 1 and decays
- * over the five minutes it takes to grow back, so this is a time in disguise:
- * 0.93 is about the first half minute after the fire went through.
+ * over the five minutes it takes to grow back, so this is a time in disguise.
+ *
+ * Tight on purpose: at about two and a half seconds, and a front travelling
+ * half a tile a second, the band of blades that are actually alight is a tile
+ * or so wide - a flame front crossing the field. Wider and the whole scar
+ * burns at once, which is a lit patch rather than a fire going through it.
+ *
+ * It cannot go much tighter. The scar is one byte decaying over five minutes,
+ * so a step of the counter is over a second however often the pass runs, and
+ * a window narrower than a couple of steps would flicker on the quantisation
+ * rather than on the flame.
  */
-const HEAT_FROM = 0.985;
+const HEAT_FROM = 0.992;
 
 /**
  * Fraction of stubs that keep a lit tip while the scar is hot.
@@ -264,6 +273,21 @@ const CHAR_AT = 0.3;
  */
 const DISSOLVE_MIN = 0.45;
 const DISSOLVE_SPAN = 0.45;
+
+/**
+ * The flame drawn on a burning blade, in place of a sprite.
+ *
+ * LEN is how far down the leaf the tongue reaches, as a fraction of its
+ * length; the two RATEs and FREQ are the flicker, out of phase so no two
+ * blades are in step. LOW and HIGH are the body and the hot core - both over
+ * 1, so the bloom pass has something to take, which is what makes a small
+ * flame read as bright rather than as an orange smear.
+ */
+const FLAME_LEN = 0.26;
+const FLAME_RATE = [7.3, 11.9] as const;
+const FLAME_FREQ = 9;
+const FLAME_LOW = [2.2, 0.55, 0.08] as const;
+const FLAME_HIGH = [3.0, 1.35, 0.3] as const;
 
 /** The ember line itself. Above 1 so the bloom pass has something to catch. */
 const EMBER_COLOUR = [2.6, 0.85, 0.18] as const;
@@ -807,11 +831,41 @@ ${
 
       if (past > 0.0) discard;
 
-      // The ember line just under the cut, and the char just under that. This
-      // is the only part of the blade that is brighter than the field, and it
-      // is what says fire rather than says missing.
+      // The char, just under the cut.
       f = mix(f, vec3(${CHAR_COLOUR[0].toFixed(3)}, ${CHAR_COLOUR[1].toFixed(3)}, ${CHAR_COLOUR[2].toFixed(3)}),
         smoothstep(-${DISSOLVE_CHAR.toFixed(2)}, 0.0, past));
+
+      // And the blade alight, which is the fire itself.
+      //
+      // This was a sprite: the skills' flame recipe, thrown at points around
+      // the rim. A sprite is a picture of a fire standing near some grass, and
+      // however small it is made it is still a billboard hanging over the
+      // field rather than a blade that is burning. The blade already knows
+      // where its own cut is and how hot the ground under it is, so the flame
+      // is drawn on the leaf, in the band just below where the leaf is being
+      // eaten.
+      //
+      // Three sines out of phase, on the blade's own hash, so each one
+      // flickers to its own clock and a burning patch is never in step. The
+      // band breathes with the flicker rather than only brightening, because a
+      // flame that changes only in intensity reads as a lamp.
+      float flick =
+        0.55
+        + 0.28 * sin(time * ${FLAME_RATE[0].toFixed(2)} + vSeed * 47.0)
+        + 0.17 * sin(time * ${FLAME_RATE[1].toFixed(2)} - vV * ${FLAME_FREQ.toFixed(1)} + vSeed * 91.0);
+
+      float tongue = smoothstep(
+        -${FLAME_LEN.toFixed(3)} * flick, 0.0, past) * vHeat;
+
+      // White at the cut through orange below it: a flame is hottest where it
+      // is eating the leaf. Over 1 so the bloom has something to take.
+      f = mix(f, mix(
+        vec3(${FLAME_LOW[0].toFixed(2)}, ${FLAME_LOW[1].toFixed(2)}, ${FLAME_LOW[2].toFixed(2)}),
+        vec3(${FLAME_HIGH[0].toFixed(2)}, ${FLAME_HIGH[1].toFixed(2)}, ${FLAME_HIGH[2].toFixed(2)}),
+        tongue * tongue), tongue);
+
+      // The ember that outlives the flame: a few stubs keep a lit tip after
+      // the front has gone by, which is what a burnt patch cools through.
       f = mix(f, vec3(${EMBER_COLOUR[0].toFixed(2)}, ${EMBER_COLOUR[1].toFixed(2)}, ${EMBER_COLOUR[2].toFixed(2)}),
         smoothstep(-${DISSOLVE_RIM.toFixed(3)}, 0.0, past) * vHeat
           * step(fract(vSeed * 13.73), ${EMBER_CHANCE.toFixed(2)}));
