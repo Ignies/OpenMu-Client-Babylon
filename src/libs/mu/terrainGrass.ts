@@ -14,7 +14,7 @@ import { CLOUD_UNIFORMS } from '../../lighting/clouds';
 import { ENUM_WORLD } from '../../common/types';
 import { GameOptions } from '../../common/gameOptions';
 import { lightingTier } from '../../common/lightingQuality';
-import type { TileTextureArray } from './tileTextureArray';
+import { GRASS_CARD_SLOTS, type GrassCards } from './terrainGrassCards';
 import {
   TERRAIN_CSM_SAMPLERS,
   TERRAIN_LIGHT_UNIFORMS,
@@ -43,9 +43,6 @@ import {
  * shade off the ground it grows from is more obviously wrong than either
  * would be alone, so there is no second opinion about the light here.
  */
-
-/** Tile slots that are grass: 0 `TileGrass01`, 1 `TileGrass02` (`maps/recipes.ts`). */
-const GRASS_SLOTS = new Set([0, 1]);
 
 /** Tiles per block edge. 256 blocks over the map. */
 const BLOCK_TILES = 16;
@@ -141,10 +138,7 @@ function bladeVertexData(): VertexData {
   return data;
 }
 
-function createGrassMaterial(
-  scene: Scene,
-  tileArray: TileTextureArray
-): ShaderMaterial {
+function createGrassMaterial(scene: Scene, cards: GrassCards): ShaderMaterial {
   const material = new ShaderMaterial(
     'TerrainGrassMaterial',
     scene,
@@ -160,8 +154,7 @@ function createGrassMaterial(
   uniform vec3 cameraPosition;
   uniform float time;
   uniform vec2 grassFade; // x start, y end
-  uniform highp sampler2DArray tileTextures;
-  uniform float tileScales[${tileArray.layers}];
+  uniform sampler2D grassRamp;
 
   varying vec2 vWorldXZ;
   varying vec3 vWorldPos;
@@ -205,22 +198,22 @@ function createGrassMaterial(
       vBake = iTint.rgb;
       vV = v;
 
-      // The blade takes the colour of the tile it is rooted in - the same
-      // fetch the ground under it makes, at the same UV - so grass can never
-      // disagree in hue with its own tile, including on a map whose
-      // TileGrass01 is not green.
+      // The blade's colour comes from the map's own grass *card*
+      // (terrainGrassCards.ts), not from the ground tile it stands on: the
+      // original always kept the plant and the floor as two different
+      // textures, and on Devias the floor is ice while the grass is
+      // frost-white grass. Reading the floor put green blades on a snowfield.
       //
-      // In the vertex stage rather than the fragment, and not for cost: a
-      // blade is one to three pixels wide, so a 2x2 derivative quad on it
-      // straddles the background and the implicit LOD comes back garbage -
-      // in practice the 1x1 mip, which is the tile's *average*, and a field
-      // of near-black spikes. Here there are no derivatives to get wrong and
-      // the fetch is the base level by definition.
-      vec2 rootUV = iRoot.xz / ${TERRAIN_SIZE.toFixed(1)};
-      vec3 tile = texture2D(tileTextures, vec3(rootUV * tileScales[slot], float(slot))).rgb;
+      // x picks the card (the tile's layer-1 slot), y is the height up the
+      // blade, so the authored root-to-tip gradient comes along with it.
+      // Vertex stage, and not for cost: a blade is one to three pixels wide,
+      // so a 2x2 derivative quad on it straddles the background and the
+      // implicit LOD comes back garbage. Here there are no derivatives.
+      vec2 rampUV = vec2((float(slot) + 0.5) / ${GRASS_CARD_SLOTS.toFixed(1)}, v);
+      vec3 card = texture2D(grassRamp, rampUV).rgb;
       float shade = mix(${ROOT_TINT.toFixed(2)}, ${TIP_TINT.toFixed(2)}, v)
         * (1.0 + (hash - 0.5) * ${TINT_JITTER.toFixed(3)});
-      vAlbedo = tile * shade;
+      vAlbedo = card * shade;
 
       gl_Position = viewProjection * vec4(world, 1.0);
   }
@@ -258,16 +251,14 @@ ${terrainGroundLightGlsl({ bake: 'vBake', clouds: true })}
         'viewProjection',
         'cameraPosition',
         'grassFade',
-        'tileScales',
         ...TERRAIN_LIGHT_UNIFORMS,
         ...CLOUD_UNIFORMS,
       ],
-      // Order as terrainLighting.ts requires: its own, then the cascades,
-      // then the sampler array last.
+      // Order as terrainLighting.ts requires: its own, then the cascades.
       samplers: [
         ...terrainLightSamplers(true),
         ...TERRAIN_CSM_SAMPLERS,
-        'tileTextures',
+        'grassRamp',
       ],
       defines: terrainLightDefines(),
       needAlphaBlending: false,
@@ -287,8 +278,7 @@ ${terrainGroundLightGlsl({ bake: 'vBake', clouds: true })}
 
     bindTerrainLight(effect, scene, true);
     effect.setFloat2('grassFade', FADE_START, FADE_END);
-    effect.setTexture('tileTextures', tileArray.texture);
-    effect.setFloatArray('tileScales', tileArray.scales);
+    if (cards.ramp) effect.setTexture('grassRamp', cards.ramp);
   });
 
   registerTerrainMaterial(material);
@@ -314,7 +304,8 @@ export type GrassSource = {
   readonly alpha: Uint8Array;
   readonly height: Float32Array;
   readonly light: readonly IVector3Like[];
-  readonly tileArray: TileTextureArray;
+  /** Which layer-1 slots grow grass here, and the map's authored grass colour. */
+  readonly cards: GrassCards;
   readonly density: number;
 };
 
@@ -332,16 +323,17 @@ export function createGrassField(
 ): GrassField | null {
   const perTile = BLADES_PER_TILE[Math.min(src.density, 9)] ?? 0;
 
-  if (perTile <= 0) return null;
+  // No card, no grass, and no material either: the Dungeon and Tarkan ship
+  // none at all, and the original draws nothing there (terrainGrassCards.ts).
+  if (perTile <= 0 || !src.cards.slots.size || !src.cards.ramp) return null;
 
-  const material = createGrassMaterial(scene, src.tileArray);
+  const material = createGrassMaterial(scene, src.cards);
   const blade = bladeVertexData();
   const blocks = new Map<number, Mesh | null>();
 
   let centerX = 0;
   let centerZ = 0;
 
-  const isGrass = (slot: number) => GRASS_SLOTS.has(slot);
 
   /**
    * How much of this tile is drawn as grass, and which slot the blades take
@@ -358,18 +350,34 @@ export function createGrassField(
     y: number,
     out: { weight: number; slot: number }
   ): void {
+    out.weight = 0;
+    out.slot = 0;
+
+    // The original's rule, in its own order (ZzzLodTerrain.cpp:1611-1625).
+    //
+    // 1. Any alpha painted on any of the four corners and the tile is skipped
+    //    outright - grass grows only on a tile that is one layer all the way
+    //    through, so a blend is where it stops. Not a fade: a hard edge, and
+    //    that is what the original looks like.
     const i = TERRAIN_INDEX(x, y);
-    const a = src.alpha[i] / 255;
-    const opaque = a >= 1;
 
-    const s1 = src.layer1[i];
-    const s2 = src.layer2[i];
+    if (
+      src.alpha[i] > 0 ||
+      src.alpha[TERRAIN_INDEX(x + 1, y)] > 0 ||
+      src.alpha[TERRAIN_INDEX(x, y + 1)] > 0 ||
+      src.alpha[TERRAIN_INDEX(x + 1, y + 1)] > 0
+    ) {
+      return;
+    }
 
-    const w1 = isGrass(s1) ? (opaque ? 0 : 1 - a) : 0;
-    const w2 = isGrass(s2) ? (opaque ? 1 : a) : 0;
+    // 2. Layer 1 - never layer 2 - indexes the card set, and the card has to
+    //    exist. `cards.slots` is that `FindTexture` null check.
+    const slot = src.layer1[i];
 
-    out.weight = w1 + w2;
-    out.slot = w2 > w1 ? s2 : s1;
+    if (!src.cards.slots.has(slot)) return;
+
+    out.weight = 1;
+    out.slot = slot;
   }
 
   function heightAt(fx: number, fz: number): number {

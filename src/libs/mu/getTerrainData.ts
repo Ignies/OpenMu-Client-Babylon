@@ -12,6 +12,7 @@ import { updateTerrainHeightMap } from './terrainHeightMap';
 import { createTerrainMaterial } from './terrainMaterial';
 import { terrainOverlaysFor } from './terrainOverlay';
 import { disposeGrassField, installGrassField } from './terrainGrass';
+import { loadGrassCards } from './terrainGrassCards';
 import {
   createTerrainWaterRuntime,
   disposeTerrainWaterFrames,
@@ -140,6 +141,11 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
     ? await loadTerrainWaterFlipbook(scene, waterSpec)
     : [];
 
+  // The grass cards: which layer-1 slots grow anything here, and what colour.
+  // Deliberately not in `terrainFilesFor` - that list is destructured
+  // positionally above, and these are optional files besides.
+  const grassCards = await loadGrassCards(scene, worldNum);
+
   return {
     worldNum,
     bulk,
@@ -148,6 +154,7 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
     tileArray,
     waterSpec,
     waterFrames,
+    grassCards,
   };
 }
 
@@ -171,6 +178,7 @@ export async function getTerrainData(
     tileArray,
     waterSpec,
     waterFrames,
+    grassCards,
   } = prepared ?? (await prepareTerrain(scene, map));
 
   const terrainHeight = bulk.height;
@@ -234,23 +242,19 @@ export async function getTerrainData(
   );
 
   // The grass layer stands on this ground and is lit by it (terrainGrass.ts).
-  // Built from the same arrays the mesh above was: the splat says where grass
-  // is drawn, the height array where its roots sit, `terrainLight` what the
-  // bake says. Nothing is built without the packed tile array - the blades
-  // read their tile's colour through it - and nothing at all while the option
-  // is 0.
-  if (tileArray) {
-    installGrassField(scene, map, {
-      layer1: terrainMapping.layer1,
-      layer2: terrainMapping.layer2,
-      alpha: terrainMapping.alpha,
-      height: terrainHeight,
-      light: terrainLight,
-      tileArray,
-    });
-  } else {
-    disposeGrassField();
-  }
+  // Built from the same arrays the mesh above was: the splat says which tiles
+  // grow anything, the height array where the roots sit, `terrainLight` what
+  // the bake says, and the cards which slots have grass at all and what
+  // colour it is. A map that ships no card builds nothing, and neither does
+  // density 0.
+  installGrassField(scene, map, {
+    layer1: terrainMapping.layer1,
+    layer2: terrainMapping.layer2,
+    alpha: terrainMapping.alpha,
+    height: terrainHeight,
+    light: terrainLight,
+    cards: grassCards,
+  });
 
   if (DEBUG_SHOW_TERRAIN_ATTRIBUTES) {
     const plane = CreatePlane('_terrainPlane', { size: 256 }, scene);
