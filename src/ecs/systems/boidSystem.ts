@@ -34,6 +34,15 @@ const SPAWN_RISE_SPAN = 200 * MU_UNIT;
 /** `FlyDistance`: past this from the hero a boid is dropped. */
 const FLY_DISTANCE = 1500 * MU_UNIT;
 
+/**
+ * How far off a boid has to be before its own time can run out.
+ *
+ * Nothing in the original, which drops one wherever it happens to be. It is
+ * the price of fading rather than popping: a fade is a second long and a
+ * second is long enough to watch. Inside this the only way out is distance.
+ */
+const LEAVE_RANGE = 700 * MU_UNIT;
+
 /** `Vector(o->Velocity * 25.f, ...)`: forward units per tick. */
 const FORWARD_PER_TICK = 25 * MU_UNIT;
 
@@ -329,10 +338,24 @@ export const BoidSystem: ISystemFactory = world => {
         // rather than deleted: the original fades one in and out through
         // `o->Alpha`, and popping a bird out of the middle of the sky is the
         // one thing the eye is guaranteed to catch.
+        //
+        // The 1-in-512 is the original's own (GOBoid.cpp:1191), but there it
+        // sets `Live = false` and the bird is gone between two frames, high up
+        // and unwatched. Spread over most of a second it becomes something a
+        // player can stand and watch happen, so it only fires on a bird that
+        // is flying and already far enough off to be at the edge of the eye.
+        //
+        // A grounded one is exempt outright. It came down in front of the
+        // player and it leaves the way it arrived, by taking off: `bird()`
+        // sends it up as soon as the hero is within three tiles, or on its own
+        // 1-in-256. Fading one out where it stands is the one place this is
+        // certain to be seen.
+        const range = Math.hypot(p.x - hero.x, p.z - hero.z);
+
         if (
           !s.leaving &&
-          (Math.hypot(p.x - hero.x, p.z - hero.z) >= FLY_DISTANCE ||
-            rolled(512, ticks))
+          (range >= FLY_DISTANCE ||
+            (s.ai === 'fly' && range >= LEAVE_RANGE && rolled(512, ticks)))
         ) {
           s.leaving = true;
         }
