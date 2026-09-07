@@ -66,6 +66,13 @@ const FACE_SLACK = 0.02;
  */
 const EMIT_LIT = 0.002;
 
+/**
+ * How far a depth-less pixel's ray is carried before asking whether it left
+ * through a wall. The sky is at infinity and the room box is tens of tiles,
+ * so anything past the map is the same answer; this is simply well past it.
+ */
+const SKY_REACH = 10000;
+
 /** Drawn depth renders to wait for before the mask is allowed to black anything. */
 const READY_FRAMES = 2;
 
@@ -138,6 +145,22 @@ function registerShader(): void {
 
     float depth = texture2D(depthSampler, vUV).r;
 
+    vec3 viewDir = vec3((vUV.x * 2.0 - 1.0) * viewport.x, (vUV.y * 2.0 - 1.0) * viewport.y, 1.0);
+    vec3 camPos = invView[3].xyz;
+    vec3 worldDir =
+      invView[0].xyz * viewDir.x +
+      invView[1].xyz * viewDir.y +
+      invView[2].xyz * viewDir.z;
+
+    vec3 volMin = vec3(roomXZ.x, roomY.x - FLOOR_SLACK, roomXZ.y);
+    vec3 volMax = vec3(roomXZ.z, roomY.z, roomXZ.w);
+    vec3 wallMax = vec3(roomXZ.z, roomY.y, roomXZ.w);
+
+    // The see-through test rests on "a solid wall would have stopped the ray",
+    // and under the floor nothing does: the ground is one-sided, so seen from
+    // below it writes no depth. Below the floor the inside test stands alone.
+    bool underFloor = camPos.y < volMin.y;
+
     // The renderer clears to 1e8 where nothing was drawn, so both ends are
     // "no depth here".
     if (depth <= 0.0 || depth >= 1e7) {
@@ -151,32 +174,29 @@ function registerShader(): void {
       bool framed = all(greaterThanEqual(vUV, roomBox.xy))
         && all(lessThanEqual(vUV, roomBox.zw));
 
-      gl_FragColor = lit > EMIT_LIT && framed ? color : vec4(0.0, 0.0, 0.0, color.a);
+      // The other thing that writes no depth is the sky, and it was going
+      // black with everything else - so a doorway framed a black hole where
+      // the day should be. A sky pixel is not "nothing", it is a point at
+      // infinity, and the question to ask about it is the same one asked
+      // about every other pixel: does the ray reach it through a wall?
+      // Through a door or a window it does and the sky belongs there; over
+      // the wall top it does not, which is the roof the hero is standing
+      // under and stays black.
+      bool skyThroughWall =
+        !underFloor && leavesThroughWall(camPos, worldDir * ${SKY_REACH.toFixed(1)}, volMin, wallMax);
+
+      gl_FragColor = (lit > EMIT_LIT && framed) || skyThroughWall
+        ? color
+        : vec4(0.0, 0.0, 0.0, color.a);
       return;
     }
 
-    vec3 viewDir = vec3((vUV.x * 2.0 - 1.0) * viewport.x, (vUV.y * 2.0 - 1.0) * viewport.y, 1.0);
-    vec3 camPos = invView[3].xyz;
-    vec3 worldDir =
-      invView[0].xyz * viewDir.x +
-      invView[1].xyz * viewDir.y +
-      invView[2].xyz * viewDir.z;
     vec3 toPixel = worldDir * depth;
     vec3 p = camPos + toPixel;
 
-    vec3 volMin = vec3(roomXZ.x, roomY.x - FLOOR_SLACK, roomXZ.y);
-    vec3 volMax = vec3(roomXZ.z, roomY.z, roomXZ.w);
     vec3 faceSlack = vec3(FACE_SLACK, 0.0, FACE_SLACK);
     bool inside = all(greaterThanEqual(p, volMin - faceSlack)) && all(lessThanEqual(p, volMax + faceSlack));
 
-    vec3 wallMax = vec3(roomXZ.z, roomY.y, roomXZ.w);
-
-    // The see-through test rests on "a solid wall would have stopped the ray",
-    // and under the floor nothing does: the ground is one-sided, so seen from
-    // below it writes no depth, and every exterior object behind it comes back
-    // as a clear line of sight through the room. Below the floor the inside
-    // test stands alone.
-    bool underFloor = camPos.y < volMin.y;
     bool seenThrough =
       inside || (!underFloor && leavesThroughWall(camPos, toPixel, volMin, wallMax));
 
