@@ -92,6 +92,29 @@ export function isAttackableEntity(
   return true;
 }
 
+/**
+ * A player the hero may swing at. `isAttackableEntity` refuses every player
+ * so an ordinary click in a crowd never starts a fight; the quick command
+ * menu's attack entry is a deliberate choice, so it tests with this instead
+ * - the same safe-zone and liveness rules, without the monster/NPC one.
+ */
+export function isAttackablePlayer(
+  world: Parameters<ISystemFactory>[0],
+  e: Entity
+): boolean {
+  if (e.netId === undefined || e.localPlayer) return false;
+  if (e.npcType !== undefined || !e.playerAnimation) return false;
+  if (e.objOutOfScope || e.dying) return false;
+
+  const player = world.playerEntity;
+  if (player?.attributeSystem.isAboveZero('inSafeZone')) return false;
+
+  const flag = world.getTerrainFlag(~~e.transform!.pos.x, ~~e.transform!.pos.z);
+  if (isFlagInBinaryMask(flag, TWFlags.SafeZone)) return false;
+
+  return true;
+}
+
 function directionCode(dx: number, dy: number): number {
   const octant = Math.round(Math.atan2(dy, dx) / (Math.PI / 4));
   return (((3 + octant) % 8) + 8) % 8;
@@ -121,7 +144,7 @@ export const AttackSystem: ISystemFactory = world => {
       if (!target) return;
 
       if (
-        !isAttackableEntity(world, target) ||
+        (!isAttackableEntity(world, target) && !isAttackablePlayer(world, target)) ||
         target.worldIndex !== world.mapIndex
       ) {
         world.attackTarget = null;

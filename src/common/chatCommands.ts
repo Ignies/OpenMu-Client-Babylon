@@ -15,7 +15,11 @@
 
 import type { TextKey } from '../i18n';
 
-/** The command window's entries, in the window's order (COMMAND_TRADE..COMMAND_BATTLE). */
+/**
+ * The command window's entries, in the window's order
+ * (COMMAND_TRADE..COMMAND_BATTLE), plus `attack` - the quick menu's own
+ * entry, which has no window button and no `/` line.
+ */
 export type CommandKind =
   | 'trade'
   | 'purchase'
@@ -27,7 +31,8 @@ export type CommandKind =
   | 'rivalOff'
   | 'addFriend'
   | 'follow'
-  | 'battle';
+  | 'battle'
+  | 'attack';
 
 export type ChatCommand = {
   /** With the leading slash, lower case. */

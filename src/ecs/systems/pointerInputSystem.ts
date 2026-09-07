@@ -178,6 +178,20 @@ export const PointerInputSystem: ISystemFactory = world => {
       ) {
         return;
       }
+      // `CNewUIHotKey::UpdateMouseEvent`: on another player the right click
+      // opens the quick command menu at the cursor instead of casting. Ctrl
+      // is the force-cast modifier below, so it still aims past the player.
+      if (
+        ev.type === PointerEventTypes.POINTERDOWN &&
+        !ev.event.ctrlKey &&
+        Commands.openQuickOn(
+          world.currentPointerTarget,
+          ev.event.clientX,
+          ev.event.clientY
+        )
+      ) {
+        return;
+      }
       // Right button: skill use (Attack() with MouseRButton). Re-picked on
       // every move while held so the cast follows the cursor.
       if (ev.type === PointerEventTypes.POINTERDOWN) world.rightPointerPressed = true;

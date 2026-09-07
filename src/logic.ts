@@ -1085,6 +1085,13 @@ function addCharacterToScope(world: World, char: ScopeCharacter) {
       if (char.attackSpeed != null) Store.playerData.attackSpeed = char.attackSpeed;
       if (char.magicSpeed != null) Store.playerData.magicSpeed = char.magicSpeed;
       if (char.HeroState != null) Store.playerData.heroState = char.HeroState;
+    } else {
+      // `SelectCharacter(CKind_1)` (ZzzInterface.cpp:8110) tests the other
+      // players before the monsters, so another player is a pick target: the
+      // hover balloon, the command window and the quick menu all read the
+      // object under the cursor. The hero is left out - its own body would
+      // sit on every click and stop the walk (playerControllerSystem).
+      world.addComponent(playerEntity, 'interactable', true);
     }
 
     if (char.effects?.length) {

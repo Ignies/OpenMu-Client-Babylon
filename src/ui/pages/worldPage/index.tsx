@@ -29,6 +29,7 @@ import { BuffBar } from '../../components/buffBar';
 import { EmoteMenu } from './components/emoteMenu';
 import { ChatWindow } from './components/chat';
 import { CommandWindow } from './components/commandWindow';
+import { QuickCommandWindow } from './components/quickCommandWindow';
 import { PartyWindow } from './components/party';
 import {
   GuildCreationDialog,
@@ -85,6 +86,7 @@ const HUD = observer(() => {
       <EmoteMenu />
       <ChatWindow />
       <CommandWindow />
+      <QuickCommandWindow />
       <PartyWindow />
       <GuildWindow />
       <SkillListWindow />

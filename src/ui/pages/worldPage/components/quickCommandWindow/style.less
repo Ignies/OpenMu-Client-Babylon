@@ -1,0 +1,44 @@
+@import (reference) '../../../../components/muText/style.less';
+
+// `CNewUIQuickCommandWindow`. Every coordinate lives in the component; this
+// is only how the pieces stack and how a row reads.
+.quick-command-window {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: auto;
+  user-select: none;
+  transform-origin: 0 0;
+  image-rendering: pixelated;
+  .mu-font();
+
+  .quick-command-art {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .quick-command-title,
+  .quick-command-label {
+    position: absolute;
+    left: 0;
+    display: block;
+    text-shadow: 1px 1px 0 #000;
+    pointer-events: none;
+  }
+
+  // `g_hFont` is 11 px tall: the rule under a row sits at the text's bottom
+  // edge, so the label must not carry the 13 px leading it has elsewhere.
+  .quick-command-label {
+    line-height: 11px;
+  }
+
+  .quick-command-row {
+    position: absolute;
+    left: 0;
+    cursor: pointer;
+  }
+
+  .quick-command-arrow {
+    position: absolute;
+    pointer-events: none;
+  }
+}
