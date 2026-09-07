@@ -18,6 +18,7 @@ import { tierIndex } from '../../common/lightingQuality';
 import { GRASS_CARD_SLOTS, type GrassCards } from './terrainGrassCards';
 import { SNOW_COVER } from './terrainOverlay';
 import { snowCover } from '../../weather/snowCover';
+import { GROUND_WIND } from '../../weather/ambientWeather';
 import { lookDirector } from '../../lighting/director';
 import {
   TERRAIN_CSM_SAMPLERS,
@@ -90,19 +91,35 @@ const FADE_END = 34;
 const RESIDENT_RANGE = FADE_END + 4;
 
 /**
- * The travelling gust, ported: `sin(WindSpeed + xf * 5) * WindScale` with
- * `WindSpeed = WorldTime % 720000 * 0.002` and `WindScale = 10`
- * (ZzzLodTerrain.cpp:2385-2430). Centimetres there, so the scale is /100
- * here, and the rate is per second rather than per millisecond.
+ * The wind, as waves crossing the field.
+ *
+ * The first cut had the original's shape - `sin(WindSpeed + xf * 5)`,
+ * ZzzLodTerrain.cpp:2430 - with a per-blade phase added on top, and that is
+ * exactly what stops it reading as wind: a wave whose phase is randomised per
+ * blade is not a wave, it is jitter. Neighbours have to move *together* for
+ * the eye to see anything travel.
+ *
+ * So: a plane wave along `GROUND_WIND`, `sin(t*rate - dot(xz, dir)*freq)`,
+ * broad enough that a crest spans several tiles. The two-tone banding a real
+ * field shows comes free from that - blades leaning into the wind turn a
+ * different face to the sun than blades standing up, and the form shading
+ * above turns that into light and dark bands travelling with the crest.
+ *
+ * `CHOP` is a second, finer, faster wave carrying a small per-blade offset,
+ * so the field is not a rigid sheet. It is deliberately weak: it is texture
+ * on the wave, not the wave.
  */
-const WIND_RATE = 2.0;
-const WIND_FREQ = 5.0;
-const WIND_BEND = 0.1;
+const WAVE_RATE = 1.15;
+/** Radians per tile: 2*pi/0.42 is a crest about 15 tiles apart. */
+const WAVE_FREQ = 0.42;
+const WAVE_BEND = 0.26;
 
-/** A second, broader swell the original had no per-blade phase to carry. */
-const SWELL_RATE = 0.37;
-const SWELL_FREQ = 0.11;
-const SWELL_BEND = 0.06;
+const CHOP_RATE = 3.1;
+const CHOP_FREQ = 1.9;
+const CHOP_BEND = 0.05;
+
+/** How much the wave leans a blade even where it is not cresting. */
+const WIND_BIAS = 0.1;
 
 /**
  * Root and tip against the tile's own colour. The root is darkened as cheap
@@ -191,16 +208,43 @@ const BLADE_ROUND = 0.55;
  * one-tile-wide character needs. Worth revisiting if the springback is
  * wanted; not the cheapest way to get what was asked for.
  */
-const GRASS_ACTORS = 8;
-/** Tiles from an actor at which the grass is untouched. */
-const ACTOR_RADIUS = 1.6;
+const GRASS_ACTORS = 10;
+
+/**
+ * Grass does not spring back the instant a foot leaves it, and a press that
+ * vanishes on the frame the player steps off pops.
+ *
+ * So the slots are not actors, they are *presses*: a body stamps one where it
+ * stands, keeps it alive while it is there, and every press fades over
+ * `PRESS_LIFE` once nothing is refreshing it. A body that moves further than
+ * `STAMP_STEP` from the nearest press stamps another, which leaves a short
+ * trail behind a run that recovers from the back.
+ *
+ * This is the trample map's springback for the price already being paid -
+ * the same uniform array, the same loop - because the persistence lives in
+ * ten CPU-side records rather than in a texture.
+ */
+const STAMP_STEP = 0.3;
+/** Seconds a press takes to recover once nothing stands on it. */
+const PRESS_LIFE = 1.7;
+/**
+ * Tiles from an actor at which the grass is untouched.
+ *
+ * A tile is a metre and a body is not: 1.6 cleared a 3-metre bubble around
+ * the player, which reads as a force field rather than as feet. This is a
+ * footprint plus the swing of a leg, and the falloff below starts at 0.6 of
+ * it so the edge is a press rather than a wall.
+ */
+const ACTOR_RADIUS = 0.9;
+/** Where the press begins, as a fraction of the radius. */
+const ACTOR_CORE = 0.35;
 /** How flat a blade goes directly under someone standing on it. */
-const TRAMPLE_FLATTEN = 0.85;
+const TRAMPLE_FLATTEN = 0.8;
 /** How far a blade is shoved aside, as a fraction of its height. */
-const TRAMPLE_PUSH = 0.9;
+const TRAMPLE_PUSH = 0.8;
 /** A flier's downwash reaches further and presses less. */
-const FLIER_RADIUS = 2.6;
-const FLIER_PUSH = 1.15;
+const FLIER_RADIUS = 2.0;
+const FLIER_PUSH = 0.9;
 /** Above this height over the ground an actor is flying, not walking. */
 const FLYING_OVER = 0.9;
 
@@ -297,6 +341,7 @@ function createGrassMaterial(
   uniform vec3 cameraPosition;
   uniform float time;
   uniform vec2 grassFade; // x start, y end
+  const vec2 windDir = vec2(${GROUND_WIND[0].toFixed(3)}, ${GROUND_WIND[1].toFixed(3)});
   uniform float grassSnow; // settled-snow coverage, 0 = none
   uniform sampler2D grassRamp;
 ${detailed ? `  uniform vec4 grassActors[${GRASS_ACTORS}];` : ''}
@@ -353,7 +398,7 @@ ${
 
         vec2 away = iRoot.xz - a.xy;
         float far = length(away);
-        float reach = 1.0 - smoothstep(a.z * 0.3, a.z, far);
+        float reach = 1.0 - smoothstep(a.z * ${ACTOR_CORE.toFixed(2)}, a.z, far);
         if (reach <= 0.0) continue;
 
         shove += (far > 0.0001 ? away / far : vec2(1.0, 0.0)) * reach * abs(a.w);
@@ -364,16 +409,26 @@ ${
     : ''
 }
 
-      // The bend is weighted v*v so the root stays planted and the tip does
-      // the travelling.
-      float gust = sin(time * ${WIND_RATE.toFixed(2)} + iRoot.x * ${WIND_FREQ.toFixed(2)} + yaw) * ${WIND_BEND.toFixed(3)};
-      float swell = sin(time * ${SWELL_RATE.toFixed(2)} + dot(iRoot.xz, vec2(${SWELL_FREQ.toFixed(3)}))) * ${SWELL_BEND.toFixed(3)};
-      float bend = (gust + swell) * v * v * height;
+      // The wave. One phase for the whole field, travelling along the wind,
+      // so neighbours crest together and the eye has something to follow.
+      // No per-blade term here on purpose - that is what made it jitter.
+      float along = dot(iRoot.xz, windDir);
+      float wave = sin(time * ${WAVE_RATE.toFixed(2)} - along * ${WAVE_FREQ.toFixed(2)});
+      float chop = sin(time * ${CHOP_RATE.toFixed(2)} - along * ${CHOP_FREQ.toFixed(2)} + yaw);
+
+      // Biased so the field leans downwind on the whole and the wave rides on
+      // top, rather than swinging symmetrically through upright.
+      float gust = ${WIND_BIAS.toFixed(2)}
+        + wave * ${WAVE_BEND.toFixed(3)}
+        + chop * ${CHOP_BEND.toFixed(3)};
+
+      // Weighted v*v so the root stays planted and the tip does the travelling.
+      float bend = gust * v * v * height;
 
       vec3 world = iRoot.xyz;
       world.xz += side * (position.x * ${BLADE_WIDTH.toFixed(4)} * mix(0.75, 1.3, h3));
       world.y += v * height;
-      world.xz += vec2(0.86, 0.51) * bend;
+      world.xz += windDir * bend;
 ${
   detailed
     ? `
@@ -489,7 +544,10 @@ ${
         'cameraPosition',
         'grassFade',
         'grassSnow',
-        ...(detailed ? ['grassSun'] : []),
+        // Both of these have to be *listed*, not just declared in the GLSL and
+        // bound: `setFloatArray4` resolves the name against this list, and a
+        // name that is not on it silently writes nowhere.
+        ...(detailed ? ['grassSun', 'grassActors'] : []),
         ...TERRAIN_LIGHT_UNIFORMS,
         ...CLOUD_UNIFORMS,
       ],
@@ -569,6 +627,8 @@ export type GrassActor = {
   readonly z: number;
 };
 
+type Press = { x: number; z: number; life: number; flying: boolean };
+
 export type GrassField = {
   /** Where the camera is, in tiles; drives residency. */
   setCenter(x: number, z: number): void;
@@ -576,7 +636,7 @@ export type GrassField = {
    * Who is in the field this frame. The nearest `GRASS_ACTORS` to the centre
    * win the slots; everyone else is ignored, which is the whole budget.
    */
-  setActors(actors: readonly GrassActor[]): void;
+  setActors(actors: readonly GrassActor[], dt: number): void;
   /** One block of work, at most. Called once per frame. */
   step(): void;
   dispose(): void;
@@ -599,6 +659,9 @@ export function createGrassField(
 
   let centerX = 0;
   let centerZ = 0;
+
+  /** Live presses, oldest-faintest first out. Never reallocated per frame. */
+  const presses: Press[] = [];
 
 
   /**
@@ -812,43 +875,70 @@ export function createGrassField(
       centerZ = z;
     },
 
-    setActors(actors) {
-      actorSlots.fill(0);
-
+    setActors(actors, dt) {
       if (src.blade !== 'detailed') return;
 
-      // Nearest first, then take the budget. A partial selection sort over a
-      // handful of bodies beats sorting the whole list, and allocates nothing.
-      const taken: GrassActor[] = [];
+      // Everything fades first, so a press nothing refreshes this frame is
+      // already on its way back up.
+      for (let i = presses.length - 1; i >= 0; i--) {
+        presses[i].life -= dt / PRESS_LIFE;
+        if (presses[i].life <= 0) presses.splice(i, 1);
+      }
 
-      for (let slot = 0; slot < GRASS_ACTORS; slot++) {
-        let best: GrassActor | null = null;
-        let bestD = Infinity;
+      for (const a of actors) {
+        // Flying is measured against the ground the blade grows from, not
+        // read off a state flag: anything far enough above it is overhead.
+        const flying = a.y - heightAt(a.x, a.z) > FLYING_OVER;
 
-        for (const a of actors) {
-          if (taken.includes(a)) continue;
+        // Standing still refreshes the press underfoot; walking out of its
+        // reach stamps the next one, and the old one starts recovering.
+        let nearest: Press | null = null;
+        let nearestD = STAMP_STEP * STAMP_STEP;
 
-          const d = (a.x - centerX) ** 2 + (a.z - centerZ) ** 2;
+        for (const p of presses) {
+          if (p.flying !== flying) continue;
 
-          if (d < bestD) {
-            bestD = d;
-            best = a;
+          const d = (p.x - a.x) ** 2 + (p.z - a.z) ** 2;
+
+          if (d < nearestD) {
+            nearestD = d;
+            nearest = p;
           }
         }
 
-        if (!best) break;
+        if (nearest) {
+          nearest.life = 1;
+          nearest.x = a.x;
+          nearest.z = a.z;
+          continue;
+        }
 
-        taken.push(best);
+        // Full: drop the faintest, which is the oldest thing still showing.
+        if (presses.length >= GRASS_ACTORS) {
+          let faint = 0;
+          for (let i = 1; i < presses.length; i++) {
+            if (presses[i].life < presses[faint].life) faint = i;
+          }
+          presses.splice(faint, 1);
+        }
 
-        // Flying is measured against the ground the blade grows from, not
-        // against a state flag: anything far enough above it is overhead.
-        const flying = best.y - heightAt(best.x, best.z) > FLYING_OVER;
-        const i = slot * 4;
+        presses.push({ x: a.x, z: a.z, life: 1, flying });
+      }
 
-        actorSlots[i] = best.x;
-        actorSlots[i + 1] = best.z;
-        actorSlots[i + 2] = flying ? FLIER_RADIUS : ACTOR_RADIUS;
-        actorSlots[i + 3] = flying ? -FLIER_PUSH : TRAMPLE_PUSH;
+      actorSlots.fill(0);
+
+      for (let s = 0; s < presses.length && s < GRASS_ACTORS; s++) {
+        const p = presses[s];
+        // Ease the recovery so a press holds, then lifts, instead of ramping
+        // out linearly the moment it is left.
+        const strength = p.life * p.life * (3 - 2 * p.life);
+        const i = s * 4;
+
+        actorSlots[i] = p.x;
+        actorSlots[i + 1] = p.z;
+        actorSlots[i + 2] = p.flying ? FLIER_RADIUS : ACTOR_RADIUS;
+        actorSlots[i + 3] =
+          (p.flying ? -FLIER_PUSH : TRAMPLE_PUSH) * strength;
       }
     },
 

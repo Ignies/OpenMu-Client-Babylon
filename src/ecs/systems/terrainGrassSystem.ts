@@ -23,7 +23,7 @@ export const TerrainGrassSystem: ISystemFactory = world => {
   const actors: GrassActor[] = [];
 
   return {
-    update() {
+    update(deltaTime) {
       const field = grassFieldForFrame();
 
       if (!field) return;
@@ -51,7 +51,7 @@ export const TerrainGrassSystem: ISystemFactory = world => {
         actors.push({ x: p.x, y: p.y, z: p.z });
       }
 
-      field.setActors(actors);
+      field.setActors(actors, deltaTime);
       field.step();
     },
   };
