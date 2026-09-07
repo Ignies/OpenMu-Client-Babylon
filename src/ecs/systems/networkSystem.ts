@@ -2,6 +2,7 @@ import type { IVector2Like } from '../../libs/babylon/exports';
 import type { ISystemFactory } from '../world';
 import { Store } from '../../store';
 import { truncatePathForAttack } from './attackSystem';
+import { truncatePathWithinRange } from '../../common/approachPath';
 
 // Function returning CLIENT CODE (0-7) according to MU Online documentation
 // W=0, SW=1, S=2, SE=3, E=4, NE=5, N=6, NW=7
@@ -105,9 +106,12 @@ export const NetworkSystem: ISystemFactory = world => {
 
       if (playerMoveTo.sendToServer && pathfinding.calculated && path) {
         // Approaching a target: stop the server-side walk where the client
-        // stops (in attack range), not on the target's cell.
+        // stops (in attack or cast range), not on the target's cell.
         if (world.attackTarget?.transform) {
           truncatePathForAttack(path, world.attackTarget);
+        } else if (world.castApproach) {
+          const { x, y, range } = world.castApproach;
+          truncatePathWithinRange(path, x, y, range);
         }
         const last = sendWalkPathToServer(path, 0);
         sentUpTo = last >= 0 && last < path.length - 1 ? path[last] : undefined;

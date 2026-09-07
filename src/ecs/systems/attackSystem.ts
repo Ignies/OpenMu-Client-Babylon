@@ -11,6 +11,7 @@ import { isFlagInBinaryMask } from '../../common/utils';
 import { chooseAttackAction } from '../../common/playerActionMapper';
 import { combat } from '../../combat';
 import { MOUSE_UPDATE_SECONDS_MAX } from '../../combat/inputGate';
+import { truncatePathWithinRange } from '../../common/approachPath';
 
 /**
  * Left-click basic attack (`Action()` MOVEMENT_ATTACK, ZzzInterface.cpp:3283-3356):
@@ -22,29 +23,17 @@ import { MOUSE_UPDATE_SECONDS_MAX } from '../../combat/inputGate';
  * SkillCastSystem, so both read a fresh frame.
  */
 
-/**
- * Cut an approach path at the first cell that is already within attack
- * range of the target. The walk request sent to the server must end where
- * the client actually stops: sending the full path to the monster's own
- * cell leaves the server walking the player onto the corpse, and the next
- * ObjectMoved correction then snaps the hero to the monster's position.
- */
+/** The swing's half of `truncatePathWithinRange`: the reach of the hands. */
 export function truncatePathForAttack(
   path: { x: number; y: number }[],
   target: Entity
 ): void {
-  const tx = ~~target.transform!.pos.x;
-  const ty = ~~target.transform!.pos.z;
-  const range = combat.attackRange(Store.world?.playerEntity?.charAppearance);
-  const rangeSq = range * range;
-  for (let i = 0; i < path.length; i++) {
-    const dx = tx - path[i].x;
-    const dy = ty - path[i].y;
-    if (dx * dx + dy * dy <= rangeSq) {
-      path.length = i + 1;
-      return;
-    }
-  }
+  truncatePathWithinRange(
+    path,
+    ~~target.transform!.pos.x,
+    ~~target.transform!.pos.z,
+    combat.attackRange(Store.world?.playerEntity?.charAppearance)
+  );
 }
 
 const APPROACH_INTERVAL = 0.4;
