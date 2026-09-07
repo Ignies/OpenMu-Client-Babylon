@@ -30,6 +30,7 @@ import {
   terrainSkyLightGlsl,
 } from './terrainLighting';
 import { registerTerrainMaterial } from '../../scenes/shadows';
+import { grassBurnActive, grassBurnTexture } from '../../weather/grassBurn';
 import {
   bindTerrainWater,
   disposeTerrainWaterFrames,
@@ -42,6 +43,13 @@ import {
   terrainWaterVertexGlsl,
   type TerrainWaterRuntime,
 } from './terrainWater';
+
+/**
+ * What the ground keeps where the fire has been over it. A multiplier, so a
+ * scar still takes the sun and the torches rather than sitting on the map as
+ * a flat decal - and not zero, because ash is dark, not a hole.
+ */
+const BURN_GROUND = [0.13, 0.11, 0.10] as const;
 
 const FINAL_COLOR_VAR_NAME = `finalColor`;
 
@@ -201,7 +209,9 @@ ${water ? terrainWaterVertexGlsl(water.spec) : ''}
 ${
   tileArray
     ? `  uniform highp sampler2DArray tileTextures;
-  uniform float tileScales[${tileArray.layers}];`
+  uniform float tileScales[${tileArray.layers}];
+  uniform sampler2D terrainBurn;
+  uniform float terrainBurnOn;`
     : `  uniform sampler2D textures[${config.texturesData.length}];`
 }
 ${water && water.frames.length ? `  uniform sampler2D waterFlip;` : ''}
@@ -276,6 +286,28 @@ ${terrainOverlayLitGlsl(
 ${terrainOverlayReflectGlsl(overlays, 'f', 'sunShadow')}
 ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
 
+${
+  tileArray
+    ? `
+    // Ground the fire has been over (weather/grassBurn.ts). The grass above
+    // it dissolves blade by blade, and on its own that reads as nothing: a
+    // field with fewer blades in it is still a green field, and what a burnt
+    // patch actually is on screen is *dark ground*. So the same scar the
+    // blades read darkens what they stand on.
+    //
+    // Multiplied, not mixed to a colour: burnt ground still takes the sun, the
+    // torches and the cascades, and a scar that ignored them would be a decal
+    // lying on the map rather than part of it.
+    //
+    // Packed path only, like the detail grain and the cloud field above it -
+    // the per-tile fallback has already spent every one of WebGL's guaranteed
+    // sixteen fragment units, and a seventeenth is a draw error that takes the
+    // terrain with it.
+    float burnt = texture2D(terrainBurn, vWorldXZ / 256.0).r * terrainBurnOn;
+    f *= mix(vec3(1.0), vec3(${BURN_GROUND[0].toFixed(3)}, ${BURN_GROUND[1].toFixed(3)}, ${BURN_GROUND[2].toFixed(3)}), burnt);`
+    : ''
+}
+
     // When image processing runs in post the buffer is linear, and
     // Babylon's Standard fragment ends with toLinearSpace(color) - the same
     // pow(2.2). linearOut is 0 whenever the objects skip the decode too.
@@ -301,7 +333,7 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
         ...TERRAIN_LIGHT_UNIFORMS,
         ...(tileArray ? CLOUD_UNIFORMS : []),
         ...(tileArray ? [TERRAIN_DETAIL_UNIFORM] : []),
-        ...(tileArray ? ['tileScales'] : []),
+        ...(tileArray ? ['tileScales', 'terrainBurnOn'] : []),
         ...terrainOverlayUniforms(overlays),
         ...(water ? terrainWaterUniforms() : []),
       ],
@@ -318,6 +350,7 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
         // 16 fragment units.
         ...(tileArray ? [TERRAIN_DETAIL_SAMPLER] : []),
         ...(hasTrail(overlays) ? ['ovTrail'] : []),
+        ...(tileArray ? ['terrainBurn'] : []),
         ...(water ? terrainWaterSamplers(water) : []),
         ...TERRAIN_CSM_SAMPLERS,
         ...(tileArray ? ['tileTextures'] : ['textures']),
@@ -348,6 +381,11 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
       effect.setTexture('tileTextures', tileArray.texture);
       effect.setFloatArray('tileScales', tileArray.scales);
       bindTerrainDetail(effect, scene);
+      // Always bound, burnt or not: an unbound sampler here is a draw error
+      // and it takes the whole terrain with it. A map nothing has burned on
+      // holds a zero texture, and `terrainBurnOn` is what saves the fetch.
+      effect.setTexture('terrainBurn', grassBurnTexture(scene));
+      effect.setFloat('terrainBurnOn', grassBurnActive() ? 1 : 0);
     } else {
       effect.setTextureArray('textures', textures);
     }
