@@ -29,8 +29,10 @@ import type { Entity, ISystemFactory, Item } from '../world';
  *    (action 0) or moving (action 2). A Dinorant drops 30 units below the
  *    rider, who is lifted the same 30 off the terrain (AnimationSystem).
  *
- * Both fade out inside a safe zone (`o->Alpha = 0`, GOBoid.cpp:497-501) and
- * are never created in Chaos Castle (`CreateMountSub`:68). The Imp is *not*
+ * Only the *mounts* fade out inside a safe zone (`o->Alpha = 0`, the branch
+ * each rideable type opens with - GOBoid.cpp:182, :323, :497). MODEL_HELPER
+ * has no such branch (:604-621): the angel keeps flying, in town too. None
+ * of them are created in Chaos Castle (`CreateMountSub`:68). The Imp is *not*
  * here: it is link-rendered on the owner's bone 34 (`PlayerObject.Pet`).
  *
  *  - **Dark Raven** (`CSPetDarkSpirit`, CSPetSystem.cpp:291-610): worn in the
@@ -117,6 +119,19 @@ function sameItem(a: Item | null, b: Item | null): boolean {
   return a.group === b.group && a.num === b.num;
 }
 
+/** What an owner currently has an actor for in one slot, and where. */
+type Spawned = { item: Item; map: number };
+
+/**
+ * A slot has to be rebuilt when the item changed, and when its actor was left
+ * behind on another map: `unloadMap` sweeps the actors of the map just left,
+ * and one spawned in the gap before the hero is moved sits on his old tile.
+ */
+function stale(current: Spawned | undefined, item: Item | null, map: number) {
+  if (!sameItem(current?.item ?? null, item)) return true;
+  return current !== undefined && current.map !== map;
+}
+
 function ravenOf(item: Item | null | undefined): Item | null {
   return item && item.group === PET_GROUP && item.num === DARK_RAVEN
     ? item
@@ -127,9 +142,9 @@ export const PetSystem: ISystemFactory = world => {
   const owners = world.with('charAppearance', 'transform', 'visibility');
   const actors = world.with('petActor', 'transform');
 
-  /** The pet item each owner currently has an actor for, per slot. */
-  const spawned = new Map<Entity, Item | null>();
-  const spawnedRaven = new Map<Entity, Item | null>();
+  /** The pet each owner currently has an actor for, per slot. */
+  const spawned = new Map<Entity, Spawned>();
+  const spawnedRaven = new Map<Entity, Spawned>();
 
   function despawn(owner: Entity, raven: boolean) {
     (raven ? spawnedRaven : spawned).delete(owner);
@@ -137,7 +152,6 @@ export const PetSystem: ISystemFactory = world => {
     for (const actor of [...actors.entities]) {
       if (actor.petActor.owner !== owner) continue;
       if ((actor.petActor.kind === 'raven') !== raven) continue;
-      glowClocks.delete(actor);
       world.remove(actor);
       actor.modelObject?.dispose();
     }
@@ -148,8 +162,18 @@ export const PetSystem: ISystemFactory = world => {
     despawn(owner, true);
   });
 
+  // A warp removes every entity of the map just left (`unloadMap`), the pet
+  // actors among them. Without this the slot still reads as filled on the new
+  // map and the pet only comes back on a re-equip.
+  actors.onEntityRemoved.subscribe(actor => {
+    glowClocks.delete(actor);
+    const state = actor.petActor;
+    (state.kind === 'raven' ? spawnedRaven : spawned).delete(state.owner);
+  });
+
   function spawn(owner: Entity, item: Item, spec: PetSpec) {
     const pos = owner.transform!.pos;
+    const map = owner.worldIndex ?? world.mapIndex;
 
     // CreateMountSub seeds the angel a couple of tiles away and above its
     // owner; a mount starts exactly on him (GOBoid.cpp:114-125). The raven
@@ -158,7 +182,7 @@ export const PetSystem: ISystemFactory = world => {
     const raven = spec.kind === 'raven';
 
     world.add({
-      worldIndex: owner.worldIndex ?? world.mapIndex,
+      worldIndex: map,
       transform: {
         pos: new Vector3(
           pos.x + (angel ? (rand(512) - 256) * MU_UNIT : 0),
@@ -187,7 +211,7 @@ export const PetSystem: ISystemFactory = world => {
       },
     });
 
-    (raven ? spawnedRaven : spawned).set(owner, item);
+    (raven ? spawnedRaven : spawned).set(owner, { item, map });
   }
 
   function updateAngel(actor: Entity, dt: number) {
@@ -394,7 +418,7 @@ export const PetSystem: ISystemFactory = world => {
     }
   }
 
-  function updateMount(actor: Entity, dt: number) {
+  function updateMount(actor: Entity, dt: number, inSafeZone: boolean) {
     const state = actor.petActor!;
     const target = state.owner.transform?.pos;
     if (!target) return;
@@ -404,6 +428,9 @@ export const PetSystem: ISystemFactory = world => {
     pos.y = target.y - state.drop;
     pos.z = target.z;
     actor.transform!.rot.y = state.owner.transform!.rot.y;
+
+    // Faded out in town: pinned, but no clip and no Fenrir glow behind it.
+    if (inSafeZone) return;
 
     // A Fenrir mirrors its rider's clip family instead of the stand/move
     // pair, at the per-clip velocities of MoveMount.
@@ -431,12 +458,13 @@ export const PetSystem: ISystemFactory = world => {
       const chaosCastle = inChaosCastle(world.mapIndex);
 
       for (const owner of owners) {
+        const map = owner.worldIndex ?? world.mapIndex;
         const wanted = chaosCastle ? null : owner.charAppearance.pet;
         const spec = petSpec(wanted);
         // The Imp is not a world object — PlayerObject.Pet carries it.
         const wantsActor = spec && spec.kind !== 'imp' ? wanted : null;
 
-        if (!sameItem(spawned.get(owner) ?? null, wantsActor)) {
+        if (stale(spawned.get(owner), wantsActor, map)) {
           despawn(owner, false);
           if (wantsActor && spec) spawn(owner, wantsActor, spec);
         }
@@ -445,7 +473,7 @@ export const PetSystem: ISystemFactory = world => {
         const raven = chaosCastle
           ? null
           : ravenOf(owner.charAppearance.leftHand);
-        if (!sameItem(spawnedRaven.get(owner) ?? null, raven)) {
+        if (stale(spawnedRaven.get(owner), raven, map)) {
           despawn(owner, true);
           const ravenSpec = petSpec(raven);
           if (raven && ravenSpec) spawn(owner, raven, ravenSpec);
@@ -466,12 +494,19 @@ export const PetSystem: ISystemFactory = world => {
           continue;
         }
 
-        // Safe zone: the original just fades them out (o->Alpha = 0).
-        actor.modelObject?.setAlpha(inSafeZone ? 0 : 1);
-        if (inSafeZone) continue;
+        // The angel has no safe-zone branch of its own: it keeps flying, and
+        // in town too. Freezing it there left the actor a town behind, with
+        // nothing but a re-equip to bring it home.
+        if (state.kind === 'angel') {
+          actor.modelObject?.setAlpha(1);
+          updateAngel(actor, dt);
+          continue;
+        }
 
-        if (state.kind === 'angel') updateAngel(actor, dt);
-        else updateMount(actor, dt);
+        // A mount is faded out instead (o->Alpha = 0), but stays pinned to its
+        // rider so it is already in place the moment he steps out of town.
+        actor.modelObject?.setAlpha(inSafeZone ? 0 : 1);
+        updateMount(actor, dt, inSafeZone);
       }
     },
   };
