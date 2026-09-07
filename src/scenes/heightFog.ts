@@ -21,15 +21,26 @@ import type { LookProfile, Rgb } from '../lighting/profiles';
  */
 
 /**
- * The distance the additive half of a pixel is hazed at, in tiles, when the
- * depth behind it says further. A flame is drawn on top of its background so
- * it is never further away than the depth says; min() can only take haze
- * away. Roughly "standing where the player is": near fire keeps the haze it
- * had, far fire is hazed as something at arm's length rather than as the
- * water behind it. Cancelling it outright reads as a sticker laid over the
- * frame - the atmosphere does real work softening MU's additive smears.
+ * Share of the surface's extinction the additive half of a pixel takes.
+ *
+ * The depth is the surface's, and an additive pass is drawn on top of its
+ * background, so the emitter sits somewhere between the camera and that
+ * depth and its own distance is in no buffer. A share is the estimate that
+ * stays monotone in distance: zero at the camera, never more than the
+ * surface's, so an emitter can never come out brighter than the ground it
+ * stands on.
+ *
+ * This was a fixed 12 tiles, which every outdoor profile's `fog.start`
+ * (20-25) already sits past, so the extinction was identically zero: a torch
+ * at the map edge burned at its full HDR value over terrain the haze had
+ * washed to the horizon colour, which reads as a glowing ball with nothing
+ * under it. Under 1 because the share is an upper bound - rain and motes a
+ * few tiles out are drawn over whatever the frame has behind them, and the
+ * far ground's whole extinction would put them out.
+ *
+ * Dev seam: `?ehaze=<share>`.
  */
-const EFFECT_FOG_DISTANCE = 12;
+const EFFECT_HAZE_SHARE = 0.85;
 
 const FOG_SHADER = 'muDistanceHaze';
 
@@ -74,6 +85,7 @@ type Runtime = {
 let runtime: Runtime | null = null;
 
 const hazeDev = devQueryNumber('haze');
+const effectHazeDev = devQueryNumber('ehaze');
 
 /**
  * Why a pixel without depth is left alone: the G-buffer holds no blend or
@@ -98,8 +110,8 @@ function registerFogShader(): void {
   uniform vec3 fogColor;   // linear
   uniform vec4 fogParams;  // start, density, cap, height density
   uniform float fogBaseY;
+  uniform float effectShare;
 
-  const float EFFECT_FOG_DISTANCE = ${EFFECT_FOG_DISTANCE.toFixed(1)};
   const float FOG_CLOSE_NEAR = ${FOG_CLOSE_NEAR.toFixed(1)};
   const float FOG_CLOSE_FAR = ${FOG_CLOSE_FAR.toFixed(1)};
 
@@ -146,7 +158,7 @@ function registerFogShader(): void {
     // Extinction only on the emissive half: the light scattered into the ray
     // is already added once, by the surface term.
     float f = hazeAt(dist, camPos.y, rd.y);
-    float fEffect = hazeAt(min(dist, EFFECT_FOG_DISTANCE), camPos.y, rd.y);
+    float fEffect = f * effectShare;
 
     gl_FragColor = vec4(mix(surface, fogColor, f) + effect * (1.0 - fEffect), color.a);
   }
@@ -159,7 +171,14 @@ function createFog(scene: Scene, camera: ArcRotateCamera): PostProcess {
   const fog = new PostProcess(
     'distanceHaze',
     FOG_SHADER,
-    ['invView', 'viewport', 'fogColor', 'fogParams', 'fogBaseY'],
+    [
+      'invView',
+      'viewport',
+      'fogColor',
+      'fogParams',
+      'fogBaseY',
+      'effectShare',
+    ],
     ['depthSampler', EFFECT_MASK_SAMPLER],
     1,
     null,
@@ -199,6 +218,7 @@ function createFog(scene: Scene, camera: ArcRotateCamera): PostProcess {
     effect.setFloat3('fogColor', shown.color[0], shown.color[1], shown.color[2]);
     effect.setFloat4('fogParams', shown.start, shown.density, shown.cap, shown.height);
     effect.setFloat('fogBaseY', fogBaseY);
+    effect.setFloat('effectShare', effectHazeDev ?? EFFECT_HAZE_SHARE);
   };
 
   camera.attachPostProcess(fog);
