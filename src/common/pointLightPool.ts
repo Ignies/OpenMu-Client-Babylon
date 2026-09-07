@@ -211,6 +211,12 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
 
   const step = FADE_SECONDS > 0 ? dt / FADE_SECONDS : 1;
 
+  // `incoming` is in rank order (priority, then distance), so a freeing slot
+  // takes the best emitter still waiting. Popping the *end* of it handed the
+  // slot to the worst one instead, which is the emitter that had just been
+  // pushed out.
+  let next = 0;
+
   for (let i = 0; i < pool.length; i++) {
     const light = pool[i];
     const slot = slots[i];
@@ -221,10 +227,22 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
       ? Math.min(1, slot.fade + step)
       : Math.max(0, slot.fade - step);
 
-    if (!keep && slot.fade <= 0) {
-      slot.emitter = incoming.pop() ?? null;
+    if (!keep) {
+      const waiting = incoming[next] ?? null;
 
-      if (slot.emitter?.instant) slot.fade = 1;
+      // A slot changes hands when it has faded out - except for an event
+      // light, which asks for a slot on the frame the strike happens and is
+      // over inside the 0.35 s that fade takes. Waiting for it meant a skill
+      // flash never lit anything on a map with more torches than slots.
+      // Torch to torch still cross-fades.
+      if (waiting && (slot.fade <= 0 || waiting.instant)) {
+        slot.emitter = waiting;
+        next++;
+
+        if (waiting.instant) slot.fade = 1;
+      } else if (slot.fade <= 0) {
+        slot.emitter = null;
+      }
     }
 
     if (!slot.emitter) {

@@ -43,6 +43,7 @@ import {
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
 import { LiveList, darkCardGain, effectTexture, fadeOut, fxNow, hash, lightCardGain, luma, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
+import { addEffectGlow, releaseEffectGlow } from './glow';
 import { releaseGreasedLineMaterial } from './greasedLineRelease';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
@@ -360,11 +361,14 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
     };
   }
 
+  // The item halo layer draws every active mesh and would rasterise the
+  // ribbon into its map for nothing (no tier, no trim); the ribbon's halo is
+  // the effects layer's.
+  (scene as TestScene).look?.glow.addExcludedMesh(mesh);
+
   // A subtractive ribbon darkens what is behind it; blooming it would re-add
   // the light it just took away.
-  if (blend !== 'subtract') {
-    (scene as TestScene).look?.glow.referenceMeshToUseItsOwnMaterial(mesh);
-  }
+  if (blend !== 'subtract') addEffectGlow(scene, mesh);
 
   const scrollRate = opts.textureScroll ?? 0;
   return {
@@ -384,7 +388,8 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
 function disposeLine(scene: Scene, line: Line, lines: number[][]): void {
   const mesh = line.mesh;
   for (const l of lines) park(l);
-  (scene as TestScene).look?.glow.unReferenceMeshFromUsingItsOwnMaterial(mesh);
+  releaseEffectGlow(mesh);
+  (scene as TestScene).look?.glow.removeExcludedMesh(mesh);
   // Never dispose the shared empty-colours texture, and never through the
   // public `colorsTexture` setter — greasedLineRelease.ts documents both traps.
   releaseGreasedLineMaterial(mesh);
