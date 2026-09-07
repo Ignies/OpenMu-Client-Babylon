@@ -1775,8 +1775,17 @@ export const Store = new (class _Store {
     packet.TargetRotation = dirs[dirs.length - 1];
     packet.setDirections(packed, packed.length);
 
+    this.lastWalkRequest = { x, y, steps: dirs.length, at: performance.now() };
     this.sendToGS(packet.buffer);
   }
+
+  /**
+   * The last walk the server was told about. Read only by `heroMoveTrace`, to
+   * say whether a jump it just made was the end of a walk we thought we had
+   * stopped. Deliberately not observable: nothing renders it.
+   */
+  lastWalkRequest: { x: number; y: number; steps: number; at: number } | null =
+    null;
 
   /**
    * `LetHeroStop()` (ZzzInterface.cpp:1935-1948): the walk a cast opens with.
@@ -1794,6 +1803,12 @@ export const Store = new (class _Store {
     packet.StepCount = 0;
     packet.TargetRotation = walkDirection(rotYRadians);
 
+    this.lastWalkRequest = {
+      x: packet.SourceX,
+      y: packet.SourceY,
+      steps: 0,
+      at: performance.now(),
+    };
     this.sendToGS(packet.buffer);
   }
 
