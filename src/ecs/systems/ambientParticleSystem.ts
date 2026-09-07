@@ -181,9 +181,7 @@ export const AmbientParticleSystem: ISystemFactory = world => {
       active: (map, indoors) =>
         GameOptions.weatherEffects &&
         !indoors &&
-        maps.isOutdoor(map) &&
-        !SNOW_MAPS.has(map) &&
-        !UNDERWATER_MAPS.has(map) &&
+        maps.canRain(map) &&
         (rainTarget(map) > 0 || rainStrength() > 0),
       strength: () => rainStrength(),
     },
