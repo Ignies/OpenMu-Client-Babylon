@@ -12,6 +12,7 @@ import {
   type RoomHooks,
 } from '../rooms';
 import {
+  DEVIAS_CASTLE_HALLS,
   DEVIAS_CASTLE_SPEC,
   DEVIAS_EAST_HEARTH_HOUSE,
   DEVIAS_READING_ROOM,
@@ -20,6 +21,7 @@ import {
   DEVIAS_WEST_HEARTH_HOUSE,
 } from './rooms';
 import type { Room } from './rooms';
+import type { RoomFrame } from '../roomEnumeration';
 
 /**
  * Devias (World 3 / Object3). The original lights nothing indoors here;
@@ -77,7 +79,16 @@ export async function createDevias(world: World) {
   const houses = enumerateRooms(records, DEVIAS_ROOM_SPEC);
   registerRooms(world, houses, DEVIAS_ROOM_SPEC, hooksFor);
 
-  const halls = enumerateRooms(records, DEVIAS_CASTLE_SPEC);
+  // A castle's wall line does not bound its floor the way a house's does (see
+  // rooms.ts), so the enumeration is used to find the halls and read their
+  // base, and each then takes its own floor.
+  const hallFloor = (hall: RoomFrame): RoomFrame => {
+    const row = DEVIAS_CASTLE_HALLS.find(known => sameRoom(hall, known));
+
+    return row ? { ...row, base: hall.base } : hall;
+  };
+
+  const halls = enumerateRooms(records, DEVIAS_CASTLE_SPEC).map(hallFloor);
   registerRooms(world, halls, DEVIAS_CASTLE_SPEC, () => ({
     look: 'deviasCastleHall',
   }));
