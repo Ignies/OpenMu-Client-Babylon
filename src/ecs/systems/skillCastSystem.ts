@@ -290,6 +290,9 @@ export const SkillCastSystem: ISystemFactory = world => {
     update: dt => {
       cooldown -= dt;
       approachDelay -= dt;
+      // Re-armed below for as long as the approach walk is still running, so
+      // a dropped cast never leaves a stale cut on the next ordinary walk.
+      world.castApproach = null;
 
       const hero = world.playerEntity;
       if (!hero || hero.dying) {
@@ -434,6 +437,11 @@ export const SkillCastSystem: ISystemFactory = world => {
       // Force cast (Ctrl) fires in place like the original's force attack -
       // it never walks the hero into range first.
       if (target !== hero && dist > range && !req.forced) {
+        // The walk is aimed at the target's own cell, so both the server and
+        // the client's walker have to be told to give up the last `range`
+        // tiles of it (NetworkSystem, `truncatePathWithinRange`). Without
+        // that the walk ends on top of what the hero came to cast at.
+        world.castApproach = { x: ~~tx, y: ~~ty, range };
         if (approachDelay <= 0) {
           approachDelay = APPROACH_INTERVAL;
           const moveTo = hero.playerMoveTo;
@@ -512,7 +520,11 @@ export const SkillCastSystem: ISystemFactory = world => {
       // Where the cast puts the caster (`combat/skillMovement`): the contact
       // skills close the last tile themselves, either now or partway through
       // the clip.
-      const step = combat.skillStepIn(def.num);
+      // The step closes the last tile, not the whole gap: `SendAttackPacket`
+      // only runs it for a target the skill could already reach. A Ctrl force
+      // cast skips the approach walk, so without the range check here it puts
+      // the caster next to a target anywhere on the map.
+      const step = dist <= range ? combat.skillStepIn(def.num) : null;
       const stepSquare =
         step && target && target !== hero
           ? combat.stepInSquare(

@@ -419,6 +419,14 @@ export class World extends ECSWorld<Entity> {
     forced?: boolean;
   } | null = null;
 
+  /**
+   * The square a cast is walking the hero up to, and how close he has to get
+   * before he stops: `attackTarget`'s opposite number for skills, written by
+   * SkillCastSystem while an approach is in flight and read by NetworkSystem
+   * to cut the walk short of the target. Null on every other frame.
+   */
+  castApproach: { x: number; y: number; range: number } | null = null;
+
   cursorHover: CursorHover | null = null;
 
   /** Emote picked in the radial menu, consumed by EmoteSystem next frame. */
