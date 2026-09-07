@@ -29,6 +29,7 @@ import {
 import { ModelObject } from './common/modelObject';
 import { MonstersDatabase, monsterDisplayName } from './common/monstersDatabase';
 import { onLanguageChanged } from './i18n';
+import { translateServerText } from './i18n/serverText';
 import { loadNpcNames } from './libs/mu/npcNameFile';
 import {
   MonsterActionType,
@@ -2804,13 +2805,14 @@ EventBus.on('ServerMessage', packet => {
   // 10..15 are the slide-help marquee, which has no window here yet.
   switch (p.Type) {
     case 0:
-      Notices.create(text);
+      Notices.create(translateServerText(text));
       break;
     case 1:
       // OpenMU's only self-defense signal is this blue line
-      // (SelfDefensePlugIn.cs); keep the state alongside showing it.
+      // (SelfDefensePlugIn.cs); keep the state alongside showing it. It reads
+      // the server's English, so it has to run before the line is translated.
       Social.trackSelfDefense(text);
-      Social.systemMessage(text);
+      Social.systemMessage(translateServerText(text));
       break;
     case 2:
       Notices.createGuildNotice(text);
@@ -2835,7 +2837,7 @@ EventBus.on('ServerMessage', packet => {
         break;
       }
       console.log(`ServerMessage type ${p.Type}: ${text}`);
-      Social.systemMessage(text);
+      Social.systemMessage(translateServerText(text));
       break;
   }
 });
