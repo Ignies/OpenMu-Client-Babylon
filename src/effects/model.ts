@@ -29,8 +29,8 @@ import { getMaterial, loadGLTF } from '../common/modelLoader';
 import { BlendState } from '../common/objects/enum';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
-import { LiveList, additiveMaterial, fadeOut, lerp, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
-import { MODEL, RGBS } from './recipes';
+import { LiveList, additiveMaterial, darkCardGain, fadeOut, lerp, luma, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
+import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -116,24 +116,35 @@ const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
 const FLAT = Quaternion.FromEulerAngles(0, 0, 0);
 
 /**
- * `RENDER_DARK`'s mesh material: the sheet × tint under `EnableAlphaBlendMinus`
- * (ZzzBMD.cpp:1606). Owned by the spawn, never core.ts's shared cache: under
- * `(ZERO, ONE_MINUS_SRC_COLOR)` fragment alpha never reaches the blend, so the
- * fade must scale *this* material's emissive, and a cache entry is shared.
+ * `RENDER_DARK`'s mesh material (ZzzBMD.cpp:1606). Owned by the spawn, never
+ * core.ts's shared cache: the fade lives on the material and a cache entry is
+ * shared.
+ *
+ * Drawn as black under `(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)` with the sheet as
+ * the coverage, not as `(ZERO, ONE_MINUS_SRC_COLOR)` with the sheet as the
+ * colour. For the greyscale `Light` the original gives these
+ * (ZzzEffectJoint.cpp:3773) the two are the same arithmetic - `dst x (1 - t)`
+ * either way - but the subtract route caps at the sheet's own levels:
+ * `clamp(diffuseBase x diffuseColor + emissiveColor, 0, 1) x texel` means the
+ * emissive can never push the source past the texel, and the Laser01 sheet
+ * averages 0.34. Coverage has no such cap (`alpha = material.alpha x
+ * luminance(sheet)`), so `darkCardGain` can saturate the silhouette on the
+ * graded tiers, where a partial subtraction is flattened by the tone curve.
  */
-function subtractMaterial(scene: Scene, tex: Texture, colour: RGB, owned: StandardMaterial[]): StandardMaterial {
+function subtractMaterial(scene: Scene, tex: Texture, owned: StandardMaterial[]): StandardMaterial {
   const mat = new StandardMaterial('fxModelMinus', scene);
   mat.diffuseColor.set(0, 0, 0);
   mat.specularColor.set(0, 0, 0);
   mat.ambientColor.set(0, 0, 0);
-  mat.emissiveColor.set(colour[0], colour[1], colour[2]);
+  mat.emissiveColor.set(0, 0, 0);
   mat.disableLighting = true;
-  mat.alphaMode = Constants.ALPHA_SUBTRACT;
+  mat.alphaMode = Constants.ALPHA_COMBINE;
   mat.transparencyMode = Material.MATERIAL_ALPHABLEND;
   mat.backFaceCulling = false;
   mat.disableDepthWrite = true;
   mat.fogEnabled = false;
-  mat.diffuseTexture = tex;
+  mat.opacityTexture = tex;
+  mat.opacityTexture.getAlphaFromRGB = true;
   owned.push(mat);
   return mat;
 }
@@ -153,8 +164,9 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const source = opts.follow ?? pointSource(at);
   const colour = opts.colour ?? RGBS.white;
   const subtract = opts.blend === 'subtract';
-  // MODEL_FIRE's additive tail is a flame: light, at the map's level (F12).
-  const light = opts.model === MODEL.fire;
+  // The original's greyscale `Light` is the coverage a RENDER_DARK stamp takes out; the map's
+  // level scales it so the silhouette saturates on a scene-referred buffer (core.ts).
+  const cover = subtract ? luma(colour) * darkCardGain(scene) : 0;
 
   const node = new TransformNode('fxModel', scene);
   node.rotationQuaternion = null;
@@ -209,8 +221,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           mesh.material = isBright
             ? tex
               ? subtract
-                ? subtractMaterial(scene, tex, colour, fadeMats)
-                : additiveMaterial(scene, tex, colour, 'add', light)
+                ? subtractMaterial(scene, tex, fadeMats)
+                : additiveMaterial(scene, tex, colour)
               : brightFallback
             : solid;
           (scene as TestScene).look?.glow.addExcludedMesh(mesh as never);
@@ -242,9 +254,9 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         prevZ = tmp.z;
       }
       const vis = fadeOut(p, tail) * alpha * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1);
-      // A subtractive mesh fades through its own material's emissive —
-      // `visibility` is alpha, which its blend never reads.
-      if (subtract) for (const m of fadeMats) m.emissiveColor.set(colour[0] * vis, colour[1] * vis, colour[2] * vis);
+      // A dark mesh fades through its coverage: `visibility` is clamped at 1 and the
+      // coverage runs past it on the graded tiers.
+      if (subtract) for (const m of fadeMats) m.alpha = cover * vis;
       else for (const m of meshes) m.visibility = vis;
       return true;
     },
