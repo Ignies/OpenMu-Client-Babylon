@@ -25,6 +25,7 @@ import { CalculateScreenPositionSystem } from './systems/calculateScreenPosition
 import { AppearanceSystem } from './systems/appearanceSystem';
 import { ItemGlowSystem } from './systems/itemGlowSystem';
 import { CharacterLightSystem } from './systems/characterLightSystem';
+import { MonsterGlowSystem } from './systems/monsterGlowSystem';
 import { DrawDebugSystem } from './systems/drawDebugSystem';
 import { HighlightSystem } from './systems/highlightSystem';
 import type { TestScene } from '../scenes/testScene';
@@ -106,6 +107,8 @@ const factories: ISystemFactory[] = [
   ItemGlowSystem,
   // Light layer: NPCs/monsters with a CHARACTER_LIGHTS row carry a light.
   CharacterLightSystem,
+  // ...and the ones with a MONSTER_GLOWS row carry their own glow cards.
+  MonsterGlowSystem,
   CameraFollowSystem,
   // Weather layer: the rain ramp, the settled snow, the wetness — stepped
   // before anything reads them .
