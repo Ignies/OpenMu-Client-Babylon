@@ -126,6 +126,7 @@ export const LORENCIA_LEAVES: AmbientRecipe = {
   fade: 0.35,
   ramp: 7,
   schedule: LEAF_GUSTS,
+  skyBorne: true,
 };
 
 export const DEVIAS_SNOW: AmbientRecipe = {
@@ -152,6 +153,7 @@ export const DEVIAS_SNOW: AmbientRecipe = {
   // Snowfall thickens and thins more slowly than a gust of leaves does.
   ramp: 9,
   schedule: SNOW_SQUALLS,
+  skyBorne: true,
 };
 
 /**
@@ -258,6 +260,7 @@ export const RAIN: AmbientRecipe = {
   // above is invariant: light rain does not stop reaching the ground, it
   // just takes 1.85 s to get there instead of 1.15.
   growth: { size: 0.55, length: 0.45, speed: 0.62 },
+  skyBorne: true,
 };
 
 /**

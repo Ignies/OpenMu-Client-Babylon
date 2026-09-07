@@ -377,6 +377,19 @@ const LORENCIA_ROOM = room(1.4, 1);
  */
 const DEVIAS_ROOM = room(1.3, 1);
 
+/**
+ * The two castle halls: twenty tiles across with a colonnade down each side
+ * and a handful of wall candelabra, so the candles reach far less of the room
+ * than a tavern's do and its own level carries more of the picture.
+ *
+ * Not gated against Classic the way F14's rooms are, and it cannot be:
+ * Classic never opens this roof (only the slabs within the hero's fill lift,
+ * F11), so almost no interior surface is comparable between the tiers. On the
+ * one that is - the banner wall over the cutaway, same camera - the hall reads
+ * 0.81x Classic's mean, a little under. This is the knob if it wants raising.
+ */
+const DEVIAS_CASTLE_HALL = room(1.45, 1);
+
 const AREAS = {
   lorenciaTavern: LORENCIA_ROOM,
   lorenciaCabin: LORENCIA_ROOM,
@@ -384,6 +397,7 @@ const AREAS = {
   deviasReadingRoom: DEVIAS_ROOM,
   deviasHearthHouse: DEVIAS_ROOM,
   deviasGuardRoom: DEVIAS_ROOM,
+  deviasCastleHall: DEVIAS_CASTLE_HALL,
 } satisfies Record<string, AreaLook>;
 
 export type AreaLookName = keyof typeof AREAS;

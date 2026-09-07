@@ -12,6 +12,7 @@ import {
   type RoomHooks,
 } from '../rooms';
 import {
+  DEVIAS_CASTLE_SPEC,
   DEVIAS_EAST_HEARTH_HOUSE,
   DEVIAS_READING_ROOM,
   DEVIAS_ROOM_SPEC,
@@ -24,7 +25,8 @@ import type { Room } from './rooms';
  * Devias (World 3 / Object3). The original lights nothing indoors here;
  * the candelabra, hearth fire, warm interior grade, pub music and dust are
  * the Lorencia tavern treatment applied to every roofed building the hero
- * can walk into (see rooms.ts). Dust lives in AmbientParticleSystem.
+ * can walk into (see rooms.ts), the two castle halls included. Dust lives in
+ * AmbientParticleSystem.
  */
 export async function createDevias(world: World) {
   const terrain = world.terrain;
@@ -67,6 +69,16 @@ export async function createDevias(world: World) {
     },
   });
 
-  const rooms = enumerateRooms(await loadRoomRecords(map), DEVIAS_ROOM_SPEC);
-  registerRooms(world, rooms, DEVIAS_ROOM_SPEC, hooksFor);
+  const records = await loadRoomRecords(map);
+
+  // Two kits, so two passes: the houses' spec finds the roofed buildings, the
+  // castles' finds the two halls. One spec cannot do both - the castle kit
+  // stands a storey taller and its walls sit the other side of their line.
+  const houses = enumerateRooms(records, DEVIAS_ROOM_SPEC);
+  registerRooms(world, houses, DEVIAS_ROOM_SPEC, hooksFor);
+
+  const halls = enumerateRooms(records, DEVIAS_CASTLE_SPEC);
+  registerRooms(world, halls, DEVIAS_CASTLE_SPEC, () => ({
+    look: 'deviasCastleHall',
+  }));
 }
