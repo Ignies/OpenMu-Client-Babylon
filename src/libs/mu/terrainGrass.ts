@@ -7,7 +7,8 @@ import {
   type IVector3Like,
   type Scene,
 } from '../babylon/exports';
-import { TERRAIN_SIZE } from '../../common/terrain/consts';
+import { TERRAIN_SIZE, TWFlags } from '../../common/terrain/consts';
+import { isFlagInBinaryMask } from '../../common/utils';
 import { TERRAIN_INDEX } from '../../common/terrain/utils';
 import { registerTerrainMaterial } from '../../scenes/shadows';
 import { CLOUD_UNIFORMS } from '../../lighting/clouds';
@@ -15,6 +16,8 @@ import { ENUM_WORLD } from '../../common/types';
 import { GameOptions } from '../../common/gameOptions';
 import { lightingTier } from '../../common/lightingQuality';
 import { GRASS_CARD_SLOTS, type GrassCards } from './terrainGrassCards';
+import { SNOW_COVER } from './terrainOverlay';
+import { snowCover } from '../../weather/snowCover';
 import {
   TERRAIN_CSM_SAMPLERS,
   TERRAIN_LIGHT_UNIFORMS,
@@ -117,6 +120,26 @@ const TIP_TINT = 1.35;
 /** Per-blade brightness spread, so a field is not one flat tone. */
 const TINT_JITTER = 0.18;
 
+/**
+ * Settled snow, on the grass as well as on the ground.
+ *
+ * The ground under a Devias blade is whitened by the `SNOW_COVER` overlay
+ * (terrainOverlay.ts) - which is the clone's own addition, not the original's.
+ * The grass took none of it, so blades measured 0.84 of the ground they stood
+ * in and read as dark blue streaks over a white field. Snow that lies on the
+ * ground lies on what grows out of it too: the blade takes the same coverage,
+ * whitening toward the overlay's own colour and shortening as it is buried.
+ *
+ * Following terrainOverlay's rule, the colour is a literal and only the
+ * coverage is a uniform, so a uniform that never reaches the GPU reads as
+ * zero and means *no snow* - the safe state, not a white field.
+ */
+const SNOW_COLOUR = SNOW_COVER.colour;
+/** How far toward snow-white a blade goes at full cover. */
+const SNOW_ON_GRASS = 0.85;
+/** What is left of a blade's height at full cover: the rest is buried. */
+const SNOW_BURY = 0.55;
+
 /** Blade geometry: 3 segments, 7 vertices, 5 triangles, unit height. */
 function bladeVertexData(): VertexData {
   const widths = [1.0, 0.78, 0.46];
@@ -154,6 +177,7 @@ function createGrassMaterial(scene: Scene, cards: GrassCards): ShaderMaterial {
   uniform vec3 cameraPosition;
   uniform float time;
   uniform vec2 grassFade; // x start, y end
+  uniform float grassSnow; // settled-snow coverage, 0 = none
   uniform sampler2D grassRamp;
 
   varying vec2 vWorldXZ;
@@ -179,7 +203,9 @@ function createGrassMaterial(scene: Scene, cards: GrassCards): ShaderMaterial {
       // and an alpha ramp would cost it that.
       float dist = distance(iRoot.xz, cameraPosition.xz);
       float near = 1.0 - smoothstep(grassFade.x, grassFade.y, dist);
-      float height = iTint.a * near;
+      // Snow buries what it settles on, so a blade under full cover keeps
+      // only SNOW_BURY of its height.
+      float height = iTint.a * near * mix(1.0, ${SNOW_BURY.toFixed(2)}, grassSnow);
 
       // The bend is weighted v*v so the root stays planted and the tip does
       // the travelling.
@@ -213,7 +239,15 @@ function createGrassMaterial(scene: Scene, cards: GrassCards): ShaderMaterial {
       vec3 card = texture2D(grassRamp, rampUV).rgb;
       float shade = mix(${ROOT_TINT.toFixed(2)}, ${TIP_TINT.toFixed(2)}, v)
         * (1.0 + (hash - 0.5) * ${TINT_JITTER.toFixed(3)});
-      vAlbedo = card * shade;
+
+      // Snow lies on the blade the way it lies on the ground it grows from,
+      // and it lies on the tip more than the root.
+      vec3 snowed = mix(
+        card,
+        vec3(${SNOW_COLOUR[0].toFixed(3)}, ${SNOW_COLOUR[1].toFixed(3)}, ${SNOW_COLOUR[2].toFixed(3)}),
+        grassSnow * ${SNOW_ON_GRASS.toFixed(2)} * mix(0.7, 1.0, v));
+
+      vAlbedo = snowed * shade;
 
       gl_Position = viewProjection * vec4(world, 1.0);
   }
@@ -251,6 +285,7 @@ ${terrainGroundLightGlsl({ bake: 'vBake', clouds: true })}
         'viewProjection',
         'cameraPosition',
         'grassFade',
+        'grassSnow',
         ...TERRAIN_LIGHT_UNIFORMS,
         ...CLOUD_UNIFORMS,
       ],
@@ -278,6 +313,9 @@ ${terrainGroundLightGlsl({ bake: 'vBake', clouds: true })}
 
     bindTerrainLight(effect, scene, true);
     effect.setFloat2('grassFade', FADE_START, FADE_END);
+    // Zero on every map without settled snow, and zero with advancedEffects
+    // off - the same coverage the ground overlay reads.
+    effect.setFloat('grassSnow', GameOptions.advancedEffects ? snowCover() : 0);
     if (cards.ramp) effect.setTexture('grassRamp', cards.ramp);
   });
 
@@ -302,6 +340,8 @@ export type GrassSource = {
   readonly layer1: Uint8Array;
   readonly layer2: Uint8Array;
   readonly alpha: Uint8Array;
+  /** Terrain flags, for the `NoGround` test the mesh makes. */
+  readonly attributes: Uint16Array;
   readonly height: Float32Array;
   readonly light: readonly IVector3Like[];
   /** Which layer-1 slots grow grass here, and the map's authored grass colour. */
@@ -352,6 +392,18 @@ export function createGrassField(
   ): void {
     out.weight = 0;
     out.slot = 0;
+
+    // Before any of the original's rules: is there ground here at all?
+    //
+    // `CreateGroundFromHeightMap` drops a `NoGround` tile's four corners to
+    // -10000, which takes the quad out of sight; the height *array* it reads
+    // is untouched. Sampling that array, as `heightAt` does, put blades at
+    // the nominal height of tiles whose ground had been taken away - grass
+    // hanging in the air over Devias' precipices. Same flag, same index, same
+    // answer as the mesh (customGroundMesh.ts:96).
+    if (isFlagInBinaryMask(src.attributes[TERRAIN_INDEX(x, y)], TWFlags.NoGround)) {
+      return;
+    }
 
     // The original's rule, in its own order (ZzzLodTerrain.cpp:1611-1625).
     //

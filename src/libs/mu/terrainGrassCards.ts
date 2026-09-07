@@ -77,12 +77,11 @@ export const NO_GRASS_CARDS: GrassCards = { slots: new Set(), ramp: null };
  * matters.
  */
 function rampRows(pixels: Uint8ClampedArray, width: number, height: number) {
-  const rows = new Float32Array(RAMP_ROWS * 3);
+  // Every source row first, with the weight that produced it.
+  const srcWeight = new Float32Array(height);
+  const src = new Float32Array(height * 3);
 
-  for (let r = 0; r < RAMP_ROWS; r++) {
-    // v = 0 is the blade's root, which is the *bottom* of the card.
-    const y = Math.min(height - 1, Math.round(((RAMP_ROWS - 1 - r) / (RAMP_ROWS - 1)) * (height - 1)));
-
+  for (let y = 0; y < height; y++) {
     let weight = 0;
     let sr = 0;
     let sg = 0;
@@ -101,11 +100,38 @@ function rampRows(pixels: Uint8ClampedArray, width: number, height: number) {
       sb += pixels[i + 2] * w;
     }
 
+    srcWeight[y] = weight;
+
     if (weight > 0) {
-      rows[r * 3] = sr / weight;
-      rows[r * 3 + 1] = sg / weight;
-      rows[r * 3 + 2] = sb / weight;
+      src[y * 3] = sr / weight;
+      src[y * 3 + 1] = sg / weight;
+      src[y * 3 + 2] = sb / weight;
     }
+  }
+
+  // The tufts do not fill the card: the top rows of every one of these
+  // textures are empty, and sampling the full height straight through gave
+  // every blade a black tip - invisible against Lorencia's dark olive grass
+  // and a black streak against Devias' snow. The blade's 0..1 is stretched
+  // over the band the art actually occupies instead.
+  let top = 0;
+  let bottom = height - 1;
+
+  while (top < height && srcWeight[top] <= 0) top++;
+  while (bottom > top && srcWeight[bottom] <= 0) bottom--;
+
+  const rows = new Float32Array(RAMP_ROWS * 3);
+
+  if (top >= height) return rows;
+
+  for (let r = 0; r < RAMP_ROWS; r++) {
+    // v = 0 is the blade's root, which is the *bottom* of the card.
+    const t = r / (RAMP_ROWS - 1);
+    const y = Math.round(bottom - t * (bottom - top));
+
+    rows[r * 3] = src[y * 3];
+    rows[r * 3 + 1] = src[y * 3 + 1];
+    rows[r * 3 + 2] = src[y * 3 + 2];
   }
 
   return rows;
