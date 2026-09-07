@@ -13,6 +13,7 @@ import {
 } from '../libs/babylon/exports';
 import { loadEffectTexture } from '../common/moveTargetEffect';
 import { linearBufferActive } from '../common/lightModel';
+import { devQueryNumber } from '../common/devSeams';
 import { lookDirector } from '../lighting/director';
 import type { Entity } from '../ecs/world';
 import type { TestScene } from '../scenes/testScene';
@@ -233,6 +234,15 @@ export function keepDepthForEffects(scene: Scene): void {
   scene.setRenderingAutoClearDepthStencil(EFFECT_RENDERING_GROUP, false);
 }
 
+/**
+ * How much of the map's level a dark card takes as coverage. Full level
+ * saturates the whole sheet into a flat slab and loses the art's own shading;
+ * this is the measured point where the silhouette reads as black on a graded
+ * frame and still keeps its internal detail (2026-09-07 sweep, 1 / 0.75 /
+ * 0.55 / 0.35). Dev seam: `?darkgain=`.
+ */
+const DARK_COVERAGE = 0.7;
+
 /** The map's level, `2^ev` (lighting/director `keyGain`). 1 on Classic. */
 function mapKey(): number {
   return lookDirector()?.state().keyGain ?? 1;
@@ -270,15 +280,21 @@ export function lightCardGain(scene: Scene): number {
  * The same rule for `RENDER_DARK`. A subtraction removes a *fraction of the
  * frame*, and the original applied it to a display buffer; on a scene-referred
  * one that fraction is worth far less by the time the tone curve has
- * compressed what is left, so the coverage takes the map's level too and the
- * silhouette saturates. Zero is the one value the curve cannot move.
+ * compressed what is left, so the coverage takes the map's level too.
  *
- * Coverage is alpha and alpha is never decoded, so no 1/2.2 here; and only
- * the linear buffer needs it - with post off the frame is display-referred
- * and the sheet's own levels are already right.
+ * Unlike the light gain this one is **not** gated on the buffer. It was, and
+ * that made a dark effect a different effect either side of the post
+ * processing switch - the point of the switch is the grade, not the art
+ * (2026-09-07). Coverage is alpha and alpha is never decoded, so no 1/2.2
+ * here either; the two tiers differ only in the frame the same silhouette
+ * lands on, and on a graded frame that reads blacker because the surround is
+ * not clipped to white.
  */
-export function darkCardGain(scene: Scene): number {
-  return linearBufferActive(scene) ? mapKey() : 1;
+export function darkCardGain(_scene: Scene): number {
+  // Never under 1: the sheet's own levels are what the art was drawn at, and
+  // Classic composites in the buffer it was drawn for. The map's level only
+  // ever lifts a dark card above that, never below.
+  return Math.max(1, mapKey() * (devQueryNumber('darkgain') ?? DARK_COVERAGE));
 }
 
 /** MU's two effect blends: `EnableAlphaBlend` (ONE, ONE) and `EnableAlphaBlendMinus` (ZERO, ONE_MINUS_SRC_COLOR). */

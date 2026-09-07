@@ -103,6 +103,8 @@ const FIVE_SPREAD = [-20, -10, 0, 10, 20].map(d => (d * Math.PI) / 180);
 const SPIRIT_ECHOES = [1, 1, 0.85, 0.6];
 /** The violet sheen over the black spirit: the same skull drawn additive on top of its own cut-out. */
 const SPIRIT_GLOW: RGB = [0.3, 0.07, 0.45];
+/** The siphon thread pulled off the cast's victim: dimmer than the spirits' own violet. */
+const SPIRIT_SIPHON: RGB = [0.6, 0.14, 0.95];
 /** Persistent-buff ribbons: the original's five MODEL_SPEARSKILL joints. */
 const BUFF_RIBBONS = 5;
 
@@ -338,6 +340,42 @@ const streamerFan = (
     const heading = new Vector3(f.x * Math.cos(pitch), Math.sin(pitch), f.z * Math.cos(pitch));
     effects.spawn('joint', c.scene, at, { ...o, heading });
   }
+};
+/**
+ * The swarm feeding: a thin violet thread from whatever the cast landed on
+ * back to the caster, with shade motes lifting off the victim for as long as
+ * the spirits are up. Drain Life (214) is the same vocabulary. Nothing at all
+ * when the cast hit bare ground, which is most casts.
+ *
+ * `c.target` is the object standing on the cast point (`logic.ts objectOnTile`),
+ * the only victim the client is told about - the rest of the swarm's hits are
+ * the server's business and never reach the client as such.
+ */
+const siphonFrom = (seconds: number): Step => (_at, c) => {
+  const victim = c.target;
+  if (!victim || victim === c.caster || !victim.transform) return;
+  // Latches at the last seen spot: a despawned victim's `entityPos` is the
+  // map origin, and the thread would whip across the map to reach it.
+  const held = entityPos(victim, IMPACT_HEIGHT, new Vector3());
+  const from: PointSource = out =>
+    entityGone(victim) ? out.copyFrom(held) : out.copyFrom(entityPos(victim, IMPACT_HEIGHT, held));
+  // Low jitter and a scrolling sheet: a bolt's zigzag reads as lightning, and
+  // this has to look drawn *out* of the body, not struck into it - the scroll
+  // is what sells the direction.
+  effects.spawn('joint', c.scene, held.clone(), {
+    from,
+    to: followEntity(c.caster, CAST_HEIGHT),
+    colour: SPIRIT_SIPHON,
+    seconds,
+    width: 0.34,
+    jitter: 0.02,
+    segments: 8,
+    texture: TEX.jointSpirit,
+    textureRepeats: 3,
+    textureScroll: 1.2,
+    until: () => entityGone(c.caster),
+  });
+  effects.spawn('particles', c.scene, held.clone(), { recipe: SHADE_MOTES, rate: 14, seconds, follow: from });
 };
 /**
  * Swell Life / Add Mana: 36× CreateJoint(JOINT_SPIRIT sub2, Angle(−10,0,i*10),
@@ -651,6 +689,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
         effects.spawn('particles', c.scene, at, { recipe: SHADE_MOTES, rate: 16, seconds, follow: out => out.copyFrom(trail[0]) });
       }
       particles({ recipe: SHADE_MOTES, count: 24 })(at, c);
+      siphonFrom(seconds)(at, c);
     }, 1),
   },
   // 10 Hellfire: impact@caster — MODEL_CIRCLE LT 45 + MODEL_CIRCLE_LIGHT LT 40 (BlendMesh 0), stones, EarthQuake shake.
@@ -1607,26 +1646,31 @@ export function clearBuffVisuals(entity: Entity): void {
 }
 
 // Dev hook for the live harness: no offline test character casts every skill,
-// so probes fire a row by hand (`window.__skillVisuals.area(9)`).
+// so probes fire a row by hand (`window.__skillVisuals.area(9)`). `victim` is
+// whatever else is standing about - offline that is the second test character,
+// and it stands in for the object `logic.ts` finds on the cast point, so the
+// rows that draw at a target (a bolt, a siphon) can be shot at all.
 if (import.meta.env.DEV && typeof window !== 'undefined') {
+  const victim = (): Entity | null => {
+    const world = storeRef().world;
+    const caster = world?.playerEntity;
+    if (!world || !caster) return null;
+    const alive = (e: Entity): boolean => e !== caster && !!e.transform && !e.dying;
+    return world.netObjsQuery.entities.find(alive) ?? world.playersQuery.entities.find(alive) ?? null;
+  };
   (window as unknown as { __skillVisuals: unknown }).__skillVisuals = {
     area: (skill: number) => {
       const world = storeRef().world;
       const caster = world?.playerEntity;
       if (!world || !caster?.transform) return false;
-      playAreaSkillVisual(world.scene, skill, caster, null, (x, y) => world.getTerrainHeight(x, y));
+      playAreaSkillVisual(world.scene, skill, caster, null, (x, y) => world.getTerrainHeight(x, y), victim());
       return true;
     },
     targeted: (skill: number) => {
       const world = storeRef().world;
       const caster = world?.playerEntity;
       if (!world || !caster?.transform) return false;
-      // Whatever else is standing about, so bolts and beams have somewhere to go.
-      const target =
-        world.netObjsQuery.entities.find(e => e !== caster && e.transform && !e.dying) ??
-        world.playersQuery.entities.find(e => e !== caster && e.transform && !e.dying) ??
-        null;
-      playTargetedSkillVisual(world.scene, skill, caster, target);
+      playTargetedSkillVisual(world.scene, skill, caster, victim());
       return true;
     },
   };
