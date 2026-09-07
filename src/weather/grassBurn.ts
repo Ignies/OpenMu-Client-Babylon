@@ -1,9 +1,16 @@
 import type { WeatherLayer } from './layer';
-import { RawTexture, Texture, Vector3, type Scene } from '../libs/babylon/exports';
+import {
+  Constants,
+  RawTexture,
+  Texture,
+  Vector3,
+  type Scene,
+} from '../libs/babylon/exports';
 import type { ThinEngine } from '@babylonjs/core/Engines/thinEngine';
 import { GameOptions } from '../common/gameOptions';
 import { effects } from '../effects';
-import { FIRE_SPARKS } from '../effects/recipes';
+import { FIRE_SPARKS, FLAME_TONGUES } from '../effects/recipes';
+import type { ParticleRecipe } from '../effects/core';
 
 /**
  * Grass that has been set on fire, and the fire still doing it.
@@ -82,8 +89,36 @@ const STARVE_RATE = 2.5;
 /** Points sampled around a ring to ask whether there is still fuel. */
 const FUEL_SAMPLES = 8;
 
-/** Seconds between ember bursts from one front. */
-const EMBER_EVERY = 0.12;
+/**
+ * Seconds between ember bursts from one front, and sparks a burst.
+ *
+ * Per front, which is what makes the rate matter: six fires at four sparks
+ * every eighth of a second is two hundred a second, and at any distance that
+ * stops being embers and becomes a pale haze hanging over the field. The
+ * texture and the size were right all along - it was the count.
+ */
+const EMBER_EVERY = 0.3;
+const EMBER_SPARKS = 3;
+
+/** Tongues of flame per burst, standing up out of the blades on the ring. */
+const FLAME_TONGUES_PER_BURST = 3;
+
+/**
+ * The ember off burning grass.
+ *
+ * `FIRE_SPARKS` is the skills' own, sized for a fireball going off at chest
+ * height, and at a third of a tile it lies in the grass like an orange brick.
+ * Same texture and the same colours, a third of the size, and it falls rather
+ * than flying: this comes off a blade, not out of an explosion.
+ */
+const GRASS_EMBERS: ParticleRecipe = {
+  ...FIRE_SPARKS,
+  size: 0.05,
+  sizeJitter: 0.02,
+  life: 0.9,
+  power: 0.7,
+  gravity: -1.2,
+};
 
 /** How black a texel goes when the fire passes over it. */
 const CHAR = 255;
@@ -178,16 +213,34 @@ function ensureData(): Uint8Array {
 export function grassBurnTexture(scene: Scene): RawTexture {
   if (texture && texture.getScene() === scene) return texture;
 
-  // `data` may still be null: a texture built from none is all zero, which is
-  // exactly an unburnt map. The first fire uploads its rect.
+  // Allocated here rather than left null until the first fire.
+  //
+  // `snowTrail` gets away with a null-backed texture because nothing asks it
+  // for one until something has been ploughed. This one is bound by the
+  // terrain and the grass on the very first frame, so it would be created
+  // empty, and a texture Babylon was given no storage for is not one that a
+  // later `updateTextureData` can fill: every burn wrote into the CPU array,
+  // the uploads all reported success, and the shader sampled zero for ever.
+  // One megabyte of zeroes on a map that has grass, against that.
   texture = RawTexture.CreateRTexture(
-    data,
+    ensureData(),
     BURN_SIZE,
     BURN_SIZE,
     scene,
     false,
     false,
-    Texture.BILINEAR_SAMPLINGMODE
+    Texture.BILINEAR_SAMPLINGMODE,
+    // The type, and it has to be said.
+    //
+    // `CreateRTexture` defaults to `TEXTURETYPE_FLOAT`, so a texture handed a
+    // `Uint8Array` is allocated as float and every byte written into it goes
+    // nowhere - silently. Everything else looked right the whole time: the CPU
+    // scar had 1.0 in it, `terrainBurnOn` bound as 1, the sampler bound the
+    // right texture by name, `updateTextureData` returned without complaint,
+    // and reading the texture back gave 1048576 zeroes. Only the embers ever
+    // showed, because the embers are the one part of this that does not read
+    // the map.
+    Constants.TEXTURETYPE_UNSIGNED_INT
   );
   texture.name = 'grassBurn';
   texture.wrapU = Texture.CLAMP_ADDRESSMODE;
@@ -361,14 +414,25 @@ function embers(fire: Fire, dt: number): void {
 
   if (!hasFuel(x, z)) return;
 
-  // A fresh vector, not the scratch one this used to reuse. `effects.spawn`
-  // takes a `PointSource`, which a burst may hold and read again later, so a
-  // shared vector drags every ember already in the air to wherever the next
-  // one is emitted - which put sparks and smoke out at the horizon, nowhere
-  // near any fire. A few allocations a second against that is nothing.
-  effects.spawn('particles', scene, new Vector3(x, groundAt(x, z), z), {
-    recipe: FIRE_SPARKS,
-    count: 4,
+  const at = new Vector3(x, groundAt(x, z), z);
+
+  // The flame front itself, which is the thing that was missing. Sparks alone
+  // are what a fire leaves behind, not what it looks like: with only embers
+  // in the air there was nothing burning anywhere on screen, just some orange
+  // chips over ordinary grass. The tongues stand up out of the blades along
+  // the ring and travel with it.
+  effects.spawn('particles', scene, at, {
+    recipe: FLAME_TONGUES,
+    count: FLAME_TONGUES_PER_BURST,
+  });
+
+  // And the embers off it. `GRASS_EMBERS` rather than `FIRE_SPARKS`: the
+  // skills' own spark is sized for a fireball going off at chest height and
+  // is far too big for something coming off burning grass, where it reads as
+  // an orange brick lying in the field.
+  effects.spawn('particles', scene, at, {
+    recipe: GRASS_EMBERS,
+    count: EMBER_SPARKS,
   });
 }
 

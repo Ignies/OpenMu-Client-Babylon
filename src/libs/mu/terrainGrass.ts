@@ -207,6 +207,25 @@ const BURN_WITHER = 0.25;
 const CHAR_COLOUR = [0.08, 0.06, 0.045] as const;
 const CHAR_TINT = 0.85;
 
+/**
+ * The dissolve edge travelling down a burning blade.
+ *
+ * `RIM` is how much of the blade is glowing ember at the cut and `CHAR` how
+ * much is blackened behind it, both as a fraction of the blade's length. The
+ * rim is deliberately thin: it is a line of fire, and widening it turns the
+ * whole blade orange, which reads as a lit blade rather than a burning one.
+ *
+ * `WOBBLE` and `FREQ` bend the cut per blade off its own hash, so a burning
+ * patch does not go as one straight line drawn across the field.
+ */
+const DISSOLVE_RIM = 0.055;
+const DISSOLVE_CHAR = 0.22;
+const DISSOLVE_WOBBLE = 0.045;
+const DISSOLVE_FREQ = 7;
+
+/** The ember line itself. Above 1 so the bloom pass has something to catch. */
+const EMBER_COLOUR = [2.6, 0.85, 0.18] as const;
+
 /** Tufts per tile, and how far a blade strays from its tuft, in tiles. */
 const CLUMPS_PER_TILE = 4;
 const CLUMP_SPREAD = 0.34;
@@ -436,6 +455,8 @@ ${detailed ? `  uniform vec4 grassActors[${GRASS_ACTORS}];` : ''}
   varying vec3 vBake;
   varying vec3 vAlbedo;
   varying float vV;
+  varying float vBurn; // 0 whole, 1 taken by the fire
+  varying float vSeed; // the blade hash, so its dissolve is its own
 ${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;' : ''}
 
   void main() {
@@ -481,13 +502,20 @@ ${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;'
 
       // This blade's own threshold, from the hash it already carries.
       float burnAt = ${BURN_MIN.toFixed(2)} + h3 * h3 * h3 * ${BURN_SPREAD.toFixed(2)};
-      float gone = smoothstep(burnAt, burnAt + ${BURN_WITHER.toFixed(2)}, burnt);
+      // How far past its own threshold the fire has taken this blade, 0..1.
+      // The fragment stage eats the blade with it; the geometry stays whole.
+      //
+      // It used to scale the height instead, and a blade shortening to nothing
+      // is invisible: the field just gets a little sparser, which at any
+      // distance reads as nothing at all. What a burning thing looks like is
+      // an *edge* - a line of ember travelling across it with the material
+      // gone behind it - so that is what this is.
+      vBurn = clamp((burnt - burnAt) / ${BURN_WITHER.toFixed(2)}, 0.0, 1.0);
+      vSeed = hash;
       // How far this one has charred on its way there. A blade blackens before
       // it goes, which is what makes the edge read as fire and not as an
       // eraser passing over the field.
       float charred = smoothstep(0.0, burnAt, burnt);
-
-      height *= 1.0 - gone;
 
 ${
   detailed
@@ -635,6 +663,8 @@ ${
   varying vec3 vBake;
   varying vec3 vAlbedo;
   varying float vV;
+  varying float vBurn;
+  varying float vSeed;
 ${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;\n  uniform vec3 grassSun;' : ''}
 
 ${terrainLightDeclarationsGlsl(true)}
@@ -661,6 +691,34 @@ ${
     vec3 f = albedo * groundLit;
     f = muLightTint(f, groundLit);
     f = mix(f, pow(max(f, vec3(0.0)), vec3(2.2)), linearOut);
+
+    // The blade being eaten, from the tip down.
+    //
+    // A dissolve and not a shrink. The blade's geometry stays whole and the
+    // fragment stage takes it away, so what the eye follows is an *edge*
+    // travelling down each leaf with a line of ember on it. Scaling the height
+    // instead - which is what this did first - is invisible: a field of blades
+    // getting shorter is a field getting slightly sparser, and at any distance
+    // that reads as nothing happening at all.
+    //
+    // The wobble is per blade, off the hash, so a patch does not burn as one
+    // straight line across.
+    if (vBurn > 0.0) {
+      float wobble = ${DISSOLVE_WOBBLE.toFixed(3)}
+        * sin(vV * ${DISSOLVE_FREQ.toFixed(1)} + vSeed * 40.0);
+      float edge = 1.0 - vBurn + wobble;
+      float past = vV - edge;
+
+      if (past > 0.0) discard;
+
+      // The ember line just under the cut, and the char just under that. This
+      // is the only part of the blade that is brighter than the field, and it
+      // is what says fire rather than says missing.
+      f = mix(f, vec3(${CHAR_COLOUR[0].toFixed(3)}, ${CHAR_COLOUR[1].toFixed(3)}, ${CHAR_COLOUR[2].toFixed(3)}),
+        smoothstep(-${DISSOLVE_CHAR.toFixed(2)}, 0.0, past));
+      f = mix(f, vec3(${EMBER_COLOUR[0].toFixed(2)}, ${EMBER_COLOUR[1].toFixed(2)}, ${EMBER_COLOUR[2].toFixed(2)}),
+        smoothstep(-${DISSOLVE_RIM.toFixed(3)}, 0.0, past));
+    }
 
     gl_FragColor = vec4(f, 1.0);
   }
