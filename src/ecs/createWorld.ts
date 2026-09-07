@@ -17,6 +17,7 @@ import { AmbientParticleSystem } from './systems/ambientParticleSystem';
 import { WeatherSystem } from './systems/weatherSystem';
 import { TerrainMaskSystem } from './systems/terrainMaskSystem';
 import { FootprintSystem } from './systems/footprintSystem';
+import { BoidSystem } from './systems/boidSystem';
 import { TerrainGrassSystem } from './systems/terrainGrassSystem';
 import { NetworkSystem } from './systems/networkSystem';
 import { OutOfScopeSystem } from './systems/outOfScopeSystem';
@@ -119,6 +120,8 @@ const factories: ISystemFactory[] = [
   // After the camera has been moved this frame: the grass streams blocks in
   // around where the camera is actually looking.
   TerrainGrassSystem,
+  // The ambient wildlife: spawned around the hero, dropped when it drifts off.
+  BoidSystem,
   // Before the projection: it places the side bubbles' world anchor, which
   // CalculateScreenPositionSystem then projects.
   EmojiBubbleSystem,
