@@ -4,6 +4,7 @@ import type { Entity } from '../ecs/world';
 import { skillDefinition } from '../common/skillsDatabase';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
+import { tierIndex } from '../common/lightingQuality';
 import { arc, ember, flame, frost, holy, shade, spark, tide, venom } from './recipes';
 
 /**
@@ -52,7 +53,16 @@ export type SkillLight = {
   readonly travel?: LightRecipe & { readonly speed: number };
   readonly impact?: LightRecipe;
   readonly area?: LightRecipe;
+  /**
+   * `trail`: one light per moving body the effect spawns, riding it. The
+   * effects layer owns those paths, so it hands a `follow` over per body and
+   * this layer decides whether the tier can carry them.
+   */
+  readonly trail?: LightRecipe;
 };
+
+/** Lighting tier that carries per-body effect lights. */
+const ULTRA_TIER = 2;
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
 export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
@@ -71,7 +81,7 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Twister: MODEL_STORM range 5 (:10480).
   8: { area: { color: [0.75, 0.8, 0.9], range: 5, seconds: 1.4 } },
   // Evil Spirit: the original lights nothing here; a violet wash is ours.
-  9: { area: shade(3, 1.2) },
+  9: { area: shade(3, 1.2), trail: { ...shade(2.4, 49 / 25), gain: 1.3, floorGain: 1.2, release: 0.4 } },
   // Hellfire: BITMAP_FLAME range 3, as Flame, brighter.
   10: { area: flame(4, 1.5, { gain: 1.4, floorGain: 1.3 }) },
   // Power Wave: MODEL_WAVE range 5 (:9610).
@@ -234,6 +244,28 @@ export function lightAreaSkill(
   const area = row?.area ?? row?.impact;
 
   if (area) attach(scene, area, { position: { ...at } });
+}
+
+/**
+ * Command: a light riding one of a skill's moving bodies - Evil Spirit's four
+ * spirits, each carrying its own violet. Ultra only: four of these is half the
+ * point-light pool, and Ultra is the tier that budgets for that. Returns null
+ * when the row has no `trail` or the tier will not carry it, so the caller can
+ * skip its own bookkeeping.
+ */
+export function lightSkillTrail(
+  scene: Scene,
+  skill: number,
+  follow: (out: { x: number; y: number; z: number }) => void
+): LightSource | null {
+  const recipe = SKILL_LIGHTS[skill]?.trail;
+
+  if (!recipe || tierIndex() < ULTRA_TIER) return null;
+
+  const position = { x: 0, y: 0, z: 0 };
+  follow(position);
+
+  return attach(scene, recipe, { position, follow });
 }
 
 function update(): void {

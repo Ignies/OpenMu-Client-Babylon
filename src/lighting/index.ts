@@ -12,7 +12,7 @@ import {
   type LightAnchor,
   type LightRecipe,
 } from './lightSource';
-import { lightAreaSkill, lightTargetedSkill } from './skills';
+import { lightAreaSkill, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
@@ -115,6 +115,18 @@ class Lighting {
     at: { x: number; y: number; z: number }
   ): void {
     lightAreaSkill(scene, skill, caster, at);
+  }
+
+  /**
+   * Light one of a skill's moving bodies - a spirit, a wisp - for as long as
+   * the effect drives it. Null when the tier will not carry per-body lights.
+   */
+  skillTrail(
+    scene: Scene,
+    skill: number,
+    follow: (out: { x: number; y: number; z: number }) => void
+  ): LightSource | null {
+    return lightSkillTrail(scene, skill, follow);
   }
 
   /** Light a server object effect (level-up, shields, swirl) on an entity. */

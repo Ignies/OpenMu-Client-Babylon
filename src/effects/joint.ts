@@ -73,6 +73,13 @@ const TAIL_SAMPLE_SECONDS = 0.04;
 /** Fork slot count; each fork is a shorter bolt off a random middle segment. */
 const MAX_FORKS = 3;
 
+/** `taper`: width at the very nose, and how far along the ribbon it reaches full. */
+const NOSE_WIDTH = 0.5;
+const NOSE_SPAN = 0.12;
+
+/** `taper`: the tail falloff exponent. Under 1 holds the body wide and points the last stretch. */
+const TAIL_FALLOFF = 0.55;
+
 /** Where an inactive line is parked. */
 const PARKED_Y = -1000;
 
@@ -125,6 +132,13 @@ export interface JointOptions {
   fadeTail?: number;
   /** Trail: segments kept behind the head (C++ `MaxTails`). */
   maxTails?: number;
+  /**
+   * Narrow the ribbon toward its ends instead of cutting it off square: a
+   * rounded nose and a tail that comes to a point. A constant-width ribbon is
+   * what the original draws, and on a short trail it reads as a rectangular
+   * plank sliding about rather than as something alive.
+   */
+  taper?: boolean;
   colour?: RGB;
   /** Lifetime; `Infinity` lives until `stop()` / `until` (the original's LT 999999). */
   seconds?: number;
@@ -226,6 +240,25 @@ function rampUVs(lines: number[][], repeats: number): number[] {
   return uvs;
 }
 
+/**
+ * `taper`'s width multipliers, two per point (lower, upper). Point 0 is the
+ * head (`spawnTrail` shifts the history down from slot 0), so the nose is
+ * rounded off over the first tenth and the rest falls to a point at the tail.
+ */
+function taperWidths(lines: number[][]): number[] {
+  const widths: number[] = [];
+  for (const line of lines) {
+    const points = line.length / 3;
+    for (let i = 0; i < points; i++) {
+      const s = points > 1 ? i / (points - 1) : 0;
+      const nose = Math.min(1, NOSE_WIDTH + s * (1 - NOSE_WIDTH) / NOSE_SPAN);
+      const w = nose * Math.pow(1 - s, TAIL_FALLOFF);
+      widths.push(w, w);
+    }
+  }
+  return widths;
+}
+
 function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, opts: JointOptions): Line {
   const blend = opts.blend ?? 'add';
   const sheetFile = opts.texture;
@@ -239,7 +272,12 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
       : Constants.ALPHA_ADD;
   const mesh = CreateGreasedLine(
     'fxJoint',
-    { points: lines, updatable: true, ...(textured ? { uvs: rampUVs(lines, repeats) } : {}) },
+    {
+      points: lines,
+      updatable: true,
+      ...(textured ? { uvs: rampUVs(lines, repeats) } : {}),
+      ...(opts.taper ? { widths: taperWidths(lines) } : {}),
+    },
     {
       // With a texture the colour rides in `emissiveColor` below — the plugin's
       // own colour would *replace* the sampled texel (COLOR_MODE_SET).
