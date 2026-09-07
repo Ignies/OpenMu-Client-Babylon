@@ -177,6 +177,7 @@ export const frenchLayer: LanguageLayer = {
     'options.ambientParticles': 'Particules d’ambiance',
     'options.weatherEffects': 'Météo',
     'options.animatedWater': 'Eau animée',
+    'options.grassDensity': 'Herbe',
     'options.advancedEffects': 'Effets avancés',
     'options.renderDistance': 'Distance d’affichage',
     'options.lightingQuality': 'Éclairage',

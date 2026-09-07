@@ -176,6 +176,7 @@ export const chineseLayer: LanguageLayer = {
     'options.ambientParticles': '环境粒子',
     'options.weatherEffects': '天气',
     'options.animatedWater': '水面动画',
+    'options.grassDensity': '草地',
     'options.advancedEffects': '高级特效',
     'options.renderDistance': '渲染距离',
     'options.lightingQuality': '光照',

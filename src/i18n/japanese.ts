@@ -178,6 +178,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.ambientParticles': '環境パーティクル',
     'options.weatherEffects': '天候',
     'options.animatedWater': '水面のアニメーション',
+    'options.grassDensity': '草',
     'options.advancedEffects': '高度なエフェクト',
     'options.renderDistance': '描画距離',
     'options.lightingQuality': 'ライティング',

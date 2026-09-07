@@ -186,6 +186,7 @@ export const spanishLayer: LanguageLayer = {
     'options.ambientParticles': 'Partículas ambientales',
     'options.weatherEffects': 'Clima',
     'options.animatedWater': 'Agua animada',
+    'options.grassDensity': 'Hierba',
     'options.advancedEffects': 'Efectos avanzados',
     'options.renderDistance': 'Distancia de renderizado',
     'options.lightingQuality': 'Iluminación',

@@ -176,6 +176,7 @@ export const italianLayer: LanguageLayer = {
     'options.ambientParticles': 'Particelle ambientali',
     'options.weatherEffects': 'Meteo',
     'options.animatedWater': 'Acqua animata',
+    'options.grassDensity': 'Erba',
     'options.advancedEffects': 'Effetti avanzati',
     'options.renderDistance': 'Distanza di rendering',
     'options.lightingQuality': 'Illuminazione',
