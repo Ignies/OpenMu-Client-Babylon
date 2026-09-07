@@ -1,6 +1,5 @@
 import { ENUM_WORLD } from '../../common/types';
 import type { MapLayer } from '../layer';
-import { ROCK04_TILES } from '../recipes';
 import {
   STADIUM_BLEND_MESHES,
   STADIUM_EFFECT_ONLY_TYPES,
@@ -19,6 +18,22 @@ const WORLDS: readonly ENUM_WORLD[] = [
   ENUM_WORLD.WD_6STADIUM,
 ];
 
+// World7 has no TileGround01: TileGround02 stands in for slot 2. Fetching the
+// missing file failed the whole terrain download, so the arena never loaded.
+const TILES: readonly string[] = [
+  'TileGrass01',
+  'TileGrass02',
+  'TileGround02',
+  'TileGround02',
+  'TileGround03',
+  'TileWater01',
+  'TileWood01',
+  'TileRock01',
+  'TileRock02',
+  'TileRock03',
+  'TileRock04',
+];
+
 // OpenMU's spawn gate (VersionSeasonSix/Gates.cs, the `isSpawnGate: true` row), centred.
 const SPAWN = { x: 56, y: 85 } as const;
 
@@ -33,7 +48,7 @@ const OUTDOOR = true;
 export const stadiumLayer: MapLayer = {
   name: 'stadium',
   worlds: WORLDS,
-  tiles: ROCK04_TILES,
+  tiles: TILES,
   spawn: SPAWN,
   outdoor: OUTDOOR,
   blendMeshes: STADIUM_BLEND_MESHES,
