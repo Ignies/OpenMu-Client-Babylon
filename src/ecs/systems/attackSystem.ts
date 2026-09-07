@@ -11,6 +11,7 @@ import { isFlagInBinaryMask } from '../../common/utils';
 import { chooseAttackAction } from '../../common/playerActionMapper';
 import { combat } from '../../combat';
 import { MOUSE_UPDATE_SECONDS_MAX } from '../../combat/inputGate';
+import { skillDefinition } from '../../common/skillsDatabase';
 import { truncatePathWithinRange } from '../../common/approachPath';
 
 /**
@@ -139,6 +140,15 @@ export const AttackSystem: ISystemFactory = world => {
         world.attackTarget = null;
         return;
       }
+
+      // A cast is being served this frame: it owns the hero. `Action()` runs
+      // one movement intent, and these two do not agree on where to stand -
+      // the swing walks into weapon reach, the cast stands off at the skill's
+      // range. Left set against each other they take turns on the same
+      // `playerMoveTo` every frame and drag the hero onto what he is casting
+      // at. The target stays selected (the health bar, head tracking and the
+      // mobile skill pad all read it); only the walk and the swing yield.
+      if (world.castRequest && skillDefinition(Store.currentSkill)) return;
 
       const hands = playerEntity.charAppearance;
       const playerPos = playerEntity.transform.pos;

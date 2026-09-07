@@ -247,6 +247,7 @@ import { Entity, type Item, World } from './ecs/world';
 import { createAttributeSystem } from './libs/attributeSystem';
 import { classWorldScale } from './common/characterScale';
 import { skillDefinition } from './common/skillsDatabase';
+import { traceHeroInstantMove } from './common/heroMoveTrace';
 import { chooseSkillAction } from './common/skillCasting';
 import { getBaseClass, BaseClass } from './common/characterStats';
 import { SKILL_TO_EFFECT } from './common/magicEffects';
@@ -1149,6 +1150,14 @@ EventBus.on('ObjectMoved', packet => {
   const obj = world.getByNetId(maskedId);
   if (!obj) return;
   if (isDeadMonster(obj)) return;
+
+  if (obj.localPlayer) {
+    traceHeroInstantMove(
+      obj,
+      { x: p.PositionX, y: p.PositionY },
+      { attack: world.attackTarget, cast: world.castApproach }
+    );
+  }
 
   obj.transform.pos.x = p.PositionX;
   obj.transform.pos.z = p.PositionY;
