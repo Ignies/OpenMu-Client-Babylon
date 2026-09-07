@@ -5,7 +5,6 @@ import {
   linearLightActive,
 } from '../../common/lightModel';
 import { lookDirector } from '../../lighting/director';
-import { lightingTier } from '../../common/lightingQuality';
 import {
   bindClouds,
   cloudFieldGlsl,
@@ -64,64 +63,12 @@ import {
 const GROUND_CEIL_KNEE = 0.85;
 const GROUND_CEIL_ASYMPTOTE = 1.1;
 
-/**
- * How far the ground's baked lightmap is pulled toward its own mean on tiers
- * that have real shadows to put there instead.
- *
- * 0 is the lightmap as authored, which is what Classic gets: that tier exists
- * to be compared against the reference client and the bake is the reference.
- * At 0.55 Lorencia's 10th-to-90th spread goes from 4:1 to about 1.8:1 - still
- * clearly varied ground, no longer a painted-on weather system.
- */
-const BAKE_FLATTEN = 0.55;
-
-/** The live map's mean bake, per channel. Set at load; identity until then. */
-let bakePivot: readonly [number, number, number] = [0, 0, 0];
-let bakePivotLin: readonly [number, number, number] = [0, 0, 0];
-let bakeFlatten = 0;
-
-/**
- * Called once per map build with the same `TerrainLight` the ground mesh's
- * vertex colours come from, so the pivot is the map's own average and not a
- * number picked here. A map whose bake is dark stays dark.
- */
-export function setTerrainBakePivot(
-  light: readonly { x: number; y: number; z: number }[]
-): void {
-  let r = 0;
-  let g = 0;
-  let b = 0;
-  // The same mean again in linear, because which one the shader wants
-  // depends on whether the tier decodes.
-  let lr = 0;
-  let lg = 0;
-  let lb = 0;
-
-  for (const c of light) {
-    r += c.x;
-    g += c.y;
-    b += c.z;
-    lr += Math.pow(Math.max(c.x, 0), 2.2);
-    lg += Math.pow(Math.max(c.y, 0), 2.2);
-    lb += Math.pow(Math.max(c.z, 0), 2.2);
-  }
-
-  const n = Math.max(1, light.length);
-
-  bakePivot = [r / n, g / n, b / n];
-  bakePivotLin = [lr / n, lg / n, lb / n];
-  bakeFlatten = lightingTier() ? BAKE_FLATTEN : 0;
-}
-
 export const TERRAIN_LIGHT_UNIFORMS = [
   'time',
   'linearOut',
   'linearLight',
   'keyGain',
   'roomParams',
-  'bakePivot',
-  'bakePivotLin',
-  'bakeFlatten',
   LIGHT_TINT_UNIFORM,
   ...TERRAIN_CSM_UNIFORMS,
 ] as const;
@@ -156,9 +103,6 @@ export function terrainLightDeclarationsGlsl(clouds: boolean): string {
   uniform float keyGain;
   uniform float ${LIGHT_TINT_UNIFORM};
   uniform vec3 roomParams; // x: a room is the active area, y: gain on the delta (AreaLook.candles), z: the room's share of the key on the bake
-  uniform vec3 bakePivot;
-  uniform vec3 bakePivotLin;
-  uniform float bakeFlatten;
   uniform sampler2D dynamicLight;
 
   const float GROUND_CEIL_KNEE = ${GROUND_CEIL_KNEE.toFixed(3)};
@@ -223,34 +167,8 @@ ${o.clouds ? '    sunShadow *= mix(1.0, muCloudShadow(vWorldPos), skyOpen);' : '
     // original's gamma-space bake + delta (ZzzLodTerrain.cpp:481-505),
     // untouched. The bake is the ground's key: inside a room it takes the
     // room's share of the level and the delta, the candles, does not (§13 F14).
-    // The bake, pulled toward its own average.
-    //
-    // MU's lightmaps swing the full 0..1 in static patches - measured on
-    // Lorencia, the 10th and 90th percentiles are 0.24 and 0.96, a four to one
-    // ratio painted into the ground and fixed there forever. That is what the
-    // eye reads as "cloud shadows" on a field, and they never move, and they
-    // drown the real ones: a cloud at Lorencia's coverage takes at most 0.71
-    // off a sixth of the ground, which is nothing beside a bake that goes to
-    // black.
-    //
-    // Compressing toward the *map's own* mean, per channel, keeps its colour
-    // cast and its level - only the contrast goes. What is left reads as
-    // ground variation, and the moving shadow above it is the cloud's.
-    // bakeFlatten is 0 on Classic and 0 if it never binds, and 0 means the
-    // lightmap exactly as authored.
     vec3 bake = max(${o.bake}, vec3(0.0));
-
-    // Compressed *after* the decode, against a pivot taken in the same space.
-    //
-    // Doing it to the raw bake instead cost the frame 9% of its brightness:
-    // pow(2.2) is convex, so pulling values toward their mean and then
-    // decoding lands below the mean of the decoded originals. Flattening the
-    // encoded value against the encoded mean is contrast and nothing else,
-    // which is the whole point - the map keeps its level and its colour, and
-    // only its painted-in weather goes.
-    vec3 bakeEnc = mix(bake, pow(bake, vec3(2.2)), linearLight);
-    vec3 pivot = mix(bakePivot, bakePivotLin, linearLight);
-    vec3 bakeLit = mix(bakeEnc, pivot, bakeFlatten) * roomParams.z;
+    vec3 bakeLit = mix(bake, pow(bake, vec3(2.2)), linearLight) * roomParams.z;
     vec3 groundLight = max(bakeLit + dynLight, vec3(0.0));
 
     // The original clamps glColor at 1.0 per channel; tiers >= 1 bend the
@@ -316,9 +234,6 @@ export function bindTerrainLight(
     look?.key.roomShare ?? 1
   );
   effect.setFloat(LIGHT_TINT_UNIFORM, lightTintStrength());
-  effect.setFloat3('bakePivot', bakePivot[0], bakePivot[1], bakePivot[2]);
-  effect.setFloat3('bakePivotLin', bakePivotLin[0], bakePivotLin[1], bakePivotLin[2]);
-  effect.setFloat('bakeFlatten', bakeFlatten);
 
   if (clouds) {
     bindClouds(effect, scene, {

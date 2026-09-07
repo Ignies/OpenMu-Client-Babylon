@@ -10,7 +10,6 @@ import { CreateGroundFromHeightMap } from './customGroundMesh';
 import { createTileTextureArray } from './tileTextureArray';
 import { updateTerrainHeightMap } from './terrainHeightMap';
 import { createTerrainMaterial } from './terrainMaterial';
-import { setTerrainBakePivot } from './terrainLighting';
 import { terrainOverlaysFor } from './terrainOverlay';
 import { disposeGrassField, installGrassField } from './terrainGrass';
 import { loadGrassCards } from './terrainGrassCards';
@@ -118,10 +117,6 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
   const terrainLight = unpackTerrainLight(
     await parseTerrainLightOffThread(lightTextureData.BufferFloat, bulk.height)
   );
-
-  // The pivot the bake is compressed toward is the map's own mean, taken from
-  // the same array the ground mesh's vertex colours come from.
-  setTerrainBakePivot(terrainLight);
 
   // Packs the same tiles into one sampler2DArray so the splat shader does two
   // fetches per pixel instead of a guarded one per layer (tileTextureArray.ts).
