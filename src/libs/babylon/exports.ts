@@ -92,6 +92,13 @@ export { ActionManager } from '@babylonjs/core/Actions/actionManager';
 export { ParticleSystem } from '@babylonjs/core/Particles/particleSystem';
 // Side-effect import: registers the WebGL2 backend GPUParticleSystem needs.
 import '@babylonjs/core/Particles/webgl2ParticleSystem';
+// Side-effect import: puts `createEffectForParticles` on the engine, which is
+// how a system gets a custom fragment shader (weather/roomClip.ts). The two
+// stock fragment shaders come with it: Babylon imports them lazily on the
+// first render, and roomClip needs them in the store to derive its own.
+import '@babylonjs/core/Particles/particleSystemComponent';
+import '@babylonjs/core/Shaders/particles.fragment';
+import '@babylonjs/core/Shaders/gpuRenderParticles.fragment';
 export { GPUParticleSystem } from '@babylonjs/core/Particles/gpuParticleSystem';
 export type { IParticleSystem } from '@babylonjs/core/Particles/IParticleSystem';
 export { NoiseProceduralTexture } from '@babylonjs/core/Materials/Textures/Procedurals/noiseProceduralTexture';

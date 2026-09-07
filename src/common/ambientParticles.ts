@@ -10,6 +10,7 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import type { AmbientSchedule } from '../weather/ambientSchedule';
+import { clipToRoom } from '../weather/roomClip';
 import { loadEffectTexture } from './moveTargetEffect';
 
 /**
@@ -167,6 +168,13 @@ export type AmbientRecipe = {
   };
   /** Stretch the sprite along its velocity (rain). */
   readonly stretched?: boolean;
+  /**
+   * Weather that falls out of the sky, as against something a room makes of
+   * its own (dust). Sky-borne systems are clipped to the active room
+   * (`weather/roomClip.ts`) so a hero standing indoors sees the shower
+   * through the doorway and none of it on the floor beside him.
+   */
+  readonly skyBorne?: boolean;
   /** Fade in/out ramp as colour gradients (0 = hard). */
   readonly fade?: number;
   /**
@@ -399,6 +407,8 @@ export function createAmbientSystem(
 
   system.start();
 
+  const clip = recipe.skyBorne ? clipToRoom(scene, system) : null;
+
   return {
     emitter,
     system,
@@ -411,6 +421,7 @@ export function createAmbientSystem(
       target = Math.max(0, k);
     },
     update(dt: number) {
+      clip?.refresh();
       if (strength === target) return;
       // Rate-limited rather than exponential: an exponential tail never quite
       // reaches zero, so a draining system would dribble particles forever
@@ -428,6 +439,7 @@ export function createAmbientSystem(
     },
     dispose() {
       disposed = true;
+      clip?.dispose();
       // Never the texture: the recipe file and the wander noise are shared
       // across every ambient system (loadEffectTexture, wanderNoise), so the
       // default `dispose(true)` would take the rain away with the leaves.
