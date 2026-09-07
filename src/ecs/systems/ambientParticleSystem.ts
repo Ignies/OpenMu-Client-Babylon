@@ -25,6 +25,9 @@ import {
   type Room,
 } from '../../maps/devias/rooms';
 import { serverNow } from '../../common/serverTime';
+import { lookDirector } from '../../lighting/director';
+import { roomMaskActive } from '../../scenes/roomMask';
+import { roomClipAvailable, setRoomWeatherClip } from '../../weather/roomClip';
 import { Vector3 } from '../../libs/babylon/exports';
 import { GameOptions } from '../../common/gameOptions';
 import { rainStrength, rainTarget } from '../../weather/rainState';
@@ -46,6 +49,13 @@ import type { ISystemFactory } from '../world';
  *  - Lorencia tavern, Devias tavern and reading room: golden dust while the
  *    hero stands inside the room footprint (`ROOMS`, the same boxes the
  *    map modules register as `interactiveArea` entities).
+ *
+ * Sky weather is no longer switched off at a room's door. It keeps falling on
+ * the world outside and is clipped per particle to what the room's openings
+ * actually show (`weather/roomClip.ts`), which is the same rule the room mask
+ * draws the rest of the frame by: from a tavern you watch the snow through
+ * the doorway and none of it lands on the floor. Only a roof with no measured
+ * volume behind it - Classic tier, an arch, a shed - still turns it off.
  *
  * Nothing here switches. A slot that stops being eligible — the hero ducks
  * under a roof, walks out of the tavern, the option goes off — only has its
@@ -105,8 +115,8 @@ type Slot = {
   recipe: AmbientRecipe;
   /** Follows the hero each frame; otherwise the emitter is placed once. */
   followHero: boolean;
-  /** `indoors`: the hero stands in an interactive (roofed) area, so sky
-   *  weather must not follow them in. */
+  /** `indoors`: the hero is under a roof the room clip cannot judge, so sky
+   *  weather must not follow them in at all. */
   active: (world: ENUM_WORLD, indoors: boolean) => boolean;
   placeAt?: (out: Vector3) => void;
   /** Room slots: alive only while the hero stands inside this footprint. */
@@ -114,6 +124,9 @@ type Slot = {
   /** Extra 0..1 gain on top of the recipe's schedule (rain intensity). */
   strength?: () => number;
 };
+
+/** Stand-in eye while the scene has no active camera; the clip is off then anyway. */
+const ORIGIN = new Vector3();
 
 export const AmbientParticleSystem: ISystemFactory = world => {
   const scene = world.scene;
@@ -226,8 +239,21 @@ export const AmbientParticleSystem: ISystemFactory = world => {
       // The weather itself (rain ramp, settled snow, wetness) was stepped by
       // WeatherSystem just before this; the slots below only read it.
       const tavern = inTavern();
+
+      // A room the mask is drawing keeps its own weather out, per particle
+      // (weather/roomClip.ts), so the shower goes on falling in the world
+      // outside and is seen through the doorway. Without one — Classic tier,
+      // or a roof nobody measured a volume for — there is nothing to clip
+      // against and the old rule stands: under a roof, no sky weather.
+      const room =
+        roomMaskActive() && roomClipAvailable()
+          ? (lookDirector()?.state().area?.volume ?? null)
+          : null;
+      const camera = scene.activeCamera?.globalPosition;
+      setRoomWeatherClip(room, camera ?? ORIGIN);
+
       // A ceiling hidden by CeilingHideSystem still keeps the weather out.
-      const indoors = tavern || isHeroUnderRoof();
+      const indoors = (tavern || isHeroUnderRoof()) && room === null;
 
       heroPos.copyFrom(hero.transform.pos as Vector3);
       const hx = heroPos.x + (hero.transform.posOffset?.x ?? 0);
