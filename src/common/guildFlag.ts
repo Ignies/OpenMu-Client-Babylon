@@ -32,12 +32,15 @@ export const GUILD_FLAG_BONE = 26;
 /** `Angle[0] += 80; Angle[1] += 45; Angle[2] += 90 + 45;` over `o->Angle`. */
 const FLAG_ANGLE: readonly [number, number, number] = [80, 45, 135];
 
-/** `Matrix[*][3]` - cm off the bone. Bone 26 is the right upper arm and its
- * local X runs down it, so a slide along X drops the mark off the shoulder
- * and onto the middle of the back. */
-const FLAG_OFFSET: readonly [number, number, number] = [0, -5, -10];
-/** Thunder Hawk armour drops the flag further down the back (`-18`). */
-const THUNDER_HAWK_OFFSET_Z = -18;
+/**
+ * `Matrix[*][3]` - cm off the bone. `RenderGuild`'s generic offsets (20 / -5 /
+ * -10) slide the mark 20 cm down the arm, which leaves it on the middle of the
+ * back; these are the Rage Fighter ones (ZzzCharacter.cpp:9456-9470), which
+ * keep it up on the shoulder and stand it clear of the armour instead.
+ */
+const FLAG_OFFSET: readonly [number, number, number] = [5, 0, -21];
+/** The same path's bulky-armour standoff, for Thunder Hawk armour. */
+const THUNDER_HAWK_OFFSET_Z = -35;
 
 /** `RenderPlane3D(5.f, 7.f, ...)`: the quad spans ±5 in x/y and ±7 in z. */
 const FLAG_WIDTH = 5;
