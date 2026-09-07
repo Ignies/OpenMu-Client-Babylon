@@ -178,6 +178,7 @@ export const thaiLayer: LanguageLayer = {
     'options.ambientParticles': 'อนุภาคบรรยากาศ',
     'options.weatherEffects': 'สภาพอากาศ',
     'options.animatedWater': 'น้ำเคลื่อนไหว',
+    'options.grassDensity': 'หญ้า',
     'options.advancedEffects': 'เอฟเฟกต์ขั้นสูง',
     'options.renderDistance': 'ระยะการแสดงผล',
     'options.lightingQuality': 'แสง',

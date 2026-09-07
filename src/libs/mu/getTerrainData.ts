@@ -11,6 +11,7 @@ import { createTileTextureArray } from './tileTextureArray';
 import { updateTerrainHeightMap } from './terrainHeightMap';
 import { createTerrainMaterial } from './terrainMaterial';
 import { terrainOverlaysFor } from './terrainOverlay';
+import { disposeGrassField, installGrassField } from './terrainGrass';
 import {
   createTerrainWaterRuntime,
   disposeTerrainWaterFrames,
@@ -231,6 +232,25 @@ export async function getTerrainData(
         : null,
     }
   );
+
+  // The grass layer stands on this ground and is lit by it (terrainGrass.ts).
+  // Built from the same arrays the mesh above was: the splat says where grass
+  // is drawn, the height array where its roots sit, `terrainLight` what the
+  // bake says. Nothing is built without the packed tile array - the blades
+  // read their tile's colour through it - and nothing at all while the option
+  // is 0.
+  if (tileArray) {
+    installGrassField(scene, map, {
+      layer1: terrainMapping.layer1,
+      layer2: terrainMapping.layer2,
+      alpha: terrainMapping.alpha,
+      height: terrainHeight,
+      light: terrainLight,
+      tileArray,
+    });
+  } else {
+    disposeGrassField();
+  }
 
   if (DEBUG_SHOW_TERRAIN_ATTRIBUTES) {
     const plane = CreatePlane('_terrainPlane', { size: 256 }, scene);

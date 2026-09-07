@@ -173,7 +173,8 @@ type SliderRow = {
     | 'vignette'
     | 'lootZen'
     | 'uiScale'
-    | 'renderDistance';
+    | 'renderDistance'
+    | 'grassDensity';
   textId: number;
   labelKey: TextKey;
   max: number;
@@ -371,6 +372,14 @@ const TABS: Tab[] = [
             check('weatherEffects', -1, 'options.weatherEffects'),
             check('animatedWater', -1, 'options.animatedWater'),
             check('advancedEffects', -1, 'options.advancedEffects'),
+            slider({
+              key: 'grassDensity',
+              textId: -1,
+              labelKey: 'options.grassDensity',
+              max: 9,
+              needsTier: true,
+              display: v => (v === 0 ? t('common.off') : v),
+            }),
             slider({
               key: 'renderDistance',
               textId: -1,

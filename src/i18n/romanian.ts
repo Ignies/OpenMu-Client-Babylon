@@ -176,6 +176,7 @@ export const romanianLayer: LanguageLayer = {
     'options.ambientParticles': 'Particule de ambient',
     'options.weatherEffects': 'Vreme',
     'options.animatedWater': 'Apă animată',
+    'options.grassDensity': 'Iarbă',
     'options.advancedEffects': 'Efecte avansate',
     'options.renderDistance': 'Distanță de randare',
     'options.lightingQuality': 'Iluminare',

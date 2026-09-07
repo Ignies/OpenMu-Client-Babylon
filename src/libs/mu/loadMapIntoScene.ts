@@ -1,3 +1,4 @@
+import { disposeGrassField } from './terrainGrass';
 import { ENUM_WORLD } from '../../common';
 import type { World } from '../../ecs/world';
 import { Store } from '../../store';
@@ -134,6 +135,9 @@ function unloadMap(world: World, oldMap: ENUM_WORLD, newMap: ENUM_WORLD) {
   }
 
   if (world.terrain) {
+    // Before the ground it stands on: the field holds the tile array the old
+    // material is about to dispose.
+    disposeGrassField();
     world.terrain.mesh.material?.dispose(true, true);
     world.terrain.mesh.dispose(false, true);
     world.terrain = null;

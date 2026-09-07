@@ -10,7 +10,6 @@ import {
   type TerrainOverlay,
 } from './terrainOverlay';
 import type { TileTextureArray } from './tileTextureArray';
-import { getTerrainLightTexture } from '../../common/terrainDynamicLight';
 import {
   bindTerrainDetail,
   terrainDetailGlsl,
@@ -18,29 +17,19 @@ import {
   TERRAIN_DETAIL_UNIFORM,
 } from './terrainDetail';
 import {
-  linearBufferActive,
-  linearLightActive,
-} from '../../common/lightModel';
-import { lookDirector } from '../../lighting/director';
-import {
-  bindClouds,
-  cloudFieldGlsl,
-  CLOUD_NOISE_SAMPLER,
   CLOUD_UNIFORMS,
-} from '../../lighting/clouds';
-import { SKY_CLOUDS_DEFAULT } from '../../lighting/profiles';
-import {
-  LIGHT_TINT_UNIFORM,
-  lightTintGlsl,
-  lightTintStrength,
-} from '../../lighting/lightTint';
-import {
-  TERRAIN_CSM_UNIFORMS,
-  bindTerrainCsm,
-  registerTerrainMaterial,
-  terrainCsmDefines,
-  terrainCsmGlsl,
-} from '../../scenes/shadows';
+  TERRAIN_CSM_SAMPLERS,
+  TERRAIN_LIGHT_UNIFORMS,
+  bindTerrainLight,
+  startTerrainClock,
+  terrainClock,
+  terrainGroundLightGlsl,
+  terrainLightDeclarationsGlsl,
+  terrainLightDefines,
+  terrainLightSamplers,
+  terrainSkyLightGlsl,
+} from './terrainLighting';
+import { registerTerrainMaterial } from '../../scenes/shadows';
 import {
   bindTerrainWater,
   disposeTerrainWaterFrames,
@@ -69,15 +58,6 @@ const WATER_LAYER = 5;
  * turns out to sample differently on some driver.
  */
 const USE_TILE_TEXTURE_ARRAY = true;
-
-/**
- * The hue-preserving soft ceiling on the ground light sum, tiers >= 1
- * (ARCHITECTURE §4.5): linear below the knee, bent toward the asymptote
- * above it, so a torch core keeps its hue where the original's per-channel
- * clamp would have gone white.
- */
-const GROUND_CEIL_KNEE = 0.85;
-const GROUND_CEIL_ASYMPTOTE = 1.1;
 
 /**
  * The old path: `textures[i]` cannot be indexed by a per-fragment value in
@@ -218,19 +198,12 @@ ${water ? terrainWaterVertexGlsl(water.spec) : ''}
   `,
       fragmentSource: `
   precision highp float;
-  uniform float time;
-  uniform float linearOut;
-  uniform float linearLight;
-  uniform float keyGain;
-  uniform float ${LIGHT_TINT_UNIFORM};
-  uniform vec3 roomParams; // x: a room is the active area, y: gain on the delta (AreaLook.candles), z: the room's share of the key on the bake
 ${
   tileArray
     ? `  uniform highp sampler2DArray tileTextures;
   uniform float tileScales[${tileArray.layers}];`
     : `  uniform sampler2D textures[${config.texturesData.length}];`
 }
-  uniform sampler2D dynamicLight;
 ${water && water.frames.length ? `  uniform sampler2D waterFlip;` : ''}
   varying vec2 vUV;
   flat varying float vOpaqueTexture;
@@ -242,15 +215,9 @@ ${water && water.frames.length ? `  uniform sampler2D waterFlip;` : ''}
   varying vec3 vNormal;
   varying float vViewZ;
 
-  const float GROUND_CEIL_KNEE = ${GROUND_CEIL_KNEE.toFixed(3)};
-  const float GROUND_CEIL_ROOM = ${(GROUND_CEIL_ASYMPTOTE - GROUND_CEIL_KNEE).toFixed(3)};
-
+${terrainLightDeclarationsGlsl(!!tileArray)}
 ${terrainOverlayDeclarationsGlsl(overlays)}
-${lightTintGlsl()}
-${tileArray ? cloudFieldGlsl() : ''}
 ${tileArray ? terrainDetailGlsl() : ''}
-
-  ${terrainCsmGlsl()}
 
   void main()
   {
@@ -282,66 +249,11 @@ ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
     // unit left to spend.
 ${tileArray ? `    ${FINAL_COLOR_VAR_NAME}.rgb *= muGroundGrain(vWorldXZ, vViewZ);` : ''}
 
-    // One fetch, two jobs: rgb is the torches' radial light, and alpha is the
-    // roof mask the ground overlays need (terrainMask.ts). Sampled before the
-    // overlay so skyOpen is in scope for it.
-    vec4 dynSample = texture2D(dynamicLight, (vWorldXZ + 0.5) / 256.0);
-    vec3 dynLight = dynSample.rgb * 2.0 * roomParams.y;
-    float skyOpen = dynSample.a;
+${terrainSkyLightGlsl()}
 
     ${terrainOverlayGlsl(overlays, FINAL_COLOR_VAR_NAME, 'skyOpen')}
 
-    // The sun's cascaded shadow, weighted by the openness mask: both
-    // interiors take their roof *out* of the shadow map on purpose so the
-    // camera can see in (Lorencia lifts HOUSE_WALL05/06 past the caster
-    // range, Devias fades its ceiling), so under a roof the cascades are not
-    // the authority and the bake keeps the room it was authored for - until
-    // the room itself is the active area (roomShadow): then its furniture
-    // and figures cast on the floor under the roof as well.
-    float sunShadow = mix(1.0, csmShadow(vWorldPos, vViewZ), max(skyOpen, roomParams.x));
-
-    // A cloud takes the sun and leaves the sky share, the same one rule, on
-    // the same openness mask the cascades use: a floor under a roof takes no
-    // cloud shadow.
-${tileArray ? '    sunShadow *= mix(1.0, muCloudShadow(vWorldPos), skyOpen);' : ''}
-
-    // The one shadow rule: a shadow removes the sun and leaves the sky share
-    // (csmParams.y, the policy floor). 1 while Classic (no cascades).
-    float bakeShadow = mix(csmParams.y, 1.0, sunShadow);
-
-    // The ground light sum. Tiers >= 1 (linearLight): lin(bake) + delta, the
-    // delta linear-authored and added after the decode. Classic: the
-    // original's gamma-space bake + delta (ZzzLodTerrain.cpp:481-505),
-    // untouched. The bake is the ground's key: inside a room it takes the
-    // room's share of the level and the delta, the candles, does not (§13 F14).
-    vec3 bake = max(vColor.rgb, vec3(0.0));
-    vec3 bakeLit = mix(bake, pow(bake, vec3(2.2)), linearLight) * roomParams.z;
-    vec3 groundLight = max(bakeLit + dynLight, vec3(0.0));
-
-    // The original clamps glColor at 1.0 per channel; tiers >= 1 bend the
-    // sum toward the asymptote above the knee so a torch core keeps its hue.
-    float peak = max(groundLight.r, max(groundLight.g, groundLight.b));
-    float bent = peak > GROUND_CEIL_KNEE
-      ? GROUND_CEIL_KNEE + GROUND_CEIL_ROOM * (1.0 - exp(-(peak - GROUND_CEIL_KNEE) / GROUND_CEIL_ROOM))
-      : peak;
-    vec3 softCeil = peak > 0.0 ? groundLight * (bent / peak) : groundLight;
-    groundLight = mix(min(groundLight, vec3(1.0)), softCeil, linearLight);
-
-    // The cascades cut the ceiled sum, not the bake under it (§13 F15): on
-    // open ground the ceiling compresses lit and shadowed alike, so a factor
-    // applied before it left a fraction of the policy's ratio. 1 on Classic.
-    groundLight *= bakeShadow;
-
-    // The map's level (2^ev) is the light's, applied after the clamps so
-    // they keep the original's units; 1.0 on Classic.
-    groundLight *= keyGain;
-
-    // The overlays and the reflections below work in the art's display
-    // space; the linear sum is re-encoded for them and the final decode
-    // lands the product exactly at lin(texel) x groundLight.
-    vec3 groundLit = mix(groundLight, pow(groundLight, vec3(1.0 / 2.2)), linearLight);
-    vec3 extraLit = mix(dynLight, pow(dynLight * keyGain, vec3(1.0 / 2.2)), linearLight);
-
+${terrainGroundLightGlsl({ bake: 'vColor.rgb', clouds: !!tileArray })}
     // A ground overlay that is its own material (snow) takes over its share
     // of this term - see terrainOverlayLitGlsl.
 ${terrainOverlayLitGlsl(
@@ -386,18 +298,12 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
         'view',
         'world',
         'viewProjection',
-        'time',
-        'linearOut',
-        'linearLight',
-        'keyGain',
-        'roomParams',
-        LIGHT_TINT_UNIFORM,
+        ...TERRAIN_LIGHT_UNIFORMS,
         ...(tileArray ? CLOUD_UNIFORMS : []),
         ...(tileArray ? [TERRAIN_DETAIL_UNIFORM] : []),
         ...(tileArray ? ['tileScales'] : []),
         ...terrainOverlayUniforms(overlays),
         ...(water ? terrainWaterUniforms() : []),
-        ...TERRAIN_CSM_UNIFORMS,
       ],
       // `textures[N]` is expanded to N consecutive units starting at its own
       // slot; if it comes first, the shadow-map array samplers land on units
@@ -406,17 +312,17 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
       // packed path has no sampler array at all, but the ordering rule costs
       // nothing to keep.
       samplers: [
-        'dynamicLight',
-        // The cloud field rides the packed path only: the per-tile fallback
-        // already spends every one of WebGL's guaranteed 16 fragment units.
-        ...(tileArray ? [CLOUD_NOISE_SAMPLER, TERRAIN_DETAIL_SAMPLER] : []),
+        ...terrainLightSamplers(!!tileArray),
+        // The grain rides the packed path only, like the cloud field: the
+        // per-tile fallback already spends every one of WebGL's guaranteed
+        // 16 fragment units.
+        ...(tileArray ? [TERRAIN_DETAIL_SAMPLER] : []),
         ...(hasTrail(overlays) ? ['ovTrail'] : []),
         ...(water ? terrainWaterSamplers(water) : []),
-        'csmShadowMap',
-        'csmShadowMapF',
+        ...TERRAIN_CSM_SAMPLERS,
         ...(tileArray ? ['tileTextures'] : ['textures']),
       ],
-      defines: terrainCsmDefines(),
+      defines: terrainLightDefines(),
       needAlphaBlending: false,
       needAlphaTesting: false,
     }
@@ -426,48 +332,27 @@ ${water ? terrainWaterCausticsGlsl(water, 'f') : ''}
   terrainMaterial.backFaceCulling = true;
   terrainMaterial.transparencyMode = 0;
 
-  const st = Date.now();
+  // The clock the grass rooted in this ground shares (terrainLighting.ts).
+  startTerrainClock();
 
   const textures = config.texturesData.map(t => t.texture);
-
-  const dynamicLight = getTerrainLightTexture(scene);
 
   terrainMaterial.onBindObservable.add(m => {
     const effect = m.material?.getEffect();
 
     if (!effect) return;
 
-    const et = (Date.now() - st) / 1000;
-    effect.setFloat('time', et);
-    effect.setFloat('linearOut', linearBufferActive(scene) ? 1 : 0);
-    effect.setFloat('linearLight', linearLightActive(scene) ? 1 : 0);
-    const look = lookDirector()?.state();
-    effect.setFloat('keyGain', look?.keyGain ?? 1);
-    effect.setFloat3('roomParams', look?.area ? 1 : 0, look?.key.emitterGain ?? 1, look?.key.roomShare ?? 1);
-    effect.setFloat(LIGHT_TINT_UNIFORM, lightTintStrength());
+    bindTerrainLight(effect, scene, !!tileArray);
 
-    if (tileArray) {
-      bindClouds(effect, scene, {
-        // Null while the map has no sky, and inside a room, where `applyArea`
-        // clears it: the deck is not overhead, so it casts nothing.
-        base: look?.profile.sky
-          ? look.profile.sky.clouds ?? SKY_CLOUDS_DEFAULT
-          : null,
-        sunDirection: look?.key.direction ?? [0, -1, 0],
-        sunElevationDeg: look?.profile.sun.elevationDeg ?? 45,
-      });
-    }
     if (tileArray) {
       effect.setTexture('tileTextures', tileArray.texture);
       effect.setFloatArray('tileScales', tileArray.scales);
+      bindTerrainDetail(effect, scene);
     } else {
       effect.setTextureArray('textures', textures);
     }
-    effect.setTexture('dynamicLight', dynamicLight);
-    if (tileArray) bindTerrainDetail(effect, scene);
     bindTerrainOverlays(effect, overlays, scene);
-    if (water) bindTerrainWater(effect, water, et, scene);
-    bindTerrainCsm(effect);
+    if (water) bindTerrainWater(effect, water, terrainClock(), scene);
   });
 
   registerTerrainMaterial(terrainMaterial);

@@ -17,6 +17,7 @@ import { AmbientParticleSystem } from './systems/ambientParticleSystem';
 import { WeatherSystem } from './systems/weatherSystem';
 import { TerrainMaskSystem } from './systems/terrainMaskSystem';
 import { FootprintSystem } from './systems/footprintSystem';
+import { TerrainGrassSystem } from './systems/terrainGrassSystem';
 import { NetworkSystem } from './systems/networkSystem';
 import { OutOfScopeSystem } from './systems/outOfScopeSystem';
 import { CalculateVisibilitySystem } from './systems/calculateVisibilitySystem';
@@ -115,6 +116,9 @@ const factories: ISystemFactory[] = [
   // After the mask: a print asks it whether the tile it is landing on is
   // open, to decide whether there is snow underfoot to press into.
   FootprintSystem,
+  // After the camera has been moved this frame: the grass streams blocks in
+  // around where the camera is actually looking.
+  TerrainGrassSystem,
   // Before the projection: it places the side bubbles' world anchor, which
   // CalculateScreenPositionSystem then projects.
   EmojiBubbleSystem,

@@ -176,6 +176,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.ambientParticles': 'Частици на средата',
     'options.weatherEffects': 'Време',
     'options.animatedWater': 'Анимирана вода',
+    'options.grassDensity': 'Трева',
     'options.advancedEffects': 'Разширени ефекти',
     'options.renderDistance': 'Далечина на рендиране',
     'options.lightingQuality': 'Осветление',

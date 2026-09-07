@@ -72,6 +72,17 @@ export type GameOptions = {
    */
   animatedWater: boolean;
   /**
+   * Blades of grass standing on the tiles the splat map draws as grass
+   * (`libs/mu/terrainGrass.ts`), 0-9. The original had this pass and the
+   * clone never ported it; 0 is the ground exactly as it was, no mesh, no
+   * material, no per-frame cost.
+   *
+   * Its own axis rather than a rider on `advancedEffects` for that option's
+   * own reason: it is a different cost and a different taste. This one is
+   * vertex and residency work, not a branch in the ground shader.
+   */
+  grassDensity: number;
+  /**
    * Ground-contact weather: settled snow and rain wetness on the terrain,
    * puddles, footprints and the snow a boot kicks up.
    *
@@ -190,6 +201,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   lootZen: [0, 9],
   uiScale: [0, UI_SCALE_MAX],
   renderDistance: [0, RENDER_DISTANCE_MAX],
+  grassDensity: [0, 9],
   cameraFov: [CAMERA_FOV_MIN_DEG, CAMERA_FOV_MAX_DEG],
 };
 
@@ -217,6 +229,7 @@ const DEFAULTS: GameOptions = {
   clouds: true,
   weatherEffects: true,
   animatedWater: true,
+  grassDensity: 5,
   advancedEffects: true,
   renderDistance: 0,
   autoAttack: false,
