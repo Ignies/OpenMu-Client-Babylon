@@ -7,7 +7,7 @@ import {
 } from '../libs/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
 import { devQueryNumber } from '../common/devSeams';
-import { lightingTier } from '../common/lightingQuality';
+import { lightingTier, tierIndex } from '../common/lightingQuality';
 import { serverNow } from '../common/serverTime';
 
 /**
@@ -93,6 +93,50 @@ export const CLOUD_UNIFORMS = ['muCloudA', 'muCloudB', 'muCloudC'] as const;
  * is in before it reads as one object rather than as texture.
  */
 const OCTAVE_SCALE = [0.0035, 0.0125] as const;
+
+/**
+ * How much finer than the authored scale the volumetric tier reads the field.
+ *
+ * The scale above is right for a sky and wrong for a floor, and the reason is
+ * geometry: the dome shows hundreds of tiles of the deck at once, the ground
+ * shows about forty. At one period per 285 tiles the ground sees a seventh of
+ * a single cloud, so what lands on it is not a shadow but a uniform tint that
+ * changes over minutes - measured against clouds-off, the whole visible field
+ * moved together by one part in 140, with no edge anywhere in it.
+ *
+ * At 2.2 a cloud is about 130 tiles across, so one or two shadows are in view
+ * and cross it in about a minute at the existing wind. The repeat that made
+ * the coarse scale necessary is answered by the domain warp below rather than
+ * by giving up resolution.
+ *
+ * It was 3, which is finer than the march can read: near the horizon a ray
+ * steps about fifteen tiles, and asked for detail below that the march drew
+ * the beat between the two as a corrugated stipple across the whole sky. The
+ * detail argument on the field functions is the general answer and this is
+ * the headroom left over it.
+ *
+ * 1 on every other tier, which is the sky Enhanced has always drawn, to the
+ * texel.
+ */
+const VOLUME_SCALE = 2.2;
+
+/** The warp that lets the finer field tile without showing it. */
+const WARP_SCALE = 0.22;
+const WARP_AMOUNT = 0.06;
+
+/**
+ * The vertical profile: rounded for the first `BASE_ROUND` of the deck's
+ * depth, flattening over the last `1 - TOP_FLAT`. A cumulus sits on a flat
+ * base and piles up above it.
+ */
+const BASE_ROUND = 0.35;
+const TOP_FLAT = 0.55;
+
+/** The erosion bite: scale, how far it drifts, how it climbs, how deep it cuts. */
+const EROSION_SCALE = 2.6;
+const EROSION_DRIFT = 1.7;
+const EROSION_RISE = 0.03;
+const EROSION_BITE = 0.35;
 
 /** Wrapped into [0, 1): a scroll of epoch seconds is millions of UV units, and
  * a float there has no fractional resolution left, which quantises the whole
@@ -229,6 +273,14 @@ export function disposeClouds(): void {
 }
 
 /** True while the option, the tier and the map all want a cloud deck. */
+/**
+ * Ultra marches the deck; every other tier draws the flat slab it always has.
+ * The tier picks which sky, not how much of one.
+ */
+export function volumetricClouds(): boolean {
+  return tierIndex() >= 2 && GameOptions.clouds;
+}
+
 export function cloudsActive(base: number | null): boolean {
   if (base === null || !lightingTier() || !GameOptions.clouds) return false;
 
@@ -298,7 +350,10 @@ export function bindClouds(
     'muCloudC',
     wrapUv(WIND[0] * DETAIL_WIND * t * OCTAVE_SCALE[1]),
     wrapUv(WIND[1] * DETAIL_WIND * t * OCTAVE_SCALE[1]),
-    0,
+    // How finely this tier reads the field. Enhanced reads it exactly as it
+    // always has; a uniform that never binds is 0, and the field guards
+    // against that by treating anything at or below 1 as the authored scale.
+    volumetricClouds() ? VOLUME_SCALE : 1,
     0
   );
 
@@ -359,17 +414,84 @@ ${
    * edges up: averaging the two would pile the sum back around the middle,
    * which is the one thing the threshold cannot work against.
    */
-  float muCloudField(vec2 p) {
-    float a = texture2D(${CLOUD_NOISE_SAMPLER}, muSmoothUV(fract(p * ${OCTAVE_SCALE[0]} + muCloudA.xy))).r;
-    float b = texture2D(${CLOUD_NOISE_SAMPLER}, muSmoothUV(fract(p * ${OCTAVE_SCALE[1]} + muCloudC.xy))).r;
+  /**
+   * muCloudC.z is how much finer than the authored scale this tier reads the
+   * field. Position and scroll offset are scaled together - the offset is
+   * already in UV units, so scaling only the position would leave the deck
+   * drifting at the wrong rate. 1 is the sky the Enhanced tier has always
+   * drawn, to the texel.
+   */
+  float muCloudFieldLod(vec2 p, float detail) {
+    // A uniform that never binds reads 0, and 0 would collapse the field to
+    // one texel. Anything at or below 1 means the authored scale.
+    float k = max(muCloudC.z, 1.0);
 
-    return clamp(a + (b - 0.5) * ${CLOUD_DETAIL.toFixed(3)}, 0.0, 1.0);
+    // A low-frequency offset of the sample position, which breaks the repeat
+    // that a finer field would otherwise show without costing an octave. Only
+    // the tier that goes finer pays for it.
+    vec2 w = vec2(0.0);
+    if (k > 1.001) {
+      float wx = texture2D(${CLOUD_NOISE_SAMPLER}, muSmoothUV(fract((p * ${OCTAVE_SCALE[0]} + muCloudA.xy) * ${WARP_SCALE.toFixed(2)}))).r;
+      float wy = texture2D(${CLOUD_NOISE_SAMPLER}, muSmoothUV(fract((p * ${OCTAVE_SCALE[0]} + muCloudA.yx + vec2(0.37, 0.11)) * ${WARP_SCALE.toFixed(2)}))).r;
+      w = (vec2(wx, wy) - 0.5) * ${WARP_AMOUNT.toFixed(3)};
+    }
+
+    float a = texture2D(${CLOUD_NOISE_SAMPLER}, muSmoothUV(fract((p * ${OCTAVE_SCALE[0]} + muCloudA.xy) * k + w))).r;
+    float b = texture2D(${CLOUD_NOISE_SAMPLER}, muSmoothUV(fract((p * ${OCTAVE_SCALE[1]} + muCloudC.xy) * k + w))).r;
+
+    return clamp(a + (b - 0.5) * ${CLOUD_DETAIL.toFixed(3)} * detail, 0.0, 1.0);
+  }
+
+  /** The field at full detail: the sky slab and the ground shadow both read this. */
+  float muCloudField(vec2 p) {
+    return muCloudFieldLod(p, 1.0);
+  }
+
+  float muCloudCoverLod(vec2 p, float detail) {
+    float edge = 1.0 - muCloudA.z;
+
+    return smoothstep(edge, edge + ${CLOUD_SOFT.toFixed(3)}, muCloudFieldLod(p, detail));
   }
 
   float muCloudCover(vec2 p) {
-    float edge = 1.0 - muCloudA.z;
+    return muCloudCoverLod(p, 1.0);
+  }
 
-    return smoothstep(edge, edge + ${CLOUD_SOFT.toFixed(3)}, muCloudField(p));
+  /**
+   * Density inside the deck: the same horizontal shape the sky and the ground
+   * both read, given a body by a vertical profile and bitten into at the
+   * edges.
+   *
+   * h is 0 at the deck's base and 1 at its top. The profile is rounded
+   * underneath and flatter on top - a cumulus sits on its own flat bottom -
+   * and the erosion is a higher-frequency bite taken only where the cloud is
+   * already thin, which is what makes an edge torn rather than smooth.
+   *
+   * detail is how much of the fine structure this sample is allowed to see,
+   * and the caller sets it from how far apart its samples are. A march near
+   * the horizon crosses the deck at an angle and steps something like fifteen
+   * tiles at a time, which is wider than the erosion's own period: asked for
+   * detail it cannot resolve, it drew the beat between the two as a corrugated
+   * stipple across the whole sky. Fading the fine terms out as the step grows
+   * is the same bargain a mip level makes, and the shape octave - which the
+   * step can still resolve - carries the cloud on its own out there.
+   */
+  float muCloudDensity(vec3 wp, float h, float detail) {
+    float cover = muCloudCoverLod(wp.xz, detail);
+    if (cover <= 0.0) return 0.0;
+
+    float shape = smoothstep(0.0, ${BASE_ROUND.toFixed(2)}, h)
+                * (1.0 - smoothstep(${TOP_FLAT.toFixed(2)}, 1.0, h));
+
+    float d = cover * shape;
+
+    // Erosion rides its own scale and a vertical scroll, so the cloud boils
+    // as it drifts rather than sliding rigidly.
+    float e = texture2D(${CLOUD_NOISE_SAMPLER}, muSmoothUV(fract(
+      (wp.xz * ${OCTAVE_SCALE[1]} + muCloudC.xy * ${EROSION_DRIFT.toFixed(2)}) * ${EROSION_SCALE.toFixed(2)}
+      + vec2(h * ${EROSION_RISE.toFixed(2)}, 0.0)))).r;
+
+    return max(d - (1.0 - d) * e * ${EROSION_BITE.toFixed(2)} * detail, 0.0);
   }
 
   /** 1 in the open, less under a cloud. Identity while the strength is 0. */
