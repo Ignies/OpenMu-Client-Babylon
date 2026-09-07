@@ -208,7 +208,7 @@ const BLADE_ROUND = 0.55;
  * one-tile-wide character needs. Worth revisiting if the springback is
  * wanted; not the cheapest way to get what was asked for.
  */
-const GRASS_ACTORS = 10;
+const GRASS_ACTORS = 16;
 
 /**
  * Grass does not spring back the instant a foot leaves it, and a press that
@@ -224,9 +224,43 @@ const GRASS_ACTORS = 10;
  * the same uniform array, the same loop - because the persistence lives in
  * ten CPU-side records rather than in a texture.
  */
-const STAMP_STEP = 0.3;
+const STAMP_STEP = 0.75;
 /** Seconds a press takes to recover once nothing stands on it. */
-const PRESS_LIFE = 1.7;
+const PRESS_LIFE = 4.5;
+
+/**
+ * How many bodies may stamp, out of `GRASS_ACTORS` slots. The rest of the
+ * slots are the trail they leave: with the budget equal to the slot count
+ * there was no room for one, and a crowd of monsters could take every slot
+ * from the player.
+ */
+const ACTOR_BUDGET = 4;
+
+/** The `n` entries closest to a point, without sorting or allocating. */
+function nearest(
+  actors: readonly GrassActor[],
+  cx: number,
+  cz: number,
+  n: number
+): GrassActor[] {
+  picked.length = 0;
+
+  for (const a of actors) {
+    const d = (a.x - cx) ** 2 + (a.z - cz) ** 2;
+
+    let at = picked.length;
+    while (at > 0 && picked[at - 1].d > d) at--;
+
+    if (at >= n) continue;
+
+    picked.splice(at, 0, { a, d });
+    if (picked.length > n) picked.length = n;
+  }
+
+  return picked.map(p => p.a);
+}
+
+const picked: { a: GrassActor; d: number }[] = [];
 /**
  * Tiles from an actor at which the grass is untouched.
  *
@@ -885,7 +919,17 @@ export function createGrassField(
         if (presses[i].life <= 0) presses.splice(i, 1);
       }
 
-      for (const a of actors) {
+      // Nearest to the centre first, and only that many stamp anything.
+      //
+      // Without this the slots went first-come: the hero, who is what the
+      // camera is looking at, lost all ten of them to whichever monsters the
+      // query happened to yield first, and the grass pressed itself down
+      // around bodies fifteen tiles away while the player walked through an
+      // untouched field. The budget is deliberately below the slot count so
+      // there is room left for the trail these actors leave behind them.
+      const near = nearest(actors, centerX, centerZ, ACTOR_BUDGET);
+
+      for (const a of near) {
         // Flying is measured against the ground the blade grows from, not
         // read off a state flag: anything far enough above it is overhead.
         const flying = a.y - heightAt(a.x, a.z) > FLYING_OVER;
@@ -907,19 +951,35 @@ export function createGrassField(
         }
 
         if (nearest) {
+          // Refreshed, *not* moved. Dragging the press along with the body was
+          // the reason no trail ever formed: one press followed the player
+          // around and the grass behind them was never pressed at all. Left
+          // where it was stamped, it starts recovering the moment the body
+          // walks out of its reach, and the next step stamps the next one.
           nearest.life = 1;
-          nearest.x = a.x;
-          nearest.z = a.z;
           continue;
         }
 
-        // Full: drop the faintest, which is the oldest thing still showing.
+        // Full: drop the faintest, and among equally faint ones the furthest
+        // away - so a fresh press near the camera never loses to a stale one
+        // at the edge of the field.
         if (presses.length >= GRASS_ACTORS) {
-          let faint = 0;
+          let worst = 0;
+
           for (let i = 1; i < presses.length; i++) {
-            if (presses[i].life < presses[faint].life) faint = i;
+            const p = presses[i];
+            const q = presses[worst];
+
+            if (p.life < q.life - 0.01) {
+              worst = i;
+            } else if (p.life < q.life + 0.01) {
+              const dp = (p.x - centerX) ** 2 + (p.z - centerZ) ** 2;
+              const dq = (q.x - centerX) ** 2 + (q.z - centerZ) ** 2;
+              if (dp > dq) worst = i;
+            }
           }
-          presses.splice(faint, 1);
+
+          presses.splice(worst, 1);
         }
 
         presses.push({ x: a.x, z: a.z, life: 1, flying });
@@ -929,9 +989,12 @@ export function createGrassField(
 
       for (let s = 0; s < presses.length && s < GRASS_ACTORS; s++) {
         const p = presses[s];
-        // Ease the recovery so a press holds, then lifts, instead of ramping
-        // out linearly the moment it is left.
-        const strength = p.life * p.life * (3 - 2 * p.life);
+        // Smootherstep, not smoothstep: zero first *and* second derivative at
+        // both ends, so the blade neither jumps as it starts lifting nor
+        // arrives at upright with any velocity left. Over `PRESS_LIFE` that
+        // is a press which holds, then rises, then settles.
+        const t = p.life;
+        const strength = t * t * t * (t * (t * 6 - 15) + 10);
         const i = s * 4;
 
         actorSlots[i] = p.x;
