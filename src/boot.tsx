@@ -6,6 +6,7 @@ import './logic';
 import { Store } from './store';
 import { Social } from './social';
 import { Economy } from './economy';
+import { weather } from './weather';
 import { sound, installUiWindowChime } from './sound';
 import { Engine } from './libs/babylon/exports';
 import { createEngine } from './libs/babylon/utils';
@@ -156,6 +157,10 @@ installPerfOverlay(scene);
 // The sound facade, for the headless verification scripts (`sound.unlocked`,
 // `sound.isPlaying(key)`, `sound.crackling`).
 (window as any).__sound = sound;
+// The weather facade, for the same reason. Fire, snow and rain are all things
+// a screenshot has to be able to *cause* before it can show them, and the only
+// other way in is to cast a real spell at a real monster.
+(window as any).__weather = weather;
 
 /**
  * Longest step any system is handed. Coming back from an alt-tab (or from a

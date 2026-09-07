@@ -290,10 +290,20 @@ const explosion = (colour: RGB, scale = 1, seconds = ticks(20)): Step =>
 const scorch = (radius: number, strength = 1): Step => at => {
   weather.meltSnow(at.x, at.z, radius, strength);
 };
+/**
+ * The other half of what fire does to the ground: the grass goes up, and the
+ * fire spreads from the hit under its own vigour until it runs out of that or
+ * out of grass (`weather/grassBurn.ts`). Radius in tiles, the same one the
+ * snow takes - a bigger spell lights a bigger fire and therefore burns
+ * further, with no per-skill table anywhere to say so.
+ */
+const burn = (radius: number, strength = 1): Step => (at, c) => {
+  weather.burnGrass(c.scene, at.x, at.z, radius, strength);
+};
 /** MODEL_FIRE's `o->BlendMesh = 1`: the fire01 tail is additive, the fire02 lava core is drawn opaque. */
 const FIRE_BLEND_MESH = 1;
 /** Every fire skill's landing, and so the one place the snow gets melted. */
-const fireHit: Step = seq(explosion(RGBS.fire), hitSparks(FIRE_SPARKS, 16), particles({ recipe: FIRE_PUFF, count: 6 }), scorch(1.2));
+const fireHit: Step = seq(explosion(RGBS.fire), hitSparks(FIRE_SPARKS, 16), particles({ recipe: FIRE_PUFF, count: 6 }), scorch(1.2), burn(1.2));
 /** MODEL_ICE (LT 50, Scale 0.8, white) + 5× MODEL_ICE_SMALL (LT 32–47, Scale 0.8–1.1, Gravity 8–23) — the Ice hit. */
 const iceHit: Step = seq(
   model({ model: MODEL.ice, seconds: ticks(50), scale: 0.8, colour: RGBS.white }),
@@ -625,7 +635,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 4 Fire Ball: MODEL_FIRE sub1 LT 60, Scale 0.8–1.1, z+120, Dir(0,−50,0); within 100 → 2× MODEL_STONE.
   4: { travel: modelBolt(MODEL.fire, RGBS.fire, FIRE_PUFF, perTick(50), 0.95, FIRE_BLEND_MESH), impact: seq(fireHit, stones(2)) },
   // 5 Flame: BITMAP_FLAME sub0 LT 40 at SkillXY — 6 BITMAP_FLAME particles a frame in a ±25 cm box, 1/8 stones.
-  5: { area: seq(particles({ recipe: FLAME_TONGUES, rate: 150, seconds: ticks(40) }), scatter(stones(1, 0.3), 5, 0.3, 0.3), scorch(1)) },
+  5: { area: seq(particles({ recipe: FLAME_TONGUES, rate: 150, seconds: ticks(40) }), scatter(stones(1, 0.3), 5, 0.3, 0.3), scorch(1), burn(1)) },
   // 6 Teleport: cast — BITMAP_SPARK+1 LT 10 at the caster (AlphaTarget 0).
   6: { cast: atCaster(teleportFlash, 0.6) },
   // 7 Ice: impact@target — MODEL_ICE sub0 + 5× MODEL_ICE_SMALL. No bolt.
@@ -710,7 +720,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
         stones(6, 2),
         particles({ recipe: FIRE_SPARKS, count: 30 }),
         // The whole circle the stones are thrown from, not a bolt's footprint.
-        scorch(2.6)
+        scorch(2.6),
+        burn(2.6)
       ),
       0.05
     ),
@@ -1185,7 +1196,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
         speed: 6,
         model: { model: MODEL.summonSahamutt, colour: RGBS.white, scale: 0.5, fadeIn: 0.3 },
         trail: { recipe: FIRE_PUFF, rate: 25 },
-        onArrive: p => seq(bomb([1, 0.5, 0]), particles({ recipe: FIRE_SPARKS, count: 16 }), scorch(1))(p, c),
+        onArrive: p => seq(bomb([1, 0.5, 0]), particles({ recipe: FIRE_SPARKS, count: 16 }), scorch(1), burn(1))(p, c),
       });
     },
   },
