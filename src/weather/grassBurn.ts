@@ -76,9 +76,15 @@ const MAX_FIRES = 6;
  * fireball's 1.2-tile hit reaches about four tiles before it gives up;
  * Hellfire's 2.6 reaches further because it starts further, with no special
  * case anywhere to say so.
+ *
+ * Both were roughly twice this, which burnt the whole patch out in about three
+ * seconds - the fire was over before the eye found it, and what was left was a
+ * black shape that had simply appeared. Half the rate against nearly three
+ * times the span covers the same ground over about ten seconds, so the front
+ * is something a player can watch cross the field.
  */
-const SPREAD_RATE = 0.9;
-const VIGOUR_SPAN = 9;
+const SPREAD_RATE = 0.55;
+const VIGOUR_SPAN = 26;
 
 /** Past this a front is done however much vigour is left. */
 const FIRE_MAX_RADIUS = 7;
@@ -97,11 +103,22 @@ const FUEL_SAMPLES = 8;
  * stops being embers and becomes a pale haze hanging over the field. The
  * texture and the size were right all along - it was the count.
  */
-const EMBER_EVERY = 0.3;
-const EMBER_SPARKS = 2;
+const EMBER_EVERY = 0.22;
+const EMBER_SPARKS = 1;
+
+/**
+ * Bearings lit per burst, spread evenly round the rim.
+ *
+ * The count is what stops the ring being a dotted line at a large radius and
+ * a bonfire at a small one, so it is paid per fire and the interval above is
+ * set against it: five points every 0.22 s is about twenty-two flames a
+ * second from one front, against two hundred when the rate was tuned for a
+ * single point.
+ */
+const RIM_POINTS = 5;
 
 /** Tongues of flame per burst, standing up out of the blades on the ring. */
-const FLAME_TONGUES_PER_BURST = 2;
+const FLAME_TONGUES_PER_BURST = 1;
 
 /**
  * The flame standing in the grass.
@@ -478,35 +495,43 @@ function embers(fire: Fire, dt: number): void {
 
   fire.sinceEmber = 0;
 
-  // On the ring, not over the scar. A burnt patch that keeps throwing sparks
-  // for five minutes is a bonfire, not something that has been burnt.
-  const a = Math.random() * Math.PI * 2;
-  const r = fire.radius * reach(fire, a);
-  const x = fire.x + Math.cos(a) * r;
-  const z = fire.z + Math.sin(a) * r;
+  // All the way round the rim, and only the rim.
+  //
+  // This took one random bearing a burst, which is not a fire front - it is a
+  // flame that jumps about the edge, and early on, while the radius is still
+  // small, every one of those lands in nearly the same place and they pile
+  // into a single white-hot ball sitting in the middle of the scar. What is
+  // burning is the whole advancing edge, so the whole advancing edge is what
+  // emits.
+  //
+  // The bearings are stratified rather than rolled - one per equal slice of
+  // the circle, jittered inside its own slice - so the ring is covered every
+  // burst instead of clumping wherever the dice fell.
+  for (let i = 0; i < RIM_POINTS; i++) {
+    const a = ((i + Math.random()) / RIM_POINTS) * Math.PI * 2;
+    const r = fire.radius * reach(fire, a);
+    const x = fire.x + Math.cos(a) * r;
+    const z = fire.z + Math.sin(a) * r;
 
-  if (!hasFuel(x, z)) return;
+    // Nothing to burn here, so nothing burns here: the fire's edge goes dark
+    // where it has run up against stone, which is the same rule that stopped
+    // it spreading there.
+    if (!hasFuel(x, z)) continue;
 
-  const at = new Vector3(x, groundAt(x, z), z);
+    const at = new Vector3(x, groundAt(x, z), z);
 
-  // The flame front itself, which is the thing that was missing. Sparks alone
-  // are what a fire leaves behind, not what it looks like: with only embers
-  // in the air there was nothing burning anywhere on screen, just some orange
-  // chips over ordinary grass. The tongues stand up out of the blades along
-  // the ring and travel with it.
-  effects.spawn('particles', scene, at, {
-    recipe: GRASS_FLAMES,
-    count: FLAME_TONGUES_PER_BURST,
-  });
+    // The flame standing in the grass, and the ember coming off it. Both at
+    // the same point, because an ember comes off a flame.
+    effects.spawn('particles', scene, at, {
+      recipe: GRASS_FLAMES,
+      count: FLAME_TONGUES_PER_BURST,
+    });
 
-  // And the embers off it. `GRASS_EMBERS` rather than `FIRE_SPARKS`: the
-  // skills' own spark is sized for a fireball going off at chest height and
-  // is far too big for something coming off burning grass, where it reads as
-  // an orange brick lying in the field.
-  effects.spawn('particles', scene, at, {
-    recipe: GRASS_EMBERS,
-    count: EMBER_SPARKS,
-  });
+    effects.spawn('particles', scene, at, {
+      recipe: GRASS_EMBERS,
+      count: EMBER_SPARKS,
+    });
+  }
 }
 
 // ---- 4. the clock ----------------------------------------------------------

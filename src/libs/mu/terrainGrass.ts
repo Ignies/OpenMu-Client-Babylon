@@ -225,7 +225,7 @@ const CHAR_TINT = 0.96;
  * over the five minutes it takes to grow back, so this is a time in disguise:
  * 0.93 is about the first half minute after the fire went through.
  */
-const HEAT_FROM = 0.965;
+const HEAT_FROM = 0.985;
 
 /**
  * Fraction of stubs that keep a lit tip while the scar is hot.
