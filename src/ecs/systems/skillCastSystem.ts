@@ -448,7 +448,8 @@ export const SkillCastSystem: ISystemFactory = world => {
       // `LetHeroStop()` (ZzzInterface.cpp:1935): every cast drops the path
       // first, so a skill is never taken mid-stride.
       const { pathfinding } = hero;
-      if (pathfinding.path && pathfinding.path.length > 0) {
+      const wasWalking = !!pathfinding.path && pathfinding.path.length > 0;
+      if (wasWalking) {
         pathfinding.path = null;
         pathfinding.from = { x: ~~heroPos.x, y: ~~heroPos.z };
         pathfinding.to = { x: ~~heroPos.x, y: ~~heroPos.z };
@@ -463,6 +464,12 @@ export const SkillCastSystem: ISystemFactory = world => {
       if (target !== hero && dist > 0.01 && !heldClip) {
         hero.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
       }
+      // The stop is a packet, not just a dropped path. The server is still
+      // walking the steps it was handed - for the approach walk, all the way
+      // onto the target's tile - while the hero stands here casting, and once
+      // the two are more than 5 tiles apart it resynchronises us onto its own
+      // position with an ObjectMoved.
+      if (wasWalking) Store.sendWalkStop(heroPos.x, heroPos.z, hero.transform.rot.y);
 
       // Mana / AG / re-use delay / requirements are gated client-side first
       // (the skill layer's verdict; the server re-checks everything).

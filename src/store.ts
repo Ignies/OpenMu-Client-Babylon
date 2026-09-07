@@ -181,6 +181,15 @@ function itemSize(item: Item): { w: number; h: number } {
 }
 
 /**
+ * A yaw as the 0-7 direction the wire carries - the inverse of the
+ * `direction * 45 - 45` degrees `logic` reads incoming rotations with, and
+ * what `SendCharacterMove` derives from `Object.Angle[2]` for a stop.
+ */
+function walkDirection(rotYRadians: number): number {
+  return ((Math.round((rotYRadians * 4) / Math.PI) + 1) % 8 + 8) % 8;
+}
+
+/**
  * First slot of `items`'s grid part where `item` fits (the original's
  * `FindEmptySlot`); -1 when the inventory is full.
  */
@@ -1765,6 +1774,25 @@ export const Store = new (class _Store {
     packet.StepCount = dirs.length;
     packet.TargetRotation = dirs[dirs.length - 1];
     packet.setDirections(packed, packed.length);
+
+    this.sendToGS(packet.buffer);
+  }
+
+  /**
+   * `LetHeroStop()` (ZzzInterface.cpp:1935-1948): the walk a cast opens with.
+   * `SendCharacterMove` with a single path point sends the hero's own tile,
+   * no steps and just the facing (:1925-1932), which parks the server's
+   * walker where the client stopped. Without it the server keeps walking the
+   * path it was already handed while the client stands still casting, and
+   * rubber-bands the hero onto its own position once the two drift past the
+   * 5-tile tolerance.
+   */
+  sendWalkStop(x: number, y: number, rotYRadians: number): void {
+    const packet = WalkRequestPacket.createPacket(6);
+    packet.SourceX = Math.round(x);
+    packet.SourceY = Math.round(y);
+    packet.StepCount = 0;
+    packet.TargetRotation = walkDirection(rotYRadians);
 
     this.sendToGS(packet.buffer);
   }
