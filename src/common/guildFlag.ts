@@ -32,8 +32,10 @@ export const GUILD_FLAG_BONE = 26;
 /** `Angle[0] += 80; Angle[1] += 45; Angle[2] += 90 + 45;` over `o->Angle`. */
 const FLAG_ANGLE: readonly [number, number, number] = [80, 45, 135];
 
-/** `Matrix[*][3]` — 20 / -5 / -10 cm off the bone. */
-const FLAG_OFFSET: readonly [number, number, number] = [20, -5, -10];
+/** `Matrix[*][3]` - cm off the bone. Bone 26 is the right upper arm and its
+ * local X runs down it, so a slide along X drops the mark off the shoulder
+ * and onto the middle of the back. */
+const FLAG_OFFSET: readonly [number, number, number] = [0, -5, -10];
 /** Thunder Hawk armour drops the flag further down the back (`-18`). */
 const THUNDER_HAWK_OFFSET_Z = -18;
 
