@@ -6,6 +6,8 @@ import {
   type AmbientSystem,
 } from '../../common/ambientParticles';
 import {
+  ATLANS_BUBBLES,
+  ATLANS_DRIFT,
   DEVIAS_SNOW,
   DEVIAS_SNOW_BIG,
   HEARTH_DUST,
@@ -14,6 +16,7 @@ import {
   RAIN,
   SNOW_MAPS,
   TAVERN_DUST,
+  UNDERWATER_MAPS,
 } from '../../weather/ambientWeather';
 import { maps } from '../../maps';
 import { ambientStrengthAt } from '../../weather/ambientSchedule';
@@ -40,8 +43,11 @@ import type { ISystemFactory } from '../world';
  * ones along with the hero (the original's `MoveLeaves` spawned every
  * leaf around `Hero->Object.Position`).
  *
- *  - Lorencia / Noria / Atlans: falling leaves (`CreateLorenciaLeaf`,
- *    `CreateAtlanseLeaf`).
+ *  - Lorencia / Noria: falling leaves (`CreateLorenciaLeaf`).
+ *  - Atlans: marine snow drifting on the current, and bubbles rising off the
+ *    seabed. The original runs Atlans through the leaf path with Lorencia's
+ *    numbers (`CreateAtlanseLeaf`), but on World8's own round sprite and
+ *    additive; see `ATLANS_DRIFT`.
  *  - Devias: snow (`CreateDeviasSnow`).
  *  - Rain on any outdoor map while `WeatherStatusUpdate` reports weather 1
  *    (the original only rained on event maps; the packet is OpenMU's way
@@ -84,7 +90,6 @@ import type { ISystemFactory } from '../world';
 const LEAF_MAPS = new Set<ENUM_WORLD>([
   ENUM_WORLD.WD_0LORENCIA,
   ENUM_WORLD.WD_3NORIA,
-  ENUM_WORLD.WD_7ATLANSE,
 ]);
 
 /** Lorencia pub floor, matching the interactive area in loadMapIntoScene. */
@@ -139,6 +144,19 @@ export const AmbientParticleSystem: ISystemFactory = world => {
       active: (map, indoors) =>
         GameOptions.ambientParticles && !indoors && LEAF_MAPS.has(map),
     },
+    // Atlans, and any other map declaring `MapLayer.underwater`. Both run
+    // whenever the map is: there is no roof to duck under down here, and the
+    // drift carries its own schedule.
+    {
+      recipe: ATLANS_DRIFT,
+      followHero: true,
+      active: map => GameOptions.ambientParticles && UNDERWATER_MAPS.has(map),
+    },
+    {
+      recipe: ATLANS_BUBBLES,
+      followHero: true,
+      active: map => GameOptions.ambientParticles && UNDERWATER_MAPS.has(map),
+    },
     // Snow falls wherever the map says its sky is snow (`SNOW_MAPS`: Devias,
     // both Ice City worlds, Santa Town), the same set that keeps rain off.
     {
@@ -165,6 +183,7 @@ export const AmbientParticleSystem: ISystemFactory = world => {
         !indoors &&
         maps.isOutdoor(map) &&
         !SNOW_MAPS.has(map) &&
+        !UNDERWATER_MAPS.has(map) &&
         (rainTarget(map) > 0 || rainStrength() > 0),
       strength: () => rainStrength(),
     },
