@@ -236,6 +236,15 @@ const PRESS_LIFE = 4.5;
  */
 const ACTOR_BUDGET = 4;
 
+/**
+ * Slots left for the trail once every body has its live press.
+ *
+ * The first `ACTOR_BUDGET` slots are written fresh each frame at wherever the
+ * bodies are; the rest hold the breadcrumbs they have left behind, which is
+ * the part that fades.
+ */
+const TRAIL_SLOTS = GRASS_ACTORS - ACTOR_BUDGET;
+
 /** The `n` entries closest to a point, without sorting or allocating. */
 function nearest(
   actors: readonly GrassActor[],
@@ -929,15 +938,45 @@ export function createGrassField(
       // there is room left for the trail these actors leave behind them.
       const near = nearest(actors, centerX, centerZ, ACTOR_BUDGET);
 
+      actorSlots.fill(0);
+
+      let slot = 0;
+
+      function write(
+        x: number,
+        z: number,
+        flying: boolean,
+        strength: number
+      ): void {
+        const i = slot++ * 4;
+
+        actorSlots[i] = x;
+        actorSlots[i + 1] = z;
+        actorSlots[i + 2] = flying ? FLIER_RADIUS : ACTOR_RADIUS;
+        actorSlots[i + 3] = (flying ? -FLIER_PUSH : TRAMPLE_PUSH) * strength;
+      }
+
       for (const a of near) {
         // Flying is measured against the ground the blade grows from, not
         // read off a state flag: anything far enough above it is overhead.
         const flying = a.y - heightAt(a.x, a.z) > FLYING_OVER;
 
-        // Standing still refreshes the press underfoot; walking out of its
-        // reach stamps the next one, and the old one starts recovering.
-        let nearest: Press | null = null;
+        // The live press, written where the body is this frame.
+        //
+        // Without it the only thing bending the grass was the trail, and a
+        // breadcrumb is only laid every `STAMP_STEP`. So the press under a
+        // running player did not follow them, it jumped three quarters of a
+        // tile at a time and sat still in between: the grass reacted in steps
+        // instead of moving, which is what reads as a slow, stuttering
+        // animation. This one tracks the body exactly, every frame.
+        write(a.x, a.z, flying, 1);
+
+        // And the trail it leaves. A breadcrumb is stamped once the body is
+        // clear of the last one, and then stays where it was put - dragging it
+        // along with the body was the reason no trail ever formed. It starts
+        // recovering the moment the body walks on.
         let nearestD = STAMP_STEP * STAMP_STEP;
+        let found = false;
 
         for (const p of presses) {
           if (p.flying !== flying) continue;
@@ -946,24 +985,16 @@ export function createGrassField(
 
           if (d < nearestD) {
             nearestD = d;
-            nearest = p;
+            found = true;
           }
         }
 
-        if (nearest) {
-          // Refreshed, *not* moved. Dragging the press along with the body was
-          // the reason no trail ever formed: one press followed the player
-          // around and the grass behind them was never pressed at all. Left
-          // where it was stamped, it starts recovering the moment the body
-          // walks out of its reach, and the next step stamps the next one.
-          nearest.life = 1;
-          continue;
-        }
+        if (found) continue;
 
         // Full: drop the faintest, and among equally faint ones the furthest
         // away - so a fresh press near the camera never loses to a stale one
         // at the edge of the field.
-        if (presses.length >= GRASS_ACTORS) {
+        if (presses.length >= TRAIL_SLOTS) {
           let worst = 0;
 
           for (let i = 1; i < presses.length; i++) {
@@ -985,23 +1016,16 @@ export function createGrassField(
         presses.push({ x: a.x, z: a.z, life: 1, flying });
       }
 
-      actorSlots.fill(0);
+      for (const p of presses) {
+        if (slot >= GRASS_ACTORS) break;
 
-      for (let s = 0; s < presses.length && s < GRASS_ACTORS; s++) {
-        const p = presses[s];
         // Smootherstep, not smoothstep: zero first *and* second derivative at
         // both ends, so the blade neither jumps as it starts lifting nor
         // arrives at upright with any velocity left. Over `PRESS_LIFE` that
         // is a press which holds, then rises, then settles.
         const t = p.life;
-        const strength = t * t * t * (t * (t * 6 - 15) + 10);
-        const i = s * 4;
 
-        actorSlots[i] = p.x;
-        actorSlots[i + 1] = p.z;
-        actorSlots[i + 2] = p.flying ? FLIER_RADIUS : ACTOR_RADIUS;
-        actorSlots[i + 3] =
-          (p.flying ? -FLIER_PUSH : TRAMPLE_PUSH) * strength;
+        write(p.x, p.z, p.flying, t * t * t * (t * (t * 6 - 15) + 10));
       }
     },
 
