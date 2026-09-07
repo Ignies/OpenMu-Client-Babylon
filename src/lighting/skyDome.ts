@@ -95,6 +95,34 @@ const CLOUD_SELF_SHADOW = 3.2;
 const CLOUD_DENSITY = 5;
 
 /**
+ * The volumetric march: steps along the view ray, steps up the sun ray for
+ * each of them, and the transmittance at which the walk gives up because
+ * nothing behind it could show.
+ */
+const VOLUME_STEPS = 32;
+const VOLUME_LIGHT_STEPS = 4;
+const VOLUME_CUTOFF = 0.02;
+
+/**
+ * Step sizes, in tiles, between which the fine structure is faded out.
+ *
+ * A ray overhead crosses the deck in about a hundred tiles and a ray near the
+ * horizon in four hundred, so with a fixed step count the step itself varies
+ * by four. Past the erosion's own period the march cannot resolve what it is
+ * sampling and draws the beat instead - see `muCloudDensity`.
+ */
+const VOLUME_DETAIL_FULL = 4;
+const VOLUME_DETAIL_NONE = 11;
+
+/** Tiles of deck a single ray will walk before it stops. A ray near the
+ * horizon crosses hundreds and is haze long before that. */
+const VOLUME_MAX_SPAN = 900;
+
+/** Extinction per tile of density, and how hard the deck shades itself. */
+const VOLUME_DENSITY = 0.085;
+const VOLUME_SELF_SHADOW = 4.5;
+
+/**
  * Curvature the deck is bent onto, in tiles: the radius of the shell the view
  * ray is intersected against.
  *
@@ -311,6 +339,104 @@ ${cloudFieldGlsl()}
    *
    * Sky pixels only.
    */
+  /** Distance along rd to the shell of radius CLOUD_R + h. Same root as below. */
+  float muShellHit(vec3 rd, float h) {
+    float rise = max(h - cameraPosition.y, 1.0);
+    float k = rise * (2.0 * CLOUD_R + h + cameraPosition.y);
+    float b = (CLOUD_R + cameraPosition.y) * rd.y;
+
+    return k / (b + sqrt(b * b + k));
+  }
+
+  /**
+   * The deck as a body rather than a sheet: the view ray is walked between the
+   * shells at the deck's base and top, gathering density, and each sample is
+   * lit by a short march up the sun ray through the same field.
+   *
+   * Front to back, so the accumulated transmittance can stop the walk once
+   * nothing behind would show. Ultra only - every other tier takes the slab
+   * below, unchanged.
+   */
+  vec4 muCloudVolume(vec3 rd, vec3 sunLit, vec3 base) {
+    if (muCloudA.z <= 0.01) return vec4(0.0);
+
+    float tBase = muShellHit(rd, muCloudB.z);
+    float tTop = muShellHit(rd, muCloudB.z + muCloudB.w);
+
+    float tIn = min(tBase, tTop);
+    float tOut = max(tBase, tTop);
+
+    if (tOut <= 0.0) return vec4(0.0);
+
+    tIn = max(tIn, 0.0);
+
+    // A ray near the horizon crosses far more deck than one overhead. Capping
+    // the walked length keeps the step count honest and the far deck is haze
+    // by then anyway.
+    float span = min(tOut - tIn, ${VOLUME_MAX_SPAN.toFixed(1)});
+    float step = span / ${VOLUME_STEPS}.0;
+
+    // How much of the fine structure this ray's step can resolve.
+    float detail = clamp(
+      (${VOLUME_DETAIL_NONE.toFixed(1)} - step)
+        / ${(VOLUME_DETAIL_NONE - VOLUME_DETAIL_FULL).toFixed(1)},
+      0.0,
+      1.0
+    );
+
+    // Start the walk a fraction of a step in, by pixel. Every ray sampling at
+    // the same offsets puts the residual error in the same place on every one
+    // of them, and a shared error is a visible band; scattered, it is noise
+    // the eye reads as the deck's own texture.
+    float jitter = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+
+    vec3 lit = vec3(0.0);
+    float trans = 1.0;
+
+    for (int i = 0; i < ${VOLUME_STEPS}; i++) {
+      if (trans < ${VOLUME_CUTOFF.toFixed(3)}) break;
+
+      float t = tIn + (float(i) + jitter) * step;
+      vec3 wp = cameraPosition + rd * t;
+
+      float h = clamp((wp.y - muCloudB.z) / muCloudB.w, 0.0, 1.0);
+      float d = muCloudDensity(wp, h, detail);
+
+      if (d <= 0.0) continue;
+
+      // Up the sun ray, through the deck the light had to cross to get here.
+      float shade = 0.0;
+
+      for (int j = 1; j <= ${VOLUME_LIGHT_STEPS}; j++) {
+        float f = float(j) / ${VOLUME_LIGHT_STEPS}.0;
+        vec3 lp = wp + vec3(muCloudB.x, 1.0, muCloudB.y) * muCloudB.w * f;
+        float lh = clamp((lp.y - muCloudB.z) / muCloudB.w, 0.0, 1.0);
+
+        shade += muCloudDensity(lp, lh, detail);
+      }
+
+      float sun = exp(-${VOLUME_SELF_SHADOW.toFixed(2)} * shade / ${VOLUME_LIGHT_STEPS}.0);
+
+      vec3 body = mix(base * ${CLOUD_BASE_SHADE.toFixed(2)}, sunLit * ${CLOUD_LIT_GAIN.toFixed(2)}, sun);
+
+      float take = 1.0 - exp(-d * ${VOLUME_DENSITY.toFixed(2)} * step);
+
+      lit += body * take * trans;
+      trans *= 1.0 - take;
+    }
+
+    float alpha = 1.0 - trans;
+    if (alpha <= 0.001) return vec4(0.0);
+
+    vec3 colour = lit / max(alpha, 0.001);
+
+    float aerial = 1.0 - exp(
+      -max(tIn - ${CLOUD_AERIAL_START.toFixed(1)}, 0.0) / ${CLOUD_AERIAL_SCALE.toFixed(1)}
+    );
+
+    return vec4(mix(colour, base, aerial * ${CLOUD_AERIAL_MAX.toFixed(2)}), alpha);
+  }
+
   vec4 muCloudSlab(vec3 rd, vec3 sunLit, vec3 base) {
     if (muCloudA.z <= 0.01) return vec4(0.0);
 
@@ -370,7 +496,11 @@ ${cloudFieldGlsl()}
     sky += sunColor * skyParams.y * pow(max(sd, 0.0), 120.0);
     sky += sunColor * ${DISC_GAIN.toFixed(1)} * smoothstep(skyParams.z, skyParams.w, sd);
 
-    vec4 clouds = muCloudSlab(rd, sunColor, sky);
+    // muCloudC.z is the tier's field scale, and it is above 1 only where the
+    // deck is marched. One flag, no define, no second material.
+    vec4 clouds = muCloudC.z > 1.001
+      ? muCloudVolume(rd, sunColor, sky)
+      : muCloudSlab(rd, sunColor, sky);
     sky = mix(sky, clouds.rgb, clouds.a);
 
     gl_FragColor = vec4(sky, 1.0);
