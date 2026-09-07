@@ -5,7 +5,14 @@ import { GameOptions } from '../../common/gameOptions';
 import { maps } from '../../maps';
 import { snowCover } from '../../weather/snowCover';
 import { snowTrailPainted, snowTrailTexture } from '../../weather/snowTrail';
-import { MELT_EDGE, MELT_SPOTS, snowMeltUniform } from '../../weather/snowMelt';
+import {
+  MELT_EDGE,
+  MELT_LOBE_2,
+  MELT_LOBE_3,
+  MELT_LOBE_5,
+  MELT_SPOTS,
+  snowMeltUniform,
+} from '../../weather/snowMelt';
 import { puddleCover, wetness } from '../../weather/wetness';
 import { rainStrength } from '../../weather/rainState';
 import { pointLightPoolLights } from '../../common/pointLightPool';
@@ -1290,7 +1297,26 @@ ${
       float ovMelt${i} = 0.0;
       for (int m = 0; m < ${MELT_SPOTS}; m++) {
         float ovMr${i} = max(ovMeltSpot[m].z, 0.001);
-        float ovMd${i} = length(vWorldXZ - ovMeltSpot[m].xy) / ovMr${i};
+        vec2 ovMv${i} = vWorldXZ - ovMeltSpot[m].xy;
+
+        // The patch's own outline rather than a circle. A disc is the one
+        // shape that reads as stamped instead of melted, and a fire skill
+        // worked over a snowfield left a row of identical coins.
+        //
+        // The phases are hashed out of the spot's own position, so a patch
+        // holds its shape for as long as it lives and no two are alike -
+        // without a byte more uniform, because the bearing is the only thing
+        // this needs and the loop was already taking the distance.
+        float ovMs${i} = fract(
+          sin(dot(ovMeltSpot[m].xy, vec2(12.9898, 78.233))) * 43758.5453
+        ) * 6.2831853;
+        float ovMa${i} = atan(ovMv${i}.y, ovMv${i}.x);
+        float ovMk${i} = 1.0
+          + ${f(MELT_LOBE_2)} * sin(ovMa${i} * 2.0 + ovMs${i})
+          + ${f(MELT_LOBE_3)} * sin(ovMa${i} * 3.0 + ovMs${i} * 1.7)
+          + ${f(MELT_LOBE_5)} * sin(ovMa${i} * 5.0 + ovMs${i} * 2.3);
+
+        float ovMd${i} = length(ovMv${i}) / (ovMr${i} * ovMk${i});
         ovMelt${i} = max(
           ovMelt${i},
           ovMeltSpot[m].w * (1.0 - smoothstep(${f(MELT_EDGE)}, 1.0, ovMd${i})));

@@ -102,6 +102,23 @@ const MAX_RADIUS = 4;
  */
 export const MELT_EDGE = 0.45;
 
+/**
+ * How far a patch's edge departs from a circle, per harmonic of the bearing.
+ *
+ * A melt was a perfect disc, and a disc is the one shape that says "stamped"
+ * rather than "melted" - a fire skill worked over a snowfield left a row of
+ * identical coins. The second harmonic gives a patch a long axis and the third
+ * and fifth break that into lobes.
+ *
+ * The phases come out of the spot's own position (see the GLSL in
+ * `terrainOverlay.ts`), so a patch keeps its outline for as long as it lives
+ * and no two are alike, without a byte more uniform: the shape is three sines
+ * of a bearing the loop already has to compute the distance.
+ */
+export const MELT_LOBE_2 = 0.2;
+export const MELT_LOBE_3 = 0.12;
+export const MELT_LOBE_5 = 0.07;
+
 // ---- 2. state + readers ----------------------------------------------------
 
 type Spot = {
