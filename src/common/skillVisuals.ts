@@ -1622,7 +1622,10 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
       const caster = world?.playerEntity;
       if (!world || !caster?.transform) return false;
       // Whatever else is standing about, so bolts and beams have somewhere to go.
-      const target = world.netObjsQuery.entities.find(e => e !== caster && e.transform && !e.dying) ?? null;
+      const target =
+        world.netObjsQuery.entities.find(e => e !== caster && e.transform && !e.dying) ??
+        world.playersQuery.entities.find(e => e !== caster && e.transform && !e.dying) ??
+        null;
       playTargetedSkillVisual(world.scene, skill, caster, target);
       return true;
     },
