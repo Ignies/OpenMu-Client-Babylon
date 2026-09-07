@@ -116,9 +116,30 @@ class Maps {
     return this.layerFor(world)?.spawn;
   }
 
-  /** Has a sky — rain may fall here. */
+  /** Has a sky. Whether rain may fall out of it is `canRain`. */
   isOutdoor(world: ENUM_WORLD): boolean {
     return this.layerFor(world)?.outdoor === true;
+  }
+
+  /**
+   * Rain may fall here: the map has a sky, and its climate is not something
+   * else. The one place that answers the question - a caller that assembles
+   * its own version of it from the flags will drift the first time a fourth
+   * climate is added.
+   *
+   * `outdoor` is necessary and not sufficient. Each climate below has its own
+   * reason and its own other effects (snow caps and footsteps; the sea's
+   * ambience), so they stay separate flags rather than one "dry" bit.
+   */
+  canRain(world: ENUM_WORLD): boolean {
+    const layer = this.layerFor(world);
+    if (!layer) return false;
+    return (
+      layer.outdoor === true &&
+      layer.snow !== true &&
+      layer.underwater !== true &&
+      layer.desert !== true
+    );
   }
 
   /** The sky belongs to snow. */
