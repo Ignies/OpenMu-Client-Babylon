@@ -1,4 +1,5 @@
 import type { Scene } from '../libs/babylon/exports';
+import { devQueryNumber } from '../common/devSeams';
 import { registerPointLightEmitter } from '../common/pointLightPool';
 import {
   registerTerrainLight,
@@ -128,6 +129,29 @@ export const PRIORITY_EFFECT = 3;
 export const PRIORITY_TORCH = 0;
 
 /**
+ * What an event light's point term is worth against a torch's.
+ *
+ * The pool is authored for map lights, which hang on a wall or stand in a
+ * corner: by the time one reaches a body it has fallen off. An event light is
+ * *inside* the scene - a bolt lands a tile from the grass tufts, a spirit
+ * passes through them - and at a torch's strength it arrives so far over what
+ * a surface can hold that the diffuse term saturates and the prop comes back
+ * in the light's colour instead of its own. That is a wash, not a pool.
+ *
+ * Recipes' own `gain` multiplies this, so the relative tuning between skills
+ * is unchanged. Dev seam: `?fxgain=`.
+ */
+const EVENT_POINT_GAIN = 0.35;
+
+const eventGainDev = devQueryNumber('fxgain');
+
+function eventPointGain(priority: number): number {
+  if (priority < PRIORITY_EFFECT) return 1;
+
+  return eventGainDev !== null ? Math.max(0, eventGainDev) : EVENT_POINT_GAIN;
+}
+
+/**
  * Tiles the point light reaches past the terrain footprint. The floor pool
  * is a tile cone; the walls and bodies around it are lit per pixel and read
  * further out.
@@ -251,7 +275,7 @@ export class LightSource {
       position,
       heightOffset: recipe.heightOffset,
       range: recipe.pointRange ?? recipe.range + POINT_RANGE_EXTRA,
-      gain: recipe.gain,
+      gain: (recipe.gain ?? 1) * eventPointGain(recipe.priority ?? PRIORITY_EFFECT),
       wander: recipe.wander,
       priority: recipe.priority ?? PRIORITY_EFFECT,
       instant: recipe.instant ?? true,
