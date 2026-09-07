@@ -13,6 +13,7 @@ import sharp from 'sharp';
 import { decodeTga } from '@lunapaint/tga-codec';
 import { PNG } from 'pngjs';
 import { BMD_EXT, DATA_FOLDER, OUTPUT_FOLDER } from './shared';
+import { canonicalAssetPath } from './assetCase';
 
 async function tga2png(file: Buffer) {
   const tga = await decodeTga(new Uint8Array(file));
@@ -707,8 +708,11 @@ async function processFile(rawRelInputFilePath: string) {
 
   const absInputFilePath = DATA_FOLDER + relInputFilePath;
   const inputFolder = relInputFilePath.replace(inputFileName, '');
+  // Spelled the way the client asks for it, not the way Data/ spells it -
+  // see tools/assetCase.ts.
   const outputFileName =
-    OUTPUT_FOLDER + relInputFilePath.replace(BMD_EXT, '.glb');
+    OUTPUT_FOLDER +
+    canonicalAssetPath(relInputFilePath.replace(BMD_EXT, '.glb'));
 
   for (const ignoreFile of IGNORE_FILES) {
     if (ignoreFile === inputFileName) {

@@ -257,7 +257,7 @@ export const MODEL = {
   airforce: 'Skill/airforce.glb',
   boswind: 'Skill/boswind.glb',
   mayaTornado: 'Skill/mayatonedo.glb',
-  hellgate: 'Skill/hellgate.glb',
+  hellgate: 'Skill/HellGate.glb',
   skeleton: 'Skill/Skeleton01.glb',
   dragonHead: 'Skill/dragonhead.glb',
   fenrirRed: 'Skill/fenril_red.glb',
