@@ -306,6 +306,27 @@ export type Entity = Partial<{
      */
     fenrirThunder?: readonly [number, number, number];
   };
+  /**
+   * `Boids[]` - the ambient wildlife (`common/boids.ts`, GOBoid.cpp). Created
+   * and driven by BoidSystem; it has no server presence and nothing else
+   * reads it.
+   */
+  boid: {
+    kind: 'bird' | 'bat' | 'butterfly' | 'crow' | 'fish';
+    /** `o->AI`: only the bird uses more than `fly`. */
+    ai: 'fly' | 'down' | 'ground' | 'up';
+    /** `o->Angle[2]`, degrees, MU convention. */
+    yaw: number;
+    /** `o->Direction[2]`: the vertical component, MU units per tick. */
+    rise: number;
+    /** `o->Velocity`. */
+    velocity: number;
+    /** `o->Timer`, which the fish use to schedule their darting. */
+    timer: number;
+    /** Where the flock steering aims: `o->Direction[0..1]`, world units. */
+    leadX: number;
+    leadZ: number;
+  };
   highlighted: {
     color: Color3;
     layer: HighlightLayer | null;
