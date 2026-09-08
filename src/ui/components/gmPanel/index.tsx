@@ -19,9 +19,10 @@ import { GM_GROUPS, type GmCommand, type GmParam } from '../../../common/gmComma
  * grants nothing; the server re-checks `CharacterStatus` on every command it
  * receives, so hiding this from a normal player is presentation, not security.
  *
- * F10 toggles it - a raw `keyPressed` code like the debug menu's F9, not a
+ * F8 toggles it - a raw `keyPressed` code beside the debug menu's F9, not a
  * `KeyBindings` action, so the player-facing Keys tab stays clean. Game masters
- * only: everyone else renders null and never sees the key.
+ * only: everyone else renders null and never sees the key. Not F10, which opens
+ * the menu bar in Firefox.
  *
  * Drawn with the Options window's stone chrome, the same vocabulary the debug
  * menu uses, so it reads as part of the client.
@@ -29,7 +30,7 @@ import { GM_GROUPS, type GmCommand, type GmParam } from '../../../common/gmComma
 
 const WINDOW_ID = 'gm-panel';
 
-const TOGGLE_KEY = 'F10';
+const TOGGLE_KEY = 'F8';
 
 const ART_WIDTH = 213;
 

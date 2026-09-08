@@ -110,7 +110,7 @@ const HUD = observer(() => {
       <Minimap />
       {/* Offline only: renders null online (F9). */}
       <DebugMenuWindow />
-      {/* Game masters only: renders null for everyone else (F10). */}
+      {/* Game masters only: renders null for everyone else (F8). */}
       <GmPanelWindow />
       {}
       {/* Touch clients only: renders null on a mouse. */}
