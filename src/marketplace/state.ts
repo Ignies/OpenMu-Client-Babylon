@@ -49,7 +49,15 @@ class MarketplaceStore {
   /** What the player could put up for sale. Pushed in the same way. */
   inventory: Listing['item'][] = [];
 
-  listings: Listing[] = buildMockListings();
+  /**
+   * Empty until a service fills it.
+   *
+   * The fixtures are for looking at the window, and they must never reach a
+   * player: every one of them is invented, so a live build would offer things
+   * nobody is selling and take fake Zen for them. Development builds and the
+   * standalone harness seed them explicitly instead.
+   */
+  listings: Listing[] = [];
 
   /** The card the pointer is over, for the tooltip. */
   hovered: { id: string; x: number; y: number } | null = null;
@@ -64,6 +72,17 @@ class MarketplaceStore {
 
   constructor() {
     makeAutoObservable(this);
+    if (APP_STAGE === 'dev') this.seedFixtures();
+  }
+
+  /** Fills the catalogue with invented listings. Never call this in a live build. */
+  seedFixtures(): void {
+    this.listings = buildMockListings();
+  }
+
+  /** No listings at all, as opposed to none matching the current filters. */
+  get isEmpty(): boolean {
+    return this.listings.length === 0;
   }
 
   toggle(): void {
