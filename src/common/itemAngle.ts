@@ -99,11 +99,8 @@ const DEFAULT_POSE: RestPose = { angle: [0, 0, -45] };
 /**
  * The resting `o->Angle` / `o->Scale` for one item.
  *
- * Covers `ItemAngleRF` and every *structural* branch of `ItemAngle` — the
- * ones that decide whether an item lies down or stands up. `ItemAngle`'s long
- * tail of per-item scale-and-yaw tweaks for event drops (Halloween boxes,
- * Cherry Blossom, the seasonal potions) is not transcribed: those items keep
- * the default pose, which is the pose they already had.
+ * Covers `ItemAngleRF`, every *structural* branch of `ItemAngle` and, through
+ * `POSE_TABLE`, the long tail of per-item tweaks after them.
  */
 export function itemRestPose(group: number, num: number): ItemRestPose {
   const pose = restPose(group, num);
@@ -184,9 +181,288 @@ function restPose(group: number, num: number): RestPose {
       return { angle: [270, 0, -45] };
 
     default:
-      return DEFAULT_POSE;
+      return tablePose(group, num) ?? DEFAULT_POSE;
   }
 }
+
+/** One row of `ItemAngle`'s tail: a group, a num or a num range, and what it sets. */
+type PoseRule = {
+  readonly group: ItemGroup;
+  /** A single item, or `from`/`to` for an inclusive range. */
+  readonly num?: number;
+  readonly from?: number;
+  readonly to?: number;
+  readonly pitch?: number;
+  readonly roll?: number;
+  readonly yaw?: number;
+  readonly scale?: number;
+};
+
+/**
+ * `ItemAngle`'s tail (ZzzObject.cpp:5338), in the original's own order: the
+ * first row an item matches wins, the way the `else if` chain does, and a row
+ * sets only the angle components its branch sets - the rest keep the default
+ * pose. Each row carries the constants of the branch it came from.
+ *
+ * Two branches are deliberately absent. The ones whose model is a
+ * `MODEL_EVENT` entry rather than an item row reach a drop only through
+ * `CreateItemDrop`'s model swap (common/dropModelProxy.ts), so they have no
+ * (group, num) to key on. And the closing `Check_LuckyItem` branch reads a
+ * table the client loads at boot, which this client does not have.
+ */
+const POSE_TABLE: readonly PoseRule[] = [
+  // >= RED_RIBBON_BOX && <= BLUE_RIBBON_BOX
+  { group: ItemGroup.Wing, from: 32, to: 34, pitch: 0, yaw: 90, scale: 0.3 },
+  // >= SEED_FIRE && <= SEED_EARTH
+  { group: ItemGroup.Wing, from: 60, to: 65, pitch: 0, scale: 0.6 },
+  // >= SPHERE_MONO && <= SPHERE_5
+  { group: ItemGroup.Wing, from: 70, to: 74, pitch: 0, scale: 0.6 },
+  // >= SEED_SPHERE_FIRE_1 && <= SEED_SPHERE_EARTH_5
+  { group: ItemGroup.Wing, from: 100, to: 129, pitch: 0, scale: 0.6 },
+  // == PUMPKIN_OF_LUCK
+  { group: ItemGroup.Potion, num: 45, pitch: 0, yaw: 90, scale: 0.9 },
+  // >= JACK_OLANTERN_BLESSINGS && <= JACK_OLANTERN_CRY
+  { group: ItemGroup.Potion, from: 46, to: 48, pitch: 90, scale: 0.7 },
+  // == JACK_OLANTERN_FOOD
+  { group: ItemGroup.Potion, num: 49, pitch: 0, yaw: 90, scale: 0.9 },
+  // == JACK_OLANTERN_DRINK
+  { group: ItemGroup.Potion, num: 50, pitch: 0, yaw: 90, scale: 0.26 },
+  // >= PINK_CHOCOLATE_BOX && <= BLUE_CHOCOLATE_BOX
+  { group: ItemGroup.Potion, from: 32, to: 34, pitch: 0, yaw: 90, scale: 0.7 },
+  // >= HELPER + 46 && <= HELPER + 48
+  { group: ItemGroup.Helper, from: 46, to: 48, pitch: 90, scale: 0.5 },
+  // == POTION + 54
+  { group: ItemGroup.Potion, num: 54, pitch: 90, scale: 0.5 },
+  // == POTION + 58
+  { group: ItemGroup.Potion, num: 58, yaw: 90, scale: 0.3 },
+  // == POTION + 59 || == POTION + 60
+  { group: ItemGroup.Potion, num: 59, pitch: 90, roll: 90, scale: 0.3 },
+  // == POTION + 59 || == POTION + 60
+  { group: ItemGroup.Potion, num: 60, pitch: 90, roll: 90, scale: 0.3 },
+  // == POTION + 61 || == POTION + 62
+  { group: ItemGroup.Potion, num: 61, pitch: 90, scale: 0.3 },
+  // == POTION + 61 || == POTION + 62
+  { group: ItemGroup.Potion, num: 62, pitch: 90, scale: 0.3 },
+  // == POTION + 53
+  { group: ItemGroup.Potion, num: 53, yaw: 90, scale: 0.2 },
+  // == HELPER + 43 || == HELPER + 44 || == HELPER + 45
+  { group: ItemGroup.Helper, num: 43, pitch: 90, scale: 0.5 },
+  // == HELPER + 43 || == HELPER + 44 || == HELPER + 45
+  { group: ItemGroup.Helper, num: 44, pitch: 90, scale: 0.5 },
+  // == HELPER + 43 || == HELPER + 44 || == HELPER + 45
+  { group: ItemGroup.Helper, num: 45, pitch: 90, scale: 0.5 },
+  // >= POTION + 70 && <= POTION + 71
+  { group: ItemGroup.Potion, from: 70, to: 71, yaw: 90, scale: 0.6 },
+  // >= POTION + 72 && <= POTION + 77
+  { group: ItemGroup.Potion, from: 72, to: 77, yaw: 90, scale: 0.5 },
+  // == HELPER + 59
+  { group: ItemGroup.Helper, num: 59, yaw: 90, scale: 0.2 },
+  // >= HELPER + 54 && <= HELPER + 58
+  { group: ItemGroup.Helper, from: 54, to: 58, yaw: 90, scale: 0.7 },
+  // >= POTION + 78 && <= POTION + 82
+  { group: ItemGroup.Potion, from: 78, to: 82, yaw: 90, scale: 0.5 },
+  // == HELPER + 60
+  { group: ItemGroup.Helper, num: 60, yaw: 90, scale: 1.5 },
+  // == HELPER + 61
+  { group: ItemGroup.Helper, num: 61, pitch: 90, scale: 0.5 },
+  // == POTION + 83
+  { group: ItemGroup.Potion, num: 83, pitch: 90, scale: 0.3 },
+  // >= POTION + 145 && <= POTION + 150
+  { group: ItemGroup.Potion, from: 145, to: 150, pitch: 90, scale: 0.3 },
+  // >= HELPER + 125 && <= HELPER + 127
+  { group: ItemGroup.Helper, from: 125, to: 127, pitch: 90, scale: 0.5 },
+  // == POTION + 91
+  { group: ItemGroup.Potion, num: 91, pitch: 90, scale: 0.5 },
+  // == POTION + 92
+  { group: ItemGroup.Potion, num: 92, pitch: 90, scale: 0.5 },
+  // == POTION + 93
+  { group: ItemGroup.Potion, num: 93, pitch: 90, scale: 0.5 },
+  // == POTION + 95
+  { group: ItemGroup.Potion, num: 95, pitch: 90, scale: 0.5 },
+  // == POTION + 94
+  { group: ItemGroup.Potion, num: 94, yaw: 90, scale: 0.6 },
+  // == CHERRY_BLOSSOM_PLAYBOX
+  { group: ItemGroup.Potion, num: 84, yaw: 90, scale: 0.8 },
+  // == CHERRY_BLOSSOM_WINE
+  { group: ItemGroup.Potion, num: 85, yaw: 90, scale: 0.9 },
+  // == CHERRY_BLOSSOM_RICE_CAKE
+  { group: ItemGroup.Potion, num: 86, yaw: 90, scale: 0.7 },
+  // == CHERRY_BLOSSOM_FLOWER_PETAL
+  { group: ItemGroup.Potion, num: 87, yaw: 90, scale: 1.3 },
+  // == POTION + 88
+  { group: ItemGroup.Potion, num: 88, pitch: 180, roll: 180, scale: 0.7 },
+  // == POTION + 89
+  { group: ItemGroup.Potion, num: 89, pitch: 30, yaw: 90, scale: 0.7 },
+  // == GOLDEN_CHERRY_BLOSSOM_BRANCH
+  { group: ItemGroup.Potion, num: 90, pitch: 30, yaw: 90, scale: 0.7 },
+  // >= HELPER + 62 && <= HELPER + 63
+  { group: ItemGroup.Helper, from: 62, to: 63, pitch: 90, scale: 0.5 },
+  // >= POTION + 97 && <= POTION + 98
+  { group: ItemGroup.Potion, from: 97, to: 98, yaw: 90, scale: 0.5 },
+  // == POTION + 140
+  { group: ItemGroup.Potion, num: 140, yaw: 90, scale: 0.5 },
+  // == POTION + 96
+  { group: ItemGroup.Potion, num: 96, yaw: 90, scale: 0.2 },
+  // == DEMON (the switch inside the DEMON..SPIRIT_OF_GUARDIAN branch)
+  { group: ItemGroup.Helper, num: 64, yaw: 70, scale: 0.21 },
+  // == SPIRIT_OF_GUARDIAN
+  { group: ItemGroup.Helper, num: 65, yaw: 70, scale: 0.5 },
+  // == OLD_SCROLL
+  { group: ItemGroup.Helper, num: 49, pitch: 90, roll: 0, scale: 0.3 },
+  // == ILLUSION_SORCERER_COVENANT
+  { group: ItemGroup.Helper, num: 50, pitch: 0, scale: 0.6 },
+  // == SCROLL_OF_BLOOD
+  { group: ItemGroup.Helper, num: 51, pitch: 90, scale: 0.45 },
+  // == POTION + 64
+  { group: ItemGroup.Potion, num: 64, pitch: 0, scale: 0.8 },
+  // == FLAME_OF_CONDOR
+  { group: ItemGroup.Helper, num: 52, pitch: 0, scale: 1.2 },
+  // == FEATHER_OF_CONDOR
+  { group: ItemGroup.Helper, num: 53, pitch: 0, scale: 1.2 },
+  // == FLAME_OF_DEATH_BEAM_KNIGHT
+  { group: ItemGroup.Potion, num: 65, pitch: 90, scale: 0.6 },
+  // == HORN_OF_HELL_MAINE
+  { group: ItemGroup.Potion, num: 66, pitch: 90, scale: 0.8 },
+  // == FEATHER_OF_DARK_PHOENIX
+  { group: ItemGroup.Potion, num: 67, pitch: 270, scale: 0.8 },
+  // == EYE_OF_ABYSSAL
+  { group: ItemGroup.Potion, num: 68, yaw: -135, scale: 0.6 },
+  // == SCROLL_OF_EMPEROR_RING_OF_HONOR
+  { group: ItemGroup.Potion, num: 23, roll: 45, yaw: 45 },
+  // == BROKEN_SWORD_DARK_STONE
+  { group: ItemGroup.Potion, num: 24, yaw: 45 },
+  // (>= TEAR_OF_ELF && < POTION + 27) || == LOCHS_FEATHER
+  { group: ItemGroup.Potion, from: 25, to: 26, yaw: 45 },
+  // (>= TEAR_OF_ELF && < POTION + 27) || == LOCHS_FEATHER
+  { group: ItemGroup.Helper, num: 14, yaw: 45 },
+  // == DEVILS_EYE
+  { group: ItemGroup.Potion, num: 17, pitch: 90 },
+  // == FIRECRACKER
+  { group: ItemGroup.Potion, num: 63, pitch: 70, scale: 1.5 },
+  // == CHRISTMAS_FIRECRACKER
+  { group: ItemGroup.Potion, num: 99, pitch: 70, yaw: 0, scale: 1 },
+  // == GM_GIFT
+  { group: ItemGroup.Potion, num: 52, yaw: -10, scale: 0.4 },
+  // == DEVILS_KEY
+  { group: ItemGroup.Potion, num: 18, pitch: 270, yaw: 270 },
+  // == DEVILS_INVITATION
+  { group: ItemGroup.Potion, num: 19, pitch: 270, yaw: 90 },
+  // == SYMBOL_OF_KUNDUN
+  { group: ItemGroup.Potion, num: 29, pitch: 90, yaw: 70 },
+  // == SCROLL_OF_ARCHANGEL || == BLOOD_BONE
+  { group: ItemGroup.Helper, num: 16, pitch: -45, roll: -5, yaw: 18, scale: 0.48 },
+  // == SCROLL_OF_ARCHANGEL || == BLOOD_BONE
+  { group: ItemGroup.Helper, num: 17, pitch: -45, roll: -5, yaw: 18, scale: 0.48 },
+  // == INVISIBILITY_CLOAK
+  { group: ItemGroup.Helper, num: 18, pitch: 165, roll: -168, yaw: 198, scale: 0.48 },
+  // == CAPE_OF_LORD
+  { group: ItemGroup.Helper, num: 30, pitch: -45, roll: 0, yaw: 45, scale: 0.5 },
+  // == POTION + 21
+  { group: ItemGroup.Potion, num: 21, pitch: 270, yaw: 90 },
+  // == POTION + 20
+  { group: ItemGroup.Potion, num: 20, yaw: 45 },
+  // >= RING_OF_FIRE && <= RING_OF_MAGIC
+  { group: ItemGroup.Helper, from: 21, to: 24, yaw: 20 },
+  // == BLESS_OF_GUARDIAN
+  { group: ItemGroup.Helper, num: 33, yaw: 45, scale: 1.2 },
+  // == CLAW_OF_BEAST
+  { group: ItemGroup.Helper, num: 34, pitch: 90 },
+  // == FRAGMENT_OF_HORN
+  { group: ItemGroup.Helper, num: 35, yaw: 90 },
+  // == BROKEN_HORN
+  { group: ItemGroup.Helper, num: 36, yaw: 90, scale: 1.3 },
+  // == HORN_OF_FENRIR
+  { group: ItemGroup.Helper, num: 37, yaw: 180 },
+  // == JEWEL_OF_LIFE
+  { group: ItemGroup.Potion, num: 16, pitch: 270, yaw: 45 },
+  // == JEWEL_OF_HARMONY
+  { group: ItemGroup.Potion, num: 42, pitch: 270, yaw: -15, scale: 1.3 },
+  // == LOWER_REFINE_STONE || == HIGHER_REFINE_STONE
+  { group: ItemGroup.Potion, num: 43, pitch: 270, yaw: -15, scale: 1 },
+  // == LOWER_REFINE_STONE || == HIGHER_REFINE_STONE
+  { group: ItemGroup.Potion, num: 44, pitch: 270, yaw: -15, scale: 1 },
+  // >= CHAIN_LIGHTNING_PARCHMENT && <= INNOVATION_PARCHMENT
+  { group: ItemGroup.Etc, from: 19, to: 27, pitch: 270, scale: 0.8 },
+  // == HELPER + 66
+  { group: ItemGroup.Helper, num: 66, pitch: 270, scale: 1 },
+  // == POTION + 100
+  { group: ItemGroup.Potion, num: 100, pitch: 180, scale: 1 },
+  // >= TYPE_CHARM_MIXWING + EWS_BEGIN && <= TYPE_CHARM_MIXWING + EWS_END
+  { group: ItemGroup.Helper, from: 83, to: 93, yaw: 90, scale: 0.5 },
+  // == HELPER + 97 || == HELPER + 98 || == POTION + 91
+  { group: ItemGroup.Helper, num: 97, pitch: 270, scale: 1 },
+  // == HELPER + 97 || == HELPER + 98 || == POTION + 91
+  { group: ItemGroup.Helper, num: 98, pitch: 270, scale: 1 },
+  // == HELPER + 97 || == HELPER + 98 || == POTION + 91
+  { group: ItemGroup.Potion, num: 91, pitch: 270, scale: 1 },
+  // == HELPER + 99
+  { group: ItemGroup.Helper, num: 99, pitch: 270, scale: 1 },
+  // == POTION + 110 || == POTION + 111
+  { group: ItemGroup.Potion, num: 110, pitch: 270, scale: 1 },
+  // == POTION + 110 || == POTION + 111
+  { group: ItemGroup.Potion, num: 111, pitch: 270, scale: 1 },
+  // == HELPER + 107
+  { group: ItemGroup.Helper, num: 107, pitch: 270, scale: 1 },
+  // == HELPER + 104
+  { group: ItemGroup.Helper, num: 104, pitch: 270, scale: 1 },
+  // == HELPER + 105
+  { group: ItemGroup.Helper, num: 105, pitch: 270, scale: 1 },
+  // == HELPER + 103
+  { group: ItemGroup.Helper, num: 103, pitch: 0, scale: 1 },
+  // == POTION + 133
+  { group: ItemGroup.Potion, num: 133, pitch: 270, scale: 1 },
+  // == HELPER + 109
+  { group: ItemGroup.Helper, num: 109, pitch: 270, scale: 1 },
+  // == HELPER + 110
+  { group: ItemGroup.Helper, num: 110, pitch: 270, scale: 1 },
+  // == HELPER + 111
+  { group: ItemGroup.Helper, num: 111, pitch: 270, scale: 1 },
+  // == HELPER + 112
+  { group: ItemGroup.Helper, num: 112, pitch: 270, scale: 1 },
+  // == HELPER + 113
+  { group: ItemGroup.Helper, num: 113, pitch: 270, scale: 1 },
+  // == HELPER + 114
+  { group: ItemGroup.Helper, num: 114, pitch: 270, scale: 1 },
+  // == HELPER + 115
+  { group: ItemGroup.Helper, num: 115, pitch: 270, scale: 1 },
+  // == POTION + 112
+  { group: ItemGroup.Potion, num: 112, pitch: 270, scale: 1 },
+  // == POTION + 113
+  { group: ItemGroup.Potion, num: 113, pitch: 270, scale: 1 },
+  // == HELPER + 116
+  { group: ItemGroup.Helper, num: 116, pitch: 90, scale: 0.5 },
+  // == HELPER + 121
+  { group: ItemGroup.Helper, num: 121, pitch: 90, scale: 0.5 },
+  // == PET_SKELETON
+  { group: ItemGroup.Helper, num: 123, pitch: 30, scale: 0.4 },
+  // >= WING && < WING + MAX
+  { group: ItemGroup.Wing, from: 0, to: 511, pitch: 270, yaw: 45 },
+  // >= HELPER + 135 && <= HELPER + 145
+  { group: ItemGroup.Helper, from: 135, to: 145, pitch: 90, scale: 0.2 },
+  // == POTION + 160 || == POTION + 161
+  { group: ItemGroup.Potion, num: 160, pitch: 90, scale: 0.2 },
+  // == POTION + 160 || == POTION + 161
+  { group: ItemGroup.Potion, num: 161, pitch: 90, scale: 0.2 },
+];
+
+/** The first `POSE_TABLE` row this item matches, or null. */
+function tablePose(group: number, num: number): RestPose | null {
+  for (const rule of POSE_TABLE) {
+    if (rule.group !== group) continue;
+    const from = rule.from ?? rule.num ?? -1;
+    const to = rule.to ?? rule.num ?? -1;
+    if (num < from || num > to) continue;
+
+    const [pitch, roll, yaw] = DEFAULT_POSE.angle;
+    return {
+      angle: [rule.pitch ?? pitch, rule.roll ?? roll, rule.yaw ?? yaw],
+      scale: rule.scale,
+    };
+  }
+
+  return null;
+}
+
 
 /** `itemRestPose` as entity `transform.rot` (radians, renderAngles convention). */
 export function itemRestRotation(
