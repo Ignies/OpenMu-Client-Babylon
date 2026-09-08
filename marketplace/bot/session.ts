@@ -1,9 +1,13 @@
 import {
+  CreateCharacterPacket,
   LoginShortPasswordPacket,
+  PublicChatMessagePacket,
   RequestCharacterListPacket,
   SelectCharacterPacket,
 } from '../../src/common/packets/ClientToServerPackets';
+import { CharacterClassNumber } from '../../src/common/types';
 import {
+  CharacterCreationSuccessfulPacket,
   CharacterInformationPacket,
   CharacterListPacket,
   LoginResponseLoginResultEnum,
@@ -31,6 +35,7 @@ const CODE = {
   loginResponse: { code: 0xf1, sub: 0x01 },
   characterList: { code: 0xf3, sub: 0x00 },
   characterInformation: { code: 0xf3, sub: 0x03 },
+  characterCreated: { code: 0xf3, sub: 0x01 },
 } as const;
 
 /** A generated packet class reads from byteOffset 0, so the frame is copied. */
@@ -50,6 +55,9 @@ export type BotIdentity = {
   password: string;
   /** Which character to play. Defaults to the lowest slot. */
   character?: string;
+  /** Create the character when the account has none. Bot accounts do. */
+  createIfMissing?: boolean;
+  characterClass?: CharacterClassNumber;
 };
 
 export class BotSession {
@@ -103,10 +111,71 @@ export class BotSession {
     this.connection.send(packet.buffer);
 
     const characters = new CharacterListPacket(view(await answer)).getCharacters();
-    if (characters.length === 0) {
+    if (characters.length > 0) return characters;
+
+    // A fresh bot account has none. Rather than making a person go and click
+    // through character creation for every mule, the bot makes its own through
+    // the protocol, so the server applies its own rules to it.
+    if (!this.identity.createIfMissing) {
       throw new Error(`${this.identity.account} has no characters`);
     }
-    return characters;
+    return this.createCharacter();
+  }
+
+  private async createCharacter(): Promise<CharacterEntry[]> {
+    const name = this.identity.character ?? this.identity.account;
+    this.log(`no characters on ${this.identity.account}, creating "${name}"`);
+
+    const packet = CreateCharacterPacket.createPacket();
+    packet.setName(name);
+    packet.Class = this.identity.characterClass ?? CharacterClassNumber.DarkKnight;
+
+    const created = this.connection.expect(
+      CODE.characterCreated,
+      15_000,
+      'CharacterCreationSuccessful'
+    );
+    this.connection.send(packet.buffer);
+
+    const answer = new CharacterCreationSuccessfulPacket(view(await created));
+    if (!answer.Success) throw new Error(`the server refused to create "${name}"`);
+
+    // The answer carries the character, so it is read from there rather than
+    // by asking for the list again: the server does not answer a second
+    // `RequestCharacterList` in this state, and waiting for one hangs until
+    // it drops the connection.
+    this.log(`created "${answer.CharacterName}" in slot ${answer.CharacterSlot}`);
+    return [
+      {
+        SlotIndex: answer.CharacterSlot,
+        Name: answer.CharacterName,
+        Level: answer.Level,
+        Status: answer.CharacterStatus,
+        IsItemBlockActive: false,
+        Appearance: answer.PreviewData,
+        GuildPosition: 0,
+      } as CharacterEntry,
+    ];
+  }
+
+  /**
+   * Sends a chat line. The bot's own commands go this way too: `/trace <name>`
+   * warps a game master to a player, which is how it reaches someone rather
+   * than making them walk to it.
+   */
+  say(message: string): void {
+    const name = this.character?.Name ?? this.identity.account;
+    const packet = PublicChatMessagePacket.createPacket(
+      PublicChatMessagePacket.getRequiredSize(10 + message.length)
+    );
+    packet.setCharacter(name);
+    packet.setMessage(message);
+    this.connection.send(packet.buffer);
+  }
+
+  /** `/trace <character>`: game-master warp to wherever that player is standing. */
+  traceTo(characterName: string): void {
+    this.say(`/trace ${characterName}`);
   }
 
   /**
