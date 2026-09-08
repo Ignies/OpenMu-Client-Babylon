@@ -1,50 +1,44 @@
 @import (reference) '../../../../components/muText/style.less';
 
-// Modern panel, but in the game's palette and set in the game's face, so it
-// reads as part of the client rather than a page pasted over it.
-@mp-ink: #d3d8e4;
-@mp-dim: #8189a0;
-@mp-gold: #d8b35a;
-@mp-edge: #2b3145;
-@mp-panel: #12141c;
-@mp-raise: #1a1e2a;
-@mp-good: #7fc98a;
-@mp-bad: #d3796f;
+// The frame art carries the chrome, so nothing here draws a panel, a border or
+// a background of its own. Fills exist only where text needs to stay legible.
+@mp-ink: #d9dfe9;
+@mp-dim: #8d96ac;
+@mp-gold: #e0bc6a;
+@mp-good: #8fd79a;
+@mp-bad: #dd8a7f;
+
+// Every region is positioned to a slot the art draws, so padding has to stay
+// inside the box it was given. Without this the app's default content-box adds
+// padding on top of each region's measured size and everything drifts.
+.mp-window,
+.mp-window * {
+  box-sizing: border-box;
+}
 
 .mp-window {
   .mu-font();
   position: absolute;
   right: 0;
   bottom: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  pointer-events: auto;
   color: @mp-ink;
   font-size: 12px;
-  background: linear-gradient(180deg, #171a24 0%, @mp-panel 100%);
-  border: 1px solid @mp-edge;
-  border-radius: 6px;
-  box-shadow:
-    0 0 0 1px #05060a,
-    0 18px 48px rgba(0, 0, 0, 0.6);
+  background-repeat: no-repeat;
+  // The art is the window: it stretches as one piece, so every region below
+  // can be a percentage of it and nothing drifts when the window is scaled.
+  background-size: 100% 100%;
+  pointer-events: auto;
   outline: none;
 
-  // Strips the UA chrome off the bare buttons (tabs, rail, chips, pager) which
-  // paint their own. `:not(.mp-btn)` because a descendant selector outranks a
-  // single class, and without it this reset silently wins over `.mp-btn` and
-  // every action button loses its fill.
-  button:not(.mp-btn) {
+  button {
     .mu-font();
     cursor: pointer;
     color: inherit;
-    background: none;
-    border: none;
   }
 
-  .mp-btn {
-    .mu-font();
-    cursor: pointer;
+  // Everything the art already draws a slot for sits on it absolutely.
+  > * {
+    position: absolute;
   }
 
   img {
@@ -53,17 +47,13 @@
   }
 }
 
-// ---- header --------------------------------------------------------------
+// ---- plaque: title, tabs, wallet -----------------------------------------
 
-.mp-header {
+.mp-plaque {
   display: flex;
-  flex: 0 0 auto;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
-  height: 44px;
-  padding: 0 12px;
-  background: linear-gradient(180deg, #232838 0%, #171b26 100%);
-  border-bottom: 1px solid @mp-edge;
+  padding: 0 22px 0 26px;
   cursor: move;
 }
 
@@ -72,31 +62,34 @@
   font-size: 15px;
   font-weight: 700;
   color: @mp-gold;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.6px;
+  text-shadow: 0 1px 2px #000;
+  white-space: nowrap;
 }
 
-.mp-input {
-  .mu-font();
-  padding: 5px 8px;
+.mp-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.mp-tab {
+  padding: 4px 11px;
   font-size: 12px;
-  color: @mp-ink;
-  background: #0c0e14;
-  border: 1px solid @mp-edge;
-  border-radius: 4px;
-  outline: none;
+  color: @mp-dim;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  white-space: nowrap;
 
-  &:focus {
-    border-color: fade(@mp-gold, 60%);
+  &:hover {
+    color: @mp-ink;
   }
 
-  &::placeholder {
-    color: fade(@mp-dim, 70%);
+  &.is-on {
+    color: @mp-gold;
+    background: rgba(224, 188, 106, 0.12);
+    border-color: rgba(224, 188, 106, 0.45);
   }
-}
-
-.mp-search {
-  flex: 1 1 auto;
-  max-width: 260px;
 }
 
 .mp-wallet {
@@ -104,6 +97,8 @@
   font-size: 13px;
   font-weight: 700;
   color: @mp-gold;
+  text-shadow: 0 1px 2px #000;
+  white-space: nowrap;
 }
 
 .mp-zen {
@@ -114,66 +109,86 @@
 }
 
 .mp-close {
-  width: 22px;
-  height: 22px;
-  font-size: 12px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
   color: @mp-dim;
-  border: 1px solid @mp-edge;
+  background: rgba(8, 10, 15, 0.55);
+  border: 1px solid rgba(224, 188, 106, 0.35);
   border-radius: 4px;
 
   &:hover {
     color: #fff;
-    background: #2a3043;
+    border-color: @mp-gold;
   }
 }
 
-// ---- tabs ----------------------------------------------------------------
+// ---- toolbar: the art draws the fields, these fill them -------------------
 
-.mp-tabs {
-  display: flex;
-  flex: 0 0 auto;
-  gap: 2px;
-  padding: 6px 10px 0;
-  background: #14171f;
-  border-bottom: 1px solid @mp-edge;
+.mp-select,
+.mp-input {
+  .mu-font();
+  font-size: 12px;
+  color: @mp-ink;
+  background: none;
+  border: none;
+  outline: none;
 }
 
-.mp-tab {
-  padding: 6px 14px;
-  font-size: 12px;
-  color: @mp-dim;
-  border: 1px solid transparent;
-  border-bottom: none;
-  border-radius: 4px 4px 0 0;
+.mp-select {
+  padding: 0 30px 0 14px;
+  // The art draws its own arrow on the right of the slot.
+  appearance: none;
+
+  option {
+    color: @mp-ink;
+    background: #141822;
+  }
+}
+
+.mp-input {
+  padding: 0 14px;
+
+  &::placeholder {
+    color: fade(@mp-dim, 65%);
+  }
+}
+
+.mp-viewbtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: fade(@mp-gold, 55%);
+  background: none;
+  border: none;
+  border-radius: 4px;
 
   &:hover {
-    color: @mp-ink;
+    color: @mp-gold;
   }
 
   &.is-on {
-    color: @mp-gold;
-    background: @mp-panel;
-    border-color: @mp-edge;
+    color: #1a1206;
+    background: @mp-gold;
   }
 }
 
-// ---- body ----------------------------------------------------------------
-
-.mp-body {
-  display: flex;
-  flex: 1 1 auto;
-  min-height: 0;
-}
+// ---- rail ----------------------------------------------------------------
 
 .mp-rail {
   display: flex;
-  flex: 0 0 146px;
+  flex-direction: column;
+  padding: 12px 10px;
+}
+
+.mp-rail-list {
+  display: flex;
+  flex: 0 1 auto;
   flex-direction: column;
   gap: 1px;
-  padding: 8px;
-  overflow-y: auto;
-  border-right: 1px solid @mp-edge;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .mp-rail-item {
@@ -181,20 +196,22 @@
   gap: 8px;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 9px;
+  padding: 5px 9px;
   font-size: 12px;
   color: @mp-dim;
   text-align: left;
-  border-radius: 4px;
+  background: none;
+  border: none;
+  border-radius: 3px;
 
   &:hover {
     color: @mp-ink;
-    background: @mp-raise;
+    background: rgba(255, 255, 255, 0.05);
   }
 
   &.is-on {
     color: @mp-gold;
-    background: #232838;
+    background: rgba(224, 188, 106, 0.14);
   }
 }
 
@@ -203,129 +220,126 @@
   color: fade(@mp-dim, 75%);
 }
 
-.mp-content {
+.mp-rail-filters {
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
-  min-width: 0;
-  overflow: hidden;
-  padding: 8px 10px 6px;
-}
-
-// ---- toolbar -------------------------------------------------------------
-
-.mp-toolbar {
-  display: flex;
-  flex: 0 0 auto;
-  gap: 8px;
-  align-items: center;
-  padding-bottom: 8px;
-}
-
-.mp-select {
-  .mu-font();
-  padding: 4px 6px;
-  font-size: 11px;
-  color: @mp-ink;
-  background: #0c0e14;
-  border: 1px solid @mp-edge;
-  border-radius: 4px;
-  outline: none;
+  gap: 4px;
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid rgba(224, 188, 106, 0.18);
 }
 
 .mp-chip {
-  padding: 4px 10px;
+  padding: 4px 9px;
   font-size: 11px;
   color: @mp-dim;
-  border: 1px solid @mp-edge;
-  border-radius: 12px;
+  background: none;
+  border: 1px solid rgba(224, 188, 106, 0.25);
+  border-radius: 11px;
 
   &:hover {
     color: @mp-ink;
   }
 
   &.is-on {
-    color: #10121a;
+    color: #1a1206;
     background: @mp-gold;
     border-color: @mp-gold;
   }
 }
 
+.mp-rail-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid rgba(224, 188, 106, 0.18);
+}
+
 .mp-count {
-  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   font-size: 11px;
   color: @mp-dim;
+  text-align: center;
 }
 
-.mp-viewswitch {
+.mp-pager {
   display: flex;
-  gap: 1px;
-  padding: 1px;
-  background: #0c0e14;
-  border: 1px solid @mp-edge;
-  border-radius: 4px;
-}
-
-.mp-viewbtn {
-  display: flex;
+  gap: 5px;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 20px;
-  color: @mp-dim;
+}
+
+.mp-page-btn {
+  flex: 1 1 0;
+  padding: 3px 4px;
+  font-size: 11px;
+  color: @mp-ink;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(224, 188, 106, 0.22);
   border-radius: 3px;
 
-  &:hover {
-    color: @mp-ink;
+  &:hover:not(:disabled) {
+    background: rgba(224, 188, 106, 0.18);
   }
 
-  &.is-on {
-    color: #10121a;
-    background: @mp-gold;
+  &:disabled {
+    color: fade(@mp-dim, 45%);
+    cursor: default;
   }
 }
 
-// ---- list view -----------------------------------------------------------
+.mp-page-label {
+  font-size: 10px;
+  color: fade(@mp-dim, 80%);
+}
+
+// ---- content -------------------------------------------------------------
+
+.mp-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+// ---- list view: one row per ruled band -----------------------------------
 
 .mp-list {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 3px;
   min-height: 0;
-  overflow: hidden;
 }
 
 .mp-row {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) 92px 56px 44px 132px 62px;
+  // One ninth of the list area, because the art rules nine bands across it.
+  // A fixed basis rather than `1 1 0`: a short page must keep the rows on
+  // their bands instead of stretching them to fill the space.
+  flex: 0 0 (100% / 9);
+  grid-template-columns: 34px minmax(0, 1fr) 96px 62px 48px 148px 68px;
   gap: 10px;
   align-items: center;
-  // Deliberately tight: a full page of rows has to fit the content area
-  // without scrolling, or the pager and the list disagree about a page.
-  padding: 4px 8px;
-  background: linear-gradient(180deg, @mp-raise 0%, #14171f 100%);
-  border: 1px solid @mp-edge;
-  border-radius: 4px;
+  min-height: 0;
+  padding: 0 14px;
 
   &:hover {
-    border-color: fade(@mp-gold, 55%);
+    background: rgba(224, 188, 106, 0.07);
   }
 }
 
 .mp-row-head {
-  padding: 2px 8px 4px;
   font-size: 10px;
   color: fade(@mp-dim, 85%);
   letter-spacing: 0.4px;
   text-transform: uppercase;
-  background: none;
-  border: none;
-  border-bottom: 1px solid @mp-edge;
-  border-radius: 0;
 
   &:hover {
-    border-color: @mp-edge;
+    background: none;
   }
 }
 
@@ -333,15 +347,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: #0a0c11;
-  border: 1px solid #232838;
-  border-radius: 3px;
+  width: 34px;
+  height: 34px;
 
   img {
-    max-width: 25px;
-    max-height: 25px;
+    max-width: 32px;
+    max-height: 32px;
     object-fit: contain;
   }
 }
@@ -375,20 +386,49 @@
   text-align: right;
 }
 
-// ---- cards ---------------------------------------------------------------
+.mp-card-name {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 700;
+  color: @mp-ink;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.is-excellent {
+    color: #86ccff;
+  }
+
+  &.is-ancient {
+    color: @mp-gold;
+  }
+}
+
+.mp-deal {
+  padding: 0 4px;
+  font-size: 10px;
+  border-radius: 3px;
+
+  &.is-good {
+    color: @mp-good;
+    background: fade(@mp-good, 14%);
+  }
+
+  &.is-bad {
+    color: @mp-bad;
+    background: fade(@mp-bad, 14%);
+  }
+}
+
+// ---- grid view -----------------------------------------------------------
 
 .mp-grid {
   display: grid;
-  // `minmax(0, 1fr)`, not `1fr`: a grid item's default `min-width: auto` lets
-  // a long item name push its column past the track and out of the window.
   flex: 1 1 auto;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  // Fixed rows rather than `1fr`, so a short page shows short cards instead of
-  // four tall ones - and no filler is needed to hold the shape.
-  grid-auto-rows: 84px;
-  align-content: start;
-  gap: 8px;
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 7px;
   min-height: 0;
+  padding: 6px 8px;
   overflow: hidden;
 }
 
@@ -398,26 +438,26 @@
   align-items: center;
   min-width: 0;
   padding: 8px;
-  background: linear-gradient(180deg, @mp-raise 0%, #14171f 100%);
-  border: 1px solid @mp-edge;
-  border-radius: 5px;
+  // Opaque, so the ruled bands behind it do not read through the card.
+  background: linear-gradient(180deg, #1b2130 0%, #12161f 100%);
+  border: 1px solid rgba(224, 188, 106, 0.22);
+  border-radius: 4px;
 
   &:hover {
-    border-color: fade(@mp-gold, 55%);
+    border-color: fade(@mp-gold, 60%);
   }
-
 }
 
 .mp-card-icon {
   display: flex;
-  flex: 0 0 52px;
+  flex: 0 0 46px;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  background: #0a0c11;
-  border: 1px solid #232838;
-  border-radius: 4px;
+  width: 46px;
+  height: 46px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(224, 188, 106, 0.18);
+  border-radius: 3px;
 
   img {
     max-width: 42px;
@@ -434,23 +474,6 @@
   min-width: 0;
 }
 
-.mp-card-name {
-  overflow: hidden;
-  font-size: 12px;
-  font-weight: 700;
-  color: @mp-ink;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  &.is-excellent {
-    color: #79c7ff;
-  }
-
-  &.is-ancient {
-    color: @mp-gold;
-  }
-}
-
 .mp-card-meta {
   display: flex;
   gap: 6px;
@@ -465,14 +488,14 @@
   white-space: nowrap;
 }
 
-.mp-card-meta .mp-deal {
-  flex: 0 0 auto;
-  margin-left: auto;
-}
-
 .mp-dot {
   padding: 0 4px;
   vertical-align: 1px;
+}
+
+.mp-card-meta .mp-deal {
+  flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .mp-card-foot {
@@ -496,92 +519,44 @@
   }
 }
 
-.mp-deal {
-  padding: 0 4px;
-  font-size: 10px;
-  border-radius: 3px;
-
-  &.is-good {
-    color: @mp-good;
-    background: fade(@mp-good, 14%);
-  }
-
-  &.is-bad {
-    color: @mp-bad;
-    background: fade(@mp-bad, 14%);
-  }
-}
+// ---- buttons -------------------------------------------------------------
 
 .mp-btn {
   flex: 0 0 auto;
-  padding: 6px 12px;
+  padding: 5px 12px;
   font-size: 11px;
   font-weight: 700;
-  color: #10121a;
-  background: linear-gradient(180deg, lighten(@mp-gold, 6%) 0%, darken(@mp-gold, 8%) 100%);
-  border: 1px solid darken(@mp-gold, 18%);
-  border-radius: 4px;
+  color: #1a1206;
+  background: linear-gradient(180deg, lighten(@mp-gold, 6%) 0%, darken(@mp-gold, 10%) 100%);
+  border: 1px solid darken(@mp-gold, 22%);
+  border-radius: 3px;
 
   &:hover:not(:disabled) {
     background: lighten(@mp-gold, 10%);
   }
 
   &:disabled {
-    color: @mp-dim;
-    background: #1c202c;
-    border-color: @mp-edge;
+    color: fade(@mp-dim, 70%);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(224, 188, 106, 0.18);
     cursor: default;
   }
 
   &.is-quiet {
     color: @mp-ink;
-    background: #232838;
-    border-color: @mp-edge;
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(224, 188, 106, 0.28);
 
     &:hover {
-      background: #2c3243;
+      background: rgba(224, 188, 106, 0.18);
     }
   }
 
   &.is-wide {
     width: 100%;
-    padding: 8px;
+    padding: 7px;
     font-size: 12px;
   }
-}
-
-// ---- pager ---------------------------------------------------------------
-
-.mp-pager {
-  display: flex;
-  flex: 0 0 auto;
-  gap: 10px;
-  align-items: center;
-  justify-content: center;
-  padding-top: 8px;
-}
-
-.mp-page-btn {
-  padding: 4px 12px;
-  font-size: 11px;
-  color: @mp-ink;
-  background: #1c202c;
-  border: 1px solid @mp-edge;
-  border-radius: 4px;
-
-  &:hover:not(:disabled) {
-    background: #262c3c;
-  }
-
-  &:disabled {
-    color: fade(@mp-dim, 50%);
-    cursor: default;
-  }
-}
-
-.mp-page-label {
-  font-size: 11px;
-  color: @mp-dim;
 }
 
 // ---- sell ----------------------------------------------------------------
@@ -592,39 +567,48 @@
   flex-direction: column;
   gap: 10px;
   min-height: 0;
+  padding: 10px 14px;
 }
 
-.mp-sell-head {
-  font-size: 12px;
-  color: @mp-dim;
+.mp-panel-head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding-bottom: 5px;
+  font-size: 10px;
+  color: fade(@mp-dim, 85%);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(224, 188, 106, 0.18);
+}
+
+.mp-sell-bag {
+  flex: 0 0 auto;
 }
 
 .mp-sell-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 46px);
-  gap: 6px;
+  grid-template-columns: repeat(auto-fill, 42px);
+  gap: 5px;
   align-content: start;
-  max-height: 190px;
-  padding: 8px;
+  max-height: 96px;
+  padding-top: 8px;
   overflow-y: auto;
-  background: #0e1017;
-  border: 1px solid @mp-edge;
-  border-radius: 5px;
 }
 
 .mp-sell-slot {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
-  background: #14171f;
-  border: 1px solid #232838;
-  border-radius: 4px;
+  width: 42px;
+  height: 42px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(224, 188, 106, 0.18);
+  border-radius: 3px;
 
   img {
-    max-width: 40px;
-    max-height: 40px;
+    max-width: 38px;
+    max-height: 38px;
     object-fit: contain;
   }
 
@@ -638,39 +622,22 @@
   }
 }
 
-// The going rate on the left, the item being priced on the right.
 .mp-sell-split {
   display: grid;
   flex: 1 1 auto;
   grid-template-columns: minmax(0, 1fr) 290px;
-  gap: 12px;
+  gap: 14px;
   min-height: 0;
-}
-
-.mp-panel-head {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-  padding-bottom: 6px;
-  font-size: 10px;
-  color: fade(@mp-dim, 85%);
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  border-bottom: 1px solid @mp-edge;
 }
 
 .mp-rate {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  align-content: start;
+  gap: 7px;
   min-width: 0;
 
-  .mp-btn.is-wide {
+  .mp-btn {
     align-self: start;
-    width: auto;
-    padding: 6px 14px;
-    font-size: 11px;
   }
 }
 
@@ -680,7 +647,7 @@
 }
 
 .mp-rate-none {
-  padding: 16px 0;
+  padding: 14px 0;
   font-size: 11px;
   color: @mp-dim;
 }
@@ -697,8 +664,6 @@
 
 .mp-rate-rows {
   display: flex;
-  // Natural height, so the undercut button sits directly under the rows it
-  // refers to rather than being pushed to the floor of the column.
   flex: 0 1 auto;
   flex-direction: column;
   gap: 2px;
@@ -708,12 +673,12 @@
 
 .mp-rate-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 78px 106px;
+  grid-template-columns: minmax(0, 1fr) 80px 110px;
   gap: 8px;
   align-items: center;
-  padding: 4px 8px;
+  padding: 3px 8px;
   font-size: 11px;
-  background: #14171f;
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid transparent;
   border-radius: 3px;
 
@@ -729,7 +694,7 @@
   white-space: nowrap;
 
   &.is-excellent {
-    color: #79c7ff;
+    color: #86ccff;
   }
 
   &.is-ancient {
@@ -753,7 +718,7 @@
 .mp-sell-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
   min-width: 0;
 }
 
@@ -772,7 +737,11 @@
 
   .mp-input {
     flex: 1 1 auto;
+    padding: 4px 8px;
     text-align: right;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(224, 188, 106, 0.25);
+    border-radius: 3px;
   }
 }
 
@@ -784,9 +753,9 @@
 }
 
 .mp-empty {
-  grid-column: 1 / -1;
   align-self: center;
-  padding: 24px;
+  margin: auto;
+  padding: 20px;
   font-size: 12px;
   color: @mp-dim;
   text-align: center;
@@ -795,24 +764,23 @@
 // ---- modal and flash -----------------------------------------------------
 
 .mp-modal {
-  position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(4, 5, 9, 0.66);
+  background: rgba(4, 5, 9, 0.62);
 }
 
 .mp-modal-box {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  width: 280px;
+  width: 290px;
   padding: 16px;
-  background: linear-gradient(180deg, #1d212d 0%, #131620 100%);
-  border: 1px solid @mp-edge;
-  border-radius: 6px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  background: linear-gradient(180deg, #1e2431 0%, #131720 100%);
+  border: 1px solid rgba(224, 188, 106, 0.4);
+  border-radius: 5px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
 }
 
 .mp-modal-title {
@@ -845,15 +813,13 @@
 }
 
 .mp-flash {
-  position: absolute;
-  // Clear of the pager, which sits along the bottom of the content area.
-  bottom: 44px;
+  bottom: 3%;
   left: 50%;
   padding: 6px 14px;
   font-size: 11px;
-  color: #10121a;
+  color: #1a1206;
   background: @mp-gold;
-  border-radius: 12px;
+  border-radius: 11px;
   transform: translateX(-50%);
   pointer-events: none;
 }
