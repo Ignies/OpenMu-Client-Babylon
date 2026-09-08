@@ -446,6 +446,11 @@ export class World extends ECSWorld<Entity> {
     point: { x: number; y: number } | null;
     /** Ctrl was held: the cast goes at the ground point, whatever is under the cursor. */
     forced?: boolean;
+    /**
+     * Ctrl was held over another player (`CheckAttack`'s force attack):
+     * `target` is that player, who is no target at all without it.
+     */
+    pvp?: boolean;
   } | null = null;
 
   /**

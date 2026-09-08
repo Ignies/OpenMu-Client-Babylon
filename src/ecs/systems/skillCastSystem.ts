@@ -20,7 +20,11 @@ import {
   TELEPORT,
 } from '../../common/skillCasting';
 import { TW_SAFEZONE } from '../../common/terrain/consts';
-import { isAttackableEntity } from './attackSystem';
+import {
+  isAttackableEntity,
+  isAttackablePlayer,
+  isOtherPlayer,
+} from './attackSystem';
 import { isFemaleClass } from '../../common/mapPlayerNetClassToModelClass';
 import { mountKind } from '../../common/pets';
 import { skillSound } from '../../common/combatSounds';
@@ -342,9 +346,15 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       const def = skillDefinition(Store.currentSkill);
       if (!def) {
-        // No skill selected: the right button behaves like a plain attack click.
-        if (req.target && isAttackableEntity(world, req.target)) {
-          world.attackTarget = req.target;
+        // No skill selected: the right button behaves like a plain attack
+        // click, and another player is only swung at with Ctrl held.
+        const swingAt = req.target;
+        if (
+          swingAt &&
+          (isAttackableEntity(world, swingAt) ||
+            (req.pvp && isAttackablePlayer(world, swingAt)))
+        ) {
+          world.attackTarget = swingAt;
         }
         world.castRequest = null;
         return;
@@ -383,6 +393,19 @@ export const SkillCastSystem: ISystemFactory = world => {
       if (
         target &&
         !(isAttackableEntity(world, target) || (isPlayer(target) && target !== hero))
+      ) {
+        target = null;
+      }
+      // `CheckAttack` (ZzzInterface.cpp:1778) hands a hostile skill another
+      // player's key only while Ctrl is held, so a right click on a passer-by
+      // is not an attack. The ally casts - Heal, Greater Damage / Defense,
+      // Soul Barrier - are the original's own exception (:4896-4909) and
+      // reach a player without it.
+      if (
+        target &&
+        isOtherPlayer(target) &&
+        !isSelfCastable(def) &&
+        !(req.pvp && isAttackablePlayer(world, target))
       ) {
         target = null;
       }

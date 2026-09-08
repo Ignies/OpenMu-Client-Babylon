@@ -6,7 +6,7 @@ import {
   Vector3,
 } from '../../libs/babylon/exports';
 import type { EntityTypeFromQuery, ISystemFactory } from '../world';
-import { isAttackableEntity } from './attackSystem';
+import { isAttackableEntity, isOtherPlayer } from './attackSystem';
 import { isMobileDevice } from '../../common/mobile';
 import { Commands } from '../../commands';
 import { aimX, aimY } from '../../camera';
@@ -203,14 +203,21 @@ export const PointerInputSystem: ISystemFactory = world => {
           m => m === world.terrain?.mesh,
           true
         ).pickedPoint;
-        // Ctrl + right button: the skill goes at the cursor's ground point
-        // and ignores the object under it - a way to aim an area skill past
-        // a friendly player or a merchant standing in the line of fire.
-        const forced = ev.event.ctrlKey;
+        // Ctrl + right button is `CheckAttack`'s force attack
+        // (ZzzInterface.cpp:1778). Over another player it is the whole
+        // reason they are a target - without it the cast refuses them, so
+        // a right click in a crowd never opens fire on a passer-by. Over
+        // anything else it drops the object under the cursor and casts at
+        // the ground point, to aim an area skill past a merchant standing
+        // in the line of fire.
+        const hovered = world.currentPointerTarget ?? null;
+        const pvp = ev.event.ctrlKey && !!hovered && isOtherPlayer(hovered);
+        const forced = ev.event.ctrlKey && !pvp;
         world.castRequest = {
-          target: forced ? null : world.currentPointerTarget,
+          target: forced ? null : hovered,
           point: ground ? { x: ground.x, y: ground.z } : null,
           forced,
+          pvp,
         };
       }
       return;
