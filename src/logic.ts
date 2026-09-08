@@ -221,6 +221,7 @@ import { Social } from './social';
 import { heroStateMessage } from './common/nameTags';
 import { events } from './events';
 import { Economy, type ShopStock } from './economy';
+import { GmPanel } from './gmPanel';
 import { Messenger } from './messenger';
 import { ChatRooms } from './chatRooms';
 import { FRIEND_OFFLINE } from './common/messenger';
@@ -561,7 +562,16 @@ type CharacterInformationView = Pick<
   | 'MaximumShield'
   | 'CurrentAbility'
   | 'MaximumAbility'
+  | 'Status'
 > & { AttackSpeed?: number; MagicSpeed?: number };
+
+/**
+ * `CharacterStatus.GameMaster`. Tested as a bit rather than compared: the
+ * original client packs its CtlCode flags into the same byte (the character
+ * list reads bit 1 of it for the item block), so a GM with another flag set
+ * would fail an equality check.
+ */
+const GAME_MASTER_STATUS = 0x20;
 
 function applyCharacterInformation(p: CharacterInformationView) {
   const playerData = Store.playerData;
@@ -572,6 +582,7 @@ function applyCharacterInformation(p: CharacterInformationView) {
   Social.reset();
   Messenger.reset();
   Economy.reset();
+  GmPanel.reset();
 
   runInAction(() => {
     playerData.money = p.Money;
@@ -614,6 +625,11 @@ function applyCharacterInformation(p: CharacterInformationView) {
 
     // No HeroState in this packet; neutral until the scope add carries it.
     playerData.heroState = 3;
+
+    // The server's own answer to "is this character a game master", which the
+    // `#` shout guess below could never give for the hero. Set on every
+    // select, so a normal character on the same account clears it.
+    playerData.isGameMaster = (p.Status & GAME_MASTER_STATUS) !== 0;
 
     Store.uiState = UIState.World;
     SessionResume.remember(playerData.name);
@@ -1085,6 +1101,11 @@ function addCharacterToScope(world: World, char: ScopeCharacter) {
     if (Store.playerId === maskedId) {
       world.addComponent(playerEntity, 'localPlayer', true);
       console.log(`Local player spawned: ${maskedId} - ${char.Name}`);
+      // The hero's own GM tag comes from CharacterInformation, not from the
+      // `#` shout `markAsGm` watches for - the hero never sees its own shout
+      // as an inbound chat line. Re-applied here because the body is respawned
+      // on every scope add.
+      if (Store.playerData.isGameMaster) world.addComponent(playerEntity, 'isGm', true);
       if (char.attackSpeed != null) Store.playerData.attackSpeed = char.attackSpeed;
       if (char.magicSpeed != null) Store.playerData.magicSpeed = char.magicSpeed;
       if (char.HeroState != null) Store.playerData.heroState = char.HeroState;
