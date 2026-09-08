@@ -1,6 +1,6 @@
 import postgres from 'postgres';
 import bcrypt from 'bcryptjs';
-import { forgetSignupsBefore, recordSignup, signupsSince } from './db';
+import { forgetSignupsBefore, recordAccount, recordSignup, signupsSince } from './db';
 import { BurstLimit, bucketFor, clientIp } from '../../src/common/rateLimit';
 
 /**
@@ -298,6 +298,9 @@ Bun.serve({
       if (rejection) return json({ error: rejection }, 409, cors);
 
       recordSignup(bucket);
+      // The account exists in OpenMU's database by now, so this log lists
+      // accounts that were made rather than attempts that were tried.
+      recordAccount(body.username as string, bucket);
       console.log(`registered ${body.username} from ${ip}`);
       return json({ ok: true }, 200, cors);
     } catch (err) {
