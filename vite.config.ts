@@ -64,5 +64,9 @@ export default defineConfig({
   test: {
     // Tests skip main.tsx, so the default version is loaded here instead.
     setupFiles: ['./src/version/testSetup.ts'],
+    // The marketplace service stores its listings in `bun:sqlite`, which
+    // vitest runs under node and cannot import. Those tests are run by
+    // `bun test` instead (`bun run test:server`).
+    exclude: ['**/node_modules/**', '**/dist/**', 'marketplace/server/**'],
   },
 });
