@@ -17,6 +17,9 @@ export const MAX_SCALE = 3;
 
 const DEFAULT_SCALES: Record<string, number> = {
   'bottom-bar': 1,
+  // Laid out at 760x500 rather than the item window's 190x429, so it opens at
+  // its own size instead of the 1.5x every small window wants.
+  marketplace: 1,
 };
 
 export const defaultScaleOf = (id: string): number =>

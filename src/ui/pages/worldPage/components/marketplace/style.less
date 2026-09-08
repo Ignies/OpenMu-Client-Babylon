@@ -1,0 +1,629 @@
+@import (reference) '../../../../components/muText/style.less';
+
+// Modern panel, but in the game's palette and set in the game's face, so it
+// reads as part of the client rather than a page pasted over it.
+@mp-ink: #d3d8e4;
+@mp-dim: #8189a0;
+@mp-gold: #d8b35a;
+@mp-edge: #2b3145;
+@mp-panel: #12141c;
+@mp-raise: #1a1e2a;
+@mp-good: #7fc98a;
+@mp-bad: #d3796f;
+
+.mp-window {
+  .mu-font();
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: auto;
+  color: @mp-ink;
+  font-size: 12px;
+  background: linear-gradient(180deg, #171a24 0%, @mp-panel 100%);
+  border: 1px solid @mp-edge;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 1px #05060a,
+    0 18px 48px rgba(0, 0, 0, 0.6);
+  outline: none;
+
+  // Strips the UA chrome off the bare buttons (tabs, rail, chips, pager) which
+  // paint their own. `:not(.mp-btn)` because a descendant selector outranks a
+  // single class, and without it this reset silently wins over `.mp-btn` and
+  // every action button loses its fill.
+  button:not(.mp-btn) {
+    .mu-font();
+    cursor: pointer;
+    color: inherit;
+    background: none;
+    border: none;
+  }
+
+  .mp-btn {
+    .mu-font();
+    cursor: pointer;
+  }
+
+  img {
+    width: auto;
+    height: auto;
+  }
+}
+
+// ---- header --------------------------------------------------------------
+
+.mp-header {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 12px;
+  align-items: center;
+  height: 44px;
+  padding: 0 12px;
+  background: linear-gradient(180deg, #232838 0%, #171b26 100%);
+  border-bottom: 1px solid @mp-edge;
+  cursor: move;
+}
+
+.mp-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: @mp-gold;
+  letter-spacing: 0.4px;
+}
+
+.mp-input {
+  .mu-font();
+  padding: 5px 8px;
+  font-size: 12px;
+  color: @mp-ink;
+  background: #0c0e14;
+  border: 1px solid @mp-edge;
+  border-radius: 4px;
+  outline: none;
+
+  &:focus {
+    border-color: fade(@mp-gold, 60%);
+  }
+
+  &::placeholder {
+    color: fade(@mp-dim, 70%);
+  }
+}
+
+.mp-search {
+  flex: 1 1 auto;
+  max-width: 260px;
+}
+
+.mp-wallet {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: @mp-gold;
+}
+
+.mp-zen {
+  margin-left: 3px;
+  font-size: 10px;
+  font-weight: 400;
+  color: @mp-dim;
+}
+
+.mp-close {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  line-height: 1;
+  color: @mp-dim;
+  border: 1px solid @mp-edge;
+  border-radius: 4px;
+
+  &:hover {
+    color: #fff;
+    background: #2a3043;
+  }
+}
+
+// ---- tabs ----------------------------------------------------------------
+
+.mp-tabs {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  padding: 6px 10px 0;
+  background: #14171f;
+  border-bottom: 1px solid @mp-edge;
+}
+
+.mp-tab {
+  padding: 6px 14px;
+  font-size: 12px;
+  color: @mp-dim;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+
+  &:hover {
+    color: @mp-ink;
+  }
+
+  &.is-on {
+    color: @mp-gold;
+    background: @mp-panel;
+    border-color: @mp-edge;
+  }
+}
+
+// ---- body ----------------------------------------------------------------
+
+.mp-body {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.mp-rail {
+  display: flex;
+  flex: 0 0 146px;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px;
+  overflow-y: auto;
+  border-right: 1px solid @mp-edge;
+}
+
+.mp-rail-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 9px;
+  font-size: 12px;
+  color: @mp-dim;
+  text-align: left;
+  border-radius: 4px;
+
+  &:hover {
+    color: @mp-ink;
+    background: @mp-raise;
+  }
+
+  &.is-on {
+    color: @mp-gold;
+    background: #232838;
+  }
+}
+
+.mp-rail-count {
+  font-size: 10px;
+  color: fade(@mp-dim, 75%);
+}
+
+.mp-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  padding: 8px 10px 6px;
+}
+
+// ---- toolbar -------------------------------------------------------------
+
+.mp-toolbar {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.mp-select {
+  .mu-font();
+  padding: 4px 6px;
+  font-size: 11px;
+  color: @mp-ink;
+  background: #0c0e14;
+  border: 1px solid @mp-edge;
+  border-radius: 4px;
+  outline: none;
+}
+
+.mp-chip {
+  padding: 4px 10px;
+  font-size: 11px;
+  color: @mp-dim;
+  border: 1px solid @mp-edge;
+  border-radius: 12px;
+
+  &:hover {
+    color: @mp-ink;
+  }
+
+  &.is-on {
+    color: #10121a;
+    background: @mp-gold;
+    border-color: @mp-gold;
+  }
+}
+
+.mp-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: @mp-dim;
+}
+
+// ---- cards ---------------------------------------------------------------
+
+.mp-grid {
+  display: grid;
+  // `minmax(0, 1fr)`, not `1fr`: a grid item's default `min-width: auto` lets
+  // a long item name push its column past the track and out of the window.
+  flex: 1 1 auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  // Fixed rows rather than `1fr`, so a short page shows short cards instead of
+  // four tall ones - and no filler is needed to hold the shape.
+  grid-auto-rows: 84px;
+  align-content: start;
+  gap: 8px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mp-card {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  min-width: 0;
+  padding: 8px;
+  background: linear-gradient(180deg, @mp-raise 0%, #14171f 100%);
+  border: 1px solid @mp-edge;
+  border-radius: 5px;
+
+  &:hover {
+    border-color: fade(@mp-gold, 55%);
+  }
+
+}
+
+.mp-card-icon {
+  display: flex;
+  flex: 0 0 52px;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  background: #0a0c11;
+  border: 1px solid #232838;
+  border-radius: 4px;
+
+  img {
+    max-width: 42px;
+    max-height: 42px;
+    object-fit: contain;
+  }
+}
+
+.mp-card-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mp-card-name {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 700;
+  color: @mp-ink;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.is-excellent {
+    color: #79c7ff;
+  }
+
+  &.is-ancient {
+    color: @mp-gold;
+  }
+}
+
+.mp-card-meta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 10px;
+  color: @mp-dim;
+}
+
+.mp-card-seller {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-card-meta .mp-deal {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.mp-dot {
+  padding: 0 4px;
+  vertical-align: 1px;
+}
+
+.mp-card-foot {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 2px;
+
+  .mp-btn {
+    margin-left: auto;
+  }
+}
+
+.mp-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: @mp-gold;
+
+  &.is-short {
+    color: @mp-bad;
+  }
+}
+
+.mp-deal {
+  padding: 0 4px;
+  font-size: 10px;
+  border-radius: 3px;
+
+  &.is-good {
+    color: @mp-good;
+    background: fade(@mp-good, 14%);
+  }
+
+  &.is-bad {
+    color: @mp-bad;
+    background: fade(@mp-bad, 14%);
+  }
+}
+
+.mp-btn {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #10121a;
+  background: linear-gradient(180deg, lighten(@mp-gold, 6%) 0%, darken(@mp-gold, 8%) 100%);
+  border: 1px solid darken(@mp-gold, 18%);
+  border-radius: 4px;
+
+  &:hover:not(:disabled) {
+    background: lighten(@mp-gold, 10%);
+  }
+
+  &:disabled {
+    color: @mp-dim;
+    background: #1c202c;
+    border-color: @mp-edge;
+    cursor: default;
+  }
+
+  &.is-quiet {
+    color: @mp-ink;
+    background: #232838;
+    border-color: @mp-edge;
+
+    &:hover {
+      background: #2c3243;
+    }
+  }
+
+  &.is-wide {
+    width: 100%;
+    padding: 8px;
+    font-size: 12px;
+  }
+}
+
+// ---- pager ---------------------------------------------------------------
+
+.mp-pager {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding-top: 8px;
+}
+
+.mp-page-btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  color: @mp-ink;
+  background: #1c202c;
+  border: 1px solid @mp-edge;
+  border-radius: 4px;
+
+  &:hover:not(:disabled) {
+    background: #262c3c;
+  }
+
+  &:disabled {
+    color: fade(@mp-dim, 50%);
+    cursor: default;
+  }
+}
+
+.mp-page-label {
+  font-size: 11px;
+  color: @mp-dim;
+}
+
+// ---- sell ----------------------------------------------------------------
+
+.mp-sell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.mp-sell-head {
+  font-size: 12px;
+  color: @mp-dim;
+}
+
+.mp-sell-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 46px);
+  gap: 6px;
+  align-content: start;
+  max-height: 190px;
+  padding: 8px;
+  overflow-y: auto;
+  background: #0e1017;
+  border: 1px solid @mp-edge;
+  border-radius: 5px;
+}
+
+.mp-sell-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  background: #14171f;
+  border: 1px solid #232838;
+  border-radius: 4px;
+
+  img {
+    max-width: 40px;
+    max-height: 40px;
+    object-fit: contain;
+  }
+
+  &:hover {
+    border-color: fade(@mp-gold, 55%);
+  }
+
+  &.is-on {
+    border-color: @mp-gold;
+    box-shadow: 0 0 0 1px fade(@mp-gold, 40%) inset;
+  }
+}
+
+.mp-sell-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 320px;
+}
+
+.mp-sell-picked {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+
+.mp-sell-price {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: @mp-dim;
+
+  .mp-input {
+    flex: 1 1 auto;
+    text-align: right;
+  }
+}
+
+.mp-note {
+  margin: 0;
+  font-size: 10px;
+  line-height: 14px;
+  color: fade(@mp-dim, 80%);
+}
+
+.mp-empty {
+  grid-column: 1 / -1;
+  align-self: center;
+  padding: 24px;
+  font-size: 12px;
+  color: @mp-dim;
+  text-align: center;
+}
+
+// ---- modal and flash -----------------------------------------------------
+
+.mp-modal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 5, 9, 0.66);
+}
+
+.mp-modal-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 280px;
+  padding: 16px;
+  background: linear-gradient(180deg, #1d212d 0%, #131620 100%);
+  border: 1px solid @mp-edge;
+  border-radius: 6px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+
+.mp-modal-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: @mp-gold;
+}
+
+.mp-modal-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mp-modal-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: @mp-gold;
+  text-align: center;
+}
+
+.mp-modal-buttons {
+  display: flex;
+  gap: 8px;
+
+  .mp-btn {
+    flex: 1 1 0;
+    text-align: center;
+  }
+}
+
+.mp-flash {
+  position: absolute;
+  // Clear of the pager, which sits along the bottom of the content area.
+  bottom: 44px;
+  left: 50%;
+  padding: 6px 14px;
+  font-size: 11px;
+  color: #10121a;
+  background: @mp-gold;
+  border-radius: 12px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}

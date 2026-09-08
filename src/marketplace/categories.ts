@@ -1,0 +1,76 @@
+import type { Item } from '../ecs/world';
+import { ItemsDatabase } from '../common/itemsDatabase';
+
+/**
+ * Categories are derived from the item database rather than hand listed, so a
+ * new item falls into a rail without anyone maintaining a taxonomy. The only
+ * hand work is the few index ranges inside groups 12 to 14, where MU mixes
+ * wings, orbs, jewels and quest drops into one group.
+ */
+export const CATEGORIES = [
+  { id: 'all', label: 'All' },
+  { id: 'weapons', label: 'Weapons' },
+  { id: 'shields', label: 'Shields' },
+  { id: 'armour', label: 'Armour' },
+  { id: 'wings', label: 'Wings' },
+  { id: 'jewels', label: 'Jewels' },
+  { id: 'pets', label: 'Pets' },
+  { id: 'accessories', label: 'Accessories' },
+  { id: 'consumables', label: 'Consumables' },
+  { id: 'misc', label: 'Misc' },
+] as const;
+
+export type CategoryId = (typeof CATEGORIES)[number]['id'];
+
+const WING_INDEXES = new Set([0, 1, 2, 3, 4, 5, 6, 36, 37, 38, 39, 40, 41, 42, 43]);
+const PET_INDEXES = new Set([0, 1, 2, 3, 4, 5]);
+const ACCESSORY_INDEXES = new Set([8, 9, 10, 12, 13, 20, 21, 22, 23, 24, 25, 26, 27, 28]);
+/** Group 14 jewels: Bless, Soul, Life, Creation, Guardian. */
+const JEWEL_14 = new Set([13, 14, 16, 22, 31]);
+/** Group 12 jewels: Chaos, and the compressed Bless / Soul. */
+const JEWEL_12 = new Set([15, 30, 31]);
+
+export function categoryOf(item: Item): CategoryId {
+  const { group, num } = item;
+  if (group <= 5) return 'weapons';
+  if (group === 6) return 'shields';
+  if (group >= 7 && group <= 11) return 'armour';
+  if (group === 12) {
+    if (WING_INDEXES.has(num)) return 'wings';
+    if (JEWEL_12.has(num)) return 'jewels';
+    return 'misc';
+  }
+  if (group === 13) {
+    if (PET_INDEXES.has(num)) return 'pets';
+    if (ACCESSORY_INDEXES.has(num)) return 'accessories';
+    return 'misc';
+  }
+  if (group === 14) {
+    if (JEWEL_14.has(num)) return 'jewels';
+    return 'consumables';
+  }
+  if (group === 15) return 'consumables';
+  return 'misc';
+}
+
+export function itemName(item: Item): string {
+  return ItemsDatabase.getItem(item.group, item.num)?.ItemName ?? `Item ${item.group}/${item.num}`;
+}
+
+/** Grid footprint, for the card's icon box. */
+export function itemFootprint(item: Item): { x: number; y: number } {
+  const def = ItemsDatabase.getItem(item.group, item.num);
+  return { x: def?.X ?? 1, y: def?.Y ?? 1 };
+}
+
+/**
+ * The name a player reads on a card: the base name with the upgrade level and
+ * the excellent / ancient markers the tooltip would also show.
+ */
+export function displayName(item: Item): string {
+  const base = itemName(item);
+  const level = item.lvl ? ` +${item.lvl}` : '';
+  if (item.isAncient) return `Ancient ${base}${level}`;
+  if (item.isExcellent) return `Excellent ${base}${level}`;
+  return `${base}${level}`;
+}
