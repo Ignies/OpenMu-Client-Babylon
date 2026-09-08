@@ -1371,6 +1371,7 @@ export const frenchLayer: LanguageLayer = {
     'skills.tooltip.energy': 'Nécessite {energy} d’énergie',
     'skills.tooltip.mana': 'Mana insuffisant ({mana})',
     'skills.tooltip.ag': 'AG insuffisant ({ag})',
+    'skills.tooltip.safezone': 'Inutilisable en zone sûre',
     'skills.unnamed': 'Compétence n° {number}',
     'skills.named': '{name} (Niv.{level})',
     'skills.damage': 'Dégâts de compétence +{value}',

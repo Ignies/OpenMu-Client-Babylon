@@ -1335,6 +1335,7 @@ export const thaiLayer: LanguageLayer = {
     'skills.tooltip.energy': 'ต้องมีพลังงาน {energy}',
     'skills.tooltip.mana': 'มานาไม่พอ ({mana})',
     'skills.tooltip.ag': 'AG ไม่พอ ({ag})',
+    'skills.tooltip.safezone': 'ใช้ในเขตปลอดภัยไม่ได้',
     'skills.unnamed': 'สกิล #{number}',
     'skills.named': '{name} (Lv.{level})',
     'skills.damage': 'ดาเมจสกิล +{value}',

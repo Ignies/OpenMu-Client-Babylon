@@ -1317,6 +1317,7 @@ export const chineseLayer: LanguageLayer = {
     'skills.tooltip.energy': '需要能量 {energy}',
     'skills.tooltip.mana': '魔力不足（{mana}）',
     'skills.tooltip.ag': 'AG 不足（{ag}）',
+    'skills.tooltip.safezone': '安全区内无法使用',
     'skills.unnamed': '技能 #{number}',
     'skills.named': '{name}（{level} 级）',
     'skills.damage': '技能伤害 +{value}',

@@ -7,15 +7,17 @@
  * Two readers, on purpose: `skillRequirementsMet` is the *static* rule —
  * class, level, energy, the weapon a weapon-skill hangs off — and is what
  * greys the icon; `canUseSkill` adds the *transient* gates (mana, AG, the
- * running delay) and is what the cast system and the tooltip ask.
+ * running delay, the safe zone the hero stands in) and is what the cast
+ * system and the tooltip ask.
  *
- * Driven by `Store.playerData` (stats, hands, skills) and `cooldowns.ts`
+ * Driven by `Store.playerData` (stats, hands, tile, skills) and `cooldowns.ts`
  * (listed before this entry). Pure readers over MobX state: no clock, so no
  * `update`; nothing held, so no `reset`.
  */
 import { CharacterClassNumber } from '../common/types';
 import { ItemsDatabase } from '../common/itemsDatabase';
 import { skillDefinition, type SkillDefinition } from '../common/skillsDatabase';
+import { TW_SAFEZONE } from '../common/terrain/consts';
 import type { Item } from '../ecs/world';
 import type { SkillLayer } from './layer';
 import { skillCooldownRemaining } from './cooldowns';
@@ -90,7 +92,8 @@ export type SkillBlock =
   | 'weapon'
   | 'mana'
   | 'ag'
-  | 'cooldown';
+  | 'cooldown'
+  | 'safezone';
 
 export interface SkillUsability {
   /** Everything passes: the cast system may send. */
@@ -169,6 +172,10 @@ export function skillUsability(num: number): SkillUsability {
   if (def.mana > 0 && pd.currentMP < def.mana) blocks.push('mana');
   if (def.ag > 0 && pd.currentAG < def.ag) blocks.push('ag');
   if (skillCooldownRemaining(num) > 0) blocks.push('cooldown');
+  // No skill is cast from a safe zone tile - the original breaks out of the
+  // AT_SKILL_* branches on `c->SafeZone` (ZzzInterface.cpp:3325). Transient,
+  // not a requirement, so the icon keeps its colour like the original's does.
+  if ((pd.tileFlag & TW_SAFEZONE) !== 0) blocks.push('safezone');
 
   return { usable: blocks.length === 0, requirementsMet, blocks };
 }

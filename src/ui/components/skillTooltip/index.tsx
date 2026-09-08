@@ -19,6 +19,7 @@ const BLOCK_TEXT: Record<SkillBlock, (req: { level: number; energy: number; mana
   mana: r => t('skills.tooltip.mana', { mana: r.mana }),
   ag: r => t('skills.tooltip.ag', { ag: r.ag }),
   cooldown: () => t('skills.tooltip.cooldown'),
+  safezone: () => t('skills.tooltip.safezone'),
 };
 
 /**
