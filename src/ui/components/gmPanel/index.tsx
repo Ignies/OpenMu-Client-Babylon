@@ -60,7 +60,7 @@ const MAX_REPLIES = 6;
 
 const ParamField = observer(
   ({ command, param }: { command: GmCommand; param: GmParam }) => {
-    const value = GmPanel.valueOf(command, param.name);
+    const value = GmPanel.valueFor(command, param.name);
 
     return (
       <div className="gm-field">

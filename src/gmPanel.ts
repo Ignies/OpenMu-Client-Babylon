@@ -99,7 +99,7 @@ export const GmPanel = new (class _GmPanel {
     this.error = null;
   }
 
-  valueOf(command: GmCommand, paramName: string): string {
+  valueFor(command: GmCommand, paramName: string): string {
     return this.values[`${command.command}:${paramName}`] ?? '';
   }
 
@@ -144,7 +144,7 @@ export const GmPanel = new (class _GmPanel {
   private valuesFor(command: GmCommand): Record<string, string> {
     const values: Record<string, string> = {};
     for (const param of command.params ?? []) {
-      values[param.name] = this.valueOf(command, param.name);
+      values[param.name] = this.valueFor(command, param.name);
     }
     return values;
   }
