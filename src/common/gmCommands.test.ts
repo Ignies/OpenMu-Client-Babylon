@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { GM_COMMANDS, buildCommandLine, type GmCommand } from './gmCommands';
+import {
+  GM_COMMANDS,
+  buildCommandLine,
+  matchGmCommands,
+  type GmCommand,
+} from './gmCommands';
 
 const find = (name: string): GmCommand => {
   const command = GM_COMMANDS.find(c => c.command === name);
@@ -114,5 +119,34 @@ describe('buildCommandLine', () => {
 
   it('trims what was typed', () => {
     expect(line('/trace', { characterName: '  Ann  ' })).toBe('/trace Ann');
+  });
+});
+
+describe('matchGmCommands', () => {
+  const search = (needle: string): string[] =>
+    matchGmCommands(needle).map(c => c.command);
+
+  it('offers everything when nothing has been typed', () => {
+    expect(matchGmCommands('   ')).toHaveLength(GM_COMMANDS.length);
+  });
+
+  it('finds a command by its slash name', () => {
+    expect(search('/setmoney')).toEqual(['/setmoney']);
+  });
+
+  it('finds a command by what it is called, whatever the case', () => {
+    expect(search('MuTe')).toEqual(['/chatban', '/chatunban']);
+  });
+
+  it('finds a command by what it does, across every group', () => {
+    // "warp" appears in three groups; the point of the box is not having to
+    // know which one.
+    expect(search('warp')).toEqual(
+      expect.arrayContaining(['/trace', '/track', '/guildmove'])
+    );
+  });
+
+  it('finds nothing rather than everything when there is no match', () => {
+    expect(search('zzzz')).toEqual([]);
   });
 });

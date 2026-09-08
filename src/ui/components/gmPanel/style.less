@@ -1,19 +1,37 @@
 @import (reference) '../muText/style.less';
 
+// The game master panel's own look, on purpose.
+//
+// The rest of the client wears the original's sprite chrome, which is fixed
+// art: it fixes a window at whatever the sprites measure. This one is a tool -
+// a list, a form and a log, far more text than any MU window was drawn for -
+// so it is laid out rather than drawn, and it fits whatever screen it is on.
+//
+// It still speaks the game's colours (the gold, the near-black plate) so it
+// does not look like a browser dialog that wandered in.
+
+@gm-gold: #e8c877;
+@gm-gold-dim: #b9a87e;
+@gm-ink: #f2ede2;
+@gm-plate: rgba(14, 12, 9, 0.94);
+@gm-line: rgba(232, 200, 119, 0.22);
+@gm-line-strong: rgba(232, 200, 119, 0.5);
+@gm-danger: #d8756a;
+@gm-reply: #8fb4d8;
+
 // The way in, top right, where nothing else lives (`.money` has the top left).
-// Outside `.gm-panel-page` on purpose: it is drawn whether the window is open
-// or not, so it cannot live inside the window's own layer.
+// Outside the drawer on purpose: it is drawn whether the panel is open or not.
 .gm-tab-plate {
   position: absolute;
   top: 8px;
   right: 10px;
   z-index: 1;
-  padding: 3px 10px;
-  border: 1px solid rgba(232, 200, 119, 0.5);
-  border-radius: 2px;
-  background: rgba(12, 10, 8, 0.72);
+  padding: 4px 11px;
+  border: 1px solid @gm-line-strong;
+  border-radius: 4px;
+  background: @gm-plate;
   .mu-font();
-  color: #e8c877;
+  color: @gm-gold;
   font-size: 11px;
   font-weight: bold;
   letter-spacing: 1px;
@@ -21,317 +39,460 @@
   user-select: none;
   cursor: pointer;
   pointer-events: auto;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
 
   &:hover {
-    border-color: #ffffff;
+    border-color: @gm-gold;
     color: #ffffff;
   }
 
   &.is-active {
-    border-color: #ffffff;
-    background: rgba(232, 200, 119, 0.25);
+    border-color: @gm-gold;
+    background: rgba(232, 200, 119, 0.22);
     color: #ffffff;
   }
 }
 
-// The Options window's plate/gold vocabulary, same as the debug menu: this is
-// a catalogue-driven window, so rows stack and scroll rather than being
-// measured into columns.
-.gm-panel-page {
+// Docked right on a wide screen, so the world stays visible while working.
+.gm-drawer {
   position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  pointer-events: none;
-  // No z-index of its own: the window joins the stack (muWindow/windowState).
+  top: 8px;
+  right: 8px;
+  bottom: 8px;
+  width: clamp(320px, 32vw, 460px);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  border: 1px solid @gm-line-strong;
+  border-radius: 6px;
+  background: @gm-plate;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+  .mu-font();
+  color: @gm-ink;
+  pointer-events: auto;
+  user-select: none;
+  overflow: hidden;
 
-  .gm-panel {
-    position: relative;
-    flex: none;
-    .mu-font();
-    user-select: none;
-    pointer-events: auto;
+  h2,
+  h3,
+  h4,
+  p,
+  ul {
+    margin: 0;
   }
 
-  .gm-title {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 2px 16px;
-    border-radius: 2px;
-    background: rgba(12, 10, 8, 0.72);
-    text-align: center;
+  ul {
+    padding: 0;
+    list-style: none;
+  }
+
+  code {
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  }
+
+  button {
+    .mu-font();
+    cursor: pointer;
+  }
+}
+
+// A phone, or the drawer's own width no longer leaving the world any room:
+// take the screen instead of squeezing into a column nothing fits in.
+@media (max-width: 720px), (max-height: 460px) {
+  .gm-drawer {
+    inset: 4px;
+    width: auto;
+    border-radius: 5px;
+  }
+
+  .gm-tab-plate {
+    top: 4px;
+    right: 6px;
+  }
+}
+
+.gm-drawer-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 9px 10px 8px 12px;
+  border-bottom: 1px solid @gm-line;
+  background: linear-gradient(rgba(232, 200, 119, 0.1), transparent);
+
+  h2 {
+    flex: 1;
+    min-width: 0;
     color: #ffffff;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: bold;
     letter-spacing: 1px;
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
   }
+}
 
-  .gm-tab {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    border: 1px solid rgba(232, 200, 119, 0.28);
-    border-radius: 2px 2px 0 0;
-    background: rgba(0, 0, 0, 0.35);
-    color: #b9a87e;
-    font-size: 11px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-    cursor: pointer;
-    pointer-events: auto;
+.gm-close {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid @gm-line;
+  border-radius: 3px;
+  background: transparent;
+  color: @gm-gold-dim;
+  font-size: 15px;
+  line-height: 1;
 
-    &:hover {
-      color: #e8c877;
-      background: rgba(232, 200, 119, 0.1);
-    }
-
-    &.is-active {
-      border-color: rgba(232, 200, 119, 0.6);
-      border-bottom-color: transparent;
-      background: rgba(232, 200, 119, 0.16);
-      color: #ffffff;
-      font-weight: bold;
-    }
-  }
-
-  .gm-content {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-right: 4px;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(232, 200, 119, 0.45) rgba(0, 0, 0, 0.35);
-  }
-
-  // The command list: two columns of plates, the whole group at a glance.
-  .gm-commands {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3px;
-    flex: none;
-  }
-
-  .gm-command {
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    padding: 3px 7px;
-    border: 1px solid rgba(232, 200, 119, 0.3);
-    border-radius: 2px;
-    background: rgba(12, 10, 8, 0.72);
-    cursor: pointer;
-    overflow: hidden;
-
-    &:hover {
-      border-color: #e8c877;
-    }
-
-    &.is-active {
-      border-color: #ffffff;
-      background: rgba(232, 200, 119, 0.25);
-    }
-
-    // Anything that takes access or progress away wears the warning edge.
-    &.is-heavy {
-      border-left: 2px solid rgba(196, 84, 66, 0.85);
-    }
-  }
-
-  .gm-command-label {
+  &:hover {
+    border-color: @gm-danger;
     color: #ffffff;
-    font-size: 11px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  }
+}
+
+.gm-search {
+  flex: none;
+  margin: 8px 10px 0;
+  box-sizing: border-box;
+  padding: 5px 9px;
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  .mu-font();
+  color: @gm-ink;
+  font-size: 11px;
+  outline: none;
+
+  &::placeholder {
+    color: #6f6852;
   }
 
-  .gm-command-slash {
-    color: #8f866a;
-    font-size: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  &:focus {
+    border-color: @gm-gold;
+  }
+}
+
+.gm-tabs {
+  display: flex;
+  flex: none;
+  gap: 4px;
+  margin: 8px 10px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.gm-tab {
+  flex: 1 1 auto;
+  padding: 5px 8px;
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.32);
+  color: @gm-gold-dim;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+
+  &:hover {
+    border-color: @gm-line-strong;
+    color: @gm-gold;
   }
 
-  // The form for the selected command.
-  .gm-form {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    flex: none;
-    box-sizing: border-box;
-    padding: 7px;
-    border: 1px solid rgba(232, 200, 119, 0.45);
-    border-radius: 2px;
-    background: rgba(8, 7, 5, 0.72);
-  }
-
-  .gm-help {
-    color: #b9a87e;
-    font-size: 10px;
-    line-height: 1.35;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-  }
-
-  .gm-field {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .gm-field-label {
-    flex: none;
-    width: 88px;
+  &.is-active {
+    border-color: @gm-line-strong;
+    background: rgba(232, 200, 119, 0.18);
     color: #ffffff;
-    font-size: 11px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    font-weight: bold;
+  }
+}
+
+.gm-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: @gm-line-strong rgba(0, 0, 0, 0.35);
+}
+
+.gm-empty {
+  color: @gm-gold-dim;
+  font-size: 11px;
+  text-align: center;
+  padding: 12px 0;
+}
+
+// Fills the width it is given rather than assuming two columns: a phone gets
+// one, a docked drawer two, a wide one three.
+.gm-commands {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+  gap: 4px;
+  flex: none;
+}
+
+.gm-command {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  box-sizing: border-box;
+  padding: 5px 8px;
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.34);
+  text-align: left;
+  overflow: hidden;
+  transition: border-color 0.12s, background 0.12s;
+
+  &:hover {
+    border-color: @gm-line-strong;
+    background: rgba(232, 200, 119, 0.08);
   }
 
-  .gm-required {
-    color: #e8c877;
+  &.is-active {
+    border-color: @gm-gold;
+    background: rgba(232, 200, 119, 0.2);
   }
 
-  .gm-input {
+  // Anything that takes access or progress away wears the warning edge.
+  &.is-heavy {
+    border-left: 2px solid rgba(196, 84, 66, 0.8);
+  }
+}
+
+.gm-command-label {
+  max-width: 100%;
+  color: @gm-ink;
+  font-size: 11px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gm-command-slash {
+  max-width: 100%;
+  color: #8f866a;
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex: none;
+  box-sizing: border-box;
+  padding: 10px;
+  border: 1px solid @gm-line-strong;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.gm-form-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+
+  h3 {
     flex: 1;
     min-width: 0;
-    box-sizing: border-box;
-    padding: 2px 6px;
-    border: 1px solid rgba(232, 200, 119, 0.35);
-    border-radius: 2px;
-    background: rgba(0, 0, 0, 0.55);
-    .mu-font();
     color: #ffffff;
-    font-size: 11px;
-    outline: none;
-
-    &::placeholder {
-      color: #6f6852;
-    }
-
-    &:focus {
-      border-color: #e8c877;
-    }
+    font-size: 12px;
+    font-weight: bold;
   }
 
-  .gm-preview {
-    padding: 3px 6px;
-    border-radius: 2px;
-    background: rgba(0, 0, 0, 0.5);
-    color: #e8c877;
-    font-size: 11px;
-    word-break: break-all;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-  }
-
-  .gm-error {
-    color: #d8756a;
+  code {
+    color: @gm-gold;
     font-size: 10px;
-    line-height: 1.3;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}
+
+.gm-help {
+  color: @gm-gold-dim;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+// Label above input, so a long label never squeezes the field into nothing -
+// which is exactly what a fixed two-column form does on a narrow screen.
+.gm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.gm-field-label {
+  color: @gm-ink;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.gm-required {
+  color: @gm-gold;
+  margin-left: 3px;
+}
+
+.gm-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  .mu-font();
+  color: @gm-ink;
+  font-size: 11px;
+  outline: none;
+
+  &::placeholder {
+    color: #6f6852;
   }
 
-  .gm-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+  &:focus {
+    border-color: @gm-gold;
+  }
+}
+
+.gm-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.gm-choice-option {
+  padding: 4px 11px;
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  color: @gm-ink;
+  font-size: 11px;
+
+  &:hover {
+    border-color: @gm-line-strong;
   }
 
-  .gm-chip {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    padding: 3px 12px;
-    border: 1px solid rgba(232, 200, 119, 0.45);
-    border-radius: 2px;
-    background: rgba(12, 10, 8, 0.72);
+  &.is-active {
+    border-color: @gm-gold;
+    background: rgba(232, 200, 119, 0.24);
+    color: @gm-gold;
+    font-weight: bold;
+  }
+}
+
+.gm-preview {
+  display: block;
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  color: @gm-gold;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 11px;
+  word-break: break-word;
+  user-select: text;
+}
+
+.gm-error {
+  color: @gm-danger;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.gm-warn {
+  padding: 5px 8px;
+  border: 1px solid rgba(216, 117, 106, 0.55);
+  border-radius: 4px;
+  background: rgba(150, 52, 40, 0.22);
+  color: #ffd9d3;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.gm-form-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.gm-btn {
+  flex: 1;
+  padding: 6px 12px;
+  border: 1px solid @gm-line-strong;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  color: @gm-ink;
+  font-size: 11px;
+  transition: border-color 0.12s, background 0.12s;
+
+  &:hover {
+    border-color: @gm-gold;
+  }
+
+  &.gm-btn-run {
+    background: rgba(232, 200, 119, 0.16);
+    color: @gm-gold;
+    font-weight: bold;
+  }
+
+  &.gm-btn-run.is-armed {
+    border-color: @gm-danger;
+    background: rgba(150, 52, 40, 0.45);
     color: #ffffff;
-    font-size: 11px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-    white-space: nowrap;
-    cursor: pointer;
-
-    &:hover {
-      border-color: #e8c877;
-    }
-
-    &.is-active {
-      border-color: #ffffff;
-      background: rgba(232, 200, 119, 0.25);
-      color: #e8c877;
-      font-weight: bold;
-    }
-
-    &.gm-run {
-      border-color: rgba(232, 200, 119, 0.75);
-      font-weight: bold;
-    }
-
-    &.gm-run.is-armed {
-      border-color: #d8756a;
-      background: rgba(150, 52, 40, 0.4);
-      color: #ffffff;
-    }
   }
+}
 
-  .gm-section {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.gm-transcript {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  h4 {
     margin-top: 4px;
-    color: #e8c877;
-    font-size: 11px;
+    color: @gm-gold;
+    font-size: 10px;
     font-weight: bold;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-    white-space: nowrap;
-
-    &::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(
-        to right,
-        rgba(232, 200, 119, 0.55),
-        rgba(232, 200, 119, 0)
-      );
-    }
   }
 
-  .gm-transcript {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: none;
-  }
-
-  .gm-transcript-row {
-    padding: 1px 6px;
-    color: #b9a87e;
+  li {
+    padding: 1px 0;
+    color: @gm-gold-dim;
     font-size: 10px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    line-height: 1.35;
     word-break: break-word;
+    user-select: text;
+  }
 
-    &.is-reply {
-      color: #8fb4d8;
-    }
+  code {
+    font-size: 10px;
+  }
+
+  .gm-replies li {
+    color: @gm-reply;
   }
 }
 
-.gm-panel-page .mu-resize-grip {
-  opacity: 0.25;
-}
-
-.gm-panel-page .gm-panel:hover .mu-resize-grip {
-  opacity: 0.8;
+.gm-drawer-foot {
+  display: flex;
+  justify-content: space-between;
+  flex: none;
+  padding: 6px 12px;
+  border-top: 1px solid @gm-line;
+  color: #6f6852;
+  font-size: 9px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
 }

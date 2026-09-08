@@ -1,56 +1,42 @@
 import './style.less';
+import { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Social } from '../../../social';
 import { GmPanel } from '../../../gmPanel';
 import { useEventBus } from '../../../hooks/useEventBus';
 import { uiClick } from '../../../libs/sfx';
-import { MuSpriteFrame } from '../muSprite';
-import { MuButton } from '../muButton';
-import { MuResizeGrip, useWindowChrome } from '../muWindow/useWindowChrome';
-import { TEXT_COLOR } from '../../pages/serversPage/layout';
+import { MuWindows } from '../muWindow/windowState';
 import { ChatLineType } from '../../../common/chat';
 import { GM_GROUPS, type GmCommand, type GmParam } from '../../../common/gmCommands';
 
 /**
- * The game master panel: the server's own administrative commands, as buttons.
+ * The game master panel: the server's own administrative commands, as a form.
  *
  * Every entry sends the `/line` a game master would type
  * (`common/gmCommands.ts` -> `gmPanel.ts` -> `Social.sendChat`). The window
  * grants nothing; the server re-checks `CharacterStatus` on every command it
  * receives, so hiding this from a normal player is presentation, not security.
  *
- * F8 toggles it - a raw `keyPressed` code beside the debug menu's F9, not a
- * `KeyBindings` action, so the player-facing Keys tab stays clean. Game masters
- * only: everyone else renders null and never sees the key. Not F10, which opens
- * the menu bar in Firefox.
+ * **Deliberately not the original's window chrome.** Every other window here
+ * wears `op1_stone` and the sprite frames, which are fixed-size art: they pin a
+ * window to whatever the sprites measure and are scaled bodily up and down.
+ * That is right for the game's own windows and wrong for this one, which is a
+ * tool with a list, a form and a log in it, holds far more text than any MU
+ * window was drawn for, and has to be usable on a phone. So it is a drawer that
+ * lays itself out: it docks to the right on a wide screen and leaves the world
+ * visible, and takes the screen on a narrow one.
  *
- * Drawn with the Options window's stone chrome, the same vocabulary the debug
- * menu uses, so it reads as part of the client.
+ * It still joins `MuWindows` - not for the chrome, only so Escape closes this
+ * before anything underneath and the z-order stays honest.
+ *
+ * F8 toggles it, and there is a plate for the people who do not know that. Not
+ * F10, which opens the menu bar in Firefox. Game masters only: everyone else
+ * renders null and never sees either.
  */
 
 const WINDOW_ID = 'gm-panel';
 
 const TOGGLE_KEY = 'F8';
-
-const ART_WIDTH = 213;
-
-const WIN_WIDTH = ART_WIDTH * 2;
-const WIN_HEIGHT = 500;
-
-const TOP_HEIGHT = 65;
-const BOTTOM_HEIGHT = 43;
-
-const CONTENT_TOP = TOP_HEIGHT + 14;
-const TAB_HEIGHT = 24;
-const TAB_GAP = 4;
-const CONTENT_X = 28;
-const CONTENT_WIDTH = WIN_WIDTH - CONTENT_X * 2;
-
-const CLOSE_WIDTH = 108;
-const CLOSE_HEIGHT = 30;
-const CLOSE_Y = WIN_HEIGHT - 47;
-
-const CONTENT_HEIGHT = CLOSE_Y - (CONTENT_TOP + TAB_HEIGHT + 12) - 8;
 
 /** How long after a send the panel keeps showing the server's answers. */
 const REPLY_WINDOW_MS = 20_000;
@@ -63,37 +49,51 @@ const ParamField = observer(
     const value = GmPanel.valueFor(command, param.name);
 
     return (
-      <div className="gm-field">
+      <label className="gm-field">
         <span className="gm-field-label">
           {param.label}
-          {param.required ? <span className="gm-required"> *</span> : null}
+          {param.required ? <b className="gm-required">*</b> : null}
         </span>
+
         {param.validValues ? (
-          <div className="gm-chips">
+          <div className="gm-choice">
             {param.validValues.map(option => (
-              <div
+              <button
                 key={option}
-                className={`gm-chip${value === option ? ' is-active' : ''}`}
+                type="button"
+                className={`gm-choice-option${value === option ? ' is-active' : ''}`}
                 onClick={uiClick(() =>
                   GmPanel.setValue(command, param.name, value === option ? '' : option)
                 )}
               >
                 {option}
-              </div>
+              </button>
             ))}
           </div>
         ) : (
           <input
             className="gm-input"
             type="text"
+            // Not type="number": it would refuse the character names and maps
+            // these same fields hold, and spinners on a level make no sense.
+            // `inputMode` is only which keyboard a phone offers.
+            inputMode={param.type === 'number' ? 'numeric' : 'text'}
             value={value}
             placeholder={param.hint ?? ''}
             spellCheck={false}
             autoComplete="off"
             onChange={e => GmPanel.setValue(command, param.name, e.target.value)}
+            onKeyDown={e => {
+              // Enter runs it, the way every other form works. Stopped from
+              // bubbling so the chat box does not also open behind it.
+              if (e.key !== 'Enter') return;
+              e.preventDefault();
+              e.stopPropagation();
+              GmPanel.run(command);
+            }}
           />
         )}
-      </div>
+      </label>
     );
   }
 );
@@ -102,44 +102,55 @@ const CommandForm = observer(({ command }: { command: GmCommand }) => {
   const armed = GmPanel.confirming?.command === command.command;
 
   return (
-    <div className="gm-form">
-      <span className="gm-help">{command.help}</span>
+    <section className="gm-form">
+      <header className="gm-form-head">
+        <h3>{command.label}</h3>
+        <code>{command.command}</code>
+      </header>
+
+      <p className="gm-help">{command.help}</p>
 
       {(command.params ?? []).map(param => (
         <ParamField key={param.name} command={command} param={param} />
       ))}
 
-      <div className="gm-preview">{GmPanel.preview(command)}</div>
+      <output className="gm-preview">{GmPanel.preview(command)}</output>
 
-      {GmPanel.error ? <span className="gm-error">{GmPanel.error}</span> : null}
-
+      {GmPanel.error ? <p className="gm-error">{GmPanel.error}</p> : null}
       {armed ? (
-        <span className="gm-error">This cannot be undone. Press again to send.</span>
+        <p className="gm-warn">This cannot be undone. Press Confirm to send it.</p>
       ) : null}
 
-      <div className="gm-chips">
-        <div
-          className={`gm-chip gm-run${armed ? ' is-armed' : ''}`}
+      <div className="gm-form-actions">
+        <button
+          type="button"
+          className={`gm-btn gm-btn-run${armed ? ' is-armed' : ''}`}
           onClick={uiClick(() => GmPanel.run(command))}
         >
           {armed ? 'Confirm' : 'Run'}
-        </div>
-        <div className="gm-chip" onClick={uiClick(() => GmPanel.closeForm())}>
+        </button>
+        <button
+          type="button"
+          className="gm-btn"
+          onClick={uiClick(() => GmPanel.closeForm())}
+        >
           Cancel
-        </div>
+        </button>
       </div>
-    </div>
+    </section>
   );
 });
 
 /**
  * The server's answers. A command replies with a blue message
- * (`ShowBlueMessageAsync` -> `ServerMessage` type 1), which already lands in the
- * chat log as a system line, so those are read back from there rather than
+ * (`ShowBlueMessageAsync` -> `ServerMessage` type 1), which already lands in
+ * the chat log as a system line, so those are read back from there rather than
  * counted twice. A refused command replies with nothing at all, which is why
  * what was sent is listed beside them.
  */
 const Transcript = observer(() => {
+  if (GmPanel.sent.length === 0) return null;
+
   const since = GmPanel.sent[GmPanel.sent.length - 1]?.at ?? 0;
   const cutoff = Math.max(since, Date.now() - REPLY_WINDOW_MS);
 
@@ -147,29 +158,28 @@ const Transcript = observer(() => {
     .filter(line => line.type === ChatLineType.System && line.at >= cutoff)
     .slice(-MAX_REPLIES);
 
-  if (GmPanel.sent.length === 0) return null;
-
   return (
-    <div className="gm-transcript">
-      <span className="gm-section">Sent</span>
-      {GmPanel.sent
-        .slice(-MAX_REPLIES)
-        .map(entry => (
-          <div key={entry.id} className="gm-transcript-row">
-            {entry.line}
-          </div>
+    <section className="gm-transcript">
+      <h4>Sent</h4>
+      <ul>
+        {GmPanel.sent.slice(-MAX_REPLIES).map(entry => (
+          <li key={entry.id}>
+            <code>{entry.line}</code>
+          </li>
         ))}
+      </ul>
+
       {replies.length > 0 ? (
         <>
-          <span className="gm-section">Server said</span>
-          {replies.map(line => (
-            <div key={line.id} className="gm-transcript-row is-reply">
-              {line.text}
-            </div>
-          ))}
+          <h4>Server said</h4>
+          <ul className="gm-replies">
+            {replies.map(line => (
+              <li key={line.id}>{line.text}</li>
+            ))}
+          </ul>
         </>
       ) : null}
-    </div>
+    </section>
   );
 });
 
@@ -187,181 +197,136 @@ const GmTab = observer(() => {
   if (!GmPanel.available) return null;
 
   return (
-    <div
+    <button
+      type="button"
       className={`gm-tab-plate${GmPanel.open ? ' is-active' : ''}`}
       title={`Game master panel (${TOGGLE_KEY})`}
       onClick={uiClick(() => GmPanel.toggle())}
     >
       GM
-    </div>
+    </button>
   );
 });
 
 export const GmPanelWindow = observer(() => {
+  const searchRef = useRef<HTMLInputElement>(null);
+  const open = GmPanel.available && GmPanel.open;
+
   useEventBus('keyPressed', key => {
     if (!GmPanel.available) return;
     if (key === TOGGLE_KEY) GmPanel.toggle();
   });
 
-  const chrome = useWindowChrome(WINDOW_ID, {
-    width: WIN_WIDTH,
-    height: WIN_HEIGHT,
-    onClose: () => GmPanel.close(),
-  });
+  // Joins the window stack while open: Escape closes this before the windows
+  // underneath, and `zIndexOf` keeps it ordered with them. None of the
+  // placement or scaling is used - the drawer lays itself out.
+  useEffect(() => {
+    if (!open) return;
+
+    MuWindows.register(WINDOW_ID, undefined, () => {
+      GmPanel.close();
+      return true;
+    });
+    MuWindows.raise(WINDOW_ID);
+    searchRef.current?.focus({ preventScroll: true });
+
+    return () => MuWindows.unregister(WINDOW_ID);
+  }, [open]);
 
   if (!GmPanel.available) return null;
-  if (!GmPanel.open) return <GmTab />;
+  if (!open) return <GmTab />;
 
-  const group = GM_GROUPS.find(g => g.id === GmPanel.activeGroupId) ?? GM_GROUPS[0];
-
-  const tabWidth = Math.min(
-    110,
-    Math.floor((CONTENT_WIDTH - (GM_GROUPS.length - 1) * TAB_GAP) / GM_GROUPS.length)
-  );
-  const stripWidth = GM_GROUPS.length * tabWidth + (GM_GROUPS.length - 1) * TAB_GAP;
+  const commands = GmPanel.visible;
+  const searching = GmPanel.query.trim().length > 0;
 
   return (
-    <div className="gm-panel-page">
+    <>
       <GmTab />
-      <div
-        ref={chrome.ref as React.Ref<HTMLDivElement>}
-        className="gm-panel"
-        style={{
-          ...chrome.style,
-          position: chrome.anchored ? 'relative' : 'absolute',
-          transformOrigin: chrome.anchored ? 'center' : '0 0',
-        }}
+      <aside
+        className="gm-drawer"
+        style={{ zIndex: MuWindows.zIndexOf(WINDOW_ID) }}
+        aria-label="Game master panel"
+        onPointerDown={() => MuWindows.raise(WINDOW_ID)}
       >
-        <MuSpriteFrame
-          file="op1_stone.OZJ"
-          width={WIN_WIDTH - 6}
-          height={WIN_HEIGHT - 6}
-          style={{ position: 'absolute', left: 3, top: 3, backgroundRepeat: 'repeat' }}
-        />
-        <MuSpriteFrame
-          file="op1_back3.OZJ"
-          width={5}
-          height={WIN_HEIGHT - TOP_HEIGHT - BOTTOM_HEIGHT}
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: TOP_HEIGHT,
-            backgroundRepeat: 'repeat-y',
+        <header className="gm-drawer-head">
+          <h2>Game Master</h2>
+          <button
+            type="button"
+            className="gm-close"
+            title="Close (Esc)"
+            aria-label="Close"
+            onClick={uiClick(() => GmPanel.close())}
+          >
+            ×
+          </button>
+        </header>
+
+        <input
+          ref={searchRef}
+          className="gm-search"
+          type="search"
+          value={GmPanel.query}
+          placeholder="Search every command…"
+          spellCheck={false}
+          autoComplete="off"
+          onChange={e => GmPanel.setQuery(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Escape' && GmPanel.query) {
+              e.stopPropagation();
+              GmPanel.setQuery('');
+            }
           }}
         />
-        <MuSpriteFrame
-          file="op1_back4.OZJ"
-          width={5}
-          height={WIN_HEIGHT - TOP_HEIGHT - BOTTOM_HEIGHT}
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: TOP_HEIGHT,
-            backgroundRepeat: 'repeat-y',
-          }}
-        />
-        {[false, true].map(mirrored => (
-          <MuSpriteFrame
-            key={`top-${mirrored}`}
-            file="op2_back1.OZT"
-            width={ART_WIDTH}
-            height={TOP_HEIGHT}
-            style={{
-              position: 'absolute',
-              left: mirrored ? ART_WIDTH : 0,
-              top: 0,
-              ...(mirrored && { transform: 'scaleX(-1)' }),
-            }}
-          />
-        ))}
-        {[false, true].map(mirrored => (
-          <MuSpriteFrame
-            key={`bottom-${mirrored}`}
-            file="op1_back2.OZT"
-            width={ART_WIDTH}
-            height={BOTTOM_HEIGHT}
-            style={{
-              position: 'absolute',
-              left: mirrored ? ART_WIDTH : 0,
-              bottom: 0,
-              ...(mirrored && { transform: 'scaleX(-1)' }),
-            }}
-          />
-        ))}
 
-        <div
-          className="gm-title"
-          style={{ top: 10, cursor: 'move' }}
-          onPointerDown={chrome.onPointerDown}
-        >
-          Game Master
-        </div>
-
-        {GM_GROUPS.map((entry, i) => {
-          const x =
-            Math.floor((WIN_WIDTH - stripWidth) / 2) + i * (tabWidth + TAB_GAP);
-
-          return (
-            <div
-              key={entry.id}
-              className={`gm-tab${entry.id === group.id ? ' is-active' : ''}`}
-              style={{ left: x, top: CONTENT_TOP, width: tabWidth, height: TAB_HEIGHT }}
-              onClick={uiClick(() => GmPanel.setGroup(entry.id))}
-            >
-              {entry.title}
-            </div>
-          );
-        })}
-
-        <div
-          className="gm-content"
-          style={{
-            left: CONTENT_X,
-            top: CONTENT_TOP + TAB_HEIGHT + 12,
-            width: CONTENT_WIDTH,
-            height: CONTENT_HEIGHT,
-          }}
-        >
-          <div className="gm-commands">
-            {group.commands.map(command => (
-              <div
-                key={command.command}
-                className={`gm-command${
-                  GmPanel.selected?.command === command.command ? ' is-active' : ''
-                }${command.confirm ? ' is-heavy' : ''}`}
-                onClick={uiClick(() => GmPanel.select(command))}
-                title={command.help}
+        {searching ? null : (
+          <nav className="gm-tabs">
+            {GM_GROUPS.map(group => (
+              <button
+                key={group.id}
+                type="button"
+                className={`gm-tab${group.id === GmPanel.activeGroupId ? ' is-active' : ''}`}
+                onClick={uiClick(() => GmPanel.setGroup(group.id))}
               >
-                <span className="gm-command-label">{command.label}</span>
-                <span className="gm-command-slash">{command.command}</span>
-              </div>
+                {group.title}
+              </button>
             ))}
-          </div>
+          </nav>
+        )}
+
+        <div className="gm-body">
+          {commands.length === 0 ? (
+            <p className="gm-empty">No command matches that.</p>
+          ) : (
+            <div className="gm-commands">
+              {commands.map(command => (
+                <button
+                  key={command.command}
+                  type="button"
+                  className={`gm-command${
+                    GmPanel.selected?.command === command.command ? ' is-active' : ''
+                  }${command.confirm ? ' is-heavy' : ''}`}
+                  onClick={uiClick(() => GmPanel.select(command))}
+                  title={command.help}
+                >
+                  <span className="gm-command-label">{command.label}</span>
+                  <code className="gm-command-slash">{command.command}</code>
+                </button>
+              ))}
+            </div>
+          )}
 
           {GmPanel.selected ? <CommandForm command={GmPanel.selected} /> : null}
 
           <Transcript />
         </div>
 
-        <MuButton
-          file="op1_b_all.OZT"
-          width={CLOSE_WIDTH}
-          height={CLOSE_HEIGHT}
-          frames={{ up: 0, active: 1, down: 2 }}
-          color={TEXT_COLOR.brightGray}
-          activeColor={TEXT_COLOR.white}
-          label="Close"
-          onClick={() => GmPanel.close()}
-          style={{
-            position: 'absolute',
-            left: Math.floor((WIN_WIDTH - CLOSE_WIDTH) / 2),
-            top: CLOSE_Y,
-          }}
-          labelStyle={{ fontSize: 11, textShadow: '1px 1px 0 rgba(0,0,0,.85)' }}
-        />
-
-        <MuResizeGrip id={WINDOW_ID} width={WIN_WIDTH} />
-      </div>
-    </div>
+        <footer className="gm-drawer-foot">
+          <span>
+            {commands.length} command{commands.length === 1 ? '' : 's'}
+          </span>
+          <span>{TOGGLE_KEY} to close</span>
+        </footer>
+      </aside>
+    </>
   );
 });
