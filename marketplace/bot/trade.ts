@@ -1,4 +1,5 @@
 import {
+  ItemMoveRequestPacket,
   SetTradeMoneyPacket,
   TradeButtonStateChangePacket,
   TradeButtonStateEnum,
@@ -16,6 +17,7 @@ import {
   TradeRequestAnswerPacket,
   TradeRequestPacket as IncomingTradeRequestPacket,
 } from '../../src/common/packets/ServerToClientPackets';
+import { StorageKind } from '../../src/common/itemStorage';
 import type { BotConnection, Frame } from './connection';
 import { view } from './session';
 
@@ -116,6 +118,30 @@ export class TradeSession {
   }
 
   /**
+   * Moves an item from the bag onto the trade table.
+   *
+   * `inventorySlot` is the wire slot, so the bag starts at 12 - the first
+   * twelve are the equipment slots. The storage values come from `StorageKind`,
+   * *not* from the generated `StorageTypeEnum`: those are two different enums
+   * and they disagree. The wire wants OpenMU's `ItemStorageKind`, where trade
+   * is 1; `StorageTypeEnum.TradeOwn` is 2, which the server reads as the vault
+   * and refuses. The item's binary is sent zeroed: OpenMU's
+   * move handler resolves the item from the slot it is in and ignores the
+   * payload ("we don't transmit the item binary data anymore in this extended
+   * message"), so inventing a serialisation here would only be a way to get it
+   * wrong.
+   */
+  offerItem(inventorySlot: number, tradeSlot: number): void {
+    const packet = ItemMoveRequestPacket.createPacket();
+    packet.FromStorage = StorageKind.Inventory;
+    packet.FromSlot = inventorySlot;
+    packet.ToStorage = StorageKind.Trade;
+    packet.ToSlot = tradeSlot;
+    packet.setItemData(new Uint8Array(12), 12);
+    this.connection.send(packet.buffer);
+  }
+
+  /**
    * Ticks our accept box. Any change on either side clears both boxes server
    * side, so this is only ever sent once the table already matches the terms.
    */
@@ -158,15 +184,29 @@ export class TradeSession {
    * ticking ours again.
    */
   async settle(terms: TradeTerms, timeoutMs = 60_000): Promise<TradeOutcome> {
+    const finish = this.waitForFinish(timeoutMs);
+    const mismatch = this.armConfirm(terms);
+    if (mismatch !== null) return { ok: false, reason: mismatch };
+    return finish;
+  }
+
+  /**
+   * Ticks the accept box if the table matches, and cancels if it does not.
+   * Returns the reason it refused, or null when the confirm went out.
+   *
+   * Split from `settle` because the two sides must confirm one after the
+   * other, not together: the server finishes the trade on whichever confirm
+   * arrives second, and it only sees the second one if the first has already
+   * moved that player into `TradeButtonPressed`.
+   */
+  armConfirm(terms: TradeTerms): string | null {
     const mismatch = this.mismatch(terms);
     if (mismatch !== null) {
       this.cancel();
-      return { ok: false, reason: mismatch };
+      return mismatch;
     }
-
-    const finish = this.waitForFinish(timeoutMs);
     this.setConfirm(true);
-    return finish;
+    return null;
   }
 
   /** Why the table does not match the terms, or null when it does. */

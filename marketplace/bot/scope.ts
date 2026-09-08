@@ -21,6 +21,14 @@ import { view } from './session';
  * remembered at a stale id.
  */
 
+/**
+ * Scope packets set the top bit of an object id as a "just spawned" flag
+ * (`NewPlayersInScopePlugIn`: `playerBlock.Id |= 0x8000`). Every other packet,
+ * `TradeRequest` included, wants the bare id, and a request carrying the flag
+ * resolves to nobody and is answered with silence.
+ */
+const OBJECT_ID_MASK = process.env.NO_ID_MASK ? 0xffff : 0x7fff;
+
 const CODE = {
   addCharacters: 0x12,
   outOfScope: 0x14,
@@ -30,6 +38,7 @@ const CODE = {
 
 export type ScopePlayer = {
   id: number;
+  rawId: number;
   name: string;
   x: number;
   y: number;
@@ -102,9 +111,12 @@ export class Scope {
           this.log('could not read an AddCharactersToScope frame');
           return;
         }
+        if (process.env.VERBOSE) this.log(`scope frame len ${frame.bytes.length}: ${JSON.stringify(entries.map(e => [e.Name, e.Id, e.CurrentPositionX, e.CurrentPositionY]))}`);
         for (const entry of entries) {
-          this.players.set(entry.Id, {
-            id: entry.Id,
+          const id = entry.Id & OBJECT_ID_MASK;
+          this.players.set(id, {
+            id,
+            rawId: entry.Id,
             name: entry.Name,
             x: entry.CurrentPositionX,
             y: entry.CurrentPositionY,
@@ -114,12 +126,12 @@ export class Scope {
       }
       case CODE.outOfScope: {
         const p = new MapObjectOutOfScopePacket(view(frame));
-        for (const object of p.getObjects()) this.players.delete(object.Id);
+        for (const object of p.getObjects()) this.players.delete(object.Id & OBJECT_ID_MASK);
         break;
       }
       case CODE.moved: {
         const p = new ObjectMovedPacket(view(frame));
-        const player = this.players.get(p.ObjectId);
+        const player = this.players.get(p.ObjectId & OBJECT_ID_MASK);
         if (player) {
           player.x = p.PositionX;
           player.y = p.PositionY;
@@ -128,7 +140,7 @@ export class Scope {
       }
       case CODE.walked: {
         const p = new ObjectWalkedPacket(view(frame));
-        const player = this.players.get(p.ObjectId);
+        const player = this.players.get(p.ObjectId & OBJECT_ID_MASK);
         if (player) {
           player.x = p.TargetX;
           player.y = p.TargetY;

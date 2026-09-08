@@ -1,4 +1,6 @@
 import {
+  ClientReadyAfterMapChangePacket,
+  LogOutPacket,
   CreateCharacterPacket,
   LoginShortPasswordPacket,
   PublicChatMessagePacket,
@@ -179,6 +181,18 @@ export class BotSession {
   }
 
   /**
+   * Logs out properly instead of just dropping the socket.
+   *
+   * Worth doing every time: the server keeps an account connected for a while
+   * after its socket dies, and the next login is refused with
+   * `AccountAlreadyConnected` until it gives up. A bot that exits by closing
+   * the socket locks itself out of its own account for the next run.
+   */
+  logOut(): void {
+    this.connection.send(LogOutPacket.createPacket().buffer);
+  }
+
+  /**
    * The named character, or the lowest slot. Named is what production uses:
    * a mule's slots are ours to arrange, and a bot that silently picks a
    * different character would deliver from the wrong inventory.
@@ -209,6 +223,14 @@ export class BotSession {
     this.connection.send(packet.buffer);
 
     const info = new CharacterInformationPacket(view(await answer));
+
+    // Without this the server never starts streaming the world: it holds the
+    // player until the client says it has finished loading the map
+    // (`CharacterClientReadyPacketHandlerPlugIn` -> `ClientReadyAfterMapChange`).
+    // A bot that skips it stands in an empty world, sees nobody, and can never
+    // trade, because a trade partner has to be in scope.
+    this.connection.send(ClientReadyAfterMapChangePacket.createPacket().buffer);
+
     this.log(
       `entered the world as ${character.Name} on map ${info.MapId} at ${info.X},${info.Y}`
     );

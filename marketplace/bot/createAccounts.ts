@@ -15,9 +15,12 @@ import postgres from 'postgres';
  * itself, or the login it accepts from a person would not be the login it
  * accepts from a bot.
  *
- *   bun run marketplace/bot/createAccounts.ts --count 5 --password <10 chars>
+ *   bun run marketplace/bot/createAccounts.ts --count 5 --password <9 chars>
  *
- * Re-running is safe: an account that already exists is left alone.
+ * Re-running is safe and is expected: accounts are created game master, but a
+ * character only exists after the bot has logged in once, so run this again
+ * afterwards to promote the characters too. Add --reset to change the password
+ * on accounts that already exist.
  */
 
 const DATABASE_URL =
@@ -45,6 +48,10 @@ const MAX_PASSWORD_LENGTH = 9;
 const MAX_ACCOUNT_LENGTH = 10;
 
 const PREFIX = 'MKT';
+
+/** `AccountState.GameMaster` and `CharacterStatus.GameMaster` in OpenMU. */
+const ACCOUNT_GAME_MASTER = 2;
+const CHARACTER_GAME_MASTER = 32;
 
 function arg(name: string, fallback?: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
@@ -114,10 +121,28 @@ async function main(): Promise<void> {
           "RegistrationDate", "State", "TimeZone", "VaultPassword", "IsVaultExtended"
         ) VALUES (
           gen_random_uuid(), ${login}, ${await hashPassword(password)}, '', '',
-          now(), 0, 0, '', false
+          now(), ${ACCOUNT_GAME_MASTER}, 0, '', false
         )
       `;
       created.push(login);
+    }
+
+    // Game master status is what `/trace` requires, and it lives in two places:
+    // the account's `State` and the character's own `CharacterStatus`. Setting
+    // only the account leaves `/trace` refused, because the command checks the
+    // character. Characters are made by the bot on its first login, so this
+    // runs every time rather than only at creation.
+    const promoted = await sql`
+      UPDATE data."Character" c
+      SET "CharacterStatus" = ${CHARACTER_GAME_MASTER}
+      FROM data."Account" a
+      WHERE c."AccountId" = a."Id"
+        AND a."LoginName" LIKE ${PREFIX + '%'}
+        AND c."CharacterStatus" <> ${CHARACTER_GAME_MASTER}
+      RETURNING c."Name"
+    `;
+    if (promoted.length > 0) {
+      console.log(`made game master: ${promoted.map(r => r.Name).join(', ')}`);
     }
   } finally {
     await sql.end();
