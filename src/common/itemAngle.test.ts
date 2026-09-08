@@ -44,3 +44,42 @@ describe('itemWornHeight', () => {
     expect(itemWornHeight(ItemGroup.Potion)).toBe(0);
   });
 });
+
+describe('itemRestPose, ItemAngle tail', () => {
+  it('lays wings down instead of standing them up', () => {
+    // `Type >= MODEL_WING && Type < MODEL_WING + MAX_ITEM_INDEX`, the branch
+    // that used to fall through to the default upright pose.
+    expect(itemRestPose(ItemGroup.Wing, 0).angle).toEqual([270, 0, 45]); // Wings of Fairy
+    expect(itemRestPose(ItemGroup.Wing, 3).angle).toEqual([270, 0, 45]); // Wings of Spirit
+    expect(itemRestPose(ItemGroup.Wing, 3).scale).toBe(0.8);
+  });
+
+  it('keeps the earlier wing-group rows ahead of that catch-all', () => {
+    // Seed of Fire: `MODEL_SEED_FIRE .. MODEL_SEED_EARTH`, upright at 0.6.
+    expect(itemRestPose(ItemGroup.Wing, 60)).toEqual({ angle: [0, 0, -45], scale: 0.6 });
+    // Cape of Fighter is handled before the whole chain (ItemAngleRF).
+    expect(itemRestPose(ItemGroup.Wing, 49)).toEqual({ angle: [270, 180, 45], scale: 0.7 });
+  });
+
+  it('lays the quest and jewel drops flat', () => {
+    expect(itemRestPose(ItemGroup.Potion, 16)).toEqual({ angle: [270, 0, 45], scale: 0.8 }); // Jewel of Life
+    expect(itemRestPose(ItemGroup.Potion, 42)).toEqual({ angle: [270, 0, -15], scale: 1.3 }); // Jewel of Harmony
+    expect(itemRestPose(ItemGroup.Etc, 19)).toEqual({ angle: [270, 0, -45], scale: 0.8 }); // Chain Lightning scroll
+  });
+
+  it('turns the ones the original only yaws', () => {
+    expect(itemRestPose(ItemGroup.Potion, 25).angle).toEqual([0, 0, 45]); // Tear of Elf
+    expect(itemRestPose(ItemGroup.Helper, 21).angle).toEqual([0, 0, 20]); // Ring of Fire
+    expect(itemRestPose(ItemGroup.Helper, 37).angle).toEqual([0, 0, 180]); // Horn of Fenrir
+  });
+
+  it('splits the two scales inside the Daemon branch', () => {
+    expect(itemRestPose(ItemGroup.Helper, 64)).toEqual({ angle: [0, 0, 70], scale: 0.21 });
+    expect(itemRestPose(ItemGroup.Helper, 65)).toEqual({ angle: [0, 0, 70], scale: 0.5 });
+  });
+
+  it('leaves an item the table does not name at the default pose', () => {
+    expect(itemRestPose(ItemGroup.Potion, 15)).toEqual({ angle: [0, 0, -45], scale: 0.8 }); // Zen
+    expect(itemRestPose(ItemGroup.Etc, 0)).toEqual({ angle: [0, 0, -45], scale: 0.8 });
+  });
+});
