@@ -32,6 +32,8 @@ async function bootstrap() {
     .slice(0, 24)
     .map(l => l.item);
 
+  // The harness exists to look at the window, so it always has fixtures.
+  Marketplace.seedFixtures();
   Marketplace.syncFromGame(184_500_000, inventory);
   Marketplace.open = true;
 

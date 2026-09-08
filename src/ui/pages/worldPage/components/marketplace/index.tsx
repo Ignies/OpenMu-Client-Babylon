@@ -38,6 +38,18 @@ function dealDelta(listing: Listing): { label: string; tone: string } | null {
 const nameClass = (item: Listing['item']) =>
   item.isAncient ? ' is-ancient' : item.isExcellent ? ' is-excellent' : '';
 
+/**
+ * Nothing to show, and the two reasons for it read very differently: the
+ * marketplace not being open yet is not the same as a filter matching nothing.
+ */
+const EmptyState = observer(() => (
+  <div className="mp-empty">
+    {Marketplace.isEmpty
+      ? 'Nothing is listed yet. Put something up on the Sell tab.'
+      : 'Nothing matches that.'}
+  </div>
+));
+
 const ListingCard = observer(({ listing, mode }: { listing: Listing; mode: Tab }) => {
   const affordable = Marketplace.canAfford(listing);
   const deal = dealDelta(listing);
@@ -491,7 +503,7 @@ export const MarketplaceWindow = observer(() => {
               {cards.map(listing => (
                 <ListingCard key={listing.id} listing={listing} mode={Marketplace.tab} />
               ))}
-              {cards.length === 0 && <div className="mp-empty">Nothing matches that.</div>}
+              {cards.length === 0 && <EmptyState />}
             </div>
           ) : (
             <div className="mp-list">
@@ -507,7 +519,7 @@ export const MarketplaceWindow = observer(() => {
               {cards.map(listing => (
                 <ListingRow key={listing.id} listing={listing} mode={Marketplace.tab} />
               ))}
-              {cards.length === 0 && <div className="mp-empty">Nothing matches that.</div>}
+              {cards.length === 0 && <EmptyState />}
             </div>
           )
         ) : (

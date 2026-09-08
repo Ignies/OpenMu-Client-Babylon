@@ -95,33 +95,72 @@ async function booked(
  * server refuses a trade whose partner is not among the requester's own
  * observers.
  */
-async function openTradeWith(
-  context: EscrowContext,
-  characterName: string
-): Promise<EscrowResult> {
-  const { session, trade, scope, log } = context;
-  const visible = () => scope.byName(characterName);
+/**
+ * Gets the bot next to the player, and both of them able to see each other.
+ *
+ * Seeing them is not enough. The server resolves a trade partner out of the
+ * requester's *own* observers, so the customer has to be able to see the bot
+ * too, and a warp on its own does not manage that: `/trace` is a map change,
+ * which takes the bot out of the world and puts it back, dropping it from the
+ * customer's scope without ever announcing its return.
+ *
+ * So the warp is followed by an ordinary in-map move onto the customer's tile.
+ * That is broadcast to everyone nearby the same way walking is, which is what
+ * actually puts the bot on their screen.
+ */
+async function reach(context: EscrowContext, characterName: string, warp: boolean) {
+  const { session, scope, log } = context;
+  const them = () => scope.byName(characterName);
 
-  if (!visible()) {
+  if (warp || them() === null) {
     log(`warping to ${characterName}`);
     session.traceTo(characterName);
-    for (let waited = 0; waited < 6000 && !visible(); waited += 500) {
+    for (let waited = 0; waited < 5000 && them() === null; waited += 500) {
       await wait(500);
     }
   }
 
-  const partner = visible();
-  if (!partner) return { ok: false, reason: `${characterName} could not be reached` };
-
-  try {
-    await trade.requestWith(partner.id);
-    return { ok: true };
-  } catch (e) {
-    return {
-      ok: false,
-      reason: e instanceof Error ? e.message : `could not open a trade with ${characterName}`,
-    };
+  const partner = them();
+  if (partner) {
+    // Onto their tile by an ordinary in-map move, which is broadcast to
+    // everyone nearby. This is the step that puts the bot on their screen;
+    // the warp alone does not.
+    session.teleportTo(partner.x, partner.y);
+    await wait(1500);
   }
+
+  return them();
+}
+
+/**
+ * Opens a trade, re-announcing and retrying if the server cannot see us.
+ *
+ * Whether the customer can see the bot is not knowable from here - only their
+ * client holds their own scope - so it is not checked, it is *tried*. A
+ * partner the server cannot resolve comes back as "Trade partner not found",
+ * and the answer to that is to announce again and ask again.
+ */
+async function openTradeWith(
+  context: EscrowContext,
+  characterName: string
+): Promise<EscrowResult> {
+  const { trade, log } = context;
+  let lastReason = `${characterName} could not be reached`;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const partner = await reach(context, characterName, attempt > 1);
+    if (!partner) continue;
+
+    try {
+      await trade.requestWith(partner.id, 8000);
+      return { ok: true };
+    } catch (e) {
+      lastReason = e instanceof Error ? e.message : `could not open a trade with ${characterName}`;
+      log(`trade request ${attempt} did not take (${lastReason})`);
+    }
+  }
+
+  return { ok: false, reason: lastReason };
 }
 
 /**
