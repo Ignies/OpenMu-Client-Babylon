@@ -226,7 +226,9 @@ export function bindTerrainLight(
 
   const look = lookDirector()?.state();
 
-  effect.setFloat('keyGain', look?.keyGain ?? 1);
+  // `sceneGain`, not `keyGain`: the ground is lit scene and takes an event's
+  // dim; the effect cards drawn over it do not.
+  effect.setFloat('keyGain', look?.key.sceneGain ?? 1);
   effect.setFloat3(
     'roomParams',
     look?.area ? 1 : 0,

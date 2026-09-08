@@ -80,6 +80,16 @@ export function playerPlaySpeed(
   // (ZzzCharacter.cpp:860), so it never got its magic speed here: the clip
   // ran at the 0.28 default and held the cast for a full second.
   if (action === A.PLAYER_SKILL_TELEPORT) return 0.3 + magicSpeedFactor(magicSpeed);
+  // The rest of `SetAttackSpeed`'s spell block (ZzzCharacter.cpp:860-866).
+  // Only Teleport above had ever been ported, so these five ran at the 0.28
+  // fallback at the bottom of this function — Hellfire's leap, which is the
+  // clip itself and not a code path, took 1.8× as long to come down as it
+  // does in the original.
+  if (action === A.PLAYER_SKILL_FLASH) return 0.4 + magicSpeedFactor(magicSpeed);
+  if (action === A.PLAYER_SKILL_INFERNO) return 0.6 + magicSpeedFactor(magicSpeed);
+  if (action === A.PLAYER_SKILL_HELL) return 0.5 + magicSpeedFactor(magicSpeed);
+  if (action === A.PLAYER_RIDE_SKILL) return 0.3 + magicSpeedFactor(magicSpeed);
+  if (action === A.PLAYER_SKILL_HELL_BEGIN) return 0.5 + magicSpeedFactor(magicSpeed);
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {

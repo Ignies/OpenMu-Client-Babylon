@@ -19,6 +19,7 @@ import {
   itemRestRotation,
 } from './common/itemAngle';
 import { dropModelProxy } from './common/dropModelProxy';
+import { DropObject } from './common/dropObject';
 import { prefetchItemIcons } from './common/itemIconPack';
 import { ItemSerializer } from './common/itemSerializer';
 import { isFemaleClass } from './common/mapPlayerNetClassToModelClass';
@@ -26,7 +27,6 @@ import {
   isKnownObjectType,
   resolveModelFactory,
 } from './common/modelFactoryPerId';
-import { ModelObject } from './common/modelObject';
 import { MonstersDatabase, monsterDisplayName } from './common/monstersDatabase';
 import { onLanguageChanged } from './i18n';
 import { translateServerText } from './i18n/serverText';
@@ -221,6 +221,7 @@ import { Social } from './social';
 import { heroStateMessage } from './common/nameTags';
 import { events } from './events';
 import { Economy, type ShopStock } from './economy';
+import { GmPanel } from './gmPanel';
 import { Messenger } from './messenger';
 import { ChatRooms } from './chatRooms';
 import { FRIEND_OFFLINE } from './common/messenger';
@@ -272,6 +273,7 @@ import { COMBO_SOUND } from './combat/combo';
 import { SHOCK_IMMUNE_CLIPS } from './combat/recipes';
 import { isRidingMount, mountKind } from './common/pets';
 import { quests } from './quests';
+import { SessionExit } from './common/sessionExit';
 import { Store, UIState } from './store';
 import { gameServerTarget } from './common/serverConfig';
 import { MsgWinCode } from './common/msgWin';
@@ -560,7 +562,16 @@ type CharacterInformationView = Pick<
   | 'MaximumShield'
   | 'CurrentAbility'
   | 'MaximumAbility'
+  | 'Status'
 > & { AttackSpeed?: number; MagicSpeed?: number };
+
+/**
+ * `CharacterStatus.GameMaster`. Tested as a bit rather than compared: the
+ * original client packs its CtlCode flags into the same byte (the character
+ * list reads bit 1 of it for the item block), so a GM with another flag set
+ * would fail an equality check.
+ */
+const GAME_MASTER_STATUS = 0x20;
 
 function applyCharacterInformation(p: CharacterInformationView) {
   const playerData = Store.playerData;
@@ -571,6 +582,7 @@ function applyCharacterInformation(p: CharacterInformationView) {
   Social.reset();
   Messenger.reset();
   Economy.reset();
+  GmPanel.reset();
 
   runInAction(() => {
     playerData.money = p.Money;
@@ -613,6 +625,11 @@ function applyCharacterInformation(p: CharacterInformationView) {
 
     // No HeroState in this packet; neutral until the scope add carries it.
     playerData.heroState = 3;
+
+    // The server's own answer to "is this character a game master", which the
+    // `#` shout guess below could never give for the hero. Set on every
+    // select, so a normal character on the same account clears it.
+    playerData.isGameMaster = (p.Status & GAME_MASTER_STATUS) !== 0;
 
     Store.uiState = UIState.World;
     SessionResume.remember(playerData.name);
@@ -1084,6 +1101,11 @@ function addCharacterToScope(world: World, char: ScopeCharacter) {
     if (Store.playerId === maskedId) {
       world.addComponent(playerEntity, 'localPlayer', true);
       console.log(`Local player spawned: ${maskedId} - ${char.Name}`);
+      // The hero's own GM tag comes from CharacterInformation, not from the
+      // `#` shout `markAsGm` watches for - the hero never sees its own shout
+      // as an inbound chat line. Re-applied here because the body is respawned
+      // on every scope add.
+      if (Store.playerData.isGameMaster) world.addComponent(playerEntity, 'isGm', true);
       if (char.attackSpeed != null) Store.playerData.attackSpeed = char.attackSpeed;
       if (char.magicSpeed != null) Store.playerData.magicSpeed = char.magicSpeed;
       if (char.HeroState != null) Store.playerData.heroState = char.HeroState;
@@ -2399,7 +2421,7 @@ function spawnMoneyDrop(id: number, x: number, y: number, fresh: boolean | Boole
       rot: new Vector3(rot.x, rot.y, rot.z),
       scale: 1,
     },
-    modelFactory: ModelObject,
+    modelFactory: DropObject,
     modelFilePath: itemConfig.szModelFolder + itemConfig.szModelName,
     visibility: { state: 'hidden', lastChecked: 0 },
     attributeSystem: createAttributeSystem(),
@@ -2723,7 +2745,7 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
         rot: new Vector3(rot.x, rot.y, rot.z),
         scale: itemRestPose(poseGroup, poseNum).scale,
       },
-      modelFactory: ModelObject,
+      modelFactory: DropObject,
       modelFilePath:
         proxy?.modelFilePath ?? itemConfig.szModelFolder + itemConfig.szModelName,
       visibility: {
@@ -3498,38 +3520,16 @@ EventBus.on('ApplyKeyConfiguration', packet => {
 });
 
 /**
- * F1 02 — `ReceiveLogOut`. OpenMU `LogoutType`: 0 CloseGame, 1
+ * F1 02 - `ReceiveLogOut`. OpenMU `LogoutType`: 0 CloseGame, 1
  * BackToCharacterSelection (the connection stays, the player is back to
  * `Authenticated`), 2 BackToServerSelection (the server closes the socket).
+ * The answer to our own request, and to a kick we never asked for; either
+ * way `sessionExit` decides where we land.
  */
 EventBus.on('LogoutResponse', packet => {
   if (packet.byteLength < LogoutResponsePacket.Length!) return;
-  const p = new LogoutResponsePacket(packet);
 
-  SessionResume.forget();
-
-  Store.closeNpcShop();
-  quests.closeAll();
-
-  switch (p.Type) {
-    case 1:
-      // Case 1 of the original: back to the character scene; the page asks
-      // for the list again on mount.
-      runInAction(() => {
-        Store.uiState = UIState.Characters;
-      });
-      // The window sheets go with the world; decoded again on the next entry.
-      void import('./libs/mu/preloadSprites').then(m => m.clearWorldSprites());
-      break;
-    case 0:
-    case 2:
-    default:
-      // Case 0 destroys the window, case 2 closes the socket and shows the
-      // login scene: both become "start over at the server list" here.
-      Store.disconnectFromGameServer();
-      Store.playOnline();
-      break;
-  }
+  SessionExit.onResponse(new LogoutResponsePacket(packet).Type);
 });
 
 /**

@@ -176,6 +176,7 @@ export const EN_TEXT = {
 
   // ---- Options window ----------------------------------------------------
   'options.title': 'Option',
+  'options.tab.server': 'Server',
   'options.tab.game': 'Game',
   'options.tab.video': 'Video',
   'options.tab.keys': 'Keys',
@@ -193,6 +194,7 @@ export const EN_TEXT = {
   'options.section.language': 'Language',
   'options.section.loot': 'Drop names',
   'options.section.interface': 'Interface',
+  'options.section.exit': 'Exit',
 
   'options.autoAttack': 'Automatic Attack',
   'options.whisperBeep': 'Beep sound for whispering',
@@ -263,6 +265,17 @@ export const EN_TEXT = {
   'options.itemEffects.legacy': 'Legacy',
   'options.itemEffects.both': 'Both',
   'options.itemEffects.improved': 'Improved',
+
+  // The system menu's three ways out (GlobalText 381 / 382 / 383).
+  'options.exitGame': 'Exit Game',
+  'options.selectServer': 'Select Server',
+  'options.switchCharacter': 'Switch Character',
+  'exit.confirmQuit': 'Leave the game and go back to the main menu?',
+  'exit.confirmServers': 'Leave the game and go back to server selection?',
+  'exit.confirmCharacters': 'Leave the game and go back to character selection?',
+  /** GlobalText 592: the tray is lost if we leave with the mix window open. */
+  'exit.chaosOpen': 'Exit game after closing the Chaos interface.',
+  'exit.noAnswer': 'The server did not answer. Leaving anyway.',
 
   // ---- session resume ----------------------------------------------------
   'resume.title': 'Connection lost',
@@ -651,6 +664,7 @@ export const EN_TEXT = {
   'skills.tooltip.energy': 'Requires energy {energy}',
   'skills.tooltip.mana': 'Not enough mana ({mana})',
   'skills.tooltip.ag': 'Not enough AG ({ag})',
+  'skills.tooltip.safezone': 'Cannot be used in a safe zone',
   'skills.unnamed': 'Skill #{number}',
   'skills.named': '{name} (Lv.{level})',
   'skills.damage': 'Skill damage +{value}',

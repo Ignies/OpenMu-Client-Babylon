@@ -428,7 +428,7 @@ const ChatInput = observer(() => {
 
   // The `/` help: every command the typed word could become, GM ones only
   // for a GM. A whisper line is never a command, so no list while whispering.
-  const isGm = !!Store.world?.playerEntity?.isGm;
+  const isGm = Store.playerData.isGameMaster;
   const completions =
     text.startsWith('/') && !(Social.whisperEnabled && Social.whisperTarget.trim())
       ? matchChatCommands(text, isGm).slice(0, CHAT_COMPLETION_ROWS)

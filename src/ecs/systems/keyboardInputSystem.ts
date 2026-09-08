@@ -7,6 +7,7 @@ import {
 } from '../../common/keyBindings';
 import { GameOptions } from '../../common/gameOptions';
 import { MuWindows } from '../../ui/components/muWindow/windowState';
+import { openSystemMenu } from '../../common/sessionExit';
 import type { ISystemFactory } from '../world';
 
 /** Keys the page would scroll on; kept from doing so while playing. */
@@ -73,6 +74,12 @@ export const KeyboardInputSystem: ISystemFactory = world => {
       // Escape closes the top window only. A window without a closer of its
       // own leaves it to the broadcast below (every legacy handler closes).
       if (MuWindows.closeTop()) {
+        pressedKeys.add(e.code);
+        return;
+      }
+      // Nothing left to close, so Escape means the system menu, as it does
+      // in the original.
+      if (openSystemMenu()) {
         pressedKeys.add(e.code);
         return;
       }

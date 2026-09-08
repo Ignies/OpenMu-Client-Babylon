@@ -53,7 +53,20 @@ import {
   RENDER_DISTANCE_MAX,
   renderDistanceRanges,
 } from '../../../common/renderDistance';
-import { MuWindows } from '../muWindow/windowState';
+import { MuWindows, WINDOW_Z_MODAL } from '../muWindow/windowState';
+import { SessionExit, type ExitKind } from '../../../common/sessionExit';
+import {
+  BACK_SPRITE,
+  BTN_BOTH_CANCEL_X,
+  BTN_BOTH_OK_X,
+  BTN_HEIGHT,
+  BTN_WIDTH,
+  BTN_Y,
+  CANCEL_SPRITE,
+  OK_SPRITE,
+  WIN_HEIGHT as MSG_WIN_HEIGHT,
+  WIN_WIDTH as MSG_WIN_WIDTH,
+} from '../msgWindow/layout';
 import { t, type TextKey } from '../../../i18n';
 import { LanguageSelect } from './languageSelect';
 import {
@@ -85,13 +98,19 @@ const SIDE_TILE_HEIGHT = 8;
 
 const CHECK_SIZE = 16;
 
-const CONTENT_TOP = TOP_HEIGHT + 14;
+/**
+ * The tab strip goes in the header art's own band. `op2_back1.OZT` ends its
+ * bar in a hard line under the title and then hangs an ornament over bare
+ * stone; sitting the strip there finishes the header instead of leaving that
+ * plate empty, and the rows start under it.
+ */
+const TAB_TOP = 34;
 
 const SECTION_HEADER_H = 24;
 const CHECK_ROW_H = 24;
 const SLIDER_ROW_H = 40;
 const KEY_ROW_H = 24;
-const BUTTON_ROW_H = 30;
+const BUTTON_ROW_H = 34;
 /** Label plus the row of tier plates under it. */
 const PRESET_ROW_H = 40;
 const PRESET_GAP = 4;
@@ -128,6 +147,9 @@ type KeyRow = { action: KeyAction; labelKey: TextKey };
 
 type ButtonRow = { id: string; labelKey: TextKey; onClick: () => void };
 
+/** One of the system menu's ways out (`common/sessionExit.ts`). */
+type ExitRow = { exit: ExitKind; labelKey: TextKey };
+
 /** The language picker: one row, its own widget (`languageSelect.tsx`). */
 type LanguageRow = { id: 'language' };
 
@@ -139,6 +161,7 @@ type Row =
   | ({ kind: 'slider' } & SliderRow)
   | ({ kind: 'key' } & KeyRow)
   | ({ kind: 'button' } & ButtonRow)
+  | ({ kind: 'exit' } & ExitRow)
   | ({ kind: 'language' } & LanguageRow)
   | ({ kind: 'presets' } & PresetRow);
 
@@ -189,6 +212,12 @@ type SliderRow = {
 
 const slider = (row: SliderRow): Row => ({ kind: 'slider', ...row });
 
+const exitRow = (exit: ExitKind, labelKey: TextKey): Row => ({
+  kind: 'exit',
+  exit,
+  labelKey,
+});
+
 const keyRow = (action: KeyAction): Row => ({
   kind: 'key',
   action,
@@ -225,6 +254,24 @@ type Tab = {
 };
 
 const TABS: Tab[] = [
+  // First, and the one the window always opens on: this is the original's
+  // Escape menu (`CSystemMenuMsgBox`), which Escape opens here too.
+  {
+    id: 'server',
+    labelKey: 'options.tab.server',
+    columns: [
+      [
+        {
+          titleKey: 'options.section.exit',
+          rows: [
+            exitRow('quit', 'options.exitGame'),
+            exitRow('servers', 'options.selectServer'),
+            exitRow('characters', 'options.switchCharacter'),
+          ],
+        },
+      ],
+    ],
+  },
   {
     id: 'game',
     labelKey: 'options.tab.game',
@@ -466,8 +513,9 @@ const TABS: Tab[] = [
   },
 ];
 
-const TAB_HEIGHT = 24;
-const TAB_GAP = 4;
+/** Tall enough, and flush, to reach the bottom of the header art. */
+const TAB_HEIGHT = 32;
+const TAB_GAP = 0;
 const TAB_WIDTH = 96;
 
 function rowHeight(row: Row): number {
@@ -477,6 +525,7 @@ function rowHeight(row: Row): number {
     case 'key':
       return KEY_ROW_H;
     case 'button':
+    case 'exit':
       return BUTTON_ROW_H;
     case 'language':
       return LANGUAGE_ROW_H;
@@ -504,14 +553,16 @@ const CONTENT_HEIGHT = Math.max(
 
 const WIN_HEIGHT =
   Math.ceil(
-    (CONTENT_TOP + TAB_HEIGHT + 12 + CONTENT_HEIGHT + 20) / SIDE_TILE_HEIGHT
+    (TAB_TOP + TAB_HEIGHT + 12 + CONTENT_HEIGHT + 20) / SIDE_TILE_HEIGHT
   ) *
     SIDE_TILE_HEIGHT +
   BOTTOM_HEIGHT;
 
 const CLOSE_Y = WIN_HEIGHT - 47;
 
-const TAB_CONTENT_TOP = CONTENT_TOP + TAB_HEIGHT + 12;
+const TAB_CONTENT_TOP = TAB_TOP + TAB_HEIGHT + 12;
+/** Where a tab's rows have to stop: the Close button owns the rest. */
+const TAB_CONTENT_BOTTOM = CLOSE_Y - 12;
 
 const HOT_KEY = 'options';
 
@@ -520,6 +571,11 @@ export const OptionsWindow = observer(() => {
 
   // Key being rebound: the next key press goes to it instead of the game.
   const [capturing, setCapturing] = useState<KeyAction | null>(null);
+
+  // The way out waiting to be confirmed. The original's system menu is its
+  // own confirmation - a click here is one row away from the sliders, so it
+  // asks.
+  const [confirming, setConfirming] = useState<ExitKind | null>(null);
 
   useEffect(() => {
     setCapturingKey(capturing !== null);
@@ -557,7 +613,12 @@ export const OptionsWindow = observer(() => {
   });
 
   useEffect(() => {
-    if (!Store.optionsEnabled) setCapturing(null);
+    if (Store.optionsEnabled) return;
+    setCapturing(null);
+    setConfirming(null);
+    // Every open starts on the first tab: Escape is meant to reach the ways
+    // out in one press, not wherever the sliders were left.
+    setActiveTab(TABS[0].id);
   }, [Store.optionsEnabled]);
 
   if (!Store.optionsEnabled) return null;
@@ -679,7 +740,7 @@ export const OptionsWindow = observer(() => {
               className={`options-tab${tab.id === activeTab ? ' is-active' : ''}`}
               style={{
                 left: x,
-                top: CONTENT_TOP,
+                top: TAB_TOP,
                 width: TAB_WIDTH,
                 height: TAB_HEIGHT,
               }}
@@ -691,9 +752,16 @@ export const OptionsWindow = observer(() => {
         })}
 
         {tab.columns.map((sections, columnIndex) => {
-          const x = COLUMN_X[columnIndex];
+          const alone = tab.columns.length === 1;
+          const x = alone
+            ? Math.floor((WIN_WIDTH - COLUMN_WIDTH) / 2)
+            : COLUMN_X[columnIndex];
 
           let y = TAB_CONTENT_TOP;
+          if (alone) {
+            const room = TAB_CONTENT_BOTTOM - TAB_CONTENT_TOP;
+            y += Math.max(0, Math.floor((room - columnHeight(sections)) / 2));
+          }
 
           return (
             <div key={columnIndex}>
@@ -789,6 +857,36 @@ export const OptionsWindow = observer(() => {
                           onClick={() => {
                             row.onClick();
                             setCapturing(null);
+                          }}
+                          style={{
+                            position: 'absolute',
+                            left: x + Math.floor((COLUMN_WIDTH - CLOSE_WIDTH) / 2),
+                            top: rowY,
+                          }}
+                          labelStyle={{
+                            fontSize: 11,
+                            textShadow: '1px 1px 0 rgba(0,0,0,.85)',
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+
+                  if (row.kind === 'exit') {
+                    return (
+                      <div key={row.exit}>
+                        <MuButton
+                          file="op1_b_all.OZT"
+                          width={CLOSE_WIDTH}
+                          height={CLOSE_HEIGHT}
+                          frames={{ up: 0, active: 1, down: 2 }}
+                          color={TEXT_COLOR.brightGray}
+                          activeColor={TEXT_COLOR.white}
+                          label={t(row.labelKey)}
+                          disabled={!SessionExit.available(row.exit)}
+                          onClick={() => {
+                            setCapturing(null);
+                            setConfirming(row.exit);
                           }}
                           style={{
                             position: 'absolute',
@@ -980,6 +1078,74 @@ export const OptionsWindow = observer(() => {
 
         <MuResizeGrip id={WINDOW_ID} width={WIN_WIDTH} />
       </div>
+
+      {confirming && (
+        <ExitConfirm
+          kind={confirming}
+          onAnswer={yes => {
+            setConfirming(null);
+            if (yes) SessionExit.request(confirming);
+          }}
+        />
+      )}
+    </div>
+  );
+});
+
+const CONFIRM_TEXT: Record<ExitKind, TextKey> = {
+  quit: 'exit.confirmQuit',
+  servers: 'exit.confirmServers',
+  characters: 'exit.confirmCharacters',
+};
+
+/** `CMsgWin` over the option window, on the message-box art the rest use. */
+const ExitConfirm = observer(function ExitConfirm({
+  kind,
+  onAnswer,
+}: {
+  kind: ExitKind;
+  onAnswer: (yes: boolean) => void;
+}) {
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== 'Escape') return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      onAnswer(e.key === 'Enter');
+    };
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener('keydown', onKeyDown, true);
+  }, [onAnswer]);
+
+  return (
+    <div className="options-exit-confirm" style={{ zIndex: WINDOW_Z_MODAL }}>
+      <MuSpriteFrame
+        file={BACK_SPRITE}
+        width={MSG_WIN_WIDTH}
+        height={MSG_WIN_HEIGHT}
+      >
+        <div className="options-exit-text">{t(CONFIRM_TEXT[kind])}</div>
+        <MuButton
+          file={OK_SPRITE}
+          width={BTN_WIDTH}
+          height={BTN_HEIGHT}
+          frames={{ up: 0, active: 1, down: 2 }}
+          color={TEXT_COLOR.brightGray}
+          activeColor={TEXT_COLOR.white}
+          onClick={() => onAnswer(true)}
+          style={{ position: 'absolute', left: BTN_BOTH_OK_X, top: BTN_Y }}
+        />
+        <MuButton
+          file={CANCEL_SPRITE}
+          width={BTN_WIDTH}
+          height={BTN_HEIGHT}
+          frames={{ up: 0, active: 1, down: 2 }}
+          color={TEXT_COLOR.brightGray}
+          activeColor={TEXT_COLOR.white}
+          onClick={() => onAnswer(false)}
+          style={{ position: 'absolute', left: BTN_BOTH_CANCEL_X, top: BTN_Y }}
+        />
+      </MuSpriteFrame>
     </div>
   );
 });

@@ -5,8 +5,11 @@ import { EventBus } from '../libs/eventBus';
 import {
   MapEventStatePacket,
 } from '../common/packets/ServerToClientPackets';
+import { devQueryNumber } from '../common/devSeams';
 import { effects } from '../effects';
 import { FIRE_PUFF, MODEL, RGBS } from '../effects/recipes';
+import { lighting } from '../lighting';
+import { ember } from '../lighting/recipes';
 import { playSfx } from '../libs/sfx';
 import { Store } from '../store';
 import type { EventLayer } from './layer';
@@ -15,11 +18,15 @@ import type { EventLayer } from './layer';
  * The sky while a dragon invasion runs. `MapEventState` (0x0B) sets the
  * original's `EnableEvent` (ReceiveEvent, WSclient.cpp:6726: 1 Red Dragon,
  * 3 Golden Dragon) and, while it is set, `MoveBoids` (GOBoid.cpp:1206-1223)
- * streaks MODEL_FIRE sub3 meteors over the hero with SOUND_METEORITE01, and
- * the dragons circling overhead roar SOUND_MONSTER_BULLATTACK1
- * (GOBoid.cpp:1411-1412). The dragon flyover itself (the boid MODEL_DRAGON_
- * pass) needs animation-clip control the model effect does not have, so only
- * its roar is kept, distant. The banner text stays in `matchNotices.ts`.
+ * does three things: it streaks MODEL_FIRE sub3 meteors over the hero with
+ * SOUND_METEORITE01, it subtracts light from the terrain in a 16-tile disc
+ * that follows them, and it fills the boid slots with dragons instead of the
+ * map's own birds.
+ *
+ * The meteors and the dim are here. The dragons are a boid species
+ * (`common/boids.ts`, `ecs/systems/boidSystem.ts`), which is where the
+ * original keeps them and which is why they roar from over there and not from
+ * this file. The banner text stays in `matchNotices.ts`.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -41,13 +48,13 @@ const METEOR_Z = [2, 6] as const;
 const METEOR_HEIGHT = 3;
 
 /**
- * The original roars once per `rand_fps_check(128)` per circling dragon,
- * a few of which are usually up. Without the flyover the roars stay but
- * come sparser and from a distance.
+ * Ours. The original's meteor throws no light - no MODEL_FIRE path calls
+ * AddTerrainLight - it just reads as one because everything under it has been
+ * darkened. The clone dims the same way (`lighting` omen below) and this is
+ * what the room is made for: a small travelling ember so the ground under a
+ * passing meteor moves, at the pool priority every event light takes.
  */
-const ROAR_MEAN_SECONDS = 6;
-const ROAR_TILES = [7, 14] as const;
-const ROAR_GAIN = 0.7;
+const METEOR_LIGHT_TILES = 4;
 
 /** MODEL_FIRE's `o->BlendMesh = 1`: additive tail over an opaque lava core. */
 const FIRE_BLEND_MESH = 1;
@@ -56,15 +63,30 @@ const FIRE_BLEND_MESH = 1;
 
 const state = observable(
   {
-    /** 0 none, else the `MapEventStateEventsEnum` value the server lit. */
-    event: 0,
+    /**
+     * 0 none, else the `MapEventStateEventsEnum` value the server lit. Dev
+     * seam `?invasion=1` (Red) / `?invasion=3` (Golden): the event is
+     * server-driven and there is otherwise no way to stand in one to look at
+     * it, which the screenshot runs need.
+     */
+    event: devQueryNumber('invasion') ?? 0,
   },
   {},
   { deep: false }
 );
 
+/** The invasion the server has lit: 0 none, 1 Red Dragon, 3 Golden Dragon. */
+export function invasionEvent(): number {
+  return state.event;
+}
+
 /** MoveBoids' meteor pass, one roll per frame. */
 function update(_map: ENUM_WORLD, dt: number): void {
+  // Asserted every frame rather than on the packet: a new scene builds a new
+  // look director, and an invasion that started before it must still be lit.
+  // `setOmen` is a no-op when nothing changed.
+  lighting.omen(state.event ? 'invasion' : null);
+
   if (!state.event) return;
   const world = Store.world;
   const hero = world?.playerEntity;
@@ -83,14 +105,12 @@ function update(_map: ENUM_WORLD, dt: number): void {
       model: { model: MODEL.fire, colour: RGBS.fire, scale: METEOR_SCALE, blendMesh: FIRE_BLEND_MESH },
       trail: { recipe: FIRE_PUFF, rate: 30 },
     });
+    lighting.flash(
+      world.scene,
+      ember(METEOR_LIGHT_TILES, METEOR_SECONDS),
+      { position: from.clone(), travel: { to, speed: METEOR_SPEED } }
+    );
     playSfx('Sound/eMeteorite', from);
-  }
-
-  if (Math.random() < dt / ROAR_MEAN_SECONDS) {
-    const angle = Math.random() * Math.PI * 2;
-    const tiles = ROAR_TILES[0] + Math.random() * (ROAR_TILES[1] - ROAR_TILES[0]);
-    const at = new Vector3(pos.x + Math.cos(angle) * tiles, pos.y, pos.z + Math.sin(angle) * tiles);
-    playSfx('Sound/mBullAttack1', at, ROAR_GAIN);
   }
 }
 

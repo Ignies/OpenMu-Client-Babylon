@@ -354,6 +354,24 @@ export class ModelObject {
    */
   HiddenMesh = -1;
 
+  /**
+   * `b->HideSkin` (`RenderPartObject`, ZzzObject.cpp:10531): skip every mesh
+   * whose texture is skin or hair (`ZzzBMD.cpp:970-978`). Every dropped item is
+   * drawn with it on, which is what keeps the head and the hair out of a helm
+   * lying on the ground - the helm model carries them, because on a character
+   * they *are* the head.
+   */
+  HideSkin = false;
+
+  /**
+   * `o->AnimationFrame = 0` with nothing ever advancing it
+   * (`ItemObjectAttribute`, ZzzObject.cpp:5151; `MoveItems`:6241 moves a drop
+   * but never animates it): a dropped item holds the first frame of its first
+   * clip. `loadGLTF` auto-starts that clip looping, which is right for a prop
+   * and wrong for a drop - a bow on the ground kept drawing its string.
+   */
+  FrozenPose = false;
+
   BlendMesh = NO_BLEND_MESH;
 
   BlendMeshLight = 1;
@@ -412,6 +430,15 @@ export class ModelObject {
   get speedRatio(): number {
     return this.speedRatioFor(this.CurrentAction);
   }
+
+  /**
+   * `ItemHeight` / `b->BodyHeight` (ZzzObject.cpp:6274, applied at
+   * ZzzBMD.cpp:121), world units. Armour drops reuse the *worn* body part, so
+   * a helm's geometry sits at head height in the model's own space; this drops
+   * it back onto the object's origin. Model space, not world: it is applied
+   * inside the node, so the resting pose rotates it the way the original
+   * rotates it with the rest of the body.
+   */
   BodyHeight: Float = 0;
   CurrentAction: Int = 0;
   LoopAction = true;
@@ -445,6 +472,19 @@ export class ModelObject {
     alpha = Math.max(0, Math.min(1, alpha));
     if (alpha === this.Alpha) return;
     this.Alpha = alpha;
+
+    // `mesh.visibility` on its own cannot hide any of this: every BMD material
+    // is built with an explicit `transparencyMode`, and Babylon then answers
+    // `needAlphaBlendingForMesh` from that mode alone without ever reading
+    // visibility (Materials/material.ts). An opaque or alpha-tested mesh at
+    // alpha 0 therefore kept drawing at full strength — which is how a mount
+    // stayed on screen inside a town. Take the node out of the render instead;
+    // switching it back on restores each mesh's own `isVisible`, so meshes
+    // hidden for other reasons (HiddenMesh, HideSkin, texture scripts) stay
+    // hidden. `syncShadowEnabled` and the CSM caster test both read the
+    // enabled state, so the shadow goes with it.
+    this._node.setEnabled(alpha > 0);
+
     for (const mesh of this._node.getChildMeshes(false)) {
       mesh.visibility = alpha;
     }
@@ -752,9 +792,9 @@ export class ModelObject {
 
     if (paused && !this.LoopAction) return;
 
-    // A frozen back item (BackPose, speed 0) is started-and-paused on
-    // purpose; coming back into view must not restart it.
-    if (!paused && this.BackPose && this.BackPose.speed === 0) return;
+    // A frozen back item (BackPose, speed 0) and a drop are started-and-paused
+    // on purpose; coming back into view must not restart them.
+    if (!paused && (this.FrozenPose || this.BackPose?.speed === 0)) return;
 
     for (const group of groups) {
       if (!group.isStarted) continue;
@@ -839,6 +879,7 @@ export class ModelObject {
 
     gltf.mesh.setParent(this._node);
     gltf.mesh.position.setAll(0);
+    gltf.mesh.position.y = this.BodyHeight;
     gltf.mesh.scaling.set(1, -1, 1);
     gltf.mesh.rotationQuaternion = Quaternion.FromEulerAngles(
       -Math.PI / 2,
@@ -927,6 +968,8 @@ export class ModelObject {
 
     this.applyHiddenMesh();
 
+    this.applyHideSkin();
+
     this.applyWholeBodyHide();
 
     this.attachShadow();
@@ -935,7 +978,41 @@ export class ModelObject {
     // the flag was set before its GLB arrived.
     this.applyBackPose();
 
+    this.applyFrozenPose();
+
     this.Ready = true;
+  }
+
+  /** `HideSkin`: drop the skin and hair meshes out of the draw and the bounds. */
+  private applyHideSkin() {
+    if (!this.HideSkin || !this.gltf) return;
+
+    for (const mesh of this._frustumMeshes) {
+      if (mesh.metadata?.skinTexture !== true) continue;
+
+      mesh.isVisible = false;
+      mesh.metadata.csmCaster = false;
+      mesh.metadata.SkipBoundingBox = true;
+    }
+  }
+
+  /** `FrozenPose`: hold clip 0 at its first frame, paused. */
+  private applyFrozenPose() {
+    if (!this.FrozenPose) return;
+
+    const groups = this.gltf?.animationGroups;
+    if (!groups?.length) return;
+
+    for (const group of groups) {
+      if (group.isStarted) group.stop(true);
+    }
+
+    const first = groups[0];
+    if (!first) return;
+
+    first.start(true, first.speedRatio, first.from);
+    first.goToFrame(first.from);
+    first.pause();
   }
 
   /**

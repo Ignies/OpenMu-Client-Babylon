@@ -89,7 +89,7 @@
     // row of folders rather than a row of buttons.
     border-bottom-color: rgba(232, 200, 119, 0.28);
     border-radius: 2px 2px 0 0;
-    background: rgba(0, 0, 0, 0.35);
+    background: #101010;
     color: #b9a87e;
     font-size: 11px;
     letter-spacing: 0.5px;
@@ -100,13 +100,13 @@
 
     &:hover {
       color: #e8c877;
-      background: rgba(232, 200, 119, 0.1);
+      background: #2d2a22;
     }
 
     &.is-active {
       border-color: rgba(232, 200, 119, 0.6);
       border-bottom-color: transparent;
-      background: rgba(232, 200, 119, 0.16);
+      background: #393427;
       color: #ffffff;
       font-weight: bold;
     }
@@ -277,5 +277,37 @@
     font-size: 9px;
     line-height: 1;
     opacity: 0.85;
+  }
+}
+
+// The question an exit row asks, on `CMsgWin`'s own art. Centred on screen
+// rather than on the window: the option window can be dragged anywhere.
+.options-exit-confirm {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  .mu-font();
+  user-select: none;
+
+  > * {
+    position: relative;
+    flex: none;
+    pointer-events: auto;
+  }
+
+  .options-exit-text {
+    position: absolute;
+    left: 25px;
+    right: 25px;
+    top: 32px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #ffffff;
+    font-size: 11px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
   }
 }

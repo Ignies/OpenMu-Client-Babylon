@@ -1,0 +1,859 @@
+@import (reference) '../muText/style.less';
+
+// The game master panel's own look, on purpose.
+//
+// The rest of the client wears the original's sprite chrome, which is fixed
+// art: it fixes a window at whatever the sprites measure. This one is an
+// instrument - eight screens, a live radar, tables - so it is laid out rather
+// than drawn, and it fits whatever screen it is on.
+//
+// It still speaks the game's colours (the gold, the near-black plate) so it
+// does not read as a browser dialog that wandered in.
+
+@gm-gold: #e8c877;
+@gm-gold-dim: #b9a87e;
+@gm-ink: #f2ede2;
+@gm-mute: #8f866a;
+@gm-plate: rgba(14, 12, 9, 0.95);
+@gm-sunk: rgba(0, 0, 0, 0.45);
+@gm-line: rgba(232, 200, 119, 0.2);
+@gm-line-strong: rgba(232, 200, 119, 0.5);
+@gm-danger: #d8756a;
+@gm-reply: #8fb4d8;
+@gm-npc: #7f9bb5;
+
+.gm-mono {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+}
+
+// The way in, top right, where nothing else lives (`.money` has the top left).
+// Outside the drawer on purpose: drawn whether the panel is open or not.
+.gm-tab-plate {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 1;
+  padding: 4px 11px;
+  border: 1px solid @gm-line-strong;
+  border-radius: 4px;
+  background: @gm-plate;
+  .mu-font();
+  color: @gm-gold;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  user-select: none;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+
+  &:hover {
+    border-color: @gm-gold;
+    color: #ffffff;
+  }
+
+  &.is-active {
+    border-color: @gm-gold;
+    background: rgba(232, 200, 119, 0.22);
+    color: #ffffff;
+  }
+}
+
+// Docked right on a wide screen, so the world stays visible while working.
+.gm-drawer {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  bottom: 8px;
+  width: clamp(340px, 34vw, 500px);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  border: 1px solid @gm-line-strong;
+  border-radius: 6px;
+  background: @gm-plate;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+  .mu-font();
+  color: @gm-ink;
+  pointer-events: auto;
+  user-select: none;
+  overflow: hidden;
+
+  h2,
+  h3,
+  h4,
+  p,
+  ul {
+    margin: 0;
+  }
+
+  ul {
+    padding: 0;
+    list-style: none;
+  }
+
+  code {
+    .gm-mono();
+  }
+
+  button {
+    .mu-font();
+    cursor: pointer;
+  }
+}
+
+// A phone, or the drawer's own width no longer leaving the world any room:
+// take the screen instead of squeezing into a column nothing fits in.
+@media (max-width: 760px), (max-height: 460px) {
+  .gm-drawer {
+    inset: 4px;
+    width: auto;
+    border-radius: 5px;
+  }
+
+  .gm-tab-plate {
+    top: 4px;
+    right: 6px;
+  }
+}
+
+.gm-drawer-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 9px 10px 8px 12px;
+  border-bottom: 1px solid @gm-line;
+  background: linear-gradient(rgba(232, 200, 119, 0.1), transparent);
+
+  h2 {
+    flex: 1;
+    min-width: 0;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}
+
+.gm-drawer-where {
+  flex: none;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: @gm-sunk;
+  color: @gm-gold;
+  font-size: 10px;
+}
+
+.gm-close {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid @gm-line;
+  border-radius: 3px;
+  background: transparent;
+  color: @gm-gold-dim;
+  font-size: 15px;
+  line-height: 1;
+
+  &:hover {
+    border-color: @gm-danger;
+    color: #ffffff;
+  }
+}
+
+// Eight of them will not fit on one line in a docked drawer, so they wrap:
+// a section scrolled out of sight is a section nobody finds.
+.gm-rail {
+  display: flex;
+  flex-wrap: wrap;
+  flex: none;
+  gap: 3px;
+  padding: 7px 10px 0;
+}
+
+.gm-rail-btn {
+  flex: none;
+  padding: 5px 10px;
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  color: @gm-gold-dim;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+
+  &:hover {
+    border-color: @gm-line-strong;
+    color: @gm-gold;
+  }
+
+  &.is-active {
+    border-color: @gm-line-strong;
+    background: rgba(232, 200, 119, 0.18);
+    color: #ffffff;
+    font-weight: bold;
+  }
+}
+
+.gm-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: @gm-line-strong rgba(0, 0, 0, 0.35);
+}
+
+.gm-section-hint {
+  flex: none;
+  color: @gm-mute;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+}
+
+.gm-section-title {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 3px;
+  color: @gm-gold;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      rgba(232, 200, 119, 0.5),
+      rgba(232, 200, 119, 0)
+    );
+  }
+}
+
+.gm-hint,
+.gm-help {
+  color: @gm-gold-dim;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.gm-empty {
+  color: @gm-gold-dim;
+  font-size: 11px;
+  text-align: center;
+  padding: 14px 8px;
+  line-height: 1.4;
+}
+
+/* -------------------------------------------------------------- overview */
+
+.gm-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 4px;
+  flex: none;
+}
+
+.gm-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 8px;
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: @gm-sunk;
+  overflow: hidden;
+}
+
+.gm-stat-label {
+  color: @gm-mute;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.gm-stat-value {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gm-stat-sub {
+  color: @gm-gold-dim;
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Square, because its viewBox is: a wider element would letterbox the drawing
+// and leave dead space inside what looks like the instrument's frame.
+.gm-radar {
+  flex: none;
+  width: min(100%, 260px);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  align-self: center;
+}
+
+.gm-radar-bg {
+  fill: rgba(0, 0, 0, 0.5);
+  stroke: @gm-line;
+}
+
+.gm-radar-ring {
+  fill: none;
+  stroke: rgba(232, 200, 119, 0.13);
+}
+
+.gm-radar-axis {
+  stroke: rgba(232, 200, 119, 0.1);
+}
+
+.gm-radar-mark {
+  cursor: pointer;
+
+  &:hover circle {
+    stroke: #ffffff;
+    stroke-width: 1;
+  }
+}
+
+.gm-radar-halo {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1;
+}
+
+.gm-radar-gm {
+  fill: none;
+  stroke: @gm-gold;
+  stroke-width: 1;
+}
+
+.gm-radar-hero circle {
+  fill: #ffffff;
+}
+
+.gm-radar-hero-ring {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.45);
+}
+
+.gm-radar-scale {
+  fill: @gm-mute;
+  font-size: 9px;
+}
+
+.gm-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: none;
+}
+
+/* ---------------------------------------------------------------- nearby */
+
+.gm-toggle {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}
+
+.gm-toggle-btn {
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  color: @gm-gold-dim;
+  font-size: 10px;
+
+  &.is-active {
+    border-color: @gm-line-strong;
+    background: rgba(232, 200, 119, 0.18);
+    color: #ffffff;
+    font-weight: bold;
+  }
+}
+
+.gm-target-note {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid @gm-line-strong;
+  border-radius: 4px;
+  background: rgba(232, 200, 119, 0.12);
+  color: @gm-ink;
+  font-size: 10px;
+
+  b {
+    color: @gm-gold;
+  }
+}
+
+.gm-link {
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  color: @gm-gold-dim;
+  font-size: 10px;
+  text-decoration: underline;
+
+  &:hover {
+    color: #ffffff;
+  }
+}
+
+.gm-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: none;
+}
+
+.gm-row {
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+
+  &.is-selected {
+    border-color: @gm-gold;
+    background: rgba(232, 200, 119, 0.14);
+  }
+}
+
+.gm-row-main {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 5px 8px;
+  border: none;
+  background: none;
+  color: @gm-ink;
+  font-size: 11px;
+  text-align: left;
+
+  &:hover {
+    background: rgba(232, 200, 119, 0.08);
+  }
+}
+
+.gm-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+
+  &.gm-dot-player {
+    background: @gm-gold;
+  }
+
+  &.gm-dot-monster {
+    background: @gm-danger;
+  }
+
+  &.gm-dot-npc {
+    background: @gm-npc;
+  }
+}
+
+.gm-row-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gm-row-gm {
+  flex: none;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: rgba(232, 200, 119, 0.28);
+  color: @gm-gold;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+}
+
+.gm-row-dead {
+  flex: none;
+  color: @gm-mute;
+  font-size: 9px;
+  font-style: normal;
+}
+
+.gm-row-pos {
+  flex: none;
+  color: @gm-gold-dim;
+  font-size: 10px;
+}
+
+.gm-row-dist {
+  flex: none;
+  width: 30px;
+  color: @gm-mute;
+  font-size: 10px;
+  text-align: right;
+}
+
+.gm-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 0 8px 7px;
+}
+
+/* ----------------------------------------------------------------- forms */
+
+.gm-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: none;
+  box-sizing: border-box;
+  padding: 9px;
+  border: 1px solid @gm-line;
+  border-radius: 5px;
+  background: @gm-sunk;
+}
+
+.gm-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+
+  h4 {
+    flex: 1;
+    min-width: 0;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  code {
+    color: @gm-gold;
+    font-size: 9px;
+  }
+}
+
+.gm-card-actions {
+  display: flex;
+  gap: 5px;
+}
+
+// Label above input, so a long label never squeezes the field into nothing -
+// which is exactly what a fixed two-column form does on a narrow screen.
+.gm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.gm-field-label {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  color: @gm-ink;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.gm-required {
+  color: @gm-gold;
+}
+
+.gm-standin {
+  margin-left: auto;
+  color: @gm-mute;
+  font-size: 9px;
+  font-style: normal;
+  text-transform: none;
+}
+
+.gm-pair {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+// Read and write of one value on a line: label, Read, field, Set.
+.gm-pairline {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  flex: none;
+}
+
+.gm-pairline-label {
+  flex: none;
+  width: 74px;
+  padding-bottom: 5px;
+  color: @gm-ink;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.gm-input,
+.gm-search {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  .mu-font();
+  color: @gm-ink;
+  font-size: 11px;
+  outline: none;
+
+  &::placeholder {
+    color: #6f6852;
+  }
+
+  &:focus {
+    border-color: @gm-gold;
+  }
+}
+
+.gm-search {
+  flex: none;
+}
+
+.gm-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.gm-choice-option {
+  padding: 4px 11px;
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  color: @gm-ink;
+  font-size: 11px;
+
+  &:hover {
+    border-color: @gm-line-strong;
+  }
+
+  &.is-active {
+    border-color: @gm-gold;
+    background: rgba(232, 200, 119, 0.24);
+    color: @gm-gold;
+    font-weight: bold;
+  }
+}
+
+.gm-preview {
+  display: block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: @gm-gold;
+  .gm-mono();
+  font-size: 10px;
+  word-break: break-word;
+  user-select: text;
+}
+
+.gm-error {
+  flex: none;
+  padding: 5px 8px;
+  border: 1px solid rgba(216, 117, 106, 0.5);
+  border-radius: 4px;
+  background: rgba(150, 52, 40, 0.2);
+  color: #ffd9d3;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.gm-btn {
+  flex: none;
+  padding: 5px 12px;
+  border: 1px solid @gm-line-strong;
+  border-radius: 4px;
+  background: rgba(232, 200, 119, 0.14);
+  color: @gm-gold;
+  font-size: 11px;
+  font-weight: bold;
+  white-space: nowrap;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+
+  &:hover {
+    border-color: @gm-gold;
+    color: #ffffff;
+  }
+
+  &.gm-btn-compact {
+    padding: 4px 9px;
+    font-size: 10px;
+    font-weight: normal;
+  }
+
+  // Anything that takes access or progress away wears the warning edge.
+  &.gm-btn-heavy {
+    border-left: 2px solid rgba(196, 84, 66, 0.85);
+  }
+
+  &.is-armed {
+    border-color: @gm-danger;
+    background: rgba(150, 52, 40, 0.5);
+    color: #ffffff;
+  }
+}
+
+/* ---------------------------------------------------------------- travel */
+
+.gm-maps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 3px;
+  flex: none;
+
+  .gm-btn {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* --------------------------------------------------------------- console */
+
+.gm-commands {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 3px;
+  flex: none;
+}
+
+.gm-command {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  box-sizing: border-box;
+  padding: 5px 8px;
+  border: 1px solid @gm-line;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.32);
+  text-align: left;
+  overflow: hidden;
+
+  &:hover {
+    border-color: @gm-line-strong;
+    background: rgba(232, 200, 119, 0.08);
+  }
+
+  &.is-active {
+    border-color: @gm-gold;
+    background: rgba(232, 200, 119, 0.2);
+  }
+
+  &.is-heavy {
+    border-left: 2px solid rgba(196, 84, 66, 0.8);
+  }
+}
+
+.gm-command-label {
+  max-width: 100%;
+  color: @gm-ink;
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gm-command-slash {
+  max-width: 100%;
+  color: @gm-mute;
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ------------------------------------------------------------ transcript */
+
+.gm-transcript {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  h4 {
+    margin-top: 4px;
+    color: @gm-gold;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  li {
+    padding: 1px 0;
+    color: @gm-gold-dim;
+    font-size: 10px;
+    line-height: 1.35;
+    word-break: break-word;
+    user-select: text;
+  }
+
+  code {
+    font-size: 10px;
+  }
+
+  .gm-replies li {
+    color: @gm-reply;
+  }
+}
+
+.gm-drawer-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex: none;
+  padding: 6px 12px;
+  border-top: 1px solid @gm-line;
+  color: @gm-mute;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
