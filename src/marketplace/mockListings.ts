@@ -20,6 +20,8 @@ export type Listing = {
   /** What the same item has been selling for, for the "deal" sort. */
   median: number;
   mine?: boolean;
+  /** What the service says it is doing. Fixtures have none. */
+  state?: 'pending' | 'active' | 'claimed' | 'sold' | 'cancelled' | 'returning';
 };
 
 const SELLERS = [
