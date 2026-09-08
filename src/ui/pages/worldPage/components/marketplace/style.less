@@ -51,9 +51,11 @@
 
 .mp-plaque {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   align-items: center;
-  padding: 0 22px 0 26px;
+  // Right padding stays small: the bar tapers to an arrow point just past its
+  // right edge, and the close button must not ride up onto it.
+  padding: 0 10px 0 24px;
   cursor: move;
 }
 
@@ -73,7 +75,7 @@
 }
 
 .mp-tab {
-  padding: 4px 11px;
+  padding: 4px 9px;
   font-size: 12px;
   color: @mp-dim;
   background: none;
@@ -110,9 +112,12 @@
 
 .mp-close {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
   color: @mp-dim;
   background: rgba(8, 10, 15, 0.55);
   border: 1px solid rgba(224, 188, 106, 0.35);
@@ -124,22 +129,36 @@
   }
 }
 
-// ---- toolbar: the art draws the fields, these fill them -------------------
+// ---- toolbar -------------------------------------------------------------
+
+// The art is chrome only now, so these draw their own fields.
+.mp-toolbar {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+}
 
 .mp-select,
 .mp-input {
   .mu-font();
+  height: 26px;
   font-size: 12px;
   color: @mp-ink;
-  background: none;
-  border: none;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(224, 188, 106, 0.28);
+  border-radius: 3px;
   outline: none;
+
+  &:focus {
+    border-color: fade(@mp-gold, 65%);
+  }
 }
 
 .mp-select {
-  padding: 0 30px 0 14px;
-  // The art draws its own arrow on the right of the slot.
-  appearance: none;
+  flex: 0 0 auto;
+  padding: 0 8px;
 
   option {
     color: @mp-ink;
@@ -148,21 +167,38 @@
 }
 
 .mp-input {
-  padding: 0 14px;
+  padding: 0 10px;
 
   &::placeholder {
     color: fade(@mp-dim, 65%);
   }
 }
 
+.mp-search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mp-viewswitch {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 1px;
+  padding: 1px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(224, 188, 106, 0.28);
+  border-radius: 3px;
+}
+
 .mp-viewbtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: fade(@mp-gold, 55%);
+  width: 26px;
+  height: 22px;
+  color: fade(@mp-gold, 60%);
   background: none;
   border: none;
-  border-radius: 4px;
+  border-radius: 2px;
 
   &:hover {
     color: @mp-gold;
@@ -306,7 +342,7 @@
   overflow: hidden;
 }
 
-// ---- list view: one row per ruled band -----------------------------------
+// ---- list view -----------------------------------------------------------
 
 .mp-list {
   display: flex;
@@ -317,26 +353,28 @@
 
 .mp-row {
   display: grid;
-  // One ninth of the list area, because the art rules nine bands across it.
-  // A fixed basis rather than `1 1 0`: a short page must keep the rows on
-  // their bands instead of stretching them to fill the space.
-  flex: 0 0 (100% / 9);
-  grid-template-columns: 34px minmax(0, 1fr) 96px 62px 48px 148px 68px;
+  // Fixed rather than a share of the list: a short page keeps its rows the
+  // same height as a full one instead of stretching them.
+  flex: 0 0 34px;
+  grid-template-columns: 30px minmax(0, 1fr) 96px 62px 48px 148px 68px;
   gap: 10px;
   align-items: center;
   min-height: 0;
-  padding: 0 14px;
+  padding: 0 6px;
+  border-bottom: 1px solid rgba(224, 188, 106, 0.09);
 
   &:hover {
-    background: rgba(224, 188, 106, 0.07);
+    background: rgba(224, 188, 106, 0.08);
   }
 }
 
 .mp-row-head {
+  flex: 0 0 22px;
   font-size: 10px;
   color: fade(@mp-dim, 85%);
   letter-spacing: 0.4px;
   text-transform: uppercase;
+  border-bottom-color: rgba(224, 188, 106, 0.28);
 
   &:hover {
     background: none;
@@ -347,12 +385,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
 
   img {
-    max-width: 32px;
-    max-height: 32px;
+    max-width: 28px;
+    max-height: 28px;
     object-fit: contain;
   }
 }

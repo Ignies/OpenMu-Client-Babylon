@@ -13,19 +13,7 @@ import {
   type Tab,
 } from '../../../../../marketplace/state';
 import type { Listing } from '../../../../../marketplace/mockListings';
-import {
-  CLOSE,
-  CONTENT,
-  FRAME_H,
-  FRAME_SRC,
-  FRAME_W,
-  PLAQUE,
-  RAIL,
-  SEARCH,
-  SORT,
-  VIEW_GRID,
-  VIEW_LIST,
-} from './layout';
+import { CONTENT, FRAME_H, FRAME_SRC, FRAME_W, PLAQUE, RAIL } from './layout';
 
 export const MARKETPLACE_ID = 'marketplace';
 export const MARKETPLACE_WIDTH = 1000;
@@ -160,12 +148,14 @@ const ListingRow = observer(({ listing, mode }: { listing: Listing; mode: Tab })
 });
 
 const Rail = observer(() => {
-  const counts = Marketplace.categoryCounts;
+  const selling = Marketplace.tab === 'sell';
+  // On the sell tab the same rail narrows the bag instead of the catalogue.
+  const counts = selling ? Marketplace.bagCounts : Marketplace.categoryCounts;
   const { page, pageCount } = Marketplace;
 
   return (
     <div className="mp-rail" style={RAIL} data-no-drag>
-      {Marketplace.tab === 'browse' && (
+      {Marketplace.tab !== 'mine' && (
         <>
           <div className="mp-rail-list">
             {CATEGORIES.map(c => (
@@ -180,20 +170,22 @@ const Rail = observer(() => {
             ))}
           </div>
 
-          <div className="mp-rail-filters">
-            <button
-              className={`mp-chip${Marketplace.excellentOnly ? ' is-on' : ''}`}
-              onClick={() => Marketplace.toggleExcellentOnly()}
-            >
-              Excellent only
-            </button>
-            <button
-              className={`mp-chip${Marketplace.affordableOnly ? ' is-on' : ''}`}
-              onClick={() => Marketplace.toggleAffordableOnly()}
-            >
-              I can afford
-            </button>
-          </div>
+          {!selling && (
+            <div className="mp-rail-filters">
+              <button
+                className={`mp-chip${Marketplace.excellentOnly ? ' is-on' : ''}`}
+                onClick={() => Marketplace.toggleExcellentOnly()}
+              >
+                Excellent only
+              </button>
+              <button
+                className={`mp-chip${Marketplace.affordableOnly ? ' is-on' : ''}`}
+                onClick={() => Marketplace.toggleAffordableOnly()}
+              >
+                I can afford
+              </button>
+            </div>
+          )}
         </>
       )}
 
@@ -271,6 +263,7 @@ const MarketRate = observer(() => {
 
 const SellTab = observer(() => {
   const { inventory, sellPick } = Marketplace;
+  const bag = Marketplace.bagFiltered;
   const picked = sellPick === null ? null : inventory[sellPick];
 
   return (
@@ -278,12 +271,16 @@ const SellTab = observer(() => {
       <div className="mp-sell-bag">
         <div className="mp-panel-head">Your bag</div>
         <div className="mp-sell-grid">
-          {inventory.length === 0 && <div className="mp-empty">Nothing here to sell.</div>}
-          {inventory.map((item, i) => (
+          {bag.length === 0 && (
+            <div className="mp-empty">
+              {inventory.length === 0 ? 'Nothing here to sell.' : 'Nothing of that kind in your bag.'}
+            </div>
+          )}
+          {bag.map(({ item, index }) => (
             <button
-              key={`${item.group}-${item.num}-${i}`}
-              className={`mp-sell-slot${sellPick === i ? ' is-on' : ''}`}
-              onClick={() => Marketplace.pickForSale(sellPick === i ? null : i)}
+              key={`${item.group}-${item.num}-${index}`}
+              className={`mp-sell-slot${sellPick === index ? ' is-on' : ''}`}
+              onClick={() => Marketplace.pickForSale(sellPick === index ? null : index)}
               title={displayName(item)}
             >
               <ItemIcon item={item} />
@@ -423,79 +420,71 @@ export const MarketplaceWindow = observer(() => {
         <div className="mp-wallet">
           {formatZen(Marketplace.zen)} <span className="mp-zen">Zen</span>
         </div>
-      </header>
 
-      <button
-        data-no-drag
-        className="mp-close"
-        style={CLOSE}
-        aria-label="Close"
-        onClick={() => Marketplace.close()}
-      >
-        x
-      </button>
+        <button
+          data-no-drag
+          className="mp-close"
+          aria-label="Close"
+          onClick={() => Marketplace.close()}
+        >
+          x
+        </button>
+      </header>
 
       <Rail />
 
-      {browsing && (
-        <>
-          <select
-            data-no-drag
-            className="mp-select"
-            style={SORT}
-            value={Marketplace.sort}
-            onChange={e => Marketplace.setSort(e.target.value as (typeof SORTS)[number]['id'])}
-          >
-            {SORTS.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-
-          <input
-            data-no-drag
-            className="mp-input mp-search"
-            style={SEARCH}
-            placeholder="Search items or sellers"
-            value={Marketplace.search}
-            onChange={e => Marketplace.setSearch(e.target.value)}
-          />
-
-          <button
-            data-no-drag
-            className={`mp-viewbtn${Marketplace.view === 'list' ? ' is-on' : ''}`}
-            style={VIEW_LIST}
-            aria-pressed={Marketplace.view === 'list'}
-            title="List view"
-            onClick={() => Marketplace.setView('list')}
-          >
-            <svg viewBox="0 0 12 12" width="14" height="14" aria-hidden="true">
-              <rect x="0" y="1" width="12" height="2" rx="0.5" fill="currentColor" />
-              <rect x="0" y="5" width="12" height="2" rx="0.5" fill="currentColor" />
-              <rect x="0" y="9" width="12" height="2" rx="0.5" fill="currentColor" />
-            </svg>
-          </button>
-
-          <button
-            data-no-drag
-            className={`mp-viewbtn${Marketplace.view === 'grid' ? ' is-on' : ''}`}
-            style={VIEW_GRID}
-            aria-pressed={Marketplace.view === 'grid'}
-            title="Grid view"
-            onClick={() => Marketplace.setView('grid')}
-          >
-            <svg viewBox="0 0 12 12" width="14" height="14" aria-hidden="true">
-              <rect x="0" y="0" width="5" height="5" rx="0.5" fill="currentColor" />
-              <rect x="7" y="0" width="5" height="5" rx="0.5" fill="currentColor" />
-              <rect x="0" y="7" width="5" height="5" rx="0.5" fill="currentColor" />
-              <rect x="7" y="7" width="5" height="5" rx="0.5" fill="currentColor" />
-            </svg>
-          </button>
-        </>
-      )}
-
       <section className="mp-content" style={CONTENT} data-no-drag>
+        {browsing && (
+          <div className="mp-toolbar">
+            <select
+              className="mp-select"
+              value={Marketplace.sort}
+              onChange={e => Marketplace.setSort(e.target.value as (typeof SORTS)[number]['id'])}
+            >
+              {SORTS.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+
+            <input
+              className="mp-input mp-search"
+              placeholder="Search items or sellers"
+              value={Marketplace.search}
+              onChange={e => Marketplace.setSearch(e.target.value)}
+            />
+
+            <div className="mp-viewswitch">
+              <button
+                className={`mp-viewbtn${Marketplace.view === 'list' ? ' is-on' : ''}`}
+                aria-pressed={Marketplace.view === 'list'}
+                title="List view"
+                onClick={() => Marketplace.setView('list')}
+              >
+                <svg viewBox="0 0 12 12" width="13" height="13" aria-hidden="true">
+                  <rect x="0" y="1" width="12" height="2" rx="0.5" fill="currentColor" />
+                  <rect x="0" y="5" width="12" height="2" rx="0.5" fill="currentColor" />
+                  <rect x="0" y="9" width="12" height="2" rx="0.5" fill="currentColor" />
+                </svg>
+              </button>
+              <button
+                className={`mp-viewbtn${Marketplace.view === 'grid' ? ' is-on' : ''}`}
+                aria-pressed={Marketplace.view === 'grid'}
+                title="Grid view"
+                onClick={() => Marketplace.setView('grid')}
+              >
+                <svg viewBox="0 0 12 12" width="13" height="13" aria-hidden="true">
+                  <rect x="0" y="0" width="5" height="5" rx="0.5" fill="currentColor" />
+                  <rect x="7" y="0" width="5" height="5" rx="0.5" fill="currentColor" />
+                  <rect x="0" y="7" width="5" height="5" rx="0.5" fill="currentColor" />
+                  <rect x="7" y="7" width="5" height="5" rx="0.5" fill="currentColor" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         {browsing ? (
           Marketplace.view === 'grid' ? (
             <div className="mp-grid">

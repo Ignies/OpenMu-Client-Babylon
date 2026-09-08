@@ -15,7 +15,7 @@ export const SORTS: { id: Sort; label: string }[] = [
 
 /** A list row is about a third the height of a card, so it fits more of them. */
 export const PAGE_SIZE_GRID = 12;
-export const PAGE_SIZE_LIST = 8;
+export const PAGE_SIZE_LIST = 10;
 
 /**
  * Marketplace window state.
@@ -146,6 +146,26 @@ class MarketplaceStore {
     for (const l of this.listings) {
       counts.all++;
       counts[l.category] = (counts[l.category] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  /**
+   * The bag under the same category rail the catalogue uses, carrying each
+   * item's real inventory index so picking one still addresses the bag.
+   */
+  get bagFiltered(): { item: Listing['item']; index: number }[] {
+    return this.inventory
+      .map((item, index) => ({ item, index }))
+      .filter(e => this.category === 'all' || categoryOf(e.item) === this.category);
+  }
+
+  get bagCounts(): Record<string, number> {
+    const counts: Record<string, number> = { all: this.inventory.length };
+    for (const c of CATEGORIES) counts[c.id] ??= 0;
+    for (const item of this.inventory) {
+      const id = categoryOf(item);
+      counts[id] = (counts[id] ?? 0) + 1;
     }
     return counts;
   }
