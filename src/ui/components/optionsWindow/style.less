@@ -279,3 +279,35 @@
     opacity: 0.85;
   }
 }
+
+// The question an exit row asks, on `CMsgWin`'s own art. Centred on screen
+// rather than on the window: the option window can be dragged anywhere.
+.options-exit-confirm {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  .mu-font();
+  user-select: none;
+
+  > * {
+    position: relative;
+    flex: none;
+    pointer-events: auto;
+  }
+
+  .options-exit-text {
+    position: absolute;
+    left: 25px;
+    right: 25px;
+    top: 32px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #ffffff;
+    font-size: 11px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+}

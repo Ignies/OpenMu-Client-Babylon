@@ -193,6 +193,7 @@ export const EN_TEXT = {
   'options.section.language': 'Language',
   'options.section.loot': 'Drop names',
   'options.section.interface': 'Interface',
+  'options.section.exit': 'Exit',
 
   'options.autoAttack': 'Automatic Attack',
   'options.whisperBeep': 'Beep sound for whispering',
@@ -263,6 +264,17 @@ export const EN_TEXT = {
   'options.itemEffects.legacy': 'Legacy',
   'options.itemEffects.both': 'Both',
   'options.itemEffects.improved': 'Improved',
+
+  // The system menu's three ways out (GlobalText 381 / 382 / 383).
+  'options.exitGame': 'Exit Game',
+  'options.selectServer': 'Select Server',
+  'options.switchCharacter': 'Switch Character',
+  'exit.confirmQuit': 'Leave the game and go back to the main menu?',
+  'exit.confirmServers': 'Leave the game and go back to server selection?',
+  'exit.confirmCharacters': 'Leave the game and go back to character selection?',
+  /** GlobalText 592: the tray is lost if we leave with the mix window open. */
+  'exit.chaosOpen': 'Exit game after closing the Chaos interface.',
+  'exit.noAnswer': 'The server did not answer. Leaving anyway.',
 
   // ---- session resume ----------------------------------------------------
   'resume.title': 'Connection lost',
