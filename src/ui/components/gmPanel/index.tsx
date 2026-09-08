@@ -173,6 +173,30 @@ const Transcript = observer(() => {
   );
 });
 
+/**
+ * The way in. A function key alone is undiscoverable - a game master logging in
+ * would have to be told the panel exists - so there is a plate as well, in the
+ * top right where nothing else lives.
+ *
+ * Not on the main frame's button row: those five are the original's
+ * `newui_menu_Bt01..05` art, and a sixth would need a sprite that does not
+ * exist and would move the ones that do. This one only ever draws for a game
+ * master, so the bar a player sees is untouched.
+ */
+const GmTab = observer(() => {
+  if (!GmPanel.available) return null;
+
+  return (
+    <div
+      className={`gm-tab-plate${GmPanel.open ? ' is-active' : ''}`}
+      title={`Game master panel (${TOGGLE_KEY})`}
+      onClick={uiClick(() => GmPanel.toggle())}
+    >
+      GM
+    </div>
+  );
+});
+
 export const GmPanelWindow = observer(() => {
   useEventBus('keyPressed', key => {
     if (!GmPanel.available) return;
@@ -185,7 +209,8 @@ export const GmPanelWindow = observer(() => {
     onClose: () => GmPanel.close(),
   });
 
-  if (!GmPanel.available || !GmPanel.open) return null;
+  if (!GmPanel.available) return null;
+  if (!GmPanel.open) return <GmTab />;
 
   const group = GM_GROUPS.find(g => g.id === GmPanel.activeGroupId) ?? GM_GROUPS[0];
 
@@ -197,6 +222,7 @@ export const GmPanelWindow = observer(() => {
 
   return (
     <div className="gm-panel-page">
+      <GmTab />
       <div
         ref={chrome.ref as React.Ref<HTMLDivElement>}
         className="gm-panel"

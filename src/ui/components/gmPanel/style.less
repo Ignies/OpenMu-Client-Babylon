@@ -1,5 +1,39 @@
 @import (reference) '../muText/style.less';
 
+// The way in, top right, where nothing else lives (`.money` has the top left).
+// Outside `.gm-panel-page` on purpose: it is drawn whether the window is open
+// or not, so it cannot live inside the window's own layer.
+.gm-tab-plate {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 1;
+  padding: 3px 10px;
+  border: 1px solid rgba(232, 200, 119, 0.5);
+  border-radius: 2px;
+  background: rgba(12, 10, 8, 0.72);
+  .mu-font();
+  color: #e8c877;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  user-select: none;
+  cursor: pointer;
+  pointer-events: auto;
+
+  &:hover {
+    border-color: #ffffff;
+    color: #ffffff;
+  }
+
+  &.is-active {
+    border-color: #ffffff;
+    background: rgba(232, 200, 119, 0.25);
+    color: #ffffff;
+  }
+}
+
 // The Options window's plate/gold vocabulary, same as the debug menu: this is
 // a catalogue-driven window, so rows stack and scroll rather than being
 // measured into columns.
