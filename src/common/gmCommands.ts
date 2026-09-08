@@ -112,6 +112,33 @@ export const GM_GROUPS: readonly GmGroup[] = [
         params: COORDS,
       },
       {
+        // Gated at Normal, but it does more for a game master: with a map in
+        // the second slot it warps *another* character, and with coordinates
+        // it reaches any map at all. Without them it goes through the server's
+        // warp list, which only covers the maps that have a warp gate.
+        command: '/move',
+        label: 'Warp a character',
+        help: 'Warp a character to a map. Without coordinates the map needs an entry in the server’s warp list; with them, any map works.',
+        params: [
+          {
+            name: 'target',
+            label: 'Character',
+            type: 'text',
+            required: true,
+            hint: 'who to warp',
+          },
+          {
+            name: 'mapIdOrName',
+            label: 'Map',
+            type: 'text',
+            required: false,
+            hint: 'number or name',
+          },
+          { name: 'x', label: 'X', type: 'number', required: false },
+          { name: 'y', label: 'Y', type: 'number', required: false },
+        ],
+      },
+      {
         command: '/trace',
         label: 'Go to character',
         help: 'Warp yourself to where a character is standing.',
@@ -464,4 +491,26 @@ export function matchGmCommands(query: string): readonly GmCommand[] {
       command.label.toLowerCase().includes(needle) ||
       command.help.toLowerCase().includes(needle)
   );
+}
+
+const BY_NAME = new Map(GM_COMMANDS.map(command => [command.command, command]));
+
+/**
+ * One command by its slash name.
+ *
+ * The panel's purpose-built screens (teleport, the character editor, spawning)
+ * compose their own layout out of named commands rather than listing a group,
+ * and they must not restate the parameters: the order and the required flags
+ * here were checked field by field against the server's argument classes, and
+ * a second copy would drift from them.
+ *
+ * Throws rather than returning undefined - a typo names a command that will
+ * never exist at runtime either, and a screen silently missing a button is
+ * harder to notice than a failure at boot. `gmCommands.test.ts` calls this for
+ * every name the panel uses.
+ */
+export function gmCommand(name: string): GmCommand {
+  const command = BY_NAME.get(name);
+  if (!command) throw new Error(`unknown game master command: ${name}`);
+  return command;
 }
