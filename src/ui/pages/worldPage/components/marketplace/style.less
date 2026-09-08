@@ -638,11 +638,123 @@
   }
 }
 
+// The going rate on the left, the item being priced on the right.
+.mp-sell-split {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 12px;
+  min-height: 0;
+}
+
+.mp-panel-head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding-bottom: 6px;
+  font-size: 10px;
+  color: fade(@mp-dim, 85%);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border-bottom: 1px solid @mp-edge;
+}
+
+.mp-rate {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-content: start;
+  min-width: 0;
+
+  .mp-btn.is-wide {
+    align-self: start;
+    width: auto;
+    padding: 6px 14px;
+    font-size: 11px;
+  }
+}
+
+.mp-rate-count {
+  margin-left: auto;
+  text-transform: none;
+}
+
+.mp-rate-none {
+  padding: 16px 0;
+  font-size: 11px;
+  color: @mp-dim;
+}
+
+.mp-rate-floor {
+  font-size: 11px;
+  color: @mp-dim;
+
+  strong {
+    font-size: 13px;
+    color: @mp-gold;
+  }
+}
+
+.mp-rate-rows {
+  display: flex;
+  // Natural height, so the undercut button sits directly under the rows it
+  // refers to rather than being pushed to the floor of the column.
+  flex: 0 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mp-rate-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 78px 106px;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 11px;
+  background: #14171f;
+  border: 1px solid transparent;
+  border-radius: 3px;
+
+  &.is-mine {
+    border-color: fade(@mp-gold, 45%);
+  }
+}
+
+.mp-rate-name {
+  overflow: hidden;
+  color: @mp-ink;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.is-excellent {
+    color: #79c7ff;
+  }
+
+  &.is-ancient {
+    color: @mp-gold;
+  }
+}
+
+.mp-rate-seller {
+  overflow: hidden;
+  color: @mp-dim;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-rate-price {
+  font-weight: 700;
+  color: @mp-gold;
+  text-align: right;
+}
+
 .mp-sell-form {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-width: 320px;
+  min-width: 0;
 }
 
 .mp-sell-picked {

@@ -250,6 +250,56 @@ const Pager = observer(() => {
   );
 });
 
+/** What the same item is already going for, so a price can be judged. */
+const MarketRate = observer(() => {
+  const rows = Marketplace.comparable;
+  const floor = Marketplace.comparableFloor;
+
+  return (
+    <div className="mp-rate">
+      <div className="mp-panel-head">
+        On the market
+        {rows.length > 0 && <span className="mp-rate-count">{rows.length} listed</span>}
+      </div>
+
+      {rows.length === 0 ? (
+        <div className="mp-rate-none">
+          Nothing like it is listed. You set the price.
+        </div>
+      ) : (
+        <>
+          <div className="mp-rate-floor">
+            cheapest <strong>{formatZen(floor!)}</strong> <span className="mp-zen">Zen</span>
+          </div>
+
+          <div className="mp-rate-rows">
+            {rows.slice(0, 7).map(l => (
+              <div key={l.id} className={`mp-rate-row${l.mine ? ' is-mine' : ''}`}>
+                <span
+                  className={`mp-rate-name${l.item.isAncient ? ' is-ancient' : ''}${
+                    l.item.isExcellent && !l.item.isAncient ? ' is-excellent' : ''
+                  }`}
+                >
+                  {displayName(l.item)}
+                </span>
+                <span className="mp-rate-seller">{l.seller}</span>
+                <span className="mp-rate-price">{formatZen(l.price)}</span>
+              </div>
+            ))}
+          </div>
+
+          <button
+            className="mp-btn is-quiet is-wide"
+            onClick={() => Marketplace.setSellPrice(String(Math.max(1, floor! - 1)))}
+          >
+            Undercut the cheapest
+          </button>
+        </>
+      )}
+    </div>
+  );
+});
+
 const SellTab = observer(() => {
   const { inventory, sellPick } = Marketplace;
   const picked = sellPick === null ? null : inventory[sellPick];
@@ -273,37 +323,49 @@ const SellTab = observer(() => {
       </div>
 
       {picked && (
-        <div className="mp-sell-form">
-          <div className="mp-sell-picked">
-            <div className="mp-card-icon">
-              <ItemIcon item={picked} />
+        <div className="mp-sell-split">
+          <MarketRate />
+
+          <div className="mp-sell-form">
+            <div className="mp-panel-head">Your item</div>
+
+            <div className="mp-sell-picked">
+              <div className="mp-card-icon">
+                <ItemIcon item={picked} />
+              </div>
+              <div
+                className={`mp-card-name${picked.isAncient ? ' is-ancient' : ''}${
+                  picked.isExcellent && !picked.isAncient ? ' is-excellent' : ''
+                }`}
+              >
+                {displayName(picked)}
+              </div>
             </div>
-            <div className="mp-card-name">{displayName(picked)}</div>
+
+            <label className="mp-sell-price">
+              <span>Price</span>
+              <input
+                className="mp-input"
+                inputMode="numeric"
+                value={Marketplace.sellPrice}
+                placeholder="0"
+                onChange={e => Marketplace.setSellPrice(e.target.value)}
+              />
+              <span className="mp-zen">Zen</span>
+            </label>
+
+            <button
+              className="mp-btn is-wide"
+              disabled={Marketplace.sellPriceValue <= 0}
+              onClick={() => Marketplace.listForSale()}
+            >
+              List it
+            </button>
+
+            <p className="mp-note">
+              The item is handed to the market at the trading post and held until it sells.
+            </p>
           </div>
-
-          <label className="mp-sell-price">
-            <span>Price</span>
-            <input
-              className="mp-input"
-              inputMode="numeric"
-              value={Marketplace.sellPrice}
-              placeholder="0"
-              onChange={e => Marketplace.setSellPrice(e.target.value)}
-            />
-            <span className="mp-zen">Zen</span>
-          </label>
-
-          <button
-            className="mp-btn is-wide"
-            disabled={Marketplace.sellPriceValue <= 0}
-            onClick={() => Marketplace.listForSale()}
-          >
-            List it
-          </button>
-
-          <p className="mp-note">
-            The item is handed to the market at the trading post and held until it sells.
-          </p>
         </div>
       )}
     </div>

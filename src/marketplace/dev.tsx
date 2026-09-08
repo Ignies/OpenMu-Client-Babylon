@@ -18,16 +18,19 @@ import { loadGameVersion, versionIdForTag } from '../version';
 async function bootstrap() {
   await loadGameVersion(versionIdForTag('season6'));
 
-  const [React, ReactDOM, state, mock, window_] = await Promise.all([
+  const [React, ReactDOM, state, window_] = await Promise.all([
     import('react'),
     import('react-dom/client'),
     import('./state'),
-    import('./mockListings'),
     import('../ui/pages/worldPage/components/marketplace'),
   ]);
   const { Marketplace } = state;
-  /** A bag worth browsing from, so the Sell tab has something in it. */
-  const inventory = mock.buildMockListings(4242).slice(0, 24).map(l => l.item);
+  // Drawn off the catalogue rather than generated apart from it, so every item
+  // in the bag has something to compare against on the sell tab.
+  const inventory = Marketplace.listings
+    .filter((_, i) => i % 7 === 0)
+    .slice(0, 24)
+    .map(l => l.item);
 
   Marketplace.syncFromGame(184_500_000, inventory);
   Marketplace.open = true;

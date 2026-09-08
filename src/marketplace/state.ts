@@ -247,6 +247,24 @@ class MarketplaceStore {
     return Number(this.sellPrice || 0);
   }
 
+  /**
+   * What the same item is going for right now, cheapest first. Matched on the
+   * base item rather than the exact roll: a seller wants to see every Dragon
+   * Armor on the market, then judge their own +9 excellent against them.
+   */
+  get comparable(): Listing[] {
+    const item = this.sellPick === null ? null : this.inventory[this.sellPick];
+    if (!item) return [];
+    return this.listings
+      .filter(l => l.item.group === item.group && l.item.num === item.num)
+      .sort((a, b) => a.price - b.price);
+  }
+
+  /** The cheapest of those, which is the number a seller actually undercuts. */
+  get comparableFloor(): number | null {
+    return this.comparable[0]?.price ?? null;
+  }
+
   listForSale(): void {
     const index = this.sellPick;
     const item = index === null ? null : this.inventory[index];

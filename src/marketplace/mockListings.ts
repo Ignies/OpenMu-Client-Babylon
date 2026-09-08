@@ -84,11 +84,20 @@ export function buildMockListings(seed = 20260908): Listing[] {
       itemIconUrl({ group: def.Group, num: def.Index }) !== null
   );
 
+  // Drawn from a limited pool rather than the whole database, so the same item
+  // is listed several times over - which is what a real market looks like, and
+  // what the sell tab's price comparison needs to have anything to show.
+  const pool = sellable
+    .map(def => ({ def, order: r() }))
+    .sort((a, b) => a.order - b.order)
+    .slice(0, 64)
+    .map(entry => entry.def);
+
   const now = Date.now();
   const out: Listing[] = [];
 
   for (let i = 0; i < LISTING_COUNT; i++) {
-    const def = pick(r, sellable);
+    const def = pick(r, pool);
     const gear = def.Group <= 11 || (def.Group === 12 && def.Index <= 6);
 
     const item: Item = { group: def.Group, num: def.Index };
