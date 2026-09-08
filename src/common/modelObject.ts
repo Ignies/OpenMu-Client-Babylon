@@ -472,6 +472,19 @@ export class ModelObject {
     alpha = Math.max(0, Math.min(1, alpha));
     if (alpha === this.Alpha) return;
     this.Alpha = alpha;
+
+    // `mesh.visibility` on its own cannot hide any of this: every BMD material
+    // is built with an explicit `transparencyMode`, and Babylon then answers
+    // `needAlphaBlendingForMesh` from that mode alone without ever reading
+    // visibility (Materials/material.ts). An opaque or alpha-tested mesh at
+    // alpha 0 therefore kept drawing at full strength — which is how a mount
+    // stayed on screen inside a town. Take the node out of the render instead;
+    // switching it back on restores each mesh's own `isVisible`, so meshes
+    // hidden for other reasons (HiddenMesh, HideSkin, texture scripts) stay
+    // hidden. `syncShadowEnabled` and the CSM caster test both read the
+    // enabled state, so the shadow goes with it.
+    this._node.setEnabled(alpha > 0);
+
     for (const mesh of this._node.getChildMeshes(false)) {
       mesh.visibility = alpha;
     }
