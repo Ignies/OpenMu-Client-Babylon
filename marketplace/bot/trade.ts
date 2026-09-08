@@ -209,6 +209,25 @@ export class TradeSession {
     return null;
   }
 
+  /**
+   * Waits for the partner to put up what was agreed.
+   *
+   * A person takes seconds to drag an item across, so every escrow operation
+   * has to wait rather than read the table once and refuse. Resolves as soon
+   * as the table matches; rejects on the deadline, and the caller cancels.
+   */
+  async waitForTerms(terms: TradeTerms, timeoutMs = 60_000): Promise<void> {
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      if (this.mismatch(terms) === null) return;
+      if (!this.open) throw new Error('the trade closed before the terms were met');
+      if (Date.now() >= deadline) {
+        throw new Error(`the terms were not met within ${Math.round(timeoutMs / 1000)}s`);
+      }
+      await new Promise(resolve => setTimeout(resolve, 250));
+    }
+  }
+
   /** Why the table does not match the terms, or null when it does. */
   mismatch(terms: TradeTerms): string | null {
     if (terms.expectMoney !== undefined && this.theirMoney !== terms.expectMoney) {

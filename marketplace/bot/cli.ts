@@ -2,6 +2,7 @@ import { BotConnection } from './connection';
 import { BotSession } from './session';
 import { Scope } from './scope';
 import { TradeSession, TRADE_REQUEST_CODE, incomingRequestName } from './trade';
+import { collectListing, deliverPurchase, payOut, type EscrowContext } from './escrow';
 
 /**
  * Drives one bot by hand, for proving the stack against a real server.
@@ -15,6 +16,7 @@ import { TradeSession, TRADE_REQUEST_CODE, incomingRequestName } from './trade';
  *   bun run marketplace/bot/cli.ts watch  --account MKT001 --seconds 30
  *   bun run marketplace/bot/cli.ts trace  --account MKT001 --target <character>
  *   bun run marketplace/bot/cli.ts simulate --seller MKT001 --buyer MKT002
+ *   bun run marketplace/bot/cli.ts escrow --op list --bot MKT001 --player MKT002
  */
 
 const HOST = process.env.GAME_HOST ?? '127.0.0.1';
@@ -42,6 +44,11 @@ async function main(): Promise<void> {
 
   if (command === 'simulate') {
     await simulate(password);
+    return;
+  }
+
+  if (command === 'escrow') {
+    await escrow(password);
     return;
   }
 
@@ -128,6 +135,83 @@ async function main(): Promise<void> {
     trade.dispose();
     scope.dispose();
     connection.close();
+  }
+}
+
+/**
+ * The escrow handovers, driven against a second bot standing in for a player.
+ *
+ * `escrow list` is the one to run first: the seller hands an item over and the
+ * bot gives nothing back, so no Zen is ever on the table and the server's
+ * cancel bug cannot bite.
+ */
+async function escrow(password: string): Promise<void> {
+  const which = arg('op', 'list')!;
+  const botName = arg('bot', 'MKT001')!;
+  const playerName = arg('player', 'MKT002')!;
+  const slot = Number(arg('slot', '14'));
+  const price = Number(arg('price', '1000000'));
+
+  const bot = await connectBot(botName, password);
+  const player = await connectBot(playerName, password);
+
+  const context: EscrowContext = {
+    session: bot.session,
+    trade: bot.trade,
+    scope: bot.scope,
+    log: (message: string) => log(`[escrow] ${message}`),
+  };
+
+  try {
+    await sleep(2000);
+
+    // The stand-in accepts whatever the bot asks for, and plays the human's
+    // half of the handover.
+    const playerSide = player.connection
+      .expect({ code: TRADE_REQUEST_CODE }, 30_000, 'an invitation to trade')
+      .then(async () => {
+        await player.trade.accept();
+        log(`[${player.name}] accepted the trade`);
+        if (which === 'list') {
+          player.trade.offerItem(slot, 0);
+        } else if (which === 'buy') {
+          // Wait for the bot's item to appear before paying, which is the
+          // order a real buyer's client will use too.
+          await player.trade.waitForTerms({ expectItems: 1 }, 30_000);
+          player.trade.setMoney(price);
+        }
+        // Confirm second: the server completes on whichever confirm is last,
+        // and the bot has already checked the table by then.
+        await sleep(1500);
+        // What the stand-in should see on the table depends on the operation:
+        // an item when buying, the payment when being paid out, and nothing at
+        // all when listing, because the bot gives nothing back for a listing.
+        const expected =
+          which === 'buy'
+            ? { expectItems: 1 }
+            : which === 'payout'
+              ? { expectMoney: price, expectItems: 0 }
+              : { expectMoney: 0, expectItems: 0 };
+        const refused = player.trade.armConfirm(expected);
+        if (refused) log(`[${player.name}] refused to confirm: ${refused}`);
+      });
+
+    let result;
+    if (which === 'list') {
+      result = await collectListing(context, player.name, 1);
+    } else if (which === 'buy') {
+      result = await deliverPurchase(context, player.name, slot, price);
+    } else if (which === 'payout') {
+      result = await payOut(context, player.name, price);
+    } else {
+      throw new Error(`unknown --op "${which}" (list, buy or payout)`);
+    }
+
+    await playerSide.catch(() => {});
+    log(`${which}: ${result.ok ? 'ok' : `failed - ${result.reason}`}`);
+  } finally {
+    await disposeBot(player);
+    await disposeBot(bot);
   }
 }
 
