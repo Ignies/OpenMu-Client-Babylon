@@ -327,7 +327,20 @@ async function meetUp(seller: Bot, buyer: Bot, attempts = 4) {
     log(`${seller.name} tracing to ${buyer.name} (attempt ${attempt})`);
     seller.session.traceTo(buyer.name);
 
+    // The warp gets the bot there but does not announce it: it is a map
+    // change, so it drops out of the buyer's scope and the buyer is never told
+    // it came back. An ordinary in-map move onto their tile is broadcast the
+    // way walking is, and that is what makes the pair mutually visible.
     for (let waited = 0; waited < 4000; waited += 500) {
+      await sleep(500);
+      const here = seller.scope.byName(buyer.name);
+      if (here) {
+        seller.session.teleportTo(here.x, here.y);
+        break;
+      }
+    }
+
+    for (let waited = 0; waited < 5000; waited += 500) {
       await sleep(500);
       const partner = seller.scope.byName(buyer.name);
       const mutual = buyer.scope.byName(seller.name);

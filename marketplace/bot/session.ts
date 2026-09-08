@@ -181,6 +181,21 @@ export class BotSession {
   }
 
   /**
+   * `/teleport <x> <y>`: a game-master move within the current map.
+   *
+   * This exists because a warp does not announce the bot to the people already
+   * standing there. `/trace` is a map change: it takes the bot out of the world
+   * and puts it back, which removes it from the target's scope, and the target
+   * is never told it returned - so the two end up one-way visible and the
+   * server refuses the trade. An in-map move is broadcast to observers the
+   * ordinary way, the same as walking, so following the warp with one is what
+   * actually puts the bot on the customer's screen.
+   */
+  teleportTo(x: number, y: number): void {
+    this.say(`/teleport ${x} ${y}`);
+  }
+
+  /**
    * Logs out properly instead of just dropping the socket.
    *
    * Worth doing every time: the server keeps an account connected for a while
