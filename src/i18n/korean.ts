@@ -1520,6 +1520,7 @@ export const koreanLayer: LanguageLayer = {
     'serverMessage.pkClearYouAreNotPlayerKiller': '당신은 살인자가 아닙니다.',
     'serverMessage.itemDoesNotBelongToYou': '이 아이템은 당신의 것이 아닙니다.',
     'serverMessage.characterNotStrongEnough': '아직 이걸 하기에는 강하지 않습니다.',
+    'options.tab.server': '서버',
     'options.section.exit': '종료',
     'options.exitGame': '게임 종료',
     'options.selectServer': '서버 선택',

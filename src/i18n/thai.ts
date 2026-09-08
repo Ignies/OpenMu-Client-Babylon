@@ -1533,6 +1533,7 @@ export const thaiLayer: LanguageLayer = {
     'serverMessage.pkClearYouAreNotPlayerKiller': 'คุณไม่ใช่ฆาตกร',
     'serverMessage.itemDoesNotBelongToYou': 'ไอเทมนี้ไม่ใช่ของคุณ',
     'serverMessage.characterNotStrongEnough': 'คุณยังแข็งแกร่งไม่พอสำหรับสิ่งนี้',
+    'options.tab.server': 'เซิร์ฟเวอร์',
     'options.section.exit': 'ออก',
     'options.exitGame': 'ออกจากเกม',
     'options.selectServer': 'เลือกเซิร์ฟเวอร์',

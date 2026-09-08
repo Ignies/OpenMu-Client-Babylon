@@ -1571,6 +1571,7 @@ export const spanishLayer: LanguageLayer = {
     'serverMessage.pkClearYouAreNotPlayerKiller': 'No eres asesino.',
     'serverMessage.itemDoesNotBelongToYou': 'Este objeto no te pertenece.',
     'serverMessage.characterNotStrongEnough': 'Todavía no eres lo bastante fuerte para esto.',
+    'options.tab.server': 'Servidor',
     'options.section.exit': 'Salir',
     'options.exitGame': 'Salir del juego',
     'options.selectServer': 'Elegir servidor',

@@ -1561,6 +1561,7 @@ export const romanianLayer: LanguageLayer = {
     'serverMessage.pkClearYouAreNotPlayerKiller': 'Nu ești criminal.',
     'serverMessage.itemDoesNotBelongToYou': 'Acest obiect nu îți aparține.',
     'serverMessage.characterNotStrongEnough': 'Încă nu ești destul de puternic pentru asta.',
+    'options.tab.server': 'Server',
     'options.section.exit': 'Ieșire',
     'options.exitGame': 'Ieși din joc',
     'options.selectServer': 'Alege serverul',

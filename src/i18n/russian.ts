@@ -1546,6 +1546,7 @@ export const russianLayer: LanguageLayer = {
     'serverMessage.pkClearYouAreNotPlayerKiller': 'Вы не убийца.',
     'serverMessage.itemDoesNotBelongToYou': 'Этот предмет вам не принадлежит.',
     'serverMessage.characterNotStrongEnough': 'Вы для этого пока недостаточно сильны.',
+    'options.tab.server': 'Сервер',
     'options.section.exit': 'Выход',
     'options.exitGame': 'Выйти из игры',
     'options.selectServer': 'Выбор сервера',

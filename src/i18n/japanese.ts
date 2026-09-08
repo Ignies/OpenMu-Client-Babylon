@@ -1522,6 +1522,7 @@ export const japaneseLayer: LanguageLayer = {
     'serverMessage.pkClearYouAreNotPlayerKiller': 'あなたは殺人者ではありません。',
     'serverMessage.itemDoesNotBelongToYou': 'このアイテムはあなたのものではありません。',
     'serverMessage.characterNotStrongEnough': 'それにはまだ力が足りません。',
+    'options.tab.server': 'サーバー',
     'options.section.exit': '終了',
     'options.exitGame': 'ゲーム終了',
     'options.selectServer': 'サーバー選択',

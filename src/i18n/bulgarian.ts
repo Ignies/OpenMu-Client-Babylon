@@ -1553,6 +1553,7 @@ export const bulgarianLayer: LanguageLayer = {
     'serverMessage.pkClearYouAreNotPlayerKiller': 'Не си убиец.',
     'serverMessage.itemDoesNotBelongToYou': 'Този предмет не е твой.',
     'serverMessage.characterNotStrongEnough': 'Още не си достатъчно силен за това.',
+    'options.tab.server': 'Сървър',
     'options.section.exit': 'Изход',
     'options.exitGame': 'Изход от играта',
     'options.selectServer': 'Избор на сървър',

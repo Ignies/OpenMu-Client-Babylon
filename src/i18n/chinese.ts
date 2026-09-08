@@ -1514,6 +1514,7 @@ export const chineseLayer: LanguageLayer = {
     'serverMessage.pkClearYouAreNotPlayerKiller': '你不是杀人者。',
     'serverMessage.itemDoesNotBelongToYou': '该物品不属于你。',
     'serverMessage.characterNotStrongEnough': '你还不够强，做不到这件事。',
+    'options.tab.server': '服务器',
     'options.section.exit': '退出',
     'options.exitGame': '退出游戏',
     'options.selectServer': '选择服务器',

@@ -534,6 +534,16 @@ export const Social = new (class _Social {
     });
   }
 
+  /** A yes/no box from another player is up; it owns Enter and Escape. */
+  get anyRequest(): boolean {
+    return !!(
+      this.partyRequest ||
+      this.guildJoinRequest ||
+      this.guildWarRequest ||
+      this.guildRelationRequest
+    );
+  }
+
   // ---- party --------------------------------------------------------------
 
   get inParty(): boolean {

@@ -8,7 +8,10 @@ import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { MuNumber } from '../../../../components/muNumber';
 import { Item } from '../../../../../ecs/world';
-import { MuResizeGrip } from '../../../../components/muWindow/useWindowChrome';
+import {
+  MuResizeGrip,
+  useWindowStackEntry,
+} from '../../../../components/muWindow/useWindowChrome';
 import { MuWindows } from '../../../../components/muWindow/windowState';
 import { SkillIcon } from '../../../../components/skillIcon';
 import { MasterExpBar } from '../masterSkills/masterExpBar';
@@ -41,6 +44,8 @@ import {
 } from '../../../../../common/itemHotkeys';
 
 const BAR_ID = BOTTOM_BAR_ID;
+/** The skill fan is a window for Escape's purposes, nothing more. */
+const SKILL_FAN_ID = 'skill-fan';
 
 const BAR_WIDTH = 640;
 const BAR_HEIGHT = 51;
@@ -352,6 +357,10 @@ const SkillSlots = observer(() => {
     setListOpen(false);
     setAssignSlot(-1);
   };
+  useWindowStackEntry(SKILL_FAN_ID, listOpen, () => {
+    closeList();
+    return true;
+  });
   /** Open the fan as the picker for one hot key. */
   const openPicker = (slot: number) => {
     setTip(null);
@@ -398,10 +407,6 @@ const SkillSlots = observer(() => {
   const fanSkills = skillList.map(s => s.number).filter(isHotbarSkill);
 
   useEventBus('keyPressed', code => {
-    if (code === 'Escape' && listOpen) {
-      closeList();
-      return;
-    }
     const m = /^(?:Digit|Numpad)(\d)$/.exec(code);
     if (!m) return;
     const slot = +m[1];

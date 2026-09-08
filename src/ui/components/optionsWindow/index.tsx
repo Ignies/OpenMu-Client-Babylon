@@ -248,6 +248,24 @@ type Tab = {
 };
 
 const TABS: Tab[] = [
+  // First, and the one the window always opens on: this is the original's
+  // Escape menu (`CSystemMenuMsgBox`), which Escape opens here too.
+  {
+    id: 'server',
+    labelKey: 'options.tab.server',
+    columns: [
+      [
+        {
+          titleKey: 'options.section.exit',
+          rows: [
+            exitRow('quit', 'options.exitGame'),
+            exitRow('servers', 'options.selectServer'),
+            exitRow('characters', 'options.switchCharacter'),
+          ],
+        },
+      ],
+    ],
+  },
   {
     id: 'game',
     labelKey: 'options.tab.game',
@@ -330,14 +348,6 @@ const TABS: Tab[] = [
               max: 4,
               display: v => v * 2 + 5,
             }),
-          ],
-        },
-        {
-          titleKey: 'options.section.exit',
-          rows: [
-            exitRow('quit', 'options.exitGame'),
-            exitRow('servers', 'options.selectServer'),
-            exitRow('characters', 'options.switchCharacter'),
           ],
         },
         {
@@ -544,6 +554,8 @@ const WIN_HEIGHT =
 const CLOSE_Y = WIN_HEIGHT - 47;
 
 const TAB_CONTENT_TOP = CONTENT_TOP + TAB_HEIGHT + 12;
+/** Where a tab's rows have to stop: the Close button owns the rest. */
+const TAB_CONTENT_BOTTOM = CLOSE_Y - 12;
 
 const HOT_KEY = 'options';
 
@@ -594,10 +606,12 @@ export const OptionsWindow = observer(() => {
   });
 
   useEffect(() => {
-    if (!Store.optionsEnabled) {
-      setCapturing(null);
-      setConfirming(null);
-    }
+    if (Store.optionsEnabled) return;
+    setCapturing(null);
+    setConfirming(null);
+    // Every open starts on the first tab: Escape is meant to reach the ways
+    // out in one press, not wherever the sliders were left.
+    setActiveTab(TABS[0].id);
   }, [Store.optionsEnabled]);
 
   if (!Store.optionsEnabled) return null;
@@ -731,9 +745,16 @@ export const OptionsWindow = observer(() => {
         })}
 
         {tab.columns.map((sections, columnIndex) => {
-          const x = COLUMN_X[columnIndex];
+          const alone = tab.columns.length === 1;
+          const x = alone
+            ? Math.floor((WIN_WIDTH - COLUMN_WIDTH) / 2)
+            : COLUMN_X[columnIndex];
 
           let y = TAB_CONTENT_TOP;
+          if (alone) {
+            const room = TAB_CONTENT_BOTTOM - TAB_CONTENT_TOP;
+            y += Math.max(0, Math.floor((room - columnHeight(sections)) / 2));
+          }
 
           return (
             <div key={columnIndex}>
