@@ -80,7 +80,7 @@ registerDebugModule({
     state(
       'Level',
       s =>
-        `ev ${s.ev.toFixed(2)} gain ${s.keyGain.toFixed(3)} exposure ${s.exposure.toFixed(3)}`
+        `ev ${s.ev.toFixed(2)} gain ${s.keyGain.toFixed(3)} scene ${s.key.sceneGain.toFixed(3)} exposure ${s.exposure.toFixed(3)}`
     ),
     state('Tone mapper', s => s.toneMapper),
     state(

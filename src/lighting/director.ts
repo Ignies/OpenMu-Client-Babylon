@@ -31,6 +31,11 @@ import {
   type LookProfile,
   type Rgb,
   type RoomVolume,
+  NO_OMEN,
+  composeBalance,
+  omenProfile,
+  type OmenLook,
+  type OmenLookName,
   SKY_SUN_DEFAULT,
 } from './profiles';
 import {
@@ -69,7 +74,7 @@ const SKY_GROUND = 0.68;
 
 const WHITE: Rgb = [1, 1, 1];
 
-/** Area (tavern) blend, seconds. */
+/** Area (tavern) blend, seconds; an omen fades on the same clock. */
 const BLEND_SECONDS = 0.7;
 
 /** An area named without a footprint masks nothing. */
@@ -102,6 +107,17 @@ export type LookState = {
     /** Gain on the pool lights and the terrain delta: the room's `candles x roomShare` on tiers >= 1, 1 otherwise. */
     readonly emitterGain: number;
     /**
+     * The level the *lit* scene runs at: `keyGain` times whatever an event is
+     * dimming it by. The key rig, the ground bake and the emitters take this;
+     * effect art takes `keyGain` and never this, so a fireball keeps its own
+     * brightness while the world under it goes dark - which is the whole
+     * reason the original's invasion meteors read as an omen.
+     *
+     * Unlike `keyGain` it is not 1 on Classic: the dim is the event's light,
+     * not a grade, and the flat tier has to show it.
+     */
+    readonly sceneGain: number;
+    /**
      * The key's share of the map's level inside a room (`AreaLook.keyLevel /
      * keyGain`, §13 F14): the rig, the ground bake and the emitters all take
      * it. 1 outside a room and on Classic.
@@ -128,6 +144,8 @@ export type LookState = {
 export interface LookDirector {
   setMap(world: ENUM_WORLD): void;
   setArea(name: AreaLookName | null, rect?: AreaRect | RoomVolume): void;
+  /** An event's modifier over the map and area already resolved; null clears it. */
+  setOmen(name: OmenLookName | null): void;
   tick(dt: number): void;
   state(): Readonly<LookState>;
   readonly onChange: Observable<Readonly<LookState>>;
@@ -212,6 +230,12 @@ export function createLookDirector(
   let base: LookProfile = profileFor(world);
   let target: LookProfile = base;
 
+  // The omen asked for, the row it is ramping from or to (the last one named,
+  // so clearing it fades out of that row rather than snapping), and the ramp.
+  let omen: OmenLookName | null = null;
+  let omenLook: OmenLook = NO_OMEN;
+  let omenBlend = 0;
+
   let targetCandles = 1;
   let targetShare = 1;
   let from = blendable(base);
@@ -235,6 +259,24 @@ export function createLookDirector(
   };
 
   const tick = (dt: number): void => {
+    const omenTo = omen ? 1 : 0;
+
+    if (omenBlend !== omenTo) {
+      const step = dt / BLEND_SECONDS;
+
+      omenBlend +=
+        Math.sign(omenTo - omenBlend) *
+        Math.min(step, Math.abs(omenTo - omenBlend));
+    }
+
+    const omenT = omenBlend * omenBlend * (3 - 2 * omenBlend);
+    const dim = 1 + (omenLook.dim - 1) * omenT;
+    const omenBalance: Rgb = [
+      1 + (omenLook.whiteBalance[0] - 1) * omenT,
+      1 + (omenLook.whiteBalance[1] - 1) * omenT,
+      1 + (omenLook.whiteBalance[2] - 1) * omenT,
+    ];
+
     if (blend < 1) {
       blend = Math.min(1, blend + dt / BLEND_SECONDS);
       const t = blend * blend * (3 - 2 * blend);
@@ -250,7 +292,7 @@ export function createLookDirector(
     const profile: LookProfile = {
       ...target,
       ev: shown.ev,
-      whiteBalance: wbDev ?? shown.whiteBalance,
+      whiteBalance: wbDev ?? composeBalance(shown.whiteBalance, omenBalance),
       fog: shown.fog,
     };
 
@@ -266,6 +308,9 @@ export function createLookDirector(
     // `candles` is then what it says, how much more than the room's own level
     // its emitters get, and 1 is Classic.
     const emitterGain = shaped ? (candlesDev ?? shown.candles) * roomShare : 1;
+    // The event dim rides on the light, not the grade, so every lit path takes
+    // it and the emissive art does not.
+    const sceneGain = keyGain * dim;
     const sunShare = shaped ? profile.sun.share : 0;
     const skyIntensity = shaped ? 1 - sunShare : 1;
     const skyGround: Rgb = shaped
@@ -273,10 +318,10 @@ export function createLookDirector(
       : WHITE;
 
     setKey(scene, {
-      skyIntensity: skyIntensity * keyGain * roomShare,
+      skyIntensity: skyIntensity * sceneGain * roomShare,
       skyDiffuse: WHITE,
       skyGround: shaped ? skyGround : null,
-      sunIntensity: sunShare * keyGain * roomShare * directLightGain(),
+      sunIntensity: sunShare * sceneGain * roomShare * directLightGain(),
       sunDiffuse: WHITE,
     });
 
@@ -382,6 +427,7 @@ export function createLookDirector(
         sunIntensity: sunShare,
         direction: shadow.direction,
         emitterGain,
+        sceneGain,
         roomShare,
       },
       shadow,
@@ -398,6 +444,7 @@ export function createLookDirector(
       world,
       areaKey(room),
       ev.toFixed(3),
+      dim.toFixed(3),
       roomShare.toFixed(3),
       shadow.casters,
       toneMapperIndex,
@@ -426,6 +473,11 @@ export function createLookDirector(
       from = shown = blendable(base);
       blend = 1;
       mapReady = false;
+    },
+    setOmen(name) {
+      if (name === omen) return;
+      omen = name;
+      if (name) omenLook = omenProfile(name);
     },
     setArea(name, rect) {
       const next: LookArea | null = name

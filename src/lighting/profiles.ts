@@ -432,3 +432,53 @@ export function sunDirectionOf(sun: LookProfile['sun']): [number, number, number
 export function toLinear(c: Rgb): [number, number, number] {
   return [c[0] ** 2.2, c[1] ** 2.2, c[2] ** 2.2];
 }
+
+/**
+ * An event's modifier over whatever map and area are already resolved. An
+ * area *replaces* a profile (`applyArea`); an omen only scales it, so the two
+ * compose instead of fighting and the map keeps its own look underneath.
+ */
+export type OmenLook = {
+  /** Multiplier on the lit scene's level (`LookState.key.sceneGain`). */
+  readonly dim: number;
+  /** Composed over the map's balance, then clamped back into range. */
+  readonly whiteBalance: Rgb;
+};
+
+export const NO_OMEN: OmenLook = { dim: 1, whiteBalance: [1, 1, 1] };
+
+/**
+ * A dragon invasion. The original subtracts `(0.3, 0.3, 0.2)` from the terrain
+ * light in a 16-tile disc around the hero for as long as the event is lit
+ * (GOBoid.cpp:1221-1222): on a mid bake of 0.75 that leaves 0.6 of the level,
+ * and it takes more red and green than blue, so what is left is colder than
+ * what went in. Both numbers are that subtraction, expressed as a scale
+ * because the clone's light has one.
+ */
+const INVASION: OmenLook = {
+  dim: 0.6,
+  whiteBalance: [0.97, 0.99, 1.05],
+};
+
+const OMENS = {
+  invasion: INVASION,
+} satisfies Record<string, OmenLook>;
+
+export type OmenLookName = keyof typeof OMENS;
+
+export function omenProfile(name: OmenLookName): OmenLook {
+  return OMENS[name];
+}
+
+/** The balance range the profile type promises, per channel. */
+const BALANCE_MIN = 0.94;
+const BALANCE_MAX = 1.06;
+
+/** The map's balance with an omen's laid over it, kept inside the range. */
+export function composeBalance(base: Rgb, omen: Rgb): Rgb {
+  return [
+    Math.min(BALANCE_MAX, Math.max(BALANCE_MIN, base[0] * omen[0])),
+    Math.min(BALANCE_MAX, Math.max(BALANCE_MIN, base[1] * omen[1])),
+    Math.min(BALANCE_MAX, Math.max(BALANCE_MIN, base[2] * omen[2])),
+  ];
+}
