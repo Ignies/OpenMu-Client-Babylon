@@ -18,7 +18,7 @@
  * tracking every viewport or popping hearts over players on another map.
  *
  * Because the token *is* the message, typing `<3` pops the same bubble. The
- * match is on the whole line, so ordinary chat that merely contains `!!`
+ * match is on the whole line, so ordinary chat that merely contains `??`
  * is left alone.
  *
  * Two placements:
@@ -55,13 +55,25 @@ export type EmojiBubbleDefinition = {
    * are written one byte per character (`stringToBytes`), so the glyph itself
    * cannot go on the wire. The first entry is what the radial menu sends, the
    * rest are alternatives a player might type. Tokens are unique across the
-   * table and must not open with a chat routing prefix (`~ @ $ #`), which
-   * `classifyInboundChat` would read as a party / guild / gens / GM line.
+   * table and may not open with a character the server reads as routing
+   * (`RESERVED_CHAT_PREFIXES`) - such a line never comes back as normal chat,
+   * so the bubble would show for the sender and for nobody else.
    */
   words: [string, ...string[]];
 };
 
 const DEFAULT_DURATION = 2.6;
+
+/**
+ * The first characters OpenMU reads as routing instead of speech
+ * (`ChatMessageAction._messagePrefixes`): party, guild, alliance, gens,
+ * global notification and command. A line opening with one of them is handed
+ * to that processor and never reaches the players around the sender - and
+ * `!` in particular is dropped outright below game master rank
+ * (`ChatMessageGlobalNotificationProcessor`). `#` is not in the list: the
+ * server sends it, the client only reads it (`classifyInboundChat`).
+ */
+export const RESERVED_CHAT_PREFIXES = ['~', '@', '$', '!', '/'] as const;
 
 export const EMOJI_BUBBLES: readonly EmojiBubbleDefinition[] = [
   {
@@ -94,7 +106,8 @@ export const EMOJI_BUBBLES: readonly EmojiBubbleDefinition[] = [
     glyph: '❗',
     placement: 'head',
     duration: DEFAULT_DURATION,
-    words: ['!!'],
+    // `!!` would be the obvious spelling, but `!` is reserved on the wire.
+    words: ['(!)'],
   },
   {
     id: 'question',
@@ -110,7 +123,7 @@ export const EMOJI_BUBBLES: readonly EmojiBubbleDefinition[] = [
     glyph: '⁉️',
     placement: 'head',
     duration: DEFAULT_DURATION,
-    words: ['!?', '?!'],
+    words: ['?!'],
   },
   {
     id: 'dizzy',
