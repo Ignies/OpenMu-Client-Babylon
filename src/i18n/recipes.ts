@@ -176,6 +176,7 @@ export const EN_TEXT = {
 
   // ---- Options window ----------------------------------------------------
   'options.title': 'Option',
+  'options.tab.server': 'Server',
   'options.tab.game': 'Game',
   'options.tab.video': 'Video',
   'options.tab.keys': 'Keys',

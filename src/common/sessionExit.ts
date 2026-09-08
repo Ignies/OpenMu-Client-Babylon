@@ -3,6 +3,7 @@ import { t } from '../i18n';
 import { Store, UIState } from '../store';
 import { Economy } from '../economy';
 import { Social } from '../social';
+import { Messenger } from '../messenger';
 import { quests } from '../quests';
 import { LogOutPacket } from './packets/ClientToServerPackets';
 import { SessionResume } from './sessionResume';
@@ -10,8 +11,9 @@ import { SessionResume } from './sessionResume';
 /**
  * The three ways out of a session: `CSystemMenuMsgBox`'s Exit Game, Select
  * Server and Switch Character (NewUICustomMessageBox.cpp:2386-2470). The
- * original hangs them off an Escape menu; this client has no Escape menu, so
- * they live in the Options window's Game tab.
+ * original opens that menu with Escape; here they are the Options window's
+ * first tab, and Escape on a clear screen opens it - the same key, one
+ * window fewer.
  *
  * The wire side is the original's and nothing more: `SendLogOut(0|2|1)`, and
  * the screen only changes once the server has answered (`ReceiveLogOut`) - it
@@ -159,3 +161,33 @@ export const SessionExit = new (class _SessionExit {
     });
   }
 })();
+
+/**
+ * Escape on a clear screen. `NewUIManager::UpdateKeyEvent` closes the top
+ * interface with it and opens the system menu when there is none; the window
+ * stack has already had its turn by the time this is asked (`closeTop`).
+ *
+ * What it still has to know about are the overlays that answer Escape
+ * themselves without joining that stack - the yes/no boxes another player
+ * pops up, the amount prompts, the quest windows. Escape belongs to them
+ * first.
+ */
+export function openSystemMenu(): boolean {
+  if (Store.uiState !== UIState.World) return false;
+  if (Store.optionsEnabled) return false;
+  if (
+    Store.msgWin ||
+    Store.minimapEnabled ||
+    quests.anyWindowOpen ||
+    Economy.prompt ||
+    Social.anyRequest ||
+    Messenger.friendRequest
+  ) {
+    return false;
+  }
+
+  runInAction(() => {
+    Store.optionsEnabled = true;
+  });
+  return true;
+}
