@@ -57,6 +57,63 @@ async function convertImageToWebP(image: Uint8Array): Promise<Uint8Array> {
 
 const texFailures: string[] = [];
 
+/** Every texture container under the data tree, keyed by lower-case file name. */
+let textureIndex: Map<string, string[]> | null = null;
+
+function indexTextures(): Map<string, string[]> {
+  if (textureIndex) return textureIndex;
+
+  const index = new Map<string, string[]>();
+
+  for (const relative of new Glob('**/*.{OZJ,ozj,OZT,ozt}').scanSync(
+    DATA_FOLDER
+  )) {
+    const path = relative.replaceAll('\\', '/');
+    const name = path.slice(path.lastIndexOf('/') + 1).toLowerCase();
+
+    const paths = index.get(name);
+    if (paths) paths.push(DATA_FOLDER + path);
+    else index.set(name, [DATA_FOLDER + path]);
+  }
+
+  textureIndex = index;
+
+  return index;
+}
+
+function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+
+/**
+ * The model's own folder is where the original looks and where the texture
+ * almost always is. A handful of BMDs name a file that this data tree keeps
+ * somewhere else: `Skill/Rider01.bmd` (the Uniria) asks for `unicon.jpg`,
+ * which ships as `Data/Item/unicon.OZJ`, and the three pets of
+ * `Data/Player/Helper0n.bmd` ask for `fairy` / `satan` the same way. Those
+ * came out untextured, which for a model this runtime draws unlit is a solid
+ * white silhouette — a mount and its rider lighting up the screen.
+ *
+ * So: fall back to the file name across the whole tree, but never guess.
+ * Several folders carry their own `bons.OZJ` or `hide.OZJ`, so the match
+ * counts only when every copy found is byte-identical; anything genuinely
+ * ambiguous stays unresolved and is reported at the end of the run.
+ */
+async function readTextureElsewhere(
+  fileName: string,
+  headerSize: number
+): Promise<Uint8Array | null> {
+  const paths = indexTextures().get(fileName.toLowerCase());
+  if (!paths?.length) return null;
+
+  const copies = await Promise.all(paths.map(path => Bun.file(path).bytes()));
+  if (copies.some(copy => !sameBytes(copy, copies[0]))) return null;
+
+  return copies[0].slice(headerSize);
+}
+
 async function readTextureBytes(texPath: string): Promise<Uint8Array> {
   const asIs = Bun.file(texPath);
 
@@ -105,6 +162,18 @@ async function readTextureBytes(texPath: string): Promise<Uint8Array> {
     if (await file.exists()) {
       return (await file.bytes()).slice(headerSize);
     }
+  }
+
+  // Not in the model's folder — look for it by name in the rest of the tree.
+  // Both spellings of a container are one entry in that index, so the two
+  // cases collapse to one lookup per container.
+  const fileName = base.slice(base.lastIndexOf('/') + 1);
+
+  for (const [container, headerSize] of containers) {
+    if (container !== container.toUpperCase()) continue;
+
+    const found = await readTextureElsewhere(fileName + container, headerSize);
+    if (found) return found;
   }
 
   throw new Error(`no texture found for ${texPath}`);
