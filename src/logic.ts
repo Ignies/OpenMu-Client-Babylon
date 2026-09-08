@@ -19,6 +19,7 @@ import {
   itemRestRotation,
 } from './common/itemAngle';
 import { dropModelProxy } from './common/dropModelProxy';
+import { DropObject } from './common/dropObject';
 import { prefetchItemIcons } from './common/itemIconPack';
 import { ItemSerializer } from './common/itemSerializer';
 import { isFemaleClass } from './common/mapPlayerNetClassToModelClass';
@@ -26,7 +27,6 @@ import {
   isKnownObjectType,
   resolveModelFactory,
 } from './common/modelFactoryPerId';
-import { ModelObject } from './common/modelObject';
 import { MonstersDatabase, monsterDisplayName } from './common/monstersDatabase';
 import { onLanguageChanged } from './i18n';
 import { translateServerText } from './i18n/serverText';
@@ -2400,7 +2400,7 @@ function spawnMoneyDrop(id: number, x: number, y: number, fresh: boolean | Boole
       rot: new Vector3(rot.x, rot.y, rot.z),
       scale: 1,
     },
-    modelFactory: ModelObject,
+    modelFactory: DropObject,
     modelFilePath: itemConfig.szModelFolder + itemConfig.szModelName,
     visibility: { state: 'hidden', lastChecked: 0 },
     attributeSystem: createAttributeSystem(),
@@ -2724,7 +2724,7 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
         rot: new Vector3(rot.x, rot.y, rot.z),
         scale: itemRestPose(poseGroup, poseNum).scale,
       },
-      modelFactory: ModelObject,
+      modelFactory: DropObject,
       modelFilePath:
         proxy?.modelFilePath ?? itemConfig.szModelFolder + itemConfig.szModelName,
       visibility: {
