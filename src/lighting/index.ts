@@ -16,6 +16,7 @@ import { lightAreaSkill, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
+import type { OmenLookName } from './profiles';
 
 export type { LightingLayer } from './layer';
 export type { LightRecipe, LightAnchor } from './lightSource';
@@ -101,6 +102,15 @@ class Lighting {
   }
 
   // ---- commands ----------------------------------------------------------
+
+  /**
+   * An event's modifier over the map's look - a dragon invasion darkening the
+   * world. Composes with the map and the area instead of replacing them;
+   * null clears it.
+   */
+  omen(name: OmenLookName | null): void {
+    lookDirector()?.setOmen(name);
+  }
 
   /** Light a targeted skill: cast flash, projectile, impact. */
   skillTargeted(scene: Scene, skill: number, caster: Entity, target: Entity | null): void {

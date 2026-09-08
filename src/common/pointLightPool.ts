@@ -49,11 +49,15 @@ function poolIntensity(): number {
   return intensityDev ?? INTENSITY;
 }
 
-/** The map's level and the room's emitter gain, one product (`AreaLook.candles`, 1 outside a room). */
+/**
+ * The lit scene's level and the room's emitter gain, one product
+ * (`AreaLook.candles`, 1 outside a room). `sceneGain` rather than `keyGain`,
+ * so a torch pool dims with the ground while an event's omen is up.
+ */
 function keyGain(): number {
   const look = lookDirector()?.state();
 
-  return look ? look.keyGain * look.key.emitterGain : 1;
+  return look ? look.key.sceneGain * look.key.emitterGain : 1;
 }
 
 const HEIGHT_OFFSET = 0.6;

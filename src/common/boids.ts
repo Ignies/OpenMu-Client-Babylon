@@ -59,7 +59,7 @@ export const MU_UNIT = 1 / 100;
 /** The original steps its movement per 25 Hz tick. */
 export const TICKS_PER_SECOND = 25;
 
-export type BoidKind = 'bird' | 'bat' | 'butterfly' | 'crow' | 'fish';
+export type BoidKind = 'bird' | 'bat' | 'butterfly' | 'crow' | 'fish' | 'dragon';
 
 export type BoidSpec = {
   readonly kind: BoidKind;
@@ -76,6 +76,22 @@ export type BoidSpec = {
   readonly turn: number;
   /** `o->LightEnable`; the butterflies alone are drawn unlit and white. */
   readonly lit: boolean;
+  /** Slots this species may fill. `MAX_BOIDS` when it says nothing. */
+  readonly max?: number;
+  /**
+   * `rand_fps_check(n)` per free slot per tick, the original's own spawn.
+   * Without it the paced `SPAWN_INTERVAL` is used, which is what keeps a
+   * flock from arriving all at once.
+   */
+  readonly spawnOneIn?: number;
+  /** `FlyDistance` in MU units; past it from the hero the boid is dropped. */
+  readonly flyDistance?: number;
+  /** `o->Scale` range when the original rolls one, instead of the flat `scale`. */
+  readonly scaleRange?: readonly [number, number];
+  /** `o->LifeTime` in ticks, rolled per spawn. Endless when absent. */
+  readonly lifeTicks?: readonly [number, number];
+  /** The additive metal/chrome pass a golden body carries, linear RGB. */
+  readonly shine?: readonly [number, number, number];
 };
 
 const BIRD: BoidSpec = {
@@ -129,6 +145,40 @@ const FISH: BoidSpec = {
   lit: true,
 };
 
+/**
+ * The invasion dragons (GOBoid.cpp:1274-1300). While `EnableEvent` is set the
+ * spawner skips its per-map branch entirely and every free slot rolls for one
+ * of these instead, so a Lorencia invasion has dragons overhead and no birds.
+ *
+ * `MONSTER_MODEL_DRAGON` is 31, which is `Monster32` (ZzzOpenData.cpp:2322).
+ * Five slots is the default map's budget (GOBoid.cpp:1257); the roar, the
+ * mouth fire and the flight path are the system's, not this table's.
+ */
+const DRAGON_MAX = 5;
+
+const DRAGON: BoidSpec = {
+  kind: 'dragon',
+  models: ['Monster/Monster32.glb'],
+  scale: 0.7,
+  scaleRange: [0.6, 0.8],
+  velocity: 0.5,
+  turn: 0,
+  lit: true,
+  max: DRAGON_MAX,
+  spawnOneIn: 300,
+  flyDistance: 4000,
+  lifeTicks: [128, 256],
+};
+
+/**
+ * `EnableEvent == 3` is the Golden Dragon and its only difference is
+ * `SubType = 1` (GOBoid.cpp:1293), which the original renders as the
+ * `RENDER_METAL | RENDER_BRIGHT` / `RENDER_CHROME | RENDER_BRIGHT` pair -
+ * the same pass `monsters/goldenMonsters.ts` gives the rest of the golden
+ * line, at the same tint.
+ */
+const GOLDEN_DRAGON: BoidSpec = { ...DRAGON, shine: [1, 0.5, 0] };
+
 const BLOOD_CASTLE: readonly ENUM_WORLD[] = [
   ENUM_WORLD.WD_11BLOODCASTLE1,
   12,
@@ -151,8 +201,14 @@ const BY_WORLD: Partial<Record<ENUM_WORLD, BoidSpec>> = {
 
 for (const w of BLOOD_CASTLE) BY_WORLD[w] = CROW;
 
-/** What flies on this map, or null. */
-export function boidsFor(map: ENUM_WORLD): BoidSpec | null {
+/**
+ * What flies on this map, or null. A running invasion (`MapEventState`, so 1
+ * Red or 3 Golden) takes the sky over from the map's own species on every
+ * map, exactly as the original's spawner does.
+ */
+export function boidsFor(map: ENUM_WORLD, invasion = 0): BoidSpec | null {
+  if (invasion) return invasion === 3 ? GOLDEN_DRAGON : DRAGON;
+
   return BY_WORLD[map] ?? null;
 }
 
@@ -163,7 +219,10 @@ const factories = new Map<string, typeof ModelObject>();
  * uses: the boid is an ordinary model entity and the system only moves it.
  */
 export function boidFactoryFor(spec: BoidSpec, model: string): typeof ModelObject {
-  const cached = factories.get(model);
+  // The two dragons share one model file and differ only by the shine, so the
+  // key has to carry it or the first one loaded decides the colour of both.
+  const key = spec.shine ? `${model}|${spec.shine.join()}` : model;
+  const cached = factories.get(key);
   if (cached) return cached;
 
   class BoidModel extends ModelObject {
@@ -174,6 +233,10 @@ export function boidFactoryFor(spec: BoidSpec, model: string): typeof ModelObjec
     CastsShadow = false;
 
     async init(world: World, _entity: Entity) {
+      const shine = spec.shine;
+
+      if (shine) this.BodyShine.tint.set(shine[0], shine[1], shine[2]);
+
       this.load(await loadGLTF(model, world));
     }
   }
@@ -182,7 +245,7 @@ export function boidFactoryFor(spec: BoidSpec, model: string): typeof ModelObjec
     value: model.replace(/^.*\/|\.glb$/g, ''),
   });
 
-  factories.set(model, BoidModel);
+  factories.set(key, BoidModel);
 
   return BoidModel;
 }

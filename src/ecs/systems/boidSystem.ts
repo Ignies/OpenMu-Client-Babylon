@@ -11,6 +11,10 @@ import {
   type BoidSpec,
 } from '../../common/boids';
 import { GameOptions } from '../../common/gameOptions';
+import { effects } from '../../effects';
+import { FIRE_PUFF, TEX } from '../../effects/recipes';
+import { invasionEvent } from '../../events/invasion';
+import { playSfx } from '../../libs/sfx';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
@@ -68,6 +72,46 @@ const BAT_TIMER_PER_TICK = 0.2;
 const FLY_LOW = 50 * MU_UNIT;
 const FLY_HIGH = 300 * MU_UNIT;
 
+/**
+ * The invasion dragon (GOBoid.cpp:1395-1412). It does not flock and it does
+ * not turn: `Angle[2]` is fixed at spawn and it holds it, riding a sine
+ * between +300 and +400 over the ground and covering `Scale * 40` a tick.
+ * `-90` in the original's angles is the same heading its meteors take, so the
+ * two stream the same way.
+ */
+const DRAGON_YAW = 180;
+const DRAGON_RIDE = 400 * MU_UNIT;
+const DRAGON_DIP = 100 * MU_UNIT;
+const DRAGON_TIMER_PER_TICK = 0.05;
+const DRAGON_UNITS_PER_TICK = 40 * MU_UNIT;
+
+/** Spawn box off the hero: `rand%600 - 100` and `rand%400 + 200`. */
+const DRAGON_SPAWN_X = [-100, 500] as const;
+const DRAGON_SPAWN_Z = [200, 600] as const;
+
+/** `SetAction(o, MONSTER01_DIE + 1)` at `PlaySpeed` 0.5 (_define.h:495-506). */
+const DRAGON_ACTION = 7;
+const DRAGON_ACTION_SPEED = 0.5;
+
+/** `PlayBuffer(SOUND_MONSTER_BULLATTACK1)` on `rand_fps_check(128)`. */
+const ROAR_ONE_IN = 128;
+
+/** The mouth, as an offset along the heading rather than off bone 11. */
+const MOUTH_AHEAD = 1.6;
+const MOUTH_BELOW = 0.35;
+
+/** `CreateSprite(BITMAP_LIGHTNING + 1, ..., 1.f, red)` at the mouth. */
+const BREATH_CARD_TILES = 0.9;
+const BREATH_CARD_SECONDS = 0.32;
+const BREATH_RED = [1, 0, 0] as const;
+
+/**
+ * The original emits one card and one puff per rendered frame, at 25 Hz. A
+ * roll instead of a frame, so a 144 Hz client does not put six times the
+ * flame in the sky as a 25 Hz one.
+ */
+const BREATH_ONE_IN = 2;
+
 const DEG = Math.PI / 180;
 
 /** A `rand_fps_check(n)` - one chance in n, per tick, over `ticks` ticks. */
@@ -104,27 +148,43 @@ export const BoidSystem: ISystemFactory = world => {
   function spawn(heroPos: IVector3Like): void {
     if (!spec) return;
 
-    const x = heroPos.x + (rand(1024) - 512) * MU_UNIT;
-    const z = heroPos.z + (rand(1024) - 512) * MU_UNIT;
+    const dragon = spec.kind === 'dragon';
+
+    // The dragons come in off one shoulder rather than out of a box centred
+    // on the hero, and they all fly the same way (GOBoid.cpp:1288-1299).
+    const x = dragon
+      ? heroPos.x + (DRAGON_SPAWN_X[0] + rand(DRAGON_SPAWN_X[1] - DRAGON_SPAWN_X[0])) * MU_UNIT
+      : heroPos.x + (rand(1024) - 512) * MU_UNIT;
+    const z = dragon
+      ? heroPos.z + (DRAGON_SPAWN_Z[0] + rand(DRAGON_SPAWN_Z[1] - DRAGON_SPAWN_Z[0])) * MU_UNIT
+      : heroPos.z + (rand(1024) - 512) * MU_UNIT;
     const ground = world.getTerrainHeight(x, z);
     const model = spec.models[rand(spec.models.length)];
+    const range = spec.scaleRange;
+    const scale = range
+      ? range[0] + Math.random() * (range[1] - range[0])
+      : spec.scale;
+    const ticks = spec.lifeTicks;
 
     world.add({
       worldIndex: world.mapIndex,
       transform: {
         pos: new Vector3(x, ground + SPAWN_RISE_MIN + Math.random() * SPAWN_RISE_SPAN, z),
         rot: new Vector3(0, 0, 0),
-        scale: spec.scale,
+        scale,
       },
       modelFactory: boidFactoryFor(spec, model),
       visibility: { state: 'hidden', lastChecked: 0 },
       boid: {
         kind: spec.kind,
         ai: 'fly',
-        yaw: rand(360),
+        yaw: dragon ? DRAGON_YAW : rand(360),
         rise: 0,
         velocity: spec.velocity,
-        timer: Math.random() * 3.14,
+        timer: dragon ? rand(10) * 0.1 : Math.random() * 3.14,
+        life: ticks
+          ? (ticks[0] + rand(ticks[1] - ticks[0])) / TICKS_PER_SECOND
+          : Infinity,
         leadX: x,
         leadZ: z,
         alpha: 0,
@@ -282,10 +342,61 @@ export const BoidSystem: ISystemFactory = world => {
     p.y += (rand(15) - 7) * 0.3 * MU_UNIT * ticks;
   }
 
+  /**
+   * `MoveBoids`' event branch: no flock rule, no turn, a fixed heading and a
+   * sine ride over the ground, breathing fire and roaring as it goes.
+   */
+  function dragon(e: Entity, ticks: number): void {
+    const s = e.boid!;
+    const p = e.transform!.pos;
+    const scale = e.transform!.scale;
+
+    s.timer += scale * DRAGON_TIMER_PER_TICK * ticks;
+    p.y =
+      world.getTerrainHeight(p.x, p.z) +
+      DRAGON_RIDE -
+      Math.abs(Math.sin(s.timer)) * DRAGON_DIP;
+    s.rise = 0;
+
+    const model = e.modelObject;
+
+    if (model) {
+      model.setActionSpeed(DRAGON_ACTION, DRAGON_ACTION_SPEED);
+      model.playAction(DRAGON_ACTION, true);
+    }
+
+    if (rolled(ROAR_ONE_IN, ticks)) playSfx('Sound/mBullAttack1', p);
+
+    // The mouth: bone 11 offset (0, -50, 0) in the original, an offset along
+    // the heading here - the flame is a card and a puff, not a placement.
+    const rad = s.yaw * DEG;
+    const mouth = new Vector3(
+      p.x + Math.sin(rad) * MOUTH_AHEAD * scale,
+      p.y - MOUTH_BELOW * scale,
+      p.z + Math.cos(rad) * MOUTH_AHEAD * scale
+    );
+
+    if (!rolled(BREATH_ONE_IN, ticks)) return;
+
+    effects.spawn('particles', world.scene, mouth, {
+      recipe: FIRE_PUFF,
+      count: 1,
+    });
+    effects.spawn('sprite', world.scene, mouth, {
+      texture: TEX.lightning2,
+      colour: BREATH_RED,
+      size: BREATH_CARD_TILES * scale,
+      seconds: BREATH_CARD_SECONDS,
+    });
+  }
+
   return {
     update(dt) {
       // The wildlife rides the ambient budget, like the leaves and the dust.
-      const wanted = GameOptions.ambientParticles ? boidsFor(world.mapIndex) : null;
+      // An invasion takes the sky over from the map's own species.
+      const wanted = GameOptions.ambientParticles
+        ? boidsFor(world.mapIndex, invasionEvent())
+        : null;
 
       if (world.mapIndex !== map || wanted !== spec) {
         despawnAll();
@@ -310,14 +421,23 @@ export const BoidSystem: ISystemFactory = world => {
         if (s.kind === 'bird') bird(e, ticks, hero);
         else if (s.kind === 'bat') bat(e, ticks);
         else if (s.kind === 'butterfly') butterfly(e, ticks);
+        else if (s.kind === 'dragon') dragon(e, ticks);
 
-        // The butterflies flock a quarter as often (GOBoid.cpp:1133).
-        if (s.ai !== 'ground' && (s.kind !== 'butterfly' || rolled(4, ticks))) {
+        // The butterflies flock a quarter as often (GOBoid.cpp:1133); the
+        // dragons never do - the original holds their spawn angle.
+        if (
+          s.ai !== 'ground' &&
+          s.kind !== 'dragon' &&
+          (s.kind !== 'butterfly' || rolled(4, ticks))
+        ) {
           flock(e, ticks);
         }
 
         if (s.ai !== 'ground') {
-          const step = s.velocity * FORWARD_PER_TICK * ticks;
+          const step =
+            s.kind === 'dragon'
+              ? e.transform!.scale * DRAGON_UNITS_PER_TICK * ticks
+              : s.velocity * FORWARD_PER_TICK * ticks;
           const rad = s.yaw * DEG;
           const fx = Math.sin(rad);
           const fz = Math.cos(rad);
@@ -350,12 +470,25 @@ export const BoidSystem: ISystemFactory = world => {
         // sends it up as soon as the hero is within three tiles, or on its own
         // 1-in-256. Fading one out where it stands is the one place this is
         // certain to be seen.
+        //
+        // A dragon is exempt from both: the original gives it a `LifeTime`
+        // instead (GOBoid.cpp:1284) and a `FlyDistance` of its own
+        // (:1178-1181), and never rolls the 1-in-512 on it.
         const range = Math.hypot(p.x - hero.x, p.z - hero.z);
+        const flyDistance = spec.flyDistance
+          ? spec.flyDistance * MU_UNIT
+          : FLY_DISTANCE;
+
+        s.life -= dt;
 
         if (
           !s.leaving &&
-          (range >= FLY_DISTANCE ||
-            (s.ai === 'fly' && range >= LEAVE_RANGE && rolled(512, ticks)))
+          (range >= flyDistance ||
+            s.life <= 0 ||
+            (s.kind !== 'dragon' &&
+              s.ai === 'fly' &&
+              range >= LEAVE_RANGE &&
+              rolled(512, ticks)))
         ) {
           s.leaving = true;
         }
@@ -379,7 +512,22 @@ export const BoidSystem: ISystemFactory = world => {
       // second of a warp and the flocking knotted the lot of them together.
       sinceSpawn += dt;
 
-      if (live < MAX_BOIDS && sinceSpawn >= SPAWN_INTERVAL) {
+      const max = spec.max ?? MAX_BOIDS;
+
+      if (live >= max) return;
+
+      // The dragons keep the original's own gate instead: one roll per free
+      // slot per tick (GOBoid.cpp:1277). There are five slots and they cross
+      // the map in a few seconds, so pacing them would empty the sky.
+      if (spec.spawnOneIn) {
+        for (let i = live; i < max; i++) {
+          if (rolled(spec.spawnOneIn, ticks)) spawn(hero);
+        }
+
+        return;
+      }
+
+      if (sinceSpawn >= SPAWN_INTERVAL) {
         sinceSpawn = 0;
         spawn(hero);
       }

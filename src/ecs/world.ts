@@ -312,9 +312,15 @@ export type Entity = Partial<{
    * reads it.
    */
   boid: {
-    kind: 'bird' | 'bat' | 'butterfly' | 'crow' | 'fish';
+    kind: 'bird' | 'bat' | 'butterfly' | 'crow' | 'fish' | 'dragon';
     /** `o->AI`: only the bird uses more than `fly`. */
     ai: 'fly' | 'down' | 'ground' | 'up';
+    /**
+     * `o->LifeTime` in seconds, and Infinity for the species that have none.
+     * The invasion dragons are the only boid the original gives a clock; at
+     * zero it is told to leave rather than dropped, so it fades like the rest.
+     */
+    life: number;
     /** `o->Angle[2]`, degrees, MU convention. */
     yaw: number;
     /** `o->Direction[2]`: the vertical component, MU units per tick. */
