@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" translate="no" spellcheck="false">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Marketplace - harness</title>
+  <meta name="color-scheme" content="dark" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    @font-face {
+      font-family: 'Segoe UI';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/fonts/segoeuib.woff2') format('woff2'),
+        url('/fonts/segoeuib.woff') format('woff'),
+        url('/fonts/segoeuib.ttf') format('truetype');
+    }
+  </style>
+
+  <style>
+    :root {
+      font-family: 'Segoe UI', sans-serif, Arial;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body,
+    html {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    /* A neutral stand-in for the world behind the window, so the panel is
+       judged against something rather than against white. */
+    body {
+      background:
+        radial-gradient(1200px 700px at 50% 40%, #2a2f3d 0%, #10131b 70%, #080a0f 100%);
+    }
+
+    .harness-note {
+      position: fixed;
+      top: 10px;
+      left: 12px;
+      font-size: 11px;
+      color: #6f7891;
+      letter-spacing: 0.3px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="harness-note">marketplace harness - fixture data, no game session</div>
+  <div id="root"></div>
+  <script type="module" src="/src/marketplace/dev.tsx"></script>
+</body>
+
+</html>

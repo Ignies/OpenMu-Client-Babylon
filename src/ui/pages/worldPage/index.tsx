@@ -14,6 +14,7 @@ import { CharacterInfo } from './components/characterInfo';
 import { PetInfoWindow } from './components/petInfo';
 import { MuHelperWindow } from './components/muHelper';
 import { CashShop } from './components/cashShop';
+import { MarketplaceWindow } from './components/marketplace';
 import { Inventory } from './components/inventory';
 import { NpcShop } from './components/npcShop';
 import { Vault } from './components/vault';
@@ -83,6 +84,7 @@ const HUD = observer(() => {
       <PetInfoWindow />
       <MuHelperWindow />
       <CashShop />
+      <MarketplaceWindow />
       <MoveCommandWindow />
       <EmoteMenu />
       <ChatWindow />

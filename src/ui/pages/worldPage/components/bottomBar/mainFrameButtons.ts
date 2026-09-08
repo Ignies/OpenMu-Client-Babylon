@@ -1,7 +1,7 @@
 import type { TextKey } from '../../../../../i18n';
 import { Store } from '../../../../../store';
 import { Messenger } from '../../../../../messenger';
-import { toggleCashShopWindow } from '../../../../../cashShop/state';
+import { toggleMarketplace } from '../../../../../marketplace/gameBridge';
 
 /**
  * The five buttons on the right of the main frame (`newui_menu_Bt01..05`), in
@@ -21,7 +21,7 @@ export const MAIN_FRAME_BUTTONS: readonly MainFrameButton[] = [
   {
     file: 'partCharge1/newui_menu_Bt05.OZJ',
     titleKey: 'bottomBar.itemShop',
-    toggle: () => toggleCashShopWindow(),
+    toggle: () => toggleMarketplace(),
   },
   {
     file: 'partCharge1/newui_menu_Bt01.OZJ',

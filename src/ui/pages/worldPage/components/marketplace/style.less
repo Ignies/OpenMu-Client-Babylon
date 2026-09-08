@@ -1,0 +1,875 @@
+@import (reference) '../../../../components/muText/style.less';
+
+// The frame art carries the chrome, so nothing here draws a panel, a border or
+// a background of its own. Fills exist only where text needs to stay legible.
+@mp-ink: #d9dfe9;
+@mp-dim: #8d96ac;
+@mp-gold: #e0bc6a;
+@mp-good: #8fd79a;
+@mp-bad: #dd8a7f;
+
+// Every region is positioned to a slot the art draws, so padding has to stay
+// inside the box it was given. Without this the app's default content-box adds
+// padding on top of each region's measured size and everything drifts.
+.mp-window,
+.mp-window * {
+  box-sizing: border-box;
+}
+
+.mp-window {
+  .mu-font();
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  color: @mp-ink;
+  font-size: 12px;
+  background-repeat: no-repeat;
+  // The art is the window: it stretches as one piece, so every region below
+  // can be a percentage of it and nothing drifts when the window is scaled.
+  background-size: 100% 100%;
+  pointer-events: auto;
+  outline: none;
+
+  // Font and cursor only, deliberately. A descendant selector here outranks
+  // the single-class rules below it, so anything else this set - colour,
+  // background, border - would silently beat `.mp-chip.is-on` and friends and
+  // paint light text on gold. Every button class declares its own chrome.
+  button {
+    .mu-font();
+    cursor: pointer;
+  }
+
+  // Everything the art already draws a slot for sits on it absolutely.
+  > * {
+    position: absolute;
+  }
+
+  img {
+    width: auto;
+    height: auto;
+  }
+}
+
+// ---- plaque: title, tabs, wallet -----------------------------------------
+
+.mp-plaque {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  // Right padding stays small: the bar tapers to an arrow point just past its
+  // right edge, and the close button must not ride up onto it.
+  padding: 0 10px 0 24px;
+  cursor: move;
+}
+
+.mp-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: @mp-gold;
+  letter-spacing: 0.6px;
+  text-shadow: 0 1px 2px #000;
+  white-space: nowrap;
+}
+
+.mp-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.mp-tab {
+  padding: 4px 9px;
+  font-size: 12px;
+  color: @mp-dim;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  white-space: nowrap;
+
+  &:hover {
+    color: @mp-ink;
+  }
+
+  &.is-on {
+    color: @mp-gold;
+    background: rgba(224, 188, 106, 0.12);
+    border-color: rgba(224, 188, 106, 0.45);
+  }
+}
+
+.mp-wallet {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: @mp-gold;
+  text-shadow: 0 1px 2px #000;
+  white-space: nowrap;
+}
+
+.mp-zen {
+  margin-left: 3px;
+  font-size: 10px;
+  font-weight: 400;
+  color: @mp-dim;
+}
+
+.mp-close {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  color: @mp-dim;
+  background: rgba(8, 10, 15, 0.55);
+  border: 1px solid rgba(224, 188, 106, 0.35);
+  border-radius: 4px;
+
+  &:hover {
+    color: #fff;
+    border-color: @mp-gold;
+  }
+}
+
+// ---- toolbar -------------------------------------------------------------
+
+// The art is chrome only now, so these draw their own fields.
+.mp-toolbar {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+}
+
+.mp-select,
+.mp-input {
+  .mu-font();
+  height: 26px;
+  font-size: 12px;
+  color: @mp-ink;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(224, 188, 106, 0.28);
+  border-radius: 3px;
+  outline: none;
+
+  &:focus {
+    border-color: fade(@mp-gold, 65%);
+  }
+}
+
+.mp-select {
+  flex: 0 0 auto;
+  padding: 0 8px;
+
+  option {
+    color: @mp-ink;
+    background: #141822;
+  }
+}
+
+.mp-input {
+  padding: 0 10px;
+
+  &::placeholder {
+    color: fade(@mp-dim, 65%);
+  }
+}
+
+.mp-search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.mp-viewswitch {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 1px;
+  padding: 1px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(224, 188, 106, 0.28);
+  border-radius: 3px;
+}
+
+.mp-viewbtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 22px;
+  color: fade(@mp-gold, 60%);
+  background: none;
+  border: none;
+  border-radius: 2px;
+
+  &:hover {
+    color: @mp-gold;
+  }
+
+  &.is-on {
+    color: #1a1206;
+    background: @mp-gold;
+  }
+}
+
+// ---- rail ----------------------------------------------------------------
+
+.mp-rail {
+  display: flex;
+  flex-direction: column;
+  padding: 9px 8px;
+}
+
+.mp-rail-list {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 0;
+  // Ten categories, the filters and the pager are a tight fit in the rail the
+  // art draws. They are sized to fit; this is so a longer list scrolls instead
+  // of leaving a half-cut row at the bottom.
+  overflow-y: auto;
+}
+
+.mp-rail-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: @mp-dim;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 3px;
+
+  &:hover {
+    color: @mp-ink;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &.is-on {
+    color: @mp-gold;
+    background: rgba(224, 188, 106, 0.14);
+  }
+}
+
+.mp-rail-count {
+  font-size: 10px;
+  color: fade(@mp-dim, 75%);
+}
+
+.mp-rail-filters {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+  margin-top: 8px;
+  border-top: 1px solid rgba(224, 188, 106, 0.18);
+}
+
+.mp-chip {
+  padding: 4px 9px;
+  font-size: 11px;
+  color: @mp-dim;
+  background: none;
+  border: 1px solid rgba(224, 188, 106, 0.25);
+  border-radius: 11px;
+
+  &:hover {
+    color: @mp-ink;
+  }
+
+  &.is-on {
+    color: #1a1206;
+    background: @mp-gold;
+    border-color: @mp-gold;
+  }
+}
+
+.mp-rail-foot {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid rgba(224, 188, 106, 0.18);
+}
+
+.mp-count {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 11px;
+  color: @mp-dim;
+  text-align: center;
+}
+
+.mp-pager {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+}
+
+.mp-page-btn {
+  flex: 1 1 0;
+  padding: 3px 4px;
+  font-size: 11px;
+  color: @mp-ink;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(224, 188, 106, 0.22);
+  border-radius: 3px;
+
+  &:hover:not(:disabled) {
+    background: rgba(224, 188, 106, 0.18);
+  }
+
+  &:disabled {
+    color: fade(@mp-dim, 45%);
+    cursor: default;
+  }
+}
+
+.mp-page-label {
+  font-size: 10px;
+  color: fade(@mp-dim, 80%);
+}
+
+// ---- content -------------------------------------------------------------
+
+.mp-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+// ---- list view -----------------------------------------------------------
+
+.mp-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.mp-row {
+  display: grid;
+  // Fixed rather than a share of the list: a short page keeps its rows the
+  // same height as a full one instead of stretching them.
+  flex: 0 0 34px;
+  grid-template-columns: 30px minmax(0, 1fr) 96px 62px 48px 148px 68px;
+  gap: 10px;
+  align-items: center;
+  min-height: 0;
+  padding: 0 6px;
+  border-bottom: 1px solid rgba(224, 188, 106, 0.09);
+
+  &:hover {
+    background: rgba(224, 188, 106, 0.08);
+  }
+}
+
+.mp-row-head {
+  flex: 0 0 22px;
+  font-size: 10px;
+  color: fade(@mp-dim, 85%);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border-bottom-color: rgba(224, 188, 106, 0.28);
+
+  &:hover {
+    background: none;
+  }
+}
+
+.mp-row-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+
+  img {
+    max-width: 28px;
+    max-height: 28px;
+    object-fit: contain;
+  }
+}
+
+.mp-row-seller,
+.mp-row-age {
+  overflow: hidden;
+  font-size: 11px;
+  color: @mp-dim;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-row-deal {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mp-row-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: @mp-gold;
+  text-align: right;
+
+  &.is-short {
+    color: @mp-bad;
+  }
+}
+
+.mp-row-price-head {
+  text-align: right;
+}
+
+.mp-card-name {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 700;
+  color: @mp-ink;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.is-excellent {
+    color: #86ccff;
+  }
+
+  &.is-ancient {
+    color: @mp-gold;
+  }
+}
+
+.mp-deal {
+  padding: 0 4px;
+  font-size: 10px;
+  border-radius: 3px;
+
+  &.is-good {
+    color: @mp-good;
+    background: fade(@mp-good, 14%);
+  }
+
+  &.is-bad {
+    color: @mp-bad;
+    background: fade(@mp-bad, 14%);
+  }
+}
+
+// ---- grid view -----------------------------------------------------------
+
+.mp-grid {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  // A fixed row height, not a share of the area: with `1fr` a page holding one
+  // row stretched that row down the whole window. Cards are the same size
+  // whether the page has two on it or twelve.
+  grid-auto-rows: 84px;
+  align-content: start;
+  gap: 7px;
+  min-height: 0;
+  padding: 6px 8px;
+  overflow: hidden;
+}
+
+.mp-card {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  min-width: 0;
+  padding: 8px;
+  // Opaque, so the ruled bands behind it do not read through the card.
+  background: linear-gradient(180deg, #1b2130 0%, #12161f 100%);
+  border: 1px solid rgba(224, 188, 106, 0.22);
+  border-radius: 4px;
+
+  &:hover {
+    border-color: fade(@mp-gold, 60%);
+  }
+}
+
+.mp-card-icon {
+  display: flex;
+  flex: 0 0 46px;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(224, 188, 106, 0.18);
+  border-radius: 3px;
+
+  img {
+    max-width: 42px;
+    max-height: 42px;
+    object-fit: contain;
+  }
+}
+
+.mp-card-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mp-card-meta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 10px;
+  color: @mp-dim;
+}
+
+.mp-card-seller {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-dot {
+  padding: 0 4px;
+  vertical-align: 1px;
+}
+
+.mp-card-meta .mp-deal {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.mp-card-foot {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 2px;
+
+  .mp-btn {
+    margin-left: auto;
+  }
+}
+
+.mp-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: @mp-gold;
+
+  &.is-short {
+    color: @mp-bad;
+  }
+}
+
+// ---- buttons -------------------------------------------------------------
+
+.mp-btn {
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a1206;
+  background: linear-gradient(180deg, lighten(@mp-gold, 6%) 0%, darken(@mp-gold, 10%) 100%);
+  border: 1px solid darken(@mp-gold, 22%);
+  border-radius: 3px;
+
+  &:hover:not(:disabled) {
+    background: lighten(@mp-gold, 10%);
+  }
+
+  &:disabled {
+    color: fade(@mp-dim, 70%);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(224, 188, 106, 0.18);
+    cursor: default;
+  }
+
+  &.is-quiet {
+    color: @mp-ink;
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(224, 188, 106, 0.28);
+
+    &:hover {
+      background: rgba(224, 188, 106, 0.18);
+    }
+  }
+
+  &.is-wide {
+    width: 100%;
+    padding: 7px;
+    font-size: 12px;
+  }
+}
+
+// ---- sell ----------------------------------------------------------------
+
+.mp-sell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  padding: 10px 14px;
+}
+
+.mp-panel-head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding-bottom: 5px;
+  font-size: 10px;
+  color: fade(@mp-dim, 85%);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(224, 188, 106, 0.18);
+}
+
+.mp-sell-bag {
+  flex: 0 0 auto;
+}
+
+.mp-sell-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 42px);
+  gap: 5px;
+  align-content: start;
+  max-height: 96px;
+  padding-top: 8px;
+  overflow-y: auto;
+}
+
+.mp-sell-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(224, 188, 106, 0.18);
+  border-radius: 3px;
+
+  img {
+    max-width: 38px;
+    max-height: 38px;
+    object-fit: contain;
+  }
+
+  &:hover {
+    border-color: fade(@mp-gold, 55%);
+  }
+
+  &.is-on {
+    border-color: @mp-gold;
+    box-shadow: 0 0 0 1px fade(@mp-gold, 40%) inset;
+  }
+}
+
+.mp-sell-split {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 14px;
+  min-height: 0;
+}
+
+.mp-rate {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+
+  .mp-btn {
+    align-self: start;
+  }
+}
+
+.mp-rate-count {
+  margin-left: auto;
+  text-transform: none;
+}
+
+.mp-rate-none {
+  padding: 14px 0;
+  font-size: 11px;
+  color: @mp-dim;
+}
+
+.mp-rate-floor {
+  font-size: 11px;
+  color: @mp-dim;
+
+  strong {
+    font-size: 13px;
+    color: @mp-gold;
+  }
+}
+
+.mp-rate-rows {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mp-rate-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 80px 110px;
+  gap: 8px;
+  align-items: center;
+  padding: 3px 8px;
+  font-size: 11px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  border-radius: 3px;
+
+  &.is-mine {
+    border-color: fade(@mp-gold, 45%);
+  }
+}
+
+.mp-rate-name {
+  overflow: hidden;
+  color: @mp-ink;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.is-excellent {
+    color: #86ccff;
+  }
+
+  &.is-ancient {
+    color: @mp-gold;
+  }
+}
+
+.mp-rate-seller {
+  overflow: hidden;
+  color: @mp-dim;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-rate-price {
+  font-weight: 700;
+  color: @mp-gold;
+  text-align: right;
+}
+
+.mp-sell-form {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+
+.mp-sell-picked {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+
+.mp-sell-price {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 12px;
+  color: @mp-dim;
+
+  .mp-input {
+    flex: 1 1 auto;
+    padding: 4px 8px;
+    text-align: right;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(224, 188, 106, 0.25);
+    border-radius: 3px;
+  }
+}
+
+.mp-note {
+  margin: 0;
+  font-size: 10px;
+  line-height: 14px;
+  color: fade(@mp-dim, 80%);
+}
+
+.mp-empty {
+  align-self: center;
+  margin: auto;
+  padding: 20px;
+  font-size: 12px;
+  color: @mp-dim;
+  text-align: center;
+}
+
+// ---- modal and flash -----------------------------------------------------
+
+.mp-modal {
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 5, 9, 0.62);
+}
+
+.mp-modal-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 290px;
+  padding: 16px;
+  background: linear-gradient(180deg, #1e2431 0%, #131720 100%);
+  border: 1px solid rgba(224, 188, 106, 0.4);
+  border-radius: 5px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+.mp-modal-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: @mp-gold;
+}
+
+.mp-modal-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mp-modal-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: @mp-gold;
+  text-align: center;
+}
+
+.mp-modal-buttons {
+  display: flex;
+  gap: 8px;
+
+  .mp-btn {
+    flex: 1 1 0;
+    text-align: center;
+  }
+}
+
+.mp-flash {
+  bottom: 3%;
+  left: 50%;
+  padding: 6px 14px;
+  font-size: 11px;
+  color: #1a1206;
+  background: @mp-gold;
+  border-radius: 11px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
