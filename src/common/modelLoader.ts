@@ -30,6 +30,7 @@ import {
 import { textureSourceName } from './pbrMaps';
 import { getEmptyTexture } from '../libs/babylon/emptyTexture';
 import { BlendState } from './objects/enum';
+import { isSkinOrHairTexture } from './skinTexture';
 import { parseTextureScriptFromPath } from './textureScript';
 
 const reader = new BMDReader();
@@ -436,14 +437,17 @@ function prepareMeshes(
       );
       const diffuseTexture = cached;
 
-      const script = parseTextureScriptFromPath(
-        textureSourceName(m._albedoTexture as Texture)
-      );
+      const textureName = textureSourceName(m._albedoTexture as Texture);
+      const script = parseTextureScriptFromPath(textureName);
 
       if (script?.hiddenMesh) {
         mesh.setEnabled(false);
         mesh.metadata.hiddenByScript = true;
       }
+
+      // `pBitmap->IsSkin` / `IsHair` (LoadData.cpp:82-96): the flag belongs to
+      // the texture, so it is read once per GLB here rather than per drop.
+      mesh.metadata.skinTexture = isSkinOrHairTexture(textureName);
 
       const bright = script?.bright === true;
       // The converter marks every TGA-textured mesh BLEND; the
