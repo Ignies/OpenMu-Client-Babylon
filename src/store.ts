@@ -377,6 +377,16 @@ class PlayerData {
   /** CharacterHeroState byte (the original's `Hero->PK`); 3 is Normal. */
   heroState = 3;
 
+  /**
+   * `CharacterStatus.GameMaster` off CharacterInformation, which is the
+   * server's own answer rather than the `#` shout guess `isGm` makes for other
+   * players. Belongs to the selected character, so it is cleared on select.
+   *
+   * Drawing only: the server re-checks the status on every command it receives
+   * (`ChatMessageCommandProcessor`), so nothing here grants anything.
+   */
+  isGameMaster = false;
+
   exp = 50;
   currentLvlExp = 0;
   expToNextLvl = 100;
@@ -509,6 +519,7 @@ class PlayerData {
       maxNegativeFruitPoints: observable,
       level: observable,
       points: observable,
+      isGameMaster: observable,
       items: observable,
       leftHandSlot: computed,
       rightHandSlot: computed,

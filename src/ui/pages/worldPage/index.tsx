@@ -52,6 +52,7 @@ import { MapNameBanner } from './components/mapNameBanner';
 import { SessionStatsWindow } from './components/sessionStats';
 import { SlideHelpBar } from '../../components/slideHelp';
 import { DebugMenuWindow } from '../../components/debugMenu';
+import { GmPanelWindow } from '../../components/gmPanel';
 import { MobileControls } from './components/mobileControls';
 
 // The active version's take on the windows that differ per version. Lazy so
@@ -109,6 +110,8 @@ const HUD = observer(() => {
       <Minimap />
       {/* Offline only: renders null online (F9). */}
       <DebugMenuWindow />
+      {/* Game masters only: renders null for everyone else (F8). */}
+      <GmPanelWindow />
       {}
       {/* Touch clients only: renders null on a mouse. */}
       <MobileControls />
