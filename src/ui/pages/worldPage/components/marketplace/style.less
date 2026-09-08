@@ -30,16 +30,11 @@
   pointer-events: auto;
   outline: none;
 
-  // `:not(.mp-btn)` is load-bearing. A descendant selector outranks a single
-  // class, so a bare `button { color: inherit }` here beats `.mp-btn`'s own
-  // colour and the gold buttons come out with light text on gold.
-  button:not(.mp-btn) {
-    .mu-font();
-    cursor: pointer;
-    color: inherit;
-  }
-
-  .mp-btn {
+  // Font and cursor only, deliberately. A descendant selector here outranks
+  // the single-class rules below it, so anything else this set - colour,
+  // background, border - would silently beat `.mp-chip.is-on` and friends and
+  // paint light text on gold. Every button class declares its own chrome.
+  button {
     .mu-font();
     cursor: pointer;
   }
