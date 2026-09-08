@@ -1323,6 +1323,7 @@ export const koreanLayer: LanguageLayer = {
     'skills.tooltip.energy': '에너지 {energy} 필요',
     'skills.tooltip.mana': '마나가 부족합니다 ({mana})',
     'skills.tooltip.ag': 'AG가 부족합니다 ({ag})',
+    'skills.tooltip.safezone': '안전 지대에서는 사용할 수 없습니다',
     'skills.unnamed': '스킬 #{number}',
     'skills.named': '{name} (Lv.{level})',
     'skills.damage': '스킬 공격력 +{value}',

@@ -664,6 +664,7 @@ export const EN_TEXT = {
   'skills.tooltip.energy': 'Requires energy {energy}',
   'skills.tooltip.mana': 'Not enough mana ({mana})',
   'skills.tooltip.ag': 'Not enough AG ({ag})',
+  'skills.tooltip.safezone': 'Cannot be used in a safe zone',
   'skills.unnamed': 'Skill #{number}',
   'skills.named': '{name} (Lv.{level})',
   'skills.damage': 'Skill damage +{value}',

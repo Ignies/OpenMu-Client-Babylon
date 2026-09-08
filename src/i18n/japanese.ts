@@ -1325,6 +1325,7 @@ export const japaneseLayer: LanguageLayer = {
     'skills.tooltip.energy': 'エネルギー {energy} が必要です',
     'skills.tooltip.mana': 'MP が足りません（{mana}）',
     'skills.tooltip.ag': 'AG が足りません（{ag}）',
+    'skills.tooltip.safezone': '安全地帯では使用できません',
     'skills.unnamed': 'スキル #{number}',
     'skills.named': '{name}（Lv.{level}）',
     'skills.damage': 'スキルダメージ +{value}',

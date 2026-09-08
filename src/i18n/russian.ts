@@ -1348,6 +1348,7 @@ export const russianLayer: LanguageLayer = {
     'skills.tooltip.energy': 'Требуется энергия {energy}',
     'skills.tooltip.mana': 'Не хватает маны ({mana})',
     'skills.tooltip.ag': 'Не хватает AG ({ag})',
+    'skills.tooltip.safezone': 'Нельзя использовать в безопасной зоне',
     'skills.unnamed': 'Умение №{number}',
     'skills.named': '{name} (ур. {level})',
     'skills.damage': 'Урон умения +{value}',

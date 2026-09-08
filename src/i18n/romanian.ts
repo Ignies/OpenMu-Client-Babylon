@@ -1363,6 +1363,7 @@ export const romanianLayer: LanguageLayer = {
     'skills.tooltip.energy': 'Necesită energie {energy}',
     'skills.tooltip.mana': 'Mana insuficientă ({mana})',
     'skills.tooltip.ag': 'AG insuficient ({ag})',
+    'skills.tooltip.safezone': 'Nu poate fi folosită într-o zonă sigură',
     'skills.unnamed': 'Abilitatea nr. {number}',
     'skills.named': '{name} (Niv.{level})',
     'skills.damage': 'Daunele abilității +{value}',

@@ -308,6 +308,18 @@ export const SkillCastSystem: ISystemFactory = world => {
       drainDarkSide();
       drainPendingStep(hero, dt);
 
+      // Standing on a safe zone tile: no skill goes out at all, whatever the
+      // gesture was - `if (c->SafeZone) break` out of the AT_SKILL_* branches
+      // (ZzzInterface.cpp:3325), the same rule that already refuses the plain
+      // attack click (attackSystem). Ahead of the request so nothing is left
+      // half-done: no walk into range, no clip, no packet, and a Nova charge
+      // carried in from outside is dropped instead of fired.
+      if (hero.attributeSystem?.isAboveZero('inSafeZone')) {
+        if (combat.novaCharging) combat.releaseNova();
+        world.castRequest = null;
+        return;
+      }
+
       const req = world.castRequest;
 
       // ---- Nova hold: the button came up (or the left button was clicked)
@@ -335,14 +347,6 @@ export const SkillCastSystem: ISystemFactory = world => {
       }
 
       if (!req) return;
-
-      // Ctrl force cast is an attack gesture: inside a safe zone it is
-      // refused outright, the same way `isAttackableEntity` already refuses
-      // the plain attack click there (attackSystem).
-      if (req.forced && hero.attributeSystem?.isAboveZero('inSafeZone')) {
-        world.castRequest = null;
-        return;
-      }
 
       const def = skillDefinition(Store.currentSkill);
       if (!def) {

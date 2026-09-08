@@ -1375,6 +1375,7 @@ export const germanLayer: LanguageLayer = {
     'skills.tooltip.energy': 'Erfordert Energie {energy}',
     'skills.tooltip.mana': 'Nicht genug Mana ({mana})',
     'skills.tooltip.ag': 'Nicht genug AG ({ag})',
+    'skills.tooltip.safezone': 'In einer sicheren Zone nicht nutzbar',
     'skills.unnamed': 'Fertigkeit #{number}',
     'skills.named': '{name} (Stufe {level})',
     'skills.damage': 'Fertigkeitsschaden +{value}',

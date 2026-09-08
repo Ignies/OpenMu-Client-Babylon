@@ -1368,6 +1368,7 @@ export const portugueseLayer: LanguageLayer = {
     'skills.tooltip.energy': 'Exige energia {energy}',
     'skills.tooltip.mana': 'Mana insuficiente ({mana})',
     'skills.tooltip.ag': 'AG insuficiente ({ag})',
+    'skills.tooltip.safezone': 'Não pode ser usada numa zona segura',
     'skills.unnamed': 'Habilidade n.º {number}',
     'skills.named': '{name} (Nv.{level})',
     'skills.damage': 'Dano da habilidade +{value}',

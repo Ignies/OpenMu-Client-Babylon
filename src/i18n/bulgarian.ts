@@ -1355,6 +1355,7 @@ export const bulgarianLayer: LanguageLayer = {
     'skills.tooltip.energy': 'Изисква енергия {energy}',
     'skills.tooltip.mana': 'Недостатъчно мана ({mana})',
     'skills.tooltip.ag': 'Недостатъчно AG ({ag})',
+    'skills.tooltip.safezone': 'Не може да се използва в безопасна зона',
     'skills.unnamed': 'Умение №{number}',
     'skills.named': '{name} (ниво {level})',
     'skills.damage': 'Щети от умението +{value}',
