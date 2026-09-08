@@ -83,17 +83,27 @@ export function isAttackableEntity(
 }
 
 /**
+ * Another player's character. Stricter than `playerAnimation` alone: the
+ * player-rig monsters (the Skeletons, Death King, the Cursed Wizard) carry
+ * that component too, and every attack rule counts them as monsters.
+ */
+export function isOtherPlayer(e: Entity): boolean {
+  if (e.netId === undefined || e.localPlayer) return false;
+  return e.npcType === undefined && !!e.playerAnimation;
+}
+
+/**
  * A player the hero may swing at. `isAttackableEntity` refuses every player
- * so an ordinary click in a crowd never starts a fight; the quick command
- * menu's attack entry is a deliberate choice, so it tests with this instead
- * - the same safe-zone and liveness rules, without the monster/NPC one.
+ * so an ordinary click in a crowd never starts a fight; the deliberate
+ * gestures - the quick command menu's attack entry, Ctrl + right button -
+ * test with this instead: the same safe-zone and liveness rules, without
+ * the monster/NPC one.
  */
 export function isAttackablePlayer(
   world: Parameters<ISystemFactory>[0],
   e: Entity
 ): boolean {
-  if (e.netId === undefined || e.localPlayer) return false;
-  if (e.npcType !== undefined || !e.playerAnimation) return false;
+  if (!isOtherPlayer(e)) return false;
   if (e.objOutOfScope || e.dying) return false;
 
   const player = world.playerEntity;
