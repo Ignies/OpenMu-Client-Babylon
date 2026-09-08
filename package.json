@@ -23,7 +23,10 @@
     "lint": "eslint . --max-warnings=100000",
     "lint:count": "eslint . -f json | bun run tools/lintCounts.ts",
     "cashshop-api": "bun run --watch cashshop/server/main.ts",
-    "cashshop-serve": "bun run cashshop/server/main.ts"
+    "cashshop-serve": "bun run cashshop/server/main.ts",
+    "marketplace-api": "bun run --watch marketplace/server/main.ts",
+    "marketplace-bot": "bun run marketplace/bot/cli.ts",
+    "test:server": "bun test ./marketplace/server"
   },
   "devDependencies": {
     "@gltf-transform/core": "4.2.0",
