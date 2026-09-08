@@ -30,10 +30,18 @@
   pointer-events: auto;
   outline: none;
 
-  button {
+  // `:not(.mp-btn)` is load-bearing. A descendant selector outranks a single
+  // class, so a bare `button { color: inherit }` here beats `.mp-btn`'s own
+  // colour and the gold buttons come out with light text on gold.
+  button:not(.mp-btn) {
     .mu-font();
     cursor: pointer;
     color: inherit;
+  }
+
+  .mp-btn {
+    .mu-font();
+    cursor: pointer;
   }
 
   // Everything the art already draws a slot for sits on it absolutely.
@@ -215,7 +223,7 @@
 .mp-rail {
   display: flex;
   flex-direction: column;
-  padding: 12px 10px;
+  padding: 9px 8px;
 }
 
 .mp-rail-list {
@@ -224,7 +232,10 @@
   flex-direction: column;
   gap: 1px;
   min-height: 0;
-  overflow: hidden;
+  // Ten categories, the filters and the pager are a tight fit in the rail the
+  // art draws. They are sized to fit; this is so a longer list scrolls instead
+  // of leaving a half-cut row at the bottom.
+  overflow-y: auto;
 }
 
 .mp-rail-item {
@@ -232,7 +243,7 @@
   gap: 8px;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 9px;
+  padding: 4px 8px;
   font-size: 12px;
   color: @mp-dim;
   text-align: left;
@@ -258,10 +269,11 @@
 
 .mp-rail-filters {
   display: flex;
+  flex: 0 0 auto;
   flex-direction: column;
   gap: 4px;
-  padding-top: 10px;
-  margin-top: 10px;
+  padding-top: 8px;
+  margin-top: 8px;
   border-top: 1px solid rgba(224, 188, 106, 0.18);
 }
 
@@ -286,10 +298,11 @@
 
 .mp-rail-foot {
   display: flex;
+  flex: 0 0 auto;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   margin-top: auto;
-  padding-top: 10px;
+  padding-top: 8px;
   border-top: 1px solid rgba(224, 188, 106, 0.18);
 }
 
@@ -463,7 +476,11 @@
   display: grid;
   flex: 1 1 auto;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-auto-rows: minmax(0, 1fr);
+  // A fixed row height, not a share of the area: with `1fr` a page holding one
+  // row stretched that row down the whole window. Cards are the same size
+  // whether the page has two on it or twelve.
+  grid-auto-rows: 84px;
+  align-content: start;
   gap: 7px;
   min-height: 0;
   padding: 6px 8px;
