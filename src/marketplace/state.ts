@@ -83,6 +83,10 @@ class MarketplaceStore {
   }
 
   setTab(tab: Tab): void {
+    // The sell tab shares the category rail, but it opens on everything you
+    // carry: arriving at it with a bag filtered to whatever you last browsed
+    // reads as an empty bag.
+    if (tab === 'sell') this.category = 'all';
     this.tab = tab;
     this.page = 0;
     this.confirming = null;
