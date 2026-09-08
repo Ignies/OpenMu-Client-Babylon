@@ -4,6 +4,7 @@ import { Store } from './store';
 import {
   GM_GROUPS,
   buildCommandLine,
+  matchGmCommands,
   type GmCommand,
 } from './common/gmCommands';
 
@@ -34,6 +35,9 @@ export const GmPanel = new (class _GmPanel {
   open = false;
 
   activeGroupId: string = GM_GROUPS[0].id;
+
+  /** The filter box. While it holds anything, it searches every group. */
+  query = '';
 
   /** The command whose form is being filled, if any. */
   selected: GmCommand | null = null;
@@ -77,7 +81,25 @@ export const GmPanel = new (class _GmPanel {
 
   setGroup(id: string): void {
     this.activeGroupId = id;
+    this.query = '';
     this.closeForm();
+  }
+
+  setQuery(value: string): void {
+    this.query = value;
+  }
+
+  /**
+   * What the list shows: the open group, or every group at once while the
+   * filter box holds something. Searching across groups is the point of it -
+   * `/setmoney` is only in Players if you already knew that.
+   */
+  get visible(): readonly GmCommand[] {
+    if (!this.query.trim()) {
+      return GM_GROUPS.find(g => g.id === this.activeGroupId)?.commands ?? [];
+    }
+
+    return matchGmCommands(this.query);
   }
 
   /** Click a command: open its form, or run it straight away when it takes none. */
@@ -180,6 +202,7 @@ export const GmPanel = new (class _GmPanel {
     runInAction(() => {
       this.open = false;
       this.activeGroupId = GM_GROUPS[0].id;
+      this.query = '';
       this.selected = null;
       this.confirming = null;
       this.error = null;

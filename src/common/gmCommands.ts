@@ -448,3 +448,20 @@ export function buildCommandLine(
 
   return { line: parts.join(' ') };
 }
+
+/**
+ * Commands matching what was typed into the panel's filter box, across every
+ * group - `/setmoney` is only in Players if you already knew that, so the box
+ * searches the slash name, the label and the help alike.
+ */
+export function matchGmCommands(query: string): readonly GmCommand[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return GM_COMMANDS;
+
+  return GM_COMMANDS.filter(
+    command =>
+      command.command.includes(needle) ||
+      command.label.toLowerCase().includes(needle) ||
+      command.help.toLowerCase().includes(needle)
+  );
+}
