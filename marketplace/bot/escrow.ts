@@ -1,6 +1,8 @@
 import type { Scope } from './scope';
 import type { BotSession } from './session';
 import type { TradeOutcome, TradeSession } from './trade';
+import type { Wallet } from './wallet';
+import type { HandoverKind, Ledger } from './ledger';
 
 /**
  * The three handovers the marketplace is made of, on top of a plain in-game
@@ -14,8 +16,9 @@ import type { TradeOutcome, TradeSession } from './trade';
  *
  * The game server performs every one of them, so an item cannot be duplicated
  * and payment cannot be taken without delivery. What this module adds is the
- * refusal to agree to anything other than the terms, and the ordering rules
- * that today's live runs turned up.
+ * refusal to agree to anything other than the terms, the ordering rules the
+ * live runs turned up, and a booked record of whether the money actually moved
+ * by what it should have.
  */
 
 export type EscrowContext = {
@@ -23,14 +26,65 @@ export type EscrowContext = {
   trade: TradeSession;
   scope: Scope;
   log: (message: string) => void;
+  /** The bot's own balance, as the server reports it. */
+  wallet?: Wallet;
+  ledger?: Ledger;
+  /** Which bot this is, for the audit line. */
+  botName?: string;
 };
 
-export type EscrowResult =
-  | { ok: true }
-  | { ok: false; reason: string };
+export type EscrowResult = { ok: true } | { ok: false; reason: string };
 
 /** How long a person gets to put their side up before the bot gives up. */
 const PARTNER_PATIENCE_MS = 90_000;
+
+/** The balance arrives in its own packet, so it is read a moment after. */
+const BALANCE_SETTLE_MS = 1500;
+
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Runs a handover and books it.
+ *
+ * The balance is read from the server before and after and compared against
+ * what the handover was supposed to move. A *failed* handover is expected to
+ * move nothing and is checked just as strictly - that is precisely where the
+ * server's cancel bug destroys Zen, and it is the case a bot carrying a float
+ * would otherwise never notice.
+ */
+async function booked(
+  context: EscrowContext,
+  kind: HandoverKind,
+  partner: string,
+  expectedZenDelta: number,
+  run: () => Promise<EscrowResult>
+): Promise<EscrowResult> {
+  const { wallet, ledger, botName, log } = context;
+  const zenBefore = wallet?.zen ?? null;
+
+  const result = await run();
+
+  if (!ledger) return result;
+
+  if (wallet) await wait(BALANCE_SETTLE_MS);
+
+  if (zenBefore === null) {
+    log('no balance was known before this handover, so it could not be reconciled');
+  }
+
+  ledger.record({
+    bot: botName ?? 'unknown',
+    partner,
+    kind,
+    expectedZenDelta,
+    zenBefore,
+    zenAfter: wallet?.zen ?? null,
+    outcome: result.ok ? 'ok' : 'failed',
+    ...(result.ok ? {} : { reason: result.reason }),
+  });
+
+  return result;
+}
 
 /**
  * Brings the bot to the player and opens a trade with them.
@@ -46,15 +100,13 @@ async function openTradeWith(
   characterName: string
 ): Promise<EscrowResult> {
   const { session, trade, scope, log } = context;
-
   const visible = () => scope.byName(characterName);
-  const mutual = () => visible() !== null;
 
-  if (!mutual()) {
+  if (!visible()) {
     log(`warping to ${characterName}`);
     session.traceTo(characterName);
-    for (let waited = 0; waited < 6000 && !mutual(); waited += 500) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+    for (let waited = 0; waited < 6000 && !visible(); waited += 500) {
+      await wait(500);
     }
   }
 
@@ -79,25 +131,31 @@ async function openTradeWith(
  * lose if it falls apart, and the seller's item is only ever moved by the
  * server.
  */
-export async function collectListing(
+export function collectListing(
   context: EscrowContext,
   sellerCharacter: string,
   itemCount = 1
 ): Promise<EscrowResult> {
-  const { trade, log } = context;
+  return booked(context, 'list', sellerCharacter, 0, async () => {
+    const { trade, log } = context;
 
-  const opened = await openTradeWith(context, sellerCharacter);
-  if (!opened.ok) return opened;
+    const opened = await openTradeWith(context, sellerCharacter);
+    if (!opened.ok) return opened;
 
-  try {
-    log(`waiting for ${sellerCharacter} to put up ${itemCount} item(s)`);
-    await trade.waitForTerms({ expectItems: itemCount, expectMoney: 0 }, PARTNER_PATIENCE_MS);
-  } catch (e) {
-    trade.cancel();
-    return { ok: false, reason: e instanceof Error ? e.message : 'the seller never handed it over' };
-  }
+    const terms = { expectItems: itemCount, expectMoney: 0 };
+    try {
+      log(`waiting for ${sellerCharacter} to put up ${itemCount} item(s)`);
+      await trade.waitForTerms(terms, PARTNER_PATIENCE_MS);
+    } catch (e) {
+      trade.cancel();
+      return {
+        ok: false,
+        reason: e instanceof Error ? e.message : 'the seller never handed it over',
+      };
+    }
 
-  return finish(await trade.settle({ expectItems: itemCount, expectMoney: 0 }), log);
+    return finish(await trade.settle(terms), log);
+  });
 }
 
 /**
@@ -110,55 +168,60 @@ export async function collectListing(
  * money must sit on the table for as short a time as possible. Once it is
  * there the bot never cancels: it confirms, or it waits for the server.
  */
-export async function deliverPurchase(
+export function deliverPurchase(
   context: EscrowContext,
   buyerCharacter: string,
   inventorySlot: number,
   price: number
 ): Promise<EscrowResult> {
-  const { trade, log } = context;
+  return booked(context, 'buy', buyerCharacter, price, async () => {
+    const { trade, log } = context;
 
-  const opened = await openTradeWith(context, buyerCharacter);
-  if (!opened.ok) return opened;
+    const opened = await openTradeWith(context, buyerCharacter);
+    if (!opened.ok) return opened;
 
-  trade.offerItem(inventorySlot, 0);
-  log(`offered the item to ${buyerCharacter}, waiting for ${price} Zen`);
+    trade.offerItem(inventorySlot, 0);
+    log(`offered the item to ${buyerCharacter}, waiting for ${price} Zen`);
 
-  try {
-    await trade.waitForTerms({ expectMoney: price }, PARTNER_PATIENCE_MS);
-  } catch (e) {
-    // Nothing of the buyer's is on the table yet, so cancelling here is safe.
-    trade.cancel();
-    return { ok: false, reason: e instanceof Error ? e.message : 'the buyer never paid' };
-  }
+    try {
+      await trade.waitForTerms({ expectMoney: price }, PARTNER_PATIENCE_MS);
+    } catch (e) {
+      // Nothing of the buyer's is on the table yet, so cancelling is safe here.
+      trade.cancel();
+      return { ok: false, reason: e instanceof Error ? e.message : 'the buyer never paid' };
+    }
 
-  return finish(await trade.settle({ expectMoney: price }), log);
+    return finish(await trade.settle({ expectMoney: price }), log);
+  });
 }
 
 /**
  * Paying a seller what their listing earned.
  *
  * The bot's own Zen goes on the table, so this is the one operation where a
- * cancel costs the *service* rather than a player. It is still done by trade
+ * cancel costs the *service* rather than a player - which is why the bot keeps
+ * a float and the ledger checks it every time. It is still done by trade
  * rather than by writing to the database, because the seller is online by
- * definition - they are standing here to collect - and a write to a logged-in
+ * definition (they are standing here to collect) and a write to a logged-in
  * account is overwritten by their next save.
  */
-export async function payOut(
+export function payOut(
   context: EscrowContext,
   sellerCharacter: string,
   amount: number
 ): Promise<EscrowResult> {
-  const { trade, log } = context;
+  return booked(context, 'payout', sellerCharacter, -amount, async () => {
+    const { trade, log } = context;
 
-  const opened = await openTradeWith(context, sellerCharacter);
-  if (!opened.ok) return opened;
+    const opened = await openTradeWith(context, sellerCharacter);
+    if (!opened.ok) return opened;
 
-  trade.setMoney(amount);
-  log(`offered ${amount} Zen to ${sellerCharacter}`);
+    trade.setMoney(amount);
+    log(`offered ${amount} Zen to ${sellerCharacter}`);
 
-  // The seller has nothing to put up, so there is nothing to wait for.
-  return finish(await trade.settle({ expectItems: 0, expectMoney: 0 }), log);
+    // The seller has nothing to put up, so there is nothing to wait for.
+    return finish(await trade.settle({ expectItems: 0, expectMoney: 0 }), log);
+  });
 }
 
 function finish(outcome: TradeOutcome, log: (message: string) => void): EscrowResult {

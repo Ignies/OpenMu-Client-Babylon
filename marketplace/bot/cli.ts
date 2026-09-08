@@ -3,6 +3,8 @@ import { BotSession } from './session';
 import { Scope } from './scope';
 import { TradeSession, TRADE_REQUEST_CODE, incomingRequestName } from './trade';
 import { collectListing, deliverPurchase, payOut, type EscrowContext } from './escrow';
+import { Wallet } from './wallet';
+import { Ledger } from './ledger';
 
 /**
  * Drives one bot by hand, for proving the stack against a real server.
@@ -17,6 +19,7 @@ import { collectListing, deliverPurchase, payOut, type EscrowContext } from './e
  *   bun run marketplace/bot/cli.ts trace  --account MKT001 --target <character>
  *   bun run marketplace/bot/cli.ts simulate --seller MKT001 --buyer MKT002
  *   bun run marketplace/bot/cli.ts escrow --op list --bot MKT001 --player MKT002
+ *   bun run marketplace/bot/cli.ts ledger
  */
 
 const HOST = process.env.GAME_HOST ?? '127.0.0.1';
@@ -36,6 +39,21 @@ async function main(): Promise<void> {
   const command = process.argv[2] ?? 'enter';
   const account = arg('account', 'MKT001')!;
   const password = arg('password', process.env.MARKETPLACE_BOT_PASSWORD);
+
+  if (command === 'ledger') {
+    const rows = new Ledger().summary();
+    if (rows.length === 0) {
+      log('the ledger is empty');
+      return;
+    }
+    for (const r of rows) {
+      log(
+        `${r.bot}: ${r.handovers} handover(s), ${r.mismatches} mismatch(es), ` +
+          `drift ${r.drift >= 0 ? '+' : ''}${r.drift} Zen`
+      );
+    }
+    return;
+  }
 
   if (!password) {
     console.error('no password: pass --password or set MARKETPLACE_BOT_PASSWORD');
@@ -159,6 +177,9 @@ async function escrow(password: string): Promise<void> {
     session: bot.session,
     trade: bot.trade,
     scope: bot.scope,
+    wallet: bot.wallet,
+    ledger: new Ledger(undefined, (m: string) => log(`[ledger] ${m}`)),
+    botName: bot.name,
     log: (message: string) => log(`[escrow] ${message}`),
   };
 
@@ -192,6 +213,13 @@ async function escrow(password: string): Promise<void> {
             : which === 'payout'
               ? { expectMoney: price, expectItems: 0 }
               : { expectMoney: 0, expectItems: 0 };
+        // --refuse makes the stand-in walk away with the bot's Zen already on
+        // the table, which is the case the ledger exists to catch.
+        if (process.argv.includes('--refuse')) {
+          log(`[${player.name}] refusing on purpose`);
+          player.trade.cancel();
+          return;
+        }
         const refused = player.trade.armConfirm(expected);
         if (refused) log(`[${player.name}] refused to confirm: ${refused}`);
       });
@@ -222,6 +250,7 @@ type Bot = {
   scope: Scope;
   trade: TradeSession;
   session: BotSession;
+  wallet: Wallet;
 };
 
 async function connectBot(account: string, password: string): Promise<Bot> {
@@ -229,6 +258,7 @@ async function connectBot(account: string, password: string): Promise<Bot> {
   const connection = new BotConnection(HOST, PORT, tag);
   const scope = new Scope(connection, tag);
   const trade = new TradeSession(connection, tag);
+  const wallet = new Wallet(connection, tag);
   const session = new BotSession(
     connection,
     { account, password, character: account, createIfMissing: true },
@@ -254,7 +284,10 @@ async function connectBot(account: string, password: string): Promise<Bot> {
   await connection.connect();
   const character = await session.enterWorld();
   scope.selfName = character.Name;
-  return { name: character.Name, connection, scope, trade, session };
+  // A bot that does not know its balance cannot reconcile a handover, so it
+  // waits for the server to state one before it is handed any work.
+  await wallet.waitForBalance().catch(() => tag('no balance reported; handovers will not reconcile'));
+  return { name: character.Name, connection, scope, trade, session, wallet };
 }
 
 async function disposeBot(bot: Bot): Promise<void> {
@@ -268,6 +301,7 @@ async function disposeBot(bot: Bot): Promise<void> {
   }
   bot.trade.dispose();
   bot.scope.dispose();
+  bot.wallet.dispose();
   bot.connection.close();
 }
 
