@@ -24,22 +24,27 @@ export type Item = {
 export type Listing = {
   id: string;
   seller: string;
+  /** The character a bot has to meet to collect or return this. */
+  sellerCharacter: string;
   price: number;
   item: Item;
   category: string;
   state: ListingState;
   buyer: string | null;
+  buyerCharacter: string | null;
   listedAt: number;
 };
 
 const toListing = (row: ListingRow): Listing => ({
   id: row.id,
   seller: row.seller,
+  sellerCharacter: row.seller_char,
   price: row.price,
   item: JSON.parse(row.item_json) as Item,
   category: row.category,
   state: row.state,
   buyer: row.buyer,
+  buyerCharacter: row.buyer_char,
   listedAt: row.created_at,
 });
 
@@ -49,6 +54,7 @@ const toListing = (row: ListingRow): Listing => ({
  */
 export function createPending(input: {
   seller: string;
+  sellerCharacter: string;
   price: number;
   item: Item;
   category: string;
@@ -65,12 +71,13 @@ export function createPending(input: {
 
   db.query(
     `INSERT INTO listings
-       (id, seller, price, item_group, item_number, item_level, item_json,
-        category, state, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`
+       (id, seller, seller_char, price, item_group, item_number, item_level,
+        item_json, category, state, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`
   ).run(
     id,
     input.seller,
+    input.sellerCharacter,
     input.price,
     input.item.group,
     input.item.num,
@@ -105,13 +112,13 @@ export function activate(id: string, holder: string, holderSlot: number): boolea
  * decides and exactly one gets `true`. Everything after this - dispatching a
  * bot, meeting the buyer - happens only for the winner.
  */
-export function claim(id: string, buyer: string): boolean {
+export function claim(id: string, buyer: string, buyerCharacter: string): boolean {
   const changed = db
     .query(
-      `UPDATE listings SET state = 'claimed', buyer = ?, updated_at = ?
+      `UPDATE listings SET state = 'claimed', buyer = ?, buyer_char = ?, updated_at = ?
        WHERE id = ? AND state = 'active'`
     )
-    .run(buyer, Date.now(), id).changes;
+    .run(buyer, buyerCharacter, Date.now(), id).changes;
 
   audit(changed ? 'listing claimed' : 'claim refused', { listing: id, account: buyer });
   return changed > 0;
@@ -121,7 +128,7 @@ export function claim(id: string, buyer: string): boolean {
 export function release(id: string, why: string): boolean {
   const changed = db
     .query(
-      `UPDATE listings SET state = 'active', buyer = NULL, updated_at = ?
+      `UPDATE listings SET state = 'active', buyer = NULL, buyer_char = NULL, updated_at = ?
        WHERE id = ? AND state = 'claimed'`
     )
     .run(Date.now(), id).changes;

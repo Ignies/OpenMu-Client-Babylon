@@ -128,21 +128,21 @@ export function mine() {
 }
 
 /** Asks for a listing. It is not on sale until a bot has collected the item. */
-export function list(item: Item, price: number, category: string) {
+export function list(item: Item, price: number, category: string, character: string) {
   return withTicket(t =>
     request<{ listing: ApiListing }>('/listings', {
       method: 'POST',
-      body: JSON.stringify({ ticket: t.ticket, session: sessionNonce(), item, price, category }),
+      body: JSON.stringify({ ticket: t.ticket, session: sessionNonce(), item, price, category, character }),
     })
   );
 }
 
 /** Reserves a listing. Exactly one buyer can win this. */
-export function claim(id: string) {
+export function claim(id: string, character: string) {
   return withTicket(t =>
     request<{ listing: ApiListing }>(`/listings/${encodeURIComponent(id)}/claim`, {
       method: 'POST',
-      body: JSON.stringify({ ticket: t.ticket, session: sessionNonce() }),
+      body: JSON.stringify({ ticket: t.ticket, session: sessionNonce(), character }),
     })
   );
 }

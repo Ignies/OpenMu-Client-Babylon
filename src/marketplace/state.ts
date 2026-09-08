@@ -66,6 +66,11 @@ class MarketplaceStore {
   zen = 0;
   /** What the player could put up for sale. Pushed in the same way. */
   inventory: Listing['item'][] = [];
+  /**
+   * The character a bot has to meet. Pushed in from the world page, because
+   * the service knows accounts and a trade happens with a character.
+   */
+  characterName = '';
 
   /**
    * Empty until a service fills it.
@@ -356,7 +361,7 @@ class MarketplaceStore {
     });
 
     try {
-      await api.claim(listing.id);
+      await api.claim(listing.id, this.characterName);
       runInAction(() => {
         this.flash = `Reserved ${displayName(listing.item)}. A trader is on the way.`;
       });
@@ -460,7 +465,7 @@ class MarketplaceStore {
 
     const price = this.sellPriceValue;
     try {
-      await api.list(item, price, categoryOf(item));
+      await api.list(item, price, categoryOf(item), this.characterName);
       runInAction(() => {
         this.sellPick = null;
         this.sellPrice = '';
@@ -495,7 +500,8 @@ class MarketplaceStore {
   }
 
   /** The world page pushes the live numbers in; the harness pushes fixtures. */
-  syncFromGame(zen: number, inventory: Listing['item'][]): void {
+  syncFromGame(zen: number, inventory: Listing['item'][], characterName = ''): void {
+    if (characterName) this.characterName = characterName;
     this.zen = zen;
     this.inventory = inventory;
   }

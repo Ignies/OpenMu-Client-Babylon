@@ -26,7 +26,8 @@
     "cashshop-serve": "bun run cashshop/server/main.ts",
     "marketplace-api": "bun run --watch marketplace/server/main.ts",
     "marketplace-bot": "bun run marketplace/bot/cli.ts",
-    "test:server": "bun test ./marketplace/server/"
+    "test:server": "bun test ./marketplace/server/",
+    "marketplace-worker": "bun run marketplace/server/worker.ts"
   },
   "devDependencies": {
     "@gltf-transform/core": "4.2.0",

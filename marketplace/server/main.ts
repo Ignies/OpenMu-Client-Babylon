@@ -162,6 +162,16 @@ Bun.serve({
         const refused = await authorizeCommit(body, auth.account, cors);
         if (refused) return refused;
 
+        // The character the bot has to meet. It is the one field the browser
+        // supplies that the ticket cannot vouch for, so it is shape-checked
+        // here and the handover itself is the real check: a wrong name simply
+        // never completes, because that player has to accept the trade and put
+        // the item up themselves.
+        const character = body.character;
+        if (typeof character !== 'string' || !/^[A-Za-z0-9]{1,10}$/.test(character)) {
+          return json({ error: 'Log in to a character first.' }, 400, cors);
+        }
+
         const item = body.item as store.Item | undefined;
         const price = Number(body.price);
         const category = typeof body.category === 'string' ? body.category : 'misc';
@@ -172,7 +182,13 @@ Bun.serve({
 
         try {
           // The seller is the ticket's account, never the body's.
-          const listing = store.createPending({ seller: auth.account, price, item, category });
+          const listing = store.createPending({
+            seller: auth.account,
+            sellerCharacter: character,
+            price,
+            item,
+            category,
+          });
           return json({ listing }, 201, cors);
         } catch (e) {
           return json({ error: e instanceof Error ? e.message : 'That listing was refused.' }, 400, cors);
@@ -190,13 +206,18 @@ Bun.serve({
         const refused = await authorizeCommit(body, auth.account, cors);
         if (refused) return refused;
 
+        const character = body.character;
+        if (action === 'claim' && (typeof character !== 'string' || !/^[A-Za-z0-9]{1,10}$/.test(character))) {
+          return json({ error: 'Log in to a character first.' }, 400, cors);
+        }
+
         if (action === 'claim') {
           const listing = store.byId(id);
           if (!listing) return json({ error: 'That listing is gone.' }, 404, cors);
           if (listing.seller === auth.account) {
             return json({ error: 'That is your own listing.' }, 400, cors);
           }
-          if (!store.claim(id, auth.account)) {
+          if (!store.claim(id, auth.account, character as string)) {
             return json({ error: 'Somebody else got there first.' }, 409, cors);
           }
           return json({ listing: store.byId(id) }, 200, cors);

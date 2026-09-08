@@ -31,7 +31,7 @@ beforeEach(() => {
 const anItem = { group: 14, num: 13, lvl: 0 };
 
 function listed(seller = 'alice', price = 1000) {
-  const listing = store.createPending({ seller, price, item: anItem, category: 'jewels' });
+  const listing = store.createPending({ seller, sellerCharacter: seller, price, item: anItem, category: 'jewels' });
   store.activate(listing.id, 'MKT001', 12);
   return listing.id;
 }
@@ -40,6 +40,7 @@ describe('a listing is not on sale until the bot holds the item', () => {
   test('a new listing is pending and invisible to buyers', () => {
     const listing = store.createPending({
       seller: 'alice',
+      sellerCharacter: 'Alice',
       price: 1000,
       item: anItem,
       category: 'jewels',
@@ -65,8 +66,8 @@ describe('claiming', () => {
   test('exactly one of two buyers racing wins', () => {
     const id = listed();
 
-    const first = store.claim(id, 'bob');
-    const second = store.claim(id, 'carol');
+    const first = store.claim(id, 'bob', 'Bob');
+    const second = store.claim(id, 'carol', 'Carol');
 
     expect([first, second]).toEqual([true, false]);
     expect(store.byId(id)!.buyer).toBe('bob');
@@ -74,13 +75,13 @@ describe('claiming', () => {
 
   test('a claimed listing leaves the catalogue at once', () => {
     const id = listed();
-    store.claim(id, 'bob');
+    store.claim(id, 'bob', 'Bob');
     expect(store.browse().total).toBe(0);
   });
 
   test('releasing puts it back for everyone', () => {
     const id = listed();
-    store.claim(id, 'bob');
+    store.claim(id, 'bob', 'Bob');
 
     expect(store.release(id, 'buyer walked away')).toBe(true);
     expect(store.browse().total).toBe(1);
@@ -95,7 +96,7 @@ describe('claiming', () => {
 describe('selling', () => {
   test('the price becomes the seller balance, not a delivery', () => {
     const id = listed('alice', 5000);
-    store.claim(id, 'bob');
+    store.claim(id, 'bob', 'Bob');
 
     expect(store.settleSale(id)).toBe(true);
     expect(store.byId(id)!.state).toBe('sold');
@@ -109,7 +110,7 @@ describe('selling', () => {
   test('two sales add up for the same seller', () => {
     for (const price of [1000, 2500]) {
       const id = listed('alice', price);
-      store.claim(id, 'bob');
+      store.claim(id, 'bob', 'Bob');
       store.settleSale(id);
     }
     expect(store.balance('alice')).toBe(3500);
@@ -132,7 +133,7 @@ describe('cancelling', () => {
 
   test('a claimed listing cannot be pulled out from under the buyer', () => {
     const id = listed('alice');
-    store.claim(id, 'bob');
+    store.claim(id, 'bob', 'Bob');
     expect(store.cancel(id, 'alice')).toBe(false);
   });
 });
@@ -151,7 +152,7 @@ describe('balances', () => {
 
 describe('prices are bounded', () => {
   const bad = (price: number) => () =>
-    store.createPending({ seller: 'alice', price, item: anItem, category: 'jewels' });
+    store.createPending({ seller: 'alice', sellerCharacter: 'Alice', price, item: anItem, category: 'jewels' });
 
   test('zero and negative are refused', () => {
     expect(bad(0)).toThrow();
@@ -167,12 +168,13 @@ describe('what the bots have to do', () => {
   test('pending, claimed and returning listings are all work', () => {
     const pending = store.createPending({
       seller: 'alice',
+      sellerCharacter: 'Alice',
       price: 10,
       item: anItem,
       category: 'jewels',
     });
     const claimed = listed('bob');
-    store.claim(claimed, 'carol');
+    store.claim(claimed, 'carol', 'Carol');
     const returning = listed('dave');
     store.cancel(returning, 'dave');
 

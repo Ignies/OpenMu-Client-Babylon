@@ -39,6 +39,7 @@ db.run(`
   CREATE TABLE IF NOT EXISTS listings (
     id            TEXT PRIMARY KEY,
     seller        TEXT NOT NULL,
+    seller_char   TEXT NOT NULL,
     price         INTEGER NOT NULL,
     item_group    INTEGER NOT NULL,
     item_number   INTEGER NOT NULL,
@@ -49,6 +50,7 @@ db.run(`
     holder        TEXT,
     holder_slot   INTEGER,
     buyer         TEXT,
+    buyer_char    TEXT,
     created_at    INTEGER NOT NULL,
     updated_at    INTEGER NOT NULL
   )
@@ -98,6 +100,7 @@ export type ListingState =
 export type ListingRow = {
   id: string;
   seller: string;
+  seller_char: string;
   price: number;
   item_group: number;
   item_number: number;
@@ -108,6 +111,7 @@ export type ListingRow = {
   holder: string | null;
   holder_slot: number | null;
   buyer: string | null;
+  buyer_char: string | null;
   created_at: number;
   updated_at: number;
 };
