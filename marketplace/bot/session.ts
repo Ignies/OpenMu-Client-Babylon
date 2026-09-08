@@ -1,0 +1,147 @@
+import {
+  LoginShortPasswordPacket,
+  RequestCharacterListPacket,
+  SelectCharacterPacket,
+} from '../../src/common/packets/ClientToServerPackets';
+import {
+  CharacterInformationPacket,
+  CharacterListPacket,
+  LoginResponseLoginResultEnum,
+  LoginResponsePacket,
+} from '../../src/common/packets/ServerToClientPackets';
+import { Xor3Byte } from '../../src/common/encryption/xor3';
+import { stringToBytes } from '../../src/common/wireUtils';
+import { gameVersion } from '../../versions/season6';
+import { BotConnection, type Frame } from './connection';
+
+/**
+ * Getting a bot from a socket to a character standing in the world.
+ *
+ * Every step is request-then-await with a deadline, in the order the browser
+ * client does them (`Store.loginRequest`, `refreshCharactersListRequest`,
+ * `selectCharacterRequest`). A step that does not get its answer throws rather
+ * than leaving a half-logged-in bot for the escrow queue to trip over.
+ */
+
+/** The client's own field widths for the login frame. */
+const MAX_USERNAME_LENGTH = 10;
+const MAX_PASSWORD_LENGTH = 10;
+
+const CODE = {
+  loginResponse: { code: 0xf1, sub: 0x01 },
+  characterList: { code: 0xf3, sub: 0x00 },
+  characterInformation: { code: 0xf3, sub: 0x03 },
+} as const;
+
+/** A generated packet class reads from byteOffset 0, so the frame is copied. */
+export function view(frame: Frame): DataView {
+  return new DataView(
+    frame.bytes.buffer.slice(
+      frame.bytes.byteOffset,
+      frame.bytes.byteOffset + frame.bytes.length
+    )
+  );
+}
+
+export type CharacterEntry = ReturnType<CharacterListPacket['getCharacters']>[number];
+
+export type BotIdentity = {
+  account: string;
+  password: string;
+  /** Which character to play. Defaults to the lowest slot. */
+  character?: string;
+};
+
+export class BotSession {
+  character: CharacterEntry | null = null;
+
+  constructor(
+    private readonly connection: BotConnection,
+    private readonly identity: BotIdentity,
+    private readonly log: (message: string) => void = () => {}
+  ) {}
+
+  /** Socket to standing in the world. Throws on any refusal or silence. */
+  async enterWorld(): Promise<CharacterEntry> {
+    await this.login();
+    const characters = await this.listCharacters();
+    const chosen = this.choose(characters);
+    await this.select(chosen);
+    this.character = chosen;
+    return chosen;
+  }
+
+  private async login(): Promise<void> {
+    const username = stringToBytes(this.identity.account, MAX_USERNAME_LENGTH);
+    const password = stringToBytes(this.identity.password, MAX_PASSWORD_LENGTH);
+    Xor3Byte(username);
+    Xor3Byte(password);
+
+    const packet = LoginShortPasswordPacket.createPacket();
+    packet.setUsername(username, username.length);
+    packet.setPassword(password, password.length);
+    packet.setClientVersion(gameVersion.clientVersionBytes);
+    packet.setClientSerial(gameVersion.serialBytes);
+
+    const answer = this.connection.expect(CODE.loginResponse, 15_000, 'LoginResponse');
+    this.connection.send(packet.buffer);
+
+    const result = new LoginResponsePacket(view(await answer)).Success;
+    if (result !== LoginResponseLoginResultEnum.Okay) {
+      throw new Error(
+        `login refused for ${this.identity.account}: ${LoginResponseLoginResultEnum[result] ?? result}`
+      );
+    }
+    this.log(`logged in as ${this.identity.account}`);
+  }
+
+  private async listCharacters(): Promise<CharacterEntry[]> {
+    const packet = RequestCharacterListPacket.createPacket();
+    packet.Language = 0;
+
+    const answer = this.connection.expect(CODE.characterList, 15_000, 'CharacterList');
+    this.connection.send(packet.buffer);
+
+    const characters = new CharacterListPacket(view(await answer)).getCharacters();
+    if (characters.length === 0) {
+      throw new Error(`${this.identity.account} has no characters`);
+    }
+    return characters;
+  }
+
+  /**
+   * The named character, or the lowest slot. Named is what production uses:
+   * a mule's slots are ours to arrange, and a bot that silently picks a
+   * different character would deliver from the wrong inventory.
+   */
+  private choose(characters: CharacterEntry[]): CharacterEntry {
+    const wanted = this.identity.character;
+    if (wanted === undefined) {
+      return [...characters].sort((a, b) => a.SlotIndex - b.SlotIndex)[0];
+    }
+
+    const found = characters.find(c => c.Name === wanted);
+    if (!found) {
+      const names = characters.map(c => c.Name).join(', ');
+      throw new Error(`${this.identity.account} has no character "${wanted}" (has: ${names})`);
+    }
+    return found;
+  }
+
+  private async select(character: CharacterEntry): Promise<void> {
+    const packet = SelectCharacterPacket.createPacket();
+    packet.setName(character.Name);
+
+    const answer = this.connection.expect(
+      CODE.characterInformation,
+      15_000,
+      'CharacterInformation'
+    );
+    this.connection.send(packet.buffer);
+
+    const info = new CharacterInformationPacket(view(await answer));
+    this.log(
+      `entered the world as ${character.Name} on map ${info.MapId} at ${info.X},${info.Y}`
+    );
+  }
+}
