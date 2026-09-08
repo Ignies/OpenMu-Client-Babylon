@@ -4,6 +4,7 @@ import { buildMockListings, type Listing } from './mockListings';
 
 export type Tab = 'browse' | 'mine' | 'sell';
 export type Sort = 'newest' | 'price-asc' | 'price-desc' | 'deal';
+export type View = 'list' | 'grid';
 
 export const SORTS: { id: Sort; label: string }[] = [
   { id: 'newest', label: 'Newest' },
@@ -12,7 +13,9 @@ export const SORTS: { id: Sort; label: string }[] = [
   { id: 'deal', label: 'Best deal' },
 ];
 
-export const PAGE_SIZE = 12;
+/** A list row is about a third the height of a card, so it fits more of them. */
+export const PAGE_SIZE_GRID = 12;
+export const PAGE_SIZE_LIST = 8;
 
 /**
  * Marketplace window state.
@@ -31,6 +34,12 @@ class MarketplaceStore {
   category: CategoryId = 'all';
   search = '';
   sort: Sort = 'newest';
+  /**
+   * Opens on the list every time, deliberately not remembered: the list is
+   * the view that answers "what is for sale and what does it cost", and the
+   * grid is for browsing by eye.
+   */
+  view: View = 'list';
   page = 0;
   excellentOnly = false;
   affordableOnly = false;
@@ -92,6 +101,20 @@ class MarketplaceStore {
   setSort(sort: Sort): void {
     this.sort = sort;
     this.page = 0;
+  }
+
+  setView(view: View): void {
+    if (this.view === view) return;
+    // Keep the player roughly where they were rather than snapping to page 1:
+    // the two views hold different numbers of listings per page.
+    const firstIndex = this.page * this.pageSize;
+    this.view = view;
+    this.page = Math.floor(firstIndex / this.pageSize);
+    this.setPage(this.page);
+  }
+
+  get pageSize(): number {
+    return this.view === 'grid' ? PAGE_SIZE_GRID : PAGE_SIZE_LIST;
   }
 
   toggleExcellentOnly(): void {
@@ -161,12 +184,12 @@ class MarketplaceStore {
   }
 
   get pageCount(): number {
-    return Math.max(1, Math.ceil(this.matching.length / PAGE_SIZE));
+    return Math.max(1, Math.ceil(this.matching.length / this.pageSize));
   }
 
   get pageItems(): Listing[] {
-    const start = Math.min(this.page, this.pageCount - 1) * PAGE_SIZE;
-    return this.matching.slice(start, start + PAGE_SIZE);
+    const start = Math.min(this.page, this.pageCount - 1) * this.pageSize;
+    return this.matching.slice(start, start + this.pageSize);
   }
 
   get hoveredListing(): Listing | null {

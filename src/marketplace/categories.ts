@@ -12,7 +12,7 @@ export const CATEGORIES = [
   { id: 'weapons', label: 'Weapons' },
   { id: 'shields', label: 'Shields' },
   { id: 'armour', label: 'Armour' },
-  { id: 'wings', label: 'Wings' },
+  { id: 'wings', label: 'Wings / Capes' },
   { id: 'jewels', label: 'Jewels' },
   { id: 'pets', label: 'Pets' },
   { id: 'accessories', label: 'Accessories' },
@@ -24,6 +24,8 @@ export type CategoryId = (typeof CATEGORIES)[number]['id'];
 
 const WING_INDEXES = new Set([0, 1, 2, 3, 4, 5, 6, 36, 37, 38, 39, 40, 41, 42, 43]);
 const PET_INDEXES = new Set([0, 1, 2, 3, 4, 5]);
+/** Capes sit with wings: same slot, same reason to shop for one. */
+const CAPE_INDEXES = new Set([30]);
 const ACCESSORY_INDEXES = new Set([8, 9, 10, 12, 13, 20, 21, 22, 23, 24, 25, 26, 27, 28]);
 /** Group 14 jewels: Bless, Soul, Life, Creation, Guardian. */
 const JEWEL_14 = new Set([13, 14, 16, 22, 31]);
@@ -41,6 +43,7 @@ export function categoryOf(item: Item): CategoryId {
     return 'misc';
   }
   if (group === 13) {
+    if (CAPE_INDEXES.has(num)) return 'wings';
     if (PET_INDEXES.has(num)) return 'pets';
     if (ACCESSORY_INDEXES.has(num)) return 'accessories';
     return 'misc';

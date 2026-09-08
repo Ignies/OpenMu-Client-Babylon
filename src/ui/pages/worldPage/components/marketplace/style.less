@@ -257,6 +257,124 @@
   color: @mp-dim;
 }
 
+.mp-viewswitch {
+  display: flex;
+  gap: 1px;
+  padding: 1px;
+  background: #0c0e14;
+  border: 1px solid @mp-edge;
+  border-radius: 4px;
+}
+
+.mp-viewbtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 20px;
+  color: @mp-dim;
+  border-radius: 3px;
+
+  &:hover {
+    color: @mp-ink;
+  }
+
+  &.is-on {
+    color: #10121a;
+    background: @mp-gold;
+  }
+}
+
+// ---- list view -----------------------------------------------------------
+
+.mp-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mp-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 92px 56px 44px 132px 62px;
+  gap: 10px;
+  align-items: center;
+  // Deliberately tight: a full page of rows has to fit the content area
+  // without scrolling, or the pager and the list disagree about a page.
+  padding: 4px 8px;
+  background: linear-gradient(180deg, @mp-raise 0%, #14171f 100%);
+  border: 1px solid @mp-edge;
+  border-radius: 4px;
+
+  &:hover {
+    border-color: fade(@mp-gold, 55%);
+  }
+}
+
+.mp-row-head {
+  padding: 2px 8px 4px;
+  font-size: 10px;
+  color: fade(@mp-dim, 85%);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  border-bottom: 1px solid @mp-edge;
+  border-radius: 0;
+
+  &:hover {
+    border-color: @mp-edge;
+  }
+}
+
+.mp-row-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #0a0c11;
+  border: 1px solid #232838;
+  border-radius: 3px;
+
+  img {
+    max-width: 25px;
+    max-height: 25px;
+    object-fit: contain;
+  }
+}
+
+.mp-row-seller,
+.mp-row-age {
+  overflow: hidden;
+  font-size: 11px;
+  color: @mp-dim;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-row-deal {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mp-row-price {
+  font-size: 12px;
+  font-weight: 700;
+  color: @mp-gold;
+  text-align: right;
+
+  &.is-short {
+    color: @mp-bad;
+  }
+}
+
+.mp-row-price-head {
+  text-align: right;
+}
+
 // ---- cards ---------------------------------------------------------------
 
 .mp-grid {

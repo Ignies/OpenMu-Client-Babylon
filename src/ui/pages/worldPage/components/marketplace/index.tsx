@@ -96,6 +96,61 @@ const ListingCard = observer(({ listing, mode }: { listing: Listing; mode: Tab }
   );
 });
 
+/** The same listing as a table row: denser, and the prices line up. */
+const ListingRow = observer(({ listing, mode }: { listing: Listing; mode: Tab }) => {
+  const affordable = Marketplace.canAfford(listing);
+  const deal = dealDelta(listing);
+
+  const onMove = (e: ReactPointerEvent<HTMLDivElement>) =>
+    Marketplace.hover(listing.id, e.clientX, e.clientY);
+
+  return (
+    <div
+      className="mp-row"
+      onPointerMove={onMove}
+      onPointerEnter={onMove}
+      onPointerLeave={() => Marketplace.unhover(listing.id)}
+    >
+      <div className="mp-row-icon">
+        <ItemIcon item={listing.item} />
+      </div>
+
+      <div
+        className={`mp-card-name${listing.item.isAncient ? ' is-ancient' : ''}${
+          listing.item.isExcellent && !listing.item.isAncient ? ' is-excellent' : ''
+        }`}
+      >
+        {displayName(listing.item)}
+      </div>
+
+      <div className="mp-row-seller">{listing.seller}</div>
+      <div className="mp-row-age">{sinceLabel(listing.listedAt)}</div>
+      <div className="mp-row-deal">
+        {deal && <span className={`mp-deal ${deal.tone}`}>{deal.label}</span>}
+      </div>
+
+      <div className={`mp-row-price${affordable ? '' : ' is-short'}`}>
+        {formatZen(listing.price)}
+        <span className="mp-zen">Zen</span>
+      </div>
+
+      {mode === 'mine' ? (
+        <button className="mp-btn is-quiet" onClick={() => Marketplace.cancelListing(listing.id)}>
+          Cancel
+        </button>
+      ) : (
+        <button
+          className="mp-btn"
+          disabled={!affordable}
+          onClick={() => Marketplace.askBuy(listing)}
+        >
+          {affordable ? 'Buy' : 'Short'}
+        </button>
+      )}
+    </div>
+  );
+});
+
 const CategoryRail = observer(() => {
   const counts = Marketplace.categoryCounts;
   return (
@@ -142,8 +197,37 @@ const Toolbar = observer(() => (
     </button>
 
     <span className="mp-count">{Marketplace.matching.length} listings</span>
+
+    <div className="mp-viewswitch" role="group" aria-label="View">
+      <button
+        className={`mp-viewbtn${Marketplace.view === 'list' ? ' is-on' : ''}`}
+        aria-pressed={Marketplace.view === 'list'}
+        title="List view"
+        onClick={() => Marketplace.setView('list')}
+      >
+        <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+          <rect x="0" y="1" width="12" height="2" rx="0.5" fill="currentColor" />
+          <rect x="0" y="5" width="12" height="2" rx="0.5" fill="currentColor" />
+          <rect x="0" y="9" width="12" height="2" rx="0.5" fill="currentColor" />
+        </svg>
+      </button>
+      <button
+        className={`mp-viewbtn${Marketplace.view === 'grid' ? ' is-on' : ''}`}
+        aria-pressed={Marketplace.view === 'grid'}
+        title="Grid view"
+        onClick={() => Marketplace.setView('grid')}
+      >
+        <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true">
+          <rect x="0" y="0" width="5" height="5" rx="0.5" fill="currentColor" />
+          <rect x="7" y="0" width="5" height="5" rx="0.5" fill="currentColor" />
+          <rect x="0" y="7" width="5" height="5" rx="0.5" fill="currentColor" />
+          <rect x="7" y="7" width="5" height="5" rx="0.5" fill="currentColor" />
+        </svg>
+      </button>
+    </div>
   </div>
 ));
+
 
 const Pager = observer(() => {
   const { page, pageCount } = Marketplace;
@@ -329,12 +413,32 @@ export const MarketplaceWindow = observer(() => {
           {browsing ? (
             <>
               <Toolbar />
-              <div className="mp-grid">
-                {cards.map(listing => (
-                  <ListingCard key={listing.id} listing={listing} mode={Marketplace.tab} />
-                ))}
-                {cards.length === 0 && <div className="mp-empty">Nothing matches that.</div>}
-              </div>
+
+              {Marketplace.view === 'grid' ? (
+                <div className="mp-grid">
+                  {cards.map(listing => (
+                    <ListingCard key={listing.id} listing={listing} mode={Marketplace.tab} />
+                  ))}
+                  {cards.length === 0 && <div className="mp-empty">Nothing matches that.</div>}
+                </div>
+              ) : (
+                <div className="mp-list">
+                  <div className="mp-row mp-row-head">
+                    <span />
+                    <span>Item</span>
+                    <span>Seller</span>
+                    <span>Listed</span>
+                    <span />
+                    <span className="mp-row-price-head">Price</span>
+                    <span />
+                  </div>
+                  {cards.map(listing => (
+                    <ListingRow key={listing.id} listing={listing} mode={Marketplace.tab} />
+                  ))}
+                  {cards.length === 0 && <div className="mp-empty">Nothing matches that.</div>}
+                </div>
+              )}
+
               <Pager />
             </>
           ) : (
