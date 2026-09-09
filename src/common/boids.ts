@@ -92,6 +92,17 @@ export type BoidSpec = {
   readonly lifeTicks?: readonly [number, number];
   /** The additive metal/chrome pass a golden body carries, linear RGB. */
   readonly shine?: readonly [number, number, number];
+  /**
+   * Half-turn on the render angle for a model authored the other way round.
+   *
+   * The wildlife models face along `-yaw`, which is what `boidSystem` writes.
+   * Every character and monster in the game faces along
+   * `atan2(dz, dx) + PI/2` instead (moveAlongPathSystem, skillCastSystem,
+   * headTrackingSystem), and for a boid's own heading that is `PI - yaw` -
+   * the same direction turned 180 degrees. A species that borrows a monster
+   * model flies tail first without this.
+   */
+  readonly modelHalfTurn?: boolean;
 };
 
 const BIRD: BoidSpec = {
@@ -168,6 +179,7 @@ const DRAGON: BoidSpec = {
   spawnOneIn: 300,
   flyDistance: 4000,
   lifeTicks: [128, 256],
+  modelHalfTurn: true,
 };
 
 /**
