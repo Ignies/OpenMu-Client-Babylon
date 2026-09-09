@@ -96,9 +96,13 @@ const DRAGON_ACTION_SPEED = 0.5;
 /** `PlayBuffer(SOUND_MONSTER_BULLATTACK1)` on `rand_fps_check(128)`. */
 const ROAR_ONE_IN = 128;
 
-/** The mouth, as an offset along the heading rather than off bone 11. */
-const MOUTH_AHEAD = 1.6;
-const MOUTH_BELOW = 0.35;
+/**
+ * The mouth: `BoneTransform[11]` in the original (GOBoid.cpp:1546-1549),
+ * which the export names `bone_11_attack01`. Skeletons here carry a root bone
+ * the BMD does not, so an MU bone index is one lower than the glb's - the
+ * same `+ 1` `ModelObject.ParentBoneLink` applies.
+ */
+const MOUTH_BONE = 11 + 1;
 
 /** `CreateSprite(BITMAP_LIGHTNING + 1, ..., 1.f, red)` at the mouth. */
 const BREATH_CARD_TILES = 0.9;
@@ -360,23 +364,21 @@ export const BoidSystem: ISystemFactory = world => {
 
     const model = e.modelObject;
 
-    if (model) {
-      model.setActionSpeed(DRAGON_ACTION, DRAGON_ACTION_SPEED);
-      model.playAction(DRAGON_ACTION, true);
-    }
+    if (!model) return;
+
+    model.setActionSpeed(DRAGON_ACTION, DRAGON_ACTION_SPEED);
+    model.playAction(DRAGON_ACTION, true);
 
     if (rolled(ROAR_ONE_IN, ticks)) playSfx('Sound/mBullAttack1', p);
 
-    // The mouth: bone 11 offset (0, -50, 0) in the original, an offset along
-    // the heading here - the flame is a card and a puff, not a placement.
-    const rad = s.yaw * DEG;
-    const mouth = new Vector3(
-      p.x + Math.sin(rad) * MOUTH_AHEAD * scale,
-      p.y - MOUTH_BELOW * scale,
-      p.z + Math.cos(rad) * MOUTH_AHEAD * scale
-    );
-
     if (!rolled(BREATH_ONE_IN, ticks)) return;
+
+    const gltf = model.gltf;
+    const bone = gltf?.skeleton?.bones[MOUTH_BONE];
+
+    if (!gltf || !bone) return;
+
+    const mouth = bone.getAbsolutePosition(gltf.mesh);
 
     effects.spawn('particles', world.scene, mouth, {
       recipe: FIRE_PUFF,
@@ -451,8 +453,12 @@ export const BoidSystem: ISystemFactory = world => {
         }
 
         // The model faces along its heading; MU yaw is the render angle's
-        // mirror, the same relationship every other object here has.
-        e.transform!.rot.y = -rad0(s.yaw);
+        // mirror, the same relationship every other object here has - plus a
+        // half turn for a species wearing a monster model, which the rest of
+        // the game orients the other way round (`BoidSpec.modelHalfTurn`).
+        e.transform!.rot.y = spec.modelHalfTurn
+          ? Math.PI - rad0(s.yaw)
+          : -rad0(s.yaw);
 
         // Out of range, or its time is up. Either way it is told to leave
         // rather than deleted: the original fades one in and out through
