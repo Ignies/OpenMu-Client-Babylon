@@ -23,7 +23,7 @@ function bagItems(): Item[] {
 }
 
 export function syncMarketplaceFromGame(): void {
-  Marketplace.syncFromGame(Store.playerData.money, bagItems());
+  Marketplace.syncFromGame(Store.playerData.money, bagItems(), Store.playerData.name);
 }
 
 export function toggleMarketplace(): void {

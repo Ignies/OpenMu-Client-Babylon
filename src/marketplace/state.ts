@@ -1,4 +1,6 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, runInAction } from 'mobx';
+import * as api from './api';
+import type { ApiListing } from './api';
 import { CATEGORIES, categoryOf, displayName, type CategoryId } from './categories';
 import { buildMockListings, type Listing } from './mockListings';
 
@@ -14,6 +16,22 @@ export const SORTS: { id: Sort; label: string }[] = [
 ];
 
 /** A list row is about a third the height of a card, so it fits more of them. */
+/** The service speaks in its own rows; the window draws these. */
+function fromApi(row: ApiListing): Listing {
+  return {
+    id: row.id,
+    item: row.item as Listing['item'],
+    category: categoryOf(row.item as Listing['item']),
+    seller: row.seller,
+    price: row.price,
+    listedAt: row.listedAt,
+    // No history to compare against yet, so nothing claims to be a deal.
+    median: row.price,
+    mine: row.state !== 'active' || undefined,
+    state: row.state,
+  };
+}
+
 export const PAGE_SIZE_GRID = 12;
 export const PAGE_SIZE_LIST = 10;
 
@@ -48,6 +66,11 @@ class MarketplaceStore {
   zen = 0;
   /** What the player could put up for sale. Pushed in the same way. */
   inventory: Listing['item'][] = [];
+  /**
+   * The character a bot has to meet. Pushed in from the world page, because
+   * the service knows accounts and a trade happens with a character.
+   */
+  characterName = '';
 
   /**
    * Empty until a service fills it.
@@ -65,6 +88,8 @@ class MarketplaceStore {
   confirming: Listing | null = null;
   /** Set for a moment after a purchase, so the window can say so. */
   flash: string | null = null;
+  /** Zen the service is holding for this player, from sales made while away. */
+  payoutOwed = 0;
 
   /** Sell tab: which inventory item is picked, and the price typed for it. */
   sellPick: number | null = null;
@@ -85,10 +110,66 @@ class MarketplaceStore {
     return this.listings.length === 0;
   }
 
+  /**
+   * Whether a service is answering.
+   *
+   * `live` is the real marketplace. `offline` is the standalone harness and a
+   * development build with nothing running behind them, where the fixtures
+   * stand in. A live build that cannot reach the service stays offline with an
+   * empty catalogue rather than inventing one.
+   */
+  mode: 'unknown' | 'live' | 'offline' = 'unknown';
+  /** Set when the service refuses or cannot be reached, for the window to show. */
+  problem: string | null = null;
+  loading = false;
+
   toggle(): void {
     this.open = !this.open;
-    if (this.open) this.page = 0;
-    else this.closeTransients();
+    if (this.open) {
+      this.page = 0;
+      void this.refresh();
+    } else {
+      this.closeTransients();
+    }
+  }
+
+  /**
+   * Pulls the catalogue and this player's own listings from the service.
+   *
+   * The window shows what the service holds and nothing else: no optimistic
+   * rows, no local edits that survive a reload. Every action below re-reads
+   * rather than patching state, because the service is the only thing that
+   * knows whether a bot actually completed a handover.
+   */
+  async refresh(): Promise<void> {
+    if (this.mode === 'offline') return;
+
+    runInAction(() => {
+      this.loading = true;
+    });
+
+    try {
+      const [catalogue, own] = await Promise.all([api.browse({ limit: 200 }), api.mine()]);
+      runInAction(() => {
+        this.mode = 'live';
+        this.problem = null;
+        this.listings = [...catalogue.listings, ...own.listings].map(fromApi);
+        this.payoutOwed = own.balance;
+        this.loading = false;
+      });
+    } catch (error) {
+      runInAction(() => {
+        this.loading = false;
+        // In a development build the fixtures are the point, so a service that
+        // is not running is not an error - it is the harness.
+        if (APP_STAGE === 'dev' && this.listings.length > 0) {
+          this.mode = 'offline';
+          return;
+        }
+        this.mode = 'live';
+        this.problem = error instanceof Error ? error.message : 'The marketplace is unreachable.';
+      });
+    }
   }
 
   close(): void {
@@ -256,22 +337,64 @@ class MarketplaceStore {
    * Fixture purchase: the Zen and the listing move locally so the flow can be
    * walked end to end. The real one is a trade the game server performs.
    */
-  confirmBuy(): void {
+  /**
+   * Reserves the listing. Nothing is bought here and no Zen moves: the service
+   * holds it for this buyer, and a bot then meets them in game to make the
+   * exchange. That is the only place goods actually change hands.
+   */
+  async confirmBuy(): Promise<void> {
     const listing = this.confirming;
     if (!listing || !this.canAfford(listing)) return;
-    this.zen -= listing.price;
-    this.listings = this.listings.filter(l => l.id !== listing.id);
-    this.confirming = null;
-    this.flash = `Bought ${displayName(listing.item)}`;
-    this.setPage(this.page);
+
+    if (this.mode === 'offline') {
+      // The harness has no service to reserve anything with.
+      this.zen -= listing.price;
+      this.listings = this.listings.filter(l => l.id !== listing.id);
+      this.confirming = null;
+      this.flash = `Bought ${displayName(listing.item)}`;
+      this.setPage(this.page);
+      return;
+    }
+
+    runInAction(() => {
+      this.confirming = null;
+    });
+
+    try {
+      await api.claim(listing.id, this.characterName);
+      runInAction(() => {
+        this.flash = `Reserved ${displayName(listing.item)}. A trader is on the way.`;
+      });
+    } catch (error) {
+      runInAction(() => {
+        this.flash = error instanceof Error ? error.message : 'That purchase was refused.';
+      });
+    }
+    await this.refresh();
   }
 
-  cancelListing(id: string): void {
+  async cancelListing(id: string): Promise<void> {
     const listing = this.listings.find(l => l.id === id);
     if (!listing) return;
-    this.listings = this.listings.filter(l => l.id !== id);
-    this.flash = `Cancelled ${displayName(listing.item)}`;
-    this.setPage(this.page);
+
+    if (this.mode === 'offline') {
+      this.listings = this.listings.filter(l => l.id !== id);
+      this.flash = `Cancelled ${displayName(listing.item)}`;
+      this.setPage(this.page);
+      return;
+    }
+
+    try {
+      await api.cancel(id);
+      runInAction(() => {
+        this.flash = `Cancelling ${displayName(listing.item)}. A trader will return it.`;
+      });
+    } catch (error) {
+      runInAction(() => {
+        this.flash = error instanceof Error ? error.message : 'That could not be cancelled.';
+      });
+    }
+    await this.refresh();
   }
 
   pickForSale(index: number | null): void {
@@ -308,28 +431,68 @@ class MarketplaceStore {
     return this.comparable[0]?.price ?? null;
   }
 
-  listForSale(): void {
+  /**
+   * Asks the service to list the item. It is not on sale yet: a bot has to
+   * come and take it first, and only then does anyone else see it. Saying
+   * "listed" here would be a lie, so the wording says what actually happens.
+   */
+  async listForSale(): Promise<void> {
     const index = this.sellPick;
     const item = index === null ? null : this.inventory[index];
     if (!item || this.sellPriceValue <= 0) return;
-    this.listings = [
-      {
-        id: `L${Math.random().toString(36).slice(2, 7)}`,
-        item,
-        category: categoryOf(item),
-        seller: 'You',
-        price: this.sellPriceValue,
-        listedAt: Date.now(),
-        median: this.sellPriceValue,
-        mine: true,
-      },
-      ...this.listings,
-    ];
-    this.inventory = this.inventory.filter((_, i) => i !== index);
-    this.sellPick = null;
-    this.sellPrice = '';
-    this.flash = `Listed ${displayName(item)}`;
-    this.setTab('mine');
+
+    if (this.mode === 'offline') {
+      this.listings = [
+        {
+          id: `L${Math.random().toString(36).slice(2, 7)}`,
+          item,
+          category: categoryOf(item),
+          seller: 'You',
+          price: this.sellPriceValue,
+          listedAt: Date.now(),
+          median: this.sellPriceValue,
+          mine: true,
+        },
+        ...this.listings,
+      ];
+      this.inventory = this.inventory.filter((_, i) => i !== index);
+      this.sellPick = null;
+      this.sellPrice = '';
+      this.flash = `Listed ${displayName(item)}`;
+      this.setTab('mine');
+      return;
+    }
+
+    const price = this.sellPriceValue;
+    try {
+      await api.list(item, price, categoryOf(item), this.characterName);
+      runInAction(() => {
+        this.sellPick = null;
+        this.sellPrice = '';
+        this.flash = `A trader is coming for your ${displayName(item)}.`;
+      });
+      this.setTab('mine');
+    } catch (error) {
+      runInAction(() => {
+        this.flash = error instanceof Error ? error.message : 'That listing was refused.';
+      });
+    }
+    await this.refresh();
+  }
+
+  /** Asks for the Zen the service is holding from sales made while away. */
+  async collectPayout(): Promise<void> {
+    if (this.payoutOwed <= 0) return;
+    try {
+      const { owed } = await api.requestPayout();
+      runInAction(() => {
+        this.flash = `A trader is bringing you ${formatZen(owed)} Zen.`;
+      });
+    } catch (error) {
+      runInAction(() => {
+        this.flash = error instanceof Error ? error.message : 'That could not be collected.';
+      });
+    }
   }
 
   clearFlash(): void {
@@ -337,7 +500,8 @@ class MarketplaceStore {
   }
 
   /** The world page pushes the live numbers in; the harness pushes fixtures. */
-  syncFromGame(zen: number, inventory: Listing['item'][]): void {
+  syncFromGame(zen: number, inventory: Listing['item'][], characterName = ''): void {
+    if (characterName) this.characterName = characterName;
     this.zen = zen;
     this.inventory = inventory;
   }
