@@ -865,10 +865,41 @@ type ScopeNpc = {
   TypeNumber: number;
   CurrentPositionX: number;
   CurrentPositionY: number;
+  TargetPositionX: number;
+  TargetPositionY: number;
   Rotation: number;
   /** AddSummonedMonstersToScope only: name of the summoning player. */
   OwnerCharacterName?: string;
 };
+
+/**
+ * Keep an object that entered scope mid-walk walking.
+ *
+ * Every scope packet carries the walk target next to the current position:
+ * OpenMU writes `WalkTarget` while the object `IsWalking` and repeats the
+ * current position otherwise (NewPlayersInScopePlugIn / NewNpcsInScopePlugIn).
+ * The walk itself started before we could see it, so no ObjectWalked follows
+ * and the object would stand on the tile it entered on until it walks again,
+ * while everyone already in the room watches it walk on. The original client
+ * does the same here (`PathFinding2(c->PositionX, c->PositionY,
+ * Data->TargetX, Data->TargetY)`, WSclient.cpp:2278).
+ */
+function resumeWalkIntoScope(
+  entity: Entity,
+  currentX: number,
+  currentY: number,
+  targetX: number,
+  targetY: number
+): void {
+  if (targetX === currentX && targetY === currentY) return;
+
+  const moveTo = entity.playerMoveTo;
+  if (!moveTo) return;
+
+  moveTo.point.x = targetX;
+  moveTo.point.y = targetY;
+  moveTo.handled = false;
+}
 
 function addNpcToScope(world: World, npc: ScopeNpc) {
   const id = npc.Id & 0x7fff;
@@ -954,6 +985,14 @@ function addNpcToScope(world: World, npc: ScopeNpc) {
   const monsterHP = MonstersDatabase.get(npc.TypeNumber)?.HP ?? 0;
   npcEntity.attributeSystem.setValue('maxHealth', monsterHP);
   npcEntity.attributeSystem.setValue('currentHealth', monsterHP);
+
+  resumeWalkIntoScope(
+    npcEntity,
+    npc.CurrentPositionX,
+    npc.CurrentPositionY,
+    npc.TargetPositionX,
+    npc.TargetPositionY
+  );
 }
 
 EventBus.on('AddNpcsToScope', packet => {
@@ -1009,13 +1048,15 @@ type ScopeCharacter = {
   Id: number;
   CurrentPositionX: number;
   CurrentPositionY: number;
+  TargetPositionX: number;
+  TargetPositionY: number;
   Rotation: number;
   Name: string;
   appearance: ReturnType<typeof deserializeAppearance>;
   /** Server-computed speeds (extended protocol only). */
   attackSpeed?: number;
   magicSpeed?: number;
-  /** Visible magic effect ids (extended protocol only). */
+  /** Visible magic effect ids on this character. */
   effects?: number[];
   /** PK / hero status byte (`c->PK`; OpenMU CharacterHeroState, same values). */
   HeroState?: number;
@@ -1032,6 +1073,9 @@ EventBus.on('AddCharactersToScope', packet => {
     addCharacterToScope(world, {
       ...char,
       appearance: deserializeAppearance(char.Appearance),
+      // The classic packet carries the visible effects too, one record each;
+      // only the extended one names the field the way the entity wants it.
+      effects: char.Effects.map(e => e.Id),
     });
   });
 });
@@ -1061,6 +1105,8 @@ EventBus.on('AddCharacterToScopeExtended', packet => {
     Id: p.Id,
     CurrentPositionX: p.CurrentPositionX,
     CurrentPositionY: p.CurrentPositionY,
+    TargetPositionX: p.TargetPositionX,
+    TargetPositionY: p.TargetPositionY,
     Rotation: p.Rotation,
     Name: p.Name.replace(/ +$/, ''),
     appearance: deserializeAppearanceExtended(data),
@@ -1140,6 +1186,14 @@ function addCharacterToScope(world: World, char: ScopeCharacter) {
     cApp.pet = appearance.pet ?? null;
 
     cApp.changed = true;
+
+    resumeWalkIntoScope(
+      playerEntity,
+      char.CurrentPositionX,
+      char.CurrentPositionY,
+      char.TargetPositionX,
+      char.TargetPositionY
+    );
   }
 }
 
