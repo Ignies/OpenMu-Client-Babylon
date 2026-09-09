@@ -16,6 +16,8 @@ import {
   TradeMoneyUpdatePacket,
   TradeRequestAnswerPacket,
   TradeRequestPacket as IncomingTradeRequestPacket,
+  ItemMovedPacket,
+  ItemAddedToInventoryPacket,
 } from '../../src/common/packets/ServerToClientPackets';
 import { StorageKind } from '../../src/common/itemStorage';
 import type { BotConnection, Frame } from './connection';
@@ -39,7 +41,17 @@ const CODE = {
   moneyUpdate: { code: 0x3b },
   buttonState: { code: 0x3c },
   finished: { code: 0x3d },
+  /** Our own item move landed; `TargetStorageType` says where. */
+  itemMoved: { code: 0x24 },
+  /** An item arrived in our bag, carrying the slot the server chose. */
+  itemReceived: { code: 0x22 },
 } as const;
+
+/**
+ * `InventoryMoneyUpdate` shares 0x22 with `ItemAddedToInventory` and is told
+ * apart by its sub code, which is not a slot any bag has.
+ */
+const MONEY_SUB = 0xfe;
 
 export type TradeSlotItem = { slot: number; data: Uint8Array };
 
@@ -53,11 +65,29 @@ export type TradeTerms = {
   expectMoney?: number;
   /** How many items the partner must have put in. */
   expectItems?: number;
+  /**
+   * How many items *we* must have on the table.
+   *
+   * Without this the bot will confirm a trade in which it is giving nothing:
+   * a refused item move is silent, and every other check reads the partner's
+   * half. That is how a delivery took payment for an empty table.
+   */
+  expectOwnItems?: number;
 };
 
 export class TradeSession {
   /** Items the partner has put on the table, by trade slot. */
   readonly theirItems = new Map<number, Uint8Array>();
+  /** Trade slots the server has confirmed *our* items into. */
+  readonly myItems = new Set<number>();
+  /**
+   * Bag slots the server put items into during this trade, in arrival order.
+   *
+   * Where a collected item lands is the server's choice, not ours, and it is
+   * only ever said here. Guessing it and writing the guess down is what left
+   * deliveries offering an empty slot.
+   */
+  readonly receivedSlots: number[] = [];
   theirMoney = 0;
   theirConfirm = false;
   partner: string | null = null;
@@ -105,6 +135,8 @@ export class TradeSession {
     this.open = true;
     this.partner = answer.Name;
     this.theirItems.clear();
+    this.myItems.clear();
+    this.receivedSlots.length = 0;
     this.theirMoney = 0;
     this.theirConfirm = false;
     this.log(`trading with ${this.partner}`);
@@ -236,6 +268,9 @@ export class TradeSession {
     if (terms.expectItems !== undefined && this.theirItems.size !== terms.expectItems) {
       return `expected ${terms.expectItems} item(s) on the table, found ${this.theirItems.size}`;
     }
+    if (terms.expectOwnItems !== undefined && this.myItems.size !== terms.expectOwnItems) {
+      return `expected ${terms.expectOwnItems} of our item(s) on the table, found ${this.myItems.size}`;
+    }
     return null;
   }
 
@@ -247,6 +282,26 @@ export class TradeSession {
         // Any change clears both accept boxes server side; mirror it so we
         // never believe a stale agreement.
         this.theirConfirm = false;
+        break;
+      }
+      case CODE.itemMoved.code: {
+        // The server's answer to our own move. It is only ever sent for a
+        // move that happened, so a refused one leaves the table as it was and
+        // `expectOwnItems` catches it.
+        const p = new ItemMovedPacket(view(frame));
+        if (p.TargetStorageType === StorageKind.Trade) {
+          this.myItems.add(p.TargetSlot);
+          this.theirConfirm = false;
+        } else {
+          // Moved back off the table, or somewhere else entirely.
+          this.myItems.delete(p.TargetSlot);
+        }
+        break;
+      }
+      case CODE.itemReceived.code: {
+        if (frame.sub === MONEY_SUB) break;
+        const p = new ItemAddedToInventoryPacket(view(frame));
+        this.receivedSlots.push(p.InventorySlot);
         break;
       }
       case CODE.moneyUpdate.code: {

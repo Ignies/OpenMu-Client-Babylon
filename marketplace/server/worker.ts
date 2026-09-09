@@ -35,15 +35,6 @@ const log = (message: string) => console.log(`${stamp()}  ${message}`);
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-/**
- * Where the bot puts an item it is holding for a listing.
- *
- * The slot matters: every trade shuffles the bag, so the service records where
- * an item landed rather than assuming, and a delivery reads that back. Slot 12
- * is the first bag square; below it is equipment.
- */
-const FIRST_BAG_SLOT = 12;
-
 type Bot = {
   name: string;
   connection: BotConnection;
@@ -86,22 +77,9 @@ async function connect(): Promise<Bot> {
   };
 }
 
-/** Which bag slot the bot's next collected item should go to. */
-function nextFreeSlot(): number {
-  const taken = db
-    .query(`SELECT holder_slot AS s FROM listings WHERE holder = ? AND holder_slot IS NOT NULL
-            AND state IN ('active', 'claimed', 'returning')`)
-    .all(ACCOUNT) as { s: number }[];
-  const used = new Set(taken.map(r => r.s));
-  let slot = FIRST_BAG_SLOT;
-  while (used.has(slot)) slot++;
-  return slot;
-}
-
 /** A seller is handing an item over, so it can go on sale. */
 async function collect(bot: Bot, listing: store.Listing): Promise<void> {
   log(`collecting "${listing.id}" from ${listing.sellerCharacter}`);
-  const slot = nextFreeSlot();
   const result = await collectListing(bot.context, listing.sellerCharacter, 1);
 
   if (!result.ok) {
@@ -109,8 +87,11 @@ async function collect(bot: Bot, listing: store.Listing): Promise<void> {
     audit('collect failed', { listing: listing.id, detail: result.reason });
     return;
   }
-  store.activate(listing.id, ACCOUNT, slot);
-  log(`"${listing.id}" is on sale, held in slot ${slot}`);
+  // The slot the server chose, not one picked in advance: the bag holds
+  // whatever the bot was already carrying, so where an item lands is only
+  // knowable once it has landed.
+  store.activate(listing.id, ACCOUNT, result.slot);
+  log(`"${listing.id}" is on sale, held in slot ${result.slot}`);
 }
 
 /** A buyer has reserved something: hand it over and take the price. */
