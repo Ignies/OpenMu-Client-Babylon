@@ -146,10 +146,16 @@ async function openTradeWith(
 ): Promise<EscrowResult> {
   const { trade, log } = context;
   let lastReason = `${characterName} could not be reached`;
+  let everSeen = false;
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     const partner = await reach(context, characterName, attempt > 1);
-    if (!partner) continue;
+    if (!partner) {
+      lastReason = `${characterName} never came into view`;
+      log(`attempt ${attempt} of 3: ${lastReason}`);
+      continue;
+    }
+    everSeen = true;
 
     try {
       await trade.requestWith(partner.id, 8000);
@@ -158,6 +164,19 @@ async function openTradeWith(
       lastReason = e instanceof Error ? e.message : `could not open a trade with ${characterName}`;
       log(`trade request ${attempt} did not take (${lastReason})`);
     }
+  }
+
+  if (!everSeen) {
+    // The two things that make a warp do nothing, said out loud because neither
+    // reports itself: the server answers `/trace` with silence for a character
+    // that is not a game master, and it cannot reach across game servers at all
+    // - each one runs its own copy of every map, so a bot on one is standing in
+    // a different Lorencia to a player on another.
+    log(
+      `never saw ${characterName} at all: check the bot character is a game master ` +
+        `(CharacterStatus 32, not only the account State) and that both are on this ` +
+        `game server.`
+    );
   }
 
   return { ok: false, reason: lastReason };
