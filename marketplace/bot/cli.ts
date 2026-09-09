@@ -2,6 +2,7 @@ import { BotConnection } from './connection';
 import { BotSession } from './session';
 import { Scope } from './scope';
 import { TradeSession, TRADE_REQUEST_CODE, incomingRequestName } from './trade';
+import { TRADE_SLOTS } from '../../src/common/itemStorage';
 import { collectListing, deliverPurchase, payOut, type EscrowContext } from './escrow';
 import { Wallet } from './wallet';
 import { Ledger } from './ledger';
@@ -20,6 +21,7 @@ import { Ledger } from './ledger';
  *   bun run marketplace/bot/cli.ts simulate --seller MKT001 --buyer MKT002
  *   bun run marketplace/bot/cli.ts escrow --op list --bot MKT001 --player MKT002
  *   bun run marketplace/bot/cli.ts ledger
+ *   bun run marketplace/bot/cli.ts return --account MKT001 --to <character>
  */
 
 const HOST = process.env.GAME_HOST ?? '127.0.0.1';
@@ -107,6 +109,13 @@ async function main(): Promise<void> {
           await sleep(1000);
           if (i % 5 === 4) report(scope);
         }
+        break;
+      }
+
+      case 'return': {
+        const target = arg('to');
+        if (!target) throw new Error('return needs --to <character name>');
+        await returnEverything({ session, trade, scope, log }, target);
         break;
       }
 
@@ -439,6 +448,75 @@ async function simulate(password: string): Promise<void> {
     await disposeBot(buyer);
     await disposeBot(seller);
   }
+}
+
+/** The first bag square; below it is worn equipment, which is not ours to give. */
+const FIRST_BAG_SLOT = 12;
+
+/** Bag squares to sweep. 64 ordinary plus the extension rows above them. */
+const LAST_BAG_SLOT = 203;
+
+/**
+ * Hands a bot's entire bag back to a person, in as many trades as it takes.
+ *
+ * For clearing up after the service has lost track of what it is holding: the
+ * listings table records a slot per listing, and when that record is wrong or
+ * missing there is no way to work out which item belonged to whom. Everything
+ * in the bag goes back to one named person, and sorting out who was owed what
+ * is left to people.
+ *
+ * The bag is not read, it is *probed*. There is no packet that asks the server
+ * what a character is carrying outside of login, so every square is offered in
+ * turn and the ones holding something answer with `ItemMoved`. An empty square
+ * is refused silently, which is exactly the signal needed, and costs one
+ * packet.
+ */
+async function returnEverything(
+  bot: { session: BotSession; trade: TradeSession; scope: Scope; log: (m: string) => void },
+  target: string
+): Promise<void> {
+  const { session, trade, scope } = bot;
+  let slot = FIRST_BAG_SLOT;
+  let trips = 0;
+  let given = 0;
+
+  while (slot <= LAST_BAG_SLOT) {
+    await session.warpTo(target).catch(() => log(`could not warp to ${target}`));
+    await sleep(1500);
+
+    const partner = scope.byName(target);
+    if (!partner) throw new Error(`${target} is not in view; stand somewhere reachable`);
+    session.teleportTo(partner.x, partner.y);
+    await sleep(1500);
+
+    await trade.requestWith(partner.id, 20_000);
+    log(`trade ${++trips} open with ${target}`);
+
+    // Fill the table, skipping the squares that turn out to be empty.
+    const before = slot;
+    while (slot <= LAST_BAG_SLOT && trade.myItems.size < TRADE_SLOTS) {
+      trade.offerItem(slot, trade.myItems.size);
+      slot++;
+      await sleep(120);
+    }
+    log(`offered ${trade.myItems.size} item(s) from squares ${before}-${slot - 1}`);
+
+    if (trade.myItems.size === 0) {
+      trade.cancel();
+      continue;
+    }
+
+    // The partner puts up nothing; this is a gift, not an exchange.
+    log(`waiting for ${target} to accept`);
+    const outcome = await trade.settle({ expectMoney: 0, expectItems: 0 }, 120_000);
+    if (!outcome.ok) throw new Error(`trade ${trips} failed: ${outcome.reason}`);
+
+    given += trade.myItems.size;
+    log(`trade ${trips} done; ${given} item(s) returned so far`);
+    await sleep(2000);
+  }
+
+  log(`returned ${given} item(s) to ${target} in ${trips} trade(s)`);
 }
 
 function report(scope: Scope): void {
