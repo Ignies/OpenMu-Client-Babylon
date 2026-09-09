@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { parseServerLine } from './serverList';
-import { registerApiUrl, registerUrl, shopApiUrl } from './serverServices';
+import { marketApiUrl, registerApiUrl, registerUrl, shopApiUrl } from './serverServices';
 import type { ServerProfile } from './serverConfig';
 
 const world = (line: string): ServerProfile => {
@@ -54,5 +54,30 @@ describe('shopApiUrl', () => {
 
   it('falls back to the relative path for a world with no domain', () => {
     expect(shopApiUrl(addressed)).toBe('/api');
+  });
+});
+
+describe('marketApiUrl', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("asks a domain world's own service", () => {
+    expect(marketApiUrl(listed)).toBe('https://api.ignies.net/api/market');
+  });
+
+  // The one this exists for: the window is being served by the very world it
+  // is asking about, so the call stays on this origin and costs no preflight.
+  // An earlier version tested the domain for a `play.` prefix, which a bare
+  // domain never has, and so went the long way round from the world's own
+  // page.
+  it('stays relative while served by the world itself', () => {
+    vi.stubGlobal('location', { hostname: 'play.ignies.net' });
+    expect(marketApiUrl(listed)).toBe('/api/market');
+  });
+
+  it('falls back to the relative path for a world with no domain', () => {
+    expect(marketApiUrl(addressed)).toBe('/api/market');
   });
 });

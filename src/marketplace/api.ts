@@ -1,5 +1,5 @@
 import { sessionNonce } from '../common/sessionNonce';
-import { ServerConfig, type ServerProfile } from '../common/serverConfig';
+import { marketApiUrl } from '../common/serverServices';
 import type { Item } from '../ecs/world';
 
 /**
@@ -34,22 +34,9 @@ export class MarketError extends Error {
   }
 }
 
-const env = import.meta.env as Record<string, unknown>;
-
-/**
- * Same shape as the cash shop's: a world played from its own site keeps the
- * relative path, because that deployment publishes the service under `/api`
- * on the client's host and needs no CORS allowlist.
- */
-function apiUrl(profile: ServerProfile = ServerConfig.active): string {
-  if (profile.domain && !profile.domain.startsWith('play.')) {
-    return `https://api.${profile.domain}/api/market`;
-  }
-  return (env.VITE_MARKETPLACE_API as string) || '/api/market';
-}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${apiUrl()}${path}`, {
+  const response = await fetch(`${marketApiUrl()}${path}`, {
     // Nothing is cookie-authenticated, and the preflight allows no header but
     // Content-Type, so the ticket rides in the body or the query string.
     credentials: 'omit',
