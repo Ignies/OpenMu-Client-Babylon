@@ -34,8 +34,8 @@ const IMPACT_HEIGHT = 0.9;
 /** Energy Ball's projectile speed in tiles/s, matching effects/energyBall.ts. */
 const BOLT_SPEED = 7;
 
-/** Arrows are faster than magic bolts (MODEL_ARROW moves 35 units/tick). */
-const ARROW_SPEED = 12;
+/** Arrows are faster than magic bolts: 70 cm a tick, like `common/skillVisuals.ts`. */
+const ARROW_SPEED = 17.5;
 
 /**
  * One skill, in up to four moments. Each is optional; a skill with only

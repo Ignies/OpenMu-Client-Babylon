@@ -253,7 +253,9 @@ import { traceHeroInstantMove } from './common/heroMoveTrace';
 import { chooseSkillAction } from './common/skillCasting';
 import { getBaseClass, BaseClass } from './common/characterStats';
 import { SKILL_TO_EFFECT } from './common/magicEffects';
-import { playAreaSkillVisual, playTargetedSkillVisual, setBuffVisual } from './common/skillVisuals';
+import { playAreaSkillVisual, playBowShotVisual, playTargetedSkillVisual, setBuffVisual } from './common/skillVisuals';
+import { playerPlaySpeed } from './common/playSpeed';
+import { delay } from './effects/core';
 import { Vector3 } from './libs/babylon/exports';
 import { EventBus } from './libs/eventBus';
 import type { Events } from './libs/eventBus/events';
@@ -2070,9 +2072,10 @@ EventBus.on('ObjectAnimation', packet => {
   const p = new ObjectAnimationPacket(packet);
 
   const maskedId = p.ObjectId & 0x7fff;
-  const obj = Store.world?.getByNetId(maskedId);
+  const world = Store.world;
+  const obj = world?.getByNetId(maskedId);
 
-  if (!obj) return;
+  if (!world || !obj) return;
 
   let serverActionId = p.Animation as ServerPlayerActionType;
   let clientActionToPlay = serverActionId;
@@ -2114,6 +2117,17 @@ EventBus.on('ObjectAnimation', packet => {
         obj.charAppearance,
         clientActionToPlay === ServerPlayerActionType.Attack2
       );
+      // CreateArrows(): a bow in scope lets go at its clip's hit key. The
+      // hero's own shot is fired by AttackSystem, off the swing it latched.
+      const shotAt = world.getByNetId(p.TargetId & 0x7fff);
+      if (shotAt && combat.equippedLauncher(obj.charAppearance)) {
+        const playSpeed =
+          obj.modelObject?.actionPlaySpeed(action) ??
+          playerPlaySpeed(action, obj.attributeSystem?.getValue('attackSpeed') ?? 0);
+        delay(combat.hitDelaySeconds(action, playSpeed), () =>
+          playBowShotVisual(world.scene, obj, shotAt)
+        );
+      }
       if (
         obj.playerAnimation.action === action &&
         obj.modelObject?.CurrentAction === action

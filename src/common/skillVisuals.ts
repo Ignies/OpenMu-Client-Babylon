@@ -82,8 +82,8 @@ const CAST_HEIGHT = 1.1;
 const IMPACT_HEIGHT = 0.9;
 /** The weapon hand's bone (MU index; the original's `weaponBone` on a wizard staff). */
 const WEAPON_BONE = 37;
-/** Arrows: MODEL_ARROW moves 35 units/tick. */
-const ARROW_SPEED = perTick(35);
+/** Arrows: `o->Direction[1] = -70` cm a tick (ZzzEffect.cpp:1795), 17.5 tiles/s. */
+const ARROW_SPEED = perTick(70);
 /** A slash sweep: from -60° to +60° of the caster's yaw at this reach. */
 const SLASH_REACH = 0.9;
 const SLASH_SECONDS = 0.35;
@@ -1638,6 +1638,72 @@ export function playAreaSkillVisual(
   }
 
   lighting.skillArea(scene, skill, caster, { x, y, z });
+}
+
+// ---- the basic bow / crossbow shot -------------------------------------------------
+
+/**
+ * `CreateArrow` (ZzzEffectMagicSkill.cpp:174-251): the launcher picks the
+ * arrow, keyed here by its item index in group 4 (`common/items.json`).
+ * Anything not listed throws the plain MODEL_ARROW - the five wooden bows do,
+ * and so do the few late launchers whose own model this client has no sheet
+ * for (the Celestial Bow's MODEL_ARROW_HOLY).
+ */
+const LAUNCHER_ARROWS: Partial<Record<number, { model: string; colour: RGB }>> = {
+  2: { model: MODEL.arrowV, colour: RGBS.steel }, // Elven Bow
+  6: { model: MODEL.arrowNature, colour: RGBS.venom }, // Chaos Nature Bow
+  8: { model: MODEL.arrowSteel, colour: RGBS.steel }, // Crossbow
+  9: { model: MODEL.arrowSteel, colour: RGBS.steel }, // Golden Crossbow
+  10: { model: MODEL.arrowSaw, colour: RGBS.steel }, // Arquebus
+  11: { model: MODEL.arrowLaser, colour: RGBS.arc }, // Light Crossbow
+  12: { model: MODEL.arrowThunder, colour: RGBS.arc }, // Serpent Crossbow
+  13: { model: MODEL.arrowWing, colour: RGBS.energy }, // Bluewing Crossbow
+  14: { model: MODEL.arrowBomb, colour: RGBS.fire }, // Aquagold Crossbow
+  16: { model: MODEL.arrowDouble, colour: RGBS.holy }, // Saint Crossbow
+  18: { model: MODEL.arrowBestCrossbow, colour: RGBS.holy }, // Divine Crossbow of Archangel
+  19: { model: MODEL.arrowDrill, colour: RGBS.steel }, // Great Reign Crossbow
+  20: { model: MODEL.laceArrow, colour: RGBS.venom }, // Arrow Viper Bow
+  21: { model: MODEL.arrowSpark, colour: RGBS.spark }, // Sylph Wind Bow
+  22: { model: MODEL.arrowRing, colour: RGBS.wind }, // Albatross Bow
+  23: { model: MODEL.arrowDarkStinger, colour: RGBS.dark }, // Dark Stinger Bow
+  24: { model: MODEL.arrowGamble, colour: RGBS.gold }, // Air Lyn Bow
+};
+
+/** `ArrowPos`: the shot leaves 135 cm up and 60 cm ahead of the shooter. */
+const BOW_MUZZLE_HEIGHT = cm(135);
+const BOW_MUZZLE_FORWARD = cm(60);
+
+/** The Aquagold Crossbow's bolt bursts where it lands (`CreateBomb`). */
+const ARROW_BURST = bomb(RGBS.fire);
+
+/**
+ * The arrow a plain bow / crossbow attack throws. The original fires it from
+ * `AttackStage`'s hit key, whenever the clip is one of the bow / crossbow
+ * attacks (ZzzCharacter.cpp:4700-4735) - a basic swing, not a skill - so the
+ * callers hand it the shot at the moment the blow lands.
+ *
+ * `CheckClientArrow` just kills a spent arrow, so nothing is drawn on
+ * arrival; the sparks belong to the damage packet (`impactVisuals.ts`). The
+ * Aquagold Crossbow is the exception the original makes: its MODEL_ARROW_BOMB
+ * bursts (ZzzEffect.cpp:6620).
+ */
+export function playBowShotVisual(scene: Scene, shooter: Entity, target: Entity): void {
+  const launcher = combat.equippedLauncher(shooter.charAppearance);
+  if (!launcher || entityGone(shooter) || entityGone(target)) return;
+
+  const shot = LAUNCHER_ARROWS[launcher.num] ?? { model: MODEL.arrow, colour: RGBS.steel };
+  const from = entityPos(shooter, BOW_MUZZLE_HEIGHT, new Vector3());
+  const to = entityPos(target, IMPACT_HEIGHT, new Vector3());
+  from.addInPlace(to.subtract(from).normalize().scaleInPlace(BOW_MUZZLE_FORWARD));
+
+  const ctx = contextFor(scene, shooter, target);
+  effects.spawn('projectile', scene, from, {
+    ...arrow(shot.model, shot.colour),
+    to: followEntity(target, IMPACT_HEIGHT),
+    ...(shot.model === MODEL.arrowBomb
+      ? { onArrive: (at: Vector3) => ARROW_BURST(at, ctx) }
+      : {}),
+  });
 }
 
 // ---- persistent buff visuals (MagicEffectStatus) ----------------------------------
