@@ -4,6 +4,7 @@ import { Scope } from '../bot/scope';
 import { TradeSession } from '../bot/trade';
 import { Wallet } from '../bot/wallet';
 import { Ledger } from '../bot/ledger';
+import { ServerMessages } from '../bot/serverMessages';
 import { collectListing, deliverPurchase, payOut, type EscrowContext } from '../bot/escrow';
 import * as store from './listings';
 import { audit, db } from './db';
@@ -56,6 +57,8 @@ async function connect(): Promise<Bot> {
   const scope = new Scope(connection, tag);
   const trade = new TradeSession(connection, tag);
   const wallet = new Wallet(connection, tag);
+  // Registered before the login, so anything the server says during it is seen.
+  new ServerMessages(connection, tag);
   const session = new BotSession(
     connection,
     { account: ACCOUNT, password: PASSWORD, character: ACCOUNT, createIfMissing: true },
@@ -102,6 +105,7 @@ async function collect(bot: Bot, listing: store.Listing): Promise<void> {
   const result = await collectListing(bot.context, listing.sellerCharacter, 1);
 
   if (!result.ok) {
+    log(`could not collect "${listing.id}": ${result.reason}`);
     audit('collect failed', { listing: listing.id, detail: result.reason });
     return;
   }
@@ -123,6 +127,7 @@ async function deliver(bot: Bot, listing: store.Listing): Promise<void> {
   if (!result.ok) {
     // Back on sale rather than stuck: the buyer never paid, so nobody is owed
     // anything and somebody else can have it.
+    log(`could not deliver "${listing.id}": ${result.reason}; back on sale`);
     store.release(listing.id, result.reason);
     return;
   }
@@ -145,6 +150,7 @@ async function giveBack(bot: Bot, listing: store.Listing): Promise<void> {
   log(`returning "${listing.id}" to ${listing.sellerCharacter}`);
   const result = await deliverPurchase(bot.context, listing.sellerCharacter, slot, 0);
   if (!result.ok) {
+    log(`could not return "${listing.id}": ${result.reason}`);
     audit('return failed', { listing: listing.id, detail: result.reason });
     return;
   }
@@ -185,6 +191,7 @@ async function payOutOwed(bot: Bot): Promise<void> {
     if (!result.ok) {
       // Credited back rather than lost: the money never left the bot.
       store.credit(row.account, taken);
+      log(`could not pay ${row.account} ${taken} Zen: ${result.reason}; credited back`);
       audit('payout failed', { account: row.account, detail: result.reason });
     }
   }
