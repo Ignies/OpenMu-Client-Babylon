@@ -113,10 +113,18 @@ async function collect(bot: Bot, listing: store.Listing): Promise<void> {
     audit('collect failed', { listing: listing.id, detail: result.reason });
     return;
   }
-  // The slot the server chose, not one picked in advance: the bag holds
-  // whatever the bot was already carrying, so where an item lands is only
-  // knowable once it has landed.
+  // Recorded as held before anything else can go wrong. The item has left
+  // the seller's bag; if this row is not written the next poll treats the
+  // listing as uncollected and takes another one.
   store.activate(listing.id, ACCOUNT, result.slot);
+
+  if (result.slot === null) {
+    // Held, but we cannot say where. Delivery refuses a listing without a
+    // slot, so nobody can be charged for it - it waits for a human instead.
+    log(`"${listing.id}" is held but its slot is unknown; it will not be delivered`);
+    audit('slot unknown', { listing: listing.id, detail: 'collected without a reported slot' });
+    return;
+  }
   log(`"${listing.id}" is on sale, held in slot ${result.slot}`);
 }
 

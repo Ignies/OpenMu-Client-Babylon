@@ -93,7 +93,12 @@ export function createPending(input: {
 }
 
 /** The bot has the item: the listing goes on sale. */
-export function activate(id: string, holder: string, holderSlot: number): boolean {
+export function activate(
+  id: string,
+  holder: string,
+  /** Null when the server never said where it put the item; see CollectResult. */
+  holderSlot: number | null
+): boolean {
   const changed = db
     .query(
       `UPDATE listings SET state = 'active', holder = ?, holder_slot = ?, updated_at = ?

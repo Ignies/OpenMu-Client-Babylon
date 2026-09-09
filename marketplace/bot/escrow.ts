@@ -40,7 +40,14 @@ export type EscrowResult = { ok: true } | { ok: false; reason: string };
 
 /** A collect also reports where the server actually put the item. */
 export type CollectResult =
-  | { ok: true; slot: number }
+  /**
+   * The item is ours. `slot` is where the server put it, or null when it did
+   * not say - a completed trade sends no notification of what arrived, so
+   * this is unknown more often than not. Unknown is not failure: the seller
+   * has handed the item over either way, and reporting failure here is what
+   * made the bot collect the same listing again on the next poll.
+   */
+  | { ok: true; slot: number | null }
   | { ok: false; reason: string };
 
 /** How long a person gets to put their side up before the bot gives up. */
@@ -231,15 +238,11 @@ export function collectListing(
     const outcome = finish(await trade.settle(terms), log);
     if (!outcome.ok) return outcome;
 
-    // Where it landed is the server's decision and it says so exactly once,
-    // as the item arrives in the bag. Recording a guess instead is what left
-    // a delivery moving nothing from an empty slot.
-    const slot = trade.receivedSlots.at(-1);
-    if (slot === undefined) {
-      return {
-        ok: false,
-        reason: 'the trade completed but the server never said where the item went',
-      };
+    // Past this line the trade has completed and the seller no longer has the
+    // item, so there is no failure left to report - only how much we know.
+    const slot = trade.receivedSlots.at(-1) ?? null;
+    if (slot === null) {
+      log('the item is ours but the server did not say which slot it went to');
     }
     return { ok: true, slot };
   });
