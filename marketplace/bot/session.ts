@@ -38,6 +38,7 @@ const CODE = {
   characterList: { code: 0xf3, sub: 0x00 },
   characterInformation: { code: 0xf3, sub: 0x03 },
   characterCreated: { code: 0xf3, sub: 0x01 },
+  mapChanged: { code: 0x1c, sub: 0x0f },
 } as const;
 
 /** A generated packet class reads from byteOffset 0, so the frame is copied. */
@@ -175,9 +176,27 @@ export class BotSession {
     this.connection.send(packet.buffer);
   }
 
-  /** `/trace <character>`: game-master warp to wherever that player is standing. */
-  traceTo(characterName: string): void {
+  /**
+   * `/trace <character>`: game-master warp to wherever that player is standing.
+   *
+   * A warp is a map change even when the destination is the map the bot is
+   * already on. `PlayerMapTransitions.WarpToAsync` clears `CurrentMap` and
+   * parks the player in `ChangingMap` either way, then waits for the client to
+   * say it has finished loading - and until that acknowledgement the server
+   * sends nothing at all. No players, no monsters, no scope.
+   *
+   * So a bot that warps and then waits to see somebody waits forever, and
+   * every warp after the first is made from limbo. This is the same handshake
+   * `enterWorld` performs after selecting a character, for the same reason.
+   *
+   * Rejects when no map change arrives, which is what `/trace` on a name
+   * nobody is using looks like from here.
+   */
+  async warpTo(characterName: string): Promise<void> {
+    const changed = this.connection.expect(CODE.mapChanged, 10_000, 'MapChanged');
     this.say(`/trace ${characterName}`);
+    await changed;
+    this.connection.send(ClientReadyAfterMapChangePacket.createPacket().buffer);
   }
 
   /**

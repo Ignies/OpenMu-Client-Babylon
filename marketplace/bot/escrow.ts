@@ -114,7 +114,12 @@ async function reach(context: EscrowContext, characterName: string, warp: boolea
 
   if (warp || them() === null) {
     log(`warping to ${characterName}`);
-    session.traceTo(characterName);
+    try {
+      await session.warpTo(characterName);
+    } catch {
+      log(`the server never moved us, so /trace found nobody called ${characterName}`);
+      return null;
+    }
     for (let waited = 0; waited < 5000 && them() === null; waited += 500) {
       await wait(500);
     }

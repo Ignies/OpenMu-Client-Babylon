@@ -114,7 +114,7 @@ async function main(): Promise<void> {
         const target = arg('target');
         if (!target) throw new Error('trace needs --target <character name>');
         log(`tracing to ${target}`);
-        session.traceTo(target);
+        await session.warpTo(target);
         await sleep(3000);
         report(scope);
         const found = scope.byName(target);
@@ -125,7 +125,7 @@ async function main(): Promise<void> {
       case 'trade': {
         const target = arg('target');
         if (!target) throw new Error('trade needs --target <character name>');
-        session.traceTo(target);
+        await session.warpTo(target);
         await sleep(3000);
 
         const partner = scope.byName(target);
@@ -325,7 +325,7 @@ async function meetUp(seller: Bot, buyer: Bot, attempts = 4) {
 
   for (let attempt = 1; attempt <= attempts; attempt++) {
     log(`${seller.name} tracing to ${buyer.name} (attempt ${attempt})`);
-    seller.session.traceTo(buyer.name);
+    await seller.session.warpTo(buyer.name);
 
     // The warp gets the bot there but does not announce it: it is a map
     // change, so it drops out of the buyer's scope and the buyer is never told
