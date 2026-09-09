@@ -200,6 +200,21 @@ export class BotSession {
   }
 
   /**
+   * `/skin <monster>`: wears a monster's appearance.
+   *
+   * Cosmetic, and the point is honesty rather than decoration: a bot that
+   * looks like an ordinary character standing in a bar is a stranger warping
+   * onto people and opening shops. One that looks like the Budge Dragon
+   * reads as what it is - the marketplace's courier - at a glance and
+   * without a word of explanation.
+   *
+   * The number is a `MonsterDefinition.Number`; 2 is the Budge Dragon.
+   */
+  skinAs(monsterNumber: number): void {
+    this.say(`/skin ${monsterNumber}`);
+  }
+
+  /**
    * `/teleport <x> <y>`: a game-master move within the current map.
    *
    * This exists because a warp does not announce the bot to the people already

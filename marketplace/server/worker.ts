@@ -5,7 +5,14 @@ import { TradeSession } from '../bot/trade';
 import { Wallet } from '../bot/wallet';
 import { Ledger } from '../bot/ledger';
 import { ServerMessages } from '../bot/serverMessages';
-import { collectListing, deliverPurchase, payOut, type EscrowContext } from '../bot/escrow';
+import {
+  collectListing,
+  deliverPurchase,
+  deliverViaShop,
+  payOut,
+  type EscrowContext,
+} from '../bot/escrow';
+import { ShopSession, MINIMUM_SHOP_LEVEL } from '../bot/shop';
 import * as store from './listings';
 import { audit, db } from './db';
 
@@ -30,6 +37,12 @@ const ACCOUNT = process.env.MARKETPLACE_BOT_ACCOUNT ?? 'MKT001';
 const PASSWORD = process.env.MARKETPLACE_BOT_PASSWORD ?? '';
 const POLL_MS = Number(process.env.MARKETPLACE_POLL_MS ?? 5000);
 
+/**
+ * What the bot looks like. 2 is the Budge Dragon, the small flying one from
+ * Lorencia - a courier rather than a person. Set to 0 to stay human.
+ */
+const SKIN = Number(process.env.MARKETPLACE_BOT_SKIN ?? 2);
+
 const stamp = () => new Date().toISOString().slice(11, 19);
 const log = (message: string) => console.log(`${stamp()}  ${message}`);
 
@@ -48,6 +61,7 @@ async function connect(): Promise<Bot> {
   const scope = new Scope(connection, tag);
   const trade = new TradeSession(connection, tag);
   const wallet = new Wallet(connection, tag);
+  const shop = new ShopSession(connection, tag);
   // Registered before the login, so anything the server says during it is seen.
   new ServerMessages(connection, tag);
   const session = new BotSession(
@@ -59,6 +73,17 @@ async function connect(): Promise<Bot> {
   await connection.connect();
   const character = await session.enterWorld();
   scope.selfName = character.Name;
+  if (SKIN > 0) session.skinAs(SKIN);
+
+  // A shop is the delivery mechanism, and OpenMU refuses to price an item for
+  // a character below level 6 - which a freshly created bot is. Said once, at
+  // startup, rather than as a puzzling refusal on the first sale.
+  if (character.Level !== undefined && character.Level < MINIMUM_SHOP_LEVEL) {
+    tag(
+      `level ${character.Level}: too low to open a shop (needs ${MINIMUM_SHOP_LEVEL}), ` +
+        `so deliveries will fall back to trading`
+    );
+  }
   await wallet.waitForBalance().catch(() => tag('no balance reported; handovers will not reconcile'));
 
   return {
@@ -70,6 +95,7 @@ async function connect(): Promise<Bot> {
       trade,
       scope,
       wallet,
+      shop,
       ledger: new Ledger(undefined, (m: string) => log(`[ledger] ${m}`)),
       botName: character.Name,
       log: (m: string) => log(`[escrow] ${m}`),
@@ -103,7 +129,15 @@ async function deliver(bot: Bot, listing: store.Listing): Promise<void> {
   }
 
   log(`delivering "${listing.id}" to ${listing.buyerCharacter} for ${listing.price}`);
-  const result = await deliverPurchase(bot.context, listing.buyerCharacter, slot, listing.price);
+  // Through the shop, because the server pairs item and payment there in one
+  // step: no table to leave empty, no confirm to get wrong, and no cancel to
+  // destroy the buyer's Zen. Trading stays the fallback for what a shop
+  // cannot sell - a Harmony item, or a bot too low to open one.
+  let result = await deliverViaShop(bot.context, listing.buyerCharacter, slot, listing.price);
+  if (!result.ok && shopUnavailable(result.reason)) {
+    log(`shop delivery refused (${result.reason}); trading instead`);
+    result = await deliverPurchase(bot.context, listing.buyerCharacter, slot, listing.price);
+  }
 
   if (!result.ok) {
     // Back on sale rather than stuck: the buyer never paid, so nobody is owed
@@ -114,6 +148,23 @@ async function deliver(bot: Bot, listing: store.Listing): Promise<void> {
   }
   store.settleSale(listing.id);
   log(`"${listing.id}" sold; ${listing.seller} is owed ${listing.price}`);
+}
+
+/**
+ * Whether a refused shop delivery is worth trying as a trade.
+ *
+ * Only for the reasons a shop is structurally unable to help with. "Nobody
+ * bought it" is not one: the buyer had three minutes and did not come, and
+ * opening a trade window at them instead would be pestering, not delivering.
+ */
+function shopUnavailable(reason: string): boolean {
+  return (
+    reason.includes('no shop') ||
+    reason.includes('CharacterLevelTooLow') ||
+    reason.includes('ItemIsBlocked') ||
+    reason.includes('would not open') ||
+    reason.includes('would not take it')
+  );
 }
 
 /** A seller cancelled: give it back. */

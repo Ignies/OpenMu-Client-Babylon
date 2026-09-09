@@ -1,4 +1,5 @@
 import type { Scope } from './scope';
+import { FIRST_SHOP_SLOT, type ShopSession } from './shop';
 import type { BotSession } from './session';
 import type { TradeOutcome, TradeSession } from './trade';
 import type { Wallet } from './wallet';
@@ -31,6 +32,8 @@ export type EscrowContext = {
   ledger?: Ledger;
   /** Which bot this is, for the audit line. */
   botName?: string;
+  /** The bot's shop window, when this bot sells through one. */
+  shop?: ShopSession;
 };
 
 export type EscrowResult = { ok: true } | { ok: false; reason: string };
@@ -277,6 +280,107 @@ export function deliverPurchase(
 
     return finish(await trade.settle({ expectMoney: price }), log);
   });
+}
+
+/** How long a claimed listing stays open in the shop before it goes back. */
+const SHOP_PATIENCE_MS = 180_000;
+
+/** What the shop is called while it is standing next to somebody. */
+const SHOP_NAME = 'Marketplace';
+
+/**
+ * Buying, done as a shop instead of a trade.
+ *
+ * The bot stocks the one item the buyer claimed, prices it at the listing
+ * price, walks to them and opens. `BuyRequestAction` then moves the item and
+ * the Zen in a single server-side step: there is no table to leave empty, no
+ * confirm to get wrong, and no cancel to destroy money standing on it. The
+ * bot's part is over before the buyer clicks.
+ *
+ * Somebody other than the claimer can still buy it - a shop sells to whoever
+ * asks first - but they pay the same price into the same pocket, so the
+ * seller is made whole either way. The server names the buyer, so it is
+ * recorded rather than assumed.
+ */
+export async function deliverViaShop(
+  context: EscrowContext,
+  buyerCharacter: string,
+  inventorySlot: number,
+  price: number,
+  patienceMs = SHOP_PATIENCE_MS
+): Promise<EscrowResult> {
+  const { shop } = context;
+  if (!shop) return { ok: false, reason: 'this bot has no shop' };
+
+  return booked(context, 'buy', buyerCharacter, price, async () => {
+    const { log } = context;
+    const shopSlot = FIRST_SHOP_SLOT;
+
+    // Shut first: OpenMU refuses a price change on an open store, and an
+    // inherited open shop from a previous run would make every step below
+    // fail for a reason that reads like something else.
+    shop.close();
+    shop.reset();
+
+    try {
+      await shop.stockItem(inventorySlot, shopSlot);
+      await shop.setPrice(shopSlot, price);
+    } catch (e) {
+      shop.close();
+      return { ok: false, reason: e instanceof Error ? e.message : 'the shop would not take it' };
+    }
+
+    // Standing next to them before opening, so the shop is announced to the
+    // buyer as it opens rather than to an empty room.
+    const partner = await reach(context, buyerCharacter, false);
+    if (!partner) log(`could not reach ${buyerCharacter}; opening the shop here anyway`);
+
+    try {
+      await shop.openWith(SHOP_NAME);
+    } catch (e) {
+      shop.close();
+      await putBack(context, shopSlot, inventorySlot);
+      return { ok: false, reason: e instanceof Error ? e.message : 'the shop would not open' };
+    }
+
+    log(`selling to ${buyerCharacter} for ${price} Zen from the shop`);
+
+    try {
+      const sale = await shop.waitForSale(shopSlot, patienceMs);
+      shop.close();
+      if (sale.buyer !== buyerCharacter) {
+        log(`${sale.buyer} bought it before ${buyerCharacter} did; the seller is paid either way`);
+      }
+      return { ok: true };
+    } catch (e) {
+      shop.close();
+      await putBack(context, shopSlot, inventorySlot);
+      return { ok: false, reason: e instanceof Error ? e.message : 'nobody bought it' };
+    }
+  });
+}
+
+/**
+ * Returns an unsold item to the bag.
+ *
+ * Failing this is worse than failing the sale: the item is still the bot's,
+ * but the slot the service has written down no longer holds it. So it is
+ * logged loudly rather than swallowed, and the listing stays where it is for
+ * a human to look at.
+ */
+async function putBack(
+  context: EscrowContext,
+  shopSlot: number,
+  inventorySlot: number
+): Promise<void> {
+  try {
+    await context.shop?.unstockItem(shopSlot, inventorySlot);
+  } catch (e) {
+    context.log(
+      `could not put the item back in bag slot ${inventorySlot}: ` +
+        `${e instanceof Error ? e.message : e}`
+    );
+  }
 }
 
 /**
