@@ -35,8 +35,16 @@ export type EscrowContext = {
 
 export type EscrowResult = { ok: true } | { ok: false; reason: string };
 
+/** A collect also reports where the server actually put the item. */
+export type CollectResult =
+  | { ok: true; slot: number }
+  | { ok: false; reason: string };
+
 /** How long a person gets to put their side up before the bot gives up. */
 const PARTNER_PATIENCE_MS = 90_000;
+
+/** The server answers our own item move at once, or it refused it. */
+const OWN_ITEM_PATIENCE_MS = 8_000;
 
 /** The balance arrives in its own packet, so it is read a moment after. */
 const BALANCE_SETTLE_MS = 1500;
@@ -52,13 +60,13 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
  * server's cancel bug destroys Zen, and it is the case a bot carrying a float
  * would otherwise never notice.
  */
-async function booked(
+async function booked<T extends EscrowResult>(
   context: EscrowContext,
   kind: HandoverKind,
   partner: string,
   expectedZenDelta: number,
-  run: () => Promise<EscrowResult>
-): Promise<EscrowResult> {
+  run: () => Promise<T>
+): Promise<T> {
   const { wallet, ledger, botName, log } = context;
   const zenBefore = wallet?.zen ?? null;
 
@@ -198,7 +206,7 @@ export function collectListing(
   context: EscrowContext,
   sellerCharacter: string,
   itemCount = 1
-): Promise<EscrowResult> {
+): Promise<CollectResult> {
   return booked(context, 'list', sellerCharacter, 0, async () => {
     const { trade, log } = context;
 
@@ -217,7 +225,20 @@ export function collectListing(
       };
     }
 
-    return finish(await trade.settle(terms), log);
+    const outcome = finish(await trade.settle(terms), log);
+    if (!outcome.ok) return outcome;
+
+    // Where it landed is the server's decision and it says so exactly once,
+    // as the item arrives in the bag. Recording a guess instead is what left
+    // a delivery moving nothing from an empty slot.
+    const slot = trade.receivedSlots.at(-1);
+    if (slot === undefined) {
+      return {
+        ok: false,
+        reason: 'the trade completed but the server never said where the item went',
+      };
+    }
+    return { ok: true, slot };
   });
 }
 

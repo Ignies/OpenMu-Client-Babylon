@@ -9,6 +9,8 @@ import {
   TradeItemAddedPacket,
   TradeMoneyUpdatePacket,
   TradeRequestAnswerPacket,
+  ItemMovedPacket,
+  ItemAddedToInventoryPacket,
 } from '../../src/common/packets/ServerToClientPackets';
 import { codeOf } from './wire';
 
@@ -73,6 +75,22 @@ function itemAdded(slot: number) {
   const p = TradeItemAddedPacket.createPacket(12);
   p.writeHeader().writeLength();
   p.ToSlot = slot;
+  return p;
+}
+
+/** The server's answer to one of our own moves. */
+function itemMoved(targetSlot: number, storage: number) {
+  const p = ItemMovedPacket.createPacket(16);
+  p.writeHeader().writeLength();
+  p.TargetSlot = targetSlot;
+  p.TargetStorageType = storage;
+  return p;
+}
+
+function itemReceived(inventorySlot: number) {
+  const p = ItemAddedToInventoryPacket.createPacket(16);
+  p.writeHeader().writeLength();
+  p.InventorySlot = inventorySlot;
   return p;
 }
 
@@ -211,5 +229,66 @@ describe('TradeSession.settle', () => {
 
     fake.deliver(finished(TradeFinishedTradeResultEnum.Cancelled));
     expect(trade.isOpen).toBe(false);
+  });
+});
+
+/**
+ * The bot's own half of the table.
+ *
+ * Everything else here reads what the partner has offered. Nothing read what
+ * *we* had offered, and an item move the server refuses is silent - so a
+ * delivery whose item never left the bag asked the buyer for money anyway,
+ * and would have taken it.
+ */
+describe('TradeSession, its own side', () => {
+  const TRADE = 1;
+  const INVENTORY = 0;
+
+  it('counts an item the server confirmed onto the table', () => {
+    const { fake, trade } = session();
+    fake.deliver(itemMoved(0, TRADE));
+
+    expect(trade.myItems.size).toBe(1);
+    expect(trade.mismatch({ expectOwnItems: 1 })).toBeNull();
+  });
+
+  it('refuses terms when our item never made it', () => {
+    const { fake, trade } = session();
+    fake.deliver(moneyUpdate(50));
+
+    // The buyer has paid and we are giving nothing. This is the case that
+    // must never confirm.
+    expect(trade.mismatch({ expectMoney: 50, expectOwnItems: 1 })).toBe(
+      'expected 1 of our item(s) on the table, found 0'
+    );
+  });
+
+  it('cancels rather than confirm a table we are not on', async () => {
+    const { fake, trade } = session();
+    const accepted = trade.accept();
+    fake.deliver(opened());
+    await accepted;
+    fake.deliver(moneyUpdate(50));
+
+    // The buyer has paid for an item that never left the bag. Confirming
+    // here would complete the trade and take the money for nothing.
+    expect(trade.armConfirm({ expectMoney: 50, expectOwnItems: 1 })).not.toBeNull();
+    expect(fake.sent.some(s => s.code === CONFIRM_CODE)).toBe(false);
+    expect(fake.sent.some(s => s.code === CANCEL_CODE)).toBe(true);
+  });
+
+  it('drops an item taken back off the table', () => {
+    const { fake, trade } = session();
+    fake.deliver(itemMoved(0, TRADE));
+    fake.deliver(itemMoved(0, INVENTORY));
+
+    expect(trade.myItems.size).toBe(0);
+  });
+
+  it('records where the server put an item it gave us', () => {
+    const { fake, trade } = session();
+    fake.deliver(itemReceived(19));
+
+    expect(trade.receivedSlots).toEqual([19]);
   });
 });
