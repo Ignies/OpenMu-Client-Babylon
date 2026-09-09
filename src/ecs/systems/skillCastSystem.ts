@@ -65,6 +65,14 @@ export const SkillCastSystem: ISystemFactory = world => {
   let approachDelay = 0;
   let alternate = false;
   /**
+   * The request a cast has already gone out for. The button is usually let go
+   * of while the cast clip is still running, so the request outlives the
+   * release and would fire a second time on the frame the clip ends.
+   */
+  let castSent: object | null = null;
+  /** A summon already went out during the right button's current hold. */
+  let summonCast = false;
+  /**
    * A Rage Fighter contact skill whose step has not landed yet. Beast
    * Uppercut, Chain Drive and Dragon Slasher relocate the caster partway
    * through the clip rather than as it starts (`IsRageHalfwaySkillAni` /
@@ -294,6 +302,7 @@ export const SkillCastSystem: ISystemFactory = world => {
     update: dt => {
       cooldown -= dt;
       approachDelay -= dt;
+      if (!world.rightPointerPressed) summonCast = false;
       // Re-armed below for as long as the approach walk is still running, so
       // a dropped cast never leaves a stale cut on the next ordinary walk.
       world.castApproach = null;
@@ -346,6 +355,17 @@ export const SkillCastSystem: ISystemFactory = world => {
         return;
       }
 
+      // The repeat belongs to the held button, not to the request: one that
+      // has already cast is dropped as soon as the button is up, instead of
+      // waiting for the clip to end and going out a second time. A request
+      // that has not cast yet is left alone - that is the hero still walking
+      // into range, which the mobile pad and the approach walk both rely on.
+      if (req && castSent === req && !world.rightPointerPressed) {
+        world.castRequest = null;
+        castSent = null;
+        return;
+      }
+
       if (!req) return;
 
       const def = skillDefinition(Store.currentSkill);
@@ -360,6 +380,15 @@ export const SkillCastSystem: ISystemFactory = world => {
         ) {
           world.attackTarget = swingAt;
         }
+        world.castRequest = null;
+        return;
+      }
+
+      // One summon per press. The button is still down when the cast goes
+      // out, and a right-drag re-arms the request on every mouse move, so
+      // without the latch the second cast dismisses the monster the first
+      // one just put on the map.
+      if (def.type === 'SummonMonster' && summonCast) {
         world.castRequest = null;
         return;
       }
@@ -581,7 +610,14 @@ export const SkillCastSystem: ISystemFactory = world => {
         serverMinAttackInterval(hero.attributeSystem?.getValue('attackSpeed') ?? 0)
       );
 
-      if (!world.rightPointerPressed) world.castRequest = null;
+      if (def.type === 'SummonMonster') summonCast = true;
+
+      if (def.type === 'SummonMonster' || !world.rightPointerPressed) {
+        world.castRequest = null;
+        castSent = null;
+      } else {
+        castSent = req;
+      }
     },
   };
 };
