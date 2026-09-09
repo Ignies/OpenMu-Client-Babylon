@@ -44,6 +44,7 @@ import {
   type ShadowPolicy,
 } from './shadowPolicy';
 import { syncSkyDome } from './skyDome';
+import { syncSkyline } from './horizon';
 import { syncShadows } from '../scenes/shadows';
 import { syncAmbientOcclusion } from '../scenes/ambientOcclusion';
 import { syncHeightFog, updateHeightFog } from '../scenes/heightFog';
@@ -346,6 +347,9 @@ export function createLookDirector(
       bytes: maps.clearColorFor(world),
       black: room !== null,
     });
+
+    // The far scenery standing against it, for a map that has any.
+    syncSkyline(scene);
 
     // 5. haze and AO
     const fogSource = profile.fog.color ?? base.sky?.horizon ?? null;
