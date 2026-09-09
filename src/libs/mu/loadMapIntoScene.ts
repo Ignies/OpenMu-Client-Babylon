@@ -179,6 +179,16 @@ export function loadMapIntoScene(
   pos?: { x: number; y: number }
 ): Promise<void> {
   const serial = ++warpSerial;
+
+  // Here, not in `runLoad`: the load is queued behind a microtask, while the
+  // packet the warp came from is dispatched in a loop that drains the whole
+  // received frame first. Everything the server puts in scope in that frame -
+  // the players and NPCs already standing on the map we are being placed on -
+  // would otherwise be stamped with the map we are leaving, and swept by this
+  // load's `unloadMap`. The scene teardown keys off `sceneMap`, not this, so
+  // running ahead is what this field is for.
+  world.mapIndex = map;
+
   loadQueue = loadQueue
     .then(() => runLoad(world, map, pos, serial))
     // Unexpected failures (a map entry's `create`, object creation) used to
@@ -194,11 +204,11 @@ async function runLoad(
   pos: { x: number; y: number } | undefined,
   serial: number
 ) {
-  // Superseded while queued: the newest request does the whole job itself.
+  // Superseded while queued: the newest request does the whole job itself,
+  // and already owns `world.mapIndex`.
   if (serial !== warpSerial) return;
 
   const oldMap = sceneMap;
-  world.mapIndex = map;
 
   // Before anything loads: a shadowless world (Icarus) must not build blob
   // clones for the objects it is about to create.
