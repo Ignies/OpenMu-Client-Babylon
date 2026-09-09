@@ -9,6 +9,7 @@ import {
 import { TWFlags } from '../../common/terrain/consts';
 import { isFlagInBinaryMask } from '../../common/utils';
 import { chooseAttackAction } from '../../common/playerActionMapper';
+import { playBowShotVisual } from '../../common/skillVisuals';
 import { combat } from '../../combat';
 import { MOUSE_UPDATE_SECONDS_MAX } from '../../combat/inputGate';
 import { skillDefinition } from '../../common/skillsDatabase';
@@ -242,6 +243,8 @@ export const AttackSystem: ISystemFactory = world => {
       const playSpeed = model?.AnimationSpeed ?? 0;
       const clipSeconds = model?.getActionDuration(action) || undefined;
       const hitDelay = combat.startAttack(action, playSpeed, () => {
+        // CreateArrows() at AttackStage's hit key: the bow lets go here.
+        playBowShotVisual(world.scene, playerEntity, target);
         if (target.dying || target.objOutOfScope || target.netId === undefined) return;
         const packet = HitRequestPacket.createPacket();
         packet.TargetId = target.netId;

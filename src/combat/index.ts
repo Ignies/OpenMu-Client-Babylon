@@ -1,3 +1,4 @@
+import type { Item } from '../ecs/world';
 import type { PlayerAction } from '../common/objects/enum';
 import type { AreaSkillHitPacket } from '../common/packets/ClientToServerPackets';
 import type { SkillDefinition } from '../common/skillsDatabase';
@@ -10,10 +11,11 @@ import {
   attackTime,
   cancelAttack,
   checkAttackTime,
+  hitDelaySeconds,
   setLastAttackEffectTime,
   startAttack,
 } from './attackTiming';
-import { attackRange, hasAmmo, type Hands } from './weaponRange';
+import { attackRange, equippedLauncher, hasAmmo, type Hands } from './weaponRange';
 import { magicClip, skillClip, type CastContext } from './skillClips';
 import {
   clipHoldsFacing,
@@ -130,6 +132,14 @@ class Combat {
     return startAttack(action, playSpeed, hit, clipSeconds);
   }
 
+  /**
+   * Seconds from a swing's start to its blow, for anyone whose swing this
+   * client does not latch (another player's attack packet).
+   */
+  hitDelaySeconds(action: PlayerAction, playSpeed: number): number {
+    return hitDelaySeconds(action, playSpeed);
+  }
+
   /** Drop the swing in flight without landing it. */
   cancelAttack(): void {
     cancelAttack();
@@ -145,6 +155,11 @@ class Combat {
   /** `CheckArrow()`: a launcher has its ammunition, or there is no launcher. */
   hasAmmo(hands: Hands): boolean {
     return hasAmmo(hands);
+  }
+
+  /** The bow or crossbow in these hands, `null` when neither is one. */
+  equippedLauncher(hands: Hands): Item | null {
+    return equippedLauncher(hands);
   }
 
   // ---- skills ------------------------------------------------------------

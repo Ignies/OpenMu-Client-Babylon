@@ -200,6 +200,16 @@ export const MODEL = {
   arrowSteel: 'Skill/ArrowSteel01.glb',
   arrowSpark: 'Skill/Arrow_Spark.glb',
   laceArrow: 'Skill/LaceArrow.glb',
+  /** MODEL_ARROW_RING (CW_Bow_Skill): the Albatross Bow's shot. */
+  arrowRing: 'Skill/CW_Bow_Skill.glb',
+  /** MODEL_ARROW_DARKSTINGER (sketbows_arrows): the Dark Stinger Bow's shot. */
+  arrowDarkStinger: 'Skill/sketbows_arrows.glb',
+  /** MODEL_ARROW_GAMBLE (gamble_arrows01): the Air Lyn Bow's shot. */
+  arrowGamble: 'Skill/gamble_arrows01.glb',
+  /** MODEL_ARROW_BEST_CROSSBOW (KCross): the Divine Crossbow of Archangel's bolt. */
+  arrowBestCrossbow: 'Skill/kcross.glb',
+  /** MODEL_ARROW_DRILL (Carow): the Great Reign Crossbow's bolt. */
+  arrowDrill: 'Skill/Carow.glb',
   /** MODEL_BONE1 (the skull, 1) / MODEL_BONE2 (a bone, ×10): a skeleton's or Death Cow's shatter death. */
   bone: 'Skill/Bone01.glb',
   bone2: 'Skill/Bone02.glb',
