@@ -8,7 +8,7 @@ import { ServerConfig, type ServerProfile } from './serverConfig';
  *     play.<domain>      the browser client
  *     ws.<domain>        the ws-to-TCP proxy every connection goes through
  *     register.<domain>  the signup page the login window links to
- *     api.<domain>       the cash shop service
+ *     api.<domain>       the cash shop and marketplace services
  *
  * That convention is what lets one build play any world. This client is
  * compiled once and published for everyone, so a world it has never heard of
@@ -111,4 +111,21 @@ export function shopApiUrl(profile: ServerProfile = ServerConfig.active): string
   }
 
   return (env.VITE_CASHSHOP_API as string) || '/api';
+}
+
+/**
+ * Where the marketplace window asks for its listings.
+ *
+ * The same rule as the shop, and for the same reason: a world played from its
+ * own site keeps the relative path, and only somebody else's marketplace has
+ * to be addressed by name. It shares `api.<domain>` with the shop because a
+ * world publishes one service host, not one per window - the two answer on
+ * different paths behind it.
+ */
+export function marketApiUrl(profile: ServerProfile = ServerConfig.active): string {
+  if (profile.domain && !servedByWorld(profile.domain)) {
+    return `https://${serviceHost('api', profile.domain)}/api/market`;
+  }
+
+  return (env.VITE_MARKETPLACE_API as string) || '/api/market';
 }
