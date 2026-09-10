@@ -56,6 +56,30 @@ export type SkyLook = {
   readonly halo?: number;
   /** Base cloud coverage, 0..1. */
   readonly clouds?: number;
+  /** Far scenery on the skyline; omit for a map whose ground is all there is. */
+  readonly skyline?: SkylineLook;
+};
+
+/**
+ * A painted horizon (sky_atmospherics §10): a panorama strip wrapped around
+ * the camera past everything the map draws, so the ground reads as ending in
+ * a country rather than in the haze. Nothing the original client had.
+ *
+ * The angles place the strip's two edges against the eye line, so the art's
+ * own skyline lands where its split says it does - Lorencia's sits 52% down
+ * the strip, so 6.8 up against 6.2 down puts it on the eye.
+ */
+export type SkylineLook = {
+  /** The strip, served from `public/`. */
+  readonly art: string;
+  /** Degrees its top edge stands above the eye line. */
+  readonly riseDeg: number;
+  /** Degrees its bottom edge sits below the eye line. */
+  readonly dropDeg: number;
+  /** How far the art is pulled toward this sky's horizon colour, 0..1. */
+  readonly haze: number;
+  /** Fraction of the strip's height its bottom edge dissolves over. */
+  readonly fade: number;
 };
 
 export const SKY_CURVE_DEFAULT = 0.75;
@@ -105,6 +129,22 @@ const GRADED_HAZE: LookProfile['fog'] = { ...OPEN_HAZE, color: [0.74, 0.76, 0.8]
 
 const NOON_SUN = sun(215, 48);
 
+/**
+ * Lorencia's far country: a rocky range over a dry plain, the strip cropped
+ * to its painted band so its middle is the art's own skyline.
+ *
+ * The peaks reach 6.8 degrees over the eye, which is a range a day's walk
+ * out rather than a wall at the fence - and the plain below the eye covers
+ * the sliver of void the map edge leaves under the horizon.
+ */
+const LORENCIA_SKYLINE: SkylineLook = {
+  art: '/skyline/lorencia_back.webp',
+  riseDeg: 6.8,
+  dropDeg: 6.2,
+  haze: 0.3,
+  fade: 0.4,
+};
+
 /** Ruins under a heavy deck; Kanturu's two open floors share it. */
 const KANTURU_SKY: SkyLook = {
   zenith: [0.46, 0.54, 0.66],
@@ -153,7 +193,7 @@ const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
     // Measured (wave 1, Standard mapper): 1.6 lands p50 0.424, 1.8 lands 0.451.
     ev: 1.8,
     whiteBalance: [1.02, 1.0, 0.97],
-    sky: OPEN_SKY,
+    sky: { ...OPEN_SKY, skyline: LORENCIA_SKYLINE },
     fog: GRADED_HAZE,
     sun: NOON_SUN,
   },
