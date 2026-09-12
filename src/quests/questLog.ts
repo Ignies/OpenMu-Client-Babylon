@@ -26,7 +26,7 @@ import { t, type TextKey } from '../i18n';
  * Read by the quest windows in `ui/pages/worldPage/components/quests/`.
  */
 import { observable, reaction, runInAction } from 'mobx';
-import { ItemsDatabase } from '../common/itemsDatabase';
+import { itemBaseName } from '../common/itemsDatabase';
 import { ItemSerializer } from '../common/itemSerializer';
 import { monsterDisplayName } from '../common/monstersDatabase';
 import {
@@ -451,9 +451,11 @@ reaction(
 function itemName(data: DataView): string {
   try {
     const item = ItemSerializer.DeserializeItem(new Uint8Array(data.buffer));
-    const config = ItemsDatabase.getItem(item.group, item.num);
+    const name =
+      itemBaseName(item.group, item.num) ||
+      t('quest.itemFallback', { id: item.group * 512 + item.num });
     const level = item.lvl ? ` +${item.lvl}` : '';
-    return `${config?.ItemName ?? `Item ${item.group}-${item.num}`}${level}`;
+    return `${name}${level}`;
   } catch {
     return t('quest.item');
   }

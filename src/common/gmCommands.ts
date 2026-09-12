@@ -18,6 +18,11 @@
  * master: the warehouse opens anywhere, any NPC store opens by id, and the
  * inventory cleared can be someone else's, for free.
  *
+ * Everything a person reads is a `TextKey`, resolved where it is drawn - the
+ * table is module scope, and a `t()` here would freeze at whatever language
+ * was current when the module first loaded. The slash names themselves are the
+ * server's and are never translated.
+ *
  * The shape mirrors the server's own `AvailableChatCommand` message (command,
  * name, description, and per-parameter name / type / required / valid values),
  * so once the client declares itself as OpenMU 106.3 this table can be replaced
@@ -25,19 +30,21 @@
  * changing. See `todo/client_version_106_3_migration.md`.
  */
 
+import { t, type TextKey } from '../i18n';
+
 export type GmParamType = 'text' | 'number' | 'boolean';
 
 export type GmParam = {
   /** Matches the property on the server's argument class. */
   name: string;
   /** What to show above the input. */
-  label: string;
+  labelKey: TextKey;
   type: GmParamType;
   required: boolean;
   /** Offered as a chip row instead of a free input when present. */
   validValues?: readonly string[];
   /** Greyed hint inside an empty input. */
-  hint?: string;
+  hintKey?: TextKey;
   /** Takes the rest of the line, spaces and all. Only ever the last one. */
   rest?: boolean;
 };
@@ -45,8 +52,8 @@ export type GmParam = {
 export type GmCommand = {
   /** With the leading slash, as the server's plugin `Key` spells it. */
   command: string;
-  label: string;
-  help: string;
+  labelKey: TextKey;
+  helpKey: TextKey;
   params?: readonly GmParam[];
   /**
    * Takes someone's access or progress away, or speaks to the whole server.
@@ -58,57 +65,57 @@ export type GmCommand = {
 
 export type GmGroup = {
   id: string;
-  title: string;
+  titleKey: TextKey;
   commands: readonly GmCommand[];
 };
 
 const characterParam = (required: boolean): GmParam => ({
   name: 'characterName',
-  label: 'Character',
+  labelKey: 'gm.param.character',
   type: 'text',
   required,
-  hint: required ? 'name' : 'blank = you',
+  hintKey: required ? 'gm.hint.name' : 'gm.hint.blankIsYou',
 });
 
 const COORDS: readonly GmParam[] = [
-  { name: 'x', label: 'X', type: 'number', required: true },
-  { name: 'y', label: 'Y', type: 'number', required: true },
+  { name: 'x', labelKey: 'gm.param.x', type: 'number', required: true },
+  { name: 'y', labelKey: 'gm.param.y', type: 'number', required: true },
 ];
 
 /** `/set<thing> <value> [character]` - the value comes first, always. */
 const setter = (
   command: string,
-  label: string,
-  help: string,
+  labelKey: TextKey,
+  helpKey: TextKey,
   valueName: string,
-  valueLabel: string
+  valueLabelKey: TextKey
 ): GmCommand => ({
   command,
-  label,
-  help,
+  labelKey,
+  helpKey,
   params: [
-    { name: valueName, label: valueLabel, type: 'number', required: true },
+    { name: valueName, labelKey: valueLabelKey, type: 'number', required: true },
     characterParam(false),
   ],
   confirm: true,
 });
 
-const getter = (command: string, label: string, help: string): GmCommand => ({
+const getter = (command: string, labelKey: TextKey, helpKey: TextKey): GmCommand => ({
   command,
-  label,
-  help,
+  labelKey,
+  helpKey,
   params: [characterParam(false)],
 });
 
 export const GM_GROUPS: readonly GmGroup[] = [
   {
     id: 'world',
-    title: 'World',
+    titleKey: 'gm.group.world',
     commands: [
       {
         command: '/teleport',
-        label: 'Teleport',
-        help: 'Move to a coordinate on the map you are standing on.',
+        labelKey: 'gm.cmd.teleport.label',
+        helpKey: 'gm.cmd.teleport.help',
         params: COORDS,
       },
       {
@@ -117,57 +124,57 @@ export const GM_GROUPS: readonly GmGroup[] = [
         // it reaches any map at all. Without them it goes through the server's
         // warp list, which only covers the maps that have a warp gate.
         command: '/move',
-        label: 'Warp a character',
-        help: 'Warp a character to a map. Without coordinates the map needs an entry in the server’s warp list; with them, any map works.',
+        labelKey: 'gm.cmd.move.label',
+        helpKey: 'gm.cmd.move.help',
         params: [
           {
             name: 'target',
-            label: 'Character',
+            labelKey: 'gm.param.character',
             type: 'text',
             required: true,
-            hint: 'who to warp',
+            hintKey: 'gm.hint.whoToWarp',
           },
           {
             name: 'mapIdOrName',
-            label: 'Map',
+            labelKey: 'gm.param.map',
             type: 'text',
             required: false,
-            hint: 'number or name',
+            hintKey: 'gm.hint.numberOrName',
           },
-          { name: 'x', label: 'X', type: 'number', required: false },
-          { name: 'y', label: 'Y', type: 'number', required: false },
+          { name: 'x', labelKey: 'gm.param.x', type: 'number', required: false },
+          { name: 'y', labelKey: 'gm.param.y', type: 'number', required: false },
         ],
       },
       {
         command: '/trace',
-        label: 'Go to character',
-        help: 'Warp yourself to where a character is standing.',
+        labelKey: 'gm.cmd.trace.label',
+        helpKey: 'gm.cmd.trace.help',
         params: [characterParam(true)],
       },
       {
         command: '/track',
-        label: 'Bring character here',
-        help: 'Warp a character to where you are standing.',
+        labelKey: 'gm.cmd.track.label',
+        helpKey: 'gm.cmd.track.help',
         params: [characterParam(true)],
         confirm: true,
       },
-      { command: '/hide', label: 'Become invisible', help: 'Drop out of every other player’s scope.' },
-      { command: '/unhide', label: 'Become visible', help: 'Come back into scope.' },
+      { command: '/hide', labelKey: 'gm.cmd.hide.label', helpKey: 'gm.cmd.hide.help' },
+      { command: '/unhide', labelKey: 'gm.cmd.unhide.label', helpKey: 'gm.cmd.unhide.help' },
       {
         command: '/skin',
-        label: 'Wear monster skin',
-        help: 'Appear as a monster, by its number.',
-        params: [{ name: 'skin', label: 'Monster', type: 'number', required: true }],
+        labelKey: 'gm.cmd.skin.label',
+        helpKey: 'gm.cmd.skin.help',
+        params: [{ name: 'skin', labelKey: 'gm.param.monster', type: 'number', required: true }],
       },
       {
         command: '/createmonster',
-        label: 'Spawn monster',
-        help: 'Spawn a monster where you stand. Intelligence 1 makes it move and fight.',
+        labelKey: 'gm.cmd.createmonster.label',
+        helpKey: 'gm.cmd.createmonster.help',
         params: [
-          { name: 'number', label: 'Monster', type: 'number', required: true },
+          { name: 'number', labelKey: 'gm.param.monster', type: 'number', required: true },
           {
             name: 'intelligence',
-            label: 'Intelligence',
+            labelKey: 'gm.param.intelligence',
             type: 'boolean',
             required: false,
             validValues: ['0', '1'],
@@ -176,86 +183,104 @@ export const GM_GROUPS: readonly GmGroup[] = [
       },
       {
         command: '/movemonster',
-        label: 'Place monster',
-        help: 'Put a monster you can see at a coordinate.',
-        params: [{ name: 'id', label: 'Monster id', type: 'number', required: true }, ...COORDS],
+        labelKey: 'gm.cmd.movemonster.label',
+        helpKey: 'gm.cmd.movemonster.help',
+        params: [
+          { name: 'id', labelKey: 'gm.param.monsterId', type: 'number', required: true },
+          ...COORDS,
+        ],
       },
       {
         command: '/walkmonster',
-        label: 'Walk monster',
-        help: 'Walk a monster you can see to a coordinate instead of putting it there.',
-        params: [{ name: 'id', label: 'Monster id', type: 'number', required: true }, ...COORDS],
+        labelKey: 'gm.cmd.walkmonster.label',
+        helpKey: 'gm.cmd.walkmonster.help',
+        params: [
+          { name: 'id', labelKey: 'gm.param.monsterId', type: 'number', required: true },
+          ...COORDS,
+        ],
       },
       {
         command: '/removenpc',
-        label: 'Remove NPC',
-        help: 'Remove an NPC or monster you can see, by its id.',
-        params: [{ name: 'id', label: 'NPC id', type: 'number', required: true }],
+        labelKey: 'gm.cmd.removenpc.label',
+        helpKey: 'gm.cmd.removenpc.help',
+        params: [{ name: 'id', labelKey: 'gm.param.npcId', type: 'number', required: true }],
         confirm: true,
       },
-      { command: '/showids', label: 'Show NPC ids', help: 'Print the ids of the NPCs around you.' },
-      { command: '/openware', label: 'Open warehouse', help: 'Open your vault without standing at the NPC.' },
+      {
+        command: '/showids',
+        labelKey: 'gm.cmd.showids.label',
+        helpKey: 'gm.cmd.showids.help',
+      },
+      {
+        command: '/openware',
+        labelKey: 'gm.cmd.openware.label',
+        helpKey: 'gm.cmd.openware.help',
+      },
       {
         command: '/npc',
-        label: 'Open NPC store',
-        help: 'Open any NPC’s store by its id.',
-        params: [{ name: 'npcId', label: 'NPC id', type: 'number', required: false }],
+        labelKey: 'gm.cmd.npc.label',
+        helpKey: 'gm.cmd.npc.help',
+        params: [{ name: 'npcId', labelKey: 'gm.param.npcId', type: 'number', required: false }],
       },
     ],
   },
   {
     id: 'players',
-    title: 'Players',
+    titleKey: 'gm.group.players',
     commands: [
-      { command: '/online', label: 'Who is online', help: 'Print how many players are online.' },
+      {
+        command: '/online',
+        labelKey: 'gm.cmd.online.label',
+        helpKey: 'gm.cmd.online.help',
+      },
       {
         command: '/charinfo',
-        label: 'Character info',
-        help: 'Print a character’s level, stats and money.',
+        labelKey: 'gm.cmd.charinfo.label',
+        helpKey: 'gm.cmd.charinfo.help',
         params: [characterParam(true)],
       },
-      getter('/getlevel', 'Read level', 'Print a character’s level.'),
-      setter('/setlevel', 'Set level', 'Set a character’s level.', 'level', 'Level'),
-      getter('/getmoney', 'Read zen', 'Print how much zen a character carries.'),
-      setter('/setmoney', 'Set zen', 'Set how much zen a character carries.', 'amount', 'Zen'),
-      getter('/getresets', 'Read resets', 'Print a character’s reset count.'),
-      setter('/setresets', 'Set resets', 'Set a character’s reset count.', 'resets', 'Resets'),
-      getter('/getleveluppoints', 'Read points', 'Print a character’s unspent level-up points.'),
+      getter('/getlevel', 'gm.cmd.getlevel.label', 'gm.cmd.getlevel.help'),
+      setter('/setlevel', 'gm.cmd.setlevel.label', 'gm.cmd.setlevel.help', 'level', 'gm.param.level'),
+      getter('/getmoney', 'gm.cmd.getmoney.label', 'gm.cmd.getmoney.help'),
+      setter('/setmoney', 'gm.cmd.setmoney.label', 'gm.cmd.setmoney.help', 'amount', 'common.zen'),
+      getter('/getresets', 'gm.cmd.getresets.label', 'gm.cmd.getresets.help'),
+      setter('/setresets', 'gm.cmd.setresets.label', 'gm.cmd.setresets.help', 'resets', 'gm.param.resets'),
+      getter('/getleveluppoints', 'gm.cmd.getleveluppoints.label', 'gm.cmd.getleveluppoints.help'),
       setter(
         '/setleveluppoints',
-        'Set points',
-        'Set a character’s unspent level-up points.',
+        'gm.cmd.setleveluppoints.label',
+        'gm.cmd.setleveluppoints.help',
         'levelUpPoints',
-        'Points'
+        'gm.param.points'
       ),
-      getter('/getmasterlevel', 'Read master level', 'Print a character’s master level.'),
+      getter('/getmasterlevel', 'gm.cmd.getmasterlevel.label', 'gm.cmd.getmasterlevel.help'),
       setter(
         '/setmasterlevel',
-        'Set master level',
-        'Set a character’s master level.',
+        'gm.cmd.setmasterlevel.label',
+        'gm.cmd.setmasterlevel.help',
         'masterLevel',
-        'Level'
+        'gm.param.level'
       ),
       getter(
         '/getmasterleveluppoints',
-        'Read master points',
-        'Print a character’s unspent master level-up points.'
+        'gm.cmd.getmasterleveluppoints.label',
+        'gm.cmd.getmasterleveluppoints.help'
       ),
       setter(
         '/setmasterleveluppoints',
-        'Set master points',
-        'Set a character’s unspent master level-up points.',
+        'gm.cmd.setmasterleveluppoints.label',
+        'gm.cmd.setmasterleveluppoints.help',
         'masterLevelUpPoints',
-        'Points'
+        'gm.param.points'
       ),
       {
         command: '/get',
-        label: 'Read stat',
-        help: 'Print one stat of a character.',
+        labelKey: 'gm.cmd.get.label',
+        helpKey: 'gm.cmd.get.help',
         params: [
           {
             name: 'statType',
-            label: 'Stat',
+            labelKey: 'gm.param.stat',
             type: 'text',
             required: true,
             validValues: ['str', 'agi', 'vit', 'ene', 'cmd'],
@@ -265,59 +290,76 @@ export const GM_GROUPS: readonly GmGroup[] = [
       },
       {
         command: '/set',
-        label: 'Set stat',
-        help: 'Set one stat of a character.',
+        labelKey: 'gm.cmd.set.label',
+        helpKey: 'gm.cmd.set.help',
         params: [
           {
             name: 'statType',
-            label: 'Stat',
+            labelKey: 'gm.param.stat',
             type: 'text',
             required: true,
             validValues: ['str', 'agi', 'vit', 'ene', 'cmd'],
           },
-          { name: 'amount', label: 'Value', type: 'number', required: true },
+          { name: 'amount', labelKey: 'gm.param.value', type: 'number', required: true },
           characterParam(false),
         ],
         confirm: true,
       },
       {
         command: '/pk',
-        label: 'Set PK state',
-        help: 'Set a character’s murderer level and kill count.',
+        labelKey: 'gm.cmd.pk.label',
+        helpKey: 'gm.cmd.pk.help',
         params: [
           characterParam(true),
-          { name: 'pkLevel', label: 'PK level', type: 'number', required: true },
-          { name: 'pkCount', label: 'PK count', type: 'number', required: true },
+          { name: 'pkLevel', labelKey: 'gm.param.pkLevel', type: 'number', required: true },
+          { name: 'pkCount', labelKey: 'gm.param.pkCount', type: 'number', required: true },
         ],
         confirm: true,
       },
       {
         command: '/item',
-        label: 'Drop item',
-        help: 'Drop an item at your feet. Group and number identify it; everything after is optional, and a blank one ends the line.',
+        labelKey: 'gm.cmd.item.label',
+        helpKey: 'gm.cmd.item.help',
         params: [
-          { name: 'group', label: 'Group', type: 'number', required: true },
-          { name: 'number', label: 'Number', type: 'number', required: true },
-          { name: 'lvl', label: 'Level', type: 'number', required: false },
-          { name: 'ex', label: 'Excellent', type: 'number', required: false },
-          { name: 'sk', label: 'Skill', type: 'boolean', required: false, validValues: ['0', '1'] },
-          { name: 'lu', label: 'Luck', type: 'boolean', required: false, validValues: ['0', '1'] },
-          { name: 'opt', label: 'Option', type: 'number', required: false },
-          { name: 'anc', label: 'Ancient', type: 'number', required: false },
-          { name: 'ancBonuslvl', label: 'Ancient bonus', type: 'number', required: false },
+          { name: 'group', labelKey: 'gm.param.group', type: 'number', required: true },
+          { name: 'number', labelKey: 'gm.param.number', type: 'number', required: true },
+          { name: 'lvl', labelKey: 'gm.param.level', type: 'number', required: false },
+          { name: 'ex', labelKey: 'gm.param.excellent', type: 'number', required: false },
+          {
+            name: 'sk',
+            labelKey: 'gm.param.skill',
+            type: 'boolean',
+            required: false,
+            validValues: ['0', '1'],
+          },
+          {
+            name: 'lu',
+            labelKey: 'gm.param.luck',
+            type: 'boolean',
+            required: false,
+            validValues: ['0', '1'],
+          },
+          { name: 'opt', labelKey: 'gm.param.option', type: 'number', required: false },
+          { name: 'anc', labelKey: 'gm.param.ancient', type: 'number', required: false },
+          {
+            name: 'ancBonuslvl',
+            labelKey: 'gm.param.ancientBonus',
+            type: 'number',
+            required: false,
+          },
         ],
       },
       {
         command: '/clearinv',
-        label: 'Clear inventory',
-        help: 'Empty an inventory. Blank clears your own; a name clears that character’s, for free and without asking them.',
+        labelKey: 'gm.cmd.clearinv.label',
+        helpKey: 'gm.cmd.clearinv.help',
         params: [characterParam(false)],
         confirm: true,
       },
       {
         command: '/disconnect',
-        label: 'Disconnect character',
-        help: 'Close a character’s connection. They can log straight back in.',
+        labelKey: 'gm.cmd.disconnect.label',
+        helpKey: 'gm.cmd.disconnect.help',
         params: [characterParam(true)],
         confirm: true,
       },
@@ -325,69 +367,96 @@ export const GM_GROUPS: readonly GmGroup[] = [
   },
   {
     id: 'moderation',
-    title: 'Moderation',
+    titleKey: 'gm.group.moderation',
     commands: [
       {
         command: '/banacc',
-        label: 'Ban account',
-        help: 'Lock an account by its login name. Everyone on it is disconnected.',
-        params: [{ name: 'acc', label: 'Account', type: 'text', required: true, hint: 'login name' }],
+        labelKey: 'gm.cmd.banacc.label',
+        helpKey: 'gm.cmd.banacc.help',
+        params: [
+          {
+            name: 'acc',
+            labelKey: 'gm.param.account',
+            type: 'text',
+            required: true,
+            hintKey: 'gm.hint.loginName',
+          },
+        ],
         confirm: true,
       },
       {
         command: '/unbanacc',
-        label: 'Unban account',
-        help: 'Unlock an account by its login name.',
-        params: [{ name: 'acc', label: 'Account', type: 'text', required: true, hint: 'login name' }],
+        labelKey: 'gm.cmd.unbanacc.label',
+        helpKey: 'gm.cmd.unbanacc.help',
+        params: [
+          {
+            name: 'acc',
+            labelKey: 'gm.param.account',
+            type: 'text',
+            required: true,
+            hintKey: 'gm.hint.loginName',
+          },
+        ],
         confirm: true,
       },
       {
         command: '/banchar',
-        label: 'Ban character',
-        help: 'Lock the account behind a character name.',
+        labelKey: 'gm.cmd.banchar.label',
+        helpKey: 'gm.cmd.banchar.help',
         params: [characterParam(true)],
         confirm: true,
       },
       {
         command: '/unbanchar',
-        label: 'Unban character',
-        help: 'Unlock the account behind a character name.',
+        labelKey: 'gm.cmd.unbanchar.label',
+        helpKey: 'gm.cmd.unbanchar.help',
         params: [characterParam(true)],
         confirm: true,
       },
       {
         command: '/chatban',
-        label: 'Mute character',
-        help: 'Stop a character from talking, for a number of minutes.',
+        labelKey: 'gm.cmd.chatban.label',
+        helpKey: 'gm.cmd.chatban.help',
         params: [
           characterParam(true),
-          { name: 'durationMinutes', label: 'Minutes', type: 'number', required: true },
+          {
+            name: 'durationMinutes',
+            labelKey: 'gm.param.minutes',
+            type: 'number',
+            required: true,
+          },
         ],
         confirm: true,
       },
       {
         command: '/chatunban',
-        label: 'Unmute character',
-        help: 'Let a muted character talk again.',
+        labelKey: 'gm.cmd.chatunban.label',
+        helpKey: 'gm.cmd.chatunban.help',
         params: [characterParam(true)],
         confirm: true,
       },
       {
         command: '/guilddisconnect',
-        label: 'Disconnect guild',
-        help: 'Close the connection of every online member of a guild.',
-        params: [{ name: 'guild', label: 'Guild', type: 'text', required: true }],
+        labelKey: 'gm.cmd.guilddisconnect.label',
+        helpKey: 'gm.cmd.guilddisconnect.help',
+        params: [{ name: 'guild', labelKey: 'gm.param.guild', type: 'text', required: true }],
         confirm: true,
       },
       {
         command: '/guildmove',
-        label: 'Warp guild',
-        help: 'Warp every online member of a guild to a map.',
+        labelKey: 'gm.cmd.guildmove.label',
+        helpKey: 'gm.cmd.guildmove.help',
         params: [
-          { name: 'guild', label: 'Guild', type: 'text', required: true },
-          { name: 'mapIdOrName', label: 'Map', type: 'text', required: true, hint: 'name or id' },
-          { name: 'x', label: 'X', type: 'number', required: false },
-          { name: 'y', label: 'Y', type: 'number', required: false },
+          { name: 'guild', labelKey: 'gm.param.guild', type: 'text', required: true },
+          {
+            name: 'mapIdOrName',
+            labelKey: 'gm.param.map',
+            type: 'text',
+            required: true,
+            hintKey: 'gm.hint.nameOrId',
+          },
+          { name: 'x', labelKey: 'gm.param.x', type: 'number', required: false },
+          { name: 'y', labelKey: 'gm.param.y', type: 'number', required: false },
         ],
         confirm: true,
       },
@@ -395,34 +464,46 @@ export const GM_GROUPS: readonly GmGroup[] = [
   },
   {
     id: 'events',
-    title: 'Events',
+    titleKey: 'gm.group.events',
     commands: [
-      { command: '/startbc', label: 'Start Blood Castle', help: 'Start the Blood Castle event now.' },
-      { command: '/startcc', label: 'Start Chaos Castle', help: 'Start the Chaos Castle event now.' },
-      { command: '/startds', label: 'Start Devil Square', help: 'Start the Devil Square event now.' },
+      {
+        command: '/startbc',
+        labelKey: 'gm.cmd.startbc.label',
+        helpKey: 'gm.cmd.startbc.help',
+      },
+      {
+        command: '/startcc',
+        labelKey: 'gm.cmd.startcc.label',
+        helpKey: 'gm.cmd.startcc.help',
+      },
+      {
+        command: '/startds',
+        labelKey: 'gm.cmd.startds.label',
+        helpKey: 'gm.cmd.startds.help',
+      },
       {
         command: '/fireworks',
-        label: 'Fireworks',
-        help: 'Set off fireworks at a coordinate on this map.',
+        labelKey: 'gm.cmd.fireworks.label',
+        helpKey: 'gm.cmd.fireworks.help',
         params: COORDS,
       },
       {
         command: '/xmasfireworks',
-        label: 'Christmas fireworks',
-        help: 'Set off the Christmas fireworks at a coordinate on this map.',
+        labelKey: 'gm.cmd.xmasfireworks.label',
+        helpKey: 'gm.cmd.xmasfireworks.help',
         params: COORDS,
       },
       {
         command: '/goldnotice',
-        label: 'Golden notice',
-        help: 'Show a golden banner to everyone on the server.',
+        labelKey: 'gm.cmd.goldnotice.label',
+        helpKey: 'gm.cmd.goldnotice.help',
         params: [
           {
             name: 'message',
-            label: 'Message',
+            labelKey: 'gm.param.message',
             type: 'text',
             required: true,
-            hint: 'what to say',
+            hintKey: 'gm.hint.whatToSay',
             rest: true,
           },
         ],
@@ -452,22 +533,25 @@ export function buildCommandLine(
 
   for (const param of command.params ?? []) {
     const raw = (values[param.name] ?? '').trim();
+    const field = t(param.labelKey);
 
     if (!raw) {
-      if (param.required) return { error: `${param.label} is required.` };
+      if (param.required) return { error: t('gm.error.required', { field }) };
       break;
     }
 
     if (param.type === 'number' && !/^-?\d+$/.test(raw)) {
-      return { error: `${param.label} must be a whole number.` };
+      return { error: t('gm.error.wholeNumber', { field }) };
     }
 
     if (param.validValues && !param.validValues.includes(raw)) {
-      return { error: `${param.label} must be one of ${param.validValues.join(', ')}.` };
+      return {
+        error: t('gm.error.oneOf', { field, values: param.validValues.join(', ') }),
+      };
     }
 
     if (!param.rest && /\s/.test(raw)) {
-      return { error: `${param.label} cannot contain spaces.` };
+      return { error: t('gm.error.noSpaces', { field }) };
     }
 
     parts.push(raw);
@@ -479,7 +563,9 @@ export function buildCommandLine(
 /**
  * Commands matching what was typed into the panel's filter box, across every
  * group - `/setmoney` is only in Players if you already knew that, so the box
- * searches the slash name, the label and the help alike.
+ * searches the slash name, the label and the help alike. The label and help
+ * are matched in the language on screen, so a Spanish game master can search
+ * in Spanish.
  */
 export function matchGmCommands(query: string): readonly GmCommand[] {
   const needle = query.trim().toLowerCase();
@@ -488,8 +574,8 @@ export function matchGmCommands(query: string): readonly GmCommand[] {
   return GM_COMMANDS.filter(
     command =>
       command.command.includes(needle) ||
-      command.label.toLowerCase().includes(needle) ||
-      command.help.toLowerCase().includes(needle)
+      t(command.labelKey).toLowerCase().includes(needle) ||
+      t(command.helpKey).toLowerCase().includes(needle)
   );
 }
 

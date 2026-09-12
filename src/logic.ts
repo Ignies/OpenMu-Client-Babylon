@@ -11,7 +11,7 @@ import {
   withAppearanceClass,
 } from './common/deserializeAppearance';
 import { StatType } from './common/characterStats';
-import { ItemsDatabase } from './common/itemsDatabase';
+import { ItemsDatabase, itemBaseName } from './common/itemsDatabase';
 import {
   ItemGroup,
   itemRestHeight,
@@ -2630,7 +2630,13 @@ EventBus.on('HeroStateChanged', packet => {
 
 EventBus.on('ObjectMessage', packet => {
   const p = new ObjectMessagePacket(packet);
-  EventBus.emit('objectMessage', { netId: p.ObjectId & 0x7fff, message: p.Message });
+  // What an NPC says over its own head (`IShowMessageOfObjectPlugIn`) is
+  // server-built English like every other sentence it sends, so it goes
+  // through the same catalogue as `ServerMessage`; unknown text passes through.
+  EventBus.emit('objectMessage', {
+    netId: p.ObjectId & 0x7fff,
+    message: translateServerText(cleanName(p.Message)),
+  });
 });
 
 // F3/0x40 (length 7) is shared by PlayFanfareSound (EffectType 2), ShowSwirl
@@ -2886,7 +2892,7 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
         group: poseGroup,
         num: poseNum,
       },
-      objectNameInWorld: dropName(isMoney, amount, itemConfig.ItemName, parsed),
+      objectNameInWorld: dropName(isMoney, amount, itemBaseName(group, id), parsed),
     });
   });
 }
@@ -2905,7 +2911,8 @@ function dropName(
   baseName: unknown,
   item: Item | undefined
 ): string {
-  if (isMoney) return amount > 0 ? `Zen ${amount}` : 'Zen';
+  const zen = t('common.zen');
+  if (isMoney) return amount > 0 ? `${zen} ${amount}` : zen;
   const name = String(baseName);
   const lvl = item?.lvl ?? 0;
   return lvl > 0 ? `${name} +${lvl}` : name;

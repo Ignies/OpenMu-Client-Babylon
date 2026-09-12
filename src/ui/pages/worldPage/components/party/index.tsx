@@ -153,7 +153,7 @@ const NearbyList = observer(() => {
             disabled={!canInvite}
             onClick={uiClick(() => Social.partyInvite(p))}
           >
-            Invite
+            {t('party.invite')}
           </button>
           <button
             type="button"
@@ -161,7 +161,7 @@ const NearbyList = observer(() => {
             disabled={Economy.tradeOpen}
             onClick={uiClick(() => Economy.requestTrade(p))}
           >
-            Trade
+            {t('prompt.trade')}
           </button>
           {Economy.shopTitles.has(p.netId) && (
             <button
@@ -169,7 +169,7 @@ const NearbyList = observer(() => {
               title={Economy.shopTitles.get(p.netId)}
               onClick={uiClick(() => Economy.browseShop(p))}
             >
-              Shop
+              {t('party.shop')}
             </button>
           )}
         </div>
@@ -205,7 +205,7 @@ export const PartyWindow = observer(() => {
       onClose={close}
     >
       <div className="party-title" style={{ top: TITLE_Y }}>
-        Party
+        {t('party.title')}
       </div>
       <div
         className="head-close"

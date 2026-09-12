@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { skillDefinition } from '../../../common/skillsDatabase';
+import { skillDisplayName } from '../../../common/skillNames';
 import { skills, type SkillBlock } from '../../../skills';
 import { skillDelaySeconds } from '../../../skills/cooldowns';
 
@@ -37,11 +38,12 @@ export function buildSkillTooltip(number: number, level = 0): Line[] {
     ];
   }
 
+  const skillName = skillDisplayName(number) ?? def.name;
   const { blocks } = skills.usability(number);
   const lines: Line[] = [
     { text: '', color: 'white', blank: true },
     {
-      text: level > 0 ? t('skills.named', { name: def.name, level }) : def.name,
+      text: level > 0 ? t('skills.named', { name: skillName, level }) : skillName,
       color: 'blue',
       bold: true,
     },

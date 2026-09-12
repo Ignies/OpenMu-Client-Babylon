@@ -36,7 +36,7 @@ import { createPortal } from 'react-dom';
 import { skills } from '../../../../../skills';
 import { onCooldownTick, skillCooldowns } from '../../../../../skills/cooldowns';
 import { SkillTooltip } from '../../../../components/skillTooltip';
-import { ItemsDatabase } from '../../../../../common/itemsDatabase';
+import { itemBaseName } from '../../../../../common/itemsDatabase';
 import {
   canRegisterItemHotkey,
   countHotkeyItems,
@@ -133,7 +133,7 @@ const ConsumableItem = observer(({ index, hotKey }: { index: number; hotKey: str
   const count = slot >= 0 ? countHotkeyItems(items, index, hotkey) : 0;
   const picked = Store.pickedItem;
   const canBind = !!picked && canRegisterItemHotkey(picked.item);
-  const name = icon ? ItemsDatabase.getItem(icon.group, icon.num)?.ItemName : undefined;
+  const name = icon ? itemBaseName(icon.group, icon.num) : undefined;
 
   return (
     <>

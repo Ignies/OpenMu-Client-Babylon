@@ -1,10 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { i18n } from '../i18n';
 import {
   GM_COMMANDS,
   buildCommandLine,
   matchGmCommands,
   type GmCommand,
 } from './gmCommands';
+
+// The catalogue reads through `t()`, so pin the language: the wording asserted
+// below is the English one, whatever locale the machine running the suite has.
+beforeAll(() => i18n.setLanguage('en'));
 
 const find = (name: string): GmCommand => {
   const command = GM_COMMANDS.find(c => c.command === name);

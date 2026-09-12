@@ -24,8 +24,9 @@ import {
   type ItemDef,
   type ItemStats,
 } from './itemStats';
+import { itemBaseName } from './itemsDatabase';
 import { learnableSkill } from './skillItems';
-import { skillDefinition } from './skillsDatabase';
+import { skillDisplayName } from './skillNames';
 
 /**
  * `RenderItemInfo` (ZzzInventory.cpp:2091) as data: the tooltip is a list
@@ -121,7 +122,7 @@ function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
 }
 
 function nameLine(item: Item, def: ItemDef, level: number): string {
-  let name = def.name;
+  let name = itemBaseName(def.group, def.index) || def.name;
   if (item.isExcellent) name = t('item.excellentPrefix', { name });
   return level > 0 ? `${name} +${level}` : name;
 }
@@ -263,8 +264,8 @@ function consumableLines(out: Lines, def: ItemDef, item: Item) {
   }
   // Orbs, scrolls and crystals name the skill they teach.
   const taught = learnableSkill(item);
-  const skill = taught === undefined ? undefined : skillDefinition(taught);
-  if (skill) out.add(t('item.learns', { skill: skill.name }), 'blue');
+  const skill = taught === undefined ? undefined : skillDisplayName(taught);
+  if (skill) out.add(t('item.learns', { skill }), 'blue');
 }
 
 /** Builds the tooltip for `item` as seen by `hero`. */
@@ -415,11 +416,8 @@ function equipmentLines(
   if (hasOptions) out.blank();
 
   if (item.hasSkill) {
-    const skill = skillDefinition(def.skill);
-    out.add(
-      skill ? t('item.skillNamed', { skill: skill.name }) : t('item.skill'),
-      'blue'
-    );
+    const skill = skillDisplayName(def.skill);
+    out.add(skill ? t('item.skillNamed', { skill }) : t('item.skill'), 'blue');
   }
 
   if (item.luck) {

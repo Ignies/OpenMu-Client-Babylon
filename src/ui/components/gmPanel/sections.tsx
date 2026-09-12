@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import { t, type TextKey } from '../../../i18n';
 import { GmPanel } from '../../../gmPanel';
 import { uiClick } from '../../../libs/sfx';
 import { gmCommand } from '../../../common/gmCommands';
@@ -26,14 +27,14 @@ import {
  * `view` is a fresh read of the world (see `gmWorld.ts`), polled by the shell.
  */
 
-const HERO_STATE: Record<number, string> = {
-  0: 'New',
-  1: 'Hero',
-  2: 'Hero',
-  3: 'Normal',
-  4: 'Outlaw',
-  5: 'Murderer',
-  6: 'Murderer',
+const HERO_STATE: Record<number, TextKey> = {
+  0: 'gm.heroState.new',
+  1: 'gm.heroState.hero',
+  2: 'gm.heroState.hero',
+  3: 'gm.heroState.normal',
+  4: 'gm.heroState.outlaw',
+  5: 'gm.heroState.murderer',
+  6: 'gm.heroState.murderer',
 };
 
 /* ------------------------------------------------------------------ overview */
@@ -42,7 +43,7 @@ export const OverviewSection = observer(({ view }: { view: WorldView }) => {
   const hero = view.hero;
 
   if (!hero) {
-    return <p className="gm-empty">Not in the world yet.</p>;
+    return <p className="gm-empty">{t('gm.notInWorld')}</p>;
   }
 
   const players = view.nearby.filter(e => e.kind === 'player');
@@ -52,28 +53,32 @@ export const OverviewSection = observer(({ view }: { view: WorldView }) => {
     <>
       <section className="gm-stats">
         <div className="gm-stat">
-          <span className="gm-stat-label">Map</span>
+          <span className="gm-stat-label">{t('gm.stat.map')}</span>
           <span className="gm-stat-value">{mapName(hero.map)}</span>
           <span className="gm-stat-sub">#{hero.map}</span>
         </div>
         <div className="gm-stat">
-          <span className="gm-stat-label">Position</span>
+          <span className="gm-stat-label">{t('gm.stat.position')}</span>
           <span className="gm-stat-value gm-mono">
             {hero.x}, {hero.y}
           </span>
-          <span className="gm-stat-sub">live</span>
+          <span className="gm-stat-sub">{t('gm.stat.live')}</span>
         </div>
         <div className="gm-stat">
-          <span className="gm-stat-label">Level</span>
+          <span className="gm-stat-label">{t('common.level')}</span>
           <span className="gm-stat-value">{hero.level}</span>
-          <span className="gm-stat-sub">{HERO_STATE[hero.heroState] ?? hero.heroState}</span>
+          <span className="gm-stat-sub">
+            {HERO_STATE[hero.heroState] ? t(HERO_STATE[hero.heroState]) : hero.heroState}
+          </span>
         </div>
         <div className="gm-stat">
-          <span className="gm-stat-label">In scope</span>
+          <span className="gm-stat-label">{t('gm.stat.inScope')}</span>
           <span className="gm-stat-value">{players.length}</span>
           <span className="gm-stat-sub">
-            {players.length === 1 ? 'player' : 'players'}, {monsters.length} mob
-            {monsters.length === 1 ? '' : 's'}
+            {t('gm.stat.scopeCounts', {
+              players: players.length,
+              monsters: monsters.length,
+            })}
           </span>
         </div>
       </section>
@@ -87,7 +92,7 @@ export const OverviewSection = observer(({ view }: { view: WorldView }) => {
         }}
       />
 
-      <h4 className="gm-section-title">Quick actions</h4>
+      <h4 className="gm-section-title">{t('gm.quickActions')}</h4>
       <div className="gm-quick">
         <QuickButton command={gmCommand('/hide')} />
         <QuickButton command={gmCommand('/unhide')} />
@@ -124,8 +129,8 @@ const NearbyRow = observer(({ entry, hereX, hereY }: {
         <span className={`gm-dot gm-dot-${entry.kind}`} />
         <span className="gm-row-name">
           {entry.name}
-          {entry.isGm ? <b className="gm-row-gm">GM</b> : null}
-          {entry.dying ? <em className="gm-row-dead">dead</em> : null}
+          {entry.isGm ? <b className="gm-row-gm">{t('gm.tabPlate')}</b> : null}
+          {entry.dying ? <em className="gm-row-dead">{t('gm.row.dead')}</em> : null}
         </span>
         <span className="gm-row-pos gm-mono">
           {entry.x}, {entry.y}
@@ -140,31 +145,31 @@ const NearbyRow = observer(({ entry, hereX, hereY }: {
               <RunButton
                 command={gmCommand('/trace')}
                 overrides={{ characterName: entry.name }}
-                label="Go to"
+                labelKey="gm.action.goTo"
                 compact
               />
               <RunButton
                 command={gmCommand('/track')}
                 overrides={{ characterName: entry.name }}
-                label="Bring here"
+                labelKey="gm.action.bringHere"
                 compact
               />
               <RunButton
                 command={gmCommand('/charinfo')}
                 overrides={{ characterName: entry.name }}
-                label="Info"
+                labelKey="gm.action.info"
                 compact
               />
               <RunButton
                 command={gmCommand('/disconnect')}
                 overrides={{ characterName: entry.name }}
-                label="Kick"
+                labelKey="gm.action.kick"
                 compact
               />
               <RunButton
                 command={gmCommand('/banchar')}
                 overrides={{ characterName: entry.name }}
-                label="Ban"
+                labelKey="gm.action.ban"
                 compact
               />
             </>
@@ -173,7 +178,7 @@ const NearbyRow = observer(({ entry, hereX, hereY }: {
               <RunButton
                 command={gmCommand('/removenpc')}
                 overrides={{ id: String(entry.netId) }}
-                label="Remove"
+                labelKey="gm.action.remove"
                 compact
               />
               <RunButton
@@ -183,7 +188,7 @@ const NearbyRow = observer(({ entry, hereX, hereY }: {
                   x: String(hereX),
                   y: String(hereY),
                 }}
-                label="Bring here"
+                labelKey="gm.action.bringHere"
                 compact
               />
             </>
@@ -209,34 +214,34 @@ export const NearbySection = observer(({ view }: { view: WorldView }) => {
           className={`gm-toggle-btn${kind === 'player' ? ' is-active' : ''}`}
           onClick={uiClick(() => setKind('player'))}
         >
-          Players ({view.nearby.filter(e => e.kind === 'player').length})
+          {t('gm.nearby.players', {
+            count: view.nearby.filter(e => e.kind === 'player').length,
+          })}
         </button>
         <button
           type="button"
           className={`gm-toggle-btn${kind === 'monster' ? ' is-active' : ''}`}
           onClick={uiClick(() => setKind('monster'))}
         >
-          Monsters ({view.nearby.filter(e => e.kind !== 'player').length})
+          {t('gm.nearby.monsters', {
+            count: view.nearby.filter(e => e.kind !== 'player').length,
+          })}
         </button>
       </div>
 
       {GmPanel.target ? (
         <p className="gm-target-note">
-          Acting on <b>{GmPanel.target}</b>
+          {t('gm.actingOn')} <b>{GmPanel.target}</b>
           <button type="button" className="gm-link" onClick={uiClick(() => GmPanel.setTarget(''))}>
-            clear
+            {t('gm.clear')}
           </button>
         </p>
       ) : (
-        <p className="gm-hint">
-          Pick a player to aim the Character and Moderation screens at them.
-        </p>
+        <p className="gm-hint">{t('gm.nearby.pickHint')}</p>
       )}
 
       {shown.length === 0 ? (
-        <p className="gm-empty">
-          Nothing in scope. The server only tells this client what is near you.
-        </p>
+        <p className="gm-empty">{t('gm.nearby.empty')}</p>
       ) : (
         <ul className="gm-rows">
           {shown.map(entry => (
@@ -280,21 +285,17 @@ export const TravelSection = observer(({ view }: { view: WorldView }) => {
     <>
       <section className="gm-card">
         <header className="gm-card-head">
-          <h4>Teleport on this map</h4>
+          <h4>{t('gm.travel.teleportHere')}</h4>
           <code>/teleport</code>
         </header>
         <p className="gm-help">
-          {hero ? (
-            <>
-              You are at{' '}
-              <b className="gm-mono">
-                {hero.x}, {hero.y}
-              </b>{' '}
-              on {mapName(hero.map)}.
-            </>
-          ) : (
-            'Not in the world yet.'
-          )}
+          {hero
+            ? t('gm.travel.youAreAt', {
+                x: hero.x,
+                y: hero.y,
+                map: mapName(hero.map),
+              })
+            : t('gm.notInWorld')}
         </p>
         <div className="gm-pair">
           <CommandFields command={teleport} />
@@ -305,30 +306,27 @@ export const TravelSection = observer(({ view }: { view: WorldView }) => {
         </div>
       </section>
 
-      <h4 className="gm-section-title">Warp yourself</h4>
-      <p className="gm-hint">
-        Leave the spot blank to arrive at the map’s gate, which only works for maps on the
-        server’s warp list. Fill it in and any map is reachable.
-      </p>
+      <h4 className="gm-section-title">{t('gm.travel.warpYourself')}</h4>
+      <p className="gm-hint">{t('gm.travel.warpYourselfHint')}</p>
 
       <div className="gm-pair">
         <label className="gm-field">
-          <span className="gm-field-label">X</span>
+          <span className="gm-field-label">{t('gm.param.x')}</span>
           <input
             className="gm-input"
             inputMode="numeric"
             value={x}
-            placeholder="gate"
+            placeholder={t('gm.hint.gate')}
             onChange={e => setX(e.target.value)}
           />
         </label>
         <label className="gm-field">
-          <span className="gm-field-label">Y</span>
+          <span className="gm-field-label">{t('gm.param.y')}</span>
           <input
             className="gm-input"
             inputMode="numeric"
             value={y}
-            placeholder="gate"
+            placeholder={t('gm.hint.gate')}
             onChange={e => setY(e.target.value)}
           />
         </label>
@@ -338,13 +336,13 @@ export const TravelSection = observer(({ view }: { view: WorldView }) => {
         className="gm-search"
         type="search"
         value={filter}
-        placeholder="Filter maps…"
+        placeholder={t('gm.travel.filterMaps')}
         spellCheck={false}
         onChange={e => setFilter(e.target.value)}
       />
 
       {maps.length === 0 ? (
-        <p className="gm-empty">No map matches that.</p>
+        <p className="gm-empty">{t('gm.travel.noMapMatches')}</p>
       ) : (
         <div className="gm-maps">
           {maps.map(map => (
@@ -352,15 +350,15 @@ export const TravelSection = observer(({ view }: { view: WorldView }) => {
               key={map.number}
               command={move}
               overrides={warpMe(map.number)}
-              label={map.name}
+              text={map.name}
               compact
             />
           ))}
         </div>
       )}
 
-      <h4 className="gm-section-title">Warp somebody else</h4>
-      <CommandCard command={move} label="Warp a character" />
+      <h4 className="gm-section-title">{t('gm.travel.warpSomebody')}</h4>
+      <CommandCard command={move} />
     </>
   );
 });
@@ -369,12 +367,12 @@ export const TravelSection = observer(({ view }: { view: WorldView }) => {
 
 /** A read and a write of the same value, side by side. */
 const StatPair = observer(
-  ({ get, set, label }: { get: string; set: string; label: string }) => (
+  ({ get, set, labelKey }: { get: string; set: string; labelKey: TextKey }) => (
     <div className="gm-pairline">
-      <span className="gm-pairline-label">{label}</span>
-      <RunButton command={gmCommand(get)} label="Read" compact />
+      <span className="gm-pairline-label">{t(labelKey)}</span>
+      <RunButton command={gmCommand(get)} labelKey="gm.action.read" compact />
       <CommandFields command={gmCommand(set)} hide={['characterName']} bare />
-      <RunButton command={gmCommand(set)} label="Set" compact />
+      <RunButton command={gmCommand(set)} labelKey="gm.action.set" compact />
     </div>
   )
 );
@@ -382,39 +380,41 @@ const StatPair = observer(
 export const CharacterSection = observer(() => (
   <>
     <label className="gm-field">
-      <span className="gm-field-label">Character</span>
+      <span className="gm-field-label">{t('gm.param.character')}</span>
       <input
         className="gm-input"
         type="text"
         value={GmPanel.target}
-        placeholder="blank = you"
+        placeholder={t('gm.hint.blankIsYou')}
         spellCheck={false}
         autoComplete="off"
         onChange={e => GmPanel.setTarget(e.target.value)}
       />
     </label>
-    <p className="gm-hint">
-      Picked in Nearby, or typed here. Blank means you, wherever the command allows it.
-    </p>
+    <p className="gm-hint">{t('gm.character.targetHint')}</p>
 
     <div className="gm-quick">
-      <RunButton command={gmCommand('/charinfo')} label="Character info" compact />
-      <RunButton command={gmCommand('/clearinv')} label="Clear inventory" compact />
+      <RunButton command={gmCommand('/charinfo')} labelKey="gm.cmd.charinfo.label" compact />
+      <RunButton command={gmCommand('/clearinv')} labelKey="gm.cmd.clearinv.label" compact />
     </div>
 
-    <h4 className="gm-section-title">Values</h4>
-    <StatPair label="Level" get="/getlevel" set="/setlevel" />
-    <StatPair label="Zen" get="/getmoney" set="/setmoney" />
-    <StatPair label="Resets" get="/getresets" set="/setresets" />
-    <StatPair label="Points" get="/getleveluppoints" set="/setleveluppoints" />
-    <StatPair label="Master lv" get="/getmasterlevel" set="/setmasterlevel" />
-    <StatPair label="Master pts" get="/getmasterleveluppoints" set="/setmasterleveluppoints" />
+    <h4 className="gm-section-title">{t('gm.character.values')}</h4>
+    <StatPair labelKey="common.level" get="/getlevel" set="/setlevel" />
+    <StatPair labelKey="common.zen" get="/getmoney" set="/setmoney" />
+    <StatPair labelKey="gm.param.resets" get="/getresets" set="/setresets" />
+    <StatPair labelKey="gm.param.points" get="/getleveluppoints" set="/setleveluppoints" />
+    <StatPair labelKey="gm.param.masterLevel" get="/getmasterlevel" set="/setmasterlevel" />
+    <StatPair
+      labelKey="gm.param.masterPoints"
+      get="/getmasterleveluppoints"
+      set="/setmasterleveluppoints"
+    />
 
-    <h4 className="gm-section-title">Stats</h4>
-    <CommandCard command={gmCommand('/get')} hide={['characterName']} label="Read a stat" />
-    <CommandCard command={gmCommand('/set')} hide={['characterName']} label="Set a stat" />
+    <h4 className="gm-section-title">{t('gm.character.stats')}</h4>
+    <CommandCard command={gmCommand('/get')} hide={['characterName']} />
+    <CommandCard command={gmCommand('/set')} hide={['characterName']} />
 
-    <h4 className="gm-section-title">Hero state</h4>
+    <h4 className="gm-section-title">{t('gm.character.heroState')}</h4>
     <CommandCard command={gmCommand('/pk')} hide={['characterName']} />
   </>
 ));
@@ -430,23 +430,19 @@ export const SpawnSection = observer(({ view }: { view: WorldView }) => {
       <CommandCard command={gmCommand('/createmonster')} />
       <CommandCard command={gmCommand('/item')} />
 
-      <h4 className="gm-section-title">Monsters in front of you</h4>
-      <p className="gm-hint">
-        Ids come from Show NPC ids, or from the Nearby list. Coordinates default to where you
-        stand.
-      </p>
+      <h4 className="gm-section-title">{t('gm.spawn.monstersInFront')}</h4>
+      <p className="gm-hint">{t('gm.spawn.idsHint')}</p>
       <CommandCard
         command={gmCommand('/movemonster')}
         overrides={here}
         hide={here ? ['x', 'y'] : undefined}
-        label="Bring a monster here"
       />
-      <CommandCard command={gmCommand('/walkmonster')} label="Walk a monster to a spot" />
+      <CommandCard command={gmCommand('/walkmonster')} />
       <CommandCard command={gmCommand('/removenpc')} />
 
-      <h4 className="gm-section-title">Yourself</h4>
-      <CommandCard command={gmCommand("/skin")} label="Wear a monster skin" />
-      <CommandCard command={gmCommand("/npc")} label="Open an NPC store" />
+      <h4 className="gm-section-title">{t('gm.spawn.yourself')}</h4>
+      <CommandCard command={gmCommand('/skin')} />
+      <CommandCard command={gmCommand('/npc')} />
     </>
   );
 });
@@ -457,27 +453,27 @@ export const ModerationSection = observer(() => (
   <>
     {GmPanel.target ? (
       <p className="gm-target-note">
-        Acting on <b>{GmPanel.target}</b>
+        {t('gm.actingOn')} <b>{GmPanel.target}</b>
         <button type="button" className="gm-link" onClick={uiClick(() => GmPanel.setTarget(''))}>
-          clear
+          {t('gm.clear')}
         </button>
       </p>
     ) : (
-      <p className="gm-hint">Pick a player in Nearby, or type a name in each command.</p>
+      <p className="gm-hint">{t('gm.moderation.pickHint')}</p>
     )}
 
-    <h4 className="gm-section-title">Characters</h4>
+    <h4 className="gm-section-title">{t('gm.moderation.characters')}</h4>
     <CommandCard command={gmCommand('/banchar')} hide={['characterName']} />
     <CommandCard command={gmCommand('/unbanchar')} hide={['characterName']} />
     <CommandCard command={gmCommand('/chatban')} hide={['characterName']} />
     <CommandCard command={gmCommand('/chatunban')} hide={['characterName']} />
     <CommandCard command={gmCommand('/disconnect')} hide={['characterName']} />
 
-    <h4 className="gm-section-title">Accounts</h4>
+    <h4 className="gm-section-title">{t('gm.moderation.accounts')}</h4>
     <CommandCard command={gmCommand('/banacc')} />
     <CommandCard command={gmCommand('/unbanacc')} />
 
-    <h4 className="gm-section-title">Guilds</h4>
+    <h4 className="gm-section-title">{t('gm.moderation.guilds')}</h4>
     <CommandCard command={gmCommand('/guilddisconnect')} />
     <CommandCard command={gmCommand('/guildmove')} />
   </>
@@ -491,32 +487,32 @@ export const EventsSection = observer(({ view }: { view: WorldView }) => {
 
   return (
     <>
-      <h4 className="gm-section-title">Start an event</h4>
+      <h4 className="gm-section-title">{t('gm.events.start')}</h4>
       <div className="gm-quick">
         <QuickButton command={gmCommand('/startbc')} />
         <QuickButton command={gmCommand('/startcc')} />
         <QuickButton command={gmCommand('/startds')} />
       </div>
 
-      <h4 className="gm-section-title">Fireworks</h4>
-      <p className="gm-hint">Set off where you stand, or give a spot on this map.</p>
+      <h4 className="gm-section-title">{t('gm.cmd.fireworks.label')}</h4>
+      <p className="gm-hint">{t('gm.events.fireworksHint')}</p>
       <div className="gm-quick">
         <RunButton
           command={gmCommand('/fireworks')}
           overrides={here}
-          label="Here"
+          labelKey="gm.events.here"
           compact
         />
         <RunButton
           command={gmCommand('/xmasfireworks')}
           overrides={here}
-          label="Christmas, here"
+          labelKey="gm.events.christmasHere"
           compact
         />
       </div>
-      <CommandCard command={gmCommand('/fireworks')} label="Fireworks at a spot" />
+      <CommandCard command={gmCommand('/fireworks')} />
 
-      <h4 className="gm-section-title">Announce</h4>
+      <h4 className="gm-section-title">{t('gm.events.announce')}</h4>
       <CommandCard command={gmCommand('/goldnotice')} />
     </>
   );
@@ -530,7 +526,7 @@ export const ConsoleSection = observer(() => {
   return (
     <>
       <label className="gm-field">
-        <span className="gm-field-label">Type a line</span>
+        <span className="gm-field-label">{t('gm.console.typeLine')}</span>
         <input
           className="gm-input gm-mono"
           type="text"
@@ -548,26 +544,24 @@ export const ConsoleSection = observer(() => {
           }}
         />
       </label>
-      <p className="gm-hint">
-        Sent exactly as typed, the same as the chat box. Nothing here is checked first.
-      </p>
+      <p className="gm-hint">{t('gm.console.rawHint')}</p>
 
       <input
         className="gm-search"
         type="search"
         value={GmPanel.query}
-        placeholder="Search every command…"
+        placeholder={t('gm.console.search')}
         spellCheck={false}
         autoComplete="off"
         onChange={e => GmPanel.setQuery(e.target.value)}
       />
 
       {GmPanel.consoleGroups.length === 0 ? (
-        <p className="gm-empty">No command matches that.</p>
+        <p className="gm-empty">{t('gm.console.noMatch')}</p>
       ) : (
         GmPanel.consoleGroups.map(group => (
-          <div key={group.title}>
-            <h4 className="gm-section-title">{group.title}</h4>
+          <div key={group.titleKey}>
+            <h4 className="gm-section-title">{t(group.titleKey)}</h4>
             <div className="gm-commands">
               {group.commands.map(command => (
                 <button
@@ -577,9 +571,9 @@ export const ConsoleSection = observer(() => {
                     GmPanel.selected?.command === command.command ? ' is-active' : ''
                   }${command.confirm ? ' is-heavy' : ''}`}
                   onClick={uiClick(() => GmPanel.select(command))}
-                  title={command.help}
+                  title={t(command.helpKey)}
                 >
-                  <span className="gm-command-label">{command.label}</span>
+                  <span className="gm-command-label">{t(command.labelKey)}</span>
                   <code className="gm-command-slash">{command.command}</code>
                 </button>
               ))}

@@ -7,7 +7,7 @@ import { isKey } from '../../../../../common/keyBindings';
 import { getBaseClass } from '../../../../../common/characterStats';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import { uiClick } from '../../../../../libs/sfx';
-import { ItemsDatabase } from '../../../../../common/itemsDatabase';
+import { itemBaseName } from '../../../../../common/itemsDatabase';
 import { monsterDisplayName } from '../../../../../common/monstersDatabase';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
@@ -292,7 +292,7 @@ const NpcQuestWindow = observer(() => {
                 ? `${monsterName(act.itemType)}  ${Math.min(legacyKillCount(act.itemType), act.itemNum)} / ${act.itemNum}`
                 : t('quest.reward.item', {
                     name:
-                      ItemsDatabase.getItem(act.itemType, act.itemSubType)?.ItemName ??
+                      itemBaseName(act.itemType, act.itemSubType) ||
                       t('quest.itemFallback', {
                         id: act.itemType * MAX_ITEM_INDEX + act.itemSubType,
                       }),
@@ -357,7 +357,7 @@ const QuestListDialog = observer(() => {
   return (
     <MuItemWindow id={LIST_WINDOW_ID} className="quest-window" column={1}>
       <div className="window-title" style={{ top: TITLE_Y, color: COLOR.title }}>
-        Quest
+        {t('quest.tab.quest')}
       </div>
       <Line y={QP_NPC_NAME_Y} left={QP_TEXT_X} text={monsterName(questListNpcNumber())} bold color={COLOR.s6NpcName} />
       <div className="head-close" data-no-drag="true" style={HEAD_CLOSE} onClick={uiClick(closeQuestList)} />
@@ -424,7 +424,7 @@ const QuestProgressWindow = observer(() => {
   return (
     <MuItemWindow id={PROGRESS_WINDOW_ID} className="quest-window" column={1}>
       <div className="window-title" style={{ top: TITLE_Y, color: COLOR.title }}>
-        Quest
+        {t('quest.tab.quest')}
       </div>
       <Line y={QP_SUBJECT_Y} text={questSubject(key)} bold color={COLOR.subject} />
       <Line y={QP_NPC_NAME_Y} left={QP_TEXT_X} text={npcName} bold color={COLOR.s6NpcName} />
@@ -836,7 +836,7 @@ const MyQuestInfoWindow = observer(() => {
   return (
     <MuItemWindow id={MY_QUEST_WINDOW_ID} className="quest-window" column={2}>
       <div className="window-title" style={{ top: TITLE_Y, color: COLOR.title }}>
-        Quest
+        {t('quest.tab.quest')}
       </div>
       <div className="head-close" data-no-drag="true" style={HEAD_CLOSE} onClick={uiClick(() => showMyQuestWindow(false))} />
       <TabStrip />

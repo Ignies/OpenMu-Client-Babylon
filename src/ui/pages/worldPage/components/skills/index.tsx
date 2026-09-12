@@ -102,7 +102,7 @@ export const SkillListWindow = observer(() => {
       }
     >
       <div className="window-title" style={{ top: TITLE_Y }}>
-        Skills
+        {t('skills.title')}
       </div>
       <MuTableFrame left={LIST.x} top={LIST.y} width={LIST.width} height={LIST.height} />
       <div
