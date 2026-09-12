@@ -1383,6 +1383,8 @@ export const bulgarianLayer: LanguageLayer = {
     'options.lootZen': 'Zen от',
     'options.firstPersonBob': 'Поклащане на главата от първо лице',
     'options.chatTimestamps': 'Час в чата',
+    'options.blockBrowserKeys': 'Блокирай клавишните комбинации на браузъра (Ctrl+W, F5, мащаб)',
+    'options.fullscreen': 'Цял екран (F11)',
     'keys.replyWhisper': 'Отговор на шепот',
     'options.uiScale': 'Размер',
     'options.lockWindows': 'Заключи прозорците',

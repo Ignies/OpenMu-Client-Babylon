@@ -1391,6 +1391,8 @@ export const romanianLayer: LanguageLayer = {
     'options.lootZen': 'Zen de la',
     'options.firstPersonBob': 'Legănarea capului la persoana întâi',
     'options.chatTimestamps': 'Ora în chat',
+    'options.blockBrowserKeys': 'Blochează scurtăturile browserului (Ctrl+W, F5, zoom)',
+    'options.fullscreen': 'Ecran complet (F11)',
     'keys.replyWhisper': 'Răspunde la șoaptă',
     'options.uiScale': 'Mărime',
     'options.lockWindows': 'Blochează ferestrele',

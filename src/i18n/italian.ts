@@ -1398,6 +1398,8 @@ export const italianLayer: LanguageLayer = {
     'options.lootZen': 'Zen da',
     'options.firstPersonBob': 'Oscillazione della testa in prima persona',
     'options.chatTimestamps': 'Orario nella chat',
+    'options.blockBrowserKeys': 'Blocca le scorciatoie del browser (Ctrl+W, F5, zoom)',
+    'options.fullscreen': 'Schermo intero (F11)',
     'keys.replyWhisper': 'Rispondi al sussurro',
     'options.uiScale': 'Dimensione',
     'options.lockWindows': 'Blocca finestre',

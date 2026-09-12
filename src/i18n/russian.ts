@@ -1376,6 +1376,8 @@ export const russianLayer: LanguageLayer = {
     'options.lootZen': 'Zen от',
     'options.firstPersonBob': 'Покачивание головы от первого лица',
     'options.chatTimestamps': 'Время в чате',
+    'options.blockBrowserKeys': 'Блокировать горячие клавиши браузера (Ctrl+W, F5, масштаб)',
+    'options.fullscreen': 'Полный экран (F11)',
     'keys.replyWhisper': 'Ответить на шёпот',
     'options.uiScale': 'Размер',
     'options.lockWindows': 'Закрепить окна',

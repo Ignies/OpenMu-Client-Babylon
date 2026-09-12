@@ -7,6 +7,7 @@ import { Messenger } from '../messenger';
 import { quests } from '../quests';
 import { LogOutPacket } from './packets/ClientToServerPackets';
 import { SessionResume } from './sessionResume';
+import { allowUnload } from './browserHotkeys';
 
 /**
  * The three ways out of a session: `CSystemMenuMsgBox`'s Exit Game, Select
@@ -149,6 +150,7 @@ export const SessionExit = new (class _SessionExit {
     // original's `DestroyWindow` is the start menu it would boot back into.
     // Offline rewrote the URL to `/offline`, so that one restarts instead.
     if (Store.isOffline) {
+      allowUnload();
       location.href = '/';
       return;
     }

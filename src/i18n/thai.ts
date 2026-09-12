@@ -1363,6 +1363,8 @@ export const thaiLayer: LanguageLayer = {
     'options.lootZen': 'Zen ตั้งแต่',
     'options.firstPersonBob': 'การโยกศีรษะในมุมมองบุคคลที่หนึ่ง',
     'options.chatTimestamps': 'เวลาในแชท',
+    'options.blockBrowserKeys': 'บล็อกคีย์ลัดของเบราว์เซอร์ (Ctrl+W, F5, ซูม)',
+    'options.fullscreen': 'เต็มหน้าจอ (F11)',
     'keys.replyWhisper': 'ตอบกระซิบ',
     'options.uiScale': 'ขนาด',
     'options.lockWindows': 'ล็อกหน้าต่าง',

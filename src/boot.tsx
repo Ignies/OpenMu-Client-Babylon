@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './style.less';
 import './logic';
-import { Store } from './store';
+import { Store, UIState } from './store';
 import { Social } from './social';
 import { Economy } from './economy';
 import { weather } from './weather';
@@ -17,6 +17,7 @@ import { createWorld } from './ecs/createWorld';
 import { EventBus } from './libs/eventBus';
 import { installLoginMusic } from './libs/loginMusic';
 import { setKeyProfile } from './common/keyBindings';
+import { installBrowserHotkeyGuard } from './common/browserHotkeys';
 import { SessionResume } from './common/sessionResume';
 import { reaction } from 'mobx';
 import { watchStateWarnings } from './common/stateWarnings';
@@ -60,8 +61,17 @@ try {
   throw e;
 }
 
-// Keyboard: every keydown guard (page scroll keys, Tab, Alt, IME, the
-// window stack) lives in `ecs/systems/keyboardInputSystem.ts`.
+// The browser's own chords (Ctrl+W, Ctrl+R, F5, the zoom keys) taken off the
+// keyboard before anything else listens on it (`common/browserHotkeys.ts`).
+// The game's own keydown guards - page scroll keys, Tab, Alt, IME, the window
+// stack - live in `ecs/systems/keyboardInputSystem.ts`.
+installBrowserHotkeyGuard(
+  () =>
+    Store.uiState === UIState.World ||
+    Store.uiState === UIState.LoadingWorld ||
+    Store.uiState === UIState.Characters
+);
+
 const ignoredIds = ['scene-explorer-host', 'inspector-host'];
 
 // The right button is the cast button (`Attack()` with MouseRButton), and

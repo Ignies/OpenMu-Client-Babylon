@@ -1403,6 +1403,8 @@ export const germanLayer: LanguageLayer = {
     'options.lootZen': 'Zen ab',
     'options.firstPersonBob': 'Kopfbewegung in der Egoperspektive',
     'options.chatTimestamps': 'Uhrzeit im Chat',
+    'options.blockBrowserKeys': 'Browser-Tastenkürzel blockieren (Strg+W, F5, Zoom)',
+    'options.fullscreen': 'Vollbild (F11)',
     'keys.replyWhisper': 'Auf Flüstern antworten',
     'options.uiScale': 'Größe',
     'options.lockWindows': 'Fenster sperren',

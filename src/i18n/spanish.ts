@@ -1401,6 +1401,8 @@ export const spanishLayer: LanguageLayer = {
     'options.lootZen': 'Zen desde',
     'options.firstPersonBob': 'Balanceo de la cabeza en primera persona',
     'options.chatTimestamps': 'Hora en el chat',
+    'options.blockBrowserKeys': 'Bloquear atajos del navegador (Ctrl+W, F5, zoom)',
+    'options.fullscreen': 'Pantalla completa (F11)',
     'keys.replyWhisper': 'Responder al susurro',
     'options.uiScale': 'Tamaño',
     'options.lockWindows': 'Bloquear ventanas',
