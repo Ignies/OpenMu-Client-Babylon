@@ -626,8 +626,11 @@ class PropBatches {
     mesh.scaling.copyFrom(MIRROR_SCALING);
     // Now, not later: the clone computed a world matrix under the *source's*
     // parent (the model root's basis change) and left its bounds dirty, and
-    // Babylon's lazy bounds refresh would read that stale matrix.
+    // Babylon's lazy bounds refresh would read that stale matrix. Then
+    // frozen: a chunk never moves, and the per-frame synchronisation check
+    // Babylon runs on every mesh is the one thing a static mesh can skip.
     mesh.computeWorldMatrix(true);
+    mesh.freezeWorldMatrix();
 
     mesh.skeleton = src.skeleton;
     if (mesh.skeleton) mesh.numBoneInfluencers = 1;

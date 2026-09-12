@@ -1018,7 +1018,25 @@ export class ModelObject {
 
     this.applyFrozenPose();
 
+    if (this.IsMapObject) this.stopStaticClips();
+
     this.Ready = true;
+  }
+
+  /**
+   * A one-key clip is a pose, not a motion, and the loader auto-starts it
+   * looping between identical keys: one Animatable per bone interpolating
+   * nothing, on every prop of the map (Lorencia carried ~5 000). The pose
+   * stays where the clip left the bone nodes; the loop goes.
+   */
+  private stopStaticClips() {
+    const groups = this.gltf?.animationGroups;
+    if (!groups) return;
+
+    for (const group of groups) {
+      if (!group.isStarted || group.to > group.from) continue;
+      group.stop(true);
+    }
   }
 
   /** `HideSkin`: drop the skin and hair meshes out of the draw and the bounds. */

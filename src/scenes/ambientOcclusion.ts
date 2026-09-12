@@ -25,6 +25,7 @@ import '@babylonjs/core/Shaders/ssaoCombine.fragment.js';
 import { pipelineSamples, type LightingTier } from '../common/lightingQuality';
 import { devQuery, devQueryNumbers } from '../common/devSeams';
 import { drawsSolidGeometry } from './shadows';
+import { driveRenderList } from './renderList';
 
 /**
  * Contact-scale SSAO2 and the effect mask (ARCHITECTURE §4.1, §4.8 step 1).
@@ -266,7 +267,7 @@ function createEffectMask(
 
   mask.clearColor = new Color4(0, 0, 0, 1);
   mask.activeCamera = camera;
-  mask.renderListPredicate = emits;
+  driveRenderList(scene, mask, emits);
   mask.renderParticles = true;
   mask.renderSprites = true;
   mask.wrapU = Texture.CLAMP_ADDRESSMODE;
@@ -327,7 +328,7 @@ function createSsao(
   if (gbuffer) {
     const target = gbuffer.getGBuffer();
 
-    target.renderListPredicate = occludes;
+    driveRenderList(scene, target, occludes);
     depthWriteAlphaKeyed(target);
     normals = target.textures[
       gbuffer.getTextureIndex(GeometryBufferRenderer.NORMAL_TEXTURE_TYPE)

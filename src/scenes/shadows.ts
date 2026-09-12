@@ -17,6 +17,7 @@ import {
   type LightingTier,
 } from '../common/lightingQuality';
 import type { ShadowCasters, ShadowPolicy } from '../lighting/shadowPolicy';
+import { driveRenderList } from './renderList';
 
 /**
  * The cascaded shadow map on the sun: sole owner of the
@@ -370,12 +371,14 @@ function rebuildFrozenMaterials(scene: Scene): void {
  * set freezes to whatever stood in it when the room was entered: nothing
  * loaded afterwards ever casts, and nothing already in it ever leaves.
  */
-function hookShadowMap(csm: CascadedShadowGenerator): void {
+function hookShadowMap(csm: CascadedShadowGenerator, scene: Scene): void {
   const map = csm.getShadowMap();
 
   if (!map) return;
 
-  map.renderListPredicate = castsSunShadow;
+  // Not `renderListPredicate`: see scenes/renderList.ts for what that costs
+  // per frame. The list is released with the map.
+  driveRenderList(scene, map, castsSunShadow);
   map.refreshRate = refreshDev ?? 1;
 }
 
@@ -413,7 +416,7 @@ function createCsm(
   // They land in the alpha-tested depth pass, keyed by their own texture.
   csm.transparencyShadow = true;
 
-  hookShadowMap(csm);
+  hookShadowMap(csm, scene);
 
   // The object materials are shared and carry a placeholder diffuse; the
   // real texture is per mesh (`metadata.diffuseTexture`, see itemMaterial).
@@ -485,7 +488,7 @@ export function syncShadows(
 
     if (runtime.csm.numCascades !== cascades) {
       runtime.csm.numCascades = cascades;
-      hookShadowMap(runtime.csm);
+      hookShadowMap(runtime.csm, scene);
     }
   }
 
