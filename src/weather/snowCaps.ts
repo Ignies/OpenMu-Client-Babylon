@@ -40,10 +40,18 @@ export const SNOW_CAP_KNEE_FULL = 0.45;
  * one reader the material binds and it is the material that pays.
  */
 export function snowCapAt(x: number, z: number): number {
-  if (!GameOptions.advancedEffects) return 0;
-  const cover = snowCover();
+  const cover = snowCapCover();
   if (cover <= 0) return 0;
   return isTileOpen(x, z) ? cover : 0;
+}
+
+/**
+ * The cap before the tile test: what a prop batch binds as its uniform, the
+ * openness of each placement's tile riding in its instance attribute.
+ */
+export function snowCapCover(): number {
+  if (!GameOptions.advancedEffects) return 0;
+  return Math.max(0, snowCover());
 }
 
 // ---- 3. the layer -------------------------------------------------------

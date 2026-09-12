@@ -1,4 +1,5 @@
 import type { Scene } from './babylon/exports';
+import { propBatchStats } from '../common/propBatches';
 
 /**
  * Render-budget overlay. Shift+Ctrl+Alt+P toggles it.
@@ -82,6 +83,14 @@ function countEnabledMeshes(scene: Scene): number {
 
 const SYSTEM_ROWS = 8;
 
+function propLine(): string {
+  const s = propBatchStats();
+  if (!s) return 'props      none batched';
+  return `props      ${s.instances} in ${s.meshes} meshes / ${s.types} types${
+    s.pending ? ` (${s.pending} loading)` : ''
+  }, ${s.excluded.size} types per object`;
+}
+
 function render(scene: Scene): void {
   const engine = scene.getEngine();
 
@@ -108,6 +117,7 @@ function render(scene: Scene): void {
     }`,
     `particles  ${scene.particleSystems.length}`,
     `lights     ${scene.lights.length}`,
+    propLine(),
     `materials  ${scene.materials.length}   textures ${scene.textures.length}`,
     '',
     'slowest systems',

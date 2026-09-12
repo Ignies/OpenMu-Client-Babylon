@@ -44,6 +44,7 @@ import { BlendState } from './objects/enum';
 // Late-bound: a value import of `../store` closed an import cycle back to
 // the monster classes that extend this one (B14, see `storeRef.ts`).
 import { storeRef } from './storeRef';
+import { settleStillAnimations } from './staticClips';
 import { requestGlowProbe } from '../scenes/sceneLook';
 import type { MapObjectLights } from './mapObjectLights';
 
@@ -194,17 +195,20 @@ function extendBySkinnedBounds(
  * space (per-bone bounds × current bone matrices, no CPU re-skinning).
  * Returns false when the mesh has no usable skin data.
  */
-function extendByPosedLocalBounds(
+export function extendByPosedLocalBounds(
   mesh: AbstractMesh,
   min: Vector3,
-  max: Vector3
+  max: Vector3,
+  forcePrepare = false
 ): boolean {
   const skeleton = mesh.skeleton;
   if (!skeleton) return false;
 
   const boneCount = skeleton.bones.length;
   const bounds = boneLocalBounds(mesh, boneCount);
-  skeleton.prepare();
+  // `prepare()` runs once per render id; a caller sampling several poses
+  // inside one frame (propBatches) has to force it.
+  skeleton.prepare(forcePrepare);
   const matrices = skeleton.getTransformMatrices(mesh);
   if (!bounds || !matrices || matrices.length < boneCount * 16) return false;
 
@@ -343,6 +347,14 @@ export type BodyShine = {
 
 export class ModelObject {
   static OverrideScale = -1;
+
+  /**
+   * The class does nothing per object that a prop batch cannot reproduce
+   * (`common/propBatches.ts`): it picks a file and material tweaks in
+   * `init()` and nothing else. Off for everything that animates, lights,
+   * hides or moves its own body.
+   */
+  static Batchable = false;
 
   Type: number = -1;
 
@@ -963,6 +975,13 @@ export class ModelObject {
             mesh.skeleton?.dispose();
             mesh.skeleton = parentSkeleton;
           });
+
+          // The part now poses with the rig; its own clips would go on
+          // driving its own bone nodes, which nothing reads any more - one
+          // Animatable per bone per armour piece, on every character.
+          for (const group of gltf.animationGroups) {
+            if (group.isStarted) group.stop(true);
+          }
         }
       }
     }
@@ -1049,7 +1068,33 @@ export class ModelObject {
 
     this.applyFrozenPose();
 
+    if (this.IsMapObject) this.settleStaticClips();
+
     this.Ready = true;
+  }
+
+  /**
+   * A one-key clip is a pose, not a motion, and the loader auto-starts it
+   * looping between identical keys: one Animatable per bone interpolating
+   * nothing, on every prop of the map (Lorencia carried ~5 000). The pose
+   * stays where the clip left the bone nodes; the loop goes.
+   *
+   * Inside a real clip, the bones keyed to one value all the way through go
+   * the same way (common/staticClips.ts): Noria's sway rigs move a few
+   * branch tips and key everything else still. Only the running clip is
+   * settled; a clip a class starts later is intact, and the settled one
+   * writes its pose back on every start.
+   */
+  private settleStaticClips() {
+    const groups = this.gltf?.animationGroups;
+    if (!groups) return;
+
+    for (const group of groups) {
+      if (!group.isStarted) continue;
+
+      if (group.to > group.from) settleStillAnimations(group);
+      else group.stop(true);
+    }
   }
 
   /** `HideSkin`: drop the skin and hair meshes out of the draw and the bounds. */

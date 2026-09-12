@@ -74,6 +74,7 @@ export { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
 export { CreateTorus } from '@babylonjs/core/Meshes/Builders/torusBuilder';
 export { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder';
 export { Plane } from '@babylonjs/core/Maths/math.plane';
+export { Frustum } from '@babylonjs/core/Maths/math.frustum';
 export { CreateCylinder } from '@babylonjs/core/Meshes/Builders/cylinderBuilder';
 export { CreateDecal } from '@babylonjs/core/Meshes/Builders/decalBuilder';
 export type { Light } from '@babylonjs/core/Lights/light';
@@ -107,7 +108,10 @@ export { SolidParticle } from '@babylonjs/core/Particles/solidParticle';
 
 export { Animation } from '@babylonjs/core/Animations/animation';
 export { Animatable } from '@babylonjs/core/Animations/animatable';
-export { AnimationGroup } from '@babylonjs/core/Animations/animationGroup';
+export {
+  AnimationGroup,
+  TargetedAnimation,
+} from '@babylonjs/core/Animations/animationGroup';
 
 export { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 export type { IMouseEvent } from '@babylonjs/core/Events';

@@ -99,6 +99,13 @@ export type GameOptions = {
    * holds the whole map at once.
    */
   renderDistance: number;
+  /**
+   * Draw the map's scenery as instanced batches - one mesh per prop type
+   * and 32-tile chunk instead of one per placement (`common/propBatches.ts`).
+   * Off is the client exactly as it was, every prop its own model. A change
+   * reloads the current map's objects.
+   */
+  propBatching: boolean;
   autoAttack: boolean;
   whisperBeep: boolean;
   slideHelp: boolean;
@@ -232,6 +239,7 @@ const DEFAULTS: GameOptions = {
   grassDensity: 5,
   advancedEffects: true,
   renderDistance: 0,
+  propBatching: true,
   autoAttack: false,
   whisperBeep: true,
   slideHelp: true,

@@ -71,6 +71,18 @@ const REST_OBJECTS: Partial<
   },
 };
 
+/**
+ * The operate boxes whose rest pose is the lean rather than the sit: the
+ * cursor shows the lean hand over them (`CursorSystem`), and they keep a
+ * model of their own for it.
+ */
+export const LEAN_CURSOR_OBJECTS: Partial<Record<ENUM_WORLD, ReadonlySet<number>>> = {
+  [ENUM_WORLD.WD_0LORENCIA]: new Set([MODEL_POSE_BOX]),
+  [ENUM_WORLD.WD_1DUNGEON]: new Set([60]),
+  [ENUM_WORLD.WD_2DEVIAS]: new Set([91]),
+  [ENUM_WORLD.WD_3NORIA]: new Set([38]),
+};
+
 export function findRestObject(
   map: ENUM_WORLD,
   objectType: number

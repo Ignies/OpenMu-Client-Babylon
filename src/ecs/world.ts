@@ -118,6 +118,11 @@ export type Entity = Partial<{
   };
   modelObject: ModelObject;
   modelFactory: typeof ModelObject;
+  /**
+   * The record is drawn by a prop batch (`common/propBatches.ts`) and never
+   * gets a `modelObject` of its own: which type's batch, and which chunk.
+   */
+  propBatch: { type: number; chunk: number };
   objOutOfScope: true;
   pathfinding: {
     from: IVector2Like;

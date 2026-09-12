@@ -189,6 +189,7 @@ export const spanishLayer: LanguageLayer = {
     'options.grassDensity': 'Hierba',
     'options.advancedEffects': 'Efectos avanzados',
     'options.renderDistance': 'Distancia de renderizado',
+    'options.propBatching': 'Agrupar escenario',
     'options.lightingQuality': 'Iluminación',
     'options.materialQuality': 'Materiales',
     'options.materialDetail': 'Detalle',

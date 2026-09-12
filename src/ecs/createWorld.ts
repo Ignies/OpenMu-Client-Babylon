@@ -12,6 +12,7 @@ import { DeathSystem } from './systems/deathSystem';
 import { NameTagSystem } from './systems/nameTagSystem';
 import { HeadTrackingSystem } from './systems/headTrackingSystem';
 import { ModelLoaderSystem } from './systems/modelLoaderSystem';
+import { PropBatchSystem } from './systems/propBatchSystem';
 import { CameraFollowSystem } from './systems/cameraFollowSystem';
 import { AmbientParticleSystem } from './systems/ambientParticleSystem';
 import { WeatherSystem } from './systems/weatherSystem';
@@ -63,6 +64,8 @@ import { perfOverlayVisible, recordSystemTime } from '../libs/perfOverlay';
 const factories: ISystemFactory[] = [
   CharacterSelectSystem,
   ModelLoaderSystem,
+  // Right behind it: the scenery the loader does not clone per placement.
+  PropBatchSystem,
   PointerInputSystem,
   KeyboardInputSystem,
   InteractiveAreaSystem,

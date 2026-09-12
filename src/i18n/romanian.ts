@@ -179,6 +179,7 @@ export const romanianLayer: LanguageLayer = {
     'options.grassDensity': 'Iarbă',
     'options.advancedEffects': 'Efecte avansate',
     'options.renderDistance': 'Distanță de randare',
+    'options.propBatching': 'Grupare decor',
     'options.lightingQuality': 'Iluminare',
     'options.materialQuality': 'Materiale',
     'options.materialDetail': 'Detaliu',

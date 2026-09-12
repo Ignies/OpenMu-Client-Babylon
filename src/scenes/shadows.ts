@@ -1,10 +1,13 @@
 import {
   CascadedShadowGenerator,
+  Frustum,
   Material,
+  Plane,
   ShadowGenerator,
   type AbstractMesh,
   type DirectionalLight,
   type Effect,
+  type RenderTargetTexture,
   type Scene,
   type ShaderMaterial,
 } from '../libs/babylon/exports';
@@ -17,6 +20,7 @@ import {
   type LightingTier,
 } from '../common/lightingQuality';
 import type { ShadowCasters, ShadowPolicy } from '../lighting/shadowPolicy';
+import { driveRenderList } from './renderList';
 
 /**
  * The cascaded shadow map on the sun: sole owner of the
@@ -256,7 +260,10 @@ export function bindTerrainCsm(effect: Effect): void {
  */
 const CSM_CASTER_SLACK = 16;
 
-const CSM_CASTER_RANGE_SQ = (CSM_MAX_Z + CSM_CASTER_SLACK) ** 2;
+/** How far from the camera (tiles) a mesh can stand and still cast. */
+export const CSM_CASTER_REACH = CSM_MAX_Z + CSM_CASTER_SLACK;
+
+const CSM_CASTER_RANGE_SQ = CSM_CASTER_REACH ** 2;
 
 /**
  * A map object under this height (tiles) is ground clutter - grass, a flower,
@@ -275,11 +282,20 @@ const CSM_CASTER_RANGE_SQ = (CSM_MAX_Z + CSM_CASTER_SLACK) ** 2;
 const CLUTTER_HEIGHT = 1;
 
 function isGroundClutter(mesh: AbstractMesh): boolean {
-  const box = mesh.getBoundingInfo().boundingBox;
+  // A prop batch's box is the union of every placement in its chunk; the
+  // type's own height rides in its metadata (common/propBatches.ts).
+  const own = mesh.metadata?.casterHeight;
 
-  return (
-    box.maximumWorld.y - box.minimumWorld.y < (minCasterDev ?? CLUTTER_HEIGHT)
-  );
+  let height: number;
+
+  if (typeof own === 'number') {
+    height = own;
+  } else {
+    const box = mesh.getBoundingInfo().boundingBox;
+    height = box.maximumWorld.y - box.minimumWorld.y;
+  }
+
+  return height < (minCasterDev ?? CLUTTER_HEIGHT);
 }
 
 function castsSunShadow(mesh: AbstractMesh): boolean {
@@ -361,13 +377,61 @@ function rebuildFrozenMaterials(scene: Scene): void {
  * set freezes to whatever stood in it when the room was entered: nothing
  * loaded afterwards ever casts, and nothing already in it ever leaves.
  */
-function hookShadowMap(csm: CascadedShadowGenerator): void {
+function hookShadowMap(csm: CascadedShadowGenerator, scene: Scene): void {
   const map = csm.getShadowMap();
 
   if (!map) return;
 
-  map.renderListPredicate = castsSunShadow;
+  // Not `renderListPredicate`: see scenes/renderList.ts for what that costs
+  // per frame. The list is released with the map.
+  driveRenderList(scene, map, castsSunShadow);
+  cullPerCascade(csm, map);
   map.refreshRate = refreshDev ?? 1;
+}
+
+/** A plane every point is in front of: the slot of a test that is skipped. */
+const PASS_PLANE = new Plane(0, 0, 0, 1);
+
+/**
+ * Babylon draws the whole caster list into every cascade. The near cascade
+ * covers a few tiles around the hero and the middle one a few more, so most
+ * of the list lands in the far one only: at the Noria spawn, 88 casters were
+ * 264 draws for 159 that reach a cascade. Each cascade now takes the casters
+ * inside its own bounds.
+ *
+ * Only the four side planes are tested. With `depthClamp` Babylon tightens a
+ * cascade's near plane to the casters' box and clamps whatever stands nearer
+ * the light, so a caster the near plane would reject still casts; and the far
+ * plane already sits at the casters' box. Babylon's frustum test reads six
+ * planes, so those two slots hold a plane nothing is behind.
+ */
+function cullPerCascade(
+  csm: CascadedShadowGenerator,
+  map: RenderTargetTexture
+): void {
+  const planes = [0, 1, 2, 3, 4, 5].map(() => new Plane(0, 0, 0, 0));
+  const sides = [PASS_PLANE, PASS_PLANE, planes[2], planes[3], planes[4], planes[5]];
+  const lists: AbstractMesh[][] = [];
+
+  map.getCustomRenderList = (cascade, list, length) => {
+    const transform = csm.getCascadeTransformMatrix(cascade);
+
+    if (!list || !transform) return null;
+
+    Frustum.GetPlanesToRef(transform, planes);
+
+    const out = (lists[cascade] ??= []);
+    let n = 0;
+
+    for (let i = 0; i < length; i++) {
+      const mesh = list[i];
+      if (mesh.isInFrustum(sides)) out[n++] = mesh;
+    }
+
+    out.length = n;
+
+    return out;
+  };
 }
 
 function createCsm(
@@ -404,7 +468,7 @@ function createCsm(
   // They land in the alpha-tested depth pass, keyed by their own texture.
   csm.transparencyShadow = true;
 
-  hookShadowMap(csm);
+  hookShadowMap(csm, scene);
 
   // The object materials are shared and carry a placeholder diffuse; the
   // real texture is per mesh (`metadata.diffuseTexture`, see itemMaterial).
@@ -476,7 +540,7 @@ export function syncShadows(
 
     if (runtime.csm.numCascades !== cascades) {
       runtime.csm.numCascades = cascades;
-      hookShadowMap(runtime.csm);
+      hookShadowMap(runtime.csm, scene);
     }
   }
 

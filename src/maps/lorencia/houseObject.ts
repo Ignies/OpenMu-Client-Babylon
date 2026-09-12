@@ -4,6 +4,8 @@ import { getMaterial } from '../../common/modelLoader';
 import { World } from '../../ecs/world';
 
 export class HouseObject extends ModelObject {
+  static Batchable = true;
+
   async init(world: World) {
     // LightEnabled = true;
     await this.loadSpecificModelWithDynamicID(MODEL_HOUSE01, 'House');

@@ -71,6 +71,35 @@ export function resetTerrainMask(): void {
   ensureBytes().fill(OPEN);
 }
 
+/** Slab bottom this far (tiles) above the ground under it. Clears a head. */
+const ROOF_ABOVE_GROUND = 1.6;
+
+/** Thicker boxes are tree crowns, towers and cliffs, not ceilings. */
+const ROOF_MAX_THICKNESS = 2.5;
+
+/** A roof more than this far up is a spire, and shelters nothing below it. */
+const ROOF_MAX_HEIGHT = 6;
+
+/**
+ * Whether a mesh's world box (`minY..maxY`) over ground at `ground` is a
+ * roof: a thin slab sitting above head height. The one test both the object
+ * scan (`TerrainMaskSystem`) and the prop batches run.
+ */
+export function isRoofSlab(minY: number, maxY: number, ground: number): boolean {
+  if (maxY - minY > ROOF_MAX_THICKNESS) return false;
+
+  const clearance = minY - ground;
+
+  return clearance >= ROOF_ABOVE_GROUND && clearance <= ROOF_MAX_HEIGHT;
+}
+
+/** Bumped whenever a paint changes a tile; readers that cache openness poll it. */
+let maskVersion = 0;
+
+export function terrainMaskVersion(): number {
+  return maskVersion;
+}
+
 /**
  * Mark an axis-aligned world footprint as roofed. Coordinates are in tiles and
  * need not be integers — the box is expanded to whole tiles, because a roof
@@ -97,6 +126,8 @@ export function paintRoof(box: MaskBox): boolean {
       }
     }
   }
+
+  if (changed) maskVersion++;
 
   return changed;
 }

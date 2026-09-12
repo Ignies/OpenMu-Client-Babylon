@@ -47,6 +47,7 @@ import {
   SNOW_CAP_KNEE_FULL,
   SNOW_CAP_KNEE_THIN,
   snowCapAt,
+  snowCapCover,
 } from '../weather/snowCaps';
 
 const ITEM_FX_UNIFORM = `itemFx`;
@@ -64,15 +65,55 @@ const SNOW_CAP_UNIFORM = `muSnowCap`;
  * tops, full cover reaches down the slopes.
  */
 const snowCapGlsl = (albedo: string) => `
-  if (${SNOW_CAP_UNIFORM} > 0.0) {
-    float capKnee = mix(${f(SNOW_CAP_KNEE_THIN)}, ${f(SNOW_CAP_KNEE_FULL)}, ${SNOW_CAP_UNIFORM});
-    float cap = smoothstep(capKnee - 0.12, capKnee + 0.12, normalW.y) * ${SNOW_CAP_UNIFORM};
-    ${albedo}.rgb = mix(${albedo}.rgb, vec3(${f(SNOW_CAP_COLOUR[0])}, ${f(
+  {
+    float muCap = ${SNOW_CAP_UNIFORM} * ${INSTANCE_VARYING}.a;
+    if (muCap > 0.0) {
+      float capKnee = mix(${f(SNOW_CAP_KNEE_THIN)}, ${f(SNOW_CAP_KNEE_FULL)}, muCap);
+      float cap = smoothstep(capKnee - 0.12, capKnee + 0.12, normalW.y) * muCap;
+      ${albedo}.rgb = mix(${albedo}.rgb, vec3(${f(SNOW_CAP_COLOUR[0])}, ${f(
   SNOW_CAP_COLOUR[1]
 )}, ${f(SNOW_CAP_COLOUR[2])}), cap);
+    }
   }
 `;
 const f = (n: number) => n.toFixed(3);
+
+/**
+ * Per-instance state of a prop batch (`common/propBatches.ts`): rgb is one
+ * placement's packed BodyLight, a the snow-cap openness of its tile. It is a
+ * thin-instance attribute, so it exists only on an `INSTANCES` compile; every
+ * other draw gets the varying at (1, 1, 1, 1) and the uniforms it multiplies
+ * reach the fragment unchanged - Classic's non-instanced frame is byte for
+ * byte what it was.
+ */
+const INSTANCE_ATTRIBUTE = 'muInst';
+const INSTANCE_VARYING = 'vMuInst';
+
+const INSTANCE_VERTEX_DEFINITIONS = `
+  #ifdef INSTANCES
+    attribute vec4 ${INSTANCE_ATTRIBUTE};
+  #endif
+  varying vec4 ${INSTANCE_VARYING};
+`;
+
+const INSTANCE_VERTEX_MAIN_END = `
+  #ifdef INSTANCES
+    ${INSTANCE_VARYING} = ${INSTANCE_ATTRIBUTE};
+  #else
+    ${INSTANCE_VARYING} = vec4(1.0);
+  #endif
+`;
+
+const INSTANCE_FRAGMENT_DEFINITIONS = `
+  varying vec4 ${INSTANCE_VARYING};
+`;
+
+/** Both item materials declare the attribute and carry the varying across. */
+function addInstanceAttribute(material: ItemMaterial): void {
+  material.AddAttribute(INSTANCE_ATTRIBUTE);
+  material.Vertex_Definitions(INSTANCE_VERTEX_DEFINITIONS);
+  material.Vertex_MainEnd(INSTANCE_VERTEX_MAIN_END);
+}
 /** PBR variant: BodyLight lives outside the Material UBO so it can be set per mesh. */
 const BODY_LIGHT_UNIFORM = `muBodyLight`;
 
@@ -348,7 +389,7 @@ const BRIGHT_OVERRIDE = `
 const UNCLAMP = `
   {
     vec3 muLight = diffuseBase * baseAmbientColor;
-    vec3 muArt = max(baseColor.rgb * ${BODY_LIGHT_UNIFORM}.rgb, vec3(0.0));
+    vec3 muArt = max(baseColor.rgb * ${BODY_LIGHT_UNIFORM}.rgb * ${INSTANCE_VARYING}.rgb, vec3(0.0));
   #ifdef ${LINEAR_LIGHT_DEFINE}
     color.rgb = pow(pow(muArt, vec3(2.2)) * muLight, vec3(1.0 / 2.2));
   #else
@@ -637,11 +678,17 @@ function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
   effect.setFloat(ITEM_FX_UNIFORM, fx);
 
   // Snow caps: only map props flagged for it, never a glow card. The mesh's
-  // tile decides whether it stands under a roof.
+  // tile decides whether it stands under a roof - for a prop batch that is
+  // per placement, carried in the instance attribute, so the uniform is the
+  // cover alone.
   let cap = 0;
   if (mesh.metadata?.snowCap && !mesh.metadata.brightMesh) {
-    const p = mesh.absolutePosition;
-    cap = snowCapAt(p.x, p.z);
+    if (mesh.metadata.propBatch) {
+      cap = snowCapCover();
+    } else {
+      const p = mesh.absolutePosition;
+      cap = snowCapAt(p.x, p.z);
+    }
   }
   effect.setFloat(SNOW_CAP_UNIFORM, cap);
 
@@ -669,28 +716,55 @@ function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
  * keeps byte for byte; tiers >= 1 divide by the peak instead so a torch's
  * hue survives the cap.
  */
+/**
+ * BodyLight as the shader takes it: the cap of the paragraph above, applied
+ * to one terrain-light triple. Written to `out[o..o+2]`. The per-mesh bind
+ * and the prop batches' per-instance attribute both pack through here, so a
+ * batched tree and its per-object twin read the same light.
+ */
+export function packBodyLight(
+  x: number,
+  y: number,
+  z: number,
+  out: Float32Array | number[],
+  o = 0
+): void {
+  if (!UNIFIED_LIGHT_MODEL) {
+    out[o] = 1;
+    out[o + 1] = 1;
+    out[o + 2] = 1;
+    return;
+  }
+
+  if (lightingTier()) {
+    const peak = Math.max(1, x, y, z);
+    out[o] = x / peak;
+    out[o + 1] = y / peak;
+    out[o + 2] = z / peak;
+  } else {
+    out[o] = Math.min(1, x);
+    out[o + 1] = Math.min(1, y);
+    out[o + 2] = Math.min(1, z);
+  }
+}
+
+const packedLight = [1, 1, 1];
+
 function bindBodyLight(effect: Effect, mesh: AbstractMesh, uniform: string) {
   const bodyLight = mesh.metadata?.bodyLight;
 
   if (bodyLight && UNIFIED_LIGHT_MODEL) {
     const blend = mesh.metadata?.blendMeshLight ?? 1;
 
-    let r = bodyLight.x;
-    let g = bodyLight.y;
-    let b = bodyLight.z;
+    packBodyLight(bodyLight.x, bodyLight.y, bodyLight.z, packedLight);
 
-    if (lightingTier()) {
-      const peak = Math.max(1, r, g, b);
-      r /= peak;
-      g /= peak;
-      b /= peak;
-    } else {
-      r = Math.min(1, r);
-      g = Math.min(1, g);
-      b = Math.min(1, b);
-    }
-
-    effect.setFloat4(uniform, r * blend, g * blend, b * blend, mesh.visibility);
+    effect.setFloat4(
+      uniform,
+      packedLight[0] * blend,
+      packedLight[1] * blend,
+      packedLight[2] * blend,
+      mesh.visibility
+    );
   }
 
   if (mesh.metadata?.diffuseColor) {
@@ -828,7 +902,11 @@ export function createItemMaterial(
 
   if (!bright && !flatLit) addLitDefines(simpleMaterial, scene);
 
-  simpleMaterial.Fragment_Definitions(lightTintGlsl() + cloudFieldGlsl(false));
+  addInstanceAttribute(simpleMaterial);
+
+  simpleMaterial.Fragment_Definitions(
+    lightTintGlsl() + cloudFieldGlsl(false) + INSTANCE_FRAGMENT_DEFINITIONS
+  );
 
   // Glow cards and flat-lit UI models never take a cap; the uniform is
   // still declared for them (addItemUniforms) and simply unread.
@@ -965,7 +1043,11 @@ export function createItemPbrMaterial(scene: Scene) {
   material.AddUniform('muEmissiveSampler', 'sampler2D', flat.black);
   addLitDefines(material, scene);
 
-  material.Fragment_Definitions(lightTintGlsl() + cloudFieldGlsl(false));
+  addInstanceAttribute(material);
+
+  material.Fragment_Definitions(
+    lightTintGlsl() + cloudFieldGlsl(false) + INSTANCE_FRAGMENT_DEFINITIONS
+  );
 
   // BodyLight: the bake's flat per-object light (the unified model). The
   // albedo texel is already decoded (GAMMAALBEDO); the bake - a display-
@@ -977,7 +1059,7 @@ export function createItemPbrMaterial(scene: Scene) {
   material.Fragment_Custom_Albedo(`
     ${
       UNIFIED_LIGHT_MODEL
-        ? `surfaceAlbedo *= pow(max(${BODY_LIGHT_UNIFORM}.rgb, vec3(0.0)), vec3(2.2));`
+        ? `surfaceAlbedo *= pow(max(${BODY_LIGHT_UNIFORM}.rgb * ${INSTANCE_VARYING}.rgb, vec3(0.0)), vec3(2.2));`
         : ''
     }
     alpha *= ${BODY_LIGHT_UNIFORM}.a;

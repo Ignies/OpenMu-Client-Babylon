@@ -145,6 +145,30 @@ export function uploadTerrainLightDelta(): void {
   deltaTexture.update(deltaBytes);
 }
 
+/**
+ * Whether any registered emitter's footprint reaches into the tile box
+ * `[minX, maxX] x [minZ, maxZ]`. The prop batches re-pack a chunk's light
+ * only while a torch can change it.
+ */
+export function terrainLightReaches(
+  minX: number,
+  minZ: number,
+  maxX: number,
+  maxZ: number
+): boolean {
+  for (const emitter of emitters) {
+    const { x, z } = emitter.position;
+    const reach = emitter.range + TOUCHED_MARGIN;
+
+    if (x + reach < minX || x - reach > maxX) continue;
+    if (z + reach < minZ || z - reach > maxZ) continue;
+
+    return true;
+  }
+
+  return false;
+}
+
 export function registerTerrainLight(emitter: TerrainLightEmitter): () => void {
   emitters.add(emitter);
   touchedDirty = true;

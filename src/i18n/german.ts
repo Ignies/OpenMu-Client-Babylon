@@ -178,6 +178,7 @@ export const germanLayer: LanguageLayer = {
     'options.grassDensity': 'Gras',
     'options.advancedEffects': 'Erweiterte Effekte',
     'options.renderDistance': 'Sichtweite',
+    'options.propBatching': 'Gebündelte Szenerie',
     'options.lightingQuality': 'Beleuchtung',
     'options.materialQuality': 'Materialien',
     'options.materialDetail': 'Detail',

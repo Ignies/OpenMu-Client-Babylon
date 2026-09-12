@@ -1,6 +1,7 @@
 import { ENUM_WORLD } from '../../common/types';
 import {
   flushTerrainMask,
+  isRoofSlab,
   paintRoof,
   resetTerrainMask,
 } from '../../libs/mu/terrainMask';
@@ -50,15 +51,6 @@ import type { ISystemFactory } from '../world';
  * Living bodies are out for the same reason: nothing that can be somewhere
  * else a second later has any business deciding what the sky over a tile is.
  */
-
-/** Slab bottom this far (tiles) above the ground under it. Clears a head. */
-const ABOVE_GROUND = 1.6;
-
-/** Thicker boxes are tree crowns, towers and cliffs, not ceilings. */
-const MAX_THICKNESS = 2.5;
-
-/** A roof more than this far up is a spire, and shelters nothing below it. */
-const MAX_HEIGHT = 6;
 
 /** Seconds between scans. The mask only has to be right before snow builds. */
 const SCAN_INTERVAL = 0.5;
@@ -130,15 +122,12 @@ export const TerrainMaskSystem: ISystemFactory = world => {
         const min = box.minimumWorld;
         const max = box.maximumWorld;
 
-        if (max.y - min.y > MAX_THICKNESS) continue;
-
         const ground = world.getTerrainHeight(
           (min.x + max.x) * 0.5,
           (min.z + max.z) * 0.5
         );
 
-        const clearance = min.y - ground;
-        if (clearance < ABOVE_GROUND || clearance > MAX_HEIGHT) continue;
+        if (!isRoofSlab(min.y, max.y, ground)) continue;
 
         paintRoof({
           minX: min.x,

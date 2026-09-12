@@ -23,6 +23,7 @@ import {
   type GameOptions as GameOptionsType,
 } from '../../../common/gameOptions';
 import { invalidateShadowState } from '../../../common/objectShadow';
+import { reloadMapObjects } from '../../../libs/mu/loadMapIntoScene';
 import {
   KEY_ACTIONS,
   KEY_ACTION_LABEL_KEYS,
@@ -419,6 +420,7 @@ const TABS: Tab[] = [
             check('weatherEffects', -1, 'options.weatherEffects'),
             check('animatedWater', -1, 'options.animatedWater'),
             check('advancedEffects', -1, 'options.advancedEffects'),
+            check('propBatching', -1, 'options.propBatching'),
             slider({
               key: 'grassDensity',
               textId: -1,
@@ -635,6 +637,11 @@ export const OptionsWindow = observer(() => {
       // Each ModelObject re-applies its own slots next frame; `shadowSlotActive`
       // already reads GameOptions.shadows.
       invalidateShadowState();
+    }
+
+    if (key === 'propBatching') {
+      // Which path a record takes is decided when it is created.
+      void reloadMapObjects();
     }
   };
 
