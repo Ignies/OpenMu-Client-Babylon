@@ -217,7 +217,7 @@ export const EN_TEXT = {
   'options.fullscreen': 'Fullscreen (F11)',
   'options.uiScale': 'Interface size',
   'options.lockWindows': 'Lock windows',
-  'options.minimapCorner': 'Minimap in the corner (Tab shows and hides it)',
+  'options.minimapCorner': 'Minimap in the corner',
   'options.resetWindows': 'Reset windows',
   'options.stateWarnings': 'Warning notices',
   'options.volume': 'Volume',
@@ -1023,6 +1023,7 @@ export const EN_TEXT = {
 
   // ---- misc world UI -----------------------------------------------------
   'minimap.close': 'Close',
+  'minimap.center': 'Center',
   'moveList.title': 'Move list',
   'warp.title': 'Warp Command Window',
   'warp.map': 'Map',

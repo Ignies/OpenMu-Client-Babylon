@@ -5,25 +5,32 @@ import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Store } from '../../../../../store';
 import { uiClick } from '../../../../../libs/sfx';
+import type { WorldMinimap } from '../../../../../libs/mu/minimap';
 import type { MinimapMarker } from '../../../../../common/minimapData';
 import { useMuSprite } from '../../../../components/muSprite';
 import { MuTipText } from '../../../../components/muText';
 import { useUiStageScale } from '../../../../components/uiStage';
 import {
+  CENTER_BUTTON,
+  CenterButton,
   CLOSE_SPRITE,
   Frame,
   HERO_SIZE,
   HERO_SPRITE,
+  isPanned,
   MAP_ROTATION,
   MARKER_SIZE,
   MARKER_SPRITE,
+  NO_PAN,
   NPC_SIZE,
   NPC_SPRITE,
   Sprite,
   TERRAIN_SIZE,
   useHeroTile,
+  useMapDrag,
   usePartyMarkers,
   useWorldMinimap,
+  type MapPan,
   type MapPoint,
 } from './shared';
 
@@ -47,8 +54,9 @@ import {
  * drawn at (325, 230) rather than (320, 240); both read as fudge against
  * `ConvertX`, so here everything shares the exact centre.
  *
- * The TAB and Escape keys are handled by `Minimap` (`index.tsx`), which
- * also owns the choice between this sheet and the corner panel.
+ * Ours on top: click and drag slides the map off the hero, and a Center
+ * button next to the X (shown only while off it) brings it back. The TAB
+ * and Escape keys are handled by `Minimap` (`index.tsx`).
  */
 
 const SHEET_WIDTH = 640;
@@ -63,21 +71,24 @@ const ZOOM_LEVELS = [800, 1000, 1200, 1400, 1600, 1800];
 const CLOSE_BUTTON = { x: 640 - 27, y: 3, width: 30, height: 25 };
 const CLOSE_FRAME = { width: 36, height: 29 };
 
+/** Left of the X, in its band. */
+const CENTER_BUTTON_POS = { x: CLOSE_BUTTON.x - CENTER_BUTTON.width - 6, y: 4 };
+
 const Marker = ({
   marker,
-  hero,
+  center,
   mapSize,
   onHover,
 }: {
   marker: MinimapMarker;
-  hero: MapPoint;
+  center: MapPoint;
   mapSize: number;
   onHover: (marker: MinimapMarker | null) => void;
 }) => {
   const size = MARKER_SIZE[marker.kind] ?? NPC_SIZE;
-  // Offset from the hero in map pixels, before the 45° spin.
-  const dx = ((marker.y - hero.y) / TERRAIN_SIZE) * mapSize;
-  const dy = ((marker.x - hero.x) / TERRAIN_SIZE) * mapSize;
+  // Offset from the view's centre in map pixels, before the 45° spin.
+  const dx = ((marker.y - center.y) / TERRAIN_SIZE) * mapSize;
+  const dy = ((marker.x - center.x) / TERRAIN_SIZE) * mapSize;
 
   return (
     <Sprite
@@ -102,16 +113,16 @@ const Marker = ({
 
 const MarkerTip = ({
   marker,
-  hero,
+  center,
   mapSize,
 }: {
   marker: MinimapMarker;
-  hero: MapPoint;
+  center: MapPoint;
   mapSize: number;
 }) => {
   const size = MARKER_SIZE[marker.kind] ?? NPC_SIZE;
-  const dx = ((marker.y - hero.y) / TERRAIN_SIZE) * mapSize;
-  const dy = ((marker.x - hero.x) / TERRAIN_SIZE) * mapSize;
+  const dx = ((marker.y - center.y) / TERRAIN_SIZE) * mapSize;
+  const dy = ((marker.x - center.x) / TERRAIN_SIZE) * mapSize;
   const rad = (MAP_ROTATION * Math.PI) / 180;
   const sx = CENTER_X + dx * Math.cos(rad) - dy * Math.sin(rad);
   const sy = CENTER_Y + dx * Math.sin(rad) + dy * Math.cos(rad);
@@ -159,51 +170,38 @@ const CloseButton = ({ onClick }: { onClick: () => void }) => {
   );
 };
 
-export const MinimapSheet = observer(() => {
-  const open = Store.minimapEnabled;
-  const world = Store.world;
-  const map = open ? world?.mapIndex : undefined;
-  const minimap = useWorldMinimap(map);
-  const hero = useHeroTile(open);
-  const partyMarkers = usePartyMarkers(open, map);
-  const [zoom, setZoom] = useState(0);
+/**
+ * The open sheet. Mounted with it and gone with it, so the pan and the
+ * hovered marker start clean every time; the zoom lives outside, across
+ * opens.
+ */
+const SheetView = ({
+  minimap,
+  map,
+  zoom,
+  onWheel,
+  close,
+}: {
+  minimap: WorldMinimap;
+  map: number;
+  zoom: number;
+  onWheel: (event: React.WheelEvent) => void;
+  close: () => void;
+}) => {
+  const hero = useHeroTile(true);
+  const partyMarkers = usePartyMarkers(true, map);
   const [hovered, setHovered] = useState<MinimapMarker | null>(null);
+  const [pan, setPan] = useState<MapPan>(NO_PAN);
   const scale = useUiStageScale();
-
-  useEffect(() => {
-    if (!open) setHovered(null);
-  }, [open]);
-
-  // `m_bSuccess == false`: a world without mini_map.ozt has no map to show.
-  // An effect, not a render-time write: the store only changes in an action.
-  useEffect(() => {
-    if (open && minimap === null) {
-      runInAction(() => {
-        Store.minimapEnabled = false;
-      });
-    }
-  }, [open, minimap]);
-
-  if (!open) return null;
-  if (minimap === null) return null;
-
-  if (!minimap) return null;
-
   const mapSize = ZOOM_LEVELS[zoom];
-  const tx = (hero.y / TERRAIN_SIZE) * mapSize;
-  const ty = (hero.x / TERRAIN_SIZE) * mapSize;
+  const { dragging, handlers } = useMapDrag(mapSize, scale, setPan);
 
-  const close = () => {
-    runInAction(() => {
-      Store.minimapEnabled = false;
-    });
-  };
-
-  const onWheel = (event: React.WheelEvent) => {
-    setZoom(z =>
-      Math.max(0, Math.min(ZOOM_LEVELS.length - 1, z + (event.deltaY < 0 ? 1 : -1)))
-    );
-  };
+  const center: MapPoint = { x: hero.x + pan.v, y: hero.y + pan.u };
+  const tx = (center.y / TERRAIN_SIZE) * mapSize;
+  const ty = (center.x / TERRAIN_SIZE) * mapSize;
+  // The hero sits off the centre by the pan, upright as the original draws it.
+  const heroDx = (-pan.u / TERRAIN_SIZE) * mapSize;
+  const heroDy = (-pan.v / TERRAIN_SIZE) * mapSize;
 
   return (
     <div
@@ -217,10 +215,13 @@ export const MinimapSheet = observer(() => {
         style={{
           width: SHEET_WIDTH,
           height: SHEET_HEIGHT,
+          // Centred by half the *scaled* width: the stage scales from its
+          // top-left corner, so an unscaled margin left it off to the right.
+          marginLeft: (-SHEET_WIDTH / 2) * scale,
           transform: `scale(${scale})`,
         }}
       >
-        <div className="minimap-clip">
+        <div className={`minimap-clip${dragging ? ' is-dragging' : ''}`} {...handlers}>
           <div
             className="minimap-map"
             style={{
@@ -237,7 +238,7 @@ export const MinimapSheet = observer(() => {
             <Marker
               key={i}
               marker={marker}
-              hero={hero}
+              center={center}
               mapSize={mapSize}
               onHover={setHovered}
             />
@@ -246,7 +247,7 @@ export const MinimapSheet = observer(() => {
             <Marker
               key={`party-${i}`}
               marker={marker}
-              hero={hero}
+              center={center}
               mapSize={mapSize}
               onHover={setHovered}
             />
@@ -258,13 +259,54 @@ export const MinimapSheet = observer(() => {
               position: 'absolute',
               left: CENTER_X - HERO_SIZE / 2,
               top: CENTER_Y - HERO_SIZE / 2,
+              transform: `rotate(${MAP_ROTATION}deg) translate(${heroDx}px, ${heroDy}px) rotate(${-MAP_ROTATION}deg)`,
             }}
           />
-          {hovered && <MarkerTip marker={hovered} hero={hero} mapSize={mapSize} />}
+          {hovered && <MarkerTip marker={hovered} center={center} mapSize={mapSize} />}
         </div>
         <Frame width={SHEET_WIDTH} height={SHEET_HEIGHT} />
+        {isPanned(pan) && (
+          <CenterButton
+            onClick={() => setPan(NO_PAN)}
+            style={{ position: 'absolute', left: CENTER_BUTTON_POS.x, top: CENTER_BUTTON_POS.y }}
+          />
+        )}
         <CloseButton onClick={close} />
       </div>
     </div>
   );
+};
+
+export const MinimapSheet = observer(() => {
+  const open = Store.minimapEnabled;
+  const world = Store.world;
+  const map = open ? world?.mapIndex : undefined;
+  const minimap = useWorldMinimap(map);
+  const [zoom, setZoom] = useState(0);
+
+  // `m_bSuccess == false`: a world without mini_map.ozt has no map to show.
+  // An effect, not a render-time write: the store only changes in an action.
+  useEffect(() => {
+    if (open && minimap === null) {
+      runInAction(() => {
+        Store.minimapEnabled = false;
+      });
+    }
+  }, [open, minimap]);
+
+  if (!open || !minimap || map === undefined) return null;
+
+  const close = () => {
+    runInAction(() => {
+      Store.minimapEnabled = false;
+    });
+  };
+
+  const onWheel = (event: React.WheelEvent) => {
+    setZoom(z =>
+      Math.max(0, Math.min(ZOOM_LEVELS.length - 1, z + (event.deltaY < 0 ? 1 : -1)))
+    );
+  };
+
+  return <SheetView minimap={minimap} map={map} zoom={zoom} onWheel={onWheel} close={close} />;
 });

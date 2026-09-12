@@ -804,6 +804,7 @@ export const spanishLayer: LanguageLayer = {
     'chat.tab.system': 'Sistema',
 
     'minimap.close': 'Cerrar',
+    'minimap.center': 'Centrar',
     'moveList.title': 'Lista de destinos',
     'warp.title': 'Ventana de teletransporte',
     'warp.map': 'Mapa',
@@ -1406,7 +1407,7 @@ export const spanishLayer: LanguageLayer = {
     'keys.replyWhisper': 'Responder al susurro',
     'options.uiScale': 'Tamaño',
     'options.lockWindows': 'Bloquear ventanas',
-    'options.minimapCorner': 'Minimapa en la esquina (Tab lo muestra y oculta)',
+    'options.minimapCorner': 'Minimapa en la esquina',
     'options.resetWindows': 'Restablecer',
     'options.section.interface': 'Interfaz',
     'options.stateWarnings': 'Avisos',

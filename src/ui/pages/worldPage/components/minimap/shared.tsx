@@ -1,9 +1,11 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { t } from '../../../../../i18n';
 import { Store } from '../../../../../store';
 import { Social } from '../../../../../social';
 import { loadWorldMinimap, type WorldMinimap } from '../../../../../libs/mu/minimap';
 import { MinimapMarkerKind, type MinimapMarker } from '../../../../../common/minimapData';
 import { useMuSprite } from '../../../../components/muSprite';
+import { MuButton } from '../../../../components/muButton';
 
 /**
  * What the sheet and the corner panel share: the art, the marker tables and
@@ -227,3 +229,105 @@ export const Frame = ({ width, height }: { width: number; height: number }) => {
     </>
   );
 };
+
+/**
+ * How far the view has been dragged off the hero (ours: the original pins
+ * the hero to the centre), in tiles along the picture's U (tile Y) and V
+ * (tile X). Tiles rather than pixels, so a zoom step keeps the same tile
+ * under the centre.
+ */
+export type MapPan = { u: number; v: number };
+
+export const NO_PAN: MapPan = { u: 0, v: 0 };
+
+export const isPanned = (pan: MapPan): boolean => pan.u !== 0 || pan.v !== 0;
+
+/**
+ * A pointer moved `sx, sy` screen pixels with the picture in hand: undo the
+ * view's CSS scale, then the 45° spin, and the tile under the fixed centre
+ * went the other way.
+ */
+export function dragToPan(sx: number, sy: number, mapSize: number, scale: number): MapPan {
+  const rad = (MAP_ROTATION * Math.PI) / 180;
+  const px = sx / scale;
+  const py = sy / scale;
+  const mu = px * Math.cos(rad) + py * Math.sin(rad);
+  const mv = -px * Math.sin(rad) + py * Math.cos(rad);
+  return {
+    u: (-mu / mapSize) * TERRAIN_SIZE,
+    v: (-mv / mapSize) * TERRAIN_SIZE,
+  };
+}
+
+/**
+ * Click and drag on the map picture. The pointer is captured on the element
+ * the handlers go on, so a drag that leaves it (or the window) keeps
+ * following until the button comes up.
+ */
+export function useMapDrag(
+  mapSize: number,
+  scale: number,
+  setPan: React.Dispatch<React.SetStateAction<MapPan>>
+): {
+  dragging: boolean;
+  handlers: Pick<
+    React.DOMAttributes<HTMLDivElement>,
+    'onPointerDown' | 'onPointerMove' | 'onPointerUp' | 'onPointerCancel'
+  >;
+} {
+  const [dragging, setDragging] = useState(false);
+  const held = useRef<{ id: number; x: number; y: number } | null>(null);
+
+  const end = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (held.current?.id !== e.pointerId) return;
+    held.current = null;
+    setDragging(false);
+  };
+
+  return {
+    dragging,
+    handlers: {
+      onPointerDown: e => {
+        if (e.button !== 0) return;
+        e.currentTarget.setPointerCapture(e.pointerId);
+        held.current = { id: e.pointerId, x: e.clientX, y: e.clientY };
+        setDragging(true);
+      },
+      onPointerMove: e => {
+        const h = held.current;
+        if (!h || h.id !== e.pointerId) return;
+        const d = dragToPan(e.clientX - h.x, e.clientY - h.y, mapSize, scale);
+        h.x = e.clientX;
+        h.y = e.clientY;
+        setPan(p => ({ u: p.u + d.u, v: p.v + d.v }));
+      },
+      onPointerUp: end,
+      onPointerCancel: end,
+    },
+  };
+}
+
+/** `newui_btn_empty_very_small`: three 54x23 plates, up / lit / pressed. */
+const CENTER_SPRITE = 'newui_btn_empty_very_small.OZT';
+export const CENTER_BUTTON = { width: 54, height: 23 };
+
+/** Back to the hero. The plate the original's small windows put their own labels on. */
+export const CenterButton = ({
+  onClick,
+  style,
+}: {
+  onClick: () => void;
+  style?: CSSProperties;
+}) => (
+  <div className="minimap-center" style={style}>
+    <MuButton
+      file={CENTER_SPRITE}
+      width={CENTER_BUTTON.width}
+      height={CENTER_BUTTON.height}
+      frames={{ up: 0, active: 1, down: 2 }}
+      label={t('minimap.center')}
+      labelStyle={{ fontWeight: 'bold', fontSize: 11 }}
+      onClick={onClick}
+    />
+  </div>
+);

@@ -2,8 +2,8 @@
 
 // CNewUIMiniMap. Every coordinate lives in the original's 640×480 UI space on
 // the `.minimap-stage`; the overlay itself darkens the whole viewport. The
-// corner panel (`.minimap-corner`) reuses the frame and sprite rules at the
-// same art sizes and scales itself as a whole.
+// corner panel (`.minimap-corner-panel`) reuses the frame and sprite rules at
+// the same art sizes and scales itself as a whole.
 @edge-width: 35px;
 @edge-height: 6px;
 @corner-size: 35px;
@@ -22,14 +22,22 @@
   left: 50%;
   top: 0;
   transform-origin: 0 0;
-  // `scale()` is applied inline; the translate keeps the stage centred.
-  margin-left: -320px;
+  // `scale()` and the centring margin are applied inline, from the same
+  // scale.
 }
 
-.minimap-clip {
+// The map area of either view: click and drag slides the map (ours).
+.minimap-clip,
+.minimap-corner-clip {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+
+  &.is-dragging {
+    cursor: grabbing;
+  }
 }
 
 .minimap-map {
@@ -123,6 +131,11 @@
   pointer-events: auto;
 }
 
+// The Center button's plate: the sprite is pixel art, its label is not.
+.minimap-center {
+  pointer-events: auto;
+}
+
 // ---- the corner panel ------------------------------------------------------
 
 // Its own name, not `.minimap-corner`: that class is the frame's corner piece.
@@ -140,9 +153,6 @@
   z-index: 10;
 
   .minimap-corner-clip {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
     background: rgba(0, 0, 0, 0.75);
   }
 
@@ -155,8 +165,8 @@
     height: 0;
   }
 
-  // Slid by the frame loop (`translate`) so the hero's tile sits on the spin
-  // point.
+  // Slid by the frame loop (`translate`) so the hero's tile, plus the pan,
+  // sits on the spin point.
   .minimap-corner-map {
     position: absolute;
     left: 0;
@@ -170,6 +180,13 @@
     cursor: pointer;
   }
 
+  // Placed by the frame loop at the hero's tile, after the markers so it
+  // stays on top of them.
+  .minimap-corner-hero {
+    position: absolute;
+    pointer-events: none;
+  }
+
   .minimap-corner-tip {
     position: absolute;
     left: 50%;
@@ -179,18 +196,26 @@
     white-space: nowrap;
   }
 
-  // The hero's tile, under the frame. Sized in art units like the rest, so
-  // the panel's scale brings it down with the map.
-  .minimap-corner-coords {
+  // Under the frame, right-aligned: the Center button while panned, then
+  // the hero's tile. `scale()` is applied inline to undo the panel's, so the
+  // plate and the text are the interface size like every other button.
+  .minimap-corner-bar {
     position: absolute;
-    left: 0;
     right: 0;
     top: 100%;
-    margin-top: 2px;
-    text-align: center;
+    margin-top: 3px;
+    transform-origin: 100% 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .minimap-corner-coords {
     font-family: @mu-font-family;
-    font-size: 15px;
-    line-height: 17px;
+    font-size: 11px;
+    line-height: 13px;
     color: #fff;
     text-shadow:
       1px 0 0 #000,
