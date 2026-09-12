@@ -16,6 +16,11 @@ import {
 import type { World } from '../ecs/world';
 import { BMD, BMDReader } from './BMD';
 import { downloadDataBytesBuffer } from './utils';
+import {
+  fetchAsset,
+  plainBytes,
+  sidecarFailed,
+} from './compressedAssets';
 import { resolveUrlToDataFolder } from './resolveUrlToDataFolder';
 import {
   createItemMaterial,
@@ -495,6 +500,42 @@ function prepareMeshes(
   });
 }
 
+/**
+ * The bytes of one GLB, taken through the asset transport so the build's gzip
+ * sidecar is used when there is one (`common/compressedAssets.ts`), then
+ * handed to Babylon as a file rather than a URL. These GLBs carry their own
+ * textures, so nothing is resolved against the root URL and the loader only
+ * needs the name for its `.glb` extension.
+ */
+async function loadContainerBytes(
+  filePath: string,
+  fileName: string,
+  scene: Scene
+): Promise<AssetContainer> {
+  const parse = (bytes: Uint8Array) =>
+    SceneLoader.LoadAssetContainerAsync(
+      '',
+      new File([bytes as BlobPart], fileName, { type: 'model/gltf-binary' }),
+      scene,
+      null,
+      '.glb'
+    );
+
+  const { bytes, fromSidecar } = await fetchAsset(filePath);
+
+  try {
+    return await parse(bytes);
+  } catch (error) {
+    if (!fromSidecar) throw error;
+
+    // The glTF parser is the only thing that can tell a sidecar the browser
+    // unwrapped for us from a whole file, so a parse failure on packed bytes
+    // is the point where the plain file is tried instead.
+    sidecarFailed(filePath, error);
+    return parse(await plainBytes(filePath));
+  }
+}
+
 function loadContainer(
   filePath: string,
   scene: Scene,
@@ -504,7 +545,7 @@ function loadContainer(
   const cached = containersCache.get(filePath);
   if (cached) return cached;
 
-  const pending = SceneLoader.LoadAssetContainerAsync(filePath, '', scene)
+  const pending = loadContainerBytes(filePath, fileName, scene)
     .then(container => {
       prepareMeshes(
         container.meshes,
@@ -603,7 +644,7 @@ export async function loadGLTF(
   if (!USE_MODEL_CONTAINER_CACHE) {
     // Uncached: one fresh parse per request, added to the scene as-is. No
     // clone, no shared geometry — the pre-cache behaviour, kept for A/B.
-    const own = await SceneLoader.LoadAssetContainerAsync(filePath, '', scene);
+    const own = await loadContainerBytes(filePath, fileName, scene);
 
     prepareMeshes(
       own.meshes,

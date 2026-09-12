@@ -8,6 +8,7 @@ import {
 import { i18n, onLanguageChanged } from '../../i18n';
 import { resolveDataUrl } from './dataFolder';
 import { clearSpriteCache, loadMuSprite, type MuSprite } from './sprites';
+import { fetchAssetBytes, prefetchAsset } from '../../common/compressedAssets';
 
 /**
  * The minimap assets of one world, the way `CNewUIMiniMap::LoadImages` finds
@@ -83,10 +84,7 @@ export function loadWorldMinimap(map: ENUM_WORLD): Promise<WorldMinimap | null> 
 /** Warm the HTTP cache for the picture; the TGA decode waits for the first TAB. */
 export function prefetchWorldMinimap(map: ENUM_WORLD): void {
   if (cache.has(map)) return;
-  fetch(resolveDataUrl(minimapImagePath(map))).then(
-    res => res.body?.cancel(),
-    () => {}
-  );
+  void prefetchAsset(resolveDataUrl(minimapImagePath(map)));
 }
 
 /** Drop every decoded minimap but `keep`'s (their blob URLs with them). */
@@ -99,10 +97,13 @@ export function evictWorldMinimaps(keep: ENUM_WORLD): void {
   }
 }
 
+/** The localised marker tables: absent for most worlds, so a miss is normal. */
 async function fetchDataBytes(path: string): Promise<Uint8Array | null> {
-  const res = await fetch(resolveDataUrl(path));
-  if (!res.ok) return null;
-  return new Uint8Array(await res.arrayBuffer());
+  try {
+    return await fetchAssetBytes(resolveDataUrl(path));
+  } catch {
+    return null;
+  }
 }
 
 async function readWorldMinimap(map: ENUM_WORLD): Promise<WorldMinimap | null> {

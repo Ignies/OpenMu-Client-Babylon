@@ -6,3 +6,10 @@ dist-register
 # are committed in their place. Note `dist` above does not cover
 # `dist-register`: gitignore matches whole path segments, not prefixes.
 .env
+
+# gzip sidecars (tools/compressAssets.ts). Generated into dist/ by the build;
+# a dev server can be given its own set under public/, which is not committed -
+# they are derived from files that are.
+public/**/*.gz
+Data/**/*.gz
+Data-v097d/**/*.gz
