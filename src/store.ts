@@ -991,6 +991,8 @@ export const Store = new (class _Store {
   emoteMenuEnabled = false;
   /** TAB minimap sheet (`INTERFACE_MINI_MAP`). */
   minimapEnabled = false;
+  /** TAB hid the corner minimap (ours; the sheet is `minimapEnabled`). */
+  minimapCornerHidden = false;
   /** The Move command (warp list) window, M (`INTERFACE_MOVEMAP`). */
   warpWindowEnabled = false;
 
@@ -1111,6 +1113,7 @@ export const Store = new (class _Store {
       optionsEnabled: observable,
       emoteMenuEnabled: observable,
       minimapEnabled: observable,
+      minimapCornerHidden: observable,
       warpWindowEnabled: observable,
       hudHidden: observable,
       sessionStatsEnabled: observable,

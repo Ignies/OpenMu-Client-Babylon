@@ -1,5 +1,9 @@
+@import (reference) '../../../../components/muText/style.less';
+
 // CNewUIMiniMap. Every coordinate lives in the original's 640×480 UI space on
-// the `.minimap-stage`; the overlay itself darkens the whole viewport.
+// the `.minimap-stage`; the overlay itself darkens the whole viewport. The
+// corner panel (`.minimap-corner`) reuses the frame and sprite rules at the
+// same art sizes and scales itself as a whole.
 @edge-width: 35px;
 @edge-height: 6px;
 @corner-size: 35px;
@@ -73,10 +77,9 @@
 }
 
 // The side strips are the top strip turned 90° about its top-left corner
-// (`RenderBitmapRotate(..., ±90.f, ...)`).
+// (`RenderBitmapRotate(..., ±90.f, ...)`); their length is set inline.
 .minimap-edge-side {
   top: 0;
-  width: 430px;
   height: @edge-height;
   transform-origin: 0 0;
 }
@@ -118,4 +121,87 @@
   background-repeat: no-repeat;
   cursor: pointer;
   pointer-events: auto;
+}
+
+// ---- the corner panel ------------------------------------------------------
+
+// Its own name, not `.minimap-corner`: that class is the frame's corner piece.
+.minimap-corner-panel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  // `scale()` is applied inline; it grows from the top right corner so the
+  // visible right edge stays put.
+  transform-origin: 100% 0;
+  pointer-events: auto;
+  user-select: none;
+  // Under every window (WINDOW_Z_BASE is 100): the inventory opens over it
+  // as it opens over that corner of the world.
+  z-index: 10;
+
+  .minimap-corner-clip {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.75);
+  }
+
+  // A point at the panel's centre that the picture spins about.
+  .minimap-corner-spin {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+  }
+
+  // Slid by the frame loop (`translate`) so the hero's tile sits on the spin
+  // point.
+  .minimap-corner-map {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-size: 100% 100%;
+    image-rendering: auto;
+  }
+
+  .minimap-corner-marker {
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .minimap-corner-tip {
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    margin-bottom: 2px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  // The hero's tile, under the frame. Sized in art units like the rest, so
+  // the panel's scale brings it down with the map.
+  .minimap-corner-coords {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    margin-top: 2px;
+    text-align: center;
+    font-family: @mu-font-family;
+    font-size: 15px;
+    line-height: 17px;
+    color: #fff;
+    text-shadow:
+      1px 0 0 #000,
+      -1px 0 0 #000,
+      0 1px 0 #000,
+      0 -1px 0 #000;
+    pointer-events: none;
+  }
+}
+
+// The menu cluster owns that corner on a phone.
+.mu-mobile .minimap-corner-panel {
+  display: none;
 }

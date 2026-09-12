@@ -319,6 +319,7 @@ const TABS: Tab[] = [
               display: v => `${Math.round(uiScaleFactor(v) * 100)}%`,
             }),
             check('lockWindows', -1, 'options.lockWindows'),
+            check('minimapCorner', -1, 'options.minimapCorner'),
             check('autoReconnect', -1, 'options.autoReconnect'),
             check('blockBrowserKeys', -1, 'options.blockBrowserKeys'),
             {
