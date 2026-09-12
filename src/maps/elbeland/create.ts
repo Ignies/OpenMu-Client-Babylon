@@ -13,18 +13,16 @@ import { PlaySpeedObject } from '../shared/objectVariants';
  * and 89 (`+0.005`) and the 56 sine in `meshAnimation.ts`; 56's `Velocity =
  * 0.05` here.
  *
+ * `PlayObjectSound` (:193-232) is the seven object loops in
+ * `sound/objectLoops.ts`, safe-zone gating included. The map has no world
+ * bed and no `PlayWorldAmbientSounds` case, so `ambientBeds.ts` carries
+ * nothing for it.
+ *
  * Not built:
- *  - `PlayObjectSound` (:193-232): seven object-attached loops
- *    (`SE_Obj_watersmall01` on 2, `SE_Amb_ravine01` on 53,
- *    `SE_Amb_enteratlance01` on 56, `SE_Obj_waterfallsmall01` on 59,
- *    `SE_Obj_enterdevias01` on 85, `SE_Obj_waterway01` on 89,
- *    `SE_Obj_villageprotection01` on 110), most gated on *not* being in the
- *    safe zone. All seven are in the catalogue; they need a positional-loop
- *    entry in the sound system. The map has no world bed and no
- *    `PlayWorldAmbientSounds` case, so `ambientBeds.ts` carries nothing for
- *    it — the town is silent until that hook exists.
  *  - The eagle boids on 62, the decorative monsters on 133-155, the
- *    bone-anchored sprite rows on 30/110/121 beyond one flare each.
+ *    bone-anchored sprite rows on 30/110/121 beyond one flare each. 110 has
+ *    no `ELBELAND_LIGHTS` row at all: its sprite orbits bone 0 on a
+ *    `WorldTime` circle, which the static-offset emitter cannot say.
  *
  * `Music/elbeland`; clear colour `(178, 178, 178)/256` set by
  * `loadMapIntoScene` (SceneManager.cpp:361).
