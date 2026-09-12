@@ -1,5 +1,6 @@
 import { type Scene, Texture } from '../libs/babylon/exports';
 import { resolveUrlToDataFolder } from './resolveUrlToDataFolder';
+import { fetchAssetBytes } from './compressedAssets';
 
 // Moved to a Babylon-free module so the terrain worker can import them
 // without dragging this file's `Scene`/`Texture` imports along (todo C8).
@@ -38,20 +39,10 @@ export {
 
 
 export async function downloadBytesBuffer(url: string) {
-  const req = await fetch(url);
-  // vite's SPA fallback answers a missing path with index.html and HTTP 200;
-  // a BMD / OZJ / GLB reader then decodes HTML into plausible-looking garbage
-  // (the master tree once showed groups 134-255 that way). Fail loudly instead.
-  const type = req.headers.get('content-type') ?? '';
-  if (!req.ok || type.startsWith('text/html')) {
-    throw new Error(
-      `Data file not found: ${url} (HTTP ${req.status}, ${type || 'no content-type'})`
-    );
-  }
-  const ab = await req.arrayBuffer();
-  const buffer = new Uint8Array(ab);
-
-  return buffer;
+  // Takes the build's gzip sidecar when there is one and falls back to the
+  // plain file otherwise; the missing-file guard lives there too
+  // (`common/compressedAssets.ts`).
+  return fetchAssetBytes(url);
 }
 
 export async function downloadDataBytesBuffer(url: string) {
