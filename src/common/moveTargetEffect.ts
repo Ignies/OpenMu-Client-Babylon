@@ -241,7 +241,13 @@ export class TerrainDecal {
     y: number,
     scale: number,
     rotationDeg: number,
-    light: readonly [number, number, number]
+    light: readonly [number, number, number],
+    /**
+     * Tiles the decal may cover. A vertex on a closed tile takes the
+     * texture's edge, which is black on an additive sheet, so the decal
+     * stops at a wall instead of draping the floor behind it.
+     */
+    open?: (x: number, y: number) => boolean
   ): void {
     if (!this.#textured || scale <= 0) return;
 
@@ -274,6 +280,12 @@ export class TerrainDecal {
 
         const du = (wx - x0) / scale - 0.5;
         const dv = (wy - y0) / scale - 0.5;
+
+        if (open && !open(wx, wy)) {
+          uvs[v * 2 + 0] = -1;
+          uvs[v * 2 + 1] = -1;
+          continue;
+        }
 
         uvs[v * 2 + 0] = du * cos - dv * sin + 0.5;
         uvs[v * 2 + 1] = du * sin + dv * cos + 0.5;

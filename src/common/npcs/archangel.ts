@@ -102,6 +102,11 @@ function archangelFactory(file: string): typeof ModelObject {
       const halo = this.#halo;
       if (!this.Ready || !world || !entity || !halo) return;
 
+      // The map's own walls: a tile nobody can walk is one the feathers
+      // and the halo stop at.
+      const open = (x: number, z: number) => world.isWalkable(x, z);
+      const blocked = (x: number, z: number) => !world.isWalkable(x, z);
+
       if (this.OutOfView) {
         halo.hide();
         return;
@@ -124,13 +129,16 @@ function archangelFactory(file: string): typeof ModelObject {
       right.set(forward.z, 0, -forward.x);
 
       // `Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity, Light)`.
+      // The halo drapes the ground; a wall's tiles are left dark so it does
+      // not run on into the building the angel stands beside.
       halo.draw(
         world,
         pos.x + forward.x * HALO_AHEAD,
         pos.z + forward.z * HALO_AHEAD,
         HALO_SIZE,
         0,
-        [luminosity * 0.5, luminosity * 0.5, luminosity]
+        [luminosity * 0.5, luminosity * 0.5, luminosity],
+        open
       );
 
       if (seconds < this.#nextFeather) return;
@@ -144,8 +152,16 @@ function archangelFactory(file: string): typeof ModelObject {
         pos.y + FEATHER_HEIGHT_MIN + Math.random() * FEATHER_HEIGHT_SPAN,
         pos.z + right.z * span + forward.z * ahead
       );
+
+      // A wing tip over a wall lets go at the body instead.
+      if (!world.isWalkable(tmp.x, tmp.z)) {
+        tmp.x = pos.x;
+        tmp.z = pos.z;
+      }
+
       effects.spawn('feathers', world.scene, tmp, {
         count: 1,
+        blocked,
         drift: [forward.x * FEATHER_DRIFT_AHEAD, forward.z * FEATHER_DRIFT_AHEAD],
       });
     }
