@@ -25,8 +25,8 @@ import {
  * (`CNewUIMiniMap`, `sheet.tsx`); later clients keep a small copy of it in
  * the top right corner of the play area, and this is that - the same
  * `mini_map.ozt`, the same 45° spin about the hero, the same marker files,
- * drawn small and left on screen. TAB shows and hides it
- * (`Store.minimapCornerHidden`).
+ * drawn small and left on screen. TAB still opens the sheet, over it;
+ * the panel steps aside while the sheet is up.
  *
  * Laid out in the sheet's art units (its 35 px corners, 15 / 30 px markers)
  * and scaled as one element, so the frame and the markers keep the sheet's
@@ -84,7 +84,8 @@ const MapMarker = ({ marker, mapSize }: { marker: MinimapMarker; mapSize: number
 
 export const MinimapCorner = observer(() => {
   const world = Store.world;
-  const shown = !!world && !Store.minimapCornerHidden;
+  // Under the sheet it would only be a dimmed ghost of the same map.
+  const shown = !!world && !Store.minimapEnabled;
   // `mapIndex` is a plain field: the frame loop below carries a warp over.
   const [map, setMap] = useState<number | undefined>(undefined);
   const minimap = useWorldMinimap(shown ? map : undefined);

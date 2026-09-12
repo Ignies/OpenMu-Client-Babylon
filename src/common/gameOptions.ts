@@ -179,8 +179,8 @@ export type GameOptions = {
    */
   blockBrowserKeys: boolean;
   /**
-   * The world map as a small panel in the top right corner, which TAB shows
-   * and hides (ours). Off is the original's full-screen TAB sheet.
+   * The world map as a small panel in the top right corner, always on
+   * (ours). TAB opens the original's full-screen sheet either way.
    */
   minimapCorner: boolean;
 };
