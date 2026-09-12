@@ -1,4 +1,5 @@
 import monsters from './monsters.json';
+import monsterHealth from './monsterHealth.json';
 import { localisedNpcName } from '../libs/mu/npcNameFile';
 import { t } from '../i18n';
 
@@ -33,4 +34,18 @@ export function monsterDisplayName(type: number, fallback?: string): string {
     fallback ??
     t('item.monsterFallback', { type })
   );
+}
+
+const MAX_HEALTH: Readonly<Record<string, number>> = monsterHealth;
+
+/**
+ * The monster's maximum health, or 0 when nothing knows it. The server never
+ * puts a monster's health on the wire in this protocol, so the health bar
+ * needs a table to measure the damage it sees against; this one is generated
+ * from the server's own monster definitions by
+ * [tools/buildMonsterHealth.ts](../../tools/buildMonsterHealth.ts). The
+ * `HP` column of `monsters.json` is an older version's and is not it.
+ */
+export function monsterMaxHealth(type: number): number {
+  return MAX_HEALTH[type] ?? 0;
 }

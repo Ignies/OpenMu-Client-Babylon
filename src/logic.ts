@@ -27,10 +27,9 @@ import {
   isKnownObjectType,
   resolveModelFactory,
 } from './common/modelFactoryPerId';
-import { MonstersDatabase, monsterDisplayName } from './common/monstersDatabase';
-import { onLanguageChanged } from './i18n';
+import { monsterDisplayName, monsterMaxHealth } from './common/monstersDatabase';
 import { translateServerText } from './i18n/serverText';
-import { loadNpcNames } from './libs/mu/npcNameFile';
+import { loadNpcNames, onNpcNamesChanged } from './libs/mu/npcNameFile';
 import {
   MonsterActionType,
   PlayerAction,
@@ -247,7 +246,7 @@ import { chooseAttackAction, type AttackPose } from './common/weaponClass';
 import { isWingItem } from './common/wings';
 import { PlayerObject, npcClassOf } from './common/playerObject';
 import { Entity, type Item, World } from './ecs/world';
-import { createAttributeSystem } from './libs/attributeSystem';
+import { createAttributeSystem, type MUAttributeSystem } from './libs/attributeSystem';
 import { classWorldScale } from './common/characterScale';
 import { skillDefinition } from './common/skillsDatabase';
 import { traceHeroInstantMove } from './common/heroMoveTrace';
@@ -837,21 +836,24 @@ EventBus.on('warpCompleted', ({ map }) => {
  * `objectNameInWorld` is a snapshot, and deliberately so: it is also the
  * identity players are matched by (party, guild, chat sender), so it stays a
  * plain string rather than becoming a live lookup. That leaves the monsters
- * and NPCs already in scope holding the name of the language they spawned in,
- * so a language change has to walk them once the new `NpcName_*.txt` is in.
+ * and NPCs already in scope holding the name they spawned with, so every
+ * change to the `NpcName_*.txt` table - the first load as much as a language
+ * change - has to walk them again.
  */
-onLanguageChanged(() => {
-  void loadNpcNames().then(() => {
-    const world = Store.world;
-    if (!world) return;
+onNpcNamesChanged(() => {
+  const world = Store.world;
+  if (!world) return;
 
-    for (const e of world.with('npcType', 'objectNameInWorld')) {
-      e.objectNameInWorld = e.summonedBy
-        ? summonDisplayName(e.npcType, e.summonedBy)
-        : monsterDisplayName(e.npcType, 'NPC');
-    }
-  });
+  for (const e of world.with('npcType', 'objectNameInWorld')) {
+    e.objectNameInWorld = e.summonedBy
+      ? summonDisplayName(e.npcType, e.summonedBy)
+      : monsterDisplayName(e.npcType, 'NPC');
+  }
 });
+
+// The names are wanted from the first monster on screen, not from the first
+// time a quest window or a language change asks for them.
+void loadNpcNames();
 
 /**
  * ReceiveCreateSummonViewport (WSclient.cpp:2718-2727): the tag is the
@@ -1022,7 +1024,10 @@ function addNpcToScope(world: World, npc: ScopeNpc) {
     MONSTER_WALK_TILES_PER_SECOND
   );
 
-  const monsterHP = MonstersDatabase.get(npc.TypeNumber)?.HP ?? 0;
+  // Nothing on the wire carries a monster's health, so the bar measures the
+  // damage it sees against this. 0 for a type no table knows: the bar stays
+  // off rather than showing a full one that never moves.
+  const monsterHP = monsterMaxHealth(npc.TypeNumber);
   npcEntity.attributeSystem.setValue('maxHealth', monsterHP);
   npcEntity.attributeSystem.setValue('currentHealth', monsterHP);
 
@@ -2422,7 +2427,36 @@ type ObjectHitView = Pick<
   | 'IsTripleDamage'
   | 'IsRageFighterStreakHit'
   | 'IsRageFighterStreakFinalHit'
->;
+> & {
+  /** Extended variant only; see `applyHealthStatus`. */
+  HealthStatus?: number;
+};
+
+/** `HealthStatus` the server could not work out (WSclient.cpp:3133). */
+const HEALTH_STATUS_UNKNOWN = 0xff;
+/** The byte is the target's remaining health in fractions of 1/250. */
+const HEALTH_STATUS_SCALE = 250;
+
+/**
+ * ReceiveAttackDamageExtended (WSclient.cpp:3133-3143): the server's own
+ * reading of what the target has left. It is the only source that is right
+ * whatever the monster's real maximum is, so it replaces the estimate rather
+ * than adjusting it - including for a type no health table knows, which then
+ * gets the server's 250 steps as its maximum.
+ *
+ * Only `ObjectHitExtended` carries it, and OpenMU sends that variant to the
+ * open-source client line (>= 106.3); on the S6E3 line this is never called
+ * and the bar runs on the table alone.
+ */
+function applyHealthStatus(attributes: MUAttributeSystem, status: number): void {
+  const max = attributes.getValue('maxHealth');
+  if (max > 0) {
+    attributes.setValue('currentHealth', (max * status) / HEALTH_STATUS_SCALE);
+    return;
+  }
+  attributes.setValue('maxHealth', HEALTH_STATUS_SCALE);
+  attributes.setValue('currentHealth', status);
+}
 
 /** Bytes before the target list of RageAttackRangeResponse (C1 header 3 + skill 2 + count 1). */
 const RAGE_RANGE_TARGETS_OFFSET = 6;
@@ -2458,11 +2492,20 @@ function applyObjectHit(p: ObjectHitView) {
   }
 
   if (!obj.localPlayer && obj.attributeSystem?.hasAttribute('currentHealth')) {
-    const hp = obj.attributeSystem.getValue('currentHealth');
-    obj.attributeSystem.setValue(
-      'currentHealth',
-      Math.max(0, hp - p.HealthDamage)
-    );
+    const status = p.HealthStatus;
+    if (
+      obj.npcType !== undefined &&
+      status !== undefined &&
+      status !== HEALTH_STATUS_UNKNOWN
+    ) {
+      applyHealthStatus(obj.attributeSystem, status);
+    } else {
+      const hp = obj.attributeSystem.getValue('currentHealth');
+      obj.attributeSystem.setValue(
+        'currentHealth',
+        Math.max(0, hp - p.HealthDamage)
+      );
+    }
   }
 
   // SetPlayerShock (ZzzCharacter.cpp:1283-1310): `Hit` is the health damage;
