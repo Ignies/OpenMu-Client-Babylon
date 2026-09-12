@@ -51,6 +51,84 @@
   "kor": "안내를?;부탁하겠다!",
   "tha": "สอนพื้นฐานหรือ;ยินดียิ่ง"
  },
+ "34": {
+  "en": "Character and Server Selection",
+  "ger": "Charakter- und Serverauswahl",
+  "fre": "Choix du personnage et du serveur",
+  "ita": "Scelta del personaggio e del server",
+  "rom": "Alegerea personajului şi a serverului",
+  "rus": "Выбор персонажа и сервера",
+  "bul": "Избор на герой и сървър",
+  "chi": "角色与服务器选择",
+  "jpn": "キャラクターとサーバーの選択",
+  "kor": "캐릭터와 서버 선택",
+  "tha": "การเลือกตัวละครและเซิร์ฟเวอร์"
+ },
+ "35": {
+  "en": "Points and Status",
+  "ger": "Punkte und Status",
+  "fre": "Points et statut",
+  "ita": "Punti e stato",
+  "rom": "Puncte şi stare",
+  "rus": "Очки и состояние",
+  "bul": "Точки и състояние",
+  "chi": "点数与状态",
+  "jpn": "ポイントとステータス",
+  "kor": "포인트와 상태",
+  "tha": "แต้มและสถานะ"
+ },
+ "38": {
+  "en": "Character and Server Selection",
+  "ger": "Charakter- und Serverauswahl",
+  "fre": "Choix du personnage et du serveur",
+  "ita": "Scelta del personaggio e del server",
+  "rom": "Alegerea personajului şi a serverului",
+  "rus": "Выбор персонажа и сервера",
+  "bul": "Избор на герой и сървър",
+  "chi": "角色与服务器选择",
+  "jpn": "キャラクターとサーバーの選択",
+  "kor": "캐릭터와 서버 선택",
+  "tha": "การเลือกตัวละครและเซิร์ฟเวอร์"
+ },
+ "39": {
+  "en": "Points and Status",
+  "ger": "Punkte und Status",
+  "fre": "Points et statut",
+  "ita": "Punti e stato",
+  "rom": "Puncte şi stare",
+  "rus": "Очки и состояние",
+  "bul": "Точки и състояние",
+  "chi": "点数与状态",
+  "jpn": "ポイントとステータス",
+  "kor": "포인트와 상태",
+  "tha": "แต้มและสถานะ"
+ },
+ "128": {
+  "en": "What level do I need to be?",
+  "ger": "Welche Stufe muss ich haben?",
+  "fre": "Quel niveau me faut-il ?",
+  "ita": "Che livello mi serve?",
+  "rom": "Ce nivel îmi trebuie?",
+  "rus": "Какой уровень мне нужен?",
+  "bul": "Какво ниво ми трябва?",
+  "chi": "我需要达到几级？",
+  "jpn": "レベルはいくつ必要ですか？",
+  "kor": "레벨이 얼마나 되어야 하지?",
+  "tha": "ข้าต้องมีเลเวลเท่าใด"
+ },
+ "131": {
+  "en": "What level do I need to be?",
+  "ger": "Welche Stufe muss ich haben?",
+  "fre": "Quel niveau me faut-il ?",
+  "ita": "Che livello mi serve?",
+  "rom": "Ce nivel îmi trebuie?",
+  "rus": "Какой уровень мне нужен?",
+  "bul": "Какво ниво ми трябва?",
+  "chi": "我需要达到几级？",
+  "jpn": "レベルはいくつ必要ですか？",
+  "kor": "레벨이 얼마나 되어야 하지?",
+  "tha": "ข้าต้องมีเลเวลเท่าใด"
+ },
  "135": {
   "en": "Continue listening.",
   "ger": "Weiter zuhören.",
@@ -63,6 +141,32 @@
   "jpn": "話を聞き続ける。",
   "kor": "계속 듣는다.",
   "tha": "ฟังต่อ"
+ },
+ "138": {
+  "en": "Excellent! Bring on the test!",
+  "ger": "Vortrefflich! Her mit der Prüfung!",
+  "fre": "Parfait ! Que l'épreuve commence !",
+  "ita": "Ottimo! Che venga la prova!",
+  "rom": "Minunat! Să vină proba!",
+  "rus": "Отлично! Давай своё испытание!",
+  "bul": "Отлично! Дай да видим изпитанието!",
+  "chi": "好极了！试炼放马过来吧！",
+  "jpn": "けっこう！その試練、いざ！",
+  "kor": "훌륭하군! 시험을 내어 보라!",
+  "tha": "ยอดเยี่ยม เอาการทดสอบมาเลย"
+ },
+ "142": {
+  "en": "Excellent! Bring on the test!",
+  "ger": "Vortrefflich! Her mit der Prüfung!",
+  "fre": "Parfait ! Que l'épreuve commence !",
+  "ita": "Ottimo! Che venga la prova!",
+  "rom": "Minunat! Să vină proba!",
+  "rus": "Отлично! Давай своё испытание!",
+  "bul": "Отлично! Дай да видим изпитанието!",
+  "chi": "好极了！试炼放马过来吧！",
+  "jpn": "けっこう！その試練、いざ！",
+  "kor": "훌륭하군! 시험을 내어 보라!",
+  "tha": "ยอดเยี่ยม เอาการทดสอบมาเลย"
  },
  "192": {
   "en": "Continue listening.",
@@ -128,6 +232,84 @@
   "jpn": "町にいる間に、影の幻影兵のNPCを探しましょう。",
   "kor": "마을에 있을 때 그림자 환영 병사 NPC를 찾아라.",
   "tha": "ขณะอยู่ในเมือง จงตามหา NPC ทหารเงาภาพลวง"
+ },
+ "239": {
+  "en": "When you hunt monsters, you can employ normal attacks by left-clicking or use skill attacks by right-clicking.",
+  "ger": "Bei der Monsterjagd führst du mit der linken Maustaste normale Angriffe aus und mit der rechten Fertigkeitsangriffe.",
+  "fre": "Pour chasser les monstres, le clic gauche donne des attaques normales et le clic droit des attaques de compétence.",
+  "ita": "Quando cacci mostri, il clic sinistro esegue attacchi normali e il destro attacchi con abilità.",
+  "rom": "Când vânezi monştri, clicul stâng dă atacuri obişnuite, iar cel drept atacuri cu abilităţi.",
+  "rus": "На охоте за монстрами левая кнопка мыши наносит обычные удары, а правая — удары умениями.",
+  "bul": "Когато ловуваш чудовища, левият бутон нанася обикновени удари, а десният - удари с умения.",
+  "chi": "讨伐怪物时，左键可施展普通攻击，右键则施展技能攻击。",
+  "jpn": "モンスターを狩るときは、左クリックで通常攻撃、右クリックでスキル攻撃を行えます。",
+  "kor": "몬스터를 사냥할 때 왼쪽 클릭으로 일반 공격을, 오른쪽 클릭으로 스킬 공격을 할 수 있다.",
+  "tha": "เมื่อล่าสัตว์ประหลาด ท่านใช้คลิกซ้ายเพื่อโจมตีปกติ หรือคลิกขวาเพื่อโจมตีด้วยสกิล"
+ },
+ "240": {
+  "en": "When you hunt monsters, you can employ normal attacks by left-clicking or use skill attacks by right-clicking.",
+  "ger": "Bei der Monsterjagd führst du mit der linken Maustaste normale Angriffe aus und mit der rechten Fertigkeitsangriffe.",
+  "fre": "Pour chasser les monstres, le clic gauche donne des attaques normales et le clic droit des attaques de compétence.",
+  "ita": "Quando cacci mostri, il clic sinistro esegue attacchi normali e il destro attacchi con abilità.",
+  "rom": "Când vânezi monştri, clicul stâng dă atacuri obişnuite, iar cel drept atacuri cu abilităţi.",
+  "rus": "На охоте за монстрами левая кнопка мыши наносит обычные удары, а правая — удары умениями.",
+  "bul": "Когато ловуваш чудовища, левият бутон нанася обикновени удари, а десният - удари с умения.",
+  "chi": "讨伐怪物时，左键可施展普通攻击，右键则施展技能攻击。",
+  "jpn": "モンスターを狩るときは、左クリックで通常攻撃、右クリックでスキル攻撃を行えます。",
+  "kor": "몬스터를 사냥할 때 왼쪽 클릭으로 일반 공격을, 오른쪽 클릭으로 스킬 공격을 할 수 있다.",
+  "tha": "เมื่อล่าสัตว์ประหลาด ท่านใช้คลิกซ้ายเพื่อโจมตีปกติ หรือคลิกขวาเพื่อโจมตีด้วยสกิล"
+ },
+ "241": {
+  "en": "When you hunt monsters, you can employ normal attacks by left-clicking or use skill attacks by right-clicking.",
+  "ger": "Bei der Monsterjagd führst du mit der linken Maustaste normale Angriffe aus und mit der rechten Fertigkeitsangriffe.",
+  "fre": "Pour chasser les monstres, le clic gauche donne des attaques normales et le clic droit des attaques de compétence.",
+  "ita": "Quando cacci mostri, il clic sinistro esegue attacchi normali e il destro attacchi con abilità.",
+  "rom": "Când vânezi monştri, clicul stâng dă atacuri obişnuite, iar cel drept atacuri cu abilităţi.",
+  "rus": "На охоте за монстрами левая кнопка мыши наносит обычные удары, а правая — удары умениями.",
+  "bul": "Когато ловуваш чудовища, левият бутон нанася обикновени удари, а десният - удари с умения.",
+  "chi": "讨伐怪物时，左键可施展普通攻击，右键则施展技能攻击。",
+  "jpn": "モンスターを狩るときは、左クリックで通常攻撃、右クリックでスキル攻撃を行えます。",
+  "kor": "몬스터를 사냥할 때 왼쪽 클릭으로 일반 공격을, 오른쪽 클릭으로 스킬 공격을 할 수 있다.",
+  "tha": "เมื่อล่าสัตว์ประหลาด ท่านใช้คลิกซ้ายเพื่อโจมตีปกติ หรือคลิกขวาเพื่อโจมตีด้วยสกิล"
+ },
+ "266": {
+  "en": "I'll test you to see if you have the basic knowledge required for travel throughout the MU empire and give you the queen's gifts if you pass.",
+  "ger": "Ich prüfe, ob du das Grundwissen für Reisen durch das Reich MU besitzt, und überreiche dir die Geschenke der Königin, wenn du bestehst.",
+  "fre": "Je vais vérifier que tu possèdes les connaissances de base nécessaires pour voyager à travers l'empire de MU, et te remettre les présents de la reine si tu réussis.",
+  "ita": "Verificherò se possiedi le nozioni di base necessarie a viaggiare per l'impero di MU e ti consegnerò i doni della regina se supererai la prova.",
+  "rom": "Voi vedea dacă ai cunoştinţele de bază trebuincioase pentru călătoria prin imperiul MU şi îţi voi da darurile reginei dacă treci.",
+  "rus": "Я проверю, есть ли у тебя основные познания, нужные для странствий по империи MU, и вручу дары королевы, если ты справишься.",
+  "bul": "Ще проверя дали имаш основните познания, нужни за пътуване из империята MU, и ще ти връча даровете на кралицата, ако се справиш.",
+  "chi": "我将考校你是否具备游历 MU 帝国所需的基本知识，若你通过，便授予你女王的礼物。",
+  "jpn": "MU帝国を旅するのに必要な基礎の心得があるか試し、合格すれば女王陛下の贈り物をお渡しします。",
+  "kor": "MU 제국을 여행하는 데 필요한 기본 지식이 있는지 시험하고, 통과하면 여왕의 선물을 주겠다.",
+  "tha": "ข้าจะทดสอบว่าท่านมีความรู้พื้นฐานที่จำเป็นต่อการเดินทางทั่วจักรวรรดิ MU หรือไม่ และจะมอบของขวัญจากราชินีให้หากท่านผ่าน"
+ },
+ "267": {
+  "en": "I'll test you to see if you have the basic knowledge required for travel throughout the MU empire and give you the queen's gifts if you pass.",
+  "ger": "Ich prüfe, ob du das Grundwissen für Reisen durch das Reich MU besitzt, und überreiche dir die Geschenke der Königin, wenn du bestehst.",
+  "fre": "Je vais vérifier que tu possèdes les connaissances de base nécessaires pour voyager à travers l'empire de MU, et te remettre les présents de la reine si tu réussis.",
+  "ita": "Verificherò se possiedi le nozioni di base necessarie a viaggiare per l'impero di MU e ti consegnerò i doni della regina se supererai la prova.",
+  "rom": "Voi vedea dacă ai cunoştinţele de bază trebuincioase pentru călătoria prin imperiul MU şi îţi voi da darurile reginei dacă treci.",
+  "rus": "Я проверю, есть ли у тебя основные познания, нужные для странствий по империи MU, и вручу дары королевы, если ты справишься.",
+  "bul": "Ще проверя дали имаш основните познания, нужни за пътуване из империята MU, и ще ти връча даровете на кралицата, ако се справиш.",
+  "chi": "我将考校你是否具备游历 MU 帝国所需的基本知识，若你通过，便授予你女王的礼物。",
+  "jpn": "MU帝国を旅するのに必要な基礎の心得があるか試し、合格すれば女王陛下の贈り物をお渡しします。",
+  "kor": "MU 제국을 여행하는 데 필요한 기본 지식이 있는지 시험하고, 통과하면 여왕의 선물을 주겠다.",
+  "tha": "ข้าจะทดสอบว่าท่านมีความรู้พื้นฐานที่จำเป็นต่อการเดินทางทั่วจักรวรรดิ MU หรือไม่ และจะมอบของขวัญจากราชินีให้หากท่านผ่าน"
+ },
+ "268": {
+  "en": "I'll test you to see if you have the basic knowledge required for travel throughout the MU empire and give you the queen's gifts if you pass.",
+  "ger": "Ich prüfe, ob du das Grundwissen für Reisen durch das Reich MU besitzt, und überreiche dir die Geschenke der Königin, wenn du bestehst.",
+  "fre": "Je vais vérifier que tu possèdes les connaissances de base nécessaires pour voyager à travers l'empire de MU, et te remettre les présents de la reine si tu réussis.",
+  "ita": "Verificherò se possiedi le nozioni di base necessarie a viaggiare per l'impero di MU e ti consegnerò i doni della regina se supererai la prova.",
+  "rom": "Voi vedea dacă ai cunoştinţele de bază trebuincioase pentru călătoria prin imperiul MU şi îţi voi da darurile reginei dacă treci.",
+  "rus": "Я проверю, есть ли у тебя основные познания, нужные для странствий по империи MU, и вручу дары королевы, если ты справишься.",
+  "bul": "Ще проверя дали имаш основните познания, нужни за пътуване из империята MU, и ще ти връча даровете на кралицата, ако се справиш.",
+  "chi": "我将考校你是否具备游历 MU 帝国所需的基本知识，若你通过，便授予你女王的礼物。",
+  "jpn": "MU帝国を旅するのに必要な基礎の心得があるか試し、合格すれば女王陛下の贈り物をお渡しします。",
+  "kor": "MU 제국을 여행하는 데 필요한 기본 지식이 있는지 시험하고, 통과하면 여왕의 선물을 주겠다.",
+  "tha": "ข้าจะทดสอบว่าท่านมีความรู้พื้นฐานที่จำเป็นต่อการเดินทางทั่วจักรวรรดิ MU หรือไม่ และจะมอบของขวัญจากราชินีให้หากท่านผ่าน"
  },
  "288": {
   "en": "You have completed the tutorial. Take this Ring of Hero and Ring of Warrior. They are gifts to you from the queen.",
@@ -870,6 +1052,19 @@
   "kor": "NPC 대화 스크립트 오류!",
   "tha": "สคริปต์บทสนทนา NPC ผิดพลาด"
  },
+ "2002": {
+  "en": "Chaos Castle...",
+  "ger": "Chaosburg...",
+  "fre": "Château du Chaos...",
+  "ita": "Castello del Caos...",
+  "rom": "Castelul Haosului...",
+  "rus": "Замок Хаоса...",
+  "bul": "Замъкът на хаоса...",
+  "chi": "混沌城……",
+  "jpn": "カオスキャッスル……",
+  "kor": "카오스 캐슬….",
+  "tha": "ปราสาทเคออส…"
+ },
  "2003": {
   "en": "Very well. Tell me more.",
   "ger": "Nun gut. Erzähl mir mehr.",
@@ -882,6 +1077,19 @@
   "jpn": "よろしい。もっと聞かせてください。",
   "kor": "좋다. 더 말해 보라.",
   "tha": "ดีแล้ว เล่าให้ข้าฟังอีก"
+ },
+ "2009": {
+  "en": "I see.",
+  "ger": "Verstehe.",
+  "fre": "Je vois.",
+  "ita": "Capisco.",
+  "rom": "Înţeleg.",
+  "rus": "Понятно.",
+  "bul": "Разбирам.",
+  "chi": "原来如此。",
+  "jpn": "なるほど。",
+  "kor": "그렇군.",
+  "tha": "เข้าใจแล้ว"
  },
  "2013": {
   "en": "It really is easy to enter. What does the event involve, exactly?",
@@ -1039,6 +1247,19 @@
   "kor": "유감이군. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย หากเปลี่ยนใจก็กลับมาได้เสมอ (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "2038": {
+  "en": "Chaos Castle...",
+  "ger": "Chaosburg...",
+  "fre": "Château du Chaos...",
+  "ita": "Castello del Caos...",
+  "rom": "Castelul Haosului...",
+  "rus": "Замок Хаоса...",
+  "bul": "Замъкът на хаоса...",
+  "chi": "混沌城……",
+  "jpn": "カオスキャッスル……",
+  "kor": "카오스 캐슬….",
+  "tha": "ปราสาทเคออส…"
+ },
  "2039": {
   "en": "Very well. Tell me more.",
   "ger": "Nun gut. Erzähl mir mehr.",
@@ -1051,6 +1272,19 @@
   "jpn": "よろしい。もっと聞かせてください。",
   "kor": "좋다. 더 말해 보라.",
   "tha": "ดีแล้ว เล่าให้ข้าฟังอีก"
+ },
+ "2045": {
+  "en": "I see.",
+  "ger": "Verstehe.",
+  "fre": "Je vois.",
+  "ita": "Capisco.",
+  "rom": "Înţeleg.",
+  "rus": "Понятно.",
+  "bul": "Разбирам.",
+  "chi": "原来如此。",
+  "jpn": "なるほど。",
+  "kor": "그렇군.",
+  "tha": "เข้าใจแล้ว"
  },
  "2049": {
   "en": "It really is easy to enter. What does the event involve, exactly?",
@@ -1207,6 +1441,19 @@
   "jpn": "残念です。気が変わったら、また来てください。（クエストは取り消されました。）",
   "kor": "유감이군. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย หากเปลี่ยนใจก็กลับมาได้เสมอ (เควสต์ถูกยกเลิกแล้ว)"
+ },
+ "2074": {
+  "en": "So it's the real deal from now on. I understand.",
+  "ger": "Ab jetzt wird es also ernst. Ich verstehe.",
+  "fre": "Alors on passe aux choses sérieuses. Je comprends.",
+  "ita": "Da qui in poi si fa sul serio, dunque. Ho capito.",
+  "rom": "Aşadar, de-acum e pe bune. Am înţeles.",
+  "rus": "Значит, теперь всё по-настоящему. Я понял.",
+  "bul": "Значи отсега нататък е на сериозно. Разбирам.",
+  "chi": "如此说来，从此便是动真格的了。我明白了。",
+  "jpn": "ここからが本番というわけですね。承知しました。",
+  "kor": "이제부터가 진짜란 말이군. 알겠다.",
+  "tha": "งั้นตั้งแต่นี้ไปก็ของจริงแล้วสินะ ข้าเข้าใจแล้ว"
  },
  "2076": {
   "en": "By a 'simple quest', do you mean killing monsters?",
@@ -2079,6 +2326,19 @@
   "kor": "이번 목표는 카오스 캐슬에서 살아남는 것이다. 그림자 환영 병사를 찾아가 극한의 시험을 치르고, 그런 뒤 카오스 캐슬에 도전하라.",
   "tha": "คราวนี้เป้าหมายคือรอดชีวิตจากปราสาทเคออส จงไปพบทหารเงาภาพลวง รับการทดสอบขั้นสุด แล้วท้าทายปราสาทเคออส"
  },
+ "3002": {
+  "en": "Blood Castle...",
+  "ger": "Blutburg...",
+  "fre": "Château Sanglant...",
+  "ita": "Castello di Sangue...",
+  "rom": "Castelul Sângelui...",
+  "rus": "Замок Крови...",
+  "bul": "Кървавият замък...",
+  "chi": "血之城……",
+  "jpn": "ブラッドキャッスル……",
+  "kor": "블러드 캐슬….",
+  "tha": "ปราสาทเลือด…"
+ },
  "3003": {
   "en": "Very well. Tell me more.",
   "ger": "Nun gut. Erzähl mir mehr.",
@@ -2117,6 +2377,19 @@
   "jpn": "入るのは確かに簡単ですね。そのイベントとは、具体的にどんなものですか？",
   "kor": "들어가는 건 확실히 쉽군. 그 이벤트는 정확히 어떤 것인가?",
   "tha": "เข้าไปง่ายจริงด้วย แล้วอีเวนต์นี้มีเนื้อหาอย่างไรกันแน่"
+ },
+ "3017": {
+  "en": "I understand.",
+  "ger": "Ich verstehe.",
+  "fre": "Je comprends.",
+  "ita": "Ho capito.",
+  "rom": "Am înţeles.",
+  "rus": "Я понял.",
+  "bul": "Разбирам.",
+  "chi": "我明白了。",
+  "jpn": "承知しました。",
+  "kor": "알겠다.",
+  "tha": "ข้าเข้าใจแล้ว"
  },
  "3020": {
   "en": "By a 'simple quest', do you mean killing monsters?",
@@ -2248,6 +2521,19 @@
   "kor": "유감이군. 그대와 동료들의 유대가 더 단단해지거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย เมื่อสายสัมพันธ์ระหว่างท่านกับสหายแน่นแฟ้นขึ้นแล้ว จงกลับมาหาข้า (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "3038": {
+  "en": "Blood Castle...",
+  "ger": "Blutburg...",
+  "fre": "Château Sanglant...",
+  "ita": "Castello di Sangue...",
+  "rom": "Castelul Sângelui...",
+  "rus": "Замок Крови...",
+  "bul": "Кървавият замък...",
+  "chi": "血之城……",
+  "jpn": "ブラッドキャッスル……",
+  "kor": "블러드 캐슬….",
+  "tha": "ปราสาทเลือด…"
+ },
  "3039": {
   "en": "Very well. Tell me more.",
   "ger": "Nun gut. Erzähl mir mehr.",
@@ -2286,6 +2572,19 @@
   "jpn": "入るのは確かに簡単ですね。そのイベントとは、具体的にどんなものですか？",
   "kor": "들어가는 건 확실히 쉽군. 그 이벤트는 정확히 어떤 것인가?",
   "tha": "เข้าไปง่ายจริงด้วย แล้วอีเวนต์นี้มีเนื้อหาอย่างไรกันแน่"
+ },
+ "3053": {
+  "en": "I understand.",
+  "ger": "Ich verstehe.",
+  "fre": "Je comprends.",
+  "ita": "Ho capito.",
+  "rom": "Am înţeles.",
+  "rus": "Я понял.",
+  "bul": "Разбирам.",
+  "chi": "我明白了。",
+  "jpn": "承知しました。",
+  "kor": "알겠다.",
+  "tha": "ข้าเข้าใจแล้ว"
  },
  "3056": {
   "en": "By a 'simple quest', do you mean killing monsters?",
@@ -3522,6 +3821,19 @@
   "kor": "이제 목표는 블러드 캐슬에서 대천사의 퀘스트를 완수하는 것이다. 그림자 환영 병사의 시험을 치른 뒤 블러드 캐슬에 도전하라.",
   "tha": "เป้าหมายตอนนี้คือทำเควสต์ของเทวทูตในปราสาทเลือดให้สำเร็จ จงผ่านการทดสอบของทหารเงาภาพลวงแล้วท้าทายปราสาทเลือด"
  },
+ "4002": {
+  "en": "Devil Square...",
+  "ger": "Teufelsplatz...",
+  "fre": "Place du Diable...",
+  "ita": "Piazza del Diavolo...",
+  "rom": "Piaţa Diavolului...",
+  "rus": "Площадь Дьявола...",
+  "bul": "Площадът на дявола...",
+  "chi": "恶魔广场……",
+  "jpn": "デビルスクエア……",
+  "kor": "데빌 스퀘어….",
+  "tha": "ลานปีศาจ…"
+ },
  "4003": {
   "en": "Very well. Tell me more.",
   "ger": "Nun gut. Erzähl mir mehr.",
@@ -3730,6 +4042,19 @@
   "kor": "유감이군. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย หากเปลี่ยนใจก็กลับมาได้เสมอ (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "4038": {
+  "en": "Devil Square...",
+  "ger": "Teufelsplatz...",
+  "fre": "Place du Diable...",
+  "ita": "Piazza del Diavolo...",
+  "rom": "Piaţa Diavolului...",
+  "rus": "Площадь Дьявола...",
+  "bul": "Площадът на дявола...",
+  "chi": "恶魔广场……",
+  "jpn": "デビルスクエア……",
+  "kor": "데빌 스퀘어….",
+  "tha": "ลานปีศาจ…"
+ },
  "4039": {
   "en": "Very well. Tell me more.",
   "ger": "Nun gut. Erzähl mir mehr.",
@@ -3937,6 +4262,19 @@
   "jpn": "残念です。気が変わったら、また来てください。（クエストは取り消されました。）",
   "kor": "유감이군. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย หากเปลี่ยนใจก็กลับมาได้เสมอ (เควสต์ถูกยกเลิกแล้ว)"
+ },
+ "4074": {
+  "en": "So it's the real deal from now on. I understand.",
+  "ger": "Ab jetzt wird es also ernst. Ich verstehe.",
+  "fre": "Alors on passe aux choses sérieuses. Je comprends.",
+  "ita": "Da qui in poi si fa sul serio, dunque. Ho capito.",
+  "rom": "Aşadar, de-acum e pe bune. Am înţeles.",
+  "rus": "Значит, теперь всё по-настоящему. Я понял.",
+  "bul": "Значи отсега нататък е на сериозно. Разбирам.",
+  "chi": "如此说来，从此便是动真格的了。我明白了。",
+  "jpn": "ここからが本番というわけですね。承知しました。",
+  "kor": "이제부터가 진짜란 말이군. 알겠다.",
+  "tha": "งั้นตั้งแต่นี้ไปก็ของจริงแล้วสินะ ข้าเข้าใจแล้ว"
  },
  "4076": {
   "en": "By a 'simple quest', do you mean killing monsters?",
@@ -4926,6 +5264,19 @@
   "kor": "데빌 스퀘어에서 빠르게 성장하면 그림자 환영 병사가 작은 보상을 줄 것이다. 그림자 환영 병사의 시험을 받고 데빌 스퀘어에 도전하라.",
   "tha": "หากท่านเติบโตได้รวดเร็วในลานปีศาจ ทหารเงาภาพลวงจะมอบรางวัลเล็กน้อยให้ จงรับการทดสอบของทหารเงาภาพลวงแล้วท้าทายลานปีศาจ"
  },
+ "5002": {
+  "en": "Illusion Temple...",
+  "ger": "Illusionstempel...",
+  "fre": "Temple d'Illusion...",
+  "ita": "Tempio dell'Illusione...",
+  "rom": "Templul Iluziei...",
+  "rus": "Храм Иллюзий...",
+  "bul": "Храмът на илюзиите...",
+  "chi": "幻影神殿……",
+  "jpn": "幻影の神殿……",
+  "kor": "환영의 신전….",
+  "tha": "วิหารลวงตา…"
+ },
  "5003": {
   "en": "Very well. Tell me more.",
   "ger": "Nun gut. Erzähl mir mehr.",
@@ -5082,6 +5433,19 @@
   "kor": "유감이군. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย หากเปลี่ยนใจก็กลับมาได้เสมอ (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "5032": {
+  "en": "Illusion Temple...",
+  "ger": "Illusionstempel...",
+  "fre": "Temple d'Illusion...",
+  "ita": "Tempio dell'Illusione...",
+  "rom": "Templul Iluziei...",
+  "rus": "Храм Иллюзий...",
+  "bul": "Храмът на илюзиите...",
+  "chi": "幻影神殿……",
+  "jpn": "幻影の神殿……",
+  "kor": "환영의 신전….",
+  "tha": "วิหารลวงตา…"
+ },
  "5033": {
   "en": "Very well. Tell me more.",
   "ger": "Nun gut. Erzähl mir mehr.",
@@ -5237,6 +5601,19 @@
   "jpn": "残念です。気が変わったら、また来てください。（クエストは取り消されました。）",
   "kor": "유감이군. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย หากเปลี่ยนใจก็กลับมาได้เสมอ (เควสต์ถูกยกเลิกแล้ว)"
+ },
+ "5062": {
+  "en": "So it's the real deal from now on. I understand.",
+  "ger": "Ab jetzt wird es also ernst. Ich verstehe.",
+  "fre": "Alors on passe aux choses sérieuses. Je comprends.",
+  "ita": "Da qui in poi si fa sul serio, dunque. Ho capito.",
+  "rom": "Aşadar, de-acum e pe bune. Am înţeles.",
+  "rus": "Значит, теперь всё по-настоящему. Я понял.",
+  "bul": "Значи отсега нататък е на сериозно. Разбирам.",
+  "chi": "如此说来，从此便是动真格的了。我明白了。",
+  "jpn": "ここからが本番というわけですね。承知しました。",
+  "kor": "이제부터가 진짜란 말이군. 알겠다.",
+  "tha": "งั้นตั้งแต่นี้ไปก็ของจริงแล้วสินะ ข้าเข้าใจแล้ว"
  },
  "5064": {
   "en": "By a 'simple quest', do you mean killing monsters?",
@@ -5784,6 +6161,32 @@
   "kor": "환영의 신전에서 승리하면 그림자 환영 병사가 작은 보상을 줄 것이다. 그림자 환영 병사의 시험을 받고 환영의 신전에 도전하라.",
   "tha": "หากท่านชนะที่วิหารลวงตา ทหารเงาภาพลวงจะมอบรางวัลเล็กน้อยให้ จงรับการทดสอบของทหารเงาภาพลวงแล้วท้าทายวิหารลวงตา"
  },
+ "6013": {
+  "en": "I accept the mission. (Accept)",
+  "ger": "Ich nehme den Auftrag an. (Annehmen)",
+  "fre": "J'accepte la mission. (Accepter)",
+  "ita": "Accetto l'incarico. (Accetta)",
+  "rom": "Accept misiunea. (Acceptă)",
+  "rus": "Я принимаю задание. (Принять)",
+  "bul": "Приемам мисията. (Приеми)",
+  "chi": "我接受这项任务。（接受）",
+  "jpn": "任務をお受けします。（受ける）",
+  "kor": "임무를 받아들이겠다. (수락)",
+  "tha": "ข้ารับภารกิจนี้ (รับ)"
+ },
+ "6014": {
+  "en": "No, I need some rest first. (Refuse)",
+  "ger": "Nein, ich brauche erst etwas Ruhe. (Ablehnen)",
+  "fre": "Non, il me faut d'abord du repos. (Refuser)",
+  "ita": "No, prima ho bisogno di riposo. (Rifiuta)",
+  "rom": "Nu, întâi am nevoie de odihnă. (Refuză)",
+  "rus": "Нет, сперва мне нужен отдых. (Отказаться)",
+  "bul": "Не, първо ми трябва почивка. (Откажи)",
+  "chi": "不，我得先歇息片刻。（拒绝）",
+  "jpn": "いえ、まず休息が要ります。（断る）",
+  "kor": "아니, 먼저 좀 쉬어야겠다. (거절)",
+  "tha": "ไม่ ข้าต้องพักก่อน (ปฏิเสธ)"
+ },
  "6015": {
   "en": "I'm sorry to hear that. You can't repeat the first mission if you abandon the second mission. You must complete the second mission before you can repeat the first mission. Please return if you change your mind.",
   "ger": "Das höre ich ungern. Brichst du den zweiten Auftrag ab, kannst du den ersten nicht wiederholen. Erst wenn der zweite Auftrag erfüllt ist, lässt sich der erste erneut angehen. Komm wieder, wenn du es dir anders überlegst.",
@@ -5797,6 +6200,45 @@
   "kor": "그것 참 아쉽군. 두 번째 임무를 포기하면 첫 번째 임무는 다시 할 수 없다. 첫 번째를 되풀이하려면 먼저 두 번째를 끝내야 한다. 마음이 바뀌거든 다시 오게.",
   "tha": "น่าเสียดายที่ได้ยินเช่นนั้น หากท่านละทิ้งภารกิจที่สอง จะทำภารกิจแรกซ้ำไม่ได้ ต้องทำภารกิจที่สองให้เสร็จก่อนจึงจะทำภารกิจแรกซ้ำได้ หากเปลี่ยนใจก็กลับมาได้"
  },
+ "6019": {
+  "en": "I accept the mission. (Accept)",
+  "ger": "Ich nehme den Auftrag an. (Annehmen)",
+  "fre": "J'accepte la mission. (Accepter)",
+  "ita": "Accetto l'incarico. (Accetta)",
+  "rom": "Accept misiunea. (Acceptă)",
+  "rus": "Я принимаю задание. (Принять)",
+  "bul": "Приемам мисията. (Приеми)",
+  "chi": "我接受这项任务。（接受）",
+  "jpn": "任務をお受けします。（受ける）",
+  "kor": "임무를 받아들이겠다. (수락)",
+  "tha": "ข้ารับภารกิจนี้ (รับ)"
+ },
+ "6025": {
+  "en": "I accept the mission. (Accept)",
+  "ger": "Ich nehme den Auftrag an. (Annehmen)",
+  "fre": "J'accepte la mission. (Accepter)",
+  "ita": "Accetto l'incarico. (Accetta)",
+  "rom": "Accept misiunea. (Acceptă)",
+  "rus": "Я принимаю задание. (Принять)",
+  "bul": "Приемам мисията. (Приеми)",
+  "chi": "我接受这项任务。（接受）",
+  "jpn": "任務をお受けします。（受ける）",
+  "kor": "임무를 받아들이겠다. (수락)",
+  "tha": "ข้ารับภารกิจนี้ (รับ)"
+ },
+ "6026": {
+  "en": "No, I need some rest first. (Refuse)",
+  "ger": "Nein, ich brauche erst etwas Ruhe. (Ablehnen)",
+  "fre": "Non, il me faut d'abord du repos. (Refuser)",
+  "ita": "No, prima ho bisogno di riposo. (Rifiuta)",
+  "rom": "Nu, întâi am nevoie de odihnă. (Refuză)",
+  "rus": "Нет, сперва мне нужен отдых. (Отказаться)",
+  "bul": "Не, първо ми трябва почивка. (Откажи)",
+  "chi": "不，我得先歇息片刻。（拒绝）",
+  "jpn": "いえ、まず休息が要ります。（断る）",
+  "kor": "아니, 먼저 좀 쉬어야겠다. (거절)",
+  "tha": "ไม่ ข้าต้องพักก่อน (ปฏิเสธ)"
+ },
  "6027": {
   "en": "I'm sorry to hear that. You can't repeat the first mission if you abandon the second mission. You must complete the second mission before you can repeat the first mission. Please return if you change your mind.",
   "ger": "Das höre ich ungern. Brichst du den zweiten Auftrag ab, kannst du den ersten nicht wiederholen. Erst wenn der zweite Auftrag erfüllt ist, lässt sich der erste erneut angehen. Komm wieder, wenn du es dir anders überlegst.",
@@ -5809,6 +6251,19 @@
   "jpn": "それは残念です。二つ目の任務を放棄すると、一つ目をやり直すことはできません。一つ目を繰り返すには、まず二つ目を終えねばなりません。気が変わったら、また来てください。",
   "kor": "그것 참 아쉽군. 두 번째 임무를 포기하면 첫 번째 임무는 다시 할 수 없다. 첫 번째를 되풀이하려면 먼저 두 번째를 끝내야 한다. 마음이 바뀌거든 다시 오게.",
   "tha": "น่าเสียดายที่ได้ยินเช่นนั้น หากท่านละทิ้งภารกิจที่สอง จะทำภารกิจแรกซ้ำไม่ได้ ต้องทำภารกิจที่สองให้เสร็จก่อนจึงจะทำภารกิจแรกซ้ำได้ หากเปลี่ยนใจก็กลับมาได้"
+ },
+ "6038": {
+  "en": "I am not ready yet. (Refuse)",
+  "ger": "Ich bin noch nicht so weit. (Ablehnen)",
+  "fre": "Je ne suis pas encore prêt. (Refuser)",
+  "ita": "Non sono ancora pronto. (Rifiuta)",
+  "rom": "Nu sunt încă gata. (Refuză)",
+  "rus": "Я ещё не готов. (Отказаться)",
+  "bul": "Още не съм готов. (Откажи)",
+  "chi": "我尚未准备好。（拒绝）",
+  "jpn": "まだ支度が整っていません。（断る）",
+  "kor": "아직 준비가 안 되었다. (거절)",
+  "tha": "ข้ายังไม่พร้อม (ปฏิเสธ)"
  },
  "6039": {
   "en": "I'm sorry to hear that. You can't repeat the first mission if you abandon the second mission. You must complete the second mission before you can repeat the first mission. Please return if you change your mind.",
@@ -5848,6 +6303,19 @@
   "jpn": "それは残念です。二つ目の任務を放棄すると、一つ目をやり直すことはできません。一つ目を繰り返すには、まず二つ目を終えねばなりません。気が変わったら、また来てください。",
   "kor": "그것 참 아쉽군. 두 번째 임무를 포기하면 첫 번째 임무는 다시 할 수 없다. 첫 번째를 되풀이하려면 먼저 두 번째를 끝내야 한다. 마음이 바뀌거든 다시 오게.",
   "tha": "น่าเสียดายที่ได้ยินเช่นนั้น หากท่านละทิ้งภารกิจที่สอง จะทำภารกิจแรกซ้ำไม่ได้ ต้องทำภารกิจที่สองให้เสร็จก่อนจึงจะทำภารกิจแรกซ้ำได้ หากเปลี่ยนใจก็กลับมาได้"
+ },
+ "6068": {
+  "en": "I am not ready yet. (Refuse)",
+  "ger": "Ich bin noch nicht so weit. (Ablehnen)",
+  "fre": "Je ne suis pas encore prêt. (Refuser)",
+  "ita": "Non sono ancora pronto. (Rifiuta)",
+  "rom": "Nu sunt încă gata. (Refuză)",
+  "rus": "Я ещё не готов. (Отказаться)",
+  "bul": "Още не съм готов. (Откажи)",
+  "chi": "我尚未准备好。（拒绝）",
+  "jpn": "まだ支度が整っていません。（断る）",
+  "kor": "아직 준비가 안 되었다. (거절)",
+  "tha": "ข้ายังไม่พร้อม (ปฏิเสธ)"
  },
  "6075": {
   "en": "I'm sorry to hear that. You can't repeat the first mission if you abandon the second mission. You must complete the second mission before you can repeat the first mission. Please return if you change your mind.",
@@ -8423,6 +8891,45 @@
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
  },
+ "18801": {
+  "en": "The town's Shadow Phantom Soldier is looking for someone he can rely on to carry out quests both big and small. Go see the Shadow Phantom Soldier again.",
+  "ger": "Der Schattenphantom-Soldat der Stadt sucht jemanden, auf den er sich bei Quests großer wie kleiner Art verlassen kann. Suche den Schattenphantom-Soldaten noch einmal auf.",
+  "fre": "Le Soldat fantôme de l'ombre de la ville cherche quelqu'un de fiable pour mener des quêtes grandes et petites. Va revoir le Soldat fantôme de l'ombre.",
+  "ita": "Il Soldato fantasma d'ombra della città cerca qualcuno di fidato per missioni grandi e piccole. Torna dal Soldato fantasma d'ombra.",
+  "rom": "Soldatul Fantomă a Umbrei din oraş caută pe cineva de încredere pentru misiuni mari şi mici. Du-te iar la Soldatul Fantomă a Umbrei.",
+  "rus": "Теневой призрачный воин города ищет того, на кого можно положиться в делах и больших, и малых. Навести Теневого призрачного воина снова.",
+  "bul": "Сенчестият призрачен войник в града търси някой надежден за задачи, големи и малки. Иди пак при Сенчестия призрачен войник.",
+  "chi": "城中的暗影幻影士兵正在寻觅一位可托付之人，承办大小任务。再去见暗影幻影士兵吧。",
+  "jpn": "町の影の幻影兵が、大小さまざまな依頼を託せる者を探しています。もう一度、影の幻影兵に会いに行きましょう。",
+  "kor": "마을의 그림자 환영 병사가 크고 작은 퀘스트를 맡길 만한 자를 찾고 있다. 그림자 환영 병사를 다시 찾아가라.",
+  "tha": "ทหารเงาภาพลวงประจำเมืองกำลังมองหาผู้ที่ไว้ใจได้เพื่อทำเควสต์ทั้งใหญ่และเล็ก จงไปพบทหารเงาภาพลวงอีกครั้ง"
+ },
+ "18803": {
+  "en": "The town's Shadow Phantom Soldier is looking for someone he can rely on to carry out quests both big and small. Go see the Shadow Phantom Soldier again.",
+  "ger": "Der Schattenphantom-Soldat der Stadt sucht jemanden, auf den er sich bei Quests großer wie kleiner Art verlassen kann. Suche den Schattenphantom-Soldaten noch einmal auf.",
+  "fre": "Le Soldat fantôme de l'ombre de la ville cherche quelqu'un de fiable pour mener des quêtes grandes et petites. Va revoir le Soldat fantôme de l'ombre.",
+  "ita": "Il Soldato fantasma d'ombra della città cerca qualcuno di fidato per missioni grandi e piccole. Torna dal Soldato fantasma d'ombra.",
+  "rom": "Soldatul Fantomă a Umbrei din oraş caută pe cineva de încredere pentru misiuni mari şi mici. Du-te iar la Soldatul Fantomă a Umbrei.",
+  "rus": "Теневой призрачный воин города ищет того, на кого можно положиться в делах и больших, и малых. Навести Теневого призрачного воина снова.",
+  "bul": "Сенчестият призрачен войник в града търси някой надежден за задачи, големи и малки. Иди пак при Сенчестия призрачен войник.",
+  "chi": "城中的暗影幻影士兵正在寻觅一位可托付之人，承办大小任务。再去见暗影幻影士兵吧。",
+  "jpn": "町の影の幻影兵が、大小さまざまな依頼を託せる者を探しています。もう一度、影の幻影兵に会いに行きましょう。",
+  "kor": "마을의 그림자 환영 병사가 크고 작은 퀘스트를 맡길 만한 자를 찾고 있다. 그림자 환영 병사를 다시 찾아가라.",
+  "tha": "ทหารเงาภาพลวงประจำเมืองกำลังมองหาผู้ที่ไว้ใจได้เพื่อทำเควสต์ทั้งใหญ่และเล็ก จงไปพบทหารเงาภาพลวงอีกครั้ง"
+ },
+ "18808": {
+  "en": "The town's Shadow Phantom Soldier is looking for someone he can rely on to carry out quests both big and small. Go see the Shadow Phantom Soldier again.",
+  "ger": "Der Schattenphantom-Soldat der Stadt sucht jemanden, auf den er sich bei Quests großer wie kleiner Art verlassen kann. Suche den Schattenphantom-Soldaten noch einmal auf.",
+  "fre": "Le Soldat fantôme de l'ombre de la ville cherche quelqu'un de fiable pour mener des quêtes grandes et petites. Va revoir le Soldat fantôme de l'ombre.",
+  "ita": "Il Soldato fantasma d'ombra della città cerca qualcuno di fidato per missioni grandi e piccole. Torna dal Soldato fantasma d'ombra.",
+  "rom": "Soldatul Fantomă a Umbrei din oraş caută pe cineva de încredere pentru misiuni mari şi mici. Du-te iar la Soldatul Fantomă a Umbrei.",
+  "rus": "Теневой призрачный воин города ищет того, на кого можно положиться в делах и больших, и малых. Навести Теневого призрачного воина снова.",
+  "bul": "Сенчестият призрачен войник в града търси някой надежден за задачи, големи и малки. Иди пак при Сенчестия призрачен войник.",
+  "chi": "城中的暗影幻影士兵正在寻觅一位可托付之人，承办大小任务。再去见暗影幻影士兵吧。",
+  "jpn": "町の影の幻影兵が、大小さまざまな依頼を託せる者を探しています。もう一度、影の幻影兵に会いに行きましょう。",
+  "kor": "마을의 그림자 환영 병사가 크고 작은 퀘스트를 맡길 만한 자를 찾고 있다. 그림자 환영 병사를 다시 찾아가라.",
+  "tha": "ทหารเงาภาพลวงประจำเมืองกำลังมองหาผู้ที่ไว้ใจได้เพื่อทำเควสต์ทั้งใหญ่และเล็ก จงไปพบทหารเงาภาพลวงอีกครั้ง"
+ },
  "18813": {
   "en": "The Shadow Phantom Soldier is looking for someone he can rely on to carry out Shadow Phantom Guardians' quests. Go see the Shadow Phantom Soldier again.",
   "ger": "Der Schattenphantom-Soldat sucht jemanden, auf den er sich bei den Quests der Schattenphantom-Wächter verlassen kann. Suche den Schattenphantom-Soldaten noch einmal auf.",
@@ -8813,6 +9320,318 @@
   "kor": "몬스터들이 다시 병사들을 습격하기 시작했다. 그림자 환영 병사를 만나러 가라.",
   "tha": "สัตว์ประหลาดเริ่มโจมตีเหล่าทหารอีกครั้ง จงไปพบทหารเงาภาพลวง"
  },
+ "19002": {
+  "en": "What kind of supplies...?",
+  "ger": "Was für Vorräte...?",
+  "fre": "Quel genre de provisions... ?",
+  "ita": "Che genere di provviste...?",
+  "rom": "Ce fel de provizii...?",
+  "rus": "Какие припасы...?",
+  "bul": "Какви припаси...?",
+  "chi": "是什么样的补给……？",
+  "jpn": "どのような物資を……？",
+  "kor": "어떤 물자를…?",
+  "tha": "เสบียงแบบไหนกัน…"
+ },
+ "19003": {
+  "en": "Ok, I'll try it. (Accept)",
+  "ger": "Gut, ich versuche es. (Annehmen)",
+  "fre": "Bon, je vais essayer. (Accepter)",
+  "ita": "Va bene, ci provo. (Accetta)",
+  "rom": "Bine, am să încerc. (Acceptă)",
+  "rus": "Ладно, попробую. (Принять)",
+  "bul": "Добре, ще опитам. (Приеми)",
+  "chi": "好，我试试。（接受）",
+  "jpn": "では、やってみます。（受ける）",
+  "kor": "좋다, 해 보겠다. (수락)",
+  "tha": "ได้ ข้าจะลองดู (รับ)"
+ },
+ "19004": {
+  "en": "It's the quartermaster unit's job. (Refuse)",
+  "ger": "Das ist Sache der Quartiermeister-Einheit. (Ablehnen)",
+  "fre": "C'est l'affaire de l'intendance. (Refuser)",
+  "ita": "È compito del reparto del quartiermastro. (Rifiuta)",
+  "rom": "E treaba unităţii de intendenţă. (Refuză)",
+  "rus": "Это дело интендантской службы. (Отказаться)",
+  "bul": "Това е работа на интендантството. (Откажи)",
+  "chi": "那是补给官部队的差事。（拒绝）",
+  "jpn": "それは補給官部隊の仕事です。（断る）",
+  "kor": "그건 보급관 부대의 일이다. (거절)",
+  "tha": "นั่นเป็นงานของหน่วยพลาธิการ (ปฏิเสธ)"
+ },
+ "19008": {
+  "en": "Oh, already gone...",
+  "ger": "Oh, schon fort...",
+  "fre": "Oh, déjà parti...",
+  "ita": "Oh, già andato...",
+  "rom": "Oh, deja plecat...",
+  "rus": "О, уже ушёл...",
+  "bul": "О, вече го няма...",
+  "chi": "哦，已经走了……",
+  "jpn": "おや、もういないのか……",
+  "kor": "어라, 벌써 갔군….",
+  "tha": "อ้าว ไปเสียแล้ว…"
+ },
+ "19009": {
+  "en": "All right. (Accept)",
+  "ger": "Also gut. (Annehmen)",
+  "fre": "D'accord. (Accepter)",
+  "ita": "Va bene. (Accetta)",
+  "rom": "În regulă. (Acceptă)",
+  "rus": "Хорошо. (Принять)",
+  "bul": "Добре. (Приеми)",
+  "chi": "好的。（接受）",
+  "jpn": "わかりました。（受ける）",
+  "kor": "좋다. (수락)",
+  "tha": "ตกลง (รับ)"
+ },
+ "19010": {
+  "en": "I'm busy now. I'll come back later. (Refuse)",
+  "ger": "Ich bin gerade beschäftigt. Ich komme später wieder. (Ablehnen)",
+  "fre": "Je suis occupé pour l'instant. Je reviendrai plus tard. (Refuser)",
+  "ita": "Ora sono occupato. Tornerò più tardi. (Rifiuta)",
+  "rom": "Acum sunt ocupat. Revin mai târziu. (Refuză)",
+  "rus": "Я сейчас занят. Вернусь позже. (Отказаться)",
+  "bul": "В момента съм зает. Ще се върна по-късно. (Откажи)",
+  "chi": "我现在正忙，稍后再来。（拒绝）",
+  "jpn": "今は手が離せません。後ほどまた。（断る）",
+  "kor": "지금은 바쁘다. 나중에 다시 오겠다. (거절)",
+  "tha": "ตอนนี้ข้ายุ่งอยู่ ไว้กลับมาใหม่ (ปฏิเสธ)"
+ },
+ "19018": {
+  "en": "What kind of supplies...?",
+  "ger": "Was für Vorräte...?",
+  "fre": "Quel genre de provisions... ?",
+  "ita": "Che genere di provviste...?",
+  "rom": "Ce fel de provizii...?",
+  "rus": "Какие припасы...?",
+  "bul": "Какви припаси...?",
+  "chi": "是什么样的补给……？",
+  "jpn": "どのような物資を……？",
+  "kor": "어떤 물자를…?",
+  "tha": "เสบียงแบบไหนกัน…"
+ },
+ "19019": {
+  "en": "Ok, I'll try it. (Accept)",
+  "ger": "Gut, ich versuche es. (Annehmen)",
+  "fre": "Bon, je vais essayer. (Accepter)",
+  "ita": "Va bene, ci provo. (Accetta)",
+  "rom": "Bine, am să încerc. (Acceptă)",
+  "rus": "Ладно, попробую. (Принять)",
+  "bul": "Добре, ще опитам. (Приеми)",
+  "chi": "好，我试试。（接受）",
+  "jpn": "では、やってみます。（受ける）",
+  "kor": "좋다, 해 보겠다. (수락)",
+  "tha": "ได้ ข้าจะลองดู (รับ)"
+ },
+ "19020": {
+  "en": "It's the quartermaster unit's job. (Refuse)",
+  "ger": "Das ist Sache der Quartiermeister-Einheit. (Ablehnen)",
+  "fre": "C'est l'affaire de l'intendance. (Refuser)",
+  "ita": "È compito del reparto del quartiermastro. (Rifiuta)",
+  "rom": "E treaba unităţii de intendenţă. (Refuză)",
+  "rus": "Это дело интендантской службы. (Отказаться)",
+  "bul": "Това е работа на интендантството. (Откажи)",
+  "chi": "那是补给官部队的差事。（拒绝）",
+  "jpn": "それは補給官部隊の仕事です。（断る）",
+  "kor": "그건 보급관 부대의 일이다. (거절)",
+  "tha": "นั่นเป็นงานของหน่วยพลาธิการ (ปฏิเสธ)"
+ },
+ "19024": {
+  "en": "Oh, already gone...",
+  "ger": "Oh, schon fort...",
+  "fre": "Oh, déjà parti...",
+  "ita": "Oh, già andato...",
+  "rom": "Oh, deja plecat...",
+  "rus": "О, уже ушёл...",
+  "bul": "О, вече го няма...",
+  "chi": "哦，已经走了……",
+  "jpn": "おや、もういないのか……",
+  "kor": "어라, 벌써 갔군….",
+  "tha": "อ้าว ไปเสียแล้ว…"
+ },
+ "19025": {
+  "en": "All right. (Accept)",
+  "ger": "Also gut. (Annehmen)",
+  "fre": "D'accord. (Accepter)",
+  "ita": "Va bene. (Accetta)",
+  "rom": "În regulă. (Acceptă)",
+  "rus": "Хорошо. (Принять)",
+  "bul": "Добре. (Приеми)",
+  "chi": "好的。（接受）",
+  "jpn": "わかりました。（受ける）",
+  "kor": "좋다. (수락)",
+  "tha": "ตกลง (รับ)"
+ },
+ "19026": {
+  "en": "I'm busy now. I'll come back later. (Refuse)",
+  "ger": "Ich bin gerade beschäftigt. Ich komme später wieder. (Ablehnen)",
+  "fre": "Je suis occupé pour l'instant. Je reviendrai plus tard. (Refuser)",
+  "ita": "Ora sono occupato. Tornerò più tardi. (Rifiuta)",
+  "rom": "Acum sunt ocupat. Revin mai târziu. (Refuză)",
+  "rus": "Я сейчас занят. Вернусь позже. (Отказаться)",
+  "bul": "В момента съм зает. Ще се върна по-късно. (Откажи)",
+  "chi": "我现在正忙，稍后再来。（拒绝）",
+  "jpn": "今は手が離せません。後ほどまた。（断る）",
+  "kor": "지금은 바쁘다. 나중에 다시 오겠다. (거절)",
+  "tha": "ตอนนี้ข้ายุ่งอยู่ ไว้กลับมาใหม่ (ปฏิเสธ)"
+ },
+ "19034": {
+  "en": "What kind of supplies...?",
+  "ger": "Was für Vorräte...?",
+  "fre": "Quel genre de provisions... ?",
+  "ita": "Che genere di provviste...?",
+  "rom": "Ce fel de provizii...?",
+  "rus": "Какие припасы...?",
+  "bul": "Какви припаси...?",
+  "chi": "是什么样的补给……？",
+  "jpn": "どのような物資を……？",
+  "kor": "어떤 물자를…?",
+  "tha": "เสบียงแบบไหนกัน…"
+ },
+ "19035": {
+  "en": "Ok, I'll try it. (Accept)",
+  "ger": "Gut, ich versuche es. (Annehmen)",
+  "fre": "Bon, je vais essayer. (Accepter)",
+  "ita": "Va bene, ci provo. (Accetta)",
+  "rom": "Bine, am să încerc. (Acceptă)",
+  "rus": "Ладно, попробую. (Принять)",
+  "bul": "Добре, ще опитам. (Приеми)",
+  "chi": "好，我试试。（接受）",
+  "jpn": "では、やってみます。（受ける）",
+  "kor": "좋다, 해 보겠다. (수락)",
+  "tha": "ได้ ข้าจะลองดู (รับ)"
+ },
+ "19036": {
+  "en": "It's the quartermaster unit's job. (Refuse)",
+  "ger": "Das ist Sache der Quartiermeister-Einheit. (Ablehnen)",
+  "fre": "C'est l'affaire de l'intendance. (Refuser)",
+  "ita": "È compito del reparto del quartiermastro. (Rifiuta)",
+  "rom": "E treaba unităţii de intendenţă. (Refuză)",
+  "rus": "Это дело интендантской службы. (Отказаться)",
+  "bul": "Това е работа на интендантството. (Откажи)",
+  "chi": "那是补给官部队的差事。（拒绝）",
+  "jpn": "それは補給官部隊の仕事です。（断る）",
+  "kor": "그건 보급관 부대의 일이다. (거절)",
+  "tha": "นั่นเป็นงานของหน่วยพลาธิการ (ปฏิเสธ)"
+ },
+ "19040": {
+  "en": "Oh, already gone...",
+  "ger": "Oh, schon fort...",
+  "fre": "Oh, déjà parti...",
+  "ita": "Oh, già andato...",
+  "rom": "Oh, deja plecat...",
+  "rus": "О, уже ушёл...",
+  "bul": "О, вече го няма...",
+  "chi": "哦，已经走了……",
+  "jpn": "おや、もういないのか……",
+  "kor": "어라, 벌써 갔군….",
+  "tha": "อ้าว ไปเสียแล้ว…"
+ },
+ "19041": {
+  "en": "All right. (Accept)",
+  "ger": "Also gut. (Annehmen)",
+  "fre": "D'accord. (Accepter)",
+  "ita": "Va bene. (Accetta)",
+  "rom": "În regulă. (Acceptă)",
+  "rus": "Хорошо. (Принять)",
+  "bul": "Добре. (Приеми)",
+  "chi": "好的。（接受）",
+  "jpn": "わかりました。（受ける）",
+  "kor": "좋다. (수락)",
+  "tha": "ตกลง (รับ)"
+ },
+ "19042": {
+  "en": "I'm busy now. I'll come back later. (Refuse)",
+  "ger": "Ich bin gerade beschäftigt. Ich komme später wieder. (Ablehnen)",
+  "fre": "Je suis occupé pour l'instant. Je reviendrai plus tard. (Refuser)",
+  "ita": "Ora sono occupato. Tornerò più tardi. (Rifiuta)",
+  "rom": "Acum sunt ocupat. Revin mai târziu. (Refuză)",
+  "rus": "Я сейчас занят. Вернусь позже. (Отказаться)",
+  "bul": "В момента съм зает. Ще се върна по-късно. (Откажи)",
+  "chi": "我现在正忙，稍后再来。（拒绝）",
+  "jpn": "今は手が離せません。後ほどまた。（断る）",
+  "kor": "지금은 바쁘다. 나중에 다시 오겠다. (거절)",
+  "tha": "ตอนนี้ข้ายุ่งอยู่ ไว้กลับมาใหม่ (ปฏิเสธ)"
+ },
+ "19801": {
+  "en": "'Shadow Phantom Soldier' is looking for an adventurer who will do the jobs for the Shadow Phantom unit. Go check with him.",
+  "ger": "Der 'Schattenphantom-Soldat' sucht einen Abenteurer, der die Arbeiten der Schattenphantom-Einheit übernimmt. Frag bei ihm nach.",
+  "fre": "Le 'Soldat fantôme de l'ombre' cherche un aventurier pour accomplir les travaux de l'unité fantôme de l'ombre. Va le voir.",
+  "ita": "Il 'Soldato fantasma d'ombra' cerca un avventuriero che svolga i lavori del reparto fantasma d'ombra. Va' a informarti da lui.",
+  "rom": "'Soldatul Fantomă a Umbrei' caută un aventurier care să facă treburile unităţii Fantomă a Umbrei. Du-te să-l întrebi.",
+  "rus": "«Теневой призрачный воин» ищет искателя приключений, который возьмётся за работу Теневого призрачного отряда. Спроси у него.",
+  "bul": "„Сенчестият призрачен войник“ търси авантюрист, който да върши работата на Сенчестия призрачен отряд. Иди да го попиташ.",
+  "chi": "“暗影幻影士兵”正在寻觅一位冒险者，为暗影幻影部队办事。去向他打听吧。",
+  "jpn": "「影の幻影兵」が、影の幻影部隊の仕事を担う冒険者を探しています。彼に尋ねてみましょう。",
+  "kor": "'그림자 환영 병사'가 그림자 환영 부대의 일을 맡을 모험가를 찾고 있다. 그를 찾아가 물어보라.",
+  "tha": "'ทหารเงาภาพลวง' กำลังมองหานักผจญภัยที่จะทำงานให้หน่วยเงาภาพลวง จงไปสอบถามจากเขา"
+ },
+ "19803": {
+  "en": "'Shadow Phantom Soldier' is looking for an adventurer who will do the quests of the Shadow Phantom unit. Go check with him.",
+  "ger": "Der 'Schattenphantom-Soldat' sucht einen Abenteurer, der die Quests der Schattenphantom-Einheit übernimmt. Frag bei ihm nach.",
+  "fre": "Le 'Soldat fantôme de l'ombre' cherche un aventurier pour accomplir les quêtes de l'unité fantôme de l'ombre. Va le voir.",
+  "ita": "Il 'Soldato fantasma d'ombra' cerca un avventuriero che svolga le missioni del reparto fantasma d'ombra. Va' a informarti da lui.",
+  "rom": "'Soldatul Fantomă a Umbrei' caută un aventurier care să ducă misiunile unităţii Fantomă a Umbrei. Du-te să-l întrebi.",
+  "rus": "«Теневой призрачный воин» ищет искателя приключений, который возьмётся за задания Теневого призрачного отряда. Спроси у него.",
+  "bul": "„Сенчестият призрачен войник“ търси авантюрист, който да поеме задачите на Сенчестия призрачен отряд. Иди да го попиташ.",
+  "chi": "“暗影幻影士兵”正在寻觅一位冒险者，承接暗影幻影部队的任务。去向他打听吧。",
+  "jpn": "「影の幻影兵」が、影の幻影部隊のクエストを担う冒険者を探しています。彼に尋ねてみましょう。",
+  "kor": "'그림자 환영 병사'가 그림자 환영 부대의 퀘스트를 맡을 모험가를 찾고 있다. 그를 찾아가 물어보라.",
+  "tha": "'ทหารเงาภาพลวง' กำลังมองหานักผจญภัยที่จะรับเควสต์ของหน่วยเงาภาพลวง จงไปสอบถามจากเขา"
+ },
+ "19809": {
+  "en": "'Shadow Phantom Soldier' is looking for an adventurer who will do the jobs for the Shadow Phantom unit. Go check with him.",
+  "ger": "Der 'Schattenphantom-Soldat' sucht einen Abenteurer, der die Arbeiten der Schattenphantom-Einheit übernimmt. Frag bei ihm nach.",
+  "fre": "Le 'Soldat fantôme de l'ombre' cherche un aventurier pour accomplir les travaux de l'unité fantôme de l'ombre. Va le voir.",
+  "ita": "Il 'Soldato fantasma d'ombra' cerca un avventuriero che svolga i lavori del reparto fantasma d'ombra. Va' a informarti da lui.",
+  "rom": "'Soldatul Fantomă a Umbrei' caută un aventurier care să facă treburile unităţii Fantomă a Umbrei. Du-te să-l întrebi.",
+  "rus": "«Теневой призрачный воин» ищет искателя приключений, который возьмётся за работу Теневого призрачного отряда. Спроси у него.",
+  "bul": "„Сенчестият призрачен войник“ търси авантюрист, който да върши работата на Сенчестия призрачен отряд. Иди да го попиташ.",
+  "chi": "“暗影幻影士兵”正在寻觅一位冒险者，为暗影幻影部队办事。去向他打听吧。",
+  "jpn": "「影の幻影兵」が、影の幻影部隊の仕事を担う冒険者を探しています。彼に尋ねてみましょう。",
+  "kor": "'그림자 환영 병사'가 그림자 환영 부대의 일을 맡을 모험가를 찾고 있다. 그를 찾아가 물어보라.",
+  "tha": "'ทหารเงาภาพลวง' กำลังมองหานักผจญภัยที่จะทำงานให้หน่วยเงาภาพลวง จงไปสอบถามจากเขา"
+ },
+ "19811": {
+  "en": "'Shadow Phantom Soldier' is looking for an adventurer who will do the quests of the Shadow Phantom unit. Go check with him.",
+  "ger": "Der 'Schattenphantom-Soldat' sucht einen Abenteurer, der die Quests der Schattenphantom-Einheit übernimmt. Frag bei ihm nach.",
+  "fre": "Le 'Soldat fantôme de l'ombre' cherche un aventurier pour accomplir les quêtes de l'unité fantôme de l'ombre. Va le voir.",
+  "ita": "Il 'Soldato fantasma d'ombra' cerca un avventuriero che svolga le missioni del reparto fantasma d'ombra. Va' a informarti da lui.",
+  "rom": "'Soldatul Fantomă a Umbrei' caută un aventurier care să ducă misiunile unităţii Fantomă a Umbrei. Du-te să-l întrebi.",
+  "rus": "«Теневой призрачный воин» ищет искателя приключений, который возьмётся за задания Теневого призрачного отряда. Спроси у него.",
+  "bul": "„Сенчестият призрачен войник“ търси авантюрист, който да поеме задачите на Сенчестия призрачен отряд. Иди да го попиташ.",
+  "chi": "“暗影幻影士兵”正在寻觅一位冒险者，承接暗影幻影部队的任务。去向他打听吧。",
+  "jpn": "「影の幻影兵」が、影の幻影部隊のクエストを担う冒険者を探しています。彼に尋ねてみましょう。",
+  "kor": "'그림자 환영 병사'가 그림자 환영 부대의 퀘스트를 맡을 모험가를 찾고 있다. 그를 찾아가 물어보라.",
+  "tha": "'ทหารเงาภาพลวง' กำลังมองหานักผจญภัยที่จะรับเควสต์ของหน่วยเงาภาพลวง จงไปสอบถามจากเขา"
+ },
+ "19817": {
+  "en": "'Shadow Phantom Soldier' is looking for an adventurer who will do the jobs for the Shadow Phantom unit. Go check with him.",
+  "ger": "Der 'Schattenphantom-Soldat' sucht einen Abenteurer, der die Arbeiten der Schattenphantom-Einheit übernimmt. Frag bei ihm nach.",
+  "fre": "Le 'Soldat fantôme de l'ombre' cherche un aventurier pour accomplir les travaux de l'unité fantôme de l'ombre. Va le voir.",
+  "ita": "Il 'Soldato fantasma d'ombra' cerca un avventuriero che svolga i lavori del reparto fantasma d'ombra. Va' a informarti da lui.",
+  "rom": "'Soldatul Fantomă a Umbrei' caută un aventurier care să facă treburile unităţii Fantomă a Umbrei. Du-te să-l întrebi.",
+  "rus": "«Теневой призрачный воин» ищет искателя приключений, который возьмётся за работу Теневого призрачного отряда. Спроси у него.",
+  "bul": "„Сенчестият призрачен войник“ търси авантюрист, който да върши работата на Сенчестия призрачен отряд. Иди да го попиташ.",
+  "chi": "“暗影幻影士兵”正在寻觅一位冒险者，为暗影幻影部队办事。去向他打听吧。",
+  "jpn": "「影の幻影兵」が、影の幻影部隊の仕事を担う冒険者を探しています。彼に尋ねてみましょう。",
+  "kor": "'그림자 환영 병사'가 그림자 환영 부대의 일을 맡을 모험가를 찾고 있다. 그를 찾아가 물어보라.",
+  "tha": "'ทหารเงาภาพลวง' กำลังมองหานักผจญภัยที่จะทำงานให้หน่วยเงาภาพลวง จงไปสอบถามจากเขา"
+ },
+ "19819": {
+  "en": "'Shadow Phantom Soldier' is looking for an adventurer who will do the quests of the Shadow Phantom unit. Go check with him.",
+  "ger": "Der 'Schattenphantom-Soldat' sucht einen Abenteurer, der die Quests der Schattenphantom-Einheit übernimmt. Frag bei ihm nach.",
+  "fre": "Le 'Soldat fantôme de l'ombre' cherche un aventurier pour accomplir les quêtes de l'unité fantôme de l'ombre. Va le voir.",
+  "ita": "Il 'Soldato fantasma d'ombra' cerca un avventuriero che svolga le missioni del reparto fantasma d'ombra. Va' a informarti da lui.",
+  "rom": "'Soldatul Fantomă a Umbrei' caută un aventurier care să ducă misiunile unităţii Fantomă a Umbrei. Du-te să-l întrebi.",
+  "rus": "«Теневой призрачный воин» ищет искателя приключений, который возьмётся за задания Теневого призрачного отряда. Спроси у него.",
+  "bul": "„Сенчестият призрачен войник“ търси авантюрист, който да поеме задачите на Сенчестия призрачен отряд. Иди да го попиташ.",
+  "chi": "“暗影幻影士兵”正在寻觅一位冒险者，承接暗影幻影部队的任务。去向他打听吧。",
+  "jpn": "「影の幻影兵」が、影の幻影部隊のクエストを担う冒険者を探しています。彼に尋ねてみましょう。",
+  "kor": "'그림자 환영 병사'가 그림자 환영 부대의 퀘스트를 맡을 모험가를 찾고 있다. 그를 찾아가 물어보라.",
+  "tha": "'ทหารเงาภาพลวง' กำลังมองหานักผจญภัยที่จะรับเควสต์ของหน่วยเงาภาพลวง จงไปสอบถามจากเขา"
+ },
  "20024": {
   "en": "I'm not ready yet. Please wait. (Refuse)",
   "ger": "Ich bin noch nicht so weit. Bitte warte. (Ablehnen)",
@@ -8825,6 +9644,19 @@
   "jpn": "まだ支度が整っていません。お待ちください。（断る）",
   "kor": "아직 준비가 안 되었다. 기다려 다오. (거절)",
   "tha": "ข้ายังไม่พร้อม โปรดรอก่อน (ปฏิเสธ)"
+ },
+ "20025": {
+  "en": "I'll give you a full briefing when you're ready, then. May the grace of God be with you¡¦ (The quest has been cancelled)",
+  "ger": "Dann weise ich dich ausführlich ein, sobald du bereit bist. Möge Gottes Gnade mit dir sein… (Die Quest wurde abgebrochen)",
+  "fre": "Je te ferai alors un exposé complet quand tu seras prêt. Que la grâce de Dieu t'accompagne… (La quête a été annulée)",
+  "ita": "Ti darò allora tutte le istruzioni quando sarai pronto. Che la grazia di Dio sia con te… (La missione è stata annullata)",
+  "rom": "Atunci îţi voi da toate lămuririle când vei fi gata. Harul lui Dumnezeu să fie cu tine… (Misiunea a fost anulată)",
+  "rus": "Тогда я всё подробно объясню, когда ты будешь готов. Да пребудет с тобой милость Божья… (Задание отменено)",
+  "bul": "Тогава ще ти обясня всичко подробно, щом бъдеш готов. Божията благодат да е с теб… (Задачата е отменена)",
+  "chi": "那么待你准备妥当，我再详加说明。愿神的恩泽与你同在……（任务已取消）",
+  "jpn": "では、あなたの支度が整い次第、詳しくお話ししましょう。神の恵みがあなたと共に……（クエストは取り消されました）",
+  "kor": "그렇다면 그대가 준비되거든 자세히 일러 주겠다. 신의 은총이 그대와 함께하기를… (퀘스트가 취소되었다)",
+  "tha": "เช่นนั้นเมื่อท่านพร้อม ข้าจะอธิบายให้ฟังโดยละเอียด ขอพระคุณของพระเจ้าจงอยู่กับท่าน… (เควสต์ถูกยกเลิกแล้ว)"
  },
  "20030": {
   "en": "I'm not ready yet. Please wait. (Refuse)",
@@ -8839,6 +9671,19 @@
   "kor": "아직 준비가 안 되었다. 기다려 다오. (거절)",
   "tha": "ข้ายังไม่พร้อม โปรดรอก่อน (ปฏิเสธ)"
  },
+ "20038": {
+  "en": "Better grab a chance than to regret it. Well, come back later if you change your mind. (The quest has been cancelled.)",
+  "ger": "Eine Gelegenheit zu ergreifen ist besser, als sie zu bereuen. Nun gut, komm später wieder, wenn du es dir anders überlegst. (Die Quest wurde abgebrochen.)",
+  "fre": "Mieux vaut saisir sa chance que de la regretter. Enfin, reviens plus tard si tu changes d'avis. (La quête a été annulée.)",
+  "ita": "Meglio cogliere un'occasione che rimpiangerla. Va bene, torna più tardi se cambi idea. (La missione è stata annullata.)",
+  "rom": "Mai bine prinzi o şansă decât s-o regreţi. Ei bine, întoarce-te mai târziu dacă te răzgândeşti. (Misiunea a fost anulată.)",
+  "rus": "Лучше ухватиться за случай, чем потом жалеть. Что ж, вернись позже, если передумаешь. (Задание отменено.)",
+  "bul": "По-добре да уловиш случая, отколкото да съжаляваш. Е, върни се по-късно, ако размислиш. (Задачата е отменена.)",
+  "chi": "抓住机会总好过日后追悔。罢了，若改变主意，日后再来吧。（任务已取消。）",
+  "jpn": "好機は逃すより掴むに限ります。まあ、気が変わったら後ほどまた。（クエストは取り消されました。）",
+  "kor": "기회란 놓치고 후회하느니 잡는 편이 낫지. 뭐, 마음이 바뀌거든 나중에 다시 오게. (퀘스트가 취소되었다.)",
+  "tha": "คว้าโอกาสไว้ย่อมดีกว่ามานั่งเสียดายภายหลัง เอาเถอะ หากเปลี่ยนใจก็กลับมาใหม่ (เควสต์ถูกยกเลิกแล้ว)"
+ },
  "20043": {
   "en": "Give me some time to prepare. (Refuse)",
   "ger": "Gib mir Zeit, mich vorzubereiten. (Ablehnen)",
@@ -8851,6 +9696,58 @@
   "jpn": "準備する時間をください。（断る）",
   "kor": "준비할 시간을 다오. (거절)",
   "tha": "ขอเวลาเตรียมตัวสักหน่อย (ปฏิเสธ)"
+ },
+ "20044": {
+  "en": "Better grab a chance than to regret it. Well, come back later if you change your mind. (The quest has been cancelled.)",
+  "ger": "Eine Gelegenheit zu ergreifen ist besser, als sie zu bereuen. Nun gut, komm später wieder, wenn du es dir anders überlegst. (Die Quest wurde abgebrochen.)",
+  "fre": "Mieux vaut saisir sa chance que de la regretter. Enfin, reviens plus tard si tu changes d'avis. (La quête a été annulée.)",
+  "ita": "Meglio cogliere un'occasione che rimpiangerla. Va bene, torna più tardi se cambi idea. (La missione è stata annullata.)",
+  "rom": "Mai bine prinzi o şansă decât s-o regreţi. Ei bine, întoarce-te mai târziu dacă te răzgândeşti. (Misiunea a fost anulată.)",
+  "rus": "Лучше ухватиться за случай, чем потом жалеть. Что ж, вернись позже, если передумаешь. (Задание отменено.)",
+  "bul": "По-добре да уловиш случая, отколкото да съжаляваш. Е, върни се по-късно, ако размислиш. (Задачата е отменена.)",
+  "chi": "抓住机会总好过日后追悔。罢了，若改变主意，日后再来吧。（任务已取消。）",
+  "jpn": "好機は逃すより掴むに限ります。まあ、気が変わったら後ほどまた。（クエストは取り消されました。）",
+  "kor": "기회란 놓치고 후회하느니 잡는 편이 낫지. 뭐, 마음이 바뀌거든 나중에 다시 오게. (퀘스트가 취소되었다.)",
+  "tha": "คว้าโอกาสไว้ย่อมดีกว่ามานั่งเสียดายภายหลัง เอาเถอะ หากเปลี่ยนใจก็กลับมาใหม่ (เควสต์ถูกยกเลิกแล้ว)"
+ },
+ "20051": {
+  "en": "I didn't mean to pester you. But as the clan gets stronger, so do you. Please come back if you change your mind. (The quest has been cancelled.)",
+  "ger": "Ich wollte dich nicht bedrängen. Doch je stärker das Haus wird, desto stärker wirst auch du. Komm wieder, wenn du es dir anders überlegst. (Die Quest wurde abgebrochen.)",
+  "fre": "Je ne voulais pas t'importuner. Mais plus la maison se renforce, plus tu te renforces. Reviens si tu changes d'avis. (La quête a été annulée.)",
+  "ita": "Non volevo assillarti. Ma più il casato si rafforza, più ti rafforzi tu. Torna se cambi idea. (La missione è stata annullata.)",
+  "rom": "N-am vrut să te sâcâi. Dar cu cât casa se întăreşte, cu atât te întăreşti şi tu. Întoarce-te dacă te răzgândeşti. (Misiunea a fost anulată.)",
+  "rus": "Я не хотел досаждать. Но чем крепче становится род, тем крепче и ты. Возвращайся, если передумаешь. (Задание отменено.)",
+  "bul": "Не исках да те досаждам. Но колкото по-силен става родът, толкова по-силен ставаш и ти. Върни се, ако размислиш. (Задачата е отменена.)",
+  "chi": "我并非有意纠缠。只是家族愈强，你亦愈强。若改变主意，请再来找我。（任务已取消。）",
+  "jpn": "しつこくするつもりはありませんでした。ただ、一族が強くなればあなたも強くなるのです。気が変わったら、また来てください。（クエストは取り消されました。）",
+  "kor": "귀찮게 할 뜻은 없었다. 다만 가문이 강해질수록 그대도 강해지는 법이지. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
+  "tha": "ข้าไม่ได้ตั้งใจจะรบเร้า เพียงแต่ยิ่งตระกูลแข็งแกร่งขึ้น ท่านก็แข็งแกร่งขึ้นด้วย หากเปลี่ยนใจก็กลับมาได้ (เควสต์ถูกยกเลิกแล้ว)"
+ },
+ "20054": {
+  "en": "¡¦¡¦ Hmm, for the clan¡¦¡¦",
+  "ger": "…… Hmm, für das Haus……",
+  "fre": "…… Hmm, pour la maison……",
+  "ita": "…… Hmm, per il casato……",
+  "rom": "…… Hmm, pentru casă……",
+  "rus": "…… Хм, ради рода……",
+  "bul": "…… Хм, заради рода……",
+  "chi": "……嗯，为了家族……",
+  "jpn": "……ふむ、一族のために……",
+  "kor": "…… 흠, 가문을 위해서라….",
+  "tha": "…… อืม เพื่อตระกูล……"
+ },
+ "20055": {
+  "en": "All right, I'll take it. (Accept)",
+  "ger": "Also gut, ich nehme sie an. (Annehmen)",
+  "fre": "D'accord, je m'en charge. (Accepter)",
+  "ita": "Va bene, me ne occupo. (Accetta)",
+  "rom": "În regulă, o iau. (Acceptă)",
+  "rus": "Хорошо, я берусь. (Принять)",
+  "bul": "Добре, поемам я. (Приеми)",
+  "chi": "好，我接下了。（接受）",
+  "jpn": "承知しました、お受けします。（受ける）",
+  "kor": "좋다, 맡겠다. (수락)",
+  "tha": "ตกลง ข้ารับไว้ (รับ)"
  },
  "20056": {
   "en": "Give me some time to prepare. (Refuse)",
@@ -8865,6 +9762,19 @@
   "kor": "준비할 시간을 다오. (거절)",
   "tha": "ขอเวลาเตรียมตัวสักหน่อย (ปฏิเสธ)"
  },
+ "20057": {
+  "en": "I didn't mean to pester you. But as the clan gets stronger, so do you. Please come back if you change your mind. (The quest has been cancelled.)",
+  "ger": "Ich wollte dich nicht bedrängen. Doch je stärker das Haus wird, desto stärker wirst auch du. Komm wieder, wenn du es dir anders überlegst. (Die Quest wurde abgebrochen.)",
+  "fre": "Je ne voulais pas t'importuner. Mais plus la maison se renforce, plus tu te renforces. Reviens si tu changes d'avis. (La quête a été annulée.)",
+  "ita": "Non volevo assillarti. Ma più il casato si rafforza, più ti rafforzi tu. Torna se cambi idea. (La missione è stata annullata.)",
+  "rom": "N-am vrut să te sâcâi. Dar cu cât casa se întăreşte, cu atât te întăreşti şi tu. Întoarce-te dacă te răzgândeşti. (Misiunea a fost anulată.)",
+  "rus": "Я не хотел досаждать. Но чем крепче становится род, тем крепче и ты. Возвращайся, если передумаешь. (Задание отменено.)",
+  "bul": "Не исках да те досаждам. Но колкото по-силен става родът, толкова по-силен ставаш и ти. Върни се, ако размислиш. (Задачата е отменена.)",
+  "chi": "我并非有意纠缠。只是家族愈强，你亦愈强。若改变主意，请再来找我。（任务已取消。）",
+  "jpn": "しつこくするつもりはありませんでした。ただ、一族が強くなればあなたも強くなるのです。気が変わったら、また来てください。（クエストは取り消されました。）",
+  "kor": "귀찮게 할 뜻은 없었다. 다만 가문이 강해질수록 그대도 강해지는 법이지. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
+  "tha": "ข้าไม่ได้ตั้งใจจะรบเร้า เพียงแต่ยิ่งตระกูลแข็งแกร่งขึ้น ท่านก็แข็งแกร่งขึ้นด้วย หากเปลี่ยนใจก็กลับมาได้ (เควสต์ถูกยกเลิกแล้ว)"
+ },
  "20063": {
   "en": "I'm not ready yet. Please wait. (Refuse)",
   "ger": "Ich bin noch nicht so weit. Bitte warte. (Ablehnen)",
@@ -8877,6 +9787,19 @@
   "jpn": "まだ支度が整っていません。お待ちください。（断る）",
   "kor": "아직 준비가 안 되었다. 기다려 다오. (거절)",
   "tha": "ข้ายังไม่พร้อม โปรดรอก่อน (ปฏิเสธ)"
+ },
+ "20064": {
+  "en": "I'll give you a full briefing when you're ready, then. May the grace of God be with you¡¦ (The quest has been cancelled)",
+  "ger": "Dann weise ich dich ausführlich ein, sobald du bereit bist. Möge Gottes Gnade mit dir sein… (Die Quest wurde abgebrochen)",
+  "fre": "Je te ferai alors un exposé complet quand tu seras prêt. Que la grâce de Dieu t'accompagne… (La quête a été annulée)",
+  "ita": "Ti darò allora tutte le istruzioni quando sarai pronto. Che la grazia di Dio sia con te… (La missione è stata annullata)",
+  "rom": "Atunci îţi voi da toate lămuririle când vei fi gata. Harul lui Dumnezeu să fie cu tine… (Misiunea a fost anulată)",
+  "rus": "Тогда я всё подробно объясню, когда ты будешь готов. Да пребудет с тобой милость Божья… (Задание отменено)",
+  "bul": "Тогава ще ти обясня всичко подробно, щом бъдеш готов. Божията благодат да е с теб… (Задачата е отменена)",
+  "chi": "那么待你准备妥当，我再详加说明。愿神的恩泽与你同在……（任务已取消）",
+  "jpn": "では、あなたの支度が整い次第、詳しくお話ししましょう。神の恵みがあなたと共に……（クエストは取り消されました）",
+  "kor": "그렇다면 그대가 준비되거든 자세히 일러 주겠다. 신의 은총이 그대와 함께하기를… (퀘스트가 취소되었다)",
+  "tha": "เช่นนั้นเมื่อท่านพร้อม ข้าจะอธิบายให้ฟังโดยละเอียด ขอพระคุณของพระเจ้าจงอยู่กับท่าน… (เควสต์ถูกยกเลิกแล้ว)"
  },
  "20069": {
   "en": "I'm not ready yet. Please wait. (Refuse)",
@@ -8891,6 +9814,32 @@
   "kor": "아직 준비가 안 되었다. 기다려 다오. (거절)",
   "tha": "ข้ายังไม่พร้อม โปรดรอก่อน (ปฏิเสธ)"
  },
+ "20070": {
+  "en": "I'll give you a full briefing when you're ready, then. May the grace of God be with you¡¦ (The quest has been cancelled)",
+  "ger": "Dann weise ich dich ausführlich ein, sobald du bereit bist. Möge Gottes Gnade mit dir sein… (Die Quest wurde abgebrochen)",
+  "fre": "Je te ferai alors un exposé complet quand tu seras prêt. Que la grâce de Dieu t'accompagne… (La quête a été annulée)",
+  "ita": "Ti darò allora tutte le istruzioni quando sarai pronto. Che la grazia di Dio sia con te… (La missione è stata annullata)",
+  "rom": "Atunci îţi voi da toate lămuririle când vei fi gata. Harul lui Dumnezeu să fie cu tine… (Misiunea a fost anulată)",
+  "rus": "Тогда я всё подробно объясню, когда ты будешь готов. Да пребудет с тобой милость Божья… (Задание отменено)",
+  "bul": "Тогава ще ти обясня всичко подробно, щом бъдеш готов. Божията благодат да е с теб… (Задачата е отменена)",
+  "chi": "那么待你准备妥当，我再详加说明。愿神的恩泽与你同在……（任务已取消）",
+  "jpn": "では、あなたの支度が整い次第、詳しくお話ししましょう。神の恵みがあなたと共に……（クエストは取り消されました）",
+  "kor": "그렇다면 그대가 준비되거든 자세히 일러 주겠다. 신의 은총이 그대와 함께하기를… (퀘스트가 취소되었다)",
+  "tha": "เช่นนั้นเมื่อท่านพร้อม ข้าจะอธิบายให้ฟังโดยละเอียด ขอพระคุณของพระเจ้าจงอยู่กับท่าน… (เควสต์ถูกยกเลิกแล้ว)"
+ },
+ "20077": {
+  "en": "Better grab a chance than to regret it. Well, come back later if you change your mind. (The quest has been cancelled.)",
+  "ger": "Eine Gelegenheit zu ergreifen ist besser, als sie zu bereuen. Nun gut, komm später wieder, wenn du es dir anders überlegst. (Die Quest wurde abgebrochen.)",
+  "fre": "Mieux vaut saisir sa chance que de la regretter. Enfin, reviens plus tard si tu changes d'avis. (La quête a été annulée.)",
+  "ita": "Meglio cogliere un'occasione che rimpiangerla. Va bene, torna più tardi se cambi idea. (La missione è stata annullata.)",
+  "rom": "Mai bine prinzi o şansă decât s-o regreţi. Ei bine, întoarce-te mai târziu dacă te răzgândeşti. (Misiunea a fost anulată.)",
+  "rus": "Лучше ухватиться за случай, чем потом жалеть. Что ж, вернись позже, если передумаешь. (Задание отменено.)",
+  "bul": "По-добре да уловиш случая, отколкото да съжаляваш. Е, върни се по-късно, ако размислиш. (Задачата е отменена.)",
+  "chi": "抓住机会总好过日后追悔。罢了，若改变主意，日后再来吧。（任务已取消。）",
+  "jpn": "好機は逃すより掴むに限ります。まあ、気が変わったら後ほどまた。（クエストは取り消されました。）",
+  "kor": "기회란 놓치고 후회하느니 잡는 편이 낫지. 뭐, 마음이 바뀌거든 나중에 다시 오게. (퀘스트가 취소되었다.)",
+  "tha": "คว้าโอกาสไว้ย่อมดีกว่ามานั่งเสียดายภายหลัง เอาเถอะ หากเปลี่ยนใจก็กลับมาใหม่ (เควสต์ถูกยกเลิกแล้ว)"
+ },
  "20082": {
   "en": "Give me some time to prepare. (Refuse)",
   "ger": "Gib mir Zeit, mich vorzubereiten. (Ablehnen)",
@@ -8903,6 +9852,58 @@
   "jpn": "準備する時間をください。（断る）",
   "kor": "준비할 시간을 다오. (거절)",
   "tha": "ขอเวลาเตรียมตัวสักหน่อย (ปฏิเสธ)"
+ },
+ "20083": {
+  "en": "Better grab a chance than to regret it. Well, come back later if you change your mind. (The quest has been cancelled.)",
+  "ger": "Eine Gelegenheit zu ergreifen ist besser, als sie zu bereuen. Nun gut, komm später wieder, wenn du es dir anders überlegst. (Die Quest wurde abgebrochen.)",
+  "fre": "Mieux vaut saisir sa chance que de la regretter. Enfin, reviens plus tard si tu changes d'avis. (La quête a été annulée.)",
+  "ita": "Meglio cogliere un'occasione che rimpiangerla. Va bene, torna più tardi se cambi idea. (La missione è stata annullata.)",
+  "rom": "Mai bine prinzi o şansă decât s-o regreţi. Ei bine, întoarce-te mai târziu dacă te răzgândeşti. (Misiunea a fost anulată.)",
+  "rus": "Лучше ухватиться за случай, чем потом жалеть. Что ж, вернись позже, если передумаешь. (Задание отменено.)",
+  "bul": "По-добре да уловиш случая, отколкото да съжаляваш. Е, върни се по-късно, ако размислиш. (Задачата е отменена.)",
+  "chi": "抓住机会总好过日后追悔。罢了，若改变主意，日后再来吧。（任务已取消。）",
+  "jpn": "好機は逃すより掴むに限ります。まあ、気が変わったら後ほどまた。（クエストは取り消されました。）",
+  "kor": "기회란 놓치고 후회하느니 잡는 편이 낫지. 뭐, 마음이 바뀌거든 나중에 다시 오게. (퀘스트가 취소되었다.)",
+  "tha": "คว้าโอกาสไว้ย่อมดีกว่ามานั่งเสียดายภายหลัง เอาเถอะ หากเปลี่ยนใจก็กลับมาใหม่ (เควสต์ถูกยกเลิกแล้ว)"
+ },
+ "20090": {
+  "en": "I didn't mean to pester you. But as the clan gets stronger, so do you. Please come back if you change your mind. (The quest has been cancelled.)",
+  "ger": "Ich wollte dich nicht bedrängen. Doch je stärker das Haus wird, desto stärker wirst auch du. Komm wieder, wenn du es dir anders überlegst. (Die Quest wurde abgebrochen.)",
+  "fre": "Je ne voulais pas t'importuner. Mais plus la maison se renforce, plus tu te renforces. Reviens si tu changes d'avis. (La quête a été annulée.)",
+  "ita": "Non volevo assillarti. Ma più il casato si rafforza, più ti rafforzi tu. Torna se cambi idea. (La missione è stata annullata.)",
+  "rom": "N-am vrut să te sâcâi. Dar cu cât casa se întăreşte, cu atât te întăreşti şi tu. Întoarce-te dacă te răzgândeşti. (Misiunea a fost anulată.)",
+  "rus": "Я не хотел досаждать. Но чем крепче становится род, тем крепче и ты. Возвращайся, если передумаешь. (Задание отменено.)",
+  "bul": "Не исках да те досаждам. Но колкото по-силен става родът, толкова по-силен ставаш и ти. Върни се, ако размислиш. (Задачата е отменена.)",
+  "chi": "我并非有意纠缠。只是家族愈强，你亦愈强。若改变主意，请再来找我。（任务已取消。）",
+  "jpn": "しつこくするつもりはありませんでした。ただ、一族が強くなればあなたも強くなるのです。気が変わったら、また来てください。（クエストは取り消されました。）",
+  "kor": "귀찮게 할 뜻은 없었다. 다만 가문이 강해질수록 그대도 강해지는 법이지. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
+  "tha": "ข้าไม่ได้ตั้งใจจะรบเร้า เพียงแต่ยิ่งตระกูลแข็งแกร่งขึ้น ท่านก็แข็งแกร่งขึ้นด้วย หากเปลี่ยนใจก็กลับมาได้ (เควสต์ถูกยกเลิกแล้ว)"
+ },
+ "20093": {
+  "en": "¡¦¡¦ Hmm, for the clan¡¦¡¦",
+  "ger": "…… Hmm, für das Haus……",
+  "fre": "…… Hmm, pour la maison……",
+  "ita": "…… Hmm, per il casato……",
+  "rom": "…… Hmm, pentru casă……",
+  "rus": "…… Хм, ради рода……",
+  "bul": "…… Хм, заради рода……",
+  "chi": "……嗯，为了家族……",
+  "jpn": "……ふむ、一族のために……",
+  "kor": "…… 흠, 가문을 위해서라….",
+  "tha": "…… อืม เพื่อตระกูล……"
+ },
+ "20094": {
+  "en": "All right, I'll take it. (Accept)",
+  "ger": "Also gut, ich nehme sie an. (Annehmen)",
+  "fre": "D'accord, je m'en charge. (Accepter)",
+  "ita": "Va bene, me ne occupo. (Accetta)",
+  "rom": "În regulă, o iau. (Acceptă)",
+  "rus": "Хорошо, я берусь. (Принять)",
+  "bul": "Добре, поемам я. (Приеми)",
+  "chi": "好，我接下了。（接受）",
+  "jpn": "承知しました、お受けします。（受ける）",
+  "kor": "좋다, 맡겠다. (수락)",
+  "tha": "ตกลง ข้ารับไว้ (รับ)"
  },
  "20095": {
   "en": "Give me some time to prepare. (Refuse)",
@@ -8930,6 +9931,45 @@
   "kor": "준비할 시간을 다오. (거절)",
   "tha": "ขอเวลาเตรียมตัวสักหน่อย (ปฏิเสธ)"
  },
+ "20805": {
+  "en": "Talk to Priestess Beina of the Underwater Temple and check the details of her request to the mercenary guild.",
+  "ger": "Sprich mit Priesterin Beina vom Unterwassertempel und erfrage die Einzelheiten ihres Auftrags an die Söldnergilde.",
+  "fre": "Parle à la prêtresse Beina du Temple englouti et prends connaissance du détail de sa requête à la guilde des mercenaires.",
+  "ita": "Parla con la sacerdotessa Beina del Tempio sommerso e informati sui dettagli della sua richiesta alla gilda dei mercenari.",
+  "rom": "Vorbeşte cu preoteasa Beina de la Templul Subacvatic şi află amănuntele cererii ei către breasla mercenarilor.",
+  "rus": "Поговори с жрицей Бейной из Подводного храма и узнай подробности её поручения гильдии наёмников.",
+  "bul": "Поговори с жрицата Бейна от Подводния храм и научи подробностите за поръчката и към гилдията на наемниците.",
+  "chi": "去与水下神殿的女祭司贝娜交谈，了解她委托佣兵公会之事的详情。",
+  "jpn": "水中神殿の女祭司ベイナと話し、傭兵ギルドへの依頼の詳細を確かめましょう。",
+  "kor": "수중 신전의 여사제 베이나와 이야기해 용병 길드에 넣은 의뢰의 내막을 확인하라.",
+  "tha": "จงไปคุยกับนักบวชหญิงเบน่าแห่งวิหารใต้น้ำ และตรวจสอบรายละเอียดคำร้องที่นางยื่นต่อกิลด์ทหารรับจ้าง"
+ },
+ "20807": {
+  "en": "Talk to Priestess Beina of the Underwater Temple and check the details of her request to the mercenary guild.",
+  "ger": "Sprich mit Priesterin Beina vom Unterwassertempel und erfrage die Einzelheiten ihres Auftrags an die Söldnergilde.",
+  "fre": "Parle à la prêtresse Beina du Temple englouti et prends connaissance du détail de sa requête à la guilde des mercenaires.",
+  "ita": "Parla con la sacerdotessa Beina del Tempio sommerso e informati sui dettagli della sua richiesta alla gilda dei mercenari.",
+  "rom": "Vorbeşte cu preoteasa Beina de la Templul Subacvatic şi află amănuntele cererii ei către breasla mercenarilor.",
+  "rus": "Поговори с жрицей Бейной из Подводного храма и узнай подробности её поручения гильдии наёмников.",
+  "bul": "Поговори с жрицата Бейна от Подводния храм и научи подробностите за поръчката и към гилдията на наемниците.",
+  "chi": "去与水下神殿的女祭司贝娜交谈，了解她委托佣兵公会之事的详情。",
+  "jpn": "水中神殿の女祭司ベイナと話し、傭兵ギルドへの依頼の詳細を確かめましょう。",
+  "kor": "수중 신전의 여사제 베이나와 이야기해 용병 길드에 넣은 의뢰의 내막을 확인하라.",
+  "tha": "จงไปคุยกับนักบวชหญิงเบน่าแห่งวิหารใต้น้ำ และตรวจสอบรายละเอียดคำร้องที่นางยื่นต่อกิลด์ทหารรับจ้าง"
+ },
+ "20814": {
+  "en": "Find your Gens Steward.",
+  "ger": "Finde deinen Gens-Verwalter.",
+  "fre": "Trouve l'intendant de ta gens.",
+  "ita": "Trova l'amministratore della tua gens.",
+  "rom": "Găseşte administratorul gens-ului tău.",
+  "rus": "Найди управляющего своего генса.",
+  "bul": "Намери управителя на своя генс.",
+  "chi": "去寻访你的家族总管。",
+  "jpn": "自分の一族の執事を探しましょう。",
+  "kor": "그대의 가문 집사를 찾아라.",
+  "tha": "จงตามหาผู้ดูแลตระกูลของท่าน"
+ },
  "20815": {
   "en": "Talk to your Gens Steward and check the details of his request to the mercenary guild.",
   "ger": "Sprich mit deinem Gens-Verwalter und erfrage die Einzelheiten seines Auftrags an die Söldnergilde.",
@@ -8956,6 +9996,45 @@
   "kor": "그대의 가문 집사와 이야기해 용병 길드에 넣은 의뢰의 내막을 확인하라.",
   "tha": "จงไปคุยกับผู้ดูแลตระกูลของท่าน และตรวจสอบรายละเอียดคำร้องที่เขายื่นต่อกิลด์ทหารรับจ้าง"
  },
+ "20820": {
+  "en": "Talk to Priestess Beina of the Underwater Temple and check the details of her request to the mercenary guild.",
+  "ger": "Sprich mit Priesterin Beina vom Unterwassertempel und erfrage die Einzelheiten ihres Auftrags an die Söldnergilde.",
+  "fre": "Parle à la prêtresse Beina du Temple englouti et prends connaissance du détail de sa requête à la guilde des mercenaires.",
+  "ita": "Parla con la sacerdotessa Beina del Tempio sommerso e informati sui dettagli della sua richiesta alla gilda dei mercenari.",
+  "rom": "Vorbeşte cu preoteasa Beina de la Templul Subacvatic şi află amănuntele cererii ei către breasla mercenarilor.",
+  "rus": "Поговори с жрицей Бейной из Подводного храма и узнай подробности её поручения гильдии наёмников.",
+  "bul": "Поговори с жрицата Бейна от Подводния храм и научи подробностите за поръчката и към гилдията на наемниците.",
+  "chi": "去与水下神殿的女祭司贝娜交谈，了解她委托佣兵公会之事的详情。",
+  "jpn": "水中神殿の女祭司ベイナと話し、傭兵ギルドへの依頼の詳細を確かめましょう。",
+  "kor": "수중 신전의 여사제 베이나와 이야기해 용병 길드에 넣은 의뢰의 내막을 확인하라.",
+  "tha": "จงไปคุยกับนักบวชหญิงเบน่าแห่งวิหารใต้น้ำ และตรวจสอบรายละเอียดคำร้องที่นางยื่นต่อกิลด์ทหารรับจ้าง"
+ },
+ "20822": {
+  "en": "Talk to Priestess Beina of the Underwater Temple and check the details of her request to the mercenary guild.",
+  "ger": "Sprich mit Priesterin Beina vom Unterwassertempel und erfrage die Einzelheiten ihres Auftrags an die Söldnergilde.",
+  "fre": "Parle à la prêtresse Beina du Temple englouti et prends connaissance du détail de sa requête à la guilde des mercenaires.",
+  "ita": "Parla con la sacerdotessa Beina del Tempio sommerso e informati sui dettagli della sua richiesta alla gilda dei mercenari.",
+  "rom": "Vorbeşte cu preoteasa Beina de la Templul Subacvatic şi află amănuntele cererii ei către breasla mercenarilor.",
+  "rus": "Поговори с жрицей Бейной из Подводного храма и узнай подробности её поручения гильдии наёмников.",
+  "bul": "Поговори с жрицата Бейна от Подводния храм и научи подробностите за поръчката и към гилдията на наемниците.",
+  "chi": "去与水下神殿的女祭司贝娜交谈，了解她委托佣兵公会之事的详情。",
+  "jpn": "水中神殿の女祭司ベイナと話し、傭兵ギルドへの依頼の詳細を確かめましょう。",
+  "kor": "수중 신전의 여사제 베이나와 이야기해 용병 길드에 넣은 의뢰의 내막을 확인하라.",
+  "tha": "จงไปคุยกับนักบวชหญิงเบน่าแห่งวิหารใต้น้ำ และตรวจสอบรายละเอียดคำร้องที่นางยื่นต่อกิลด์ทหารรับจ้าง"
+ },
+ "20829": {
+  "en": "Find your Gens Steward.",
+  "ger": "Finde deinen Gens-Verwalter.",
+  "fre": "Trouve l'intendant de ta gens.",
+  "ita": "Trova l'amministratore della tua gens.",
+  "rom": "Găseşte administratorul gens-ului tău.",
+  "rus": "Найди управляющего своего генса.",
+  "bul": "Намери управителя на своя генс.",
+  "chi": "去寻访你的家族总管。",
+  "jpn": "自分の一族の執事を探しましょう。",
+  "kor": "그대의 가문 집사를 찾아라.",
+  "tha": "จงตามหาผู้ดูแลตระกูลของท่าน"
+ },
  "20830": {
   "en": "Talk to your Gens Steward and check the details of his request to the mercenary guild.",
   "ger": "Sprich mit deinem Gens-Verwalter und erfrage die Einzelheiten seines Auftrags an die Söldnergilde.",
@@ -8981,6 +10060,58 @@
   "jpn": "自分の一族の執事と話し、傭兵ギルドへの依頼の詳細を確かめましょう。",
   "kor": "그대의 가문 집사와 이야기해 용병 길드에 넣은 의뢰의 내막을 확인하라.",
   "tha": "จงไปคุยกับผู้ดูแลตระกูลของท่าน และตรวจสอบรายละเอียดคำร้องที่เขายื่นต่อกิลด์ทหารรับจ้าง"
+ },
+ "20909": {
+  "en": "Call from the Gens",
+  "ger": "Ruf der Gens",
+  "fre": "L'appel de la gens",
+  "ita": "Il richiamo della gens",
+  "rom": "Chemarea gens-ului",
+  "rus": "Зов генса",
+  "bul": "Зовът на генса",
+  "chi": "家族的召唤",
+  "jpn": "一族からの招集",
+  "kor": "가문의 부름",
+  "tha": "เสียงเรียกจากตระกูล"
+ },
+ "20911": {
+  "en": "Glory to the Gens",
+  "ger": "Ruhm der Gens",
+  "fre": "Gloire à la gens",
+  "ita": "Gloria alla gens",
+  "rom": "Slavă gens-ului",
+  "rus": "Слава генсу",
+  "bul": "Слава на генса",
+  "chi": "家族的荣耀",
+  "jpn": "一族に栄光あれ",
+  "kor": "가문에 영광을",
+  "tha": "เกียรติยศแด่ตระกูล"
+ },
+ "20918": {
+  "en": "Call from the Gens",
+  "ger": "Ruf der Gens",
+  "fre": "L'appel de la gens",
+  "ita": "Il richiamo della gens",
+  "rom": "Chemarea gens-ului",
+  "rus": "Зов генса",
+  "bul": "Зовът на генса",
+  "chi": "家族的召唤",
+  "jpn": "一族からの招集",
+  "kor": "가문의 부름",
+  "tha": "เสียงเรียกจากตระกูล"
+ },
+ "20920": {
+  "en": "Glory to the Gens",
+  "ger": "Ruhm der Gens",
+  "fre": "Gloire à la gens",
+  "ita": "Gloria alla gens",
+  "rom": "Slavă gens-ului",
+  "rus": "Слава генсу",
+  "bul": "Слава на генса",
+  "chi": "家族的荣耀",
+  "jpn": "一族に栄光あれ",
+  "kor": "가문에 영광을",
+  "tha": "เกียรติยศแด่ตระกูล"
  },
  "20995": {
   "en": "Give me a letter of request.",
