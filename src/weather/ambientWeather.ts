@@ -185,6 +185,33 @@ export const LORENCIA_LEAVES: AmbientRecipe = {
 };
 
 /**
+ * Noria: the same fall, on the map's own art.
+ *
+ * `BITMAP_LEAF1` is `<WorldName>/leaf01` (MapManager.cpp:1474-1476), so every
+ * map that sheds anything sheds its own. Noria's is a pink blossom petal;
+ * Lorencia's is a cream dandelion puff on a brown stem, and that is what has
+ * been blowing through the fairy forest - the same texture-follows-the-recipe
+ * slip Atlans was pulled out of below.
+ *
+ * The motion is Lorencia's on purpose: `CreateAtlanseLeaf`
+ * (ZzzEffectFireLeave.cpp:292-313) is `CreateLorenciaLeaf`'s spawn box and
+ * velocity copied line for line, and Noria takes that path. The one
+ * difference there is that Noria's copy forgets `FPS_ANIMATION_FACTOR` on the
+ * velocity, which is a frame-rate bug in a fixed-tick client and nothing to
+ * port.
+ *
+ * `RenderLeaves` (:507) leaves Noria on `EnableAlphaTest()` with
+ * `glColor3f(1, 1, 1)`, so the petal is drawn at its own colour - no cream
+ * variation over it, or the pink goes grey.
+ */
+export const NORIA_PETALS: AmbientRecipe = {
+  ...LORENCIA_LEAVES,
+  name: 'noriaPetals',
+  texture: 'World4/leaf01.OZT',
+  colour: [WHITE, WHITE],
+};
+
+/**
  * Atlans: what hangs in twenty metres of water, drifting on the current.
  *
  * The original wires Atlans into the leaf path (`CreateAtlanseLeaf`,

@@ -13,6 +13,7 @@ import {
   HEARTH_DUST,
   HOUSE_HEARTH_DUST,
   LORENCIA_LEAVES,
+  NORIA_PETALS,
   RAIN,
   SNOWFALL_MAPS,
   TAVERN_DUST,
@@ -43,7 +44,8 @@ import type { ISystemFactory } from '../world';
  * ones along with the hero (the original's `MoveLeaves` spawned every
  * leaf around `Hero->Object.Position`).
  *
- *  - Lorencia / Noria: falling leaves (`CreateLorenciaLeaf`).
+ *  - Lorencia: falling leaves (`CreateLorenciaLeaf`). Noria takes the same
+ *    numbers (`CreateAtlanseLeaf`) on its own petal; see `NORIA_PETALS`.
  *  - Atlans: marine snow drifting on the current, and bubbles rising off the
  *    seabed. The original runs Atlans through the leaf path with Lorencia's
  *    numbers (`CreateAtlanseLeaf`), but on World8's own round sprite and
@@ -87,10 +89,15 @@ import type { ISystemFactory } from '../world';
 // Maps with a sky (rain may fall) are declared per map as `MapLayer.outdoor`
 // and read through `maps.isOutdoor(map)`.
 
-const LEAF_MAPS = new Set<ENUM_WORLD>([
-  ENUM_WORLD.WD_0LORENCIA,
-  ENUM_WORLD.WD_3NORIA,
-]);
+/**
+ * What falls out of the sky on the two maps that shed anything, each on its
+ * own `<WorldName>/leaf01` (MapManager.cpp:1474-1476): Lorencia's dandelion
+ * puffs, Noria's pink petals.
+ */
+const LEAF_RECIPES: readonly { map: ENUM_WORLD; recipe: AmbientRecipe }[] = [
+  { map: ENUM_WORLD.WD_0LORENCIA, recipe: LORENCIA_LEAVES },
+  { map: ENUM_WORLD.WD_3NORIA, recipe: NORIA_PETALS },
+];
 
 /** Lorencia pub floor, matching the interactive area in loadMapIntoScene. */
 const LORENCIA_TAVERN: Room = {
@@ -138,12 +145,14 @@ export const AmbientParticleSystem: ISystemFactory = world => {
   const areas = world.with('interactiveArea', 'worldIndex');
 
   const slots: Slot[] = [
-    {
-      recipe: LORENCIA_LEAVES,
-      followHero: true,
-      active: (map, indoors) =>
-        GameOptions.ambientParticles && !indoors && LEAF_MAPS.has(map),
-    },
+    ...LEAF_RECIPES.map(
+      ({ map: leafMap, recipe }): Slot => ({
+        recipe,
+        followHero: true,
+        active: (map, indoors) =>
+          GameOptions.ambientParticles && !indoors && map === leafMap,
+      })
+    ),
     // Atlans, and any other map declaring `MapLayer.underwater`. Both run
     // whenever the map is: there is no roof to duck under down here, and the
     // drift carries its own schedule.
