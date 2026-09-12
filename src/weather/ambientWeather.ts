@@ -61,6 +61,17 @@ export const SNOW_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
 );
 
 /**
+ * The subset of `SNOW_MAPS` with flakes in the air. A snow sky says what may
+ * not fall on a map; it does not say that anything does. Ice City is the
+ * split: its ground and its props are ice rather than settled snow, and a
+ * fall over them reads as dirt on the lens instead of weather, so the sky
+ * stays snow (no rain on the ice field) with nothing coming out of it.
+ */
+export const SNOWFALL_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
+  maps.worldsWhere(layer => layer.snow === true && layer.snowfall !== false)
+);
+
+/**
  * Maps under water. Rain must never fall on them for the same reason it never
  * falls on a snow map: what the sky is doing is a property of the *map*, and
  * the weather byte is global - the proxy computes one sky for every client

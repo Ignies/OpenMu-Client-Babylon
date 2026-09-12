@@ -3,7 +3,7 @@ import { getMaterial, loadGLTF } from './modelLoader';
 import { ModelObject } from './modelObject';
 import { BlendState } from './objects/enum';
 import { ENUM_WORLD } from './types';
-import { SNOW_MAPS } from '../weather/ambientWeather';
+import { SNOW_GROUND_MAPS } from '../weather/snowCover';
 import { isEffectOnlyObject } from './effectOnlyObjects';
 import { createEffectLight, type EffectLight } from './effectLights';
 import {
@@ -69,7 +69,7 @@ export class MapTileObject extends ModelObject {
     // loaded by MapManager.cpp:151 and used only for the lightning flash
     // plane — never a map object. maps/icarus/cloudObject.ts owns all six now.
     // Before load: the metadata loop in ModelObject.load stamps every mesh.
-    this.SnowCap = SNOW_MAPS.has(this.WorldIndex);
+    this.SnowCap = SNOW_GROUND_MAPS.has(this.WorldIndex);
 
     this.load(await loadGLTF(modelPath, world));
 

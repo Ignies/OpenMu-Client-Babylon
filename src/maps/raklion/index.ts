@@ -24,8 +24,9 @@ import {
  * the boss state machine is live.
  *
  * Snow: `g_Raklion.CreateSnow` is the leaves slot for both Ice City worlds,
- * so the two join `SNOW_MAPS` in `weather/ambientWeather.ts` and get the
- * Devias flakes and snow cap.
+ * so the two join `SNOW_MAPS` in `weather/ambientWeather.ts` - the sky is
+ * snow and rain never falls here. Nothing falls out of it either: see the
+ * `SNOWFALL` note below.
  *
  * Sound: no `PlayWorldAmbientSounds` case for 57 (the hatchery has the
  * wind); `PlayObjectSound` (:2671) is the boss room's. `Music/Raklion`.
@@ -49,6 +50,14 @@ const OUTDOOR = true;
 // `g_Raklion.CreateSnow` (ZzzEffectFireLeave.cpp:481): the leaves-slot snow maker.
 const SNOW = true;
 
+// No flakes over the ice. The original's Ice City fall is a fast, near-flat
+// blizzard (scale 3-12, tilted 50-79 degrees, 30-49 u/tick -
+// GM_Raklion.cpp:2198); what we have is the Devias flake, and a slow vertical
+// drift over a field that is already white reads as speckle on the screen
+// rather than weather. The sky stays snow so rain can never reach the ice
+// field, and with no fall nothing settles on it either.
+const SNOWFALL = false;
+
 // ---- 2. state + readers ----------------------------------------------------
 // None: the map's runtime state lives in the objects `create` binds.
 
@@ -61,6 +70,7 @@ export const raklionLayer: MapLayer = {
   spawn: SPAWN,
   outdoor: OUTDOOR,
   snow: SNOW,
+  snowfall: SNOWFALL,
   blendMeshes: RAKLION_BLEND_MESHES,
   effectOnly: RAKLION_EFFECT_ONLY_TYPES,
   emissions: RAKLION_EMISSIONS,

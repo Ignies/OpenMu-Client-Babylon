@@ -38,6 +38,10 @@ const SPAWN = { x: 160, y: 25 } as const;
 // `g_Raklion.CreateSnow` covers both Ice City worlds (ZzzEffectFireLeave.cpp:481).
 const SNOW = true;
 
+// The hatchery is Raklion's art set and takes Raklion's sky with it: snow
+// climate, no fall. See `maps/raklion/index.ts`.
+const SNOWFALL = false;
+
 // ---- 2. state + readers ----------------------------------------------------
 // None: the map's runtime state lives in the objects `create` binds.
 
@@ -49,6 +53,7 @@ export const raklionbossLayer: MapLayer = {
   tiles: FULL_TILES,
   spawn: SPAWN,
   snow: SNOW,
+  snowfall: SNOWFALL,
   // The hatchery is Raklion's art set: it shares the Raklion tables.
   blendMeshes: RAKLION_BLEND_MESHES,
   effectOnly: RAKLION_EFFECT_ONLY_TYPES,

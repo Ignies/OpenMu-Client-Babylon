@@ -67,6 +67,16 @@ export interface MapLayer {
   readonly snow?: boolean;
 
   /**
+   * Snow actually falls out of that snow sky. Defaults to `snow`; declare it
+   * false where the climate is snow but the air is clear, and the map keeps
+   * rain off without a fall of its own - nor anything a fall leaves behind,
+   * since the cover, the caps and the prints all hang off it. Read through
+   * `weather/ambientWeather.ts`'s `SNOWFALL_MAPS` and `weather/snowCover.ts`'s
+   * `SNOW_GROUND_MAPS`.
+   */
+  readonly snowfall?: boolean;
+
+  /**
    * The map is under water: rain never falls here however the weather byte
    * reads, and the ambient particles are the sea's (marine snow on the
    * current, bubbles off the seabed) rather than leaves. Read through
