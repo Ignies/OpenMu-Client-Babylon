@@ -30,6 +30,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Sword01.glb"
   },
@@ -64,6 +65,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Sword02.glb"
   },
@@ -98,6 +100,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword03.glb"
   },
@@ -132,6 +135,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword04.glb"
   },
@@ -166,6 +170,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword05.glb"
   },
@@ -200,6 +205,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword06.glb"
   },
@@ -234,6 +240,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword07.glb"
   },
@@ -268,6 +275,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword08.glb"
   },
@@ -302,6 +310,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword09.glb"
   },
@@ -336,6 +345,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword10.glb"
   },
@@ -370,6 +380,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword11.glb"
   },
@@ -404,6 +415,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword12.glb"
   },
@@ -438,6 +450,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword13.glb"
   },
@@ -472,6 +485,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword14.glb"
   },
@@ -506,6 +520,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword15.glb"
   },
@@ -540,6 +555,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword16.glb"
   },
@@ -574,6 +590,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword17.glb"
   },
@@ -608,6 +625,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword18.glb"
   },
@@ -642,6 +660,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword19.glb"
   },
@@ -676,6 +695,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword20.glb"
   },
@@ -710,6 +730,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "sword21.glb"
   },
@@ -744,6 +765,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "sword22.glb"
   },
@@ -778,6 +800,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "HDK_Sword.glb"
   },
@@ -812,6 +835,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "HDK_Sword2.glb"
   },
@@ -846,6 +870,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CW_Sword.glb"
   },
@@ -880,6 +905,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CW_Sword2.glb"
   },
@@ -914,6 +940,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword_27.glb"
   },
@@ -948,6 +975,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword_28.glb"
   },
@@ -982,6 +1010,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword_29.glb"
   },
@@ -1016,6 +1045,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Sword32.glb"
   },
@@ -1050,6 +1080,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Sword33.glb"
   },
@@ -1084,6 +1115,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Sword34.glb"
   },
@@ -1118,6 +1150,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Sword35.glb"
   },
@@ -1152,6 +1185,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Sword36.glb"
   },
@@ -1186,6 +1220,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Axe01.glb"
   },
@@ -1220,6 +1255,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Axe02.glb"
   },
@@ -1254,6 +1290,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Axe03.glb"
   },
@@ -1288,6 +1325,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Axe04.glb"
   },
@@ -1322,6 +1360,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Axe05.glb"
   },
@@ -1356,6 +1395,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Axe06.glb"
   },
@@ -1390,6 +1430,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Axe07.glb"
   },
@@ -1424,6 +1465,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Axe08.glb"
   },
@@ -1458,6 +1500,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Axe09.glb"
   },
@@ -1492,6 +1535,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Mace01.glb"
   },
@@ -1526,6 +1570,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Mace02.glb"
   },
@@ -1560,6 +1605,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Mace03.glb"
   },
@@ -1594,6 +1640,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Mace04.glb"
   },
@@ -1628,6 +1675,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Item/",
     "szModelName": "Mace05.glb"
   },
@@ -1662,6 +1710,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Mace06.glb"
   },
@@ -1696,6 +1745,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Mace07.glb"
   },
@@ -1730,6 +1780,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Mace08.glb"
   },
@@ -1764,6 +1815,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Mace09.glb"
   },
@@ -1798,6 +1850,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Mace10.glb"
   },
@@ -1832,6 +1885,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Mace11.glb"
   },
@@ -1866,6 +1920,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Mace12.glb"
   },
@@ -1900,6 +1955,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Mace13.glb"
   },
@@ -1934,6 +1990,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "saint.glb"
   },
@@ -1968,6 +2025,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "HDK_Mace.glb"
   },
@@ -2002,6 +2060,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CW_Mace.glb"
   },
@@ -2036,6 +2095,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Mace_17.glb"
   },
@@ -2070,6 +2130,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Mace_18.glb"
   },
@@ -2104,6 +2165,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "gamble_safter01.glb"
   },
@@ -2138,6 +2200,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Spear01.glb"
   },
@@ -2172,6 +2235,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Spear02.glb"
   },
@@ -2206,6 +2270,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Spear03.glb"
   },
@@ -2240,6 +2305,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Spear04.glb"
   },
@@ -2274,6 +2340,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Spear05.glb"
   },
@@ -2308,6 +2375,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Spear06.glb"
   },
@@ -2342,6 +2410,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Spear07.glb"
   },
@@ -2376,6 +2445,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Spear08.glb"
   },
@@ -2410,6 +2480,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Spear09.glb"
   },
@@ -2444,6 +2515,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Spear10.glb"
   },
@@ -2478,6 +2550,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "spear11.glb"
   },
@@ -2512,6 +2585,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "gamble_scyder01.glb"
   },
@@ -2546,6 +2620,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Bow01.glb"
   },
@@ -2580,6 +2655,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Bow02.glb"
   },
@@ -2614,6 +2690,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Bow03.glb"
   },
@@ -2648,6 +2725,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Bow04.glb"
   },
@@ -2682,6 +2760,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Bow05.glb"
   },
@@ -2716,6 +2795,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Bow06.glb"
   },
@@ -2750,6 +2830,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Bow07.glb"
   },
@@ -2784,6 +2865,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Arrows01.glb"
   },
@@ -2818,6 +2900,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CrossBow01.glb"
   },
@@ -2852,6 +2935,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CrossBow02.glb"
   },
@@ -2886,6 +2970,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CrossBow03.glb"
   },
@@ -2920,6 +3005,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CrossBow04.glb"
   },
@@ -2954,6 +3040,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CrossBow05.glb"
   },
@@ -2988,6 +3075,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CrossBow06.glb"
   },
@@ -3022,6 +3110,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CrossBow07.glb"
   },
@@ -3056,6 +3145,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Arrows02.glb"
   },
@@ -3090,6 +3180,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CrossBow17.glb"
   },
@@ -3124,6 +3215,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Bow18.glb"
   },
@@ -3158,6 +3250,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Bow19.glb"
   },
@@ -3192,6 +3285,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CrossBow20.glb"
   },
@@ -3226,6 +3320,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Bow20.glb"
   },
@@ -3260,6 +3355,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "HDK_Bow.glb"
   },
@@ -3294,6 +3390,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CW_Bow.glb"
   },
@@ -3328,6 +3425,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Bow_24.glb"
   },
@@ -3362,6 +3460,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "gamblebow.glb"
   },
@@ -3396,6 +3495,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff01.glb"
   },
@@ -3430,6 +3530,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff02.glb"
   },
@@ -3464,6 +3565,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff03.glb"
   },
@@ -3498,6 +3600,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff04.glb"
   },
@@ -3532,6 +3635,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff05.glb"
   },
@@ -3566,6 +3670,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff06.glb"
   },
@@ -3600,6 +3705,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff07.glb"
   },
@@ -3634,6 +3740,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff08.glb"
   },
@@ -3668,6 +3775,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff09.glb"
   },
@@ -3702,6 +3810,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff10.glb"
   },
@@ -3736,6 +3845,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff11.glb"
   },
@@ -3770,6 +3880,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff12.glb"
   },
@@ -3804,6 +3915,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "HDK_Staff.glb"
   },
@@ -3838,6 +3950,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "CW_Staff.glb"
   },
@@ -3872,6 +3985,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff15.glb"
   },
@@ -3906,6 +4020,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff16.glb"
   },
@@ -3940,6 +4055,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff17.glb"
   },
@@ -3974,6 +4090,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff18.glb"
   },
@@ -4008,6 +4125,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff19.glb"
   },
@@ -4042,6 +4160,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff20.glb"
   },
@@ -4076,6 +4195,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff21.glb"
   },
@@ -4110,6 +4230,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book_of_Sahamutt.glb"
   },
@@ -4144,6 +4265,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book_of_Neil.glb"
   },
@@ -4178,6 +4300,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book_of_Rargle.glb"
   },
@@ -4212,6 +4335,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff_31.glb"
   },
@@ -4246,6 +4370,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Staff_32.glb"
   },
@@ -4280,6 +4405,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "summonsprit.glb"
   },
@@ -4314,6 +4440,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "gamble_wand.glb"
   },
@@ -4348,6 +4475,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "gamble_stick.glb"
   },
@@ -4379,6 +4507,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield01.glb"
   },
@@ -4410,6 +4539,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield02.glb"
   },
@@ -4441,6 +4571,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield03.glb"
   },
@@ -4472,6 +4603,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield04.glb"
   },
@@ -4503,6 +4635,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield05.glb"
   },
@@ -4534,6 +4667,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield06.glb"
   },
@@ -4565,6 +4699,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield07.glb"
   },
@@ -4596,6 +4731,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield08.glb"
   },
@@ -4627,6 +4763,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield09.glb"
   },
@@ -4658,6 +4795,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield10.glb"
   },
@@ -4689,6 +4827,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield11.glb"
   },
@@ -4720,6 +4859,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield12.glb"
   },
@@ -4751,6 +4891,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield13.glb"
   },
@@ -4782,6 +4923,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield14.glb"
   },
@@ -4813,6 +4955,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield15.glb"
   },
@@ -4844,6 +4987,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "shield16.glb"
   },
@@ -4875,6 +5019,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "shield17.glb"
   },
@@ -4906,6 +5051,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield_18.glb"
   },
@@ -4937,6 +5083,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield_19.glb"
   },
@@ -4968,6 +5115,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield_20.glb"
   },
@@ -4999,6 +5147,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Shield_21.glb"
   },
@@ -5030,6 +5179,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "crosssheild.glb"
   },
@@ -5061,6 +5211,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale01.glb"
   },
@@ -5092,6 +5243,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale02.glb"
   },
@@ -5123,6 +5275,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale03.glb"
   },
@@ -5154,6 +5307,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale04.glb"
   },
@@ -5185,6 +5339,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale05.glb"
   },
@@ -5216,6 +5371,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale06.glb"
   },
@@ -5247,6 +5403,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale07.glb"
   },
@@ -5278,6 +5435,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale08.glb"
   },
@@ -5309,6 +5467,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale09.glb"
   },
@@ -5340,6 +5499,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale10.glb"
   },
@@ -5371,6 +5531,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmElf01.glb"
   },
@@ -5402,6 +5563,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmElf02.glb"
   },
@@ -5433,6 +5595,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmElf03.glb"
   },
@@ -5464,6 +5627,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmElf04.glb"
   },
@@ -5495,6 +5659,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmElf05.glb"
   },
@@ -5526,6 +5691,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale17.glb"
   },
@@ -5557,6 +5723,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale18.glb"
   },
@@ -5588,6 +5755,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale19.glb"
   },
@@ -5619,6 +5787,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMaleTest20.glb"
   },
@@ -5650,6 +5819,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale22.glb"
   },
@@ -5681,6 +5851,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale23.glb"
   },
@@ -5712,6 +5883,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale25.glb"
   },
@@ -5743,6 +5915,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale26.glb"
   },
@@ -5774,6 +5947,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale27.glb"
   },
@@ -5805,6 +5979,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale28.glb"
   },
@@ -5836,6 +6011,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale29.glb"
   },
@@ -5867,6 +6043,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_HelmMale01.glb"
   },
@@ -5898,6 +6075,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_HelmMale02.glb"
   },
@@ -5929,6 +6107,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_HelmMale03.glb"
   },
@@ -5960,6 +6139,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_HelmMale05.glb"
   },
@@ -5991,6 +6171,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_HelmMale01.glb"
   },
@@ -6022,6 +6203,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_HelmMale02.glb"
   },
@@ -6053,6 +6235,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_HelmMale03.glb"
   },
@@ -6084,6 +6267,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_HelmMale05.glb"
   },
@@ -6115,6 +6299,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale40.glb"
   },
@@ -6146,6 +6331,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale41.glb"
   },
@@ -6177,6 +6363,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale42.glb"
   },
@@ -6208,6 +6395,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale43.glb"
   },
@@ -6239,6 +6427,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale44.glb"
   },
@@ -6270,6 +6459,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale45.glb"
   },
@@ -6301,6 +6491,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale46.glb"
   },
@@ -6332,6 +6523,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale47.glb"
   },
@@ -6363,6 +6555,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale50.glb"
   },
@@ -6394,6 +6587,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale51.glb"
   },
@@ -6425,6 +6619,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale52.glb"
   },
@@ -6456,6 +6651,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMale53.glb"
   },
@@ -6487,6 +6683,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HelmMail_succubus.glb"
   },
@@ -6518,6 +6715,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale01.glb"
   },
@@ -6549,6 +6747,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale02.glb"
   },
@@ -6580,6 +6779,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale03.glb"
   },
@@ -6611,6 +6811,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale04.glb"
   },
@@ -6642,6 +6843,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale05.glb"
   },
@@ -6673,6 +6875,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale06.glb"
   },
@@ -6704,6 +6907,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale07.glb"
   },
@@ -6735,6 +6939,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale08.glb"
   },
@@ -6766,6 +6971,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale09.glb"
   },
@@ -6797,6 +7003,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale10.glb"
   },
@@ -6828,6 +7035,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorElf01.glb"
   },
@@ -6859,6 +7067,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorElf02.glb"
   },
@@ -6890,6 +7099,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorElf03.glb"
   },
@@ -6921,6 +7131,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorElf04.glb"
   },
@@ -6952,6 +7163,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorElf05.glb"
   },
@@ -6983,6 +7195,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale16.glb"
   },
@@ -7014,6 +7227,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale17.glb"
   },
@@ -7045,6 +7259,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale18.glb"
   },
@@ -7076,6 +7291,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale19.glb"
   },
@@ -7107,6 +7323,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMaleTest20.glb"
   },
@@ -7138,6 +7355,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale21.glb"
   },
@@ -7169,6 +7387,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale22.glb"
   },
@@ -7200,6 +7419,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale23.glb"
   },
@@ -7231,6 +7451,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale24.glb"
   },
@@ -7262,6 +7483,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale25.glb"
   },
@@ -7293,6 +7515,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale26.glb"
   },
@@ -7324,6 +7547,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale27.glb"
   },
@@ -7355,6 +7579,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale28.glb"
   },
@@ -7386,6 +7611,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale29.glb"
   },
@@ -7417,6 +7643,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_ArmorMale01.glb"
   },
@@ -7448,6 +7675,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_ArmorMale02.glb"
   },
@@ -7479,6 +7707,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_ArmorMale03.glb"
   },
@@ -7510,6 +7739,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_ArmorMale04.glb"
   },
@@ -7541,6 +7771,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_ArmorMale05.glb"
   },
@@ -7572,6 +7803,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_ArmorMale01.glb"
   },
@@ -7603,6 +7835,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_ArmorMale02.glb"
   },
@@ -7634,6 +7867,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_ArmorMale03.glb"
   },
@@ -7665,6 +7899,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_ArmorMale04.glb"
   },
@@ -7696,6 +7931,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_ArmorMale05.glb"
   },
@@ -7727,6 +7963,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale40.glb"
   },
@@ -7758,6 +7995,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale41.glb"
   },
@@ -7789,6 +8027,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale42.glb"
   },
@@ -7820,6 +8059,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale43.glb"
   },
@@ -7851,6 +8091,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale44.glb"
   },
@@ -7882,6 +8123,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale45.glb"
   },
@@ -7913,6 +8155,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale46.glb"
   },
@@ -7944,6 +8187,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale47.glb"
   },
@@ -7975,6 +8219,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale48.glb"
   },
@@ -8006,6 +8251,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale49.glb"
   },
@@ -8037,6 +8283,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale50.glb"
   },
@@ -8068,6 +8315,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale51.glb"
   },
@@ -8099,6 +8347,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale52.glb"
   },
@@ -8130,6 +8379,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMale53.glb"
   },
@@ -8161,6 +8411,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "ArmorMail_succubus.glb"
   },
@@ -8192,6 +8443,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale01.glb"
   },
@@ -8223,6 +8475,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale02.glb"
   },
@@ -8254,6 +8507,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale03.glb"
   },
@@ -8285,6 +8539,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale04.glb"
   },
@@ -8316,6 +8571,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale05.glb"
   },
@@ -8347,6 +8603,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "PantMale06.glb"
   },
@@ -8378,6 +8635,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "PantMale07.glb"
   },
@@ -8409,6 +8667,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale08.glb"
   },
@@ -8440,6 +8699,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "PantMale09.glb"
   },
@@ -8471,6 +8731,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "PantMale10.glb"
   },
@@ -8502,6 +8763,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantElf01.glb"
   },
@@ -8533,6 +8795,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantElf02.glb"
   },
@@ -8564,6 +8827,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantElf03.glb"
   },
@@ -8595,6 +8859,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantElf04.glb"
   },
@@ -8626,6 +8891,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantElf05.glb"
   },
@@ -8657,6 +8923,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale16.glb"
   },
@@ -8688,6 +8955,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale17.glb"
   },
@@ -8719,6 +8987,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale18.glb"
   },
@@ -8750,6 +9019,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "t_PantMale19.glb"
   },
@@ -8781,6 +9051,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMaleTest20.glb"
   },
@@ -8812,6 +9083,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale21.glb"
   },
@@ -8843,6 +9115,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale22.glb"
   },
@@ -8874,6 +9147,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale23.glb"
   },
@@ -8905,6 +9179,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale24.glb"
   },
@@ -8936,6 +9211,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale25.glb"
   },
@@ -8967,6 +9243,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale26.glb"
   },
@@ -8998,6 +9275,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale27.glb"
   },
@@ -9029,6 +9307,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale28.glb"
   },
@@ -9060,6 +9339,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale29.glb"
   },
@@ -9091,6 +9371,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_PantMale01.glb"
   },
@@ -9122,6 +9403,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_PantMale02.glb"
   },
@@ -9153,6 +9435,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_PantMale03.glb"
   },
@@ -9184,6 +9467,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_PantMale04.glb"
   },
@@ -9215,6 +9499,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_PantMale05.glb"
   },
@@ -9246,6 +9531,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_PantMale01.glb"
   },
@@ -9277,6 +9563,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_PantMale02.glb"
   },
@@ -9308,6 +9595,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_PantMale03.glb"
   },
@@ -9339,6 +9627,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_PantMale04.glb"
   },
@@ -9370,6 +9659,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_PantMale05.glb"
   },
@@ -9401,6 +9691,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale40.glb"
   },
@@ -9432,6 +9723,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale41.glb"
   },
@@ -9463,6 +9755,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale42.glb"
   },
@@ -9494,6 +9787,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale43.glb"
   },
@@ -9525,6 +9819,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale44.glb"
   },
@@ -9556,6 +9851,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale45.glb"
   },
@@ -9587,6 +9883,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale46.glb"
   },
@@ -9618,6 +9915,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale47.glb"
   },
@@ -9649,6 +9947,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale48.glb"
   },
@@ -9680,6 +9979,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale49.glb"
   },
@@ -9711,6 +10011,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale50.glb"
   },
@@ -9742,6 +10043,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale51.glb"
   },
@@ -9773,6 +10075,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale52.glb"
   },
@@ -9804,6 +10107,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMale53.glb"
   },
@@ -9835,6 +10139,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "PantMail_succubus.glb"
   },
@@ -9866,6 +10171,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale01.glb"
   },
@@ -9897,6 +10203,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale02.glb"
   },
@@ -9928,6 +10235,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale03.glb"
   },
@@ -9959,6 +10267,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale04.glb"
   },
@@ -9990,6 +10299,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale05.glb"
   },
@@ -10021,6 +10331,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale06.glb"
   },
@@ -10052,6 +10363,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale07.glb"
   },
@@ -10083,6 +10395,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale08.glb"
   },
@@ -10114,6 +10427,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale09.glb"
   },
@@ -10145,6 +10459,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale10.glb"
   },
@@ -10176,6 +10491,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveElf01.glb"
   },
@@ -10207,6 +10523,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveElf02.glb"
   },
@@ -10238,6 +10555,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveElf03.glb"
   },
@@ -10269,6 +10587,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveElf04.glb"
   },
@@ -10300,6 +10619,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveElf05.glb"
   },
@@ -10331,6 +10651,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale16.glb"
   },
@@ -10362,6 +10683,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale17.glb"
   },
@@ -10393,6 +10715,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale18.glb"
   },
@@ -10424,6 +10747,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale19.glb"
   },
@@ -10455,6 +10779,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMaleTest20.glb"
   },
@@ -10486,6 +10811,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale21.glb"
   },
@@ -10517,6 +10843,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale22.glb"
   },
@@ -10548,6 +10875,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale23.glb"
   },
@@ -10579,6 +10907,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale24.glb"
   },
@@ -10610,6 +10939,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale25.glb"
   },
@@ -10641,6 +10971,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale26.glb"
   },
@@ -10672,6 +11003,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale27.glb"
   },
@@ -10703,6 +11035,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale28.glb"
   },
@@ -10734,6 +11067,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale29.glb"
   },
@@ -10765,6 +11099,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_GloveMale01.glb"
   },
@@ -10796,6 +11131,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_GloveMale02.glb"
   },
@@ -10827,6 +11163,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_GloveMale03.glb"
   },
@@ -10858,6 +11195,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_GloveMale04.glb"
   },
@@ -10889,6 +11227,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_GloveMale05.glb"
   },
@@ -10920,6 +11259,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_GloveMale01.glb"
   },
@@ -10951,6 +11291,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_GloveMale02.glb"
   },
@@ -10982,6 +11323,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_GloveMale03.glb"
   },
@@ -11013,6 +11355,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_GloveMale04.glb"
   },
@@ -11044,6 +11387,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_GloveMale05.glb"
   },
@@ -11075,6 +11419,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale40.glb"
   },
@@ -11106,6 +11451,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale41.glb"
   },
@@ -11137,6 +11483,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale42.glb"
   },
@@ -11168,6 +11515,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale43.glb"
   },
@@ -11199,6 +11547,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale44.glb"
   },
@@ -11230,6 +11579,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale45.glb"
   },
@@ -11261,6 +11611,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale46.glb"
   },
@@ -11292,6 +11643,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale47.glb"
   },
@@ -11323,6 +11675,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale48.glb"
   },
@@ -11354,6 +11707,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale49.glb"
   },
@@ -11385,6 +11739,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale50.glb"
   },
@@ -11416,6 +11771,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale51.glb"
   },
@@ -11447,6 +11803,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale52.glb"
   },
@@ -11478,6 +11835,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale53.glb"
   },
@@ -11509,6 +11867,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "GloveMail_succubus.glb"
   },
@@ -11540,6 +11899,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale01.glb"
   },
@@ -11571,6 +11931,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale02.glb"
   },
@@ -11602,6 +11963,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale03.glb"
   },
@@ -11633,6 +11995,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale04.glb"
   },
@@ -11664,6 +12027,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale05.glb"
   },
@@ -11695,6 +12059,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "BootMale06.glb"
   },
@@ -11726,6 +12091,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "BootMale07.glb"
   },
@@ -11757,6 +12123,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale08.glb"
   },
@@ -11788,6 +12155,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "BootMale09.glb"
   },
@@ -11819,6 +12187,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "BootMale10.glb"
   },
@@ -11850,6 +12219,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootElf01.glb"
   },
@@ -11881,6 +12251,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootElf02.glb"
   },
@@ -11912,6 +12283,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootElf03.glb"
   },
@@ -11943,6 +12315,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootElf04.glb"
   },
@@ -11974,6 +12347,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootElf05.glb"
   },
@@ -12005,6 +12379,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale16.glb"
   },
@@ -12036,6 +12411,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale17.glb"
   },
@@ -12067,6 +12443,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale18.glb"
   },
@@ -12098,6 +12475,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale19.glb"
   },
@@ -12129,6 +12507,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMaleTest20.glb"
   },
@@ -12160,6 +12539,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale21.glb"
   },
@@ -12191,6 +12571,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale22.glb"
   },
@@ -12222,6 +12603,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale23.glb"
   },
@@ -12253,6 +12635,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale24.glb"
   },
@@ -12284,6 +12667,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale25.glb"
   },
@@ -12315,6 +12699,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale26.glb"
   },
@@ -12346,6 +12731,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale27.glb"
   },
@@ -12377,6 +12763,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale28.glb"
   },
@@ -12408,6 +12795,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale29.glb"
   },
@@ -12439,6 +12827,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_BootMale01.glb"
   },
@@ -12470,6 +12859,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_BootMale02.glb"
   },
@@ -12501,6 +12891,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_BootMale03.glb"
   },
@@ -12532,6 +12923,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_BootMale04.glb"
   },
@@ -12563,6 +12955,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "HDK_BootMale05.glb"
   },
@@ -12594,6 +12987,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_BootMale01.glb"
   },
@@ -12625,6 +13019,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_BootMale02.glb"
   },
@@ -12656,6 +13051,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_BootMale03.glb"
   },
@@ -12687,6 +13083,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_BootMale04.glb"
   },
@@ -12718,6 +13115,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "CW_BootMale05.glb"
   },
@@ -12749,6 +13147,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale40.glb"
   },
@@ -12780,6 +13179,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale41.glb"
   },
@@ -12811,6 +13211,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale42.glb"
   },
@@ -12842,6 +13243,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale43.glb"
   },
@@ -12873,6 +13275,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale44.glb"
   },
@@ -12904,6 +13307,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale45.glb"
   },
@@ -12935,6 +13339,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale46.glb"
   },
@@ -12966,6 +13371,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale47.glb"
   },
@@ -12997,6 +13403,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale48.glb"
   },
@@ -13028,6 +13435,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale49.glb"
   },
@@ -13059,6 +13467,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale50.glb"
   },
@@ -13090,6 +13499,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale51.glb"
   },
@@ -13121,6 +13531,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale52.glb"
   },
@@ -13152,6 +13563,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMale53.glb"
   },
@@ -13183,6 +13595,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "BootMail_succubus.glb"
   },
@@ -13212,6 +13625,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Wing01.glb"
   },
@@ -13241,6 +13655,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Wing02.glb"
   },
@@ -13270,6 +13685,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Wing03.glb"
   },
@@ -13299,6 +13715,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Wing04.glb"
   },
@@ -13328,6 +13745,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Wing05.glb"
   },
@@ -13357,6 +13775,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Wing06.glb"
   },
@@ -13386,6 +13805,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Wing07.glb"
   },
@@ -13415,6 +13835,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem01.glb"
   },
@@ -13444,6 +13865,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem02.glb"
   },
@@ -13473,6 +13895,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem03.glb"
   },
@@ -13502,6 +13925,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem04.glb"
   },
@@ -13531,6 +13955,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem05.glb"
   },
@@ -13560,6 +13985,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem06.glb"
   },
@@ -13589,6 +14015,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem07.glb"
   },
@@ -13618,6 +14045,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem08.glb"
   },
@@ -13647,6 +14075,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Jewel15.glb"
   },
@@ -13676,6 +14105,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem10.glb"
   },
@@ -13705,6 +14135,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem11.glb"
   },
@@ -13734,6 +14165,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem12.glb"
   },
@@ -13763,6 +14195,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem13.glb"
   },
@@ -13792,6 +14225,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "skillScroll.glb"
   },
@@ -13821,6 +14255,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "skillScroll.glb"
   },
@@ -13850,6 +14285,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "skillScroll.glb"
   },
@@ -13879,6 +14315,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "skillScroll.glb"
   },
@@ -13908,6 +14345,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rs.glb"
   },
@@ -13937,6 +14375,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -13966,6 +14405,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -13995,6 +14435,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "giftbox_r.glb"
   },
@@ -14024,6 +14465,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "giftbox_g.glb"
   },
@@ -14053,6 +14495,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "giftbox_b.glb"
   },
@@ -14082,6 +14525,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "skillScroll.glb"
   },
@@ -14111,6 +14555,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "wing08.glb"
   },
@@ -14140,6 +14585,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "wing09.glb"
   },
@@ -14169,6 +14615,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "wing10.glb"
   },
@@ -14198,6 +14645,7 @@
     "MG": 2,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "wing11.glb"
   },
@@ -14227,6 +14675,7 @@
     "MG": 0,
     "DL": 3,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "DarkLordRobe02.glb"
   },
@@ -14256,6 +14705,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Wing42.glb"
   },
@@ -14285,6 +14735,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Wing43.glb"
   },
@@ -14314,6 +14765,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 3,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Wing44.glb"
   },
@@ -14343,6 +14795,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem06.glb"
   },
@@ -14372,6 +14825,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem06.glb"
   },
@@ -14401,6 +14855,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem06.glb"
   },
@@ -14430,6 +14885,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Gem06.glb"
   },
@@ -14459,6 +14915,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "skillScroll.glb"
   },
@@ -14488,6 +14945,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "s30_seed.glb"
   },
@@ -14517,6 +14975,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "s30_seed.glb"
   },
@@ -14546,6 +15005,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "s30_seed.glb"
   },
@@ -14575,6 +15035,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "s30_seed.glb"
   },
@@ -14604,6 +15065,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "s30_seed.glb"
   },
@@ -14633,6 +15095,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "s30_seed.glb"
   },
@@ -14662,6 +15125,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "s30_sphere_body01.glb"
   },
@@ -14691,6 +15155,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "s30_sphere01.glb"
   },
@@ -14720,6 +15185,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -14749,6 +15215,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -14778,6 +15245,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -14807,6 +15275,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -14836,6 +15305,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -14865,6 +15335,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -14894,6 +15365,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -14923,6 +15395,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -14952,6 +15425,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -14981,6 +15455,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15010,6 +15485,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15039,6 +15515,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15068,6 +15545,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15097,6 +15575,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15126,6 +15605,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15155,6 +15635,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15184,6 +15665,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15213,6 +15695,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15242,6 +15725,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15271,6 +15755,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15300,6 +15785,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15329,6 +15815,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15358,6 +15845,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15387,6 +15875,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15416,6 +15905,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15445,6 +15935,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15474,6 +15965,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15503,6 +15995,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15532,6 +16025,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -15562,6 +16056,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "Helper01.glb"
   },
@@ -15592,6 +16087,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "Helper02.glb"
   },
@@ -15622,6 +16118,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "Helper03.glb"
   },
@@ -15652,6 +16149,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Player/",
     "szModelName": "Helper04.glb"
   },
@@ -15682,6 +16180,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "DarkHorseHorn.glb"
   },
@@ -15712,6 +16211,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "spiritbill.glb"
   },
@@ -15742,6 +16242,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Covenant.glb"
   },
@@ -15772,6 +16273,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Ring01.glb"
   },
@@ -15802,6 +16304,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Ring02.glb"
   },
@@ -15832,6 +16335,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Ring01.glb"
   },
@@ -15862,6 +16366,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "SummonBook.glb"
   },
@@ -15892,6 +16397,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Necklace01.glb"
   },
@@ -15922,6 +16428,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Necklace02.glb"
   },
@@ -15952,6 +16459,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Quest04.glb"
   },
@@ -15982,6 +16490,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Quest05.glb"
   },
@@ -16012,6 +16521,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "EventBloodCastle00.glb"
   },
@@ -16042,6 +16552,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "EventBloodCastle01.glb"
   },
@@ -16072,6 +16583,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "EventBloodCastle02.glb"
   },
@@ -16102,6 +16614,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Empty",
     "szModelName": "Empty"
   },
@@ -16132,6 +16645,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "MagicRing00.glb"
   },
@@ -16162,6 +16676,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "firering.glb"
   },
@@ -16192,6 +16707,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "groundring.glb"
   },
@@ -16222,6 +16738,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "windring.glb"
   },
@@ -16252,6 +16769,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "manaring.glb"
   },
@@ -16282,6 +16800,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "icenecklace.glb"
   },
@@ -16312,6 +16831,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "windnecklace.glb"
   },
@@ -16342,6 +16862,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "waternecklace.glb"
   },
@@ -16372,6 +16893,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "agnecklace.glb"
   },
@@ -16402,6 +16924,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "EventChaosCastle.glb"
   },
@@ -16432,6 +16955,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "DarkLordRobe.glb"
   },
@@ -16462,6 +16986,7 @@
     "MG": 0,
     "DL": 1,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "DarkHorseSoul.glb"
   },
@@ -16492,6 +17017,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "FR_1.glb"
   },
@@ -16522,6 +17048,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "FR_2.glb"
   },
@@ -16552,6 +17079,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "FR_3.glb"
   },
@@ -16582,6 +17110,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "FR_4.glb"
   },
@@ -16612,6 +17141,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "FR_5.glb"
   },
@@ -16642,6 +17172,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "FR_6.glb"
   },
@@ -16672,6 +17203,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "kanneck2.glb"
   },
@@ -16702,6 +17234,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Ring01.glb"
   },
@@ -16732,6 +17265,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Ring01.glb"
   },
@@ -16762,6 +17296,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Ring01.glb"
   },
@@ -16792,6 +17327,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Ring01.glb"
   },
@@ -16822,6 +17358,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "monmark01.glb"
   },
@@ -16852,6 +17389,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "monmark02.glb"
   },
@@ -16882,6 +17420,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "monmark03.glb"
   },
@@ -16912,6 +17451,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "scrollpaper.glb"
   },
@@ -16942,6 +17482,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "oath.glb"
   },
@@ -16972,6 +17513,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "songbl.glb"
   },
@@ -17002,6 +17544,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "condolstone.glb"
   },
@@ -17032,6 +17575,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "condolwing.glb"
   },
@@ -17062,6 +17606,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/partcharge4/",
     "szModelName": "demon.glb"
   },
@@ -17092,6 +17637,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/partcharge4/",
     "szModelName": "maria.glb"
   },
@@ -17122,6 +17668,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/xmas/",
     "szModelName": "santa_village.glb"
   },
@@ -17152,6 +17699,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/xmas/",
     "szModelName": "xmas_deer.glb"
   },
@@ -17182,6 +17730,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/xmas/",
     "szModelName": "xmasring.glb"
   },
@@ -17212,6 +17761,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "gamble_scyderx01.glb"
   },
@@ -17242,6 +17792,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "gamble_wand01.glb"
   },
@@ -17272,6 +17823,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "gamble_bowx01.glb"
   },
@@ -17302,6 +17854,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "gamble_safterx01.glb"
   },
@@ -17332,6 +17885,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "gamble_stickx01.glb"
   },
@@ -17362,6 +17916,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "PandaPetRing.glb"
   },
@@ -17392,6 +17947,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "PandaPet.glb"
   },
@@ -17422,6 +17978,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Empty",
     "szModelName": "Empty"
   },
@@ -18726,6 +19283,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book01.glb"
   },
@@ -18750,6 +19308,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book02.glb"
   },
@@ -18774,6 +19333,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book03.glb"
   },
@@ -18798,6 +19358,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book04.glb"
   },
@@ -18822,6 +19383,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book05.glb"
   },
@@ -18846,6 +19408,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book06.glb"
   },
@@ -18870,6 +19433,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book07.glb"
   },
@@ -18894,6 +19458,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book08.glb"
   },
@@ -18918,6 +19483,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book09.glb"
   },
@@ -18942,6 +19508,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book10.glb"
   },
@@ -18966,6 +19533,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book11.glb"
   },
@@ -18990,6 +19558,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book12.glb"
   },
@@ -19014,6 +19583,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book13.glb"
   },
@@ -19038,6 +19608,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book14.glb"
   },
@@ -19062,6 +19633,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book15.glb"
   },
@@ -19086,6 +19658,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book16.glb"
   },
@@ -19110,6 +19683,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book17.glb"
   },
@@ -19134,6 +19708,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book18.glb"
   },
@@ -19158,6 +19733,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book19.glb"
   },
@@ -19182,6 +19758,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -19206,6 +19783,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -19230,6 +19808,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -19254,6 +19833,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -19278,6 +19858,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -19302,6 +19883,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -19326,6 +19908,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 1,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -19350,6 +19933,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -19374,6 +19958,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 2,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "rollofpaper.glb"
   },
@@ -19398,6 +19983,7 @@
     "MG": 0,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book18.glb"
   },
@@ -19422,6 +20008,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
+    "RF": 0,
     "szModelFolder": "Item/",
     "szModelName": "Book18.glb"
   }

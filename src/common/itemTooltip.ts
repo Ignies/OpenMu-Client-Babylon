@@ -3,6 +3,7 @@ import type { Item } from '../ecs/world';
 import {
   ItemGroup,
   classCanUse,
+  classUnrestricted,
   isArmorPart,
   isCapeOfFighter,
   isCapeOfLord,
@@ -75,6 +76,8 @@ const CLASS_NAME_KEYS: readonly (readonly [TextKey, TextKey, TextKey])[] = [
   ['class.magicGladiator', 'class.magicGladiator', 'class.duelMaster'],
   ['class.darkLord', 'class.darkLord', 'class.lordEmperor'],
   ['class.summoner', 'class.bloodySummoner', 'class.dimensionMaster'],
+  // No second class, so step 2 falls back to the first name, as MG and DL do.
+  ['class.rageFighter', 'class.rageFighter', 'class.fistMaster'],
 ];
 
 const RESISTANCE_NAME_KEYS: readonly TextKey[] = [
@@ -187,7 +190,7 @@ function requirementLine(
 
 /** `RequireClass` (ZzzInventory.cpp:604). */
 function classLines(out: Lines, def: ItemDef, hero: HeroStats) {
-  if (def.classes.every(value => value === 1)) return;
+  if (classUnrestricted(def)) return;
   if (def.classes.every(value => value === 0)) return;
 
   out.blank();
