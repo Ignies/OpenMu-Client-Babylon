@@ -11,6 +11,7 @@ import { createTileTextureArray } from './tileTextureArray';
 import { updateTerrainHeightMap } from './terrainHeightMap';
 import { createTerrainMaterial } from './terrainMaterial';
 import { terrainOverlaysFor } from './terrainOverlay';
+import { createTerrainEdge } from './terrainEdge';
 import { disposeGrassField, installGrassField } from './terrainGrass';
 import { loadGrassCards } from './terrainGrassCards';
 import {
@@ -115,8 +116,14 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
   ]);
   lightTextureData.Texture.dispose();
 
+  // The bake's border vignette comes off on the tiers that can frame it
+  // (`common/terrain/borderVignette.ts`); Classic keeps the original's fade.
   const terrainLight = unpackTerrainLight(
-    await parseTerrainLightOffThread(lightTextureData.BufferFloat, bulk.height)
+    await parseTerrainLightOffThread(
+      lightTextureData.BufferFloat,
+      bulk.height,
+      lightingTier() !== null
+    )
   );
 
   // Packs the same tiles into one sampler2DArray so the splat shader does two
@@ -245,6 +252,29 @@ export async function getTerrainData(
         : null,
     }
   );
+
+  // The world's outer frame: the ground carried past the last tile row, so
+  // the map ends in a coast instead of a cut (terrainEdge.ts). It shares this
+  // material, which is what keeps the sea outside the map in step with the
+  // sea inside it. Classic draws none of it, the way it draws no sky dome.
+  if (lightingTier()) {
+    const edge = createTerrainEdge('_worldEdge_' + worldNum, scene, {
+      height: terrainHeight,
+      layer1: terrainMapping.layer1,
+      layer2: terrainMapping.layer2,
+      alpha: terrainMapping.alpha,
+      light: terrainLight,
+      ambient: Vector3.One().setAll(TERRAIN_AMBIENT),
+    });
+
+    if (edge) {
+      edge.material = terrain.material;
+      edge.renderingGroupId = terrain.renderingGroupId;
+      // Goes with the ground it frames. Its own dispose leaves the material
+      // alone: the two share one, and the teardown already disposes it.
+      terrain.onDisposeObservable.addOnce(() => edge.dispose(false, false));
+    }
+  }
 
   // The grass layer stands on this ground and is lit by it (terrainGrass.ts).
   // Built from the same arrays the mesh above was: the splat says which tiles
