@@ -74,8 +74,16 @@ export const ELBELAND_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *    `BITMAP_TRUE_BLUE` particles (:283-289) — the blue elf lamps.
  *  - **63** (×6), `RenderObjectVisual` :290-299: one `BITMAP_LIGHT` sprite at
  *    bone 5 sized `scale * 6` — the great lanterns; no terrain light.
- *  - **110** (×1) and **121** (×26): `BITMAP_LIGHT` particles / sprites on
- *    bones (:301-327) — the shrine and the lamp posts; sprites only.
+ *  - **110** (×1, at 47.5/218.5), `RenderObjectVisual` :301-311: one
+ *    `BITMAP_LIGHT` particle every other tick at
+ *    `(cos, sin)(WorldTime * 0.03) * (30 + rand()%5)` around bone 0, 70 up,
+ *    scale 0.6, white — the village-protection shrine. 0.03 rad/ms is 4.8
+ *    turns a second against 12.5 spawns, so consecutive sparks land 138°
+ *    apart and the ring never reads as an orbit in the original either: what
+ *    it looks like is a light hanging over the shrine, which is the sprite
+ *    below. The same stand-in 63 and 121 already take.
+ *  - **121** (×26): `BITMAP_LIGHT` sprites on bones 3…8 (:312-327) — the
+ *    lamp posts; one sprite each.
  */
 export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
   {
@@ -105,6 +113,12 @@ export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
       {
         offset: [0, 0, 300],
         sprite: { scale: 3, color: [1, 0.9, 0.7] },
+      },
+    ],
+    110: [
+      {
+        offset: [0, 0, 70],
+        sprite: { scale: 1.2, color: [1, 1, 1] },
       },
     ],
     121: [

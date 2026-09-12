@@ -48,6 +48,27 @@ export interface MapLayer {
    */
   readonly tiles: readonly string[];
 
+  /**
+   * The slot this world fills with an `AlphaTile*.Tga` instead of a ground
+   * texture, when it has one. `LoadWorld` gives it to Elbeland (slot 2),
+   * Kanturu 3 (3), Cursed Temple (4), the Empire Guardian maps and the two
+   * new login scenes (10), and Karutan (12); `RenderFace`
+   * (ZzzLodTerrain.cpp:1394-1435) then draws that one slot through
+   * `EnableAlphaTest` and every other through `DisableAlphaBlend`.
+   *
+   * All thirteen of those files shipped in `Data/` are 256x256 32-bit TGAs
+   * that are zero in every byte, alpha included, so the alpha test leaves
+   * nothing of them: the slot does not mean "a see-through ground texture",
+   * it means *no ground here*. The maps that use it punch the terrain out
+   * from under a bridge span or a platform so the span reads as a span
+   * instead of a ribbon of ground hanging in the void.
+   *
+   * The tile named in `tiles` for this slot is never drawn; it still has to
+   * be a file the folder has, so the indices `EncTerrain<n>.map` uses stay
+   * put.
+   */
+  readonly cutoutTile?: number;
+
   /** Where the offline hero lands, in tiles. Omit = keep the current position. */
   readonly spawn?: Spawn;
 

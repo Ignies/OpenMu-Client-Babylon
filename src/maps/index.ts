@@ -111,6 +111,11 @@ class Maps {
     return layer.tiles;
   }
 
+  /** The `AlphaTile*` slot, the one that means "no ground here", or null. */
+  cutoutTileFor(world: ENUM_WORLD): number | null {
+    return this.layerFor(world)?.cutoutTile ?? null;
+  }
+
   /** Where the offline hero lands, in tiles. */
   spawn(world: ENUM_WORLD): Spawn | undefined {
     return this.layerFor(world)?.spawn;

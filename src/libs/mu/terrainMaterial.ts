@@ -130,6 +130,34 @@ function textureArrayGlsl(layers: number): string {
   `;
 }
 
+/**
+ * The `AlphaTile*` slot: a hole in the ground, not a texture.
+ *
+ * `RenderFace` (ZzzLodTerrain.cpp:1394-1435) draws that one slot through
+ * `EnableAlphaTest` and every other through `DisableAlphaBlend`, and every
+ * `AlphaTile*.Tga` in the data set is zero in every byte, so the face
+ * contributes nothing (`MapLayer.cutoutTile`).
+ *
+ * The tile whose second layer covers it fully never gets here: the mesh
+ * already puts layer 2 in `vOpaqueTexture` for those, which is the same rule
+ * `RenderTerrainFace` picks its base texture by (customGroundMesh.ts:161).
+ * Under that the original alpha-tests the base away and blends layer 2 over
+ * the void at the vertex alpha; one opaque pass can only test, so a partial
+ * second layer takes a 0.5 cut - 11 tiles of the 309 on Elbeland, the only
+ * map that declares a cutout today.
+ *
+ * Emitted only for a map that has one, so every other terrain shader keeps
+ * its early-Z.
+ */
+function cutoutGlsl(slot: number): string {
+  return `
+    if (int(m1) == ${slot}) {
+      if (!alphaRendered || vAlphaColor.a < 0.5) discard;
+      opaqueColor = alphaColor;
+    }
+  `;
+}
+
 export function createTerrainMaterial(
   scene: Scene,
   { name }: { name: string },
@@ -141,10 +169,13 @@ export function createTerrainMaterial(
     overlays?: readonly TerrainOverlay[];
     /** Animated water for this map (terrainWater.ts); null = shader unchanged. */
     water?: TerrainWaterRuntime | null;
+    /** The map's `AlphaTile*` slot (`MapLayer.cutoutTile`); null = no cutout. */
+    cutout?: number | null;
   }
 ) {
   const tileArray = USE_TILE_TEXTURE_ARRAY ? config.tileArray ?? null : null;
   const water = config.water ?? null;
+  const cutout = config.cutout ?? null;
   // The ploughed-trail map is one more sampler, and the per-tile fallback
   // path already spends every one of WebGL's guaranteed 16 fragment units
   // (13 tiles + the light map + two cascades). On that path the trail is
@@ -246,6 +277,7 @@ ${tileArray ? terrainDetailGlsl() : ''}
 
     ${finalColorStr}
 ${water ? terrainWaterAlphaSkipGlsl(water) : ''}
+${cutout === null ? '' : cutoutGlsl(cutout)}
     ${FINAL_COLOR_VAR_NAME} = vec4(opaqueColor, 1.0);
 
     if(alphaRendered){

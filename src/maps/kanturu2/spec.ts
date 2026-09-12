@@ -35,16 +35,23 @@ export const KANTURU2_EFFECT_ONLY_TYPES: readonly number[] = [
   45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 65,
 ];
 
-/** The steam. `cloud21` for every cloud SubType; `waterfall5_9` for the spray. */
+/**
+ * The steam. `cloud21` for every cloud SubType; `waterfall5_9` for the spray.
+ *
+ * Only the three that repeat are here. **45**, **46**, **47** and **49**
+ * (:387-448) sit behind `if (o->HiddenMesh != -2)`, which the move hook sets
+ * on all of them every frame, so they fire once at most and what they fire is
+ * 20 near-black sprites - nothing to draw, and a stream of white in its place
+ * fogs the map in. **48**, **50** and **51** are `rand_fps_check(3)` with no
+ * such guard, so they keep their row, with the light the C++ gives them: a
+ * flat 0.2 grey on 48, and near-black blue and red on 50/51 (:449-470,
+ * where the third channel is `rand()%3 * 0.01` over a 0.02/0.01 floor).
+ */
 export const KANTURU2_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
   {
-    45: [{ kinds: ['cloud21'], every: 8 }],
-    46: [{ kinds: ['cloud21'], every: 8 }],
-    47: [{ kinds: ['cloud21'], every: 4 }],
-    48: [{ kinds: ['cloud21'], every: 6 }],
-    49: [{ kinds: ['cloud21'], every: 4 }],
-    50: [{ kinds: ['cloud21'], every: 6 }],
-    51: [{ kinds: ['cloud21'], every: 6 }],
+    48: [{ kinds: ['cloud21'], every: 3, light: [0.2, 0.2, 0.2] }],
+    50: [{ kinds: ['cloud21'], every: 3, light: [0, 0.01, 0.03] }],
+    51: [{ kinds: ['cloud21'], every: 3, light: [0.02, 0, 0] }],
     52: [{ kinds: ['waterfall5_9'], every: 2 }],
     53: [{ kinds: ['waterfall5_9'], every: 3, scale: 0.5 }],
   };

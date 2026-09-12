@@ -30,15 +30,18 @@ export const SWAMP_EFFECT_ONLY_TYPES: readonly number[] = [
 ];
 
 /**
- * The vents. 77/78 are 204 emitters — the cloud rate is kept low (one in
- * eight) because they sit in every direction at once.
+ * The vents. 77/78 are 204 emitters, and they do repeat - `rand_fps_check(6)`
+ * with no `HiddenMesh` guard (:179-196) - so what keeps them off the screen
+ * is the light the C++ gives them, `(0.04, 0.06, 0.03)` and
+ * `(0.03, 0.03, 0.05)`. On an additive sprite that is a breath of colour over
+ * the ground; the white they defaulted to before was 204 searchlights.
  */
 export const SWAMP_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
   71: [{ kinds: ['fire1', 'fire2'], every: 3, light: [1, 0.6, 0.3] }],
   72: [{ kinds: ['smoke21'], every: 4 }],
   74: [{ kinds: ['smoke21'], every: 4, scale: 2 }],
-  77: [{ kinds: ['cloud21'], every: 8 }],
-  78: [{ kinds: ['cloud21'], every: 8 }],
+  77: [{ kinds: ['cloud21'], every: 6, light: [0.04, 0.06, 0.03] }],
+  78: [{ kinds: ['cloud21'], every: 6, light: [0.03, 0.03, 0.05] }],
 };
 
 /**
