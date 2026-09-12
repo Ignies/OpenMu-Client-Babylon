@@ -14,7 +14,7 @@ import {
 import { dynamicLightGain, pointLightBudget } from './lightingQuality';
 import { devQueryNumber } from './devSeams';
 import { lookDirector } from '../lighting/director';
-import type { TerrainLightColor } from './terrainDynamicLight';
+import type { TerrainLightColor, TerrainLightEmitter } from './terrainDynamicLight';
 
 /**
  * Torch slots this session, from the lighting tier — see `pointLightBudget`
@@ -64,6 +64,12 @@ const HEIGHT_OFFSET = 0.6;
 
 export type PointLightEmitter = {
   readonly position: { x: number; y: number; z: number };
+  /**
+   * The tile-map emitter this light stands in for while it holds a slot:
+   * the ground then takes it per pixel (`terrainLighting.ts`) and the tile
+   * map carries only the share the slot's fade has not taken yet.
+   */
+  readonly terrain?: TerrainLightEmitter;
   readonly heightOffset?: number;
   readonly range?: number;
   readonly wander?: number;
@@ -82,6 +88,44 @@ export type PointLightEmitter = {
 const emitters = new Set<PointLightEmitter>();
 
 let pool: PointLight[] = [];
+
+/** One ground light per slot, as `terrainLighting.ts` binds it. */
+export type GroundLight = {
+  x: number;
+  z: number;
+  /** Tile-map footprint radius, 0 for an empty slot. */
+  range: number;
+  falloff: number;
+  /** Colour with the floor gain, the fade and the dynamic gain folded in. */
+  r: number;
+  g: number;
+  b: number;
+};
+
+const groundLights: GroundLight[] = [];
+
+/** Terrain emitters a slot stands in for this frame, with the slot's fade. */
+const heldTerrain = new Map<TerrainLightEmitter, number>();
+
+/** The pool's lights as the ground takes them per pixel this frame. */
+export function pointLightPoolGroundLights(): readonly GroundLight[] {
+  return groundLights;
+}
+
+/** Tile-map emitters the pool lights per pixel this frame, and how far in. */
+export function pointLightPoolHeldTerrain(): ReadonlyMap<TerrainLightEmitter, number> {
+  return heldTerrain;
+}
+
+function clearGroundLight(g: GroundLight): void {
+  g.x = 0;
+  g.z = 0;
+  g.range = 0;
+  g.falloff = 1;
+  g.r = 0;
+  g.g = 0;
+  g.b = 0;
+}
 let poolScene: Scene | null = null;
 
 export function initPointLightPool(scene: Scene): void {
@@ -160,12 +204,18 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
     });
   }
 
+  while (groundLights.length < pool.length) {
+    groundLights.push({ x: 0, z: 0, range: 0, falloff: 1, r: 0, g: 0, b: 0 });
+  }
+  heldTerrain.clear();
+
   if (!GameOptions.dynamicLights || emitters.size === 0) {
     for (const light of pool) light.intensity = 0;
     for (const slot of slots) {
       slot.emitter = null;
       slot.fade = 0;
     }
+    for (const g of groundLights) clearGroundLight(g);
     return;
   }
 
@@ -249,13 +299,36 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
       }
     }
 
+    const ground = groundLights[i];
+
     if (!slot.emitter) {
       light.intensity = 0;
+      clearGroundLight(ground);
       continue;
     }
 
     const emitter = slot.emitter;
     const { r, g, b } = emitter.color(elapsedMs);
+
+    // The ground's share of this light: the tile emitter's own footprint,
+    // colour and floor gain, taken per pixel instead of per tile.
+    const terrain = emitter.terrain;
+
+    if (terrain) {
+      const tc = terrain.color(elapsedMs);
+      const k = (terrain.floorGain ?? 1) * slot.fade * dynamicLightGain();
+
+      ground.x = terrain.position.x;
+      ground.z = terrain.position.z;
+      ground.range = terrain.range;
+      ground.falloff = terrain.falloff ?? 1;
+      ground.r = tc.r * k;
+      ground.g = tc.g * k;
+      ground.b = tc.b * k;
+      heldTerrain.set(terrain, slot.fade);
+    } else {
+      clearGroundLight(ground);
+    }
 
     light.range = emitter.range ?? LIGHT_RANGE;
 

@@ -1,5 +1,6 @@
 import type { Effect, Scene } from '../babylon/exports';
 import { getTerrainLightTexture } from '../../common/terrainDynamicLight';
+import { pointLightPoolGroundLights } from '../../common/pointLightPool';
 import {
   linearBufferActive,
   linearLightActive,
@@ -63,12 +64,20 @@ import {
 const GROUND_CEIL_KNEE = 0.85;
 const GROUND_CEIL_ASYMPTOTE = 1.1;
 
+/**
+ * Ground lights bound per frame: the point-light pool's slots. The pool is
+ * this many at most; an empty slot binds range 0 and adds nothing.
+ */
+export const GROUND_POINT_LIGHTS = 8;
+
 export const TERRAIN_LIGHT_UNIFORMS = [
   'time',
   'linearOut',
   'linearLight',
   'keyGain',
   'roomParams',
+  'groundLightPos',
+  'groundLightCol',
   LIGHT_TINT_UNIFORM,
   ...TERRAIN_CSM_UNIFORMS,
 ] as const;
@@ -104,6 +113,11 @@ export function terrainLightDeclarationsGlsl(clouds: boolean): string {
   uniform float ${LIGHT_TINT_UNIFORM};
   uniform vec3 roomParams; // x: a room is the active area, y: gain on the delta (AreaLook.candles), z: the room's share of the key on the bake
   uniform sampler2D dynamicLight;
+  // The pool's slots on the ground: xy the tile position, z the footprint
+  // radius (0: empty slot), w the falloff exponent; the colour carries the
+  // floor gain, the fade and the dynamic gain.
+  uniform vec4 groundLightPos[${GROUND_POINT_LIGHTS}];
+  uniform vec4 groundLightCol[${GROUND_POINT_LIGHTS}];
 
   const float GROUND_CEIL_KNEE = ${GROUND_CEIL_KNEE.toFixed(3)};
   const float GROUND_CEIL_ROOM = ${(GROUND_CEIL_ASYMPTOTE - GROUND_CEIL_KNEE).toFixed(3)};
@@ -127,6 +141,17 @@ export function terrainSkyLightGlsl(): string {
     vec4 dynSample = texture2D(dynamicLight, (vWorldXZ + 0.5) / 256.0);
     vec3 dynLight = dynSample.rgb * 2.0 * roomParams.y;
     float skyOpen = dynSample.a;
+
+    // Tiers >= 1: the lights the pool holds, per pixel, with the same
+    // footprint the tile map would have stamped for them - the stamp is one
+    // texel a tile, and on a dark floor its bilinear skirt read as tile
+    // squares. The tile map above carries only what the pool does not hold.
+    for (int i = 0; i < ${GROUND_POINT_LIGHTS}; i++) {
+      vec4 gl = groundLightPos[i];
+      float gd = length(vWorldXZ - gl.xy);
+      float gf = max(0.0, (gl.z - gd) / max(gl.z, 0.001));
+      dynLight += groundLightCol[i].rgb * pow(gf, gl.w) * linearLight * roomParams.y;
+    }
 `;
 }
 
@@ -250,7 +275,29 @@ export function bindTerrainLight(
   }
 
   effect.setTexture('dynamicLight', getTerrainLightTexture(scene));
+
+  const lights = pointLightPoolGroundLights();
+
+  for (let i = 0; i < GROUND_POINT_LIGHTS; i++) {
+    const l = lights[i];
+    const o = i * 4;
+
+    groundPos[o] = l ? l.x : 0;
+    groundPos[o + 1] = l ? l.z : 0;
+    groundPos[o + 2] = l ? l.range : 0;
+    groundPos[o + 3] = l ? l.falloff : 1;
+    groundCol[o] = l ? l.r : 0;
+    groundCol[o + 1] = l ? l.g : 0;
+    groundCol[o + 2] = l ? l.b : 0;
+    groundCol[o + 3] = 0;
+  }
+
+  effect.setArray4('groundLightPos', groundPos);
+  effect.setArray4('groundLightCol', groundCol);
   bindTerrainCsm(effect);
 }
+
+const groundPos: number[] = new Array(GROUND_POINT_LIGHTS * 4).fill(0);
+const groundCol: number[] = new Array(GROUND_POINT_LIGHTS * 4).fill(0);
 
 export { CLOUD_UNIFORMS };
