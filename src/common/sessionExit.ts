@@ -126,6 +126,9 @@ export const SessionExit = new (class _SessionExit {
     SessionResume.forget();
     Store.closeNpcShop();
     quests.closeAll();
+    // The character is out of the world on all three of these; the backdrop
+    // behind the pre-game screens is not a map it stands on.
+    Store.world?.removeHero();
     runInAction(() => {
       Store.optionsEnabled = false;
     });
