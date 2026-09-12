@@ -8,6 +8,8 @@ import {
 } from '../libs/babylon/exports';
 import { downloadDataFile, hasDataFile } from '../libs/mu/dataFolder';
 import { maps } from '../maps';
+import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../effects/core';
+import { devQueryNumber } from './devSeams';
 
 const TICKS_PER_SECOND = 25;
 
@@ -624,6 +626,15 @@ async function getPool(
 
       manager.disableDepthWrite = true;
       manager.isPickable = false;
+
+      // The group the flare card over the flame already sits in
+      // (`common/effectLights.ts`). Babylon draws sprites before the
+      // transparent queue, and MU's alpha-keyed meshes write depth in that
+      // queue, so a flame left in group 0 was drawn first and then painted
+      // over by the bridge rail, the fence or the bush standing in front of
+      // it. Dev seam: `?fxgroup=0` puts them back.
+      manager.renderingGroupId = devQueryNumber('fxgroup') ?? EFFECT_RENDERING_GROUP;
+      keepDepthForEffects(target);
 
       const pool: Pool = {
         manager,
