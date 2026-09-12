@@ -483,6 +483,18 @@ function createCsm(
     const texture = current?.metadata?.diffuseTexture;
 
     if (texture) effect.setTexture('diffuseSampler', texture);
+
+    // The normal bias pulls a caster's vertices inward along their normals so
+    // a receiver's lit surface stays clear of its own stored depth. Only a
+    // receiver has that problem, and only the map receives (ModelObject sets
+    // `receiveShadows = IsMapObject`). A body is rigid bone segments that
+    // overlap by a few centimetres (`bmdToGlb` binds each vertex to one
+    // bone), so the same 3 cm opened a gap at every joint and a character's
+    // shadow landed as a pile of parts. Babylon binds this uniform per
+    // submesh just before the observer fires, so the override sticks.
+    const normalBias = current?.receiveShadows ? csm.normalBias : 0;
+
+    effect.setFloat3('biasAndScaleSM', csm.bias, normalBias, csm.depthScale);
   });
 
   return csm;
