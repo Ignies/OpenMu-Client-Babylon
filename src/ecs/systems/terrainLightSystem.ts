@@ -3,7 +3,11 @@ import {
   updateTerrainDynamicLight,
   uploadTerrainLightDelta,
 } from '../../common/terrainDynamicLight';
-import { updatePointLightPool } from '../../common/pointLightPool';
+import {
+  pointLightPoolHeldTerrain,
+  updatePointLightPool,
+} from '../../common/pointLightPool';
+import { lightingTier } from '../../common/lightingQuality';
 import { lighting } from '../../lighting';
 import { GameOptions } from '../../common/gameOptions';
 import { updateSceneLook } from '../../scenes/sceneLook';
@@ -27,15 +31,15 @@ export const TerrainLightSystem: ISystemFactory = world => {
 
       const elapsedMs = world.gameTime.TotalGameTime.TotalSeconds * 1000;
       const enabled = GameOptions.dynamicLights;
-
-      updateTerrainDynamicLight(elapsedMs, enabled);
-      uploadTerrainLightDelta();
-
       const camera = world.scene.activeCamera;
-
+      // The pool first: on tiers >= 1 the ground takes its slots per pixel,
+      // and the tile map below carries only what the pool does not hold.
       if (camera) {
         updatePointLightPool(elapsedMs, camera);
       }
+      const held = lightingTier() ? pointLightPoolHeldTerrain() : undefined;
+      updateTerrainDynamicLight(elapsedMs, enabled, held);
+      uploadTerrainLightDelta();
     },
   };
 };

@@ -263,16 +263,19 @@ export class LightSource {
   #register(): void {
     const { recipe, position } = this;
 
-    this.#offTerrain = registerTerrainLight({
+    const terrain = {
       position,
       range: recipe.range,
       falloff: recipe.falloff,
       floorGain: recipe.floorGain,
       color: () => this.#color,
-    });
+    };
+
+    this.#offTerrain = registerTerrainLight(terrain);
 
     this.#offPoint = registerPointLightEmitter({
       position,
+      terrain,
       heightOffset: recipe.heightOffset,
       range: recipe.pointRange ?? recipe.range + POINT_RANGE_EXTRA,
       gain: (recipe.gain ?? 1) * eventPointGain(recipe.priority ?? PRIORITY_EFFECT),

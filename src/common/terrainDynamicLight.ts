@@ -277,7 +277,13 @@ let wasActive = false;
 
 export function updateTerrainDynamicLight(
   elapsedMs: number,
-  enabled = true
+  enabled = true,
+  /**
+   * Emitters the point-light pool lights per pixel this frame, with the
+   * slot's fade: the tile map stamps their remaining share, so a light
+   * changing hands never dips. Tiers >= 1 only; Classic keeps every stamp.
+   */
+  held?: ReadonlyMap<TerrainLightEmitter, number>
 ): void {
   if (!primary || !baked) return;
 
@@ -302,14 +308,18 @@ export function updateTerrainDynamicLight(
   if (touchedDirty) rebuildTouched();
 
   for (const emitter of emitters) {
+    const share = 1 - (held?.get(emitter) ?? 0);
+
+    if (share <= 0) continue;
+
     const { r, g, b } = emitter.color(elapsedMs);
 
     addTerrainLight(
       emitter.position.x,
       emitter.position.z,
-      r,
-      g,
-      b,
+      r * share,
+      g * share,
+      b * share,
       emitter.range,
       emitter.falloff ?? 1,
       emitter.floorGain ?? 1
