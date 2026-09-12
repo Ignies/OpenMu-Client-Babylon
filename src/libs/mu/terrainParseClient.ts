@@ -156,7 +156,8 @@ export async function parseTerrainBulk(
  */
 export async function parseTerrainLightOffThread(
   lightBuffer: Float32Array,
-  heightData: Float32Array
+  heightData: Float32Array,
+  liftBorder: boolean
 ): Promise<Float32Array> {
   try {
     return await post<Float32Array>({
@@ -164,9 +165,10 @@ export async function parseTerrainLightOffThread(
       kind: 'light',
       lightBuffer,
       heightData,
+      liftBorder,
     });
   } catch (error) {
     console.warn('Terrain light parse fell back to the main thread:', error);
-    return parseTerrainLightPacked(lightBuffer, heightData);
+    return parseTerrainLightPacked(lightBuffer, heightData, liftBorder);
   }
 }

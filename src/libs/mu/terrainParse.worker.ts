@@ -40,6 +40,7 @@ export type TerrainWorkerRequest =
       kind: 'light';
       lightBuffer: Float32Array;
       heightData: Float32Array;
+      liftBorder: boolean;
     };
 
 export type TerrainWorkerBulkResult = {
@@ -91,7 +92,11 @@ ctx.onmessage = async (ev: MessageEvent<TerrainWorkerRequest>) => {
       return;
     }
 
-    const packed = parseTerrainLightPacked(req.lightBuffer, req.heightData);
+    const packed = parseTerrainLightPacked(
+      req.lightBuffer,
+      req.heightData,
+      req.liftBorder
+    );
 
     ctx.postMessage({ id: req.id, ok: true, kind: 'light', result: packed }, [
       packed.buffer,
