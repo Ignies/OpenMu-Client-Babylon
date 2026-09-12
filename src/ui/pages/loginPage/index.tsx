@@ -137,10 +137,10 @@ export const LoginPage = observer(() => {
           }}
         >
           <span className="login-label" style={{ left: LABEL_X, top: 113 }}>
-            ID
+            {t('login.id')}
           </span>
           <span className="login-label" style={{ left: LABEL_X, top: 139 }}>
-            Password
+            {t('login.password')}
           </span>
 
           <MuSpriteFrame

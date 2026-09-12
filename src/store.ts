@@ -2560,7 +2560,7 @@ export const Store = new (class _Store {
     // the only feedback there is.
     if (targetSlot < InventoryConstants.EquippableSlotsCount) {
       this.addNotification(
-        jewelTargetError(picked.item, target, targetSlot) ?? 'Take the item off before upgrading it',
+        jewelTargetError(picked.item, target, targetSlot) ?? t('item.takeItemOffFirst'),
         'error'
       );
       return true;

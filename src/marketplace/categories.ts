@@ -1,5 +1,6 @@
 import type { Item } from '../ecs/world';
-import { ItemsDatabase } from '../common/itemsDatabase';
+import { ItemsDatabase, itemBaseName } from '../common/itemsDatabase';
+import { t, type TextKey } from '../i18n';
 
 /**
  * Categories are derived from the item database rather than hand listed, so a
@@ -7,20 +8,34 @@ import { ItemsDatabase } from '../common/itemsDatabase';
  * hand work is the few index ranges inside groups 12 to 14, where MU mixes
  * wings, orbs, jewels and quest drops into one group.
  */
-export const CATEGORIES = [
-  { id: 'all', label: 'All' },
-  { id: 'weapons', label: 'Weapons' },
-  { id: 'shields', label: 'Shields' },
-  { id: 'armour', label: 'Armour' },
-  { id: 'wings', label: 'Wings / Capes' },
-  { id: 'jewels', label: 'Jewels' },
-  { id: 'pets', label: 'Pets' },
-  { id: 'accessories', label: 'Accessories' },
-  { id: 'consumables', label: 'Consumables' },
-  { id: 'misc', label: 'Misc' },
-] as const;
+export type CategoryId =
+  | 'all'
+  | 'weapons'
+  | 'shields'
+  | 'armour'
+  | 'wings'
+  | 'jewels'
+  | 'pets'
+  | 'accessories'
+  | 'consumables'
+  | 'misc';
 
-export type CategoryId = (typeof CATEGORIES)[number]['id'];
+export const CATEGORIES: readonly {
+  readonly id: CategoryId;
+  readonly labelKey: TextKey;
+}[] = [
+  { id: 'all', labelKey: 'marketplace.cat.all' },
+  { id: 'weapons', labelKey: 'marketplace.cat.weapons' },
+  { id: 'shields', labelKey: 'marketplace.cat.shields' },
+  { id: 'armour', labelKey: 'marketplace.cat.armour' },
+  { id: 'wings', labelKey: 'marketplace.cat.wings' },
+  { id: 'jewels', labelKey: 'marketplace.cat.jewels' },
+  { id: 'pets', labelKey: 'marketplace.cat.pets' },
+  { id: 'accessories', labelKey: 'marketplace.cat.accessories' },
+  { id: 'consumables', labelKey: 'marketplace.cat.consumables' },
+  { id: 'misc', labelKey: 'marketplace.cat.misc' },
+];
+
 
 const WING_INDEXES = new Set([0, 1, 2, 3, 4, 5, 6, 36, 37, 38, 39, 40, 41, 42, 43]);
 const PET_INDEXES = new Set([0, 1, 2, 3, 4, 5]);
@@ -57,7 +72,10 @@ export function categoryOf(item: Item): CategoryId {
 }
 
 export function itemName(item: Item): string {
-  return ItemsDatabase.getItem(item.group, item.num)?.ItemName ?? `Item ${item.group}/${item.num}`;
+  return (
+    itemBaseName(item.group, item.num) ||
+    t('quest.itemFallback', { id: item.group * 512 + item.num })
+  );
 }
 
 /** Grid footprint, for the card's icon box. */
@@ -73,7 +91,7 @@ export function itemFootprint(item: Item): { x: number; y: number } {
 export function displayName(item: Item): string {
   const base = itemName(item);
   const level = item.lvl ? ` +${item.lvl}` : '';
-  if (item.isAncient) return `Ancient ${base}${level}`;
-  if (item.isExcellent) return `Excellent ${base}${level}`;
+  if (item.isAncient) return `${t('item.ancientPrefix', { name: base })}${level}`;
+  if (item.isExcellent) return `${t('item.excellentPrefix', { name: base })}${level}`;
   return `${base}${level}`;
 }

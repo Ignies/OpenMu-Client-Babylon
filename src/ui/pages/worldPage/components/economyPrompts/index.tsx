@@ -178,7 +178,7 @@ export const EconomyPrompts = observer(() => {
 
         {spec.field === 'amount' && (
           <label className="economy-prompt-field">
-            Zen
+            {t('common.zen')}
             <input
               autoFocus
               inputMode="numeric"
@@ -191,7 +191,7 @@ export const EconomyPrompts = observer(() => {
 
         {(spec.field === 'pin' || spec.field === 'pin+password') && (
           <label className="economy-prompt-field">
-            Pin
+            {t('prompt.pin')}
             <input
               autoFocus
               inputMode="numeric"
@@ -205,7 +205,7 @@ export const EconomyPrompts = observer(() => {
 
         {(spec.field === 'password' || spec.field === 'pin+password') && (
           <label className="economy-prompt-field">
-            Password
+            {t('prompt.password')}
             <input
               autoFocus={spec.field === 'password'}
               type="password"
@@ -222,7 +222,7 @@ export const EconomyPrompts = observer(() => {
             {spec.okLabel}
           </button>
           <button type="button" onClick={uiClick(cancel)}>
-            Cancel
+            {t('common.cancel')}
           </button>
         </div>
       </div>
@@ -253,20 +253,20 @@ export const TradePrompt = observer(() => {
       <div className="economy-prompt">
         <div className="economy-prompt-title">{t('prompt.trade')}</div>
         <div className="economy-prompt-hint">
-          {`${request.name} wants to trade with you.`}
+          {t('prompt.wantsToTrade', { name: request.name })}
         </div>
         <div className="economy-prompt-buttons">
           <button
             type="button"
             onClick={uiClick(() => Economy.answerTradeRequest(true))}
           >
-            Accept
+            {t('prompt.accept')}
           </button>
           <button
             type="button"
             onClick={uiClick(() => Economy.answerTradeRequest(false))}
           >
-            Refuse
+            {t('prompt.refuse')}
           </button>
         </div>
       </div>

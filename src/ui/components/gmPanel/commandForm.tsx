@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react-lite';
+import { t, type TextKey } from '../../../i18n';
 import { GmPanel } from '../../../gmPanel';
 import { uiClick } from '../../../libs/sfx';
 import type { GmCommand, GmParam } from '../../../common/gmCommands';
@@ -32,9 +33,11 @@ const Field = observer(
             `bare`, so the label is not printed twice on one line. */}
         {bare ? null : (
           <span className="gm-field-label">
-            {param.label}
+            {t(param.labelKey)}
             {param.required ? <b className="gm-required">*</b> : null}
-            {standIn ? <em className="gm-standin">using {standIn}</em> : null}
+            {standIn ? (
+              <em className="gm-standin">{t('gm.using', { name: standIn })}</em>
+            ) : null}
           </span>
         )}
 
@@ -62,7 +65,7 @@ const Field = observer(
             // picks which keyboard a phone offers.
             inputMode={param.type === 'number' ? 'numeric' : 'text'}
             value={own}
-            placeholder={standIn ?? param.hint ?? ''}
+            placeholder={standIn ?? (param.hintKey ? t(param.hintKey) : '')}
             spellCheck={false}
             autoComplete="off"
             onChange={e => GmPanel.setValue(command, param.name, e.target.value)}
@@ -117,12 +120,15 @@ export const RunButton = observer(
   ({
     command,
     overrides,
-    label,
+    labelKey,
+    text,
     compact,
   }: {
     command: GmCommand;
     overrides?: Overrides;
-    label?: string;
+    labelKey?: TextKey;
+    /** A name the server owns (a map), which is never translated. */
+    text?: string;
     compact?: boolean;
   }) => {
     const armed = GmPanel.isArmed(command, overrides);
@@ -133,10 +139,10 @@ export const RunButton = observer(
         className={`gm-btn${compact ? ' gm-btn-compact' : ''}${
           command.confirm ? ' gm-btn-heavy' : ''
         }${armed ? ' is-armed' : ''}`}
-        title={command.help}
+        title={t(command.helpKey)}
         onClick={uiClick(() => GmPanel.run(command, overrides))}
       >
-        {armed ? 'Confirm' : (label ?? 'Run')}
+        {armed ? t('gm.confirm') : (text ?? t(labelKey ?? 'gm.run'))}
       </button>
     );
   }
@@ -148,19 +154,19 @@ export const CommandCard = observer(
     command,
     overrides,
     hide,
-    label,
+    labelKey,
   }: {
     command: GmCommand;
     overrides?: Overrides;
     hide?: readonly string[];
-    label?: string;
+    labelKey?: TextKey;
   }) => (
     <section className="gm-card">
       <header className="gm-card-head">
-        <h4>{label ?? command.label}</h4>
+        <h4>{t(labelKey ?? command.labelKey)}</h4>
         <code>{command.command}</code>
       </header>
-      <p className="gm-help">{command.help}</p>
+      <p className="gm-help">{t(command.helpKey)}</p>
       <CommandFields command={command} hide={hide} />
       <CommandPreview command={command} overrides={overrides} />
       <div className="gm-card-actions">
@@ -173,6 +179,6 @@ export const CommandCard = observer(
 /** The one-press commands: no fields, just a labelled button. */
 export const QuickButton = observer(
   ({ command, overrides }: { command: GmCommand; overrides?: Overrides }) => (
-    <RunButton command={command} overrides={overrides} label={command.label} compact />
+    <RunButton command={command} overrides={overrides} labelKey={command.labelKey} compact />
   )
 );

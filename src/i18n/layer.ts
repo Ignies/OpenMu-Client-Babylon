@@ -69,8 +69,13 @@ export interface LanguageLayer {
    * shipped one folder per language (`Eng`, `Spn`, `Por`, …) with the language
    * tag in every file name (`Quest_spn.bmd`).
    *
-   * Omit when the tree has no folder for this language — that text then stays
-   * English, one file at a time, while everything in `strings` is still
+   * Webzen shipped only three of the languages this client offers, so the rest
+   * of the folders are built by `tools/localPacks.ts` from the vocabularies in
+   * `tools/packs/`: item names, monster names and the warp list, and nothing
+   * else. Quest prose and the master-skill tooltips fall back to English there.
+   *
+   * Omit when there is no folder at all for this language — that text then
+   * stays English, one file at a time, while everything in `strings` is still
    * translated. See `libs/mu/localData.ts`.
    */
   readonly dataPack?: LanguageDataPack;

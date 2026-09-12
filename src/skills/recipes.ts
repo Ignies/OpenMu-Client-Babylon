@@ -8,14 +8,16 @@
  * `Data/Local/BuffEffect.bmd` (127 BUX-encrypted `_BUFFINFO` records,
  * `w_BuffScriptLoader.cpp`) and the icon index of `newui_statusicon*.jpg`
  * (`CNewUIBuffWindow::RenderBuffIcon`). `kind` is that file's
- * `s_BuffClassType` (0 buff / 1 debuff); the names are the enum's, since the
- * shipped BMD is Japanese.
+ * `s_BuffClassType` (0 buff / 1 debuff); the names here are the enum's, the
+ * last fallback under the catalogue and the language pack (`buffNameFile.ts`)
+ * - the root `Local/BuffEffect.bmd` is Japanese, the per-language ones are not.
  *
  * Delays: `SkillAttribute[].Delay` from `Data/Local/Skill.bmd` (600 × 80-byte
  * BUX records, `Delay` at offset 44, milliseconds) — every non-zero entry.
  */
 
 import { MAGIC_EFFECTS } from '../common/magicEffects';
+import { localisedBuffName } from '../libs/mu/buffNameFile';
 import { t } from '../i18n';
 
 export type BuffKind = 'buff' | 'debuff';
@@ -200,12 +202,17 @@ const DURATIONS: Record<number, (energy: number) => number> = {
 };
 
 export function buffRecipe(effectId: number): BuffRecipe {
-  // The catalogue covers the effects the client itself names; the rest of
-  // BuffEffect.bmd is only in NAMES and stays English until the pack is read.
+  // The pack first: `BuffEffect_<lang>.bmd` is Webzen's own wording and covers
+  // every effect, so a language that has one reads the whole bar in one voice
+  // instead of mixing it with the catalogue. Underneath it the catalogue key
+  // (which is what the ten languages with no pack read), then the enum's
+  // English for the ~110 effects the client never named.
   const key = MAGIC_EFFECTS[effectId]?.nameKey;
 
   return {
-    name: key ? t(key) : (NAMES[effectId] ?? t('buff.unnamed', { number: effectId })),
+    name:
+      localisedBuffName(effectId) ??
+      (key ? t(key) : (NAMES[effectId] ?? t('buff.unnamed', { number: effectId }))),
     kind: DEBUFF_IDS.has(effectId) ? 'debuff' : 'buff',
     durationSeconds: DURATIONS[effectId],
   };

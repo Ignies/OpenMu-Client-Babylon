@@ -183,6 +183,13 @@ export type GameOptions = {
    * (ours). TAB opens the original's full-screen sheet either way.
    */
   minimapCorner: boolean;
+  /**
+   * Item names in English whatever the interface language is. The language
+   * packs translate them (`Data/Local/<pack>/item_<lang>.bmd`), which reads
+   * well but leaves a trader unable to match what a forum or a price list
+   * calls the same item - so this turns that one table off and nothing else.
+   */
+  englishItemNames: boolean;
 };
 
 export const TONE_MAPPER_MAX = 3;
@@ -273,6 +280,7 @@ const DEFAULTS: GameOptions = {
   stateWarnings: true,
   blockBrowserKeys: true,
   minimapCorner: true,
+  englishItemNames: false,
 };
 
 /**

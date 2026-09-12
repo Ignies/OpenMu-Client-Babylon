@@ -1,6 +1,6 @@
 import type { Item } from '../ecs/world';
 import { classCanUse, type HeroStats, type ItemStats } from './itemStats';
-import { skillDefinition } from './skillsDatabase';
+import { skillDisplayName } from './skillNames';
 import { t } from '../i18n';
 
 /**
@@ -146,7 +146,7 @@ export function learnSkillError(
   const number = learnableSkill(item);
   if (number === undefined) return t('skills.teachesNothing');
 
-  const name = skillDefinition(number)?.name ?? t('skills.thisSkill');
+  const name = skillDisplayName(number) ?? t('skills.thisSkill');
 
   if (!classCanUse(stats.def, hero)) {
     return t('skills.classCannotLearn', { name });

@@ -11,6 +11,7 @@ import {
   skillDefinition,
   type SkillDefinition,
 } from '../../../../../common/skillsDatabase';
+import { skillDisplayName } from '../../../../../common/skillNames';
 import { uiClick } from '../../../../../libs/sfx';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import { MuButton } from '../../../../components/muButton';
@@ -210,7 +211,7 @@ const SkillPicker = observer(
               onClick={uiClick(() => pick(def.num))}
             >
               <SkillIcon number={def.num} />
-              <span>{def.name}</span>
+              <span>{skillDisplayName(def.num) ?? def.name}</span>
             </div>
           ))}
         </div>

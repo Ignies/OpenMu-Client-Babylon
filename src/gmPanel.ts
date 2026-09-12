@@ -7,6 +7,7 @@ import {
   matchGmCommands,
   type GmCommand,
 } from './common/gmCommands';
+import { t, type TextKey } from './i18n';
 
 /**
  * The game master panel's state.
@@ -46,17 +47,17 @@ export type GmSection =
   | 'events'
   | 'console';
 
-export type GmSectionInfo = { id: GmSection; title: string; hint: string };
+export type GmSectionInfo = { id: GmSection; titleKey: TextKey; hintKey: TextKey };
 
 export const GM_SECTIONS: readonly GmSectionInfo[] = [
-  { id: 'overview', title: 'Overview', hint: 'Where you are, and what is around you' },
-  { id: 'nearby', title: 'Nearby', hint: 'Everyone and everything in scope' },
-  { id: 'travel', title: 'Travel', hint: 'Maps and coordinates' },
-  { id: 'character', title: 'Character', hint: 'Read and set a character' },
-  { id: 'spawn', title: 'Spawn', hint: 'Monsters and items' },
-  { id: 'moderation', title: 'Moderation', hint: 'Bans, mutes and disconnects' },
-  { id: 'events', title: 'Events', hint: 'Start events and announce' },
-  { id: 'console', title: 'Console', hint: 'Every command, and a raw line' },
+  { id: 'overview', titleKey: 'gm.section.overview', hintKey: 'gm.section.overviewHint' },
+  { id: 'nearby', titleKey: 'gm.section.nearby', hintKey: 'gm.section.nearbyHint' },
+  { id: 'travel', titleKey: 'gm.section.travel', hintKey: 'gm.section.travelHint' },
+  { id: 'character', titleKey: 'gm.section.character', hintKey: 'gm.section.characterHint' },
+  { id: 'spawn', titleKey: 'gm.section.spawn', hintKey: 'gm.section.spawnHint' },
+  { id: 'moderation', titleKey: 'gm.section.moderation', hintKey: 'gm.section.moderationHint' },
+  { id: 'events', titleKey: 'gm.section.events', hintKey: 'gm.section.eventsHint' },
+  { id: 'console', titleKey: 'gm.section.console', hintKey: 'gm.section.consoleHint' },
 ];
 
 export type SentLine = { id: number; line: string; at: number };
@@ -146,11 +147,11 @@ export const GmPanel = new (class _GmPanel {
    * them grouped when it is empty. Searching across groups is the point of it -
    * `/setmoney` is only in Players if you already knew that.
    */
-  get consoleGroups(): readonly { title: string; commands: readonly GmCommand[] }[] {
+  get consoleGroups(): readonly { titleKey: TextKey; commands: readonly GmCommand[] }[] {
     if (!this.query.trim()) return GM_GROUPS;
 
     const found = matchGmCommands(this.query);
-    return found.length ? [{ title: 'Matches', commands: found }] : [];
+    return found.length ? [{ titleKey: 'gm.console.matches', commands: found }] : [];
   }
 
   /** Click a command in the Console: open its form, or close it if it was open. */
@@ -242,7 +243,7 @@ export const GmPanel = new (class _GmPanel {
   sendRaw(line: string): void {
     const trimmed = line.trim();
     if (!trimmed.startsWith('/')) {
-      this.error = 'A command starts with a slash.';
+      this.error = t('gm.error.needsSlash');
       return;
     }
 

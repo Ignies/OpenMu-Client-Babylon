@@ -3,16 +3,17 @@ import * as api from './api';
 import type { ApiListing } from './api';
 import { CATEGORIES, categoryOf, displayName, type CategoryId } from './categories';
 import { buildMockListings, type Listing } from './mockListings';
+import { i18n, t, type TextKey } from '../i18n';
 
 export type Tab = 'browse' | 'mine' | 'sell';
 export type Sort = 'newest' | 'price-asc' | 'price-desc' | 'deal';
 export type View = 'list' | 'grid';
 
-export const SORTS: { id: Sort; label: string }[] = [
-  { id: 'newest', label: 'Newest' },
-  { id: 'price-asc', label: 'Price: low to high' },
-  { id: 'price-desc', label: 'Price: high to low' },
-  { id: 'deal', label: 'Best deal' },
+export const SORTS: { id: Sort; labelKey: TextKey }[] = [
+  { id: 'newest', labelKey: 'marketplace.sort.newest' },
+  { id: 'price-asc', labelKey: 'marketplace.sort.priceAsc' },
+  { id: 'price-desc', labelKey: 'marketplace.sort.priceDesc' },
+  { id: 'deal', labelKey: 'marketplace.sort.deal' },
 ];
 
 /** A list row is about a third the height of a card, so it fits more of them. */
@@ -167,7 +168,7 @@ class MarketplaceStore {
           return;
         }
         this.mode = 'live';
-        this.problem = error instanceof Error ? error.message : 'The marketplace is unreachable.';
+        this.problem = error instanceof Error ? error.message : t('marketplace.unreachable');
       });
     }
   }
@@ -351,7 +352,7 @@ class MarketplaceStore {
       this.zen -= listing.price;
       this.listings = this.listings.filter(l => l.id !== listing.id);
       this.confirming = null;
-      this.flash = `Bought ${displayName(listing.item)}`;
+      this.flash = t('marketplace.bought', { name: displayName(listing.item) });
       this.setPage(this.page);
       return;
     }
@@ -363,11 +364,11 @@ class MarketplaceStore {
     try {
       await api.claim(listing.id, this.characterName);
       runInAction(() => {
-        this.flash = `Reserved ${displayName(listing.item)}. A trader is on the way.`;
+        this.flash = t('marketplace.reserved', { name: displayName(listing.item) });
       });
     } catch (error) {
       runInAction(() => {
-        this.flash = error instanceof Error ? error.message : 'That purchase was refused.';
+        this.flash = error instanceof Error ? error.message : t('marketplace.buyRefused');
       });
     }
     await this.refresh();
@@ -379,7 +380,7 @@ class MarketplaceStore {
 
     if (this.mode === 'offline') {
       this.listings = this.listings.filter(l => l.id !== id);
-      this.flash = `Cancelled ${displayName(listing.item)}`;
+      this.flash = t('marketplace.cancelled', { name: displayName(listing.item) });
       this.setPage(this.page);
       return;
     }
@@ -387,11 +388,11 @@ class MarketplaceStore {
     try {
       await api.cancel(id);
       runInAction(() => {
-        this.flash = `Cancelling ${displayName(listing.item)}. A trader will return it.`;
+        this.flash = t('marketplace.cancelling', { name: displayName(listing.item) });
       });
     } catch (error) {
       runInAction(() => {
-        this.flash = error instanceof Error ? error.message : 'That could not be cancelled.';
+        this.flash = error instanceof Error ? error.message : t('marketplace.cancelFailed');
       });
     }
     await this.refresh();
@@ -447,7 +448,7 @@ class MarketplaceStore {
           id: `L${Math.random().toString(36).slice(2, 7)}`,
           item,
           category: categoryOf(item),
-          seller: 'You',
+          seller: t('marketplace.you'),
           price: this.sellPriceValue,
           listedAt: Date.now(),
           median: this.sellPriceValue,
@@ -458,7 +459,7 @@ class MarketplaceStore {
       this.inventory = this.inventory.filter((_, i) => i !== index);
       this.sellPick = null;
       this.sellPrice = '';
-      this.flash = `Listed ${displayName(item)}`;
+      this.flash = t('marketplace.listedFlash', { name: displayName(item) });
       this.setTab('mine');
       return;
     }
@@ -469,12 +470,12 @@ class MarketplaceStore {
       runInAction(() => {
         this.sellPick = null;
         this.sellPrice = '';
-        this.flash = `A trader is coming for your ${displayName(item)}.`;
+        this.flash = t('marketplace.traderComing', { name: displayName(item) });
       });
       this.setTab('mine');
     } catch (error) {
       runInAction(() => {
-        this.flash = error instanceof Error ? error.message : 'That listing was refused.';
+        this.flash = error instanceof Error ? error.message : t('marketplace.listRefused');
       });
     }
     await this.refresh();
@@ -486,11 +487,11 @@ class MarketplaceStore {
     try {
       const { owed } = await api.requestPayout();
       runInAction(() => {
-        this.flash = `A trader is bringing you ${formatZen(owed)} Zen.`;
+        this.flash = t('marketplace.payoutComing', { amount: formatZen(owed) });
       });
     } catch (error) {
       runInAction(() => {
-        this.flash = error instanceof Error ? error.message : 'That could not be collected.';
+        this.flash = error instanceof Error ? error.message : t('marketplace.collectFailed');
       });
     }
   }
@@ -512,14 +513,16 @@ export const Marketplace = new MarketplaceStore();
 export const toggleMarketplaceWindow = () => Marketplace.toggle();
 
 export function formatZen(zen: number): string {
-  return zen.toLocaleString('en-US');
+  // Grouping follows the player's language: 1,250,000 in English, 1.250.000
+  // in Spanish and German, 1 250 000 in French.
+  return zen.toLocaleString(i18n.language);
 }
 
 /** "2h ago" / "3d ago", short enough for a card corner. */
 export function sinceLabel(at: number): string {
   const mins = Math.max(0, Math.floor((Date.now() - at) / 60000));
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 60) return t('marketplace.agoMinutes', { value: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
+  if (hours < 24) return t('marketplace.agoHours', { value: hours });
+  return t('marketplace.agoDays', { value: Math.floor(hours / 24) });
 }

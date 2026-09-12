@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { useWindowChrome } from '../../../../components/muWindow/useWindowChrome';
 import { ItemIcon } from '../../../../components/itemIcon';
 import { ItemTooltip } from '../../../../components/itemTooltip';
+import { t, type TextKey } from '../../../../../i18n';
 import { CATEGORIES, displayName } from '../../../../../marketplace/categories';
 import {
   Marketplace,
@@ -19,10 +20,10 @@ export const MARKETPLACE_ID = 'marketplace';
 export const MARKETPLACE_WIDTH = 1000;
 export const MARKETPLACE_HEIGHT = Math.round((MARKETPLACE_WIDTH * FRAME_H) / FRAME_W);
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'browse', label: 'Browse' },
-  { id: 'mine', label: 'My Listings' },
-  { id: 'sell', label: 'Sell' },
+const TABS: { id: Tab; labelKey: TextKey }[] = [
+  { id: 'browse', labelKey: 'marketplace.tab.browse' },
+  { id: 'mine', labelKey: 'marketplace.tab.mine' },
+  { id: 'sell', labelKey: 'marketplace.tab.sell' },
 ];
 
 /** Price against the going rate, which is the number that says "deal". */
@@ -44,9 +45,7 @@ const nameClass = (item: Listing['item']) =>
  */
 const EmptyState = observer(() => (
   <div className="mp-empty">
-    {Marketplace.isEmpty
-      ? 'Nothing is listed yet. Put something up on the Sell tab.'
-      : 'Nothing matches that.'}
+    {Marketplace.isEmpty ? t('marketplace.empty') : t('marketplace.noMatch')}
   </div>
 ));
 
@@ -83,7 +82,7 @@ const ListingCard = observer(({ listing, mode }: { listing: Listing; mode: Tab }
         <div className="mp-card-foot">
           <span className={`mp-price${affordable ? '' : ' is-short'}`}>
             {formatZen(listing.price)}
-            <span className="mp-zen">Zen</span>
+            <span className="mp-zen">{t('common.zen')}</span>
           </span>
 
           {mode === 'mine' ? (
@@ -91,7 +90,7 @@ const ListingCard = observer(({ listing, mode }: { listing: Listing; mode: Tab }
               className="mp-btn is-quiet"
               onClick={() => Marketplace.cancelListing(listing.id)}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           ) : (
             <button
@@ -99,7 +98,7 @@ const ListingCard = observer(({ listing, mode }: { listing: Listing; mode: Tab }
               disabled={!affordable}
               onClick={() => Marketplace.askBuy(listing)}
             >
-              {affordable ? 'Buy' : 'Short'}
+              {affordable ? t('marketplace.buy') : t('marketplace.short')}
             </button>
           )}
         </div>
@@ -139,12 +138,12 @@ const ListingRow = observer(({ listing, mode }: { listing: Listing; mode: Tab })
 
       <div className={`mp-row-price${affordable ? '' : ' is-short'}`}>
         {formatZen(listing.price)}
-        <span className="mp-zen">Zen</span>
+        <span className="mp-zen">{t('common.zen')}</span>
       </div>
 
       {mode === 'mine' ? (
         <button className="mp-btn is-quiet" onClick={() => Marketplace.cancelListing(listing.id)}>
-          Cancel
+          {t('common.cancel')}
         </button>
       ) : (
         <button
@@ -152,7 +151,7 @@ const ListingRow = observer(({ listing, mode }: { listing: Listing; mode: Tab })
           disabled={!affordable}
           onClick={() => Marketplace.askBuy(listing)}
         >
-          {affordable ? 'Buy' : 'Short'}
+          {affordable ? t('marketplace.buy') : t('marketplace.short')}
         </button>
       )}
     </div>
@@ -176,7 +175,7 @@ const Rail = observer(() => {
                 className={`mp-rail-item${Marketplace.category === c.id ? ' is-on' : ''}`}
                 onClick={() => Marketplace.setCategory(c.id)}
               >
-                <span>{c.label}</span>
+                <span>{t(c.labelKey)}</span>
                 <span className="mp-rail-count">{counts[c.id] ?? 0}</span>
               </button>
             ))}
@@ -188,13 +187,13 @@ const Rail = observer(() => {
                 className={`mp-chip${Marketplace.excellentOnly ? ' is-on' : ''}`}
                 onClick={() => Marketplace.toggleExcellentOnly()}
               >
-                Excellent only
+                {t('marketplace.excellentOnly')}
               </button>
               <button
                 className={`mp-chip${Marketplace.affordableOnly ? ' is-on' : ''}`}
                 onClick={() => Marketplace.toggleAffordableOnly()}
               >
-                I can afford
+                {t('marketplace.affordable')}
               </button>
             </div>
           )}
@@ -204,9 +203,9 @@ const Rail = observer(() => {
       {Marketplace.tab !== 'sell' && (
         <div className="mp-rail-foot">
           <div className="mp-count">
-            {Marketplace.matching.length} listings
+            {t('marketplace.listings', { count: Marketplace.matching.length })}
             <span className="mp-page-label">
-              page {page + 1} / {pageCount}
+              {t('marketplace.page', { page: page + 1, total: pageCount })}
             </span>
           </div>
           <div className="mp-pager">
@@ -215,14 +214,14 @@ const Rail = observer(() => {
               disabled={page <= 0}
               onClick={() => Marketplace.setPage(page - 1)}
             >
-              Prev
+              {t('marketplace.prev')}
             </button>
             <button
               className="mp-page-btn"
               disabled={page >= pageCount - 1}
               onClick={() => Marketplace.setPage(page + 1)}
             >
-              Next
+              {t('marketplace.next')}
             </button>
           </div>
         </div>
@@ -239,16 +238,21 @@ const MarketRate = observer(() => {
   return (
     <div className="mp-rate">
       <div className="mp-panel-head">
-        On the market
-        {rows.length > 0 && <span className="mp-rate-count">{rows.length} listed</span>}
+        {t('marketplace.onTheMarket')}
+        {rows.length > 0 && (
+          <span className="mp-rate-count">
+            {t('marketplace.listedCount', { count: rows.length })}
+          </span>
+        )}
       </div>
 
       {rows.length === 0 ? (
-        <div className="mp-rate-none">Nothing like it is listed. You set the price.</div>
+        <div className="mp-rate-none">{t('marketplace.nothingLikeIt')}</div>
       ) : (
         <>
           <div className="mp-rate-floor">
-            cheapest <strong>{formatZen(floor!)}</strong> <span className="mp-zen">Zen</span>
+            {t('marketplace.cheapest')} <strong>{formatZen(floor!)}</strong>{' '}
+            <span className="mp-zen">{t('common.zen')}</span>
           </div>
 
           <div className="mp-rate-rows">
@@ -265,7 +269,7 @@ const MarketRate = observer(() => {
             className="mp-btn is-quiet"
             onClick={() => Marketplace.setSellPrice(String(Math.max(1, floor! - 1)))}
           >
-            Undercut the cheapest
+            {t('marketplace.undercut')}
           </button>
         </>
       )}
@@ -281,11 +285,13 @@ const SellTab = observer(() => {
   return (
     <div className="mp-sell">
       <div className="mp-sell-bag">
-        <div className="mp-panel-head">Your bag</div>
+        <div className="mp-panel-head">{t('marketplace.yourBag')}</div>
         <div className="mp-sell-grid">
           {bag.length === 0 && (
             <div className="mp-empty">
-              {inventory.length === 0 ? 'Nothing here to sell.' : 'Nothing of that kind in your bag.'}
+              {inventory.length === 0
+                ? t('marketplace.bagEmpty')
+                : t('marketplace.bagNoneOfKind')}
             </div>
           )}
           {bag.map(({ item, index }) => (
@@ -306,7 +312,7 @@ const SellTab = observer(() => {
           <MarketRate />
 
           <div className="mp-sell-form">
-            <div className="mp-panel-head">Your item</div>
+            <div className="mp-panel-head">{t('marketplace.yourItem')}</div>
 
             <div className="mp-sell-picked">
               <div className="mp-card-icon">
@@ -316,7 +322,7 @@ const SellTab = observer(() => {
             </div>
 
             <label className="mp-sell-price">
-              <span>Price</span>
+              <span>{t('marketplace.price')}</span>
               <input
                 className="mp-input"
                 inputMode="numeric"
@@ -324,7 +330,7 @@ const SellTab = observer(() => {
                 placeholder="0"
                 onChange={e => Marketplace.setSellPrice(e.target.value)}
               />
-              <span className="mp-zen">Zen</span>
+              <span className="mp-zen">{t('common.zen')}</span>
             </label>
 
             <button
@@ -332,16 +338,14 @@ const SellTab = observer(() => {
               disabled={Marketplace.sellPriceValue <= 0}
               onClick={() => Marketplace.listForSale()}
             >
-              List it
+              {t('marketplace.listIt')}
             </button>
 
-            <p className="mp-note">
-              The item is handed to the market at the trading post and held until it sells.
-            </p>
+            <p className="mp-note">{t('marketplace.sellNote')}</p>
           </div>
         </div>
       ) : (
-        <div className="mp-empty">Pick something from your bag to price it.</div>
+        <div className="mp-empty">{t('marketplace.pickToPrice')}</div>
       )}
     </div>
   );
@@ -356,7 +360,7 @@ const ConfirmDialog = observer(() => {
     // never lands.
     <div className="mp-modal" data-no-drag>
       <div className="mp-modal-box">
-        <div className="mp-modal-title">Buy this?</div>
+        <div className="mp-modal-title">{t('marketplace.buyThis')}</div>
         <div className="mp-modal-item">
           <div className="mp-card-icon">
             <ItemIcon item={listing.item} />
@@ -365,18 +369,20 @@ const ConfirmDialog = observer(() => {
             <div className={`mp-card-name${nameClass(listing.item)}`}>
               {displayName(listing.item)}
             </div>
-            <div className="mp-card-meta">from {listing.seller}</div>
+            <div className="mp-card-meta">
+              {t('marketplace.fromSeller', { seller: listing.seller })}
+            </div>
           </div>
         </div>
         <div className="mp-modal-price">
-          {formatZen(listing.price)} <span className="mp-zen">Zen</span>
+          {formatZen(listing.price)} <span className="mp-zen">{t('common.zen')}</span>
         </div>
         <div className="mp-modal-buttons">
           <button className="mp-btn" onClick={() => Marketplace.confirmBuy()}>
-            Confirm
+            {t('marketplace.confirm')}
           </button>
           <button className="mp-btn is-quiet" onClick={() => Marketplace.cancelBuy()}>
-            Cancel
+            {t('common.cancel')}
           </button>
         </div>
       </div>
@@ -408,14 +414,14 @@ export const MarketplaceWindow = observer(() => {
     <div
       ref={chrome.ref as (el: HTMLDivElement | null) => void}
       role="dialog"
-      aria-label="Marketplace"
+      aria-label={t('marketplace.title')}
       tabIndex={-1}
       className="mp-window"
       onPointerDown={chrome.onPointerDown}
       style={{ ...chrome.style, backgroundImage: `url(${FRAME_SRC})` }}
     >
       <header className="mp-plaque" style={PLAQUE}>
-        <h2 className="mp-title">Marketplace</h2>
+        <h2 className="mp-title">{t('marketplace.title')}</h2>
 
         <nav className="mp-tabs" data-no-drag>
           {TABS.map(tab => (
@@ -424,19 +430,19 @@ export const MarketplaceWindow = observer(() => {
               className={`mp-tab${Marketplace.tab === tab.id ? ' is-on' : ''}`}
               onClick={() => Marketplace.setTab(tab.id)}
             >
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           ))}
         </nav>
 
         <div className="mp-wallet">
-          {formatZen(Marketplace.zen)} <span className="mp-zen">Zen</span>
+          {formatZen(Marketplace.zen)} <span className="mp-zen">{t('common.zen')}</span>
         </div>
 
         <button
           data-no-drag
           className="mp-close"
-          aria-label="Close"
+          aria-label={t('common.close')}
           onClick={() => Marketplace.close()}
         >
           x
@@ -455,14 +461,14 @@ export const MarketplaceWindow = observer(() => {
             >
               {SORTS.map(s => (
                 <option key={s.id} value={s.id}>
-                  {s.label}
+                  {t(s.labelKey)}
                 </option>
               ))}
             </select>
 
             <input
               className="mp-input mp-search"
-              placeholder="Search items or sellers"
+              placeholder={t('marketplace.search')}
               value={Marketplace.search}
               onChange={e => Marketplace.setSearch(e.target.value)}
             />
@@ -471,7 +477,7 @@ export const MarketplaceWindow = observer(() => {
               <button
                 className={`mp-viewbtn${Marketplace.view === 'list' ? ' is-on' : ''}`}
                 aria-pressed={Marketplace.view === 'list'}
-                title="List view"
+                title={t('marketplace.listView')}
                 onClick={() => Marketplace.setView('list')}
               >
                 <svg viewBox="0 0 12 12" width="13" height="13" aria-hidden="true">
@@ -483,7 +489,7 @@ export const MarketplaceWindow = observer(() => {
               <button
                 className={`mp-viewbtn${Marketplace.view === 'grid' ? ' is-on' : ''}`}
                 aria-pressed={Marketplace.view === 'grid'}
-                title="Grid view"
+                title={t('marketplace.gridView')}
                 onClick={() => Marketplace.setView('grid')}
               >
                 <svg viewBox="0 0 12 12" width="13" height="13" aria-hidden="true">
@@ -509,11 +515,11 @@ export const MarketplaceWindow = observer(() => {
             <div className="mp-list">
               <div className="mp-row mp-row-head">
                 <span />
-                <span>Item</span>
-                <span>Seller</span>
-                <span>Listed</span>
+                <span>{t('marketplace.colItem')}</span>
+                <span>{t('marketplace.colSeller')}</span>
+                <span>{t('marketplace.colListed')}</span>
                 <span />
-                <span className="mp-row-price-head">Price</span>
+                <span className="mp-row-price-head">{t('marketplace.price')}</span>
                 <span />
               </div>
               {cards.map(listing => (

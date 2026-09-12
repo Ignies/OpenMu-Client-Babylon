@@ -93,10 +93,10 @@ export function isJewelTarget(item: Item): boolean {
  * tone (GlobalText[474] for the storage case lives in Store).
  */
 export function jewelTargetError(jewel: Item, target: Item, targetSlot: number): string | null {
-  if (!isUpgradeJewel(jewel)) return 'That item cannot be used on another item';
+  if (!isUpgradeJewel(jewel)) return t('item.jewelNotAJewel');
 
   if (targetSlot < InventoryConstants.EquippableSlotsCount) {
-    return 'Take the item off before upgrading it';
+    return t('item.takeItemOffFirst');
   }
 
   if (!isJewelTarget(target)) return t('item.jewelNotUpgradable');

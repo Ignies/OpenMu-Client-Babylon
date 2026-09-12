@@ -1,6 +1,7 @@
 import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
+import { t } from '../../../i18n';
 import { Social } from '../../../social';
 import { GM_SECTIONS, GmPanel } from '../../../gmPanel';
 import { worldView, type WorldView } from '../../../gmWorld';
@@ -82,7 +83,7 @@ const Transcript = observer(() => {
 
   return (
     <section className="gm-transcript">
-      <h4>Sent</h4>
+      <h4>{t('gm.transcript.sent')}</h4>
       <ul>
         {GmPanel.sent.slice(-MAX_REPLIES).map(entry => (
           <li key={entry.id}>
@@ -93,7 +94,7 @@ const Transcript = observer(() => {
 
       {replies.length > 0 ? (
         <>
-          <h4>Server said</h4>
+          <h4>{t('gm.transcript.serverSaid')}</h4>
           <ul className="gm-replies">
             {replies.map(line => (
               <li key={line.id}>{line.text}</li>
@@ -122,10 +123,10 @@ const GmTab = observer(() => {
     <button
       type="button"
       className={`gm-tab-plate${GmPanel.open ? ' is-active' : ''}`}
-      title={`Game master panel (${TOGGLE_KEY})`}
+      title={t('gm.tabHint', { key: TOGGLE_KEY })}
       onClick={uiClick(() => GmPanel.toggle())}
     >
-      GM
+      {t('gm.tabPlate')}
     </button>
   );
 });
@@ -196,11 +197,11 @@ export const GmPanelWindow = observer(() => {
       <aside
         className="gm-drawer"
         style={{ zIndex: MuWindows.zIndexOf(WINDOW_ID) }}
-        aria-label="Game master panel"
+        aria-label={t('gm.title')}
         onPointerDown={() => MuWindows.raise(WINDOW_ID)}
       >
         <header className="gm-drawer-head">
-          <h2>Game Master</h2>
+          <h2>{t('gm.title')}</h2>
           {view.hero ? (
             <span className="gm-drawer-where gm-mono">
               {view.hero.x}, {view.hero.y}
@@ -209,30 +210,30 @@ export const GmPanelWindow = observer(() => {
           <button
             type="button"
             className="gm-close"
-            title="Close (Esc)"
-            aria-label="Close"
+            title={t('gm.closeHint')}
+            aria-label={t('common.close')}
             onClick={uiClick(() => GmPanel.close())}
           >
             ×
           </button>
         </header>
 
-        <nav className="gm-rail" aria-label="Sections">
+        <nav className="gm-rail" aria-label={t('gm.sections')}>
           {GM_SECTIONS.map(entry => (
             <button
               key={entry.id}
               type="button"
               className={`gm-rail-btn${entry.id === section.id ? ' is-active' : ''}`}
-              title={entry.hint}
+              title={t(entry.hintKey)}
               onClick={uiClick(() => GmPanel.setSection(entry.id))}
             >
-              {entry.title}
+              {t(entry.titleKey)}
             </button>
           ))}
         </nav>
 
         <div className="gm-body">
-          <p className="gm-section-hint">{section.hint}</p>
+          <p className="gm-section-hint">{t(section.hintKey)}</p>
 
           <Section view={view} />
 
@@ -242,8 +243,12 @@ export const GmPanelWindow = observer(() => {
         </div>
 
         <footer className="gm-drawer-foot">
-          <span>{GmPanel.target ? `Target: ${GmPanel.target}` : 'No target picked'}</span>
-          <span>{TOGGLE_KEY} to close</span>
+          <span>
+            {GmPanel.target
+              ? t('gm.targetIs', { name: GmPanel.target })
+              : t('gm.noTarget')}
+          </span>
+          <span>{t('gm.keyToClose', { key: TOGGLE_KEY })}</span>
         </footer>
       </aside>
     </>
