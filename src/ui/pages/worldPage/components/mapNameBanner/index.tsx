@@ -28,6 +28,21 @@ const IMG_TOP = 50;
 const FADE_IN_MS = ((1 - START_ALPHA) / ALPHA_PER_SECOND) * 1000;
 const FADE_OUT_MS = (1 / ALPHA_PER_SECOND) * 1000;
 
+/**
+ * The picture to try, best first. Webzen drew the map name into the bitmap,
+ * so this is art, not a string: the pack that ships `ImgsMapName/` has the
+ * name in its own language and its own lettering, and there is nothing to
+ * translate at runtime. Only `Eng`, `Spn` and `Por` have the folder - the
+ * generated packs write tables, not art - so everything else falls back to
+ * the English picture instead of showing no banner at all.
+ */
+function bannerPaths(file: string): string[] {
+  const folder = i18n.dataPack?.folder ?? 'Eng';
+  const paths = [`Data/Local/${folder}/ImgsMapName/${file}`];
+  if (folder !== 'Eng') paths.push(`Data/Local/Eng/ImgsMapName/${file}`);
+  return paths;
+}
+
 // `InitImgPathMap`, file names as shipped in Data/Local/<lang>/ImgsMapName.
 const MAP_IMAGES: Record<number, string> = {
   0: 'lorencia.OZT',
@@ -86,10 +101,7 @@ export const MapNameBanner = () => {
   });
 
   const file = shown ? bannerImage(shown.map) : null;
-  const folder = i18n.dataPack?.folder ?? 'Eng';
-  const sprite = useMuSprite(
-    file ? `Data/Local/${folder}/ImgsMapName/${file}` : undefined
-  );
+  const sprite = useMuSprite(file ? bannerPaths(file) : undefined);
 
   // The original steps the alpha only once the bitmap is in; the clock
   // starts when the sprite is decoded, not at warpCompleted.
