@@ -52,6 +52,17 @@ const BoundingUpdateInterval = 5;
 /** The original's default `PlaySpeed` for an idle clip (playSpeed.ts tables). */
 const DEFAULT_ANIMATION_SPEED = 0.28;
 
+/**
+ * A part's clip override. `speed` 0 holds key 0; `holdFrame` runs the clip
+ * once and stops on that key; neither loops it.
+ */
+export type PartPose = {
+  action: number;
+  speed: number;
+  /** `AnimationFrame` the original pins the part to once it gets there. */
+  holdFrame?: number;
+};
+
 type Int = number;
 
 const EmptyBone = Matrix.Identity();
@@ -421,6 +432,13 @@ export class ModelObject {
    */
   private readonly _lastRealFrame = new Map<number, number>();
 
+  /**
+   * Frames between two keys of a clip. The converter bakes every key, evenly
+   * spaced, so one step turns a BMD `AnimationFrame` number into a Babylon
+   * frame - which is what a `PartPose.holdFrame` is written in.
+   */
+  private readonly _keyFrameStep = new Map<number, number>();
+
   /** Babylon speedRatio that advances `AnimationSpeed` keys per 25 Hz tick for an action. */
   speedRatioFor(actionIndex: number): number {
     const keyDt = this._bakedKeyDt.get(actionIndex) ?? 1 / 24;
@@ -566,24 +584,27 @@ export class ModelObject {
    * (`RenderCharacterItem` ZzzCharacter.cpp:9881-9955,
    * `RenderCharacterBackItem` :15044-15065). Speed 0 holds the clip's first
    * frame, which is what most parts do - stowed on the back, and in the hand
-   * too. `null` = no override, the auto-started clip-0 loop runs. Kept as
-   * state (not applied fire-and-forget) so a part whose GLB is still
-   * streaming picks it up in `load()`.
+   * too. `holdFrame` is the third shape the original uses: run the clip once
+   * and pin `AnimationFrame` there (the Phoenix Soul Star's wings, :9919).
+   * `null` = no override, the auto-started clip-0 loop runs. Kept as state
+   * (not applied fire-and-forget) so a part whose GLB is still streaming
+   * picks it up in `load()`.
    */
-  PartPose: { action: number; speed: number } | null = null;
+  PartPose: PartPose | null = null;
 
   /** True while the animation groups actually hold an override. */
   private _partPoseActive = false;
 
   /** Sets `PartPose` and applies it, skipping an unchanged pose. */
-  setPartPose(pose: { action: number; speed: number } | null) {
+  setPartPose(pose: PartPose | null) {
     const current = this.PartPose;
     if (
       current === pose ||
       (current !== null &&
         pose !== null &&
         current.action === pose.action &&
-        current.speed === pose.speed)
+        current.speed === pose.speed &&
+        current.holdFrame === pose.holdFrame)
     ) {
       return;
     }
@@ -618,16 +639,27 @@ export class ModelObject {
     for (const group of groups) {
       if (group.isStarted) group.stop(true);
     }
-    const group = groups[pose.action] ?? groups[0];
+    const index = groups[pose.action] ? pose.action : 0;
+    const group = groups[index];
     if (!group) return;
-    if (pose.speed > 0) {
-      this.AnimationSpeed = pose.speed;
-      group.start(true, this.speedRatioFor(pose.action), group.from);
-    } else {
+    if (pose.speed <= 0) {
       group.start(true, group.speedRatio, group.from);
       group.goToFrame(group.from);
       group.pause();
+      return;
     }
+
+    this.AnimationSpeed = pose.speed;
+    if (pose.holdFrame === undefined) {
+      group.start(true, this.speedRatioFor(index), group.from);
+      return;
+    }
+    // Play once and stop on that key, where it holds - the original pins
+    // `AnimationFrame` to the same number and stops advancing it.
+    const step = this._keyFrameStep.get(index);
+    const to =
+      step === undefined ? group.to : Math.min(group.to, group.from + pose.holdFrame * step);
+    group.start(false, this.speedRatioFor(index), group.from, to);
   }
   loadSeq = 0;
   private _node: TransformNode;
@@ -819,9 +851,17 @@ export class ModelObject {
 
     if (paused && !this.LoopAction) return;
 
-    // A part held at its first frame (PartPose, speed 0) and a drop are
-    // started-and-paused on purpose; coming back into view must not restart them.
-    if (!paused && (this.FrozenPose || this.PartPose?.speed === 0)) return;
+    // A part holding a fixed frame (PartPose at speed 0, or one that has run
+    // into its holdFrame) and a drop are stopped on purpose; coming back into
+    // view must not restart them.
+    if (
+      !paused &&
+      (this.FrozenPose ||
+        this.PartPose?.speed === 0 ||
+        this.PartPose?.holdFrame !== undefined)
+    ) {
+      return;
+    }
 
     for (const group of groups) {
       if (!group.isStarted) continue;
@@ -929,12 +969,14 @@ export class ModelObject {
 
     this._bakedKeyDt.clear();
     this._lastRealFrame.clear();
+    this._keyFrameStep.clear();
     gltf.animationGroups.forEach((group, index) => {
       const anim = group.targetedAnimations[0]?.animation;
       const keys = anim?.getKeys();
       if (anim && keys && keys.length > 1) {
         this._bakedKeyDt.set(index, (keys[1].frame - keys[0].frame) / anim.framePerSecond);
         this._lastRealFrame.set(index, keys[keys.length - 2].frame);
+        this._keyFrameStep.set(index, keys[1].frame - keys[0].frame);
       }
       group.speedRatio = this.speedRatioFor(index);
       const markFinished = () => {

@@ -4,8 +4,13 @@ import { PlayerAction as A } from './objects/enum';
 import {
   chooseAttackAction,
   chooseHighBowAttackAction,
+  isPhoenixSoulStar,
+  isSwordformGloves,
+  swordformGlovesModel,
   type AttackPose,
 } from './weaponClass';
+import { playerPlaySpeed, RAGEFIGHTER_STOP_SPEED } from './playSpeed';
+import { PHOENIX_POSE } from './weaponAttachment';
 import type { Item } from '../ecs/world';
 
 const item = (group: number, num: number): Item => ({ group, num, lvl: 0 }) as Item;
@@ -162,5 +167,51 @@ describe('chooseHighBowAttackAction', () => {
     expect(chooseHighBowAttackAction(pose(ARROWS, BOW, { mount: 'dinorant' }))).toBe(
       A.PLAYER_ATTACK_RIDE_BOW_UP
     );
+  });
+});
+
+describe('Rage Fighter glove weapons', () => {
+  const SACRED_GLOVE = item(0, 32);
+  const PHOENIX = item(0, 35);
+
+  it('wears a left/right model of its own, never the inventory one', () => {
+    expect(swordformGlovesModel(SACRED_GLOVE, 0)).toBe('SwordR33.glb');
+    expect(swordformGlovesModel(SACRED_GLOVE, 1)).toBe('SwordL33.glb');
+    expect(swordformGlovesModel(PHOENIX, 0)).toBe('Sword36R.glb');
+    expect(swordformGlovesModel(PHOENIX, 1)).toBe('Sword36L.glb');
+    expect(swordformGlovesModel(SHORT_SWORD, 0)).toBeNull();
+    expect(swordformGlovesModel(item(0, 31), 0)).toBeNull(); // Rune Blade
+  });
+
+  it('knows which sword-group items are gloves', () => {
+    expect(isSwordformGloves(SACRED_GLOVE)).toBe(true);
+    expect(isSwordformGloves(PHOENIX)).toBe(true);
+    expect(isSwordformGloves(item(0, 31))).toBe(false);
+    expect(isPhoenixSoulStar(PHOENIX)).toBe(true);
+    expect(isPhoenixSoulStar(SACRED_GLOVE)).toBe(false);
+  });
+
+  it('swings one-handed, and runs the four-clip round with a pair', () => {
+    expect(cycle(pose(PHOENIX))).toEqual([
+      A.PLAYER_ATTACK_SWORD_RIGHT1,
+      A.PLAYER_ATTACK_SWORD_RIGHT2,
+      A.PLAYER_ATTACK_SWORD_RIGHT1,
+      A.PLAYER_ATTACK_SWORD_RIGHT2,
+    ]);
+    expect(cycle(pose(PHOENIX, PHOENIX))).toEqual([
+      A.PLAYER_ATTACK_SWORD_RIGHT1,
+      A.PLAYER_ATTACK_SWORD_LEFT1,
+      A.PLAYER_ATTACK_SWORD_RIGHT2,
+      A.PLAYER_ATTACK_SWORD_LEFT2,
+    ]);
+  });
+
+  it('keys the Phoenix wings to the Rage Fighter stance rate, held at frame 2', () => {
+    expect(playerPlaySpeed(A.PLAYER_STOP_RAGEFIGHTER)).toBe(RAGEFIGHTER_STOP_SPEED);
+    expect(PHOENIX_POSE).toEqual({
+      action: 0,
+      speed: RAGEFIGHTER_STOP_SPEED * 1.5,
+      holdFrame: 2,
+    });
   });
 });

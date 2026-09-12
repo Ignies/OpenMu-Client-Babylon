@@ -172,10 +172,33 @@ export function playerPlaySpeed(
   // --- reactions
   if (action >= A.PLAYER_DEFENSE1 && action <= A.PLAYER_SHOCK) return 0.32;
   if (action === A.PLAYER_DIE1 || action === A.PLAYER_DIE2) return 0.45;
+
+  // The Rage Fighter's own stance and his Uniria clips are named overrides on
+  // top of the 0.40 the base table gives everything from PLAYER_SIT1 up
+  // (ZzzOpenData.cpp:339-340, :428-431). The two run clips are rewritten to
+  // 0.34 by SetPlayerWalk every frame it runs, like the rest of the run block
+  // (ZzzCharacter.cpp:435-437), and those clips only ever play while running.
+  switch (action) {
+    case A.PLAYER_STOP_RAGEFIGHTER:
+      return 0.16;
+    case A.PLAYER_RAGE_UNI_STOP_ONE_RIGHT:
+      return 0.18;
+    case A.PLAYER_RAGE_UNI_ATTACK_ONE_RIGHT:
+      return 0.2;
+    case A.PLAYER_RAGE_UNI_RUN:
+    case A.PLAYER_RAGE_UNI_RUN_ONE_RIGHT:
+      return 0.34;
+  }
   if (action >= A.PLAYER_SIT1) return 0.4;
 
   return 0.28;
 }
+
+/**
+ * `PLAYER_STOP_RAGEFIGHTER`'s rate, which the Phoenix Soul Star's own clip is
+ * keyed to (`RenderCharacterItem`, ZzzCharacter.cpp:9922).
+ */
+export const RAGEFIGHTER_STOP_SPEED = 0.16;
 
 /**
  * Wing part play speed (`RenderCharacterBackItem`, ZzzCharacter.cpp:15107-15129).

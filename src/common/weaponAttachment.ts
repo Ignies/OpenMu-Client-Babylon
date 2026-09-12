@@ -1,5 +1,6 @@
 import { Matrix } from '../libs/babylon/exports';
 import {
+  angleLinkMatrix,
   angleMatrix,
   concatTransforms,
   toBabylon,
@@ -7,6 +8,8 @@ import {
 } from './boneLink';
 import { BaseClass, getBaseClass } from './characterStats';
 import { PlayerAction } from './objects/enum';
+import { RAGEFIGHTER_STOP_SPEED } from './playSpeed';
+import type { PartPose } from './modelObject';
 import type { PlayerObject } from './playerObject';
 import type { CharacterClassNumber } from './types';
 import type { Item } from '../ecs/world';
@@ -17,7 +20,9 @@ import {
   isBackItem,
   isCrossbow,
   isShield,
+  isPhoenixSoulStar,
   isWeaponItem,
+  PHOENIX_SOUL_STAR,
   type Hands,
 } from './weaponClass';
 
@@ -25,6 +30,28 @@ import {
 export const RIGHT_HAND_BONE = 33; // bone_33_knife_gdf
 export const LEFT_HAND_BONE = 42; // bone_42_hand_bofdgne01
 export const BACK_BONE = 47; // bone_47_Bone05
+
+/**
+ * The Phoenix Soul Star's wings (`RenderPhoenixGloves`, MonkSystem.cpp:241):
+ * a second model per hand, on its own forearm bone, at the angle the call
+ * passes and the (15, -5, 0) offset `RenderLinkObject` gives that one type
+ * (ZzzCharacter.cpp:6518-6524). Rendered before the back-item pass, so the
+ * wings stay on the arms even where the weapon itself is stowed.
+ */
+export const PHOENIX_WING_MODEL = 'sword36wing.glb';
+const PHOENIX_WING_BONES = [28, 37] as const;
+const PHOENIX_WING_LINKS: readonly BmdLink[] = [
+  { angle: [80, 10, -75], offset: [15, -5, 0] },
+  { angle: [100, 10, -75], offset: [15, -5, 0] },
+];
+
+/** Bone + link matrix for the wing worn on `slot` (0 right, 1 left). */
+export function phoenixWingLink(slot: 0 | 1): { bone: number; link: Matrix } {
+  return {
+    bone: PHOENIX_WING_BONES[slot],
+    link: angleLinkMatrix(PHOENIX_WING_LINKS[slot]),
+  };
+}
 
 /**
  * How the original places weapons (RenderLinkObject, ZzzCharacter.cpp:6439-6760):
@@ -194,13 +221,24 @@ function backPose(item: {
     : { action: 0, speed: 0 };
 }
 
-type PartPose = NonNullable<PlayerObject['Weapon1']['PartPose']>;
-
 /** Holds the first frame: `PlaySpeed = 0`, `AnimationFrame = 0.001`. */
 const HELD: PartPose = { action: 0, speed: 0 };
 
 /** `PLAYER_STOP_MALE`'s rate, which every animated in-hand item is keyed to. */
 const STOP_MALE_SPEED = 0.28;
+
+/**
+ * The Phoenix Soul Star (`RenderCharacterItem` :9919-9927): its clip runs at
+ * one and a half times the Rage Fighter's stance rate until `AnimationFrame`
+ * reaches 2, and is pinned there from then on - the wings spread once and
+ * stay spread. The same pose drives the weapon and its wing part, which the
+ * original animates off the one `PART_t`.
+ */
+export const PHOENIX_POSE: PartPose = {
+  action: 0,
+  speed: RAGEFIGHTER_STOP_SPEED * 1.5,
+  holdFrame: 2,
+};
 
 /**
  * The handful of weapons `RenderCharacterItem` keeps animating in the hand
@@ -257,6 +295,10 @@ function handPose(
     return swinging
       ? { action: 2, speed: playerSpeed }
       : { action: 1, speed: STOP_MALE_SPEED };
+  }
+
+  if (item.group === GROUP_SWORD && item.num === PHOENIX_SOUL_STAR) {
+    return PHOENIX_POSE;
   }
 
   // The whole sword group keeps its clip 0 running; most of those clips are
@@ -330,4 +372,10 @@ export function applyWeaponPoses(
 
   player.Weapon1.setPartPose(poseFor(main));
   player.Weapon2.setPartPose(poseFor(off));
+
+  // The wings run off the weapon's own clip, and the original renders them
+  // before the back-item pass - they spread on the arms whether or not the
+  // weapon itself is stowed.
+  player.PhoenixWing1.setPartPose(isPhoenixSoulStar(main) ? PHOENIX_POSE : null);
+  player.PhoenixWing2.setPartPose(isPhoenixSoulStar(off) ? PHOENIX_POSE : null);
 }

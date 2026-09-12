@@ -62,6 +62,49 @@ export function isBook(item: Item | null): boolean {
   );
 }
 
+// The Rage Fighter's glove weapons (`CMonkSystem::RegistItem`,
+// MonkSystem.cpp:76-89). Each is a sword-group item worn one per hand, and
+// each carries three models: the inventory one items.json names, and a left /
+// right pair worn on the character. The Phoenix Soul Star additionally trails
+// a pair of phoenix wings (`RenderPhoenixGloves`, :241).
+const SACRED_GLOVE = 32;
+export const PHOENIX_SOUL_STAR = 35;
+
+/** `Item/` model stems, indexed from `SACRED_GLOVE`: [worn right, worn left]. */
+const SWORDFORM_GLOVE_MODELS: readonly (readonly [string, string])[] = [
+  ['SwordR33', 'SwordL33'], // Sacred Glove
+  ['SwordR34', 'SwordL34'], // Storm Hard Glove
+  ['SwordR35', 'SwordL35'], // Piercing Blade Glove
+  ['Sword36R', 'Sword36L'], // Phoenix Soul Star
+];
+
+export function isPhoenixSoulStar(item: Item | null | undefined): boolean {
+  return !!item && item.group === GROUP_SWORD && item.num === PHOENIX_SOUL_STAR;
+}
+
+/** `IsSwordformGloves` (MonkSystem.cpp:223). */
+export function isSwordformGloves(item: Item | null): boolean {
+  return (
+    !!item &&
+    item.group === GROUP_SWORD &&
+    item.num >= SACRED_GLOVE &&
+    item.num < SACRED_GLOVE + SWORDFORM_GLOVE_MODELS.length
+  );
+}
+
+/**
+ * `ModifyTypeSwordformGloves` (MonkSystem.cpp:254): the model actually worn,
+ * which is never the one items.json names. Slot 0 takes the right-hand model,
+ * slot 1 the left. `null` for anything that is not a glove weapon.
+ */
+export function swordformGlovesModel(
+  item: Item | null,
+  slot: 0 | 1
+): string | null {
+  if (!item || !isSwordformGloves(item)) return null;
+  return `${SWORDFORM_GLOVE_MODELS[item.num - SACRED_GLOVE][slot]}.glb`;
+}
+
 /** `IsBowModel` (CharacterManager.cpp:68): 0-6, Celestial 17, Viper…Stinger 20-23, Air Lyn 24. */
 export function isBow(item: Item | null): boolean {
   if (!item || item.group !== GROUP_BOW) return false;
