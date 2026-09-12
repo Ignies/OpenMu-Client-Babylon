@@ -41,6 +41,7 @@ import { snowCapCover } from '../weather/snowCaps';
 import { weather } from '../weather';
 import { setSceneHold } from './sceneGate';
 import { devQuery } from './devSeams';
+import { isStillAnimation } from './staticClips';
 import { CSM_CASTER_REACH } from '../scenes/shadows';
 import { renderDistanceRanges } from './renderDistance';
 import { ENUM_WORLD } from './types';
@@ -208,6 +209,20 @@ const MIRROR = Matrix.Scaling(1, -1, 1);
 const nodeM = Matrix.Identity();
 const instM = Matrix.Identity();
 const bufM = Matrix.Identity();
+
+/** Whether the prototype's running clip moves any bone (a settled clip keeps one still animation). */
+function typeSways(proto: ModelObject): boolean {
+  const groups = proto.gltf?.animationGroups;
+  if (!groups) return false;
+
+  return groups.some(
+    group =>
+      group.isStarted &&
+      group.targetedAnimations.some(
+        targeted => !isStillAnimation(targeted.animation)
+      )
+  );
+}
 
 /** Writes the placement's world matrix into an instance buffer, mirror taken out. */
 function writeInstance(world: Matrix, target: Float32Array, offset: number): void {
@@ -498,6 +513,13 @@ class PropBatches {
 
     const shadows = this.tier === null && proto.CastsShadow && !pt.emitsLight;
 
+    // A roof holds still. A type whose clip moves is foliage: a tree crown
+    // is a thin slab a few tiles up, which is the roof test to the letter,
+    // and painting it took the sun off the ground under every tree in tile
+    // steps. The per-object scan never saw those - a skinned mesh's box
+    // collapses at its bone, and the batches measure the posed one.
+    const paintsRoofs = this.mask && !typeSways(proto);
+
     let minX = Infinity;
     let minZ = Infinity;
     let maxX = -Infinity;
@@ -531,7 +553,7 @@ class PropBatches {
         if (height > casterHeight[j]) casterHeight[j] = height;
 
         // Batched roofs paint the same mask the object scan would.
-        if (this.mask) {
+        if (paintsRoofs) {
           const ground = this.world.getTerrainHeight(
             (boxMin.x + boxMax.x) * 0.5,
             (boxMin.z + boxMax.z) * 0.5
