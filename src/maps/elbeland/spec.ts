@@ -36,19 +36,33 @@ export const ELBELAND_BLEND_MESHES: Readonly<Record<number, number>> = {
  *    148's neighbours) and **149-155** (0 placed) are `CreateMonster` markers
  *    for the decorative town monsters — the server's job in the clone. Kept
  *    in the table so a future .obj that places them stays quiet.
+ *  - **165** (×1, at 35.7/241.5): Object52 ships 165 models, so the highest
+ *    type with art is 164. The original loads no `Object166.bmd` for it
+ *    either and draws nothing; listing it here skips the fetch instead of
+ *    failing it twice per load.
  */
 export const ELBELAND_EFFECT_ONLY_TYPES: readonly number[] = [
   0, 54, 58, 59, 60, 61, 62, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142,
-  143, 144, 145, 146, 147, 149, 150, 151, 152, 153, 154, 155,
+  143, 144, 145, 146, 147, 149, 150, 151, 152, 153, 154, 155, 165,
 ];
 
-/** The falls, the river spray and the mist banks. */
+/**
+ * The falls and the river spray.
+ *
+ * **60** emits nothing. `RenderObjectVisual` :271-282 spawns ten
+ * `BITMAP_CLOUD` SubType 3 at light `(0.06, 0.07, 0.08)` and latches
+ * `HiddenMesh = -2` so it can never run a second time; SubType 3 has no init
+ * and no move case, so those ten keep `CreateParticle`'s default
+ * `LifeTime = 2` (ZzzEffectParticle.cpp:74) and are gone in two ticks. One
+ * near-black two-tick flash per object is nothing to draw, and this map
+ * places 162 of them around the island rim - a stream of white `cloud21`
+ * instead buried the whole town in cloud.
+ */
 export const ELBELAND_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
   {
     54: [{ kinds: ['waterfall5_9'], every: 4 }],
     58: [{ kinds: ['waterfall5_9'], every: 1, scale: 0.6 }],
     59: [{ kinds: ['waterfall5_9'], every: 2 }],
-    60: [{ kinds: ['cloud21'], every: 8 }],
   };
 
 /**
