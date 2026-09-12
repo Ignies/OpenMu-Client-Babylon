@@ -25,9 +25,10 @@ import type {
  */
 type Driven = {
   readonly rt: RenderTargetTexture;
-  readonly predicate: (mesh: AbstractMesh) => boolean;
+  predicate: (mesh: AbstractMesh) => boolean;
   readonly list: AbstractMesh[];
   wasEmpty: boolean;
+  release: () => void;
 };
 
 type SceneDrivers = {
@@ -100,17 +101,39 @@ export function driveRenderList(
   // Typed non-nullable, checked for truthiness at runtime (objectRenderer.js).
   (rt as unknown as { renderListPredicate: null }).renderListPredicate = null;
 
-  const d: Driven = { rt, predicate, list: [], wasEmpty: true };
-  rt.renderList = d.list;
-  entry.driven.push(d);
+  // One driver per target, whatever the caller does. Stacking a second one
+  // added a second sweep of every mesh in the scene to every frame, and only
+  // the last list was ever drawn - so the extra sweeps were pure cost with
+  // nothing to show for them. The cascades re-hook their map whenever the
+  // caster set is re-chosen, which is once a frame while a room is the active
+  // area, so an interior grew one dead sweep per frame for as long as the hero
+  // stood in it.
+  const existing = entry.driven.find(d => d.rt === rt);
 
-  const release = () => {
+  if (existing) {
+    existing.predicate = predicate;
+    rt.renderList = existing.list;
+
+    return existing.release;
+  }
+
+  const d: Driven = {
+    rt,
+    predicate,
+    list: [],
+    wasEmpty: true,
+    release: () => {},
+  };
+
+  d.release = () => {
     const index = entry.driven.indexOf(d);
     if (index >= 0) entry.driven.splice(index, 1);
     if (rt.renderList === d.list) rt.renderList = null;
   };
 
-  rt.onDisposeObservable.addOnce(release);
+  rt.renderList = d.list;
+  entry.driven.push(d);
+  rt.onDisposeObservable.addOnce(d.release);
 
-  return release;
+  return d.release;
 }

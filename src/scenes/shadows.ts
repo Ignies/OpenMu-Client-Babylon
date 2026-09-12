@@ -43,12 +43,13 @@ const CSM_MAX_Z = 32;
 /**
  * The reach inside a room (`casters: 'all'`): the far wall of the pub or the
  * reading room is under 20 tiles from the camera, so the map is spent on the
- * room instead of on the black past its walls. One cascade covers it: the
- * room's furniture is drawn once into the map, not three times, and 20 tiles
- * over 2048 texels is still 100 texels a tile.
+ * room instead of on the black past its walls. The fewest cascades the
+ * generator takes cover it: the room's furniture is drawn twice into the map
+ * rather than three times, and 20 tiles over 2048 texels is still 100 texels
+ * a tile.
  */
 const CSM_ROOM_MAX_Z = 20;
-const CSM_ROOM_CASCADES = 1;
+const CSM_ROOM_CASCADES = CascadedShadowGenerator.MIN_CASCADES_COUNT;
 
 const CSM_LAMBDA = 0.1;
 
@@ -356,8 +357,19 @@ function reachFor(who: ShadowCasters): number {
   return who === 'all' ? CSM_ROOM_MAX_Z : CSM_MAX_Z;
 }
 
+/**
+ * Clamped to a count the generator will report back. It pulls an out-of-range
+ * count into range without saying so, so asking for one outside it leaves
+ * `syncShadows` re-applying the same request on every frame. The upper bound
+ * is ours: the terrain shader sizes its cascade arrays at `CSM_MAX_CASCADES`.
+ */
 function cascadesFor(who: ShadowCasters, tier: LightingTier): number {
-  return who === 'all' ? CSM_ROOM_CASCADES : cascadesDev ?? tier.cascades;
+  const want = who === 'all' ? CSM_ROOM_CASCADES : cascadesDev ?? tier.cascades;
+
+  return Math.min(
+    Math.max(want, CascadedShadowGenerator.MIN_CASCADES_COUNT),
+    CSM_MAX_CASCADES
+  );
 }
 
 /** Frozen materials skip the light-dirty pass; force the rebuild once. */
