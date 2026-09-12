@@ -23,24 +23,48 @@ function load(fileName: string): Promise<Sprite> {
     : loadInterfaceSprite(fileName);
 }
 
+/** Joins a candidate list into one dependency-stable key. */
+const SEP = '|';
+
+/** The first candidate already decoded, or null. */
+function peekAny(names: readonly string[]): Sprite | null {
+  for (const name of names) {
+    const cached = peek(name);
+    if (cached) return cached;
+  }
+  return null;
+}
+
 /**
  * The decoded sprite for `fileName`. A sprite the preloader already holds is
  * returned synchronously on the first render (no empty paint, no state
  * update), so the 100-odd squares of a grid mount without a hundred effects
  * firing `setState`.
+ *
+ * Several names are tried in order and the first that decodes wins, which is
+ * how a picture that a language pack may or may not ship is asked for: the
+ * pack's own art, then English. Same rule as `localDataCandidates` uses for
+ * the tables, per file rather than per language.
  */
-export function useMuSprite(fileName: string | undefined): Sprite | null {
+export function useMuSprite(
+  fileName: string | readonly string[] | undefined
+): Sprite | null {
+  // Joined, so an inline array literal does not restart the load on every
+  // render the way its identity would. No asset name holds a `|`.
+  const key = typeof fileName === 'string' ? fileName : (fileName?.join(SEP) ?? '');
+
   const [sprite, setSprite] = useState<Sprite | null>(() =>
-    fileName ? peek(fileName) : null
+    key ? peekAny(key.split(SEP)) : null
   );
 
   useEffect(() => {
-    if (!fileName) {
+    if (!key) {
       setSprite(null);
       return;
     }
 
-    const cached = peek(fileName);
+    const names = key.split(SEP);
+    const cached = peekAny(names);
     if (cached) {
       setSprite(current => (current === cached ? current : cached));
       return;
@@ -48,17 +72,26 @@ export function useMuSprite(fileName: string | undefined): Sprite | null {
 
     let cancelled = false;
 
-    load(fileName).then(
-      loaded => {
-        if (!cancelled) setSprite(loaded);
-      },
-      err => console.error(`Could not load sprite ${fileName}:`, err)
-    );
+    void (async () => {
+      for (const [at, name] of names.entries()) {
+        try {
+          const loaded = await load(name);
+          if (!cancelled) setSprite(loaded);
+          return;
+        } catch (err) {
+          // Only the last one failing is news: the ones before it missing is
+          // the fallback doing its job.
+          if (at === names.length - 1) {
+            console.error(`Could not load sprite ${name}:`, err);
+          }
+        }
+      }
+    })();
 
     return () => {
       cancelled = true;
     };
-  }, [fileName]);
+  }, [key]);
 
   return sprite;
 }
