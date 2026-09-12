@@ -17,11 +17,12 @@
 
 import { observable, runInAction } from 'mobx';
 import { convertBux } from '../../common/terrain/mapFileEncryption';
+import { GameOptions } from '../../common/gameOptions';
 import { i18n, onLanguageChanged } from '../../i18n';
 import {
   checkPackText,
   decodeLocalText,
-  downloadLocalDataFile,
+  downloadPackDataFile,
   repairPackText,
 } from './localData';
 
@@ -73,7 +74,7 @@ export function loadItemNames(): Promise<void> {
 
   const wanted = i18n.language;
 
-  pending = downloadLocalDataFile(FILE)
+  pending = downloadPackDataFile(FILE)
     .then(bytes => {
       // Two changes in quick succession: the slower fetch must not land on
       // top of the language that is current by the time it answers.
@@ -95,6 +96,11 @@ export function localisedItemName(
   group: number,
   index: number
 ): string | undefined {
+  // The one option that turns a whole table off: a trader who wants to match
+  // a price list reads `items.json` instead, with the rest of the interface
+  // still in their own language. Observable, so every open window redraws the
+  // moment it is switched.
+  if (GameOptions.englishItemNames) return undefined;
   return names.get().get(group * GROUP_STRIDE + index);
 }
 
@@ -104,7 +110,9 @@ onLanguageChanged(() => {
   void loadItemNames();
 });
 
-// Kicked off at import, never from a render: `loadItemNames` writes the
-// observable synchronously on the no-pack path, and a write inside a MobX
-// derivation is how a component starts re-rendering itself.
-void loadItemNames();
+// Kicked off once the module graph has finished evaluating, never from a
+// render: `loadItemNames` reads `i18n.dataPack`, and this module can be
+// evaluated before `i18n/index.ts` has run its own body - a straight call here
+// would quietly load nothing. It must not run inside a render either, because
+// the no-pack path writes the observable synchronously.
+queueMicrotask(() => void loadItemNames());

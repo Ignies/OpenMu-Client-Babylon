@@ -178,7 +178,7 @@ export const EN_TEXT = {
 
   // ---- Options window ----------------------------------------------------
   'options.title': 'Option',
-  'options.tab.server': 'Server',
+  'options.tab.system': 'System',
   'options.tab.game': 'Game',
   'options.tab.video': 'Video',
   'options.tab.keys': 'Keys',
@@ -197,6 +197,16 @@ export const EN_TEXT = {
   'options.section.loot': 'Drop names',
   'options.section.interface': 'Interface',
   'options.section.exit': 'Exit',
+  'options.section.connection': 'Connection',
+  'options.section.camera': 'Camera',
+  'options.section.chat': 'Chat',
+  'options.section.world': 'World',
+  'options.section.grade': 'Grade',
+  'options.section.layout': 'Layout',
+  'options.section.text': 'Text',
+  'options.section.bindings': 'Bindings',
+  'options.tab.interface': 'Interface',
+  'options.englishItemNames': 'Item names in English',
 
   'options.autoAttack': 'Automatic Attack',
   'options.whisperBeep': 'Beep sound for whispering',

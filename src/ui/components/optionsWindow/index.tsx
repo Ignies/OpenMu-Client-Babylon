@@ -249,277 +249,412 @@ const gradeSlider = (
     needsTier,
   });
 
-type Tab = {
+/**
+ * One screen of the window: a column layout of sections.
+ *
+ * A tab is a *category* and a subtab is one screen inside it, so nothing has
+ * to be filed under a heading it does not belong to - the sound slider is not
+ * gameplay, and quitting is not a server setting. A tab with a single subtab
+ * draws no second strip.
+ */
+type SubTab = {
   id: string;
   labelKey: TextKey;
   columns: Section[][];
 };
 
+type Tab = {
+  id: string;
+  labelKey: TextKey;
+  subtabs: SubTab[];
+};
+
+/** Every screen in the window, for the sizing pass. */
+const allScreens = (tabs: Tab[]): SubTab[] => tabs.flatMap(tab => tab.subtabs);
+
 const TABS: Tab[] = [
-  // First, and the one the window always opens on: this is the original's
-  // Escape menu (`CSystemMenuMsgBox`), which Escape opens here too.
+  // First, and the one the window always opens on: Escape opens this window
+  // instead of the original's `CSystemMenuMsgBox`, so the way out has to be
+  // the first thing under the cursor.
   {
-    id: 'server',
-    labelKey: 'options.tab.server',
-    columns: [
-      [
-        {
-          titleKey: 'options.section.exit',
-          rows: [
-            exitRow('quit', 'options.exitGame'),
-            exitRow('servers', 'options.selectServer'),
-            exitRow('characters', 'options.switchCharacter'),
+    id: 'system',
+    labelKey: 'options.tab.system',
+    subtabs: [
+      {
+        id: 'exit',
+        labelKey: 'options.section.exit',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.exit',
+              rows: [
+                exitRow('quit', 'options.exitGame'),
+                exitRow('servers', 'options.selectServer'),
+                exitRow('characters', 'options.switchCharacter'),
+              ],
+            },
           ],
-        },
-      ],
+        ],
+      },
+      {
+        id: 'connection',
+        labelKey: 'options.section.connection',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.connection',
+              rows: [
+                check('autoReconnect', -1, 'options.autoReconnect'),
+                check('blockBrowserKeys', -1, 'options.blockBrowserKeys'),
+              ],
+            },
+          ],
+        ],
+      },
     ],
   },
   {
     id: 'game',
     labelKey: 'options.tab.game',
-    columns: [
-      [
-        {
-          titleKey: 'options.section.gameplay',
-          rows: [
-            check('autoAttack', 386, 'options.autoAttack'),
-            check('whisperBeep', 387, 'options.whisperBeep'),
-            check('slideHelp', 919, 'options.slideHelp'),
-            check('cameraControl', -1, 'options.cameraControl'),
-            slider({
-              key: 'cameraFov',
-              textId: -1,
-              labelKey: 'options.cameraFov',
-              min: CAMERA_FOV_MIN_DEG,
-              max: CAMERA_FOV_MAX_DEG,
-              display: v => `${v}°`,
-              needsCameraControl: true,
-            }),
-            check('wsadMovement', -1, 'options.wsadMovement'),
+    subtabs: [
+      {
+        id: 'gameplay',
+        labelKey: 'options.section.gameplay',
+        columns: [
+          [
             {
-              kind: 'check',
-              key: 'thirdPersonMouseLook',
-              textId: -1,
-              labelKey: 'options.thirdPersonMouseLook',
-              needsWsadMovement: true,
-            },
-            check('firstPersonBob', -1, 'options.firstPersonBob'),
-            check('chatTimestamps', -1, 'options.chatTimestamps'),
-            check('stateWarnings', -1, 'options.stateWarnings'),
-          ],
-        },
-        {
-          titleKey: 'options.section.interface',
-          rows: [
-            slider({
-              key: 'uiScale',
-              textId: -1,
-              labelKey: 'options.uiScale',
-              max: UI_SCALE_MAX,
-              display: v => `${Math.round(uiScaleFactor(v) * 100)}%`,
-            }),
-            check('lockWindows', -1, 'options.lockWindows'),
-            check('minimapCorner', -1, 'options.minimapCorner'),
-            check('autoReconnect', -1, 'options.autoReconnect'),
-            check('blockBrowserKeys', -1, 'options.blockBrowserKeys'),
-            {
-              kind: 'button',
-              id: 'fullscreen',
-              labelKey: 'options.fullscreen',
-              onClick: toggleFullscreen,
+              titleKey: 'options.section.gameplay',
+              rows: [
+                check('autoAttack', 386, 'options.autoAttack'),
+                check('wsadMovement', -1, 'options.wsadMovement'),
+                {
+                  kind: 'check',
+                  key: 'thirdPersonMouseLook',
+                  textId: -1,
+                  labelKey: 'options.thirdPersonMouseLook',
+                  needsWsadMovement: true,
+                },
+                check('firstPersonBob', -1, 'options.firstPersonBob'),
+              ],
             },
             {
-              kind: 'button',
-              id: 'reset-windows',
-              labelKey: 'options.resetWindows',
-              onClick: () => MuWindows.resetAll(),
+              titleKey: 'options.section.camera',
+              rows: [
+                check('cameraControl', -1, 'options.cameraControl'),
+                slider({
+                  key: 'cameraFov',
+                  textId: -1,
+                  labelKey: 'options.cameraFov',
+                  min: CAMERA_FOV_MIN_DEG,
+                  max: CAMERA_FOV_MAX_DEG,
+                  display: v => `${v}°`,
+                  needsCameraControl: true,
+                }),
+              ],
             },
           ],
-        },
-        {
-          titleKey: 'options.section.language',
-          rows: [{ kind: 'language', id: 'language' }],
-        },
-      ],
-      [
-        {
-          titleKey: 'options.section.sound',
-          rows: [
-            slider({
-              key: 'volume',
-              textId: 389,
-              labelKey: 'options.volume',
-              max: 9,
-              display: v => v,
-            }),
+        ],
+      },
+      {
+        id: 'drops',
+        labelKey: 'options.section.loot',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.loot',
+              rows: [
+                check('lootFilter', -1, 'options.lootFilter'),
+                check('lootJewels', -1, 'options.lootJewels'),
+                check('lootExcellent', -1, 'options.lootExcellent'),
+                check('lootAncient', -1, 'options.lootAncient'),
+                check('lootHighLevel', -1, 'options.lootHighLevel'),
+                check('lootOther', -1, 'options.lootOther'),
+                slider({
+                  key: 'lootZen',
+                  textId: -1,
+                  labelKey: 'options.lootZen',
+                  max: LOOT_ZEN_MAX,
+                  display: v => (v === 0 ? t('common.off') : lootZenThreshold(v)),
+                }),
+              ],
+            },
           ],
-        },
-        {
-          titleKey: 'options.section.performance',
-          rows: [
-            slider({
-              key: 'effectLevel',
-              textId: 1840,
-              labelKey: 'options.effectLevel',
-              max: 4,
-              display: v => v * 2 + 5,
-            }),
+        ],
+      },
+      {
+        id: 'chat',
+        labelKey: 'options.section.chat',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.chat',
+              rows: [
+                check('whisperBeep', 387, 'options.whisperBeep'),
+                check('chatTimestamps', -1, 'options.chatTimestamps'),
+                check('slideHelp', 919, 'options.slideHelp'),
+                check('stateWarnings', -1, 'options.stateWarnings'),
+              ],
+            },
           ],
-        },
-        {
-          titleKey: 'options.section.loot',
-          rows: [
-            check('lootFilter', -1, 'options.lootFilter'),
-            check('lootJewels', -1, 'options.lootJewels'),
-            check('lootExcellent', -1, 'options.lootExcellent'),
-            check('lootAncient', -1, 'options.lootAncient'),
-            check('lootHighLevel', -1, 'options.lootHighLevel'),
-            check('lootOther', -1, 'options.lootOther'),
-            slider({
-              key: 'lootZen',
-              textId: -1,
-              labelKey: 'options.lootZen',
-              max: LOOT_ZEN_MAX,
-              display: v => (v === 0 ? t('common.off') : lootZenThreshold(v)),
-            }),
-          ],
-        },
-      ],
+        ],
+      },
     ],
   },
   {
     id: 'video',
     labelKey: 'options.tab.video',
-    columns: [
-      [
-        {
-          titleKey: 'options.section.quality',
-          rows: [
-            { kind: 'presets', id: 'presets', labelKey: 'options.preset' },
-            slider({
-              key: 'lightingQuality',
-              textId: -1,
-              labelKey: 'options.lightingQuality',
-              max: LIGHTING_QUALITY_MAX,
-              display: v => t(LIGHTING_QUALITY_LABEL_KEYS[v]) ?? v,
-            }),
-            slider({
-              key: 'materialQuality',
-              textId: -1,
-              labelKey: 'options.materialQuality',
-              max: MATERIAL_QUALITY_MAX,
-              display: v => t(MATERIAL_QUALITY_LABEL_KEYS[v]) ?? v,
-            }),
-            slider({
-              key: 'materialDetail',
-              textId: -1,
-              labelKey: 'options.materialDetail',
-              max: MATERIAL_DETAIL_MAX,
-              display: v => (v === 0 ? t('common.off') : v),
-            }),
+    subtabs: [
+      {
+        id: 'quality',
+        labelKey: 'options.section.quality',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.quality',
+              rows: [
+                { kind: 'presets', id: 'presets', labelKey: 'options.preset' },
+                slider({
+                  key: 'lightingQuality',
+                  textId: -1,
+                  labelKey: 'options.lightingQuality',
+                  max: LIGHTING_QUALITY_MAX,
+                  display: v => t(LIGHTING_QUALITY_LABEL_KEYS[v]) ?? v,
+                }),
+                slider({
+                  key: 'materialQuality',
+                  textId: -1,
+                  labelKey: 'options.materialQuality',
+                  max: MATERIAL_QUALITY_MAX,
+                  display: v => t(MATERIAL_QUALITY_LABEL_KEYS[v]) ?? v,
+                }),
+                slider({
+                  key: 'materialDetail',
+                  textId: -1,
+                  labelKey: 'options.materialDetail',
+                  max: MATERIAL_DETAIL_MAX,
+                  display: v => (v === 0 ? t('common.off') : v),
+                }),
+                slider({
+                  key: 'effectLevel',
+                  textId: 1840,
+                  labelKey: 'options.effectLevel',
+                  max: 4,
+                  display: v => v * 2 + 5,
+                }),
+              ],
+            },
           ],
-        },
-        {
-          titleKey: 'options.section.rendering',
-          rows: [
-            check('shadows', -1, 'options.shadows'),
-            check('dynamicLights', -1, 'options.dynamicLights'),
-            check('postProcessing', -1, 'options.postProcessing'),
-            check('ambientParticles', -1, 'options.ambientParticles'),
-            check('weatherEffects', -1, 'options.weatherEffects'),
-            check('animatedWater', -1, 'options.animatedWater'),
-            check('advancedEffects', -1, 'options.advancedEffects'),
-            check('propBatching', -1, 'options.propBatching'),
-            slider({
-              key: 'grassDensity',
-              textId: -1,
-              labelKey: 'options.grassDensity',
-              max: 9,
-              needsTier: true,
-              display: v => (v === 0 ? t('common.off') : v),
-            }),
-            slider({
-              key: 'renderDistance',
-              textId: -1,
-              labelKey: 'options.renderDistance',
-              max: RENDER_DISTANCE_MAX,
-              display: v => renderDistanceRanges(v).nearby,
-            }),
+        ],
+      },
+      {
+        id: 'rendering',
+        labelKey: 'options.section.rendering',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.rendering',
+              rows: [
+                check('shadows', -1, 'options.shadows'),
+                check('dynamicLights', -1, 'options.dynamicLights'),
+                check('postProcessing', -1, 'options.postProcessing'),
+                check('ambientParticles', -1, 'options.ambientParticles'),
+                check('weatherEffects', -1, 'options.weatherEffects'),
+                check('animatedWater', -1, 'options.animatedWater'),
+                check('advancedEffects', -1, 'options.advancedEffects'),
+                check('propBatching', -1, 'options.propBatching'),
+              ],
+            },
           ],
-        },
-        {
-          titleKey: 'options.section.items',
-          rows: [
-            slider({
-              key: 'itemEffects',
-              textId: -1,
-              labelKey: 'options.itemEffects',
-              max: ITEM_EFFECT_MODE_MAX,
-              display: v => t(ITEM_EFFECT_MODE_LABEL_KEYS[v]) ?? v,
-            }),
+          [
+            {
+              titleKey: 'options.section.world',
+              rows: [
+                slider({
+                  key: 'grassDensity',
+                  textId: -1,
+                  labelKey: 'options.grassDensity',
+                  max: 9,
+                  needsTier: true,
+                  display: v => (v === 0 ? t('common.off') : v),
+                }),
+                slider({
+                  key: 'renderDistance',
+                  textId: -1,
+                  labelKey: 'options.renderDistance',
+                  max: RENDER_DISTANCE_MAX,
+                  display: v => renderDistanceRanges(v).nearby,
+                }),
+              ],
+            },
+            {
+              titleKey: 'options.section.items',
+              rows: [
+                slider({
+                  key: 'itemEffects',
+                  textId: -1,
+                  labelKey: 'options.itemEffects',
+                  max: ITEM_EFFECT_MODE_MAX,
+                  display: v => t(ITEM_EFFECT_MODE_LABEL_KEYS[v]) ?? v,
+                }),
+              ],
+            },
           ],
-        },
-      ],
-      [
-        {
-          titleKey: 'options.section.image',
-          rows: [
-            slider({
-              key: 'toneMapper',
-              textId: -1,
-              labelKey: 'options.toneMapper',
-              max: TONE_MAPPER_MAX,
-              display: v => t(TONE_MAPPER_LABEL_KEYS[v]) ?? v,
-              needsPostProcessing: true,
-              needsTier: true,
-            }),
-            slider({
-              key: 'brightness',
-              textId: -1,
-              labelKey: 'options.brightness',
-              min: BRIGHTNESS_MIN,
-              max: BRIGHTNESS_MAX,
-              display: v =>
-                v === 0 ? t('common.off') : v > 0 ? `+${v}` : `-${-v}`,
-              needsPostProcessing: true,
-              needsTier: true,
-            }),
-            gradeSlider('bloom', 'options.bloom', true),
-            gradeSlider('glow', 'options.glow', false),
-            gradeSlider('sharpness', 'options.sharpness', false),
-            gradeSlider('filmGrain', 'options.filmGrain', true),
-            gradeSlider('chromatic', 'options.chromatic', true),
-            gradeSlider('vignette', 'options.vignette', true),
-            check('fxaa', -1, 'options.fxaa', true),
+        ],
+      },
+      {
+        id: 'image',
+        labelKey: 'options.section.image',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.image',
+              rows: [
+                slider({
+                  key: 'toneMapper',
+                  textId: -1,
+                  labelKey: 'options.toneMapper',
+                  max: TONE_MAPPER_MAX,
+                  display: v => t(TONE_MAPPER_LABEL_KEYS[v]) ?? v,
+                  needsPostProcessing: true,
+                  needsTier: true,
+                }),
+                slider({
+                  key: 'brightness',
+                  textId: -1,
+                  labelKey: 'options.brightness',
+                  min: BRIGHTNESS_MIN,
+                  max: BRIGHTNESS_MAX,
+                  display: v =>
+                    v === 0 ? t('common.off') : v > 0 ? `+${v}` : `-${-v}`,
+                  needsPostProcessing: true,
+                  needsTier: true,
+                }),
+                gradeSlider('bloom', 'options.bloom', true),
+                gradeSlider('glow', 'options.glow', false),
+              ],
+            },
           ],
-        },
-      ],
+          [
+            {
+              titleKey: 'options.section.grade',
+              rows: [
+                gradeSlider('sharpness', 'options.sharpness', false),
+                gradeSlider('filmGrain', 'options.filmGrain', true),
+                gradeSlider('chromatic', 'options.chromatic', true),
+                gradeSlider('vignette', 'options.vignette', true),
+                check('fxaa', -1, 'options.fxaa', true),
+              ],
+            },
+          ],
+        ],
+      },
+    ],
+  },
+  {
+    id: 'interface',
+    labelKey: 'options.tab.interface',
+    subtabs: [
+      {
+        id: 'layout',
+        labelKey: 'options.section.layout',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.layout',
+              rows: [
+                slider({
+                  key: 'uiScale',
+                  textId: -1,
+                  labelKey: 'options.uiScale',
+                  max: UI_SCALE_MAX,
+                  display: v => `${Math.round(uiScaleFactor(v) * 100)}%`,
+                }),
+                check('lockWindows', -1, 'options.lockWindows'),
+                check('minimapCorner', -1, 'options.minimapCorner'),
+                {
+                  kind: 'button',
+                  id: 'fullscreen',
+                  labelKey: 'options.fullscreen',
+                  onClick: toggleFullscreen,
+                },
+                {
+                  kind: 'button',
+                  id: 'reset-windows',
+                  labelKey: 'options.resetWindows',
+                  onClick: () => MuWindows.resetAll(),
+                },
+              ],
+            },
+          ],
+        ],
+      },
+      {
+        id: 'text',
+        labelKey: 'options.section.text',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.language',
+              rows: [
+                { kind: 'language', id: 'language' },
+                check('englishItemNames', -1, 'options.englishItemNames'),
+              ],
+            },
+          ],
+        ],
+      },
+      {
+        id: 'sound',
+        labelKey: 'options.section.sound',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.sound',
+              rows: [
+                slider({
+                  key: 'volume',
+                  textId: 389,
+                  labelKey: 'options.volume',
+                  max: 9,
+                  display: v => v,
+                }),
+              ],
+            },
+          ],
+        ],
+      },
     ],
   },
   {
     id: 'keys',
     labelKey: 'options.tab.keys',
-    columns: [
-      [
-        {
-          titleKey: 'options.section.windows',
-          rows: KEY_ACTIONS.slice(0, KEY_COLUMN_SPLIT).map(keyRow),
-        },
-      ],
-      [
-        {
-          titleKey: 'options.section.actions',
-          rows: [
-            ...KEY_ACTIONS.slice(KEY_COLUMN_SPLIT).map(keyRow),
+    subtabs: [
+      {
+        id: 'bindings',
+        labelKey: 'options.section.bindings',
+        columns: [
+          [
             {
-              kind: 'button',
-              id: 'reset-keys',
-              labelKey: 'options.resetKeys',
-              onClick: resetKeyBindings,
+              titleKey: 'options.section.windows',
+              rows: KEY_ACTIONS.slice(0, KEY_COLUMN_SPLIT).map(keyRow),
             },
           ],
-        },
-      ],
+          [
+            {
+              titleKey: 'options.section.actions',
+              rows: [
+                ...KEY_ACTIONS.slice(KEY_COLUMN_SPLIT).map(keyRow),
+                {
+                  kind: 'button',
+                  id: 'reset-keys',
+                  labelKey: 'options.resetKeys',
+                  onClick: resetKeyBindings,
+                },
+              ],
+            },
+          ],
+        ],
+      },
     ],
   },
 ];
@@ -527,7 +662,8 @@ const TABS: Tab[] = [
 /** Tall enough, and flush, to reach the bottom of the header art. */
 const TAB_HEIGHT = 32;
 const TAB_GAP = 0;
-const TAB_WIDTH = 96;
+/** Five categories across the 426 px window. */
+const TAB_WIDTH = 84;
 
 function rowHeight(row: Row): number {
   switch (row.kind) {
@@ -559,19 +695,24 @@ function columnHeight(sections: Section[]): number {
 }
 
 const CONTENT_HEIGHT = Math.max(
-  ...TABS.flatMap(tab => tab.columns.map(columnHeight))
+  ...allScreens(TABS).flatMap(sub => sub.columns.map(columnHeight))
 );
 
 const WIN_HEIGHT =
   Math.ceil(
-    (TAB_TOP + TAB_HEIGHT + 12 + CONTENT_HEIGHT + 20) / SIDE_TILE_HEIGHT
+    (TAB_TOP + TAB_HEIGHT + 6 + 20 + 10 + CONTENT_HEIGHT + 20) / SIDE_TILE_HEIGHT
   ) *
     SIDE_TILE_HEIGHT +
   BOTTOM_HEIGHT;
 
 const CLOSE_Y = WIN_HEIGHT - 47;
 
-const TAB_CONTENT_TOP = TAB_TOP + TAB_HEIGHT + 12;
+/** The subtab strip sits directly under the tabs; the rows start under it. */
+const SUBTAB_TOP = TAB_TOP + TAB_HEIGHT + 6;
+const SUBTAB_HEIGHT = 20;
+const SUBTAB_GAP = 4;
+
+const TAB_CONTENT_TOP = SUBTAB_TOP + SUBTAB_HEIGHT + 10;
 /** Where a tab's rows have to stop: the Close button owns the rest. */
 const TAB_CONTENT_BOTTOM = CLOSE_Y - 12;
 
@@ -579,6 +720,7 @@ const HOT_KEY = 'options';
 
 export const OptionsWindow = observer(() => {
   const [activeTab, setActiveTab] = useState(TABS[0].id);
+  const [activeSub, setActiveSub] = useState(TABS[0].subtabs[0].id);
 
   // Key being rebound: the next key press goes to it instead of the game.
   const [capturing, setCapturing] = useState<KeyAction | null>(null);
@@ -630,11 +772,19 @@ export const OptionsWindow = observer(() => {
     // Every open starts on the first tab: Escape is meant to reach the ways
     // out in one press, not wherever the sliders were left.
     setActiveTab(TABS[0].id);
+    setActiveSub(TABS[0].subtabs[0].id);
   }, [Store.optionsEnabled]);
 
   if (!Store.optionsEnabled) return null;
 
   const tab = TABS.find(t => t.id === activeTab) ?? TABS[0];
+  const sub = tab.subtabs.find(s => s.id === activeSub) ?? tab.subtabs[0];
+
+  /** A category and the screen it opens on, together: they change as one. */
+  const openTab = (next: Tab) => {
+    setActiveTab(next.id);
+    setActiveSub(next.subtabs[0].id);
+  };
 
   const set = <K extends keyof GameOptionsType>(
     key: K,
@@ -760,15 +910,44 @@ export const OptionsWindow = observer(() => {
                 width: TAB_WIDTH,
                 height: TAB_HEIGHT,
               }}
-              onClick={uiClick(() => setActiveTab(tab.id))}
+              onClick={uiClick(() => openTab(tab))}
             >
               {t(tab.labelKey)}
             </div>
           );
         })}
 
-        {tab.columns.map((sections, columnIndex) => {
-          const alone = tab.columns.length === 1;
+        {/* One strip per category; a category with one screen draws none. */}
+        {tab.subtabs.length > 1 &&
+          tab.subtabs.map((entry, i) => {
+            const width = Math.floor(
+              (COLUMN_WIDTH * 2 - SUBTAB_GAP * (tab.subtabs.length - 1)) /
+                tab.subtabs.length
+            );
+            const stripWidth =
+              tab.subtabs.length * width + (tab.subtabs.length - 1) * SUBTAB_GAP;
+            const x =
+              Math.floor((WIN_WIDTH - stripWidth) / 2) + i * (width + SUBTAB_GAP);
+
+            return (
+              <div
+                key={entry.id}
+                className={`options-subtab${entry.id === sub.id ? ' is-active' : ''}`}
+                style={{
+                  left: x,
+                  top: SUBTAB_TOP,
+                  width,
+                  height: SUBTAB_HEIGHT,
+                }}
+                onClick={uiClick(() => setActiveSub(entry.id))}
+              >
+                {t(entry.labelKey)}
+              </div>
+            );
+          })}
+
+        {sub.columns.map((sections, columnIndex) => {
+          const alone = sub.columns.length === 1;
           const x = alone
             ? Math.floor((WIN_WIDTH - COLUMN_WIDTH) / 2)
             : COLUMN_X[columnIndex];

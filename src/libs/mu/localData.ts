@@ -171,6 +171,34 @@ export function checkPackText(base: string, samples: Iterable<string>): void {
 }
 
 /**
+ * One table **from the active pack only**, or empty when that pack does not
+ * ship it.
+ *
+ * This is what the overlay readers (`itemNameFile`, `skillNameFile`,
+ * `buffNameFile`) use, and the English fallback in `downloadLocalDataFile`
+ * is exactly what they must not have: an overlay sits *on top of* the English
+ * the client already carries, so loading `Eng` into it would replace a
+ * language's own names with English ones it was falling back to anyway. A pack
+ * that ships item names but no buff names then gets its item names, and its
+ * buff names still come from the catalogue.
+ */
+export async function downloadPackDataFile(base: string): Promise<Uint8Array> {
+  const pack = i18n.dataPack;
+  if (!pack || pack.folder === 'Eng') return MISSING;
+
+  const lower = base.toLowerCase();
+  const paths = [`Local/${pack.folder}/${base}_${pack.suffix}.bmd`];
+  if (lower !== base) paths.push(`Local/${pack.folder}/${lower}_${pack.suffix}.bmd`);
+
+  for (const path of paths) {
+    const bytes = await optional(path);
+    if (bytes.length) return bytes;
+  }
+
+  return MISSING;
+}
+
+/**
  * The first of `localDataCandidates` that is actually there, or empty. Nothing
  * is cached: the tables that use this hold their own decoded copy and re-read
  * it when the language changes.

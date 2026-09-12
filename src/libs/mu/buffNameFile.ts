@@ -29,7 +29,7 @@ import { i18n, onLanguageChanged } from '../../i18n';
 import {
   checkPackText,
   decodeLocalText,
-  downloadLocalDataFile,
+  downloadPackDataFile,
   repairPackText,
 } from './localData';
 
@@ -86,7 +86,7 @@ export function loadBuffNames(): Promise<void> {
 
   const wanted = i18n.language;
 
-  pending = downloadLocalDataFile(FILE)
+  pending = downloadPackDataFile(FILE)
     .then(bytes => {
       if (i18n.language !== wanted || !bytes.length) return;
       const parsed = parseBuffNames(bytes);
@@ -112,4 +112,6 @@ onLanguageChanged(() => {
   void loadBuffNames();
 });
 
-void loadBuffNames();
+// Deferred past module evaluation, like `itemNameFile`: this module can run
+// before `i18n/index.ts` has, and reading `dataPack` then loads nothing.
+queueMicrotask(() => void loadBuffNames());
