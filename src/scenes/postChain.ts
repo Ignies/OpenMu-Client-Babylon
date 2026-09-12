@@ -53,7 +53,7 @@ const VIGNETTE_MAX_WEIGHT = 1.2;
  * key is normalised so an up-facing surface takes 1.0, so nothing lit by it
  * blooms and emitters and torch cores do.
  */
-const BLOOM_THRESHOLD = 1.0;
+export const BLOOM_THRESHOLD = 1.0;
 
 /**
  * With the MU curve live the buffer reaching bloom is already rolled into

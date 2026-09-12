@@ -50,6 +50,7 @@ import { syncAmbientOcclusion } from '../scenes/ambientOcclusion';
 import { syncHeightFog, updateHeightFog } from '../scenes/heightFog';
 import { syncRoomMask } from '../scenes/roomMask';
 import { syncToneMap } from '../scenes/toneMap';
+import { syncFireflyGuard } from '../scenes/fireflyGuard';
 import { syncSunShafts, sunShaftsLive } from '../scenes/sunShafts';
 import {
   createPostChain,
@@ -397,6 +398,17 @@ export function createLookDirector(
     // pass, so it runs after the haze and the mask and before the chain.
     reordered =
       syncToneMap(scene, camera, toneMapperIndex === 1, postExposure) || reordered;
+
+    // Bloom reads whatever the buffer holds, so a single aliased fragment can
+    // be drawn as a pool of light. The guard bounds a pixel against its
+    // neighbours ahead of the chain; the MU curve already bounds the whole
+    // buffer, so the two are never live at once.
+    reordered =
+      syncFireflyGuard(
+        scene,
+        camera,
+        shaped && post && GameOptions.bloom > 0 && toneMapperIndex !== 1
+      ) || reordered;
 
     if (reordered) postChain.moveToEnd();
 
