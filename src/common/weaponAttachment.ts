@@ -6,10 +6,13 @@ import {
   type BmdLink,
 } from './boneLink';
 import { BaseClass, getBaseClass } from './characterStats';
+import { PlayerAction } from './objects/enum';
 import type { PlayerObject } from './playerObject';
 import type { CharacterClassNumber } from './types';
+import type { Item } from '../ecs/world';
 import {
   GROUP_BOW,
+  GROUP_SWORD,
   isAmmo,
   isBackItem,
   isCrossbow,
@@ -185,17 +188,96 @@ function backLink(
 function backPose(item: {
   group: number;
   num: number;
-}): NonNullable<PlayerObject['Weapon1']['BackPose']> {
+}): PartPose {
   return item.group === GROUP_BOW && item.num === STINGER_BOW
     ? { action: 2, speed: 0.25 }
     : { action: 0, speed: 0 };
 }
 
+type PartPose = NonNullable<PlayerObject['Weapon1']['PartPose']>;
+
+/** Holds the first frame: `PlaySpeed = 0`, `AnimationFrame = 0.001`. */
+const HELD: PartPose = { action: 0, speed: 0 };
+
+/** `PLAYER_STOP_MALE`'s rate, which every animated in-hand item is keyed to. */
+const STOP_MALE_SPEED = 0.28;
+
 /**
- * `RenderCharacterBackItem` + the in-hand loop: when `bindBack` is true every
- * sword…shield item moves to the back bone (frozen), ammo is always on the
- * back, everything else stays in the hands. Idempotent; call whenever the
- * appearance or the bind state changes.
+ * The handful of weapons `RenderCharacterItem` keeps animating in the hand
+ * (ZzzCharacter.cpp:9895-9950). Everything else - bows included, which is
+ * why an idle archer is not forever drawing the string - holds frame 0.
+ * Keyed `group:num`.
+ */
+const HAND_CLIPS: Readonly<Record<string, PartPose>> = {
+  '2:5': { action: 0, speed: STOP_MALE_SPEED * 2 }, // Crystal Sword
+  '2:16': { action: 0, speed: STOP_MALE_SPEED }, // Frost Mace
+  '2:17': { action: 0, speed: STOP_MALE_SPEED }, // Absolute Scepter
+  '5:6': { action: 0, speed: STOP_MALE_SPEED * 15 }, // Staff of Resurrection
+  '5:34': { action: 0, speed: STOP_MALE_SPEED }, // Raven Stick
+  [`${GROUP_BOW}:${STINGER_BOW}`]: { action: 0, speed: STOP_MALE_SPEED },
+};
+
+/** The Flail swings its head: clip 2 under a sword swing, clip 1 at rest. */
+const FLAIL = '2:2';
+
+/** The four clips that make a weapon's own bow/crossbow clip run (:9883). */
+function isBowDrawAction(action: PlayerAction): boolean {
+  return (
+    action === PlayerAction.PLAYER_ATTACK_BOW ||
+    action === PlayerAction.PLAYER_ATTACK_CROSSBOW ||
+    action === PlayerAction.PLAYER_ATTACK_FLY_BOW ||
+    action === PlayerAction.PLAYER_ATTACK_FLY_CROSSBOW
+  );
+}
+
+/**
+ * `RenderCharacterItem`'s per-frame `w->CurrentAction` / `w->PlaySpeed`
+ * switch (ZzzCharacter.cpp:9881-9955). `playerSpeed` is the rate of the clip
+ * the character is playing, which is what the original hands the bow and the
+ * Flail while they follow a swing.
+ */
+function handPose(
+  item: { group: number; num: number },
+  action: PlayerAction,
+  playerSpeed: number
+): PartPose {
+  const key = `${item.group}:${item.num}`;
+
+  if (isBowDrawAction(action)) {
+    // The draw runs for as long as the swing does; a Stinger Bow draws on
+    // clip 1 because its idle wobble already owns clip 0.
+    const stinger = item.group === GROUP_BOW && item.num === STINGER_BOW;
+    return { action: stinger ? 1 : 0, speed: playerSpeed };
+  }
+
+  if (key === FLAIL) {
+    const swinging =
+      action >= PlayerAction.PLAYER_ATTACK_SWORD_RIGHT1 &&
+      action <= PlayerAction.PLAYER_ATTACK_SWORD_RIGHT2;
+    return swinging
+      ? { action: 2, speed: playerSpeed }
+      : { action: 1, speed: STOP_MALE_SPEED };
+  }
+
+  // The whole sword group keeps its clip 0 running; most of those clips are
+  // a single frame, so this only shows on the few swords that have one.
+  return HAND_CLIPS[key] ?? (item.group === GROUP_SWORD ? { action: 0, speed: STOP_MALE_SPEED } : HELD);
+}
+
+/** True when this slot's item is riding the back rather than the hand. */
+function stowed(
+  item: Item | null,
+  hands: (Hands & { charClass?: CharacterClassNumber }) | undefined,
+  bindBack: boolean
+): item is Item {
+  return !!item && ((bindBack && isBackItem(item, hands)) || isAmmo(item));
+}
+
+/**
+ * `RenderCharacterBackItem`: when `bindBack` is true every sword…shield item
+ * moves to the back bone, ammo is always on the back, everything else stays
+ * in the hands. Idempotent; call whenever the appearance or the bind state
+ * changes. The clip each part runs is `applyWeaponPoses`, every frame.
  */
 export function applyWeaponAttachments(
   player: PlayerObject,
@@ -211,22 +293,41 @@ export function applyWeaponAttachments(
     rageFighter && RAGE_FIGHTER_COMMON.has(`${item.group}:${item.num}`);
 
   // Slot 0 (appearance "leftHand") → Weapon1 → right hand (bRightHandItem).
-  if (main && ((bindBack && isBackItem(main, hands)) || isAmmo(main))) {
+  if (stowed(main, hands, bindBack)) {
     player.Weapon1.setBoneLink(BACK_BONE, backLink(main, false, rageCommon(main)));
-    player.Weapon1.BackPose = backPose(main);
   } else {
     player.Weapon1.setBoneLink(RIGHT_HAND_BONE);
-    player.Weapon1.BackPose = null;
   }
-  player.Weapon1.applyBackPose();
 
   // Slot 1 (appearance "rightHand") → Weapon2 → left hand.
-  if (off && ((bindBack && isBackItem(off, hands)) || isAmmo(off))) {
+  if (stowed(off, hands, bindBack)) {
     player.Weapon2.setBoneLink(BACK_BONE, backLink(off, true, rageCommon(off)));
-    player.Weapon2.BackPose = backPose(off);
   } else {
     player.Weapon2.setBoneLink(LEFT_HAND_BONE);
-    player.Weapon2.BackPose = null;
   }
-  player.Weapon2.applyBackPose();
+}
+
+/**
+ * The clip each weapon part runs this frame: the stowed pose on the back,
+ * otherwise `RenderCharacterItem`'s in-hand switch. Cheap to call every
+ * frame - an unchanged pose is a no-op.
+ */
+export function applyWeaponPoses(
+  player: PlayerObject,
+  hands: (Hands & { charClass?: CharacterClassNumber }) | undefined,
+  bindBack: boolean,
+  action: PlayerAction,
+  playerSpeed: number
+) {
+  const main = hands && isWeaponItem(hands.leftHand) ? hands.leftHand : null;
+  const off = hands && isWeaponItem(hands.rightHand) ? hands.rightHand : null;
+
+  const poseFor = (item: Item | null) => {
+    if (!item) return null;
+    if (stowed(item, hands, bindBack)) return backPose(item);
+    return handPose(item, action, playerSpeed);
+  };
+
+  player.Weapon1.setPartPose(poseFor(main));
+  player.Weapon2.setPartPose(poseFor(off));
 }

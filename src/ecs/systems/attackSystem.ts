@@ -8,7 +8,10 @@ import {
 } from '../../common/objects/enum';
 import { TWFlags } from '../../common/terrain/consts';
 import { isFlagInBinaryMask } from '../../common/utils';
-import { chooseAttackAction } from '../../common/playerActionMapper';
+import { chooseAttackAction } from '../../common/weaponClass';
+import { getBaseClass } from '../../common/characterStats';
+import { isWingItem } from '../../common/wings';
+import { mountKind } from '../../common/pets';
 import { playBowShotVisual } from '../../common/skillVisuals';
 import { combat } from '../../combat';
 import { MOUSE_UPDATE_SECONDS_MAX } from '../../combat/inputGate';
@@ -222,7 +225,20 @@ export const AttackSystem: ISystemFactory = world => {
         return;
       }
 
-      const action = chooseAttackAction(hands, alternateSwing);
+      const anim = playerEntity.playerAnimation;
+      const swordCount = anim.swordCount ?? 0;
+      const action = chooseAttackAction({
+        hands,
+        baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
+        swordCount,
+        wings: isWingItem(hands?.wings),
+        mount: mountKind(
+          hands?.pet,
+          playerEntity.attributeSystem?.isAboveZero('inSafeZone') ?? false
+        ),
+      });
+      // `c->SwordCount++` at the end of SetPlayerAttack.
+      anim.swordCount = swordCount + 1;
       const attackAnimation = alternateSwing
         ? ServerPlayerActionType.Attack2
         : ServerPlayerActionType.Attack1;
@@ -231,12 +247,12 @@ export const AttackSystem: ISystemFactory = world => {
 
       const model = playerEntity.modelObject;
       if (model) applyPlayerActionSpeed(model, action, playerEntity.attributeSystem);
-      if (model && playerEntity.playerAnimation.action === action) {
+      if (model && anim.action === action) {
         // Same clip twice in a row: AnimationSystem would see no change, so
         // restart it explicitly.
         model.restartAction();
       }
-      playerEntity.playerAnimation.action = action;
+      anim.action = action;
 
       // The blow lands at the clip's hit key: latch the HitRequest there. The
       // clip length is the fallback — the request never outlives the clip.

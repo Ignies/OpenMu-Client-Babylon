@@ -26,6 +26,9 @@ import {
   isOtherPlayer,
 } from './attackSystem';
 import { isFemaleClass } from '../../common/mapPlayerNetClassToModelClass';
+import { getBaseClass } from '../../common/characterStats';
+import { isWingItem } from '../../common/wings';
+import type { AttackPose } from '../../common/weaponClass';
 import { mountKind } from '../../common/pets';
 import { skillSound } from '../../common/combatSounds';
 import { playSfx } from '../../libs/sfx';
@@ -113,8 +116,26 @@ export const SkillCastSystem: ISystemFactory = world => {
     };
   }
 
+  /** The swing half of the fallback: what `SetPlayerAttack` would read. */
+  function attackPose(hero: Entity): AttackPose {
+    const hands = hero.charAppearance;
+    const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
+    return {
+      hands,
+      baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
+      swordCount: hero.playerAnimation?.swordCount ?? 0,
+      wings: isWingItem(hands?.wings),
+      mount: mountKind(hands?.pet, inSafeZone),
+    };
+  }
+
   function clipFor(hero: Entity, def: SkillDefinition): PlayerAction {
-    const action = chooseSkillAction(def, hero.charAppearance, castContext(hero));
+    const action = chooseSkillAction(def, attackPose(hero), castContext(hero));
+    // `c->SwordCount++`: every SetPlayerAttack / SetPlayerHighBowAttack the
+    // skill switch falls through to ends on it.
+    if (hero.playerAnimation) {
+      hero.playerAnimation.swordCount = (hero.playerAnimation.swordCount ?? 0) + 1;
+    }
     alternate = !alternate;
     return action;
   }

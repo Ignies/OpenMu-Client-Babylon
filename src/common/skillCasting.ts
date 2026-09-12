@@ -1,6 +1,9 @@
 import { PlayerAction } from './objects/enum';
-import type { Item } from '../ecs/world';
-import { chooseAttackAction } from './playerActionMapper';
+import {
+  chooseAttackAction,
+  chooseHighBowAttackAction,
+  type AttackPose,
+} from './weaponClass';
 import type { SkillDefinition } from './skillsDatabase';
 import { magicClip, skillClip, type CastContext } from '../combat/skillClips';
 import { castsOnSelf } from '../combat/castTargets';
@@ -22,6 +25,9 @@ import { castsOnSelf } from '../combat/castTargets';
  */
 export const TELEPORT = 6;
 export const TELEPORT_ALLY = 15;
+
+/** `AT_SKILL_DEEPIMPACT`: the aimed-up bow shot, OpenMU's Starfall. */
+const STARFALL = 46;
 
 export function isTeleportSkill(num: number): boolean {
   return num === TELEPORT || num === TELEPORT_ALLY;
@@ -54,24 +60,27 @@ export function isSpell(def: SkillDefinition): boolean {
 
 /**
  * The clip a cast plays, for the hero and for everyone else in scope alike.
- * Three tiers, in the order the original tries them:
+ * Four tiers, in the order the original tries them:
  *
- *  1. the per-skill clip (`combat/skillClips` — every `UseSkill*` /
+ *  1. Starfall, the one skill that shoots through `SetPlayerHighBowAttack`
+ *     instead (`AT_SKILL_DEEPIMPACT`, ZzzInterface.cpp:2523-2527),
+ *  2. the per-skill clip (`combat/skillClips` — every `UseSkill*` /
  *     `Attack*` / `ReceiveMagic` case, with its mount and map branches),
- *  2. `SetPlayerMagic` for a spell (ZzzCharacter.cpp:1238-1262) — the
+ *  3. `SetPlayerMagic` for a spell (ZzzCharacter.cpp:1238-1262) — the
  *     female hand-raise, the male HAND1/HAND2 coin toss, or the mount's own
  *     cast clip,
- *  3. the weapon swing, for a physical skill with no clip of its own.
+ *  4. the weapon swing, for a physical skill with no clip of its own.
  */
 export function chooseSkillAction(
   def: SkillDefinition,
-  app: { leftHand: Item | null; rightHand: Item | null } | undefined,
+  pose: AttackPose,
   ctx: CastContext = {}
 ): PlayerAction {
+  if (def.num === STARFALL) return chooseHighBowAttackAction(pose);
   const dedicated = skillClip(def.num, ctx);
   if (dedicated !== null) return dedicated;
   if (isSpell(def)) return magicClip(ctx);
-  return chooseAttackAction(app, !!ctx.alternate);
+  return chooseAttackAction(pose);
 }
 
 /** AreaSkill.Rotation: (BYTE)(Angle / 360 * 256) of the hero's yaw. */
