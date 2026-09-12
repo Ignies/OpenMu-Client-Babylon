@@ -490,6 +490,8 @@ export function createObjectShadow(
  * and skips exactly two: the one the object nominated as `BlendMesh` —
  * an additive glow card, which is light, not matter — and `HiddenMesh`,
  * which is not drawn at all. Everything else casts, alpha-keyed or not.
+ * `shadowSkip` is a `HiddenMesh` set for the shadow pass alone
+ * (`ModelObject.ShadowHiddenMesh`): the mesh is drawn, its silhouette is not.
  *
  * The rule here used to drop every mesh whose material needed alpha
  * blending, which after `modelLoader`'s TGA → ALPHATESTANDBLEND promotion
@@ -501,7 +503,9 @@ export function createObjectShadow(
 export function meshCasts(mesh: AbstractMesh, rules: ShadowMeshRules): boolean {
   const blendMesh = mesh.metadata?.brightMesh === true;
   const hidden =
-    mesh.metadata?.hiddenByScript === true || mesh.isVisible === false;
+    mesh.metadata?.hiddenByScript === true ||
+    mesh.metadata?.shadowSkip === true ||
+    mesh.isVisible === false;
   const keyed = mesh.material?.needAlphaBlending() === true;
 
   return !hidden && (!blendMesh || rules.blendMesh) && (!keyed || rules.keyed);

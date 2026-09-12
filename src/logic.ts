@@ -278,6 +278,7 @@ import { isRidingMount, mountKind } from './common/pets';
 import { quests } from './quests';
 import { SessionExit } from './common/sessionExit';
 import { Store, UIState } from './store';
+import { devQuery } from './common/devSeams';
 import { gameServerTarget } from './common/serverConfig';
 import { MsgWinCode } from './common/msgWin';
 import { CREATE_MESSAGES } from './ui/pages/charactersPage/layout';
@@ -874,6 +875,42 @@ type ScopeNpc = {
   /** AddSummonedMonstersToScope only: name of the summoning player. */
   OwnerCharacterName?: string;
 };
+
+/**
+ * `?offline&npcs=232@222,27;233@216,27` (dev builds): NPCs stood in the
+ * offline scene, which the server would otherwise be the only source of,
+ * so an NPC class can be looked at without a live server. Type, tile x,
+ * tile y, and an optional direction (0-7), `;`-separated.
+ */
+EventBus.on('warpCompleted', () => {
+  if (!Store.isOffline) return;
+
+  const spec = devQuery('npcs');
+  const world = Store.world;
+
+  if (!spec || !world) return;
+
+  let id = 0x7000;
+
+  for (const item of spec.split(';')) {
+    const m = /^(\d+)@(\d+(?:\.\d+)?),(\d+(?:\.\d+)?)(?:,(\d))?$/.exec(item.trim());
+
+    if (!m) continue;
+
+    const x = Number(m[2]);
+    const y = Number(m[3]);
+
+    addNpcToScope(world, {
+      Id: id++,
+      TypeNumber: Number(m[1]),
+      CurrentPositionX: x,
+      CurrentPositionY: y,
+      TargetPositionX: x,
+      TargetPositionY: y,
+      Rotation: m[4] ? Number(m[4]) : 0,
+    });
+  }
+});
 
 /**
  * Keep an object that entered scope mid-walk walking.

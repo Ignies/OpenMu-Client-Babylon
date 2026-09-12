@@ -164,6 +164,8 @@ export const FIRE_TEXTURES: ReadonlySet<string> = new Set<string>([
 // ---- models (Data/Skill/*.bmd → *.glb) -----------------------------------------
 
 export const MODEL = {
+  /** MODEL_FEATHER (darkwing_hetachi.bmd): the one feather the original sheds, a white one on an additive sheet. */
+  feather: 'Skill/darkwing_hetachi.glb',
   fire: 'Skill/Fire01.glb',
   poison: 'Skill/Poison01.glb',
   ice: 'Skill/Ice01.glb',

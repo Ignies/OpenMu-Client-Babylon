@@ -2,6 +2,7 @@ import { spriteLayer } from './sprite';
 import { particlesLayer } from './particles';
 import { projectileLayer } from './projectile';
 import { debrisLayer } from './debris';
+import { feathersLayer } from './feathers';
 import { modelLayer } from './model';
 import { columnLayer } from './column';
 import { jointLayer } from './joint';
@@ -25,7 +26,8 @@ import { monsterGlowLayer } from './monsterGlow';
 export const EFFECT_LAYERS = [
   projectileLayer, // moves the point the model / trail below follow
   debrisLayer, // moves the pieces the models below follow
-  modelLayer, // reads projectile's / debris' points
+  feathersLayer, // moves the feathers the models below follow
+  modelLayer, // reads projectile's / debris' / feathers' points
   spriteLayer,
   particlesLayer,
   columnLayer,
