@@ -29,6 +29,23 @@ const ENABLED_WORLDS = new Set<ENUM_WORLD>([
 
 /** Slab bottom must be this far (tiles) above the hero's feet: clears his head. */
 const ABOVE_HEAD = 1.0;
+
+/**
+ * Whether a submesh standing on the ground at `ground` could be a ceiling
+ * piece this system fades: the slab test below, without the hero. The prop
+ * batches keep any type that answers yes on the per-object path, because a
+ * batched mesh has no visibility of its own to fade.
+ */
+export function mayBeCeilingPiece(
+  map: ENUM_WORLD,
+  minY: number,
+  maxY: number,
+  ground: number
+): boolean {
+  if (!ENABLED_WORLDS.has(map)) return false;
+
+  return minY >= ground + ABOVE_HEAD && maxY - minY <= MAX_THICKNESS;
+}
 /**
  * How far (tiles) under the room's roof underside a slab may still start and
  * count as roof.

@@ -1,6 +1,8 @@
 import { ModelObject } from '../../common/modelObject';
 
 export class StairObject extends ModelObject {
+  static Batchable = true;
+
   async init() {
     // LightEnabled = true;
 

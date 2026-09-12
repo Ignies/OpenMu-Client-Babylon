@@ -189,6 +189,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.grassDensity': 'Grama',
     'options.advancedEffects': 'Efeitos avançados',
     'options.renderDistance': 'Distância de renderização',
+    'options.propBatching': 'Agrupar cenário',
     'options.lightingQuality': 'Iluminação',
     'options.materialQuality': 'Materiais',
     'options.materialDetail': 'Detalhe',

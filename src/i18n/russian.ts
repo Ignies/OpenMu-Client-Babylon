@@ -178,6 +178,7 @@ export const russianLayer: LanguageLayer = {
     'options.grassDensity': 'Трава',
     'options.advancedEffects': 'Расширенные эффекты',
     'options.renderDistance': 'Дальность прорисовки',
+    'options.propBatching': 'Группировка декораций',
     'options.lightingQuality': 'Освещение',
     'options.materialQuality': 'Материалы',
     'options.materialDetail': 'Детализация',

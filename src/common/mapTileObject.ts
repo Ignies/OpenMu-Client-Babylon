@@ -20,6 +20,8 @@ import {
 } from './effectParticles';
 
 export class MapTileObject extends ModelObject {
+  static Batchable = true;
+
   #light: EffectLight | null = null;
 
   #emitter: ParticleEmitter | null = null;

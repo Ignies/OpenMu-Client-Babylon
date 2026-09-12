@@ -238,7 +238,16 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
         (shadowNormalXZ / shadowNormalLen) * ${SHADOW_DILATE.toFixed(5)};
     }
 
-    vec3 shadowRel = worldPos.xyz - shadowOrigin.xyz;
+    #ifdef INSTANCES
+      // A prop batch (common/propBatches.ts): the caster is one thin
+      // instance, and its origin is the instance matrix's translation - the
+      // loader's basis change carries none, so this is the record's position.
+      vec3 shadowOriginI = (world * mat4(world0, world1, world2, world3))[3].xyz;
+    #else
+      vec3 shadowOriginI = shadowOrigin.xyz;
+    #endif
+
+    vec3 shadowRel = worldPos.xyz - shadowOriginI;
 
     float shadowDenom = min(shadowRel.y - shadowParams.y, -0.001);
 
@@ -256,9 +265,9 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
 
     shadowA += (shadowRel.y * (shadowA + shadowParams.x)) / shadowDenom;
 
-    worldPos.x = shadowOrigin.x
+    worldPos.x = shadowOriginI.x
       + shadowSunDir.x * shadowA + shadowAcross.x * shadowB;
-    worldPos.z = shadowOrigin.z
+    worldPos.z = shadowOriginI.z
       + shadowSunDir.y * shadowA + shadowAcross.y * shadowB;
 
     vec2 shadowUV = (vec2(worldPos.x, worldPos.z) + 0.5) / ${TERRAIN_SIZE}.0;
@@ -358,7 +367,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
   return material;
 }
 
-function getShadowMaterial(scene: Scene, slot: number): CustomMaterial {
+export function getShadowMaterial(scene: Scene, slot: number): CustomMaterial {
   const existing = shadowMaterials[slot];
 
   if (!existing || existing.getScene() !== scene) {
@@ -489,7 +498,7 @@ export function createObjectShadow(
  * which is why it read as a thin, naked body. It survives for map objects
  * only, as `rules.keyed`.
  */
-function meshCasts(mesh: AbstractMesh, rules: ShadowMeshRules): boolean {
+export function meshCasts(mesh: AbstractMesh, rules: ShadowMeshRules): boolean {
   const blendMesh = mesh.metadata?.brightMesh === true;
   const hidden =
     mesh.metadata?.hiddenByScript === true || mesh.isVisible === false;

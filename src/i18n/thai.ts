@@ -181,6 +181,7 @@ export const thaiLayer: LanguageLayer = {
     'options.grassDensity': 'หญ้า',
     'options.advancedEffects': 'เอฟเฟกต์ขั้นสูง',
     'options.renderDistance': 'ระยะการแสดงผล',
+    'options.propBatching': 'รวมวาดฉาก',
     'options.lightingQuality': 'แสง',
     'options.materialQuality': 'วัสดุ',
     'options.materialDetail': 'รายละเอียด',

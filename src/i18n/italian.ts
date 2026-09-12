@@ -179,6 +179,7 @@ export const italianLayer: LanguageLayer = {
     'options.grassDensity': 'Erba',
     'options.advancedEffects': 'Effetti avanzati',
     'options.renderDistance': 'Distanza di rendering',
+    'options.propBatching': 'Raggruppamento scenario',
     'options.lightingQuality': 'Illuminazione',
     'options.materialQuality': 'Materiali',
     'options.materialDetail': 'Dettaglio',

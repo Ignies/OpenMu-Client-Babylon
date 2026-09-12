@@ -181,6 +181,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.grassDensity': '草',
     'options.advancedEffects': '高度なエフェクト',
     'options.renderDistance': '描画距離',
+    'options.propBatching': '背景の一括描画',
     'options.lightingQuality': 'ライティング',
     'options.materialQuality': 'マテリアル',
     'options.materialDetail': 'ディテール',

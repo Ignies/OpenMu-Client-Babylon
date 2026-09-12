@@ -13,6 +13,8 @@ const HEIGHT_INFLUENCE = 1.0;
 const HEIGHT_GRADIENT = 0.5;
 
 export class GrassObject extends ModelObject {
+  static Batchable = true;
+
   CastsShadow = false;
 
   private _lastWindUpdate = 0;

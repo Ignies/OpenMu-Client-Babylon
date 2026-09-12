@@ -179,6 +179,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.grassDensity': 'Трева',
     'options.advancedEffects': 'Разширени ефекти',
     'options.renderDistance': 'Далечина на рендиране',
+    'options.propBatching': 'Групиране на декора',
     'options.lightingQuality': 'Осветление',
     'options.materialQuality': 'Материали',
     'options.materialDetail': 'Детайл',

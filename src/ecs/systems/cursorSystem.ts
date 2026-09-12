@@ -4,12 +4,10 @@ import {
   Ray,
   Vector3,
 } from '../../libs/babylon/exports';
-import { ENUM_WORLD } from '../../common';
-import { MODEL_POSE_BOX } from '../../common/objects/enum';
 import { TWFlags } from '../../common/terrain/consts';
 import { isFlagInBinaryMask } from '../../common/utils';
 import { aimX, aimY } from '../../camera';
-import { findRestObject } from '../../libs/mu/restObjects';
+import { LEAN_CURSOR_OBJECTS, findRestObject } from '../../libs/mu/restObjects';
 import { Store } from '../../store';
 import type { CursorHover } from '../../ui/components/gameCursor/cursors';
 import type { Entity, ISystemFactory, World } from '../world';
@@ -17,12 +15,6 @@ import { isAttackableEntity, isNpcOrTrapType } from './attackSystem';
 
 const SAMPLE_INTERVAL = 0.05;
 
-const LEAN_CURSOR_OBJECTS: Partial<Record<ENUM_WORLD, ReadonlySet<number>>> = {
-  [ENUM_WORLD.WD_0LORENCIA]: new Set([MODEL_POSE_BOX]),
-  [ENUM_WORLD.WD_1DUNGEON]: new Set([60]),
-  [ENUM_WORLD.WD_2DEVIAS]: new Set([91]),
-  [ENUM_WORLD.WD_3NORIA]: new Set([38]),
-};
 
 function isNpcEntity(e: Entity): boolean {
   const type = e.npcType;

@@ -275,11 +275,20 @@ const CSM_CASTER_RANGE_SQ = (CSM_MAX_Z + CSM_CASTER_SLACK) ** 2;
 const CLUTTER_HEIGHT = 1;
 
 function isGroundClutter(mesh: AbstractMesh): boolean {
-  const box = mesh.getBoundingInfo().boundingBox;
+  // A prop batch's box is the union of every placement in its chunk; the
+  // type's own height rides in its metadata (common/propBatches.ts).
+  const own = mesh.metadata?.casterHeight;
 
-  return (
-    box.maximumWorld.y - box.minimumWorld.y < (minCasterDev ?? CLUTTER_HEIGHT)
-  );
+  let height: number;
+
+  if (typeof own === 'number') {
+    height = own;
+  } else {
+    const box = mesh.getBoundingInfo().boundingBox;
+    height = box.maximumWorld.y - box.minimumWorld.y;
+  }
+
+  return height < (minCasterDev ?? CLUTTER_HEIGHT);
 }
 
 function castsSunShadow(mesh: AbstractMesh): boolean {

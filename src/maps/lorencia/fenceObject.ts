@@ -4,6 +4,8 @@ import {
 } from '../../common/objects/enum';
 
 export class FenceObject extends ModelObject {
+  static Batchable = true;
+
   async init() {
     // this.LightEnabled = true;
 

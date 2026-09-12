@@ -40,6 +40,20 @@ export type RoomHooks = {
  * on it - walked in, warped in, stepped in across a corner - is in the room
  * and a step into the doorway is out.
  */
+/** Roof and wall types of every room registered on a map. */
+const structureTypes = new Map<ENUM_WORLD, Set<number>>();
+
+const NO_TYPES: ReadonlySet<number> = new Set();
+
+/**
+ * The object types a map's rooms are built from: the pieces the map lifts
+ * out of the way (`transform.posOffset`) or the ceiling fade thins. They
+ * keep a model of their own, so the prop batches leave them alone.
+ */
+export function roomStructureTypes(map: ENUM_WORLD): ReadonlySet<number> {
+  return structureTypes.get(map) ?? NO_TYPES;
+}
+
 export function registerRooms(
   world: World,
   rooms: readonly RoomFrame[],
@@ -47,6 +61,11 @@ export function registerRooms(
   hooksFor: (room: RoomFrame) => RoomHooks
 ): void {
   const map = world.mapIndex;
+
+  const structure = structureTypes.get(map) ?? new Set<number>();
+  for (const type of spec.roofTypes) structure.add(type);
+  for (const type of spec.wallTypes) structure.add(type);
+  structureTypes.set(map, structure);
 
   for (const room of rooms) {
     const hooks = hooksFor(room);

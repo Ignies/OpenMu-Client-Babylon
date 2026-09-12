@@ -180,6 +180,7 @@ export const frenchLayer: LanguageLayer = {
     'options.grassDensity': 'Herbe',
     'options.advancedEffects': 'Effets avancés',
     'options.renderDistance': 'Distance d’affichage',
+    'options.propBatching': 'Regroupement du décor',
     'options.lightingQuality': 'Éclairage',
     'options.materialQuality': 'Matériaux',
     'options.materialDetail': 'Détail',

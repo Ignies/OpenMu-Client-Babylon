@@ -17,6 +17,12 @@ import { assetWorldNum } from '../../common/worldAssets';
 import { Vector3 } from '../babylon/exports';
 import { toRadians } from '../../common/utils';
 import { MapTileObject } from '../../common/mapTileObject';
+import {
+  addPropToBatch,
+  disposePropBatches,
+  propBatchExclusion,
+  propBatchingActive,
+} from '../../common/propBatches';
 import { IVector3Like } from '../babylon/exports';
 import { EventBus } from '../eventBus';
 import { DISABLE_OBJECTS_LOADING } from '../../consts';
@@ -52,6 +58,17 @@ let sceneMap = ENUM_WORLD.WD_55LOGINSCENE;
  */
 let loadQueue: Promise<void> = Promise.resolve();
 
+/** The records of the map on screen, kept for `reloadMapObjects`. */
+let sceneObjects: MapObjectRecord[] = [];
+let sceneWorld: World | null = null;
+
+type MapObjectRecord = {
+  id: number;
+  pos: IVector3Like;
+  rot: IVector3Like;
+  scale: number;
+};
+
 /**
  * The map's own setup: the look director takes the map (its profile, and
  * with it the clear colour - `SetWorldClearColor` bytes on Classic,
@@ -68,10 +85,9 @@ async function loadWorld(world: World) {
   await maps.create(world);
 }
 
-function createObjects(
-  world: World,
-  objs: { id: number; pos: IVector3Like; rot: IVector3Like; scale: number }[]
-) {
+function createObjects(world: World, objs: MapObjectRecord[]) {
+  const batching = propBatchingActive();
+
   for (const data of objs) {
     // CreateObject (ZzzObject.cpp:4433-4435) discards records outside the
     // 16×16 block grid (1600 MU units per block).
@@ -99,6 +115,26 @@ function createObjects(
       data.pos.y / world.terrainScale
     );
 
+    const modelFactory = world.terrain!.MapTileObjects[data.id] || MapTileObject;
+
+    // Scenery the batches can draw gets no model factory and no visibility
+    // radius: the per-object systems never see it (common/propBatches.ts).
+    if (batching && propBatchExclusion(world, data.id, modelFactory) === null) {
+      const entity = world.add({
+        worldIndex: world.mapIndex,
+        transform: {
+          pos,
+          rot: angles,
+          scale: data.scale,
+        },
+        modelId: data.id,
+        propBatch: { type: data.id, chunk: 0 },
+      });
+
+      addPropToBatch(world, entity, modelFactory);
+      continue;
+    }
+
     world.add({
       worldIndex: world.mapIndex,
       transform: {
@@ -107,7 +143,7 @@ function createObjects(
         scale: data.scale,
       },
       modelId: data.id,
-      modelFactory: world.terrain!.MapTileObjects[data.id] || MapTileObject,
+      modelFactory,
       visibility: {
         state: 'hidden',
         // Spread over the first 0.2 s so the 9 000 distance checks — and the
@@ -133,6 +169,10 @@ function unloadMap(world: World, oldMap: ENUM_WORLD, newMap: ENUM_WORLD) {
       e.modelObject?.dispose();
     }
   }
+
+  // Before the prototypes' folder is evicted below: the chunks share their
+  // geometry.
+  disposePropBatches();
 
   if (world.terrain) {
     // Before the ground it stands on: the field holds the tile array the old
@@ -171,6 +211,31 @@ function failWarp(
   setShadowWorld(oldMap);
   Store.setSceneLoading(false);
   EventBus.emit('warpFailed', { map, error });
+}
+
+/**
+ * Rebuild the map's objects in place - every record back through
+ * `createObjects` under the current options. The scenery batching toggle
+ * changes which path a record takes, and that is decided at creation.
+ */
+export function reloadMapObjects(): Promise<void> {
+  loadQueue = loadQueue.then(() => {
+    const world = sceneWorld;
+    if (!world || !world.terrain || world.mapIndex !== sceneMap) return;
+
+    // A copy: `world.remove` mutates the live query while it is iterated.
+    for (const e of [...world.with('modelId', 'worldIndex')]) {
+      if (e.worldIndex !== sceneMap) continue;
+      world.remove(e);
+      e.modelObject?.dispose();
+    }
+
+    disposePropBatches();
+
+    createObjects(world, sceneObjects);
+  });
+
+  return loadQueue;
 }
 
 export function loadMapIntoScene(
@@ -328,7 +393,10 @@ async function runLoad(
 
     applyMapObjectFixups(map, filteredObjects);
 
-    !DISABLE_OBJECTS_LOADING && createObjects(world, filteredObjects);
+    sceneObjects = filteredObjects;
+    sceneWorld = world;
+
+    if (!DISABLE_OBJECTS_LOADING) createObjects(world, filteredObjects);
   }
 
   sceneMap = map;

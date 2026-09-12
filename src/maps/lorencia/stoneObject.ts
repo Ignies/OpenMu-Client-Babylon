@@ -2,6 +2,8 @@ import { ModelObject } from '../../common/modelObject';
 import { MODEL_STONE01 } from '../../common/objects/enum';
 
 export class StoneObject extends ModelObject {
+  static Batchable = true;
+
   async init() {
     // LightEnabled = true;
 

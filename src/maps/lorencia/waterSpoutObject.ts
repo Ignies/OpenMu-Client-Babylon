@@ -4,6 +4,8 @@ import { BlendState } from '../../common/objects/enum';
 import type { World } from '../../ecs/world';
 
 export class WaterSpoutObject extends ModelObject {
+  static Batchable = true;
+
   async init(world: World) {
     // LightEnabled = true;
 

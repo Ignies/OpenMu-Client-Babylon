@@ -180,6 +180,7 @@ export const koreanLayer: LanguageLayer = {
     'options.grassDensity': '풀',
     'options.advancedEffects': '고급 효과',
     'options.renderDistance': '렌더링 거리',
+    'options.propBatching': '배경 일괄 렌더링',
     'options.lightingQuality': '조명',
     'options.materialQuality': '재질',
     'options.materialDetail': '디테일',

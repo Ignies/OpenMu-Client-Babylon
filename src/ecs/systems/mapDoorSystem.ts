@@ -60,6 +60,11 @@ function turnAngle2(current: number, target: number, maxDelta: number): number {
   return normalizeDegrees(current + delta);
 }
 
+/** Whether the map animates this object type as a door. */
+export function isMapDoorType(map: ENUM_WORLD, type: number): boolean {
+  return DOORS[map]?.[type] !== undefined;
+}
+
 export const MapDoorSystem: ISystemFactory = world => {
   const query = world.with('modelId', 'worldIndex', 'transform');
   const states = new WeakMap<Entity, DoorState>();

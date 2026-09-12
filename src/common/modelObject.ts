@@ -183,17 +183,20 @@ function extendBySkinnedBounds(
  * space (per-bone bounds × current bone matrices, no CPU re-skinning).
  * Returns false when the mesh has no usable skin data.
  */
-function extendByPosedLocalBounds(
+export function extendByPosedLocalBounds(
   mesh: AbstractMesh,
   min: Vector3,
-  max: Vector3
+  max: Vector3,
+  forcePrepare = false
 ): boolean {
   const skeleton = mesh.skeleton;
   if (!skeleton) return false;
 
   const boneCount = skeleton.bones.length;
   const bounds = boneLocalBounds(mesh, boneCount);
-  skeleton.prepare();
+  // `prepare()` runs once per render id; a caller sampling several poses
+  // inside one frame (propBatches) has to force it.
+  skeleton.prepare(forcePrepare);
   const matrices = skeleton.getTransformMatrices(mesh);
   if (!bounds || !matrices || matrices.length < boneCount * 16) return false;
 
@@ -332,6 +335,14 @@ export type BodyShine = {
 
 export class ModelObject {
   static OverrideScale = -1;
+
+  /**
+   * The class does nothing per object that a prop batch cannot reproduce
+   * (`common/propBatches.ts`): it picks a file and material tweaks in
+   * `init()` and nothing else. Off for everything that animates, lights,
+   * hides or moves its own body.
+   */
+  static Batchable = false;
 
   Type: number = -1;
 
