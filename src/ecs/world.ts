@@ -147,6 +147,14 @@ export type Entity = Partial<{
      * it. At 40 the run clips take over. See common/locomotion.ts.
      */
     run: number;
+    /**
+     * `c->SwordCount` (ZzzCharacter.cpp:1129): swings this character has
+     * thrown. `SetPlayerAttack` cycles the repeated clips on it - three
+     * two-hand swings, three scythe swings, the four-clip dual-wield round -
+     * so it has to live on the character, not on the system that reads it.
+     * Absent until the first swing.
+     */
+    swordCount?: number;
   };
   monsterAnimation: {
     action: MonsterActionType;

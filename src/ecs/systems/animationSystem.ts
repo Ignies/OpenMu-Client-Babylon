@@ -15,7 +15,10 @@ import {
   type CharacterPose,
   type Hands,
 } from '../../common/weaponClass';
-import { applyWeaponAttachments } from '../../common/weaponAttachment';
+import {
+  applyWeaponAttachments,
+  applyWeaponPoses,
+} from '../../common/weaponAttachment';
 import { TWFlags } from '../../common/terrain/consts';
 import { isFlagInBinaryMask } from '../../common/utils';
 import {
@@ -389,6 +392,18 @@ export const AnimationSystem: ISystemFactory = world => {
         const oneShot =
           isOneShotPlayerAction(action) || action === PlayerAction.PLAYER_DIE1;
         playerObject.playAction(action, !oneShot);
+
+        // RenderCharacterItem rewrites the weapons' own clip every frame off
+        // the character's: a bow only draws while the shot plays.
+        if (playerObject.Weapon1) {
+          applyWeaponPoses(
+            playerObject,
+            entity.charAppearance,
+            attrs?.isAboveZero('weaponsOnBack') ?? false,
+            action,
+            playerObject.AnimationSpeed
+          );
+        }
 
         const wings = playerObject.Wings;
         if (wings?.Ready) {

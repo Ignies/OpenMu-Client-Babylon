@@ -2,6 +2,7 @@ import type { Item } from '../ecs/world';
 import { BaseClass } from './characterStats';
 import { ItemsDatabase } from './itemsDatabase';
 import { PlayerAction } from './objects/enum';
+import type { MountKind } from './pets';
 
 /**
  * Weapon-class rules transcribed from the original client
@@ -435,4 +436,193 @@ export function chooseFenrirRunAction(pose: CharacterPose): PlayerAction {
     PlayerAction.PLAYER_FENRIR_RUN_MAGOM,
     PlayerAction.PLAYER_RAGE_FENRIR_RUN
   );
+}
+
+// ---- attack clips ----------------------------------------------------------
+// `SetPlayerAttack` (ZzzCharacter.cpp:988-1130) and `SetPlayerHighBowAttack`
+// (:949-985). Four families in the order the original tries them - Fenrir,
+// Dark Horse, the two horns, then the ground switch - and the repeated clips
+// cycle on `c->SwordCount` rather than alternating.
+
+/** MODEL_DOUBLE_POLEAXE = MODEL_SPEAR + 5: the mounts split the group here. */
+const DOUBLE_POLEAXE = 5;
+
+/**
+ * Everything `SetPlayerAttack` reads off the character that the weapon slots
+ * do not already say.
+ */
+export type AttackPose = {
+  hands: Hands | undefined;
+  baseClass: BaseClass;
+  /** `c->SwordCount`: swings so far. Cycles the repeated clips. */
+  swordCount: number;
+  /** `c->Wing.Type != -1`: the archer's swing has an airborne variant. */
+  wings?: boolean;
+  /** `c->Helper.Type`, already collapsed to `null` in a safe zone. */
+  mount?: MountKind | null;
+};
+
+function rnd(n: number): number {
+  return Math.floor(Math.random() * n);
+}
+
+/**
+ * The swing's bow lookup. `GetEquipedBowType` reads one fixed slot per type,
+ * but `chooseIdleAction` takes a launcher from either hand - so must this
+ * one, or a character standing in the bow pose would swing with his fists.
+ */
+function attackBowType(hands: Hands | undefined): 'bow' | 'crossbow' | null {
+  if (!hands) return null;
+  const launcher = equippedBow(hands);
+  if (!launcher) return null;
+  return isCrossbow(launcher) ? 'crossbow' : 'bow';
+}
+
+/** `SwordCount % 4` for a pair of one-handers (:1078-1086). */
+const DUAL_WIELD_CYCLE = [
+  PlayerAction.PLAYER_ATTACK_SWORD_RIGHT1,
+  PlayerAction.PLAYER_ATTACK_SWORD_LEFT1,
+  PlayerAction.PLAYER_ATTACK_SWORD_RIGHT2,
+  PlayerAction.PLAYER_ATTACK_SWORD_LEFT2,
+] as const;
+
+/** `Type >= MODEL_SWORD && Type < MODEL_MACE + MAX_ITEM_INDEX`: groups 0-2. */
+function isMelee(item: Item | null): boolean {
+  return !!item && item.group <= GROUP_MACE;
+}
+
+/** `SetPlayerAttack`'s Fenrir branch (:995-1024). */
+function fenrirAttack(pose: AttackPose, main: Item | null, off: Item | null): PlayerAction {
+  // The Dark Lord's sword swing wins over every other Fenrir clip: the
+  // original assigns it last, outside the ladder (:1021-1024).
+  if (pose.baseClass === BaseClass.DarkLord) {
+    return PlayerAction.PLAYER_FENRIR_ATTACK_DARKLORD_SWORD;
+  }
+  if (main && main.group === GROUP_SPEAR && main.num < DOUBLE_POLEAXE) {
+    return PlayerAction.PLAYER_FENRIR_ATTACK_SPEAR;
+  }
+  const bow = attackBowType(pose.hands);
+  if (bow === 'bow') return PlayerAction.PLAYER_FENRIR_ATTACK_BOW;
+  if (bow === 'crossbow') return PlayerAction.PLAYER_FENRIR_ATTACK_CROSSBOW;
+
+  if (main && off) return PlayerAction.PLAYER_FENRIR_ATTACK_TWO_SWORD;
+  if (main) return PlayerAction.PLAYER_FENRIR_ATTACK_ONE_SWORD;
+  if (off) {
+    return pose.baseClass === BaseClass.RageFighter
+      ? PlayerAction.PLAYER_RAGE_FENRIR_ATTACK_RIGHT
+      : PlayerAction.PLAYER_FENRIR_ATTACK_ONE_SWORD;
+  }
+  return PlayerAction.PLAYER_FENRIR_ATTACK;
+}
+
+/** Horn of Uniria / Dinorant (:1030-1067). */
+function hornAttack(pose: AttackPose, main: Item | null): PlayerAction {
+  if (main && main.group === GROUP_SPEAR) {
+    return main.num < DOUBLE_POLEAXE
+      ? PlayerAction.PLAYER_ATTACK_RIDE_SPEAR
+      : PlayerAction.PLAYER_ATTACK_RIDE_SCYTHE;
+  }
+  const bow = attackBowType(pose.hands);
+  if (bow === 'bow') return PlayerAction.PLAYER_ATTACK_RIDE_BOW;
+  if (bow === 'crossbow') return PlayerAction.PLAYER_ATTACK_RIDE_CROSSBOW;
+
+  const rage = pose.baseClass === BaseClass.RageFighter;
+  if (!main) {
+    return rage ? PlayerAction.PLAYER_RAGE_UNI_ATTACK : PlayerAction.PLAYER_ATTACK_RIDE_SWORD;
+  }
+  if (!isTwoHanded(main)) {
+    return rage ? PlayerAction.PLAYER_RAGE_UNI_ATTACK : PlayerAction.PLAYER_ATTACK_RIDE_SWORD;
+  }
+  return rage
+    ? PlayerAction.PLAYER_RAGE_UNI_ATTACK_ONE_RIGHT
+    : PlayerAction.PLAYER_ATTACK_RIDE_TWO_HAND_SWORD;
+}
+
+/** The on-foot weapon switch (:1069-1129). */
+function groundAttack(pose: AttackPose, main: Item | null, off: Item | null): PlayerAction {
+  if (!main && !off) return PlayerAction.PLAYER_ATTACK_FIST;
+  const n = pose.swordCount;
+
+  if (main && isMelee(main)) {
+    if (!isTwoHanded(main)) {
+      // A one-hander in each hand runs the four-clip cycle; alone, the two
+      // right-hand swings alternate.
+      if (isMelee(off)) return DUAL_WIELD_CYCLE[n % 4];
+      return PlayerAction.PLAYER_ATTACK_SWORD_RIGHT1 + (n % 2);
+    }
+    if (main.group === GROUP_SWORD && TWO_HAND_SWORD_TWO_INDICES.has(main.num)) {
+      return PlayerAction.PLAYER_ATTACK_TWO_HAND_SWORD_TWO;
+    }
+    return PlayerAction.PLAYER_ATTACK_TWO_HAND_SWORD1 + (n % 3);
+  }
+
+  // Reached with the main hand empty or holding something that is not a
+  // sword/axe/mace: an off-hand blade swings on its own.
+  if (isMelee(off)) return PlayerAction.PLAYER_ATTACK_SWORD_LEFT1 + rnd(2);
+
+  if (main && main.group === GROUP_STAFF) {
+    return isTwoHanded(main)
+      ? PlayerAction.PLAYER_SKILL_WEAPON1 + rnd(2)
+      : PlayerAction.PLAYER_ATTACK_SWORD_RIGHT1 + rnd(2);
+  }
+
+  if (main && main.group === GROUP_SPEAR) {
+    return SPEAR_POSE_INDICES.has(main.num)
+      ? PlayerAction.PLAYER_ATTACK_SPEAR1
+      : PlayerAction.PLAYER_ATTACK_SCYTHE1 + (n % 3);
+  }
+
+  const bow = attackBowType(pose.hands);
+  if (bow === 'bow') {
+    return pose.wings ? PlayerAction.PLAYER_ATTACK_FLY_BOW : PlayerAction.PLAYER_ATTACK_BOW;
+  }
+  if (bow === 'crossbow') {
+    return pose.wings
+      ? PlayerAction.PLAYER_ATTACK_FLY_CROSSBOW
+      : PlayerAction.PLAYER_ATTACK_CROSSBOW;
+  }
+
+  return PlayerAction.PLAYER_ATTACK_FIST;
+}
+
+/** `SetPlayerAttack`: the clip one basic swing plays. */
+export function chooseAttackAction(pose: AttackPose): PlayerAction {
+  const hands = pose.hands;
+  const main = hands && isWeaponItem(hands.leftHand) ? hands.leftHand : null;
+  const off = hands && isWeaponItem(hands.rightHand) ? hands.rightHand : null;
+
+  switch (pose.mount) {
+    case 'fenrir':
+      return fenrirAttack(pose, main, off);
+    case 'horse':
+      return PlayerAction.PLAYER_ATTACK_RIDE_HORSE_SWORD;
+    case 'uniria':
+    case 'dinorant':
+      return hornAttack(pose, main);
+    default:
+      return groundAttack(pose, main, off);
+  }
+}
+
+/**
+ * `SetPlayerHighBowAttack`: the aimed-up shot, which only Starfall uses. A
+ * crossbow has its own clip, wings and the horns each swap the pair again,
+ * and the Fenrir has none - a rider shoots with the ground clip.
+ */
+export function chooseHighBowAttackAction(pose: AttackPose): PlayerAction {
+  const crossbow = attackBowType(pose.hands) === 'crossbow';
+
+  if (pose.mount === 'uniria' || pose.mount === 'dinorant') {
+    return crossbow
+      ? PlayerAction.PLAYER_ATTACK_RIDE_CROSSBOW_UP
+      : PlayerAction.PLAYER_ATTACK_RIDE_BOW_UP;
+  }
+  if (pose.wings) {
+    return crossbow
+      ? PlayerAction.PLAYER_ATTACK_FLY_CROSSBOW_UP
+      : PlayerAction.PLAYER_ATTACK_FLY_BOW_UP;
+  }
+  return crossbow
+    ? PlayerAction.PLAYER_ATTACK_CROSSBOW_UP
+    : PlayerAction.PLAYER_ATTACK_BOW_UP;
 }

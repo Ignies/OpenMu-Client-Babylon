@@ -240,10 +240,11 @@ import {
 } from './common/emojiBubbles';
 import { startEmojiBubble } from './ecs/systems/emojiBubbleSystem';
 import {
-  chooseAttackAction,
   resolveGenderedAction,
   ServerToClientActionMap,
 } from './common/playerActionMapper';
+import { chooseAttackAction, type AttackPose } from './common/weaponClass';
+import { isWingItem } from './common/wings';
 import { PlayerObject, npcClassOf } from './common/playerObject';
 import { Entity, type Item, World } from './ecs/world';
 import { createAttributeSystem } from './libs/attributeSystem';
@@ -2014,6 +2015,23 @@ function isDeadMonster(obj: Entity): boolean {
   return !!obj.dying || obj.monsterAnimation?.action === MonsterActionType.Die;
 }
 
+/**
+ * What `SetPlayerAttack` reads off a character in scope. The hero builds the
+ * same thing in AttackSystem; everyone else gets it here, so the swing a
+ * player sees on his own screen is the swing his neighbours see.
+ */
+function attackPoseOf(obj: Entity): AttackPose {
+  const hands = obj.charAppearance;
+  const inSafeZone = !!obj.attributeSystem?.isAboveZero('inSafeZone');
+  return {
+    hands,
+    baseClass: getBaseClass(hands?.charClass ?? Store.playerData.charClass),
+    swordCount: obj.playerAnimation?.swordCount ?? 0,
+    wings: isWingItem(hands?.wings),
+    mount: mountKind(hands?.pet, inSafeZone),
+  };
+}
+
 function markKilled(
   world: World,
   obj: Entity,
@@ -2113,10 +2131,8 @@ EventBus.on('ObjectAnimation', packet => {
       clientActionToPlay === ServerPlayerActionType.Attack1 ||
       clientActionToPlay === ServerPlayerActionType.Attack2
     ) {
-      action = chooseAttackAction(
-        obj.charAppearance,
-        clientActionToPlay === ServerPlayerActionType.Attack2
-      );
+      action = chooseAttackAction(attackPoseOf(obj));
+      obj.playerAnimation.swordCount = (obj.playerAnimation.swordCount ?? 0) + 1;
       // CreateArrows(): a bow in scope lets go at its clip's hit key. The
       // hero's own shot is fired by AttackSystem, off the swing it latched.
       const shotAt = world.getByNetId(p.TargetId & 0x7fff);
@@ -2205,8 +2221,10 @@ function playCastAnimation(caster: Entity, skill: number) {
       alternate: Math.random() < 0.5,
     };
     const action = def
-      ? chooseSkillAction(def, caster.charAppearance, ctx)
+      ? chooseSkillAction(def, attackPoseOf(caster), ctx)
       : PlayerAction.PLAYER_SKILL_HAND1;
+    caster.playerAnimation.swordCount =
+      (caster.playerAnimation.swordCount ?? 0) + 1;
     if (caster.playerAnimation.action === action) caster.modelObject?.restartAction();
     caster.playerAnimation.action = action;
     if (caster.pathfinding) caster.pathfinding.path = null;

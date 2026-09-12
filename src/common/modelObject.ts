@@ -561,30 +561,48 @@ export class ModelObject {
   }
 
   /**
-   * Stowed-part animation override (`RenderCharacterBackItem`,
-   * ZzzCharacter.cpp:15044-15065): a back-bound item holds frame 0 of clip 0
-   * with PlaySpeed 0 instead of running the auto-started idle clip; the
-   * Stinger Bow loops clip 2 at 0.25 instead. `null` = in hand, the
-   * auto-started loop runs. Kept as state (not applied fire-and-forget) so a
-   * part whose GLB is still streaming picks it up in `load()`.
+   * Per-part animation override, the `w->CurrentAction` / `w->PlaySpeed` the
+   * original writes on every weapon and back item each frame
+   * (`RenderCharacterItem` ZzzCharacter.cpp:9881-9955,
+   * `RenderCharacterBackItem` :15044-15065). Speed 0 holds the clip's first
+   * frame, which is what most parts do - stowed on the back, and in the hand
+   * too. `null` = no override, the auto-started clip-0 loop runs. Kept as
+   * state (not applied fire-and-forget) so a part whose GLB is still
+   * streaming picks it up in `load()`.
    */
-  BackPose: { action: number; speed: number } | null = null;
+  PartPose: { action: number; speed: number } | null = null;
 
-  /** True while the animation groups actually hold a stowed pose. */
-  private _backPoseActive = false;
+  /** True while the animation groups actually hold an override. */
+  private _partPoseActive = false;
 
-  /** Pushes `BackPose` into the animation groups; no-op before load(). */
-  applyBackPose() {
+  /** Sets `PartPose` and applies it, skipping an unchanged pose. */
+  setPartPose(pose: { action: number; speed: number } | null) {
+    const current = this.PartPose;
+    if (
+      current === pose ||
+      (current !== null &&
+        pose !== null &&
+        current.action === pose.action &&
+        current.speed === pose.speed)
+    ) {
+      return;
+    }
+    this.PartPose = pose;
+    this.applyPartPose();
+  }
+
+  /** Pushes `PartPose` into the animation groups; no-op before load(). */
+  applyPartPose() {
     const groups = this.gltf?.animationGroups;
     if (!groups?.length) return;
 
-    const pose = this.BackPose;
+    const pose = this.PartPose;
     if (!pose) {
-      // Back in the hands: resume the clip-0 loop loadGLTF auto-starts.
-      // Only ever undoes a stowed pose — load()-time calls on models that
-      // were never stowed must not touch their clips.
-      if (!this._backPoseActive) return;
-      this._backPoseActive = false;
+      // Override dropped: resume the clip-0 loop loadGLTF auto-starts. Only
+      // ever undoes a pose this object actually took — load()-time calls on
+      // models that never had one must not touch their clips.
+      if (!this._partPoseActive) return;
+      this._partPoseActive = false;
       for (const group of groups) {
         if (group.isStarted) group.stop(true);
       }
@@ -596,7 +614,7 @@ export class ModelObject {
       return;
     }
 
-    this._backPoseActive = true;
+    this._partPoseActive = true;
     for (const group of groups) {
       if (group.isStarted) group.stop(true);
     }
@@ -801,9 +819,9 @@ export class ModelObject {
 
     if (paused && !this.LoopAction) return;
 
-    // A frozen back item (BackPose, speed 0) and a drop are started-and-paused
-    // on purpose; coming back into view must not restart them.
-    if (!paused && (this.FrozenPose || this.BackPose?.speed === 0)) return;
+    // A part held at its first frame (PartPose, speed 0) and a drop are
+    // started-and-paused on purpose; coming back into view must not restart them.
+    if (!paused && (this.FrozenPose || this.PartPose?.speed === 0)) return;
 
     for (const group of groups) {
       if (!group.isStarted) continue;
@@ -985,7 +1003,7 @@ export class ModelObject {
 
     // A part loaded while already stowed (spawn in a safe zone) freezes now;
     // the flag was set before its GLB arrived.
-    this.applyBackPose();
+    this.applyPartPose();
 
     this.applyFrozenPose();
 
