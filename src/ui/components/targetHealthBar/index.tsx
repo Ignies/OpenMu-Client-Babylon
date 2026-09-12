@@ -2,6 +2,7 @@ import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import { Store } from '../../../store';
+import { isNpcOrTrapType } from '../../../ecs/systems/attackSystem';
 
 const STEPS = 20;
 const BORDER_WIDTH = 2;
@@ -17,14 +18,18 @@ const FRAME_COLOUR = 'rgb(51, 0, 0)';
 const TRACK_COLOUR = 'rgb(50, 10, 0)';
 const FILL_COLOUR = 'rgb(250, 10, 0)';
 
-/** What the bar shows: the target's name and its health in whole steps. */
-type Target = { name: string; steps: number; alive: boolean };
+/**
+ * What the panel shows: the target's name, and its health in whole steps when
+ * anything knows it. `showBar` is the original's `HealthStatus > 0` - the name
+ * is unconditional, the bar is not (NewUINameWindow.cpp:138-144).
+ */
+type Target = { name: string; steps: number; showBar: boolean };
 
 /**
  * Reads the current target into the scratch record without allocating.
  * Returns `false` when there is nothing to show.
  */
-const scratch: Target = { name: '', steps: 0, alive: false };
+const scratch: Target = { name: '', steps: 0, showBar: false };
 
 function readTarget(out: Target): boolean {
   const world = Store.world;
@@ -32,21 +37,27 @@ function readTarget(out: Target): boolean {
 
   const entity = world.currentPointerTarget ?? world.attackTarget;
 
-  if (!entity || !entity.monsterAnimation || entity.localPlayer) return false;
+  if (!entity || entity.localPlayer) return false;
   if (entity.dying) return false; // SelectedCharacter is cleared once Dead > 0
 
+  // `Kind == KIND_MONSTER`: players and NPCs get the floating name balloon
+  // instead. The animation rig is deliberately not the test - the Skeleton
+  // line and the Doppelganger set are monsters drawn on the player rig, and
+  // asking for `monsterAnimation` left every one of them nameless.
+  const type = entity.npcType;
+  if (type === undefined || isNpcOrTrapType(type)) return false;
+
   const name = entity.objectNameInWorld;
+  if (!name) return false;
+
   const attributes = entity.attributeSystem;
-  if (!name || !attributes) return false;
-
-  const max = attributes.getValue('maxHealth');
-  if (!(max > 0)) return false;
-
-  const health = Math.min(1, Math.max(0, attributes.getValue('currentHealth') / max));
+  const max = attributes ? attributes.getValue('maxHealth') : 0;
+  const current = attributes ? attributes.getValue('currentHealth') : 0;
+  const health = max > 0 ? Math.min(1, Math.max(0, current / max)) : 0;
 
   out.name = name;
   out.steps = Math.trunc(health * STEPS);
-  out.alive = health > 0;
+  out.showBar = health > 0;
   return true;
 }
 
@@ -98,12 +109,12 @@ export const TargetHealthBar = observer(() => {
         shown &&
         shown.name === scratch.name &&
         shown.steps === scratch.steps &&
-        shown.alive === scratch.alive
+        shown.showBar === scratch.showBar
       ) {
         return;
       }
 
-      shown = { name: scratch.name, steps: scratch.steps, alive: scratch.alive };
+      shown = { name: scratch.name, steps: scratch.steps, showBar: scratch.showBar };
       setTarget(shown);
     };
 
@@ -120,7 +131,7 @@ export const TargetHealthBar = observer(() => {
         {target.name}
       </div>
 
-      {target.alive && (
+      {target.showBar && (
         <div className="target-bar" style={BAR_STYLE}>
           <div className="bar-shadow" />
           <div className="bar-frame" style={FRAME_STYLE} />

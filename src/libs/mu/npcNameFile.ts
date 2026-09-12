@@ -13,11 +13,13 @@
  * ```
  *
  * `//` lines are comments, the middle column is a flag the client does not
- * read here, and the name is quoted. The English file is the same data
- * `monsters.json` carries, so it is not loaded at all: this is an **overlay**
- * that only exists when the active language has a pack, and every lookup falls
- * back to the JSON table. That keeps `Name` the single source of truth for
- * everything the server keys on and makes the localisation additive.
+ * read here, and the name is quoted. Every language pack has one, English
+ * included: `Eng/NpcName_Eng.txt` is 532 rows covering types 0 to 585 and is
+ * this client version's own table, where `monsters.json` is an older
+ * version's - 220 types are missing from it entirely and 168 of the names it
+ * does have belong to other monsters ("King Orc" for type 84, which is the
+ * Chief Skeleton Warrior). So the file is the base table for every language
+ * and the JSON is only the fallback under it.
  *
  * Read through `monsterDisplayName()` in `common/monstersDatabase.ts`.
  */
@@ -57,14 +59,14 @@ function parse(text: string): Map<number, string> {
 }
 
 /**
- * Load the overlay for the active language. A no-op for a language with no
- * pack, and for English — `monsters.json` already holds those names.
+ * Load the table for the active language. A no-op only for a language with no
+ * pack at all, which falls back to `monsters.json`.
  */
 export function loadNpcNames(): Promise<void> {
   if (pending) return pending;
 
   const pack = i18n.dataPack;
-  if (!pack || pack.folder === 'Eng') {
+  if (!pack) {
     set(new Map());
     pending = Promise.resolve();
     return pending;
@@ -93,11 +95,23 @@ export function loadNpcNames(): Promise<void> {
 
 function set(map: ReadonlyMap<number, string>): void {
   runInAction(() => names.set(map));
+  for (const listener of listeners) listener();
 }
 
 /** The localised name for a type number, or undefined to use `monsters.json`. */
 export function localisedNpcName(type: number): string | undefined {
   return names.get().get(type);
+}
+
+const listeners = new Set<() => void>();
+
+/**
+ * Called every time the table changes: a pack finished loading, or the
+ * language changed and cleared it. Names already snapshotted onto entities
+ * (`objectNameInWorld`) have to be walked again on each of those.
+ */
+export function onNpcNamesChanged(listener: () => void): void {
+  listeners.add(listener);
 }
 
 onLanguageChanged(() => {
