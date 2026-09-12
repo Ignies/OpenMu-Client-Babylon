@@ -32,9 +32,13 @@ import type { EffectHandle, EffectLayer } from './layer';
 /** `Position[i] += (rand() % 20 - 10) * 4`: up to 40 cm off the point, each axis. */
 const JITTER_CM = 40;
 
-/** Life in ticks. The original's `30 + rand() % 20 - 10`, stretched for the fall. */
-const LIFE_TICKS_MIN = 40;
-const LIFE_TICKS_SPAN = 20;
+/**
+ * Life in ticks. The original's `30 + rand() % 20 - 10` is a hit's spray;
+ * a feather let go from a wing has two tiles to fall and a few to drift,
+ * so it lives seconds, not a second.
+ */
+const LIFE_TICKS_MIN = 110;
+const LIFE_TICKS_SPAN = 50;
 
 /** `Alpha = 0.6 + (rand() % 10) * 0.02`. */
 const ALPHA_MIN = 0.6;
@@ -44,16 +48,21 @@ const ALPHA_SPAN = 0.2;
 const TUMBLE_DEG_MAX = 5;
 
 /** How fast the feather ends up falling, tiles/s, and how quickly it gets there. */
-const FALL_TILES_PER_S = 0.55;
-const FALL_RAMP_S = 0.6;
+const FALL_TILES_PER_S = 0.32;
+const FALL_RAMP_S = 0.8;
 
 /** Sideways drift, tiles/s, along a random heading, with a slow sway across it. */
 const DRIFT_TILES_PER_S = 0.18;
 const SWAY_TILES = 0.12;
 const SWAY_RATE = 2.2;
 
-/** `Alpha *= 0.97` a tick; the model fades over this share of its life to match. */
-const FADE_TAIL = 0.7;
+/**
+ * The fade: in over the first share of life (a feather does not pop into
+ * being beside a wing), out over the last, where the original's
+ * `Alpha *= 0.97` a tick would have taken it.
+ */
+const FADE_IN = 0.12;
+const FADE_TAIL = 0.45;
 
 /** Piece scale: the Desair feather's 1.4, not the dark wings' 0.6 (a shed feather, seen whole). */
 const SCALE = 1.4;
@@ -67,6 +76,11 @@ export interface FeathersOptions {
   colour?: RGB;
   /** Extra scale on every feather (1 = the original). */
   scale?: number;
+  /**
+   * A heading the drift favours, tiles/s on the ground plane (the way the
+   * wings face, a breeze). Added to each feather's own random drift.
+   */
+  drift?: readonly [number, number];
 }
 
 type Feather = {
@@ -109,13 +123,14 @@ function spawn(scene: Scene, at: Vector3, opts: FeathersOptions): EffectHandle {
     );
     const heading = Math.random() * Math.PI * 2;
     const drift = DRIFT_TILES_PER_S * (0.5 + Math.random() * 0.5);
+    const bias = opts.drift ?? [0, 0];
     const lifeTicks = LIFE_TICKS_MIN + Math.random() * LIFE_TICKS_SPAN;
     const tumbleDeg = (Math.random() * 2 - 1) * TUMBLE_DEG_MAX;
 
     feathers.push({
       pos,
-      vx: Math.sin(heading) * drift,
-      vz: -Math.cos(heading) * drift,
+      vx: Math.sin(heading) * drift + bias[0],
+      vz: -Math.cos(heading) * drift + bias[1],
       swayX: Math.cos(heading) * SWAY_TILES,
       swayZ: Math.sin(heading) * SWAY_TILES,
       swayPhase: Math.random() * Math.PI * 2,
@@ -132,6 +147,7 @@ function spawn(scene: Scene, at: Vector3, opts: FeathersOptions): EffectHandle {
         yaw: Math.random() * Math.PI * 2,
         loop: false,
         alpha: ALPHA_MIN + Math.random() * ALPHA_SPAN,
+        fadeIn: FADE_IN,
         fadeTail: FADE_TAIL,
         follow: out => out.copyFrom(pos),
       }),
