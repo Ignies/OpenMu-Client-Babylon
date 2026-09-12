@@ -33,15 +33,19 @@ export const KANTURU3_EFFECT_ONLY_TYPES: readonly number[] = [
   1, 11, 32, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 57, 58, 70, 74,
 ];
 
-/** The steam and the sprays. */
+/**
+ * The steam and the sprays.
+ *
+ * **1**, **11**, **46**, **49** and **50** emit nothing: every one of those
+ * bodies is `if (o->HiddenMesh != -2) { ... }` followed by
+ * `o->HiddenMesh = -2` on the line after (:248-361), which is the clearest
+ * statement of the rule in the whole client - it runs once, ever. Ten to
+ * twenty `BITMAP_CLOUD` at 0.0-0.25 grey, gone in two ticks, is nothing to
+ * draw; a stream of white `cloud21` in its place is a steam room.
+ */
 export const KANTURU3_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
   {
-    1: [{ kinds: ['cloud21'], every: 8 }],
-    11: [{ kinds: ['cloud21'], every: 6 }],
     32: [{ kinds: ['waterfall5_9'], every: 3, scale: 0.5 }],
-    46: [{ kinds: ['cloud21'], every: 4 }],
-    49: [{ kinds: ['cloud21'], every: 8 }],
-    50: [{ kinds: ['cloud21'], every: 6 }],
     52: [{ kinds: ['wingFlareBlue'], every: 3 }],
     53: [{ kinds: ['smoke21'], every: 3 }],
   };

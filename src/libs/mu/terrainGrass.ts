@@ -27,6 +27,7 @@ import {
 } from '../../weather/grassBurn';
 import { lookDirector } from '../../lighting/director';
 import { devQueryNumber } from '../../common/devSeams';
+import { maps } from '../../maps';
 import { LUMA_GLSL } from '../../lighting/lightTint';
 import {
   TERRAIN_CSM_SAMPLERS,
@@ -962,6 +963,8 @@ export type GrassSource = {
   readonly alpha: Uint8Array;
   /** Terrain flags, for the `NoGround` test the mesh makes. */
   readonly attributes: Uint16Array;
+  /** The map's `AlphaTile*` slot (`MapLayer.cutoutTile`); null = none. */
+  readonly cutout: number | null;
   readonly height: Float32Array;
   readonly light: readonly IVector3Like[];
   /** Which layer-1 slots grow grass here, and the map's authored grass colour. */
@@ -1042,6 +1045,17 @@ export function createGrassField(
     // hanging in the air over Devias' precipices. Same flag, same index, same
     // answer as the mesh (customGroundMesh.ts:96).
     if (isFlagInBinaryMask(src.attributes[TERRAIN_INDEX(x, y)], TWFlags.NoGround)) {
+      return;
+    }
+
+    // The same question of the tile mapping. A map with an `AlphaTile*` slot
+    // has its ground cut out wherever layer 1 names that slot
+    // (`MapLayer.cutoutTile`), and the original grows grass there all the
+    // same: its grass pass reads `TerrainMappingLayer1` and never asks what
+    // the tile drew (ZzzLodTerrain.cpp:1611-1625). On Elbeland that is 298
+    // tiles of bridge span, and blades standing in the gap between the planks
+    // are the same mistake as blades over a precipice.
+    if (src.cutout !== null && src.layer1[TERRAIN_INDEX(x, y)] === src.cutout) {
       return;
     }
 
@@ -1489,7 +1503,7 @@ function build(entry: Installed): void {
 export function installGrassField(
   scene: Scene,
   map: ENUM_WORLD,
-  src: Omit<GrassSource, 'density' | 'blade'>
+  src: Omit<GrassSource, 'density' | 'blade' | 'cutout'>
 ): void {
   disposeGrassField();
 
@@ -1497,7 +1511,7 @@ export function installGrassField(
 
   installed = {
     scene,
-    src,
+    src: { ...src, cutout: maps.cutoutTileFor(map) },
     field: null,
     density: grassDensity(),
     blade: bladeKind(),

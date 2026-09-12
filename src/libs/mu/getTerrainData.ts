@@ -48,6 +48,7 @@ import { lightingTier } from '../../common/lightingQuality';
 import { World, type TerrainLayers } from '../../ecs/world';
 import { DEBUG_SHOW_TERRAIN_ATTRIBUTES } from '../../consts';
 import { assetWorldNum } from '../../common/worldAssets';
+import { maps } from '../../maps';
 
 const TERRAIN_AMBIENT = 0;
 
@@ -234,6 +235,10 @@ export async function getTerrainData(
       // Lorencia and Noria, settled snow on Devias. Empty everywhere else,
       // and the shader is then exactly what it always was.
       overlays: terrainOverlaysFor(map),
+      // The `AlphaTile*` slot, where this map has one: those tiles are a hole
+      // in the ground, not a texture. Null everywhere else, and the shader is
+      // then exactly what it always was.
+      cutout: maps.cutoutTileFor(map),
       // Animated water: Atlans' wave deformation and caustics flipbook.
       water: waterSpec
         ? createTerrainWaterRuntime(waterSpec, waterFrames)

@@ -49,17 +49,22 @@ export const KANTURU1_EFFECT_ONLY_TYPES: readonly number[] = [
  * The emitters. Bubbles have no kind in `effectParticles`; 97 uses the
  * generic rising `smoke0` at a low rate and the 5-of-10 duty cycle is
  * dropped — a single object at the far edge of the map.
+ *
+ * **62**, **107** and **108** emit nothing. Each body sits behind
+ * `if (pObject->HiddenMesh != -2)` (:164-172, :272-291) and the move hook
+ * sets that on all three every frame, so each fires once at most: 20
+ * `BITMAP_CLOUD` at `(0.04)`, `(0.06)` and `(0.2)` grey, which is near-black
+ * on an additive sprite and gone in two ticks besides (the SubType has no
+ * init, so `LifeTime` stays `CreateParticle`'s default 2). 148 emitters
+ * streaming white `cloud21` instead is a fog bank over the whole map.
  */
 export const KANTURU1_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
   {
     59: [{ kinds: ['smoke21'], every: 3 }],
-    62: [{ kinds: ['cloud21'], every: 8 }],
     81: [{ kinds: ['waterfall5_9'], every: 2 }],
     82: [{ kinds: ['waterfall5_9'], every: 1 }],
     83: [{ kinds: ['waterfall5_9'], every: 2 }],
     97: [{ kinds: ['smoke0'], every: 6, scale: 0.4 }],
-    107: [{ kinds: ['cloud21'], every: 8 }],
-    108: [{ kinds: ['cloud21'], every: 8 }],
   };
 
 /**

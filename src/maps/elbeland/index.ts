@@ -18,9 +18,10 @@ const WORLDS: readonly ENUM_WORLD[] = [
   ENUM_WORLD.WD_51ELBELAND,
 ];
 
-// Slot 2 is `AlphaTileGround01.Tga` in the original (MapManager.cpp:1371) and
-// World52 ships no TileGround01 at all; the loader reads OZJ only, so Ground02
-// stands in for the alpha tile.
+// Slot 2 is `AlphaTileGround01.Tga` in the original (MapManager.cpp:1371),
+// which is a blank TGA meaning "no ground here" - see `CUTOUT` below. World52
+// ships no TileGround01 at all, so Ground02 keeps the slot filled with
+// something the loader can read; nothing ever samples it.
 const TILES: readonly string[] = [
   'TileGrass01',
   'TileGrass02',
@@ -37,6 +38,13 @@ const TILES: readonly string[] = [
   'TileRock06',
   'TileRock07',
 ];
+
+// `RenderFace` (ZzzLodTerrain.cpp:1402-1412) puts slot 2 through
+// `EnableAlphaTest` here, and `World52/AlphaTileGround01.OZT` is zero in every
+// byte, so the 309 tiles that name it draw nothing at all. They are the narrow
+// spans: the terrain is cut out from under the bridges so the walkway reads as
+// a walkway over the drop.
+const CUTOUT = 2;
 
 // OpenMU's spawn gate (VersionSeasonSix/Gates.cs, the `isSpawnGate: true` row), centred.
 const SPAWN = { x: 61, y: 201 } as const;
@@ -57,6 +65,7 @@ export const elbelandLayer: MapLayer = {
   name: 'elbeland',
   worlds: WORLDS,
   tiles: TILES,
+  cutoutTile: CUTOUT,
   spawn: SPAWN,
   outdoor: OUTDOOR,
   clearColor: CLEAR_COLOR,

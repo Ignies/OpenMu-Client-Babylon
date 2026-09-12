@@ -38,17 +38,24 @@ export const AIDA_EFFECT_ONLY_TYPES: readonly number[] = [
 ];
 
 /**
- * The falls and the mist. `every` is the C++ `rand_fps_check` divisor where
- * one is given (:169, :180: 56/58 spawn one in two; 57 every tick; the cloud
- * types one in eight). `cloud21` is the same `BITMAP_CLOUD` texture.
+ * The falls. `every` is the C++ `rand_fps_check` divisor where one is given
+ * (:169, :180: 56 spawns one in two, 58 one in three, 57 every tick).
+ *
+ * **59**, **62** and **63** emit nothing. All three bodies are wrapped in
+ * `if (pObject->HiddenMesh != -2)` (:184-225) and `MoveAidaObject` (:76-84)
+ * sets exactly that on all three every frame, so each fires at most once -
+ * the first frame its block enters the frustum - and never again. What it
+ * fires is 20 `BITMAP_CLOUD` SubType 1 at light `(0.01, 0.03, 0.05)`,
+ * `(0.05, 0.05, 0.05)` and `(0.05, 0.02, 0.02)`: near-black on an additive
+ * sprite, and SubType 1 has no init and no move case, so they keep
+ * `CreateParticle`'s default `LifeTime = 2` (ZzzEffectParticle.cpp:74) and
+ * are gone in two ticks. A stream of white `cloud21` from 91 emitters
+ * instead buried the map in cloud.
  */
 export const AIDA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
   56: [{ kinds: ['waterfall5_9'], every: 2 }],
   57: [{ kinds: ['waterfall5_9'], every: 1 }],
-  58: [{ kinds: ['waterfall5_9'], every: 2 }],
-  59: [{ kinds: ['cloud21'], every: 8 }],
-  62: [{ kinds: ['cloud21'], every: 8 }],
-  63: [{ kinds: ['cloud21'], every: 8 }],
+  58: [{ kinds: ['waterfall5_9'], every: 3 }],
 };
 
 /**
