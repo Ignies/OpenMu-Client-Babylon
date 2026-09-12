@@ -28,7 +28,19 @@ const speedFor = (waypoint: CameraWaypoint) =>
 
 const TOUR_RADIUS_SCALE = 1.1;
 
+/** `SetCameraFOV` (CameraUtility.cpp:284): the login world in tour mode. */
 const TOUR_FOV = (65 * Math.PI) / 180;
+
+/** `MoveCamera` (LoginScene.cpp:256): the scene's own camera, the one the character line-up is shot with. */
+const CHARACTER_FOV = (45 * Math.PI) / 180;
+
+/**
+ * The pitch the backdrop is framed at - the scene camera's own, which is what
+ * the tour was drawn with before anything else had touched it. A constant
+ * because the game's camera must not reach back here: the pre-game screens
+ * have to look the same on the way out of a session as on the way in.
+ */
+const BACKDROP_BETA = Math.PI / 4.5;
 
 /**
  * Which pre-game screen the backdrop is standing behind, or null in the
@@ -203,12 +215,12 @@ export const LoginSceneSystem: ISystemFactory = world => {
         camera.setTarget(target);
         camera.fov = TOUR_FOV;
         camera.alpha = heading + Math.PI;
-        camera.beta = gameFraming.beta;
+        camera.beta = BACKDROP_BETA;
         camera.radius = radius;
         return;
       }
 
-      camera.fov = gameFraming.fov;
+      camera.fov = CHARACTER_FOV;
 
       camera.setTarget(characterCameraTarget());
       camera.setPosition(CHARACTER_CAMERA_POSITION);

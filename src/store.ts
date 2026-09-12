@@ -1191,6 +1191,9 @@ export const Store = new (class _Store {
 
   playOnline() {
     this.uiState = UIState.Servers;
+    // Also the landing for a connection lost mid-game, which never passes
+    // through `SessionExit`: the hero does not stay behind on the backdrop.
+    this.world?.removeHero();
 
     this.connectToConnectServer();
   }

@@ -425,6 +425,24 @@ export class World extends ECSWorld<Entity> {
     return this.#localPlayerQuery.entities[0];
   }
 
+  /**
+   * Takes the hero out of the world, which is what leaving a session does.
+   * The pre-game screens are not the world: their camera is the backdrop's,
+   * nowhere near the hero, and everything that culls against the hero
+   * (`CalculateVisibilitySystem`, the prop batches' ring) hides the scene the
+   * camera is actually looking at while a body is still standing on the map
+   * it was left on. The next entry spawns it again (`addCharacterToScope`).
+   */
+  removeHero(): void {
+    // A switch to another character leaves its own entity behind, so the
+    // loop: the getter hands back whichever one the query has first.
+    for (let hero = this.playerEntity; hero; hero = this.playerEntity) {
+      this.remove(hero);
+      hero.onDispose?.();
+      hero.modelObject?.dispose();
+    }
+  }
+
   #keyboardInputQuery = this.with('keyboardInput');
 
   get keyboardInput() {
