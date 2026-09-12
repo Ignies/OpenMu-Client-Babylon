@@ -44,6 +44,7 @@ import { BlendState } from './objects/enum';
 // Late-bound: a value import of `../store` closed an import cycle back to
 // the monster classes that extend this one (B14, see `storeRef.ts`).
 import { storeRef } from './storeRef';
+import { settleStillAnimations } from './staticClips';
 import { requestGlowProbe } from '../scenes/sceneLook';
 import type { MapObjectLights } from './mapObjectLights';
 
@@ -1025,7 +1026,7 @@ export class ModelObject {
 
     this.applyFrozenPose();
 
-    if (this.IsMapObject) this.stopStaticClips();
+    if (this.IsMapObject) this.settleStaticClips();
 
     this.Ready = true;
   }
@@ -1035,14 +1036,22 @@ export class ModelObject {
    * looping between identical keys: one Animatable per bone interpolating
    * nothing, on every prop of the map (Lorencia carried ~5 000). The pose
    * stays where the clip left the bone nodes; the loop goes.
+   *
+   * Inside a real clip, the bones keyed to one value all the way through go
+   * the same way (common/staticClips.ts): Noria's sway rigs move a few
+   * branch tips and key everything else still. Only the running clip is
+   * settled; a clip a class starts later is intact, and the settled one
+   * writes its pose back on every start.
    */
-  private stopStaticClips() {
+  private settleStaticClips() {
     const groups = this.gltf?.animationGroups;
     if (!groups) return;
 
     for (const group of groups) {
-      if (!group.isStarted || group.to > group.from) continue;
-      group.stop(true);
+      if (!group.isStarted) continue;
+
+      if (group.to > group.from) settleStillAnimations(group);
+      else group.stop(true);
     }
   }
 

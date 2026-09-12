@@ -2,9 +2,11 @@ import {
   GlowLayer,
   type AbstractMesh,
   type ArcRotateCamera,
+  type RenderTargetTexture,
   type Scene,
   type Texture,
 } from '../libs/babylon/exports';
+import { driveRenderList } from './renderList';
 import { GameOptions, onGameOptionsChanged } from '../common/gameOptions';
 import {
   itemHaloAt,
@@ -99,6 +101,7 @@ export function applySceneLook(
 
   const look = { glow };
 
+  driveGlowList(scene, glow);
   syncGlowIntensity(look);
   syncPbrDetail();
   installMaterialDebug(scene);
@@ -148,26 +151,61 @@ export function requestGlowProbe(): void {
   glowProbeTimer = 0;
 }
 
-function anyGlowSource(scene: Scene): boolean {
-  const improved = improvedItemEffectsOn();
+// The option reads behind the source test, refreshed once per frame: the
+// test runs per mesh per frame for the render list.
+let glowImproved = false;
+let glowPbr = false;
+
+function syncGlowSourceOptions(): void {
+  glowImproved = improvedItemEffectsOn();
   // The derivation only binds an emissive map when saturated highlights cover
   // enough of the texture, and most of the world's art clears that bar
-  // nowhere, so the probe asks the meshes instead of assuming.
-  const pbr = pbrMaterialsOn();
+  // nowhere, so the test asks the meshes instead of assuming.
+  glowPbr = pbrMaterialsOn();
+}
+
+/** What the layer has any colour for: its selectors paint the rest black. */
+function isGlowSource(mesh: AbstractMesh): boolean {
+  const meta = mesh.metadata;
+  if (!meta) return false;
+
+  if (meta.glowOwnMaterial) return true;
+
+  if (glowPbr && trimEmissive(mesh)) return true;
+
+  const tier = meta.itemTier as ItemVisualTier | null | undefined;
+
+  return glowImproved && tier?.improvedActive === true;
+}
+
+function anyGlowSource(scene: Scene): boolean {
+  syncGlowSourceOptions();
 
   for (const mesh of scene.meshes) {
-    const meta = mesh.metadata;
-    if (!meta) continue;
-
-    if (meta.glowOwnMaterial) return true;
-
-    if (pbr && trimEmissive(mesh)) return true;
-
-    const tier = meta.itemTier as ItemVisualTier | null | undefined;
-    if (improved && tier?.improvedActive) return true;
+    if (isGlowSource(mesh)) return true;
   }
 
   return false;
+}
+
+/**
+ * The layer's own render target has no list: it walks and draws every active
+ * mesh and lets the emissive selectors paint most of them black, a second
+ * full pass over the map (91 of ~700 draws at the Noria spawn). The list is
+ * driven by the source test the gate above uses, so the pass walks and draws
+ * the few meshes that glow. The layer rebuilds its target on a size change,
+ * so the per-frame update re-drives it whenever it is a new one.
+ */
+let drivenGlowTexture: RenderTargetTexture | null = null;
+
+function driveGlowList(scene: Scene, glow: GlowLayer): void {
+  const texture = (glow as unknown as { _mainTexture?: RenderTargetTexture })
+    ._mainTexture;
+
+  if (!texture || texture === drivenGlowTexture) return;
+
+  drivenGlowTexture = texture;
+  driveRenderList(scene, texture, isGlowSource);
 }
 
 /** Per frame: the glow layer's on/off gate. */
@@ -179,7 +217,11 @@ export function updateSceneLook(scene: Scene, look: SceneLook | undefined): void
   if (glowProbeTimer <= 0) {
     glowProbeTimer = GLOW_PROBE_INTERVAL;
     glowSourcesPresent = anyGlowSource(scene);
+  } else {
+    syncGlowSourceOptions();
   }
+
+  driveGlowList(scene, look.glow);
 
   const enabled = glowSourcesPresent && look.glow.intensity > 0;
 

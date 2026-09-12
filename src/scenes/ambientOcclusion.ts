@@ -238,7 +238,7 @@ function patchSsaoCombine(): void {
 
 /** The additive half of the frame - everything the G-buffer refuses. */
 function emits(mesh: AbstractMesh): boolean {
-  return mesh.metadata?.brightMesh === true;
+  return mesh.metadata?.brightMesh === true && mesh.isEnabled();
 }
 
 /**

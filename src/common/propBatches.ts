@@ -41,6 +41,8 @@ import { snowCapCover } from '../weather/snowCaps';
 import { weather } from '../weather';
 import { setSceneHold } from './sceneGate';
 import { devQuery } from './devSeams';
+import { CSM_CASTER_REACH } from '../scenes/shadows';
+import { renderDistanceRanges } from './renderDistance';
 import { ENUM_WORLD } from './types';
 import {
   batchExclusion,
@@ -69,11 +71,20 @@ import {
 
 const SCENE_HOLD = 'propBatches';
 
+/**
+ * Tiles of slack on the cell test. The frustum planes are the last frame's
+ * (the camera moves inside `scene.render`), so a cell entering the view is
+ * still off for one frame without it; a hero walks ~0.1 tiles a frame.
+ */
+const CELL_MARGIN = 4;
+
+/** `?cells=0`: every chunk mesh stays on, for the A/B. */
+const CELL_CULLING = devQuery('cells') !== '0';
+
 /** Clip samples the culling box is grown over, so a swaying crown stays inside it. */
 const POSE_SAMPLES = 4;
 
 /** Up to this many placements a type is one mesh for the whole map, unchunked. */
-const SINGLE_CHUNK_MAX = 64;
 
 /** How often a snow map re-reads the cover and the roof mask. */
 const SNOW_POLL_SECONDS = 0.5;
@@ -105,10 +116,34 @@ type Submesh = {
   readonly casts: boolean;
 };
 
+/**
+ * One 32-tile square of the map, holding every chunk mesh that stands in it
+ * whatever its type. Babylon visits every enabled mesh of the scene every
+ * frame to find the ones in view (`_evaluateActiveMeshes`), and a map's
+ * batches are ~900 meshes for the ~60 on screen: a cell outside the camera
+ * frustum and beyond the sun's caster reach is switched off as a whole, so
+ * the walk skips its meshes at the first check.
+ */
+type Cell = {
+  readonly meshes: Mesh[];
+  readonly shadows: Mesh[];
+  /** World bounding sphere of the meshes. */
+  readonly centre: Vector3;
+  radius: number;
+  /** World box of the meshes on the ground plane, for the ring test. */
+  minX: number;
+  maxX: number;
+  minZ: number;
+  maxZ: number;
+  enabled: boolean;
+};
+
 type Chunk = {
   readonly key: number;
   readonly placements: Placement[];
   readonly meshes: Mesh[];
+  /** The cell the chunk stands in; null until the cells are indexed. */
+  cell: Cell | null;
   readonly shadows: Mesh[];
   /** Which submesh each shadow mesh is the silhouette of. */
   readonly shadowSubmesh: number[];
@@ -129,6 +164,8 @@ type Chunk = {
 class PropType {
   prototype: ModelObject | null = null;
   state: 'pending' | 'built' | 'fallback' = 'pending';
+  /** No chunk of the type is in reach: its clip is paused. */
+  clipPaused = false;
   readonly placements: Placement[] = [];
   submeshes: Submesh[] = [];
   readonly chunks = new Map<number, Chunk>();
@@ -196,6 +233,9 @@ class PropBatches {
   readonly mask: boolean;
 
   private readonly tableVerdicts = new Map<number, string | null>();
+  private readonly cells = new Map<number, Cell>();
+  /** A chunk was built or disposed: the cells are re-indexed before use. */
+  private cellsDirty = false;
   private tier: LightingTier | null;
   private shadowSerial = -1;
   private snowTimer = 0;
@@ -386,13 +426,12 @@ class PropBatches {
       }
     }
 
-    // A sparse type is one mesh for the whole map: a dozen statues spread
-    // over twelve chunks would be twelve meshes to walk for twelve draws.
-    const single = pt.placements.length <= SINGLE_CHUNK_MAX;
-
+    // Every type is chunked per cell, a dozen statues over twelve cells
+    // included: the cell is what holds a chunk to the render-distance ring,
+    // and a mesh in a cell that is off costs the walk one check.
     const byChunk = new Map<number, Placement[]>();
     for (const p of pt.placements) {
-      const key = single ? 0 : p.chunk;
+      const key = p.chunk;
       let list = byChunk.get(key);
       if (!list) {
         list = [];
@@ -406,6 +445,7 @@ class PropBatches {
     }
 
     pt.state = 'built';
+    this.cellsDirty = true;
   }
 
   /**
@@ -609,6 +649,7 @@ class PropBatches {
       key,
       placements,
       meshes,
+      cell: null,
       shadows: shadowMeshes,
       shadowSubmesh,
       shadowLists: usedShadowLists,
@@ -765,10 +806,13 @@ class PropBatches {
       const on = blobShadowsActive();
       for (const pt of this.types.values()) {
         for (const chunk of pt.chunks.values()) {
-          for (const shadow of chunk.shadows) shadow.setEnabled(on);
+          const here = on && (chunk.cell?.enabled ?? true);
+          for (const shadow of chunk.shadows) shadow.setEnabled(here);
         }
       }
     }
+
+    if (CELL_CULLING) this.cullCells();
 
     // Classic: BodyLight carries the torch delta, which flickers. Only the
     // chunks a torch reaches are re-packed; tiers >= 1 read the bake alone.
@@ -830,6 +874,166 @@ class PropBatches {
       for (const shadow of chunk.shadows) shadow.dispose(false, false);
     }
     pt.chunks.clear();
+    this.cellsDirty = true;
+  }
+
+  // --- cells -----------------------------------------------------------------
+
+  /** The cells from the built chunks. */
+  private indexCells(): void {
+    this.cells.clear();
+    this.cellsDirty = false;
+
+    for (const pt of this.types.values()) {
+      if (pt.state !== 'built') continue;
+
+      for (const chunk of pt.chunks.values()) {
+        let cell = this.cells.get(chunk.key);
+
+        if (!cell) {
+          cell = {
+            meshes: [],
+            shadows: [],
+            centre: new Vector3(),
+            radius: 0,
+            minX: 0,
+            maxX: 0,
+            minZ: 0,
+            maxZ: 0,
+            enabled: true,
+          };
+          this.cells.set(chunk.key, cell);
+        }
+
+        chunk.cell = cell;
+        cell.meshes.push(...chunk.meshes);
+        cell.shadows.push(...chunk.shadows);
+      }
+    }
+
+    // The sphere of each cell: the box of its meshes' world spheres.
+    for (const cell of this.cells.values()) {
+      let minX = Infinity;
+      let minY = Infinity;
+      let minZ = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+      let maxZ = -Infinity;
+
+      for (const mesh of cell.meshes) {
+        const sphere = mesh.getBoundingInfo().boundingSphere;
+        const c = sphere.centerWorld;
+        const r = sphere.radiusWorld;
+        minX = Math.min(minX, c.x - r);
+        minY = Math.min(minY, c.y - r);
+        minZ = Math.min(minZ, c.z - r);
+        maxX = Math.max(maxX, c.x + r);
+        maxY = Math.max(maxY, c.y + r);
+        maxZ = Math.max(maxZ, c.z + r);
+      }
+
+      cell.centre.set((minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2);
+      cell.radius =
+        Math.sqrt((maxX - minX) ** 2 + (maxY - minY) ** 2 + (maxZ - minZ) ** 2) /
+        2;
+      cell.minX = minX;
+      cell.maxX = maxX;
+      cell.minZ = minZ;
+      cell.maxZ = maxZ;
+    }
+  }
+
+  /**
+   * A cell is on while it touches the render-distance ring around the hero
+   * - the radius the per-object path loads a map object inside, so the
+   * scenery ends where it always did rather than standing past the terrain's
+   * haze - and, inside the ring, while its sphere touches the camera frustum
+   * or stands within the sun's caster reach, the two reasons a mesh is drawn
+   * at all. The clip of a type with no chunk in an on cell is paused with
+   * them: nothing draws the skeleton it poses, and the sway resumes where it
+   * stopped when a chunk comes back.
+   */
+  private cullCells(): void {
+    const scene = this.world.scene;
+    const camera = scene.activeCamera;
+    const planes = scene.frustumPlanes;
+
+    if (!camera || !planes) return;
+    if (this.cellsDirty) this.indexCells();
+
+    const eye = camera.globalPosition;
+    const hero = this.world.playerEntity?.transform.pos ?? null;
+    const ring = renderDistanceRanges(GameOptions.renderDistance).nearby;
+    let changed = false;
+
+    for (const cell of this.cells.values()) {
+      const c = cell.centre;
+      const r = cell.radius + CELL_MARGIN;
+      let on = true;
+
+      if (hero) {
+        const gx = Math.max(cell.minX - hero.x, 0, hero.x - cell.maxX);
+        const gz = Math.max(cell.minZ - hero.z, 0, hero.z - cell.maxZ);
+        on = gx * gx + gz * gz <= ring * ring;
+      }
+
+      if (on) {
+        const dx = c.x - eye.x;
+        const dy = c.y - eye.y;
+        const dz = c.z - eye.z;
+        const reach = CSM_CASTER_REACH + r;
+
+        on = dx * dx + dy * dy + dz * dz <= reach * reach;
+
+        if (!on) {
+          on = true;
+          for (let i = 0; i < 6; i++) {
+            if (planes[i].dotCoordinate(c) <= -r) {
+              on = false;
+              break;
+            }
+          }
+        }
+      }
+
+      if (on === cell.enabled) continue;
+
+      cell.enabled = on;
+      changed = true;
+      for (const mesh of cell.meshes) mesh.setEnabled(on);
+
+      const blobs = on && blobShadowsActive();
+      for (const shadow of cell.shadows) shadow.setEnabled(blobs);
+    }
+
+    if (changed) this.syncTypeClips();
+  }
+
+  private syncTypeClips(): void {
+    for (const pt of this.types.values()) {
+      if (pt.state !== 'built') continue;
+
+      let inReach = false;
+      for (const chunk of pt.chunks.values()) {
+        if (chunk.cell === null || chunk.cell.enabled) {
+          inReach = true;
+          break;
+        }
+      }
+
+      if (inReach !== pt.clipPaused) continue;
+
+      pt.clipPaused = !inReach;
+
+      const groups = pt.prototype?.gltf?.animationGroups;
+      if (!groups) continue;
+
+      for (const group of groups) {
+        if (!group.isStarted) continue;
+        if (inReach) group.restart();
+        else group.pause();
+      }
+    }
   }
 
   /**
@@ -891,14 +1095,18 @@ class PropBatches {
   stats(): PropBatchStats {
     let types = 0;
     let meshes = 0;
+    let meshesOn = 0;
     let shadowMeshes = 0;
     let instances = 0;
+    let clipsPaused = 0;
 
     for (const pt of this.types.values()) {
       if (pt.state !== 'built') continue;
       types++;
+      if (pt.clipPaused) clipsPaused++;
       for (const chunk of pt.chunks.values()) {
         meshes += chunk.meshes.length;
+        if (chunk.cell?.enabled ?? true) meshesOn += chunk.meshes.length;
         shadowMeshes += chunk.shadows.length;
         instances += chunk.placements.length;
       }
@@ -907,8 +1115,10 @@ class PropBatches {
     return {
       types,
       meshes,
+      meshesOn,
       shadowMeshes,
       instances,
+      clipsPaused,
       pending: this.pendingCount(),
       excluded: this.excluded,
     };
@@ -932,8 +1142,12 @@ class PropBatches {
 export type PropBatchStats = {
   types: number;
   meshes: number;
+  /** Chunk meshes in a cell that is on this frame (plus the sparse ones). */
+  meshesOn: number;
   shadowMeshes: number;
   instances: number;
+  /** Types whose clip is paused: no chunk of theirs is in reach. */
+  clipsPaused: number;
   pending: number;
   excluded: ReadonlyMap<number, string>;
 };

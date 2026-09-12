@@ -555,6 +555,16 @@ function loadContainer(
         scene,
         characterAsset
       );
+
+      // The glTF loader starts the first clip on parse (`animationStartMode`
+      // FIRST) - on the container's own nodes, which never enter the scene.
+      // The clones do, and `loadGLTF` plays their clip; the source's
+      // Animatables would otherwise run for nothing, one set per cached
+      // model, for the whole session (Noria: 1 620 of 2 122 running).
+      for (const group of container.animationGroups) {
+        if (group.isStarted) group.stop(true);
+      }
+
       return container;
     })
     .catch(error => {
