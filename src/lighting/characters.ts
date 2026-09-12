@@ -51,6 +51,15 @@ const CARRIED_GLOW_PULSE = { speed: 0.002, amount: 0.3, base: 0.1 };
 /** `RenderLight`'s colour at full luminosity: `(L, 0.6L, 0.4L)` (:8250). */
 const CARRIED_GLOW_RGB = [1, 0.6, 0.4] as const;
 
+/**
+ * The colour of a hand that holds `BITMAP_LIGHTNING + 1`: `lightning2` is a
+ * cyan burst, and the card on the bone reads cyan-white whatever
+ * `RenderLight`'s amber says. The pool on the floor is the light in the
+ * hand, so it takes the card's colour - the reviewer caught the Vepar's blue
+ * hands pooling orange on the Atlans sand.
+ */
+const LIGHTNING_GLOW_RGB = [0.35, 0.8, 1] as const;
+
 type CharacterLight = LightRecipe & {
   /**
    * Ours, not the original's: the monster carries a glow but throws no
@@ -115,14 +124,14 @@ export const CHARACTER_LIGHTS: Partial<Record<number, CharacterLight>> = {
   // lying on the seabed, so the pool sits low.
   45: carried(3, 0.35),
   51: carried(3, 0.5),
-  // 46 Vepar / 80 Golden Vepar: one light in each hand.
-  46: carried(3, 0.8),
-  80: carried(3, 0.8),
+  // 46 Vepar / 80 Golden Vepar: one `lightning2` light in each hand.
+  46: carried(3, 0.8, LIGHTNING_GLOW_RGB),
+  80: carried(3, 0.8, LIGHTNING_GLOW_RGB),
   // 48 Lizard King / 81 Golden Lizard King: four burning spikes.
   48: carried(3, 0.9),
   81: carried(3, 0.9),
-  // 49 Hydra: the big flare over the head of a boss.
-  49: carried(4, 1.2),
+  // 49 Hydra: the big `lightning2` flare over the head of a boss.
+  49: carried(4, 1.2, LIGHTNING_GLOW_RGB),
   // 36 Shadow has no row on purpose: its body cards are `SubType 1`,
   // `dst * (1 - src)` — it removes light rather than adding it, and a
   // negative source is the one thing the two sinks cannot carry (see above).
