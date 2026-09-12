@@ -1,3 +1,4 @@
+import { liftBorderVignette } from './borderVignette';
 import { TERRAIN_SIZE } from './consts';
 import { createTerrainNormal } from './createTerrainNormal';
 import { TERRAIN_INDEX } from './utils';
@@ -19,11 +20,17 @@ function clamp01(v: number): number {
  * `lightBuffer` is the decoded TerrainLight.OZJ (3 floats per texel), which
  * still has to be produced on the main thread because the JPEG decode goes
  * through the engine.
+ *
+ * `liftBorder` undoes the bake's border vignette first (`borderVignette.ts`).
+ * Off on Classic, which keeps the original's fade.
  */
 export function parseTerrainLightPacked(
   lightBuffer: Float32Array,
-  heightData: Float32Array
+  heightData: Float32Array,
+  liftBorder = false
 ): Float32Array {
+  if (liftBorder) liftBorderVignette(lightBuffer);
+
   const normals = createTerrainNormal(heightData);
   const result = new Float32Array(TERRAIN_SIZE * TERRAIN_SIZE * 3);
 
