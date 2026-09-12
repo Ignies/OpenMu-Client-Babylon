@@ -23,6 +23,7 @@ import {
   type GameOptions as GameOptionsType,
 } from '../../../common/gameOptions';
 import { invalidateShadowState } from '../../../common/objectShadow';
+import { toggleFullscreen } from '../../../common/browserHotkeys';
 import { reloadMapObjects } from '../../../libs/mu/loadMapIntoScene';
 import {
   KEY_ACTIONS,
@@ -319,6 +320,13 @@ const TABS: Tab[] = [
             }),
             check('lockWindows', -1, 'options.lockWindows'),
             check('autoReconnect', -1, 'options.autoReconnect'),
+            check('blockBrowserKeys', -1, 'options.blockBrowserKeys'),
+            {
+              kind: 'button',
+              id: 'fullscreen',
+              labelKey: 'options.fullscreen',
+              onClick: toggleFullscreen,
+            },
             {
               kind: 'button',
               id: 'reset-windows',

@@ -1399,6 +1399,8 @@ export const frenchLayer: LanguageLayer = {
     'options.lootZen': 'Zen à partir de',
     'options.firstPersonBob': 'Balancement de la tête en vue subjective',
     'options.chatTimestamps': 'Horodatage du chat',
+    'options.blockBrowserKeys': 'Bloquer les raccourcis du navigateur (Ctrl+W, F5, zoom)',
+    'options.fullscreen': 'Plein écran (F11)',
     'keys.replyWhisper': 'Répondre au chuchotement',
     'options.uiScale': 'Taille',
     'options.lockWindows': 'Verrouiller les fenêtres',

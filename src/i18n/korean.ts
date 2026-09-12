@@ -1350,6 +1350,8 @@ export const koreanLayer: LanguageLayer = {
     'options.lootZen': 'Zen 이상',
     'options.firstPersonBob': '1인칭 시점 흔들림',
     'options.chatTimestamps': '채팅 시각 표시',
+    'options.blockBrowserKeys': '브라우저 단축키 차단 (Ctrl+W, F5, 확대/축소)',
+    'options.fullscreen': '전체 화면 (F11)',
     'keys.replyWhisper': '귓속말 답장',
     'options.uiScale': '크기',
     'options.lockWindows': '창 고정',

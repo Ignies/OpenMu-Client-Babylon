@@ -1344,6 +1344,8 @@ export const chineseLayer: LanguageLayer = {
     'options.lootZen': 'Zen 起',
     'options.firstPersonBob': '第一人称视角头部晃动',
     'options.chatTimestamps': '聊天时间',
+    'options.blockBrowserKeys': '屏蔽浏览器快捷键（Ctrl+W、F5、缩放）',
+    'options.fullscreen': '全屏（F11）',
     'keys.replyWhisper': '回复密语',
     'options.uiScale': '大小',
     'options.lockWindows': '锁定窗口',

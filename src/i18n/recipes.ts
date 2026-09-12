@@ -213,6 +213,8 @@ export const EN_TEXT = {
   'options.lootOther': 'Everything else',
   'options.lootZen': 'Zen from',
   'options.chatTimestamps': 'Chat timestamps',
+  'options.blockBrowserKeys': 'Block browser shortcuts (Ctrl+W, F5, zoom)',
+  'options.fullscreen': 'Fullscreen (F11)',
   'options.uiScale': 'Interface size',
   'options.lockWindows': 'Lock windows',
   'options.resetWindows': 'Reset windows',

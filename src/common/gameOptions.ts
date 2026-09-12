@@ -172,6 +172,12 @@ export type GameOptions = {
    * drops, instead of sending the player back to the server list.
    */
   autoReconnect: boolean;
+  /**
+   * Keep the browser's own shortcuts off the keyboard: Ctrl+W, Ctrl+R,
+   * Ctrl+S and the rest of the chords a game key lands on by accident
+   * (`common/browserHotkeys.ts`). Off is the plain tab, reload and all.
+   */
+  blockBrowserKeys: boolean;
 };
 
 export const TONE_MAPPER_MAX = 3;
@@ -260,6 +266,7 @@ const DEFAULTS: GameOptions = {
   uiScale: 3,
   lockWindows: false,
   stateWarnings: true,
+  blockBrowserKeys: true,
 };
 
 /**

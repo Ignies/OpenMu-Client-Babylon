@@ -1352,6 +1352,8 @@ export const japaneseLayer: LanguageLayer = {
     'options.lootZen': 'Zen 以上',
     'options.firstPersonBob': '一人称視点の頭の揺れ',
     'options.chatTimestamps': 'チャットの時刻',
+    'options.blockBrowserKeys': 'ブラウザのショートカットを無効化（Ctrl+W、F5、ズーム）',
+    'options.fullscreen': 'フルスクリーン（F11）',
     'keys.replyWhisper': 'ささやきに返信',
     'options.uiScale': '大きさ',
     'options.lockWindows': 'ウィンドウを固定',
