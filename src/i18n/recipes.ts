@@ -217,6 +217,7 @@ export const EN_TEXT = {
   'options.fullscreen': 'Fullscreen (F11)',
   'options.uiScale': 'Interface size',
   'options.lockWindows': 'Lock windows',
+  'options.minimapCorner': 'Minimap in the corner (Tab shows and hides it)',
   'options.resetWindows': 'Reset windows',
   'options.stateWarnings': 'Warning notices',
   'options.volume': 'Volume',

@@ -178,6 +178,11 @@ export type GameOptions = {
    * (`common/browserHotkeys.ts`). Off is the plain tab, reload and all.
    */
   blockBrowserKeys: boolean;
+  /**
+   * The world map as a small panel in the top right corner, which TAB shows
+   * and hides (ours). Off is the original's full-screen TAB sheet.
+   */
+  minimapCorner: boolean;
 };
 
 export const TONE_MAPPER_MAX = 3;
@@ -267,6 +272,7 @@ const DEFAULTS: GameOptions = {
   lockWindows: false,
   stateWarnings: true,
   blockBrowserKeys: true,
+  minimapCorner: true,
 };
 
 /**
