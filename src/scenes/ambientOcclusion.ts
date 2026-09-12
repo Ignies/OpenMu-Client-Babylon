@@ -130,11 +130,17 @@ function occludes(mesh: AbstractMesh): boolean {
   if (meta.depthOccluder !== true || meta.brightMesh) return false;
 
   // A map object's alpha-keyed cards (Noria's canopies, grass, every fence
-  // and bar) are the bulk of the G-buffer's cost and occlude nothing worth
-  // the pass; the haze reads the depth behind them (§4.8 step 1). A figure's
-  // keyed trim stays in: it is the body's own silhouette.
+  // and bar) were kept out: per object they were the bulk of the G-buffer's
+  // cost, and the haze read the depth behind them (§4.8 step 1). That is
+  // also why a tree at the ring's edge stood crisp over the fog band - a
+  // card against the sky carries the sky's depth, which is no haze at all.
+  // Batched, a chunk is one instanced draw per submesh and the cells hold
+  // the count, so the batches go in and the haze reads their own depth;
+  // the per-object cards (doors, rest spots, the rooms) stay out as before.
+  // A figure's keyed trim stays in: it is the body's own silhouette.
   if (
     meta.mapObject === true &&
+    meta.propBatch !== true &&
     mesh.material?.transparencyMode === Material.MATERIAL_ALPHATESTANDBLEND
   ) {
     return false;
