@@ -22,7 +22,9 @@ import {
   disposePropBatches,
   propBatchExclusion,
   propBatchingActive,
+  propTypeCarriesLight,
 } from '../../common/propBatches';
+import { LightCarrier } from '../../common/lightCarrier';
 import { IVector3Like } from '../babylon/exports';
 import { EventBus } from '../eventBus';
 import { DISABLE_OBJECTS_LOADING } from '../../consts';
@@ -120,6 +122,19 @@ function createObjects(world: World, objs: MapObjectRecord[]) {
     // Scenery the batches can draw gets no model factory and no visibility
     // radius: the per-object systems never see it (common/propBatches.ts).
     if (batching && propBatchExclusion(world, data.id, modelFactory) === null) {
+      // A lit type keeps the per-object path for its light alone: a
+      // `LightCarrier` (no model) under the same radius and loader, so the
+      // lamp comes and goes with the hero exactly as it did.
+      const carrier = propTypeCarriesLight(world, data.id)
+        ? {
+            modelFactory: LightCarrier,
+            visibility: {
+              state: 'hidden' as const,
+              lastChecked: Math.random() * 0.2,
+            },
+          }
+        : {};
+
       const entity = world.add({
         worldIndex: world.mapIndex,
         transform: {
@@ -129,6 +144,7 @@ function createObjects(world: World, objs: MapObjectRecord[]) {
         },
         modelId: data.id,
         propBatch: { type: data.id, chunk: 0 },
+        ...carrier,
       });
 
       addPropToBatch(world, entity, modelFactory);

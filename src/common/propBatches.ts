@@ -14,7 +14,10 @@ import { packBodyLight } from './itemMaterial';
 import { blendMeshFor } from './blendMeshes';
 import { isEffectOnlyObject } from './effectOnlyObjects';
 import { meshAnimationFor } from './meshAnimation';
-import { lightEmittersFor } from '../lighting/mapObjectLights';
+import {
+  lightEmittersFor,
+  recipeFromEmitter,
+} from '../lighting/mapObjectLights';
 import { LEAN_CURSOR_OBJECTS, findRestObject } from '../libs/mu/restObjects';
 import { isMapDoorType } from '../ecs/systems/mapDoorSystem';
 import { roomStructureTypes } from '../maps/rooms';
@@ -119,6 +122,8 @@ type Chunk = {
   minZ: number;
   maxX: number;
   maxZ: number;
+  /** A light carrier stood in this chunk last frame: one more re-pack after it goes. */
+  litLastFrame: boolean;
 };
 
 class PropType {
@@ -130,14 +135,19 @@ class PropType {
 
   constructor(
     readonly type: number,
-    readonly factory: typeof ModelObject
+    readonly factory: typeof ModelObject,
+    /** The type carries a light: its placements have a `LightCarrier` in range. */
+    readonly lit: boolean,
+    /** ...and that light reaches the terrain (`MapObjectLights.emitsLight`). */
+    readonly emitsLight: boolean
   ) {}
 }
 
 /** What the map's own tables ask of a type per object; null when nothing. */
 function tableExclusion(map: ENUM_WORLD, type: number): string | null {
   if (isEffectOnlyObject(map, type)) return 'effect only';
-  if (lightEmittersFor(map, type)?.length) return 'light';
+  // A light is not an exclusion: the body is batched and a `LightCarrier`
+  // stands in for the model (see `propTypeCarriesLight`).
   if (meshAnimationFor(map, type)) return 'mesh animation';
   if (isMapDoorType(map, type)) return 'door';
   if (findRestObject(map, type)) return 'rest object';
@@ -226,7 +236,11 @@ class PropBatches {
     let pt = this.types.get(type);
 
     if (!pt) {
-      pt = new PropType(type, factory);
+      const emitters = lightEmittersFor(this.map, type);
+      const lit = (emitters?.length ?? 0) > 0;
+      const emitsLight =
+        lit && emitters!.some(emitter => recipeFromEmitter(emitter) !== null);
+      pt = new PropType(type, factory, lit, emitsLight);
       this.types.set(type, pt);
       this.createPrototype(pt, entity);
     }
@@ -361,6 +375,17 @@ class PropBatches {
 
     pt.submeshes = submeshes;
 
+    // What `ModelObject.load` and `applyBlendMesh` would have read off
+    // `Lights` on a per-object model: a lamp casts no sun shadow, and its
+    // flame card is light, so it takes the map's key gain.
+    if (pt.emitsLight) {
+      for (const sub of submeshes) {
+        sub.source.metadata ??= {};
+        sub.source.metadata.csmCaster = false;
+        if (sub.source.metadata.brightMesh) sub.source.metadata.lightCard = true;
+      }
+    }
+
     // A sparse type is one mesh for the whole map: a dozen statues spread
     // over twelve chunks would be twelve meshes to walk for twelve draws.
     const single = pt.placements.length <= SINGLE_CHUNK_MAX;
@@ -431,8 +456,7 @@ class PropBatches {
     const chunkMax = subs.map(() => new Vector3(-Infinity, -Infinity, -Infinity));
     const casterHeight = subs.map(() => 0);
 
-    const shadows =
-      this.tier === null && proto.CastsShadow && !proto.Lights?.emitsLight;
+    const shadows = this.tier === null && proto.CastsShadow && !pt.emitsLight;
 
     let minX = Infinity;
     let minZ = Infinity;
@@ -595,6 +619,7 @@ class PropBatches {
       minZ,
       maxX,
       maxZ,
+      litLastFrame: false,
     };
   }
 
@@ -671,7 +696,13 @@ class PropBatches {
   }
 
   private packLight(p: Placement, inst: Float32Array, o: number): void {
-    const light = this.world.getTerrainLight(p.pos.x, p.pos.z);
+    // A placement with a light carrier in range takes the carrier's light:
+    // the terrain plus its own lamp, the sum `RenderSystem` keeps on it.
+    const carrier = p.entity.modelObject;
+    const light =
+      carrier?.Ready === true
+        ? carrier.Light
+        : this.world.getTerrainLight(p.pos.x, p.pos.z);
 
     packBodyLight(light.x, light.y, light.z, inst, o);
     inst[o + 3] = this.snow && !isTileOpen(p.pos.x, p.pos.z) ? 0 : 1;
@@ -741,14 +772,24 @@ class PropBatches {
 
     // Classic: BodyLight carries the torch delta, which flickers. Only the
     // chunks a torch reaches are re-packed; tiers >= 1 read the bake alone.
-    if (this.tier === null) {
-      for (const pt of this.types.values()) {
-        if (pt.state !== 'built') continue;
-        for (const chunk of pt.chunks.values()) {
-          if (terrainLightReaches(chunk.minX, chunk.minZ, chunk.maxX, chunk.maxZ)) {
-            this.repackLight(chunk);
-          }
+    // A lit type's chunks re-pack while a light carrier stands in them on
+    // every tier: the lamp's own colour flickers into its body.
+    for (const pt of this.types.values()) {
+      if (pt.state !== 'built') continue;
+      for (const chunk of pt.chunks.values()) {
+        let repack =
+          this.tier === null &&
+          terrainLightReaches(chunk.minX, chunk.minZ, chunk.maxX, chunk.maxZ);
+
+        if (pt.lit) {
+          const litNow = chunk.placements.some(
+            p => p.entity.modelObject?.Ready === true
+          );
+          if (litNow || chunk.litLastFrame) repack = true;
+          chunk.litLastFrame = litNow;
         }
+
+        if (repack) this.repackLight(chunk);
       }
     }
 
@@ -898,6 +939,14 @@ export type PropBatchStats = {
 };
 
 let batches: PropBatches | null = null;
+
+/**
+ * Whether placements of this type need a `LightCarrier` beside their
+ * batched body: the type has light emitters in the map's table.
+ */
+export function propTypeCarriesLight(world: World, type: number): boolean {
+  return (lightEmittersFor(world.mapIndex, type)?.length ?? 0) > 0;
+}
 
 /** The option, with `?batch=0` as the dev A/B. */
 export function propBatchingActive(): boolean {

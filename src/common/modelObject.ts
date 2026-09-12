@@ -934,6 +934,13 @@ export class ModelObject {
             mesh.skeleton?.dispose();
             mesh.skeleton = parentSkeleton;
           });
+
+          // The part now poses with the rig; its own clips would go on
+          // driving its own bone nodes, which nothing reads any more - one
+          // Animatable per bone per armour piece, on every character.
+          for (const group of gltf.animationGroups) {
+            if (group.isStarted) group.stop(true);
+          }
         }
       }
     }
