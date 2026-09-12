@@ -568,8 +568,8 @@ export class ModelObject {
 
   /**
    * Whether snow may settle on this object (weather/snowCaps.ts). Set by
-   * MapTileObject on snow maps; every mesh carries it as `metadata.snowCap`
-   * for the item material to bind against.
+   * MapTileObject on the maps snow settles on; every mesh carries it as
+   * `metadata.snowCap` for the item material to bind against.
    */
   SnowCap = false;
 

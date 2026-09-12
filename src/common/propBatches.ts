@@ -36,7 +36,7 @@ import {
   terrainMaskVersion,
 } from '../libs/mu/terrainMask';
 import { needsTerrainMask } from '../libs/mu/terrainOverlay';
-import { SNOW_MAPS } from '../weather/ambientWeather';
+import { SNOW_GROUND_MAPS } from '../weather/snowCover';
 import { snowCapCover } from '../weather/snowCaps';
 import { weather } from '../weather';
 import { setSceneHold } from './sceneGate';
@@ -264,7 +264,7 @@ class PropBatches {
     readonly map: ENUM_WORLD
   ) {
     this.root = new TransformNode('propBatches', world.scene);
-    this.snow = SNOW_MAPS.has(map);
+    this.snow = SNOW_GROUND_MAPS.has(map);
     this.mask = needsTerrainMask(map);
     this.tier = lightingTier();
   }

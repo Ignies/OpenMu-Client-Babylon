@@ -2,7 +2,7 @@ import { ENUM_WORLD } from '../common/types';
 import type { WeatherLayer } from './layer';
 import { serverNow } from '../common/serverTime';
 import { ambientStrengthAt } from './ambientSchedule';
-import { DEVIAS_SNOW } from './ambientWeather';
+import { DEVIAS_SNOW, SNOWFALL_MAPS } from './ambientWeather';
 import { maps } from '../maps';
 
 /**
@@ -31,15 +31,16 @@ import { maps } from '../maps';
 // ---- 1. tuning -------------------------------------------------------------
 
 /**
- * Maps whose ground collects snow: the map's `snow` flag (`SNOW_MAPS`, the
- * one the flakes read) where the map also has a sky. Snow settles under the
- * open sky, so the Ice City boss cave keeps the original's flakes and no
- * cover; the caps, the prints, the sink and the terrain's `SNOW_COVER`
- * overlay all read this set, so nothing sitting on the settled snow can
- * outrun the ground it claims to stand on. `snowCover()` is 0 off it.
+ * Maps whose ground collects snow: the maps snow actually falls on
+ * (`SNOWFALL_MAPS`) where it also has a sky to fall out of. Cover is what a
+ * fall leaves behind, so it cannot reach a map nothing falls on - the ice
+ * fields declare a snow climate and no fall, and stay bare ice. The caps,
+ * the prints, the sink and the terrain's `SNOW_COVER` overlay all read this
+ * set, so nothing sitting on the settled snow can outrun the ground it
+ * claims to stand on. `snowCover()` is 0 off it.
  */
 export const SNOW_GROUND_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
-  maps.worldsWhere(layer => layer.snow === true && layer.outdoor === true)
+  [...SNOWFALL_MAPS].filter(world => maps.isOutdoor(world))
 );
 
 /** Seconds of full-strength snowfall to go from bare ground to full cover. */

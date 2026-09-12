@@ -147,7 +147,11 @@ class Maps {
     );
   }
 
-  /** The sky belongs to snow. */
+  /**
+   * The map's climate is snow. That is all it says: whether anything falls
+   * out of it is `SNOWFALL_MAPS` and whether any of it settles is
+   * `SNOW_GROUND_MAPS`, and the ice fields are snow-climate with neither.
+   */
   isSnow(world: ENUM_WORLD): boolean {
     return this.layerFor(world)?.snow === true;
   }

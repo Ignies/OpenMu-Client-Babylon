@@ -15,7 +15,7 @@ import { monsterModelTypeOf } from '../../common/playSpeed';
 import { weather } from '../../weather';
 import { isTileOpen } from '../../libs/mu/terrainMask';
 import { onSnowGround } from '../../weather/snowSink';
-import { SNOW_MAPS } from '../../weather/ambientWeather';
+import { SNOW_GROUND_MAPS } from '../../weather/snowCover';
 import { RUN_THRESHOLD } from '../../common/locomotion';
 import { ploughSnowTrail } from '../../weather/snowTrail';
 import type { Entity, ISystemFactory } from '../world';
@@ -305,7 +305,7 @@ export const FootprintSystem: ISystemFactory = world => {
     let strength = 0;
     let scale = 1;
 
-    if (SNOW_MAPS.has(map)) {
+    if (SNOW_GROUND_MAPS.has(map)) {
       // Snow lies on the ground, so the ground has to be open, covered, and
       // actually snow — and it has to be the ground, not a bridge over it.
       // `isTileOpen` alone only says there is sky overhead; it is true of a

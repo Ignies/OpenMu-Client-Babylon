@@ -14,7 +14,7 @@ import {
   HOUSE_HEARTH_DUST,
   LORENCIA_LEAVES,
   RAIN,
-  SNOW_MAPS,
+  SNOWFALL_MAPS,
   TAVERN_DUST,
   UNDERWATER_MAPS,
 } from '../../weather/ambientWeather';
@@ -157,19 +157,20 @@ export const AmbientParticleSystem: ISystemFactory = world => {
       followHero: true,
       active: map => GameOptions.ambientParticles && UNDERWATER_MAPS.has(map),
     },
-    // Snow falls wherever the map says its sky is snow (`SNOW_MAPS`: Devias,
-    // both Ice City worlds, Santa Town), the same set that keeps rain off.
+    // Snow falls on the maps that declare a fall (`SNOWFALL_MAPS`: Devias and
+    // Santa Town). A snow sky keeps rain off every Ice City world too, but
+    // nothing comes down over the ice.
     {
       recipe: DEVIAS_SNOW,
       followHero: true,
       active: (map, indoors) =>
-        GameOptions.ambientParticles && !indoors && SNOW_MAPS.has(map),
+        GameOptions.ambientParticles && !indoors && SNOWFALL_MAPS.has(map),
     },
     {
       recipe: DEVIAS_SNOW_BIG,
       followHero: true,
       active: (map, indoors) =>
-        GameOptions.ambientParticles && !indoors && SNOW_MAPS.has(map),
+        GameOptions.ambientParticles && !indoors && SNOWFALL_MAPS.has(map),
     },
     {
       recipe: RAIN,

@@ -2,8 +2,7 @@ import { Vector3, type Effect, type Scene } from '../babylon/exports';
 import { sunLightOf } from '../../lighting/keyRig';
 import { ENUM_WORLD } from '../../common/types';
 import { GameOptions } from '../../common/gameOptions';
-import { maps } from '../../maps';
-import { snowCover } from '../../weather/snowCover';
+import { SNOW_GROUND_MAPS, snowCover } from '../../weather/snowCover';
 import { snowTrailPainted, snowTrailTexture } from '../../weather/snowTrail';
 import {
   MELT_EDGE,
@@ -766,13 +765,15 @@ const OVERLAYS_BY_WORLD: Partial<Record<ENUM_WORLD, readonly TerrainOverlay[]>> 
 const NONE: readonly TerrainOverlay[] = [];
 
 /**
- * Where snow lies on the other snow maps, by tile slot (Data/World58 and
- * World63 share Devias' slot list, not its art): Ice City's clear ice (2, 4,
- * 8) and Santa Town's embers (4) stay bare, its dark rock and the grey stone
- * take snow between them, the painted snow and white ice are solid.
+ * Where snow lies on the other snow maps, by tile slot (Data/World63 shares
+ * Devias' slot list, not its art): Santa Town's embers (4) stay bare, its
+ * dark rock and the grey stone take snow between them, the painted snow and
+ * white ice are solid.
+ *
+ * No Ice City row: the ice fields declare `snowfall: false` and draw no
+ * settled layer at all, so their ground is the original terrain art.
  */
 const SNOW_BEDS: Partial<Record<ENUM_WORLD, TerrainOverlay['bed']>> = {
-  [ENUM_WORLD.WD_57ICECITY]: { 0: 1, 3: 1, 7: 1, 10: 1, 1: 0.55, 6: 0.55, 9: 0.55, 5: 0, 13: 0 },
   [ENUM_WORLD.WD_62SANTA_TOWN]: { 0: 1, 1: 1, 2: 1, 3: 1, 7: 1, 10: 1, 6: 0.55, 9: 0.55, 4: 0, 5: 0, 13: 0 },
 };
 
@@ -792,9 +793,10 @@ export function snowCoverFor(map: ENUM_WORLD): TerrainOverlay {
 
 /**
  * The layers this map draws, or nothing if the player has ground weather off.
- * Settled snow follows the map's `snow` flag under an open sky (Devias, Ice
- * City, Santa Town; not the boss cave), the set the caps and the prints read
- * (`weather/snowCover.ts` SNOW_GROUND_MAPS).
+ * Settled snow follows `SNOW_GROUND_MAPS` itself (`weather/snowCover.ts`) -
+ * the one set the cover, the caps, the sink and the prints all read. It was
+ * reassembled from the map flags here, which is how the ice fields ended up
+ * with a layer in the shader after they stopped collecting snow.
  *
  * Read at *map load*, so switching the option off and walking through a gate
  * gets a terrain shader with no overlay branch in it at all. Switching it off
@@ -805,7 +807,7 @@ export function snowCoverFor(map: ENUM_WORLD): TerrainOverlay {
 export function terrainOverlaysFor(map: ENUM_WORLD): readonly TerrainOverlay[] {
   if (!GameOptions.advancedEffects) return NONE;
   const own = OVERLAYS_BY_WORLD[map];
-  if (!maps.isSnow(map) || !maps.isOutdoor(map)) return own ?? NONE;
+  if (!SNOW_GROUND_MAPS.has(map)) return own ?? NONE;
   return [...(own ?? NONE), snowCoverFor(map)];
 }
 
