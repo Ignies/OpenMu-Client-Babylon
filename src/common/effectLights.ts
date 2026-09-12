@@ -7,6 +7,7 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { downloadDataFile } from '../libs/mu/dataFolder';
+import { linearBufferActive } from './lightModel';
 import { lookDirector, type LookDirector } from '../lighting/director';
 import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../effects/core';
 
@@ -18,9 +19,9 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../effects/core';
  * the `FlareSpec` a host hands to `createEffectLight`.
  *
  * A flare is the glow of a light, so it sits at the map's level: its colour
- * is `spec x luminosity x flareLevel` (ARCHITECTURE F12, §13 F14), repainted
- * when the director's state changes. Sprites are not decoded on their way
- * into the buffer, so the gain is applied as is.
+ * is `lin(spec x luminosity) x flareLevel` (ARCHITECTURE F12, §13 F14),
+ * repainted when the director's state changes. Nothing decodes a sprite on
+ * its way into the buffer, so `paintFlare` does it.
  *
  * One `SpriteManager` per scene, shared by every flare on the map.
  */
@@ -59,6 +60,11 @@ function flareLevel(): number {
   const look = lookDirector()?.state();
 
   return look ? look.keyGain * look.key.roomShare : 1;
+}
+
+/** Whether the buffer a flare lands in is linear; see `paintFlare`. */
+function flaresDecoded(): boolean {
+  return managerScene ? linearBufferActive(managerScene) : false;
 }
 
 function watchLook(): void {
@@ -134,7 +140,25 @@ export type MovableFlare = {
   dispose(): void;
 };
 
-/** Paints `color x lumi x flareLevel` and keeps repainting it while the flare lives. */
+/**
+ * Paints `lin(color x lumi) x flareLevel` and keeps repainting it while the
+ * flare lives.
+ *
+ * Babylon's sprite shader is `texel x vColor` and nothing more - its
+ * `imageProcessingCompatibility` decode sits behind `IMAGEPROCESSINGPOSTPROCESS`
+ * and `SpriteRenderer` never defines it - so on the graded tiers a flare lands
+ * in a *linear* buffer carrying a *display* colour. Every tint here is
+ * display-referred (they are the original's `Luminosity x (r, g, b)` vectors,
+ * composited by a gamma-space client), so skipping the decode lifts the low
+ * channels: Noria's (0.4, 0.7, 1.0) reached the buffer at 0.93/1.63/2.33 and
+ * the fairy forest's blue burned as a white ball. The decode leaves the
+ * brightest channel where it is and puts the colour back underneath it.
+ *
+ * Same rule as `effects/core.ts lightCardGain`, reached from the other side: a
+ * card's material decodes downstream so only the gain enters pre-decoded
+ * there, and nothing decodes a sprite so the whole product enters decoded
+ * here. Classic has no linear buffer and keeps the original's own arithmetic.
+ */
 function paintFlare(
   sprite: Sprite,
   color: readonly [number, number, number]
@@ -142,8 +166,10 @@ function paintFlare(
   const [r, g, b] = color;
   let lumi = 1;
   const repaint = () => {
-    const k = lumi * flareLevel();
-    sprite.color.set(r * k, g * k, b * k, 1);
+    const level = flareLevel();
+    const decode = flaresDecoded();
+    const c = (v: number) => (decode ? (v * lumi) ** 2.2 : v * lumi) * level;
+    sprite.color.set(c(r), c(g), c(b), 1);
   };
   sprite.color = new Color4(r, g, b, 1);
   repaint();
