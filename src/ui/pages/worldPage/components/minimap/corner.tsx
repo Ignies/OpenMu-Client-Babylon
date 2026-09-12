@@ -6,18 +6,23 @@ import { GameOptions, uiScaleFactor } from '../../../../../common/gameOptions';
 import type { MinimapMarker } from '../../../../../common/minimapData';
 import { MuTipText } from '../../../../components/muText';
 import {
+  CenterButton,
   Frame,
   HERO_SIZE,
   HERO_SPRITE,
+  isPanned,
   MAP_ROTATION,
   MARKER_SIZE,
   MARKER_SPRITE,
+  NO_PAN,
   NPC_SIZE,
   NPC_SPRITE,
   Sprite,
   TERRAIN_SIZE,
+  useMapDrag,
   usePartyMarkers,
   useWorldMinimap,
+  type MapPan,
 } from './shared';
 
 /**
@@ -30,15 +35,17 @@ import {
  *
  * Laid out in the sheet's art units (its 35 px corners, 15 / 30 px markers)
  * and scaled as one element, so the frame and the markers keep the sheet's
- * proportions at any interface size.
+ * proportions at any interface size. The bar under it (the coordinates, and
+ * the Center button while the map is dragged off the hero) is scaled back
+ * up to the interface size, so its text and plate match every other button.
  *
  * The hero moves every frame and nothing here re-renders for it: the
- * markers are children of the map picture at their own tile, and one frame
- * loop slides the picture under the fixed centre and writes the coordinates.
+ * markers and the hero are children of the map picture at their own tile,
+ * and one frame loop slides the picture under the fixed centre and writes
+ * the hero's place and the coordinates.
  */
 
 const PANEL = 240;
-const CENTER = PANEL / 2;
 /** Art units to CSS pixels at interface size 100%. */
 const PANEL_SCALE = 0.75;
 
@@ -91,17 +98,20 @@ export const MinimapCorner = observer(() => {
   const minimap = useWorldMinimap(shown ? map : undefined);
   const partyMarkers = usePartyMarkers(shown, map);
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+  const [pan, setPan] = useState<MapPan>(NO_PAN);
   const pictureRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
   const coordsRef = useRef<HTMLDivElement>(null);
   const scale = PANEL_SCALE * uiScaleFactor(GameOptions.uiScale);
   const mapSize = ZOOM_LEVELS[zoom];
+  const { dragging, handlers } = useMapDrag(mapSize, scale, setPan);
 
   // Before paint, so the picture never shows its top-left corner for a frame.
   useLayoutEffect(() => {
     if (!shown) return;
 
     let frame = 0;
-    let lastMap = -1;
+    let lastMap = map;
     let lastX = NaN;
     let lastY = NaN;
 
@@ -113,6 +123,8 @@ export const MinimapCorner = observer(() => {
       if (current.mapIndex !== lastMap) {
         lastMap = current.mapIndex;
         setMap(lastMap);
+        // A warp: back on the hero.
+        setPan(NO_PAN);
       }
 
       const pos = current.playerEntity?.transform?.pos;
@@ -121,9 +133,16 @@ export const MinimapCorner = observer(() => {
       lastX = pos.x;
       lastY = pos.z;
 
-      const tx = (pos.z / TERRAIN_SIZE) * mapSize;
-      const ty = (pos.x / TERRAIN_SIZE) * mapSize;
+      const heroTx = (pos.z / TERRAIN_SIZE) * mapSize;
+      const heroTy = (pos.x / TERRAIN_SIZE) * mapSize;
+      const tx = heroTx + (pan.u / TERRAIN_SIZE) * mapSize;
+      const ty = heroTy + (pan.v / TERRAIN_SIZE) * mapSize;
       picture.style.transform = `translate(${-tx}px, ${-ty}px)`;
+      const hero = heroRef.current;
+      if (hero) {
+        hero.style.left = `${heroTx - HERO_SIZE / 2}px`;
+        hero.style.top = `${heroTy - HERO_SIZE / 2}px`;
+      }
       if (coordsRef.current) {
         coordsRef.current.textContent = `${Math.floor(pos.x)}, ${Math.floor(pos.z)}`;
       }
@@ -131,7 +150,7 @@ export const MinimapCorner = observer(() => {
 
     tick();
     return () => cancelAnimationFrame(frame);
-  }, [shown, mapSize, minimap]);
+  }, [shown, map, mapSize, minimap, pan]);
 
   if (!shown || !minimap) return null;
 
@@ -148,7 +167,7 @@ export const MinimapCorner = observer(() => {
       onWheel={onWheel}
       onContextMenu={e => e.preventDefault()}
     >
-      <div className="minimap-corner-clip">
+      <div className={`minimap-corner-clip${dragging ? ' is-dragging' : ''}`} {...handlers}>
         <div
           className="minimap-corner-spin"
           style={{ transform: `rotate(${MAP_ROTATION}deg)` }}
@@ -168,20 +187,25 @@ export const MinimapCorner = observer(() => {
             {partyMarkers.map((marker, i) => (
               <MapMarker key={`party-${i}`} marker={marker} mapSize={mapSize} />
             ))}
+            <div
+              ref={heroRef}
+              className="minimap-corner-hero"
+              style={{
+                width: HERO_SIZE,
+                height: HERO_SIZE,
+                transform: `rotate(${-MAP_ROTATION}deg)`,
+              }}
+            >
+              <Sprite file={HERO_SPRITE} size={HERO_SIZE} />
+            </div>
           </div>
         </div>
-        <Sprite
-          file={HERO_SPRITE}
-          size={HERO_SIZE}
-          style={{
-            position: 'absolute',
-            left: CENTER - HERO_SIZE / 2,
-            top: CENTER - HERO_SIZE / 2,
-          }}
-        />
       </div>
       <Frame width={PANEL} height={PANEL} />
-      <div ref={coordsRef} className="minimap-corner-coords" />
+      <div className="minimap-corner-bar" style={{ transform: `scale(${1 / PANEL_SCALE})` }}>
+        {isPanned(pan) && <CenterButton onClick={() => setPan(NO_PAN)} />}
+        <div ref={coordsRef} className="minimap-corner-coords" />
+      </div>
     </div>
   );
 });

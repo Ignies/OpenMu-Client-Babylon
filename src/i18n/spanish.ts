@@ -804,6 +804,7 @@ export const spanishLayer: LanguageLayer = {
     'chat.tab.system': 'Sistema',
 
     'minimap.close': 'Cerrar',
+    'minimap.center': 'Centrar',
     'moveList.title': 'Lista de destinos',
     'warp.title': 'Ventana de teletransporte',
     'warp.map': 'Mapa',
