@@ -3,23 +3,31 @@ import { itemVisualTier } from '../../common/itemVisualTier';
 import type { ModelObject } from '../../common/modelObject';
 import type { PlayerObject } from '../../common/playerObject';
 import { applyWeaponAttachments } from '../../common/weaponAttachment';
-import { isBook } from '../../common/weaponClass';
+import { isBook, swordformGlovesModel } from '../../common/weaponClass';
 import type { ISystemFactory, Item } from '../world';
 
 function loadPart(
   part: Item | null,
   playerObject: PlayerObject,
-  socket: ModelObject
+  socket: ModelObject,
+  /** Weapon slot, when this socket is one: picks the worn glove model. */
+  slot?: 0 | 1
 ) {
   if (!part) return;
   const item = ItemsDatabase.getItem(part.group, part.num);
 
   if (!item) return;
 
+  // A Rage Fighter glove weapon is worn as a left/right pair of its own
+  // (`RenderSwordformGloves`, MonkSystem.cpp:248); the model items.json names
+  // is the one the inventory draws.
+  const worn =
+    (slot !== undefined && swordformGlovesModel(part, slot)) || item.szModelName;
+
   playerObject.loadPartAsync(
     item.szModelFolder,
     socket,
-    item.szModelName,
+    worn,
     part.lvl,
     part.isExcellent,
     itemVisualTier(part)
@@ -71,10 +79,12 @@ export const AppearanceSystem: ISystemFactory = world => {
         const offHand = isBook(charAppearance.rightHand)
           ? null
           : charAppearance.rightHand;
-        loadPart(mainHand, playerObject, playerObject.Weapon1) ||
+        loadPart(mainHand, playerObject, playerObject.Weapon1, 0) ||
           playerObject.Weapon1.Unload();
-        loadPart(offHand, playerObject, playerObject.Weapon2) ||
+        loadPart(offHand, playerObject, playerObject.Weapon2, 1) ||
           playerObject.Weapon2.Unload();
+        void playerObject.setPhoenixWingAsync(0, mainHand);
+        void playerObject.setPhoenixWingAsync(1, offHand);
 
         if (attributeSystem) {
           // Kept for consumers of the flag; reset properly on unequip and

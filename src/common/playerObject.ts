@@ -10,7 +10,12 @@ import { Entity, World, type Item } from '../ecs/world';
 import { PlayerAction } from './objects/enum';
 import { loadGLTF } from './modelLoader';
 import { Store } from '../store';
-import { LEFT_HAND_BONE, RIGHT_HAND_BONE } from './weaponAttachment';
+import {
+  LEFT_HAND_BONE,
+  PHOENIX_WING_MODEL,
+  phoenixWingLink,
+  RIGHT_HAND_BONE,
+} from './weaponAttachment';
 import { itemVisualTier, type ItemVisualTier } from './itemVisualTier';
 import { requestGlowProbe } from '../scenes/sceneLook';
 import { WingObject } from './wingObject';
@@ -18,7 +23,7 @@ import { WING_BONE, wingSpec } from './wings';
 import { ItemsDatabase } from './itemsDatabase';
 import { IMP_BONE, petSpec, type PetSpec } from './pets';
 import { angleLinkMatrix } from './boneLink';
-import { chooseIdleAction } from './weaponClass';
+import { chooseIdleAction, isPhoenixSoulStar } from './weaponClass';
 import { getBaseClass } from './characterStats';
 import { isFemaleClass } from './mapPlayerNetClassToModelClass';
 import { playerPlaySpeed } from './playSpeed';
@@ -56,6 +61,13 @@ export class PlayerObject extends ModelObject {
   readonly Boots: ModelObject;
   readonly Weapon1: ModelObject;
   readonly Weapon2: ModelObject;
+  /**
+   * The wings the Phoenix Soul Star trails from each forearm - a second model
+   * for the same weapon slot, which the original draws in its own pass
+   * (`RenderPhoenixGloves`, MonkSystem.cpp:241). Empty for every other item.
+   */
+  readonly PhoenixWing1: ModelObject;
+  readonly PhoenixWing2: ModelObject;
   readonly Wings: WingObject;
   /** `c->Helper` when it is link-rendered on the body (the Imp / Satan). */
   readonly Pet: ModelObject;
@@ -80,6 +92,8 @@ export class PlayerObject extends ModelObject {
     this.Boots = new ModelObject(scene, this.node);
     this.Weapon1 = new ModelObject(scene, this.node);
     this.Weapon2 = new ModelObject(scene, this.node);
+    this.PhoenixWing1 = new ModelObject(scene, this.node);
+    this.PhoenixWing2 = new ModelObject(scene, this.node);
     this.Wings = new WingObject(scene, this.node);
     this.Pet = new ModelObject(scene, this.node);
 
@@ -91,6 +105,8 @@ export class PlayerObject extends ModelObject {
     this.Boots.NodeNamePrefix = 'Boots_';
     this.Weapon1.NodeNamePrefix = 'Weapon1_';
     this.Weapon2.NodeNamePrefix = 'Weapon2_';
+    this.PhoenixWing1.NodeNamePrefix = 'PhoenixWing1_';
+    this.PhoenixWing2.NodeNamePrefix = 'PhoenixWing2_';
     this.Wings.NodeNamePrefix = 'Wings_';
     this.Pet.NodeNamePrefix = 'Pet_';
 
@@ -103,6 +119,8 @@ export class PlayerObject extends ModelObject {
       this.Boots,
       this.Weapon1,
       this.Weapon2,
+      this.PhoenixWing1,
+      this.PhoenixWing2,
       this.Wings,
       this.Pet,
     ];
@@ -136,6 +154,28 @@ export class PlayerObject extends ModelObject {
     this.Weapon1.ParentBoneLink = RIGHT_HAND_BONE;
     this.Weapon2.LinkParent = false;
     this.Weapon2.ParentBoneLink = LEFT_HAND_BONE;
+
+    for (const slot of [0, 1] as const) {
+      const wing = slot === 0 ? this.PhoenixWing1 : this.PhoenixWing2;
+      const { bone, link } = phoenixWingLink(slot);
+      wing.LinkParent = false;
+      wing.SkipBoundingBox = true;
+      wing.setBoneLink(bone, link);
+    }
+  }
+
+  /**
+   * Loads (or clears) the phoenix wings of one weapon slot. They belong to
+   * the Phoenix Soul Star alone, and the original runs them off the weapon's
+   * own clip - `PHOENIX_POSE`, applied every frame with the other parts.
+   */
+  async setPhoenixWingAsync(slot: 0 | 1, weapon: Item | null) {
+    const wing = slot === 0 ? this.PhoenixWing1 : this.PhoenixWing2;
+    if (!isPhoenixSoulStar(weapon)) {
+      wing.Unload();
+      return;
+    }
+    await this.loadPartAsync('Item/', wing, PHOENIX_WING_MODEL);
   }
 
   async init(world: World, entity: Entity) {

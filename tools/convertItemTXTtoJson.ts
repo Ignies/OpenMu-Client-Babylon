@@ -1,3 +1,9 @@
+// Item.txt -> src/common/items.json.
+//
+// This rewrites items.json from scratch, so the `RF` class column goes with
+// it: Item.txt names only six classes and has no Rage Fighter one. Follow
+// every run with `bun run tools/addRageFighterColumn.ts`, which puts it back
+// from the server's item definitions.
 import { ItemsDatabase } from '../src/common/itemsDatabase';
 import { ItemGroups } from '../src/common/objects/enum';
 

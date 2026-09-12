@@ -31,7 +31,13 @@ export const ItemGroup = {
   Etc: 15,
 } as const;
 
-/** Base-class index used by `RequireClass[]`: DW, DK, Elf, MG, DL, Summoner. */
+/**
+ * Base-class index used by `RequireClass[]`: DW, DK, Elf, MG, DL, Summoner,
+ * Rage Fighter. The Item.txt this table was converted from predates the last
+ * class and names only six columns; `RF` is filled from the server's own item
+ * definitions (OpenMU `VersionSeasonSix/Items`), whose class block is in this
+ * same order.
+ */
 export const CLASS_COLUMNS = [
   'DW/SM',
   'DK/BK',
@@ -39,7 +45,11 @@ export const CLASS_COLUMNS = [
   'MG',
   'DL',
   'SUM',
+  'RF',
 ] as const;
+
+/** How many of those the Item.txt itself named. See `classUnrestricted`. */
+const ITEM_TXT_CLASS_COLUMNS = 6;
 
 export type ItemDef = {
   group: number;
@@ -578,15 +588,31 @@ export function classOf(charClass: number): { base: number; step: number } {
       return { base: 5, step: 2 };
     case 23:
       return { base: 5, step: 3 };
+    // The Rage Fighter has no second class: `IsSecondClass` does not list him
+    // and `IsThirdClass` lists only the Fist Master (CharacterManager.cpp:191-220).
+    case 24:
+      return { base: 6, step: 1 };
+    case 25:
+      return { base: 6, step: 3 };
     default:
-      // Rage Fighter has no column in this Item.txt; nothing class-gated fits.
       return { base: -1, step: 1 };
   }
 }
 
+/**
+ * `RequireClass` with every column set: the item restricts nobody. Only the
+ * six columns the Item.txt itself carries are counted - `RF` was filled in
+ * from the server afterwards, and testing it too would turn every jewel and
+ * box that was unrestricted into one that names six classes and omits the
+ * seventh.
+ */
+export function classUnrestricted(def: ItemDef): boolean {
+  return def.classes.slice(0, ITEM_TXT_CLASS_COLUMNS).every(value => value === 1);
+}
+
 /** `RequireClass`: the item's class entry for the hero is set and at or below the hero's step. */
 export function classCanUse(def: ItemDef, hero: HeroStats): boolean {
-  if (def.classes.every(value => value === 1)) return true;
+  if (classUnrestricted(def)) return true;
   if (hero.baseClass < 0) return false;
   const required = def.classes[hero.baseClass] ?? 0;
   return required !== 0 && required <= hero.stepClass;
