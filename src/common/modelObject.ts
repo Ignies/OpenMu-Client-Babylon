@@ -388,6 +388,21 @@ export class ModelObject {
   BlendMeshLight = 1;
 
   /**
+   * `RenderMesh(n, RENDER_TEXTURE | RENDER_BRIGHT)` after `RenderBody`: the
+   * mesh drawn a second time, additive, over its own lit pass (the Blood
+   * Castle archangels' mesh 0, ZzzObject.cpp:2606). `BlendMesh` replaces a
+   * mesh's pass; this adds one. -1 = none.
+   */
+  BrightMesh = -1;
+
+  /**
+   * The one mesh the flattened shadow leaves out while the mesh itself is
+   * drawn: `o->HiddenMesh = n` set for the shadow pass alone
+   * (ZzzCharacter.cpp:8473, the archangels' wings). -1 = none.
+   */
+  ShadowHiddenMesh = -1;
+
+  /**
    * `Models[type].StreamMesh` (ZzzBMD.cpp:990-1001): this mesh is drawn
    * textured but *unlit* - flat `BodyLight` instead of the per-vertex terrain
    * light - and its UVs may scroll. Waterfalls, sand-falls and the Dungeon
@@ -1033,6 +1048,8 @@ export class ModelObject {
 
     this.applyBlendMesh();
 
+    this.applyBrightMesh();
+
     this.applyMeshAnimation();
 
     this.applyHiddenMesh();
@@ -1040,6 +1057,8 @@ export class ModelObject {
     this.applyHideSkin();
 
     this.applyWholeBodyHide();
+
+    this.applyShadowHiddenMesh();
 
     this.attachShadow();
 
@@ -1183,6 +1202,60 @@ export class ModelObject {
     if (anim.light && this.#animatedMesh) {
       this.#animatedMesh.metadata.blendMeshLight = anim.light(timeMs);
     }
+  }
+
+  /**
+   * `BrightMesh`: the mesh cloned in place - same geometry, same skeleton -
+   * onto the additive item material, with the metadata the shadow, cascade
+   * and G-buffer rules read as light. The original mesh keeps its lit pass,
+   * so the two add, which is `RenderMesh(n, RENDER_TEXTURE | RENDER_BRIGHT)`
+   * after `RenderBody`. Appended under the same parent, so mesh indices
+   * stand.
+   */
+  private applyBrightMesh() {
+    if (this.BrightMesh < 0 || !this.gltf) return;
+
+    const mesh = this.getMesh(this.BrightMesh);
+
+    if (!mesh) {
+      console.warn(
+        `BrightMesh ${this.BrightMesh} is out of range for type ${this.Type}`
+      );
+      return;
+    }
+
+    const bright = mesh.clone(`${mesh.name}_bright`, mesh.parent, true);
+
+    if (!bright) return;
+
+    bright.material = getMaterial(
+      mesh.getScene(),
+      false,
+      2,
+      BlendState.ALPHA_ONEOE,
+      true
+    );
+    bright.metadata = {
+      ...mesh.metadata,
+      brightMesh: true,
+      blendMeshLight: 1,
+      csmCaster: false,
+      depthOccluder: false,
+    };
+    bright.isPickable = false;
+    bright.receiveShadows = false;
+  }
+
+  /** `ShadowHiddenMesh`: the flag `objectShadow.meshCasts` reads. */
+  private applyShadowHiddenMesh() {
+    if (this.ShadowHiddenMesh < 0 || !this.gltf) return;
+
+    const mesh = this.getMesh(this.ShadowHiddenMesh);
+
+    if (!mesh) return;
+
+    mesh.metadata ??= {};
+    mesh.metadata.shadowSkip = true;
   }
 
   private applyBlendMesh() {

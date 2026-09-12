@@ -64,10 +64,14 @@ import {
   TRANSFORMED_NPC_TABLE,
 } from './npcs/playerNpcTables';
 import { NPC_MODEL_TABLE } from './npcs/npcModelTable';
+import { Archangel, ArchangelMessenger } from './npcs/archangel';
 
 export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   [226]: Trainer,
   [230]: Alex,
+  // The Blood Castle archangels: bright pass, halo, feathers.
+  [232]: Archangel,
+  [233]: ArchangelMessenger,
   [240]: Baz,
   [247]: CrossbowGuard,
   [248]: Martin,

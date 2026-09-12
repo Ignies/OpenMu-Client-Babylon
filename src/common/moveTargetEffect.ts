@@ -208,6 +208,12 @@ export class TerrainDecal {
     this.#mesh.setEnabled(false);
   }
 
+  /** The mesh and its material go; the texture is the shared cache's. */
+  dispose(): void {
+    this.#mesh.dispose(false, false);
+    this.#material.dispose();
+  }
+
   get enabled(): boolean {
     return this.#mesh.isEnabled(false);
   }
