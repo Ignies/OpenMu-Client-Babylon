@@ -81,6 +81,11 @@ export interface FeathersOptions {
    * wings face, a breeze). Added to each feather's own random drift.
    */
   drift?: readonly [number, number];
+  /**
+   * Ground a feather may not cross (a wall, a building): it settles there
+   * and falls straight down the face instead of drifting through it.
+   */
+  blocked?: (x: number, z: number) => boolean;
 }
 
 type Feather = {
@@ -175,8 +180,20 @@ function spawn(scene: Scene, at: Vector3, opts: FeathersOptions): EffectHandle {
         const sway = Math.cos(f.swayPhase + f.age * SWAY_RATE) * SWAY_RATE;
 
         f.pos.y -= fall * dt;
-        f.pos.x += (f.vx + f.swayX * sway) * dt;
-        f.pos.z += (f.vz + f.swayZ * sway) * dt;
+
+        const nx = f.pos.x + (f.vx + f.swayX * sway) * dt;
+        const nz = f.pos.z + (f.vz + f.swayZ * sway) * dt;
+
+        if (opts.blocked && opts.blocked(nx, nz)) {
+          // Met a wall: the drift is spent, the fall goes on where it is.
+          f.vx = 0;
+          f.vz = 0;
+          f.swayX = 0;
+          f.swayZ = 0;
+        } else {
+          f.pos.x = nx;
+          f.pos.z = nz;
+        }
 
         const ground = world ? world.getTerrainHeight(f.pos.x, f.pos.z) : -Infinity;
 
