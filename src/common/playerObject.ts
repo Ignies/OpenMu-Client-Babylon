@@ -365,24 +365,32 @@ export class PlayerObject extends ModelObject {
     tier?: ItemVisualTier
   ) {
     const seq = ++part.loadSeq;
-    const gltf = await loadGLTF(dir + modelPath, Store.world!);
-    if (seq !== part.loadSeq) return;
-    part.load(gltf);
+    // Counted so the loading screen can tell a character that is merely
+    // `Ready` (its rig is in) from one that is dressed: every part of a
+    // character comes through here (`sceneGate.isStaged`).
+    this.PartsPending++;
+    try {
+      const gltf = await loadGLTF(dir + modelPath, Store.world!);
+      if (seq !== part.loadSeq) return;
+      part.load(gltf);
 
-    gltf.mesh.isPickable = this.IsInteractable;
-    const meshes = part.getMeshes(true);
+      gltf.mesh.isPickable = this.IsInteractable;
+      const meshes = part.getMeshes(true);
 
-    meshes.forEach(mesh => {
-      mesh.isPickable = this.IsInteractable;
-      mesh.metadata ??= {};
-      mesh.metadata.itemLvl = itemLvl ?? 0;
-      mesh.metadata.isExcellent = isExcellent ?? false;
-      // Read by the GlowLayer emissive selector (sceneLook.ts); null keeps
-      // the default body parts off the glow pass.
-      mesh.metadata.itemTier = tier?.active ? tier : null;
-      mesh.metadata.timeOffset = 0;
-      if (tier?.active) requestGlowProbe();
-    });
+      meshes.forEach(mesh => {
+        mesh.isPickable = this.IsInteractable;
+        mesh.metadata ??= {};
+        mesh.metadata.itemLvl = itemLvl ?? 0;
+        mesh.metadata.isExcellent = isExcellent ?? false;
+        // Read by the GlowLayer emissive selector (sceneLook.ts); null keeps
+        // the default body parts off the glow pass.
+        mesh.metadata.itemTier = tier?.active ? tier : null;
+        mesh.metadata.timeOffset = 0;
+        if (tier?.active) requestGlowProbe();
+      });
+    } finally {
+      this.PartsPending--;
+    }
   }
 
   Update(gameTime: World['gameTime']): void {

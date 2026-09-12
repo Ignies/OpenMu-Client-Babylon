@@ -453,6 +453,15 @@ export class ModelObject {
   Ready = false;
 
   LoadFailed = false;
+
+  /**
+   * Sub-loads still in flight under this model. A character's body and
+   * equipment parts are fetched after `Ready` has already flipped
+   * (`PlayerObject.loadPartAsync`), so `Ready` on its own does not mean the
+   * object is finished - `sceneGate.isStaged` waits on both.
+   */
+  PartsPending = 0;
+
   /**
    * No part of this model (or of its bone-linked children) is inside the
    * camera frustum. Driven by `updateFrustumVisibility`; while set, the model

@@ -8,6 +8,10 @@ import {
   characterSlotAngle,
   characterSlotPosition,
 } from '../../common/characterSelect';
+import { setSceneHold } from '../../common/sceneGate';
+
+/** This system's name on the loading gate (`common/sceneGate.ts`). */
+const GATE = 'characterSelect';
 
 export const CharacterSelectSystem: ISystemFactory = world => {
   const spawned: Entity[] = [];
@@ -92,6 +96,11 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
       if (!staged) {
         if (stagedFor !== null) clear();
+        // The line-up is part of this screen's load, so the loading screen
+        // has to wait for it: the terrain lands first and the character list
+        // is still in flight, and without this hold the gate lifted on an
+        // empty scene with the characters walking in behind it.
+        setSceneHold(GATE, Store.uiState === UIState.Characters);
         return;
       }
 
@@ -99,10 +108,14 @@ export const CharacterSelectSystem: ISystemFactory = world => {
         .map(c => `${c.SlotIndex}:${c.Name}:${c.Level}`)
         .join('|');
 
-      if (key === stagedFor) return;
+      if (key !== stagedFor) {
+        stage();
+        stagedFor = key;
+      }
 
-      stage();
-      stagedFor = key;
+      // Spawned: from here the models are counted by the ready check like
+      // every other one in the scene.
+      setSceneHold(GATE, Store.loadingCharactersList);
     },
   };
 };

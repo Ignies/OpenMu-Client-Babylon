@@ -14,7 +14,6 @@ import { TestScene } from './scenes/testScene';
 import { loadMapIntoScene } from './libs/mu/loadMapIntoScene';
 import { prefetchWorldTerrain } from './libs/mu/prefetchWorld';
 import { createWorld } from './ecs/createWorld';
-import { ENUM_WORLD } from './common';
 import { EventBus } from './libs/eventBus';
 import { installLoginMusic } from './libs/loginMusic';
 import { setKeyProfile } from './common/keyBindings';
@@ -27,7 +26,6 @@ import {
 } from './libs/mu/preloadSprites';
 import { installPerfOverlay, recordFrame } from './libs/perfOverlay';
 import { refreshServerList } from './common/serverList';
-import { loadVersionUi } from './version';
 
 if (APP_STAGE === 'dev' || QA_ENABLED) {
   import('@babylonjs/core/Legacy/legacy');
@@ -221,29 +219,11 @@ window.addEventListener('resize', onResize);
 
 onResize();
 
-/**
- * The version's two menu worlds, so stepping from the login backdrop to the
- * character one does not flash the loading screen. Empty for a version whose
- * pre-game backdrop is a standalone set piece instead of a world.
- */
-let pregameWorlds: ReadonlySet<ENUM_WORLD> = new Set();
-
-void loadVersionUi().then(({ pregame }) => {
-  if (pregame.backdrop.kind !== 'world') return;
-
-  pregameWorlds = new Set([
-    pregame.backdrop.login,
-    pregame.backdrop.characters,
-  ]);
-});
-
 EventBus.on('requestWarp', ({ map, pos }) => {
-  const betweenMenus =
-    pregameWorlds.has(map) && pregameWorlds.has(world.mapIndex);
-
-  if (!betweenMenus) {
-    Store.setSceneLoading(true);
-  }
+  // Every warp, the step from the login backdrop to the character one
+  // included: that one is a full terrain swap plus the character line-up, and
+  // skipping the screen for it meant watching both load on an open scene.
+  Store.setSceneLoading(true);
 
   // The terrain files go out together, before the loader's first await; the
   // loader picks up the same promises (prefetchWorld.ts).
