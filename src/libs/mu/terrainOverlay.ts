@@ -16,6 +16,7 @@ import { puddleCover, wetness } from '../../weather/wetness';
 import { rainStrength } from '../../weather/rainState';
 import { pointLightPoolLights } from '../../common/pointLightPool';
 import { linearBufferActive } from '../../common/lightModel';
+import { SNOW_ART, type ArtMatch } from './artMatch';
 import { lookDirector } from '../../lighting/director';
 
 /**
@@ -104,6 +105,28 @@ export type TerrainOverlay = {
   readonly bed?: Readonly<Record<number, number>>;
   /** Share for a tile `bed` does not name. Only read when `bed` is set. */
   readonly bedDefault?: number;
+
+  /**
+   * Where the map's own art is already this substance, stand aside and let it
+   * show. Declared as the albedo a fragment has to have for the layer to read
+   * it as already painted: a luminance ramp and a chroma ramp, both
+   * `[start, full]`, tested against the resolved splat colour in the tile
+   * textures' own space.
+   *
+   * This is what keeps one white off another. Devias, Santa Town and the ice
+   * fields all ship tiles with snow painted into them; a layer that covers
+   * them anyway is drawing a second snow over the first, in its own flat
+   * colour and with its own tile-shaped edges, and the map's art is what
+   * loses. Deferring is a change of COLOUR and not of amount: the layer still
+   * has its full depth there, so the drifts, the trail, the prints and the
+   * melt all carry across a field unbroken - it simply has nothing to add to
+   * a pixel that is already snow.
+   *
+   * Chroma matters as much as luminance, and only together do they separate
+   * snow from the things that are merely bright: Santa Town's water and the
+   * ice fields' blue ice are as light as a drift and nothing like as grey.
+   */
+  readonly defersToArt?: ArtMatch;
   /**
    * Brightness variation across the layer's own surface, as a fraction. 0 is
    * a flat wash of `colour`.
@@ -267,6 +290,10 @@ export const SNOW_COVER: TerrainOverlay = {
   //     stamped into it.
   bed: { 0: 1, 1: 1, 2: 1, 7: 1, 4: 0.55, 6: 0.55, 5: 0 },
   bedDefault: 0.3,
+  // Where the tile is already painted snow, the layer's colour becomes the
+  // tile's and the map's own art draws the ground (`artMatch.ts` for the
+  // numbers and the measurements behind them).
+  defersToArt: SNOW_ART,
   // A patch every ~7 tiles, with the second octave breaking that up further.
   patchScale: 0.14,
   softness: 0.12,
@@ -1063,6 +1090,21 @@ export function terrainOverlayGlsl(
         ? `${finalColorVar}.rgb * vec3(${f(c[0])}, ${f(c[1])}, ${f(c[2])})`
         : `vec3(${f(c[0])}, ${f(c[1])}, ${f(c[2])})`;
 
+    // Art the layer defers to: its colour becomes the ground's own wherever
+    // the ground is already the substance being drawn. Before the surface
+    // terms, so the drifts and the grain shape the map's texture there
+    // instead of shaping a flat colour laid over it - the layer keeps its
+    // depth, it just stops repainting what is already snow.
+    const artGlsl = !o.defersToArt
+      ? ''
+      : `
+      float ovArt${i} = ovArtMatch(
+        ${finalColorVar}.rgb,
+        vec2(${f(o.defersToArt.lum[0])}, ${f(o.defersToArt.lum[1])}),
+        vec2(${f(o.defersToArt.chroma[0])}, ${f(o.defersToArt.chroma[1])}));
+      ovCol${i} = mix(ovCol${i}, ${finalColorVar}.rgb, ovArt${i});
+`;
+
     const grain = o.grain ?? 0;
     const grainScale = o.grainScale ?? 1;
 
@@ -1365,7 +1407,7 @@ ${meltGlsl}
       );
 
       vec3 ovCol${i} = ${blended};
-${grainGlsl}${reliefGlsl}
+${artGlsl}${grainGlsl}${reliefGlsl}
       ${finalColorVar}.rgb = mix(${finalColorVar}.rgb, ovCol${i}, ovAmount${i});${meltDampGlsl}${
       o.reflect
         ? `
@@ -1738,6 +1780,18 @@ ${bedFns}
       mix(overlayHash(i + vec2(0.0, 1.0)), overlayHash(i + vec2(1.0, 1.0)), f.x),
       f.y
     );
+  }
+
+  // How much this albedo already IS a layer's own substance: bright, and
+  // without the colour that separates blue ice or standing water from snow.
+  // The CPU twin is artMatch in terrainOverlay.ts; keep them in step.
+  float ovArtMatch(vec3 c, vec2 lumRamp, vec2 chromaRamp) {
+    float mx = max(c.r, max(c.g, c.b));
+    float mn = min(c.r, min(c.g, c.b));
+    float chroma = mx > 0.0 ? (mx - mn) / mx : 0.0;
+    float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));
+    return smoothstep(lumRamp.x, lumRamp.y, lum) *
+           (1.0 - smoothstep(chromaRamp.x, chromaRamp.y, chroma));
   }
 
   // How level this fragment is, against a layer's slope limit.
