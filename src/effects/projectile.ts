@@ -74,6 +74,12 @@ export interface ProjectileOptions {
   onArrive?: (at: Vector3) => void;
   /** Fired if it gave up (target gone). */
   onLost?: () => void;
+  /**
+   * The head's position, once a tick - as `joint`'s `trace`. For a host
+   * that must ride something on the bolt this layer does not own: an
+   * arrow's own light. Read-only: copy it, never keep it.
+   */
+  trace?: (head: Vector3) => void;
 }
 
 const live = new LiveList();
@@ -110,6 +116,8 @@ function spawn(scene: Scene, at: Vector3, opts: ProjectileOptions): EffectHandle
     : null;
   const trail = opts.trail ? new Emitter(scene, opts.trail.recipe, opts.trail.rate) : null;
 
+  opts.trace?.(pos);
+
   let t = 0;
   let travelled = 0;
   let arrived = false;
@@ -126,6 +134,7 @@ function spawn(scene: Scene, at: Vector3, opts: ProjectileOptions): EffectHandle
       const step = speed * dt;
       if (dist <= Math.max(step, HIT_DISTANCE)) {
         pos.copyFrom(target);
+        opts.trace?.(pos);
         arrived = true;
         return false;
       }
@@ -146,6 +155,7 @@ function spawn(scene: Scene, at: Vector3, opts: ProjectileOptions): EffectHandle
         card.visibility = (card.material as { diffuseTexture?: unknown } | null)?.diffuseTexture ? 1 : 0;
       }
       if (model) model.yawTo(dir);
+      opts.trace?.(pos);
       trail?.tick(pos, dt);
       return true;
     },

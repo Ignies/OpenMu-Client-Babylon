@@ -12,7 +12,7 @@ import {
   type LightAnchor,
   type LightRecipe,
 } from './lightSource';
-import { lightAreaSkill, lightSkillTrail, lightTargetedSkill } from './skills';
+import { lightAreaSkill, lightArrow, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
@@ -137,6 +137,20 @@ class Lighting {
     follow: (out: { x: number; y: number; z: number }) => void
   ): LightSource | null {
     return lightSkillTrail(scene, skill, follow);
+  }
+
+  /**
+   * Light an arrow for the length of its flight - the original lights the
+   * arrow body itself every frame it is alive. `skill` is 0 for a plain bow
+   * shot. Null when that arrow flies dark, so the caller skips the rest.
+   */
+  arrow(
+    scene: Scene,
+    skill: number,
+    model: string,
+    follow: (out: { x: number; y: number; z: number }) => void
+  ): LightSource | null {
+    return lightArrow(scene, skill, model, follow);
   }
 
   /** Light a server object effect (level-up, shields, swirl) on an entity. */
