@@ -1,7 +1,6 @@
 import { BurstLimit, bucketFor, clientIp } from '../../src/common/rateLimit';
 import { confirmLive, exchangeSession, verifyTicket } from './identity';
 import * as store from './listings';
-import { audit } from './db';
 
 /**
  * The marketplace's HTTP face.
@@ -242,10 +241,15 @@ Bun.serve({
         const owed = store.balance(auth.account);
         if (owed <= 0) return json({ error: 'You have nothing to collect.' }, 400, cors);
 
-        // Recorded as requested rather than taken: the money is only removed
-        // from the balance when a bot is actually about to hand it over, so a
+        // The character the bot has to meet, checked the same way a listing's
+        // is. Recorded as a request rather than taken: the money only leaves
+        // the balance when a bot is actually about to hand it over, so a
         // request that never reaches a handover cannot lose it.
-        audit('payout requested', { account: auth.account, detail: { owed } });
+        const character = body.character;
+        if (typeof character !== 'string' || !/^[A-Za-z0-9]{1,10}$/.test(character)) {
+          return json({ error: 'Log in to a character first.' }, 400, cors);
+        }
+        store.requestPayout(auth.account, character);
         return json({ owed }, 200, cors);
       }
 

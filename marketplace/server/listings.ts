@@ -33,6 +33,8 @@ export type Listing = {
   buyer: string | null;
   buyerCharacter: string | null;
   listedAt: number;
+  /** When the state last changed; what the dispatch deadlines count from. */
+  updatedAt: number;
 };
 
 const toListing = (row: ListingRow): Listing => ({
@@ -46,6 +48,7 @@ const toListing = (row: ListingRow): Listing => ({
   buyer: row.buyer,
   buyerCharacter: row.buyer_char,
   listedAt: row.created_at,
+  updatedAt: row.updated_at,
 });
 
 /**
@@ -166,6 +169,90 @@ export function settleSale(id: string): boolean {
   return true;
 }
 
+/**
+ * A `pending` listing that will not be collected: the seller refused or
+ * cancelled the trade, walked away from it, or never turned up. Nothing left
+ * their bag, so there is nothing to give back; the row just stops being work,
+ * and the bot does not come asking again.
+ */
+export function drop(id: string, why: string): boolean {
+  const changed = db
+    .query(
+      `UPDATE listings SET state = 'cancelled', updated_at = ?
+       WHERE id = ? AND state = 'pending'`
+    )
+    .run(Date.now(), id).changes;
+
+  if (changed) audit('listing dropped', { listing: id, detail: { why } });
+  return changed > 0;
+}
+
+/**
+ * A seller who asked for their item back and then refused the trade that
+ * returns it. The item stays the bot's and goes back on sale at the same
+ * price; they can cancel again when they want it.
+ */
+export function backOnSale(id: string, why: string): boolean {
+  const changed = db
+    .query(
+      `UPDATE listings SET state = 'active', updated_at = ?
+       WHERE id = ? AND state = 'returning'`
+    )
+    .run(Date.now(), id).changes;
+
+  if (changed) audit('return refused', { listing: id, detail: { why } });
+  return changed > 0;
+}
+
+/**
+ * The bot cannot find the item the service says it holds. Off sale, and
+ * left for a person rather than offered to the next buyer to fail on.
+ */
+export function markStuck(id: string, why: string): boolean {
+  const changed = db
+    .query(
+      `UPDATE listings SET state = 'stuck', buyer = NULL, buyer_char = NULL, updated_at = ?
+       WHERE id = ? AND state IN ('active', 'claimed', 'returning')`
+    )
+    .run(Date.now(), id).changes;
+
+  if (changed) audit('listing stuck', { listing: id, detail: { why } });
+  return changed > 0;
+}
+
+/** The bot found the held item somewhere else in its bag: write that down. */
+export function adoptSlot(id: string, slot: number): void {
+  db.query('UPDATE listings SET holder_slot = ?, updated_at = ? WHERE id = ?').run(
+    slot,
+    Date.now(),
+    id
+  );
+  audit('slot adopted', { listing: id, detail: { slot } });
+}
+
+/** Which bot holds this listing's item, and where. Null holder: never collected. */
+export function holderOf(id: string): { holder: string | null; slot: number | null } {
+  const row = db
+    .query('SELECT holder, holder_slot AS slot FROM listings WHERE id = ?')
+    .get(id) as { holder: string | null; slot: number | null } | undefined;
+  return { holder: row?.holder ?? null, slot: row?.slot ?? null };
+}
+
+/**
+ * Every bag slot this bot account is recorded as holding an item in, so a
+ * bag search for one listing's item never lands on another listing's.
+ */
+export function heldSlots(holder: string): Set<number> {
+  const rows = db
+    .query(
+      `SELECT holder_slot AS slot FROM listings
+       WHERE holder = ? AND holder_slot IS NOT NULL
+         AND state IN ('active', 'claimed', 'returning', 'stuck')`
+    )
+    .all(holder) as { slot: number }[];
+  return new Set(rows.map(r => r.slot));
+}
+
 /** The seller wants it back. Only possible while nobody has claimed it. */
 export function cancel(id: string, seller: string): boolean {
   const changed = db
@@ -269,4 +356,39 @@ export function takeBalance(account: string): number {
   db.query('UPDATE balances SET zen = 0 WHERE account = ?').run(account);
   audit('balance taken for payout', { account, detail: { zen: owed } });
   return owed;
+}
+
+// ---- payouts ---------------------------------------------------------------
+
+export type PayoutRequest = { account: string; character: string; requestedAt: number };
+
+/**
+ * A seller asked for what they are owed. One open request per account; the
+ * character is who the bot has to meet, and asking again just moves it to
+ * whichever character they are on now.
+ */
+export function requestPayout(account: string, character: string): void {
+  db.query(
+    `INSERT INTO payout_requests (account, character, requested_at) VALUES (?, ?, ?)
+     ON CONFLICT(account) DO UPDATE SET character = excluded.character,
+                                       requested_at = excluded.requested_at`
+  ).run(account, character, Date.now());
+  audit('payout requested', { account, detail: { character } });
+}
+
+/** Every open request whose account is still owed something, oldest first. */
+export function payoutRequests(): PayoutRequest[] {
+  const rows = db
+    .query(
+      `SELECT p.account, p.character, p.requested_at AS requestedAt
+       FROM payout_requests p JOIN balances b ON b.account = p.account
+       WHERE b.zen > 0 ORDER BY p.requested_at ASC`
+    )
+    .all() as PayoutRequest[];
+  return rows;
+}
+
+/** Paid, or given up on: the request is done either way. */
+export function clearPayoutRequest(account: string): void {
+  db.query('DELETE FROM payout_requests WHERE account = ?').run(account);
 }

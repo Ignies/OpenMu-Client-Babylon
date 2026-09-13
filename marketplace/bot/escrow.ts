@@ -1,3 +1,4 @@
+import type { Bag } from './bag';
 import type { Scope } from './scope';
 import { FIRST_SHOP_SLOT, type ShopSession } from './shop';
 import type { BotSession } from './session';
@@ -20,6 +21,11 @@ import type { HandoverKind, Ledger } from './ledger';
  * refusal to agree to anything other than the terms, the ordering rules the
  * live runs turned up, and a booked record of whether the money actually moved
  * by what it should have.
+ *
+ * The bot is not seen between handovers. It stays hidden (a game-master
+ * `/hide`), warps to the customer unseen, and only steps into view once it is
+ * standing on their tile - wearing whatever skin the worker gave it. When the
+ * handover is over, whichever way it went, it hides again.
  */
 
 export type EscrowContext = {
@@ -34,32 +40,54 @@ export type EscrowContext = {
   botName?: string;
   /** The bot's shop window, when this bot sells through one. */
   shop?: ShopSession;
+  /** What the bot is carrying, slot by slot, when it tracks that. */
+  bag?: Bag;
+  /**
+   * Whether the bot hides between handovers and only appears at the
+   * customer. On by default; off for a bot that is not a game master.
+   */
+  stealth?: boolean;
 };
 
-export type EscrowResult = { ok: true } | { ok: false; reason: string };
+/**
+ * `declined` on a failure means the bot stood in front of the customer and
+ * they refused, cancelled, or never put their side up: the customer's
+ * decision, and the worker does not ask them again. Without it the bot could
+ * not reach them at all, which is worth another try later.
+ */
+export type EscrowResult = { ok: true } | { ok: false; reason: string; declined?: boolean };
 
 /** A collect also reports where the server actually put the item. */
 export type CollectResult =
   /**
-   * The item is ours. `slot` is where the server put it, or null when it did
-   * not say - a completed trade sends no notification of what arrived, so
-   * this is unknown more often than not. Unknown is not failure: the seller
-   * has handed the item over either way, and reporting failure here is what
-   * made the bot collect the same listing again on the next poll.
+   * The item is ours. `slot` is where the server put it, read from the
+   * inventory list it sends after every trade, or null when even that could
+   * not say - which is rare, and is reported rather than guessed. Unknown is
+   * not failure: the seller has handed the item over either way.
    */
   | { ok: true; slot: number | null }
-  | { ok: false; reason: string };
+  | { ok: false; reason: string; declined?: boolean };
 
 /** How long a person gets to put their side up before the bot gives up. */
 const PARTNER_PATIENCE_MS = 90_000;
 
-/** The server answers our own item move at once, or it refused it. */
-const OWN_ITEM_PATIENCE_MS = 8_000;
-
 /** The balance arrives in its own packet, so it is read a moment after. */
 const BALANCE_SETTLE_MS = 1500;
 
+/** The inventory list follows the trade result by a packet or two. */
+const BAG_SETTLE_MS = 5000;
+
+/**
+ * The prefix of the reason given when the service names a slot the bot is
+ * not actually holding anything in. The worker treats it differently from a
+ * customer who never turned up: the item may be elsewhere in the bag.
+ */
+export const HELD_ITEM_MISSING = 'nothing is held in bag slot';
+
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/** What `TradeSession.requestWith` throws when the answer was no. */
+const REFUSED = 'the trade was refused';
 
 /**
  * Runs a handover and books it.
@@ -69,6 +97,8 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
  * move nothing and is checked just as strictly - that is precisely where the
  * server's cancel bug destroys Zen, and it is the case a bot carrying a float
  * would otherwise never notice.
+ *
+ * Whatever happens inside, the bot ends hidden again.
  */
 async function booked<T extends EscrowResult>(
   context: EscrowContext,
@@ -80,7 +110,12 @@ async function booked<T extends EscrowResult>(
   const { wallet, ledger, botName, log } = context;
   const zenBefore = wallet?.zen ?? null;
 
-  const result = await run();
+  let result: T;
+  try {
+    result = await run();
+  } finally {
+    vanish(context);
+  }
 
   if (!ledger) return result;
 
@@ -105,26 +140,41 @@ async function booked<T extends EscrowResult>(
 }
 
 /**
- * Brings the bot to the player and opens a trade with them.
+ * Steps into the customer's view.
  *
- * The warp is only used when it is needed. A warp is a leave-and-re-enter, and
- * warping onto someone already in view drops the bot out of *their* scope
- * without putting it back - which leaves the two one-way visible, and the
- * server refuses a trade whose partner is not among the requester's own
- * observers.
+ * Hide first, then unhide, even when the bot believes it is already hidden:
+ * `/unhide` re-spawns the bot on the map, which hands every observer a fresh
+ * scope entry, and that announcement is the whole point. A bot that arrived
+ * by warp alone is in the customer's scope server side but was never
+ * announced to their client - the two are one-way visible, and the server
+ * refuses a trade whose partner is not among the requester's observers.
+ * Hiding first makes the unhide a real re-spawn rather than a no-op.
  */
+async function appear(context: EscrowContext): Promise<void> {
+  if (context.stealth === false) return;
+  context.session.hide();
+  await wait(300);
+  context.session.unhide();
+  await wait(1200);
+}
+
+/** Back out of everybody's view. Sent blind: a hide on a hidden bot is free. */
+function vanish(context: EscrowContext): void {
+  if (context.stealth === false) return;
+  try {
+    context.session.hide();
+  } catch {
+    // The connection is gone; there is nobody left to hide from.
+  }
+}
+
 /**
  * Gets the bot next to the player, and both of them able to see each other.
  *
- * Seeing them is not enough. The server resolves a trade partner out of the
- * requester's *own* observers, so the customer has to be able to see the bot
- * too, and a warp on its own does not manage that: `/trace` is a map change,
- * which takes the bot out of the world and puts it back, dropping it from the
- * customer's scope without ever announcing its return.
- *
- * So the warp is followed by an ordinary in-map move onto the customer's tile.
- * That is broadcast to everyone nearby the same way walking is, which is what
- * actually puts the bot on their screen.
+ * `/trace` is a map change, which takes the bot out of the world and puts it
+ * back without announcing it to anyone. So the warp is followed by an in-map
+ * move onto the customer's tile, and then by stepping into view, which is
+ * what actually puts the bot on their screen.
  */
 async function reach(context: EscrowContext, characterName: string, warp: boolean) {
   const { session, scope, log } = context;
@@ -145,11 +195,9 @@ async function reach(context: EscrowContext, characterName: string, warp: boolea
 
   const partner = them();
   if (partner) {
-    // Onto their tile by an ordinary in-map move, which is broadcast to
-    // everyone nearby. This is the step that puts the bot on their screen;
-    // the warp alone does not.
     session.teleportTo(partner.x, partner.y);
-    await wait(1500);
+    await wait(800);
+    await appear(context);
   }
 
   return them();
@@ -185,6 +233,8 @@ async function openTradeWith(
       return { ok: true };
     } catch (e) {
       lastReason = e instanceof Error ? e.message : `could not open a trade with ${characterName}`;
+      // A "no" is an answer. Asking twice more would be pestering.
+      if (lastReason === REFUSED) return { ok: false, reason: lastReason, declined: true };
       log(`trade request ${attempt} did not take (${lastReason})`);
     }
   }
@@ -202,7 +252,8 @@ async function openTradeWith(
     );
   }
 
-  return { ok: false, reason: lastReason };
+  // Seen, asked, and not answered or refused: that is the customer's call.
+  return { ok: false, reason: lastReason, declined: everSeen };
 }
 
 /**
@@ -218,7 +269,7 @@ export function collectListing(
   itemCount = 1
 ): Promise<CollectResult> {
   return booked(context, 'list', sellerCharacter, 0, async () => {
-    const { trade, log } = context;
+    const { trade, bag, log } = context;
 
     const opened = await openTradeWith(context, sellerCharacter);
     if (!opened.ok) return opened;
@@ -232,20 +283,83 @@ export function collectListing(
       return {
         ok: false,
         reason: e instanceof Error ? e.message : 'the seller never handed it over',
+        declined: true,
       };
     }
+
+    // What the seller actually put up, and what the bag looked like before
+    // the exchange: both are needed to say where the item landed afterwards.
+    const offered = [...trade.theirItems.values()];
+    const before = bag?.snapshot() ?? null;
+    const bagVersion = bag?.version ?? 0;
 
     const outcome = finish(await trade.settle(terms), log);
     if (!outcome.ok) return outcome;
 
     // Past this line the trade has completed and the seller no longer has the
     // item, so there is no failure left to report - only how much we know.
-    const slot = trade.receivedSlots.at(-1) ?? null;
+    const slot = await landedSlot(context, before, bagVersion, offered);
     if (slot === null) {
-      log('the item is ours but the server did not say which slot it went to');
+      log('the item is ours but which slot it went to could not be worked out');
     }
     return { ok: true, slot };
   });
+}
+
+/**
+ * Where a collected item ended up.
+ *
+ * The server lists the whole inventory after every trade, so the answer is
+ * the slot that is occupied now and was not before. When several are (the
+ * seller put up more than one), the one holding the bytes the trade showed
+ * us wins. The item-appear notice the trade code used to rely on is a
+ * fallback only: the server does not send it for traded goods.
+ */
+async function landedSlot(
+  context: EscrowContext,
+  before: Set<number> | null,
+  bagVersion: number,
+  offered: Uint8Array[]
+): Promise<number | null> {
+  const { bag, trade, log } = context;
+
+  if (bag && before) {
+    try {
+      await bag.waitForUpdate(bagVersion, BAG_SETTLE_MS);
+    } catch {
+      log('the server did not list the bag after the trade');
+    }
+    const arrived = bag.newSince(before);
+    if (arrived.length === 1) return arrived[0];
+    if (arrived.length > 1) {
+      const last = offered.at(-1);
+      const matched = last ? bag.slotOf(last) : null;
+      if (matched !== null && arrived.includes(matched)) return matched;
+      log(`${arrived.length} items arrived (slots ${arrived.join(', ')}); taking the last`);
+      return arrived[arrived.length - 1];
+    }
+    const last = offered.at(-1);
+    if (last) {
+      const matched = bag.slotOf(last);
+      if (matched !== null) return matched;
+    }
+  }
+
+  return trade.receivedSlots.at(-1) ?? null;
+}
+
+/**
+ * Refuses to offer from a slot the bag says is empty.
+ *
+ * The service writes a slot down when it collects; if a human moved the item
+ * or a shop stranded it, offering that slot sends a silent no-op and the
+ * handover fails for a reason that reads like the customer's fault.
+ */
+function checkHeld(context: EscrowContext, inventorySlot: number): EscrowResult {
+  const { bag } = context;
+  if (!bag || !bag.known) return { ok: true };
+  if (bag.slots.has(inventorySlot)) return { ok: true };
+  return { ok: false, reason: `${HELD_ITEM_MISSING} ${inventorySlot}` };
 }
 
 /**
@@ -267,6 +381,9 @@ export function deliverPurchase(
   return booked(context, 'buy', buyerCharacter, price, async () => {
     const { trade, log } = context;
 
+    const held = checkHeld(context, inventorySlot);
+    if (!held.ok) return held;
+
     const opened = await openTradeWith(context, buyerCharacter);
     if (!opened.ok) return opened;
 
@@ -274,14 +391,18 @@ export function deliverPurchase(
     log(`offered the item to ${buyerCharacter}, waiting for ${price} Zen`);
 
     try {
-      await trade.waitForTerms({ expectMoney: price }, PARTNER_PATIENCE_MS);
+      await trade.waitForTerms({ expectMoney: price, expectOwnItems: 1 }, PARTNER_PATIENCE_MS);
     } catch (e) {
       // Nothing of the buyer's is on the table yet, so cancelling is safe here.
       trade.cancel();
-      return { ok: false, reason: e instanceof Error ? e.message : 'the buyer never paid' };
+      return {
+        ok: false,
+        reason: e instanceof Error ? e.message : 'the buyer never paid',
+        declined: true,
+      };
     }
 
-    return finish(await trade.settle({ expectMoney: price }), log);
+    return finish(await trade.settle({ expectMoney: price, expectOwnItems: 1 }), log);
   });
 }
 
@@ -319,6 +440,9 @@ export async function deliverViaShop(
     const { log } = context;
     const shopSlot = FIRST_SHOP_SLOT;
 
+    const held = checkHeld(context, inventorySlot);
+    if (!held.ok) return held;
+
     // Shut first: OpenMU refuses a price change on an open store, and an
     // inherited open shop from a previous run would make every step below
     // fail for a reason that reads like something else.
@@ -333,10 +457,14 @@ export async function deliverViaShop(
       return { ok: false, reason: e instanceof Error ? e.message : 'the shop would not take it' };
     }
 
-    // Standing next to them before opening, so the shop is announced to the
-    // buyer as it opens rather than to an empty room.
+    // Standing next to them, and in view, before opening: the shop is
+    // announced to the buyer as it opens rather than to an empty room.
     const partner = await reach(context, buyerCharacter, false);
-    if (!partner) log(`could not reach ${buyerCharacter}; opening the shop here anyway`);
+    if (!partner) {
+      shop.close();
+      await putBack(context, shopSlot, inventorySlot);
+      return { ok: false, reason: `${buyerCharacter} never came into view` };
+    }
 
     try {
       await shop.openWith(SHOP_NAME);
@@ -358,7 +486,11 @@ export async function deliverViaShop(
     } catch (e) {
       shop.close();
       await putBack(context, shopSlot, inventorySlot);
-      return { ok: false, reason: e instanceof Error ? e.message : 'nobody bought it' };
+      return {
+        ok: false,
+        reason: e instanceof Error ? e.message : 'nobody bought it',
+        declined: true,
+      };
     }
   });
 }
@@ -421,5 +553,7 @@ function finish(outcome: TradeOutcome, log: (message: string) => void): EscrowRe
     return { ok: true };
   }
   log(`handover failed: ${outcome.reason}`);
-  return { ok: false, reason: outcome.reason };
+  // The table was open and the exchange did not go through: whichever side
+  // cancelled, the customer was there and it did not happen.
+  return { ok: false, reason: outcome.reason, declined: true };
 }

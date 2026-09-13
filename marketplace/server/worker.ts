@@ -3,18 +3,23 @@ import { BotSession } from '../bot/session';
 import { Scope } from '../bot/scope';
 import { TradeSession } from '../bot/trade';
 import { Wallet } from '../bot/wallet';
+import { Bag } from '../bot/bag';
 import { Ledger } from '../bot/ledger';
 import { ServerMessages } from '../bot/serverMessages';
 import {
+  HELD_ITEM_MISSING,
   collectListing,
   deliverPurchase,
   deliverViaShop,
   payOut,
   type EscrowContext,
+  type EscrowResult,
 } from '../bot/escrow';
 import { ShopSession, MINIMUM_SHOP_LEVEL } from '../bot/shop';
 import * as store from './listings';
 import { audit, db } from './db';
+import { isOnline } from './presence';
+import { Backoff, decide } from './dispatch';
 
 /**
  * The bot that does the work the listings describe.
@@ -28,7 +33,12 @@ import { audit, db } from './db';
  * Everything here is driven by the listing's state, never by memory of what it
  * was doing: if this process dies mid-handover, the row is still `pending` or
  * `claimed` and the next run picks it up. The only state that matters lives in
- * SQLite and in the game.
+ * SQLite and in the game. What the process does remember is which work has
+ * been failing, so that it is retried later rather than on every poll.
+ *
+ * Between handovers the bot is hidden. It is a game master, `/hide` takes it
+ * out of everybody's view, and it only steps out - wearing Julia's skin, the
+ * market's own NPC - once it is standing on the customer's tile.
  */
 
 const HOST = process.env.GAME_HOST ?? '127.0.0.1';
@@ -38,10 +48,17 @@ const PASSWORD = process.env.MARKETPLACE_BOT_PASSWORD ?? '';
 const POLL_MS = Number(process.env.MARKETPLACE_POLL_MS ?? 5000);
 
 /**
- * What the bot looks like. 2 is the Budge Dragon, the small flying one from
- * Lorencia - a courier rather than a person. Set to 0 to stay human.
+ * What the bot looks like when it is seen. 547 is Market Union Member Julia,
+ * the marketplace's own NPC in the original game. A `MonsterDefinition.Number`;
+ * 0 stays human.
  */
-const SKIN = Number(process.env.MARKETPLACE_BOT_SKIN ?? 2);
+const SKIN = Number(process.env.MARKETPLACE_BOT_SKIN ?? 547);
+
+/** Hidden between handovers. `off` for a bot that cannot `/hide`. */
+const STEALTH = (process.env.MARKETPLACE_BOT_HIDE ?? 'on') !== 'off';
+
+/** A payout request this old is dropped; the seller can press Collect again. */
+const PAYOUT_REQUEST_TTL_MS = 24 * 60 * 60_000;
 
 const stamp = () => new Date().toISOString().slice(11, 19);
 const log = (message: string) => console.log(`${stamp()}  ${message}`);
@@ -52,8 +69,13 @@ type Bot = {
   name: string;
   connection: BotConnection;
   session: BotSession;
+  bag: Bag;
+  /** Always present for item moves, whether or not this bot sells through it. */
+  shop: ShopSession;
   context: EscrowContext;
 };
+
+const backoff = new Backoff();
 
 async function connect(): Promise<Bot> {
   const tag = (message: string) => log(`[${ACCOUNT}] ${message}`);
@@ -61,6 +83,7 @@ async function connect(): Promise<Bot> {
   const scope = new Scope(connection, tag);
   const trade = new TradeSession(connection, tag);
   const wallet = new Wallet(connection, tag);
+  const bag = new Bag(connection, tag);
   const shop = new ShopSession(connection, tag);
   // Registered before the login, so anything the server says during it is seen.
   new ServerMessages(connection, tag);
@@ -73,15 +96,22 @@ async function connect(): Promise<Bot> {
   await connection.connect();
   const character = await session.enterWorld();
   scope.selfName = character.Name;
-  if (SKIN > 0) session.skinAs(SKIN);
 
-  // A shop is the delivery mechanism, and OpenMU refuses to price an item for
-  // a character below level 6 - which a freshly created bot is. Said once, at
-  // startup, rather than as a puzzling refusal on the first sale.
-  if (character.Level !== undefined && character.Level < MINIMUM_SHOP_LEVEL) {
+  // Out of sight first, then into costume: a skin change is announced to
+  // whoever can see the bot, and nobody should be able to.
+  if (STEALTH) session.hide();
+  if (SKIN > 0) session.skinAs(SKIN);
+  tag(`${STEALTH ? 'hidden' : 'visible'} between handovers, skin ${SKIN || 'none'}`);
+
+  // A shop is the delivery mechanism, and OpenMU refuses a character below
+  // level 6 - which a freshly created bot is - at the first step, the move of
+  // the item into the shop window. Said once, at startup, and the shop is
+  // then simply not offered: every delivery goes by trade instead.
+  const shopUsable = character.Level === undefined || character.Level >= MINIMUM_SHOP_LEVEL;
+  if (!shopUsable) {
     tag(
       `level ${character.Level}: too low to open a shop (needs ${MINIMUM_SHOP_LEVEL}), ` +
-        `so deliveries will fall back to trading`
+        `so deliveries will be trades`
     );
   }
   await wallet.waitForBalance().catch(() => tag('no balance reported; handovers will not reconcile'));
@@ -90,12 +120,16 @@ async function connect(): Promise<Bot> {
     name: character.Name,
     connection,
     session,
+    bag,
+    shop,
     context: {
       session,
       trade,
       scope,
       wallet,
-      shop,
+      shop: shopUsable ? shop : undefined,
+      bag,
+      stealth: STEALTH,
       ledger: new Ledger(undefined, (m: string) => log(`[ledger] ${m}`)),
       botName: character.Name,
       log: (m: string) => log(`[escrow] ${m}`),
@@ -103,15 +137,83 @@ async function connect(): Promise<Bot> {
   };
 }
 
-/** A seller is handing an item over, so it can go on sale. */
-async function collect(bot: Bot, listing: store.Listing): Promise<void> {
+/**
+ * The one bag slot holding this listing's item, when the bag can say.
+ *
+ * Slots already written down against other listings are ruled out first, so
+ * two listings of the same kind of item never resolve to the same square.
+ * Null when there is no candidate or more than one: guessing is what put
+ * empty slots up for sale.
+ */
+function findHeld(bot: Bot, listing: store.Listing): number | null {
+  if (!bot.bag.known) return null;
+  const taken = store.heldSlots(ACCOUNT);
+  const candidates = bot.bag
+    .slotsMatching({ group: listing.item.group, num: listing.item.num, lvl: listing.item.lvl })
+    .filter(slot => !taken.has(slot));
+  return candidates.length === 1 ? candidates[0] : null;
+}
+
+/**
+ * The slot to offer from: the recorded one, or the bag's answer, or none.
+ *
+ * An item can also be sitting in the stall grid: an earlier run stocked the
+ * shop, misread the server's answer as a refusal, and never put it back. That
+ * one is brought back into the bag first - an item is only ever offered from
+ * a bag slot - and the listing learns its new home.
+ */
+async function slotFor(bot: Bot, listing: store.Listing): Promise<number | null> {
+  const { holder, slot } = store.holderOf(listing.id);
+  if (holder !== null && holder !== ACCOUNT) return null;
+  if (slot !== null && (!bot.bag.known || bot.bag.slots.has(slot))) return slot;
+
+  let found = findHeld(bot, listing);
+  if (found === null) found = await recoverFromStall(bot, listing);
+  if (found !== null && found !== slot) {
+    log(`"${listing.id}" is in slot ${found}, not ${slot ?? 'unknown'}; adopting it`);
+    store.adoptSlot(listing.id, found);
+  }
+  return found;
+}
+
+/** Moves a stranded item from the stall back into the bag; the new bag slot, or null. */
+async function recoverFromStall(bot: Bot, listing: store.Listing): Promise<number | null> {
+  const shape = { group: listing.item.group, num: listing.item.num, lvl: listing.item.lvl };
+  const stranded = bot.bag.stallSlotsMatching(shape);
+  if (stranded.length !== 1) return null;
+
+  // A shop that is open refuses every move out of it.
+  bot.shop.close();
+  for (const free of bot.bag.freeBagSlots().slice(0, 8)) {
+    try {
+      await bot.shop.unstockItem(stranded[0], free);
+      log(`"${listing.id}" was stranded in stall slot ${stranded[0]}; back in bag slot ${free}`);
+      audit('recovered from stall', { listing: listing.id, detail: { from: stranded[0], to: free } });
+      return free;
+    } catch {
+      // That square did not fit it; the next one may.
+    }
+  }
+  log(`"${listing.id}" is stranded in stall slot ${stranded[0]} and no bag square would take it`);
+  return null;
+}
+
+/** A seller is handing an item over, so it can go on sale. Returns done. */
+async function collect(bot: Bot, listing: store.Listing): Promise<boolean> {
   log(`collecting "${listing.id}" from ${listing.sellerCharacter}`);
   const result = await collectListing(bot.context, listing.sellerCharacter, 1);
 
   if (!result.ok) {
+    if (result.declined) {
+      // The seller said no, cancelled the trade, or left it open: it is their
+      // item and their call, and the bot does not come back asking.
+      log(`"${listing.id}" dropped: ${result.reason}`);
+      store.drop(listing.id, result.reason);
+      return true;
+    }
     log(`could not collect "${listing.id}": ${result.reason}`);
     audit('collect failed', { listing: listing.id, detail: result.reason });
-    return;
+    return false;
   }
   // Recorded as held before anything else can go wrong. The item has left
   // the seller's bag; if this row is not written the next poll treats the
@@ -119,43 +221,22 @@ async function collect(bot: Bot, listing: store.Listing): Promise<void> {
   store.activate(listing.id, ACCOUNT, result.slot);
 
   if (result.slot === null) {
-    // Held, but we cannot say where. Delivery refuses a listing without a
-    // slot, so nobody can be charged for it - it waits for a human instead.
-    log(`"${listing.id}" is held but its slot is unknown; it will not be delivered`);
-    audit('slot unknown', { listing: listing.id, detail: 'collected without a reported slot' });
-    return;
+    // The bag may still know: the item is the only one of its kind that is
+    // not already spoken for.
+    const found = findHeld(bot, listing);
+    if (found !== null) {
+      store.adoptSlot(listing.id, found);
+      log(`"${listing.id}" is on sale, held in slot ${found} (found in the bag)`);
+      return true;
+    }
+    // Held, but nobody can say where. Off sale rather than sold and then
+    // never delivered; a person sorts it out.
+    store.markStuck(listing.id, 'collected without a known slot');
+    log(`"${listing.id}" is held but its slot is unknown; it is marked stuck`);
+    return true;
   }
   log(`"${listing.id}" is on sale, held in slot ${result.slot}`);
-}
-
-/** A buyer has reserved something: hand it over and take the price. */
-async function deliver(bot: Bot, listing: store.Listing): Promise<void> {
-  const slot = holderSlot(listing.id);
-  if (slot === null || !listing.buyerCharacter) {
-    audit('deliver impossible', { listing: listing.id, detail: 'no held slot or buyer character' });
-    return;
-  }
-
-  log(`delivering "${listing.id}" to ${listing.buyerCharacter} for ${listing.price}`);
-  // Through the shop, because the server pairs item and payment there in one
-  // step: no table to leave empty, no confirm to get wrong, and no cancel to
-  // destroy the buyer's Zen. Trading stays the fallback for what a shop
-  // cannot sell - a Harmony item, or a bot too low to open one.
-  let result = await deliverViaShop(bot.context, listing.buyerCharacter, slot, listing.price);
-  if (!result.ok && shopUnavailable(result.reason)) {
-    log(`shop delivery refused (${result.reason}); trading instead`);
-    result = await deliverPurchase(bot.context, listing.buyerCharacter, slot, listing.price);
-  }
-
-  if (!result.ok) {
-    // Back on sale rather than stuck: the buyer never paid, so nobody is owed
-    // anything and somebody else can have it.
-    log(`could not deliver "${listing.id}": ${result.reason}; back on sale`);
-    store.release(listing.id, result.reason);
-    return;
-  }
-  store.settleSale(listing.id);
-  log(`"${listing.id}" sold; ${listing.seller} is owed ${listing.price}`);
+  return true;
 }
 
 /**
@@ -171,82 +252,198 @@ function shopUnavailable(reason: string): boolean {
     reason.includes('CharacterLevelTooLow') ||
     reason.includes('ItemIsBlocked') ||
     reason.includes('would not open') ||
-    reason.includes('would not take it')
+    reason.includes('would not take it') ||
+    reason.includes('did not reach shop slot')
   );
 }
 
-/** A seller cancelled: give it back. */
-async function giveBack(bot: Bot, listing: store.Listing): Promise<void> {
-  const slot = holderSlot(listing.id);
+/** A buyer has reserved something: hand it over and take the price. */
+async function deliver(bot: Bot, listing: store.Listing): Promise<boolean> {
+  if (!listing.buyerCharacter) {
+    store.release(listing.id, 'claimed without a buyer character');
+    return true;
+  }
+
+  const slot = await slotFor(bot, listing);
   if (slot === null) {
+    store.markStuck(listing.id, 'held item not found in the bag');
+    log(`"${listing.id}" cannot be delivered: the held item is not in the bag; marked stuck`);
+    return true;
+  }
+
+  log(`delivering "${listing.id}" to ${listing.buyerCharacter} for ${listing.price}`);
+  // Through the shop, because the server pairs item and payment there in one
+  // step: no table to leave empty, no confirm to get wrong, and no cancel to
+  // destroy the buyer's Zen. Trading stays the fallback for what a shop
+  // cannot sell - a Harmony item, or a bot too low to open one.
+  let result: EscrowResult = await deliverViaShop(
+    bot.context,
+    listing.buyerCharacter,
+    slot,
+    listing.price
+  );
+  if (!result.ok && shopUnavailable(result.reason)) {
+    log(`shop delivery refused (${result.reason}); trading instead`);
+    result = await deliverPurchase(bot.context, listing.buyerCharacter, slot, listing.price);
+  }
+
+  if (!result.ok) {
+    if (result.reason.startsWith(HELD_ITEM_MISSING)) {
+      store.markStuck(listing.id, result.reason);
+      log(`"${listing.id}": ${result.reason}; marked stuck`);
+      return true;
+    }
+    // Back on sale rather than stuck: the buyer never paid, so nobody is owed
+    // anything and somebody else can have it.
+    log(`could not deliver "${listing.id}": ${result.reason}; back on sale`);
+    store.release(listing.id, result.reason);
+    return false;
+  }
+  store.settleSale(listing.id);
+  log(`"${listing.id}" sold; ${listing.seller} is owed ${listing.price}`);
+  return true;
+}
+
+/** A seller cancelled: give it back. */
+async function giveBack(bot: Bot, listing: store.Listing): Promise<boolean> {
+  const { holder } = store.holderOf(listing.id);
+  if (holder === null) {
     // Never collected in the first place, so there is nothing to return.
     db.query(`UPDATE listings SET state = 'cancelled', updated_at = ? WHERE id = ?`).run(
       Date.now(),
       listing.id
     );
-    return;
+    return true;
+  }
+
+  const slot = await slotFor(bot, listing);
+  if (slot === null) {
+    store.markStuck(listing.id, 'held item not found in the bag');
+    log(`"${listing.id}" cannot be returned: the held item is not in the bag; marked stuck`);
+    return true;
   }
 
   log(`returning "${listing.id}" to ${listing.sellerCharacter}`);
   const result = await deliverPurchase(bot.context, listing.sellerCharacter, slot, 0);
   if (!result.ok) {
+    if (result.reason.startsWith(HELD_ITEM_MISSING)) {
+      store.markStuck(listing.id, result.reason);
+      return true;
+    }
+    if (result.declined) {
+      // They asked for it back and then would not take it. Back on sale at
+      // the same price; cancelling again is one click.
+      log(`"${listing.id}" back on sale: ${result.reason}`);
+      store.backOnSale(listing.id, result.reason);
+      return true;
+    }
     log(`could not return "${listing.id}": ${result.reason}`);
     audit('return failed', { listing: listing.id, detail: result.reason });
-    return;
+    return false;
   }
   db.query(`UPDATE listings SET state = 'cancelled', updated_at = ? WHERE id = ?`).run(
     Date.now(),
     listing.id
   );
+  return true;
 }
 
-function holderSlot(id: string): number | null {
-  const row = db.query('SELECT holder_slot AS s FROM listings WHERE id = ?').get(id) as
-    | { s: number | null }
-    | undefined;
-  return row?.s ?? null;
-}
+/** Sellers who pressed Collect, met one at a time. */
+async function payOutRequested(bot: Bot): Promise<void> {
+  const now = Date.now();
+  for (const request of store.payoutRequests()) {
+    if (!bot.connection.connected) return;
 
-/** Sellers waiting on Zen from sales made while they were away. */
-async function payOutOwed(bot: Bot): Promise<void> {
-  const owed = db
-    .query(
-      `SELECT b.account, b.zen, (
-         SELECT seller_char FROM listings l WHERE l.seller = b.account
-         ORDER BY updated_at DESC LIMIT 1
-       ) AS character
-       FROM balances b WHERE b.zen > 0`
-    )
-    .all() as { account: string; zen: number; character: string | null }[];
+    const key = `payout:${request.account}`;
+    if (!backoff.due(key, now)) continue;
 
-  for (const row of owed) {
-    if (!row.character) continue;
-    // Only pay somebody standing in front of us; the balance keeps until then.
-    if (!bot.context.scope.byName(row.character)) continue;
+    if (now - request.requestedAt > PAYOUT_REQUEST_TTL_MS) {
+      store.clearPayoutRequest(request.account);
+      audit('payout request dropped', { account: request.account, detail: 'older than a day' });
+      continue;
+    }
+    if ((await isOnline(request.account)) === false) continue;
 
-    const taken = store.takeBalance(row.account);
-    if (taken <= 0) continue;
+    const taken = store.takeBalance(request.account);
+    if (taken <= 0) {
+      store.clearPayoutRequest(request.account);
+      continue;
+    }
 
-    const result = await payOut(bot.context, row.character, taken);
+    log(`paying ${request.account} ${taken} Zen via ${request.character}`);
+    const result = await payOut(bot.context, request.character, taken);
     if (!result.ok) {
       // Credited back rather than lost: the money never left the bot.
-      store.credit(row.account, taken);
-      log(`could not pay ${row.account} ${taken} Zen: ${result.reason}; credited back`);
-      audit('payout failed', { account: row.account, detail: result.reason });
+      store.credit(request.account, taken);
+      log(`could not pay ${request.account} ${taken} Zen: ${result.reason}; credited back`);
+      audit('payout failed', { account: request.account, detail: result.reason });
+      if (result.declined) {
+        // They refused the Zen. The request is done; Collect asks again.
+        store.clearPayoutRequest(request.account);
+      } else {
+        backoff.failed(key, Date.now());
+      }
+      continue;
     }
+    store.clearPayoutRequest(request.account);
+    backoff.succeeded(key);
+    audit('payout paid', { account: request.account, detail: { zen: taken } });
   }
 }
 
 async function tick(bot: Bot): Promise<void> {
-  for (const listing of store.pendingWork()) {
-    if (!bot.connection.connected) return;
+  const work = store.pendingWork();
+  backoff.keepOnly([
+    ...work.map(l => l.id),
+    ...store.payoutRequests().map(r => `payout:${r.account}`),
+  ]);
 
-    if (listing.state === 'pending') await collect(bot, listing);
-    else if (listing.state === 'claimed') await deliver(bot, listing);
-    else if (listing.state === 'returning') await giveBack(bot, listing);
+  for (const listing of work) {
+    if (!bot.connection.connected) return;
+    const now = Date.now();
+    if (!backoff.due(listing.id, now)) continue;
+
+    // A cancellation of something never collected needs nobody: the item is
+    // still in the seller's bag, and the row just closes.
+    if (listing.state === 'returning' && store.holderOf(listing.id).holder === null) {
+      await giveBack(bot, listing);
+      continue;
+    }
+
+    // Who the bot has to meet: the buyer of a claim, the seller otherwise.
+    const who = listing.state === 'claimed' ? listing.buyer : listing.seller;
+    const online = who ? await isOnline(who) : null;
+    const decision = decide(
+      { id: listing.id, state: listing.state as 'pending' | 'claimed' | 'returning', updatedAt: listing.updatedAt },
+      online,
+      now
+    );
+
+    if (decision.kind === 'wait') continue;
+    if (decision.kind === 'release') {
+      log(`releasing "${listing.id}": ${decision.reason}`);
+      store.release(listing.id, decision.reason);
+      continue;
+    }
+    if (decision.kind === 'expire') {
+      log(`dropping "${listing.id}": ${decision.reason}`);
+      store.drop(listing.id, decision.reason);
+      continue;
+    }
+
+    let done = false;
+    if (listing.state === 'pending') done = await collect(bot, listing);
+    else if (listing.state === 'claimed') done = await deliver(bot, listing);
+    else if (listing.state === 'returning') done = await giveBack(bot, listing);
+
+    if (done) backoff.succeeded(listing.id);
+    else {
+      backoff.failed(listing.id, Date.now());
+      log(`"${listing.id}" will be tried again in ${Math.round(backoff.remaining(listing.id, Date.now()) / 1000)}s`);
+    }
   }
 
-  await payOutOwed(bot);
+  await payOutRequested(bot);
 }
 
 async function main(): Promise<void> {
