@@ -7,16 +7,20 @@ import type { HeroStats } from './itemStats';
 
 /**
  * Items the table actually carries, so the numbers below are the client's own:
- * Kris (6-11, speed 50, 40 str), Blade (36-47, speed 30, 80 str), Bill of
- * Balrog (two-handed, Dark Knight only), Small and Horn Shield, Skull Staff
- * (Dark Wizard only) and two rings.
+ * Kris (6-11, speed 50, 40 str), Blade (36-47, speed 30, 80 str), Explosion
+ * Blade (Magic Gladiator only), Spear and Bill of Balrog (two-handed), Small
+ * and Horn Shield, Skull and Angelic Staff (Dark Wizard and Magic Gladiator
+ * only) and two rings.
  */
 const KRIS: Item = { group: 0, num: 0 };
 const BLADE: Item = { group: 0, num: 5 };
+const EXPLOSION_BLADE: Item = { group: 0, num: 23 };
+const SPEAR: Item = { group: 3, num: 1 };
 const BILL_OF_BALROG: Item = { group: 3, num: 9 };
 const SMALL_SHIELD: Item = { group: 6, num: 0 };
 const HORN_SHIELD: Item = { group: 6, num: 1 };
 const SKULL_STAFF: Item = { group: 5, num: 0 };
+const ANGELIC_STAFF: Item = { group: 5, num: 1 };
 const RING_OF_ICE: Item = { group: 13, num: 8 };
 const RING_OF_POISON: Item = { group: 13, num: 9 };
 const BRONZE_HELM: Item = { group: 7, num: 0 };
@@ -32,6 +36,9 @@ const KNIGHT: HeroStats = {
   baseClass: 1,
   stepClass: 2,
 };
+
+/** A Magic Gladiator, the one class that wears both swords and staffs. */
+const GLADIATOR: HeroStats = { ...KNIGHT, baseClass: 3 };
 
 const LEFT_HAND = 0;
 const RIGHT_HAND = 1;
@@ -52,8 +59,30 @@ describe('which worn item a tooltip compares with', () => {
   });
 
   it('measures a two-hander against the worn weapon, not the shield', () => {
-    const slots = worn({ [LEFT_HAND]: BLADE, [RIGHT_HAND]: SMALL_SHIELD });
-    expect(comparedItem(BILL_OF_BALROG, slots, KNIGHT)).toBe(BLADE);
+    const slots = worn({ [LEFT_HAND]: SPEAR, [RIGHT_HAND]: SMALL_SHIELD });
+    expect(comparedItem(BILL_OF_BALROG, slots, KNIGHT)).toBe(SPEAR);
+  });
+
+  it('never measures a staff against a worn sword', () => {
+    const slots = worn({ [LEFT_HAND]: BLADE });
+    expect(comparedItem(SKULL_STAFF, slots, GLADIATOR)).toBeNull();
+    expect(
+      comparedItem(BLADE, worn({ [LEFT_HAND]: SKULL_STAFF }), GLADIATOR)
+    ).toBeNull();
+  });
+
+  it('measures a sword against a worn sword and a staff against a staff', () => {
+    expect(comparedItem(BLADE, worn({ [LEFT_HAND]: KRIS }), GLADIATOR)).toBe(
+      KRIS
+    );
+    expect(
+      comparedItem(ANGELIC_STAFF, worn({ [LEFT_HAND]: SKULL_STAFF }), GLADIATOR)
+    ).toBe(SKULL_STAFF);
+  });
+
+  it('never measures a weapon against another group in the off hand', () => {
+    const slots = worn({ [RIGHT_HAND]: KRIS });
+    expect(comparedItem(BILL_OF_BALROG, slots, KNIGHT)).toBeNull();
   });
 
   it('never measures a weapon against a shield in the off hand', () => {
@@ -79,7 +108,9 @@ describe('which worn item a tooltip compares with', () => {
 
   it('takes the first worn ring of the pair', () => {
     const both = worn({ [RING_1]: RING_OF_ICE, [RING_2]: RING_OF_POISON });
-    expect(comparedItem({ group: 13, num: 21 }, both, KNIGHT)).toBe(RING_OF_ICE);
+    expect(comparedItem({ group: 13, num: 21 }, both, KNIGHT)).toBe(
+      RING_OF_ICE
+    );
 
     const second = worn({ [RING_2]: RING_OF_POISON });
     expect(comparedItem({ group: 13, num: 21 }, second, KNIGHT)).toBe(
@@ -94,7 +125,8 @@ describe('which worn item a tooltip compares with', () => {
 
   it('shows one box for gear the class can never wear', () => {
     const slots = worn({ [LEFT_HAND]: BLADE });
-    expect(comparedItem(SKULL_STAFF, slots, KNIGHT)).toBeNull();
+    expect(comparedItem(EXPLOSION_BLADE, slots, KNIGHT)).toBeNull();
+    expect(comparedItem(EXPLOSION_BLADE, slots, GLADIATOR)).toBe(BLADE);
   });
 
   it('shows one box when the slot is empty', () => {
@@ -103,7 +135,9 @@ describe('which worn item a tooltip compares with', () => {
 
   it('shows one box for something that is not gear', () => {
     const potion: Item = { group: 14, num: 0, durability: 3 };
-    expect(comparedItem(potion, worn({ [LEFT_HAND]: BLADE }), KNIGHT)).toBeNull();
+    expect(
+      comparedItem(potion, worn({ [LEFT_HAND]: BLADE }), KNIGHT)
+    ).toBeNull();
   });
 });
 
