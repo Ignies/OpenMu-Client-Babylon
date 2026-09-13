@@ -72,6 +72,7 @@ import { Item, World } from './ecs/world';
 import { EventBus } from './libs/eventBus';
 import { Scalar } from './libs/babylon/exports';
 import { InventoryConstants } from './common/inventoryConstants';
+import { StatType } from './common/characterStats';
 import { findFreeSlot, type Footprint } from './common/inventoryFit';
 import { isJewel, jewelTargetError } from './common/jewelUpgrade';
 import { ItemGroups } from './common/objects/enum';
@@ -134,6 +135,9 @@ xor32.xor32Key = gameVersion.protocol.encryption.xor32Key;
 const INVENTORY_STORAGE = StorageKind.Inventory;
 
 const ITEM_MOVE_TIMEOUT = 5000;
+
+/** How long the offline demo takes to "answer" a stat point request. */
+const OFFLINE_ANSWER_DELAY = 30;
 
 /** `CNewUINPCShop`'s item control: 8 columns × 15 rows. */
 export const SHOP_COLUMNS = 8;
@@ -1677,9 +1681,52 @@ export const Store = new (class _Store {
   }
 
   increaseStatRequest(stat: number): void {
+    if (this.isOffline) {
+      this.answerStatOffline(stat);
+      return;
+    }
+
     const packet = IncreaseCharacterStatPointPacket.createPacket();
     packet.StatType = stat;
     this.sendToGS(packet.buffer);
+  }
+
+  /**
+   * No server offline: the point is applied here, one answer per request and
+   * after a beat, so the window and the bulk run behave as they do in game.
+   */
+  private answerStatOffline(stat: number): void {
+    setTimeout(() => {
+      const playerData = this.playerData;
+
+      if (playerData.points <= 0) {
+        EventBus.emit('statPointAnswered', { stat, added: 0 });
+        return;
+      }
+
+      runInAction(() => {
+        switch (stat) {
+          case StatType.Strength:
+            playerData.str++;
+            break;
+          case StatType.Agility:
+            playerData.agi++;
+            break;
+          case StatType.Vitality:
+            playerData.sta++;
+            break;
+          case StatType.Energy:
+            playerData.eng++;
+            break;
+          case StatType.Leadership:
+            playerData.leadership++;
+            break;
+        }
+        playerData.points--;
+      });
+
+      EventBus.emit('statPointAnswered', { stat, added: 1 });
+    }, OFFLINE_ANSWER_DELAY);
   }
 
   deleteCharacterRequest(name: string, securityCode: string): void {

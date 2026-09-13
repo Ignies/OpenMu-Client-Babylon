@@ -144,6 +144,8 @@ export const romanianLayer: LanguageLayer = {
     'charInfo.skillDamage': 'Daunele abilității: {value}%',
     'charInfo.divineDamage': 'Daune divine (Roar, Slasher): {value}%',
     'charInfo.aoeDamage': 'Daune în zonă (Dark Side): {value}%',
+    'charInfo.addAmount': 'Puncte de adăugat',
+    'charInfo.stopAdding': 'Oprește',
 
     'options.title': 'Opțiuni',
     'options.tab.game': 'Joc',
@@ -162,6 +164,7 @@ export const romanianLayer: LanguageLayer = {
     'options.section.quality': 'Calitate',
     'options.preset': 'Presetare',
     'options.autoAttack': 'Atac automat',
+    'options.statPointAmounts': 'Adaugă puncte în bloc',
     'options.whisperBeep': 'Sunet la primirea unei șoapte',
     'options.slideHelp': 'Ajutor glisant',
     'options.cameraControl': 'Control cameră (Ctrl+rotiță, Ins/Del)',

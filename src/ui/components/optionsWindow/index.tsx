@@ -367,6 +367,7 @@ const TABS: Tab[] = [
               titleKey: 'options.section.gameplay',
               rows: [
                 check('autoAttack', 386, 'options.autoAttack'),
+                check('statPointAmounts', -1, 'options.statPointAmounts'),
                 check('wsadMovement', -1, 'options.wsadMovement'),
                 {
                   kind: 'check',

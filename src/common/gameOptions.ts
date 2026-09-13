@@ -148,6 +148,12 @@ export type GameOptions = {
    */
   propBatching: boolean;
   autoAttack: boolean;
+  /**
+   * An amount box in front of every `+` in the character info window, so a
+   * few hundred level-up points go in with one press instead of one click
+   * each. Off, the window is the original's: one point per click.
+   */
+  statPointAmounts: boolean;
   whisperBeep: boolean;
   slideHelp: boolean;
   /**
@@ -354,6 +360,7 @@ const DEFAULTS: GameOptions = {
   renderDistance: 0,
   propBatching: true,
   autoAttack: false,
+  statPointAmounts: true,
   whisperBeep: true,
   slideHelp: true,
   cameraControl: true,

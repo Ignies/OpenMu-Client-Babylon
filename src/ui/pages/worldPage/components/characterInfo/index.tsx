@@ -2,8 +2,14 @@ import { isKey } from '../../../../../common/keyBindings';
 import { t } from '../../../../../i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
+import { runInAction } from 'mobx';
+import { useEffect, useRef, useState } from 'react';
+import { EventBus } from '../../../../../libs/eventBus';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import { Store } from '../../../../../store';
+import { GameOptions } from '../../../../../common/gameOptions';
+import { StatAllocation } from '../../../../../common/statAllocation';
+import { devQueryNumber } from '../../../../../common/devSeams';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { toggleMasterSkillsWindow } from '../masterSkills/windowState';
@@ -23,6 +29,11 @@ import {
   StatType,
 } from '../../../../../common/characterStats';
 import {
+  AMOUNT_DY,
+  AMOUNT_HEIGHT,
+  AMOUNT_MAX_DIGITS,
+  AMOUNT_WIDTH,
+  AMOUNT_X,
   BUTTON_FRAMES,
   BUTTON_HEIGHT,
   BUTTON_WIDTH,
@@ -52,6 +63,7 @@ import {
   PET_BUTTON_X,
   PET_SPRITE,
   PET_TOOLTIP,
+  POINTS_RUN_RIGHT,
   POINTS_X,
   POINT_Y,
   PROBABILITY_Y,
@@ -69,6 +81,7 @@ import {
   STAT_BUTTON_SPRITE,
   STAT_BUTTON_WIDTH,
   STAT_BUTTON_X,
+  STOP_BUTTON_FRAMES,
   TABLE_FILL_HEIGHT,
   TABLE_FILL_WIDTH,
   TABLE_HEIGHT,
@@ -81,6 +94,7 @@ import {
   TABLE_Y,
   TEXT_COLOR,
   VALUE_WIDTH,
+  VALUE_WIDTH_WITH_AMOUNT,
   VALUE_X,
   WIN_WIDTH,
 } from './layout';
@@ -102,6 +116,11 @@ function fruitProbability(used: number, max: number): number {
   return 40;
 }
 
+const digitsOnly = (value: string) => value.replace(/[^0-9]/g, '');
+
+/** Shift on the `+` adds ten, Ctrl every point that is left. */
+const SHIFT_AMOUNT = 10;
+
 const StatRow = observer(
   ({
     label,
@@ -120,7 +139,34 @@ const StatRow = observer(
     detailX?: number;
     firstDy?: number;
   }) => {
-    const hasPoints = Store.playerData.points > 0;
+    const points = Store.playerData.points;
+    const hasPoints = points > 0;
+    const amounts = GameOptions.statPointAmounts;
+
+    const run = StatAllocation.run;
+    const mine = run !== null && run.stat === stat;
+    const elsewhere = run !== null && !mine;
+
+    const [amount, setAmount] = useState('');
+    // MuButton hands its handler no event, and the modifier is only known at
+    // the press.
+    const held = useRef({ shift: false, ctrl: false });
+
+    const press = () => {
+      if (!amounts) {
+        Store.increaseStatRequest(stat);
+        return;
+      }
+      if (mine) {
+        StatAllocation.cancel();
+        return;
+      }
+      if (elsewhere) return;
+
+      const { shift, ctrl } = held.current;
+      const typed = Number(amount || '1');
+      StatAllocation.start(stat, ctrl ? points : shift ? SHIFT_AMOUNT : typed);
+    };
 
     return (
       <>
@@ -147,12 +193,43 @@ const StatRow = observer(
           style={{
             left: VALUE_X,
             top: y,
-            width: VALUE_WIDTH,
+            width: hasPoints && amounts ? VALUE_WIDTH_WITH_AMOUNT : VALUE_WIDTH,
             height: ROW_FIELD_HEIGHT,
           }}
         >
           {value}
         </div>
+
+        {hasPoints && amounts && (
+          <input
+            className="stat-amount"
+            data-no-drag="true"
+            inputMode="numeric"
+            spellCheck={false}
+            title={t('charInfo.addAmount')}
+            // While this row is the one being filled the box says what the
+            // run is for, which is not always what is typed in it (Shift and
+            // Ctrl on the `+` pick their own amount).
+            value={mine ? String(run.wanted) : amount}
+            disabled={run !== null}
+            style={{
+              left: AMOUNT_X,
+              top: y + AMOUNT_DY,
+              width: AMOUNT_WIDTH,
+              height: AMOUNT_HEIGHT,
+            }}
+            onChange={event =>
+              setAmount(digitsOnly(event.target.value).slice(0, AMOUNT_MAX_DIGITS))
+            }
+            onKeyDown={event => {
+              if (event.key === 'Enter') press();
+              else if (event.key === 'Escape') StatAllocation.cancel();
+              else return;
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+          />
+        )}
 
         {}
         {hasPoints && (
@@ -160,14 +237,22 @@ const StatRow = observer(
             className="stat-button"
             data-no-drag="true"
             style={{ left: STAT_BUTTON_X, top: y + STAT_BUTTON_DY }}
+            onPointerDown={event => {
+              held.current = { shift: event.shiftKey, ctrl: event.ctrlKey };
+            }}
           >
             <MuButton
               file={STAT_BUTTON_SPRITE}
               width={STAT_BUTTON_WIDTH}
               height={STAT_BUTTON_HEIGHT}
-              frames={BUTTON_FRAMES}
-              onClick={() => Store.increaseStatRequest(stat)}
-            />
+              frames={mine ? STOP_BUTTON_FRAMES : BUTTON_FRAMES}
+              disabled={elsewhere}
+              onClick={press}
+            >
+              {mine && (
+                <span className="button-tooltip">{t('charInfo.stopAdding')}</span>
+              )}
+            </MuButton>
           </div>
         )}
 
@@ -221,8 +306,37 @@ const WindowButton = ({
   </div>
 );
 
+/**
+ * Dev-only staging for the offline demo: `?statPoints=500` opens the window
+ * on a character with that many free points, `&statRun=200` starts a run on
+ * Strength as well.
+ */
+function stageStatPoints(): (() => void) | undefined {
+  const points = devQueryNumber('statPoints');
+  if (points === null) return;
+
+  runInAction(() => {
+    Store.playerData.points = points;
+    Store.characterInfoEnabled = true;
+  });
+
+  const wanted = devQueryNumber('statRun');
+  if (wanted === null) return;
+
+  // The map is still being warped into when this mounts, and arriving is one
+  // of the things that ends a run.
+  const begin = () => {
+    EventBus.off('warpCompleted', begin);
+    StatAllocation.start(StatType.Strength, wanted);
+  };
+  EventBus.on('warpCompleted', begin);
+
+  return () => EventBus.off('warpCompleted', begin);
+}
+
 export const CharacterInfo = observer(() => {
   const playerData = Store.playerData;
+  const run = StatAllocation.run;
 
   useEventBus('keyPressed', key => {
     if (isKey(HOT_KEY, key)) {
@@ -230,7 +344,16 @@ export const CharacterInfo = observer(() => {
     }
   });
 
-  if (!Store.characterInfoEnabled) {
+  const open = Store.characterInfoEnabled;
+
+  // A run belongs to the open window: closing it is one of the stops.
+  useEffect(() => {
+    if (!open) StatAllocation.cancel();
+  }, [open]);
+
+  useEffect(() => stageStatPoints(), []);
+
+  if (!open) {
     return null;
   }
 
@@ -489,13 +612,17 @@ export const CharacterInfo = observer(() => {
         <div
           className="table-text centred"
           style={{
-            left: POINTS_X,
+            ...(run
+              ? { right: POINTS_RUN_RIGHT }
+              : { left: POINTS_X }),
             top: LEVEL_FIELD_Y,
             height: LEVEL_FIELD_HEIGHT,
             color: TEXT_COLOR.points,
           }}
         >
-          Point: {playerData.points}
+          {run
+            ? `${playerData.points} (${run.added}/${run.wanted})`
+            : `Point: ${playerData.points}`}
         </div>
       )}
       <div

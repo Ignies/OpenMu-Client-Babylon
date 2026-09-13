@@ -144,6 +144,8 @@ export const frenchLayer: LanguageLayer = {
     'charInfo.skillDamage': 'Dégâts de compétence : {value}%',
     'charInfo.divineDamage': 'Dégâts divins (Roar, Slasher) : {value}%',
     'charInfo.aoeDamage': 'Dégâts de zone (Dark Side) : {value}%',
+    'charInfo.addAmount': 'Points à ajouter',
+    'charInfo.stopAdding': 'Arrêter',
 
     'options.title': 'Options',
     'options.tab.game': 'Jeu',
@@ -162,6 +164,7 @@ export const frenchLayer: LanguageLayer = {
     'options.section.quality': 'Qualité',
     'options.preset': 'Préréglage',
     'options.autoAttack': 'Attaque automatique',
+    'options.statPointAmounts': 'Ajouter les points par lot',
     'options.whisperBeep': 'Bip à la réception d’un chuchotement',
     'options.slideHelp': 'Aide glissante',
     'options.cameraControl':

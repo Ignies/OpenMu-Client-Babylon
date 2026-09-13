@@ -148,6 +148,8 @@ export const japaneseLayer: LanguageLayer = {
     'charInfo.skillDamage': 'スキルダメージ：{value}%',
     'charInfo.divineDamage': '神聖ダメージ（Roar・Slasher）：{value}%',
     'charInfo.aoeDamage': '範囲ダメージ（Dark Side）：{value}%',
+    'charInfo.addAmount': '追加するポイント数',
+    'charInfo.stopAdding': '停止',
 
     'options.title': 'オプション',
     'options.tab.game': 'ゲーム',
@@ -166,6 +168,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.section.quality': '品質',
     'options.preset': 'プリセット',
     'options.autoAttack': '自動攻撃',
+    'options.statPointAmounts': 'ポイントの一括割り振り',
     'options.whisperBeep': 'ささやき受信時に音を鳴らす',
     'options.slideHelp': 'スライドヘルプ',
     'options.cameraControl': 'カメラ操作（Ctrl+ホイール、Ins/Del）',

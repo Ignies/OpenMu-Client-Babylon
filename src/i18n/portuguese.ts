@@ -152,6 +152,8 @@ export const portugueseLayer: LanguageLayer = {
     'charInfo.skillDamage': 'Dano de habilidade: {value}%',
     'charInfo.divineDamage': 'Dano divino (Roar, Slasher): {value}%',
     'charInfo.aoeDamage': 'Dano em área (Dark Side): {value}%',
+    'charInfo.addAmount': 'Pontos a adicionar',
+    'charInfo.stopAdding': 'Parar',
 
     'options.title': 'Opções',
     'options.tab.game': 'Jogo',
@@ -170,6 +172,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.section.quality': 'Qualidade',
     'options.preset': 'Predefinição',
     'options.autoAttack': 'Ataque automático',
+    'options.statPointAmounts': 'Adicionar pontos em lote',
     'options.whisperBeep': 'Bipe ao receber sussurro',
     'options.slideHelp': 'Ajuda deslizante',
     'options.cameraControl': 'Controle da câmera (Ctrl+roda, Ins/Del)',

@@ -146,6 +146,8 @@ export const chineseLayer: LanguageLayer = {
     'charInfo.skillDamage': '技能伤害：{value}%',
     'charInfo.divineDamage': '神圣伤害（怒吼、斩击）：{value}%',
     'charInfo.aoeDamage': '范围伤害（暗黑之力）：{value}%',
+    'charInfo.addAmount': '要加的点数',
+    'charInfo.stopAdding': '停止',
 
     'options.title': '选项',
     'options.tab.game': '游戏',
@@ -164,6 +166,7 @@ export const chineseLayer: LanguageLayer = {
     'options.section.quality': '质量',
     'options.preset': '预设',
     'options.autoAttack': '自动攻击',
+    'options.statPointAmounts': '批量加点',
     'options.whisperBeep': '收到密语时提示音',
     'options.slideHelp': '滑动提示',
     'options.cameraControl': '镜头控制（Ctrl+滚轮，Ins/Del）',
