@@ -13,16 +13,16 @@ import {
  * class per object.
  *
  * `mesh` names which mesh the writes land on:
- *  - `blend` — the mesh the object already declares as its `BlendMesh`
+ *  - `blend` - the mesh the object already declares as its `BlendMesh`
  *    (additive, unlit). The original sets `o->BlendMesh = N` in the same
  *    `MoveObject` case.
- *  - `stream` — `Models[type].StreamMesh = N`: drawn *textured but unlit*,
+ *  - `stream` - `Models[type].StreamMesh = N`: drawn *textured but unlit*,
  *    flat `BodyLight` instead of the per-vertex terrain light
  *    (ZzzBMD.cpp:990-1001). That is the sand-fall / waterfall look.
  *
  * Time is milliseconds, matching `WorldTime`. Note `-(int)WorldTime % 1000`
- * in C parses as `((-(int)WorldTime) % 1000)` — `%` keeps the dividend's
- * sign — so it ramps 0 → -0.999 and wraps, which is what `-(t % 1000)` gives
+ * in C parses as `((-(int)WorldTime) % 1000)` - `%` keeps the dividend's
+ * sign - so it ramps 0 → -0.999 and wraps, which is what `-(t % 1000)` gives
  * for positive `t`.
  */
 export type MeshAnimation = {
@@ -55,7 +55,7 @@ const DUNGEON: Partial<Record<number, MeshAnimation>> = {
 
 /**
  * Noria (ZzzObject.cpp:3925-3944). 18 is the mill wheel's water, 41 the
- * stream, 42/43 a mirrored pair of waterfall curtains — hence the opposite
+ * stream, 42/43 a mirrored pair of waterfall curtains - hence the opposite
  * U signs.
  */
 const NORIA: Partial<Record<number, MeshAnimation>> = {
@@ -66,7 +66,7 @@ const NORIA: Partial<Record<number, MeshAnimation>> = {
 };
 
 /**
- * Lost Tower (ZzzObject.cpp:3952-3966). 3/4 are the glowing conduits — the
+ * Lost Tower (ZzzObject.cpp:3952-3966). 3/4 are the glowing conduits - the
  * original scrolls them and then re-draws mesh 1 through `StreamMesh` with a
  * chrome pass (`Draw_RenderObject`:1002); we keep the scroll and the unlit
  * pass, the chrome layer is materials work. 19/20 are the two tower machines.
@@ -84,7 +84,7 @@ const STADIUM: Partial<Record<number, MeshAnimation>> = {
 };
 
 /**
- * Atlans (ZzzObject.cpp:4012-4034). No UV scroll at all here — the movement
+ * Atlans (ZzzObject.cpp:4012-4034). No UV scroll at all here - the movement
  * is baked into the BMD bone animation. What the original does animate is
  * `BlendMeshLight`, a slow breathing on the water plane (23), the two coral
  * lamps (32/34) and the anemone (40).
@@ -131,7 +131,7 @@ const perTick = (k: number) => (t: number) => ((t * k) / 40) % 1;
 /**
  * Aida (GMAida.cpp:49-54, :283-320). 25/28 scroll V down `0.015`/tick;
  * 65/66 and 77/78 are drawn by `RenderAidaObjectVisual` with an explicit
- * `RenderMesh(0, RENDER_TEXTURE, …, U)` — a plain textured pass, so
+ * `RenderMesh(0, RENDER_TEXTURE, …, U)` - a plain textured pass, so
  * `stream` rather than `blend`. Mesh indices for 25/28 are not set in the
  * C++ (the BMD's own blend flag decides); 0 is the single-mesh case.
  */
@@ -157,7 +157,7 @@ const KANTURU1: Partial<Record<number, MeshAnimation>> = {
 
 /**
  * Kanturu Relics (GM_Kanturu_2nd.cpp:219-241): 10's clamped sine, 38's
- * sine, 42's diagonal scroll (no model for 42 in Object39 — kept to match
+ * sine, 42's diagonal scroll (no model for 42 in Object39 - kept to match
  * the source).
  */
 const KANTURU2: Partial<Record<number, MeshAnimation>> = {

@@ -1,6 +1,6 @@
 /**
  * Romanian. MU's proper nouns (class names, event names, Zen, MU Helper) stay
- * as they are — the Romanian servers use them untranslated.
+ * as they are - the Romanian servers use them untranslated.
  */
 
 import type { LanguageLayer } from './layer';
@@ -205,7 +205,7 @@ export const romanianLayer: LanguageLayer = {
     'options.packHint':
       'Textul misiunilor, dialogurile NPC-urilor și numele monștrilor sunt traduse și în această limbă.',
     'options.noPackHint':
-      'Doar interfața — textul misiunilor și numele monștrilor rămân în engleză.',
+      'Doar interfața - textul misiunilor și numele monștrilor rămân în engleză.',
     'options.languageHint':
       'Limba interfeței. Numele obiectelor, monștrilor și abilităților rămân neschimbate.',
     'options.quality.classic': 'Clasică',
@@ -256,7 +256,7 @@ export const romanianLayer: LanguageLayer = {
     'bottomBar.emptySlot': '[{key}] gol',
     'bottomBar.itemSlot': '{name} [{key}]',
     'bottomBar.skillHint':
-      ' — clic: lista de abilități, clic dreapta: atac simplu',
+      ' - clic: lista de abilități, clic dreapta: atac simplu',
     'bottomBar.pet.normal': 'Nor',
     'bottomBar.pet.random': 'Ale',
     'bottomBar.pet.owner': 'Stp',
@@ -1223,7 +1223,7 @@ export const romanianLayer: LanguageLayer = {
     'notify.learnedSkill': 'Ai învățat {name}',
     'notify.storageOpen': 'Nu poți folosi obiecte cât timp seiful este deschis',
     'notify.upgradeNeedsServer': 'Îmbunătățirea are nevoie de un server',
-    'notify.noAnswerRestored': 'Serverul nu a răspuns — obiectul a fost restaurat',
+    'notify.noAnswerRestored': 'Serverul nu a răspuns - obiectul a fost restaurat',
     'notify.cannotMoveItem': 'Nu poți muta acel obiect acolo',
     'notify.cannotUseItem': 'Acel obiect nu se folosește așa',
     'notify.npcNothingYet': 'Acest NPC nu are încă nimic pentru tine',
@@ -1281,8 +1281,42 @@ export const romanianLayer: LanguageLayer = {
     'worlds.answering': 'Răspunde',
     'worlds.noAnswer': 'Fără răspuns',
     'worlds.hint': 'Alege o lume, apoi intră.',
-    'bottomBar.pickSkill': '[{key}] gol — dă clic ca să alegi o abilitate',
-    'bottomBar.boundSlot': '{name} [{key}] — clic dreapta ca să schimbi',
+    'worlds.tabList': 'Listă',
+    'account.list': 'Conturi pe {world}',
+    'account.unnamed': 'Cont nou',
+    'account.addFirst': 'Adaugă întâi un cont',
+    'account.keepPassword': 'Ține minte parola',
+    'account.entersAs': 'Intră se conectează ca {name}.',
+    'worlds.tabWorlds': 'Lumi',
+    'worlds.tabInfo': 'Detalii',
+    'worlds.tabAccount': 'Conturi',
+    'worlds.tabSetup': 'Setări',
+    'worlds.search': 'Caută lumi',
+    'worlds.clearSearch': 'Șterge căutarea',
+    'worlds.noMatch': 'Nimic nu se potrivește cu "{text}".',
+    'worlds.count': '{shown} din {total}',
+    'worlds.hasAccount': 'Există un cont salvat pentru această lume',
+    'worlds.accountMark': 'ID',
+    'info.client': 'Client',
+    'info.anyClient': 'Oricare',
+    'info.address': 'Adresă',
+    'info.route': 'Traseu',
+    'info.status': 'Stare',
+    'info.notChecked': 'Neverificat încă',
+    'info.account': 'Cont',
+    'info.noAccount': 'Niciunul salvat',
+    'info.lastLogin': 'Ultima autentificare',
+    'info.never': 'Niciodată',
+    'info.noDescription': 'Această lume nu a publicat nicio descriere.',
+    'info.gameServers': 'Servere de joc',
+    'info.noGameServers': 'Această lume nu a publicat nume de servere; apar la conectare.',
+    'info.moreServers': 'și încă {count}',
+    'account.notKept': 'CERE',
+    'account.storedLocally': 'Păstrat doar în acest browser, în text simplu.',
+    'account.cannotSave': 'Această lume nu poate păstra un cont.',
+    'account.needSignup': 'Nu ai cont? Creează unul în ecranul de autentificare.',
+    'bottomBar.pickSkill': '[{key}] gol - dă clic ca să alegi o abilitate',
+    'bottomBar.boundSlot': '{name} [{key}] - clic dreapta ca să schimbi',
     'bottomBar.clearSlot': 'Lasă locul [{key}] gol',
     'guild.leaveTitle': 'Părăsește breasla',
     'guild.breakHint': 'Dacă vrei să îți părăsești breasla,',

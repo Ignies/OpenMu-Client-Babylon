@@ -18,8 +18,8 @@ import { GameOptions } from '../common/gameOptions';
  *
  * One system, emitted **manually**. Every ambient recipe in
  * `ambientParticles.ts` is a continuous emitter with a rate that ramps; this
- * is the opposite shape — nothing at all, then eight particles in one frame,
- * then nothing again — so it drives `manualEmitCount` directly rather than
+ * is the opposite shape - nothing at all, then eight particles in one frame,
+ * then nothing again - so it drives `manualEmitCount` directly rather than
  * pretending to be a rate.
  *
  * Note what this can and cannot buy on Devias. Nothing drawn white reads
@@ -141,7 +141,7 @@ export function snowSprayBurst(
   ps.manualEmitCount = Math.max(0, ps.manualEmitCount) + count;
 }
 
-/** Drop the spray — a map change or a teardown. */
+/** Drop the spray - a map change or a teardown. */
 export function resetSnowSpray(): void {
   system?.dispose(false);
   system = null;

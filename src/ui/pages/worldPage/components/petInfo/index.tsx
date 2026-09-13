@@ -159,7 +159,7 @@ const StatsBox = observer(({ pet }: { pet: PetTypeEnum }) => {
 
   const stats = derived(pet, info);
   const life = Math.min(info.health, PET_MAX_LIFE);
-  // `int iHP = (min(life, 255) * 147) / 255` — filled pixels, not a ratio.
+  // `int iHP = (min(life, 255) * 147) / 255` - filled pixels, not a ratio.
   const filled = Math.trunc((life * LIFE_FILL.width) / PET_MAX_LIFE);
 
   const row = (top: number, text: string, className = 'pet-row') => (
@@ -233,7 +233,7 @@ const StatsBox = observer(({ pet }: { pet: PetTypeEnum }) => {
   );
 });
 
-/** The raven's command boxes — the bottom bar's four, in window clothes. */
+/** The raven's command boxes - the bottom bar's four, in window clothes. */
 const CommandBox = observer(() => {
   const current = Store.petMode;
 

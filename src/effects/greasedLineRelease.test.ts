@@ -13,7 +13,7 @@ import { releaseGreasedLineMaterial } from './greasedLineRelease';
  * game silently: `GreasedLineSimpleMaterial.dispose()` takes the shared
  * empty-colours texture down with it (every later ribbon and crackle stops
  * rendering), and its public `colorsTexture` setter dereferences the value
- * it is given, so "detaching" through it with `null` throws — which, from an
+ * it is given, so "detaching" through it with `null` throws - which, from an
  * effect's release inside the frame loop, killed Babylon's render loop and
  * froze the picture (the Drain Life "hang"). The helper has to avoid both.
  */

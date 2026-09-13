@@ -9,8 +9,8 @@ import { listenerHero } from './listener';
 
 /**
  * The torch crackle: a looping fire sound under every flickering flame the
- * lighting layer has lit — the Lorencia street braziers, the 120 Dungeon
- * wall torches, Noria's and Lost Tower's — attenuated by its distance to the
+ * lighting layer has lit - the Lorencia street braziers, the 120 Dungeon
+ * wall torches, Noria's and Lost Tower's - attenuated by its distance to the
  * hero, capped to the nearest few so a corridor of torches is one warm
  * chorus rather than a hundred copies of the same file.
  *
@@ -20,7 +20,7 @@ import { listenerHero } from './listener';
  * because it is the one continuous burning sound in the catalogue.
  *
  * Driven by: the lighting layer's live sources (`lighting.emitters(map)`,
- * read-only — a flame is any source whose recipe flickers) and the listener.
+ * read-only - a flame is any source whose recipe flickers) and the listener.
  * Read by: `sound.crackling` (the verification scripts).
  */
 
@@ -42,7 +42,7 @@ const MAX_SOURCES = 4;
 /** Share of the effects track a flame at the hero's feet sits at. */
 const VOLUME = 0.3;
 
-/** Tiles inside which a flame is at full crackle volume — a hand's reach. */
+/** Tiles inside which a flame is at full crackle volume - a hand's reach. */
 const FULL_VOLUME_TILES = 1.5;
 
 /**

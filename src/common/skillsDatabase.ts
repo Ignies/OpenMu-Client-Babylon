@@ -1,7 +1,7 @@
 /**
  * Skill definitions as configured by the OpenMU server we play against
  * (src/Persistence/Initialization/VersionSeasonSix/SkillsInitializer.cs).
- * Generated — do not edit by hand. Numbers are the wire SkillNumber.
+ * Generated - do not edit by hand. Numbers are the wire SkillNumber.
  */
 
 export type SkillType =

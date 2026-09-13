@@ -7,7 +7,7 @@ import type { LightSource } from './lightSource';
  *
  * The common core (`name`, `maps?`, `update?`, `reset?`) is spelled exactly as
  * in every other system . Lighting adds one reader:
- * `emitters?(map)` — the light sources the entry currently has alive, so the
+ * `emitters?(map)` - the light sources the entry currently has alive, so the
  * facade, the perf overlay and tooling can see what is lighting the map from
  * one call. Registration into the two sinks (the terrain delta texture and
  * the point-light pool) is done by `LightSource` itself; entries never talk
@@ -32,7 +32,7 @@ export interface LightingLayer {
   update?(map: ENUM_WORLD, dt: number): void;
 
   /**
-   * The map changed. Drop everything belonging to the world just left —
+   * The map changed. Drop everything belonging to the world just left -
    * every source this entry attached is already disposed by the facade
    * (`disposeAllLightSources`), so this only has to forget its handles.
    */

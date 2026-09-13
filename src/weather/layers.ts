@@ -20,7 +20,7 @@ import { puddleUnderfootLayer } from './puddleUnderfoot';
  */
 export const WEATHER_LAYERS: readonly WeatherLayer[] = [
   rainLayer,
-  snowCoverLayer, // reads the squall schedule, not rain — order-free
+  snowCoverLayer, // reads the squall schedule, not rain - order-free
   wetnessLayer, // reads rainLayer
   footprintsLayer, // reset only; laid down by FootprintSystem
   snowSprayLayer, // reset only; fired by FootprintSystem

@@ -3,7 +3,7 @@
  *
  * `proxy/weather.ts` is a pure function of wall-clock time, so its climate is
  * a thing you can measure rather than guess at: this sweeps a year of it at
- * one-minute resolution and prints the numbers its tuning comments quote —
+ * one-minute resolution and prints the numbers its tuning comments quote -
  * how often it rains, how the days divide up, how long a shower lasts, and
  * the odds that a player who logs in for half an hour sees any rain at all.
  *
@@ -18,7 +18,7 @@ import { weatherAt } from '../proxy/weather';
 const DAYS = Number(process.argv[2] ?? 365);
 const SESSION_MINUTES = Number(process.argv[3] ?? 30);
 
-/** Midnight UTC on 1 Jan 2026 — an arbitrary but fixed window to sweep. */
+/** Midnight UTC on 1 Jan 2026 - an arbitrary but fixed window to sweep. */
 const START = Date.UTC(2026, 0, 1);
 const MINUTE = 60_000;
 

@@ -25,7 +25,7 @@ import type { PlayerObject } from '../../common/playerObject';
  *    Combo kill or a castle death also starts a body motion.
  * 2. Die clip plays once and holds; two blood splats under the head bone.
  *    **Special deaths** (`common/deathVisuals.ts`): Death Cow / Stone Golem /
- *    Ice Monster burst into pieces instead — the body vanishes at once.
+ *    Ice Monster burst into pieces instead - the body vanishes at once.
  * 3. Rot += 0.02/tick from the kill. At Rot >= 1 (2 s) alpha fades to 0
  *    over the next 2 s while the body sinks 0.4 cm per tick.
  * 4. Body motion, render-only (`dying.offset` / `dying.pitch`):
@@ -234,7 +234,7 @@ export const DeathSystem: ISystemFactory = world => {
     const model = e.modelObject!;
 
     // SetPlayerDie's switch: a shatter death replaces the Die clip and the
-    // blood — the body is gone (`o->Live = false`) and the pieces fly.
+    // blood - the body is gone (`o->Live = false`) and the pieces fly.
     const shatter = e.monsterAnimation
       ? shatterDeathFor(monsterModelTypeOf(e.npcType))
       : ((model.constructor as typeof PlayerObject).DeathShatter ?? undefined);

@@ -9,7 +9,7 @@ import { LightSource, type LightRecipe } from './lightSource';
  * Server-driven object effects as light sources.
  *
  * What it is: the flash under a level-up, a shield potion, a lost shield or
- * a swirl — the bursts in `effects/burstEffects.ts`, lit. Driven by the
+ * a swirl - the bursts in `effects/burstEffects.ts`, lit. Driven by the
  * `objectEffect` event, through `ObjectEffectSystem` calling the command
  * below. The light follows the body, so a level-up mid-walk keeps its glow
  * under the feet.

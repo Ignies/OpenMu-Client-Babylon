@@ -10,8 +10,8 @@ export const NPC_MODEL_TABLE: Readonly<
   156: ['/Skill/HellGate',  1.0],
   157: ['/Skill/HellGate',  1.0],
   158: ['/Skill/HellGate',  1.0],
-  // Soccer ball (ZzzCharacter.cpp:14015-14021). Its `BlendMesh = 2` — the
-  // additive panel — is not modelled.
+  // Soccer ball (ZzzCharacter.cpp:14015-14021). Its `BlendMesh = 2` - the
+  // additive panel - is not modelled.
   200: ['/Skill/Ball01',  1.8],
   // Crywolf statue (ZzzCharacter.cpp:14260). The five altars (205-209) spawn
   // invisible and are routed to HiddenNpc in modelFactoryPerId.
@@ -29,7 +29,7 @@ export const NPC_MODEL_TABLE: Readonly<
   224: ['NpcClerk',  1.0],
   226: ['Breeder',  1.0],
   // 230/248/250 (Alex/Martin/Harold) and 253 (Amy) are NOT here: Man01/Girl01
-  // are rig-only GLBs (0 meshes) — those NPCs compose body parts in
+  // are rig-only GLBs (0 meshes) - those NPCs compose body parts in
   // npcs/man.ts and npcs/girl.ts .
   231: ['DeviasTrader01',  1.0],
   232: ['BloodCastle01',  1.0],
@@ -70,7 +70,7 @@ export const NPC_MODEL_TABLE: Readonly<
   407: ['WereQuarrel',  1.9],
   408: ['cry2doorhead',  1.2],
   // Elbeland shop NPCs (GMNewTown.cpp:863-885). Previously mis-numbered as
-  // 258/212/400, which left the real types unmapped — they rendered as the
+  // 258/212/400, which left the real types unmapped - they rendered as the
   // Bull Fighter fallback.
   415: ['silvia',  1.0],
   416: ['rhea',  1.0],
@@ -106,7 +106,7 @@ export const NPC_MODEL_TABLE: Readonly<
 };
 
 /**
- * Entries are relative to `Data/NPC/` — the folder `OpenNpc` loads from. A
+ * Entries are relative to `Data/NPC/` - the folder `OpenNpc` loads from. A
  * handful of types the server spawns as NPCs are props whose model lives
  * elsewhere (`Data/Skill`, `Data/Object35`, `Data/Item`); those are written
  * with a leading `/` and resolve against the asset root instead.

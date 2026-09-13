@@ -1,6 +1,6 @@
 /**
  * German. MU's proper nouns (class names, event names, Zen, MU Helper) stay as
- * they are — the German-speaking servers use them untranslated.
+ * they are - the German-speaking servers use them untranslated.
  */
 
 import type { LanguageLayer } from './layer';
@@ -204,7 +204,7 @@ export const germanLayer: LanguageLayer = {
     'options.packHint':
       'Questtexte, NPC-Dialoge und Monsternamen sind für diese Sprache ebenfalls übersetzt.',
     'options.noPackHint':
-      'Nur die Oberfläche — Questtexte und Monsternamen bleiben englisch.',
+      'Nur die Oberfläche - Questtexte und Monsternamen bleiben englisch.',
     'options.languageHint':
       'Die Sprache der Oberfläche. Namen von Gegenständen, Monstern und Fertigkeiten bleiben unverändert.',
     'options.quality.classic': 'Klassisch',
@@ -255,7 +255,7 @@ export const germanLayer: LanguageLayer = {
     'bottomBar.emptySlot': '[{key}] leer',
     'bottomBar.itemSlot': '{name} [{key}]',
     'bottomBar.skillHint':
-      ' — Klick: Fertigkeitenliste, Rechtsklick: normaler Angriff',
+      ' - Klick: Fertigkeitenliste, Rechtsklick: normaler Angriff',
     'bottomBar.pet.normal': 'Nor',
     'bottomBar.pet.random': 'Zuf',
     'bottomBar.pet.owner': 'Herr',
@@ -1232,7 +1232,7 @@ export const germanLayer: LanguageLayer = {
     'notify.storageOpen': 'Bei geöffnetem Lager kannst du nichts benutzen',
     'notify.upgradeNeedsServer': 'Die Aufwertung braucht einen Server',
     'notify.noAnswerRestored':
-      'Der Server hat nicht geantwortet — Gegenstand wiederhergestellt',
+      'Der Server hat nicht geantwortet - Gegenstand wiederhergestellt',
     'notify.cannotMoveItem': 'Dieser Gegenstand kann nicht dorthin',
     'notify.cannotUseItem': 'So lässt sich dieser Gegenstand nicht benutzen',
     'notify.npcNothingYet': 'Dieser NPC hat noch nichts für dich',
@@ -1269,7 +1269,7 @@ export const germanLayer: LanguageLayer = {
     'guild.ally': 'Verbünden',
     'guild.rival': 'Feind',
     'guild.joinHint':
-      'Stell dich neben den Gildenmeister, dem du beitreten willst, und drücke Beitreten — oder sprich mit dem Gildenmeister-NPC, um eine eigene zu gründen.',
+      'Stell dich neben den Gildenmeister, dem du beitreten willst, und drücke Beitreten - oder sprich mit dem Gildenmeister-NPC, um eine eigene zu gründen.',
     'guild.join': 'Beitreten',
     'guild.nameScore': '{name} ( Punkte:{score} )',
     'guild.notInGuild': 'Du bist in keiner Gilde.',
@@ -1290,8 +1290,42 @@ export const germanLayer: LanguageLayer = {
     'worlds.answering': 'Antwortet',
     'worlds.noAnswer': 'Keine Antwort',
     'worlds.hint': 'Wähle eine Welt und betritt sie.',
-    'bottomBar.pickSkill': '[{key}] leer — klicken, um eine Fertigkeit zu wählen',
-    'bottomBar.boundSlot': '{name} [{key}] — Rechtsklick zum Ändern',
+    'worlds.tabList': 'Liste',
+    'account.list': 'Konten auf {world}',
+    'account.unnamed': 'Neues Konto',
+    'account.addFirst': 'Erst ein Konto anlegen',
+    'account.keepPassword': 'Passwort merken',
+    'account.entersAs': 'Betreten meldet {name} an.',
+    'worlds.tabWorlds': 'Welten',
+    'worlds.tabInfo': 'Details',
+    'worlds.tabAccount': 'Konten',
+    'worlds.tabSetup': 'Setup',
+    'worlds.search': 'Welten suchen',
+    'worlds.clearSearch': 'Suche löschen',
+    'worlds.noMatch': 'Nichts passt zu "{text}".',
+    'worlds.count': '{shown} von {total}',
+    'worlds.hasAccount': 'Für diese Welt ist ein Konto gespeichert',
+    'worlds.accountMark': 'ID',
+    'info.client': 'Client',
+    'info.anyClient': 'Beliebig',
+    'info.address': 'Adresse',
+    'info.route': 'Route',
+    'info.status': 'Status',
+    'info.notChecked': 'Noch nicht geprüft',
+    'info.account': 'Konto',
+    'info.noAccount': 'Keines gespeichert',
+    'info.lastLogin': 'Letzter Login',
+    'info.never': 'Nie',
+    'info.noDescription': 'Diese Welt hat keine Beschreibung veröffentlicht.',
+    'info.gameServers': 'Spielserver',
+    'info.noGameServers': 'Diese Welt hat keine Servernamen veröffentlicht; sie kommen beim Verbinden.',
+    'info.moreServers': 'und {count} weitere',
+    'account.notKept': 'FRAGEN',
+    'account.storedLocally': 'Nur in diesem Browser gespeichert, im Klartext.',
+    'account.cannotSave': 'Diese Welt kann kein Konto speichern.',
+    'account.needSignup': 'Noch kein Konto? Erstelle eins im Anmeldefenster.',
+    'bottomBar.pickSkill': '[{key}] leer - klicken, um eine Fertigkeit zu wählen',
+    'bottomBar.boundSlot': '{name} [{key}] - Rechtsklick zum Ändern',
     'bottomBar.clearSlot': 'Platz [{key}] leer lassen',
     'guild.leaveTitle': 'Gilde verlassen',
     'guild.breakHint': 'Wenn du deine Gilde verlassen willst,',

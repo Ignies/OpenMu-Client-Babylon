@@ -577,7 +577,7 @@ export const CharacterInfo = observer(() => {
         tooltip={t(QUEST_TOOLTIP)}
         disabled
       />
-      {/* `m_BtnPet` — `Toggle(INTERFACE_PET)`. */}
+      {/* `m_BtnPet` - `Toggle(INTERFACE_PET)`. */}
       <WindowButton
         x={PET_BUTTON_X}
         file={PET_SPRITE}

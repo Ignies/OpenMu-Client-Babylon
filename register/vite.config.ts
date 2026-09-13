@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
  * served from its own host, and it must not drag in Babylon, the packet
  * layer, or the 800 MB asset tree to draw one window.
  *
- * It shares exactly one module with the client — `libs/mu/tga` — which is why
+ * It shares exactly one module with the client - `libs/mu/tga` - which is why
  * `server.fs.allow` reaches up to the repo root in dev.
  *
  * Build:  bun run --cwd register build   ->  dist-register/

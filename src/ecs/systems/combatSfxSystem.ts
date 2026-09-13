@@ -25,7 +25,7 @@ import { Store } from '../../store';
  * (re)starts, and this system reacts to the bump.
  *
  * Monster idle / walk chatter is `rand_fps_check(16)` at the moment the
- * action is set, i.e. a 1-in-16 roll per stop/walk transition — not a
+ * action is set, i.e. a 1-in-16 roll per stop/walk transition - not a
  * per-frame roll.
  */
 

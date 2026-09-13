@@ -40,7 +40,7 @@ const DELTA_ENCODE = 127.5;
  * bends toward the ceiling along an exponential and never reaches it, so two
  * candelabra whose pools overlap read as brighter than one and not as a flat
  * plateau. A hard clamp is what forced the emitters to be tuned as tight hot
- * cores in the first place — see the note in devias/candleObject.ts — because
+ * cores in the first place - see the note in devias/candleObject.ts - because
  * any generous tail summed straight into the ceiling and erased the gradient
  * the pools were supposed to read against.
  */
@@ -123,7 +123,7 @@ export function getTerrainLightTexture(scene: Scene): RawTexture {
  * It lives here rather than in a texture of its own for one blunt reason: the
  * terrain fragment shader already samples this texture, at this exact UV, for
  * the torch light. The mask needs the same lookup, and the shader's own
- * comments twice record how brittle its sampler list is — a sampler declared
+ * comments twice record how brittle its sampler list is - a sampler declared
  * but unbound, or two sampler types landing on one unit, is a GL draw error
  * that makes the whole terrain vanish. Riding in a channel nobody was using
  * costs no unit, no upload and no ordering rule.
@@ -335,8 +335,8 @@ export function updateTerrainDynamicLight(
 
       // Hue-preserving soft shoulder. This byte texture tops out at 2.0
       // (decoded `* 2.0` in terrainMaterial), and MU's floor lights are almost
-      // pure hue — the candelabra are (1, 0.66, 0.3), the hearths
-      // (1, 0.6, 0.35) — so anything done per channel goes wrong twice over.
+      // pure hue - the candelabra are (1, 0.66, 0.3), the hearths
+      // (1, 0.6, 0.35) - so anything done per channel goes wrong twice over.
       //
       // A per-channel `min` pins red at the ceiling while green and blue are
       // still climbing, and the light *changes colour* as it gets stronger:
@@ -344,7 +344,7 @@ export function updateTerrainDynamicLight(
       // maroon where six candelabra overlap. That is the same trap as the
       // per-channel clamp in `default.fragment` that made warm light read
       // green (clamped lighting is why warm light reads
-      // *green*"), mirrored — clamping the top of a colour throws away the
+      // *green*"), mirrored - clamping the top of a colour throws away the
       // hue, and it is the hue that reads.
       //
       // Scaling the triple by `255 / peak` fixes the colour but not the
@@ -380,7 +380,7 @@ export function updateTerrainDynamicLight(
 }
 
 /**
- * Samples `primary` — the bake plus this frame's dynamic emitters (torches,
+ * Samples `primary` - the bake plus this frame's dynamic emitters (torches,
  * +9…+15 item lamps, skills), the original's `PrimaryTerrainLight`. This is
  * what BodyLight reads, so a character standing by a torch or next to a
  * glowing drop warms up on every tier, exactly like the ground under them.

@@ -1,10 +1,10 @@
 /**
- * Particles — a burst or a timed stream of pooled particles from one recipe.
+ * Particles - a burst or a timed stream of pooled particles from one recipe.
  * The original's `CreateParticle(BITMAP_*, …)` loop: N particles thrown from
  * a point with a direction, gravity and a lifetime (ZzzEffectParticle.cpp).
  *
  * A burst is one call; a stream (`rate` + `seconds`) keeps emitting while it
- * lives, following `follow` if given — a fireball's trail, a buff's shimmer.
+ * lives, following `follow` if given - a fireball's trail, a buff's shimmer.
  * Every recipe shares one `ParticleSystem` (core.ts), so a hundred bursts of
  * one kind cost one draw.
  *
@@ -23,7 +23,7 @@ import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** A stream with no `seconds` runs this long — long enough to be a mistake you notice. */
+/** A stream with no `seconds` runs this long - long enough to be a mistake you notice. */
 const DEFAULT_STREAM_SECONDS = 2;
 
 // ---- 2. state + readers ----------------------------------------------------

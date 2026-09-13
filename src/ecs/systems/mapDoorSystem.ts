@@ -74,7 +74,7 @@ export const MapDoorSystem: ISystemFactory = world => {
     if (state) return state;
 
     const t = e.transform!;
-    // `(int)Angle[2] % 360` — rest yaws are multiples of 90 in the map data.
+    // `(int)Angle[2] % 360` - rest yaws are multiples of 90 in the map data.
     const homeAngle = normalizeDegrees(Math.trunc(t.rot.y * DEG));
     state = {
       kind,

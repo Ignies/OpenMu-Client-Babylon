@@ -24,7 +24,7 @@ import {
  *    trees. Their sway is a BMD bone animation the converter already baked
  *    into the GLB clips, so `MapTileObject` plays it with no help.
  *  - Type 24 (the 6x6x7 big tree), 30 (the wooden bridge) and 31-33 (rocks)
- *    have no case in `CreateObject`, `MoveObject` or `RenderObjectVisual` —
+ *    have no case in `CreateObject`, `MoveObject` or `RenderObjectVisual` -
  *    they are plain props.
  *  - The water tiles are terrain layer 5 on the generic scroll; Noria adds no
  *    terrain code of its own.
@@ -46,7 +46,7 @@ export async function createNoria(world: World) {
 
   /**
    * Noria 38: `CreateOperate(o)` + `o->HiddenMesh = -2` (ZzzObject.cpp:4703),
-   * and — unlike every other operate box in the game — with no
+   * and - unlike every other operate box in the game - with no
    * `BoundingBoxMax` override anywhere in the Noria block, so it keeps
    * `CreateObject`'s default `(40, 40, 80)`. That is `OperateBoxObject`, not
    * `LeanBoxObject`: the taller (40, 40, 160) variant belongs to the
@@ -59,12 +59,12 @@ export async function createNoria(world: World) {
 
 /**
  * `MapManager.cpp:100-103`, the Noria arm of the warp-gate block: one gate at
- * tile (223, 30), angle `(0, 0, 10)`, from `Data/Npc/warp01..03.bmd` — all
+ * tile (223, 30), angle `(0, 0, 10)`, from `Data/Npc/warp01..03.bmd` - all
  * three are staged as `NPC/warp0N.glb`.
  *
  * `CreateObject` (ZzzObject.cpp:4675-4693) turns that single record into five
  * stacked effects at `z + 350`, offset along Y by 0, 4, 8, 12 and 20, in the
- * order warp01, warp02, warp01, warp02, warp03. The base object is skipped —
+ * order warp01, warp02, warp01, warp02, warp03. The base object is skipped -
  * see the note in warpGateObject.ts: the original leaves its Z at 0 and buries
  * it under 1.80 tiles of terrain.
  */
@@ -76,7 +76,7 @@ function createWarpGate(world: World): void {
   /** `Position[2] + 350.f`, in tiles. The gate floats; no terrain lookup. */
   const height = 3.5;
 
-  /** `Vector(0.f, 0.f, 10.f, Ang)` — `Angle[2]` is the MU yaw. */
+  /** `Vector(0.f, 0.f, 10.f, Ang)` - `Angle[2]` is the MU yaw. */
   const yaw = toRadians(10);
 
   const stack: {
@@ -96,7 +96,7 @@ function createWarpGate(world: World): void {
     world.add({
       worldIndex: world.mapIndex,
       transform: {
-        // The Y offsets are in MU units, so 4…20 is 0.04…0.20 of a tile —
+        // The Y offsets are in MU units, so 4…20 is 0.04…0.20 of a tile -
         // the copies are meant to sit almost inside one another and beat
         // against each other as they spin at different rates.
         pos: new Vector3(tileX, height, tileY + offsetY / world.terrainScale),

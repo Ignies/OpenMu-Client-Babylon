@@ -13,7 +13,7 @@ export class Hound extends MonsterObject {
     Hound.OverrideScale = monsterScaleOf(NPC_TYPE);
   }
 
-  // `c->Object.HiddenMesh = 0` — the Hell Hound variant's kit (:13856).
+  // `c->Object.HiddenMesh = 0` - the Hell Hound variant's kit (:13856).
   HiddenMesh = MONSTER_HIDDEN_MESH[NPC_TYPE] ?? -1;
 
   async init(world: World, entity: Entity) {

@@ -1,5 +1,5 @@
 /**
- * Projectile — something that flies from a point to a target and does a
+ * Projectile - something that flies from a point to a target and does a
  * thing on arrival. The original's `CreateEffect(MODEL_* or BITMAP_*, …, Target)`
  * with a `Velocity`: `MoveEffect` steps toward `Target->Position` each tick
  * and, within one step of it, kills the effect and spawns the hit
@@ -34,7 +34,7 @@ import type { EffectHandle, EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Magic bolts: the original's 7 units/tick... at 25 Hz — 7 tiles/s, matching lighting/skills.ts. */
+/** Magic bolts: the original's 7 units/tick... at 25 Hz - 7 tiles/s, matching lighting/skills.ts. */
 const DEFAULT_SPEED = 7;
 
 /** Give up after this long: a target that despawned mid-flight. */
@@ -57,7 +57,7 @@ export interface ProjectileHead {
 }
 
 export interface ProjectileOptions {
-  /** Where it flies to — a fixed point or a moving one (the target's chest). */
+  /** Where it flies to - a fixed point or a moving one (the target's chest). */
   to: Vector3 | PointSource;
   /** Tiles per second. */
   speed?: number;
@@ -66,7 +66,7 @@ export interface ProjectileOptions {
   model?: Omit<ModelOptions, 'follow' | 'seconds'>;
   /** Particles left behind. */
   trail?: { recipe: ParticleRecipe; rate: number };
-  /** Peak height of a lob in tiles (0 = straight). A Meteorite falls, so it starts high instead — use `from`. */
+  /** Peak height of a lob in tiles (0 = straight). A Meteorite falls, so it starts high instead - use `from`. */
   arc?: number;
   /** Start somewhere other than `at` (a comet from the sky). */
   from?: Vector3;
@@ -74,6 +74,12 @@ export interface ProjectileOptions {
   onArrive?: (at: Vector3) => void;
   /** Fired if it gave up (target gone). */
   onLost?: () => void;
+  /**
+   * The head's position, once a tick - as `joint`'s `trace`. For a host
+   * that must ride something on the bolt this layer does not own: an
+   * arrow's own light. Read-only: copy it, never keep it.
+   */
+  trace?: (head: Vector3) => void;
 }
 
 const live = new LiveList();
@@ -110,6 +116,8 @@ function spawn(scene: Scene, at: Vector3, opts: ProjectileOptions): EffectHandle
     : null;
   const trail = opts.trail ? new Emitter(scene, opts.trail.recipe, opts.trail.rate) : null;
 
+  opts.trace?.(pos);
+
   let t = 0;
   let travelled = 0;
   let arrived = false;
@@ -126,6 +134,7 @@ function spawn(scene: Scene, at: Vector3, opts: ProjectileOptions): EffectHandle
       const step = speed * dt;
       if (dist <= Math.max(step, HIT_DISTANCE)) {
         pos.copyFrom(target);
+        opts.trace?.(pos);
         arrived = true;
         return false;
       }
@@ -146,6 +155,7 @@ function spawn(scene: Scene, at: Vector3, opts: ProjectileOptions): EffectHandle
         card.visibility = (card.material as { diffuseTexture?: unknown } | null)?.diffuseTexture ? 1 : 0;
       }
       if (model) model.yawTo(dir);
+      opts.trace?.(pos);
       trail?.tick(pos, dt);
       return true;
     },

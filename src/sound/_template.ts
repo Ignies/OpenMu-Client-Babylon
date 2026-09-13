@@ -1,5 +1,5 @@
 /**
- * TEMPLATE — copy this file to `<name>.ts`, fill in the blanks, add the layer
+ * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
  * to `layers.ts`. Never imported; it only exists to be copied.
  *
  * Every sound entry has the same three parts, in this order:
@@ -25,7 +25,7 @@ import type { SoundLayer } from './layer';
 /** The bed this entry loops. */
 const BED: Sounds = 'Sound/aWind';
 
-/** Share of the effects track the bed sits at — under the SFX, never on top. */
+/** Share of the effects track the bed sits at - under the SFX, never on top. */
 const VOLUME = 0.35;
 
 /** Maps this exists on. */

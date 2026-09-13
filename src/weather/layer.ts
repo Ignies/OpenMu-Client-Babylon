@@ -7,7 +7,7 @@ import type { ENUM_WORLD } from '../common/types';
  * Keep it small on purpose: an effect that needs more than this (a terrain
  * overlay, a particle recipe, a sound) declares it in its own file and the
  * consumer that draws it imports it from there. The layer is only the
- * *lifecycle* — what happens each frame and what happens on a map change.
+ * *lifecycle* - what happens each frame and what happens on a map change.
  */
 export interface WeatherLayer {
   /** Unique, kebab-free camelCase, same as the file name. */
@@ -27,7 +27,7 @@ export interface WeatherLayer {
   update?(map: ENUM_WORLD, dt: number): void;
 
   /**
-   * The map changed. Drop everything belonging to the world just left —
+   * The map changed. Drop everything belonging to the world just left -
    * accumulators, pools, particle systems. Called before the new map's
    * terrain material binds, so anything a shader samples must be zeroed here.
    */

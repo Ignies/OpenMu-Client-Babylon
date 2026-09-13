@@ -12,7 +12,7 @@ const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
  *
  * OpenMU never sends `WeatherStatusUpdate`, so the proxy synthesises it. This
  * is the only place in the pipe that *originates* a packet rather than
- * forwarding one — everything else here is a byte copy — so it is kept to one
+ * forwarding one - everything else here is a byte copy - so it is kept to one
  * timer and one 4-byte frame.
  *
  * The state is global, not per connection: every client must see the same sky,
@@ -27,7 +27,7 @@ const WEATHER_TICK_MS = Number(process.env.WEATHER_TICK ?? 5000);
  * Resend even when nothing changed, so a steady sky is self-healing: a client
  * that connects mid-shower is told, and one that missed a frame is corrected
  * within the interval rather than holding the wrong weather until the next
- * change — which, on a soaked day, can be hours away.
+ * change - which, on a soaked day, can be hours away.
  */
 const WEATHER_HEARTBEAT_MS = Number(process.env.WEATHER_HEARTBEAT ?? 20000);
 
@@ -99,7 +99,7 @@ if (WEATHER_ENABLED) {
   console.log(
     weatherForced
       ? `weather: FORCED to ${weather.kind === 0 ? "clear" : `rain ${weather.variation}/15`} (WEATHER_FORCE)`
-      : `weather: on (slot ${weatherSlotSeconds}s, tick ${WEATHER_TICK_MS}ms) — WEATHER_FORCE=12 to pin rain, WEATHER=off to disable`
+      : `weather: on (slot ${weatherSlotSeconds}s, tick ${WEATHER_TICK_MS}ms) - WEATHER_FORCE=12 to pin rain, WEATHER=off to disable`
   );
 } else {
   console.log("weather: off");
@@ -228,7 +228,7 @@ Bun.serve<WebSocketData>({
               error
             );
             // Tell the client now. Left open, the ws just sits there and the
-            // player waits on a game server that was never reached — which is
+            // player waits on a game server that was never reached - which is
             // also what the client's address fallback keys off.
             ws.close();
           }, // connection failed

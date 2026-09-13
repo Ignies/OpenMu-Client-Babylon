@@ -8,7 +8,7 @@ import type { Entity } from '../ecs/world';
  * emitted once per tracked entity per frame, and every mounted name tag,
  * guild mark and damage label subscribed to the same global event and threw
  * away everything that was not its own entity. With n entities and n overlay
- * components that is n² handler calls a frame — 900 of them for 30 characters
+ * components that is n² handler calls a frame - 900 of them for 30 characters
  * on screen, before any DOM work.
  *
  * Here a listener is registered against one entity and only ever hears about
@@ -49,7 +49,7 @@ export type AnyScreenPositionListener = (
 const anyListeners = new Set<AnyScreenPositionListener>();
 
 /**
- * For the handful of consumers that genuinely want every entity — the name
+ * For the handful of consumers that genuinely want every entity - the name
  * tag layout pass keeps one slot table for all of them, so a per-entity
  * subscription would just be the old n² pattern wearing a new hat.
  */
@@ -60,7 +60,7 @@ export function onAnyScreenPosition(
   return () => anyListeners.delete(listener);
 }
 
-/** True when anything is listening — lets the producer skip the projection. */
+/** True when anything is listening - lets the producer skip the projection. */
 export function hasScreenPositionListener(entity: Entity): boolean {
   return listeners.has(entity) || anyListeners.size > 0;
 }

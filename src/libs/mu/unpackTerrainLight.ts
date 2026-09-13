@@ -9,7 +9,7 @@ import { TERRAIN_SIZE } from '../../common/terrain/consts';
  * even though every signature involved is typed `IVector3Like`:
  * `CreateGroundFromHeightMap` copies each entry with `Vector3.copyFrom`
  * (customGroundMesh.ts:51), and Babylon's `copyFrom` reads the *private*
- * backing fields — `source._x`, not `source.x` (math.vector.js:1753). Handing
+ * backing fields - `source._x`, not `source.x` (math.vector.js:1753). Handing
  * it a plain object silently writes `undefined` into every terrain vertex
  * colour: no error, no exception, just flat unlit ground.
  *

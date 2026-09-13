@@ -102,7 +102,7 @@ export const SkillCastSystem: ISystemFactory = world => {
   /**
    * What the clip switches branch on: the mount (collapsed to none inside a
    * safe zone, the way every `&& !c->SafeZone` in the original does),
-   * `IsFemale(Class)` — which is Elf *and* Summoner, not "is elf" — and the
+   * `IsFemale(Class)` - which is Elf *and* Summoner, not "is elf" - and the
    * active world, for Rider's flying variant.
    */
   function castContext(hero: Entity): CastContext {
@@ -414,7 +414,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         return;
       }
 
-      // ---- Nova hold: the button is down — keep the charge clip up.
+      // ---- Nova hold: the button is down - keep the charge clip up.
       if (combat.novaCharging) {
         const model = hero.modelObject;
         if (model?.ActionIterationWasFinished) {
@@ -568,7 +568,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         if (!area && !target) {
           // Forced cast with nothing near the cursor: the clip whiffs
           // toward the ground point and nothing goes on the wire. The hero
-          // key must not stand in here — a targeted packet naming the
+          // key must not stand in here - a targeted packet naming the
           // caster lands the skill on the character, not at the cursor.
         } else if (combat.isDarkSide(def.num)) {
           // Dark Side: 0x4B asks the server for the targets, 0x4A lands the

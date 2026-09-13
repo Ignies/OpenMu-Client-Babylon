@@ -1,5 +1,5 @@
 /**
- * Portuguese (Brazilian wording, `pt-BR` first among the aliases — that is
+ * Portuguese (Brazilian wording, `pt-BR` first among the aliases - that is
  * where most of MU's Portuguese-speaking players are). MU's proper nouns
  * (class names, event names, Zen, MU Helper) stay as they are.
  */
@@ -213,7 +213,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.packHint':
       'O texto das missões, os diálogos dos NPCs e os nomes dos monstros também estão traduzidos neste idioma.',
     'options.noPackHint':
-      'Apenas a interface — o texto das missões e os nomes dos monstros continuam em inglês.',
+      'Apenas a interface - o texto das missões e os nomes dos monstros continuam em inglês.',
     'options.languageHint':
       'O idioma da interface. Nomes de itens, monstros e habilidades não mudam.',
     'options.quality.classic': 'Clássica',
@@ -264,7 +264,7 @@ export const portugueseLayer: LanguageLayer = {
     'bottomBar.emptySlot': '[{key}] vazio',
     'bottomBar.itemSlot': '{name} [{key}]',
     'bottomBar.skillHint':
-      ' — clique: lista de habilidades, clique direito: ataque comum',
+      ' - clique: lista de habilidades, clique direito: ataque comum',
     'bottomBar.pet.normal': 'Nor',
     'bottomBar.pet.random': 'Ale',
     'bottomBar.pet.owner': 'Don',
@@ -1225,7 +1225,7 @@ export const portugueseLayer: LanguageLayer = {
     'notify.learnedSkill': 'Você aprendeu {name}',
     'notify.storageOpen': 'Você não pode usar itens com o baú aberto',
     'notify.upgradeNeedsServer': 'O aprimoramento precisa de um servidor',
-    'notify.noAnswerRestored': 'O servidor não respondeu — item restaurado',
+    'notify.noAnswerRestored': 'O servidor não respondeu - item restaurado',
     'notify.cannotMoveItem': 'Você não pode mover esse item para aí',
     'notify.cannotUseItem': 'Esse item não se usa assim',
     'notify.npcNothingYet': 'Este NPC ainda não tem nada para você',
@@ -1283,8 +1283,42 @@ export const portugueseLayer: LanguageLayer = {
     'worlds.answering': 'Responde',
     'worlds.noAnswer': 'Sem resposta',
     'worlds.hint': 'Escolha um mundo e entre.',
-    'bottomBar.pickSkill': '[{key}] vazio — clique para escolher uma habilidade',
-    'bottomBar.boundSlot': '{name} [{key}] — clique direito para trocar',
+    'worlds.tabList': 'Lista',
+    'account.list': 'Contas em {world}',
+    'account.unnamed': 'Conta nova',
+    'account.addFirst': 'Adicione uma conta primeiro',
+    'account.keepPassword': 'Guardar a palavra-passe',
+    'account.entersAs': 'Entrar acede como {name}.',
+    'worlds.tabWorlds': 'Mundos',
+    'worlds.tabInfo': 'Detalhes',
+    'worlds.tabAccount': 'Contas',
+    'worlds.tabSetup': 'Ajustes',
+    'worlds.search': 'Procurar mundos',
+    'worlds.clearSearch': 'Limpar a procura',
+    'worlds.noMatch': 'Nada corresponde a "{text}".',
+    'worlds.count': '{shown} de {total}',
+    'worlds.hasAccount': 'Há uma conta guardada para este mundo',
+    'worlds.accountMark': 'ID',
+    'info.client': 'Cliente',
+    'info.anyClient': 'Qualquer',
+    'info.address': 'Endereço',
+    'info.route': 'Rota',
+    'info.status': 'Estado',
+    'info.notChecked': 'Ainda não verificado',
+    'info.account': 'Conta',
+    'info.noAccount': 'Nenhuma guardada',
+    'info.lastLogin': 'Último acesso',
+    'info.never': 'Nunca',
+    'info.noDescription': 'Este mundo não publicou nenhuma descrição.',
+    'info.gameServers': 'Servidores de jogo',
+    'info.noGameServers': 'Este mundo não publicou nomes de servidor; chegam ao ligar.',
+    'info.moreServers': 'e mais {count}',
+    'account.notKept': 'PEDIR',
+    'account.storedLocally': 'Guardada apenas neste navegador, em texto simples.',
+    'account.cannotSave': 'Este mundo não pode guardar uma conta.',
+    'account.needSignup': 'Ainda sem conta? Crie uma no ecrã de acesso.',
+    'bottomBar.pickSkill': '[{key}] vazio - clique para escolher uma habilidade',
+    'bottomBar.boundSlot': '{name} [{key}] - clique direito para trocar',
     'bottomBar.clearSlot': 'Deixar o espaço [{key}] vazio',
     'guild.leaveTitle': 'Sair da guilda',
     'guild.breakHint': 'Se você quer sair da sua guilda,',

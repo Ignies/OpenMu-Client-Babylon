@@ -46,7 +46,7 @@ import {
  * main frame stays visible under it), the map is `m_Lenth[m_MiniPos]` px on
  * a side (800 at the only zoom level the original ever uses; the other five
  * entries are here as the mouse-wheel zoom, which is ours) and the hero's
- * tile is pinned to the screen centre — texture U runs along tile Y and V
+ * tile is pinned to the screen centre - texture U runs along tile Y and V
  * along tile X (`Tx = PositionY / 256 · L`, `Ty = PositionX / 256 · L`).
  * Markers are 15 px (NPC) / 30 px (portal) sprites placed at their tile the
  * same way and spun by their own `Rotation` on top of the map's 45°.

@@ -2,7 +2,7 @@ import { useState, type CSSProperties } from 'react';
 import { MuSpriteFrame } from './muSprite';
 
 /**
- * The client's `ui/components/muButton`, minus `libs/sfx` — this page has no
+ * The client's `ui/components/muButton`, minus `libs/sfx` - this page has no
  * audio engine and a register form does not need click sounds. Frame layout is
  * the same: the sheet stacks states vertically, so frame *n* sits at `y = n *
  * height`.

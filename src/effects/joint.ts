@@ -1,5 +1,5 @@
 /**
- * Joint — a glowing ribbon that jitters while it lives: a lightning bolt, a
+ * Joint - a glowing ribbon that jitters while it lives: a lightning bolt, a
  * chain of energy, a spirit tether, a streamer. The original's
  * `CreateJoint(BITMAP_JOINT_*, from, to, …)` (ZzzEffectJoint.cpp) comes in
  * two shapes and both live here:
@@ -17,9 +17,9 @@
  *
  * A joint with a `texture` is drawn the way `RenderJoints` draws its tail
  * quads: the BITMAP_JOINT_* sheet runs U along the ribbon (per tail slot, not
- * per world distance — ZzzEffectJoint.cpp:7036), V across it, × the joint's
+ * per world distance - ZzzEffectJoint.cpp:7036), V across it, × the joint's
  * `Light`. The sheets are black at the edges, so under the additive blend only
- * the bright filament in the middle shows — an untextured ribbon is a solid
+ * the bright filament in the middle shows - an untextured ribbon is a solid
  * band of colour the full width of the quad strip, which is what every bolt
  * looked like (issue #4). Untextured stays supported for the plain glow
  * ribbons (aura's orbit lines).
@@ -109,7 +109,7 @@ export interface JointOptions {
   /** Trail: tiles/s² pulling the free head down. */
   gravity?: number;
   /**
-   * Trail: steer like JOINT_SPIRIT sub0 (ZzzEffectJoint.cpp:3732-3772) — per
+   * Trail: steer like JOINT_SPIRIT sub0 (ZzzEffectJoint.cpp:3732-3772) - per
    * tick, home the heading on `seek` by up to `seekRate` radians
    * (MoveHumming's 10°/frame), kick damped angular velocities with uniform
    * impulses in ±`wander.pitch` / ±`wander.yaw` (the ±3.2°/±12.8° rolls,
@@ -124,7 +124,7 @@ export interface JointOptions {
     band?: { floor: number; ceiling: number };
   };
   /**
-   * Trail: the head's position, once a tick — the per-frame `CreateEffect`
+   * Trail: the head's position, once a tick - the per-frame `CreateEffect`
    * stamp at a joint's head (Evil Spirit's MODEL_LASER). Read-only: copy it,
    * never keep it.
    */
@@ -155,13 +155,13 @@ export interface JointOptions {
   height?: number;
   /**
    * `add` (default) is `EnableAlphaBlend`; `subtract` is
-   * `EnableAlphaBlendMinus` (`dst × (1 − src)`, ZzzOpenglUtil.cpp:444) — the
+   * `EnableAlphaBlendMinus` (`dst × (1 − src)`, ZzzOpenglUtil.cpp:444) - the
    * dark ribbons of `RENDER_TYPE_ALPHA_BLEND_MINUS` joints (Evil Spirit's
    * JOINT_SPIRIT sub0, ZzzEffectJoint.cpp:602).
    */
   blend?: EffectBlend;
   /**
-   * `Effect/Joint*` sheet run along the ribbon (recipes.ts `TEX.joint*`) —
+   * `Effect/Joint*` sheet run along the ribbon (recipes.ts `TEX.joint*`) -
    * the original's `BindTexture(o->Type)` per joint. Without it the ribbon is
    * a flat band of `colour`.
    */
@@ -222,7 +222,7 @@ interface Line {
 }
 
 /**
- * The U along the ribbon per point slot — the original's
+ * The U along the ribbon per point slot - the original's
  * `(NumTails − j) / (MaxTails − 1)`: the head end at `repeats`, the oldest
  * tail at 0 (ZzzEffectJoint.cpp:7036). Four floats per point, matching the
  * two side vertices GreasedLine builds per point; explicit because the
@@ -280,7 +280,7 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
       ...(opts.taper ? { widths: taperWidths(lines) } : {}),
     },
     {
-      // With a texture the colour rides in `emissiveColor` below — the plugin's
+      // With a texture the colour rides in `emissiveColor` below - the plugin's
       // own colour would *replace* the sampled texel (COLOR_MODE_SET).
       ...(textured ? {} : { color: new Color3(colour[0], colour[1], colour[2]) }),
       width,
@@ -305,7 +305,7 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
     // The plugin defaults to white + COLOR_MODE_SET when no color is given,
     // overwriting the shaded texel with a flat band; null keeps ours.
     if (glMat) glMat.color = null;
-    // The sheet × `Light` under the joint's blend — the same Standard set-up
+    // The sheet × `Light` under the joint's blend - the same Standard set-up
     // as core.ts `additiveMaterial` (texel × emissive tint, lighting off).
     // A dark ribbon instead draws black with the sheet as its coverage, for
     // the reason model.ts `subtractMaterial` gives: coverage is the only
@@ -323,7 +323,7 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
     std.backFaceCulling = false;
     std.disableDepthWrite = true;
     std.fogEnabled = false;
-    // Hold the line unseen until the sheet is in — a texture-less Standard
+    // Hold the line unseen until the sheet is in - a texture-less Standard
     // ribbon is exactly the solid band this is here to remove.
     if (glMat) glMat.visibility = -1;
     void effectTexture(scene, sheetFile).then(tex => {
@@ -377,7 +377,7 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
     scroll:
       scrollRate > 0
         ? () => {
-            // The original's global `WorldTime % 1000 * 0.001` — every thunder
+            // The original's global `WorldTime % 1000 * 0.001` - every thunder
             // joint writes the same value, so sharing the texture is safe.
             if (sheet) sheet.uOffset = -((fxNow() * scrollRate) % 1);
           }
@@ -391,7 +391,7 @@ function disposeLine(scene: Scene, line: Line, lines: number[][]): void {
   releaseEffectGlow(mesh);
   (scene as TestScene).look?.glow.removeExcludedMesh(mesh);
   // Never dispose the shared empty-colours texture, and never through the
-  // public `colorsTexture` setter — greasedLineRelease.ts documents both traps.
+  // public `colorsTexture` setter - greasedLineRelease.ts documents both traps.
   releaseGreasedLineMaterial(mesh);
   mesh.dispose();
 }

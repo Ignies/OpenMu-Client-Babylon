@@ -65,7 +65,7 @@ class Weather {
     return snowCover();
   }
 
-  /** Snow an object at tile (x, z) carries, 0…1 — zero under a roof. */
+  /** Snow an object at tile (x, z) carries, 0…1 - zero under a roof. */
   snowCapAt(x: number, z: number): number {
     return snowCapAt(x, z);
   }

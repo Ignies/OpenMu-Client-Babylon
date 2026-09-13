@@ -1,5 +1,5 @@
 /**
- * Aura — a persistent effect that wraps a body until told to stop: the
+ * Aura - a persistent effect that wraps a body until told to stop: the
  * Soul Barrier bubble, the elf buffs' orbiting motes, Swell Life's red
  * shimmer. The original keeps these in the character's `m_pEffect` slots and
  * re-draws them every frame while the buff flag is set

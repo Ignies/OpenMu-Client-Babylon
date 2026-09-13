@@ -40,10 +40,10 @@ const A = PlayerAction;
  * spreads below, so a row here reads as the one `case` it came from.
  *
  * A missing mount field means the original has no branch for it and the
- * ground clip plays — that is a fact about the original, not a gap.
+ * ground clip plays - that is a fact about the original, not a gap.
  */
 export type SkillClipSet = {
-  /** On foot, and in a safe zone — every mount branch is written `&& !c->SafeZone`. */
+  /** On foot, and in a safe zone - every mount branch is written `&& !c->SafeZone`. */
   readonly ground: PlayerAction;
   readonly uniria?: PlayerAction;
   readonly dinorant?: PlayerAction;
@@ -52,7 +52,7 @@ export type SkillClipSet = {
 };
 
 /**
- * Dark Lord strikes — Force, Force Wave, Fire Burst, Fire Scream, Space
+ * Dark Lord strikes - Force, Force Wave, Fire Burst, Fire Scream, Space
  * Split, Chaotic Diseier. `Helper >= UNIRIA && <= DARK_HORSE` is one branch
  * (WSclient.cpp:3929-3945).
  */
@@ -78,7 +78,7 @@ const MOUNTED_TELEPORT = {
 } as const;
 
 /**
- * The castle-siege commands — Stun, Removal, Mana, Invisible, Removal Buff:
+ * The castle-siege commands - Stun, Removal, Mana, Invisible, Removal Buff:
  * the four-way ladder `AttackCommon` runs (ZzzInterface.cpp:6495-6690,
  * WSclient.cpp:4170-4350).
  */
@@ -121,7 +121,7 @@ const CHAIN_LIGHTNING_CLIPS: SkillClipSet = {
   fenrir: A.PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR,
 };
 
-/** Sleep, Blind, Thorns, Berserker, Weakness, Enervation — one clip for all six. */
+/** Sleep, Blind, Thorns, Berserker, Weakness, Enervation - one clip for all six. */
 const SLEEP_CLIPS: SkillClipSet = { ground: A.PLAYER_SKILL_SLEEP, ...MOUNTED_SLEEP };
 
 /**
@@ -188,7 +188,7 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
 
   // --- Fairy Elf ----------------------------------------------------------
   // Infinity Arrow is the one skill that plays a *social* clip, and only on
-  // foot — mounted it falls back to SetPlayerMagic (:4967-4975), which is
+  // foot - mounted it falls back to SetPlayerMagic (:4967-4975), which is
   // what an absent mount row means here.
   77: { ground: A.PLAYER_RUSH1 }, // Infinity Arrow
   441: { ground: A.PLAYER_RUSH1 }, // Infinity Arrow Str
@@ -286,7 +286,7 @@ export const RAGE_BUFF_CLIPS: readonly PlayerAction[] = [
 ];
 
 /**
- * `SetPlayerMagic` (ZzzCharacter.cpp:1238-1262) — the generic cast clip, and
+ * `SetPlayerMagic` (ZzzCharacter.cpp:1238-1262) - the generic cast clip, and
  * the one place the original tests `IsFemale` rather than the class: a
  * Summoner raises her hand with the same clip an Elf does. The Dark Horse has
  * no branch there, so a mounted Dark Lord casting a plain spell keeps the
@@ -322,7 +322,7 @@ export const HIT_KEYS: Readonly<Partial<Record<PlayerAction, number>>> = {
 
 /**
  * `SetPlayerShock` (ZzzCharacter.cpp:1283-1297): a player hit mid-clip does
- * NOT flinch while in one of these — the swing / cast finishes. Everything
+ * NOT flinch while in one of these - the swing / cast finishes. Everything
  * else (including a plain attack swing) is interrupted by PLAYER_SHOCK.
  * Riders of Uniria / Dinorant / Dark Horse never flinch either (the mount
  * check lives with the consumer, which knows the pet slot).

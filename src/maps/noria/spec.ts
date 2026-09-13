@@ -2,12 +2,12 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
 import type { Emission } from '../../common/effectParticles';
 
 /**
- * Noria (WD_3NORIA, World4 / Object4). Plain data — no scene imports, so the
+ * Noria (WD_3NORIA, World4 / Object4). Plain data - no scene imports, so the
  * shared registries can pull it in without dragging Babylon along.
  *
  * `Object4` ships 43 BMDs, so `o->Type` runs 0…42 (`Object4/Object{N+1}.glb`).
  * EncTerrain4.obj carries 9399 records over all 44 ids: id 43 is placed once,
- * at tile (181, 104.5), and has no model at all — see
+ * at tile (181, 104.5), and has no model at all - see
  * `NORIA_EFFECT_ONLY_TYPES`.
  */
 
@@ -44,13 +44,13 @@ export const NORIA_BLEND_MESHES: Readonly<Record<number, number>> = {
  * at `Object43.bmd` (type 42), and `MapManager` loads exactly that many, so
  * `Models[43]` stays a zero-mesh BMD and `RenderObject` draws nothing for the
  * single instance at (181, 104.5). Its `MoveObject` case (ZzzObject.cpp:3940)
- * still runs — it writes `StreamMesh`/`BlendMeshTexCoordU` into that empty
+ * still runs - it writes `StreamMesh`/`BlendMeshTexCoordU` into that empty
  * model, which is why the type looks implemented in the source.
  *
  * Declaring it effect-only reproduces "loads nothing, draws nothing" exactly:
  * `MapTileObject.init` returns before `loadGLTF`, so the entity stays live
  * (pickable-free, shadowless, no body) instead of throwing a 404 through
- * `modelLoaderSystem`'s failure path on every Noria load. It emits nothing —
+ * `modelLoaderSystem`'s failure path on every Noria load. It emits nothing -
  * see `NORIA_EMISSIONS`.
  */
 export const NORIA_EFFECT_ONLY_TYPES: readonly number[] = [43];
@@ -59,7 +59,7 @@ export const NORIA_EFFECT_ONLY_TYPES: readonly number[] = [43];
  * `emissionsFor` is only ever consulted for effect-only types
  * (`MapTileObject.init`), and Noria's only effect-only type is 43, the record
  * whose model is missing. The original draws nothing there and invents no
- * particles, so neither do we — putting steam or water on that spot would be
+ * particles, so neither do we - putting steam or water on that spot would be
  * new content, not a port.
  *
  * The forge's sparks are *not* here on purpose: they hang off bone 58 of
@@ -74,7 +74,7 @@ export const NORIA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {};
  * and every Noria lamp colour is that value times a fixed tint.
  *
  * `LightEmitter.sprite.pulse` is the only per-sprite animation the shared
- * emitter offers — `(sin(t * speed) + 1) * amount + base` — so `amount` 0.145
+ * emitter offers - `(sin(t * speed) + 1) * amount + base` - so `amount` 0.145
  * over `base` 0.70 lands on exactly the original's 0.70…0.99 window and only
  * the *shape* differs: a ~0.8 s breath instead of white noise. That is the
  * better trade at this scale. The alternative, a class per lamp re-rolling
@@ -95,7 +95,7 @@ const LAMP_COLOR: readonly [number, number, number] = [0.4, 0.7, 1];
  * at a bone, and nothing else.
  *
  * There is deliberately no `terrain` block. Noria is the one town map with no
- * `AddTerrainLight` call anywhere — its lamps are pure additive sprites that
+ * `AddTerrainLight` call anywhere - its lamps are pure additive sprites that
  * do not light the ground, and `MapObjectLights` nests the point-light
  * registration inside the terrain one, so omitting it here reproduces both
  * halves. Copying Lorencia's street-light recipe would have been wrong twice
@@ -103,7 +103,7 @@ const LAMP_COLOR: readonly [number, number, number] = [0.4, 0.7, 1];
  * delta texture's 2.0 clamp would flatten the whole west of the map.
  *
  * `offset` is in BMD units and `resolveEmitterPosition` maps it as
- * `(x, z, y)` then rotates it by the object's own yaw/pitch/roll — the same
+ * `(x, z, y)` then rotates it by the object's own yaw/pitch/roll - the same
  * frame the model root ends up in after `scaling(1,-1,1) · rotX(-90°)`, so a
  * bone's BMD rest position can be pasted in unchanged.
  */
@@ -131,8 +131,8 @@ const FORGE_GLOW: LightEmitter['sprite'] = {
  * below are those bones' rest positions read out of the converted GLBs (the
  * first animation key of each channel, composed down the parent chain).
  *
- * The animation moves them 5…30 MU — under a third of a tile, against
- * sprites 0.3…1.5 tiles across — so a fixed offset costs the slow bob and
+ * The animation moves them 5…30 MU - under a third of a tile, against
+ * sprites 0.3…1.5 tiles across - so a fixed offset costs the slow bob and
  * buys back the bone lookups. Type 17's hanging lanterns swing the furthest
  * (~0.3 tile); with three of them on the map that is the one place a
  * bone-following class would still be visible, and it is noted rather than
@@ -140,9 +140,9 @@ const FORGE_GLOW: LightEmitter['sprite'] = {
  */
 export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   /**
-   * The glow plant (Object02, 2336 records — the signature blue of the
+   * The glow plant (Object02, 2336 records - the signature blue of the
    * fairy forest). ZzzObject.cpp:2839-2847 draws three 0.5-scale sprites, at
-   * bones 2/4/6 — named `light03`/`light02`/`light01` in the BMD, resting at
+   * bones 2/4/6 - named `light03`/`light02`/`light01` in the BMD, resting at
    * (-20.9, -8.7, 138.3), (13.3, -28.6, 138.4) and (24.8, 6.3, 115.1).
    *
    * One sprite, at their centroid and grown to cover the ~45 MU spread. Three
@@ -150,7 +150,7 @@ export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
    * radius around (44, 98), which is 927 sprites against the 512 the
    * `effectLights` manager can hold. Babylon renders the first 512 in
    * creation order and silently drops the rest, so *which* plants glow would
-   * come down to load order — a worse artefact than a slightly rounder glow.
+   * come down to load order - a worse artefact than a slightly rounder glow.
    * (The original hits the same wall from the other side: MAX_SPRITES is
    * 1000, _define.h:441, and it draws every block on screen rather than a
    * radius.) One each puts the peak at ~360 sprites with types 9/17/35/39.
@@ -158,18 +158,18 @@ export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   // Reduced from 0.9 after seeing it: `createEffectLight` sizes a flare as
   // `64 * scale * objectScale / 100` tiles, so 0.9 was a 0.58-tile additive
   // disc, and 300 of them at once read as white cotton rather than as a
-  // fairy-forest glow — they blew past the ground and each other. The
+  // fairy-forest glow - they blew past the ground and each other. The
   // original's three sprites are 0.5 *of a BITMAP_LIGHT*, a much tighter
   // texture than flare01. At 0.3 this is a fifth of the area and stays a
   // point of light. If it still crowds the map, this constant is the dial.
   1: [lamp([6, -10, 131], 0.3)],
 
-  /** Street lamp (Object10, 14 records): bone 1, scale 1.5 — :2829-2833. */
+  /** Street lamp (Object10, 14 records): bone 1, scale 1.5 - :2829-2833. */
   9: [lamp([-1, 0, 179], 1.5)],
 
   /**
    * The lantern arch by the spawn (Object18, 3 records): bones 4, 7, 10, 13,
-   * scale 1.0 each — :2848-2858.
+   * scale 1.0 each - :2848-2858.
    */
   17: [
     lamp([65, -5, 281], 1),
@@ -179,7 +179,7 @@ export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   ],
 
   /**
-   * Glow shrub (Object36, 228 records): bone 3, scale 1.5 — :2834-2838.
+   * Glow shrub (Object36, 228 records): bone 3, scale 1.5 - :2834-2838.
    *
    * The one type here whose records are not all 1.00 scale (EncTerrain4.obj
    * has them from 1.00 to 1.48), and `resolveEmitterPosition` rotates the
@@ -208,18 +208,18 @@ export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
    *    embers alongside the sparks carry the arc instead.
    */
   39: [
-    // bone 57 (light01) — the lightning pair, flattened to one sprite.
+    // bone 57 (light01) - the lightning pair, flattened to one sprite.
     lamp([-18, 0, 152], 1, [0.4, 0.8, 1]),
 
-    // bones 61…65 (light06/04/03/05/02) — BITMAP_LIGHT, white, scale 1.
+    // bones 61…65 (light06/04/03/05/02) - BITMAP_LIGHT, white, scale 1.
     { offset: [-186, -42, 85], sprite: FORGE_GLOW },
     {
       offset: [-178, 9, 92],
       sprite: FORGE_GLOW,
       /**
        * Stated deviation: Noria has no `AddTerrainLight` anywhere, so this
-       * ground glow is ours. It is confined to the single forge — one object
-       * on a 9399-object map — because a smithy whose sparks light nothing
+       * ground glow is ours. It is confined to the single forge - one object
+       * on a 9399-object map - because a smithy whose sparks light nothing
        * reads as a prop rather than a fire, and because the cost and the
        * clamp argument that rule the light out for the 2500-odd lamps do not
        * apply to one instance. Side effect worth knowing: `emitsLight` makes
@@ -244,7 +244,7 @@ export const NORIA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
     { offset: [-198, -32, 92], sprite: FORGE_GLOW },
 
     /**
-     * bone 58 (light07) — the anvil. `rand_fps_check(8)` is a 1-in-8 roll per
+     * bone 58 (light07) - the anvil. `rand_fps_check(8)` is a 1-in-8 roll per
      * 25 Hz tick and each hit fires eight BITMAP_SPARK, so `every: 8` with
      * `count: 8` keeps both the burst size and the ~3 bursts a second. The
      * original's sparks carry `Light` still set to white from the hearth

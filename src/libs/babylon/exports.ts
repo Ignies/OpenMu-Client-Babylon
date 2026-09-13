@@ -26,7 +26,7 @@ DracoCompression.Configuration = {
 
 // EXT_meshopt_compression (todo C10). Babylon's default points at
 // cdn.babylonjs.com; every other decoder here is self-hosted, so this one is
-// too — `public/js/meshopt_decoder.js` is a straight copy of
+// too - `public/js/meshopt_decoder.js` is a straight copy of
 // `node_modules/meshoptimizer/meshopt_decoder.cjs`, whose UMD tail assigns
 // `self.MeshoptDecoder` when it is loaded as a classic script, which is what
 // `Tools.LoadBabylonScriptAsync` does. Re-copy it if meshoptimizer is

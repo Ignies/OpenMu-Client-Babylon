@@ -26,11 +26,11 @@ export const AIDA_BLEND_MESHES: Readonly<Record<number, number>> = {};
  *
  *  - **56** (×22) `BITMAP_WATERFALL_1` SubType 2, **57** (×23)
  *    `WATERFALL_3` SubType 4 every tick, **58** (×39) `WATERFALL_2` SubType
- *    2 — the three waterfall sheets around 15/150 and 182/113.
+ *    2 - the three waterfall sheets around 15/150 and 182/113.
  *  - **59** (×20), **62** (×47), **63** (×24): `BITMAP_CLOUD` SubType 1 mist
  *    puffs.
  *  - **60** (×20): butterflies (`MODEL_BUTTERFLY01` SubType 3), an effect
- *    model — empty marker here.
+ *    model - empty marker here.
  *  - **67** (×11), **70** (×5): hidden, no effect in the C++.
  */
 export const AIDA_EFFECT_ONLY_TYPES: readonly number[] = [
@@ -61,17 +61,17 @@ export const AIDA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
 /**
  * `MoveAidaObject`:
  *  - **30** (×155), :55-60: `L = (rand%5)*0.01; AddTerrainLight(x, y,
- *    (L+0.4, L+0.6, L+0.4), 2)` — a pale green glow under the luminous
+ *    (L+0.4, L+0.6, L+0.4), 2)` - a pale green glow under the luminous
  *    plants, plus (`RenderAidaObjectVisual` :106-150) a pair of
  *    `BITMAP_SPARK+1` sprites at each of bones 6/7/8/12/13/17, blue-tinted
  *    `(0.1, 0.1, 0.3)` over grey `(0.15, 0.15, 0.15)`. The sprites are
  *    reduced to one flare at the origin; the light is what reads.
- *  - **71** (×28), :62-67: the same with `(L+0.9, L+0.2, L+0.2)` — the red
- *    crystals — and the same bone sprites (:236-282).
+ *  - **71** (×28), :62-67: the same with `(L+0.9, L+0.2, L+0.2)` - the red
+ *    crystals - and the same bone sprites (:236-282).
  *  - **75** (×1), :208-217: a rotating `BITMAP_FLARE` at bone 4, `(1, 0.6,
- *    0.2)` scale 3 — the one torch.
+ *    0.2)` scale 3 - the one torch.
  *
- * The `rand() % 5 * 0.01` jitter is ±0.05 — a static light in practice, so no
+ * The `rand() % 5 * 0.01` jitter is ±0.05 - a static light in practice, so no
  * flicker block.
  */
 export const AIDA_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {

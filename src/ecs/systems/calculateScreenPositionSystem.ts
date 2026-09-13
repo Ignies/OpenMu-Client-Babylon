@@ -119,7 +119,7 @@ export const CalculateScreenPositionSystem: ISystemFactory = world => {
         scrPos.y = screenPosition.y / ratioY;
 
         // An emoji bubble hangs off its own world anchor (over the head, or
-        // on the shoulder facing the camera — placed by EmojiBubbleSystem)
+        // on the shoulder facing the camera - placed by EmojiBubbleSystem)
         // rather than off the balloon anchor above, so it gets its own
         // projection here, where the matrices and the ratios are to hand.
         const bubble = entity.emojiBubble;

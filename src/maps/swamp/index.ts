@@ -8,7 +8,7 @@ import {
 } from './spec';
 
 /**
- * Swamp of Calmness (World57 / Object57) — the map entry: identity and the per-world data the
+ * Swamp of Calmness (World57 / Object57) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
@@ -19,7 +19,7 @@ import {
  * Every behaviour is table data in `spec.ts`: the seven hidden vents and the
  * brazier light.
  *
- * Not built: `RenderBaseSmoke` (GMSwampOfQuiet.cpp:37-49) — two full-screen
+ * Not built: `RenderBaseSmoke` (GMSwampOfQuiet.cpp:37-49) - two full-screen
  * scrolling `BITMAP_CHROME+2/+3` layers tinted `(0.4, 0.4, 0.45)`, the same
  * screen-space overlay Tarkan's sandstorm is. That is the map's defining
  * look and it belongs to the post/mood lane; a `swamp` mood row with dense

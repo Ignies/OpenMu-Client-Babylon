@@ -49,7 +49,7 @@ export const ObjectEffectSystem: ISystemFactory = world => {
     const kind: BurstKind = effect;
     playBurst(world.scene, kind, positionOf(entity, 0).clone());
 
-    // The burst also lights the ground and whoever stands by — the lighting
+    // The burst also lights the ground and whoever stands by - the lighting
     // layer's `objectEffects` entry owns the recipe and the follow.
     lighting.objectEffect(world.scene, entity, effect);
   });

@@ -16,7 +16,7 @@ import { CrywolfDomeObject, CrywolfVentObject } from './eventObjects';
  *    `crywolf_before/ready/back` stingers (:268-320). The peace state is
  *    staged: `EncTerrain35.att`, `TerrainLight.OZJ`, `Music/crywolf1st`.
  *    OpenMU never runs the event, so the swaps would be dead paths today.
- *  - `M34CryWolf1st::CreateMist` (weather 2 only) — a weather recipe.
+ *  - `M34CryWolf1st::CreateMist` (weather 2 only) - a weather recipe.
  *
  * `SOUND_CRY1ST_AMBIENT` (`w35/crywolf_ambi.wav`, loaded looping at
  * MapManager.cpp:193) is the bed in `ambientBeds.ts`.

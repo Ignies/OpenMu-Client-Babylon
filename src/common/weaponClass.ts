@@ -135,7 +135,7 @@ export function equippedBowType(
 /**
  * `ItemAttribute[].TwoHand` is not in items.json; the inventory width is the
  * reliable proxy for swords/axes/maces (two-handers are 2 wide), spears are
- * always two-handed, and staffs switch at Legendary Staff (index 5) — the
+ * always two-handed, and staffs switch at Legendary Staff (index 5) - the
  * summoner sticks/books are one-handed.
  */
 export function isTwoHanded(item: Item): boolean {
@@ -160,7 +160,7 @@ export function isTwoHanded(item: Item): boolean {
 /**
  * `IsBackItem` (ZzzCharacter.cpp:14937): with a bow or crossbow equipped
  * everything rides the back; otherwise anything sword…shield except the
- * summoner books — the sticks (staff 14-20) do go to the back.
+ * summoner books - the sticks (staff 14-20) do go to the back.
  */
 export function isBackItem(item: Item, hands?: Hands): boolean {
   if (equippedBowType(hands) !== null) return true;
@@ -182,7 +182,7 @@ export type CharacterPose = {
   hands: Hands | undefined;
   baseClass: BaseClass;
   /**
-   * `gCharacterManager.IsFemale(c->Class)` — elf or summoner. Kept separate
+   * `gCharacterManager.IsFemale(c->Class)` - elf or summoner. Kept separate
    * from `baseClass` because the walk branch tests it directly.
    */
   isFemale: boolean;
@@ -313,7 +313,7 @@ export function chooseWalkAction(pose: CharacterPose): PlayerAction {
  * Three ways it differs from the walk branch, all deliberate in the original:
  * a second melee weapon selects the dual-wield run (a Rage Fighter runs
  * plain instead), a two-handed staff runs with the *spear* clip rather than
- * the scythe one, and the whole spear group runs with `PLAYER_RUN_SPEAR` —
+ * the scythe one, and the whole spear group runs with `PLAYER_RUN_SPEAR` -
  * there is no Dragon Lance special case up here.
  */
 export function chooseRunAction(pose: CharacterPose): PlayerAction {

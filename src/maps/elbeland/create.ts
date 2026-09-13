@@ -3,11 +3,11 @@ import type { World } from '../../ecs/world';
 import { PlaySpeedObject } from '../shared/objectVariants';
 
 /**
- * Elbeland (`WD_51ELBELAND`, `World52`/`Object52`) — the elf town.
+ * Elbeland (`WD_51ELBELAND`, `World52`/`Object52`) - the elf town.
  *
  * `GMNewTown::CreateObject` (GMNewTown.cpp:49-85): 103 (×19) is
- * `CreateOperate` — the benches; thirteen tree/rock types get
- * `CollisionRange = -300` (unpickable — no hook for that in `ModelObject`,
+ * `CreateOperate` - the benches; thirteen tree/rock types get
+ * `CollisionRange = -300` (unpickable - no hook for that in `ModelObject`,
  * they stay pickable). `MoveObject` (:87-191): the fire pits, lamps, falls
  * and mist in `spec.ts`; the V scrolls on 2/53/55 (`+0.015` per 25 Hz tick)
  * and 89 (`+0.005`) and the 56 sine in `meshAnimation.ts`; 56's `Velocity =

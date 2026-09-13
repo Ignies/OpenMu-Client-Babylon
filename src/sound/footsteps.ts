@@ -14,7 +14,7 @@ import { listenerHero, listenerWorld } from './listener';
  * / run clip.
  *
  * Driven by: the hero's current animation frame each frame.
- * Read by: nothing — it only plays.
+ * Read by: nothing - it only plays.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -85,7 +85,7 @@ export function footstepSound(): Sounds | null {
   const hero = listenerHero();
   if (!world || !hero) return null;
 
-  // `if (o->CurrentAction == PLAYER_FLY || PLAYER_FLY_CROSSBOW) {}` — the
+  // `if (o->CurrentAction == PLAYER_FLY || PLAYER_FLY_CROSSBOW) {}` - the
   // original guards on the clip, not on a flying flag, so a winged
   // character still lands a footstep when it walks in a safe zone.
   const action = hero.playerAnimation?.action;

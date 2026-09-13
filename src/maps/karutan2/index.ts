@@ -8,19 +8,19 @@ import {
 } from '../karutan1/spec';
 
 /**
- * Karutan 2 (World82 / Object82) — the map entry: identity and the per-world data the
+ * Karutan 2 (World82 / Object82) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
  * lives in another system; the notes below say what is and is not built.
  *
- * Karutan 2 (`WD_81KARUTAN2`, `World82`/`Object82`) — Kardamahal's canyon.
+ * Karutan 2 (`WD_81KARUTAN2`, `World82`/`Object82`) - Kardamahal's canyon.
  *
  * Same `CGMKarutan1::MoveObject` as Karutan 1; tables in
  * `maps/karutan1/spec.ts`, registered for this world from there.
  *
  * Sound (SceneManager.cpp:636-645): the desert bed everywhere except on tile
- * 12, where it is swapped for `Kardamahal_entrance_env` — two beds with
+ * 12, where it is swapped for `Kardamahal_entrance_env` - two beds with
  * opposite `mutedOn` gates in `ambientBeds.ts`. `Music/Karutan_B`.
  */
 

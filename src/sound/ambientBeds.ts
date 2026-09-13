@@ -26,8 +26,8 @@ import {
  *
  * The original calls `PlayBuffer(..., true)` on the current world's bed every
  * frame and `StopBuffer` on every other world's, which is idempotent in
- * DirectSound. This keeps the shape — a table of beds per world, everything
- * not in the current world's list stopped — because that is what makes the
+ * DirectSound. This keeps the shape - a table of beds per world, everything
+ * not in the current world's list stopped - because that is what makes the
  * mute gates work: Lorencia's wind is not stopped on a map change, it is
  * stopped the moment the hero steps under a roof.
  *
@@ -40,7 +40,7 @@ import {
  * "somewhere over there" survive. Doors and gates stay with their objects.
  *
  * Driven by: the map, the tile under the hero, and `weather` (rain).
- * Read by: nothing — it only plays.
+ * Read by: nothing - it only plays.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -57,7 +57,7 @@ export type AmbientBed = {
   readonly volume: number;
   /**
    * Silences the bed for the tile the hero is standing on. The original uses
-   * this to cut the wind the moment the hero walks indoors — the tile under
+   * this to cut the wind the moment the hero walks indoors - the tile under
    * their feet is the only "am I inside" test it has, and the two maps that
    * use it test open-ended ranges, so this is a predicate rather than a list.
    */
@@ -75,14 +75,14 @@ export type AmbientOneShot = {
   /**
    * Tiles around the hero the sound is placed within, for the wildlife the
    * original voiced from a boid's position. Omit for an unpositioned call
-   * (`PlayBuffer(SOUND_FOREST01)` with no object) — full volume, no place.
+   * (`PlayBuffer(SOUND_FOREST01)` with no object) - full volume, no place.
    */
   readonly spread?: number;
 };
 
 /**
  * The original's boids spawn within `rand() % 1024 - 512` units of the hero
- * (GOBoid.cpp:1300, 1678) — ±5.12 tiles — and only voice within 600 units.
+ * (GOBoid.cpp:1300, 1678) - ±5.12 tiles - and only voice within 600 units.
  */
 const BOID_SPREAD_TILES = 5;
 /** Nearest a stand-in call is placed: the flock is never in the hero's ear. */
@@ -96,7 +96,7 @@ export const BEDS: Partial<Record<ENUM_WORLD, readonly AmbientBed[]>> = {
   [ENUM_WORLD.WD_0LORENCIA]: [
     { ...WIND, mutedOn: tile => tile === 4 },
     // `if (RainCurrent > 0) PlayBuffer(SOUND_RAIN01, NULL, true)`
-    // (SceneManager.cpp:577) — the sound follows the *current* rain, not the
+    // (SceneManager.cpp:577) - the sound follows the *current* rain, not the
     // packet, so it fades in with the first drops and keeps going while the
     // last shower falls out.
     { sound: 'Sound/aRain', volume: 0.4, when: () => rainStrength() > 0 },
@@ -123,7 +123,7 @@ export const BEDS: Partial<Record<ENUM_WORLD, readonly AmbientBed[]>> = {
   // Devil Square: `PlayWorldAmbientSounds` has no case for it, but the rain
   // loop is the one bed `StopInactiveAmbientSounds` never stops here
   // (SceneManager.cpp:658: `WorldActive != WD_0LORENCIA && InDevilSquare() == false`),
-  // so whatever rain was playing keeps playing — and `MoveLeaves` gives the
+  // so whatever rain was playing keeps playing - and `MoveLeaves` gives the
   // square the full `MAX_LEAVES` rain budget (ZzzEffectFireLeave.cpp:422).
   ...onWorlds(DEVIL_SQUARE_WORLDS, [{ sound: 'Sound/aRain', volume: 0.4 }]),
 
@@ -182,7 +182,7 @@ export const BEDS: Partial<Record<ENUM_WORLD, readonly AmbientBed[]>> = {
   // Raklion's hatchery: wind (SceneManager.cpp:620-622).
   [ENUM_WORLD.WD_58ICECITY_BOSS]: [WIND],
   // Loren Market: wind and rain, both unconditional (:623-628) and both
-  // spared by `StopInactiveAmbientSounds` — it always rains here.
+  // spared by `StopInactiveAmbientSounds` - it always rains here.
   [ENUM_WORLD.WD_79UNITEDMARKETPLACE]: [
     WIND,
     { sound: 'Sound/aRain', volume: 0.4 },
@@ -205,7 +205,7 @@ export const BEDS: Partial<Record<ENUM_WORLD, readonly AmbientBed[]>> = {
     },
   ],
 
-  // Stadium has no bed in the original — the arena is deliberately silent.
+  // Stadium has no bed in the original - the arena is deliberately silent.
 };
 
 /** A Lorencia bird (`MODEL_BIRD01`): two 1-in-512 rolls a frame, one per call. */
@@ -236,7 +236,7 @@ export const ONE_SHOTS: Partial<Record<ENUM_WORLD, readonly AmbientOneShot[]>> =
     // Bats overhead and rats underfoot (GOBoid.cpp:1332, 1717).
     [ENUM_WORLD.WD_1DUNGEON]: [BAT, RAT],
 
-    // `if (rand_fps_check(512)) PlayBuffer(SOUND_FOREST01);` — birdsong over
+    // `if (rand_fps_check(512)) PlayBuffer(SOUND_FOREST01);` - birdsong over
     // the wind, roughly every 20 s (SceneManager.cpp:592). Noria's own boids
     // are butterflies, which are silent.
     [ENUM_WORLD.WD_3NORIA]: [
@@ -312,8 +312,8 @@ function update(map: ENUM_WORLD, dt: number): void {
     SoundsManager.playAmbientLoop(bed.sound, bed.volume * gain);
   }
 
-  // Everything this map does not want right now — including a bed this
-  // map owns but has just muted — goes quiet.
+  // Everything this map does not want right now - including a bed this
+  // map owns but has just muted - goes quiet.
   for (const sound of ALL_BEDS) {
     if (wanted.has(sound)) continue;
     if (!playing.has(sound)) continue;

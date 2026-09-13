@@ -4,7 +4,7 @@
  * new attack / move only every `MouseUpdateTimeMax` reference ticks, and a
  * swing that fires (`Action()`, :3341) opens the gate immediately so the
  * next click is honoured on the very next poll. Nothing else gates a basic
- * attack — the swing clip is restarted, not waited for.
+ * attack - the swing clip is restarted, not waited for.
  *
  * Driven by `attackSystem` (consumes / forces the gate); read by
  * `attackSystem` and `skillCastSystem` before they accept a click.
@@ -18,7 +18,7 @@ import type { CombatLayer } from './layer';
 /** `MouseUpdateTimeMax = 6` reference ticks at 25 Hz: the default poll gap. */
 const MOUSE_UPDATE_TICKS_MAX = 6;
 
-/** The same gap in seconds — 0.24 s, the swing-rate floor of the todo. */
+/** The same gap in seconds - 0.24 s, the swing-rate floor of the todo. */
 export const MOUSE_UPDATE_SECONDS_MAX = MOUSE_UPDATE_TICKS_MAX / REFERENCE_FPS;
 
 // ---- 2. state + readers ----------------------------------------------------
@@ -36,12 +36,12 @@ export function inputGateRemaining(): number {
   return Math.max(0, MOUSE_UPDATE_SECONDS_MAX - sinceConsumed);
 }
 
-/** Command: `MouseUpdateTime = 0` — a click was acted on. */
+/** Command: `MouseUpdateTime = 0` - a click was acted on. */
 export function consumeInputGate(): void {
   sinceConsumed = 0;
 }
 
-/** Command: `MouseUpdateTime = MouseUpdateTimeMax` — a swing fired, poll again next frame. */
+/** Command: `MouseUpdateTime = MouseUpdateTimeMax` - a swing fired, poll again next frame. */
 export function forceInputGate(): void {
   sinceConsumed = MOUSE_UPDATE_SECONDS_MAX;
 }

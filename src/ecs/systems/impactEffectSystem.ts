@@ -20,7 +20,7 @@ import {
  *   with the struck entity and the health / shield split; the sparks come off
  *   that.
  *
- * The hero's footsteps draw nothing — the original's `PlayWalkSound` is
+ * The hero's footsteps draw nothing - the original's `PlayWalkSound` is
  * sound only.
  */
 export const ImpactEffectSystem: ISystemFactory = world => {

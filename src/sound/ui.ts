@@ -11,7 +11,7 @@ import { playSfx } from './listener';
  *
  * Driven by: the UI (`uiClick`, `playUiSound`) and the window open / close
  * chime (`installUiWindowChime`). Command-only: no per-frame state.
- * Read by: nothing — it only plays.
+ * Read by: nothing - it only plays.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

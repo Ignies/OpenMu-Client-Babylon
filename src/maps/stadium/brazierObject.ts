@@ -14,9 +14,9 @@ type BoneNode = BonedEmission['node'];
 
 /**
  * `b->TransformPosition(BoneTransform[1], …)` (ZzzObject.cpp:2951).
- * `Object7/Object10.glb` has exactly two bones — bone 0 `Box01` is the pillar
+ * `Object7/Object10.glb` has exactly two bones - bone 0 `Box01` is the pillar
  * (au_03, z 0…1.08 tiles) and bone 1 `Bone01` sits in the bowl (au_04,
- * z 1.08…2.38) — so bone 1 is the flame.
+ * z 1.08…2.38) - so bone 1 is the flame.
  */
 const FLAME_BONE = 1;
 
@@ -31,7 +31,7 @@ const FLARE_COLOR: readonly [number, number, number] = [0.6, 0.3, 0.1];
 /**
  * `Scale = Luminosity * 5.f` (ZzzObject.cpp:2948) with Luminosity in
  * 0.70…0.99, so 3.5…4.95. `createMovableFlare` cannot resize after creation,
- * so the sprite is built at the midpoint and only its brightness is animated —
+ * so the sprite is built at the midpoint and only its brightness is animated -
  * see the note in `Update`.
  */
 const FLARE_SCALE = 4.2;
@@ -61,7 +61,7 @@ const POSE_WAIT_LIMIT = 120;
  * whatever the stack held. Every other caller in the file passes a `p` it has
  * just filled with `Vector(…, p)` first (see ZzzObject.cpp:2760-2764). The
  * same typo sits on Lorencia's merchant animal at ZzzObject.cpp:2770/2772,
- * which is how you can tell it is a slip rather than a trick — nobody writes
+ * which is how you can tell it is a slip rather than a trick - nobody writes
  * the same undefined read twice on purpose.
  *
  * What was meant is unambiguous: local (0,0,0) through bone 1, i.e. the bone's
@@ -69,7 +69,7 @@ const POSE_WAIT_LIMIT = 120;
  *
  * The fire particles and the pose-wait are ours; the floor light is in
  * spec.ts. Auto-attack and auto-targeting are disabled in this world (the same
- * rule Chaos Castle runs under) — that is combat work and is not touched
+ * rule Chaos Castle runs under) - that is combat work and is not touched
  * here. Music and ambience are handled centrally, and Stadium deliberately has
  * neither: the arena is silent in the original.
  */
@@ -147,7 +147,7 @@ export class StadiumBrazierObject extends MapTileObject {
 
   /**
    * BMD bone transforms only exist once a render has posed the skeleton, so
-   * the flare waits for bone 1 to leave the object origin — created earlier it
+   * the flare waits for bone 1 to leave the object origin - created earlier it
    * would spend its first frames at the foot of the pillar.
    */
   #posed(): boolean {
@@ -224,7 +224,7 @@ export class StadiumBrazierObject extends MapTileObject {
     // as brightness. A pooled Babylon sprite is sized at creation and resizing
     // it every frame would mean touching the manager's vertex buffer for 32
     // objects, so only the brightness follows the roll. At a 5:1 scale ratio
-    // of 3.5 to 4.95 the size swing is a ±8% wobble on a soft-edged disc —
+    // of 3.5 to 4.95 the size swing is a ±8% wobble on a soft-edged disc -
     // invisible next to the brightness it is riding on.
     const lumi =
       LUMINOSITY_MIN +

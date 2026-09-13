@@ -41,7 +41,7 @@ type DropEntity = With<Entity, 'transform' | 'screenPosition' | 'droppedItem'>;
 
 /**
  * A drop's name: drawn over the item while the ALT overlay is on or the
- * cursor is on the item (SelectedItem), and clickable — the original's
+ * cursor is on the item (SelectedItem), and clickable - the original's
  * ALT-mode `SelectItem()` lets players pull one item out of a loot pile.
  */
 const DropLabel = observer(({

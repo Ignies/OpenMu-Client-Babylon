@@ -1,8 +1,8 @@
 import { t, type TextKey } from '../i18n';
 /**
- * The legacy quest chain — Scroll of the Emperor, Three Treasures of Mu,
+ * The legacy quest chain - Scroll of the Emperor, Three Treasures of Mu,
  * Gain Hero Status, Secret of Dark Stone, Evidence of Strength, the Balgass
- * quests — ported from `CSQuest` (CSQuest.cpp) and the window that shows it,
+ * quests - ported from `CSQuest` (CSQuest.cpp) and the window that shows it,
  * `CNewUINPCQuest` (NewUINPCQuest.cpp).
  *
  * Driven by the 0xA0…0xA4 packets: `LegacyQuestStateList` (all states, 2 bits
@@ -397,7 +397,7 @@ function showDialogText(page: number): void {
  * A dialogue page is a snapshot: `showDialogText` copies the words and answers
  * out of the tables into `state`. When the language changes those tables are
  * fetched again (`questData.ts`), so an open window has to be redrawn from the
- * new ones — otherwise it keeps showing the language it was opened in.
+ * new ones - otherwise it keeps showing the language it was opened in.
  *
  * Keyed on `questDataReady()` rather than on the language itself: it is the
  * flip back to true, once the new tables are decoded, that has something to

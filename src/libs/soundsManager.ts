@@ -70,7 +70,7 @@ const lastUsed = new Map<Sounds, number>();
 let mapEpoch = 0;
 
 /**
- * Independent looping instances of a buffer, keyed `${key}#${slot}` — the
+ * Independent looping instances of a buffer, keyed `${key}#${slot}` - the
  * slots of a positional chorus (the torch crackle) where several copies of
  * the same file sound at once at different volumes. Never in `sounds`, so
  * the shared per-key instance the beds and one-shots use is untouched.
@@ -119,7 +119,7 @@ export class SoundsManager {
    * them up to date from then on).
    *
    * A track's gain node only exists once its audio graph is built, which
-   * Babylon does on the first `addSound` — `setVolume` before that is a
+   * Babylon does on the first `addSound` - `setVolume` before that is a
    * no-op, and the constructor option is skipped when it is 0 (falsy). So
    * the gains are handed to the constructor for the common case AND
    * re-applied by `syncTrackGains` after every sound is added.
@@ -338,7 +338,7 @@ export class SoundsManager {
     });
   }
 
-  /** Stop one buffer (a bed, a track, a loop) — a real stop, not a pause. */
+  /** Stop one buffer (a bed, a track, a loop) - a real stop, not a pause. */
   static stopSoundEffect(key: Sounds) {
     const s = sounds.get(key);
 

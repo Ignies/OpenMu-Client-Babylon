@@ -4,7 +4,7 @@ import type { ENUM_WORLD } from '../common/types';
  * The contract every combat-timing entry implements. One file per entry, one
  * exported `CombatLayer` per file, listed once in `layers.ts`. Copy `_template.ts` for the recipe.
  *
- * Entries own the client-side *timing* of fighting — the swing latch, the
+ * Entries own the client-side *timing* of fighting - the swing latch, the
  * input gate, the skill re-use delays, a held charge, a multi-hit streak.
  * They never send packets on their own initiative and never touch the
  * scene: the ECS systems that fight (`attackSystem`, `skillCastSystem`) read

@@ -5,13 +5,13 @@ import type { Item } from '../ecs/world';
 import { PlayerAction } from './objects/enum';
 
 /**
- * `c->Helper` — the pet / mount slot of the appearance (group 13, indices
+ * `c->Helper` - the pet / mount slot of the appearance (group 13, indices
  * 0-3). The original splits them three ways:
  *
  *  - **Guardian Angel** (`MODEL_GUARDIAN_ANGEL` → `MODEL_HELPER`) becomes a
  *    free-flying `Mounts[]` object with its own boid AI: `CreateMountSub` +
  *    `MoveMount`, GOBoid.cpp:66-660.
- *  - **Imp / Satan** (`MODEL_IMP`) is *not* a mount — it is link-rendered on
+ *  - **Imp / Satan** (`MODEL_IMP`) is *not* a mount - it is link-rendered on
  *    the wearer's bone 34 every frame (`RenderCharacterBackItem`,
  *    ZzzCharacter.cpp:15144-15180) with a red light sprite on top.
  *  - **Horn of Uniria / Dinorant** (`MODEL_UNICON` / `MODEL_PEGASUS`) are
@@ -22,7 +22,7 @@ import { PlayerAction } from './objects/enum';
  *
  * `Data/Player/Helper0n.bmd` is the model behind `MODEL_HELPER + n`
  * (ZzzOpenData.cpp:705) and `Data/Skill/Rider0n.bmd` behind the two mounts
- * (:3969-3970) — **not** the `Item/helper0n` path items.json carries for the
+ * (:3969-3970) - **not** the `Item/helper0n` path items.json carries for the
  * horn items, which is the inventory icon model and does not exist as a GLB.
  */
 
@@ -55,7 +55,7 @@ export type PetSpec = {
   readonly blendMesh?: number;
   /** `f->PlaySpeed` for a link-rendered pet. */
   readonly playSpeed?: number;
-  /** `FlyRange` in MU units — how far a follower drifts before turning back. */
+  /** `FlyRange` in MU units - how far a follower drifts before turning back. */
   readonly flyRange?: number;
   /** World units the mount sits below its rider (`o->Position[2] -= 30`). */
   readonly mountDrop?: number;
@@ -175,7 +175,7 @@ export function isRidingMount(item: Item | null | undefined): boolean {
 /**
  * `c->Helper.Type` reduced to the four values every skill switch of the
  * original tests for (`MODEL_HORN_OF_UNIRIA` / `_DINORANT` / `_FENRIR` /
- * `MODEL_DARK_HORSE_ITEM`). `null` means on foot — and so does a safe zone,
+ * `MODEL_DARK_HORSE_ITEM`). `null` means on foot - and so does a safe zone,
  * because each of those branches is written `&& !c->SafeZone`: the caller
  * passes `inSafeZone` and gets the on-foot clip back inside town.
  */

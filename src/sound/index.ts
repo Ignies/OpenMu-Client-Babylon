@@ -87,8 +87,8 @@ export { SOUND_FILES, SOUND_KEYS, isMusicKey, soundUrl } from './recipes';
 export { OBJECT_LOOPS } from './objectLoops';
 
 /**
- * The sound layer: everything the player hears — the beds under a map, the
- * music, the footsteps, the clicks, the swings, the monster voices — behind
+ * The sound layer: everything the player hears - the beds under a map, the
+ * music, the footsteps, the clicks, the swings, the monster voices - behind
  * one object. Copy `_template.ts` when adding to it.
  *
  * The game talks to `sound.update` once a frame

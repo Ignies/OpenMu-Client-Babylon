@@ -1,5 +1,5 @@
 /**
- * Sprite — a few additive billboard cards that appear at a point, grow, drift
+ * Sprite - a few additive billboard cards that appear at a point, grow, drift
  * and fade. The original's `CreateEffect(BITMAP_*, …)` for a flash, an impact
  * star, a spark cluster: each card lives a fixed number of ticks, scales
  * with `Scale` and fades through `Alpha` (ZzzEffect.cpp `MoveEffect`).
@@ -72,7 +72,7 @@ export interface SpriteOptions {
   /**
    * The texture is a sheet: play its cells once over the life, one card = one
    * cell (BITMAP_EXPLOTION's `Frame = (20 − LifeTime) / 2`). Without this the
-   * whole sheet is one image — right for a single-frame flare, wrong for a
+   * whole sheet is one image - right for a single-frame flare, wrong for a
    * sheet with white filler cells.
    */
   cells?: SheetCells;
