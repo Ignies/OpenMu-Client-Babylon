@@ -256,6 +256,11 @@ export type GameOptions = {
    */
   performanceReadout: boolean;
   /**
+   * The worn item beside the hovered one, with the lines that differ marked
+   * up or down: 0 off / 1 while Shift is held / 2 always.
+   */
+  compareTooltips: number;
+  /**
    * A row per timed event under the corner minimap, counting down to the
    * next Blood Castle / Devil Square / Chaos Castle (ours). Off, the client
    * asks the server nothing of its own accord.
@@ -319,6 +324,9 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   vignette: [0, 9],
   sunShafts: [0, 9],
   lootZen: [0, 9],
+  // Literal rather than `COMPARE_TOOLTIP_MAX`: itemCompare.ts imports this
+  // module, so naming it here would close an import cycle.
+  compareTooltips: [0, 2],
   lowHealthPercent: [LOW_VITAL_MIN_PERCENT, LOW_VITAL_MAX_PERCENT],
   lowManaPercent: [LOW_VITAL_MIN_PERCENT, LOW_VITAL_MAX_PERCENT],
   uiScale: [0, UI_SCALE_MAX],
@@ -400,6 +408,7 @@ const DEFAULTS: GameOptions = {
   blockBrowserKeys: true,
   minimapCorner: true,
   performanceReadout: false,
+  compareTooltips: 2,
   eventTimers: true,
   questTracker: true,
   englishItemNames: false,

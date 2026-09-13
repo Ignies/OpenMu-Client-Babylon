@@ -1024,6 +1024,7 @@ export const portugueseLayer: LanguageLayer = {
     'event.cwNotice4c': 'A penalidade vale até a próxima batalha de Crywolf.',
 
     'item.thisItem': 'este item',
+    'item.equipped': 'Equipado',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Poder de ataque',
     'item.attackPowerTwoHand': 'Poder de ataque de duas mãos',
@@ -1624,6 +1625,9 @@ export const portugueseLayer: LanguageLayer = {
     'exit.chaosOpen': 'Fecha a janela do Chaos antes de sair do jogo.',
     'exit.noAnswer': 'O servidor não respondeu. A sair mesmo assim.',
     'options.minimapCorner': 'Minimapa no canto',
+    'options.compareTooltips': 'Comparar com o equipado',
+    'options.compare.shift': 'Segurar Shift',
+    'options.compare.always': 'Sempre',
     'options.eventTimers': 'Temporizadores de eventos',
     'options.questTracker': 'Rastreador de missões',
     'minimap.center': 'Centrar',

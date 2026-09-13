@@ -56,12 +56,23 @@ export type TooltipColor =
   | 'violet'
   | 'orange';
 
+/**
+ * The `(+N)` / `(-N)` tail a line grows when the item is being compared with
+ * the worn one. Green is the better number, red the worse, which for a
+ * requirement means the smaller one.
+ */
+export type TooltipDelta = {
+  text: string;
+  color: 'green' | 'red';
+};
+
 export type TooltipLine = {
   text: string;
   color: TooltipColor;
   bold: boolean;
   /** A `"\n"` entry: half a line of space. */
   blank?: true;
+  delta?: TooltipDelta;
 };
 
 export type ItemTooltipData = {
@@ -94,8 +105,13 @@ const RESISTANCE_NAME_KEYS: readonly TextKey[] = [
 class Lines {
   readonly list: TooltipLine[] = [];
 
-  add(text: string, color: TooltipColor = 'white', bold = false) {
-    this.list.push({ text, color, bold });
+  add(
+    text: string,
+    color: TooltipColor = 'white',
+    bold = false,
+    delta?: TooltipDelta
+  ) {
+    this.list.push(delta ? { text, color, bold, delta } : { text, color, bold });
   }
 
   blank() {
@@ -172,20 +188,62 @@ function excellentLines(out: Lines, def: ItemDef, flags: number, heroLevel: numb
   }
 }
 
+const signed = (value: number) => (value > 0 ? `+${value}` : `${value}`);
+
+/**
+ * The tail for one number against the worn item's. `lowerIsBetter` for the
+ * requirement lines, where needing less is the upgrade.
+ */
+export function statDelta(
+  now: number,
+  before: number | undefined,
+  lowerIsBetter = false
+): TooltipDelta | undefined {
+  if (before === undefined) return undefined;
+  const diff = now - before;
+  if (diff === 0) return undefined;
+  const better = lowerIsBetter ? diff < 0 : diff > 0;
+  return { text: `(${signed(diff)})`, color: better ? 'green' : 'red' };
+}
+
+/** Both ends of the damage range in one tail: `(+3 / +5)`. */
+export function damageDelta(
+  min: number,
+  max: number,
+  before: { damageMin: number; damageMax: number } | undefined
+): TooltipDelta | undefined {
+  if (!before) return undefined;
+  const low = min - before.damageMin;
+  const high = max - before.damageMax;
+  if (low === 0 && high === 0) return undefined;
+
+  const total = low + high;
+  const better = total !== 0 ? total > 0 : high > 0;
+  return {
+    text:
+      low === high
+        ? `(${signed(low)})`
+        : `(${signed(low)} / ${signed(high)})`,
+    color: better ? 'green' : 'red',
+  };
+}
+
 function requirementLine(
   out: Lines,
   labelKey: TextKey,
   required: number,
-  have: number
+  have: number,
+  before?: number
 ) {
   if (!required) return;
   const label = t(labelKey);
   const line = t('item.required', { label, value: required });
+  const delta = statDelta(required, before, true);
   if (have < required) {
-    out.add(line, 'red');
+    out.add(line, 'red', false, delta);
     out.add(t('item.moreNeeded', { value: required - have }), 'red');
   } else {
-    out.add(line, 'white');
+    out.add(line, 'white', false, delta);
   }
 }
 
@@ -268,22 +326,29 @@ function consumableLines(out: Lines, def: ItemDef, item: Item) {
   if (skill) out.add(t('item.learns', { skill }), 'blue');
 }
 
-/** Builds the tooltip for `item` as seen by `hero`. */
+/**
+ * Builds the tooltip for `item` as seen by `hero`. `compareWith` is the worn
+ * item of the slot this one would take: its numbers become the `(+N)` tails
+ * on the lines the two share. The worn item's own tooltip is this same
+ * builder called without it.
+ */
 export function buildItemTooltip(
   item: Item,
-  hero: HeroStats
+  hero: HeroStats,
+  compareWith?: Item | null
 ): ItemTooltipData | null {
   const stats = itemStats(item);
   if (!stats) return null;
 
   const { def, level } = stats;
   const out = new Lines();
+  const worn = compareWith ? itemStats(compareWith) : null;
 
   out.blank();
   out.add(nameLine(item, def, level), nameColor(item, def, level), true);
   out.blank();
 
-  equipmentLines(out, item, stats, hero);
+  equipmentLines(out, item, stats, hero, worn);
 
   const requirementsFail =
     hero.level < stats.reqLvl ||
@@ -303,7 +368,8 @@ function equipmentLines(
   out: Lines,
   item: Item,
   stats: ItemStats,
-  hero: HeroStats
+  hero: HeroStats,
+  worn: ItemStats | null = null
 ) {
   const { def, level, isExcellent } = stats;
 
@@ -320,25 +386,38 @@ function equipmentLines(
     const max = stats.damageMax;
     out.add(
       t('item.damageRange', { label, min: min >= max ? max : min, max }),
-      isExcellent ? 'blue' : 'white'
+      isExcellent ? 'blue' : 'white',
+      false,
+      damageDelta(min, max, worn ?? undefined)
     );
   }
 
   if (stats.defense) {
     out.add(
       t('item.defense', { value: stats.defense }),
-      isArmorPart(def) && isExcellent ? 'blue' : 'white'
+      isArmorPart(def) && isExcellent ? 'blue' : 'white',
+      false,
+      statDelta(stats.defense, worn?.defense)
     );
   }
 
   if (def.blocking) {
     out.add(
       t('item.defenseRate', { value: stats.blocking }),
-      isExcellent ? 'blue' : 'white'
+      isExcellent ? 'blue' : 'white',
+      false,
+      statDelta(stats.blocking, worn?.blocking)
     );
   }
 
-  if (def.speed) out.add(t('item.attackSpeed', { value: def.speed }));
+  if (def.speed) {
+    out.add(
+      t('item.attackSpeed', { value: def.speed }),
+      'white',
+      false,
+      statDelta(def.speed, worn?.def.speed)
+    );
+  }
 
   wingLines(out, def, level);
   jewelLines(out, def);
@@ -353,7 +432,10 @@ function equipmentLines(
       t('item.durability', {
         current: item.durability ?? stats.maxDurability,
         max: stats.maxDurability,
-      })
+      }),
+      'white',
+      false,
+      statDelta(stats.maxDurability, worn?.maxDurability)
     );
   }
 
@@ -368,12 +450,12 @@ function equipmentLines(
     }
   });
 
-  requirementLine(out, 'common.level', stats.reqLvl, hero.level);
-  requirementLine(out, 'stat.strength', stats.reqStr, hero.str);
-  requirementLine(out, 'stat.agility', stats.reqAgi, hero.agi);
-  requirementLine(out, 'stat.vitality', stats.reqVit, hero.vit);
-  requirementLine(out, 'stat.energy', stats.reqEne, hero.ene);
-  requirementLine(out, 'stat.command', stats.reqCmd, hero.cmd);
+  requirementLine(out, 'common.level', stats.reqLvl, hero.level, worn?.reqLvl);
+  requirementLine(out, 'stat.strength', stats.reqStr, hero.str, worn?.reqStr);
+  requirementLine(out, 'stat.agility', stats.reqAgi, hero.agi, worn?.reqAgi);
+  requirementLine(out, 'stat.vitality', stats.reqVit, hero.vit, worn?.reqVit);
+  requirementLine(out, 'stat.energy', stats.reqEne, hero.ene, worn?.reqEne);
+  requirementLine(out, 'stat.command', stats.reqCmd, hero.cmd, worn?.reqCmd);
 
   if (def.group !== ItemGroup.Potion && !isJewel(def)) {
     classLines(out, def, hero);
@@ -396,14 +478,16 @@ function equipmentLines(
     out.add(
       t('item.percentBonus', { label, value: stats.magicPower }),
       'blue',
-      true
+      true,
+      statDelta(stats.magicPower, worn?.magicPower)
     );
   } else if (isScepter(def) && def.magicPower) {
     out.blank();
     out.add(
       t('item.petAttackIncrease', { value: stats.magicPower }),
       'blue',
-      true
+      true,
+      statDelta(stats.magicPower, worn?.magicPower)
     );
   }
 
