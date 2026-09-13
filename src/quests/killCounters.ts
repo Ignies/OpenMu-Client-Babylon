@@ -1,5 +1,5 @@
 /**
- * Monster kill counters for quests — the five `m_anKillMobType /
+ * Monster kill counters for quests - the five `m_anKillMobType /
  * m_anKillMobCount` slots of `CSQuest` that `LegacyQuestMonsterKillInfo`
  * (0xA4) fills when a quest NPC is opened mid-quest, plus a client-side
  * mirror that counts the hero's own kills between two server refreshes so

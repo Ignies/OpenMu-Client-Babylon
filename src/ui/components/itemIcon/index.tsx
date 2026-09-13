@@ -16,7 +16,7 @@ const IMG_PRIORITY = { fetchpriority: 'high' } as const;
  *
  * An observer leaf taking the item itself: only the fields the file name
  * depends on (`itemIconKey`) are read here, so a durability tick or an
- * option change on one item re-renders nothing — the grid above passes the
+ * option change on one item re-renders nothing - the grid above passes the
  * same `item` reference and this memo skips. (The old `{...item}` spread
  * subscribed the whole grid to all fourteen fields of every item.)
  */

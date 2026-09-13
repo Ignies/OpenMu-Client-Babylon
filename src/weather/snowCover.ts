@@ -9,10 +9,10 @@ import { maps } from '../maps';
  * How much settled snow is lying on the ground, 0…1.
  *
  * The falling flakes are particles (`DEVIAS_SNOW`); this is what they leave
- * behind. The original client has no equivalent — `MoveEtcLeaf` settles a leaf
+ * behind. The original client has no equivalent - `MoveEtcLeaf` settles a leaf
  * on the terrain and fades it out, and that is as far as ground contact ever
  * went ("leaves settling on terrain, and `BITMAP_RAIN_CIRCLE`
- * splashes" are both listed as missing) — so this is our own, and it is
+ * splashes" are both listed as missing) - so this is our own, and it is
  * deliberately a *simulation* rather than a lookup: cover builds while the
  * squall blows and melts once it passes, which is the whole reason the ground
  * reads as weather rather than as a texture swap.
@@ -24,7 +24,7 @@ import { maps } from '../maps';
  * Not shared across clients the way the schedule is: two players who arrived at
  * different times can disagree on the exact depth for a minute or two after a
  * squall starts. That is invisible at the thresholds this feeds, and the
- * alternative — integrating the schedule analytically over all of history —
+ * alternative - integrating the schedule analytically over all of history -
  * buys nothing anyone can see.
  */
 
@@ -55,7 +55,7 @@ const MELT_SECONDS = 240;
  * Devias is a snow world: its ground textures are painted snow and the
  * reference frames show a field that is white edge to edge whether or not
  * flakes are in the air. Before this the cover was seeded from the squall
- * alone, so between squalls — and at any squall under full strength — the
+ * alone, so between squalls - and at any squall under full strength - the
  * overlay was patchy and most of the ground was the bare tile texture, which
  * under the blue bake reads as cyan ice. 0.85 with the overlay's headroom
  * (1.25) is past the break-up noise's range, so the snow tiles are solid;
@@ -104,7 +104,7 @@ export function snowCover(): number {
   return cover;
 }
 
-/** Drop the cover — a map change that is not to a snow map, or a teardown. */
+/** Drop the cover - a map change that is not to a snow map, or a teardown. */
 export function resetSnowCover(): void {
   cover = 0;
   lastMap = null;

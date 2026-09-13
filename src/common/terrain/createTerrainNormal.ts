@@ -8,15 +8,15 @@ import { TERRAIN_INDEX, TERRAIN_INDEX_REPEAT } from './utils';
  * over one `Float32Array`. Two reasons: it is 65 536 fewer allocations, and
  * it makes the whole normal → light chain Babylon-free, so it can run in the
  * terrain worker (todo C8) and its result can be transferred rather than
- * cloned. The arithmetic — two face normals per texel, summed, left
- * un-normalised — is unchanged.
+ * cloned. The arithmetic - two face normals per texel, summed, left
+ * un-normalised - is unchanged.
  *
  * Including the degenerate case: the original hoisted one `face_normal`
  * scratch vector outside both loops and `FaceNormalize` returned early
  * without writing to it when the cross product had zero length, so the
  * *previous* face's normal was added instead. `fnx/fny/fnz` below are that
  * same carried scratch. (With TERRAIN_SCALE = 1 the quad corners are always
- * distinct in XY, so this branch is unreachable in practice — it is kept
+ * distinct in XY, so this branch is unreachable in practice - it is kept
  * because "unreachable" is an assumption about the height data, not a
  * guarantee.)
  */
@@ -51,7 +51,7 @@ export function createTerrainNormal(heightBuffer: Float32Array): Float32Array {
       const o = TERRAIN_INDEX(x, y) * 3;
 
       // The quad whose lower-left corner is (x, y). The original built these
-      // as Vector3(x * SCALE, y * SCALE, height) — z is the height axis here.
+      // as Vector3(x * SCALE, y * SCALE, height) - z is the height axis here.
       const v4x = x * TERRAIN_SCALE;
       const v4y = y * TERRAIN_SCALE;
       const v4z = heightBuffer[TERRAIN_INDEX_REPEAT(x, y)];

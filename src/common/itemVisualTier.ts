@@ -12,15 +12,15 @@ import { legacyItemColours, type LegacyItemColours } from './itemLegacyEffects';
 
 /**
  * Item visual identity: a pure `(item) → ItemVisualTier` lookup
- * that every renderer consumes — the character's equipment, the hand, and
+ * that every renderer consumes - the character's equipment, the hand, and
  * the ground drop all read the same descriptor, so a +13 blade glows, pulses
  * and lights the floor the same way wherever it is.
  *
  * Two looks share the descriptor (Options → Video → Item effects):
- *  - **legacy** — the original client's passes, reproduced in itemMaterial.ts
+ *  - **legacy** - the original client's passes, reproduced in itemMaterial.ts
  *    from ZzzObject.cpp `RenderPartObjectEffect`; `legacy` carries the
  *    per-item chrome colours from its tables (itemLegacyEffects.ts).
- *  - **improved** — our own: GlowLayer halo + in-surface rim sheen, aura
+ *  - **improved** - our own: GlowLayer halo + in-surface rim sheen, aura
  *    motes (itemAura.ts), energy arcs (itemCrackle.ts) and pooled lights, all
  *    in the item's legacy chrome colour (improvedColour):
  *      +0–6 none · +7–8 sheen · +9–10 pulse, motes, arcs, orbit ring, starts
@@ -44,12 +44,12 @@ export type ItemVisualTier = {
   readonly isAncient: boolean;
   readonly sockets: number;
   readonly glow: ItemGlowTier;
-  /** Base emissive tint; may exceed 1 — the ACES tone map handles it. */
+  /** Base emissive tint; may exceed 1 - the ACES tone map handles it. */
   readonly emissive: RGB;
   /** Emissive strength at the pulse peak (0 = no level glow). */
   readonly intensity: number;
   /**
-   * GlowLayer halo amplitude — deliberately a much gentler ladder than
+   * GlowLayer halo amplitude - deliberately a much gentler ladder than
    * `intensity`. The layer paints the *whole mesh silhouette* and blurs it,
    * so anything near the surface intensity floods the armor into one bright
    * shape and every texel of detail drowns (the "reflective blob"). The
@@ -84,7 +84,7 @@ const NONE: RGB = [0, 0, 0];
 
 /**
  * Improved-look colour of an item: the original's chrome colour for it
- * (PartObjectColor — gold for most, blue for Legendary / Lightning, white for
+ * (PartObjectColor - gold for most, blue for Legendary / Lightning, white for
  * Silver Bow…), so the halo, the motes and the floor light all agree with the
  * legacy passes. From +11 the PartObjectColor2 tint is mixed in, as the
  * original adds that pass on top. Normalised so the brightest channel is 1;
@@ -166,7 +166,7 @@ export function itemVisualTier(item: Item | null | undefined): ItemVisualTier {
       pulseRate = 2;
       break;
     case 2:
-      // +9 / +10: the first "real" tier — clearly more than a sheen, with
+      // +9 / +10: the first "real" tier - clearly more than a sheen, with
       // a visible step between the two so the level reads at a glance.
       emissive = colour;
       intensity = level === 9 ? 1.1 : 1.3;
@@ -295,7 +295,7 @@ type ColorOut = { r: number; g: number; b: number };
 
 /**
  * Emissive colour of a tier at `t` seconds. `out` is written in place (a
- * Babylon Color4 works — only r/g/b/a are touched).
+ * Babylon Color4 works - only r/g/b/a are touched).
  */
 export function itemEmissiveAt<T extends ColorOut & { a?: number }>(
   tier: ItemVisualTier,
@@ -360,7 +360,7 @@ export function itemEmissiveAt<T extends ColorOut & { a?: number }>(
 /**
  * Colour handed to the GlowLayer's emissive selector: the tier tint at the
  * capped `halo` amplitude, breathing on the shared clock. Separate from
- * `itemEmissiveAt` on purpose — the layer floods the whole silhouette, so it
+ * `itemEmissiveAt` on purpose - the layer floods the whole silhouette, so it
  * gets the soft-aura ladder while the surface sheen keeps the full ladder.
  * The excellent / ancient / socket shimmers ride along at half gain so their
  * colour still reads in the aura without re-flooding it.

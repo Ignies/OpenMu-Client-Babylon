@@ -15,7 +15,7 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
 
 /**
  * `MoveObject` :127-131, type 56 (×4): `o->BlendMesh = 0; BlendMeshLight =
- * sin(t*0.003)*0.3+0.5; Velocity = 0.05` — the Atlans gate's water sheet
+ * sin(t*0.003)*0.3+0.5; Velocity = 0.05` - the Atlans gate's water sheet
  * (56 is `SE_Amb_enteratlance01`'s object). The sine is in
  * `meshAnimation.ts`, the play speed in `index.ts`.
  */
@@ -25,16 +25,16 @@ export const ELBELAND_BLEND_MESHES: Readonly<Record<number, number>> = {
 
 /**
  * Hidden every frame:
- *  - `MoveObject`: **0** (×27, the fire pits — see `ELBELAND_LIGHTS`), **54**
+ *  - `MoveObject`: **0** (×27, the fire pits - see `ELBELAND_LIGHTS`), **54**
  *    (×37) `WATERFALL_2` one in four (:256-262), **58** (×141)
  *    `WATERFALL_5` every tick (:263-266), **59** (×73) `WATERFALL_3` SubType
  *    8 (:267-270), **60** (×162) `BITMAP_CLOUD` SubType 3 then hidden
- *    (:271-282), **61** (×23, the blue lamps — see lights), **62** (×13) the
- *    eagle spawner (a `Boids[]` slot with `MODEL_EAGLE`, :150-189 — no boid
+ *    (:271-282), **61** (×23, the blue lamps - see lights), **62** (×13) the
+ *    eagle spawner (a `Boids[]` slot with `MODEL_EAGLE`, :150-189 - no boid
  *    system here).
  *  - `RenderObjectVisual` :329-360: **133-147** (0 placed except through
  *    148's neighbours) and **149-155** (0 placed) are `CreateMonster` markers
- *    for the decorative town monsters — the server's job in the clone. Kept
+ *    for the decorative town monsters - the server's job in the clone. Kept
  *    in the table so a future .obj that places them stays quiet.
  *  - **165** (×1, at 35.7/241.5): Object52 ships 165 models, so the highest
  *    type with art is 164. The original loads no `Object166.bmd` for it
@@ -69,20 +69,20 @@ export const ELBELAND_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  * `MoveObject`:
  *  - **0** (×27), :99-104: `L = (rand%4+3)*0.1; AddTerrainLight(x, y,
  *    (L, 0.6L, 0.2L), 3)` + hidden; `RenderObjectVisual` :249-254 adds
- *    `BITMAP_TRUE_FIRE` SubType 0 — the town's fire pits.
+ *    `BITMAP_TRUE_FIRE` SubType 0 - the town's fire pits.
  *  - **61** (×23), :132-137: `(0.2L, 0.6L, L)` at range 3 + hidden, with
- *    `BITMAP_TRUE_BLUE` particles (:283-289) — the blue elf lamps.
+ *    `BITMAP_TRUE_BLUE` particles (:283-289) - the blue elf lamps.
  *  - **63** (×6), `RenderObjectVisual` :290-299: one `BITMAP_LIGHT` sprite at
- *    bone 5 sized `scale * 6` — the great lanterns; no terrain light.
+ *    bone 5 sized `scale * 6` - the great lanterns; no terrain light.
  *  - **110** (×1, at 47.5/218.5), `RenderObjectVisual` :301-311: one
  *    `BITMAP_LIGHT` particle every other tick at
  *    `(cos, sin)(WorldTime * 0.03) * (30 + rand()%5)` around bone 0, 70 up,
- *    scale 0.6, white — the village-protection shrine. 0.03 rad/ms is 4.8
+ *    scale 0.6, white - the village-protection shrine. 0.03 rad/ms is 4.8
  *    turns a second against 12.5 spawns, so consecutive sparks land 138°
  *    apart and the ring never reads as an orbit in the original either: what
  *    it looks like is a light hanging over the shrine, which is the sprite
  *    below. The same stand-in 63 and 121 already take.
- *  - **121** (×26): `BITMAP_LIGHT` sprites on bones 3…8 (:312-327) — the
+ *  - **121** (×26): `BITMAP_LIGHT` sprites on bones 3…8 (:312-327) - the
  *    lamp posts; one sprite each.
  */
 export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =

@@ -7,7 +7,7 @@ import { CharacterClassNumber, PlayerClass } from '../types';
 
 /**
  * `CreateCharacter(Key, MODEL_PLAYER, …)` followed by a fixed
- * `c->BodyPart[]` / `c->Weapon[]` kit — the guards, doppelgangers and helper
+ * `c->BodyPart[]` / `c->Weapon[]` kit - the guards, doppelgangers and helper
  * NPCs the original dresses inline. Every one of them wears a single armour
  * set across all five slots, so the kit names it once by its items.json
  * index.
@@ -25,9 +25,9 @@ export type NpcGear = {
    * a named item (`MODEL_BODY_HELM + n`) and items.json has no such row.
    */
   readonly noHelm?: boolean;
-  /** `c->Weapon[0]` — the main hand (AppearanceSystem's `leftHand` slot). */
+  /** `c->Weapon[0]` - the main hand (AppearanceSystem's `leftHand` slot). */
   readonly mainHand?: Item | null;
-  /** `c->Weapon[1]` — the off hand. */
+  /** `c->Weapon[1]` - the off hand. */
   readonly offHand?: Item | null;
   /** `c->Wing` (group 12). */
   readonly wings?: Item | null;

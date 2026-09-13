@@ -17,8 +17,8 @@ export const LOREN_MARKET_BLEND_MESHES: Readonly<Record<number, number>> = {};
 /**
  * `MoveObject` :132-139 hides 54-58; `RenderObjectVisual` draws them as:
  *  - **54** (×5) `WATERFALL_5` every tick, **55** (×5) `WATERFALL_3` SubType
- *    8, **56** (×4) `WATERFALL_2` one in four — the fountain's spray.
- *  - **57** (×12): a fire vent — see `LOREN_MARKET_LIGHTS`.
+ *    8, **56** (×4) `WATERFALL_2` one in four - the fountain's spray.
+ *  - **57** (×12): a fire vent - see `LOREN_MARKET_LIGHTS`.
  *  - **58** (×0): a `BITMAP_LIGHT` sprite at `20 * scale`.
  * `CreateObject` 67 (×0 placed) is the lean box.
  */
@@ -36,12 +36,12 @@ export const LOREN_MARKET_EMISSIONS: Partial<
 
 /**
  * `MoveObject`:
- *  - **30** (×4), :98-113: the street lamp — `L = (rand%4+3)*0.1` fire
+ *  - **30** (×4), :98-113: the street lamp - `L = (rand%4+3)*0.1` fire
  *    colour at bone 1, `AddTerrainLight(…, 3)`; `RenderObjectVisual`
  *    :249-263 adds a `BITMAP_FLARE` per bone.
- *  - **35** (×8), :115-130: the wall lamp — the same at bone 2, range 1.
+ *  - **35** (×8), :115-130: the wall lamp - the same at bone 2, range 1.
  *  - **57** (×12), `RenderObjectVisual` :297-318: `BITMAP_LIGHT` sprite at
- *    `2 * scale` plus the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3` — the
+ *    `2 * scale` plus the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3` - the
  *    same vent Vulcanus 6 and Karutan 113 are.
  *
  * Bone offsets are approximated by height (lamp heads ~2.5 tiles up).

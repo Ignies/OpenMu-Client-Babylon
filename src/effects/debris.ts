@@ -1,5 +1,5 @@
 /**
- * Debris — a handful of solid pieces thrown from a point that fly, tumble,
+ * Debris - a handful of solid pieces thrown from a point that fly, tumble,
  * bounce on the terrain and vanish: the bones a skeleton / Death Cow bursts
  * into (`MODEL_BONE1/2`), the boulders of a Stone Golem (`MODEL_BIG_STONE1/2`),
  * the shards of an Ice Monster (`MODEL_ICE_SMALL`), the chips of a shattered

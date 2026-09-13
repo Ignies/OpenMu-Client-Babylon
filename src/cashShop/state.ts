@@ -3,7 +3,7 @@ import { JEWEL_OF_CHAOS } from '../common/jewelUpgrade';
 import { sessionNonce } from '../common/sessionNonce';
 import { shopApiUrl } from '../common/serverServices';
 import { t } from '../i18n';
-import { playSfx, playUiSound } from '../libs/sfx';
+import { playSfx, playUiSound, UI_BUS } from '../libs/sfx';
 import { LocalStorage } from '../libs/localStorage';
 import type { Item } from '../ecs/world';
 import {
@@ -824,11 +824,11 @@ export async function rollGacha(): Promise<void> {
   // Quieter than the thud it echoes; only `playSfx` takes a gain.
   at(S.knockA, () => {
     knock();
-    playSfx('Sound/pDropItem', null, 0.45);
+    playSfx('Sound/pDropItem', null, { gain: 0.45, bus: UI_BUS });
   });
   at(S.knockB, () => {
     knock();
-    playSfx('Sound/pDropItem', null, 0.45);
+    playSfx('Sound/pDropItem', null, { gain: 0.45, bus: UI_BUS });
   });
   // The clasp. The box is the same box whatever is in it, so this is the last
   // thing the player is told until it is paid for.
@@ -919,7 +919,9 @@ export function openSealed(): void {
   at(burst + O.afterPrize, () => setPhase('prize'));
   if (!calm) {
     roll.options.forEach((_, index) =>
-      at(burst + O.afterOption + index * O.optionStep, () => playSfx('Sound/iButtonMove', null, 0.3))
+      at(burst + O.afterOption + index * O.optionStep, () =>
+        playSfx('Sound/iButtonMove', null, { gain: 0.3, bus: UI_BUS })
+      )
     );
   }
   // Straight on to the next, if more than one arrived while they were away.

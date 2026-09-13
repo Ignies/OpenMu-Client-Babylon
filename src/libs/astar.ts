@@ -156,7 +156,7 @@ const astar = {
     },
     /**
      * Exact distance on an 8-connected grid with diagonals at √2:
-     * `max + (√2 − 1)·min` — the `min` diagonal steps cost √2 each and the
+     * `max + (√2 − 1)·min` - the `min` diagonal steps cost √2 each and the
      * remaining `max − min` are straight. (`d1 + d2 + …` over-estimated and
      * made A* inadmissible.)
      */

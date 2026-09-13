@@ -291,7 +291,7 @@ const SKILLBOX_USE_SPRITE = 'newui_skillbox2.OZJ';
 /**
  * Which hot-key slot each of the five boxes shows, per page
  * (`iStartSkillIndex`, with 10 folded back to 0). The slot index *is* the
- * digit that fires it — which is why the bar art has 1..5 printed on it —
+ * digit that fires it - which is why the bar art has 1..5 printed on it -
  * so the second page is 6..9 and 0, and nothing here is off by one.
  */
 const BAR_PAGES: readonly (readonly number[])[] = [
@@ -358,13 +358,13 @@ const SkillDragGhost = ({ drag }: { drag: SkillDrag }) =>
   );
 
 /**
- * CNewUISkillList: the five bar slots are hot keys 1..5 or 6..9,0 — the page
+ * CNewUISkillList: the five bar slots are hot keys 1..5 or 6..9,0 - the page
  * holding the current skill (`IsArrayUp`), the mouse wheel flips it, and the
  * slot index is the digit that fires it, so box one really is key 1.
  *
  * A click on a bound slot makes it the current skill; a click on an *empty*
  * slot (and a right click on a bound one) opens the fan of every learned
- * skill (`m_bSkillList`) as a picker for that slot — the box after the last
+ * skill (`m_bSkillList`) as a picker for that slot - the box after the last
  * skill clears it. A click on the current-skill box opens the same fan to
  * select rather than bind, and a right click there goes back to the plain
  * attack. Ctrl+digit over an icon binds that key (`SetHotKey`), as does
@@ -429,7 +429,7 @@ const SkillSlots = observer(() => {
     sweep();
     return onCooldownTick(sweep);
   });
-  // Which slot holds the current skill, or -1 — guarded, because with no
+  // Which slot holds the current skill, or -1 - guarded, because with no
   // current skill `indexOf(-1)` would answer with the first *empty* slot.
   const currentIdx =
     Store.currentSkill >= 0 ? Store.skillHotkeys.indexOf(Store.currentSkill) : -1;

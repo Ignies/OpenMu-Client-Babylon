@@ -1,7 +1,7 @@
 import { convertBux } from './terrain/mapFileEncryption';
 
 /**
- * `Data/World{n}/Minimap.bmd` — the NPC / portal markers drawn over the
+ * `Data/World{n}/Minimap.bmd` - the NPC / portal markers drawn over the
  * minimap (`CNewUIMiniMap::LoadImages`). The file is `MAX_MINI_MAP_DATA`
  * (100) BUX-encoded `MINI_MAP_FILE` records, a 45-byte tail and a 4-byte
  * checksum (`GenerateCheckSum2(..., 0x2BC1)`). The struct is 4-byte aligned:

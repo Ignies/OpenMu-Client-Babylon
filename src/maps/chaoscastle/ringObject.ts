@@ -20,7 +20,7 @@ const SMOKE_SPREAD = 150;
  * A Chaos Castle floor/rim segment (types 0-5, 13-35 minus the markers): drawn
  * or not by the arena stage, dropped into the void by the current drop, and
  * smoking while its drop is imminent. All state is `arena.ts`'s; this class
- * only applies it to the mesh (alpha), the entity (`posOffset.y`, in tiles —
+ * only applies it to the mesh (alpha), the entity (`posOffset.y`, in tiles -
  * the render system adds it to the position) and its own emitter.
  */
 export class ChaosCastleRingObject extends MapTileObject {

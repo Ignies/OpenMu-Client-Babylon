@@ -7,7 +7,7 @@ import { BurstLimit, bucketFor, clientIp } from '../../src/common/rateLimit';
  * The account-creation endpoint behind `register.ignies.net`.
  *
  * It writes straight into OpenMU's database rather than going through the game
- * server, because OpenMU has no public "create account" call — the admin panel
+ * server, because OpenMU has no public "create account" call - the admin panel
  * does it in-process. That makes this file the *only* thing outside OpenMU that
  * writes to `data."Account"`, so the column list below has to stay in step with
  * that table (see `docs` in README for the `\d` output it was written from).
@@ -35,7 +35,7 @@ const DATABASE_URL =
  * This page is open to the internet with nothing in front of it, so this is the
  * only thing between it and a script. It is kept on disk rather than in memory
  * because `mu-update.sh` restarts this service on every deploy, and an
- * in-memory counter would hand out a fresh allowance each time — a limit anyone
+ * in-memory counter would hand out a fresh allowance each time - a limit anyone
  * could reset by waiting for a push.
  */
 const RATE_LIMIT = Number(process.env.RATE_LIMIT || 1);
@@ -52,7 +52,7 @@ const BURST_LIMIT = Number(process.env.BURST_LIMIT || 20);
 const BURST_WINDOW_MS = Number(process.env.BURST_WINDOW_MS || 10 * 60 * 1000);
 
 const MIN_USERNAME_LENGTH = 4;
-/** `data."Account"."LoginName"` is `varchar(10)` — longer would truncate. */
+/** `data."Account"."LoginName"` is `varchar(10)` - longer would truncate. */
 const MAX_USERNAME_LENGTH = 10;
 const MIN_PASSWORD_LENGTH = 4;
 const MAX_PASSWORD_LENGTH = 10;
@@ -126,13 +126,13 @@ function validate(body: {
 }
 
 /**
- * OpenMU stores a bare BCrypt string — variant `2a` at cost 11, no wrapper.
+ * OpenMU stores a bare BCrypt string - variant `2a` at cost 11, no wrapper.
  * Both are matched exactly below, because a hash OpenMU cannot verify produces
  * an account that exists but cannot log in, which is far more confusing than a
  * failed registration.
  *
  * To re-confirm this against a live server (after an OpenMU upgrade, say),
- * read the prefix off any existing account — `$2a$11$` is algorithm and cost:
+ * read the prefix off any existing account - `$2a$11$` is algorithm and cost:
  *
  *   docker exec -i database psql -U postgres -d openmu \
  *     -c 'SELECT "LoginName", left("PasswordHash", 7) FROM data."Account";'
@@ -156,7 +156,7 @@ async function hashPassword(password: string): Promise<string> {
 
   // Some `bcryptjs` versions emit `$2b$`. The variants differ only in how
   // passwords of 256 bytes or more are handled, and `validate` caps them at
-  // ten characters — so for anything reaching here the digests are identical
+  // ten characters - so for anything reaching here the digests are identical
   // and only the label differs. Rewrite it so what we store is byte-identical
   // to what OpenMU writes itself.
   return BCRYPT_VARIANT + hash.slice(hash.indexOf('$', 1) + 1);
@@ -257,7 +257,7 @@ Bun.serve({
       return json({ error: 'Method not allowed' }, 405, cors);
     }
 
-    // Caddy is in front, so the socket address is always loopback — the real
+    // Caddy is in front, so the socket address is always loopback - the real
     // client is in the forwarded header, which `clientIp` believes for exactly
     // that reason and no other.
     const ip = clientIp(req, server);

@@ -12,6 +12,12 @@ type Props = {
   /** Extra class on the label root (`drop` makes it clickable). */
   className?: string;
   onPointerDown?: (ev: PointerEvent<HTMLDivElement>) => void;
+  /**
+   * The label sits over the canvas, so a cursor resting on it stops the scene
+   * hearing pointer moves: hover has to be read off the element itself.
+   */
+  onPointerEnter?: (ev: PointerEvent<HTMLDivElement>) => void;
+  onPointerLeave?: (ev: PointerEvent<HTMLDivElement>) => void;
 };
 
 export const WorldLabel = ({
@@ -20,6 +26,8 @@ export const WorldLabel = ({
   colour,
   className,
   onPointerDown,
+  onPointerEnter,
+  onPointerLeave,
 }: Props) => {
   const elementRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +42,8 @@ export const WorldLabel = ({
         className="text"
         style={colour ? { color: colour } : undefined}
         onPointerDown={onPointerDown}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
       >
         {text}
       </div>

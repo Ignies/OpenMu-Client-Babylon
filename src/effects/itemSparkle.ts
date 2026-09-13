@@ -1,5 +1,5 @@
 /**
- * Item sparkle — the infrequent star glints an excellent item throws from
+ * Item sparkle - the infrequent star glints an excellent item throws from
  * random points of its surface. The original's `CreateShiny`
  * (ZzzObject.cpp:6223, called from `MoveItems` :6268): every 48th tick two
  * `BITMAP_SHINY` particles at a point 16–48 cm out and 16–48 cm up from the

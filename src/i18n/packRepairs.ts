@@ -3,21 +3,21 @@
  *
  * `QuestWords_spn.bmd` and `QuestWords_por.bmd` reached this tree after a lossy
  * conversion: a UTF-8 decoder read their windows-1252 bytes and wrote back a
- * single `?` for every accented character — **taking the byte after it with
+ * single `?` for every accented character - **taking the byte after it with
  * it**. "héroe" became "h?oe", "próxima" became "pr?ima", "dará una" became
  * "dar?una". Nothing can recover that from the bytes, so the words are restored
  * here from context, once, as data.
  *
  * Two passes, in order:
  *
- * 1. `phrases` — for the handful of forms that are ambiguous on their own
+ * 1. `phrases` - for the handful of forms that are ambiguous on their own
  *    ("m?" is *más* almost everywhere but *mí* after a preposition). Longest
  *    match wins, so these run before the token map.
- * 2. `tokens` — whole-token replacements. The key is the token with its
+ * 2. `tokens` - whole-token replacements. The key is the token with its
  *    surrounding punctuation stripped, exactly as `repairPackText` splits it,
  *    so `¿Aceptar?` and `Aceptar?` share one entry.
  *
- * A token that is *not* here is left alone — most `?` in these files are
+ * A token that is *not* here is left alone - most `?` in these files are
  * ordinary question marks ("¿matar monstruos?"), and only a word the language
  * cannot spell that way is damage.
  *
@@ -628,8 +628,8 @@ export const SPANISH_PACK_REPAIRS: PackRepairs = {
 // ---- Portuguese (`Data/Local/Por`) -----------------------------------------
 
 /**
- * The Portuguese pack is only partly translated — a good number of its records
- * are still the Spanish text — so the Spanish table is spread in underneath and
+ * The Portuguese pack is only partly translated - a good number of its records
+ * are still the Spanish text - so the Spanish table is spread in underneath and
  * the Portuguese entries override it wherever the two spell a token
  * differently ("s?" is *são* here and *sí* there).
  */

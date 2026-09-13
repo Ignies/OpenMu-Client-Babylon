@@ -65,25 +65,25 @@ import type { ISystemFactory } from '../world';
  * the doorway and none of it lands on the floor. Only a roof with no measured
  * volume behind it - Classic tier, an arch, a shed - still turns it off.
  *
- * Nothing here switches. A slot that stops being eligible — the hero ducks
- * under a roof, walks out of the tavern, the option goes off — only has its
+ * Nothing here switches. A slot that stops being eligible - the hero ducks
+ * under a roof, walks out of the tavern, the option goes off - only has its
  * emit rate *ramped* down to zero (`AmbientSystem.update`), and the recipe is
  * not disposed until the last particle it emitted has died. Becoming eligible
  * is the same in reverse: the system is created at rate zero and thickens up.
- * Disposing a live emitter is a pop — every leaf in the air vanishes in one
- * frame — so it is kept for the one case where the particles belong to a world
+ * Disposing a live emitter is a pop - every leaf in the air vanishes in one
+ * frame - so it is kept for the one case where the particles belong to a world
  * we are no longer standing in: a map change.
  *
  * Eligibility (map / area / option) only says a recipe *may* run. A recipe
  * carrying a `schedule` then asks the shared clock how hard it blows right
  * now (`ambientSchedule.ts`): leaves and snow come in gusts and squalls with
  * calm in between, rolled from `serverNow()` so every client on the map sees
- * the same weather at the same second. Rain is left unscheduled — the server
- * already drives it through `WeatherStatusUpdate` — and so is interior dust,
+ * the same weather at the same second. Rain is left unscheduled - the server
+ * already drives it through `WeatherStatusUpdate` - and so is interior dust,
  * which is a property of the room rather than of the weather.
  */
 
-/** Weather byte that means rain (assumed — see the weather notes). */
+/** Weather byte that means rain (assumed - see the weather notes). */
 
 
 // Maps with a sky (rain may fall) are declared per map as `MapLayer.outdoor`
@@ -185,7 +185,7 @@ export const AmbientParticleSystem: ISystemFactory = world => {
       recipe: RAIN,
       followHero: true,
       // `RainCurrent` (see rainState.ts): the server's low nibble is the
-      // intensity, and the value ramps rather than snapping — so the slot is
+      // intensity, and the value ramps rather than snapping - so the slot is
       // alive as long as any rain is still falling, including while the last
       // shower fades out after the packet has already said 'clear'.
       active: (map, indoors) =>
@@ -269,8 +269,8 @@ export const AmbientParticleSystem: ISystemFactory = world => {
 
       // A room the mask is drawing keeps its own weather out, per particle
       // (weather/roomClip.ts), so the shower goes on falling in the world
-      // outside and is seen through the doorway. Without one — Classic tier,
-      // or a roof nobody measured a volume for — there is nothing to clip
+      // outside and is seen through the doorway. Without one - Classic tier,
+      // or a roof nobody measured a volume for - there is nothing to clip
       // against and the old rule stands: under a roof, no sky weather.
       const room =
         roomMaskActive() && roomClipAvailable()

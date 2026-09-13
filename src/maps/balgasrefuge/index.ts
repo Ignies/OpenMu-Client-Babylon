@@ -7,7 +7,7 @@ import {
 } from '../balgasbarracks/spec';
 
 /**
- * Balgas Refuge (World43 / Object43) — the map entry: identity and the per-world data the
+ * Balgas Refuge (World43 / Object43) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  * The object classes and the setup function are in `create.ts`, loaded on demand.
  */
@@ -19,7 +19,7 @@ const WORLDS: readonly ENUM_WORLD[] = [
 ];
 
 // Rock01-04 only, but `EncTerrain43.map` also indexes slot 11 (`TileRock05`,
-// not in the folder — unbound in the original); Rock04 stands in.
+// not in the folder - unbound in the original); Rock04 stands in.
 const TILES: readonly string[] = [
   'TileGrass01',
   'TileGrass02',

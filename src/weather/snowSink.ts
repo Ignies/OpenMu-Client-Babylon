@@ -12,7 +12,7 @@ import { FOOTPRINT_TUNING } from './footprints';
  * How far something standing in settled snow sinks into it.
  *
  * A character whose boots rest on the surface beside a hole their own stride
- * just punched is visibly floating — which is exactly what the trail makes
+ * just punched is visibly floating - which is exactly what the trail makes
  * obvious, because the print is the evidence that the leg went down. So the
  * depth here is a fraction of the print's own depth (`FOOTPRINT_TUNING.sink`)
  * rather than a number of its own: dial the hollow deeper through
@@ -31,7 +31,7 @@ import { FOOTPRINT_TUNING } from './footprints';
  * ### It has to be local, and the first cut was not
  *
  * A single map-wide depth sank characters through paving, through the boards
- * of a bridge and through the floor of every interior — anywhere the snow was
+ * of a bridge and through the floor of every interior - anywhere the snow was
  * not actually lying but the map still said "Devias". Four things decide it
  * now, and all four already existed for other reasons:
  *
@@ -135,7 +135,7 @@ export function snowUnderfoot(world: World, x: number, z: number): number {
   }
 
   // What fire has taken off the ground (weather/snowMelt.ts), with the
-  // shader's own falloff — so a hero standing in a patch a fireball opened
+  // shader's own falloff - so a hero standing in a patch a fireball opened
   // neither sinks into snow that is no longer drawn there nor stamps a print
   // into it. Applied to the finished share rather than per corner: a melt is
   // a smooth field of its own and owes nothing to the tile grid.
@@ -156,7 +156,7 @@ export function snowUnderfoot(world: World, x: number, z: number): number {
  * Shared with the footprint system, which needs exactly the same answer for
  * exactly the same reason: a print is the evidence that a foot went into the
  * snow, and a boot standing on a bridge deck did not. It used to test only
- * `isTileOpen` — sky overhead — so the hero crossing Devias' bridges stamped
+ * `isTileOpen` - sky overhead - so the hero crossing Devias' bridges stamped
  * holes into the planks. The sink already refused to lower them there, which
  * is how the disagreement showed: the character stood proud of the deck beside
  * a hole in it.

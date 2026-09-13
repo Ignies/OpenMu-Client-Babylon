@@ -3,7 +3,7 @@ import type { Item } from '../ecs/world';
 import { angleLinkMatrix, type BmdLink } from './boneLink';
 
 /**
- * The wing part (`c->Wing`) as the original renders it — `RenderCharacterBackItem`
+ * The wing part (`c->Wing`) as the original renders it - `RenderCharacterBackItem`
  * ZzzCharacter.cpp:15100-15142, the per-type passes in `ItemObjectAttribute`
  * (ZzzObject.cpp:5151-5299) and `RenderPartObjectBody` (:6851-6890), and the
  * bone auras in `RenderPartObjectEffect` (:9860-9925).
@@ -22,7 +22,7 @@ import { angleLinkMatrix, type BmdLink } from './boneLink';
 export const WING_GROUP = 12;
 export const HELPER_GROUP = 13;
 
-/** `w->LinkBone = 47` — the default back bone every wing hangs from. */
+/** `w->LinkBone = 47` - the default back bone every wing hangs from. */
 export const WING_BONE = 47;
 /** Capes link to bone 19 instead (`RenderCharacterBackItem`:15132). */
 export const CAPE_BONE = 19;
@@ -70,7 +70,7 @@ export type WingSpec = {
   /** Capes are link-bound to bone 19 with an explicit matrix. */
   readonly cape?: 'emperor' | 'overrule';
   /**
-   * Clip to play inside a safe zone instead of clip 0 — the Wings of Darkness
+   * Clip to play inside a safe zone instead of clip 0 - the Wings of Darkness
    * fold shut in town (`RenderLinkObject`, ZzzCharacter.cpp:6785).
    */
   readonly safeZoneAction?: number;

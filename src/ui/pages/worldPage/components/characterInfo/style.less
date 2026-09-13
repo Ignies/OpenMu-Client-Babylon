@@ -80,8 +80,52 @@
     text-shadow: 1px 1px 0 #000;
   }
 
+  // The amount in front of the `+`: the dark plate and the game's own font
+  // the vault and price prompts are set in, at the size of the row it sits on.
+  .stat-amount {
+    position: absolute;
+    padding: 0 3px;
+    border: 1px solid rgba(120, 100, 70, 0.8);
+    background: rgba(0, 0, 0, 0.6);
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 1;
+    text-align: right;
+    color: #ffe6d2;
+    outline: none;
+    pointer-events: auto;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: rgba(255, 204, 26, 0.9);
+    }
+
+    &:disabled {
+      opacity: 0.75;
+    }
+  }
+
   .stat-button {
     position: absolute;
+
+    .button-tooltip {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 2px;
+      padding: 1px 4px;
+      background-color: #000000cc;
+      border: 1px solid #6a6a6a;
+      color: #fff;
+      font-size: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    &:hover .button-tooltip {
+      display: block;
+    }
   }
 
   .window-button {

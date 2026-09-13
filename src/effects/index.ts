@@ -10,7 +10,7 @@ export { delay, fxNow } from './core';
 
 /**
  * The effects layer: everything a skill, a packet or a buff draws in the
- * world for a while — bolts, columns, rings, trails, auras — behind one
+ * world for a while - bolts, columns, rings, trails, auras - behind one
  * object. Copy `_template.ts` when adding to it.
  *
  * The game talks to `effects.update` once a frame

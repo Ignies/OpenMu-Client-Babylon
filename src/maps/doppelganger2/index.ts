@@ -7,13 +7,13 @@ import {
 } from './spec';
 
 /**
- * Doppelganger 2 (World67 / Object67) — the map entry: identity and the per-world data the
+ * Doppelganger 2 (World67 / Object67) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
  * lives in another system; the notes below say what is and is not built.
  *
- * Doppelganger 2 (`WD_66DOPPLEGANGER2`, `World67`/`Object67`) — the lava
+ * Doppelganger 2 (`WD_66DOPPLEGANGER2`, `World67`/`Object67`) - the lava
  * arena. Vulcanus' tables via `spec.ts`; `CreateFireSpark` embers not built;
  * music `null` (event-gated, see doppelganger1).
  */

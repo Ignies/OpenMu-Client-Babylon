@@ -260,9 +260,10 @@ import { delay } from './effects/core';
 import { Vector3 } from './libs/babylon/exports';
 import { EventBus } from './libs/eventBus';
 import type { Events } from './libs/eventBus/events';
-import { sound, type Sounds } from './sound';
-import { playSfx, playUiSound, UI_SOUND_KEYS } from './libs/sfx';
+import { playDrop, sound } from './sound';
+import { playSfx, playUiSound, UI_BUS } from './libs/sfx';
 import {
+  COMBAT_BUS,
   hitSound,
   pickupSound,
   skillSound,
@@ -423,11 +424,11 @@ EventBus.on('wsClosed', ({ socket }) => {
 // Packet handlers are synchronous on purpose: `createSocket` emits packets in
 // wire order from one loop, so a handler that awaits would let the packets
 // behind it run first (and with two `async` handlers, in whichever order the
-// microtasks resolve). Nothing below needs to await — the socket calls are
-// fire-and-forget — so none does.
+// microtasks resolve). Nothing below needs to await - the socket calls are
+// fire-and-forget - so none does.
 EventBus.on('ConnectionInfo', bytes => {
   const p = new ConnectionInfoPacket(bytes);
-  // The server names the game server it wants us on — a separate box on any
+  // The server names the game server it wants us on - a separate box on any
   // real deployment. `gameServerTarget` weighs that against the connect-server
   // host we just used (see its comment: an address only the internet can route
   // to is not believed from a server we reached locally) and hands back the
@@ -1229,7 +1230,7 @@ function addCharacterToScope(world: World, char: ScopeCharacter) {
     cApp.pants = appearance.pants;
     cApp.gloves = appearance.gloves;
     cApp.boots = appearance.boots;
-    // Both layouts carry them — the legacy one in the wing / pet bits of the
+    // Both layouts carry them - the legacy one in the wing / pet bits of the
     // preview (`deserializeAppearance`), the extended one in its own slots.
     cApp.wings = appearance.wings ?? null;
     cApp.pet = appearance.pet ?? null;
@@ -2256,7 +2257,7 @@ function playCastAnimation(caster: Entity, skill: number) {
   // ExecuteSkill's cast sound for everyone else (the hero's plays in SkillCastSystem).
   if (!caster.localPlayer && caster.transform) {
     const sfx = skillSound(skill);
-    if (sfx) playSfx(sfx, caster.transform.pos);
+    if (sfx) playSfx(sfx, caster.transform.pos, { bus: COMBAT_BUS });
   }
   if (caster.playerAnimation) {
     if (caster.localPlayer) return; // SkillCastSystem already started the clip
@@ -2265,7 +2266,7 @@ function playCastAnimation(caster: Entity, skill: number) {
       (caster.attributeSystem?.getValue('playerNetClass') as CharacterClassNumber);
     // The same context the hero's cast builds: mount (none in a safe zone),
     // IsFemale(Class), the active world, and the coin toss for the male
-    // hand cast — everyone in scope plays the same clip for the same skill.
+    // hand cast - everyone in scope plays the same clip for the same skill.
     const ctx = {
       mount: mountKind(
         caster.charAppearance?.pet,
@@ -2308,7 +2309,7 @@ EventBus.on('SkillAnimation', packet => {
   playCastAnimation(caster, p.SkillId);
   // AT_SKILL_COMBO: the server announces a landed DK combo (ReceiveMagic, WSclient.cpp:4436).
   if (combat.observeSkillAnimation(p.SkillId, target?.netId)) {
-    playSfx(COMBO_SOUND, caster.transform.pos);
+    playSfx(COMBO_SOUND, caster.transform.pos, { bus: COMBAT_BUS });
   }
   playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
 });
@@ -2363,7 +2364,7 @@ function setObjectEffect(objectId: number, effectId: number, active: boolean) {
   if (!obj.buffs) world.addComponent(obj, 'buffs', new Set<number>());
   if (active) obj.buffs!.add(effectId);
   else obj.buffs!.delete(effectId);
-  // The persistent look of the buff (Soul Barrier bubble, elf orbits) — effects layer consumer.
+  // The persistent look of the buff (Soul Barrier bubble, elf orbits) - effects layer consumer.
   setBuffVisual(world.scene, obj, effectId, active);
 }
 
@@ -2425,7 +2426,7 @@ EventBus.on('ObjectGotKilled', packet => {
   }
 
   // Dead = 1; the Die clip itself starts in DeathSystem (at once, or when
-  // the hero's killing swing connects — WSclient.cpp:5362-5384).
+  // the hero's killing swing connects - WSclient.cpp:5362-5384).
   const killerId = p.KillerId & 0x7fff;
   markKilled(world, obj, killerId === Store.playerId, p.SkillId, killerId);
 });
@@ -2501,7 +2502,7 @@ function applyObjectHit(p: ObjectHitView) {
     const hero = world.playerEntity;
     const missile =
       world.attackTarget === obj && !!hero && usesMissileWeapon(hero.charAppearance);
-    playSfx(hitSound(missile), obj.transform.pos);
+    playSfx(hitSound(missile), obj.transform.pos, { bus: COMBAT_BUS });
   }
 
   if (!obj.localPlayer && obj.attributeSystem?.hasAttribute('currentHealth')) {
@@ -2523,7 +2524,7 @@ function applyObjectHit(p: ObjectHitView) {
 
   // SetPlayerShock (ZzzCharacter.cpp:1283-1310): `Hit` is the health damage;
   // nothing flinches once dead, a rider never does, a player finishing one
-  // of the SHOCK_IMMUNE_CLIPS is not interrupted — every other clip is.
+  // of the SHOCK_IMMUNE_CLIPS is not interrupted - every other clip is.
   if (
     obj.playerAnimation &&
     p.HealthDamage > 0 &&
@@ -2624,7 +2625,10 @@ EventBus.on('MoneyDropped', packet => {
 EventBus.on('MoneyDroppedExtended', packet => {
   const p = new MoneyDroppedExtendedPacket(packet);
   if (p.IsFreshDrop) {
-    playSfx('Sound/pDropMoney', { x: p.PositionX, z: p.PositionY });
+    playDrop(
+      { isMoney: true, group: ZEN_GROUP, num: ZEN_NUM },
+      { x: p.PositionX, z: p.PositionY }
+    );
   }
   spawnMoneyDrop(p.Id, p.PositionX, p.PositionY, p.IsFreshDrop);
 });
@@ -2638,7 +2642,7 @@ EventBus.on('WeatherStatusUpdate', packet => {
   const variation = p.Variation;
 
   // The packet is the only thing that can start rain anywhere but Icarus, and
-  // nothing in the client reports when it does not arrive — so a weather
+  // nothing in the client reports when it does not arrive - so a weather
   // change is worth one line. Only on change: the proxy heartbeats.
   if (
     weather !== Store.weather.weather ||
@@ -2648,10 +2652,10 @@ EventBus.on('WeatherStatusUpdate', packet => {
       // `RainTarget = (Value & 15) * 6` is zero: the original client simply
       // shows no rain for this value. The proxy never emits it, but OpenMU
       // itself does (kind 1 / variation 0 on map entry), several times a
-      // session — treated as clear, said once.
+      // session - treated as clear, said once.
       if (!weatherZeroReported) {
         weatherZeroReported = true;
-        console.debug('[weather] rain with intensity 0 received — treated as clear');
+        console.debug('[weather] rain with intensity 0 received - treated as clear');
       }
     } else {
       console.log(
@@ -2749,7 +2753,7 @@ const FANFARE_SOUNDS = [
 ] as const;
 EventBus.on('fanfare', ({ effectType }) => {
   const sfx = FANFARE_SOUNDS[effectType];
-  if (sfx) playSfx(sfx);
+  if (sfx) playSfx(sfx, null, { bus: UI_BUS });
 });
 
 function handleRespawnAfterDeath(packet: DataView) {
@@ -2860,7 +2864,7 @@ EventBus.on('PoisonDamage', packet => {
 /**
  * ItemsDropped (0x20): items and zen piles coming into view or just landing.
  * A zen pile (and a single-item drop) is 21 bytes, the same wire shape as
- * MoneyDropped, which the dispatcher picks by length — so both handlers end
+ * MoneyDropped, which the dispatcher picks by length - so both handlers end
  * up here.
  */
 function applyItemsDropped(p: ItemsDroppedPacket) {
@@ -2902,9 +2906,13 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
         );
 
     // CreateItem / CreateMoneyDrop (ZzzObject.cpp:5997-6002 / :6198): a fresh
-    // drop lands with a thud, zen jingles, jewels ring.
+    // drop lands with a thud, zen jingles, jewels ring - for the drops the
+    // player asked to hear (`sound/drops.ts`).
     if (item.IsFreshDrop) {
-      playSfx(dropSound(isMoney, parsed), { x: item.PositionX, z: item.PositionY });
+      playDrop(
+        { isMoney, item: parsed, group, num: id },
+        { x: item.PositionX, z: item.PositionY }
+      );
     }
 
     removeNetObject(world, maskedId);
@@ -2914,7 +2922,7 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
     const poseGroup = proxy?.group ?? group;
     const poseNum = proxy?.num ?? id;
     // ItemAngle (common/itemAngle.ts): the resting pose and height for this
-    // item's class — armour face-down, a sword leaning back, everything 30 cm
+    // item's class - armour face-down, a sword leaning back, everything 30 cm
     // (a weapon 70) off the terrain.
     const rot = itemRestRotation(poseGroup, poseNum);
     world.add({
@@ -2972,12 +2980,6 @@ function dropName(
   const name = String(baseName);
   const lvl = item?.lvl ?? 0;
   return lvl > 0 ? `${name} +${lvl}` : name;
-}
-
-function dropSound(isMoney: boolean, item: Item | undefined): Sounds {
-  if (isMoney || !item) return 'Sound/pDropMoney';
-  const kind = pickupSound(item);
-  return kind === 'getItem' ? 'Sound/pDropItem' : UI_SOUND_KEYS[kind];
 }
 
 EventBus.on('ItemsDropped', packet => {
@@ -3235,7 +3237,7 @@ EventBus.on('NpcWindowResponse', packet => {
       Store.dropNpcTalk();
       Store.addNotification(t('notify.npcNothingYet'), 'info');
       // OpenMU keeps the player in NpcDialogOpened after opening ANY window
-      // (TalkNpcAction.cs) — without this reset it ignores every later
+      // (TalkNpcAction.cs) - without this reset it ignores every later
       // TalkToNpcRequest until relogin (the "one refusal bricks all NPCs" bug).
       Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
       break;
@@ -3534,6 +3536,7 @@ EventBus.on('CharacterStatIncreaseResponse', packet => {
 
   if (!p.Success) {
     Store.addNotification(t('notify.pointNotAdded'), 'error');
+    EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 0 });
     return;
   }
 
@@ -3565,6 +3568,8 @@ EventBus.on('CharacterStatIncreaseResponse', packet => {
 
     if (playerData.points > 0) playerData.points--;
   });
+
+  EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 1 });
 });
 
 type LevelUpdateView = Pick<
@@ -3621,7 +3626,7 @@ EventBus.on('MasterCharacterLevelUpdate', packet => {
   Store.addNotification(t('notify.masterLevelUp', { level: p.MasterLevel }));
 });
 
-// C3 16 — sent for every kill share. Without this handler the exp bar only
+// C3 16 - sent for every kill share. Without this handler the exp bar only
 // moved on relog (CharacterInformation).
 function applyExperienceGained(p: { AddedExperience: number; KilledObjectId: number }) {
   const added = p.AddedExperience;
@@ -3656,7 +3661,7 @@ function emitObjectEffect(
   EventBus.emit('objectEffect', { entity, effect });
 }
 
-// C1 48 — level-up beam, shield potion, shield lost.
+// C1 48 - level-up beam, shield potion, shield lost.
 EventBus.on('ShowEffect', packet => {
   const p = new ShowEffectPacket(packet);
   const netId = p.PlayerId & 0x7fff;
@@ -3677,7 +3682,7 @@ EventBus.on('ShowEffect', packet => {
   }
 });
 
-// C1 67 — swirl effect (used e.g. on teleport / certain skills).
+// C1 67 - swirl effect (used e.g. on teleport / certain skills).
 EventBus.on('ShowSwirl', packet => {
   const p = new ShowSwirlPacket(packet);
   emitObjectEffect(p.TargetObjectId & 0x7fff, 'swirl');
@@ -3688,7 +3693,7 @@ EventBus.on('ShowSwirl', packet => {
 // ---------------------------------------------------------------------------
 
 /**
- * F3 30 — `ReceiveOption` (`LPPRECEIVE_OPTION`): the key configuration the
+ * F3 30 - `ReceiveOption` (`LPPRECEIVE_OPTION`): the key configuration the
  * server saved for this character. Layout after the sub-code: `HotKey[20]`
  * (ten big-endian words, skill *numbers*, 0xFFFF = empty), `GameOption`
  * (auto-attack / whisper sound / slide help bits), `KeyQWE[3]`, `ChatLogBox`,
@@ -3722,7 +3727,7 @@ EventBus.on('LogoutResponse', packet => {
 });
 
 /**
- * F3 06 extended (client >= 106.3) — `ReceiveAddPointExtended`: the same as
+ * F3 06 extended (client >= 106.3) - `ReceiveAddPointExtended`: the same as
  * the short form, with a 16-bit amount and 32-bit maximums for all four
  * pools. `Attribute` uses the same `StatType` order (str 0 … cmd 4).
  */
@@ -3733,6 +3738,7 @@ EventBus.on('CharacterStatIncreaseResponseExtended', packet => {
 
   if (added === 0) {
     Store.addNotification(t('notify.pointNotAdded'), 'error');
+    EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 0 });
     return;
   }
 
@@ -3763,10 +3769,12 @@ EventBus.on('CharacterStatIncreaseResponseExtended', packet => {
     playerData.maxAG = p.UpdatedMaximumAbility;
     playerData.points = Math.max(0, playerData.points - added);
   });
+
+  EventBus.emit('statPointAnswered', { stat: p.Attribute, added });
 });
 
 /**
- * F3 51 extended — `Receive_Master_LevelUp` with `LPPMSG_MASTERLEVEL_UP_EXTENDED`:
+ * F3 51 extended - `Receive_Master_LevelUp` with `LPPMSG_MASTERLEVEL_UP_EXTENDED`:
  * the master level plus 32-bit maximum life / mana / shield / BP. The level
  * and points go to `skills/masterLevel.ts` (its own handler); the maximums
  * belong to the hero's stats here.
@@ -3785,7 +3793,7 @@ EventBus.on('MasterCharacterLevelUpdateExtended', packet => {
 });
 
 /**
- * F9 01 — `ReceiveNPCDlgUIStart`: the server opened the Season 6 NPC
+ * F9 01 - `ReceiveNPCDlgUIStart`: the server opened the Season 6 NPC
  * dialogue (`g_QuestMng.SetNPC`, `INTERFACE_NPC_DIALOGUE`). Routed to the
  * quests facade, which opens what it can for that NPC number.
  */
@@ -3805,7 +3813,7 @@ const FRUIT_STAT_NAMES: Record<number, string> = {
 };
 
 /**
- * 2C — `ReceiveUseStateItem` (`LPPMSG_USE_STAT_FRUIT`): the result of eating
+ * 2C - `ReceiveUseStateItem` (`LPPMSG_USE_STAT_FRUIT`): the result of eating
  * a Jewel of Life fruit. A success moves the stat by `StatPoints` and counts
  * the fruit points (`AddPoint`); everything else is the original's OK box,
  * shown as a notification. The server sends the current stats again anyway.
@@ -3878,7 +3886,7 @@ EventBus.on('FruitConsumptionResponse', packet => {
 });
 
 /**
- * 0x25 — `ReceiveChangePlayer`: one equipment slot of a player in scope
+ * 0x25 - `ReceiveChangePlayer`: one equipment slot of a player in scope
  * changed. Slot numbers are the inventory's (`InventoryConstants`); a group
  * of 0xFF means the slot was emptied. The hero's own appearance is driven by
  * the inventory (`Store.syncPlayerAppearance`), so it is left alone here.
@@ -3975,7 +3983,7 @@ EventBus.on('AppearanceChangedExtended', packet => {
   applyAppearanceChange(p.ChangedPlayerId, p.ItemSlot, item);
 });
 
-/** A9 — `ReceivePetInfo` (`giPetManager::SetPetInfo`): state for the tooltip. */
+/** A9 - `ReceivePetInfo` (`giPetManager::SetPetInfo`): state for the tooltip. */
 EventBus.on('PetInfoResponse', packet => {
   if (packet.byteLength < PetInfoResponsePacket.Length!) return;
   const p = new PetInfoResponsePacket(packet);
@@ -3989,7 +3997,7 @@ EventBus.on('PetInfoResponse', packet => {
   });
 });
 
-/** A7 — `ReceivePetCommand` (`giPetManager::SetPetCommand`): the raven's mode. */
+/** A7 - `ReceivePetCommand` (`giPetManager::SetPetCommand`): the raven's mode. */
 EventBus.on('PetMode', packet => {
   if (packet.byteLength < PetModePacket.Length!) return;
   const p = new PetModePacket(packet);
@@ -3997,7 +4005,7 @@ EventBus.on('PetMode', packet => {
 });
 
 /**
- * BF 51 — `ReceiveMuHelperStatusUpdate`: `Pause` stops the helper, otherwise
+ * BF 51 - `ReceiveMuHelperStatusUpdate`: `Pause` stops the helper, otherwise
  * it starts; with `ConsumeMoney` the server charged `Money` zen for it (the
  * money itself arrives through the usual money packets).
  */
@@ -4007,7 +4015,7 @@ EventBus.on('MuHelperStatusUpdate', packet => {
   Store.setMuHelperStatus(!p.PauseStatus, p.ConsumeMoney ? p.Money : 0);
 });
 
-/** C2 AE — `ReceiveMuHelperConfigurationData`: the saved config blob, kept as is. */
+/** C2 AE - `ReceiveMuHelperConfigurationData`: the saved config blob, kept as is. */
 EventBus.on('MuHelperConfigurationData', packet => {
   if (packet.byteLength < MuHelperConfigurationDataPacket.Length!) return;
   const p = new MuHelperConfigurationDataPacket(packet);

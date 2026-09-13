@@ -12,7 +12,7 @@ import type { Entity, ISystemFactory } from '../world';
  * OpenMU walks every object by wall-clock time: each step takes
  * `100 * tileDistance / movementSpeed * 40 ms` (PlayerMovement.GetStepDelay),
  * i.e. `movementSpeed / 4` tiles per second. The speed is 12 while walking
- * (safe zone, or no running gear) and the MovementSpeed attribute otherwise —
+ * (safe zone, or no running gear) and the MovementSpeed attribute otherwise -
  * 15 with boots of level >= 5 or wings (MovementSpeedConstants). The client
  * has to cover the same distance in the same time, otherwise the next
  * WalkRequest's source tile drifts away from the server's position and the
@@ -46,7 +46,7 @@ const HORN_OF_FENRIR = 37;
  *  - Uniria / Dinorant 15, Dark Horse / Fenrir 17 (the upgraded-Fenrir
  *    combination bonuses are not modelled).
  * Without any of these the server walks at 12 even while the client plays the
- * run clip — OpenMU has no free run for the Dark Knight.
+ * run clip - OpenMU has no free run for the Dark Knight.
  */
 function runningMovementSpeed(entity: Entity, world: number): number {
   const items = Store.playerData.items;
@@ -103,7 +103,7 @@ export const MoveAlongPathSystem: ISystemFactory = world => {
   return {
     update: () => {
       // The render loop clamps its delta to 100 ms (MAX_FRAME_DELTA) so
-      // effects never skip ahead; walkers must not inherit that clamp — the
+      // effects never skip ahead; walkers must not inherit that clamp - the
       // server keeps stepping at wall-clock pace while we render at 3 fps in
       // a background tab, and every lost frame became a tile of desync.
       const now = performance.now();
@@ -120,7 +120,7 @@ export const MoveAlongPathSystem: ISystemFactory = world => {
         if (localPlayer) {
           // Both setters are MobX actions: writing an unchanged value still
           // runs the action (and its reaction pass) every frame, so only the
-          // tile the hero stands on — not its float position — is mirrored,
+          // tile the hero stands on - not its float position - is mirrored,
           // and only when it moved.
           const tileX = ~~transform.pos.x;
           const tileY = ~~transform.pos.z;
@@ -193,7 +193,7 @@ export const MoveAlongPathSystem: ISystemFactory = world => {
 
           if (world.terrain) {
             // RequestTerrainHeight is bilinear at the float position
-            // (ZzzLodTerrain.cpp:825-839, ZzzCharacter.cpp:6265) — the
+            // (ZzzLodTerrain.cpp:825-839, ZzzCharacter.cpp:6265) - the
             // previous 4 integer samples averaged with fixed weights made
             // characters float/sink on slopes.
             transform.pos.y = world.getTerrainHeight(

@@ -2,7 +2,7 @@ import type { World } from '../../ecs/world';
 import { loadGLTF } from '../modelLoader';
 import { PlayerObject } from '../playerObject';
 
-// Man01.glb is a rig-only BMD conversion (0 meshes — see
+// Man01.glb is a rig-only BMD conversion (0 meshes - see
 //  the geometry ships as
 // ManHead/ManUpper/ManGloves/ManBoots 01|02 part files (there is no ManLower).
 // The original picks the parts per NPC in ZzzCharacter.cpp:
@@ -11,7 +11,7 @@ import { PlayerObject } from '../playerObject';
 //   14224 MONSTER_WANDERING_MERCHANT_HAROLD (250): Head+0 Upper+0 Gloves+0 Boots+0
 // (+0 = the 01 files, +1 = 02.)
 // Idle mirrors Lumen: the entity keeps its `monsterAnimation` component and
-// the animation system's Stop1 (= 0) plays the rig's stand clip — the
+// the animation system's Stop1 (= 0) plays the rig's stand clip - the
 // PlayerAction indices `startNpcIdle()` picks don't exist on this 2-action rig.
 abstract class MerchantMan extends PlayerObject {
   /** Skin (1 or 2) per part slot, from the ZzzCharacter.cpp cases above. */

@@ -36,7 +36,7 @@ const WEDGE_GAP_DEG = 1.6;
 
 /**
  * A wedge is either an animated emote (plays a clip, sent as an animation
- * request) or an emoji bubble (an overlay, sent as its chat token) — see
+ * request) or an emoji bubble (an overlay, sent as its chat token) - see
  * common/emojiBubbles.ts for why those are separate things and why the
  * bubbles travel over chat.
  */

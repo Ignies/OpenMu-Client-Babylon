@@ -8,7 +8,7 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
  * EncTerrain57.obj places 4176 objects of 87 types (fourteen records outside
  * the block grid). Object57 ships 91 models; types 58, 59 and 64 (one record
  * each, by the shrine at 15/83 and 12/110) have no model. The C++ is
- * GMSwampOfQuiet.cpp: `CreateObject` (:51-63, empty — the 103 operate box is
+ * GMSwampOfQuiet.cpp: `CreateObject` (:51-63, empty - the 103 operate box is
  * commented out), `MoveObject` (:66-104), `RenderObjectVisual` (:127-199).
  */
 
@@ -17,12 +17,12 @@ export const SWAMP_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
  * `MoveObject` :78-102 hides 57, 71, 72, 73, 74, 77, 78:
- *  - **57** (×18): the brazier — see `SWAMP_LIGHTS`.
- *  - **71** (×8): `BITMAP_TRUE_FIRE` SubType 5 — fire without light.
- *  - **72** (×59): `BITMAP_SMOKE` SubType 49 from an offset — marsh gas.
+ *  - **57** (×18): the brazier - see `SWAMP_LIGHTS`.
+ *  - **71** (×8): `BITMAP_TRUE_FIRE` SubType 5 - fire without light.
+ *  - **72** (×59): `BITMAP_SMOKE` SubType 49 from an offset - marsh gas.
  *  - **73** (×51): hidden, nothing drawn.
  *  - **74** (×11): `BITMAP_SMOKE` SubType 21 at twice scale.
- *  - **77** (×87), **78** (×117): `BITMAP_CLOUD` SubType 20 — the fog
+ *  - **77** (×87), **78** (×117): `BITMAP_CLOUD` SubType 20 - the fog
  *    banks that make the map.
  */
 export const SWAMP_EFFECT_ONLY_TYPES: readonly number[] = [

@@ -6,7 +6,7 @@ import { masterLevelLayer } from './masterLevel';
 import { masterTreeLayer } from './masterTree';
 
 /**
- * THE LIST — the only place skill entries are enumerated. Order is update
+ * THE LIST - the only place skill entries are enumerated. Order is update
  * order; an entry that reads another goes after it, with a comment saying so.
  */
 export const SKILL_LAYERS: readonly SkillLayer[] = [

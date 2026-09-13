@@ -5,8 +5,8 @@ import { useVersionUi } from '../../../hooks/useVersionUi';
 
 /**
  * `LoginScene::Render` in tour mode (Scenes/LoginScene.cpp:410-421): the glow
- * `MU-logo_g.jpg` then `MU-logo.tga`, both 256×128 drawn at 0.8 — so
- * 204.8×102.4 — centred on x 320, y 25 of the 640×480 stage, fading in by 0.02
+ * `MU-logo_g.jpg` then `MU-logo.tga`, both 256×128 drawn at 0.8 - so
+ * 204.8×102.4 - centred on x 320, y 25 of the 640×480 stage, fading in by 0.02
  * a frame (`g_fMULogoAlpha`), about 0.8 s at 60 fps.
  *
  * Which art, and how big, is the version's answer (`pregame.logo`): the

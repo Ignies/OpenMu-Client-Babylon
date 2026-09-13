@@ -1,5 +1,5 @@
 /**
- * English — the source language.
+ * English - the source language.
  *
  * Its `strings` is the catalogue itself, so English is complete by
  * construction and is what every other entry falls back to line by line.

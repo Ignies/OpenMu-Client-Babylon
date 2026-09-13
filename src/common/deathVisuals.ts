@@ -5,7 +5,7 @@ import { BOMB_SPARKS, EXPLOSION_CELLS, FIRE_PUFF, MODEL, SMOKE, TEX } from '../e
 import type { Sounds } from '../libs/soundsManager';
 
 /**
- * What a character breaks into when it dies — the effects-layer consumer for
+ * What a character breaks into when it dies - the effects-layer consumer for
  * the special deaths of `SetPlayerDie` (ZzzCharacter.cpp:1372-1420) and
  * `CreateBlood` (ZzzEffectBlurSpark.cpp:445-450). `deathSystem.ts` asks
  * `shatterDeathFor(monsterModelType)` when the Die clip would start; a row
@@ -17,7 +17,7 @@ import type { Sounds } from '../libs/soundsManager';
  * `monsterModelTypeOf(npcType)` reads from `MONSTER_MODEL_TABLE`.
  *
  * Not here: the player transformed by a Skeleton ring (`o->SubType` in
- * `MODEL_SKELETON1..3`, :1383) — the client has no transformation rings yet;
+ * `MODEL_SKELETON1..3`, :1383) - the client has no transformation rings yet;
  * it takes the same `boneShatter` when it does.
  */
 
@@ -93,7 +93,7 @@ export function shatterDeathFor(monsterModelType: number): ShatterDeath | undefi
 
 /**
  * Small stone chips (MODEL_STONE1/2, `SubType 0`) with their fire puffs
- * (ZzzEffect.cpp:11019-11022) — what a breaking prop or a stone skill throws.
+ * (ZzzEffect.cpp:11019-11022) - what a breaking prop or a stone skill throws.
  * Exposed for the next consumer; no death uses it.
  */
 export function spawnStoneChips(scene: Scene, at: Vector3, count: number, light: RGB): void {

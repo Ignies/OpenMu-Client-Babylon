@@ -1,5 +1,5 @@
 /**
- * The text catalogue — every string the client itself writes on screen, in
+ * The text catalogue - every string the client itself writes on screen, in
  * English, keyed once.
  *
  * This is the **source of truth**: `TextKey` is derived from it, so a key that
@@ -13,7 +13,7 @@
  * them the way `ZzzInterface.cpp` did.
  *
  * Read by: every entry file (`english.ts` … `german.ts`) and the facade's
- * `t()` fallback. Nothing else imports it — the game calls `t()`.
+ * `t()` fallback. Nothing else imports it - the game calls `t()`.
  */
 
 export const EN_TEXT = {
@@ -57,7 +57,7 @@ export const EN_TEXT = {
   'server.insecure':
     'This page is https: a ws:// proxy is blocked, use wss://.',
   'server.lockedByUrl': 'Pinned by the URL (?cs= / ?ws=).',
-  'server.listedHint': 'From the published list — pick another in Worlds, or Copy it to edit.',
+  'server.listedHint': 'From the published list - pick another world, or Copy it to edit.',
   'server.listOffline': 'The published server list could not be read.',
   'server.copy': 'Copy',
 
@@ -73,7 +73,49 @@ export const EN_TEXT = {
   'worlds.checking': 'Checking...',
   'worlds.answering': 'Answering',
   'worlds.noAnswer': 'No answer',
+  'worlds.tabWorlds': 'Worlds',
+  'worlds.tabSetup': 'Setup',
+  'worlds.tabList': 'List',
+  'worlds.tabInfo': 'Details',
+  'worlds.tabAccount': 'Accounts',
+  'worlds.search': 'Search worlds',
+  'worlds.clearSearch': 'Clear the search',
+  'worlds.noMatch': 'Nothing matches "{text}".',
+  'worlds.count': '{shown} of {total}',
+  'worlds.hasAccount': 'An account is saved for this world',
+  /** One glyph on the card, so it must stay short in every language. */
+  'worlds.accountMark': 'ID',
   'server.fromUrl': 'From URL',
+
+  // The details tab: what the published list knows about a world, before the
+  // client has said a word to it.
+  'info.client': 'Client',
+  'info.anyClient': 'Any',
+  'info.address': 'Address',
+  'info.route': 'Route',
+  'info.status': 'Status',
+  'info.notChecked': 'Not checked yet',
+  'info.account': 'Account',
+  'info.noAccount': 'None saved',
+  'info.lastLogin': 'Last login',
+  'info.never': 'Never',
+  'info.noDescription': 'This world published no description.',
+  'info.gameServers': 'Game servers',
+  'info.noGameServers':
+    'This world published no server names; they arrive once connected.',
+  'info.moreServers': 'and {count} more',
+
+  // The accounts tab: the logins saved for one world, a main and its mules.
+  'account.list': 'Accounts on {world}',
+  'account.unnamed': 'New account',
+  'account.addFirst': 'Add an account first',
+  'account.keepPassword': 'Remember the password',
+  'account.entersAs': 'Enter signs in as {name}.',
+  /** The row tag for an account whose password is not kept. */
+  'account.notKept': 'ASK',
+  'account.storedLocally': 'Kept in this browser only, in plain text.',
+  'account.cannotSave': 'This world cannot keep an account.',
+  'account.needSignup': 'No account yet? Create one on the login screen.',
 
   'servers.connectionLost': 'Connection to the server was lost.',
   'servers.loading': 'Loading server list...',
@@ -175,6 +217,8 @@ export const EN_TEXT = {
   'charInfo.skillDamage': 'Skill Damage: {value}%',
   'charInfo.divineDamage': 'Divine Damage (Roar, Slasher): {value}%',
   'charInfo.aoeDamage': 'AOE Damage (Dark Side): {value}%',
+  'charInfo.addAmount': 'Points to add',
+  'charInfo.stopAdding': 'Stop',
 
   // ---- Options window ----------------------------------------------------
   'options.title': 'Option',
@@ -205,10 +249,28 @@ export const EN_TEXT = {
   'options.section.layout': 'Layout',
   'options.section.text': 'Text',
   'options.section.bindings': 'Bindings',
+  'options.section.vitals': 'Health and mana',
+  'options.section.warnings': 'Warnings',
   'options.tab.interface': 'Interface',
+  'options.tab.sound': 'Sound',
+  'options.section.mixer': 'Mixer',
+  'options.section.sfx': 'Effects',
+  'options.section.dropSounds': 'Drop sounds',
   'options.englishItemNames': 'Item names in English',
 
+  'options.musicVolume': 'Music',
+  'options.effectsVolume': 'Effects',
+  'options.combatVolume': 'Combat',
+  'options.monsterVolume': 'Monsters',
+  'options.ambientVolume': 'Ambience',
+  'options.stepsVolume': 'Footsteps',
+  'options.dropVolume': 'Drops',
+  'options.uiVolume': 'Interface',
+  'options.muteInBackground': 'Mute in background',
+  'options.dropSoundFilter': 'Only the drops below',
+
   'options.autoAttack': 'Automatic Attack',
+  'options.statPointAmounts': 'Add stat points in bulk',
   'options.whisperBeep': 'Beep sound for whispering',
   'options.slideHelp': 'Slide Help',
   'options.cameraControl': 'Camera control (Ctrl+wheel, Ins/Del)',
@@ -217,6 +279,7 @@ export const EN_TEXT = {
   'options.firstPersonBob': 'Head bob in first person',
   'options.thirdPersonMouseLook': 'Mouse look in third person too',
   'options.autoReconnect': 'Reconnect automatically',
+  'options.dropTooltips': 'Item details on ground drops',
   'options.lootFilter': 'Filter drop names',
   'options.lootJewels': 'Jewels',
   'options.lootExcellent': 'Excellent',
@@ -230,8 +293,13 @@ export const EN_TEXT = {
   'options.uiScale': 'Interface size',
   'options.lockWindows': 'Lock windows',
   'options.minimapCorner': 'Minimap in the corner',
+  'options.questTracker': 'Quest tracker',
   'options.resetWindows': 'Reset windows',
   'options.stateWarnings': 'Warning notices',
+  'options.lowHealthWarning': 'Low health warning',
+  'options.lowHealthPercent': 'Health threshold',
+  'options.lowManaWarning': 'Low mana warning',
+  'options.lowManaPercent': 'Mana threshold',
   'options.volume': 'Volume',
   'options.effectLevel': '+Effect limitation',
   'options.shadows': 'Object shadows',
@@ -271,7 +339,7 @@ export const EN_TEXT = {
   'options.packHint':
     'Quest text, NPC dialogue and monster names are translated for this language too.',
   'options.noPackHint':
-    'Interface only — quest text and monster names stay English.',
+    'Interface only - quest text and monster names stay English.',
 
   // Slider value labels.
   'options.quality.classic': 'Classic',
@@ -370,9 +438,9 @@ export const EN_TEXT = {
   'bottomBar.noSkill': 'No skill (right click = attack)',
   'bottomBar.emptySlot': '[{key}] empty',
   'bottomBar.itemSlot': '{name} [{key}]',
-  'bottomBar.skillHint': ' — click: skill list, right click: plain attack',
-  'bottomBar.pickSkill': '[{key}] empty — click to choose a skill',
-  'bottomBar.boundSlot': '{name} [{key}] — right click to change',
+  'bottomBar.skillHint': ' - click: skill list, right click: plain attack',
+  'bottomBar.pickSkill': '[{key}] empty - click to choose a skill',
+  'bottomBar.boundSlot': '{name} [{key}] - right click to change',
   'bottomBar.clearSlot': 'Leave slot [{key}] empty',
   'bottomBar.pet.normal': 'Nor',
   'bottomBar.pet.random': 'Rnd',
@@ -1119,6 +1187,7 @@ export const EN_TEXT = {
   'quest.contribution': 'Contribution: {value}',
   'quest.talkToStart': 'Talk to {npc} to start this quest.',
   'quest.talkToContinue': 'Talk to {npc} to continue this quest.',
+  'quest.tracker.returnToNpc': 'Return to the quest NPC',
 
   // ---- events ------------------------------------------------------------
   'event.devilSquare': 'Devil Square',

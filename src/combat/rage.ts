@@ -1,7 +1,7 @@
 /**
  * Rage Fighter packets (MonkSystem.cpp, ZzzInterface.cpp:2835-2845,
  * WSclient.cpp:14228-14233): Dark Side (263) is the one skill on its own
- * wire — the cast sends `RageAttackRangeRequest` (0x4B) *and*
+ * wire - the cast sends `RageAttackRangeRequest` (0x4B) *and*
  * `RageAttackRequest` (0x4A) at the picked target; the server answers 0x4B
  * with up to five targets it chose (`ReceiveDarkside` →
  * `SetDarksideTargetIndex`), and the client then lands one 0x4A per extra

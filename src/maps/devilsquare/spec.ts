@@ -28,7 +28,7 @@ export const DEVIL_SQUARE_EFFECT_ONLY_TYPES: readonly number[] = [];
 /**
  * `RenderObjectVisual`, ZzzObject.cpp:3030-3053, is the map's one visual: on
  * type 2 (the 200 fence pillars) it drops `BITMAP_RAIN_CIRCLE + 1` ripple
- * particles at bones 23 and 31, one in four ticks each plus one every tick —
+ * particles at bones 23 and 31, one in four ticks each plus one every tick -
  * rain splashing off the pillar caps, on the map whose rain never stops.
  *
  * **Not reproduced.** `effectParticles` has no ripple kind (every kind it

@@ -3,7 +3,7 @@ import { loadGLTF } from '../modelLoader';
 import { MonsterObject } from '../monsterObject';
 import { monsterModelFile } from './monsterModelTable';
 
-/** `MODEL_BUDGE_DRAGON`'s model index — the one monster model that hovers. */
+/** `MODEL_BUDGE_DRAGON`'s model index - the one monster model that hovers. */
 export const BUDGE_DRAGON_MODEL = 2;
 
 const cache = new Map<string, typeof MonsterObject>();

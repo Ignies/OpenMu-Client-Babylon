@@ -6,8 +6,8 @@ import { migrate } from '../../tools/sqliteMigrate';
  * The register service's own storage: the signup log the rate limiter reads,
  * and the account creation log an operator can query.
  *
- * Deliberately *not* OpenMU's database. Nothing here is game state — it is the
- * gate in front of account creation, and the record of what came through it —
+ * Deliberately *not* OpenMU's database. Nothing here is game state - it is the
+ * gate in front of account creation, and the record of what came through it -
  * and keeping it separate means this service never adds tables to a schema
  * OpenMU owns and migrates.
  *

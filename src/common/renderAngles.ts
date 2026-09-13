@@ -8,7 +8,7 @@ import type { IVector3Like, Vector3 } from '../libs/babylon/exports';
  * `AngleMatrix(a0,a1,a2)` (Rz·Ry·Rx, Z-up) maps to Babylon as
  * `(x, y, z) = (-a0, -a2, -a1)`. The loader already negates pitch/roll; yaw is
  * kept "MU-positive" in `transform.rot.y` because the character code computes
- * it with `atan2` in that convention, and is flipped here — in exactly one
+ * it with `atan2` in that convention, and is flipped here - in exactly one
  * place, so `init()`-time readers of `node.rotation` (particle emitters, map
  * object lights) see the same value the render loop will use.
  *

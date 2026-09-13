@@ -1,11 +1,11 @@
 /**
- * Emoji bubbles — a small status glyph a character can pop for a couple of
+ * Emoji bubbles - a small status glyph a character can pop for a couple of
  * seconds. Unlike the emotes in `emotes.ts` these play no animation clip and
  * have no `ServerPlayerActionType`, so no packet in the protocol carries one.
  *
  * They travel as public chat instead. Every bubble owns a short ASCII token
- * (`words`) in the spirit of the original's chat emoticons — `^^`, `T_T` and
- * `-_-` all fired social actions through `CheckChatText` — and picking one in
+ * (`words`) in the spirit of the original's chat emoticons - `^^`, `T_T` and
+ * `-_-` all fired social actions through `CheckChatText` - and picking one in
  * the radial menu sends that token as an ordinary chat line. A client that
  * knows the table turns the line back into a bubble over the sender
  * (`matchEmojiBubbleWord`, the ChatMessage handler in logic.ts); one that does
@@ -23,8 +23,8 @@
  *
  * Two placements:
  *
- *  - `head` — floats above the head, just over where the name balloon sits.
- *  - `side` — floats beside the shoulder, on whichever side currently faces
+ *  - `head` - floats above the head, just over where the name balloon sits.
+ *  - `side` - floats beside the shoulder, on whichever side currently faces
  *    the camera, so it swaps across as the character turns
  *    (`EmojiBubbleSystem` picks the side, `CalculateScreenPositionSystem`
  *    projects it).
@@ -173,7 +173,7 @@ export function matchEmojiBubbleWord(text: string): EmojiBubbleId | null {
  * Anchor heights as a fraction of the entity's name-balloon height
  * (`screenPosition.worldOffsetZ`, 2.5 tiles for a player). The balloon
  * deliberately floats clear of the head so a name never covers it, which is
- * too high for a bubble — these bring both placements back down onto the
+ * too high for a bubble - these bring both placements back down onto the
  * character.
  *
  * Both are world-space, so the bubbles keep their distance from the body as

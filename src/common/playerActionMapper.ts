@@ -17,7 +17,7 @@ export function isPlayerAttackAction(action: PlayerAction): boolean {
  * `PLAYER_SKILL_SLEEP … PLAYER_SKILL_LIGHTNING_SHOCK`, `PLAYER_RECOVER_SKILL`
  * and `PLAYER_SKILL_THRUST … PLAYER_SKILL_HP_UP_OURFORCES`, and re-admits the
  * stand / walk / run clips that happen to sit inside the first range. Every
- * skill clip of `combat/recipes.ts` falls in one of these — a cast clip
+ * skill clip of `combat/recipes.ts` falls in one of these - a cast clip
  * outside them would loop for ever instead of returning to idle, which is
  * what the old `PLAYER_SKILL_HAND1 … PLAYER_SKILL_TELEPORT` bound did to
  * every clip past Teleport.

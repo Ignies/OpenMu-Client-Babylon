@@ -10,13 +10,13 @@ import { PlaySpeedObject } from '../shared/objectVariants';
  * normalise their yaw and cache it as `HeadAngle` (used by the event's
  * turning statues), 115/117 get `SubType = 100`, day 4's 10 gets a random
  * `SubType` countdown that restarts its animation. `MoveObject`: the play
- * speed multipliers — 20 at 2x, 122-124 at 3x, 128 at 6x, 36 at 0.02, 64 at
- * 0.64 (0.44 on day 3) — and the hidden list in `spec.ts`.
+ * speed multipliers - 20 at 2x, 122-124 at 3x, 128 at 6x, 36 at 0.02, 64 at
+ * 0.64 (0.44 on day 3) - and the hidden list in `spec.ts`.
  *
  * Not built: the event itself (gates, bosses, `RenderFrontSideVisual`), the
  * weather-dependent ambience (`ImperialGuardianFort_out1/2/3.wav`,
- * `_in.wav` — not in the sound catalogue), `CreateRain` on days 1-3 (the
- * leaves slot — days 1-3 are `outdoor` on their entry so the weather layer's rain can
+ * `_in.wav` - not in the sound catalogue), `CreateRain` on days 1-3 (the
+ * leaves slot - days 1-3 are `outdoor` on their entry so the weather layer's rain can
  * fall). `Music/ImperialGuardianFort` on all four.
  */
 export async function createEmpireGuardian(world: World) {

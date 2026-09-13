@@ -8,13 +8,13 @@ import {
 import type { World } from '../ecs/world';
 
 /**
- * Whether there is standing water under a point — the CPU's view of the
+ * Whether there is standing water under a point - the CPU's view of the
  * `PUDDLES` terrain layer, for the footprints.
  *
  * The wet-boot mechanic (`footprintSystem.ts`) is: step in a puddle, the
  * sole is charged; each print spends some of it; the trail dims and stops.
- * Its first cut asked `puddleCover() > 0.3` — *are there puddles on this
- * map* — so once the streets had pooled the boot recharged on every outdoor
+ * Its first cut asked `puddleCover() > 0.3` - *are there puddles on this
+ * map* - so once the streets had pooled the boot recharged on every outdoor
  * step and never dried. A puddle is a patch, not a state, and this asks
  * about the patch: the same break-up noise, slope test and threshold the
  * shader paints with, so the boot gets wet where the eye sees water.

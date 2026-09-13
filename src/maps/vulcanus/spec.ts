@@ -5,7 +5,7 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
  * Vulcanus / the PK Field (`WD_63PK_FIELD`, `World64`/`Object64`), the
  * plain-data half. Nothing here may import the scene.
  *
- * EncTerrain64.obj places 2290 objects of 62 types — 993 of them type 17,
+ * EncTerrain64.obj places 2290 objects of 62 types - 993 of them type 17,
  * the lava-rock scatter. Object64 ships 61 models; the one type-54 record
  * (224.5/163.5) has none. The C++ is GM_PK_Field.cpp: `CreateObject`
  * (:230-243), `MoveObject` (:245-269), `RenderObjectVisual` (:271-389).
@@ -20,13 +20,13 @@ export const VULCANUS_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
  * `MoveObject` :252-262 hides 0-6, which `RenderObjectVisual` draws as:
- *  - **0** (×10): `WATERFALL_2` SubType 6 — lava spray, one in eight.
+ *  - **0** (×10): `WATERFALL_2` SubType 6 - lava spray, one in eight.
  *  - **1** (×49): `BITMAP_SMOKE` SubType 60.
- *  - **2** (×0): `BITMAP_CLOUD` SubType 16; **3** (×102): SubType 11 — the
+ *  - **2** (×0): `BITMAP_CLOUD` SubType 16; **3** (×102): SubType 11 - the
  *    heat haze.
  *  - **4** (×0): `BITMAP_SPARK` SubType 9 thrown at a random angle.
  *  - **5** (×5): `BITMAP_SMOKE` SubType 21.
- *  - **6** (×50): the lava vent — see `VULCANUS_LIGHTS`.
+ *  - **6** (×50): the lava vent - see `VULCANUS_LIGHTS`.
  */
 export const VULCANUS_EFFECT_ONLY_TYPES: readonly number[] = [
   0, 1, 2, 3, 4, 5, 6,
@@ -47,7 +47,7 @@ export const VULCANUS_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  * Type 6 (×50), `RenderObjectVisual` :363-386: a `BITMAP_LIGHT` sprite sized
  * `2 * scale` in a fire colour, plus a `FIRE_HIK1` / `FIRE_CURSEDLICH` /
  * `FIRE_HIK3` particle cycling on `(int)WorldTime % 3`. No `AddTerrainLight`
- * in the PK Field code at all — the lava glow is the baked lightmap — so the
+ * in the PK Field code at all - the lava glow is the baked lightmap - so the
  * terrain light here is ours, kept small (range 2) so it only lifts the rim
  * of the vent.
  */

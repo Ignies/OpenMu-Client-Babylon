@@ -101,7 +101,7 @@ async function loadSprite(path: string): Promise<MuSprite> {
 /**
  * Width / height from the JPEG's first frame header (SOF0..SOF15, minus the
  * DHT/JPG/DAC markers that share the range). Reading it costs a few byte
- * compares; the alternative — `createImageBitmap` — decodes the whole image
+ * compares; the alternative - `createImageBitmap` - decodes the whole image
  * a second time just to measure it, and the browser decodes it again anyway
  * when the blob URL is painted.
  */

@@ -31,8 +31,8 @@ export type { LightRecipe, LightAnchor } from './lightSource';
  * public surface for consumers; every entry file stays importable directly
  * for anything that needs a single function.
  *
- * The two sinks — `common/terrainDynamicLight.ts` and
- * `common/pointLightPool.ts` — are consumers of this folder: `LightSource`
+ * The two sinks - `common/terrainDynamicLight.ts` and
+ * `common/pointLightPool.ts` - are consumers of this folder: `LightSource`
  * registers into them, `TerrainLightSystem` steps them after `update`.
  */
 class Lighting {
@@ -62,7 +62,7 @@ class Lighting {
   }
 
   /**
-   * Drop everything. Call when the map changes — the terrain light field is
+   * Drop everything. Call when the map changes - the terrain light field is
    * rebuilt from the new bake and no registration may outlive it.
    */
   reset(): void {
@@ -168,7 +168,7 @@ class Lighting {
   }
 
   /**
-   * An ad-hoc light from any recipe — for a host that is not an entry (a
+   * An ad-hoc light from any recipe - for a host that is not an entry (a
    * map object class, a test). Prefer a row in an entry's table.
    */
   flash(scene: Scene, recipe: LightRecipe, anchor: LightAnchor): LightSource {

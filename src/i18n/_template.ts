@@ -1,6 +1,6 @@
 /**
  * Copy me to add a language: `cp _template.ts <language>.ts`, fill the three
- * sections, then add `<language>Layer` to `layers.ts`. Nothing else changes —
+ * sections, then add `<language>Layer` to `layers.ts`. Nothing else changes -
  * the selector lists whatever `layers.ts` holds, and `muFlag` already draws
  * every region in `FlagRegion`.
  *
@@ -11,7 +11,7 @@ import type { LanguageLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** The language's own name for itself — what the selector shows. */
+/** The language's own name for itself - what the selector shows. */
 const LABEL = 'Language';
 
 /**

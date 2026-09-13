@@ -7,7 +7,7 @@ import {
 } from './spec';
 
 /**
- * Balgas Barracks (World42 / Object42) — the map entry: identity and the per-world data the
+ * Balgas Barracks (World42 / Object42) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  * The object classes and the setup function are in `create.ts`, loaded on demand.
  */
@@ -19,7 +19,7 @@ const WORLDS: readonly ENUM_WORLD[] = [
 ];
 
 // Rock01-04 only, but `EncTerrain42.map` also indexes slot 11 (`TileRock05`,
-// which the folder does not ship — unbound in the original); Rock04 stands in
+// which the folder does not ship - unbound in the original); Rock04 stands in
 // so the slot does not fall back to Grass01 (terrainMaterial.ts `valid1`).
 const TILES: readonly string[] = [
   'TileGrass01',

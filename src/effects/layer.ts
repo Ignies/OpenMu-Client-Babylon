@@ -5,7 +5,7 @@ import type { Scene, Vector3 } from '../libs/babylon/exports';
  * The contract every visual effect implements. One file per effect, one
  * exported `EffectLayer` per file, listed once in `layers.ts`. Copy `_template.ts` for the recipe.
  *
- * Effects differ from weather in one way: they are *spawned* — a skill, a
+ * Effects differ from weather in one way: they are *spawned* - a skill, a
  * packet or a buff asks for one at a point, and it lives for its own
  * duration. So the contract adds `spawn`, and `update` is where an entry
  * steps the effects it has spawned (its own live list, from `core.ts`).
@@ -15,7 +15,7 @@ import type { Scene, Vector3 } from '../libs/babylon/exports';
 export interface EffectHandle {
   /** False once the effect has finished (or was stopped) and released its pool slots. */
   readonly alive: boolean;
-  /** End it now — a buff cancelled, a flame column released, a map left. */
+  /** End it now - a buff cancelled, a flame column released, a map left. */
   stop(): void;
 }
 
@@ -37,7 +37,7 @@ export interface EffectLayer<TOptions = unknown, TName extends string = string> 
 
   /**
    * Start one effect at `at` (world position, tiles). `opts` is the entry's
-   * own option type — what flies where, which texture, what colour, how
+   * own option type - what flies where, which texture, what colour, how
    * long. Every effect is spawnable; the handle ends it early.
    */
   spawn(scene: Scene, at: Vector3, opts: TOptions): EffectHandle;
