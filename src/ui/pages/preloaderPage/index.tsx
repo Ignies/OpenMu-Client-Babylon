@@ -13,8 +13,7 @@ import { MuLogo } from '../../components/muLogo';
 import { LoadingArt, useSheetSizes } from '../../components/loadingScreen/art';
 import { TEXT_COLOR } from '../serversPage/layout';
 import { t } from '../../../i18n';
-import { ServerSettings } from './serverSettings';
-import { WorldSelect } from './worldSelect';
+import { ServerWindow } from './serverWindow';
 import {
   MENU_BTN_HEIGHT,
   MENU_BTN_STEP,
@@ -28,8 +27,8 @@ import {
   SPRITE,
 } from './layout';
 
-/** The menu, the worlds it opens, or the server fields Worlds opens in turn. */
-type View = 'menu' | 'worlds' | 'setup';
+/** The menu, or the tabbed server window Worlds opens. */
+type View = 'menu' | 'worlds';
 
 /**
  * The start menu: MU's login window frame over the login scene the original
@@ -81,13 +80,9 @@ export const PreloaderPage = observer(() => {
         )}
       </div>
 
-      {!artReady ? null : view === 'setup' ? (
-        // Setup is reached through Worlds, so Close goes back there.
-        <ServerSettings onClose={() => setView('worlds')} />
-      ) : view === 'worlds' ? (
-        <WorldSelect
+      {!artReady ? null : view === 'worlds' ? (
+        <ServerWindow
           onPlay={() => Store.playOnline()}
-          onSetup={() => setView('setup')}
           onClose={() => setView('menu')}
         />
       ) : (

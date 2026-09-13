@@ -235,6 +235,39 @@ export function playableHere(profile: ServerProfile): boolean {
   return !profile.version || versionByTag(profile.version) !== null;
 }
 
+/**
+ * Does this world answer to what was typed in the worlds tab's search box?
+ *
+ * Everything the world says about itself is searched, not just its name: a
+ * player looking for somewhere to go types a language, a version tag, a domain
+ * or the name of a channel they were told about as readily as the world's own
+ * name, and a box that only matched the name would be a box that usually finds
+ * nothing. Every word has to match something, so adding one narrows the list
+ * rather than widening it.
+ */
+export function matchesSearch(profile: ServerProfile, query: string): boolean {
+  const words = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+
+  if (!words.length) return true;
+
+  const haystack = [
+    profile.name,
+    profile.description ?? '',
+    profile.language ?? '',
+    profile.version ?? '',
+    profile.domain ?? '',
+    displayAddress(profile),
+    ...(profile.servers ?? []).flatMap(server => [
+      server.name,
+      ...server.channels.map(channel => channel.name),
+    ]),
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  return words.every(word => haystack.includes(word));
+}
+
 function defaultProfile(): ServerProfile {
   return {
     id: 'local',

@@ -57,7 +57,7 @@ export const EN_TEXT = {
   'server.insecure':
     'This page is https: a ws:// proxy is blocked, use wss://.',
   'server.lockedByUrl': 'Pinned by the URL (?cs= / ?ws=).',
-  'server.listedHint': 'From the published list - pick another in Worlds, or Copy it to edit.',
+  'server.listedHint': 'From the published list - pick another world, or Copy it to edit.',
   'server.listOffline': 'The published server list could not be read.',
   'server.copy': 'Copy',
 
@@ -73,7 +73,49 @@ export const EN_TEXT = {
   'worlds.checking': 'Checking...',
   'worlds.answering': 'Answering',
   'worlds.noAnswer': 'No answer',
+  'worlds.tabWorlds': 'Worlds',
+  'worlds.tabSetup': 'Setup',
+  'worlds.tabList': 'List',
+  'worlds.tabInfo': 'Details',
+  'worlds.tabAccount': 'Accounts',
+  'worlds.search': 'Search worlds',
+  'worlds.clearSearch': 'Clear the search',
+  'worlds.noMatch': 'Nothing matches "{text}".',
+  'worlds.count': '{shown} of {total}',
+  'worlds.hasAccount': 'An account is saved for this world',
+  /** One glyph on the card, so it must stay short in every language. */
+  'worlds.accountMark': 'ID',
   'server.fromUrl': 'From URL',
+
+  // The details tab: what the published list knows about a world, before the
+  // client has said a word to it.
+  'info.client': 'Client',
+  'info.anyClient': 'Any',
+  'info.address': 'Address',
+  'info.route': 'Route',
+  'info.status': 'Status',
+  'info.notChecked': 'Not checked yet',
+  'info.account': 'Account',
+  'info.noAccount': 'None saved',
+  'info.lastLogin': 'Last login',
+  'info.never': 'Never',
+  'info.noDescription': 'This world published no description.',
+  'info.gameServers': 'Game servers',
+  'info.noGameServers':
+    'This world published no server names; they arrive once connected.',
+  'info.moreServers': 'and {count} more',
+
+  // The accounts tab: the logins saved for one world, a main and its mules.
+  'account.list': 'Accounts on {world}',
+  'account.unnamed': 'New account',
+  'account.addFirst': 'Add an account first',
+  'account.keepPassword': 'Remember the password',
+  'account.entersAs': 'Enter signs in as {name}.',
+  /** The row tag for an account whose password is not kept. */
+  'account.notKept': 'ASK',
+  'account.storedLocally': 'Kept in this browser only, in plain text.',
+  'account.cannotSave': 'This world cannot keep an account.',
+  'account.needSignup': 'No account yet? Create one on the login screen.',
 
   'servers.connectionLost': 'Connection to the server was lost.',
   'servers.loading': 'Loading server list...',
