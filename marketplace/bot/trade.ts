@@ -73,6 +73,14 @@ export type TradeTerms = {
    * half. That is how a delivery took payment for an empty table.
    */
   expectOwnItems?: number;
+  /**
+   * What every item the partner puts up must be, by its wire bytes.
+   *
+   * Counting items is not enough: a seller who listed gloves and put boots
+   * on the table had them confirmed and sold as gloves. The predicate is the
+   * listing's own description, checked here before any confirm goes out.
+   */
+  expectItemMatching?: (data: Uint8Array) => boolean;
 };
 
 export class TradeSession {
@@ -270,6 +278,11 @@ export class TradeSession {
     }
     if (terms.expectOwnItems !== undefined && this.myItems.size !== terms.expectOwnItems) {
       return `expected ${terms.expectOwnItems} of our item(s) on the table, found ${this.myItems.size}`;
+    }
+    if (terms.expectItemMatching !== undefined) {
+      for (const data of this.theirItems.values()) {
+        if (!terms.expectItemMatching(data)) return 'the item on the table is not the one listed';
+      }
     }
     return null;
   }

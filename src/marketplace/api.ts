@@ -146,7 +146,7 @@ export function cancel(id: string) {
 /** Asks for what is owed. A bot then meets this character to hand it over. */
 export function requestPayout(character: string) {
   return withTicket(t =>
-    request<{ owed: number }>('/payout', {
+    request<{ owed: number; requested?: boolean }>('/payout', {
       method: 'POST',
       body: JSON.stringify({ ticket: t.ticket, session: sessionNonce(), character }),
     })

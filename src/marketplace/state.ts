@@ -473,9 +473,13 @@ class MarketplaceStore {
   async collectPayout(): Promise<void> {
     if (this.payoutOwed <= 0) return;
     try {
-      const { owed } = await api.requestPayout(this.characterName);
+      const { owed, requested } = await api.requestPayout(this.characterName);
       runInAction(() => {
-        this.flash = t('marketplace.payoutComing', { amount: formatZen(owed) });
+        // A service from before Collect was a request answers without the
+        // flag; saying a trader is coming would then be a lie.
+        this.flash = requested
+          ? t('marketplace.payoutComing', { amount: formatZen(owed) })
+          : t('marketplace.collectUnavailable');
       });
     } catch (error) {
       runInAction(() => {

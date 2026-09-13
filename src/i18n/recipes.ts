@@ -1588,6 +1588,11 @@ export const EN_TEXT = {
   'marketplace.state.stuck': 'Held by the market. Ask a game master.',
   'marketplace.owed': 'You are owed {amount} Zen',
   'marketplace.collect': 'Collect',
+  'marketplace.collectUnavailable': 'This server cannot send a trader for it yet.',
+  'marketplace.pill.pending': 'Waiting',
+  'marketplace.pill.claimed': 'Reserved',
+  'marketplace.pill.returning': 'Coming back',
+  'marketplace.pill.stuck': 'Held',
 
   // ---- the game master panel (`gmPanel.ts`, `common/gmCommands.ts`) -------
   // Map names are not here: `gmMaps.ts` carries the server's own

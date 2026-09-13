@@ -5,6 +5,7 @@ import {
 import { InventoryConstants } from '../../src/common/inventoryConstants';
 import { StorageKind } from '../../src/common/storageKind';
 import type { BotConnection, Frame } from './connection';
+import { decodeItem } from './itemMatch';
 import { view } from './session';
 
 /**
@@ -108,6 +109,16 @@ export class Bag {
     return matching(this.stall, shape);
   }
 
+  /** Every bag slot whose item satisfies `pred` - the listing's own test, say. */
+  slotsWhere(pred: (data: Uint8Array) => boolean): number[] {
+    return where(this.slots, pred);
+  }
+
+  /** Every stall slot whose item satisfies `pred`. */
+  stallSlotsWhere(pred: (data: Uint8Array) => boolean): number[] {
+    return where(this.stall, pred);
+  }
+
   /**
    * Empty bag squares, lowest first. A square is not a guarantee - a wide
    * item needs its neighbours free too - so a caller tries them in turn and
@@ -194,31 +205,25 @@ export class Bag {
 }
 
 function matching(map: Map<number, Uint8Array>, shape: ItemShape): number[] {
+  return where(map, bytes => {
+    const item = decodeItem(bytes);
+    if (!item) return false;
+    if (item.group !== shape.group || item.num !== shape.num) return false;
+    return shape.lvl === undefined || item.lvl === shape.lvl;
+  });
+}
+
+function where(map: Map<number, Uint8Array>, pred: (data: Uint8Array) => boolean): number[] {
   const out: number[] = [];
-  for (const [slot, bytes] of map) {
-    const item = decode(bytes);
-    if (!item) continue;
-    if (item.group !== shape.group || item.num !== shape.num) continue;
-    if (shape.lvl !== undefined && (item.lvl ?? 0) !== shape.lvl) continue;
-    out.push(slot);
-  }
+  for (const [slot, bytes] of map) if (pred(bytes)) out.push(slot);
   return out.sort((a, b) => a - b);
 }
 
-/**
- * The three fields a listing is matched on, read straight off the 12-byte
- * item (the layout `src/common/itemSerializer.ts` reads in full). Only these
- * three: the client's serializer pulls the whole data folder in behind it,
- * which a headless bot cannot load.
- */
+/** The listing-facing fields of an item, decoded without the client's serializer. */
 function decode(bytes: Uint8Array): (ItemShape & { isExcellent?: boolean }) | null {
-  if (bytes.length < 6) return null;
-  return {
-    num: bytes[0] + ((bytes[3] & 0x80) << 1),
-    group: (bytes[5] & 0xf0) >> 4,
-    lvl: (bytes[1] & 0x78) >> 3,
-    isExcellent: (bytes[3] & 0x3f) !== 0,
-  };
+  const item = decodeItem(bytes);
+  if (!item) return null;
+  return { group: item.group, num: item.num, lvl: item.lvl, isExcellent: item.excellentFlags !== 0 };
 }
 
 function copy(data: DataView): Uint8Array {

@@ -364,7 +364,9 @@
   // Fixed rather than a share of the list: a short page keeps its rows the
   // same height as a full one instead of stretching them.
   flex: 0 0 34px;
-  grid-template-columns: 30px minmax(0, 1fr) 96px 62px 48px 148px 68px;
+  // The fifth column carries the deal chip, or the seller's own state pill;
+  // the last one the row's single button, wide enough for "Cancelar".
+  grid-template-columns: 30px minmax(0, 1fr) 96px 62px 88px 136px 84px;
   gap: 10px;
   align-items: center;
   min-height: 0;
@@ -413,6 +415,12 @@
 }
 
 .mp-row-deal {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.mp-row-action {
   display: flex;
   justify-content: flex-end;
 }
@@ -533,9 +541,16 @@
 }
 
 .mp-card-seller {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+// The pill keeps its words; the line before it gives way first.
+.mp-card-meta .mp-state {
+  flex: 0 0 auto;
 }
 
 .mp-dot {
@@ -874,11 +889,40 @@
   pointer-events: none;
 }
 
-/* A seller's own row: what the trader is doing with it. */
+/* A seller's own row: what the trader is doing with it, as a pill. */
 .mp-state {
+  display: inline-block;
+  max-width: 100%;
+  padding: 1px 6px;
+  overflow: hidden;
   font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
   color: @mp-dim;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(224, 188, 106, 0.18);
+  border-radius: 3px;
+
+  &.is-active {
+    color: @mp-good;
+    background: fade(@mp-good, 10%);
+    border-color: fade(@mp-good, 35%);
+  }
+
+  &.is-claimed,
+  &.is-returning {
+    color: @mp-gold;
+    background: fade(@mp-gold, 10%);
+    border-color: fade(@mp-gold, 40%);
+  }
+
+  &.is-stuck {
+    color: @mp-bad;
+    background: fade(@mp-bad, 12%);
+    border-color: fade(@mp-bad, 40%);
+  }
 }
 
 /* My Listings: the Zen a sale earned while the seller was away. */

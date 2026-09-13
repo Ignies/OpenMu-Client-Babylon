@@ -73,3 +73,21 @@ export function stateLabelKey(state: ListingState | undefined): TextKey | null {
       return null;
   }
 }
+
+/** The same, short enough for a pill; the sentence above is its hover text. */
+export function statePillKey(state: ListingState | undefined): TextKey | null {
+  switch (state) {
+    case 'pending':
+      return 'marketplace.pill.pending';
+    case 'active':
+      return 'marketplace.state.active';
+    case 'claimed':
+      return 'marketplace.pill.claimed';
+    case 'returning':
+      return 'marketplace.pill.returning';
+    case 'stuck':
+      return 'marketplace.pill.stuck';
+    default:
+      return null;
+  }
+}

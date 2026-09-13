@@ -1675,6 +1675,11 @@ export const chineseLayer: LanguageLayer = {
     'marketplace.state.stuck': '被市场扣留。请联系游戏管理员。',
     'marketplace.owed': '你有 {amount} Zen 待领取',
     'marketplace.collect': '领取',
+    'marketplace.collectUnavailable': '此服务器暂时无法为此派出商人。',
+    'marketplace.pill.pending': '等待中',
+    'marketplace.pill.claimed': '已预订',
+    'marketplace.pill.returning': '退回中',
+    'marketplace.pill.stuck': '已扣留',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

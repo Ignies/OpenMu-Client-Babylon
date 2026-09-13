@@ -126,11 +126,14 @@ export function buildMockListings(seed = 20260908): Listing[] {
     });
   }
 
-  // A handful are the player's own, so My Listings has something in it.
-  for (let i = 0; i < 4; i++) {
+  // A handful are the player's own, one in each state the service can
+  // answer with, so My Listings shows every pill the window can draw.
+  const states: NonNullable<Listing['state']>[] = ['pending', 'active', 'claimed', 'returning', 'stuck'];
+  for (const state of states) {
     const l = out[Math.floor(r() * out.length)];
     l.mine = true;
     l.seller = 'You';
+    l.state = state;
   }
 
   return out;
