@@ -52,7 +52,43 @@ export type GameOptions = {
    * world. See `materialQuality.ts`.
    */
   materialQuality: number;
+  /** Master sound level, 0..9, the original's one slider. */
   volume: number;
+  /**
+   * The mixer's categories, 0..`BUS_VOLUME_MAX` (`sound/buses.ts`), each a
+   * share of the master. 10 is the top, where the category is transparent
+   * and the master alone decides - which is where they all start, so the
+   * client sounds exactly as it did before they existed.
+   */
+  musicVolume: number;
+  /** Everything that is not music. The categories below are shares of it. */
+  effectsVolume: number;
+  combatVolume: number;
+  monsterVolume: number;
+  /** Beds, map-object loops, fire crackle, wildlife. */
+  ambientVolume: number;
+  stepsVolume: number;
+  /** A drop landing on the ground, before the filter below decides. */
+  dropVolume: number;
+  /** Clicks, windows, pickups, level up, repair, whisper. */
+  uiVolume: number;
+  /** Ramp the tracks to silence while the page is hidden, and back. */
+  muteInBackground: boolean;
+  /**
+   * Run a landing drop through the rules below instead of sounding every
+   * one of them (`sound/drops.ts`). The vocabulary is the loot filter's:
+   * what is worth a name on the ground is what is worth hearing land.
+   */
+  dropSoundFilter: boolean;
+  dropSoundJewels: boolean;
+  dropSoundExcellent: boolean;
+  dropSoundAncient: boolean;
+  /** `+7` and up (`HIGH_DROP_LEVEL`, the gold tint). */
+  dropSoundHighLevel: boolean;
+  /** Everything the rules above do not claim. */
+  dropSoundOther: boolean;
+  /** Zen piles. */
+  dropSoundZen: boolean;
   effectLevel: number;
   /** Item effect style: 0 off / 1 legacy / 2 legacy + improved / 3 improved. */
   itemEffects: number;
@@ -213,6 +249,17 @@ export function uiScaleFactor(step: number): number {
 }
 
 const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
+  volume: [0, 9],
+  // Literal rather than `BUS_VOLUME_MAX`: sound/buses.ts imports this
+  // module, so naming it here would close an import cycle.
+  musicVolume: [0, 10],
+  effectsVolume: [0, 10],
+  combatVolume: [0, 10],
+  monsterVolume: [0, 10],
+  ambientVolume: [0, 10],
+  stepsVolume: [0, 10],
+  dropVolume: [0, 10],
+  uiVolume: [0, 10],
   toneMapper: [0, TONE_MAPPER_MAX],
   brightness: [BRIGHTNESS_MIN, BRIGHTNESS_MAX],
   effectLevel: [0, 4],
@@ -254,6 +301,22 @@ const DEFAULTS: GameOptions = {
   materialQuality: 1,
   materialDetail: 6,
   volume: 5,
+  musicVolume: 10,
+  effectsVolume: 10,
+  combatVolume: 10,
+  monsterVolume: 10,
+  ambientVolume: 10,
+  stepsVolume: 10,
+  dropVolume: 10,
+  uiVolume: 10,
+  muteInBackground: true,
+  dropSoundFilter: false,
+  dropSoundJewels: true,
+  dropSoundExcellent: true,
+  dropSoundAncient: true,
+  dropSoundHighLevel: true,
+  dropSoundOther: false,
+  dropSoundZen: false,
   effectLevel: 4,
   itemEffects: 2,
   ambientParticles: true,

@@ -1,6 +1,7 @@
 import { ENUM_WORLD } from '../common/types';
 import { rainStrength } from '../weather/rainState';
 import { SoundsManager } from '../libs/soundsManager';
+import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import {
@@ -43,6 +44,9 @@ import {
  */
 
 // ---- 1. tuning -------------------------------------------------------------
+
+/** The beds and their wildlife are ambience (`sound/buses.ts`). */
+const BUS: SoundBus = 'ambient';
 
 /** Reference frame rate the original's `rand_fps_check` counts against. */
 const REFERENCE_FPS = 25;
@@ -284,16 +288,20 @@ function update(map: ENUM_WORLD, dt: number): void {
   const hero = listenerHero();
   if (!hero) return;
 
-  const beds = BEDS[map] ?? [];
+  // The ambience slider at 0 leaves `wanted` empty, so the pass below stops
+  // every bed rather than looping them at silence.
+  const gain = busGain(BUS);
+  const beds = gain > 0 ? (BEDS[map] ?? []) : [];
 
   const heroTile = world.getTerrainTile(
     ~~hero.transform.pos.x,
     ~~hero.transform.pos.z
   );
 
-  // The beds live on the effects track, so the user's volume setting is
-  // already applied to them; `bed.volume` is only the mix under the SFX.
-  // (`playAmbientLoop` only touches the gain when it changed.)
+  // The beds live on the effects track, so the master volume is already
+  // applied to them; `bed.volume` is only the mix under the SFX, and `gain`
+  // the ambience category. (`playAmbientLoop` only touches the gain when it
+  // changed.)
   wanted.clear();
 
   for (const bed of beds) {
@@ -301,7 +309,7 @@ function update(map: ENUM_WORLD, dt: number): void {
     if (bed.when && !bed.when()) continue;
 
     wanted.add(bed.sound);
-    SoundsManager.playAmbientLoop(bed.sound, bed.volume);
+    SoundsManager.playAmbientLoop(bed.sound, bed.volume * gain);
   }
 
   // Everything this map does not want right now - including a bed this
@@ -316,7 +324,7 @@ function update(map: ENUM_WORLD, dt: number): void {
   playing.clear();
   for (const sound of wanted) playing.add(sound);
 
-  for (const shot of ONE_SHOTS[map] ?? []) {
+  for (const shot of gain > 0 ? (ONE_SHOTS[map] ?? []) : []) {
     // rand_fps_check(n) is a 1-in-n roll per reference frame; at any other
     // frame rate the same expected rate is dt * REFERENCE_FPS / n.
     if (Math.random() >= (dt * REFERENCE_FPS) / shot.oneIn) continue;
@@ -324,11 +332,10 @@ function update(map: ENUM_WORLD, dt: number): void {
     // Through `playSfx`, the streaming path: the buffer is fetched on first
     // use, so a one-shot sounds the first time it is rolled rather than only
     // after an eager preload nobody runs.
-    playSfx(
-      shot.sound,
-      shot.spread ? boidPosition(hero, shot.spread) : null,
-      shot.volume
-    );
+    playSfx(shot.sound, shot.spread ? boidPosition(hero, shot.spread) : null, {
+      gain: shot.volume,
+      bus: BUS,
+    });
   }
 }
 

@@ -3,6 +3,7 @@ import { PlayerAction } from '../common/objects/enum';
 import { Rand } from '../common/rand';
 import { KALIMA_WORLDS, onWorlds } from '../common/worldAssets';
 import { SoundsManager } from '../libs/soundsManager';
+import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerHero, listenerWorld } from './listener';
@@ -17,6 +18,9 @@ import { listenerHero, listenerWorld } from './listener';
  */
 
 // ---- 1. tuning -------------------------------------------------------------
+
+/** The hero's own stride, its own category (`sound/buses.ts`). */
+const BUS: SoundBus = 'steps';
 
 /** Clip frames at which the left / right foot lands. */
 const FOOT_DOWN_FRAMES: readonly [number, number] = [1.0, 9.0];
@@ -112,10 +116,18 @@ export function footstepSound(): Sounds | null {
 
 /** Play one footstep for the tile under the hero. */
 export function playFootstep(): void {
+  // Not through `playSfx`: a footstep is never attenuated (it is under the
+  // listener) and it needs the per-play pitch below, which `playSfx` throttle
+  // aside has no way to carry.
+  const gain = busGain(BUS);
+  if (gain <= 0) return;
+
   const sfx = footstepSound();
   if (!sfx) return;
   const sound = SoundsManager.loadAndPlaySoundEffect(sfx);
-  if (sound) sound.setPlaybackRate(Rand.nextFloat(PITCH_MIN, PITCH_MAX));
+  if (!sound) return;
+  sound.setVolume(gain);
+  sound.setPlaybackRate(Rand.nextFloat(PITCH_MIN, PITCH_MAX));
 }
 
 function isWalkClip(playerAction: PlayerAction): boolean {

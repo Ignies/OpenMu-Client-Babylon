@@ -2,6 +2,7 @@ import { Vector3 } from '../../libs/babylon/exports';
 import { EventBus } from '../../libs/eventBus';
 import { playBurst, type BurstKind } from '../../effects/bursts';
 import { playSfx } from '../../libs/sfx';
+import { UI_BUS } from '../../sound/ui';
 import { TerrainDecal } from '../../common/moveTargetEffect';
 import { dropTier, type DropTier } from '../../common/dropTier';
 import { lighting } from '../../lighting';
@@ -42,7 +43,9 @@ export const ObjectEffectSystem: ISystemFactory = world => {
 
   EventBus.on('objectEffect', ({ entity, effect }) => {
     // ReceiveLevelUp (WSclient.cpp:6476, :9027): SOUND_LEVEL_UP with the flare burst.
-    if (effect === 'levelUp') playSfx('Sound/pLevelUp', entity.transform.pos);
+    if (effect === 'levelUp') {
+      playSfx('Sound/pLevelUp', entity.transform.pos, { bus: UI_BUS });
+    }
     const kind: BurstKind = effect;
     playBurst(world.scene, kind, positionOf(entity, 0).clone());
 

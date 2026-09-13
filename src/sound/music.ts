@@ -11,6 +11,7 @@ import {
 import { ENUM_WORLD } from '../common/types';
 import { EventBus } from '../libs/eventBus';
 import { SoundsManager } from '../libs/soundsManager';
+import { busSilent, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerWorld } from './listener';
@@ -27,6 +28,9 @@ import { listenerWorld } from './listener';
  */
 
 // ---- 1. tuning -------------------------------------------------------------
+
+/** The tracks ride their own slider, not the effects one (`sound/buses.ts`). */
+const BUS: SoundBus = 'music';
 
 /** Seconds after `warpCompleted` before the map's track starts. */
 const MUSIC_DELAY_SECONDS = 1;
@@ -138,6 +142,14 @@ function wire(): void {
 
 function update(map: ENUM_WORLD, dt: number): void {
   wire();
+
+  // The music slider at 0 stops the track rather than streaming it at
+  // silence, and re-arms the start so raising the slider brings it back.
+  if (busSilent(BUS)) {
+    if (SoundsManager.currentMusic) stopMusic();
+    delay = 0;
+    return;
+  }
 
   delay -= dt;
   if (delay > 0) return;

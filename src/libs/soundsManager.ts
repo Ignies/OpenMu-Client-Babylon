@@ -4,7 +4,6 @@ import { SoundTrack } from '@babylonjs/core/Audio/soundTrack';
 import { Engine, PointerEventTypes, type Scene } from './babylon/exports';
 import { isMusicKey, soundUrl, type Sounds } from '../sound/recipes';
 import { ENABLE_BG_MUSIC } from '../consts';
-import { LocalStorage } from './localStorage';
 
 /**
  * The mixer: two Babylon `SoundTrack`s (music / effects), one `Sound` per
@@ -15,6 +14,12 @@ import { LocalStorage } from './localStorage';
  * context) so a 2 MB track is never decoded into a 30 MB buffer, and always
  * `loop`. Effects are decoded buffers, evicted when they have not been asked
  * for on the last `EVICT_AFTER_MAPS` maps (`evictStale`, from `sound.reset`).
+ *
+ * The two track gains are the *only* gains it owns, and `setTrackGains` is
+ * their one writer - `sound/index.ts` hands it what the sliders say
+ * (`sound/buses.ts`). The per-category share is folded into each play's own
+ * volume by whoever plays it, because a sound key belongs to more than one
+ * category and a track owns its sounds.
  */
 
 const getSoundUrls = (key: Sounds) => soundUrl(key);
@@ -25,14 +30,40 @@ export const MUSIC_CROSSFADE_SECONDS = 0.5;
 /** Decoded effects unused for this many map changes are dropped. */
 const EVICT_AFTER_MAPS = 2;
 
-/** `localStorage` key of the per-track gains (`{ music, effects }`). */
-const VOLUME_KEY = 'mu_audio';
-
-/** The original's slider curve: level 0…9 → gain `level / 10` (SceneCommon.cpp:220-234). */
-export const gainForLevel = (level: number): number =>
-  Math.max(0, Math.min(1, level / 10));
+/** Seconds the tracks take to ramp away and back when the page is hidden. */
+export const BACKGROUND_FADE_SECONDS = 0.3;
 
 const sounds = new Map<Sounds, Sound>();
+
+/**
+ * The background ramp, 1 up and 0 away, multiplied into both track gains.
+ *
+ * Hand-stepped because `SoundTrack.setVolume` has no time argument the way
+ * `Sound.setVolume` does, and the track's gain node is private. Progress
+ * comes from the clock rather than a step count, so a hidden tab - where the
+ * browser clamps timers to about a second - lands on the target in one late
+ * callback instead of crawling.
+ */
+let backgroundMix = 1;
+let fadeFrom = 1;
+let fadeStart = 0;
+let fading = false;
+
+function stepBackgroundFade(): void {
+  const target = SoundsManager.backgrounded ? 0 : 1;
+  const elapsed = (performance.now() - fadeStart) / 1000;
+  const t = Math.min(1, elapsed / BACKGROUND_FADE_SECONDS);
+
+  backgroundMix = fadeFrom + (target - fadeFrom) * t;
+  SoundsManager.syncTrackGains();
+
+  if (t >= 1) {
+    fading = false;
+    return;
+  }
+
+  window.setTimeout(stepBackgroundFade, 16);
+}
 
 /** Map epoch a buffer was last asked for, for `evictStale`. */
 const lastUsed = new Map<Sounds, number>();
@@ -62,21 +93,12 @@ const createSound = (key: Sounds, scene: Scene, track: SoundTrack) => {
 
 export type { Sounds };
 
-type StoredVolumes = { music?: number; effects?: number };
-
-function loadStoredVolumes(): StoredVolumes | null {
-  const raw = LocalStorage.load(VOLUME_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as StoredVolumes;
-  } catch {
-    return null;
-  }
-}
-
 export class SoundsManager {
   static musicVolume = 0.5;
   static effectsVolume = 0.5;
+
+  /** The page is hidden and `muteInBackground` asked for silence. */
+  static backgrounded = false;
 
   static musicTrack: SoundTrack | null = null;
   static effectsTrack: SoundTrack | null = null;
@@ -93,9 +115,8 @@ export class SoundsManager {
   }
 
   /**
-   * Boot the tracks. `defaultGain` is the options slider's level as a gain;
-   * a per-track gain stored by `setMusicVolume` / `setEffectsVolume` wins
-   * over it.
+   * Boot the tracks at the gains the sliders ask for (`setTrackGains` keeps
+   * them up to date from then on).
    *
    * A track's gain node only exists once its audio graph is built, which
    * Babylon does on the first `addSound` - `setVolume` before that is a
@@ -103,12 +124,11 @@ export class SoundsManager {
    * the gains are handed to the constructor for the common case AND
    * re-applied by `syncTrackGains` after every sound is added.
    */
-  static initializeSounds(scene: Scene, defaultGain = this.musicVolume) {
+  static initializeSounds(scene: Scene, music: number, effects: number) {
     this.scene = scene;
 
-    const stored = loadStoredVolumes();
-    this.musicVolume = stored?.music ?? defaultGain;
-    this.effectsVolume = stored?.effects ?? defaultGain;
+    this.musicVolume = music;
+    this.effectsVolume = effects;
 
     if (this.musicTrack) {
       this.musicTrack.dispose();
@@ -164,8 +184,10 @@ export class SoundsManager {
 
   /** Push the remembered gains onto the tracks' gain nodes (see `initializeSounds`). */
   static syncTrackGains() {
-    this.musicTrack?.setVolume(ENABLE_BG_MUSIC ? this.musicVolume : 0);
-    this.effectsTrack?.setVolume(this.effectsVolume);
+    this.musicTrack?.setVolume(
+      (ENABLE_BG_MUSIC ? this.musicVolume : 0) * backgroundMix
+    );
+    this.effectsTrack?.setVolume(this.effectsVolume * backgroundMix);
   }
 
   static loadSound(key: Sounds) {
@@ -344,39 +366,32 @@ export class SoundsManager {
     return !!s && s.isPlaying && s.loop;
   }
 
-  private static persistVolumes() {
-    LocalStorage.save(
-      VOLUME_KEY,
-      JSON.stringify({ music: this.musicVolume, effects: this.effectsVolume })
-    );
-  }
-
-  /** Music track gain, 0…1, applied now and remembered (respects the ENABLE_BG_MUSIC kill switch). */
-  static setMusicVolume(volume: number) {
-    this.musicVolume = volume;
-    this.musicTrack?.setVolume(ENABLE_BG_MUSIC ? volume : 0);
-    this.persistVolumes();
-  }
-
-  /** Effects track gain, 0…1, applied now and remembered. */
-  static setEffectsVolume(volume: number) {
-    this.effectsVolume = volume;
-    this.effectsTrack?.setVolume(volume);
-    this.persistVolumes();
+  /**
+   * The two track gains, 0…1, master already folded in (`sound/buses.ts`).
+   * The one writer of `SoundTrack.setVolume`; `sound/index.ts` calls it
+   * whenever an option changes, and nothing else may.
+   */
+  static setTrackGains(music: number, effects: number) {
+    this.musicVolume = music;
+    this.effectsVolume = effects;
+    this.syncTrackGains();
   }
 
   /**
-   * The options slider (one level for both tracks, as the original). It
-   * replaces whatever per-track gains were stored: the slider is the one
-   * control the player can see.
+   * The page went away or came back. Ramps both tracks rather than cutting
+   * them, and never unlocks audio on its own: a tab that was never clicked
+   * comes back as quiet as it left.
    */
-  static setVolumeLevel(level: number) {
-    const gain = gainForLevel(level);
-    this.musicVolume = gain;
-    this.effectsVolume = gain;
-    this.musicTrack?.setVolume(ENABLE_BG_MUSIC ? gain : 0);
-    this.effectsTrack?.setVolume(gain);
-    LocalStorage.delete(VOLUME_KEY);
+  static setBackgrounded(backgrounded: boolean) {
+    if (this.backgrounded === backgrounded) return;
+    this.backgrounded = backgrounded;
+
+    fadeFrom = backgroundMix;
+    fadeStart = performance.now();
+    if (fading) return;
+
+    fading = true;
+    stepBackgroundFade();
   }
 
   static stopAllMusic() {

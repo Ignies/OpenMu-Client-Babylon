@@ -1,8 +1,10 @@
 import type { ENUM_WORLD } from '../common/types';
 import type { Scene } from '../libs/babylon/exports';
 import type { World } from '../ecs/world';
-import { SoundsManager, gainForLevel } from '../libs/soundsManager';
+import { SoundsManager } from '../libs/soundsManager';
+import { EventBus } from '../libs/eventBus';
 import { GameOptions, onGameOptionsChanged } from '../common/gameOptions';
+import { busGain, trackGains, type SoundBus } from './buses';
 import type { SoundLayer } from './layer';
 import { SOUND_LAYERS } from './layers';
 import type { Sounds } from './recipes';
@@ -22,8 +24,10 @@ import { crackleSources, type CrackleSource } from './crackle';
 import { objectLoopSources, type ObjectLoopSource } from './objectLoops';
 
 export type { SoundLayer } from './layer';
+export type { SoundBus } from './buses';
 export type { Sounds } from './recipes';
-export type { SfxPosition } from './listener';
+export type { SfxPosition, SfxOptions } from './listener';
+export type { DropSoundInfo } from './drops';
 export type { UiSound } from './ui';
 export type { WeaponHands } from './combat';
 export type { MonsterSoundSlots, MonsterVoice } from './monsters';
@@ -40,6 +44,7 @@ export {
   listenerTile,
 } from './listener';
 export {
+  UI_BUS,
   UI_SOUNDS,
   UI_SOUND_KEYS,
   playUiSound,
@@ -47,6 +52,7 @@ export {
 } from './ui';
 export { installUiWindowChime } from './windowChime';
 export {
+  COMBAT_BUS,
   SKILL_SOUNDS,
   hitSound,
   pickupSound,
@@ -60,13 +66,23 @@ export {
 } from './combat';
 export {
   MONSTER_ASSASSIN,
+  MONSTER_BUS,
   MONSTER_SOUNDS,
   monsterAttackSound,
   monsterDeathSound,
   monsterIdleSound,
   playMonster,
 } from './monsters';
+export { dropSound, dropSoundAllowed, playDrop } from './drops';
 export { currentMusic, mapMusic, playMusic, stopMusic } from './music';
+export {
+  BUS_VOLUME_MAX,
+  BUS_VOLUME_OPTION,
+  busGain,
+  busSilent,
+  masterGain,
+  trackGains,
+} from './buses';
 export { SOUND_FILES, SOUND_KEYS, isMusicKey, soundUrl } from './recipes';
 export { OBJECT_LOOPS } from './objectLoops';
 
@@ -101,15 +117,30 @@ class Sound {
 
   /**
    * Boot the mixer on the scene (Babylon tracks + the audio-unlock gesture)
-   * at the options slider's level, and follow the slider from then on.
+   * at the sliders' levels, and follow them from then on.
+   *
+   * Only the two track gains are pushed here. The categories under `effects`
+   * are read per play (`buses.ts`), so a slider move reaches the one-shots
+   * and the loops without anything being pushed at all.
    */
   init(scene: Scene): void {
-    SoundsManager.initializeSounds(scene, gainForLevel(GameOptions.volume));
-    let level = GameOptions.volume;
-    onGameOptionsChanged(o => {
-      if (o.volume === level) return;
-      level = o.volume;
-      SoundsManager.setVolumeLevel(level);
+    const boot = trackGains();
+    SoundsManager.initializeSounds(scene, boot.music, boot.effects);
+
+    let music = boot.music;
+    let effects = boot.effects;
+
+    onGameOptionsChanged(() => {
+      const next = trackGains();
+      if (next.music !== music || next.effects !== effects) {
+        music = next.music;
+        effects = next.effects;
+        SoundsManager.setTrackGains(music, effects);
+      }
+    });
+
+    EventBus.on('pageVisibilityChanged', visible => {
+      SoundsManager.setBackgrounded(!visible && GameOptions.muteInBackground);
     });
   }
 
@@ -144,14 +175,22 @@ class Sound {
     return currentMusic();
   }
 
-  /** Music track gain, 0…1. */
+  /** Music track gain, 0…1, master folded in. */
   get musicVolume(): number {
     return SoundsManager.musicVolume;
   }
 
-  /** Effects track gain, 0…1 (beds, footsteps and one-shots all sit on it). */
+  /**
+   * Effects track gain, 0…1, master folded in. Beds, footsteps and one-shots
+   * all sit on it, each scaled again by its own category (`buses.ts`).
+   */
   get effectsVolume(): number {
     return SoundsManager.effectsVolume;
+  }
+
+  /** One category's share of the effects track, 0…1 (`buses.ts`). */
+  busVolume(bus: SoundBus): number {
+    return busGain(bus);
   }
 
   /** Whether a buffer is currently sounding. */
@@ -186,9 +225,13 @@ class Sound {
     playUiSound(kind);
   }
 
-  /** Any catalogue sound once; `at` (tiles) attenuates it by distance to the hero. */
-  play(key: Sounds, at?: SfxPosition | null): void {
-    playSfx(key, at);
+  /**
+   * Any catalogue sound once; `at` (tiles) attenuates it by distance to the
+   * hero. `bus` names the mixer category, `world` by default - the slider a
+   * map door or a firework rides.
+   */
+  play(key: Sounds, at?: SfxPosition | null, bus?: SoundBus): void {
+    playSfx(key, at, { bus });
   }
 
   /** A skill's cast sound at its caster. */
@@ -233,16 +276,6 @@ class Sound {
   /** Forget the listener: positioned sounds play at full volume. */
   clearListener(): void {
     clearSfxListener();
-  }
-
-  /** Music track gain, 0…1, applied now and persisted. */
-  setMusicVolume(volume: number): void {
-    SoundsManager.setMusicVolume(volume);
-  }
-
-  /** Effects track gain, 0…1, applied now and persisted. */
-  setEffectsVolume(volume: number): void {
-    SoundsManager.setEffectsVolume(volume);
   }
 }
 

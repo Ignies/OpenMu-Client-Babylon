@@ -4,7 +4,9 @@ import { isPlayerAttackAction } from '../../common/playerActionMapper';
 import { monsterModelTypeOf } from '../../common/playSpeed';
 import type { CharacterClassNumber } from '../../common/types';
 import {
+  COMBAT_BUS,
   MONSTER_ASSASSIN,
+  MONSTER_BUS,
   monsterAttackSound,
   monsterDeathSound,
   monsterIdleSound,
@@ -66,39 +68,39 @@ export const CombatSfxSystem: ISystemFactory = world => {
             case MonsterActionType.Attack3:
             case MonsterActionType.Attack4: {
               const sfx = monsterAttackSound(type);
-              if (sfx) playSfx(sfx, pos);
+              if (sfx) playSfx(sfx, pos, { bus: MONSTER_BUS });
               break;
             }
             case MonsterActionType.Shock: {
               if (type === MONSTER_ASSASSIN) break;
               const sfx = monsterAttackSound(type);
-              if (sfx) playSfx(sfx, pos);
+              if (sfx) playSfx(sfx, pos, { bus: MONSTER_BUS });
               break;
             }
             case MonsterActionType.Die: {
               const sfx = monsterDeathSound(type);
-              if (sfx) playSfx(sfx, pos);
+              if (sfx) playSfx(sfx, pos, { bus: MONSTER_BUS });
               break;
             }
             case MonsterActionType.Stop1:
             case MonsterActionType.Walk: {
               if (Math.random() >= IDLE_CHATTER_CHANCE) break;
               const sfx = monsterIdleSound(type);
-              if (sfx) playSfx(sfx, pos);
+              if (sfx) playSfx(sfx, pos, { bus: MONSTER_BUS });
               break;
             }
           }
         } else if (e.playerAnimation) {
           if (isPlayerAttackAction(action)) {
             const sfx = playerSwingSound(e.charAppearance);
-            if (sfx) playSfx(sfx, pos);
+            if (sfx) playSfx(sfx, pos, { bus: COMBAT_BUS });
           } else if (action === PlayerAction.PLAYER_SHOCK) {
-            playSfx(playerPainSound(classOf(e)), pos);
+            playSfx(playerPainSound(classOf(e)), pos, { bus: COMBAT_BUS });
           } else if (
             action === PlayerAction.PLAYER_DIE1 ||
             action === PlayerAction.PLAYER_DIE2
           ) {
-            playSfx(playerDeathSound(classOf(e)), pos);
+            playSfx(playerDeathSound(classOf(e)), pos, { bus: COMBAT_BUS });
           }
         }
       }
