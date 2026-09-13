@@ -19,7 +19,7 @@ import {
   ItemMovedPacket,
   ItemAddedToInventoryPacket,
 } from '../../src/common/packets/ServerToClientPackets';
-import { StorageKind } from '../../src/common/itemStorage';
+import { StorageKind } from '../../src/common/storageKind';
 import type { BotConnection, Frame } from './connection';
 import { view } from './session';
 

@@ -1,6 +1,7 @@
 import type { Item } from '../ecs/world';
 import { ItemGroup } from './itemStats';
 import { InventoryConstants } from './inventoryConstants';
+import { StorageKind, TRADE_COLUMNS, TRADE_ROWS, TRADE_SLOTS } from './storageKind';
 
 /**
  * `STORAGE_TYPE` (_define.h:168): the `FromStorage` / `ToStorage` byte of
@@ -8,16 +9,12 @@ import { InventoryConstants } from './inventoryConstants';
  * five the client can actually open are listed; the mix variants beyond
  * `ChaosMachine` (trainer, Elpis, Osbourne…) all reuse the same window in
  * the original and are not ported.
+ *
+ * Defined in `storageKind.ts`, together with the trade grid, so the headless
+ * marketplace bot can import them without the item database this module
+ * reaches; everyone else keeps importing them from here.
  */
-export const StorageKind = {
-  Inventory: 0,
-  Trade: 1,
-  Vault: 2,
-  ChaosMachine: 3,
-  PersonalShop: 4,
-} as const;
-
-export type StorageKind = (typeof StorageKind)[keyof typeof StorageKind];
+export { StorageKind, TRADE_COLUMNS, TRADE_ROWS, TRADE_SLOTS };
 
 /**
  * `STORAGE_TYPE::CHAOS_CARD_MIX` (_define.h:180) / OpenMU
@@ -34,9 +31,6 @@ export const VAULT_COLUMNS = InventoryConstants.RowSize;
 export const VAULT_ROWS = InventoryConstants.WarehouseRows;
 export const VAULT_SLOTS = VAULT_COLUMNS * VAULT_ROWS;
 
-export const TRADE_COLUMNS = 8;
-export const TRADE_ROWS = 4;
-export const TRADE_SLOTS = TRADE_COLUMNS * TRADE_ROWS;
 
 export const MIX_COLUMNS = 8;
 export const MIX_ROWS = 4;

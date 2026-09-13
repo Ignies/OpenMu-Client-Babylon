@@ -11,7 +11,7 @@ import {
   PlayerShopSetItemPriceResponseItemPriceSetResultEnum as PriceResult,
   ItemMovedPacket,
 } from '../../src/common/packets/ServerToClientPackets';
-import { StorageKind } from '../../src/common/itemStorage';
+import { StorageKind } from '../../src/common/storageKind';
 import { InventoryConstants } from '../../src/common/inventoryConstants';
 import type { BotConnection, Frame } from './connection';
 import { view } from './session';
@@ -87,10 +87,16 @@ export class ShopSession {
    * Moves a held item out of the bag and into the shop window.
    *
    * The move is confirmed rather than assumed: the server answers with
-   * `ItemMoved` naming where the item actually went, and a refused move is
-   * silent. Pricing a slot that never received the item would otherwise open
-   * a shop selling nothing, which is the same shape of bug the trade
-   * delivery had.
+   * `ItemMoved` naming where the item actually went, and a refused move
+   * answers with the same code and an all-ones sub code. Pricing a slot that
+   * never received the item would otherwise open a shop selling nothing.
+   *
+   * The stall is a window onto the inventory, and OpenMU's `ItemMovedPlugIn`
+   * says so on the wire: a move into it comes back as storage *Inventory* at
+   * the absolute slot (204 and up), never as the shop storage the request
+   * named. Expecting the shop storage here read every successful stocking as
+   * a failure - and, since a failure was not put back, left the item stranded
+   * in the stall where the next delivery could not find it.
    */
   async stockItem(inventorySlot: number, shopSlot: number, timeoutMs = 8000): Promise<void> {
     const answer = this.connection.expect(CODE.moved, timeoutMs, 'ItemMoved');
@@ -103,7 +109,11 @@ export class ShopSession {
     this.connection.send(packet.buffer);
 
     const moved = new ItemMovedPacket(view(await answer));
-    if (moved.TargetStorageType !== StorageKind.PersonalShop || moved.TargetSlot !== shopSlot) {
+    const landedInStall =
+      (moved.TargetStorageType === StorageKind.Inventory ||
+        moved.TargetStorageType === StorageKind.PersonalShop) &&
+      moved.TargetSlot === shopSlot;
+    if (!landedInStall) {
       throw new Error(
         `the item did not reach shop slot ${shopSlot} from bag slot ${inventorySlot}`
       );
