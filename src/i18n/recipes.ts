@@ -230,6 +230,7 @@ export const EN_TEXT = {
   'options.uiScale': 'Interface size',
   'options.lockWindows': 'Lock windows',
   'options.minimapCorner': 'Minimap in the corner',
+  'options.eventTimers': 'Event timers',
   'options.resetWindows': 'Reset windows',
   'options.stateWarnings': 'Warning notices',
   'options.volume': 'Volume',
@@ -1174,6 +1175,8 @@ export const EN_TEXT = {
   'event.zonePenetration': '%s Penetration (in %d seconds)',
   'event.monsterCount': 'Monster: ( %d/%d )',
   'event.timeLeft': 'Time Left',
+  /** Ours: the HUD event rows, when the gate is open right now. */
+  'event.timerOpen': 'Open',
   'event.skeletonCount': 'Magic Skeleton: ( %d/%d )',
   'event.bcQuestDone': 'completed the Blood Castle Quest!',
   'event.bcCongrats': 'Congratulations! You have successfully',

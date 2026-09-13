@@ -36,6 +36,7 @@ import {
   formatText,
 } from '../../../../../events/recipes';
 import { GoldenArcherWindow } from './goldenArcherWindow';
+import { EventTimers } from './eventTimers';
 // Aliased: this file already binds `t` to a timer record in two components.
 import { t as text } from '../../../../../i18n';
 import { MuButton } from '../../../../components/muButton';
@@ -879,6 +880,7 @@ export const EventWindows = observer(() => (
     <DoppelgangerWindow />
     <GoldenArcherWindow />
     <ChaosCastlePrompt />
+    <EventTimers />
     <EventTimer />
     <CrywolfBar />
     <EventCountdown />

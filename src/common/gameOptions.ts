@@ -184,6 +184,12 @@ export type GameOptions = {
    */
   minimapCorner: boolean;
   /**
+   * A row per timed event under the corner minimap, counting down to the
+   * next Blood Castle / Devil Square / Chaos Castle (ours). Off, the client
+   * asks the server nothing of its own accord.
+   */
+  eventTimers: boolean;
+  /**
    * Item names in English whatever the interface language is. The language
    * packs translate them (`Data/Local/<pack>/item_<lang>.bmd`), which reads
    * well but leaves a trader unable to match what a forum or a price list
@@ -280,6 +286,7 @@ const DEFAULTS: GameOptions = {
   stateWarnings: true,
   blockBrowserKeys: true,
   minimapCorner: true,
+  eventTimers: true,
   englishItemNames: false,
 };
 

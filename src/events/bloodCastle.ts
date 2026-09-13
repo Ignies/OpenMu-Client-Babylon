@@ -17,6 +17,7 @@ import {
   MiniGameOpeningStatePacket,
 } from '../common/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
+import { noteOpeningStateRequest, takeOpeningState } from './schedule';
 import {
   BLOOD_CASTLE_LEVELS,
   EVENT_TEXT,
@@ -198,6 +199,7 @@ function useTicket(_slot: number, item: Item): boolean {
     return true;
   }
 
+  noteOpeningStateRequest(OPENING_STATE_GAME.bloodCastle);
   const packet = MiniGameOpeningStateRequestPacket.createPacket();
   packet.EventType = OPENING_STATE_GAME.bloodCastle;
   packet.EventLevel = level - 1;
@@ -289,6 +291,10 @@ EventBus.on('MiniGameOpeningState', packet => {
   if (p.GameType !== OPENING_STATE_GAME.bloodCastle) return;
 
   const minutes = p.RemainingEnteringTimeMinutes;
+  // The HUD rows ask the same question on their own timer; those answers
+  // feed the schedule and say nothing.
+  if (takeOpeningState(OPENING_STATE_GAME.bloodCastle, minutes)) return;
+
   const zone = EVENT_TEXT.bloodCastleZone;
   Store.addNotification(
     minutes === 0
