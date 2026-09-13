@@ -17,7 +17,10 @@ import {
 import { ItemsDatabase } from '../../../../../common/itemsDatabase';
 import { canRegisterItemHotkey } from '../../../../../common/itemHotkeys';
 import { isUpgradeJewel } from '../../../../../common/jewelUpgrade';
-import { InventoryConstants } from '../../../../../common/inventoryConstants';
+import {
+  equipDestination,
+  isEquipable,
+} from '../../../../../common/equipSlots';
 import { InventorySort } from '../../../../../common/inventorySort';
 import { QuickItemActions } from '../../../../../common/quickItemActions';
 import { StorageKind } from '../../../../../common/itemStorage';
@@ -169,30 +172,6 @@ function isConsumable(item: Item): boolean {
 function stackCount(item: Item): number {
   if (item.group !== POTION_GROUP) return 0;
   return item.durability ?? 0;
-}
-
-function isEquipable(slot: number, item: Item): boolean {
-  const config = ItemsDatabase.getItem(item.group, item.num);
-  const itemSlot = config?.ItemSlot ?? -1;
-
-  if (itemSlot < 0) return false;
-  if (itemSlot === slot) return true;
-
-  if (
-    itemSlot === InventoryConstants.LeftHandSlot &&
-    slot === InventoryConstants.RightHandSlot
-  ) {
-    return true;
-  }
-
-  if (
-    itemSlot === InventoryConstants.Ring1Slot &&
-    slot === InventoryConstants.Ring2Slot
-  ) {
-    return true;
-  }
-
-  return false;
 }
 
 const EquipmentSlot = observer(
@@ -523,20 +502,8 @@ export const Inventory = observer(() => {
       return;
     }
 
-    const config = ItemsDatabase.getItem(entry.item.group, entry.item.num);
-    const equipSlot = config?.ItemSlot ?? -1;
-    if (equipSlot < 0) return;
-
-    let destination = equipSlot;
-    if (playerData.items[destination]) {
-      if (equipSlot === InventoryConstants.LeftHandSlot) {
-        destination = InventoryConstants.RightHandSlot;
-      } else if (equipSlot === InventoryConstants.Ring1Slot) {
-        destination = InventoryConstants.Ring2Slot;
-      }
-
-      if (playerData.items[destination]) return;
-    }
+    const destination = equipDestination(entry.item, playerData.items);
+    if (destination < 0) return;
 
     Store.pickInventoryItem(entry.slot);
     Store.placePickedItem(destination);

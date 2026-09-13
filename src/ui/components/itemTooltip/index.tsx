@@ -1,10 +1,16 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Item } from '../../../ecs/world';
 import { Store } from '../../../store';
 import { buildItemTooltip, type TooltipLine } from '../../../common/itemTooltip';
+import {
+  comparedItem,
+  compareTooltipsOn,
+  CompareTooltips,
+} from '../../../common/itemCompare';
+import { GameOptions } from '../../../common/gameOptions';
 import type { HeroStats } from '../../../common/itemStats';
 import { PET_GROUP } from '../../../common/pets';
 import { PetTypeEnum } from '../../../common/packets/ClientToServerPackets';
@@ -17,7 +23,7 @@ import {
   repairCost,
   withTax,
 } from '../../../common/itemValue';
-import { place } from './placement';
+import { placePair } from './placement';
 
 /** The hero as `RenderItemInfo` compares against (`CharacterAttribute`). */
 export function heroStats(): HeroStats {
@@ -133,10 +139,62 @@ function petLines(pet: PetTypeEnum, slot: number): TooltipLine[] {
   ];
 }
 
+// ---- compare with the worn item -------------------------------------------
+
+/** Shift, watched only while the option is the Hold Shift step. */
+function useShiftHeld(enabled: boolean): boolean {
+  const [held, setHeld] = useState(false);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const update = (event: KeyboardEvent) => setHeld(event.shiftKey);
+    const clear = () => setHeld(false);
+
+    window.addEventListener('keydown', update);
+    window.addEventListener('keyup', update);
+    window.addEventListener('blur', clear);
+
+    return () => {
+      window.removeEventListener('keydown', update);
+      window.removeEventListener('keyup', update);
+      window.removeEventListener('blur', clear);
+    };
+  }, [enabled]);
+
+  // Never cleared on the way out: the mask below is what the caller reads.
+  return enabled && held;
+}
+
+function tooltipRows(lines: TooltipLine[]) {
+  return lines.map((line, index) =>
+    line.blank ? (
+      <div key={index} className="mu-item-tooltip-gap" />
+    ) : (
+      <div
+        key={index}
+        className={`mu-item-tooltip-line color-${line.color}${
+          line.bold ? ' bold' : ''
+        }`}
+      >
+        {line.text}
+        {!!line.delta && (
+          <span className={`mu-item-tooltip-delta color-${line.delta.color}`}>
+            {line.delta.text}
+          </span>
+        )}
+      </div>
+    )
+  );
+}
+
 /**
  * `RenderItemInfo` + `RenderTipTextList`: the black 80% box with the
  * coloured text lines, centred on the cursor's x and hanging below it, kept
  * inside the viewport. Portalled onto the body so no window clips it.
+ *
+ * With `compareTooltips` on, a second box of the same kind stands beside it
+ * with the worn item of the slot this one would take.
  *
  * `x` / `y` are only the *initial* cursor position: once mounted the box
  * follows the pointer itself through a `transform`, so the grid that owns
@@ -162,19 +220,40 @@ export const ItemTooltip = observer(
     slot?: number;
   }) => {
     const ref = useRef<HTMLDivElement>(null);
+    const wornRef = useRef<HTMLDivElement>(null);
     const size = useRef({ width: 0, height: 0 });
+    const wornSize = useRef({ width: 0, height: 0 });
     const cursor = useRef({ x, y });
+
+    const shiftHeld = useShiftHeld(
+      Math.round(GameOptions.compareTooltips) === CompareTooltips.HoldShift
+    );
+    const worn = compareTooltipsOn(shiftHeld)
+      ? comparedItem(item, Store.playerData.items, Store.heroStats())
+      : null;
 
     // Every field an item can change is part of the stamp, so a +1 or a
     // durability tick rebuilds and anything else reuses the lines.
     const hero = heroStats();
     const itemStamp = JSON.stringify(item);
     const heroStamp = JSON.stringify(hero);
+    const wornStamp = worn ? JSON.stringify(worn) : '';
     const data = useMemo(
-      () => buildItemTooltip(item, hero),
+      () => buildItemTooltip(item, hero, worn),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [itemStamp, heroStamp]
+      [itemStamp, heroStamp, wornStamp]
     );
+
+    const wornLines = useMemo(() => {
+      const built = worn ? buildItemTooltip(worn, hero) : null;
+      if (!built) return null;
+      return [
+        { text: t('item.equipped'), color: 'gray', bold: false },
+        { text: '', color: 'white', bold: false, blank: true },
+        ...built.lines,
+      ] as TooltipLine[];
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [wornStamp, heroStamp]);
 
     const pet = context === 'inventory' ? petTypeOf(item) : undefined;
     const petSlot =
@@ -206,14 +285,18 @@ export const ItemTooltip = observer(
       cursor.current = { x: clientX, y: clientY };
       const box = ref.current;
       if (!box) return;
-      const { left, top } = place(
+      const second = wornRef.current;
+      const spot = placePair(
         clientX,
         clientY,
-        size.current.width,
-        size.current.height,
+        size.current,
+        second ? wornSize.current : null,
         { width: window.innerWidth, height: window.innerHeight }
       );
-      box.style.transform = `translate(${left}px, ${top}px)`;
+      box.style.transform = `translate(${spot.primary.left}px, ${spot.primary.top}px)`;
+      if (second && spot.second) {
+        second.style.transform = `translate(${spot.second.left}px, ${spot.second.top}px)`;
+      }
     };
 
     // Measure once per content change (the one layout read), then place.
@@ -222,9 +305,16 @@ export const ItemTooltip = observer(
       if (!box) return;
       const rect = box.getBoundingClientRect();
       size.current = { width: rect.width, height: rect.height };
+
+      const second = wornRef.current;
+      const wornRect = second?.getBoundingClientRect();
+      wornSize.current = wornRect
+        ? { width: wornRect.width, height: wornRect.height }
+        : { width: 0, height: 0 };
+
       move(cursor.current.x, cursor.current.y);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [lines]);
+    }, [lines, wornLines]);
 
     // The initial position from the props, then the pointer itself.
     useLayoutEffect(() => {
@@ -254,22 +344,16 @@ export const ItemTooltip = observer(
     if (!lines) return null;
 
     return createPortal(
-      <div ref={ref} className="mu-item-tooltip">
-        {lines.map((line, index) =>
-          line.blank ? (
-            <div key={index} className="mu-item-tooltip-gap" />
-          ) : (
-            <div
-              key={index}
-              className={`mu-item-tooltip-line color-${line.color}${
-                line.bold ? ' bold' : ''
-              }`}
-            >
-              {line.text}
-            </div>
-          )
+      <>
+        <div ref={ref} className="mu-item-tooltip">
+          {tooltipRows(lines)}
+        </div>
+        {!!wornLines && (
+          <div ref={wornRef} className="mu-item-tooltip">
+            {tooltipRows(wornLines)}
+          </div>
         )}
-      </div>,
+      </>,
       document.body
     );
   }

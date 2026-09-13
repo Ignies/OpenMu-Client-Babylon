@@ -1009,6 +1009,7 @@ export const russianLayer: LanguageLayer = {
     'event.cwNotice4c': 'Наказание действует до следующей битвы за Crywolf.',
 
     'item.thisItem': 'этот предмет',
+    'item.equipped': 'Надето',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Сила атаки',
     'item.attackPowerTwoHand': 'Сила атаки двумя руками',
@@ -1613,6 +1614,9 @@ export const russianLayer: LanguageLayer = {
     'exit.chaosOpen': 'Закройте окно Хаоса, прежде чем выходить из игры.',
     'exit.noAnswer': 'Сервер не ответил. Выходим всё равно.',
     'options.minimapCorner': 'Миникарта в углу',
+    'options.compareTooltips': 'Сравнение с надетым',
+    'options.compare.shift': 'С зажатым Shift',
+    'options.compare.always': 'Всегда',
     'options.eventTimers': 'Таймеры событий',
     'options.questTracker': 'Отслеживание заданий',
     'minimap.center': 'Центрировать',

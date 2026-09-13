@@ -14,6 +14,8 @@ export type Viewport = { width: number; height: number };
 
 export type Placement = { left: number; top: number };
 
+export type BoxSize = { width: number; height: number };
+
 /** The cursor sprite's footprint in viewport pixels (gameCursor/index.tsx). */
 function cursorBox(x: number, y: number) {
   const left = x - CURSOR_HOTSPOT;
@@ -64,4 +66,58 @@ export function place(
   }
 
   return { left: Math.round(left), top: Math.round(top) };
+}
+
+function hidesCursor(
+  left: number,
+  top: number,
+  size: BoxSize,
+  cursor: ReturnType<typeof cursorBox>
+): boolean {
+  return (
+    top < cursor.bottom &&
+    top + size.height > cursor.top &&
+    left < cursor.right &&
+    left + size.width > cursor.left
+  );
+}
+
+/**
+ * The hovered box where it always goes, and the worn item's box beside it:
+ * to its right, mirrored to its left when the right edge is too close, and
+ * clamped inside the viewport either way. Neither box lands on the cursor.
+ */
+export function placePair(
+  x: number,
+  y: number,
+  primary: BoxSize,
+  second: BoxSize | null,
+  viewport: Viewport
+): { primary: Placement; second: Placement | null } {
+  const first = place(x, y, primary.width, primary.height, viewport);
+  if (!second || second.width === 0) return { primary: first, second: null };
+
+  const rightOf = first.left + primary.width + GAP;
+  const leftOf = first.left - GAP - second.width;
+  const fitsRight = rightOf + second.width <= viewport.width - MARGIN;
+  const fitsLeft = leftOf >= MARGIN;
+
+  let left = fitsRight ? rightOf : fitsLeft ? leftOf : rightOf;
+
+  let top = first.top;
+  if (top + second.height > viewport.height - MARGIN) {
+    top = viewport.height - MARGIN - second.height;
+  }
+  if (top < MARGIN) top = MARGIN;
+
+  // Only reachable once one of the boxes was clamped: step to the free side.
+  const cursor = cursorBox(x, y);
+  if (hidesCursor(left, top, second, cursor)) {
+    const other = left === rightOf ? leftOf : rightOf;
+    if (!hidesCursor(other, top, second, cursor)) left = other;
+  }
+
+  left = Math.max(MARGIN, Math.min(viewport.width - MARGIN - second.width, left));
+
+  return { primary: first, second: { left: Math.round(left), top: Math.round(top) } };
 }

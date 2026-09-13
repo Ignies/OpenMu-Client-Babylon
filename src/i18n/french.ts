@@ -1026,6 +1026,7 @@ export const frenchLayer: LanguageLayer = {
       'La pénalité vaut jusqu’à la prochaine bataille de Crywolf.',
 
     'item.thisItem': 'cet objet',
+    'item.equipped': 'Équipé',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Puissance d’attaque',
     'item.attackPowerTwoHand': 'Puissance d’attaque à deux mains',
@@ -1636,6 +1637,9 @@ export const frenchLayer: LanguageLayer = {
     'exit.chaosOpen': 'Ferme la fenêtre du Chaos avant de quitter le jeu.',
     'exit.noAnswer': 'Le serveur n’a pas répondu. Sortie quand même.',
     'options.minimapCorner': 'Mini-carte dans le coin',
+    'options.compareTooltips': 'Comparer à l’équipé',
+    'options.compare.shift': 'Maintenir Maj',
+    'options.compare.always': 'Toujours',
     'options.eventTimers': 'Minuteurs des événements',
     'options.questTracker': 'Suivi des quêtes',
     'minimap.center': 'Centrer',
