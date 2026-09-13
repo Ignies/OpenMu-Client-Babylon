@@ -33,11 +33,11 @@ type View = 'menu' | 'worlds' | 'setup';
 
 /**
  * The start menu: MU's login window frame over the login scene the original
- * opens on (`WD_73NEW_LOGIN_SCENE` — `loginSceneSystem` warps to it for this
+ * opens on (`WD_73NEW_LOGIN_SCENE` - `loginSceneSystem` warps to it for this
  * state too, so the camera is already touring the map behind this window).
  *
  * The scene needs a moment to load, and a black screen is not what MU shows
- * while a map loads — its loading artwork is. So that art is the backdrop
+ * while a map loads - its loading artwork is. So that art is the backdrop
  * until the warp completes, then it fades off the camera tour.
  */
 export const PreloaderPage = observer(() => {
@@ -56,13 +56,13 @@ export const PreloaderPage = observer(() => {
   // Nothing is drawn before the interface sprites are decoded: every frame of
   // this page is a piece of MU art, and unstyled text over the map is not a
   // loading state anyone would recognise. Black, then the artwork, then the
-  // scene — the order the original boots in.
+  // scene - the order the original boots in.
   const artReady = !Store.spritesLoading;
   const backGone = artReady && sceneReady;
 
   // Two entries. Picking a world and entering it is one act, so both live on
-  // the Worlds screen — which is also where a server the published list does
-  // not carry gets typed in — and the menu keeps only the two ways in.
+  // the Worlds screen - which is also where a server the published list does
+  // not carry gets typed in - and the menu keeps only the two ways in.
   const buttons = [
     { key: 'worlds', label: t('preloader.worlds'), onClick: () => setView('worlds') },
     { key: 'offline', label: t('preloader.playOffline'), onClick: () => Store.playOffline() },
@@ -120,7 +120,7 @@ export const PreloaderPage = observer(() => {
               />
             ))}
 
-            {/* Which server the next click connects to, and where that is —
+            {/* Which server the next click connects to, and where that is -
                 or, with nothing to name yet, what the list is doing. */}
             {ServerConfig.isEmpty ? (
               <MuText

@@ -10,7 +10,7 @@ import type { Emission } from '../../common/effectParticles';
  * x ~ 5-20. Reading south to north: 0-4 the wall segments on the approach
  * (y 19-67), 14/15 the bridge girders under it (z 70-95; the bridge deck is
  * the walkable strip at x 14, y 16-21, with `TW_NOMOVE | TW_ACTION` rails at
- * x 13 and 15 — the edge `deathSystem` reads for the fall), 20/25/26/27 the
+ * x 13 and 15 - the edge `deathSystem` reads for the fall), 20/25/26/27 the
  * gatehouse walls (y 73-76), 16/17 the gate towers, 36 the gate at
  * (14.5, 76.1), 9/10 the broken-gate halves, 18/19 the throne room at y 91-98
  * with 12 the altar and 13 its four lamps; 21/22/23 the 43 hanging banners and
@@ -28,11 +28,11 @@ export const BLOOD_CASTLE_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
  * `MoveObject` (ZzzObject.cpp:4135-4150) hides 9 and 10 unless `PKKey == 4`
- * — but they are *not* effect-only markers: they are the gate's two broken
+ * - but they are *not* effect-only markers: they are the gate's two broken
  * halves, shown once the gate is down. `BloodCastleGateDebrisObject` owns
  * them, so the model loads and simply starts invisible.
  */
-// Type 37: `Data/Object12` stops at Object37.bmd — there is no Object38.bmd for
+// Type 37: `Data/Object12` stops at Object37.bmd - there is no Object38.bmd for
 // it, so the original loads nothing and only ever runs the `RenderObjectVisual`
 // particles. The effect-only path skips the load and keeps the emissions.
 export const BLOOD_CASTLE_EFFECT_ONLY_TYPES: readonly number[] = [37];
@@ -40,7 +40,7 @@ export const BLOOD_CASTLE_EFFECT_ONLY_TYPES: readonly number[] = [37];
 /**
  * Type 37 (x9), `RenderObjectVisual` ZzzObject.cpp:3187-3204: on alternate
  * quarter-ticks an `ADV_SMOKE` pair and a `CLOUD` + `ADV_SMOKE` + faint pink
- * `FLARE` — the smoke vents. Three sit *below* the ground (z -155 … 47) under
+ * `FLARE` - the smoke vents. Three sit *below* the ground (z -155 … 47) under
  * the bridge and the approach, the rest at floor level along the throne room
  * walls (z 215). `rand_fps_check(2)` on a `Timer % 4` is one puff of each
  * group every ~8 reference ticks, which is what `every: 8` on two rows gives.

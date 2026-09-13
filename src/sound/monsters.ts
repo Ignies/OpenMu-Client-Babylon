@@ -5,7 +5,7 @@ import { playSfx, type SfxPosition } from './listener';
 /**
  * Monster voices: `Models[type].Sounds[0..4]`, filled by the original's
  * `OpenMonsterModel` switch (ZzzOpenData.cpp) and played from
- * ZzzCharacter.cpp — idle / walk `Sounds[rand % 2]` (:351, :712), attack and
+ * ZzzCharacter.cpp - idle / walk `Sounds[rand % 2]` (:351, :712), attack and
  * flinch `Sounds[2 + rand % 2]` (:1202, :1329), death `Sounds[4]` (:1464).
  *
  * Driven by: `CombatSfxSystem` (the monster's clip changes) through the

@@ -66,7 +66,7 @@ const MemberRow = observer(({ index }: { index: number }) => {
       : member.maximumHealth > 0
         ? member.currentHealth / member.maximumHealth
         : 1;
-  // `int iHP = (currHP * 147) / maxHP` — an integer number of filled pixels.
+  // `int iHP = (currHP * 147) / maxHP` - an integer number of filled pixels.
   const filled = Math.max(0, Math.min(HP_FILL.width, Math.trunc(ratio * HP_FILL.width)));
   const canRemove = isMe || Social.isPartyLeader;
 

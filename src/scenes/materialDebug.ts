@@ -17,7 +17,7 @@ import { liveTileArrays } from '../libs/mu/tileTextureArray';
  * change, and the difference between "the option is wired wrong" and "the
  * option is wired right but pulls on the wrong thing" is not answerable by
  * reading the source. The last one of these was settled the same
- * way — by measuring instead of reasoning.
+ * way - by measuring instead of reasoning.
  */
 export function installMaterialDebug(scene: Scene): void {
   (globalThis as Record<string, unknown>).muMat = () => {
@@ -76,5 +76,5 @@ export function installMaterialDebug(scene: Scene): void {
     return report;
   };
 
-  console.log('[mu] material debug ready — run muMat() in the console');
+  console.log('[mu] material debug ready - run muMat() in the console');
 }

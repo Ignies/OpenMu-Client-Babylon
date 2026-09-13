@@ -8,20 +8,20 @@ import {
 } from '../raklion/spec';
 
 /**
- * Raklion's hatchery (World59 / Object59) — the map entry: identity and the per-world data the
+ * Raklion's hatchery (World59 / Object59) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
  * lives in another system; the notes below say what is and is not built.
  *
- * Raklion's hatchery (`WD_58ICECITY_BOSS`, `World59`/`Object59`) — Selupan's
+ * Raklion's hatchery (`WD_58ICECITY_BOSS`, `World59`/`Object59`) - Selupan's
  * cave, 162 objects.
  *
  * Runs the same `CGM_Raklion::MoveObject` as Raklion; the tables are in
  * `maps/raklion/spec.ts` and registered for this world from there.
  *
  * Not built: the Selupan fight (`m_byState`, the boss lowered from
- * `Position[2] = 1000` on READY, the egg clusters, `MoveEffect`) — all
+ * `Position[2] = 1000` on READY, the egg clusters, `MoveEffect`) - all
  * server-driven; `Music/Raklion_Hatchery` is the idle track `PlayBGM`
  * (:2872-2890) starts with. `aWind` is the bed (SceneManager.cpp:620-622).
  */

@@ -1,5 +1,5 @@
 /**
- * Korean — MU's original language.
+ * Korean - MU's original language.
  *
  * Class, event and item-option names are the ones the Korean client uses.
  * Tahoma has no Hangul, so `font` puts a Korean face in front of it.
@@ -206,7 +206,7 @@ export const koreanLayer: LanguageLayer = {
     'options.packHint':
       '이 언어는 퀘스트 문구, NPC 대화, 몬스터 이름까지 번역되어 있습니다.',
     'options.noPackHint':
-      '인터페이스만 — 퀘스트 문구와 몬스터 이름은 영어로 남습니다.',
+      '인터페이스만 - 퀘스트 문구와 몬스터 이름은 영어로 남습니다.',
     'options.languageHint':
       '인터페이스 언어입니다. 아이템·몬스터·스킬 이름은 바뀌지 않습니다.',
     'options.quality.classic': '클래식',
@@ -256,7 +256,7 @@ export const koreanLayer: LanguageLayer = {
     'bottomBar.noSkill': '스킬 없음(오른쪽 클릭 = 공격)',
     'bottomBar.emptySlot': '[{key}] 비어 있음',
     'bottomBar.itemSlot': '{name} [{key}]',
-    'bottomBar.skillHint': ' — 클릭: 스킬 목록, 오른쪽 클릭: 일반 공격',
+    'bottomBar.skillHint': ' - 클릭: 스킬 목록, 오른쪽 클릭: 일반 공격',
     'bottomBar.pet.normal': '기본',
     'bottomBar.pet.random': '무작위',
     'bottomBar.pet.owner': '주인',
@@ -1245,8 +1245,8 @@ export const koreanLayer: LanguageLayer = {
     'worlds.answering': '응답함',
     'worlds.noAnswer': '응답 없음',
     'worlds.hint': '월드를 고른 뒤 입장하세요.',
-    'bottomBar.pickSkill': '[{key}] 비어 있음 — 클릭해 스킬을 고르세요',
-    'bottomBar.boundSlot': '{name} [{key}] — 오른쪽 클릭으로 변경',
+    'bottomBar.pickSkill': '[{key}] 비어 있음 - 클릭해 스킬을 고르세요',
+    'bottomBar.boundSlot': '{name} [{key}] - 오른쪽 클릭으로 변경',
     'bottomBar.clearSlot': '[{key}] 칸을 비우기',
     'guild.leaveTitle': '길드 탈퇴',
     'guild.breakHint': '길드를 탈퇴하려면,',

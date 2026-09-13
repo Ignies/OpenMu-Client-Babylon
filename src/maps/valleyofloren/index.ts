@@ -8,7 +8,7 @@ import {
 } from './spec';
 
 /**
- * Valley of Loren (World31 / Object31) — the map entry: identity and the per-world data the
+ * Valley of Loren (World31 / Object31) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  * The object classes and the setup function are in `create.ts`, loaded on demand.
  */

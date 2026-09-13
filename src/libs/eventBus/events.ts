@@ -46,7 +46,7 @@ export type Events = CSEvents &
     objectMessage: { netId: number; message: string };
     /** ChatMessage (0x00): a player's chat line, addressed by name (`AssignChat`). */
     chatMessage: { sender: string; message: string; whisper: boolean };
-    /** PlayFanfareSound (0x0F): an event sound at a map position (0 ready / 1 start / 2 end — logic.ts plays it). */
+    /** PlayFanfareSound (0x0F): an event sound at a map position (0 ready / 1 start / 2 end - logic.ts plays it). */
     fanfare: { effectType: number; x: number; y: number };
     keyPressed: string;
     keyReleased: string;

@@ -31,7 +31,7 @@ import { skillDisplayName } from './skillNames';
 /**
  * `RenderItemInfo` (ZzzInventory.cpp:2091) as data: the tooltip is a list
  * of coloured lines, blank lines being half-height spacers, drawn by
- * `RenderTipTextList`. Only the paths the clone can reach are ported — the
+ * `RenderTipTextList`. Only the paths the clone can reach are ported - the
  * generic equipment block, wings, jewels and the option/excellent lines;
  * event items and pets fall back to their name.
  *

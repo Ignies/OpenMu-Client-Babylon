@@ -7,7 +7,7 @@ import {
 
 /**
  * Doppelganger 2 (`WD_66DOPPLEGANGER2`, `World67`/`Object67`), the plain-data
- * half — Vulcanus' art and Vulcanus' code (`CGMDoppelGanger2`,
+ * half - Vulcanus' art and Vulcanus' code (`CGMDoppelGanger2`,
  * GMDoppelGanger2.cpp:41-86, is `CGM_PK_Field` with 47/48 added to the
  * hidden list). EncTerrain67.obj: 253 objects, 15 types; Object67 ships 31
  * models, all present.

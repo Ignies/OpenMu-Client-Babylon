@@ -2,7 +2,7 @@
  * Server-side weather, pushed to every connected client as `WeatherStatusUpdate`.
  *
  * OpenMU has no weather system, so nothing ever sends 0x0F and the client's
- * rain slot can never become eligible on its own — the only map that rains is
+ * rain slot can never become eligible on its own - the only map that rains is
  * Icarus, which overrides the packet entirely. The proxy is the natural place
  * to fill that in: it is the one process every client already talks through,
  * so a schedule computed here is authoritative and identical for everyone
@@ -21,7 +21,7 @@
  *
  *  - **A day roll** sets the day's character. Most days never rain at all;
  *    the rest carry a *per-slot chance*, never a certainty. This is why the
- *    same hour rains today and not tomorrow — the day seed changes, so every
+ *    same hour rains today and not tomorrow - the day seed changes, so every
  *    slot inside it re-rolls.
  *  - **Slot levels** inside the day pick a target intensity every `SLOT`
  *    seconds, and the reported intensity eases between neighbouring slot
@@ -30,12 +30,12 @@
  *
  * **Rain is an event, not a climate.** The day chance is capped well under 1
  * (`MAX_SLOT_CHANCE`), so even the wettest day is a day of *showers with gaps
- * between them* rather than one that rains from dawn to dusk — which is the
+ * between them* rather than one that rains from dawn to dusk - which is the
  * failure the first tuning had, and the reason the sky read as permanently
  * overcast.
  *
- * The client ramps further on top of this — `RainCurrent` chases `RainTarget`
- * at 0.25/s (rainState.ts, ported from the original) — so the steps sent here
+ * The client ramps further on top of this - `RainCurrent` chases `RainTarget`
+ * at 0.25/s (rainState.ts, ported from the original) - so the steps sent here
  * are already smoothed again before anything is drawn.
  */
 
@@ -61,7 +61,7 @@ const SLOT_SECONDS = Number(process.env.WEATHER_SLOT ?? 600);
 /**
  * The day-character curve, tuned by sweeping a year of minutes and counting
  * the mix. A day rolling under `DRY_BELOW` is bone dry; the rest is cubed,
- * which is what separates "a shower this afternoon" from "showers all day" —
+ * which is what separates "a shower this afternoon" from "showers all day" -
  * without the exponent the mid-range days all saturate, because neighbouring
  * wet slots blend into each other.
  *
@@ -69,7 +69,7 @@ const SLOT_SECONDS = Number(process.env.WEATHER_SLOT ?? 600);
  * the sky ~19 % of all hours with 16 % of days raining end to end. That is a
  * climate, not an event: on a wet day every slot rolled wet, and because the
  * eased intensity never passes through zero between two wet slot centres, the
- * shower never ended. Both halves are fixed here — far fewer days carry rain
+ * shower never ended. Both halves are fixed here - far fewer days carry rain
  * at all, and the days that do can only ever *roll* for it, one slot at a
  * time.
  *
@@ -85,7 +85,7 @@ const WETNESS_CURVE = 3;
 /**
  * The most a slot's chance of rain can ever be, however wet the day rolled.
  *
- * This is the cap that makes rain an event. At 1 — the old implicit value —
+ * This is the cap that makes rain an event. At 1 - the old implicit value -
  * the wettest days rained in every slot, and a run of wet slots is
  * indistinguishable from continuous rain, because the smoothstep between two
  * wet slot centres never touches zero. Held here, the wettest day of the year
@@ -101,17 +101,17 @@ const SEED_TEXT = process.env.WEATHER_SEED ?? 'muWeather';
  * Manual override, for looking at the rain without waiting for the sky to
  * agree. `WEATHER_FORCE=12` pins a downpour, `WEATHER_FORCE=0` pins clear,
  * unset follows the schedule. Four days in five never rain at all by design,
- * so without this the first question any change to the rain raises — "is it
- * broken, or is it just not raining today?" — has no cheap answer. It is the
+ * so without this the first question any change to the rain raises - "is it
+ * broken, or is it just not raining today?" - has no cheap answer. It is the
  * only practical way to look at the wet-weather ground, which needs minutes
  * of rain before it pools.
  */
 const FORCE = process.env.WEATHER_FORCE;
 
 export type WeatherState = {
-  /** 0 clear, 1 rain — the packet's high nibble. */
+  /** 0 clear, 1 rain - the packet's high nibble. */
   readonly kind: number;
-  /** Intensity 0…15 — the packet's low nibble. */
+  /** Intensity 0…15 - the packet's low nibble. */
   readonly variation: number;
 };
 
@@ -126,7 +126,7 @@ function hashString(s: string): number {
   return h >>> 0;
 }
 
-/** One roll in [0, 1) from (slot, salt) — the same on every run, forever. */
+/** One roll in [0, 1) from (slot, salt) - the same on every run, forever. */
 function roll(slot: number, salt: number): number {
   let h =
     (hashString(SEED_TEXT) ^
@@ -164,7 +164,7 @@ function dayChance(day: number): number {
 /** The target intensity this slot is heading for; 0 when the slot is dry. */
 function slotLevel(slot: number): number {
   // Which day the slot belongs to. Slots do not divide the day evenly for
-  // every SLOT_SECONDS, and that is fine — a slot straddling midnight simply
+  // every SLOT_SECONDS, and that is fine - a slot straddling midnight simply
   // takes the character of the day it starts in.
   const day = Math.floor((slot * SLOT_SECONDS) / DAY_SECONDS);
 
@@ -191,7 +191,7 @@ export function weatherAt(nowMs: number): WeatherState {
   const variation = Math.min(MAX_VARIATION, Math.round(value));
 
   // Never kind 1 with intensity 0: `RainTarget = (Value & 15) * 6` would be
-  // zero, which the client correctly reads as "not raining" — sending it
+  // zero, which the client correctly reads as "not raining" - sending it
   // would claim rain and show none.
   if (variation <= 0) return CLEAR;
 
@@ -216,7 +216,7 @@ export function currentWeather(nowMs: number): WeatherState {
 /** Whether the schedule is currently pinned by `WEATHER_FORCE`. */
 export const weatherForced = FORCE != null && FORCE !== '';
 
-/** `C1 04 0F <kind:variation>` — the wire form of a `WeatherStatusUpdate`. */
+/** `C1 04 0F <kind:variation>` - the wire form of a `WeatherStatusUpdate`. */
 export function weatherPacket(state: WeatherState): Uint8Array {
   return new Uint8Array([
     0xc1,

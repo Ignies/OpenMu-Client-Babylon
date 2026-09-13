@@ -7,7 +7,7 @@ import {
 } from './spec';
 
 /**
- * Vulcanus / PK Field (World64 / Object64) — the map entry: identity and the per-world data the
+ * Vulcanus / PK Field (World64 / Object64) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
@@ -16,7 +16,7 @@ import {
  * Vulcanus, the PK Field (`WD_63PK_FIELD`, `World64`/`Object64`).
  *
  * `CGM_PK_Field::CreateObject` (GM_PK_Field.cpp:230-243) makes types 0-6
- * unpickable (`CollisionRange = -300`) and `MoveObject` hides them — they
+ * unpickable (`CollisionRange = -300`) and `MoveObject` hides them - they
  * are the seven vent kinds in `spec.ts`. Nothing else is per-object.
  *
  * This is one of the three `IsTerrainHeightExtMap` worlds (ZzzLodTerrain.cpp
@@ -24,7 +24,7 @@ import {
  * Its slot-11 tile is `Object64song_lava1.jpg` in the original
  * (MapManager.cpp:1424); `getTilesList` uses the folder's `TileWater02`.
  *
- * Not built: `CreateFireSpark` (the leaves slot — embers in the air, a
+ * Not built: `CreateFireSpark` (the leaves slot - embers in the air, a
  * weather recipe), `MoveBlurEffect` on the Volcanic monsters, and the
  * `TileGrass01_R.jpg` additive grass (:1459). `Music/PK_Field`; no bed
  * (`PlayObjectSound` is empty).
@@ -37,10 +37,10 @@ const WORLDS: readonly ENUM_WORLD[] = [
 ];
 
 // Slot 11 is `Object64\\song_lava1.jpg` (MapManager.cpp:1424, `IsPKField() ||
-// IsDoppelGanger2()`) — a texture outside the World folder, which the loader
+// IsDoppelGanger2()`) - a texture outside the World folder, which the loader
 // cannot reach; the folder's own TileWater02 (the lava sheet) is the closest
 // thing it has. `EncTerrain64.map` also indexes slot 12 (`TileRock06`, not in
-// World64 — unbound in the original); Rock04 stands in so the cells do not
+// World64 - unbound in the original); Rock04 stands in so the cells do not
 // fall back to Grass01.
 const TILES: readonly string[] = [
   'TileGrass01',

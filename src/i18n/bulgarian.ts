@@ -1,6 +1,6 @@
 /**
  * Bulgarian. Tahoma carries Cyrillic, so no extra font is needed. MU's proper
- * nouns (class names, event names, Zen, MU Helper) stay in Latin — that is how
+ * nouns (class names, event names, Zen, MU Helper) stay in Latin - that is how
  * the Bulgarian servers write them.
  */
 
@@ -205,7 +205,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.packHint':
       'Текстът на мисиите, диалозите на NPC и имената на чудовищата също са преведени на този език.',
     'options.noPackHint':
-      'Само интерфейсът — текстът на мисиите и имената на чудовищата остават на английски.',
+      'Само интерфейсът - текстът на мисиите и имената на чудовищата остават на английски.',
     'options.languageHint':
       'Езикът на интерфейса. Имената на предмети, чудовища и умения не се променят.',
     'options.quality.classic': 'Класическо',
@@ -256,7 +256,7 @@ export const bulgarianLayer: LanguageLayer = {
     'bottomBar.emptySlot': '[{key}] празно',
     'bottomBar.itemSlot': '{name} [{key}]',
     'bottomBar.skillHint':
-      ' — щракване: списък с умения, десен бутон: обикновена атака',
+      ' - щракване: списък с умения, десен бутон: обикновена атака',
     'bottomBar.pet.normal': 'Обк',
     'bottomBar.pet.random': 'Слч',
     'bottomBar.pet.owner': 'Ггд',
@@ -1214,7 +1214,7 @@ export const bulgarianLayer: LanguageLayer = {
     'notify.learnedSkill': 'Научи {name}',
     'notify.storageOpen': 'Не можеш да използваш предмети при отворен трезор',
     'notify.upgradeNeedsServer': 'Подобряването има нужда от сървър',
-    'notify.noAnswerRestored': 'Сървърът не отговори — предметът е върнат',
+    'notify.noAnswerRestored': 'Сървърът не отговори - предметът е върнат',
     'notify.cannotMoveItem': 'Не можеш да преместиш този предмет там',
     'notify.cannotUseItem': 'Този предмет не се използва така',
     'notify.npcNothingYet': 'Този NPC още няма нищо за теб',
@@ -1272,8 +1272,8 @@ export const bulgarianLayer: LanguageLayer = {
     'worlds.answering': 'Отговаря',
     'worlds.noAnswer': 'Няма отговор',
     'worlds.hint': 'Избери свят и влез.',
-    'bottomBar.pickSkill': '[{key}] празно — щракни, за да избереш умение',
-    'bottomBar.boundSlot': '{name} [{key}] — десен бутон за смяна',
+    'bottomBar.pickSkill': '[{key}] празно - щракни, за да избереш умение',
+    'bottomBar.boundSlot': '{name} [{key}] - десен бутон за смяна',
     'bottomBar.clearSlot': 'Остави мястото [{key}] празно',
     'guild.leaveTitle': 'Напусни гилдията',
     'guild.breakHint': 'Ако искаш да напуснеш гилдията си,',
@@ -1718,7 +1718,7 @@ export const bulgarianLayer: LanguageLayer = {
     'gm.travel.youAreAt': 'Ти си на {x}, {y} на {map}.',
     'gm.travel.warpYourself': 'Телепортирай себе си',
     'gm.travel.warpYourselfHint':
-      'Остави мястото празно, за да стигнеш до портата на картата — това работи само за картите от списъка за телепорт на сървъра. Попълни го и всяка карта става достъпна.',
+      'Остави мястото празно, за да стигнеш до портата на картата - това работи само за картите от списъка за телепорт на сървъра. Попълни го и всяка карта става достъпна.',
     'gm.travel.filterMaps': 'Филтрирай картите…',
     'gm.travel.noMapMatches': 'Няма съвпадаща карта.',
     'gm.travel.warpSomebody': 'Телепортирай някой друг',
@@ -1873,7 +1873,7 @@ export const bulgarianLayer: LanguageLayer = {
       'Пуска предмет в краката ти. Групата и номерът го определят; всичко след това е по избор, а празно поле прекъсва реда.',
     'gm.cmd.clearinv.label': 'Изчисти инвентара',
     'gm.cmd.clearinv.help':
-      'Изпразва инвентар. Празно изпразва твоя; с име — този на онзи герой, безплатно и без да го питаш.',
+      'Изпразва инвентар. Празно изпразва твоя; с име - този на онзи герой, безплатно и без да го питаш.',
     'gm.cmd.disconnect.label': 'Изключи герой',
     'gm.cmd.disconnect.help':
       'Затваря връзката на герой. Той може веднага да влезе отново.',

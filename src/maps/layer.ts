@@ -11,7 +11,7 @@ import type { Emission } from '../common/effectParticles';
  * `Data/World<n>` folder it draws, its tile slots, its offline spawn, its sky
  * kind and the per-object-type tables (`blendMeshes`, `effectOnly`,
  * `emissions`) the renderer reads. The one piece of behaviour, `create`,
- * loads the map's object classes on demand — see the field.
+ * loads the map's object classes on demand - see the field.
  *
  * The convention's common core is `name` / `maps?` / `update?` / `reset?`. A
  * map entry has no per-frame step, and "maps" would be the set of worlds it
@@ -39,8 +39,8 @@ export interface MapLayer {
   readonly assetWorld?: number;
 
   /**
-   * Tile textures by slot — 0 Grass01, 1 Grass02, 2 Ground01, 3 Ground02,
-   * 4 Ground03, 5 Water01, 6 Wood01, 7 Rock01 … 13 Rock07 — the list
+   * Tile textures by slot - 0 Grass01, 1 Grass02, 2 Ground01, 3 Ground02,
+   * 4 Ground03, 5 Water01, 6 Wood01, 7 Rock01 … 13 Rock07 - the list
    * `LoadWorld` (MapManager.cpp:1362-1420) binds from `World<n>`. A slot the
    * folder cannot fill (missing file, or a `.tga` the OZJ-only loader cannot
    * read) names a tile the folder *does* have, so the indices
@@ -137,7 +137,7 @@ export interface MapLayer {
   readonly blendMeshes?: Readonly<Record<number, number>>;
 
   /**
-   * Object types that are an emitter and nothing else — the model is never
+   * Object types that are an emitter and nothing else - the model is never
    * drawn, only its `emissions`. Read by `common/effectOnlyObjects.ts`.
    */
   readonly effectOnly?: readonly number[];

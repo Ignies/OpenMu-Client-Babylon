@@ -282,7 +282,7 @@ function serializeItemBytes(item: Item): number[] {
 
 /**
  * The player's saved login. Where the client connects lives in
- * `common/serverConfig.ts` (server profiles), not here — the four endpoint
+ * `common/serverConfig.ts` (server profiles), not here - the four endpoint
  * keys this blob used to carry are migrated out of it on first load.
  */
 type ConfigType = {
@@ -1052,7 +1052,7 @@ export const Store = new (class _Store {
   /**
    * The game server being dialled, while it is unproven. `ConnectionInfo` names
    * an address the server believes clients reach it at, which is often not the
-   * address that works from where the proxy sits — the OpenMU demo hands out its
+   * address that works from where the proxy sits - the OpenMU demo hands out its
    * public IP to a client on the same box. Under the `auto` policy the second
    * attempt is the connect-server host, which answered a moment ago.
    */
@@ -1470,7 +1470,7 @@ export const Store = new (class _Store {
 
   /**
    * Opens the game-server socket. `fallbackHost` is the address to try if this
-   * one never answers — `gameServerTarget` decides which of the two addresses
+   * one never answers - `gameServerTarget` decides which of the two addresses
    * (the one the server advertised, the connect-server host) goes first.
    */
   connectToGameServer(ip: string, port: number, fallbackHost: string | null = null) {
@@ -1496,7 +1496,7 @@ export const Store = new (class _Store {
     this.gsAttempt = { host: ip, port, fallbackHost, timer: null };
 
     // The proxy closes the ws when the TCP connect fails, which is the fast
-    // path into the retry. The timer is for the case with no close at all —
+    // path into the retry. The timer is for the case with no close at all -
     // a firewall that drops the SYN, an address that routes nowhere.
     if (fallbackHost) {
       this.gsAttempt.timer = setTimeout(
@@ -1514,7 +1514,7 @@ export const Store = new (class _Store {
 
   /**
    * Second and last attempt at the game server, on the connect-server host.
-   * Returns false when there is nothing to retry — the caller then treats the
+   * Returns false when there is nothing to retry - the caller then treats the
    * dead socket as a lost connection, as it always did.
    */
   private retryGameServer(reason: string): boolean {
@@ -1657,7 +1657,7 @@ export const Store = new (class _Store {
       this.playerData.name = name;
       if (character) {
         this.playerData.charClass = classFromAppearance(character.Appearance);
-        // CharacterInformation carries no level — the list entry is the only source
+        // CharacterInformation carries no level - the list entry is the only source
         // until the first CharacterLevelUpdate.
         this.playerData.level = character.Level;
       }
@@ -1766,7 +1766,7 @@ export const Store = new (class _Store {
   }
 
   /**
-   * WalkRequest (0xD4). `x`/`y` is the tile the walk starts from — the one
+   * WalkRequest (0xD4). `x`/`y` is the tile the walk starts from - the one
    * the hero is logically standing on when the first step is taken, which
    * the server compares against its own position (PlayerMovement.
    * IsWalkRequestValidAsync, tolerance 5 tiles). At most 15 steps fit the
@@ -2736,7 +2736,7 @@ registerStore(Store);
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute the chain with a second `Store` instance (`store.ts?t=…`)
-// that later-loaded modules import — an unconnected store whose actions do
+// that later-loaded modules import - an unconnected store whose actions do
 // nothing.
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

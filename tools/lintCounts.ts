@@ -1,4 +1,4 @@
-// `bun run lint:count` — reads ESLint's JSON formatter output from stdin and
+// `bun run lint:count` - reads ESLint's JSON formatter output from stdin and
 // prints a count per rule (most frequent first), plus the file total. Used
 // to report lint health without touching any code.
 const text = await Bun.stdin.text();

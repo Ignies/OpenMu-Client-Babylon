@@ -1,5 +1,5 @@
 /**
- * Feathers — a few white feathers let go from a point that drift down,
+ * Feathers - a few white feathers let go from a point that drift down,
  * tumbling, and fade: what the Blood Castle archangels shed
  * (`common/npcs/archangel.ts`, documentation/archangel_npcs).
  *

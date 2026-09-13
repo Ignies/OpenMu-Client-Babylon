@@ -1,5 +1,5 @@
 /**
- * Season 6 Episode 3 — the version this client was written against and the
+ * Season 6 Episode 3 - the version this client was written against and the
  * OpenMU default (`-version:season6`, `Persistence/Initialization/VersionSeasonSix`).
  * Everything the base game did before the version seam existed lives here.
  */

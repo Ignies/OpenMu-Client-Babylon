@@ -207,7 +207,7 @@ export const thaiLayer: LanguageLayer = {
     'options.packHint':
       'ภาษานี้แปลข้อความเควส บทสนทนา NPC และชื่อมอนสเตอร์ด้วย',
     'options.noPackHint':
-      'เฉพาะหน้าจอ — ข้อความเควสและชื่อมอนสเตอร์ยังเป็นภาษาอังกฤษ',
+      'เฉพาะหน้าจอ - ข้อความเควสและชื่อมอนสเตอร์ยังเป็นภาษาอังกฤษ',
     'options.languageHint':
       'ภาษาของหน้าจอ ชื่อไอเทม มอนสเตอร์ และสกิลจะไม่เปลี่ยน',
     'options.quality.classic': 'คลาสสิก',
@@ -257,7 +257,7 @@ export const thaiLayer: LanguageLayer = {
     'bottomBar.noSkill': 'ไม่มีสกิล (คลิกขวา = โจมตี)',
     'bottomBar.emptySlot': '[{key}] ว่าง',
     'bottomBar.itemSlot': '{name} [{key}]',
-    'bottomBar.skillHint': ' — คลิก: รายการสกิล, คลิกขวา: โจมตีธรรมดา',
+    'bottomBar.skillHint': ' - คลิก: รายการสกิล, คลิกขวา: โจมตีธรรมดา',
     'bottomBar.pet.normal': 'ปกติ',
     'bottomBar.pet.random': 'สุ่ม',
     'bottomBar.pet.owner': 'เจ้าของ',
@@ -1200,7 +1200,7 @@ export const thaiLayer: LanguageLayer = {
     'notify.learnedSkill': 'คุณเรียนรู้ {name} แล้ว',
     'notify.storageOpen': 'ใช้ไอเทมไม่ได้ขณะเปิดคลัง',
     'notify.upgradeNeedsServer': 'การอัปเกรดต้องใช้เซิร์ฟเวอร์',
-    'notify.noAnswerRestored': 'เซิร์ฟเวอร์ไม่ตอบสนอง — คืนไอเทมแล้ว',
+    'notify.noAnswerRestored': 'เซิร์ฟเวอร์ไม่ตอบสนอง - คืนไอเทมแล้ว',
     'notify.cannotMoveItem': 'ย้ายไอเทมนั้นไปตรงนั้นไม่ได้',
     'notify.cannotUseItem': 'ใช้ไอเทมนั้นแบบนั้นไม่ได้',
     'notify.npcNothingYet': 'NPC นี้ยังไม่มีอะไรให้คุณ',
@@ -1257,8 +1257,8 @@ export const thaiLayer: LanguageLayer = {
     'worlds.answering': 'ตอบสนอง',
     'worlds.noAnswer': 'ไม่ตอบสนอง',
     'worlds.hint': 'เลือกโลกแล้วกดเข้า',
-    'bottomBar.pickSkill': '[{key}] ว่าง — คลิกเพื่อเลือกสกิล',
-    'bottomBar.boundSlot': '{name} [{key}] — คลิกขวาเพื่อเปลี่ยน',
+    'bottomBar.pickSkill': '[{key}] ว่าง - คลิกเพื่อเลือกสกิล',
+    'bottomBar.boundSlot': '{name} [{key}] - คลิกขวาเพื่อเปลี่ยน',
     'bottomBar.clearSlot': 'ปล่อยช่อง [{key}] ให้ว่าง',
     'guild.leaveTitle': 'ออกจากกิลด์',
     'guild.breakHint': 'หากคุณต้องการออกจากกิลด์',

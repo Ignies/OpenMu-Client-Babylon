@@ -7,7 +7,7 @@ import type { SoundLayer } from './layer';
 /**
  * The listener: where the hero's ears are, and the one-shot `playSfx` every
  * positioned effect goes through (the original's `PlayBuffer(sound, object)`
- * — DirectSound's 3D listener sits on the hero, so a sound played "at" an
+ * - DirectSound's 3D listener sits on the hero, so a sound played "at" an
  * object is attenuated by its distance to the hero; a sound with no position
  * is UI / hero-local and full volume).
  *
@@ -82,7 +82,7 @@ export function clearSfxListener(): void {
 /**
  * Plays `key` once; `at` (tile coordinates) attenuates it by distance to the
  * hero. `gain` is the caller's share of the effects track (0…1) under that
- * attenuation — a bed's one-shot sits under the SFX, a hit sits on top.
+ * attenuation - a bed's one-shot sits under the SFX, a hit sits on top.
  */
 export function playSfx(
   key: Sounds,

@@ -23,8 +23,8 @@ import { OK_SPRITE, BTN_HEIGHT, BTN_WIDTH } from '../../../../components/msgWind
  * with its icon, name, level, mana / AG cost and the master level of a
  * master skill, greyed when `skills.requirementsMet` fails (the hotbar's
  * `bCantSkill` rule). A click makes it the current skill, like a click on a
- * hotbar slot. The original has no such window — its list *is* the five
- * scrolling bar slots — so this uses the item-window chrome. Toggled by the
+ * hotbar slot. The original has no such window - its list *is* the five
+ * scrolling bar slots - so this uses the item-window chrome. Toggled by the
  * skill-list key (K); the master button below opens the master tree.
  */
 

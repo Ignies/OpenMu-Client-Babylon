@@ -92,7 +92,7 @@ export const RenderSystem: ISystemFactory = world => {
           // most writers (fresh drops, Chaos Castle ring floors, the Kanturu
           // tower sink, Lorencia walls) hand a plain {x, y, z}. Babylon's
           // addInPlace reads `_x`, undefined on those, which turned the whole
-          // node position NaN — a model that never draws under a perfectly
+          // node position NaN - a model that never draws under a perfectly
           // placed name tag ("Zen 336" with nothing beneath it).
           const offset = transform.posOffset;
           v3Temp2.x += offset.x;
@@ -109,7 +109,7 @@ export const RenderSystem: ISystemFactory = world => {
           v3Temp2.z += offset.z;
           v3Temp.x += pitch;
         }
-        // Settled snow is something you stand *in*, not on — but only where
+        // Settled snow is something you stand *in*, not on - but only where
         // it is actually lying. Rendered position only: transform.pos stays
         // where pathing and the server think it is.
         v3Temp2.y -= weather.snowSinkDepth(

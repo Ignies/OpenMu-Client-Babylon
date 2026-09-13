@@ -1,5 +1,5 @@
 /**
- * THE LIST — every language the client ships, in the order the selector shows
+ * THE LIST - every language the client ships, in the order the selector shows
  * them. English first (it is the fallback), then the rest alphabetically by
  * their English name.
  *

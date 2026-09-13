@@ -13,7 +13,7 @@ import type { Emission } from '../../common/effectParticles';
 /** No `o->BlendMesh` writes. */
 export const SANTA_TOWN_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
-/** `MoveObject` :86-93 hides 26 (×42), 27 (×71), 28 (×56) — the snow-drift markers. */
+/** `MoveObject` :86-93 hides 26 (×42), 27 (×71), 28 (×56) - the snow-drift markers. */
 export const SANTA_TOWN_EFFECT_ONLY_TYPES: readonly number[] = [26, 27, 28];
 
 /** The markers draw nothing of their own in `RenderObjectVisual`. */

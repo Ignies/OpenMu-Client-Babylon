@@ -17,7 +17,7 @@ import { TEX } from '../effects/recipes';
  * sample `Pos1` and the tip `Pos2`, centimetres down the link bone's Y) and
  * `BlurMapping` (which `BITMAP_BLUR + n` sheet; 0 also picks the colour from
  * the weapon's level). `RenderBlurs` (ZzzEffectBlurSpark.cpp:173) draws a
- * levelled owner's trail with `EnableAlphaBlendMinus` — a dark smear — and
+ * levelled owner's trail with `EnableAlphaBlendMinus` - a dark smear - and
  * only a level-0 owner's additively.
  */
 

@@ -1,7 +1,7 @@
 /**
  * Japanese.
  *
- * Like the other CJK entries this one translates MU's proper nouns as well —
+ * Like the other CJK entries this one translates MU's proper nouns as well -
  * class names, event names and Zen. Tahoma has no kana or kanji, so `font`
  * puts a Japanese face in front of it.
  */
@@ -207,7 +207,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.packHint':
       'この言語ではクエストの文章、NPC の台詞、モンスター名も翻訳されています。',
     'options.noPackHint':
-      'インターフェイスのみ — クエストの文章とモンスター名は英語のままです。',
+      'インターフェイスのみ - クエストの文章とモンスター名は英語のままです。',
     'options.languageHint':
       'インターフェイスの言語です。アイテム・モンスター・スキルの名前は変わりません。',
     'options.quality.classic': 'クラシック',
@@ -257,7 +257,7 @@ export const japaneseLayer: LanguageLayer = {
     'bottomBar.noSkill': 'スキルなし（右クリック＝通常攻撃）',
     'bottomBar.emptySlot': '[{key}] 空き',
     'bottomBar.itemSlot': '{name} [{key}]',
-    'bottomBar.skillHint': ' — クリック：スキル一覧、右クリック：通常攻撃',
+    'bottomBar.skillHint': ' - クリック：スキル一覧、右クリック：通常攻撃',
     'bottomBar.pet.normal': '通常',
     'bottomBar.pet.random': 'ランダム',
     'bottomBar.pet.owner': '主人',
@@ -1190,7 +1190,7 @@ export const japaneseLayer: LanguageLayer = {
     'notify.learnedSkill': '{name} を習得しました',
     'notify.storageOpen': '倉庫を開いている間はアイテムを使えません',
     'notify.upgradeNeedsServer': '強化にはサーバーが必要です',
-    'notify.noAnswerRestored': 'サーバーが応答しませんでした — アイテムを戻しました',
+    'notify.noAnswerRestored': 'サーバーが応答しませんでした - アイテムを戻しました',
     'notify.cannotMoveItem': 'そのアイテムはそこへ移せません',
     'notify.cannotUseItem': 'そのアイテムはそのように使えません',
     'notify.npcNothingYet': 'この NPC にはまだ用意がありません',
@@ -1247,8 +1247,8 @@ export const japaneseLayer: LanguageLayer = {
     'worlds.answering': '応答あり',
     'worlds.noAnswer': '応答なし',
     'worlds.hint': 'ワールドを選んで入ってください。',
-    'bottomBar.pickSkill': '[{key}] 空き — クリックしてスキルを選択',
-    'bottomBar.boundSlot': '{name} [{key}] — 右クリックで変更',
+    'bottomBar.pickSkill': '[{key}] 空き - クリックしてスキルを選択',
+    'bottomBar.boundSlot': '{name} [{key}] - 右クリックで変更',
     'bottomBar.clearSlot': 'スロット [{key}] を空にする',
     'guild.leaveTitle': 'ギルドを脱退',
     'guild.breakHint': 'ギルドを脱退したい場合は、',

@@ -3,7 +3,7 @@
  * :5777-5850): pressing the right button with Nova selected sends
  * `AT_SKILL_NOVA_BEGIN` (58) on the hero and plays PLAYER_SKILL_HELL_BEGIN;
  * the button is then held (`MouseRButtonPress++` every frame) and the
- * release — or a left click, `SkillKeyPush` — sends `AT_SKILL_NOVA` (40) at
+ * release - or a left click, `SkillKeyPush` - sends `AT_SKILL_NOVA` (40) at
  * the selected target and plays PLAYER_SKILL_HELL_START. The server scales
  * the damage by how long the charge was held (`SkillStageUpdate`).
  *
@@ -21,7 +21,7 @@ import { SKILL_NOVA } from './recipes';
 /**
  * Seconds of holding for a full charge. The server reports up to 12 stages
  * (`SkillStageUpdate`) and the original's `m_bySkillCount` climbs one per
- * `AttackTime % 5 == 1` — five ticks (0.2 s) per stage → 2.4 s to the top.
+ * `AttackTime % 5 == 1` - five ticks (0.2 s) per stage → 2.4 s to the top.
  */
 const FULL_CHARGE_SECONDS = 2.4;
 

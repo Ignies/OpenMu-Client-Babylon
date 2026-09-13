@@ -1,5 +1,5 @@
 /**
- * The text catalogue — every string the client itself writes on screen, in
+ * The text catalogue - every string the client itself writes on screen, in
  * English, keyed once.
  *
  * This is the **source of truth**: `TextKey` is derived from it, so a key that
@@ -13,7 +13,7 @@
  * them the way `ZzzInterface.cpp` did.
  *
  * Read by: every entry file (`english.ts` … `german.ts`) and the facade's
- * `t()` fallback. Nothing else imports it — the game calls `t()`.
+ * `t()` fallback. Nothing else imports it - the game calls `t()`.
  */
 
 export const EN_TEXT = {
@@ -57,7 +57,7 @@ export const EN_TEXT = {
   'server.insecure':
     'This page is https: a ws:// proxy is blocked, use wss://.',
   'server.lockedByUrl': 'Pinned by the URL (?cs= / ?ws=).',
-  'server.listedHint': 'From the published list — pick another in Worlds, or Copy it to edit.',
+  'server.listedHint': 'From the published list - pick another in Worlds, or Copy it to edit.',
   'server.listOffline': 'The published server list could not be read.',
   'server.copy': 'Copy',
 
@@ -271,7 +271,7 @@ export const EN_TEXT = {
   'options.packHint':
     'Quest text, NPC dialogue and monster names are translated for this language too.',
   'options.noPackHint':
-    'Interface only — quest text and monster names stay English.',
+    'Interface only - quest text and monster names stay English.',
 
   // Slider value labels.
   'options.quality.classic': 'Classic',
@@ -370,9 +370,9 @@ export const EN_TEXT = {
   'bottomBar.noSkill': 'No skill (right click = attack)',
   'bottomBar.emptySlot': '[{key}] empty',
   'bottomBar.itemSlot': '{name} [{key}]',
-  'bottomBar.skillHint': ' — click: skill list, right click: plain attack',
-  'bottomBar.pickSkill': '[{key}] empty — click to choose a skill',
-  'bottomBar.boundSlot': '{name} [{key}] — right click to change',
+  'bottomBar.skillHint': ' - click: skill list, right click: plain attack',
+  'bottomBar.pickSkill': '[{key}] empty - click to choose a skill',
+  'bottomBar.boundSlot': '{name} [{key}] - right click to change',
   'bottomBar.clearSlot': 'Leave slot [{key}] empty',
   'bottomBar.pet.normal': 'Nor',
   'bottomBar.pet.random': 'Rnd',

@@ -162,8 +162,8 @@ function createObjects(world: World, objs: MapObjectRecord[]) {
       modelFactory,
       visibility: {
         state: 'hidden',
-        // Spread over the first 0.2 s so the 9 000 distance checks — and the
-        // model instantiations they trigger — do not all land in one frame,
+        // Spread over the first 0.2 s so the 9 000 distance checks - and the
+        // model instantiations they trigger - do not all land in one frame,
         // and stay staggered afterwards (CalculateVisibilitySystem re-arms
         // each entity relative to its own check).
         lastChecked: Math.random() * 0.2,
@@ -213,7 +213,7 @@ function unloadMap(world: World, oldMap: ENUM_WORLD, newMap: ENUM_WORLD) {
 /**
  * A warp whose terrain cannot be loaded (a missing world folder, a corrupt
  * file, the dev server answering HTML) must leave the client on the map it
- * was on, out of the loading screen, with the failure logged — not on a
+ * was on, out of the loading screen, with the failure logged - not on a
  * loading screen forever with a half-torn scene behind it.
  */
 function failWarp(
@@ -315,8 +315,8 @@ async function runLoad(
 
     unloadMap(world, oldMap, map);
 
-    // Weather is global — the proxy computes one sky for every client, and the
-    // packet is not re-sent on warp — so `Store.weather` deliberately carries
+    // Weather is global - the proxy computes one sky for every client, and the
+    // packet is not re-sent on warp - so `Store.weather` deliberately carries
     // across the gate: the same shower really is still falling on the far side.
     // What is reset is only `RainCurrent`, so the rain fades back in over its
     // ramp instead of being at full strength in the first frame of a map the

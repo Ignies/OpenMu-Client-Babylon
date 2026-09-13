@@ -13,7 +13,7 @@ import {
 /**
  * `for (i < 10) CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position + (±150, -600…-620, 0))`
  * (ZzzObject.cpp:116-124): ten puffs, spread 3 tiles across, 6 tiles *south*
- * of the gate — where the top of a 90° gate lands. The one-tick emitter below
+ * of the gate - where the top of a 90° gate lands. The one-tick emitter below
  * is run for a single update, so `count` is the whole burst.
  */
 const SMOKE_BURST_COUNT = 10;

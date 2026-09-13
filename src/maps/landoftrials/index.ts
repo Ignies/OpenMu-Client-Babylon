@@ -8,7 +8,7 @@ import {
 } from './spec';
 
 /**
- * Land of Trials (World32 / Object32) — the map entry: identity and the per-world data the
+ * Land of Trials (World32 / Object32) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
@@ -16,15 +16,15 @@ import {
  *
  * Land of Trials (`WD_31HUNTING_GROUND`, `World32`/`Object32`).
  *
- * Every runtime behaviour is table data in `spec.ts` — the six hidden
+ * Every runtime behaviour is table data in `spec.ts` - the six hidden
  * emitter/marker types, the brazier light and the crystal flares.
  *
  * Not built:
  *  - **Type 27** (×28): `Position[2] += sin(Timer + t*0.0024) * 0.3` per
- *    frame — a ±0.3 MU (0.003 tile) bob that is below what the camera can
+ *    frame - a ±0.3 MU (0.003 tile) bob that is below what the camera can
  *    resolve; `CreateHuntingGroundObject` seeds `Timer` only for this and 54.
  *  - **The butterflies** on 1/44/45 (effect models) and **`CreateMist`**
- *    (the leaves slot, GMHuntingGround.cpp) — the first needs an effect-model
+ *    (the leaves slot, GMHuntingGround.cpp) - the first needs an effect-model
  *    system, the second is a weather-layer recipe.
  *  - `SOUND_BC_HUNTINGGROUND_AMBIENT` is fired once every 300 s
  *    (`g_MusicStartStamp`, :109-112); the sample is a long loop, so it is a

@@ -16,7 +16,7 @@ import { rageLayer } from './rage';
  * them.
  *
  * Order is update order. Nothing here reads another entry during `update`
- * — the consumers (`attackSystem`, `skillCastSystem`) combine them — so the
+ * - the consumers (`attackSystem`, `skillCastSystem`) combine them - so the
  * order is the order the original steps them: input poll, swing counter,
  * then the per-skill timers.
  */

@@ -8,17 +8,17 @@ import {
 } from './spec';
 
 /**
- * Raklion (World58 / Object58) — the map entry: identity and the per-world data the
+ * Raklion (World58 / Object58) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
  * lives in another system; the notes below say what is and is not built.
  *
- * Raklion (`WD_57ICECITY`, `World58`/`Object58`) — the ice field.
+ * Raklion (`WD_57ICECITY`, `World58`/`Object58`) - the ice field.
  *
  * `CGM_Raklion::CreateObject` (GM_Raklion.cpp:52-84): `MODEL_WARP4` spawns
  * the three-model warp-gate effect (`CreateEffect(MODEL_WARP4/5/6)` 5.2
- * tiles up) — an effect-model stack, not built. `MoveObject` (:244-269) is
+ * tiles up) - an effect-model stack, not built. `MoveObject` (:244-269) is
  * the two hidden braziers (`spec.ts`) and the 22 sine (`meshAnimation.ts`);
  * `MoveEffect` (:2742) runs the Selupan fight's screen effects only while
  * the boss state machine is live.

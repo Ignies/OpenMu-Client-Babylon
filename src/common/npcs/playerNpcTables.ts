@@ -43,7 +43,7 @@ const VENOM_MIST = 30;
  */
 export const GEARED_NPC_TABLE: Readonly<Record<number, NpcGear>> = {
   // PK Dark Knight. `Skin = 1` and `PK = PVP_MURDERER2` (the red name) are
-  // not modelled — neither changes the mesh.
+  // not modelled - neither changes the mesh.
   297: {
     charClass: CharacterClassNumber.DarkKnight,
     playerClass: PlayerClass.DarkKnight,
@@ -82,7 +82,7 @@ export const GEARED_NPC_TABLE: Readonly<Record<number, NpcGear>> = {
     offHand: GRAND_SOUL_SHIELD,
     scale: 1.0,
   },
-  // The Magic Gladiator's helm is `MODEL_BODY_HELM + 15` — the Storm Crow set
+  // The Magic Gladiator's helm is `MODEL_BODY_HELM + 15` - the Storm Crow set
   // ships no helm item, so items.json has no group-7 row 15 to name and the
   // part is left off.
   537: {
@@ -129,7 +129,7 @@ export const GEARED_NPC_TABLE: Readonly<Record<number, NpcGear>> = {
 export const TRANSFORMED_NPC_TABLE: Readonly<
   Record<number, readonly [dir: string, part: string, scale: number]>
 > = {
-  // MODEL_SKELETON_PCBANG loads Skill\Skeleton with index 3 — the same part
+  // MODEL_SKELETON_PCBANG loads Skill\Skeleton with index 3 - the same part
   // file the Elite Skeleton wears.
   372: ['Skill/', 'Skeleton03.glb', 0.95],
   373: ['Skill/', 'jack.glb', 0.95],

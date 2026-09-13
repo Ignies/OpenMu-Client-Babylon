@@ -4,7 +4,7 @@ import { writeTerrainOpenness } from '../../common/terrainDynamicLight';
 
 /**
  * A 256x256 per-tile openness mask, for the terrain shader effects that need
- * to know *where* they are allowed to appear — settled snow and rain wetness
+ * to know *where* they are allowed to appear - settled snow and rain wetness
  * today, Atlans' caustics later.
  *
  * The plane lives here; the GPU copy rides in the **alpha channel of the
@@ -19,7 +19,7 @@ import { writeTerrainOpenness } from '../../common/terrainDynamicLight';
  *
  * ### Why the roofs are measured rather than read
  *
- * The obvious source is the terrain attribute file — the original has a
+ * The obvious source is the terrain attribute file - the original has a
  * `TW_HEIGHT` flag that raises building floors to `g_fSpecialHeight`
  * (ZzzLodTerrain.cpp:1723) and lifts the camera for them
  * (CameraUtility.cpp:169), which reads exactly like "this tile is indoors".
@@ -31,8 +31,8 @@ import { writeTerrainOpenness } from '../../common/terrainDynamicLight';
  * Two sources, painted together:
  *
  *  - **Roof slabs.** The same test `CeilingHideSystem` uses to find the
- *    ceiling over the hero — a mesh whose world AABB is a thin slab sitting
- *    above head height — applied to the whole map instead of a radius around
+ *    ceiling over the hero - a mesh whose world AABB is a thin slab sitting
+ *    above head height - applied to the whole map instead of a radius around
  *    the player. This is what covers the buildings nobody has enumerated.
  *  - **Known interiors.** The room boxes the dust recipes already use. These
  *    are painted unconditionally at map load because the roof scan has one
@@ -40,7 +40,7 @@ import { writeTerrainOpenness } from '../../common/terrainDynamicLight';
  *    out of view* while the hero is inside it (`loadMapIntoScene`), so a
  *    player who logs in standing in the tavern would have no slab to find.
  *
- * Painting is **additive** — a tile that has ever been seen as roofed stays
+ * Painting is **additive** - a tile that has ever been seen as roofed stays
  * roofed for the life of the map. That is what makes the pub's disappearing
  * roof harmless: it is measured once on the way in and never un-measured.
  */
@@ -102,7 +102,7 @@ export function terrainMaskVersion(): number {
 
 /**
  * Mark an axis-aligned world footprint as roofed. Coordinates are in tiles and
- * need not be integers — the box is expanded to whole tiles, because a roof
+ * need not be integers - the box is expanded to whole tiles, because a roof
  * covering any part of a tile keeps the weather off all of it.
  *
  * Additive: this only ever closes tiles, never re-opens them.
@@ -155,7 +155,7 @@ export function isTileOpen(x: number, z: number): boolean {
   return b[TERRAIN_INDEX(xi, zi)] !== 0;
 }
 
-/** Share of the map currently marked roofed — a one-line sanity check. */
+/** Share of the map currently marked roofed - a one-line sanity check. */
 export function roofedTileCount(): number {
   const b = ensureBytes();
   let n = 0;

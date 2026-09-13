@@ -61,7 +61,7 @@ single-player offline demo.
 
 ```
 [▓▓▓▓▓▓▓▓▓░] Networking & Protocol (9/10):
-     [ Packet codec ]: Generated from OpenMU — 242 server→client, 190 client→server classes.
+     [ Packet codec ]: Generated from OpenMU - 242 server→client, 190 client→server classes.
      [ Handlers ]: 127/242 S2C wired, 97/190 C2S sent. Remainder is 0.75/0.95 legacy
                    variants + Castle Siege / Duel / Illusion Temple (systems not built).
      [ Encryption ]: SimpleModulus, Xor3, Xor32 all implemented with key tables.
@@ -69,7 +69,7 @@ single-player offline demo.
      [ Offline ]: Single-player /offline demo path works with no server.
 
 [▓▓▓▓▓▓▓▓▓░] Worlds & Maps (9/10):
-     [ Coverage ]: 42 map layers registered — every S6 world incl. all 4 Doppelganger,
+     [ Coverage ]: 42 map layers registered - every S6 world incl. all 4 Doppelganger,
                    Kalima, Karutan 1/2, Raklion + boss, Empire Guardian, Loren Market.
      [ Bespoke ]: 26 maps have custom object code (Icarus clouds/sky, Atlans anemones &
                   bubble vents, Devias candles, Blood Castle gate/lamps/bones, Chaos
@@ -86,11 +86,11 @@ single-player offline demo.
      [ HUD ]: Bottom bar, buff bar, damage numbers, party bars, target health bar,
               name tags, emoji bubbles, world labels, notices, cursors, slide help.
      [ Pages ]: Preloader, Login, Server select, Character select + creation.
-     [ Fidelity ]: Original MU sprite chrome — draggable/resizable MuWindow, MuSprite,
+     [ Fidelity ]: Original MU sprite chrome - draggable/resizable MuWindow, MuSprite,
                    MuNumber, MuText, MuFlag, MuLogo. Not a custom skin.
 
 [▓▓▓▓▓▓▓▓▓░] Localization (9/10):
-     [ Languages ]: 15 + English source — BG, ZH, FR, DE, IT, JA, KO, PT, RO, RU, ES, TH.
+     [ Languages ]: 15 + English source - BG, ZH, FR, DE, IT, JA, KO, PT, RO, RU, ES, TH.
      [ Keys ]: 725 across 34 areas. Layered pack system with a repairs pass.
      [ Live switch ]: In-game language selector, re-renders without reload.
 
@@ -98,7 +98,7 @@ single-player offline demo.
      [ Rain ]: Rain state, wetness accumulation, puddles underfoot.
      [ Snow ]: Cover, caps, trails ploughed by walking, sink depth, melt from fire
                skills, spray on footfall. All feed the terrain shader.
-     [ Footprints ]: 1,932-line system — the single largest subsystem in the repo.
+     [ Footprints ]: 1,932-line system - the single largest subsystem in the repo.
      [ Schedule ]: Ambient weather squalls on a timed schedule per map.
 
 [▓▓▓▓▓▓▓▓░░] Items & Inventory (8/10):
@@ -107,10 +107,10 @@ single-player offline demo.
                   tier, legacy effect flags, rest pose/angle/height on the ground.
      [ Systems ]: Jewel upgrade, durability, hotkeys, drop tiers, glow/aura/crackle/
                   sparkle per +level, item effect mode option.
-     [ Storage ]: Inventory, Vault, Trade, Personal Shop, Mix slots — one shared model.
+     [ Storage ]: Inventory, Vault, Trade, Personal Shop, Mix slots - one shared model.
 
 [▓▓▓▓▓▓▓▓░░] Combat (8/10):
-     [ Timing ]: 10 layers — input gate, attack-time latch, hit-frame callbacks,
+     [ Timing ]: 10 layers - input gate, attack-time latch, hit-frame callbacks,
                  weapon range, per-skill cast clips + movement, cast targets.
      [ Class specials ]: Nova charge (hold-to-release), Dark Knight combo detection,
                          Rage Fighter Dark Side follow-ups + streak timeout.
@@ -118,21 +118,21 @@ single-player offline demo.
      [ Feedback ]: Weapon trails, impact effects, blood decals, combat SFX, death visuals.
 
 [▓▓▓▓▓▓▓▓░░] Skills (8/10):
-     [ Database ]: Generated from OpenMU S6 SkillsInitializer — full skill table with
+     [ Database ]: Generated from OpenMU S6 SkillsInitializer - full skill table with
                    type, target kind, damage type, class flags.
-     [ Master tree ]: 645-line implementation — categories, points, learn blocks,
+     [ Master tree ]: 645-line implementation - categories, points, learn blocks,
                       requirement chains, tooltips, master level + exp curve.
      [ Runtime ]: Buff timers, cooldowns/re-use delays, castability checks.
      [ Visuals ]: 155 skill→effect mappings.
 
 [▓▓▓▓▓▓▓▓░░] Effects / VFX (8/10):
-     [ Primitives ]: 14 layers — projectiles, models, sprites, particles, columns,
+     [ Primitives ]: 14 layers - projectiles, models, sprites, particles, columns,
                      rings, auras, joint ribbons, blur, debris, bursts.
      [ Item glow ]: Aura, crackle, sparkle driven per-character by +level.
      [ Recipe table ]: 737 lines of declarative effect data, no hardcoded spawns.
 
 [▓▓▓▓▓▓▓▓░░] Sound (8/10):
-     [ Layers ]: 9 — 3D listener, ambient beds, fire crackle, map object loops,
+     [ Layers ]: 9 - 3D listener, ambient beds, fire crackle, map object loops,
                  music, footsteps (per surface), UI, combat, monsters.
      [ Monsters ]: 460-line per-monster voice table.
      [ Objects ]: 371-line map-object loop table (waterfalls, torches, machinery).
@@ -149,7 +149,7 @@ single-player offline demo.
      [ Party ]: Invite, respond, list, kick, HP bars.
      [ Guild ]: Create, join, kick, role assign, alliance, war, relationship changes,
                 guild marks + flags rendered in-world.
-     [ Messenger ]: Friend list, online state, letters — read, write, delete.
+     [ Messenger ]: Friend list, online state, letters - read, write, delete.
 
 [▓▓▓▓▓▓▓▓░░] Characters & Models (8/10):
      [ Loading ]: Native .bmd parsing (not pre-baked .glb), skeletal animation.
@@ -164,11 +164,11 @@ single-player offline demo.
                  object effects, sky.
      [ Sinks ]: Terrain dynamic light + point light pool, quality tiers in Options.
      [ In flight ]: sun.ts and skyGobo.ts are new and uncommitted on Improved-Shadows.
-     [ Gap ]: Shadow work is mid-rework — that's what this branch is for.
+     [ Gap ]: Shadow work is mid-rework - that's what this branch is for.
 
 [▓▓▓▓▓▓▓░░░] Quests (7/10):
      [ Legacy ]: Full Scroll of Emperor chain (571 lines).
-     [ Season 6 ]: Quest log with 761 lines — states, progress, rewards.
+     [ Season 6 ]: Quest log with 761 lines - states, progress, rewards.
      [ Support ]: Kill counters, NPC dialogue trees, over-head quest bubbles.
      [ Gap ]: Quest data tables load from files; coverage depends on server config.
 
@@ -180,14 +180,14 @@ single-player offline demo.
      [ Gap ]: Most monsters run through genericMonster rather than bespoke behaviour.
 
 [▓▓▓░░░░░░░] Events (3/10):
-     [ Done ]: Blood Castle, Devil Square, Chaos Castle — full state machines,
+     [ Done ]: Blood Castle, Devil Square, Chaos Castle - full state machines,
                ticket handling, match notices, invasion banners.
      [ Missing ]: Castle Siege (25+ packets unhandled), Illusion Temple (9 unhandled),
                   Duel + spectators (9 unhandled), Guild Soccer, Crywolf event logic,
                   Kanturu event logic. Those maps load; the events don't run.
 
 [▓▓▓▓▓▓░░░░] Multi-version Support (6/10):
-     [ Contract ]: Version seam exists — GameVersion contract, protocol/data/encryption/
+     [ Contract ]: Version seam exists - GameVersion contract, protocol/data/encryption/
                    features split, _template folder ready.
      [ Shipped ]: season6 and 0.97d, selected at runtime: versions/registry.ts picks the
                   version per server-list entry (or ?version=), one build carries both.

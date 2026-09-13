@@ -10,18 +10,18 @@ import { versionByTag } from '../version';
  *
  * Three layers, highest first:
  *
- *   1. the URL (`?cs=host:port`, `?ws=wss://host:port`, `?server=<name>`) —
+ *   1. the URL (`?cs=host:port`, `?ws=wss://host:port`, `?server=<name>`) -
  *      an ephemeral profile, never saved, so a link can point a build at a
  *      server without touching what the player has stored;
- *   2. the saved profiles (localStorage) — what the in-client picker edits;
+ *   2. the saved profiles (localStorage) - what the in-client picker edits;
  *   3. the build defaults (`VITE_CS_HOST/PORT`, `VITE_WS_HOST/PORT` via
- *      consts.ts) — the seed of the first profile on a fresh install.
+ *      consts.ts) - the seed of the first profile on a fresh install.
  *
  * Note what the ws address is *not*: a browser cannot open a TCP socket, so
  * every connection goes through the ws↔TCP proxy (`proxy/main.ts`), which
  * dials `?host=&port=` for us. `wsUrl` is therefore the proxy's own address,
  * and `csHost:csPort` is the MU connect server as seen **from the proxy's
- * network** — they have no reason to be the same machine.
+ * network** - they have no reason to be the same machine.
  */
 
 const SERVERS_KEY = 'mu_servers';
@@ -62,7 +62,7 @@ export type ServerProfile = {
   id: string;
   /** What the picker shows. Free text, never parsed. */
   name: string;
-  /** Connect-server host, no scheme — the proxy resolves it, not the browser. */
+  /** Connect-server host, no scheme - the proxy resolves it, not the browser. */
   csHost: string;
   csPort: number;
   /** Proxy origin, scheme included (`ws://localhost:3000`, `wss://play.x.com`). */
@@ -109,7 +109,7 @@ const MAX_PORT = 65535;
  */
 const UNUSABLE_HOSTS = new Set(['', '0.0.0.0', '255.255.255.255', 'null']);
 
-/** Hostnames/IPs only — no scheme, path, credentials or spaces. */
+/** Hostnames/IPs only - no scheme, path, credentials or spaces. */
 const HOST_RE = /^[A-Za-z0-9._-]+$/;
 
 function clampPort(value: unknown, fallback: number): number {
@@ -135,7 +135,7 @@ export function isUsableHost(raw: string): boolean {
 }
 
 /**
- * A page served over https may not open a `ws://` socket — the browser blocks
+ * A page served over https may not open a `ws://` socket - the browser blocks
  * it as mixed content, with an error the player cannot act on. Default the
  * scheme to the page's, and upgrade a bare `ws://` typed into an https build.
  */
@@ -252,7 +252,7 @@ function defaultProfile(): ServerProfile {
  * Whether a fresh install gets that profile at all.
  *
  * It is seeded when the build names a connect server of its own, and when the
- * page is being served off the machine it describes — a developer's checkout,
+ * page is being served off the machine it describes - a developer's checkout,
  * where `127.0.0.1:44405` is a server that is really there.
  *
  * A client served from a host gets neither: its worlds come from the published
@@ -267,7 +267,7 @@ function seedsDefaultProfile(): boolean {
 }
 
 /**
- * What `active` answers when there is nothing to be active — no saved profile,
+ * What `active` answers when there is nothing to be active - no saved profile,
  * no published world, no URL. It is never saved and never shown: the screens
  * ask `isEmpty` first. It exists so the sockets and the picker keep reading a
  * profile instead of a null.
@@ -276,7 +276,7 @@ const NO_WORLD = defaultProfile();
 
 /**
  * The endpoints the pre-profile client kept in its config blob. Carried over
- * so an existing install keeps connecting where it did, then left alone —
+ * so an existing install keeps connecting where it did, then left alone -
  * store.ts no longer writes those four keys.
  */
 function legacyProfile(): ServerProfile | null {
@@ -342,7 +342,7 @@ function load(): StoredState {
       .map(p => sanitizeProfile(p, { ...base, id: p.id || base.id }));
 
     // Saving nothing is a state of its own on a client whose worlds come from
-    // the published list, so an empty array is kept rather than re-seeded — and
+    // the published list, so an empty array is kept rather than re-seeded - and
     // the selection is kept as written, because it may name a listed world that
     // this launch has not fetched yet. `active` falls back until it arrives.
     const activeId =
@@ -439,7 +439,7 @@ class ServerConfigStore {
   }
 
   /**
-   * Everything the picker offers: what the player saved, then the list — with
+   * Everything the picker offers: what the player saved, then the list - with
    * the world they last played pulled to the front, wherever it came from. The
    * one you keep going back to should not be on page three.
    */
@@ -474,7 +474,7 @@ class ServerConfigStore {
   /**
    * There is nowhere to play: nothing saved, nothing published, no URL. A
    * hosted client is in this state until its list arrives, and stays there if
-   * the list cannot be read — so the screens say so rather than offering the
+   * the list cannot be read - so the screens say so rather than offering the
    * placeholder `active` hands them.
    */
   get isEmpty(): boolean {
@@ -492,7 +492,7 @@ class ServerConfigStore {
   }
 
   /**
-   * True when the fields belong to something the player may not edit — a URL
+   * True when the fields belong to something the player may not edit - a URL
    * override, a published row, or, with nothing to play at all, the placeholder
    * standing in for one. Typing into that last one would write nowhere; Add is
    * the way out of it, and makes a profile that does save.
@@ -558,7 +558,7 @@ class ServerConfigStore {
 
   /**
    * A new saved server, copied from whatever is selected. That is how a listed
-   * server becomes editable: pick it, add it, and the copy is yours — with the
+   * server becomes editable: pick it, add it, and the copy is yours - with the
    * list's own marks (`listed`, its blurb and language) stripped off.
    */
   add(from?: Partial<ServerProfile>): ServerProfile {
@@ -579,7 +579,7 @@ class ServerConfigStore {
         // game servers, not to wherever this copy ends up pointing.
         servers: [],
         // The copy is the player's own address, so it is whatever this build
-        // is — not whatever the line it came from asked for.
+        // is - not whatever the line it came from asked for.
         version: '',
       },
       { ...base, name: base.listed ? base.name : 'New server' }
@@ -658,7 +658,7 @@ export function connectServerAddress(): { host: string; port: number } {
  *
  * A published world's `csHost` is the connect server as its own proxy reaches
  * it, and a world whose proxy shares a box with the game server publishes
- * `127.0.0.1` there — correct, and meaningless on a player's screen. So a
+ * `127.0.0.1` there - correct, and meaningless on a player's screen. So a
  * listed world shows what it is known by: its domain, or failing that the
  * proxy that carries it, which is the address the browser really opens.
  *
@@ -677,7 +677,7 @@ export function displayAddress(
 
 /**
  * Where a host sits: the client cannot probe reachability, but it can tell a
- * public address from one that only means something inside a network — which
+ * public address from one that only means something inside a network - which
  * is enough to know when a server is describing itself to the internet rather
  * than to us.
  */
@@ -695,7 +695,7 @@ function isLoopback(host: string): boolean {
 }
 
 /**
- * True when the wider internet could route to this address — a public IPv4, or
+ * True when the wider internet could route to this address - a public IPv4, or
  * any qualified hostname (a name resolves to whatever its DNS says, so it is
  * assumed routable). False for loopback, RFC1918 / CGNAT / link-local space,
  * single-label names and the local-network suffixes.
@@ -721,7 +721,7 @@ function isPublicAddress(host: string): boolean {
     return true;
   }
 
-  // `mu-server`, `openmu.local`, `box.lan` — names only a local resolver knows.
+  // `mu-server`, `openmu.local`, `box.lan` - names only a local resolver knows.
   if (!lower.includes('.')) return false;
 
   return !/\.(local|lan|home|internal|localdomain)$/.test(lower);
@@ -730,7 +730,7 @@ function isPublicAddress(host: string): boolean {
 /**
  * Where the game-server socket goes, and where it goes if that fails.
  *
- * `ConnectionInfo` carries the address the server wants us on — right for a
+ * `ConnectionInfo` carries the address the server wants us on - right for a
  * real deployment, where the game servers are separate boxes. But the address a
  * server advertises is how it believes the *internet* reaches it, which is a
  * different question from how the proxy reaches it, and the two disagree in one
@@ -740,7 +740,7 @@ function isPublicAddress(host: string): boolean {
  * So a public address is believed only when the connect server we just spoke to
  * was itself public. Reached OpenMU on `127.0.0.1` and it answers with a public
  * IP? That IP is this same machine seen from outside; going out to the router
- * and back — if the router even hairpins — is at best a slow way to reach a
+ * and back - if the router even hairpins - is at best a slow way to reach a
  * server that is right here, so the loopback address is used at once. Two
  * private addresses, on the other hand, are two boxes on one network: believed.
  *

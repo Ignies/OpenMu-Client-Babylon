@@ -1,6 +1,6 @@
 /**
  * Italian. MU's proper nouns (class names, event names, Zen, MU Helper) stay as
- * they are — the Italian servers use them untranslated.
+ * they are - the Italian servers use them untranslated.
  */
 
 import type { LanguageLayer } from './layer';
@@ -256,7 +256,7 @@ export const italianLayer: LanguageLayer = {
     'bottomBar.emptySlot': '[{key}] vuoto',
     'bottomBar.itemSlot': '{name} [{key}]',
     'bottomBar.skillHint':
-      ' — clic: lista abilità, clic destro: attacco semplice',
+      ' - clic: lista abilità, clic destro: attacco semplice',
     'bottomBar.pet.normal': 'Nor',
     'bottomBar.pet.random': 'Cas',
     'bottomBar.pet.owner': 'Pad',
@@ -1228,7 +1228,7 @@ export const italianLayer: LanguageLayer = {
     'notify.storageOpen': 'Non puoi usare oggetti con il deposito aperto',
     'notify.upgradeNeedsServer': 'Il potenziamento ha bisogno di un server',
     'notify.noAnswerRestored':
-      'Il server non ha risposto — oggetto ripristinato',
+      'Il server non ha risposto - oggetto ripristinato',
     'notify.cannotMoveItem': 'Non puoi spostare quell’oggetto lì',
     'notify.cannotUseItem': 'Quell’oggetto non si usa così',
     'notify.npcNothingYet': 'Questo PNG non ha ancora nulla per te',
@@ -1286,8 +1286,8 @@ export const italianLayer: LanguageLayer = {
     'worlds.answering': 'Risponde',
     'worlds.noAnswer': 'Nessuna risposta',
     'worlds.hint': 'Scegli un mondo, poi entra.',
-    'bottomBar.pickSkill': '[{key}] vuoto — clicca per scegliere un’abilità',
-    'bottomBar.boundSlot': '{name} [{key}] — clic destro per cambiare',
+    'bottomBar.pickSkill': '[{key}] vuoto - clicca per scegliere un’abilità',
+    'bottomBar.boundSlot': '{name} [{key}] - clic destro per cambiare',
     'bottomBar.clearSlot': 'Lascia vuoto lo slot [{key}]',
     'guild.leaveTitle': 'Lascia la gilda',
     'guild.breakHint': 'Se vuoi lasciare la tua gilda,',

@@ -11,7 +11,7 @@ import type { LightRecipe } from './lightSource';
  * pale blue, MODEL_POISON green).
  */
 
-/** Orange fire — flame columns, fire balls, hellfire. Rolls like a torch. */
+/** Orange fire - flame columns, fire balls, hellfire. Rolls like a torch. */
 export const flame = (
   range: number,
   seconds: number,
@@ -24,7 +24,7 @@ export const flame = (
   ...extra,
 });
 
-/** Deep red-orange — embers in flight, meteor cores. */
+/** Deep red-orange - embers in flight, meteor cores. */
 export const ember = (range: number, seconds: number): LightRecipe => ({
   color: [1, 0.35, 0.1],
   range,
@@ -33,7 +33,7 @@ export const ember = (range: number, seconds: number): LightRecipe => ({
 });
 
 /**
- * Blue-white electricity — strikes, sparks.
+ * Blue-white electricity - strikes, sparks.
  *
  * A strike holds and snaps: the tail is a quarter of the life, not the 0.7 it
  * was. At 0.7 the light started falling a third of the way in and the ground
@@ -41,7 +41,7 @@ export const ember = (range: number, seconds: number): LightRecipe => ({
  * length of a 10-tick clip.
  *
  * `floorGain` because a bolt is a line of light hanging over the ground, not
- * a lamp standing in it — the same reading the fire family already has
+ * a lamp standing in it - the same reading the fire family already has
  * (Hellfire 1.3, Nova 1.4, Inferno 1.5).
  */
 export const arc = (
@@ -80,14 +80,14 @@ export const tide = (range: number, seconds: number): LightRecipe => ({
   seconds,
 });
 
-/** Violet — dark magic. */
+/** Violet - dark magic. */
 export const shade = (range: number, seconds: number): LightRecipe => ({
   color: [0.7, 0.4, 1],
   range,
   seconds,
 });
 
-/** Warm white — heals and buffs; a short attack so it blooms rather than pops. */
+/** Warm white - heals and buffs; a short attack so it blooms rather than pops. */
 export const holy = (range: number, seconds: number): LightRecipe => ({
   color: [1, 0.95, 0.75],
   range,
@@ -95,7 +95,7 @@ export const holy = (range: number, seconds: number): LightRecipe => ({
   attack: 0.08,
 });
 
-/** Pure white — energy, slashes. Long tail. */
+/** Pure white - energy, slashes. Long tail. */
 export const spark = (range: number, seconds: number): LightRecipe => ({
   color: [1, 1, 1],
   range,

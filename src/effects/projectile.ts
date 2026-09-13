@@ -1,5 +1,5 @@
 /**
- * Projectile — something that flies from a point to a target and does a
+ * Projectile - something that flies from a point to a target and does a
  * thing on arrival. The original's `CreateEffect(MODEL_* or BITMAP_*, …, Target)`
  * with a `Velocity`: `MoveEffect` steps toward `Target->Position` each tick
  * and, within one step of it, kills the effect and spawns the hit
@@ -34,7 +34,7 @@ import type { EffectHandle, EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Magic bolts: the original's 7 units/tick... at 25 Hz — 7 tiles/s, matching lighting/skills.ts. */
+/** Magic bolts: the original's 7 units/tick... at 25 Hz - 7 tiles/s, matching lighting/skills.ts. */
 const DEFAULT_SPEED = 7;
 
 /** Give up after this long: a target that despawned mid-flight. */
@@ -57,7 +57,7 @@ export interface ProjectileHead {
 }
 
 export interface ProjectileOptions {
-  /** Where it flies to — a fixed point or a moving one (the target's chest). */
+  /** Where it flies to - a fixed point or a moving one (the target's chest). */
   to: Vector3 | PointSource;
   /** Tiles per second. */
   speed?: number;
@@ -66,7 +66,7 @@ export interface ProjectileOptions {
   model?: Omit<ModelOptions, 'follow' | 'seconds'>;
   /** Particles left behind. */
   trail?: { recipe: ParticleRecipe; rate: number };
-  /** Peak height of a lob in tiles (0 = straight). A Meteorite falls, so it starts high instead — use `from`. */
+  /** Peak height of a lob in tiles (0 = straight). A Meteorite falls, so it starts high instead - use `from`. */
   arc?: number;
   /** Start somewhere other than `at` (a comet from the sky). */
   from?: Vector3;

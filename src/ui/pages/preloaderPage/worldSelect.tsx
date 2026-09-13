@@ -48,7 +48,7 @@ import {
  * The worlds: every server the client knows of, as a grid of cards, in the
  * setup window's frame.
  *
- * A card is the world's own banner with the server-list row art under it —
+ * A card is the world's own banner with the server-list row art under it -
  * MU's list rows already carry the hover and pressed states a card wants, and
  * the name and language tag sit on them the way a server name sits on the
  * server screen. A world with no banner of its own gets the MU mark on stone
@@ -79,8 +79,8 @@ const REACH_TEXT: Record<Exclude<Reach, 'unknown'>, TextKey> = {
 
 /**
  * The stone-and-mark tile a card falls back to. It is what a world with no
- * banner of its own gets, and — since a published banner is somebody else's
- * URL on somebody else's host — what a banner that fails to load gets too. A
+ * banner of its own gets, and - since a published banner is somebody else's
+ * URL on somebody else's host - what a banner that fails to load gets too. A
  * browser's broken-image glyph in the middle of a grid of MU art is worse than
  * no banner at all.
  */
@@ -177,7 +177,7 @@ const WorldCard = ({
 
       {/* Which client the world is published for. It is the first thing its
           line says, and with more than one version in the client it is the
-          thing that decides what the player is about to load — so it is on
+          thing that decides what the player is about to load - so it is on
           every card that names one, and only turns red when this client does
           not carry it. */}
       {world.version && (
@@ -253,7 +253,7 @@ export const WorldSelect = observer(
     const all = ServerConfig.all;
     const selected = ServerConfig.active;
 
-    // A saved world carries no language, so it belongs to no tag but `All` —
+    // A saved world carries no language, so it belongs to no tag but `All` -
     // where it is always the first thing in the grid anyway.
     const worlds = useMemo(
       () =>
@@ -276,7 +276,7 @@ export const WorldSelect = observer(
 
     // The height follows the *list*, not the page. Sizing it to the page put
     // the frame through a 268px shrink and a re-centre every time the last page
-    // came up short — which, with paging, is most lists. A list that fits in
+    // came up short - which, with paging, is most lists. A list that fits in
     // one short grid still gets a short window; a list that pages keeps one
     // height for all of them.
     const metrics = worldMetrics(
@@ -359,7 +359,7 @@ export const WorldSelect = observer(
     });
 
     // One line under the grid: what this world says about itself, or why the
-    // grid is thin — a list that could not be read is worth saying out loud
+    // grid is thin - a list that could not be read is worth saying out loud
     // here, where the player is looking for somewhere to play, and with the
     // reason attached, because "could not be read" is not one of them.
     const blurb = !worlds.length
@@ -534,7 +534,7 @@ export const WorldSelect = observer(
             className="setup-line"
             color={TEXT_COLOR.brightYellow}
             style={{ top: metrics.addressY }}
-            text={`${selected.name.trim() || t('server.unnamed')} — ${displayAddress(selected)}`}
+            text={`${selected.name.trim() || t('server.unnamed')} - ${displayAddress(selected)}`}
           />
         )}
 

@@ -10,10 +10,10 @@ import { BLOOD_CASTLE_GATE_PIT } from './spec';
  * g_fActionObjectVelocity` (ZzzObject.cpp:50-58) narrowed to the one object
  * that uses them on this map.
  *
- * Driven by: `BloodCastleGateObject.Update` (the tick) and two triggers —
+ * Driven by: `BloodCastleGateObject.Update` (the tick) and two triggers -
  *  - the match state `BloodCastleGateDestroyed` (the `BloodCastleState`
  *    packet, read through `events/bloodCastle`), which is the animated fall:
- *    `SetActionObject(world, 36, 20, 1)` — twenty ticks, pitch from 35° up to
+ *    `SetActionObject(world, 36, 20, 1)` - twenty ticks, pitch from 35° up to
  *    90° at a velocity that grows 1.5°/tick, a smoke burst as it passes 80°,
  *    `SOUND_DOWN_GATE` on the first tick (ZzzObject.cpp:96-131);
  *  - the server clearing `TW_NOGROUND` on the pit (`ReceiveSetAttribute`,

@@ -3,13 +3,13 @@
  *
  * Two pieces of MU chrome are reused rather than invented: the menu is the
  * login window's own frame (`login_back.OZT`, the one with the MU ONLINE plate
- * and the dragon corners), and the setup window is the Option window's frame —
+ * and the dragon corners), and the setup window is the Option window's frame -
  * a mirrored top and bottom band over a stone fill, which is what MU uses for
  * anything with settings in it.
  */
 
 export const SPRITE = {
-  /** 329×245 window with the MU ONLINE plate — the login window's frame. */
+  /** 329×245 window with the MU ONLINE plate - the login window's frame. */
   menuWindow: 'login_back.OZT',
   /** 193×26, three frames: idle, hover, pressed. The server-list row art. */
   menuButton: 'server_b2_all.OZT',
@@ -45,8 +45,8 @@ const MENU_BTN_AREA_BOTTOM = 190;
 
 /**
  * The buttons centred in that band rather than hung from its top. The menu is
- * two entries now — online play and the server fields both live behind
- * Worlds — and two buttons pinned under the plate leave the stone below them
+ * two entries now - online play and the server fields both live behind
+ * Worlds - and two buttons pinned under the plate leave the stone below them
  * looking
  * like the rest of the menu failed to draw.
  */
@@ -109,7 +109,7 @@ export const FIELD_STEP = 40;
 export const FIELD_TOP = CONTENT_TOP;
 
 /**
- * A published server's banner, under its fields. 16:10 of the right column —
+ * A published server's banner, under its fields. 16:10 of the right column -
  * the artwork these lists carry is a wide title card, so it crops well.
  */
 export const BANNER_X = FIELD_X;
@@ -149,7 +149,7 @@ export const CLOSE_HEIGHT = BTN_HEIGHT;
 
 /**
  * The worlds screen: the published servers as a grid of cards, in the same
- * frame as the setup window — same width, so the two read as one family of
+ * frame as the setup window - same width, so the two read as one family of
  * windows rather than two unrelated dialogs.
  *
  * A card is a banner with the server-list row art bolted under it, which is
@@ -158,7 +158,7 @@ export const CLOSE_HEIGHT = BTN_HEIGHT;
  */
 export const WORLD_CARD_WIDTH = MENU_BTN_WIDTH;
 /**
- * 16:10 of the card's width, which is the shape these banners are drawn in —
+ * 16:10 of the card's width, which is the shape these banners are drawn in -
  * the same ratio the setup window crops its own preview to (`BANNER_*`). At the
  * 2:1 this used to be, `object-fit: cover` was quietly taking a fifth off the
  * top and bottom of every published banner, which is where a server tends to
@@ -173,7 +173,7 @@ export const WORLD_COLS = 2;
 /**
  * How many rows of cards the window may hold, and how tall a window that is.
  *
- * The card is 193 wide because that is the row art's own width — `MuSpriteFrame`
+ * The card is 193 wide because that is the row art's own width - `MuSpriteFrame`
  * crops rather than scales, so a narrower card would cut the button's right
  * bevel off. Two columns is therefore fixed, and depth is the only axis density
  * can be had on: three rows where the viewport allows it, two where it does not.
@@ -219,7 +219,7 @@ export const WORLD_BACK_X = WORLD_SETUP_X + BTN_WIDTH + WORLD_BTN_GAP;
 /**
  * The window sized to the worlds it actually holds. One world is one row, and
  * a window with a row of empty stone under its only card looks like something
- * failed to load — so the height follows the grid rather than the page size.
+ * failed to load - so the height follows the grid rather than the page size.
  */
 export function worldMetrics(rowCount: number) {
   const rows = Math.max(1, Math.min(rowCount, WORLD_ROWS_MAX));

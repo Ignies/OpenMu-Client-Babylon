@@ -47,7 +47,7 @@ import { storeRef } from './storeRef';
 /**
  * Skill → visual recipe. The **consumer** of the effects layer
  * : every row in `SKILL_VISUALS` is a handful of
- * `effects.spawn(...)` calls at the four moments a skill has — `cast` at the
+ * `effects.spawn(...)` calls at the four moments a skill has - `cast` at the
  * caster's hands, `travel` from caster to target (a projectile whose arrival
  * fires `impact`), `impact` at the target, `area` at the ground point. A
  * skill with no row falls back on its type (`fallbackFor`), so nothing is
@@ -151,7 +151,7 @@ const ringOf = (step: Step, n: number, radius: number, every = 0): Step => (at, 
   }
 };
 /**
- * `step` again after `seconds` — on the effects clock (`effects/core.ts`
+ * `step` again after `seconds` - on the effects clock (`effects/core.ts`
  * `delay`), never `setTimeout`: a warp or a death resets the layer and the
  * pending step with it.
  */
@@ -170,7 +170,7 @@ const repeat = (n: number, every: number, step: Step): Step => (at, c) => {
 /**
  * The facing convention: `transform.rot.y` is `atan2(dz, dx) + π/2`
  * (skillCastSystem / logic.ts), so the forward vector is (sin yaw, −cos yaw)
- * — the same one deathSystem and the debris entry use.
+ * - the same one deathSystem and the debris entry use.
  */
 const forwardOf = (yaw: number): { x: number; z: number } => ({ x: Math.sin(yaw), z: -Math.cos(yaw) });
 /** `step`, offset from `at` by `forward` tiles along the caster's facing and `side` tiles to its right, `up` tiles higher. */
@@ -264,7 +264,7 @@ function weaponModelOf(e: Entity): string | null {
 const hitSparks = (recipe = SPARKS, count = HIT_COUNT): Step => particles({ recipe, count });
 const flash = (texture: string, colour: RGB, size = 1, seconds = 0.4): Step =>
   sprite({ texture, colour, size, seconds, grow: 1.6, growFrom: 0.4, fadeTail: 0.5 });
-/** MODEL_STONE1 / MODEL_STONE2 chips thrown up from a ground hit — either model, rolled per chip (ZzzEffect.cpp:280). */
+/** MODEL_STONE1 / MODEL_STONE2 chips thrown up from a ground hit - either model, rolled per chip (ZzzEffect.cpp:280). */
 const stones = (n: number, radius = 0.6): Step =>
   scatter(
     (at, c) => model({ model: Math.random() < 0.5 ? MODEL.stone : MODEL.stone2, seconds: 1, colour: RGBS.gold, rise: 2.5, spin: 6, scale: 0.7 })(at, c),
@@ -272,7 +272,7 @@ const stones = (n: number, radius = 0.6): Step =>
     radius
   );
 /**
- * `c->AttackTime >= g_iLimitAttackTime` — 15 ticks (ZzzCharacter.cpp:90). The
+ * `c->AttackTime >= g_iLimitAttackTime` - 15 ticks (ZzzCharacter.cpp:90). The
  * wizard's leap in `player_action_154` lands around tick 12, so the ground
  * effect follows him down rather than waiting on the clip.
  */
@@ -309,8 +309,8 @@ const explosion = (colour: RGB, scale = 1, seconds = ticks(20)): Step =>
 /**
  * Burn the settled snow off the ground under `at` (weather/snowMelt.ts).
  *
- * Not from the original — nothing in `ZzzEffect.cpp` has ever touched the
- * terrain — but the ground here is a simulation rather than a texture, and a
+ * Not from the original - nothing in `ZzzEffect.cpp` has ever touched the
+ * terrain - but the ground here is a simulation rather than a texture, and a
  * fireball that leaves a snowfield untouched is the one thing on screen that
  * gives that away. Radius in tiles; it takes only x/z, so a hit at a target's
  * chest still melts what is under them. Free to call anywhere: a map with no
@@ -333,7 +333,7 @@ const burn = (radius: number, strength = 1): Step => (at, c) => {
 const FIRE_BLEND_MESH = 1;
 /** Every fire skill's landing, and so the one place the snow gets melted. */
 const fireHit: Step = seq(explosion(RGBS.fire), hitSparks(FIRE_SPARKS, 16), particles({ recipe: FIRE_PUFF, count: 6 }), scorch(1.2), burn(1.2));
-/** MODEL_ICE (LT 50, Scale 0.8, white) + 5× MODEL_ICE_SMALL (LT 32–47, Scale 0.8–1.1, Gravity 8–23) — the Ice hit. */
+/** MODEL_ICE (LT 50, Scale 0.8, white) + 5× MODEL_ICE_SMALL (LT 32–47, Scale 0.8–1.1, Gravity 8–23) - the Ice hit. */
 const iceHit: Step = seq(
   model({ model: MODEL.ice, seconds: ticks(50), scale: 0.8, colour: RGBS.white }),
   scatter(model({ model: MODEL.ice2, seconds: ticks(40), scale: 0.95, colour: RGBS.white, rise: 1.5, spin: 3 }), 5, 0.5),
@@ -341,7 +341,7 @@ const iceHit: Step = seq(
 );
 const arcHit: Step = seq(flash(TEX.thunder, RGBS.arc, 1.3, 0.3), hitSparks(ARC_MOTES, 20));
 const venomHit: Step = seq(flash(TEX.flare, RGBS.venom, 1.1, 0.5), particles({ recipe: VENOM_MOTES, count: 16 }));
-/** BITMAP_MAGIC+1 (Magic_Ground2) at a body's feet, LT 20 — the buff-cast circle. */
+/** BITMAP_MAGIC+1 (Magic_Ground2) at a body's feet, LT 20 - the buff-cast circle. */
 const magicGround = (colour: RGB, seconds = ticks(20), scale = 2.5): Step =>
   ring({ texture: TEX.magicGround2, colour, seconds, scale, spin: 60, growFrom: 0.5 });
 const holyCircle = (colour: RGB = RGBS.holy): Step =>
@@ -351,12 +351,12 @@ const shockRing = (colour: RGB = RGBS.gold, scale = 4): Step =>
 /**
  * A bleed skill landing. No `flash`: a card is additive whatever it is
  * tinted, and a red `flare` over a bright map clipped to white and bloomed
- * into a pink cloud — BLOOD_MIST is the same spray drawn straight-alpha.
+ * into a pink cloud - BLOOD_MIST is the same spray drawn straight-alpha.
  */
 const bloodHit: Step = seq(hitSparks(BLOOD_CHIPS, 18), particles({ recipe: BLOOD_MIST, count: 5 }));
 const steelHit: Step = seq(hitSparks(STEEL_GLINTS, 14), flash(TEX.spark2, RGBS.steel, 0.8, 0.25));
 const wizardCast: Step = atCaster(sprite({ texture: TEX.magicCircle, colour: RGBS.energy, size: 0.5, seconds: 0.4, spin: 6, grow: 1.4 }));
-/** BITMAP_SPARK+1 (Spark03) LT 10 — the Teleport flash. */
+/** BITMAP_SPARK+1 (Spark03) LT 10 - the Teleport flash. */
 const teleportFlash: Step = sprite({ texture: TEX.spark3, colour: RGBS.energy, size: 1.6, seconds: ticks(10), count: 3, spread: 0.3, grow: 1.8, growFrom: 0.5 });
 /** A JOINT_THUNDER bolt from the sky onto `at` (GiganticStorm, Twister's strikes). */
 const skyBolt = (height: number, width = 0.3, seconds = ticks(20)): Step => (at, c) => {
@@ -418,7 +418,7 @@ const siphonFrom = (seconds: number): Step => (_at, c) => {
 };
 /**
  * Swell Life / Add Mana: 36× CreateJoint(JOINT_SPIRIT sub2, Angle(−10,0,i*10),
- * width 60) — Vel 50, LT 20, MaxTails 3, Light 0.5 — with BITMAP_MAGIC+1 every
+ * width 60) - Vel 50, LT 20, MaxTails 3, Light 0.5 - with BITMAP_MAGIC+1 every
  * 20th. Drawn at half the count: 18 ribbons read the same and cost half.
  */
 const spiritBurst = (colour: RGB): Step =>
@@ -642,7 +642,7 @@ const NOVA_MAX_SECONDS = ticks(60);
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
 export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
-  // 1 Poison: impact@target — MODEL_POISON LT 40 + 10× BITMAP_SMOKE tinted (0.4, 0.6, 1.0). No bolt.
+  // 1 Poison: impact@target - MODEL_POISON LT 40 + 10× BITMAP_SMOKE tinted (0.4, 0.6, 1.0). No bolt.
   1: { impact: seq(model({ model: MODEL.poison, seconds: ticks(40), scale: 1, colour: RGBS.venom }), particles({ recipe: POISON_SMOKE, count: 10 })) },
   // 2 Meteorite: MODEL_FIRE sub0 LT 40, Scale 1.0–1.7, from target + (130…162, 400) cm, Dir(0,0,−50).
   2: {
@@ -663,13 +663,13 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 4 Fire Ball: MODEL_FIRE sub1 LT 60, Scale 0.8–1.1, z+120, Dir(0,−50,0); within 100 → 2× MODEL_STONE.
   4: { travel: modelBolt(MODEL.fire, RGBS.fire, FIRE_PUFF, perTick(50), 0.95, FIRE_BLEND_MESH), impact: seq(fireHit, stones(2)) },
-  // 5 Flame: BITMAP_FLAME sub0 LT 40 at SkillXY — 6 BITMAP_FLAME particles a frame in a ±25 cm box, 1/8 stones.
+  // 5 Flame: BITMAP_FLAME sub0 LT 40 at SkillXY - 6 BITMAP_FLAME particles a frame in a ±25 cm box, 1/8 stones.
   5: { area: seq(particles({ recipe: FLAME_TONGUES, rate: 150, seconds: ticks(40) }), scatter(stones(1, 0.3), 5, 0.3, 0.3), scorch(1), burn(1)) },
-  // 6 Teleport: cast — BITMAP_SPARK+1 LT 10 at the caster (AlphaTarget 0).
+  // 6 Teleport: cast - BITMAP_SPARK+1 LT 10 at the caster (AlphaTarget 0).
   6: { cast: atCaster(teleportFlash, 0.6) },
-  // 7 Ice: impact@target — MODEL_ICE sub0 + 5× MODEL_ICE_SMALL. No bolt.
+  // 7 Ice: impact@target - MODEL_ICE sub0 + 5× MODEL_ICE_SMALL. No bolt.
   7: { impact: iceHit },
-  // 8 Twister: impact@caster — MODEL_STORM LT 59, Dir(0,−10,0) (walks forward), smoke, JOINT_THUNDER from
+  // 8 Twister: impact@caster - MODEL_STORM LT 59, Dir(0,−10,0) (walks forward), smoke, JOINT_THUNDER from
   // ±200/+700 half the frames, stones 1/4.
   8: {
     area: (at, c) => {
@@ -681,11 +681,11 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       after(0.5, stones(3, 1))(at, c);
     },
   },
-  // 9 Evil Spirit: impact@caster+100z — 4× JOINT_SPIRIT sub0 pairs at Angle(0,0,i*90), width 80 + 20:
+  // 9 Evil Spirit: impact@caster+100z - 4× JOINT_SPIRIT sub0 pairs at Angle(0,0,i*90), width 80 + 20:
   // ALPHA_BLEND_MINUS, Vel 70, LT 49, MaxTails 6, Light = LifeTime×0.1, homing the *caster*+80z
   // (MoveHumming 10°/frame) under damped random steering (±3.2° pitch ×0.6, ±12.8° yaw ×0.8 a frame)
   // between terrain +100 and +400; each width-80 joint stamps MODEL_LASER (Scale 1.3, LT 1,
-  // RENDER_DARK) at its head every frame — the visible spirits (ZzzCharacter.cpp:4468,
+  // RENDER_DARK) at its head every frame - the visible spirits (ZzzCharacter.cpp:4468,
   // ZzzEffectJoint.cpp:3698, ZzzEffect.cpp:1890). Stamps land a tick apart and each holds its spot
   // for a tick, so the screen shows the newest one plus the just-expired ones still inside display
   // persistence: a short trail of spirit shadows. Five tick-lagged models per wide joint
@@ -744,7 +744,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
    * 10 Hellfire. The skill is a leap: `SetAction(o, PLAYER_SKILL_HELL)` and
    * `c->AttackTime = 1` at the cast (ZzzInterface.cpp:5900-5906), the wizard
    * burning off random bones the whole way up (ZzzCharacter.cpp:5633), and the
-   * ground only opens once he is back on it — `MoveCharacter` holds the branch
+   * ground only opens once he is back on it - `MoveCharacter` holds the branch
    * until `c->AttackTime >= g_iLimitAttackTime`, 15 ticks, and only then
    * creates MODEL_CIRCLE (LT 45) + MODEL_CIRCLE_LIGHT (LT 40) at `o->Position`
    * (ZzzCharacter.cpp:4307-4318, g_iLimitAttackTime at :90).
@@ -753,8 +753,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
    * climbs 0.58 → 3.52 over its first five keys and is back down by key 6, so
    * at the action's own PlaySpeed the wizard touches down around tick 12 and
    * the fire follows him in about three ticks later. Firing the circle at the
-   * cast instead — which is what this row did, the `0.05` being `atCaster`'s
-   * *height* and not a delay — put the whole ground effect under a wizard who
+   * cast instead - which is what this row did, the `0.05` being `atCaster`'s
+   * *height* and not a delay - put the whole ground effect under a wizard who
    * was still in the air, and left nothing at all for the landing.
    */
   10: {
@@ -763,7 +763,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       ticks(HELLFIRE_TOUCHDOWN),
       atCaster(
         seq(
-          // Not `flat` — despite the name. `Skill/Circle01` is an 8x8 disc with
+          // Not `flat` - despite the name. `Skill/Circle01` is an 8x8 disc with
           // zero thickness in Z, because MU authors ground planes in XY (Z is
           // up there), and `flat` skips the Z-up-to-Y-up basis change that lays
           // it down. It stood the fire ring on its edge like a wall.
@@ -805,7 +805,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       after(0.15, skyfall(MODEL.blast, RGBS.fire, ARC_MOTES, [2, 3, -0.4], perTick(75), 1.1, seq(fireHit, stones(6, 1))))
     ),
   },
-  // 14 Inferno: impact@caster — CreateInferno: 8 bombs on r=220 at 45° + 2 stones each; then MODEL_SKILL_INFERNO
+  // 14 Inferno: impact@caster - CreateInferno: 8 bombs on r=220 at 45° + 2 stones each; then MODEL_SKILL_INFERNO
   // sub0 LT 15, Light 0.8, Scale 0.9.
   14: {
     area: atCaster(
@@ -816,9 +816,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       0.05
     ),
   },
-  // 15 Teleport Ally: CreateTeleportBegin(target) + CreateTeleportEnd(caster) — BITMAP_SPARK+1 at both.
+  // 15 Teleport Ally: CreateTeleportBegin(target) + CreateTeleportEnd(caster) - BITMAP_SPARK+1 at both.
   15: { impact: seq(teleportFlash, atCaster(teleportFlash, 0.6)) },
-  // 16 Soul Barrier: 5× CreateJoint(MODEL_SPEARSKILL sub0, width 20, white, LT 999999, MaxTails 30) — persistent,
+  // 16 Soul Barrier: 5× CreateJoint(MODEL_SPEARSKILL sub0, width 20, white, LT 999999, MaxTails 30) - persistent,
   // so the ribbons live in BUFF_VISUALS[4] and end on MagicEffectStatus. Here only the arrival glimmer.
   16: { impact: particles({ recipe: SOUL_MOTES, count: 12, height: 0.6 }) },
   // 17 Energy Ball: BITMAP_ENERGY sub0 LT 20, Dir(0,−60,0), z+100; per frame ENERGY + SPARK+1 (scale 4) particles;
@@ -829,7 +829,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 18 Defense (knight): BITMAP_SHINY flash on the body.
   18: { impact: seq(flash(TEX.shiny, RGBS.steel, 1.4, 0.6), particles({ recipe: SPARKS, count: 12, height: 0.6 })) },
-  // 19 Falling Slash / 20 Lunge / 21 Uppercut / 22 Cyclone / 23 Slash: cast only — the weapon blur (BlurType 1).
+  // 19 Falling Slash / 20 Lunge / 21 Uppercut / 22 Cyclone / 23 Slash: cast only - the weapon blur (BlurType 1).
   19: { cast: slash() },
   20: { cast: slash(RGBS.steel, TEX.swordBlur, 1.1) },
   21: { cast: slash(RGBS.gold) },
@@ -858,7 +858,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   27: { impact: magicGround([0.4, 0.8, 0.2]) },
   // 28 Greater Damage: BITMAP_MAGIC+1 sub3 LT 20.
   28: { impact: magicGround([1, 0.75, 0.55]) },
-  // 30–36 Summons: impact@caster — BITMAP_MAGIC+1 sub3.
+  // 30–36 Summons: impact@caster - BITMAP_MAGIC+1 sub3.
   30: { area: summonCircle }, 31: { area: summonCircle }, 32: { area: summonCircle }, 33: { area: summonCircle },
   34: { area: summonCircle }, 35: { area: summonCircle }, 36: { area: summonCircle },
   // 38 Decay @SkillXY: 2× MODEL_FIRE sub6 LT 40, Scale 1.5–2.2, Light (0.8,0.5,0.1), Pos += (200–300, ±50, 500–800),
@@ -976,7 +976,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       steelHit
     ),
   },
-  // 45 Javelin (Lance): 3× MODEL_SKILL_JAVELIN sub0/1/2 — LT 35, Vel 10, Scale 1.2, z+150, HeadAngle ±Ang.
+  // 45 Javelin (Lance): 3× MODEL_SKILL_JAVELIN sub0/1/2 - LT 35, Vel 10, Scale 1.2, z+150, HeadAngle ±Ang.
   45: {
     area: (at, c) => fanArrows(at, c, 3, MODEL.javelin, RGBS.steel, 0.3, 1.2),
     impact: steelHit,
@@ -997,7 +997,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     ),
     impact: steelHit,
   },
-  // 48 Swell Life: impact@caster+100z — 36× JOINT_SPIRIT sub2 fan (Light 0.5) + BITMAP_MAGIC+1 sub4 LT 40.
+  // 48 Swell Life: impact@caster+100z - 36× JOINT_SPIRIT sub2 fan (Light 0.5) + BITMAP_MAGIC+1 sub4 LT 40.
   48: { impact: atCaster(spiritBurst([0.5, 0.5, 0.5]), 1), area: atCaster(spiritBurst([0.5, 0.5, 0.5]), 1) },
   // 49 Rider / Dark Horse strike (Fire Breath): BITMAP_SHOTGUN LT 10, Dir(0,−30,0) + 40× JOINT_SPARK sub1 in two
   // fans from (−20,−20,60) / (30,−20,60). Drawn as 2×6 spark ribbons.
@@ -1013,7 +1013,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 50 Flame of Evil (monster)
   50: { impact: fireHit },
-  // 51 Ice Arrow: cast — MODEL_ICE sub1 + sub2 (+180°) at the target LT 20, Scale 0.8, BlendMeshLight 0.5, 3× BITMAP_SMOKE,
+  // 51 Ice Arrow: cast - MODEL_ICE sub1 + sub2 (+180°) at the target LT 20, Scale 0.8, BlendMeshLight 0.5, 3× BITMAP_SMOKE,
   // a BITMAP_FIRE+2 sub10 orbiting r=60; impact: a single arrow.
   51: {
     travel: arrow(MODEL.arrow, RGBS.ice),
@@ -1027,7 +1027,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       hitSparks(ICE_MOTES, 10)(at, c);
     },
   },
-  // 52 Penetration: charge t=3 BITMAP_GATHERING sub0 LT 10 at (−100 fwd, +150 z) — 3 a frame JOINT_THUNDER sub3 /
+  // 52 Penetration: charge t=3 BITMAP_GATHERING sub0 LT 10 at (−100 fwd, +150 z) - 3 a frame JOINT_THUNDER sub3 /
   // SPARK+1 sub2 on a r=120 ring + SHINY+1 sprite; impact: CreateArrows(sub 2).
   52: {
     cast: after(ticks(3), atCaster(offset(seq(
@@ -1061,7 +1061,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       slash(RGBS.fire, TEX.jointFire)
     ), 1),
   },
-  // 56 Power Slash: charge — 5× MODEL_MAGIC2 sub2 at yaw −40..+40 step 20, LT 20; each 2× SHINY+1 + LIGHT sprites.
+  // 56 Power Slash: charge - 5× MODEL_MAGIC2 sub2 at yaw −40..+40 step 20, LT 20; each 2× SHINY+1 + LIGHT sprites.
   56: {
     area: (_at, c) => {
       for (let i = -2; i <= 2; i++) {
@@ -1073,9 +1073,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       slash(RGBS.arc, TEX.swordEff2)(_at, c);
     },
   },
-  // 57 Spiral Slash: charge frame > 5 — CreateJoint(BITMAP_FLARE sub23, width 40) on the weapon.
+  // 57 Spiral Slash: charge frame > 5 - CreateJoint(BITMAP_FLARE sub23, width 40) on the weapon.
   57: { cast: seq(slash(RGBS.wind, TEX.flareBig), (at, c) => effects.spawn('joint', c.scene, at, { head: weaponBone(c.caster), maxTails: 10, width: 0.4, colour: RGBS.wind, seconds: SLASH_SECONDS })), impact: steelHit },
-  // 58 Nova (start): the charge — bones 0..38, (skillCount+1)× BITMAP_LIGHT sub6 (Light (0.3,0.3,1.0), scale
+  // 58 Nova (start): the charge - bones 0..38, (skillCount+1)× BITMAP_LIGHT sub6 (Light (0.3,0.3,1.0), scale
   // 1.3+count·0.08) + CreateForce: 3× JOINT_HEALING sub8 from r=500, LT 17. On the hero it runs for the hold
   // (`combat.novaCharging` / `novaStage`); on anyone else for a full charge's length.
   58: { cast: novaCharge },
@@ -1097,7 +1097,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       fireHit
     ),
   },
-  // 62 Earthshake: frame ≥ 5 — the EarthQuake0N companions at the caster.
+  // 62 Earthshake: frame ≥ 5 - the EarthQuake0N companions at the caster.
   62: {
     area: atCaster(seq(
       model({ model: MODEL.earthQuake, seconds: ticks(20), colour: RGBS.gold, flat: true, scale: 1.5 }),
@@ -1113,7 +1113,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     ), 0.05),
   },
   // 63 Party Teleport (Summon): MODEL_CIRCLE sub2 + MODEL_CIRCLE_LIGHT sub3 (LT 250 in the original; held 3 s
-  // here — no completion packet ends it) + BITMAP_LIGHT particles at bone 42 after frame 5.5.
+  // here - no completion packet ends it) + BITMAP_LIGHT particles at bone 42 after frame 5.5.
   63: {
     area: atCaster(seq(
       model({ model: MODEL.circle, seconds: PARTY_TELEPORT_SECONDS, colour: RGBS.soul, flat: true, scale: 1 }),
@@ -1123,7 +1123,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 64 Add Critical (Increase Critical Damage): MODEL_DARKLORD_SKILL at weapon bone 0 (sub0) and bone 1 (sub1), Light (1,0.6,0.3).
   64: { impact: addCritical, area: addCritical },
-  // 65 Electric Spark: impact at CalcAddPosition(0,−90,−50) — BITMAP_FLARE_FORCE one-shot → 5 ribbons: sub1 (100),
+  // 65 Electric Spark: impact at CalcAddPosition(0,−90,−50) - BITMAP_FLARE_FORCE one-shot → 5 ribbons: sub1 (100),
   // sub0 (250), sub2/3/4 (100).
   65: {
     area: atCaster(offset(seq(
@@ -1136,7 +1136,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 67 Stun: CreateJoint(BITMAP_FLASH sub7 at the caster).
   67: { area: atCaster((at, c) => effects.spawn('joint', c.scene, at, { head: followEntity(c.caster, 1.2), maxTails: 10, width: 0.5, colour: RGBS.gold, seconds: ticks(20) }), 1.2) },
   // 68 Removal Stun / 71 Removal Invisible: BITMAP_FLASH sub0/1 at target +1200 z, width 120, MaxTails 10, LT 40,
-  // Vel 70, Angle (90,0,0) — a ribbon dropping from the sky.
+  // Vel 70, Angle (90,0,0) - a ribbon dropping from the sky.
   68: { impact: flashDrop(RGBS.gold) },
   71: { impact: flashDrop(RGBS.soul) },
   // 69 Add Mana (Swell Mana): 36× JOINT_SPIRIT sub21 (= sub2) fan + BITMAP_MAGIC+1 sub10.
@@ -1164,7 +1164,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       after(0.25, seq(flash(TEX.flareBlue, RGBS.soul, 1.3, 0.4), hitSparks(ARC_MOTES)))(at, c);
     },
   },
-  // 74 Space Split (Fire Blast): MODEL_PIER_PART sub2 caster→target — LT 20, Vel 50, z−20, Dir(0,−40,0).
+  // 74 Space Split (Fire Blast): MODEL_PIER_PART sub2 caster→target - LT 20, Vel 50, z−20, Dir(0,−40,0).
   74: { travel: modelBolt(MODEL.pierPart, RGBS.fire, FIRE_SPARKS, perTick(40), 1), impact: fireHit },
   // 75 Brand of Skill: MODEL_DARKLORD_SKILL at the weapon bones + MODEL_MANA_RUNE sub0 (LT 50, Scale 0→, Alpha 0.3, z+300).
   75: { impact: seq(addCritical, atCaster(model({ model: MODEL.manaRune, seconds: ticks(50), scale: 0.2, grow: 5, colour: RGBS.gold, alpha: 0.3, yaw: Math.PI / 4 }), 3)) },
@@ -1209,7 +1209,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   211: { impact: flash(TEX.flare, RGBS.shade, 1.4, 0.6) },
   212: { impact: flash(TEX.eye, RGBS.shade, 1.2, 0.6) },
   213: { impact: seq(flash(TEX.flareRed, RGBS.blood, 1.4, 0.5), particles({ recipe: BLOOD_CHIPS, count: 12, height: 0.6 })) },
-  // 214 Drain Life: MODEL_ALICE_DRAIN_LIFE sub0 LT 70 (no such model here) — a spirit joint target → caster for the 70 ticks.
+  // 214 Drain Life: MODEL_ALICE_DRAIN_LIFE sub0 LT 70 (no such model here) - a spirit joint target → caster for the 70 ticks.
   214: { impact: (at, c) => { effects.spawn('joint', c.scene, at, { to: followEntity(c.caster, CAST_HEIGHT), colour: RGBS.blood, seconds: ticks(70), width: 0.12, jitter: 0.06 }); particles({ recipe: SHADE_MOTES, count: 16 })(at, c); } },
   // 215 Chain Lightning: MODEL_LIGHTNING_ORB sub0 (LT 20, Dir(0,−60,0), z+100) → arrival sub1 LT 18 (the chain hops server-side).
   215: {
@@ -1323,7 +1323,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 233 Expansion of Wizardry: MODEL_SWELL_OF_MAGICPOWER at the caster, Light (0.3,0.2,0.9) (WSclient.cpp
   // AT_SKILL_SWELL_OF_MAGICPOWER cast).
   233: { impact: swellOfMagic, area: swellOfMagic },
-  // 234 Recover: cast — BITMAP_IMPACT at caster (0,−220,130), Light (0.7,0.6,0), LT 80, Scale 0→; target — 19× JOINT
+  // 234 Recover: cast - BITMAP_IMPACT at caster (0,−220,130), Light (0.7,0.6,0), LT 80, Scale 0→; target - 19× JOINT
   // FLARE sub47 width 40 + MODEL_SUMMON (LT 60, Scale 0.7) + BITMAP_TWLIGHT sub0/1/2 + 2× FLARE sub3 on random bones.
   234: {
     cast: atCaster(offset(sprite({ texture: TEX.impact3, colour: [0.7, 0.6, 0], size: 2, seconds: ticks(80), growFrom: 0, grow: 1.2 }), 2.2, 0.2), 1.1),
@@ -1345,7 +1345,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     },
     impact: steelHit,
   },
-  // 236 Flame Strike: MODEL_EFFECT_FLAME_STRIKE sub0 at the caster — Alpha 0→, LT 35, Vel = the clip's speed.
+  // 236 Flame Strike: MODEL_EFFECT_FLAME_STRIKE sub0 at the caster - Alpha 0→, LT 35, Vel = the clip's speed.
   236: { area: atCaster(model({ model: MODEL.flameStrike, seconds: ticks(35), colour: RGBS.fire, scale: 1, fadeIn: 0.3, loop: false }), 0.05) },
   // 237 Gigantic Storm: 5× CreateEffect(BITMAP_JOINT_THUNDER) on a r=200 ring, LT 20, StartPos.z += 800.
   237: { area: seq(ringOf(seq(skyBolt(8, 0.35), arcHit), 5, 2, 0.05), particles({ recipe: WIND_STREAKS, rate: 80, seconds: 1 })) },
@@ -1472,7 +1472,7 @@ function fanArrows(at: Vector3, c: SkillContext, n: number, m: string, colour: R
   }
 }
 
-/** The skill being dispatched — for helpers that fire a row's impact later. */
+/** The skill being dispatched - for helpers that fire a row's impact later. */
 let currentSkill = 0;
 
 /**

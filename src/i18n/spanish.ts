@@ -1,6 +1,6 @@
 /**
  * Spanish. MU's own proper nouns (class names, event names, Zen, MU Helper)
- * stay as they are — that is what the Spanish-speaking servers and their
+ * stay as they are - that is what the Spanish-speaking servers and their
  * guides call them.
  */
 
@@ -264,7 +264,7 @@ export const spanishLayer: LanguageLayer = {
     'bottomBar.emptySlot': '[{key}] vacío',
     'bottomBar.itemSlot': '{name} [{key}]',
     'bottomBar.skillHint':
-      ' — clic: lista de habilidades, clic derecho: ataque normal',
+      ' - clic: lista de habilidades, clic derecho: ataque normal',
     'bottomBar.pet.normal': 'Nor',
     'bottomBar.pet.random': 'Alz',
     'bottomBar.pet.owner': 'Amo',
@@ -1289,8 +1289,8 @@ export const spanishLayer: LanguageLayer = {
     'worlds.answering': 'Responde',
     'worlds.noAnswer': 'Sin respuesta',
     'worlds.hint': 'Elige un mundo y entra.',
-    'bottomBar.pickSkill': '[{key}] vacío — haz clic para elegir una habilidad',
-    'bottomBar.boundSlot': '{name} [{key}] — clic derecho para cambiar',
+    'bottomBar.pickSkill': '[{key}] vacío - haz clic para elegir una habilidad',
+    'bottomBar.boundSlot': '{name} [{key}] - clic derecho para cambiar',
     'bottomBar.clearSlot': 'Dejar vacía la ranura [{key}]',
     'guild.leaveTitle': 'Salir del gremio',
     'guild.breakHint': 'Si quieres salir de tu gremio,',

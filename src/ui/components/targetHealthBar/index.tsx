@@ -83,7 +83,7 @@ const TRACK_STYLE = {
 
 /**
  * The target's name and twenty-step health bar over the screen centre. The
- * pointer target is plain per-frame state, so it is polled once a frame —
+ * pointer target is plain per-frame state, so it is polled once a frame -
  * into a reused record, and React only hears about it when the name or the
  * step count actually changes.
  */

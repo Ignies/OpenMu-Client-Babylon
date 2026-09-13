@@ -27,7 +27,7 @@ export interface QuestLayer {
   /**
    * Map changed: close the NPC windows (the original hides every NPC
    * interface on `ReceiveMapChange`) and drop anything bound to the world
-   * just left. Quest *state* survives — it belongs to the character.
+   * just left. Quest *state* survives - it belongs to the character.
    */
   reset?(): void;
 }

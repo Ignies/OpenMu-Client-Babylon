@@ -3,7 +3,7 @@ import { Matrix } from '../libs/babylon/exports';
 /**
  * The 3×4 matrix maths `RenderLinkObject` builds a bone-link transform with
  * (ZzzMathLib.cpp:194 `AngleMatrix`, :254 `R_ConcatTransforms`), shared by
- * every part that hangs off a bone with an explicit matrix — back weapons
+ * every part that hangs off a bone with an explicit matrix - back weapons
  * (weaponAttachment.ts) and capes (wings.ts).
  *
  * Angles are degrees in BMD space, offsets are centimetres.
@@ -40,7 +40,7 @@ export function angleMatrix(link: BmdLink): Mat34 {
 /**
  * R_ConcatTransforms (ZzzMathLib.cpp:254) in its exact evaluation order.
  * Passing the same array as `in1` and `out` reproduces the original's
- * aliasing, which is deliberate — see weaponAttachment.ts.
+ * aliasing, which is deliberate - see weaponAttachment.ts.
  */
 export function concatTransforms(in1: Mat34, in2: Mat34, out: Mat34) {
   for (let r = 0; r < 3; r++) {

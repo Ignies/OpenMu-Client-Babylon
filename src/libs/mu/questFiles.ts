@@ -23,9 +23,9 @@ import {
  * | `Local/NPCDialogue.bmd` | n × 88 B | `DWORD` + `SNPCDialogue` (QuestMng.h:12), `LoadNPCDialogueScript` |
  *
  * `QuestAttributeFile` is `{short cond; short req; WORD npc; char name[32]}`
- * = 38 bytes, then `QUEST_CLASS_ACT[16]` at 38 — 24 bytes each because
+ * = 38 bytes, then `QUEST_CLASS_ACT[16]` at 38 - 24 bytes each because
  * `byRequestClass[MAX_CLASS = 7]` plus one pad byte aligns the four
- * `shQuestStartText` shorts — then `QUEST_CLASS_REQUEST[16]` at 424 (the
+ * `shQuestStartText` shorts - then `QUEST_CLASS_REQUEST[16]` at 424 (the
  * act array ends at 422, padded to the DWORD `dwZen` alignment), 20 bytes
  * each with `wRequestStrength` at +8, `dwZen` at +12 and `shErrorText` at
  * +16. 38 + 384 + 2 + 320 = 744, which is what 148800 / 200 gives.
@@ -56,7 +56,7 @@ export const QuestActKind = {
   Monster: 2,
 } as const;
 
-/** `QUEST_CLASS_ACT` — one thing a class has to do for this quest. */
+/** `QUEST_CLASS_ACT` - one thing a class has to do for this quest. */
 export type QuestAct = {
   live: number;
   kind: number;
@@ -76,7 +76,7 @@ export type QuestAct = {
   startText: number[];
 };
 
-/** `QUEST_CLASS_REQUEST` — a precondition the server also checks. */
+/** `QUEST_CLASS_REQUEST` - a precondition the server also checks. */
 export type QuestRequest = {
   live: number;
   /** Matches `QuestAct.requestType`; 255 = applies to every act. */
@@ -91,7 +91,7 @@ export type QuestRequest = {
   errorText: number;
 };
 
-/** `QUEST_ATTRIBUTE` — one legacy quest. */
+/** `QUEST_ATTRIBUTE` - one legacy quest. */
 export type QuestDefinition = {
   index: number;
   conditionCount: number;
@@ -112,7 +112,7 @@ const DIALOG_TEXT_LENGTH = 300;
 const DIALOG_MAX_ANSWERS = 10;
 const DIALOG_ANSWER_LENGTH = 64;
 
-/** `DIALOG_SCRIPT` — a page of NPC speech plus its numbered answers. */
+/** `DIALOG_SCRIPT` - a page of NPC speech plus its numbered answers. */
 export type DialogScript = {
   text: string;
   answers: {
@@ -130,7 +130,7 @@ const PROGRESS_RECORD_SIZE = 41;
 /** `QM_MAX_ANSWER` (QuestMng.h:9). */
 const PROGRESS_MAX_ANSWERS = 5;
 
-/** `SQuestProgress` — one S6 quest step, keyed by `(number << 16) | group`. */
+/** `SQuestProgress` - one S6 quest step, keyed by `(number << 16) | group`. */
 export type QuestProgressEntry = {
   key: number;
   /** 0 = NPC-words window (`CNewUIQuestProgress`), 1 = the "etc" variant. */
@@ -151,7 +151,7 @@ const NPC_DIALOGUE_RECORD_SIZE = 4 + 4 + 10 * 2 * 4;
 const NPC_DIALOGUE_MAX_ANSWERS = 10;
 
 /**
- * `SNPCDialogue` — one page of a Season 6 NPC's talk, keyed
+ * `SNPCDialogue` - one page of a Season 6 NPC's talk, keyed
  * `npcIndex * 0x10000 + dialogState` (`GetNPCDlgNPCWords`). Each answer is a
  * QuestWords index and a *result*: ≤ 900 the next page, 901 quest list,
  * 902 NPC buff, 903 / 904 join Gens Duprian / Vanert, 905 leave, 906 / 907

@@ -17,7 +17,7 @@ const BOX_HALF = 0.4;
  * body.
  *
  * The original loads the model like any other object and simply never draws
- * it — `Draw_RenderObject` (ZzzObject.cpp:390) gates the whole body on
+ * it - `Draw_RenderObject` (ZzzObject.cpp:390) gates the whole body on
  * `HiddenMesh != -2`, so it is visible only in the map editor. Setting
  * `HiddenMesh` to `HIDDEN_MESH_ALL` reproduces that: the meshes load, leave
  * the render list, cast no shadow, and `UpdateBoundings` uses the fixed box
@@ -69,7 +69,7 @@ export class OperateBoxObject extends ModelObject {
 /**
  * The taller variant: `CreateOperate` + the explicit
  * `Vector(40.f, 40.f, 160.f, o->BoundingBoxMax)` + `HiddenMesh = -2`, which
- * the original uses for every "lean against me" pose trigger — Lorencia's
+ * the original uses for every "lean against me" pose trigger - Lorencia's
  * MODEL_POSE_BOX (ZzzObject.cpp:4585), Dungeon 60 (:4611), Devias 91 (:4652),
  * Atlans 39 and Market 67.
  *

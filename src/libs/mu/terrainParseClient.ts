@@ -2,8 +2,8 @@
  * Main-thread half of the terrain parsing worker (todo C8).
  *
  * One worker, created lazily on the first map load and kept for the session
- * (map changes reuse it). If the worker cannot be constructed — no module
- * worker support, a bundler quirk, a CSP — every call falls back to running
+ * (map changes reuse it). If the worker cannot be constructed - no module
+ * worker support, a bundler quirk, a CSP - every call falls back to running
  * the same parsers inline, which is exactly the old behaviour, so this can
  * only ever cost the stutter it was meant to remove.
  */
@@ -77,7 +77,7 @@ function getWorker(): Worker | null {
 
 /**
  * Inputs are structured-cloned, never transferred. Transferring them would
- * be ~1.2 MB cheaper per map change, but it detaches the caller's buffers —
+ * be ~1.2 MB cheaper per map change, but it detaches the caller's buffers -
  * and the worker can still fail *after* the post (onerror mid-flight), at
  * which point the inline fallback would be handed detached arrays and throw.
  * A one-off clone of ~1.2 MB is not worth trading a working fallback for.

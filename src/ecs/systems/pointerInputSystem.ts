@@ -18,7 +18,7 @@ const COLOR_RED = new Color3(1, 0, 0);
 // with the weapon), so a click near a body still selects it. Our boxes come
 // from the mesh bounds and are tight, so they are padded here, in tiles: a
 // third of a tile around the feet, a little over the head, and every
-// selectable stands at least a character tall — a kneeling smith or a short
+// selectable stands at least a character tall - a kneeling smith or a short
 // NPC is still a full click target.
 const PICK_PAD_XZ = 0.35;
 const PICK_PAD_TOP = 0.15;
@@ -71,8 +71,8 @@ export const PointerInputSystem: ISystemFactory = world => {
    * pass runs `SelectCharacter` for characters and monsters, then NPCs, and
    * only asks `SelectItem` when both came back empty (ZzzInterface.cpp
    * :8117-8130), so a monster standing on a pile of loot is the click target
-   * and not the loot. Holding Alt flips the order — items first, then NPCs,
-   * then monsters (:8048-8058) — which is how loot under a monster is still
+   * and not the loot. Holding Alt flips the order - items first, then NPCs,
+   * then monsters (:8048-8058) - which is how loot under a monster is still
    * reachable. Without that rule a drop's padded box (every selectable is
    * at least a character tall) could steal the click from the monster on
    * top of it and turn an attack into a walk-to-pick-up under its blows.
@@ -94,7 +94,7 @@ export const PointerInputSystem: ISystemFactory = world => {
       modelObject.UpdateBoundings();
       const bb = modelObject.BoundingBoxLocal;
       if (bb.minimumWorld.x > bb.maximumWorld.x) {
-        // Degenerate box (a model whose GLB carries no meshes — e.g. a
+        // Degenerate box (a model whose GLB carries no meshes - e.g. a
         // bones-only conversion): fall back to a body-sized box on the
         // entity position so the NPC stays clickable.
         const pos = e.transform.pos;
@@ -150,7 +150,7 @@ export const PointerInputSystem: ISystemFactory = world => {
   }
 
   scene.onPointerObservable.add(ev => {
-    // Only the ray is wanted here — the hovered object is resolved by
+    // Only the ray is wanted here - the hovered object is resolved by
     // testing it against each candidate's own box. `scene.pick` would
     // ray-intersect every pickable mesh in the scene (the terrain's 131k
     // triangles included) on every pointer event, move events included.

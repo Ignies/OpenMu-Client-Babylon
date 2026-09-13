@@ -76,7 +76,7 @@ export const TEX = {
   /**
    * blood01.ozt: one ragged 64×64 splat, a TGA with real alpha (mean 96) and
    * the red already in the texels. The client's only usable blood art, and
-   * what everything blood is drawn with rather than a red-tinted `flare` —
+   * what everything blood is drawn with rather than a red-tinted `flare` -
    * see BLOOD_CHIPS. (blood.OZT, the 128×128 two-patch spatter, averages
    * alpha 13 and all but vanishes on a card; the ground decal's splat is this
    * same blood01.)
@@ -331,7 +331,7 @@ export const RGBS = {
   shade: [0.6, 0.3, 0.9] as RGB,
   blood: [0.9, 0.15, 0.1] as RGB,
   /**
-   * Physical blood, as against the `blood` above — the glowing red the bleed
+   * Physical blood, as against the `blood` above - the glowing red the bleed
    * *skills* tint their rings and ribbons with. Only ever a modulator on the
    * blood sheets, which carry the red themselves; it pulls them a shade
    * darker so a fleck reads as fluid rather than as an ember.
@@ -377,7 +377,7 @@ export const FIRE_SPARKS: ParticleRecipe = {
   spin: 4,
 };
 
-/** BITMAP_FIRE puffs that drift up — the trail of a fireball, a small blaze. */
+/** BITMAP_FIRE puffs that drift up - the trail of a fireball, a small blaze. */
 export const FIRE_PUFF: ParticleRecipe = {
   texture: TEX.fire,
   cells: { w: 64, h: 64, count: 4 },
@@ -505,12 +505,12 @@ export const SHADE_MOTES: ParticleRecipe = {
 };
 
 /**
- * Blood flecks thrown off a struck body — a blow's, and the knight's bleed
+ * Blood flecks thrown off a struck body - a blow's, and the knight's bleed
  * skills'.
  *
  * **Alpha, never additive.** Additive light can only brighten what is behind
- * it, so a red-tinted `flare` over a bright ground — Devias snow, Tarkan sand
- * — adds into all three channels at once, clips to white, and the bloom in
+ * it, so a red-tinted `flare` over a bright ground - Devias snow, Tarkan sand
+ * - adds into all three channels at once, clips to white, and the bloom in
  * `scenes/sceneLook.ts` then spreads that clipped white into a pink haze:
  * blood came out looking like steam. The blood sheet drawn straight-alpha
  * *darkens* the ground the way fluid does, and its deep red sits well under
@@ -533,7 +533,7 @@ export const BLOOD_CHIPS: ParticleRecipe = {
  * The wider spray behind the flecks: a few soft spatter cards that grow and
  * fade over a third of a second. This is what stands in for the white-cored
  * `flash(TEX.flare, RGBS.blood)` a blood hit used to draw on top of its
- * chips — the single brightest thing in the effect, and the one that read as
+ * chips - the single brightest thing in the effect, and the one that read as
  * a pale pink cloud rather than as blood.
  */
 export const BLOOD_MIST: ParticleRecipe = {
@@ -659,7 +659,7 @@ export const NOVA_DEATH_MOTES: ParticleRecipe = {
 
 /**
  * `CreateBomb(pos, true)` (ZzzEffect.cpp:6394): 20 BITMAP_SPARK chips thrown
- * up in a 60-120° fan and one grey BITMAP_EXPLOTION card — the Chaos Castle
+ * up in a 60-120° fan and one grey BITMAP_EXPLOTION card - the Chaos Castle
  * corpse pops.
  */
 export const BOMB_SPARKS: ParticleRecipe = {
@@ -688,7 +688,7 @@ export const SOUL_MOTES: ParticleRecipe = {
 
 /**
  * `BITMAP_SMOKE + 1` (smoke02.tga, 64 px, alpha `EnableAlphaBlend3`) SubType
- * 0 — the sand a walking Tarkan monster kicks up (`MonsterMoveSandSmoke`,
+ * 0 - the sand a walking Tarkan monster kicks up (`MonsterMoveSandSmoke`,
  * ZzzCharacter.cpp:5456; init ZzzEffectParticle.cpp:1661, move :7052): LT 32
  * ticks, Scale 0.32–0.64 (card 20–41 cm), ±8 cm jitter, `Light` fading
  * LifeTime/32 linearly to black under the texture's own alpha, Scale +0.08 a tick
@@ -696,7 +696,7 @@ export const SOUL_MOTES: ParticleRecipe = {
  * at half its own height. The pin is the 0.6 tile/s climb here: the centre
  * rises as fast as the card swells, so the bottom edge stays on the ground.
  * Not ported: the 3 cm/tick drift along the monster's facing, decaying ×0.9
- * a tick (30 cm in all) — a shared system has one direction for every
+ * a tick (30 cm in all) - a shared system has one direction for every
  * emitter.
  */
 export const SAND_SMOKE: ParticleRecipe = {
@@ -721,12 +721,12 @@ export const SAND_SMOKE: ParticleRecipe = {
 };
 
 /**
- * `BITMAP_SPARK` SubType 0 (Spark02) — the chips a landed blow throws
+ * `BITMAP_SPARK` SubType 0 (Spark02) - the chips a landed blow throws
  * (ZzzEffectParticle.cpp:2012 init, :6554 move): Scale `(rand()%4+4)*0.1` =
  * 0.4–0.7, LT 24–39 ticks, thrown 2–4 cm/tick sideways and 6–22 cm/tick up,
  * gravity −2 cm/tick², brightness LifeTime/16 (full until the last 16
  * ticks). `RenderParticles` draws `pBitmap->Width * o->Scale` and Spark02 is
- * **4 px** — a chip is a 1.6–2.8 cm card (0.016–0.028 tiles), a hot grain,
+ * **4 px** - a chip is a 1.6–2.8 cm card (0.016–0.028 tiles), a hot grain,
  * not a flame card. Babylon's direction is not normalised, so the two
  * corners *are* the velocity range in tiles/s at power 1.
  */
@@ -749,7 +749,7 @@ export const HIT_SPARKS: ParticleRecipe = {
 
 /**
  * `BITMAP_SHINY` (Shiny01), SubType 0 and 1, from `CreateShiny`
- * (ZzzObject.cpp:6223): LT 18 ticks, tilted 45°, no motion — a star that
+ * (ZzzObject.cpp:6223): LT 18 ticks, tilted 45°, no motion - a star that
  * appears, holds and is gone. Two per burst, every 48th tick.
  */
 export const SHINY_GLINT: ParticleRecipe = {

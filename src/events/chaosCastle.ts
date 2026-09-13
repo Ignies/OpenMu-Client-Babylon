@@ -24,7 +24,7 @@ import {
 } from './recipes';
 
 /**
- * Chaos Castle: there is no NPC window — the Armor of Guardsman in the
+ * Chaos Castle: there is no NPC window - the Armor of Guardsman in the
  * inventory asks the server for the opening state, the answer is the
  * `CChaosCastleTimeCheckMsgBoxLayout` prompt (`ReceiveEventZoneOpenTime`,
  * Value 4) whose OK sends `ChaosCastleEnterRequest`. On the castle maps the
@@ -38,7 +38,7 @@ import {
  * `ui/pages/worldPage/components/events`.
  *
  * Not here: the shrinking arena (states 8..10 add `TW_NOGROUND` rings and
- * play the falling-stone sound) — that is the map's business once the
+ * play the falling-stone sound) - that is the map's business once the
  * castle maps are staged.
  */
 

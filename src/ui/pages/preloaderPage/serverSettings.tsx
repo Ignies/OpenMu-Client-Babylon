@@ -49,13 +49,13 @@ import {
 } from './layout';
 
 /**
- * Where the client connects, in MU's own settings chrome — the Option
+ * Where the client connects, in MU's own settings chrome - the Option
  * window's frame, the server-list row art for the saved servers, and the login
  * window's sunken plate under every field.
  *
  * The ws proxy is a field of its own rather than something derived from the
  * server host because it is a different machine's job: a browser cannot open a
- * TCP socket, so `proxy/main.ts` — yours, or one hosted beside the server — is
+ * TCP socket, so `proxy/main.ts` - yours, or one hosted beside the server - is
  * what dials `csHost:csPort` and then the game server.
  */
 
@@ -229,7 +229,7 @@ export const ServerSettings = observer(({ onClose }: { onClose: () => void }) =>
         {pages > 1 && ` ${current + 1}/${pages}`}
       </span>
 
-      {/* Paging, in the server-list screen's own arrows — only once there is
+      {/* Paging, in the server-list screen's own arrows - only once there is
           more than a page to turn. */}
       {pages > 1 &&
         (

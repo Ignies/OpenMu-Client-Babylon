@@ -1,6 +1,6 @@
 /**
  * Romanian. MU's proper nouns (class names, event names, Zen, MU Helper) stay
- * as they are — the Romanian servers use them untranslated.
+ * as they are - the Romanian servers use them untranslated.
  */
 
 import type { LanguageLayer } from './layer';
@@ -205,7 +205,7 @@ export const romanianLayer: LanguageLayer = {
     'options.packHint':
       'Textul misiunilor, dialogurile NPC-urilor și numele monștrilor sunt traduse și în această limbă.',
     'options.noPackHint':
-      'Doar interfața — textul misiunilor și numele monștrilor rămân în engleză.',
+      'Doar interfața - textul misiunilor și numele monștrilor rămân în engleză.',
     'options.languageHint':
       'Limba interfeței. Numele obiectelor, monștrilor și abilităților rămân neschimbate.',
     'options.quality.classic': 'Clasică',
@@ -256,7 +256,7 @@ export const romanianLayer: LanguageLayer = {
     'bottomBar.emptySlot': '[{key}] gol',
     'bottomBar.itemSlot': '{name} [{key}]',
     'bottomBar.skillHint':
-      ' — clic: lista de abilități, clic dreapta: atac simplu',
+      ' - clic: lista de abilități, clic dreapta: atac simplu',
     'bottomBar.pet.normal': 'Nor',
     'bottomBar.pet.random': 'Ale',
     'bottomBar.pet.owner': 'Stp',
@@ -1223,7 +1223,7 @@ export const romanianLayer: LanguageLayer = {
     'notify.learnedSkill': 'Ai învățat {name}',
     'notify.storageOpen': 'Nu poți folosi obiecte cât timp seiful este deschis',
     'notify.upgradeNeedsServer': 'Îmbunătățirea are nevoie de un server',
-    'notify.noAnswerRestored': 'Serverul nu a răspuns — obiectul a fost restaurat',
+    'notify.noAnswerRestored': 'Serverul nu a răspuns - obiectul a fost restaurat',
     'notify.cannotMoveItem': 'Nu poți muta acel obiect acolo',
     'notify.cannotUseItem': 'Acel obiect nu se folosește așa',
     'notify.npcNothingYet': 'Acest NPC nu are încă nimic pentru tine',
@@ -1281,8 +1281,8 @@ export const romanianLayer: LanguageLayer = {
     'worlds.answering': 'Răspunde',
     'worlds.noAnswer': 'Fără răspuns',
     'worlds.hint': 'Alege o lume, apoi intră.',
-    'bottomBar.pickSkill': '[{key}] gol — dă clic ca să alegi o abilitate',
-    'bottomBar.boundSlot': '{name} [{key}] — clic dreapta ca să schimbi',
+    'bottomBar.pickSkill': '[{key}] gol - dă clic ca să alegi o abilitate',
+    'bottomBar.boundSlot': '{name} [{key}] - clic dreapta ca să schimbi',
     'bottomBar.clearSlot': 'Lasă locul [{key}] gol',
     'guild.leaveTitle': 'Părăsește breasla',
     'guild.breakHint': 'Dacă vrei să îți părăsești breasla,',

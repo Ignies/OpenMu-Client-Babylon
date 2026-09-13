@@ -2,10 +2,10 @@
  * The hero's `AttackTime` latch (w_CharacterInfo.h:247, ZzzCharacter.cpp:4018-4025):
  * a swing sets `AttackTime = 1`; every reference tick (25 Hz) adds one,
  * **independent of the clip's PlaySpeed**; `AttackStage` / `AttackEffect`
- * fire their sounds and sparks on `CheckAttackTime(n)` — true exactly once
- * per swing when the counter passes `n` — and the swing state ends when the
+ * fire their sounds and sparks on `CheckAttackTime(n)` - true exactly once
+ * per swing when the counter passes `n` - and the swing state ends when the
  * counter reaches `g_iLimitAttackTime` (15) or the clip reaches its hit key
- * (`AnimationFrame >= 5`, ZzzCharacter.cpp:2755 — the frame advances by
+ * (`AnimationFrame >= 5`, ZzzCharacter.cpp:2755 - the frame advances by
  * PlaySpeed per tick), which forces the counter to the limit.
  *
  * The original sends `SendHitRequest` on the click itself (ZzzInterface.cpp
@@ -13,7 +13,7 @@
  * key instead so the packet lands with the blow: the consumer hands over a
  * callback, this entry fires it once when the clip reaches the key. Because
  * the key is reached at `key / PlaySpeed` ticks, a slow clip reaches it
- * *after* the 15-tick limit — the limit only ends the swing once the blow
+ * *after* the 15-tick limit - the limit only ends the swing once the blow
  * has fired (see the table at `hitTickFor`). Driven by `attackSystem`
  * (`startAttack`); read by `attackSystem`, `combatSfxSystem` and any effect
  * that wants a hit-frame moment (`checkAttackTime`).
@@ -41,7 +41,7 @@ const MIN_PLAY_SPEED = 0.01;
 /**
  * Fallback ceiling on how long a blow may stay pending, in ticks (1.6 s).
  * The slowest real clip (0.24 keys/tick, key 5) lands at tick 21.8; anything
- * later means the clip was cut short (shock, death, a lost model) — the
+ * later means the clip was cut short (shock, death, a lost model) - the
  * request is sent then so the server always sees exactly one per swing.
  */
 const MAX_HIT_WAIT_TICKS = 40;
@@ -122,7 +122,7 @@ export function setLastAttackEffectTime(): void {
 
 /**
  * Command: a swing started now with `action` at `playSpeed` keys per tick.
- * `hit` is called once when the clip reaches its hit key — send the
+ * `hit` is called once when the clip reaches its hit key - send the
  * `HitRequest` there. `clipSeconds` (one iteration of the clip at this
  * speed) is the fallback: the blow never waits past the clip's end.
  * Returns the seconds until that moment.

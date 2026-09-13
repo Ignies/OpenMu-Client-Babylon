@@ -1,5 +1,5 @@
 /**
- * Portuguese (Brazilian wording, `pt-BR` first among the aliases — that is
+ * Portuguese (Brazilian wording, `pt-BR` first among the aliases - that is
  * where most of MU's Portuguese-speaking players are). MU's proper nouns
  * (class names, event names, Zen, MU Helper) stay as they are.
  */
@@ -213,7 +213,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.packHint':
       'O texto das missões, os diálogos dos NPCs e os nomes dos monstros também estão traduzidos neste idioma.',
     'options.noPackHint':
-      'Apenas a interface — o texto das missões e os nomes dos monstros continuam em inglês.',
+      'Apenas a interface - o texto das missões e os nomes dos monstros continuam em inglês.',
     'options.languageHint':
       'O idioma da interface. Nomes de itens, monstros e habilidades não mudam.',
     'options.quality.classic': 'Clássica',
@@ -264,7 +264,7 @@ export const portugueseLayer: LanguageLayer = {
     'bottomBar.emptySlot': '[{key}] vazio',
     'bottomBar.itemSlot': '{name} [{key}]',
     'bottomBar.skillHint':
-      ' — clique: lista de habilidades, clique direito: ataque comum',
+      ' - clique: lista de habilidades, clique direito: ataque comum',
     'bottomBar.pet.normal': 'Nor',
     'bottomBar.pet.random': 'Ale',
     'bottomBar.pet.owner': 'Don',
@@ -1225,7 +1225,7 @@ export const portugueseLayer: LanguageLayer = {
     'notify.learnedSkill': 'Você aprendeu {name}',
     'notify.storageOpen': 'Você não pode usar itens com o baú aberto',
     'notify.upgradeNeedsServer': 'O aprimoramento precisa de um servidor',
-    'notify.noAnswerRestored': 'O servidor não respondeu — item restaurado',
+    'notify.noAnswerRestored': 'O servidor não respondeu - item restaurado',
     'notify.cannotMoveItem': 'Você não pode mover esse item para aí',
     'notify.cannotUseItem': 'Esse item não se usa assim',
     'notify.npcNothingYet': 'Este NPC ainda não tem nada para você',
@@ -1283,8 +1283,8 @@ export const portugueseLayer: LanguageLayer = {
     'worlds.answering': 'Responde',
     'worlds.noAnswer': 'Sem resposta',
     'worlds.hint': 'Escolha um mundo e entre.',
-    'bottomBar.pickSkill': '[{key}] vazio — clique para escolher uma habilidade',
-    'bottomBar.boundSlot': '{name} [{key}] — clique direito para trocar',
+    'bottomBar.pickSkill': '[{key}] vazio - clique para escolher uma habilidade',
+    'bottomBar.boundSlot': '{name} [{key}] - clique direito para trocar',
     'bottomBar.clearSlot': 'Deixar o espaço [{key}] vazio',
     'guild.leaveTitle': 'Sair da guilda',
     'guild.breakHint': 'Se você quer sair da sua guilda,',

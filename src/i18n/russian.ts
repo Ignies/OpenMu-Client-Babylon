@@ -1,6 +1,6 @@
 /**
  * Russian. Tahoma carries Cyrillic, so no extra font is needed. MU's proper
- * nouns (class names, event names, Zen, MU Helper) stay in Latin — that is how
+ * nouns (class names, event names, Zen, MU Helper) stay in Latin - that is how
  * the Russian-speaking servers and their guides write them.
  */
 
@@ -28,7 +28,7 @@ export const russianLayer: LanguageLayer = {
     'server.delete': 'Удалить',
     'server.trustAddress': 'Использовать адрес игрового сервера, присланный сервером',
     'server.proxyHint':
-      'Прокси соединяется с сервером, поэтому хост — тот, который видит прокси.',
+      'Прокси соединяется с сервером, поэтому хост - тот, который видит прокси.',
     'server.insecure':
       'Страница открыта по https: прокси ws:// заблокирован, используйте wss://.',
     'server.lockedByUrl': 'Задано в адресе страницы (?cs= / ?ws=).',
@@ -199,12 +199,12 @@ export const russianLayer: LanguageLayer = {
     'options.toneMapper.aces': 'ACES',
     'options.toneMapper.neutral': 'Нейтральная',
     'options.resetKeys': 'Сбросить по умолчанию',
-    'options.keyHint': 'Нажмите, затем нажмите клавишу. Esc — отмена.',
+    'options.keyHint': 'Нажмите, затем нажмите клавишу. Esc - отмена.',
     'options.packMark': '★',
     'options.packHint':
       'Тексты заданий, диалоги NPC и названия монстров для этого языка тоже переведены.',
     'options.noPackHint':
-      'Только интерфейс — тексты заданий и названия монстров останутся на английском.',
+      'Только интерфейс - тексты заданий и названия монстров останутся на английском.',
     'options.languageHint':
       'Язык интерфейса. Названия предметов, монстров и умений не меняются.',
     'options.quality.classic': 'Классика',
@@ -251,11 +251,11 @@ export const russianLayer: LanguageLayer = {
     'bottomBar.inventory': 'Инвентарь',
     'bottomBar.friendList': 'Список друзей',
     'bottomBar.options': 'Настройки',
-    'bottomBar.noSkill': 'Нет умения (правый клик — атака)',
+    'bottomBar.noSkill': 'Нет умения (правый клик - атака)',
     'bottomBar.emptySlot': '[{key}] пусто',
     'bottomBar.itemSlot': '{name} [{key}]',
     'bottomBar.skillHint':
-      ' — клик: список умений, правый клик: обычная атака',
+      ' - клик: список умений, правый клик: обычная атака',
     'bottomBar.pet.normal': 'Обч',
     'bottomBar.pet.random': 'Слч',
     'bottomBar.pet.owner': 'Хзн',
@@ -321,7 +321,7 @@ export const russianLayer: LanguageLayer = {
     'personalShop.info4': 'Предметы с ценой нельзя использовать и выбрасывать.',
     'personalShop.info5': 'Zen поступает прямо в ваш инвентарь.',
     'personalShop.warn1': 'Никогда не продавайте дешевле реальной цены.',
-    'personalShop.warn2': 'Последнее слово о ценах — за сервером.',
+    'personalShop.warn2': 'Последнее слово о ценах - за сервером.',
     'personalShop.needLevel': 'Для личной лавки нужен 6-й уровень.',
     'personalShop.needName': 'Сначала дайте лавке название.',
     'personalShop.needItems': 'Сначала выставьте что-нибудь на продажу.',
@@ -906,14 +906,14 @@ export const russianLayer: LanguageLayer = {
     'event.rank.myInfo': 'Мои данные',
     'event.archangelMessenger': 'Посланник Архангела',
     'event.bloodCastleIntro':
-      'Ваше желание помочь Архангелу ценно. Но будьте осторожны, юный воин: Blood Castle — опасное место. Да пребудет с вами Бог.',
+      'Ваше желание помочь Архангелу ценно. Но будьте осторожны, юный воин: Blood Castle - опасное место. Да пребудет с вами Бог.',
     'event.castleButton': 'Замок %d (уровень %d-%d)',
     'event.castleButtonMaster': 'Замок № %d (уровень мастера)',
     'event.enterNow': 'Теперь вы можете войти в %s.',
     'event.enterAfterMinutes': 'Через %d минут вы сможете войти в %s.',
     'event.timePassed': 'Время входа в %s прошло.',
     'event.capacityReached':
-      'Вместимость %s исчерпана. Максимум — %d.',
+      'Вместимость %s исчерпана. Максимум - %d.',
     'event.cloakLevelWrong': 'Уровень Плаща невидимости не подходит.',
     'event.timesPerDay': 'Нельзя входить больше %d раз в день.',
     'event.zoneClosing': '%s закрывается (через %d секунд)',
@@ -1210,7 +1210,7 @@ export const russianLayer: LanguageLayer = {
     'notify.learnedSkill': 'Вы изучили {name}',
     'notify.storageOpen': 'Нельзя использовать предметы при открытом хранилище',
     'notify.upgradeNeedsServer': 'Для улучшения нужен сервер',
-    'notify.noAnswerRestored': 'Сервер не ответил — предмет восстановлен',
+    'notify.noAnswerRestored': 'Сервер не ответил - предмет восстановлен',
     'notify.cannotMoveItem': 'Туда этот предмет переместить нельзя',
     'notify.cannotUseItem': 'Так этот предмет не используют',
     'notify.npcNothingYet': 'У этого NPC для вас пока ничего нет',
@@ -1268,8 +1268,8 @@ export const russianLayer: LanguageLayer = {
     'worlds.answering': 'Отвечает',
     'worlds.noAnswer': 'Нет ответа',
     'worlds.hint': 'Выберите мир и войдите.',
-    'bottomBar.pickSkill': '[{key}] пусто — нажмите, чтобы выбрать умение',
-    'bottomBar.boundSlot': '{name} [{key}] — правый клик, чтобы сменить',
+    'bottomBar.pickSkill': '[{key}] пусто - нажмите, чтобы выбрать умение',
+    'bottomBar.boundSlot': '{name} [{key}] - правый клик, чтобы сменить',
     'bottomBar.clearSlot': 'Оставить ячейку [{key}] пустой',
     'guild.leaveTitle': 'Покинуть гильдию',
     'guild.breakHint': 'Если вы хотите покинуть гильдию,',
@@ -1651,7 +1651,7 @@ export const russianLayer: LanguageLayer = {
     'gm.sections': 'Разделы',
     'gm.targetIs': 'Цель: {name}',
     'gm.noTarget': 'Цель не выбрана',
-    'gm.keyToClose': '{key} — закрыть',
+    'gm.keyToClose': '{key} - закрыть',
     'gm.actingOn': 'Действует на',
     'gm.clear': 'сбросить',
     'gm.using': 'используется {name}',
@@ -1711,20 +1711,20 @@ export const russianLayer: LanguageLayer = {
     'gm.travel.youAreAt': 'Вы в {x}, {y} на карте {map}.',
     'gm.travel.warpYourself': 'Переместить себя',
     'gm.travel.warpYourselfHint':
-      'Оставьте точку пустой, чтобы попасть к воротам карты — это работает только для карт из списка перемещений сервера. Заполните её, и доступна любая карта.',
+      'Оставьте точку пустой, чтобы попасть к воротам карты - это работает только для карт из списка перемещений сервера. Заполните её, и доступна любая карта.',
     'gm.travel.filterMaps': 'Фильтр карт…',
     'gm.travel.noMapMatches': 'Ни одна карта не подходит.',
     'gm.travel.warpSomebody': 'Переместить другого',
 
     'gm.character.targetHint':
-      'Выбран в разделе Рядом или введён здесь. Пусто — это вы, там где команда это позволяет.',
+      'Выбран в разделе Рядом или введён здесь. Пусто - это вы, там где команда это позволяет.',
     'gm.character.values': 'Значения',
     'gm.character.stats': 'Характеристики',
     'gm.character.heroState': 'Состояние героя',
 
     'gm.spawn.monstersInFront': 'Монстры перед вами',
     'gm.spawn.idsHint':
-      'Id берутся из Показать id NPC или из списка Рядом. Координаты по умолчанию — там, где вы стоите.',
+      'Id берутся из Показать id NPC или из списка Рядом. Координаты по умолчанию - там, где вы стоите.',
     'gm.spawn.yourself': 'Вы сами',
 
     'gm.moderation.pickHint':
@@ -1867,7 +1867,7 @@ export const russianLayer: LanguageLayer = {
       'Бросает предмет вам под ноги. Группа и номер задают его; всё остальное необязательно, и пустое поле обрывает строку.',
     'gm.cmd.clearinv.label': 'Очистить инвентарь',
     'gm.cmd.clearinv.help':
-      'Очищает инвентарь. Пусто — ваш собственный; с именем — этого персонажа, бесплатно и не спрашивая его.',
+      'Очищает инвентарь. Пусто - ваш собственный; с именем - этого персонажа, бесплатно и не спрашивая его.',
     'gm.cmd.disconnect.label': 'Отключить персонажа',
     'gm.cmd.disconnect.help':
       'Закрывает соединение персонажа. Он может сразу зайти снова.',

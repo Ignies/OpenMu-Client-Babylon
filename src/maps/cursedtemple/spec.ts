@@ -2,7 +2,7 @@ import type { Emission } from '../../common/effectParticles';
 
 /**
  * Illusion Temple (`WD_45CURSEDTEMPLE_LV1 … LV6`, one `World47`/`Object47`
- * for all six levels — `assetWorldNum`), the plain-data half. Nothing here
+ * for all six levels - `assetWorldNum`), the plain-data half. Nothing here
  * may import the scene.
  *
  * EncTerrain47.obj places 1964 objects of 78 types; Object47 ships 83 models
@@ -18,7 +18,7 @@ import type { Emission } from '../../common/effectParticles';
 export const CURSED_TEMPLE_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
- * `MoveObject` :342-353 hides 70-79 — the relic pedestals' markers that the
+ * `MoveObject` :342-353 hides 70-79 - the relic pedestals' markers that the
  * event's `RenderObjectVisual` draws its own effects on. Placed: 70 (×46), 71
  * (×23), 72 (×65), 73 (×5), 74 (×37), 75 (×21), 76 (×12), 77 (×20), 78 (×46),
  * 79 (×11).
@@ -28,8 +28,8 @@ export const CURSED_TEMPLE_EFFECT_ONLY_TYPES: readonly number[] = [
 ];
 
 /**
- * Empty: what the markers show (:525-689) is the event's own state —
- * relic glow while a relic is held, the cursed statues' flames — none of
+ * Empty: what the markers show (:525-689) is the event's own state -
+ * relic glow while a relic is held, the cursed statues' flames - none of
  * which exists outside a running Illusion Temple match.
  */
 export const CURSED_TEMPLE_EMISSIONS: Partial<
