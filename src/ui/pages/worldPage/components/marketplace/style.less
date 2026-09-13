@@ -1013,3 +1013,218 @@
     border-color: fade(@mp-gold, 40%);
   }
 }
+
+// ---- the look of a listing, by its item -----------------------------------
+//
+// Two axes, one class each (`src/marketplace/tiers.ts`): the tier from the
+// level - forged from +4, high from +7 where the original starts its glow,
+// elite from +10 - and the kind, excellent or ancient. Tiers tint and glow
+// the edge; kinds add a foil edge that slides, and sparkles that twinkle.
+// Cards and rows are both positioned so the pseudo-elements can sit on the
+// edge; on a row they are absolutely positioned and so stay out of the grid.
+
+@foil-excellent: linear-gradient(
+  115deg,
+  rgba(110, 185, 255, 0) 15%,
+  rgba(140, 205, 255, 0.85) 42%,
+  rgba(235, 248, 255, 1) 50%,
+  rgba(140, 205, 255, 0.85) 58%,
+  rgba(110, 185, 255, 0) 85%
+);
+@foil-ancient: linear-gradient(
+  115deg,
+  rgba(224, 188, 106, 0) 15%,
+  rgba(224, 188, 106, 0.85) 42%,
+  rgba(255, 244, 214, 1) 50%,
+  rgba(224, 188, 106, 0.85) 58%,
+  rgba(224, 188, 106, 0) 85%
+);
+@foil-elite: linear-gradient(
+  115deg,
+  rgba(255, 228, 160, 0) 15%,
+  rgba(255, 228, 160, 0.8) 42%,
+  rgba(255, 255, 255, 1) 50%,
+  rgba(255, 228, 160, 0.8) 58%,
+  rgba(255, 228, 160, 0) 85%
+);
+@sparkle: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 1px, rgba(255, 255, 255, 0) 2px);
+
+@keyframes mp-foil {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes mp-twinkle {
+  0%,
+  100% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.mp-card,
+.mp-row {
+  position: relative;
+}
+
+// Tiers: the edge warms and glows as the level climbs.
+.mp-card.tier-forged {
+  border-color: fade(@mp-gold, 40%);
+}
+
+.mp-card.tier-high {
+  border-color: fade(@mp-gold, 62%);
+  box-shadow: inset 0 0 14px fade(@mp-gold, 10%);
+}
+
+.mp-card.tier-elite {
+  border-color: fade(@mp-gold, 85%);
+  box-shadow:
+    inset 0 0 18px fade(@mp-gold, 18%),
+    0 0 8px fade(@mp-gold, 28%);
+}
+
+.mp-row.tier-forged {
+  box-shadow: inset 2px 0 0 fade(@mp-gold, 40%);
+}
+
+.mp-row.tier-high {
+  box-shadow: inset 3px 0 0 fade(@mp-gold, 70%);
+}
+
+.mp-row.tier-elite {
+  box-shadow:
+    inset 3px 0 0 @mp-gold,
+    inset 60px 0 30px -30px fade(@mp-gold, 12%);
+}
+
+// The icon glows for the high tiers, as the item does in the original.
+.mp-card.tier-high .mp-card-icon,
+.mp-row.tier-high .mp-row-icon {
+  filter: drop-shadow(0 0 4px fade(@mp-gold, 55%));
+}
+
+.mp-card.tier-elite .mp-card-icon,
+.mp-row.tier-elite .mp-row-icon {
+  filter: drop-shadow(0 0 6px fade(@mp-gold, 90%));
+}
+
+// Kinds: a foil edge that slides along the border, and sparkles on it.
+.mp-foil-edge(@foil) {
+  &::before {
+    position: absolute;
+    inset: -1px;
+    padding: 1px;
+    pointer-events: none;
+    content: '';
+    background: @foil;
+    background-size: 220% 100%;
+    border-radius: 5px;
+    animation: mp-foil 4.5s linear infinite;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  &::after {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    content: '';
+    background-image: @sparkle, @sparkle, @sparkle, @sparkle, @sparkle, @sparkle;
+    background-position:
+      2% 0%,
+      38% 100%,
+      100% 22%,
+      70% 0%,
+      0% 78%,
+      99% 88%;
+    background-repeat: no-repeat;
+    background-size: 5px 5px;
+    animation: mp-twinkle 2.2s ease-in-out infinite;
+  }
+}
+
+.mp-card.is-excellent {
+  .mp-foil-edge(@foil-excellent);
+  border-color: rgba(110, 185, 255, 0.35);
+}
+
+.mp-card.is-ancient {
+  .mp-foil-edge(@foil-ancient);
+}
+
+.mp-card.tier-elite:not(.is-excellent):not(.is-ancient) {
+  .mp-foil-edge(@foil-elite);
+}
+
+// Rows are a strip, so the foil rides the name instead of the whole edge:
+// the text itself catches a sliding sheen, with a matching accent and a
+// couple of sparkles at the icon.
+.mp-sheen-name(@from, @to) {
+  .mp-card-name {
+    color: transparent;
+    background: linear-gradient(90deg, @from 0%, @from 35%, @to 50%, @from 65%, @from 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: mp-foil 4.5s linear infinite;
+  }
+
+  &::after {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 46px;
+    pointer-events: none;
+    content: '';
+    background-image: @sparkle, @sparkle, @sparkle;
+    background-position:
+      10% 15%,
+      85% 80%,
+      55% 45%;
+    background-repeat: no-repeat;
+    background-size: 5px 5px;
+    animation: mp-twinkle 2.2s ease-in-out infinite;
+  }
+}
+
+.mp-row.is-excellent {
+  .mp-sheen-name(#86ccff, #eaf7ff);
+  box-shadow: inset 2px 0 0 rgba(110, 185, 255, 0.7);
+}
+
+.mp-row.is-ancient {
+  .mp-sheen-name(@mp-gold, #fff4d6);
+  box-shadow: inset 2px 0 0 fade(@mp-gold, 80%);
+}
+
+// Every second one twinkles on a different beat, so a page of them does
+// not blink in unison.
+.mp-card:nth-child(even)::after,
+.mp-row:nth-child(even)::after {
+  animation-delay: -1.1s;
+}
+
+.mp-card:nth-child(3n)::before,
+.mp-row:nth-child(3n) .mp-card-name {
+  animation-delay: -1.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-card::before,
+  .mp-card::after,
+  .mp-row::after,
+  .mp-row .mp-card-name {
+    animation: none;
+  }
+}
