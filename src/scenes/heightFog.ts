@@ -65,13 +65,19 @@ const FOG_CLOSE_FAR = 320;
 /** How fast the height reference follows the camera target (per second). */
 const FOG_BASE_EASE = 2.5;
 
+type Underworld = NonNullable<LookProfile['underworld']>;
+
 const shown = {
   color: [0, 0, 0] as [number, number, number],
   start: 0,
   density: 0,
   cap: 0,
   height: 0,
+  underworld: null as Underworld | null,
 };
+
+/** The underworld's colour, decoded once per sync rather than once per bind. */
+const uwLinear: [number, number, number] = [0, 0, 0];
 
 let fogBaseY = 0;
 let fogBaseSeeded = false;
@@ -86,6 +92,7 @@ let runtime: Runtime | null = null;
 
 const hazeDev = devQueryNumber('haze');
 const effectHazeDev = devQueryNumber('ehaze');
+const uwDev = devQueryNumber('uw');
 
 /**
  * Why a pixel without depth is left alone: the G-buffer holds no blend or
@@ -111,6 +118,8 @@ function registerFogShader(): void {
   uniform vec4 fogParams;  // start, density, cap, height density
   uniform float fogBaseY;
   uniform float effectShare;
+  uniform vec4 uwParams;   // top, density at top, e-folds per tile down, on
+  uniform vec3 uwColor;    // linear
 
   const float FOG_CLOSE_NEAR = ${FOG_CLOSE_NEAR.toFixed(1)};
   const float FOG_CLOSE_FAR = ${FOG_CLOSE_FAR.toFixed(1)};
@@ -126,14 +135,65 @@ function registerFogShader(): void {
     return mix(f, 1.0, smoothstep(FOG_CLOSE_NEAR, FOG_CLOSE_FAR, dist));
   }
 
+  /**
+   * Optical depth of the underworld fog between the camera and \`dist\`: the
+   * integral of \`density x exp(falloff x (top - y))\` over the part of the ray
+   * that is under \`top\`, which has a closed form because the ray is a line.
+   *
+   * Zero above \`top\` rather than an exponential tail that never quite ends:
+   * a ray leaving the camera a degree above the horizon would otherwise
+   * gather thousands of tiles of that tail and the sky over the far edge
+   * would come back grey.
+   */
+  float underworldDepth(float dist, float camY, float rdY) {
+    float top = uwParams.x;
+    float k = uwParams.z;
+
+    // Nothing to collect: the ray starts over the fog and climbs away.
+    if (camY > top && rdY >= 0.0) return 0.0;
+
+    // Where it goes under, and how far it runs after that.
+    float t0 = camY > top ? (top - camY) / rdY : 0.0;
+    float span = max(0.0, dist - t0);
+
+    if (span <= 0.0) return 0.0;
+
+    // A ray a degree under the horizon goes below \`top\` too, hundreds of
+    // tiles out and past the end of the map's own frame, and with nothing to
+    // stop it it collects the whole integral: a black band ruled across the
+    // sky at eye level. Past the map's own scale - the same range the haze
+    // gives up at - this is not a hole in the ground, it is the horizon.
+    float reach = 1.0 - smoothstep(FOG_CLOSE_NEAR, FOG_CLOSE_FAR, t0);
+
+    if (reach <= 0.0) return 0.0;
+
+    // The exponent at the entry and at the far end. Clamped because a ray
+    // that meets nothing carries \`dist\` to the far plane and \`exp\` of that
+    // is an infinity; the transmittance is zero long before the clamp bites,
+    // so nothing anyone can see depends on where it sits.
+    float a = min(k * (top - min(camY, top)), 60.0);
+    float b = min(k * (top - camY - rdY * dist), 60.0);
+
+    if (abs(rdY) < 1.0e-4) return reach * uwParams.y * exp(a) * span;
+
+    return reach * uwParams.y * (exp(a) - exp(b)) / (k * rdY);
+  }
+
   void main(void) {
     vec4 color = texture2D(textureSampler, vUV);
     float depth = texture2D(depthSampler, vUV).r;
 
-    if (fogParams.y <= 0.0 || depth <= 0.0) {
+    // A pixel with no depth is left alone by both terms, for the reason
+    // above: a card against the sky and a hole in the ground are the same
+    // thing here, and this cannot tell them apart - a grass blade on a rim
+    // would go out with the ravine behind it. What is under a hole is drawn
+    // rather than deduced: the floor of the sky, in lighting/skyDome.ts.
+    if (depth <= 0.0 || (fogParams.y <= 0.0 && uwParams.w <= 0.0)) {
       gl_FragColor = color;
       return;
     }
+
+    bool hazed = fogParams.y > 0.0;
 
     vec3 viewDir = vec3((vUV.x * 2.0 - 1.0) * viewport.x, (vUV.y * 2.0 - 1.0) * viewport.y, 1.0);
     vec3 camPos = invView[3].xyz;
@@ -157,10 +217,26 @@ function registerFogShader(): void {
 
     // Extinction only on the emissive half: the light scattered into the ray
     // is already added once, by the surface term.
-    float f = hazeAt(dist, camPos.y, rd.y);
+    float f = hazed ? hazeAt(dist, camPos.y, rd.y) : 0.0;
     float fEffect = f * effectShare;
 
-    gl_FragColor = vec4(mix(surface, fogColor, f) + effect * (1.0 - fEffect), color.a);
+    vec3 lit = mix(surface, fogColor, f);
+
+    // The underworld, last of the two: the haze fades a surface toward the
+    // horizon and this fades what is left toward the bottom of the world, so
+    // a crevasse stays dark however much air is in front of it.
+    //
+    // The surface only. The additive half is drawn over whatever the frame
+    // had behind it and is almost always in front of this - an aurora over a
+    // ravine, snow falling into one - and putting the fog through it would
+    // put those out with the ground they are over.
+    if (uwParams.w > 0.0) {
+      float uw = 1.0 - exp(-max(underworldDepth(dist, camPos.y, rd.y), 0.0));
+
+      lit = mix(lit, uwColor, uw);
+    }
+
+    gl_FragColor = vec4(lit + effect * (1.0 - fEffect), color.a);
   }
   `;
 }
@@ -178,6 +254,8 @@ function createFog(scene: Scene, camera: ArcRotateCamera): PostProcess {
       'fogParams',
       'fogBaseY',
       'effectShare',
+      'uwParams',
+      'uwColor',
     ],
     ['depthSampler', EFFECT_MASK_SAMPLER],
     1,
@@ -219,6 +297,17 @@ function createFog(scene: Scene, camera: ArcRotateCamera): PostProcess {
     effect.setFloat4('fogParams', shown.start, shown.density, shown.cap, shown.height);
     effect.setFloat('fogBaseY', fogBaseY);
     effect.setFloat('effectShare', effectHazeDev ?? EFFECT_HAZE_SHARE);
+
+    const uw = shown.underworld;
+
+    effect.setFloat4(
+      'uwParams',
+      uw ? uw.top : 0,
+      uw ? uw.density : 0,
+      uw ? Math.max(uw.falloff, 1e-3) : 1,
+      uw ? 1 : 0
+    );
+    effect.setFloat3('uwColor', uwLinear[0], uwLinear[1], uwLinear[2]);
   };
 
   camera.attachPostProcess(fog);
@@ -245,10 +334,23 @@ export function syncHeightFog(
   camera: ArcRotateCamera,
   fog: LookProfile['fog'],
   colorLinear: Rgb,
-  post: boolean
+  post: boolean,
+  /** The map's underworld fog, or null - see `LookProfile.underworld`. */
+  underworld: Underworld | null
 ): boolean {
   // Dev seam: `?haze=<density>` replaces the profile's density (0 = no pass).
   const density = hazeDev ?? fog.density;
+
+  // Dev seam: `?uw=<density>` replaces the underworld's (0 = off), which is
+  // both the A/B for what it is worth and the dial for how hard it bites.
+  const uwDensity = uwDev ?? underworld?.density ?? 0;
+
+  shown.underworld =
+    underworld && uwDensity > 0 ? { ...underworld, density: uwDensity } : null;
+
+  uwLinear[0] = shown.underworld?.color[0] ?? 0;
+  uwLinear[1] = shown.underworld?.color[1] ?? 0;
+  uwLinear[2] = shown.underworld?.color[2] ?? 0;
 
   shown.color[0] = colorLinear[0];
   shown.color[1] = colorLinear[1];
@@ -258,7 +360,10 @@ export function syncHeightFog(
   shown.cap = fog.cap;
   shown.height = fog.height;
 
-  const want = post && density > 0 && effectMask() !== null;
+  // Either fog is reason enough for the pass: a map may have holes in its
+  // ground and no haze at all.
+  const want =
+    post && (density > 0 || shown.underworld !== null) && effectMask() !== null;
 
   if (runtime && (!want || runtime.scene !== scene)) {
     disposeHeightFog();

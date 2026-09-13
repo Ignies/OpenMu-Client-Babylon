@@ -28,6 +28,34 @@ export type LookProfile = {
     readonly color: Rgb | null;
   };
   /**
+   * The fog that fills the bottom of the world, under `top` and thickening
+   * downward - what a map with holes in its ground is standing over.
+   *
+   * Devias' ravines are `NoGround` tiles, which the ground mesh sends past the
+   * far plane, so what shows through them is the sky dome: panes of pale blue
+   * lying across the snow field, brighter than the snow they are cut out of.
+   * A ray down one of those never meets anything, so it collects this the
+   * whole way and ends black; a ray that stops on the cliff face a few tiles
+   * down collects a few tiles of it and comes back half there. That is the
+   * difference between a fog and a cut-out, and it is why this is integrated
+   * along the ray rather than keyed off the height the ray happened to end
+   * at: the same wall reads differently near and far, and nothing anywhere
+   * has an edge.
+   *
+   * `top` belongs under the map's lowest walkable ground, or the field itself
+   * is standing in it. Omit for a map whose ground has no holes in it.
+   */
+  readonly underworld?: {
+    /** World height the fog starts under. */
+    readonly top: number;
+    /** Density at `top`, per tile of ray travelled. */
+    readonly density: number;
+    /** How fast it thickens below that: e-folds per tile of descent. */
+    readonly falloff: number;
+    /** What a ray that never comes out of it ends up. */
+    readonly color: Rgb;
+  };
+  /**
    * Sun direction for the shaped key and its share of the key total; the sky
    * takes the rest, and a shadow removes exactly the share (§3.2).
    */
@@ -209,6 +237,12 @@ const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
     whiteBalance: [0.97, 0.99, 1.04],
     sky: { zenith: [0.44, 0.62, 0.88], horizon: [0.78, 0.85, 0.92], clouds: 0.28 },
     fog: { start: 20, density: 0.012, cap: 0.9, height: 0.02, color: [0.7, 0.76, 0.86] },
+    // `top` is 0: the shallowest tile anyone can stand on here is 0.135, so
+    // none of the snow field is over it and none of it changes. The cliff
+    // faces along the ravines hang to about eight tiles under that, and the
+    // numbers are set so they are half gone by four - which is the fade the
+    // original's crevasses have, seen from the rim.
+    underworld: { top: 0, density: 0.075, falloff: 0.25, color: [0, 0, 0] },
     sun: sun(200, 35),
   },
   [ENUM_WORLD.WD_8TARKAN]: {

@@ -358,7 +358,16 @@ export function createLookDirector(
 
     let reordered = syncAmbientOcclusion(scene, camera, lightTier, post);
     reordered =
-      syncHeightFog(scene, camera, shaped ? profile.fog : { ...profile.fog, density: 0 }, fogColorLinear, post) ||
+      syncHeightFog(
+        scene,
+        camera,
+        shaped ? profile.fog : { ...profile.fog, density: 0 },
+        fogColorLinear,
+        post,
+        // The map's own, not the area's: a room owns the frame and shows
+        // nothing past its walls, and a room has no holes in its floor.
+        shaped && !room ? base.underworld ?? null : null
+      ) ||
       reordered;
     updateHeightFog(camera, dt);
 
