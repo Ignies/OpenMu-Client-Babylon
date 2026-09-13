@@ -1200,6 +1200,7 @@ export const bulgarianLayer: LanguageLayer = {
     'msgWin.wrongPassword': 'Въведената парола е грешна.',
     'msgWin.confirmSell': 'Да продам ли %s?',
     'msgWin.confirmDrop': 'Да изхвърля ли %s?',
+    'msgWin.confirmAddPoints': 'Да добавиш ли {count} точки за {stat}?',
 
     'notify.wsError': 'Грешка във връзката WebSocket',
     'notify.connectionLost': 'Връзката със сървъра се разпадна',

@@ -1170,6 +1170,7 @@ export const chineseLayer: LanguageLayer = {
     'msgWin.wrongPassword': '你输入的密码不正确。',
     'msgWin.confirmSell': '出售 %s？',
     'msgWin.confirmDrop': '丢弃 %s？',
+    'msgWin.confirmAddPoints': '要为{stat}增加 {count} 点吗？',
 
     'notify.wsError': 'WebSocket 连接错误',
     'notify.connectionLost': '与服务器的连接已断开',

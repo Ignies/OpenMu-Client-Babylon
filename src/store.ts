@@ -49,7 +49,7 @@ import {
   GuildMemberRoleEnum,
 } from './common/packets/ServerToClientPackets';
 import { classFromAppearance } from './common/deserializeAppearance';
-import { formatMsgWinText, MsgWinCode } from './common/msgWin';
+import { formatMsgWinText, MsgWinCode, type MsgWinArg } from './common/msgWin';
 import { stringToBytes } from './common/utils';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from './consts';
 import {
@@ -1754,7 +1754,7 @@ export const Store = new (class _Store {
     this.sendToGS(packet.buffer);
   }
 
-  popUpMsgWin(code: MsgWinCode, arg?: string, onOk?: () => void): void {
+  popUpMsgWin(code: MsgWinCode, arg?: MsgWinArg, onOk?: () => void): void {
     this.msgWin = { code, text: formatMsgWinText(code, arg) };
     this.msgWinOk = onOk ?? null;
   }

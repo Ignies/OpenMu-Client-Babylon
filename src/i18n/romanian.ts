@@ -1209,6 +1209,7 @@ export const romanianLayer: LanguageLayer = {
     'msgWin.wrongPassword': 'Parola introdusă nu este corectă.',
     'msgWin.confirmSell': 'Vinzi %s?',
     'msgWin.confirmDrop': 'Arunci %s?',
+    'msgWin.confirmAddPoints': 'Adaugi {count} puncte pe {stat}?',
 
     'notify.wsError': 'Eroare de conexiune WebSocket',
     'notify.connectionLost': 'Conexiunea cu serverul s-a pierdut',

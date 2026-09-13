@@ -7,6 +7,18 @@
 /** Ceiling on one run, and on what the amount box accepts. */
 export const MAX_AMOUNT = 9999;
 
+/**
+ * From this many points on, the run is confirmed before it starts. Points are
+ * irreversible and there is no reset, so a mistyped amount has to be caught
+ * before the first request goes out.
+ */
+export const CONFIRM_AMOUNT = 100;
+
+/** Whether a run of this size asks the player first. */
+export function needsConfirm(amount: number): boolean {
+  return amount >= CONFIRM_AMOUNT;
+}
+
 /** What the box may ask for: at least one, never more than what is left. */
 export function clampAmount(amount: number, points: number): number {
   if (!Number.isFinite(amount)) return 0;

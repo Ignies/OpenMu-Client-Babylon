@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { clampAmount, MAX_AMOUNT, nextStep } from './statAmounts';
+import {
+  clampAmount,
+  CONFIRM_AMOUNT,
+  MAX_AMOUNT,
+  needsConfirm,
+  nextStep,
+} from './statAmounts';
 
 describe('stat point amount', () => {
   it('keeps a sane amount as it is', () => {
@@ -28,6 +34,30 @@ describe('stat point amount', () => {
 
   it('answers nothing to a broken number', () => {
     expect(clampAmount(NaN, 500)).toBe(0);
+  });
+});
+
+describe('stat point confirmation', () => {
+  it('asks at 100, not at 99', () => {
+    expect(CONFIRM_AMOUNT).toBe(100);
+    expect(needsConfirm(99)).toBe(false);
+    expect(needsConfirm(100)).toBe(true);
+  });
+
+  it('leaves the everyday amounts alone', () => {
+    expect(needsConfirm(1)).toBe(false);
+    expect(needsConfirm(10)).toBe(false);
+  });
+
+  it('asks for anything above the threshold', () => {
+    expect(needsConfirm(200)).toBe(true);
+    expect(needsConfirm(MAX_AMOUNT)).toBe(true);
+  });
+
+  it('asks about what the run will really be, not what was typed', () => {
+    // 2000 typed with 40 points left is a run of 40: no question.
+    expect(needsConfirm(clampAmount(2000, 40))).toBe(false);
+    expect(needsConfirm(clampAmount(2000, 500))).toBe(true);
   });
 });
 

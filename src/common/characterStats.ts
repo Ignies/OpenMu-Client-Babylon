@@ -82,6 +82,18 @@ export function getClassName(cls: CharacterClassNumber): string {
   return t(CLASS_NAME_KEYS[cls] ?? 'class.darkWizard');
 }
 
+const STAT_NAME_KEYS: Record<StatType, TextKey> = {
+  [StatType.Strength]: 'stat.strength',
+  [StatType.Agility]: 'stat.agility',
+  [StatType.Vitality]: 'stat.vitality',
+  [StatType.Energy]: 'stat.energy',
+  [StatType.Leadership]: 'stat.command',
+};
+
+export function getStatName(stat: StatType): string {
+  return t(STAT_NAME_KEYS[stat]);
+}
+
 type ItemConfig = Record<string, unknown>;
 
 function configOf(item: Item): ItemConfig | null {

@@ -9,6 +9,8 @@ import { useEventBus } from '../../../../../hooks/useEventBus';
 import { Store } from '../../../../../store';
 import { GameOptions } from '../../../../../common/gameOptions';
 import { StatAllocation } from '../../../../../common/statAllocation';
+import { clampAmount, needsConfirm } from '../../../../../common/statAmounts';
+import { MsgWinCode } from '../../../../../common/msgWin';
 import { devQueryNumber } from '../../../../../common/devSeams';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
@@ -26,6 +28,7 @@ import {
   deriveCharacterStats,
   getBaseClass,
   getClassName,
+  getStatName,
   StatType,
 } from '../../../../../common/characterStats';
 import {
@@ -121,6 +124,20 @@ const digitsOnly = (value: string) => value.replace(/[^0-9]/g, '');
 /** Shift on the `+` adds ten, Ctrl every point that is left. */
 const SHIFT_AMOUNT = 10;
 
+/** True while the confirmation raised by a `+` is on screen. */
+function asking(): boolean {
+  return Store.msgWin?.code === MsgWinCode.ConfirmAddPoints;
+}
+
+/** The question in front of a big run: Yes starts it, No changes nothing. */
+function askToAdd(stat: StatType, wanted: number): void {
+  Store.popUpMsgWin(
+    MsgWinCode.ConfirmAddPoints,
+    { count: wanted, stat: getStatName(stat) },
+    () => StatAllocation.start(stat, wanted)
+  );
+}
+
 const StatRow = observer(
   ({
     label,
@@ -162,10 +179,20 @@ const StatRow = observer(
         return;
       }
       if (elsewhere) return;
+      // A second press while the question is up must not start a second run.
+      if (asking()) return;
 
       const { shift, ctrl } = held.current;
       const typed = Number(amount || '1');
-      StatAllocation.start(stat, ctrl ? points : shift ? SHIFT_AMOUNT : typed);
+      const wanted = clampAmount(
+        ctrl ? points : shift ? SHIFT_AMOUNT : typed,
+        points
+      );
+      if (wanted <= 0) return;
+
+      // Points cannot be taken back, so a big run is asked about first.
+      if (needsConfirm(wanted)) askToAdd(stat, wanted);
+      else StatAllocation.start(stat, wanted);
     };
 
     return (
@@ -222,6 +249,8 @@ const StatRow = observer(
               setAmount(digitsOnly(event.target.value).slice(0, AMOUNT_MAX_DIGITS))
             }
             onKeyDown={event => {
+              // While the question is up Enter and Escape answer it.
+              if (asking()) return;
               if (event.key === 'Enter') press();
               else if (event.key === 'Escape') StatAllocation.cancel();
               else return;
@@ -309,7 +338,8 @@ const WindowButton = ({
 /**
  * Dev-only staging for the offline demo: `?statPoints=500` opens the window
  * on a character with that many free points, `&statRun=200` starts a run on
- * Strength as well.
+ * Strength as well, `&statConfirm=200` puts the question for that run up
+ * instead of starting it.
  */
 function stageStatPoints(): (() => void) | undefined {
   const points = devQueryNumber('statPoints');
@@ -321,13 +351,20 @@ function stageStatPoints(): (() => void) | undefined {
   });
 
   const wanted = devQueryNumber('statRun');
-  if (wanted === null) return;
+  const confirm = devQueryNumber('statConfirm');
+  if (wanted === null && confirm === null) return;
 
   // The map is still being warped into when this mounts, and arriving is one
   // of the things that ends a run.
   const begin = () => {
     EventBus.off('warpCompleted', begin);
-    StatAllocation.start(StatType.Strength, wanted);
+
+    const amount = confirm ?? wanted ?? 0;
+    const clamped = clampAmount(amount, Store.playerData.points);
+    if (clamped <= 0) return;
+
+    if (confirm !== null) askToAdd(StatType.Strength, clamped);
+    else StatAllocation.start(StatType.Strength, clamped);
   };
   EventBus.on('warpCompleted', begin);
 
@@ -346,9 +383,12 @@ export const CharacterInfo = observer(() => {
 
   const open = Store.characterInfoEnabled;
 
-  // A run belongs to the open window: closing it is one of the stops.
+  // A run belongs to the open window: closing it is one of the stops, and it
+  // takes the question with it.
   useEffect(() => {
-    if (!open) StatAllocation.cancel();
+    if (open) return;
+    StatAllocation.cancel();
+    if (asking()) Store.closeMsgWin();
   }, [open]);
 
   useEffect(() => stageStatPoints(), []);

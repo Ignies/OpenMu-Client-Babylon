@@ -1176,6 +1176,7 @@ export const japaneseLayer: LanguageLayer = {
     'msgWin.wrongPassword': '入力したパスワードが正しくありません。',
     'msgWin.confirmSell': '%s を売りますか？',
     'msgWin.confirmDrop': '%s を捨てますか？',
+    'msgWin.confirmAddPoints': 'ポイント {count} を{stat}に振りますか？',
 
     'notify.wsError': 'WebSocket の接続エラー',
     'notify.connectionLost': 'サーバーとの接続が切れました',

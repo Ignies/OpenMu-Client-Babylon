@@ -1858,6 +1858,7 @@ export const EN_TEXT = {
   'msgWin.wrongPassword': 'The password you have entered is incorrect.',
   'msgWin.confirmSell': 'Sell %s?',
   'msgWin.confirmDrop': 'Drop %s?',
+  'msgWin.confirmAddPoints': 'Add {count} points to {stat}?',
 
   // ---- notifications the client raises itself ----------------------------
   'notify.wsError': 'WebSocket connection error',

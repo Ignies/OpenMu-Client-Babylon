@@ -1213,6 +1213,7 @@ export const italianLayer: LanguageLayer = {
     'msgWin.wrongPassword': 'La password inserita non è corretta.',
     'msgWin.confirmSell': 'Vendere %s?',
     'msgWin.confirmDrop': 'Gettare %s?',
+    'msgWin.confirmAddPoints': 'Aggiungere {count} punti su {stat}?',
 
     'notify.wsError': 'Errore di connessione WebSocket',
     'notify.connectionLost': 'La connessione al server è caduta',
