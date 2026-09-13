@@ -171,11 +171,19 @@ export function createTerrainMaterial(
     water?: TerrainWaterRuntime | null;
     /** The map's `AlphaTile*` slot (`MapLayer.cutoutTile`); null = no cutout. */
     cutout?: number | null;
+    /**
+     * This map draws its `NoGround` tiles instead of hiding them, and the
+     * vertex colour's alpha says how much of the ground light each corner
+     * keeps (`common/terrain/precipice.ts`). False = alpha is 1 everywhere
+     * and the multiply is not emitted.
+     */
+    precipice?: boolean;
   }
 ) {
   const tileArray = USE_TILE_TEXTURE_ARRAY ? config.tileArray ?? null : null;
   const water = config.water ?? null;
   const cutout = config.cutout ?? null;
+  const precipice = config.precipice ?? false;
   // The ploughed-trail map is one more sampler, and the per-tile fallback
   // path already spends every one of WebGL's guaranteed 16 fragment units
   // (13 tiles + the light map + two cascades). On that path the trail is
@@ -306,6 +314,19 @@ ${terrainOverlayLitGlsl(
   'sunShadow',
   'extraLit'
 )}
+${
+  precipice
+    ? `
+    // Down a ravine (common/terrain/precipice.ts), after the overlays and not
+    // before them: settled snow is a \`lightNeutral\` layer, so where it covers
+    // the ground it *replaces* the map's light with its own palette
+    // (terrainOverlay.ts). A darkening folded into the bake, or into the
+    // ground light, would have been thrown away with it and the ravines would
+    // have come out as bright white snow. Here there is one term left for
+    // both to pass through.
+    lit *= vColor.a;`
+    : ''
+}
     vec3 f = ${FINAL_COLOR_VAR_NAME}.rgb * max(lit, 0.0);
 
     // A torch does not only brighten the stone beside it, it colours it. The

@@ -76,6 +76,25 @@ const shown = {
 let fogBaseY = 0;
 let fogBaseSeeded = false;
 
+/**
+ * The current map's precipice mask, or null (`common/terrain/precipice.ts`).
+ *
+ * The haze reads it because it is the only pass that can: a ravine is drawn
+ * black by the ground shader and this is what would put the horizon colour
+ * back over it. There is no lit air down a crevasse to scatter, so the haze
+ * is scaled by the mask and the dark reaches the camera. Everything outside
+ * one fades exactly as it did, and a map without precipices never binds it -
+ * the uniform is off and the fetch does not happen.
+ *
+ * Set by the terrain build rather than handed down the director's chain,
+ * because it and the ground mesh are the same field and must not come apart.
+ */
+let precipiceMask: Texture | null = null;
+
+export function setPrecipiceMask(mask: Texture | null): void {
+  precipiceMask = mask;
+}
+
 type Runtime = {
   scene: Scene;
   camera: ArcRotateCamera;
@@ -111,6 +130,8 @@ function registerFogShader(): void {
   uniform vec4 fogParams;  // start, density, cap, height density
   uniform float fogBaseY;
   uniform float effectShare;
+  uniform sampler2D pcMask;
+  uniform float pcMaskOn;
 
   const float FOG_CLOSE_NEAR = ${FOG_CLOSE_NEAR.toFixed(1)};
   const float FOG_CLOSE_FAR = ${FOG_CLOSE_FAR.toFixed(1)};
@@ -158,6 +179,15 @@ function registerFogShader(): void {
     // Extinction only on the emissive half: the light scattered into the ray
     // is already added once, by the surface term.
     float f = hazeAt(dist, camPos.y, rd.y);
+
+    // Down a precipice there is no lit air to scatter, so the haze does not
+    // reach it and the ground shader's black survives to the camera. 1 - no
+    // change at all - on every map that declares none.
+    if (pcMaskOn > 0.5) {
+      vec2 pcXZ = camPos.xz + rd.xz * dist;
+      f *= texture2D(pcMask, (pcXZ + 0.5) / 256.0).r;
+    }
+
     float fEffect = f * effectShare;
 
     gl_FragColor = vec4(mix(surface, fogColor, f) + effect * (1.0 - fEffect), color.a);
@@ -178,8 +208,9 @@ function createFog(scene: Scene, camera: ArcRotateCamera): PostProcess {
       'fogParams',
       'fogBaseY',
       'effectShare',
+      'pcMaskOn',
     ],
-    ['depthSampler', EFFECT_MASK_SAMPLER],
+    ['depthSampler', EFFECT_MASK_SAMPLER, 'pcMask'],
     1,
     null,
     Texture.BILINEAR_SAMPLINGMODE,
@@ -219,6 +250,12 @@ function createFog(scene: Scene, camera: ArcRotateCamera): PostProcess {
     effect.setFloat4('fogParams', shown.start, shown.density, shown.cap, shown.height);
     effect.setFloat('fogBaseY', fogBaseY);
     effect.setFloat('effectShare', effectHazeDev ?? EFFECT_HAZE_SHARE);
+
+    // Always bound, mask or not: an unbound sampler is a draw error and it
+    // takes the whole frame with it. A map without precipices binds the
+    // effect mask over the slot and never fetches it - `pcMaskOn` is 0.
+    effect.setTexture('pcMask', precipiceMask ?? mask);
+    effect.setFloat('pcMaskOn', precipiceMask ? 1 : 0);
   };
 
   camera.attachPostProcess(fog);

@@ -1,4 +1,5 @@
 import { TERRAIN_SIZE, TWFlags } from '../../common/terrain/consts';
+import type { PrecipiceField } from '../../common/terrain/precipice';
 import { TERRAIN_INDEX } from '../../common/terrain/utils';
 import { isFlagInBinaryMask } from '../../common/utils';
 import {
@@ -31,7 +32,13 @@ export function CreateGroundFromHeightMap(
   alpha: Uint8Array,
   backTerrainLight: IVector3Like[],
   terrainFlags: Uint16Array,
-  ambientLight: Vector3
+  ambientLight: Vector3,
+  /**
+   * How this map's `NoGround` tiles are drawn (`common/terrain/precipice.ts`).
+   * Null - every map but the ones that declare a `PrecipiceSpec` - keeps the
+   * hole: the tile's corners go to -10000 and it is never seen.
+   */
+  precipice: PrecipiceField | null = null
 ): Mesh {
   const ground = new Mesh(name, scene);
 
@@ -84,6 +91,19 @@ return color.asArray();
     alphaColors[index++] = a4;
   }
 
+  /**
+   * With a precipice field the `NoGround` tile is drawn where the height map
+   * puts it, the way the original draws every tile - nothing is moved, and
+   * what makes it a ravine is that the light comes off it (`prepareLights`).
+   * Without one the tile goes where it has always gone: past the far plane,
+   * and out of sight.
+   */
+  function cornerHeight(index: number, noGround: boolean): number {
+    if (precipice) return heightBuffer[index];
+
+    return noGround ? -10000 : heightBuffer[index];
+  }
+
   function prepareVertices(
     x: number,
     y: number,
@@ -95,10 +115,10 @@ return color.asArray();
     const flag = terrainFlags[getTerrainIndex(x, y)];
     const noGround = isFlagInBinaryMask(flag, TWFlags.NoGround);
 
-    const h1 = noGround ? -10000 : heightBuffer[idx1];
-    const h2 = noGround ? -10000 : heightBuffer[idx2];
-    const h3 = noGround ? -10000 : heightBuffer[idx3];
-    const h4 = noGround ? -10000 : heightBuffer[idx4];
+    const h1 = cornerHeight(idx1, noGround);
+    const h2 = cornerHeight(idx2, noGround);
+    const h3 = cornerHeight(idx3, noGround);
+    const h4 = cornerHeight(idx4, noGround);
 
     positions.push(x, h1, y);
     positions.push(x + 1, h2, y);
@@ -119,10 +139,18 @@ return color.asArray();
     idx3: number,
     idx4: number
   ) {
-    colors.push(...buildVertexLight(idx1), 1);
-    colors.push(...buildVertexLight(idx2), 1);
-    colors.push(...buildVertexLight(idx3), 1);
-    colors.push(...buildVertexLight(idx4), 1);
+    // Alpha is the share of the ground light this corner keeps: 1 everywhere
+    // the map has ground, falling to nothing a few tiles into a ravine
+    // (`common/terrain/precipice.ts`). The terrain shader multiplies it into
+    // `lit` after the overlays have had theirs, which is the one place that
+    // covers the map's own light and the settled snow's alike
+    // (`terrainMaterial.ts`). 1 is the neutral value, which is what the frame
+    // mesh outside the map writes without knowing any of this
+    // (`terrainEdge.ts`).
+    colors.push(...buildVertexLight(idx1), precipice?.light[idx1] ?? 1);
+    colors.push(...buildVertexLight(idx2), precipice?.light[idx2] ?? 1);
+    colors.push(...buildVertexLight(idx3), precipice?.light[idx3] ?? 1);
+    colors.push(...buildVertexLight(idx4), precipice?.light[idx4] ?? 1);
 
     alphaColors.push(...buildVertexLight(idx1), 0);
     alphaColors.push(...buildVertexLight(idx2), 0);

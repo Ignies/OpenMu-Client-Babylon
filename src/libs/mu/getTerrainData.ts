@@ -7,8 +7,13 @@ import {
 } from '../babylon/exports';
 import type { IVector3Like, Scene } from '../babylon/exports';
 import { CreateGroundFromHeightMap } from './customGroundMesh';
+import { buildPrecipiceField } from '../../common/terrain/precipice';
+import { devQueryNumber } from '../../common/devSeams';
 import { createTileTextureArray } from './tileTextureArray';
-import { updateTerrainHeightMap } from './terrainHeightMap';
+import {
+  updatePrecipiceMask,
+  updateTerrainHeightMap,
+} from './terrainHeightMap';
 import { createTerrainMaterial } from './terrainMaterial';
 import { terrainOverlaysFor } from './terrainOverlay';
 import { createTerrainEdge } from './terrainEdge';
@@ -200,6 +205,28 @@ export async function getTerrainData(
 
   updateTerrainHeightMap(scene, terrainHeight);
 
+  // How this map draws its `NoGround` tiles. Null on every map that has not
+  // asked for them to be drawn at all, and the mesh is then exactly what it
+  // always was (`common/terrain/precipice.ts`).
+  //
+  // Classic keeps the holes, the way it draws no sky dome and no map frame:
+  // the fade that makes a drawn ravine read as a ravine is a term on the
+  // ground light, and Classic's is the original's untouched.
+  //
+  // Dev seam: `?precipice=0` puts the holes back, which is the A/B.
+  const precipiceSpec =
+    lightingTier() && devQueryNumber('precipice') !== 0
+      ? maps.precipiceFor(map)
+      : null;
+  const precipice = precipiceSpec
+    ? buildPrecipiceField(terrainAttrs, precipiceSpec)
+    : null;
+
+  // The same field the mesh's vertex alpha carries, on the GPU for the one
+  // other reader of it: the distance haze, which would otherwise put the
+  // horizon colour straight back over a ravine drawn black (`heightFog.ts`).
+  updatePrecipiceMask(scene, precipice?.bytes ?? null);
+
   const terrain = CreateGroundFromHeightMap(
     '_world_' + worldNum,
     scene,
@@ -209,7 +236,8 @@ export async function getTerrainData(
     terrainMapping.alpha,
     terrainLight,
     terrainAttrs,
-    Vector3.One().setAll(TERRAIN_AMBIENT)
+    Vector3.One().setAll(TERRAIN_AMBIENT),
+    precipice
   );
   terrain.isPickable = true;
 
@@ -246,6 +274,10 @@ export async function getTerrainData(
       // in the ground, not a texture. Null everywhere else, and the shader is
       // then exactly what it always was.
       cutout: maps.cutoutTileFor(map),
+      // This map's `NoGround` tiles are drawn and darkened rather than
+      // hidden. Off everywhere else, and the shader is then exactly what it
+      // always was.
+      precipice: precipice !== null,
       // Animated water: Atlans' wave deformation and caustics flipbook.
       water: waterSpec
         ? createTerrainWaterRuntime(waterSpec, waterFrames)
