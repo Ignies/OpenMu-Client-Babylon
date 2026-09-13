@@ -2,6 +2,7 @@ import postgres from 'postgres';
 import bcrypt from 'bcryptjs';
 import { forgetSignupsBefore, recordAccount, recordSignup, signupsSince } from './db';
 import { BurstLimit, bucketFor, clientIp } from '../../src/common/rateLimit';
+import { isReservedName } from '../../src/common/reservedNames';
 
 /**
  * The account-creation endpoint behind `register.ignies.net`.
@@ -113,6 +114,10 @@ function validate(body: {
 
   if (!USERNAME_RE.test(username)) {
     return 'ID may contain only letters and numbers.';
+  }
+
+  if (isReservedName(username)) {
+    return 'That ID is reserved.';
   }
 
   if (

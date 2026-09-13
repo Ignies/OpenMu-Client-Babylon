@@ -2,6 +2,7 @@ import { t } from '../../../i18n';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
 import { Store } from '../../../store';
+import { isReservedName } from '../../../common/reservedNames';
 import { MuButton } from '../../components/muButton';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { TEXT_COLOR } from '../serversPage/layout';
@@ -109,6 +110,11 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
 
     if (hasSpecialCharacters(name)) {
       Store.addNotification(CREATE_MESSAGES.specialName, 'error');
+      return;
+    }
+
+    if (isReservedName(name)) {
+      Store.addNotification(CREATE_MESSAGES.reservedName, 'error');
       return;
     }
 
