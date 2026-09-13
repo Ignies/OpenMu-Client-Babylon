@@ -1031,6 +1031,7 @@ export const spanishLayer: LanguageLayer = {
       'La penalización dura hasta la próxima batalla de Crywolf.',
 
     'item.thisItem': 'este objeto',
+    'item.equipped': 'Equipado',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Poder de ataque',
     'item.attackPowerTwoHand': 'Poder de ataque a dos manos',
@@ -1448,6 +1449,9 @@ export const spanishLayer: LanguageLayer = {
     'options.uiScale': 'Tamaño',
     'options.lockWindows': 'Bloquear ventanas',
     'options.minimapCorner': 'Minimapa en la esquina',
+    'options.compareTooltips': 'Comparar con lo puesto',
+    'options.compare.shift': 'Con Shift',
+    'options.compare.always': 'Siempre',
     'options.eventTimers': 'Temporizadores de eventos',
     'options.questTracker': 'Seguimiento de misiones',
     'options.resetWindows': 'Restablecer',

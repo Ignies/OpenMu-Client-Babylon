@@ -42,6 +42,10 @@ import {
   ITEM_EFFECT_MODE_MAX,
 } from '../../../common/itemEffectMode';
 import {
+  COMPARE_TOOLTIP_LABEL_KEYS,
+  COMPARE_TOOLTIP_MAX,
+} from '../../../common/itemCompare';
+import {
   LIGHTING_QUALITY_LABEL_KEYS,
   LIGHTING_QUALITY_MAX,
 } from '../../../common/lightingQuality';
@@ -190,6 +194,7 @@ type SliderRow = {
     | 'volume'
     | 'effectLevel'
     | 'itemEffects'
+    | 'compareTooltips'
     | 'lightingQuality'
     | 'materialQuality'
     | 'materialDetail'
@@ -715,6 +720,13 @@ const TABS: Tab[] = [
                 }),
                 check('lockWindows', -1, 'options.lockWindows'),
                 check('minimapCorner', -1, 'options.minimapCorner'),
+                slider({
+                  key: 'compareTooltips',
+                  textId: -1,
+                  labelKey: 'options.compareTooltips',
+                  max: COMPARE_TOOLTIP_MAX,
+                  display: v => t(COMPARE_TOOLTIP_LABEL_KEYS[v]) ?? v,
+                }),
                 check('eventTimers', -1, 'options.eventTimers'),
                 check('questTracker', -1, 'options.questTracker'),
                 {
