@@ -88,33 +88,96 @@ function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
 }
 
 /**
+ * Folders in the order a name is taken from when the copies are not all the
+ * same file. The art folders come first because the models that reach here
+ * are shop racks and prop shelves showing off *items* - Elbeland's and
+ * Devias' weapon racks ask for `sword02` / `medicine1`, and the `Item/` copy
+ * is the one the item itself wears. Numbered `ObjectN` / `WorldN` folders
+ * follow in map order, everything else last.
+ */
+const FOLDER_ORDER = ['item', 'player', 'monster', 'npc', 'skill', 'effect'];
+
+const UNRANKED = 1e6;
+
+/** Sort key: the model's own folder first, then FOLDER_ORDER, then shallowest. */
+function pickOrder(
+  path: string,
+  modelTop: string
+): [number, number, number, string] {
+  const relative = path.slice(DATA_FOLDER.length);
+  const top = relative.slice(0, relative.indexOf('/')).toLowerCase();
+
+  const named = FOLDER_ORDER.indexOf(top);
+  const numbered = top.match(/^(?:object|world)(\d+)$/);
+
+  const rank =
+    named >= 0
+      ? named
+      : numbered
+        ? FOLDER_ORDER.length + Number(numbered[1])
+        : UNRANKED;
+
+  return [top === modelTop ? 0 : 1, rank, relative.split('/').length, relative];
+}
+
+/** Every ambiguous name and the copy it took, printed at the end of a run. */
+const texPicks: string[] = [];
+
+/**
  * The model's own folder is where the original looks and where the texture
  * almost always is. A handful of BMDs name a file that this data tree keeps
  * somewhere else: `Skill/Rider01.bmd` (the Uniria) asks for `unicon.jpg`,
  * which ships as `Data/Item/unicon.OZJ`, and the three pets of
  * `Data/Player/Helper0n.bmd` ask for `fairy` / `satan` the same way. Those
  * came out untextured, which for a model this runtime draws unlit is a solid
- * white silhouette — a mount and its rider lighting up the screen.
+ * white silhouette - a mount and its rider lighting up the screen.
  *
- * So: fall back to the file name across the whole tree, but never guess.
- * Several folders carry their own `bons.OZJ` or `hide.OZJ`, so the match
- * counts only when every copy found is byte-identical; anything genuinely
- * ambiguous stays unresolved and is reported at the end of the run.
+ * So: fall back to the file name across the whole tree. The original does the
+ * same - `CLoadData::OpenTexture` (LoadData.cpp:100-108) hands the bare name
+ * to `CGlobalBitmap::FindTextureByName` and takes whatever bitmap is already
+ * loaded under it, which means load order decides when a name ships more than
+ * once. Load order is not worth copying, so: most of these are byte-identical
+ * wherever they sit and the copy is taken outright; the handful that differ go
+ * by `FOLDER_ORDER`, and every one of those picks is logged.
  */
 async function readTextureElsewhere(
   fileName: string,
-  headerSize: number
+  headerSize: number,
+  modelDir: string
 ): Promise<Uint8Array | null> {
   const paths = indexTextures().get(fileName.toLowerCase());
   if (!paths?.length) return null;
 
   const copies = await Promise.all(paths.map(path => Bun.file(path).bytes()));
-  if (copies.some(copy => !sameBytes(copy, copies[0]))) return null;
+  if (copies.every(copy => sameBytes(copy, copies[0]))) {
+    return copies[0].slice(headerSize);
+  }
 
-  return copies[0].slice(headerSize);
+  const modelTop = modelDir.slice(0, modelDir.indexOf('/')).toLowerCase();
+  const ordered = [...paths].sort((a, b) => {
+    const ka = pickOrder(a, modelTop);
+    const kb = pickOrder(b, modelTop);
+
+    for (let i = 0; i < 3; i++) {
+      if (ka[i] !== kb[i]) return (ka[i] as number) - (kb[i] as number);
+    }
+
+    return (ka[3] as string).localeCompare(kb[3] as string);
+  });
+
+  texPicks.push(
+    `${modelDir}${fileName} -> ${ordered[0].slice(DATA_FOLDER.length)} (${
+      ordered.length - 1
+    } other copy/copies differ)`
+  );
+
+  return (await Bun.file(ordered[0]).bytes()).slice(headerSize);
 }
 
-async function readTextureBytes(texPath: string): Promise<Uint8Array> {
+async function readTextureBytes(
+  texPath: string,
+  modelDir: string
+): Promise<Uint8Array> {
   const asIs = Bun.file(texPath);
 
   if (await asIs.exists()) {
@@ -172,7 +235,11 @@ async function readTextureBytes(texPath: string): Promise<Uint8Array> {
   for (const [container, headerSize] of containers) {
     if (container !== container.toUpperCase()) continue;
 
-    const found = await readTextureElsewhere(fileName + container, headerSize);
+    const found = await readTextureElsewhere(
+      fileName + container,
+      headerSize,
+      modelDir
+    );
     if (found) return found;
   }
 
@@ -669,7 +736,7 @@ async function convertBMDToGLTF(bmd: BMD, outputFilename: string) {
     let texSuccess = false;
 
     try {
-      const bytes = await readTextureBytes(texPath);
+      const bytes = await readTextureBytes(texPath, bmd.Dir);
       const webpBytes = await convertImageToWebP(bytes);
       texture.setImage(webpBytes);
       texture.setMimeType(`image/webp`);
@@ -819,6 +886,13 @@ async function processFile(rawRelInputFilePath: string) {
 await Promise.all(files.map(processFile));
 
 console.log(`Processed ${files.length} files!`);
+
+if (texPicks.length > 0) {
+  console.warn(
+    `\n${texPicks.length} textures were taken from another folder whose copies differ:`
+  );
+  for (const pick of texPicks.sort()) console.warn(`  ${pick}`);
+}
 
 if (texFailures.length > 0) {
   console.warn(`\n${texFailures.length} textures could not be resolved:`);

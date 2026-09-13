@@ -35,7 +35,7 @@ import {
 import { textureSourceName } from './pbrMaps';
 import { getEmptyTexture } from '../libs/babylon/emptyTexture';
 import { BlendState } from './objects/enum';
-import { isSkinOrHairTexture } from './skinTexture';
+import { isHideTexture, isSkinOrHairTexture } from './skinTexture';
 import { parseTextureScriptFromPath } from './textureScript';
 
 const reader = new BMDReader();
@@ -445,7 +445,13 @@ function prepareMeshes(
       const textureName = textureSourceName(m._albedoTexture as Texture);
       const script = parseTextureScriptFromPath(textureName);
 
-      if (script?.hiddenMesh) {
+      // A texture named `hid*` is not a texture: `CLoadData::OpenTexture`
+      // (LoadData.cpp:70-73) binds BITMAP_HIDE for it before it looks at the
+      // extension, and every RenderMesh returns on that index
+      // (ZzzBMD.cpp:953-956, :1384, :1964). The slot means "this mesh does not
+      // draw" - 147 meshes name one, mostly the skin panels under the Lucky
+      // Item armour parts.
+      if (script?.hiddenMesh || isHideTexture(textureName)) {
         mesh.setEnabled(false);
         mesh.metadata.hiddenByScript = true;
       }

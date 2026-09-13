@@ -14,3 +14,13 @@ export function isSkinOrHairTexture(fileName: string): boolean {
     name.startsWith('ski') || name.startsWith('level') || name.startsWith('hair')
   );
 }
+
+/**
+ * The hide slot (`LoadData.cpp:70-73`): a mesh whose texture name starts with
+ * `hid` binds BITMAP_HIDE instead of a bitmap, and every RenderMesh returns
+ * on that index (`ZzzBMD.cpp:953-956`). The name is the instruction - the
+ * file it points at may or may not exist, and either way nothing draws.
+ */
+export function isHideTexture(fileName: string): boolean {
+  return fileName.toLowerCase().startsWith('hid');
+}

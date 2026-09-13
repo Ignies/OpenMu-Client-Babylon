@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isSkinOrHairTexture } from './skinTexture';
+import { isHideTexture, isSkinOrHairTexture } from './skinTexture';
 
 describe('isSkinOrHairTexture', () => {
   it('catches the skin, level and hair textures the body parts carry', () => {
@@ -15,5 +15,18 @@ describe('isSkinOrHairTexture', () => {
     expect(isSkinOrHairTexture('upper_07_m')).toBe(false);
     expect(isSkinOrHairTexture('hide_m')).toBe(false);
     expect(isSkinOrHairTexture('Sword01')).toBe(false);
+  });
+});
+
+describe('isHideTexture', () => {
+  it('catches the hide slot whatever extension the BMD names', () => {
+    expect(isHideTexture('hide')).toBe(true);
+    expect(isHideTexture('hide_m')).toBe(true);
+    expect(isHideTexture('HIDE')).toBe(true);
+  });
+
+  it('leaves a name that only starts the same way alone', () => {
+    expect(isHideTexture('hi_light')).toBe(false);
+    expect(isHideTexture('shield02')).toBe(false);
   });
 });
