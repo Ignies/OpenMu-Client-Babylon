@@ -2020,5 +2020,11 @@ export const frenchLayer: LanguageLayer = {
     'options.section.vitals': 'Vie et mana',
     'options.section.warnings': 'Alertes',
     'options.englishItemNames': 'Noms d’objets en anglais',
+    'exp.title': 'Expérience',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Image',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'Infos de performance',
+    'keys.performanceReadout': 'Infos de performance',
   },
 };

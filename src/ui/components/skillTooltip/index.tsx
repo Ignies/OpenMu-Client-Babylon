@@ -8,7 +8,14 @@ import { skillDisplayName } from '../../../common/skillNames';
 import { skills, type SkillBlock } from '../../../skills';
 import { skillDelaySeconds } from '../../../skills/cooldowns';
 
-type Line = { text: string; color: 'white' | 'blue' | 'darkRed' | 'gray'; bold?: boolean; blank?: boolean };
+export type TipLine = {
+  text: string;
+  color: 'white' | 'blue' | 'darkRed' | 'gray';
+  bold?: boolean;
+  blank?: boolean;
+};
+
+type Line = TipLine;
 
 /** `RenderSkillInfo`'s dark-red requirement lines, one per failed gate. */
 const BLOCK_TEXT: Record<SkillBlock, (req: { level: number; energy: number; mana: number; ag: number }) => string> = {
@@ -81,42 +88,47 @@ export function buildSkillTooltip(number: number, level = 0): Line[] {
 }
 
 /**
- * `RenderSkillInfo` via `RenderTipTextList`: the black 80% box hanging off
+ * `RenderTipTextList` (ZzzInventory.cpp:282): the black 80% box hanging off
  * the cursor, kept inside the viewport, portalled so no window clips it.
+ * Every hover tip on the bottom bar is drawn by this one component.
  */
+export const MuTipList = observer(({ lines, x, y }: { lines: TipLine[]; x: number; y: number }) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const box = ref.current;
+    if (!box) return;
+    const rect = box.getBoundingClientRect();
+    const margin = 2;
+    let left = x - rect.width / 2;
+    // The bar sits at the bottom: the tip hangs above the cursor by default.
+    let top = y - 8 - rect.height;
+    if (left + rect.width > window.innerWidth - margin) left = window.innerWidth - margin - rect.width;
+    if (left < margin) left = margin;
+    if (top < margin) top = y + 16;
+    box.style.left = `${Math.round(left)}px`;
+    box.style.top = `${Math.round(top)}px`;
+  });
+
+  return createPortal(
+    <div ref={ref} className="mu-skill-tooltip">
+      {lines.map((line, i) =>
+        line.blank ? (
+          <div key={i} className="mu-skill-tooltip-gap" />
+        ) : (
+          <div key={i} className={`mu-skill-tooltip-line color-${line.color}${line.bold ? ' bold' : ''}`}>
+            {line.text}
+          </div>
+        )
+      )}
+    </div>,
+    document.body
+  );
+});
+
+/** `RenderSkillInfo` for one hotbar skill, in the box above. */
 export const SkillTooltip = observer(
-  ({ number, level = 0, x, y }: { number: number; level?: number; x: number; y: number }) => {
-    const ref = useRef<HTMLDivElement>(null);
-    const lines = buildSkillTooltip(number, level);
-
-    useLayoutEffect(() => {
-      const box = ref.current;
-      if (!box) return;
-      const rect = box.getBoundingClientRect();
-      const margin = 2;
-      let left = x - rect.width / 2;
-      // The bar sits at the bottom: the tip hangs above the cursor by default.
-      let top = y - 8 - rect.height;
-      if (left + rect.width > window.innerWidth - margin) left = window.innerWidth - margin - rect.width;
-      if (left < margin) left = margin;
-      if (top < margin) top = y + 16;
-      box.style.left = `${Math.round(left)}px`;
-      box.style.top = `${Math.round(top)}px`;
-    });
-
-    return createPortal(
-      <div ref={ref} className="mu-skill-tooltip">
-        {lines.map((line, i) =>
-          line.blank ? (
-            <div key={i} className="mu-skill-tooltip-gap" />
-          ) : (
-            <div key={i} className={`mu-skill-tooltip-line color-${line.color}${line.bold ? ' bold' : ''}`}>
-              {line.text}
-            </div>
-          )
-        )}
-      </div>,
-      document.body
-    );
-  }
+  ({ number, level = 0, x, y }: { number: number; level?: number; x: number; y: number }) => (
+    <MuTipList lines={buildSkillTooltip(number, level)} x={x} y={y} />
+  )
 );

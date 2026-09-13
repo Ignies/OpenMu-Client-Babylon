@@ -2017,5 +2017,11 @@ export const italianLayer: LanguageLayer = {
     'options.section.vitals': 'Vita e mana',
     'options.section.warnings': 'Avvisi',
     'options.englishItemNames': 'Nomi oggetti in inglese',
+    'exp.title': 'Esperienza',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Frame',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'Dati prestazioni',
+    'keys.performanceReadout': 'Dati prestazioni',
   },
 };

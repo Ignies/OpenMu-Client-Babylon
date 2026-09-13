@@ -2011,5 +2011,11 @@ export const romanianLayer: LanguageLayer = {
     'options.section.vitals': 'Viață și mana',
     'options.section.warnings': 'Avertizări',
     'options.englishItemNames': 'Nume de obiecte în engleză',
+    'exp.title': 'Experiență',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Cadru',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'Date de performanță',
+    'keys.performanceReadout': 'Date de performanță',
   },
 };

@@ -52,6 +52,7 @@ import { DuelWindows } from './components/duel';
 import { Notices } from '../../components/notices';
 import { MapNameBanner } from './components/mapNameBanner';
 import { SessionStatsWindow } from './components/sessionStats';
+import { PerfReadout } from './components/perfReadout';
 import { SlideHelpBar } from '../../components/slideHelp';
 import { DebugMenuWindow } from '../../components/debugMenu';
 import { GmPanelWindow } from '../../components/gmPanel';
@@ -69,6 +70,7 @@ const HUD = observer(() => {
     <div className="hud">
       <TargetHealthBar />
       <MapNameBanner />
+      <PerfReadout />
       <Notices />
       <SlideHelpBar />
       <BuffBar />

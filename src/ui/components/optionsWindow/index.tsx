@@ -727,6 +727,7 @@ const TABS: Tab[] = [
                 }),
                 check('lockWindows', -1, 'options.lockWindows'),
                 check('minimapCorner', -1, 'options.minimapCorner'),
+                check('performanceReadout', -1, 'options.performanceReadout'),
                 slider({
                   key: 'compareTooltips',
                   textId: -1,

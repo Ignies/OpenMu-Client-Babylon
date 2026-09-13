@@ -203,6 +203,14 @@
   .exp-fill {
     position: absolute;
   }
+
+  // The hover target for the experience tip: over both exp strips (the master
+  // bar draws on the same pixels), so either one answers the pointer.
+  .exp-hover {
+    position: absolute;
+    z-index: 2;
+    cursor: help;
+  }
 }
 
 // The skill hanging off the cursor while it is dragged off the bar; on the

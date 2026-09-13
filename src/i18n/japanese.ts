@@ -1954,5 +1954,11 @@ export const japaneseLayer: LanguageLayer = {
     'options.section.vitals': 'HPとMP',
     'options.section.warnings': '警告',
     'options.englishItemNames': 'アイテム名を英語で表示',
+    'exp.title': '経験値',
+    'perf.fps': 'FPS',
+    'perf.frame': 'フレーム',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'パフォーマンス表示',
+    'keys.performanceReadout': 'パフォーマンス表示',
   },
 };

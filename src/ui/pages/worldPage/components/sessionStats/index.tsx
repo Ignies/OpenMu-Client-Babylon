@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { runInAction } from 'mobx';
 import { Store } from '../../../../../store';
 import { SessionStats } from '../../../../../common/sessionStats';
+import { formatDuration } from '../../../../../common/hudFormat';
 import { isKey } from '../../../../../common/keyBindings';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import { uiClick } from '../../../../../libs/sfx';
@@ -42,15 +43,6 @@ function compact(value: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
   if (n >= 10_000) return `${(n / 1000).toFixed(1)}K`;
   return n.toLocaleString('en-US');
-}
-
-function clock(ms: number): string {
-  const s = Math.floor(ms / 1000);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const rest = s % 60;
-  const pad = (v: number) => String(v).padStart(2, '0');
-  return h > 0 ? `${h}:${pad(m)}:${pad(rest)}` : `${pad(m)}:${pad(rest)}`;
 }
 
 const Row = ({ label, value, top }: { label: string; value: string; top: number }) => (
@@ -110,7 +102,11 @@ export const SessionStatsWindow = observer(() => {
         text={t('session.title')}
       />
 
-      <Row label={t('session.time')} value={clock(SessionStats.elapsedMs)} top={FIRST_ROW} />
+      <Row
+        label={t('session.time')}
+        value={formatDuration(SessionStats.elapsedMs)}
+        top={FIRST_ROW}
+      />
       <Row
         label={t('session.exp')}
         value={rate(SessionStats.experiencePerHour)}
@@ -128,7 +124,7 @@ export const SessionStatsWindow = observer(() => {
       />
       <Row
         label={t('session.toLevel')}
-        value={toLevel === null ? '-' : clock(toLevel)}
+        value={toLevel === null ? '-' : formatDuration(toLevel)}
         top={FIRST_ROW + ROW_HEIGHT * 4}
       />
 

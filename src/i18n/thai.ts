@@ -1965,5 +1965,11 @@ export const thaiLayer: LanguageLayer = {
     'options.section.vitals': 'พลังชีวิตและมานา',
     'options.section.warnings': 'คำเตือน',
     'options.englishItemNames': 'ชื่อไอเทมเป็นภาษาอังกฤษ',
+    'exp.title': 'ค่าประสบการณ์',
+    'perf.fps': 'FPS',
+    'perf.frame': 'เฟรม',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'ข้อมูลประสิทธิภาพ',
+    'keys.performanceReadout': 'ข้อมูลประสิทธิภาพ',
   },
 };
