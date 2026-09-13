@@ -4,6 +4,7 @@ import type { Scope } from './scope';
 import { FIRST_SHOP_SLOT, type ShopSession } from './shop';
 import type { BotSession } from './session';
 import type { TradeOutcome, TradeSession, TradeTerms } from './trade';
+import { TradeFinishedTradeResultEnum } from '../../src/common/packets/ServerToClientPackets';
 import type { Wallet } from './wallet';
 import type { HandoverKind, Ledger } from './ledger';
 
@@ -316,7 +317,10 @@ export function collectListing(
     const before = bag?.snapshot() ?? null;
     const bagVersion = bag?.version ?? 0;
 
-    const outcome = finish(await trade.settle(terms), log);
+    // In a collection only the bot receives, so a full inventory is the
+    // bot's own, and the listing must not be dropped for it: another bot,
+    // with room, is the answer.
+    const outcome = finish(await trade.settle(terms), log, { fullBagIsOurs: true });
     if (!outcome.ok) return outcome;
 
     // Past this line the trade has completed and the seller no longer has the
@@ -583,12 +587,19 @@ export function payOut(
   });
 }
 
-function finish(outcome: TradeOutcome, log: (message: string) => void): EscrowResult {
+function finish(
+  outcome: TradeOutcome,
+  log: (message: string) => void,
+  options: { fullBagIsOurs?: boolean } = {}
+): EscrowResult {
   if (outcome.ok) {
     log('handover complete');
     return { ok: true };
   }
   log(`handover failed: ${outcome.reason}`);
+  if (options.fullBagIsOurs && outcome.result === TradeFinishedTradeResultEnum.FailedByFullInventory) {
+    return { ok: false, reason: "the bot's bag is full", declined: false };
+  }
   // The table was open and the exchange did not go through: whichever side
   // cancelled, the customer was there and it did not happen.
   return { ok: false, reason: outcome.reason, declined: true };

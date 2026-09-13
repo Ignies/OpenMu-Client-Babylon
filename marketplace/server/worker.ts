@@ -523,11 +523,20 @@ async function pay(bot: Bot, request: store.PayoutRequest): Promise<boolean> {
   return true;
 }
 
-/** The fleet as the scheduler sees it, right now. */
-function runners(): Runner[] {
+/**
+ * The fleet as the scheduler sees it, right now. With an item, each bot also
+ * says whether that item would fit in its bag; a bag the server has not
+ * listed yet is given the benefit of the doubt.
+ */
+function runners(item?: store.Item): Runner[] {
   return [...fleet.values()]
     .filter(b => b.connection.connected)
-    .map(b => ({ name: b.name, busy: b.busy, zen: b.context.wallet?.zen ?? null }));
+    .map(b => ({
+      name: b.name,
+      busy: b.busy,
+      zen: b.context.wallet?.zen ?? null,
+      hasRoom: item && b.bag.known ? b.bag.canHold(item) : true,
+    }));
 }
 
 /**
@@ -580,7 +589,7 @@ async function tick(): Promise<void> {
       continue;
     }
 
-    const pick = pickForListing(runners(), listing.holder);
+    const pick = pickForListing(runners(listing.item), listing.holder);
     if (!pick.bot) {
       noteWaiting(key, pick.reason);
       continue;

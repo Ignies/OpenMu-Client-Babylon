@@ -5,6 +5,7 @@ import {
 import { InventoryConstants } from '../../src/common/inventoryConstants';
 import { StorageKind } from '../../src/common/storageKind';
 import type { BotConnection, Frame } from './connection';
+import { footprintOf } from './footprint';
 import { decodeItem } from './itemMatch';
 import { view } from './session';
 
@@ -39,6 +40,10 @@ const FIRST_BAG_SLOT = InventoryConstants.EquippableSlotsCount;
 /** The stall grid sits behind this in the same storage and is not the bag. */
 const FIRST_STORE_SLOT = InventoryConstants.FirstStoreItemSlotIndex;
 const LAST_STORE_SLOT = FIRST_STORE_SLOT + InventoryConstants.StoreSize - 1;
+
+/** The bag grid a bot has: no extensions, so the base rows only. */
+const COLUMNS = InventoryConstants.RowSize;
+const ROWS = InventoryConstants.InventoryRows;
 
 export type BagItem = { slot: number; data: Uint8Array };
 
@@ -130,6 +135,55 @@ export class Bag {
       if (!this.slots.has(slot)) out.push(slot);
     }
     return out;
+  }
+
+  /**
+   * The bag's squares that something is standing on, each item covering
+   * its footprint from its slot. Squares are numbered from the first bag
+   * slot, row by row.
+   */
+  occupiedCells(): Set<number> {
+    const cells = new Set<number>();
+    for (const [slot, bytes] of this.slots) {
+      const item = decodeItem(bytes);
+      const { w, h } = item ? footprintOf(item.group, item.num) : { w: 1, h: 1 };
+      const origin = slot - FIRST_BAG_SLOT;
+      const row = Math.floor(origin / COLUMNS);
+      const col = origin % COLUMNS;
+      for (let r = row; r < Math.min(ROWS, row + h); r++) {
+        for (let c = col; c < Math.min(COLUMNS, col + w); c++) cells.add(r * COLUMNS + c);
+      }
+    }
+    return cells;
+  }
+
+  /**
+   * Whether an item of this kind would fit anywhere in the bag right now.
+   *
+   * The server decides where it lands; this only answers whether there is a
+   * rectangle of the item's size left. A bot that says no is not sent to
+   * collect - another one is - instead of opening a trade the server then
+   * fails for a full inventory, which the bot used to read as the seller
+   * backing out.
+   */
+  canHold(shape: ItemShape): boolean {
+    const { w, h } = footprintOf(shape.group, shape.num);
+    const taken = this.occupiedCells();
+    for (let row = 0; row + h <= ROWS; row++) {
+      for (let col = 0; col + w <= COLUMNS; col++) {
+        let free = true;
+        for (let r = row; r < row + h && free; r++) {
+          for (let c = col; c < col + w; c++) {
+            if (taken.has(r * COLUMNS + c)) {
+              free = false;
+              break;
+            }
+          }
+        }
+        if (free) return true;
+      }
+    }
+    return false;
   }
 
   /** What is in a bag slot, or null when it is empty. */

@@ -132,3 +132,43 @@ describe('the bag', () => {
     await expect(bag.waitForUpdate(0, 250)).rejects.toThrow();
   });
 });
+
+describe('room in the bag', () => {
+  // Items in the fixture table: a jewel is 1x1, a Kris (0/0) 1x2, a Small
+  // Shield (6/0) 2x2.
+  const kris = item(0, 0);
+  const shield = item(6, 0);
+
+  it('is judged by rectangles, not by empty squares', () => {
+    const connection = new FakeConnection();
+    const bag = new Bag(connection.asConnection());
+    // Every other square of every row taken by a jewel: 32 free squares,
+    // none of them adjacent.
+    const entries = [];
+    for (let slot = 12; slot < 76; slot += 2) entries.push({ slot, data: jewel });
+    connection.deliver(inventory(entries));
+
+    expect(bag.canHold({ group: 14, num: 13 })).toBe(true);
+    expect(bag.canHold({ group: 6, num: 0 })).toBe(false);
+  });
+
+  it('sees a tall item cover the rows beneath its slot', () => {
+    const connection = new FakeConnection();
+    const bag = new Bag(connection.asConnection());
+    // A Kris in the first square covers the square below it too.
+    connection.deliver(inventory([{ slot: 12, data: kris }]));
+    expect(bag.occupiedCells().has(0)).toBe(true);
+    expect(bag.occupiedCells().has(8)).toBe(true);
+    expect(bag.occupiedCells().has(1)).toBe(false);
+  });
+
+  it('says a full bag is full', () => {
+    const connection = new FakeConnection();
+    const bag = new Bag(connection.asConnection());
+    const entries = [];
+    for (let slot = 12; slot < 76; slot++) entries.push({ slot, data: jewel });
+    connection.deliver(inventory(entries));
+    expect(bag.canHold({ group: 14, num: 13 })).toBe(false);
+    void shield;
+  });
+});
