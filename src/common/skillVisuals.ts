@@ -1444,6 +1444,41 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
 };
 
 /**
+ * Fire a projectile, carrying its own light for the length of the flight.
+ *
+ * The original lights an arrow body every frame it is alive (ZzzEffect.cpp
+ * MoveEffect, `AddTerrainLight(..., range 2)` per arrow model);
+ * `lighting/skills.ts` holds the colours and decides which models light at
+ * all, so anything else through here - a fire ball, a summoned beast -
+ * simply asks and is told no. Every shot in the game goes out this way, so
+ * a volley, a skill shot and a plain bow shot all light the same.
+ */
+function shoot(scene: Scene, from: Vector3, skill: number, opts: ProjectileOptions): void {
+  const model = opts.model?.model;
+  const head = from.clone();
+  const light = model
+    ? lighting.arrow(scene, skill, model, out => {
+        out.x = head.x;
+        out.y = head.y;
+        out.z = head.z;
+      })
+    : null;
+
+  effects.spawn('projectile', scene, from, {
+    ...opts,
+    trace: p => head.copyFrom(p),
+    onArrive: at => {
+      light?.stop();
+      opts.onArrive?.(at);
+    },
+    onLost: () => {
+      light?.stop();
+      opts.onLost?.();
+    },
+  });
+}
+
+/**
  * `n` arrows fanning out from the caster toward `at`: `spread` radians
  * between them, or the explicit angles (Triple Shot ±15°, the five-arrow
  * masters ±5/10/20, Javelin's three).
@@ -1460,7 +1495,7 @@ function fanArrows(at: Vector3, c: SkillContext, n: number, m: string, colour: R
   for (let i = 0; i < n; i++) {
     const a = base + (typeof spread === 'number' ? (i - (n - 1) / 2) * spread : spread[i] ?? 0);
     const to = new Vector3(from.x + Math.sin(a) * dist, at.y + IMPACT_HEIGHT * 0.5, from.z + Math.cos(a) * dist);
-    effects.spawn('projectile', c.scene, from, {
+    shoot(c.scene, from, baseSkill(skill), {
       to,
       speed: ARROW_SPEED,
       model: { model: m, colour, scale },
@@ -1536,6 +1571,15 @@ export function fallbackFor(def: SkillDefinition | undefined): SkillVisual {
   }
 }
 
+/**
+ * The row a master-level skill borrows: `SKILL_VISUALS` and the lighting
+ * tables are keyed by the base skill, and a Strengthener / Mastery number
+ * must land on the same row as the skill it strengthens.
+ */
+export function baseSkill(skill: number): number {
+  return SKILL_VISUALS[skill] ? skill : MASTER_ALIASES[skill] ?? skill;
+}
+
 /** The row for a skill, through master aliases, else its type's fallback. */
 export function skillVisualFor(skill: number): SkillVisual {
   return SKILL_VISUALS[skill] ?? SKILL_VISUALS[MASTER_ALIASES[skill] ?? -1] ?? fallbackFor(skillDefinition(skill));
@@ -1567,7 +1611,7 @@ function runTravel(row: SkillVisual, ctx: SkillContext, target: Entity): void {
     from.addInPlace(dir.scaleInPlace(0.4));
   }
   const skill = currentSkill;
-  effects.spawn('projectile', ctx.scene, from, {
+  shoot(ctx.scene, from, baseSkill(skill), {
     ...travel,
     to: followEntity(target, IMPACT_HEIGHT),
     onArrive: at => {
@@ -1697,7 +1741,8 @@ export function playBowShotVisual(scene: Scene, shooter: Entity, target: Entity)
   from.addInPlace(to.subtract(from).normalize().scaleInPlace(BOW_MUZZLE_FORWARD));
 
   const ctx = contextFor(scene, shooter, target);
-  effects.spawn('projectile', scene, from, {
+
+  shoot(scene, from, 0, {
     ...arrow(shot.model, shot.colour),
     to: followEntity(target, IMPACT_HEIGHT),
     ...(shot.model === MODEL.arrowBomb
