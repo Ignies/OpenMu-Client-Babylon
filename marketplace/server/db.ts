@@ -1,5 +1,5 @@
 import { Database } from 'bun:sqlite';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -35,48 +35,17 @@ db.run('PRAGMA journal_mode = WAL');
 // is a bug worth failing on, not one worth carrying.
 db.run('PRAGMA foreign_keys = ON');
 
-db.run(`
-  CREATE TABLE IF NOT EXISTS listings (
-    id            TEXT PRIMARY KEY,
-    seller        TEXT NOT NULL,
-    seller_char   TEXT NOT NULL,
-    price         INTEGER NOT NULL,
-    item_group    INTEGER NOT NULL,
-    item_number   INTEGER NOT NULL,
-    item_level    INTEGER NOT NULL DEFAULT 0,
-    item_json     TEXT NOT NULL,
-    category      TEXT NOT NULL,
-    state         TEXT NOT NULL,
-    holder        TEXT,
-    holder_slot   INTEGER,
-    buyer         TEXT,
-    buyer_char    TEXT,
-    created_at    INTEGER NOT NULL,
-    updated_at    INTEGER NOT NULL
-  )
-`);
-
-db.run('CREATE INDEX IF NOT EXISTS listings_state ON listings (state)');
-db.run('CREATE INDEX IF NOT EXISTS listings_seller ON listings (seller)');
-db.run('CREATE INDEX IF NOT EXISTS listings_item ON listings (item_group, item_number)');
-
-db.run(`
-  CREATE TABLE IF NOT EXISTS balances (
-    account   TEXT PRIMARY KEY,
-    zen       INTEGER NOT NULL DEFAULT 0
-  )
-`);
-
-db.run(`
-  CREATE TABLE IF NOT EXISTS audit (
-    id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    at        INTEGER NOT NULL,
-    listing   TEXT,
-    account   TEXT,
-    event     TEXT NOT NULL,
-    detail    TEXT
-  )
-`);
+/**
+ * The schema lives in `schema/*.sql`, numbered, and every statement in them
+ * is idempotent. They are applied here on every start so a fresh box works,
+ * and they are what an operator runs by hand on a live one after a deploy -
+ * a table that only ever came into being as a side effect of a service
+ * booting would be invisible to whoever has to reproduce it.
+ */
+const SCHEMA_DIR = path.join(import.meta.dir, 'schema');
+for (const file of readdirSync(SCHEMA_DIR).filter(f => f.endsWith('.sql')).sort()) {
+  db.exec(readFileSync(path.join(SCHEMA_DIR, file), 'utf8'));
+}
 
 export { db };
 
@@ -88,6 +57,12 @@ export { db };
  * a seller who never completes that handover leaves a `pending` row that never
  * becomes visible to anybody. Showing it earlier would advertise an item the
  * service does not hold.
+ *
+ * `stuck` is the one state a bot cannot leave on its own: the service says a
+ * bot holds the item in a slot, and the bot's bag says that slot is empty and
+ * nothing like it is anywhere else. It is off sale, still the seller's, and
+ * waits for a person - `bun run marketplace-bot return --to <seller>` hands
+ * the bot's whole bag back.
  */
 export type ListingState =
   | 'pending'
@@ -95,7 +70,8 @@ export type ListingState =
   | 'claimed'
   | 'sold'
   | 'cancelled'
-  | 'returning';
+  | 'returning'
+  | 'stuck';
 
 export type ListingRow = {
   id: string;

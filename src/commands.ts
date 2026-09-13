@@ -148,7 +148,8 @@ export const Commands = new (class _Commands {
     const hero = Store.world?.playerEntity;
     if (!entity || !hero) return false;
     if (entity.localPlayer || entity.netId === undefined) return false;
-    if (!entity.playerAnimation || entity.npcType !== undefined) return false;
+    const isPlayer = !!entity.playerAnimation || entity.skin !== undefined;
+    if (!isPlayer || entity.npcType !== undefined) return false;
     if (entity.dying || entity.objOutOfScope) return false;
     const dx = entity.transform!.pos.x - hero.transform!.pos.x;
     const dy = entity.transform!.pos.z - hero.transform!.pos.z;
@@ -167,7 +168,10 @@ export const Commands = new (class _Commands {
   targetOf(entity: Entity | null | undefined): CommandTarget | string {
     const hero = Store.world?.playerEntity;
     if (!entity || !hero) return t('command.noPlayerUnderCursor');
-    if (entity.localPlayer || !entity.playerAnimation || entity.netId === undefined) {
+    // A skinned player wears a monster rig, so the animation component alone
+    // would not know it for a player.
+    const isPlayer = !!entity.playerAnimation || entity.skin !== undefined;
+    if (entity.localPlayer || !isPlayer || entity.netId === undefined) {
       return t('command.notAPlayer');
     }
     if (entity.dying) return t('command.playerDead');

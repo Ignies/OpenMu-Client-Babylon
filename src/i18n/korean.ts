@@ -96,6 +96,7 @@ export const koreanLayer: LanguageLayer = {
     'characters.select': '캐릭터를 선택하세요',
     'characters.create.minLength': '5자 이상 입력하세요',
     'characters.create.specialName': '기호는 사용할 수 없습니다.',
+    'characters.create.reservedName': '예약된 이름입니다.',
     'characters.create.failed':
       '캐릭터 이름이 올바르지 않거나 이미 존재합니다.',
 
@@ -1673,6 +1674,13 @@ export const koreanLayer: LanguageLayer = {
     'marketplace.agoMinutes': '{value}분 전',
     'marketplace.agoHours': '{value}시간 전',
     'marketplace.agoDays': '{value}일 전',
+    'marketplace.state.pending': '상인이 수거하러 오기를 기다리는 중',
+    'marketplace.state.active': '판매 중',
+    'marketplace.state.claimed': '예약됨, 배달 중',
+    'marketplace.state.returning': '당신에게 돌아가는 중',
+    'marketplace.state.stuck': '시장에 보관 중입니다. 게임 마스터에게 문의하세요.',
+    'marketplace.owed': '받을 Zen: {amount}',
+    'marketplace.collect': '수령',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

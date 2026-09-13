@@ -222,6 +222,7 @@ export const COMMAND_VALUE = '25';
 export const CREATE_MESSAGES = textTable({
   minLength: 'characters.create.minLength',
   specialName: 'characters.create.specialName',
+  reservedName: 'characters.create.reservedName',
   failed: 'characters.create.failed',
 });
 

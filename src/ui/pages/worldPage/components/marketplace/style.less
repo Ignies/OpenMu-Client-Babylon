@@ -873,3 +873,23 @@
   transform: translateX(-50%);
   pointer-events: none;
 }
+
+/* A seller's own row: what the trader is doing with it. */
+.mp-state {
+  font-size: 10px;
+  color: @mp-dim;
+  white-space: nowrap;
+}
+
+/* My Listings: the Zen a sale earned while the seller was away. */
+.mp-owed {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: @mp-ink;
+  background: rgba(0, 0, 0, 0.24);
+}

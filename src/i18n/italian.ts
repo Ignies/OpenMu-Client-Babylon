@@ -93,6 +93,7 @@ export const italianLayer: LanguageLayer = {
     'characters.select': 'Scegli un personaggio',
     'characters.create.minLength': 'Scrivi più di 4 lettere',
     'characters.create.specialName': 'Non si possono usare simboli.',
+    'characters.create.reservedName': 'Quel nome è riservato.',
     'characters.create.failed':
       'Nome del personaggio non valido o già esistente.',
 
@@ -1722,6 +1723,13 @@ export const italianLayer: LanguageLayer = {
     'marketplace.agoMinutes': '{value} min fa',
     'marketplace.agoHours': '{value} h fa',
     'marketplace.agoDays': '{value} g fa',
+    'marketplace.state.pending': 'In attesa che il mercante lo ritiri',
+    'marketplace.state.active': 'In vendita',
+    'marketplace.state.claimed': 'Riservato, in consegna',
+    'marketplace.state.returning': 'Sta tornando da te',
+    'marketplace.state.stuck': 'Trattenuto dal mercato. Chiedi a un game master.',
+    'marketplace.owed': 'Ti sono dovuti {amount} Zen',
+    'marketplace.collect': 'Ritira',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

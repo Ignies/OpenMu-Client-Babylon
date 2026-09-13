@@ -215,6 +215,28 @@ export class BotSession {
   }
 
   /**
+   * `/hide`: a game master steps out of everybody's view.
+   *
+   * The server drops the bot from every observer and refuses new ones, so a
+   * bot parked between handovers is not a stranger standing on somebody's
+   * tile. It still sees the world itself, which is what a warp needs.
+   */
+  hide(): void {
+    this.say('/hide');
+  }
+
+  /**
+   * `/unhide`: back into view, announced properly.
+   *
+   * The server re-spawns the bot on its map, so everyone nearby gets a fresh
+   * scope entry - the one thing a warp alone never does. This is what puts
+   * the bot on the customer's screen, and in the skin it is wearing.
+   */
+  unhide(): void {
+    this.say('/unhide');
+  }
+
+  /**
    * `/teleport <x> <y>`: a game-master move within the current map.
    *
    * This exists because a warp does not announce the bot to the people already

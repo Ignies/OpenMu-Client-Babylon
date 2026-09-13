@@ -97,6 +97,7 @@ export const thaiLayer: LanguageLayer = {
     'characters.select': 'เลือกตัวละคร',
     'characters.create.minLength': 'พิมพ์มากกว่า 4 ตัวอักษร',
     'characters.create.specialName': 'ใช้สัญลักษณ์ไม่ได้',
+    'characters.create.reservedName': 'ชื่อนี้ถูกสงวนไว้',
     'characters.create.failed': 'ชื่อตัวละครไม่ถูกต้อง หรือมีชื่อนี้อยู่แล้ว',
 
     'class.darkWizard': 'ดาร์กวิซาร์ด',
@@ -1686,6 +1687,13 @@ export const thaiLayer: LanguageLayer = {
     'marketplace.agoMinutes': '{value} นาทีที่แล้ว',
     'marketplace.agoHours': '{value} ชั่วโมงที่แล้ว',
     'marketplace.agoDays': '{value} วันที่แล้ว',
+    'marketplace.state.pending': 'รอพ่อค้ามารับ',
+    'marketplace.state.active': 'กำลังขาย',
+    'marketplace.state.claimed': 'จองแล้ว กำลังจัดส่ง',
+    'marketplace.state.returning': 'กำลังส่งคืนให้คุณ',
+    'marketplace.state.stuck': 'ตลาดเก็บรักษาไว้ โปรดติดต่อเกมมาสเตอร์',
+    'marketplace.owed': 'คุณมี {amount} Zen รอรับ',
+    'marketplace.collect': 'รับ',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

@@ -94,6 +94,7 @@ export const bulgarianLayer: LanguageLayer = {
     'characters.select': 'Избери герой',
     'characters.create.minLength': 'Напиши повече от 4 букви',
     'characters.create.specialName': 'Не може да се използват символи.',
+    'characters.create.reservedName': 'Това име е запазено.',
     'characters.create.failed':
       'Невалидно име на герой или вече съществува такова.',
 
@@ -1707,6 +1708,13 @@ export const bulgarianLayer: LanguageLayer = {
     'marketplace.agoMinutes': 'преди {value} мин',
     'marketplace.agoHours': 'преди {value} ч',
     'marketplace.agoDays': 'преди {value} д',
+    'marketplace.state.pending': 'Чака търговецът да го вземе',
+    'marketplace.state.active': 'В продажба',
+    'marketplace.state.claimed': 'Запазено, доставя се',
+    'marketplace.state.returning': 'На път обратно към теб',
+    'marketplace.state.stuck': 'Задържано от пазара. Попитай гейм мастър.',
+    'marketplace.owed': 'Дължат ти се {amount} Zen',
+    'marketplace.collect': 'Вземи',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

@@ -18,7 +18,7 @@ export type ApiListing = {
   price: number;
   item: Item;
   category: string;
-  state: 'pending' | 'active' | 'claimed' | 'sold' | 'cancelled' | 'returning';
+  state: 'pending' | 'active' | 'claimed' | 'sold' | 'cancelled' | 'returning' | 'stuck';
   buyer: string | null;
   listedAt: number;
 };
@@ -143,11 +143,12 @@ export function cancel(id: string) {
   );
 }
 
-export function requestPayout() {
+/** Asks for what is owed. A bot then meets this character to hand it over. */
+export function requestPayout(character: string) {
   return withTicket(t =>
     request<{ owed: number }>('/payout', {
       method: 'POST',
-      body: JSON.stringify({ ticket: t.ticket, session: sessionNonce() }),
+      body: JSON.stringify({ ticket: t.ticket, session: sessionNonce(), character }),
     })
   );
 }

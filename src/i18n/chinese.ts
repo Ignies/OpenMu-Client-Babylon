@@ -96,6 +96,7 @@ export const chineseLayer: LanguageLayer = {
     'characters.select': '请选择角色',
     'characters.create.minLength': '请输入 4 个以上的字符',
     'characters.create.specialName': '不能使用符号。',
+    'characters.create.reservedName': '该名称已被保留。',
     'characters.create.failed': '角色名不正确，或该名称已被使用。',
 
     'class.darkWizard': '魔法师',
@@ -1667,6 +1668,13 @@ export const chineseLayer: LanguageLayer = {
     'marketplace.agoMinutes': '{value} 分钟前',
     'marketplace.agoHours': '{value} 小时前',
     'marketplace.agoDays': '{value} 天前',
+    'marketplace.state.pending': '等待商人来收取',
+    'marketplace.state.active': '出售中',
+    'marketplace.state.claimed': '已预订，正在交付',
+    'marketplace.state.returning': '正在送回给你',
+    'marketplace.state.stuck': '被市场扣留。请联系游戏管理员。',
+    'marketplace.owed': '你有 {amount} Zen 待领取',
+    'marketplace.collect': '领取',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

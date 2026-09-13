@@ -94,6 +94,7 @@ export const russianLayer: LanguageLayer = {
     'characters.select': 'Выберите персонажа',
     'characters.create.minLength': 'Введите больше 4 букв',
     'characters.create.specialName': 'Символы использовать нельзя.',
+    'characters.create.reservedName': 'Это имя зарезервировано.',
     'characters.create.failed':
       'Неверное имя персонажа или такое имя уже занято.',
 
@@ -1700,6 +1701,13 @@ export const russianLayer: LanguageLayer = {
     'marketplace.agoMinutes': '{value} мин назад',
     'marketplace.agoHours': '{value} ч назад',
     'marketplace.agoDays': '{value} д назад',
+    'marketplace.state.pending': 'Ожидает, пока торговец заберёт его',
+    'marketplace.state.active': 'В продаже',
+    'marketplace.state.claimed': 'Зарезервировано, доставляется',
+    'marketplace.state.returning': 'Возвращается к вам',
+    'marketplace.state.stuck': 'Удержано рынком. Обратитесь к гейм-мастеру.',
+    'marketplace.owed': 'Вам причитается {amount} Zen',
+    'marketplace.collect': 'Забрать',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

@@ -21,7 +21,7 @@ export type Listing = {
   median: number;
   mine?: boolean;
   /** What the service says it is doing. Fixtures have none. */
-  state?: 'pending' | 'active' | 'claimed' | 'sold' | 'cancelled' | 'returning';
+  state?: 'pending' | 'active' | 'claimed' | 'sold' | 'cancelled' | 'returning' | 'stuck';
 };
 
 const SELLERS = [

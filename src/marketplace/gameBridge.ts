@@ -1,3 +1,4 @@
+import { autorun } from 'mobx';
 import type { Item } from '../ecs/world';
 import { Store } from '../store';
 import { InventoryConstants } from '../common/inventoryConstants';
@@ -30,3 +31,11 @@ export function toggleMarketplace(): void {
   if (!Marketplace.open) syncMarketplaceFromGame();
   Marketplace.toggle();
 }
+
+// Kept current while the window is open: the trader collecting a listing
+// takes the item out of the bag, and a purchase changes the wallet. Read
+// once at opening, both were stale until the window was closed and reopened.
+autorun(() => {
+  if (!Marketplace.open) return;
+  syncMarketplaceFromGame();
+});

@@ -2,7 +2,7 @@ import { BotConnection } from './connection';
 import { BotSession } from './session';
 import { Scope } from './scope';
 import { TradeSession, TRADE_REQUEST_CODE, incomingRequestName } from './trade';
-import { TRADE_SLOTS } from '../../src/common/itemStorage';
+import { TRADE_SLOTS } from '../../src/common/storageKind';
 import { collectListing, deliverPurchase, payOut, type EscrowContext } from './escrow';
 import { Wallet } from './wallet';
 import { Ledger } from './ledger';

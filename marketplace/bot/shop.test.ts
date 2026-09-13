@@ -101,7 +101,18 @@ const setup = () => {
 };
 
 describe('ShopSession.stockItem', () => {
-  it('accepts an item the server put in the shop window', async () => {
+  it('accepts an item the server put in the shop window, reported as the inventory slot it is', async () => {
+    const { fake, shop } = setup();
+    const stocking = shop.stockItem(19, FIRST_SHOP_SLOT);
+
+    // What OpenMU actually answers: the stall is a window onto the
+    // inventory, so the move comes back as storage 0 at slot 204.
+    fake.deliver(itemMoved(FIRST_SHOP_SLOT, StorageKind.Inventory));
+
+    await expect(stocking).resolves.toBeUndefined();
+  });
+
+  it('still accepts a server that names the shop storage', async () => {
     const { fake, shop } = setup();
     const stocking = shop.stockItem(19, FIRST_SHOP_SLOT);
 
