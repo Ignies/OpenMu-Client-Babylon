@@ -1,4 +1,5 @@
 import { TERRAIN_SIZE, TWFlags } from '../../common/terrain/consts';
+import type { PrecipiceField } from '../../common/terrain/precipice';
 import { TERRAIN_INDEX } from '../../common/terrain/utils';
 import { isFlagInBinaryMask } from '../../common/utils';
 import {
@@ -31,7 +32,13 @@ export function CreateGroundFromHeightMap(
   alpha: Uint8Array,
   backTerrainLight: IVector3Like[],
   terrainFlags: Uint16Array,
-  ambientLight: Vector3
+  ambientLight: Vector3,
+  /**
+   * How this map's `NoGround` tiles are drawn (`common/terrain/precipice.ts`).
+   * Null - every map but the ones that declare a `PrecipiceSpec` - keeps the
+   * hole: the tile's corners go to -10000 and it is never seen.
+   */
+  precipice: PrecipiceField | null = null
 ): Mesh {
   const ground = new Mesh(name, scene);
 
@@ -84,6 +91,19 @@ return color.asArray();
     alphaColors[index++] = a4;
   }
 
+  /**
+   * With a precipice field the `NoGround` tile is drawn, sunk corner by
+   * corner: the rim corners it shares with walkable ground do not move, so
+   * the quad stays welded to its neighbour and the ravine falls away from the
+   * edge instead of being punched out of it. Without one the tile goes where
+   * it has always gone - past the far plane, and out of sight.
+   */
+  function cornerHeight(index: number, noGround: boolean): number {
+    if (precipice) return heightBuffer[index] - precipice.sink[index];
+
+    return noGround ? -10000 : heightBuffer[index];
+  }
+
   function prepareVertices(
     x: number,
     y: number,
@@ -95,10 +115,10 @@ return color.asArray();
     const flag = terrainFlags[getTerrainIndex(x, y)];
     const noGround = isFlagInBinaryMask(flag, TWFlags.NoGround);
 
-    const h1 = noGround ? -10000 : heightBuffer[idx1];
-    const h2 = noGround ? -10000 : heightBuffer[idx2];
-    const h3 = noGround ? -10000 : heightBuffer[idx3];
-    const h4 = noGround ? -10000 : heightBuffer[idx4];
+    const h1 = cornerHeight(idx1, noGround);
+    const h2 = cornerHeight(idx2, noGround);
+    const h3 = cornerHeight(idx3, noGround);
+    const h4 = cornerHeight(idx4, noGround);
 
     positions.push(x, h1, y);
     positions.push(x + 1, h2, y);

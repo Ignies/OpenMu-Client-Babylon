@@ -1,6 +1,7 @@
 import { ENUM_WORLD } from '../common/types';
 import type { World } from '../ecs/world';
 import type { Emission } from '../common/effectParticles';
+import type { PrecipiceSpec } from '../common/terrain/precipice';
 import type { MapLayer, Room, Spawn } from './layer';
 import { MAP_LAYERS } from './layers';
 
@@ -114,6 +115,11 @@ class Maps {
   /** The `AlphaTile*` slot, the one that means "no ground here", or null. */
   cutoutTileFor(world: ENUM_WORLD): number | null {
     return this.layerFor(world)?.cutoutTile ?? null;
+  }
+
+  /** How this world draws its `NoGround` tiles, or null for a plain hole. */
+  precipiceFor(world: ENUM_WORLD): PrecipiceSpec | null {
+    return this.layerFor(world)?.precipice ?? null;
   }
 
   /** Where the offline hero lands, in tiles. */

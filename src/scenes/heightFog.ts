@@ -10,6 +10,7 @@ import {
 import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
 import { devQueryNumber } from '../common/devSeams';
 import type { LookProfile, Rgb } from '../lighting/profiles';
+import type { PrecipiceSpec } from '../common/terrain/precipice';
 
 /**
  * The distance haze (ARCHITECTURE §4.8 step 2): sole owner of the fog
@@ -76,6 +77,41 @@ const shown = {
 let fogBaseY = 0;
 let fogBaseSeeded = false;
 
+/**
+ * The precipice mask this map asked for, or the neutral one.
+ *
+ * It rides the haze pass rather than a pass of its own for two reasons. The
+ * first is that this is already the one place in the frame that turns a
+ * pixel's depth back into a point in the world, and a second full-screen pass
+ * re-deriving the same number would be waste. The second is the whole reason
+ * the mask exists: a crevasse floor drawn black still comes out a third of
+ * the way to white, because the haze mixes the horizon colour into it and
+ * eight per cent of a bright linear colour is a lot once the tone curve has
+ * it. The mask has to be the thing *after* the haze or it is not a mask at
+ * all - and where there is no haze there is nothing for it to undo, which is
+ * exactly when this pass does not exist.
+ *
+ * Neutral is `keep = 1`: the mix below is then the identity whatever the two
+ * heights are.
+ */
+const maskOff = { top: 0, bottom: -1, keep: 1 } as const;
+
+let pcMask: { top: number; bottom: number; keep: number } = maskOff;
+
+/**
+ * The mask the current map wants, or null for none.
+ *
+ * Set by the terrain build (`getTerrainData`) rather than handed down the
+ * director's chain, because it and the ground mesh have to agree: the mesh
+ * only sinks its `NoGround` tiles on the tiers that have a post chain to
+ * darken them in, and one decision means they cannot come apart.
+ */
+export function setPrecipiceMask(spec: PrecipiceSpec | null): void {
+  pcMask = spec
+    ? { top: spec.maskTop, bottom: spec.maskBottom, keep: spec.floor }
+    : maskOff;
+}
+
 type Runtime = {
   scene: Scene;
   camera: ArcRotateCamera;
@@ -111,6 +147,7 @@ function registerFogShader(): void {
   uniform vec4 fogParams;  // start, density, cap, height density
   uniform float fogBaseY;
   uniform float effectShare;
+  uniform vec3 pcMask;     // world height the dark starts, the height it is total, what is left under it
 
   const float FOG_CLOSE_NEAR = ${FOG_CLOSE_NEAR.toFixed(1)};
   const float FOG_CLOSE_FAR = ${FOG_CLOSE_FAR.toFixed(1)};
@@ -160,7 +197,18 @@ function registerFogShader(): void {
     float f = hazeAt(dist, camPos.y, rd.y);
     float fEffect = f * effectShare;
 
-    gl_FragColor = vec4(mix(surface, fogColor, f) + effect * (1.0 - fEffect), color.a);
+    // The precipice mask: what this map has under a height is not lit by
+    // anything, and the haze may not fill it back in either - hence *here*,
+    // where the haze has just been added. The surface only: the additive
+    // half is a light source in its own right, and a torch or a spell down a
+    // ravine is the one thing that should still be seen there. Off
+    // (keep = 1) on every map that has not asked for it.
+    float above = smoothstep(pcMask.y, pcMask.x, camPos.y + rd.y * dist);
+    float keep = mix(pcMask.z, 1.0, above);
+
+    gl_FragColor = vec4(
+      mix(surface, fogColor, f) * keep + effect * (1.0 - fEffect),
+      color.a);
   }
   `;
 }
@@ -178,6 +226,7 @@ function createFog(scene: Scene, camera: ArcRotateCamera): PostProcess {
       'fogParams',
       'fogBaseY',
       'effectShare',
+      'pcMask',
     ],
     ['depthSampler', EFFECT_MASK_SAMPLER],
     1,
@@ -219,6 +268,7 @@ function createFog(scene: Scene, camera: ArcRotateCamera): PostProcess {
     effect.setFloat4('fogParams', shown.start, shown.density, shown.cap, shown.height);
     effect.setFloat('fogBaseY', fogBaseY);
     effect.setFloat('effectShare', effectHazeDev ?? EFFECT_HAZE_SHARE);
+    effect.setFloat3('pcMask', pcMask.top, pcMask.bottom, pcMask.keep);
   };
 
   camera.attachPostProcess(fog);

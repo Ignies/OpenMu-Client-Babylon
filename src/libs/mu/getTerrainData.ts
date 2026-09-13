@@ -7,6 +7,9 @@ import {
 } from '../babylon/exports';
 import type { IVector3Like, Scene } from '../babylon/exports';
 import { CreateGroundFromHeightMap } from './customGroundMesh';
+import { buildPrecipiceField } from '../../common/terrain/precipice';
+import { devQueryNumber } from '../../common/devSeams';
+import { setPrecipiceMask } from '../../scenes/heightFog';
 import { createTileTextureArray } from './tileTextureArray';
 import { updateTerrainHeightMap } from './terrainHeightMap';
 import { createTerrainMaterial } from './terrainMaterial';
@@ -200,6 +203,26 @@ export async function getTerrainData(
 
   updateTerrainHeightMap(scene, terrainHeight);
 
+  // How this map draws its `NoGround` tiles. Null on every map that has not
+  // asked for a floor under them, and the mesh is then exactly what it always
+  // was (`common/terrain/precipice.ts`).
+  //
+  // Classic keeps the holes, the way it draws no sky dome and no map frame:
+  // the dark that makes a floor read as a crevasse rather than a lit plain
+  // rides the haze pass, and Classic has no post chain to put it in.
+  //
+  // Dev seam: `?precipice=0` puts the holes back, which is the A/B for what
+  // the floors are worth.
+  const precipiceSpec =
+    lightingTier() && devQueryNumber('precipice') !== 0
+      ? maps.precipiceFor(map)
+      : null;
+  const precipice = precipiceSpec
+    ? buildPrecipiceField(terrainAttrs, precipiceSpec, objects)
+    : null;
+
+  setPrecipiceMask(precipiceSpec);
+
   const terrain = CreateGroundFromHeightMap(
     '_world_' + worldNum,
     scene,
@@ -209,7 +232,8 @@ export async function getTerrainData(
     terrainMapping.alpha,
     terrainLight,
     terrainAttrs,
-    Vector3.One().setAll(TERRAIN_AMBIENT)
+    Vector3.One().setAll(TERRAIN_AMBIENT),
+    precipice
   );
   terrain.isPickable = true;
 

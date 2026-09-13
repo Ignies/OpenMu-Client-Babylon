@@ -1,6 +1,7 @@
 import type { ENUM_WORLD } from '../common/types';
 import type { World } from '../ecs/world';
 import type { Emission } from '../common/effectParticles';
+import type { PrecipiceSpec } from '../common/terrain/precipice';
 
 /**
  * The contract every map entry implements. One folder per map,
@@ -68,6 +69,15 @@ export interface MapLayer {
    * put.
    */
   readonly cutoutTile?: number;
+
+  /**
+   * This map's `NoGround` tiles are a crevasse, not a pit: the ground carries
+   * on over them, sinking away from the rim and losing its light on the way
+   * down (`common/terrain/precipice.ts`). Omit and they stay what they have
+   * always been - four corners at -10000, past the far plane, with the sky
+   * behind them - which is what a pit the hero falls into wants.
+   */
+  readonly precipice?: PrecipiceSpec;
 
   /** Where the offline hero lands, in tiles. Omit = keep the current position. */
   readonly spawn?: Spawn;
