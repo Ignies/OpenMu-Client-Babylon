@@ -16,7 +16,7 @@ import { ParticleEmitter, type Emission } from './effectParticles';
  * map-object table (`src/lighting/mapObjectLights.ts`): resolves each row's
  * offset in the object's frame, asks the entry for the light, draws the
  * flare and the particles that ride along, and feeds the light's colour
- * back into the particle tint and the object's own `SelfLight` — the
+ * back into the particle tint and the object's own `SelfLight` - the
  * original adds a burning object's light to its own body.
  *
  * Owns no registration: the `LightSource` handles are the entry's; this

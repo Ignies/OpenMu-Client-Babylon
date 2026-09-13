@@ -2,7 +2,7 @@ import type { Emission } from '../../common/effectParticles';
 
 /**
  * Raklion (`WD_57ICECITY`, `World58`/`Object58`) and its hatchery
- * (`WD_58ICECITY_BOSS`, `World59`/`Object59`), the plain-data half — one
+ * (`WD_58ICECITY_BOSS`, `World59`/`Object59`), the plain-data half - one
  * table set, because `CGM_Raklion::MoveObject` (GM_Raklion.cpp:244-269)
  * tests `IsIceCity()`, which is both worlds (:2235-2242). `maps/raklionboss`
  * imports these.
@@ -21,7 +21,7 @@ export const RAKLION_BLEND_MESHES: Readonly<Record<number, number>> = {};
 /**
  * `MoveObject` :255-260 hides 70 (×0 / ×6) and 80 (×4 / ×0);
  * `RenderObjectVisual` (:1686-1737) gives both a cycling
- * `BITMAP_FIRE_HIK1/2/3_MONO` — the ice-blue flames on the cave braziers.
+ * `BITMAP_FIRE_HIK1/2/3_MONO` - the ice-blue flames on the cave braziers.
  */
 export const RAKLION_EFFECT_ONLY_TYPES: readonly number[] = [70, 80];
 

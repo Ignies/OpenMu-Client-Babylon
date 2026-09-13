@@ -1,5 +1,5 @@
 /**
- * TEMPLATE — copy this file to `<name>.ts`, fill in the blanks, add the layer
+ * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
  * to `layers.ts`. Never imported; it only exists to be copied.
  *
  * Every quest entry file has the same three parts, in this order:
@@ -15,7 +15,7 @@
  *
  * If the entry opens a window, the window lives in
  * `ui/pages/worldPage/components/quests/` and reads this file's state.
- * If it reacts to a packet, the handler is here — never in `logic.ts`.
+ * If it reacts to a packet, the handler is here - never in `logic.ts`.
  */
 import { observable, runInAction } from 'mobx';
 import { ENUM_WORLD } from '../common/types';

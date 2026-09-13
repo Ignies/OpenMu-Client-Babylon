@@ -2,7 +2,7 @@
  * Basic-attack reach per weapon and the archer's ammunition check
  * (`Action()` ZzzInterface.cpp:3283-3299, `CheckArrow()` :3148-3170):
  * 1.8 tiles bare-handed or with a sword / axe / mace / staff, 2.2 with a
- * spear, 6.0 with any bow or crossbow — and a bow needs arrows, a crossbow
+ * spear, 6.0 with any bow or crossbow - and a bow needs arrows, a crossbow
  * bolts, in the other hand with durability left.
  *
  * Pure readers over the hero's equipment; no per-frame state. Read by

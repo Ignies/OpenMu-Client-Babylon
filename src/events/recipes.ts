@@ -197,7 +197,7 @@ export type EntryButton = { readonly label: string; readonly enabled: boolean };
 
 /**
  * `CheckLimitLV` + `OpenningProcess`: every button of the window, with the
- * one grade the hero's level falls into unlocked — or the master button
+ * one grade the hero's level falls into unlocked - or the master button
  * when the hero is a master class, whatever the level. Returns the buttons
  * and the unlocked index (-1 when no grade fits).
  */

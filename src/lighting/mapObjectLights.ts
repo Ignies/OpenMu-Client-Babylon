@@ -1,6 +1,6 @@
 /**
  * Lights that belong to the map: torches, braziers, hearths, street lamps,
- * candelabra, the Tarkan glow lamps — anything a map object throws by being
+ * candelabra, the Tarkan glow lamps - anything a map object throws by being
  * there. The per-world tables live here (or in `maps/<map>/spec.ts` for the
  * maps that already have one), keyed by `Object<n>.obj` type; a host (the
  * `MapObjectLights` adapter on `ModelObject`, or a map object class) resolves
@@ -8,7 +8,7 @@
  *
  * The original lights the ground under these objects with `AddTerrainLight`
  * from `MoveObjectSetting` / `RenderObjectVisual` (ZzzObject.cpp); the point
- * light is ours — the original has no per-pixel dynamic lights — and reaches
+ * light is ours - the original has no per-pixel dynamic lights - and reaches
  * the walls and bodies around each flame.
  */
 import type { Scene } from '../libs/babylon/exports';
@@ -52,9 +52,9 @@ import {
 /**
  * One row of a map's light table. `terrain` is the light itself (MU's
  * `AddTerrainLight` range and colour, plus our point-light knobs beside it);
- * `sprite` and `emissions` are the visuals that ride along — a flare card
+ * `sprite` and `emissions` are the visuals that ride along - a flare card
  * (`common/effectLights.ts`) and a particle recipe (`common/effectParticles.ts`)
- * — which the host draws, tinted by this light's colour.
+ * - which the host draws, tinted by this light's colour.
  */
 export type LightEmitter = {
   readonly sprite?: {
@@ -250,11 +250,11 @@ const DEVIAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
       // both:
       //  - Hearths (0.70-0.78, always sharing a spot with a 36) come out
       //    small, so spawn twice a tick to fill the grate and keep the smoke
-      //    tight — it is going up a chimney.
+      //    tight - it is going up a chimney.
       //  - Camp fires (1.00 at 11.5/77.5, 108.6/242.4, 174/192, 162.6/233.6,
       //    plus the 0.72 one at 238.5/194.5) already have the mass at full
       //    size, so one a tick is enough and the second only burned fill
-      //    rate. They spend it on wider, more frequent smoke instead —
+      //    rate. They spend it on wider, more frequent smoke instead -
       //    that is what reads at distance against snow.
       emissions: scale =>
         scale < DEVIAS_HEARTH_SCALE
@@ -275,7 +275,7 @@ const DEVIAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
  * of the three wick bones by `DeviasCandleObject`. Lorencia's table candle
  * (150 above) minus the fixed offset, reaching further and yellower: the
  * wicks sit ~1.7 tiles over the floor. A lower peak over a longer, softer
- * falloff — ~0.41 at two tiles, ~0.24 at three, ~0.13 at four — now that the
+ * falloff - ~0.41 at two tiles, ~0.24 at three, ~0.13 at four - now that the
  * delta texture has a shoulder (`DELTA_KNEE`) and the interior key lifts the
  * floor between pools (`INTERIOR_GROUND_KEY`, sceneLook.ts).
  */
@@ -388,7 +388,7 @@ export function lightEmittersFor(
 
 /**
  * The adapter from a table row to the framework's recipe. Null when the row
- * has no `terrain` block — a bare flare (Icarus type 10) lights nothing.
+ * has no `terrain` block - a bare flare (Icarus type 10) lights nothing.
  */
 export function recipeFromEmitter(emitter: LightEmitter): LightRecipe | null {
   const terrain = emitter.terrain;
@@ -423,7 +423,7 @@ const sources = new Set<LightSource>();
 
 /**
  * Command: light a map object's row at a resolved world position. The
- * position is held by reference — a host whose flame moves (the candelabra
+ * position is held by reference - a host whose flame moves (the candelabra
  * wicks) mutates it. Returns null when the row has no light. The host owns
  * the handle and `dispose()`s it with the object; `update` forgets the dead.
  */

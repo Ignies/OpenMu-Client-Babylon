@@ -139,7 +139,7 @@ export const MONSTER_MODEL_TABLE: Readonly<
   161: [ 69,  1.0],
   // Chaos Castle: MONSTER_CHAOS_CASTLE_1/3/5/… are the knight (70); the
   // even-numbered ones roll elf (71) or wizard (72) per spawn
-  // (ZzzCharacter.cpp:13065-13098). The roll is not modelled — they all use
+  // (ZzzCharacter.cpp:13065-13098). The roll is not modelled - they all use
   // the elf.
   162: [ 70,  0.9],
   163: [ 71,  0.9],
@@ -410,7 +410,7 @@ export const FALLBACK_SCALE = 0.8;
 /**
  * `c->Object.HiddenMesh` from `Setting_Monster` (ZzzCharacter.cpp:13795-13866):
  * several monster types share one BMD and hide the mesh their variant does not
- * wear. Only the types the shipped maps actually spawn are transcribed —
+ * wear. Only the types the shipped maps actually spawn are transcribed -
  * the rest of `Setting_Monster` (weapons, per-type buffs, the ~200 remaining
  * cases) is content work scheduled for M5.
  */

@@ -213,7 +213,7 @@ export type Entity = Partial<{
     worldOffsetZ: number;
   };
   /**
-   * A short-lived emoji over (or beside) a character — see
+   * A short-lived emoji over (or beside) a character - see
    * `common/emojiBubbles.ts`. `EmojiBubbleSystem` owns the lifetime and the
    * side anchor, `CalculateScreenPositionSystem` projects that anchor, and
    * the `EmojiBubbles` overlay draws it.
@@ -229,7 +229,7 @@ export type Entity = Partial<{
     /** Cached `placement === 'side'`, so the hot paths need no catalogue lookup. */
     isSide: boolean;
     /**
-     * The bubble's own world anchor — over the head, or on the shoulder
+     * The bubble's own world anchor - over the head, or on the shoulder
      * currently facing the camera. Without `mapParent` (the projection adds
      * it, as it does for the main anchor).
      */
@@ -281,7 +281,7 @@ export type Entity = Partial<{
     changed: boolean;
     /**
      * Bumped by AppearanceSystem every time it applies these slots to the
-     * model — not only when they differ from last time. Item effects are
+     * model - not only when they differ from last time. Item effects are
      * re-stamped on every apply (`PlayerObject.loadPartAsync`), so anything
      * else a character's items own has to be re-examined on the same beat, or
      * it survives exactly until something re-applies the same gear underneath
@@ -293,7 +293,7 @@ export type Entity = Partial<{
    * A pet or mount object owned by another entity: the free-flying Guardian
    * Angel, the two ridden mounts (`Mounts[]` in the original, GOBoid.cpp) and
    * the Dark Raven (`CSPetDarkSpirit`). Created and driven by PetSystem; the
-   * Imp is not one of these — it is a bone-linked child of its owner's
+   * Imp is not one of these - it is a bone-linked child of its owner's
    * PlayerObject.
    */
   petActor: {
@@ -309,7 +309,7 @@ export type Entity = Partial<{
     flyRange: number;
     /** World units the mount sits below its rider. */
     drop: number;
-    /** `SetAction(o, n)` while standing / moving — mounts differ. */
+    /** `SetAction(o, n)` while standing / moving - mounts differ. */
     standAction: number;
     moveAction: number;
     /**
@@ -375,7 +375,7 @@ export type Entity = Partial<{
     amount?: number;
     /** Parsed item (level / excellent) for name tints and ground glow. */
     item?: Item;
-    /** `IsFreshDrop`: it just left a hand or a corpse — falls and tumbles in (dropMotionSystem). */
+    /** `IsFreshDrop`: it just left a hand or a corpse - falls and tumbles in (dropMotionSystem). */
     fresh?: boolean;
     /** `ITEM_GROUP_*` and the index inside it: what `ItemAngle` poses the drop by. */
     group: number;
@@ -397,7 +397,7 @@ export class World extends ECSWorld<Entity> {
   readonly netObjsQuery = this.with('netId', 'transform');
 
   /**
-   * Every entity that carries a `netId`, keyed by it — the server's object id
+   * Every entity that carries a `netId`, keyed by it - the server's object id
    * is how every packet names its subject, so this is the lookup the packet
    * handlers do. Maintained by `netObjsQuery`'s add / remove hooks; a
    * stale entity that shares an id with a newer one never shadows it (the

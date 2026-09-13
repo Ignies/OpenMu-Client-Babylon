@@ -29,7 +29,7 @@ function mapToServerDirectionCode(clientDir: number): number {
 
 // A WalkRequest carries at most 15 steps (4-bit step count). The server
 // (OpenMU Walker) stops at the last step it received, so longer paths have to
-// be re-sent in chunks as the hero walks — the original client does the same
+// be re-sent in chunks as the hero walks - the original client does the same
 // by re-issuing the walk packet while moving (ZzzCharacter.cpp).
 const MAX_STEPS_PER_PACKET = 15;
 

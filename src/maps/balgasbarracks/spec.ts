@@ -4,7 +4,7 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
 /**
  * Barracks of Balgass (`WD_41CHANGEUP3RD_1ST`, `World42`/`Object42`) and
  * Balgass' Refuge (`WD_42CHANGEUP3RD_2ND`, `World43`/`Object43`), the
- * plain-data half — one table set, because the C++ is one function:
+ * plain-data half - one table set, because the C++ is one function:
  * `SEASON3A::CGM3rdChangeUp::MoveObject` (GM3rdChangeUp.cpp:63-116) tests
  * `IsBalgasBarrackMap() || IsBalgasRefugeMap()` and the two `Create*Object`
  * entries (:47-61) are bare `return true`s. `maps/balgasrefuge` imports
@@ -39,7 +39,7 @@ export const BALGAS_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
 
 /**
  * Type 3 (Barracks ×39, Refuge ×17), :79-85: `L = (rand%4+3)*0.1;
- * AddTerrainLight(x, y, (L, 0.6L, 0.2L), 3)` + hidden — the brazier, the
+ * AddTerrainLight(x, y, (L, 0.6L, 0.2L), 3)` + hidden - the brazier, the
  * same recipe as Kanturu 61.
  */
 export const BALGAS_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {

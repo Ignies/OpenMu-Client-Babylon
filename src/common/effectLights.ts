@@ -13,7 +13,7 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../effects/core';
 
 /**
  * Flare cards: the additive `flare01` sprite the original draws over a
- * flame (`BITMAP_LIGHT` / `BITMAP_FLARE`). Purely visual — a flare lights
+ * flame (`BITMAP_LIGHT` / `BITMAP_FLARE`). Purely visual - a flare lights
  * nothing. The light a flame throws is the lighting layer's
  * (`src/lighting/mapObjectLights.ts`), whose `LightEmitter.sprite` block is
  * the `FlareSpec` a host hands to `createEffectLight`.

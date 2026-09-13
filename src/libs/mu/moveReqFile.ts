@@ -3,7 +3,7 @@ import { onLanguageChanged } from '../../i18n';
 import { decodeLocalText, downloadLocalDataFile } from './localData';
 
 /**
- * `Local/<lang>/MoveReq_<lang>.bmd` — the rows of the Move (warp) command window,
+ * `Local/<lang>/MoveReq_<lang>.bmd` - the rows of the Move (warp) command window,
  * decoded the way `CMoveCommandData::Create` (MoveCommandData.cpp:37) does:
  * an `int count`, then `count` records of `MOVEREQINFO_FILE`, each XOR-ed
  * with the 3-byte Bux key **restarting at every record** (one `BuxConvert`
@@ -31,7 +31,7 @@ const RECORD_SIZE = 84;
 const NAME_LENGTH = 32;
 
 export type MoveReqEntry = {
-  /** `MOVEREQINFO.index` — what `WarpCommandRequest.WarpInfoIndex` carries. */
+  /** `MOVEREQINFO.index` - what `WarpCommandRequest.WarpInfoIndex` carries. */
   index: number;
   /** `szMainMapName`: the name printed in the window. */
   name: string;

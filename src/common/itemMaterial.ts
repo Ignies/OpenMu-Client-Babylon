@@ -131,7 +131,7 @@ const WRAP_DEFINE = 'MU_WRAP';
 /**
  * Detail strength as the shader sees it. The emissive map is *added* on top
  * of the lit surface, so a texture the derivation found trim in comes out
- * brighter than its Classic twin — that is one of the ways Enhanced reads as
+ * brighter than its Classic twin - that is one of the ways Enhanced reads as
  * "the texture itself got lighter", and it has to follow the dial with the
  * rest of the derivation.
  */
@@ -150,14 +150,14 @@ const pbrMaterials = new Set<PBRCustomMaterial>();
  * Each of these is a separate way Enhanced comes out lighter and paler than
  * its Classic twin, which is why the dial has to move all of them together:
  *
- *  - `specularIntensity` — the Standard item material ships `specularColor 0`
+ *  - `specularIntensity` - the Standard item material ships `specularColor 0`
  *    and has no highlight at all, so every bit of GGX the PBR path adds is
  *    white laid over the texture. That is the *pale*: it lifts the surface and
  *    desaturates it at the same time, and it is the largest of the three.
- *  - `metallic` — multiplies the map's blue channel, pulling back the palette
+ *  - `metallic` - multiplies the map's blue channel, pulling back the palette
  *    heuristic's guesses. A texel it calls metal loses its diffuse and gets a
  *    highlight back in exchange, with no environment map to justify it.
- *  - `bumpTexture.level` — scales `perturbNormal`, thinning the
+ *  - `bumpTexture.level` - scales `perturbNormal`, thinning the
  *    height-from-luma relief that turns JPEG ringing into geometry.
  *
  * The added emissive follows too, through `DETAIL_UNIFORM` in the shader.
@@ -481,7 +481,7 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
       float tms = time * 1000.0;
       vec3 nm = vec3(normalW.x, normalW.z, normalW.y);
       // RENDER_TEXTURE passes are vertex lit (BodyLight × IntensityTransform,
-      // 0.2…1.2); the chrome passes are not — glColor3fv(BodyLight) only.
+      // 0.2…1.2); the chrome passes are not - glColor3fv(BodyLight) only.
       vec3 lit = clamp(diffuseBase, vec3(0.2), vec3(1.2));
       float fade = ${LEGACY_GAIN};
 
@@ -800,15 +800,15 @@ function trackTime(scene: Scene, onReady: (now: () => number) => void) {
  * raw attribute and there is no matrix uniform left to write.
  *
  * So the offset is its own uniform and the texel is re-fetched in the
- * fragment, at `CUSTOM_FRAGMENT_UPDATE_DIFFUSE` — the first hook that runs
+ * fragment, at `CUSTOM_FRAGMENT_UPDATE_DIFFUSE` - the first hook that runs
  * after `baseColor = texture2D(diffuseSampler, vDiffuseUV + uvOffset)`.
  *
  * **Do not move this to the vertex stage.** Offsetting the varying there
  * looks better on paper (one fetch, and the alpha test would see the scrolled
  * texel) and it does not compile: `vDiffuseUV` is a *fragment-only* symbol.
  * Babylon declares it through `samplerFragmentDeclaration`, and when the
- * texture matrix is identity — which the shared placeholder always is, so
- * `DIFFUSEDIRECTUV = 1` — it is a `#define` onto `vMainUV1` emitted into the
+ * texture matrix is identity - which the shared placeholder always is, so
+ * `DIFFUSEDIRECTUV = 1` - it is a `#define` onto `vMainUV1` emitted into the
  * fragment shader alone. Writing to it from `Vertex_MainEnd` is an undeclared
  * identifier, the program fails to link, and Babylon dumps the whole shader
  * to the console. Tried, reverted; this comment is the record.
@@ -818,14 +818,14 @@ function trackTime(scene: Scene, onReady: (now: () => number) => void) {
  * the same way on any variant compiled without a diffuse texture.
  *
  * What this costs is the alpha test, which runs on the *unscrolled* texel a
- * few lines earlier. It shows only on alpha-keyed scrollers — Noria's
- * waterfall curtains (42/43) and Lost Tower's conduits (3/4) — where the
+ * few lines earlier. It shows only on alpha-keyed scrollers - Noria's
+ * waterfall curtains (42/43) and Lost Tower's conduits (3/4) - where the
  * texture slides inside a key that stays put. Both are near-uniform masks, so
  * it is close to invisible; the fix, when it matters, is
  * `ALPHATEST_AFTERALLALPHACOMPUTATIONS`, which Babylon does not expose here.
  *
- * It exists only on the bright/flat-lit variants — the ones MU marks
- * `BlendMesh` or `StreamMesh`, which is every mesh that can scroll — so the
+ * It exists only on the bright/flat-lit variants - the ones MU marks
+ * `BlendMesh` or `StreamMesh`, which is every mesh that can scroll - so the
  * ordinary lit path compiles exactly as before.
  */
 const UV_SCROLL_UNIFORM = 'muUvScroll';
@@ -844,18 +844,18 @@ export type UvScroll = { u: number; v: number };
 /**
  * Give a shared item material a **per-mesh** alpha-test texture.
  *
- * Every off-screen pass Babylon runs — the geometry buffer, the cascades, the
- * glow layer — alpha-tests with its own effect, not the material's, so none of
+ * Every off-screen pass Babylon runs - the geometry buffer, the cascades, the
+ * glow layer - alpha-tests with its own effect, not the material's, so none of
  * them ever reaches `onBindObservable`. What they bind into `diffuseSampler`
  * is whatever `getAlphaTestTexture()` hands back, and on a shared material
  * that is the 2×2 opaque placeholder: alpha 1 everywhere, so the test passes
  * everywhere and a keyed mesh writes its whole quad. That is why the G-buffer
- * could only ever hold the opaque meshes — grass and leaves went into it as
+ * could only ever hold the opaque meshes - grass and leaves went into it as
  * solid blocks and SSAO smeared them across the ground.
  *
  * Babylon always calls `needAlphaTestingForMesh(mesh)` immediately before
- * `getAlphaTestTexture()` — geometryBufferRenderer, shadowGenerator and
- * thinEffectLayer all do, and the `&&` between them fixes the order — so the
+ * `getAlphaTestTexture()` - geometryBufferRenderer, shadowGenerator and
+ * thinEffectLayer all do, and the `&&` between them fixes the order - so the
  * first is where the mesh is picked up and the second is where its texture is
  * handed over. Same trick `createCsm` uses through
  * `onBeforeShadowMapRenderMeshObservable`, expressed through the API the
@@ -966,7 +966,7 @@ const PBR_EMISSIVE_GAIN = '0.2';
  * environment map to reflect. But `pbrBlockReflectivity` captures
  * `vec3 baseColor = surfaceAlbedo;` immediately *after* that anchor and builds
  * `surfaceReflectivityColor = mix(metallicF0, baseColor, metallic)` from it,
- * so the boost landed on the metallic F0 as well — up to 1.6× at the old
+ * so the boost landed on the metallic F0 as well - up to 1.6× at the old
  * METAL_MAX. Lorencia's oak and stone got a conductor's reflectance on top of
  * a diffuse that had barely dimmed: energy added twice, which is the broad
  * yellow sheen Enhanced showed across the tavern floor and counter.
@@ -979,19 +979,19 @@ const PBR_EMISSIVE_GAIN = '0.2';
 
 /**
  * Enhanced variant: the same per-mesh contract as
- * `createItemMaterial` — shared, frozen, `diffuseTexture` / `bodyLight` /
- * `itemTier` read off `mesh.metadata` at bind — on a metallic-roughness PBR
+ * `createItemMaterial` - shared, frozen, `diffuseTexture` / `bodyLight` /
+ * `itemTier` read off `mesh.metadata` at bind - on a metallic-roughness PBR
  * shader with normal, metal/rough and emissive maps per texture
  * (`pbrMaps.ts`). Classic stays the Standard path; only lit, non-blend
  * meshes ever get this material (see `modelLoader.getMaterial`).
  *
  * Calibration choices, so the toggle is a look change and not an exposure
- * change: the albedo is sampled as-is (no gamma decode — the Standard path
+ * change: the albedo is sampled as-is (no gamma decode - the Standard path
  * multiplies the gamma texel, and the moods/light intensities were tuned
  * against that); light falloff stays Babylon's legacy range curve, matching
  * the pooled torches' tuned ranges; no environment map, so specular only
  * comes from the key lights and the torch pool (their `specular` is raised
- * off black while this material is on — `syncMaterialQuality`).
+ * off black while this material is on - `syncMaterialQuality`).
  */
 export function createItemPbrMaterial(scene: Scene) {
   const material = new PBRCustomMaterial('itemPbrMaterial', scene);

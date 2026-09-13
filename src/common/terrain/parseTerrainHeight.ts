@@ -15,7 +15,7 @@ function _readString(buffer: DataView, from: number, to: number): string {
 
 /**
  * `OpenTerrainHeightNew` (ZzzLodTerrain.cpp:737-790), the 24-bit variant
- * three worlds use — `IsTerrainHeightExtMap` (:599): Balgas Refuge (42),
+ * three worlds use - `IsTerrainHeightExtMap` (:599): Balgas Refuge (42),
  * Vulcanus / PK Field (63) and Doppelganger 2 (66). The file is the same
  * 4-byte tag + BITMAPFILEHEADER (14) + BITMAPINFOHEADER (40), but the pixels
  * are 24-bit BGR with no palette, and each pixel is one 24-bit integer read

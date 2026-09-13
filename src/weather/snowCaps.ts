@@ -4,7 +4,7 @@ import { isTileOpen } from '../libs/mu/terrainMask';
 import { snowCover } from './snowCover';
 
 /**
- * Snow lying on the map's objects — barrels, signs, fences, rocks, roofs.
+ * Snow lying on the map's objects - barrels, signs, fences, rocks, roofs.
  *
  * The ground overlay whitens the terrain; without this the props standing
  * on it stay bare, and a bare barrel on a white field is the first thing the
@@ -13,7 +13,7 @@ import { snowCover } from './snowCover';
  * ceiling gets a cap.
  *
  * Read by the shared item material (`common/itemMaterial.ts`), which whitens
- * every UP-facing fragment of a mesh flagged `metadata.snowCap` — the flag
+ * every UP-facing fragment of a mesh flagged `metadata.snowCap` - the flag
  * is set by `MapTileObject` on `SNOW_GROUND_MAPS`, so characters, items and
  * effects never take one.
  */
@@ -36,7 +36,7 @@ export const SNOW_CAP_KNEE_FULL = 0.45;
 
 /**
  * How much cap an object standing at tile (x, z) carries, 0…1. Zero under a
- * roof and with advanced effects off — checked here, because this is the
+ * roof and with advanced effects off - checked here, because this is the
  * one reader the material binds and it is the material that pays.
  */
 export function snowCapAt(x: number, z: number): number {

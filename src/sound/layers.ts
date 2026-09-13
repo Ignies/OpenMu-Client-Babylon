@@ -8,6 +8,7 @@ import { footstepsLayer } from './footsteps';
 import { uiLayer } from './ui';
 import { combatLayer } from './combat';
 import { monstersLayer } from './monsters';
+import { dropsLayer } from './drops';
 
 /**
  * THE list. Every sound entry in the game is one line here, and adding an
@@ -26,4 +27,5 @@ export const SOUND_LAYERS: readonly SoundLayer[] = [
   uiLayer, // command-only
   combatLayer, // command-only
   monstersLayer, // command-only
+  dropsLayer, // command-only
 ];

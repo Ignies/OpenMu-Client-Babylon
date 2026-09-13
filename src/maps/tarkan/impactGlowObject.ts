@@ -6,8 +6,8 @@ import type { Entity, World } from '../../ecs/world';
 
 /**
  * `Luminosity = sinf((WorldTime + (o->Angle[2] * 5)) * 0.002f) * 0.3f + 0.7f;`
- * (ZzzObject.cpp:2972). Same shape as the type 7 lamp but shallower — 0.4 to
- * 1.0 — and phased by the object's own yaw twenty times more weakly
+ * (ZzzObject.cpp:2972). Same shape as the type 7 lamp but shallower - 0.4 to
+ * 1.0 - and phased by the object's own yaw twenty times more weakly
  * (`* 5` rather than `* 100`), so the 18 glows drift apart by up to a second
  * rather than by half a minute.
  */
@@ -19,7 +19,7 @@ const PHASE_MS_PER_DEGREE = 5;
 const DEGREES_PER_RADIAN = 180 / Math.PI;
 
 /**
- * `Vector(Luminosity / 1.7f, Luminosity, Luminosity, Light)` (:2975) — a
+ * `Vector(Luminosity / 1.7f, Luminosity, Luminosity, Light)` (:2975) - a
  * cyan-white, held here as the unit colour with the luminosity applied by
  * `setLuminosity`.
  */
@@ -38,13 +38,13 @@ const FLARE_SCALE = 1.5 * BASE;
 const BONE_PREFIX = 'bone_2_';
 
 /**
- * Tarkan 63 (ZzzObject.cpp:2971-2977 with :4092-4094), ×18 — the pale glows
+ * Tarkan 63 (ZzzObject.cpp:2971-2977 with :4092-4094), ×18 - the pale glows
  * on the temple faces and inside the sunken arches, at scales 0.69 to 1.55.
  *
  * `MoveObject` sets `o->HiddenMesh = -2`, so `Object64.glb` is loaded,
  * animated and never drawn; `RenderObjectVisual` then hangs a `BITMAP_IMPACT`
  * sprite off bone 2 of that invisible skeleton every frame. That is why this
- * type is *not* in `TARKAN_EFFECT_ONLY_TYPES` — the effect-only path skips
+ * type is *not* in `TARKAN_EFFECT_ONLY_TYPES` - the effect-only path skips
  * the model load, and without the model there is no bone 2 and no position
  * for the sprite. `Object64.glb` carries exactly three bones
  * (`bone_0_Box01`, `bone_1_Bone01`, `bone_2_Bone02`) and one clip.
@@ -53,7 +53,7 @@ const BONE_PREFIX = 'bone_2_';
  * flare the port's effect lights use) rather than `Object9/Impack03.jpg`,
  * because `createMovableFlare` is the only movable-sprite primitive there is;
  * and no light of any kind is registered, because the original registers
- * none — 63 calls `CreateSprite`, never `AddTerrainLight`.
+ * none - 63 calls `CreateSprite`, never `AddTerrainLight`.
  */
 export class TarkanImpactGlowObject extends MapTileObject {
   #phaseMs = 0;

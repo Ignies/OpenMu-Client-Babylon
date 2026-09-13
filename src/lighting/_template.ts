@@ -1,12 +1,12 @@
 /**
- * TEMPLATE — copy this file to `<name>.ts`, fill in the blanks, add the layer
+ * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
  * to `layers.ts`. Never imported; it only exists to be copied.
  *
  * Every entry file has the same three parts, in this order:
  *
  *   1. Tuning constants at the top, each with a comment saying what it is in
  *      real units (tiles, seconds, linear RGB) and why it has that value. The
- *      entry's recipe table lives here too — it is data.
+ *      entry's recipe table lives here too - it is data.
  *   2. Module state + the functions that read or command it. State lives
  *      here, not in the facade. A light is made with `LightSource.attach`;
  *      keep the handle so `emitters()` can report it.
@@ -14,7 +14,7 @@
  *      `emitters`.
  *
  * Whatever *triggers* the light stays where it happens (an ECS system, a
- * packet handler, a map object class) and calls this file's command — or the
+ * packet handler, a map object class) and calls this file's command - or the
  * facade's wrapper of it when more than one consumer needs it.
  */
 import type { Scene } from '../libs/babylon/exports';
@@ -25,7 +25,7 @@ import { flame } from './recipes';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Maps this exists on. Data — never `if (map === …)` inside logic. */
+/** Maps this exists on. Data - never `if (map === …)` inside logic. */
 const MAPS: ReadonlySet<ENUM_WORLD> = new Set([ENUM_WORLD.WD_0LORENCIA]);
 
 /** Tiles above the anchor where the point light hangs. */

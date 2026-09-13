@@ -31,8 +31,8 @@ export function turnAngle(current: number, target: number, maxDelta: number): nu
 }
 
 /**
- * The original's `TurnAngle2(a, t, FarAngle(a, t) * k)` — an exponential
- * approach closing `k` of the remaining gap every tick — made frame-rate
+ * The original's `TurnAngle2(a, t, FarAngle(a, t) * k)` - an exponential
+ * approach closing `k` of the remaining gap every tick - made frame-rate
  * independent: the same fraction per 25 Hz tick regardless of dt.
  */
 export function approachAngle(

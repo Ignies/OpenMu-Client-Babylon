@@ -14,21 +14,21 @@ import {
 } from './spec';
 
 /**
- * Blood Castle (`WD_11BLOODCASTLE1` … `_END` and the master-level 52 — eight
+ * Blood Castle (`WD_11BLOODCASTLE1` … `_END` and the master-level 52 - eight
  * server instances on one art set, `World12` + `Object12`; see
  * `common/worldAssets.ts`).
  *
  * What the original does per object here, and where each piece went:
  *  - 11 candelabra / 13 lamps: bone-anchored light sprites on a sine
- *    (`RenderObjectVisual`, ZzzObject.cpp:3157-3188) — the two classes.
- *  - 36 the gate, 9/10 its debris: `ActionObject` (ZzzObject.cpp:60-140) —
+ *    (`RenderObjectVisual`, ZzzObject.cpp:3157-3188) - the two classes.
+ *  - 36 the gate, 9/10 its debris: `ActionObject` (ZzzObject.cpp:60-140) -
  *    `gate.ts` + `gateObject.ts`. The fall opens the `TW_NOGROUND` pit under
  *    the gate through `world.setTerrainFlags`, which is also what the server's
  *    `ChangeTerrainAttributes` packet drives (libs/mu/terrainAttributeUpdates).
  *  - 37 smoke vents: `spec.ts` emissions.
  *  - 28/29 (`RenderObject`, ZzzObject.cpp:1041-1057): two statue types drawn
  *    normally and then *again* as a flat black shadow with `HiddenMesh = 2`.
- *    **Not reproduced** — the blob shadow every map object already gets is
+ *    **Not reproduced** - the blob shadow every map object already gets is
  *    the same idea, and a second projected copy of a 4-mesh statue is not
  *    worth a render path of its own.
  *  - The hero's flare motes (`MoveObjectOnEffect`'s `InBloodCastle` branch,
@@ -43,7 +43,7 @@ import {
  * so nothing here has to set them.
  *
  * Sound: `iBloodCastle` loops from match state 0 (ambientBeds.ts); no music.
- * Mood: none registered — `MOOD_BY_WORLD` has no row, so the map runs on the
+ * Mood: none registered - `MOOD_BY_WORLD` has no row, so the map runs on the
  * default grade plus its own baked lightmap, which is red-brown by design.
  */
 export async function createBloodCastle(world: World) {

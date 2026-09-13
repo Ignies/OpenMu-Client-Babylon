@@ -1,7 +1,7 @@
 /**
  * The Dark Knight combo. The sequence itself is judged by the server
  * (OpenMU's `ComboStateMachine`: three different combo skills in a row); the
- * client sends nothing extra — it only *hears* the result: a
+ * client sends nothing extra - it only *hears* the result: a
  * `SkillAnimation` carrying `AT_SKILL_COMBO` (59) (`ReceiveMagic`,
  * WSclient.cpp:3763, :4436), on which the original spawns `MODEL_COMBO`,
  * plays `SOUND_COMBO` and knocks the target up (`m_byDieType = COMBO`,

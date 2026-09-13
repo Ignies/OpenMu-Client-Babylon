@@ -19,6 +19,12 @@ export const CLASS_Y = 27;
 
 export const TABLE_TEXT_X = 18;
 export const POINTS_X = 110;
+/**
+ * The same line carrying the run counter: anchored to the right edge of the
+ * table instead, so it grows leftwards and never runs out of the plate. Even
+ * `Point:` has to go - the two halves of the line do not both fit in 190 px.
+ */
+export const POINTS_RUN_RIGHT = 18;
 
 export const LEVEL_FIELD_Y = TABLE_Y + 3;
 export const LEVEL_FIELD_HEIGHT = 67 - LEVEL_FIELD_Y;
@@ -46,6 +52,15 @@ export const VALUE_WIDTH = 86;
 
 export const ROW_FIELD_HEIGHT = 19;
 
+// With the amount box in the row the value keeps the left half of the plate
+// and the box takes the strip that is left between it and the `+`.
+export const VALUE_WIDTH_WITH_AMOUNT = 36;
+export const AMOUNT_X = 124;
+export const AMOUNT_WIDTH = 34;
+export const AMOUNT_HEIGHT = 15;
+export const AMOUNT_DY = 2;
+export const AMOUNT_MAX_DIGITS = 4;
+
 export const STAT_BUTTON_SPRITE = 'newui_chainfo_btn_level.OZT';
 export const STAT_BUTTON_X = 160;
 export const STAT_BUTTON_DY = 2;
@@ -62,6 +77,9 @@ export const BUTTON_Y = 392;
 export const BUTTON_WIDTH = 36;
 export const BUTTON_HEIGHT = 29;
 export const BUTTON_FRAMES = { up: 0, down: 1 } as const;
+
+/** The `+` of a running row: the same two frames, held down. */
+export const STOP_BUTTON_FRAMES = { up: 1, down: 0 } as const;
 
 export const EXIT_BUTTON_X = 13;
 export const QUEST_BUTTON_X = 50;

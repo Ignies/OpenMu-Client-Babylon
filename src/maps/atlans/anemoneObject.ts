@@ -4,7 +4,7 @@ import type { Entity, World } from '../../ecs/world';
 /**
  * `o->Velocity = 0.05f` (ZzzObject.cpp:4033). `Velocity` *is* the play speed
  * of a map object: `PlayAnimation` is called with `fSpeed = o->Velocity`
- * (:3676), in BMD keys per 25 Hz reference tick — the same units as
+ * (:3676), in BMD keys per 25 Hz reference tick - the same units as
  * `ModelObject.AnimationSpeed` (see common/playSpeed.ts). `CreateObject`
  * hands every object 0.16 (:4470), so this is the anemone running at just
  * under a third of the speed of the kelp around it.
@@ -24,7 +24,7 @@ const ANEMONE_PLAY_SPEED = 0.05;
  *
  * The absolute value matters more than the ratio here: `AnimationSpeed`
  * defaults to 0.28, the *player* idle speed, where every map object should
- * start at the original's 0.16 — so the rest of the map currently animates
+ * start at the original's 0.16 - so the rest of the map currently animates
  * ~1.75x fast. Writing 0.05 sets what the C++ sets and is unaffected by that
  * shared-code fix when it lands.
  */

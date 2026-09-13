@@ -94,7 +94,7 @@ function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
  * which ships as `Data/Item/unicon.OZJ`, and the three pets of
  * `Data/Player/Helper0n.bmd` ask for `fairy` / `satan` the same way. Those
  * came out untextured, which for a model this runtime draws unlit is a solid
- * white silhouette — a mount and its rider lighting up the screen.
+ * white silhouette - a mount and its rider lighting up the screen.
  *
  * So: fall back to the file name across the whole tree, but never guess.
  * Several folders carry their own `bons.OZJ` or `hide.OZJ`, so the match
@@ -129,8 +129,8 @@ async function readTextureBytes(texPath: string): Promise<Uint8Array> {
   // has no alpha channel at all. The same base name usually ships as *both*.
   //
   // Searching OZJ-first regardless threw that away. `Grass03.bmd` asks for
-  // `tree_01.tga` and got `tree_01.OZJ` — a 128x64 opaque JPEG in place of a
-  // 32x32 cut-out — while the mesh stayed marked transparent by the `.tga`
+  // `tree_01.tga` and got `tree_01.OZJ` - a 128x64 opaque JPEG in place of a
+  // 32x32 cut-out - while the mesh stayed marked transparent by the `.tga`
   // test further down. An alpha-tested card whose alpha is a solid 1.0 draws
   // as a full rectangle, which is Lorencia's planter bushes and Devias' trees
   // rendering as flat grey pleated cards.
@@ -164,7 +164,7 @@ async function readTextureBytes(texPath: string): Promise<Uint8Array> {
     }
   }
 
-  // Not in the model's folder — look for it by name in the rest of the tree.
+  // Not in the model's folder - look for it by name in the rest of the tree.
   // Both spellings of a container are one entry in that index, so the two
   // cases collapse to one lookup per container.
   const fileName = base.slice(base.lastIndexOf('/') + 1);
@@ -224,15 +224,15 @@ const IGNORE_FILES = [
  *
  * `KHR_mesh_quantization` stores attributes in narrower component types:
  * float32 normals become signed bytes, UVs unsigned shorts, and so on. The
- * runtime already supports it — `libs/babylon/exports.ts` imports the whole
- * `@babylonjs/loaders/glTF/2.0` index, which registers the loader extension —
+ * runtime already supports it - `libs/babylon/exports.ts` imports the whole
+ * `@babylonjs/loaders/glTF/2.0` index, which registers the loader extension -
  * so nothing has to change client-side.
  *
  * POSITION is deliberately excluded. To quantize positions, gltf-transform
  * shifts them into unit range and compensates with either a transform on the
  * parent node or, for a skinned mesh, synthesised inverse bind matrices. This
  * converter emits skins with *no* IBMs (identity), and `common/modelLoader`
- * builds the Babylon skeleton by hand from the `bone_<i>_` node names — the
+ * builds the Babylon skeleton by hand from the `bone_<i>_` node names - the
  * exact area that already produced one silent mis-skinning regression (see
  * an earlier bone-ordering regression). The remaining
  * attributes carry most of the per-vertex bytes anyway:
@@ -253,8 +253,8 @@ const QUANTIZE_POSITION = process.env.GLB_QUANTIZE_POSITION === '1';
 /**
  * `EXT_meshopt_compression` on top of quantization (todo C10), measured at a
  * further -20% on Monster/. Off by default, and deliberately so: unlike
- * quantization — whose output this repo verified attribute-by-attribute
- * against the previous GLBs — meshopt changes how every buffer view is
+ * quantization - whose output this repo verified attribute-by-attribute
+ * against the previous GLBs - meshopt changes how every buffer view is
  * *stored*, so a mistake here does not degrade a model, it stops all of them
  * loading. The runtime side is wired and self-hosted
  * (`libs/babylon/exports.ts` → `public/js/meshopt_decoder.js`); turn this on
@@ -264,8 +264,8 @@ const QUANTIZE_POSITION = process.env.GLB_QUANTIZE_POSITION === '1';
  *   GLB_MESHOPT=1 bun run tools/bmdToGlb.ts
  *
  * Note it does NOT touch keyframe timing: meshopt is a buffer-view codec, so
- * `keys[1].frame - keys[0].frame` — which `ModelObject` reads to derive every
- * clip's playback speed — comes back exactly as written. That is also why
+ * `keys[1].frame - keys[0].frame` - which `ModelObject` reads to derive every
+ * clip's playback speed - comes back exactly as written. That is also why
  * `resample()` is not used here despite animation data being ~40% of these
  * files: it removes redundant keys, which makes that spacing non-uniform and
  * would silently re-time every animation in the game.
@@ -275,7 +275,7 @@ const USE_MESHOPT = process.env.GLB_MESHOPT === '1';
 /**
  * Set GLB_COMPRESS=0 to write exactly what this converter produced before the
  * C10 pass. Kept so the shipped assets can be regenerated in their previous
- * form in one command — there is no VCS here to restore them from.
+ * form in one command - there is no VCS here to restore them from.
  */
 const COMPRESS = process.env.GLB_COMPRESS !== '0';
 
@@ -286,12 +286,12 @@ async function compress(doc: Document, fileName: string): Promise<void> {
     await doc.transform(
       // Identical accessors across primitives collapse to one.
       //
-      // ACCESSOR only, and TEXTURE/MATERIAL are deliberately excluded — they
+      // ACCESSOR only, and TEXTURE/MATERIAL are deliberately excluded - they
       // were in this list and had to come out. Between them, dedup and the
       // prune below were *deleting live textures*: `Object1/Light01.glb` came
       // out with its `ston03` image, its texture and its material reference
       // gone entirely, and `Player/ArmorElf01.glb` lost `Player/hide`. That
-      // second one is not just an untextured mesh — this runtime reads render
+      // second one is not just an untextured mesh - this runtime reads render
       // state off the texture *name* (`textureScript.ts`: `hide` means the
       // mesh is never drawn, `_R` means additive), so dropping a texture
       // silently turns a hidden mesh visible.
@@ -324,7 +324,7 @@ async function compress(doc: Document, fileName: string): Promise<void> {
       // references, and `player.glb` is a rig with **no meshes at all**:
       // nothing references its skin, so a default prune deletes all 61 joints
       // and the file silently stops skinning every character. (`modelLoader`
-      // synthesises the Babylon skeleton from that node graph — the same area
+      // synthesises the Babylon skeleton from that node graph - the same area
       // as the bone-ordering regression fixed earlier.)
       // Nodes, skins and animations are never candidates either.
       prune({
@@ -422,12 +422,12 @@ async function convertBMDToGLTF(bmd: BMD, outputFilename: string) {
           ? action.PlaySpeed * DEFAULT_FPS
           : DEFAULT_FPS);
 
-      // How many of the authored keys the clip may actually reach — the
+      // How many of the authored keys the clip may actually reach - the
       // original's `Key` in PlayAnimation (ZzzBMD.cpp:415-421). A
       // LockPositions action wraps at `NumAnimationKeys - 1`, every other
       // action at `NumAnimationKeys`, so the last key of a locked action is
       // never displayed: it is a loop-closing duplicate of key 0 (measurably
-      // so — across Player.bmd's walk/run actions the key N-1 -> key 0 delta
+      // so - across Player.bmd's walk/run actions the key N-1 -> key 0 delta
       // is ~0.1 against ~5 for every real interval). Emitting it as a real key
       // adds one motionless interval to every cycle: the legs hold while the
       // character keeps sliding, and the cycle runs 1/(N-1) too long.
@@ -802,11 +802,11 @@ async function processFile(rawRelInputFilePath: string) {
     // *Head/*Upper/*Lower part files and is composed at runtime (see
     // src/common/npcs/lumen.ts), plus animation-only companions such as
     // NPC/songkoani.bmd (for songko.bmd) or Monster/condra_7_cone_left.bmd.
-    // Logged so a 0-mesh GLB is never again mistaken for a converter bug —
+    // Logged so a 0-mesh GLB is never again mistaken for a converter bug -
     // but a *new* name appearing in this list is worth a look.
     if (bmd.Meshes.length === 0) {
       console.log(
-        `${relInputFilePath}: rig-only BMD (mesh count 0 in source) — GLB carries bones+animations only`
+        `${relInputFilePath}: rig-only BMD (mesh count 0 in source) - GLB carries bones+animations only`
       );
     }
 

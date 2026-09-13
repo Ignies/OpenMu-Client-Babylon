@@ -7,6 +7,7 @@ import { monsterModelTypeOf } from '../../common/playSpeed';
 import { inBloodCastle, inChaosCastle } from '../../common/locomotion';
 import { TW_ACTION, TW_NOGROUND } from '../../common/terrain/consts';
 import { playSfx } from '../../libs/sfx';
+import { COMBAT_BUS } from '../../common/combatSounds';
 import { effects } from '../../effects';
 import { bonePos, entityYaw, type RGB } from '../../effects/core';
 import { NOVA_DEATH_MOTES } from '../../effects/recipes';
@@ -24,7 +25,7 @@ import type { PlayerObject } from '../../common/playerObject';
  *    Combo kill or a castle death also starts a body motion.
  * 2. Die clip plays once and holds; two blood splats under the head bone.
  *    **Special deaths** (`common/deathVisuals.ts`): Death Cow / Stone Golem /
- *    Ice Monster burst into pieces instead — the body vanishes at once.
+ *    Ice Monster burst into pieces instead - the body vanishes at once.
  * 3. Rot += 0.02/tick from the kill. At Rot >= 1 (2 s) alpha fades to 0
  *    over the next 2 s while the body sinks 0.4 cm per tick.
  * 4. Body motion, render-only (`dying.offset` / `dying.pitch`):
@@ -233,7 +234,7 @@ export const DeathSystem: ISystemFactory = world => {
     const model = e.modelObject!;
 
     // SetPlayerDie's switch: a shatter death replaces the Die clip and the
-    // blood — the body is gone (`o->Live = false`) and the pieces fly.
+    // blood - the body is gone (`o->Live = false`) and the pieces fly.
     const shatter = e.monsterAnimation
       ? shatterDeathFor(monsterModelTypeOf(e.npcType))
       : ((model.constructor as typeof PlayerObject).DeathShatter ?? undefined);
@@ -241,7 +242,9 @@ export const DeathSystem: ISystemFactory = world => {
       const light: RGB = [model.Light.x, model.Light.y, model.Light.z];
       bodyOrigin(e, tmpHead);
       shatter.spawn(world.scene, tmpHead, light);
-      if (shatter.sound) playSfx(shatter.sound, { x: tmpHead.x, z: tmpHead.z });
+      if (shatter.sound) {
+        playSfx(shatter.sound, { x: tmpHead.x, z: tmpHead.z }, { bus: COMBAT_BUS });
+      }
       model.setAlpha(0);
       d.alpha = 0;
       d.shattered = true;

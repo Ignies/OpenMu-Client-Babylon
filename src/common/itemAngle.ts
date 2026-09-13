@@ -5,7 +5,7 @@
  *
  * The original's item models are all authored standing (that is the pose the
  * inventory and the hand want), so a drop is only ever "lying" because
- * `ItemAngle` pitches it over — armour rolls face-down at `Angle[0] = 270`,
+ * `ItemAngle` pitches it over - armour rolls face-down at `Angle[0] = 270`,
  * a sword leans back at 60, a crossbow lies flat at 90. Without this every
  * drop stands to attention in the grass.
  *
@@ -16,7 +16,7 @@
 // ---- 1. tuning ---------------------------------------------------------
 
 const DEG = Math.PI / 180;
-/** Centimetres per world unit — `MoveItems` works in the original's cm. */
+/** Centimetres per world unit - `MoveItems` works in the original's cm. */
 const CM = 1 / 100;
 
 /** `ITEM_GROUP_*`: an item's model is `MODEL_ITEM + group × 512 + num`. */
@@ -51,7 +51,7 @@ const PLATINA_STAFF = 13;
 
 /** `Height = RequestTerrainHeight(...) + 30` for every drop (MoveItems:6250). */
 const REST_ABOVE_TERRAIN_CM = 30;
-/** `if (Type >= MODEL_SWORD && Type < MODEL_STAFF + MAX_ITEM_INDEX) Height += 40` — a
+/** `if (Type >= MODEL_SWORD && Type < MODEL_STAFF + MAX_ITEM_INDEX) Height += 40` - a
  *  weapon rests on its guard, not on the model origin. */
 const WEAPON_EXTRA_CM = 40;
 

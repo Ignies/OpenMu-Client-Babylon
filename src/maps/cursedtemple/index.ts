@@ -7,7 +7,7 @@ import {
 } from './spec';
 
 /**
- * Illusion Temple (World47 / Object47) — the map entry: identity and the per-world data the
+ * Illusion Temple (World47 / Object47) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
@@ -17,9 +17,9 @@ import {
  * `World47`/`Object47`).
  *
  * Outside a match the map is ten hidden markers and three breathing lamps
- * (`spec.ts`, `meshAnimation.ts`). The match itself — the relic, the
+ * (`spec.ts`, `meshAnimation.ts`). The match itself - the relic, the
  * statues, the score gauge (`m_bGaugebarEnabled`, :330), `cursedtempleplay`
- * replacing `cursedtemplewait` — is server-driven and not built; the waiting
+ * replacing `cursedtemplewait` - is server-driven and not built; the waiting
  * music `Music/cursedtemplewait` is what `PlayBGM` starts with.
  *
  * Clear colour `(9, 8, 33)/256` (SceneManager.cpp:356) is set by

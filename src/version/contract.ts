@@ -21,7 +21,7 @@ export type SimpleModulusKeyList = readonly number[];
 export interface VersionEncryption {
   /**
    * Client → server SimpleModulus (C3/C4 packets). OpenMU: the "default client
-   * key" of `PipelinedSimpleModulusEncryptor` — unchanged from 0.95 to S6;
+   * key" of `PipelinedSimpleModulusEncryptor` - unchanged from 0.95 to S6;
    * only the 0.75 plug-in ships its own Enc1/Dec2 keys.
    */
   readonly clientToServer: SimpleModulusKeyList;

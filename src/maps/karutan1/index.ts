@@ -8,13 +8,13 @@ import {
 } from './spec';
 
 /**
- * Karutan 1 (World81 / Object81) — the map entry: identity and the per-world data the
+ * Karutan 1 (World81 / Object81) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
  * lives in another system; the notes below say what is and is not built.
  *
- * Karutan 1 (`WD_80KARUTAN1`, `World81`/`Object81`) — the desert.
+ * Karutan 1 (`WD_80KARUTAN1`, `World81`/`Object81`) - the desert.
  *
  * `CGMKarutan1::MoveObject` (GMKarutan1.cpp:42-65) is the five hidden vent
  * types and the fire light, all in `spec.ts` (shared with Karutan 2).
@@ -22,7 +22,7 @@ import {
  *
  * Sound (SceneManager.cpp:630-645, `ASG_ADD_MAP_KARUTAN`):
  * `Karutan_desert_env` is the bed; `PlayObjectSound` (:349-417) adds
- * `Karutan_insect_env` on 58 (×4) and 66 (×6) — positional loops, hook
+ * `Karutan_insect_env` on 58 (×4) and 66 (×6) - positional loops, hook
  * missing. `Music/Karutan_A`. Slot 12 of the tile set is `AlphaTile01.Tga`
  * in the original (`getTilesList` substitutes Rock06).
  */

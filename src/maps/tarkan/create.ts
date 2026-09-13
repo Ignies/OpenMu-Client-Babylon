@@ -24,7 +24,7 @@ import { TarkanQuakeVentObject, TarkanSandVentObject } from './ventObject';
  *
  * **`Object9` has holes**: no `Object01/04/05/35/36/39/65/85`, so types 0, 3,
  * 4, 34, 35, 38, 64 and 84 have no model. Two of them carry C++ behaviour
- * that can therefore never run — type 4's blend mesh, V scroll and white
+ * that can therefore never run - type 4's blend mesh, V scroll and white
  * range-3 terrain light (:4044-4057), and type 64, the red twin of the type
  * 63 impact glow (:2978-2986). Both are no-ops here. EncTerrain9.obj still
  * places one type 4 and two type 0 records; their loads fail and are logged.
@@ -34,13 +34,13 @@ import { TarkanQuakeVentObject, TarkanSandVentObject } from './ventObject';
  *  - **The sandstorm overlay.** `ZzzInterface.cpp:8463` draws two
  *    full-screen scrolling `sand01`/`sand02` layers tinted `(0.3, 0.3, 0.25)`
  *    over everything in this world. It is the single loudest thing about
- *    Tarkan and it is a screen-space pass, not an object — UI/post work.
+ *    Tarkan and it is a screen-space pass, not an object - UI/post work.
  *  - **The terrain wind and water rates.** Tarkan runs the terrain's wind
  *    oscillation ten times faster (`ZzzLodTerrain.cpp:2411`) and its
- *    `WaterMove` at half rate — a 40 s loop instead of 20 s (:2615). Both are
+ *    `WaterMove` at half rate - a 40 s loop instead of 20 s (:2615). Both are
  *    per-world constants inside the terrain, not map objects.
  *  - **Scorpion boids** (`Object9/Bug02.glb` is placed by the boid code, not
- *    by EncTerrain9.obj — which is why it has no type number).
+ *    by EncTerrain9.obj - which is why it has no type number).
  *  - **The Dinorant `+90` height.** `ZzzCharacter.cpp:6263-6273` lifts a
  *    Dinorant rider by 90 rather than 30 in Tarkan and Heaven; that is
  *    `ModelObject.HoverHeight` on the *player*, set from the map.
@@ -84,7 +84,7 @@ export async function createTarkan(world: World) {
   // white rather than lit by the terrain it stands on.
   tiles[82] = TarkanLightShaftObject;
 
-  // Tarkan 78 (ZzzObject.cpp:4730-4734), x13 — the sittable step, and the
+  // Tarkan 78 (ZzzObject.cpp:4730-4734), x13 - the sittable step, and the
   // only type in the map's `CreateObject` case. It is `CreateOperate(o)` and
   // nothing else: no `HiddenMesh`, no `BoundingBoxMax` override, so unlike
   // Atlans 39 the model draws normally and keeps the default

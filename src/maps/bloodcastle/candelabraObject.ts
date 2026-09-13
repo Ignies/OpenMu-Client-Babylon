@@ -45,7 +45,7 @@ const POSE_WAIT_LIMIT = 120;
  * Blood Castle type 11, the candelabra (x11, EncTerrain12.obj): seven light
  * sprites on the candle-tip bones, brightness a slow sine phased by yaw
  * (ZzzObject.cpp:3165-3181). Sprites are sized once and only their
- * brightness follows the sine — the same trade Stadium's brazier makes.
+ * brightness follows the sine - the same trade Stadium's brazier makes.
  */
 export class BloodCastleCandelabraObject extends MapTileObject {
   #bones: BoneNode[] = [];

@@ -9,7 +9,7 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
  * Four folders, one art set (Object70/71/72 are 127 models each, Object73
  * the same list) and four copies of one `MoveObject`
  * (GMEmpireGuardian1.cpp:215-294, 2.cpp:116-196, 3.cpp:110-190,
- * 4.cpp:150-241) that differ in one constant — 64's `Velocity` is 0.44 on
+ * 4.cpp:150-241) that differ in one constant - 64's `Velocity` is 0.44 on
  * day 3, 0.64 on the others. EncTerrain70-73.obj: 836 / 729 / 748 / 628
  * objects.
  *
@@ -23,7 +23,7 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
 export const EMPIRE_GUARDIAN_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
- * `MoveObject`: 79, 80, 82-86, 129-132 hidden — the torches, rain sheets and
+ * `MoveObject`: 79, 80, 82-86, 129-132 hidden - the torches, rain sheets and
  * fog banks the login scene already drives (79 fire, 82 water, 86/129-131
  * cloud, 132 smoke). Same list as `EMPIRE_GUARDIAN_4_EFFECT_TYPES`.
  */

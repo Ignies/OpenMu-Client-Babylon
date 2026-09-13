@@ -1,5 +1,5 @@
 /**
- * `Data/Local/<lang>/NpcName_<Lang>.txt` — the monster and NPC names, in the
+ * `Data/Local/<lang>/NpcName_<Lang>.txt` - the monster and NPC names, in the
  * language the player picked.
  *
  * The original ships this as a plain tab-separated text file rather than a
@@ -29,7 +29,7 @@ import { i18n, onLanguageChanged } from '../../i18n';
 import { resolveDataUrl } from './dataFolder';
 import { decodeLocalText } from './localData';
 
-/** `84\t1\t"Chief Skeleton Warrior"` — id, flag, quoted name. */
+/** `84\t1\t"Chief Skeleton Warrior"` - id, flag, quoted name. */
 const ROW = /^\s*(\d+)\s+\d+\s+"([^"]*)"/;
 
 /**
@@ -72,7 +72,7 @@ export function loadNpcNames(): Promise<void> {
     return pending;
   }
 
-  // `NpcName_Spn.txt` — the folder is capitalised in the file name too.
+  // `NpcName_Spn.txt` - the folder is capitalised in the file name too.
   const url = resolveDataUrl(`Local/${pack.folder}/NpcName_${pack.folder}.txt`);
   const wanted = i18n.language;
 

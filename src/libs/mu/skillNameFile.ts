@@ -1,5 +1,5 @@
 /**
- * `Data/Local/<pack>/skill_<lang>.bmd` — the skill names in the language the
+ * `Data/Local/<pack>/skill_<lang>.bmd` - the skill names in the language the
  * player picked.
  *
  * `SKILL_ATTRIBUTE_FILE_LEGACY` (`GameData/SkillData/SkillStructs.h`): 650

@@ -1,5 +1,5 @@
 /**
- * Ring — a textured decal draped over the terrain at a point that grows,
+ * Ring - a textured decal draped over the terrain at a point that grows,
  * turns and fades: the magic circle under a heal, the shock ring of an
  * earth skill, the scorch under a meteor. The original's
  * `RenderTerrainAlphaBitmap(BITMAP_MAGIC_*, …)` calls from `RenderEffect`

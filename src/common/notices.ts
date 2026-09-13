@@ -4,8 +4,8 @@ import type { TextKey } from '../i18n';
 /**
  * The golden server notice (ZzzInterface.cpp:491-603). `ReceiveNotice`
  * (WSclient.cpp:1605) routes `ServerMessage` by type: 0 is a notice, 1 goes
- * to the system log, 2 is a guild notice — `GlobalText[483]` wrapped, colour
- * 1 — which also lands in the guild window.
+ * to the system log, 2 is a guild notice - `GlobalText[483]` wrapped, colour
+ * 1 - which also lands in the guild window.
  *
  * The banner is a six-line stack (`MAX_NOTICE`) drawn centred at y = 300 +
  * 13·i in the 640×480 space with `g_hFontBold`. `CreateNotice` pushes at the

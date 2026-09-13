@@ -89,7 +89,7 @@ export async function parseTerrainAttribute(
 
   // The original's anti-tamper probe (`OpenTerrainAttribute`): one known tile
   // per town. A mismatch means an edited or foreign `.att`, which is worth a
-  // note but not a bricked client — the map still loads with what it has.
+  // note but not a bricked client - the map still loads with what it has.
   if (hasError) {
     console.warn(
       `EncTerrain${map + 1}.att failed the attribute probe (edited or unexpected file)`

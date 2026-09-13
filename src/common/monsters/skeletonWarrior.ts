@@ -20,8 +20,8 @@ import { skeletonShatter } from '../deathVisuals';
  * MODEL_SKELETON1..3` (ZzzCharacter.cpp:13910-13950), drawn by
  * `RenderPartObject(&c->Object, o->SubType, …)` (:9321) on the Player.bmd
  * bones instead of the helm/armor/… parts. `Skeleton0N.bmd` is a body part
- * file exactly like `ArmorClass01.bmd` — the player's `Bip01` bone list, one
- * single-key bind-pose action, vertices skinned to bones 2..39 — so it has no
+ * file exactly like `ArmorClass01.bmd` - the player's `Bip01` bone list, one
+ * single-key bind-pose action, vertices skinned to bones 2..39 - so it has no
  * animation of its own. Loading it standalone and driving it with the
  * monster action table left the mesh posed by whatever clip index happened to
  * exist: the stretched, splayed limbs of the bug report.
@@ -126,7 +126,7 @@ export class SkeletonWarrior extends SkeletonMonster {
   protected override readonly offHand = BUCKLER;
 }
 
-// [NpcInfo(55, "Death King")] — MONSTER_DEATH_KING shares MODEL_SKELETON1.
+// [NpcInfo(55, "Death King")] - MONSTER_DEATH_KING shares MODEL_SKELETON1.
 export class DeathKing extends SkeletonMonster {
   static {
     DeathKing.OverrideScale = 1.4;
@@ -135,7 +135,7 @@ export class DeathKing extends SkeletonMonster {
   protected override readonly mainHand = BILL_OF_BALROG;
 }
 
-// [NpcInfo(56, "Death Bone")] — MONSTER_DEATH_BONE shares MODEL_SKELETON1.
+// [NpcInfo(56, "Death Bone")] - MONSTER_DEATH_BONE shares MODEL_SKELETON1.
 export class DeathBone extends SkeletonMonster {
   static {
     DeathBone.OverrideScale = 0.8;

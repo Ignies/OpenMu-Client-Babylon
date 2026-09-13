@@ -5,6 +5,11 @@ import {
   CAMERA_FOV_MIN_DEG,
 } from '../camera/recipes';
 import { RENDER_DISTANCE_MAX } from './renderDistance';
+import {
+  LOW_VITAL_DEFAULT_PERCENT,
+  LOW_VITAL_MAX_PERCENT,
+  LOW_VITAL_MIN_PERCENT,
+} from './lowVitals';
 import { LocalStorage } from '../libs/localStorage';
 
 const OPTIONS_KEY = 'mu_options';
@@ -52,7 +57,43 @@ export type GameOptions = {
    * world. See `materialQuality.ts`.
    */
   materialQuality: number;
+  /** Master sound level, 0..9, the original's one slider. */
   volume: number;
+  /**
+   * The mixer's categories, 0..`BUS_VOLUME_MAX` (`sound/buses.ts`), each a
+   * share of the master. 10 is the top, where the category is transparent
+   * and the master alone decides - which is where they all start, so the
+   * client sounds exactly as it did before they existed.
+   */
+  musicVolume: number;
+  /** Everything that is not music. The categories below are shares of it. */
+  effectsVolume: number;
+  combatVolume: number;
+  monsterVolume: number;
+  /** Beds, map-object loops, fire crackle, wildlife. */
+  ambientVolume: number;
+  stepsVolume: number;
+  /** A drop landing on the ground, before the filter below decides. */
+  dropVolume: number;
+  /** Clicks, windows, pickups, level up, repair, whisper. */
+  uiVolume: number;
+  /** Ramp the tracks to silence while the page is hidden, and back. */
+  muteInBackground: boolean;
+  /**
+   * Run a landing drop through the rules below instead of sounding every
+   * one of them (`sound/drops.ts`). The vocabulary is the loot filter's:
+   * what is worth a name on the ground is what is worth hearing land.
+   */
+  dropSoundFilter: boolean;
+  dropSoundJewels: boolean;
+  dropSoundExcellent: boolean;
+  dropSoundAncient: boolean;
+  /** `+7` and up (`HIGH_DROP_LEVEL`, the gold tint). */
+  dropSoundHighLevel: boolean;
+  /** Everything the rules above do not claim. */
+  dropSoundOther: boolean;
+  /** Zen piles. */
+  dropSoundZen: boolean;
   effectLevel: number;
   /** Item effect style: 0 off / 1 legacy / 2 legacy + improved / 3 improved. */
   itemEffects: number;
@@ -107,6 +148,12 @@ export type GameOptions = {
    */
   propBatching: boolean;
   autoAttack: boolean;
+  /**
+   * An amount box in front of every `+` in the character info window, so a
+   * few hundred level-up points go in with one press instead of one click
+   * each. Off, the window is the original's: one point per click.
+   */
+  statPointAmounts: boolean;
   whisperBeep: boolean;
   slideHelp: boolean;
   /**
@@ -147,6 +194,12 @@ export type GameOptions = {
    * every pile on the ground. ALT held still shows all of them.
    */
   lootFilter: boolean;
+  /**
+   * Hovering a drop on the ground shows the item's own tooltip, the same box
+   * the inventory draws, so a player can read the options before spending a
+   * click and an inventory square on it. Off is the original's name only.
+   */
+  dropTooltips: boolean;
   lootJewels: boolean;
   lootExcellent: boolean;
   lootAncient: boolean;
@@ -167,6 +220,19 @@ export type GameOptions = {
   lockWindows: boolean;
   /** Durability, full grid, last potion and buff ending notices. */
   stateWarnings: boolean;
+  /**
+   * A red gradient round the screen edge while health is under
+   * `lowHealthPercent`, beating like a heart near death. The life orb sits in
+   * a corner nobody looks at mid-fight; this puts the same warning where the
+   * eye already is.
+   */
+  lowHealthWarning: boolean;
+  /** Health share the red edge starts at, `LOW_VITAL_MIN/MAX_PERCENT`. */
+  lowHealthPercent: number;
+  /** The same edge in blue for mana. Off: only casters want it. */
+  lowManaWarning: boolean;
+  /** Mana share the blue edge starts at. */
+  lowManaPercent: number;
   /**
    * Walk the login flow again by ourselves when the game server socket
    * drops, instead of sending the player back to the server list.
@@ -189,6 +255,12 @@ export type GameOptions = {
    * asks the server nothing of its own accord.
    */
   eventTimers: boolean;
+  /**
+   * The running quests and their counts on the HUD, under the corner minimap
+   * (ours). Off is the Classic look: the quest log (T) is the only place a
+   * kill count shows.
+   */
+  questTracker: boolean;
   /**
    * Item names in English whatever the interface language is. The language
    * packs translate them (`Data/Local/<pack>/item_<lang>.bmd`), which reads
@@ -213,6 +285,17 @@ export function uiScaleFactor(step: number): number {
 }
 
 const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
+  volume: [0, 9],
+  // Literal rather than `BUS_VOLUME_MAX`: sound/buses.ts imports this
+  // module, so naming it here would close an import cycle.
+  musicVolume: [0, 10],
+  effectsVolume: [0, 10],
+  combatVolume: [0, 10],
+  monsterVolume: [0, 10],
+  ambientVolume: [0, 10],
+  stepsVolume: [0, 10],
+  dropVolume: [0, 10],
+  uiVolume: [0, 10],
   toneMapper: [0, TONE_MAPPER_MAX],
   brightness: [BRIGHTNESS_MIN, BRIGHTNESS_MAX],
   effectLevel: [0, 4],
@@ -230,6 +313,8 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   vignette: [0, 9],
   sunShafts: [0, 9],
   lootZen: [0, 9],
+  lowHealthPercent: [LOW_VITAL_MIN_PERCENT, LOW_VITAL_MAX_PERCENT],
+  lowManaPercent: [LOW_VITAL_MIN_PERCENT, LOW_VITAL_MAX_PERCENT],
   uiScale: [0, UI_SCALE_MAX],
   renderDistance: [0, RENDER_DISTANCE_MAX],
   grassDensity: [0, 9],
@@ -254,6 +339,22 @@ const DEFAULTS: GameOptions = {
   materialQuality: 1,
   materialDetail: 6,
   volume: 5,
+  musicVolume: 10,
+  effectsVolume: 10,
+  combatVolume: 10,
+  monsterVolume: 10,
+  ambientVolume: 10,
+  stepsVolume: 10,
+  dropVolume: 10,
+  uiVolume: 10,
+  muteInBackground: true,
+  dropSoundFilter: false,
+  dropSoundJewels: true,
+  dropSoundExcellent: true,
+  dropSoundAncient: true,
+  dropSoundHighLevel: true,
+  dropSoundOther: false,
+  dropSoundZen: false,
   effectLevel: 4,
   itemEffects: 2,
   ambientParticles: true,
@@ -265,6 +366,7 @@ const DEFAULTS: GameOptions = {
   renderDistance: 0,
   propBatching: true,
   autoAttack: false,
+  statPointAmounts: true,
   whisperBeep: true,
   slideHelp: true,
   cameraControl: true,
@@ -274,6 +376,7 @@ const DEFAULTS: GameOptions = {
   firstPersonBob: true,
   autoReconnect: true,
   lootFilter: false,
+  dropTooltips: true,
   lootJewels: true,
   lootExcellent: true,
   lootAncient: true,
@@ -284,9 +387,14 @@ const DEFAULTS: GameOptions = {
   uiScale: 3,
   lockWindows: false,
   stateWarnings: true,
+  lowHealthWarning: true,
+  lowHealthPercent: LOW_VITAL_DEFAULT_PERCENT,
+  lowManaWarning: false,
+  lowManaPercent: LOW_VITAL_DEFAULT_PERCENT,
   blockBrowserKeys: true,
   minimapCorner: true,
   eventTimers: true,
+  questTracker: true,
   englishItemNames: false,
 };
 

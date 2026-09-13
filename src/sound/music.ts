@@ -11,13 +11,14 @@ import {
 import { ENUM_WORLD } from '../common/types';
 import { EventBus } from '../libs/eventBus';
 import { SoundsManager } from '../libs/soundsManager';
+import { busSilent, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerWorld } from './listener';
 
 /**
  * Background music: `ManageBackgroundMusic` (Scenes/SceneManager.cpp:711-839)
- * — one track per world, started a beat after the warp completes. Area
+ * - one track per world, started a beat after the warp completes. Area
  * overrides (the Lorencia / Devias taverns) and the login theme
  * (`libs/loginMusic.ts`) go through the same `playMusic` / `stopMusic`
  * commands, so the mixer only ever has one track up.
@@ -27,6 +28,9 @@ import { listenerWorld } from './listener';
  */
 
 // ---- 1. tuning -------------------------------------------------------------
+
+/** The tracks ride their own slider, not the effects one (`sound/buses.ts`). */
+const BUS: SoundBus = 'music';
 
 /** Seconds after `warpCompleted` before the map's track starts. */
 const MUSIC_DELAY_SECONDS = 1;
@@ -51,7 +55,7 @@ const MAP_MUSIC: Partial<Record<ENUM_WORLD, Sounds | null>> = {
   [ENUM_WORLD.WD_10ICARUS]: 'Music/icarus',
   [ENUM_WORLD.WD_6STADIUM]: null,
   // `MUSIC_LOGIN_THEME` (LoginScene.cpp:300): the login backdrop and the
-  // character select are one scene under one theme — `libs/loginMusic.ts`
+  // character select are one scene under one theme - `libs/loginMusic.ts`
   // starts it before the world exists; this row keeps the map loop from
   // swapping it for the MuTheme fallback once the backdrop's terrain loads.
   [ENUM_WORLD.WD_73NEW_LOGIN_SCENE]: 'Music/login_theme',
@@ -67,7 +71,7 @@ const MAP_MUSIC: Partial<Record<ENUM_WORLD, Sounds | null>> = {
   // `ManageBackgroundMusic` (SceneManager.cpp:711-857) and the per-map
   // `PlayBGM`s it calls; file names from _enum.h:180-216.
   ...onWorlds(KALIMA_WORLDS, 'Music/kalima' as Sounds),
-  // `MUSIC_CASTLE_PEACE` — the siege tracks need the siege state.
+  // `MUSIC_CASTLE_PEACE` - the siege tracks need the siege state.
   [ENUM_WORLD.WD_30BATTLECASTLE]: 'Music/castle',
   [ENUM_WORLD.WD_31HUNTING_GROUND]: 'Music/huntingground',
   [ENUM_WORLD.WD_33AIDA]: 'Music/Aida',
@@ -138,6 +142,14 @@ function wire(): void {
 
 function update(map: ENUM_WORLD, dt: number): void {
   wire();
+
+  // The music slider at 0 stops the track rather than streaming it at
+  // silence, and re-arms the start so raising the slider brings it back.
+  if (busSilent(BUS)) {
+    if (SoundsManager.currentMusic) stopMusic();
+    delay = 0;
+    return;
+  }
 
   delay -= dt;
   if (delay > 0) return;

@@ -24,8 +24,8 @@ import { lookDirector } from '../../lighting/director';
  * lit, for the weather effects that touch the ground rather than fall through
  * the air.
  *
- * This closes a long-standing gap — *"leaves settling on terrain,
- * and `BITMAP_RAIN_CIRCLE` splashes — GPU particles cannot read the height
+ * This closes a long-standing gap - *"leaves settling on terrain,
+ * and `BITMAP_RAIN_CIRCLE` splashes - GPU particles cannot read the height
  * map, so both fade instead"*. A particle genuinely cannot read the height
  * map; the terrain shader is already standing on it. So settled snow, wet
  * stone, puddles and [Atlans' caustics] are one mechanism rather than
@@ -44,13 +44,13 @@ import { lookDirector } from '../../lighting/director';
  * ### Everything except coverage is a compile-time constant
  *
  * A layer's colour, patch size, edge softness and slope limit are baked into
- * the generated GLSL as literals. Only `coverage` — the one value that
- * genuinely changes per frame — is a uniform, and it is its own `float`.
+ * the generated GLSL as literals. Only `coverage` - the one value that
+ * genuinely changes per frame - is a uniform, and it is its own `float`.
  *
  * That is a deliberate failure-mode choice, not tidiness. A uniform that does
  * not reach the GPU reads as zero; with the colour in a uniform, "zero" meant
  * *mix the ground toward black*, and a single unbound uniform turned the whole
- * map pitch black. With only coverage in a uniform, "zero" means *no layer* —
+ * map pitch black. With only coverage in a uniform, "zero" means *no layer* -
  * the ground renders exactly as it would with the feature switched off. The
  * shader can no longer fail into a worse state than not having the feature.
  */
@@ -69,7 +69,7 @@ export type TerrainOverlay = {
   readonly blend: OverlayBlend;
   /**
    * How much of the layer is down, 0…1, read every frame. The recipe owns its
-   * own driver so the shader stays generic — snow reads its accumulator, wet
+   * own driver so the shader stays generic - snow reads its accumulator, wet
    * ground reads the rain's.
    */
   readonly coverage: () => number;
@@ -96,8 +96,8 @@ export type TerrainOverlay = {
    *
    * This is what keeps settled snow off swept paving. Without it the layer
    * is uniform over every open tile, so the square's flagstones whitened
-   * exactly like the drifts beside them, and — because the footprint and
-   * sink code read the same field — boots punched snow holes into stone.
+   * exactly like the drifts beside them, and - because the footprint and
+   * sink code read the same field - boots punched snow holes into stone.
    * The shader mixes the two mapping layers by the same alpha the ground
    * does, so a path painted over snow thins the layer the way it thins the
    * snow texture under it. `snowSink.ts` reads the same table on the CPU.
@@ -132,7 +132,7 @@ export type TerrainOverlay = {
    * a flat wash of `colour`.
    *
    * Separate from `patchScale`, which decides *where* the layer is. This is
-   * what the layer looks like once it is there — settled snow is not a flat
+   * what the layer looks like once it is there - settled snow is not a flat
    * white, it is drifted and scalloped, and without this a fully covered
    * Devias reads as a sheet of paper laid over the map.
    */
@@ -146,8 +146,8 @@ export type TerrainOverlay = {
    *
    * This is what separates a layer that has *form* from one that is paint.
    * Until this went in, a layer only ever changed the ground's **colour**: the
-   * mix ran and then the ground was lit by `vColor` — the baked lightmap of
-   * the rock underneath — so a drift and a flat plain took byte-identical
+   * mix ran and then the ground was lit by `vColor` - the baked lightmap of
+   * the rock underneath - so a drift and a flat plain took byte-identical
    * light and no amount of albedo variation could suggest otherwise. Bending
    * the normal is the fix, and everything else here hangs off it.
    *
@@ -156,7 +156,7 @@ export type TerrainOverlay = {
    */
   readonly relief?: number;
   /**
-   * Repeats of the relief noise per world unit — a tile is 1. ~0.8 gives
+   * Repeats of the relief noise per world unit - a tile is 1. ~0.8 gives
    * drifts a little over a tile across, which is the scale that reads from
    * the game's camera height.
    */
@@ -174,7 +174,7 @@ export type TerrainOverlay = {
    * ground the fire uncovers is damped down as wet rather than left as the
    * bare tile.
    *
-   * Costs no sampler — the patches ride in a small uniform array, the way the
+   * Costs no sampler - the patches ride in a small uniform array, the way the
    * torch pool does for `reflect`.
    */
   readonly melt?: boolean;
@@ -182,7 +182,7 @@ export type TerrainOverlay = {
    * Extra target above the coverage, so that at coverage 1 the layer is
    * SOLID where its bed is 1. The break-up noise runs 0…1 and the edge is
    * `softness` wide either side of it, so without this a full cover still
-   * leaves bare ground wherever the noise sits within `softness` of 1 —
+   * leaves bare ground wherever the noise sits within `softness` of 1 -
    * on screen, dark blotches in a field that should be closed. 0 (default)
    * keeps the exact behaviour the wet layers were tuned against.
    */
@@ -202,7 +202,7 @@ export type TerrainOverlay = {
    * This layer is standing water, and reflects. Emits `terrainOverlayReflectGlsl`
    * after the lighting: a Fresnel share of a **built sky** (a horizon-to-zenith
    * gradient with a parallaxing cloud deck over it), the sun's halo and glint,
-   * and a highlight from each of the point-light pool's torches — all read off
+   * and a highlight from each of the point-light pool's torches - all read off
    * a normal carrying both the wind ripple and the rings of individual
    * raindrops. Without it a puddle layer is only a darkening, which is what
    * read as "black paint" instead of water; with a flat sky colour instead of
@@ -216,7 +216,7 @@ export type TerrainOverlay = {
     /**
      * Wind-ripple normal slope at full rain. 0 = a mirror.
      *
-     * Only the broad wind chop. The raindrop rings are not scaled by it —
+     * Only the broad wind chop. The raindrop rings are not scaled by it -
      * how many drops are landing is a fact about the sky, not about how
      * glossy this map's water was dialled (see `RING_SLOPE`).
      */
@@ -230,7 +230,7 @@ export type TerrainOverlay = {
  * `shadow` is what the layer looks like where the bake is dark or the sun
  * is cut by the cascades: sky-lit snow, a pale blue-grey, never the map's
  * own hue and never black. `gain` scales the bake's luminance before it
- * picks between shadow and full white — Devias' open ground bakes around
+ * picks between shadow and full white - Devias' open ground bakes around
  * 0.6–0.8, and 1.3 puts open ground at white while the authored shadows
  * under walls and trees keep their shape.
  */
@@ -331,7 +331,7 @@ export const SNOW_COVER: TerrainOverlay = {
  * Wet stone is darker and less saturated than dry stone, because the water
  * film fills the surface roughness and sends most of the scattered light
  * forward instead of back at the eye. That is why this multiplies rather than
- * mixing — it is the same ground, seen through water, not a coat of paint.
+ * mixing - it is the same ground, seen through water, not a coat of paint.
  *
  * Broad and soft (`patchScale` well under the puddle layer's) so it reads as
  * the whole street darkening, with the dry patches under eaves and against
@@ -355,7 +355,7 @@ export const WET_GROUND: TerrainOverlay = {
 /**
  * Standing water on top of the wet ground.
  *
- * Much darker, much sharper-edged, and — the point of it — held only by
+ * Much darker, much sharper-edged, and - the point of it - held only by
  * near-flat ground: `slopeKnee` at 0.985 means a tile has to be within a few
  * degrees of level to pool at all, so water sits in the streets and squares
  * and never on the ramps or the banks. Terrain quads carry a per-tile normal,
@@ -373,7 +373,7 @@ export const PUDDLES: TerrainOverlay = {
   colour: [0.5, 0.53, 0.6],
   blend: 'multiply',
   // CAPPED, hard. The accumulator reaches 0.9 in a long downpour, and the
-  // amount is a threshold of 0..1 noise against the coverage — so at 0.9,
+  // amount is a threshold of 0..1 noise against the coverage - so at 0.9,
   // nine tenths of the flat ground was under water: a flood, not puddles.
   // Water stands in the LOW spots, which no amount of rain makes most of a
   // street. The cap keeps the worst downpour at scattered pools.
@@ -398,8 +398,8 @@ export const PUDDLES: TerrainOverlay = {
  * How a relief layer is shaded, live.
  *
  * These four are the only numbers in this file that are **not** baked into the
- * GLSL, and the exception is deliberate. Everything else here — colour, patch
- * size, softness, slope limit — is a compile-time literal because a uniform
+ * GLSL, and the exception is deliberate. Everything else here - colour, patch
+ * size, softness, slope limit - is a compile-time literal because a uniform
  * that fails to reach the GPU reads as zero, and zero for a *colour* meant
  * mixing the ground toward black. Zero for each of these means "this term
  * contributes nothing". A uniform is allowed here precisely because it cannot
@@ -421,7 +421,7 @@ export const SNOW_SHADE = {
    * Slope of the drift field: how steeply the snow surface rises and falls.
    *
    * Drives the geometry, and the shading follows from it rather than being its
-   * own dial — a steeper drift catches more sun on its lit face and loses more
+   * own dial - a steeper drift catches more sun on its lit face and loses more
    * on its far one because that is what the normal says, not because a second
    * number was turned up to say so.
    *
@@ -503,7 +503,7 @@ if (typeof window !== 'undefined') {
     get: () => ({ ...SNOW_SHADE }),
     /** How much snow is on the ground right now, 0…1 (snowCover.ts). */
     cover: () => snowCover(),
-    /** Takes effect on the next frame — these are uniforms, not literals. */
+    /** Takes effect on the next frame - these are uniforms, not literals. */
     set(next: Partial<typeof SNOW_SHADE>) {
       Object.assign(SNOW_SHADE, next);
       return { ...SNOW_SHADE };
@@ -567,7 +567,7 @@ function overlayNoiseAt(x: number, y: number): number {
 
 /**
  * How much of layer `o` the shader draws at world (x, z), 0…1, given the
- * ground's normal Y there and whether the sky is open — the same break-up
+ * ground's normal Y there and whether the sky is open - the same break-up
  * noise, threshold and slope test the GLSL block runs, so the CPU can ask
  * "is there a puddle under this boot" and get the answer the eye sees.
  * Bed share is the caller's (see `overlayBedShare`).
@@ -605,7 +605,7 @@ export function overlayAmountAt(
 
 /**
  * How much of `o` this tile texture holds, per `bed`. 1 for a layer with no
- * bed table — such a layer lies on every tile alike.
+ * bed table - such a layer lies on every tile alike.
  */
 export function overlayBedShare(o: TerrainOverlay, tile: number): number {
   if (!o.bed) return 1;
@@ -673,11 +673,11 @@ const TORCH_GLOW = 0.35;
 const TORCH_GLOW_GLOSS = 5;
 
 /**
- * The sky the water reflects — a **fake** one, built in the shader.
+ * The sky the water reflects - a **fake** one, built in the shader.
  *
  * The first cut reflected `ovSky` alone: one flat colour, the map's fog,
  * scaled by Fresnel. That is a wash, and a wash is exactly what reads as a
- * texture laid on the ground rather than as water — because the one thing
+ * texture laid on the ground rather than as water - because the one thing
  * every real puddle does is show a *different* piece of sky at every point
  * of it, and slide that piece as you walk. Nothing here is a real
  * reflection (there is no second pass and no probe); it is the two cues
@@ -691,7 +691,7 @@ const TORCH_GLOW_GLOSS = 5;
  *  2. **Structure that parallaxes.** A cloud deck `CLOUD_HEIGHT` tiles up,
  *     hit by that same mirrored ray. Because the ray's elevation changes
  *     across the pool, the deck is sampled *further away* at the grazing
- *     edge — so the clouds stretch toward the near edge and swim when the
+ *     edge - so the clouds stretch toward the near edge and swim when the
  *     camera moves, which a scrolling texture cannot fake.
  *
  * `SKY_GRADIENT_POW` above 1 keeps most of a pool in horizon colour and
@@ -703,7 +703,7 @@ const SKY_GRADIENT_POW = 1.5;
 /**
  * The least the zenith must be under the horizon, as a fraction. Guarantees
  * a visible gradient on a map whose sky light and fog colour happen to
- * agree — without it such a map reflects a flat wash and the water goes back
+ * agree - without it such a map reflects a flat wash and the water goes back
  * to reading as paint.
  */
 const ZENITH_SEPARATION = 0.25;
@@ -712,7 +712,7 @@ const ZENITH_SEPARATION = 0.25;
 const CLOUD_HEIGHT = 12;
 /** Repeats of the cloud noise per tile on the deck: a feature ~20 tiles wide. */
 const CLOUD_SCALE = 0.05;
-/** Tiles per second the deck slides. Slow — this is weather, not a conveyor. */
+/** Tiles per second the deck slides. Slow - this is weather, not a conveyor. */
 const CLOUD_DRIFT = 0.6;
 /** Noise window the cloud breaks open in, and how much brighter a break is. */
 const CLOUD_LO = 0.44;
@@ -724,8 +724,8 @@ const CLOUD_LIT = 1.55;
  * of sky around it, which is most of what a real puddle shows of the sun.
  * The glint alone is a star on a flat field.
  *
- * Tested on the mirrored ray against the sun direction — a lobe in the sky,
- * not on the surface — so it moves across the pool and shivers with the
+ * Tested on the mirrored ray against the sun direction - a lobe in the sky,
+ * not on the surface - so it moves across the pool and shivers with the
  * rings. The exponent is what a hazy sun looks like: wide enough to be a
  * patch, tight enough to have an edge.
  */
@@ -733,7 +733,7 @@ const SUN_HALO = 0.6;
 const SUN_HALO_GLOSS = 8;
 
 /**
- * Raindrop rings — the drops landing on the standing water.
+ * Raindrop rings - the drops landing on the standing water.
  *
  * One impact per cell per `RING_PERIOD`, re-rolled every period so the drop
  * moves and a cell can sit a period out; that re-roll is what lets the
@@ -755,7 +755,7 @@ const RING_PERIOD = 0.9;
 /**
  * How far a ring spreads before it dies, in cells. The fade below takes the
  * amplitude to zero at exactly this radius, which is what confines a ring to
- * its own cell and buys the whole field its cheapness — so this and
+ * its own cell and buys the whole field its cheapness - so this and
  * `RING_FADE` must stay under 0.5 together.
  */
 const RING_MAX = 0.44;
@@ -827,7 +827,7 @@ export function snowCoverFor(map: ENUM_WORLD): TerrainOverlay {
  *
  * Read at *map load*, so switching the option off and walking through a gate
  * gets a terrain shader with no overlay branch in it at all. Switching it off
- * without reloading is handled at the other end, in `bindTerrainOverlays` —
+ * without reloading is handled at the other end, in `bindTerrainOverlays` -
  * between them the option both stops costing anything and takes effect at
  * once, without a shader recompile in the middle of play.
  */
@@ -887,7 +887,7 @@ function f(n: number): string {
 
 /**
  * Spacing of the finite difference that turns the relief field into a normal,
- * in world units — a tile is 1.
+ * in world units - a tile is 1.
  *
  * Has to sit under the *finest* octave in the field, not the coarsest. At
  * SNOW_COVER's scales the third octave lands at 0.3 * 2.13 * 2.31 = 1.48
@@ -928,7 +928,7 @@ const TRAIL_GAIN = 2.4;
 
 /**
  * What the ground a melt uncovers is multiplied by at the centre of the patch
- * — `WET_GROUND.colour`, on purpose and to the digit.
+ * - `WET_GROUND.colour`, on purpose and to the digit.
  *
  * Snow that a fireball took off the ground did not vanish, it became water,
  * and without this the patch reads as a hole punched in the snow rather than
@@ -944,7 +944,7 @@ const MELT_DAMP: readonly [number, number, number] = [0.63, 0.65, 0.7];
  * How hard the sun term swings the albedo either side of 1.
  *
  * Deliberately not a second dial. The shading is meant to follow the geometry
- * — a steeper drift catches more light because its normal says so — so this
+ * - a steeper drift catches more light because its normal says so - so this
  * stays fixed and `SNOW_SHADE.relief` moves the slope that feeds it. Two
  * knobs would let the shading and the shape disagree with each other.
  */
@@ -955,7 +955,7 @@ const LIT_GAIN = 1.0;
  *
  * Two jobs, and the first is not cosmetic: without it the multiplier goes
  * **negative** on a face steep enough and turned far enough from the sun, and
- * a negative albedo is not a dark drift — it is whatever the rest of the
+ * a negative albedo is not a dark drift - it is whatever the rest of the
  * pipeline happens to do with a negative colour. A sweep found this at a
  * relief of 1.3 and a gain of 2.2, both inside the range the console hook
  * lets someone dial to.
@@ -978,7 +978,7 @@ const SHADE_FLOOR = 0.55;
  * hue 232 at half saturation - the same blue the map's own
  * shadows are, so snow in shade matches stone in shade.
  *
- * Baked rather than exposed — it is gated by `SNOW_SHADE.cavity`, so it
+ * Baked rather than exposed - it is gated by `SNOW_SHADE.cavity`, so it
  * cannot fail into anything on its own.
  */
 // Half the chroma of the 0.66/0.74/0.93 it was: the same hue at full
@@ -987,7 +987,7 @@ const SHADE_FLOOR = 0.55;
 const CAVITY_TINT = 'vec3(0.72, 0.75, 0.83)';
 
 /**
- * Range over which surface detail fades to a flat wash, in world units — a
+ * Range over which surface detail fades to a flat wash, in world units - a
  * tile is 1.
  *
  * Sized against the game's actual camera, not to taste. The ArcRotateCamera in
@@ -998,7 +998,7 @@ const CAVITY_TINT = 'vec3(0.72, 0.75, 0.83)';
  * does not actually alias anywhere the player normally looks.
  *
  * Which makes this insurance rather than a fix, and it is deliberately set
- * where insurance belongs — past everything on screen. A fade that started at
+ * where insurance belongs - past everything on screen. A fade that started at
  * sixteen (the first guess here) would have flattened the far half of every
  * shot and put a visible falloff band across the middle of the ground. What
  * it still covers is the pathological case: a wider screen, a zoomed-out
@@ -1431,7 +1431,7 @@ ${artGlsl}${grainGlsl}${reliefGlsl}
 
   // Zero when the sun direction never reached the GPU. Every relief term is
   // multiplied by it, so the feature collapses to the flat wash this file drew
-  // before it existed — the same rule the coverage uniforms follow: a uniform
+  // before it existed - the same rule the coverage uniforms follow: a uniform
   // that fails must fail to "feature off", never to something worse than not
   // having the feature at all.
   const prelude =
@@ -1534,7 +1534,7 @@ export function terrainOverlayDeclarationsGlsl(
   ].join('\n');
 
   // Three more, and only when a layer has a surface. `cameraPosition` is
-  // Babylon's own name — ShaderMaterial fills it in for us once it is on the
+  // Babylon's own name - ShaderMaterial fills it in for us once it is on the
   // uniform list, which is why terrainOverlayUniforms asks for it there.
   const reliefUniforms = [
     ...(hasRelief(overlays) || hasReflect(overlays)
@@ -1847,7 +1847,7 @@ export function bindTerrainOverlays(
 
   // Every one of these is a term that contributes nothing at zero, so the
   // advanced-effects switch turns the surface off by handing over zeroes and
-  // the layer falls back to the flat wash — no recompile, no reload.
+  // the layer falls back to the flat wash - no recompile, no reload.
   effect.setFloat('ovGrain', on ? SNOW_SHADE.grain : 0);
   effect.setFloat4(
     'ovShade',
@@ -1869,7 +1869,7 @@ export function bindTerrainOverlays(
  *
  * **The normal is water, not ground.** Three fields stack into it: two
  * scrolling octaves of gradient noise for the wind ripple, tilted by
- * `ovRipple`, and — new — the rings of individual raindrops landing on the
+ * `ovRipple`, and - new - the rings of individual raindrops landing on the
  * pool (`ovRingGrad`). Still water is a mirror; in a shower the rings
  * shiver everything it is showing, which is what makes it read as rain ON
  * water instead of a wet decal beside falling rain.
@@ -1878,7 +1878,7 @@ export function bindTerrainOverlays(
  * point on a horizon-to-zenith gradient and on a drifting cloud deck above
  * it (see the SKY_/CLOUD_ block). That gradient runs across every pool and
  * moves with the camera, and it is the whole difference between water and a
- * dark patch of paint — the flat `ovSky` wash this had before was, correctly,
+ * dark patch of paint - the flat `ovSky` wash this had before was, correctly,
  * read as "a texture given to them".
  */
 export function terrainOverlayReflectGlsl(

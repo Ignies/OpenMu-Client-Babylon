@@ -13,7 +13,7 @@ export const PLAY_SPEED_TO_RATIO = REFERENCE_FPS / BMD_KEYS_PER_SECOND;
 
 /**
  * `SetAttackSpeed()` stat scaling (ZzzCharacter.cpp:738-826): the piecewise
- * multiplier is the cap — there is no clamp on the result.
+ * multiplier is the cap - there is no clamp on the result.
  */
 export function attackSpeedFactor(attackSpeed: number): number {
   if (attackSpeed >= 509 && attackSpeed <= 549) return attackSpeed * 0.0026;
@@ -82,7 +82,7 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_SKILL_TELEPORT) return 0.3 + magicSpeedFactor(magicSpeed);
   // The rest of `SetAttackSpeed`'s spell block (ZzzCharacter.cpp:860-866).
   // Only Teleport above had ever been ported, so these five ran at the 0.28
-  // fallback at the bottom of this function — Hellfire's leap, which is the
+  // fallback at the bottom of this function - Hellfire's leap, which is the
   // clip itself and not a code path, took 1.8× as long to come down as it
   // does in the original.
   if (action === A.PLAYER_SKILL_FLASH) return 0.4 + magicSpeedFactor(magicSpeed);
@@ -313,7 +313,7 @@ export function applyPlayerActionSpeed(
  * `max(AttackSpeedMinIntervalMs, AttackSpeedBaseDelayMs - attackSpeed * AttackSpeedScalingFactor)`
  * ms on a 5-token bucket; sustained faster rates earn warnings and, after
  * MaxWarnings, a ban. A very fast clip (high agility) must therefore never
- * send the next request before this interval has elapsed — the animation may
+ * send the next request before this interval has elapsed - the animation may
  * play at its stat rate, the *request* waits. Values mirror the plugin's
  * defaults; a small margin absorbs timer/network jitter.
  */

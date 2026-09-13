@@ -9,7 +9,7 @@ import { PlaySpeedObject } from '../shared/objectVariants';
  * 16 (×0 placed) `Velocity = 0.06`; 26-28 hidden (`spec.ts`).
  *
  * Snow: `g_SantaTown.CreateSnow` is the leaves slot, so the world joins
- * `SNOW_MAPS`. `Music/Santa_Village`; no bed. Not an OpenMU spawn-gate map —
+ * `SNOW_MAPS`. `Music/Santa_Village`; no bed. Not an OpenMU spawn-gate map -
  * the offline spawn is the village square.
  */
 export async function createSantaTown(world: World) {

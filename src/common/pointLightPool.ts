@@ -17,7 +17,7 @@ import { lookDirector } from '../lighting/director';
 import type { TerrainLightColor, TerrainLightEmitter } from './terrainDynamicLight';
 
 /**
- * Torch slots this session, from the lighting tier — see `pointLightBudget`
+ * Torch slots this session, from the lighting tier - see `pointLightBudget`
  * for why it is fixed at startup and what it costs per pixel.
  */
 export function pointLightPoolSize(): number {
@@ -78,7 +78,7 @@ export type PointLightEmitter = {
   readonly priority?: number;
   /**
    * Skip the fade-in when this emitter takes a slot. For lights that start
-   * on an event — a lightning strike, a skill impact — where the 0.35 s
+   * on an event - a lightning strike, a skill impact - where the 0.35 s
    * swell reads as lag. Fade-out on losing a slot is unchanged.
    */
   readonly instant?: boolean;
@@ -148,8 +148,8 @@ export function initPointLightPool(scene: Scene): void {
 }
 
 /**
- * The pool's lights as placed this frame — position, diffuse, intensity and
- * range — for a shader that has no Babylon light binding of its own (the
+ * The pool's lights as placed this frame - position, diffuse, intensity and
+ * range - for a shader that has no Babylon light binding of its own (the
  * terrain, for the reflections in standing water). An unused slot has
  * intensity 0; readers must treat that as "no light".
  */
@@ -221,8 +221,8 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
 
   // Rank from what the player is looking *at*, not from where the camera
   // stands. The arc camera sits ~10 tiles back and above the hero, so
-  // camera-distance ranking favoured emitters in the bottom of the frame —
-  // between the lens and the hero — over the torch the hero is standing next
+  // camera-distance ranking favoured emitters in the bottom of the frame -
+  // between the lens and the hero - over the torch the hero is standing next
   // to. The camera target is the hero (or the login-scene focus), which is
   // the centre of the screen and the thing the lights are for.
   const focus = (camera as { target?: Vector3 }).target ?? camera.globalPosition;

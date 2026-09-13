@@ -20,11 +20,11 @@ import { linearBufferActive } from '../common/lightModel';
  * Footprints left on the ground: boot marks pressed into settled snow, or
  * stamped in water onto dry stone.
  *
- * Nothing in the original does this — there is no decal system in the client
- * at all — so the shape of it is ours. It is deliberately **not** a terrain
+ * Nothing in the original does this - there is no decal system in the client
+ * at all - so the shape of it is ours. It is deliberately **not** a terrain
  * overlay layer (`terrainOverlay.ts`): that mask is one texel per tile, which
  * is about a person's whole stride, and a boot print is a tenth of a tile. So
- * prints are geometry — flat quads drawn as **thin instances of one mesh**, so
+ * prints are geometry - flat quads drawn as **thin instances of one mesh**, so
  * the whole trail is a single draw call, in a ring pool that bounds the cost
  * and lets a long walk trail off behind you.
  *
@@ -41,7 +41,7 @@ import { linearBufferActive } from '../common/lightModel';
  * ambient occlusion, and rotation-invariant is exactly what *flat* means.
  *
  * The way out is to bake a **normal map** rather than a shading, and rotate it
- * into world space in the shader using the instance's own axes — which are
+ * into world space in the shader using the instance's own axes - which are
  * sitting right there in the thin-instance matrix. Every print on the map is
  * then lit from the same sun however it is turned: one wall of the hollow
  * catches the light, the opposite wall falls into shadow, and that pairing is
@@ -54,7 +54,7 @@ import { linearBufferActive } from '../common/lightModel';
  *
  * ### Why it multiplies
  *
- * The blend is `ALPHA_MULTIPLY` — `blendFunc(DST_COLOR, ZERO)` — so a fragment
+ * The blend is `ALPHA_MULTIPLY` - `blendFunc(DST_COLOR, ZERO)` - so a fragment
  * multiplies whatever the terrain already drew, and white means "leave it
  * alone". That buys correctness for free: a print inside a building's shadow,
  * or on ground the snow overlay has only half covered, darkens by the right
@@ -76,7 +76,7 @@ import { linearBufferActive } from '../common/lightModel';
  * A pool is a ring: the oldest print is dropped to make room for the newest,
  * so the number of slots IS how long a trail can be. The hero at a walking
  * stride lays four prints a tile, which at 64 slots is about sixteen tiles of
- * trail behind them — everything older is carried by the ploughed channel in
+ * trail behind them - everything older is carried by the ploughed channel in
  * `snowTrail.ts`, which is a depth map and does not run out.
  *
  * Once everything else in the world leaves prints too, one shared ring means
@@ -84,7 +84,7 @@ import { linearBufferActive } from '../common/lightModel';
  * matters most is the one leading away from where you are standing. So the
  * hero keeps a ring of their own at exactly the size they had, and everyone
  * else shares a bigger one. Two meshes rather than one, therefore two draw
- * calls per kind — the same price the drag marks were judged worth paying,
+ * calls per kind - the same price the drag marks were judged worth paying,
  * and for a better reason.
  */
 export type PrintLane = 'hero' | 'crowd';
@@ -115,13 +115,13 @@ const Z_LIFT = 0.012;
  * These were tuned by round-tripping screenshots, which is a slow and
  * imprecise way to find a look: one parameter per message, each change landing
  * blind. So they are read rather than baked in, and exposed on
- * `window.muFootprints` so they can be dialled live —
+ * `window.muFootprints` so they can be dialled live -
  * `muFootprints.set({ length: 0.7, depth: 0.2 })` rebuilds the soles and the
  * materials on the spot. Find the look in one session, then paste the numbers
  * back here as the defaults.
  *
- * Sizes are in tiles, and they are the size of the **print** — the outline the
- * boot leaves — not of the quad that carries it. The quad is larger, because
+ * Sizes are in tiles, and they are the size of the **print** - the outline the
+ * boot leaves - not of the quad that carries it. The quad is larger, because
  * the crest of shouldered snow sits outside the outline and the relief march
  * needs margin to walk into; `SOLE_FILL` is the ratio and `quadWidth` /
  * `quadLength` do the conversion.
@@ -171,7 +171,7 @@ export const FOOTPRINT_TUNING = {
    */
   depth: 0.34,
   /**
-   * Where the cavity profile saturates. Low is a rigid sole — a broad flat
+   * Where the cavity profile saturates. Low is a rigid sole - a broad flat
    * floor with a wall round it; high is a soft dish ramping to a point. The
    * flat floor is what gives a print weight, because occlusion needs area to
    * act on: at 0.98 no amount of occlusion moved the mean by more than 0.01.
@@ -258,8 +258,8 @@ const VARIANTS = 4;
 /**
  * The atlas is a grid: **one column per variant, one row per `TrackShape`**.
  *
- * It started as a 2x2 of four boots. Monsters need silhouettes of their own —
- * a paw is not a boot with noise on it — and a silhouette is exactly what the
+ * It started as a 2x2 of four boots. Monsters need silhouettes of their own -
+ * a paw is not a boot with noise on it - and a silhouette is exactly what the
  * sole texture is, so a shape is a row and the per-instance atlas offset that
  * already picked the variant now picks the pair. Nothing else about the
  * instancing changes: still one mesh, one draw call, one texture per kind.
@@ -277,7 +277,7 @@ function shapeRow(shape: TrackShape): number {
 }
 
 /**
- * How much of the atlas, per axis, one sole spans — 1/cols by 1/rows.
+ * How much of the atlas, per axis, one sole spans - 1/cols by 1/rows.
  *
  * Anything measured in texture space has to be scaled by this. The relief
  * march is the one that matters: its reach is a depth expressed as a fraction
@@ -334,7 +334,7 @@ const SHAPE_ASPECT: Record<TrackShape, number> = {
   paw: 1.3,
   /** Talons fan out sideways, so this is the widest of them. */
   claw: 1.45,
-  /** Two crescents side by side — a shade narrower than a boot. */
+  /** Two crescents side by side - a shade narrower than a boot. */
   hoof: 0.95,
   /** A leg tip: a slot, not a print. */
   chitin: 0.6,
@@ -375,7 +375,7 @@ export const FADE_STEPS = 10;
  * next `FADE_STEPS`.
  *
  * A boot does not dry by the clock, it dries by being walked on, which is why
- * this counts prints and not seconds — standing still in a doorway leaves the
+ * this counts prints and not seconds - standing still in a doorway leaves the
  * sole exactly as wet as it was.
  */
 export function bootStrength(stepsSinceWet: number): number {
@@ -405,7 +405,7 @@ type Print = {
  *
  * Snow is a *slight* blue: the only light reaching the bottom of a hole in
  * snow is sky, so the hollow goes cold while the untouched rim stays neutral.
- * Wet is the whole effect — water on stone has no relief to shade, just a
+ * Wet is the whole effect - water on stone has no relief to shade, just a
  * darker, less saturated patch where the film fills the surface roughness.
  */
 const TINT: Record<PrintKind, readonly [number, number, number]> = {
@@ -460,7 +460,7 @@ type Pool = {
   matrixData: Float32Array;
   colourData: Float32Array;
   prints: Print[];
-  /** How many slots this pool has — the hero's ring is smaller (see `POOL`). */
+  /** How many slots this pool has - the hero's ring is smaller (see `POOL`). */
   size: number;
   next: number;
   dirty: boolean;
@@ -501,7 +501,7 @@ const smoothstep = (a: number, b: number, x: number) => {
 };
 
 /**
- * The silhouette: **a waisted superellipse** — the outline of a boot sole.
+ * The silhouette: **a waisted superellipse** - the outline of a boot sole.
  *
  * One connected shape, not a ball plus a separate heel: pressed into snow the
  * whole sole bears down and the arch fills in, so the print has a waist rather
@@ -583,7 +583,7 @@ function variantShape(seed: number) {
  * units of "fraction of the way to the middle".
  *
  * `power` is the corner: 2 is an ellipse, above it squares off toward a
- * rounded rectangle, below it pinches toward a diamond — which is the whole
+ * rounded rectangle, below it pinches toward a diamond - which is the whole
  * difference between a boot, a pad and a leg tip.
  */
 function lobe(a: number, b: number, power: number): number {
@@ -602,8 +602,8 @@ function lobe(a: number, b: number, power: number): number {
  * **+dv is forward** (see the `v = 1 is the toe` note on `SOLE`).
  *
  * Each returns the same signed depth `lobe` does, so a shape is a union of
- * lobes taken with `Math.max` and everything downstream — the wall profile,
- * the crest, the clods, the normals — is written once and works for all of
+ * lobes taken with `Math.max` and everything downstream - the wall profile,
+ * the crest, the clods, the normals - is written once and works for all of
  * them. Adding a shape is a case here, a row in `DRAWN_SHAPES` and an aspect
  * in `SHAPE_ASPECT`; nothing else in the file needs to know.
  */
@@ -628,7 +628,7 @@ function shapeDepth(
         const cv = 0.62 - Math.abs(t) * 0.13;
         // Small, and spread wide enough to stay four. The first cut had them
         // at 0.27 across on 0.4 centres, so every neighbour overlapped and
-        // the four came out as one bar across the front of the pad — which
+        // the four came out as one bar across the front of the pad - which
         // is the difference between an animal's foot and a shoe.
         best = Math.max(best, lobe((du - t * 0.72) / 0.19, (dv - cv) / 0.25, 2.2));
       }
@@ -676,7 +676,7 @@ function shapeDepth(
     case 'chitin': {
       // A leg tip, not a foot: one narrow slot with a point at each end
       // (power under 2 pinches the ends), and the dew claw behind it. Small
-      // and deep is the read — an insect's weight goes through a needle, and
+      // and deep is the read - an insect's weight goes through a needle, and
       // the two marks have to stay two: at 0.78 long the slot ran back into
       // the dew and the pair came out as one streak.
       const tip = lobe(du / 0.42, (dv - 0.32) / 0.5, 1.7);
@@ -860,12 +860,12 @@ function soleHeight(
 
       // A dish, not a shaft. The wall ramps the whole way from the outline to
       // the middle, so the floor is a continuous curve rather than a flat
-      // bottom with a lip round it — which is what stops the print reading as
+      // bottom with a lip round it - which is what stops the print reading as
       // a cut-out and starts it reading as something pressed.
       // Saturating part-way in is deliberate here: it gives a broad flat
       // floor with a defined wall round it, which is what a **rigid sole**
       // actually leaves. The earlier dish profile ramped the whole way to a
-      // point, and that is right for a soft impression but wrong for a boot —
+      // point, and that is right for a soft impression but wrong for a boot -
       // it also put most of the print's area at shallow depth, so occlusion
       // had almost nothing to bite on and the print read flat however hard
       // the shading was pushed. Swept over the wall edge with AO at 0.42:
@@ -915,12 +915,12 @@ function soleHeight(
 
 /**
  * The sole texture: **R** signed height, biased so 0.5 is the undisturbed
- * surface — below it is the cavity (parallax and AO), above it is the snow the
+ * surface - below it is the cavity (parallax and AO), above it is the snow the
  * boot pushed up (the rim light and the subsurface term),
  * **G** and **B** the tangent-space normal's x and z, **A** how much of this texel
  * the boot disturbed at all.
  *
- * Generated rather than shipped as an asset — it is a handful of superellipses
+ * Generated rather than shipped as an asset - it is a handful of superellipses
  * and some noise, and adding an OZT to the data folder for that would be silly.
  *
  * Every row at once. The **runtime does not use this**: it allocates the atlas
@@ -950,7 +950,7 @@ function atlasHeight(kind: PrintKind): number {
 }
 
 /**
- * Bake one shape's whole row — all four variants — into the atlas buffer.
+ * Bake one shape's whole row - all four variants - into the atlas buffer.
  *
  * A row at a time rather than the whole atlas, because rows are baked
  * **lazily**: six shapes times four variants is a quarter of a million texels
@@ -982,7 +982,7 @@ function writeVariant(
   const { height, coverage } = soleHeight(kind, shape, seed);
 
   // The two axes have different world scales, so the gradient is taken in
-  // tiles rather than in UV — otherwise the normals would come out stretched
+  // tiles rather than in UV - otherwise the normals would come out stretched
   // by however much longer the print is than it is wide.
   const step = 1 / TEX;
   const perX = FOOTPRINT_TUNING.depth / (2 * step * quadWidth(shape));
@@ -1148,7 +1148,7 @@ const int RELIEF_STEPS = 12;
 const int SHADOW_STEPS = 6;
 
 /**
- * How much of the atlas one sole spans, and half a texel of it — so a clamped
+ * How much of the atlas one sole spans, and half a texel of it - so a clamped
  * fetch cannot bilinearly pick up the sole next door. Both are uniforms now:
  * the atlas is a grid of variants by track shape and its size depends on how
  * many shapes the kind has.
@@ -1242,7 +1242,7 @@ void main() {
   vec2 lightT = vec2(dot(sunDir, vTan), dot(sunDir, vBit));
   float lightUp = max(dot(sunDir, vNrm), 0.08);
   // Capped the same way the view march is. Uncapped it walks out of the cell
-  // at a grazing sun, and every sample then clamps to the border — which is
+  // at a grazing sun, and every sample then clamps to the border - which is
   // outside the outline and so reads as flat, undisturbed snow. Against a ray
   // that is below the surface that scores as fully blocked, so a print in a
   // low sun went dark for a reason that was entirely an artefact of the atlas.
@@ -1368,7 +1368,7 @@ function sunDirection(scene: Scene): Vector3 {
  * variants is about a quarter of a million texels of value noise, and most
  * sessions press two or three shapes into the ground; paying for the spiders
  * and the hooves the first time it snows is a stall for nothing. An unbaked
- * row is all zeroes, which is coverage 0 — a print drawn from it would be
+ * row is all zeroes, which is coverage 0 - a print drawn from it would be
  * invisible rather than wrong, and `ensureShape` runs before any print can
  * claim a cell in it.
  */
@@ -1466,7 +1466,7 @@ function atlasFor(scene: Scene, kind: PrintKind): SoleAtlas {
       // Relief reach in CELL uv: the hollow's depth as a fraction of the
       // quad's own length, which is the axis the march mostly runs along. The
       // shader takes it into atlas scale itself (`toAtlas`), because that
-      // scale is now a vec2 — the grid is variants across by shapes down and
+      // scale is now a vec2 - the grid is variants across by shapes down and
       // is no longer square.
       //
       // Getting this scale wrong is what made every print vanish when the
@@ -1718,7 +1718,7 @@ export interface FootprintSpec {
   /** Walk heading in radians about Y. */
   angle: number;
   kind: PrintKind;
-  /** Which silhouette to press — the creature's, from `recipes.ts`. */
+  /** Which silhouette to press - the creature's, from `recipes.ts`. */
   shape: TrackShape;
   /** How strongly it takes; where the drying boot enters (`footprintSystem`). */
   strength: number;
@@ -1733,7 +1733,7 @@ export interface FootprintSpec {
   scale?: number;
   /** The ground's own normal under the foot. */
   up?: { x: number; y: number; z: number };
-  /** Which ring it goes in. The hero has one to itself — see `POOL`. */
+  /** Which ring it goes in. The hero has one to itself - see `POOL`. */
   lane?: PrintLane;
 }
 
@@ -1887,7 +1887,7 @@ export function updateFootprints(dt: number): void {
   }
 }
 
-/** Wipe the trail — a map change or a teardown. */
+/** Wipe the trail - a map change or a teardown. */
 export function resetFootprints(): void {
   for (const pool of pools.values()) {
     for (const print of pool.prints) print.age = -1;
@@ -1904,7 +1904,7 @@ export function resetFootprints(): void {
  *
  * The soles are generated once into a texture and the materials bind their
  * parameters once, so a change to the tuning has to throw both away. Prints
- * already on the ground go with them — they were drawn with the old numbers
+ * already on the ground go with them - they were drawn with the old numbers
  * and keeping them would show two looks at once.
  */
 export function applyFootprintTuning(): void {

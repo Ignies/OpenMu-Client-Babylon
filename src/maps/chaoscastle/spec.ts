@@ -10,7 +10,7 @@ import type { Emission } from '../../common/effectParticles';
  * 22x34-tile floor at x 23-44, y 75-108 (the `TW_SAFEZONE` rectangle) hanging
  * in a black void (`SetWorldClearColor`, SceneManager.cpp:346). Types by role,
  * from `CSChaosCastle.cpp`:
- *  - **0-5, 13-17**: the outer ring — floor slabs and rim (the ones at z 0),
+ *  - **0-5, 13-17**: the outer ring - floor slabs and rim (the ones at z 0),
  *    with 0/1 their underside girders at z -785/-795. Stand until arena
  *    stage 1, then drop away.
  *  - **30-35**: the second rim, hidden at load and shown for stages 1-2, drop
@@ -19,7 +19,7 @@ import type { Emission } from '../../common/effectParticles';
  *    girders at z ~ -780 (22/23, 28/29, 34/35 pair with the slabs above them).
  *  - **6-12**: `RenderChaosCastleVisual` types that puff a handful of `CLOUD`
  *    particles on their first frame and hide themselves (`HiddenMesh = -2`)
- *    — smoke-box markers, never drawn.
+ *    - smoke-box markers, never drawn.
  *  - **0-3 with `PKKey`**: the four lightning pillars; a `CreateJoint` thunder
  *    ribbon and `SOUND_CHAOS_THUNDER01/02` when the server flags one. No
  *    ribbon primitive in the clone (see Icarus), not reproduced.
@@ -30,8 +30,8 @@ export const CHAOS_CASTLE_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
  * Types 6-12 (`RenderChaosCastleVisual`, CSChaosCastle.cpp:375-470): each
- * spawns 5-10 `BITMAP_CLOUD` particles once — dim `(0.05, 0.05, 0.1)` puffs,
- * one per object lifetime — and sets `HiddenMesh = -2`. A single puff at load
+ * spawns 5-10 `BITMAP_CLOUD` particles once - dim `(0.05, 0.05, 0.1)` puffs,
+ * one per object lifetime - and sets `HiddenMesh = -2`. A single puff at load
  * is not worth an emitter, so they are plain markers here.
  */
 export const CHAOS_CASTLE_EFFECT_ONLY_TYPES: readonly number[] = [

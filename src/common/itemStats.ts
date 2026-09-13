@@ -58,7 +58,7 @@ export type ItemDef = {
   slot: number;
   width: number;
   height: number;
-  /** `ITEM_ATTRIBUTE::Level` — the drop level every formula scales from. */
+  /** `ITEM_ATTRIBUTE::Level` - the drop level every formula scales from. */
   level: number;
   damageMin: number;
   damageMax: number;

@@ -2,14 +2,15 @@ import type { ENUM_WORLD } from '../common/types';
 import { lighting } from '../lighting';
 import type { LightSource } from '../lighting/lightSource';
 import { SoundsManager } from '../libs/soundsManager';
+import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerHero } from './listener';
 
 /**
  * The torch crackle: a looping fire sound under every flickering flame the
- * lighting layer has lit — the Lorencia street braziers, the 120 Dungeon
- * wall torches, Noria's and Lost Tower's — attenuated by its distance to the
+ * lighting layer has lit - the Lorencia street braziers, the 120 Dungeon
+ * wall torches, Noria's and Lost Tower's - attenuated by its distance to the
  * hero, capped to the nearest few so a corridor of torches is one warm
  * chorus rather than a hundred copies of the same file.
  *
@@ -19,11 +20,14 @@ import { listenerHero } from './listener';
  * because it is the one continuous burning sound in the catalogue.
  *
  * Driven by: the lighting layer's live sources (`lighting.emitters(map)`,
- * read-only — a flame is any source whose recipe flickers) and the listener.
+ * read-only - a flame is any source whose recipe flickers) and the listener.
  * Read by: `sound.crackling` (the verification scripts).
  */
 
 // ---- 1. tuning -------------------------------------------------------------
+
+/** A burning torch is part of the place, so it is ambience (`sound/buses.ts`). */
+const BUS: SoundBus = 'ambient';
 
 /** The looping fire file. */
 const CRACKLE: Sounds = 'Sound/sFlame';
@@ -38,7 +42,7 @@ const MAX_SOURCES = 4;
 /** Share of the effects track a flame at the hero's feet sits at. */
 const VOLUME = 0.3;
 
-/** Tiles inside which a flame is at full crackle volume — a hand's reach. */
+/** Tiles inside which a flame is at full crackle volume - a hand's reach. */
 const FULL_VOLUME_TILES = 1.5;
 
 /**
@@ -137,8 +141,12 @@ function update(map: ENUM_WORLD, dt: number): void {
   const hz = hero.transform.pos.z;
   const silent2 = SILENT_TILES * SILENT_TILES;
 
+  // The ambience slider at 0 leaves nothing sounding, so the pass below
+  // stops every slot rather than looping them at silence.
+  const gain = busGain(BUS);
+
   sounding = 0;
-  for (const flame of flames) {
+  for (const flame of gain > 0 ? flames : []) {
     if (!flame.alive) continue;
     const dx = flame.position.x - hx;
     const dz = flame.position.z - hz;
@@ -150,7 +158,7 @@ function update(map: ENUM_WORLD, dt: number): void {
   for (let i = 0; i < MAX_SOURCES; i++) {
     if (i < sounding) {
       const slot = slots[i];
-      slot.volume = VOLUME * gainAt(Math.sqrt(slotDist2[i]));
+      slot.volume = VOLUME * gain * gainAt(Math.sqrt(slotDist2[i]));
 
       const s = SoundsManager.loopInstance(CRACKLE, i);
       if (!s) continue;

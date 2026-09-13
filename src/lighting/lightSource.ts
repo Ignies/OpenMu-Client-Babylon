@@ -7,7 +7,7 @@ import {
 } from '../common/terrainDynamicLight';
 
 /**
- * The one registration — shared by every entry in this folder.
+ * The one registration - shared by every entry in this folder.
  *
  * Everything that emits light goes through the same two sinks: the terrain
  * delta texture (`common/terrainDynamicLight.ts`, MU's `AddTerrainLight`)
@@ -19,7 +19,7 @@ import {
  *
  * Entries own sources; the facade ticks them (`tickLightSources`) and drops
  * them on a map change (`disposeAllLightSources`). Nothing else registers
- * into the sinks — lighting is a
+ * into the sinks - lighting is a
  * layer".
  *
  * What the original does, for reference: ZzzEffect.cpp lights the ground
@@ -28,7 +28,7 @@ import {
  * ZzzCharacter.cpp under the blacksmith's forge and the Devias trader's
  * brazier, and each light dies with its effect. Those need three things the
  * static map-object path lacks: a lifetime with an envelope, a position that
- * moves, and an instant start — the pool's 0.35 s fade-in turns a lightning
+ * moves, and an instant start - the pool's 0.35 s fade-in turns a lightning
  * strike into a swell.
  *
  * Governing rule unchanged: sources only *add*. The original's negative
@@ -42,7 +42,7 @@ export type LightPulse = {
   speed: number;
   amount: number;
   base: number;
-  /** Milliseconds added to the clock — lamps that pulse out of step. */
+  /** Milliseconds added to the clock - lamps that pulse out of step. */
   phase?: number;
 };
 
@@ -60,7 +60,7 @@ export type LightColorFn = (out: TerrainLightColor) => TerrainLightColor;
 export type LightRecipe = {
   /** Peak colour, linear RGB, or a callback that writes it. The envelope scales it. */
   readonly color: readonly [number, number, number] | LightColorFn;
-  /** Terrain footprint radius in tiles — MU's `AddTerrainLight` range. */
+  /** Terrain footprint radius in tiles - MU's `AddTerrainLight` range. */
   readonly range: number;
   /** Point-light radius in tiles; defaults to `range + POINT_RANGE_EXTRA`. */
   readonly pointRange?: number;
@@ -70,7 +70,7 @@ export type LightRecipe = {
   readonly floorGain?: number;
   /** Terrain falloff exponent (`LightEmitter.terrain.falloff`). */
   readonly falloff?: number;
-  /** Random flicker — MU's `Luminosity` roll. Wins over `pulse`. */
+  /** Random flicker - MU's `Luminosity` roll. Wins over `pulse`. */
   readonly flicker?: LightFlicker;
   /**
    * Flicker chase per tick, 0…1. Defaults to FLICKER_SMOOTHING (0.25, event
@@ -87,7 +87,7 @@ export type LightRecipe = {
   /** Pool priority: hero gear 2, players 1, torches 0. Defaults to PRIORITY_EFFECT. */
   readonly priority?: number;
   /**
-   * Skip the pool's 0.35 s fade-in when taking a slot. Defaults to true —
+   * Skip the pool's 0.35 s fade-in when taking a slot. Defaults to true -
    * an event light must be on the frame it is asked for. Torches and lamps
    * that exist for the whole map pass false and keep the cross-fade.
    */
@@ -101,13 +101,13 @@ export type LightRecipe = {
 };
 
 export type LightAnchor = {
-  /** Start position. Held by reference — the host may mutate it to move. */
+  /** Start position. Held by reference - the host may mutate it to move. */
   readonly position: { x: number; y: number; z: number };
   /** Called every tick; write the current position into `out`. */
   readonly follow?: (out: { x: number; y: number; z: number }) => void;
   /**
    * Straight-line travel to `to` at `speed` tiles/second. The light ends on
-   * arrival and `onArrive` fires — an impact flash belongs there.
+   * arrival and `onArrive` fires - an impact flash belongs there.
    */
   readonly travel?: {
     readonly to: { x: number; y: number; z: number };
@@ -120,7 +120,7 @@ export type LightAnchor = {
 
 /**
  * Pool priority for event lights, above hero gear (2): a skill flash lasts
- * under two seconds and is the brightest thing in frame while it does — it
+ * under two seconds and is the brightest thing in frame while it does - it
  * must never wait for a slot.
  */
 export const PRIORITY_EFFECT = 3;
@@ -250,7 +250,7 @@ export class LightSource {
     if (this.#stoppedAt === null) this.#stoppedAt = this.#age;
   }
 
-  /** Cut it dead — no tail. */
+  /** Cut it dead - no tail. */
   dispose(): void {
     if (this.#dead) return;
     this.#dead = true;

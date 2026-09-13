@@ -18,7 +18,7 @@ import { MODEL, TEX } from '../../effects/recipes';
 import type { Entity, ISystemFactory, Item } from '../world';
 
 /**
- * `Mounts[]` — the pet objects that live in the world rather than on the
+ * `Mounts[]` - the pet objects that live in the world rather than on the
  * wearer's skeleton (GOBoid.cpp:66-680).
  *
  *  - **Guardian Angel**: a boid. It drifts on a heading it re-rolls roughly
@@ -52,7 +52,7 @@ import type { Entity, ISystemFactory, Item } from '../world';
 const MU_UNIT = 1 / 100;
 const TICKS_PER_SECOND = 25;
 
-/** `TurnAngle2(o->Angle[2], Angle, 20.f)` — 20° per tick (GOBoid.cpp:636). */
+/** `TurnAngle2(o->Angle[2], Angle, 20.f)` - 20° per tick (GOBoid.cpp:636). */
 const TURN_DEGREES_PER_TICK = 20;
 
 /** The `rand_fps_check(32)` re-roll interval, in ticks. */
@@ -63,7 +63,7 @@ const ANGEL_MIN_HEIGHT = 100;
 const ANGEL_MAX_HEIGHT = 200;
 const ANGEL_HEIGHT_NUDGE = 1.5;
 
-/** `o->Velocity` — the PlaySpeed each pet's clip runs at. */
+/** `o->Velocity` - the PlaySpeed each pet's clip runs at. */
 const ANGEL_PLAY_SPEED = 0.5;
 const MOUNT_PLAY_SPEED = 0.34;
 /** `CSPetSystem::PlayAnimation`: the raven's clips run at 0.4. */
@@ -75,7 +75,7 @@ const RAVEN_HEIGHT_HORSE = 350;
 const RAVEN_HEIGHT_NUDGE = 1.5;
 /** `Position[2] += 300` when the raven is created. */
 const RAVEN_SPAWN_HEIGHT = 300;
-/** `Distance > 409600` (640 units) — the far failsafe that snaps it home. */
+/** `Distance > 409600` (640 units) - the far failsafe that snaps it home. */
 const RAVEN_SNAP_DISTANCE = 640;
 
 /** DarkSpirit.bmd clips: 0 glide, 1 flap, 2 perch, 3 attack. */
@@ -461,7 +461,7 @@ export const PetSystem: ISystemFactory = world => {
         const map = owner.worldIndex ?? world.mapIndex;
         const wanted = chaosCastle ? null : owner.charAppearance.pet;
         const spec = petSpec(wanted);
-        // The Imp is not a world object — PlayerObject.Pet carries it.
+        // The Imp is not a world object - PlayerObject.Pet carries it.
         const wantsActor = spec && spec.kind !== 'imp' ? wanted : null;
 
         if (stale(spawned.get(owner), wantsActor, map)) {

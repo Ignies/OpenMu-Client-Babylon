@@ -1,3 +1,4 @@
+import type { SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { playSfx } from './listener';
@@ -10,10 +11,13 @@ import { playSfx } from './listener';
  *
  * Driven by: the UI (`uiClick`, `playUiSound`) and the window open / close
  * chime (`installUiWindowChime`). Command-only: no per-frame state.
- * Read by: nothing — it only plays.
+ * Read by: nothing - it only plays.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
+
+/** Every sound in here is the interface talking back (`sound/buses.ts`). */
+export const UI_BUS: SoundBus = 'ui';
 
 /** Interface sound → catalogue key. Data, so callers name the intent. */
 export const UI_SOUNDS = {
@@ -49,7 +53,7 @@ export const UI_SOUND_KEYS: Record<UiSound, Sounds> = UI_SOUNDS;
 // One-shots: nothing to hold between frames.
 
 export function playUiSound(kind: UiSound): void {
-  playSfx(UI_SOUNDS[kind]);
+  playSfx(UI_SOUNDS[kind], null, { bus: UI_BUS });
 }
 
 /** `onClick` wrapper for interface buttons (Button.cpp:134 SOUND_CLICK01). */

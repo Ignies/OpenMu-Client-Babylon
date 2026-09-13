@@ -10,7 +10,7 @@ import {
 } from './skySprites';
 
 /**
- * Billboards per emitter, by type — `RenderObjectVisual` spawns 20 for types
+ * Billboards per emitter, by type - `RenderObjectVisual` spawns 20 for types
  * 0-2 and 10 for types 3-5 (ZzzObject.cpp:3052-3096). The type is also the
  * particle's SubType, which is what decides the spin direction below.
  */
@@ -23,7 +23,7 @@ const SPREAD_MU = 250;
 const RISE_MIN_MU = 20;
 const RISE_RANGE_MU = 21;
 
-/** `Scale = (rand()%20 + 180) * 0.01f` — 1.80 … 1.99, independent of `o->Scale`. */
+/** `Scale = (rand()%20 + 180) * 0.01f` - 1.80 … 1.99, independent of `o->Scale`. */
 const SCALE_MIN = 1.8;
 const SCALE_RANGE = 0.2;
 
@@ -40,7 +40,7 @@ const BOB_PHASE_RANGE_MS = 1000;
 
 /**
  * `TurningForce = o->Scale + (rand()%30) * 0.01f`, spun at `±0.02 *
- * TurningForce` degrees per millisecond about the view axis — a full turn in
+ * TurningForce` degrees per millisecond about the view axis - a full turn in
  * roughly 15-20 s at the map's usual object scales.
  */
 const SPIN_DEG_PER_MS = 0.02;
@@ -54,18 +54,18 @@ const CLOUD_LIGHT = 0.1;
 /** 25 Hz, the rate every `rand_fps_check` in the original is counted against. */
 const TICKS_PER_SECOND = 25;
 
-/** `MoveObjectOnEffect`'s `rand_fps_check(10)` — one tick in ten. */
+/** `MoveObjectOnEffect`'s `rand_fps_check(10)` - one tick in ten. */
 const GLOW_CHANCE = 10;
 
 /** `CreateParticle(BITMAP_CLOUD+1, …, 0.5f)` (ZzzObject.cpp:4338-4356). */
 const GLOW_SCALE = 0.5;
 
-/** `Light = (rand()%20 * 0.01f, …)` on each channel independently — 0 … 0.19. */
+/** `Light = (rand()%20 * 0.01f, …)` on each channel independently - 0 … 0.19. */
 const GLOW_LIGHT_RANGE = 0.2;
 
 /**
- * Ticks a glow lives. Not recoverable from the call site — the original leaves
- * the particle's own default — so it is set to read as a blink rather than as
+ * Ticks a glow lives. Not recoverable from the call site - the original leaves
+ * the particle's own default - so it is set to read as a blink rather than as
  * a second, steadier cloud: about half a second, fading out the whole way.
  */
 const GLOW_LIFE_TICKS = 12;
@@ -120,7 +120,7 @@ function spinSign(type: number, index: number): number {
  * `init()` that resolves with neither a `gltf` nor `Ready` as a load failure.
  *
  * The bank is created once, when the object is built, and released when it is
- * disposed — which `ModelLoaderSystem` does on the visibility transition, so
+ * disposed - which `ModelLoaderSystem` does on the visibility transition, so
  * "alive while the owner is visible" falls out of the entity's own lifetime
  * exactly as it does in the original.
  */
@@ -187,7 +187,7 @@ export class IcarusCloudObject extends ModelObject {
       // MU x/y are the ground plane and MU z is up, so the one-sided rise goes
       // on Babylon's y. The original scales the offsets by the frame factor
       // `CreateParticleFpsChecked` was called with, which is an artefact of
-      // spawning inside a per-frame call — a bank created once has no frame to
+      // spawning inside a per-frame call - a bank created once has no frame to
       // be a fraction of.
       const cloud: Cloud = {
         sprite,
@@ -213,7 +213,7 @@ export class IcarusCloudObject extends ModelObject {
    * `MoveObjectOnEffect` (ZzzObject.cpp:4338): one frame in ten, a cloud
    * object grows a dim `cloudLight` sprite and two thunder joints. The joints
    * are ribbons drawn by `CreateJoint`, which has no counterpart in this
-   * client, so only the sprite is reproduced — which is the half that carries,
+   * client, so only the sprite is reproduced - which is the half that carries,
    * since the joints are two 40 MU wide bolts seen against a bank five tiles
    * across.
    */

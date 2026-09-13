@@ -82,7 +82,7 @@ export function skillCooldown(num: number): SkillCooldown | null {
 
 /**
  * Start the skill's delay after a cast. Returns `false` when the skill is
- * still cooling down (the caller should not have cast) — `CheckSkillDelay`.
+ * still cooling down (the caller should not have cast) - `CheckSkillDelay`.
  * Skills without a delay always return `true`.
  */
 export function startSkillCooldown(num: number): boolean {

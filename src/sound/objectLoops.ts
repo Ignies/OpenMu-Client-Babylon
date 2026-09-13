@@ -1,13 +1,14 @@
 import { ENUM_WORLD } from '../common/types';
 import { TW_SAFEZONE } from '../common/terrain/consts';
 import { SoundsManager } from '../libs/soundsManager';
+import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerHero, listenerWorld } from './listener';
 
 /**
  * The object loops: the sounds the original attaches to map objects from a
- * world's per-object sound hook — `PlayBuffer(SOUND_x, o)` re-issued every
+ * world's per-object sound hook - `PlayBuffer(SOUND_x, o)` re-issued every
  * frame for as long as the object is in the update set (DSPlaySound.cpp:303,
  * a `Play` on an already-playing channel is a no-op, so a long sample reads
  * as a loop). Elbeland's brooks and gates (`GMNewTown::PlayObjectSound`),
@@ -17,7 +18,7 @@ import { listenerHero, listenerWorld } from './listener';
  * fire pillar (`CGM3rdChangeUp::PlayEffectSound`).
  *
  * Every instance of a registered type is a candidate; each frame the nearest
- * `MAX_SOURCES` within their row's reach get a slot — an independent looping
+ * `MAX_SOURCES` within their row's reach get a slot - an independent looping
  * mixer instance (`SoundsManager.loopInstance`) at the row's gain under the
  * listener's attenuation curve. The older worlds (Lorencia … Icarus) have no
  * such hook in `ZzzObject.cpp`: their only object sounds are the door and
@@ -31,6 +32,9 @@ import { listenerHero, listenerWorld } from './listener';
 
 // ---- 1. tuning -------------------------------------------------------------
 
+/** Brooks, gears and gates are part of the place, so ambience (`sound/buses.ts`). */
+const BUS: SoundBus = 'ambient';
+
 /**
  * A registered object sound: every placed instance of `types` on the map is a
  * source of `sound`.
@@ -39,7 +43,7 @@ export type ObjectLoop = {
   /** Object types (`modelId`, the world's `Object<N>` index) that carry it. */
   readonly types: readonly number[];
   readonly sound: Sounds;
-  /** Share of the effects track at the source, 0…1 — under the beds' SFX. */
+  /** Share of the effects track at the source, 0…1 - under the beds' SFX. */
   readonly gain: number;
   /** Tiles inside which the loop is at full `gain`. */
   readonly full: number;
@@ -65,14 +69,14 @@ const outsideSafeZone = (h: HeroContext): boolean => !h.inSafeZone;
 
 /**
  * GM3rdChangeUp.cpp:364-367: the pillar sounds only while its flame sine
- * (`(sin(WorldTime * 0.0005) + 1) / 2`) is above 0.9 — a burst every ~12.6 s.
+ * (`(sin(WorldTime * 0.0005) + 1) / 2`) is above 0.9 - a burst every ~12.6 s.
  */
 const firePillarBurning = (h: HeroContext): boolean =>
   (Math.sin(h.time * 0.0005) + 1) * 0.5 > 0.9;
 
 /**
  * Reach of a small source (a brook, a gear): full inside a hand's reach,
- * gone at 14 tiles — DirectSound's 3D rolloff on a sample that was set up to
+ * gone at 14 tiles - DirectSound's 3D rolloff on a sample that was set up to
  * be heard from across a courtyard, not across the map.
  */
 const SMALL_FULL = 2;
@@ -114,7 +118,7 @@ const large = (
 });
 
 /**
- * THE table: which object types sound on which map. Pure data — the source
+ * THE table: which object types sound on which map. Pure data - the source
  * lines are the original's per-world sound hook.
  */
 export const OBJECT_LOOPS: ReadonlyMap<ENUM_WORLD, readonly ObjectLoop[]> =
@@ -166,7 +170,7 @@ export const OBJECT_LOOPS: ReadonlyMap<ENUM_WORLD, readonly ObjectLoop[]> =
       [small([58, 66], 'Sound/Karutan/Karutan_insect_env', 0.3)],
     ],
     // GM3rdChangeUp.cpp:352-371 (`PlayEffectSound`); cage01/02 are the
-    // original's coin flip per call — one file per cage type here so the
+    // original's coin flip per call - one file per cage type here so the
     // two never fight for one channel.
     [
       ENUM_WORLD.WD_41CHANGEUP3RD_1ST,
@@ -317,8 +321,12 @@ function update(map: ENUM_WORLD, dt: number): void {
   ctx.inSafeZone = (world.getTerrainFlag(~~hx, ~~hz) & TW_SAFEZONE) !== 0;
   ctx.time = performance.now();
 
+  // The ambience slider at 0 leaves nothing sounding, so the pass below
+  // stops every slot rather than looping them at silence.
+  const gain = busGain(BUS);
+
   sounding = 0;
-  for (const c of candidates) {
+  for (const c of gain > 0 ? candidates : []) {
     const dx = c.x - hx;
     const dz = c.z - hz;
     const d2 = dx * dx + dz * dz;
@@ -339,7 +347,7 @@ function update(map: ENUM_WORLD, dt: number): void {
     // instances by (file, slot), so the two would otherwise both sound.
     if (slot.playing && slot.playing !== row.sound) stopSlot(i);
 
-    slot.volume = row.gain * gainAt(row, Math.sqrt(slotDist2[i]));
+    slot.volume = row.gain * gain * gainAt(row, Math.sqrt(slotDist2[i]));
 
     const s = SoundsManager.loopInstance(row.sound, i);
     if (!s) continue;

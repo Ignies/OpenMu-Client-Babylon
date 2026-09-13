@@ -1,5 +1,5 @@
 /**
- * TEMPLATE — copy this file to `<name>.ts`, fill in the blanks, add the layer
+ * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
  * to `layers.ts`. Never imported; it only exists to be copied.
  *
  * Every effect file has the same three parts, in this order:

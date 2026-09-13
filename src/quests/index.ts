@@ -140,7 +140,7 @@ class Quests {
   /**
    * `OpenNpcDialog` (F9 01, `ReceiveNPCDlgUIStart`): the server opened the
    * Season 6 NPC dialogue for `npcNumber` (OpenMU sends it for NPCs whose
-   * window is `NpcDialog` — the buff NPCs, quest givers, Gens stewards).
+   * window is `NpcDialog` - the buff NPCs, quest givers, Gens stewards).
    * Opens `npcDialogue.ts`'s window on page 0 of `NPCDialogue.bmd`; a NPC
    * without a page but with a legacy quest gets the legacy dialog instead.
    * `contribution` is the Gens contribution the packet carries.

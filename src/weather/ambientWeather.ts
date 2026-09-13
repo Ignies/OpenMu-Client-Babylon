@@ -25,13 +25,13 @@ import { maps } from '../maps';
  *    tilted −30° about x, scale 5 (1 in 10 a big flake at 10, leaf02).
  *  - **Rain** (`CreateHeavenRain` / `CreateDevilSquareRain`): z +200…+399,
  *    speed 20…43 (+RainSpeed wobble) tilted −30…−50°, drawn as a 1×20
- *    plane along its angle — a stretched billboard here.
+ *    plane along its angle - a stretched billboard here.
  *  - **Tavern dust**: slow golden motes inside the Lorencia pub volume.
  *
  * Three things keep a recipe from popping, and they are not interchangeable.
- * `fade` is per particle — the share of a leaf's own life spent fading in and
+ * `fade` is per particle - the share of a leaf's own life spent fading in and
  * out, which is what stops a single sprite blinking into existence in mid-air.
- * `ramp` is per system — the seconds the *emit rate* takes to cross its whole
+ * `ramp` is per system - the seconds the *emit rate* takes to cross its whole
  * range, which is what stops the whole field arriving or leaving at once when
  * a gust starts or the hero steps under a roof. `growth` is per particle
  * again, and it is the one that carries a shower's *shape*: how big and how
@@ -40,7 +40,7 @@ import { maps } from '../maps';
  *
  * The original settled leaves on the terrain (`MoveEtcLeaf`) and spawned a
  * `BITMAP_RAIN_CIRCLE` where a drop landed. A GPU particle still cannot read
- * the height map, so leaves end with a fade; rain no longer does — it is
+ * the height map, so leaves end with a fade; rain no longer does - it is
  * given enough life to fall past the ground and is occluded by it, the same
  * trick `DEVIAS_SNOW` already used. The splash itself lives in the terrain
  * shader now, as rings on the standing water (`terrainOverlay.ts`), which is
@@ -51,12 +51,12 @@ import { maps } from '../maps';
  * Maps whose sky belongs to snow. Rain must never fall on them however the
  * weather byte reads: it is established that snow is a property of the *map*
  * and never of the packet (`CreateDeviasSnow` gates on the world alone), while
- * the weather byte is global — the proxy computes one sky for every client and
+ * the weather byte is global - the proxy computes one sky for every client and
  * cannot know which map anyone is standing on.
  */
 export const SNOW_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
   // Declared per map as `MapLayer.snow` (Devias; `g_Raklion.CreateSnow` on
-  // both Ice City worlds; `g_SantaTown.CreateSnow` — ZzzEffectFireLeave.cpp:481-482).
+  // both Ice City worlds; `g_SantaTown.CreateSnow` - ZzzEffectFireLeave.cpp:481-482).
   maps.worldsWhere(layer => layer.snow === true)
 );
 
@@ -101,7 +101,7 @@ const TILT_50 = v(
  * Weather comes in episodes, not as a permanent fixture: a gust of leaves
  * every minute or so, snow that thickens and thins. Both are rolled off the
  * shared clock (`ambientSchedule.ts`), so every client on the map sees the
- * same gust at the same second — the calm stretches are the point, a field
+ * same gust at the same second - the calm stretches are the point, a field
  * that always has leaves in it stops reading as wind.
  */
 const LEAF_GUSTS: AmbientSchedule = {
@@ -169,7 +169,7 @@ export const LORENCIA_LEAVES: AmbientRecipe = {
   // which is the pop: it never reached the ground and never left the frame,
   // it just stopped existing. At 4.5-7 s a leaf crosses 12-22 tiles and is
   // out of shot before its time is up. It also sets the floor on how gently
-  // a gust can die — a field cannot drain more slowly than its slowest leaf.
+  // a gust can die - a field cannot drain more slowly than its slowest leaf.
   life: [4.5, 7],
   size: [0.16, 0.24],
   angularSpeed: [-3, 3],
@@ -327,7 +327,7 @@ export const DEVIAS_SNOW: AmbientRecipe = {
   direction: [TILT_30, TILT_30],
   // 8…23 u/tick.
   power: [2, 5.75],
-  // 1.2-2.2 s put a flake out at 3-12 tiles of fall — mid-air, above the
+  // 1.2-2.2 s put a flake out at 3-12 tiles of fall - mid-air, above the
   // ground, in plain view. 3.5-6 s carries it to the terrain, where it goes
   // out of sight under the ground instead of out of existence in front of
   // the camera.
@@ -409,7 +409,7 @@ export const RAIN: AmbientRecipe = {
   // visible part was under half a pixel: the rasteriser threw most of it
   // away and the tone curve in post finished the job, which is why the rain
   // was there with post-processing off and gone with it on. At [0.45, 0.65]
-  // a drop is 0.027–0.052 tiles — 3.5–7 px, with the widened core filling
+  // a drop is 0.027–0.052 tiles - 3.5–7 px, with the widened core filling
   // most of that. Still a streak, now one the frame can actually carry.
   scaleX: [0.45, 0.65],
   scaleY: [1.6, 2.4],

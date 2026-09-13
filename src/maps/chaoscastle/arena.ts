@@ -16,7 +16,7 @@ import {
  * 40, 1)` (CSChaosCastle.cpp / NewChaosCastleSystem.cpp:83-119) as one state
  * machine for the map's ring objects.
  *
- * Driven by: the `BloodCastleState` packet, states 8/9/10 — each one closes
+ * Driven by: the `BloodCastleState` packet, states 8/9/10 - each one closes
  * the next `TW_NOGROUND` strip, plays `SOUND_CHAOS_FALLING_STONE`
  * (`eWallFall`) and starts a 40-tick drop of the ring that just lost its
  * floor: ten ticks of smoke and quake, then thirty ticks of accelerating fall
@@ -30,7 +30,7 @@ import {
  * guard is simply "this stage has not run yet", which is the same protection
  * without the client second-guessing the server's count.
  *
- * Not here: the quake (`EarthQuake = -0.1…-0.3` while the smoke runs) — the
+ * Not here: the quake (`EarthQuake = -0.1…-0.3` while the smoke runs) - the
  * clone has no camera-shake hook yet; and `RenderTerrainVisual`'s smoke on
  * the tiles of the strip about to close (one tile in eight, every frame).
  */

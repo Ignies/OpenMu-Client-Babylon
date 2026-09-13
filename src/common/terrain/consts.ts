@@ -4,7 +4,7 @@ export const Bitmaps: { Width: Float; Height: Float }[] = [];
 
 /**
  * World units per tile. The clone keeps the world in tiles (1 tile = 1 unit),
- * so this is 1 — terrain geometry multiplies by it and nothing else should.
+ * so this is 1 - terrain geometry multiplies by it and nothing else should.
  */
 export const TERRAIN_SCALE = 1.0;
 /**

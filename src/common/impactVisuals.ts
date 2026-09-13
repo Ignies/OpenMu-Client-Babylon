@@ -7,7 +7,7 @@ import { MonsterActionType } from './objects/enum';
 import { monsterModelTypeOf } from './playSpeed';
 
 /**
- * What a walking sand-monster and a landed blow draw — the consumer table for
+ * What a walking sand-monster and a landed blow draw - the consumer table for
  * `ecs/systems/impactEffectSystem.ts` ("Footstep dust / hit
  * impacts"), in the shape of `deathVisuals.ts`.
  *
@@ -16,11 +16,11 @@ import { monsterModelTypeOf } from './playSpeed';
  *   `BITMAP_SMOKE + 1` puff per 25 Hz tick (`rand_fps_check(1)`), anywhere
  *   within ±100 cm of its origin, on the ground. The **hero never raises
  *   dust**: `PlayWalkSound` (:5230) only picks a sound, and no
- *   `CreateParticle` in the client is tied to a footfall — walking Lorencia
+ *   `CreateParticle` in the client is tied to a footfall - walking Lorencia
  *   stone, Noria grass or Devias snow draws nothing.
  * - **Blow**: `BITMAP_SPARK` chips from the struck body (the spark loop next
  *   to `CreateBlood`, ZzzEffectBlurSpark.cpp:436, throws 20 of them), plus a
- *   few blood flecks when health — not just shield — was taken.
+ *   few blood flecks when health - not just shield - was taken.
  */
 
 // ---- sand smoke ------------------------------------------------------------------
@@ -28,7 +28,7 @@ import { monsterModelTypeOf } from './playSpeed';
 /**
  * The monster models whose `MoveCharacterVisual` case calls
  * `MonsterMoveSandSmoke` (ZzzCharacter.cpp:5720-5866): Golden Wheel 41,
- * Tantallos 42 (the plain one — its fire-lit `SubType 1` variant burns
+ * Tantallos 42 (the plain one - its fire-lit `SubType 1` variant burns
  * instead, and the client has no SubType yet), Bloody Wolf 43, Beam Knight
  * 44, Mutant 45, Red Skeleton Knight 88.
  */

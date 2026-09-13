@@ -12,7 +12,7 @@ const DEGREES_TO_RADIANS = Math.PI / 180;
 /**
  * `o->Angle[1] += (4.0f + o->Gravity) * FPS_ANIMATION_FACTOR`
  * (ZzzEffect.cpp:7186). `Gravity` is `(float)(rand() % 80) / 10.f` for
- * warp01/02 (ZzzEffect.cpp:567) and untouched — so zero — for warp03
+ * warp01/02 (ZzzEffect.cpp:567) and untouched - so zero - for warp03
  * (:552-556), giving 4…11.9 degrees a tick, i.e. 100…298 deg/s.
  */
 const SPIN_BASE_DEGREES = 4;
@@ -30,7 +30,7 @@ const RING_SCALE_SPREAD = 0.5;
  * The Noria warp gate, `MapManager.cpp:100-103`: one `CreateObject(MODEL_WARP)`
  * at `Pos = (223 * TERRAIN_SCALE, 30 * TERRAIN_SCALE, 0)`, angle `(0, 0, 10)`,
  * which `CreateObject` (ZzzObject.cpp:4675-4693) answers with five stacked
- * effects at `z + 350` — warp01, warp02, warp01, warp02, warp03, offset along
+ * effects at `z + 350` - warp01, warp02, warp01, warp02, warp03, offset along
  * Y by 0/4/8/12/20.
  *
  * The base object itself is not spawned here, and that is not a shortcut: its
@@ -39,7 +39,7 @@ const RING_SCALE_SPREAD = 0.5;
  * the whole gate model 58 MU under the ground. Nothing of it is ever on
  * screen; the five effects floating at 3.5 tiles are the visible gate.
  *
- * Each effect is `o->BlendMesh = -2` — the original's "additive whole body",
+ * Each effect is `o->BlendMesh = -2` - the original's "additive whole body",
  * which maps onto `BlendMesh = 0` here because all three warp models convert
  * to exactly one mesh.
  */
@@ -104,7 +104,7 @@ export class NoriaWarpHaloObject extends ModelObject {
 
       this.#sparks = new ParticleEmitter(
         world.scene,
-        // `CreateParticleFpsChecked(BITMAP_SPARK + 1, …, 9, 1.4f)` — one a
+        // `CreateParticleFpsChecked(BITMAP_SPARK + 1, …, 9, 1.4f)` - one a
         // tick at 25 Hz. `spark03_24` is the same Spark03 sheet; the subtype
         // 9 variant's own motion curve is not ported.
         [{ kinds: ['spark03_24'], every: 1, count: 1, light: [0.5, 0.5, 0.5] }],
@@ -133,7 +133,7 @@ export class NoriaWarpHaloObject extends ModelObject {
     const deltaSeconds = this.node.getScene().getEngine().getDeltaTime() / 1000;
 
     // `Angle[1]` is the MU Y axis, which the loader's `-toRadians(rot.y)` puts
-    // in `transform.rot.z` and `toRenderAngles` passes through unchanged —
+    // in `transform.rot.z` and `toRenderAngles` passes through unchanged -
     // hence the minus. These discs face along Y, so this is the portal
     // spinning in its own plane. Wrapped so the accumulator keeps its
     // precision over a long session.
@@ -147,7 +147,7 @@ export class NoriaWarpHaloObject extends ModelObject {
 
     // `WorldTime`, in milliseconds. It is accumulated from the engine delta
     // rather than read off `gameTime`, which is a fixed 0.1 s in this build
-    // (ecs/world.ts:244) — the same reason effectParticles keeps its own.
+    // (ecs/world.ts:244) - the same reason effectParticles keeps its own.
     this.#elapsedMs += deltaSeconds * 1000;
 
     const t = this.#elapsedMs;
