@@ -103,6 +103,19 @@
   "kor": "포인트와 상태",
   "tha": "แต้มและสถานะ"
  },
+ "54": {
+  "en": "The character's current coordinates are shown on the top left corner of the screen. Movement in the ¢Ø or ¢Ù direction changes the first number, and movement in the ¢Ö or ¢× direction the second.",
+  "ger": "Die aktuellen Koordinaten des Charakters stehen oben links am Bildschirm. Bewegung nach oben oder unten ändert die erste Zahl, Bewegung nach links oder rechts die zweite.",
+  "fre": "Les coordonnées actuelles du personnage s'affichent en haut à gauche de l'écran. Se déplacer vers le haut ou le bas change le premier nombre, vers la gauche ou la droite le second.",
+  "ita": "Le coordinate attuali del personaggio sono in alto a sinistra dello schermo. Muoversi in alto o in basso cambia il primo numero, a sinistra o a destra il secondo.",
+  "rom": "Coordonatele curente ale personajului se văd în colţul din stânga sus al ecranului. Mişcarea în sus ori în jos schimbă primul număr, iar la stânga ori la dreapta pe al doilea.",
+  "rus": "Текущие координаты персонажа показаны в левом верхнем углу экрана. Движение вверх или вниз меняет первое число, а влево или вправо второе.",
+  "bul": "Текущите координати на героя се виждат в горния ляв ъгъл на екрана. Движение нагоре или надолу променя първото число, а наляво или надясно второто.",
+  "chi": "角色当前坐标显示于屏幕左上角。向上或向下移动会改变第一个数字，向左或向右移动则改变第二个。",
+  "jpn": "キャラクターの現在座標は画面左上に表示されます。上や下へ動くと最初の数字が、左や右へ動くと二つ目の数字が変わります。",
+  "kor": "캐릭터의 현재 좌표는 화면 왼쪽 위에 표시된다. 위나 아래로 움직이면 첫 번째 숫자가, 왼쪽이나 오른쪽으로 움직이면 두 번째 숫자가 바뀐다.",
+  "tha": "พิกัดปัจจุบันของตัวละครแสดงที่มุมบนซ้ายของหน้าจอ การเคลื่อนที่ขึ้นหรือลงจะเปลี่ยนตัวเลขแรก ส่วนซ้ายหรือขวาจะเปลี่ยนตัวเลขที่สอง"
+ },
  "63": {
   "en": "Excellent! What is the name of the monster you want me to hunt down?",
   "ger": "Vortrefflich! Wie heißt das Monster, das ich jagen soll?",
@@ -363,6 +376,19 @@
   "kor": "캐릭터 정보 창에는 캐릭터의 이름과 레벨, 현재 서버의 이름, 그리고 상태 정보가 표시된다.",
   "tha": "หน้าต่างสถานะตัวละครจะบอกชื่อและเลเวลของตัวละคร ชื่อเซิร์ฟเวอร์ปัจจุบัน และข้อมูลสถานะต่างๆ"
  },
+ "222": {
+  "en": "The character's current coordinates are shown on the top left corner of the screen. Movement in the ¢Ø or ¢Ù direction changes the first number, and movement in the ¢Ö or ¢× direction the second.",
+  "ger": "Die aktuellen Koordinaten des Charakters stehen oben links am Bildschirm. Bewegung nach oben oder unten ändert die erste Zahl, Bewegung nach links oder rechts die zweite.",
+  "fre": "Les coordonnées actuelles du personnage s'affichent en haut à gauche de l'écran. Se déplacer vers le haut ou le bas change le premier nombre, vers la gauche ou la droite le second.",
+  "ita": "Le coordinate attuali del personaggio sono in alto a sinistra dello schermo. Muoversi in alto o in basso cambia il primo numero, a sinistra o a destra il secondo.",
+  "rom": "Coordonatele curente ale personajului se văd în colţul din stânga sus al ecranului. Mişcarea în sus ori în jos schimbă primul număr, iar la stânga ori la dreapta pe al doilea.",
+  "rus": "Текущие координаты персонажа показаны в левом верхнем углу экрана. Движение вверх или вниз меняет первое число, а влево или вправо второе.",
+  "bul": "Текущите координати на героя се виждат в горния ляв ъгъл на екрана. Движение нагоре или надолу променя първото число, а наляво или надясно второто.",
+  "chi": "角色当前坐标显示于屏幕左上角。向上或向下移动会改变第一个数字，向左或向右移动则改变第二个。",
+  "jpn": "キャラクターの現在座標は画面左上に表示されます。上や下へ動くと最初の数字が、左や右へ動くと二つ目の数字が変わります。",
+  "kor": "캐릭터의 현재 좌표는 화면 왼쪽 위에 표시된다. 위나 아래로 움직이면 첫 번째 숫자가, 왼쪽이나 오른쪽으로 움직이면 두 번째 숫자가 바뀐다.",
+  "tha": "พิกัดปัจจุบันของตัวละครแสดงที่มุมบนซ้ายของหน้าจอ การเคลื่อนที่ขึ้นหรือลงจะเปลี่ยนตัวเลขแรก ส่วนซ้ายหรือขวาจะเปลี่ยนตัวเลขที่สอง"
+ },
  "239": {
   "en": "When you hunt monsters, you can employ normal attacks by left-clicking or use skill attacks by right-clicking.",
   "ger": "Bei der Monsterjagd führst du mit der linken Maustaste normale Angriffe aus und mit der rechten Fertigkeitsangriffe.",
@@ -545,6 +571,32 @@
   "kor": "D를 누르면 거래, 파티, 구매, 따라가기 등 여러 명령을 쓸 수 있다. 잘 활용하라.",
   "tha": "กด D เพื่อเรียกใช้คำสั่งต่างๆ ทั้งแลกเปลี่ยน ปาร์ตี้ ซื้อ และติดตาม จงใช้ให้เป็นประโยชน์"
  },
+ "274": {
+  "en": "If you don't want to receive party requests while hunting, simply type in 'Party off' in the Chat window. To start receiving party requests again, type in 'Request on' in the Chat window.",
+  "ger": "Willst du beim Jagen keine Gruppenanfragen erhalten, tippe einfach 'Party off' ins Chatfenster. Um sie wieder zuzulassen, tippe 'Request on'.",
+  "fre": "Si tu ne veux pas recevoir d'invitations de groupe en chassant, tape simplement 'Party off' dans la fenêtre de discussion. Pour les recevoir à nouveau, tape 'Request on'.",
+  "ita": "Se non vuoi ricevere inviti di gruppo mentre cacci, digita 'Party off' nella finestra della chat. Per riceverli di nuovo, digita 'Request on'.",
+  "rom": "Dacă nu vrei cereri de grup cât vânezi, scrie pur şi simplu 'Party off' în fereastra de chat. Ca să le primeşti iar, scrie 'Request on'.",
+  "rus": "Если не хочешь получать приглашения в группу во время охоты, набери в окне чата 'Party off'. Чтобы снова их принимать, набери 'Request on'.",
+  "bul": "Ако не искаш покани за група, докато ловуваш, просто напиши 'Party off' в прозореца за чат. За да ги получаваш пак, напиши 'Request on'.",
+  "chi": "若你狩猎时不愿收到组队邀请，只需在聊天窗口输入 'Party off'。欲重新接收，请输入 'Request on'。",
+  "jpn": "狩りの最中にパーティー勧誘を受けたくなければ、チャットウィンドウに 'Party off' と入力してください。再び受け取るには 'Request on' と入力します。",
+  "kor": "사냥 중에 파티 요청을 받고 싶지 않다면 대화 창에 'Party off'라고 입력하라. 다시 받으려면 'Request on'이라고 입력하면 된다.",
+  "tha": "หากท่านไม่ต้องการรับคำเชิญปาร์ตี้ขณะล่าสัตว์ ให้พิมพ์ 'Party off' ในหน้าต่างแชท หากต้องการรับอีกครั้ง ให้พิมพ์ 'Request on'"
+ },
+ "275": {
+  "en": "If you don't want to receive party requests while hunting, simply type in 'Party off' in the Chat window. To start receiving party requests again, type in 'Request on' in the Chat window.",
+  "ger": "Willst du beim Jagen keine Gruppenanfragen erhalten, tippe einfach 'Party off' ins Chatfenster. Um sie wieder zuzulassen, tippe 'Request on'.",
+  "fre": "Si tu ne veux pas recevoir d'invitations de groupe en chassant, tape simplement 'Party off' dans la fenêtre de discussion. Pour les recevoir à nouveau, tape 'Request on'.",
+  "ita": "Se non vuoi ricevere inviti di gruppo mentre cacci, digita 'Party off' nella finestra della chat. Per riceverli di nuovo, digita 'Request on'.",
+  "rom": "Dacă nu vrei cereri de grup cât vânezi, scrie pur şi simplu 'Party off' în fereastra de chat. Ca să le primeşti iar, scrie 'Request on'.",
+  "rus": "Если не хочешь получать приглашения в группу во время охоты, набери в окне чата 'Party off'. Чтобы снова их принимать, набери 'Request on'.",
+  "bul": "Ако не искаш покани за група, докато ловуваш, просто напиши 'Party off' в прозореца за чат. За да ги получаваш пак, напиши 'Request on'.",
+  "chi": "若你狩猎时不愿收到组队邀请，只需在聊天窗口输入 'Party off'。欲重新接收，请输入 'Request on'。",
+  "jpn": "狩りの最中にパーティー勧誘を受けたくなければ、チャットウィンドウに 'Party off' と入力してください。再び受け取るには 'Request on' と入力します。",
+  "kor": "사냥 중에 파티 요청을 받고 싶지 않다면 대화 창에 'Party off'라고 입력하라. 다시 받으려면 'Request on'이라고 입력하면 된다.",
+  "tha": "หากท่านไม่ต้องการรับคำเชิญปาร์ตี้ขณะล่าสัตว์ ให้พิมพ์ 'Party off' ในหน้าต่างแชท หากต้องการรับอีกครั้ง ให้พิมพ์ 'Request on'"
+ },
  "277": {
   "en": "When you want to talk to a friend and you know his or her ID, or if you want to pass on private messages, send whispers by using Tab from the Chat window.",
   "ger": "Willst du mit einem Freund sprechen, dessen ID du kennst, oder vertrauliche Nachrichten senden, so flüstere mit Tab aus dem Chatfenster.",
@@ -596,6 +648,32 @@
   "jpn": "装備の修理は、ロレンシアの鍛冶屋ハンゾー（117,140）、エルベランドのレア（30, 235）、ノリアの職人イオ（194, 123）に頼めます。こまめに利用しましょう。",
   "kor": "장비 수리는 로렌시아의 대장장이 한조(117,140), 엘베란드의 레아(30, 235), 노리아의 장인 이오(194, 123)에게 맡길 수 있다. 자주 이용하라.",
   "tha": "อุปกรณ์ของท่านซ่อมได้ที่ช่างตีเหล็กฮันโซ (117,140) ในลอเรนเซีย เรอา (30, 235) ในเอลเวแลนด์ หรือช่างฝีมืออีโอ (194, 123) ในโนเรีย จงใช้บริการพวกเขาบ่อยๆ"
+ },
+ "283": {
+  "en": "In the MU world, you can use the M button to travel with ease, provided that your level is high enough and you have enough money for the destination. Discovering areas that are right for your level and hunting there can also be very fun.",
+  "ger": "In der Welt von MU reist du bequem mit der Taste M, sofern deine Stufe hoch genug ist und du das Geld für das Ziel hast. Gegenden zu entdecken, die zu deiner Stufe passen, und dort zu jagen, macht ebenfalls großen Spaß.",
+  "fre": "Dans le monde de MU, la touche M permet de voyager aisément, pour peu que ton niveau soit suffisant et que tu aies l'argent du trajet. Découvrir des régions adaptées à ton niveau et y chasser peut aussi être très plaisant.",
+  "ita": "Nel mondo di MU il tasto M permette di viaggiare comodamente, purché il tuo livello sia sufficiente e tu abbia il denaro per la destinazione. Scoprire zone adatte al tuo livello e cacciarvi può essere molto divertente.",
+  "rom": "În lumea MU poţi călători lesne cu tasta M, dacă nivelul tău e destul de mare şi ai banii pentru destinaţie. Să descoperi ţinuturi potrivite nivelului tău şi să vânezi acolo poate fi, de asemenea, foarte plăcut.",
+  "rus": "В мире MU клавишей M можно путешествовать без хлопот, если уровень достаточно высок и хватает денег на дорогу. Открывать места по своему уровню и охотиться там тоже бывает очень занятно.",
+  "bul": "В света на MU с клавиша M пътуваш без усилие, стига нивото ти да е достатъчно и да имаш парите за пътя. Да откриваш земи, подходящи за нивото ти, и да ловуваш там, също е много приятно.",
+  "chi": "在 MU 的世界中，只要等级足够、盘缠充裕，按 M 键便可轻松往来各地。探访与自身等级相称之地并于其中狩猎，亦是一大乐事。",
+  "jpn": "MUの世界では、レベルが足りていて目的地までの路銀があれば、Mキーで手軽に移動できます。自分のレベルに合った地域を見つけて狩るのも、また大きな楽しみです。",
+  "kor": "MU의 세계에서는 레벨이 충분하고 목적지까지의 노잣돈만 있으면 M 키로 손쉽게 이동할 수 있다. 제 레벨에 맞는 지역을 찾아내어 그곳에서 사냥하는 것 또한 큰 즐거움이다.",
+  "tha": "ในโลกของ MU ท่านใช้ปุ่ม M เดินทางได้อย่างสะดวก ขอเพียงเลเวลสูงพอและมีเงินค่าเดินทาง การค้นพบพื้นที่ที่เหมาะกับเลเวลของท่านแล้วล่าสัตว์ที่นั่นก็สนุกไม่น้อย"
+ },
+ "284": {
+  "en": "In the MU world, you can use the M button to travel with ease, provided that your level is high enough and you have enough money for the destination. Discovering areas that are right for your level and hunting there can also be very fun.",
+  "ger": "In der Welt von MU reist du bequem mit der Taste M, sofern deine Stufe hoch genug ist und du das Geld für das Ziel hast. Gegenden zu entdecken, die zu deiner Stufe passen, und dort zu jagen, macht ebenfalls großen Spaß.",
+  "fre": "Dans le monde de MU, la touche M permet de voyager aisément, pour peu que ton niveau soit suffisant et que tu aies l'argent du trajet. Découvrir des régions adaptées à ton niveau et y chasser peut aussi être très plaisant.",
+  "ita": "Nel mondo di MU il tasto M permette di viaggiare comodamente, purché il tuo livello sia sufficiente e tu abbia il denaro per la destinazione. Scoprire zone adatte al tuo livello e cacciarvi può essere molto divertente.",
+  "rom": "În lumea MU poţi călători lesne cu tasta M, dacă nivelul tău e destul de mare şi ai banii pentru destinaţie. Să descoperi ţinuturi potrivite nivelului tău şi să vânezi acolo poate fi, de asemenea, foarte plăcut.",
+  "rus": "В мире MU клавишей M можно путешествовать без хлопот, если уровень достаточно высок и хватает денег на дорогу. Открывать места по своему уровню и охотиться там тоже бывает очень занятно.",
+  "bul": "В света на MU с клавиша M пътуваш без усилие, стига нивото ти да е достатъчно и да имаш парите за пътя. Да откриваш земи, подходящи за нивото ти, и да ловуваш там, също е много приятно.",
+  "chi": "在 MU 的世界中，只要等级足够、盘缠充裕，按 M 键便可轻松往来各地。探访与自身等级相称之地并于其中狩猎，亦是一大乐事。",
+  "jpn": "MUの世界では、レベルが足りていて目的地までの路銀があれば、Mキーで手軽に移動できます。自分のレベルに合った地域を見つけて狩るのも、また大きな楽しみです。",
+  "kor": "MU의 세계에서는 레벨이 충분하고 목적지까지의 노잣돈만 있으면 M 키로 손쉽게 이동할 수 있다. 제 레벨에 맞는 지역을 찾아내어 그곳에서 사냥하는 것 또한 큰 즐거움이다.",
+  "tha": "ในโลกของ MU ท่านใช้ปุ่ม M เดินทางได้อย่างสะดวก ขอเพียงเลเวลสูงพอและมีเงินค่าเดินทาง การค้นพบพื้นที่ที่เหมาะกับเลเวลของท่านแล้วล่าสัตว์ที่นั่นก็สนุกไม่น้อย"
  },
  "286": {
   "en": "With the help of NPCs in the towns, you can not only combine items, but also enhance your armor by adding jewels to it and much more. Make sure to visit them all.",
@@ -1416,6 +1494,19 @@
   "kor": "소식이 빠르군. 카오스 캐슬에 들어가는 데 필요한 물건을 주겠다. 시간이 나거든 쉬운 퀘스트를 받으러 오게.",
   "tha": "ท่านรู้ข่าวดีทีเดียว ข้าจะมอบของที่จำเป็นต่อการเข้าปราสาทเคออสให้ เมื่อว่างก็มาหาข้าเพื่อรับเควสต์ง่ายๆ"
  },
+ "2008": {
+  "en": "To restore balance to the battle event, Secrarium made Lugard an offer and suggested implementation of a new rule. This rule was for everyone participating in the event to wear guardsman's armor. Lugard, believing the offer to be fair, accepted.",
+  "ger": "Um dem Kampfereignis das Gleichgewicht zurückzugeben, machte Secrarium Lugard ein Angebot und schlug eine neue Regel vor: Jeder Teilnehmer solle einen Wächterharnisch tragen. Lugard hielt das Angebot für redlich und nahm an.",
+  "fre": "Pour rendre son équilibre à l'événement, le Secrarium fit une offre à Lugard et proposa une règle nouvelle : que chaque participant porte une armure de garde. Lugard, jugeant l'offre équitable, accepta.",
+  "ita": "Per restituire equilibrio all'evento, il Secrarium fece un'offerta a Lugard e propose una nuova regola: che ogni partecipante indossasse un'armatura da guardia. Lugard, ritenendo l'offerta equa, accettò.",
+  "rom": "Ca să redea cumpăna evenimentului, Secrarium i-a făcut lui Lugard o propunere şi a sugerat o regulă nouă: fiecare părtaş la eveniment să poarte armură de străjer. Lugard, socotind propunerea dreaptă, a primit-o.",
+  "rus": "Чтобы вернуть равновесие боевому событию, Секрариум сделал Лугарду предложение и подал новое правило: всякий участник должен носить доспех стражника. Лугард счёл предложение честным и согласился.",
+  "bul": "За да върне равновесието на бойното събитие, Секрариум направи на Лугард предложение и подхвърли ново правило: всеки участник да носи броня на стражник. Лугард сметна предложението за честно и прие.",
+  "chi": "为使此战事重归均衡，塞克拉留姆向卢加德提议，主张立一新规：凡参与者皆须披卫兵铠甲。卢加德以为此议公允，遂应允之。",
+  "jpn": "戦いの催しに均衡を取り戻すため、セクラリウムはルガードに申し出を行い、新たな掟を提案しました。催しに加わる者は皆、衛兵の鎧を身に着けるという掟です。ルガードはこれを公正と見て受け入れました。",
+  "kor": "전투 행사에 균형을 되돌리고자 세크라리움은 루가드에게 제안을 하며 새로운 규칙을 내놓았다. 행사에 참가하는 모든 이가 경비병 갑옷을 입는다는 규칙이었다. 루가드는 그 제안이 공정하다 여겨 받아들였다.",
+  "tha": "เพื่อคืนความสมดุลแก่งานประลอง เซคราเรียมยื่นข้อเสนอต่อลูการ์ดและเสนอกฎใหม่ คือให้ทุกคนที่เข้าร่วมสวมเกราะทหารยาม ลูการ์ดเห็นว่าข้อเสนอนั้นยุติธรรมจึงตอบรับ"
+ },
  "2009": {
   "en": "I see.",
   "ger": "Verstehe.",
@@ -1441,6 +1532,19 @@
   "jpn": "ルガードはセクラリウムに欺かれたのですね。どうすれば参加できますか？",
   "kor": "루가드가 세크라리움에게 속은 모양이군. 어떻게 참여하지?",
   "tha": "ดูเหมือนลูการ์ดถูกเซคราเรียมหลอก ข้าจะเข้าร่วมได้อย่างไร"
+ },
+ "2012": {
+  "en": "It's very easy to enter Chaos Castle. Simply right-click on your Armor of Guardsman at the appropriate times (12:00am, 14:00pm, 16:00pm, 18:00pm, 20:00pm, and 22:00pm) to enter. Players in designated locations, such as a PC cafe, will have more opportunities to enter.",
+  "ger": "Der Zutritt zur Chaosburg ist sehr leicht. Klicke zu den passenden Zeiten (0:00, 14:00, 16:00, 18:00, 20:00 und 22:00 Uhr) einfach mit rechts auf deinen Wächterharnisch. Spieler an ausgewiesenen Orten, etwa in einem Internetcafé, erhalten mehr Gelegenheiten.",
+  "fre": "Entrer au Château du Chaos est très simple. Il suffit de faire un clic droit sur ton Armure de garde aux heures prévues (00h00, 14h00, 16h00, 18h00, 20h00 et 22h00). Les joueurs situés dans des lieux désignés, tels qu'un cybercafé, bénéficient de plus d'occasions.",
+  "ita": "Entrare al Castello del Caos è molto semplice. Basta fare clic destro sulla tua Armatura della guardia negli orari previsti (00:00, 14:00, 16:00, 18:00, 20:00 e 22:00). I giocatori in luoghi designati, come un internet café, hanno più occasioni di entrare.",
+  "rom": "E foarte lesne să intri în Castelul Haosului. Dă doar clic dreapta pe Armura de străjer la ceasurile rânduite (00:00, 14:00, 16:00, 18:00, 20:00 şi 22:00). Jucătorii aflaţi în locuri anume, precum un internet café, au mai multe prilejuri să intre.",
+  "rus": "Войти в Замок Хаоса очень просто. Достаточно щёлкнуть правой кнопкой по Доспеху стражника в положенные часы (00:00, 14:00, 16:00, 18:00, 20:00 и 22:00). У игроков в отведённых местах, например в интернет-кафе, возможностей войти больше.",
+  "bul": "Да влезеш в Замъка на хаоса е много лесно. Просто щракни с десния бутон върху Бронята на стражник в определените часове (00:00, 14:00, 16:00, 18:00, 20:00 и 22:00). Играчите на посочени места, като интернет клуб, имат повече възможности да влязат.",
+  "chi": "进入混沌城甚为简便。只需于指定时辰（0:00、14:00、16:00、18:00、20:00 与 22:00）右键点击你的卫兵铠甲即可入场。身处指定场所（如网吧）的玩家，入场机会更多。",
+  "jpn": "カオスキャッスルへの入場はごく簡単です。定められた時刻（0時、14時、16時、18時、20時、22時）に衛兵の鎧を右クリックするだけで入れます。ネットカフェなど指定の場所にいるプレイヤーは、入場の機会がより多くなります。",
+  "kor": "카오스 캐슬에 들어가기란 아주 간단하다. 정해진 시각(0시, 14시, 16시, 18시, 20시, 22시)에 경비병 갑옷을 오른쪽 클릭하기만 하면 된다. PC방처럼 지정된 장소에 있는 플레이어는 입장 기회가 더 많다.",
+  "tha": "การเข้าปราสาทเคออสนั้นง่ายมาก เพียงคลิกขวาที่เกราะทหารยามของท่านในเวลาที่กำหนด (00:00, 14:00, 16:00, 18:00, 20:00 และ 22:00) ผู้เล่นที่อยู่ในสถานที่ที่กำหนด เช่น ร้านอินเทอร์เน็ต จะมีโอกาสเข้ามากกว่า"
  },
  "2013": {
   "en": "It really is easy to enter. What does the event involve, exactly?",
@@ -1468,6 +1572,19 @@
   "kor": "주의해야 할 것이 있나?",
   "tha": "มีสิ่งใดที่ข้าต้องระวังหรือไม่"
  },
+ "2016": {
+  "en": "It doesn't matter with the travelers, but you have to be careful when you kill a corrupt guardsman. Corrupt guardsmen will explode and may even push you off the arena. If this happens, you will be disqualified.",
+  "ger": "Bei den Reisenden macht es nichts, doch beim Töten eines verderbten Wächters ist Vorsicht geboten. Verderbte Wächter explodieren und können dich sogar aus der Arena stoßen. Geschieht das, bist du ausgeschieden.",
+  "fre": "Avec les voyageurs, peu importe, mais prends garde en tuant un garde corrompu. Les gardes corrompus explosent et peuvent même te projeter hors de l'arène. Si cela arrive, tu seras disqualifié.",
+  "ita": "Con i viaggiatori non importa, ma devi fare attenzione quando uccidi una guardia corrotta. Le guardie corrotte esplodono e possono perfino spingerti fuori dall'arena. Se accade, sarai squalificato.",
+  "rom": "Cu călătorii n-are a face, dar trebuie să iei seama când ucizi un străjer stricat. Străjerii stricaţi explodează şi te pot chiar împinge afară din arenă. De se întâmplă asta, eşti descalificat.",
+  "rus": "С путниками это неважно, но с порченым стражником надо быть осторожным. Порченые стражники взрываются и могут даже вытолкнуть тебя с арены. Если так случится, ты будешь дисквалифицирован.",
+  "bul": "С пътниците няма значение, но внимавай, когато убиваш покварен стражник. Покварените стражници се взривяват и може дори да те изтласкат вън от арената. Стане ли това, си дисквалифициран.",
+  "chi": "对付旅人倒无妨，但击杀堕落卫兵时须得当心。堕落卫兵会爆裂，甚至可能将你掀出竞技场。若如此，你便遭淘汰。",
+  "jpn": "旅人であれば構いませんが、堕ちた衛兵を倒すときは気をつけてください。堕ちた衛兵は爆発し、あなたを闘技場の外へ押し出すことすらあります。そうなれば失格です。",
+  "kor": "나그네라면 상관없으나, 타락한 경비병을 처치할 때는 조심해야 한다. 타락한 경비병은 폭발하여 그대를 투기장 밖으로 밀어낼 수도 있다. 그리 되면 실격이다.",
+  "tha": "กับนักเดินทางนั้นไม่เป็นไร แต่ท่านต้องระวังเมื่อสังหารทหารยามที่เสื่อมทราม ทหารยามเสื่อมทรามจะระเบิดและอาจผลักท่านตกจากสังเวียน หากเป็นเช่นนั้นท่านจะถูกตัดสิทธิ์"
+ },
  "2017": {
   "en": "It all makes sense now.",
   "ger": "Jetzt ergibt alles einen Sinn.",
@@ -1480,6 +1597,19 @@
   "jpn": "これで合点がいきました。",
   "kor": "이제 모든 게 이해가 되는군.",
   "tha": "ตอนนี้ทุกอย่างกระจ่างแล้ว"
+ },
+ "2018": {
+  "en": "If you want to find out when you can enter, simply move your mouse over the Armor of Guardsman. If you want to enter, simply right-click on the armor at a designated time. Come see me when you have time, and I will give you a quest that will earn you the item needed to enter the event.",
+  "ger": "Willst du wissen, wann du hinein kannst, fahre einfach mit der Maus über den Wächterharnisch. Willst du eintreten, klicke zur festgelegten Zeit mit rechts darauf. Komm zu mir, wenn du Zeit hast, und ich gebe dir eine Quest, die dir den nötigen Gegenstand einbringt.",
+  "fre": "Pour savoir quand tu peux entrer, passe simplement la souris sur l'Armure de garde. Pour entrer, fais un clic droit dessus à l'heure prévue. Viens me voir quand tu auras le temps et je te confierai une quête qui te procurera l'objet nécessaire.",
+  "ita": "Per sapere quando puoi entrare, passa il mouse sull'Armatura della guardia. Per entrare, falle clic destro all'orario previsto. Vieni da me quando hai tempo e ti darò una missione che ti procurerà l'oggetto necessario.",
+  "rom": "De vrei să afli când poţi intra, treci doar cu mouse-ul peste Armura de străjer. De vrei să intri, dă-i clic dreapta la ceasul rânduit. Vino la mine când ai timp şi îţi voi da o misiune care-ţi va aduce obiectul trebuincios.",
+  "rus": "Чтобы узнать, когда можно войти, просто наведи мышь на Доспех стражника. Чтобы войти, щёлкни по нему правой кнопкой в назначенный час. Приходи, когда будет время, и я дам тебе задание, которое принесёт нужный предмет.",
+  "bul": "Ако искаш да разбереш кога можеш да влезеш, просто задръж мишката върху Бронята на стражник. За да влезеш, щракни с десния бутон върху нея в определения час. Ела при мен, като имаш време, и ще ти дам задача, която ще ти донесе нужния предмет.",
+  "chi": "若欲知晓何时可入，只需将鼠标移至卫兵铠甲之上。若欲入场，于指定时辰右键点击此甲即可。得空时来找我，我将给你一件任务，可换得入场所需之物。",
+  "jpn": "いつ入れるか知りたければ、衛兵の鎧にマウスを重ねてみてください。入りたいときは、定められた時刻にその鎧を右クリックします。手が空いたら訪ねてください。入場に要る品を得られる依頼をお渡しします。",
+  "kor": "언제 들어갈 수 있는지 알고 싶다면 경비병 갑옷 위에 마우스를 올려 보라. 들어가려면 정해진 시각에 그 갑옷을 오른쪽 클릭하면 된다. 시간이 나거든 찾아오게. 입장에 필요한 물품을 얻을 퀘스트를 주겠다.",
+  "tha": "หากอยากรู้ว่าเข้าได้เมื่อใด เพียงเลื่อนเมาส์ไปเหนือเกราะทหารยาม หากต้องการเข้า ให้คลิกขวาที่เกราะในเวลาที่กำหนด เมื่อว่างก็มาหาข้า แล้วข้าจะมอบเควสต์ที่จะทำให้ได้ของที่จำเป็นต่อการเข้าร่วม"
  },
  "2020": {
   "en": "By a 'simple quest', do you mean killing monsters?",
@@ -1663,6 +1793,19 @@
   "kor": "소식이 빠르군. 카오스 캐슬에 들어가는 데 필요한 물건을 주겠다. 시간이 나거든 쉬운 퀘스트를 받으러 오게.",
   "tha": "ท่านรู้ข่าวดีทีเดียว ข้าจะมอบของที่จำเป็นต่อการเข้าปราสาทเคออสให้ เมื่อว่างก็มาหาข้าเพื่อรับเควสต์ง่ายๆ"
  },
+ "2044": {
+  "en": "To restore balance to the battle event, Secrarium made Lugard an offer and suggested implementation of a new rule. This rule was for everyone participating in the event to wear guardsman's armor. Lugard, believing the offer to be fair, accepted.",
+  "ger": "Um dem Kampfereignis das Gleichgewicht zurückzugeben, machte Secrarium Lugard ein Angebot und schlug eine neue Regel vor: Jeder Teilnehmer solle einen Wächterharnisch tragen. Lugard hielt das Angebot für redlich und nahm an.",
+  "fre": "Pour rendre son équilibre à l'événement, le Secrarium fit une offre à Lugard et proposa une règle nouvelle : que chaque participant porte une armure de garde. Lugard, jugeant l'offre équitable, accepta.",
+  "ita": "Per restituire equilibrio all'evento, il Secrarium fece un'offerta a Lugard e propose una nuova regola: che ogni partecipante indossasse un'armatura da guardia. Lugard, ritenendo l'offerta equa, accettò.",
+  "rom": "Ca să redea cumpăna evenimentului, Secrarium i-a făcut lui Lugard o propunere şi a sugerat o regulă nouă: fiecare părtaş la eveniment să poarte armură de străjer. Lugard, socotind propunerea dreaptă, a primit-o.",
+  "rus": "Чтобы вернуть равновесие боевому событию, Секрариум сделал Лугарду предложение и подал новое правило: всякий участник должен носить доспех стражника. Лугард счёл предложение честным и согласился.",
+  "bul": "За да върне равновесието на бойното събитие, Секрариум направи на Лугард предложение и подхвърли ново правило: всеки участник да носи броня на стражник. Лугард сметна предложението за честно и прие.",
+  "chi": "为使此战事重归均衡，塞克拉留姆向卢加德提议，主张立一新规：凡参与者皆须披卫兵铠甲。卢加德以为此议公允，遂应允之。",
+  "jpn": "戦いの催しに均衡を取り戻すため、セクラリウムはルガードに申し出を行い、新たな掟を提案しました。催しに加わる者は皆、衛兵の鎧を身に着けるという掟です。ルガードはこれを公正と見て受け入れました。",
+  "kor": "전투 행사에 균형을 되돌리고자 세크라리움은 루가드에게 제안을 하며 새로운 규칙을 내놓았다. 행사에 참가하는 모든 이가 경비병 갑옷을 입는다는 규칙이었다. 루가드는 그 제안이 공정하다 여겨 받아들였다.",
+  "tha": "เพื่อคืนความสมดุลแก่งานประลอง เซคราเรียมยื่นข้อเสนอต่อลูการ์ดและเสนอกฎใหม่ คือให้ทุกคนที่เข้าร่วมสวมเกราะทหารยาม ลูการ์ดเห็นว่าข้อเสนอนั้นยุติธรรมจึงตอบรับ"
+ },
  "2045": {
   "en": "I see.",
   "ger": "Verstehe.",
@@ -1688,6 +1831,19 @@
   "jpn": "ルガードはセクラリウムに欺かれたのですね。どうすれば参加できますか？",
   "kor": "루가드가 세크라리움에게 속은 모양이군. 어떻게 참여하지?",
   "tha": "ดูเหมือนลูการ์ดถูกเซคราเรียมหลอก ข้าจะเข้าร่วมได้อย่างไร"
+ },
+ "2048": {
+  "en": "It's very easy to enter Chaos Castle. Simply right-click on your Armor of Guardsman at the appropriate times (12:00am, 14:00pm, 16:00pm, 18:00pm, 20:00pm, and 22:00pm) to enter. Players in designated locations, such as a PC cafe, will have more opportunities to enter.",
+  "ger": "Der Zutritt zur Chaosburg ist sehr leicht. Klicke zu den passenden Zeiten (0:00, 14:00, 16:00, 18:00, 20:00 und 22:00 Uhr) einfach mit rechts auf deinen Wächterharnisch. Spieler an ausgewiesenen Orten, etwa in einem Internetcafé, erhalten mehr Gelegenheiten.",
+  "fre": "Entrer au Château du Chaos est très simple. Il suffit de faire un clic droit sur ton Armure de garde aux heures prévues (00h00, 14h00, 16h00, 18h00, 20h00 et 22h00). Les joueurs situés dans des lieux désignés, tels qu'un cybercafé, bénéficient de plus d'occasions.",
+  "ita": "Entrare al Castello del Caos è molto semplice. Basta fare clic destro sulla tua Armatura della guardia negli orari previsti (00:00, 14:00, 16:00, 18:00, 20:00 e 22:00). I giocatori in luoghi designati, come un internet café, hanno più occasioni di entrare.",
+  "rom": "E foarte lesne să intri în Castelul Haosului. Dă doar clic dreapta pe Armura de străjer la ceasurile rânduite (00:00, 14:00, 16:00, 18:00, 20:00 şi 22:00). Jucătorii aflaţi în locuri anume, precum un internet café, au mai multe prilejuri să intre.",
+  "rus": "Войти в Замок Хаоса очень просто. Достаточно щёлкнуть правой кнопкой по Доспеху стражника в положенные часы (00:00, 14:00, 16:00, 18:00, 20:00 и 22:00). У игроков в отведённых местах, например в интернет-кафе, возможностей войти больше.",
+  "bul": "Да влезеш в Замъка на хаоса е много лесно. Просто щракни с десния бутон върху Бронята на стражник в определените часове (00:00, 14:00, 16:00, 18:00, 20:00 и 22:00). Играчите на посочени места, като интернет клуб, имат повече възможности да влязат.",
+  "chi": "进入混沌城甚为简便。只需于指定时辰（0:00、14:00、16:00、18:00、20:00 与 22:00）右键点击你的卫兵铠甲即可入场。身处指定场所（如网吧）的玩家，入场机会更多。",
+  "jpn": "カオスキャッスルへの入場はごく簡単です。定められた時刻（0時、14時、16時、18時、20時、22時）に衛兵の鎧を右クリックするだけで入れます。ネットカフェなど指定の場所にいるプレイヤーは、入場の機会がより多くなります。",
+  "kor": "카오스 캐슬에 들어가기란 아주 간단하다. 정해진 시각(0시, 14시, 16시, 18시, 20시, 22시)에 경비병 갑옷을 오른쪽 클릭하기만 하면 된다. PC방처럼 지정된 장소에 있는 플레이어는 입장 기회가 더 많다.",
+  "tha": "การเข้าปราสาทเคออสนั้นง่ายมาก เพียงคลิกขวาที่เกราะทหารยามของท่านในเวลาที่กำหนด (00:00, 14:00, 16:00, 18:00, 20:00 และ 22:00) ผู้เล่นที่อยู่ในสถานที่ที่กำหนด เช่น ร้านอินเทอร์เน็ต จะมีโอกาสเข้ามากกว่า"
  },
  "2049": {
   "en": "It really is easy to enter. What does the event involve, exactly?",
@@ -1715,6 +1871,19 @@
   "kor": "주의해야 할 것이 있나?",
   "tha": "มีสิ่งใดที่ข้าต้องระวังหรือไม่"
  },
+ "2052": {
+  "en": "It doesn't matter with the travelers, but you have to be careful when you kill a corrupt guardsman. Corrupt guardsmen will explode and may even push you off the arena. If this happens, you will be disqualified.",
+  "ger": "Bei den Reisenden macht es nichts, doch beim Töten eines verderbten Wächters ist Vorsicht geboten. Verderbte Wächter explodieren und können dich sogar aus der Arena stoßen. Geschieht das, bist du ausgeschieden.",
+  "fre": "Avec les voyageurs, peu importe, mais prends garde en tuant un garde corrompu. Les gardes corrompus explosent et peuvent même te projeter hors de l'arène. Si cela arrive, tu seras disqualifié.",
+  "ita": "Con i viaggiatori non importa, ma devi fare attenzione quando uccidi una guardia corrotta. Le guardie corrotte esplodono e possono perfino spingerti fuori dall'arena. Se accade, sarai squalificato.",
+  "rom": "Cu călătorii n-are a face, dar trebuie să iei seama când ucizi un străjer stricat. Străjerii stricaţi explodează şi te pot chiar împinge afară din arenă. De se întâmplă asta, eşti descalificat.",
+  "rus": "С путниками это неважно, но с порченым стражником надо быть осторожным. Порченые стражники взрываются и могут даже вытолкнуть тебя с арены. Если так случится, ты будешь дисквалифицирован.",
+  "bul": "С пътниците няма значение, но внимавай, когато убиваш покварен стражник. Покварените стражници се взривяват и може дори да те изтласкат вън от арената. Стане ли това, си дисквалифициран.",
+  "chi": "对付旅人倒无妨，但击杀堕落卫兵时须得当心。堕落卫兵会爆裂，甚至可能将你掀出竞技场。若如此，你便遭淘汰。",
+  "jpn": "旅人であれば構いませんが、堕ちた衛兵を倒すときは気をつけてください。堕ちた衛兵は爆発し、あなたを闘技場の外へ押し出すことすらあります。そうなれば失格です。",
+  "kor": "나그네라면 상관없으나, 타락한 경비병을 처치할 때는 조심해야 한다. 타락한 경비병은 폭발하여 그대를 투기장 밖으로 밀어낼 수도 있다. 그리 되면 실격이다.",
+  "tha": "กับนักเดินทางนั้นไม่เป็นไร แต่ท่านต้องระวังเมื่อสังหารทหารยามที่เสื่อมทราม ทหารยามเสื่อมทรามจะระเบิดและอาจผลักท่านตกจากสังเวียน หากเป็นเช่นนั้นท่านจะถูกตัดสิทธิ์"
+ },
  "2053": {
   "en": "It all makes sense now.",
   "ger": "Jetzt ergibt alles einen Sinn.",
@@ -1727,6 +1896,19 @@
   "jpn": "これで合点がいきました。",
   "kor": "이제 모든 게 이해가 되는군.",
   "tha": "ตอนนี้ทุกอย่างกระจ่างแล้ว"
+ },
+ "2054": {
+  "en": "If you want to find out when you can enter, simply move your mouse over the Armor of Guardsman. If you want to enter, simply right-click on the armor at a designated time. Come see me when you have time, and I will give you a quest that will earn you the item needed to enter the event.",
+  "ger": "Willst du wissen, wann du hinein kannst, fahre einfach mit der Maus über den Wächterharnisch. Willst du eintreten, klicke zur festgelegten Zeit mit rechts darauf. Komm zu mir, wenn du Zeit hast, und ich gebe dir eine Quest, die dir den nötigen Gegenstand einbringt.",
+  "fre": "Pour savoir quand tu peux entrer, passe simplement la souris sur l'Armure de garde. Pour entrer, fais un clic droit dessus à l'heure prévue. Viens me voir quand tu auras le temps et je te confierai une quête qui te procurera l'objet nécessaire.",
+  "ita": "Per sapere quando puoi entrare, passa il mouse sull'Armatura della guardia. Per entrare, falle clic destro all'orario previsto. Vieni da me quando hai tempo e ti darò una missione che ti procurerà l'oggetto necessario.",
+  "rom": "De vrei să afli când poţi intra, treci doar cu mouse-ul peste Armura de străjer. De vrei să intri, dă-i clic dreapta la ceasul rânduit. Vino la mine când ai timp şi îţi voi da o misiune care-ţi va aduce obiectul trebuincios.",
+  "rus": "Чтобы узнать, когда можно войти, просто наведи мышь на Доспех стражника. Чтобы войти, щёлкни по нему правой кнопкой в назначенный час. Приходи, когда будет время, и я дам тебе задание, которое принесёт нужный предмет.",
+  "bul": "Ако искаш да разбереш кога можеш да влезеш, просто задръж мишката върху Бронята на стражник. За да влезеш, щракни с десния бутон върху нея в определения час. Ела при мен, като имаш време, и ще ти дам задача, която ще ти донесе нужния предмет.",
+  "chi": "若欲知晓何时可入，只需将鼠标移至卫兵铠甲之上。若欲入场，于指定时辰右键点击此甲即可。得空时来找我，我将给你一件任务，可换得入场所需之物。",
+  "jpn": "いつ入れるか知りたければ、衛兵の鎧にマウスを重ねてみてください。入りたいときは、定められた時刻にその鎧を右クリックします。手が空いたら訪ねてください。入場に要る品を得られる依頼をお渡しします。",
+  "kor": "언제 들어갈 수 있는지 알고 싶다면 경비병 갑옷 위에 마우스를 올려 보라. 들어가려면 정해진 시각에 그 갑옷을 오른쪽 클릭하면 된다. 시간이 나거든 찾아오게. 입장에 필요한 물품을 얻을 퀘스트를 주겠다.",
+  "tha": "หากอยากรู้ว่าเข้าได้เมื่อใด เพียงเลื่อนเมาส์ไปเหนือเกราะทหารยาม หากต้องการเข้า ให้คลิกขวาที่เกราะในเวลาที่กำหนด เมื่อว่างก็มาหาข้า แล้วข้าจะมอบเควสต์ที่จะทำให้ได้ของที่จำเป็นต่อการเข้าร่วม"
  },
  "2056": {
   "en": "By a 'simple quest', do you mean killing monsters?",
@@ -2859,6 +3041,58 @@
   "kor": "잘 알고 있다. 그곳에 가려면 특별한 물건이 필요하다더군….",
   "tha": "ข้ารู้ดี ได้ยินว่าต้องมีของพิเศษจึงจะไปที่นั่นได้…."
  },
+ "3005": {
+  "en": "You're well-informed. In order to penetrate the barrier surrounding Blood Castle, you will need an Invisibility Cloak. If you pass a simple test of mine, I will provide you with an Invisibility Cloak before you head to Blood Castle. When you have time, come see me for an easy quest.",
+  "ger": "Du bist gut unterrichtet. Um die Barriere um die Blutburg zu durchdringen, brauchst du einen Tarnumhang. Bestehst du eine einfache Prüfung von mir, gebe ich dir einen, bevor du zur Blutburg aufbrichst. Komm zu mir, wenn du Zeit hast, für eine leichte Quest.",
+  "fre": "Tu es bien informé. Pour franchir la barrière qui entoure le Château Sanglant, il te faudra une Cape d'invisibilité. Si tu passes une simple épreuve que je te soumettrai, je te la remettrai avant ton départ. Quand tu auras le temps, viens me voir pour une quête facile.",
+  "ita": "Sei bene informato. Per varcare la barriera attorno al Castello di Sangue ti servirà un Mantello dell'invisibilità. Se supererai una semplice prova, te lo darò prima che tu parta. Quando avrai tempo, vieni da me per una missione facile.",
+  "rom": "Eşti bine informat. Ca să străbaţi bariera din jurul Castelului Sângelui îţi va trebui o Mantie a invizibilităţii. De treci o probă simplă de-a mea, ţi-o voi da înainte să porneşti. Când ai timp, vino la mine pentru o misiune uşoară.",
+  "rus": "Ты хорошо осведомлён. Чтобы пройти сквозь барьер вокруг Замка Крови, тебе понадобится Плащ невидимости. Если выдержишь моё несложное испытание, я дам его тебе перед дорогой. Будет время — приходи за лёгким заданием.",
+  "bul": "Добре си осведомен. За да минеш бариерата около Кървавия замък, ще ти трябва Плащ невидимка. Преминеш ли едно просто изпитание, ще ти го дам, преди да потеглиш. Като имаш време, ела при мен за лесна задача.",
+  "chi": "你消息灵通。欲穿透环绕血之城的结界，你须有隐身斗篷。若能通过我一道简单的试炼，我便在你启程前将其予你。得空时来找我，有件轻省的任务。",
+  "jpn": "よくご存じですね。ブラッドキャッスルを囲む結界を抜けるには、透明マントが要ります。私の簡単な試練に通れば、出発の前にお渡ししましょう。手が空いたら、簡単な依頼を受けに来てください。",
+  "kor": "소식이 빠르군. 블러드 캐슬을 두른 결계를 뚫으려면 투명 망토가 필요하다. 내 간단한 시험을 통과하면 떠나기 전에 그것을 주겠다. 시간이 나거든 쉬운 퀘스트를 받으러 오게.",
+  "tha": "ท่านรู้ข่าวดีทีเดียว การจะทะลุเกราะกำบังที่ล้อมปราสาทเลือดได้ ท่านต้องมีผ้าคลุมล่องหน หากท่านผ่านการทดสอบง่ายๆ ของข้า ข้าจะมอบให้ก่อนท่านออกเดินทาง เมื่อว่างก็มาหาข้าเพื่อรับเควสต์ง่ายๆ"
+ },
+ "3006": {
+  "en": "I will tell you then. Devildom's royal guards, who were summoned when Kundun succumbed to Secrarium, posed a great threat to the heaven world. To protect their base, the Twelve Saints formed a barrier around Blood Castle.",
+  "ger": "Dann will ich es dir sagen. Die Leibgarde der Teufelswelt, herbeigerufen, als Kundun dem Secrarium erlag, bedrohte die Himmelswelt schwer. Um ihre Feste zu schützen, errichteten die Zwölf Heiligen eine Barriere um die Blutburg.",
+  "fre": "Je vais donc te le dire. La garde royale du Royaume démoniaque, invoquée lorsque Kundun succomba au Secrarium, menaçait gravement le monde céleste. Pour protéger leur bastion, les Douze Saints dressèrent une barrière autour du Château Sanglant.",
+  "ita": "Allora te lo dirò. Le guardie reali del Regno dei demoni, evocate quando Kundun cedette al Secrarium, minacciavano gravemente il mondo celeste. Per proteggere la loro roccaforte, i Dodici Santi eressero una barriera attorno al Castello di Sangue.",
+  "rom": "Atunci am să-ţi spun. Garda regală a Tărâmului Diavolesc, chemată când Kundun a căzut pradă Secrarium-ului, ameninţa greu lumea cerească. Ca să-şi apere cetatea, cei Doisprezece Sfinţi au ridicat o barieră în jurul Castelului Sângelui.",
+  "rus": "Тогда я расскажу. Королевская стража Дьявольского царства, призванная, когда Кундун пал перед Секрариумом, тяжко угрожала небесному миру. Чтобы защитить свою твердыню, Двенадцать Святых воздвигли барьер вокруг Замка Крови.",
+  "bul": "Тогава ще ти кажа. Кралската гвардия на Дяволското царство, призована, когато Кундун се поддаде на Секрариум, тежко застрашаваше небесния свят. За да опазят твърдината си, Дванадесетте светци издигнаха бариера около Кървавия замък.",
+  "chi": "那我便告诉你。魔界的近卫，乃库顿屈从于塞克拉留姆之时所召，曾大举威胁天界。为护其基业，十二圣者在血之城四周布下结界。",
+  "jpn": "では申し上げましょう。クンドゥンがセクラリウムに屈した折に召喚された魔界の近衛たちは、天上の世界を大いに脅かしました。拠り所を守るため、十二聖人はブラッドキャッスルの周りに結界を張ったのです。",
+  "kor": "그렇다면 말해 주겠다. 쿤둔이 세크라리움에 굴복하던 때 소환된 마계의 근위대는 천상의 세계를 크게 위협했다. 그들의 터전을 지키고자 열두 성인은 블러드 캐슬 둘레에 결계를 세웠다.",
+  "tha": "เช่นนั้นข้าจะเล่าให้ฟัง องครักษ์แห่งดินแดนปีศาจซึ่งถูกอัญเชิญมาเมื่อคราวคุนดุนยอมสยบต่อเซคราเรียม คุกคามโลกสวรรค์อย่างใหญ่หลวง เพื่อปกป้องฐานที่มั่น สิบสองนักบุญจึงสร้างเกราะกำบังล้อมปราสาทเลือด"
+ },
+ "3008": {
+  "en": "Kundun, however, must've anticipated such a move. He hid beyond the range of the barrier and eliminated the Twelve Saints as soon as the barrier was formed. Luckily, Archangel evaded that peril and sacrificed himself for the barrier.",
+  "ger": "Doch Kundun muss mit einem solchen Zug gerechnet haben. Er verbarg sich jenseits der Barriere und tilgte die Zwölf Heiligen, kaum dass sie errichtet war. Zum Glück entging der Erzengel dieser Gefahr und opferte sich für die Barriere.",
+  "fre": "Mais Kundun avait dû prévoir ce geste. Il se tapit hors de portée de la barrière et anéantit les Douze Saints dès qu'elle fut dressée. Par chance, l'Archange échappa à ce péril et se sacrifia pour la barrière.",
+  "ita": "Ma Kundun doveva aver previsto una tale mossa. Si nascose oltre la portata della barriera e annientò i Dodici Santi non appena essa fu eretta. Per fortuna l'Arcangelo sfuggì a quel pericolo e si sacrificò per la barriera.",
+  "rom": "Însă Kundun trebuie să fi bănuit o astfel de mişcare. S-a ascuns dincolo de raza barierei şi i-a nimicit pe cei Doisprezece Sfinţi de îndată ce aceasta s-a înălţat. Din fericire, Arhanghelul a scăpat de acea primejdie şi s-a jertfit pentru barieră.",
+  "rus": "Но Кундун, должно быть, предвидел этот ход. Он укрылся за пределами барьера и истребил Двенадцать Святых, едва тот был возведён. По счастью, Архангел избежал этой беды и принёс себя в жертву ради барьера.",
+  "bul": "Но Кундун навярно е предвидил такъв ход. Скрил се е отвъд обсега на бариерата и е изтребил Дванадесетте светци веднага щом тя се е издигнала. За щастие Архангелът е избегнал тази беда и се е пожертвал за бариерата.",
+  "chi": "然而库顿想必早已料到此举。他藏身于结界之外，结界方成便将十二圣者尽数铲除。所幸大天使避过此劫，并为结界献出了自身。",
+  "jpn": "しかしクンドゥンは、そうした手を読んでいたのでしょう。結界の及ばぬ外へ身を隠し、結界が張られるや十二聖人を葬り去ったのです。幸い大天使はその難を逃れ、結界のために己を捧げました。",
+  "kor": "허나 쿤둔은 그런 수를 내다보고 있었던 모양이다. 그는 결계가 미치지 않는 밖에 몸을 숨겼다가, 결계가 세워지자마자 열두 성인을 몰살했다. 다행히 대천사는 그 화를 피해 결계를 위해 스스로를 바쳤다.",
+  "tha": "ทว่าคุนดุนคงคาดการณ์ท่าทีเช่นนั้นไว้แล้ว เขาซ่อนตัวพ้นรัศมีเกราะกำบัง และกำจัดสิบสองนักบุญทันทีที่เกราะถูกสร้างขึ้น โชคดีที่เทวทูตรอดพ้นภัยนั้นและพลีตนเพื่อเกราะกำบัง"
+ },
+ "3010": {
+  "en": "Kundun's Royal Guards, however, continue to attack the barrier, and are weakening it. We need Archangel's weapon in order to prevent this weakening of the barrier, and that's why we are now seeking the help of travelers.",
+  "ger": "Doch Kunduns Leibgarde greift die Barriere weiter an und schwächt sie. Um diese Schwächung aufzuhalten, brauchen wir die Waffe des Erzengels, und darum suchen wir nun die Hilfe der Reisenden.",
+  "fre": "Mais la garde royale de Kundun continue d'assaillir la barrière et l'affaiblit. Pour empêcher cet affaiblissement, il nous faut l'arme de l'Archange, et c'est pourquoi nous sollicitons l'aide des voyageurs.",
+  "ita": "Ma le Guardie Reali di Kundun continuano ad assalire la barriera, indebolendola. Per impedirlo ci serve l'arma dell'Arcangelo, ed è per questo che ora cerchiamo l'aiuto dei viaggiatori.",
+  "rom": "Însă Garda Regală a lui Kundun loveşte mai departe în barieră şi o slăbeşte. Ca să oprim această slăbire ne trebuie arma Arhanghelului, şi de aceea căutăm acum ajutorul călătorilor.",
+  "rus": "Но Королевская стража Кундуна продолжает бить по барьеру и ослабляет его. Чтобы остановить это, нам нужно оружие Архангела, — потому мы и просим помощи у странников.",
+  "bul": "Но Кралската гвардия на Кундун продължава да напада бариерата и я отслабва. За да спрем това, ни трябва оръжието на Архангела, и затова сега търсим помощта на пътниците.",
+  "chi": "然而库顿的近卫仍不断冲击结界，使其日渐衰弱。欲阻此衰弱，我们需要大天使的武器，故而此刻求助于旅人。",
+  "jpn": "しかしクンドゥンの近衛たちは今も結界を攻め続け、これを弱めています。その弱まりを防ぐには大天使の武器が必要であり、それゆえ我らは旅人の助けを求めているのです。",
+  "kor": "허나 쿤둔의 근위대는 여전히 결계를 두드려 약하게 만들고 있다. 그 약화를 막으려면 대천사의 무기가 필요하며, 그래서 우리는 지금 나그네들의 도움을 구하고 있다.",
+  "tha": "ทว่าองครักษ์ของคุนดุนยังคงโจมตีเกราะกำบังและทำให้มันอ่อนลง เราต้องใช้อาวุธของเทวทูตเพื่อยับยั้งการอ่อนกำลังนี้ ด้วยเหตุนั้นเราจึงขอความช่วยเหลือจากนักเดินทาง"
+ },
  "3011": {
   "en": "I see. How do I enter?",
   "ger": "Verstehe. Wie komme ich hinein?",
@@ -2884,6 +3118,19 @@
   "jpn": "入るのは確かに簡単ですね。そのイベントとは、具体的にどんなものですか？",
   "kor": "들어가는 건 확실히 쉽군. 그 이벤트는 정확히 어떤 것인가?",
   "tha": "เข้าไปง่ายจริงด้วย แล้วอีเวนต์นี้มีเนื้อหาอย่างไรกันแน่"
+ },
+ "3014": {
+  "en": "You will stand by for about a minute before actually entering. You'll enter Blood Castle after this standby time has elapsed. Once inside Blood Castle, you can buy some time by defeating 40 monsters summoned by a necromancer named Red Skull.",
+  "ger": "Vor dem eigentlichen Eintritt wartest du etwa eine Minute. Nach dieser Wartezeit betrittst du die Blutburg. Drinnen verschaffst du dir Zeit, indem du 40 Monster besiegst, die ein Totenbeschwörer namens Roter Schädel herbeiruft.",
+  "fre": "Tu patienteras environ une minute avant d'entrer réellement. Passé ce délai, tu pénétreras dans le Château Sanglant. Une fois à l'intérieur, tu peux gagner du temps en vainquant 40 monstres invoqués par un nécromancien nommé Crâne Rouge.",
+  "ita": "Prima di entrare davvero attenderai circa un minuto. Trascorsa l'attesa, entrerai nel Castello di Sangue. Una volta dentro, puoi guadagnare tempo sconfiggendo 40 mostri evocati da un negromante chiamato Teschio Rosso.",
+  "rom": "Înainte de a intra cu adevărat vei aştepta cam un minut. După acest răgaz vei intra în Castelul Sângelui. Odată înăuntru, poţi câştiga timp învingând 40 de monştri chemaţi de un necromant numit Craniul Roşu.",
+  "rus": "Перед самым входом ты подождёшь около минуты. Когда это ожидание истечёт, ты войдёшь в Замок Крови. Внутри можно выиграть время, победив 40 монстров, призванных некромантом по имени Красный Череп.",
+  "bul": "Преди същинското влизане ще изчакаш около минута. След този срок ще влезеш в Кървавия замък. Веднъж вътре, можеш да спечелиш време, като победиш 40 чудовища, призовани от некромант на име Червен череп.",
+  "chi": "真正入场之前，你将等候约一分钟。待此候场时间过去，便可进入血之城。入内之后，击败由名为红骷髅的亡灵法师所召的 40 只怪物，可为自己争取时间。",
+  "jpn": "実際に入場するまで、およそ一分待機します。その待機が終わるとブラッドキャッスルへ入ります。中に入ったら、レッドスカルという降霊術師が呼び出す40体のモンスターを倒すことで時間を稼げます。",
+  "kor": "실제로 입장하기까지 약 1분을 기다리게 된다. 그 대기 시간이 지나면 블러드 캐슬에 들어간다. 안에 들어가면 레드 스컬이라는 강령술사가 불러낸 몬스터 40마리를 처치해 시간을 벌 수 있다.",
+  "tha": "ท่านจะรอราวหนึ่งนาทีก่อนเข้าไปจริง เมื่อพ้นเวลารอ ท่านจะเข้าสู่ปราสาทเลือด เมื่ออยู่ข้างในแล้ว ท่านซื้อเวลาเพิ่มได้ด้วยการสังหารสัตว์ประหลาด 40 ตัวที่ถูกเรียกโดยหมอผีนามว่าเรดสกัล"
  },
  "3017": {
   "en": "I understand.",
@@ -3067,6 +3314,58 @@
   "kor": "잘 알고 있다. 그곳에 가려면 특별한 물건이 필요하다더군….",
   "tha": "ข้ารู้ดี ได้ยินว่าต้องมีของพิเศษจึงจะไปที่นั่นได้…."
  },
+ "3041": {
+  "en": "You're well-informed. In order to penetrate the barrier surrounding Blood Castle, you will need an Invisibility Cloak. If you pass a simple test of mine, I will provide you with an Invisibility Cloak before you head to Blood Castle. When you have time, come see me for an easy quest.",
+  "ger": "Du bist gut unterrichtet. Um die Barriere um die Blutburg zu durchdringen, brauchst du einen Tarnumhang. Bestehst du eine einfache Prüfung von mir, gebe ich dir einen, bevor du zur Blutburg aufbrichst. Komm zu mir, wenn du Zeit hast, für eine leichte Quest.",
+  "fre": "Tu es bien informé. Pour franchir la barrière qui entoure le Château Sanglant, il te faudra une Cape d'invisibilité. Si tu passes une simple épreuve que je te soumettrai, je te la remettrai avant ton départ. Quand tu auras le temps, viens me voir pour une quête facile.",
+  "ita": "Sei bene informato. Per varcare la barriera attorno al Castello di Sangue ti servirà un Mantello dell'invisibilità. Se supererai una semplice prova, te lo darò prima che tu parta. Quando avrai tempo, vieni da me per una missione facile.",
+  "rom": "Eşti bine informat. Ca să străbaţi bariera din jurul Castelului Sângelui îţi va trebui o Mantie a invizibilităţii. De treci o probă simplă de-a mea, ţi-o voi da înainte să porneşti. Când ai timp, vino la mine pentru o misiune uşoară.",
+  "rus": "Ты хорошо осведомлён. Чтобы пройти сквозь барьер вокруг Замка Крови, тебе понадобится Плащ невидимости. Если выдержишь моё несложное испытание, я дам его тебе перед дорогой. Будет время — приходи за лёгким заданием.",
+  "bul": "Добре си осведомен. За да минеш бариерата около Кървавия замък, ще ти трябва Плащ невидимка. Преминеш ли едно просто изпитание, ще ти го дам, преди да потеглиш. Като имаш време, ела при мен за лесна задача.",
+  "chi": "你消息灵通。欲穿透环绕血之城的结界，你须有隐身斗篷。若能通过我一道简单的试炼，我便在你启程前将其予你。得空时来找我，有件轻省的任务。",
+  "jpn": "よくご存じですね。ブラッドキャッスルを囲む結界を抜けるには、透明マントが要ります。私の簡単な試練に通れば、出発の前にお渡ししましょう。手が空いたら、簡単な依頼を受けに来てください。",
+  "kor": "소식이 빠르군. 블러드 캐슬을 두른 결계를 뚫으려면 투명 망토가 필요하다. 내 간단한 시험을 통과하면 떠나기 전에 그것을 주겠다. 시간이 나거든 쉬운 퀘스트를 받으러 오게.",
+  "tha": "ท่านรู้ข่าวดีทีเดียว การจะทะลุเกราะกำบังที่ล้อมปราสาทเลือดได้ ท่านต้องมีผ้าคลุมล่องหน หากท่านผ่านการทดสอบง่ายๆ ของข้า ข้าจะมอบให้ก่อนท่านออกเดินทาง เมื่อว่างก็มาหาข้าเพื่อรับเควสต์ง่ายๆ"
+ },
+ "3042": {
+  "en": "I will tell you then. Devildom's royal guards, who were summoned when Kundun succumbed to Secrarium, posed a great threat to the heaven world. To protect their base, the Twelve Saints formed a barrier around Blood Castle.",
+  "ger": "Dann will ich es dir sagen. Die Leibgarde der Teufelswelt, herbeigerufen, als Kundun dem Secrarium erlag, bedrohte die Himmelswelt schwer. Um ihre Feste zu schützen, errichteten die Zwölf Heiligen eine Barriere um die Blutburg.",
+  "fre": "Je vais donc te le dire. La garde royale du Royaume démoniaque, invoquée lorsque Kundun succomba au Secrarium, menaçait gravement le monde céleste. Pour protéger leur bastion, les Douze Saints dressèrent une barrière autour du Château Sanglant.",
+  "ita": "Allora te lo dirò. Le guardie reali del Regno dei demoni, evocate quando Kundun cedette al Secrarium, minacciavano gravemente il mondo celeste. Per proteggere la loro roccaforte, i Dodici Santi eressero una barriera attorno al Castello di Sangue.",
+  "rom": "Atunci am să-ţi spun. Garda regală a Tărâmului Diavolesc, chemată când Kundun a căzut pradă Secrarium-ului, ameninţa greu lumea cerească. Ca să-şi apere cetatea, cei Doisprezece Sfinţi au ridicat o barieră în jurul Castelului Sângelui.",
+  "rus": "Тогда я расскажу. Королевская стража Дьявольского царства, призванная, когда Кундун пал перед Секрариумом, тяжко угрожала небесному миру. Чтобы защитить свою твердыню, Двенадцать Святых воздвигли барьер вокруг Замка Крови.",
+  "bul": "Тогава ще ти кажа. Кралската гвардия на Дяволското царство, призована, когато Кундун се поддаде на Секрариум, тежко застрашаваше небесния свят. За да опазят твърдината си, Дванадесетте светци издигнаха бариера около Кървавия замък.",
+  "chi": "那我便告诉你。魔界的近卫，乃库顿屈从于塞克拉留姆之时所召，曾大举威胁天界。为护其基业，十二圣者在血之城四周布下结界。",
+  "jpn": "では申し上げましょう。クンドゥンがセクラリウムに屈した折に召喚された魔界の近衛たちは、天上の世界を大いに脅かしました。拠り所を守るため、十二聖人はブラッドキャッスルの周りに結界を張ったのです。",
+  "kor": "그렇다면 말해 주겠다. 쿤둔이 세크라리움에 굴복하던 때 소환된 마계의 근위대는 천상의 세계를 크게 위협했다. 그들의 터전을 지키고자 열두 성인은 블러드 캐슬 둘레에 결계를 세웠다.",
+  "tha": "เช่นนั้นข้าจะเล่าให้ฟัง องครักษ์แห่งดินแดนปีศาจซึ่งถูกอัญเชิญมาเมื่อคราวคุนดุนยอมสยบต่อเซคราเรียม คุกคามโลกสวรรค์อย่างใหญ่หลวง เพื่อปกป้องฐานที่มั่น สิบสองนักบุญจึงสร้างเกราะกำบังล้อมปราสาทเลือด"
+ },
+ "3044": {
+  "en": "Kundun, however, must've anticipated such a move. He hid beyond the range of the barrier and eliminated the Twelve Saints as soon as the barrier was formed. Luckily, Archangel evaded that peril and sacrificed himself for the barrier.",
+  "ger": "Doch Kundun muss mit einem solchen Zug gerechnet haben. Er verbarg sich jenseits der Barriere und tilgte die Zwölf Heiligen, kaum dass sie errichtet war. Zum Glück entging der Erzengel dieser Gefahr und opferte sich für die Barriere.",
+  "fre": "Mais Kundun avait dû prévoir ce geste. Il se tapit hors de portée de la barrière et anéantit les Douze Saints dès qu'elle fut dressée. Par chance, l'Archange échappa à ce péril et se sacrifia pour la barrière.",
+  "ita": "Ma Kundun doveva aver previsto una tale mossa. Si nascose oltre la portata della barriera e annientò i Dodici Santi non appena essa fu eretta. Per fortuna l'Arcangelo sfuggì a quel pericolo e si sacrificò per la barriera.",
+  "rom": "Însă Kundun trebuie să fi bănuit o astfel de mişcare. S-a ascuns dincolo de raza barierei şi i-a nimicit pe cei Doisprezece Sfinţi de îndată ce aceasta s-a înălţat. Din fericire, Arhanghelul a scăpat de acea primejdie şi s-a jertfit pentru barieră.",
+  "rus": "Но Кундун, должно быть, предвидел этот ход. Он укрылся за пределами барьера и истребил Двенадцать Святых, едва тот был возведён. По счастью, Архангел избежал этой беды и принёс себя в жертву ради барьера.",
+  "bul": "Но Кундун навярно е предвидил такъв ход. Скрил се е отвъд обсега на бариерата и е изтребил Дванадесетте светци веднага щом тя се е издигнала. За щастие Архангелът е избегнал тази беда и се е пожертвал за бариерата.",
+  "chi": "然而库顿想必早已料到此举。他藏身于结界之外，结界方成便将十二圣者尽数铲除。所幸大天使避过此劫，并为结界献出了自身。",
+  "jpn": "しかしクンドゥンは、そうした手を読んでいたのでしょう。結界の及ばぬ外へ身を隠し、結界が張られるや十二聖人を葬り去ったのです。幸い大天使はその難を逃れ、結界のために己を捧げました。",
+  "kor": "허나 쿤둔은 그런 수를 내다보고 있었던 모양이다. 그는 결계가 미치지 않는 밖에 몸을 숨겼다가, 결계가 세워지자마자 열두 성인을 몰살했다. 다행히 대천사는 그 화를 피해 결계를 위해 스스로를 바쳤다.",
+  "tha": "ทว่าคุนดุนคงคาดการณ์ท่าทีเช่นนั้นไว้แล้ว เขาซ่อนตัวพ้นรัศมีเกราะกำบัง และกำจัดสิบสองนักบุญทันทีที่เกราะถูกสร้างขึ้น โชคดีที่เทวทูตรอดพ้นภัยนั้นและพลีตนเพื่อเกราะกำบัง"
+ },
+ "3046": {
+  "en": "Kundun's Royal Guards, however, continue to attack the barrier, and are weakening it. We need Archangel's weapon in order to prevent this weakening of the barrier, and that's why we are now seeking the help of travelers.",
+  "ger": "Doch Kunduns Leibgarde greift die Barriere weiter an und schwächt sie. Um diese Schwächung aufzuhalten, brauchen wir die Waffe des Erzengels, und darum suchen wir nun die Hilfe der Reisenden.",
+  "fre": "Mais la garde royale de Kundun continue d'assaillir la barrière et l'affaiblit. Pour empêcher cet affaiblissement, il nous faut l'arme de l'Archange, et c'est pourquoi nous sollicitons l'aide des voyageurs.",
+  "ita": "Ma le Guardie Reali di Kundun continuano ad assalire la barriera, indebolendola. Per impedirlo ci serve l'arma dell'Arcangelo, ed è per questo che ora cerchiamo l'aiuto dei viaggiatori.",
+  "rom": "Însă Garda Regală a lui Kundun loveşte mai departe în barieră şi o slăbeşte. Ca să oprim această slăbire ne trebuie arma Arhanghelului, şi de aceea căutăm acum ajutorul călătorilor.",
+  "rus": "Но Королевская стража Кундуна продолжает бить по барьеру и ослабляет его. Чтобы остановить это, нам нужно оружие Архангела, — потому мы и просим помощи у странников.",
+  "bul": "Но Кралската гвардия на Кундун продължава да напада бариерата и я отслабва. За да спрем това, ни трябва оръжието на Архангела, и затова сега търсим помощта на пътниците.",
+  "chi": "然而库顿的近卫仍不断冲击结界，使其日渐衰弱。欲阻此衰弱，我们需要大天使的武器，故而此刻求助于旅人。",
+  "jpn": "しかしクンドゥンの近衛たちは今も結界を攻め続け、これを弱めています。その弱まりを防ぐには大天使の武器が必要であり、それゆえ我らは旅人の助けを求めているのです。",
+  "kor": "허나 쿤둔의 근위대는 여전히 결계를 두드려 약하게 만들고 있다. 그 약화를 막으려면 대천사의 무기가 필요하며, 그래서 우리는 지금 나그네들의 도움을 구하고 있다.",
+  "tha": "ทว่าองครักษ์ของคุนดุนยังคงโจมตีเกราะกำบังและทำให้มันอ่อนลง เราต้องใช้อาวุธของเทวทูตเพื่อยับยั้งการอ่อนกำลังนี้ ด้วยเหตุนั้นเราจึงขอความช่วยเหลือจากนักเดินทาง"
+ },
  "3047": {
   "en": "I see. How do I enter?",
   "ger": "Verstehe. Wie komme ich hinein?",
@@ -3092,6 +3391,19 @@
   "jpn": "入るのは確かに簡単ですね。そのイベントとは、具体的にどんなものですか？",
   "kor": "들어가는 건 확실히 쉽군. 그 이벤트는 정확히 어떤 것인가?",
   "tha": "เข้าไปง่ายจริงด้วย แล้วอีเวนต์นี้มีเนื้อหาอย่างไรกันแน่"
+ },
+ "3050": {
+  "en": "You will stand by for about a minute before actually entering. You'll enter Blood Castle after this standby time has elapsed. Once inside Blood Castle, you can buy some time by defeating 40 monsters summoned by a necromancer named Red Skull.",
+  "ger": "Vor dem eigentlichen Eintritt wartest du etwa eine Minute. Nach dieser Wartezeit betrittst du die Blutburg. Drinnen verschaffst du dir Zeit, indem du 40 Monster besiegst, die ein Totenbeschwörer namens Roter Schädel herbeiruft.",
+  "fre": "Tu patienteras environ une minute avant d'entrer réellement. Passé ce délai, tu pénétreras dans le Château Sanglant. Une fois à l'intérieur, tu peux gagner du temps en vainquant 40 monstres invoqués par un nécromancien nommé Crâne Rouge.",
+  "ita": "Prima di entrare davvero attenderai circa un minuto. Trascorsa l'attesa, entrerai nel Castello di Sangue. Una volta dentro, puoi guadagnare tempo sconfiggendo 40 mostri evocati da un negromante chiamato Teschio Rosso.",
+  "rom": "Înainte de a intra cu adevărat vei aştepta cam un minut. După acest răgaz vei intra în Castelul Sângelui. Odată înăuntru, poţi câştiga timp învingând 40 de monştri chemaţi de un necromant numit Craniul Roşu.",
+  "rus": "Перед самым входом ты подождёшь около минуты. Когда это ожидание истечёт, ты войдёшь в Замок Крови. Внутри можно выиграть время, победив 40 монстров, призванных некромантом по имени Красный Череп.",
+  "bul": "Преди същинското влизане ще изчакаш около минута. След този срок ще влезеш в Кървавия замък. Веднъж вътре, можеш да спечелиш време, като победиш 40 чудовища, призовани от некромант на име Червен череп.",
+  "chi": "真正入场之前，你将等候约一分钟。待此候场时间过去，便可进入血之城。入内之后，击败由名为红骷髅的亡灵法师所召的 40 只怪物，可为自己争取时间。",
+  "jpn": "実際に入場するまで、およそ一分待機します。その待機が終わるとブラッドキャッスルへ入ります。中に入ったら、レッドスカルという降霊術師が呼び出す40体のモンスターを倒すことで時間を稼げます。",
+  "kor": "실제로 입장하기까지 약 1분을 기다리게 된다. 그 대기 시간이 지나면 블러드 캐슬에 들어간다. 안에 들어가면 레드 스컬이라는 강령술사가 불러낸 몬스터 40마리를 처치해 시간을 벌 수 있다.",
+  "tha": "ท่านจะรอราวหนึ่งนาทีก่อนเข้าไปจริง เมื่อพ้นเวลารอ ท่านจะเข้าสู่ปราสาทเลือด เมื่ออยู่ข้างในแล้ว ท่านซื้อเวลาเพิ่มได้ด้วยการสังหารสัตว์ประหลาด 40 ตัวที่ถูกเรียกโดยหมอผีนามว่าเรดสกัล"
  },
  "3053": {
   "en": "I understand.",
@@ -4016,6 +4328,19 @@
   "kor": "유감이군. 그대와 동료들의 유대가 더 단단해지거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย เมื่อสายสัมพันธ์ระหว่างท่านกับสหายแน่นแฟ้นขึ้นแล้ว จงกลับมาหาข้า (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "3801": {
+  "en": "Blood Castle builds and tests the fellowship of you and your brothers in arms. If you wish to find out the strength of your party's bond, inquire with the Shadow Phantom Soldier about Blood Castle.",
+  "ger": "Die Blutburg schmiedet und prüft die Gemeinschaft zwischen dir und deinen Waffenbrüdern. Willst du die Stärke eures Bandes erfahren, frage den Schattenphantom-Soldaten nach der Blutburg.",
+  "fre": "Le Château Sanglant forge et éprouve la fraternité qui te lie à tes frères d'armes. Si tu veux mesurer la force de votre lien, interroge le Soldat fantôme de l'ombre à son sujet.",
+  "ita": "Il Castello di Sangue forgia e mette alla prova il cameratismo fra te e i tuoi fratelli d'armi. Se vuoi scoprire quanto è saldo il vostro legame, chiedine al Soldato fantasma d'ombra.",
+  "rom": "Castelul Sângelui întăreşte şi încearcă frăţia dintre tine şi fraţii tăi de arme. De vrei să afli cât de puternică e legătura voastră, întreabă Soldatul Fantomă a Umbrei despre Castelul Sângelui.",
+  "rus": "Замок Крови куёт и испытывает братство между тобой и твоими соратниками. Хочешь узнать, насколько крепка ваша связь, — расспроси о нём Теневого призрачного воина.",
+  "bul": "Кървавият замък кове и изпитва побратимството между теб и бойните ти другари. Искаш ли да узнаеш колко здрава е връзката ви, разпитай Сенчестия призрачен войник за него.",
+  "chi": "血之城既锤炼亦考验你与袍泽之间的情谊。若欲知晓你们羁绊之深浅，可向暗影幻影士兵打听血之城。",
+  "jpn": "ブラッドキャッスルは、あなたと戦友たちの絆を鍛え、試す場です。絆の強さを知りたければ、影の幻影兵にブラッドキャッスルのことを尋ねてみましょう。",
+  "kor": "블러드 캐슬은 그대와 전우들의 우애를 벼리고 시험하는 곳이다. 그 유대가 얼마나 단단한지 알고 싶거든 그림자 환영 병사에게 블러드 캐슬에 대해 물어보라.",
+  "tha": "ปราสาทเลือดหล่อหลอมและทดสอบมิตรภาพระหว่างท่านกับเพื่อนร่วมรบ หากอยากรู้ว่าสายสัมพันธ์ของพวกท่านแน่นแฟ้นเพียงใด จงสอบถามทหารเงาภาพลวงเรื่องปราสาทเลือด"
+ },
  "3802": {
   "en": "Hear what the Shadow Phantom Soldier has to say and take the Blood Castle challenge. Successfully complete the Blood Castle quest to receive a valuable reward.",
   "ger": "Höre, was der Schattenphantom-Soldat zu sagen hat, und stelle dich der Blutburg. Schließe die Blutburg-Quest erfolgreich ab, um eine wertvolle Belohnung zu erhalten.",
@@ -4067,6 +4392,19 @@
   "jpn": "今の目標は、ブラッドキャッスルで大天使の依頼を果たすことです。影の幻影兵の試練を受け、それからブラッドキャッスルに挑みましょう。",
   "kor": "이제 목표는 블러드 캐슬에서 대천사의 퀘스트를 완수하는 것이다. 그림자 환영 병사의 시험을 치른 뒤 블러드 캐슬에 도전하라.",
   "tha": "เป้าหมายตอนนี้คือทำเควสต์ของเทวทูตในปราสาทเลือดให้สำเร็จ จงผ่านการทดสอบของทหารเงาภาพลวงแล้วท้าทายปราสาทเลือด"
+ },
+ "3810": {
+  "en": "Blood Castle builds and tests the fellowship of you and your brothers in arms. If you wish to find out the strength of your party's bond, inquire with the Shadow Phantom Soldier about Blood Castle.",
+  "ger": "Die Blutburg schmiedet und prüft die Gemeinschaft zwischen dir und deinen Waffenbrüdern. Willst du die Stärke eures Bandes erfahren, frage den Schattenphantom-Soldaten nach der Blutburg.",
+  "fre": "Le Château Sanglant forge et éprouve la fraternité qui te lie à tes frères d'armes. Si tu veux mesurer la force de votre lien, interroge le Soldat fantôme de l'ombre à son sujet.",
+  "ita": "Il Castello di Sangue forgia e mette alla prova il cameratismo fra te e i tuoi fratelli d'armi. Se vuoi scoprire quanto è saldo il vostro legame, chiedine al Soldato fantasma d'ombra.",
+  "rom": "Castelul Sângelui întăreşte şi încearcă frăţia dintre tine şi fraţii tăi de arme. De vrei să afli cât de puternică e legătura voastră, întreabă Soldatul Fantomă a Umbrei despre Castelul Sângelui.",
+  "rus": "Замок Крови куёт и испытывает братство между тобой и твоими соратниками. Хочешь узнать, насколько крепка ваша связь, — расспроси о нём Теневого призрачного воина.",
+  "bul": "Кървавият замък кове и изпитва побратимството между теб и бойните ти другари. Искаш ли да узнаеш колко здрава е връзката ви, разпитай Сенчестия призрачен войник за него.",
+  "chi": "血之城既锤炼亦考验你与袍泽之间的情谊。若欲知晓你们羁绊之深浅，可向暗影幻影士兵打听血之城。",
+  "jpn": "ブラッドキャッスルは、あなたと戦友たちの絆を鍛え、試す場です。絆の強さを知りたければ、影の幻影兵にブラッドキャッスルのことを尋ねてみましょう。",
+  "kor": "블러드 캐슬은 그대와 전우들의 우애를 벼리고 시험하는 곳이다. 그 유대가 얼마나 단단한지 알고 싶거든 그림자 환영 병사에게 블러드 캐슬에 대해 물어보라.",
+  "tha": "ปราสาทเลือดหล่อหลอมและทดสอบมิตรภาพระหว่างท่านกับเพื่อนร่วมรบ หากอยากรู้ว่าสายสัมพันธ์ของพวกท่านแน่นแฟ้นเพียงใด จงสอบถามทหารเงาภาพลวงเรื่องปราสาทเลือด"
  },
  "3811": {
   "en": "Hear what the Shadow Phantom Soldier has to say and take the Blood Castle challenge. Successfully complete the Blood Castle quest to receive a valuable reward.",
@@ -4419,6 +4757,32 @@
   "kor": "소식이 빠르군. 데빌 스퀘어에 들어가는 데 필요한 물건을 주겠다. 시간이 나거든 쉬운 퀘스트를 받으러 오게.",
   "tha": "ท่านรู้ข่าวดีทีเดียว ข้าจะมอบของที่จำเป็นต่อการเข้าลานปีศาจให้ เมื่อว่างก็มาหาข้าเพื่อรับเควสต์ง่ายๆ"
  },
+ "4006": {
+  "en": "Devil Square is the place where the Elf Tree once stood. The Elf Tree was created by the mother of all Elves, an underground Elf known as Aria. This tree had the ability to produce Elves regularly. Then Secrarium tricked Lugard and appeared in Noria, at the location of the Elf Tree.",
+  "ger": "Der Teufelsplatz ist der Ort, an dem einst der Elfenbaum stand. Ihn schuf die Mutter aller Elfen, eine unterirdische Elfe namens Aria. Dieser Baum vermochte regelmäßig Elfen hervorzubringen. Dann täuschte Secrarium Lugard und erschien in Noria, an der Stelle des Elfenbaums.",
+  "fre": "La Place du Diable est le lieu où se dressait jadis l'Arbre des elfes. Il fut créé par la mère de tous les elfes, une elfe souterraine nommée Aria. Cet arbre avait le pouvoir d'enfanter des elfes à intervalles réguliers. Puis le Secrarium dupa Lugard et parut à Noria, à l'emplacement de l'Arbre des elfes.",
+  "ita": "La Piazza del Diavolo è il luogo dove sorgeva un tempo l'Albero degli elfi. Lo creò la madre di tutti gli elfi, un'elfa sotterranea di nome Aria. Quell'albero aveva il potere di generare elfi a intervalli regolari. Poi il Secrarium ingannò Lugard e comparve a Noria, dove sorgeva l'Albero degli elfi.",
+  "rom": "Piaţa Diavolului e locul unde stătea odinioară Copacul Elfilor. L-a făurit mama tuturor elfilor, o elfă de sub pământ numită Aria. Copacul acesta avea puterea de a zămisli elfi la răstimpuri. Apoi Secrarium l-a păcălit pe Lugard şi s-a ivit în Noria, chiar unde era Copacul Elfilor.",
+  "rus": "Площадь Дьявола — то место, где некогда стояло Древо эльфов. Его создала мать всех эльфов, подземная эльфийка по имени Ария. Это древо умело порождать эльфов через равные сроки. Затем Секрариум обманул Лугарда и явился в Нории, там, где стояло Древо эльфов.",
+  "bul": "Площадът на дявола е мястото, където някога стоеше Дървото на елфите. Създала го е майката на всички елфи, подземна елфка на име Ария. Това дърво имало силата да ражда елфи през равни срокове. После Секрариум измамил Лугард и се явил в Нория, там където било Дървото на елфите.",
+  "chi": "恶魔广场，昔日乃精灵之树所在之处。此树由万灵之母、地下精灵艾莉亚所创，能按时孕育精灵。其后塞克拉留姆诓骗卢加德，现身于诺利亚精灵之树所在之地。",
+  "jpn": "デビルスクエアは、かつてエルフの樹が立っていた場所です。その樹は、すべてのエルフの母である地下のエルフ、アリアが生み出しました。樹には定期的にエルフを生み出す力がありました。やがてセクラリウムはルガードを欺き、ノリアのエルフの樹があった場所に現れたのです。",
+  "kor": "데빌 스퀘어는 한때 요정의 나무가 서 있던 곳이다. 그 나무는 모든 요정의 어머니이자 지하의 요정인 아리아가 만들었다. 이 나무에는 일정한 주기로 요정을 낳는 힘이 있었다. 이윽고 세크라리움이 루가드를 속이고, 노리아의 요정의 나무가 있던 자리에 나타났다.",
+  "tha": "ลานปีศาจคือที่ซึ่งต้นไม้เอลฟ์เคยตั้งอยู่ ต้นไม้นั้นถูกสร้างโดยมารดาแห่งเอลฟ์ทั้งปวง เอลฟ์ใต้พิภพนามว่าอาเรีย ต้นไม้นี้มีอำนาจให้กำเนิดเอลฟ์เป็นระยะ ต่อมาเซคราเรียมหลอกลวงลูการ์ดและปรากฏตัวที่โนเรีย ณ ที่ซึ่งต้นไม้เอลฟ์ตั้งอยู่"
+ },
+ "4010": {
+  "en": "Monsters, however, continued to spawn at regular intervals from the spot where the tree once stood. After careful consideration, the queen of the Elves decided to make a training arena of this place for travelers.",
+  "ger": "Dennoch entsprangen der Stelle, an der einst der Baum stand, in regelmäßigen Abständen weiter Monster. Nach reiflicher Überlegung beschloss die Elfenkönigin, diesen Ort zu einer Übungsarena für Reisende zu machen.",
+  "fre": "Pourtant, des monstres continuaient d'apparaître à intervalles réguliers à l'endroit où se dressait jadis l'arbre. Après mûre réflexion, la reine des elfes décida de faire de ce lieu une arène d'entraînement pour les voyageurs.",
+  "ita": "Tuttavia, dal punto in cui sorgeva un tempo l'albero continuavano a comparire mostri a intervalli regolari. Dopo lunga riflessione, la regina degli elfi decise di farne un'arena d'addestramento per i viaggiatori.",
+  "rom": "Totuşi, din locul unde stătuse cândva copacul ieşeau mai departe monştri, la răstimpuri hotărâte. După îndelungă chibzuinţă, regina elfilor a hotărât să facă din acest loc o arenă de antrenament pentru călători.",
+  "rus": "И всё же на месте, где некогда стояло дерево, монстры продолжали появляться через равные промежутки. Хорошо всё обдумав, королева эльфов решила сделать здесь тренировочную арену для странников.",
+  "bul": "И все пак от мястото, където някога стоеше дървото, продължаваха да излизат чудовища през равни промеждутъци. След дълъг размисъл кралицата на елфите реши да направи от това място тренировъчна арена за пътниците.",
+  "chi": "然而，怪物仍自那棵树昔日所在之处按时涌出。精灵女王深思熟虑之后，决意将此地辟作旅人的练武场。",
+  "jpn": "それでもなお、かつて木が立っていた場所からは、一定の間隔でモンスターが湧き続けました。熟慮の末、エルフの女王はこの地を旅人たちの修練場とすることに決めたのです。",
+  "kor": "그럼에도 나무가 서 있던 자리에서는 일정한 간격으로 몬스터가 계속 솟아났다. 오랜 숙고 끝에 요정 여왕은 이곳을 나그네들의 수련장으로 삼기로 하였다.",
+  "tha": "กระนั้น สัตว์ประหลาดก็ยังผุดขึ้นเป็นระยะจากจุดที่ต้นไม้เคยตั้งอยู่ หลังพิจารณาอย่างถี่ถ้วน ราชินีแห่งเอลฟ์จึงตัดสินใจทำที่แห่งนี้เป็นสังเวียนฝึกฝนสำหรับนักเดินทาง"
+ },
  "4011": {
   "en": "I see. How do I enter?",
   "ger": "Verstehe. Wie komme ich hinein?",
@@ -4444,6 +4808,19 @@
   "jpn": "入るのは確かに簡単ですね。そのイベントとは、具体的にどんなものですか？",
   "kor": "들어가는 건 확실히 쉽군. 그 이벤트는 정확히 어떤 것인가?",
   "tha": "เข้าไปง่ายจริงด้วย แล้วอีเวนต์นี้มีเนื้อหาอย่างไรกันแน่"
+ },
+ "4014": {
+  "en": "You'll stand by for about a minute before actually entering. Once this standby time passes, monsters will start to appear. The monsters will continue to attack for ten minutes, and killing them will earn you points. If you score high enough, you might even receive a reward.",
+  "ger": "Vor dem eigentlichen Eintritt wartest du etwa eine Minute. Ist diese Wartezeit vorbei, erscheinen die Monster. Sie greifen zehn Minuten lang an, und für jeden Abschuss erhältst du Punkte. Erreichst du genug, winkt dir sogar eine Belohnung.",
+  "fre": "Tu patienteras environ une minute avant d'entrer réellement. Ce délai passé, des monstres commenceront à surgir. Ils attaqueront durant dix minutes, et les abattre te rapportera des points. Si ton score est assez élevé, tu pourrais même recevoir une récompense.",
+  "ita": "Prima di entrare davvero attenderai circa un minuto. Trascorsa l'attesa, cominceranno a comparire mostri. Attaccheranno per dieci minuti, e abbatterli ti farà guadagnare punti. Con un punteggio abbastanza alto potresti perfino ricevere una ricompensa.",
+  "rom": "Înainte de a intra cu adevărat vei aştepta cam un minut. După acest răgaz vor începe să apară monştri. Aceştia vor ataca vreme de zece minute, iar doborârea lor îţi aduce puncte. De aduni destule, ai putea primi chiar o răsplată.",
+  "rus": "Перед самым входом ты подождёшь около минуты. Когда ожидание истечёт, начнут появляться монстры. Они будут нападать десять минут, а за убитых ты получишь очки. Набрав достаточно, можешь даже получить награду.",
+  "bul": "Преди същинското влизане ще изчакаш около минута. След този срок ще започнат да се появяват чудовища. Те ще нападат десет минути, а убиването им носи точки. Събереш ли достатъчно, може дори да получиш награда.",
+  "chi": "真正入场之前，你将等候约一分钟。待此候场时间过去，怪物便会开始现身。怪物将持续攻来十分钟，将其击杀可得积分。若积分足够，甚或可获奖励。",
+  "jpn": "実際に入場するまで、およそ一分待機します。その待機が終わるとモンスターが現れ始めます。モンスターは十分間攻め続け、倒すごとに点数が入ります。点数が十分に高ければ、褒美を得られることもあります。",
+  "kor": "실제로 입장하기까지 약 1분을 기다리게 된다. 그 대기 시간이 지나면 몬스터가 나타나기 시작한다. 몬스터는 10분 동안 계속 공격해 오며, 처치하면 점수를 얻는다. 점수가 충분히 높으면 보상을 받을 수도 있다.",
+  "tha": "ท่านจะรอราวหนึ่งนาทีก่อนเข้าไปจริง เมื่อพ้นเวลารอ สัตว์ประหลาดจะเริ่มปรากฏ พวกมันจะโจมตีต่อเนื่องสิบนาที และการสังหารพวกมันจะทำให้ได้แต้ม หากได้แต้มสูงพอ ท่านอาจได้รับรางวัลด้วย"
  },
  "4015": {
   "en": "Is there anything I should know about Devil Square?",
@@ -4679,6 +5056,32 @@
   "kor": "소식이 빠르군. 데빌 스퀘어에 들어가는 데 필요한 물건을 주겠다. 시간이 나거든 쉬운 퀘스트를 받으러 오게.",
   "tha": "ท่านรู้ข่าวดีทีเดียว ข้าจะมอบของที่จำเป็นต่อการเข้าลานปีศาจให้ เมื่อว่างก็มาหาข้าเพื่อรับเควสต์ง่ายๆ"
  },
+ "4042": {
+  "en": "Devil Square is the place where the Elf Tree once stood. The Elf Tree was created by the mother of all Elves, an underground Elf known as Aria. This tree had the ability to produce Elves regularly. Then Secrarium tricked Lugard and appeared in Noria, at the location of the Elf Tree.",
+  "ger": "Der Teufelsplatz ist der Ort, an dem einst der Elfenbaum stand. Ihn schuf die Mutter aller Elfen, eine unterirdische Elfe namens Aria. Dieser Baum vermochte regelmäßig Elfen hervorzubringen. Dann täuschte Secrarium Lugard und erschien in Noria, an der Stelle des Elfenbaums.",
+  "fre": "La Place du Diable est le lieu où se dressait jadis l'Arbre des elfes. Il fut créé par la mère de tous les elfes, une elfe souterraine nommée Aria. Cet arbre avait le pouvoir d'enfanter des elfes à intervalles réguliers. Puis le Secrarium dupa Lugard et parut à Noria, à l'emplacement de l'Arbre des elfes.",
+  "ita": "La Piazza del Diavolo è il luogo dove sorgeva un tempo l'Albero degli elfi. Lo creò la madre di tutti gli elfi, un'elfa sotterranea di nome Aria. Quell'albero aveva il potere di generare elfi a intervalli regolari. Poi il Secrarium ingannò Lugard e comparve a Noria, dove sorgeva l'Albero degli elfi.",
+  "rom": "Piaţa Diavolului e locul unde stătea odinioară Copacul Elfilor. L-a făurit mama tuturor elfilor, o elfă de sub pământ numită Aria. Copacul acesta avea puterea de a zămisli elfi la răstimpuri. Apoi Secrarium l-a păcălit pe Lugard şi s-a ivit în Noria, chiar unde era Copacul Elfilor.",
+  "rus": "Площадь Дьявола — то место, где некогда стояло Древо эльфов. Его создала мать всех эльфов, подземная эльфийка по имени Ария. Это древо умело порождать эльфов через равные сроки. Затем Секрариум обманул Лугарда и явился в Нории, там, где стояло Древо эльфов.",
+  "bul": "Площадът на дявола е мястото, където някога стоеше Дървото на елфите. Създала го е майката на всички елфи, подземна елфка на име Ария. Това дърво имало силата да ражда елфи през равни срокове. После Секрариум измамил Лугард и се явил в Нория, там където било Дървото на елфите.",
+  "chi": "恶魔广场，昔日乃精灵之树所在之处。此树由万灵之母、地下精灵艾莉亚所创，能按时孕育精灵。其后塞克拉留姆诓骗卢加德，现身于诺利亚精灵之树所在之地。",
+  "jpn": "デビルスクエアは、かつてエルフの樹が立っていた場所です。その樹は、すべてのエルフの母である地下のエルフ、アリアが生み出しました。樹には定期的にエルフを生み出す力がありました。やがてセクラリウムはルガードを欺き、ノリアのエルフの樹があった場所に現れたのです。",
+  "kor": "데빌 스퀘어는 한때 요정의 나무가 서 있던 곳이다. 그 나무는 모든 요정의 어머니이자 지하의 요정인 아리아가 만들었다. 이 나무에는 일정한 주기로 요정을 낳는 힘이 있었다. 이윽고 세크라리움이 루가드를 속이고, 노리아의 요정의 나무가 있던 자리에 나타났다.",
+  "tha": "ลานปีศาจคือที่ซึ่งต้นไม้เอลฟ์เคยตั้งอยู่ ต้นไม้นั้นถูกสร้างโดยมารดาแห่งเอลฟ์ทั้งปวง เอลฟ์ใต้พิภพนามว่าอาเรีย ต้นไม้นี้มีอำนาจให้กำเนิดเอลฟ์เป็นระยะ ต่อมาเซคราเรียมหลอกลวงลูการ์ดและปรากฏตัวที่โนเรีย ณ ที่ซึ่งต้นไม้เอลฟ์ตั้งอยู่"
+ },
+ "4046": {
+  "en": "Monsters, however, continued to spawn at regular intervals from the spot where the tree once stood. After careful consideration, the queen of the Elves decided to make a training arena of this place for travelers.",
+  "ger": "Dennoch entsprangen der Stelle, an der einst der Baum stand, in regelmäßigen Abständen weiter Monster. Nach reiflicher Überlegung beschloss die Elfenkönigin, diesen Ort zu einer Übungsarena für Reisende zu machen.",
+  "fre": "Pourtant, des monstres continuaient d'apparaître à intervalles réguliers à l'endroit où se dressait jadis l'arbre. Après mûre réflexion, la reine des elfes décida de faire de ce lieu une arène d'entraînement pour les voyageurs.",
+  "ita": "Tuttavia, dal punto in cui sorgeva un tempo l'albero continuavano a comparire mostri a intervalli regolari. Dopo lunga riflessione, la regina degli elfi decise di farne un'arena d'addestramento per i viaggiatori.",
+  "rom": "Totuşi, din locul unde stătuse cândva copacul ieşeau mai departe monştri, la răstimpuri hotărâte. După îndelungă chibzuinţă, regina elfilor a hotărât să facă din acest loc o arenă de antrenament pentru călători.",
+  "rus": "И всё же на месте, где некогда стояло дерево, монстры продолжали появляться через равные промежутки. Хорошо всё обдумав, королева эльфов решила сделать здесь тренировочную арену для странников.",
+  "bul": "И все пак от мястото, където някога стоеше дървото, продължаваха да излизат чудовища през равни промеждутъци. След дълъг размисъл кралицата на елфите реши да направи от това място тренировъчна арена за пътниците.",
+  "chi": "然而，怪物仍自那棵树昔日所在之处按时涌出。精灵女王深思熟虑之后，决意将此地辟作旅人的练武场。",
+  "jpn": "それでもなお、かつて木が立っていた場所からは、一定の間隔でモンスターが湧き続けました。熟慮の末、エルフの女王はこの地を旅人たちの修練場とすることに決めたのです。",
+  "kor": "그럼에도 나무가 서 있던 자리에서는 일정한 간격으로 몬스터가 계속 솟아났다. 오랜 숙고 끝에 요정 여왕은 이곳을 나그네들의 수련장으로 삼기로 하였다.",
+  "tha": "กระนั้น สัตว์ประหลาดก็ยังผุดขึ้นเป็นระยะจากจุดที่ต้นไม้เคยตั้งอยู่ หลังพิจารณาอย่างถี่ถ้วน ราชินีแห่งเอลฟ์จึงตัดสินใจทำที่แห่งนี้เป็นสังเวียนฝึกฝนสำหรับนักเดินทาง"
+ },
  "4047": {
   "en": "I see. How do I enter?",
   "ger": "Verstehe. Wie komme ich hinein?",
@@ -4704,6 +5107,19 @@
   "jpn": "入るのは確かに簡単ですね。そのイベントとは、具体的にどんなものですか？",
   "kor": "들어가는 건 확실히 쉽군. 그 이벤트는 정확히 어떤 것인가?",
   "tha": "เข้าไปง่ายจริงด้วย แล้วอีเวนต์นี้มีเนื้อหาอย่างไรกันแน่"
+ },
+ "4050": {
+  "en": "You'll stand by for about a minute before actually entering. Once this standby time passes, monsters will start to appear. The monsters will continue to attack for ten minutes, and killing them will earn you points. If you score high enough, you might even receive a reward.",
+  "ger": "Vor dem eigentlichen Eintritt wartest du etwa eine Minute. Ist diese Wartezeit vorbei, erscheinen die Monster. Sie greifen zehn Minuten lang an, und für jeden Abschuss erhältst du Punkte. Erreichst du genug, winkt dir sogar eine Belohnung.",
+  "fre": "Tu patienteras environ une minute avant d'entrer réellement. Ce délai passé, des monstres commenceront à surgir. Ils attaqueront durant dix minutes, et les abattre te rapportera des points. Si ton score est assez élevé, tu pourrais même recevoir une récompense.",
+  "ita": "Prima di entrare davvero attenderai circa un minuto. Trascorsa l'attesa, cominceranno a comparire mostri. Attaccheranno per dieci minuti, e abbatterli ti farà guadagnare punti. Con un punteggio abbastanza alto potresti perfino ricevere una ricompensa.",
+  "rom": "Înainte de a intra cu adevărat vei aştepta cam un minut. După acest răgaz vor începe să apară monştri. Aceştia vor ataca vreme de zece minute, iar doborârea lor îţi aduce puncte. De aduni destule, ai putea primi chiar o răsplată.",
+  "rus": "Перед самым входом ты подождёшь около минуты. Когда ожидание истечёт, начнут появляться монстры. Они будут нападать десять минут, а за убитых ты получишь очки. Набрав достаточно, можешь даже получить награду.",
+  "bul": "Преди същинското влизане ще изчакаш около минута. След този срок ще започнат да се появяват чудовища. Те ще нападат десет минути, а убиването им носи точки. Събереш ли достатъчно, може дори да получиш награда.",
+  "chi": "真正入场之前，你将等候约一分钟。待此候场时间过去，怪物便会开始现身。怪物将持续攻来十分钟，将其击杀可得积分。若积分足够，甚或可获奖励。",
+  "jpn": "実際に入場するまで、およそ一分待機します。その待機が終わるとモンスターが現れ始めます。モンスターは十分間攻め続け、倒すごとに点数が入ります。点数が十分に高ければ、褒美を得られることもあります。",
+  "kor": "실제로 입장하기까지 약 1분을 기다리게 된다. 그 대기 시간이 지나면 몬스터가 나타나기 시작한다. 몬스터는 10분 동안 계속 공격해 오며, 처치하면 점수를 얻는다. 점수가 충분히 높으면 보상을 받을 수도 있다.",
+  "tha": "ท่านจะรอราวหนึ่งนาทีก่อนเข้าไปจริง เมื่อพ้นเวลารอ สัตว์ประหลาดจะเริ่มปรากฏ พวกมันจะโจมตีต่อเนื่องสิบนาที และการสังหารพวกมันจะทำให้ได้แต้ม หากได้แต้มสูงพอ ท่านอาจได้รับรางวัลด้วย"
  },
  "4051": {
   "en": "Is there anything I should know about Devil Square?",
@@ -6018,6 +6434,19 @@
   "kor": "들어가는 건 확실히 쉽군. 그 이벤트는 정확히 어떤 것인가?",
   "tha": "เข้าไปง่ายจริงด้วย แล้วอีเวนต์นี้มีเนื้อหาอย่างไรกันแน่"
  },
+ "5014": {
+  "en": "Upon entering, you'll need to wait for other players to enter. The players will then be divided into two teams: Alliance Camp and Illusion Sorcery Camp. The camp that brings over more relics to their own side wins.",
+  "ger": "Nach dem Betreten musst du warten, bis weitere Spieler eintreffen. Dann werden alle in zwei Lager geteilt: das Bündnislager und das Lager der Illusionszauberei. Es siegt das Lager, das mehr Relikte auf seine Seite bringt.",
+  "fre": "Une fois entré, il te faudra attendre l'arrivée d'autres joueurs. Ils seront ensuite répartis en deux camps : le camp de l'Alliance et le camp de la Sorcellerie d'illusion. Le camp qui ramène le plus de reliques de son côté l'emporte.",
+  "ita": "Una volta entrato, dovrai attendere l'ingresso di altri giocatori. Questi saranno poi divisi in due schieramenti: il Campo dell'Alleanza e il Campo della Stregoneria d'illusione. Vince il campo che porta più reliquie dalla propria parte.",
+  "rom": "După ce intri, va trebui să aştepţi şi alţi jucători. Aceştia vor fi apoi împărţiţi în două tabere: Tabăra Alianţei şi Tabăra Vrăjitoriei Iluziei. Câştigă tabăra care aduce mai multe relicve de partea sa.",
+  "rus": "Войдя, тебе придётся подождать других игроков. Затем всех разделят на два лагеря: лагерь Союза и лагерь Иллюзорного чародейства. Побеждает лагерь, перенёсший на свою сторону больше реликвий.",
+  "bul": "След като влезеш, ще трябва да изчакаш и други играчи. После всички ще бъдат разделени на два лагера: лагер на Съюза и лагер на Илюзорното магьосничество. Печели лагерът, който пренесе повече реликви на своята страна.",
+  "chi": "入内之后，你须等待其他玩家进场。众人随后将分为两阵营：联盟阵营与幻术阵营。将更多圣物带回己方者获胜。",
+  "jpn": "入場したら、他のプレイヤーが入るのを待つことになります。その後、全員が二つの陣営に分かれます。同盟陣営と幻影術陣営です。より多くの聖物を自陣へ運んだ陣営の勝ちです。",
+  "kor": "들어가면 다른 플레이어들이 입장할 때까지 기다려야 한다. 이후 모두가 두 진영으로 나뉜다. 연합 진영과 환영술 진영이다. 자기 쪽으로 성물을 더 많이 옮긴 진영이 승리한다.",
+  "tha": "เมื่อเข้าไปแล้ว ท่านต้องรอผู้เล่นคนอื่นเข้ามา จากนั้นทุกคนจะถูกแบ่งเป็นสองฝ่าย คือฝ่ายพันธมิตรและฝ่ายเวทลวงตา ฝ่ายที่นำของศักดิ์สิทธิ์กลับมายังฝั่งตนได้มากกว่าเป็นผู้ชนะ"
+ },
  "5015": {
   "en": "Is there anything I should be aware of about Illusion Temple?",
   "ger": "Gibt es etwas, das ich über den Illusionstempel wissen sollte?",
@@ -6030,6 +6459,19 @@
   "jpn": "幻影の神殿について、心得ておくべきことはありますか？",
   "kor": "환영의 신전에 대해 알아 둘 것이 있나?",
   "tha": "มีสิ่งใดเกี่ยวกับวิหารลวงตาที่ข้าควรรู้หรือไม่"
+ },
+ "5016": {
+  "en": "You'll not be able to use certain skills like Teleport or Telekinesis while holding on to a relic. On the other hand, there are special skills that can only be used in Illusion Temple. Using these skills to your advantage will make it easier for your camp to win.",
+  "ger": "Solange du ein Relikt trägst, kannst du bestimmte Fertigkeiten wie Teleport oder Telekinese nicht nutzen. Dafür gibt es besondere Fertigkeiten, die nur im Illusionstempel wirken. Setzt du sie geschickt ein, gewinnt dein Lager leichter.",
+  "fre": "Tant que tu portes une relique, certaines compétences comme Téléport ou Télékinésie te sont interdites. En revanche, il existe des compétences spéciales utilisables seulement au Temple d'Illusion. Bien employées, elles faciliteront la victoire de ton camp.",
+  "ita": "Finché porti una reliquia non potrai usare certe abilità come Teletrasporto o Telecinesi. Esistono però abilità speciali utilizzabili solo al Tempio dell'Illusione. Sfruttarle bene renderà più facile la vittoria del tuo campo.",
+  "rom": "Cât timp duci o relicvă, nu vei putea folosi anumite abilităţi precum Teleportare ori Telechinezie. În schimb, există abilităţi deosebite ce se pot folosi doar în Templul Iluziei. Folosite cu cap, îi vor uşura taberei tale izbânda.",
+  "rus": "Пока ты несёшь реликвию, некоторые умения — Телепорт или Телекинез — будут недоступны. Зато есть особые умения, действующие только в Храме Иллюзий. Умелое их применение облегчит победу твоему лагерю.",
+  "bul": "Докато носиш реликва, няма да можеш да ползваш някои умения като Телепорт или Телекинеза. Затова пък има особени умения, които действат само в Храма на илюзиите. Умелото им използване ще улесни победата на твоя лагер.",
+  "chi": "手持圣物之时，你无法使用瞬移、念力等部分技能。另一方面，亦有仅能于幻影神殿中施展的特殊技能。善用这些技能，可令己方阵营更易获胜。",
+  "jpn": "聖物を抱えている間は、テレポートやテレキネシスといった一部のスキルが使えません。その代わり、幻影の神殿でしか使えない特別なスキルがあります。これらをうまく使えば、自陣の勝利がぐっと近づきます。",
+  "kor": "성물을 들고 있는 동안에는 텔레포트나 염력 같은 일부 스킬을 쓸 수 없다. 반면 환영의 신전에서만 쓸 수 있는 특별한 스킬이 있다. 이를 잘 활용하면 그대의 진영이 이기기가 한결 쉬워진다.",
+  "tha": "ขณะถือของศักดิ์สิทธิ์ ท่านจะใช้สกิลบางอย่างเช่นเทเลพอร์ตหรือเทเลคิเนซิสไม่ได้ ในทางกลับกัน มีสกิลพิเศษที่ใช้ได้เฉพาะในวิหารลวงตา การใช้สกิลเหล่านี้ให้เป็นประโยชน์จะทำให้ฝ่ายของท่านชนะง่ายขึ้น"
  },
  "5017": {
   "en": "It all makes sense now.",
@@ -6213,6 +6655,19 @@
   "kor": "들어가는 건 확실히 쉽군. 그 이벤트는 정확히 어떤 것인가?",
   "tha": "เข้าไปง่ายจริงด้วย แล้วอีเวนต์นี้มีเนื้อหาอย่างไรกันแน่"
  },
+ "5044": {
+  "en": "Upon entering, you'll need to wait for other players to enter. The players will then be divided into two teams: Alliance Camp and Illusion Sorcery Camp. The camp that brings over more relics to their own side wins.",
+  "ger": "Nach dem Betreten musst du warten, bis weitere Spieler eintreffen. Dann werden alle in zwei Lager geteilt: das Bündnislager und das Lager der Illusionszauberei. Es siegt das Lager, das mehr Relikte auf seine Seite bringt.",
+  "fre": "Une fois entré, il te faudra attendre l'arrivée d'autres joueurs. Ils seront ensuite répartis en deux camps : le camp de l'Alliance et le camp de la Sorcellerie d'illusion. Le camp qui ramène le plus de reliques de son côté l'emporte.",
+  "ita": "Una volta entrato, dovrai attendere l'ingresso di altri giocatori. Questi saranno poi divisi in due schieramenti: il Campo dell'Alleanza e il Campo della Stregoneria d'illusione. Vince il campo che porta più reliquie dalla propria parte.",
+  "rom": "După ce intri, va trebui să aştepţi şi alţi jucători. Aceştia vor fi apoi împărţiţi în două tabere: Tabăra Alianţei şi Tabăra Vrăjitoriei Iluziei. Câştigă tabăra care aduce mai multe relicve de partea sa.",
+  "rus": "Войдя, тебе придётся подождать других игроков. Затем всех разделят на два лагеря: лагерь Союза и лагерь Иллюзорного чародейства. Побеждает лагерь, перенёсший на свою сторону больше реликвий.",
+  "bul": "След като влезеш, ще трябва да изчакаш и други играчи. После всички ще бъдат разделени на два лагера: лагер на Съюза и лагер на Илюзорното магьосничество. Печели лагерът, който пренесе повече реликви на своята страна.",
+  "chi": "入内之后，你须等待其他玩家进场。众人随后将分为两阵营：联盟阵营与幻术阵营。将更多圣物带回己方者获胜。",
+  "jpn": "入場したら、他のプレイヤーが入るのを待つことになります。その後、全員が二つの陣営に分かれます。同盟陣営と幻影術陣営です。より多くの聖物を自陣へ運んだ陣営の勝ちです。",
+  "kor": "들어가면 다른 플레이어들이 입장할 때까지 기다려야 한다. 이후 모두가 두 진영으로 나뉜다. 연합 진영과 환영술 진영이다. 자기 쪽으로 성물을 더 많이 옮긴 진영이 승리한다.",
+  "tha": "เมื่อเข้าไปแล้ว ท่านต้องรอผู้เล่นคนอื่นเข้ามา จากนั้นทุกคนจะถูกแบ่งเป็นสองฝ่าย คือฝ่ายพันธมิตรและฝ่ายเวทลวงตา ฝ่ายที่นำของศักดิ์สิทธิ์กลับมายังฝั่งตนได้มากกว่าเป็นผู้ชนะ"
+ },
  "5045": {
   "en": "Is there anything I should be aware of about Illusion Temple?",
   "ger": "Gibt es etwas, das ich über den Illusionstempel wissen sollte?",
@@ -6225,6 +6680,19 @@
   "jpn": "幻影の神殿について、心得ておくべきことはありますか？",
   "kor": "환영의 신전에 대해 알아 둘 것이 있나?",
   "tha": "มีสิ่งใดเกี่ยวกับวิหารลวงตาที่ข้าควรรู้หรือไม่"
+ },
+ "5046": {
+  "en": "You'll not be able to use certain skills like Teleport or Telekinesis while holding on to a relic. On the other hand, there are special skills that can only be used in Illusion Temple. Using these skills to your advantage will make it easier for your camp to win.",
+  "ger": "Solange du ein Relikt trägst, kannst du bestimmte Fertigkeiten wie Teleport oder Telekinese nicht nutzen. Dafür gibt es besondere Fertigkeiten, die nur im Illusionstempel wirken. Setzt du sie geschickt ein, gewinnt dein Lager leichter.",
+  "fre": "Tant que tu portes une relique, certaines compétences comme Téléport ou Télékinésie te sont interdites. En revanche, il existe des compétences spéciales utilisables seulement au Temple d'Illusion. Bien employées, elles faciliteront la victoire de ton camp.",
+  "ita": "Finché porti una reliquia non potrai usare certe abilità come Teletrasporto o Telecinesi. Esistono però abilità speciali utilizzabili solo al Tempio dell'Illusione. Sfruttarle bene renderà più facile la vittoria del tuo campo.",
+  "rom": "Cât timp duci o relicvă, nu vei putea folosi anumite abilităţi precum Teleportare ori Telechinezie. În schimb, există abilităţi deosebite ce se pot folosi doar în Templul Iluziei. Folosite cu cap, îi vor uşura taberei tale izbânda.",
+  "rus": "Пока ты несёшь реликвию, некоторые умения — Телепорт или Телекинез — будут недоступны. Зато есть особые умения, действующие только в Храме Иллюзий. Умелое их применение облегчит победу твоему лагерю.",
+  "bul": "Докато носиш реликва, няма да можеш да ползваш някои умения като Телепорт или Телекинеза. Затова пък има особени умения, които действат само в Храма на илюзиите. Умелото им използване ще улесни победата на твоя лагер.",
+  "chi": "手持圣物之时，你无法使用瞬移、念力等部分技能。另一方面，亦有仅能于幻影神殿中施展的特殊技能。善用这些技能，可令己方阵营更易获胜。",
+  "jpn": "聖物を抱えている間は、テレポートやテレキネシスといった一部のスキルが使えません。その代わり、幻影の神殿でしか使えない特別なスキルがあります。これらをうまく使えば、自陣の勝利がぐっと近づきます。",
+  "kor": "성물을 들고 있는 동안에는 텔레포트나 염력 같은 일부 스킬을 쓸 수 없다. 반면 환영의 신전에서만 쓸 수 있는 특별한 스킬이 있다. 이를 잘 활용하면 그대의 진영이 이기기가 한결 쉬워진다.",
+  "tha": "ขณะถือของศักดิ์สิทธิ์ ท่านจะใช้สกิลบางอย่างเช่นเทเลพอร์ตหรือเทเลคิเนซิสไม่ได้ ในทางกลับกัน มีสกิลพิเศษที่ใช้ได้เฉพาะในวิหารลวงตา การใช้สกิลเหล่านี้ให้เป็นประโยชน์จะทำให้ฝ่ายของท่านชนะง่ายขึ้น"
  },
  "5047": {
   "en": "It all makes sense now.",
@@ -6434,6 +6902,19 @@
   "kor": "유감이군. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย หากเปลี่ยนใจก็กลับมาได้เสมอ (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "5075": {
+  "en": "Were you able to acquire plenty of items for your training? I should tell you now that it's not so easy to enter Illusion Temple. I, however, have a quest that will earn you a ticket into Illusion Temple. Will you accept? (All characters: Level 351-380)",
+  "ger": "Konntest du reichlich Gegenstände für deine Schulung erlangen? Ich sage dir gleich: In den Illusionstempel zu gelangen ist nicht eben leicht. Ich habe jedoch eine Quest, die dir Einlass verschafft. Nimmst du sie an? (Alle Klassen: Stufe 351-380)",
+  "fre": "As-tu pu réunir assez d'objets pour ton entraînement ? Autant te le dire tout de suite : entrer au Temple d'Illusion n'a rien d'aisé. J'ai pourtant une quête qui t'en ouvrira l'accès. L'acceptes-tu ? (Tous personnages : niveau 351-380)",
+  "ita": "Sei riuscito a procurarti oggetti a sufficienza per il tuo addestramento? Te lo dico subito: entrare al Tempio dell'Illusione non è affatto facile. Ho però una missione che ti darà l'accesso. L'accetti? (Tutti i personaggi: livello 351-380)",
+  "rom": "Ai izbutit să aduni destule obiecte pentru pregătirea ta? Ţi-o spun de la bun început: nu e deloc uşor să intri în Templul Iluziei. Am totuşi o misiune care-ţi va deschide intrarea. O primeşti? (Toate personajele: nivel 351-380)",
+  "rus": "Удалось ли тебе добыть довольно вещей для выучки? Скажу сразу: попасть в Храм Иллюзий не так просто. Однако у меня есть задание, которое откроет тебе вход. Возьмёшься? (Все персонажи: уровень 351-380)",
+  "bul": "Успя ли да събереш достатъчно предмети за обучението си? Ще ти кажа отсега: не е никак лесно да влезеш в Храма на илюзиите. Имам обаче задача, която ще ти отвори входа. Ще я приемеш ли? (Всички герои: ниво 351-380)",
+  "chi": "修行所需之物，你可曾备齐？我先言明：入幻影神殿并非易事。不过我有一件任务，可为你换得入殿之凭。你可愿接？（全职业：351-380 级）",
+  "jpn": "鍛錬に要る品は十分に手に入りましたか。先に申しておきますが、幻影の神殿に入るのは容易ではありません。とはいえ、入場の証を得られる依頼がございます。お受けになりますか。（全キャラクター：レベル351-380）",
+  "kor": "수련에 쓸 물품은 넉넉히 구했는가? 미리 일러 두자면, 환영의 신전에 들어가기란 결코 쉽지 않다. 허나 내게는 입장권을 얻게 해 줄 퀘스트가 있다. 받겠는가? (모든 캐릭터: 레벨 351-380)",
+  "tha": "ท่านหาไอเทมสำหรับการฝึกฝนได้มากพอหรือยัง ข้าขอบอกไว้ก่อนว่าการเข้าวิหารลวงตานั้นไม่ง่ายเลย ทว่าข้ามีเควสต์ที่จะทำให้ท่านได้บัตรผ่านเข้าวิหารลวงตา ท่านจะรับหรือไม่ (ทุกตัวละคร: เลเวล 351-380)"
+ },
  "5076": {
   "en": "By a 'simple quest', do you mean killing monsters?",
   "ger": "Mit einer 'einfachen Quest' meinst du das Töten von Monstern?",
@@ -6486,6 +6967,19 @@
   "kor": "유감이군. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย หากเปลี่ยนใจก็กลับมาได้เสมอ (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "5081": {
+  "en": "Illusion Temple is a place where you can find both wealth and fame. If you take the temple challenge, you might acquire something essential for your training. Would you like to take the challenge? (All characters: Level 351-380)",
+  "ger": "Im Illusionstempel finden sich Reichtum und Ruhm zugleich. Stellst du dich ihm, erlangst du vielleicht etwas, das deine Schulung wesentlich voranbringt. Willst du dich der Herausforderung stellen? (Alle Klassen: Stufe 351-380)",
+  "fre": "Le Temple d'Illusion est un lieu où l'on trouve à la fois richesse et renommée. En relevant son défi, tu pourrais obtenir ce qui manque à ton entraînement. Veux-tu relever le défi ? (Tous personnages : niveau 351-380)",
+  "ita": "Il Tempio dell'Illusione è un luogo dove si trovano insieme ricchezza e fama. Affrontando la sua sfida potresti ottenere qualcosa di essenziale per il tuo addestramento. Vuoi accettarla? (Tutti i personaggi: livello 351-380)",
+  "rom": "Templul Iluziei e un loc unde se află deopotrivă avere şi faimă. De-i primeşti provocarea, ai putea dobândi ceva de neapărată trebuinţă pentru pregătirea ta. Vrei să o primeşti? (Toate personajele: nivel 351-380)",
+  "rus": "В Храме Иллюзий можно обрести и богатство, и славу. Приняв его вызов, ты, быть может, добудешь то, что необходимо для твоей выучки. Примешь вызов? (Все персонажи: уровень 351-380)",
+  "bul": "Храмът на илюзиите е място, където се намират и богатство, и слава. Приемеш ли предизвикателството му, може да се сдобиеш с нещо нужно за обучението ти. Ще го приемеш ли? (Всички герои: ниво 351-380)",
+  "chi": "幻影神殿乃财富与名望兼得之地。若接下此殿的挑战，或可获得修行所必需之物。你可愿一试？（全职业：351-380 级）",
+  "jpn": "幻影の神殿は、富と名声の双方を得られる場所です。その挑戦を受ければ、鍛錬に欠かせぬ品を手にできるかもしれません。挑戦なさいますか？（全キャラクター：レベル351-380）",
+  "kor": "환영의 신전은 부와 명성을 함께 얻을 수 있는 곳이다. 그 도전을 받아들이면 수련에 꼭 필요한 것을 얻을지도 모른다. 도전하겠는가? (모든 캐릭터: 레벨 351-380)",
+  "tha": "วิหารลวงตาคือที่ซึ่งท่านพบได้ทั้งทรัพย์และชื่อเสียง หากรับคำท้าของวิหารนี้ ท่านอาจได้สิ่งจำเป็นต่อการฝึกฝน ท่านจะรับคำท้าหรือไม่ (ทุกตัวละคร: เลเวล 351-380)"
+ },
  "5083": {
   "en": "Very well. I will take on this challenge.",
   "ger": "Nun gut. Ich stelle mich dieser Herausforderung.",
@@ -6524,6 +7018,19 @@
   "jpn": "残念です。気が変わったら、また来てください。（クエストは取り消されました。）",
   "kor": "유감이군. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย หากเปลี่ยนใจก็กลับมาได้เสมอ (เควสต์ถูกยกเลิกแล้ว)"
+ },
+ "5087": {
+  "en": "Were you able to acquire plenty of items for your training? I should tell you now that it's not so easy to enter Illusion Temple. I, however, have a quest that will earn you a ticket into Illusion Temple. Will you accept? (All characters: Level 351-380)",
+  "ger": "Konntest du reichlich Gegenstände für deine Schulung erlangen? Ich sage dir gleich: In den Illusionstempel zu gelangen ist nicht eben leicht. Ich habe jedoch eine Quest, die dir Einlass verschafft. Nimmst du sie an? (Alle Klassen: Stufe 351-380)",
+  "fre": "As-tu pu réunir assez d'objets pour ton entraînement ? Autant te le dire tout de suite : entrer au Temple d'Illusion n'a rien d'aisé. J'ai pourtant une quête qui t'en ouvrira l'accès. L'acceptes-tu ? (Tous personnages : niveau 351-380)",
+  "ita": "Sei riuscito a procurarti oggetti a sufficienza per il tuo addestramento? Te lo dico subito: entrare al Tempio dell'Illusione non è affatto facile. Ho però una missione che ti darà l'accesso. L'accetti? (Tutti i personaggi: livello 351-380)",
+  "rom": "Ai izbutit să aduni destule obiecte pentru pregătirea ta? Ţi-o spun de la bun început: nu e deloc uşor să intri în Templul Iluziei. Am totuşi o misiune care-ţi va deschide intrarea. O primeşti? (Toate personajele: nivel 351-380)",
+  "rus": "Удалось ли тебе добыть довольно вещей для выучки? Скажу сразу: попасть в Храм Иллюзий не так просто. Однако у меня есть задание, которое откроет тебе вход. Возьмёшься? (Все персонажи: уровень 351-380)",
+  "bul": "Успя ли да събереш достатъчно предмети за обучението си? Ще ти кажа отсега: не е никак лесно да влезеш в Храма на илюзиите. Имам обаче задача, която ще ти отвори входа. Ще я приемеш ли? (Всички герои: ниво 351-380)",
+  "chi": "修行所需之物，你可曾备齐？我先言明：入幻影神殿并非易事。不过我有一件任务，可为你换得入殿之凭。你可愿接？（全职业：351-380 级）",
+  "jpn": "鍛錬に要る品は十分に手に入りましたか。先に申しておきますが、幻影の神殿に入るのは容易ではありません。とはいえ、入場の証を得られる依頼がございます。お受けになりますか。（全キャラクター：レベル351-380）",
+  "kor": "수련에 쓸 물품은 넉넉히 구했는가? 미리 일러 두자면, 환영의 신전에 들어가기란 결코 쉽지 않다. 허나 내게는 입장권을 얻게 해 줄 퀘스트가 있다. 받겠는가? (모든 캐릭터: 레벨 351-380)",
+  "tha": "ท่านหาไอเทมสำหรับการฝึกฝนได้มากพอหรือยัง ข้าขอบอกไว้ก่อนว่าการเข้าวิหารลวงตานั้นไม่ง่ายเลย ทว่าข้ามีเควสต์ที่จะทำให้ท่านได้บัตรผ่านเข้าวิหารลวงตา ท่านจะรับหรือไม่ (ทุกตัวละคร: เลเวล 351-380)"
  },
  "5088": {
   "en": "By a 'simple quest', do you mean killing monsters?",
@@ -6576,6 +7083,19 @@
   "jpn": "残念です。気が変わったら、また来てください。（クエストは取り消されました。）",
   "kor": "유감이군. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย หากเปลี่ยนใจก็กลับมาได้เสมอ (เควสต์ถูกยกเลิกแล้ว)"
+ },
+ "5093": {
+  "en": "Illusion Temple is a place where you can find both wealth and fame. If you take the temple challenge, you might acquire something essential for your training. Would you like to take the challenge? (All characters: Level 351-380)",
+  "ger": "Im Illusionstempel finden sich Reichtum und Ruhm zugleich. Stellst du dich ihm, erlangst du vielleicht etwas, das deine Schulung wesentlich voranbringt. Willst du dich der Herausforderung stellen? (Alle Klassen: Stufe 351-380)",
+  "fre": "Le Temple d'Illusion est un lieu où l'on trouve à la fois richesse et renommée. En relevant son défi, tu pourrais obtenir ce qui manque à ton entraînement. Veux-tu relever le défi ? (Tous personnages : niveau 351-380)",
+  "ita": "Il Tempio dell'Illusione è un luogo dove si trovano insieme ricchezza e fama. Affrontando la sua sfida potresti ottenere qualcosa di essenziale per il tuo addestramento. Vuoi accettarla? (Tutti i personaggi: livello 351-380)",
+  "rom": "Templul Iluziei e un loc unde se află deopotrivă avere şi faimă. De-i primeşti provocarea, ai putea dobândi ceva de neapărată trebuinţă pentru pregătirea ta. Vrei să o primeşti? (Toate personajele: nivel 351-380)",
+  "rus": "В Храме Иллюзий можно обрести и богатство, и славу. Приняв его вызов, ты, быть может, добудешь то, что необходимо для твоей выучки. Примешь вызов? (Все персонажи: уровень 351-380)",
+  "bul": "Храмът на илюзиите е място, където се намират и богатство, и слава. Приемеш ли предизвикателството му, може да се сдобиеш с нещо нужно за обучението ти. Ще го приемеш ли? (Всички герои: ниво 351-380)",
+  "chi": "幻影神殿乃财富与名望兼得之地。若接下此殿的挑战，或可获得修行所必需之物。你可愿一试？（全职业：351-380 级）",
+  "jpn": "幻影の神殿は、富と名声の双方を得られる場所です。その挑戦を受ければ、鍛錬に欠かせぬ品を手にできるかもしれません。挑戦なさいますか？（全キャラクター：レベル351-380）",
+  "kor": "환영의 신전은 부와 명성을 함께 얻을 수 있는 곳이다. 그 도전을 받아들이면 수련에 꼭 필요한 것을 얻을지도 모른다. 도전하겠는가? (모든 캐릭터: 레벨 351-380)",
+  "tha": "วิหารลวงตาคือที่ซึ่งท่านพบได้ทั้งทรัพย์และชื่อเสียง หากรับคำท้าของวิหารนี้ ท่านอาจได้สิ่งจำเป็นต่อการฝึกฝน ท่านจะรับคำท้าหรือไม่ (ทุกตัวละคร: เลเวล 351-380)"
  },
  "5095": {
   "en": "Very well. I will take on this challenge.",
@@ -6707,6 +7227,19 @@
   "kor": "유감이군. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "น่าเสียดาย หากเปลี่ยนใจก็กลับมาได้เสมอ (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "5801": {
+  "en": "Illusion Temple is a place where you can acquire items and equipment for fast growth. If you wish to possess such items and equipment for yourself, inquire with the Shadow Phantom Soldier about Illusion Temple.",
+  "ger": "Im Illusionstempel erlangst du Gegenstände und Ausrüstung für schnelles Wachstum. Willst du sie selbst besitzen, frage den Schattenphantom-Soldaten nach dem Illusionstempel.",
+  "fre": "Le Temple d'Illusion permet d'obtenir objets et équipements propices à une progression rapide. Si tu veux les posséder, interroge le Soldat fantôme de l'ombre à son sujet.",
+  "ita": "Al Tempio dell'Illusione si ottengono oggetti ed equipaggiamento per crescere in fretta. Se vuoi possederli, chiedine al Soldato fantasma d'ombra.",
+  "rom": "În Templul Iluziei poţi dobândi obiecte şi echipament pentru o creştere iute. De vrei să le ai, întreabă Soldatul Fantomă a Umbrei despre Templul Iluziei.",
+  "rus": "В Храме Иллюзий можно добыть предметы и снаряжение для быстрого роста. Хочешь их заполучить — расспроси о нём Теневого призрачного воина.",
+  "bul": "В Храма на илюзиите можеш да се сдобиеш с предмети и екипировка за бърз растеж. Искаш ли да ги имаш, разпитай Сенчестия призрачен войник за него.",
+  "chi": "幻影神殿是可获取助你速成之物品与装备之地。若欲将其据为己有，可向暗影幻影士兵打听幻影神殿。",
+  "jpn": "幻影の神殿は、速い成長に役立つアイテムや装備を手に入れられる場所です。それらを自分のものにしたければ、影の幻影兵に幻影の神殿のことを尋ねてみましょう。",
+  "kor": "환영의 신전은 빠른 성장에 필요한 아이템과 장비를 얻을 수 있는 곳이다. 그것들을 손에 넣고 싶거든 그림자 환영 병사에게 환영의 신전에 대해 물어보라.",
+  "tha": "วิหารลวงตาคือที่ซึ่งท่านได้ไอเทมและอุปกรณ์สำหรับการเติบโตอย่างรวดเร็ว หากอยากครอบครองสิ่งเหล่านั้น จงสอบถามทหารเงาภาพลวงเรื่องวิหารลวงตา"
+ },
  "5802": {
   "en": "Hear what the Shadow Phantom Soldier has to say and take the Illusion Temple challenge. Win at Illusion Temple to claim a valuable reward.",
   "ger": "Höre, was der Schattenphantom-Soldat zu sagen hat, und stelle dich dem Illusionstempel. Siege dort, um eine wertvolle Belohnung zu erhalten.",
@@ -6758,6 +7291,19 @@
   "jpn": "幻影の神殿で勝利すれば、影の幻影兵がささやかな褒美をくれます。影の幻影兵の試練を受け、幻影の神殿に挑みましょう。",
   "kor": "환영의 신전에서 승리하면 그림자 환영 병사가 작은 보상을 줄 것이다. 그림자 환영 병사의 시험을 받고 환영의 신전에 도전하라.",
   "tha": "หากท่านชนะที่วิหารลวงตา ทหารเงาภาพลวงจะมอบรางวัลเล็กน้อยให้ จงรับการทดสอบของทหารเงาภาพลวงแล้วท้าทายวิหารลวงตา"
+ },
+ "5808": {
+  "en": "Illusion Temple is a place where you can acquire items and equipment for fast growth. If you wish to possess such items and equipment for yourself, inquire with the Shadow Phantom Soldier about Illusion Temple.",
+  "ger": "Im Illusionstempel erlangst du Gegenstände und Ausrüstung für schnelles Wachstum. Willst du sie selbst besitzen, frage den Schattenphantom-Soldaten nach dem Illusionstempel.",
+  "fre": "Le Temple d'Illusion permet d'obtenir objets et équipements propices à une progression rapide. Si tu veux les posséder, interroge le Soldat fantôme de l'ombre à son sujet.",
+  "ita": "Al Tempio dell'Illusione si ottengono oggetti ed equipaggiamento per crescere in fretta. Se vuoi possederli, chiedine al Soldato fantasma d'ombra.",
+  "rom": "În Templul Iluziei poţi dobândi obiecte şi echipament pentru o creştere iute. De vrei să le ai, întreabă Soldatul Fantomă a Umbrei despre Templul Iluziei.",
+  "rus": "В Храме Иллюзий можно добыть предметы и снаряжение для быстрого роста. Хочешь их заполучить — расспроси о нём Теневого призрачного воина.",
+  "bul": "В Храма на илюзиите можеш да се сдобиеш с предмети и екипировка за бърз растеж. Искаш ли да ги имаш, разпитай Сенчестия призрачен войник за него.",
+  "chi": "幻影神殿是可获取助你速成之物品与装备之地。若欲将其据为己有，可向暗影幻影士兵打听幻影神殿。",
+  "jpn": "幻影の神殿は、速い成長に役立つアイテムや装備を手に入れられる場所です。それらを自分のものにしたければ、影の幻影兵に幻影の神殿のことを尋ねてみましょう。",
+  "kor": "환영의 신전은 빠른 성장에 필요한 아이템과 장비를 얻을 수 있는 곳이다. 그것들을 손에 넣고 싶거든 그림자 환영 병사에게 환영의 신전에 대해 물어보라.",
+  "tha": "วิหารลวงตาคือที่ซึ่งท่านได้ไอเทมและอุปกรณ์สำหรับการเติบโตอย่างรวดเร็ว หากอยากครอบครองสิ่งเหล่านั้น จงสอบถามทหารเงาภาพลวงเรื่องวิหารลวงตา"
  },
  "5809": {
   "en": "Hear what the Shadow Phantom Soldier has to say and take the Illusion Temple challenge. Win at Illusion Temple to claim a valuable reward.",
@@ -7253,6 +7799,19 @@
   "kor": "빠르게 성장해 강력한 전사가 되려면 여러 이벤트 맵을 통과해야 한다. 이벤트 맵 퀘스트를 맡고 싶거든 환영 병사를 찾아가라.",
   "tha": "หากต้องการเติบโตเร็วและเป็นนักรบผู้ทรงพลัง ท่านต้องผ่านแผนที่อีเวนต์ต่างๆ จงตามหาทหารภาพลวงหากประสงค์จะรับเควสต์แผนที่อีเวนต์"
  },
+ "6818": {
+  "en": "Be the last one standing in Chaos Castle, deliver a weapon to Archangel in Blood Castle, and survive until the end of Devil Square. Complete all three and return to the Phantom Soldier to receive your reward.",
+  "ger": "Bleibe in der Chaosburg als Letzter stehen, bringe dem Erzengel in der Blutburg eine Waffe und überstehe den Teufelsplatz bis zum Ende. Erfülle alle drei und kehre zum Phantom-Soldaten zurück, um deine Belohnung zu erhalten.",
+  "fre": "Sois le dernier debout au Château du Chaos, remets une arme à l'Archange au Château Sanglant, et survis jusqu'à la fin de la Place du Diable. Accomplis les trois et reviens voir le Soldat fantôme pour ta récompense.",
+  "ita": "Resta l'ultimo in piedi al Castello del Caos, consegna un'arma all'Arcangelo al Castello di Sangue e sopravvivi fino alla fine della Piazza del Diavolo. Compi tutte e tre le imprese e torna dal Soldato fantasma per la tua ricompensa.",
+  "rom": "Fii ultimul rămas în picioare în Castelul Haosului, du-i o armă Arhanghelului în Castelul Sângelui şi supravieţuieşte până la capăt în Piaţa Diavolului. Împlineşte-le pe toate trei şi întoarce-te la Soldatul Fantomă pentru răsplată.",
+  "rus": "Останься последним в Замке Хаоса, доставь оружие Архангелу в Замке Крови и продержись до конца на Площади Дьявола. Выполни все три и вернись к Призрачному воину за наградой.",
+  "bul": "Остани последният изправен в Замъка на хаоса, занеси оръжие на Архангела в Кървавия замък и оцелей до края на Площада на дявола. Изпълни и трите и се върни при Призрачния войник за наградата си.",
+  "chi": "于混沌城中笑到最后，于血之城将武器交予大天使，并在恶魔广场撑到终局。三者皆成之后，返回幻影士兵处领取奖励。",
+  "jpn": "カオスキャッスルで最後の一人となり、ブラッドキャッスルで大天使に武器を届け、デビルスクエアを最後まで生き延びてください。三つすべてを果たしたら、幻影兵のもとへ戻って褒美を受け取りましょう。",
+  "kor": "카오스 캐슬에서 마지막까지 살아남고, 블러드 캐슬에서 대천사에게 무기를 전하며, 데빌 스퀘어를 끝까지 버텨라. 셋 모두를 이루고 환영 병사에게 돌아가 보상을 받아라.",
+  "tha": "จงเป็นผู้ยืนหยัดคนสุดท้ายในปราสาทเคออส ส่งอาวุธให้เทวทูตในปราสาทเลือด และรอดจนจบที่ลานปีศาจ ทำครบทั้งสามแล้วกลับไปหาทหารภาพลวงเพื่อรับรางวัล"
+ },
  "6819": {
   "en": "Then you must clear Illusion Temple. Find a Phantom Soldier to begin the Illusion Temple quest.",
   "ger": "Dann musst du den Illusionstempel bezwingen. Suche einen Phantom-Soldaten, um die Illusionstempel-Quest zu beginnen.",
@@ -7291,6 +7850,19 @@
   "jpn": "速く成長し、強き戦士となるには、さまざまなイベントマップを踏破せねばなりません。イベントマップの依頼を受けたいなら、幻影兵を訪ねましょう。",
   "kor": "빠르게 성장해 강력한 전사가 되려면 여러 이벤트 맵을 통과해야 한다. 이벤트 맵 퀘스트를 맡고 싶거든 환영 병사를 찾아가라.",
   "tha": "หากต้องการเติบโตเร็วและเป็นนักรบผู้ทรงพลัง ท่านต้องผ่านแผนที่อีเวนต์ต่างๆ จงตามหาทหารภาพลวงหากประสงค์จะรับเควสต์แผนที่อีเวนต์"
+ },
+ "6822": {
+  "en": "Be the last one standing in Chaos Castle, deliver a weapon to Archangel in Blood Castle, and survive until the end of Devil Square. Complete all three and return to the Phantom Soldier to receive your reward.",
+  "ger": "Bleibe in der Chaosburg als Letzter stehen, bringe dem Erzengel in der Blutburg eine Waffe und überstehe den Teufelsplatz bis zum Ende. Erfülle alle drei und kehre zum Phantom-Soldaten zurück, um deine Belohnung zu erhalten.",
+  "fre": "Sois le dernier debout au Château du Chaos, remets une arme à l'Archange au Château Sanglant, et survis jusqu'à la fin de la Place du Diable. Accomplis les trois et reviens voir le Soldat fantôme pour ta récompense.",
+  "ita": "Resta l'ultimo in piedi al Castello del Caos, consegna un'arma all'Arcangelo al Castello di Sangue e sopravvivi fino alla fine della Piazza del Diavolo. Compi tutte e tre le imprese e torna dal Soldato fantasma per la tua ricompensa.",
+  "rom": "Fii ultimul rămas în picioare în Castelul Haosului, du-i o armă Arhanghelului în Castelul Sângelui şi supravieţuieşte până la capăt în Piaţa Diavolului. Împlineşte-le pe toate trei şi întoarce-te la Soldatul Fantomă pentru răsplată.",
+  "rus": "Останься последним в Замке Хаоса, доставь оружие Архангелу в Замке Крови и продержись до конца на Площади Дьявола. Выполни все три и вернись к Призрачному воину за наградой.",
+  "bul": "Остани последният изправен в Замъка на хаоса, занеси оръжие на Архангела в Кървавия замък и оцелей до края на Площада на дявола. Изпълни и трите и се върни при Призрачния войник за наградата си.",
+  "chi": "于混沌城中笑到最后，于血之城将武器交予大天使，并在恶魔广场撑到终局。三者皆成之后，返回幻影士兵处领取奖励。",
+  "jpn": "カオスキャッスルで最後の一人となり、ブラッドキャッスルで大天使に武器を届け、デビルスクエアを最後まで生き延びてください。三つすべてを果たしたら、幻影兵のもとへ戻って褒美を受け取りましょう。",
+  "kor": "카오스 캐슬에서 마지막까지 살아남고, 블러드 캐슬에서 대천사에게 무기를 전하며, 데빌 스퀘어를 끝까지 버텨라. 셋 모두를 이루고 환영 병사에게 돌아가 보상을 받아라.",
+  "tha": "จงเป็นผู้ยืนหยัดคนสุดท้ายในปราสาทเคออส ส่งอาวุธให้เทวทูตในปราสาทเลือด และรอดจนจบที่ลานปีศาจ ทำครบทั้งสามแล้วกลับไปหาทหารภาพลวงเพื่อรับรางวัล"
  },
  "6823": {
   "en": "Then you must clear Illusion Temple. Find a Phantom Soldier to begin the Illusion Temple quest.",
@@ -9996,6 +10568,19 @@
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
  },
+ "18235": {
+  "en": "That's unfortunate. You shouldn't pass up on this if you want fast growth.... Come see me again before you reach level 235 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen.... Komm wieder zu mir, bevor du Stufe 235 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela.... Reviens me voir avant d'atteindre le niveau 235 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare.... Torna da me prima di raggiungere il livello 235 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta.... Vino iar la mine înainte să ajungi la nivelul 235 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться.... Приходи снова до 235-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това.... Ела пак при мен преди да стигнеш ниво 235, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事……若你改变心意愿接此任务，请在达到 235 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません……クエストを受ける気になったら、レベル235に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지…. 퀘스트를 받기로 마음을 정하거든 235레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป…. หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 235 (เควสต์ถูกยกเลิกแล้ว)"
+ },
  "18236": {
   "en": "At Tarkan 1, you'll encounter giant axe-wielding Mutants. Defeat 60 Mutants and return to me for a reward.",
   "ger": "In Tarkan 1 triffst du auf riesige axtschwingende Mutanten. Besiege 60 Mutanten und kehre für eine Belohnung zu mir zurück.",
@@ -10047,6 +10632,19 @@
   "jpn": "時間がありません。申し訳ない。（断る）",
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
+ },
+ "18245": {
+  "en": "That's unfortunate. You shouldn't pass up on this if you want fast growth.... Come see me again before you reach level 235 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen.... Komm wieder zu mir, bevor du Stufe 235 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela.... Reviens me voir avant d'atteindre le niveau 235 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare.... Torna da me prima di raggiungere il livello 235 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta.... Vino iar la mine înainte să ajungi la nivelul 235 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться.... Приходи снова до 235-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това.... Ела пак при мен преди да стигнеш ниво 235, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事……若你改变心意愿接此任务，请在达到 235 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません……クエストを受ける気になったら、レベル235に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지…. 퀘스트를 받기로 마음을 정하거든 235레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป…. หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 235 (เควสต์ถูกยกเลิกแล้ว)"
  },
  "18246": {
   "en": "At Tarkan 1, you'll encounter giant axe-wielding Mutants. Defeat 60 Mutants and return to me for a reward.",
@@ -10100,6 +10698,19 @@
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
  },
+ "18255": {
+  "en": "That's unfortunate. You shouldn't pass up on this if you want fast growth.... Come see me again before you reach level 240 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen.... Komm wieder zu mir, bevor du Stufe 240 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela.... Reviens me voir avant d'atteindre le niveau 240 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare.... Torna da me prima di raggiungere il livello 240 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta.... Vino iar la mine înainte să ajungi la nivelul 240 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться.... Приходи снова до 240-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това.... Ела пак при мен преди да стигнеш ниво 240, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事……若你改变心意愿接此任务，请在达到 240 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません……クエストを受ける気になったら、レベル240に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지…. 퀘스트를 받기로 마음을 정하거든 240레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป…. หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 240 (เควสต์ถูกยกเลิกแล้ว)"
+ },
  "18256": {
   "en": "At Tarkan 1, you'll encounter Bloody Wolves and their scent of death. Defeat 60 Bloody Wolves and return to me for a reward.",
   "ger": "In Tarkan 1 triffst du auf Blutige Wölfe und ihren Geruch nach Tod. Besiege 60 Blutige Wölfe und kehre für eine Belohnung zu mir zurück.",
@@ -10151,6 +10762,19 @@
   "jpn": "時間がありません。申し訳ない。（断る）",
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
+ },
+ "18265": {
+  "en": "That's unfortunate. You shouldn't pass up on this if you want fast growth.... Come see me again before you reach level 240 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen.... Komm wieder zu mir, bevor du Stufe 240 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela.... Reviens me voir avant d'atteindre le niveau 240 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare.... Torna da me prima di raggiungere il livello 240 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta.... Vino iar la mine înainte să ajungi la nivelul 240 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться.... Приходи снова до 240-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това.... Ела пак при мен преди да стигнеш ниво 240, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事……若你改变心意愿接此任务，请在达到 240 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません……クエストを受ける気になったら、レベル240に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지…. 퀘스트를 받기로 마음을 정하거든 240레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป…. หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 240 (เควสต์ถูกยกเลิกแล้ว)"
  },
  "18266": {
   "en": "At Tarkan 1, you'll encounter Bloody Wolves and their scent of death. Defeat 60 Bloody Wolves and return to me for a reward.",
@@ -10204,6 +10828,19 @@
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
  },
+ "18275": {
+  "en": "That's unfortunate. You shouldn't pass up on this up if you want fast growth... Come see me again before you reach level 245 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen... Komm wieder zu mir, bevor du Stufe 245 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela... Reviens me voir avant d'atteindre le niveau 245 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare... Torna da me prima di raggiungere il livello 245 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta... Vino iar la mine înainte să ajungi la nivelul 245 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться... Приходи снова до 245-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това... Ела пак при мен преди да стигнеш ниво 245, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事…若你改变心意愿接此任务，请在达到 245 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません…クエストを受ける気になったら、レベル245に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지… 퀘스트를 받기로 마음을 정하거든 245레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป… หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 245 (เควสต์ถูกยกเลิกแล้ว)"
+ },
  "18276": {
   "en": "Go to the area between Tarkan 1 and Tarkan 2, and you will see these assassins known as Iron Wheels. Defeat 60 Iron Wheels and return to me for a reward.",
   "ger": "Geh in das Gebiet zwischen Tarkan 1 und Tarkan 2, dort siehst du jene Meuchler namens Eisenräder. Besiege 60 Eisenräder und kehre für eine Belohnung zu mir zurück.",
@@ -10255,6 +10892,19 @@
   "jpn": "時間がありません。申し訳ない。（断る）",
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
+ },
+ "18285": {
+  "en": "That's unfortunate. You shouldn't pass up on this up if you want fast growth... Come see me again before you reach level 245 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen... Komm wieder zu mir, bevor du Stufe 245 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela... Reviens me voir avant d'atteindre le niveau 245 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare... Torna da me prima di raggiungere il livello 245 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta... Vino iar la mine înainte să ajungi la nivelul 245 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться... Приходи снова до 245-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това... Ела пак при мен преди да стигнеш ниво 245, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事…若你改变心意愿接此任务，请在达到 245 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません…クエストを受ける気になったら、レベル245に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지… 퀘스트를 받기로 마음을 정하거든 245레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป… หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 245 (เควสต์ถูกยกเลิกแล้ว)"
  },
  "18286": {
   "en": "Go to the area between Tarkan 1 and Tarkan 2, and you will see these assassins known as Iron Wheels. Defeat 60 Iron Wheels and return to me for a reward.",
@@ -10308,6 +10958,19 @@
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
  },
+ "18295": {
+  "en": "That's unfortunate. You shouldn't pass up on this if you want fast growth.... Come see me again before you reach level 250 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen.... Komm wieder zu mir, bevor du Stufe 250 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela.... Reviens me voir avant d'atteindre le niveau 250 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare.... Torna da me prima di raggiungere il livello 250 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta.... Vino iar la mine înainte să ajungi la nivelul 250 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться.... Приходи снова до 250-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това.... Ела пак при мен преди да стигнеш ниво 250, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事……若你改变心意愿接此任务，请在达到 250 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません……クエストを受ける気になったら、レベル250に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지…. 퀘스트를 받기로 마음을 정하거든 250레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป…. หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 250 (เควสต์ถูกยกเลิกแล้ว)"
+ },
  "18296": {
   "en": "At Icarus, you'll encounter stardust-carrying Alquamoses. Defeat 80 Alquamoses and return to me for a reward.",
   "ger": "Auf Ikarus triffst du auf Alquamos, die Sternenstaub tragen. Besiege 80 Alquamos und kehre für eine Belohnung zu mir zurück.",
@@ -10359,6 +11022,19 @@
   "jpn": "時間がありません。申し訳ない。（断る）",
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
+ },
+ "18305": {
+  "en": "That's unfortunate. You shouldn't pass up on this if you want fast growth.... Come see me again before you reach level 250 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen.... Komm wieder zu mir, bevor du Stufe 250 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela.... Reviens me voir avant d'atteindre le niveau 250 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare.... Torna da me prima di raggiungere il livello 250 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta.... Vino iar la mine înainte să ajungi la nivelul 250 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться.... Приходи снова до 250-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това.... Ела пак при мен преди да стигнеш ниво 250, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事……若你改变心意愿接此任务，请在达到 250 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません……クエストを受ける気になったら、レベル250に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지…. 퀘스트를 받기로 마음을 정하거든 250레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป…. หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 250 (เควสต์ถูกยกเลิกแล้ว)"
  },
  "18306": {
   "en": "At Icarus, you'll encounter stardust-carrying Alquamoses. Defeat 80 Alquamoses and return to me for a reward.",
@@ -10412,6 +11088,19 @@
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
  },
+ "18315": {
+  "en": "That's unfortunate. You shouldn't pass up on this if you want fast growth.... Come see me again before you reach level 255 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen.... Komm wieder zu mir, bevor du Stufe 255 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela.... Reviens me voir avant d'atteindre le niveau 255 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare.... Torna da me prima di raggiungere il livello 255 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta.... Vino iar la mine înainte să ajungi la nivelul 255 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться.... Приходи снова до 255-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това.... Ела пак при мен преди да стигнеш ниво 255, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事……若你改变心意愿接此任务，请在达到 255 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません……クエストを受ける気になったら、レベル255に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지…. 퀘스트를 받기로 마음을 정하거든 255레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป…. หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 255 (เควสต์ถูกยกเลิกแล้ว)"
+ },
  "18316": {
   "en": "At Icarus, you'll encounter Mega Crusts, which are even more fearsome than Alquamoses. Defeat 80 Mega Crusts and return to me for a reward.",
   "ger": "Auf Ikarus triffst du auf Mega-Crusts, die noch furchtbarer sind als Alquamos. Besiege 80 Mega-Crusts und kehre für eine Belohnung zu mir zurück.",
@@ -10463,6 +11152,19 @@
   "jpn": "時間がありません。申し訳ない。（断る）",
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
+ },
+ "18325": {
+  "en": "That's unfortunate. You shouldn't pass up on this if you want fast growth.... Come see me again before you reach level 255 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen.... Komm wieder zu mir, bevor du Stufe 255 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela.... Reviens me voir avant d'atteindre le niveau 255 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare.... Torna da me prima di raggiungere il livello 255 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta.... Vino iar la mine înainte să ajungi la nivelul 255 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться.... Приходи снова до 255-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това.... Ела пак при мен преди да стигнеш ниво 255, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事……若你改变心意愿接此任务，请在达到 255 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません……クエストを受ける気になったら、レベル255に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지…. 퀘스트를 받기로 마음을 정하거든 255레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป…. หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 255 (เควสต์ถูกยกเลิกแล้ว)"
  },
  "18326": {
   "en": "At Icarus, you'll encounter Mega Crusts, which are even more fearsome than Alquamoses. Defeat 80 Mega Crusts and return to me for a reward.",
@@ -10516,6 +11218,19 @@
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
  },
+ "18335": {
+  "en": "That's unfortunate. You shouldn't pass up on this if you want fast growth.... Come see me again before you reach level 260 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen.... Komm wieder zu mir, bevor du Stufe 260 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela.... Reviens me voir avant d'atteindre le niveau 260 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare.... Torna da me prima di raggiungere il livello 260 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta.... Vino iar la mine înainte să ajungi la nivelul 260 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться.... Приходи снова до 260-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това.... Ела пак при мен преди да стигнеш ниво 260, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事……若你改变心意愿接此任务，请在达到 260 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません……クエストを受ける気になったら、レベル260に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지…. 퀘스트를 받기로 마음을 정하거든 260레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป…. หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 260 (เควสต์ถูกยกเลิกแล้ว)"
+ },
  "18336": {
   "en": "At Icarus, you'll encounter Queen Rainiers, which disguise their deathly aura with beauty. Defeat 80 Queen Rainiers and return to me for a reward.",
   "ger": "Auf Ikarus triffst du auf Königinnen Rainier, die ihre Todesaura hinter Schönheit verbergen. Besiege 80 Königinnen Rainier und kehre für eine Belohnung zu mir zurück.",
@@ -10567,6 +11282,19 @@
   "jpn": "時間がありません。申し訳ない。（断る）",
   "kor": "시간이 없다. 미안하군. (거절)",
   "tha": "ข้าไม่มีเวลา ขออภัย (ปฏิเสธ)"
+ },
+ "18345": {
+  "en": "That's unfortunate. You shouldn't pass up on this if you want fast growth.... Come see me again before you reach level 260 if you decide to accept the quest. (The quest has been cancelled.)",
+  "ger": "Wie schade. Wer schnell wachsen will, sollte das nicht ausschlagen.... Komm wieder zu mir, bevor du Stufe 260 erreichst, wenn du die Quest doch annehmen willst. (Die Quest wurde abgebrochen.)",
+  "fre": "C'est dommage. Qui veut progresser vite ne devrait pas refuser cela.... Reviens me voir avant d'atteindre le niveau 260 si tu décides d'accepter la quête. (La quête a été annulée.)",
+  "ita": "Che peccato. Chi vuole crescere in fretta non dovrebbe rifiutare.... Torna da me prima di raggiungere il livello 260 se decidi di accettare la missione. (La missione è stata annullata.)",
+  "rom": "Păcat. Cine vrea să crească repede n-ar trebui să refuze asta.... Vino iar la mine înainte să ajungi la nivelul 260 dacă te hotărăşti să primeşti misiunea. (Misiunea a fost anulată.)",
+  "rus": "Жаль. Тому, кто хочет быстро расти, не стоит от этого отказываться.... Приходи снова до 260-го уровня, если решишь взяться за задание. (Задание отменено.)",
+  "bul": "Жалко. Който иска да расте бързо, не бива да отказва това.... Ела пак при мен преди да стигнеш ниво 260, ако решиш да приемеш задачата. (Задачата е отменена.)",
+  "chi": "真是遗憾。若想快速成长，可不该错过此事……若你改变心意愿接此任务，请在达到 260 级之前再来找我。（任务已取消。）",
+  "jpn": "残念です。速く成長したいなら、これを見送るべきではありません……クエストを受ける気になったら、レベル260に達する前にまた訪ねてください。（クエストは取り消されました。）",
+  "kor": "유감이군. 빠르게 성장하고 싶다면 이를 마다해서는 안 되지…. 퀘스트를 받기로 마음을 정하거든 260레벨에 이르기 전에 다시 찾아오게. (퀘스트가 취소되었다.)",
+  "tha": "น่าเสียดาย หากอยากเติบโตเร็วก็ไม่ควรปล่อยโอกาสนี้ไป…. หากตัดสินใจรับเควสต์ จงมาหาข้าอีกครั้งก่อนถึงเลเวล 260 (เควสต์ถูกยกเลิกแล้ว)"
  },
  "18346": {
   "en": "At Icarus, you'll encounter Queen Rainiers, which disguise their deathly aura with beauty. Defeat 80 Queen Rainiers and return to me for a reward.",
@@ -11517,6 +12245,19 @@
   "kor": "그건 보급관 부대의 일이다. (거절)",
   "tha": "นั่นเป็นงานของหน่วยพลาธิการ (ปฏิเสธ)"
  },
+ "19022": {
+  "en": "A wise decision. Watchers of Kundun say that they need the 'Lost Map' to enter the barrier of Kundun but it's getting harder to get the map. Please bring me 2 pages of 'Lost Map Lv. 4' and I will give you a quest with a handsome reward.",
+  "ger": "Eine kluge Entscheidung. Kunduns Späher sagen, sie brauchten die 'Verlorene Karte', um Kunduns Barriere zu durchdringen, doch die Karte ist immer schwerer zu bekommen. Bring mir 2 Seiten der 'Verlorenen Karte Stufe 4', und ich gebe dir eine Quest mit stattlichem Lohn.",
+  "fre": "Sage décision. Les guetteurs de Kundun disent qu'il leur faut la 'Carte perdue' pour franchir la barrière de Kundun, mais la carte se fait rare. Apporte-moi 2 pages de la 'Carte perdue niv. 4' et je te confierai une quête à belle récompense.",
+  "ita": "Saggia decisione. Gli osservatori di Kundun dicono di aver bisogno della 'Mappa perduta' per varcare la barriera di Kundun, ma la mappa si trova sempre meno. Portami 2 pagine della 'Mappa perduta Lv. 4' e ti affiderò una missione dalla bella ricompensa.",
+  "rom": "Hotărâre înţeleaptă. Iscoadele lui Kundun spun că le trebuie 'Harta pierdută' ca să treacă de bariera lui Kundun, dar harta se găseşte tot mai greu. Adu-mi 2 file din 'Harta pierdută Lv. 4' şi îţi voi da o misiune cu răsplată frumoasă.",
+  "rus": "Мудрое решение. Дозорные Кундуна говорят, что для прохода за барьер Кундуна нужна «Потерянная карта», но добыть её всё труднее. Принеси мне 2 страницы «Потерянной карты ур. 4», и я дам тебе задание со щедрой наградой.",
+  "bul": "Мъдро решение. Наблюдателите на Кундун казват, че им трябва „Изгубената карта“, за да минат бариерата на Кундун, но картата се намира все по-трудно. Донеси ми 2 страници от „Изгубена карта Лв. 4“ и ще ти дам задача с добра награда.",
+  "chi": "明智之举。库顿的守望者称，须有“失落地图”方能穿越库顿的结界，然此图愈发难得。请为我带来 2 页“失落地图 Lv. 4”，我便给你一件厚赏的任务。",
+  "jpn": "賢明な判断です。クンドゥンの見張りたちは、クンドゥンの結界を越えるには「失われた地図」が要ると言いますが、その地図は年々手に入りにくくなっています。「失われた地図 Lv. 4」を2枚お持ちください。手厚い褒美のある依頼をお渡しします。",
+  "kor": "현명한 판단이군. 쿤둔의 감시자들은 쿤둔의 결계를 넘으려면 '잃어버린 지도'가 필요하다 하나, 그 지도는 갈수록 구하기 어렵다. '잃어버린 지도 Lv. 4' 2장을 가져다다오. 후한 보상이 걸린 퀘스트를 주겠다.",
+  "tha": "ตัดสินใจได้อย่างชาญฉลาด ผู้เฝ้าดูคุนดุนบอกว่าต้องใช้ 'แผนที่สาบสูญ' เพื่อผ่านเกราะกำบังของคุนดุน แต่แผนที่หายากขึ้นทุกที จงนำ 'แผนที่สาบสูญ Lv. 4' มาให้ข้า 2 แผ่น แล้วข้าจะมอบเควสต์ที่มีรางวัลงามให้"
+ },
  "19024": {
   "en": "Oh, already gone...",
   "ger": "Oh, schon fort...",
@@ -11594,6 +12335,19 @@
   "jpn": "それは補給官部隊の仕事です。（断る）",
   "kor": "그건 보급관 부대의 일이다. (거절)",
   "tha": "นั่นเป็นงานของหน่วยพลาธิการ (ปฏิเสธ)"
+ },
+ "19038": {
+  "en": "A wise decision. Watchers of Kundun say that they need the 'Lost Map' to enter the barrier of Kundun but it's getting harder to get the map. Please bring me 2 pages of 'Lost Map Lv. 4' and I will give you a quest with a handsome reward.",
+  "ger": "Eine kluge Entscheidung. Kunduns Späher sagen, sie brauchten die 'Verlorene Karte', um Kunduns Barriere zu durchdringen, doch die Karte ist immer schwerer zu bekommen. Bring mir 2 Seiten der 'Verlorenen Karte Stufe 4', und ich gebe dir eine Quest mit stattlichem Lohn.",
+  "fre": "Sage décision. Les guetteurs de Kundun disent qu'il leur faut la 'Carte perdue' pour franchir la barrière de Kundun, mais la carte se fait rare. Apporte-moi 2 pages de la 'Carte perdue niv. 4' et je te confierai une quête à belle récompense.",
+  "ita": "Saggia decisione. Gli osservatori di Kundun dicono di aver bisogno della 'Mappa perduta' per varcare la barriera di Kundun, ma la mappa si trova sempre meno. Portami 2 pagine della 'Mappa perduta Lv. 4' e ti affiderò una missione dalla bella ricompensa.",
+  "rom": "Hotărâre înţeleaptă. Iscoadele lui Kundun spun că le trebuie 'Harta pierdută' ca să treacă de bariera lui Kundun, dar harta se găseşte tot mai greu. Adu-mi 2 file din 'Harta pierdută Lv. 4' şi îţi voi da o misiune cu răsplată frumoasă.",
+  "rus": "Мудрое решение. Дозорные Кундуна говорят, что для прохода за барьер Кундуна нужна «Потерянная карта», но добыть её всё труднее. Принеси мне 2 страницы «Потерянной карты ур. 4», и я дам тебе задание со щедрой наградой.",
+  "bul": "Мъдро решение. Наблюдателите на Кундун казват, че им трябва „Изгубената карта“, за да минат бариерата на Кундун, но картата се намира все по-трудно. Донеси ми 2 страници от „Изгубена карта Лв. 4“ и ще ти дам задача с добра награда.",
+  "chi": "明智之举。库顿的守望者称，须有“失落地图”方能穿越库顿的结界，然此图愈发难得。请为我带来 2 页“失落地图 Lv. 4”，我便给你一件厚赏的任务。",
+  "jpn": "賢明な判断です。クンドゥンの見張りたちは、クンドゥンの結界を越えるには「失われた地図」が要ると言いますが、その地図は年々手に入りにくくなっています。「失われた地図 Lv. 4」を2枚お持ちください。手厚い褒美のある依頼をお渡しします。",
+  "kor": "현명한 판단이군. 쿤둔의 감시자들은 쿤둔의 결계를 넘으려면 '잃어버린 지도'가 필요하다 하나, 그 지도는 갈수록 구하기 어렵다. '잃어버린 지도 Lv. 4' 2장을 가져다다오. 후한 보상이 걸린 퀘스트를 주겠다.",
+  "tha": "ตัดสินใจได้อย่างชาญฉลาด ผู้เฝ้าดูคุนดุนบอกว่าต้องใช้ 'แผนที่สาบสูญ' เพื่อผ่านเกราะกำบังของคุนดุน แต่แผนที่หายากขึ้นทุกที จงนำ 'แผนที่สาบสูญ Lv. 4' มาให้ข้า 2 แผ่น แล้วข้าจะมอบเควสต์ที่มีรางวัลงามให้"
  },
  "19040": {
   "en": "Oh, already gone...",
@@ -11816,6 +12570,32 @@
   "kor": "기회란 놓치고 후회하느니 잡는 편이 낫지. 뭐, 마음이 바뀌거든 나중에 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "คว้าโอกาสไว้ย่อมดีกว่ามานั่งเสียดายภายหลัง เอาเถอะ หากเปลี่ยนใจก็กลับมาใหม่ (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "20046": {
+  "en": "Request from the Gens Steward; Location: Gens Duprian- Lorencia, Gens Banert- Noria; Task: Talk to the Gens Steward; Reward: Random, Purple Box; Note: If you haven't joined the Gens yet, choose one and join now to proceed.",
+  "ger": "Auftrag vom Gens-Verwalter;Ort: Gens Duprian - Lorencia, Gens Vanert - Noria;Aufgabe: Sprich mit dem Gens-Verwalter;Lohn: Zufällig, Violette Kiste;Hinweis: Gehörst du noch keiner Gens an, wähle eine und tritt jetzt bei, um fortzufahren.",
+  "fre": "Requête de l'intendant de la gens;Lieu : Gens Duprian - Lorencia, Gens Vanert - Noria;Tâche : parler à l'intendant de la gens;Récompense : aléatoire, Boîte violette;Note : si tu n'as pas encore rejoint de gens, choisis-en une et rejoins-la pour continuer.",
+  "ita": "Richiesta dall'amministratore della gens;Luogo: Gens Duprian - Lorencia, Gens Vanert - Noria;Compito: parla con l'amministratore della gens;Ricompensa: casuale, Scatola viola;Nota: se non ti sei ancora unito a una gens, scegline una e uniscitisi per proseguire.",
+  "rom": "Cerere de la administratorul gens-ului;Loc: Gens Duprian - Lorencia, Gens Vanert - Noria;Sarcină: vorbeşte cu administratorul gens-ului;Răsplată: aleatorie, Cutie violetă;Notă: dacă nu te-ai alăturat încă unui gens, alege unul şi intră acum ca să mergi mai departe.",
+  "rus": "Поручение от управляющего генса;Место: Gens Duprian - Лоренсия, Gens Vanert - Нория;Задача: поговорить с управляющим генса;Награда: случайная, Фиолетовый ящик;Примечание: если ты ещё не в генсе, выбери один и вступи, чтобы продолжить.",
+  "bul": "Поръчка от управителя на генса;Място: Gens Duprian - Лоренсия, Gens Vanert - Нория;Задача: поговори с управителя на генса;Награда: случайна, Лилава кутия;Бележка: ако още не си в генс, избери един и се присъедини сега, за да продължиш.",
+  "chi": "家族总管的委托;地点：Gens Duprian - 洛伦西亚，Gens Vanert - 诺利亚;任务：与家族总管交谈;奖励：随机、紫色宝箱;备注：若你尚未加入家族，请择一加入以继续。",
+  "jpn": "一族の執事からの依頼;場所：Gens Duprian - ロレンシア、Gens Vanert - ノリア;任務：一族の執事と話す;報酬：ランダム、紫の箱;備考：まだ一族に加わっていない場合は、どちらかを選んで加入すると進められます。",
+  "kor": "가문 집사의 의뢰;장소: Gens Duprian - 로렌시아, Gens Vanert - 노리아;임무: 가문 집사와 대화;보상: 무작위, 보라 상자;비고: 아직 가문에 들지 않았다면 하나를 골라 가입해야 진행할 수 있다.",
+  "tha": "คำร้องจากผู้ดูแลตระกูล;สถานที่: Gens Duprian - ลอเรนเซีย, Gens Vanert - โนเรีย;ภารกิจ: คุยกับผู้ดูแลตระกูล;รางวัล: สุ่ม, กล่องม่วง;หมายเหตุ: หากท่านยังไม่ได้เข้าร่วมตระกูล จงเลือกหนึ่งและเข้าร่วมเสียก่อนจึงจะดำเนินการต่อได้"
+ },
+ "20047": {
+  "en": "How have you been? On behalf of the master of our clan, I thank you for answering the call of the clan. I personally hate to let the wandering mercenaries do this job, so I requested to send someone of the clan. I hope this didn't offend you. (Lv. 350 - 400)",
+  "ger": "Wie ist es dir ergangen? Im Namen des Hausherrn danke ich dir, dass du dem Ruf des Hauses gefolgt bist. Mir selbst ist es zuwider, diese Arbeit fahrenden Söldnern zu überlassen, darum bat ich darum, jemanden aus dem Haus zu schicken. Ich hoffe, das hat dich nicht gekränkt. (Stufe 350 - 400)",
+  "fre": "Comment vas-tu ? Au nom du maître de notre maison, je te remercie d'avoir répondu à son appel. Il me déplaît de confier cette tâche à des mercenaires errants, aussi ai-je demandé qu'on envoie quelqu'un de la maison. J'espère ne pas t'avoir offensé. (Niv. 350 - 400)",
+  "ita": "Come stai? A nome del signore del nostro casato, ti ringrazio per aver risposto alla sua chiamata. Personalmente detesto affidare questo compito a mercenari erranti, perciò ho chiesto che si mandasse qualcuno del casato. Spero non te la sia presa. (Lv. 350 - 400)",
+  "rom": "Cum o mai duci? În numele stăpânului casei noastre, îţi mulţumesc că ai răspuns chemării ei. Mie unuia îmi vine greu să las treaba asta pe seama mercenarilor pribegi, aşa că am cerut să fie trimis cineva din casă. Nădăjduiesc că nu te-am supărat. (Niv. 350 - 400)",
+  "rus": "Как поживаешь? От имени господина нашего дома благодарю тебя за то, что откликнулся на его зов. Мне самому претит отдавать это дело бродячим наёмникам, потому я и просил прислать кого-то из дома. Надеюсь, тебя это не задело. (Ур. 350 - 400)",
+  "bul": "Как я караш? От името на господаря на нашия дом ти благодаря, че се отзова на зова му. На мен самия ми е неприятно да оставя тази работа на скитащи наемници, затова поисках да пратят някой от дома. Надявам се да не съм те засегнал. (Нв. 350 - 400)",
+  "chi": "近来可好？谨代表家主，谢你应家族之召。我素不愿将此事交予游荡的佣兵，故请遣家族中人前来。望此举未曾冒犯于你。（350 - 400 级）",
+  "jpn": "お変わりありませんか。当家の主に代わり、一族の招集に応じてくださったことに礼を申し上げます。私としては、この仕事を流れの傭兵に任せるのは本意ではなく、家の者を遣わすよう願い出たのです。ご気分を害していなければ幸いです。（Lv. 350 - 400）",
+  "kor": "그간 잘 지냈는가? 우리 가문 주군을 대신하여, 가문의 부름에 응해 준 데 감사한다. 나로서는 이 일을 떠돌이 용병에게 맡기기가 내키지 않아, 가문의 사람을 보내 달라 청하였다. 기분이 상하지 않았기를 바란다. (Lv. 350 - 400)",
+  "tha": "สบายดีหรือ ในนามของนายท่านแห่งตระกูลเรา ข้าขอขอบคุณที่ท่านตอบรับเสียงเรียกของตระกูล ส่วนตัวข้าไม่อยากปล่อยให้ทหารรับจ้างพเนจรทำงานนี้ จึงร้องขอให้ส่งคนของตระกูลมา หวังว่าคงไม่ทำให้ท่านขุ่นเคือง (Lv. 350 - 400)"
+ },
  "20048": {
   "en": "¡¦¡¦ Something pestering seems to happen¡¦¡¦",
   "ger": "…… Da braut sich wohl etwas Lästiges zusammen……",
@@ -11868,6 +12648,19 @@
   "kor": "귀찮게 할 뜻은 없었다. 다만 가문이 강해질수록 그대도 강해지는 법이지. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "ข้าไม่ได้ตั้งใจจะรบเร้า เพียงแต่ยิ่งตระกูลแข็งแกร่งขึ้น ท่านก็แข็งแกร่งขึ้นด้วย หากเปลี่ยนใจก็กลับมาได้ (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "20052": {
+  "en": "Thank you. Recently things get in the way of the clan's business. Especially things in Vulcanus are the worst. We did some investigation and our people got killed by the assassins. Please go to Vulcanus and eliminate 20 Bloody Slayers and 10 Vicious Bloody Slayers.",
+  "ger": "Ich danke dir. In letzter Zeit kommt dem Haus allerlei in die Quere, und in Vulcanus steht es am schlimmsten. Wir haben Nachforschungen angestellt, und unsere Leute wurden von den Meuchlern getötet. Geh bitte nach Vulcanus und vernichte 20 Blutige Schlächter und 10 Grausame Blutige Schlächter.",
+  "fre": "Merci à toi. Ces derniers temps, bien des choses entravent les affaires de la maison, et à Vulcanus c'est le pire. Nous avons mené une enquête, et nos gens ont été tués par les assassins. Va à Vulcanus, je te prie, et élimine 20 Égorgeurs sanglants et 10 Égorgeurs sanglants féroces.",
+  "ita": "Ti ringrazio. Di recente molte cose ostacolano gli affari del casato, e a Vulcanus è il peggio. Abbiamo indagato, e i nostri sono stati uccisi dagli assassini. Va' a Vulcanus, ti prego, ed elimina 20 Massacratori sanguinari e 10 Massacratori sanguinari feroci.",
+  "rom": "Îţi mulţumesc. În ultima vreme multe stau în calea treburilor casei, iar în Vulcanus e cel mai rău. Am făcut cercetări, iar oamenii noştri au fost ucişi de ucigaşi. Mergi, te rog, în Vulcanus şi nimiceşte 20 de Măcelari sângeroşi şi 10 Măcelari sângeroşi cruzi.",
+  "rus": "Благодарю. В последнее время делам дома многое мешает, а в Вулканусе хуже всего. Мы провели дознание: наших людей перебили убийцы. Ступай, прошу, в Вулканус и уничтожь 20 Кровавых убийц и 10 Свирепых кровавых убийц.",
+  "bul": "Благодаря ти. Напоследък какво ли не пречи на делата на дома, а във Вулканус е най-зле. Разследвахме и се оказа, че нашите хора са били убити от убийците. Иди, моля те, във Вулканус и унищожи 20 Кървави касапи и 10 Свирепи кървави касапи.",
+  "chi": "多谢。近来家族诸事屡遭阻挠，而火山之事尤为棘手。我等查探之下，方知我族之人皆丧于刺客之手。请前往火山，铲除 20 只嗜血屠戮者与 10 只凶暴嗜血屠戮者。",
+  "jpn": "ありがとうございます。近ごろ一族の営みを妨げる事が多く、とりわけヴァルカヌスの有様がひどいのです。調べたところ、我らの者は刺客に殺されていました。どうかヴァルカヌスへ赴き、血の殺戮者を20体、狂暴な血の殺戮者を10体始末してください。",
+  "kor": "고맙다. 요즘 가문의 일을 가로막는 것이 많은데, 특히 불카누스가 가장 심하다. 조사해 보니 우리 사람들은 암살자들의 손에 죽어 있었다. 부디 불카누스로 가서 피의 학살자 20마리와 흉포한 피의 학살자 10마리를 없애 다오.",
+  "tha": "ขอบคุณ ระยะหลังมีสิ่งขัดขวางกิจการของตระกูลอยู่มาก โดยเฉพาะที่วัลคานัสนั้นเลวร้ายที่สุด เราสืบสวนแล้วพบว่าคนของเราถูกนักฆ่าสังหาร ขอท่านจงไปยังวัลคานัสและกำจัดนักฆ่าเลือด 20 ตัว กับนักฆ่าเลือดโหด 10 ตัว"
+ },
  "20054": {
   "en": "¡¦¡¦ Hmm, for the clan¡¦¡¦",
   "ger": "…… Hmm, für das Haus……",
@@ -11919,6 +12712,19 @@
   "jpn": "しつこくするつもりはありませんでした。ただ、一族が強くなればあなたも強くなるのです。気が変わったら、また来てください。（クエストは取り消されました。）",
   "kor": "귀찮게 할 뜻은 없었다. 다만 가문이 강해질수록 그대도 강해지는 법이지. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "ข้าไม่ได้ตั้งใจจะรบเร้า เพียงแต่ยิ่งตระกูลแข็งแกร่งขึ้น ท่านก็แข็งแกร่งขึ้นด้วย หากเปลี่ยนใจก็กลับมาได้ (เควสต์ถูกยกเลิกแล้ว)"
+ },
+ "20058": {
+  "en": "Cutting down the enemy clan's force will be the best revenge. Teach them a lesson by eliminating 5 of them who infiltrated in Vulcanus. Kill the enemy clan member in Vulcanus and come back to me to get the reward. (Can proceed only in Vulcanus)",
+  "ger": "Die Streitmacht des feindlichen Hauses zu dezimieren ist die beste Rache. Erteile ihnen eine Lehre, indem du 5 von ihnen ausschaltest, die sich nach Vulcanus eingeschlichen haben. Töte die feindlichen Hausangehörigen in Vulcanus und kehre zu mir zurück, um den Lohn zu erhalten. (Nur in Vulcanus möglich)",
+  "fre": "Réduire les forces de la maison ennemie est la meilleure des vengeances. Donne-leur une leçon en éliminant 5 des leurs infiltrés à Vulcanus. Tue les membres de la maison ennemie à Vulcanus et reviens me voir pour la récompense. (Réalisable uniquement à Vulcanus)",
+  "ita": "Assottigliare le forze del casato nemico è la vendetta migliore. Dai loro una lezione eliminando 5 dei loro infiltrati a Vulcanus. Uccidi i membri del casato nemico a Vulcanus e torna da me per la ricompensa. (Possibile solo a Vulcanus)",
+  "rom": "Să subţiezi oastea casei duşmane e cea mai bună răzbunare. Dă-le o lecţie nimicind 5 dintre ai lor strecuraţi în Vulcanus. Ucide-i pe membrii casei duşmane în Vulcanus şi întoarce-te la mine pentru răsplată. (Se poate doar în Vulcanus)",
+  "rus": "Проредить силы вражеского дома — лучшая месть. Проучи их, уничтожив 5 тех, кто пробрался в Вулканус. Убей членов вражеского дома в Вулканусе и вернись ко мне за наградой. (Возможно только в Вулканусе)",
+  "bul": "Да проредиш силите на вражеския дом е най-добрата мъст. Дай им урок, като унищожиш 5 от тях, промъкнали се във Вулканус. Убий членовете на вражеския дом във Вулканус и се върни при мен за наградата. (Възможно само във Вулканус)",
+  "chi": "削弱敌对家族之势，乃最好的复仇。铲除 5 名潜入火山的敌族之人，予其教训。于火山击杀敌族成员后回来找我领取奖励。（仅可于火山进行）",
+  "jpn": "敵対する一族の戦力を削ぐことこそ、最良の報復です。ヴァルカヌスに潜り込んだ者を5人始末し、思い知らせてやりましょう。ヴァルカヌスで敵一族の者を討ち、褒美を受け取りに戻ってください。（ヴァルカヌスでのみ進行可）",
+  "kor": "적대 가문의 전력을 깎는 것이야말로 최고의 복수다. 불카누스에 잠입한 자들 중 5명을 없애어 본때를 보여라. 불카누스에서 적대 가문의 일원을 처치한 뒤 보상을 받으러 돌아오라. (불카누스에서만 진행 가능)",
+  "tha": "การบั่นทอนกำลังของตระกูลศัตรูคือการแก้แค้นที่ดีที่สุด จงสั่งสอนพวกมันด้วยการกำจัด 5 คนที่แทรกซึมเข้าวัลคานัส สังหารสมาชิกตระกูลศัตรูในวัลคานัสแล้วกลับมาหาข้าเพื่อรับรางวัล (ดำเนินการได้เฉพาะในวัลคานัส)"
  },
  "20059": {
   "en": "Request from Kalima; Location: Kalima 6; Task: Talk to Priestess Beina in the Underwater Temple; Reward: Random, Red Box; Note: Drop Lost Map +6 on the ground to enter Kalima",
@@ -12037,6 +12843,32 @@
   "kor": "기회란 놓치고 후회하느니 잡는 편이 낫지. 뭐, 마음이 바뀌거든 나중에 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "คว้าโอกาสไว้ย่อมดีกว่ามานั่งเสียดายภายหลัง เอาเถอะ หากเปลี่ยนใจก็กลับมาใหม่ (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "20085": {
+  "en": "Request from the Gens Steward; Location: Gens Duprian- Lorencia, Gens Banert- Noria; Task: Talk to the Gens Steward; Reward: Random, Purple Box; Note: If you haven't joined the Gens yet, choose one and join now to proceed.",
+  "ger": "Auftrag vom Gens-Verwalter;Ort: Gens Duprian - Lorencia, Gens Vanert - Noria;Aufgabe: Sprich mit dem Gens-Verwalter;Lohn: Zufällig, Violette Kiste;Hinweis: Gehörst du noch keiner Gens an, wähle eine und tritt jetzt bei, um fortzufahren.",
+  "fre": "Requête de l'intendant de la gens;Lieu : Gens Duprian - Lorencia, Gens Vanert - Noria;Tâche : parler à l'intendant de la gens;Récompense : aléatoire, Boîte violette;Note : si tu n'as pas encore rejoint de gens, choisis-en une et rejoins-la pour continuer.",
+  "ita": "Richiesta dall'amministratore della gens;Luogo: Gens Duprian - Lorencia, Gens Vanert - Noria;Compito: parla con l'amministratore della gens;Ricompensa: casuale, Scatola viola;Nota: se non ti sei ancora unito a una gens, scegline una e uniscitisi per proseguire.",
+  "rom": "Cerere de la administratorul gens-ului;Loc: Gens Duprian - Lorencia, Gens Vanert - Noria;Sarcină: vorbeşte cu administratorul gens-ului;Răsplată: aleatorie, Cutie violetă;Notă: dacă nu te-ai alăturat încă unui gens, alege unul şi intră acum ca să mergi mai departe.",
+  "rus": "Поручение от управляющего генса;Место: Gens Duprian - Лоренсия, Gens Vanert - Нория;Задача: поговорить с управляющим генса;Награда: случайная, Фиолетовый ящик;Примечание: если ты ещё не в генсе, выбери один и вступи, чтобы продолжить.",
+  "bul": "Поръчка от управителя на генса;Място: Gens Duprian - Лоренсия, Gens Vanert - Нория;Задача: поговори с управителя на генса;Награда: случайна, Лилава кутия;Бележка: ако още не си в генс, избери един и се присъедини сега, за да продължиш.",
+  "chi": "家族总管的委托;地点：Gens Duprian - 洛伦西亚，Gens Vanert - 诺利亚;任务：与家族总管交谈;奖励：随机、紫色宝箱;备注：若你尚未加入家族，请择一加入以继续。",
+  "jpn": "一族の執事からの依頼;場所：Gens Duprian - ロレンシア、Gens Vanert - ノリア;任務：一族の執事と話す;報酬：ランダム、紫の箱;備考：まだ一族に加わっていない場合は、どちらかを選んで加入すると進められます。",
+  "kor": "가문 집사의 의뢰;장소: Gens Duprian - 로렌시아, Gens Vanert - 노리아;임무: 가문 집사와 대화;보상: 무작위, 보라 상자;비고: 아직 가문에 들지 않았다면 하나를 골라 가입해야 진행할 수 있다.",
+  "tha": "คำร้องจากผู้ดูแลตระกูล;สถานที่: Gens Duprian - ลอเรนเซีย, Gens Vanert - โนเรีย;ภารกิจ: คุยกับผู้ดูแลตระกูล;รางวัล: สุ่ม, กล่องม่วง;หมายเหตุ: หากท่านยังไม่ได้เข้าร่วมตระกูล จงเลือกหนึ่งและเข้าร่วมเสียก่อนจึงจะดำเนินการต่อได้"
+ },
+ "20086": {
+  "en": "How have you been? On behalf of the master of our clan, I thank you for answering the call of the clan. I personally hate to let the wandering mercenaries do this job, so I requested to send someone of the clan. I hope this didn't offend you. (Lv. 350 - 400)",
+  "ger": "Wie ist es dir ergangen? Im Namen des Hausherrn danke ich dir, dass du dem Ruf des Hauses gefolgt bist. Mir selbst ist es zuwider, diese Arbeit fahrenden Söldnern zu überlassen, darum bat ich darum, jemanden aus dem Haus zu schicken. Ich hoffe, das hat dich nicht gekränkt. (Stufe 350 - 400)",
+  "fre": "Comment vas-tu ? Au nom du maître de notre maison, je te remercie d'avoir répondu à son appel. Il me déplaît de confier cette tâche à des mercenaires errants, aussi ai-je demandé qu'on envoie quelqu'un de la maison. J'espère ne pas t'avoir offensé. (Niv. 350 - 400)",
+  "ita": "Come stai? A nome del signore del nostro casato, ti ringrazio per aver risposto alla sua chiamata. Personalmente detesto affidare questo compito a mercenari erranti, perciò ho chiesto che si mandasse qualcuno del casato. Spero non te la sia presa. (Lv. 350 - 400)",
+  "rom": "Cum o mai duci? În numele stăpânului casei noastre, îţi mulţumesc că ai răspuns chemării ei. Mie unuia îmi vine greu să las treaba asta pe seama mercenarilor pribegi, aşa că am cerut să fie trimis cineva din casă. Nădăjduiesc că nu te-am supărat. (Niv. 350 - 400)",
+  "rus": "Как поживаешь? От имени господина нашего дома благодарю тебя за то, что откликнулся на его зов. Мне самому претит отдавать это дело бродячим наёмникам, потому я и просил прислать кого-то из дома. Надеюсь, тебя это не задело. (Ур. 350 - 400)",
+  "bul": "Как я караш? От името на господаря на нашия дом ти благодаря, че се отзова на зова му. На мен самия ми е неприятно да оставя тази работа на скитащи наемници, затова поисках да пратят някой от дома. Надявам се да не съм те засегнал. (Нв. 350 - 400)",
+  "chi": "近来可好？谨代表家主，谢你应家族之召。我素不愿将此事交予游荡的佣兵，故请遣家族中人前来。望此举未曾冒犯于你。（350 - 400 级）",
+  "jpn": "お変わりありませんか。当家の主に代わり、一族の招集に応じてくださったことに礼を申し上げます。私としては、この仕事を流れの傭兵に任せるのは本意ではなく、家の者を遣わすよう願い出たのです。ご気分を害していなければ幸いです。（Lv. 350 - 400）",
+  "kor": "그간 잘 지냈는가? 우리 가문 주군을 대신하여, 가문의 부름에 응해 준 데 감사한다. 나로서는 이 일을 떠돌이 용병에게 맡기기가 내키지 않아, 가문의 사람을 보내 달라 청하였다. 기분이 상하지 않았기를 바란다. (Lv. 350 - 400)",
+  "tha": "สบายดีหรือ ในนามของนายท่านแห่งตระกูลเรา ข้าขอขอบคุณที่ท่านตอบรับเสียงเรียกของตระกูล ส่วนตัวข้าไม่อยากปล่อยให้ทหารรับจ้างพเนจรทำงานนี้ จึงร้องขอให้ส่งคนของตระกูลมา หวังว่าคงไม่ทำให้ท่านขุ่นเคือง (Lv. 350 - 400)"
+ },
  "20087": {
   "en": "¡¦¡¦ Something pestering seems to happen¡¦¡¦",
   "ger": "…… Da braut sich wohl etwas Lästiges zusammen……",
@@ -12089,6 +12921,19 @@
   "kor": "귀찮게 할 뜻은 없었다. 다만 가문이 강해질수록 그대도 강해지는 법이지. 마음이 바뀌거든 다시 오게. (퀘스트가 취소되었다.)",
   "tha": "ข้าไม่ได้ตั้งใจจะรบเร้า เพียงแต่ยิ่งตระกูลแข็งแกร่งขึ้น ท่านก็แข็งแกร่งขึ้นด้วย หากเปลี่ยนใจก็กลับมาได้ (เควสต์ถูกยกเลิกแล้ว)"
  },
+ "20091": {
+  "en": "Thank you. Recently things get in the way of the clan's business. Especially things in Vulcanus are the worst. We did some investigation and our people got killed by the assassins. Please go to Vulcanus and eliminate 20 Bloody Slayers and 10 Vicious Bloody Slayers.",
+  "ger": "Ich danke dir. In letzter Zeit kommt dem Haus allerlei in die Quere, und in Vulcanus steht es am schlimmsten. Wir haben Nachforschungen angestellt, und unsere Leute wurden von den Meuchlern getötet. Geh bitte nach Vulcanus und vernichte 20 Blutige Schlächter und 10 Grausame Blutige Schlächter.",
+  "fre": "Merci à toi. Ces derniers temps, bien des choses entravent les affaires de la maison, et à Vulcanus c'est le pire. Nous avons mené une enquête, et nos gens ont été tués par les assassins. Va à Vulcanus, je te prie, et élimine 20 Égorgeurs sanglants et 10 Égorgeurs sanglants féroces.",
+  "ita": "Ti ringrazio. Di recente molte cose ostacolano gli affari del casato, e a Vulcanus è il peggio. Abbiamo indagato, e i nostri sono stati uccisi dagli assassini. Va' a Vulcanus, ti prego, ed elimina 20 Massacratori sanguinari e 10 Massacratori sanguinari feroci.",
+  "rom": "Îţi mulţumesc. În ultima vreme multe stau în calea treburilor casei, iar în Vulcanus e cel mai rău. Am făcut cercetări, iar oamenii noştri au fost ucişi de ucigaşi. Mergi, te rog, în Vulcanus şi nimiceşte 20 de Măcelari sângeroşi şi 10 Măcelari sângeroşi cruzi.",
+  "rus": "Благодарю. В последнее время делам дома многое мешает, а в Вулканусе хуже всего. Мы провели дознание: наших людей перебили убийцы. Ступай, прошу, в Вулканус и уничтожь 20 Кровавых убийц и 10 Свирепых кровавых убийц.",
+  "bul": "Благодаря ти. Напоследък какво ли не пречи на делата на дома, а във Вулканус е най-зле. Разследвахме и се оказа, че нашите хора са били убити от убийците. Иди, моля те, във Вулканус и унищожи 20 Кървави касапи и 10 Свирепи кървави касапи.",
+  "chi": "多谢。近来家族诸事屡遭阻挠，而火山之事尤为棘手。我等查探之下，方知我族之人皆丧于刺客之手。请前往火山，铲除 20 只嗜血屠戮者与 10 只凶暴嗜血屠戮者。",
+  "jpn": "ありがとうございます。近ごろ一族の営みを妨げる事が多く、とりわけヴァルカヌスの有様がひどいのです。調べたところ、我らの者は刺客に殺されていました。どうかヴァルカヌスへ赴き、血の殺戮者を20体、狂暴な血の殺戮者を10体始末してください。",
+  "kor": "고맙다. 요즘 가문의 일을 가로막는 것이 많은데, 특히 불카누스가 가장 심하다. 조사해 보니 우리 사람들은 암살자들의 손에 죽어 있었다. 부디 불카누스로 가서 피의 학살자 20마리와 흉포한 피의 학살자 10마리를 없애 다오.",
+  "tha": "ขอบคุณ ระยะหลังมีสิ่งขัดขวางกิจการของตระกูลอยู่มาก โดยเฉพาะที่วัลคานัสนั้นเลวร้ายที่สุด เราสืบสวนแล้วพบว่าคนของเราถูกนักฆ่าสังหาร ขอท่านจงไปยังวัลคานัสและกำจัดนักฆ่าเลือด 20 ตัว กับนักฆ่าเลือดโหด 10 ตัว"
+ },
  "20093": {
   "en": "¡¦¡¦ Hmm, for the clan¡¦¡¦",
   "ger": "…… Hmm, für das Haus……",
@@ -12127,6 +12972,19 @@
   "jpn": "準備する時間をください。（断る）",
   "kor": "준비할 시간을 다오. (거절)",
   "tha": "ขอเวลาเตรียมตัวสักหน่อย (ปฏิเสธ)"
+ },
+ "20097": {
+  "en": "Cutting down the enemy clan's force will be the best revenge. Teach them a lesson by eliminating 5 of them who infiltrated in Vulcanus. Kill the enemy clan member in Vulcanus and come back to me to get the reward. (Can proceed only in Vulcanus)",
+  "ger": "Die Streitmacht des feindlichen Hauses zu dezimieren ist die beste Rache. Erteile ihnen eine Lehre, indem du 5 von ihnen ausschaltest, die sich nach Vulcanus eingeschlichen haben. Töte die feindlichen Hausangehörigen in Vulcanus und kehre zu mir zurück, um den Lohn zu erhalten. (Nur in Vulcanus möglich)",
+  "fre": "Réduire les forces de la maison ennemie est la meilleure des vengeances. Donne-leur une leçon en éliminant 5 des leurs infiltrés à Vulcanus. Tue les membres de la maison ennemie à Vulcanus et reviens me voir pour la récompense. (Réalisable uniquement à Vulcanus)",
+  "ita": "Assottigliare le forze del casato nemico è la vendetta migliore. Dai loro una lezione eliminando 5 dei loro infiltrati a Vulcanus. Uccidi i membri del casato nemico a Vulcanus e torna da me per la ricompensa. (Possibile solo a Vulcanus)",
+  "rom": "Să subţiezi oastea casei duşmane e cea mai bună răzbunare. Dă-le o lecţie nimicind 5 dintre ai lor strecuraţi în Vulcanus. Ucide-i pe membrii casei duşmane în Vulcanus şi întoarce-te la mine pentru răsplată. (Se poate doar în Vulcanus)",
+  "rus": "Проредить силы вражеского дома — лучшая месть. Проучи их, уничтожив 5 тех, кто пробрался в Вулканус. Убей членов вражеского дома в Вулканусе и вернись ко мне за наградой. (Возможно только в Вулканусе)",
+  "bul": "Да проредиш силите на вражеския дом е най-добрата мъст. Дай им урок, като унищожиш 5 от тях, промъкнали се във Вулканус. Убий членовете на вражеския дом във Вулканус и се върни при мен за наградата. (Възможно само във Вулканус)",
+  "chi": "削弱敌对家族之势，乃最好的复仇。铲除 5 名潜入火山的敌族之人，予其教训。于火山击杀敌族成员后回来找我领取奖励。（仅可于火山进行）",
+  "jpn": "敵対する一族の戦力を削ぐことこそ、最良の報復です。ヴァルカヌスに潜り込んだ者を5人始末し、思い知らせてやりましょう。ヴァルカヌスで敵一族の者を討ち、褒美を受け取りに戻ってください。（ヴァルカヌスでのみ進行可）",
+  "kor": "적대 가문의 전력을 깎는 것이야말로 최고의 복수다. 불카누스에 잠입한 자들 중 5명을 없애어 본때를 보여라. 불카누스에서 적대 가문의 일원을 처치한 뒤 보상을 받으러 돌아오라. (불카누스에서만 진행 가능)",
+  "tha": "การบั่นทอนกำลังของตระกูลศัตรูคือการแก้แค้นที่ดีที่สุด จงสั่งสอนพวกมันด้วยการกำจัด 5 คนที่แทรกซึมเข้าวัลคานัส สังหารสมาชิกตระกูลศัตรูในวัลคานัสแล้วกลับมาหาข้าเพื่อรับรางวัล (ดำเนินการได้เฉพาะในวัลคานัส)"
  },
  "20110": {
   "en": "Give me some time to prepare. (Refuse)",
