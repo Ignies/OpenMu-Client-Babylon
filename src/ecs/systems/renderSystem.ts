@@ -112,13 +112,19 @@ export const RenderSystem: ISystemFactory = world => {
         // Settled snow is something you stand *in*, not on — but only where
         // it is actually lying. Rendered position only: transform.pos stays
         // where pathing and the server think it is.
-        v3Temp2.y -= weather.snowSinkDepth(
-          world,
-          map,
-          v3Temp2.x,
-          transform.pos.y,
-          v3Temp2.z
-        );
+        // Characters only. A prop out of the map's object list is placed at an
+        // authored height that already fits its neighbours, and the sink is a
+        // per-position number: it pulled every segment of a fence run down by a
+        // different amount and the rail stopped meeting itself.
+        if (!modelObject.IsMapObject) {
+          v3Temp2.y -= weather.snowSinkDepth(
+            world,
+            map,
+            v3Temp2.x,
+            transform.pos.y,
+            v3Temp2.z
+          );
+        }
 
 modelObject.updateLocation(v3Temp2, transform.scale, v3Temp);
 
