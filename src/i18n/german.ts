@@ -274,8 +274,6 @@ export const germanLayer: LanguageLayer = {
     'inventory.repair': 'Reparieren (L)',
     'inventory.personalShop': 'Eigener Laden',
     'inventory.expand': 'Erweitertes Inventar öffnen (K)',
-    'inventory.setOption': '[Set-Option]',
-    'inventory.socketOption': '[Socket-Option]',
 
     'vault.title': 'Lager',
     'vault.unlocked': 'Entsperrt',

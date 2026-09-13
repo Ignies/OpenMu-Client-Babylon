@@ -464,8 +464,6 @@ export const EN_TEXT = {
   'inventory.repair': 'Repair (L)',
   'inventory.personalShop': 'Personal Shop',
   'inventory.expand': 'Open Expanded Inventory (K)',
-  'inventory.setOption': '[Set option]',
-  'inventory.socketOption': '[Socket option]',
 
   'vault.title': 'Vault',
   'vault.unlocked': 'Unlocked',

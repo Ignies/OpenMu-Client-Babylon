@@ -275,8 +275,6 @@ export const koreanLayer: LanguageLayer = {
     'inventory.repair': '수리(L)',
     'inventory.personalShop': '개인 상점',
     'inventory.expand': '확장 인벤토리 열기(K)',
-    'inventory.setOption': '[세트 옵션]',
-    'inventory.socketOption': '[소켓 옵션]',
 
     'vault.title': '창고',
     'vault.unlocked': '잠금 해제',

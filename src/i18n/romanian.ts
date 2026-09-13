@@ -275,8 +275,6 @@ export const romanianLayer: LanguageLayer = {
     'inventory.repair': 'Repară (L)',
     'inventory.personalShop': 'Magazin personal',
     'inventory.expand': 'Deschide inventarul extins (K)',
-    'inventory.setOption': '[Opțiune de set]',
-    'inventory.socketOption': '[Opțiune de socket]',
 
     'vault.title': 'Seif',
     'vault.unlocked': 'Deblocat',

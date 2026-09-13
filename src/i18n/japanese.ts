@@ -276,8 +276,6 @@ export const japaneseLayer: LanguageLayer = {
     'inventory.repair': '修理（L）',
     'inventory.personalShop': '個人商店',
     'inventory.expand': '拡張インベントリを開く（K）',
-    'inventory.setOption': '[セットオプション]',
-    'inventory.socketOption': '[ソケットオプション]',
 
     'vault.title': '倉庫',
     'vault.unlocked': 'ロック解除',

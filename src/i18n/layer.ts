@@ -9,6 +9,7 @@
 
 import type { TextKey } from './recipes';
 import type { PackRepairs } from './packRepairs';
+import type { ItemNameFixes } from './itemNames';
 
 /**
  * Which flag the selector draws. The value is an ISO 3166-1 alpha-2 region,
@@ -100,4 +101,10 @@ export interface LanguageDataPack {
    * `packRepairs.ts`; applied by `libs/mu/localData.ts` after decoding.
    */
   readonly repairs?: PackRepairs;
+
+  /**
+   * Item names this pack gets wrong, keyed `"group/index"`. See
+   * `itemNames.ts`; read by `libs/mu/itemNameFile.ts` in front of the table.
+   */
+  readonly itemNames?: ItemNameFixes;
 }

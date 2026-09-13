@@ -15,6 +15,7 @@ import { LocalStorage } from '../libs/localStorage';
 import { EN_TEXT, type TextKey } from './recipes';
 import type { LanguageDataPack, LanguageLayer } from './layer';
 import type { PackRepairs } from './packRepairs';
+import type { ItemNameFixes } from './itemNames';
 import { LANGUAGE_LAYERS } from './layers';
 
 const LANGUAGE_KEY = 'mu_language';
@@ -145,6 +146,11 @@ class I18n {
   /** Corrections for the active pack, if it is one of the damaged ones. */
   get dataRepairs(): PackRepairs | null {
     return this.current.dataPack?.repairs ?? null;
+  }
+
+  /** Item names the active pack gets wrong, keyed `"group/index"`. */
+  get itemNameFixes(): ItemNameFixes | null {
+    return this.current.dataPack?.itemNames ?? null;
   }
 
   /**

@@ -6,6 +6,7 @@
 
 import type { LanguageLayer } from './layer';
 import { SPANISH_PACK_REPAIRS } from './packRepairs';
+import { SPANISH_ITEM_NAMES } from './itemNames';
 
 export const spanishLayer: LanguageLayer = {
   name: 'spanish',
@@ -20,6 +21,7 @@ export const spanishLayer: LanguageLayer = {
     suffix: 'spn',
     encoding: 'windows-1252',
     repairs: SPANISH_PACK_REPAIRS,
+    itemNames: SPANISH_ITEM_NAMES,
   },
   strings: {
     'preloader.serverSetup': 'Configurar servidor',
@@ -283,8 +285,6 @@ export const spanishLayer: LanguageLayer = {
     'inventory.repair': 'Reparar (L)',
     'inventory.personalShop': 'Tienda personal',
     'inventory.expand': 'Abrir el inventario ampliado (K)',
-    'inventory.setOption': '[Opción de set]',
-    'inventory.socketOption': '[Opción de socket]',
 
     'vault.title': 'Bóveda',
     'vault.unlocked': 'Abierta',

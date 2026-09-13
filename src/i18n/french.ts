@@ -276,8 +276,6 @@ export const frenchLayer: LanguageLayer = {
     'inventory.repair': 'Réparer (L)',
     'inventory.personalShop': 'Boutique personnelle',
     'inventory.expand': 'Ouvrir l’inventaire étendu (K)',
-    'inventory.setOption': '[Option de set]',
-    'inventory.socketOption': '[Option de socket]',
 
     'vault.title': 'Coffre',
     'vault.unlocked': 'Déverrouillé',

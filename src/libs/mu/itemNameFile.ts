@@ -101,7 +101,11 @@ export function localisedItemName(
   // still in their own language. Observable, so every open window redraws the
   // moment it is switched.
   if (GameOptions.englishItemNames) return undefined;
-  return names.get().get(group * GROUP_STRIDE + index);
+  // A name the pack itself gets wrong, replaced before the table is read.
+  return (
+    i18n.itemNameFixes?.[`${group}/${index}`] ??
+    names.get().get(group * GROUP_STRIDE + index)
+  );
 }
 
 onLanguageChanged(() => {
