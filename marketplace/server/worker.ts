@@ -146,7 +146,7 @@ async function connect(name: string): Promise<{ bot: Bot; gameMaster: boolean; l
   const bag = new Bag(connection, tag);
   const shop = new ShopSession(connection, tag);
   // Registered before the login, so anything the server says during it is seen.
-  new ServerMessages(connection, tag);
+  const messages = new ServerMessages(connection, tag);
   const session = new BotSession(
     connection,
     { account: name, password: PASSWORD, character: name, createIfMissing: true },
@@ -196,6 +196,7 @@ async function connect(name: string): Promise<{ bot: Bot; gameMaster: boolean; l
         wallet,
         shop: shopUsable ? shop : undefined,
         bag,
+        messages,
         stealth: STEALTH,
         ledger: new Ledger(undefined, (m: string) => log(`[ledger] ${m}`)),
         botName: character.Name,

@@ -1,6 +1,7 @@
 import type { Bag } from './bag';
 import { sameItem, type ListedItem } from './itemMatch';
 import type { Scope } from './scope';
+import type { ServerMessages } from './serverMessages';
 import { FIRST_SHOP_SLOT, type ShopSession } from './shop';
 import type { BotSession } from './session';
 import type { TradeOutcome, TradeSession, TradeTerms } from './trade';
@@ -44,6 +45,8 @@ export type EscrowContext = {
   shop?: ShopSession;
   /** What the bot is carrying, slot by slot, when it tracks that. */
   bag?: Bag;
+  /** What the server says out loud; how "trade partner not found" is heard. */
+  messages?: ServerMessages;
   /**
    * Whether the bot hides between handovers and only appears at the
    * customer. On by default; off for a bot that is not a game master.
@@ -72,6 +75,16 @@ export type CollectResult =
 
 /** How long a person gets to put their side up before the bot gives up. */
 const PARTNER_PATIENCE_MS = 90_000;
+
+/**
+ * How long a person gets to answer the trade request itself. A dialog has
+ * to be noticed and clicked; eight seconds was not enough, and asking again
+ * while the first request stood was refused in silence.
+ */
+const REQUEST_PATIENCE_MS = 45_000;
+
+/** The server's blue line when the request's target is not among our observers. */
+const NOT_FOUND = /partner not found/i;
 
 /** The balance arrives in its own packet, so it is read a moment after. */
 const BALANCE_SETTLE_MS = 1500;
@@ -213,14 +226,22 @@ async function reach(context: EscrowContext, characterName: string, warp: boolea
  *
  * Whether the customer can see the bot is not knowable from here - only their
  * client holds their own scope - so it is not checked, it is *tried*. A
- * partner the server cannot resolve comes back as "Trade partner not found",
- * and the answer to that is to announce again and ask again.
+ * partner the server cannot resolve comes back as "Trade partner not found"
+ * on the blue line and nothing else, and the answer to that is to announce
+ * again and ask again.
+ *
+ * A request the server did accept is asked once and waited on for as long
+ * as a person needs to notice a dialog. It is never asked again while it
+ * stands - the server refuses that in silence - and if it is never answered
+ * it is withdrawn, which frees the customer from the "trade requested" state
+ * the request put them in. Leaving that state behind was what made every
+ * later bot's request time out in silence too.
  */
 async function openTradeWith(
   context: EscrowContext,
   characterName: string
 ): Promise<EscrowResult> {
-  const { trade, log } = context;
+  const { trade, messages, log } = context;
   let lastReason = `${characterName} could not be reached`;
   let everSeen = false;
 
@@ -233,15 +254,33 @@ async function openTradeWith(
     }
     everSeen = true;
 
-    try {
-      await trade.requestWith(partner.id, 8000);
-      return { ok: true };
-    } catch (e) {
-      lastReason = e instanceof Error ? e.message : `could not open a trade with ${characterName}`;
+    const said = messages?.count ?? 0;
+    const asked = trade.requestWith(partner.id, REQUEST_PATIENCE_MS);
+    const outcome: 'opened' | 'refused' | 'unanswered' | 'not found' = await Promise.race([
+      asked.then(
+        () => 'opened' as const,
+        (e: unknown) => (e instanceof Error && e.message === REFUSED ? 'refused' : 'unanswered')
+      ),
+      notFoundSaid(messages, said, REQUEST_PATIENCE_MS).then(() => 'not found' as const),
+    ]);
+
+    if (outcome === 'opened') return { ok: true };
+    if (outcome === 'refused') {
       // A "no" is an answer. Asking twice more would be pestering.
-      if (lastReason === REFUSED) return { ok: false, reason: lastReason, declined: true };
-      log(`trade request ${attempt} did not take (${lastReason})`);
+      return { ok: false, reason: REFUSED, declined: true };
     }
+    if (outcome === 'not found') {
+      lastReason = `the server could not find ${characterName} among our observers`;
+      log(`trade request ${attempt} did not take (${lastReason})`);
+      continue;
+    }
+    // Unanswered: withdrawn, so they are not left in the requested state.
+    trade.abandonRequest();
+    return {
+      ok: false,
+      reason: `${characterName} did not answer the trade request`,
+      declined: true,
+    };
   }
 
   if (!everSeen) {
@@ -259,6 +298,25 @@ async function openTradeWith(
 
   // Seen, asked, and not answered or refused: that is the customer's call.
   return { ok: false, reason: lastReason, declined: everSeen };
+}
+
+/**
+ * Resolves when the server says the partner was not found, after the
+ * request went out; never, when it does not. The request itself is what
+ * ends the wait otherwise.
+ */
+async function notFoundSaid(
+  messages: ServerMessages | undefined,
+  sinceCount: number,
+  withinMs: number
+): Promise<void> {
+  if (!messages) return new Promise(() => {});
+  const deadline = Date.now() + withinMs + 1000;
+  while (Date.now() < deadline) {
+    if (messages.count > sinceCount && messages.latest && NOT_FOUND.test(messages.latest)) return;
+    await wait(250);
+  }
+  return new Promise(() => {});
 }
 
 /**

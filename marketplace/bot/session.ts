@@ -42,7 +42,11 @@ const CODE = {
   characterInformation: { code: 0xf3, sub: 0x03 },
   characterCreated: { code: 0xf3, sub: 0x01 },
   mapChanged: { code: 0x1c, sub: 0x0f },
+  magicEffectStatus: { code: 0x07 },
 } as const;
+
+/** How long the server gets to confirm `/hide` before it is called ineffective. */
+const HIDE_ACK_MS = 3000;
 
 /** A generated packet class reads from byteOffset 0, so the frame is copied. */
 export function view(frame: Frame): DataView {
@@ -232,8 +236,30 @@ export class BotSession {
    * tile. It still sees the world itself, which is what a warp needs.
    */
   hide(): void {
+    // The server answers a hide that took with the Invisible effect going
+    // active on us. A database from before that effect existed answers
+    // nothing at all, and the bot stands in plain sight believing it is
+    // hidden - so the silence is written down, once.
+    const ack = this.connection.expect(CODE.magicEffectStatus, HIDE_ACK_MS, 'MagicEffectStatus');
     this.say('/hide');
+    ack.then(
+      () => {
+        this.hideConfirmed = true;
+      },
+      () => {
+        if (this.hideConfirmed || this.hideWarned) return;
+        this.hideWarned = true;
+        this.log(
+          'the server did not confirm /hide; the bot is probably visible. ' +
+            'The Invisible magic effect is missing from the game database ' +
+            '(OpenMU adds it with its duel configuration update)'
+        );
+      }
+    );
   }
+
+  private hideConfirmed = false;
+  private hideWarned = false;
 
   /**
    * `/unhide`: back into view, announced properly.
