@@ -1175,6 +1175,7 @@ export const koreanLayer: LanguageLayer = {
     'msgWin.wrongPassword': '입력한 비밀번호가 올바르지 않습니다.',
     'msgWin.confirmSell': '%s 을(를) 판매할까요?',
     'msgWin.confirmDrop': '%s 을(를) 버릴까요?',
+    'msgWin.confirmAddPoints': '포인트 {count}을(를) {stat}에 올릴까요?',
 
     'notify.wsError': 'WebSocket 연결 오류',
     'notify.connectionLost': '서버와의 연결이 끊어졌습니다',

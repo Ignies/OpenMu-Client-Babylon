@@ -1187,6 +1187,7 @@ export const thaiLayer: LanguageLayer = {
     'msgWin.wrongPassword': 'รหัสผ่านที่กรอกไม่ถูกต้อง',
     'msgWin.confirmSell': 'ขาย %s หรือไม่?',
     'msgWin.confirmDrop': 'ทิ้ง %s หรือไม่?',
+    'msgWin.confirmAddPoints': 'เพิ่มแต้ม {count} แต้มให้ {stat} ไหม',
 
     'notify.wsError': 'การเชื่อมต่อ WebSocket ผิดพลาด',
     'notify.connectionLost': 'การเชื่อมต่อกับเซิร์ฟเวอร์ขาดหาย',

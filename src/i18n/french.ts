@@ -1216,6 +1216,7 @@ export const frenchLayer: LanguageLayer = {
     'msgWin.wrongPassword': 'Le mot de passe saisi est incorrect.',
     'msgWin.confirmSell': 'Vendre %s ?',
     'msgWin.confirmDrop': 'Jeter %s ?',
+    'msgWin.confirmAddPoints': 'Ajouter {count} points sur {stat} ?',
 
     'notify.wsError': 'Erreur de connexion WebSocket',
     'notify.connectionLost': 'La connexion au serveur a été perdue',

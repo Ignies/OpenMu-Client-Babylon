@@ -20,6 +20,7 @@ export enum MsgWinCode {
   StorageResidentWrong = 'MESSAGE_STORAGE_RESIDENTWRONG',
   ConfirmSellItem = 'MESSAGE_CONFIRM_SELL_ITEM',
   ConfirmDropItem = 'MESSAGE_CONFIRM_DROP_ITEM',
+  ConfirmAddPoints = 'MESSAGE_CONFIRM_ADD_POINTS',
 }
 
 export type MsgWinMessage = {
@@ -82,10 +83,21 @@ export const MSG_WIN_MESSAGES: Record<MsgWinCode, MsgWinMessage> = {
     textId: -1,
     textKey: 'msgWin.confirmDrop',
   },
+  [MsgWinCode.ConfirmAddPoints]: {
+    type: MsgWinType.Both,
+    textId: -1,
+    textKey: 'msgWin.confirmAddPoints',
+  },
 };
 
-export function formatMsgWinText(code: MsgWinCode, arg?: string): string {
-  const text = t(MSG_WIN_MESSAGES[code].textKey);
+/** A `%s` line takes the one string; a `{hole}` line takes the named set. */
+export type MsgWinArg = string | Record<string, string | number>;
 
-  return arg === undefined ? text : text.replace('%s', arg);
+export function formatMsgWinText(code: MsgWinCode, arg?: MsgWinArg): string {
+  const key = MSG_WIN_MESSAGES[code].textKey;
+
+  if (arg === undefined) return t(key);
+  if (typeof arg === 'string') return t(key).replace('%s', arg);
+
+  return t(key, arg);
 }

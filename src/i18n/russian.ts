@@ -1197,6 +1197,7 @@ export const russianLayer: LanguageLayer = {
     'msgWin.wrongPassword': 'Введённый пароль неверен.',
     'msgWin.confirmSell': 'Продать %s?',
     'msgWin.confirmDrop': 'Выбросить %s?',
+    'msgWin.confirmAddPoints': 'Добавить {count} очков на {stat}?',
 
     'notify.wsError': 'Ошибка соединения WebSocket',
     'notify.connectionLost': 'Связь с сервером потеряна',
