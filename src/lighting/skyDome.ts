@@ -6,6 +6,7 @@ import {
 } from '../libs/babylon/exports';
 import { CreateSphereVertexData } from '@babylonjs/core/Meshes/Builders/sphereBuilder';
 import { linearBufferActive } from '../common/lightModel';
+import { devQueryNumber } from '../common/devSeams';
 import { lookDirector, type LookDirector, type LookState } from './director';
 import {
   bindClouds,
@@ -55,6 +56,9 @@ export type ClearLook = {
  * behind the map.
  */
 const DOME_RADIUS = 2000;
+
+/** Dev seam, shared with the fog it belongs to (`scenes/heightFog.ts`). */
+const uwDev = devQueryNumber('uw');
 
 const DOME_SEGMENTS = 24;
 
@@ -168,6 +172,28 @@ type Dome = {
 
 let dome: Dome | null = null;
 
+/**
+ * The other half of the sky: the inverted dome under the world, for a map
+ * whose ground has holes in it (`LookProfile.underworld`).
+ *
+ * Devias' ravines are `NoGround` tiles, which the ground mesh sends past the
+ * far plane, so nothing at all is drawn where they are and the pixel is the
+ * scene's clear colour - the same pale blue as the sky, which is why the
+ * ravines came out as panes lying *brighter* than the snow they are cut out
+ * of. The clear colour cannot simply be darkened: on a camera looking down it
+ * is also what fills the top of the frame, where the dome above does not
+ * reach.
+ *
+ * So: geometry, not a mask over the frame. A ray down a hole meets this and a
+ * ray to the sky does not, which is a distinction the renderer can make and a
+ * post pass cannot - depth 0 is a card against the sky and a hole in the
+ * ground alike, and the three cuts of this that tried to tell them apart in
+ * screen space all ended up blacking out grass cards on the rim. Drawn like
+ * the dome above - riding the camera, first group, out of every buffer - so
+ * everything in the world draws over it and occludes it without being asked.
+ */
+let floor: Dome | null = null;
+
 let domeScene: Scene | null = null;
 
 let observed: LookDirector | null = null;
@@ -262,6 +288,47 @@ function syncDomeMesh(state: Readonly<LookState>): void {
   ]);
 
   domeSky = sky;
+
+  syncFloorMesh(scene, state, horizon);
+}
+
+/**
+ * Where the floor stops being the sky and starts being the underworld, as the
+ * sine of the angle under the horizon.
+ *
+ * It has to hold the horizon's own colour right under the line, or the map
+ * ends in a dark band ruled across the frame at eye level. By 27 degrees down
+ * it is all underworld, which every camera that can see into a ravine is past:
+ * the ported one looks down 48.5.
+ */
+const FLOOR_NEAR = 0.02;
+const FLOOR_FAR = 0.45;
+
+function syncFloorMesh(
+  scene: Scene,
+  state: Readonly<LookState>,
+  horizon: Rgb
+): void {
+  // `?uw=0` takes the floor down with the fog it belongs to, so the A/B is
+  // the whole feature and not half of it.
+  const under = uwDev === 0 ? undefined : profileFor(state.world).underworld;
+
+  if (!under) {
+    disposeSkyFloor();
+    return;
+  }
+
+  if (floor && (floor.scene !== scene || floor.mesh.isDisposed())) {
+    disposeSkyFloor();
+  }
+
+  floor ??= createFloor(scene);
+
+  const c = linearBufferActive(scene) ? toLinear(under.color) : under.color;
+
+  floor.material.setArray3('horizon', [horizon[0], horizon[1], horizon[2]]);
+  floor.material.setArray3('deep', [c[0], c[1], c[2]]);
+  floor.material.setArray2('floorBand', [FLOOR_NEAR, FLOOR_FAR]);
 }
 
 /** The sky the dome is drawing, for the per-frame cloud binding. */
@@ -284,10 +351,100 @@ function bindDomeClouds(scene: Scene, state: Readonly<LookState> | null): void {
 }
 
 export function disposeSkyDome(): void {
+  disposeSkyFloor();
+
   if (!dome) return;
 
   dome.mesh.dispose(false, true);
   dome = null;
+}
+
+function disposeSkyFloor(): void {
+  if (!floor) return;
+
+  floor.mesh.dispose(false, true);
+  floor = null;
+}
+
+const FLOOR_SHADER = 'muSkyFloor';
+
+function registerFloorShader(): void {
+  if (ShaderStore.ShadersStore[`${FLOOR_SHADER}VertexShader`]) return;
+
+  ShaderStore.ShadersStore[`${FLOOR_SHADER}VertexShader`] = `
+  precision highp float;
+  attribute vec3 position;
+  uniform mat4 worldViewProjection;
+  varying vec3 vDir;
+
+  void main(void) {
+    vDir = position;
+    gl_Position = worldViewProjection * vec4(position, 1.0);
+  }
+  `;
+
+  ShaderStore.ShadersStore[`${FLOOR_SHADER}FragmentShader`] = `
+  precision highp float;
+  varying vec3 vDir;
+  uniform vec3 horizon;
+  uniform vec3 deep;
+  uniform vec2 floorBand;
+
+  void main(void) {
+    float down = clamp(-normalize(vDir).y, 0.0, 1.0);
+
+    gl_FragColor = vec4(
+      mix(horizon, deep, smoothstep(floorBand.x, floorBand.y, down)),
+      1.0);
+  }
+  `;
+}
+
+function createFloor(scene: Scene): Dome {
+  registerFloorShader();
+
+  const mesh = new Mesh('skyFloor', scene);
+
+  // The same half sphere the dome is, turned over in its *vertices* rather
+  // than by rotating the node: the shader reads the direction off the raw
+  // attribute, the way the dome's does, and a rotation on the node would
+  // leave it reading the half it was built as. `backFaceCulling` is off, so
+  // the winding the flip inverts does not matter.
+  const data = CreateSphereVertexData({
+    segments: DOME_SEGMENTS,
+    diameter: DOME_RADIUS * 2,
+    slice: 0.5,
+    sideOrientation: Mesh.BACKSIDE,
+  });
+
+  if (data.positions) {
+    for (let i = 1; i < data.positions.length; i += 3) {
+      data.positions[i] = -data.positions[i];
+    }
+  }
+
+  data.applyToMesh(mesh);
+
+  const material = new ShaderMaterial('skyFloor', scene, FLOOR_SHADER, {
+    attributes: ['position'],
+    uniforms: ['worldViewProjection', 'horizon', 'deep', 'floorBand'],
+  });
+
+  material.backFaceCulling = false;
+  mesh.material = material;
+
+  // The dome's rules, for the dome's reasons: rides with the camera, always in
+  // view, first group, and no metadata - the G-buffer, the effect mask and the
+  // cascades all admit meshes by their flags, so this is in none of them and
+  // neither the haze nor the AO ever touches it.
+  mesh.infiniteDistance = true;
+  mesh.alwaysSelectAsActiveMesh = true;
+  mesh.renderingGroupId = 0;
+  mesh.isPickable = false;
+  mesh.receiveShadows = false;
+  mesh.doNotSyncBoundingInfo = true;
+
+  return { scene, mesh, material };
 }
 
 function registerDomeShader(): void {

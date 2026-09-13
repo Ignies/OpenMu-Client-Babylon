@@ -183,12 +183,17 @@ function registerFogShader(): void {
     vec4 color = texture2D(textureSampler, vUV);
     float depth = texture2D(depthSampler, vUV).r;
 
-    bool hazed = fogParams.y > 0.0 && depth > 0.0;
-
-    if (!hazed && uwParams.w <= 0.0) {
+    // A pixel with no depth is left alone by both terms, for the reason
+    // above: a card against the sky and a hole in the ground are the same
+    // thing here, and this cannot tell them apart - a grass blade on a rim
+    // would go out with the ravine behind it. What is under a hole is drawn
+    // rather than deduced: the floor of the sky, in lighting/skyDome.ts.
+    if (depth <= 0.0 || (fogParams.y <= 0.0 && uwParams.w <= 0.0)) {
       gl_FragColor = color;
       return;
     }
+
+    bool hazed = fogParams.y > 0.0;
 
     vec3 viewDir = vec3((vUV.x * 2.0 - 1.0) * viewport.x, (vUV.y * 2.0 - 1.0) * viewport.y, 1.0);
     vec3 camPos = invView[3].xyz;
@@ -200,11 +205,7 @@ function registerFogShader(): void {
       invView[1].xyz * viewDir.y +
       invView[2].xyz * viewDir.z;
 
-    // A pixel with no depth is not a surface at a distance, it is a ray that
-    // met nothing: the sky over the map, or - the reason any of this is here
-    // - the far plane under a hole in the ground. Carried out to the far
-    // plane so the underworld integral below runs the whole way.
-    float dist = depth > 0.0 ? length(worldDir) * depth : 1.0e6;
+    float dist = length(worldDir) * depth;
     vec3 rd = normalize(worldDir);
 
     // The depth belongs to the surface, so only the surface may be hazed by
