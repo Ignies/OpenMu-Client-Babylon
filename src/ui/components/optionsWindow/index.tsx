@@ -727,6 +727,7 @@ const TABS: Tab[] = [
                   max: COMPARE_TOOLTIP_MAX,
                   display: v => t(COMPARE_TOOLTIP_LABEL_KEYS[v]) ?? v,
                 }),
+                check('eventTimers', -1, 'options.eventTimers'),
                 check('questTracker', -1, 'options.questTracker'),
                 {
                   kind: 'button',

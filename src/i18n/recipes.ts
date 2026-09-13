@@ -296,6 +296,7 @@ export const EN_TEXT = {
   'options.compareTooltips': 'Compare with worn',
   'options.compare.shift': 'Hold Shift',
   'options.compare.always': 'Always',
+  'options.eventTimers': 'Event timers',
   'options.questTracker': 'Quest tracker',
   'options.resetWindows': 'Reset windows',
   'options.stateWarnings': 'Warning notices',
@@ -1246,6 +1247,8 @@ export const EN_TEXT = {
   'event.zonePenetration': '%s Penetration (in %d seconds)',
   'event.monsterCount': 'Monster: ( %d/%d )',
   'event.timeLeft': 'Time Left',
+  /** Ours: the HUD event rows, when the gate is open right now. */
+  'event.timerOpen': 'Open',
   'event.skeletonCount': 'Magic Skeleton: ( %d/%d )',
   'event.bcQuestDone': 'completed the Blood Castle Quest!',
   'event.bcCongrats': 'Congratulations! You have successfully',

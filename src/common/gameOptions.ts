@@ -255,6 +255,12 @@ export type GameOptions = {
    */
   compareTooltips: number;
   /**
+   * A row per timed event under the corner minimap, counting down to the
+   * next Blood Castle / Devil Square / Chaos Castle (ours). Off, the client
+   * asks the server nothing of its own accord.
+   */
+  eventTimers: boolean;
+  /**
    * The running quests and their counts on the HUD, under the corner minimap
    * (ours). Off is the Classic look: the quest log (T) is the only place a
    * kill count shows.
@@ -396,6 +402,7 @@ const DEFAULTS: GameOptions = {
   blockBrowserKeys: true,
   minimapCorner: true,
   compareTooltips: 2,
+  eventTimers: true,
   questTracker: true,
   englishItemNames: false,
 };
