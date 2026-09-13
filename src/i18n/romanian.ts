@@ -1185,7 +1185,7 @@ export const romanianLayer: LanguageLayer = {
     'prompt.itemCosts': '{name} costă {price}.',
     'prompt.thisItem': 'Acest obiect',
     'prompt.itemGone': 'Acest obiect nu mai este.',
-    'prompt.buyHowMany': 'Câte {name}? {price} bucata.',
+    'prompt.buyHowMany': 'Câte bucăți de {name}? {price} bucata.',
     'prompt.quantity': 'Cantitate',
     'prompt.trade': 'Schimb',
 
@@ -1477,7 +1477,7 @@ export const romanianLayer: LanguageLayer = {
     'vault.depositJewels': 'Bijuterii',
     'vault.depositJewelsHint': 'Mută toate bijuteriile din inventar în depozit',
     'notify.itemsMoved': '{count} obiecte mutate',
-    'notify.itemsBought': '{count} cumpărate',
+    'notify.itemsBought': 'Bucăți cumpărate: {count}',
     'options.autoReconnect': 'Reconectare automată',
     'resume.title': 'Conexiune pierdută',
     'resume.connecting': 'Reconectare... (încercarea {attempt})',

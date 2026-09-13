@@ -920,17 +920,33 @@ EventBus.on('warpCompleted', () => {
   }
 });
 
+/** The economy prompts the dev seam below can raise on their own. */
+const PROMPT_DEMOS = [
+  'vault-deposit',
+  'vault-withdraw',
+  'vault-unlock',
+  'vault-set-pin',
+  'vault-remove-pin',
+  'trade-money',
+] as const;
+
 /**
- * `?offline&quickItems=sell|buy` (dev builds): the merchant open on the test
- * loadout, with the sell confirmation or the buy quantity prompt already up.
- * There is no server offline, so this is the only way to look at either of
- * them without one.
+ * `?offline&quickItems=sell|buy|<prompt kind>` (dev builds): the merchant open
+ * on the test loadout with the sell confirmation or the buy quantity prompt
+ * already up, or one of the vault / trade prompts on its own. There is no
+ * server offline, so this is the only way to look at any of them without one.
  */
 EventBus.on('warpCompleted', () => {
   if (!Store.isOffline) return;
 
   const demo = devQuery('quickItems');
   if (!demo) return;
+
+  const promptDemo = PROMPT_DEMOS.find(kind => kind === demo);
+  if (promptDemo) {
+    Economy.openPrompt({ kind: promptDemo });
+    return;
+  }
 
   Store.talkToNpc({ netId: 0, name: 'Merchant', npcType: 0 });
 

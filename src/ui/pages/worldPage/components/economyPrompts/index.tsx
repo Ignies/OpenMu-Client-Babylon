@@ -1,14 +1,75 @@
 import './style.less';
 import { t } from '../../../../../i18n';
 import { observer } from 'mobx-react-lite';
-import { useEffect, useState } from 'react';
+import {
+  useEffect,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+} from 'react';
 import { Store } from '../../../../../store';
 import { Economy, type EconomyPrompt } from '../../../../../economy';
-import { uiClick } from '../../../../../libs/sfx';
 import { itemDisplayName } from '../../../../../common/itemTooltip';
 import { itemValue } from '../../../../../common/itemValue';
 import { QuickItemActions } from '../../../../../common/quickItemActions';
 import { MAX_BULK_BUY } from '../../../../../common/quickItemRules';
+import { MuSpriteFrame } from '../../../../components/muSprite';
+import { MuButton } from '../../../../components/muButton';
+import { TEXT_COLOR } from '../../../serversPage/layout';
+import {
+  BACK_SPRITE,
+  BTN_BOTH_CANCEL_X,
+  BTN_BOTH_OK_X,
+  BTN_HEIGHT,
+  BTN_INPUT_CANCEL_X,
+  BTN_INPUT_OK_X,
+  BTN_WIDTH,
+  BTN_Y,
+  CANCEL_SPRITE,
+  INPUT_HEIGHT,
+  INPUT_SPRITE,
+  INPUT_TEXT_INSET_X,
+  INPUT_TEXT_INSET_Y,
+  INPUT_WIDTH,
+  INPUT_X,
+  INPUT_Y,
+  OK_SPRITE,
+  TEXT_INSET_X,
+  TEXT_LINE_HEIGHT,
+  TEXT_LINES,
+  TEXT_TOP,
+  WIN_HEIGHT,
+  WIN_WIDTH,
+} from '../../../../components/msgWindow/layout';
+import {
+  TALL_BACK_HEIGHT,
+  TALL_BACK_SPRITE,
+  TALL_BACK_TOP,
+  TALL_BACK_WIDTH,
+  TALL_BOTTOM_HEIGHT,
+  TALL_BOTTOM_SPRITE,
+  TALL_BTN_CANCEL_X,
+  TALL_BTN_OK_X,
+  TALL_BTN_Y,
+  TALL_FIELD_ONE_INPUT_Y,
+  TALL_FIELD_ONE_LABEL_Y,
+  TALL_FIELD_TWO_INPUT_Y,
+  TALL_FIELD_TWO_LABEL_Y,
+  TALL_HEIGHT,
+  TALL_INPUT_X,
+  TALL_LABEL_HEIGHT,
+  TALL_MIDDLE_HEIGHT,
+  TALL_MIDDLE_LINES,
+  TALL_MIDDLE_SPRITE,
+  TALL_TEXT_INSET_X,
+  TALL_TEXT_LINE_HEIGHT,
+  TALL_TEXT_LINES,
+  TALL_TEXT_TOP,
+  TALL_TOP_HEIGHT,
+  TALL_TOP_SPRITE,
+  TALL_WIDTH,
+} from './layout';
 
 const zen = (gold: number) => `${gold.toLocaleString('en-US')} Zen`;
 
@@ -17,9 +78,8 @@ type Spec = {
   /** The line under the title; the amount / pin field sits below it. */
   hint: string;
   field: 'amount' | 'pin' | 'pin+password' | 'password' | 'none';
-  okLabel: string;
   max?: number;
-  /** Label in front of the number box; Zen unless something else is counted. */
+  /** What the number box counts; Zen unless something else is. */
   amountLabel?: string;
 };
 
@@ -36,7 +96,6 @@ function specOf(prompt: EconomyPrompt): Spec {
         title: t('prompt.storeZen'),
         hint: t('prompt.carrying', { amount: zen(Store.playerData.money) }),
         field: 'amount',
-        okLabel: t('prompt.store'),
         max: Store.playerData.money,
       };
     case 'vault-withdraw':
@@ -44,7 +103,6 @@ function specOf(prompt: EconomyPrompt): Spec {
         title: t('prompt.takeZen'),
         hint: t('prompt.vaultHolds', { amount: zen(Economy.vaultMoney) }),
         field: 'amount',
-        okLabel: t('prompt.take'),
         max: Economy.vaultMoney,
       };
     case 'vault-unlock':
@@ -52,21 +110,18 @@ function specOf(prompt: EconomyPrompt): Spec {
         title: t('prompt.unlockVault'),
         hint: t('prompt.enterPin'),
         field: 'pin',
-        okLabel: t('prompt.unlock'),
       };
     case 'vault-set-pin':
       return {
         title: t('prompt.setPin'),
         hint: t('prompt.newPinHint'),
         field: 'pin+password',
-        okLabel: t('prompt.setPinButton'),
       };
     case 'vault-remove-pin':
       return {
         title: t('prompt.removePin'),
         hint: t('prompt.removePinHint'),
         field: 'password',
-        okLabel: t('prompt.remove'),
       };
     case 'trade-money':
       return {
@@ -75,7 +130,6 @@ function specOf(prompt: EconomyPrompt): Spec {
           amount: zen(Store.playerData.money + Economy.myTradeMoney),
         }),
         field: 'amount',
-        okLabel: t('prompt.offer'),
         max: Store.playerData.money + Economy.myTradeMoney,
       };
     case 'shop-price': {
@@ -87,7 +141,6 @@ function specOf(prompt: EconomyPrompt): Spec {
           ? t('prompt.askingPriceFor', { name })
           : t('prompt.askingPrice'),
         field: 'amount',
-        okLabel: t('prompt.set'),
         max: 2000000000,
       };
     }
@@ -103,7 +156,6 @@ function specOf(prompt: EconomyPrompt): Spec {
             })
           : t('prompt.itemGone'),
         field: 'none',
-        okLabel: t('prompt.buy'),
       };
     }
     case 'npc-buy-many': {
@@ -117,7 +169,6 @@ function specOf(prompt: EconomyPrompt): Spec {
             })
           : t('prompt.itemGone'),
         field: 'amount',
-        okLabel: t('prompt.buy'),
         max: MAX_BULK_BUY,
         amountLabel: t('prompt.quantity'),
       };
@@ -126,6 +177,195 @@ function specOf(prompt: EconomyPrompt): Spec {
 }
 
 const digitsOnly = (value: string) => value.replace(/[^0-9]/g, '');
+
+/** `message_back.OZT`, the 352x113 box the sell confirmation is drawn on. */
+const SmallBox = ({ children }: { children: ReactNode }) => (
+  <MuSpriteFrame
+    file={BACK_SPRITE}
+    width={WIN_WIDTH}
+    height={WIN_HEIGHT}
+    className="economy-prompt"
+  >
+    {children}
+  </MuSpriteFrame>
+);
+
+/** The three-slice box, for the one prompt that asks for two things. */
+const TallBox = ({ children }: { children: ReactNode }) => (
+  <div className="economy-prompt" style={{ width: TALL_WIDTH, height: TALL_HEIGHT }}>
+    <MuSpriteFrame
+      file={TALL_BACK_SPRITE}
+      style={{
+        position: 'absolute',
+        left: 0,
+        top: TALL_BACK_TOP,
+        width: TALL_BACK_WIDTH,
+        height: TALL_BACK_HEIGHT,
+        backgroundSize: '100% 100%',
+      }}
+    />
+    <MuSpriteFrame
+      file={TALL_TOP_SPRITE}
+      width={TALL_WIDTH}
+      height={TALL_TOP_HEIGHT}
+      style={{ position: 'absolute', left: 0, top: 0 }}
+    />
+    <MuSpriteFrame
+      file={TALL_MIDDLE_SPRITE}
+      width={TALL_WIDTH}
+      height={TALL_MIDDLE_HEIGHT * TALL_MIDDLE_LINES}
+      style={{
+        position: 'absolute',
+        left: 0,
+        top: TALL_TOP_HEIGHT,
+        backgroundRepeat: 'repeat-y',
+      }}
+    />
+    <MuSpriteFrame
+      file={TALL_BOTTOM_SPRITE}
+      width={TALL_WIDTH}
+      height={TALL_BOTTOM_HEIGHT}
+      style={{
+        position: 'absolute',
+        left: 0,
+        top: TALL_HEIGHT - TALL_BOTTOM_HEIGHT,
+      }}
+    />
+    {children}
+  </div>
+);
+
+type TextBlockProps = {
+  title: string;
+  hint: string;
+  inset: number;
+  top: number;
+  lineHeight: number;
+  lines: number;
+  /** The narrow box lets the message run onto a second line. */
+  wrapHint?: boolean;
+};
+
+const PromptText = ({
+  title,
+  hint,
+  inset,
+  top,
+  lineHeight,
+  lines,
+  wrapHint,
+}: TextBlockProps) => (
+  <div
+    className="economy-prompt-text"
+    style={{
+      left: inset,
+      right: inset,
+      top,
+      height: lineHeight * lines,
+      lineHeight: `${lineHeight}px`,
+    }}
+  >
+    <div className="economy-prompt-line">{title}</div>
+    <div className={wrapHint ? 'economy-prompt-line-wrap' : 'economy-prompt-line'}>
+      {hint}
+    </div>
+  </div>
+);
+
+type PromptInputProps = {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  left: number;
+  top: number;
+  autoFocus?: boolean;
+  password?: boolean;
+  numeric?: boolean;
+  maxLength?: number;
+};
+
+/** `delete_secret_number.OZT` with the field itself invisible on top of it. */
+const PromptInput = ({
+  label,
+  value,
+  onChange,
+  left,
+  top,
+  autoFocus,
+  password,
+  numeric,
+  maxLength,
+}: PromptInputProps) => (
+  <MuSpriteFrame
+    file={INPUT_SPRITE}
+    width={INPUT_WIDTH}
+    height={INPUT_HEIGHT}
+    style={{ position: 'absolute', left, top }}
+  >
+    <input
+      className="economy-prompt-input"
+      aria-label={label}
+      autoFocus={autoFocus}
+      type={password ? 'password' : 'text'}
+      inputMode={numeric ? 'numeric' : undefined}
+      maxLength={maxLength}
+      value={value}
+      spellCheck={false}
+      onChange={event => onChange(event.target.value)}
+      style={{ paddingLeft: INPUT_TEXT_INSET_X, paddingTop: INPUT_TEXT_INSET_Y }}
+    />
+  </MuSpriteFrame>
+);
+
+const labelStyle = (top: number): CSSProperties => ({
+  left: TALL_INPUT_X,
+  width: INPUT_WIDTH,
+  top,
+  height: TALL_LABEL_HEIGHT,
+  lineHeight: `${TALL_LABEL_HEIGHT}px`,
+});
+
+type ButtonsProps = {
+  okX: number;
+  cancelX: number;
+  top: number;
+  okDisabled?: boolean;
+  onOk: () => void;
+  onCancel: () => void;
+};
+
+const PromptButtons = ({
+  okX,
+  cancelX,
+  top,
+  okDisabled,
+  onOk,
+  onCancel,
+}: ButtonsProps) => (
+  <>
+    <MuButton
+      file={OK_SPRITE}
+      width={BTN_WIDTH}
+      height={BTN_HEIGHT}
+      frames={{ up: 0, active: 1, down: 2 }}
+      color={TEXT_COLOR.brightGray}
+      activeColor={TEXT_COLOR.white}
+      disabled={okDisabled}
+      onClick={onOk}
+      style={{ position: 'absolute', left: okX, top }}
+    />
+    <MuButton
+      file={CANCEL_SPRITE}
+      width={BTN_WIDTH}
+      height={BTN_HEIGHT}
+      frames={{ up: 0, active: 1, down: 2 }}
+      color={TEXT_COLOR.brightGray}
+      activeColor={TEXT_COLOR.white}
+      onClick={onCancel}
+      style={{ position: 'absolute', left: cancelX, top }}
+    />
+  </>
+);
 
 export const EconomyPrompts = observer(() => {
   const prompt = Economy.prompt;
@@ -187,69 +427,127 @@ export const EconomyPrompts = observer(() => {
     (spec.field === 'pin+password' && (pin.length < 4 || !password)) ||
     (spec.field === 'password' && !password);
 
+  const onKeyDown = (event: ReactKeyboardEvent) => {
+    if (event.key === 'Enter' && !okDisabled) confirm();
+    else if (event.key === 'Escape') cancel();
+    event.stopPropagation();
+  };
+
+  if (spec.field === 'pin+password') {
+    return (
+      <div className="economy-prompt-layer" onKeyDown={onKeyDown}>
+        <TallBox>
+          <PromptText
+            title={spec.title}
+            hint={spec.hint}
+            inset={TALL_TEXT_INSET_X}
+            top={TALL_TEXT_TOP}
+            lineHeight={TALL_TEXT_LINE_HEIGHT}
+            lines={TALL_TEXT_LINES}
+            wrapHint
+          />
+
+          <div className="economy-prompt-label" style={labelStyle(TALL_FIELD_ONE_LABEL_Y)}>
+            {t('prompt.pin')}
+          </div>
+          <PromptInput
+            label={t('prompt.pin')}
+            value={pin}
+            onChange={next => setPin(digitsOnly(next))}
+            left={TALL_INPUT_X}
+            top={TALL_FIELD_ONE_INPUT_Y}
+            autoFocus
+            numeric
+            maxLength={5}
+          />
+
+          <div className="economy-prompt-label" style={labelStyle(TALL_FIELD_TWO_LABEL_Y)}>
+            {t('prompt.password')}
+          </div>
+          <PromptInput
+            label={t('prompt.password')}
+            value={password}
+            onChange={setPassword}
+            left={TALL_INPUT_X}
+            top={TALL_FIELD_TWO_INPUT_Y}
+            password
+            maxLength={20}
+          />
+
+          <PromptButtons
+            okX={TALL_BTN_OK_X}
+            cancelX={TALL_BTN_CANCEL_X}
+            top={TALL_BTN_Y}
+            okDisabled={okDisabled}
+            onOk={confirm}
+            onCancel={cancel}
+          />
+        </TallBox>
+      </div>
+    );
+  }
+
+  const hasField = spec.field !== 'none';
+
   return (
-    <div className="economy-prompt-layer">
-      <div
-        className="economy-prompt"
-        onKeyDown={event => {
-          if (event.key === 'Enter' && !okDisabled) confirm();
-          else if (event.key === 'Escape') cancel();
-          event.stopPropagation();
-        }}
-      >
-        <div className="economy-prompt-title">{spec.title}</div>
-        <div className="economy-prompt-hint">{spec.hint}</div>
+    <div className="economy-prompt-layer" onKeyDown={onKeyDown}>
+      <SmallBox>
+        <PromptText
+          title={spec.title}
+          hint={spec.hint}
+          inset={TEXT_INSET_X}
+          top={TEXT_TOP}
+          lineHeight={TEXT_LINE_HEIGHT}
+          lines={TEXT_LINES}
+        />
 
         {spec.field === 'amount' && (
-          <label className="economy-prompt-field">
-            {spec.amountLabel ?? t('common.zen')}
-            <input
-              autoFocus
-              inputMode="numeric"
-              value={amount}
-              spellCheck={false}
-              onChange={event => setAmount(digitsOnly(event.target.value).slice(0, 10))}
-            />
-          </label>
+          <PromptInput
+            label={spec.amountLabel ?? t('common.zen')}
+            value={amount}
+            onChange={next => setAmount(digitsOnly(next).slice(0, 10))}
+            left={INPUT_X}
+            top={INPUT_Y}
+            autoFocus
+            numeric
+          />
         )}
 
-        {(spec.field === 'pin' || spec.field === 'pin+password') && (
-          <label className="economy-prompt-field">
-            {t('prompt.pin')}
-            <input
-              autoFocus
-              inputMode="numeric"
-              maxLength={5}
-              value={pin}
-              spellCheck={false}
-              onChange={event => setPin(digitsOnly(event.target.value))}
-            />
-          </label>
+        {spec.field === 'pin' && (
+          <PromptInput
+            label={t('prompt.pin')}
+            value={pin}
+            onChange={next => setPin(digitsOnly(next))}
+            left={INPUT_X}
+            top={INPUT_Y}
+            autoFocus
+            numeric
+            maxLength={5}
+          />
         )}
 
-        {(spec.field === 'password' || spec.field === 'pin+password') && (
-          <label className="economy-prompt-field">
-            {t('prompt.password')}
-            <input
-              autoFocus={spec.field === 'password'}
-              type="password"
-              maxLength={20}
-              value={password}
-              spellCheck={false}
-              onChange={event => setPassword(event.target.value)}
-            />
-          </label>
+        {spec.field === 'password' && (
+          <PromptInput
+            label={t('prompt.password')}
+            value={password}
+            onChange={setPassword}
+            left={INPUT_X}
+            top={INPUT_Y}
+            autoFocus
+            password
+            maxLength={20}
+          />
         )}
 
-        <div className="economy-prompt-buttons">
-          <button type="button" disabled={okDisabled} onClick={uiClick(confirm)}>
-            {spec.okLabel}
-          </button>
-          <button type="button" onClick={uiClick(cancel)}>
-            {t('common.cancel')}
-          </button>
-        </div>
-      </div>
+        <PromptButtons
+          okX={hasField ? BTN_INPUT_OK_X : BTN_BOTH_OK_X}
+          cancelX={hasField ? BTN_INPUT_CANCEL_X : BTN_BOTH_CANCEL_X}
+          top={BTN_Y}
+          okDisabled={okDisabled}
+          onOk={confirm}
+          onCancel={cancel}
+        />
+      </SmallBox>
     </div>
   );
 });
@@ -274,26 +572,23 @@ export const TradePrompt = observer(() => {
 
   return (
     <div className="economy-prompt-layer">
-      <div className="economy-prompt">
-        <div className="economy-prompt-title">{t('prompt.trade')}</div>
-        <div className="economy-prompt-hint">
-          {t('prompt.wantsToTrade', { name: request.name })}
-        </div>
-        <div className="economy-prompt-buttons">
-          <button
-            type="button"
-            onClick={uiClick(() => Economy.answerTradeRequest(true))}
-          >
-            {t('prompt.accept')}
-          </button>
-          <button
-            type="button"
-            onClick={uiClick(() => Economy.answerTradeRequest(false))}
-          >
-            {t('prompt.refuse')}
-          </button>
-        </div>
-      </div>
+      <SmallBox>
+        <PromptText
+          title={t('prompt.trade')}
+          hint={t('prompt.wantsToTrade', { name: request.name })}
+          inset={TEXT_INSET_X}
+          top={TEXT_TOP}
+          lineHeight={TEXT_LINE_HEIGHT}
+          lines={TEXT_LINES}
+        />
+        <PromptButtons
+          okX={BTN_BOTH_OK_X}
+          cancelX={BTN_BOTH_CANCEL_X}
+          top={BTN_Y}
+          onOk={() => Economy.answerTradeRequest(true)}
+          onCancel={() => Economy.answerTradeRequest(false)}
+        />
+      </SmallBox>
     </div>
   );
 });
