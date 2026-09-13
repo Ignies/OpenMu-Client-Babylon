@@ -6,7 +6,7 @@ import {
   Vector3,
 } from '../../libs/babylon/exports';
 import type { EntityTypeFromQuery, ISystemFactory } from '../world';
-import { isAttackableEntity, isOtherPlayer } from './attackSystem';
+import { canAttackPlayer, isAttackableEntity } from './attackSystem';
 import { isMobileDevice } from '../../common/mobile';
 import { Commands } from '../../commands';
 import { aimX, aimY } from '../../camera';
@@ -178,24 +178,31 @@ export const PointerInputSystem: ISystemFactory = world => {
       ) {
         return;
       }
+      // `CheckAttack` (ZzzInterface.cpp:1752-1783) on the player under the
+      // cursor: the duel enemy, an outlaw, or anyone while Ctrl is held.
+      const hovered = world.currentPointerTarget ?? null;
+      const pvp = !!hovered && canAttackPlayer(world, hovered, ev.event.ctrlKey);
       // `CNewUIHotKey::UpdateMouseEvent`: on another player the right click
-      // opens the quick command menu at the cursor instead of casting. Ctrl
+      // opens the quick command menu at the cursor instead of casting - but
+      // not on one the hero may attack, where the click is the attack. Ctrl
       // is the force-cast modifier below, so it still aims past the player.
       if (
         ev.type === PointerEventTypes.POINTERDOWN &&
         !ev.event.ctrlKey &&
-        Commands.openQuickOn(
-          world.currentPointerTarget,
-          ev.event.clientX,
-          ev.event.clientY
-        )
+        !pvp &&
+        Commands.openQuickOn(hovered, ev.event.clientX, ev.event.clientY)
       ) {
         return;
       }
       // Right button: skill use (Attack() with MouseRButton). Re-picked on
       // every move while held so the cast follows the cursor.
-      if (ev.type === PointerEventTypes.POINTERDOWN) world.rightPointerPressed = true;
-      else if (ev.type === PointerEventTypes.POINTERUP) world.rightPointerPressed = false;
+      if (ev.type === PointerEventTypes.POINTERDOWN) {
+        world.rightPointerPressed = true;
+        // A cast of the hero's own ends the follow (ZzzInterface.cpp:6812).
+        Commands.stopFollowing();
+      } else if (ev.type === PointerEventTypes.POINTERUP) {
+        world.rightPointerPressed = false;
+      }
       if (ev.type === PointerEventTypes.POINTERDOWN || rightDrag) {
         const ground = scene.pick(
           aimX(ev.event.clientX),
@@ -203,15 +210,11 @@ export const PointerInputSystem: ISystemFactory = world => {
           m => m === world.terrain?.mesh,
           true
         ).pickedPoint;
-        // Ctrl + right button is `CheckAttack`'s force attack
-        // (ZzzInterface.cpp:1778). Over another player it is the whole
-        // reason they are a target - without it the cast refuses them, so
-        // a right click in a crowd never opens fire on a passer-by. Over
-        // anything else it drops the object under the cursor and casts at
-        // the ground point, to aim an area skill past a merchant standing
-        // in the line of fire.
-        const hovered = world.currentPointerTarget ?? null;
-        const pvp = ev.event.ctrlKey && !!hovered && isOtherPlayer(hovered);
+        // Without `pvp` a player under the cursor is no target, so a right
+        // click in a crowd never opens fire on a passer-by. Ctrl over
+        // anything else drops the object under the cursor and casts at the
+        // ground point, to aim an area skill past a merchant standing in
+        // the line of fire.
         const forced = ev.event.ctrlKey && !pvp;
         world.castRequest = {
           target: forced ? null : hovered,
@@ -229,9 +232,16 @@ export const PointerInputSystem: ISystemFactory = world => {
 
     if (ev.type === PointerEventTypes.POINTERDOWN) {
       world.pointerPressed = true;
+      // `MoveHero` (ZzzInterface.cpp:7535): a click of the hero's own -
+      // ground, monster, NPC or drop - ends the follow.
+      Commands.stopFollowing();
 
       const target = world.currentPointerTarget;
-      if (target && isAttackableEntity(world, target)) {
+      if (
+        target &&
+        (isAttackableEntity(world, target) ||
+          canAttackPlayer(world, target, ev.event.ctrlKey))
+      ) {
         world.attackTarget = target;
       }
     } else if (ev.type === PointerEventTypes.POINTERUP) {

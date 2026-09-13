@@ -5,6 +5,7 @@ import './style.less';
 import './logic';
 import { Store, UIState } from './store';
 import { Social } from './social';
+import { Commands } from './commands';
 import { Economy } from './economy';
 import { weather } from './weather';
 import { sound, installUiWindowChime } from './sound';
@@ -161,6 +162,7 @@ installPerfOverlay(scene);
 (window as any).__scene = scene;
 (window as any).__world = world;
 (window as any).__social = Social;
+(window as any).__commands = Commands;
 // Live instance for the CDP scenario scripts: a dynamic import('/src/economy.ts')
 // gets a second module copy (vite serves the live graph as `?t=`-stamped URLs)
 // whose state never changes.

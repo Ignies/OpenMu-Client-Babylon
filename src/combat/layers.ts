@@ -5,6 +5,7 @@ import { weaponRangeLayer } from './weaponRange';
 import { skillClipsLayer } from './skillClips';
 import { skillMovementLayer } from './skillMovement';
 import { castTargetsLayer } from './castTargets';
+import { playerTargetLayer } from './playerTarget';
 import { novaChargeLayer } from './novaCharge';
 import { areaHitLayer } from './areaHit';
 import { comboLayer } from './combo';
@@ -27,6 +28,7 @@ export const COMBAT_LAYERS: readonly CombatLayer[] = [
   skillClipsLayer, // readers only
   skillMovementLayer, // readers only
   castTargetsLayer, // readers only
+  playerTargetLayer, // readers only
   novaChargeLayer, // right-button hold
   areaHitLayer, // 0xDB counters
   comboLayer, // combo flash / knock-up timers

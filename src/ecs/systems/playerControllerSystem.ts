@@ -9,6 +9,7 @@ import { MoveTargetEffect } from '../../common/moveTargetEffect';
 import { GameOptions } from '../../common/gameOptions';
 import { WALK_KEYS } from '../../common/keyBindings';
 import { aimX, aimY } from '../../camera';
+import { Commands } from '../../commands';
 
 const MOVE_DELAY = 0.25;
 
@@ -260,6 +261,8 @@ export const PlayerControllerSystem: ISystemFactory = world => {
     world.attackTarget = null;
     world.pickupTarget = null;
     world.talkTarget = null;
+    // A walk of the hero's own ends the follow, the way a click does.
+    Commands.stopFollowing();
 
     return true;
   }

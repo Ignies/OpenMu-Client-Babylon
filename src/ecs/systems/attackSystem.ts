@@ -17,6 +17,8 @@ import { combat } from '../../combat';
 import { MOUSE_UPDATE_SECONDS_MAX } from '../../combat/inputGate';
 import { skillDefinition } from '../../common/skillsDatabase';
 import { truncatePathWithinRange } from '../../common/approachPath';
+import { isHostilePlayer } from '../../combat/playerTarget';
+import { duelEnemyId } from '../../events/duel';
 
 /**
  * Left-click basic attack (`Action()` MOVEMENT_ATTACK, ZzzInterface.cpp:3283-3356):
@@ -98,10 +100,10 @@ export function isOtherPlayer(e: Entity): boolean {
 
 /**
  * A player the hero may swing at. `isAttackableEntity` refuses every player
- * so an ordinary click in a crowd never starts a fight; the deliberate
- * gestures - the quick command menu's attack entry, Ctrl + right button -
- * test with this instead: the same safe-zone and liveness rules, without
- * the monster/NPC one.
+ * so an ordinary click in a crowd never starts a fight; the quick command
+ * menu's attack entry, a deliberate gesture, tests with this instead: the
+ * same safe-zone and liveness rules, without the monster/NPC one. The
+ * clicks themselves go through `canAttackPlayer`.
  */
 export function isAttackablePlayer(
   world: Parameters<ISystemFactory>[0],
@@ -117,6 +119,22 @@ export function isAttackablePlayer(
   if (isFlagInBinaryMask(flag, TWFlags.SafeZone)) return false;
 
   return true;
+}
+
+/**
+ * `CheckAttack` on another player, in full: `isAttackablePlayer` plus the
+ * rule that makes them fair game - the duel, their PK state, or Ctrl held
+ * (`combat/playerTarget`). What both click paths test.
+ */
+export function canAttackPlayer(
+  world: Parameters<ISystemFactory>[0],
+  e: Entity,
+  ctrl: boolean
+): boolean {
+  return (
+    isAttackablePlayer(world, e) &&
+    isHostilePlayer(e, { duelEnemyId: duelEnemyId(), ctrl })
+  );
 }
 
 function directionCode(dx: number, dy: number): number {
