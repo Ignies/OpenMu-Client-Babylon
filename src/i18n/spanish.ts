@@ -1193,7 +1193,7 @@ export const spanishLayer: LanguageLayer = {
     'prompt.itemCosts': '{name} cuesta {price}.',
     'prompt.thisItem': 'Este objeto',
     'prompt.itemGone': 'Este objeto ya no está.',
-    'prompt.buyHowMany': '¿Cuántos {name}? {price} cada uno.',
+    'prompt.buyHowMany': '¿Qué cantidad de {name}? {price} por unidad.',
     'prompt.quantity': 'Cantidad',
     'prompt.trade': 'Intercambio',
 
@@ -1490,7 +1490,7 @@ export const spanishLayer: LanguageLayer = {
     'vault.depositJewels': 'Joyas',
     'vault.depositJewelsHint': 'Mover todas las joyas del inventario al almacén',
     'notify.itemsMoved': '{count} objetos movidos',
-    'notify.itemsBought': '{count} comprados',
+    'notify.itemsBought': 'Unidades compradas: {count}',
     'options.autoReconnect': 'Reconectar automáticamente',
     'resume.title': 'Conexión perdida',
     'resume.connecting': 'Reconectando... (intento {attempt})',
