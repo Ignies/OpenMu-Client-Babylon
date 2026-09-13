@@ -7,6 +7,7 @@ import { ItemTooltip } from '../../../../components/itemTooltip';
 import { t, type TextKey } from '../../../../../i18n';
 import { CATEGORIES, displayName } from '../../../../../marketplace/categories';
 import { cancellable, stateLabelKey, statePillKey } from '../../../../../marketplace/catalogue';
+import { lookClasses } from '../../../../../marketplace/tiers';
 import {
   Marketplace,
   SORTS,
@@ -103,7 +104,7 @@ const ListingCard = observer(({ listing }: { listing: Listing }) => {
 
   return (
     <div
-      className="mp-card"
+      className={`mp-card ${lookClasses(listing.item)}`}
       onPointerMove={onMove}
       onPointerEnter={onMove}
       onPointerLeave={() => Marketplace.unhover(listing.id)}
@@ -156,7 +157,7 @@ const ListingRow = observer(({ listing }: { listing: Listing }) => {
 
   return (
     <div
-      className="mp-row"
+      className={`mp-row ${lookClasses(listing.item)}`}
       onPointerMove={onMove}
       onPointerEnter={onMove}
       onPointerLeave={() => Marketplace.unhover(listing.id)}
