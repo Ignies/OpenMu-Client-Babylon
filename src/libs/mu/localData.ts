@@ -1,10 +1,10 @@
 /**
- * `Data/Local/<pack>/…` — the original client's own localisation.
+ * `Data/Local/<pack>/…` - the original client's own localisation.
  *
  * Webzen shipped one folder per language under `Data/Local/`, with the language
  * tag in every file name: `Eng/Quest_eng.bmd`, `Spn/Quest_spn.bmd`,
  * `Por/Quest_por.bmd`. That is where the quest names, the NPC dialogue scripts,
- * the warp list and the master-skill tooltips live — text the client does not
+ * the warp list and the master-skill tooltips live - text the client does not
  * write itself and so is not in `i18n/recipes.ts`.
  *
  * This resolves one of those files for the active language and falls back to
@@ -22,7 +22,7 @@
 import { i18n } from '../../i18n';
 import { downloadDataFile } from './dataFolder';
 
-/** Empty means "not there" everywhere below — the readers all tolerate it. */
+/** Empty means "not there" everywhere below - the readers all tolerate it. */
 const MISSING = new Uint8Array(0);
 
 /** One decoder per code page; `TextDecoder` construction is not free. */
@@ -135,7 +135,7 @@ export function repairPackText(text: string): string {
  *
  * Some copies of the language packs in the wild were run through a lossy
  * conversion before they were shipped: a UTF-8 decoder read the code-page
- * bytes, and every accented character came back as `?` — taking the byte after
+ * bytes, and every accented character came back as `?` - taking the byte after
  * it with it ("héroe" → "h?oe", "próxima" → "pr?ima"). The text stays readable
  * but the accents are gone from the *file*, so no decoder can bring them back.
  * Say so once, loudly, rather than let it look like a bug here.
@@ -165,7 +165,7 @@ export function checkPackText(base: string, samples: Iterable<string>): void {
       `[i18n] Local/${pack.folder}/${base}_${pack.suffix}.bmd lost its accents ` +
         `before it was shipped (${questions} "?" against ${accents} accented ` +
         `characters). The text is the pack's; replacing that one file with an ` +
-        `undamaged copy fixes it — every other table is read per file.`
+        `undamaged copy fixes it - every other table is read per file.`
     );
   }
 }

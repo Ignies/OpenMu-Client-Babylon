@@ -26,8 +26,8 @@ import type { Entity, ISystemFactory } from '../world';
  * Two different things wear the same shapes:
  *
  *  - **Wet prints.** The water is on the *boot*, not on the ground, so these
- *    keep appearing after the walker has left the puddle and — the whole point
- *    — keep appearing **indoors**. Walking wet feet into the tavern and leaving
+ *    keep appearing after the walker has left the puddle and - the whole point
+ *    - keep appearing **indoors**. Walking wet feet into the tavern and leaving
  *    a trail across the floorboards is the behaviour worth having.
  *  - **Snow prints.** The snow is on the *ground*, so these need settled cover
  *    under the foot and stop dead at a doorway. A run of them is the trail.
@@ -47,7 +47,7 @@ import type { Entity, ISystemFactory } from '../world';
  *    few pixels; a print off the screen is nothing at all.
  *  - The long trail is not decals anyway. It is the ploughed channel in
  *    `snowTrail.ts`, a world-space depth map that the terrain shader folds
- *    into the snow's own relief — that has no pool to empty and is what
+ *    into the snow's own relief - that has no pool to empty and is what
  *    actually reads from a distance.
  *
  * ### Different feet leave different marks
@@ -55,8 +55,8 @@ import type { Entity, ISystemFactory } from '../world';
  * What a thing presses into the snow is its own (`weather/recipes.ts`): a
  * humanoid leaves boot prints, a hound leaves four pads in two pairs, a spider
  * leaves a line of pricks with clean snow between them, a worm leaves one
- * unbroken groove and no prints at all, and anything off the ground — a Budge
- * Dragon hovering, a wraith, a Dinorant rider — leaves the snow exactly as it
+ * unbroken groove and no prints at all, and anything off the ground - a Budge
+ * Dragon hovering, a wraith, a Dinorant rider - leaves the snow exactly as it
  * found it. The recipe decides the silhouette, the size, the stride, the
  * stance, whether there are two feet or four, how hard it presses and how wide
  * a channel its body ploughs; this file decides *when*, and does it once for
@@ -69,7 +69,7 @@ import type { Entity, ISystemFactory } from '../world';
  * Tiles from the hero past which nothing lays a print.
  *
  * Comfortably past the far edge of the screen at the game's camera, so a trail
- * is never seen to start. Everything beyond it costs nothing at all — the
+ * is never seen to start. Everything beyond it costs nothing at all - the
  * distance test is the first thing the loop does.
  */
 const PRINT_RANGE = 26;
@@ -118,7 +118,7 @@ const HOVERING = 0.05;
  * what lets one gait table serve a hero, a yeti and a spider. Against the
  * `boot` recipe they reproduce the tuned hero exactly: stride 0.5 and 0.78,
  * press 0.28 and 0.4, and so on down. Only players have a `run` accumulator,
- * so everything else walks — which is right anyway, since a charging hound
+ * so everything else walks - which is right anyway, since a charging hound
  * lays prints by the tile and not by the second.
  */
 const GAIT = {
@@ -145,7 +145,7 @@ const GAIT = {
      * earlier cut gave the run no trough at all and full-strength prints, and
      * because MU's hero runs by default that was the trail everybody actually
      * saw: a row of dark ovals (the "before" shot). Deep snow does not care
-     * whether the leg lifted between footfalls — the body still ploughs a
+     * whether the leg lifted between footfalls - the body still ploughs a
      * channel.
      */
     press: 1.4286,
@@ -205,7 +205,7 @@ function newWalker(x: number, z: number): Walker {
  * `stride` is ALSO how far the newest print can be behind the walker, and that
  * is the number that matters most for how the trail reads. A print is laid the
  * instant the accumulator crosses it and not again until the next one, so when
- * someone stops walking the last print is, on average, half a stride back —
+ * someone stops walking the last print is, on average, half a stride back -
  * and at the moment they stop, up to a full one. That lag is what keeps
  * reading as "the prints are too far from the boots"; it is not an offset that
  * can be corrected, because at the moment of placement the print IS under the
@@ -215,12 +215,12 @@ function newWalker(x: number, z: number): Walker {
  * a walk. Feet alternate, so consecutive prints must be separated along the
  * track by MORE than a print is long. At 0.34 against a print 0.573 long they
  * overlapped by 0.23 and the trail read as rows of PAIRS rather than as left,
- * right, left — which is not a matter of taste, it is the gait being wrong.
+ * right, left - which is not a matter of taste, it is the gait being wrong.
  * Shortening the PRINT is what buys room for both, which is why
  * `FOOTPRINT_TUNING.length` came down at the same time.
  *
  * `side` is the distance from the WALKER'S CENTRE to the print, so it has to
- * match where that creature's feet actually are — and a person's stance is
+ * match where that creature's feet actually are - and a person's stance is
  * narrow. At 0.24 the two tracks were 0.48 tiles apart, roughly a third of the
  * figure's own height, so the near print landed visibly outside the near boot
  * and the trail straddled the character instead of running under them.
@@ -233,8 +233,8 @@ const SNOW_MIN = 0.12;
  * How snowy a tile has to be before it takes a print at all.
  *
  * Above `SNOW_COVER.bedDefault` (0.3), the share `snowUnderfoot` gives a
- * non-snow tile, so paving and paths take none — they get the thin overlay
- * wash and nothing stamped into them — and below the 0.55 the part-snow
+ * non-snow tile, so paving and paths take none - they get the thin overlay
+ * wash and nothing stamped into them - and below the 0.55 the part-snow
  * tiles (cobbles with snow between) get, so those take a faint mark. The
  * bilinear sampling means the threshold is crossed part way across the
  * boundary tile rather than exactly on its edge.
@@ -276,7 +276,7 @@ export const FootprintSystem: ISystemFactory = world => {
    * Everything that has feet and a place to put them: every player (the hero
    * included, via `playerAnimation`) and every monster and NPC (`npcType`).
    * Two queries rather than one because the ECS has no "or", and because the
-   * two differ in exactly one thing — a player has a run accumulator.
+   * two differ in exactly one thing - a player has a run accumulator.
    */
   const players = world.with('transform', 'playerAnimation');
   const characters = world.with('transform', 'npcType');
@@ -307,7 +307,7 @@ export const FootprintSystem: ISystemFactory = world => {
 
     if (SNOW_GROUND_MAPS.has(map)) {
       // Snow lies on the ground, so the ground has to be open, covered, and
-      // actually snow — and it has to be the ground, not a bridge over it.
+      // actually snow - and it has to be the ground, not a bridge over it.
       // `isTileOpen` alone only says there is sky overhead; it is true of a
       // paved square as readily as of a drift, which is how prints ended up
       // stamped into Devias' swept stone.
@@ -457,7 +457,7 @@ export const FootprintSystem: ISystemFactory = world => {
     }
 
     // Join it to the last footfall. Deep snow does not let a leg swing through
-    // cleanly, so the gap between footfalls is a ploughed trough — and that
+    // cleanly, so the gap between footfalls is a ploughed trough - and that
     // trough is what makes a row of holes read as somebody's trail. It runs
     // from CENTRE to CENTRE, not from foot to foot: joined foot to foot it
     // zigzags with the alternating feet and reads as a sawtooth of rectangles
@@ -499,7 +499,7 @@ export const FootprintSystem: ISystemFactory = world => {
 
   /**
    * Bank one entity's movement and lay a footfall when it has walked far
-   * enough. Returns whether it counted against `MAX_WALKERS` — a walker that
+   * enough. Returns whether it counted against `MAX_WALKERS` - a walker that
    * did not move, or that leaves nothing, is free.
    */
   function walk(map: ENUM_WORLD, entity: Entity, lane: PrintLane): boolean {
@@ -583,7 +583,7 @@ export const FootprintSystem: ISystemFactory = world => {
    *
    *     muTracks()
    *
-   * A wrong row in `weather/recipes.ts` fails **silently** — a creature
+   * A wrong row in `weather/recipes.ts` fails **silently** - a creature
    * classified `none` or `slide` simply leaves nothing, which is
    * indistinguishable from the whole feature being broken, and Devias' Worm
    * cost an afternoon of guessing at a screenshot before that was obvious.

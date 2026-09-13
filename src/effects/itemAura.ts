@@ -22,7 +22,7 @@ import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
  *
  * That "one system per character" is the cost (todo C13): a +13 wearer runs
  * motes + sparks + three rings, and a crowded town square multiplies that by
- * every glowing player and every drop on the ground — each one a per-frame
+ * every glowing player and every drop on the ground - each one a per-frame
  * CPU walk over its particle array. None of these systems needs a custom
  * `startPositionFunction` or `updateFunction` (only the ring's *emitter
  * point* is animated, from a scene observer, which works the same either
@@ -84,7 +84,7 @@ const FLARE = 'Effect/flare01.OZJ';
 
 /**
  * Hands a system the shared flare once it decodes. The system can be gone by
- * then — the wearer walked out of range, the drop was picked up — and Babylon
+ * then - the wearer walked out of range, the drop was picked up - and Babylon
  * splices a disposed system out of `scene.particleSystems`, so that is the
  * check. Assigning to a dead system would pin the decoded texture to it and,
  * worse, hide the fact that it is dead.
@@ -113,7 +113,7 @@ export interface ItemAuraOptions {
   kind: ItemAuraKind;
 }
 
-/** Every aura handed out and not yet disposed — so a map change can end them. */
+/** Every aura handed out and not yet disposed - so a map change can end them. */
 const liveAuras = new Set<ItemAura>();
 
 /** How many auras are running (debug). */
@@ -152,7 +152,7 @@ function motes(
   ps.color2 = second;
   ps.colorDead = new Color4(colour.r, colour.g, colour.b, 0);
 
-  // Soft in, hold, fade out — flare cards popping in read as noise.
+  // Soft in, hold, fade out - flare cards popping in read as noise.
   ps.addColorGradient(0, new Color4(colour.r, colour.g, colour.b, 0));
   ps.addColorGradient(0.25, colour, second);
   ps.addColorGradient(1, new Color4(second.r, second.g, second.b, 0));
@@ -338,7 +338,7 @@ export function createItemAura(
       // aura in the game shares one cached flare01 (loadEffectTexture). The
       // first drop picked up or wearer walking out of range would otherwise
       // destroy that texture for everyone, and the cache would keep handing
-      // out the dead handle — every mote, spark and ring gone for the session.
+      // out the dead handle - every mote, spark and ring gone for the session.
       for (const ps of systems) ps.dispose(false);
       systems.length = 0;
     },

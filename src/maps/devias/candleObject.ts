@@ -22,7 +22,7 @@ const POSE_WAIT_LIMIT = 120;
  * unchanged; only the model file differs. The original gives them a
  * BlendMesh and nothing else (ZzzObject.cpp:4650).
  *
- * The light is ours — `DEVIAS_CANDELABRA` in the lighting layer's map-object
+ * The light is ours - `DEVIAS_CANDELABRA` in the lighting layer's map-object
  * table. Instead of a fixed table offset it sits at the wicks: BMD bone
  * transforms only exist once the skeleton has been posed by a render (see
  * the bounds note in the memory), so the light is created from `Update` the

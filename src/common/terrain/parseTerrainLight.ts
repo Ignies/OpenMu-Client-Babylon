@@ -15,7 +15,7 @@ function clamp01(v: number): number {
 /**
  * The baked terrain light, packed as 3 floats per texel.
  *
- * Pure: no Babylon, no DOM, typed arrays in and out — so it runs in the
+ * Pure: no Babylon, no DOM, typed arrays in and out - so it runs in the
  * terrain worker (todo C8) and the result transfers instead of cloning.
  * `lightBuffer` is the decoded TerrainLight.OZJ (3 floats per texel), which
  * still has to be produced on the main thread because the JPEG decode goes
@@ -39,7 +39,7 @@ export function parseTerrainLightPacked(
       const i = TERRAIN_INDEX(x, y);
       const o = i * 3;
 
-      // Dot(normal, light) + 0.5, clamped — the original's Luminosity.
+      // Dot(normal, light) + 0.5, clamped - the original's Luminosity.
       const luminosity = clamp01(
         normals[o] * LIGHT_X +
           normals[o + 1] * LIGHT_Y +

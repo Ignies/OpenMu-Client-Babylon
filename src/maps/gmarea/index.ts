@@ -7,7 +7,7 @@ import {
 } from '../kanturu1/spec';
 
 /**
- * GM area (World41 / Object41) — the map entry: identity and the per-world data the
+ * GM area (World41 / Object41) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  * The object classes and the setup function are in `create.ts`, loaded on demand.
  */

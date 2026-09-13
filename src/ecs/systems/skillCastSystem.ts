@@ -30,7 +30,7 @@ import { getBaseClass } from '../../common/characterStats';
 import { isWingItem } from '../../common/wings';
 import type { AttackPose } from '../../common/weaponClass';
 import { mountKind } from '../../common/pets';
-import { skillSound } from '../../common/combatSounds';
+import { COMBAT_BUS, skillSound } from '../../common/combatSounds';
 import { playSfx } from '../../libs/sfx';
 import { skills } from '../../skills';
 import { combat } from '../../combat';
@@ -102,7 +102,7 @@ export const SkillCastSystem: ISystemFactory = world => {
   /**
    * What the clip switches branch on: the mount (collapsed to none inside a
    * safe zone, the way every `&& !c->SafeZone` in the original does),
-   * `IsFemale(Class)` — which is Elf *and* Summoner, not "is elf" — and the
+   * `IsFemale(Class)` - which is Elf *and* Summoner, not "is elf" - and the
    * active world, for Rider's flying variant.
    */
   function castContext(hero: Entity): CastContext {
@@ -370,7 +370,7 @@ export const SkillCastSystem: ISystemFactory = world => {
             serverMinAttackInterval(hero.attributeSystem?.getValue('attackSpeed') ?? 0)
           );
           const sfx = skillSound(def.num);
-          if (sfx) playSfx(sfx, hero.transform.pos);
+          if (sfx) playSfx(sfx, hero.transform.pos, { bus: COMBAT_BUS });
         }
         world.castRequest = null;
         return;
@@ -414,7 +414,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         return;
       }
 
-      // ---- Nova hold: the button is down — keep the charge clip up.
+      // ---- Nova hold: the button is down - keep the charge clip up.
       if (combat.novaCharging) {
         const model = hero.modelObject;
         if (model?.ActionIterationWasFinished) {
@@ -434,7 +434,7 @@ export const SkillCastSystem: ISystemFactory = world => {
           hero.pathfinding.path = null;
           const duration = playClip(hero, clipFor(hero, def));
           const sfx = skillSound(def.num);
-          if (sfx) playSfx(sfx, heroPos);
+          if (sfx) playSfx(sfx, heroPos, { bus: COMBAT_BUS });
           cooldown = duration > 0 ? duration : FALLBACK_CAST_COOLDOWN;
         }
         world.castRequest = null;
@@ -568,7 +568,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         if (!area && !target) {
           // Forced cast with nothing near the cursor: the clip whiffs
           // toward the ground point and nothing goes on the wire. The hero
-          // key must not stand in here — a targeted packet naming the
+          // key must not stand in here - a targeted packet naming the
           // caster lands the skill on the character, not at the cursor.
         } else if (combat.isDarkSide(def.num)) {
           // Dark Side: 0x4B asks the server for the targets, 0x4A lands the
@@ -624,7 +624,7 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       // ExecuteSkill plays the skill's sound as the cast starts.
       const sfx = skillSound(def.num);
-      if (sfx) playSfx(sfx, hero.transform.pos);
+      if (sfx) playSfx(sfx, hero.transform.pos, { bus: COMBAT_BUS });
 
       cooldown = Math.max(
         duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,

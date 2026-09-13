@@ -10,8 +10,8 @@ import { ITEM_ICON_MANIFEST } from './itemIconManifest';
  * models and textures through exactly those while the player walks. A shop
  * opened in a busy town watched its 30–100 icons trickle in six at a time
  * (HTTP/1.1 per-host limit), each batch waiting on a frame, for 20 s. The
- * warm-up fires the requests the moment the stock / inventory packet lands —
- * before React mounts a single square — at high priority, and keeps the
+ * warm-up fires the requests the moment the stock / inventory packet lands -
+ * before React mounts a single square - at high priority, and keeps the
  * `Image` objects so the memory cache never has to revalidate them (vite's
  * `public/` answers with `Cache-Control: no-cache`).
  *
@@ -70,7 +70,7 @@ export function itemIconPackUrl({ group, num, lvl, isExcellent }: Item): string 
 /**
  * The files to try for this item, best first, restricted to the ones that
  * exist: the exact tint and variant, then the tint dropped, then the
- * variant dropped, then both. Empty when the item has no icon at all — the
+ * variant dropped, then both. Empty when the item has no icon at all - the
  * caller shows the missing-icon square straight away instead of 404ing.
  */
 export function itemIconPackChain(item: Item): string[] {
@@ -98,7 +98,7 @@ export function itemIconUrl(item: Item): string | null {
 }
 
 /**
- * Identity of an item's icon — every field the file name depends on. Used
+ * Identity of an item's icon - every field the file name depends on. Used
  * as the React key / effect dependency so a durability tick on the same
  * item does not restart its load.
  */
@@ -112,7 +112,7 @@ export function itemIconKey(item: Item): string {
  * Pinned so the browser's memory cache keeps the decoded file. Bounded: a
  * long session through vault, shops and trades would otherwise pin every
  * icon ever seen (8 k files, 65 MB on disk). Insertion-ordered `Map` as an
- * LRU — a hit is re-inserted at the end, the oldest entry is dropped past
+ * LRU - a hit is re-inserted at the end, the oldest entry is dropped past
  * the cap.
  */
 const WARM_CAP = 512;

@@ -7,7 +7,7 @@ import {
 } from './spec';
 
 /**
- * Devil Square (World10 / Object10) — the map entry: identity and the per-world data the
+ * Devil Square (World10 / Object10) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
@@ -16,8 +16,8 @@ import {
  * Devil Square (`WD_9DEVILSQUARE`, world 9 / `World10` + `Object10`).
  *
  * The whole map is the default `MapTileObject`: `CreateObject` and `MoveObject`
- * have no case for it, and its single `RenderObjectVisual` case — the rain
- * ripples on the 200 fence pillars — is documented and deliberately skipped in
+ * have no case for it, and its single `RenderObjectVisual` case - the rain
+ * ripples on the 200 fence pillars - is documented and deliberately skipped in
  * `spec.ts`. What the square does at runtime is the *event*: the waves, the
  * timer and the rank table live in `events/devilSquare.ts`, and the rain in
  * the weather layer (the square is `outdoor` on its entry, per
@@ -30,7 +30,7 @@ import {
  * are the event's stingers, not a map track).
  *
  * The four arenas share one terrain: DS1 at (44-87, 72-110), DS2 (118-152,
- * 72-110), DS3 (44-87, 140-184), DS4 (118-152, 140-184) — the server picks the
+ * 72-110), DS3 (44-87, 140-184), DS4 (118-152, 140-184) - the server picks the
  * square by ticket level and sends the spawn with the warp. Offline lands in
  * DS1 at (133, 86).
  *
@@ -44,7 +44,7 @@ import {
 // ---- 1. data ---------------------------------------------------------------
 
 // Squares 1-4 (map 9) and 5-7 (OpenMU map 32): `LoadWorld` folds 32 into 9
-// (MapManager.cpp:1177) — one terrain, one object set, one entry.
+// (MapManager.cpp:1177) - one terrain, one object set, one entry.
 const WORLDS: readonly ENUM_WORLD[] = [
   ENUM_WORLD.WD_9DEVILSQUARE,
   ENUM_WORLD.WD_32DEVILSQUARE_5_7,

@@ -5,7 +5,7 @@ export type BoneNode = BonedEmission['node'];
 
 /**
  * The transform node the converter left for BMD bone `index`
- * (`bone_<i>_<bmdName>`, tools/bmdToGlb.ts:283) — the same two-step lookup
+ * (`bone_<i>_<bmdName>`, tools/bmdToGlb.ts:283) - the same two-step lookup
  * Stadium's brazier and the login wall torch make: the skeleton's linked node
  * first, the node graph by name second.
  */

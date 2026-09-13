@@ -16,7 +16,7 @@ import {
 } from './guildMark';
 
 /**
- * `RenderGuild` (ZzzCharacter.cpp:6388) — the guild flag every guild member
+ * `RenderGuild` (ZzzCharacter.cpp:6388) - the guild flag every guild member
  * carries on the right shoulder: a 5x7 plane bound to the guild-mark texture,
  * hung off bone 26 with the character's own angle folded into the link matrix
  * a second time (the bone transform already carries it, ZzzBMD.cpp:134), which
@@ -51,7 +51,7 @@ const CM = 1 / 100;
 
 const DEG = Math.PI / 180;
 
-/** `MODEL_THUNDER_HAWK_ARMOR` — group 5 (armour), number 39. */
+/** `MODEL_THUNDER_HAWK_ARMOR` - group 5 (armour), number 39. */
 const THUNDER_HAWK_ARMOR = { group: 5, num: 39 };
 
 export function isThunderHawkArmor(
@@ -178,7 +178,7 @@ export class GuildFlag {
   }
 
   /**
-   * `AngleMatrix(o->Angle + FLAG_ANGLE)` then the offset — rebuilt per frame
+   * `AngleMatrix(o->Angle + FLAG_ANGLE)` then the offset - rebuilt per frame
    * because it reads the wearer's yaw.
    */
   update(yawRadians: number, thunderHawk: boolean): void {

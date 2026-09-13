@@ -1,6 +1,6 @@
 import { t, type TextKey } from '../i18n';
 /**
- * The Season 6 NPC dialogue — `CNewUINPCDialogue` (NewUINPCDialogue.cpp) on
+ * The Season 6 NPC dialogue - `CNewUINPCDialogue` (NewUINPCDialogue.cpp) on
  * top of `CQuestMng`'s `NPCDialogue.bmd` pages.
  *
  * Driven by `OpenNpcDialog` (F9 01, `ReceiveNPCDlgUIStart`): the server says
@@ -286,7 +286,7 @@ export function answerNpcDialogue(index: number): void {
 
 /**
  * `ProcessQuestListReceive`: while the dialogue is up the NPC's list goes
- * into it — words 1501 / 1502 above, "[Q]subject" lines and "Go back." below.
+ * into it - words 1501 / 1502 above, "[Q]subject" lines and "Go back." below.
  */
 EventBus.on('AvailableQuests', packet => {
   if (!state.open) return;

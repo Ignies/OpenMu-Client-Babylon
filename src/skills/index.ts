@@ -51,8 +51,8 @@ export type {
 } from './masterTree';
 
 /**
- * The skill layer: the client-side bookkeeping the server does not send —
- * buff timers, re-use delays, castability — behind one object. Copy `_template.ts` when adding to it.
+ * The skill layer: the client-side bookkeeping the server does not send -
+ * buff timers, re-use delays, castability - behind one object. Copy `_template.ts` when adding to it.
  *
  * The game talks to `skills.update` once a frame (`ecs/systems/skillSystem`)
  * and `skills.reset` on a map change (`libs/mu/loadMapIntoScene`); both fan

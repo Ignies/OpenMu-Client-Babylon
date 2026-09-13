@@ -1,5 +1,5 @@
 /**
- * Model — a skill mesh from Data/Skill (the original's `MODEL_*` effects:
+ * Model - a skill mesh from Data/Skill (the original's `MODEL_*` effects:
  * MODEL_FIRE, MODEL_ICE, MODEL_POISON, MODEL_MAGIC_CIRCLE…) placed at a
  * point, drawn bright/additive with its own animation, scaled and turned
  * over its life, then dropped. `CreateEffect(MODEL_*, …)` + the per-model
@@ -41,7 +41,7 @@ const DEFAULT_SECONDS = 1.2;
 
 /**
  * The GLB converter already scales BMD centimetres to tiles, so `scale` 1 is
- * the model's native size — `CreateEffect`'s `Scale` default (ZzzEffect.cpp:332;
+ * the model's native size - `CreateEffect`'s `Scale` default (ZzzEffect.cpp:332;
  * MODEL_FIRE rolls 1.0–1.7, MODEL_POISON 1.0, MODEL_ICE 0.8). The move-target
  * pin's 0.6 is its own (moveTargetEffect.ts) and used to leak in here, drawing
  * every skill mesh at 60 % .
@@ -84,14 +84,14 @@ export interface ModelOptions {
   /**
    * The original's `o->BlendMesh`: only this mesh (BMD order) is drawn
    * bright/additive; every other mesh is an opaque textured surface
-   * (ZzzBMD.cpp `RenderMesh`, RENDER_TEXTURE → `DisableAlphaBlend`) —
+   * (ZzzBMD.cpp `RenderMesh`, RENDER_TEXTURE → `DisableAlphaBlend`) -
    * MODEL_FIRE's lava core under its additive tail. Default: every mesh bright.
    */
   blendMesh?: number;
   /**
    * `add` (default) is the bright meshes' usual look; `subtract` is
-   * `RENDER_DARK` — `EnableAlphaBlendMinus`, `dst × (1 − src)`
-   * (ZzzBMD.cpp:1606) — the dark spirit stamps of Evil Spirit's MODEL_LASER.
+   * `RENDER_DARK` - `EnableAlphaBlendMinus`, `dst × (1 − src)`
+   * (ZzzBMD.cpp:1606) - the dark spirit stamps of Evil Spirit's MODEL_LASER.
    */
   blend?: EffectBlend;
   /** Yaw follows the direction `follow` moves the node (the original re-stamps along the joint's `Angle`). */
@@ -209,7 +209,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         // The lighting lane's shared bright material, for a mesh whose
         // texture did not come through the GLB cache (never disposed here).
         const brightFallback = getMaterial(scene, false, Material.MATERIAL_ALPHABLEND, BlendState.ALPHA_ONEOE, true);
-        // Unlit, opaque, texture × body light — `glColor3fv(BodyLight)` with lighting off.
+        // Unlit, opaque, texture × body light - `glColor3fv(BodyLight)` with lighting off.
         const solid =
           opts.blendMesh === undefined
             ? null
@@ -227,8 +227,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           }
           mesh.isPickable = false;
           mesh.alwaysSelectAsActiveMesh = true;
-          // A bright mesh takes the effects' own additive material — the
-          // sheet × `colour` under (SRC_ALPHA, ONE) — so `visibility` is the
+          // A bright mesh takes the effects' own additive material - the
+          // sheet × `colour` under (SRC_ALPHA, ONE) - so `visibility` is the
           // original's `Alpha` and the tint is its `Light`. Cached per
           // (texture, colour) in core.ts; the texture stays the GLB cache's.
           const tex = mesh.metadata.diffuseTexture as Texture | undefined;
@@ -282,7 +282,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       clip?.stop();
       // Never the shared materials and textures: the bright / solid materials
       // are shared caches (core.ts, modelLoader.ts) and the textures the GLB
-      // cache's — `dispose(false, true)` used to take them down with the
+      // cache's - `dispose(false, true)` used to take them down with the
       // first Meteorite to land. The subtractive materials are this spawn's
       // own (their emissive is mutated per frame) and go with it.
       for (const m of fadeMats) m.dispose(false, false);

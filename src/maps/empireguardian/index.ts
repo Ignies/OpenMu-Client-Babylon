@@ -8,7 +8,7 @@ import {
 } from './spec';
 
 /**
- * Fortress of Imperial Guardian, days 1-3 (World70-72 / Object70-72) — the map entry: identity and the per-world data the
+ * Fortress of Imperial Guardian, days 1-3 (World70-72 / Object70-72) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  * The object classes and the setup function are in `create.ts`, loaded on demand.
  */
@@ -16,7 +16,7 @@ import {
 // ---- 1. data ---------------------------------------------------------------
 
 // Days 1-3. Unlike the castles each day has its own `World<n+1>` folder; the
-// three share every table. Day 4 has its own tables — see `../empireguardian4`.
+// three share every table. Day 4 has its own tables - see `../empireguardian4`.
 const WORLDS: readonly ENUM_WORLD[] = [
   ENUM_WORLD.WD_69EMPIREGUARDIAN1,
   ENUM_WORLD.WD_70EMPIREGUARDIAN2,

@@ -1,5 +1,5 @@
 /**
- * Monster glow — the additive cards a monster carries on its own bones for as
+ * Monster glow - the additive cards a monster carries on its own bones for as
  * long as it is in scope: Bahamut's anglerfish lure, the light in each of
  * Vepar's hands, the Lost Tower Shadow's whole luminous body.
  *
@@ -77,7 +77,7 @@ type GlowTexture = keyof typeof GLOW_TEXTURES;
 /**
  * `CreateSprite`'s `SubType` picks the blend (zzzeffectsprite.cpp:151-166):
  * 0 is `EnableAlphaBlend`, `(ONE, ONE)`; 1 is `EnableAlphaBlendMinus`,
- * `(ZERO, ONE_MINUS_SRC_COLOR)` — `dst * (1 - src)`, which is Babylon's
+ * `(ZERO, ONE_MINUS_SRC_COLOR)` - `dst * (1 - src)`, which is Babylon's
  * `ALPHA_SUBTRACT` exactly. The Shadow is the one glow drawn that way, and
  * that is the whole monster: it takes light out of the frame.
  */
@@ -140,7 +140,7 @@ export const MONSTER_GLOWS: Partial<Record<number, MonsterGlow>> = {
   // 49 Hydra (MODEL_HYDRA): one big flare over the head, :11005.
   49: renderLight([63], [{ tex: 'halo', scale: 1 }, { tex: 'bar', scale: 4 }], [0, 0, 0.2]),
   // 36 Shadow (MODEL_SHADOW, `c->Level == 0`): `SubType 1`, so the body is
-  // drawn *out* of the frame rather than into it — the name is literal
+  // drawn *out* of the frame rather than into it - the name is literal
   // (:11123). The skipped bones are the floating Box01-14 shards, which stay
   // solid. :11099-11132.
   36: {
@@ -194,7 +194,7 @@ export function monsterGlowFor(npcType: number): MonsterGlow | undefined {
 
 // ---- 2. state + readers ----------------------------------------------------
 
-/** One manager per texture *and* blend — `blendMode` is a manager setting. */
+/** One manager per texture *and* blend - `blendMode` is a manager setting. */
 type ManagerKey = `${GlowTexture}:${GlowBlend}`;
 
 const managers = new Map<ManagerKey, SpriteManager>();
@@ -208,7 +208,7 @@ let generation = 0;
 
 /**
  * The manager for one texture, built on first use. Null until the OZJ has
- * decoded — a glow asked for meanwhile has no sprite for that card yet and
+ * decoded - a glow asked for meanwhile has no sprite for that card yet and
  * picks it up on a later frame.
  */
 function managerFor(
@@ -311,7 +311,7 @@ function skipped(glow: MonsterGlow, bone: number): boolean {
 
 /**
  * The bones the cards hang on. `'body'` resolves against the loaded skeleton
- * — the original's `for (i < b->NumBones) if (!b->Bones[i].Dummy)`. The
+ * - the original's `for (i < b->NumBones) if (!b->Bones[i].Dummy)`. The
  * converter keeps a dummy as a joint named `bone_<i>_Dummy`
  * (tools/bmdToGlb.ts:312), which is that test.
  */
@@ -383,7 +383,7 @@ function drop(g: LiveGlow): void {
 }
 
 /**
- * Command: light a monster's own body. The handle ends it — the system stops
+ * Command: light a monster's own body. The handle ends it - the system stops
  * it when the monster dies or leaves; a map change ends every one.
  */
 export function glowMonster(

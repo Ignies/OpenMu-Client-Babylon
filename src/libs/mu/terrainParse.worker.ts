@@ -5,16 +5,16 @@
  *
  * Every parser reachable from here is pure: typed arrays in, typed arrays
  * out, no Babylon and no DOM. That is why `mapFileEncryption` and friends
- * import `common/binaryUtils` rather than `common/utils` — the latter pulls
+ * import `common/binaryUtils` rather than `common/utils` - the latter pulls
  * in `Scene`/`Texture` and would drag the whole engine into this chunk.
  *
  * Two request kinds rather than one, because the light bake depends on a
  * JPEG decode that only the engine can do:
  *
- *   'bulk'  — height + attributes + mapping + objects, straight from the
+ *   'bulk'  - height + attributes + mapping + objects, straight from the
  *             downloaded bytes. This is the part that used to block the
  *             frame on every map change.
- *   'light' — the normal/luminosity pass, once the main thread has decoded
+ *   'light' - the normal/luminosity pass, once the main thread has decoded
  *             TerrainLight.OZJ into floats.
  */
 

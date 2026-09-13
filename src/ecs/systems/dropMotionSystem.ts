@@ -8,7 +8,7 @@ import type { Entity, ISystemFactory } from '../world';
  *
  * - A **fresh** drop (`IsFreshDrop`) is created 180 cm up with
  *   `Gravity = 20` cm/tick and falls under `Gravity -= 6` a tick, tumbling
- *   — `Angle[0] = -Gravity × 10°` while airborne, `Angle[1]` for a shield —
+ *   - `Angle[0] = -Gravity × 10°` while airborne, `Angle[1]` for a shield -
  *   until it reaches its rest height, where `ItemAngle` sets the lying pose
  *   back (that pose is `common/itemAngle.ts`, applied at spawn). Here the
  *   fall is a render-only `posOffset.y` above the rest position logic.ts

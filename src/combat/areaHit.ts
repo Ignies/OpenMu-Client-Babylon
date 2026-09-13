@@ -1,7 +1,7 @@
 /**
  * The `AreaSkillHit` (0xDB, `PACKET_MAGIC_ATTACK`) follow-up: for a skill
  * whose hits the *client* decides, an `AreaSkill` cast is followed by one
- * 0xDB carrying the targets inside the area — up to the packet's byte cap —
+ * 0xDB carrying the targets inside the area - up to the packet's byte cap -
  * and a per-cast `HitCounter` / `AnimationCounter` the server uses to drop
  * duplicates. OpenMU processes it only for skills typed
  * `AreaSkillExplicitHits`; for `AreaSkillAutomaticHits` the server picks

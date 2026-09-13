@@ -1,7 +1,7 @@
 export const MAX_USERNAME_LENGTH = 10;
 export const MAX_PASSWORD_LENGTH = 10;
 
-// Connect-server and ws-proxy endpoints — the DEFAULTS only. They seed the
+// Connect-server and ws-proxy endpoints - the DEFAULTS only. They seed the
 // first server profile on a fresh install; from then on `common/serverConfig.ts`
 // owns where the client connects (saved profiles, edited in the start screen's
 // server picker, with `?cs=` / `?ws=` in the URL above them). A build sets its

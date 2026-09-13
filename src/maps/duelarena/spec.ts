@@ -15,7 +15,7 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
 export const DUEL_ARENA_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
- * `MoveObject` :71-76 hides 35 (×34) and 36 (×59) — nothing drawn in their
+ * `MoveObject` :71-76 hides 35 (×34) and 36 (×59) - nothing drawn in their
  * place; :77-85 hides 34 (×131), the brazier below.
  */
 export const DUEL_ARENA_EFFECT_ONLY_TYPES: readonly number[] = [34, 35, 36];
@@ -26,7 +26,7 @@ export const DUEL_ARENA_EMISSIONS: Partial<Record<number, readonly Emission[]>> 
 
 /**
  * Type 34 (×131), `MoveObject` :77-85: `L = (rand%3+5)*0.1;
- * AddTerrainLight(x, y, (0.9L, 0.2L, 0.1L), 3)` + hidden — a deep-red
+ * AddTerrainLight(x, y, (0.9L, 0.2L, 0.1L), 3)` + hidden - a deep-red
  * brazier, brighter and steadier than the Kanturu one (0.5-0.7 rather than
  * 0.3-0.6). 131 of them ring the four arenas.
  */

@@ -21,7 +21,7 @@ import { truncatePathWithinRange } from '../../common/approachPath';
 /**
  * Left-click basic attack (`Action()` MOVEMENT_ATTACK, ZzzInterface.cpp:3283-3356):
  * walk into the weapon's reach, face the target, restart the swing clip and
- * latch the hit. Timing comes from the `combat` layer — the 0.24 s input
+ * latch the hit. Timing comes from the `combat` layer - the 0.24 s input
  * gate, the `AttackTime` latch that sends `HitRequest` at the clip's hit
  * key, the reach per weapon and the archer's ammunition check. This is
  * also the one place `combat.update` is stepped: it runs before
@@ -180,7 +180,7 @@ export const AttackSystem: ISystemFactory = world => {
       const range = combat.attackRange(hands);
 
       // Face the target's live position, not its tile corner, and keep
-      // facing it whenever the hero stands still — including the throttle
+      // facing it whenever the hero stands still - including the throttle
       // gaps of the approach walk while a swing clip is still finishing:
       // the original's CreateAngle (ZzzCharacter.cpp, AT_ATTACK*) works on
       // the objects' float positions, re-evaluated every frame while the
@@ -255,7 +255,7 @@ export const AttackSystem: ISystemFactory = world => {
       anim.action = action;
 
       // The blow lands at the clip's hit key: latch the HitRequest there. The
-      // clip length is the fallback — the request never outlives the clip.
+      // clip length is the fallback - the request never outlives the clip.
       const playSpeed = model?.AnimationSpeed ?? 0;
       const clipSeconds = model?.getActionDuration(action) || undefined;
       const hitDelay = combat.startAttack(action, playSpeed, () => {
@@ -271,7 +271,7 @@ export const AttackSystem: ISystemFactory = world => {
       combat.consumeInputGate();
 
       // MouseUpdateTimeMax (0.24 s), the hit key of this swing, and the
-      // server's anti-speedhack interval — whichever is the latest.
+      // server's anti-speedhack interval - whichever is the latest.
       attackCooldown = Math.max(
         MOUSE_UPDATE_SECONDS_MAX,
         hitDelay,

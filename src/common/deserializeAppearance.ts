@@ -14,7 +14,7 @@ type Item = {
 const APPEARANCE_LENGTH = 18;
 
 /**
- * Equipment slot order of the 18-byte preview's level field — the inventory's
+ * Equipment slot order of the 18-byte preview's level field - the inventory's
  * own numbering (`InventoryConstants`), which `SetItemLevels` walks 0..6.
  */
 const LEVEL_SLOTS = [
@@ -57,7 +57,7 @@ export function emptyAppearance(cls: CharacterClassNumber): DataView {
   bytes[3] = 0xff;
   bytes[4] = 0xff;
   // Boots nibble empty; the low two bits are the pet slot, and `AddPet` marks
-  // "no pet" with 0b11 — leaving them at 0 would read back as a Guardian Angel.
+  // "no pet" with 0b11 - leaving them at 0 would read back as a Guardian Angel.
   bytes[5] = 0xf3;
   bytes[9] = HELM_MASK | ARMOR_MASK | PANTS_MASK | GLOVES_MASK | BOOTS_MASK;
   bytes[12] = 0xf0;
@@ -87,7 +87,7 @@ export function classFromAppearance(app: DataView): CharacterClassNumber {
 
 /**
  * The classic 18-byte preview ("CharSet") every Season 6 client is sent for a
- * player in scope — the exact inverse of OpenMU's `AppearanceSerializer`:
+ * player in scope - the exact inverse of OpenMU's `AppearanceSerializer`:
  *
  *   0      class (bits 3-7) + pose (bits 0-2)
  *   1, 2   left / right hand item number, 0xFF = empty
@@ -102,8 +102,8 @@ export function classFromAppearance(app: DataView): CharacterClassNumber {
  *   16     transform pet flags (high 3 bits) + black/blue Fenrir (bits 0/1)
  *   17     small-wing flags (high 3 bits) + gold Fenrir (bit 0)
  *
- * Everything the wearer's own gear can show — level glow, excellent and
- * ancient passes, wings, the pet — is in here; reading only the item numbers
+ * Everything the wearer's own gear can show - level glow, excellent and
+ * ancient passes, wings, the pet - is in here; reading only the item numbers
  * is what left other players' effects and wings off in the first place.
  */
 export function deserializeAppearance(app: DataView) {
@@ -116,8 +116,8 @@ export function deserializeAppearance(app: DataView) {
   const leftHandGroup = GetByteValue(app.getUint8(12), 3, 5);
   const rightHandGroup = GetByteValue(app.getUint8(13), 3, 5);
 
-  // Hands carry no excellent / ancient bit in this layout — only the five
-  // armor slots do — so a remote weapon shows its level glow and nothing more.
+  // Hands carry no excellent / ancient bit in this layout - only the five
+  // armor slots do - so a remote weapon shows its level glow and nothing more.
   const leftHand: Item | null =
     leftHandIndex === 0xff && leftHandGroup === 0x07
       ? null
@@ -218,8 +218,8 @@ function ClassFromAppearance(raw: number): CharacterClassNumber {
  *
  * The wire carries `(level - 1) / 2` (`ItemExtensions.GetGlowLevel`), so a
  * level cannot be recovered exactly: glow *g* was worn as +2g+1 or +2g+2. The
- * odd one is the answer, because every threshold the renderer steps on — +7
- * sheen, +9 aura, +11 sparks, +13 light — is odd, so the tier always comes
+ * odd one is the answer, because every threshold the renderer steps on - +7
+ * sheen, +9 aura, +11 sparks, +13 light - is odd, so the tier always comes
  * out right and only the shade between two levels of one tier is lost. That
  * loss is the protocol's, not ours: the original client cannot tell either.
  */
@@ -237,7 +237,7 @@ function itemLevels(app: DataView): Record<(typeof LEVEL_SLOTS)[number], number>
 }
 
 /**
- * One glow level back to the item level to render it at — see `itemLevels`
+ * One glow level back to the item level to render it at - see `itemLevels`
  * for why the odd one is the right answer. Shared with the `AppearanceChanged`
  * (0x25) path, whose byte 1 carries the same glow level in its low nibble.
  */
@@ -262,7 +262,7 @@ function wingFromAppearance(app: DataView): Item | null {
   // neither do the 4th-level Cape of Fighter / Cape of Overrule (id 7).
   if (num === undefined) return null;
 
-  // Cape of Lord is the one wing that lives in the helper group (13) — the
+  // Cape of Lord is the one wing that lives in the helper group (13) - the
   // preview has no room for a group, so the table names it.
   return { num, group: num === CAPE_OF_LORD ? 13 : 12, lvl: 0 };
 }
@@ -283,7 +283,7 @@ const WING_NUMBERS: Record<number, Record<number, number | undefined>> = {
  * The pet slot (`AddPet`). The low two bits of byte 5 hold the three pets that
  * fit there; 0b11 means "one of the rest", and the rest are single bits spread
  * over bytes 10 and 12. A Dark Raven is written as plain 0b11 with no flag, so
- * it is indistinguishable from an empty slot here — the original client has
+ * it is indistinguishable from an empty slot here - the original client has
  * the same blind spot.
  *
  * Byte 16's transform pets (Demon, Spirit of Guardian, Skeleton, Rudolph, Pet
@@ -313,8 +313,8 @@ function petFromAppearance(app: DataView): Item | null {
 
 /**
  * One of the five armor slots. `SetArmorItemIndex` splits the item number
- * three ways — bits 0-3 into a nibble of `firstIndex`, bit 4 into the slot's
- * byte-9 bit, bits 5-8 into a nibble of `thirdIndex` — and an unequipped slot
+ * three ways - bits 0-3 into a nibble of `firstIndex`, bit 4 into the slot's
+ * byte-9 bit, bits 5-8 into a nibble of `thirdIndex` - and an unequipped slot
  * is every one of those bits set (`SetEmptyArmor`).
  */
 function GetArmorPiece(

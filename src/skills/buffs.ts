@@ -30,7 +30,7 @@ export interface ActiveBuff {
   startedAt: number;
 }
 
-/** Seconds of `update` since the last reset — the layer's own clock. */
+/** Seconds of `update` since the last reset - the layer's own clock. */
 let clock = 0;
 /** Effect id → clock seconds when it appeared. */
 const startedAt = new Map<number, number>();

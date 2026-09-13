@@ -59,7 +59,7 @@ const MONSTER_ONE_SHOT_ACTIONS = new Set<MonsterActionType>([
   MonsterActionType.Appear,
 ]);
 
-/** `GetEquipedBowType(c) == BOWTYPE_CROSSBOW` — picks the crossbow variants. */
+/** `GetEquipedBowType(c) == BOWTYPE_CROSSBOW` - picks the crossbow variants. */
 function equippedCrossbow(hands: Hands | undefined): boolean {
   if (!hands) return false;
   return isCrossbow(hands.leftHand) || isCrossbow(hands.rightHand);
@@ -90,7 +90,7 @@ export const AnimationSystem: ISystemFactory = world => {
    * SetPlayerStop / SetPlayerWalk (ZzzCharacter.cpp:157-679) minus the Dark
    * Spirit. The order is the original's and it matters: Fenrir, then the
    * horse, the horns, wings, the swim worlds, and only then the weapon
-   * switch — a winged character in Atlans flies, it does not swim.
+   * switch - a winged character in Atlans flies, it does not swim.
    */
   function calculateAnimation(ctx: {
     pose: CharacterPose;
@@ -120,7 +120,7 @@ export const AnimationSystem: ISystemFactory = world => {
     }
 
     // The Dark Horse is tested before the horns and ignores the weapon
-    // split — both arms of the original pick the same clip
+    // split - both arms of the original pick the same clip
     // (SetPlayerStop:189-195, SetPlayerWalk:477-480).
     if (ctx.ridingHorse && !ctx.inSafeZone) {
       return ctx.isMoving
@@ -351,7 +351,7 @@ export const AnimationSystem: ISystemFactory = world => {
               npcClass !== undefined
                 ? isFemaleClass(npcClass)
                 : attributeSystem.isAboveZero('isFemale'),
-            // "(no weapon) or (safe zone outside Blood Castle)" — the caller
+            // "(no weapon) or (safe zone outside Blood Castle)" - the caller
             // side of the collapse is the safe zone; the no-weapon half is
             // tested inside chooseIdleAction / chooseWalkAction.
             weaponsStowed: inSafeZone && !bloodCastle,

@@ -15,7 +15,7 @@ import type { World } from '../../ecs/world';
  *
  *  - **Bats and rats.** `Object2/Bat01.glb` and `Object2/Rat01.glb` are
  *    ambient wildlife, flocked by the original's boid code rather than placed
- *    in the object list — which is why neither appears in EncTerrain2.obj.
+ *    in the object list - which is why neither appears in EncTerrain2.obj.
  *    The clone has no boid system and this map is not the place to grow one.
  *  - **The type 52 rock-fall as real falling models.** See the long note on
  *    `DUNGEON_EMISSIONS` in `spec.ts`: it runs as particles until an
@@ -30,7 +30,7 @@ import type { World } from '../../ecs/world';
  * `loadGLTF` reproduces the glTF loader's `animationStartMode = FIRST` and
  * plays clip 0 looping on every instance and clone (modelLoader.ts:471-481),
  * which is what the original's single-action map objects do. Their *rate* is
- * a separate, map-agnostic matter — `ModelObject.AnimationSpeed` defaults to
+ * a separate, map-agnostic matter - `ModelObject.AnimationSpeed` defaults to
  * the 0.28 player idle speed where `CreateObject` gives every map object
  * `o->Velocity = 0.16f` (ZzzObject.cpp:4470), so every map object in the port
  * animates ~1.75× fast. That is shared-code work, not a Dungeon fix.
@@ -41,13 +41,13 @@ export async function createDungeon(world: World) {
 
   const tiles = terrain.MapTileObjects;
 
-  // Dungeon 59 (ZzzObject.cpp:4608-4610), the sittable stone ledge — 30 of
+  // Dungeon 59 (ZzzObject.cpp:4608-4610), the sittable stone ledge - 30 of
   // them, in clusters of three to five around the six rest spots. The
   // original only calls `CreateOperate(o)`: the model draws normally and the
   // object joins the operate list, which `ObjectCollisionCheck` uses to route
   // a click into the sit pose. Nothing in this clone consumes that list yet
   // (combat and UI work), so the default `MapTileObject` is already the whole of the
-  // visible behaviour and the type is left unassigned on purpose — a class
+  // visible behaviour and the type is left unassigned on purpose - a class
   // that only re-loaded `Object60.glb` would be a class that does nothing.
 
   // Dungeon 60 (ZzzObject.cpp:4611-4615): `CreateOperate` + the explicit

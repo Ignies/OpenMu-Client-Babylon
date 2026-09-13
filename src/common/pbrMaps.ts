@@ -14,7 +14,7 @@ import { FILTER_ANISOTROPY } from './materialQuality';
  * MU's art is diffuse-only, so the maps are derived from it: height-from-luma
  * normals, metalness from the palette (desaturated mid/high-luma pixels are
  * metal, saturated ones are cloth/leather/skin), roughness from metal +
- * highlight density, and an emissive mask over saturated *bright* pixels —
+ * highlight density, and an emissive mask over saturated *bright* pixels -
  * the gems and gold trim that should feed the GlowLayer.
  *
  * Hand-authored maps win over the derivation: `Data/PBR/manifest.json` maps a
@@ -37,7 +37,7 @@ export type DerivedMaps = {
 
 /**
  * Height scale for the normal derivation (luma 0..1 → texels of relief),
- * applied to the *normalised* Sobel gradient — see `SOBEL_NORM`.
+ * applied to the *normalised* Sobel gradient - see `SOBEL_NORM`.
  */
 const NORMAL_STRENGTH = 1.4;
 
@@ -46,12 +46,12 @@ const NORMAL_STRENGTH = 1.4;
  * per-texel slope. Without it the raw kernel output spans ±4 for luma in
  * 0..1, so the old `gradient * 2.2` bent the average normal of Lorencia's
  * wood and stone by 30–58° (measured over tile_wood01 / bookshelf / desk_big /
- * c_wall04) and its 95th percentile past 70°. That is not relief — it is a
+ * c_wall04) and its 95th percentile past 70°. That is not relief - it is a
  * per-texel randomisation of N·L, and it is why Enhanced read as blotchy,
  * smeared and mis-lit next to Classic. MU's art is 128², JPEG-compressed and
  * has its shading painted in, so block ringing and dither become 'geometry'
  * at any real strength. Normalised, the same textures land at 4–10° average
- * and 12–20° at p95 — a surface that catches the torches without fighting the
+ * and 12–20° at p95 - a surface that catches the torches without fighting the
  * art.
  */
 const SOBEL_NORM = 1 / 8;
@@ -114,7 +114,7 @@ export function derivePbrMaps(
     for (let x = 0; x < width; x++) {
       const i = y * width + x;
 
-      // Sobel height gradient (wrapping — MU textures tile).
+      // Sobel height gradient (wrapping - MU textures tile).
       const dx =
         at(x + 1, y - 1) +
         2 * at(x + 1, y) +
@@ -154,7 +154,7 @@ export function derivePbrMaps(
         )
       );
 
-      // glTF layout: G roughness, B metalness (R is free — AO, left white).
+      // glTF layout: G roughness, B metalness (R is free - AO, left white).
       metallicRoughness[i * 4] = 255;
       metallicRoughness[i * 4 + 1] = rough * 255;
       metallicRoughness[i * 4 + 2] = metal * 255;
@@ -222,7 +222,7 @@ function raw(
   return texture;
 }
 
-/** Flat normal, "rough dielectric", black — what a mesh gets until its maps exist. */
+/** Flat normal, "rough dielectric", black - what a mesh gets until its maps exist. */
 export function pbrPlaceholders(scene: Scene): Placeholders {
   let set = placeholders.get(scene);
   if (set) return set;
@@ -267,7 +267,7 @@ function loadManifest(): Promise<Manifest> {
   return manifest;
 }
 
-/** Source file name of a texture — the GLB label when loaded from one. */
+/** Source file name of a texture - the GLB label when loaded from one. */
 export function textureSourceName(texture: BaseTexture): string {
   const internal = texture.getInternalTexture() as { label?: string } | null;
 
@@ -377,7 +377,7 @@ export function pbrMapsFor(
   return null;
 }
 
-/** Already-built maps only (no build kick-off) — for the GlowLayer selector. */
+/** Already-built maps only (no build kick-off) - for the GlowLayer selector. */
 export function pbrMapsIfReady(
   texture: BaseTexture | undefined
 ): PbrMapSet | null {

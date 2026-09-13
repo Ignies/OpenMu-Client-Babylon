@@ -1,5 +1,5 @@
 /**
- * Blur — a weapon-swing trail: a ribbon stretched between the last N
+ * Blur - a weapon-swing trail: a ribbon stretched between the last N
  * positions of two moving points (hilt and tip), textured with the sword
  * sheet, fading from the newest sample to the oldest. The original's
  * `CreateBlur(o, bone, …)` / `RenderBlur` (ZzzEffectBlur.cpp): it stores
@@ -50,7 +50,7 @@ export interface BlurOptions {
   /**
    * `add` (default) is `EnableAlphaBlend`; `subtract` is the
    * `EnableAlphaBlendMinus` pass RenderBlurs switches to once the owner has a
-   * level — the trail darkens what is behind it instead of glowing.
+   * level - the trail darkens what is behind it instead of glowing.
    */
   blend?: EffectBlend;
   /** Stops sampling early when true (the swing clip was cut short). */

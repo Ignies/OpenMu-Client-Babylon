@@ -1,11 +1,11 @@
 /**
- * `Data/Local/<pack>/item_<lang>.bmd` — the item names in the language the
+ * `Data/Local/<pack>/item_<lang>.bmd` - the item names in the language the
  * player picked.
  *
  * `ITEM_ATTRIBUTE_FILE` (`GameData/ItemData/ItemStructs.h`) with the legacy
  * 30-byte name the Season 6 tree ships: 8192 fixed records of 84 bytes, no
  * count in front, a 4-byte checksum after (which the client does not verify),
- * each record XOR-ed with the 3-byte Bux key **restarting at every record** —
+ * each record XOR-ed with the 3-byte Bux key **restarting at every record** -
  * one `BuxConvert(pSeek, structsize)` per record, the same as `MoveReq` and
  * the quest tables. The record index is the item code: `group * 512 + index`.
  *
@@ -29,7 +29,7 @@ import {
 const FILE = 'item';
 const RECORD_SIZE = 84;
 const NAME_LENGTH = 30;
-/** `MAX_SUBTYPE` — the stride between two groups in the flat record array. */
+/** `MAX_SUBTYPE` - the stride between two groups in the flat record array. */
 const GROUP_STRIDE = 512;
 
 const names = observable.box<ReadonlyMap<number, string>>(new Map(), {
@@ -60,7 +60,7 @@ export function parseItemNames(bytes: Uint8Array): Map<number, string> {
 
 /**
  * Load the overlay for the active language. A no-op for a language with no
- * pack, and for English — `items.json` already holds those names.
+ * pack, and for English - `items.json` already holds those names.
  */
 export function loadItemNames(): Promise<void> {
   if (pending) return pending;

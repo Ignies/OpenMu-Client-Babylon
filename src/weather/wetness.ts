@@ -9,7 +9,7 @@ import { rainStrength, rainTarget } from './rainState';
  * The falling drops are particles (`RAIN`); this is what they leave behind.
  * The original client has nothing like it; the roadmap lists
  * `BITMAP_RAIN_CIRCLE` splashes as missing and they were never ground
- * contact anyway — so this is our own, and like `snowCover` it is a
+ * contact anyway - so this is our own, and like `snowCover` it is a
  * *simulation* rather than a lookup: stone darkens while the shower falls and
  * dries out slowly afterwards, which is the whole reason a passing shower
  * leaves a mark on the map instead of switching a texture on and off.
@@ -21,7 +21,7 @@ import { rainStrength, rainTarget } from './rainState';
  * lags `wetness` on the way up and outlives it on the way down.
  */
 
-/** Maps that get wet ground. Snow maps are excluded — Devias gets snow cover. */
+/** Maps that get wet ground. Snow maps are excluded - Devias gets snow cover. */
 // ---- 1. tuning -------------------------------------------------------------
 
 const WET_MAPS: ReadonlySet<ENUM_WORLD> = new Set([
@@ -40,7 +40,7 @@ const WET_DRY_SECONDS = 150;
  *
  * Without this, wetness only ever asked *is it raining* and crept to fully
  * soaked either way, so a drizzle left the same black streets as a downpour
- * if you waited long enough — and eventually crossed the puddle threshold,
+ * if you waited long enough - and eventually crossed the puddle threshold,
  * which is plainly wrong for rain you can barely see. Ground now approaches a
  * ceiling set by the intensity instead. The packet tops out at 0.9
  * (`variation` 15 x 6 / 100), so the gain is what lets real rain still reach
@@ -122,12 +122,12 @@ export function updateWetness(map: ENUM_WORLD, dt: number): number {
   return wet;
 }
 
-/** Ground wetness, 0…1 — the broad darkening. */
+/** Ground wetness, 0…1 - the broad darkening. */
 export function wetness(): number {
   return wet;
 }
 
-/** Standing water, 0…1 — the sharp-edged dark patches on flat ground. */
+/** Standing water, 0…1 - the sharp-edged dark patches on flat ground. */
 export function puddleCover(): number {
   return puddles;
 }
@@ -145,7 +145,7 @@ export function inPuddles(): boolean {
   return puddles > 0.3;
 }
 
-/** Drop both — a map change that is not to a wet map, or a teardown. */
+/** Drop both - a map change that is not to a wet map, or a teardown. */
 export function resetWetness(): void {
   wet = 0;
   puddles = 0;

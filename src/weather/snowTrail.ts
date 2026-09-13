@@ -6,7 +6,7 @@ import type { ThinEngine } from '@babylonjs/core/Engines/thinEngine';
  * The trail ploughed through settled snow: one continuous channel behind the
  * hero, with the snow heaped along its rims and churned on its floor.
  *
- * This used to be decals — a chain of `drag` quads from `footprints.ts`, one
+ * This used to be decals - a chain of `drag` quads from `footprints.ts`, one
  * per stride. It cannot be. Each quad is its own little height field with its
  * own ends, so where one piece's floor rises back to the surface there is a
  * wall across the channel, and however far the pieces overlap the eye reads
@@ -14,7 +14,7 @@ import type { ThinEngine } from '@babylonjs/core/Engines/thinEngine';
  * world-space depth map, painted on every footfall, that the terrain shader
  * folds into the snow's own relief. The walls, the lit and shaded faces, the
  * heaped rims and the churned floor then all come out of the same gradient
- * the drifts already use — the trench is a shape in the snow, not a picture
+ * the drifts already use - the trench is a shape in the snow, not a picture
  * laid on it.
  *
  * The map is 2048² (4 MB). It is allocated the first time a boot ploughs it,

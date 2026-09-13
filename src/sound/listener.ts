@@ -1,13 +1,14 @@
 import type { ENUM_WORLD } from '../common/types';
 import type { World } from '../ecs/world';
 import { SoundsManager } from '../libs/soundsManager';
+import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 
 /**
  * The listener: where the hero's ears are, and the one-shot `playSfx` every
  * positioned effect goes through (the original's `PlayBuffer(sound, object)`
- * — DirectSound's 3D listener sits on the hero, so a sound played "at" an
+ * - DirectSound's 3D listener sits on the hero, so a sound played "at" an
  * object is attenuated by its distance to the hero; a sound with no position
  * is UI / hero-local and full volume).
  *
@@ -79,17 +80,31 @@ export function clearSfxListener(): void {
   hasListener = false;
 }
 
+export type SfxOptions = {
+  /**
+   * The caller's own share of the effects track (0…1), before the bus - a
+   * bed's one-shot sits under the SFX, a hit sits on top.
+   */
+  gain?: number;
+  /** Which mixer category this sound belongs to (`buses.ts`). */
+  bus?: SoundBus;
+};
+
 /**
  * Plays `key` once; `at` (tile coordinates) attenuates it by distance to the
- * hero. `gain` is the caller's share of the effects track (0…1) under that
- * attenuation — a bed's one-shot sits under the SFX, a hit sits on top.
+ * hero, and the bus slider scales what is left. A sound that names no bus is
+ * `world`: it rides the effects slider and nothing else.
  */
 export function playSfx(
   key: Sounds,
   at?: SfxPosition | null,
-  gain = 1
+  opts?: SfxOptions
 ): void {
-  let volume = gain;
+  const bus = opts?.bus ?? 'world';
+  const category = busGain(bus);
+  if (category <= 0) return;
+
+  let volume = (opts?.gain ?? 1) * category;
   if (at && hasListener) {
     const dx = at.x - listenerX;
     const dz = at.z - listenerZ;

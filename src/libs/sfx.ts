@@ -7,9 +7,11 @@ export {
   playSfx,
   setSfxListener,
   clearSfxListener,
+  type SfxOptions,
   type SfxPosition,
 } from '../sound/listener';
 export {
+  UI_BUS,
   UI_SOUNDS,
   UI_SOUND_KEYS,
   playUiSound,

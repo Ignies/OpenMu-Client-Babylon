@@ -10,7 +10,7 @@ import { SQUARE } from '../itemGrid';
 /**
  * The last place the pointer was pressed or moved. Tracked at all times so
  * the picked item can appear under the cursor on the very click that lifted
- * it — on touch there is no `pointermove` before the tap, and waiting for
+ * it - on touch there is no `pointermove` before the tap, and waiting for
  * one left the item invisible until the finger moved.
  */
 const lastPointer = { x: -10000, y: -10000 };

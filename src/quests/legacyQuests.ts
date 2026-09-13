@@ -1,8 +1,8 @@
 import { t, type TextKey } from '../i18n';
 /**
- * The legacy quest chain — Scroll of the Emperor, Three Treasures of Mu,
+ * The legacy quest chain - Scroll of the Emperor, Three Treasures of Mu,
  * Gain Hero Status, Secret of Dark Stone, Evidence of Strength, the Balgass
- * quests — ported from `CSQuest` (CSQuest.cpp) and the window that shows it,
+ * quests - ported from `CSQuest` (CSQuest.cpp) and the window that shows it,
  * `CNewUINPCQuest` (NewUINPCQuest.cpp).
  *
  * Driven by the 0xA0…0xA4 packets: `LegacyQuestStateList` (all states, 2 bits
@@ -27,11 +27,14 @@ import { t, type TextKey } from '../i18n';
  */
 import { observable, reaction, runInAction } from 'mobx';
 import { getBaseClass, BaseClass } from '../common/characterStats';
+import { itemBaseName } from '../common/itemsDatabase';
+import { monsterDisplayName } from '../common/monstersDatabase';
 import {
   LegacyQuestStateRequestPacket,
   LegacyQuestStateSetRequestPacket,
 } from '../common/packets/ClientToServerPackets';
 import {
+  ConditionTypeEnum,
   LegacyQuestRewardPacket,
   LegacyQuestStateDialogPacket,
   LegacyQuestStateListPacket,
@@ -50,6 +53,7 @@ import {
   questDefinitions,
 } from './questData';
 import { legacyKillCount } from './killCounters';
+import type { QuestObjective } from './objectives';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -176,6 +180,15 @@ export function legacyQuestNeedZen(): number {
 /** `getQuestTitleWindow()`: name of the quest the log tab is about. */
 export function legacyQuestWindowTitle(): string {
   return questDefinition(state.windowIndex)?.name ?? '';
+}
+
+/** The chain quests the hero is on (`QUEST_ING`), by index. */
+export function legacyQuestsInProgress(): number[] {
+  const running: number[] = [];
+  for (let i = 0; i < MAX_QUESTS; i++) {
+    if (state.states[i] === LegacyQuestState.InProgress && questDefinition(i)?.name) running.push(i);
+  }
+  return running;
 }
 
 /** Whether the server told us the states yet. */
@@ -308,6 +321,39 @@ function actsFulfilled(quest: QuestDefinition): boolean {
   return true;
 }
 
+/**
+ * `RenderItemMobText`: what this class still has to bring, as objective
+ * records. The item count is the bag's, the kill count the counters', both
+ * read the same way `CheckActCondition` reads them.
+ */
+export function legacyQuestObjectives(index: number): QuestObjective[] {
+  const quest = questDefinition(index);
+  if (!quest) return [];
+
+  const objectives: QuestObjective[] = [];
+  for (const act of actsForHero(quest)) {
+    if (act.kind === QuestActKind.Monster) {
+      objectives.push({
+        type: ConditionTypeEnum.MonsterKills,
+        id: act.itemType,
+        required: act.itemNum,
+        current: legacyKillCount(act.itemType),
+        name: monsterDisplayName(act.itemType),
+      });
+    } else if (act.kind === QuestActKind.Item) {
+      const type = act.itemType * MAX_ITEM_INDEX + act.itemSubType;
+      objectives.push({
+        type: ConditionTypeEnum.Item,
+        id: type,
+        required: act.itemNum,
+        current: act.itemNum - missingItems(type, act.itemNum, act.itemLevel),
+        name: itemBaseName(act.itemType, act.itemSubType) || t('quest.itemFallback', { id: type }),
+      });
+    }
+  }
+  return objectives;
+}
+
 /** `FindQuestContext(quest, column)`: the dialog page for this state column. */
 function pageFor(quest: QuestDefinition, column: number): number {
   const act = actsForHero(quest)[0];
@@ -397,7 +443,7 @@ function showDialogText(page: number): void {
  * A dialogue page is a snapshot: `showDialogText` copies the words and answers
  * out of the tables into `state`. When the language changes those tables are
  * fetched again (`questData.ts`), so an open window has to be redrawn from the
- * new ones — otherwise it keeps showing the language it was opened in.
+ * new ones - otherwise it keeps showing the language it was opened in.
  *
  * Keyed on `questDataReady()` rather than on the language itself: it is the
  * flip back to true, once the new tables are decoded, that has something to

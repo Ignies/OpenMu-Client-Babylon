@@ -21,7 +21,7 @@ export const KANTURU3_BLEND_MESHES: Readonly<Record<number, number>> = {};
  * hides 1, 11, 46, 49, 50 on their first frame and 74.
  *
  *  - **1** (×21) / **11** (×50) / **46** (×49) / **49** (×24) / **50**
- *    (×20): `BITMAP_CLOUD` SubType 1/3/7/1/4 — the tower's steam.
+ *    (×20): `BITMAP_CLOUD` SubType 1/3/7/1/4 - the tower's steam.
  *  - **32** (×5): `BITMAP_TWINTAIL_WATER`; **52** (×8): `BITMAP_TRUE_BLUE`;
  *    **53** (×32): `BITMAP_SMOKE` SubType 46.
  *  - **45** (×26), **50**, **54** (×45): white terrain-light flashes, see
@@ -53,13 +53,13 @@ export const KANTURU3_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
 /**
  * `MoveKanturu3rdObject`:
  *  - **45** (×26), :147-157: one tick in three, `L = (rand%4+3)*0.3` white
- *    at range `1 + scale/2` — the machinery's arc lights.
+ *    at range `1 + scale/2` - the machinery's arc lights.
  *  - **50** (×20), :163-171: one in three, `L = (rand%10)*0.2` white at
- *    range `1 + scale` — harsher, flickering to black.
+ *    range `1 + scale` - harsher, flickering to black.
  *  - **54** (×45), :173-184: a single flash on the first frame, then hidden
- *    — a one-shot, reduced here to a dim steady glow.
+ *    - a one-shot, reduced here to a dim steady glow.
  *  - **5** (×13, `RenderKanturu3rdObjectVisual` :262-272): `BITMAP_LIGHT`
- *    plus two counter-spinning `SHINY` sprites at bone 1 — the crystal
+ *    plus two counter-spinning `SHINY` sprites at bone 1 - the crystal
  *    lamps, no terrain light.
  *
  * `range` is fixed at the scale-1 value; the objects sit at 1.0-1.9.

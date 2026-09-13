@@ -26,7 +26,7 @@ const MASTER_SHEET = ['new_Master_Icon.OZJ', 'new_Master_non_Icon.OZJ'];
  * texture id.
  *
  * A master-tree skill's cell lives in `Skill.bmd` (`Magic_Icon`), which the
- * tree loads lazily — the load is kicked off here so a master skill sitting
+ * tree loads lazily - the load is kicked off here so a master skill sitting
  * on a bar slot draws without the tree window ever being opened, and the
  * component is an observer so it repaints when the tables land.
  */

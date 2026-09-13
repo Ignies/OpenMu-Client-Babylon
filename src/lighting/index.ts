@@ -12,7 +12,7 @@ import {
   type LightAnchor,
   type LightRecipe,
 } from './lightSource';
-import { lightAreaSkill, lightSkillTrail, lightTargetedSkill } from './skills';
+import { lightAreaSkill, lightArrow, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
@@ -31,8 +31,8 @@ export type { LightRecipe, LightAnchor } from './lightSource';
  * public surface for consumers; every entry file stays importable directly
  * for anything that needs a single function.
  *
- * The two sinks — `common/terrainDynamicLight.ts` and
- * `common/pointLightPool.ts` — are consumers of this folder: `LightSource`
+ * The two sinks - `common/terrainDynamicLight.ts` and
+ * `common/pointLightPool.ts` - are consumers of this folder: `LightSource`
  * registers into them, `TerrainLightSystem` steps them after `update`.
  */
 class Lighting {
@@ -62,7 +62,7 @@ class Lighting {
   }
 
   /**
-   * Drop everything. Call when the map changes — the terrain light field is
+   * Drop everything. Call when the map changes - the terrain light field is
    * rebuilt from the new bake and no registration may outlive it.
    */
   reset(): void {
@@ -139,6 +139,20 @@ class Lighting {
     return lightSkillTrail(scene, skill, follow);
   }
 
+  /**
+   * Light an arrow for the length of its flight - the original lights the
+   * arrow body itself every frame it is alive. `skill` is 0 for a plain bow
+   * shot. Null when that arrow flies dark, so the caller skips the rest.
+   */
+  arrow(
+    scene: Scene,
+    skill: number,
+    model: string,
+    follow: (out: { x: number; y: number; z: number }) => void
+  ): LightSource | null {
+    return lightArrow(scene, skill, model, follow);
+  }
+
   /** Light a server object effect (level-up, shields, swirl) on an entity. */
   objectEffect(scene: Scene, entity: Entity, effect: Events['objectEffect']['effect']): void {
     lightObjectEffect(scene, entity, effect);
@@ -154,7 +168,7 @@ class Lighting {
   }
 
   /**
-   * An ad-hoc light from any recipe — for a host that is not an entry (a
+   * An ad-hoc light from any recipe - for a host that is not an entry (a
    * map object class, a test). Prefer a row in an entry's table.
    */
   flash(scene: Scene, recipe: LightRecipe, anchor: LightAnchor): LightSource {

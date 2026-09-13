@@ -6,7 +6,7 @@ import {
 } from './spec';
 
 /**
- * Icarus (World11 / Object11) — the map entry: identity and the per-world data the
+ * Icarus (World11 / Object11) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  * The object classes and the setup function are in `create.ts`, loaded on demand.
  */
@@ -45,7 +45,7 @@ export const icarusLayer: MapLayer = {
   outdoor: OUTDOOR,
   clearColor: CLEAR_COLOR,
   // `ICARUS_EFFECT_ONLY_TYPES` (the six cloud boxes) is bound by `create` as
-  // `IcarusCloudObject`, which skips the model itself — not an effect-only row.
+  // `IcarusCloudObject`, which skips the model itself - not an effect-only row.
   blendMeshes: ICARUS_BLEND_MESHES,
   emissions: ICARUS_EMISSIONS,
   create: world => import('./create').then(m => m.createIcarus(world)),

@@ -1,5 +1,5 @@
 /**
- * Season 6 game tables — the ones OpenMU's `VersionSeasonSix` initializer
+ * Season 6 game tables - the ones OpenMU's `VersionSeasonSix` initializer
  * configures. Today they are the files under `src/common/`; this module is
  * the one door the base game should import them through (a `tables` handle
  * beside `versionPackets` in src/version/index.ts, Phase 7 step b) so a

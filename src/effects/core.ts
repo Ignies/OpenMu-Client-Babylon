@@ -29,7 +29,7 @@ import type { EffectHandle } from './layer';
  *  - `LiveList` steps an entry's running effects from `effects.update`;
  *  - textures come from `loadEffectTexture` (one GPU texture per file, shared
  *    with the map emitters and the item auras);
- *  - additive `StandardMaterial`s are cached per (texture, colour) — MU's
+ *  - additive `StandardMaterial`s are cached per (texture, colour) - MU's
  *    `EnableAlphaBlend` drawn as `(SRC_ALPHA, ONE)` so `visibility` is the
  *    fade (`ADDITIVE_ALPHA_MODE` below), and an additive material only
  *    blends when `transparencyMode` is ALPHABLEND;
@@ -41,7 +41,7 @@ import type { EffectHandle } from './layer';
  * `disposePools()` + `clearTimers()` are the facade's reset for all of this.
  */
 
-/** MU's 25 Hz effect tick — the C++ counts lifetimes in these. */
+/** MU's 25 Hz effect tick - the C++ counts lifetimes in these. */
 export const TICK = 1 / 25;
 
 /** One MU world unit is a centimetre; a tile is 100 of them. */
@@ -117,7 +117,7 @@ export class LiveList {
  * An effect's release runs from the frame loop, and a throw there does not
  * stop at the effect: it climbs through `effects.update` and the ECS into
  * Babylon's render loop, which never queues another frame after an exception
- * — the picture freezes while the socket and the audio carry on. `update`
+ * - the picture freezes while the socket and the audio carry on. `update`
  * already drops a throwing effect; its release gets the same treatment.
  */
 function release(e: LiveEffect): void {
@@ -149,7 +149,7 @@ export function entityYaw(e: Entity): number {
 /**
  * A skinned bone's world position, or the entity at `fallbackHeight` when
  * the skeleton is not there (monsters, still-loading models). `bone` is the
- * MU bone index (the GLB adds a root, hence +1 — modelObject.ts:1099).
+ * MU bone index (the GLB adds a root, hence +1 - modelObject.ts:1099).
  */
 export function bonePos(e: Entity, bone: number, out: Vector3, fallbackHeight = 0.9): Vector3 {
   const gltf = e.modelObject?.gltf;
@@ -161,7 +161,7 @@ export function bonePos(e: Entity, bone: number, out: Vector3, fallbackHeight = 
 }
 
 /**
- * A point given in a skinned bone's own frame — the original's
+ * A point given in a skinned bone's own frame - the original's
  * `TransformPosition(BoneTransform[bone], p, …)`. `local` is in tiles: the
  * GLB keeps bone frames in BMD bone space with centimetres scaled to tiles
  * (weaponAttachment.ts). Falls back to the entity at `fallbackHeight`.
@@ -304,11 +304,11 @@ export type EffectBlend = 'add' | 'subtract';
 /**
  * The additive blend the cards and skill meshes use: `(SRC_ALPHA, ONE)`.
  * The original's `EnableAlphaBlend` is `(ONE, ONE)` and it fades an effect
- * by scaling `glColor3fv(Light × Alpha)` — the colour toward black. Under
+ * by scaling `glColor3fv(Light × Alpha)` - the colour toward black. Under
  * `(ONE, ONE)` Babylon's `mesh.visibility` never reaches the framebuffer
  * (the alpha is simply dropped), so every fade was a no-op and `sprite`
  * shrank its card instead. `(SRC_ALPHA, ONE)` with an opaque sheet is the
- * same maths — `src × visibility + dst` — and lets `visibility` be the
+ * same maths - `src × visibility + dst` - and lets `visibility` be the
  * original's `Alpha` .
  */
 const ADDITIVE_ALPHA_MODE = Constants.ALPHA_ADD;
@@ -317,12 +317,12 @@ const ADDITIVE_ALPHA_MODE = Constants.ALPHA_ADD;
  * Unlit material tinted `colour` (the original's `glColor3fv(Light)` on an
  * `EnableAlphaBlend` quad). Cached per (texture, colour, blend). JPG effect
  * sheets are black where they are transparent, and with (ONE, ONE) black adds
- * nothing — so no alpha channel is needed. The sheet rides in `diffuseTexture`
+ * nothing - so no alpha channel is needed. The sheet rides in `diffuseTexture`
  * with the tint in `emissiveColor`: the Standard fragment is
  * `clamp(diffuseBase·diffuseColor + emissiveColor + ambient) × diffuseTexel`,
  * and with lighting off `diffuseBase` is 0, so the texel is *multiplied* by
  * the tint like `glColor3fv`. (The sheet as `emissiveTexture` is *added* to
- * `emissiveColor` instead — the tint filled the card's black and every flash
+ * `emissiveColor` instead - the tint filled the card's black and every flash
  * was a solid tinted square, 2026-08-30.) `subtract` is
  * `EnableAlphaBlendMinus` (ZzzOpenglUtil.cpp:444, `dest × (1 − src)`,
  * Babylon's ALPHA_SUBTRACT): the dark trail a levelled character's sword
@@ -365,7 +365,7 @@ export function additiveMaterial(
     });
   } else {
     // A texture somebody else owns (a skill model's, from the GLB cache):
-    // referenced, never disposed — `disposePools` drops the material only.
+    // referenced, never disposed - `disposePools` drops the material only.
     mat.diffuseTexture = texture;
   }
 
@@ -380,10 +380,10 @@ export function additiveMaterial(
 export type Card = Mesh;
 
 /**
- * A sheet drawn one cell at a time — the original's
+ * A sheet drawn one cell at a time - the original's
  * `RenderSprite(…, Frame % 4 * 0.25, Frame / 4 * 0.25, 0.25, 0.25)` on
  * BITMAP_EXPLOTION. `w`/`h` are the cell size in texels, `count` how many
- * cells hold frames (Explotion01 is 4×4 but only the first 10 are drawn — the
+ * cells hold frames (Explotion01 is 4×4 but only the first 10 are drawn - the
  * rest of the sheet is solid white, which is what a card showing the whole
  * sheet used to look like).
  */
@@ -447,7 +447,7 @@ export function releaseCard(scene: Scene, card: Card): void {
 }
 
 /**
- * Point a card's UVs at cell `frame` of its material's sheet — row-major from
+ * Point a card's UVs at cell `frame` of its material's sheet - row-major from
  * the top-left, like the original's `Frame % 4`, `Frame / 4`. The columns
  * come from the loaded sheet's size, so this returns false (and leaves the
  * card alone) until the texture is ready; call it again next frame.
@@ -539,7 +539,7 @@ function queueEmit(ps: ParticleSystem, at: Vector3, n: number): void {
     emitQueues.set(ps, s);
   }
   // Babylon zeroes `manualEmitCount` when it flushes; nothing pending means
-  // last frame's queue is spent (or was dropped at capacity) — start over.
+  // last frame's queue is spent (or was dropped at capacity) - start over.
   if (ps.manualEmitCount <= 0) {
     s.head = 0;
     s.len = 0;
@@ -641,7 +641,7 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   if (r.endScale !== undefined) {
     // A size gradient *replaces* minSize/maxSize (thinParticleSystem
     // `_createParticle`: `particle.size = gradient.getFactor()`), so the
-    // keys must carry the real size range — `(0, 1) → (1, endScale)` was born
+    // keys must carry the real size range - `(0, 1) → (1, endScale)` was born
     // one tile wide and grew to `endScale` tiles.
     ps.addSizeGradient(0, ps.minSize, ps.maxSize);
     ps.addSizeGradient(1, ps.minSize * r.endScale, ps.maxSize * r.endScale);
@@ -723,8 +723,8 @@ export class Emitter {
 
 /**
  * The effects clock: seconds of `effects.update` so far. Everything that
- * sequences a skill — a step after a delay, a point flying along the facing,
- * a ribbon spiralling up — reads this, never `performance.now()` or
+ * sequences a skill - a step after a delay, a point flying along the facing,
+ * a ribbon spiralling up - reads this, never `performance.now()` or
  * `setTimeout`: it stops when the game does, and `effects.reset()` cancels
  * every pending step so a warp or a death mid-cast leaves nothing to land
  * on the next map .
@@ -775,7 +775,7 @@ export function clearTimers(): void {
 export function disposePools(): void {
   // The halo draws the pooled meshes, so it goes with them.
   disposeEffectGlow();
-  // Not the textures — a card's comes from loadEffectTexture's cache, a
+  // Not the textures - a card's comes from loadEffectTexture's cache, a
   // skill mesh's from the GLB cache; both are shared with the map.
   for (const byKey of materials.values()) for (const m of byKey.values()) m.dispose(false, false);
   materials.clear();
@@ -805,7 +805,7 @@ export function fadeOut(progress: number, tail = 0.35): number {
   return clamp01((1 - progress) / tail);
 }
 
-/** Deterministic 0…1 noise per seed — jitter without `Math.random` churn. */
+/** Deterministic 0…1 noise per seed - jitter without `Math.random` churn. */
 export function hash(n: number): number {
   const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
   return x - Math.floor(x);

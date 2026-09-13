@@ -13,7 +13,7 @@ export default tseslint.config(
       'node_modules/**',
       'public/**',
       'Data/**',
-      // generated from OpenMU's packet XML — regenerate, never lint
+      // generated from OpenMU's packet XML - regenerate, never lint
       'src/common/packets/*Packets.ts',
       // known dead files slated for deletion 
       'src/common/walkerObject.ts',

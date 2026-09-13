@@ -58,8 +58,8 @@ function GetTerrainIndex(x: number, y: number) {
 }
 
 /**
- * Everything `getTerrainData` needs that can fail — the downloads, the worker
- * parse (incl. the anti-tamper probe), the JPEG decodes — gathered *before*
+ * Everything `getTerrainData` needs that can fail - the downloads, the worker
+ * parse (incl. the anti-tamper probe), the JPEG decodes - gathered *before*
  * the current map is torn down, so a failed warp leaves the old map standing
  * (`loadMapIntoScene`). Holds GPU textures: `disposePreparedTerrain` if the
  * build never happens.
@@ -83,7 +83,7 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
   ] = await Promise.all(terrainFilesFor(map).map(consumeTerrainFile));
 
   // Height, attributes, tile mapping and the object list are pure typed-array
-  // work — no engine, no DOM — so they run in a worker (todo C8) instead of
+  // work - no engine, no DOM - so they run in a worker (todo C8) instead of
   // blocking the frame for the length of a map change. The client falls back
   // to running them inline if the worker is unavailable.
   const bulk = await parseTerrainBulk(

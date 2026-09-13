@@ -15,17 +15,17 @@ import { LightSource, type LightRecipe } from './lightSource';
  * (ZzzCharacter.cpp:5790-6005) does this per frame under a handful of
  * models; `heightOffset` is where on the body the point light hangs.
  *
- * Player-worn gear is not this — `ecs/systems/itemGlowSystem.ts` grades it
+ * Player-worn gear is not this - `ecs/systems/itemGlowSystem.ts` grades it
  * by item tier .
  *
  * The rows marked `improvedOnly` are not the original's: they are the floor
  * light under a monster that only *carries* a glow there (Bahamut's lure,
- * the Lost Tower Shadow's body — `effects/monsterGlow.ts` draws the cards).
+ * the Lost Tower Shadow's body - `effects/monsterGlow.ts` draws the cards).
  * They breathe on the same curve the cards do, and Classic withholds them so
  * that tier stays as shipped.
  *
  * Not carried over: the negative light under Bloody Wolf and Tantallos
- * (`Vector(-1.3, -1.3, -1.3)`, range 3) — sources only add, and the terrain
+ * (`Vector(-1.3, -1.3, -1.3)`, range 3) - sources only add, and the terrain
  * delta texture has no sign bit. it is recorded as an open
  * decision.
  */
@@ -107,7 +107,7 @@ export const CHARACTER_LIGHTS: Partial<Record<number, CharacterLight>> = {
     priority: PRIORITY_CHARACTER,
   },
   // 35 Death Gorgon (MODEL_GORGON, `c->Level == 2`): the one monster in the
-  // classic set that lights the floor itself — (0.8, 0.16, 0), range 2
+  // classic set that lights the floor itself - (0.8, 0.16, 0), range 2
   // (ZzzCharacter.cpp:5956-5957). Every tier: this one is the original's.
   35: {
     color: [0.8, 0.16, 0],
@@ -133,7 +133,7 @@ export const CHARACTER_LIGHTS: Partial<Record<number, CharacterLight>> = {
   // 49 Hydra: the big `lightning2` flare over the head of a boss.
   49: carried(4, 1.2, LIGHTNING_GLOW_RGB),
   // 36 Shadow has no row on purpose: its body cards are `SubType 1`,
-  // `dst * (1 - src)` — it removes light rather than adding it, and a
+  // `dst * (1 - src)` - it removes light rather than adding it, and a
   // negative source is the one thing the two sinks cannot carry (see above).
   // 39 Poison Shadow: the same body, but additive, in `Vector(0.2, 0.7, 0.1)`.
   39: carried(3, BODY_HEIGHT, [0.2, 0.7, 0.1], undefined),

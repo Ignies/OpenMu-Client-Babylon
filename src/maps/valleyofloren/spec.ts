@@ -5,9 +5,9 @@ import type { Emission } from '../../common/effectParticles';
  * half. Nothing here may import the scene.
  *
  * EncTerrain31.obj places 3724 objects of 86 types; Object31 ships 89 models
- * and every referenced type has one. The C++ is GMBattleCastle.cpp —
+ * and every referenced type has one. The C++ is GMBattleCastle.cpp -
  * `CreateBattleCastleObject` (:986-1049), `MoveBattleCastleObject` (:926-984)
- * and `MoveBattleCastleVisual` (:1051+) — and almost all of it is the *siege*:
+ * and `MoveBattleCastleVisual` (:1051+) - and almost all of it is the *siege*:
  * wall segments (`BATTLE_CASTLE_WALL1-4`) that switch between whole and
  * ruined on `o->ExtState` from the server, guard stones, the gate plane
  * effect, `SetAttackDefenseObjectType`. None of that runs outside a Castle
@@ -18,7 +18,7 @@ import type { Emission } from '../../common/effectParticles';
 /**
  * `MoveBattleCastleObject` (:930-940): 81 and 83 both force `o->BlendMesh = 1`
  * with a full `BlendMeshLight` and a V scroll (`+0.0002`/ms on 81,
- * `-0.0004`/ms on 83) — the two banner/energy sheets on the castle. The
+ * `-0.0004`/ms on 83) - the two banner/energy sheets on the castle. The
  * scrolls are in `meshAnimation.ts`. EncTerrain31.obj places one 81 and no
  * 83; the table matches the source rather than the map.
  */

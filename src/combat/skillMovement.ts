@@ -2,18 +2,18 @@
  * What a cast does to where the hero *is*, as opposed to what it plays.
  * Three separate rules of the original, none of which lived anywhere before:
  *
- *  - **stop** — every `UseSkill*` opens with `LetHeroStop()`
+ *  - **stop** - every `UseSkill*` opens with `LetHeroStop()`
  *    (ZzzInterface.cpp:1935): the path is dropped and a one-step move is sent
  *    so the server puts the caster on the square he is standing on. A cast is
  *    never taken mid-stride.
- *  - **step in** — the Rage Fighter's contact skills relocate the caster to
+ *  - **step in** - the Rage Fighter's contact skills relocate the caster to
  *    the square one tile short of the target and send `InstantMoveRequest`
  *    (`CMonkSystem::SendAttackPacket`, MonkSystem.cpp:445-485; the same maths
  *    is inlined for Killing Blow / Occupy at ZzzInterface.cpp:2760-2780).
  *    Beast Uppercut, Chain Drive and Dragon Slasher do it *mid-clip*, on the
  *    consecutive-attack frame (`IsRageHalfwaySkillAni`), which is why they
  *    read as a lunge; Killing Blow and Occupy do it as the cast starts.
- *  - **root** — a clip that holds the caster's facing while it plays
+ *  - **root** - a clip that holds the caster's facing while it plays
  *    (`bLookAtMouse = false`, :7394-7419). Everything else keeps turning to
  *    the cursor.
  *
@@ -36,8 +36,8 @@ const STEP_IN_ON_CAST: ReadonlySet<number> = new Set([260, 551, 554, 269]);
 
 /**
  * `CMonkSystem::IsRageHalfwaySkillAni` (MonkSystem.cpp:428-442): Beast
- * Uppercut, Chain Drive and Dragon Slasher send their packet — and so take
- * their step — on the consecutive-attack frame partway through the clip.
+ * Uppercut, Chain Drive and Dragon Slasher send their packet - and so take
+ * their step - on the consecutive-attack frame partway through the clip.
  */
 const STEP_IN_MID_CLIP: ReadonlySet<number> = new Set([
   261, 552, 555, // Beast Uppercut, Str, Mastery
@@ -53,7 +53,7 @@ const STEP_IN_MID_CLIP: ReadonlySet<number> = new Set([
 export const CONSECUTIVE_ATTACK_KEY = 3;
 
 /**
- * Clips that hold the caster's facing for their whole length — the original
+ * Clips that hold the caster's facing for their whole length - the original
  * skips the look-at-cursor update for them (`bLookAtMouse = false`,
  * ZzzInterface.cpp:7394-7419). Rageful Blow spins in place, Chain Drive
  * swings the target round, and Beast Uppercut / Dragon Slasher would
@@ -79,7 +79,7 @@ export function skillStepIn(skill: number): 'cast' | 'midClip' | null {
 /**
  * The square a step-in lands on: one tile short of the target, along the
  * line from the caster (`VectorNormalize` × `TERRAIN_SCALE`, subtracted from
- * the target — MonkSystem.cpp:452-460). Returns `null` when caster and
+ * the target - MonkSystem.cpp:452-460). Returns `null` when caster and
  * target share a square.
  */
 export function stepInSquare(
