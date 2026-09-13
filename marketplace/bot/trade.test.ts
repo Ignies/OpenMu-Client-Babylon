@@ -71,11 +71,21 @@ function moneyUpdate(amount: number) {
   return p;
 }
 
-function itemAdded(slot: number) {
-  const p = TradeItemAddedPacket.createPacket(12);
+function itemAdded(slot: number, data?: Uint8Array) {
+  const p = TradeItemAddedPacket.createPacket(data ? 16 : 12);
   p.writeHeader().writeLength();
   p.ToSlot = slot;
+  if (data) p.setItemData(data, data.length);
   return p;
+}
+
+/** Twelve wire bytes: number in byte 0, level in byte 1, group in byte 5. */
+function wireItem(group: number, num: number, lvl = 0): Uint8Array {
+  const b = new Uint8Array(12);
+  b[0] = num;
+  b[1] = lvl << 3;
+  b[5] = group << 4;
+  return b;
 }
 
 /** The server's answer to one of our own moves. */
@@ -143,6 +153,47 @@ describe('TradeSession table tracking', () => {
     fake.deliver(buttonState(TradeButtonStateChangedTradeButtonStateEnum.Checked));
     fake.deliver(itemAdded(0));
     expect(trade.theirConfirm).toBe(false);
+  });
+});
+
+describe('TradeSession.mismatch on which item', () => {
+  const gloves = wireItem(10, 1, 7);
+  const boots = wireItem(11, 1, 7);
+  const isGloves = (data: Uint8Array) => data[5] === gloves[5] && data[0] === gloves[0] && data[1] === gloves[1];
+
+  it('accepts the listed item', () => {
+    const { fake, trade } = session();
+    fake.deliver(itemAdded(0, gloves));
+    expect(trade.mismatch({ expectItems: 1, expectMoney: 0, expectItemMatching: isGloves })).toBeNull();
+  });
+
+  it('refuses another item, and never ticks the box for it', async () => {
+    const { fake, trade } = session();
+    const opening = trade.requestWith(7);
+    fake.deliver(opened());
+    await opening;
+    fake.deliver(itemAdded(0, boots));
+
+    expect(trade.mismatch({ expectItems: 1, expectMoney: 0, expectItemMatching: isGloves })).toMatch(
+      /not the one listed/
+    );
+    const refused = trade.armConfirm({ expectItems: 1, expectMoney: 0, expectItemMatching: isGloves });
+    expect(refused).toMatch(/not the one listed/);
+    expect(fake.sent.some(s => s.code === CONFIRM_CODE)).toBe(false);
+    expect(fake.sent.some(s => s.code === CANCEL_CODE)).toBe(true);
+  });
+
+  it('is satisfied once the seller swaps in the right one', async () => {
+    const { fake, trade } = session();
+    const opening = trade.requestWith(7);
+    fake.deliver(opened());
+    await opening;
+    fake.deliver(itemAdded(0, boots));
+    const waiting = trade.waitForTerms({ expectItems: 1, expectMoney: 0, expectItemMatching: isGloves }, 2000);
+    // The table is replaced, not appended to: the server re-sends the slot.
+    trade.theirItems.clear();
+    fake.deliver(itemAdded(0, gloves));
+    await expect(waiting).resolves.toBeUndefined();
   });
 });
 

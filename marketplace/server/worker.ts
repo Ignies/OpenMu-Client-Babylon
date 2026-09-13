@@ -16,6 +16,7 @@ import {
   type EscrowResult,
 } from '../bot/escrow';
 import { ShopSession, MINIMUM_SHOP_LEVEL } from '../bot/shop';
+import { sameItem, type ListedItem } from '../bot/itemMatch';
 import * as store from './listings';
 import { audit, db } from './db';
 import { isOnline } from './presence';
@@ -171,23 +172,36 @@ function findHeld(bot: Bot, listing: store.Listing): number | null {
   if (!bot.bag.known) return null;
   const taken = store.heldSlots(ACCOUNT);
   const candidates = bot.bag
-    .slotsMatching({ group: listing.item.group, num: listing.item.num, lvl: listing.item.lvl })
+    .slotsWhere(bytes => sameItem(bytes, listing.item as ListedItem))
     .filter(slot => !taken.has(slot));
   return candidates.length === 1 ? candidates[0] : null;
+}
+
+/** True when the recorded slot holds the listed item itself, not merely something. */
+function holdsListed(bot: Bot, slot: number, listing: store.Listing): boolean {
+  const bytes = bot.bag.slots.get(slot);
+  return bytes !== undefined && sameItem(bytes, listing.item as ListedItem);
 }
 
 /**
  * The slot to offer from: the recorded one, or the bag's answer, or none.
  *
- * An item can also be sitting in the stall grid: an earlier run stocked the
- * shop, misread the server's answer as a refusal, and never put it back. That
- * one is brought back into the bag first - an item is only ever offered from
- * a bag slot - and the listing learns its new home.
+ * The recorded slot is trusted only while it holds the item the listing
+ * describes: what goes out to a buyer is checked against what they were
+ * shown, never taken on the slot number's word. An item can also be sitting
+ * in the stall grid: an earlier run stocked the shop, misread the server's
+ * answer as a refusal, and never put it back. That one is brought back into
+ * the bag first - an item is only ever offered from a bag slot - and the
+ * listing learns its new home.
  */
 async function slotFor(bot: Bot, listing: store.Listing): Promise<number | null> {
   const { holder, slot } = store.holderOf(listing.id);
   if (holder !== null && holder !== ACCOUNT) return null;
-  if (slot !== null && (!bot.bag.known || bot.bag.slots.has(slot))) return slot;
+  if (slot !== null && !bot.bag.known) return slot;
+  if (slot !== null && holdsListed(bot, slot, listing)) return slot;
+  if (slot !== null && bot.bag.slots.has(slot)) {
+    log(`"${listing.id}": bag slot ${slot} holds something other than the listed item`);
+  }
 
   let found = findHeld(bot, listing);
   if (found === null) found = await recoverFromStall(bot, listing);
@@ -200,8 +214,7 @@ async function slotFor(bot: Bot, listing: store.Listing): Promise<number | null>
 
 /** Moves a stranded item from the stall back into the bag; the new bag slot, or null. */
 async function recoverFromStall(bot: Bot, listing: store.Listing): Promise<number | null> {
-  const shape = { group: listing.item.group, num: listing.item.num, lvl: listing.item.lvl };
-  const stranded = bot.bag.stallSlotsMatching(shape);
+  const stranded = bot.bag.stallSlotsWhere(bytes => sameItem(bytes, listing.item as ListedItem));
   if (stranded.length !== 1) return null;
 
   // A shop that is open refuses every move out of it.
@@ -223,7 +236,12 @@ async function recoverFromStall(bot: Bot, listing: store.Listing): Promise<numbe
 /** A seller is handing an item over, so it can go on sale. Returns done. */
 async function collect(bot: Bot, listing: store.Listing): Promise<boolean> {
   log(`collecting "${listing.id}" from ${listing.sellerCharacter}`);
-  const result = await collectListing(bot.context, listing.sellerCharacter, 1);
+  const result = await collectListing(
+    bot.context,
+    listing.sellerCharacter,
+    1,
+    listing.item as ListedItem
+  );
 
   if (!result.ok) {
     if (result.declined) {

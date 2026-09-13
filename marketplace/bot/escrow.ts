@@ -1,8 +1,9 @@
 import type { Bag } from './bag';
+import { sameItem, type ListedItem } from './itemMatch';
 import type { Scope } from './scope';
 import { FIRST_SHOP_SLOT, type ShopSession } from './shop';
 import type { BotSession } from './session';
-import type { TradeOutcome, TradeSession } from './trade';
+import type { TradeOutcome, TradeSession, TradeTerms } from './trade';
 import type { Wallet } from './wallet';
 import type { HandoverKind, Ledger } from './ledger';
 
@@ -262,11 +263,18 @@ async function openTradeWith(
  * The bot puts nothing on the table at all, so there is nothing of ours to
  * lose if it falls apart, and the seller's item is only ever moved by the
  * server.
+ *
+ * `listed` is what the listing says the item is. The bot confirms only the
+ * item that matches it - a seller who puts up something else is given the
+ * same patience to swap it, and then the listing is dropped rather than
+ * filled with the wrong thing. Without this a listing for gloves was
+ * fulfilled with boots, and a buyer paid for gloves and got boots.
  */
 export function collectListing(
   context: EscrowContext,
   sellerCharacter: string,
-  itemCount = 1
+  itemCount = 1,
+  listed?: ListedItem
 ): Promise<CollectResult> {
   return booked(context, 'list', sellerCharacter, 0, async () => {
     const { trade, bag, log } = context;
@@ -274,15 +282,27 @@ export function collectListing(
     const opened = await openTradeWith(context, sellerCharacter);
     if (!opened.ok) return opened;
 
-    const terms = { expectItems: itemCount, expectMoney: 0 };
+    const terms: TradeTerms = { expectItems: itemCount, expectMoney: 0 };
+    if (listed) terms.expectItemMatching = data => sameItem(data, listed);
+
     try {
       log(`waiting for ${sellerCharacter} to put up ${itemCount} item(s)`);
       await trade.waitForTerms(terms, PARTNER_PATIENCE_MS);
     } catch (e) {
+      // An empty table and the wrong item read the same to the deadline;
+      // the seller deserves to be told which it was.
+      const wrongItem =
+        listed !== undefined &&
+        trade.theirItems.size > 0 &&
+        [...trade.theirItems.values()].some(data => !sameItem(data, listed));
       trade.cancel();
       return {
         ok: false,
-        reason: e instanceof Error ? e.message : 'the seller never handed it over',
+        reason: wrongItem
+          ? 'put up a different item from the one listed'
+          : e instanceof Error
+            ? e.message
+            : 'the seller never handed it over',
         declined: true,
       };
     }
