@@ -113,6 +113,7 @@ import {
 } from './common/itemHotkeys';
 import { spawnPlayer } from './logic';
 import { registerStore } from './common/storeRef';
+import { devVitalPercent } from './common/devSeams';
 import { Social } from './social';
 import { Economy } from './economy';
 
@@ -1186,7 +1187,23 @@ export const Store = new (class _Store {
     this.playerData.name = 'TestPlayer';
     this.playerData.charClass = cls;
     this.syncPlayerAppearance();
+    this.applyOfflineVitals();
     EventBus.emit('requestWarp', { map });
+  }
+
+  /** `?hp=` / `?mp=` on the offline route: the bars start where they say. */
+  applyOfflineVitals(): void {
+    const hp = devVitalPercent('hp');
+    const mp = devVitalPercent('mp');
+
+    runInAction(() => {
+      if (hp !== null) {
+        this.playerData.currentHP = Math.round((this.playerData.maxHP * hp) / 100);
+      }
+      if (mp !== null) {
+        this.playerData.currentMP = Math.round((this.playerData.maxMP * mp) / 100);
+      }
+    });
   }
 
   playOnline() {

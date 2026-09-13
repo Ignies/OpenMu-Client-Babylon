@@ -52,6 +52,10 @@ import {
 } from '../../../common/materialQuality';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
 import {
+  LOW_VITAL_MAX_PERCENT,
+  LOW_VITAL_MIN_PERCENT,
+} from '../../../common/lowVitals';
+import {
   RENDER_DISTANCE_MAX,
   renderDistanceRanges,
 } from '../../../common/renderDistance';
@@ -197,6 +201,8 @@ type SliderRow = {
     | 'brightness'
     | 'vignette'
     | 'lootZen'
+    | 'lowHealthPercent'
+    | 'lowManaPercent'
     | 'uiScale'
     | 'renderDistance'
     | 'grassDensity';
@@ -210,6 +216,8 @@ type SliderRow = {
   needsTier?: boolean;
   /** Dim and lock while the classic framing, not the facade, owns the camera. */
   needsCameraControl?: boolean;
+  /** Dim while the warning this threshold belongs to is switched off. */
+  needsWarning?: 'lowHealthWarning' | 'lowManaWarning';
 };
 
 const slider = (row: SliderRow): Row => ({ kind: 'slider', ...row });
@@ -393,6 +401,39 @@ const TABS: Tab[] = [
                 check('chatTimestamps', -1, 'options.chatTimestamps'),
                 check('slideHelp', 919, 'options.slideHelp'),
                 check('stateWarnings', -1, 'options.stateWarnings'),
+              ],
+            },
+          ],
+        ],
+      },
+      {
+        id: 'vitals',
+        labelKey: 'options.section.warnings',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.vitals',
+              rows: [
+                check('lowHealthWarning', -1, 'options.lowHealthWarning'),
+                slider({
+                  key: 'lowHealthPercent',
+                  textId: -1,
+                  labelKey: 'options.lowHealthPercent',
+                  min: LOW_VITAL_MIN_PERCENT,
+                  max: LOW_VITAL_MAX_PERCENT,
+                  display: v => `${v}%`,
+                  needsWarning: 'lowHealthWarning',
+                }),
+                check('lowManaWarning', -1, 'options.lowManaWarning'),
+                slider({
+                  key: 'lowManaPercent',
+                  textId: -1,
+                  labelKey: 'options.lowManaPercent',
+                  min: LOW_VITAL_MIN_PERCENT,
+                  max: LOW_VITAL_MAX_PERCENT,
+                  display: v => `${v}%`,
+                  needsWarning: 'lowManaWarning',
+                }),
               ],
             },
           ],
@@ -1159,7 +1200,9 @@ export const OptionsWindow = observer(() => {
                       !GameOptions.postProcessing) ||
                     (row.needsTier === true && GameOptions.lightingQuality === 0) ||
                     (row.needsCameraControl === true &&
-                      !GameOptions.cameraControl);
+                      !GameOptions.cameraControl) ||
+                    (row.needsWarning !== undefined &&
+                      !GameOptions[row.needsWarning]);
 
                   return (
                     <div
