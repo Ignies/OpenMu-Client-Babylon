@@ -1171,6 +1171,8 @@ export const russianLayer: LanguageLayer = {
     'prompt.itemCosts': '{name} стоит {price}.',
     'prompt.thisItem': 'Этот предмет',
     'prompt.itemGone': 'Этого предмета больше нет.',
+    'prompt.buyHowMany': 'Сколько {name}? По {price}.',
+    'prompt.quantity': 'Количество',
     'prompt.trade': 'Обмен',
 
     'social.partyInvite': '{name} приглашает вас в группу.',
@@ -1192,6 +1194,8 @@ export const russianLayer: LanguageLayer = {
     'msgWin.guildCharacter':
       'Нельзя удалить персонажа, состоящего в гильдии',
     'msgWin.wrongPassword': 'Введённый пароль неверен.',
+    'msgWin.confirmSell': 'Продать %s?',
+    'msgWin.confirmDrop': 'Выбросить %s?',
 
     'notify.wsError': 'Ошибка соединения WebSocket',
     'notify.connectionLost': 'Связь с сервером потеряна',
@@ -1419,6 +1423,8 @@ export const russianLayer: LanguageLayer = {
     'options.lootZen': 'Zen от',
     'options.firstPersonBob': 'Покачивание головы от первого лица',
     'options.chatTimestamps': 'Время в чате',
+    'options.quickItemActions': 'Ctrl-клик перемещает предметы',
+    'options.confirmValuableItems': 'Спрашивать перед выбросом или продажей ценностей',
     'options.blockBrowserKeys': 'Блокировать горячие клавиши браузера (Ctrl+W, F5, масштаб)',
     'options.fullscreen': 'Полный экран (F11)',
     'keys.replyWhisper': 'Ответить на шёпот',
@@ -1454,6 +1460,7 @@ export const russianLayer: LanguageLayer = {
     'vault.depositJewels': 'Камни',
     'vault.depositJewelsHint': 'Переместить все камни из инвентаря в хранилище',
     'notify.itemsMoved': 'Перемещено предметов: {count}',
+    'notify.itemsBought': 'Куплено: {count}',
     'options.autoReconnect': 'Переподключаться автоматически',
     'resume.title': 'Соединение потеряно',
     'resume.connecting': 'Переподключение... (попытка {attempt})',

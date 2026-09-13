@@ -1184,6 +1184,8 @@ export const romanianLayer: LanguageLayer = {
     'prompt.itemCosts': '{name} costă {price}.',
     'prompt.thisItem': 'Acest obiect',
     'prompt.itemGone': 'Acest obiect nu mai este.',
+    'prompt.buyHowMany': 'Câte {name}? {price} bucata.',
+    'prompt.quantity': 'Cantitate',
     'prompt.trade': 'Schimb',
 
     'social.partyInvite': '{name} te invită în grup.',
@@ -1205,6 +1207,8 @@ export const romanianLayer: LanguageLayer = {
     'msgWin.guildCharacter':
       'Nu poți șterge un personaj care face parte dintr-o breaslă',
     'msgWin.wrongPassword': 'Parola introdusă nu este corectă.',
+    'msgWin.confirmSell': 'Vinzi %s?',
+    'msgWin.confirmDrop': 'Arunci %s?',
 
     'notify.wsError': 'Eroare de conexiune WebSocket',
     'notify.connectionLost': 'Conexiunea cu serverul s-a pierdut',
@@ -1434,6 +1438,8 @@ export const romanianLayer: LanguageLayer = {
     'options.lootZen': 'Zen de la',
     'options.firstPersonBob': 'Legănarea capului la persoana întâi',
     'options.chatTimestamps': 'Ora în chat',
+    'options.quickItemActions': 'Ctrl-clic mută obiectele',
+    'options.confirmValuableItems': 'Întreabă înainte de a arunca sau vinde obiecte valoroase',
     'options.blockBrowserKeys': 'Blochează scurtăturile browserului (Ctrl+W, F5, zoom)',
     'options.fullscreen': 'Ecran complet (F11)',
     'keys.replyWhisper': 'Răspunde la șoaptă',
@@ -1469,6 +1475,7 @@ export const romanianLayer: LanguageLayer = {
     'vault.depositJewels': 'Bijuterii',
     'vault.depositJewelsHint': 'Mută toate bijuteriile din inventar în depozit',
     'notify.itemsMoved': '{count} obiecte mutate',
+    'notify.itemsBought': '{count} cumpărate',
     'options.autoReconnect': 'Reconectare automată',
     'resume.title': 'Conexiune pierdută',
     'resume.connecting': 'Reconectare... (încercarea {attempt})',

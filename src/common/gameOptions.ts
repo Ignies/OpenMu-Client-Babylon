@@ -250,6 +250,18 @@ export type GameOptions = {
    */
   minimapCorner: boolean;
   /**
+   * Ctrl-click moves an item to whichever window is open - vault, trade, mix
+   * tray, or the merchant - and back again, and Ctrl-click on a shop entry
+   * asks how many to buy (`common/quickItemActions.ts`). Off, only the drag
+   * and the right click move anything.
+   */
+  quickItemActions: boolean;
+  /**
+   * Ask before an excellent, ancient, +7 or higher item, or a jewel, is
+   * dropped on the ground or sold to a merchant.
+   */
+  confirmValuableItems: boolean;
+  /**
    * A small corner readout with the frame rate, the frame time and the last
    * measured server round trip (`common/netStats.ts`). Off is the HUD exactly
    * as it was; the `performanceReadout` key action toggles it too.
@@ -407,6 +419,8 @@ const DEFAULTS: GameOptions = {
   lowManaPercent: LOW_VITAL_DEFAULT_PERCENT,
   blockBrowserKeys: true,
   minimapCorner: true,
+  quickItemActions: true,
+  confirmValuableItems: true,
   performanceReadout: false,
   compareTooltips: 2,
   eventTimers: true,

@@ -25,6 +25,7 @@ import {
   EconomyPrompts,
   TradePrompt,
 } from './components/economyPrompts';
+import { MsgWindow } from '../../components/msgWindow';
 import { PickedItemCursor } from '../../components/pickedItem';
 import { BuffBar } from '../../components/buffBar';
 import { EmoteMenu } from './components/emoteMenu';
@@ -105,6 +106,8 @@ const HUD = observer(() => {
       <SocialPrompts />
       <TradePrompt />
       <EconomyPrompts />
+      {/* The original's message box, in the world for the item confirmations. */}
+      <MsgWindow />
       <GuildMasterDialog />
       <GuildCreationDialog />
       <GuildKickPasswordDialog />

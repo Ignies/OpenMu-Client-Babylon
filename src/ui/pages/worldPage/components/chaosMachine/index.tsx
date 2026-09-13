@@ -7,6 +7,7 @@ import { StorageKind } from '../../../../../common/itemStorage';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
 import { ItemGrid } from '../../../../components/itemGrid';
+import { QuickItemActions } from '../../../../../common/quickItemActions';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import { uiClick } from '../../../../../libs/sfx';
 import {
@@ -127,6 +128,9 @@ export const ChaosMachine = observer(() => {
             square,
             StorageKind.Inventory
           )
+        }
+        onQuickAction={square =>
+          QuickItemActions.toInventory(StorageKind.ChaosMachine, square)
         }
       />
 

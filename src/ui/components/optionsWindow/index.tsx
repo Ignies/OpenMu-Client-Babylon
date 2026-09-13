@@ -385,6 +385,13 @@ const TABS: Tab[] = [
               ],
             },
             {
+              titleKey: 'options.section.items',
+              rows: [
+                check('quickItemActions', -1, 'options.quickItemActions'),
+                check('confirmValuableItems', -1, 'options.confirmValuableItems'),
+              ],
+            },
+            {
               titleKey: 'options.section.camera',
               rows: [
                 check('cameraControl', -1, 'options.cameraControl'),

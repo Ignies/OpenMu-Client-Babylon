@@ -1186,6 +1186,8 @@ export const portugueseLayer: LanguageLayer = {
     'prompt.itemCosts': '{name} custa {price}.',
     'prompt.thisItem': 'Este item',
     'prompt.itemGone': 'Este item não está mais aí.',
+    'prompt.buyHowMany': 'Quantos {name}? {price} cada.',
+    'prompt.quantity': 'Quantidade',
     'prompt.trade': 'Troca',
 
     'social.partyInvite': '{name} convida você para o grupo.',
@@ -1207,6 +1209,8 @@ export const portugueseLayer: LanguageLayer = {
     'msgWin.guildCharacter':
       'Você não pode excluir um personagem que pertence a uma guilda',
     'msgWin.wrongPassword': 'A senha digitada está incorreta.',
+    'msgWin.confirmSell': 'Vender %s?',
+    'msgWin.confirmDrop': 'Largar %s?',
 
     'notify.wsError': 'Erro de conexão WebSocket',
     'notify.connectionLost': 'A conexão com o servidor foi perdida',
@@ -1437,6 +1441,8 @@ export const portugueseLayer: LanguageLayer = {
     'options.lootZen': 'Zen a partir de',
     'options.firstPersonBob': 'Balanço da cabeça em primeira pessoa',
     'options.chatTimestamps': 'Horário no chat',
+    'options.quickItemActions': 'Ctrl-clique move os itens',
+    'options.confirmValuableItems': 'Perguntar antes de largar ou vender itens valiosos',
     'options.blockBrowserKeys': 'Bloquear atalhos do navegador (Ctrl+W, F5, zoom)',
     'options.fullscreen': 'Tela cheia (F11)',
     'keys.replyWhisper': 'Responder ao sussurro',
@@ -1472,6 +1478,7 @@ export const portugueseLayer: LanguageLayer = {
     'vault.depositJewels': 'Joias',
     'vault.depositJewelsHint': 'Mover todas as joias do inventário para o baú',
     'notify.itemsMoved': '{count} itens movidos',
+    'notify.itemsBought': '{count} comprados',
     'options.autoReconnect': 'Reconectar automaticamente',
     'resume.title': 'Conexão perdida',
     'resume.connecting': 'Reconectando... (tentativa {attempt})',

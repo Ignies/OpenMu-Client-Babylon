@@ -1,5 +1,6 @@
 import { PointerEventTypes } from '../../libs/babylon/exports';
 import { Store } from '../../store';
+import { QuickItemActions } from '../../common/quickItemActions';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
@@ -33,7 +34,7 @@ export const ItemPickupSystem: ISystemFactory = world => {
       const point = pickInfo?.pickedPoint;
       if (!point) return;
 
-      Store.dropPickedItem(~~point.x, ~~point.z);
+      QuickItemActions.dropPickedItem(~~point.x, ~~point.z);
       return;
     }
 

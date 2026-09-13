@@ -10,6 +10,7 @@ import { MuItemWindow } from '../../../../components/muWindow';
 import { ItemGrid } from '../../../../components/itemGrid';
 import { ItemSearchBox, useItemSearch } from '../../../../components/itemSearch';
 import { BulkMove } from '../../../../../common/bulkMove';
+import { QuickItemActions } from '../../../../../common/quickItemActions';
 import { isJewel, itemDef } from '../../../../../common/itemStats';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import {
@@ -154,6 +155,10 @@ export const Vault = observer(() => {
         onUse={square => {
           if (!unlock()) return;
           Store.autoMoveItem(StorageKind.Vault, square, StorageKind.Inventory);
+        }}
+        onQuickAction={square => {
+          if (!unlock()) return;
+          QuickItemActions.toInventory(StorageKind.Vault, square);
         }}
       />
 
