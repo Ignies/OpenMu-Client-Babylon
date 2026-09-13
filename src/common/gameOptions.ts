@@ -147,6 +147,12 @@ export type GameOptions = {
    * every pile on the ground. ALT held still shows all of them.
    */
   lootFilter: boolean;
+  /**
+   * Hovering a drop on the ground shows the item's own tooltip, the same box
+   * the inventory draws, so a player can read the options before spending a
+   * click and an inventory square on it. Off is the original's name only.
+   */
+  dropTooltips: boolean;
   lootJewels: boolean;
   lootExcellent: boolean;
   lootAncient: boolean;
@@ -268,6 +274,7 @@ const DEFAULTS: GameOptions = {
   firstPersonBob: true,
   autoReconnect: true,
   lootFilter: false,
+  dropTooltips: true,
   lootJewels: true,
   lootExcellent: true,
   lootAncient: true,

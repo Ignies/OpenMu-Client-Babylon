@@ -1393,6 +1393,7 @@ export const spanishLayer: LanguageLayer = {
     'skills.needMore':
       '{label} {required} para aprender {name} (faltan {more})',
     'options.section.loot': 'Nombres en el suelo',
+    'options.dropTooltips': 'Detalles de los objetos en el suelo',
     'options.lootFilter': 'Filtrar nombres en el suelo',
     'options.lootJewels': 'Joyas',
     'options.lootExcellent': 'Excellent',

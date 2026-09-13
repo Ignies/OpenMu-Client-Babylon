@@ -1345,6 +1345,7 @@ export const japaneseLayer: LanguageLayer = {
     'skills.alreadyKnown': '{name}はすでに習得しています',
     'skills.needMore': '{name}の習得には{label} {required} が必要です（あと {more}）',
     'options.section.loot': 'ドロップ名',
+    'options.dropTooltips': '地面のアイテムの詳細',
     'options.lootFilter': 'ドロップ名を絞り込む',
     'options.lootJewels': '宝石',
     'options.lootExcellent': 'エクセレント',

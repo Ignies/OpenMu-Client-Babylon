@@ -1337,6 +1337,7 @@ export const chineseLayer: LanguageLayer = {
     'skills.alreadyKnown': '你已经学会了{name}',
     'skills.needMore': '学习{name}需要{label} {required}（还差 {more}）',
     'options.section.loot': '掉落名称',
+    'options.dropTooltips': '显示地面物品的详情',
     'options.lootFilter': '过滤掉落名称',
     'options.lootJewels': '宝石',
     'options.lootExcellent': '卓越',

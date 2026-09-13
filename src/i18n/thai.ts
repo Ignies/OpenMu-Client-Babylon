@@ -1356,6 +1356,7 @@ export const thaiLayer: LanguageLayer = {
     'skills.needMore':
       'ต้องมี {label} {required} เพื่อเรียน {name} (ขาดอีก {more})',
     'options.section.loot': 'ชื่อไอเทมที่ตก',
+    'options.dropTooltips': 'รายละเอียดไอเทมบนพื้น',
     'options.lootFilter': 'กรองชื่อไอเทมที่ตก',
     'options.lootJewels': 'อัญมณี',
     'options.lootExcellent': 'Excellent',

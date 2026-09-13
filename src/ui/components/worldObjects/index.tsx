@@ -11,10 +11,15 @@ import { useEventBus } from '../../../hooks/useEventBus';
 import { onScreenPosition } from '../../../libs/screenPositionBus';
 import { DROP_TIER_COLOURS, dropTier } from '../../../common/dropTier';
 import { dropPassesLootFilter } from '../../../common/lootFilter';
+import { GameOptions } from '../../../common/gameOptions';
+import { ItemTooltip } from '../itemTooltip';
 import type { Entity } from '../../../ecs/world';
 import { stableKeyOf } from '../partyBars/stableKey';
 
 const isAlt = (code: string) => code === 'AltLeft' || code === 'AltRight';
+
+/** How long the cursor has to rest on a drop before its tooltip opens. */
+const DROP_TOOLTIP_DELAY_MS = 250;
 
 /**
  * CNewUINameWindow (NewUINameWindow.cpp:74, :201): pressing ALT toggles the
@@ -39,6 +44,29 @@ function useDropNamesOverlay(): { overlay: boolean; showAll: boolean } {
 
 type DropEntity = With<Entity, 'transform' | 'screenPosition' | 'droppedItem'>;
 
+type Point = { x: number; y: number };
+
+/**
+ * Where the box opens. `ItemTooltip` keeps itself clear of the cursor art and
+ * then follows the pointer, so it is handed the cursor.
+ *
+ * On the label, that is where the pointer came in: the scene stops hearing
+ * moves the moment the cursor leaves the canvas, so its own reading is stale
+ * there. Otherwise the scene's reading is the one the pick itself used, and
+ * the canvas fills the window, so those coordinates are the viewport's.
+ */
+function tooltipAnchor(entity: DropEntity, onLabel: Point | null): Point {
+  if (onLabel) return onLabel;
+
+  const scene = Store.world?.scene;
+
+  if (scene && (scene.pointerX !== 0 || scene.pointerY !== 0)) {
+    return { x: scene.pointerX, y: scene.pointerY };
+  }
+
+  return { x: entity.screenPosition.x, y: entity.screenPosition.y };
+}
+
 /**
  * A drop's name: drawn over the item while the ALT overlay is on or the
  * cursor is on the item (SelectedItem), and clickable — the original's
@@ -55,6 +83,9 @@ const DropLabel = observer(({
 }) => {
   const [hovered, setHovered] = useState(false);
   const hoveredRef = useRef(false);
+  const [onLabel, setOnLabel] = useState(false);
+  const labelPointer = useRef<Point | null>(null);
+  const [anchor, setAnchor] = useState<Point | null>(null);
 
   // `currentPointerTarget` is plain state sampled per frame; piggyback on the
   // per-frame screen-position event instead of polling.
@@ -71,22 +102,64 @@ const DropLabel = observer(({
   );
 
   const named = overlay && (showAll || dropPassesLootFilter(entity.droppedItem));
-  if (!named && !hovered) return null;
+  const visible = named || hovered;
+
+  // Money is its own name ("Zen 1234") and a drop whose bytes did not decode
+  // has nothing to show, so both keep the label alone.
+  const item = entity.droppedItem.isMoney ? undefined : entity.droppedItem.item;
+  const wanted = GameOptions.dropTooltips && !!item && visible && (hovered || onLabel);
+
+  useEffect(() => {
+    if (!wanted) {
+      setAnchor(null);
+      return;
+    }
+    const timer = setTimeout(
+      () => setAnchor(tooltipAnchor(entity, labelPointer.current)),
+      DROP_TOOLTIP_DELAY_MS
+    );
+
+    return () => clearTimeout(timer);
+  }, [wanted, entity]);
+
+  // A latch turned off under a resting cursor takes the label away without a
+  // leave event, so the flag is cleared with the element it belongs to.
+  useEffect(() => {
+    if (!visible) {
+      labelPointer.current = null;
+      setOnLabel(false);
+    }
+  }, [visible]);
+
+  if (!visible) return null;
 
   return (
-    <WorldLabel
-      entity={entity}
-      text={entity.objectNameInWorld ?? ''}
-      colour={DROP_TIER_COLOURS[dropTier(entity.droppedItem)]}
-      className="drop"
-      onPointerDown={ev => {
-        if (ev.button !== 0) return;
-        ev.stopPropagation();
-        const world = Store.world;
-        if (!world || Store.pickedItem || Store.pendingItemMove) return;
-        world.pickupTarget = entity;
-      }}
-    />
+    <>
+      <WorldLabel
+        entity={entity}
+        text={entity.objectNameInWorld ?? ''}
+        colour={DROP_TIER_COLOURS[dropTier(entity.droppedItem)]}
+        className="drop"
+        onPointerDown={ev => {
+          if (ev.button !== 0) return;
+          ev.stopPropagation();
+          const world = Store.world;
+          if (!world || Store.pickedItem || Store.pendingItemMove) return;
+          world.pickupTarget = entity;
+        }}
+        onPointerEnter={ev => {
+          labelPointer.current = { x: ev.clientX, y: ev.clientY };
+          setOnLabel(true);
+        }}
+        onPointerLeave={() => {
+          labelPointer.current = null;
+          setOnLabel(false);
+        }}
+      />
+      {anchor && item && (
+        <ItemTooltip item={item} x={anchor.x} y={anchor.y} context="plain" />
+      )}
+    </>
   );
 });
 
