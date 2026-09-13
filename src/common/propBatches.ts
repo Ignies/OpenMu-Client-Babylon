@@ -37,8 +37,6 @@ import {
 } from '../libs/mu/terrainMask';
 import { needsTerrainMask } from '../libs/mu/terrainOverlay';
 import { SNOW_GROUND_MAPS } from '../weather/snowCover';
-import { snowCapCover } from '../weather/snowCaps';
-import { weather } from '../weather';
 import { setSceneHold } from './sceneGate';
 import { devQuery } from './devSeams';
 import { isStillAnimation } from './staticClips';
@@ -87,11 +85,8 @@ const POSE_SAMPLES = 4;
 
 /** Up to this many placements a type is one mesh for the whole map, unchunked. */
 
-/** How often a snow map re-reads the cover and the roof mask. */
+/** How often a snow map re-reads the roof mask. */
 const SNOW_POLL_SECONDS = 0.5;
-
-/** Cover change (0..1) that re-packs the sink and the caps. */
-const SNOW_COVER_STEP = 0.02;
 
 /**
  * How far past the placements' box a chunk's shadow may reach, per tile of
@@ -254,7 +249,6 @@ class PropBatches {
   private tier: LightingTier | null;
   private shadowSerial = -1;
   private snowTimer = 0;
-  private snowCover = -1;
   private maskVersion = -1;
   private disposed = false;
   private summarised = false;
@@ -530,7 +524,7 @@ class PropBatches {
     for (let i = 0; i < n; i++) {
       const p = placements[i];
 
-      this.placeInstance(p, nodeM);
+      placementMatrix(p, nodeM);
       this.packLight(p, inst, i * 4);
 
       resetBox(placeMin, placeMax);
@@ -623,7 +617,7 @@ class PropBatches {
       mesh.receiveShadows = true;
       mesh.visibility = src.visibility;
 
-      mesh.thinInstanceSetBuffer('matrix', matrices[j], 16, !this.snow);
+      mesh.thinInstanceSetBuffer('matrix', matrices[j], 16, true);
       mesh.thinInstanceSetBuffer('muInst', inst, 4, false);
       this.setWorldBounds(mesh, chunkMin[j], chunkMax[j]);
 
@@ -651,7 +645,7 @@ class PropBatches {
         if (layer instanceof GlowLayer) layer.addExcludedMesh(shadow);
       }
 
-      shadow.thinInstanceSetBuffer('matrix', data, 16, !this.snow);
+      shadow.thinInstanceSetBuffer('matrix', data, 16, true);
 
       const reach = casterHeight[j] * SHADOW_REACH_PER_TILE + SHADOW_REACH_MARGIN;
       this.setWorldBounds(
@@ -750,14 +744,6 @@ class PropBatches {
     mesh.getBoundingInfo();
   }
 
-  private placeInstance(p: Placement, out: Matrix): void {
-    const sink = this.snow
-      ? weather.snowSinkDepth(this.world, this.map, p.pos.x, p.pos.y, p.pos.z)
-      : 0;
-
-    placementMatrix(p, out, -sink);
-  }
-
   private packLight(p: Placement, inst: Float32Array, o: number): void {
     // A placement with a light carrier in range takes the carrier's light:
     // the terrain plus its own lamp, the sum `RenderSystem` keeps on it.
@@ -780,36 +766,6 @@ class PropBatches {
     }
 
     for (const mesh of chunk.meshes) mesh.thinInstanceBufferUpdated('muInst');
-  }
-
-  /** Re-packs a chunk's matrices (the snow sink moved) and light. */
-  private repackAll(pt: PropType, chunk: Chunk): void {
-    const { placements, matrices, shadowMatrices, shadowLists } = chunk;
-
-    for (let i = 0; i < placements.length; i++) {
-      this.placeInstance(placements[i], nodeM);
-      this.packLight(placements[i], chunk.inst, i * 4);
-
-      for (let j = 0; j < pt.submeshes.length; j++) {
-        instanceMatrix(pt.submeshes[j].meshToNode, nodeM, instM);
-        writeInstance(instM, matrices[j], i * 16);
-      }
-    }
-
-    for (let j = 0; j < chunk.meshes.length; j++) {
-      chunk.meshes[j].thinInstanceBufferUpdated('matrix');
-      chunk.meshes[j].thinInstanceBufferUpdated('muInst');
-    }
-
-    for (let s = 0; s < chunk.shadows.length; s++) {
-      const j = chunk.shadowSubmesh[s];
-      const list = shadowLists[s];
-      const data = shadowMatrices[s];
-      for (let k = 0; k < list.length; k++) {
-        data.set(matrices[j].subarray(list[k] * 16, list[k] * 16 + 16), k * 16);
-      }
-      chunk.shadows[s].thinInstanceBufferUpdated('matrix');
-    }
   }
 
   update(dt: number): void {
@@ -863,17 +819,12 @@ class PropBatches {
       this.snowTimer += dt;
       if (this.snowTimer >= SNOW_POLL_SECONDS) {
         this.snowTimer = 0;
-        const cover = snowCapCover();
         const mask = terrainMaskVersion();
-        if (
-          Math.abs(cover - this.snowCover) >= SNOW_COVER_STEP ||
-          mask !== this.maskVersion
-        ) {
-          this.snowCover = cover;
+        if (mask !== this.maskVersion) {
           this.maskVersion = mask;
           for (const pt of this.types.values()) {
             if (pt.state !== 'built') continue;
-            for (const chunk of pt.chunks.values()) this.repackAll(pt, chunk);
+            for (const chunk of pt.chunks.values()) this.repackLight(chunk);
           }
         }
       }

@@ -23,6 +23,11 @@ import { FOOTPRINT_TUNING } from './footprints';
  * untouched: it is what pathing, targeting and the server agree on, and a
  * visual detail has no business moving it.
  *
+ * And to characters only: `renderSystem` keeps the map's own props out of it
+ * (`ModelObject.IsMapObject`). A prop is placed at an authored height that
+ * already fits its neighbours, so a per-position depth pulls the segments of
+ * a fence run down by different amounts and the rail stops meeting itself.
+ *
  * ### It has to be local, and the first cut was not
  *
  * A single map-wide depth sank characters through paving, through the boards
