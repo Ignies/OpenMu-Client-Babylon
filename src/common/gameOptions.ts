@@ -250,6 +250,12 @@ export type GameOptions = {
    */
   minimapCorner: boolean;
   /**
+   * A small corner readout with the frame rate, the frame time and the last
+   * measured server round trip (`common/netStats.ts`). Off is the HUD exactly
+   * as it was; the `performanceReadout` key action toggles it too.
+   */
+  performanceReadout: boolean;
+  /**
    * The worn item beside the hovered one, with the lines that differ marked
    * up or down: 0 off / 1 while Shift is held / 2 always.
    */
@@ -401,6 +407,7 @@ const DEFAULTS: GameOptions = {
   lowManaPercent: LOW_VITAL_DEFAULT_PERCENT,
   blockBrowserKeys: true,
   minimapCorner: true,
+  performanceReadout: false,
   compareTooltips: 2,
   eventTimers: true,
   questTracker: true,

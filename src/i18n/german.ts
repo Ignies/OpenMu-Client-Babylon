@@ -2015,5 +2015,11 @@ export const germanLayer: LanguageLayer = {
     'options.section.vitals': 'Leben und Mana',
     'options.section.warnings': 'Warnungen',
     'options.englishItemNames': 'Gegenstandsnamen auf Englisch',
+    'exp.title': 'Erfahrung',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Bild',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'Leistungsanzeige',
+    'keys.performanceReadout': 'Leistungsanzeige',
   },
 };

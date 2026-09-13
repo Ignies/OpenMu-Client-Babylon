@@ -2006,5 +2006,11 @@ export const portugueseLayer: LanguageLayer = {
     'options.section.vitals': 'Vida e mana',
     'options.section.warnings': 'Avisos',
     'options.englishItemNames': 'Nomes de itens em inglês',
+    'exp.title': 'Experiência',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Quadro',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'Dados de desempenho',
+    'keys.performanceReadout': 'Dados de desempenho',
   },
 };

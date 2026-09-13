@@ -1993,5 +1993,11 @@ export const bulgarianLayer: LanguageLayer = {
     'options.section.vitals': 'Живот и мана',
     'options.section.warnings': 'Известия',
     'options.englishItemNames': 'Имена на предмети на английски',
+    'exp.title': 'Опит',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Кадър',
+    'perf.ping': 'Пинг',
+    'options.performanceReadout': 'Показатели на работата',
+    'keys.performanceReadout': 'Показатели на работата',
   },
 };

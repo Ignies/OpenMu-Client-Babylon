@@ -1,0 +1,17 @@
+// Three lines of plain HUD text in the top left: no plate, no frame, just
+// the shadow every loose label on screen carries.
+.perf-readout {
+  position: absolute;
+  transform-origin: 0 0;
+  pointer-events: none;
+  user-select: none;
+
+  .mu-text {
+    position: absolute;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.9);
+  }
+
+  .perf-value {
+    font-variant-numeric: tabular-nums;
+  }
+}

@@ -1988,5 +1988,11 @@ export const russianLayer: LanguageLayer = {
     'options.section.vitals': 'Жизнь и мана',
     'options.section.warnings': 'Оповещения',
     'options.englishItemNames': 'Названия предметов по-английски',
+    'exp.title': 'Опыт',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Кадр',
+    'perf.ping': 'Пинг',
+    'options.performanceReadout': 'Показатели работы',
+    'keys.performanceReadout': 'Показатели работы',
   },
 };

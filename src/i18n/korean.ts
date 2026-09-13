@@ -1945,5 +1945,11 @@ export const koreanLayer: LanguageLayer = {
     'options.section.vitals': '생명력과 마나',
     'options.section.warnings': '경고',
     'options.englishItemNames': '아이템 이름을 영어로',
+    'exp.title': '경험치',
+    'perf.fps': 'FPS',
+    'perf.frame': '프레임',
+    'perf.ping': '핑',
+    'options.performanceReadout': '성능 표시',
+    'keys.performanceReadout': '성능 표시',
   },
 };

@@ -1938,5 +1938,11 @@ export const chineseLayer: LanguageLayer = {
     'options.section.vitals': '生命与魔力',
     'options.section.warnings': '警告',
     'options.englishItemNames': '物品名称用英文',
+    'exp.title': '经验',
+    'perf.fps': 'FPS',
+    'perf.frame': '帧',
+    'perf.ping': '延迟',
+    'options.performanceReadout': '性能信息',
+    'keys.performanceReadout': '性能信息',
   },
 };

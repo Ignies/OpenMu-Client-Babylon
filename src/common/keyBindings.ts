@@ -30,7 +30,8 @@ export type KeyAction =
   | 'sessionStats'
   | 'sortInventory'
   | 'targetNearest'
-  | 'replyWhisper';
+  | 'replyWhisper'
+  | 'performanceReadout';
 
 export type KeyBindings = Record<KeyAction, string>;
 
@@ -57,6 +58,7 @@ export const KEY_ACTION_LABEL_KEYS: Record<KeyAction, TextKey> = {
   sortInventory: 'keys.sortInventory',
   targetNearest: 'keys.targetNearest',
   replyWhisper: 'keys.replyWhisper',
+  performanceReadout: 'keys.performanceReadout',
 };
 
 export const KEY_ACTIONS = Object.keys(KEY_ACTION_LABEL_KEYS) as KeyAction[];
@@ -89,6 +91,9 @@ const DEFAULTS: KeyBindings = {
   sortInventory: 'KeyS',
   targetNearest: 'KeyN',
   replyWhisper: 'KeyY',
+  // Unbound on purpose: a diagnostics readout should not claim a letter from
+  // a fresh install. An empty code matches no key press.
+  performanceReadout: '',
 };
 
 /** Keys that cannot be bound: they already mean something else. */
@@ -208,11 +213,12 @@ export function keyFor(action: KeyAction): string {
 
 /** Whether `code` is the key bound to `action`. */
 export function isKey(action: KeyAction, code: string): boolean {
-  return KeyBindings[action] === code;
+  return code !== '' && KeyBindings[action] === code;
 }
 
 /** The action `code` is bound to, if any. */
 export function actionOfKey(code: string): KeyAction | null {
+  if (code === '') return null;
   for (const action of KEY_ACTIONS) {
     if (KeyBindings[action] === code) return action;
   }
@@ -295,6 +301,7 @@ const CODE_LABELS: Record<string, string> = {
 
 /** Short, human-readable name of a `KeyboardEvent.code`. */
 export function keyLabel(code: string): string {
+  if (code === '') return '-';
   if (CODE_LABELS[code]) return CODE_LABELS[code];
   const letter = /^Key([A-Z])$/.exec(code);
   if (letter) return letter[1];
