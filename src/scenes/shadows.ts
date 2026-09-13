@@ -327,8 +327,17 @@ function castsSunShadow(mesh: AbstractMesh): boolean {
  * "surfaces that are really there", and both are re-run over every mesh in
  * the scene on every refresh (`RenderTargetTexture.render`), so the distance
  * test comes first as the cheapest filter available.
+ *
+ * They do not share a reach, though, and `rangeSq` is it, squared: a cascade
+ * is fitted out to `CSM_MAX_Z` and cannot hold a caster past it, while the
+ * G-buffer is where the haze reads its distance, so its reach has to be
+ * whatever the camera actually draws.
  */
-export function drawsSolidGeometry(mesh: AbstractMesh, allowBlend = false): boolean {
+export function drawsSolidGeometry(
+  mesh: AbstractMesh,
+  allowBlend = false,
+  rangeSq = CSM_CASTER_RANGE_SQ
+): boolean {
   if (!mesh.isEnabled() || !mesh.isVisible) return false;
 
   const camera = mesh.getScene().activeCamera;
@@ -339,7 +348,7 @@ export function drawsSolidGeometry(mesh: AbstractMesh, allowBlend = false): bool
     const dy = centre.y - camera.globalPosition.y;
     const dz = centre.z - camera.globalPosition.z;
 
-    if (dx * dx + dy * dy + dz * dz > CSM_CASTER_RANGE_SQ) return false;
+    if (dx * dx + dy * dy + dz * dz > rangeSq) return false;
   }
 
   const material = mesh.material;
