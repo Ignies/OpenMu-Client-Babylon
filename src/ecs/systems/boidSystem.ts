@@ -369,7 +369,11 @@ export const BoidSystem: ISystemFactory = world => {
     model.setActionSpeed(DRAGON_ACTION, DRAGON_ACTION_SPEED);
     model.playAction(DRAGON_ACTION, true);
 
-    if (rolled(ROAR_ONE_IN, ticks)) playSfx('Sound/mBullAttack1', p);
+    if (rolled(ROAR_ONE_IN, ticks)) {
+      // Wildlife at a distance is part of the place, not a monster in front
+      // of you: it rides the ambience slider.
+      playSfx('Sound/mBullAttack1', p, { bus: 'ambient' });
+    }
 
     if (!rolled(BREATH_ONE_IN, ticks)) return;
 

@@ -1,6 +1,7 @@
 import { ENUM_WORLD } from '../common/types';
 import { TW_SAFEZONE } from '../common/terrain/consts';
 import { SoundsManager } from '../libs/soundsManager';
+import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerHero, listenerWorld } from './listener';
@@ -30,6 +31,9 @@ import { listenerHero, listenerWorld } from './listener';
  */
 
 // ---- 1. tuning -------------------------------------------------------------
+
+/** Brooks, gears and gates are part of the place, so ambience (`sound/buses.ts`). */
+const BUS: SoundBus = 'ambient';
 
 /**
  * A registered object sound: every placed instance of `types` on the map is a
@@ -317,8 +321,12 @@ function update(map: ENUM_WORLD, dt: number): void {
   ctx.inSafeZone = (world.getTerrainFlag(~~hx, ~~hz) & TW_SAFEZONE) !== 0;
   ctx.time = performance.now();
 
+  // The ambience slider at 0 leaves nothing sounding, so the pass below
+  // stops every slot rather than looping them at silence.
+  const gain = busGain(BUS);
+
   sounding = 0;
-  for (const c of candidates) {
+  for (const c of gain > 0 ? candidates : []) {
     const dx = c.x - hx;
     const dz = c.z - hz;
     const d2 = dx * dx + dz * dz;
@@ -339,7 +347,7 @@ function update(map: ENUM_WORLD, dt: number): void {
     // instances by (file, slot), so the two would otherwise both sound.
     if (slot.playing && slot.playing !== row.sound) stopSlot(i);
 
-    slot.volume = row.gain * gainAt(row, Math.sqrt(slotDist2[i]));
+    slot.volume = row.gain * gain * gainAt(row, Math.sqrt(slotDist2[i]));
 
     const s = SoundsManager.loopInstance(row.sound, i);
     if (!s) continue;

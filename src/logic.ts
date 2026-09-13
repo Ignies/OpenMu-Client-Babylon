@@ -259,9 +259,10 @@ import { delay } from './effects/core';
 import { Vector3 } from './libs/babylon/exports';
 import { EventBus } from './libs/eventBus';
 import type { Events } from './libs/eventBus/events';
-import { sound, type Sounds } from './sound';
-import { playSfx, playUiSound, UI_SOUND_KEYS } from './libs/sfx';
+import { playDrop, sound } from './sound';
+import { playSfx, playUiSound, UI_BUS } from './libs/sfx';
 import {
+  COMBAT_BUS,
   hitSound,
   pickupSound,
   skillSound,
@@ -2243,7 +2244,7 @@ function playCastAnimation(caster: Entity, skill: number) {
   // ExecuteSkill's cast sound for everyone else (the hero's plays in SkillCastSystem).
   if (!caster.localPlayer && caster.transform) {
     const sfx = skillSound(skill);
-    if (sfx) playSfx(sfx, caster.transform.pos);
+    if (sfx) playSfx(sfx, caster.transform.pos, { bus: COMBAT_BUS });
   }
   if (caster.playerAnimation) {
     if (caster.localPlayer) return; // SkillCastSystem already started the clip
@@ -2295,7 +2296,7 @@ EventBus.on('SkillAnimation', packet => {
   playCastAnimation(caster, p.SkillId);
   // AT_SKILL_COMBO: the server announces a landed DK combo (ReceiveMagic, WSclient.cpp:4436).
   if (combat.observeSkillAnimation(p.SkillId, target?.netId)) {
-    playSfx(COMBO_SOUND, caster.transform.pos);
+    playSfx(COMBO_SOUND, caster.transform.pos, { bus: COMBAT_BUS });
   }
   playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
 });
@@ -2488,7 +2489,7 @@ function applyObjectHit(p: ObjectHitView) {
     const hero = world.playerEntity;
     const missile =
       world.attackTarget === obj && !!hero && usesMissileWeapon(hero.charAppearance);
-    playSfx(hitSound(missile), obj.transform.pos);
+    playSfx(hitSound(missile), obj.transform.pos, { bus: COMBAT_BUS });
   }
 
   if (!obj.localPlayer && obj.attributeSystem?.hasAttribute('currentHealth')) {
@@ -2611,7 +2612,10 @@ EventBus.on('MoneyDropped', packet => {
 EventBus.on('MoneyDroppedExtended', packet => {
   const p = new MoneyDroppedExtendedPacket(packet);
   if (p.IsFreshDrop) {
-    playSfx('Sound/pDropMoney', { x: p.PositionX, z: p.PositionY });
+    playDrop(
+      { isMoney: true, group: ZEN_GROUP, num: ZEN_NUM },
+      { x: p.PositionX, z: p.PositionY }
+    );
   }
   spawnMoneyDrop(p.Id, p.PositionX, p.PositionY, p.IsFreshDrop);
 });
@@ -2736,7 +2740,7 @@ const FANFARE_SOUNDS = [
 ] as const;
 EventBus.on('fanfare', ({ effectType }) => {
   const sfx = FANFARE_SOUNDS[effectType];
-  if (sfx) playSfx(sfx);
+  if (sfx) playSfx(sfx, null, { bus: UI_BUS });
 });
 
 function handleRespawnAfterDeath(packet: DataView) {
@@ -2889,9 +2893,13 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
         );
 
     // CreateItem / CreateMoneyDrop (ZzzObject.cpp:5997-6002 / :6198): a fresh
-    // drop lands with a thud, zen jingles, jewels ring.
+    // drop lands with a thud, zen jingles, jewels ring - for the drops the
+    // player asked to hear (`sound/drops.ts`).
     if (item.IsFreshDrop) {
-      playSfx(dropSound(isMoney, parsed), { x: item.PositionX, z: item.PositionY });
+      playDrop(
+        { isMoney, item: parsed, group, num: id },
+        { x: item.PositionX, z: item.PositionY }
+      );
     }
 
     removeNetObject(world, maskedId);
@@ -2959,12 +2967,6 @@ function dropName(
   const name = String(baseName);
   const lvl = item?.lvl ?? 0;
   return lvl > 0 ? `${name} +${lvl}` : name;
-}
-
-function dropSound(isMoney: boolean, item: Item | undefined): Sounds {
-  if (isMoney || !item) return 'Sound/pDropMoney';
-  const kind = pickupSound(item);
-  return kind === 'getItem' ? 'Sound/pDropItem' : UI_SOUND_KEYS[kind];
 }
 
 EventBus.on('ItemsDropped', packet => {

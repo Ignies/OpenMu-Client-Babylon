@@ -2,6 +2,7 @@ import type { ENUM_WORLD } from '../common/types';
 import { lighting } from '../lighting';
 import type { LightSource } from '../lighting/lightSource';
 import { SoundsManager } from '../libs/soundsManager';
+import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerHero } from './listener';
@@ -24,6 +25,9 @@ import { listenerHero } from './listener';
  */
 
 // ---- 1. tuning -------------------------------------------------------------
+
+/** A burning torch is part of the place, so it is ambience (`sound/buses.ts`). */
+const BUS: SoundBus = 'ambient';
 
 /** The looping fire file. */
 const CRACKLE: Sounds = 'Sound/sFlame';
@@ -137,8 +141,12 @@ function update(map: ENUM_WORLD, dt: number): void {
   const hz = hero.transform.pos.z;
   const silent2 = SILENT_TILES * SILENT_TILES;
 
+  // The ambience slider at 0 leaves nothing sounding, so the pass below
+  // stops every slot rather than looping them at silence.
+  const gain = busGain(BUS);
+
   sounding = 0;
-  for (const flame of flames) {
+  for (const flame of gain > 0 ? flames : []) {
     if (!flame.alive) continue;
     const dx = flame.position.x - hx;
     const dz = flame.position.z - hz;
@@ -150,7 +158,7 @@ function update(map: ENUM_WORLD, dt: number): void {
   for (let i = 0; i < MAX_SOURCES; i++) {
     if (i < sounding) {
       const slot = slots[i];
-      slot.volume = VOLUME * gainAt(Math.sqrt(slotDist2[i]));
+      slot.volume = VOLUME * gain * gainAt(Math.sqrt(slotDist2[i]));
 
       const s = SoundsManager.loopInstance(CRACKLE, i);
       if (!s) continue;

@@ -51,6 +51,7 @@ import {
   MATERIAL_QUALITY_MAX,
 } from '../../../common/materialQuality';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
+import { BUS_VOLUME_MAX } from '../../../sound/buses';
 import {
   RENDER_DISTANCE_MAX,
   renderDistanceRanges,
@@ -199,7 +200,15 @@ type SliderRow = {
     | 'lootZen'
     | 'uiScale'
     | 'renderDistance'
-    | 'grassDensity';
+    | 'grassDensity'
+    | 'musicVolume'
+    | 'effectsVolume'
+    | 'combatVolume'
+    | 'monsterVolume'
+    | 'ambientVolume'
+    | 'stepsVolume'
+    | 'dropVolume'
+    | 'uiVolume';
   textId: number;
   labelKey: TextKey;
   max: number;
@@ -247,6 +256,30 @@ const gradeSlider = (
     display: v => (v === 0 ? t('common.off') : v),
     needsPostProcessing: true,
     needsTier,
+  });
+
+/**
+ * One mixer category (`sound/buses.ts`): 0 is off, `BUS_VOLUME_MAX` is the
+ * top, where the category is transparent and the master alone decides.
+ */
+const busSlider = (
+  key:
+    | 'musicVolume'
+    | 'effectsVolume'
+    | 'combatVolume'
+    | 'monsterVolume'
+    | 'ambientVolume'
+    | 'stepsVolume'
+    | 'dropVolume'
+    | 'uiVolume',
+  labelKey: TextKey
+): Row =>
+  slider({
+    key,
+    textId: -1,
+    labelKey,
+    max: BUS_VOLUME_MAX,
+    display: v => (v === 0 ? t('common.off') : v),
   });
 
 /**
@@ -551,6 +584,74 @@ const TABS: Tab[] = [
     ],
   },
   {
+    id: 'sound',
+    labelKey: 'options.tab.sound',
+    subtabs: [
+      {
+        id: 'mixer',
+        labelKey: 'options.section.mixer',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.mixer',
+              rows: [
+                slider({
+                  key: 'volume',
+                  textId: 389,
+                  labelKey: 'options.volume',
+                  max: 9,
+                  display: v => (v === 0 ? t('common.off') : v),
+                }),
+                busSlider('musicVolume', 'options.musicVolume'),
+                busSlider('effectsVolume', 'options.effectsVolume'),
+                busSlider('uiVolume', 'options.uiVolume'),
+                check('muteInBackground', -1, 'options.muteInBackground'),
+              ],
+            },
+          ],
+        ],
+      },
+      {
+        id: 'effects',
+        labelKey: 'options.section.sfx',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.sfx',
+              rows: [
+                busSlider('combatVolume', 'options.combatVolume'),
+                busSlider('monsterVolume', 'options.monsterVolume'),
+                busSlider('ambientVolume', 'options.ambientVolume'),
+                busSlider('stepsVolume', 'options.stepsVolume'),
+              ],
+            },
+          ],
+        ],
+      },
+      {
+        id: 'drops',
+        labelKey: 'options.section.dropSounds',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.dropSounds',
+              rows: [
+                busSlider('dropVolume', 'options.dropVolume'),
+                check('dropSoundFilter', -1, 'options.dropSoundFilter'),
+                check('dropSoundJewels', -1, 'options.lootJewels'),
+                check('dropSoundExcellent', -1, 'options.lootExcellent'),
+                check('dropSoundAncient', -1, 'options.lootAncient'),
+                check('dropSoundHighLevel', -1, 'options.lootHighLevel'),
+                check('dropSoundOther', -1, 'options.lootOther'),
+                check('dropSoundZen', -1, 'common.zen'),
+              ],
+            },
+          ],
+        ],
+      },
+    ],
+  },
+  {
     id: 'interface',
     labelKey: 'options.tab.interface',
     subtabs: [
@@ -603,26 +704,6 @@ const TABS: Tab[] = [
           ],
         ],
       },
-      {
-        id: 'sound',
-        labelKey: 'options.section.sound',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.sound',
-              rows: [
-                slider({
-                  key: 'volume',
-                  textId: 389,
-                  labelKey: 'options.volume',
-                  max: 9,
-                  display: v => v,
-                }),
-              ],
-            },
-          ],
-        ],
-      },
     ],
   },
   {
@@ -662,8 +743,10 @@ const TABS: Tab[] = [
 /** Tall enough, and flush, to reach the bottom of the header art. */
 const TAB_HEIGHT = 32;
 const TAB_GAP = 0;
-/** Five categories across the 426 px window. */
-const TAB_WIDTH = 84;
+/** The categories share the 426 px window, whatever there are of them. */
+const TAB_WIDTH = Math.floor(
+  (WIN_WIDTH - (TABS.length - 1) * TAB_GAP) / TABS.length
+);
 
 function rowHeight(row: Row): number {
   switch (row.kind) {

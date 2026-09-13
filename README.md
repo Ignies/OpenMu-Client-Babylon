@@ -132,8 +132,11 @@ single-player offline demo.
      [ Recipe table ]: 737 lines of declarative effect data, no hardcoded spawns.
 
 [▓▓▓▓▓▓▓▓░░] Sound (8/10):
-     [ Layers ]: 9 — 3D listener, ambient beds, fire crackle, map object loops,
-                 music, footsteps (per surface), UI, combat, monsters.
+     [ Layers ]: 10 — 3D listener, ambient beds, fire crackle, map object loops,
+                 music, footsteps (per surface), UI, combat, monsters, drops.
+     [ Mixer ]: A slider per category (music, effects, combat, monsters,
+                ambience, footsteps, drops, interface) under the master, and a
+                filter for which ground drops are worth a noise.
      [ Monsters ]: 460-line per-monster voice table.
      [ Objects ]: 371-line map-object loop table (waterfalls, torches, machinery).
 

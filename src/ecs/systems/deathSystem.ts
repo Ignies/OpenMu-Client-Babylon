@@ -7,6 +7,7 @@ import { monsterModelTypeOf } from '../../common/playSpeed';
 import { inBloodCastle, inChaosCastle } from '../../common/locomotion';
 import { TW_ACTION, TW_NOGROUND } from '../../common/terrain/consts';
 import { playSfx } from '../../libs/sfx';
+import { COMBAT_BUS } from '../../common/combatSounds';
 import { effects } from '../../effects';
 import { bonePos, entityYaw, type RGB } from '../../effects/core';
 import { NOVA_DEATH_MOTES } from '../../effects/recipes';
@@ -241,7 +242,9 @@ export const DeathSystem: ISystemFactory = world => {
       const light: RGB = [model.Light.x, model.Light.y, model.Light.z];
       bodyOrigin(e, tmpHead);
       shatter.spawn(world.scene, tmpHead, light);
-      if (shatter.sound) playSfx(shatter.sound, { x: tmpHead.x, z: tmpHead.z });
+      if (shatter.sound) {
+        playSfx(shatter.sound, { x: tmpHead.x, z: tmpHead.z }, { bus: COMBAT_BUS });
+      }
       model.setAlpha(0);
       d.alpha = 0;
       d.shattered = true;
