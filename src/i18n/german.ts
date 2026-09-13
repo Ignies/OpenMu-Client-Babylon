@@ -1430,6 +1430,7 @@ export const germanLayer: LanguageLayer = {
     'skills.needMore':
       '{label} {required} nötig, um {name} zu lernen ({more} fehlen)',
     'options.section.loot': 'Namen am Boden',
+    'options.dropTooltips': 'Gegenstandsdetails am Boden',
     'options.lootFilter': 'Namen am Boden filtern',
     'options.lootJewels': 'Juwelen',
     'options.lootExcellent': 'Excellent',

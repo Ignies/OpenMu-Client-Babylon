@@ -1425,6 +1425,7 @@ export const italianLayer: LanguageLayer = {
     'skills.needMore':
       '{label} {required} per imparare {name} (ne mancano {more})',
     'options.section.loot': 'Nomi a terra',
+    'options.dropTooltips': 'Dettagli degli oggetti a terra',
     'options.lootFilter': 'Filtra i nomi a terra',
     'options.lootJewels': 'Gioielli',
     'options.lootExcellent': 'Excellent',

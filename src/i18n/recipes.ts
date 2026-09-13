@@ -259,6 +259,7 @@ export const EN_TEXT = {
   'options.firstPersonBob': 'Head bob in first person',
   'options.thirdPersonMouseLook': 'Mouse look in third person too',
   'options.autoReconnect': 'Reconnect automatically',
+  'options.dropTooltips': 'Item details on ground drops',
   'options.lootFilter': 'Filter drop names',
   'options.lootJewels': 'Jewels',
   'options.lootExcellent': 'Excellent',

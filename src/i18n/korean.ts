@@ -1377,6 +1377,7 @@ export const koreanLayer: LanguageLayer = {
     'skills.alreadyKnown': '{name}은(는) 이미 배웠습니다',
     'skills.needMore': '{name}을(를) 배우려면 {label} {required} 필요 ({more} 부족)',
     'options.section.loot': '드롭 이름',
+    'options.dropTooltips': '바닥 아이템 상세 정보',
     'options.lootFilter': '드롭 이름 거르기',
     'options.lootJewels': '보석',
     'options.lootExcellent': '엑설런트',

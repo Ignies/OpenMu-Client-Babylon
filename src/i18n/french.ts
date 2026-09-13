@@ -1426,6 +1426,7 @@ export const frenchLayer: LanguageLayer = {
     'skills.needMore':
       '{label} {required} pour apprendre {name} (il en manque {more})',
     'options.section.loot': 'Noms au sol',
+    'options.dropTooltips': 'Détails des objets au sol',
     'options.lootFilter': 'Filtrer les noms au sol',
     'options.lootJewels': 'Joyaux',
     'options.lootExcellent': 'Excellent',

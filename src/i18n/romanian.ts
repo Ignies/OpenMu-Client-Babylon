@@ -1418,6 +1418,7 @@ export const romanianLayer: LanguageLayer = {
     'skills.needMore':
       '{label} {required} pentru a învăța {name} (mai lipsesc {more})',
     'options.section.loot': 'Nume pe jos',
+    'options.dropTooltips': 'Detalii pentru obiectele de pe jos',
     'options.lootFilter': 'Filtrează numele de pe jos',
     'options.lootJewels': 'Bijuterii',
     'options.lootExcellent': 'Excellent',

@@ -1410,6 +1410,7 @@ export const bulgarianLayer: LanguageLayer = {
     'skills.needMore':
       '{label} {required}, за да научиш {name} (липсват още {more})',
     'options.section.loot': 'Имена по земята',
+    'options.dropTooltips': 'Данни за предметите по земята',
     'options.lootFilter': 'Филтър на имената по земята',
     'options.lootJewels': 'Камъни',
     'options.lootExcellent': 'Excellent',

@@ -363,6 +363,7 @@ const TABS: Tab[] = [
             {
               titleKey: 'options.section.loot',
               rows: [
+                check('dropTooltips', -1, 'options.dropTooltips'),
                 check('lootFilter', -1, 'options.lootFilter'),
                 check('lootJewels', -1, 'options.lootJewels'),
                 check('lootExcellent', -1, 'options.lootExcellent'),

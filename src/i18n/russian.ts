@@ -1403,6 +1403,7 @@ export const russianLayer: LanguageLayer = {
     'skills.needMore':
       '{label} {required}, чтобы выучить {name} (не хватает {more})',
     'options.section.loot': 'Названия на земле',
+    'options.dropTooltips': 'Подробности о предметах на земле',
     'options.lootFilter': 'Фильтр названий на земле',
     'options.lootJewels': 'Камни',
     'options.lootExcellent': 'Excellent',
