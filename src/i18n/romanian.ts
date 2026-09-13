@@ -990,6 +990,7 @@ export const romanianLayer: LanguageLayer = {
     'duel.join': 'Privește',
     'duel.vs': 'VS',
     'duel.leaveWatch': 'Ieși din canalul de duel',
+    'duel.stop': 'Încheie',
     'event.cwDarkElves': 'Dark Elf (%d/12)',
     'event.cwBalgass': 'Balgass',
     'event.cwContractMade':

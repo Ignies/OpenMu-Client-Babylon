@@ -491,8 +491,9 @@ export class World extends ECSWorld<Entity> {
     /** Ctrl was held: the cast goes at the ground point, whatever is under the cursor. */
     forced?: boolean;
     /**
-     * Ctrl was held over another player (`CheckAttack`'s force attack):
-     * `target` is that player, who is no target at all without it.
+     * `target` is another player the hero may attack (`CheckAttack`: the
+     * duel enemy, an outlaw, or anyone while Ctrl is held). Without this a
+     * player under the cursor is no target at all.
      */
     pvp?: boolean;
   } | null = null;

@@ -995,6 +995,7 @@ export const portugueseLayer: LanguageLayer = {
     'duel.join': 'Assistir',
     'duel.vs': 'VS',
     'duel.leaveWatch': 'Sair do canal de duelo',
+    'duel.stop': 'Encerrar',
     'event.cwDarkElves': 'Dark Elf (%d/12)',
     'event.cwBalgass': 'Balgass',
     'event.cwContractMade':

@@ -1000,6 +1000,7 @@ export const germanLayer: LanguageLayer = {
     'duel.join': 'Zusehen',
     'duel.vs': 'VS',
     'duel.leaveWatch': 'Duellkanal verlassen',
+    'duel.stop': 'Beenden',
     'event.cwDarkElves': 'Dark Elf (%d/12)',
     'event.cwBalgass': 'Balgass',
     'event.cwContractMade':

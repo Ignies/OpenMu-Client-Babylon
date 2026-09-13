@@ -965,6 +965,7 @@ export const chineseLayer: LanguageLayer = {
     'duel.join': '观战',
     'duel.vs': 'VS',
     'duel.leaveWatch': '离开决斗频道',
+    'duel.stop': '结束决斗',
     'event.cwDarkElves': '黑暗精灵（%d/12）',
     'event.cwBalgass': '巴尔加斯',
     'event.cwContractMade': '你已登记为守护狼像的守护者。',

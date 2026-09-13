@@ -353,6 +353,10 @@ export const Commands = new (class _Commands {
     moveTo.sendToServer = true;
   }
 
+  /**
+   * `g_iFollowCharacter = -1`: a walk, attack or cast of the hero's own
+   * (pointer and controller systems), on top of the tick's own tests.
+   */
   stopFollowing(): void {
     if (!this.following) return;
     runInAction(() => {

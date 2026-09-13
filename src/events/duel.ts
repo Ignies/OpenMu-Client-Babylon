@@ -41,7 +41,8 @@ import {
  * Driven by: the twelve `Duel*` S2C packets (all `0xAA`), the Titus
  * `NpcWindowResponse` via `openDuelWatch`, and `commands.ts` (`/duelstart`,
  * `/duelend` keep sending `DuelStartRequest` / `DuelStopRequest` unchanged).
- * Read by: `ui/pages/worldPage/components/duel`.
+ * Read by: `ui/pages/worldPage/components/duel`, and `duelEnemyId` by
+ * `ecs/systems/attackSystem` for the click rules.
  *
  * Duel state survives `reset()`: the accept -> warp -> `DuelInit` sequence
  * crosses a map change, and the original clears `g_DuelMgr` only on duel end
@@ -124,6 +125,19 @@ export function duelSpectators(): string[] {
 /** The winner/loser box, or null when there is none. */
 export function duelResult(): { winner: string; loser: string } | null {
   return state.result;
+}
+
+/**
+ * `IsDuelPlayer(c, DUEL_ENEMY)`: the other duelist's id while the hero is
+ * one of the two sides; null with no duel, or when the hero only watches.
+ */
+export function duelEnemyId(): number | null {
+  const duel = state.duel;
+  if (!duel || duel.watching) return null;
+  const hero = heroNetId();
+  if (hero === duel.side1.id) return duel.side2.id;
+  if (hero === duel.side2.id) return duel.side1.id;
+  return null;
 }
 
 /** `NpcWindowResponse` DoorkeeperTitusDuelWatch: rows arrive by `DuelStatus`. */

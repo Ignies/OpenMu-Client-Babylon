@@ -1000,6 +1000,7 @@ export const spanishLayer: LanguageLayer = {
     'duel.join': 'Ver',
     'duel.vs': 'VS',
     'duel.leaveWatch': 'Salir del canal de duelo',
+    'duel.stop': 'Terminar',
     'event.cwDarkElves': 'Dark Elf (%d/12)',
     'event.cwBalgass': 'Balgass',
     'event.cwContractMade':

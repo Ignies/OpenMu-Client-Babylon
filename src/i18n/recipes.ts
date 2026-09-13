@@ -1308,6 +1308,7 @@ export const EN_TEXT = {
   'duel.join': 'Watch',
   'duel.vs': 'VS',
   'duel.leaveWatch': 'Leave the duel channel',
+  'duel.stop': 'End duel',
 
   'event.cwDarkElves': 'Dark Elf (%d/12)',
   'event.cwBalgass': 'Balgass',
