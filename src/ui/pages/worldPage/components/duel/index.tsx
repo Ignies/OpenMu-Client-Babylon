@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../../i18n';
 import { events } from '../../../../../events';
+import { Commands } from '../../../../../commands';
 import {
   duelBars,
   duelRequest,
@@ -61,6 +62,8 @@ import {
   SCORE_SPRITE,
   SCORE_VALUE_WIDTH,
   SCORE_VALUE_X,
+  STOP_BUTTON_X,
+  STOP_BUTTON_Y,
   SD1,
   SD2,
   SD_COLOR,
@@ -192,6 +195,19 @@ const DuelScorePanel = observer(() => {
     >
       {line(SCORE_HERO_Y, SCORE_HERO_COLOR, duel.score1, duel.side1.name)}
       {line(SCORE_ENEMY_Y, SCORE_ENEMY_COLOR, duel.score2, duel.side2.name)}
+      {/* `/duelend`: `SendDuelStopRequest`, the server cancels with no winner. */}
+      <div className="duel-stop" style={{ left: STOP_BUTTON_X, top: STOP_BUTTON_Y }}>
+        <MuButton
+          file={WATCH_BUTTON_SPRITE}
+          width={WATCH_BUTTON.width}
+          height={WATCH_BUTTON.height}
+          frames={{ up: 0, active: 1, down: 2 }}
+          label={t('duel.stop')}
+          color="rgb(255,255,255)"
+          onClick={() => Commands.duelStop()}
+          labelStyle={{ fontSize: 10 }}
+        />
+      </div>
     </MuSpriteFrame>
   );
 });

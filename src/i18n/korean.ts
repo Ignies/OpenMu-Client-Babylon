@@ -969,6 +969,7 @@ export const koreanLayer: LanguageLayer = {
     'duel.join': '관전',
     'duel.vs': 'VS',
     'duel.leaveWatch': '결투 채널에서 나가기',
+    'duel.stop': '결투 종료',
     'event.cwDarkElves': '다크 엘프 (%d/12)',
     'event.cwBalgass': '발가스',
     'event.cwContractMade': '늑대를 지키는 수호자로 등록되었습니다.',

@@ -994,6 +994,7 @@ export const italianLayer: LanguageLayer = {
     'duel.join': 'Guarda',
     'duel.vs': 'VS',
     'duel.leaveWatch': 'Esci dal canale duello',
+    'duel.stop': 'Termina',
     'event.cwDarkElves': 'Dark Elf (%d/12)',
     'event.cwBalgass': 'Balgass',
     'event.cwContractMade':

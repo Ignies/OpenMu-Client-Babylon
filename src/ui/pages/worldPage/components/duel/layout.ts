@@ -38,6 +38,12 @@ export const WATCH_BUTTON_SPRITE = 'newui_btn_empty_very_small.OZT';
 export const WATCH_BUTTON = { width: 53, height: 23 };
 /** `m_Pos.x + INVENTORY_WIDTH / 2 - 27`. */
 export const WATCH_BUTTON_X = 190 / 2 - 27;
+/**
+ * The stop button (`/duelend`) hangs centred under the score frame, in the
+ * join button's art. Ours: the original panel has no button at all.
+ */
+export const STOP_BUTTON_X = (SCORE.width - WATCH_BUTTON.width) / 2;
+export const STOP_BUTTON_Y = SCORE.height + 2;
 export const HEAD_CLOSE = { left: 169, top: 7, width: 13, height: 12 };
 
 export const BAR_Y = 480 - 51;

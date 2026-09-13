@@ -983,6 +983,7 @@ export const bulgarianLayer: LanguageLayer = {
     'duel.join': 'Гледай',
     'duel.vs': 'VS',
     'duel.leaveWatch': 'Напусни канала за дуел',
+    'duel.stop': 'Прекрати',
     'event.cwDarkElves': 'Dark Elf (%d/12)',
     'event.cwBalgass': 'Balgass',
     'event.cwContractMade': 'Вписан си като пазител, който да защити вълка.',

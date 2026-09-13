@@ -979,6 +979,7 @@ export const thaiLayer: LanguageLayer = {
     'duel.join': 'ชม',
     'duel.vs': 'VS',
     'duel.leaveWatch': 'ออกจากช่องดวล',
+    'duel.stop': 'จบการดวล',
     'event.cwDarkElves': 'ดาร์คเอลฟ์ (%d/12)',
     'event.cwBalgass': 'บัลกัส',
     'event.cwContractMade':

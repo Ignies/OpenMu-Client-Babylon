@@ -992,6 +992,7 @@ export const frenchLayer: LanguageLayer = {
     'duel.join': 'Regarder',
     'duel.vs': 'VS',
     'duel.leaveWatch': 'Quitter le canal de duel',
+    'duel.stop': 'Terminer',
     'event.cwDarkElves': 'Dark Elf (%d/12)',
     'event.cwBalgass': 'Balgass',
     'event.cwContractMade':

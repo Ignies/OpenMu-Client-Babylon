@@ -982,6 +982,7 @@ export const russianLayer: LanguageLayer = {
     'duel.join': 'Смотреть',
     'duel.vs': 'VS',
     'duel.leaveWatch': 'Покинуть дуэльный канал',
+    'duel.stop': 'Прервать',
     'event.cwDarkElves': 'Dark Elf (%d/12)',
     'event.cwBalgass': 'Balgass',
     'event.cwContractMade': 'Вы записаны стражем, который защитит волка.',

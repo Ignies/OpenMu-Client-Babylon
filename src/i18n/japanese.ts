@@ -971,6 +971,7 @@ export const japaneseLayer: LanguageLayer = {
     'duel.join': '観戦',
     'duel.vs': 'VS',
     'duel.leaveWatch': '決闘チャンネルから出る',
+    'duel.stop': '決闘終了',
     'event.cwDarkElves': 'ダークエルフ（%d/12）',
     'event.cwBalgass': 'バルガス',
     'event.cwContractMade': '狼を守る守護者として登録されました。',
