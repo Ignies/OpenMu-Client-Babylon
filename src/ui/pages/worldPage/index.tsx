@@ -38,7 +38,7 @@ import {
   GuildMasterDialog,
   GuildWindow,
 } from './components/guild';
-import { QuestWindows } from './components/quests';
+import { QuestTracker, QuestWindows } from './components/quests';
 import { FriendWindow } from './components/friends';
 import { ChatRoomWindow } from './components/chatRoom';
 import { SocialPrompts } from './components/socialPrompts';
@@ -110,6 +110,7 @@ const HUD = observer(() => {
       <DuelWindows />
       <SessionStatsWindow />
       <Minimap />
+      <QuestTracker />
       {/* Offline only: renders null online (F9). */}
       <DebugMenuWindow />
       {/* Game masters only: renders null for everyone else (F8). */}

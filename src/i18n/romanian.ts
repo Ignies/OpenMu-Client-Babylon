@@ -879,6 +879,7 @@ export const romanianLayer: LanguageLayer = {
     'quest.contribution': 'Contribuție: {value}',
     'quest.talkToStart': 'Vorbește cu {npc} ca să începi această misiune.',
     'quest.talkToContinue': 'Vorbește cu {npc} ca să continui această misiune.',
+    'quest.tracker.returnToNpc': 'Întoarce-te la NPC-ul misiunii',
 
     'event.devilSquare': 'Devil Square',
     'event.bloodCastle': 'Blood Castle',
@@ -1577,6 +1578,7 @@ export const romanianLayer: LanguageLayer = {
     'exit.chaosOpen': 'Închide fereastra Chaos înainte să ieși din joc.',
     'exit.noAnswer': 'Serverul nu a răspuns. Ieșim oricum.',
     'options.minimapCorner': 'Minihartă în colț',
+    'options.questTracker': 'Urmărirea misiunilor',
     'minimap.center': 'Centrează',
     'login.id': 'ID',
     'login.password': 'Parolă',

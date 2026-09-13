@@ -26,6 +26,7 @@ import { t, type TextKey } from '../i18n';
  * Read by the quest windows in `ui/pages/worldPage/components/quests/`.
  */
 import { observable, reaction, runInAction } from 'mobx';
+import { GameOptions } from '../common/gameOptions';
 import { itemBaseName } from '../common/itemsDatabase';
 import { ItemSerializer } from '../common/itemSerializer';
 import { monsterDisplayName } from '../common/monstersDatabase';
@@ -56,8 +57,10 @@ import { EventBus } from '../libs/eventBus';
 import { playUiSound } from '../libs/sfx';
 import { Store } from '../store';
 import type { QuestLayer } from './layer';
-import { questDataReady, questProgressEntry, questWordLines, questWords } from './questData';
+import { questDataReady, questProgressEntry, questProgressKeys, questWordLines, questWords } from './questData';
 import { npcDialogueOpen } from './npcDialogue';
+import { objectiveDone, objectiveText, type QuestObjective } from './objectives';
+import { devQueryNumber } from '../common/devSeams';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -113,13 +116,15 @@ export type AvailableQuest = { number: number; group: number; key: number; subje
  *  can be built again after a language change. The packet's own accessors hand
  *  back copies (`_readDataView` slices), so holding these does not pin the
  *  receive buffer. */
-type RawCondition = Parameters<typeof describeCondition>[0];
+type RawCondition = Parameters<typeof conditionRecord>[0];
 type RawReward = Parameters<typeof describeReward>[0];
 
-/** The cached `QuestProgress` / `QuestState` of one quest. `lines` is derived
- *  for the same reason `subject` is. */
+/** The cached `QuestProgress` / `QuestState` of one quest. `objectives` and
+ *  `lines` are derived for the same reason `subject` is. */
 export type QuestProgressState = {
   key: number;
+  /** The conditions the packet carried, counts and all (`objectives.ts`). */
+  objectives: QuestObjective[];
   lines: QuestRequirementLine[];
   /** Every condition met (`m_bRequestComplete`). */
   complete: boolean;
@@ -465,57 +470,37 @@ function monsterName(type: number): string {
   return monsterDisplayName(type);
 }
 
-/** `CQuestMng::GetRequestRewardText`: one text line per condition / reward. */
-function describeCondition(c: {
+/**
+ * One condition of the packet as an objective record. The name is resolved
+ * here rather than stored, so an open window follows a language change.
+ */
+function conditionRecord(c: {
   Type: number;
   RequirementId: number;
   RequiredCount: number;
   CurrentCount: number;
   RequiredItemData: DataView;
-}): QuestRequirementLine | null {
-  const progress = `${Math.min(c.CurrentCount, c.RequiredCount)} / ${c.RequiredCount}`;
-  const done = c.CurrentCount >= c.RequiredCount;
-  const line = (text: string): QuestRequirementLine => ({ kind: 'request', done, text });
+}): QuestObjective {
+  const named =
+    c.Type === ConditionTypeEnum.Item
+      ? itemName(c.RequiredItemData)
+      : c.Type === ConditionTypeEnum.MonsterKills || c.Type === ConditionTypeEnum.NpcTalk
+        ? monsterName(c.RequirementId)
+        : '';
 
-  switch (c.Type) {
-    case ConditionTypeEnum.None:
-      return null;
-    case ConditionTypeEnum.MonsterKills:
-      return line(t('quest.req.hunt', { name: monsterName(c.RequirementId), progress }));
-    case ConditionTypeEnum.Item:
-      return line(t('quest.req.bring', { name: itemName(c.RequiredItemData), progress }));
-    case ConditionTypeEnum.Level:
-      return line(t('quest.req.level', { level: c.RequiredCount }));
-    case ConditionTypeEnum.Money:
-      return line(t('quest.req.money', { amount: c.RequiredCount.toLocaleString() }));
-    case ConditionTypeEnum.Skill:
-      return line(t('quest.req.skill', { id: c.RequirementId }));
-    case ConditionTypeEnum.ClientAction:
-      return line(t('quest.req.tutorial'));
-    case ConditionTypeEnum.RequestBuff:
-      return line(t('quest.req.buff'));
-    case ConditionTypeEnum.EventMapPlayerKills:
-    case ConditionTypeEnum.EventMapMonsterKills:
-      return line(t('quest.req.eventKills', { progress }));
-    case ConditionTypeEnum.BloodCastleGate:
-      return line(t('quest.req.bloodCastleGate'));
-    case ConditionTypeEnum.WinBloodCastle:
-      return line(t('quest.req.bloodCastle'));
-    case ConditionTypeEnum.WinChaosCastle:
-      return line(t('quest.req.chaosCastle'));
-    case ConditionTypeEnum.WinDevilSquare:
-      return line(t('quest.req.devilSquare'));
-    case ConditionTypeEnum.WinIllusionTemple:
-      return line(t('quest.req.illusionTemple'));
-    case ConditionTypeEnum.DevilSquarePoints:
-      return line(t('quest.req.devilSquarePoints', { progress }));
-    case ConditionTypeEnum.PvpPoints:
-      return line(t('quest.req.pvpPoints', { progress }));
-    case ConditionTypeEnum.NpcTalk:
-      return line(t('quest.req.talk', { name: monsterName(c.RequirementId) }));
-    default:
-      return line(t('quest.req.other', { type: c.Type, progress }));
-  }
+  return {
+    type: c.Type,
+    id: c.RequirementId,
+    required: c.RequiredCount,
+    current: c.CurrentCount,
+    name: named,
+  };
+}
+
+/** `CQuestMng::GetRequestRewardText`: one text line per condition / reward. */
+function describeCondition(objective: QuestObjective): QuestRequirementLine | null {
+  const text = objectiveText(objective);
+  return text === null ? null : { kind: 'request', done: objectiveDone(objective), text };
 }
 
 function describeReward(r: {
@@ -559,10 +544,10 @@ function describeReward(r: {
 
 /** `SetQuestRequestReward`, drawn: headers through `t()`, monster names out of
  *  the language pack. Rebuilt on every read so both follow the selector. */
-function requirementLines(raw: RawCondition[], rewardsRaw: RawReward[]): QuestRequirementLine[] {
+function requirementLines(objectives: QuestObjective[], rewardsRaw: RawReward[]): QuestRequirementLine[] {
   const lines: QuestRequirementLine[] = [];
 
-  const conditions = raw.map(describeCondition).filter((l): l is QuestRequirementLine => !!l);
+  const conditions = objectives.map(describeCondition).filter((l): l is QuestRequirementLine => !!l);
   if (conditions.length) {
     lines.push({ kind: 'header', text: t('quest.requirements') });
     lines.push(...conditions);
@@ -578,28 +563,34 @@ function requirementLines(raw: RawCondition[], rewardsRaw: RawReward[]): QuestRe
 }
 
 /** `SetQuestRequestReward`: cache what a `QuestProgress` / `QuestState` carried. */
-function storeProgress(p: QuestProgressPacket | QuestStatePacket): number {
-  const key = questKey(p.QuestNumber, p.QuestGroup);
-  const conditions = p.getConditions();
-  const rewards = p.getRewards();
-  const complete = conditions
-    .filter(c => c.Type !== ConditionTypeEnum.None)
-    .every(c => c.CurrentCount >= c.RequiredCount);
+function cacheProgress(key: number, conditions: RawCondition[], rewards: RawReward[]): void {
+  const filled = conditions.filter(c => c.Type !== ConditionTypeEnum.None);
+  const complete = filled.every(c => c.CurrentCount >= c.RequiredCount);
+  const objectivesOf = () => filled.map(conditionRecord);
 
   runInAction(() => {
     state.progress.set(key, {
       key,
       complete,
+      get objectives() {
+        return objectivesOf();
+      },
       get lines() {
-        return requirementLines(conditions, rewards);
+        return requirementLines(objectivesOf(), rewards);
       },
     });
     if (!state.active.includes(key)) state.active.push(key);
   });
+}
+
+function storeProgress(p: QuestProgressPacket | QuestStatePacket): number {
+  const key = questKey(p.QuestNumber, p.QuestGroup);
+  cacheProgress(key, p.getConditions(), p.getRewards());
   return key;
 }
 
 function removeActive(key: number): void {
+  requestedStates.delete(key);
   runInAction(() => {
     const i = state.active.indexOf(key);
     if (i >= 0) state.active.splice(i, 1);
@@ -608,6 +599,26 @@ function removeActive(key: number): void {
     if (state.currentKey === key) state.progressOpen = false;
   });
 }
+
+/** Quests whose conditions have already been asked for. */
+const requestedStates = new Set<number>();
+
+/**
+ * `QuestStateList` names the running quests but carries no counts: the log
+ * fetches those one quest at a time when a row is picked (`selectMyQuest`).
+ * The tracker draws them all, so with it on the same request is sent once per
+ * running quest. No new packet - it is the one the log's own list sends.
+ */
+reaction(
+  () => (GameOptions.questTracker ? state.active.filter(key => !state.progress.has(key)) : []),
+  keys => {
+    for (const key of keys) {
+      if (requestedStates.has(key)) continue;
+      requestedStates.add(key);
+      requestQuestState(key);
+    }
+  }
+);
 
 EventBus.on('AvailableQuests', packet => {
   const p = new AvailableQuestsPacket(packet);
@@ -728,6 +739,7 @@ EventBus.on('QuestStateList', packet => {
 });
 
 EventBus.on('CharacterInformation', () => {
+  requestedStates.clear();
   runInAction(() => {
     state.active = [];
     state.progress.clear();
@@ -754,8 +766,57 @@ function reset(): void {
   });
 }
 
+// ---- the offline dev seam ----------------------------------------------------
+
+/** `?quests=<n>`: how many staged quests the offline client pretends to run. */
+const DEV_STAGED_MAX = 4;
+
+/** Kills staged per quest: enough, one short, and the last one finished. */
+const DEV_STAGED_KILLS: readonly { monster: number; current: number; required: number }[][] = [
+  [
+    { monster: 3, current: 7, required: 10 },
+    { monster: 6, current: 3, required: 5 },
+  ],
+  [{ monster: 14, current: 15, required: 15 }],
+  [{ monster: 2, current: 0, required: 20 }],
+  [{ monster: 20, current: 4, required: 8 }],
+];
+
+let devStaged = false;
+
+/**
+ * Offline only (`?quests=<n>`): fill the log with running quests taken from
+ * `QuestProgress.bmd`, so the tracker and the quest window can be looked at
+ * without a server. `devQueryNumber` answers null in a production build, so
+ * this can never stage anything a player would see.
+ */
+function stageDevQuests(): void {
+  if (devStaged) return;
+
+  const count = devQueryNumber('quests');
+  if (count === null || count <= 0 || !questDataReady()) return;
+  devStaged = true;
+
+  const named = questProgressKeys().filter(key => {
+    const entry = questProgressEntry(key);
+    return !!entry && !!questWords(entry.subject);
+  });
+
+  named.slice(0, Math.min(count, DEV_STAGED_MAX)).forEach((key, i) => {
+    const conditions = (DEV_STAGED_KILLS[i] ?? []).map(kill => ({
+      Type: ConditionTypeEnum.MonsterKills as number,
+      RequirementId: kill.monster,
+      RequiredCount: kill.required,
+      CurrentCount: kill.current,
+      RequiredItemData: new DataView(new ArrayBuffer(0)),
+    }));
+    cacheProgress(key, conditions, []);
+  });
+}
+
 function update(_map: ENUM_WORLD, _dt: number): void {
   // Titles resolve lazily once the tables are in; nothing ticks here.
+  stageDevQuests();
 }
 
 // ---- 3. the layer ----------------------------------------------------------

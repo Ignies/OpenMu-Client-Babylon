@@ -848,6 +848,8 @@ const MyQuestInfoWindow = observer(() => {
   );
 });
 
+export { QuestTracker } from './tracker';
+
 /** Every quest window; one line in `worldPage/index.tsx`. */
 export const QuestWindows = () => (
   <>

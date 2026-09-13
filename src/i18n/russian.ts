@@ -872,6 +872,7 @@ export const russianLayer: LanguageLayer = {
     'quest.contribution': 'Вклад: {value}',
     'quest.talkToStart': 'Поговорите с {npc}, чтобы начать это задание.',
     'quest.talkToContinue': 'Поговорите с {npc}, чтобы продолжить это задание.',
+    'quest.tracker.returnToNpc': 'Вернитесь к NPC задания',
 
     'event.devilSquare': 'Devil Square',
     'event.bloodCastle': 'Blood Castle',
@@ -1562,6 +1563,7 @@ export const russianLayer: LanguageLayer = {
     'exit.chaosOpen': 'Закройте окно Хаоса, прежде чем выходить из игры.',
     'exit.noAnswer': 'Сервер не ответил. Выходим всё равно.',
     'options.minimapCorner': 'Миникарта в углу',
+    'options.questTracker': 'Отслеживание заданий',
     'minimap.center': 'Центрировать',
     'login.id': 'ID',
     'login.password': 'Пароль',

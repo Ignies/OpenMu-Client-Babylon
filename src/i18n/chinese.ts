@@ -856,6 +856,7 @@ export const chineseLayer: LanguageLayer = {
     'quest.contribution': '贡献度：{value}',
     'quest.talkToStart': '与{npc}对话即可开始这个任务。',
     'quest.talkToContinue': '与{npc}对话即可继续这个任务。',
+    'quest.tracker.returnToNpc': '返回任务NPC处',
 
     'event.devilSquare': '恶魔广场',
     'event.bloodCastle': '血色城堡',
@@ -1530,6 +1531,7 @@ export const chineseLayer: LanguageLayer = {
     'exit.chaosOpen': '请先关闭混沌合成窗口再退出游戏。',
     'exit.noAnswer': '服务器没有回应，仍然退出。',
     'options.minimapCorner': '角落小地图',
+    'options.questTracker': '任务追踪',
     'minimap.center': '居中',
     'login.id': '账号',
     'login.password': '密码',

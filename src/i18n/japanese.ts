@@ -862,6 +862,7 @@ export const japaneseLayer: LanguageLayer = {
     'quest.contribution': '貢献度: {value}',
     'quest.talkToStart': '{npc}に話しかけるとこのクエストを始められます。',
     'quest.talkToContinue': '{npc}に話しかけるとこのクエストを続けられます。',
+    'quest.tracker.returnToNpc': 'クエストNPCのところへ戻りましょう',
 
     'event.devilSquare': 'デビルスクエア',
     'event.bloodCastle': 'ブラッドキャッスル',
@@ -1538,6 +1539,7 @@ export const japaneseLayer: LanguageLayer = {
     'exit.chaosOpen': 'カオスウィンドウを閉じてからゲームを終了してください。',
     'exit.noAnswer': 'サーバーから応答がありません。そのまま終了します。',
     'options.minimapCorner': '隅にミニマップ',
+    'options.questTracker': 'クエスト追跡',
     'minimap.center': '中央に戻す',
     'login.id': 'ID',
     'login.password': 'パスワード',

@@ -130,6 +130,8 @@ export const COLOR = {
   tabOn: 'rgb(255,255,255)',
   tabOff: 'rgb(181,181,181)',
   zenLabel: 'rgb(255,220,150)',
+  /** `RenderSelTextBlock`'s (0.5, 0.7, 0.3): the green the log picks a row out with. */
+  complete: 'rgb(128,179,77)',
 } as const;
 
 // ---- CNewUINPCDialogue ------------------------------------------------------

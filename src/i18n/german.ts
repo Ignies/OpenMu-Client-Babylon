@@ -889,6 +889,7 @@ export const germanLayer: LanguageLayer = {
     'quest.contribution': 'Beitrag: {value}',
     'quest.talkToStart': 'Sprich mit {npc}, um diese Quest zu beginnen.',
     'quest.talkToContinue': 'Sprich mit {npc}, um diese Quest fortzusetzen.',
+    'quest.tracker.returnToNpc': 'Kehre zum Quest-NPC zurück',
 
     'event.devilSquare': 'Devil Square',
     'event.bloodCastle': 'Blood Castle',
@@ -1589,6 +1590,7 @@ export const germanLayer: LanguageLayer = {
     'exit.chaosOpen': 'Schließe das Chaos-Fenster, bevor du das Spiel verlässt.',
     'exit.noAnswer': 'Der Server hat nicht geantwortet. Es wird trotzdem beendet.',
     'options.minimapCorner': 'Minikarte in der Ecke',
+    'options.questTracker': 'Quest-Verfolgung',
     'minimap.center': 'Zentrieren',
     'login.id': 'ID',
     'login.password': 'Passwort',

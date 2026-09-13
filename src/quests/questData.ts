@@ -114,6 +114,11 @@ export function questProgressEntry(key: number): QuestProgressEntry | undefined 
   return tables.get()?.progress.get(key);
 }
 
+/** Every key the progress table holds, in file order. */
+export function questProgressKeys(): readonly number[] {
+  return [...(tables.get()?.progress.keys() ?? [])];
+}
+
 /** `m_mapNPCDialogue[npcIndex * 0x10000 + state]` (`GetNPCDlgNPCWords` / `GetNPCDlgAnswer`). */
 export function npcDialogueEntry(npcIndex: number, dialogState: number): NpcDialogueEntry | undefined {
   return tables.get()?.npcDialogues.get(npcIndex * 0x10000 + dialogState);

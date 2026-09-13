@@ -870,6 +870,7 @@ export const thaiLayer: LanguageLayer = {
     'quest.contribution': 'การมีส่วนร่วม: {value}',
     'quest.talkToStart': 'คุยกับ {npc} เพื่อเริ่มเควสต์นี้',
     'quest.talkToContinue': 'คุยกับ {npc} เพื่อทำเควสต์นี้ต่อ',
+    'quest.tracker.returnToNpc': 'กลับไปหา NPC ของเควสต์',
 
     'event.devilSquare': 'เดวิลสแควร์',
     'event.bloodCastle': 'บลัดคาสเซิล',
@@ -1549,6 +1550,7 @@ export const thaiLayer: LanguageLayer = {
     'exit.chaosOpen': 'ปิดหน้าต่างเคออสก่อนออกจากเกม',
     'exit.noAnswer': 'เซิร์ฟเวอร์ไม่ตอบกลับ กำลังออกจากเกม',
     'options.minimapCorner': 'มินิแมพที่มุมจอ',
+    'options.questTracker': 'ติดตามเควสต์',
     'minimap.center': 'กลับไปตรงกลาง',
     'login.id': 'ไอดี',
     'login.password': 'รหัสผ่าน',
