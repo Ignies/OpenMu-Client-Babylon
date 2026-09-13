@@ -26,6 +26,7 @@ beforeEach(() => {
   db.run('DELETE FROM listings');
   db.run('DELETE FROM balances');
   db.run('DELETE FROM audit');
+  db.run('DELETE FROM leases');
 });
 
 const anItem = { group: 14, num: 13, lvl: 0 };
@@ -185,5 +186,31 @@ describe('what the bots have to do', () => {
   test('an active listing is not work - it is just for sale', () => {
     listed();
     expect(store.pendingWork()).toHaveLength(0);
+  });
+});
+
+describe('leases keep two bots off one handover', () => {
+  test('the first bot takes the keys and the second is refused all of them', () => {
+    expect(store.acquireLeases(['listing:a', 'customer:bob'], 'MKT001', 60_000)).toBe(true);
+    expect(store.acquireLeases(['listing:b', 'customer:bob'], 'MKT002', 60_000)).toBe(false);
+    // Refused as a whole: the key that was free was not kept either.
+    expect(store.leaseHolder('listing:b')).toBeNull();
+    expect(store.leaseHolder('customer:bob')).toBe('MKT001');
+  });
+
+  test('a bot may retake what it holds, and only it can release it', () => {
+    expect(store.acquireLeases(['listing:a'], 'MKT001', 60_000)).toBe(true);
+    expect(store.acquireLeases(['listing:a'], 'MKT001', 60_000)).toBe(true);
+    store.releaseLeases(['listing:a'], 'MKT002');
+    expect(store.leaseHolder('listing:a')).toBe('MKT001');
+    store.releaseLeases(['listing:a'], 'MKT001');
+    expect(store.leaseHolder('listing:a')).toBeNull();
+  });
+
+  test('a lease a dead bot left behind lapses on its own', () => {
+    expect(store.acquireLeases(['listing:a'], 'MKT001', -1)).toBe(true);
+    expect(store.leaseHolder('listing:a')).toBeNull();
+    expect(store.acquireLeases(['listing:a'], 'MKT002', 60_000)).toBe(true);
+    expect(store.leaseHolder('listing:a')).toBe('MKT002');
   });
 });

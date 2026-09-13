@@ -35,6 +35,8 @@ export type Listing = {
   listedAt: number;
   /** When the state last changed; what the dispatch deadlines count from. */
   updatedAt: number;
+  /** The bot account holding the item, once collected; its work from then on. */
+  holder: string | null;
 };
 
 const toListing = (row: ListingRow): Listing => ({
@@ -49,6 +51,7 @@ const toListing = (row: ListingRow): Listing => ({
   buyerCharacter: row.buyer_char,
   listedAt: row.created_at,
   updatedAt: row.updated_at,
+  holder: row.holder,
 });
 
 /**
@@ -391,4 +394,54 @@ export function payoutRequests(): PayoutRequest[] {
 /** Paid, or given up on: the request is done either way. */
 export function clearPayoutRequest(account: string): void {
   db.query('DELETE FROM payout_requests WHERE account = ?').run(account);
+}
+
+// ---- leases ----------------------------------------------------------------
+
+/**
+ * Takes every key for `worker`, for `ttlMs`, or none of them.
+ *
+ * Several bots read the same rows, and a handover is not a thing two of them
+ * can do at once. Keys are `listing:<id>`, `payout:<account>` and
+ * `customer:<character>` - the customer too, because two bots at one player
+ * would have the second trade request refused by the server, and a refusal
+ * reads as the player saying no. A lease lapses on its own after `ttlMs`,
+ * for a bot that died holding it; the row's own state is still what the next
+ * bot works from. A worker may retake its own lease.
+ */
+export function acquireLeases(keys: string[], worker: string, ttlMs: number): boolean {
+  const now = Date.now();
+  const until = now + ttlMs;
+  try {
+    db.transaction(() => {
+      for (const key of keys) {
+        const changed = db
+          .query(
+            `INSERT INTO leases (key, worker, until) VALUES (?, ?, ?)
+             ON CONFLICT(key) DO UPDATE SET worker = excluded.worker, until = excluded.until
+             WHERE leases.until < ? OR leases.worker = excluded.worker`
+          )
+          .run(key, worker, until, now).changes;
+        if (!changed) throw new Error('taken');
+      }
+    })();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Gives the keys back; only the worker holding them can. */
+export function releaseLeases(keys: string[], worker: string): void {
+  for (const key of keys) {
+    db.query('DELETE FROM leases WHERE key = ? AND worker = ?').run(key, worker);
+  }
+}
+
+/** Who holds a key right now, or null when nobody does or it has lapsed. */
+export function leaseHolder(key: string): string | null {
+  const row = db.query('SELECT worker, until FROM leases WHERE key = ?').get(key) as
+    | { worker: string; until: number }
+    | undefined;
+  return row && row.until >= Date.now() ? row.worker : null;
 }

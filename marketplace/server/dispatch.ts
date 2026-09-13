@@ -47,24 +47,39 @@ export const CLAIM_TTL_MS = Number(process.env.MARKETPLACE_CLAIM_TTL_MS ?? 10 * 
  * buyer of a claim, the seller otherwise - or null when presence could not
  * say, in which case the bot goes and finds out the expensive way.
  */
-export function decide(work: Work, online: boolean | null, now: number): Decision {
+export function decide(
+  work: Work,
+  online: boolean | null,
+  now: number,
+  /** Whether they are on this bot's game server; null when presence cannot say. */
+  here: boolean | null = null
+): Decision {
   const age = now - work.updatedAt;
+  const who = work.state === 'claimed' ? 'the buyer' : 'the seller';
+
+  // Online, but in another game server's copy of the world: another bot's
+  // customer. Nothing here is released or dropped for that - the claim keeps
+  // its own deadline - the bot simply does not set off.
+  const elsewhere = online === true && here === false;
 
   if (work.state === 'claimed') {
     if (online === false) return { kind: 'release', reason: 'the buyer is not online' };
     if (age > CLAIM_TTL_MS) return { kind: 'release', reason: 'the buyer never came' };
+    if (elsewhere) return { kind: 'wait', reason: `${who} is on another game server` };
     return { kind: 'go' };
   }
 
   if (work.state === 'pending') {
     if (age > PENDING_TTL_MS) return { kind: 'expire', reason: 'the seller never handed it over' };
     if (online === false) return { kind: 'wait', reason: 'the seller is not online' };
+    if (elsewhere) return { kind: 'wait', reason: `${who} is on another game server` };
     return { kind: 'go' };
   }
 
   // returning: the item is the bot's to give back whenever the seller is
   // next seen. Nothing to expire; it waits.
   if (online === false) return { kind: 'wait', reason: 'the seller is not online' };
+  if (elsewhere) return { kind: 'wait', reason: `${who} is on another game server` };
   return { kind: 'go' };
 }
 

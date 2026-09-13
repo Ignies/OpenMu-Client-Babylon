@@ -19,7 +19,7 @@ import { ShopSession, MINIMUM_SHOP_LEVEL } from '../bot/shop';
 import { sameItem, type ListedItem } from '../bot/itemMatch';
 import * as store from './listings';
 import { audit, db } from './db';
-import { isOnline } from './presence';
+import { onServer, presenceOf } from './presence';
 import { Backoff, decide } from './dispatch';
 
 /**
@@ -29,7 +29,11 @@ import { Backoff, decide } from './dispatch';
  * one place, and every handover needs it standing next to a particular player,
  * so running several against the same customer would just make them queue
  * anyway. More throughput means more bots, each with its own account and its
- * own worker, not one bot doing two things at once.
+ * own worker, not one bot doing two things at once - and they share the rows
+ * safely because each piece of work, and each customer, is leased to one bot
+ * for the length of a handover, and a claim or a return belongs to the bot
+ * holding the item. Each bot plays on one game server and, since presence
+ * says which server a player is on, only goes after the players on its own.
  *
  * Everything here is driven by the listing's state, never by memory of what it
  * was doing: if this process dies mid-handover, the row is still `pending` or
@@ -60,6 +64,13 @@ const STEALTH = (process.env.MARKETPLACE_BOT_HIDE ?? 'on') !== 'off';
 
 /** A payout request this old is dropped; the seller can press Collect again. */
 const PAYOUT_REQUEST_TTL_MS = 24 * 60 * 60_000;
+
+/**
+ * How long a piece of work, and its customer, stay this bot's. Longer than
+ * any handover (a shop waits three minutes), short enough that a bot dying
+ * mid-handover does not park a listing for the afternoon.
+ */
+const LEASE_MS = 6 * 60_000;
 
 const stamp = () => new Date().toISOString().slice(11, 19);
 const log = (message: string) => console.log(`${stamp()}  ${message}`);
@@ -132,11 +143,13 @@ async function connect(): Promise<Bot> {
 
   // Said once, because a presence server that cannot be reached makes every
   // dispatch a blind try and one that is reachable decides who gets visited.
-  const probe = await isOnline(ACCOUNT);
+  const probe = await presenceOf(ACCOUNT);
   tag(
     probe === null
       ? `presence at ${process.env.PRESENCE_URL ?? 'http://127.0.0.1:3001'} is unreachable; dispatching blind`
-      : `presence answers (this bot reads as ${probe ? 'online' : 'offline'} there)`
+      : probe.ports === null
+        ? 'presence answers, but not which game server a player is on; serving everyone'
+        : `presence answers with game servers; this bot serves port ${PORT}`
   );
 
   return {
@@ -402,36 +415,47 @@ async function payOutRequested(bot: Bot): Promise<void> {
       audit('payout request dropped', { account: request.account, detail: 'older than a day' });
       continue;
     }
-    if ((await isOnline(request.account)) === false) {
+    const seen = await presenceOf(request.account);
+    if (seen?.online === false) {
       noteWaiting(key, `${request.account} is not online`);
+      continue;
+    }
+    if (onServer(seen, PORT) === false) {
+      noteWaiting(key, `${request.account} is on another game server`);
       continue;
     }
     noteWaiting(key, null);
 
-    const taken = store.takeBalance(request.account);
-    if (taken <= 0) {
-      store.clearPayoutRequest(request.account);
-      continue;
-    }
-
-    log(`paying ${request.account} ${taken} Zen via ${request.character}`);
-    const result = await payOut(bot.context, request.character, taken);
-    if (!result.ok) {
-      // Credited back rather than lost: the money never left the bot.
-      store.credit(request.account, taken);
-      log(`could not pay ${request.account} ${taken} Zen: ${result.reason}; credited back`);
-      audit('payout failed', { account: request.account, detail: result.reason });
-      if (result.declined) {
-        // They refused the Zen. The request is done; Collect asks again.
+    const keys = [key, `customer:${request.character.toLowerCase()}`];
+    if (!store.acquireLeases(keys, ACCOUNT, LEASE_MS)) continue;
+    try {
+      const taken = store.takeBalance(request.account);
+      if (taken <= 0) {
         store.clearPayoutRequest(request.account);
-      } else {
-        backoff.failed(key, Date.now());
+        continue;
       }
-      continue;
+
+      log(`paying ${request.account} ${taken} Zen via ${request.character}`);
+      const result = await payOut(bot.context, request.character, taken);
+      if (!result.ok) {
+        // Credited back rather than lost: the money never left the bot.
+        store.credit(request.account, taken);
+        log(`could not pay ${request.account} ${taken} Zen: ${result.reason}; credited back`);
+        audit('payout failed', { account: request.account, detail: result.reason });
+        if (result.declined) {
+          // They refused the Zen. The request is done; Collect asks again.
+          store.clearPayoutRequest(request.account);
+        } else {
+          backoff.failed(key, Date.now());
+        }
+        continue;
+      }
+      store.clearPayoutRequest(request.account);
+      backoff.succeeded(key);
+      audit('payout paid', { account: request.account, detail: { zen: taken } });
+    } finally {
+      store.releaseLeases(keys, ACCOUNT);
     }
-    store.clearPayoutRequest(request.account);
-    backoff.succeeded(key);
-    audit('payout paid', { account: request.account, detail: { zen: taken } });
   }
 }
 
@@ -447,20 +471,25 @@ async function tick(bot: Bot): Promise<void> {
     const now = Date.now();
     if (!backoff.due(listing.id, now)) continue;
 
+    // A claim or a return is the holding bot's to finish: only it has the item.
+    if (listing.holder !== null && listing.holder !== ACCOUNT) continue;
+
     // A cancellation of something never collected needs nobody: the item is
     // still in the seller's bag, and the row just closes.
-    if (listing.state === 'returning' && store.holderOf(listing.id).holder === null) {
+    if (listing.state === 'returning' && listing.holder === null) {
       await giveBack(bot, listing);
       continue;
     }
 
     // Who the bot has to meet: the buyer of a claim, the seller otherwise.
     const who = listing.state === 'claimed' ? listing.buyer : listing.seller;
-    const online = who ? await isOnline(who) : null;
+    const character = listing.state === 'claimed' ? listing.buyerCharacter : listing.sellerCharacter;
+    const seen = who ? await presenceOf(who) : null;
     const decision = decide(
       { id: listing.id, state: listing.state as 'pending' | 'claimed' | 'returning', updatedAt: listing.updatedAt },
-      online,
-      now
+      seen?.online ?? null,
+      now,
+      onServer(seen, PORT)
     );
 
     if (decision.kind === 'wait') {
@@ -479,10 +508,24 @@ async function tick(bot: Bot): Promise<void> {
       continue;
     }
 
+    // Ours for the length of the handover, the customer included: two bots
+    // at one player would have the second trade request refused by the
+    // server, and a refusal reads as the player saying no.
+    const keys = [`listing:${listing.id}`];
+    if (character) keys.push(`customer:${character.toLowerCase()}`);
+    if (!store.acquireLeases(keys, ACCOUNT, LEASE_MS)) {
+      noteWaiting(`"${listing.id}"`, 'another bot has it, or has its customer');
+      continue;
+    }
+
     let done = false;
-    if (listing.state === 'pending') done = await collect(bot, listing);
-    else if (listing.state === 'claimed') done = await deliver(bot, listing);
-    else if (listing.state === 'returning') done = await giveBack(bot, listing);
+    try {
+      if (listing.state === 'pending') done = await collect(bot, listing);
+      else if (listing.state === 'claimed') done = await deliver(bot, listing);
+      else if (listing.state === 'returning') done = await giveBack(bot, listing);
+    } finally {
+      store.releaseLeases(keys, ACCOUNT);
+    }
 
     if (done) backoff.succeeded(listing.id);
     else {

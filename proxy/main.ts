@@ -166,7 +166,7 @@ Bun.serve<WebSocketData>({
     // turns out not to be a websocket handshake has to close it: otherwise it
     // sits in the presence registry, and with a nonce in the ticket map, for
     // the life of the process.
-    const presence = new ConnectionPresence(session);
+    const presence = new ConnectionPresence(session, targetPort);
 
     // upgrade the request to a WebSocket
     if (server.upgrade(req, { data: { targetHost, targetPort, presence } })) {
