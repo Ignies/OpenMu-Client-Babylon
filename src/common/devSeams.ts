@@ -19,6 +19,17 @@ export function devQueryNumber(key: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+/**
+ * `?hp=` / `?mp=`: stage the hero's health or mana at a percentage on the
+ * offline route, so a warning state can be looked at without being hit.
+ */
+export function devVitalPercent(key: 'hp' | 'mp'): number | null {
+  const percent = devQueryNumber(key);
+  if (percent === null) return null;
+
+  return Math.max(0, Math.min(100, percent));
+}
+
 /** A comma-separated list of exactly `count` numbers, or null. */
 export function devQueryNumbers(key: string, count: number): number[] | null {
   const raw = devQuery(key);

@@ -5,6 +5,11 @@ import {
   CAMERA_FOV_MIN_DEG,
 } from '../camera/recipes';
 import { RENDER_DISTANCE_MAX } from './renderDistance';
+import {
+  LOW_VITAL_DEFAULT_PERCENT,
+  LOW_VITAL_MAX_PERCENT,
+  LOW_VITAL_MIN_PERCENT,
+} from './lowVitals';
 import { LocalStorage } from '../libs/localStorage';
 
 const OPTIONS_KEY = 'mu_options';
@@ -210,6 +215,19 @@ export type GameOptions = {
   /** Durability, full grid, last potion and buff ending notices. */
   stateWarnings: boolean;
   /**
+   * A red gradient round the screen edge while health is under
+   * `lowHealthPercent`, beating like a heart near death. The life orb sits in
+   * a corner nobody looks at mid-fight; this puts the same warning where the
+   * eye already is.
+   */
+  lowHealthWarning: boolean;
+  /** Health share the red edge starts at, `LOW_VITAL_MIN/MAX_PERCENT`. */
+  lowHealthPercent: number;
+  /** The same edge in blue for mana. Off: only casters want it. */
+  lowManaWarning: boolean;
+  /** Mana share the blue edge starts at. */
+  lowManaPercent: number;
+  /**
    * Walk the login flow again by ourselves when the game server socket
    * drops, instead of sending the player back to the server list.
    */
@@ -283,6 +301,8 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   vignette: [0, 9],
   sunShafts: [0, 9],
   lootZen: [0, 9],
+  lowHealthPercent: [LOW_VITAL_MIN_PERCENT, LOW_VITAL_MAX_PERCENT],
+  lowManaPercent: [LOW_VITAL_MIN_PERCENT, LOW_VITAL_MAX_PERCENT],
   uiScale: [0, UI_SCALE_MAX],
   renderDistance: [0, RENDER_DISTANCE_MAX],
   grassDensity: [0, 9],
@@ -354,6 +374,10 @@ const DEFAULTS: GameOptions = {
   uiScale: 3,
   lockWindows: false,
   stateWarnings: true,
+  lowHealthWarning: true,
+  lowHealthPercent: LOW_VITAL_DEFAULT_PERCENT,
+  lowManaWarning: false,
+  lowManaPercent: LOW_VITAL_DEFAULT_PERCENT,
   blockBrowserKeys: true,
   minimapCorner: true,
   questTracker: true,

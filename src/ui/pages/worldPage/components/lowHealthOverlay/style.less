@@ -1,0 +1,79 @@
+// The low health / low mana edge. Two stacked layers, both inert: the outer
+// one holds the strength the reaction writes and fades it in, the inner one
+// carries the gradient and the beat, so the fade and the pulse never fight
+// over the same opacity.
+
+.low-vitals {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.low-vital-edge {
+  position: absolute;
+  inset: 0;
+  opacity: var(--low-vital-strength, 0);
+  transition: opacity 0.5s ease-out;
+}
+
+.low-vital-glow {
+  position: absolute;
+  inset: 0;
+}
+
+// The original's hit flash red, held at the frame instead of over the scene.
+// The ellipse is smaller than the viewport on purpose: its last stop has to
+// land inside the frame, or the edges only ever get a part of the colour.
+.low-vital-edge.is-health .low-vital-glow {
+  background: radial-gradient(
+    ellipse 52% 48% at 50% 50%,
+    rgba(176, 6, 6, 0) 52%,
+    rgba(186, 10, 10, 0.4) 80%,
+    rgba(132, 0, 0, 0.88) 100%
+  );
+}
+
+// Quieter than the red: running out of mana is a problem, not a death.
+.low-vital-edge.is-mana .low-vital-glow {
+  background: radial-gradient(
+    ellipse 52% 48% at 50% 50%,
+    rgba(30, 70, 220, 0) 54%,
+    rgba(38, 84, 226, 0.26) 82%,
+    rgba(18, 46, 168, 0.6) 100%
+  );
+}
+
+.low-vital-glow.is-beating {
+  animation: low-vital-beat var(--low-vital-beat, 1s) ease-in-out infinite;
+}
+
+// Two thumps and a rest, the shape of a heartbeat.
+@keyframes low-vital-beat {
+  0% {
+    opacity: 0.6;
+  }
+  9% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 0.66;
+  }
+  30% {
+    opacity: 0.94;
+  }
+  46% {
+    opacity: 0.58;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+// A pulsing red frame is exactly what this setting is about; the warning
+// itself stays, only the beating stops.
+@media (prefers-reduced-motion: reduce) {
+  .low-vital-glow.is-beating {
+    animation: none;
+  }
+}
