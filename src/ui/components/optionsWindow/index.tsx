@@ -673,6 +673,7 @@ const TABS: Tab[] = [
                 }),
                 check('lockWindows', -1, 'options.lockWindows'),
                 check('minimapCorner', -1, 'options.minimapCorner'),
+                check('questTracker', -1, 'options.questTracker'),
                 {
                   kind: 'button',
                   id: 'fullscreen',

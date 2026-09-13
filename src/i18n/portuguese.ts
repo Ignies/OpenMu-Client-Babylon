@@ -884,6 +884,7 @@ export const portugueseLayer: LanguageLayer = {
     'quest.contribution': 'Contribuição: {value}',
     'quest.talkToStart': 'Fale com {npc} para começar esta missão.',
     'quest.talkToContinue': 'Fale com {npc} para continuar esta missão.',
+    'quest.tracker.returnToNpc': 'Volte ao NPC da missão',
 
     'event.devilSquare': 'Devil Square',
     'event.bloodCastle': 'Blood Castle',
@@ -1615,6 +1616,7 @@ export const portugueseLayer: LanguageLayer = {
     'exit.chaosOpen': 'Fecha a janela do Chaos antes de sair do jogo.',
     'exit.noAnswer': 'O servidor não respondeu. A sair mesmo assim.',
     'options.minimapCorner': 'Minimapa no canto',
+    'options.questTracker': 'Rastreador de missões',
     'minimap.center': 'Centrar',
     'login.id': 'ID',
     'login.password': 'Senha',

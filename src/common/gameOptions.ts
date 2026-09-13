@@ -226,6 +226,12 @@ export type GameOptions = {
    */
   minimapCorner: boolean;
   /**
+   * The running quests and their counts on the HUD, under the corner minimap
+   * (ours). Off is the Classic look: the quest log (T) is the only place a
+   * kill count shows.
+   */
+  questTracker: boolean;
+  /**
    * Item names in English whatever the interface language is. The language
    * packs translate them (`Data/Local/<pack>/item_<lang>.bmd`), which reads
    * well but leaves a trader unable to match what a forum or a price list
@@ -350,6 +356,7 @@ const DEFAULTS: GameOptions = {
   stateWarnings: true,
   blockBrowserKeys: true,
   minimapCorner: true,
+  questTracker: true,
   englishItemNames: false,
 };
 

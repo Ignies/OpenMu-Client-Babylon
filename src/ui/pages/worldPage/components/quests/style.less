@@ -119,3 +119,43 @@
     position: absolute;
   }
 }
+
+// The HUD quest tracker (ours). No frame of its own: the quest windows have
+// no sprite that fits a free-standing list, so it is their text and nothing
+// else, laid on the world under the corner minimap.
+.quest-tracker {
+  position: absolute;
+  right: 10px;
+  transform-origin: 100% 0;
+  // Under every window (WINDOW_Z_BASE is 100), like the corner minimap.
+  z-index: 10;
+  pointer-events: none;
+  user-select: none;
+
+  .quest-tracker-quest {
+    margin-bottom: 6px;
+  }
+
+  .quest-tracker-title,
+  .quest-tracker-objective {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  // The log's own affordance for a clickable row.
+  .quest-tracker-title {
+    pointer-events: auto;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  .quest-tracker-objective {
+    padding-left: 8px;
+  }
+}

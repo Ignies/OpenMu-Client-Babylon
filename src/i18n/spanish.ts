@@ -886,6 +886,7 @@ export const spanishLayer: LanguageLayer = {
     'quest.contribution': 'Contribución: {value}',
     'quest.talkToStart': 'Habla con {npc} para empezar esta misión.',
     'quest.talkToContinue': 'Habla con {npc} para continuar esta misión.',
+    'quest.tracker.returnToNpc': 'Vuelve al NPC de la misión',
 
     'event.devilSquare': 'Devil Square',
     'event.bloodCastle': 'Blood Castle',
@@ -1443,6 +1444,7 @@ export const spanishLayer: LanguageLayer = {
     'options.uiScale': 'Tamaño',
     'options.lockWindows': 'Bloquear ventanas',
     'options.minimapCorner': 'Minimapa en la esquina',
+    'options.questTracker': 'Seguimiento de misiones',
     'options.resetWindows': 'Restablecer',
     'options.section.interface': 'Interfaz',
     'options.stateWarnings': 'Avisos',

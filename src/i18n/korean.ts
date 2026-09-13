@@ -860,6 +860,7 @@ export const koreanLayer: LanguageLayer = {
     'quest.contribution': '기여도: {value}',
     'quest.talkToStart': '{npc}에게 말을 걸면 이 퀘스트를 시작할 수 있습니다.',
     'quest.talkToContinue': '{npc}에게 말을 걸면 이 퀘스트를 이어갈 수 있습니다.',
+    'quest.tracker.returnToNpc': '퀘스트 NPC에게 돌아가세요',
 
     'event.devilSquare': '데빌 스퀘어',
     'event.bloodCastle': '블러드 캐슬',
@@ -1571,6 +1572,7 @@ export const koreanLayer: LanguageLayer = {
     'exit.chaosOpen': '카오스 창을 닫은 뒤에 게임을 종료하세요.',
     'exit.noAnswer': '서버가 응답하지 않았습니다. 그대로 나갑니다.',
     'options.minimapCorner': '구석에 미니맵',
+    'options.questTracker': '퀘스트 추적',
     'minimap.center': '가운데로',
     'login.id': 'ID',
     'login.password': '비밀번호',

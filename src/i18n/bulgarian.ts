@@ -872,6 +872,7 @@ export const bulgarianLayer: LanguageLayer = {
     'quest.contribution': 'Принос: {value}',
     'quest.talkToStart': 'Говори с {npc}, за да започнеш тази задача.',
     'quest.talkToContinue': 'Говори с {npc}, за да продължиш тази задача.',
+    'quest.tracker.returnToNpc': 'Върни се при NPC-то на задачата',
 
     'event.devilSquare': 'Devil Square',
     'event.bloodCastle': 'Blood Castle',
@@ -1604,6 +1605,7 @@ export const bulgarianLayer: LanguageLayer = {
     'exit.chaosOpen': 'Затвори прозореца на Хаоса, преди да излезеш от играта.',
     'exit.noAnswer': 'Сървърът не отговори. Излизане въпреки това.',
     'options.minimapCorner': 'Миникарта в ъгъла',
+    'options.questTracker': 'Проследяване на задачи',
     'minimap.center': 'Центрирай',
     'login.id': 'ID',
     'login.password': 'Парола',

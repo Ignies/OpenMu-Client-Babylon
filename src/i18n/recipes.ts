@@ -288,6 +288,7 @@ export const EN_TEXT = {
   'options.uiScale': 'Interface size',
   'options.lockWindows': 'Lock windows',
   'options.minimapCorner': 'Minimap in the corner',
+  'options.questTracker': 'Quest tracker',
   'options.resetWindows': 'Reset windows',
   'options.stateWarnings': 'Warning notices',
   'options.volume': 'Volume',
@@ -1177,6 +1178,7 @@ export const EN_TEXT = {
   'quest.contribution': 'Contribution: {value}',
   'quest.talkToStart': 'Talk to {npc} to start this quest.',
   'quest.talkToContinue': 'Talk to {npc} to continue this quest.',
+  'quest.tracker.returnToNpc': 'Return to the quest NPC',
 
   // ---- events ------------------------------------------------------------
   'event.devilSquare': 'Devil Square',
