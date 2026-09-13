@@ -917,6 +917,7 @@ export const japaneseLayer: LanguageLayer = {
     'event.monsterCount': 'モンスター：( %d/%d )',
     'event.timeLeft': '残り時間',
     'event.timerOpen': '開催中',
+    'event.timerFarOff': '> 4時間',
     'event.skeletonCount': 'マジックスケルトン：( %d/%d )',
     'event.bcQuestDone': 'がブラッドキャッスルのクエストを達成しました！',
     'event.bcCongrats': 'おめでとうございます！ あなたは見事に',

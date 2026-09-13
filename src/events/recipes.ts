@@ -83,8 +83,9 @@ export const EVENT_TEXT = textTable({
   monsterCount: 'event.monsterCount',
   timeLeft: 'event.timeLeft',
   skeletonCount: 'event.skeletonCount',
-  /** Ours: the HUD schedule rows say this instead of a clock. */
+  /** Ours: the HUD schedule rows say these instead of a clock. */
   timerOpen: 'event.timerOpen',
+  timerFarOff: 'event.timerFarOff',
   /** GlobalText[857..863]: the result box. */
   bcQuestDone: 'event.bcQuestDone',
   bcCongrats: 'event.bcCongrats',

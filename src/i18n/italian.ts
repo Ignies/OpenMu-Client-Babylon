@@ -939,6 +939,7 @@ export const italianLayer: LanguageLayer = {
     'event.monsterCount': 'Mostri: ( %d/%d )',
     'event.timeLeft': 'Tempo rimasto',
     'event.timerOpen': 'Aperto',
+    'event.timerFarOff': '> 4 h',
     'event.skeletonCount': 'Scheletro magico: ( %d/%d )',
     'event.bcQuestDone': 'ha completato la missione di Blood Castle!',
     'event.bcCongrats': 'Complimenti! Sei riuscito',

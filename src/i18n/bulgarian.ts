@@ -929,6 +929,7 @@ export const bulgarianLayer: LanguageLayer = {
     'event.monsterCount': 'Чудовища: ( %d/%d )',
     'event.timeLeft': 'Оставащо време',
     'event.timerOpen': 'Отворено',
+    'event.timerFarOff': '> 4 ч',
     'event.skeletonCount': 'Магически скелет: ( %d/%d )',
     'event.bcQuestDone': 'завърши мисията Blood Castle!',
     'event.bcCongrats': 'Поздравления! Успя',

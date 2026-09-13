@@ -8,6 +8,7 @@ import {
   type EventScheduleKey,
   type EventScheduleRow,
 } from '../../../../../events/schedule';
+import { rowText } from '../../../../../events/scheduleClock';
 import { EVENT_TEXT } from '../../../../../events/recipes';
 import { MuText } from '../../../../components/muText';
 import {
@@ -35,13 +36,6 @@ import {
  * Reads `events/schedule.ts` and writes nothing.
  */
 
-/** `%.2d:%.2d` of the seconds left; the same clock the timer figure prints. */
-function clock(seconds: number): string {
-  const s = Math.max(0, Math.floor(seconds));
-  const m = Math.floor(s / 60);
-  return `${String(m).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-}
-
 const LABEL: Readonly<Record<EventScheduleKey, () => string>> = {
   bloodCastle: () => EVENT_TEXT.bloodCastle,
   devilSquare: () => EVENT_TEXT.devilSquare,
@@ -60,16 +54,14 @@ function clickRow(row: EventScheduleRow): void {
 }
 
 const Row = observer(({ row }: { row: EventScheduleRow }) => {
+  // Grey is for silence only: a row the server answered reads in the timer's
+  // own colour even when all it said was that the wait is a long one.
   const color = row.open
     ? EVENT_ROW_COLOR_OPEN
-    : row.seconds === null
+    : row.seconds === null && !row.far
       ? EVENT_ROW_COLOR_UNKNOWN
       : EVENT_ROW_COLOR;
-  const value = row.open
-    ? EVENT_TEXT.timerOpen
-    : row.seconds === null
-      ? '--:--'
-      : clock(row.seconds);
+  const value = rowText(row);
 
   return (
     <div

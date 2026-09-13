@@ -911,6 +911,7 @@ export const chineseLayer: LanguageLayer = {
     'event.monsterCount': '怪物：( %d/%d )',
     'event.timeLeft': '剩余时间',
     'event.timerOpen': '开放',
+    'event.timerFarOff': '> 4小时',
     'event.skeletonCount': '魔法骷髅：( %d/%d )',
     'event.bcQuestDone': '完成了血色城堡的任务！',
     'event.bcCongrats': '恭喜！你成功地',

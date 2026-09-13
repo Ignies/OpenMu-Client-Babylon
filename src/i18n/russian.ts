@@ -928,6 +928,7 @@ export const russianLayer: LanguageLayer = {
     'event.monsterCount': 'Монстры: ( %d/%d )',
     'event.timeLeft': 'Осталось времени',
     'event.timerOpen': 'Открыт',
+    'event.timerFarOff': '> 4 ч',
     'event.skeletonCount': 'Магический скелет: ( %d/%d )',
     'event.bcQuestDone': 'выполнил задание Blood Castle!',
     'event.bcCongrats': 'Поздравляем! Вам удалось',

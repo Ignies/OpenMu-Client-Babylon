@@ -77,7 +77,9 @@ const MAX_SILENT_POLLS = 3;
 export type EventScheduleRow = {
   readonly key: EventScheduleKey;
   readonly open: boolean;
-  /** Whole seconds until it opens, or null when open / not known. */
+  /** Answered, but no nearer than the 255 minutes one byte can hold. */
+  readonly far: boolean;
+  /** Whole seconds until it opens, or null when open / far off / not known. */
   readonly seconds: number | null;
 };
 
@@ -119,6 +121,7 @@ const state = observable(
     rows: EVENT_SCHEDULE_KEYS.map(key => ({
       key,
       open: false,
+      far: false,
       seconds: null,
     })) as readonly EventScheduleRow[],
   },
@@ -183,11 +186,12 @@ function publish(nowMs: number): void {
   const rows = EVENT_SCHEDULE_KEYS.map(key => ({
     key,
     open: entries[key].open,
+    far: entries[key].far,
     seconds: countdownSeconds(entries[key], nowMs),
   }));
   const same = rows.every((row, i) => {
     const old = state.rows[i];
-    return old.open === row.open && old.seconds === row.seconds;
+    return old.open === row.open && old.far === row.far && old.seconds === row.seconds;
   });
   if (same) return;
   runInAction(() => {
