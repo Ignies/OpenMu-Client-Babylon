@@ -97,6 +97,7 @@ export const japaneseLayer: LanguageLayer = {
     'characters.select': 'キャラクターを選んでください',
     'characters.create.minLength': '5 文字以上で入力してください',
     'characters.create.specialName': '記号は使用できません。',
+    'characters.create.reservedName': 'その名前は予約されています。',
     'characters.create.failed':
       'キャラクター名が正しくないか、同じ名前が既に存在します。',
 
@@ -1677,6 +1678,13 @@ export const japaneseLayer: LanguageLayer = {
     'marketplace.agoMinutes': '{value} 分前',
     'marketplace.agoHours': '{value} 時間前',
     'marketplace.agoDays': '{value} 日前',
+    'marketplace.state.pending': '商人が受け取りに来るのを待っています',
+    'marketplace.state.active': '販売中',
+    'marketplace.state.claimed': '予約済み、配達中',
+    'marketplace.state.returning': 'あなたのもとへ返送中',
+    'marketplace.state.stuck': '市場に保管されています。ゲームマスターにお問い合わせください。',
+    'marketplace.owed': '{amount} Zen を受け取れます',
+    'marketplace.collect': '受け取る',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

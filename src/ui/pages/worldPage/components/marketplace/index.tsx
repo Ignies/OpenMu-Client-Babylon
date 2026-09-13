@@ -6,6 +6,7 @@ import { ItemIcon } from '../../../../components/itemIcon';
 import { ItemTooltip } from '../../../../components/itemTooltip';
 import { t, type TextKey } from '../../../../../i18n';
 import { CATEGORIES, displayName } from '../../../../../marketplace/categories';
+import { cancellable, stateLabelKey } from '../../../../../marketplace/catalogue';
 import {
   Marketplace,
   SORTS,
@@ -39,6 +40,29 @@ function dealDelta(listing: Listing): { label: string; tone: string } | null {
 const nameClass = (item: Listing['item']) =>
   item.isAncient ? ' is-ancient' : item.isExcellent ? ' is-excellent' : '';
 
+/** The window asks the service again this often while it is open. */
+const REFRESH_MS = 10_000;
+
+/**
+ * A seller's own row: what the trader is doing with it, and Cancel while
+ * that is still allowed. Never a Buy button - the service refuses a seller
+ * buying their own listing, and offering it was how a row "for sale" could
+ * be one nobody had collected yet.
+ */
+const OwnerActions = observer(({ listing }: { listing: Listing }) => {
+  const labelKey = stateLabelKey(listing.state);
+  return (
+    <>
+      {labelKey && <span className="mp-state">{t(labelKey)}</span>}
+      {cancellable(listing) && (
+        <button className="mp-btn is-quiet" onClick={() => Marketplace.cancelListing(listing.id)}>
+          {t('common.cancel')}
+        </button>
+      )}
+    </>
+  );
+});
+
 /**
  * Nothing to show, and the two reasons for it read very differently: the
  * marketplace not being open yet is not the same as a filter matching nothing.
@@ -49,7 +73,7 @@ const EmptyState = observer(() => (
   </div>
 ));
 
-const ListingCard = observer(({ listing, mode }: { listing: Listing; mode: Tab }) => {
+const ListingCard = observer(({ listing }: { listing: Listing }) => {
   const affordable = Marketplace.canAfford(listing);
   const deal = dealDelta(listing);
 
@@ -85,13 +109,8 @@ const ListingCard = observer(({ listing, mode }: { listing: Listing; mode: Tab }
             <span className="mp-zen">{t('common.zen')}</span>
           </span>
 
-          {mode === 'mine' ? (
-            <button
-              className="mp-btn is-quiet"
-              onClick={() => Marketplace.cancelListing(listing.id)}
-            >
-              {t('common.cancel')}
-            </button>
+          {listing.mine ? (
+            <OwnerActions listing={listing} />
           ) : (
             <button
               className="mp-btn"
@@ -108,7 +127,7 @@ const ListingCard = observer(({ listing, mode }: { listing: Listing; mode: Tab }
 });
 
 /** The same listing as one of the frame's ruled bands. */
-const ListingRow = observer(({ listing, mode }: { listing: Listing; mode: Tab }) => {
+const ListingRow = observer(({ listing }: { listing: Listing }) => {
   const affordable = Marketplace.canAfford(listing);
   const deal = dealDelta(listing);
 
@@ -141,10 +160,8 @@ const ListingRow = observer(({ listing, mode }: { listing: Listing; mode: Tab })
         <span className="mp-zen">{t('common.zen')}</span>
       </div>
 
-      {mode === 'mine' ? (
-        <button className="mp-btn is-quiet" onClick={() => Marketplace.cancelListing(listing.id)}>
-          {t('common.cancel')}
-        </button>
+      {listing.mine ? (
+        <OwnerActions listing={listing} />
       ) : (
         <button
           className="mp-btn"
@@ -404,6 +421,15 @@ export const MarketplaceWindow = observer(() => {
     return () => window.clearTimeout(timer);
   }, [flash]);
 
+  // A listing goes from "waiting for the trader" to "on sale" while the
+  // window is open, and a sale credits a balance; polling is what shows it.
+  const { open } = Marketplace;
+  useEffect(() => {
+    if (!open) return;
+    const timer = window.setInterval(() => void Marketplace.refresh(), REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [open]);
+
   if (!Marketplace.open) return null;
 
   const hovered = Marketplace.hoveredListing;
@@ -503,11 +529,20 @@ export const MarketplaceWindow = observer(() => {
           </div>
         )}
 
+        {Marketplace.tab === 'mine' && Marketplace.payoutOwed > 0 && (
+          <div className="mp-owed">
+            <span>{t('marketplace.owed', { amount: formatZen(Marketplace.payoutOwed) })}</span>
+            <button className="mp-btn" onClick={() => Marketplace.collectPayout()}>
+              {t('marketplace.collect')}
+            </button>
+          </div>
+        )}
+
         {browsing ? (
           Marketplace.view === 'grid' ? (
             <div className="mp-grid">
               {cards.map(listing => (
-                <ListingCard key={listing.id} listing={listing} mode={Marketplace.tab} />
+                <ListingCard key={listing.id} listing={listing} />
               ))}
               {cards.length === 0 && <EmptyState />}
             </div>
@@ -523,7 +558,7 @@ export const MarketplaceWindow = observer(() => {
                 <span />
               </div>
               {cards.map(listing => (
-                <ListingRow key={listing.id} listing={listing} mode={Marketplace.tab} />
+                <ListingRow key={listing.id} listing={listing} />
               ))}
               {cards.length === 0 && <EmptyState />}
             </div>

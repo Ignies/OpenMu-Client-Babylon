@@ -93,6 +93,7 @@ export const romanianLayer: LanguageLayer = {
     'characters.select': 'Alege un personaj',
     'characters.create.minLength': 'Scrie mai mult de 4 litere',
     'characters.create.specialName': 'Simbolurile nu sunt permise.',
+    'characters.create.reservedName': 'Acest nume este rezervat.',
     'characters.create.failed':
       'Nume de personaj greșit sau numele există deja.',
 
@@ -1717,6 +1718,13 @@ export const romanianLayer: LanguageLayer = {
     'marketplace.agoMinutes': 'acum {value} min',
     'marketplace.agoHours': 'acum {value} h',
     'marketplace.agoDays': 'acum {value} z',
+    'marketplace.state.pending': 'Așteaptă ca negustorul să îl ridice',
+    'marketplace.state.active': 'La vânzare',
+    'marketplace.state.claimed': 'Rezervat, în livrare',
+    'marketplace.state.returning': 'În drum înapoi la tine',
+    'marketplace.state.stuck': 'Reținut de piață. Întreabă un game master.',
+    'marketplace.owed': 'Ți se datorează {amount} Zen',
+    'marketplace.collect': 'Ridică',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

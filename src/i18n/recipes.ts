@@ -146,6 +146,7 @@ export const EN_TEXT = {
   'characters.select': 'Select a character',
   'characters.create.minLength': 'Type more than 4 letters',
   'characters.create.specialName': 'Cannot use symbols.',
+  'characters.create.reservedName': 'That name is reserved.',
   'characters.create.failed':
     'Incorrect character name was entered or same character name exists.',
 
@@ -1582,6 +1583,13 @@ export const EN_TEXT = {
   'marketplace.agoMinutes': '{value}m ago',
   'marketplace.agoHours': '{value}h ago',
   'marketplace.agoDays': '{value}d ago',
+  'marketplace.state.pending': 'Waiting for the trader to collect it',
+  'marketplace.state.active': 'On sale',
+  'marketplace.state.claimed': 'Reserved, being delivered',
+  'marketplace.state.returning': 'On its way back to you',
+  'marketplace.state.stuck': 'Held by the market. Ask a game master.',
+  'marketplace.owed': 'You are owed {amount} Zen',
+  'marketplace.collect': 'Collect',
 
   // ---- the game master panel (`gmPanel.ts`, `common/gmCommands.ts`) -------
   // Map names are not here: `gmMaps.ts` carries the server's own

@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import * as api from './api';
-import type { ApiListing } from './api';
 import { CATEGORIES, categoryOf, displayName, type CategoryId } from './categories';
+import { isOnSale, mergeCatalogue } from './catalogue';
 import { buildMockListings, type Listing } from './mockListings';
 import { i18n, t, type TextKey } from '../i18n';
 
@@ -16,23 +16,6 @@ export const SORTS: { id: Sort; labelKey: TextKey }[] = [
   { id: 'deal', labelKey: 'marketplace.sort.deal' },
 ];
 
-/** A list row is about a third the height of a card, so it fits more of them. */
-/** The service speaks in its own rows; the window draws these. */
-function fromApi(row: ApiListing): Listing {
-  return {
-    id: row.id,
-    item: row.item as Listing['item'],
-    category: categoryOf(row.item as Listing['item']),
-    seller: row.seller,
-    price: row.price,
-    listedAt: row.listedAt,
-    // No history to compare against yet, so nothing claims to be a deal.
-    median: row.price,
-    mine: row.state !== 'active' || undefined,
-    state: row.state,
-  };
-}
-
 export const PAGE_SIZE_GRID = 12;
 export const PAGE_SIZE_LIST = 10;
 
@@ -44,8 +27,8 @@ export const PAGE_SIZE_LIST = 10;
  * needs from the game - the player's Zen and their inventory - is pushed in
  * from the world page instead.
  *
- * Every listing here is a fixture. The buy and list actions move local state
- * only; nothing talks to a service yet, and no trade is driven.
+ * Live, the listings are whatever the service answered last; in the
+ * standalone harness they are fixtures and the actions move local state.
  */
 class MarketplaceStore {
   open = false;
@@ -154,7 +137,7 @@ class MarketplaceStore {
       runInAction(() => {
         this.mode = 'live';
         this.problem = null;
-        this.listings = [...catalogue.listings, ...own.listings].map(fromApi);
+        this.listings = mergeCatalogue(catalogue.listings, own.listings);
         this.payoutOwed = own.balance;
         this.loading = false;
       });
@@ -248,7 +231,7 @@ class MarketplaceStore {
   get categoryCounts(): Record<string, number> {
     const counts: Record<string, number> = { all: 0 };
     for (const c of CATEGORIES) counts[c.id] = 0;
-    for (const l of this.listings) {
+    for (const l of this.listings.filter(isOnSale)) {
       counts.all++;
       counts[l.category] = (counts[l.category] ?? 0) + 1;
     }
@@ -277,7 +260,12 @@ class MarketplaceStore {
 
   get matching(): Listing[] {
     const needle = this.search.trim().toLowerCase();
-    const pool = this.tab === 'mine' ? this.listings.filter(l => l.mine) : this.listings;
+    // The catalogue is what is actually buyable. A seller's own rows in every
+    // other state - waiting for the trader, reserved, coming back - are for
+    // the My Listings tab only, and were the "for sale but never collected"
+    // rows before this filter existed.
+    const pool =
+      this.tab === 'mine' ? this.listings.filter(l => l.mine) : this.listings.filter(isOnSale);
 
     const filtered = pool.filter(l => {
       if (this.tab === 'browse' && this.category !== 'all' && l.category !== this.category) {
@@ -423,7 +411,7 @@ class MarketplaceStore {
     const item = this.sellPick === null ? null : this.inventory[this.sellPick];
     if (!item) return [];
     return this.listings
-      .filter(l => l.item.group === item.group && l.item.num === item.num)
+      .filter(l => isOnSale(l) && l.item.group === item.group && l.item.num === item.num)
       .sort((a, b) => a.price - b.price);
   }
 
@@ -485,7 +473,7 @@ class MarketplaceStore {
   async collectPayout(): Promise<void> {
     if (this.payoutOwed <= 0) return;
     try {
-      const { owed } = await api.requestPayout();
+      const { owed } = await api.requestPayout(this.characterName);
       runInAction(() => {
         this.flash = t('marketplace.payoutComing', { amount: formatZen(owed) });
       });
