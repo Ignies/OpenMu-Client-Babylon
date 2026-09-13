@@ -2016,7 +2016,7 @@ export const spanishLayer: LanguageLayer = {
     'options.section.text': 'Texto',
     'options.section.bindings': 'Teclas',
     'options.section.vitals': 'Vida y maná',
-    'options.section.warnings': 'Avisos',
+    'options.section.warnings': 'Salud',
     'options.englishItemNames': 'Nombres de objetos en inglés',
     'exp.title': 'Experiencia',
     'perf.fps': 'FPS',

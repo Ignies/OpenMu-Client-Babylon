@@ -250,7 +250,7 @@ export const EN_TEXT = {
   'options.section.text': 'Text',
   'options.section.bindings': 'Bindings',
   'options.section.vitals': 'Health and mana',
-  'options.section.warnings': 'Warnings',
+  'options.section.warnings': 'Health',
   'options.tab.interface': 'Interface',
   'options.tab.sound': 'Sound',
   'options.section.mixer': 'Mixer',

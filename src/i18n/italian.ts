@@ -2015,7 +2015,7 @@ export const italianLayer: LanguageLayer = {
     'options.section.text': 'Testo',
     'options.section.bindings': 'Tasti',
     'options.section.vitals': 'Vita e mana',
-    'options.section.warnings': 'Avvisi',
+    'options.section.warnings': 'Salute',
     'options.englishItemNames': 'Nomi oggetti in inglese',
     'exp.title': 'Esperienza',
     'perf.fps': 'FPS',

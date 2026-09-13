@@ -1952,7 +1952,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.section.text': 'テキスト',
     'options.section.bindings': 'キー',
     'options.section.vitals': 'HPとMP',
-    'options.section.warnings': '警告',
+    'options.section.warnings': '体力',
     'options.englishItemNames': 'アイテム名を英語で表示',
     'exp.title': '経験値',
     'perf.fps': 'FPS',
