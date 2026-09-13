@@ -184,6 +184,12 @@ export type GameOptions = {
    */
   minimapCorner: boolean;
   /**
+   * A small corner readout with the frame rate, the frame time and the last
+   * measured server round trip (`common/netStats.ts`). Off is the HUD exactly
+   * as it was; the `performanceReadout` key action toggles it too.
+   */
+  performanceReadout: boolean;
+  /**
    * Item names in English whatever the interface language is. The language
    * packs translate them (`Data/Local/<pack>/item_<lang>.bmd`), which reads
    * well but leaves a trader unable to match what a forum or a price list
@@ -280,6 +286,7 @@ const DEFAULTS: GameOptions = {
   stateWarnings: true,
   blockBrowserKeys: true,
   minimapCorner: true,
+  performanceReadout: false,
   englishItemNames: false,
 };
 

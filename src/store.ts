@@ -58,6 +58,7 @@ import {
   wsAddress,
 } from './common/serverConfig';
 import { LocalStorage } from './libs/localStorage';
+import { NetStats } from './common/netStats';
 import { createSocket } from './libs/sockets/createSocket';
 import { ensureActiveVersion, gameVersion } from './version';
 import {
@@ -1540,6 +1541,8 @@ export const Store = new (class _Store {
     this.gsAttempt = null;
     this.gsSocket?.close();
     this.gsSocket = undefined;
+    // A new socket is a new set of round trips.
+    NetStats.reset();
   }
 
   /**
@@ -1746,6 +1749,7 @@ export const Store = new (class _Store {
     packet.TeleportTargetX = 0;
     packet.TeleportTargetY = 0;
 
+    NetStats.markSent('warp');
     this.sendToGS(packet.buffer);
   }
 
@@ -1762,6 +1766,7 @@ export const Store = new (class _Store {
     packet.CommandKey = 0;
     packet.WarpInfoIndex = index;
 
+    NetStats.markSent('warp');
     this.sendToGS(packet.buffer);
   }
 
@@ -2302,6 +2307,7 @@ export const Store = new (class _Store {
     packet.setItemData(serializeItemBytes(item), 12);
 
     this.beginItemMove(fromStorage, fromSlot, toStorage, toSlot);
+    NetStats.markSent('itemMove');
     this.sendToGS(packet.buffer);
   }
 

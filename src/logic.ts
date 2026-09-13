@@ -230,6 +230,7 @@ import {
   StorageKind,
   localIndexOf,
 } from './common/itemStorage';
+import { NetStats } from './common/netStats';
 import { Notices } from './common/notices';
 import { SlideHelp } from './common/slideHelp';
 import { ChatLineType, classifyInboundChat, cleanName } from './common/chat';
@@ -653,6 +654,9 @@ EventBus.on('CharacterInformationExtended', packet =>
 );
 
 EventBus.on('MapChanged', packet => {
+  // Answers a warp the player asked for; a server-initiated one pairs with
+  // nothing and is ignored (common/netStats.ts).
+  NetStats.markAnswered('warp');
   // HideAll on warp: the merchant stays behind.
   Store.closeNpcShop();
   // `ReceiveMapChange` (WSclient.cpp:622): the notice stack and the minimap
@@ -1339,6 +1343,15 @@ EventBus.on('ChatMessage', packet => {
   const p = new ChatMessagePacket(packet);
   const sender = cleanName(p.Sender);
   const message = p.Message.replace(/\0+$/, '');
+
+  // Our own line coming back is the answer to the one we sent: that pair is
+  // what the round-trip figure is measured on (common/netStats.ts).
+  if (
+    p.Type !== ChatMessageChatMessageTypeEnum.Whisper &&
+    sender === Store.playerData.name
+  ) {
+    NetStats.markAnswered('chat');
+  }
 
   if (p.Type === ChatMessageChatMessageTypeEnum.Whisper) {
     // SOUND_WHISPER for an incoming whisper; the name is offered as the next
@@ -3057,6 +3070,7 @@ const KNOWN_STORAGES: number[] = [
  * chaos machine or the personal shop.
  */
 EventBus.on('ItemMoved', packet => {
+  NetStats.markAnswered('itemMove');
   const p = new ItemMovedPacket(packet);
 
   // The Chaos Card Master's tray is the same local grid as the chaos
@@ -3103,6 +3117,8 @@ function storeStorageOf(storage: StorageKind, wireSlot: number): StorageKind {
 }
 
 EventBus.on('ItemMoveRequestFailed', () => {
+  // A refusal is still an answer, so it times the same round trip.
+  NetStats.markAnswered('itemMove');
   console.warn('ItemMoveRequestFailed - rolling the item back');
   Store.rollbackItemMove();
   Store.addNotification(t('notify.cannotMoveItem'), 'error');

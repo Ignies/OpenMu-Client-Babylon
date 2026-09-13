@@ -1892,5 +1892,11 @@ export const thaiLayer: LanguageLayer = {
     'options.section.text': 'ข้อความ',
     'options.section.bindings': 'ปุ่ม',
     'options.englishItemNames': 'ชื่อไอเทมเป็นภาษาอังกฤษ',
+    'exp.title': 'ค่าประสบการณ์',
+    'perf.fps': 'FPS',
+    'perf.frame': 'เฟรม',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'ข้อมูลประสิทธิภาพ',
+    'keys.performanceReadout': 'ข้อมูลประสิทธิภาพ',
   },
 };

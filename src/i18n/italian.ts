@@ -1944,5 +1944,11 @@ export const italianLayer: LanguageLayer = {
     'options.section.text': 'Testo',
     'options.section.bindings': 'Tasti',
     'options.englishItemNames': 'Nomi oggetti in inglese',
+    'exp.title': 'Esperienza',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Frame',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'Dati prestazioni',
+    'keys.performanceReadout': 'Dati prestazioni',
   },
 };

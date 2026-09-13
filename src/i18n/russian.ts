@@ -1922,5 +1922,11 @@ export const russianLayer: LanguageLayer = {
     'options.section.text': 'Текст',
     'options.section.bindings': 'Клавиши',
     'options.englishItemNames': 'Названия предметов по-английски',
+    'exp.title': 'Опыт',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Кадр',
+    'perf.ping': 'Пинг',
+    'options.performanceReadout': 'Показатели работы',
+    'keys.performanceReadout': 'Показатели работы',
   },
 };

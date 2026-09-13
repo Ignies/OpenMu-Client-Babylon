@@ -1872,5 +1872,11 @@ export const chineseLayer: LanguageLayer = {
     'options.section.text': '文字',
     'options.section.bindings': '按键',
     'options.englishItemNames': '物品名称用英文',
+    'exp.title': '经验',
+    'perf.fps': 'FPS',
+    'perf.frame': '帧',
+    'perf.ping': '延迟',
+    'options.performanceReadout': '性能信息',
+    'keys.performanceReadout': '性能信息',
   },
 };

@@ -1947,5 +1947,11 @@ export const frenchLayer: LanguageLayer = {
     'options.section.text': 'Texte',
     'options.section.bindings': 'Touches',
     'options.englishItemNames': 'Noms d’objets en anglais',
+    'exp.title': 'Expérience',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Image',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'Infos de performance',
+    'keys.performanceReadout': 'Infos de performance',
   },
 };

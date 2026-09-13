@@ -1938,5 +1938,11 @@ export const romanianLayer: LanguageLayer = {
     'options.section.text': 'Text',
     'options.section.bindings': 'Taste',
     'options.englishItemNames': 'Nume de obiecte în engleză',
+    'exp.title': 'Experiență',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Cadru',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'Date de performanță',
+    'keys.performanceReadout': 'Date de performanță',
   },
 };

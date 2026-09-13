@@ -1945,5 +1945,11 @@ export const spanishLayer: LanguageLayer = {
     'options.section.text': 'Texto',
     'options.section.bindings': 'Teclas',
     'options.englishItemNames': 'Nombres de objetos en inglés',
+    'exp.title': 'Experiencia',
+    'perf.fps': 'FPS',
+    'perf.frame': 'Cuadro',
+    'perf.ping': 'Ping',
+    'options.performanceReadout': 'Datos de rendimiento',
+    'keys.performanceReadout': 'Datos de rendimiento',
   },
 };

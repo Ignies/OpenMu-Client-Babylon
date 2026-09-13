@@ -36,6 +36,9 @@ import { createPortal } from 'react-dom';
 import { skills } from '../../../../../skills';
 import { onCooldownTick, skillCooldowns } from '../../../../../skills/cooldowns';
 import { SkillTooltip } from '../../../../components/skillTooltip';
+import { ExpTooltip } from './expTooltip';
+import { SessionStats } from '../../../../../common/sessionStats';
+import { devQuery } from '../../../../../common/devSeams';
 import { itemBaseName } from '../../../../../common/itemsDatabase';
 import {
   canRegisterItemHotkey,
@@ -223,8 +226,23 @@ const BarButton = ({
   </div>
 );
 
+/** The 4 px strip is too thin to aim at; the hover area reaches past it. */
+const EXP_HOVER_PAD = 4;
+/** Stopping short of the corner leaves the resize grip its own 12 px. */
+const EXP_HOVER_WIDTH = EXP_WIDTH - 14;
+
 export const ExpBar = observer(() => {
   const progress = Store.playerData.expPercent;
+  const hover = useRef<HTMLDivElement>(null);
+  const [tip, setTip] = useState<{ x: number; y: number } | null>(null);
+
+  // Dev seam: `?exptip` pins the tip open over the middle of the strip, so a
+  // headless shot can show it. Null outside the dev build.
+  useEffect(() => {
+    if (devQuery('exptip') === null) return;
+    const rect = hover.current?.getBoundingClientRect();
+    if (rect) setTip({ x: rect.left + rect.width / 2, y: rect.top });
+  }, []);
 
   return (
     <>
@@ -244,6 +262,20 @@ export const ExpBar = observer(() => {
         x={EXP_NUMBER_X}
         y={EXP_NUMBER_Y}
       />
+      <div
+        ref={hover}
+        className="exp-hover"
+        style={{
+          left: EXP_X,
+          top: EXP_Y - EXP_HOVER_PAD,
+          width: EXP_HOVER_WIDTH,
+          height: EXP_HEIGHT + EXP_HOVER_PAD * 2,
+        }}
+        onPointerEnter={() => SessionStats.watch()}
+        onPointerMove={e => setTip({ x: e.clientX, y: e.clientY })}
+        onPointerLeave={() => setTip(null)}
+      />
+      {tip && <ExpTooltip x={tip.x} y={tip.y} />}
     </>
   );
 });

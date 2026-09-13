@@ -56,6 +56,7 @@ import {
   parseSelfDefense,
   SELF_DEFENSE_MS,
 } from './common/nameTags';
+import { NetStats } from './common/netStats';
 import { playUiSound } from './libs/sfx';
 
 export type PartyMember = {
@@ -487,6 +488,9 @@ export const Social = new (class _Social {
     );
     packet.setCharacter(heroName);
     packet.setMessage(message);
+    // The server echoes our own line back, which is the one request/answer
+    // pair a player can trigger on demand (common/netStats.ts).
+    NetStats.markSent('chat');
     Store.sendToGS(packet.buffer);
 
     this.remember(this.chatHistory, text);

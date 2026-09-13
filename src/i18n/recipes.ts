@@ -1973,6 +1973,14 @@ export const EN_TEXT = {
     'I have nothing to do for you. You solved all my quests already.',
   'serverMessage.npcGuildNeedsLevel100': 'Your level should be at least level 100',
   'serverMessage.npcAlreadyInGuild': 'You already belong to a guild',
+
+  // ---- hud readouts ------------------------------------------------------
+  'exp.title': 'Experience',
+  'perf.fps': 'FPS',
+  'perf.frame': 'Frame',
+  'perf.ping': 'Ping',
+  'options.performanceReadout': 'Performance readout',
+  'keys.performanceReadout': 'Performance readout',
 } as const;
 
 /** Every key the client can ask for. Derived, so typos do not compile. */
