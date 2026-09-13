@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { MuSpriteFrame } from '../../components/muSprite';
 import {
+  BOTTOM_PLAIN_END,
   FIELD_HEIGHT,
   FIELD_LABEL_H,
   FIELD_WIDTH,
@@ -19,7 +20,60 @@ import {
  * rather than each drawing their own slightly different one.
  */
 
-/** Stone fill, side rails, and the mirrored top and bottom bands. */
+/**
+ * One band of the frame: the art, and the same art mirrored beside it.
+ *
+ * Given a `plainEnd`, the band is closed across the middle instead. The mirror
+ * puts the figure at the art's inner end against its own reflection, which
+ * reads as a join in the frame rather than as decoration - so each half stops
+ * where the art is still a plain edge and a slice of that edge bridges what is
+ * left, cut from the columns just inside the figure. What closes the band is
+ * the band.
+ */
+const Band = ({
+  file,
+  height,
+  plainEnd = SETUP_ART_WIDTH,
+  edge,
+}: {
+  file: string;
+  height: number;
+  plainEnd?: number;
+  /** Which way up this band hangs. */
+  edge: 'top' | 'bottom';
+}) => {
+  const bridge = SETUP_WIN_WIDTH - plainEnd * 2;
+
+  return (
+    <>
+      {[false, true].map(mirrored => (
+        <MuSpriteFrame
+          key={`${edge}-${mirrored}`}
+          file={file}
+          width={plainEnd}
+          height={height}
+          style={{
+            position: 'absolute',
+            left: mirrored ? SETUP_WIN_WIDTH - plainEnd : 0,
+            [edge]: 0,
+            ...(mirrored && { transform: 'scaleX(-1)' }),
+          }}
+        />
+      ))}
+      {bridge > 0 && (
+        <MuSpriteFrame
+          file={file}
+          x={plainEnd - bridge}
+          width={bridge}
+          height={height}
+          style={{ position: 'absolute', left: plainEnd, [edge]: 0 }}
+        />
+      )}
+    </>
+  );
+};
+
+/** Stone fill, side rails, and the top and bottom bands. */
 export const SetupFrame = ({ height }: { height: number }) => (
   <>
     <MuSpriteFrame
@@ -55,34 +109,13 @@ export const SetupFrame = ({ height }: { height: number }) => (
         backgroundRepeat: 'repeat-y',
       }}
     />
-    {[false, true].map(mirrored => (
-      <MuSpriteFrame
-        key={`top-${mirrored}`}
-        file={SPRITE.optionTop}
-        width={SETUP_ART_WIDTH}
-        height={SETUP_TOP_HEIGHT}
-        style={{
-          position: 'absolute',
-          left: mirrored ? SETUP_ART_WIDTH : 0,
-          top: 0,
-          ...(mirrored && { transform: 'scaleX(-1)' }),
-        }}
-      />
-    ))}
-    {[false, true].map(mirrored => (
-      <MuSpriteFrame
-        key={`bottom-${mirrored}`}
-        file={SPRITE.optionBottom}
-        width={SETUP_ART_WIDTH}
-        height={SETUP_BOTTOM_HEIGHT}
-        style={{
-          position: 'absolute',
-          left: mirrored ? SETUP_ART_WIDTH : 0,
-          bottom: 0,
-          ...(mirrored && { transform: 'scaleX(-1)' }),
-        }}
-      />
-    ))}
+    <Band file={SPRITE.optionTop} height={SETUP_TOP_HEIGHT} edge="top" />
+    <Band
+      file={SPRITE.optionBottom}
+      height={SETUP_BOTTOM_HEIGHT}
+      plainEnd={BOTTOM_PLAIN_END}
+      edge="bottom"
+    />
   </>
 );
 

@@ -74,6 +74,26 @@ export const SETUP_TOP_HEIGHT = 65;
 export const SETUP_BOTTOM_HEIGHT = 43;
 export const SETUP_ART_WIDTH = ART_WIDTH;
 
+/**
+ * Where the bottom band stops being a plain rule and becomes its inner figure.
+ *
+ * A band is 213 wide and the window is two of them, so the second is mirrored -
+ * which stands that figure against its own reflection in the middle of the
+ * window, where it reads as a join in the frame rather than as decoration. So
+ * each half is cut here, and `SetupFrame` bridges what is left with a slice of
+ * the same plain rule: the frame closes with nothing meeting in it.
+ *
+ * Measured off `op1_back2.OZT`: a 5px rule that runs plain from x=53 to x=160,
+ * corner figure to its left and inner figure to its right. 107 columns, and the
+ * bridge needs 106 of them, so the band closes itself with one to spare. The
+ * rule is a noisy texture rather than a gradient, which is why a slice of it
+ * joins without a seam of its own.
+ *
+ * The top band is left whole. Its plain run is shorter than the gap it would
+ * have to bridge, and its figure is under the tab strip anyway.
+ */
+export const BOTTOM_PLAIN_END = 160;
+
 export const SETUP_TITLE_Y = 12;
 
 /** Enter and Close, and every other button in this window. */
