@@ -18,7 +18,7 @@ export const DOPPELGANGER1_EFFECT_ONLY_TYPES: readonly number[] = [
   70, 80, 99, 101,
 ];
 
-/** The markers' effects (:400-474) are the event's state — empty. */
+/** The markers' effects (:400-474) are the event's state - empty. */
 export const DOPPELGANGER1_EMISSIONS: Partial<
   Record<number, readonly Emission[]>
 > = {};

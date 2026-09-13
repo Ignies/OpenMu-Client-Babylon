@@ -114,7 +114,7 @@ const factories: ISystemFactory[] = [
   // ...and the ones with a MONSTER_GLOWS row carry their own glow cards.
   MonsterGlowSystem,
   CameraFollowSystem,
-  // Weather layer: the rain ramp, the settled snow, the wetness — stepped
+  // Weather layer: the rain ramp, the settled snow, the wetness - stepped
   // before anything reads them .
   WeatherSystem,
   // After movement: weather volumes follow this frame's hero position.

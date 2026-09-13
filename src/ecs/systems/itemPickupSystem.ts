@@ -4,8 +4,8 @@ import { QuickItemActions } from '../../common/quickItemActions';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
- * MOVEMENT_GET (ZzzInterface.cpp:3543-3575): clicking a drop — its model or
- * its name label — walks the hero next to it (CheckTile 1.5 tiles) and only
+ * MOVEMENT_GET (ZzzInterface.cpp:3543-3575): clicking a drop - its model or
+ * its name label - walks the hero next to it (CheckTile 1.5 tiles) and only
  * then sends the pickup request. A ground click or another target cancels it.
  */
 

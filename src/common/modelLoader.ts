@@ -90,7 +90,7 @@ const materialArgs: Map<ItemMaterial, MaterialArgs> = new Map();
 
 /** Babylon `Material.MATERIAL_ALPHATESTANDBLEND`. */
 const ALPHA_TEST_AND_BLEND = 3;
-/** glAlphaFunc(GL_GREATER, 0.25f) — the threshold the original runs with. */
+/** glAlphaFunc(GL_GREATER, 0.25f) - the threshold the original runs with. */
 const ALPHA_TEST_CUTOFF = 0.25;
 
 export function getMaterial(
@@ -157,7 +157,7 @@ export function getMaterial(
 
   if (transparencyMode === ALPHA_TEST_AND_BLEND) {
     // MU's EnableAlphaTest (ZzzOpenglUtil.cpp:395): alpha test + SRC_ALPHA
-    // blend with the depth mask left on — and it calls DisableCullFace(), so
+    // blend with the depth mask left on - and it calls DisableCullFace(), so
     // every alpha-keyed mesh is drawn double-sided. Babylon drops depth writes
     // for anything in the blend pass unless forced.
     material.forceDepthWrite = true;
@@ -188,7 +188,7 @@ export function getMaterial(
  * shared with `getMaterial`.
  *
  * The UV-scroll uniform and its extra texel fetch exist on perhaps twenty
- * meshes in the whole game — Dungeon's flesh curtains, Noria's waterfalls,
+ * meshes in the whole game - Dungeon's flesh curtains, Noria's waterfalls,
  * Lost Tower's conduits, Stadium's fountain, Tarkan's sand-falls. Putting
  * them on the shared bright/flat-lit materials meant recompiling the shader
  * that draws *every* additive card in the game, foliage included, to serve
@@ -242,7 +242,7 @@ export function getScrollMaterial(
   scrollMaterialsCache.set(name, material);
 
   // Deliberately not in `materialArgs`: a quality flip must not re-resolve
-  // these back to the shared non-scrolling material. Nothing is lost — bright
+  // these back to the shared non-scrolling material. Nothing is lost - bright
   // and flat-lit never take the PBR path anyway.
   return material;
 }
@@ -379,7 +379,7 @@ export type LoadedModel = {
 /**
  * One parsed copy of each GLB, kept for the whole session and cloned per
  * entity (`instantiateModelsToScene`). Before this, every instance of every
- * map object ran its own glTF parse, geometry upload and WebP decode — a
+ * map object ran its own glTF parse, geometry upload and WebP decode - a
  * Lorencia field with 40 grass tufts paid for 40 identical models, and paid
  * again every time the hero walked out of `CalculateVisibilitySystem`'s
  * radius and back. Clones share the geometry (`Geometry.applyToMesh`), so the
@@ -389,7 +389,7 @@ const containersCache = new Map<string, Promise<AssetContainer>>();
 
 /**
  * Set to false to bypass the cache entirely and give every request its own
- * freshly parsed, non-cloned copy — what the loader did before the container
+ * freshly parsed, non-cloned copy - what the loader did before the container
  * cache landed.
  *
  * Kept as a one-line A/B. If a model ever renders in its raw BMD orientation
@@ -456,7 +456,7 @@ function prepareMeshes(
 
       const bright = script?.bright === true;
       // The converter marks every TGA-textured mesh BLEND; the
-      // original draws those through EnableAlphaTest — alpha test +
+      // original draws those through EnableAlphaTest - alpha test +
       // blend, depth-written, and with face culling disabled. The
       // spider's legs (single-sided alpha cards) vanish from behind
       // and get overdrawn by the body without this.
@@ -580,7 +580,7 @@ function loadContainer(
 }
 
 /**
- * `player.glb` is a rig with 62 nodes, 284 clips and *no meshes* — the glTF
+ * `player.glb` is a rig with 62 nodes, 284 clips and *no meshes* - the glTF
  * loader only materialises a `Skeleton` for a skin a mesh actually
  * references, so this one has to be built by hand from the instantiated
  * `skin_*` subtree. `PlayerObject` then hands it to the body-part models
@@ -606,7 +606,7 @@ function synthesizeRigSkeleton(
     // `ParentBoneLink` indexes `skeleton.bones` directly (weaponAttachment's
     // LEFT_HAND_BONE / RIGHT_HAND_BONE). The converter emits the skin root
     // first and then `bone_<i>_<name>` in ascending `i`, so the list has to be
-    // rebuilt in that order — a depth-first walk of the same nodes gives a
+    // rebuilt in that order - a depth-first walk of the same nodes gives a
     // different order as soon as the bone tree branches, which skins every
     // vertex to the wrong bone.
     const bones: Node[] = [skinRoot];
@@ -653,7 +653,7 @@ export async function loadGLTF(
 
   if (!USE_MODEL_CONTAINER_CACHE) {
     // Uncached: one fresh parse per request, added to the scene as-is. No
-    // clone, no shared geometry — the pre-cache behaviour, kept for A/B.
+    // clone, no shared geometry - the pre-cache behaviour, kept for A/B.
     const own = await loadContainerBytes(filePath, fileName, scene);
 
     prepareMeshes(
@@ -685,7 +685,7 @@ export async function loadGLTF(
   // turned into an InstancedMesh. That is deliberate: the shared item
   // materials bind `metadata.diffuseTexture` and `metadata.bodyLight` per
   // mesh in `onBindObservable`, and hardware instances draw in one call with
-  // one uniform set — every object would take the last one's terrain light.
+  // one uniform set - every object would take the last one's terrain light.
   const entries = container.instantiateModelsToScene(name => name, false);
 
   const root = entries.rootNodes[0] as AbstractMesh;
@@ -706,7 +706,7 @@ export async function loadGLTF(
   }
 
   // The glTF loader auto-starts the first clip (`animationStartMode` defaults
-  // to FIRST), and BMD models carry their rest pose *in* that clip — the
+  // to FIRST), and BMD models carry their rest pose *in* that clip - the
   // converter leaves every bone node at identity, so an unplayed model sits in
   // the raw, tilted BMD orientation. Instantiated clones do not inherit the
   // auto-play, so reproduce it here.
@@ -730,8 +730,8 @@ export async function loadGLTF(
 /**
  * Drop every cached container whose path contains `pathPrefix` (an asset
  * folder such as `Object4/`): `loadMapIntoScene` calls it when the asset
- * world changes, after the old map's entities — the clones that shared the
- * containers' geometry — are gone. Without this the cache grew by one map's
+ * world changes, after the old map's entities - the clones that shared the
+ * containers' geometry - are gone. Without this the cache grew by one map's
  * worth of GLBs per warp for the whole session. Shared folders (`Player/`,
  * `Item/`, `Npc/`) are never passed here.
  */

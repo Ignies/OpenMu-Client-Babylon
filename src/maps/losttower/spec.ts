@@ -12,7 +12,7 @@ import type { Emission } from '../../common/effectParticles';
  * `RenderObjectVisual` (:2893) and `Draw_RenderObject` (:1002), which is why
  * this file is almost all table and only three types need a class.
  *
- * Counts below are from EncTerrain5.obj (5380 records) — they decide how much
+ * Counts below are from EncTerrain5.obj (5380 records) - they decide how much
  * each recipe is allowed to cost.
  */
 
@@ -20,10 +20,10 @@ import type { Emission } from '../../common/effectParticles';
  * `o->BlendMesh = N` from `MoveObject` (ZzzObject.cpp:3959-3970): that mesh is
  * drawn additive and unlit.
  *
- *  - 18 (n=68) wall lamp, mesh 1 = light01.jpg — the lit pane.
- *  - 19/20 (n=14 / n=6) the two tower machines, mesh 4 = t20 — the small
+ *  - 18 (n=68) wall lamp, mesh 1 = light01.jpg - the lit pane.
+ *  - 19/20 (n=14 / n=6) the two tower machines, mesh 4 = t20 - the small
  *    emitter panel the U-scroll runs across.
- *  - 23 (n=163) brazier, mesh 1 = re_008.jpg — the coals.
+ *  - 23 (n=163) brazier, mesh 1 = re_008.jpg - the coals.
  *
  * Types 3 and 4 (n=211 / n=399, the glowing conduits) are deliberately absent:
  * `MoveObject` writes only `BlendMeshTexCoordU` for them and never a
@@ -44,7 +44,7 @@ export const LOST_TOWER_BLEND_MESHES: Readonly<Record<number, number>> = {
  *
  *  - 24 (n=95) is the flame vent. Its model (Object25.glb, t19, a 0.4-tile
  *    box) exists only so the map editor has something to click; what the
- *    player sees is the BITMAP_FLAME effect it spawns — see LOST_TOWER_LIGHTS.
+ *    player sees is the BITMAP_FLAME effect it spawns - see LOST_TOWER_LIGHTS.
  *  - 25 (n=148) is a bare marker: hidden, no effect, no `CreateOperate`, so
  *    nothing at all reaches the player. It is here rather than left as a
  *    normal object so the clone does not load and draw 148 stray t17 boxes.
@@ -59,7 +59,7 @@ export const LOST_TOWER_EFFECT_ONLY_TYPES: readonly number[] = [24, 25];
 /**
  * Empty on purpose, and not an oversight.
  *
- * This table is for effect-only types that emit particles and *no* light —
+ * This table is for effect-only types that emit particles and *no* light -
  * Lorencia's chimney smoke (131/132) is the shape it exists for. Lost Tower's
  * one particle source, the type 24 flame vent, also calls `AddTerrainLight`
  * (ZzzEffect.cpp:8648), so its recipe belongs in LOST_TOWER_LIGHTS where the
@@ -75,7 +75,7 @@ export const LOST_TOWER_EMISSIONS: Partial<Record<number, readonly Emission[]>> 
 /**
  * `Luminosity` as `RenderObjectVisual` rolls it (ZzzObject.cpp:2743):
  * `(rand() % 30 + 70) * 0.01f`. 30 steps across 0.70…0.99 reproduces it
- * exactly — `recipeFromEmitter` (lighting/mapObjectLights.ts) walks `min + step * (max - min) / (steps - 1)`,
+ * exactly - `recipeFromEmitter` (lighting/mapObjectLights.ts) walks `min + step * (max - min) / (steps - 1)`,
  * which for these numbers is `0.70 + step * 0.01`.
  */
 const VISUAL_LUMINOSITY = { min: 0.7, max: 0.99, steps: 30 } as const;
@@ -90,13 +90,13 @@ const FLAME_LUMINOSITY = { min: 0.7, max: 1, steps: 4 } as const;
 export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
   {
     /**
-     * Wall lamp (n=68). Ours — the original lights nothing in this world, it
+     * Wall lamp (n=68). Ours - the original lights nothing in this world, it
      * only makes the light01.jpg pane additive.
      *
      * Steady, not flickering: light01 is a caged lamp, and 68 of them
      * stuttering out of phase down a corridor reads as a fault, not as
      * atmosphere. Range 3 keeps each one a pool of its own instead of merging
-     * into a lit floor — the tower is meant to be navigated between lamps.
+     * into a lit floor - the tower is meant to be navigated between lamps.
      *
      * No sprite. The BlendMesh already draws the pane at full brightness, and
      * a flare on top of it would only wash out the one part of the model that
@@ -121,7 +121,7 @@ export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>>
      * What is here is the floor light, which is ours. It can sit at the object
      * origin rather than on a bone because `addTerrainLight` is a 2D
      * footprint (x/z only) and the machine's emitters are stacked vertically
-     * above that origin — the bone offset would move the light nowhere the
+     * above that origin - the bone offset would move the light nowhere the
      * terrain can see.
      */
     19: [
@@ -150,7 +150,7 @@ export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>>
     /**
      * Brazier (n=163). The original's `case 23` carries a commented-out
      * `TransformPosition(BoneTransform[1]) + CreateSprite(BITMAP_LIGHT, 2.f)`
-     * (ZzzObject.cpp:3967-3968) — the devs built the glow and then switched it
+     * (ZzzObject.cpp:3967-3968) - the devs built the glow and then switched it
      * off. The sprite scale 2 below is taken from that dead line, so if it is
      * ever compared against the original the number matches.
      *
@@ -186,7 +186,7 @@ export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>>
      *
      *  - It burns continuously here instead of guttering. 1-in-64 restarts on
      *    a 40-tick flame is a ~62% duty cycle, and `Emission` has no notion of
-     *    one — reproducing it would need per-object state in a class for what
+     *    one - reproducing it would need per-object state in a class for what
      *    is, at 95 vents scattered across the map, an effect nobody watches
      *    long enough to see restart. The rate is dropped to match: 1 particle
      *    a tick against the original's 6-at-62%, which is also what keeps the
@@ -198,7 +198,7 @@ export const LOST_TOWER_LIGHTS: Partial<Record<number, readonly LightEmitter[]>>
      *    no port. They are the strip fire Lorencia's camp fires burn, which is
      *    the right read for a floor vent even if it is not the same texture.
      *
-     * `jitter` 25 and the terrain range 3 are the original's, unchanged —
+     * `jitter` 25 and the terrain range 3 are the original's, unchanged -
      * `jitter` is in MU units, which is what the C++ `rand() % 50 - 25` is in.
      */
     24: [

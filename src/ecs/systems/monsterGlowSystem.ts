@@ -6,7 +6,7 @@ import type { EffectHandle } from '../../effects';
  * Consumer of the effects layer's `monsterGlow` entry: walks the entities
  * that have an `npcType` and gives the ones its table names their own body
  * glow once the model is posed, drops it when they die or leave. Owns no
- * visual state — `effects/monsterGlow.ts` does.
+ * visual state - `effects/monsterGlow.ts` does.
  *
  * The light these monsters throw on the floor is a separate seam entirely:
  * `CharacterLightSystem` reads `lighting/characters.ts`, which carries the

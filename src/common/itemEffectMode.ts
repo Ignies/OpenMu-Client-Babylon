@@ -3,10 +3,10 @@ import type { TextKey } from '../i18n';
 
 /**
  * Item effect style (Options → Video → "Item effects"):
- *   0 Off                 — no level tints, no glow, no item lights
- *   1 Legacy              — the original client's passes only (itemMaterial.ts)
- *   2 Legacy + improved   — original passes plus the GlowLayer / light layer
- *   3 Improved            — only the modern layer
+ *   0 Off                 - no level tints, no glow, no item lights
+ *   1 Legacy              - the original client's passes only (itemMaterial.ts)
+ *   2 Legacy + improved   - original passes plus the GlowLayer / light layer
+ *   3 Improved            - only the modern layer
  *
  * `effectLevel` is the original's "+Effect limitation" (`g_pOption->GetRenderLevel()`,
  * 0–4): it caps the rendered item level at `2n + 5` and, at 0, drops the

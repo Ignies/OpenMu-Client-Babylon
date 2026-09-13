@@ -2,6 +2,7 @@ import type { Scene } from '../libs/babylon/exports';
 import type { ENUM_WORLD } from '../common/types';
 import type { Entity } from '../ecs/world';
 import { skillDefinition } from '../common/skillsDatabase';
+import { MODEL } from '../effects/recipes';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 import { tierIndex } from '../common/lightingQuality';
@@ -10,7 +11,7 @@ import { arc, ember, flame, frost, holy, shade, spark, tide, venom } from './rec
 /**
  * Skills as light sources.
  *
- * What it is: the light a skill throws — at the caster's hands as the clip
+ * What it is: the light a skill throws - at the caster's hands as the clip
  * starts, riding the projectile to the target, at the target on impact, or
  * on the ground point of an area skill. Driven by the two commands below,
  * which `common/skillVisuals.ts` calls from the skill packets. Read by nobody
@@ -38,13 +39,21 @@ const BOLT_SPEED = 7;
 const ARROW_SPEED = 17.5;
 
 /**
+ * Seconds an arrow light lives if nothing ends it. An arrow crosses the
+ * elf's six tiles in about a third of a second and `lightArrow`'s host stops
+ * the source the moment the shot lands, so this only catches a projectile
+ * that never reports back - it is the effects layer's own give-up time.
+ */
+const ARROW_SECONDS = 4;
+
+/**
  * One skill, in up to four moments. Each is optional; a skill with only
  * `cast` flashes at the caster and nothing else.
  *
  *  - `cast`: at the caster's hands as the clip starts.
  *  - `travel`: rides from the caster to the target at `speed` tiles/s and
  *    ends on arrival; then `impact` fires at the target.
- *  - `impact`: at the target — on arrival if there is a `travel`, at once
+ *  - `impact`: at the target - on arrival if there is a `travel`, at once
  *    otherwise.
  *  - `area`: at the ground point of an area skill.
  */
@@ -59,6 +68,12 @@ export type SkillLight = {
    * this layer decides whether the tier can carry them.
    */
   readonly trail?: LightRecipe;
+  /**
+   * `arrow`: what this skill's arrows carry while they fly, overriding the
+   * launcher-model row in `ARROW_LIGHTS`. For the skills this client draws
+   * with a tinted arrow where the original fires the plain one.
+   */
+  readonly arrow?: LightRecipe;
 };
 
 /** Lighting tier that carries per-body effect lights. */
@@ -68,7 +83,7 @@ const ULTRA_TIER = 2;
 export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // MODEL_POISON: AddTerrainLight range 2 (ZzzEffect.cpp:9752).
   1: { travel: { ...venom(2, 3), speed: BOLT_SPEED }, impact: venom(2, 0.6) },
-  // Meteorite: a falling fire model — warm impact (BITMAP_FIRE+1 range 2, :8092).
+  // Meteorite: a falling fire model - warm impact (BITMAP_FIRE+1 range 2, :8092).
   2: { cast: ember(1, 0.3), impact: flame(2, 0.5) },
   // BITMAP_LIGHTNING: range 6 on the strike (ZzzEffectParticle.cpp:4298).
   // 0.4 s is the clip: the bolt is `ticks(10)` in skillVisuals, and a light
@@ -107,10 +122,18 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   40: { area: flame(6, 0.8, { gain: 1.8, floorGain: 1.4, release: 0.6 }) },
   // Twisting Slash: MODEL_SKILL_WHEEL2 range 3 (:9798).
   41: { area: spark(3, 0.6) },
+  // Starfall: MODEL_ARROW_IMPACT lights nothing in the original (:14596);
+  // the holy wash riding the shot down is ours.
+  46: { arrow: { ...holy(2, ARROW_SECONDS), release: 0.2 } },
   // Fire Breath: BITMAP_FIRE+1 range 2.
   49: { impact: flame(2, 0.5) },
-  // Ice Arrow: MODEL_ARROW range 2 (:11777).
+  // Ice Arrow: MODEL_ARROW range 2 (:11777). The bolt light rides the same
+  // path the arrow does and fires the impact on arrival, so it keeps it.
   51: { travel: { ...frost(2, 3), speed: ARROW_SPEED }, impact: frost(2, 0.4) },
+  // Penetration: the original fires the launcher arrow (MODEL_ARROW_STEEL on
+  // a crossbow, which lights nothing); this client draws it charged
+  // blue-white, so the arc is ours.
+  52: { arrow: { ...arc(2, ARROW_SECONDS), release: 0.2 } },
   // Fire Slash / Flame Strike: BITMAP_JOINT_FIRE range 2 (ZzzEffectJoint.cpp:4612).
   55: { area: flame(3, 0.7) },
   236: { area: flame(3, 0.8, { gain: 1.3 }) },
@@ -127,8 +150,64 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
 };
 
 /**
+ * One arrow's light: the original's range 2 in the colour of the row,
+ * rolling on `Luminosity`. The tail is short because an arrow ends where it
+ * lands - a long one leaves a glow hanging in the air behind the shot.
+ */
+function arrowLight(color: readonly [number, number, number]): LightRecipe {
+  return {
+    color,
+    range: 2,
+    seconds: ARROW_SECONDS,
+    release: 0.2,
+    flicker: { min: 0.7, max: 1, steps: 4 },
+  };
+}
+
+/**
+ * What an arrow throws on the ground while it flies, by the launcher's
+ * arrow model.
+ *
+ * The original lights the arrow body itself, every frame it is alive:
+ * `AddTerrainLight(..., range 2)` in the colour below, from MoveEffect's
+ * arrow cases in ZzzEffect.cpp (line cited per row). `Luminosity` there is
+ * `(rand() % 4 + 7) * 0.1` rolled per effect per frame (:6764), which is the
+ * flicker every row carries. Range 2 is the whole reason a volley reads at
+ * night: the arrow is a tile off the ground, so the pool it drags along is
+ * what the grass and the shooter are lit by.
+ *
+ * The metal bolts fall through the original's chain without a light and have
+ * no row here either: MODEL_ARROW_STEEL, _THUNDER, _LASER, _V, _SAW, _SPARK
+ * and _DARKSTINGER fly dark.
+ */
+export const ARROW_LIGHTS: Partial<Record<string, LightRecipe>> = {
+  // MODEL_ARROW (:11776) - the plain wooden arrow every bow but the Elven,
+  // Chaos Nature and Celestial fires, and what Triple Shot, Multi-Shot and
+  // Ice Arrow draw here.
+  [MODEL.arrow]: arrowLight([0.8, 0.5, 0.2]),
+  // MODEL_ARROW_NATURE sub1, the Poison Arrow shot (:11833).
+  [MODEL.arrowNature]: arrowLight([0.2, 0.8, 0.2]),
+  // MODEL_LACEARROW, Arrow Viper Bow (:11885).
+  [MODEL.laceArrow]: arrowLight([0.6, 0.2, 0.8]),
+  // MODEL_ARROW_WING, Bluewing Crossbow (:11900).
+  [MODEL.arrowWing]: arrowLight([0.6, 0.8, 0.8]),
+  // MODEL_ARROW_BOMB, Aquagold Crossbow (:12056).
+  [MODEL.arrowBomb]: arrowLight([0.6, 0.8, 0.8]),
+  // MODEL_ARROW_RING, Albatross Bow (:12023).
+  [MODEL.arrowRing]: arrowLight([0.6, 0.2, 0.8]),
+  // MODEL_ARROW_GAMBLE, Air Lyn Bow (:12125).
+  [MODEL.arrowGamble]: arrowLight([0.2, 0.8, 0.5]),
+  // MODEL_ARROW_DOUBLE, Saint Crossbow (:11738).
+  [MODEL.arrowDouble]: arrowLight([0.2, 0.4, 1]),
+  // MODEL_ARROW_BEST_CROSSBOW, Divine Crossbow of Archangel (:11730).
+  [MODEL.arrowBestCrossbow]: arrowLight([1, 0.4, 0.2]),
+  // MODEL_ARROW_DRILL, Great Reign Crossbow (:12846).
+  [MODEL.arrowDrill]: arrowLight([1, 0.4, 0.2]),
+};
+
+/**
  * Any wizardry skill without a row: a short pale flash at the caster's
- * hands — the MODEL_MAGIC2 cast glow (range 3, :10437), kept to 2 tiles so it
+ * hands - the MODEL_MAGIC2 cast glow (range 3, :10437), kept to 2 tiles so it
  * never out-lights a skill that has a real recipe.
  */
 export const DEFAULT_WIZARDRY_CAST: LightRecipe = {
@@ -184,7 +263,7 @@ function castRecipeFor(skill: number): LightRecipe | null {
     : null;
 }
 
-/** Command: a targeted skill — cast flash, then projectile or direct impact. */
+/** Command: a targeted skill - cast flash, then projectile or direct impact. */
 export function lightTargetedSkill(
   scene: Scene,
   skill: number,
@@ -226,7 +305,7 @@ export function lightTargetedSkill(
   }
 }
 
-/** Command: an area skill — cast flash, then the ground light at `at`. */
+/** Command: an area skill - cast flash, then the ground light at `at`. */
 export function lightAreaSkill(
   scene: Scene,
   skill: number,
@@ -265,6 +344,41 @@ export function lightSkillTrail(
   if (!recipe || tierIndex() < ULTRA_TIER) return null;
 
   const position = { x: 0, y: 0, z: 0 };
+  follow(position);
+
+  return attach(scene, recipe, { position, follow });
+}
+
+/**
+ * Command: the light an arrow carries while it flies. `skill` is 0 for a
+ * plain bow shot and the base skill number for a skill volley; `model` is
+ * the arrow model the launcher picked. Null when neither the skill nor the
+ * model has a row, so the caller can skip its own bookkeeping.
+ *
+ * Not tier-gated, unlike `lightSkillTrail`: an arrow is one light per shot,
+ * and where there is no point-light pool the terrain delta still carries it
+ * - which is all the original ever had.
+ *
+ * A row with its own `travel` bolt keeps it and gets nothing here: the two
+ * ride the same path, and the bolt is the one that fires the impact flash
+ * when it lands.
+ */
+export function lightArrow(
+  scene: Scene,
+  skill: number,
+  model: string,
+  follow: (out: { x: number; y: number; z: number }) => void
+): LightSource | null {
+  const row = SKILL_LIGHTS[skill];
+
+  if (row?.travel) return null;
+
+  const recipe = row?.arrow ?? ARROW_LIGHTS[model];
+
+  if (!recipe) return null;
+
+  const position = { x: 0, y: 0, z: 0 };
+
   follow(position);
 
   return attach(scene, recipe, { position, follow });

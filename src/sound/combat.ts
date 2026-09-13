@@ -9,6 +9,7 @@ import {
   isCrossbow,
   isWeaponItem,
 } from '../common/weaponClass';
+import type { SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { playSfx, type SfxPosition } from './listener';
@@ -27,6 +28,9 @@ import { playSfx, type SfxPosition } from './listener';
  */
 
 // ---- 1. tuning -------------------------------------------------------------
+
+/** Swings, hits, screams and casts are one category (`sound/buses.ts`). */
+export const COMBAT_BUS: SoundBus = 'combat';
 
 /** MODEL_LIGHT_SABER = MODEL_SWORD + 10, MODEL_SPEAR = spear group index 0 (_enum.h:1504, :1451). */
 const LIGHT_SABER_INDEX = 10;
@@ -208,7 +212,7 @@ export function pickupSound(item: Item): 'jewel' | 'gemstone' | 'getItem' {
 
 /** Play an already-selected combat sound at a position (swing, hit, scream). */
 export function playCombat(key: Sounds | null, at?: SfxPosition | null): void {
-  if (key) playSfx(key, at);
+  if (key) playSfx(key, at, { bus: COMBAT_BUS });
 }
 
 /** Play a skill's cast sound at its caster; silent for unlisted skills. */

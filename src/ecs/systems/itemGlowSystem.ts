@@ -33,10 +33,10 @@ import type { LightSource } from '../../lighting/lightSource';
  *    re-stamps everything when the item-effects option or the level cap
  *    changes, because tiers are baked per option state). itemMaterial.ts
  *    (legacy passes) and the GlowLayer selector in sceneLook.ts read it.
- *  - Improved look only: +9…+15 gear gets a lamp — one light source from the
- *    lighting layer's `items` entry, following the body — plus an aura and a
+ *  - Improved look only: +9…+15 gear gets a lamp - one light source from the
+ *    lighting layer's `items` entry, following the body - plus an aura and a
  *    crackle (effects/). Dropped +9…+15 items do the same, static.
- *  - Both looks: an excellent item — worn or on the ground — throws the
+ *  - Both looks: an excellent item - worn or on the ground - throws the
  *    `CreateShiny` star glints (`effects/itemSparkle.ts`), on the body for a
  *    wearer, beside and above the drop for a drop.
  *
@@ -209,7 +209,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
   // map so they re-light on their own; a worn item lamp is the one thing that
   // outlives the load, so the generation bump re-seats it at the wearer's new
   // position on the next apply of their items. Note what it is *not* for: the
-  // crackle vanishing across a gate was never this — see itemCrackle.ts's
+  // crackle vanishing across a gate was never this - see itemCrackle.ts's
   // `disposeCrackleMaterial`, which is the actual cause and the actual fix.
   EventBus.on('warpCompleted', ({ map }) => {
     // Warping to the map you are already on reloads nothing.
@@ -227,7 +227,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
 
       const lampsOn = improvedItemEffectsOn();
 
-      // Option changed: every baked tier is stale — re-stamp and re-light.
+      // Option changed: every baked tier is stale - re-stamp and re-light.
       const options = itemEffectSignature();
       const restamp = options !== optionState;
       optionState = options;
@@ -267,7 +267,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
 
         // The apply counter leads: the lamp belongs to this character's
         // items, so it is re-examined whenever those items are put on the
-        // model, not only when they come out different — re-applying the same
+        // model, not only when they come out different - re-applying the same
         // gear is exactly what a warp does.
         const signature =
           options +
@@ -311,7 +311,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
           // crackle's GreasedLine mesh and compiles a fresh ShaderMaterial
           // for the replacement. Doing that on repeat is how a shader compile
           // starts failing, and a material whose shader fails to compile
-          // renders WHITE — see the note above.
+          // renders WHITE - see the note above.
           const stale =
             restamp ||
             !state.lamp ||

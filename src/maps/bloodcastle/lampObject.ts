@@ -28,7 +28,7 @@ const POSE_WAIT_LIMIT = 120;
 /**
  * Blood Castle type 13, the four throne-room lamps at (11-17, 91-98), z ~ 265:
  * one breathing white flare on bone 3 (ZzzObject.cpp:3182-3188). No terrain
- * light — the original makes none, and the altar is meant to be the bright
+ * light - the original makes none, and the altar is meant to be the bright
  * spot, not the lamps.
  */
 export class BloodCastleLampObject extends MapTileObject {

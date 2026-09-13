@@ -57,7 +57,7 @@ import {
   ServerConfig,
   wsAddress,
 } from './common/serverConfig';
-import { LocalStorage } from './libs/localStorage';
+import { ServerAccounts } from './common/serverAccounts';
 import { createSocket } from './libs/sockets/createSocket';
 import { ensureActiveVersion, gameVersion } from './version';
 import {
@@ -72,6 +72,7 @@ import { Item, World } from './ecs/world';
 import { EventBus } from './libs/eventBus';
 import { Scalar } from './libs/babylon/exports';
 import { InventoryConstants } from './common/inventoryConstants';
+import { StatType } from './common/characterStats';
 import { findFreeSlot, type Footprint } from './common/inventoryFit';
 import { isJewel, jewelTargetError } from './common/jewelUpgrade';
 import { ItemGroups } from './common/objects/enum';
@@ -113,10 +114,9 @@ import {
 } from './common/itemHotkeys';
 import { spawnPlayer } from './logic';
 import { registerStore } from './common/storeRef';
+import { devVitalPercent } from './common/devSeams';
 import { Social } from './social';
 import { Economy } from './economy';
-
-const CONFIG_KEY = '_mu_key';
 
 /**
  * How long the game server named by `ConnectionInfo` has to say `GameServerEntered`
@@ -135,6 +135,9 @@ xor32.xor32Key = gameVersion.protocol.encryption.xor32Key;
 const INVENTORY_STORAGE = StorageKind.Inventory;
 
 const ITEM_MOVE_TIMEOUT = 5000;
+
+/** How long the offline demo takes to "answer" a stat point request. */
+const OFFLINE_ANSWER_DELAY = 30;
 
 /** `CNewUINPCShop`'s item control: 8 columns × 15 rows. */
 export const SHOP_COLUMNS = 8;
@@ -279,17 +282,6 @@ function serializeItemBytes(item: Item): number[] {
   ItemSerializer.SerializeItem(bytes, item);
   return Array.from(bytes);
 }
-
-/**
- * The player's saved login. Where the client connects lives in
- * `common/serverConfig.ts` (server profiles), not here — the four endpoint
- * keys this blob used to carry are migrated out of it on first load.
- */
-type ConfigType = {
-  username?: string;
-  password?: string;
-  rememberLogin?: boolean;
-};
 
 export enum UIState {
   Preloader,
@@ -957,6 +949,9 @@ export const Store = new (class _Store {
 
   rememberLogin = true;
 
+  /** Which world's account the login fields hold, as `world/account`. */
+  private accountFor = '';
+
   loadingCharactersList = false;
   newCharName: string = '';
   newCharClass: CharacterClassNumber = CharacterClassNumber.DarkKnight;
@@ -1057,12 +1052,10 @@ export const Store = new (class _Store {
     return this.pendingNpcTalk?.npcType ?? 0;
   }
 
-  config: ConfigType = {};
-
   /**
    * The game server being dialled, while it is unproven. `ConnectionInfo` names
    * an address the server believes clients reach it at, which is often not the
-   * address that works from where the proxy sits — the OpenMU demo hands out its
+   * address that works from where the proxy sits - the OpenMU demo hands out its
    * public IP to a client on the same box. Under the `auto` policy the second
    * attempt is the connect-server host, which answered a moment ago.
    */
@@ -1164,7 +1157,7 @@ export const Store = new (class _Store {
       }
     );
 
-    this.loadConfig();
+    this.loadAccount();
   }
 
   playOffline() {
@@ -1197,11 +1190,30 @@ export const Store = new (class _Store {
     this.playerData.name = 'TestPlayer';
     this.playerData.charClass = cls;
     this.syncPlayerAppearance();
+    this.applyOfflineVitals();
     EventBus.emit('requestWarp', { map });
+  }
+
+  /** `?hp=` / `?mp=` on the offline route: the bars start where they say. */
+  applyOfflineVitals(): void {
+    const hp = devVitalPercent('hp');
+    const mp = devVitalPercent('mp');
+
+    runInAction(() => {
+      if (hp !== null) {
+        this.playerData.currentHP = Math.round((this.playerData.maxHP * hp) / 100);
+      }
+      if (mp !== null) {
+        this.playerData.currentMP = Math.round((this.playerData.maxMP * mp) / 100);
+      }
+    });
   }
 
   playOnline() {
     this.uiState = UIState.Servers;
+    // The login fields belong to the world being entered, and which world that
+    // is was decided on the screen this was called from.
+    this.loadAccount();
     // Also the landing for a connection lost mid-game, which never passes
     // through `SessionExit`: the hero does not stay behind on the backdrop.
     this.world?.removeHero();
@@ -1364,27 +1376,30 @@ export const Store = new (class _Store {
     playerEntity.charAppearance.changed = true;
   }
 
-  private loadConfig(): void {
-    // Only the credential keys: an install written before server profiles
-    // existed also has csIp / csPort / wsHost / wsPort in here, which
-    // `serverConfig.ts` migrates into a profile and this must not resurrect.
-    const data = JSON.parse(
-      LocalStorage.load(CONFIG_KEY) ?? '{}'
-    ) as ConfigType;
+  /**
+   * The login fields, filled from the account saved for the world being
+   * entered. Called on the way into a world rather than only at construction:
+   * which world that is may still change - the published list arrives after
+   * launch, and picking another card is the whole point of the worlds screen.
+   *
+   * Filling them again for the world they already hold would undo what the
+   * player has typed, and `playOnline` is also where a lost connection lands,
+   * so the same world is a no-op unless the caller insists.
+   */
+  loadAccount(id: string = ServerConfig.activeId, force = false): void {
+    const account = ServerAccounts.of(id);
+    // The world and the account chosen on it: picking another of that world's
+    // accounts has to refill the fields as surely as picking another world.
+    const token = `${id}/${account.id}`;
 
-    if (data) {
-      this.config.username = data.username;
-      this.config.password = data.password;
-      this.config.rememberLogin = data.rememberLogin;
-    }
+    if (!force && token === this.accountFor) return;
 
-    this.username = this.config.username ?? '';
-    this.password = this.config.password ?? '';
-    this.rememberLogin = this.config.rememberLogin ?? true;
-  }
-
-  saveConfig(): void {
-    LocalStorage.save(CONFIG_KEY, JSON.stringify(this.config));
+    runInAction(() => {
+      this.accountFor = token;
+      this.username = account.username;
+      this.password = account.password;
+      this.rememberLogin = account.remember;
+    });
   }
 
   setSceneLoading(loading: boolean): void {
@@ -1410,19 +1425,17 @@ export const Store = new (class _Store {
     });
   }
 
+  /**
+   * The login the server just accepted, kept against the world it was used on.
+   * `remember` off stores nothing but the choice itself, which is what the
+   * original did with its one saved account.
+   */
   saveLoginData(): void {
-    const c = this.config;
-    c.rememberLogin = this.rememberLogin;
-
-    if (this.rememberLogin) {
-      c.username = this.username;
-      c.password = this.password;
-    } else {
-      delete c.username;
-      delete c.password;
-    }
-
-    this.saveConfig();
+    ServerAccounts.record(ServerConfig.activeId, {
+      username: this.username,
+      password: this.password,
+      remember: this.rememberLogin,
+    });
   }
 
   /**
@@ -1481,7 +1494,7 @@ export const Store = new (class _Store {
 
   /**
    * Opens the game-server socket. `fallbackHost` is the address to try if this
-   * one never answers — `gameServerTarget` decides which of the two addresses
+   * one never answers - `gameServerTarget` decides which of the two addresses
    * (the one the server advertised, the connect-server host) goes first.
    */
   connectToGameServer(ip: string, port: number, fallbackHost: string | null = null) {
@@ -1507,7 +1520,7 @@ export const Store = new (class _Store {
     this.gsAttempt = { host: ip, port, fallbackHost, timer: null };
 
     // The proxy closes the ws when the TCP connect fails, which is the fast
-    // path into the retry. The timer is for the case with no close at all —
+    // path into the retry. The timer is for the case with no close at all -
     // a firewall that drops the SYN, an address that routes nowhere.
     if (fallbackHost) {
       this.gsAttempt.timer = setTimeout(
@@ -1525,7 +1538,7 @@ export const Store = new (class _Store {
 
   /**
    * Second and last attempt at the game server, on the connect-server host.
-   * Returns false when there is nothing to retry — the caller then treats the
+   * Returns false when there is nothing to retry - the caller then treats the
    * dead socket as a lost connection, as it always did.
    */
   private retryGameServer(reason: string): boolean {
@@ -1668,7 +1681,7 @@ export const Store = new (class _Store {
       this.playerData.name = name;
       if (character) {
         this.playerData.charClass = classFromAppearance(character.Appearance);
-        // CharacterInformation carries no level — the list entry is the only source
+        // CharacterInformation carries no level - the list entry is the only source
         // until the first CharacterLevelUpdate.
         this.playerData.level = character.Level;
       }
@@ -1679,9 +1692,52 @@ export const Store = new (class _Store {
   }
 
   increaseStatRequest(stat: number): void {
+    if (this.isOffline) {
+      this.answerStatOffline(stat);
+      return;
+    }
+
     const packet = IncreaseCharacterStatPointPacket.createPacket();
     packet.StatType = stat;
     this.sendToGS(packet.buffer);
+  }
+
+  /**
+   * No server offline: the point is applied here, one answer per request and
+   * after a beat, so the window and the bulk run behave as they do in game.
+   */
+  private answerStatOffline(stat: number): void {
+    setTimeout(() => {
+      const playerData = this.playerData;
+
+      if (playerData.points <= 0) {
+        EventBus.emit('statPointAnswered', { stat, added: 0 });
+        return;
+      }
+
+      runInAction(() => {
+        switch (stat) {
+          case StatType.Strength:
+            playerData.str++;
+            break;
+          case StatType.Agility:
+            playerData.agi++;
+            break;
+          case StatType.Vitality:
+            playerData.sta++;
+            break;
+          case StatType.Energy:
+            playerData.eng++;
+            break;
+          case StatType.Leadership:
+            playerData.leadership++;
+            break;
+        }
+        playerData.points--;
+      });
+
+      EventBus.emit('statPointAnswered', { stat, added: 1 });
+    }, OFFLINE_ANSWER_DELAY);
   }
 
   deleteCharacterRequest(name: string, securityCode: string): void {
@@ -1786,7 +1842,7 @@ export const Store = new (class _Store {
   }
 
   /**
-   * WalkRequest (0xD4). `x`/`y` is the tile the walk starts from — the one
+   * WalkRequest (0xD4). `x`/`y` is the tile the walk starts from - the one
    * the hero is logically standing on when the first step is taken, which
    * the server compares against its own position (PlayerMovement.
    * IsWalkRequestValidAsync, tolerance 5 tiles). At most 15 steps fit the
@@ -2770,7 +2826,7 @@ registerStore(Store);
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute the chain with a second `Store` instance (`store.ts?t=…`)
-// that later-loaded modules import — an unconnected store whose actions do
+// that later-loaded modules import - an unconnected store whose actions do
 // nothing.
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

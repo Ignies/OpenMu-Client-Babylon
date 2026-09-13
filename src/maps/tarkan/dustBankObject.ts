@@ -8,7 +8,7 @@ const BURST_COUNT = 20;
 
 /**
  * `Luminosity = 0.6f; Vector(L*0.6, L*0.5, L*0.4, o->Light)`
- * (ZzzEffectParticle.cpp:5416) — the SubType 6 dust colour, fixed, ignoring
+ * (ZzzEffectParticle.cpp:5416) - the SubType 6 dust colour, fixed, ignoring
  * whatever light was passed in.
  */
 const DUST_LIGHT: readonly [number, number, number] = [0.36, 0.3, 0.24];
@@ -16,8 +16,8 @@ const DUST_LIGHT: readonly [number, number, number] = [0.36, 0.3, 0.24];
 /**
  * `cloud21` sizes itself `(rand(20) + 180) * 0.01 * scale` off a 256 px
  * texture; SubType 6 sizes itself `(rand%20+180)*0.01` off a 64 px one and
- * then oscillates between 1.3 and 2.3 (:5414). Matching the *world* size —
- * ~1.3 tiles across — means scaling the bigger texture down by 64/256 and a
+ * then oscillates between 1.3 and 2.3 (:5414). Matching the *world* size -
+ * ~1.3 tiles across - means scaling the bigger texture down by 64/256 and a
  * little more for the oscillation midpoint. Without this the bank would be
  * five tiles wide per sprite, twenty sprites deep, and would cost more fill
  * rate than the rest of the map together.
@@ -25,7 +25,7 @@ const DUST_LIGHT: readonly [number, number, number] = [0.36, 0.3, 0.24];
 const CLOUD_SCALE = 0.27;
 
 /**
- * Tarkan 60 (ZzzObject.cpp:2959-2969), ×82 — the low dust banks that sit in
+ * Tarkan 60 (ZzzObject.cpp:2959-2969), ×82 - the low dust banks that sit in
  * the hollows all over the desert, at scales 0.74 to ~1.3.
  *
  * ```cpp
@@ -38,7 +38,7 @@ const CLOUD_SCALE = 0.27;
  * ```
  *
  * A one-shot: 20 puffs the first frame the object is drawn, then hidden for
- * good. That reads like a burst and is not one — SubType 6 puffs are
+ * good. That reads like a burst and is not one - SubType 6 puffs are
  * **immortal**. Their move case re-pins `o->LifeTime = 10` every frame
  * (ZzzEffectParticle.cpp:5411) and only bobs them:
  * `Position[2] = Rotation + sin((WorldTime + Gravity) / 5000) * 20` with a
@@ -47,13 +47,13 @@ const CLOUD_SCALE = 0.27;
  * haze about two tiles wide, and never touches it again.
  *
  * **Two divergences, both forced by there being no immortal kind to spawn.**
- * `cloud21` is the closest available — its `init` is nearly SubType 6's
+ * `cloud21` is the closest available - its `init` is nearly SubType 6's
  * (`px/py += rand(200) - 100`, scale `(rand(20)+180)*0.01`, tinted by the
- * passed light) — but it lives 100 ticks and then dies, so our bank fades
+ * passed light) - but it lives 100 ticks and then dies, so our bank fades
  * after ~4 s instead of standing forever. And because the marker is
  * effect-only (meshless), it is never `OutOfView`, so the burst fires when
  * the object enters the 32-tile load radius rather than when it is first
- * *rendered* — dust can appear behind the camera. A `smoke6` kind fixes the
+ * *rendered* - dust can appear behind the camera. A `smoke6` kind fixes the
  * first and makes the second harmless:
  *
  * ```ts

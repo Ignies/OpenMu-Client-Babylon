@@ -2,10 +2,10 @@ import type { World } from '../../ecs/world';
 import { AlphaObject, PlaySpeedObject } from '../shared/objectVariants';
 
 /**
- * Doppelganger 4 (`WD_68DOPPLEGANGER4`, `World69`/`Object69`) — the ruins
+ * Doppelganger 4 (`WD_68DOPPLEGANGER4`, `World69`/`Object69`) - the ruins
  * arena. Kanturu 1st's tables via `spec.ts` and the same per-object
  * settings (GMDoppelGanger4.cpp:85-133); of them only 44 (×0), 46 (×0), 76
- * (×0), 90 (×0), 96 (×0) — none placed, kept for parity. Music `null`
+ * (×0), 90 (×0), 96 (×0) - none placed, kept for parity. Music `null`
  * (event-gated).
  */
 export async function createDoppelganger4(world: World) {

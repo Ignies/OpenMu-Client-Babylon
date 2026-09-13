@@ -14,8 +14,8 @@ import { clipToRoom } from '../weather/roomClip';
 import { loadEffectTexture } from './moveTargetEffect';
 
 /**
- * Ambient particle backbone: high-count, long-lived emitters —
- * weather, leaves, dust — that the CPU sprite pool (effectParticles.ts) is
+ * Ambient particle backbone: high-count, long-lived emitters -
+ * weather, leaves, dust - that the CPU sprite pool (effectParticles.ts) is
  * the wrong tool for. Each recipe becomes one Babylon system:
  *
  *  - `GPUParticleSystem` when the engine can run it (WebGL2 transform
@@ -26,7 +26,7 @@ import { loadEffectTexture } from './moveTargetEffect';
  *
  * Textures are shared through `loadEffectTexture` (one GPU texture per
  * file), and every recipe positions itself through an emitter `Vector3`
- * the owner moves each frame — weather follows the hero, room effects stay
+ * the owner moves each frame - weather follows the hero, room effects stay
  * put. The original's leaves / rain / snow (ZzzEffectFireLeave.cpp) ran
  * around `Hero->Object.Position`, which is the same idea.
  *
@@ -41,7 +41,7 @@ export type AmbientBlend = 'alpha' | 'add';
  * Generated sprites, for recipes whose data-file texture cannot do the job.
  *
  * `proc:streak` is the raindrop: a soft white vertical streak. The
- * original's `rain01` is a 4x32 TGA whose RGB is ~0.1 (28,20,18) — under
+ * original's `rain01` is a 4x32 TGA whose RGB is ~0.1 (28,20,18) - under
  * the original's `GL_ONE, GL_ONE` blend that adds a faint glint, and under
  * a straight-alpha blend it draws as **dark brown rain**. Additive of a
  * white streak is what a drop against a lit street actually reads as.
@@ -92,7 +92,7 @@ function streakPixels(): Pixels {
   const h = 32;
   const data = new Uint8Array(w * h * 4);
 
-  // Variance of the Gaussian across the streak. Was 0.045 — a two-texel core
+  // Variance of the Gaussian across the streak. Was 0.045 - a two-texel core
   // in an eight-texel sprite, i.e. a quarter of the drop's width carrying
   // essentially all of its light. 0.13 lights about two thirds of the sprite
   // and still falls to ~0.15 at the edge, so the streak has a soft edge
@@ -252,14 +252,14 @@ export type AmbientRecipe = {
    *
    * That default is wrong for rain and right for nearly everything else. A
    * gust of leaves is more leaves; a shower is not just more drops, it is
-   * bigger and faster ones — the first spits of a shower are small, slow and
+   * bigger and faster ones - the first spits of a shower are small, slow and
    * sparse, and a downpour is long fast streaks. With count as the only
    * variable, the difference between a drizzle and a downpour is density
    * alone, which is what makes a shower look like a tap being opened.
    *
    * `speed` also buys the drop its `life`: the lifetime is divided by the
    * same factor, so **a particle always falls the same distance** whatever
-   * the intensity — it just takes longer to do it when the rain is light.
+   * the intensity - it just takes longer to do it when the rain is light.
    * That invariant is what lets a recipe promise its particles reach the
    * ground (see `RAIN`) without the promise breaking at low strength.
    */
@@ -332,7 +332,7 @@ const CPU_CAPACITY_SCALE = 0.35;
  * Nothing about an ambient system is allowed to be instant. A recipe that
  * starts at its full rate drops a whole field of leaves into the air over one
  * particle lifetime, and one disposed the moment it stops being eligible takes
- * every leaf still flying with it — both read as a pop. Emission ramps
+ * every leaf still flying with it - both read as a pop. Emission ramps
  * instead, and what is already in the air drains through its own lifetime.
  */
 const DEFAULT_RAMP = 2.5;
@@ -454,7 +454,7 @@ export function createAmbientSystem(
    * to the update shader from the live property each frame (GPU path) or read
    * at emission (CPU path), so a drop already falling keeps the size and
    * speed the sky had when it left the cloud. That is the behaviour we want
-   * and not a compromise — a shower easing off should not shrink the drops
+   * and not a compromise - a shower easing off should not shrink the drops
    * already in the air, it should stop making new big ones.
    */
   function applyGrowth(k: number): void {

@@ -39,7 +39,7 @@ import {
   GuildMasterDialog,
   GuildWindow,
 } from './components/guild';
-import { QuestWindows } from './components/quests';
+import { QuestTracker, QuestWindows } from './components/quests';
 import { FriendWindow } from './components/friends';
 import { ChatRoomWindow } from './components/chatRoom';
 import { SocialPrompts } from './components/socialPrompts';
@@ -56,6 +56,7 @@ import { SlideHelpBar } from '../../components/slideHelp';
 import { DebugMenuWindow } from '../../components/debugMenu';
 import { GmPanelWindow } from '../../components/gmPanel';
 import { MobileControls } from './components/mobileControls';
+import { LowHealthOverlay } from './components/lowHealthOverlay';
 
 // The active version's take on the windows that differ per version. Lazy so
 // the version UI chunk evaluates after the core app modules, not before.
@@ -113,6 +114,7 @@ const HUD = observer(() => {
       <DuelWindows />
       <SessionStatsWindow />
       <Minimap />
+      <QuestTracker />
       {/* Offline only: renders null online (F9). */}
       <DebugMenuWindow />
       {/* Game masters only: renders null for everyone else (F8). */}
@@ -136,6 +138,9 @@ export const WorldPage = observer(() => {
 
   return (
     <div className="world-page">
+      {/* Over the world, under everything drawn on it, and outside the HUD:
+          a warning is not chrome, so the hide-interface key leaves it up. */}
+      <LowHealthOverlay />
       <WorldObjects />
       <DamageNumbers />
       {!Store.hudHidden && <HUD />}

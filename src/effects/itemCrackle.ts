@@ -16,7 +16,7 @@ import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
 /**
  * Energy crackle (improved look, +9 and up): short lightning arcs that flash
- * over the body in the item's colour — a few times a second, each living a
+ * over the body in the item's colour - a few times a second, each living a
  * handful of frames, jittering while alive.
  *
  * One GreasedLine mesh per wearer with a fixed topology (bolts × segments
@@ -98,7 +98,7 @@ export interface ItemCrackleOptions {
   kind: ItemAuraKind;
 }
 
-/** Every crackle handed out and not yet disposed — so a map change can end them. */
+/** Every crackle handed out and not yet disposed - so a map change can end them. */
 const liveCrackles = new Set<ItemCrackle>();
 
 /** How many crackles are running (debug). */
@@ -145,7 +145,7 @@ export function createItemCrackle(
   const SEGMENTS = shapeOf.segments;
   const WIDTH = shapeOf.width;
 
-  // Flat xyz arrays — one per bolt, then one fork slot per bolt — the shape
+  // Flat xyz arrays - one per bolt, then one fork slot per bolt - the shape
   // GreasedLine rebuilds fastest. Line b is bolt b; line BOLTS + b its fork.
   const lines: number[][] = [];
   const bolts: Bolt[] = [];
@@ -331,7 +331,7 @@ export function createItemCrackle(
       (scene as TestScene).look?.glow.unReferenceMeshFromUsingItsOwnMaterial(
         mesh
       );
-      // The shared empty-colours texture must survive this — see greasedLineRelease.ts.
+      // The shared empty-colours texture must survive this - see greasedLineRelease.ts.
       releaseGreasedLineMaterial(mesh);
       mesh.dispose();
     },

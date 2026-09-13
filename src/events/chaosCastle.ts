@@ -16,6 +16,7 @@ import {
   MiniGameScoreTablePacket,
 } from '../common/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
+import { noteOpeningStateRequest, takeOpeningState } from './schedule';
 import {
   EVENT_TEXT,
   OPENING_STATE_GAME,
@@ -24,7 +25,7 @@ import {
 } from './recipes';
 
 /**
- * Chaos Castle: there is no NPC window — the Armor of Guardsman in the
+ * Chaos Castle: there is no NPC window - the Armor of Guardsman in the
  * inventory asks the server for the opening state, the answer is the
  * `CChaosCastleTimeCheckMsgBoxLayout` prompt (`ReceiveEventZoneOpenTime`,
  * Value 4) whose OK sends `ChaosCastleEnterRequest`. On the castle maps the
@@ -38,7 +39,7 @@ import {
  * `ui/pages/worldPage/components/events`.
  *
  * Not here: the shrinking arena (states 8..10 add `TW_NOGROUND` rings and
- * play the falling-stone sound) — that is the map's business once the
+ * play the falling-stone sound) - that is the map's business once the
  * castle maps are staged.
  */
 
@@ -69,6 +70,11 @@ const MAX_RANK_ROWS = 200;
 const RESULT_SECONDS = 20;
 /** How long the OK-box substitutes stay on screen. */
 const MESSAGE_MS = 5000;
+/**
+ * Level asked for when no ticket picked one: every castle level exists from
+ * 1 up, and OpenMU only reads the number when the hero fits no level range.
+ */
+const ASK_EVENT_LEVEL = 1;
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -144,12 +150,27 @@ export function enterChaosCastle(): void {
   Store.sendToGS(packet.buffer);
 }
 
+/**
+ * The HUD row was clicked while the gate is open. Chaos Castle has no NPC
+ * window: the same request the ticket sends raises the original's prompt,
+ * with the head count on it. No ticket is held, so its OK only closes -
+ * entering is still the Armor of Guardsman in the inventory.
+ */
+export function askChaosCastleOpening(): void {
+  noteOpeningStateRequest(OPENING_STATE_GAME.chaosCastle);
+  const packet = MiniGameOpeningStateRequestPacket.createPacket();
+  packet.EventType = OPENING_STATE_GAME.chaosCastle;
+  packet.EventLevel = ASK_EVENT_LEVEL;
+  Store.sendToGS(packet.buffer);
+}
+
 /** Double-clicked Armor of Guardsman: ask for the opening state first. */
 function useTicket(slot: number, item: Item): boolean {
   const t = TICKETS.armorOfGuardsman;
   if (item.group !== t.group || item.num !== t.num) return false;
 
   ticket = { level: item.lvl ?? 0, slot };
+  noteOpeningStateRequest(OPENING_STATE_GAME.chaosCastle);
   const packet = MiniGameOpeningStateRequestPacket.createPacket();
   packet.EventType = OPENING_STATE_GAME.chaosCastle;
   packet.EventLevel = ticket.level;
@@ -204,6 +225,9 @@ EventBus.on('MiniGameOpeningState', packet => {
   const zone = EVENT_TEXT.chaosCastleZone;
   const minutes =
     (p.RemainingEnteringTimeMinutes << 8) | p.RemainingEnteringTimeMinutesLow;
+  // The HUD rows ask the same question on their own timer; those answers
+  // feed the schedule and raise no prompt.
+  if (takeOpeningState(OPENING_STATE_GAME.chaosCastle, minutes)) return;
 
   let prompt: ChaosCastlePrompt;
   if (minutes === 0) {

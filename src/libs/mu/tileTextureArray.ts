@@ -12,7 +12,7 @@ import { textureFiltering } from '../../common/materialQuality';
  *
  * The splat shader used to be generated as a chain of
  * `if (m1 >= i && m1 < i+0.5) { texture2D(textures[i], …) }` over every tile
- * texture — twice, once for the opaque layer and once for the alpha layer. A
+ * texture - twice, once for the opaque layer and once for the alpha layer. A
  * GLSL sampler array cannot be indexed by a value that varies per fragment,
  * which is why it was written that way; with a 2D array the layer *is* just a
  * coordinate, so 18-20 conditional fetches per pixel of a full-screen,

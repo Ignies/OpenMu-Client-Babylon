@@ -14,7 +14,7 @@ const TICKS_PER_SECOND = 25;
 /** Longest gap `CheckSkull` is stepped over in one frame, in ticks. */
 const MAX_TICKS_PER_FRAME = 4;
 
-/** `Distance < 50.f` (ZzzEffectFireLeave.cpp:98) — half a tile. */
+/** `Distance < 50.f` (ZzzEffectFireLeave.cpp:98) - half a tile. */
 const KICK_RANGE = 50 / MU_PER_TILE;
 
 /**
@@ -29,7 +29,7 @@ const DECAY = 0.6;
 /** `Vector(-dx * 0.4f, -dy * 0.4f, 0.f, o->Direction)` (:100). */
 const KICK_SPEED = 0.4;
 
-/** `o->HeadAngle[1] = -dx * 4.f` — degrees per MU, so ×100 per tile (:101-102). */
+/** `o->HeadAngle[1] = -dx * 4.f` - degrees per MU, so ×100 per tile (:101-102). */
 const KICK_SPIN = 4 * MU_PER_TILE;
 
 /**
@@ -42,14 +42,14 @@ const SLIDE_AT_REST = 1e-4;
 const SPIN_AT_REST = 1e-3;
 
 /**
- * `CheckSkull(o)` — Lost Tower types 38 (n=777, the skulls) and 39 (n=335,
+ * `CheckSkull(o)` - Lost Tower types 38 (n=777, the skulls) and 39 (n=335,
  * the loose stones), the only props on this map the player can touch.
  * `MoveObject` routes both to it (ZzzObject.cpp:3949-3951); the function
  * itself is ZzzEffectFireLeave.cpp:87-111.
  *
  * Walk or run within half a tile and the thing skitters away from you and
  * tumbles, then coasts to a stop wherever it lands and stays there for the
- * rest of the visit — nothing resets it, and the map file is never written
+ * rest of the visit - nothing resets it, and the map file is never written
  * back, so a corridor the player has walked twice is visibly disturbed.
  * Reproducing that permanence is the point of the prop; a spring-back would
  * turn the map's one interactive detail into a toy.
@@ -59,7 +59,7 @@ const SPIN_AT_REST = 1e-3;
  * them, and a distance test that only one of the 1112 candidates passes.
  *
  * The original moves them from `MoveObject`, i.e. once per rendered frame,
- * with only the position step scaled by `FPS_ANIMATION_FACTOR` — the 0.6
+ * with only the position step scaled by `FPS_ANIMATION_FACTOR` - the 0.6
  * decay and the angle step are raw, so a skull travels four times as far at
  * 25 fps as at 100. That is a bug, not a design, and there is no frame rate at
  * which it is "correct" other than the reference 25 (ZzzAI.cpp:729,
@@ -127,7 +127,7 @@ export class LostTowerSkullObject extends MapTileObject {
     // sound/footsteps': CheckSkull predates the two-handed-sword-two and
     // ride-horse clips and was never extended to them, so a player on a horse
     // walks through the bones without touching them. Kept as the original has
-    // it — the alternative is inventing behaviour for actions the function has
+    // it - the alternative is inventing behaviour for actions the function has
     // never seen.
     if (hero && hero.worldIndex === this.WorldIndex) {
       const action = hero.playerAnimation.action;
@@ -138,7 +138,7 @@ export class LostTowerSkullObject extends MapTileObject {
         action === PlayerAction.PLAYER_RAGE_UNI_RUN ||
         action === PlayerAction.PLAYER_RAGE_UNI_RUN_ONE_RIGHT;
 
-      // The arming test is `o->Direction[0] < 0.1f` — one axis, one-sided, and
+      // The arming test is `o->Direction[0] < 0.1f` - one axis, one-sided, and
       // it is the original's. A skull kicked towards +x has a large positive
       // Direction[0] and is locked out until it decays; one kicked towards -x
       // has a negative Direction[0] and passes immediately, so it can be
@@ -156,7 +156,7 @@ export class LostTowerSkullObject extends MapTileObject {
           this.#head1 = -dx * KICK_SPIN;
           this.#head0 = -dy * KICK_SPIN;
 
-          // `PlayBuffer(SOUND_BONE2, o)` — Data/Sound/mBone2.wav
+          // `PlayBuffer(SOUND_BONE2, o)` - Data/Sound/mBone2.wav
           // (ZzzOpenData.cpp:4572). playSfx carries the same distance
           // attenuation PlayBuffer's 3D listener gave it, and its per-key
           // throttle stands in for DirectSound's channel limit when a stride
@@ -182,7 +182,7 @@ export class LostTowerSkullObject extends MapTileObject {
 
     // MU x/y are the ground plane; the clone's is x/z. Position[2] never
     // changes (Direction[2] is always 0), so the skull keeps the height the
-    // map file gave it and does not re-sample the terrain — it can and does
+    // map file gave it and does not re-sample the terrain - it can and does
     // end up hanging slightly off a step it was kicked down.
     transform.pos.x += this.#dirX;
     transform.pos.z += this.#dirY;
@@ -190,7 +190,7 @@ export class LostTowerSkullObject extends MapTileObject {
     // `VectorAdd(o->Angle, o->HeadAngle, o->Angle)`, through the same axis
     // mapping createObjects uses on load (loadMapIntoScene.ts): rot.x is
     // -radians(Angle[0]) and rot.z is -radians(Angle[1]), hence the negation
-    // and the swap. Angle[2] (yaw) is untouched — the skull tumbles, it does
+    // and the swap. Angle[2] (yaw) is untouched - the skull tumbles, it does
     // not spin on the spot.
     transform.rot.x -= toRadians(this.#head0);
     transform.rot.z -= toRadians(this.#head1);

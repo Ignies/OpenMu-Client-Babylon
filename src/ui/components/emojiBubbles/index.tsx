@@ -17,10 +17,10 @@ const OFF_SCREEN = 'translate(-10000px, -10000px)';
 /**
  * A character's emoji bubble (`common/emojiBubbles.ts`).
  *
- * Both placements ride their own projected world anchor — over the head, or
+ * Both placements ride their own projected world anchor - over the head, or
  * on the shoulder `EmojiBubbleSystem` picks as the one facing the camera.
  * Position and fade are driven straight from the
- * per-frame screen-position callback — no React re-render per frame, only a
+ * per-frame screen-position callback - no React re-render per frame, only a
  * transform write, the same way the name tags and guild marks work.
  */
 const EmojiBubble = ({ entity }: { entity: BubbleEntity }) => {

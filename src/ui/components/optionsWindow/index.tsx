@@ -51,6 +51,11 @@ import {
   MATERIAL_QUALITY_MAX,
 } from '../../../common/materialQuality';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
+import { BUS_VOLUME_MAX } from '../../../sound/buses';
+import {
+  LOW_VITAL_MAX_PERCENT,
+  LOW_VITAL_MIN_PERCENT,
+} from '../../../common/lowVitals';
 import {
   RENDER_DISTANCE_MAX,
   renderDistanceRanges,
@@ -197,9 +202,19 @@ type SliderRow = {
     | 'brightness'
     | 'vignette'
     | 'lootZen'
+    | 'lowHealthPercent'
+    | 'lowManaPercent'
     | 'uiScale'
     | 'renderDistance'
-    | 'grassDensity';
+    | 'grassDensity'
+    | 'musicVolume'
+    | 'effectsVolume'
+    | 'combatVolume'
+    | 'monsterVolume'
+    | 'ambientVolume'
+    | 'stepsVolume'
+    | 'dropVolume'
+    | 'uiVolume';
   textId: number;
   labelKey: TextKey;
   max: number;
@@ -210,6 +225,8 @@ type SliderRow = {
   needsTier?: boolean;
   /** Dim and lock while the classic framing, not the facade, owns the camera. */
   needsCameraControl?: boolean;
+  /** Dim while the warning this threshold belongs to is switched off. */
+  needsWarning?: 'lowHealthWarning' | 'lowManaWarning';
 };
 
 const slider = (row: SliderRow): Row => ({ kind: 'slider', ...row });
@@ -247,6 +264,30 @@ const gradeSlider = (
     display: v => (v === 0 ? t('common.off') : v),
     needsPostProcessing: true,
     needsTier,
+  });
+
+/**
+ * One mixer category (`sound/buses.ts`): 0 is off, `BUS_VOLUME_MAX` is the
+ * top, where the category is transparent and the master alone decides.
+ */
+const busSlider = (
+  key:
+    | 'musicVolume'
+    | 'effectsVolume'
+    | 'combatVolume'
+    | 'monsterVolume'
+    | 'ambientVolume'
+    | 'stepsVolume'
+    | 'dropVolume'
+    | 'uiVolume',
+  labelKey: TextKey
+): Row =>
+  slider({
+    key,
+    textId: -1,
+    labelKey,
+    max: BUS_VOLUME_MAX,
+    display: v => (v === 0 ? t('common.off') : v),
   });
 
 /**
@@ -326,6 +367,7 @@ const TABS: Tab[] = [
               titleKey: 'options.section.gameplay',
               rows: [
                 check('autoAttack', 386, 'options.autoAttack'),
+                check('statPointAmounts', -1, 'options.statPointAmounts'),
                 check('wsadMovement', -1, 'options.wsadMovement'),
                 {
                   kind: 'check',
@@ -370,6 +412,7 @@ const TABS: Tab[] = [
             {
               titleKey: 'options.section.loot',
               rows: [
+                check('dropTooltips', -1, 'options.dropTooltips'),
                 check('lootFilter', -1, 'options.lootFilter'),
                 check('lootJewels', -1, 'options.lootJewels'),
                 check('lootExcellent', -1, 'options.lootExcellent'),
@@ -400,6 +443,39 @@ const TABS: Tab[] = [
                 check('chatTimestamps', -1, 'options.chatTimestamps'),
                 check('slideHelp', 919, 'options.slideHelp'),
                 check('stateWarnings', -1, 'options.stateWarnings'),
+              ],
+            },
+          ],
+        ],
+      },
+      {
+        id: 'vitals',
+        labelKey: 'options.section.warnings',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.vitals',
+              rows: [
+                check('lowHealthWarning', -1, 'options.lowHealthWarning'),
+                slider({
+                  key: 'lowHealthPercent',
+                  textId: -1,
+                  labelKey: 'options.lowHealthPercent',
+                  min: LOW_VITAL_MIN_PERCENT,
+                  max: LOW_VITAL_MAX_PERCENT,
+                  display: v => `${v}%`,
+                  needsWarning: 'lowHealthWarning',
+                }),
+                check('lowManaWarning', -1, 'options.lowManaWarning'),
+                slider({
+                  key: 'lowManaPercent',
+                  textId: -1,
+                  labelKey: 'options.lowManaPercent',
+                  min: LOW_VITAL_MIN_PERCENT,
+                  max: LOW_VITAL_MAX_PERCENT,
+                  display: v => `${v}%`,
+                  needsWarning: 'lowManaWarning',
+                }),
               ],
             },
           ],
@@ -558,6 +634,74 @@ const TABS: Tab[] = [
     ],
   },
   {
+    id: 'sound',
+    labelKey: 'options.tab.sound',
+    subtabs: [
+      {
+        id: 'mixer',
+        labelKey: 'options.section.mixer',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.mixer',
+              rows: [
+                slider({
+                  key: 'volume',
+                  textId: 389,
+                  labelKey: 'options.volume',
+                  max: 9,
+                  display: v => (v === 0 ? t('common.off') : v),
+                }),
+                busSlider('musicVolume', 'options.musicVolume'),
+                busSlider('effectsVolume', 'options.effectsVolume'),
+                busSlider('uiVolume', 'options.uiVolume'),
+                check('muteInBackground', -1, 'options.muteInBackground'),
+              ],
+            },
+          ],
+        ],
+      },
+      {
+        id: 'effects',
+        labelKey: 'options.section.sfx',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.sfx',
+              rows: [
+                busSlider('combatVolume', 'options.combatVolume'),
+                busSlider('monsterVolume', 'options.monsterVolume'),
+                busSlider('ambientVolume', 'options.ambientVolume'),
+                busSlider('stepsVolume', 'options.stepsVolume'),
+              ],
+            },
+          ],
+        ],
+      },
+      {
+        id: 'drops',
+        labelKey: 'options.section.dropSounds',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.dropSounds',
+              rows: [
+                busSlider('dropVolume', 'options.dropVolume'),
+                check('dropSoundFilter', -1, 'options.dropSoundFilter'),
+                check('dropSoundJewels', -1, 'options.lootJewels'),
+                check('dropSoundExcellent', -1, 'options.lootExcellent'),
+                check('dropSoundAncient', -1, 'options.lootAncient'),
+                check('dropSoundHighLevel', -1, 'options.lootHighLevel'),
+                check('dropSoundOther', -1, 'options.lootOther'),
+                check('dropSoundZen', -1, 'common.zen'),
+              ],
+            },
+          ],
+        ],
+      },
+    ],
+  },
+  {
     id: 'interface',
     labelKey: 'options.tab.interface',
     subtabs: [
@@ -578,6 +722,8 @@ const TABS: Tab[] = [
                 }),
                 check('lockWindows', -1, 'options.lockWindows'),
                 check('minimapCorner', -1, 'options.minimapCorner'),
+                check('eventTimers', -1, 'options.eventTimers'),
+                check('questTracker', -1, 'options.questTracker'),
                 {
                   kind: 'button',
                   id: 'fullscreen',
@@ -605,26 +751,6 @@ const TABS: Tab[] = [
               rows: [
                 { kind: 'language', id: 'language' },
                 check('englishItemNames', -1, 'options.englishItemNames'),
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'sound',
-        labelKey: 'options.section.sound',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.sound',
-              rows: [
-                slider({
-                  key: 'volume',
-                  textId: 389,
-                  labelKey: 'options.volume',
-                  max: 9,
-                  display: v => v,
-                }),
               ],
             },
           ],
@@ -669,8 +795,10 @@ const TABS: Tab[] = [
 /** Tall enough, and flush, to reach the bottom of the header art. */
 const TAB_HEIGHT = 32;
 const TAB_GAP = 0;
-/** Five categories across the 426 px window. */
-const TAB_WIDTH = 84;
+/** The categories share the 426 px window, whatever there are of them. */
+const TAB_WIDTH = Math.floor(
+  (WIN_WIDTH - (TABS.length - 1) * TAB_GAP) / TABS.length
+);
 
 function rowHeight(row: Row): number {
   switch (row.kind) {
@@ -1166,7 +1294,9 @@ export const OptionsWindow = observer(() => {
                       !GameOptions.postProcessing) ||
                     (row.needsTier === true && GameOptions.lightingQuality === 0) ||
                     (row.needsCameraControl === true &&
-                      !GameOptions.cameraControl);
+                      !GameOptions.cameraControl) ||
+                    (row.needsWarning !== undefined &&
+                      !GameOptions[row.needsWarning]);
 
                   return (
                     <div

@@ -17,7 +17,7 @@ import type { FlagRegion } from '../../../i18n';
 const W = 24;
 const H = 16;
 
-/** A five-pointed star, point up, as a path — China's are the only ones. */
+/** A five-pointed star, point up, as a path - China's are the only ones. */
 function star(cx: number, cy: number, r: number, rotation = 0): string {
   const points: string[] = [];
 
@@ -110,7 +110,7 @@ const SHAPES: Record<FlagRegion, ReactNode> = {
     </>
   ),
 
-  // 1:1:2:1:1 bands — the blue centre is twice the others.
+  // 1:1:2:1:1 bands - the blue centre is twice the others.
   TH: (
     <>
       <rect x={0} y={0} width={W} height={H} fill="#a51931" />
@@ -148,7 +148,7 @@ const SHAPES: Record<FlagRegion, ReactNode> = {
   DE: bands(['#000000', '#dd0000', '#ffce00']),
 };
 
-/** The regions `SHAPES` actually draws — the language list is checked against it. */
+/** The regions `SHAPES` actually draws - the language list is checked against it. */
 export const SHAPES_REGIONS = Object.keys(SHAPES) as FlagRegion[];
 
 export function MuFlag({

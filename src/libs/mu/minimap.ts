@@ -13,15 +13,15 @@ import { fetchAssetBytes, prefetchAsset } from '../../common/compressedAssets';
 /**
  * The minimap assets of one world, the way `CNewUIMiniMap::LoadImages` finds
  * them: `Data/World{n}/mini_map.ozt` is the map picture (its absence means
- * "this map has no minimap" — `m_bSuccess = false`, TAB does nothing), and the
+ * "this map has no minimap" - `m_bSuccess = false`, TAB does nothing), and the
  * markers come from the localised `Data/Local/{lang}/Minimap/Minimap_World{n}_{lang}.bmd`.
  * This Data folder also carries the older per-world `World{n}/Minimap.bmd`,
  * whose names are Shift-JIS; it is the fallback when no localised file exists.
  *
  * Loading is in two steps: `prefetchWorldMinimap` on warp warms the browser's
  * HTTP cache for the 4 MB picture (no decode, nothing held), and
- * `loadWorldMinimap` decodes it on the first TAB. One decoded map is kept —
- * the current one — `evictWorldMinimaps` on warp drops the others.
+ * `loadWorldMinimap` decodes it on the first TAB. One decoded map is kept -
+ * the current one - `evictWorldMinimaps` on warp drops the others.
  */
 
 export type WorldMinimap = {
@@ -37,7 +37,7 @@ const cache = new Map<ENUM_WORLD, Promise<WorldMinimap | null>>();
  * so the fallback is decided per world rather than per language.
  *
  * The Latin packs are windows-1252, not the UTF-8 the English file is
- * (`i18n.dataEncoding` says which) — read as UTF-8 they come back as
+ * (`i18n.dataEncoding` says which) - read as UTF-8 they come back as
  * "Guardi<28>n de Seguridad".
  */
 function markerFiles(worldNum: number): { path: string; encoding: string }[] {

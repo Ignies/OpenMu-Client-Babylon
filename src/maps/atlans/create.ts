@@ -8,7 +8,7 @@ import { AtlansBubbleVentObject } from './bubbleVentObject';
  * (ZzzObject.cpp:4718-4725) touches exactly one of the 41 types and
  * `MoveObject` (:4005-4034) six more; `RenderObjectVisual` has no World 8
  * case at all. Almost everything those seven cases need is table data and
- * lives in `spec.ts` or in `common/meshAnimation.ts` — this file is the three
+ * lives in `spec.ts` or in `common/meshAnimation.ts` - this file is the three
  * class assignments and the notes on what the original does here that we do
  * not.
  *
@@ -18,7 +18,7 @@ import { AtlansBubbleVentObject } from './bubbleVentObject';
  * (28 carries 91 bones), 32/34 coral lamps, 35-37 skeletons, 38 god-ray, 39
  * pose box, 40 anemone.
  *
- * **Not implemented, deliberately — the underwater layer.** Atlans is not
+ * **Not implemented, deliberately - the underwater layer.** Atlans is not
  * just a map with kelp on it; the original changes how the client behaves
  * while you are in it, and none of that is object work:
  *
@@ -31,7 +31,7 @@ import { AtlansBubbleVentObject } from './bubbleVentObject';
  *    tile 5 with a 32-frame `wt00..wt31` additive flipbook, which is what
  *    makes the seabed ripple. Terrain material work, not map work.
  *  - **Player head bubbles**, the boid fish shoals (`Object8/Fish02..09.glb`
- *    are placed by the boid code, not by EncTerrain8.obj — which is why they
+ *    are placed by the boid code, not by EncTerrain8.obj - which is why they
  *    have no type numbers), and the 20 %-opacity shadows the original uses
  *    down here.
  *  - **No grass layer.** Atlans never renders one; the port has no grass
@@ -51,14 +51,14 @@ export async function createAtlans(world: World) {
   // owns the timer and the emitter.
   tiles[22] = AtlansBubbleVentObject;
 
-  // Atlans 39 (ZzzObject.cpp:4719-4723), ×4 — the "lean on the wall" pose
+  // Atlans 39 (ZzzObject.cpp:4719-4723), ×4 - the "lean on the wall" pose
   // trigger, already mapped as `pose(true)` in libs/mu/restObjects.ts.
   //
   // `OperateBoxObject`, *not* `LeanBoxObject`: the Atlans case is
   // `CreateOperate(o); o->HiddenMesh = -2;` and nothing else. The
   // `Vector(40.f, 40.f, 160.f, o->BoundingBoxMax)` line that doubles the pick
   // box belongs to Lorencia's MODEL_POSE_BOX (:4585) and to Dungeon 60 /
-  // Devias 91 / Market 67 — Atlans 39 keeps `CreateObject`'s default
+  // Devias 91 / Market 67 - Atlans 39 keeps `CreateObject`'s default
   // `(-40,-40,0)…(40,40,80)` box (:4457-4494). loadMapIntoScene previously
   // registered the lean box here, which made these four triggers twice as
   // tall as the original's.

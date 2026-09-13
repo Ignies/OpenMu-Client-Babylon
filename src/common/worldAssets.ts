@@ -3,7 +3,7 @@ import { maps } from '../maps';
 
 /**
  * Which `Data/World<n>` / `Data/Object<n>` folder a world draws from, and the
- * per-event world lists — the old names for what the map entries declare
+ * per-event world lists - the old names for what the map entries declare
  * (`MapLayer.worlds` / `MapLayer.assetWorld`, `src/maps/<name>/index.ts`).
  * Every export here is a thin reader over the `maps` facade, kept so
  * `modelObject`, the terrain loaders, the sound tables and the lighting
@@ -17,7 +17,7 @@ import { maps } from '../maps';
 /**
  * `CMapManager::LoadWorld` (MapManager.cpp:1206-1225) and `OpenObjects`
  * (MapManager.cpp:1103-1124): the event castles do not use `WorldActive + 1`
- * — every Blood Castle floor loads `World12`/`Object12`, every Chaos Castle
+ * - every Blood Castle floor loads `World12`/`Object12`, every Chaos Castle
  * `World19`/`Object19`, every Kalima floor `World25`/`Object25`, every
  * Illusion Temple level `World47`/`Object47`, and Devil Square 5-7 (map 32)
  * folds into `World10`. Every other world is `n + 1`. Each entry declares
@@ -66,7 +66,7 @@ export const DOPPELGANGER_WORLDS: readonly ENUM_WORLD[] = [
 ];
 
 /**
- * The same table row for every world in a list — what a per-world table
+ * The same table row for every world in a list - what a per-world table
  * (`BEDS`, `MAP_MUSIC`, the lighting tables) spreads in for an event whose
  * instances share one art set.
  */

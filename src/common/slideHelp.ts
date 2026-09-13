@@ -2,8 +2,8 @@ import { makeAutoObservable } from 'mobx';
 
 /**
  * `CSlideHelpMgr` / `CUISlideHelp` (UIControls.cpp:4033-4530): the marquee
- * strip along the top of the screen. Two lanes — the *help* slide (`g_hFont`)
- * and the *notice* slide (`g_hFontBold`) — each with a queue of texts keyed
+ * strip along the top of the screen. Two lanes - the *help* slide (`g_hFont`)
+ * and the *notice* slide (`g_hFontBold`) - each with a queue of texts keyed
  * by the second they are due. `ReceiveNotice` feeds them from `ServerMessage`
  * types 10..15 (`AddSlide(Count, Delay, Text, Type - 10, Speed / 10, Color)`):
  * 0..2 go to the help lane, 3..5 to the notice lane, and within a lane the

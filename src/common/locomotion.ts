@@ -12,7 +12,7 @@ import { isFastWing } from './wings';
  *
  * Everything here is expressed in the original's units and converted at the
  * call site: `c->Run` counts `FPS_ANIMATION_FACTOR` per frame, which is
- * `clamp(REFERENCE_FPS / FPS, 0, 1)` (ZzzAI.cpp:729) — i.e. it climbs by
+ * `clamp(REFERENCE_FPS / FPS, 0, 1)` (ZzzAI.cpp:729) - i.e. it climbs by
  * REFERENCE_FPS (25) per second whenever the frame rate is at or above the
  * reference, and slower below it. Time-stepping it is the frame-rate
  * independent form of the same thing.
@@ -84,7 +84,7 @@ export function isSwimWorld(world: number): boolean {
 /**
  * `SetPlayerWalk`'s gate on the run accumulator (ZzzCharacter.cpp:387-408).
  * Knights, Dark Lords, Rage Fighters and anyone on a Fenrir always run;
- * everyone else needs +5 boots — or +5 gloves in the swim worlds, where the
+ * everyone else needs +5 boots - or +5 gloves in the swim worlds, where the
  * "run" is a swim stroke driven by the arms.
  *
  * The original ORs the equipped-item level with the *rendered* body-part
@@ -130,7 +130,7 @@ export type MoveSpeedInput = {
   /** `c->Run`, in the original's 0…40 units. */
   run: number;
   inSafeZone: boolean;
-  /** `c->Wing` — the equipped wing item, or null. */
+  /** `c->Wing` - the equipped wing item, or null. */
   wings: Item | null | undefined;
   /** `c->Helper` is a Horn of Uniria / Dinorant (they move at wing speed). */
   riding: boolean;

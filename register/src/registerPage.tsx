@@ -14,8 +14,8 @@ import { MuButton } from './muButton';
  * Account registration, drawn with the game's own interface art so it reads as
  * part of MU rather than a web form bolted onto it.
  *
- * The window is `login_back.OZT` — the same frame the client's login screen
- * uses — because a register box is the login box with two more rows. MU's UI is
+ * The window is `login_back.OZT` - the same frame the client's login screen
+ * uses - because a register box is the login box with two more rows. MU's UI is
  * authored at fixed pixel sizes, so everything here is absolutely positioned
  * against the art and must never reflow.
  *
@@ -133,7 +133,7 @@ export const RegisterPage = () => {
       setStatus({ kind: 'done' });
       setValues(EMPTY);
     } catch {
-      // Offline, DNS, CORS — none of which the player can act on beyond
+      // Offline, DNS, CORS - none of which the player can act on beyond
       // trying again.
       setStatus({ kind: 'error', message: 'Could not reach the server.' });
     }

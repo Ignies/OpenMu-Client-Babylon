@@ -3,7 +3,7 @@ import type { Entity, World } from '../../ecs/world';
 
 /**
  * The two per-object settings the later worlds' `MoveObject` cases write
- * over and over — `o->Alpha = k` and `o->Velocity = k` — as parameterised
+ * over and over - `o->Alpha = k` and `o->Velocity = k` - as parameterised
  * classes, so a map's `index.ts` can say `tiles[41] = AlphaObject.at(0.5)`
  * instead of declaring a subclass per type per map.
  *

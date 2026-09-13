@@ -142,7 +142,7 @@ function createModelObject(
     // A model that never became Ready has no bounds, so the pointer and
     // cursor systems skip it: an NPC whose GLB is missing or corrupt could
     // not be hovered, clicked or talked to at all. Stand a placeholder in so
-    // the entity keeps a pickable footprint (map props are left alone — an
+    // the entity keeps a pickable footprint (map props are left alone - an
     // invisible rock is preferable to a magenta box).
     if (entity.modelObject === modelObject && entity.netId !== undefined) {
       attachMissingModelPlaceholder(world, modelObject);

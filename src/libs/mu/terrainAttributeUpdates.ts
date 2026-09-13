@@ -4,7 +4,7 @@ import { Store } from '../../store';
 
 /**
  * `ReceiveSetAttribute` (WSclient.cpp:8320-8345): the server rewrites terrain
- * attributes at runtime — the Blood Castle pit opening, the Chaos Castle
+ * attributes at runtime - the Blood Castle pit opening, the Chaos Castle
  * strips closing, Crywolf's gates. OpenMU sends it as `ChangeTerrainAttributes`
  * (C1 46): one flag, set or clear, over a list of tile rectangles.
  *

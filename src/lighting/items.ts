@@ -1,7 +1,7 @@
 /**
  * Items as lights : in the improved look, +9…+15 gear lights
- * the wearer's surroundings — one point light and a terrain stain per
- * character, following the body — and a dropped +9…+15 item does the same,
+ * the wearer's surroundings - one point light and a terrain stain per
+ * character, following the body - and a dropped +9…+15 item does the same,
  * static. The colour is the item tier's, breathing on the item-glow clock so
  * floor and blade agree (`common/itemVisualTier.ts`).
  *
@@ -63,7 +63,7 @@ const lamps = new Set<LightSource>();
 
 /**
  * Command: a lamp for an item tier at `position`, which is held by reference
- * — the caller moves it with the wearer. Null for tiers that throw no light
+ * - the caller moves it with the wearer. Null for tiers that throw no light
  * (`lightGain` 0). The caller keeps the handle and `dispose()`s it when the
  * gear changes; a map change disposes it underneath (the facade's reset),
  * after which `alive` is false and the caller rebuilds.
@@ -84,7 +84,7 @@ export function lightItem(
 }
 
 /**
- * Reader: what the wearer's own body gets back from their gear — the
+ * Reader: what the wearer's own body gets back from their gear - the
  * original adds `o->Light` to the character it belongs to.
  */
 export function itemSelfLight(

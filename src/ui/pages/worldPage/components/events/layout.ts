@@ -153,6 +153,40 @@ export const CW_CLOCK_COLOR_BALGASS = 'rgb(255,77,77)';
 /** The success / failure banner crop, parked at its slide-in rest point. */
 export const CW_RESULT = { x: 150, y: 50, width: 328, height: 93 };
 
+// ---- the schedule rows (ours) ----------------------------------------------
+
+/**
+ * The corner minimap's slot, in interface units: the panel is 240 art units
+ * at 0.75, its bar sits 3 units under it and draws at the interface size
+ * (`minimap/corner.tsx`, `minimap/style.less`). The rows keep this spot
+ * whether the panel is drawn there or not, so nothing below them moves when
+ * the `minimapCorner` option is toggled.
+ */
+export const MINIMAP_SLOT_TOP = 10;
+export const MINIMAP_SLOT_HEIGHT = 240 * 0.75 + 3 * 0.75 + 13;
+
+/** Between the minimap slot and the first row. */
+export const EVENT_ROW_GAP = 6;
+/** One row, at interface size 1. */
+export const EVENT_ROW_HEIGHT = 14;
+/** Label column width, so the clocks line up under each other. */
+export const EVENT_ROW_LABEL_WIDTH = 84;
+export const EVENT_ROW_CLOCK_WIDTH = 38;
+
+/**
+ * The whole block, from the bottom of the minimap slot to the bottom of the
+ * last row, in interface units. Anything else that wants that corner offsets
+ * by this.
+ */
+export const EVENT_TIMERS_HEIGHT = EVENT_ROW_GAP + 3 * EVENT_ROW_HEIGHT;
+
+/** Counting down: the colour the in-event timer figure draws its lines in. */
+export const EVENT_ROW_COLOR = TIMER_COLOR;
+/** Open: the colour the match notice line uses. */
+export const EVENT_ROW_COLOR_OPEN = COUNTDOWN_COLOR;
+/** Nothing known yet, or the server never answered. */
+export const EVENT_ROW_COLOR_UNKNOWN = 'rgb(150,150,150)';
+
 export const EVENT_SPRITES = [
   BUTTON_SPRITE,
   EXIT_SPRITE,

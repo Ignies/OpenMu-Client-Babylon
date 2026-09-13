@@ -561,7 +561,7 @@ export type Emission = {
 };
 
 /**
- * Emissions for an object type on a world — `MapLayer.emissions` on each map
+ * Emissions for an object type on a world - `MapLayer.emissions` on each map
  * entry (`src/maps/<name>/spec.ts`), read through the facade.
  */
 export function emissionsFor(

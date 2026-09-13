@@ -67,7 +67,7 @@ export class MapTileObject extends ModelObject {
     // (`o->HiddenMesh = -2`, ZzzObject.cpp:3052-3110) and replaces them with
     // BITMAP_CLOUD billboards. `cloud.bmd` is MODEL_CLOUD, an *effect* model
     // loaded by MapManager.cpp:151 and used only for the lightning flash
-    // plane — never a map object. maps/icarus/cloudObject.ts owns all six now.
+    // plane - never a map object. maps/icarus/cloudObject.ts owns all six now.
     // Before load: the metadata loop in ModelObject.load stamps every mesh.
     this.SnowCap = SNOW_GROUND_MAPS.has(this.WorldIndex);
 
@@ -105,7 +105,7 @@ export class MapTileObject extends ModelObject {
     // Icarus used to force every mesh on the map additive here. It is not in
     // the reference and it is not needed: every Icarus map mesh is textured
     // `top02_R` or `gyg_R`, and the `_R` suffix already means bright/additive
-    // through textureScript.ts — the one mesh family that is not (`test12_H`)
+    // through textureScript.ts - the one mesh family that is not (`test12_H`)
     // is `_H`, never drawn. The blanket added nothing the flags had not
     // already done, and took the decision away from them.
   }
@@ -234,7 +234,7 @@ export class MapTileObject extends ModelObject {
     this.#boneEmitter?.update();
 
     // The `Object8/Object24.glb` sine that pulsed mesh *visibility* here was
-    // the Atlans water plane's `BlendMeshLight` done as alpha — it dimmed the
+    // the Atlans water plane's `BlendMeshLight` done as alpha - it dimmed the
     // whole mesh rather than the additive layer. ZzzObject.cpp:4016 is
     // `o->BlendMeshLight = sinf(WorldTime * 0.002f) * 0.3f + 0.5f`, which now
     // lives in common/meshAnimation.ts as the ATLANS table's `light`.

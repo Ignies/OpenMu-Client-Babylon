@@ -85,7 +85,7 @@ export function buildOccupancy(
 
 /**
  * What the occupancy depends on, as a string: which squares hold which item
- * object (by identity — a fresh object from a refresh must rebuild) at what
+ * object (by identity - a fresh object from a refresh must rebuild) at what
  * level. Reading it inside an observer is what subscribes the grid to the
  * items, and it is the memo key for `buildOccupancy`.
  */

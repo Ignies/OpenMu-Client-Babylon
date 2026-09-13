@@ -1,5 +1,5 @@
 /**
- * Bursts — the server-driven object effects: level-up, shield potion,
+ * Bursts - the server-driven object effects: level-up, shield potion,
  * shield lost, swirl. Short additive flare bursts around a body, each a row
  * in `BURSTS`. The original's `ReceiveLevelUp` (WSclient.cpp:6455-6476)
  * spawns 15 flare joints that rise ~40 ticks plus a magic ring; the shield
