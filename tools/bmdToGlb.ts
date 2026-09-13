@@ -1,6 +1,7 @@
 import { Document, Node, NodeIO, type Skin } from '@gltf-transform/core';
 import { BMD, BMDReader, BMDTextureBone } from '../src/common/BMD';
 import { Glob } from 'bun';
+import { readdirSync } from 'fs';
 import {
   EXTMeshoptCompression,
   EXTTextureWebP,
@@ -79,6 +80,44 @@ function indexTextures(): Map<string, string[]> {
   textureIndex = index;
 
   return index;
+}
+
+/**
+ * The files in one folder, keyed by lower-case name. The model's own folder is
+ * searched through this rather than by `Bun.file(...).exists()` because the
+ * BMDs and the tree disagree about case all over: `Skill/gatepart1.bmd` asks
+ * for `gate.JPG` and the file is `gate.OZJ`, `World7/Object123.bmd` asks for
+ * `flower7.jpg` against `Flower7.OZJ`. 316 lookups across the tree resolve
+ * only because Windows does not care. On a case-sensitive filesystem every one
+ * of them misses its own folder and falls through to the by-name search, which
+ * would hand the mesh another folder's art - a converter run on Linux would
+ * reskin models a Windows run gets right.
+ */
+const folderIndex = new Map<string, Map<string, string>>();
+
+function indexFolder(folder: string): Map<string, string> {
+  const cached = folderIndex.get(folder);
+  if (cached) return cached;
+
+  const files = new Map<string, string>();
+
+  try {
+    for (const name of readdirSync(folder)) files.set(name.toLowerCase(), name);
+  } catch {
+    // A BMD naming a folder that is not in this tree: the by-name search
+    // downstream is the answer, not a crash.
+  }
+
+  folderIndex.set(folder, files);
+
+  return files;
+}
+
+/** The path a folder actually holds for `name`, whatever case it is stored in. */
+function inFolder(folder: string, name: string): string | null {
+  const real = indexFolder(folder).get(name.toLowerCase());
+
+  return real ? folder + '/' + real : null;
 }
 
 function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
@@ -178,13 +217,14 @@ async function readTextureBytes(
   texPath: string,
   modelDir: string
 ): Promise<Uint8Array> {
-  const asIs = Bun.file(texPath);
+  const folder = texPath.slice(0, texPath.lastIndexOf('/'));
+  const named = texPath.slice(texPath.lastIndexOf('/') + 1);
 
-  if (await asIs.exists()) {
-    return asIs.bytes();
-  }
+  const asIs = inFolder(folder, named);
 
-  const base = texPath.replace(/\.[^.]+$/, '');
+  if (asIs) return Bun.file(asIs).bytes();
+
+  const base = named.replace(/\.[^.]+$/, '');
 
   // MU packs a texture in the container matching the format the BMD names,
   // and the extension is load-bearing: `.tga` means the 32-bit `.OZT`, which
@@ -203,15 +243,9 @@ async function readTextureBytes(
   // and came out correct through the same broken ordering.
   const ext = texPath.slice(texPath.lastIndexOf('.')).toLowerCase();
 
-  const OZT: [string, number][] = [
-    ['.OZT', 4],
-    ['.ozt', 4],
-  ];
+  const OZT: [string, number][] = [['.OZT', 4]];
 
-  const OZJ: [string, number][] = [
-    ['.OZJ', 24],
-    ['.ozj', 24],
-  ];
+  const OZJ: [string, number][] = [['.OZJ', 24]];
 
   // The non-matching container is still tried, last: a missing texture is a
   // worse outcome than an opaque one, and this is the only reason the wrong
@@ -220,11 +254,9 @@ async function readTextureBytes(
     ext === '.tga' ? [...OZT, ...OZJ] : [...OZJ, ...OZT];
 
   for (const [container, headerSize] of containers) {
-    const file = Bun.file(base + container);
+    const found = inFolder(folder, base + container);
 
-    if (await file.exists()) {
-      return (await file.bytes()).slice(headerSize);
-    }
+    if (found) return (await Bun.file(found).bytes()).slice(headerSize);
   }
 
   // Not in the model's folder - look for it by name in the rest of the tree.
@@ -233,8 +265,6 @@ async function readTextureBytes(
   const fileName = base.slice(base.lastIndexOf('/') + 1);
 
   for (const [container, headerSize] of containers) {
-    if (container !== container.toUpperCase()) continue;
-
     const found = await readTextureElsewhere(
       fileName + container,
       headerSize,
