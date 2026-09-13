@@ -1681,6 +1681,11 @@ export const koreanLayer: LanguageLayer = {
     'marketplace.state.stuck': '시장에 보관 중입니다. 게임 마스터에게 문의하세요.',
     'marketplace.owed': '받을 Zen: {amount}',
     'marketplace.collect': '수령',
+    'marketplace.collectUnavailable': '이 서버는 아직 이를 위해 상인을 보낼 수 없습니다.',
+    'marketplace.pill.pending': '대기 중',
+    'marketplace.pill.claimed': '예약됨',
+    'marketplace.pill.returning': '반환 중',
+    'marketplace.pill.stuck': '보관 중',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

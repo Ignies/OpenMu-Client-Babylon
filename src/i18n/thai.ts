@@ -1694,6 +1694,11 @@ export const thaiLayer: LanguageLayer = {
     'marketplace.state.stuck': 'ตลาดเก็บรักษาไว้ โปรดติดต่อเกมมาสเตอร์',
     'marketplace.owed': 'คุณมี {amount} Zen รอรับ',
     'marketplace.collect': 'รับ',
+    'marketplace.collectUnavailable': 'เซิร์ฟเวอร์นี้ยังไม่สามารถส่งพ่อค้ามาได้',
+    'marketplace.pill.pending': 'รอ',
+    'marketplace.pill.claimed': 'จองแล้ว',
+    'marketplace.pill.returning': 'กำลังคืน',
+    'marketplace.pill.stuck': 'ถูกเก็บไว้',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ApiListing } from './api';
-import { cancellable, isOnSale, mergeCatalogue, stateLabelKey } from './catalogue';
+import { cancellable, isOnSale, mergeCatalogue, stateLabelKey, statePillKey } from './catalogue';
 
 /**
  * The window's reading of the service's two lists. The bug these guard
@@ -80,5 +80,12 @@ describe('state labels', () => {
 
   it('has none for a fixture', () => {
     expect(stateLabelKey(undefined)).toBeNull();
+    expect(statePillKey(undefined)).toBeNull();
+  });
+
+  it('has a short pill for every state too', () => {
+    for (const state of ['pending', 'active', 'claimed', 'returning', 'stuck'] as const) {
+      expect(statePillKey(state)).toMatch(/^marketplace\.(pill|state)\./);
+    }
   });
 });

@@ -1726,6 +1726,11 @@ export const portugueseLayer: LanguageLayer = {
     'marketplace.state.stuck': 'Retido pelo mercado. Fale com um game master.',
     'marketplace.owed': 'Você tem {amount} Zen a receber',
     'marketplace.collect': 'Receber',
+    'marketplace.collectUnavailable': 'Este servidor ainda não pode enviar um comerciante para isso.',
+    'marketplace.pill.pending': 'Aguardando',
+    'marketplace.pill.claimed': 'Reservado',
+    'marketplace.pill.returning': 'Voltando',
+    'marketplace.pill.stuck': 'Retido',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

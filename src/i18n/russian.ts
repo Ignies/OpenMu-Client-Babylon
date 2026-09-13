@@ -1708,6 +1708,11 @@ export const russianLayer: LanguageLayer = {
     'marketplace.state.stuck': 'Удержано рынком. Обратитесь к гейм-мастеру.',
     'marketplace.owed': 'Вам причитается {amount} Zen',
     'marketplace.collect': 'Забрать',
+    'marketplace.collectUnavailable': 'Этот сервер пока не может отправить за этим торговца.',
+    'marketplace.pill.pending': 'Ожидание',
+    'marketplace.pill.claimed': 'Резерв',
+    'marketplace.pill.returning': 'Возврат',
+    'marketplace.pill.stuck': 'Удержано',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

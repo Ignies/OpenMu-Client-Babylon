@@ -1723,6 +1723,11 @@ export const romanianLayer: LanguageLayer = {
     'marketplace.state.stuck': 'Reținut de piață. Întreabă un game master.',
     'marketplace.owed': 'Ți se datorează {amount} Zen',
     'marketplace.collect': 'Ridică',
+    'marketplace.collectUnavailable': 'Acest server nu poate trimite încă un negustor pentru asta.',
+    'marketplace.pill.pending': 'În așteptare',
+    'marketplace.pill.claimed': 'Rezervat',
+    'marketplace.pill.returning': 'Se întoarce',
+    'marketplace.pill.stuck': 'Reținut',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

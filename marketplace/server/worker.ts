@@ -77,6 +77,19 @@ type Bot = {
 
 const backoff = new Backoff();
 
+/** The last reason logged for waiting on a piece of work, so it is said once. */
+const waitingBecause = new Map<string, string>();
+
+function noteWaiting(key: string, reason: string | null): void {
+  if (reason === null) {
+    waitingBecause.delete(key);
+    return;
+  }
+  if (waitingBecause.get(key) === reason) return;
+  waitingBecause.set(key, reason);
+  log(`${key} is waiting: ${reason}`);
+}
+
 async function connect(): Promise<Bot> {
   const tag = (message: string) => log(`[${ACCOUNT}] ${message}`);
   const connection = new BotConnection(HOST, PORT, tag);
@@ -115,6 +128,15 @@ async function connect(): Promise<Bot> {
     );
   }
   await wallet.waitForBalance().catch(() => tag('no balance reported; handovers will not reconcile'));
+
+  // Said once, because a presence server that cannot be reached makes every
+  // dispatch a blind try and one that is reachable decides who gets visited.
+  const probe = await isOnline(ACCOUNT);
+  tag(
+    probe === null
+      ? `presence at ${process.env.PRESENCE_URL ?? 'http://127.0.0.1:3001'} is unreachable; dispatching blind`
+      : `presence answers (this bot reads as ${probe ? 'online' : 'offline'} there)`
+  );
 
   return {
     name: character.Name,
@@ -362,7 +384,11 @@ async function payOutRequested(bot: Bot): Promise<void> {
       audit('payout request dropped', { account: request.account, detail: 'older than a day' });
       continue;
     }
-    if ((await isOnline(request.account)) === false) continue;
+    if ((await isOnline(request.account)) === false) {
+      noteWaiting(key, `${request.account} is not online`);
+      continue;
+    }
+    noteWaiting(key, null);
 
     const taken = store.takeBalance(request.account);
     if (taken <= 0) {
@@ -419,7 +445,11 @@ async function tick(bot: Bot): Promise<void> {
       now
     );
 
-    if (decision.kind === 'wait') continue;
+    if (decision.kind === 'wait') {
+      noteWaiting(`"${listing.id}"`, decision.reason);
+      continue;
+    }
+    noteWaiting(`"${listing.id}"`, null);
     if (decision.kind === 'release') {
       log(`releasing "${listing.id}": ${decision.reason}`);
       store.release(listing.id, decision.reason);

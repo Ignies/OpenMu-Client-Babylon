@@ -1735,6 +1735,11 @@ export const germanLayer: LanguageLayer = {
     'marketplace.state.stuck': 'Vom Markt einbehalten. Frag einen Game Master.',
     'marketplace.owed': 'Dir stehen {amount} Zen zu',
     'marketplace.collect': 'Abholen',
+    'marketplace.collectUnavailable': 'Dieser Server kann dafür noch keinen Händler schicken.',
+    'marketplace.pill.pending': 'Wartet',
+    'marketplace.pill.claimed': 'Reserviert',
+    'marketplace.pill.returning': 'Kommt zurück',
+    'marketplace.pill.stuck': 'Einbehalten',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

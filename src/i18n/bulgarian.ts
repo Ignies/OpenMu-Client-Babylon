@@ -1715,6 +1715,11 @@ export const bulgarianLayer: LanguageLayer = {
     'marketplace.state.stuck': 'Задържано от пазара. Попитай гейм мастър.',
     'marketplace.owed': 'Дължат ти се {amount} Zen',
     'marketplace.collect': 'Вземи',
+    'marketplace.collectUnavailable': 'Този сървър още не може да изпрати търговец за това.',
+    'marketplace.pill.pending': 'Изчаква',
+    'marketplace.pill.claimed': 'Запазено',
+    'marketplace.pill.returning': 'Връща се',
+    'marketplace.pill.stuck': 'Задържано',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

@@ -6,7 +6,7 @@ import { ItemIcon } from '../../../../components/itemIcon';
 import { ItemTooltip } from '../../../../components/itemTooltip';
 import { t, type TextKey } from '../../../../../i18n';
 import { CATEGORIES, displayName } from '../../../../../marketplace/categories';
-import { cancellable, stateLabelKey } from '../../../../../marketplace/catalogue';
+import { cancellable, stateLabelKey, statePillKey } from '../../../../../marketplace/catalogue';
 import {
   Marketplace,
   SORTS,
@@ -44,22 +44,40 @@ const nameClass = (item: Listing['item']) =>
 const REFRESH_MS = 10_000;
 
 /**
- * A seller's own row: what the trader is doing with it, and Cancel while
- * that is still allowed. Never a Buy button - the service refuses a seller
- * buying their own listing, and offering it was how a row "for sale" could
- * be one nobody had collected yet.
+ * What the trader is doing with a seller's own listing, as a short pill; the
+ * whole sentence is the hover text. Nothing for a fixture without a state.
  */
-const OwnerActions = observer(({ listing }: { listing: Listing }) => {
+const StatePill = observer(({ listing }: { listing: Listing }) => {
+  const pillKey = statePillKey(listing.state);
   const labelKey = stateLabelKey(listing.state);
+  if (!pillKey) return null;
   return (
-    <>
-      {labelKey && <span className="mp-state">{t(labelKey)}</span>}
-      {cancellable(listing) && (
-        <button className="mp-btn is-quiet" onClick={() => Marketplace.cancelListing(listing.id)}>
-          {t('common.cancel')}
-        </button>
-      )}
-    </>
+    <span className={`mp-state is-${listing.state}`} title={labelKey ? t(labelKey) : undefined}>
+      {t(pillKey)}
+    </span>
+  );
+});
+
+/**
+ * The one control a row carries: Buy on somebody else's listing, Cancel on
+ * the seller's own while that is still allowed, nothing otherwise. Never a
+ * Buy button on an own row - the service refuses it, and offering it was how
+ * a row "for sale" could be one nobody had collected yet.
+ */
+const RowAction = observer(({ listing }: { listing: Listing }) => {
+  if (listing.mine) {
+    if (!cancellable(listing)) return null;
+    return (
+      <button className="mp-btn is-quiet" onClick={() => Marketplace.cancelListing(listing.id)}>
+        {t('common.cancel')}
+      </button>
+    );
+  }
+  const affordable = Marketplace.canAfford(listing);
+  return (
+    <button className="mp-btn" disabled={!affordable} onClick={() => Marketplace.askBuy(listing)}>
+      {affordable ? t('marketplace.buy') : t('marketplace.short')}
+    </button>
   );
 });
 
@@ -74,7 +92,8 @@ const EmptyState = observer(() => (
 ));
 
 const ListingCard = observer(({ listing }: { listing: Listing }) => {
-  const affordable = Marketplace.canAfford(listing);
+  // Your own price is never "short": the red is for what you cannot buy.
+  const affordable = !!listing.mine || Marketplace.canAfford(listing);
   const deal = dealDelta(listing);
 
   const onMove = (e: ReactPointerEvent<HTMLDivElement>) =>
@@ -97,29 +116,28 @@ const ListingCard = observer(({ listing }: { listing: Listing }) => {
         </div>
         <div className="mp-card-meta">
           <span className="mp-card-seller">
-            {listing.seller}
-            <span className="mp-dot">.</span>
+            {/* Your own card says so with its pill and its Cancel; the
+                name would only crowd the age out. */}
+            {!listing.mine && (
+              <>
+                {listing.seller}
+                <span className="mp-dot">.</span>
+              </>
+            )}
             {sinceLabel(listing.listedAt)}
           </span>
-          {deal && <span className={`mp-deal ${deal.tone}`}>{deal.label}</span>}
+          {listing.mine ? (
+            <StatePill listing={listing} />
+          ) : (
+            deal && <span className={`mp-deal ${deal.tone}`}>{deal.label}</span>
+          )}
         </div>
         <div className="mp-card-foot">
           <span className={`mp-price${affordable ? '' : ' is-short'}`}>
             {formatZen(listing.price)}
             <span className="mp-zen">{t('common.zen')}</span>
           </span>
-
-          {listing.mine ? (
-            <OwnerActions listing={listing} />
-          ) : (
-            <button
-              className="mp-btn"
-              disabled={!affordable}
-              onClick={() => Marketplace.askBuy(listing)}
-            >
-              {affordable ? t('marketplace.buy') : t('marketplace.short')}
-            </button>
-          )}
+          <RowAction listing={listing} />
         </div>
       </div>
     </div>
@@ -128,7 +146,7 @@ const ListingCard = observer(({ listing }: { listing: Listing }) => {
 
 /** The same listing as one of the frame's ruled bands. */
 const ListingRow = observer(({ listing }: { listing: Listing }) => {
-  const affordable = Marketplace.canAfford(listing);
+  const affordable = !!listing.mine || Marketplace.canAfford(listing);
   const deal = dealDelta(listing);
 
   const onMove = (e: ReactPointerEvent<HTMLDivElement>) =>
@@ -152,7 +170,11 @@ const ListingRow = observer(({ listing }: { listing: Listing }) => {
       <div className="mp-row-seller">{listing.seller}</div>
       <div className="mp-row-age">{sinceLabel(listing.listedAt)}</div>
       <div className="mp-row-deal">
-        {deal && <span className={`mp-deal ${deal.tone}`}>{deal.label}</span>}
+        {listing.mine ? (
+          <StatePill listing={listing} />
+        ) : (
+          deal && <span className={`mp-deal ${deal.tone}`}>{deal.label}</span>
+        )}
       </div>
 
       <div className={`mp-row-price${affordable ? '' : ' is-short'}`}>
@@ -160,17 +182,10 @@ const ListingRow = observer(({ listing }: { listing: Listing }) => {
         <span className="mp-zen">{t('common.zen')}</span>
       </div>
 
-      {listing.mine ? (
-        <OwnerActions listing={listing} />
-      ) : (
-        <button
-          className="mp-btn"
-          disabled={!affordable}
-          onClick={() => Marketplace.askBuy(listing)}
-        >
-          {affordable ? t('marketplace.buy') : t('marketplace.short')}
-        </button>
-      )}
+      {/* Always one cell, even when empty: the grid counts children. */}
+      <div className="mp-row-action">
+        <RowAction listing={listing} />
+      </div>
     </div>
   );
 });

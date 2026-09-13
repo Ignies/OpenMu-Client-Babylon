@@ -1730,6 +1730,11 @@ export const italianLayer: LanguageLayer = {
     'marketplace.state.stuck': 'Trattenuto dal mercato. Chiedi a un game master.',
     'marketplace.owed': 'Ti sono dovuti {amount} Zen',
     'marketplace.collect': 'Ritira',
+    'marketplace.collectUnavailable': 'Questo server non può ancora inviare un mercante per questo.',
+    'marketplace.pill.pending': 'In attesa',
+    'marketplace.pill.claimed': 'Riservato',
+    'marketplace.pill.returning': 'In ritorno',
+    'marketplace.pill.stuck': 'Trattenuto',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',

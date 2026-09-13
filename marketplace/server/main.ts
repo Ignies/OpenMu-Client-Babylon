@@ -250,7 +250,9 @@ Bun.serve({
           return json({ error: 'Log in to a character first.' }, 400, cors);
         }
         store.requestPayout(auth.account, character);
-        return json({ owed }, 200, cors);
+        // `requested` is how the window tells this service from an older one
+        // that answered the same route without sending anybody.
+        return json({ owed, requested: true }, 200, cors);
       }
 
       return json({ error: 'No such route.' }, 404, cors);

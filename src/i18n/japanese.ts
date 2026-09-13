@@ -1683,6 +1683,11 @@ export const japaneseLayer: LanguageLayer = {
     'marketplace.state.stuck': '市場に保管されています。ゲームマスターにお問い合わせください。',
     'marketplace.owed': '{amount} Zen を受け取れます',
     'marketplace.collect': '受け取る',
+    'marketplace.collectUnavailable': 'このサーバーではまだ商人を派遣できません。',
+    'marketplace.pill.pending': '待機中',
+    'marketplace.pill.claimed': '予約済み',
+    'marketplace.pill.returning': '返送中',
+    'marketplace.pill.stuck': '保管中',
 
     'gm.title': 'Game Master',
     'gm.tabPlate': 'GM',
