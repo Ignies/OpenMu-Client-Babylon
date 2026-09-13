@@ -998,6 +998,7 @@ export const thaiLayer: LanguageLayer = {
     'event.cwNotice4c': 'บทลงโทษข้างต้นมีผลจนถึงศึกครายวูล์ฟครั้งถัดไป',
 
     'item.thisItem': 'ไอเทมนี้',
+    'item.equipped': 'สวมใส่อยู่',
     'item.excellentPrefix': 'เอ็กเซลเลนต์ {name}',
     'item.attackPower': 'พลังโจมตี',
     'item.attackPowerTwoHand': 'พลังโจมตีสองมือ',
@@ -1549,6 +1550,9 @@ export const thaiLayer: LanguageLayer = {
     'exit.chaosOpen': 'ปิดหน้าต่างเคออสก่อนออกจากเกม',
     'exit.noAnswer': 'เซิร์ฟเวอร์ไม่ตอบกลับ กำลังออกจากเกม',
     'options.minimapCorner': 'มินิแมพที่มุมจอ',
+    'options.compareTooltips': 'เทียบกับที่สวมใส่',
+    'options.compare.shift': 'กด Shift ค้าง',
+    'options.compare.always': 'เสมอ',
     'minimap.center': 'กลับไปตรงกลาง',
     'login.id': 'ไอดี',
     'login.password': 'รหัสผ่าน',

@@ -1024,6 +1024,7 @@ export const germanLayer: LanguageLayer = {
     'event.cwNotice4c': 'Die Strafe gilt bis zur nächsten Crywolf-Schlacht.',
 
     'item.thisItem': 'diesen Gegenstand',
+    'item.equipped': 'Getragen',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Angriffskraft',
     'item.attackPowerTwoHand': 'Zweihändige Angriffskraft',
@@ -1589,6 +1590,9 @@ export const germanLayer: LanguageLayer = {
     'exit.chaosOpen': 'Schließe das Chaos-Fenster, bevor du das Spiel verlässt.',
     'exit.noAnswer': 'Der Server hat nicht geantwortet. Es wird trotzdem beendet.',
     'options.minimapCorner': 'Minikarte in der Ecke',
+    'options.compareTooltips': 'Mit Getragenem vergleichen',
+    'options.compare.shift': 'Shift halten',
+    'options.compare.always': 'Immer',
     'minimap.center': 'Zentrieren',
     'login.id': 'ID',
     'login.password': 'Passwort',

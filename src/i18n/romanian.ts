@@ -1017,6 +1017,7 @@ export const romanianLayer: LanguageLayer = {
       'Penalizarea ține până la următoarea bătălie de la Crywolf.',
 
     'item.thisItem': 'acest obiect',
+    'item.equipped': 'Echipat',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Putere de atac',
     'item.attackPowerTwoHand': 'Putere de atac cu două mâini',
@@ -1577,6 +1578,9 @@ export const romanianLayer: LanguageLayer = {
     'exit.chaosOpen': 'Închide fereastra Chaos înainte să ieși din joc.',
     'exit.noAnswer': 'Serverul nu a răspuns. Ieșim oricum.',
     'options.minimapCorner': 'Minihartă în colț',
+    'options.compareTooltips': 'Compară cu ce e echipat',
+    'options.compare.shift': 'Ține Shift',
+    'options.compare.always': 'Mereu',
     'minimap.center': 'Centrează',
     'login.id': 'ID',
     'login.password': 'Parolă',

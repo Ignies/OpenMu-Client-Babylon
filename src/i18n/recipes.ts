@@ -230,6 +230,9 @@ export const EN_TEXT = {
   'options.uiScale': 'Interface size',
   'options.lockWindows': 'Lock windows',
   'options.minimapCorner': 'Minimap in the corner',
+  'options.compareTooltips': 'Compare with worn',
+  'options.compare.shift': 'Hold Shift',
+  'options.compare.always': 'Always',
   'options.resetWindows': 'Reset windows',
   'options.stateWarnings': 'Warning notices',
   'options.volume': 'Volume',
@@ -1255,6 +1258,7 @@ export const EN_TEXT = {
 
   // ---- item tooltip ------------------------------------------------------
   'item.thisItem': 'this item',
+  'item.equipped': 'Equipped',
   'item.excellentPrefix': 'Excellent {name}',
   'item.ancientPrefix': 'Ancient {name}',
   'item.takeItemOffFirst': 'Take the item off before upgrading it',

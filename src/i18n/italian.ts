@@ -1020,6 +1020,7 @@ export const italianLayer: LanguageLayer = {
       'La penalità vale fino alla prossima battaglia di Crywolf.',
 
     'item.thisItem': 'questo oggetto',
+    'item.equipped': 'Equipaggiato',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Potenza d’attacco',
     'item.attackPowerTwoHand': 'Potenza d’attacco a due mani',
@@ -1584,6 +1585,9 @@ export const italianLayer: LanguageLayer = {
     'exit.chaosOpen': 'Chiudi la finestra del Chaos prima di uscire dal gioco.',
     'exit.noAnswer': 'Il server non ha risposto. Si esce comunque.',
     'options.minimapCorner': 'Minimappa nell’angolo',
+    'options.compareTooltips': 'Confronta con l’equipaggiato',
+    'options.compare.shift': 'Tieni Shift',
+    'options.compare.always': 'Sempre',
     'minimap.center': 'Centra',
     'login.id': 'ID',
     'login.password': 'Password',

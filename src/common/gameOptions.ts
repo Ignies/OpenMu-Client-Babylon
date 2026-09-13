@@ -184,6 +184,11 @@ export type GameOptions = {
    */
   minimapCorner: boolean;
   /**
+   * The worn item beside the hovered one, with the lines that differ marked
+   * up or down: 0 off / 1 while Shift is held / 2 always.
+   */
+  compareTooltips: number;
+  /**
    * Item names in English whatever the interface language is. The language
    * packs translate them (`Data/Local/<pack>/item_<lang>.bmd`), which reads
    * well but leaves a trader unable to match what a forum or a price list
@@ -224,6 +229,9 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   vignette: [0, 9],
   sunShafts: [0, 9],
   lootZen: [0, 9],
+  // Literal rather than `COMPARE_TOOLTIP_MAX`: itemCompare.ts imports this
+  // module, so naming it here would close an import cycle.
+  compareTooltips: [0, 2],
   uiScale: [0, UI_SCALE_MAX],
   renderDistance: [0, RENDER_DISTANCE_MAX],
   grassDensity: [0, 9],
@@ -280,6 +288,7 @@ const DEFAULTS: GameOptions = {
   stateWarnings: true,
   blockBrowserKeys: true,
   minimapCorner: true,
+  compareTooltips: 2,
   englishItemNames: false,
 };
 

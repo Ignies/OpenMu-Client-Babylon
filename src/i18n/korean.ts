@@ -986,6 +986,7 @@ export const koreanLayer: LanguageLayer = {
     'event.cwNotice4c': '위 벌칙은 다음 크라이울프 전투까지 유지됩니다.',
 
     'item.thisItem': '이 아이템',
+    'item.equipped': '착용 중',
     'item.excellentPrefix': '엑설런트 {name}',
     'item.attackPower': '공격력',
     'item.attackPowerTwoHand': '양손 공격력',
@@ -1536,6 +1537,9 @@ export const koreanLayer: LanguageLayer = {
     'exit.chaosOpen': '카오스 창을 닫은 뒤에 게임을 종료하세요.',
     'exit.noAnswer': '서버가 응답하지 않았습니다. 그대로 나갑니다.',
     'options.minimapCorner': '구석에 미니맵',
+    'options.compareTooltips': '착용 중인 장비와 비교',
+    'options.compare.shift': 'Shift 누를 때',
+    'options.compare.always': '항상',
     'minimap.center': '가운데로',
     'login.id': 'ID',
     'login.password': '비밀번호',

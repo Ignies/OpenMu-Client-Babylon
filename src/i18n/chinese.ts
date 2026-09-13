@@ -982,6 +982,7 @@ export const chineseLayer: LanguageLayer = {
     'event.cwNotice4c': '以上惩罚持续到下一次克里沃夫战役。',
 
     'item.thisItem': '这件物品',
+    'item.equipped': '已装备',
     'item.excellentPrefix': '卓越的{name}',
     'item.attackPower': '攻击力',
     'item.attackPowerTwoHand': '双手攻击力',
@@ -1530,6 +1531,9 @@ export const chineseLayer: LanguageLayer = {
     'exit.chaosOpen': '请先关闭混沌合成窗口再退出游戏。',
     'exit.noAnswer': '服务器没有回应，仍然退出。',
     'options.minimapCorner': '角落小地图',
+    'options.compareTooltips': '与已装备对比',
+    'options.compare.shift': '按住 Shift',
+    'options.compare.always': '始终',
     'minimap.center': '居中',
     'login.id': '账号',
     'login.password': '密码',

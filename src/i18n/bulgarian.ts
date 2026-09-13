@@ -1007,6 +1007,7 @@ export const bulgarianLayer: LanguageLayer = {
     'event.cwNotice4c': 'Наказанието важи до следващата битка при Crywolf.',
 
     'item.thisItem': 'този предмет',
+    'item.equipped': 'Носено',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Сила на атаката',
     'item.attackPowerTwoHand': 'Сила на атаката с две ръце',
@@ -1569,6 +1570,9 @@ export const bulgarianLayer: LanguageLayer = {
     'exit.chaosOpen': 'Затвори прозореца на Хаоса, преди да излезеш от играта.',
     'exit.noAnswer': 'Сървърът не отговори. Излизане въпреки това.',
     'options.minimapCorner': 'Миникарта в ъгъла',
+    'options.compareTooltips': 'Сравнение с носеното',
+    'options.compare.shift': 'Със Shift',
+    'options.compare.always': 'Винаги',
     'minimap.center': 'Центрирай',
     'login.id': 'ID',
     'login.password': 'Парола',

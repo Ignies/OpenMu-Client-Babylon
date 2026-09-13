@@ -988,6 +988,7 @@ export const japaneseLayer: LanguageLayer = {
     'event.cwNotice4c': '上のペナルティは次のクライウルフ戦まで続きます。',
 
     'item.thisItem': 'このアイテム',
+    'item.equipped': '装備中',
     'item.excellentPrefix': 'エクセレント{name}',
     'item.attackPower': '攻撃力',
     'item.attackPowerTwoHand': '両手攻撃力',
@@ -1538,6 +1539,9 @@ export const japaneseLayer: LanguageLayer = {
     'exit.chaosOpen': 'カオスウィンドウを閉じてからゲームを終了してください。',
     'exit.noAnswer': 'サーバーから応答がありません。そのまま終了します。',
     'options.minimapCorner': '隅にミニマップ',
+    'options.compareTooltips': '装備中と比較',
+    'options.compare.shift': 'Shift 押下中',
+    'options.compare.always': '常に',
     'minimap.center': '中央に戻す',
     'login.id': 'ID',
     'login.password': 'パスワード',
