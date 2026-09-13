@@ -14,6 +14,18 @@ describe('which bot collects a listing', () => {
     expect(picked.bot).toBeNull();
     expect((picked as { reason: string }).reason).toMatch(/busy/);
   });
+
+  test('a bot whose bag has no room for the item is passed over for one that has', () => {
+    const full = { ...bot('MKT001'), hasRoom: false };
+    const roomy = { ...bot('MKT002'), hasRoom: true };
+    expect(pickForListing([full, roomy], null).bot?.name).toBe('MKT002');
+  });
+
+  test('nobody when every idle bot is full, and says so', () => {
+    const picked = pickForListing([{ ...bot('MKT001'), hasRoom: false }, bot('MKT002', true)], null);
+    expect(picked.bot).toBeNull();
+    expect((picked as { reason: string }).reason).toMatch(/full/);
+  });
 });
 
 describe('which bot delivers or returns', () => {

@@ -14,9 +14,17 @@ export type Runner = {
   busy: boolean;
   /** Zen the server last reported for this bot, null until it said. */
   zen: number | null;
+  /** Whether the item in question would fit in its bag. Absent means yes. */
+  hasRoom?: boolean;
 };
 
-/** The bot to send for a listing, or null with the reason nobody can go. */
+/**
+ * The bot to send for a listing, or null with the reason nobody can go.
+ *
+ * A collection needs an idle bot with room for the item: a bot whose bag is
+ * full is passed over for one that is not, rather than sent to open a trade
+ * the server will fail. A claim or a return can only be the holder's.
+ */
 export function pickForListing(
   bots: Runner[],
   holder: string | null
@@ -27,8 +35,10 @@ export function pickForListing(
     if (own.busy) return { bot: null, reason: `bot ${holder} holds the item and is busy` };
     return { bot: own };
   }
-  const idle = bots.find(b => !b.busy);
-  return idle ? { bot: idle } : { bot: null, reason: 'every bot is busy' };
+  const idle = bots.filter(b => !b.busy);
+  if (idle.length === 0) return { bot: null, reason: 'every bot is busy' };
+  const roomy = idle.find(b => b.hasRoom !== false);
+  return roomy ? { bot: roomy } : { bot: null, reason: 'every idle bot is full' };
 }
 
 /** The bot to send with `amount` Zen, or null with the reason nobody can. */
