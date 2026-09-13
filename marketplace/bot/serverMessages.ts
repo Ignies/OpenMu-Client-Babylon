@@ -33,6 +33,8 @@ export class ServerMessages {
 
   /** The last thing the server said, for a failure that wants to quote it. */
   latest: string | null = null;
+  /** How many it has said; a caller remembers the count to spot a new one. */
+  count = 0;
 
   constructor(
     connection: BotConnection,
@@ -60,6 +62,7 @@ export class ServerMessages {
       if (!text) return;
 
       this.latest = text;
+      this.count++;
       this.log(`server says (${KIND[packet.Type] ?? packet.Type}): ${text}`);
     } catch {
       // A message we cannot parse is not worth failing a handover over.

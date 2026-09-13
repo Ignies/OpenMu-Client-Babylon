@@ -205,6 +205,22 @@ describe('TradeSession.mismatch on which item', () => {
   });
 });
 
+describe('a request nobody answered', () => {
+  it('is withdrawn with the server\'s cancel, so the partner is not left waiting', () => {
+    const { fake, trade } = session();
+    void trade.requestWith(7).catch(() => {});
+    expect(fake.sent.some(s => s.code === CANCEL_CODE)).toBe(false);
+
+    // Nothing came back. A plain cancel would do nothing, since no trade opened.
+    trade.cancel();
+    expect(fake.sent.some(s => s.code === CANCEL_CODE)).toBe(false);
+
+    trade.abandonRequest();
+    expect(fake.sent.some(s => s.code === CANCEL_CODE)).toBe(true);
+    expect(trade.isOpen).toBe(false);
+  });
+});
+
 describe('an item that arrives with the answer', () => {
   it('is kept: the table is cleared when the request goes out, not when it is answered', async () => {
     const { fake, trade } = session();

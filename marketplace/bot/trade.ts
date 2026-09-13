@@ -229,6 +229,20 @@ export class TradeSession {
     this.open = false;
   }
 
+  /**
+   * Withdraws a request nobody answered.
+   *
+   * Asking puts the partner into the server's "trade requested" state, and
+   * they stay there until they answer or the asker cancels. A bot that just
+   * walked away left the customer stuck: every later request, from any bot,
+   * was refused in silence. The server's cancel frees both sides, so it is
+   * sent even though no trade ever opened.
+   */
+  abandonRequest(): void {
+    this.connection.send(TradeCancelPacket.createPacket().buffer);
+    this.open = false;
+  }
+
   /** Resolves when the server reports the trade closed, either way. */
   waitForFinish(timeoutMs = 60_000): Promise<TradeOutcome> {
     return new Promise<TradeOutcome>(resolve => {
