@@ -214,3 +214,37 @@ describe('leases keep two bots off one handover', () => {
     expect(store.leaseHolder('listing:a')).toBe('MKT002');
   });
 });
+
+describe('history', () => {
+  test('tells a seller how each listing ended, and names the bot', () => {
+    const sold = listed('alice', 1000);
+    store.claim(sold, 'bob', 'BobDk');
+    store.settleSale(sold);
+    const dropped = store.createPending({ seller: 'alice', sellerCharacter: 'alice', price: 5, item: anItem, category: 'jewels' }).id;
+    store.drop(dropped, 'the trade was refused');
+    const waiting = store.createPending({ seller: 'alice', sellerCharacter: 'alice', price: 7, item: anItem, category: 'jewels' }).id;
+
+    const rows = store.historyFor('alice');
+    const byId = new Map(rows.map(r => [r.id, r]));
+    expect(byId.get(sold)).toMatchObject({ kind: 'sale', status: 'success', bot: 'MKT001', note: 'sold to BobDk' });
+    expect(byId.get(dropped)).toMatchObject({ kind: 'sale', status: 'failed', note: 'the trade was refused' });
+    expect(byId.get(waiting)).toMatchObject({ kind: 'sale', status: 'pending' });
+  });
+
+  test('shows a buyer their purchase, and a seller their payout', () => {
+    const id = listed('alice', 1000);
+    store.claim(id, 'bob', 'BobDk');
+    store.settleSale(id);
+    expect(store.historyFor('bob')[0]).toMatchObject({ kind: 'purchase', status: 'success', note: 'bought' });
+
+    store.requestPayout('alice', 'alice');
+    const pending = store.historyFor('alice').find(r => r.kind === 'payout');
+    expect(pending).toMatchObject({ status: 'pending', zen: 1000 });
+
+    store.takeBalance('alice');
+    store.clearPayoutRequest('alice');
+    db.query('INSERT INTO audit (at, account, event, detail) VALUES (?, ?, ?, ?)').run(Date.now(), 'alice', 'payout paid', JSON.stringify({ zen: 1000 }));
+    const paid = store.historyFor('alice').find(r => r.kind === 'payout');
+    expect(paid).toMatchObject({ status: 'success', zen: 1000, note: 'paid out' });
+  });
+});

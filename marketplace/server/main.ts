@@ -137,6 +137,15 @@ Bun.serve({
         return json(page, 200, cors);
       }
 
+      if (path === '/api/market/history' && req.method === 'GET') {
+        if (reads.hammering(ip)) return json({ error: TOO_MANY }, 429, cors);
+
+        const auth = authenticate({}, url, cors);
+        if ('error' in auth) return auth.error;
+
+        return json({ history: store.historyFor(auth.account) }, 200, cors);
+      }
+
       if (path === '/api/market/mine' && req.method === 'GET') {
         if (reads.hammering(ip)) return json({ error: TOO_MANY }, 429, cors);
 

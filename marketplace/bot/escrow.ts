@@ -75,6 +75,9 @@ const PARTNER_PATIENCE_MS = 90_000;
 /** The balance arrives in its own packet, so it is read a moment after. */
 const BALANCE_SETTLE_MS = 1500;
 
+/** The server answers our own offer at once, or it refused it. */
+const OWN_ITEM_PATIENCE_MS = 8_000;
+
 /** The inventory list follows the trade result by a packet or two. */
 const BAG_SETTLE_MS = 5000;
 
@@ -562,8 +565,21 @@ export function payOut(
     trade.setMoney(amount);
     log(`offered ${amount} Zen to ${sellerCharacter}`);
 
-    // The seller has nothing to put up, so there is nothing to wait for.
-    return finish(await trade.settle({ expectItems: 0, expectMoney: 0 }), log);
+    // The server says yes to an offer it took and nothing to one it refused,
+    // which is what a bot short of Zen gets. Confirming anyway would close a
+    // trade with nothing on it and book the seller as paid.
+    try {
+      await trade.waitForTerms({ expectOwnMoney: amount }, OWN_ITEM_PATIENCE_MS);
+    } catch {
+      trade.cancel();
+      return { ok: false, reason: `the server would not take ${amount} Zen from this bot` };
+    }
+
+    // The seller has nothing to put up, so there is nothing more to wait for.
+    return finish(
+      await trade.settle({ expectItems: 0, expectMoney: 0, expectOwnMoney: amount }),
+      log
+    );
   });
 }
 

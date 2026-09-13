@@ -15,6 +15,7 @@ import {
   type Tab,
 } from '../../../../../marketplace/state';
 import type { Listing } from '../../../../../marketplace/mockListings';
+import type { HistoryEntry } from '../../../../../marketplace/api';
 import { CONTENT, FRAME_H, FRAME_SRC, FRAME_W, PLAQUE, RAIL } from './layout';
 
 export const MARKETPLACE_ID = 'marketplace';
@@ -25,6 +26,7 @@ const TABS: { id: Tab; labelKey: TextKey }[] = [
   { id: 'browse', labelKey: 'marketplace.tab.browse' },
   { id: 'mine', labelKey: 'marketplace.tab.mine' },
   { id: 'sell', labelKey: 'marketplace.tab.sell' },
+  { id: 'history', labelKey: 'marketplace.tab.history' },
 ];
 
 /** Price against the going rate, which is the number that says "deal". */
@@ -198,7 +200,7 @@ const Rail = observer(() => {
 
   return (
     <div className="mp-rail" style={RAIL} data-no-drag>
-      {Marketplace.tab !== 'mine' && (
+      {Marketplace.tab !== 'mine' && Marketplace.tab !== 'history' && (
         <>
           <div className="mp-rail-list">
             {CATEGORIES.map(c => (
@@ -232,7 +234,7 @@ const Rail = observer(() => {
         </>
       )}
 
-      {Marketplace.tab !== 'sell' && (
+      {Marketplace.tab !== 'sell' && Marketplace.tab !== 'history' && (
         <div className="mp-rail-foot">
           <div className="mp-count">
             {t('marketplace.listings', { count: Marketplace.matching.length })}
@@ -383,6 +385,62 @@ const SellTab = observer(() => {
   );
 });
 
+const STATUS_KEY: Record<HistoryEntry['status'], TextKey> = {
+  success: 'marketplace.status.success',
+  failed: 'marketplace.status.failed',
+  pending: 'marketplace.status.pending',
+};
+
+const KIND_KEY: Record<HistoryEntry['kind'], TextKey> = {
+  sale: 'marketplace.kind.sale',
+  purchase: 'marketplace.kind.purchase',
+  payout: 'marketplace.kind.payout',
+};
+
+/**
+ * What happened, newest first: each listing the player sold or tried to,
+ * each purchase, each payout - with the bot that carried it and how it
+ * ended. The service's own words for the ending sit under the item name.
+ */
+const HistoryTab = observer(() => {
+  const rows = Marketplace.history;
+  return (
+    <div className="mp-hist">
+      <div className="mp-hist-row mp-hist-head">
+        <span />
+        <span>{t('marketplace.colItem')}</span>
+        <span>{t('marketplace.colBot')}</span>
+        <span>{t('marketplace.colStatus')}</span>
+        <span>{t('marketplace.colWhen')}</span>
+        <span className="mp-row-price-head">{t('marketplace.price')}</span>
+      </div>
+      {rows.length === 0 && <div className="mp-empty">{t('marketplace.historyEmpty')}</div>}
+      {rows.map(row => (
+        <div key={row.id} className="mp-hist-row">
+          <div className="mp-row-icon">{row.item && <ItemIcon item={row.item} />}</div>
+          <div className="mp-hist-what">
+            <div className={`mp-card-name${row.item ? nameClass(row.item) : ''}`}>
+              {row.item ? displayName(row.item) : t(KIND_KEY[row.kind])}
+            </div>
+            <div className="mp-hist-note" title={row.note}>
+              {row.item ? `${t(KIND_KEY[row.kind])} - ${row.note}` : row.note}
+            </div>
+          </div>
+          <div className="mp-hist-bot">{row.bot ?? '-'}</div>
+          <div>
+            <span className={`mp-status is-${row.status}`}>{t(STATUS_KEY[row.status])}</span>
+          </div>
+          <div className="mp-row-age">{sinceLabel(row.at)}</div>
+          <div className="mp-row-price">
+            {formatZen(row.zen)}
+            <span className="mp-zen">{t('common.zen')}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+});
+
 const ConfirmDialog = observer(() => {
   const listing = Marketplace.confirming;
   if (!listing) return null;
@@ -449,7 +507,7 @@ export const MarketplaceWindow = observer(() => {
 
   const hovered = Marketplace.hoveredListing;
   const cards = Marketplace.pageItems;
-  const browsing = Marketplace.tab !== 'sell';
+  const browsing = Marketplace.tab === 'browse' || Marketplace.tab === 'mine';
 
   return (
     <div
@@ -578,6 +636,8 @@ export const MarketplaceWindow = observer(() => {
               {cards.length === 0 && <EmptyState />}
             </div>
           )
+        ) : Marketplace.tab === 'history' ? (
+          <HistoryTab />
         ) : (
           <SellTab />
         )}

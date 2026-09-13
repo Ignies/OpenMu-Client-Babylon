@@ -445,3 +445,130 @@ export function leaseHolder(key: string): string | null {
     | undefined;
   return row && row.until >= Date.now() ? row.worker : null;
 }
+
+// ---- history ---------------------------------------------------------------
+
+export type HistoryStatus = 'success' | 'failed' | 'pending';
+
+export type HistoryEntry = {
+  id: string;
+  /** What the player was in it: seller, buyer, or the one collecting Zen. */
+  kind: 'sale' | 'purchase' | 'payout';
+  item: Item | null;
+  /** The price of a listing, or the Zen of a payout. */
+  zen: number;
+  /** The bot that carried it, once one did. */
+  bot: string | null;
+  status: HistoryStatus;
+  /** The service's own words for how it ended, or where it is. */
+  note: string;
+  at: number;
+};
+
+const HISTORY_LIMIT = 100;
+
+/** The last thing the audit says about a listing, for the note. */
+function lastWord(listing: string): string | null {
+  const row = db
+    .query(
+      `SELECT event, detail FROM audit WHERE listing = ?
+         AND event IN ('listing dropped', 'listing cancelled', 'claim released', 'listing stuck',
+                       'listing sold', 'return refused', 'listing active')
+       ORDER BY id DESC LIMIT 1`
+    )
+    .get(listing) as { event: string; detail: string | null } | undefined;
+  if (!row) return null;
+  try {
+    const detail = row.detail ? (JSON.parse(row.detail) as { why?: unknown }) : {};
+    if (typeof detail.why === 'string') return detail.why;
+  } catch {
+    // The event name is enough.
+  }
+  return row.event;
+}
+
+function statusOf(state: ListingState): HistoryStatus {
+  if (state === 'sold') return 'success';
+  if (state === 'cancelled' || state === 'stuck') return 'failed';
+  return 'pending';
+}
+
+/**
+ * Everything this account has been part of, newest first: what they sold or
+ * tried to sell, what they bought, and what they were paid. Every row names
+ * the bot that carried it, so "the trader never came" has a name to look
+ * for in the worker's log.
+ */
+export function historyFor(account: string): HistoryEntry[] {
+  const listings = db
+    .query(
+      `SELECT * FROM listings WHERE seller = ? OR buyer = ?
+       ORDER BY updated_at DESC LIMIT ?`
+    )
+    .all(account, account, HISTORY_LIMIT) as ListingRow[];
+
+  const entries: HistoryEntry[] = listings.map(row => {
+    const purchase = row.buyer === account && row.seller !== account;
+    const state = row.state;
+    let note = lastWord(row.id) ?? state;
+    if (state === 'sold') note = purchase ? 'bought' : `sold to ${row.buyer_char ?? row.buyer ?? 'somebody'}`;
+    if (state === 'cancelled' && note === 'listing cancelled') note = 'returned to you';
+    return {
+      id: row.id,
+      kind: purchase ? 'purchase' : 'sale',
+      item: JSON.parse(row.item_json) as Item,
+      zen: row.price,
+      bot: row.holder,
+      status: statusOf(state),
+      note,
+      at: row.updated_at,
+    };
+  });
+
+  const payouts = db
+    .query(
+      `SELECT id, at, event, detail FROM audit WHERE account = ?
+         AND event IN ('payout paid', 'payout failed')
+       ORDER BY id DESC LIMIT ?`
+    )
+    .all(account, HISTORY_LIMIT) as { id: number; at: number; event: string; detail: string | null }[];
+  for (const row of payouts) {
+    let zen = 0;
+    let note = row.event === 'payout paid' ? 'paid out' : 'could not be paid';
+    try {
+      const detail = row.detail ? (JSON.parse(row.detail) as { zen?: unknown }) : {};
+      if (typeof detail.zen === 'number') zen = detail.zen;
+      else if (typeof row.detail === 'string' && row.event === 'payout failed') note = row.detail.replace(/^"|"$/g, '');
+    } catch {
+      // The event name is enough.
+    }
+    entries.push({
+      id: `payout-${row.id}`,
+      kind: 'payout',
+      item: null,
+      zen,
+      bot: null,
+      status: row.event === 'payout paid' ? 'success' : 'failed',
+      note,
+      at: row.at,
+    });
+  }
+
+  const open = db.query('SELECT character, requested_at FROM payout_requests WHERE account = ?').get(account) as
+    | { character: string; requested_at: number }
+    | undefined;
+  if (open) {
+    entries.push({
+      id: 'payout-open',
+      kind: 'payout',
+      item: null,
+      zen: balance(account),
+      bot: null,
+      status: 'pending',
+      note: `a trader is coming to ${open.character}`,
+      at: open.requested_at,
+    });
+  }
+
+  return entries.sort((a, b) => b.at - a.at).slice(0, HISTORY_LIMIT);
+}
