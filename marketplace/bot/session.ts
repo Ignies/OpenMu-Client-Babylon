@@ -29,6 +29,9 @@ import { BotConnection, type Frame } from './connection';
  * than leaving a half-logged-in bot for the escrow queue to trip over.
  */
 
+/** `CharacterStatus.GameMaster`, a bit in `CharacterInformation.Status`. */
+const GAME_MASTER_STATUS = 32;
+
 /** The client's own field widths for the login frame. */
 const MAX_USERNAME_LENGTH = 10;
 const MAX_PASSWORD_LENGTH = 10;
@@ -65,6 +68,13 @@ export type BotIdentity = {
 
 export class BotSession {
   character: CharacterEntry | null = null;
+  /**
+   * Whether the character entered the world as a game master. Read from
+   * `CharacterInformation`, the packet the server answers a select with: the
+   * character list also names a status, but in four bits, and the game
+   * master value is 32.
+   */
+  gameMaster = false;
 
   constructor(
     private readonly connection: BotConnection,
@@ -294,6 +304,7 @@ export class BotSession {
     this.connection.send(packet.buffer);
 
     const info = new CharacterInformationPacket(view(await answer));
+    this.gameMaster = (Number(info.Status) & GAME_MASTER_STATUS) !== 0;
 
     // Without this the server never starts streaming the world: it holds the
     // player until the client says it has finished loading the map

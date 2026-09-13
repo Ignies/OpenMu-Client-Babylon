@@ -97,6 +97,11 @@ export interface PresenceAnswer {
   account: string;
   online: boolean;
   connections: number;
+  /**
+   * The game server ports the account's live sockets dialled, without
+   * repeats. A bot that plays on one port reaches only the players on it.
+   */
+  ports: number[];
   /** Now while online; when the last socket closed otherwise; null if never seen. */
   lastSeenAt: number | null;
   /**
@@ -194,7 +199,12 @@ export class ConnectionPresence {
   /** The page's nonce, when the socket URL carried a well-formed one. */
   private readonly session: string | null;
 
-  constructor(session: string | null = null) {
+  /**
+   * @param targetPort The game server port this socket dialled, when known.
+   * The marketplace's bots each live on one game server, and a player is
+   * only reachable by the bot on theirs; this is how presence says which.
+   */
+  constructor(session: string | null = null, readonly targetPort: number | null = null) {
     open.add(this);
 
     // The proxy screens the query string before it gets here, but the map
@@ -431,10 +441,17 @@ export function lookup(account: string): PresenceAnswer {
   const connections = set ? set.size : 0;
   const now = Date.now();
 
+  const ports = set
+    ? [...new Set([...set].map(c => c.targetPort).filter((p): p is number => p !== null))].sort(
+        (a, b) => a - b
+      )
+    : [];
+
   return {
     account,
     online: connections > 0,
     connections,
+    ports,
     lastSeenAt: connections > 0 ? now : (lastSeen.get(key) ?? null),
     startedAt,
     now,

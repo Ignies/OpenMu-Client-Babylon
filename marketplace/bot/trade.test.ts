@@ -8,6 +8,7 @@ import {
   TradeFinishedTradeResultEnum,
   TradeItemAddedPacket,
   TradeMoneyUpdatePacket,
+  TradeMoneySetResponsePacket,
   TradeRequestAnswerPacket,
   ItemMovedPacket,
   ItemAddedToInventoryPacket,
@@ -104,6 +105,13 @@ function itemReceived(inventorySlot: number) {
   return p;
 }
 
+/** The server's yes to our own money offer. */
+function moneySet() {
+  const p = TradeMoneySetResponsePacket.createPacket();
+  p.writeHeader().writeLength();
+  return p;
+}
+
 function finished(result: TradeFinishedTradeResultEnum) {
   const p = TradeFinishedPacket.createPacket();
   p.writeHeader().writeLength();
@@ -194,6 +202,49 @@ describe('TradeSession.mismatch on which item', () => {
     trade.theirItems.clear();
     fake.deliver(itemAdded(0, gloves));
     await expect(waiting).resolves.toBeUndefined();
+  });
+});
+
+describe('an item that arrives with the answer', () => {
+  it('is kept: the table is cleared when the request goes out, not when it is answered', async () => {
+    const { fake, trade } = session();
+    fake.deliver(itemAdded(0)); // a stale entry from some earlier trade
+    const opening = trade.requestWith(7);
+    expect(trade.theirItems.size).toBe(0);
+    // The answer and the partner's item in one chunk: the item is recorded
+    // before the answer's continuation runs.
+    fake.deliver(opened());
+    fake.deliver(itemAdded(3));
+    await opening;
+    expect(trade.theirItems.has(3)).toBe(true);
+  });
+});
+
+describe('TradeSession.mismatch on our own Zen', () => {
+  it('does not count Zen the server never acknowledged', async () => {
+    const { fake, trade } = session();
+    const opening = trade.requestWith(7);
+    fake.deliver(opened());
+    await opening;
+
+    trade.setMoney(5000);
+    expect(trade.mismatch({ expectOwnMoney: 5000 })).toMatch(/expected 5000 of our Zen/);
+    // A bot without the Zen gets silence, and a confirm now would close a
+    // trade with nothing on it.
+    expect(trade.armConfirm({ expectOwnMoney: 5000 })).toMatch(/our Zen/);
+    expect(fake.sent.some(s => s.code === CONFIRM_CODE)).toBe(false);
+  });
+
+  it('counts it once the server says it took the offer', async () => {
+    const { fake, trade } = session();
+    const opening = trade.requestWith(7);
+    fake.deliver(opened());
+    await opening;
+
+    trade.setMoney(5000);
+    fake.deliver(moneySet());
+    expect(trade.myMoney).toBe(5000);
+    expect(trade.mismatch({ expectOwnMoney: 5000 })).toBeNull();
   });
 });
 

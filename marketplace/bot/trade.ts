@@ -41,6 +41,8 @@ const CODE = {
   moneyUpdate: { code: 0x3b },
   buttonState: { code: 0x3c },
   finished: { code: 0x3d },
+  /** The server took the Zen we asked to put up. Silence means it did not. */
+  moneySet: { code: 0x3a },
   /** Our own item move landed; `TargetStorageType` says where. */
   itemMoved: { code: 0x24 },
   /** An item arrived in our bag, carrying the slot the server chose. */
@@ -81,6 +83,14 @@ export type TradeTerms = {
    * listing's own description, checked here before any confirm goes out.
    */
   expectItemMatching?: (data: Uint8Array) => boolean;
+  /**
+   * Zen *we* must have on the table.
+   *
+   * The server answers a money offer it accepted, and says nothing to one it
+   * refused - a bot without that much Zen. A payout that confirmed regardless
+   * would complete a trade with nothing on it and be booked as paid.
+   */
+  expectOwnMoney?: number;
 };
 
 export class TradeSession {
@@ -98,6 +108,10 @@ export class TradeSession {
   readonly receivedSlots: number[] = [];
   theirMoney = 0;
   theirConfirm = false;
+  /** Zen the server confirmed is on our side of the table. */
+  myMoney = 0;
+  /** The last amount we asked to put up, until the server answers. */
+  private offeredMoney = 0;
   partner: string | null = null;
 
   private open = false;
@@ -121,6 +135,7 @@ export class TradeSession {
 
   /** Asks a player in view to trade. Their id only exists while they are visible. */
   async requestWith(playerId: number, timeoutMs = 20_000): Promise<void> {
+    this.clearTable();
     const answer = this.connection.expect(CODE.answer, timeoutMs, 'TradeRequestAnswer');
     const packet = TradeRequestPacket.createPacket();
     packet.PlayerId = playerId;
@@ -130,6 +145,7 @@ export class TradeSession {
 
   /** Accepts a trade the partner opened. */
   async accept(timeoutMs = 20_000): Promise<void> {
+    this.clearTable();
     const answer = this.connection.expect(CODE.answer, timeoutMs, 'TradeRequestAnswer');
     const packet = TradeRequestResponsePacket.createPacket();
     packet.TradeAccepted = true;
@@ -137,21 +153,35 @@ export class TradeSession {
     this.readAnswer(await answer);
   }
 
+  /**
+   * Forgets the last trade's table, before asking for the next one - never
+   * on the answer. A partner who puts their item up the instant the trade
+   * opens has it arrive in the same chunk as the answer; the item is
+   * recorded as the chunk is read, and the answer's continuation runs after.
+   * Clearing there wiped an item that was already on the table, and the bot
+   * then waited a minute for an item it had just forgotten.
+   */
+  private clearTable(): void {
+    this.theirItems.clear();
+    this.myItems.clear();
+    this.receivedSlots.length = 0;
+    this.theirMoney = 0;
+    this.myMoney = 0;
+    this.offeredMoney = 0;
+    this.theirConfirm = false;
+  }
+
   private readAnswer(frame: Frame): void {
     const answer = new TradeRequestAnswerPacket(view(frame));
     if (!answer.Accepted) throw new Error('the trade was refused');
     this.open = true;
     this.partner = answer.Name;
-    this.theirItems.clear();
-    this.myItems.clear();
-    this.receivedSlots.length = 0;
-    this.theirMoney = 0;
-    this.theirConfirm = false;
     this.log(`trading with ${this.partner}`);
   }
 
-  /** Puts Zen on the table. */
+  /** Puts Zen on the table. `myMoney` says whether the server agreed. */
   setMoney(amount: number): void {
+    this.offeredMoney = amount;
     const packet = SetTradeMoneyPacket.createPacket();
     packet.Amount = amount;
     this.connection.send(packet.buffer);
@@ -284,6 +314,9 @@ export class TradeSession {
         if (!terms.expectItemMatching(data)) return 'the item on the table is not the one listed';
       }
     }
+    if (terms.expectOwnMoney !== undefined && this.myMoney !== terms.expectOwnMoney) {
+      return `expected ${terms.expectOwnMoney} of our Zen on the table, found ${this.myMoney}`;
+    }
     return null;
   }
 
@@ -320,6 +353,12 @@ export class TradeSession {
       case CODE.moneyUpdate.code: {
         const p = new TradeMoneyUpdatePacket(view(frame));
         this.theirMoney = p.MoneyAmount;
+        this.theirConfirm = false;
+        break;
+      }
+      case CODE.moneySet.code: {
+        // Only ever sent for an offer the server accepted.
+        this.myMoney = this.offeredMoney;
         this.theirConfirm = false;
         break;
       }

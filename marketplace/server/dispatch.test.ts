@@ -49,6 +49,26 @@ describe('a claimed listing', () => {
   });
 });
 
+describe('a player on another game server', () => {
+  test('is another bot\'s customer: the work waits, whatever its state', () => {
+    for (const state of ['pending', 'claimed', 'returning'] as const) {
+      const d = decide(fresh(state), true, NOW, false);
+      expect(d.kind).toBe('wait');
+      expect((d as { reason: string }).reason).toMatch(/another game server/);
+    }
+  });
+
+  test('is served when they are here, or when presence cannot say where', () => {
+    expect(decide(fresh('pending'), true, NOW, true)).toEqual({ kind: 'go' });
+    expect(decide(fresh('pending'), true, NOW, null)).toEqual({ kind: 'go' });
+  });
+
+  test('still loses a claim to its own deadline', () => {
+    const old = { ...fresh('claimed'), updatedAt: NOW - CLAIM_TTL_MS - 1 };
+    expect(decide(old, true, NOW, false).kind).toBe('release');
+  });
+});
+
 describe('a returning listing', () => {
   test('waits for the seller and never expires: the item is theirs', () => {
     const old = { ...fresh('returning'), updatedAt: NOW - 100 * PENDING_TTL_MS };

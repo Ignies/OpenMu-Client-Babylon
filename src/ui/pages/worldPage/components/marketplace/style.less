@@ -937,3 +937,79 @@
   color: @mp-ink;
   background: rgba(0, 0, 0, 0.24);
 }
+
+// ---- history -------------------------------------------------------------
+
+.mp-hist {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.mp-hist-row {
+  display: grid;
+  flex: 0 0 40px;
+  grid-template-columns: 30px minmax(0, 1fr) 72px 84px 62px 120px;
+  gap: 10px;
+  align-items: center;
+  padding: 0 6px;
+  border-bottom: 1px solid rgba(224, 188, 106, 0.09);
+}
+
+.mp-hist-head {
+  flex: 0 0 22px;
+  font-size: 10px;
+  color: fade(@mp-dim, 85%);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border-bottom-color: rgba(224, 188, 106, 0.28);
+}
+
+.mp-hist-what {
+  min-width: 0;
+}
+
+.mp-hist-note {
+  overflow: hidden;
+  font-size: 10px;
+  color: @mp-dim;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mp-hist-bot {
+  font-size: 11px;
+  color: @mp-ink;
+}
+
+/* How a past handover ended. */
+.mp-status {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
+  white-space: nowrap;
+  border: 1px solid;
+  border-radius: 3px;
+
+  &.is-success {
+    color: @mp-good;
+    background: fade(@mp-good, 10%);
+    border-color: fade(@mp-good, 35%);
+  }
+
+  &.is-failed {
+    color: @mp-bad;
+    background: fade(@mp-bad, 12%);
+    border-color: fade(@mp-bad, 40%);
+  }
+
+  &.is-pending {
+    color: @mp-gold;
+    background: fade(@mp-gold, 10%);
+    border-color: fade(@mp-gold, 40%);
+  }
+}

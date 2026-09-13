@@ -152,3 +152,22 @@ export function requestPayout(character: string) {
     })
   );
 }
+
+/** One thing that happened to this player in the market, as the service tells it. */
+export type HistoryEntry = {
+  id: string;
+  kind: 'sale' | 'purchase' | 'payout';
+  item: Item | null;
+  zen: number;
+  /** The bot that carried it, once one did. */
+  bot: string | null;
+  status: 'success' | 'failed' | 'pending';
+  note: string;
+  at: number;
+};
+
+export function history() {
+  return withTicket(t =>
+    request<{ history: HistoryEntry[] }>(`/history?ticket=${encodeURIComponent(t.ticket)}`)
+  );
+}

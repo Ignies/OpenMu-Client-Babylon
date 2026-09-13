@@ -1,11 +1,12 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import * as api from './api';
+import type { HistoryEntry } from './api';
 import { CATEGORIES, categoryOf, displayName, type CategoryId } from './categories';
 import { isOnSale, mergeCatalogue } from './catalogue';
 import { buildMockListings, type Listing } from './mockListings';
 import { i18n, t, type TextKey } from '../i18n';
 
-export type Tab = 'browse' | 'mine' | 'sell';
+export type Tab = 'browse' | 'mine' | 'sell' | 'history';
 export type Sort = 'newest' | 'price-asc' | 'price-desc' | 'deal';
 export type View = 'list' | 'grid';
 
@@ -74,6 +75,8 @@ class MarketplaceStore {
   flash: string | null = null;
   /** Zen the service is holding for this player, from sales made while away. */
   payoutOwed = 0;
+  /** What happened to this player's listings, purchases and payouts, newest first. */
+  history: HistoryEntry[] = [];
 
   /** Sell tab: which inventory item is picked, and the price typed for it. */
   sellPick: number | null = null;
@@ -87,6 +90,33 @@ class MarketplaceStore {
   /** Fills the catalogue with invented listings. Never call this in a live build. */
   seedFixtures(): void {
     this.listings = buildMockListings();
+    // A few invented rows for the history tab, one of each kind and status.
+    const kinds = ['sale', 'purchase', 'payout', 'sale', 'sale', 'purchase'] as const;
+    const statuses = ['success', 'failed', 'pending', 'pending', 'success', 'failed'] as const;
+    const notes = ['sold to Faelan', 'the trade was refused', 'a trader is coming', 'waiting', 'sold to Xanthe', 'nobody bought it'];
+    this.history = this.listings.slice(0, 6).map((l, i) => ({
+      id: `H${i}`,
+      kind: kinds[i],
+      item: kinds[i] === 'payout' ? null : l.item,
+      zen: kinds[i] === 'payout' ? 12_500_000 : l.price,
+      bot: statuses[i] === 'pending' && i === 3 ? null : `MKT00${(i % 3) + 1}`,
+      status: statuses[i],
+      note: notes[i],
+      at: Date.now() - i * 3_600_000 * 5,
+    }));
+  }
+
+  /** Pulls the history from the service. Offline, the fixtures stand. */
+  async loadHistory(): Promise<void> {
+    if (this.mode === 'offline') return;
+    try {
+      const { history } = await api.history();
+      runInAction(() => {
+        this.history = history;
+      });
+    } catch {
+      // The catalogue's own refresh reports the service being away.
+    }
   }
 
   /** No listings at all, as opposed to none matching the current filters. */
@@ -141,6 +171,7 @@ class MarketplaceStore {
         this.payoutOwed = own.balance;
         this.loading = false;
       });
+      if (this.tab === 'history') await this.loadHistory();
     } catch (error) {
       runInAction(() => {
         this.loading = false;
@@ -174,6 +205,7 @@ class MarketplaceStore {
     this.tab = tab;
     this.page = 0;
     this.confirming = null;
+    if (tab === 'history') void this.loadHistory();
   }
 
   setCategory(category: CategoryId): void {
