@@ -276,8 +276,6 @@ export const thaiLayer: LanguageLayer = {
     'inventory.repair': 'ซ่อม (L)',
     'inventory.personalShop': 'ร้านค้าส่วนตัว',
     'inventory.expand': 'เปิดกระเป๋าขยาย (K)',
-    'inventory.setOption': '[ออปชันเซต]',
-    'inventory.socketOption': '[ออปชันซ็อกเก็ต]',
 
     'vault.title': 'คลัง',
     'vault.unlocked': 'ปลดล็อกแล้ว',

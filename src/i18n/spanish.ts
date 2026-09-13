@@ -283,8 +283,6 @@ export const spanishLayer: LanguageLayer = {
     'inventory.repair': 'Reparar (L)',
     'inventory.personalShop': 'Tienda personal',
     'inventory.expand': 'Abrir el inventario ampliado (K)',
-    'inventory.setOption': '[Opción de set]',
-    'inventory.socketOption': '[Opción de socket]',
 
     'vault.title': 'Bóveda',
     'vault.unlocked': 'Abierta',

@@ -27,11 +27,7 @@ import { StorageKind } from '../../../../../common/itemStorage';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
-import {
-  MuItemWindow,
-  MuTableFrame,
-  WINDOW_WIDTH,
-} from '../../../../components/muWindow';
+import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,
@@ -63,19 +59,13 @@ import {
   MONEY_WIDTH,
   MONEY_X,
   MONEY_Y,
-  OPTION_WIDTH,
-  OPTION_Y,
   REPAIR_BUTTON_X,
   REPAIR_SPRITE,
   REPAIR_TOOLTIP,
   ROWS,
-  SET_OPTION_TEXT,
-  SET_OPTION_X,
   SHOP_BUTTON_X,
   SHOP_SPRITE,
   SHOP_TOOLTIP,
-  SOCKET_OPTION_TEXT,
-  SOCKET_OPTION_X,
   SQUARE,
   SQUARES,
   TITLE,
@@ -535,28 +525,6 @@ export const Inventory = observer(() => {
         }}
         onClick={() => (Store.inventoryEnabled = false)}
       />
-
-      {}
-      <div
-        className="inventory-option"
-        style={{
-          left: WINDOW_WIDTH * SET_OPTION_X,
-          top: OPTION_Y,
-          width: WINDOW_WIDTH * OPTION_WIDTH,
-        }}
-      >
-        {t(SET_OPTION_TEXT)}
-      </div>
-      <div
-        className="inventory-option"
-        style={{
-          left: WINDOW_WIDTH * SOCKET_OPTION_X,
-          top: OPTION_Y,
-          width: WINDOW_WIDTH * OPTION_WIDTH,
-        }}
-      >
-        {t(SOCKET_OPTION_TEXT)}
-      </div>
 
       {EQUIPMENT_SLOTS.map(info => (
         <EquipmentSlot

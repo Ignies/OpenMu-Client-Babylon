@@ -275,8 +275,6 @@ export const bulgarianLayer: LanguageLayer = {
     'inventory.repair': 'Поправи (L)',
     'inventory.personalShop': 'Личен магазин',
     'inventory.expand': 'Отвори разширената раница (K)',
-    'inventory.setOption': '[Опция за сет]',
-    'inventory.socketOption': '[Опция за socket]',
 
     'vault.title': 'Трезор',
     'vault.unlocked': 'Отключен',

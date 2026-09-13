@@ -275,8 +275,6 @@ export const italianLayer: LanguageLayer = {
     'inventory.repair': 'Ripara (L)',
     'inventory.personalShop': 'Negozio personale',
     'inventory.expand': 'Apri l’inventario esteso (K)',
-    'inventory.setOption': '[Opzione set]',
-    'inventory.socketOption': '[Opzione socket]',
 
     'vault.title': 'Deposito',
     'vault.unlocked': 'Sbloccato',

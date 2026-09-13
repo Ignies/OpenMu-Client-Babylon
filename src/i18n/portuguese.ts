@@ -283,8 +283,6 @@ export const portugueseLayer: LanguageLayer = {
     'inventory.repair': 'Reparar (L)',
     'inventory.personalShop': 'Loja pessoal',
     'inventory.expand': 'Abrir o inventário estendido (K)',
-    'inventory.setOption': '[Opção de set]',
-    'inventory.socketOption': '[Opção de socket]',
 
     'vault.title': 'Baú',
     'vault.unlocked': 'Destrancado',

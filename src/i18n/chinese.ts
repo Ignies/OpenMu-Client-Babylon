@@ -271,8 +271,6 @@ export const chineseLayer: LanguageLayer = {
     'inventory.repair': '修理（L）',
     'inventory.personalShop': '个人商店',
     'inventory.expand': '打开扩展背包（K）',
-    'inventory.setOption': '[套装属性]',
-    'inventory.socketOption': '[镶嵌属性]',
 
     'vault.title': '仓库',
     'vault.unlocked': '已解锁',
