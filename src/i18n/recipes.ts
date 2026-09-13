@@ -1251,6 +1251,8 @@ export const EN_TEXT = {
   'event.timeLeft': 'Time Left',
   /** Ours: the HUD event rows, when the gate is open right now. */
   'event.timerOpen': 'Open',
+  /** Ours: the server capped its answer at 255 minutes, so the wait is longer. */
+  'event.timerFarOff': '> 4 h',
   'event.skeletonCount': 'Magic Skeleton: ( %d/%d )',
   'event.bcQuestDone': 'completed the Blood Castle Quest!',
   'event.bcCongrats': 'Congratulations! You have successfully',

@@ -915,6 +915,7 @@ export const koreanLayer: LanguageLayer = {
     'event.monsterCount': '몬스터: ( %d/%d )',
     'event.timeLeft': '남은 시간',
     'event.timerOpen': '열림',
+    'event.timerFarOff': '> 4시간',
     'event.skeletonCount': '마법 스켈레톤: ( %d/%d )',
     'event.bcQuestDone': '블러드 캐슬 퀘스트를 완료했습니다!',
     'event.bcCongrats': '축하합니다! 당신은 성공적으로',

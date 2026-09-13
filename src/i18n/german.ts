@@ -946,6 +946,7 @@ export const germanLayer: LanguageLayer = {
     'event.monsterCount': 'Monster: ( %d/%d )',
     'event.timeLeft': 'Restzeit',
     'event.timerOpen': 'Offen',
+    'event.timerFarOff': '> 4 h',
     'event.skeletonCount': 'Magisches Skelett: ( %d/%d )',
     'event.bcQuestDone': 'hat die Blood-Castle-Quest abgeschlossen!',
     'event.bcCongrats': 'Glückwunsch! Es ist dir gelungen,',

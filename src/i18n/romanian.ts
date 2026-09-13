@@ -936,6 +936,7 @@ export const romanianLayer: LanguageLayer = {
     'event.monsterCount': 'Monștri: ( %d/%d )',
     'event.timeLeft': 'Timp rămas',
     'event.timerOpen': 'Deschis',
+    'event.timerFarOff': '> 4 h',
     'event.skeletonCount': 'Schelet magic: ( %d/%d )',
     'event.bcQuestDone': 'a terminat misiunea Blood Castle!',
     'event.bcCongrats': 'Felicitări! Ai reușit',

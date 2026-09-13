@@ -925,6 +925,7 @@ export const thaiLayer: LanguageLayer = {
     'event.monsterCount': 'มอนสเตอร์: ( %d/%d )',
     'event.timeLeft': 'เวลาที่เหลือ',
     'event.timerOpen': 'เปิดอยู่',
+    'event.timerFarOff': '> 4 ชม.',
     'event.skeletonCount': 'โครงกระดูกเวทมนตร์: ( %d/%d )',
     'event.bcQuestDone': 'ทำเควสบลัดคาสเซิลสำเร็จ!',
     'event.bcCongrats': 'ยินดีด้วย! คุณทำสำเร็จแล้วใน',
