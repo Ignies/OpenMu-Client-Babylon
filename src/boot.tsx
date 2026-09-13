@@ -21,6 +21,7 @@ import { installBrowserHotkeyGuard } from './common/browserHotkeys';
 import { SessionResume } from './common/sessionResume';
 import { reaction } from 'mobx';
 import { watchStateWarnings } from './common/stateWarnings';
+import { watchPageTitle } from './common/pageTitle';
 import {
   preloadPregameSprites,
   preloadWorldSprites,
@@ -35,6 +36,9 @@ if (APP_STAGE === 'dev' || QA_ENABLED) {
 installUiWindowChime();
 // Durability / full grid / last potion / buff ending, on the notice banner.
 watchStateWarnings();
+
+// The browser tab: the client's name until the player is in, the world's after.
+watchPageTitle();
 
 // What a lost game server socket does before falling back to the server
 // list. Wired here rather than in logic.ts, which the store's own module

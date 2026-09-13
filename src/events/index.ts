@@ -16,7 +16,11 @@ import {
   enterDevilSquare,
   openDevilSquare,
 } from './devilSquare';
-import { closeChaosCastlePrompt, enterChaosCastle } from './chaosCastle';
+import {
+  askChaosCastleOpening,
+  closeChaosCastlePrompt,
+  enterChaosCastle,
+} from './chaosCastle';
 import {
   answerDuelRequest,
   closeDuelWatch,
@@ -137,6 +141,11 @@ class Events {
   /** The Chaos Castle prompt's OK. */
   enterChaosCastle(): void {
     enterChaosCastle();
+  }
+
+  /** The HUD schedule row for Chaos Castle: raise the same prompt. */
+  askChaosCastleOpening(): void {
+    askChaosCastleOpening();
   }
 
   /** `NpcWindowResponse` DoorkeeperTitusDuelWatch: the channel window. */

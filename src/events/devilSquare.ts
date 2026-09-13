@@ -16,6 +16,7 @@ import {
   MiniGameScoreTablePacket,
 } from '../common/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
+import { noteOpeningStateRequest, takeOpeningState } from './schedule';
 import {
   DEVIL_SQUARE_LEVELS,
   EVENT_TEXT,
@@ -153,6 +154,7 @@ function useTicket(_slot: number, item: Item): boolean {
   const t = TICKETS.devilInvitation;
   if (item.group !== t.group || item.num !== t.num) return false;
 
+  noteOpeningStateRequest(OPENING_STATE_GAME.devilSquare);
   const packet = MiniGameOpeningStateRequestPacket.createPacket();
   packet.EventType = OPENING_STATE_GAME.devilSquare;
   packet.EventLevel = item.lvl ?? 0;
@@ -218,6 +220,10 @@ EventBus.on('MiniGameOpeningState', packet => {
   if (p.GameType !== OPENING_STATE_GAME.devilSquare) return;
 
   const minutes = p.RemainingEnteringTimeMinutes;
+  // The HUD rows ask the same question on their own timer; those answers
+  // feed the schedule and say nothing.
+  if (takeOpeningState(OPENING_STATE_GAME.devilSquare, minutes)) return;
+
   Store.addNotification(
     minutes === 0
       ? EVENT_TEXT.devilOpenNow
