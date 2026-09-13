@@ -1298,14 +1298,14 @@ export const Economy = new (class _Economy {
     Store.sendToGS(packet.buffer);
   }
 
-  /** `PlayerShopBuyResult` (0x3F 0x06). */
+  /**
+   * `PlayerShopBuyResult` (0x3F 0x06), refusals only: a success is the item
+   * itself arriving, and logic.ts puts that in the inventory.
+   */
   shopBuyResult(result: PlayerShopBuyResultResultKindEnum): void {
     const E = PlayerShopBuyResultResultKindEnum;
 
-    if (result === E.Success) {
-      playUiSound('getItem');
-      return;
-    }
+    if (result === E.Success) return;
 
     const reason: Partial<Record<PlayerShopBuyResultResultKindEnum, TextKey>> = {
       [E.NotAvailable]: 'personalShop.sellerUnavailable',

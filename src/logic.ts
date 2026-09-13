@@ -193,6 +193,7 @@ import {
   ClosePlayerShopDialogPacket,
   ItemCraftingResultPacket,
   PlayerShopBuyResultPacket,
+  PlayerShopBuyResultResultKindEnum,
   PlayerShopClosedPacket,
   PlayerShopItemListPacket,
   PlayerShopItemSoldToPlayerPacket,
@@ -3520,9 +3521,29 @@ EventBus.on('PlayerShopItemList', packet => {
   });
 });
 
+/**
+ * The bought item rides this packet and nothing else: OpenMU's
+ * `BuyRequestAction` puts it in the inventory server-side and reports it
+ * here, with no `ItemAddedToInventory` behind it. Dropping the payload left
+ * the slot empty until the next login.
+ */
 EventBus.on('PlayerShopBuyResult', packet => {
   const p = new PlayerShopBuyResultPacket(packet);
-  Economy.shopBuyResult(p.Result);
+
+  if (p.Result !== PlayerShopBuyResultResultKindEnum.Success) {
+    Economy.shopBuyResult(p.Result);
+    return;
+  }
+
+  const item = ItemSerializer.DeserializeItem(new Uint8Array(p.ItemData.buffer));
+
+  playUiSound(pickupSound(item));
+
+  runInAction(() => {
+    Store.playerData.items[p.ItemSlot] = item;
+  });
+
+  Store.syncPlayerAppearance();
 });
 
 EventBus.on('InventoryMoneyUpdate', packet => {
