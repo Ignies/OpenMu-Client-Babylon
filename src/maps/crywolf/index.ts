@@ -8,7 +8,7 @@ import {
 } from './spec';
 
 /**
- * Crywolf (World35 / Object35) — the map entry: identity and the per-world data the
+ * Crywolf (World35 / Object35) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  * The object classes and the setup function are in `create.ts`, loaded on demand.
  */

@@ -14,7 +14,7 @@ import { t, type TextKey } from '../i18n';
 
 /**
  * The lines every event shares: the 30-second state countdown
- * (`CSBaseMatch::StartMatchCountDown` / `RenderTime`, CSEventMatch.cpp —
+ * (`CSBaseMatch::StartMatchCountDown` / `RenderTime`, CSEventMatch.cpp -
  * "%s Closing (in %d seconds)" at the bottom of the screen) and the map
  * invasion banners (`MapEventState`: Red / Golden Dragon).
  *
@@ -135,7 +135,7 @@ function update(_map: ENUM_WORLD, dt: number): void {
 }
 
 function reset(): void {
-  // The countdown is global — a warp into the event must not eat it — so
+  // The countdown is global - a warp into the event must not eat it - so
   // only a finished line is dropped here.
   if (state.left <= 0) {
     runInAction(() => {

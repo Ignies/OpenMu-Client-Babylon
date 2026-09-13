@@ -23,7 +23,7 @@ export const DATA_FOLDER = process.env.MU_DATA
 /**
  * Where the converted GLBs land. Overridable so a pipeline change can be
  * trialled into a scratch folder and diffed before it overwrites ~200 MB of
- * working assets in place — there is no VCS here to undo that.
+ * working assets in place - there is no VCS here to undo that.
  *
  *   GLB_OUTPUT=/tmp/glb-test bun run tools/bmdToGlb.ts Object1
  */

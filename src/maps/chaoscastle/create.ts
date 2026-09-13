@@ -7,7 +7,7 @@ import {
 } from './spec';
 
 /**
- * Chaos Castle (`WD_18CHAOS_CASTLE` … `_END` and the master-level 53 — seven
+ * Chaos Castle (`WD_18CHAOS_CASTLE` … `_END` and the master-level 53 - seven
  * server instances on one art set, `World19` + `Object19`; see
  * `common/worldAssets.ts`).
  *
@@ -29,7 +29,7 @@ import {
  *    monster skins from `Npc/`: all in the events / locomotion / character
  *    lanes, none of it map data.
  *
- * Not built: the thunder pillars (0-3 with `PKKey`, a `CreateJoint` ribbon —
+ * Not built: the thunder pillars (0-3 with `PKKey`, a `CreateJoint` ribbon -
  * no ribbon primitive in the clone), the quake, and the tile smoke on the
  * strip about to close (`RenderTerrainVisual`). All three are listed in
  * `arena.ts` / `spec.ts` against their C++ lines.

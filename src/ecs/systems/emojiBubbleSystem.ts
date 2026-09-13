@@ -18,7 +18,7 @@ import type { Entity, ISystemFactory, World } from '../world';
  * θ = 2π − yaw that axis is `(cos yaw, 0, sin yaw)`.
  *
  * Which of the two shoulders is "facing the camera" is then just the sign
- * that puts the anchor on the camera's side of the spine — so the anatomical
+ * that puts the anchor on the camera's side of the spine - so the anatomical
  * polarity of the axis never has to be worked out, and the same code is
  * correct for players, NPCs and monsters alike.
  *

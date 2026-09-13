@@ -7,7 +7,7 @@ import {
 
 /**
  * Doppelganger 4 (`WD_68DOPPLEGANGER4`, `World69`/`Object69`), the plain-data
- * half — Kanturu Ruins' art and a line-for-line copy of its `MoveObject`
+ * half - Kanturu Ruins' art and a line-for-line copy of its `MoveObject`
  * (GMDoppelGanger4.cpp:61-133) with 47/48 added to the hidden list.
  * EncTerrain69.obj: 433 objects, 38 types; Object69 ships 61 models and the
  * two type-34 records have none.

@@ -75,7 +75,7 @@ installBrowserHotkeyGuard(
 const ignoredIds = ['scene-explorer-host', 'inspector-host'];
 
 // The right button is the cast button (`Attack()` with MouseRButton), and
-// the browser's context menu carries "Reload" — one right click that lands
+// the browser's context menu carries "Reload" - one right click that lands
 // on a HUD element, a window, a name tag or the page margin instead of the
 // canvas used to open it, and a slip from there reloaded the game. The
 // canvas already swallowed its own `contextmenu`; this covers everything
@@ -182,7 +182,7 @@ const MAX_FRAME_DELTA = 0.1;
 /**
  * Babylon queues the next animation frame only after the render function
  * returns: an exception out of a frame ends the render loop for good, and
- * the game "hangs" in the worst possible way — the canvas freezes while the
+ * the game "hangs" in the worst possible way - the canvas freezes while the
  * socket keeps delivering packets and the sounds keep playing (that is what
  * a Summoner saw when a Drain Life tether expired). A frame that throws is
  * logged and skipped; the next one runs. Logging is throttled so a fault
@@ -248,7 +248,7 @@ preloadPregameSprites()
 
 // The published server list (`common/serverList.ts`), once per launch. Nothing
 // waits on it: it fills the picker when it lands, and the saved servers are
-// what the client uses until then — or instead, if it never lands.
+// what the client uses until then - or instead, if it never lands.
 refreshServerList();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

@@ -14,7 +14,7 @@ import { LightSource, type LightRecipe } from './lightSource';
 
 const MAPS: ReadonlySet<ENUM_WORLD> = new Set([ENUM_WORLD.WD_10ICARUS]);
 
-/** `Luminosity = (rand()%4 + 4) * 0.05f` — 0.20, 0.25, 0.30 or 0.35. */
+/** `Luminosity = (rand()%4 + 4) * 0.05f` - 0.20, 0.25, 0.30 or 0.35. */
 const THUNDER_LUMI_MIN = 0.2;
 const THUNDER_LUMI_STEP = 0.05;
 const THUNDER_LUMI_STEPS = 4;
@@ -24,18 +24,18 @@ const THUNDER_R = 0.3;
 const THUNDER_G = 0.3;
 const THUNDER_B = 0.081;
 
-/** `AddTerrainLight(…, 2, PrimaryTerrainLight)` — moot, Icarus draws no terrain. */
+/** `AddTerrainLight(…, 2, PrimaryTerrainLight)` - moot, Icarus draws no terrain. */
 const THUNDER_TERRAIN_RANGE = 2;
 
 /**
  * How long a strike takes to die away, in seconds.
  *
  * The original's flash is a single frame of `AddTerrainLight` plus a
- * `MODEL_CLOUD` plane with `LifeTime` 2 — two frames at the 25-30 fps it was
+ * `MODEL_CLOUD` plane with `LifeTime` 2 - two frames at the 25-30 fps it was
  * written for, so ~70 ms. Reproducing that literally at 60-144 fps gives a
  * flash one or two frames long, which reads as a dropped frame rather than as
  * lightning, so the pulse is held to a fixed wall-clock decay instead of a
- * frame count. Instant on, linear out — the recipe's release is the whole
+ * frame count. Instant on, linear out - the recipe's release is the whole
  * life.
  */
 const THUNDER_DECAY = 0.22;
@@ -47,7 +47,7 @@ const THUNDER_DECAY = 0.22;
  * not have to carry the effect on its own: what the player sees is the
  * additive `MODEL_CLOUD` plane at `Scale` 10 hanging over the hero. That is
  * not reproduced, Icarus draws no terrain (`MainScene.cpp:402`), and objects
- * read the *baked* lightmap rather than the dynamic delta — so the pulse is a
+ * read the *baked* lightmap rather than the dynamic delta - so the pulse is a
  * point light sized to wash the islands the hero is standing on: `Light`
  * peaks at 0.105, and the pool turns that into `0.105 × 3 × gain`.
  */

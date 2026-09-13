@@ -30,7 +30,7 @@ export * as packets from './packets';
 const CLIENT_TO_SERVER_KEYS = [128079, 164742, 70235, 106898, 23489, 11911, 19816, 13647, 48413, 46165, 15171, 37433];
 const SERVER_TO_CLIENT_KEYS = [73326, 109989, 98843, 171058, 18035, 30340, 24701, 11141, 62004, 64409, 35374, 64599];
 
-// TODO: Xor32 key — OpenMU Network/Xor/DefaultKeys (S6) or
+// TODO: Xor32 key - OpenMU Network/Xor/DefaultKeys (S6) or
 // PreSeason6NetworkEncryptionFactoryPlugIn.Xor32Key (every earlier client).
 const XOR32_KEY = new Uint8Array(32);
 const XOR3_KEY = new Uint8Array([0xfc, 0xcf, 0xab]);

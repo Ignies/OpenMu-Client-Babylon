@@ -13,7 +13,7 @@
  * - the root `Local/BuffEffect.bmd` is Japanese, the per-language ones are not.
  *
  * Delays: `SkillAttribute[].Delay` from `Data/Local/Skill.bmd` (600 × 80-byte
- * BUX records, `Delay` at offset 44, milliseconds) — every non-zero entry.
+ * BUX records, `Delay` at offset 44, milliseconds) - every non-zero entry.
  */
 
 import { MAGIC_EFFECTS } from '../common/magicEffects';

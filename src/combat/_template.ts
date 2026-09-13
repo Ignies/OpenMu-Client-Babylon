@@ -1,5 +1,5 @@
 /**
- * TEMPLATE — copy this file to `<name>.ts`, fill in the blanks, add the layer
+ * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
  * to `layers.ts`. Never imported; it only exists to be copied.
  *
  * Every combat entry has the same three parts, in this order:
@@ -11,7 +11,7 @@
  *   3. The exported `CombatLayer` at the bottom, wiring `update` / `reset`.
  *
  * If the entry needs a packet sent, it exposes a *command* that the ECS
- * consumer (`attackSystem.ts`, `skillCastSystem.ts`) calls — the entry
+ * consumer (`attackSystem.ts`, `skillCastSystem.ts`) calls - the entry
  * itself never imports `Store` to send. If it needs a clip, add the row to
  * `recipes.ts`.
  */

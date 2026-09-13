@@ -1,6 +1,6 @@
 /**
  * French. MU's proper nouns (class names, event names, Zen, MU Helper) stay as
- * they are — the French-speaking servers use them untranslated.
+ * they are - the French-speaking servers use them untranslated.
  */
 
 import type { LanguageLayer } from './layer';
@@ -206,7 +206,7 @@ export const frenchLayer: LanguageLayer = {
     'options.packHint':
       'Le texte des quêtes, les dialogues des PNJ et les noms des monstres sont traduits dans cette langue aussi.',
     'options.noPackHint':
-      'Interface seulement — le texte des quêtes et les noms des monstres restent en anglais.',
+      'Interface seulement - le texte des quêtes et les noms des monstres restent en anglais.',
     'options.languageHint':
       'La langue de l’interface. Les noms d’objets, de monstres et de compétences restent inchangés.',
     'options.quality.classic': 'Classique',
@@ -257,7 +257,7 @@ export const frenchLayer: LanguageLayer = {
     'bottomBar.emptySlot': '[{key}] vide',
     'bottomBar.itemSlot': '{name} [{key}]',
     'bottomBar.skillHint':
-      ' — clic : liste des compétences, clic droit : attaque simple',
+      ' - clic : liste des compétences, clic droit : attaque simple',
     'bottomBar.pet.normal': 'Nor',
     'bottomBar.pet.random': 'Alé',
     'bottomBar.pet.owner': 'Mtr',
@@ -1229,7 +1229,7 @@ export const frenchLayer: LanguageLayer = {
     'notify.learnedSkill': 'Vous avez appris {name}',
     'notify.storageOpen': 'Impossible d’utiliser des objets, le coffre est ouvert',
     'notify.upgradeNeedsServer': 'L’amélioration a besoin d’un serveur',
-    'notify.noAnswerRestored': 'Le serveur n’a pas répondu — objet restauré',
+    'notify.noAnswerRestored': 'Le serveur n’a pas répondu - objet restauré',
     'notify.cannotMoveItem': 'Impossible de déplacer cet objet là',
     'notify.cannotUseItem': 'Cet objet ne s’utilise pas comme ça',
     'notify.npcNothingYet': 'Ce PNJ n’a encore rien pour vous',
@@ -1287,8 +1287,42 @@ export const frenchLayer: LanguageLayer = {
     'worlds.answering': 'Répond',
     'worlds.noAnswer': 'Pas de réponse',
     'worlds.hint': 'Choisissez un monde, puis entrez.',
-    'bottomBar.pickSkill': '[{key}] vide — cliquez pour choisir une compétence',
-    'bottomBar.boundSlot': '{name} [{key}] — clic droit pour changer',
+    'worlds.tabList': 'Liste',
+    'account.list': 'Comptes sur {world}',
+    'account.unnamed': 'Nouveau compte',
+    'account.addFirst': "Ajoutez d'abord un compte",
+    'account.keepPassword': 'Retenir le mot de passe',
+    'account.entersAs': 'Entrer se connecte en {name}.',
+    'worlds.tabWorlds': 'Mondes',
+    'worlds.tabInfo': 'Détails',
+    'worlds.tabAccount': 'Comptes',
+    'worlds.tabSetup': 'Réglages',
+    'worlds.search': 'Rechercher un monde',
+    'worlds.clearSearch': 'Effacer la recherche',
+    'worlds.noMatch': 'Rien ne correspond à "{text}".',
+    'worlds.count': '{shown} sur {total}',
+    'worlds.hasAccount': 'Un compte est enregistré pour ce monde',
+    'worlds.accountMark': 'ID',
+    'info.client': 'Client',
+    'info.anyClient': 'Indifférent',
+    'info.address': 'Adresse',
+    'info.route': 'Trajet',
+    'info.status': 'État',
+    'info.notChecked': 'Pas encore vérifié',
+    'info.account': 'Compte',
+    'info.noAccount': 'Aucun enregistré',
+    'info.lastLogin': 'Dernière connexion',
+    'info.never': 'Jamais',
+    'info.noDescription': "Ce monde n'a publié aucune description.",
+    'info.gameServers': 'Serveurs de jeu',
+    'info.noGameServers': "Ce monde n'a publié aucun nom de serveur ; ils arrivent à la connexion.",
+    'info.moreServers': 'et {count} de plus',
+    'account.notKept': 'DEMANDER',
+    'account.storedLocally': 'Conservé dans ce navigateur seulement, en clair.',
+    'account.cannotSave': 'Ce monde ne peut pas conserver de compte.',
+    'account.needSignup': "Pas encore de compte ? Créez-en un sur l'écran de connexion.",
+    'bottomBar.pickSkill': '[{key}] vide - cliquez pour choisir une compétence',
+    'bottomBar.boundSlot': '{name} [{key}] - clic droit pour changer',
     'bottomBar.clearSlot': 'Laisser l’emplacement [{key}] vide',
     'guild.leaveTitle': 'Quitter la guilde',
     'guild.breakHint': 'Si vous voulez quitter votre guilde,',

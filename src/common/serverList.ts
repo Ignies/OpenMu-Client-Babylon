@@ -16,12 +16,12 @@ import {
 } from './serverServices';
 
 /**
- * The published server list — a markdown file in the project's repository, one
+ * The published server list - a markdown file in the project's repository, one
  * server per line:
  *
  *     [VERSION:NAME:DESCRIPTION:LANGUAGE:IMAGE](host:port@WSPROXY)
  *
- * The version says which client that world is meant to be played with — the
+ * The version says which client that world is meant to be played with - the
  * token a `versions/<id>` folder gives as `gameVersion.listTag`, `S6EP3` for
  * the Season 6 Episode 3 build. It matters because the base game is compiled
  * against exactly one version, so a world asking for another is one this build
@@ -49,8 +49,8 @@ import {
  * in it, so a run that has to touch its own entry is a run that cannot drift
  * onto somebody else's world.
  *
- * The target is either `host:port` — the connect server as the world's proxy
- * reaches it — or the world's domain on its own, which leaves the addresses to
+ * The target is either `host:port` - the connect server as the world's proxy
+ * reaches it - or the world's domain on its own, which leaves the addresses to
  * the convention in `serverServices.ts`.
  *
  * Fetched once per launch so a player who has never edited a setting still has
@@ -63,7 +63,7 @@ import {
  *
  * The list is **untrusted text from the internet**. Every line goes through the
  * same normalisers a typed field does, and a line that does not parse is
- * dropped rather than repaired — a list nobody can edit into a broken client is
+ * dropped rather than repaired - a list nobody can edit into a broken client is
  * worth more than one that shows every row.
  */
 
@@ -72,7 +72,7 @@ const CACHE_KEY = 'mu_serverlist';
 const DEFAULT_LIST_URL =
   'https://raw.githubusercontent.com/Ignies/OpenMu-Client-Babylon/main/serverlist.md';
 
-/** Refuse to parse a list that is not a list — a login page, an error blob. */
+/** Refuse to parse a list that is not a list - a login page, an error blob. */
 const MAX_BYTES = 64 * 1024;
 
 /** Enough for any real list; a longer file is a mistake or an attack. */
@@ -92,7 +92,7 @@ const LINE_RE = /^\s*\[([^\]]+)\]\(\s*([^)\s]+)\s*\)\s*$/;
  *
  * `host:port`, and optionally `@` and the proxy that reaches it. The proxy is
  * a URL with colons of its own, so a colon cannot also be what separates it
- * from the server — `@` reads as "this server, at that proxy" and cannot be
+ * from the server - `@` reads as "this server, at that proxy" and cannot be
  * mistaken for part of either address.
  *
  * Or the world's domain alone, which says all of it at once through the
@@ -107,14 +107,14 @@ const TARGET_RE = /^([^:\s@]+)(?::(\d{1,5}))?(?:@(.+))?$/;
  * A domain, for the short form. Two labels at least, ending in a real TLD:
  * a single label is a name on somebody's own network and `ws.mybox` is not a
  * world anyone else can reach, and an IP has no labels to hang services off at
- * all. `localhost:44405` and `1.2.3.4:44405` still parse — as the long form,
+ * all. `localhost:44405` and `1.2.3.4:44405` still parse - as the long form,
  * which is what they are.
  */
 const DOMAIN_RE = /^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/;
 
 /**
  * A proxy address and nothing else: a ws scheme, a host, an optional port. No
- * path, query or credentials — the socket appends its own `?host=&port=`, so a
+ * path, query or credentials - the socket appends its own `?host=&port=`, so a
  * line asking for more is asking for something this client does not do.
  *
  * The scheme is required rather than defaulted. `normalizeWsUrl` would read a
@@ -128,7 +128,7 @@ const WS_RE = /^wss?:\/\/[A-Za-z0-9._-]+(?::\d{1,5})?\/?$/i;
  * be played with (`S6EP3`, and whatever a future `versions/<id>` calls itself
  * in `gameVersion.listTag`).
  *
- * It is optional, and a line that omits it still parses — so the field has to
+ * It is optional, and a line that omits it still parses - so the field has to
  * be told apart from the name that used to be first. A version token is short,
  * unspaced, and contains a digit; server names in practice do not (`Test-Server`
  * has a hyphen, `Aida` has no digit). The cost of the guess is bounded either
@@ -203,7 +203,7 @@ function splitImage(fields: string[]): { fields: string[]; image: string } {
 }
 
 /**
- * One line to a profile, or null. Exported for the parser's own tests — the
+ * One line to a profile, or null. Exported for the parser's own tests - the
  * shape of somebody's markdown is exactly the thing worth pinning down.
  */
 export function parseServerLine(line: string): ServerProfile | null {
@@ -243,7 +243,7 @@ export function parseServerLine(line: string): ServerProfile | null {
 
   return {
     // Stable across refreshes, so a selected server stays selected: the list
-    // has no ids of its own, so a world is identified by what it published —
+    // has no ids of its own, so a world is identified by what it published -
     // its domain, or the address it named.
     id: domain ? `list:${domain}` : `list:${host}:${port}`,
     name,
@@ -252,7 +252,7 @@ export function parseServerLine(line: string): ServerProfile | null {
     // The proxy the line names, the convention's when it named a domain, and
     // this client's own (the build default, or whatever the deployment set)
     // when it gave neither. A published world is reached through the proxy it
-    // was published with — the older two-field target simply says nothing
+    // was published with - the older two-field target simply says nothing
     // about one.
     wsUrl: normalizeWsUrl(
       WS_RE.test(proxy)

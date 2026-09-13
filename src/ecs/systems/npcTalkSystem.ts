@@ -140,7 +140,7 @@ export const NpcTalkSystem: ISystemFactory = world => {
         // The A* (`libs/astar.ts`) never returns an empty path for an
         // unreachable goal: it hands back the path to the *closest* node. So
         // "unreachable" is a calculated path whose last node is not the tile
-        // asked for (an empty path counts too) — a tile behind a merchant's
+        // asked for (an empty path counts too) - a tile behind a merchant's
         // counter, say. Strike it and try the next-nearest at once; waiting
         // the approach interval here would leave the hero standing short of
         // the NPC for no reason.

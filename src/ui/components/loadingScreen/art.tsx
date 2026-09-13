@@ -3,7 +3,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { MuSpriteFrame } from '../muSprite';
 
 /**
- * The loading artwork itself — `LSBg01..04`, the four 400×300 quarters of the
+ * The loading artwork itself - `LSBg01..04`, the four 400×300 quarters of the
  * 800×600 sheet the original draws while a map loads.
  *
  * Split out of the loading screen because two places want the picture and only

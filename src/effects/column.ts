@@ -1,5 +1,5 @@
 /**
- * Column — a standing column of rising, animated fire (or ice, or spirit)
+ * Column - a standing column of rising, animated fire (or ice, or spirit)
  * cards at a ground point for a while. The original's Flame / Inferno /
  * Hellfire: `CreateEffect(BITMAP_FLAME, …)` stacked every few ticks over the
  * cast point, each tongue rising and cycling its 4-cell strip

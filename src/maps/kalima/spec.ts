@@ -28,12 +28,12 @@ export const KALIMA_BLEND_MESHES: Readonly<Record<number, number>> = {};
  * and `RenderHellasVisual` does the same for 35 and 36 every frame. All six
  * are pure emitters:
  *
- *  - **35** (×18) `BITMAP_LIGHT` SubType 6 in `(0.3, 0.6, 1)` — a slow blue
+ *  - **35** (×18) `BITMAP_LIGHT` SubType 6 in `(0.3, 0.6, 1)` - a slow blue
  *    glow rising out of the floor.
  *  - **36** (×6, scale forced to 0.5) `BITMAP_TRUE_BLUE` SubType 0.
  *  - **37** (×62) `BITMAP_WATERFALL_5` every tick, **38** (×25)
  *    `BITMAP_WATERFALL_1` one tick in two, **39** (×52) `WATERFALL_3/4`
- *    every tick, **40** (×50) `WATERFALL_2` one in four — the cave drips and
+ *    every tick, **40** (×50) `WATERFALL_2` one in four - the cave drips and
  *    the small falls, all at the forced 0.5 scale.
  */
 export const KALIMA_EFFECT_ONLY_TYPES: readonly number[] = [
@@ -44,7 +44,7 @@ export const KALIMA_EFFECT_ONLY_TYPES: readonly number[] = [
  * The emitters above. `waterfall5_9` is the only falling kind in
  * `effectParticles` and stands in for all four waterfall bitmaps (the same
  * substitution Tarkan 70 and Dungeon 52 make); `wingFlareBlue` is the closest
- * thing to the blue `BITMAP_LIGHT`/`TRUE_BLUE` glow — same additive blue
+ * thing to the blue `BITMAP_LIGHT`/`TRUE_BLUE` glow - same additive blue
  * flare, but it drifts sideways rather than rising.
  */
 export const KALIMA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
@@ -58,7 +58,7 @@ export const KALIMA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
 
 /**
  * `RenderHellasVisual` case 12 (×49) and 32 (×19): a `BITMAP_LIGHT` sprite
- * at bone 5, `(0.6, 0.6, 1)`, sized `sin(t * 0.001) * 0.3 + 0.7 + 0.2` — the
+ * at bone 5, `(0.6, 0.6, 1)`, sized `sin(t * 0.001) * 0.3 + 0.7 + 0.2` - the
  * glowing crystal clusters. No `AddTerrainLight` anywhere on this map, so no
  * `terrain` block and no point light; the flare is the whole effect.
  *

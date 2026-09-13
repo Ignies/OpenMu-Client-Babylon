@@ -11,7 +11,7 @@ import { arc, ember, flame, frost, holy, shade, spark, tide, venom } from './rec
 /**
  * Skills as light sources.
  *
- * What it is: the light a skill throws — at the caster's hands as the clip
+ * What it is: the light a skill throws - at the caster's hands as the clip
  * starts, riding the projectile to the target, at the target on impact, or
  * on the ground point of an area skill. Driven by the two commands below,
  * which `common/skillVisuals.ts` calls from the skill packets. Read by nobody
@@ -53,7 +53,7 @@ const ARROW_SECONDS = 4;
  *  - `cast`: at the caster's hands as the clip starts.
  *  - `travel`: rides from the caster to the target at `speed` tiles/s and
  *    ends on arrival; then `impact` fires at the target.
- *  - `impact`: at the target — on arrival if there is a `travel`, at once
+ *  - `impact`: at the target - on arrival if there is a `travel`, at once
  *    otherwise.
  *  - `area`: at the ground point of an area skill.
  */
@@ -83,7 +83,7 @@ const ULTRA_TIER = 2;
 export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // MODEL_POISON: AddTerrainLight range 2 (ZzzEffect.cpp:9752).
   1: { travel: { ...venom(2, 3), speed: BOLT_SPEED }, impact: venom(2, 0.6) },
-  // Meteorite: a falling fire model — warm impact (BITMAP_FIRE+1 range 2, :8092).
+  // Meteorite: a falling fire model - warm impact (BITMAP_FIRE+1 range 2, :8092).
   2: { cast: ember(1, 0.3), impact: flame(2, 0.5) },
   // BITMAP_LIGHTNING: range 6 on the strike (ZzzEffectParticle.cpp:4298).
   // 0.4 s is the clip: the bolt is `ticks(10)` in skillVisuals, and a light
@@ -207,7 +207,7 @@ export const ARROW_LIGHTS: Partial<Record<string, LightRecipe>> = {
 
 /**
  * Any wizardry skill without a row: a short pale flash at the caster's
- * hands — the MODEL_MAGIC2 cast glow (range 3, :10437), kept to 2 tiles so it
+ * hands - the MODEL_MAGIC2 cast glow (range 3, :10437), kept to 2 tiles so it
  * never out-lights a skill that has a real recipe.
  */
 export const DEFAULT_WIZARDRY_CAST: LightRecipe = {
@@ -263,7 +263,7 @@ function castRecipeFor(skill: number): LightRecipe | null {
     : null;
 }
 
-/** Command: a targeted skill — cast flash, then projectile or direct impact. */
+/** Command: a targeted skill - cast flash, then projectile or direct impact. */
 export function lightTargetedSkill(
   scene: Scene,
   skill: number,
@@ -305,7 +305,7 @@ export function lightTargetedSkill(
   }
 }
 
-/** Command: an area skill — cast flash, then the ground light at `at`. */
+/** Command: an area skill - cast flash, then the ground light at `at`. */
 export function lightAreaSkill(
   scene: Scene,
   skill: number,

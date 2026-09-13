@@ -1,8 +1,8 @@
 /**
  * The one clock every client agrees on.
  *
- * Anything that has to look the same on two screens at the same moment —
- * ambient weather episodes, timed world events — must be a pure function of
+ * Anything that has to look the same on two screens at the same moment -
+ * ambient weather episodes, timed world events - must be a pure function of
  * `serverNow()` rather than of `Math.random()` or a per-client uptime, or two
  * players standing next to each other see different skies.
  *
@@ -10,7 +10,7 @@
  * not time), so the base is UTC wall time: NTP keeps desktops within a second
  * or two of each other, which is far tighter than the tens of seconds an
  * ambient episode lasts. `setServerTimeOffset` is the seam for the day a
- * server-stamped packet arrives — set it once from
+ * server-stamped packet arrives - set it once from
  * `serverEpochMs - Date.now()` and every consumer follows without changing.
  */
 

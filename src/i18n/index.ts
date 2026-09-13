@@ -1,10 +1,10 @@
 /**
- * THE FACADE — the one object the rest of the game talks to for text.
+ * THE FACADE - the one object the rest of the game talks to for text.
  *
  * `t(key)` is what call sites use; `i18n` is the selector's side of it (the
  * list of languages, the current one, and the setter). The current code is a
  * MobX observable, so every `observer` component that renders a `t()` string
- * re-renders the moment the language changes — no reload, no remount.
+ * re-renders the moment the language changes - no reload, no remount.
  *
  * Holds no strings of its own: the entries in `layers.ts` own those, and
  * `recipes.ts` owns English.
@@ -19,7 +19,7 @@ import { LANGUAGE_LAYERS } from './layers';
 
 const LANGUAGE_KEY = 'mu_language';
 
-/** The one language that is always complete — the fallback for every other. */
+/** The one language that is always complete - the fallback for every other. */
 const FALLBACK_CODE = 'en';
 
 type Params = Record<string, string | number>;
@@ -31,7 +31,7 @@ const listeners = new Set<Listener>();
 /**
  * Called after the language changed. For the things `t()` cannot redraw on its
  * own: the `Data/Local/**` tables, which have to be fetched again in the new
- * language. UI text needs nothing — it is observable.
+ * language. UI text needs nothing - it is observable.
  */
 export function onLanguageChanged(listener: Listener): () => void {
   listeners.add(listener);
@@ -86,7 +86,7 @@ function load(layers: readonly LanguageLayer[]): string {
 class I18n {
   private readonly layers: LanguageLayer[] = [...LANGUAGE_LAYERS];
 
-  /** The active BCP-47 code. Observable — this is what redraws the UI. */
+  /** The active BCP-47 code. Observable - this is what redraws the UI. */
   private code: string;
 
   constructor() {
@@ -111,7 +111,7 @@ class I18n {
     return this.code;
   }
 
-  /** The active entry. Never undefined — falls back to English. */
+  /** The active entry. Never undefined - falls back to English. */
   get current(): LanguageLayer {
     return (
       this.layers.find(l => l.code === this.code) ??
@@ -120,14 +120,14 @@ class I18n {
     );
   }
 
-  /** Every language, in `layers.ts` order — what the selector lists. */
+  /** Every language, in `layers.ts` order - what the selector lists. */
   get languages(): readonly LanguageLayer[] {
     return this.layers;
   }
 
   /**
    * The `Data/Local/<folder>/` pack for the active language, or null when the
-   * original never shipped one — `libs/mu/localData.ts` then reads `Eng`.
+   * original never shipped one - `libs/mu/localData.ts` then reads `Eng`.
    */
   get dataPack(): LanguageDataPack | null {
     return this.current.dataPack ?? null;

@@ -1,6 +1,6 @@
 import { t, type TextKey } from '../i18n';
 /**
- * The Season 6 quest system — `CQuestMng` (QuestMng.cpp), the NPC quest
+ * The Season 6 quest system - `CQuestMng` (QuestMng.cpp), the NPC quest
  * list of `CNewUINPCDialogue::ProcessQuestListReceive`, the progress window
  * `CNewUIQuestProgress` (NewUIQuestProgress.cpp) and the quest tab of
  * `CNewUIMyQuestInfoWindow` (NewUIMyQuestInfoWindow.cpp).
@@ -155,8 +155,8 @@ const state = observable({
   /**
    * `QuestEventResponse` (F6 03) arrived: the server answered the event
    * quest list request (only for fresh characters without a Gens). It has
-   * no per-quest payload worth keeping — OpenMU always sends two fixed
-   * groups — so only the fact is remembered.
+   * no per-quest payload worth keeping - OpenMU always sends two fixed
+   * groups - so only the fact is remembered.
    */
   eventQuestsReceived: false,
 
@@ -433,7 +433,7 @@ function setProgressContents(key: number): void {
  * Same snapshot problem as the two dialogue windows: the step's words are
  * copied into `state` when the window opens, so an open window has to be
  * refilled from the tables a language change fetched. `mode` and `busy` are
- * left alone — the player is mid-conversation and did not step anywhere.
+ * left alone - the player is mid-conversation and did not step anywhere.
  */
 reaction(
   () => questDataReady(),
@@ -643,7 +643,7 @@ EventBus.on('AvailableQuests', packet => {
   }
 });
 
-// F6 03 — the answer to `EventQuestStateListRequest`; the original's
+// F6 03 - the answer to `EventQuestStateListRequest`; the original's
 // handler is unknown / a no-op, so this only records that it came.
 EventBus.on('QuestEventResponse', packet => {
   if (packet.byteLength < QuestEventResponsePacket.Length!) return;

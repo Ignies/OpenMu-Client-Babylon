@@ -392,7 +392,7 @@ const QuestListDialog = observer(() => {
 
 /**
  * `CNewUIQuestProgress`: the NPC's words paged seven lines at a time, then
- * the hero's answers, or — once the quest runs — the requirement / reward
+ * the hero's answers, or - once the quest runs - the requirement / reward
  * list with the Complete button.
  */
 const QuestProgressWindow = observer(() => {

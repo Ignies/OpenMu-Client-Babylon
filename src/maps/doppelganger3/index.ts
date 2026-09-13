@@ -7,7 +7,7 @@ import {
 } from './spec';
 
 /**
- * Doppelganger 3 (World68 / Object68) — the map entry: identity and the per-world data the
+ * Doppelganger 3 (World68 / Object68) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  * The object classes and the setup function are in `create.ts`, loaded on demand.
  */

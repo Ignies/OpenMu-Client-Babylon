@@ -1,7 +1,7 @@
 import { monsterModelTypeOf } from '../common/playSpeed';
 
 /**
- * **Who leaves what.** Pure data shared by the ground effects — the shape a
+ * **Who leaves what.** Pure data shared by the ground effects - the shape a
  * thing presses into settled snow, how far apart it puts its feet down, how
  * hard it presses and how wide a channel its body ploughs.
  *
@@ -14,20 +14,20 @@ import { monsterModelTypeOf } from '../common/playSpeed';
  *
  * ### The two halves
  *
- *  - **`TrackShape`** is what the print *looks like* — the silhouette baked
+ *  - **`TrackShape`** is what the print *looks like* - the silhouette baked
  *    into the sole atlas. There are six, and adding one costs an atlas row
  *    and a case in `shapeDepth`.
  *  - **`TrackRecipe`** is how a particular creature *uses* one: its size, its
  *    stride, how wide it stands, whether it puts down two feet or four, and
  *    how much of a trench it drags between footfalls. Several recipes share a
- *    shape — a yeti and a hound both leave a pad with toes, but one is a
+ *    shape - a yeti and a hound both leave a pad with toes, but one is a
  *    barefoot biped and the other a quadruped at half the size.
  *
  * ### Keyed by model, not by monster
  *
  * `MODEL_TRACKS` is keyed by the **monster model type** (`MONSTER_MODEL_*`,
  * `MODEL_MONSTER01 + type`), which `monsterModelTypeOf(npcType)` reads from
- * `MONSTER_MODEL_TABLE` — the same key `deathVisuals.ts` uses for its
+ * `MONSTER_MODEL_TABLE` - the same key `deathVisuals.ts` uses for its
  * shatters, and for the same reason: what a thing leaves behind is decided by
  * the body it has, and a few hundred `npcType` rows share a few dozen bodies.
  * Golden, elite and event variants of a monster therefore inherit its track
@@ -44,11 +44,11 @@ import { monsterModelTypeOf } from '../common/playSpeed';
 
 /**
  * The silhouettes. One atlas row each in `footprints.ts`, so this list is
- * short on purpose — six shapes that read differently at a glance beat twenty
+ * short on purpose - six shapes that read differently at a glance beat twenty
  * that all read as "some kind of mark".
  *
  * `none` draws nothing: it is what a flyer, a wraith and a slitherer share.
- * The slitherer still ploughs its channel — see `dragWidth`.
+ * The slitherer still ploughs its channel - see `dragWidth`.
  */
 export type TrackShape =
   | 'boot'
@@ -109,7 +109,7 @@ export interface TrackRecipe {
 
 /**
  * The recipes. `boot` is the hero's and the default, and its numbers are the
- * ones the whole look was tuned against — the gait multipliers in
+ * ones the whole look was tuned against - the gait multipliers in
  * `footprintSystem.ts` are relative to it, so changing `boot` moves every
  * character in the game.
  */
@@ -143,7 +143,7 @@ const TRACKS = {
     drag: 1,
     spray: 1.6,
   },
-  /** A barefoot biped with toes — yetis, forest monsters, the big and furry. */
+  /** A barefoot biped with toes - yetis, forest monsters, the big and furry. */
   barefoot: {
     shape: 'paw',
     scale: 1.35,
@@ -158,7 +158,7 @@ const TRACKS = {
   },
   /**
    * A four-footed animal: hounds, wolves, werewolves. Small pads in two
-   * pairs, and a narrow channel — a dog's chest clears snow that a man's legs
+   * pairs, and a narrow channel - a dog's chest clears snow that a man's legs
    * plough straight through.
    */
   paw: {
@@ -227,7 +227,7 @@ const TRACKS = {
   },
   /**
    * Spiders, scorpions, beetles: thin legs that punch small deep holes and a
-   * body that never touches the snow, so there is no channel at all — which
+   * body that never touches the snow, so there is no channel at all - which
    * is the whole point of it. A line of separate pricks with clean snow
    * between them reads as an insect and as nothing else.
    */
@@ -244,7 +244,7 @@ const TRACKS = {
     spray: 0.25,
   },
   /**
-   * Worms, larvae, hydras, the rolling Iron Wheel: no feet, so no prints —
+   * Worms, larvae, hydras, the rolling Iron Wheel: no feet, so no prints -
    * one unbroken groove and nothing else in it.
    */
   slide: {
@@ -291,7 +291,7 @@ export type TrackName = keyof typeof TRACKS;
  * silent recipes are exactly where that fails invisibly: a wrong `boot` on a
  * hound is a visible mistake somebody can report, and a wrong `none` is a
  * creature that quietly leaves nothing, which reads as the feature being
- * broken. Devias' **Worm** was the one that proved it — MU's name is a
+ * broken. Devias' **Worm** was the one that proved it - MU's name is a
  * mistranslation and the model is a striped, fanged quadruped, so a row
  * written from the word "worm" turned the map's most common monster into a
  * thing that left no prints at all. Its **Iron Wheel** does not roll either:
@@ -300,14 +300,14 @@ export type TrackName = keyof typeof TRACKS;
  * evidence that they are on their feet.
  *
  * So a row here only says `none` when something proves the thing is off the
- * ground — the client lifting it (`HoverHeight`), or a model that is plainly a
- * floating shroud — and only says `slide` for a body with no legs in it. When
+ * ground - the client lifting it (`HoverHeight`), or a model that is plainly a
+ * floating shroud - and only says `slide` for a body with no legs in it. When
  * in doubt it walks, because walking is the mistake that can be seen.
  */
 const MODEL_TRACKS: Readonly<Record<number, TrackName>> = {
   0: 'cloven', // Bull Fighter
   1: 'paw', // Hound
-  2: 'none', // Budge Dragon — hovers (MonsterObject.BobsWhileMoving)
+  2: 'none', // Budge Dragon - hovers (MonsterObject.BobsWhileMoving)
   5: 'stomp', // Giant
   6: 'slide', // Larva
   7: 'none', // Ghost
@@ -318,7 +318,7 @@ const MODEL_TRACKS: Readonly<Record<number, TrackName>> = {
   12: 'barefoot', // Yeti
   13: 'barefoot', // Elite Yeti
   15: 'stomp', // Ice Monster
-  // Devias' "Worm" is a four-legged, striped, fanged beast — the name is a
+  // Devias' "Worm" is a four-legged, striped, fanged beast - the name is a
   // mistranslation and it is the map's commonest monster, so this row is the
   // one most likely to be looked at.
   17: 'paw', // Worm
@@ -330,7 +330,7 @@ const MODEL_TRACKS: Readonly<Record<number, TrackName>> = {
   26: 'cloven', // Devil
   27: 'stomp', // Balrog
   30: 'hoof', // Death Cow
-  31: 'none', // Red Dragon — flies
+  31: 'none', // Red Dragon - flies
   33: 'beast', // Bahamut
   34: 'slide', // Vepar
   36: 'claw', // Lizard King
@@ -369,8 +369,8 @@ export function trackNamed(name: TrackName): TrackRecipe {
  * What this character leaves behind.
  *
  * `npcType` is what makes an entity a monster or an NPC (attackSystem.ts): a
- * player has none, and players wear boots. A type with no monster model — a
- * town NPC, a trap, an unknown — falls back to `boot` for the same reason the
+ * player has none, and players wear boots. A type with no monster model - a
+ * town NPC, a trap, an unknown - falls back to `boot` for the same reason the
  * default does.
  */
 export function trackFor(npcType: number | undefined): TrackRecipe {

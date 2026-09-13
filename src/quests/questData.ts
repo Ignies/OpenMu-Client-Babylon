@@ -1,6 +1,6 @@
 /**
- * The quest tables — `Quest_<lang>.bmd`, `Dialog_<lang>.bmd`,
- * `QuestProgress.bmd`, `QuestWords_<lang>.bmd` — loaded once (and again after
+ * The quest tables - `Quest_<lang>.bmd`, `Dialog_<lang>.bmd`,
+ * `QuestProgress.bmd`, `QuestWords_<lang>.bmd` - loaded once (and again after
  * a language change) and held here. Driven by nothing but
  * the first frame; read by `legacyQuests.ts` (definitions + dialog pages),
  * `questLog.ts` (progress steps + words) and the quest windows (names).
@@ -94,7 +94,7 @@ export function questDataReady(): boolean {
   return state.ready;
 }
 
-/** `m_Quest[index]` — a legacy quest, or undefined before load / out of range. */
+/** `m_Quest[index]` - a legacy quest, or undefined before load / out of range. */
 export function questDefinition(index: number): QuestDefinition | undefined {
   return tables.get()?.quests[index];
 }

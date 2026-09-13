@@ -27,14 +27,14 @@ export const CRYWOLF_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
 
 /**
  * `MoveCryWolf1stObject`:
- *  - **41** (×9), :344-348: `AddTerrainLight(x, y, (0.2, 0.7, 0.5), 2)` —
+ *  - **41** (×9), :344-348: `AddTerrainLight(x, y, (0.2, 0.7, 0.5), 2)` -
  *    a steady teal glow, no flicker; `RenderCryWolf1stObjectVisual` :393-412
  *    adds two counter-rotating `BITMAP_FLARE`s sized by a sine.
  *  - **57** (×12) and **71** (×8), :349-356: `L = (rand%4+3)*0.1;
- *    AddTerrainLight(x, y, (L, 0.6L, 0.2L), 3)` — the standard MU brazier
+ *    AddTerrainLight(x, y, (L, 0.6L, 0.2L), 3)` - the standard MU brazier
  *    fire, the same recipe as Kanturu 61 / Swamp 57 / Balgas 3 / Karutan 113.
  *    Not hidden here (the brazier model draws), so no `emissions` on the
- *    light — the flame is in the mesh.
+ *    light - the flame is in the mesh.
  */
 export const CRYWOLF_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   41: [

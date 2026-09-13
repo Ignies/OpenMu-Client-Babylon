@@ -32,7 +32,7 @@ const GROUND_OFFSET = 5 / TILE_CM;
  * `glColor4f(0, 0, 0, 0.5)`; this sits above it because the original draws
  * onto a terrain that is already dimmed by its own vertex lighting, and this
  * one draws onto a lit, tone-mapped floor where a flat half-black reads as a
- * grey smudge — most visibly on snow, where the ground is the brightest thing
+ * grey smudge - most visibly on snow, where the ground is the brightest thing
  * on screen. The stencil below still means overlaps never deepen it, so this
  * is the shadow's one and only value.
  *
@@ -43,13 +43,13 @@ const GROUND_OFFSET = 5 / TILE_CM;
 const SHADOW_ALPHA = 0.65;
 
 /**
- * `EnableAlphaTest` — glAlphaFunc(GL_GREATER, 0.25), ZzzOpenglUtil.cpp:395.
+ * `EnableAlphaTest` - glAlphaFunc(GL_GREATER, 0.25), ZzzOpenglUtil.cpp:395.
  * The silhouette is cut by the caster's own texture at the same threshold the
  * caster is drawn with, so a mesh that is a card with a shape keyed into it
  * (a sword's guard, a wing membrane, a leaf spray) throws that shape and not
  * its quad.
  *
- * The original does not do this — `RenderBodyShadow` calls `DisableTexture()`
+ * The original does not do this - `RenderBodyShadow` calls `DisableTexture()`
  * and every triangle lands solid. It gets away with it because it only ever
  * shadows body parts and weapons, whose meshes *are* their silhouette; the
  * blobs here also cover map objects, where an untextured card reads as a
@@ -58,8 +58,8 @@ const SHADOW_ALPHA = 0.65;
  * Well below the 0.25 the caster itself is drawn with, though, and
  * deliberately: the caster is keyed to hide a card's corners, the shadow is
  * keyed only to find the silhouette's outline. MU's TGAs carry partial alpha
- * across whole surfaces and not just along a key's edge — a cape's weave, a
- * skirt's hem, a wing membrane, a helmet's visor — and at 0.25 every one of
+ * across whole surfaces and not just along a key's edge - a cape's weave, a
+ * skirt's hem, a wing membrane, a helmet's visor - and at 0.25 every one of
  * those surfaces fell under the test and punched a hole clean through the
  * middle of the shadow, along the seam of whichever body part wore it. At 0.1
  * only a texel the artist actually keyed out is cut, which is the outline and
@@ -72,7 +72,7 @@ const SHADOW_ALPHA_CUTOFF = 0.1;
  *
  * There was a second projection here: the silhouette a torch throws across the
  * floor *away from the flame*, on its own stencil bit, with the blob under a
- * character warped between the two. It was removed on request — outdoors it
+ * character warped between the two. It was removed on request - outdoors it
  * put a second shadow under everything within reach of a brazier, and indoors
  * it exposed three separate faults at once: the room's own walls and roof cast
  * across the floor they enclose (the Lorencia pub's roof is lifted 100 units
@@ -97,22 +97,22 @@ const SHADOW_FADE_END = 600 / TILE_CM;
  * How far the silhouette is pushed out along its own surface normal, in MU
  * units, before it is projected.
  *
- * A MU body is not one skin. It is a stack of separate BMDs — body, helm,
- * armour, pants, gloves, boots, plus whatever is in each hand — and inside
+ * A MU body is not one skin. It is a stack of separate BMDs - body, helm,
+ * armour, pants, gloves, boots, plus whatever is in each hand - and inside
  * each of those every vertex is bound rigidly to exactly one bone
  * (`bmdToGlb`: `weightsArray.push(1, 0, 0, 0)`). Nothing blends across a
  * joint, so wherever two pieces meet they simply overlap, and the overlap is
- * only as deep as the artist left it. Seen in 3D that is invisible — one
+ * only as deep as the artist left it. Seen in 3D that is invisible - one
  * piece is in front of the other. Flattened onto the floor it is not: the
  * two silhouettes are laid side by side in the same plane, and every place
- * their overlap ran out shows as a bright hairline of unshadowed ground —
+ * their overlap ran out shows as a bright hairline of unshadowed ground -
  * around the neck, at each elbow and knee, where a boot meets a shin. A
  * shadow that ought to be one shape arrives as a pile of parts.
  *
  * Growing each piece by a hair along its own normal makes the overlaps deep
  * enough to survive being flattened, and the seams close. Only the horizontal
  * part of the normal is used, because the vertical part cannot change a
- * silhouette that has already been squashed flat — see the vertex block.
+ * silhouette that has already been squashed flat - see the vertex block.
  *
  * Kept small: this is the whole outline growing, not just the joints, so it
  * is also what the shadow's edge costs in accuracy. Three units is under a
@@ -142,11 +142,11 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
   material.disableLighting = true;
 
   // Deliberately 1 rather than SHADOW_ALPHA. This value never reaches the
-  // blend — the shadow's opacity is assigned in the fragment below — but it
+  // blend - the shadow's opacity is assigned in the fragment below - but it
   // does reach the alpha *test*, because Babylon folds it in before the
   // compare: `alpha = vDiffuseColor.a * texel.a`, then `alpha < alphaCutOff`
   // (ALPHATEST_AFTERALLALPHACOMPUTATIONS, which any explicit
-  // `transparencyMode` turns on — default.fragment:246). At 0.5 the test read
+  // `transparencyMode` turns on - default.fragment:246). At 0.5 the test read
   // `texel.a < 0.5`, five times the threshold below, and every soft key went
   // with it: a feathered wing edge, hair, a fringe, a blade's ground bevel.
   material.alpha = 1;
@@ -164,7 +164,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
 
   material.disableDepthWrite = true;
 
-  // A constant depth bias only — enough to beat the coplanar ground it was
+  // A constant depth bias only - enough to beat the coplanar ground it was
   // just draped on (with SHADOW_LIFT), never the caster. The slope-scaled
   // `zOffset = -2` that stood here pulled a flattened polygon seen at the
   // camera's grazing angle far enough forward to beat the character's legs:
@@ -196,7 +196,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
   material.AddUniform('terrainHeightMap', 'sampler2D', undefined);
 
   // The silhouette dilation (SHADOW_DILATE) needs the caster's normals, and
-  // nothing else in this pass does — `disableLighting` is on, there is no
+  // nothing else in this pass does - `disableLighting` is on, there is no
   // bump map and no reflection, so `_needNormals` is false and Babylon leaves
   // the NORMAL define, the attribute and `vNormalW` out of the compiled
   // shader (`PrepareDefinesForAttributes`, materialHelper.functions:708).
@@ -214,7 +214,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
   `);
 
   material.Vertex_After_WorldPosComputed(`
-    // Grow the caster before flattening it — see SHADOW_DILATE. finalWorld
+    // Grow the caster before flattening it - see SHADOW_DILATE. finalWorld
     // already carries this vertex's bone (Babylon's bonesVertex include folds
     // the skinning matrix into it a few lines above), so this is the normal
     // in the same posed world space worldPos is in.
@@ -222,7 +222,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
     // Only the horizontal component is kept. The projection below overwrites
     // worldPos.y with the terrain height, so anything pushed along the
     // vertical part of the normal is thrown away a moment later; on a
-    // top-facing polygon that leaves no dilation at all, which is right —
+    // top-facing polygon that leaves no dilation at all, which is right -
     // those are the interior of the silhouette, not its outline. Faces that
     // do bound the outline, and the ring of faces around the open end of
     // every limb segment, all point sideways and get the full push.
@@ -285,12 +285,12 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
 
   material.Fragment_Before_FragColor(`
     // Flat, from SHADOW_ALPHA, the way glColor4f(0, 0, 0, 0.5) is flat in
-    // RenderBodyShadow — and not the
+    // RenderBodyShadow - and not the
     // texel's alpha, which Babylon has already multiplied in by this point
     // (ALPHAFROMDIFFUSE, default.fragment:114). The texture is in this pass to
     // cut the key and for nothing else. MU's TGAs carry partial alpha across
-    // whole surfaces and not only along a key's edge — a cape's weave, a wing
-    // membrane, a lantern's glass — so letting it through faded each shadow in
+    // whole surfaces and not only along a key's edge - a cape's weave, a wing
+    // membrane, a lantern's glass - so letting it through faded each shadow in
     // proportion to how see-through its caster was, and a shadow that is a
     // little bit of everything is the one that reads as too thin. The original
     // samples no texture here at all: every triangle it keeps lands solid 50%
@@ -312,7 +312,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
 
     // The caster's own texture, carried onto the clone by `createOneShadow`.
     // Only its alpha is read (the material's diffuse colour is black), and
-    // only to cut the key — see SHADOW_ALPHA_CUTOFF.
+    // only to cut the key - see SHADOW_ALPHA_CUTOFF.
     effect.setTexture(
       'diffuseSampler',
       (mesh.metadata?.diffuseTexture as Texture | undefined) ??
@@ -343,7 +343,7 @@ function createShadowMaterial(scene: Scene, slot: number): CustomMaterial {
 
     // Lean axis from the rig's sun. The fold above pushes toward -axis for
     // a caster above its origin, so the axis is the *negated* horizontal of
-    // the light's travel direction — the blob then extends away from the
+    // the light's travel direction - the blob then extends away from the
     // sun, the same way the CSM projects. No rig (login scenes) keeps the
     // old +X-formula lean.
     const sun = sunLightOf(mesh.getScene());
@@ -385,7 +385,7 @@ export function getShadowMaterial(scene: Scene, slot: number): CustomMaterial {
  * Worlds where nothing casts a ground shadow.
  *
  * Icarus is the whole set. `RenderTerrain` is skipped there
- * (MainScene.cpp:402), so there is no floor for a blob to land on — the
+ * (MainScene.cpp:402), so there is no floor for a blob to land on - the
  * projection would hang in the void at terrain height, under islands it has
  * no relationship to. The original suppresses every shadow on this world
  * explicitly and separately: mounts, fenrir and weapons in `Draw_RenderObject`
@@ -414,7 +414,7 @@ export function setShadowWorld(world: ENUM_WORLD): void {
 }
 
 /**
- * The projected sun blob — the Classic-tier shadow, and the only one this
+ * The projected sun blob - the Classic-tier shadow, and the only one this
  * module still draws. On Enhanced/Ultra the cascades own the sun, and two sun
  * shadows read wrong, so the blob steps aside.
  *
@@ -430,7 +430,7 @@ export function blobShadowsActive(): boolean {
  * Bumped whenever something that `blobShadowsActive` depends on changes (the
  * shadows toggle, the lighting tier taking the sun off the blobs). Each
  * `ModelObject` re-applies its own slots' enabled state when it sees a new
- * value, instead of this walking every mesh in the scene — and, unlike that
+ * value, instead of this walking every mesh in the scene - and, unlike that
  * walk, it composes with the per-object frustum gate.
  */
 let shadowStateSerial = 0;
@@ -449,14 +449,14 @@ blobShadowRefresh.fn = invalidateShadowState;
 export type ShadowMeshRules = {
   /**
    * `o->BlendMesh` casts with the rest of the body. Off everywhere the
-   * original has it off, which is everywhere — see `WingObject`.
+   * original has it off, which is everywhere - see `WingObject`.
    */
   readonly blendMesh: boolean;
   /**
    * Alpha-keyed meshes cast, cut by their own texture (SHADOW_ALPHA_CUTOFF).
    *
    * On for characters and their gear, which is what the original's shadow
-   * pass covers and where the key *is* the shape — armour trim, robes,
+   * pass covers and where the key *is* the shape - armour trim, robes,
    * skirts, a weapon's blade. Off for map objects, which are this project's
    * own extension of the pass and carry cards the original never meant to
    * cast: the pre-baked shadow decals under Lorencia's bridges would throw a
@@ -467,7 +467,7 @@ export type ShadowMeshRules = {
 
 /**
  * One projected blob for `slot`, or null when this caster has nothing to
- * project. Built on demand — every clone is a full copy of the caster's
+ * project. Built on demand - every clone is a full copy of the caster's
  * submesh hierarchy and a second set of draw calls, so on a tier where the
  * slot never activates it should never exist.
  */
@@ -487,8 +487,8 @@ export function createObjectShadow(
  * Whether one of the caster's meshes belongs in the silhouette.
  *
  * `AddMeshShadowTriangles` (ZzzBMD.cpp:2295) walks every mesh of the body
- * and skips exactly two: the one the object nominated as `BlendMesh` —
- * an additive glow card, which is light, not matter — and `HiddenMesh`,
+ * and skips exactly two: the one the object nominated as `BlendMesh` -
+ * an additive glow card, which is light, not matter - and `HiddenMesh`,
  * which is not drawn at all. Everything else casts, alpha-keyed or not.
  * `shadowSkip` is a `HiddenMesh` set for the shadow pass alone
  * (`ModelObject.ShadowHiddenMesh`): the mesh is drawn, its silhouette is not.
@@ -496,7 +496,7 @@ export function createObjectShadow(
  * The rule here used to drop every mesh whose material needed alpha
  * blending, which after `modelLoader`'s TGA → ALPHATESTANDBLEND promotion
  * is most of what a character wears: the shadow lost the armour's keyed
- * trim and its robes, all of a BLEND-textured weapon, and every wing —
+ * trim and its robes, all of a BLEND-textured weapon, and every wing -
  * which is why it read as a thin, naked body. It survives for map objects
  * only, as `rules.keyed`.
  */
@@ -521,7 +521,7 @@ function createOneShadow(
   // Decide on the caster before paying for a clone. A map object built
   // entirely of alpha cards (Noria's fairy-forest foliage) has nothing to
   // cast, and cloning its hierarchy just to strip every mesh and dispose the
-  // rest was the dominant frame cost of the whole map — see issue #6.
+  // rest was the dominant frame cost of the whole map - see issue #6.
   const casts = [root, ...root.getChildMeshes(false)].some(
     mesh => meshCasts(mesh, rules) && mesh.getTotalVertices() > 0
   );
@@ -558,7 +558,7 @@ function createOneShadow(
     };
 
     // The glow layer draws every mesh into its emissive pass with its own
-    // vertex shader — no ground projection — so a clone would sit on the
+    // vertex shader - no ground projection - so a clone would sit on the
     // character as a black, depth-writing copy and mask its glow. Keep the
     // clones out of every effect layer.
     for (const layer of root.getScene().effectLayers) {

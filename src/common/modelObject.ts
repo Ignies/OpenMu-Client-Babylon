@@ -88,7 +88,7 @@ function vertexDataKey(mesh: AbstractMesh): object {
   return (mesh as Mesh).geometry ?? mesh;
 }
 
-/** @see boneLocalBounds — keyed by shared geometry, not by mesh. */
+/** @see boneLocalBounds - keyed by shared geometry, not by mesh. */
 const boneBoundsCache = new WeakMap<object, Float32Array | null>();
 
 /**
@@ -258,7 +258,7 @@ const settledSkinnedBounds = new WeakMap<
  * the screen. The real placement of a BMD object's parts comes from its
  * animation (frame 0 even for static props), which is not applied yet inside
  * `load()`, so the box is grown after each of the first few rendered frames
- * — this also covers swaying trees and flags — and then left alone; Babylon's
+ * - this also covers swaying trees and flags - and then left alone; Babylon's
  * `_updateBoundingInfo` carries it along with the world matrix each frame.
  */
 function fixSkinnedLocalBounds(mesh: AbstractMesh): void {
@@ -324,7 +324,7 @@ function fixSkinnedLocalBounds(mesh: AbstractMesh): void {
 }
 
 /**
- * `o->HiddenMesh = -2` — hide the whole body rather than one mesh index.
+ * `o->HiddenMesh = -2` - hide the whole body rather than one mesh index.
  * The original's operate boxes and effect-replaced props use it.
  */
 export const HIDDEN_MESH_ALL = -2;
@@ -360,7 +360,7 @@ export class ModelObject {
 
   /**
    * Set for the props that come out of the map's object list, and for nothing
-   * else — `modelId` is assigned in `createObjects` alone. Characters, NPCs,
+   * else - `modelId` is assigned in `createObjects` alone. Characters, NPCs,
    * monsters, items and UI models all leave it false, which is what keeps the
    * blob-shadow size gate off them: a small monster still needs its shadow,
    * a ground flower does not.
@@ -370,7 +370,7 @@ export class ModelObject {
 
   /**
    * `o->HiddenMesh` (ZzzObject.cpp). A mesh index skips that one mesh in
-   * `DrawMesh`; `HIDDEN_MESH_ALL` (-2) hides the *whole body* — the model is
+   * `DrawMesh`; `HIDDEN_MESH_ALL` (-2) hides the *whole body* - the model is
    * still loaded, animated and pickable, it is simply never drawn. The
    * original uses it for operate boxes (pose boxes, Dungeon 60, Devias 91,
    * Atlans 39, Market 67) and for props replaced by an effect (Dungeon 52).
@@ -448,11 +448,11 @@ export class ModelObject {
   /**
    * Frame of the last *authored* key of each clip.
    *
-   * The converter closes every clip with a duplicate of key 0 — the wrap
+   * The converter closes every clip with a duplicate of key 0 - the wrap
    * segment the original interpolates through (tools/bmdToGlb.ts). That is
    * right for a loop and wrong for a one-shot, which holds wherever it stops:
    * played to `group.to` a Die clip runs on past the collapsed body, back up
-   * through the wrap into the standing pose of key 0, and freezes there —
+   * through the wrap into the standing pose of key 0, and freezes there -
    * a monster that dies, stands up, and fades away on its feet. The original
    * stops a one-shot on the last authored key (`PlayAnimation`,
    * ZzzBMD.cpp:415); `startGroup` makes that the clip's `to`.
@@ -490,7 +490,7 @@ export class ModelObject {
   LinkParent = false;
   ActionIterationWasFinished = false;
   /**
-   * Bumped every time an action (re)starts from its first frame — the
+   * Bumped every time an action (re)starts from its first frame - the
    * original's `AnimationFrame == 0` moment that sound/effect code keys on
    * (CombatSfxSystem).
    */
@@ -514,7 +514,7 @@ export class ModelObject {
    *
    * Babylon already frustum-culls the *drawing* of these meshes, but an
    * `AnimationGroup` keeps interpolating every bone of every loaded model
-   * whether or not it is on screen — in Lorencia most of what sits inside
+   * whether or not it is on screen - in Lorencia most of what sits inside
    * `CalculateVisibilitySystem`'s 32-tile radius is behind the camera.
    */
   OutOfView = false;
@@ -531,7 +531,7 @@ export class ModelObject {
     // is built with an explicit `transparencyMode`, and Babylon then answers
     // `needAlphaBlendingForMesh` from that mode alone without ever reading
     // visibility (Materials/material.ts). An opaque or alpha-tested mesh at
-    // alpha 0 therefore kept drawing at full strength — which is how a mount
+    // alpha 0 therefore kept drawing at full strength - which is how a mount
     // stayed on screen inside a town. Take the node out of the render instead;
     // switching it back on restores each mesh's own `isVisible`, so meshes
     // hidden for other reasons (HiddenMesh, HideSkin, texture scripts) stay
@@ -579,7 +579,7 @@ export class ModelObject {
    * Off by default, which is `AddMeshShadowTriangles`' `mesh->Texture ==
    * blendMesh -> continue` (ZzzBMD.cpp:2306): the blend mesh is an additive
    * glow card, and light does not cast a shadow. `WingObject` turns it on
-   * because on a wing that card *is* the wing — see the note there.
+   * because on a wing that card *is* the wing - see the note there.
    */
   ShadowBlendMeshCasts = false;
 
@@ -590,7 +590,7 @@ export class ModelObject {
    * The original's link matrix (`RenderLinkObject`, Link=true) in bone space,
    * as a Babylon matrix with metre translation. Identity = the item's BMD
    * frame sits straight in the bone frame (Link=false, the in-hand case). It
-   * may be non-orthogonal — see weaponAttachment.ts — so it is applied as a
+   * may be non-orthogonal - see weaponAttachment.ts - so it is applied as a
    * raw pre-transform on an intermediate node, never decomposed into TRS.
    */
   BoneLinkMatrix = Matrix.Identity();
@@ -647,7 +647,7 @@ export class ModelObject {
     const pose = this.PartPose;
     if (!pose) {
       // Override dropped: resume the clip-0 loop loadGLTF auto-starts. Only
-      // ever undoes a pose this object actually took — load()-time calls on
+      // ever undoes a pose this object actually took - load()-time calls on
       // models that never had one must not touch their clips.
       if (!this._partPoseActive) return;
       this._partPoseActive = false;
@@ -694,18 +694,18 @@ export class ModelObject {
   private _shadows: (AbstractMesh | null)[] = [];
 
   /**
-   * Slots whose `createObjectShadow` came back null — a caster none of whose
+   * Slots whose `createObjectShadow` came back null - a caster none of whose
    * meshes pass the shadow rules (a map object made entirely of alpha cards,
    * like Noria's foliage). Null in `_shadows` means "not built yet" and is
    * retried, so without this memo such an object re-attempted the build every
-   * frame it was on screen — issue #6. Reset with `_shadows` on (re)load: a
+   * frame it was on screen - issue #6. Reset with `_shadows` on (re)load: a
    * new gltf means new meshes and a fresh verdict.
    */
   private _shadowSlotsBarren: boolean[] = [];
 
   /**
    * The model's own meshes as of `load()`, kept so the per-frame frustum test
-   * does not allocate a child list. Bone-linked children are not in here —
+   * does not allocate a child list. Bone-linked children are not in here -
    * they hang off this model's bones, so they are covered by their owner's
    * `Children` walk in `anyMeshInFrustum`.
    */
@@ -786,7 +786,7 @@ export class ModelObject {
   /**
    * Starts one clip from its first frame.
    *
-   * A loop plays the whole range, wrap segment included — that segment is the
+   * A loop plays the whole range, wrap segment included - that segment is the
    * cycle closing. A one-shot stops one key short of it (`_lastRealFrame`)
    * and holds there, which is where the original leaves a Die or a swing.
    */
@@ -810,7 +810,7 @@ export class ModelObject {
    * Sets `AnimationSpeed` *and* pushes it into the clip that is already
    * playing. Plain assignment only takes effect on the next `playAction`,
    * which is fine for characters (their rate changes with the action) but not
-   * for parts whose rate changes under a single looping clip — a wing beats
+   * for parts whose rate changes under a single looping clip - a wing beats
    * at 0.25 on the ground and 1.0 in the air without ever changing action.
    */
   setAnimationSpeed(speed: number) {
@@ -865,7 +865,7 @@ export class ModelObject {
   }
 
   /**
-   * Pauses/resumes the clips of this model. **Looping clips only** — a
+   * Pauses/resumes the clips of this model. **Looping clips only** - a
    * one-shot (attack swing, Die) is what several systems wait on
    * (`ActionIterationWasFinished`, `actionProgress`), so freezing one off
    * screen would stall a monster's corpse fade or hold a player in a swing.
@@ -903,7 +903,7 @@ export class ModelObject {
   /**
    * True when this model or any of its bone-linked children has a mesh inside
    * `planes`; `null` when there is nothing to test at all (the player rig is
-   * a mesh-less skeleton — its body parts are separate child models).
+   * a mesh-less skeleton - its body parts are separate child models).
    */
   private anyMeshInFrustum(planes: readonly Plane[]): boolean | null {
     let sawMesh = false;
@@ -1151,7 +1151,7 @@ export class ModelObject {
   /**
    * `o->HiddenMesh = n` (n >= 0): `DrawMesh` skips that one mesh. The monster
    * models pack several variants into one BMD and hide the ones the current
-   * type does not wear — a plain Bull Fighter hides mesh 0, an Elite one keeps
+   * type does not wear - a plain Bull Fighter hides mesh 0, an Elite one keeps
    * it (`Setting_Monster`, ZzzCharacter.cpp:13801-13812).
    */
   private applyHiddenMesh() {
@@ -1175,7 +1175,7 @@ export class ModelObject {
    * `HiddenMesh = -2` in `RenderObject`: the original walks the mesh list and
    * draws nothing. Here the meshes stay loaded (so bones, animation and the
    * pick ray still work) but leave the render list, and the object stops
-   * casting a shadow — an operate box has no body to cast one.
+   * casting a shadow - an operate box has no body to cast one.
    */
   private applyWholeBodyHide() {
     if (!this.bodyHidden || !this.gltf) return;
@@ -1229,7 +1229,7 @@ export class ModelObject {
     } else if (anim.u || anim.v) {
       // A `blend` scroller is already on the shared additive material from
       // `applyBlendMesh`; move it to the scrolling twin. Skipped when the
-      // table only animates `light`, which needs no shader change at all —
+      // table only animates `light`, which needs no shader change at all -
       // that is every Atlans entry.
       const scroll = getScrollVariant(mesh.getScene(), mesh);
       if (scroll) mesh.material = scroll;
@@ -1345,14 +1345,14 @@ export class ModelObject {
    * Below this height, in tiles, a map object gets no blob shadow.
    *
    * A blob is a full clone of the caster's submesh hierarchy plus its own
-   * draw call, and Noria places 9399 objects — 2336 of them ground flowers
+   * draw call, and Noria places 9399 objects - 2336 of them ground flowers
    * about a third of a tile tall. The shadow of a thing that short is a
    * smudge under a thing already touching the ground: it costs a mesh and a
    * draw call to change nothing on screen. Lorencia is 2154 objects and never
    * made this hurt; the foliage maps are where an eager per-object clone stops
    * being affordable.
    *
-   * Characters are exempt — see `_castsBlobShadow`.
+   * Characters are exempt - see `_castsBlobShadow`.
    */
   static BLOB_SHADOW_MIN_HEIGHT = 0.75;
 
@@ -1364,16 +1364,16 @@ export class ModelObject {
    * the terrain height and leans it in proportion to how high each vertex
    * sits. It was written for a character on open ground, and the original
    * never pointed it at anything else (map-object shadows are
-   * ours"). Pointed at scenery that *is* the ground — Devias' cliff faces and
-   * mountains, the walls of a keep — it does two wrong things at once: the
+   * ours"). Pointed at scenery that *is* the ground - Devias' cliff faces and
+   * mountains, the walls of a keep - it does two wrong things at once: the
    * flattened silhouette lands on the terrain directly under the rock, which
    * is the rock's own visible face, so the whole face goes flat grey; and its
    * lean is several tiles, so the streak reaches whatever stands beside it.
    * Those objects' shading is already in the terrain bake and in their own
    * lightmap, which is where the original leaves it.
    *
-   * Four tiles is well over the widest thing that should cast — a tree
-   * crown, a market stall, a statue — and well under the smallest cliff piece.
+   * Four tiles is well over the widest thing that should cast - a tree
+   * crown, a market stall, a statue - and well under the smallest cliff piece.
    */
   static BLOB_SHADOW_MAX_FOOTPRINT = 4;
 
@@ -1431,7 +1431,7 @@ export class ModelObject {
    *
    * Nothing here is built speculatively. A clone is a full copy of the
    * caster's submesh hierarchy and a second set of draw calls, so on a tier
-   * where the shadow never activates it should never exist — and when the
+   * where the shadow never activates it should never exist - and when the
    * player turns shadows off, the maps they have not visited yet cost nothing
    * at all.
    */
@@ -1470,7 +1470,7 @@ export class ModelObject {
    * the caster is on screen. The last condition is the point: the clones opt
    * out of Babylon's frustum culling (their vertex shader moves them to the
    * ground, away from their own bounds), so without this every loaded
-   * object's shadow is submitted every frame — most of them behind the
+   * object's shadow is submitted every frame - most of them behind the
    * camera. `OutOfView` is measured against a frustum widened past the
    * projection's reach (RenderSystem), so a caster just off screen still
    * draws the shadow that pokes into view.
@@ -1505,7 +1505,7 @@ export class ModelObject {
 
     // Both slots are created lazily, by `updateShadowSlots`. Slot 0 used to be
     // built here, for every caster, whether or not anything would ever draw
-    // it — which on Enhanced and Ultra is *never*, because the CSM owns the sun
+    // it - which on Enhanced and Ultra is *never*, because the CSM owns the sun
     // and slot 0 only draws for a torch. On a 9399-object map that was 9399
     // submesh-hierarchy clones built during the load and held for the life of
     // the map, to be disabled on the next frame.
@@ -1556,7 +1556,7 @@ export class ModelObject {
     // milliseconds, which is what the table's saw-tooths are written against.
     // It sits here rather than in MapTileObject because several map props
     // (Lorencia's candles, Devias' candelabra) extend ModelObject directly,
-    // and the early-out above already skips it off screen — the uniform is
+    // and the early-out above already skips it off screen - the uniform is
     // only read while the mesh is drawn.
     this.updateMeshAnimation(gameTime.TotalGameTime.TotalSeconds * 1000);
 
@@ -1624,7 +1624,7 @@ export class ModelObject {
    * `BoundingBoxMin/Max` transformed by the object matrix: the mesh's
    * bind-pose bounds under the current node transform (bone-linked children
    * follow their bones). It deliberately does not re-skin the vertices on the
-   * CPU (`refreshBoundingInfo(true)`) — that cost ~10 ms per character per
+   * CPU (`refreshBoundingInfo(true)`) - that cost ~10 ms per character per
    * call and was being called by three systems per frame.
    *
    * Memoised per frame so the cursor, pointer and debug systems share one
@@ -1660,7 +1660,7 @@ export class ModelObject {
     // last world-matrix pass (at most one frame old). Not
     // getHierarchyBoundingVectors(): that calls scene.incrementRenderId(),
     // invalidating every cached world matrix in the scene, and force-recomputes
-    // every descendant node (all skeleton joints included) — ~10 ms per
+    // every descendant node (all skeleton joints included) - ~10 ms per
     // character.
     const meshes = this._node.getChildMeshes(
       false,

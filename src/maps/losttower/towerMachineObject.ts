@@ -15,7 +15,7 @@ type BoneNode = BonedEmission['node'];
  *
  * The bone names in Object5/Object20.glb confirm the choice was deliberate:
  * bone 15 is `light02`, bone 19 is `light01` and bone 21 is `Bone01`, the
- * mount point at the machine's core — the two small emitters and the big one.
+ * mount point at the machine's core - the two small emitters and the big one.
  */
 const EMITTER_BONES: readonly { bone: number; scale: number }[] = [
   { bone: 15, scale: 0.3 },
@@ -43,8 +43,8 @@ const POSE_WAIT_LIMIT = 120;
 /**
  * The two Lost Tower machines (types 19 and 20, `Object5/Object20.glb` and
  * `Object21.glb`; n=14 and n=6 in EncTerrain5.obj). They are the same 22-bone
- * rig in two colours — the red one is powered by `BITMAP_MAGIC + 1`, the blue
- * one by `BITMAP_LIGHTNING + 1` (ZzzObject.cpp:2896-2905) — and they are the
+ * rig in two colours - the red one is powered by `BITMAP_MAGIC + 1`, the blue
+ * one by `BITMAP_LIGHTNING + 1` (ZzzObject.cpp:2896-2905) - and they are the
  * only things in the tower that are unambiguously *on*.
  *
  * `MoveObject` gives them `BlendMesh = 4` and the U scroll (both tabled
@@ -61,13 +61,13 @@ const POSE_WAIT_LIMIT = 120;
  *    four-pointed star against itself is how the original builds a symmetric,
  *    shimmering flare out of an asymmetric texture; on a disc the rotation is
  *    a no-op and the pair is just the same sprite drawn twice. One sprite per
- *    bone, then — doubling it would only double the additive brightness, and
+ *    bone, then - doubling it would only double the additive brightness, and
  *    that is a colour decision, not a fidelity one.
  *  - `Draw_RenderObject` (ZzzObject.cpp:1013-1022) additionally redraws the
  *    body with `StreamMesh = 2`, `BITMAP_CHROME` and `BodyLight` forced to
  *    (1.0, 0.2, 0.1), then lays the normal textured pass over it. The clone
  *    has no per-object chrome pass; that is materials work. The `stream`
- *    half of it — unlit, UV-scrolled — is already handled by
+ *    half of it - unlit, UV-scrolled - is already handled by
  *    common/meshAnimation.ts.
  *
  * The floor light these throw is in spec.ts: `addTerrainLight` is an x/z
@@ -123,7 +123,7 @@ export class LostTowerMachineObject extends MapTileObject {
   /**
    * BMD bone transforms only exist once a render has posed the skeleton, so
    * the flares are created from `Update` the first time a bone has left the
-   * object origin — otherwise all three would spawn stacked at the machine's
+   * object origin - otherwise all three would spawn stacked at the machine's
    * feet and stay there for a frame.
    */
   #posed(): boolean {
@@ -195,7 +195,7 @@ export class LostTowerMachineObject extends MapTileObject {
     if (this.OutOfView) return;
 
     // `RenderObjectVisual` re-rolls Luminosity per object per frame, and every
-    // sprite it creates that frame shares the roll — so the three emitters
+    // sprite it creates that frame shares the roll - so the three emitters
     // pulse together rather than sparkling independently. One roll here, then.
     const lumi =
       LUMINOSITY_MIN +

@@ -7,13 +7,13 @@ import {
 } from './spec';
 
 /**
- * Duel Arena (World65 / Object65) — the map entry: identity and the per-world data the
+ * Duel Arena (World65 / Object65) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
  * lives in another system; the notes below say what is and is not built.
  *
- * Duel Arena (`WD_64DUELARENA`, `World65`/`Object65`) — four fenced rings.
+ * Duel Arena (`WD_64DUELARENA`, `World65`/`Object65`) - four fenced rings.
  *
  * `CGMDuelArena::CreateObject` (GMDuelArena.cpp:41-50) makes 0/1/32
  * unpickable (no hook); `MoveObject` (:64-89) is the three hidden types and
@@ -21,7 +21,7 @@ import {
  * duel-state banner effects, server-driven.
  *
  * `Music/DuelArena`; no bed. OpenMU has twelve spawn gates here, one per
- * duel slot — offline lands on the first (101, 64).
+ * duel slot - offline lands on the first (101, 64).
  */
 
 // ---- 1. data ---------------------------------------------------------------

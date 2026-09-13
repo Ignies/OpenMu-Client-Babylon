@@ -10,7 +10,7 @@ import { downloadDataFile } from '../../libs/mu/dataFolder';
 /** OZJ is a 24-byte header in front of a plain JPEG (see `effectLights.ts`). */
 const OZJ_HEADER_SIZE = 24;
 
-/** MU units per world unit — the whole client divides positions by this. */
+/** MU units per world unit - the whole client divides positions by this. */
 
 export type SkySpriteTexture = {
   readonly file: string;
@@ -24,7 +24,7 @@ export type SkySpriteTexture = {
  *
  * The capacity is a budget, not the reference's count. EncTerrain11.obj holds
  * 335 cloud emitters (16+21+8 of types 0-2 at 20 clouds each, 115+61+114 of
- * types 3-5 at 10 each) — 3800 billboards if every one were in view at once.
+ * types 3-5 at 10 each) - 3800 billboards if every one were in view at once.
  * The visibility radius keeps most of them unbuilt, and `IcarusCloudField`
  * spawns what it can get and lives with a thinner bank when the pool is full,
  * so the first emitters built (which are the ones nearest the hero, since
@@ -38,7 +38,7 @@ export const CLOUD_TEXTURE: SkySpriteTexture = {
 };
 
 /**
- * `BITMAP_CLOUD + 1` — `Effect/cloudLight.OZJ`, also 256². The glow
+ * `BITMAP_CLOUD + 1` - `Effect/cloudLight.OZJ`, also 256². The glow
  * `MoveObjectOnEffect` (ZzzObject.cpp:4338) hangs off a cloud object one frame
  * in ten. Far fewer live at once than clouds: ~2.5 spawns a second per visible
  * emitter, each lasting well under a second.
@@ -58,7 +58,7 @@ export const CLOUD_LIGHT_TEXTURE: SkySpriteTexture = {
  * particle's motion. See `ICARUS_EMISSIONS` in spec.ts for the long form.
  *
  * Managers are cached per scene and are *not* disposed when the map unloads,
- * matching `effectLights.ts` and `effectParticles.ts` — the sprites are hidden
+ * matching `effectLights.ts` and `effectParticles.ts` - the sprites are hidden
  * and returned to the free list instead, so a return trip to Icarus reuses the
  * decoded texture rather than downloading and uploading it again.
  */

@@ -2,13 +2,13 @@ import type { ENUM_WORLD } from '../common/types';
 import type { WeatherLayer } from './layer';
 
 /**
- * Snow melted off the ground by fire — the patch a Fire Ball, a Meteorite or
+ * Snow melted off the ground by fire - the patch a Fire Ball, a Meteorite or
  * an Inferno leaves in a Devias snowfield.
  *
  * The original client has none of this: `snowCover.ts` already records that
  * settled snow is our own invention, and nothing in `ZzzEffect.cpp` ever
  * touches the terrain. What makes it worth having is that the snow is a
- * *simulation* — it builds while the squall blows and melts once it passes —
+ * *simulation* - it builds while the squall blows and melts once it passes -
  * so a fireball that leaves the field untouched is the one thing on screen
  * saying the white is a texture after all.
  *
@@ -19,35 +19,35 @@ import type { WeatherLayer } from './layer';
  * not: it is a handful of round patches at a time, each alive for half a
  * minute. So this keeps them as **at most `MELT_SPOTS` circles in a uniform
  * array**, the way the water reflections already carry the torch pool
- * (`ovLightPos` / `ovLightCol` in terrainOverlay.ts) — no texture, no upload,
+ * (`ovLightPos` / `ovLightCol` in terrainOverlay.ts) - no texture, no upload,
  * no second sampler.
  *
  * That last point is the deciding one. The terrain fragment shader's sampler
  * list is brittle enough that both `terrainMaterial.ts` and
- * `terrainDynamicLight.ts` carry warnings about it — a sampler declared but
+ * `terrainDynamicLight.ts` carry warnings about it - a sampler declared but
  * unbound, or two sampler types landing on one unit, is a GL draw error that
- * makes the whole terrain vanish — and on the unpacked tile path the units
+ * makes the whole terrain vanish - and on the unpacked tile path the units
  * are nearly spoken for already. A melt that costs zero of them cannot
  * provoke any of that.
  *
  * ### It imports nothing from this folder, and must not
  *
  * `terrainOverlay.ts` reads this file, and `snowCover.ts` reads
- * `terrainOverlay.ts` — so anything here that touched another weather module
+ * `terrainOverlay.ts` - so anything here that touched another weather module
  * at *module scope* would sit inside that cycle and be initialised before the
  * thing it read. Naming `SNOW_GROUND_MAPS` on the layer, which is what every
  * other snow effect does, crashed the client on load with exactly that. So
  * this file is a leaf, like `snowTrail.ts`: it owns a pool of patches and
- * knows nothing about snow. Which layer they eat — and therefore which maps
- * can show them — is `SNOW_COVER.melt`, decided at the other end.
+ * knows nothing about snow. Which layer they eat - and therefore which maps
+ * can show them - is `SNOW_COVER.melt`, decided at the other end.
  *
  * ### What reads it
  *
- *  - The terrain shader, through `SNOW_COVER.melt` — the spots divide the
+ *  - The terrain shader, through `SNOW_COVER.melt` - the spots divide the
  *    layer's *target*, so the snow's coverage, depth, relief, drift lighting
  *    and any trail ploughed through it all thin together, and the revealed
  *    ground is damped down rather than left as bare cyan tile.
- *  - `snowSink.snowUnderfoot`, on the CPU, through `snowMeltAt` — so a hero
+ *  - `snowSink.snowUnderfoot`, on the CPU, through `snowMeltAt` - so a hero
  *    standing in a melt neither sinks into snow that is not there nor stamps
  *    a print into it. Same falloff on both sides, for the reason the bed
  *    table is shared: what you stand in has to be what you see.
@@ -62,8 +62,8 @@ import type { WeatherLayer } from './layer';
  * 45° around a 2.2-tile ring, which is wider apart than the merge below can
  * join, so anything less turns the one skill built out of eight ground hits
  * into a ring with gaps in it. The fragment loop is a `length()` and a
- * `smoothstep` per slot — a fraction of what the reflection pool's six
- * lights cost — and nearby hits merge rather than each claiming a slot, so a
+ * `smoothstep` per slot - a fraction of what the reflection pool's six
+ * lights cost - and nearby hits merge rather than each claiming a slot, so a
  * sustained barrage widens one scar instead of exhausting the array.
  */
 export const MELT_SPOTS = 8;
@@ -97,7 +97,7 @@ const MAX_RADIUS = 4;
 
 /**
  * Where the edge of a patch starts, as a share of the radius. The snow does
- * not stop at a line — it thins over the last half of the circle, which is
+ * not stop at a line - it thins over the last half of the circle, which is
  * what makes it read as melted rather than as a stencil.
  */
 export const MELT_EDGE = 0.45;
@@ -143,13 +143,13 @@ const spots: Spot[] = Array.from({ length: MELT_SPOTS }, () => ({
 const uniform: number[] = new Array(MELT_SPOTS * 4).fill(0);
 
 /**
- * How much of a patch's life is left, 1…0 — full until the snow starts
+ * How much of a patch's life is left, 1…0 - full until the snow starts
  * closing it, then down the fill ramp to nothing.
  *
  * Separate from `envelope` because the opening ramp is not a claim on the
  * slot. Scored by the envelope, a patch made this frame is worth 0 and the
- * allocator reads it as free: a volley that lands in one frame — Inferno's
- * eight bombs, a chain of fireballs — then piles every hit into the same slot
+ * allocator reads it as free: a volley that lands in one frame - Inferno's
+ * eight bombs, a chain of fireballs - then piles every hit into the same slot
  * and only the last one is ever seen.
  */
 function life(age: number): number {
@@ -202,7 +202,7 @@ export function meltSnow(
   }
 
   // Otherwise the emptiest slot: a free one (strength 0), else the patch
-  // closest to healed. Scored on `life`, never on the envelope — see there.
+  // closest to healed. Scored on `life`, never on the envelope - see there.
   let slot = spots[0];
   let best = slot.strength * life(slot.age);
   for (const s of spots) {
@@ -241,7 +241,7 @@ export function snowMeltAt(x: number, z: number): number {
   return melt;
 }
 
-/** Whether anything is melted anywhere — the shader's "no melt" fast path. */
+/** Whether anything is melted anywhere - the shader's "no melt" fast path. */
 export function snowMeltActive(): boolean {
   for (const s of spots) if (s.strength > 0) return true;
   return false;

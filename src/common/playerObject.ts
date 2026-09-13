@@ -33,14 +33,14 @@ export class PlayerObject extends ModelObject {
   /**
    * The class a *player-rig NPC* poses as (`c->Class` on the NPC the
    * original creates with `CreateCharacter(..., MODEL_PLAYER, ...)`).
-   * `null` on real players — their class arrives with the appearance.
+   * `null` on real players - their class arrives with the appearance.
    * Read by logic.ts so `isFemale` is not hard-zeroed for these.
    */
   static NpcClass: CharacterClassNumber | null = null;
 
   /**
    * `if (c->MonsterIndex == MONSTER_ELF_SOLDIER) Fly = true;`
-   * (ZzzCharacter.cpp:222) — the Elf Soldier hovers wherever she stands.
+   * (ZzzCharacter.cpp:222) - the Elf Soldier hovers wherever she stands.
    */
   static NpcAlwaysFly = false;
 
@@ -131,7 +131,7 @@ export class PlayerObject extends ModelObject {
     });
 
     // c->Wing hangs off back bone 47 (ZzzCharacter.cpp:15104); a cape moves
-    // it to bone 19 with a link matrix — WingObject.prepare() owns that.
+    // it to bone 19 with a link matrix - WingObject.prepare() owns that.
     this.Wings.LinkParent = false;
     this.Wings.ParentBoneLink = WING_BONE;
     this.Wings.SkipBoundingBox = true;
@@ -228,7 +228,7 @@ export class PlayerObject extends ModelObject {
   }
 
   /**
-   * Loads (or clears) the body-linked pet. Only the Imp lives here — the
+   * Loads (or clears) the body-linked pet. Only the Imp lives here - the
    * Guardian Angel and the two mounts are world objects owned by PetSystem.
    */
   async setBodyPetAsync(pet: Item | null) {
@@ -260,7 +260,7 @@ export class PlayerObject extends ModelObject {
   /**
    * Starts the idle clip a player-rig NPC stands in. The factories used to
    * assign `CurrentAction` without playing it, which left the model on the
-   * glTF loader’s auto-started clip 0 (`PLAYER_SET`) — always the male rest
+   * glTF loader’s auto-started clip 0 (`PLAYER_SET`) - always the male rest
    * pose, whatever the NPC’s class.
    */
   startNpcIdle() {

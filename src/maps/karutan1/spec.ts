@@ -3,7 +3,7 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
 
 /**
  * Karutan 1 (`WD_80KARUTAN1`, `World81`/`Object81`) and Karutan 2
- * (`WD_81KARUTAN2`, `World82`/`Object82`), the plain-data half — one table
+ * (`WD_81KARUTAN2`, `World82`/`Object82`), the plain-data half - one table
  * set: `CGMKarutan1::MoveObject` (GMKarutan1.cpp:42-65) tests
  * `IsKarutanMap()`, both worlds (:882-885), and `CreateObject` (:37-40) is
  * `return false`. `maps/karutan2` imports these.
@@ -19,11 +19,11 @@ export const KARUTAN_BLEND_MESHES: Readonly<Record<number, number>> = {};
 /**
  * `MoveObject` :48-63 hides 113, 114, 115, 116, 118; `RenderObjectVisual`
  * (:67-167):
- *  - **113** (K1 ×59 / K2 ×50): the fire vent — see `KARUTAN_LIGHTS`.
- *  - **114** (×15 / ×20): `WATERFALL_3` SubType 16 — the oasis spray.
- *  - **115** (×0 / ×26), **118** (×6 / ×9): `BITMAP_CLOUD` SubType 0 — the
+ *  - **113** (K1 ×59 / K2 ×50): the fire vent - see `KARUTAN_LIGHTS`.
+ *  - **114** (×15 / ×20): `WATERFALL_3` SubType 16 - the oasis spray.
+ *  - **115** (×0 / ×26), **118** (×6 / ×9): `BITMAP_CLOUD` SubType 0 - the
  *    sand haze.
- *  - **116** (×65 / ×21): `BITMAP_SMOKE` SubType 69 and 13 at twice scale —
+ *  - **116** (×65 / ×21): `BITMAP_SMOKE` SubType 69 and 13 at twice scale -
  *    the dust devils.
  */
 export const KARUTAN_EFFECT_ONLY_TYPES: readonly number[] = [
@@ -46,7 +46,7 @@ export const KARUTAN_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
  * + `RenderObjectVisual` :106-128: a `BITMAP_LIGHT` sprite at `2 * scale`
  * and the cycling `FIRE_HIK1` / `CURSEDLICH` / `HIK3`. Types 66 (×6 / ×0)
  * and 72 (×85 / ×113) carry bone sprites (`SHINY+5` at bones 13/14;
- * `LIGHT` + `SPARK` at bones 11/7, :74-105) — the Kardamahal lamps; sprites
+ * `LIGHT` + `SPARK` at bones 11/7, :74-105) - the Kardamahal lamps; sprites
  * only, one flare each.
  */
 export const KARUTAN_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {

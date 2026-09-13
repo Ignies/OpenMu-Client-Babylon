@@ -11,13 +11,13 @@ import type { ISystemFactory } from '../world';
 
 /**
  * Keeps the terrain mask (`terrainMask.ts`) up to date: which tiles have a roof
- * over them, so the ground overlays — settled snow today — stop at the door.
+ * over them, so the ground overlays - settled snow today - stop at the door.
  *
  * Nothing in the map data says where an interior is (see the note in
  * terrainMask.ts: the shipped `.att` files carry no `TW_HEIGHT` at all), so a
  * roof has to be recognised by its shape. The test is the one
- * `CeilingHideSystem` already proved for finding the ceiling over the hero — a
- * mesh whose world AABB is a thin slab sitting above head height — applied to
+ * `CeilingHideSystem` already proved for finding the ceiling over the hero - a
+ * mesh whose world AABB is a thin slab sitting above head height - applied to
  * every loaded object rather than a radius around the player.
  *
  * ### Why it scans continuously instead of once
@@ -25,7 +25,7 @@ import type { ISystemFactory } from '../world';
  * Objects stream in with the player, so at map load most of the world's
  * geometry does not exist yet and a single pass would see almost nothing.
  * Because painting is additive, a continuous scan converges on exactly the
- * right answer wherever the player has been — and the only place that matters
+ * right answer wherever the player has been - and the only place that matters
  * is where they can see the ground. Each entity is measured **once** and then
  * skipped forever, so the steady-state cost is walking the entity list, not
  * its meshes.
@@ -37,7 +37,7 @@ import type { ISystemFactory } from '../world';
  * ### Only the map's own geometry is ever measured
  *
  * The query is keyed on `modelId`, which `loadMapIntoScene.createObjects`
- * sets and nothing else in the game does — so it holds exactly the objects
+ * sets and nothing else in the game does - so it holds exactly the objects
  * the map file placed, and never a player, a monster, an NPC or a dropped
  * item.
  *
@@ -45,7 +45,7 @@ import type { ISystemFactory } from '../world';
  * and thrown a further ~44 cm by `DropMotionSystem`, then falls for about
  * half a second: for that half second it is a thin mesh hanging 1.8–2.2
  * tiles over the ground, which is precisely the slab test below. Whichever
- * scan caught it painted the item's tumbling world AABB as a roof — and
+ * scan caught it painted the item's tumbling world AABB as a roof - and
  * because painting is additive and each entity is measured once, every item
  * that ever fell left a permanent square of bare ground in the snow under it.
  * Living bodies are out for the same reason: nothing that can be somewhere
@@ -61,7 +61,7 @@ const TERRAIN_PROBE = 128;
 export const TerrainMaskSystem: ISystemFactory = world => {
   // `modelId` is the map file's object id, set only by `createObjects`. It is
   // what separates the world's own geometry from everything that walks, flies
-  // or falls through it — see the note above.
+  // or falls through it - see the note above.
   const models = world.with('modelObject', 'transform', 'worldIndex', 'modelId');
   const areas = world.with('interactiveArea', 'worldIndex');
 
@@ -72,7 +72,7 @@ export const TerrainMaskSystem: ISystemFactory = world => {
   let sinceScan = SCAN_INTERVAL;
 
   /**
-   * The interiors the game already knows by name — every registered
+   * The interiors the game already knows by name - every registered
    * `interactiveArea`, plus the Devias rooms that are data-only. Painted
    * unconditionally, because these are the rooms a player is most likely to be
    * standing in when the map loads and no roof has streamed in yet.

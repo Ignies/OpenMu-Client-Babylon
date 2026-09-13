@@ -7,7 +7,7 @@ import { CHAOS_CASTLE_WORLDS, DEVIL_SQUARE_WORLDS } from '../common/worldAssets'
  * Rain strength, ported from `RainTarget` / `RainCurrent`
  * (ZzzEffectFireLeave.cpp:27-28, 422-452).
  *
- * The weather byte's meaning is no longer an assumption — `ReceiveWeather`
+ * The weather byte's meaning is no longer an assumption - `ReceiveWeather`
  * (WSclient.cpp:6716) reads it as:
  *
  * ```cpp
@@ -16,17 +16,17 @@ import { CHAOS_CASTLE_WORLDS, DEVIL_SQUARE_WORLDS } from '../common/worldAssets'
  * else if (Weather == 1) RainTarget = (Data->Value & 15) * 6;
  * ```
  *
- * So the high nibble is the kind (**0 clear, 1 rain — confirmed**, and no
+ * So the high nibble is the kind (**0 clear, 1 rain - confirmed**, and no
  * other value does anything: snow is a property of the map, never of this
  * packet) and the low nibble is the **intensity**, which the clone was
  * discarding. `RainTarget` lands in 0…90, `Rainly = RainCurrent * MAX_LEAVES
  * / 100` with `MAX_LEAVES = 200` (_define.h:443), so `RainCurrent / 100` is
- * the share of the full particle budget — that is the number below.
+ * the share of the full particle budget - that is the number below.
  *
  * `RainCurrent` chases `RainTarget` by one unit per reference frame rather
  * than snapping, which is what stops a weather packet from switching a
  * downpour on between two frames. At 25 Hz that is 0.25 of full strength per
- * second, a ~4 s ramp across the whole range — and four seconds is where the
+ * second, a ~4 s ramp across the whole range - and four seconds is where the
  * port stops being useful, because a shower that arrives in four seconds
  * reads as a switch. See `RAMP_UP_SECONDS`.
  */
@@ -40,7 +40,7 @@ export const WEATHER_RAIN = 1;
  * How long a shower takes to arrive, and how long it takes to leave.
  *
  * **This is a deliberate divergence from the port.** The original's chase is
- * one `RainTarget` unit per 25 Hz frame — 0.25 of the full range per second,
+ * one `RainTarget` unit per 25 Hz frame - 0.25 of the full range per second,
  * so ~4 s from clear to a downpour and 4 s back. On screen that is not a
  * shower, it is a switch with a short delay on it: the rain is either there
  * or not, and because a drop only lives about a second the *field* follows
@@ -48,7 +48,7 @@ export const WEATHER_RAIN = 1;
  * the corner.
  *
  * A shower is a thing with a shape. It starts as a few small slow drops,
- * fills in, sits, and thins out again — and the thinning takes longer than
+ * fills in, sits, and thins out again - and the thinning takes longer than
  * the filling, because a cloud runs out of its heaviest rain before it runs
  * out of rain. Hence the asymmetry: half a minute in, three quarters of a
  * minute out.
@@ -58,9 +58,9 @@ export const WEATHER_RAIN = 1;
  * wrong one is dominating:
  *
  *  1. the proxy eases its own intensity with a smoothstep between slot
- *     centres, over minutes — the weather itself changing its mind;
- *  2. this ramp, over tens of seconds — the shower arriving and leaving;
- *  3. the emitter's own rate slew (`AmbientRecipe.ramp`, 2.5 s for rain) —
+ *     centres, over minutes - the weather itself changing its mind;
+ *  2. this ramp, over tens of seconds - the shower arriving and leaving;
+ *  3. the emitter's own rate slew (`AmbientRecipe.ramp`, 2.5 s for rain) -
  *     the last corner off the emit rate.
  *
  * Under `WEATHER_FORCE` the first stage is bypassed, so what a test sees is
@@ -89,7 +89,7 @@ const ALWAYS_RAINING: ReadonlySet<ENUM_WORLD> = new Set([
 // ---- 2. state + readers ----------------------------------------------------
 
 let current = 0;
-/** False until the first `updateRain` after a reset — see `resetRain`. */
+/** False until the first `updateRain` after a reset - see `resetRain`. */
 let seeded = false;
 
 /** The target the packet (or the map) asks for, in 0…1. */
@@ -134,8 +134,8 @@ export function rainStrength(): number {
 /**
  * A map change re-seeds the rain rather than re-ramping it.
  *
- * This deliberately does **not** clear `Store.weather`. The sky is global —
- * one schedule in the proxy for every client — so the shower is genuinely
+ * This deliberately does **not** clear `Store.weather`. The sky is global -
+ * one schedule in the proxy for every client - so the shower is genuinely
  * still falling on the other side of the gate, and the player should walk out
  * into the rain it was already raining.
  *

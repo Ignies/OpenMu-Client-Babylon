@@ -12,13 +12,13 @@ import { castsOnSelf } from '../combat/castTargets';
  * Client-side casting rules. The wire format is decided by the OpenMU skill
  * type: area skills go out as AreaSkill (0x1E, the original's
  * SendRequestMagicContinue), everything else as TargetedSkill (0x19,
- * SendRequestMagic) — ZzzInterface.cpp:2325-2470.
+ * SendRequestMagic) - ZzzInterface.cpp:2325-2470.
  */
 
 /**
  * Teleport / Teleport Ally are neither targeted nor area casts on the wire:
  * OpenMU's `WizardTeleportAction` answers `EnterGateRequest` (C3 1C, gate 0,
- * the target square — the original's SendRequestTeleport) and
+ * the target square - the original's SendRequestTeleport) and
  * `TeleportTarget` (C3 B0, party member + square); it replies with a
  * same-map `MapChanged` that moves the hero, or one at the old square when
  * refused.
@@ -42,7 +42,7 @@ export function isAreaSkill(def: SkillDefinition): boolean {
 
 /**
  * Whether a cast with nothing suitable selected lands on the hero. The rule
- * itself — self-only versus party-member-or-self versus hostile — is
+ * itself - self-only versus party-member-or-self versus hostile - is
  * `combat/castTargets`; this stays exported because the hotbar and the skill
  * list ask the same question.
  */
@@ -64,9 +64,9 @@ export function isSpell(def: SkillDefinition): boolean {
  *
  *  1. Starfall, the one skill that shoots through `SetPlayerHighBowAttack`
  *     instead (`AT_SKILL_DEEPIMPACT`, ZzzInterface.cpp:2523-2527),
- *  2. the per-skill clip (`combat/skillClips` — every `UseSkill*` /
+ *  2. the per-skill clip (`combat/skillClips` - every `UseSkill*` /
  *     `Attack*` / `ReceiveMagic` case, with its mount and map branches),
- *  3. `SetPlayerMagic` for a spell (ZzzCharacter.cpp:1238-1262) — the
+ *  3. `SetPlayerMagic` for a spell (ZzzCharacter.cpp:1238-1262) - the
  *     female hand-raise, the male HAND1/HAND2 coin toss, or the mount's own
  *     cast clip,
  *  4. the weapon swing, for a physical skill with no clip of its own.

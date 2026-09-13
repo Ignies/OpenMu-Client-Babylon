@@ -26,7 +26,7 @@ export class WingObject extends ModelObject {
    * the wings are the largest thing on the character and their absence from
    * the shadow is what reads as broken.
    *
-   * The blend-mesh exemption is the other half of it — on Wing of Elf and
+   * The blend-mesh exemption is the other half of it - on Wing of Elf and
    * Wings of Spirits (`o->BlendMesh = 0`, ZzzObject.cpp:5276-5284) the
    * additive card is the only mesh in the model, so the ordinary rule would
    * leave those two wings shadowless while every other pair cast.
@@ -38,7 +38,7 @@ export class WingObject extends ModelObject {
   #elapsedMs = 0;
 
   /**
-   * Applies a wing spec *before* the model is loaded — `BlendMesh` is read by
+   * Applies a wing spec *before* the model is loaded - `BlendMesh` is read by
    * `load()`, so it has to be in place first. Returns the bone the part should
    * link to and the matrix (capes only).
    */

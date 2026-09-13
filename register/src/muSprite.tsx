@@ -7,7 +7,7 @@ import { decodeTGA } from '../../src/libs/mu/tga';
  *
  * The game's `libs/mu/sprites.ts` would do this already, but it reaches
  * `Data/` through `common/utils.ts`, which imports Babylon's `Texture` as a
- * value — so importing it here would pull the whole engine into a page that
+ * value - so importing it here would pull the whole engine into a page that
  * draws six sprites and a text box. The decode itself is small enough to
  * restate; `decodeTGA` is shared, since that part is neither small nor
  * engine-bound.
@@ -23,7 +23,7 @@ const OZT_HEADER_SIZE = 4;
  * Where `Data/` lives. This page is served from its own origin
  * (`register.ignies.net`), so by default it borrows the client's already
  * published tree rather than shipping a second 88 MB copy of it. That is a
- * cross-origin fetch and needs CORS on the client host — see README.
+ * cross-origin fetch and needs CORS on the client host - see README.
  */
 const DATA_URL = (import.meta.env.VITE_DATA_URL || './Data/').replace(
   /\/*$/,

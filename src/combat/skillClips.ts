@@ -7,7 +7,7 @@
  * switches decide at run time and a table cannot:
  *
  *  - the **mount** (`c->Helper.Type`, and always `&& !c->SafeZone`),
- *  - the **map** — `AT_SKILL_RIDER` flies on Tarkan / Heaven / Maya,
+ *  - the **map** - `AT_SKILL_RIDER` flies on Tarkan / Heaven / Maya,
  *  - the two random picks (`rand_fps_check(2)` for the Rage Fighter party
  *    buffs, `rand() % 2` for the male hand cast), which stay random.
  *
@@ -40,7 +40,7 @@ import {
 export type CastContext = {
   /** `c->Helper.Type`, or `null` on foot / in a safe zone. */
   readonly mount?: MountKind | null;
-  /** `gCharacterManager.IsFemale(c->Class)` — Elf *and* Summoner. */
+  /** `gCharacterManager.IsFemale(c->Class)` - Elf *and* Summoner. */
   readonly isFemale?: boolean;
   /** `gMapManager.WorldActive`, for the one map-dependent clip. */
   readonly world?: ENUM_WORLD;
@@ -53,8 +53,8 @@ export type CastContext = {
 /**
  * `SetPlayerMagic` (ZzzCharacter.cpp:1238-1262): the generic cast clip a
  * skill with no dedicated one falls back to. Uniria and Dinorant share one
- * ride clip here — the four-way ladder is the castle-siege commands', not
- * this — and the Dark Horse has no branch at all, so its rider keeps the
+ * ride clip here - the four-way ladder is the castle-siege commands', not
+ * this - and the Dark Horse has no branch at all, so its rider keeps the
  * hand clip.
  */
 export function magicClip(ctx: CastContext = {}): PlayerAction {

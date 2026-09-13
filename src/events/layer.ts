@@ -9,7 +9,7 @@ import type { Item } from '../ecs/world';
  * The four common-core fields (`name`, `maps?`, `update?`, `reset?`) are
  * spelled exactly like every other system's contract.
  * The extras are what every event must answer: a `state()` snapshot for the
- * HUD and tools, and — optionally — the inventory ticket that opens it.
+ * HUD and tools, and - optionally - the inventory ticket that opens it.
  */
 export interface EventLayer {
   /** Unique camelCase, identical to the file name. */

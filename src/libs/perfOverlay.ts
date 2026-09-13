@@ -6,7 +6,7 @@ import { propBatchStats } from '../common/propBatches';
  *
  * Nothing here runs while it is hidden: `record` is a no-op, the sampler is
  * not installed, and no per-frame allocation happens. The point is to be able
- * to answer "what did that change actually cost" without guessing — the
+ * to answer "what did that change actually cost" without guessing - the
  * per-system column is usually the surprise.
  */
 
@@ -133,7 +133,7 @@ function render(scene: Scene): void {
  */
 export function installPerfOverlay(scene: Scene): void {
   window.addEventListener('keydown', ev => {
-    // Shift+Ctrl+Alt+P — same shape as the Babylon inspector chord.
+    // Shift+Ctrl+Alt+P - same shape as the Babylon inspector chord.
     if (!ev.shiftKey || !ev.ctrlKey || !ev.altKey) return;
     if (ev.code !== 'KeyP') return;
 
