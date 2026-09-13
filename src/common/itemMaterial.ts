@@ -370,8 +370,30 @@ const BODY_SHINE_UNIFORM = 'muBodyShine';
  */
 const LEGACY_GAIN = '0.65';
 
-const BRIGHT_OVERRIDE = `
-  color.rgb = baseColor.rgb * vDiffuseColor.rgb;
+/**
+ * A blend mesh is drawn additive at `glColor3f(BodyLight * BlendMeshLight)`
+ * with the lighting off (`RenderMesh`, ZzzBMD.cpp:1580-1596), so the card is
+ * the texel scaled by the light where the object stands. This path read the
+ * texel alone, which put Elbeland's waterfalls - sixteen sheets over one
+ * cliff, and sixteen more flat on the plaza - at full strength on a map whose
+ * bake sits near white, and they summed to a solid white wall.
+ *
+ * The multiply is on the scrolling variant only, which is MU's `BlendMesh` /
+ * `StreamMesh` set: map water, waterfalls, sand-falls and the Dungeon
+ * curtains. The plain bright card keeps the texel because the same term on
+ * *its* meshes takes the wings off an elf - `metadata.bodyLight` on a
+ * character part is the light at the hero's feet, not the light the original
+ * hands a wing (wings go through `RenderPartObjectEffect`, not this branch),
+ * and at 0.45 an already-translucent wing card disappears. That half is a
+ * separate job; see found_issues.md.
+ *
+ * `muBodyLight` is `packBodyLight`'s output times `BlendMeshLight`, never
+ * above 1, so this only ever takes brightness away.
+ */
+const brightOverride = (withScroll: boolean) => `
+  color.rgb = baseColor.rgb * vDiffuseColor.rgb${
+    withScroll ? ` * ${BODY_LIGHT_UNIFORM}.rgb` : ''
+  };
 `;
 
 /**
@@ -924,7 +946,7 @@ ${bright || flatLit ? '' : snowCapGlsl('baseColor')}
   // recompute reads it; glow cards and flat-lit models take neither.
   simpleMaterial.Fragment_Before_Fog(`
 ${bright || flatLit ? '' : halfLambertGlsl('diffuseBase', '') + UNCLAMP}${
-    bright ? BRIGHT_OVERRIDE : ''
+    bright ? brightOverride(withScroll) : ''
   }${flatLit ? FLAT_LIT_OVERRIDE : ''}
 `);
 
