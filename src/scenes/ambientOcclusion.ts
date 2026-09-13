@@ -23,8 +23,10 @@ import {
 // cached module, and does *not* re-run the registration over the top of ours.
 import '@babylonjs/core/Shaders/ssaoCombine.fragment.js';
 import { pipelineSamples, type LightingTier } from '../common/lightingQuality';
-import { devQuery, devQueryNumbers } from '../common/devSeams';
-import { drawsSolidGeometry } from './shadows';
+import { devQuery, devQueryNumber, devQueryNumbers } from '../common/devSeams';
+import { GameOptions } from '../common/gameOptions';
+import { renderDistanceRanges } from '../common/renderDistance';
+import { CSM_CASTER_REACH, drawsSolidGeometry } from './shadows';
 import { driveRenderList } from './renderList';
 
 /**
@@ -117,6 +119,8 @@ export function effectMask(): RenderTargetTexture | null {
  * `csmCaster`: an object the map marks `CastsShadow = false`, and every
  * torch, candle and lamp, casts no sun shadow and is still solid geometry
  * standing in front of the camera.
+ *
+ * The reach is the render distance's own, not the cascades': see `gbufferReach`.
  */
 function occludes(mesh: AbstractMesh): boolean {
   const meta = mesh.metadata;
@@ -146,7 +150,48 @@ function occludes(mesh: AbstractMesh): boolean {
     return false;
   }
 
-  return drawsSolidGeometry(mesh);
+  return drawsSolidGeometry(mesh, false, gbufferReach());
+}
+
+/**
+ * How far out this buffer has to reach, squared.
+ *
+ * `drawsSolidGeometry` defaults to the cascades' 48 tiles, which is right for
+ * a shadow map and wrong here: the haze reads this buffer's depth and returns
+ * a pixel with no depth in it untouched. Every object past 48 tiles was drawn
+ * at full contrast over terrain the haze had washed to the horizon colour - a
+ * hard line at eye level with crisp trunks and roofs standing above it, each
+ * one appearing whole as the render-distance ring reached it. So the reach is
+ * that ring instead, plus the stand-off: `nearby` is measured from the hero
+ * and this test from the camera, which orbits out behind them.
+ *
+ * Dev seam: `?gbreach=<tiles>`, and `?gbreach=0` restores the cascades' reach.
+ */
+const GBUFFER_CAMERA_STANDOFF = 32;
+
+let reachStep = -1;
+let reachSq = 0;
+
+function gbufferReach(): number {
+  const forced = devQueryNumber('gbreach');
+
+  if (forced !== null) {
+    return forced > 0 ? forced * forced : CSM_CASTER_REACH ** 2;
+  }
+
+  const step = GameOptions.renderDistance;
+
+  // Per mesh per frame; the ring only moves when the player moves the slider.
+  if (step !== reachStep) {
+    reachStep = step;
+
+    const ring =
+      renderDistanceRanges(step).nearby + GBUFFER_CAMERA_STANDOFF;
+
+    reachSq = ring * ring;
+  }
+
+  return reachSq;
 }
 
 /** Stand-in for a bucket a pass is not meant to draw this time round. */
