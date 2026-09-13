@@ -277,6 +277,8 @@ export type ItemGridProps = {
   onPlace?: (square: number) => void;
   /** Right click on an occupied square. */
   onUse?: (square: number, item: Item) => void;
+  /** Ctrl + left click on an occupied square (`common/quickItemActions.ts`). */
+  onQuickAction?: (square: number, item: Item) => void;
   tooltipContext?: TooltipContext;
   /** Personal-shop asking price shown in the tooltip and under the icon. */
   priceOf?: (square: number) => number | undefined;
@@ -312,6 +314,7 @@ export const ItemGrid = observer(
     onPick,
     onPlace,
     onUse,
+    onQuickAction,
     tooltipContext = 'plain',
     priceOf,
     marked,
@@ -443,6 +446,11 @@ export const ItemGrid = observer(
 
       const entry = squares[square];
       if (!entry) return;
+
+      if (event.ctrlKey) {
+        onQuickAction?.(entry.square, entry.item);
+        return;
+      }
 
       onPick?.(entry.square, entry.item);
     };

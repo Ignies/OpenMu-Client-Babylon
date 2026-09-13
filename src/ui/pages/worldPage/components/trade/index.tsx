@@ -8,6 +8,7 @@ import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow } from '../../../../components/muWindow';
 import { ItemGrid } from '../../../../components/itemGrid';
+import { QuickItemActions } from '../../../../../common/quickItemActions';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import {
   ACCEPT_FRAMES,
@@ -223,6 +224,10 @@ export const TradeWindow = observer(() => {
         onUse={square => {
           if (Economy.myTradeConfirm) Economy.setMyConfirm(false);
           Store.autoMoveItem(StorageKind.Trade, square, StorageKind.Inventory);
+        }}
+        onQuickAction={square => {
+          if (Economy.myTradeConfirm) Economy.setMyConfirm(false);
+          QuickItemActions.toInventory(StorageKind.Trade, square);
         }}
       />
 

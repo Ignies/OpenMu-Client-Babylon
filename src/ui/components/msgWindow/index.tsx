@@ -49,6 +49,10 @@ export const MsgWindow = observer(() => {
   const onOk = () => {
     if (!code) return;
 
+    // Boxes raised with a Yes handler (the valuable-item confirmations) carry
+    // it here; the rest answer by their code.
+    const confirmed = Store.takeMsgWinOk();
+
     Store.closeMsgWin();
 
     switch (code) {
@@ -67,6 +71,7 @@ export const MsgWindow = observer(() => {
       }
 
       default:
+        confirmed?.();
         break;
     }
   };

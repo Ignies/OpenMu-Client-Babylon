@@ -184,6 +184,18 @@ export type GameOptions = {
    */
   minimapCorner: boolean;
   /**
+   * Ctrl-click moves an item to whichever window is open - vault, trade, mix
+   * tray, or the merchant - and back again, and Ctrl-click on a shop entry
+   * asks how many to buy (`common/quickItemActions.ts`). Off, only the drag
+   * and the right click move anything.
+   */
+  quickItemActions: boolean;
+  /**
+   * Ask before an excellent, ancient, +7 or higher item, or a jewel, is
+   * dropped on the ground or sold to a merchant.
+   */
+  confirmValuableItems: boolean;
+  /**
    * Item names in English whatever the interface language is. The language
    * packs translate them (`Data/Local/<pack>/item_<lang>.bmd`), which reads
    * well but leaves a trader unable to match what a forum or a price list
@@ -280,6 +292,8 @@ const DEFAULTS: GameOptions = {
   stateWarnings: true,
   blockBrowserKeys: true,
   minimapCorner: true,
+  quickItemActions: true,
+  confirmValuableItems: true,
   englishItemNames: false,
 };
 

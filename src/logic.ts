@@ -278,6 +278,7 @@ import { quests } from './quests';
 import { SessionExit } from './common/sessionExit';
 import { Store, UIState } from './store';
 import { devQuery } from './common/devSeams';
+import { QuickItemActions } from './common/quickItemActions';
 import { gameServerTarget } from './common/serverConfig';
 import { MsgWinCode } from './common/msgWin';
 import { CREATE_MESSAGES } from './ui/pages/charactersPage/layout';
@@ -912,6 +913,29 @@ EventBus.on('warpCompleted', () => {
       Rotation: m[4] ? Number(m[4]) : 0,
     });
   }
+});
+
+/**
+ * `?offline&quickItems=sell|buy` (dev builds): the merchant open on the test
+ * loadout, with the sell confirmation or the buy quantity prompt already up.
+ * There is no server offline, so this is the only way to look at either of
+ * them without one.
+ */
+EventBus.on('warpCompleted', () => {
+  if (!Store.isOffline) return;
+
+  const demo = devQuery('quickItems');
+  if (!demo) return;
+
+  Store.talkToNpc({ netId: 0, name: 'Merchant', npcType: 0 });
+
+  if (demo === 'buy') {
+    const slot = Store.npcShop?.items.findIndex(entry => !!entry) ?? -1;
+    if (slot >= 0) QuickItemActions.promptBuy(slot);
+    return;
+  }
+
+  QuickItemActions.fromInventory(InventoryConstants.LastEquippableItemSlotIndex + 1);
 });
 
 /**
@@ -3271,8 +3295,7 @@ EventBus.on('ItemBought', packet => {
 });
 
 EventBus.on('NpcItemBuyFailed', () => {
-  Store.finishShopBuy();
-  Store.addNotification(t('notify.cannotBuy'), 'error');
+  Store.shopBuyFailed();
 });
 
 EventBus.on('NpcItemSellResult', packet => {

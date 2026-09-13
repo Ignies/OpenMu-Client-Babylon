@@ -15,6 +15,7 @@ import {
 } from '../../../../components/itemGrid';
 import { ItemsDatabase } from '../../../../../common/itemsDatabase';
 import { isSellingBanned } from '../../../../../common/itemValue';
+import { QuickItemActions } from '../../../../../common/quickItemActions';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
@@ -154,7 +155,7 @@ export const NpcShop = observer(() => {
 
     // `InventoryProcess`: the carried item lands here → sold.
     if (picked) {
-      Store.sellPickedItemToNpc();
+      QuickItemActions.sellPickedItem();
       return;
     }
 
@@ -163,6 +164,11 @@ export const NpcShop = observer(() => {
 
     const entry = squares[square];
     if (!entry) return;
+
+    if (event.ctrlKey) {
+      QuickItemActions.promptBuy(entry.slot);
+      return;
+    }
 
     Store.buyItemFromNpc(entry.slot);
   };

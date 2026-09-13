@@ -1184,6 +1184,8 @@ export const frenchLayer: LanguageLayer = {
     'prompt.itemCosts': '{name} coûte {price}.',
     'prompt.thisItem': 'Cet objet',
     'prompt.itemGone': 'Cet objet n’est plus là.',
+    'prompt.buyHowMany': 'Combien de {name} ? {price} chacun.',
+    'prompt.quantity': 'Quantité',
     'prompt.trade': 'Échange',
 
     'social.partyInvite': '{name} vous invite dans son groupe.',
@@ -1205,6 +1207,8 @@ export const frenchLayer: LanguageLayer = {
     'msgWin.guildCharacter':
       'Vous ne pouvez pas supprimer un personnage membre d’une guilde',
     'msgWin.wrongPassword': 'Le mot de passe saisi est incorrect.',
+    'msgWin.confirmSell': 'Vendre %s ?',
+    'msgWin.confirmDrop': 'Jeter %s ?',
 
     'notify.wsError': 'Erreur de connexion WebSocket',
     'notify.connectionLost': 'La connexion au serveur a été perdue',
@@ -1401,6 +1405,8 @@ export const frenchLayer: LanguageLayer = {
     'options.lootZen': 'Zen à partir de',
     'options.firstPersonBob': 'Balancement de la tête en vue subjective',
     'options.chatTimestamps': 'Horodatage du chat',
+    'options.quickItemActions': 'Ctrl-clic déplace les objets',
+    'options.confirmValuableItems': 'Demander avant de jeter ou vendre un objet de valeur',
     'options.blockBrowserKeys': 'Bloquer les raccourcis du navigateur (Ctrl+W, F5, zoom)',
     'options.fullscreen': 'Plein écran (F11)',
     'keys.replyWhisper': 'Répondre au chuchotement',
@@ -1432,6 +1438,7 @@ export const frenchLayer: LanguageLayer = {
     'vault.depositJewels': 'Joyaux',
     'vault.depositJewelsHint': 'Envoyer tous les joyaux de l’inventaire au coffre',
     'notify.itemsMoved': '{count} objets déplacés',
+    'notify.itemsBought': '{count} achetés',
     'options.autoReconnect': 'Reconnexion automatique',
     'resume.title': 'Connexion perdue',
     'resume.connecting': 'Reconnexion... (tentative {attempt})',

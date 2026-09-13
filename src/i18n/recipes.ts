@@ -224,6 +224,8 @@ export const EN_TEXT = {
   'options.lootHighLevel': 'Level +7 and up',
   'options.lootOther': 'Everything else',
   'options.lootZen': 'Zen from',
+  'options.quickItemActions': 'Ctrl-click moves items',
+  'options.confirmValuableItems': 'Ask before dropping or selling valuables',
   'options.chatTimestamps': 'Chat timestamps',
   'options.blockBrowserKeys': 'Block browser shortcuts (Ctrl+W, F5, zoom)',
   'options.fullscreen': 'Fullscreen (F11)',
@@ -1422,6 +1424,8 @@ export const EN_TEXT = {
   'prompt.itemCosts': '{name} costs {price}.',
   'prompt.thisItem': 'This item',
   'prompt.itemGone': 'This item is gone.',
+  'prompt.buyHowMany': 'How many {name}? {price} each.',
+  'prompt.quantity': 'Quantity',
   'prompt.trade': 'Trade',
   'prompt.carrying': 'You are carrying {amount}.',
   'prompt.vaultHolds': 'The vault holds {amount}.',
@@ -1776,6 +1780,8 @@ export const EN_TEXT = {
   'msgWin.guildCharacter':
     "You can't delete the character that belongs to the guild",
   'msgWin.wrongPassword': 'The password you have entered is incorrect.',
+  'msgWin.confirmSell': 'Sell %s?',
+  'msgWin.confirmDrop': 'Drop %s?',
 
   // ---- notifications the client raises itself ----------------------------
   'notify.wsError': 'WebSocket connection error',
@@ -1800,6 +1806,7 @@ export const EN_TEXT = {
   'notify.noRoomForItem': 'There is no room for that item',
   'notify.inventorySorted': 'Inventory arranged',
   'notify.itemsMoved': '{count} items moved',
+  'notify.itemsBought': '{count} bought',
   'notify.learnedSkill': 'You have learned {name}',
   'notify.storageOpen': 'You cannot use items while the storage is open',
   'notify.upgradeNeedsServer': 'Upgrading needs a server',

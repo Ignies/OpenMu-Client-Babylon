@@ -1169,6 +1169,8 @@ export const bulgarianLayer: LanguageLayer = {
     'prompt.itemCosts': '{name} струва {price}.',
     'prompt.thisItem': 'Този предмет',
     'prompt.itemGone': 'Този предмет вече го няма.',
+    'prompt.buyHowMany': 'Колко {name}? По {price}.',
+    'prompt.quantity': 'Количество',
     'prompt.trade': 'Размяна',
 
     'social.partyInvite': '{name} те кани в група.',
@@ -1190,6 +1192,8 @@ export const bulgarianLayer: LanguageLayer = {
     'msgWin.guildCharacter':
       'Не можеш да изтриеш герой, който членува в гилдия',
     'msgWin.wrongPassword': 'Въведената парола е грешна.',
+    'msgWin.confirmSell': 'Да продам ли %s?',
+    'msgWin.confirmDrop': 'Да изхвърля ли %s?',
 
     'notify.wsError': 'Грешка във връзката WebSocket',
     'notify.connectionLost': 'Връзката със сървъра се разпадна',
@@ -1385,6 +1389,8 @@ export const bulgarianLayer: LanguageLayer = {
     'options.lootZen': 'Zen от',
     'options.firstPersonBob': 'Поклащане на главата от първо лице',
     'options.chatTimestamps': 'Час в чата',
+    'options.quickItemActions': 'Ctrl-клик мести предмети',
+    'options.confirmValuableItems': 'Питай преди изхвърляне или продажба на ценни',
     'options.blockBrowserKeys': 'Блокирай клавишните комбинации на браузъра (Ctrl+W, F5, мащаб)',
     'options.fullscreen': 'Цял екран (F11)',
     'keys.replyWhisper': 'Отговор на шепот',
@@ -1416,6 +1422,7 @@ export const bulgarianLayer: LanguageLayer = {
     'vault.depositJewels': 'Камъни',
     'vault.depositJewelsHint': 'Премести всички камъни от инвентара в склада',
     'notify.itemsMoved': 'Преместени предмета: {count}',
+    'notify.itemsBought': 'Купени {count}',
     'options.autoReconnect': 'Автоматично свързване наново',
     'resume.title': 'Връзката прекъсна',
     'resume.connecting': 'Свързване наново... (опит {attempt})',

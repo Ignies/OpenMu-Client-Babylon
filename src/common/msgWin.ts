@@ -18,6 +18,8 @@ export enum MsgWinCode {
   DeleteCharacterItemBlock = 'MESSAGE_DELETE_CHARACTER_ITEM_BLOCK',
   DeleteCharacterGuildWarning = 'MESSAGE_DELETE_CHARACTER_GUILDWARNING',
   StorageResidentWrong = 'MESSAGE_STORAGE_RESIDENTWRONG',
+  ConfirmSellItem = 'MESSAGE_CONFIRM_SELL_ITEM',
+  ConfirmDropItem = 'MESSAGE_CONFIRM_DROP_ITEM',
 }
 
 export type MsgWinMessage = {
@@ -67,6 +69,18 @@ export const MSG_WIN_MESSAGES: Record<MsgWinCode, MsgWinMessage> = {
     type: MsgWinType.Ok,
     textId: 401,
     textKey: 'msgWin.wrongPassword',
+  },
+  // The original never asked; these two are ours (`quickItemActions.ts`), so
+  // they carry no GlobalText id.
+  [MsgWinCode.ConfirmSellItem]: {
+    type: MsgWinType.Both,
+    textId: -1,
+    textKey: 'msgWin.confirmSell',
+  },
+  [MsgWinCode.ConfirmDropItem]: {
+    type: MsgWinType.Both,
+    textId: -1,
+    textKey: 'msgWin.confirmDrop',
   },
 };
 

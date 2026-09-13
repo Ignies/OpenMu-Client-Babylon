@@ -1186,6 +1186,8 @@ export const germanLayer: LanguageLayer = {
     'prompt.itemCosts': '{name} kostet {price}.',
     'prompt.thisItem': 'Dieser Gegenstand',
     'prompt.itemGone': 'Dieser Gegenstand ist weg.',
+    'prompt.buyHowMany': 'Wie viele {name}? Je {price}.',
+    'prompt.quantity': 'Anzahl',
     'prompt.trade': 'Handel',
 
     'social.partyInvite': '{name} lädt dich in eine Gruppe ein.',
@@ -1207,6 +1209,8 @@ export const germanLayer: LanguageLayer = {
     'msgWin.guildCharacter':
       'Du kannst keinen Charakter löschen, der in einer Gilde ist',
     'msgWin.wrongPassword': 'Das eingegebene Passwort ist falsch.',
+    'msgWin.confirmSell': '%s verkaufen?',
+    'msgWin.confirmDrop': '%s wegwerfen?',
 
     'notify.wsError': 'WebSocket-Verbindungsfehler',
     'notify.connectionLost': 'Die Verbindung zum Server ging verloren',
@@ -1405,6 +1409,8 @@ export const germanLayer: LanguageLayer = {
     'options.lootZen': 'Zen ab',
     'options.firstPersonBob': 'Kopfbewegung in der Egoperspektive',
     'options.chatTimestamps': 'Uhrzeit im Chat',
+    'options.quickItemActions': 'Strg-Klick verschiebt Gegenstände',
+    'options.confirmValuableItems': 'Vor dem Wegwerfen oder Verkaufen von Wertsachen fragen',
     'options.blockBrowserKeys': 'Browser-Tastenkürzel blockieren (Strg+W, F5, Zoom)',
     'options.fullscreen': 'Vollbild (F11)',
     'keys.replyWhisper': 'Auf Flüstern antworten',
@@ -1436,6 +1442,7 @@ export const germanLayer: LanguageLayer = {
     'vault.depositJewels': 'Juwelen',
     'vault.depositJewelsHint': 'Alle Juwelen aus dem Inventar ins Lager legen',
     'notify.itemsMoved': '{count} Gegenstände verschoben',
+    'notify.itemsBought': '{count} gekauft',
     'options.autoReconnect': 'Automatisch neu verbinden',
     'resume.title': 'Verbindung verloren',
     'resume.connecting': 'Neu verbinden... (Versuch {attempt})',

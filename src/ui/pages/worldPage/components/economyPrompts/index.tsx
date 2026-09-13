@@ -6,6 +6,9 @@ import { Store } from '../../../../../store';
 import { Economy, type EconomyPrompt } from '../../../../../economy';
 import { uiClick } from '../../../../../libs/sfx';
 import { itemDisplayName } from '../../../../../common/itemTooltip';
+import { itemValue } from '../../../../../common/itemValue';
+import { QuickItemActions } from '../../../../../common/quickItemActions';
+import { MAX_BULK_BUY } from '../../../../../common/quickItemRules';
 
 const zen = (gold: number) => `${gold.toLocaleString('en-US')} Zen`;
 
@@ -16,6 +19,8 @@ type Spec = {
   field: 'amount' | 'pin' | 'pin+password' | 'password' | 'none';
   okLabel: string;
   max?: number;
+  /** Label in front of the number box; Zen unless something else is counted. */
+  amountLabel?: string;
 };
 
 /**
@@ -101,6 +106,22 @@ function specOf(prompt: EconomyPrompt): Spec {
         okLabel: t('prompt.buy'),
       };
     }
+    case 'npc-buy-many': {
+      const item = Store.npcShop?.items[prompt.slot] ?? null;
+      return {
+        title: t('prompt.buy'),
+        hint: item
+          ? t('prompt.buyHowMany', {
+              name: itemDisplayName(item),
+              price: zen(itemValue(item, 0)),
+            })
+          : t('prompt.itemGone'),
+        field: 'amount',
+        okLabel: t('prompt.buy'),
+        max: MAX_BULK_BUY,
+        amountLabel: t('prompt.quantity'),
+      };
+    }
   }
 }
 
@@ -150,6 +171,9 @@ export const EconomyPrompts = observer(() => {
       case 'shop-buy':
         Economy.buyFromShop(prompt.slot);
         break;
+      case 'npc-buy-many':
+        QuickItemActions.startBuyRun(prompt.slot, value);
+        break;
     }
 
     Economy.closePrompt();
@@ -178,7 +202,7 @@ export const EconomyPrompts = observer(() => {
 
         {spec.field === 'amount' && (
           <label className="economy-prompt-field">
-            {t('common.zen')}
+            {spec.amountLabel ?? t('common.zen')}
             <input
               autoFocus
               inputMode="numeric"

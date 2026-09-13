@@ -19,6 +19,7 @@ import { canRegisterItemHotkey } from '../../../../../common/itemHotkeys';
 import { isUpgradeJewel } from '../../../../../common/jewelUpgrade';
 import { InventoryConstants } from '../../../../../common/inventoryConstants';
 import { InventorySort } from '../../../../../common/inventorySort';
+import { QuickItemActions } from '../../../../../common/quickItemActions';
 import { StorageKind } from '../../../../../common/itemStorage';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { MuSpriteFrame } from '../../../../components/muSprite';
@@ -468,6 +469,11 @@ export const Inventory = observer(() => {
     // REPAIR_MODE_ON (NewUIMyInventory.cpp:1520): the click repairs instead.
     if (Store.repairMode) {
       Store.repairItemRequest(entry.slot);
+      return;
+    }
+
+    if (event.ctrlKey) {
+      QuickItemActions.fromInventory(entry.slot);
       return;
     }
 

@@ -969,6 +969,13 @@ export const Store = new (class _Store {
 
   msgWin: { code: MsgWinCode; text: string } | null = null;
 
+  /**
+   * What the Yes of the box currently up does, when it was raised with one
+   * (the valuable-item confirmations). Kept off `msgWin` so the observable
+   * state stays plain data.
+   */
+  private msgWinOk: (() => void) | null = null;
+
   deletingChar: string | null = null;
 
   playerData = new PlayerData();
@@ -1036,6 +1043,9 @@ export const Store = new (class _Store {
 
   /** A buy request is in flight (`BuyCost != 0` blocks a second one). */
   shopBuyPending = false;
+
+  /** The merchant refused the last purchase; a bulk buy run stops on it. */
+  shopBuyRefused = false;
 
   private shopBuyTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -1125,6 +1135,7 @@ export const Store = new (class _Store {
       npcShop: observable,
       repairMode: observable,
       shopBuyPending: observable,
+      shopBuyRefused: observable,
       canRepair: computed,
       // Packet handlers (logic.ts) and the UI call these straight from a
       // non-action context; declaring them actions keeps strict mode quiet.
@@ -1684,12 +1695,21 @@ export const Store = new (class _Store {
     this.sendToGS(packet.buffer);
   }
 
-  popUpMsgWin(code: MsgWinCode, arg?: string): void {
+  popUpMsgWin(code: MsgWinCode, arg?: string, onOk?: () => void): void {
     this.msgWin = { code, text: formatMsgWinText(code, arg) };
+    this.msgWinOk = onOk ?? null;
+  }
+
+  /** The Yes handler of the box that is up, cleared as it is handed over. */
+  takeMsgWinOk(): (() => void) | null {
+    const onOk = this.msgWinOk;
+    this.msgWinOk = null;
+    return onOk;
   }
 
   closeMsgWin(): void {
     this.msgWin = null;
+    this.msgWinOk = null;
   }
 
   createCharacterRequest(name: string, charClass: CharacterClassNumber): void {
@@ -1942,6 +1962,10 @@ export const Store = new (class _Store {
     const item = shop.items[shopSlot];
     if (!item) return;
 
+    runInAction(() => {
+      this.shopBuyRefused = false;
+    });
+
     if (this.isOffline) {
       this.buyOffline(item);
       return;
@@ -1970,6 +1994,16 @@ export const Store = new (class _Store {
     runInAction(() => {
       this.shopBuyPending = false;
     });
+  }
+
+  /** NpcItemBuyFailed: nothing was bought and nothing was charged. */
+  shopBuyFailed(): void {
+    runInAction(() => {
+      this.shopBuyRefused = true;
+    });
+
+    this.finishShopBuy();
+    this.addNotification(t('notify.cannotBuy'), 'error');
   }
 
   /**

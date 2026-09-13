@@ -307,7 +307,9 @@ export type EconomyPrompt =
   | { kind: 'vault-remove-pin' }
   | { kind: 'trade-money' }
   | { kind: 'shop-price'; slot: number }
-  | { kind: 'shop-buy'; slot: number };
+  | { kind: 'shop-buy'; slot: number }
+  /** How many of the merchant's stock slot to buy (`quickItemActions.ts`). */
+  | { kind: 'npc-buy-many'; slot: number };
 
 const emptyGrid = (size: number) => new Array<Item | null>(size).fill(null);
 
