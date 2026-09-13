@@ -144,6 +144,8 @@ export const germanLayer: LanguageLayer = {
     'charInfo.skillDamage': 'Fertigkeitsschaden: {value}%',
     'charInfo.divineDamage': 'Göttlicher Schaden (Roar, Slasher): {value}%',
     'charInfo.aoeDamage': 'Flächenschaden (Dark Side): {value}%',
+    'charInfo.addAmount': 'Punkte hinzufügen',
+    'charInfo.stopAdding': 'Anhalten',
 
     'options.title': 'Optionen',
     'options.tab.game': 'Spiel',
@@ -162,6 +164,7 @@ export const germanLayer: LanguageLayer = {
     'options.section.quality': 'Qualität',
     'options.preset': 'Voreinstellung',
     'options.autoAttack': 'Automatischer Angriff',
+    'options.statPointAmounts': 'Punkte gebündelt vergeben',
     'options.whisperBeep': 'Signalton beim Flüstern',
     'options.slideHelp': 'Gleithilfe',
     'options.cameraControl': 'Kamerasteuerung (Strg+Rad, Einfg/Entf)',

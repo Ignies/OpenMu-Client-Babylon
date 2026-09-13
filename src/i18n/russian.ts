@@ -145,6 +145,8 @@ export const russianLayer: LanguageLayer = {
     'charInfo.skillDamage': 'Урон умений: {value}%',
     'charInfo.divineDamage': 'Божественный урон (Roar, Slasher): {value}%',
     'charInfo.aoeDamage': 'Урон по области (Dark Side): {value}%',
+    'charInfo.addAmount': 'Сколько очков добавить',
+    'charInfo.stopAdding': 'Остановить',
 
     'options.title': 'Настройки',
     'options.tab.game': 'Игра',
@@ -163,6 +165,7 @@ export const russianLayer: LanguageLayer = {
     'options.section.quality': 'Качество',
     'options.preset': 'Предустановка',
     'options.autoAttack': 'Автоатака',
+    'options.statPointAmounts': 'Добавлять очки пачкой',
     'options.whisperBeep': 'Звук при получении шёпота',
     'options.slideHelp': 'Всплывающая подсказка',
     'options.cameraControl': 'Управление камерой (Ctrl+колесо, Ins/Del)',

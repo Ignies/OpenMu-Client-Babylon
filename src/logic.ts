@@ -3518,6 +3518,7 @@ EventBus.on('CharacterStatIncreaseResponse', packet => {
 
   if (!p.Success) {
     Store.addNotification(t('notify.pointNotAdded'), 'error');
+    EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 0 });
     return;
   }
 
@@ -3549,6 +3550,8 @@ EventBus.on('CharacterStatIncreaseResponse', packet => {
 
     if (playerData.points > 0) playerData.points--;
   });
+
+  EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 1 });
 });
 
 type LevelUpdateView = Pick<
@@ -3717,6 +3720,7 @@ EventBus.on('CharacterStatIncreaseResponseExtended', packet => {
 
   if (added === 0) {
     Store.addNotification(t('notify.pointNotAdded'), 'error');
+    EventBus.emit('statPointAnswered', { stat: p.Attribute, added: 0 });
     return;
   }
 
@@ -3747,6 +3751,8 @@ EventBus.on('CharacterStatIncreaseResponseExtended', packet => {
     playerData.maxAG = p.UpdatedMaximumAbility;
     playerData.points = Math.max(0, playerData.points - added);
   });
+
+  EventBus.emit('statPointAnswered', { stat: p.Attribute, added });
 });
 
 /**

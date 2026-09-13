@@ -175,6 +175,8 @@ export const EN_TEXT = {
   'charInfo.skillDamage': 'Skill Damage: {value}%',
   'charInfo.divineDamage': 'Divine Damage (Roar, Slasher): {value}%',
   'charInfo.aoeDamage': 'AOE Damage (Dark Side): {value}%',
+  'charInfo.addAmount': 'Points to add',
+  'charInfo.stopAdding': 'Stop',
 
   // ---- Options window ----------------------------------------------------
   'options.title': 'Option',
@@ -209,6 +211,7 @@ export const EN_TEXT = {
   'options.englishItemNames': 'Item names in English',
 
   'options.autoAttack': 'Automatic Attack',
+  'options.statPointAmounts': 'Add stat points in bulk',
   'options.whisperBeep': 'Beep sound for whispering',
   'options.slideHelp': 'Slide Help',
   'options.cameraControl': 'Camera control (Ctrl+wheel, Ins/Del)',

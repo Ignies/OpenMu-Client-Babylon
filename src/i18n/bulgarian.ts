@@ -145,6 +145,8 @@ export const bulgarianLayer: LanguageLayer = {
     'charInfo.skillDamage': 'Щети от умения: {value}%',
     'charInfo.divineDamage': 'Божествени щети (Roar, Slasher): {value}%',
     'charInfo.aoeDamage': 'Щети в зона (Dark Side): {value}%',
+    'charInfo.addAmount': 'Точки за добавяне',
+    'charInfo.stopAdding': 'Спри',
 
     'options.title': 'Настройки',
     'options.tab.game': 'Игра',
@@ -163,6 +165,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.section.quality': 'Качество',
     'options.preset': 'Предварителна настройка',
     'options.autoAttack': 'Автоматична атака',
+    'options.statPointAmounts': 'Добавяне на точки наведнъж',
     'options.whisperBeep': 'Звук при получен шепот',
     'options.slideHelp': 'Плъзгаща помощ',
     'options.cameraControl': 'Управление на камерата (Ctrl+колелце, Ins/Del)',

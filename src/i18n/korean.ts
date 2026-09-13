@@ -147,6 +147,8 @@ export const koreanLayer: LanguageLayer = {
     'charInfo.skillDamage': '스킬 공격력: {value}%',
     'charInfo.divineDamage': '신성 공격력(Roar, Slasher): {value}%',
     'charInfo.aoeDamage': '범위 공격력(Dark Side): {value}%',
+    'charInfo.addAmount': '추가할 포인트',
+    'charInfo.stopAdding': '중지',
 
     'options.title': '옵션',
     'options.tab.game': '게임',
@@ -165,6 +167,7 @@ export const koreanLayer: LanguageLayer = {
     'options.section.quality': '품질',
     'options.preset': '프리셋',
     'options.autoAttack': '자동 공격',
+    'options.statPointAmounts': '포인트 한 번에 분배',
     'options.whisperBeep': '귓속말 수신음',
     'options.slideHelp': '슬라이드 도움말',
     'options.cameraControl': '카메라 조작 (Ctrl+휠, Ins/Del)',

@@ -42,6 +42,11 @@ export type Events = CSEvents &
     };
     /** Local player gained experience (already applied to Store.playerData). */
     experienceGained: { added: number; killedNetId: number };
+    /**
+     * The server answered an `IncreaseCharacterStatPoint` (already applied to
+     * Store.playerData). `added` is 0 when the point was refused.
+     */
+    statPointAnswered: { stat: number; added: number };
     /** ObjectMessage (0x01): a speech bubble line from an object in scope. */
     objectMessage: { netId: number; message: string };
     /** ChatMessage (0x00): a player's chat line, addressed by name (`AssignChat`). */

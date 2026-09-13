@@ -147,6 +147,8 @@ export const thaiLayer: LanguageLayer = {
     'charInfo.skillDamage': 'ดาเมจสกิล: {value}%',
     'charInfo.divineDamage': 'ดาเมจศักดิ์สิทธิ์ (Roar, Slasher): {value}%',
     'charInfo.aoeDamage': 'ดาเมจเป็นพื้นที่ (Dark Side): {value}%',
+    'charInfo.addAmount': 'จำนวนแต้มที่จะเพิ่ม',
+    'charInfo.stopAdding': 'หยุด',
 
     'options.title': 'ตัวเลือก',
     'options.tab.game': 'เกม',
@@ -165,6 +167,7 @@ export const thaiLayer: LanguageLayer = {
     'options.section.quality': 'คุณภาพ',
     'options.preset': 'พรีเซ็ต',
     'options.autoAttack': 'โจมตีอัตโนมัติ',
+    'options.statPointAmounts': 'เพิ่มแต้มทีละหลายจุด',
     'options.whisperBeep': 'เสียงเตือนเมื่อได้รับข้อความกระซิบ',
     'options.slideHelp': 'คำแนะนำแบบเลื่อน',
     'options.cameraControl': 'ควบคุมกล้อง (Ctrl+ลูกกลิ้ง, Ins/Del)',
