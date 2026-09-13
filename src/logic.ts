@@ -42,6 +42,7 @@ import {
 } from './common/packets/ConnectServerPackets';
 import {
   AddCharactersToScopePacket,
+  AddTransformedCharactersToScopePacket,
   AddCharacterToScopeExtendedPacket,
   AddNpcsToScopePacket,
   AddSummonedMonstersToScopePacket,
@@ -1206,6 +1207,122 @@ EventBus.on('AddCharacterToScopeExtended', packet => {
     HeroState: p.HeroState,
   });
 });
+
+// 0x45: a player wearing a monster's appearance - a transformation ring, or
+// a game master's `/skin`. Same block as the classic scope packet plus the
+// monster number. Until this was handled a skinned player simply never
+// appeared: the frame was dropped and there was nothing on screen to click.
+EventBus.on('AddTransformedCharactersToScope', packet => {
+  const p = new AddTransformedCharactersToScopePacket(packet);
+
+  const world = Store.world;
+  if (!world) return;
+
+  for (const char of p.getCharacters()) {
+    const scoped: ScopeCharacter = {
+      ...char,
+      Name: char.Name.replace(/ +$/, ''),
+      appearance: deserializeAppearance(char.Appearance),
+      effects: char.Effects.map(e => e.Id),
+    };
+    // The hero keeps its own body: the whole player controller and camera
+    // are built around the player rig. Everyone else is drawn as the monster.
+    if (char.Skin === 0 || Store.playerId === (char.Id & 0x7fff)) {
+      addCharacterToScope(world, scoped);
+    } else {
+      addTransformedCharacterToScope(world, scoped, char.Skin);
+    }
+  }
+});
+
+/**
+ * A player drawn as a monster. The body is the monster's model and rig, as
+ * `addNpcToScope` would build it; the identity is the player's - its net id,
+ * its name, its PK tint, and the `skin` mark that tells every command, trade
+ * and shop click that this is a person. No `npcType`, so it is never an
+ * attack or talk target the way a monster or an NPC is.
+ */
+function addTransformedCharacterToScope(world: World, char: ScopeCharacter, skin: number) {
+  const worldIndex = world.mapIndex;
+  const maskedId = char.Id & 0x7fff;
+  console.log(
+    `[scope] character "${char.Name}" id=${maskedId} at (${char.CurrentPositionX},${char.CurrentPositionY}) map=${worldIndex} skin=${skin}`
+  );
+
+  removeNetObject(world, maskedId);
+
+  if (!isKnownObjectType(skin)) {
+    console.warn(`No model mapping for skin ${skin} on "${char.Name}"; drawing the default body.`);
+  }
+  const modelFactory = resolveModelFactory(skin);
+
+  const entity = world.add({
+    netId: maskedId,
+    worldIndex,
+    skin,
+    transform: {
+      pos: new Vector3(
+        char.CurrentPositionX,
+        world.getTerrainHeight(char.CurrentPositionX, char.CurrentPositionY),
+        char.CurrentPositionY
+      ),
+      rot: new Vector3(0, convertDirectionToAngle(char.Rotation), 0),
+      scale: modelFactory.OverrideScale >= 0 ? modelFactory.OverrideScale : 1,
+    },
+    modelFactory,
+    pathfinding: {
+      from: { x: 0, y: 0 },
+      to: { x: 0, y: 0 },
+      path: [],
+      calculated: true,
+    },
+    playerMoveTo: {
+      point: { x: 0, y: 0 },
+      handled: true as boolean,
+    },
+    movement: {
+      velocity: { x: 0, y: 0 },
+    },
+    monsterAnimation: {
+      action: MonsterActionType.Stop1,
+    },
+    attributeSystem: createAttributeSystem(),
+    visibility: {
+      lastChecked: 0,
+      state: 'hidden',
+    },
+    screenPosition: {
+      worldOffsetZ: 2.5,
+      x: 0,
+      y: 0,
+    },
+    objectNameInWorld: char.Name,
+    interactable: true,
+  });
+
+  if (char.HeroState != null) entity.heroState = char.HeroState;
+  if (char.effects?.length) world.addComponent(entity, 'buffs', new Set(char.effects));
+
+  const npcClass = npcClassOf(modelFactory);
+  entity.attributeSystem.setValue(
+    'isFemale',
+    npcClass !== null && isFemaleClass(npcClass) ? 1 : 0
+  );
+  entity.attributeSystem.setValue('isFlying', 0);
+  // A player's walking pace, not a monster's: the server moves this body at
+  // the player's speed, and a slower animation would trail behind it.
+  entity.attributeSystem.setValue('totalMovementSpeed', 3);
+  entity.attributeSystem.setValue('maxHealth', 1);
+  entity.attributeSystem.setValue('currentHealth', 1);
+
+  resumeWalkIntoScope(
+    entity,
+    char.CurrentPositionX,
+    char.CurrentPositionY,
+    char.TargetPositionX,
+    char.TargetPositionY
+  );
+}
 
 function addCharacterToScope(world: World, char: ScopeCharacter) {
   const worldIndex = world.mapIndex;

@@ -1,5 +1,6 @@
 import {
   AddCharactersToScopePacket,
+  AddTransformedCharactersToScopePacket,
   MapObjectOutOfScopePacket,
   ObjectMovedPacket,
   ObjectWalkedPacket,
@@ -31,10 +32,15 @@ const OBJECT_ID_MASK = process.env.NO_ID_MASK ? 0xffff : 0x7fff;
 
 const CODE = {
   addCharacters: 0x12,
+  /** A player wearing a monster skin arrives in its own packet. */
+  addTransformed: 0x45,
   outOfScope: 0x14,
   moved: 0x15,
   walked: 0xd4,
 } as const;
+
+/** A name field is fixed width; whatever pads it is not part of the name. */
+const cleanName = (name: string) => name.replace(/[\s\0]+$/, '');
 
 export type ScopePlayer = {
   id: number;
@@ -117,7 +123,29 @@ export class Scope {
           this.players.set(id, {
             id,
             rawId: entry.Id,
-            name: entry.Name,
+            name: cleanName(entry.Name),
+            x: entry.CurrentPositionX,
+            y: entry.CurrentPositionY,
+          });
+        }
+        break;
+      }
+      case CODE.addTransformed: {
+        // Same shape with a skin number in it; a customer wearing a
+        // transformation ring would otherwise be invisible to the bot.
+        let entries;
+        try {
+          entries = new AddTransformedCharactersToScopePacket(view(frame)).getCharacters();
+        } catch {
+          this.log('could not read an AddTransformedCharactersToScope frame');
+          return;
+        }
+        for (const entry of entries) {
+          const id = entry.Id & OBJECT_ID_MASK;
+          this.players.set(id, {
+            id,
+            rawId: entry.Id,
+            name: cleanName(entry.Name),
             x: entry.CurrentPositionX,
             y: entry.CurrentPositionY,
           });

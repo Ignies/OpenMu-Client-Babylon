@@ -104,6 +104,13 @@ export type Entity = Partial<{
   worldIndex: ENUM_WORLD;
   modelFilePath: string;
   npcType: number;
+  /**
+   * AddTransformedCharactersToScope: a player wearing a monster's appearance
+   * (a transformation ring, or a game master's `/skin`). The number is the
+   * monster it is drawn as; the entity is still a player for every command,
+   * trade and shop click, and never a target the way a monster is.
+   */
+  skin: number;
   /** AddSummonedMonstersToScope: name of the player who summoned this monster. */
   summonedBy: string;
   localPlayer: true;

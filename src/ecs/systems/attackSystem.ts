@@ -93,7 +93,7 @@ export function isAttackableEntity(
  */
 export function isOtherPlayer(e: Entity): boolean {
   if (e.netId === undefined || e.localPlayer) return false;
-  return e.npcType === undefined && !!e.playerAnimation;
+  return e.npcType === undefined && (!!e.playerAnimation || e.skin !== undefined);
 }
 
 /**
