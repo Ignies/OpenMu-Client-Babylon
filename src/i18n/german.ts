@@ -2013,7 +2013,7 @@ export const germanLayer: LanguageLayer = {
     'options.section.text': 'Text',
     'options.section.bindings': 'Tasten',
     'options.section.vitals': 'Leben und Mana',
-    'options.section.warnings': 'Warnungen',
+    'options.section.warnings': 'Gesundheit',
     'options.englishItemNames': 'Gegenstandsnamen auf Englisch',
     'exp.title': 'Erfahrung',
     'perf.fps': 'FPS',

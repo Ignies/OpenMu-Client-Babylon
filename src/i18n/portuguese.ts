@@ -2004,7 +2004,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.section.text': 'Texto',
     'options.section.bindings': 'Teclas',
     'options.section.vitals': 'Vida e mana',
-    'options.section.warnings': 'Avisos',
+    'options.section.warnings': 'Saúde',
     'options.englishItemNames': 'Nomes de itens em inglês',
     'exp.title': 'Experiência',
     'perf.fps': 'FPS',

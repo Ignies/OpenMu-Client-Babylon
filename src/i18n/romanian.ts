@@ -2002,7 +2002,7 @@ export const romanianLayer: LanguageLayer = {
     'options.section.text': 'Text',
     'options.section.bindings': 'Taste',
     'options.section.vitals': 'Viață și mana',
-    'options.section.warnings': 'Avertizări',
+    'options.section.warnings': 'Sănătate',
     'options.englishItemNames': 'Nume de obiecte în engleză',
     'exp.title': 'Experiență',
     'perf.fps': 'FPS',

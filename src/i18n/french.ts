@@ -2011,7 +2011,7 @@ export const frenchLayer: LanguageLayer = {
     'options.section.text': 'Texte',
     'options.section.bindings': 'Touches',
     'options.section.vitals': 'Vie et mana',
-    'options.section.warnings': 'Alertes',
+    'options.section.warnings': 'Santé',
     'options.englishItemNames': 'Noms d’objets en anglais',
     'exp.title': 'Expérience',
     'perf.fps': 'FPS',

@@ -1956,7 +1956,7 @@ export const thaiLayer: LanguageLayer = {
     'options.section.text': 'ข้อความ',
     'options.section.bindings': 'ปุ่ม',
     'options.section.vitals': 'พลังชีวิตและมานา',
-    'options.section.warnings': 'คำเตือน',
+    'options.section.warnings': 'พลังชีวิต',
     'options.englishItemNames': 'ชื่อไอเทมเป็นภาษาอังกฤษ',
     'exp.title': 'ค่าประสบการณ์',
     'perf.fps': 'FPS',

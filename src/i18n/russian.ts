@@ -1986,7 +1986,7 @@ export const russianLayer: LanguageLayer = {
     'options.section.text': 'Текст',
     'options.section.bindings': 'Клавиши',
     'options.section.vitals': 'Жизнь и мана',
-    'options.section.warnings': 'Оповещения',
+    'options.section.warnings': 'Здоровье',
     'options.englishItemNames': 'Названия предметов по-английски',
     'exp.title': 'Опыт',
     'perf.fps': 'FPS',

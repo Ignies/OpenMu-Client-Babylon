@@ -1991,7 +1991,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.section.text': 'Текст',
     'options.section.bindings': 'Клавиши',
     'options.section.vitals': 'Живот и мана',
-    'options.section.warnings': 'Известия',
+    'options.section.warnings': 'Здраве',
     'options.englishItemNames': 'Имена на предмети на английски',
     'exp.title': 'Опит',
     'perf.fps': 'FPS',

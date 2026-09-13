@@ -1936,7 +1936,7 @@ export const chineseLayer: LanguageLayer = {
     'options.section.text': '文字',
     'options.section.bindings': '按键',
     'options.section.vitals': '生命与魔力',
-    'options.section.warnings': '警告',
+    'options.section.warnings': '生命',
     'options.englishItemNames': '物品名称用英文',
     'exp.title': '经验',
     'perf.fps': 'FPS',
