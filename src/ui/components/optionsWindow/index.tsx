@@ -55,11 +55,12 @@ import {
   MATERIAL_QUALITY_MAX,
 } from '../../../common/materialQuality';
 import {
-  OUTLINE_STRENGTH_MAX,
   RENDERING_STYLE_LABEL_KEYS,
   RENDERING_STYLE_MAX,
   SHADE_STEPS_MAX,
   SHADE_STEPS_MIN,
+  STYLE_STRENGTH_MAX,
+  STYLE_STRENGTH_MIN,
   renderingStyle,
 } from '../../../common/renderingStyle';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
@@ -208,7 +209,7 @@ type SliderRow = {
     | 'materialDetail'
     | 'renderingStyle'
     | 'shadeSteps'
-    | 'outlineStrength'
+    | 'styleStrength'
     | 'sharpness'
     | 'filmGrain'
     | 'bloom'
@@ -621,14 +622,14 @@ const TABS: Tab[] = [
                   display: v => v,
                 }),
                 slider({
-                  key: 'outlineStrength',
+                  key: 'styleStrength',
                   textId: -1,
-                  labelKey: 'options.outlineStrength',
-                  max: OUTLINE_STRENGTH_MAX,
-                  needsPostProcessing: true,
+                  labelKey: 'options.styleStrength',
+                  min: STYLE_STRENGTH_MIN,
+                  max: STYLE_STRENGTH_MAX,
                   needsTier: true,
                   needsStyle: 'outline',
-                  display: v => (v === 0 ? t('common.off') : v),
+                  display: v => v,
                 }),
               ],
             },

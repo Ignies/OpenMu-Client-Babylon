@@ -191,7 +191,7 @@ export const germanLayer: LanguageLayer = {
     'options.materialDetail': 'Detail',
     'options.renderingStyle': 'Darstellungsstil',
     'options.shadeSteps': 'Schattierungsstufen',
-    'options.outlineStrength': 'Tuschelinien',
+    'options.styleStrength': 'Stilstärke',
     'options.itemEffects': 'Gegenstandseffekte',
     'options.sharpness': 'Schärfe',
     'options.filmGrain': 'Filmkorn',

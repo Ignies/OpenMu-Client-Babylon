@@ -194,7 +194,7 @@ export const thaiLayer: LanguageLayer = {
     'options.materialDetail': 'รายละเอียด',
     'options.renderingStyle': 'สไตล์การเรนเดอร์',
     'options.shadeSteps': 'ระดับเงา',
-    'options.outlineStrength': 'เส้นหมึก',
+    'options.styleStrength': 'ความเข้มของสไตล์',
     'options.itemEffects': 'เอฟเฟกต์ไอเทม',
     'options.sharpness': 'ความคมชัด',
     'options.filmGrain': 'เกรนฟิล์ม',

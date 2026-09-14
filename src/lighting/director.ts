@@ -50,7 +50,7 @@ import {
 } from './shadowPolicy';
 import { syncSkyDome } from './skyDome';
 import { syncSkyline } from './horizon';
-import { syncShadows } from '../scenes/shadows';
+import { syncShadows, syncTerrainDefines } from '../scenes/shadows';
 import { syncAmbientOcclusion } from '../scenes/ambientOcclusion';
 import { syncInkOutline, inkOutlineLive } from '../scenes/inkOutline';
 import { syncHeightFog, updateHeightFog } from '../scenes/heightFog';
@@ -358,6 +358,9 @@ export function createLookDirector(
 
     // 3. shadows (CSM + terrain hook + the blobs' re-park)
     syncShadows(scene, lightTier, shadow);
+    // The ground and the grass take the style's defines the way they take
+    // the cascades'.
+    syncTerrainDefines();
 
     // 4. sky. The map's own horizon, not the area's: a tavern has no sky of
     // its own but the doorway still shows the one outside - unless the room

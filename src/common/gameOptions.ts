@@ -66,8 +66,11 @@ export type GameOptions = {
   renderingStyle: number;
   /** Bands in the cel ramp, 2..4; unread while no style has a ramp. */
   shadeSteps: number;
-  /** Darkness of the ink lines, 0..9; 0 builds no pass. Unread unless the style draws lines. */
-  outlineStrength: number;
+  /**
+   * How far the Anime style goes, 1..9: the ink lines' darkness and width,
+   * the flatness of the textures, the rim. Unread by the other styles.
+   */
+  styleStrength: number;
   /** Master sound level, 0..9, the original's one slider. */
   volume: number;
   /**
@@ -340,7 +343,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   // module, so naming them here would close an import cycle.
   renderingStyle: [0, 2],
   shadeSteps: [2, 4],
-  outlineStrength: [0, 9],
+  styleStrength: [1, 9],
   // Literal rather than `MATERIAL_DETAIL_MAX`: materialQuality.ts imports
   // this module, so naming it here would close an import cycle.
   materialDetail: [0, 9],
@@ -382,7 +385,7 @@ const DEFAULTS: GameOptions = {
   materialDetail: 6,
   renderingStyle: 0,
   shadeSteps: 3,
-  outlineStrength: 6,
+  styleStrength: 5,
   volume: 5,
   musicVolume: 10,
   effectsVolume: 10,

@@ -193,7 +193,7 @@ export const frenchLayer: LanguageLayer = {
     'options.materialDetail': 'Détail',
     'options.renderingStyle': 'Style de rendu',
     'options.shadeSteps': "Paliers d'ombrage",
-    'options.outlineStrength': "Traits d'encre",
+    'options.styleStrength': 'Intensité du style',
     'options.itemEffects': 'Effets d’objets',
     'options.sharpness': 'Netteté',
     'options.filmGrain': 'Grain de film',

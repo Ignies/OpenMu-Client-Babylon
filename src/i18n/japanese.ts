@@ -194,7 +194,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.materialDetail': 'ディテール',
     'options.renderingStyle': '描画スタイル',
     'options.shadeSteps': '陰影の段階',
-    'options.outlineStrength': '線画',
+    'options.styleStrength': 'スタイルの強さ',
     'options.itemEffects': 'アイテムエフェクト',
     'options.sharpness': 'シャープネス',
     'options.filmGrain': 'フィルムグレイン',

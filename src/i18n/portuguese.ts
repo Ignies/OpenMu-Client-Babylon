@@ -200,7 +200,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.materialDetail': 'Detalhe',
     'options.renderingStyle': 'Estilo de renderização',
     'options.shadeSteps': 'Níveis de sombra',
-    'options.outlineStrength': 'Traços de tinta',
+    'options.styleStrength': 'Intensidade do estilo',
     'options.itemEffects': 'Efeitos dos itens',
     'options.sharpness': 'Nitidez',
     'options.filmGrain': 'Granulação',

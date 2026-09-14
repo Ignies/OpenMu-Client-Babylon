@@ -13,6 +13,7 @@ import {
 } from '../libs/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
 import { devQueryNumber } from '../common/devSeams';
+import { toonTerrainDefines } from '../common/renderingStyle';
 import { sunLightOf } from '../lighting/keyRig';
 import {
   blobShadowRefresh,
@@ -125,12 +126,31 @@ export function registerTerrainMaterial(material: ShaderMaterial): void {
   material.onDisposeObservable.addOnce(() => terrainMaterials.delete(material));
 }
 
+/** What the ground and the grass compile: the cascades' defines and the style's (`terrainLightDefines`). */
+function terrainDefines(): string[] {
+  return [...terrainCsmDefines(), ...toonTerrainDefines()];
+}
+
+let compiledTerrainDefines = '';
+
 function recompileTerrainMaterials(): void {
-  const defines = terrainCsmDefines();
+  const defines = terrainDefines();
+
+  compiledTerrainDefines = defines.join();
 
   for (const material of terrainMaterials) {
     material.options.defines = [...defines];
     material.markDirty(true);
+  }
+}
+
+/**
+ * Recompiles the ground and the grass when the style's defines moved; the
+ * cascades' own changes come through `invalidate`. One compare a tick.
+ */
+export function syncTerrainDefines(): void {
+  if (terrainDefines().join() !== compiledTerrainDefines) {
+    recompileTerrainMaterials();
   }
 }
 

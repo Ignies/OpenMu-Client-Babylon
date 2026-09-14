@@ -325,7 +325,7 @@ export const EN_TEXT = {
   'options.materialDetail': 'Detail',
   'options.renderingStyle': 'Rendering style',
   'options.shadeSteps': 'Shade steps',
-  'options.outlineStrength': 'Ink lines',
+  'options.styleStrength': 'Style strength',
   'options.preset': 'Preset',
   'options.itemEffects': 'Item effects',
   'options.sharpness': 'Sharpness',

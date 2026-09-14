@@ -14,11 +14,14 @@ import { pbrDetailStrength, specularLightScale } from './materialQuality';
 import { UNIFIED_LIGHT_MODEL, linearLightActive } from './lightModel';
 import { lightingTier } from './lightingQuality';
 import {
+  TOON_FILTER_UNIFORM,
   TOON_REF_UNIFORM,
   TOON_UNIFORM,
   bindToon,
+  toonFlatActive,
   toonFunctionsGlsl,
   toonRampActive,
+  toonTextureGlsl,
 } from './renderingStyle';
 import { pointLightPoolSize } from './pointLightPool';
 import {
@@ -129,13 +132,15 @@ const BODY_LIGHT_UNIFORM = `muBodyLight`;
  * way the terrain takes its `CSM_` defines: `MU_LINEAR_LIGHT` composes
  * `lin(texel x body) x light` while the structured budget is on
  * (`linearLightActive`), `MU_WRAP` is the half-lambert response on tiers
- * >= 1, `MU_TOON` steps that response while a rendering style is on
- * (renderingStyle.ts). Classic compiles none of them and stays
- * byte-identical to the original's `texel x BodyLight x light`.
+ * >= 1, `MU_TOON` steps that response while a rendering style is on and
+ * `MU_TOON_FLAT` flattens the art's tones (renderingStyle.ts). Classic
+ * compiles none of them and stays byte-identical to the original's
+ * `texel x BodyLight x light`.
  */
 const LINEAR_LIGHT_DEFINE = 'MU_LINEAR_LIGHT';
 const WRAP_DEFINE = 'MU_WRAP';
 const TOON_DEFINE = 'MU_TOON';
+const FLAT_DEFINE = 'MU_TOON_FLAT';
 
 /**
  * Detail strength as the shader sees it. The emissive map is *added* on top
@@ -387,7 +392,8 @@ function litDefineState(scene: Scene): number {
   return (
     (linearLightActive(scene) ? 1 : 0) |
     (wrapActive() ? 2 : 0) |
-    (toonRampActive() ? 4 : 0)
+    (toonRampActive() ? 4 : 0) |
+    (toonFlatActive() ? 8 : 0)
   );
 }
 
@@ -413,6 +419,7 @@ function addLitDefines(material: ItemMaterial, scene: Scene): void {
       lit[LINEAR_LIGHT_DEFINE] = (state & 1) !== 0;
       lit[WRAP_DEFINE] = (state & 2) !== 0;
       lit[TOON_DEFINE] = (state & 4) !== 0;
+      lit[FLAT_DEFINE] = (state & 8) !== 0;
       lit.rebuild();
     }
 
@@ -709,6 +716,7 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
   material.AddUniform(SUN_COLOR_UNIFORM, 'vec3', null);
   material.AddUniform(TOON_UNIFORM, 'vec4', null);
   material.AddUniform(TOON_REF_UNIFORM, 'vec2', null);
+  material.AddUniform(TOON_FILTER_UNIFORM, 'vec4', null);
   material.AddUniform('time', 'float', 0);
   material.AddUniform('chromeColor', 'vec3', null);
   material.AddUniform('chrome2Color', 'vec3', null);
@@ -1017,7 +1025,16 @@ export function createItemMaterial(
   // still declared for them (addItemUniforms) and simply unread.
   simpleMaterial.Fragment_Custom_Diffuse(`
 ${withScroll ? UV_SCROLL_RESAMPLE : ''}
-${bright || flatLit ? '' : snowCapGlsl('baseColor')}
+${
+  bright || flatLit
+    ? ''
+    : toonTextureGlsl(
+        'diffuseSampler',
+        withScroll ? `vDiffuseUV + ${UV_SCROLL_UNIFORM}` : 'vDiffuseUV + uvOffset',
+        'baseColor.rgb',
+        'DIFFUSE'
+      ) + snowCapGlsl('baseColor')
+}
   `);
   if (withScroll) {
     simpleMaterial.AddUniform(UV_SCROLL_UNIFORM, 'vec2', null);
@@ -1165,6 +1182,19 @@ export function createItemPbrMaterial(scene: Scene) {
   // the albedo, so the highlight and the emissive trim keep their strength.
   // Alpha carries mesh visibility on both paths.
   material.Fragment_Custom_Albedo(`
+  #ifdef ${FLAT_DEFINE}
+  #ifdef ALBEDO
+    {
+      // The art read again with the mip bias and snapped to its tone levels,
+      // in the display space it was authored in, then decoded as Babylon did.
+      vec3 toonTexel = muToonFlat(texture2D(albedoSampler, vAlbedoUV + uvOffset, ${TOON_FILTER_UNIFORM}.x).rgb, ${TOON_FILTER_UNIFORM}.y);
+      #ifdef GAMMAALBEDO
+      toonTexel = toLinearSpace(toonTexel);
+      #endif
+      surfaceAlbedo = vAlbedoColor.rgb * toonTexel * vAlbedoInfos.y;
+    }
+  #endif
+  #endif
     ${
       UNIFIED_LIGHT_MODEL
         ? `surfaceAlbedo *= pow(max(${BODY_LIGHT_UNIFORM}.rgb * ${INSTANCE_VARYING}.rgb, vec3(0.0)), vec3(2.2));`

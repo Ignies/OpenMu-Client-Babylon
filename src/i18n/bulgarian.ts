@@ -192,7 +192,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.materialDetail': 'Детайл',
     'options.renderingStyle': 'Стил на изобразяване',
     'options.shadeSteps': 'Степени на сянка',
-    'options.outlineStrength': 'Контурни линии',
+    'options.styleStrength': 'Сила на стила',
     'options.itemEffects': 'Ефекти на предметите',
     'options.sharpness': 'Острота',
     'options.filmGrain': 'Зърнистост',

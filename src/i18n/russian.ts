@@ -191,7 +191,7 @@ export const russianLayer: LanguageLayer = {
     'options.materialDetail': 'Детализация',
     'options.renderingStyle': 'Стиль отрисовки',
     'options.shadeSteps': 'Ступени тени',
-    'options.outlineStrength': 'Контурные линии',
+    'options.styleStrength': 'Сила стиля',
     'options.itemEffects': 'Эффекты предметов',
     'options.sharpness': 'Резкость',
     'options.filmGrain': 'Зернистость',

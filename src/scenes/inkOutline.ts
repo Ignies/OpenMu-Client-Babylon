@@ -7,11 +7,11 @@ import {
   type ArcRotateCamera,
   type Scene,
 } from '../libs/babylon/exports';
-import { devQueryNumber, devQueryNumbers } from '../common/devSeams';
+import { devQueryNumbers } from '../common/devSeams';
 import type { LightingTier } from '../common/lightingQuality';
 import {
-  OUTLINE_STRENGTH_MAX,
-  outlineStrength,
+  inkDarkness,
+  inkWidth,
   type RenderingStyle,
 } from '../common/renderingStyle';
 import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
@@ -31,17 +31,14 @@ import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
  * is. The effect mask is subtracted and added back the way the haze does it,
  * so the additive half of a pixel keeps its own light.
  *
- * Dev seams: `?ink=0..9` replaces the slider (0 = no pass),
- * `?inkk=depthThreshold,normalThreshold` the edge thresholds.
+ * The style strength dial sets the darkness and the width (renderingStyle.ts).
+ * Dev seam: `?inkk=depthThreshold,normalThreshold` replaces the edge thresholds.
  */
 
 const SHADER = 'muInkOutline';
 
-/** Tap rings per tier index; Ultra adds a second ring at twice the offset. */
+/** Tap rings per tier index; Ultra adds a second ring one texel further out. */
 const RINGS: readonly number[] = [0, 1, 2];
-
-/** Darkness at the top slider notch. */
-const INK_MAX = 0.9;
 
 /** A depth step counts past this share of the pixel's own depth... */
 const DEPTH_THRESHOLD = 0.02;
@@ -58,7 +55,6 @@ const FAR: readonly [number, number] = [80, 160];
 /** One line is one G-buffer texel at this frame height, two at twice it. */
 const REFERENCE_HEIGHT = 900;
 
-const inkDev = devQueryNumber('ink');
 const knobsDev = devQueryNumbers('inkk', 2);
 
 type Runtime = {
@@ -84,7 +80,8 @@ function registerShader(rings: number): void {
   uniform sampler2D depthSampler;    // G-buffer depth: view-space z in tiles, 0 = sky
   uniform sampler2D normalSampler;   // G-buffer normal: view space, signed, 0 at sky
   uniform sampler2D ${EFFECT_MASK_SAMPLER};
-  uniform vec2 texel;      // one line width in G-buffer UV
+  uniform vec2 texel;      // one G-buffer texel at the reference height, in UV
+  uniform float inkWidth;  // the line's width in those texels
   uniform vec2 viewport;   // tan(fov/2) * aspect, tan(fov/2)
   uniform vec4 ink;        // strength, depth threshold (share of z), depth floor (tiles), normal threshold (1 - cos)
   uniform vec2 inkFar;     // fade start, fade end (tiles)
@@ -143,7 +140,7 @@ function registerShader(rings: number): void {
     float weight = 1.0;
 
     for (int r = 1; r <= RINGS; r++) {
-      vec2 o = texel * float(r);
+      vec2 o = texel * (inkWidth + float(r) - 1.0);
 
       float step4 = max(
         max(depthStep(vUV + vec2(o.x, 0.0), n0, zPlane, threshold),
@@ -183,7 +180,7 @@ function createPass(
   const pass = new PostProcess(
     'inkOutline',
     `${SHADER}${rings}`,
-    ['texel', 'viewport', 'ink', 'inkFar'],
+    ['texel', 'inkWidth', 'viewport', 'ink', 'inkFar'],
     ['depthSampler', 'normalSampler', EFFECT_MASK_SAMPLER],
     1,
     null,
@@ -226,6 +223,7 @@ function createPass(
     const height = target.getRenderHeight();
     const px = Math.max(1, Math.round(height / REFERENCE_HEIGHT));
     effect.setFloat2('texel', px / width, px / height);
+    effect.setFloat('inkWidth', inkWidth());
 
     const tanHalf = Math.tan(camera.fov / 2);
     effect.setFloat2(
@@ -257,10 +255,10 @@ export function disposeInkOutline(): void {
 }
 
 /**
- * Built while the style draws lines, post is on, the slider is above zero and
- * the AO left a G-buffer and an effect mask to read. Returns true when the
- * chain changed. `upstreamChanged` (the AO was rebuilt this tick) re-attaches
- * the pass behind the new SSAO passes without rebuilding it.
+ * Built while the style draws lines, post is on and the AO left a G-buffer
+ * and an effect mask to read. Returns true when the chain changed.
+ * `upstreamChanged` (the AO was rebuilt this tick) re-attaches the pass
+ * behind the new SSAO passes without rebuilding it.
  */
 export function syncInkOutline(
   scene: Scene,
@@ -271,20 +269,14 @@ export function syncInkOutline(
   post: boolean,
   upstreamChanged: boolean
 ): boolean {
-  const slider = Math.max(
-    0,
-    Math.min(OUTLINE_STRENGTH_MAX, inkDev ?? outlineStrength())
-  );
-
   const wanted =
     tier !== null &&
     post &&
     style !== null &&
     style.outline &&
-    slider > 0 &&
     effectMask() !== null;
 
-  shown.strength = wanted ? (slider / OUTLINE_STRENGTH_MAX) * INK_MAX : 0;
+  shown.strength = wanted ? inkDarkness() : 0;
 
   const rings = RINGS[tierIndex] ?? RINGS[1];
 
