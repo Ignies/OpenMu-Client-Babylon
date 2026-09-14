@@ -34,7 +34,7 @@ export type RenderingStyle = {
 export const RENDERING_STYLES: readonly (RenderingStyle | null)[] = [
   null,
   { ramp: true, rim: 0, outline: false },
-  { ramp: true, rim: 0.5, outline: true },
+  { ramp: true, rim: 1, outline: true },
 ];
 
 export const SHADE_STEPS_MIN = 2;
@@ -45,7 +45,7 @@ export const OUTLINE_STRENGTH_MAX = 9;
 const TOON_EDGE_SOFTNESS = 1;
 
 /** Where the stepped rim switches on, in `(1 - N.V) x lit` units. */
-const TOON_RIM_EDGE = 0.6;
+const TOON_RIM_EDGE = 0.45;
 
 const styleDev = devQueryNumber('style');
 const stepsDev = devQueryNumber('shadeSteps');
