@@ -13,6 +13,13 @@ import { pbrMapsFor, pbrPlaceholders } from './pbrMaps';
 import { pbrDetailStrength, specularLightScale } from './materialQuality';
 import { UNIFIED_LIGHT_MODEL, linearLightActive } from './lightModel';
 import { lightingTier } from './lightingQuality';
+import {
+  TOON_REF_UNIFORM,
+  TOON_UNIFORM,
+  bindToon,
+  toonFunctionsGlsl,
+  toonRampActive,
+} from './renderingStyle';
 import { pointLightPoolSize } from './pointLightPool';
 import {
   itemEmissiveAt,
@@ -27,7 +34,7 @@ import {
 
 const glowScratch = { r: 0, g: 0, b: 0, a: 1 };
 import { loadMuSprite } from '../libs/mu/sprites';
-import { sunLightOf } from '../lighting/keyRig';
+import { skyLightOf, sunLightOf } from '../lighting/keyRig';
 import {
   bindClouds,
   cloudFieldGlsl,
@@ -122,11 +129,13 @@ const BODY_LIGHT_UNIFORM = `muBodyLight`;
  * way the terrain takes its `CSM_` defines: `MU_LINEAR_LIGHT` composes
  * `lin(texel x body) x light` while the structured budget is on
  * (`linearLightActive`), `MU_WRAP` is the half-lambert response on tiers
- * >= 1. Classic compiles neither and stays byte-identical to the original's
- * `texel x BodyLight x light`.
+ * >= 1, `MU_TOON` steps that response while a rendering style is on
+ * (renderingStyle.ts). Classic compiles none of them and stays
+ * byte-identical to the original's `texel x BodyLight x light`.
  */
 const LINEAR_LIGHT_DEFINE = 'MU_LINEAR_LIGHT';
 const WRAP_DEFINE = 'MU_WRAP';
+const TOON_DEFINE = 'MU_TOON';
 
 /**
  * Detail strength as the shader sees it. The emissive map is *added* on top
@@ -240,6 +249,7 @@ function wrapActive(): boolean {
  * Standard path (the UNCLAMP recompute multiplies it by the texel after
  * this), `finalColor.rgb` on the PBR path - there the albedo has to be
  * applied by hand, the diffuse composition is already done.
+ *
  */
 const halfLambertGlsl = (target: string, albedo: string) => {
   const [scale, bias, floor] = halfLambert ?? HALF_LAMBERT_DEFAULT;
@@ -265,6 +275,67 @@ const halfLambertGlsl = (target: string, albedo: string) => {
 };
 
 /**
+ * `MU_TOON` (renderingStyle.ts): the lit sum the wrap left - sky, sun with
+ * its wrap, cloud and cascade, the torches - is remapped onto `muToon.x`
+ * levels between the darkest a surface can be under the key (`muToonRef.y`,
+ * the sky's ground share) and the key's level (`muToonRef.x`); whatever
+ * stands above the level, a torch core, passes through. One scalar on the
+ * whole sum, so a coloured light keeps its hue and a shadow or a cloud lands
+ * as a band edge. The stepped rim in sun units goes on the figures
+ * (`muToon.z`), added after the bands so it stays one clean line.
+ */
+const toonGlsl = (target: string, albedo: string) => {
+  const mul = albedo ? ` * ${albedo}` : '';
+
+  return `
+  #ifdef ${TOON_DEFINE}
+  {
+    float toonLum = dot(diffuseBase, vec3(0.299, 0.587, 0.114));
+    float toonX = toonLum / max(${TOON_REF_UNIFORM}.x, 1e-4);
+    float toonLo = ${TOON_REF_UNIFORM}.y;
+    float toonT = clamp((toonX - toonLo) / max(1.0 - toonLo, 1e-4), 0.0, 1.0);
+    float toonQ = toonLo + (1.0 - toonLo) * muToonBands(toonT, ${TOON_UNIFORM}.x, ${TOON_UNIFORM}.y)
+      + max(toonX - 1.0, 0.0);
+    float toonScale = toonX > 1e-4 ? toonQ / toonX : 1.0;
+    ${target} += diffuseBase * (toonScale - 1.0)${mul};
+
+    float rimDot = dot(normalW, -${SUN_DIR_UNIFORM});
+    float rimShadow = numLights > 0.0 ? clamp(aggShadow * numLights - (numLights - 1.0), 0.0, 1.0) : 1.0;
+    float rimV = 1.0 - clamp(dot(viewDirectionW, normalW), 0.0, 1.0);
+    float rimLit = clamp(rimDot * 0.5 + 0.5, 0.0, 1.0);
+    float rim = muToonStep(rimV * rimLit, ${TOON_UNIFORM}.w, ${TOON_UNIFORM}.y) * ${TOON_UNIFORM}.z;
+    ${target} += ${SUN_COLOR_UNIFORM} * rim * muToonStep(rimShadow, 0.5, ${TOON_UNIFORM}.y)${mul};
+  }
+  #endif
+`;
+};
+
+/** The wrap, then the bands over what it left; each compiles under its own define. */
+const sunResponseGlsl = (target: string, albedo: string) =>
+  halfLambertGlsl(target, albedo) + toonGlsl(target, albedo);
+
+const luma = (c: { r: number; g: number; b: number }): number =>
+  c.r * 0.299 + c.g * 0.587 + c.b * 0.114;
+
+/** The key's level and its floor for the toon remap; unread without `MU_TOON`. */
+function bindToonRef(effect: Effect, scene: Scene): void {
+  if (!toonRampActive()) return;
+
+  const sky = skyLightOf(scene);
+  const sun = sunLightOf(scene);
+  const skyTop = sky ? sky.intensity * luma(sky.diffuse) : 0;
+  const skyGround = sky ? sky.intensity * luma(sky.groundColor) : 0;
+  // `sun.intensity` carries `directLightGain`; see bindSunWrap.
+  const sunPlain =
+    sun && sun.intensity > 0
+      ? sun.intensity * specularLightScale() * luma(sun.diffuse)
+      : 0;
+  const level = skyTop + sunPlain;
+
+  effect.setFloat2(TOON_REF_UNIFORM, level, level > 0 ? skyGround / level : 0);
+}
+
+/**
  * The cloud deck the wrap term subtracts. Null while the map has no sky and
  * inside a room, so the shadow is identity there.
  */
@@ -280,9 +351,9 @@ function bindItemClouds(effect: Effect, scene: Scene): void {
   });
 }
 
-/** Per-draw sun uniforms for the half-lambert term; unread without `MU_WRAP`. */
+/** Per-draw sun uniforms for the sun response; unread without `MU_WRAP` or `MU_TOON`. */
 function bindSunWrap(effect: Effect, mesh: AbstractMesh) {
-  if (!wrapActive()) return;
+  if (!wrapActive() && !toonRampActive()) return;
 
   const sun = sunLightOf(mesh.getScene());
 
@@ -313,7 +384,11 @@ type LitDefines = Record<string, boolean> & { rebuild(): void };
 
 /** The compile-time state of a lit variant, as one number to compare. */
 function litDefineState(scene: Scene): number {
-  return (linearLightActive(scene) ? 1 : 0) | (wrapActive() ? 2 : 0);
+  return (
+    (linearLightActive(scene) ? 1 : 0) |
+    (wrapActive() ? 2 : 0) |
+    (toonRampActive() ? 4 : 0)
+  );
 }
 
 /**
@@ -337,6 +412,7 @@ function addLitDefines(material: ItemMaterial, scene: Scene): void {
       const lit = defines as unknown as LitDefines;
       lit[LINEAR_LIGHT_DEFINE] = (state & 1) !== 0;
       lit[WRAP_DEFINE] = (state & 2) !== 0;
+      lit[TOON_DEFINE] = (state & 4) !== 0;
       lit.rebuild();
     }
 
@@ -631,6 +707,8 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
   material.AddUniform(SNOW_CAP_UNIFORM, 'float', 0);
   material.AddUniform(SUN_DIR_UNIFORM, 'vec3', null);
   material.AddUniform(SUN_COLOR_UNIFORM, 'vec3', null);
+  material.AddUniform(TOON_UNIFORM, 'vec4', null);
+  material.AddUniform(TOON_REF_UNIFORM, 'vec2', null);
   material.AddUniform('time', 'float', 0);
   material.AddUniform('chromeColor', 'vec3', null);
   material.AddUniform('chrome2Color', 'vec3', null);
@@ -657,6 +735,8 @@ function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
   bindItemClouds(effect, mesh.getScene());
 
   bindSunWrap(effect, mesh);
+  bindToon(effect, mesh.metadata?.characterAsset === true);
+  bindToonRef(effect, mesh.getScene());
 
   const tier = mesh.metadata?.itemTier as ItemVisualTier | null | undefined;
 
@@ -927,7 +1007,10 @@ export function createItemMaterial(
   addInstanceAttribute(simpleMaterial);
 
   simpleMaterial.Fragment_Definitions(
-    lightTintGlsl() + cloudFieldGlsl(false) + INSTANCE_FRAGMENT_DEFINITIONS
+    lightTintGlsl() +
+      cloudFieldGlsl(false) +
+      INSTANCE_FRAGMENT_DEFINITIONS +
+      toonFunctionsGlsl()
   );
 
   // Glow cards and flat-lit UI models never take a cap; the uniform is
@@ -942,10 +1025,10 @@ ${bright || flatLit ? '' : snowCapGlsl('baseColor')}
 
   simpleMaterial.Fragment_Before_FragColor(legacyPasses(STANDARD_VARS));
 
-  // The half-lambert term lands on `diffuseBase` before the UNCLAMP
-  // recompute reads it; glow cards and flat-lit models take neither.
+  // The sun response lands on `diffuseBase` before the UNCLAMP recompute
+  // reads it; glow cards and flat-lit models take neither.
   simpleMaterial.Fragment_Before_Fog(`
-${bright || flatLit ? '' : halfLambertGlsl('diffuseBase', '') + UNCLAMP}${
+${bright || flatLit ? '' : sunResponseGlsl('diffuseBase', '') + UNCLAMP}${
     bright ? brightOverride(withScroll) : ''
   }${flatLit ? FLAT_LIT_OVERRIDE : ''}
 `);
@@ -1068,7 +1151,10 @@ export function createItemPbrMaterial(scene: Scene) {
   addInstanceAttribute(material);
 
   material.Fragment_Definitions(
-    lightTintGlsl() + cloudFieldGlsl(false) + INSTANCE_FRAGMENT_DEFINITIONS
+    lightTintGlsl() +
+      cloudFieldGlsl(false) +
+      INSTANCE_FRAGMENT_DEFINITIONS +
+      toonFunctionsGlsl()
   );
 
   // BodyLight: the bake's flat per-object light (the unified model). The
@@ -1090,7 +1176,7 @@ ${snowCapGlsl('surfaceAlbedo')}
 
   material.Fragment_Before_Fog(`
     finalColor.rgb += texture2D(muEmissiveSampler, vAlbedoUV).rgb * ${PBR_EMISSIVE_GAIN} * ${DETAIL_UNIFORM};
-${halfLambertGlsl('finalColor.rgb', 'surfaceAlbedo')}
+${sunResponseGlsl('finalColor.rgb', 'surfaceAlbedo')}
     finalColor.rgb = muLightTint(finalColor.rgb, diffuseBase);
   `);
 
