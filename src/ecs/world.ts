@@ -143,12 +143,12 @@ export type Entity = Partial<{
    */
   performing: {
     instrument: InstrumentId;
-    clip: PlayerAction;
-    clipSpeed: number;
+    /** The emote the pose is copied from (already gendered). */
+    source: PlayerAction;
+    /** The copied clip's index on this entity's model, -1 until the model is loaded. */
+    clip: number;
     /** The hero, whose sound is never attenuated. */
     local: boolean;
-    /** Seconds left of the hit being shown. */
-    twitch: number;
     /** Audio times of hits not yet shown, ascending. */
     hits: number[];
     model: ModelObject | null;

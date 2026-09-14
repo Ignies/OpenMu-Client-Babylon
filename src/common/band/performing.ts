@@ -1,4 +1,5 @@
 import type { Entity, World } from '../../ecs/world';
+import { genderedEmoteAction } from '../emotes';
 import { instrumentById, type InstrumentId } from '../instruments';
 
 /**
@@ -15,16 +16,15 @@ export function startPerforming(world: World, entity: Performer, instrument: Ins
     if (entity.performing.instrument === instrument) return;
     stopPerforming(world, entity);
   }
+  const isFemale = entity.attributeSystem?.isAboveZero('isFemale') ?? false;
   world.addComponent(entity, 'performing', {
     instrument,
-    clip: def.clip,
-    clipSpeed: def.clipSpeed,
+    source: genderedEmoteAction(def.pose.clip, isFemale),
+    clip: -1,
     local,
-    twitch: 0,
     hits: [],
     model: null,
   });
-  entity.playerAnimation.action = def.clip;
 }
 
 export function stopPerforming(world: World, entity: Entity): void {

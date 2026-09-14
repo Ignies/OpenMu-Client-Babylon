@@ -18,6 +18,20 @@ import { PlayerAction } from './objects/enum';
 
 export type InstrumentId = 'guitar' | 'flute' | 'ocarina';
 
+/**
+ * The pose is a few frames of an existing emote, copied into a clip of its
+ * own and looped there and back (`band/instrumentClip.ts`): the rig has no
+ * instrument animations and its clip table is full, but the end of Again is
+ * hands at the mouth and the start of Hustle is arms out in front.
+ */
+export type InstrumentPose = {
+  /** The male clip; `genderedEmoteAction` picks the female one. */
+  clip: PlayerAction;
+  /** The frames copied, as fractions of the clip: 0 = first key, 1 = last. */
+  from: number;
+  to: number;
+};
+
 export type InstrumentDefinition = {
   id: InstrumentId;
   labelKey: TextKey;
@@ -39,20 +53,14 @@ export type InstrumentDefinition = {
   bone: number;
   /** Link on that bone - degrees and centimetres in BMD bone space (`boneLink.ts`). */
   link: { angle: [number, number, number]; offset: [number, number, number] };
-  /** The held pose while performing; `clipSpeed` is its play rate. */
-  clip: PlayerAction;
-  clipSpeed: number;
-  /** The per-note hit: an additive rotation on `bone` around `axis`, `degrees` at the peak. */
-  twitch: { bone: number; axis: [number, number, number]; degrees: number };
+  pose: InstrumentPose;
 };
 
 const A = PlayerAction;
 
-/** Bones by name, so a row reads (`weaponAttachment.ts`, `headTrackingSystem.ts`). */
+/** Bones by name, so a row reads (`weaponAttachment.ts`). */
 const RIGHT_HAND = 33;
 const LEFT_HAND = 42;
-const RIGHT_FOREARM = 28;
-const HEAD = 20;
 
 export const INSTRUMENTS: readonly InstrumentDefinition[] = [
   {
@@ -63,12 +71,12 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     sustained: false,
     model: 'Item/Instrument_Guitar.glb',
     bone: LEFT_HAND,
-    // Neck in the left hand, body down at the hip. Tune live with
+    // Across the chest, strings out, neck up to the left. Solved from the
+    // hand bones (tools/screenshot/_probe_bandsolve.mjs); tune live with
     // `?instRot=` / `?instOff=` or `__bandLink`.
-    link: { angle: [0, 0, -90], offset: [-25, 0, 0] },
-    clip: A.PLAYER_STOP_TWO_HAND_SWORD_TWO,
-    clipSpeed: 0.24,
-    twitch: { bone: RIGHT_FOREARM, axis: [1, 0, 0], degrees: 12 },
+    link: { angle: [-84, -35, -90], offset: [-11, -1, -1] },
+    // The opening of the Hustle dance: arms out in front, moving.
+    pose: { clip: A.PLAYER_HUSTLE, from: 0.05, to: 0.12 },
   },
   {
     id: 'flute',
@@ -78,11 +86,10 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     sustained: true,
     model: 'Item/Instrument_Flute.glb',
     bone: RIGHT_HAND,
-    // Across the raised hand, level; tune live like the guitar.
-    link: { angle: [90, 0, 0], offset: [0, 0, 0] },
-    clip: A.PLAYER_STOP_WAND,
-    clipSpeed: 0.3,
-    twitch: { bone: HEAD, axis: [0, 0, 1], degrees: 2 },
+    // At the mouth, out to the right and a little down.
+    link: { angle: [-59, 15, 160], offset: [9, -18, 3] },
+    // The end of the Again gesture: the right hand up at the mouth.
+    pose: { clip: A.PLAYER_AGAIN1, from: 0.75, to: 1 },
   },
   {
     id: 'ocarina',
@@ -92,10 +99,9 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     sustained: true,
     model: 'Item/Instrument_Ocarina.glb',
     bone: RIGHT_HAND,
-    link: { angle: [0, 0, 0], offset: [0, 3, 5] },
-    clip: A.PLAYER_STOP_WAND,
-    clipSpeed: 0.3,
-    twitch: { bone: HEAD, axis: [0, 0, 1], degrees: 2 },
+    // Mouthpiece at the lips, body out in front of the chin.
+    link: { angle: [-110, 15, 58], offset: [8, 8, -6] },
+    pose: { clip: A.PLAYER_AGAIN1, from: 0.75, to: 1 },
   },
 ];
 

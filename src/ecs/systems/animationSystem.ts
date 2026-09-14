@@ -386,7 +386,6 @@ export const AnimationSystem: ISystemFactory = world => {
           ) === BaseClass.RageFighter;
 
         playerObject.AnimationSpeed =
-          entity.performing?.clipSpeed ??
           playerObject.actionPlaySpeed(action) ??
           playerPlaySpeed(
             action,
