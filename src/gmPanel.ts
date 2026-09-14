@@ -36,13 +36,14 @@ const RETRY_MS = 600;
 /** How many sent lines the panel keeps on screen. */
 const MAX_SENT = 12;
 
-/** The panel's screens, in the order the rail lists them. */
+/** The panel's tabs, in the order the sidebar lists them. */
 export type GmSection =
-  | 'overview'
-  | 'nearby'
-  | 'travel'
-  | 'character'
+  | 'live'
+  | 'map'
+  | 'logs'
+  | 'skins'
   | 'spawn'
+  | 'character'
   | 'moderation'
   | 'events'
   | 'console';
@@ -50,11 +51,12 @@ export type GmSection =
 export type GmSectionInfo = { id: GmSection; titleKey: TextKey; hintKey: TextKey };
 
 export const GM_SECTIONS: readonly GmSectionInfo[] = [
-  { id: 'overview', titleKey: 'gm.section.overview', hintKey: 'gm.section.overviewHint' },
-  { id: 'nearby', titleKey: 'gm.section.nearby', hintKey: 'gm.section.nearbyHint' },
-  { id: 'travel', titleKey: 'gm.section.travel', hintKey: 'gm.section.travelHint' },
-  { id: 'character', titleKey: 'gm.section.character', hintKey: 'gm.section.characterHint' },
+  { id: 'live', titleKey: 'gm.section.live', hintKey: 'gm.section.liveHint' },
+  { id: 'map', titleKey: 'gm.section.map', hintKey: 'gm.section.mapHint' },
+  { id: 'logs', titleKey: 'gm.section.logs', hintKey: 'gm.section.logsHint' },
+  { id: 'skins', titleKey: 'gm.section.skins', hintKey: 'gm.section.skinsHint' },
   { id: 'spawn', titleKey: 'gm.section.spawn', hintKey: 'gm.section.spawnHint' },
+  { id: 'character', titleKey: 'gm.section.character', hintKey: 'gm.section.characterHint' },
   { id: 'moderation', titleKey: 'gm.section.moderation', hintKey: 'gm.section.moderationHint' },
   { id: 'events', titleKey: 'gm.section.events', hintKey: 'gm.section.eventsHint' },
   { id: 'console', titleKey: 'gm.section.console', hintKey: 'gm.section.consoleHint' },
@@ -65,12 +67,13 @@ export type SentLine = { id: number; line: string; at: number };
 export const GmPanel = new (class _GmPanel {
   open = false;
 
-  section: GmSection = 'overview';
+  section: GmSection = 'live';
 
   /**
-   * The character the Character and Moderation screens act on. Blank means
-   * "me" wherever the command allows it. Set by clicking a row in Nearby,
-   * which is the whole point: a name typed by hand is a name typed wrong.
+   * The character the Character and Moderation tabs act on. Blank means
+   * "me" wherever the command allows it. Set by clicking a player anywhere
+   * in the panel, which is the whole point: a name typed by hand is a name
+   * typed wrong.
    */
   target = '';
 
@@ -91,6 +94,21 @@ export const GmPanel = new (class _GmPanel {
 
   /** What the panel sent, oldest first. */
   sent: SentLine[] = [];
+
+  /** The top bar's player search, shared by the Live and Map tabs. */
+  search = '';
+
+  /** The tracked player whose details are open, by the tracker's id. */
+  selectedPlayerId: string | null = null;
+
+  /** The map the Map tab shows; null is wherever the game master stands. */
+  mapView: number | null = null;
+
+  /** The character whose log the Logs tab reads. */
+  logCharacter = '';
+
+  /** The last `/skin` sent; 0 is the own body. What the server holds is not reported back. */
+  skin = 0;
 
   private nextId = 1;
 
@@ -131,7 +149,7 @@ export const GmPanel = new (class _GmPanel {
     this.clearPending();
   }
 
-  /** A row in Nearby, or the field on the Character screen. */
+  /** A player row anywhere, or the field on the Character tab. */
   setTarget(name: string): void {
     this.target = name;
     this.error = null;
@@ -140,6 +158,39 @@ export const GmPanel = new (class _GmPanel {
 
   setQuery(value: string): void {
     this.query = value;
+  }
+
+  setSearch(value: string): void {
+    this.search = value;
+  }
+
+  selectPlayer(id: string | null): void {
+    this.selectedPlayerId = id;
+  }
+
+  setMapView(map: number | null): void {
+    this.mapView = map;
+  }
+
+  setLogCharacter(name: string): void {
+    this.logCharacter = name;
+  }
+
+  /** Open the Logs tab on a character. */
+  showLog(name: string): void {
+    this.logCharacter = name;
+    this.setSection('logs');
+  }
+
+  /** Open the Map tab on a map, with a player picked out. */
+  showOnMap(map: number | null, playerId: string | null): void {
+    this.mapView = map;
+    this.selectedPlayerId = playerId;
+    this.setSection('map');
+  }
+
+  setSkin(skin: number): void {
+    this.skin = skin;
   }
 
   /**
@@ -186,8 +237,8 @@ export const GmPanel = new (class _GmPanel {
 
   /**
    * The values a command would be sent with. `characterName` falls back to the
-   * shared target, so picking someone in Nearby fills every screen at once
-   * without copying the name into each form.
+   * shared target, so picking someone in Live fills every tab at once without
+   * copying the name into each form.
    */
   private valuesFor(command: GmCommand, overrides?: Record<string, string>): Record<string, string> {
     const values: Record<string, string> = {};
@@ -281,10 +332,15 @@ export const GmPanel = new (class _GmPanel {
   reset(): void {
     runInAction(() => {
       this.open = false;
-      this.section = 'overview';
+      this.section = 'live';
       this.target = '';
       this.query = '';
+      this.search = '';
       this.selected = null;
+      this.selectedPlayerId = null;
+      this.mapView = null;
+      this.logCharacter = '';
+      this.skin = 0;
       this.confirming = null;
       this.error = null;
       this.sent = [];
