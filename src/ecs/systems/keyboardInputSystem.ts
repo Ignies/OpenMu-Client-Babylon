@@ -6,6 +6,7 @@ import {
   WALK_KEY_CODES,
 } from '../../common/keyBindings';
 import { GameOptions } from '../../common/gameOptions';
+import { ITEM_HOTKEY_CODES } from '../../common/itemHotkeys';
 import { MuWindows } from '../../ui/components/muWindow/windowState';
 import { openSystemMenu } from '../../common/sessionExit';
 import type { ISystemFactory } from '../world';
@@ -56,6 +57,18 @@ export const KeyboardInputSystem: ISystemFactory = world => {
       // Space / arrows scroll the page; a field needs them as characters and
       // caret keys.
       if (PAGE_SCROLL_KEYS.has(e.code)) e.preventDefault();
+      // Ctrl+Q/W/E/R over the inventory binds an item hot key
+      // (NewUIMyInventory.cpp:622), but the browser claims the chord first:
+      // Ctrl+R reloads the page and Ctrl+E opens the search bar. Only while
+      // the window is open, so Ctrl+R still reloads the rest of the time.
+      // Ctrl+W is the browser's own and cannot be taken back from here.
+      if (
+        e.ctrlKey &&
+        Store.inventoryEnabled &&
+        ITEM_HOTKEY_CODES.includes(e.code)
+      ) {
+        e.preventDefault();
+      }
     }
     // The Options window is waiting for a key to rebind: it reads the key
     // itself, nothing else should react to it.

@@ -15,7 +15,10 @@ import {
   usedMask,
 } from '../../../../components/itemGrid';
 import { ItemsDatabase } from '../../../../../common/itemsDatabase';
-import { canRegisterItemHotkey } from '../../../../../common/itemHotkeys';
+import {
+  ITEM_HOTKEY_CODES,
+  canRegisterItemHotkey,
+} from '../../../../../common/itemHotkeys';
 import { isUpgradeJewel } from '../../../../../common/jewelUpgrade';
 import {
   equipDestination,
@@ -248,7 +251,7 @@ type HoverInfo = { item: Item; slot: number; x: number; y: number };
 /** V stays a second inventory key unless the user binds it elsewhere. */
 const ALT_HOT_KEY = 'KeyV';
 
-const ITEM_HOT_KEYS = ['KeyQ', 'KeyW', 'KeyE', 'KeyR'];
+const ITEM_HOT_KEYS = ITEM_HOTKEY_CODES;
 
 export const Inventory = observer(() => {
   const playerData = Store.playerData;

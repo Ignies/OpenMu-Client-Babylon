@@ -41,6 +41,7 @@ import { SessionStats } from '../../../../../common/sessionStats';
 import { devQuery } from '../../../../../common/devSeams';
 import { itemBaseName } from '../../../../../common/itemsDatabase';
 import {
+  ITEM_HOTKEY_CODES,
   canRegisterItemHotkey,
   countHotkeyItems,
   findHotkeyItem,
@@ -179,7 +180,7 @@ const ConsumableItem = observer(({ index, hotKey }: { index: number; hotKey: str
   );
 });
 
-const HOTKEY_CODES = ['KeyQ', 'KeyW', 'KeyE', 'KeyR'];
+const HOTKEY_CODES = ITEM_HOTKEY_CODES;
 
 const ConsumableItems = () => {
   useEventBus('keyPressed', code => {
