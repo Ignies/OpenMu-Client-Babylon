@@ -1,9 +1,9 @@
-import { Quaternion } from '../../libs/babylon/exports';
 import { angleLinkMatrix } from '../../common/boneLink';
 import { devQuery, devQueryNumbers } from '../../common/devSeams';
 import { instrumentById, isInstrumentId } from '../../common/instruments';
 import { loadGLTF } from '../../common/modelLoader';
 import { ModelObject } from '../../common/modelObject';
+import type { PlayerAction } from '../../common/objects/enum';
 import { isStandingIdle } from '../../common/playerActionMapper';
 import type { PlayerObject } from '../../common/playerObject';
 import {
@@ -11,6 +11,7 @@ import {
   refused,
   takenOut,
 } from '../../common/band';
+import { instrumentClip } from '../../common/band/instrumentClip';
 import { startPerforming, stopPerforming } from '../../common/band/performing';
 import { audioNow, dropPerformer, setPerformerPosition } from '../../sound/instruments';
 import { playUiSound } from '../../libs/sfx';
@@ -18,41 +19,36 @@ import type { Entity, ISystemFactory } from '../world';
 
 /**
  * Performers: the hero with an instrument out, and every player in scope the
- * proxy says is playing. Holds the row's clip on them, hangs the model on
- * the hand bone, twitches a bone on every note, and ends the performance
- * the moment they step, get hit into another clip, or die.
+ * proxy says is playing. Gives them the row's pose - a few frames copied out
+ * of an emote, looped (`band/instrumentClip.ts`) - hangs the model on the
+ * hand bone, and ends the performance the moment they step, get hit into
+ * another clip, or die.
  *
  * Before `AnimationSystem`, like `EmoteSystem`: it writes
- * `playerAnimation.action`, and the animation pass reads it after. The
- * twitch is applied on `scene.onAfterAnimationsObservable` instead, because
- * Babylon evaluates the clips inside `scene.render()` and would overwrite a
- * bone written here (the head-tracking precedent).
+ * `playerAnimation.action`, and the animation pass plays it like any clip.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Seconds one hit's twitch lasts. */
-const TWITCH_SECONDS = 0.08;
+/** Play rate of the copied clip: a slow sway, not the dance. */
+const CLIP_SPEED = 0.25;
 
-const DEG = Math.PI / 180;
-
-/** Dev seams: `?instRot=x,y,z` / `?instOff=x,y,z` (BMD deg / cm) and `?twitchAxis=x,y,z`. */
+/** Dev seams: `?instRot=x,y,z` / `?instOff=x,y,z` (BMD deg / cm). */
 const rotDev = devQueryNumbers('instRot', 3);
 const offDev = devQueryNumbers('instOff', 3);
-const twitchAxisDev = devQueryNumbers('twitchAxis', 3);
 /** `?band=<id>`: the offline scene takes the instrument out by itself. */
 const bandDev = devQuery('band');
 
 // ---- 2. the system ---------------------------------------------------------
 
-const tmpQ = new Quaternion();
-
 /** A live-tuned link (dev only), used for the hero's next attach. */
 let linkOverride: { angle: [number, number, number]; offset: [number, number, number] } | null = null;
 
+/** A live-tuned frame window (dev only) for the hero's clip. */
+let poseOverride: { from: number; to: number } | null = null;
+
 export const BandSystem: ISystemFactory = world => {
   const performers = world.with('performing', 'modelObject', 'transform', 'playerAnimation');
-  let observed = false;
 
   function keyOf(e: Entity): string {
     return e.performing?.local ? 'hero' : `net:${e.netId ?? -1}`;
@@ -110,20 +106,20 @@ export const BandSystem: ISystemFactory = world => {
     dropPerformer(keyOf(e));
   });
 
-  function applyTwitch(): void {
-    for (const e of performers) {
-      const p = e.performing;
-      if (p.twitch <= 0) continue;
-      const def = instrumentById(p.instrument);
-      const bone = e.modelObject.gltf?.skeleton?.bones[def.twitch.bone + 1];
-      const node = bone?.getTransformNode();
-      if (!node?.rotationQuaternion) continue;
-      const t = 1 - p.twitch / TWITCH_SECONDS;
-      const a = Math.sin(Math.PI * t) * def.twitch.degrees * DEG;
-      const [ax, ay, az] = twitchAxisDev ?? def.twitch.axis;
-      Quaternion.FromEulerAnglesToRef(ax * a, ay * a, az * a, tmpQ);
-      node.rotationQuaternion.multiplyInPlace(tmpQ);
-    }
+  /** The copied clip for this performer's model, made on first use; -1 until the model is in. */
+  function ensureClip(e: Entity): number {
+    const p = e.performing;
+    const model = e.modelObject;
+    if (!p || !model?.gltf) return -1;
+    // A reloaded rig has no copy yet: its table ends where the source's did.
+    if (p.clip >= 0 && model.gltf.animationGroups[p.clip]) return p.clip;
+    const def = instrumentById(p.instrument);
+    const window = p.local && poseOverride ? poseOverride : def.pose;
+    const clip = instrumentClip(model, p.source, window.from, window.to);
+    if (clip === null) return -1;
+    model.setActionSpeed(clip, CLIP_SPEED);
+    p.clip = clip;
+    return clip;
   }
 
   function handleRequest(): void {
@@ -157,13 +153,12 @@ export const BandSystem: ISystemFactory = world => {
 
   let devTakeOut = bandDev && isInstrumentId(bandDev) ? bandDev : null;
 
-  // Dev hook for tuning a row's link live: `__bandLink([90,0,0], [0,-8,-25])`
-  // rebuilds the hero's instrument on the bone with that angle and offset.
+  // Dev hooks for tuning a row live: `__bandLink([ax,ay,az],[ox,oy,oz])`
+  // rebuilds the hero's instrument on the bone with that link;
+  // `__bandPose(from, to)` recuts the hero's clip from that window (0..1).
   if (import.meta.env.DEV && typeof window !== 'undefined') {
-    (window as unknown as { __bandLink: unknown }).__bandLink = (
-      angle: [number, number, number],
-      offset: [number, number, number]
-    ) => {
+    const w = window as unknown as { __bandLink: unknown; __bandPose: unknown };
+    w.__bandLink = (angle: [number, number, number], offset: [number, number, number]) => {
       const hero = world.playerEntity;
       const p = hero?.performing;
       if (!hero || !p) return false;
@@ -172,15 +167,18 @@ export const BandSystem: ISystemFactory = world => {
       p.model = null;
       return true;
     };
+    w.__bandPose = (from: number, to: number) => {
+      const hero = world.playerEntity;
+      const p = hero?.performing;
+      if (!hero || !p) return false;
+      poseOverride = { from, to };
+      p.clip = -1;
+      return true;
+    };
   }
 
   return {
     update: dt => {
-      if (!observed) {
-        observed = true;
-        world.scene.onAfterAnimationsObservable.add(applyTwitch);
-      }
-
       if (devTakeOut && world.playerEntity?.modelObject?.gltf) {
         world.bandRequest = { kind: 'takeOut', instrument: devTakeOut };
         devTakeOut = null;
@@ -193,8 +191,13 @@ export const BandSystem: ISystemFactory = world => {
         const p = e.performing;
         const velocity = e.movement?.velocity;
         const moving = !!velocity && (velocity.x !== 0 || velocity.y !== 0);
+        const fresh = p.clip < 0;
+        const clip = ensureClip(e);
+        // The clip is taken the frame it is cut, so the takeover check below
+        // never sees the idle it replaces.
+        if (fresh && clip >= 0) e.playerAnimation.action = clip as PlayerAction;
 
-        if (moving || e.dying || (p.local && e.playerAnimation.action !== p.clip)) {
+        if (moving || e.dying || (p.local && clip >= 0 && e.playerAnimation.action !== clip)) {
           // A step, death, or - for the hero - an attack or skill that took
           // the clip: the performance is over. A remote performer's clip is
           // ours to hold; their own client sends the stop.
@@ -203,14 +206,11 @@ export const BandSystem: ISystemFactory = world => {
           continue;
         }
 
-        e.playerAnimation.action = p.clip;
+        if (clip >= 0) e.playerAnimation.action = clip as PlayerAction;
 
-        p.twitch = Math.max(0, p.twitch - dt);
+        // Hits are queued for a future per-note motion; the pose itself moves.
         const hits = p.hits;
-        while (hits.length && hits[0] <= now + dt) {
-          hits.shift();
-          p.twitch = TWITCH_SECONDS;
-        }
+        while (hits.length && hits[0] <= now + dt) hits.shift();
 
         setPerformerPosition(keyOf(e), e.transform.pos.x, e.transform.pos.z, p.local);
 

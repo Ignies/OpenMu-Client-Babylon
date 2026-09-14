@@ -249,22 +249,31 @@ function buildGuitar(atlas: Atlas): MeshBuilder {
   return m;
 }
 
-/** Flute: one cylinder, the strip wrapped around it; origin at the middle. */
+/**
+ * Flute: one cylinder, the strip wrapped around it; origin at the middle.
+ * Thicker and longer than a real one: a 2 cm tube is a hairline at the
+ * game's distance.
+ */
 function buildFlute(atlas: Atlas): MeshBuilder {
   const m = new MeshBuilder();
-  cylinder(m, -30, 30, 1.4, 14, rectOf(atlas, 'flute'), rectOf(atlas, 'fluteEnd'));
+  cylinder(m, -36, 36, 2.2, 14, rectOf(atlas, 'flute'), rectOf(atlas, 'fluteEnd'));
   return m;
 }
 
-/** Ocarina: an ellipsoid with the top-view crop, a short mouthpiece; origin at the centre. */
+/**
+ * Ocarina: an ellipsoid with the top-view crop, a short mouthpiece; origin
+ * at the centre. Half again as big as a real one, for the same reason as
+ * the flute: at the game's distance a fist-sized thing at the mouth is a
+ * dark dot.
+ */
 function buildOcarina(atlas: Atlas): MeshBuilder {
   const m = new MeshBuilder();
-  ellipsoid(m, 5.5, 3.6, 8, 8, 14, rectOf(atlas, 'ocarina'));
+  ellipsoid(m, 8, 5.2, 11.5, 8, 14, rectOf(atlas, 'ocarina'));
   // mouthpiece off the back end, angled up
   const clay = rectOf(atlas, 'clay');
-  const seg = 8, r = 1.1;
-  const base: V3 = [-1.5, 2.2, -5.5];
-  const tip: V3 = [-3.5, 6.2, -8.5];
+  const seg = 8, r = 1.6;
+  const base: V3 = [-2.2, 3.2, -8];
+  const tip: V3 = [-5, 9, -12.5];
   for (let i = 0; i < seg; i++) {
     const a0 = (i / seg) * Math.PI * 2, a1 = ((i + 1) / seg) * Math.PI * 2;
     const ring = (c: V3, a: number): V3 => [c[0] + Math.cos(a) * r, c[1], c[2] + Math.sin(a) * r];
