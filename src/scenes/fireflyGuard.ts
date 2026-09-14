@@ -175,13 +175,21 @@ export function disposeFireflyGuard(): void {
 export function syncFireflyGuard(
   scene: Scene,
   camera: ArcRotateCamera,
-  want: boolean
+  want: boolean,
+  /** A pass ahead of it was rebuilt this tick: re-attach behind it, no rebuild. */
+  upstreamChanged: boolean
 ): boolean {
   const live = want && guardDev !== 0;
 
   if (runtime && (!live || runtime.scene !== scene)) {
     disposeFireflyGuard();
     if (!live) return true;
+  }
+
+  if (runtime && upstreamChanged) {
+    runtime.camera.detachPostProcess(runtime.pass);
+    runtime.camera.attachPostProcess(runtime.pass);
+    return true;
   }
 
   if (!live || runtime) return false;

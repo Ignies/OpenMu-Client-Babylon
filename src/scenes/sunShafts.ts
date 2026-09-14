@@ -219,7 +219,8 @@ function placeSun(
 /**
  * Built while the map has a sky, no room owns the frame, the option is above
  * zero and there is a G-buffer to read the occluders from. Returns true when
- * the chain changed.
+ * the chain changed. `upstreamChanged` (a pass ahead of it was rebuilt this
+ * tick) re-attaches the pass behind it without rebuilding it.
  */
 export function syncSunShafts(
   scene: Scene,
@@ -231,7 +232,8 @@ export function syncSunShafts(
     readonly sunColor: Rgb | null;
     readonly direction: readonly [number, number, number];
   },
-  post: boolean
+  post: boolean,
+  upstreamChanged: boolean
 ): boolean {
   const slider = Math.max(
     0,
@@ -259,6 +261,12 @@ export function syncSunShafts(
   if (runtime && (!wanted || runtime.scene !== scene || runtime.taps !== taps)) {
     disposeSunShafts();
     if (!wanted) return true;
+  }
+
+  if (runtime && upstreamChanged) {
+    runtime.camera.detachPostProcess(runtime.pass);
+    runtime.camera.attachPostProcess(runtime.pass);
+    return true;
   }
 
   if (!wanted || runtime) return false;

@@ -97,6 +97,8 @@ type Runtime = {
   scene: Scene;
   camera: ArcRotateCamera;
   tier: LightingTier;
+  /** The G-buffer's ratio: the tier's, or 1 while the ink lines read it. */
+  gbufferRatio: number;
   ssao: SSAO2RenderingPipeline;
   mask: RenderTargetTexture;
 };
@@ -369,11 +371,15 @@ function createSsao(
   scene: Scene,
   camera: ArcRotateCamera,
   tier: LightingTier,
-  mask: RenderTargetTexture
+  mask: RenderTargetTexture,
+  gbufferRatio: number
 ): SSAO2RenderingPipeline {
   patchSsaoCombine();
 
-  const gbuffer = scene.enableGeometryBufferRenderer(tier.ssaoRatio);
+  // This call sizes the G-buffer. The pipeline below takes whatever exists
+  // (`enableGeometryBufferRenderer` returns the live renderer at any ratio);
+  // its own `ssaoRatio` sizes its blur targets only.
+  const gbuffer = scene.enableGeometryBufferRenderer(gbufferRatio);
   let normals: Texture | null = null;
 
   if (gbuffer) {
@@ -440,11 +446,19 @@ export function syncAmbientOcclusion(
   scene: Scene,
   camera: ArcRotateCamera,
   tier: LightingTier | null,
-  post: boolean
+  post: boolean,
+  /** The G-buffer's size relative to the backbuffer: the tier's ratio unless a reader needs more. */
+  gbufferRatio: number
 ): boolean {
   const want = tier !== null && post && !ssaoForcedOff();
 
-  if (runtime && (!want || runtime.tier !== tier || runtime.scene !== scene)) {
+  if (
+    runtime &&
+    (!want ||
+      runtime.tier !== tier ||
+      runtime.gbufferRatio !== gbufferRatio ||
+      runtime.scene !== scene)
+  ) {
     disposeAmbientOcclusion();
     if (!want) return true;
   }
@@ -452,9 +466,9 @@ export function syncAmbientOcclusion(
   if (!want || runtime) return false;
 
   const mask = createEffectMask(scene, camera);
-  const ssao = createSsao(scene, camera, tier, mask);
+  const ssao = createSsao(scene, camera, tier, mask, gbufferRatio);
 
-  runtime = { scene, camera, tier, ssao, mask };
+  runtime = { scene, camera, tier, gbufferRatio, ssao, mask };
 
   return true;
 }
