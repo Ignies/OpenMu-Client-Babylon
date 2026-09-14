@@ -201,6 +201,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.renderingStyle': 'Estilo de renderização',
     'options.shadeSteps': 'Níveis de sombra',
     'options.styleStrength': 'Intensidade do estilo',
+    'options.lineStrength': 'Intensidade das linhas',
     'options.lineWidth': 'Espessura das linhas',
     'options.itemEffects': 'Efeitos dos itens',
     'options.sharpness': 'Nitidez',

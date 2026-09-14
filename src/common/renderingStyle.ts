@@ -13,11 +13,13 @@ import type { TextKey } from '../i18n';
  * exists and the frame is untouched.
  *
  * `styleStrength` (1..9) is the dial on how far the Anime style goes:
- * darker lines, flatter textures, a stronger rim. `lineWidth` (1..5) is
- * the ink lines' width in texels, on its own.
+ * flatter textures, a stronger rim. The ink lines have two sliders of
+ * their own, `lineStrength` (1..9, how dark) and `lineWidth` (1..5
+ * texels).
  *
  * Dev seams: `?style=` replaces the option, `?strength=` the dial,
- * `?lineWidth=` the width, `?shadeSteps=` the band count, `?toonSoft=` the band edge width in
+ * `?lineStrength=` the darkness, `?lineWidth=` the width,
+ * `?shadeSteps=` the band count, `?toonSoft=` the band edge width in
  * pixels, `?toonRim=strength,edge`, `?toonTex=bias,levels`,
  * `?toonGrass=darkness,start`.
  */
@@ -52,6 +54,11 @@ export const STYLE_STRENGTH_MIN = 1;
 export const STYLE_STRENGTH_MAX = 9;
 export const LINE_WIDTH_MIN = 1;
 export const LINE_WIDTH_MAX = 5;
+export const LINE_STRENGTH_MIN = 1;
+export const LINE_STRENGTH_MAX = 9;
+
+/** Ink darkness per step of the line strength: 0.2 at the bottom, black at the top. */
+const INK_DARKNESS_STEP = 0.1;
 
 /** Band edge width in screen pixels (fwidth units); 0 is a hard edge. */
 const TOON_EDGE_SOFTNESS = 1;
@@ -65,6 +72,7 @@ const GRASS_INK_START = 0.45;
 const styleDev = devQueryNumber('style');
 const strengthDev = devQueryNumber('strength');
 const widthDev = devQueryNumber('lineWidth');
+const lineStrengthDev = devQueryNumber('lineStrength');
 const stepsDev = devQueryNumber('shadeSteps');
 const softDev = devQueryNumber('toonSoft');
 const rimDev = devQueryNumbers('toonRim', 2);
@@ -112,6 +120,15 @@ export function lineWidth(): number {
     Math.round(widthDev ?? GameOptions.lineWidth),
     LINE_WIDTH_MIN,
     LINE_WIDTH_MAX
+  );
+}
+
+/** The ink lines' darkness as stored, 1..9. */
+export function lineStrength(): number {
+  return clamp(
+    Math.round(lineStrengthDev ?? GameOptions.lineStrength),
+    LINE_STRENGTH_MIN,
+    LINE_STRENGTH_MAX
   );
 }
 
@@ -163,7 +180,7 @@ export function syncRenderingStyle(): void {
   toon.soft = softDev ?? TOON_EDGE_SOFTNESS;
   toon.rim = rimDev?.[0] ?? (style?.rim ?? 0) * (0.5 + t);
   toon.rimEdge = rimDev?.[1] ?? TOON_RIM_EDGE;
-  toon.inkDarkness = 0.3 + 0.6 * t;
+  toon.inkDarkness = (lineStrength() + 1) * INK_DARKNESS_STEP;
   toon.inkWidth = lineWidth();
   toon.texBias = texDev?.[0] ?? 0.5 + 1.5 * t;
   toon.texLevels = texDev?.[1] ?? Math.round(9 - 4 * t);
@@ -184,7 +201,7 @@ export function toonFlatActive(): boolean {
   return toon.flat;
 }
 
-/** How dark the ink lines are, 0..1, from the dial. */
+/** How dark the ink lines are, 0..1, from its slider. */
 export function inkDarkness(): number {
   return toon.inkDarkness;
 }

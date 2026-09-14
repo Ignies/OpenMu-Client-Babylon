@@ -195,6 +195,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.renderingStyle': '描画スタイル',
     'options.shadeSteps': '陰影の段階',
     'options.styleStrength': 'スタイルの強さ',
+    'options.lineStrength': '線の濃さ',
     'options.lineWidth': '線の太さ',
     'options.itemEffects': 'アイテムエフェクト',
     'options.sharpness': 'シャープネス',

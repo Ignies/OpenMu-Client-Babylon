@@ -55,6 +55,8 @@ import {
   MATERIAL_QUALITY_MAX,
 } from '../../../common/materialQuality';
 import {
+  LINE_STRENGTH_MAX,
+  LINE_STRENGTH_MIN,
   LINE_WIDTH_MAX,
   LINE_WIDTH_MIN,
   RENDERING_STYLE_LABEL_KEYS,
@@ -213,6 +215,7 @@ type SliderRow = {
     | 'shadeSteps'
     | 'styleStrength'
     | 'lineWidth'
+    | 'lineStrength'
     | 'sharpness'
     | 'filmGrain'
     | 'bloom'
@@ -630,6 +633,16 @@ const TABS: Tab[] = [
                   labelKey: 'options.styleStrength',
                   min: STYLE_STRENGTH_MIN,
                   max: STYLE_STRENGTH_MAX,
+                  needsTier: true,
+                  needsStyle: 'outline',
+                  display: v => v,
+                }),
+                slider({
+                  key: 'lineStrength',
+                  textId: -1,
+                  labelKey: 'options.lineStrength',
+                  min: LINE_STRENGTH_MIN,
+                  max: LINE_STRENGTH_MAX,
                   needsTier: true,
                   needsStyle: 'outline',
                   display: v => v,

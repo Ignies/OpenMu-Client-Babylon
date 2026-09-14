@@ -194,6 +194,7 @@ export const frenchLayer: LanguageLayer = {
     'options.renderingStyle': 'Style de rendu',
     'options.shadeSteps': "Paliers d'ombrage",
     'options.styleStrength': 'Intensité du style',
+    'options.lineStrength': 'Intensité des lignes',
     'options.lineWidth': 'Épaisseur des lignes',
     'options.itemEffects': 'Effets d’objets',
     'options.sharpness': 'Netteté',
