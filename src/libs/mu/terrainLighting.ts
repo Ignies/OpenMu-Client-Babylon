@@ -24,6 +24,12 @@ import {
   terrainCsmDefines,
   terrainCsmGlsl,
 } from '../../scenes/shadows';
+import {
+  TOON_FILTER_UNIFORM,
+  bindToonFilter,
+  toonFunctionsGlsl,
+  toonTerrainDefines,
+} from '../../common/renderingStyle';
 
 /**
  * How the ground is lit, in one place.
@@ -79,6 +85,7 @@ export const TERRAIN_LIGHT_UNIFORMS = [
   'groundLightPos',
   'groundLightCol',
   LIGHT_TINT_UNIFORM,
+  TOON_FILTER_UNIFORM,
   ...TERRAIN_CSM_UNIFORMS,
 ] as const;
 
@@ -99,8 +106,9 @@ export function terrainLightSamplers(clouds: boolean): string[] {
 
 export const TERRAIN_CSM_SAMPLERS = ['csmShadowMap', 'csmShadowMapF'];
 
+/** The cascades' defines and the style's; `shadows.ts` recompiles on the same pair. */
 export function terrainLightDefines(): string[] {
-  return terrainCsmDefines();
+  return [...terrainCsmDefines(), ...toonTerrainDefines()];
 }
 
 /** Uniform declarations, the tint helper, the cloud field and `csmShadow`. */
@@ -118,11 +126,13 @@ export function terrainLightDeclarationsGlsl(clouds: boolean): string {
   // floor gain, the fade and the dynamic gain.
   uniform vec4 groundLightPos[${GROUND_POINT_LIGHTS}];
   uniform vec4 groundLightCol[${GROUND_POINT_LIGHTS}];
+  uniform vec4 ${TOON_FILTER_UNIFORM}; // x mip bias, y tone levels, z grass ink, w its start along the blade
 
   const float GROUND_CEIL_KNEE = ${GROUND_CEIL_KNEE.toFixed(3)};
   const float GROUND_CEIL_ROOM = ${(GROUND_CEIL_ASYMPTOTE - GROUND_CEIL_KNEE).toFixed(3)};
 
 ${lightTintGlsl()}
+${toonFunctionsGlsl()}
 ${clouds ? cloudFieldGlsl() : ''}
 
   ${terrainCsmGlsl()}
@@ -261,6 +271,7 @@ export function bindTerrainLight(
     look?.key.roomShare ?? 1
   );
   effect.setFloat(LIGHT_TINT_UNIFORM, lightTintStrength());
+  bindToonFilter(effect);
 
   if (clouds) {
     bindClouds(effect, scene, {

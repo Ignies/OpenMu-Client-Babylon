@@ -806,6 +806,13 @@ ${
       : 0.0;
     f = mix(f, dot(f, ${LUMA_GLSL}) * (extraLit / max(dynLuma, 1e-4)), through);
 
+    // The Anime style's ink on the blade: at the tip, gone at the root
+    // (renderingStyle.ts). A blade is too thin on screen for a line around
+    // it, so the tip itself is the line.
+  #ifdef MU_TOON_FLAT
+    f *= 1.0 - muToonFilter.z * smoothstep(muToonFilter.w, 1.0, vV);
+  #endif
+
     f = mix(f, pow(max(f, vec3(0.0)), vec3(2.2)), linearOut);
 
     // The blade being eaten, from the tip down.

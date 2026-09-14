@@ -156,7 +156,9 @@ export function disposeToneMap(): void {
 /**
  * Live while the map is shaped, post is on and the viewer picked this curve
  * (`toneMapper` 1). Returns true when the chain changed, like the haze:
- * the post chain has to be re-attached behind a new pass.
+ * the post chain has to be re-attached behind a new pass. `upstreamChanged`
+ * (a pass ahead of it was rebuilt this tick) re-attaches the pass behind it
+ * without rebuilding it.
  *
  * Dev seams: `?tone=0` forces it off, `?gt=shoulder,mid,toeGamma,toeKnee`
  * replaces the curve, `?desat=start,amount` the highlight roll to white.
@@ -165,7 +167,8 @@ export function syncToneMap(
   scene: Scene,
   camera: ArcRotateCamera,
   want: boolean,
-  brightness: number
+  brightness: number,
+  upstreamChanged: boolean
 ): boolean {
   exposure = brightness;
 
@@ -174,6 +177,12 @@ export function syncToneMap(
   if (runtime && (!live || runtime.scene !== scene)) {
     disposeToneMap();
     if (!live) return true;
+  }
+
+  if (runtime && upstreamChanged) {
+    runtime.camera.detachPostProcess(runtime.pass);
+    runtime.camera.attachPostProcess(runtime.pass);
+    return true;
   }
 
   if (!live || runtime) return false;

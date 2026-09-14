@@ -336,7 +336,9 @@ export function syncHeightFog(
   colorLinear: Rgb,
   post: boolean,
   /** The map's underworld fog, or null - see `LookProfile.underworld`. */
-  underworld: Underworld | null
+  underworld: Underworld | null,
+  /** A pass ahead of it was rebuilt this tick: re-attach behind it, no rebuild. */
+  upstreamChanged: boolean
 ): boolean {
   // Dev seam: `?haze=<density>` replaces the profile's density (0 = no pass).
   const density = hazeDev ?? fog.density;
@@ -368,6 +370,12 @@ export function syncHeightFog(
   if (runtime && (!want || runtime.scene !== scene)) {
     disposeHeightFog();
     if (!want) return true;
+  }
+
+  if (runtime && upstreamChanged) {
+    runtime.camera.detachPostProcess(runtime.fog);
+    runtime.camera.attachPostProcess(runtime.fog);
+    return true;
   }
 
   if (!want || runtime) return false;

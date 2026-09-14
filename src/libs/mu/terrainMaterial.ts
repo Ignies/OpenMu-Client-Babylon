@@ -119,6 +119,18 @@ function textureArrayGlsl(layers: number): string {
   if (index1 == ${WATER_LAYER}) uv1 += vec2(WaterMove, GrassWind);
   if (index2 == ${WATER_LAYER}) uv2 += vec2(WaterMove, GrassWind);
 
+  // Flat tones read the art with a mip bias, so the grain of a texel never
+  // makes it to the levels (renderingStyle.ts).
+  #ifdef MU_TOON_FLAT
+  if (valid1) {
+      opaqueColor = texture2D(tileTextures, vec3(uv1, float(index1)), muToonFilter.x).rgb;
+  }
+
+  if (valid2) {
+      alphaColor = texture2D(tileTextures, vec3(uv2, float(index2)), muToonFilter.x).rgb;
+      alphaRendered = true;
+  }
+  #else
   if (valid1) {
       opaqueColor = texture2D(tileTextures, vec3(uv1, float(index1))).rgb;
   }
@@ -127,6 +139,7 @@ function textureArrayGlsl(layers: number): string {
       alphaColor = texture2D(tileTextures, vec3(uv2, float(index2))).rgb;
       alphaRendered = true;
   }
+  #endif
   `;
 }
 
@@ -289,7 +302,20 @@ ${cutout === null ? '' : cutoutGlsl(cutout)}
     // its level and only gains a grain to hold the eye at close range. Packed
     // path only, like the cloud field - the per-tile fallback has no sampler
     // unit left to spend.
-${tileArray ? `    ${FINAL_COLOR_VAR_NAME}.rgb *= muGroundGrain(vWorldXZ, vViewZ);` : ''}
+${
+  tileArray
+    ? `
+  #ifndef MU_TOON_FLAT
+    ${FINAL_COLOR_VAR_NAME}.rgb *= muGroundGrain(vWorldXZ, vViewZ);
+  #endif`
+    : ''
+}
+
+    // Flat tones on the ground's art, before any light touches it, like the
+    // models' (renderingStyle.ts). The grain above has no place in them.
+  #ifdef MU_TOON_FLAT
+    ${FINAL_COLOR_VAR_NAME}.rgb = muToonFlat(${FINAL_COLOR_VAR_NAME}.rgb, muToonFilter.y);
+  #endif
 
 ${terrainSkyLightGlsl()}
 

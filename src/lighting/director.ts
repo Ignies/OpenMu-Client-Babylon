@@ -6,6 +6,11 @@ import {
 import { ENUM_WORLD } from '../common/types';
 import { GameOptions } from '../common/gameOptions';
 import { lightingTier, tierIndex } from '../common/lightingQuality';
+import {
+  renderingStyle,
+  styleIndex,
+  syncRenderingStyle,
+} from '../common/renderingStyle';
 import { linearBufferActive } from '../common/lightModel';
 import {
   directLightGain,
@@ -45,8 +50,9 @@ import {
 } from './shadowPolicy';
 import { syncSkyDome } from './skyDome';
 import { syncSkyline } from './horizon';
-import { syncShadows } from '../scenes/shadows';
+import { syncShadows, syncTerrainDefines } from '../scenes/shadows';
 import { syncAmbientOcclusion } from '../scenes/ambientOcclusion';
+import { syncInkOutline, inkOutlineLive } from '../scenes/inkOutline';
 import { syncHeightFog, updateHeightFog } from '../scenes/heightFog';
 import { syncRoomMask } from '../scenes/roomMask';
 import { syncToneMap } from '../scenes/toneMap';
@@ -138,6 +144,8 @@ export type LookState = {
   /** The frame's effective level, `keyGain x post exposure`. */
   readonly exposure: number;
   readonly toneMapper: ToneMapperName;
+  /** The rendering style in force: 0 Classic (and every style on tier 0), 1 cel, 2 anime. */
+  readonly style: number;
   readonly fogColorLinear: Rgb;
   /** Names of the live post passes, chain order. */
   readonly passes: readonly string[];
@@ -261,6 +269,9 @@ export function createLookDirector(
   };
 
   const tick = (dt: number): void => {
+    // The snapshot the item materials bind this frame.
+    syncRenderingStyle();
+
     const omenTo = omen ? 1 : 0;
 
     if (omenBlend !== omenTo) {
@@ -290,6 +301,15 @@ export function createLookDirector(
     const shaped = lightTier !== null;
     const post = GameOptions.postProcessing;
     const room = shaped ? area : null;
+
+    // The style lives on tiers >= 1 only; null below them. The ink lines are
+    // one pixel wide and read the G-buffer, so it runs at full resolution
+    // while they are on and at the tier's ratio otherwise.
+    const style = renderingStyle();
+    const inkWanted = style !== null && style.outline && post;
+    const gbufferRatio = lightTier
+      ? Math.max(lightTier.ssaoRatio, inkWanted ? 1 : 0)
+      : 1;
 
     const profile: LookProfile = {
       ...target,
@@ -338,6 +358,9 @@ export function createLookDirector(
 
     // 3. shadows (CSM + terrain hook + the blobs' re-park)
     syncShadows(scene, lightTier, shadow);
+    // The ground and the grass take the style's defines the way they take
+    // the cascades'.
+    syncTerrainDefines();
 
     // 4. sky. The map's own horizon, not the area's: a tavern has no sky of
     // its own but the doorway still shows the one outside - unless the room
@@ -356,7 +379,19 @@ export function createLookDirector(
     const fogSource = profile.fog.color ?? base.sky?.horizon ?? null;
     const fogColorLinear: Rgb = fogSource ? toLinear(fogSource) : [0, 0, 0];
 
-    let reordered = syncAmbientOcclusion(scene, camera, lightTier, post);
+    let reordered = syncAmbientOcclusion(
+      scene,
+      camera,
+      lightTier,
+      post,
+      gbufferRatio
+    );
+
+    // The ink lines: after the AO, before the haze so they fade with it.
+    reordered =
+      syncInkOutline(scene, camera, lightTier, tier, style, post, reordered) ||
+      reordered;
+
     reordered =
       syncHeightFog(
         scene,
@@ -366,7 +401,8 @@ export function createLookDirector(
         post,
         // The map's own, not the area's: a room owns the frame and shows
         // nothing past its walls, and a room has no holes in its floor.
-        shaped && !room ? base.underworld ?? null : null
+        shaped && !room ? base.underworld ?? null : null,
+        reordered
       ) ||
       reordered;
     updateHeightFog(camera, dt);
@@ -392,7 +428,8 @@ export function createLookDirector(
             : null,
           direction: shadow.direction,
         },
-        post
+        post,
+        reordered
       ) || reordered;
 
     // 6. post: the viewer's brightness only; the map's level is in the key.
@@ -406,7 +443,13 @@ export function createLookDirector(
     // The MU curve is what `toneMapper` 1 selects; it is the last scene-light
     // pass, so it runs after the haze and the mask and before the chain.
     reordered =
-      syncToneMap(scene, camera, toneMapperIndex === 1, postExposure) || reordered;
+      syncToneMap(
+        scene,
+        camera,
+        toneMapperIndex === 1,
+        postExposure,
+        reordered
+      ) || reordered;
 
     // Bloom reads whatever the buffer holds, so a single aliased fragment can
     // be drawn as a pool of light. The guard bounds a pixel against its
@@ -416,7 +459,8 @@ export function createLookDirector(
       syncFireflyGuard(
         scene,
         camera,
-        shaped && post && GameOptions.bloom > 0 && toneMapperIndex !== 1
+        shaped && post && GameOptions.bloom > 0 && toneMapperIndex !== 1,
+        reordered
       ) || reordered;
 
     if (reordered) postChain.moveToEnd();
@@ -431,6 +475,7 @@ export function createLookDirector(
     // 7. publish
     const passes = [
       ...(shaped && post ? ['ssao'] : []),
+      ...(inkOutlineLive() ? ['ink'] : []),
       ...(shaped && post && profile.fog.density > 0 ? ['haze'] : []),
       ...(roomMask.live ? ['roomMask'] : []),
       ...(sunShaftsLive() ? ['sunShafts'] : []),
@@ -460,6 +505,7 @@ export function createLookDirector(
       keyGain,
       exposure: keyGain * postExposure,
       toneMapper: TONE_MAPPER_NAMES[toneMapperIndex],
+      style: style ? styleIndex() : 0,
       fogColorLinear,
       passes,
     };
@@ -473,6 +519,7 @@ export function createLookDirector(
       roomShare.toFixed(3),
       shadow.casters,
       toneMapperIndex,
+      style ? styleIndex() : 0,
       profile.whiteBalance.map(v => v.toFixed(3)).join(),
       profile.fog.density.toFixed(4),
       passes.join(),

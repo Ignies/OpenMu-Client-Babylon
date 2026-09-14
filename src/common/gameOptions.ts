@@ -57,6 +57,20 @@ export type GameOptions = {
    * world. See `materialQuality.ts`.
    */
   materialQuality: number;
+  /**
+   * 0 Classic (the frame as it is) / 1 Cel-shaded (stepped sun on the
+   * models) / 2 Anime (the bands plus ink lines and a rim). A taste, not a
+   * tier: it lives on lighting tiers >= 1 and Classic's frame never changes.
+   * See `renderingStyle.ts`.
+   */
+  renderingStyle: number;
+  /** Bands in the cel ramp, 2..4; unread while no style has a ramp. */
+  shadeSteps: number;
+  /**
+   * How far the Anime style goes, 1..9: the ink lines' darkness and width,
+   * the flatness of the textures, the rim. Unread by the other styles.
+   */
+  styleStrength: number;
   /** Master sound level, 0..9, the original's one slider. */
   volume: number;
   /**
@@ -325,6 +339,11 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   itemEffects: [0, 3],
   lightingQuality: [0, 2],
   materialQuality: [0, 2],
+  // Literal rather than the renderingStyle.ts constants: it imports this
+  // module, so naming them here would close an import cycle.
+  renderingStyle: [0, 2],
+  shadeSteps: [2, 4],
+  styleStrength: [1, 9],
   // Literal rather than `MATERIAL_DETAIL_MAX`: materialQuality.ts imports
   // this module, so naming it here would close an import cycle.
   materialDetail: [0, 9],
@@ -364,6 +383,9 @@ const DEFAULTS: GameOptions = {
   lightingQuality: 1,
   materialQuality: 1,
   materialDetail: 6,
+  renderingStyle: 0,
+  shadeSteps: 3,
+  styleStrength: 5,
   volume: 5,
   musicVolume: 10,
   effectsVolume: 10,
