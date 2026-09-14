@@ -205,6 +205,8 @@ export const HeadTrackingSystem: ISystemFactory = world => {
             !moving &&
             isIdleStandAction(action) &&
             !blocksBodyTurn(action) &&
+            // Mid-performance the pose is the band system's; a Stand1 here would end it.
+            !e.performing &&
             !e.dying &&
             !world.attackTarget
           ) {

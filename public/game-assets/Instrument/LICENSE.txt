@@ -1,0 +1,9 @@
+Instrument samples for the band system.
+
+Source: MusyngKite General MIDI soundfont, as rendered per note by
+gleitz/midi-js-soundfonts (https://github.com/gleitz/midi-js-soundfonts,
+gh-pages branch). MusyngKite is released under the Creative Commons
+Attribution-ShareAlike 3.0 license (CC BY-SA 3.0,
+https://creativecommons.org/licenses/by-sa/3.0/). The files in this folder
+are those renders, re-encoded only where the source offered no OGG; they
+stay under the same license.

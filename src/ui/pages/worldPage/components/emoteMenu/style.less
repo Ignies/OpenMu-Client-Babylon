@@ -54,6 +54,23 @@
       font-size: 12px;
     }
 
+    // Instrument ring: the outermost, shallow, three short words.
+    &.instrument text {
+      font-size: 12px;
+    }
+
+    // The instrument in hand: the wedge that puts it away.
+    &.held path {
+      fill: url(#emote-plate-hot);
+      stroke: rgba(255, 230, 168, 0.8);
+    }
+
+    // Online without the proxy's relay: nothing to take out.
+    &.unavailable {
+      opacity: 0.4;
+      cursor: default;
+    }
+
     // Emoji ring: the glyph is drawn by a colour emoji font, so the black
     // outline the lettering uses would trace a box around it.
     &.emoji text {

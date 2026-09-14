@@ -1,0 +1,177 @@
+@import (reference) '../../../../components/muText/style.less';
+// The Instrument window: the move-command window's black plate, a column of
+// rows inside it, a red close bar along the bottom.
+// Off to the side, under the minimap: the performer stays in view.
+.instrument-window {
+  position: absolute;
+  right: 200px;
+  top: 8px;
+  transform-origin: top left;
+  pointer-events: auto;
+  user-select: none;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(232, 200, 119, 0.35);
+  font-size: 11px;
+  color: #e2e2e2;
+  .mu-font();
+
+  .band-title {
+    position: absolute;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+    transform: translateX(-50%);
+  }
+
+  .band-body {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    top: 26px;
+    bottom: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .band-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 20px;
+  }
+
+  .band-bottom {
+    margin-top: auto;
+  }
+
+  .band-btn {
+    .mu-font();
+    font-size: 11px;
+    color: #e2e2e2;
+    background: rgba(40, 32, 20, 0.9);
+    border: 1px solid rgba(232, 200, 119, 0.5);
+    padding: 2px 8px;
+    cursor: pointer;
+    text-shadow: 1px 1px 0 #000;
+
+    &:hover:not(:disabled) {
+      background: rgba(90, 70, 30, 0.9);
+      color: #fff;
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+  }
+
+  .band-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+  }
+
+  .band-file {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #cfcfcf;
+  }
+
+  .band-progress {
+    position: relative;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(232, 200, 119, 0.3);
+
+    .band-progress-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      background: rgba(232, 200, 119, 0.45);
+    }
+
+    span {
+      position: absolute;
+      inset: 0;
+      text-align: center;
+      font-size: 9px;
+      line-height: 12px;
+    }
+  }
+
+  .band-section {
+    color: #ffcc1a;
+    border-bottom: 1px solid rgba(232, 200, 119, 0.3);
+    padding-bottom: 1px;
+    margin-top: 2px;
+  }
+
+  .band-channels {
+    max-height: 120px;
+    overflow-y: auto;
+  }
+
+  .band-channel {
+    display: grid;
+    grid-template-columns: 22px 1fr 36px 70px;
+    gap: 4px;
+    line-height: 16px;
+
+    &.silent {
+      opacity: 0.45;
+    }
+
+    .band-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .band-notes {
+      text-align: right;
+      color: #bdbdbd;
+    }
+
+    .band-owner {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #ffe6a8;
+    }
+  }
+
+  .band-box {
+    min-height: 40px;
+    max-height: 90px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .band-note {
+    color: #bdbdbd;
+  }
+
+  .band-error {
+    color: #ff7a7a;
+  }
+
+  // The red(0.6) close bar the original's list windows end with.
+  .band-close {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 18px;
+    background: rgba(153, 0, 0, 0.6);
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(190, 0, 0, 0.7);
+    }
+  }
+}

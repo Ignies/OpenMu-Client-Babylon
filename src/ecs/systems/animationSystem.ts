@@ -293,6 +293,8 @@ export const AnimationSystem: ISystemFactory = world => {
           !chaosCastle &&
           (inSafeZone ||
             isSocialAction(playerAnimation.action) ||
+            // An instrument takes both hands; the weapons wait on the back.
+            !!entity.performing ||
             playerAnimation.action === PlayerAction.PLAYER_WALK_SWIM ||
             playerAnimation.action === PlayerAction.PLAYER_RUN_SWIM);
         if (attributeSystem.isAboveZero('weaponsOnBack') !== bindBack) {
@@ -313,6 +315,9 @@ export const AnimationSystem: ISystemFactory = world => {
 
         // Dead or about to die: c->Movement = false, no stop/walk re-evaluation.
         if (playerAnimation.action === PlayerAction.PLAYER_DIE1 || entity.dying) continue;
+
+        // Performing: BandSystem holds the pose; nothing to re-evaluate until a step.
+        if (entity.performing && !moving) continue;
 
         if (isOneShotPlayerAction(playerAnimation.action) && !moving) {
           // Hold the one-shot clip until it has played through once, then
@@ -381,6 +386,7 @@ export const AnimationSystem: ISystemFactory = world => {
           ) === BaseClass.RageFighter;
 
         playerObject.AnimationSpeed =
+          entity.performing?.clipSpeed ??
           playerObject.actionPlaySpeed(action) ??
           playerPlaySpeed(
             action,
@@ -389,8 +395,11 @@ export const AnimationSystem: ISystemFactory = world => {
             isRageFighter
           );
 
+        // A performer's clip loops whatever band it sits in: the pose is held
+        // for as long as the instrument is out.
         const oneShot =
-          isOneShotPlayerAction(action) || action === PlayerAction.PLAYER_DIE1;
+          (isOneShotPlayerAction(action) && !entity.performing) ||
+          action === PlayerAction.PLAYER_DIE1;
         playerObject.playAction(action, !oneShot);
 
         // RenderCharacterItem rewrites the weapons' own clip every frame off

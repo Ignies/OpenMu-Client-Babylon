@@ -113,6 +113,10 @@ export type GameOptions = {
   dropVolume: number;
   /** Clicks, windows, pickups, level up, repair, whisper. */
   uiVolume: number;
+  /** Instruments played by players - your own and, when `hearInstruments`, everyone else's. */
+  instrumentsVolume: number;
+  /** Whether other players' instruments sound at all; the visuals stay either way. */
+  hearInstruments: boolean;
   /** Ramp the tracks to silence while the page is hidden, and back. */
   muteInBackground: boolean;
   /**
@@ -355,6 +359,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   stepsVolume: [0, 10],
   dropVolume: [0, 10],
   uiVolume: [0, 10],
+  instrumentsVolume: [0, 10],
   toneMapper: [0, TONE_MAPPER_MAX],
   brightness: [BRIGHTNESS_MIN, BRIGHTNESS_MAX],
   effectLevel: [0, 4],
@@ -423,6 +428,8 @@ const DEFAULTS: GameOptions = {
   stepsVolume: 10,
   dropVolume: 10,
   uiVolume: 10,
+  instrumentsVolume: 10,
+  hearInstruments: true,
   muteInBackground: true,
   dropSoundFilter: false,
   dropSoundJewels: true,

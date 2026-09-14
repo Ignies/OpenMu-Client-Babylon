@@ -50,7 +50,8 @@ export type EventKind =
   | 'npc'
   | 'trade'
   | 'shop'
-  | 'server';
+  | 'server'
+  | 'band';
 
 /** Every kind, in the order a filter row lists them. */
 export const EVENT_KINDS: readonly EventKind[] = [
@@ -85,6 +86,7 @@ export const EVENT_KINDS: readonly EventKind[] = [
   'trade',
   'shop',
   'server',
+  'band',
 ];
 
 /** One thing a character did or had done to it. */

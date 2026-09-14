@@ -292,6 +292,17 @@ export class TrackedSession {
     this.sink.event(this, event);
   }
 
+  /** Whether this player can see `objectId` right now (either id form). */
+  sees(objectId: number): boolean {
+    return this.scope.has(objectId & ID_MASK);
+  }
+
+  /** A journal line another proxy module (the band relay) wants on this character. */
+  note(kind: EventKind, text: string, data?: Record<string, unknown>): void {
+    if (this.closed) return;
+    this.emit(kind, text, data);
+  }
+
   private nameOf(objectId: number): string {
     const id = objectId & ID_MASK;
     if (id === this.objectId) return 'themselves';

@@ -241,7 +241,8 @@ type SliderRow = {
     | 'ambientVolume'
     | 'stepsVolume'
     | 'dropVolume'
-    | 'uiVolume';
+    | 'uiVolume'
+    | 'instrumentsVolume';
   textId: number;
   labelKey: TextKey;
   max: number;
@@ -308,7 +309,8 @@ const busSlider = (
     | 'ambientVolume'
     | 'stepsVolume'
     | 'dropVolume'
-    | 'uiVolume',
+    | 'uiVolume'
+    | 'instrumentsVolume',
   labelKey: TextKey
 ): Row =>
   slider({
@@ -786,6 +788,8 @@ const TABS: Tab[] = [
                 busSlider('monsterVolume', 'options.monsterVolume'),
                 busSlider('ambientVolume', 'options.ambientVolume'),
                 busSlider('stepsVolume', 'options.stepsVolume'),
+                busSlider('instrumentsVolume', 'options.instrumentsVolume'),
+                check('hearInstruments', -1, 'options.hearInstruments'),
               ],
             },
           ],

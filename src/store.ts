@@ -1811,6 +1811,15 @@ export const Store = new (class _Store {
     });
   }
 
+  /**
+   * A band frame (`bandProtocol.ts`) to the ws proxy, which handles it
+   * itself and never forwards it. Same path as every packet, so it gets the
+   * Xor32 the proxy expects and rides the one socket.
+   */
+  sendBandFrame(frame: Uint8Array): void {
+    this.sendToGS(new DataView(frame.buffer, frame.byteOffset, frame.byteLength));
+  }
+
   sendAnimationRequest(rotation: number, animationNumber: number): void {
     const packet = AnimationRequestPacket.createPacket();
     packet.Rotation = rotation;

@@ -1,3 +1,4 @@
+import { installBandNet } from './band/bandNet';
 import { runInAction } from 'mobx';
 import { t, type TextKey } from './i18n';
 import { CharacterClassNumber, ENUM_WORLD } from './common';
@@ -4303,3 +4304,6 @@ setInterval(() => {
 // of this singleton (same guard as store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();
+
+// The band system: the proxy relay listener and the transport the facade sends through.
+installBandNet();

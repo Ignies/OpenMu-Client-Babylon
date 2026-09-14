@@ -1,5 +1,6 @@
 import type { EmoteId } from '../common/emotes';
 import type { EmojiBubbleId } from '../common/emojiBubbles';
+import type { InstrumentId } from '../common/instruments';
 import type { GuildMemberRoleEnum } from '../common/packets/ServerToClientPackets';
 import { type Bucket, type With, World as ECSWorld } from 'miniplex';
 import type { IVector2Like, IVector3Like, Mesh } from '../libs/babylon/exports';
@@ -24,6 +25,10 @@ export type EntityTypeFromQuery<TB extends Bucket<any> = Bucket<any>> =
 
 /** An entity the server named: it has a `netId` and, like every scoped object, a `transform`. */
 export type NetEntity = With<Entity, 'netId' | 'transform'>;
+
+export type BandRequest =
+  | { kind: 'takeOut'; instrument: InstrumentId }
+  | { kind: 'putAway' };
 
 /** A tile's two mapping layers and the blend between them. See `World.getTerrainLayers`. */
 export type TerrainLayers = {
@@ -131,6 +136,23 @@ export type Entity = Partial<{
    */
   propBatch: { type: number; chunk: number };
   objOutOfScope: true;
+  /**
+   * Playing an instrument (the band system): the held pose, the model in the
+   * hand and the hits still to twitch on. `BandSystem` owns it; the facade in
+   * `common/band` adds and removes it through `common/band/performing.ts`.
+   */
+  performing: {
+    instrument: InstrumentId;
+    clip: PlayerAction;
+    clipSpeed: number;
+    /** The hero, whose sound is never attenuated. */
+    local: boolean;
+    /** Seconds left of the hit being shown. */
+    twitch: number;
+    /** Audio times of hits not yet shown, ascending. */
+    hits: number[];
+    model: ModelObject | null;
+  };
   pathfinding: {
     from: IVector2Like;
     to: IVector2Like;
@@ -513,6 +535,9 @@ export class World extends ECSWorld<Entity> {
 
   /** Emoji bubble picked in the radial menu, consumed by EmojiBubbleSystem. */
   emojiRequest: EmojiBubbleId | null = null;
+
+  /** Instrument taken out or put away from the radial menu, consumed by BandSystem next frame. */
+  bandRequest: BandRequest | null = null;
 
   cursorBlocked = false;
 

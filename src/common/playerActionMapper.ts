@@ -47,6 +47,15 @@ export function isPlayerSkillAction(action: PlayerAction): boolean {
   );
 }
 
+/** `SetActionClass` gate: the stop/idle clips, any weapon class. */
+export function isStandingIdle(action: PlayerAction): boolean {
+  return (
+    (action >= PlayerAction.PLAYER_STOP_MALE &&
+      action <= PlayerAction.PLAYER_STOP_RIDE_WEAPON) ||
+    action === PlayerAction.PLAYER_STOP_TWO_HAND_SWORD_TWO
+  );
+}
+
 export function isOneShotPlayerAction(action: PlayerAction): boolean {
   return (
     isPlayerAttackAction(action) ||

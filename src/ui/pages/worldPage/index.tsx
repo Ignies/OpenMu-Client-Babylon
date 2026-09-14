@@ -29,6 +29,7 @@ import { MsgWindow } from '../../components/msgWindow';
 import { PickedItemCursor } from '../../components/pickedItem';
 import { BuffBar } from '../../components/buffBar';
 import { EmoteMenu } from './components/emoteMenu';
+import { InstrumentWindow } from './components/instrumentWindow';
 import { ChatWindow } from './components/chat';
 import { CommandWindow } from './components/commandWindow';
 import { QuickCommandWindow } from './components/quickCommandWindow';
@@ -91,6 +92,7 @@ const HUD = observer(() => {
       <MarketplaceWindow />
       <MoveCommandWindow />
       <EmoteMenu />
+      <InstrumentWindow />
       <ChatWindow />
       <CommandWindow />
       <QuickCommandWindow />

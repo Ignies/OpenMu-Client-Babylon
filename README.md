@@ -55,6 +55,11 @@ bun run proxy      # ws<->tcp bridge, in a second shell
 The proxy is not optional: a browser cannot open a TCP socket, so every packet to OpenMU goes
 through it. Run it next to the client.
 
+The proxy also carries the band system (instruments played live): those frames never reach
+OpenMU, the proxy relays them to the players who can see the performer. `BAND=off` disables
+it, `BAND_MAX_PERFORMERS` (16) and `BAND_MAX_RECEIVERS` (48) cap it, and it needs `TRACK`
+on. It logs a `band: {...}` stats line once a minute when something happened.
+
 **No server, no Docker?** `bun run dev` and open <http://localhost:5173/offline> for the
 single-player offline demo.
 
