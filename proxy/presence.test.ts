@@ -98,6 +98,33 @@ describe('login sniffing', () => {
     connection.close();
   });
 
+  it('names nobody when a second login is in flight as the answer arrives', () => {
+    // The attack: log in as yourself, then send a second login frame with
+    // somebody else's name before the server has answered. The answer to
+    // the first used to land on the latest claim.
+    const connection = new ConnectionPresence();
+    const encryptor = clientEncryptor();
+    const xor32 = new Xor32Encryptor();
+
+    connection.feed(loginFrame(encryptor, xor32, 'attacker'));
+    connection.feed(loginFrame(encryptor, xor32, 'victim'));
+
+    expect(connection.feedFromServer(LOGIN_OKAY)).toBeNull();
+    expect(connection.loginName).toBeNull();
+    expect(lookup('victim').online).toBe(false);
+    expect(lookup('attacker').online).toBe(false);
+    // Not a known nobody either: the gate must refuse rather than guess.
+    expect(connection.unidentified).toBe(true);
+
+    // A later answer, of either kind, changes nothing.
+    expect(connection.feedFromServer(LOGIN_OKAY)).toBeNull();
+    expect(connection.feedFromServer(LOGIN_WRONG_PASSWORD)).toBeNull();
+    expect(connection.loginName).toBeNull();
+    expect(connection.unidentified).toBe(true);
+
+    connection.close();
+  });
+
   it('does not modify the bytes it is handed', () => {
     const connection = new ConnectionPresence();
     const frame = loginFrame(clientEncryptor(), new Xor32Encryptor(), 'copytest');

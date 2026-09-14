@@ -19,9 +19,12 @@ import { GM_MAPS } from '../../../common/gmMaps';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 
-const sources = readdirSync(HERE)
-  .filter(name => /\.tsx?$/.test(name) && !/\.test\.tsx?$/.test(name))
-  .map(name => readFileSync(join(HERE, name), 'utf8'));
+// The tabs live one folder down; a screen moved there must stay covered.
+const sources = [HERE, join(HERE, 'tabs')].flatMap(dir =>
+  readdirSync(dir)
+    .filter(name => /\.tsx?$/.test(name) && !/\.test\.tsx?$/.test(name))
+    .map(name => readFileSync(join(dir, name), 'utf8'))
+);
 
 const referenced = [
   ...new Set(
