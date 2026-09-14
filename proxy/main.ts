@@ -188,17 +188,31 @@ let tracker: Tracker | null = null;
 let journal: Journal | null = null;
 let hub: AdminHub | null = null;
 
+/**
+ * A journal that cannot open (a read-only home, a missing sqlite build) must
+ * never keep the proxy from starting: that would drop every player over a
+ * log file. It falls back to memory and says so.
+ */
+function openJournal(): { journal: Journal; where: string } {
+  if (TRACK_DB_PATH === "memory") return { journal: new MemoryJournal(), where: "in memory" };
+  try {
+    return { journal: new SqliteJournal(TRACK_DB_PATH, TRACK_RETAIN_DAYS), where: TRACK_DB_PATH };
+  } catch (error) {
+    console.error(`track: cannot open the journal at ${TRACK_DB_PATH}, keeping it in memory:`, error);
+    return { journal: new MemoryJournal(), where: "in memory (fallback)" };
+  }
+}
+
 if (TRACK_ENABLED) {
   tracker = new Tracker({ whispers: TRACK_WHISPERS });
-  journal = TRACK_DB_PATH === "memory"
-    ? new MemoryJournal()
-    : new SqliteJournal(TRACK_DB_PATH, TRACK_RETAIN_DAYS);
+  const opened = openJournal();
+  journal = opened.journal;
   const store = journal;
   tracker.subscribe({ event: (_id, event) => store.append(event) });
   hub = new AdminHub(tracker, journal, { open: ADMIN_OPEN });
 
   console.log(
-    `track: on (journal ${TRACK_DB_PATH === "memory" ? "in memory" : TRACK_DB_PATH}, ${TRACK_RETAIN_DAYS} days, whispers ${TRACK_WHISPERS ? "on" : "off"}) - admin stream on ${ADMIN_STREAM_PATH}`
+    `track: on (journal ${opened.where}, ${TRACK_RETAIN_DAYS} days, whispers ${TRACK_WHISPERS ? "on" : "off"}) - admin stream on ${ADMIN_STREAM_PATH}`
   );
   if (ADMIN_OPEN) console.warn("ADMIN_OPEN=on: loopback clients may stream without a game master socket");
   if (ADMIN_DEMO) startDemo(tracker);
