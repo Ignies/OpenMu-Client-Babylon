@@ -2,6 +2,7 @@ import { memo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Item } from '../../../ecs/world';
 import { itemIconKey, itemIconPackChain } from '../../../common/itemIconPack';
+import { ITEM_ICON_FIT } from '../../../common/itemIconFit';
 
 /**
  * `<img fetchpriority>` is not a React 18 prop (it arrives with React 19), so
@@ -10,6 +11,24 @@ import { itemIconKey, itemIconPackChain } from '../../../common/itemIconPack';
  * and would otherwise starve it (see itemIconPack.ts).
  */
 const IMG_PRIORITY = { fetchpriority: 'high' } as const;
+
+/**
+ * The pack renders every item at one world scale into a canvas sized by its
+ * inventory footprint, so a small item covers a small part of its own PNG and
+ * fitting that canvas to the square left a jewel a few pixels across. The
+ * measured zoom (tools/itemIconFit.ts) blows the opaque box back up to the
+ * square; the translate takes off the render's drift off centre first, since
+ * the zoom is about the canvas centre and would scale that drift too.
+ *
+ * The zoom never overflows: it is capped by the canvas, and the canvas is
+ * what `max-width/height: 100%` has already fitted into the box.
+ */
+function fitTransform(item: { group: number; num: number }): string | undefined {
+  const fit = ITEM_ICON_FIT[`${item.group}_${item.num}`];
+  if (!fit) return undefined;
+  const [zoom, dx, dy] = fit;
+  return `scale(${zoom}) translate(${dx * 100}%, ${dy * 100}%)`;
+}
 
 /**
  * An item's icon from the pre-rendered pack (itemIconPack.ts).
@@ -43,6 +62,7 @@ export const ItemIcon = memo(
       <img
         src={chain[fallbackStep]}
         className="item-icon"
+        style={{ transform: fitTransform(item) }}
         alt=""
         draggable={false}
         decoding="async"
