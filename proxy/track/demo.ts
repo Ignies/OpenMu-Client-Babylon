@@ -174,7 +174,7 @@ function step(runner: Runner): void {
   }
 
   if (roll < 0.66) {
-    const other = pick(BOTS.filter(b => b !== bot));
+    const other = pick(BOTS.filter(b => b.name !== bot.name));
     client(runner, whisper(other.name, pick(LINES)));
     return;
   }
