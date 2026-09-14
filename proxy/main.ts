@@ -1,8 +1,15 @@
-import type { ServerWebSocket, Socket } from "bun";
+import type { Server, ServerWebSocket, Socket } from "bun";
 import { CLEAR, currentWeather, weatherForced, weatherPacket, weatherSlotSeconds, type WeatherState } from "./weather";
 import { ConnectionPresence, PRESENCE_HOST, PRESENCE_PORT, startPresenceServer } from "./presence";
 import { parseAllowTargets, targetAllowed, type ReservedTarget } from "./allowTargets";
 import { SESSION_NONCE_RE } from "../src/common/sessionNonce";
+import { ADMIN_STREAM_PATH, type RefusalReason } from "../src/common/adminProtocol";
+import { Tracker } from "./track/tracker";
+import type { TrackedSession } from "./track/session";
+import { AdminHub, type AdminSocket } from "./track/admin";
+import { MemoryJournal, type Journal } from "./track/journal";
+import { DEFAULT_TRACK_DB, SqliteJournal } from "./track/store";
+import { startDemo } from "./track/demo";
 
 const PORT = process.env.PORT || "3000";
 const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
@@ -52,6 +59,33 @@ const RESERVED_TARGETS: ReservedTarget[] = [
   { host: PRESENCE_HOST, port: PRESENCE_PORT },
 ];
 
+/**
+ * The tracker (documentation/admin_console/ARCHITECTURE.md): every session's
+ * live state and journal, streamed to a game master's panel on
+ * `/admin/stream`. `TRACK=off` removes it whole - no decoding, no journal,
+ * and the stream refuses everyone. `TRACK_DB_PATH=memory` keeps the journal
+ * in memory for the life of the process.
+ */
+const TRACK_ENABLED = (process.env.TRACK ?? "on") !== "off";
+const TRACK_DB_PATH = process.env.TRACK_DB_PATH || DEFAULT_TRACK_DB;
+const TRACK_RETAIN_DAYS = Number(process.env.TRACK_RETAIN_DAYS ?? 30);
+const TRACK_WHISPERS = (process.env.TRACK_WHISPERS ?? "on") !== "off";
+
+/**
+ * Dev seams for the panel, both loud at startup and neither for a public
+ * proxy: `ADMIN_OPEN=on` lets a loopback client stream without a game master
+ * socket (the offline client has no login to vouch for), `ADMIN_DEMO=on`
+ * fills the tracker with synthetic players. `ADMIN_ORIGINS` is a
+ * comma-separated allowlist of browser origins for the stream; unset allows
+ * any, which the nonce check already makes safe.
+ */
+const ADMIN_OPEN = process.env.ADMIN_OPEN === "on";
+const ADMIN_DEMO = process.env.ADMIN_DEMO === "on";
+const ADMIN_ORIGINS = (process.env.ADMIN_ORIGINS ?? "")
+  .split(",")
+  .map(s => s.trim().toLowerCase())
+  .filter(Boolean);
+
 if (!ALLOW_RULES.length) {
   console.warn(
     "ALLOW_TARGETS is unset: this proxy will dial ANY host:port a client names (bar the presence server). Fine on localhost, an open relay in public - set it to the game ports, e.g. ALLOW_TARGETS=127.0.0.1:44405,127.0.0.1:55901"
@@ -65,12 +99,30 @@ if (!ALLOW_RULES.length) {
 /** The per-packet hex dump. Priceless locally, far too loud against a real server. */
 const LOG_PACKETS = (process.env.LOG_PACKETS ?? "on") !== "off";
 
-const clients = new Set<ServerWebSocket<WebSocketData>>();
+type RelayData = {
+  kind: "relay";
+  targetHost: string;
+  targetPort: number;
+  tcpSocket?: Socket;
+  presence: ConnectionPresence;
+  track: TrackedSession | null;
+};
+
+type AdminData = {
+  kind: "admin";
+  /** Set when the upgrade was accepted only to say why it is refused. */
+  refused: RefusalReason | null;
+  socket: AdminSocket | null;
+};
+
+type WebSocketData = RelayData | AdminData;
+
+const clients = new Set<ServerWebSocket<RelayData>>();
 
 let weather: WeatherState = CLEAR;
 let lastBroadcast = 0;
 
-function sendWeather(ws: ServerWebSocket<WebSocketData>, state: WeatherState) {
+function sendWeather(ws: ServerWebSocket<RelayData>, state: WeatherState) {
   ws.send(weatherPacket(state));
 }
 
@@ -123,12 +175,36 @@ function asBufferSource(data: string | Buffer): string | Uint8Array {
     : new Uint8Array(data.buffer as ArrayBuffer, data.byteOffset, data.byteLength);
 }
 
-type WebSocketData = {
-  targetHost: string;
-  targetPort: number;
-  tcpSocket?: Socket;
-  presence: ConnectionPresence;
-};
+const LOOPBACK = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
+
+function isLoopback(server: Server, req: Request): boolean {
+  const address = server.requestIP(req)?.address ?? "";
+  return LOOPBACK.has(address);
+}
+
+/* --------------------------------------------------------------- tracker */
+
+let tracker: Tracker | null = null;
+let journal: Journal | null = null;
+let hub: AdminHub | null = null;
+
+if (TRACK_ENABLED) {
+  tracker = new Tracker({ whispers: TRACK_WHISPERS });
+  journal = TRACK_DB_PATH === "memory"
+    ? new MemoryJournal()
+    : new SqliteJournal(TRACK_DB_PATH, TRACK_RETAIN_DAYS);
+  const store = journal;
+  tracker.subscribe({ event: (_id, event) => store.append(event) });
+  hub = new AdminHub(tracker, journal, { open: ADMIN_OPEN });
+
+  console.log(
+    `track: on (journal ${TRACK_DB_PATH === "memory" ? "in memory" : TRACK_DB_PATH}, ${TRACK_RETAIN_DAYS} days, whispers ${TRACK_WHISPERS ? "on" : "off"}) - admin stream on ${ADMIN_STREAM_PATH}`
+  );
+  if (ADMIN_OPEN) console.warn("ADMIN_OPEN=on: loopback clients may stream without a game master socket");
+  if (ADMIN_DEMO) startDemo(tracker);
+} else {
+  console.log("track: off");
+}
 
 startPresenceServer();
 
@@ -136,7 +212,32 @@ Bun.serve<WebSocketData>({
   port: PORT,
   hostname: HOSTNAME,
   fetch(req, server) {
-    const searchParams = new URL(req.url).searchParams;
+    const url = new URL(req.url);
+    const searchParams = url.searchParams;
+
+    if (url.pathname === ADMIN_STREAM_PATH) {
+      if (!hub) return new Response("tracking is off", { status: 404 });
+
+      const origin = (req.headers.get("origin") ?? "").toLowerCase();
+      const rawSession = searchParams.get("session") ?? "";
+      const session = SESSION_NONCE_RE.test(rawSession) ? rawSession : null;
+
+      let refused: RefusalReason | null = null;
+      if (ADMIN_ORIGINS.length && !ADMIN_ORIGINS.includes(origin)) refused = "origin";
+      else {
+        const auth = hub.authorise(session, isLoopback(server, req));
+        if (auth !== "ok") refused = auth;
+      }
+
+      // Refused requests are still upgraded, so the panel can be told why
+      // before the close: a plain 403 reaches a browser websocket as an
+      // error with no body.
+      if (server.upgrade(req, { data: { kind: "admin", refused, socket: null } satisfies AdminData })) {
+        return;
+      }
+      return new Response("Upgrade failed :(", { status: 500 });
+    }
+
     const targetHost = searchParams.get("host")?.trim().toLowerCase() ?? "";
     const targetPort = parseInt(searchParams.get("port") ?? "0");
 
@@ -167,81 +268,111 @@ Bun.serve<WebSocketData>({
     // sits in the presence registry, and with a nonce in the ticket map, for
     // the life of the process.
     const presence = new ConnectionPresence(session, targetPort);
+    const track = tracker ? tracker.open(session, targetPort) : null;
+
+    const data: RelayData = { kind: "relay", targetHost, targetPort, presence, track };
 
     // upgrade the request to a WebSocket
-    if (server.upgrade(req, { data: { targetHost, targetPort, presence } })) {
+    if (server.upgrade(req, { data })) {
       return; // do not return a Response
     }
 
     presence.close();
+    if (track) tracker?.close(track);
     return new Response("Upgrade failed :(", { status: 500 });
   },
   websocket: {
     sendPings: false,
     open(ws) {
+      if (ws.data.kind === "admin") {
+        const data = ws.data;
+        if (data.refused || !hub) {
+          ws.send(AdminHub.refusal(data.refused ?? "no-session"));
+          ws.close();
+          return;
+        }
+        data.socket = { send: text => ws.send(text), close: () => ws.close() };
+        hub.attach(data.socket);
+        return;
+      }
+
+      const relay = ws as ServerWebSocket<RelayData>;
+
       console.log(
-        `client connected, target ${ws.data.targetHost}:${ws.data.targetPort}`
+        `client connected, target ${relay.data.targetHost}:${relay.data.targetPort}`
       );
 
       if (WEATHER_ENABLED) {
-        clients.add(ws);
+        clients.add(relay);
         // The heartbeat would reach them within 20 s anyway, but a player who
         // logs into a downpour should not walk through the first seconds of it
         // under a clear sky.
-        sendWeather(ws, weather);
+        sendWeather(relay, weather);
       }
 
       // Connect to TCP server
       Bun.connect({
-        hostname: ws.data.targetHost,
-        port: ws.data.targetPort,
+        hostname: relay.data.targetHost,
+        port: relay.data.targetPort,
         socket: {
           data(socket, data) {
             if (LOG_PACKETS) console.log("data from tcp:", stringifyPacket(data));
 
             const forwarded = asBufferSource(data);
 
-            ws.send(forwarded);
+            relay.send(forwarded);
 
             // The server's side of the login: the sniffer names a socket only
             // once the game server has said yes, never off the client's own
             // claim. Same copy discipline as the other direction.
             if (typeof forwarded !== "string") {
-              ws.data.presence.feedFromServer(new Uint8Array(forwarded));
+              const copy = new Uint8Array(forwarded);
+              const confirmed = relay.data.presence.feedFromServer(copy);
+              const track = relay.data.track;
+              if (track) {
+                if (confirmed) track.setAccount(confirmed);
+                track.feedServer(copy);
+              }
             }
           },
           open(socket) {
-            ws.data.tcpSocket = socket;
+            relay.data.tcpSocket = socket;
           },
           close(socket) { },
           drain(socket) { },
           error(socket, error) {
             console.log(`tcp error:`, error);
-            ws.data.tcpSocket = undefined;
-            ws.close();
+            relay.data.tcpSocket = undefined;
+            relay.close();
           },
 
           // client-specific handlers
           connectError(socket, error) {
             console.log(
-              `tcp connect error(${ws.data.targetHost}:${ws.data.targetPort}):`,
+              `tcp connect error(${relay.data.targetHost}:${relay.data.targetPort}):`,
               error
             );
             // Tell the client now. Left open, the ws just sits there and the
             // player waits on a game server that was never reached - which is
             // also what the client's address fallback keys off.
-            ws.close();
+            relay.close();
           }, // connection failed
           end(socket) {
-            ws.data.tcpSocket = undefined;
-            ws.close();
+            relay.data.tcpSocket = undefined;
+            relay.close();
           }, // connection closed by server
           timeout(socket) { }, // connection timed out
         },
       });
     },
     message(ws, message) {
-      const socket = ws.data.tcpSocket;
+      if (ws.data.kind === "admin") {
+        if (ws.data.socket && hub && typeof message === "string") hub.receive(ws.data.socket, message);
+        return;
+      }
+
+      const relay = ws as ServerWebSocket<RelayData>;
+      const socket = relay.data.tcpSocket;
       if (socket) {
         if (LOG_PACKETS) console.log("data from ws:", stringifyPacket(message));
 
@@ -253,19 +384,28 @@ Bun.serve<WebSocketData>({
         // After the write, and on its own copy: the sniffer decrypts in place
         // and must never touch what goes to the game server.
         if (typeof forwarded !== "string") {
-          ws.data.presence.feed(new Uint8Array(forwarded));
+          const copy = new Uint8Array(forwarded);
+          relay.data.presence.feed(copy);
+          relay.data.track?.feedClient(copy);
         }
       }
     },
     close(ws, code, message) {
-      clients.delete(ws);
-      ws.data.presence.close();
+      if (ws.data.kind === "admin") {
+        if (ws.data.socket && hub) hub.detach(ws.data.socket);
+        return;
+      }
 
-      const socket = ws.data.tcpSocket;
+      const relay = ws as ServerWebSocket<RelayData>;
+      clients.delete(relay);
+      relay.data.presence.close();
+      if (relay.data.track) tracker?.close(relay.data.track);
+
+      const socket = relay.data.tcpSocket;
       if (socket) {
         socket.flush();
         socket.end();
-        ws.data.tcpSocket = undefined;
+        relay.data.tcpSocket = undefined;
       }
     },
   },
