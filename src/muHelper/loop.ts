@@ -66,6 +66,7 @@ let secondsElapsed = 0;
 let secondsAway = 0;
 let originalPos: Point = { x: 0, y: 0 };
 let originMap = -1;
+let lastHeroTile: Point | null = null;
 let buffIndex = 0;
 let buffPartyIndex = 0;
 let healPartyIndex = 0;
@@ -80,6 +81,7 @@ let moveReissueCooldown = 0;
 const lastBuffCastAt = new Map<number, number>();
 
 function resetRuntime(): void {
+  lastHeroTile = null;
   tickAccum = 0;
   loopCounter = 0;
   secondsElapsed = 0;
@@ -97,6 +99,12 @@ function resetRuntime(): void {
   moveReissueCooldown = 0;
   lastBuffCastAt.clear();
 }
+
+/**
+ * A move of more than this many tiles between two frames is a warp, not a
+ * stride: the hero walks a few tiles per second.
+ */
+const TELEPORT_TILES = 3;
 
 /** `ComputeDistanceByRange`: the diagonal of a range x range square. */
 function distanceByRange(range: number): number {
@@ -506,9 +514,19 @@ export function updateMuHelperLoop(world: World, dt: number): void {
     originMap = world.mapIndex;
     wasActive = true;
   }
-  if (world.mapIndex !== originMap) {
+
+  // Lost Tower 1-7 are one map, as are Devias 1-3 and every other numbered
+  // area of the Move window: the server answers those with a same-map
+  // `MapChanged` that only snaps the position, so the map index alone misses
+  // the warp and Regroup walks the length of the map back to the old anchor.
+  const tile = heroTile(hero);
+  const jumped =
+    lastHeroTile !== null && tileDistance(lastHeroTile, tile) > TELEPORT_TILES;
+  lastHeroTile = tile;
+
+  if (world.mapIndex !== originMap || jumped) {
     // Warped mid-run: re-anchor the regroup position.
-    originalPos = heroTile(hero);
+    originalPos = tile;
     originMap = world.mapIndex;
     secondsAway = 0;
     currentTarget = null;
