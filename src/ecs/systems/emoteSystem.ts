@@ -1,5 +1,6 @@
 import { PlayerAction, ServerPlayerActionType } from '../../common/objects/enum';
 import { emoteById, genderedEmoteAction } from '../../common/emotes';
+import { isStandingIdle } from '../../common/playerActionMapper';
 import { rotationByteOf } from '../../common/turnAngle';
 import { Store } from '../../store';
 import type { ISystemFactory } from '../world';
@@ -38,15 +39,6 @@ function restServerAction(action: PlayerAction): ServerPlayerActionType {
     return ServerPlayerActionType.Pose;
   }
   return ServerPlayerActionType.Sit;
-}
-
-/** `SetActionClass` gate: the stop/idle clips, any weapon class. */
-function isStandingIdle(action: PlayerAction): boolean {
-  return (
-    (action >= PlayerAction.PLAYER_STOP_MALE &&
-      action <= PlayerAction.PLAYER_STOP_RIDE_WEAPON) ||
-    action === PlayerAction.PLAYER_STOP_TWO_HAND_SWORD_TWO
-  );
 }
 
 export const EmoteSystem: ISystemFactory = world => {
@@ -97,7 +89,8 @@ export const EmoteSystem: ISystemFactory = world => {
       if (!request) return;
       world.emoteRequest = null;
 
-      if (hero.dying || moving || active) return;
+      // An instrument in hand holds its own pose; the wheel greys the emotes out too.
+      if (hero.dying || moving || active || hero.performing) return;
 
       const current = anim.action;
       const resting = isRestAction(current);

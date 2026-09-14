@@ -53,6 +53,7 @@ import { TerrainLightSystem } from './systems/terrainLightSystem';
 import { EventSystem } from './systems/eventSystem';
 import { CursorSystem } from './systems/cursorSystem';
 import { EmoteSystem } from './systems/emoteSystem';
+import { BandSystem } from './systems/bandSystem';
 import { MapDoorSystem } from './systems/mapDoorSystem';
 import { CeilingHideSystem } from './systems/ceilingHideSystem';
 import { EmojiBubbleSystem } from './systems/emojiBubbleSystem';
@@ -85,6 +86,9 @@ const factories: ISystemFactory[] = [
   SkillCastSystem,
   RestObjectSystem,
   EmoteSystem,
+  // Before AnimationSystem, like EmoteSystem: holds a performer's clip; the
+  // per-note bone twitch is applied after Babylon's animation pass instead.
+  BandSystem,
   CursorSystem,
   // After CursorSystem: reads this frame's hovered object (SelectedNpc / SelectedCharacter).
   NameTagSystem,

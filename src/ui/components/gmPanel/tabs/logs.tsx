@@ -48,6 +48,7 @@ const KIND_KEY: Record<EventKind, TextKey> = {
   trade: 'gm.kind.trade',
   shop: 'gm.kind.shop',
   server: 'gm.kind.server',
+  band: 'gm.kind.band',
 };
 
 export function kindLabel(kind: EventKind): string {

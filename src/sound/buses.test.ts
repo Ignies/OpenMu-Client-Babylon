@@ -37,6 +37,7 @@ describe('sound buses', () => {
     expect(busGain('steps')).toBe(1);
     expect(busGain('drops')).toBe(1);
     expect(busGain('ui')).toBe(1);
+    expect(busGain('instruments')).toBe(1);
   });
 
   it('gives the unnamed bus a gain of 1 whatever the sliders say', () => {

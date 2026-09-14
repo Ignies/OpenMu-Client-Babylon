@@ -37,6 +37,7 @@ export type SoundBus =
   | 'steps'
   | 'drops'
   | 'ui'
+  | 'instruments'
   | 'world';
 
 /** The option each bus reads, `null` for the one that has no slider. */
@@ -49,6 +50,7 @@ export const BUS_VOLUME_OPTION = {
   steps: 'stepsVolume',
   drops: 'dropVolume',
   ui: 'uiVolume',
+  instruments: 'instrumentsVolume',
   world: null,
 } as const satisfies Record<SoundBus, keyof typeof GameOptions | null>;
 

@@ -17,6 +17,15 @@ import {
   EMOJI_BUBBLES,
   type EmojiBubbleDefinition,
 } from '../../../../../common/emojiBubbles';
+import {
+  INSTRUMENTS,
+  type InstrumentDefinition,
+} from '../../../../../common/instruments';
+import {
+  Band,
+  putAwayInstrument,
+  takeOutInstrument,
+} from '../../../../../common/band';
 
 /**
  * Radial emote menu on º/` by default (TAB is the minimap as in the original, E is a
@@ -27,11 +36,11 @@ import {
 
 const HOT_KEY = 'emoteMenu';
 
-const SIZE = 580;
+const SIZE = 640;
 const CENTER = SIZE / 2;
 const HUB_RADIUS = 48;
 const RING_GAP = 6;
-const RING_DEPTH = [66, 76, 62];
+const RING_DEPTH = [62, 70, 58, 44];
 const WEDGE_GAP_DEG = 1.6;
 
 /**
@@ -42,16 +51,20 @@ const WEDGE_GAP_DEG = 1.6;
  */
 type RadialEntry =
   | { kind: 'emote'; id: string; glyph: string; emote: EmoteDefinition }
-  | { kind: 'emoji'; id: string; glyph: string; emoji: EmojiBubbleDefinition };
+  | { kind: 'emoji'; id: string; glyph: string; emoji: EmojiBubbleDefinition }
+  | { kind: 'instrument'; id: string; glyph: string; instrument: InstrumentDefinition };
 
 /**
  * The hub caption. An emoji also carries its chat token, which is both what
  * goes out on the wire and what a player can type to pop the same bubble.
+ * An instrument already in hand offers to be put away.
  */
 function entryLabel(entry: RadialEntry): string {
-  return entry.kind === 'emote'
-    ? t(entry.emote.labelKey)
-    : `${t(entry.emoji.labelKey)}  ${entry.emoji.words[0]}`;
+  if (entry.kind === 'emote') return t(entry.emote.labelKey);
+  if (entry.kind === 'emoji') return `${t(entry.emoji.labelKey)}  ${entry.emoji.words[0]}`;
+  return Band.instrument === entry.instrument.id
+    ? `${t(entry.instrument.labelKey)} - ${t('instrument.putAway')}`
+    : t(entry.instrument.labelKey);
 }
 
 const ENTRIES: RadialEntry[] = [
@@ -71,10 +84,21 @@ const ENTRIES: RadialEntry[] = [
       emoji,
     })
   ),
+  ...INSTRUMENTS.map(
+    (instrument): RadialEntry => ({
+      kind: 'instrument',
+      id: `instrument_${instrument.id}`,
+      glyph: instrument.glyph,
+      instrument,
+    })
+  ),
 ];
 
-/** Wedges per ring, innermost first: the two emote rings, then the emoji ring. */
-const RINGS = [...EMOTE_RINGS, EMOJI_BUBBLES.length];
+/**
+ * Wedges per ring, innermost first: the two emote rings, the emoji ring,
+ * then one wedge per instrument in the registry.
+ */
+const RINGS = [...EMOTE_RINGS, EMOJI_BUBBLES.length, INSTRUMENTS.length];
 
 type Wedge = {
   entry: RadialEntry;
@@ -218,7 +242,33 @@ export const EmoteMenu = observer(() => {
       return;
     }
 
-    if (heroBusy) {
+    if (entry.kind === 'instrument') {
+      // Online, an instrument only plays for others through the proxy's
+      // relay; without its hello there is nothing to take out.
+      if (!Store.isOffline && !Band.available) {
+        playUiSound('error');
+        return;
+      }
+      // Putting one away is always allowed; taking one out wants the same
+      // standing idle an emote does, which BandSystem checks again.
+      if (Band.instrument === entry.instrument.id) {
+        playUiSound('click');
+        putAwayInstrument();
+        close();
+        return;
+      }
+      if (heroBusy) {
+        playUiSound('error');
+        return;
+      }
+      playUiSound('click');
+      takeOutInstrument(entry.instrument.id);
+      close();
+      return;
+    }
+
+    // An instrument in hand holds its pose; the emotes wait until it is put away.
+    if (heroBusy || hero.performing) {
       playUiSound('error');
       return;
     }
@@ -267,6 +317,14 @@ export const EmoteMenu = observer(() => {
                 key={w.entry.id}
                 className={`emote-wedge emote-ring-${w.ring}${hot ? ' hot' : ''}${
                   w.entry.kind === 'emoji' ? ' emoji' : ''
+                }${w.entry.kind === 'instrument' ? ' instrument' : ''}${
+                  w.entry.kind === 'instrument' && Band.instrument === w.entry.instrument.id
+                    ? ' held'
+                    : ''
+                }${
+                  w.entry.kind === 'instrument' && !Store.isOffline && !Band.available
+                    ? ' unavailable'
+                    : ''
                 }`}
                 onPointerEnter={() => setHovered(w.entry)}
                 onClick={() => pick(w.entry)}

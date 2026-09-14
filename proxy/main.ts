@@ -10,6 +10,8 @@ import { AdminHub, type AdminSocket } from "./track/admin";
 import { MemoryJournal, type Journal } from "./track/journal";
 import { DEFAULT_TRACK_DB, SqliteJournal } from "./track/store";
 import { startDemo } from "./track/demo";
+import { BandHub, type BandPeer } from "./band/hub";
+import { isBandFrame } from "../src/common/bandProtocol";
 
 const PORT = process.env.PORT || "3000";
 const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
@@ -72,6 +74,16 @@ const TRACK_RETAIN_DAYS = Number(process.env.TRACK_RETAIN_DAYS ?? 30);
 const TRACK_WHISPERS = (process.env.TRACK_WHISPERS ?? "on") !== "off";
 
 /**
+ * The band relay (documentation/band/ARCHITECTURE.md): instrument frames
+ * (`C1 .. FA`) never reach the game server; they are validated and relayed
+ * here to the sockets whose character can see the performer, which is what
+ * the tracker knows. `BAND=off` swallows them. Needs `TRACK` on.
+ */
+const BAND_ENABLED = (process.env.BAND ?? "on") !== "off";
+const BAND_MAX_PERFORMERS = Number(process.env.BAND_MAX_PERFORMERS ?? 16);
+const BAND_MAX_RECEIVERS = Number(process.env.BAND_MAX_RECEIVERS ?? 48);
+
+/**
  * Dev seams for the panel, both loud at startup and neither for a public
  * proxy: `ADMIN_OPEN=on` lets a loopback client stream without a game master
  * socket (the offline client has no login to vouch for), `ADMIN_DEMO=on`
@@ -106,6 +118,8 @@ type RelayData = {
   tcpSocket?: Socket;
   presence: ConnectionPresence;
   track: TrackedSession | null;
+  /** This socket as the band relay knows it; set in `open`, null without tracking. */
+  band: BandPeer | null;
 };
 
 type AdminData = {
@@ -220,6 +234,39 @@ if (TRACK_ENABLED) {
   console.log("track: off");
 }
 
+/* ------------------------------------------------------------------ band */
+
+let band: BandHub | null = null;
+
+if (BAND_ENABLED && tracker) {
+  band = new BandHub({
+    maxPerformers: BAND_MAX_PERFORMERS,
+    maxReceivers: BAND_MAX_RECEIVERS,
+    log: line => console.log(line),
+  });
+  const hub = band;
+  setInterval(() => hub.sweep(), 5000);
+
+  // A stats line a minute, only when something happened.
+  let last = JSON.stringify(hub.stats());
+  setInterval(() => {
+    const stats = hub.stats();
+    const line = JSON.stringify(stats);
+    if (line !== last) {
+      last = line;
+      console.log(`band: ${line}`);
+    }
+  }, 60_000);
+
+  console.log(
+    `band: on (max ${BAND_MAX_PERFORMERS} performers, ${BAND_MAX_RECEIVERS} receivers each) - BAND=off to disable`
+  );
+} else if (BAND_ENABLED) {
+  console.warn("band: off (TRACK=off - the relay needs the tracker's scope to know who hears whom)");
+} else {
+  console.log("band: off");
+}
+
 startPresenceServer();
 
 Bun.serve<WebSocketData>({
@@ -284,7 +331,7 @@ Bun.serve<WebSocketData>({
     const presence = new ConnectionPresence(session, targetPort);
     const track = tracker ? tracker.open(session, targetPort) : null;
 
-    const data: RelayData = { kind: "relay", targetHost, targetPort, presence, track };
+    const data: RelayData = { kind: "relay", targetHost, targetPort, presence, track, band: null };
 
     // upgrade the request to a WebSocket
     if (server.upgrade(req, { data })) {
@@ -322,6 +369,16 @@ Bun.serve<WebSocketData>({
         // logs into a downpour should not walk through the first seconds of it
         // under a clear sky.
         sendWeather(relay, weather);
+      }
+
+      // The relay needs the ws to send with, so the peer is made here rather
+      // than in fetch. The hello tells the client instruments work on this
+      // connection; a client that never gets one keeps them off.
+      if (band && relay.data.track) {
+        const peer: BandPeer = { track: relay.data.track, send: frame => relay.send(frame) };
+        relay.data.band = peer;
+        band.attach(peer);
+        relay.send(BandHub.hello());
       }
 
       // Connect to TCP server
@@ -386,6 +443,18 @@ Bun.serve<WebSocketData>({
       }
 
       const relay = ws as ServerWebSocket<RelayData>;
+
+      // A band frame is the proxy's to handle and never the game server's:
+      // swallowed whether the relay is on or off, before the log and the
+      // write, and never shown to the sniffers.
+      if (typeof message !== "string") {
+        const bytes = asBufferSource(message) as Uint8Array;
+        if (isBandFrame(bytes)) {
+          if (band && relay.data.band) band.receive(relay.data.band, bytes);
+          return;
+        }
+      }
+
       const socket = relay.data.tcpSocket;
       if (socket) {
         if (LOG_PACKETS) console.log("data from ws:", stringifyPacket(message));
@@ -413,6 +482,9 @@ Bun.serve<WebSocketData>({
       const relay = ws as ServerWebSocket<RelayData>;
       clients.delete(relay);
       relay.data.presence.close();
+      // Before the tracker closes the session: the gone / leave notices
+      // still need its map and scope.
+      if (relay.data.band) band?.detach(relay.data.band);
       if (relay.data.track) tracker?.close(relay.data.track);
 
       const socket = relay.data.tcpSocket;

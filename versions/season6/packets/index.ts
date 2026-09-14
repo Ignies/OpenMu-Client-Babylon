@@ -20,9 +20,10 @@
  */
 import { ServerToClientPackets as generated } from '../../../src/common/packets/ServerToClientPackets';
 import { ChangeMapServerInfoPacket } from './mapServerMove';
+import { BandRelayPacket } from './bandRelay';
 
-/** The generated set plus the hand-written map-server move (C1 B1 00). */
-export const ServerToClientPackets = [...generated, ChangeMapServerInfoPacket];
-export { ChangeMapServerInfoPacket };
+/** The generated set plus the hand-written map-server move (C1 B1 00) and the proxy's band relay (C1 FA). */
+export const ServerToClientPackets = [...generated, ChangeMapServerInfoPacket, BandRelayPacket];
+export { ChangeMapServerInfoPacket, BandRelayPacket };
 export { ConnectServerPackets } from '../../../src/common/packets/ConnectServerPackets';
 export { ClientToServerPackets } from '../../../src/common/packets/ClientToServerPackets';

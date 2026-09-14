@@ -24,7 +24,17 @@ import type { SoundLayer } from './layer';
 /** Tiles inside which a positioned sound plays at full volume. */
 const FULL_VOLUME_TILES = 6;
 /** Tiles beyond which a positioned sound is skipped entirely. */
-const SILENT_TILES = 28;
+export const SILENT_TILES = 28;
+
+/**
+ * The attenuation curve every positioned sound shares: 1 up to
+ * `FULL_VOLUME_TILES`, a straight line down to 0 at `SILENT_TILES`.
+ */
+export function distanceGain(d: number): number {
+  if (d >= SILENT_TILES) return 0;
+  if (d <= FULL_VOLUME_TILES) return 1;
+  return 1 - (d - FULL_VOLUME_TILES) / (SILENT_TILES - FULL_VOLUME_TILES);
+}
 /**
  * Per-key throttle: the same buffer is never restarted twice within this
  * window, so a pack of monsters flinching in one frame reads as one hit
@@ -108,12 +118,9 @@ export function playSfx(
   if (at && hasListener) {
     const dx = at.x - listenerX;
     const dz = at.z - listenerZ;
-    const d = Math.sqrt(dx * dx + dz * dz);
-    if (d >= SILENT_TILES) return;
-    if (d > FULL_VOLUME_TILES) {
-      volume *=
-        1 - (d - FULL_VOLUME_TILES) / (SILENT_TILES - FULL_VOLUME_TILES);
-    }
+    const g = distanceGain(Math.sqrt(dx * dx + dz * dz));
+    if (g <= 0) return;
+    volume *= g;
   }
 
   const now = performance.now();
