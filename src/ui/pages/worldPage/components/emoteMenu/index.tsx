@@ -62,6 +62,7 @@ type RadialEntry =
 function entryLabel(entry: RadialEntry): string {
   if (entry.kind === 'emote') return t(entry.emote.labelKey);
   if (entry.kind === 'emoji') return `${t(entry.emoji.labelKey)}  ${entry.emoji.words[0]}`;
+  if (!Store.isOffline && !Band.available) return t('instrument.unavailable');
   return Band.instrument === entry.instrument.id
     ? `${t(entry.instrument.labelKey)} - ${t('instrument.putAway')}`
     : t(entry.instrument.labelKey);
