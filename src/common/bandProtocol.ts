@@ -76,7 +76,6 @@ export const BAND_LIMITS = {
   joinRangeTiles: 10,
   joinIntervalMs: 2_000,
   maxReceivers: 48,
-  idleStopMs: 30_000,
   maxChannelNamesBytes: 207,
   /** Milliseconds between a performer's receiver-set refreshes. */
   receiversTtlMs: 250,

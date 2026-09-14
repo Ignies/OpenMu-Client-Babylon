@@ -16,7 +16,7 @@ import {
   stopPlaying,
   toggleInstrumentWindow,
 } from '../../../../../common/band';
-import { ALL_CHANNELS, PERCUSSION_CHANNEL, hasChannel, ownerOf, takenChannels } from '../../../../../common/band/bandState';
+import { PERCUSSION_CHANNEL } from '../../../../../common/band/bandState';
 import { MuText } from '../../../../components/muText';
 import { useWindowChrome } from '../../../../components/muWindow/useWindowChrome';
 
@@ -83,18 +83,11 @@ export const InstrumentWindow = observer(() => {
   const paused = Band.phase === 'paused';
   const member = Band.role === 'member';
   const band = Band.band;
-  const taken = band ? takenChannels(band) : 0;
   const nearby = member ? [] : nearbyPerformers();
 
-  const ownerName = (channel: number): string => {
-    if (!band) return t('instrument.you');
-    const owner = ownerOf(band, channel);
-    if (owner === (Store.playerId ?? -1)) return t('instrument.you');
-    if (band.masterId === owner && member) {
-      return Store.world?.getByNetId(owner)?.objectNameInWorld ?? `#${owner}`;
-    }
-    return Store.world?.getByNetId(owner)?.objectNameInWorld ?? `#${owner}`;
-  };
+  // The song is the hero's own (a member loads none), so every channel of
+  // it is theirs; a band doubles it, it takes nothing away.
+  const ownerName = (): string => t('instrument.you');
 
   const channels = song
     ? song.channels
@@ -203,7 +196,7 @@ export const InstrumentWindow = observer(() => {
                   {c.name}
                 </span>
                 <span className="band-notes">{c.noteCount}</span>
-                <span className="band-owner">{silent ? '-' : ownerName(c.index)}</span>
+                <span className="band-owner">{silent ? '-' : ownerName()}</span>
               </div>
             );
           })}
@@ -240,8 +233,8 @@ export const InstrumentWindow = observer(() => {
                   className="band-btn"
                   disabled={playing || paused}
                   onClick={() => {
-                    // Take every channel no other member holds yet.
-                    joinBand(p.netId, ALL_CHANNELS & ~taken & ~(1 << PERCUSSION_CHANNEL));
+                    // Double the master's song on this instrument, every channel.
+                    joinBand(p.netId);
                   }}
                 >
                   {t('instrument.join')}
@@ -266,4 +259,3 @@ export const InstrumentWindow = observer(() => {
   );
 });
 
-export { hasChannel };

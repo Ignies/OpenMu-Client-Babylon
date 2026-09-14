@@ -3,7 +3,7 @@ import {
   ALL_CHANNELS,
   canRender,
   masterMask,
-  ownerOf,
+  ownersOf,
   takenChannels,
   withMember,
   withoutMember,
@@ -18,25 +18,26 @@ describe('band state', () => {
     channelMask: 0b1000,
   });
 
-  it('gives every channel to the master when nobody took one', () => {
-    for (let c = 0; c < 16; c++) expect(ownerOf(solo, c)).toBe(7);
+  it('has the master alone on every channel when nobody joined', () => {
+    for (let c = 0; c < 16; c++) expect(ownersOf(solo, c)).toEqual([7]);
     expect(masterMask(solo)).toBe(ALL_CHANNELS);
   });
 
-  it('routes a taken channel to the member and the rest to the master', () => {
-    expect(ownerOf(band, 1)).toBe(8);
-    expect(ownerOf(band, 2)).toBe(8);
-    expect(ownerOf(band, 3)).toBe(9);
-    expect(ownerOf(band, 0)).toBe(7);
+  it('doubles a channel on every member holding it, the master always first', () => {
+    expect(ownersOf(band, 0)).toEqual([7]);
+    expect(ownersOf(band, 1)).toEqual([7, 8]);
+    expect(ownersOf(band, 2)).toEqual([7, 8]);
+    expect(ownersOf(band, 3)).toEqual([7, 9]);
     expect(takenChannels(band)).toBe(0b1110);
-    expect(masterMask(band)).toBe(ALL_CHANNELS & ~0b1110);
+    // A band takes nothing from the master.
+    expect(masterMask(band)).toBe(ALL_CHANNELS);
   });
 
   it('replaces a member who rejoins and drops one who leaves', () => {
     const again = withMember(band, { netId: 8, instrument: 'guitar', channelMask: 0b1 });
     expect(again.members).toHaveLength(2);
-    expect(ownerOf(again, 0)).toBe(8);
-    expect(ownerOf(again, 1)).toBe(7);
+    expect(ownersOf(again, 0)).toEqual([7, 8]);
+    expect(ownersOf(again, 1)).toEqual([7]);
     expect(withoutMember(again, 8).members.map(m => m.netId)).toEqual([9]);
   });
 

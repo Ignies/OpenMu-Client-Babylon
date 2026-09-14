@@ -19,7 +19,9 @@ import {
   RefuseCause,
   StopReason,
   decodeRelayFrame,
+  encodeBandState,
   encodeBatch,
+  encodeJoin,
   encodeStart,
   encodeStop,
   isBandFrame,
@@ -189,6 +191,26 @@ send(a, encodeStop());
 await sleep(200);
 const bStop = b.got.find(m => m.sub === BandSub.Stop);
 check(!!bStop && bStop.reason === StopReason.Ended, 'B got A\'s stop');
+
+// A band: B takes an instrument out (a performer too), joins A and doubles
+// A's stream on it. A learns who joined; the master stopping dissolves it.
+await sleep(BAND_LIMITS.cooldownAfterEndMs + 100);
+send(a, encodeStart(0));
+send(b, encodeStart(2));
+await sleep(200);
+send(b, encodeJoin(101, 2, 0xffff));
+await sleep(200);
+const aJoin = a.got.find(m => m.sub === BandSub.Join);
+check(!!aJoin && aJoin.performerId === 102 && aJoin.masterId === 101 && aJoin.mask === 0xffff, "A got B's join");
+check(!b.got.some(m => m.sub === BandSub.Refused), 'B was not refused for having an instrument out');
+send(a, encodeBandState(0xffff, [{ id: 102, instrument: 2, mask: 0xffff }]));
+await sleep(200);
+check(b.got.some(m => m.sub === BandSub.BandState && m.performerId === 101 && m.members.length === 1), "B got A's band state");
+send(a, encodeStop());
+await sleep(200);
+check(b.got.filter(m => m.sub === BandSub.Stop && m.performerId === 101).length === 2, "B got A's stop once, as a member and receiver");
+send(b, encodeStop());
+await sleep(200);
 
 // A flood: more batches in a second than the relay allows.
 await sleep(BAND_LIMITS.cooldownAfterEndMs + 100);
