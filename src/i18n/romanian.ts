@@ -193,6 +193,7 @@ export const romanianLayer: LanguageLayer = {
     'options.renderingStyle': 'Stil de randare',
     'options.shadeSteps': 'Trepte de umbră',
     'options.styleStrength': 'Intensitatea stilului',
+    'options.lineWidth': 'Grosimea liniilor',
     'options.itemEffects': 'Efectele obiectelor',
     'options.sharpness': 'Claritate',
     'options.filmGrain': 'Granulație',

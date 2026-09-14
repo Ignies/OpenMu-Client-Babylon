@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Effect } from '../libs/babylon/exports';
 import { GameOptions, setGameOption } from './gameOptions';
 import {
+  LINE_WIDTH_MAX,
+  LINE_WIDTH_MIN,
   RENDERING_STYLES,
   RENDERING_STYLE_MAX,
   TOON_FILTER_UNIFORM,
@@ -9,6 +11,7 @@ import {
   bindToon,
   inkDarkness,
   inkWidth,
+  lineWidth,
   renderingStyle,
   shadeSteps,
   styleIndex,
@@ -25,6 +28,7 @@ const initial = {
   renderingStyle: GameOptions.renderingStyle,
   shadeSteps: GameOptions.shadeSteps,
   styleStrength: GameOptions.styleStrength,
+  lineWidth: GameOptions.lineWidth,
 };
 
 const stubEffect = () => {
@@ -93,6 +97,13 @@ describe('renderingStyle', () => {
     expect(styleStrength()).toBe(9);
     setGameOption('styleStrength', -3);
     expect(styleStrength()).toBe(1);
+
+    setGameOption('lineWidth', 0);
+    expect(lineWidth()).toBe(LINE_WIDTH_MIN);
+    setGameOption('lineWidth', 9);
+    expect(lineWidth()).toBe(LINE_WIDTH_MAX);
+    setGameOption('lineWidth', 2.6);
+    expect(lineWidth()).toBe(3);
   });
 });
 
@@ -121,9 +132,10 @@ describe('the material snapshot', () => {
     expect(toonRampActive()).toBe(false);
   });
 
-  it('turns the strength dial into darker and wider lines', () => {
+  it('turns the strength dial into darker lines and leaves their width alone', () => {
     setGameOption('lightingQuality', 1);
     setGameOption('renderingStyle', 2);
+    setGameOption('lineWidth', 2);
 
     setGameOption('styleStrength', 1);
     syncRenderingStyle();
@@ -133,10 +145,20 @@ describe('the material snapshot', () => {
     syncRenderingStyle();
     const high = { dark: inkDarkness(), width: inkWidth() };
 
-    expect(low.width).toBe(1);
-    expect(high.width).toBe(3);
     expect(high.dark).toBeGreaterThan(low.dark);
     expect(high.dark).toBeLessThanOrEqual(1);
+    expect(low.width).toBe(2);
+    expect(high.width).toBe(2);
+  });
+
+  it('takes the line width from its own slider', () => {
+    setGameOption('lightingQuality', 1);
+    setGameOption('renderingStyle', 2);
+    for (const width of [LINE_WIDTH_MIN, 3, LINE_WIDTH_MAX]) {
+      setGameOption('lineWidth', width);
+      syncRenderingStyle();
+      expect(inkWidth()).toBe(width);
+    }
   });
 
   it('binds nothing while inactive', () => {

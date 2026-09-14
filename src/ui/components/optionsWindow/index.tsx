@@ -55,6 +55,8 @@ import {
   MATERIAL_QUALITY_MAX,
 } from '../../../common/materialQuality';
 import {
+  LINE_WIDTH_MAX,
+  LINE_WIDTH_MIN,
   RENDERING_STYLE_LABEL_KEYS,
   RENDERING_STYLE_MAX,
   SHADE_STEPS_MAX,
@@ -210,6 +212,7 @@ type SliderRow = {
     | 'renderingStyle'
     | 'shadeSteps'
     | 'styleStrength'
+    | 'lineWidth'
     | 'sharpness'
     | 'filmGrain'
     | 'bloom'
@@ -574,6 +577,18 @@ const TABS: Tab[] = [
                 check('propBatching', -1, 'options.propBatching'),
               ],
             },
+            {
+              titleKey: 'options.section.items',
+              rows: [
+                slider({
+                  key: 'itemEffects',
+                  textId: -1,
+                  labelKey: 'options.itemEffects',
+                  max: ITEM_EFFECT_MODE_MAX,
+                  display: v => t(ITEM_EFFECT_MODE_LABEL_KEYS[v]) ?? v,
+                }),
+              ],
+            },
           ],
           [
             {
@@ -597,18 +612,6 @@ const TABS: Tab[] = [
               ],
             },
             {
-              titleKey: 'options.section.items',
-              rows: [
-                slider({
-                  key: 'itemEffects',
-                  textId: -1,
-                  labelKey: 'options.itemEffects',
-                  max: ITEM_EFFECT_MODE_MAX,
-                  display: v => t(ITEM_EFFECT_MODE_LABEL_KEYS[v]) ?? v,
-                }),
-              ],
-            },
-            {
               titleKey: 'options.section.style',
               rows: [
                 slider({
@@ -627,6 +630,16 @@ const TABS: Tab[] = [
                   labelKey: 'options.styleStrength',
                   min: STYLE_STRENGTH_MIN,
                   max: STYLE_STRENGTH_MAX,
+                  needsTier: true,
+                  needsStyle: 'outline',
+                  display: v => v,
+                }),
+                slider({
+                  key: 'lineWidth',
+                  textId: -1,
+                  labelKey: 'options.lineWidth',
+                  min: LINE_WIDTH_MIN,
+                  max: LINE_WIDTH_MAX,
                   needsTier: true,
                   needsStyle: 'outline',
                   display: v => v,

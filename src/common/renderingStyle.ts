@@ -12,11 +12,12 @@ import type { TextKey } from '../i18n';
  * Classic every reader here answers "off", so no define, uniform or pass
  * exists and the frame is untouched.
  *
- * `styleStrength` (1..9) is the one dial on how far the Anime style goes:
- * darker and wider lines, flatter textures, a stronger rim.
+ * `styleStrength` (1..9) is the dial on how far the Anime style goes:
+ * darker lines, flatter textures, a stronger rim. `lineWidth` (1..5) is
+ * the ink lines' width in texels, on its own.
  *
  * Dev seams: `?style=` replaces the option, `?strength=` the dial,
- * `?shadeSteps=` the band count, `?toonSoft=` the band edge width in
+ * `?lineWidth=` the width, `?shadeSteps=` the band count, `?toonSoft=` the band edge width in
  * pixels, `?toonRim=strength,edge`, `?toonTex=bias,levels`,
  * `?toonGrass=darkness,start`.
  */
@@ -49,6 +50,8 @@ export const SHADE_STEPS_MIN = 2;
 export const SHADE_STEPS_MAX = 4;
 export const STYLE_STRENGTH_MIN = 1;
 export const STYLE_STRENGTH_MAX = 9;
+export const LINE_WIDTH_MIN = 1;
+export const LINE_WIDTH_MAX = 5;
 
 /** Band edge width in screen pixels (fwidth units); 0 is a hard edge. */
 const TOON_EDGE_SOFTNESS = 1;
@@ -61,6 +64,7 @@ const GRASS_INK_START = 0.45;
 
 const styleDev = devQueryNumber('style');
 const strengthDev = devQueryNumber('strength');
+const widthDev = devQueryNumber('lineWidth');
 const stepsDev = devQueryNumber('shadeSteps');
 const softDev = devQueryNumber('toonSoft');
 const rimDev = devQueryNumbers('toonRim', 2);
@@ -99,6 +103,15 @@ export function styleStrength(): number {
     Math.round(strengthDev ?? GameOptions.styleStrength),
     STYLE_STRENGTH_MIN,
     STYLE_STRENGTH_MAX
+  );
+}
+
+/** The ink lines' width as stored, 1..5 texels at the reference height. */
+export function lineWidth(): number {
+  return clamp(
+    Math.round(widthDev ?? GameOptions.lineWidth),
+    LINE_WIDTH_MIN,
+    LINE_WIDTH_MAX
   );
 }
 
@@ -151,7 +164,7 @@ export function syncRenderingStyle(): void {
   toon.rim = rimDev?.[0] ?? (style?.rim ?? 0) * (0.5 + t);
   toon.rimEdge = rimDev?.[1] ?? TOON_RIM_EDGE;
   toon.inkDarkness = 0.3 + 0.6 * t;
-  toon.inkWidth = t < 0.3 ? 1 : t < 0.7 ? 2 : 3;
+  toon.inkWidth = lineWidth();
   toon.texBias = texDev?.[0] ?? 0.5 + 1.5 * t;
   toon.texLevels = texDev?.[1] ?? Math.round(9 - 4 * t);
   toon.grassInk = grassDev?.[0] ?? toon.inkDarkness;
@@ -176,7 +189,7 @@ export function inkDarkness(): number {
   return toon.inkDarkness;
 }
 
-/** How wide the ink lines are in G-buffer texels at the reference height. */
+/** How wide the ink lines are in G-buffer texels at the reference height, from its slider. */
 export function inkWidth(): number {
   return toon.inkWidth;
 }
