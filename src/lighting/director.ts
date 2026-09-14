@@ -270,7 +270,7 @@ export function createLookDirector(
 
   const tick = (dt: number): void => {
     // The snapshot the item materials bind this frame.
-    syncRenderingStyle();
+    syncRenderingStyle(scene.getEngine().getRenderHeight());
 
     const omenTo = omen ? 1 : 0;
 

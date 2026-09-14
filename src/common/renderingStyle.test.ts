@@ -9,6 +9,7 @@ import {
   RENDERING_STYLES,
   RENDERING_STYLE_MAX,
   TOON_FILTER_UNIFORM,
+  TOON_ULTRA_UNIFORM,
   TOON_UNIFORM,
   bindToon,
   inkDarkness,
@@ -20,10 +21,13 @@ import {
   styleIndex,
   styleStrength,
   syncRenderingStyle,
+  toonEffectsActive,
   toonFlatActive,
   toonFunctionsGlsl,
+  toonGrassActive,
   toonRampActive,
   toonTerrainDefines,
+  toonUltraActive,
 } from './renderingStyle';
 
 const initial = {
@@ -33,6 +37,8 @@ const initial = {
   styleStrength: GameOptions.styleStrength,
   lineWidth: GameOptions.lineWidth,
   lineStrength: GameOptions.lineStrength,
+  grassOutline: GameOptions.grassOutline,
+  animeEffects: GameOptions.animeEffects,
 };
 
 const stubEffect = () => {
@@ -79,8 +85,8 @@ describe('renderingStyle', () => {
 
   it('has a Cel row with bands alone and an Anime row with everything', () => {
     expect(RENDERING_STYLES[0]).toBeNull();
-    expect(RENDERING_STYLES[1]).toMatchObject({ ramp: true, rim: 0, outline: false, flat: false });
-    expect(RENDERING_STYLES[2]).toMatchObject({ ramp: true, outline: true, flat: true });
+    expect(RENDERING_STYLES[1]).toMatchObject({ ramp: true, rim: 0, outline: false, flat: false, extras: false });
+    expect(RENDERING_STYLES[2]).toMatchObject({ ramp: true, outline: true, flat: true, extras: true });
     expect(RENDERING_STYLES[2]?.rim).toBeGreaterThan(0);
   });
 
@@ -126,19 +132,105 @@ describe('the material snapshot', () => {
     expect(toonTerrainDefines()).toEqual([]);
 
     setGameOption('lightingQuality', 1);
+    setGameOption('grassOutline', true);
     syncRenderingStyle();
     expect(toonRampActive()).toBe(true);
     expect(toonFlatActive()).toBe(true);
-    expect(toonTerrainDefines()).toEqual(['#define MU_TOON_FLAT']);
+    expect(toonTerrainDefines()).toEqual(['#define MU_TOON_FLAT', '#define MU_TOON_GRASS']);
 
     setGameOption('renderingStyle', 1);
     syncRenderingStyle();
     expect(toonRampActive()).toBe(true);
     expect(toonFlatActive()).toBe(false);
+    expect(toonTerrainDefines()).toEqual([]);
 
     setGameOption('renderingStyle', 0);
     syncRenderingStyle();
     expect(toonRampActive()).toBe(false);
+  });
+
+  it('gates the grass outline and the effects on their toggles and the Anime style', () => {
+    setGameOption('lightingQuality', 1);
+    setGameOption('renderingStyle', 2);
+    setGameOption('grassOutline', true);
+    setGameOption('animeEffects', true);
+    syncRenderingStyle();
+    expect(toonGrassActive()).toBe(true);
+    expect(toonEffectsActive()).toBe(true);
+
+    setGameOption('grassOutline', false);
+    setGameOption('animeEffects', false);
+    syncRenderingStyle();
+    expect(toonGrassActive()).toBe(false);
+    expect(toonEffectsActive()).toBe(false);
+    expect(toonTerrainDefines()).toEqual(['#define MU_TOON_FLAT']);
+
+    setGameOption('grassOutline', true);
+    setGameOption('animeEffects', true);
+    setGameOption('renderingStyle', 1);
+    syncRenderingStyle();
+    expect(toonGrassActive()).toBe(false);
+    expect(toonEffectsActive()).toBe(false);
+
+    setGameOption('renderingStyle', 2);
+    setGameOption('lightingQuality', 0);
+    syncRenderingStyle();
+    expect(toonGrassActive()).toBe(false);
+    expect(toonEffectsActive()).toBe(false);
+  });
+
+  it('compiles the Ultra extras on the Ultra tier with the Anime style alone', () => {
+    setGameOption('renderingStyle', 2);
+    setGameOption('lightingQuality', 1);
+    syncRenderingStyle();
+    expect(toonUltraActive()).toBe(false);
+
+    setGameOption('lightingQuality', 2);
+    syncRenderingStyle();
+    expect(toonUltraActive()).toBe(true);
+
+    setGameOption('renderingStyle', 1);
+    syncRenderingStyle();
+    expect(toonUltraActive()).toBe(false);
+  });
+
+  it('binds the highlight for the figures alone and the hatching for everyone', () => {
+    setGameOption('renderingStyle', 2);
+    setGameOption('lightingQuality', 2);
+    syncRenderingStyle();
+
+    const { effect, setFloat4 } = stubEffect();
+    bindToon(effect, true);
+    bindToon(effect, false);
+    const ultra = written(setFloat4, TOON_ULTRA_UNIFORM);
+    expect(ultra).toHaveLength(2);
+    expect(ultra[0][0]).toBeGreaterThan(0);
+    expect(ultra[1][0]).toBe(0);
+    expect(ultra[0][2]).toBe(ultra[1][2]);
+    expect(ultra[0][2]).toBeGreaterThan(0);
+
+    setGameOption('lightingQuality', 1);
+    syncRenderingStyle();
+    const enhanced = stubEffect();
+    bindToon(enhanced.effect, true);
+    expect(written(enhanced.setFloat4, TOON_ULTRA_UNIFORM)).toEqual([]);
+  });
+
+  it('hands the grass its outline width in pixels, scaled with the frame', () => {
+    setGameOption('renderingStyle', 2);
+    setGameOption('lightingQuality', 1);
+    setGameOption('lineWidth', 3);
+    setGameOption('grassOutline', true);
+
+    syncRenderingStyle(900);
+    let stub = stubEffect();
+    bindToon(stub.effect, false);
+    expect(written(stub.setFloat4, TOON_FILTER_UNIFORM)[0][3]).toBe(3);
+
+    syncRenderingStyle(1800);
+    stub = stubEffect();
+    bindToon(stub.effect, false);
+    expect(written(stub.setFloat4, TOON_FILTER_UNIFORM)[0][3]).toBe(6);
   });
 
   it('leaves the ink lines to their own sliders and keeps the rim', () => {
@@ -222,7 +314,7 @@ describe('the material snapshot', () => {
 describe('the GLSL helpers', () => {
   it('compile under the style defines only', () => {
     const glsl = toonFunctionsGlsl();
-    expect(glsl).toContain('#if defined(MU_TOON) || defined(MU_TOON_FLAT)');
+    expect(glsl).toContain('#if defined(MU_TOON) || defined(MU_TOON_FLAT) || defined(MU_TOON_GRASS)');
     expect(glsl).toContain('#ifdef MU_TOON_FLAT');
     expect(glsl).toContain('muToonBands');
     expect(glsl).toContain('muToonStep');

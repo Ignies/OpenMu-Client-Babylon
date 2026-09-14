@@ -126,7 +126,7 @@ export function terrainLightDeclarationsGlsl(clouds: boolean): string {
   // floor gain, the fade and the dynamic gain.
   uniform vec4 groundLightPos[${GROUND_POINT_LIGHTS}];
   uniform vec4 groundLightCol[${GROUND_POINT_LIGHTS}];
-  uniform vec4 ${TOON_FILTER_UNIFORM}; // x mip bias, y tone levels, z grass ink, w its start along the blade
+  uniform vec4 ${TOON_FILTER_UNIFORM}; // x mip bias, y tone levels, z grass outline darkness, w its width in pixels
 
   const float GROUND_CEIL_KNEE = ${GROUND_CEIL_KNEE.toFixed(3)};
   const float GROUND_CEIL_ROOM = ${(GROUND_CEIL_ASYMPTOTE - GROUND_CEIL_KNEE).toFixed(3)};

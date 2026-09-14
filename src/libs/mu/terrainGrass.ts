@@ -15,6 +15,7 @@ import { CLOUD_UNIFORMS } from '../../lighting/clouds';
 import { ENUM_WORLD } from '../../common/types';
 import { GameOptions } from '../../common/gameOptions';
 import { tierIndex } from '../../common/lightingQuality';
+import { grassInkStart } from '../../common/renderingStyle';
 import { GRASS_CARD_SLOTS, type GrassCards } from './terrainGrassCards';
 import { SNOW_COVER } from './terrainOverlay';
 import { snowCover } from '../../weather/snowCover';
@@ -298,6 +299,14 @@ const CLUMPS_PER_TILE = 4;
 const CLUMP_SPREAD = 0.34;
 
 /**
+ * The Anime outline (renderingStyle.ts): the side lines never take more than
+ * this share of the blade's half width, and they fade out below this point
+ * along the blade (root 0, tip 1), baked into the shader text.
+ */
+const GRASS_INK_MAX_SHARE = 0.75;
+const GRASS_INK_START_GLSL = grassInkStart().toFixed(2);
+
+/**
  * Form shading on the detailed blade: how far a face turned toward the sun
  * sits above one turned away.
  *
@@ -556,7 +565,8 @@ ${detailed ? `  uniform vec4 grassActors[${GRASS_ACTORS}];` : ''}
   varying float vBurn; // 0 whole, 1 taken by the fire
   varying float vHeat; // 1 just burnt, 0 once the ember has gone out
   varying float vSeed; // the blade hash, so its dissolve is its own
-${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;' : ''}
+  varying float vU; // -1..1 across the blade, for its outline
+${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;' : ''}
 
   void main() {
       float v = position.y;
@@ -711,6 +721,7 @@ ${
       vViewZ = (view * vec4(world, 1.0)).z;
       vBake = iTint.rgb;
       vV = v;
+      vU = uv.x;
 
       // The blade's colour comes from the map's own grass *card*
       // (terrainGrassCards.ts), not from the ground tile it stands on: the
@@ -751,8 +762,7 @@ ${
       // presents it sideways.
       vec3 faceN = normalize(vec3(facing.x, curve * 1.6, facing.y));
       vFace = faceN;
-      vSide = vec3(side.x, 0.0, side.y);
-      vU = uv.x;`
+      vSide = vec3(side.x, 0.0, side.y);`
     : ''
 }
 
@@ -771,7 +781,8 @@ ${
   varying float vBurn;
   varying float vHeat;
   varying float vSeed;
-${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  varying float vU;\n  uniform vec3 grassSun;' : ''}
+  varying float vU;
+${detailed ? '  varying vec3 vFace;\n  varying vec3 vSide;\n  uniform vec3 grassSun;' : ''}
   uniform float grassTransmit;
 
 ${terrainLightDeclarationsGlsl(true)}
@@ -806,11 +817,25 @@ ${
       : 0.0;
     f = mix(f, dot(f, ${LUMA_GLSL}) * (extraLit / max(dynLuma, 1e-4)), through);
 
-    // The Anime style's ink on the blade: at the tip, gone at the root
-    // (renderingStyle.ts). A blade is too thin on screen for a line around
-    // it, so the tip itself is the line.
-  #ifdef MU_TOON_FLAT
-    f *= 1.0 - muToonFilter.z * smoothstep(muToonFilter.w, 1.0, vV);
+    // The Anime style's outline on the blade (renderingStyle.ts, the Grass
+    // outline toggle): an ink line along the blade's two edges and across
+    // its tip, as wide on screen as the ink lines (muToonFilter.w, pixels),
+    // full at the tip and fading toward the root, where the blades stand too
+    // close for lines to read as anything but mud. The distances come from
+    // the strap's own coordinates through their screen derivatives, so the
+    // line keeps its pixel width at every range. On a blade only a few
+    // pixels wide the two edges would meet, so the line stops short of the
+    // centre and a sliver of the blade's colour survives between them.
+  #ifdef MU_TOON_GRASS
+    {
+      float acrossPx = 1.0 / max(fwidth(vU), 1e-4);
+      float alongPx = 1.0 / max(fwidth(vV), 1e-4);
+      float sidePx = min(muToonFilter.w, acrossPx * ${GRASS_INK_MAX_SHARE.toFixed(2)});
+      float side = 1.0 - smoothstep(sidePx - 0.5, sidePx + 0.5, (1.0 - abs(vU)) * acrossPx);
+      float tip = 1.0 - smoothstep(muToonFilter.w - 0.5, muToonFilter.w + 0.5, (1.0 - vV) * alongPx);
+      float fade = smoothstep(${GRASS_INK_START_GLSL}, 1.0, vV);
+      f *= 1.0 - muToonFilter.z * max(side, tip) * fade;
+    }
   #endif
 
     f = mix(f, pow(max(f, vec3(0.0)), vec3(2.2)), linearOut);
