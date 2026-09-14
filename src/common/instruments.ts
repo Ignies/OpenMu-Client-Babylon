@@ -63,9 +63,9 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     sustained: false,
     model: 'Item/Instrument_Guitar.glb',
     bone: LEFT_HAND,
-    // Neck in the left hand, body out to the side. Tune live with
+    // Neck in the left hand, body down at the hip. Tune live with
     // `?instRot=` / `?instOff=` or `__bandLink`.
-    link: { angle: [0, 0, -90], offset: [0, 0, 0] },
+    link: { angle: [0, 0, -90], offset: [-25, 0, 0] },
     clip: A.PLAYER_STOP_TWO_HAND_SWORD_TWO,
     clipSpeed: 0.24,
     twitch: { bone: RIGHT_FOREARM, axis: [1, 0, 0], degrees: 12 },
