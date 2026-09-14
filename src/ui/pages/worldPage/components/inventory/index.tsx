@@ -15,6 +15,7 @@ import {
   usedMask,
 } from '../../../../components/itemGrid';
 import { ItemsDatabase } from '../../../../../common/itemsDatabase';
+import { goldColor } from '../../../../../common/goldColor';
 import {
   ITEM_HOTKEY_CODES,
   canRegisterItemHotkey,
@@ -629,7 +630,11 @@ export const Inventory = observer(() => {
       />
       <div
         className="inventory-money"
-        style={{ left: MONEY_TEXT_X, top: MONEY_TEXT_Y }}
+        style={{
+          left: MONEY_TEXT_X,
+          top: MONEY_TEXT_Y,
+          color: goldColor(playerData.money),
+        }}
       >
         {playerData.money.toLocaleString('en-US')}
       </div>

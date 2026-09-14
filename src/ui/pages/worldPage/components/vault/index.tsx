@@ -13,6 +13,7 @@ import { BulkMove } from '../../../../../common/bulkMove';
 import { QuickItemActions } from '../../../../../common/quickItemActions';
 import { isJewel, itemDef } from '../../../../../common/itemStats';
 import { useEventBus } from '../../../../../hooks/useEventBus';
+import { goldColor } from '../../../../../common/goldColor';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,
@@ -170,7 +171,11 @@ export const Vault = observer(() => {
       />
       <div
         className="vault-money"
-        style={{ right: 190 - MONEY_TEXT_RIGHT, top: MONEY_TEXT_Y }}
+        style={{
+          right: 190 - MONEY_TEXT_RIGHT,
+          top: MONEY_TEXT_Y,
+          color: goldColor(Economy.vaultMoney),
+        }}
       >
         {Economy.vaultMoney.toLocaleString('en-US')}
       </div>
