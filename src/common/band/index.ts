@@ -28,7 +28,7 @@ import {
   PERCUSSION_CHANNEL,
   canRender,
   masterMask,
-  ownerOf,
+  ownersOf,
   withMember,
   withoutMember,
   type BandMember,
@@ -167,14 +167,15 @@ function voiceLocal(ev: MidiEvent, when: number): void {
   }
 }
 
-/** Which channels the hero voices: everything but what members took, and percussion only if the row renders it. */
+/**
+ * Which channels the hero's own sequencer voices: all of its song (a band
+ * doubles the master, it takes nothing from them), percussion only if the
+ * row renders it. A member's sequencer never runs; their notes come off the
+ * master's stream in `voiceRemote`.
+ */
 function refreshLocalMask(): void {
   const instrument = Band.instrument;
-  let mask = Band.band ? masterMask(Band.band) : ALL_CHANNELS;
-  if (Band.role === 'member' && Band.band) {
-    const me = Band.band.members.find(m => m.netId === Store.playerId);
-    mask = me?.channelMask ?? 0;
-  }
+  let mask = Band.role === 'member' ? 0 : ALL_CHANNELS;
   if (!instrument || !canRender(instrument, PERCUSSION_CHANNEL)) mask &= ~(1 << PERCUSSION_CHANNEL);
   sequencer.localMask = mask;
 }
@@ -338,8 +339,8 @@ export function setBandAvailable(available: boolean): void {
 
 // ---- 4. bands: the hero's side --------------------------------------------
 
-/** Join another performer's band with the instrument in hand, taking `channelMask`. */
-export function joinBand(masterId: number, channelMask: number): void {
+/** Join another performer's band with the instrument in hand, doubling the channels in `channelMask`. */
+export function joinBand(masterId: number, channelMask = ALL_CHANNELS): void {
   const instrument = Band.instrument;
   if (!instrument || Band.phase === 'playing' || Band.phase === 'paused') return;
   transport.join(masterId, instrumentIndex(instrument), channelMask);
@@ -438,9 +439,22 @@ export function remoteStop(netId: number): void {
   remote.receiver.stop();
   const world = Store.world;
   if (world) stopPerforming(world, remote.entity);
-  // Members were voicing this master's channels; their own performing state stays.
-  for (const member of remote.band.members) dropPerformer(keyOf(member.netId));
+  // Members were doubling this master; their own performing state stays.
+  const self = Store.playerId ?? -1;
+  for (const member of remote.band.members) {
+    if (member.netId !== self) dropPerformer(keyOf(member.netId));
+  }
   dropPerformer(keyOf(netId));
+  if (Band.role === 'member' && Band.band?.masterId === netId) {
+    // The master stopped (the proxy already dropped the band): solo again,
+    // with the instrument still in hand.
+    allNotesOff(HERO_KEY);
+    runInAction(() => {
+      Band.role = 'solo';
+      Band.band = null;
+    });
+    refreshLocalMask();
+  }
   if (remotes.size === 0 && remoteTimer) {
     clearInterval(remoteTimer);
     remoteTimer = null;
@@ -459,28 +473,38 @@ export function isRemotePerformer(netId: number): boolean {
   return remotes.has(netId);
 }
 
+/**
+ * A note off a remote master's stream, voiced by everyone in that band who
+ * holds the channel: the master on their instrument where they stand, each
+ * member on theirs where they stand - and the hero, when a member, on the
+ * hero's own key, which is never attenuated.
+ */
 function voiceRemote(remote: Remote, ev: BatchEvent, when: number): void {
   const channel = ev.status & 0x0f;
-  const owner = ownerOf(remote.band, channel);
-  const member = remote.band.members.find(m => m.netId === owner);
-  const instrument = member ? member.instrument : remote.instrument;
-  if (!canRender(instrument, channel)) return;
-  const key = keyOf(owner);
   const kind = ev.status & 0xf0;
-  if (kind === 0x90 && ev.d2 > 0) {
-    noteOn(key, instrument, channel, ev.d1, ev.d2, when);
-    const entity = owner === remote.entity.netId ? remote.entity : Store.world?.getByNetId(owner);
-    if (entity) queueHit(entity, when);
-  } else if (kind === 0x80 || kind === 0x90) {
-    noteOff(key, channel, ev.d1, when);
-  } else if (kind === 0xb0) {
-    allNotesOff(key);
+  const self = Store.playerId ?? -1;
+  for (const owner of ownersOf(remote.band, channel)) {
+    const member = owner === remote.band.masterId ? null : remote.band.members.find(m => m.netId === owner);
+    const instrument = member ? member.instrument : remote.instrument;
+    if (!canRender(instrument, channel)) continue;
+    const key = owner === self ? HERO_KEY : keyOf(owner);
+    if (kind === 0x90 && ev.d2 > 0) {
+      noteOn(key, instrument, channel, ev.d1, ev.d2, when);
+      const entity =
+        owner === self ? heroEntity() : owner === remote.entity.netId ? remote.entity : Store.world?.getByNetId(owner);
+      if (entity) queueHit(entity, when);
+    } else if (kind === 0x80 || kind === 0x90) {
+      noteOff(key, channel, ev.d1, when);
+    } else if (kind === 0xb0) {
+      allNotesOff(key);
+    }
   }
 }
 
 function silenceRemote(remote: Remote): void {
+  const self = Store.playerId ?? -1;
   allNotesOff(keyOf(remote.entity.netId));
-  for (const m of remote.band.members) allNotesOff(keyOf(m.netId));
+  for (const m of remote.band.members) allNotesOff(m.netId === self ? HERO_KEY : keyOf(m.netId));
 }
 
 /** Map change or logout: every stream gone, the hero's instrument away. */

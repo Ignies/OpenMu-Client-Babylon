@@ -56,12 +56,23 @@ export type BandStats = {
   batchesRelayed: number;
   framesSent: number;
   dropped: { malformed: number; rate: number; order: number; backpressure: number; closed: number };
-  stopped: { flood: number; order: number; gone: number; idle: number };
+  stopped: { flood: number; order: number; gone: number };
   refused: number;
 };
 
 /** Seconds a socket that answered `send` with backpressure is left alone. */
 const BACKPRESSURE_SKIP_MS = 1000;
+
+/** Refusal causes as the log names them. */
+const REFUSE_NAMES: Record<number, string> = {
+  [RefuseCause.Cooldown]: 'cooldown',
+  [RefuseCause.Busy]: 'busy',
+  [RefuseCause.Full]: 'full',
+  [RefuseCause.Range]: 'out of range',
+  [RefuseCause.Map]: 'another map',
+  [RefuseCause.NotPerforming]: 'not performing',
+  [RefuseCause.Rate]: 'too fast',
+};
 
 /** Milliseconds between two channelNames frames from one master. */
 const NAMES_INTERVAL_MS = 5000;
@@ -86,7 +97,6 @@ type Performer = {
   map: number;
   instrument: number;
   startedAt: number;
-  lastFrameAt: number;
   seq: number | null;
   offset0: number | null;
   dropped: number;
@@ -123,7 +133,7 @@ export class BandHub {
     batchesRelayed: 0,
     framesSent: 0,
     dropped: { malformed: 0, rate: 0, order: 0, backpressure: 0, closed: 0 },
-    stopped: { flood: 0, order: 0, gone: 0, idle: 0 },
+    stopped: { flood: 0, order: 0, gone: 0 },
     refused: 0,
   };
 
@@ -196,12 +206,13 @@ export class BandHub {
         this.onStart(state, message, plain, now);
         return;
       case BandSub.Stop:
+        // Putting the instrument away ends both: the performance (the pose
+        // others see) and any band membership.
         if (state.performing) {
           this.endPerformance(state.performing, StopReason.Ended);
           state.cooldownUntil = now + BAND_LIMITS.cooldownAfterEndMs;
-        } else if (state.memberOf) {
-          this.leave(state, false);
         }
+        if (state.memberOf) this.leave(state, false);
         return;
       case BandSub.Batch:
         this.onBatch(state, message, plain, now);
@@ -237,14 +248,13 @@ export class BandHub {
     }
   }
 
-  /** Idle performers, performers who left their map, members who wandered off. Every few seconds. */
+  /**
+   * Performers who left their map, members who wandered off. Every few
+   * seconds. A performer whose song is over stays: an instrument held out
+   * costs nothing, and a dead socket ends its performance in `detach`.
+   */
   sweep(now = this.now()): void {
     for (const perf of Array.from(this.performers.values())) {
-      if (now - perf.lastFrameAt > BAND_LIMITS.idleStopMs) {
-        this.counters.stopped.idle++;
-        this.endPerformance(perf, StopReason.Ended);
-        continue;
-      }
       this.refreshReceivers(perf, now, true);
       if (!this.performers.has(perf.id)) continue;
       for (const member of Array.from(perf.members)) {
@@ -290,32 +300,39 @@ export class BandHub {
   private refuse(state: PeerState, what: number, cause: number, arg = 0): void {
     this.counters.refused++;
     const id = state.peer.track.objectId ?? 0;
+    this.log(`band: #${id} refused (${what === RefuseWhat.Start ? 'start' : 'join'}, ${REFUSE_NAMES[cause] ?? cause})`);
     this.trySend(state, encodeRefused(id, what, cause, arg), this.now());
   }
 
+  /**
+   * `start` is "instrument out": the pose and the model everyone sees. A
+   * performer sending it again has switched instruments, so the old
+   * performance ends quietly for them (the receivers get the stop and the
+   * new start); a band member may hold an instrument too, that is how they
+   * are seen playing.
+   */
   private onStart(state: PeerState, message: Extract<BandClientMessage, { sub: 1 }>, plain: Uint8Array, now: number): void {
     const track = state.peer.track;
     if (message.version !== BAND_VERSION) {
       this.strike(state, now, 'malformed');
       return;
     }
-    if (state.performing || state.memberOf) {
-      this.refuse(state, RefuseWhat.Start, RefuseCause.Busy);
-      return;
-    }
-    if (now < state.cooldownUntil) {
+    const previous = state.performing;
+    if (!previous && now < state.cooldownUntil) {
       this.refuse(state, RefuseWhat.Start, RefuseCause.Cooldown, Math.min(255, Math.ceil((state.cooldownUntil - now) / 1000)));
       return;
     }
-    if (this.performers.size >= this.maxPerformers) {
-      this.refuse(state, RefuseWhat.Start, RefuseCause.Full);
-      return;
-    }
-    let onMap = 0;
-    for (const perf of this.performers.values()) if (perf.map === track.map) onMap++;
-    if (onMap >= this.maxPerformersPerMap) {
-      this.refuse(state, RefuseWhat.Start, RefuseCause.Full);
-      return;
+    if (!previous) {
+      if (this.performers.size >= this.maxPerformers) {
+        this.refuse(state, RefuseWhat.Start, RefuseCause.Full);
+        return;
+      }
+      let onMap = 0;
+      for (const perf of this.performers.values()) if (perf.map === track.map) onMap++;
+      if (onMap >= this.maxPerformersPerMap) {
+        this.refuse(state, RefuseWhat.Start, RefuseCause.Full);
+        return;
+      }
     }
 
     const id = track.objectId ?? 0;
@@ -325,7 +342,6 @@ export class BandHub {
       map: track.map ?? -1,
       instrument: message.instrument,
       startedAt: now,
-      lastFrameAt: now,
       seq: null,
       offset0: null,
       dropped: 0,
@@ -340,9 +356,11 @@ export class BandHub {
       receivers: new Set(),
       receiversAt: 0,
     };
-    // A stale entry under the same id (a reconnect the tracker has not closed yet) gives way.
+    // The same peer switching instruments, or a stale entry under the same
+    // id (a reconnect the tracker has not closed yet): the old one gives
+    // way. Only the stale socket is told; the switching one is still going.
     const stale = this.performers.get(id);
-    if (stale) this.endPerformance(stale, StopReason.Gone);
+    if (stale) this.endPerformance(stale, stale === previous ? StopReason.Ended : StopReason.Gone, stale !== previous);
     this.performers.set(id, perf);
     state.performing = perf;
     this.counters.performers = this.performers.size;
@@ -350,13 +368,13 @@ export class BandHub {
     // Every receiver is new to this performance, so the refresh is what
     // hands them the start.
     this.refreshReceivers(perf, now, false);
+    this.log(`band: #${id} starts playing instrument ${message.instrument} on map ${perf.map} (${perf.receivers.size} receivers)`);
   }
 
   private onBatch(state: PeerState, message: Extract<BandClientMessage, { sub: 3 }>, plain: Uint8Array, now: number): void {
     const perf = state.performing;
     if (!perf) return;
     this.counters.batchesIn++;
-    perf.lastFrameAt = now;
 
     if (perf.batches.add(now) > BAND_LIMITS.maxBatchesPerSecond) {
       this.endPerformance(perf, StopReason.Flood);
@@ -398,12 +416,14 @@ export class BandHub {
     this.counters.batchesRelayed++;
   }
 
+  /**
+   * A member keeps their own performance (their instrument is out, that is
+   * their pose on every screen) and doubles the master's notes on it; the
+   * master's client learns who joined and pushes the band state to everyone
+   * in earshot.
+   */
   private onJoin(state: PeerState, message: Extract<BandClientMessage, { sub: 4 }>, plain: Uint8Array, now: number): void {
     const track = state.peer.track;
-    if (state.performing) {
-      this.refuse(state, RefuseWhat.Join, RefuseCause.Busy);
-      return;
-    }
     if (now - state.lastJoinAt < BAND_LIMITS.joinIntervalMs) {
       this.refuse(state, RefuseWhat.Join, RefuseCause.Rate);
       return;
@@ -412,6 +432,10 @@ export class BandHub {
     const master = this.performers.get(message.masterId & 0x7fff);
     if (!master) {
       this.refuse(state, RefuseWhat.Join, RefuseCause.NotPerforming);
+      return;
+    }
+    if (master.state === state) {
+      this.refuse(state, RefuseWhat.Join, RefuseCause.Busy);
       return;
     }
     if (master.map !== track.map) {
@@ -430,6 +454,7 @@ export class BandHub {
     master.members.add(state);
     state.memberOf = master;
     track.note('band', `joins the band of #${master.id}`, { master: master.id, instrument: message.instrument });
+    this.log(`band: #${track.objectId} joins the band of #${master.id} with instrument ${message.instrument}`);
     this.trySend(master.state, stampPerformer(plain, track.objectId ?? 0), now);
   }
 
@@ -442,10 +467,12 @@ export class BandHub {
     if (id !== null) {
       this.trySend(master.state, encodeLeaveNotice(id), this.now());
       if (!quiet) state.peer.track.note('band', `leaves the band of #${master.id}`, { master: master.id });
+      this.log(`band: #${id} leaves the band of #${master.id}`);
     }
   }
 
-  private endPerformance(perf: Performer, reason: number): void {
+  /** `notifyPerformer` false: the performer is switching instruments and is not to put the new one away. */
+  private endPerformance(perf: Performer, reason: number, notifyPerformer = true): void {
     if (this.performers.get(perf.id) !== perf) return;
     this.performers.delete(perf.id);
     perf.state.performing = null;
@@ -459,15 +486,20 @@ export class BandHub {
       perf.state.cooldownUntil = now + BAND_LIMITS.cooldownAfterStopMs;
     }
 
+    // One notice each: a member is usually a receiver too.
     const notice = encodeStopNotice(perf.id, reason);
-    for (const receiver of perf.receivers) this.trySend(receiver, notice, now);
+    const told = new Set<PeerState>();
+    for (const receiver of perf.receivers) {
+      this.trySend(receiver, notice, now);
+      told.add(receiver);
+    }
     perf.receivers.clear();
     for (const member of Array.from(perf.members)) {
       member.memberOf = null;
-      this.trySend(member, notice, now);
+      if (!told.has(member)) this.trySend(member, notice, now);
     }
     perf.members.clear();
-    this.trySend(perf.state, notice, now);
+    if (notifyPerformer) this.trySend(perf.state, notice, now);
 
     const why = reason === StopReason.Flood ? 'too many notes' : reason === StopReason.Order ? 'notes out of order' : reason === StopReason.Gone ? 'gone' : 'ended';
     perf.state.peer.track.note('band', `stops playing (${why})`, { reason });
@@ -484,6 +516,7 @@ export class BandHub {
    */
   private refreshReceivers(perf: Performer, now: number, force: boolean): void {
     if (!force && now - perf.receiversAt < BAND_LIMITS.receiversTtlMs) return;
+    const first = perf.receiversAt === 0;
     perf.receiversAt = now;
 
     const me = perf.state.peer.track;
@@ -508,16 +541,22 @@ export class BandHub {
     }
 
     const next = new Set(candidates);
+    let changed = false;
     for (const state of perf.receivers) {
-      if (!next.has(state)) this.trySend(state, encodeStopNotice(perf.id, StopReason.Gone), now);
+      if (!next.has(state)) {
+        this.trySend(state, encodeStopNotice(perf.id, StopReason.Gone), now);
+        changed = true;
+      }
     }
     for (const state of next) {
       if (!perf.receivers.has(state)) {
         this.trySend(state, perf.startFrame, now);
         if (perf.stateFrame) this.trySend(state, perf.stateFrame, now);
+        changed = true;
       }
     }
     perf.receivers = next;
+    if (changed && !first) this.log(`band: #${perf.id} now has ${next.size} receivers`);
   }
 
   private relay(perf: Performer, frame: Uint8Array, now: number): void {

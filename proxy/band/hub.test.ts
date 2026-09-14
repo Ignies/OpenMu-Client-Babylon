@@ -210,20 +210,56 @@ describe('band hub', () => {
     expect(a.sent[a.sent.length - 1]).toMatchObject({ sub: BandSub.Stop, reason: StopReason.Order });
   });
 
-  it('refuses a second start and a start from a band member', () => {
+  it('restarts a performer who switches instruments without telling them to put it away', () => {
+    clock = 1_000_000;
+    const h = hub();
+    const a = makePeer(1);
+    const b = makePeer(2, { x: 103, y: 100, sees: [1] });
+    h.attach(a.peer);
+    h.attach(b.peer);
+    h.receive(a.peer, xor(encodeStart(0)));
+    h.receive(a.peer, xor(encodeStart(1)));
+    expect(a.sent).toEqual([]);
+    expect(h.stats().performers).toBe(1);
+    // The room sees the guitar go and the flute come.
+    expect(b.sent.map(m => m.sub)).toEqual([BandSub.Start, BandSub.Stop, BandSub.Start]);
+    expect(b.sent[2]).toMatchObject({ sub: BandSub.Start, performerId: 1, instrument: 1 });
+    // The new performance streams as usual.
+    h.receive(a.peer, xor(encodeBatch(0, 0, [note(60)])));
+    expect(b.sent[3].sub).toBe(BandSub.Batch);
+  });
+
+  it('lets a performer with an instrument out join a band, and keeps their performance', () => {
     clock = 1_000_000;
     const h = hub();
     const a = makePeer(1);
     const g = makePeer(2, { x: 103, y: 100, sees: [1] });
-    h.attach(a.peer);
-    h.attach(g.peer);
+    const c = makePeer(3, { x: 101, y: 100, sees: [1, 2] });
+    for (const f of [a, g, c]) h.attach(f.peer);
     h.receive(a.peer, xor(encodeStart(0)));
-    h.receive(a.peer, xor(encodeStart(1)));
-    expect(a.sent[a.sent.length - 1]).toMatchObject({ sub: BandSub.Refused, cause: RefuseCause.Busy });
-
-    h.receive(g.peer, xor(encodeJoin(1, 2, 0b10)));
     h.receive(g.peer, xor(encodeStart(2)));
-    expect(g.sent[g.sent.length - 1]).toMatchObject({ sub: BandSub.Refused, cause: RefuseCause.Busy });
+    h.receive(g.peer, xor(encodeJoin(1, 2, 0xffff)));
+    expect(g.sent.filter(m => m.sub === BandSub.Refused)).toEqual([]);
+    expect(a.sent[a.sent.length - 1]).toEqual({ sub: BandSub.Join, performerId: 2, masterId: 1, instrument: 2, mask: 0xffff });
+    expect(h.stats()).toMatchObject({ performers: 2, members: 1 });
+    // The member's pose is still out for the room.
+    expect(c.sent.filter(m => m.sub === BandSub.Stop)).toEqual([]);
+
+    // Joining their own band is refused; the master stopping dissolves it.
+    h.receive(a.peer, xor(encodeJoin(1, 0, 1)));
+    expect(a.sent[a.sent.length - 1]).toMatchObject({ sub: BandSub.Refused, cause: RefuseCause.Busy });
+    h.receive(a.peer, xor(encodeStop()));
+    expect(g.sent[g.sent.length - 1]).toEqual({ sub: BandSub.Stop, performerId: 1, reason: StopReason.Ended, arg: 0 });
+    expect(h.stats()).toMatchObject({ performers: 1, members: 0 });
+
+    // Putting the instrument away as a member ends both the performance and the membership.
+    clock += BAND_LIMITS.cooldownAfterEndMs + BAND_LIMITS.joinIntervalMs + 1;
+    h.receive(a.peer, xor(encodeStart(0)));
+    h.receive(g.peer, xor(encodeJoin(1, 2, 1)));
+    expect(h.stats()).toMatchObject({ performers: 2, members: 1 });
+    h.receive(g.peer, xor(encodeStop()));
+    expect(h.stats()).toMatchObject({ performers: 1, members: 0 });
+    expect(a.sent[a.sent.length - 1]).toEqual({ sub: BandSub.Leave, performerId: 2 });
   });
 
   it('runs a band: join within range, leave, and the master stopping', () => {
@@ -317,17 +353,18 @@ describe('band hub', () => {
     expect(h.stats().dropped.malformed).toBe(0);
   });
 
-  it('ends an idle performance on sweep', () => {
+  it('keeps a performer whose song is over across sweeps', () => {
     clock = 1_000_000;
     const h = hub();
     const a = makePeer(1);
     h.attach(a.peer);
     h.receive(a.peer, xor(encodeStart(0)));
-    clock += BAND_LIMITS.idleStopMs + 1;
-    h.sweep();
-    expect(h.stats().performers).toBe(0);
-    expect(h.stats().stopped.idle).toBe(1);
-    expect(a.sent[a.sent.length - 1]).toMatchObject({ sub: BandSub.Stop, reason: StopReason.Ended });
+    for (let i = 0; i < 100; i++) {
+      clock += 60_000;
+      h.sweep();
+    }
+    expect(h.stats().performers).toBe(1);
+    expect(a.sent).toEqual([]);
   });
 
   it('says hello with the protocol version', () => {

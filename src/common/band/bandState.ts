@@ -2,9 +2,11 @@ import { instrumentById, type InstrumentId } from '../instruments';
 
 /**
  * Who voices which channel of a performance. The master voices every
- * channel nobody has taken; a member's mask is the channels they took on
- * their own instrument. Channel 9 (MIDI 10, percussion) is only ever voiced
- * by an instrument whose row says so - none does yet, so it is silent.
+ * channel of their song; a member doubles it on their own instrument, from
+ * where they stand, on the channels in their mask (Space Station 14's
+ * band: one file, every instrument in the band plays it). Channel 9 (MIDI
+ * 10, percussion) is only ever voiced by an instrument whose row says so -
+ * none does yet, so it is silent.
  *
  * Pure data; the same shape travels in the `bandState` frame.
  */
@@ -37,15 +39,16 @@ export function takenChannels(state: BandState): number {
   return mask & ALL_CHANNELS;
 }
 
-/** The net id that voices `channel`: the member holding it, else the master. */
-export function ownerOf(state: BandState, channel: number): number {
-  for (const m of state.members) if (hasChannel(m.channelMask, channel)) return m.netId;
-  return state.masterId;
+/** Everyone who voices `channel`: the master first, then each member whose mask has it. */
+export function ownersOf(state: BandState, channel: number): number[] {
+  const owners = [state.masterId];
+  for (const m of state.members) if (hasChannel(m.channelMask, channel)) owners.push(m.netId);
+  return owners;
 }
 
-/** The mask the master voices itself: everything not taken. */
-export function masterMask(state: BandState): number {
-  return ALL_CHANNELS & ~takenChannels(state);
+/** The mask the master voices: all of it, a band takes nothing away from them. */
+export function masterMask(_state: BandState): number {
+  return ALL_CHANNELS;
 }
 
 /** Whether an instrument may voice a channel at all. */
