@@ -108,13 +108,23 @@ export function installBandNet(): void {
   };
   setBandTransport(transport);
 
-  EventBus.on('wsClosed', () => setBandAvailable(false));
+  // The hello arrives on the game socket. Availability is tied to that
+  // socket, not to "a socket closed": the connect-server socket is shut
+  // after the game socket opens, and its close can land after the hello.
+  let helloSocket: WebSocket | null = null;
+
+  EventBus.on('wsClosed', ({ socket }) => {
+    if (socket !== helloSocket) return;
+    helloSocket = null;
+    setBandAvailable(false);
+  });
 
   EventBus.on('BandRelay', view => {
     const msg = decodeRelayFrame(new Uint8Array(view.buffer, view.byteOffset, view.byteLength));
     if (!msg) return;
 
     if (msg.sub === BandSub.Hello) {
+      helloSocket = Store.gsSocket ?? null;
       setBandAvailable(msg.version === BAND_VERSION);
       return;
     }

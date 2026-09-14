@@ -131,7 +131,10 @@ export const InstrumentWindow = observer(() => {
         text={`${t('instrument.title')} - ${t(def.labelKey)}`}
       />
 
-      <div className="band-body">
+      {/* The chrome drags (and captures the pointer) on any press outside
+          `data-no-drag`, which would swallow every click in here; the title
+          strip above stays the handle. */}
+      <div className="band-body" data-no-drag="true">
         <div className="band-row">
           <button
             type="button"
@@ -258,7 +261,7 @@ export const InstrumentWindow = observer(() => {
         </div>
       </div>
 
-      <div className="band-close" onClick={() => toggleInstrumentWindow(false)} />
+      <div className="band-close" data-no-drag="true" onClick={() => toggleInstrumentWindow(false)} />
     </div>
   );
 });
