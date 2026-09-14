@@ -23,6 +23,8 @@ const TIER_NAMES = ['Classic', 'Enhanced', 'Ultra'];
 
 const TONE_MAPPER_LABELS = ['None', 'Standard', 'ACES', 'Neutral'];
 
+const STYLE_NAMES = ['Classic', 'Cel', 'Anime'];
+
 const signed = (value: number): string =>
   value === 0 ? 'off' : value > 0 ? `+${value}` : String(value);
 
@@ -83,6 +85,7 @@ registerDebugModule({
         `ev ${s.ev.toFixed(2)} gain ${s.keyGain.toFixed(3)} scene ${s.key.sceneGain.toFixed(3)} exposure ${s.exposure.toFixed(3)}`
     ),
     state('Tone mapper', s => s.toneMapper),
+    state('Style', s => `${STYLE_NAMES[s.style] ?? s.style} (${s.style})`),
     state(
       'Shadow',
       s =>

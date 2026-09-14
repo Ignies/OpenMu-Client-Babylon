@@ -11,7 +11,8 @@ import type { TextKey } from '../../../i18n';
  * defaults. Classic ignores the tone mapper and bloom (no image-processing
  * pass, no bloom on tier 0), so its row keeps the shared defaults rather
  * than zeros that would follow the player up to Enhanced. The Rendering
- * checks are left alone: they are the player's own costs, not part of a look.
+ * checks are left alone: they are the player's own costs, not part of a look,
+ * and so is the rendering style.
  */
 export type TierPreset = Pick<
   GameOptionsType,
