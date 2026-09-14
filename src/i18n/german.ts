@@ -192,6 +192,7 @@ export const germanLayer: LanguageLayer = {
     'options.renderingStyle': 'Darstellungsstil',
     'options.shadeSteps': 'Schattierungsstufen',
     'options.styleStrength': 'Stilstärke',
+    'options.lineStrength': 'Linienintensität',
     'options.lineWidth': 'Linienstärke',
     'options.itemEffects': 'Gegenstandseffekte',
     'options.sharpness': 'Schärfe',

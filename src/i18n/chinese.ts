@@ -193,6 +193,7 @@ export const chineseLayer: LanguageLayer = {
     'options.renderingStyle': '渲染风格',
     'options.shadeSteps': '明暗层级',
     'options.styleStrength': '风格强度',
+    'options.lineStrength': '线条强度',
     'options.lineWidth': '线条粗细',
     'options.itemEffects': '物品特效',
     'options.sharpness': '锐化',

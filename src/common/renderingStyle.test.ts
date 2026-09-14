@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Effect } from '../libs/babylon/exports';
 import { GameOptions, setGameOption } from './gameOptions';
 import {
+  LINE_STRENGTH_MAX,
+  LINE_STRENGTH_MIN,
   LINE_WIDTH_MAX,
   LINE_WIDTH_MIN,
   RENDERING_STYLES,
@@ -11,6 +13,7 @@ import {
   bindToon,
   inkDarkness,
   inkWidth,
+  lineStrength,
   lineWidth,
   renderingStyle,
   shadeSteps,
@@ -29,6 +32,7 @@ const initial = {
   shadeSteps: GameOptions.shadeSteps,
   styleStrength: GameOptions.styleStrength,
   lineWidth: GameOptions.lineWidth,
+  lineStrength: GameOptions.lineStrength,
 };
 
 const stubEffect = () => {
@@ -104,6 +108,11 @@ describe('renderingStyle', () => {
     expect(lineWidth()).toBe(LINE_WIDTH_MAX);
     setGameOption('lineWidth', 2.6);
     expect(lineWidth()).toBe(3);
+
+    setGameOption('lineStrength', 0);
+    expect(lineStrength()).toBe(LINE_STRENGTH_MIN);
+    setGameOption('lineStrength', 12);
+    expect(lineStrength()).toBe(LINE_STRENGTH_MAX);
   });
 });
 
@@ -132,23 +141,37 @@ describe('the material snapshot', () => {
     expect(toonRampActive()).toBe(false);
   });
 
-  it('turns the strength dial into darker lines and leaves their width alone', () => {
+  it('leaves the ink lines to their own sliders and keeps the rim', () => {
     setGameOption('lightingQuality', 1);
     setGameOption('renderingStyle', 2);
     setGameOption('lineWidth', 2);
+    setGameOption('lineStrength', 5);
 
-    setGameOption('styleStrength', 1);
-    syncRenderingStyle();
-    const low = { dark: inkDarkness(), width: inkWidth() };
+    const at = (strength: number) => {
+      setGameOption('styleStrength', strength);
+      syncRenderingStyle();
+      const { effect, setFloat4 } = stubEffect();
+      bindToon(effect, true);
+      const rim = written(setFloat4, TOON_UNIFORM)[0][2];
+      return { dark: inkDarkness(), width: inkWidth(), rim };
+    };
+    const low = at(1);
+    const high = at(9);
 
-    setGameOption('styleStrength', 9);
-    syncRenderingStyle();
-    const high = { dark: inkDarkness(), width: inkWidth() };
+    expect(high.dark).toBe(low.dark);
+    expect(high.width).toBe(low.width);
+    expect(high.rim).toBeGreaterThan(low.rim);
+  });
 
-    expect(high.dark).toBeGreaterThan(low.dark);
-    expect(high.dark).toBeLessThanOrEqual(1);
-    expect(low.width).toBe(2);
-    expect(high.width).toBe(2);
+  it('turns the line strength into darkness, black at the top', () => {
+    setGameOption('lightingQuality', 1);
+    setGameOption('renderingStyle', 2);
+    const expected = [[LINE_STRENGTH_MIN, 0.2], [5, 0.6], [LINE_STRENGTH_MAX, 1]];
+    for (const [value, darkness] of expected) {
+      setGameOption('lineStrength', value);
+      syncRenderingStyle();
+      expect(inkDarkness()).toBeCloseTo(darkness, 6);
+    }
   });
 
   it('takes the line width from its own slider', () => {

@@ -31,7 +31,8 @@ import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
  * is. The effect mask is subtracted and added back the way the haze does it,
  * so the additive half of a pixel keeps its own light.
  *
- * The style strength dial sets the darkness and the width (renderingStyle.ts).
+ * The line strength and line width sliders set the darkness and the width
+ * (renderingStyle.ts).
  * Dev seam: `?inkk=depthThreshold,normalThreshold` replaces the edge thresholds.
  */
 
