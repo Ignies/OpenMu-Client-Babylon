@@ -345,8 +345,28 @@ export type BodyShine = {
   star: boolean;
 };
 
+function disposeGltf(gltf: {
+  mesh: AbstractMesh;
+  skeleton?: Skeleton | null;
+  animationGroups: AnimationGroup[];
+}): void {
+  gltf.mesh.dispose(false, false);
+  gltf.skeleton?.dispose();
+  gltf.animationGroups.forEach(group => {
+    group.dispose();
+  });
+}
+
 export class ModelObject {
   static OverrideScale = -1;
+
+  /**
+   * Set by `dispose`. An entity can be taken out of the world while its GLB
+   * is still downloading (scope, a warp, a pet whose owner left), and the
+   * load that lands afterwards must not put the model into the scene: nothing
+   * would ever move or free it again.
+   */
+  #disposed = false;
 
   /**
    * The class does nothing per object that a prop batch cannot reproduce
@@ -961,6 +981,10 @@ export class ModelObject {
     skeleton: Skeleton;
     animationGroups: AnimationGroup[];
   }) {
+    if (this.#disposed) {
+      disposeGltf(gltf);
+      return;
+    }
     if (this.gltf === gltf) return;
 
     const oldGltf = this.gltf;
@@ -1722,6 +1746,7 @@ export class ModelObject {
   }
 
   dispose(): void {
+    this.#disposed = true;
     this.Lights?.dispose();
     this.Lights = null;
 
@@ -1733,11 +1758,7 @@ export class ModelObject {
     this._boneSocket?.dispose();
     this._boneSocket = null;
     if (this.gltf) {
-      this.gltf.mesh.dispose(false, false);
-      this.gltf.skeleton?.dispose();
-      this.gltf.animationGroups.forEach(group => {
-        group.dispose();
-      });
+      disposeGltf(this.gltf);
       this.gltf = null;
     }
 
