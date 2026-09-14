@@ -10,6 +10,7 @@ import { MuItemWindow } from '../../../../components/muWindow';
 import { ItemGrid } from '../../../../components/itemGrid';
 import { QuickItemActions } from '../../../../../common/quickItemActions';
 import { useEventBus } from '../../../../../hooks/useEventBus';
+import { goldColor } from '../../../../../common/goldColor';
 import {
   ACCEPT_FRAMES,
   ACCEPT_HEIGHT,
@@ -158,6 +159,7 @@ export const TradeWindow = observer(() => {
         style={{
           right: 190 - MONEY_TEXT_RIGHT,
           top: YOUR_MONEY_Y + MONEY_TEXT_OFFSET_Y,
+          color: goldColor(Economy.yourTradeMoney),
         }}
       >
         {Economy.yourTradeMoney.toLocaleString('en-US')}
@@ -242,6 +244,7 @@ export const TradeWindow = observer(() => {
         style={{
           right: 190 - MONEY_TEXT_RIGHT,
           top: MY_MONEY_Y + MONEY_TEXT_OFFSET_Y,
+          color: goldColor(Economy.myTradeMoney),
         }}
       >
         {Economy.myTradeMoney.toLocaleString('en-US')}

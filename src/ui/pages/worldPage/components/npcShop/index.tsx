@@ -19,6 +19,7 @@ import { QuickItemActions } from '../../../../../common/quickItemActions';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
+import { goldColor } from '../../../../../common/goldColor';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,
@@ -301,7 +302,11 @@ export const NpcShop = observer(() => {
           </div>
           <div
             className="shop-repair-money"
-            style={{ left: REPAIR_TEXT_X, top: REPAIR_TEXT_Y }}
+            style={{
+              left: REPAIR_TEXT_X,
+              top: REPAIR_TEXT_Y,
+              color: goldColor(Store.repairAllPrice),
+            }}
           >
             {Store.repairAllPrice.toLocaleString('en-US')}
           </div>
