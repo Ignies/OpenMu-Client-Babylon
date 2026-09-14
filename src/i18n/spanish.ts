@@ -203,6 +203,7 @@ export const spanishLayer: LanguageLayer = {
     'options.renderingStyle': 'Estilo de render',
     'options.shadeSteps': 'Niveles de sombra',
     'options.styleStrength': 'Intensidad del estilo',
+    'options.lineWidth': 'Grosor de línea',
     'options.itemEffects': 'Efectos de objetos',
     'options.sharpness': 'Nitidez',
     'options.filmGrain': 'Grano de película',

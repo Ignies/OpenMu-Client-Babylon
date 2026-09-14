@@ -193,6 +193,7 @@ export const italianLayer: LanguageLayer = {
     'options.renderingStyle': 'Stile di resa',
     'options.shadeSteps': "Livelli d'ombra",
     'options.styleStrength': 'Intensità dello stile',
+    'options.lineWidth': 'Spessore delle linee',
     'options.itemEffects': 'Effetti degli oggetti',
     'options.sharpness': 'Nitidezza',
     'options.filmGrain': 'Grana della pellicola',

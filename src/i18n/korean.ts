@@ -194,6 +194,7 @@ export const koreanLayer: LanguageLayer = {
     'options.renderingStyle': '렌더링 스타일',
     'options.shadeSteps': '음영 단계',
     'options.styleStrength': '스타일 강도',
+    'options.lineWidth': '선 굵기',
     'options.itemEffects': '아이템 효과',
     'options.sharpness': '선명도',
     'options.filmGrain': '필름 그레인',
