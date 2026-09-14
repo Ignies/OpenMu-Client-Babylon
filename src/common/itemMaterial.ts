@@ -16,12 +16,14 @@ import { lightingTier } from './lightingQuality';
 import {
   TOON_FILTER_UNIFORM,
   TOON_REF_UNIFORM,
+  TOON_ULTRA_UNIFORM,
   TOON_UNIFORM,
   bindToon,
   toonFlatActive,
   toonFunctionsGlsl,
   toonRampActive,
   toonTextureGlsl,
+  toonUltraActive,
 } from './renderingStyle';
 import { pointLightPoolSize } from './pointLightPool';
 import {
@@ -132,15 +134,17 @@ const BODY_LIGHT_UNIFORM = `muBodyLight`;
  * way the terrain takes its `CSM_` defines: `MU_LINEAR_LIGHT` composes
  * `lin(texel x body) x light` while the structured budget is on
  * (`linearLightActive`), `MU_WRAP` is the half-lambert response on tiers
- * >= 1, `MU_TOON` steps that response while a rendering style is on and
- * `MU_TOON_FLAT` flattens the art's tones (renderingStyle.ts). Classic
- * compiles none of them and stays byte-identical to the original's
+ * >= 1, `MU_TOON` steps that response while a rendering style is on,
+ * `MU_TOON_FLAT` flattens the art's tones and `MU_TOON_ULTRA` adds the
+ * Ultra tier's highlight and hatching (renderingStyle.ts). Classic compiles
+ * none of them and stays byte-identical to the original's
  * `texel x BodyLight x light`.
  */
 const LINEAR_LIGHT_DEFINE = 'MU_LINEAR_LIGHT';
 const WRAP_DEFINE = 'MU_WRAP';
 const TOON_DEFINE = 'MU_TOON';
 const FLAT_DEFINE = 'MU_TOON_FLAT';
+const ULTRA_DEFINE = 'MU_TOON_ULTRA';
 
 /**
  * Detail strength as the shader sees it. The emissive map is *added* on top
@@ -288,6 +292,13 @@ const halfLambertGlsl = (target: string, albedo: string) => {
  * whole sum, so a coloured light keeps its hue and a shadow or a cloud lands
  * as a band edge. The stepped rim in sun units goes on the figures
  * (`muToon.z`), added after the bands so it stays one clean line.
+ *
+ * `MU_TOON_ULTRA` (the Ultra tier with the Anime style) adds two more
+ * drawn things: a hard highlight where the sun reflects toward the eye,
+ * stepped and shadowed like the rim and on the figures alone
+ * (`muToonUltra.x` is 0 on a prop), and hatching over the darkest band,
+ * diagonal screen-space lines that take a share of the stepped diffuse
+ * light away, so a shadow reads as pencilled rather than lit.
  */
 const toonGlsl = (target: string, albedo: string) => {
   const mul = albedo ? ` * ${albedo}` : '';
@@ -302,6 +313,7 @@ const toonGlsl = (target: string, albedo: string) => {
     float toonQ = toonLo + (1.0 - toonLo) * muToonBands(toonT, ${TOON_UNIFORM}.x, ${TOON_UNIFORM}.y)
       + max(toonX - 1.0, 0.0);
     float toonScale = toonX > 1e-4 ? toonQ / toonX : 1.0;
+    vec3 toonLit = diffuseBase * toonScale;
     ${target} += diffuseBase * (toonScale - 1.0)${mul};
 
     float rimDot = dot(normalW, -${SUN_DIR_UNIFORM});
@@ -310,6 +322,18 @@ const toonGlsl = (target: string, albedo: string) => {
     float rimLit = clamp(rimDot * 0.5 + 0.5, 0.0, 1.0);
     float rim = muToonStep(rimV * rimLit, ${TOON_UNIFORM}.w, ${TOON_UNIFORM}.y) * ${TOON_UNIFORM}.z;
     ${target} += ${SUN_COLOR_UNIFORM} * rim * muToonStep(rimShadow, 0.5, ${TOON_UNIFORM}.y)${mul};
+
+  #ifdef ${ULTRA_DEFINE}
+    vec3 glintH = normalize(viewDirectionW - ${SUN_DIR_UNIFORM});
+    float glintV = pow(clamp(dot(normalW, glintH), 0.0, 1.0), ${TOON_ULTRA_UNIFORM}.y);
+    float glint = muToonStep(glintV, 0.5, ${TOON_UNIFORM}.y) * ${TOON_ULTRA_UNIFORM}.x;
+    ${target} += ${SUN_COLOR_UNIFORM} * glint * muToonStep(rimShadow, 0.5, ${TOON_UNIFORM}.y)${mul};
+
+    float hatchBand = 1.0 - muToonStep(toonT, 0.5 / max(${TOON_UNIFORM}.x - 1.0, 1.0), ${TOON_UNIFORM}.y);
+    float hatchWave = 0.5 + 0.5 * sin((gl_FragCoord.x + gl_FragCoord.y) * (6.2831853 / ${TOON_ULTRA_UNIFORM}.w));
+    float hatch = smoothstep(0.4, 0.6, hatchWave) * hatchBand * ${TOON_ULTRA_UNIFORM}.z;
+    ${target} -= toonLit * hatch${mul};
+  #endif
   }
   #endif
 `;
@@ -393,7 +417,8 @@ function litDefineState(scene: Scene): number {
     (linearLightActive(scene) ? 1 : 0) |
     (wrapActive() ? 2 : 0) |
     (toonRampActive() ? 4 : 0) |
-    (toonFlatActive() ? 8 : 0)
+    (toonFlatActive() ? 8 : 0) |
+    (toonUltraActive() ? 16 : 0)
   );
 }
 
@@ -420,6 +445,7 @@ function addLitDefines(material: ItemMaterial, scene: Scene): void {
       lit[WRAP_DEFINE] = (state & 2) !== 0;
       lit[TOON_DEFINE] = (state & 4) !== 0;
       lit[FLAT_DEFINE] = (state & 8) !== 0;
+      lit[ULTRA_DEFINE] = (state & 16) !== 0;
       lit.rebuild();
     }
 
@@ -717,6 +743,7 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
   material.AddUniform(TOON_UNIFORM, 'vec4', null);
   material.AddUniform(TOON_REF_UNIFORM, 'vec2', null);
   material.AddUniform(TOON_FILTER_UNIFORM, 'vec4', null);
+  material.AddUniform(TOON_ULTRA_UNIFORM, 'vec4', null);
   material.AddUniform('time', 'float', 0);
   material.AddUniform('chromeColor', 'vec3', null);
   material.AddUniform('chrome2Color', 'vec3', null);

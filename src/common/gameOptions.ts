@@ -81,6 +81,18 @@ export type GameOptions = {
    * style draws lines.
    */
   lineStrength: number;
+  /**
+   * An ink outline on the grass blades, along their edges and across the
+   * tip, fading toward the root; the line sliders set it. Unread unless the
+   * style draws lines.
+   */
+  grassOutline: boolean;
+  /**
+   * The Anime style on the skill effects too: the additive art snapped to
+   * the shade steps and given a contour in its own darker colour. Unread
+   * unless the style draws lines.
+   */
+  animeEffects: boolean;
   /** Master sound level, 0..9, the original's one slider. */
   volume: number;
   /**
@@ -400,6 +412,8 @@ const DEFAULTS: GameOptions = {
   styleStrength: 5,
   lineWidth: 2,
   lineStrength: 5,
+  grassOutline: true,
+  animeEffects: true,
   volume: 5,
   musicVolume: 10,
   effectsVolume: 10,

@@ -165,6 +165,10 @@ type CheckRow = {
   needsPostProcessing?: boolean;
   /** Dim while the walk keys, which the pointer lock leans on, are off. */
   needsWsadMovement?: boolean;
+  /** Dim on the Classic lighting tier, where nothing reads the value. */
+  needsTier?: boolean;
+  /** Dim while the rendering style has no use for the value. */
+  needsStyle?: 'ramp' | 'outline';
 };
 
 type KeyRow = { action: KeyAction; labelKey: TextKey };
@@ -543,14 +547,6 @@ const TABS: Tab[] = [
                   display: v => (v === 0 ? t('common.off') : v),
                 }),
                 slider({
-                  key: 'renderingStyle',
-                  textId: -1,
-                  labelKey: 'options.renderingStyle',
-                  max: RENDERING_STYLE_MAX,
-                  needsTier: true,
-                  display: v => t(RENDERING_STYLE_LABEL_KEYS[v]) ?? v,
-                }),
-                slider({
                   key: 'effectLevel',
                   textId: 1840,
                   labelKey: 'options.effectLevel',
@@ -614,9 +610,25 @@ const TABS: Tab[] = [
                 }),
               ],
             },
+          ],
+        ],
+      },
+      {
+        id: 'style',
+        labelKey: 'options.section.style',
+        columns: [
+          [
             {
               titleKey: 'options.section.style',
               rows: [
+                slider({
+                  key: 'renderingStyle',
+                  textId: -1,
+                  labelKey: 'options.renderingStyle',
+                  max: RENDERING_STYLE_MAX,
+                  needsTier: true,
+                  display: v => t(RENDERING_STYLE_LABEL_KEYS[v]) ?? v,
+                }),
                 slider({
                   key: 'shadeSteps',
                   textId: -1,
@@ -637,6 +649,13 @@ const TABS: Tab[] = [
                   needsStyle: 'outline',
                   display: v => v,
                 }),
+              ],
+            },
+          ],
+          [
+            {
+              titleKey: 'options.section.lines',
+              rows: [
                 slider({
                   key: 'lineStrength',
                   textId: -1,
@@ -657,6 +676,22 @@ const TABS: Tab[] = [
                   needsStyle: 'outline',
                   display: v => v,
                 }),
+                {
+                  kind: 'check',
+                  key: 'grassOutline',
+                  textId: -1,
+                  labelKey: 'options.grassOutline',
+                  needsTier: true,
+                  needsStyle: 'outline',
+                },
+                {
+                  kind: 'check',
+                  key: 'animeEffects',
+                  textId: -1,
+                  labelKey: 'options.animeEffects',
+                  needsTier: true,
+                  needsStyle: 'outline',
+                },
               ],
             },
           ],
@@ -1196,7 +1231,11 @@ export const OptionsWindow = observer(() => {
                       (row.needsPostProcessing === true &&
                         !GameOptions.postProcessing) ||
                       (row.needsWsadMovement === true &&
-                        !GameOptions.wsadMovement);
+                        !GameOptions.wsadMovement) ||
+                      (row.needsTier === true &&
+                        GameOptions.lightingQuality === 0) ||
+                      (row.needsStyle !== undefined &&
+                        !renderingStyle()?.[row.needsStyle]);
 
                     return (
                       <div

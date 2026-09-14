@@ -12,6 +12,8 @@ import type { LightingTier } from '../common/lightingQuality';
 import {
   inkDarkness,
   inkWidth,
+  toonBands,
+  toonEffectsActive,
   type RenderingStyle,
 } from '../common/renderingStyle';
 import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
@@ -33,6 +35,18 @@ import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
  *
  * The line strength and line width sliders set the darkness and the width
  * (renderingStyle.ts).
+ *
+ * With the skill effects toggle on (`toonEffectsActive`) the pass is built
+ * in its second form and treats the additive half it just subtracted the
+ * same way: its luminance is snapped to the shade steps, hue kept, so a
+ * glow becomes a few solid tones, and where a tone meets nothing (the
+ * effect's own edge, one line width out) the whole pixel takes the ink, so
+ * every flash and bolt wears a contour in its own darker colour. Below the
+ * first tone the glow is left as it is, a soft skirt outside the line: the
+ * mask has no depth, so under a flame that dips into the ground it reports
+ * more light than landed, and a pixel whose effect is taken away entirely
+ * would show the surface with the wrong share subtracted. Off, the shader
+ * text is the one it always was.
  * Dev seam: `?inkk=depthThreshold,normalThreshold` replaces the edge thresholds.
  */
 
@@ -62,6 +76,8 @@ type Runtime = {
   scene: Scene;
   camera: ArcRotateCamera;
   rings: number;
+  /** The second form, flattening and contouring the effects. */
+  fx: boolean;
   pass: PostProcess;
 };
 
@@ -69,8 +85,13 @@ let runtime: Runtime | null = null;
 
 const shown = { strength: 0 };
 
-function registerShader(rings: number): void {
-  const name = `${SHADER}${rings}`;
+/** The shader's name for its tap rings and whether it treats the effects. */
+function shaderName(rings: number, fx: boolean): string {
+  return `${SHADER}${rings}${fx ? 'Fx' : ''}`;
+}
+
+function registerShader(rings: number, fx: boolean): void {
+  const name = shaderName(rings, fx);
 
   if (ShaderStore.ShadersStore[`${name}FragmentShader`]) return;
 
@@ -86,7 +107,25 @@ function registerShader(rings: number): void {
   uniform vec2 viewport;   // tan(fov/2) * aspect, tan(fov/2)
   uniform vec4 ink;        // strength, depth threshold (share of z), depth floor (tiles), normal threshold (1 - cos)
   uniform vec2 inkFar;     // fade start, fade end (tiles)
+${
+  fx
+    ? `
+  uniform float inkFx;     // tone levels
 
+  // The additive half's luminance at a neighbour, for the contour.
+  float maskLuma(vec2 uv) {
+    return dot(texture2D(${EFFECT_MASK_SAMPLER}, uv).rgb, vec3(0.299, 0.587, 0.114));
+  }
+
+  // Nearest of \`levels\` tones over [0, 1], hard edged: an effect is a flat
+  // shape, not a lit surface, so nothing eases here.
+  float fxBands(float x, float levels) {
+    float s = max(levels - 1.0, 1.0);
+    return floor(clamp(x, 0.0, 1.0) * s + 0.5) / s;
+  }
+`
+    : ''
+}
   const int RINGS = ${rings};
   const float SKY_Z = 1.0e6;
 
@@ -128,44 +167,73 @@ function registerShader(rings: number): void {
     vec4 color = texture2D(textureSampler, vUV);
     float z0 = texture2D(depthSampler, vUV).r;
 
-    if (z0 <= 0.0 || ink.x <= 0.0) {
+    if (${fx ? 'ink.x <= 0.0' : 'z0 <= 0.0 || ink.x <= 0.0'}) {
       gl_FragColor = color;
       return;
     }
 
-    vec3 n0 = texture2D(normalSampler, vUV).xyz;
-    float zPlane = z0 * abs(dot(n0, rayAt(vUV)));
-    float threshold = max(ink.y * z0, ink.z);
-
     float edge = 0.0;
-    float weight = 1.0;
 
-    for (int r = 1; r <= RINGS; r++) {
-      vec2 o = texel * (inkWidth + float(r) - 1.0);
+    // The geometry lines belong to matter: the sky (depth 0) draws none.
+    ${fx ? 'if (z0 > 0.0)' : ''} {
+      vec3 n0 = texture2D(normalSampler, vUV).xyz;
+      float zPlane = z0 * abs(dot(n0, rayAt(vUV)));
+      float threshold = max(ink.y * z0, ink.z);
+      float weight = 1.0;
 
-      float step4 = max(
-        max(depthStep(vUV + vec2(o.x, 0.0), n0, zPlane, threshold),
-            depthStep(vUV - vec2(o.x, 0.0), n0, zPlane, threshold)),
-        max(depthStep(vUV + vec2(0.0, o.y), n0, zPlane, threshold),
-            depthStep(vUV - vec2(0.0, o.y), n0, zPlane, threshold)));
+      for (int r = 1; r <= RINGS; r++) {
+        vec2 o = texel * (inkWidth + float(r) - 1.0);
 
-      float crease = max(
-        creaseStep(vUV + vec2(o.x, 0.0), n0, zPlane, threshold),
-        creaseStep(vUV + vec2(0.0, o.y), n0, zPlane, threshold));
+        float step4 = max(
+          max(depthStep(vUV + vec2(o.x, 0.0), n0, zPlane, threshold),
+              depthStep(vUV - vec2(o.x, 0.0), n0, zPlane, threshold)),
+          max(depthStep(vUV + vec2(0.0, o.y), n0, zPlane, threshold),
+              depthStep(vUV - vec2(0.0, o.y), n0, zPlane, threshold)));
 
-      edge = max(edge, max(step4, crease) * weight);
-      weight *= 0.5;
+        float crease = max(
+          creaseStep(vUV + vec2(o.x, 0.0), n0, zPlane, threshold),
+          creaseStep(vUV + vec2(0.0, o.y), n0, zPlane, threshold));
+
+        edge = max(edge, max(step4, crease) * weight);
+        weight *= 0.5;
+      }
+
+      // Far out a line covers less than a pixel of world and reads as noise.
+      edge *= 1.0 - smoothstep(inkFar.x, inkFar.y, z0);
     }
-
-    // Far out a line covers less than a pixel of world and reads as noise.
-    edge *= 1.0 - smoothstep(inkFar.x, inkFar.y, z0);
 
     // The depth belongs to the surface, so only the surface takes the line.
     // The additive half drawn over it keeps its own light (the haze's rule).
     // No semicolons in these comments: the shader preprocessor splits on them.
     vec3 effect = min(texture2D(${EFFECT_MASK_SAMPLER}, vUV).rgb, max(color.rgb, vec3(0.0)));
     vec3 surface = color.rgb - effect;
+${
+  fx
+    ? `
+    // The effects, flat: from the first tone up their luminance is snapped
+    // to the tone levels, hue kept, what stands above white passing through,
+    // so a soft glow ends in a hard step. Below the first tone it is left as
+    // it is. That step is where the contour goes: this pixel holds a tone
+    // and a neighbour one line width away holds none, and the whole pixel
+    // takes the ink.
+    float fxLow = 0.5 / max(inkFx - 1.0, 1.0);
+    float fxL = dot(effect, vec3(0.299, 0.587, 0.114));
+    float fxQ = fxL < fxLow ? fxL : fxBands(min(fxL, 1.0), inkFx) + max(fxL - 1.0, 0.0);
+    effect = fxL > 1e-4 ? effect * (fxQ / fxL) : effect;
 
+    vec2 fxO = texel * inkWidth;
+    float fxOut = max(
+      max(1.0 - step(fxLow, maskLuma(vUV + vec2(fxO.x, 0.0))),
+          1.0 - step(fxLow, maskLuma(vUV - vec2(fxO.x, 0.0)))),
+      max(1.0 - step(fxLow, maskLuma(vUV + vec2(0.0, fxO.y))),
+          1.0 - step(fxLow, maskLuma(vUV - vec2(0.0, fxO.y)))));
+    float contour = step(fxLow, fxL) * fxOut;
+
+    edge = max(edge, contour);
+    effect *= 1.0 - contour * ink.x;
+`
+    : ''
+}
     gl_FragColor = vec4(surface * (1.0 - edge * ink.x) + effect, color.a);
   }
   `;
@@ -174,14 +242,15 @@ function registerShader(rings: number): void {
 function createPass(
   scene: Scene,
   camera: ArcRotateCamera,
-  rings: number
+  rings: number,
+  fx: boolean
 ): PostProcess {
-  registerShader(rings);
+  registerShader(rings, fx);
 
   const pass = new PostProcess(
     'inkOutline',
-    `${SHADER}${rings}`,
-    ['texel', 'inkWidth', 'viewport', 'ink', 'inkFar'],
+    shaderName(rings, fx),
+    ['texel', 'inkWidth', 'viewport', 'ink', 'inkFar', ...(fx ? ['inkFx'] : [])],
     ['depthSampler', 'normalSampler', EFFECT_MASK_SAMPLER],
     1,
     null,
@@ -240,6 +309,8 @@ function createPass(
       normalThreshold
     );
     effect.setFloat2('inkFar', FAR[0], FAR[1]);
+
+    if (fx) effect.setFloat('inkFx', toonBands());
   };
 
   camera.attachPostProcess(pass);
@@ -280,8 +351,12 @@ export function syncInkOutline(
   shown.strength = wanted ? inkDarkness() : 0;
 
   const rings = RINGS[tierIndex] ?? RINGS[1];
+  const fx = toonEffectsActive();
 
-  if (runtime && (!wanted || runtime.scene !== scene || runtime.rings !== rings)) {
+  if (
+    runtime &&
+    (!wanted || runtime.scene !== scene || runtime.rings !== rings || runtime.fx !== fx)
+  ) {
     disposeInkOutline();
     if (!wanted) return true;
   }
@@ -294,7 +369,7 @@ export function syncInkOutline(
 
   if (!wanted || runtime) return false;
 
-  runtime = { scene, camera, rings, pass: createPass(scene, camera, rings) };
+  runtime = { scene, camera, rings, fx, pass: createPass(scene, camera, rings, fx) };
 
   return true;
 }
