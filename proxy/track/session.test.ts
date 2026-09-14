@@ -249,6 +249,45 @@ describe('TrackedSession', () => {
     expect(h.session.level).toBe(401);
   });
 
+  it('believes a character claim only when the server listed it on the account', () => {
+    const h = harness();
+    h.server(gameServerEntered(77));
+    h.session.setAccount('tester');
+    h.server(characterList([{ name: 'Aeris', cls: 7, level: 400 }]));
+
+    // A name that is not on this account is a forged claim: the world entry
+    // is tracked, but under no name.
+    h.client(selectCharacter('Victim'));
+    h.server(characterInformation({ x: 10, y: 10, map: 0 }));
+    expect(h.session.character).toBeNull();
+    expect(h.session.inWorld).toBe(false);
+    expect(h.session.identified).toBe(true);
+
+    // The account's own character is believed.
+    h.client(selectCharacter('Aeris'));
+    h.server(characterInformation({ x: 10, y: 10, map: 0 }));
+    expect(h.session.character).toBe('Aeris');
+  });
+
+  it('names nobody when two character claims are in flight as the server answers', () => {
+    const h = harness();
+    h.server(gameServerEntered(77));
+    h.session.setAccount('tester');
+    h.server(characterList([
+      { name: 'Aeris', cls: 7, level: 400 },
+      { name: 'Mira', cls: 8, level: 50 },
+    ]));
+
+    h.client(selectCharacter('Aeris'));
+    h.client(selectCharacter('Mira'));
+    h.server(characterInformation({ x: 10, y: 10, map: 0 }));
+
+    expect(h.session.character).toBeNull();
+    expect(h.last().kind).toBe('select');
+    expect(h.last().text).toContain('an unverified character');
+    expect(h.last().data?.unverified).toBe(true);
+  });
+
   it('says goodbye once when the socket goes', () => {
     const h = harness();
     h.enter();

@@ -194,6 +194,8 @@ export class ConnectionPresence {
   private pending: string | null = null;
   /** The server refused the last claim, so a nameless socket here is a known logged-out one. */
   private refused = false;
+  /** A second claim arrived while one still awaited its answer. */
+  private ambiguous = false;
   private account: string | null = null;
   private sawEncrypted = false;
   /** The page's nonce, when the socket URL carried a well-formed one. */
@@ -266,6 +268,19 @@ export class ConnectionPresence {
       if (wire[0] !== 0xc1 || wire.length < LOGIN_RESPONSE_LENGTH) return;
       if (wire[2] !== LOGIN_CODE || wire[3] !== LOGIN_SUB_CODE) return;
 
+      // Two claims in flight: whatever the server answered, it cannot be
+      // pinned to a name. A real client waits for the answer before trying
+      // again; two at once is a forged stream hoping the answer to its own
+      // login lands on somebody else's name. The socket stays unidentified
+      // for its life, like a stream the sniffer could not read, so the shop
+      // gate refuses rather than guesses.
+      if (this.ambiguous) {
+        this.finished = true;
+        this.pending = null;
+        this.ambiguous = false;
+        return;
+      }
+
       if (wire[4] === LOGIN_OKAY && this.pending !== null) {
         confirmed = this.pending;
       } else {
@@ -273,6 +288,12 @@ export class ConnectionPresence {
         this.refused = true;
       }
     });
+
+    if (this.finished && confirmed === null) {
+      this.queue = EMPTY;
+      this.serverQueue = EMPTY;
+      return null;
+    }
 
     if (confirmed !== null) {
       this.account = confirmed;
@@ -308,6 +329,7 @@ export class ConnectionPresence {
       const name = this.readLogin(wire);
 
       if (name) {
+        if (this.pending !== null) this.ambiguous = true;
         this.pending = name;
         this.refused = false;
         claimed = name;

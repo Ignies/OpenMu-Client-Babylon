@@ -45,6 +45,7 @@ import {
   PublicChatMessagePacket,
   SelectCharacterPacket,
   SellItemToNpcRequestPacket,
+  ServerChangeAuthenticationPacket,
   TalkToNpcRequestPacket,
   TargetedSkillPacket,
   TradeRequestPacket,
@@ -60,6 +61,7 @@ import {
   type TrackEvent,
   type TrackedPlayer,
 } from '../../src/common/adminProtocol';
+import { Xor3Byte } from '../../src/common/encryption/xor3';
 import { FrameReader, type Frame } from './frames';
 import { itemName, mapName, monsterName, storageName } from './names';
 
@@ -178,6 +180,8 @@ export class TrackedSession {
   private guildId: number | null = null;
 
   private pendingSelect: string | null = null;
+  /** A second character claim arrived while one still awaited the server. */
+  private selectAmbiguous = false;
   private pendingPickupAt = 0;
   private pendingDrop: { at: number; x: number; y: number } | null = null;
   private pendingBuyAt = 0;
@@ -199,9 +203,14 @@ export class TrackedSession {
     this.lastSeen = this.since;
   }
 
-  /** Named by the game server: the socket carries a logged-in account. */
+  /**
+   * Worth showing: the game server accepted a login on this socket, or put a
+   * character of its own on a map. The second half is what keeps a socket
+   * that muddied its login claims (presence then names it nobody) from
+   * vanishing off the game master's list: it shows with no account instead.
+   */
   get identified(): boolean {
-    return this.account !== null;
+    return this.account !== null || this.map !== null;
   }
 
   /** A character was picked and the server put it on a map. */
@@ -450,8 +459,27 @@ export class TrackedSession {
     }
   }
 
+  /**
+   * The name the client says it is picking. Only a name the server listed on
+   * this account is believed - the list is the server's, the claim is the
+   * client's, and a forged claim would file this socket's doings under
+   * somebody else's character. Two claims in flight when the server answers
+   * name nobody, for the same reason presence names nobody then. A socket
+   * that never saw a list (a map-server switch re-authenticates without one)
+   * has nothing to check the name against and takes it, still subject to
+   * the two-in-flight rule.
+   */
+  private claimCharacter(name: string): void {
+    if (!name) return;
+    if (this.characters.size > 0 && !this.characters.has(name)) return;
+    if (this.pendingSelect !== null) this.selectAmbiguous = true;
+    this.pendingSelect = name;
+  }
+
   private onCharacterList(p: CharacterListPacket): void {
     this.characters.clear();
+    this.pendingSelect = null;
+    this.selectAmbiguous = false;
     for (const c of p.getCharacters()) {
       // The class travels in the appearance's first byte, high five bits.
       const appearance = bytesOf(c.Appearance as DataView);
@@ -461,8 +489,10 @@ export class TrackedSession {
   }
 
   private onCharacterInformation(p: CharacterInformationPacket): void {
-    const name = this.pendingSelect ?? this.character;
+    const ambiguous = this.selectAmbiguous;
+    const name = ambiguous ? null : (this.pendingSelect ?? this.character);
     this.pendingSelect = null;
+    this.selectAmbiguous = false;
 
     const known = name ? this.characters.get(name) : undefined;
     this.character = name;
@@ -476,7 +506,7 @@ export class TrackedSession {
     this.gameMaster = (p.Status & GAME_MASTER_STATUS) !== 0;
     this.moved(p.X, p.Y);
 
-    const who = name ?? 'a character';
+    const who = name ?? (ambiguous ? 'an unverified character' : 'a character');
     const detail = [className(this.cls), this.level ? `level ${this.level}` : '']
       .filter(Boolean)
       .join(', ');
@@ -487,7 +517,15 @@ export class TrackedSession {
         p.X,
         p.Y
       ),
-      { map: p.MapId, x: p.X, y: p.Y, cls: this.cls, level: this.level, gm: this.gameMaster }
+      {
+        map: p.MapId,
+        x: p.X,
+        y: p.Y,
+        cls: this.cls,
+        level: this.level,
+        gm: this.gameMaster,
+        ...(ambiguous ? { unverified: true } : {}),
+      }
     );
     this.sink.change(this);
   }
@@ -676,7 +714,7 @@ export class TrackedSession {
     switch (code) {
       case 0xf3:
         if (subCode === 0x03) {
-          this.pendingSelect = cleanName(new SelectCharacterPacket(view).Name);
+          this.claimCharacter(cleanName(new SelectCharacterPacket(view).Name));
         } else if (subCode === 0x01) {
           const p = new CreateCharacterPacket(view);
           this.emit('select', `created the character ${cleanName(p.Name)} (${className(p.Class)})`, {
@@ -691,6 +729,15 @@ export class TrackedSession {
       case 0xf1:
         // The logout is journaled on the server's answer; nothing to do here.
         return;
+      case 0xb1: {
+        // A map-server switch re-authenticates with the character's name,
+        // Xor3-encoded like the login's; no character list comes with it.
+        if (subCode !== 0x01) return;
+        const encoded = bytesOf(new ServerChangeAuthenticationPacket(view).CharacterNameXor3 as DataView).slice();
+        Xor3Byte(encoded);
+        this.claimCharacter(cleanName(new TextDecoder('ascii').decode(encoded)));
+        return;
+      }
       case 0xd4:
         this.onWalk(new WalkRequestPacket(view), bytes);
         return;
