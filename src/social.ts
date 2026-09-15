@@ -10,9 +10,12 @@ import {
   CHAT_LOG_DEFAULT_ALPHA,
   CHAT_LOG_LINES_STEP,
   CHAT_LOG_MAX_LINES,
+  CHAT_LOG_CLIENT_WIDTH,
   CHAT_LOG_MIN_LINES,
   CHAT_SHOWING_LINES,
   ChatLineType,
+  chatTimestamp,
+  splitChatLine,
   MAX_CHAT_LENGTH,
   MAX_CHAT_LINES,
   type ChatFilterKey,
@@ -26,6 +29,8 @@ import {
   type EmojiBubbleId,
 } from './common/emojiBubbles';
 import { localCommandOf } from './common/chatCommands';
+import { chatTextWidth } from './common/chatTextWidth';
+import { GameOptions } from './common/gameOptions';
 import { Commands } from './commands';
 import {
   CancelGuildCreationPacket,
@@ -320,8 +325,26 @@ export const Social = new (class _Social {
 
   /** `CNewUIChatLogWindow::AddText`. */
   addChatLine(sender: string, text: string, type: ChatLineType): void {
-    const line: ChatLine = { id: this.nextLineId++, sender, text, type, at: Date.now() };
-    const next = this.chatLines.concat(line);
+    const at = Date.now();
+    // The optional clock column is ours, and it takes width off the line;
+    // without it in the budget a timestamped line clips again.
+    const width =
+      CHAT_LOG_CLIENT_WIDTH -
+      (GameOptions.chatTimestamps ? chatTextWidth(`${chatTimestamp(at)} `) : 0);
+
+    const parts = splitChatLine(sender, text, width, chatTextWidth);
+
+    const rows: ChatLine[] = parts.map((part, index) => ({
+      id: this.nextLineId++,
+      // `Create(L"", strText2, ...)`: the carried half has no sender.
+      sender: index === 0 ? sender : '',
+      continued: index > 0,
+      text: part,
+      type,
+      at,
+    }));
+
+    const next = this.chatLines.concat(rows);
     // `RemoveFrontLine` once MAX_NUMBER_OF_LINES is reached.
     this.chatLines =
       next.length > MAX_CHAT_LINES ? next.slice(next.length - MAX_CHAT_LINES) : next;

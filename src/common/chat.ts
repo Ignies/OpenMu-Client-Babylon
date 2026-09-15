@@ -26,6 +26,8 @@ export type ChatLine = {
   type: ChatLineType;
   /** Wall clock the line arrived, for the optional timestamp column. */
   at: number;
+  /** A row carried over from the line above by `splitChatLine`. */
+  continued?: boolean;
 };
 
 /** "14:03" in the viewer's own locale-independent 24h form. */
@@ -42,6 +44,78 @@ export const MAX_CHAT_LENGTH = 60;
 /** `CHATBOX_WIDTH` / `CHATBOX_HEIGHT` (NewUIChatInputBox.h:27). */
 export const CHATBOX_WIDTH = 281;
 export const CHATBOX_HEIGHT = 47;
+/** The size the log paints at; `chat/style.less` sets the same. */
+export const CHAT_LINE_FONT_SIZE = 11;
+
+/** `SCROLL_BAR_WIDTH` / `WND_LEFT_RIGHT_EDGE` (NewUIChatLogWindow.h:92-95). */
+export const CHAT_SCROLL_BAR_WIDTH = 7;
+export const CHAT_WND_EDGE = 4;
+
+/**
+ * `CLIENT_WIDTH` (NewUIChatLogWindow.h:100): the width a log line has to fit
+ * in. Fixed, so framing the log does not re-split lines already in it.
+ */
+export const CHAT_LOG_CLIENT_WIDTH =
+  CHATBOX_WIDTH - CHAT_SCROLL_BAR_WIDTH * 2 - CHAT_WND_EDGE * 2;
+
+/** `ProcessAddText`: shorter than this is never measured, let alone split. */
+const CHAT_SPLIT_MIN_LENGTH = 20;
+
+/**
+ * `CNewUIChatLogWindow::SeparateText` (NewUIChatLogWindow.cpp:900): a line too
+ * wide for the log is broken at the last space that fits. The sender's
+ * `name : ` prefix comes out of the first row's budget; the rows after it
+ * carry no sender, as in the original.
+ *
+ * The original stops after one break, which is not enough for the longest
+ * messages OpenMU sends - its login warning is over twice the log's width, so
+ * two rows still lost the end of it. This keeps breaking until the whole line
+ * is placed.
+ */
+export function splitChatLine(
+  sender: string,
+  text: string,
+  width: number,
+  measure: (text: string) => number
+): string[] {
+  if (text.length < CHAT_SPLIT_MIN_LENGTH) return [text];
+
+  const rows: string[] = [];
+  let rest = text;
+
+  while (rest) {
+    // Only the first row pays for the sender.
+    const budget = rows.length === 0 && sender ? width - measure(`${sender} : `) : width;
+
+    if (measure(rest) <= budget) {
+      rows.push(rest);
+      break;
+    }
+
+    const hasSpace = rest.includes(' ');
+    let at = rest.length;
+
+    while (at > 0 && measure(rest.slice(0, at)) > budget) {
+      // A word wider than the log on its own is cut mid-word rather than
+      // dropped: `find_last_of` returns npos and the original falls to -1.
+      const space = hasSpace ? rest.lastIndexOf(' ', at - 1) : -1;
+      at = space > 0 ? space : at - 1;
+    }
+
+    // Nothing fits at all (a budget narrower than one character): keep the
+    // line whole rather than looping forever on it.
+    if (at <= 0) {
+      rows.push(rest);
+      break;
+    }
+
+    rows.push(rest.slice(0, at));
+    rest = rest.slice(at).trimStart();
+  }
+
+  return rows;
+}
+
 /** `SCROLL_MIDDLE_PART_HEIGHT`: one log line. */
 export const CHAT_LINE_HEIGHT = 15;
 /** `m_nShowingLines` default (NewUIChatLogWindow.cpp:29). */

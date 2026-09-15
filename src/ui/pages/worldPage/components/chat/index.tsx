@@ -324,7 +324,14 @@ const ChatLog = observer(() => {
             }}
           >
             {GameOptions.chatTimestamps && (
-              <span className="chat-line-time">{chatTimestamp(line.at)} </span>
+              <span
+                className="chat-line-time"
+                // A carried row keeps the column so the text stays in line,
+                // without printing the same minute twice.
+                style={line.continued ? { visibility: 'hidden' } : undefined}
+              >
+                {chatTimestamp(line.at)}{' '}
+              </span>
             )}
             {line.sender ? `${line.sender} : ${line.text}` : line.text}
           </div>
