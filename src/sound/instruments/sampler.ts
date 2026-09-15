@@ -57,11 +57,12 @@ export class Sampler {
     return this.voices.size;
   }
 
-  /** The performer's gain node, made on first use. */
-  performerNode(key: PerformerKey): GainNode {
+  /** The performer's gain node, made on first use at `initialGain`. */
+  performerNode(key: PerformerKey, initialGain = 1): GainNode {
     let node = this.performers.get(key);
     if (!node) {
       node = this.ctx.createGain();
+      node.gain.value = initialGain;
       node.connect(this.out);
       this.performers.set(key, node);
     }
@@ -74,7 +75,16 @@ export class Sampler {
     node.gain.setTargetAtTime(gain, this.ctx.currentTime, ramp);
   }
 
-  noteOn(key: PerformerKey, bank: DecodedBank, channel: number, note: number, velocity: number, when: number): void {
+  /** `gain` is the performer's level should this be their first note. */
+  noteOn(
+    key: PerformerKey,
+    bank: DecodedBank,
+    channel: number,
+    note: number,
+    velocity: number,
+    when: number,
+    gain = 1
+  ): void {
     const source = noteSource(bank, note);
     if (!source) return;
 
@@ -86,7 +96,7 @@ export class Sampler {
 
     const { manifest } = bank;
     const env = this.ctx.createGain();
-    env.connect(this.performerNode(key));
+    env.connect(this.performerNode(key, gain));
 
     const src = this.ctx.createBufferSource();
     src.buffer = source.buffer;

@@ -126,6 +126,7 @@ export function installBandNet(): void {
     if (msg.sub === BandSub.Hello) {
       helloSocket = Store.gsSocket ?? null;
       setBandAvailable(msg.version === BAND_VERSION);
+      console.info(`band: relay hello, version ${msg.version} (this client speaks ${BAND_VERSION})`);
       return;
     }
 
@@ -155,13 +156,19 @@ export function installBandNet(): void {
       case BandSub.Start: {
         const def = instrumentByIndex(msg.instrument);
         const entity = world.getByNetId(msg.performerId);
-        if (!def || !entity || entity.objOutOfScope) return;
+        if (!def || !entity || entity.objOutOfScope) {
+          const why = !def ? 'an instrument this client does not know' : entity ? 'out of scope here' : 'not in scope here';
+          console.warn(`band: #${msg.performerId} starts playing, ${why}: ignored`);
+          return;
+        }
+        console.info(`band: #${msg.performerId} ${nameOf(msg.performerId)} starts playing the ${def.id}`);
         remoteStart(entity, def.id);
         Social.systemMessage(t('instrument.startsPlaying', { name: nameOf(msg.performerId), instrument: t(def.labelKey) }));
         return;
       }
       case BandSub.Stop: {
         const known = world.getByNetId(msg.performerId)?.performing;
+        console.info(`band: #${msg.performerId} stopped, reason ${msg.reason}${known ? '' : ' (was not playing here)'}`);
         remoteStop(msg.performerId);
         if (known && msg.reason === StopReason.Ended) {
           Social.systemMessage(t('instrument.stopsPlaying', { name: nameOf(msg.performerId) }));
