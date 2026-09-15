@@ -7,6 +7,7 @@ import { isSwimWorld } from '../../common/locomotion';
 import { isFastWing } from '../../common/wings';
 import { isRidingMount } from '../../common/pets';
 import type { Entity, ISystemFactory } from '../world';
+import { distanceAlongPath } from '../../common/approachPath';
 
 /**
  * OpenMU walks every object by wall-clock time: each step takes
@@ -155,6 +156,20 @@ export const MoveAlongPathSystem: ISystemFactory = world => {
             : 4;
         }
         let deltaSpeed = speed * deltaTime;
+
+        // The hero may not outwalk what the server has been told. A frame
+        // hitch (a tab in the background, a burst of asset loading) hands
+        // this loop seconds of catch-up at once, and without a stop it
+        // strides past the end of the sent chunk - where the server's walker
+        // is parked - by several tiles. The next WalkRequest then starts from
+        // a tile the server has not reached, which is what it reports as a
+        // speedhack and what rubber-bands the player back a moment later.
+        if (localPlayer && pathfinding.sentThrough && pathfinding.path) {
+          deltaSpeed = Math.min(
+            deltaSpeed,
+            distanceAlongPath(transform.pos, pathfinding.path, pathfinding.sentThrough)
+          );
+        }
 
         if (
           !pathfinding.path ||

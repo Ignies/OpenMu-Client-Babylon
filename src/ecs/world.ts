@@ -158,6 +158,14 @@ export type Entity = Partial<{
     to: IVector2Like;
     path: IVector2Like[] | null;
     calculated: boolean;
+    /**
+     * The last step of `path` the server has been sent (NetworkSystem, the
+     * only writer). Undefined when it has the whole path. MoveAlongPathSystem
+     * refuses to walk the hero past it: a WalkRequest whose source tile is
+     * where the server's walker has not reached is what the speedhack check
+     * and the 5-tile resync both fire on.
+     */
+    sentThrough?: IVector2Like;
   };
   playerMoveTo: {
     point: IVector2Like;
