@@ -175,7 +175,7 @@ function voiceOn(
   const kind = ev.status & 0xf0;
   if (kind === 0x90 && ev.d2 > 0) {
     noteOn(key, instrument, channel, ev.d1, ev.d2, when);
-    if (entity) queueHit(entity, when);
+    if (entity) queueHit(entity, when, ev.d1, ev.d2);
   } else if (kind === 0x80 || kind === 0x90) {
     noteOff(key, channel, ev.d1, when);
   } else if (kind === 0xb0) {
