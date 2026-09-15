@@ -185,7 +185,9 @@ export function installBandNet(): void {
         remoteBatch(msg.performerId, msg.seq, msg.baseMs, msg.events);
         return;
       case BandSub.Join: {
-        // The hero is the master named in the body; the joiner is the stamped id.
+        // The joiner is the stamped id. The proxy sends a join only to the
+        // master it names, with the master's own local id in the body (the
+        // joiner knew them by their public one), so any other id is a stray.
         if (msg.masterId !== self) return;
         const def = instrumentByIndex(msg.instrument);
         if (!def) return;

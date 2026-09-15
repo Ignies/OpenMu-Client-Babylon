@@ -410,6 +410,21 @@ describe('band hub', () => {
     h.receive(elfita.peer, xor(encodeStart(1)));
     expect(dkfried.sent).toEqual([{ sub: BandSub.Start, performerId: 873, version: 1, instrument: 1 }]);
 
+    // Elfita joins Dkfried's band naming him 864. Dkfried's client is told
+    // under the id it knows itself by, 0x200, with Elfita under 873 - the
+    // master's client matches the band on its own id and the member on the
+    // id her start came in under.
+    h.receive(elfita.peer, xor(encodeJoin(864, 1, 0xffff)));
+    expect(elfita.sent.filter(m => m.sub === BandSub.Refused)).toEqual([]);
+    expect(dkfried.sent[dkfried.sent.length - 1]).toEqual({
+      sub: BandSub.Join,
+      performerId: 873,
+      masterId: 0x200,
+      instrument: 1,
+      mask: 0xffff,
+    });
+    expect(h.stats()).toMatchObject({ performers: 2, members: 1 });
+
     // Two live performers, neither reaped: they no longer collide on 0x200.
     expect(h.stats().performers).toBe(2);
     expect(h.stats().stopped.gone).toBe(0);
