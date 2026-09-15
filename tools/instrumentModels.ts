@@ -220,8 +220,11 @@ function rectOf(atlas: Atlas, name: string): Rect {
 
 /**
  * Guitar: body of two round bouts extruded along Y, a neck and a head along
- * +Z, six strings, a sound hole. Origin at the base of the neck, where the
- * left hand holds it. Both faces of the body take the top-view crop.
+ * +Z, six strings. Origin at the base of the neck, where the left hand holds
+ * it. Both faces of the body take the top-view crop, and that crop already
+ * paints the sound hole with its rosette and the bridge, so the strings are
+ * laid where the crop has them - a modelled hole disc used to sit halfway
+ * down the body, a second hole beside the painted one.
  */
 function buildGuitar(atlas: Atlas): MeshBuilder {
   const m = new MeshBuilder();
@@ -230,7 +233,6 @@ function buildGuitar(atlas: Atlas): MeshBuilder {
   const head = rectOf(atlas, 'head');
   const rim = rectOf(atlas, 'rim');
   const string = rectOf(atlas, 'string');
-  const hole = rectOf(atlas, 'hole');
 
   // Outline: lower bout r 19 at z -30, upper bout r 14 at z -11, sampled as
   // the outer envelope of the two circles - a peanut, which is what the
@@ -274,24 +276,17 @@ function buildGuitar(atlas: Atlas): MeshBuilder {
       inRect(rim, i / N, 0), inRect(rim, i / N, 1), inRect(rim, (i + 1) / N, 1), inRect(rim, (i + 1) / N, 0));
   }
   m.assertOutward(bodyFrom, [0, 0, cz], 'guitar body');
-  // neck: z 0..45, sits on the body top
-  box(m, [-2.5, 2.5, 0], [2.5, 4.8, 45], neck, rim);
-  // head: z 45..59, a touch wider
-  box(m, [-3.5, 2.5, 45], [3.5, 4.8, 59], head, rim);
-  // strings over the top, from the bridge (z -38) to the nut (z 45)
+  // neck: z 0..45, sits on the body top, as wide as the crop paints it
+  box(m, [-3.3, 2.5, 0], [3.3, 4.8, 45], neck, rim);
+  // head: z 45..59, wider, with the tuners
+  box(m, [-5, 2.5, 45], [5, 4.8, 59], head, rim);
+  // strings over the top, from the painted bridge (30% up the body, z -32)
+  // to the nut, spread like the painted ones and inside the fretboard
+  const bridgeZ = -32, nutZ = 45, spread = 2.8;
   for (let s = 0; s < 6; s++) {
-    const x = -1.5 + s * 0.6;
-    box(m, [x - 0.12, 5.2, -38], [x + 0.12, 5.45, 45], string);
+    const x = -spread + s * ((2 * spread) / 5);
+    box(m, [x - 0.12, 5.2, bridgeZ], [x + 0.12, 5.45, nutZ], string);
   }
-  // sound hole: a dark disc a hair above the top, facing up like the top
-  const hz = -22, hr = 4.5, H = 12;
-  const holeFrom = m.triangles;
-  for (let i = 0; i < H; i++) {
-    const a0 = (i / H) * Math.PI * 2, a1 = ((i + 1) / H) * Math.PI * 2;
-    m.tri([0, half + 0.05, hz], [Math.cos(a1) * hr, half + 0.05, hz + Math.sin(a1) * hr], [Math.cos(a0) * hr, half + 0.05, hz + Math.sin(a0) * hr],
-      solid(hole), solid(hole), solid(hole));
-  }
-  m.assertOutward(holeFrom, [0, 0, hz], 'sound hole');
   return m;
 }
 
@@ -495,7 +490,6 @@ async function main(): Promise<void> {
         head: { x: 360, y: 0, w: 150, h: 150 },
         rim: { x: 0, y: 400, w: 256, h: 48 },
         string: { x: 300, y: 400, w: 32, h: 32 },
-        hole: { x: 350, y: 400, w: 32, h: 32 },
       },
     };
     const bodyCrop = sub(guitar, 0, 0.52, 0, 1);
@@ -505,7 +499,6 @@ async function main(): Promise<void> {
       head: { kind: 'crop', crop: sub(guitar, 0.8, 1, 0.25, 0.75) },
       rim: { kind: 'solid', rgb: await averageColour(file, bodyCrop) },
       string: { kind: 'solid', rgb: { r: 226, g: 214, b: 180 } },
-      hole: { kind: 'solid', rgb: { r: 24, g: 14, b: 8 } },
     });
     await writeGlb('Instrument_Guitar', buildGuitar(atlas), png);
   }
