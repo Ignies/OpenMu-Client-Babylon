@@ -179,29 +179,213 @@ function cylinder(m: MeshBuilder, z0: number, z1: number, radius: number, segmen
   m.assertOutward(from, [0, 0, (z0 + z1) / 2], 'cylinder');
 }
 
+// ---- silhouettes -----------------------------------------------------------
+
 /**
- * An ellipsoid with radii `rx, ry, rz`, `lat x lon` bands. The upper half
- * (+Y) maps `top` as seen from above (s along Z, t along X), the lower half
- * takes the same crop mirrored - a hand prop is never seen from below for long.
+ * A column of an instrument's silhouette: an image column and the first and
+ * last opaque rows in it. The reference is a photo on a transparent
+ * background, so its alpha channel *is* the outline the player sees painted
+ * on the model - tracing it and extruding that is what puts the model's own
+ * edge under the photo's edge. The guitar body used to be two circles and the
+ * ocarina an ellipsoid, and neither followed the picture.
  */
-function ellipsoid(m: MeshBuilder, rx: number, ry: number, rz: number, lat: number, lon: number, top: Rect): void {
-  const p = (i: number, j: number): V3 => {
-    const phi = (i / lat) * Math.PI; // 0 at +Y
-    const th = (j / lon) * Math.PI * 2;
-    return [rx * Math.sin(phi) * Math.cos(th), ry * Math.cos(phi), rz * Math.sin(phi) * Math.sin(th)];
-  };
-  const uv = (pt: V3): UV => inRect(top, (pt[2] + rz) / (2 * rz), (pt[0] + rx) / (2 * rx));
-  const from = m.triangles;
-  for (let i = 0; i < lat; i++) {
-    for (let j = 0; j < lon; j++) {
-      // Around (d) before down (b), like the cylinder wall.
-      const a = p(i, j), b = p(i + 1, j), c = p(i + 1, j + 1), d = p(i, j + 1);
-      if (i === 0) m.tri(a, c, b, uv(a), uv(c), uv(b));
-      else if (i === lat - 1) m.tri(a, d, b, uv(a), uv(d), uv(b));
-      else m.quad(a, d, c, b, uv(a), uv(d), uv(c), uv(b));
+type Column = { px: number; lo: number; hi: number };
+
+/** Alpha over this is the instrument; under it is the photo's soft fringe. */
+const OPAQUE = 96;
+
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+/** Every column of a band's silhouette, left to right. */
+async function traceColumns(file: string, band: Band): Promise<Column[]> {
+  const { data, info } = await sharp(file).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { width, channels } = info;
+  const columns: Column[] = [];
+  for (let px = band.left; px <= band.right; px++) {
+    let lo = Infinity;
+    let hi = -Infinity;
+    for (let py = band.top; py <= band.bottom; py++) {
+      if (data[(py * width + px) * channels + 3] <= OPAQUE) continue;
+      if (py < lo) lo = py;
+      if (py > hi) hi = py;
+    }
+    if (hi > lo) columns.push({ px, lo, hi });
+  }
+  if (columns.length < 4) throw new Error('the silhouette has no width');
+  return columns;
+}
+
+/**
+ * The columns worth keeping: one stays when dropping it would move either
+ * edge by more than `tol` pixels. The guitar's neck collapses to its two
+ * ends and its bouts keep their curve - the triangles land where the outline
+ * actually turns, and a step (the heel) keeps both of its sides.
+ */
+function decimate(columns: Column[], tol: number): Column[] {
+  if (columns.length <= 2) return columns.slice();
+  const kept = [columns[0]];
+  let anchor = 0;
+  for (let i = 2; i < columns.length; i++) {
+    let straight = true;
+    for (let j = anchor + 1; j < i && straight; j++) {
+      const t = (columns[j].px - columns[anchor].px) / (columns[i].px - columns[anchor].px);
+      straight =
+        Math.abs(lerp(columns[anchor].lo, columns[i].lo, t) - columns[j].lo) <= tol &&
+        Math.abs(lerp(columns[anchor].hi, columns[i].hi, t) - columns[j].hi) <= tol;
+    }
+    if (straight) continue;
+    kept.push(columns[i - 1]);
+    anchor = i - 1;
+  }
+  kept.push(columns[columns.length - 1]);
+  return kept;
+}
+
+/**
+ * How a band's pixels become model centimetres. An instrument is measured in
+ * its own axes - `along` it, `across` it, and `through` its thickness - and
+ * `orient` turns those into the model's, so a reshaped instrument still sits
+ * in the hand the way the row's `link` was solved for.
+ */
+type Placement = {
+  band: Band;
+  /** Centimetres per image pixel. */
+  cm: number;
+  /** The image column the origin sits on, and the row its long axis runs down. */
+  originPx: number;
+  originPy: number;
+  /** (across, through, along) -> model x/y/z. A rotation: the winding must hold. */
+  orient: (p: V3) => V3;
+  /** Where the band is painted on the atlas. */
+  rect: Rect;
+};
+
+const alongCm = (p: Placement, px: number): number => (px - p.originPx) * p.cm;
+const acrossCm = (p: Placement, py: number): number => (py - p.originPy) * p.cm;
+
+/** A point of the silhouette, in model space. */
+function point(p: Placement, px: number, py: number, through: number): V3 {
+  return p.orient([acrossCm(p, py), through, alongCm(p, px)]);
+}
+
+/** The texel the photo has at that pixel; the map is 1:1, which is the whole point. */
+function pixelUv(p: Placement, px: number, py: number): UV {
+  return inRect(
+    p.rect,
+    (px - p.band.left) / (p.band.right - p.band.left),
+    (py - p.band.top) / (p.band.bottom - p.band.top)
+  );
+}
+
+/** The middle of a segment, for the outwardness check its four faces must pass. */
+function segmentCentre(p: Placement, a: Column, b: Column, lo: number, hi: number): V3 {
+  const px = (a.px + b.px) / 2;
+  const py = (a.lo + a.hi + b.lo + b.hi) / 4;
+  return point(p, px, py, (lo + hi) / 2);
+}
+
+/**
+ * The silhouette as a slab with one flat face: the guitar, whose soundboard
+ * and fretboard are the same plane and whose sides are a rim. `face` is where
+ * that plane sits and `depth` how far the slab hangs under it at a column -
+ * deep through the body, thin along the neck.
+ */
+function extrudeFlat(
+  m: MeshBuilder,
+  columns: Column[],
+  p: Placement,
+  face: number,
+  depth: (px: number) => number,
+  rim: Rect
+): void {
+  const at = (px: number, py: number, through: number): V3 => point(p, px, py, through);
+  const uv = (px: number, py: number): UV => pixelUv(p, px, py);
+  const r = solid(rim);
+
+  for (let i = 0; i + 1 < columns.length; i++) {
+    const a = columns[i];
+    const b = columns[i + 1];
+    const ya = face - depth(a.px);
+    const yb = face - depth(b.px);
+    const from = m.triangles;
+    // the face, the same photo the rest of the model is painted with
+    m.quad(at(a.px, a.lo, face), at(b.px, b.lo, face), at(b.px, b.hi, face), at(a.px, a.hi, face),
+      uv(a.px, a.lo), uv(b.px, b.lo), uv(b.px, b.hi), uv(a.px, a.hi));
+    // the back, the same photo again: a guitar is never seen from behind for long
+    m.quad(at(a.px, a.lo, ya), at(a.px, a.hi, ya), at(b.px, b.hi, yb), at(b.px, b.lo, yb),
+      uv(a.px, a.lo), uv(a.px, a.hi), uv(b.px, b.hi), uv(b.px, b.lo));
+    // the two rims, in the body's own colour
+    m.quad(at(a.px, a.lo, face), at(a.px, a.lo, ya), at(b.px, b.lo, yb), at(b.px, b.lo, face), r, r, r, r);
+    m.quad(at(a.px, a.hi, ya), at(a.px, a.hi, face), at(b.px, b.hi, face), at(b.px, b.hi, yb), r, r, r, r);
+    m.assertOutward(from, segmentCentre(p, a, b, Math.min(ya, yb), face), 'slab segment');
+  }
+
+  const head = columns[0];
+  const tail = columns[columns.length - 1];
+  const caps = m.triangles;
+  const yh = face - depth(head.px);
+  const yt = face - depth(tail.px);
+  m.quad(at(head.px, head.lo, face), at(head.px, head.hi, face), at(head.px, head.hi, yh), at(head.px, head.lo, yh), r, r, r, r);
+  m.quad(at(tail.px, tail.lo, yt), at(tail.px, tail.hi, yt), at(tail.px, tail.hi, face), at(tail.px, tail.lo, face), r, r, r, r);
+  m.assertOutward(caps, [0, 0, 0], 'slab ends');
+}
+
+/**
+ * The silhouette puffed into a lens: the ocarina, a clay teardrop that is
+ * thickest down its own middle and closes at its outline. `half` is half the
+ * thickness at the ridge, from the column's width - so the body swells and
+ * the mouthpiece stays a tube.
+ */
+function extrudeLens(m: MeshBuilder, columns: Column[], p: Placement, half: (span: number) => number): void {
+  const at = (px: number, py: number, through: number): V3 => point(p, px, py, through);
+  const uv = (px: number, py: number): UV => pixelUv(p, px, py);
+  const ridge = (c: Column): number => (c.lo + c.hi) / 2;
+  const halfOf = (c: Column): number => half(c.hi - c.lo);
+
+  for (let i = 0; i + 1 < columns.length; i++) {
+    const a = columns[i];
+    const b = columns[i + 1];
+    const ha = halfOf(a);
+    const hb = halfOf(b);
+    const ma = ridge(a);
+    const mb = ridge(b);
+    const from = m.triangles;
+    m.quad(at(a.px, a.lo, 0), at(b.px, b.lo, 0), at(b.px, mb, hb), at(a.px, ma, ha),
+      uv(a.px, a.lo), uv(b.px, b.lo), uv(b.px, mb), uv(a.px, ma));
+    m.quad(at(a.px, ma, ha), at(b.px, mb, hb), at(b.px, b.hi, 0), at(a.px, a.hi, 0),
+      uv(a.px, ma), uv(b.px, mb), uv(b.px, b.hi), uv(a.px, a.hi));
+    m.quad(at(a.px, a.hi, 0), at(b.px, b.hi, 0), at(b.px, mb, -hb), at(a.px, ma, -ha),
+      uv(a.px, a.hi), uv(b.px, b.hi), uv(b.px, mb), uv(a.px, ma));
+    m.quad(at(a.px, ma, -ha), at(b.px, mb, -hb), at(b.px, b.lo, 0), at(a.px, a.lo, 0),
+      uv(a.px, ma), uv(b.px, mb), uv(b.px, b.lo), uv(a.px, a.lo));
+    m.assertOutward(from, segmentCentre(p, a, b, -Math.min(ha, hb), Math.min(ha, hb)), 'lens segment');
+  }
+
+  // The ends: the cross-section there is a diamond, closed flat.
+  const head = columns[0];
+  const tail = columns[columns.length - 1];
+  const caps = m.triangles;
+  for (const [c, front] of [[head, true], [tail, false]] as const) {
+    const h = halfOf(c);
+    const mid = ridge(c);
+    const lo = at(c.px, c.lo, 0);
+    const hi = at(c.px, c.hi, 0);
+    const top = at(c.px, mid, h);
+    const bottom = at(c.px, mid, -h);
+    const uvLo = uv(c.px, c.lo);
+    const uvHi = uv(c.px, c.hi);
+    const uvMid = uv(c.px, mid);
+    if (front) {
+      m.tri(lo, top, hi, uvLo, uvMid, uvHi);
+      m.tri(lo, hi, bottom, uvLo, uvHi, uvMid);
+    } else {
+      m.tri(lo, hi, top, uvLo, uvHi, uvMid);
+      m.tri(lo, bottom, hi, uvLo, uvMid, uvHi);
     }
   }
-  m.assertOutward(from, [0, 0, 0], 'ellipsoid');
+  m.assertOutward(caps, [0, 0, 0], 'lens ends');
 }
 
 // ---- the three instruments -------------------------------------------------
@@ -219,74 +403,65 @@ function rectOf(atlas: Atlas, name: string): Rect {
 }
 
 /**
- * Guitar: body of two round bouts extruded along Y, a neck and a head along
- * +Z, six strings. Origin at the base of the neck, where the left hand holds
- * it. Both faces of the body take the top-view crop, and that crop already
- * paints the sound hole with its rosette and the bridge, so the strings are
- * laid where the crop has them - a modelled hole disc used to sit halfway
- * down the body, a second hole beside the painted one.
+ * Guitar: the photo's own outline, extruded. The soundboard, the fretboard
+ * and the head are one flat face carrying the photo 1:1, so the painted
+ * sound hole, rosette, bridge and strings land exactly where the geometry
+ * puts them; the slab hangs deep under the body and thin under the neck.
+ * Origin at the heel, where the body ends and the hand takes the neck.
  */
-function buildGuitar(atlas: Atlas): MeshBuilder {
-  const m = new MeshBuilder();
-  const body = rectOf(atlas, 'body');
-  const neck = rectOf(atlas, 'neck');
-  const head = rectOf(atlas, 'head');
-  const rim = rectOf(atlas, 'rim');
-  const string = rectOf(atlas, 'string');
+const GUITAR_LENGTH = 108;
+const GUITAR_FACE = 4.5;
+const GUITAR_BODY_DEPTH = 9;
+const GUITAR_NECK_DEPTH = 2.4;
+const GUITAR_HEAD_DEPTH = 3;
+/** Pixels the traced outline may be simplified by (the band is 1257 wide). */
+const GUITAR_TOLERANCE = 3;
 
-  // Outline: lower bout r 19 at z -30, upper bout r 14 at z -11, sampled as
-  // the outer envelope of the two circles - a peanut, which is what the
-  // silhouette in the crop is.
-  const lower = { z: -30, r: 19 };
-  const upper = { z: -11, r: 14 };
-  const N = 28;
-  const outline: [number, number][] = [];
-  for (let i = 0; i < N; i++) {
-    const a = (i / N) * Math.PI * 2;
-    const dx = Math.cos(a), dz = Math.sin(a);
-    // Ray from the midpoint: the farther of the two circle hits.
-    const cz = (lower.z + upper.z) / 2;
-    let best = 0;
-    for (const c of [lower, upper]) {
-      const oz = cz - c.z;
-      const b = 2 * oz * dz;
-      const cc = oz * oz - c.r * c.r;
-      const disc = b * b - 4 * cc;
-      if (disc < 0) continue;
-      const t = (-b + Math.sqrt(disc)) / 2;
-      if (t > best) best = t;
+/**
+ * Where the neck is: the longest thin run of columns, between the body and
+ * the head. The body's own leading tip is thin too, which is why it is the
+ * longest run that counts and not the first.
+ */
+function neckRun(columns: Column[]): { start: number; end: number } {
+  const span = columns.map(c => c.hi - c.lo);
+  const thin = 0.3 * Math.max(...span);
+  let start = -1;
+  let end = -1;
+  let best = 0;
+  let run = -1;
+  for (let i = 0; i <= span.length; i++) {
+    if (i < span.length && span[i] < thin) {
+      if (run < 0) run = i;
+      continue;
     }
-    outline.push([dx * best, cz + dz * best]);
+    if (run >= 0 && i - run > best) {
+      best = i - run;
+      start = run;
+      end = i - 1;
+    }
+    run = -1;
   }
-  const zMin = lower.z - lower.r, zMax = upper.z + upper.r;
-  const xMax = lower.r;
-  const half = 4.5;
-  const uvTop = (x: number, z: number): UV => inRect(body, (z - zMin) / (zMax - zMin), (x + xMax) / (2 * xMax));
-  const cz = (lower.z + upper.z) / 2;
-  const bodyFrom = m.triangles;
-  for (let i = 0; i < N; i++) {
-    const [x0, z0] = outline[i];
-    const [x1, z1] = outline[(i + 1) % N];
-    // caps, fanned from the centre; the outline runs X -> Z, which seen from
-    // +Y is clockwise, so the top fan takes it backwards
-    m.tri([0, half, cz], [x1, half, z1], [x0, half, z0], uvTop(0, cz), uvTop(x1, z1), uvTop(x0, z0));
-    m.tri([0, -half, cz], [x0, -half, z0], [x1, -half, z1], uvTop(0, cz), uvTop(x0, z0), uvTop(x1, z1));
-    // rim: up first, then along the outline
-    m.quad([x0, -half, z0], [x0, half, z0], [x1, half, z1], [x1, -half, z1],
-      inRect(rim, i / N, 0), inRect(rim, i / N, 1), inRect(rim, (i + 1) / N, 1), inRect(rim, (i + 1) / N, 0));
-  }
-  m.assertOutward(bodyFrom, [0, 0, cz], 'guitar body');
-  // neck: z 0..45, sits on the body top, as wide as the crop paints it
-  box(m, [-3.3, 2.5, 0], [3.3, 4.8, 45], neck, rim);
-  // head: z 45..59, wider, with the tuners
-  box(m, [-5, 2.5, 45], [5, 4.8, 59], head, rim);
-  // strings over the top, from the painted bridge (30% up the body, z -32)
-  // to the nut, spread like the painted ones and inside the fretboard
-  const bridgeZ = -32, nutZ = 45, spread = 2.8;
-  for (let s = 0; s < 6; s++) {
-    const x = -spread + s * ((2 * spread) / 5);
-    box(m, [x - 0.12, 5.2, bridgeZ], [x + 0.12, 5.45, nutZ], string);
-  }
+  if (start < 0) throw new Error('no neck in the guitar silhouette');
+  return { start, end };
+}
+
+async function buildGuitar(atlas: Atlas, file: string, band: Band): Promise<MeshBuilder> {
+  const columns = await traceColumns(file, band);
+  const neck = neckRun(columns);
+  const heel = columns[neck.start].px;
+  const nut = columns[neck.end].px;
+  const p: Placement = {
+    band,
+    cm: GUITAR_LENGTH / (band.right - band.left),
+    originPx: heel,
+    originPy: (band.top + band.bottom) / 2,
+    orient: q => q,
+    rect: rectOf(atlas, 'guitar'),
+  };
+  const m = new MeshBuilder();
+  const depth = (px: number): number =>
+    px < heel ? GUITAR_BODY_DEPTH : px <= nut ? GUITAR_NECK_DEPTH : GUITAR_HEAD_DEPTH;
+  extrudeFlat(m, decimate(columns, GUITAR_TOLERANCE), p, GUITAR_FACE, depth, rectOf(atlas, 'rim'));
   return m;
 }
 
@@ -302,27 +477,34 @@ function buildFlute(atlas: Atlas): MeshBuilder {
 }
 
 /**
- * Ocarina: an ellipsoid with the top-view crop, a short mouthpiece; origin
- * at the centre. Half again as big as a real one, for the same reason as
- * the flute: at the game's distance a fist-sized thing at the mouth is a
- * dark dot.
+ * Ocarina: the photo's teardrop and its mouthpiece, traced as one outline
+ * and puffed into a lens - a clay ocarina is exactly that, thickest down its
+ * middle and closing at its edge. The picture stands upright in the model's
+ * Z-Y plane with its thickness across, so the mouthpiece points the way the
+ * row's link already expects: up and back toward the lips.
  */
-function buildOcarina(atlas: Atlas): MeshBuilder {
+const OCARINA_LENGTH = 23;
+const OCARINA_HALF = 4.8;
+/** Pixels the traced outline may be simplified by (the band is 601 wide). */
+const OCARINA_TOLERANCE = 2;
+
+async function buildOcarina(atlas: Atlas, file: string, band: Band): Promise<MeshBuilder> {
+  const columns = await traceColumns(file, band);
+  const widest = Math.max(...columns.map(c => c.hi - c.lo));
+  // The body is everything past the mouthpiece; it carries the size the
+  // instrument had before, so the hand still holds it the same way.
+  const body = columns.findIndex(c => c.hi - c.lo > 0.45 * widest);
+  const tail = columns[columns.length - 1].px;
+  const p: Placement = {
+    band,
+    cm: OCARINA_LENGTH / (tail - columns[body].px),
+    originPx: (columns[body].px + tail) / 2,
+    originPy: (band.top + band.bottom) / 2,
+    orient: ([a, t, l]) => [t, -a, l],
+    rect: rectOf(atlas, 'ocarina'),
+  };
   const m = new MeshBuilder();
-  ellipsoid(m, 8, 5.2, 11.5, 8, 14, rectOf(atlas, 'ocarina'));
-  // mouthpiece off the back end, angled up
-  const clay = rectOf(atlas, 'clay');
-  const seg = 8, r = 1.6;
-  const base: V3 = [-2.2, 3.2, -8];
-  const tip: V3 = [-5, 9, -12.5];
-  const from = m.triangles;
-  for (let i = 0; i < seg; i++) {
-    const a0 = (i / seg) * Math.PI * 2, a1 = ((i + 1) / seg) * Math.PI * 2;
-    const ring = (c: V3, a: number): V3 => [c[0] + Math.cos(a) * r, c[1], c[2] + Math.sin(a) * r];
-    m.quad(ring(base, a0), ring(tip, a0), ring(tip, a1), ring(base, a1), solid(clay), solid(clay), solid(clay), solid(clay));
-    m.tri(tip, ring(tip, a1), ring(tip, a0), solid(clay), solid(clay), solid(clay));
-  }
-  m.assertOutward(from, [(base[0] + tip[0]) / 2, (base[1] + tip[1]) / 2 - 0.5, (base[2] + tip[2]) / 2], 'mouthpiece');
+  extrudeLens(m, decimate(columns, OCARINA_TOLERANCE), p, span => OCARINA_HALF * Math.sqrt(span / widest));
   return m;
 }
 
@@ -478,29 +660,25 @@ async function main(): Promise<void> {
   const all = wanted.size === 0;
 
   if (all || wanted.has('guitar')) {
-    // Body is the left half of the band, neck the middle strip, head the right end.
-    // 512 square: the prop is a hand's width on screen, and MU's own item
-    // textures are 256; anything bigger only costs download.
+    // The whole photo, one crop, mapped 1:1 onto the outline traced from it -
+    // so the hole, the rosette, the bridge and the strings it paints are all
+    // exactly where the geometry says they are. 512 x 208 keeps the band's
+    // own 2.46:1; MU's item textures are 256 and this is a hand's width on
+    // screen, so anything bigger only costs download.
     const atlas: Atlas = {
       width: 512,
-      height: 512,
+      height: 256,
       rects: {
-        body: { x: 0, y: 0, w: 352, h: 288 },
-        neck: { x: 0, y: 300, w: 512, h: 80 },
-        head: { x: 360, y: 0, w: 150, h: 150 },
-        rim: { x: 0, y: 400, w: 256, h: 48 },
-        string: { x: 300, y: 400, w: 32, h: 32 },
+        guitar: { x: 0, y: 0, w: 512, h: 208 },
+        rim: { x: 0, y: 216, w: 32, h: 32 },
       },
     };
-    const bodyCrop = sub(guitar, 0, 0.52, 0, 1);
+    const crop = sub(guitar, 0, 1, 0, 1);
     const png = await paintAtlas(file, atlas, {
-      body: { kind: 'crop', crop: bodyCrop },
-      neck: { kind: 'crop', crop: sub(guitar, 0.5, 0.82, 0.4, 0.6) },
-      head: { kind: 'crop', crop: sub(guitar, 0.8, 1, 0.25, 0.75) },
-      rim: { kind: 'solid', rgb: await averageColour(file, bodyCrop) },
-      string: { kind: 'solid', rgb: { r: 226, g: 214, b: 180 } },
+      guitar: { kind: 'crop', crop },
+      rim: { kind: 'solid', rgb: await averageColour(file, crop) },
     });
-    await writeGlb('Instrument_Guitar', buildGuitar(atlas), png);
+    await writeGlb('Instrument_Guitar', await buildGuitar(atlas, file, guitar), png);
   }
 
   if (all || wanted.has('flute')) {
@@ -521,20 +699,19 @@ async function main(): Promise<void> {
   }
 
   if (all || wanted.has('ocarina')) {
+    // 384 x 256 is the band's own 1.5:1; the lens has no rim, so the crop is
+    // the whole atlas.
     const atlas: Atlas = {
-      width: 256,
+      width: 384,
       height: 256,
       rects: {
-        ocarina: { x: 0, y: 0, w: 256, h: 224 },
-        clay: { x: 0, y: 230, w: 24, h: 24 },
+        ocarina: { x: 0, y: 0, w: 384, h: 256 },
       },
     };
-    const crop = sub(ocarina, 0, 1, 0, 1);
     const png = await paintAtlas(file, atlas, {
-      ocarina: { kind: 'crop', crop },
-      clay: { kind: 'solid', rgb: await averageColour(file, crop) },
+      ocarina: { kind: 'crop', crop: sub(ocarina, 0, 1, 0, 1) },
     });
-    await writeGlb('Instrument_Ocarina', buildOcarina(atlas), png);
+    await writeGlb('Instrument_Ocarina', await buildOcarina(atlas, file, ocarina), png);
   }
 }
 

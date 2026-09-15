@@ -109,8 +109,12 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     sustained: true,
     model: 'Item/Instrument_Ocarina.glb',
     bone: RIGHT_HAND,
-    // Mouthpiece at the lips, body out in front of the chin.
-    link: { angle: [-110, 15, 58], offset: [8, 8, -6] },
+    // Mouthpiece at the lips, the body angled down and out in front of the
+    // chin with its face - the holes - turned to the camera. Re-solved when
+    // the model became the photo's own outline, whose mouthpiece lies in the
+    // body's plane rather than standing out of it
+    // (tools/screenshot/_probe_ocarinalink.mjs).
+    link: { angle: [-94, 26, 41], offset: [17, 10, -10] },
     // The right hand up at the mouth, held with a small sway (see flute).
     pose: { clip: A.PLAYER_AGAIN1, from: 0.5, to: 0.56, sway: 0.6 },
   },
