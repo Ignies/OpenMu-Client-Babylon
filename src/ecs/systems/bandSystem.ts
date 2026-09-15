@@ -45,7 +45,7 @@ const bandDev = devQuery('band');
 let linkOverride: { angle: [number, number, number]; offset: [number, number, number] } | null = null;
 
 /** A live-tuned frame window (dev only) for the hero's clip. */
-let poseOverride: { from: number; to: number } | null = null;
+let poseOverride: { from: number; to: number; sway: number } | null = null;
 
 export const BandSystem: ISystemFactory = world => {
   const performers = world.with('performing', 'modelObject', 'transform', 'playerAnimation');
@@ -115,7 +115,7 @@ export const BandSystem: ISystemFactory = world => {
     if (p.clip >= 0 && model.gltf.animationGroups[p.clip]) return p.clip;
     const def = instrumentById(p.instrument);
     const window = p.local && poseOverride ? poseOverride : def.pose;
-    const clip = instrumentClip(model, p.source, window.from, window.to);
+    const clip = instrumentClip(model, p.source, window.from, window.to, window.sway);
     if (clip === null) return -1;
     model.setActionSpeed(clip, CLIP_SPEED);
     p.clip = clip;
@@ -155,7 +155,7 @@ export const BandSystem: ISystemFactory = world => {
 
   // Dev hooks for tuning a row live: `__bandLink([ax,ay,az],[ox,oy,oz])`
   // rebuilds the hero's instrument on the bone with that link;
-  // `__bandPose(from, to)` recuts the hero's clip from that window (0..1).
+  // `__bandPose(from, to, sway)` recuts the hero's clip from that window (0..1).
   if (import.meta.env.DEV && typeof window !== 'undefined') {
     const w = window as unknown as { __bandLink: unknown; __bandPose: unknown };
     w.__bandLink = (angle: [number, number, number], offset: [number, number, number]) => {
@@ -167,11 +167,11 @@ export const BandSystem: ISystemFactory = world => {
       p.model = null;
       return true;
     };
-    w.__bandPose = (from: number, to: number) => {
+    w.__bandPose = (from: number, to: number, sway = 1) => {
       const hero = world.playerEntity;
       const p = hero?.performing;
       if (!hero || !p) return false;
-      poseOverride = { from, to };
+      poseOverride = { from, to, sway };
       p.clip = -1;
       return true;
     };
