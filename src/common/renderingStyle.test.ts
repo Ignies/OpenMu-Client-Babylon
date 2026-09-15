@@ -4,6 +4,7 @@ import { GameOptions, setGameOption } from './gameOptions';
 import {
   LINE_STRENGTH_MAX,
   LINE_STRENGTH_MIN,
+  LINE_PLACEMENT_MAX,
   LINE_WIDTH_MAX,
   LINE_WIDTH_MIN,
   RENDERING_STYLES,
@@ -13,7 +14,9 @@ import {
   TOON_UNIFORM,
   bindToon,
   inkDarkness,
+  inkSide,
   inkWidth,
+  linePlacement,
   lineStrength,
   lineWidth,
   renderingStyle,
@@ -37,6 +40,7 @@ const initial = {
   styleStrength: GameOptions.styleStrength,
   lineWidth: GameOptions.lineWidth,
   lineStrength: GameOptions.lineStrength,
+  linePlacement: GameOptions.linePlacement,
   grassOutline: GameOptions.grassOutline,
   animeEffects: GameOptions.animeEffects,
 };
@@ -119,6 +123,11 @@ describe('renderingStyle', () => {
     expect(lineStrength()).toBe(LINE_STRENGTH_MIN);
     setGameOption('lineStrength', 12);
     expect(lineStrength()).toBe(LINE_STRENGTH_MAX);
+
+    setGameOption('linePlacement', -2);
+    expect(linePlacement()).toBe(0);
+    setGameOption('linePlacement', 7);
+    expect(linePlacement()).toBe(LINE_PLACEMENT_MAX);
   });
 });
 
@@ -263,6 +272,17 @@ describe('the material snapshot', () => {
       setGameOption('lineStrength', value);
       syncRenderingStyle();
       expect(inkDarkness()).toBeCloseTo(darkness, 6);
+    }
+  });
+
+  it('turns the placement into the side the pass draws on', () => {
+    setGameOption('lightingQuality', 1);
+    setGameOption('renderingStyle', 2);
+    const sides = [1, 0, -1];
+    for (let value = 0; value <= LINE_PLACEMENT_MAX; value++) {
+      setGameOption('linePlacement', value);
+      syncRenderingStyle();
+      expect(inkSide()).toBe(sides[value]);
     }
   });
 

@@ -11,6 +11,7 @@ import { devQueryNumbers } from '../common/devSeams';
 import type { LightingTier } from '../common/lightingQuality';
 import {
   inkDarkness,
+  inkSide,
   inkWidth,
   toonBands,
   toonEffectsActive,
@@ -23,18 +24,23 @@ import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
  * post-process, between the AO combine and the haze so a line fades with
  * distance like the surface it sits on and is graded with the scene.
  *
- * The lines come from the G-buffer alone. A pixel takes a line when a
- * neighbour lies farther than the plane through the pixel predicts (a
- * silhouette, drawn on its near side only, so one texel of offset is one
- * texel of line) or when the normal turns while the depth stays on the plane
- * (a crease). The plane test is what keeps a floor at a grazing angle clean:
- * its depth changes fast, and the plane predicts that change exactly. Sky is
- * depth 0: it never inks, and as a neighbour it is the farthest thing there
- * is. The effect mask is subtracted and added back the way the haze does it,
- * so the additive half of a pixel keeps its own light.
+ * The lines come from the G-buffer alone. Depth across a flat surface is not
+ * linear in screen space but its reciprocal is, at whatever angle the surface
+ * is seen, so the two neighbours on an axis predict the pixel between them by
+ * a straight average: their second difference is zero on any flat surface,
+ * positive where the pixel stands in front of what surrounds it and negative
+ * where it stands behind. That is the whole silhouette test, and the line
+ * placement decides which side of the step takes the line. A crease is a
+ * *sudden* turn of the normal, the second difference again, counted only
+ * where the depth stayed continuous: a smoothly rounded limb turns by the
+ * same amount from tap to tap and draws nothing.
  *
- * The line strength and line width sliders set the darkness and the width
- * (renderingStyle.ts).
+ * Sky is depth 0: it never inks, and as a neighbour it is infinitely far.
+ * The effect mask is subtracted and added back the way the haze does it, so
+ * the additive half of a pixel keeps its own light.
+ *
+ * The line strength, line width and line placement sliders set the darkness,
+ * the width and the side (renderingStyle.ts).
  *
  * With the skill effects toggle on (`toonEffectsActive`) the pass is built
  * in its second form and treats the additive half it just subtracted the
@@ -44,9 +50,11 @@ import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
  * every flash and bolt wears a contour in its own darker colour. Below the
  * first tone the glow is left as it is, a soft skirt outside the line: the
  * mask has no depth, so under a flame that dips into the ground it reports
- * more light than landed, and a pixel whose effect is taken away entirely
- * would show the surface with the wrong share subtracted. Off, the shader
- * text is the one it always was.
+ * more light than landed. The mask is depthless in the other direction too,
+ * holding effects the frame never drew because something opaque stood in
+ * front, and a pixel the frame left dimmer than the effect alone is exactly
+ * that: those are left to the surface, so a contour never lands on the wall
+ * in front of a flame. Off, the shader text is the one it always was.
  * Dev seam: `?inkk=depthThreshold,normalThreshold` replaces the edge thresholds.
  */
 
@@ -61,7 +69,11 @@ const DEPTH_THRESHOLD = 0.02;
 /** ...and never under this many tiles, so a surface never inks its own texels. */
 const DEPTH_FLOOR = 0.05;
 
-/** A crease counts past this much normal turn (1 - cos), about 63 degrees. */
+/**
+ * A crease counts past this much sudden turn of the normal, as the length of
+ * the turn it takes between one tap and the next: about 26 degrees of change
+ * in the rate, not in the normal itself.
+ */
 const NORMAL_THRESHOLD = 0.45;
 
 /** Tiles over which the lines thin to nothing. */
@@ -104,8 +116,8 @@ function registerShader(rings: number, fx: boolean): void {
   uniform sampler2D ${EFFECT_MASK_SAMPLER};
   uniform vec2 texel;      // one G-buffer texel at the reference height, in UV
   uniform float inkWidth;  // the line's width in those texels
-  uniform vec2 viewport;   // tan(fov/2) * aspect, tan(fov/2)
-  uniform vec4 ink;        // strength, depth threshold (share of z), depth floor (tiles), normal threshold (1 - cos)
+  uniform float inkSide;   // 1 inside the silhouette, 0 across it, -1 outside
+  uniform vec4 ink;        // strength, depth threshold (share of z), depth floor (tiles), normal threshold
   uniform vec2 inkFar;     // fade start, fade end (tiles)
 ${
   fx
@@ -127,40 +139,43 @@ ${
     : ''
 }
   const int RINGS = ${rings};
-  const float SKY_Z = 1.0e6;
 
-  vec3 rayAt(vec2 uv) {
-    return vec3((uv.x * 2.0 - 1.0) * viewport.x, (uv.y * 2.0 - 1.0) * viewport.y, 1.0);
-  }
-
-  // Sky is depth 0 and stands behind everything: as a neighbour it is the
-  // farthest thing there is.
-  float depthAt(vec2 uv) {
+  // Sky stands infinitely far behind everything, which is zero the moment
+  // depth is read as its reciprocal.
+  float invAt(vec2 uv) {
     float z = texture2D(depthSampler, uv).r;
-    return z <= 0.0 ? SKY_Z : z;
+    return z <= 0.0 ? 0.0 : 1.0 / z;
   }
 
-  // What the plane through this pixel says the neighbour's depth should be.
-  // abs() because a front face's view-space normal has negative z and a back
-  // face's positive.
-  float expectedDepth(vec2 uv, vec3 n, float zPlane) {
-    return zPlane / max(abs(dot(n, rayAt(uv))), 0.05);
+  vec3 normalAt(vec2 uv) {
+    return texture2D(normalSampler, uv).xyz;
   }
 
-  // The line goes on the near side only: this pixel inks when its neighbour
-  // is farther than the plane predicts.
-  float depthStep(vec2 uv, vec3 n, float zPlane, float threshold) {
-    return smoothstep(threshold, threshold * 2.0, depthAt(uv) - expectedDepth(uv, n, zPlane));
+  // How far this pixel stands in front of the straight line between its two
+  // neighbours, in tiles. Zero on any flat surface at any angle, which is
+  // what a plane predicted from the shading normal could not manage: on a
+  // card whose authored normal is not its own plane, on a smoothed limb, or
+  // on anything seen near edge-on, that prediction was wrong across the
+  // whole surface and the pass filled it with ink instead of tracing it.
+  float reliefAt(vec2 uv, vec2 reach, float inv0, float scale) {
+    return (2.0 * inv0 - invAt(uv + reach) - invAt(uv - reach)) * scale;
   }
 
-  // A crease: the normal turns while the depth stays on the plane. A normal
-  // change across a depth step is that step's silhouette and is left to
-  // depthStep.
-  float creaseStep(vec2 uv, vec3 n, float zPlane, float threshold) {
-    float off = abs(depthAt(uv) - expectedDepth(uv, n, zPlane));
-    float continuous = 1.0 - smoothstep(threshold, threshold * 2.0, off);
-    float turn = 1.0 - dot(n, texture2D(normalSampler, uv).xyz);
-    return smoothstep(ink.w, ink.w * 2.0, turn) * continuous;
+  // The silhouette, on the side the placement asks for: inside it is the
+  // pixel standing in front, outside it the one standing behind.
+  float sideStep(float relief, float threshold) {
+    float inside = smoothstep(threshold, threshold * 2.0, relief);
+    float outside = smoothstep(threshold, threshold * 2.0, -relief);
+    return inkSide > 0.5 ? inside : (inkSide < -0.5 ? outside : max(inside, outside));
+  }
+
+  // A crease turns the normal suddenly. A rounded surface turns it by the
+  // same amount from tap to tap, so the second difference stays near zero
+  // there and only the folds draw.
+  float creaseStep(vec2 uv, vec2 reach, vec3 n0, float relief, float threshold) {
+    float bend = length(normalAt(uv + reach) + normalAt(uv - reach) - 2.0 * n0);
+    float continuous = 1.0 - smoothstep(threshold, threshold * 2.0, abs(relief));
+    return smoothstep(ink.w, ink.w * 2.0, bend) * continuous;
   }
 
   void main(void) {
@@ -176,25 +191,29 @@ ${
 
     // The geometry lines belong to matter: the sky (depth 0) draws none.
     ${fx ? 'if (z0 > 0.0)' : ''} {
-      vec3 n0 = texture2D(normalSampler, vUV).xyz;
-      float zPlane = z0 * abs(dot(n0, rayAt(vUV)));
+      vec3 n0 = normalAt(vUV);
+      float inv0 = 1.0 / z0;
+      // Reciprocal depth back into tiles, to first order, so the thresholds
+      // below stay the plain distances they read as.
+      float scale = z0 * z0;
       float threshold = max(ink.y * z0, ink.z);
       float weight = 1.0;
 
       for (int r = 1; r <= RINGS; r++) {
         vec2 o = texel * (inkWidth + float(r) - 1.0);
+        vec2 reachX = vec2(o.x, 0.0);
+        vec2 reachY = vec2(0.0, o.y);
 
-        float step4 = max(
-          max(depthStep(vUV + vec2(o.x, 0.0), n0, zPlane, threshold),
-              depthStep(vUV - vec2(o.x, 0.0), n0, zPlane, threshold)),
-          max(depthStep(vUV + vec2(0.0, o.y), n0, zPlane, threshold),
-              depthStep(vUV - vec2(0.0, o.y), n0, zPlane, threshold)));
+        float reliefX = reliefAt(vUV, reachX, inv0, scale);
+        float reliefY = reliefAt(vUV, reachY, inv0, scale);
+
+        float step2 = max(sideStep(reliefX, threshold), sideStep(reliefY, threshold));
 
         float crease = max(
-          creaseStep(vUV + vec2(o.x, 0.0), n0, zPlane, threshold),
-          creaseStep(vUV + vec2(0.0, o.y), n0, zPlane, threshold));
+          creaseStep(vUV, reachX, n0, reliefX, threshold),
+          creaseStep(vUV, reachY, n0, reliefY, threshold));
 
-        edge = max(edge, max(step4, crease) * weight);
+        edge = max(edge, max(step2, crease) * weight);
         weight *= 0.5;
       }
 
@@ -205,11 +224,20 @@ ${
     // The depth belongs to the surface, so only the surface takes the line.
     // The additive half drawn over it keeps its own light (the haze's rule).
     // No semicolons in these comments: the shader preprocessor splits on them.
-    vec3 effect = min(texture2D(${EFFECT_MASK_SAMPLER}, vUV).rgb, max(color.rgb, vec3(0.0)));
+    vec3 lit = max(color.rgb, vec3(0.0));
+    vec3 effect = min(texture2D(${EFFECT_MASK_SAMPLER}, vUV).rgb, lit);
     vec3 surface = color.rgb - effect;
 ${
   fx
     ? `
+    // The mask carries every additive thing in the world, the ones the depth
+    // test hid behind a wall included. An effect that did light this pixel
+    // is part of what the frame holds, so a frame dimmer than the effect
+    // alone is one where it landed somewhere else: leave those to the
+    // surface rather than draw a contour on the wall in front of them.
+    float rawL = maskLuma(vUV);
+    float shownHere = step(rawL, dot(lit, vec3(0.299, 0.587, 0.114)) + 1e-4);
+
     // The effects, flat: from the first tone up their luminance is snapped
     // to the tone levels, hue kept, what stands above white passing through,
     // so a soft glow ends in a hard step. Below the first tone it is left as
@@ -219,7 +247,7 @@ ${
     float fxLow = 0.5 / max(inkFx - 1.0, 1.0);
     float fxL = dot(effect, vec3(0.299, 0.587, 0.114));
     float fxQ = fxL < fxLow ? fxL : fxBands(min(fxL, 1.0), inkFx) + max(fxL - 1.0, 0.0);
-    effect = fxL > 1e-4 ? effect * (fxQ / fxL) : effect;
+    effect = mix(effect, fxL > 1e-4 ? effect * (fxQ / fxL) : effect, shownHere);
 
     vec2 fxO = texel * inkWidth;
     float fxOut = max(
@@ -227,7 +255,7 @@ ${
           1.0 - step(fxLow, maskLuma(vUV - vec2(fxO.x, 0.0)))),
       max(1.0 - step(fxLow, maskLuma(vUV + vec2(0.0, fxO.y))),
           1.0 - step(fxLow, maskLuma(vUV - vec2(0.0, fxO.y)))));
-    float contour = step(fxLow, fxL) * fxOut;
+    float contour = step(fxLow, fxL) * fxOut * shownHere;
 
     edge = max(edge, contour);
     effect *= 1.0 - contour * ink.x;
@@ -250,7 +278,7 @@ function createPass(
   const pass = new PostProcess(
     'inkOutline',
     shaderName(rings, fx),
-    ['texel', 'inkWidth', 'viewport', 'ink', 'inkFar', ...(fx ? ['inkFx'] : [])],
+    ['texel', 'inkWidth', 'inkSide', 'ink', 'inkFar', ...(fx ? ['inkFx'] : [])],
     ['depthSampler', 'normalSampler', EFFECT_MASK_SAMPLER],
     1,
     null,
@@ -293,14 +321,16 @@ function createPass(
     const height = target.getRenderHeight();
     const px = Math.max(1, Math.round(height / REFERENCE_HEIGHT));
     effect.setFloat2('texel', px / width, px / height);
-    effect.setFloat('inkWidth', inkWidth());
 
-    const tanHalf = Math.tan(camera.fov / 2);
-    effect.setFloat2(
-      'viewport',
-      tanHalf * scene.getEngine().getAspectRatio(camera, true),
-      tanHalf
+    // A line across the step is drawn from both sides, so each side takes
+    // half the slider and the line comes out the width it asks for.
+    const side = inkSide();
+    effect.setFloat(
+      'inkWidth',
+      side === 0 ? Math.max(1, Math.round(inkWidth() / 2)) : inkWidth()
     );
+    effect.setFloat('inkSide', side);
+
     effect.setFloat4(
       'ink',
       shown.strength,

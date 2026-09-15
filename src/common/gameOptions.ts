@@ -82,6 +82,12 @@ export type GameOptions = {
    */
   lineStrength: number;
   /**
+   * Which side of a silhouette the ink lines sit on: 0 inside it (the line
+   * eats into the thing it draws), 1 across it, 2 outside it (the thing
+   * keeps its whole shape). Unread unless the style draws lines.
+   */
+  linePlacement: number;
+  /**
    * An ink outline on the grass blades, along their edges and across the
    * tip, fading toward the root; the line sliders set it. Unread unless the
    * style draws lines.
@@ -373,6 +379,8 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   styleStrength: [1, 9],
   lineWidth: [1, 5],
   lineStrength: [1, 9],
+  // Literal rather than the renderingStyle.ts constant, as above.
+  linePlacement: [0, 2],
   // Literal rather than `MATERIAL_DETAIL_MAX`: materialQuality.ts imports
   // this module, so naming it here would close an import cycle.
   materialDetail: [0, 9],
@@ -417,6 +425,7 @@ const DEFAULTS: GameOptions = {
   styleStrength: 5,
   lineWidth: 2,
   lineStrength: 5,
+  linePlacement: 1,
   grassOutline: true,
   animeEffects: true,
   volume: 5,
