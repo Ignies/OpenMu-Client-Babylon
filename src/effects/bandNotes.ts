@@ -1,16 +1,29 @@
 /**
  * Band notes - a music note that floats up from an instrument for every note
- * it plays: the strum the held pose does not make. One additive card per
- * note, so the Anime style contours it with the other effects
- * (scenes/inkOutline.ts); tinted by the pitch class, twelve hues around the
- * octave, and sized by the velocity. The glyph is drawn once per scene into
- * a small dynamic texture as shapes (head, stem, flag, beam), not a font
- * character: every machine draws the same note.
+ * it plays: the strum the held pose does not make.
+ *
+ * Unlike the rest of the effects a note is not a glow: it is a solid glyph,
+ * alpha-tested at full opacity in the world's own rendering group, so it
+ * writes depth and lands in the G-buffer - which is what gives it an ink
+ * line of its own under the Anime style (scenes/inkOutline.ts) instead of
+ * the contour that pass draws around the additive cards. Tinted by the
+ * pitch class, twelve hues around the octave, and sized by the velocity.
+ * The glyph is drawn once per scene into a small dynamic texture as shapes
+ * (head, stem, flag, beam), not a font character: every machine draws the
+ * same note.
  *
  * Driven by: `BandSystem`, one spawn per hit it lets through. Read by: nobody.
  */
-import { DynamicTexture, type Scene, type Vector3 } from '../libs/babylon/exports';
-import { LiveList, acquireCard, additiveMaterial, fadeOut, hash, lerp, releaseCard, setCardCell, type Card, type RGB } from './core';
+import {
+  Constants,
+  DynamicTexture,
+  Material,
+  StandardMaterial,
+  Texture,
+  type Scene,
+  type Vector3,
+} from '../libs/babylon/exports';
+import { LiveList, acquireCard, hash, lerp, releaseCard, setCardCell, type Card, type RGB } from './core';
 import type { EffectHandle, EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -37,8 +50,8 @@ const SWAY_RATE = 3;
 /** Share of the life spent growing in from nothing. */
 const GROW = 0.12;
 
-/** Fade tail as a share of the life. */
-const TAIL = 0.45;
+/** Share of the life spent shrinking away at the end: a note holds its colour, so it leaves by size. */
+const SHRINK = 0.25;
 
 /** Saturation of the pitch hues, 0..1: pastel, so the note reads as a glyph, not a flare. */
 const SATURATION = 0.55;
@@ -64,6 +77,9 @@ const live = new LiveList();
 /** The glyph sheet of the current scene; a map change disposes it with the pools. */
 let sheetScene: Scene | null = null;
 let sheet: DynamicTexture | null = null;
+
+/** One opaque material per tint, this entry's own: the shared cache holds additive ones. */
+const materials = new Map<string, StandardMaterial>();
 
 let seed = 0;
 
@@ -103,11 +119,14 @@ function head(ctx: CanvasRenderingContext2D, x: number, y: number): void {
   ctx.fill();
 }
 
-/** The glyphs, white on black - the card is additive, black adds nothing. */
+/**
+ * The glyphs, white on nothing: the card is alpha-tested, so the sheet's
+ * transparent half is the shape the ink pass outlines and the depth buffer
+ * sees. White, because the material multiplies the texel by the tint.
+ */
 function drawSheet(tex: DynamicTexture): void {
   const ctx = tex.getContext() as CanvasRenderingContext2D;
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, CELL * 2, CELL);
+  ctx.clearRect(0, 0, CELL * 2, CELL);
   ctx.fillStyle = '#fff';
 
   // Cell 0: one eighth note - head, stem up its right side, a flag curling out.
@@ -140,16 +159,49 @@ function drawSheet(tex: DynamicTexture): void {
 function sheetFor(scene: Scene): DynamicTexture {
   if (sheet && sheetScene === scene) return sheet;
   sheet?.dispose();
-  sheet = new DynamicTexture('fx:bandNotes', { width: CELL * 2, height: CELL }, scene, true);
-  sheet.hasAlpha = false;
+  // No mipmaps: a mip of a glyph on a clear sheet averages its alpha down
+  // toward nothing, and an alpha-tested note would thin and fade with
+  // distance instead of staying a solid symbol.
+  sheet = new DynamicTexture('fx:bandNotes', { width: CELL * 2, height: CELL }, scene, false, Texture.BILINEAR_SAMPLINGMODE);
+  sheet.hasAlpha = true;
+  sheet.wrapU = Texture.CLAMP_ADDRESSMODE;
+  sheet.wrapV = Texture.CLAMP_ADDRESSMODE;
   sheetScene = scene;
   drawSheet(sheet);
   return sheet;
 }
 
+/**
+ * The glyph in one tint: unlit, so the texel is simply multiplied by it
+ * (`emissiveColor` with lighting off), and alpha-tested rather than blended,
+ * so every note is fully opaque and cut to its own outline.
+ */
+function noteMaterial(scene: Scene, colour: RGB): StandardMaterial {
+  const key = `${(colour[0] * 255) | 0},${(colour[1] * 255) | 0},${(colour[2] * 255) | 0}`;
+  const known = materials.get(key);
+  if (known && known.getScene() === scene) return known;
+  const mat = new StandardMaterial(`fx:note:${key}`, scene);
+  mat.diffuseColor.set(0, 0, 0);
+  mat.specularColor.set(0, 0, 0);
+  mat.ambientColor.set(0, 0, 0);
+  mat.emissiveColor.set(colour[0], colour[1], colour[2]);
+  mat.disableLighting = true;
+  mat.diffuseTexture = sheetFor(scene);
+  // The alpha test reads the *material's* alpha, which only picks up the
+  // texture's with this on (Babylon's ALPHATEST_AFTERALLALPHACOMPUTATIONS):
+  // without it the sheet's clear half draws as a black square around the note.
+  mat.useAlphaFromDiffuseTexture = true;
+  mat.alphaMode = Constants.ALPHA_DISABLE;
+  mat.transparencyMode = Material.MATERIAL_ALPHATEST;
+  mat.backFaceCulling = false;
+  materials.set(key, mat);
+  return mat;
+}
+
 function spawn(scene: Scene, at: Vector3, opts: BandNoteOptions): EffectHandle {
-  const material = additiveMaterial(scene, sheetFor(scene), pitchColour(opts.pitch));
-  const card: Card = acquireCard(scene, material);
+  const material = noteMaterial(scene, pitchColour(opts.pitch));
+  // Group 0: a note is a solid thing in the world, not a glow over it.
+  const card: Card = acquireCard(scene, material, true, 0);
   const s = seed++;
   setCardCell(card, CELLS, hash(s) < SINGLE_SHARE ? 0 : 1);
   const velocity = Math.max(0, Math.min(127, opts.velocity ?? 100)) / 127;
@@ -166,9 +218,8 @@ function spawn(scene: Scene, at: Vector3, opts: BandNoteOptions): EffectHandle {
       t += dt;
       const p = t / SECONDS;
       if (p >= 1) return false;
-      const grown = p < GROW ? p / GROW : 1;
+      const grown = p < GROW ? p / GROW : p > 1 - SHRINK ? (1 - p) / SHRINK : 1;
       card.scaling.setAll(size * grown);
-      card.visibility = fadeOut(p, TAIL);
       card.position.set(x + side * (DRIFT * t + SWAY * Math.sin(phase + SWAY_RATE * t)), y + RISE * t, z);
       return true;
     },
@@ -184,6 +235,8 @@ function update(_map: number, dt: number): void {
 
 function reset(): void {
   live.clear();
+  for (const mat of materials.values()) mat.dispose();
+  materials.clear();
   sheet?.dispose();
   sheet = null;
   sheetScene = null;

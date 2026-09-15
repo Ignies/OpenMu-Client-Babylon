@@ -401,7 +401,19 @@ const cardPool = new Map<Scene, Card[]>();
 
 let cardSeq = 0;
 
-export function acquireCard(scene: Scene, material: StandardMaterial, billboard = true): Card {
+/**
+ * A pooled card. `group` is the rendering group it draws in: the effects
+ * group by default, group 0 for a card that is a solid object rather than a
+ * glow - an alpha-tested one belongs with the world, where it writes depth
+ * and lands in the G-buffer, which is what puts an ink line around it.
+ * Always set, never only on creation: the pool is shared.
+ */
+export function acquireCard(
+  scene: Scene,
+  material: StandardMaterial,
+  billboard = true,
+  group = EFFECT_RENDERING_GROUP
+): Card {
   let pool = cardPool.get(scene);
   if (!pool) {
     pool = [];
@@ -414,7 +426,6 @@ export function acquireCard(scene: Scene, material: StandardMaterial, billboard 
     card.alwaysSelectAsActiveMesh = true;
     card.receiveShadows = false;
     card.doNotSyncBoundingInfo = true;
-    card.renderingGroupId = EFFECT_RENDERING_GROUP;
     keepDepthForEffects(scene);
     // Not the item halo layer: it draws every active mesh and a card carries
     // no tier, so it would cost a draw to contribute nothing. The card's own
@@ -422,6 +433,17 @@ export function acquireCard(scene: Scene, material: StandardMaterial, billboard 
     (scene as TestScene).look?.glow.addExcludedMesh(card);
   }
   card.material = material;
+  card.renderingGroupId = group;
+  // A card in the world's group is matter: it goes into the G-buffer, so the
+  // haze and the AO read its own depth rather than whatever stands behind it
+  // (which washed a note out to the colour of the distance), and the ink pass
+  // has an edge to draw. An effect card stays out of it - it is light.
+  card.metadata ??= {};
+  card.metadata.depthOccluder = group === 0;
+  // ... which needs its bounds to be real: the G-buffer's own reach test
+  // measures from the bounding sphere, and a pooled card never syncs one, so
+  // it reads as a card at the map's origin and is dropped every frame.
+  card.doNotSyncBoundingInfo = group !== 0;
   card.billboardMode = billboard ? Mesh.BILLBOARDMODE_ALL : Mesh.BILLBOARDMODE_NONE;
   card.rotationQuaternion = null;
   card.rotation.setAll(0);
