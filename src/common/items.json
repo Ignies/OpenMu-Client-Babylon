@@ -10331,7 +10331,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
-    "RF": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale06.glb"
   },
@@ -10363,7 +10363,7 @@
     "MG": 1,
     "DL": 1,
     "SUM": 0,
-    "RF": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale07.glb"
   },
@@ -10427,7 +10427,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
-    "RF": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale09.glb"
   },
@@ -10459,7 +10459,7 @@
     "MG": 1,
     "DL": 0,
     "SUM": 0,
-    "RF": 0,
+    "RF": 1,
     "szModelFolder": "Player/",
     "szModelName": "GloveMale10.glb"
   },
