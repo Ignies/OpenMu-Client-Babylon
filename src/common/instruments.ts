@@ -75,8 +75,9 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     // hand bones (tools/screenshot/_probe_bandsolve.mjs); tune live with
     // `?instRot=` / `?instOff=` or `__bandLink`.
     link: { angle: [-84, -35, -90], offset: [-11, -1, -1] },
-    // The opening of the Hustle dance: arms out in front, moving.
-    pose: { clip: A.PLAYER_HUSTLE, from: 0.05, to: 0.12 },
+    // The very first frames of Hustle, where the guitar sits up across the
+    // chest; a narrow window so it is a small strum, not the whole dance.
+    pose: { clip: A.PLAYER_HUSTLE, from: 0, to: 0.04 },
   },
   {
     id: 'flute',
@@ -88,8 +89,10 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     bone: RIGHT_HAND,
     // At the mouth, out to the right and a little down.
     link: { angle: [-59, 15, 160], offset: [9, -18, 3] },
-    // The end of the Again gesture: the right hand up at the mouth.
-    pose: { clip: A.PLAYER_AGAIN1, from: 0.75, to: 1 },
+    // The middle of the Again gesture, where the right hand is up at the
+    // mouth; a narrow window so the flute holds there with a small sway
+    // instead of swinging down and back.
+    pose: { clip: A.PLAYER_AGAIN1, from: 0.5, to: 0.56 },
   },
   {
     id: 'ocarina',
@@ -101,7 +104,8 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     bone: RIGHT_HAND,
     // Mouthpiece at the lips, body out in front of the chin.
     link: { angle: [-110, 15, 58], offset: [8, 8, -6] },
-    pose: { clip: A.PLAYER_AGAIN1, from: 0.75, to: 1 },
+    // The right hand up at the mouth, held with a small sway (see flute).
+    pose: { clip: A.PLAYER_AGAIN1, from: 0.5, to: 0.56 },
   },
 ];
 
