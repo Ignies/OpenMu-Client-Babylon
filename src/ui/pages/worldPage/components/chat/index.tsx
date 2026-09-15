@@ -21,6 +21,7 @@ import { isTypingInField } from '../../../../../ecs/systems/keyboardInputSystem'
 import { GameOptions } from '../../../../../common/gameOptions';
 import { isKey } from '../../../../../common/keyBindings';
 import {
+  chatPkClass,
   CHAT_FILTERS,
   CHAT_INPUT_MODES,
   CHAT_INPUT_PREFIX,
@@ -333,7 +334,24 @@ const ChatLog = observer(() => {
                 {chatTimestamp(line.at)}{' '}
               </span>
             )}
-            {line.sender ? `${line.sender} : ${line.text}` : line.text}
+            {line.sender ? (
+              <>
+                {line.senderGuild ? (
+                  <span className="chat-line-guild">{`[${line.senderGuild}] `}</span>
+                ) : null}
+                <span
+                  className={`chat-line-name ${chatPkClass(line.senderPk)}${
+                    line.senderGm ? ' is-gm' : ''
+                  }`}
+                >
+                  {line.sender}
+                </span>
+                {' : '}
+                {line.text}
+              </>
+            ) : (
+              line.text
+            )}
           </div>
         );
       })}

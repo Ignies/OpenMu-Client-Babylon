@@ -14,6 +14,7 @@ import {
   CHAT_LOG_MIN_LINES,
   CHAT_SHOWING_LINES,
   ChatLineType,
+  chatSenderPrefix,
   chatTimestamp,
   splitChatLine,
   MAX_CHAT_LENGTH,
@@ -323,21 +324,57 @@ export const Social = new (class _Social {
 
   // ---- chat ---------------------------------------------------------------
 
+  /**
+   * Who is speaking, as the log will draw them. Read once, when the line
+   * arrives: the speaker can leave scope, change guild or turn outlaw long
+   * before the line scrolls off, and the log should still show what was true
+   * when they said it.
+   */
+  private speaker(sender: string): {
+    senderGuild?: string;
+    senderPk?: number;
+    senderGm?: boolean;
+  } {
+    const world = Store.world;
+    if (!sender || !world) return {};
+
+    // `AssignChat`: players first, then anything else wearing the name.
+    const players = world.playersQuery.entities;
+    const entity =
+      players.find(e => e.objectNameInWorld === sender) ??
+      (world.playerEntity?.objectNameInWorld === sender ? world.playerEntity : undefined);
+    if (!entity) return {};
+
+    const guild = entity.guild ? Store.guilds.get(entity.guild.id) : undefined;
+    // For ourselves the server answered both outright (CharacterInformation);
+    // for anyone else `isGm` is the `#` shout guess and all there is.
+    const own = sender === Store.playerData.name;
+
+    return {
+      senderGuild: guild?.name || undefined,
+      senderPk: own ? Store.playerData.heroState : entity.heroState,
+      senderGm: own ? Store.playerData.isGameMaster : entity.isGm,
+    };
+  }
+
   /** `CNewUIChatLogWindow::AddText`. */
   addChatLine(sender: string, text: string, type: ChatLineType): void {
     const at = Date.now();
+    const speaker = this.speaker(sender);
     // The optional clock column is ours, and it takes width off the line;
     // without it in the budget a timestamped line clips again.
     const width =
       CHAT_LOG_CLIENT_WIDTH -
       (GameOptions.chatTimestamps ? chatTextWidth(`${chatTimestamp(at)} `) : 0);
 
-    const parts = splitChatLine(sender, text, width, chatTextWidth);
+    const prefix = chatSenderPrefix({ sender, ...speaker });
+    const parts = splitChatLine(prefix, text, width, chatTextWidth);
 
     const rows: ChatLine[] = parts.map((part, index) => ({
       id: this.nextLineId++,
       // `Create(L"", strText2, ...)`: the carried half has no sender.
       sender: index === 0 ? sender : '',
+      ...(index === 0 ? speaker : {}),
       continued: index > 0,
       text: part,
       type,
