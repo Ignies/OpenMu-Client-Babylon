@@ -116,6 +116,7 @@ export const NetworkSystem: ISystemFactory = world => {
         const last = sendWalkPathToServer(path, 0);
         sentUpTo = last >= 0 && last < path.length - 1 ? path[last] : undefined;
         sentPath = sentUpTo ? path : undefined;
+        pathfinding.sentThrough = sentUpTo;
         playerMoveTo.sendToServer = false;
         return;
       }
@@ -127,6 +128,7 @@ export const NetworkSystem: ISystemFactory = world => {
       if (!pathfinding.calculated || path !== sentPath || path.length === 0) {
         sentUpTo = undefined;
         sentPath = undefined;
+        pathfinding.sentThrough = undefined;
         return;
       }
 
@@ -141,6 +143,7 @@ export const NetworkSystem: ISystemFactory = world => {
         const last = sendWalkPathToServer(path, 0);
         sentUpTo = last >= 0 && last < path.length - 1 ? path[last] : undefined;
         if (!sentUpTo) sentPath = undefined;
+        pathfinding.sentThrough = sentUpTo;
         return;
       }
       if (idx > 1) return;
@@ -148,6 +151,7 @@ export const NetworkSystem: ISystemFactory = world => {
       const last = sendWalkPathToServer(path, idx);
       sentUpTo = last >= 0 && last < path.length - 1 ? path[last] : undefined;
       if (!sentUpTo) sentPath = undefined;
+      pathfinding.sentThrough = sentUpTo;
     },
   };
 };
