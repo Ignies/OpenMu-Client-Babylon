@@ -367,6 +367,54 @@ describe('band hub', () => {
     expect(a.sent).toEqual([]);
   });
 
+  it('identifies performers by the id others see, not the shared local 0x200', () => {
+    // The real server hands every client the same local hero id (0x200) and a
+    // unique id to everyone else. Two performers with the same local id must
+    // still be told apart, by the id their receivers address them under.
+    clock = 1_000_000;
+    function named(selfId: number, name: string, seen: { id: number; name: string }[]): Fake {
+      const session = new TrackedSession(`n${name}`, 55901, { event() {}, change() {}, move() {} }, { now });
+      const wire = new WireEncoder();
+      session.feedServer(wire.server(gameServerEntered(selfId)));
+      session.setAccount(`acc${name}`);
+      session.feedServer(wire.server(characterList([{ name, cls: 7, level: 1, status: 0 }])));
+      session.feedClient(wire.client(selectCharacter(name)));
+      session.feedServer(wire.server(characterInformation({ x: 100, y: 100, map: 0, money: 0, status: 0, hp: 1, maxHp: 1 })));
+      session.feedServer(wire.server(playersInScope(seen.map(s => ({ id: s.id, x: 100, y: 100, name: s.name })))));
+      const sent: BandRelayMessage[] = [];
+      const raw: Uint8Array[] = [];
+      const status = { value: 1 };
+      const peer: BandPeer = {
+        track: session,
+        send: f => {
+          raw.push(f);
+          const m = decodeRelayFrame(f);
+          if (m) sent.push(m);
+          return status.value;
+        },
+      };
+      return { peer, session, sent, raw, status };
+    }
+
+    const h = hub();
+    // Both are 0x200 to themselves; each sees the other under a real id.
+    const dkfried = named(0x200, 'Dkfried', [{ id: 873, name: 'Elfita' }]);
+    const elfita = named(0x200, 'Elfita', [{ id: 864, name: 'Dkfried' }]);
+    h.attach(dkfried.peer);
+    h.attach(elfita.peer);
+
+    h.receive(dkfried.peer, xor(encodeStart(0)));
+    // Elfita hears Dkfried under 864 - not 0x200, which is Elfita's own id.
+    expect(elfita.sent).toEqual([{ sub: BandSub.Start, performerId: 864, version: 1, instrument: 0 }]);
+
+    h.receive(elfita.peer, xor(encodeStart(1)));
+    expect(dkfried.sent).toEqual([{ sub: BandSub.Start, performerId: 873, version: 1, instrument: 1 }]);
+
+    // Two live performers, neither reaped: they no longer collide on 0x200.
+    expect(h.stats().performers).toBe(2);
+    expect(h.stats().stopped.gone).toBe(0);
+  });
+
   it('says hello with the protocol version', () => {
     expect(decodeRelayFrame(BandHub.hello())).toEqual({ sub: BandSub.Hello, performerId: 0, version: 1 });
   });

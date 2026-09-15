@@ -297,6 +297,21 @@ export class TrackedSession {
     return this.scope.has(objectId & ID_MASK);
   }
 
+  /**
+   * The object id under which this session sees the player called `name`, or
+   * null. The server gives every client the same local id (0x200) for its own
+   * hero and a real, unique id for everyone else, so a performer's own socket
+   * never knows the id others address them by - only the sockets that see
+   * them do, and they see them by name. This is how the band relay recovers a
+   * performer's public id.
+   */
+  idByName(name: string): number | null {
+    for (const [id, entry] of this.scope) {
+      if (entry.kind === 'player' && entry.name === name) return id;
+    }
+    return null;
+  }
+
   /** A journal line another proxy module (the band relay) wants on this character. */
   note(kind: EventKind, text: string, data?: Record<string, unknown>): void {
     if (this.closed) return;

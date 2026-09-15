@@ -93,7 +93,15 @@ type PeerState = {
 
 type Performer = {
   state: PeerState;
+  /**
+   * The id other clients address this performer by, which is what goes on
+   * every relayed frame and what receivers match. Resolved from the tracker
+   * by the performer's name; until a peer that sees them is found it falls
+   * back to `selfId`, which is the same 0x200 for everyone and matches no one.
+   */
   id: number;
+  /** The performer's own local id (0x200), for the still-in-world check only. */
+  selfId: number;
   map: number;
   instrument: number;
   startedAt: number;
@@ -105,6 +113,8 @@ type Performer = {
   events: SlidingWindow;
   states: SlidingWindow;
   lastNamesAt: number;
+  /** The client's own start frame, unstamped, to re-stamp when `id` resolves. */
+  startPlain: Uint8Array;
   startFrame: Uint8Array;
   stateFrame: Uint8Array | null;
   members: Set<PeerState>;
@@ -118,7 +128,8 @@ function chebyshev(a: TrackedSession, b: TrackedSession): number {
 
 export class BandHub {
   private readonly peers = new Map<BandPeer, PeerState>();
-  private readonly performers = new Map<number, Performer>();
+  /** Keyed by the performer's socket, so two performers never share a key even when their local ids do. */
+  private readonly performers = new Map<PeerState, Performer>();
   private readonly now: () => number;
   private readonly maxPerformers: number;
   private readonly maxPerformersPerMap: number;
@@ -256,7 +267,7 @@ export class BandHub {
   sweep(now = this.now()): void {
     for (const perf of Array.from(this.performers.values())) {
       this.refreshReceivers(perf, now, true);
-      if (!this.performers.has(perf.id)) continue;
+      if (!this.performers.has(perf.state)) continue;
       for (const member of Array.from(perf.members)) {
         const t = member.peer.track;
         if (!t.inWorld || t.map !== perf.map || chebyshev(t, perf.state.peer.track) > BAND_LIMITS.joinRangeTiles) {
@@ -335,10 +346,17 @@ export class BandHub {
       }
     }
 
-    const id = track.objectId ?? 0;
+    // The same socket sending start again has switched instruments: the old
+    // performance ends quietly for them (receivers get the stop and the new
+    // start). A socket is one performer, so the map is keyed by socket and no
+    // two performers can collide even when their local ids are the same 0x200.
+    if (previous) this.endPerformance(previous, StopReason.Ended, false);
+
+    const selfId = track.objectId ?? 0;
     const perf: Performer = {
       state,
-      id,
+      id: selfId,
+      selfId,
       map: track.map ?? -1,
       instrument: message.instrument,
       startedAt: now,
@@ -350,25 +368,45 @@ export class BandHub {
       events: new SlidingWindow(100, 10),
       states: new SlidingWindow(100, 10),
       lastNamesAt: 0,
-      startFrame: stampPerformer(plain, id),
+      startPlain: plain,
+      startFrame: stampPerformer(plain, selfId),
       stateFrame: null,
       members: new Set(),
       receivers: new Set(),
       receiversAt: 0,
     };
-    // The same peer switching instruments, or a stale entry under the same
-    // id (a reconnect the tracker has not closed yet): the old one gives
-    // way. Only the stale socket is told; the switching one is still going.
-    const stale = this.performers.get(id);
-    if (stale) this.endPerformance(stale, stale === previous ? StopReason.Ended : StopReason.Gone, stale !== previous);
-    this.performers.set(id, perf);
+    this.performers.set(state, perf);
     state.performing = perf;
     this.counters.performers = this.performers.size;
+    // The performer's own socket only knows its local id (0x200); the id
+    // others address it by is recovered from a peer that sees it.
+    this.resolvePublicId(perf);
     track.note('band', `starts playing instrument ${message.instrument}`, { instrument: message.instrument });
     // Every receiver is new to this performance, so the refresh is what
     // hands them the start.
     this.refreshReceivers(perf, now, false);
-    this.log(`band: #${id} starts playing instrument ${message.instrument} on map ${perf.map} (${perf.receivers.size} receivers)`);
+    this.log(`band: #${perf.id} starts playing instrument ${message.instrument} on map ${perf.map} (${perf.receivers.size} receivers)`);
+  }
+
+  /**
+   * Recover the id other clients see this performer by, from the tracker: the
+   * performer's own socket calls its hero 0x200, but every socket that has the
+   * performer in scope knows them by their real id under their name. Sets
+   * `perf.id` and re-stamps the cached start when it changes.
+   */
+  private resolvePublicId(perf: Performer): void {
+    const name = perf.state.peer.track.character;
+    if (!name) return;
+    for (const other of this.peers.values()) {
+      if (other === perf.state) continue;
+      const id = other.peer.track.idByName(name);
+      if (id === null) continue;
+      if (id !== perf.id) {
+        perf.id = id;
+        perf.startFrame = stampPerformer(perf.startPlain, id);
+      }
+      return;
+    }
   }
 
   private onBatch(state: PeerState, message: Extract<BandClientMessage, { sub: 3 }>, plain: Uint8Array, now: number): void {
@@ -407,11 +445,11 @@ export class BandHub {
       }
     } else if (offset < perf.offset0 - BAND_LIMITS.lagToleranceMs) {
       this.strike(state, now, 'rate');
-      if (!this.performers.has(perf.id)) return;
+      if (!this.performers.has(perf.state)) return;
     }
 
     this.refreshReceivers(perf, now, false);
-    if (!this.performers.has(perf.id)) return;
+    if (!this.performers.has(perf.state)) return;
     this.relay(perf, stampPerformer(plain, perf.id), now);
     this.counters.batchesRelayed++;
   }
@@ -429,7 +467,18 @@ export class BandHub {
       return;
     }
     state.lastJoinAt = now;
-    const master = this.performers.get(message.masterId & 0x7fff);
+    // The joiner names the master by the id they see them under - the master's
+    // public id, not the master's own 0x200 - so find the performance with
+    // that resolved id.
+    const wanted = message.masterId & 0x7fff;
+    let master: Performer | undefined;
+    for (const perf of this.performers.values()) {
+      this.resolvePublicId(perf);
+      if (perf.id === wanted) {
+        master = perf;
+        break;
+      }
+    }
     if (!master) {
       this.refuse(state, RefuseWhat.Join, RefuseCause.NotPerforming);
       return;
@@ -453,9 +502,18 @@ export class BandHub {
     }
     master.members.add(state);
     state.memberOf = master;
+    // The master's client must learn the joiner by the id it sees them under.
+    const joinerId = this.memberIdFor(master, state);
     track.note('band', `joins the band of #${master.id}`, { master: master.id, instrument: message.instrument });
-    this.log(`band: #${track.objectId} joins the band of #${master.id} with instrument ${message.instrument}`);
-    this.trySend(master.state, stampPerformer(plain, track.objectId ?? 0), now);
+    this.log(`band: #${joinerId} joins the band of #${master.id} with instrument ${message.instrument}`);
+    this.trySend(master.state, stampPerformer(plain, joinerId), now);
+  }
+
+  /** The id the master's client sees `member` under, falling back to the member's local id. */
+  private memberIdFor(master: Performer, member: PeerState): number {
+    const name = member.peer.track.character;
+    const seen = name ? master.state.peer.track.idByName(name) : null;
+    return seen ?? member.peer.track.objectId ?? 0;
   }
 
   private leave(state: PeerState, quiet: boolean): void {
@@ -463,18 +521,16 @@ export class BandHub {
     if (!master) return;
     master.members.delete(state);
     state.memberOf = null;
-    const id = state.peer.track.objectId;
-    if (id !== null) {
-      this.trySend(master.state, encodeLeaveNotice(id), this.now());
-      if (!quiet) state.peer.track.note('band', `leaves the band of #${master.id}`, { master: master.id });
-      this.log(`band: #${id} leaves the band of #${master.id}`);
-    }
+    const id = this.memberIdFor(master, state);
+    this.trySend(master.state, encodeLeaveNotice(id), this.now());
+    if (!quiet) state.peer.track.note('band', `leaves the band of #${master.id}`, { master: master.id });
+    this.log(`band: #${id} leaves the band of #${master.id}`);
   }
 
   /** `notifyPerformer` false: the performer is switching instruments and is not to put the new one away. */
   private endPerformance(perf: Performer, reason: number, notifyPerformer = true): void {
-    if (this.performers.get(perf.id) !== perf) return;
-    this.performers.delete(perf.id);
+    if (this.performers.get(perf.state) !== perf) return;
+    this.performers.delete(perf.state);
     perf.state.performing = null;
     this.counters.performers = this.performers.size;
     const now = this.now();
@@ -520,16 +576,25 @@ export class BandHub {
     perf.receiversAt = now;
 
     const me = perf.state.peer.track;
-    if (!me.inWorld || me.map !== perf.map || me.objectId !== perf.id) {
+    if (!me.inWorld || me.map !== perf.map || me.objectId !== perf.selfId) {
       this.endPerformance(perf, StopReason.Gone);
       return;
     }
+
+    // A peer that just came into scope may be the first to know this
+    // performer's public id; a performer whose own id is still the local
+    // 0x200 has no receivers, since nobody addresses anyone by 0x200.
+    this.resolvePublicId(perf);
+    const name = me.character;
 
     let candidates: PeerState[] = [];
     for (const state of this.peers.values()) {
       if (state === perf.state) continue;
       const t = state.peer.track;
-      if (!t.inWorld || t.objectId === null || t.map !== perf.map || !t.sees(perf.id)) continue;
+      if (!t.inWorld || t.objectId === null || t.map !== perf.map) continue;
+      // The receiver must actually see this performer - by their name, since
+      // the performer's own id (0x200) is every peer's own hero id too.
+      if (!name || t.idByName(name) === null) continue;
       candidates.push(state);
     }
     if (candidates.length > this.maxReceivers) {
