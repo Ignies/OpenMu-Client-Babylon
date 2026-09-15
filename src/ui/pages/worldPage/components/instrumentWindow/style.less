@@ -1,177 +1,163 @@
-@import (reference) '../../../../components/muText/style.less';
-// The Instrument window: the move-command window's black plate, a column of
-// rows inside it, a red close bar along the bottom.
-// Off to the side, under the minimap: the performer stays in view.
+// The Instrument window, in the item-window frame. Coordinates live in the
+// component; this is the look of the three tables and their rows, after the
+// party window's.
 .instrument-window {
-  position: absolute;
-  right: 200px;
-  top: 8px;
-  transform-origin: top left;
-  pointer-events: auto;
-  user-select: none;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.8);
-  border: 1px solid rgba(232, 200, 119, 0.35);
   font-size: 11px;
-  color: #e2e2e2;
-  .mu-font();
 
   .band-title {
     position: absolute;
-    white-space: nowrap;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-weight: bold;
+    color: #ffcc1a;
     text-shadow: 1px 1px 0 #000;
-    transform: translateX(-50%);
   }
 
-  .band-body {
+  .head-close {
     position: absolute;
-    left: 8px;
-    right: 8px;
-    top: 26px;
-    bottom: 22px;
+    cursor: pointer;
+  }
+
+  .table-fill {
+    position: absolute;
+    background-color: #0000004d;
+  }
+
+  .band-table {
+    position: absolute;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    text-shadow: 1px 1px 0 #000;
   }
 
-  .band-row {
+  .band-head {
+    color: #ffd927;
+    margin-bottom: 3px;
+  }
+
+  .band-sub {
+    color: #a8a8a8;
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+
+  .band-empty {
+    color: #a8a8a8;
+    font-size: 10px;
+  }
+
+  .band-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .band-line {
     display: flex;
     align-items: center;
-    gap: 6px;
-    min-height: 20px;
+    justify-content: space-between;
+    gap: 4px;
+    min-height: 18px;
   }
 
-  .band-bottom {
-    margin-top: auto;
-  }
-
-  .band-btn {
-    .mu-font();
-    font-size: 11px;
-    color: #e2e2e2;
-    background: rgba(40, 32, 20, 0.9);
-    border: 1px solid rgba(232, 200, 119, 0.5);
-    padding: 2px 8px;
-    cursor: pointer;
-    text-shadow: 1px 1px 0 #000;
-
-    &:hover:not(:disabled) {
-      background: rgba(90, 70, 30, 0.9);
-      color: #fff;
-    }
-
-    &:disabled {
-      opacity: 0.45;
-      cursor: default;
-    }
-  }
-
-  .band-check {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    margin-left: auto;
-  }
-
-  .band-file {
+  .band-file,
+  .band-name {
     flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #cfcfcf;
   }
 
-  .band-progress {
+  // `newui_party_lifebar01/02` as the song's position: the trough and the
+  // fill, the fill's width the played fraction of the 147 pixels.
+  .band-bar {
     position: relative;
-    height: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(232, 200, 119, 0.3);
-
-    .band-progress-fill {
-      position: absolute;
-      inset: 0 auto 0 0;
-      background: rgba(232, 200, 119, 0.45);
-    }
-
-    span {
-      position: absolute;
-      inset: 0;
-      text-align: center;
-      font-size: 9px;
-      line-height: 12px;
-    }
+    margin-top: 3px;
   }
 
-  .band-section {
-    color: #ffcc1a;
-    border-bottom: 1px solid rgba(232, 200, 119, 0.3);
-    padding-bottom: 1px;
-    margin-top: 2px;
+  .band-bar-fill {
+    position: absolute;
   }
 
-  .band-channels {
-    max-height: 120px;
-    overflow-y: auto;
+  .band-time {
+    color: #d8d8d8;
+    font-size: 10px;
+    margin: 2px 0 3px;
+    text-align: right;
   }
 
-  .band-channel {
-    display: grid;
-    grid-template-columns: 22px 1fr 36px 70px;
-    gap: 4px;
-    line-height: 16px;
-
-    &.silent {
-      opacity: 0.45;
-    }
-
-    .band-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .band-notes {
-      text-align: right;
-      color: #bdbdbd;
-    }
-
-    .band-owner {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: #ffe6a8;
-    }
-  }
-
-  .band-box {
-    min-height: 40px;
-    max-height: 90px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
+  .band-transport {
+    justify-content: flex-start;
     gap: 3px;
   }
 
-  .band-note {
-    color: #bdbdbd;
+  .band-channel {
+    display: flex;
+    gap: 4px;
+    height: 16px;
+    line-height: 16px;
+
+    &.silent {
+      color: #7a7a7a;
+    }
+
+    .band-ch {
+      width: 16px;
+      color: #ffeec1;
+      text-align: right;
+    }
+
+    .band-notes {
+      color: #a8a8a8;
+    }
   }
 
-  .band-error {
-    color: #ff7a7a;
-  }
-
-  // The red(0.6) close bar the original's list windows end with.
-  .band-close {
+  .band-status {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 18px;
-    background: rgba(153, 0, 0, 0.6);
+    left: 14px;
+    right: 14px;
+    text-align: center;
+    font-size: 10px;
+    color: #d8d8d8;
+    text-shadow: 1px 1px 0 #000;
+
+    &.error {
+      color: #ff8a8a;
+    }
+  }
+
+  .band-put-away {
+    position: absolute;
+  }
+
+  button {
+    height: 16px;
+    padding: 0 5px;
+    border: 1px solid #7a6b45;
+    background: #2a2518;
+    color: #e2e2e2;
+    font: inherit;
+    font-size: 10px;
+    line-height: 14px;
+    white-space: nowrap;
     cursor: pointer;
 
-    &:hover {
-      background: rgba(190, 0, 0, 0.7);
+    &:hover:not(:disabled) {
+      color: #fff;
+      border-color: #c8b87a;
+    }
+
+    &.on {
+      color: #ffd927;
+      border-color: #c8b87a;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
     }
   }
 }
