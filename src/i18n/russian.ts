@@ -85,6 +85,8 @@ export const russianLayer: LanguageLayer = {
     'register.idTooShort': 'ID должен быть не короче {min} символов.',
     'register.idChars': 'ID может содержать только буквы и цифры.',
     'register.passwordTooShort': 'Пароль должен быть не короче {min} символов.',
+
+    'register.passwordChars': 'Пароль может содержать только буквы, цифры и основные символы.',
     'register.mismatch': 'Пароли не совпадают.',
     'register.unreachable': 'Не удалось связаться с сервером.',
     'register.failed': 'Не удалось создать аккаунт ({status}).',

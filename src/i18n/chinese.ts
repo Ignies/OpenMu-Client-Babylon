@@ -87,6 +87,8 @@ export const chineseLayer: LanguageLayer = {
     'register.idTooShort': '账号至少需要 {min} 个字符。',
     'register.idChars': '账号只能包含字母和数字。',
     'register.passwordTooShort': '密码至少需要 {min} 个字符。',
+
+    'register.passwordChars': '密码只能包含字母、数字和基本符号。',
     'register.mismatch': '两次输入的密码不一致。',
     'register.unreachable': '无法连接到服务器。',
     'register.failed': '注册失败（{status}）。',

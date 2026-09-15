@@ -137,6 +137,8 @@ export const EN_TEXT = {
   'register.idTooShort': 'ID must be at least {min} characters.',
   'register.idChars': 'ID may contain only letters and numbers.',
   'register.passwordTooShort': 'Password must be at least {min} characters.',
+  'register.passwordChars':
+    'Password may contain only letters, numbers and basic symbols.',
   'register.mismatch': 'Passwords do not match.',
   'register.unreachable': 'Could not reach the server.',
   'register.failed': 'Registration failed ({status}).',

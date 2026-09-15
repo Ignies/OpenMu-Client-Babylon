@@ -92,6 +92,8 @@ export const portugueseLayer: LanguageLayer = {
     'register.idTooShort': 'O ID deve ter pelo menos {min} caracteres.',
     'register.idChars': 'O ID só pode ter letras e números.',
     'register.passwordTooShort': 'A senha deve ter pelo menos {min} caracteres.',
+
+    'register.passwordChars': 'A senha só pode ter letras, números e símbolos básicos.',
     'register.mismatch': 'As senhas não coincidem.',
     'register.unreachable': 'Não foi possível contatar o servidor.',
     'register.failed': 'Não foi possível criar a conta ({status}).',

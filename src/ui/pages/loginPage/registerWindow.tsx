@@ -92,6 +92,8 @@ function problemText(problem: SignupProblem): string {
       return t('register.passwordTooShort', {
         min: MIN_ACCOUNT_PASSWORD_LENGTH,
       });
+    case 'passwordChars':
+      return t('register.passwordChars');
     case 'mismatch':
       return t('register.mismatch');
   }

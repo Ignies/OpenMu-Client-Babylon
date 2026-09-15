@@ -87,6 +87,8 @@ export const koreanLayer: LanguageLayer = {
     'register.idTooShort': 'ID는 {min}자 이상이어야 합니다.',
     'register.idChars': 'ID에는 영문과 숫자만 사용할 수 있습니다.',
     'register.passwordTooShort': '비밀번호는 {min}자 이상이어야 합니다.',
+
+    'register.passwordChars': '비밀번호에는 영문과 숫자, 기본 기호만 사용할 수 있습니다.',
     'register.mismatch': '비밀번호가 일치하지 않습니다.',
     'register.unreachable': '서버에 연결할 수 없습니다.',
     'register.failed': '계정 생성에 실패했습니다({status}).',
