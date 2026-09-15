@@ -10,12 +10,30 @@ export const NPC_MODEL_TABLE: Readonly<
   156: ['/Skill/HellGate',  1.0],
   157: ['/Skill/HellGate',  1.0],
   158: ['/Skill/HellGate',  1.0],
+  // Kanturu Relics canon trap (`CTrapCanon::Create_TrapCanon`,
+  // GM_Kanturu_2nd.cpp:1380-1391). Its own render adds a sine-driven glow over
+  // the body (:1397-1404); only the body is here.
+  105: ['c_mon',  1.0],
   // Soccer ball (ZzzCharacter.cpp:14015-14021). Its `BlendMesh = 2` - the
   // additive panel - is not modelled.
   200: ['/Skill/Ball01',  1.8],
   // Crywolf statue (ZzzCharacter.cpp:14260). The five altars (205-209) spawn
   // invisible and are routed to HiddenNpc in modelFactoryPerId.
   204: ['/Object35/Object82',  1.0],
+  // Santa Village (`CGMSantaTown::CreateMonster`, GMSantaTown.cpp:58-69) and
+  // the eight Little Santas (ZzzCharacter.cpp:14515-14544). All eight load the
+  // one Npc/xmassanta model (ZzzOpenData.cpp:2118); the original tells them
+  // apart by colour, which is a texture swap not modelled here. Their
+  // per-action play speeds (0.4 standing, 0.5 idling) are not modelled either.
+  467: ['snowman',  1.3],
+  468: ['xmassanta', 0.43],
+  469: ['xmassanta', 0.43],
+  470: ['xmassanta', 0.43],
+  471: ['xmassanta', 0.43],
+  472: ['xmassanta', 0.43],
+  473: ['xmassanta', 0.43],
+  474: ['xmassanta', 0.43],
+  475: ['xmassanta', 0.43],
   // Castle Siege props and staff (GMBattleCastle.cpp:1286-1381). 220 (the
   // guard) is a monster model and lives in MONSTER_MODEL_TABLE.
   215: ['NpcBarrier', 1.52],
