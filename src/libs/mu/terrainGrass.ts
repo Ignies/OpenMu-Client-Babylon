@@ -909,7 +909,11 @@ ${
   `,
     },
     {
-      attributes: ['position', 'iRoot', 'iTint'],
+      // `uv` carries the blade's own coordinates, across it and along it.
+      // Listed, not merely declared: an attribute Babylon is not told about
+      // is never enabled and reads as zero, which pinned the outline's across
+      // term to the blade's centre and drew no side line anywhere.
+      attributes: ['position', 'uv', 'iRoot', 'iTint'],
       uniforms: [
         'view',
         'world',
