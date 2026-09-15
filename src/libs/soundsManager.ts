@@ -65,6 +65,32 @@ function stepBackgroundFade(): void {
   window.setTimeout(stepBackgroundFade, 16);
 }
 
+/** How far the background music is pulled down while an instrument plays nearby. */
+const INSTRUMENT_DUCK = 0.15;
+/** Seconds the music takes to step aside for a performance, and to come back. */
+const DUCK_SECONDS = 0.4;
+
+let bandDuck = 1;
+let duckTarget = 1;
+let duckFrom = 1;
+let duckStart = 0;
+let ducking = false;
+
+function stepInstrumentDuck(): void {
+  const elapsed = (performance.now() - duckStart) / 1000;
+  const t = Math.min(1, elapsed / DUCK_SECONDS);
+
+  bandDuck = duckFrom + (duckTarget - duckFrom) * t;
+  SoundsManager.syncTrackGains();
+
+  if (t >= 1) {
+    ducking = false;
+    return;
+  }
+
+  window.setTimeout(stepInstrumentDuck, 16);
+}
+
 /** Map epoch a buffer was last asked for, for `evictStale`. */
 const lastUsed = new Map<Sounds, number>();
 let mapEpoch = 0;
@@ -185,9 +211,30 @@ export class SoundsManager {
   /** Push the remembered gains onto the tracks' gain nodes (see `initializeSounds`). */
   static syncTrackGains() {
     this.musicTrack?.setVolume(
-      (ENABLE_BG_MUSIC ? this.musicVolume : 0) * backgroundMix
+      (ENABLE_BG_MUSIC ? this.musicVolume : 0) * backgroundMix * bandDuck
     );
     this.effectsTrack?.setVolume(this.effectsVolume * backgroundMix);
+  }
+
+  /**
+   * A performer is playing an instrument in earshot: step the background music
+   * aside so the performance is heard, and bring it back when they stop. The
+   * effects track (which the instrument bus sits beside) is left alone.
+   */
+  /** The current music duck, 1 = full music, `INSTRUMENT_DUCK` = fully ducked (debug). */
+  static get instrumentDuck(): number {
+    return bandDuck;
+  }
+
+  static setInstrumentsActive(active: boolean) {
+    const target = active ? INSTRUMENT_DUCK : 1;
+    if (duckTarget === target) return;
+    duckTarget = target;
+    duckFrom = bandDuck;
+    duckStart = performance.now();
+    if (ducking) return;
+    ducking = true;
+    stepInstrumentDuck();
   }
 
   static loadSound(key: Sounds) {

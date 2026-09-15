@@ -32,6 +32,15 @@ const BUS_RAMP = 0.1;
 /** Seconds a performer's gain takes to follow their distance. */
 const DISTANCE_RAMP = 0.05;
 
+/** Makeup gain after the compressor, so a note is as loud as a game sound effect. */
+const MAKEUP_GAIN = 2.2;
+
+/** A performer quieter than this (by distance) does not duck the music. */
+const DUCK_MIN_GAIN = 0.05;
+
+/** Seconds the music stays ducked after the last note, so it does not flap. */
+const DUCK_HOLD_SEC = 1.2;
+
 // ---- 2. state + readers ----------------------------------------------------
 
 type PerformerState = { x: number; z: number; local: boolean; gain: number };
@@ -40,6 +49,8 @@ let ctx: AudioContext | null = null;
 let sampler: Sampler | null = null;
 let bus: GainNode | null = null;
 let busLevel = -1;
+/** Audio time of the last audible note, for the music duck's release. */
+let lastAudible = 0;
 
 const banks = new Map<InstrumentId, DecodedBank>();
 const loading = new Map<InstrumentId, Promise<boolean>>();
@@ -76,10 +87,16 @@ function context(): AudioContext | null {
   bus = c.createGain();
   bus.gain.value = 0;
   const compressor = c.createDynamicsCompressor();
-  compressor.threshold.value = -12;
-  compressor.ratio.value = 4;
+  compressor.threshold.value = -10;
+  compressor.ratio.value = 3;
+  // The compressor tames a chord's peaks; on its own it also leaves a single
+  // note far quieter than a game sound effect. A makeup gain after it brings
+  // the whole instrument back up to a comparable loudness.
+  const makeup = c.createGain();
+  makeup.gain.value = MAKEUP_GAIN;
   bus.connect(compressor);
-  compressor.connect(engine.masterGain);
+  compressor.connect(makeup);
+  makeup.connect(engine.masterGain);
   sampler = new Sampler(c, bus);
   return ctx;
 }
@@ -222,13 +239,21 @@ function update(_map: ENUM_WORLD, _dt: number): void {
   }
 
   const hero = listenerHero();
+  let audible = 0;
   for (const [key, p] of performers) {
     const g = gainFor(p, hero);
     if (Math.abs(g - p.gain) > 0.01) {
       p.gain = g;
       sampler.setPerformerGain(key, g, DISTANCE_RAMP);
     }
+    audible = Math.max(audible, g);
   }
+
+  // Duck the background music while an instrument is heard nearby, and let it
+  // rise again a moment after the last note so it does not flap between notes.
+  const now = audioNow();
+  if (sampler.voiceCount > 0 && audible > DUCK_MIN_GAIN) lastAudible = now;
+  SoundsManager.setInstrumentsActive(now - lastAudible < DUCK_HOLD_SEC);
 }
 
 /** Map change: every performer is gone; the decoded banks stay. */
@@ -236,6 +261,8 @@ function reset(): void {
   if (sampler) for (const key of Array.from(performers.keys())) sampler.dropPerformer(key);
   performers.clear();
   reported.clear();
+  lastAudible = 0;
+  SoundsManager.setInstrumentsActive(false);
 }
 
 // ---- 3. the layer ----------------------------------------------------------
