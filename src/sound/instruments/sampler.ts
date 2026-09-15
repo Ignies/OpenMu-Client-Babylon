@@ -24,7 +24,7 @@ const MAX_VOICES = 96;
 const STEAL_FADE = 0.01;
 
 /** Peak gain of a full-velocity note; leaves headroom for the polyphony above. */
-const PEAK = 0.5;
+const PEAK = 0.8;
 
 /** Velocity curve: MIDI 127 is loud, 64 is a little under half. */
 const VELOCITY_CURVE = 1.6;
