@@ -19,6 +19,7 @@ import {
   instrumentVoices,
   noteOff,
   noteOn,
+  setPerformerPosition,
 } from '../../sound/instruments';
 import { MidiFileError, parseMidi, type MidiEvent, type ParsedMidi } from './midiFile';
 import { Sequencer, type BatchEvent } from './sequencer';
@@ -401,15 +402,30 @@ let remoteTimer: ReturnType<typeof setInterval> | null = null;
 
 const keyOf = (netId: number) => `net:${netId}`;
 
+/**
+ * Where a remote performer stands, for the ear. `BandSystem` does this every
+ * frame for a posed performer; one under a monster skin has no `performing`
+ * component and is placed here instead.
+ */
+function placeRemote(entity: NetEntity): void {
+  if (entity.performing) return;
+  setPerformerPosition(keyOf(entity.netId), entity.transform.pos.x, entity.transform.pos.z);
+}
+
 export function remoteStart(entity: NetEntity, instrument: InstrumentId): void {
   const world = Store.world;
-  if (!world || !entity.playerAnimation) return;
+  if (!world) return;
   const netId = entity.netId;
   const existing = remotes.get(netId);
   if (existing && existing.instrument === instrument) return;
   if (existing) remoteStop(netId);
 
-  startPerforming(world, entity as never, instrument, false);
+  // A player drawn under a monster skin (a game master's /skin) has no player
+  // rig here: no pose and nothing in hand, but their notes still sound from
+  // where they stand.
+  if (entity.playerAnimation) startPerforming(world, entity as never, instrument, false);
+  else console.info(`band: #${netId} wears a monster skin, sound only`);
+  placeRemote(entity);
   const band: BandState = { masterId: netId, members: [] };
   const remote: Remote = {
     entity,
@@ -430,7 +446,10 @@ export function remoteStart(entity: NetEntity, instrument: InstrumentId): void {
   void ensureBank(instrument);
   if (!remoteTimer) {
     remoteTimer = setInterval(() => {
-      for (const r of remotes.values()) r.receiver.tick();
+      for (const r of remotes.values()) {
+        r.receiver.tick();
+        placeRemote(r.entity);
+      }
     }, REMOTE_TICK_MS);
   }
 }
@@ -490,8 +509,9 @@ export function remoteBandState(masterId: number, members: BandMember[]): void {
   for (const m of members) void ensureBank(m.instrument);
 }
 
-export function isRemotePerformer(netId: number): boolean {
-  return remotes.has(netId);
+/** Who is performing in view of this client, with their instrument. */
+export function remotePerformers(): { netId: number; instrument: InstrumentId }[] {
+  return Array.from(remotes.values(), r => ({ netId: r.entity.netId, instrument: r.instrument }));
 }
 
 /**

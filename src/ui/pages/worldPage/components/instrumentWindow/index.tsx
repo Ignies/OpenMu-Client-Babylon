@@ -12,6 +12,7 @@ import {
   pauseSong,
   playSong,
   putAwayInstrument,
+  remotePerformers,
   setLoop,
   stopPlaying,
   toggleInstrumentWindow,
@@ -52,15 +53,18 @@ function nearbyPerformers(): Nearby[] {
   const hero = world?.playerEntity;
   if (!world || !hero) return [];
   const out: Nearby[] = [];
-  for (const e of world.playersQuery.entities) {
-    if (e === hero || !e.performing || e.netId === undefined || e.objOutOfScope) continue;
+  // The band's own list of who performs here: it includes a player drawn
+  // under a monster skin, whom the player query does not carry.
+  for (const { netId, instrument } of remotePerformers()) {
+    const e = world.getByNetId(netId);
+    if (!e || e === hero || e.objOutOfScope) continue;
     const dx = Math.abs(e.transform.pos.x - hero.transform.pos.x);
     const dz = Math.abs(e.transform.pos.z - hero.transform.pos.z);
     if (Math.max(dx, dz) > JOIN_RANGE) continue;
     out.push({
-      netId: e.netId,
-      name: e.objectNameInWorld ?? `#${e.netId}`,
-      instrument: t(instrumentById(e.performing.instrument).labelKey),
+      netId,
+      name: e.objectNameInWorld ?? `#${netId}`,
+      instrument: t(instrumentById(instrument).labelKey),
     });
   }
   return out;
