@@ -85,6 +85,7 @@ export { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 export { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 export type { Camera } from '@babylonjs/core/Cameras/camera';
 export { Texture } from '@babylonjs/core/Materials/Textures/texture';
+export { DynamicTexture } from '@babylonjs/core/Materials/Textures/dynamicTexture';
 export { RawTexture } from '@babylonjs/core/Materials/Textures/rawTexture';
 export { RawTexture2DArray } from '@babylonjs/core/Materials/Textures/rawTexture2DArray';
 export { Observable, Observer } from '@babylonjs/core/Misc/observable';

@@ -14,6 +14,7 @@ import { itemAuraLayer } from './itemAura';
 import { itemCrackleLayer } from './itemCrackle';
 import { itemSparkleLayer } from './itemSparkle';
 import { monsterGlowLayer } from './monsterGlow';
+import { bandNotesLayer } from './bandNotes';
 
 /**
  * THE list. Every visual effect entry in the game is one line here, and
@@ -39,5 +40,6 @@ export const EFFECT_LAYERS = [
   itemAuraLayer, // reset only; itemGlowSystem drives it
   itemCrackleLayer, // reset only; itemGlowSystem drives it
   itemSparkleLayer, // counters only; the shared particle pool draws the glints
+  bandNotesLayer,
   monsterGlowLayer, // last: its cards ride the bones this frame's animation posed
 ] as const;

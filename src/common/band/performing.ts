@@ -10,6 +10,9 @@ import { instrumentById, type InstrumentId } from '../instruments';
 
 export type Performer = Entity & Required<Pick<Entity, 'playerAnimation' | 'transform'>>;
 
+/** One note to show at audio time `when`: its MIDI pitch and velocity. */
+export type BandHit = { when: number; note: number; velocity: number };
+
 export function startPerforming(world: World, entity: Performer, instrument: InstrumentId, local: boolean): void {
   const def = instrumentById(instrument);
   if (entity.performing) {
@@ -32,16 +35,17 @@ export function stopPerforming(world: World, entity: Entity): void {
   world.removeComponent(entity, 'performing');
 }
 
-/** A hit to show at audio time `when`, in order. */
-export function queueHit(entity: Entity, when: number): void {
+/** A hit to show at audio time `when`, kept in time order. */
+export function queueHit(entity: Entity, when: number, note: number, velocity: number): void {
   const p = entity.performing;
   if (!p) return;
   const hits = p.hits;
-  if (hits.length === 0 || hits[hits.length - 1] <= when) {
-    hits.push(when);
+  const hit: BandHit = { when, note, velocity };
+  if (hits.length === 0 || hits[hits.length - 1].when <= when) {
+    hits.push(hit);
     return;
   }
   let i = hits.length;
-  while (i > 0 && hits[i - 1] > when) i--;
-  hits.splice(i, 0, when);
+  while (i > 0 && hits[i - 1].when > when) i--;
+  hits.splice(i, 0, hit);
 }

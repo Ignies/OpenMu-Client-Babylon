@@ -1,3 +1,4 @@
+import { Vector3 } from '../../libs/babylon/exports';
 import { angleLinkMatrix } from '../../common/boneLink';
 import { devQuery, devQueryNumbers } from '../../common/devSeams';
 import { instrumentById, isInstrumentId } from '../../common/instruments';
@@ -14,6 +15,7 @@ import {
 import { instrumentClip } from '../../common/band/instrumentClip';
 import { startPerforming, stopPerforming } from '../../common/band/performing';
 import { audioNow, dropPerformer, setPerformerPosition } from '../../sound/instruments';
+import { effects } from '../../effects';
 import { playUiSound } from '../../libs/sfx';
 import type { Entity, ISystemFactory } from '../world';
 
@@ -33,6 +35,12 @@ import type { Entity, ISystemFactory } from '../world';
 /** Play rate of the copied clip: a slow sway, not the dance. */
 const CLIP_SPEED = 0.25;
 
+/** Seconds between two notes shown for one performer: a chord is one note, not six. */
+const NOTE_GAP = 0.09;
+
+/** Tiles above the instrument's origin (the hand) a note is born. */
+const NOTE_HEIGHT = 0.15;
+
 /** Dev seams: `?instRot=x,y,z` / `?instOff=x,y,z` (BMD deg / cm). */
 const rotDev = devQueryNumbers('instRot', 3);
 const offDev = devQueryNumbers('instOff', 3);
@@ -46,6 +54,10 @@ let linkOverride: { angle: [number, number, number]; offset: [number, number, nu
 
 /** A live-tuned frame window (dev only) for the hero's clip. */
 let poseOverride: { from: number; to: number; sway: number } | null = null;
+
+/** Audio time of the last note each performer showed. */
+const lastNoteAt = new WeakMap<Entity, number>();
+const noteAt = new Vector3();
 
 export const BandSystem: ISystemFactory = world => {
   const performers = world.with('performing', 'modelObject', 'transform', 'playerAnimation');
@@ -208,9 +220,19 @@ export const BandSystem: ISystemFactory = world => {
 
         if (clip >= 0) e.playerAnimation.action = clip as PlayerAction;
 
-        // Hits are queued for a future per-note motion; the pose itself moves.
+        // Every hit whose time has come floats a note up from the instrument
+        // (effects/bandNotes.ts); the pose itself only sways. A chord's notes
+        // land together, and one of them is the strum.
         const hits = p.hits;
-        while (hits.length && hits[0] <= now + dt) hits.shift();
+        while (hits.length && hits[0].when <= now + dt) {
+          const hit = hits.shift()!;
+          const node = p.model?.node;
+          if (!node || now - (lastNoteAt.get(e) ?? -Infinity) < NOTE_GAP) continue;
+          lastNoteAt.set(e, now);
+          noteAt.copyFrom(node.getAbsolutePosition());
+          noteAt.y += NOTE_HEIGHT;
+          effects.spawn('bandNotes', world.scene, noteAt, { pitch: hit.note, velocity: hit.velocity });
+        }
 
         setPerformerPosition(keyOf(e), e.transform.pos.x, e.transform.pos.z, p.local);
 

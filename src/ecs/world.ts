@@ -1,6 +1,7 @@
 import type { EmoteId } from '../common/emotes';
 import type { EmojiBubbleId } from '../common/emojiBubbles';
 import type { InstrumentId } from '../common/instruments';
+import type { BandHit } from '../common/band/performing';
 import type { GuildMemberRoleEnum } from '../common/packets/ServerToClientPackets';
 import { type Bucket, type With, World as ECSWorld } from 'miniplex';
 import type { IVector2Like, IVector3Like, Mesh } from '../libs/babylon/exports';
@@ -149,8 +150,8 @@ export type Entity = Partial<{
     clip: number;
     /** The hero, whose sound is never attenuated. */
     local: boolean;
-    /** Audio times of hits not yet shown, ascending. */
-    hits: number[];
+    /** Hits not yet shown, ascending by audio time. */
+    hits: BandHit[];
     model: ModelObject | null;
   };
   pathfinding: {
