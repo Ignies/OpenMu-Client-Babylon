@@ -9,6 +9,11 @@ import type { ModelObject } from '../modelObject';
  * one. The copy is made per model instance the first time it is needed and
  * appended to that model's animation groups, so it plays like any clip.
  *
+ * The copy is played at its own pace, not the source's: the window is a few
+ * hundredths of a clip, and a loop that short ran at seven hertz - the
+ * instrument shook. `SWAY_SECONDS` is the half-period the two poses are
+ * spread over, and the frames between them are re-timed into it.
+ *
  * A pose is a hold, not a step of the dance the frames came from, so the
  * copy is tamed on the way in: every bone keeps the position of the first
  * frame (the emote's root travel is what read as the body lunging at the
@@ -17,6 +22,13 @@ import type { ModelObject } from '../modelObject';
  *
  * `from` / `to` are fractions of the source clip.
  */
+
+/**
+ * Seconds from the first pose to the last, so a loop is twice this. Played at
+ * `CLIP_SPEED` (bandSystem), which is the speed that makes one clip frame one
+ * frame of playback.
+ */
+const SWAY_SECONDS = 1.2;
 
 /** Keyed by the loaded rig, not the ModelObject: a reload brings a fresh clip table. */
 const cache = new WeakMap<object, Map<string, number>>();
@@ -46,7 +58,11 @@ export function instrumentClip(model: ModelObject, source: number, from: number,
 
   const f0 = src.from + from * (src.to - src.from);
   const f1 = src.from + to * (src.to - src.from);
-  const span = Math.max(0.5, f1 - f0);
+  // The window's own width is a frame or two; the sway takes as long as it
+  // takes, and the frames inside are re-timed into that span rather than
+  // bunching at its start.
+  const span = Math.max(0.5, SWAY_SECONDS * (first.animation.framePerSecond || 60));
+  const stretch = f1 > f0 ? span / (f1 - f0) : 0;
   const group = new AnimationGroup(`instrument_${key}`, first.target.getScene());
 
   for (const ta of src.targetedAnimations) {
@@ -57,7 +73,7 @@ export function instrumentClip(model: ModelObject, source: number, from: number,
     const inside = anim
       .getKeys()
       .filter(k => k.frame > f0 && k.frame < f1)
-      .map(k => ({ frame: k.frame - f0, value: tame(k.value) }));
+      .map(k => ({ frame: (k.frame - f0) * stretch, value: tame(k.value) }));
     const forward = [
       { frame: 0, value: cloneValue(base) },
       ...inside,

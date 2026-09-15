@@ -32,8 +32,13 @@ import type { Entity, ISystemFactory } from '../world';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Play rate of the copied clip: a slow sway, not the dance. */
-const CLIP_SPEED = 0.25;
+/**
+ * Play rate of the copied clip. `speedRatioFor` is `AnimationSpeed x 25 / 24`
+ * for a clip the loader never timed (the copy is appended after `load`), so
+ * this is the value that plays one of its frames per frame - the pace
+ * `instrumentClip` writes the sway at.
+ */
+const CLIP_SPEED = 24 / 25;
 
 /** Seconds between two notes shown for one performer: a chord is one note, not six. */
 const NOTE_GAP = 0.09;
