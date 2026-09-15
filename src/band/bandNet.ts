@@ -155,14 +155,20 @@ export function installBandNet(): void {
     switch (msg.sub) {
       case BandSub.Start: {
         const def = instrumentByIndex(msg.instrument);
-        const entity = world.getByNetId(msg.performerId);
-        if (!def || !entity || entity.objOutOfScope) {
-          const why = !def ? 'an instrument this client does not know' : entity ? 'out of scope here' : 'not in scope here';
-          console.warn(`band: #${msg.performerId} starts playing, ${why}: ignored`);
+        if (!def) {
+          console.warn(`band: #${msg.performerId} starts playing an instrument this client does not know: ignored`);
           return;
         }
-        console.info(`band: #${msg.performerId} ${nameOf(msg.performerId)} starts playing the ${def.id}`);
-        remoteStart(entity, def.id);
+        // The entity may not be drawn yet: the proxy relays the start the
+        // instant the tracker sees the performer in scope, which can beat the
+        // scope packet's own render here. The sound plays by net id regardless
+        // and the pose attaches when the entity arrives, so never drop it.
+        const entity = world.getByNetId(msg.performerId);
+        const seen = entity && !entity.objOutOfScope ? entity : null;
+        console.info(
+          `band: #${msg.performerId} ${nameOf(msg.performerId)} starts playing the ${def.id}${seen ? '' : ' (not in view yet)'}`
+        );
+        remoteStart(msg.performerId, def.id, seen);
         Social.systemMessage(t('instrument.startsPlaying', { name: nameOf(msg.performerId), instrument: t(def.labelKey) }));
         return;
       }

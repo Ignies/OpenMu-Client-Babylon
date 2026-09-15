@@ -386,7 +386,11 @@ export function masterStateChanged(masterId: number, members: BandMember[]): voi
 // ---- 5. remote performers --------------------------------------------------
 
 type Remote = {
-  entity: NetEntity;
+  netId: number;
+  /** The scene entity, once it exists here: the pose and the exact position. */
+  entity: NetEntity | null;
+  /** Whether the pose was started on the entity (it has the player rig). */
+  posed: boolean;
   instrument: InstrumentId;
   receiver: Receiver;
   band: BandState;
@@ -396,39 +400,66 @@ type Remote = {
 
 const remotes = new Map<number, Remote>();
 
-/** Performers whose notes arrived with no start here, each said once. */
+/** Performers heard before their start landed here, each noted once. */
 const orphans = new Set<number>();
 let remoteTimer: ReturnType<typeof setInterval> | null = null;
 
 const keyOf = (netId: number) => `net:${netId}`;
 
 /**
- * Where a remote performer stands, for the ear. `BandSystem` does this every
- * frame for a posed performer; one under a monster skin has no `performing`
- * component and is placed here instead.
+ * Where a remote performer stands, for the ear. A posed player is placed by
+ * `BandSystem` each frame; a skinned player and one whose entity has not
+ * arrived yet are placed here - at the entity if we have it, else beside the
+ * hero so the notes are heard rather than lost at the map origin.
  */
-function placeRemote(entity: NetEntity): void {
-  if (entity.performing) return;
-  setPerformerPosition(keyOf(entity.netId), entity.transform.pos.x, entity.transform.pos.z);
+function placeRemote(remote: Remote): void {
+  const e = remote.entity;
+  if (e) {
+    if (e.performing) return;
+    setPerformerPosition(keyOf(remote.netId), e.transform.pos.x, e.transform.pos.z);
+    return;
+  }
+  const hero = heroEntity();
+  if (hero) setPerformerPosition(keyOf(remote.netId), hero.transform.pos.x, hero.transform.pos.z);
 }
 
-export function remoteStart(entity: NetEntity, instrument: InstrumentId): void {
+/**
+ * Bind a remote to its scene entity once it exists: a start can arrive before
+ * this client has drawn the performer (the proxy relays it the instant the
+ * tracker sees them in scope), and a batch must never be lost waiting. The
+ * audio always plays by net id; only the pose and the exact position wait.
+ */
+function resolveEntity(remote: Remote): void {
+  const world = Store.world;
+  let entity = remote.entity;
+  if (!entity || entity.objOutOfScope) {
+    entity = world?.getByNetId(remote.netId) ?? null;
+    if (entity?.objOutOfScope) entity = null;
+    remote.entity = entity;
+  }
+  // The pose (the instrument in hand) is attached once, the first time the
+  // entity is here with a player rig - now if it was in view at the start,
+  // else the tick it arrives. A skinned player has no rig and stays sound.
+  if (entity && !remote.posed && entity.playerAnimation && world) {
+    startPerforming(world, entity as never, remote.instrument, false);
+    remote.posed = true;
+    console.info(`band: #${remote.netId} in view, holding the ${remote.instrument}`);
+  }
+  placeRemote(remote);
+}
+
+export function remoteStart(netId: number, instrument: InstrumentId, entity: NetEntity | null): void {
   const world = Store.world;
   if (!world) return;
-  const netId = entity.netId;
   const existing = remotes.get(netId);
   if (existing && existing.instrument === instrument) return;
   if (existing) remoteStop(netId);
 
-  // A player drawn under a monster skin (a game master's /skin) has no player
-  // rig here: no pose and nothing in hand, but their notes still sound from
-  // where they stand.
-  if (entity.playerAnimation) startPerforming(world, entity as never, instrument, false);
-  else console.info(`band: #${netId} wears a monster skin, sound only`);
-  placeRemote(entity);
   const band: BandState = { masterId: netId, members: [] };
   const remote: Remote = {
-    entity,
+    netId,
+    entity: entity && !entity.objOutOfScope ? entity : null,
+    posed: false,
     instrument,
     band,
     batches: 0,
@@ -442,13 +473,16 @@ export function remoteStart(entity: NetEntity, instrument: InstrumentId): void {
     ),
   };
   remotes.set(netId, remote);
-  orphans.delete(netId);
   void ensureBank(instrument);
+  // The pose (a player rig) is attached now if the entity is here, else the
+  // moment it arrives; a skinned player never gets one.
+  resolveEntity(remote);
+  if (!remote.entity) console.info(`band: #${netId} starts playing, entity not in view yet - sound only for now`);
   if (!remoteTimer) {
     remoteTimer = setInterval(() => {
       for (const r of remotes.values()) {
         r.receiver.tick();
-        placeRemote(r.entity);
+        resolveEntity(r);
       }
     }, REMOTE_TICK_MS);
   }
@@ -457,13 +491,15 @@ export function remoteStart(entity: NetEntity, instrument: InstrumentId): void {
 export function remoteBatch(netId: number, seq: number, baseMs: number, events: BatchEvent[]): void {
   const remote = remotes.get(netId);
   if (!remote) {
-    // Their start never took here (not in scope at the time): nothing to voice.
+    // No start here yet: the performer just entered scope and the proxy's
+    // cached start is on its way. Drop this batch; the next arrives with it.
     if (!orphans.has(netId)) {
       orphans.add(netId);
-      console.warn(`band: notes from #${netId} arrive without a start, dropped`);
+      console.warn(`band: notes from #${netId} before its start, waiting`);
     }
     return;
   }
+  orphans.delete(netId);
   if (remote.batches++ === 0) {
     console.info(
       `band: first notes from #${netId}: ${events.length} events, ${(baseMs / 1000).toFixed(1)} s into their song`
@@ -478,7 +514,7 @@ export function remoteStop(netId: number): void {
   remotes.delete(netId);
   remote.receiver.stop();
   const world = Store.world;
-  if (world) stopPerforming(world, remote.entity);
+  if (world && remote.entity) stopPerforming(world, remote.entity);
   // Members were doubling this master; their own performing state stays.
   const self = Store.playerId ?? -1;
   for (const member of remote.band.members) {
@@ -511,7 +547,7 @@ export function remoteBandState(masterId: number, members: BandMember[]): void {
 
 /** Who is performing in view of this client, with their instrument. */
 export function remotePerformers(): { netId: number; instrument: InstrumentId }[] {
-  return Array.from(remotes.values(), r => ({ netId: r.entity.netId, instrument: r.instrument }));
+  return Array.from(remotes.values(), r => ({ netId: r.netId, instrument: r.instrument }));
 }
 
 /**
@@ -532,7 +568,7 @@ function voiceRemote(remote: Remote, ev: BatchEvent, when: number): void {
     if (kind === 0x90 && ev.d2 > 0) {
       noteOn(key, instrument, channel, ev.d1, ev.d2, when);
       const entity =
-        owner === self ? heroEntity() : owner === remote.entity.netId ? remote.entity : Store.world?.getByNetId(owner);
+        owner === self ? heroEntity() : owner === remote.netId ? remote.entity : Store.world?.getByNetId(owner);
       if (entity) queueHit(entity, when);
     } else if (kind === 0x80 || kind === 0x90) {
       noteOff(key, channel, ev.d1, when);
@@ -544,7 +580,7 @@ function voiceRemote(remote: Remote, ev: BatchEvent, when: number): void {
 
 function silenceRemote(remote: Remote): void {
   const self = Store.playerId ?? -1;
-  allNotesOff(keyOf(remote.entity.netId));
+  allNotesOff(keyOf(remote.netId));
   for (const m of remote.band.members) allNotesOff(m.netId === self ? HERO_KEY : keyOf(m.netId));
 }
 
