@@ -28,6 +28,12 @@ export type ChatLine = {
   at: number;
   /** A row carried over from the line above by `splitChatLine`. */
   continued?: boolean;
+  /** The sender's guild, shown as a tag before the name. */
+  senderGuild?: string;
+  /** `HeroState` of the sender when they spoke, for the name colour. */
+  senderPk?: number;
+  /** The sender is a game master (`isGm`, raised by a `#` shout). */
+  senderGm?: boolean;
 };
 
 /** "14:03" in the viewer's own locale-independent 24h form. */
@@ -63,9 +69,9 @@ const CHAT_SPLIT_MIN_LENGTH = 20;
 
 /**
  * `CNewUIChatLogWindow::SeparateText` (NewUIChatLogWindow.cpp:900): a line too
- * wide for the log is broken at the last space that fits. The sender's
- * `name : ` prefix comes out of the first row's budget; the rows after it
- * carry no sender, as in the original.
+ * wide for the log is broken at the last space that fits. `prefix` is what
+ * the line prints before its text (`chatSenderPrefix`) and comes out of the
+ * first row's budget; the rows after it carry no sender, as in the original.
  *
  * The original stops after one break, which is not enough for the longest
  * messages OpenMU sends - its login warning is over twice the log's width, so
@@ -73,7 +79,7 @@ const CHAT_SPLIT_MIN_LENGTH = 20;
  * is placed.
  */
 export function splitChatLine(
-  sender: string,
+  prefix: string,
   text: string,
   width: number,
   measure: (text: string) => number
@@ -84,8 +90,8 @@ export function splitChatLine(
   let rest = text;
 
   while (rest) {
-    // Only the first row pays for the sender.
-    const budget = rows.length === 0 && sender ? width - measure(`${sender} : `) : width;
+    // Only the first row pays for the name and its tag.
+    const budget = rows.length === 0 && prefix ? width - measure(prefix) : width;
 
     if (measure(rest) <= budget) {
       rows.push(rest);
@@ -114,6 +120,40 @@ export function splitChatLine(
   }
 
   return rows;
+}
+
+/**
+ * The class the log tints a name with, by the `HeroState` byte the sender
+ * carried. The colours are `SetPlayerColor`'s (nameTags.ts); the hero and
+ * outlaw ones are animated in the stylesheet, a commoner is left plain.
+ */
+export const CHAT_PK_CLASS: Readonly<Record<number, string>> = {
+  1: 'pk-hero2',
+  2: 'pk-hero1',
+  3: 'pk-neutral',
+  4: 'pk-caution',
+  5: 'pk-murderer1',
+  6: 'pk-murderer2',
+};
+
+/** Above `PVP_MURDERER2` the original keeps the same red. */
+export function chatPkClass(pk: number | undefined): string {
+  if (pk === undefined) return '';
+  return CHAT_PK_CLASS[pk] ?? CHAT_PK_CLASS[6];
+}
+
+/**
+ * What is printed before a line's text: the guild tag, the name, the
+ * separator. One function so the width the line is split on and the width it
+ * is drawn at cannot drift apart.
+ */
+export function chatSenderPrefix(line: {
+  sender: string;
+  senderGuild?: string;
+}): string {
+  if (!line.sender) return '';
+  const tag = line.senderGuild ? `[${line.senderGuild}] ` : '';
+  return `${tag}${line.sender} : `;
 }
 
 /** `SCROLL_MIDDLE_PART_HEIGHT`: one log line. */

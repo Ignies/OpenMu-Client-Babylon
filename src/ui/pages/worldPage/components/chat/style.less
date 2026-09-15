@@ -209,3 +209,84 @@
     text-overflow: ellipsis;
   }
 }
+
+// The speaker, drawn in front of their line: the guild tag, then the name
+// tinted by the `HeroState` byte they carried when they spoke
+// (`SetPlayerColor`, common/nameTags.ts). A commoner is left flat - it is
+// almost every line, and a log of shimmering names is unreadable - while the
+// hero and outlaw levels get a sheen sliding along the letters, the same one
+// the marketplace uses for a foil item.
+.chat-line-guild {
+  color: rgb(160, 200, 160);
+}
+
+.chat-line-name {
+  // A name is not a sentence: the sheen slides along the letters only.
+  display: inline-block;
+}
+
+@keyframes chat-name-sheen {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
+.chat-name-sheen(@from, @to) {
+  color: transparent;
+  background: linear-gradient(90deg, @from 0%, @from 35%, @to 50%, @from 65%, @from 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: chat-name-sheen 4.5s linear infinite;
+}
+
+// `PK_TEXT_COLOURS` (common/nameTags.ts), each lifted to a highlight.
+.chat-line-name.pk-neutral {
+  color: rgb(200, 220, 255);
+}
+.chat-line-name.pk-hero2 {
+  .chat-name-sheen(rgb(100, 120, 255), rgb(200, 220, 255));
+}
+.chat-line-name.pk-hero1 {
+  .chat-name-sheen(rgb(140, 180, 255), rgb(225, 240, 255));
+}
+.chat-line-name.pk-caution {
+  .chat-name-sheen(rgb(255, 150, 60), rgb(255, 225, 170));
+}
+.chat-line-name.pk-murderer1 {
+  .chat-name-sheen(rgb(255, 80, 30), rgb(255, 190, 140));
+}
+.chat-line-name.pk-murderer2 {
+  .chat-name-sheen(rgb(255, 0, 0), rgb(255, 170, 170));
+}
+
+// A game master outranks whatever their hero state is: gold, and the sheen
+// with it, so a staff line is picked out of a busy log at a glance.
+.chat-line-name.is-gm {
+  .chat-name-sheen(rgb(250, 200, 50), rgb(255, 250, 215));
+  font-weight: bold;
+}
+
+// Names that slide in step read as a single blinking block; stagger them.
+.chat-line:nth-child(even) .chat-line-name {
+  animation-delay: -1.5s;
+}
+.chat-line:nth-child(3n) .chat-line-name {
+  animation-delay: -2.8s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  // Same compound selectors the sheen is set on, or this never wins.
+  .chat-line-name.pk-hero2,
+  .chat-line-name.pk-hero1,
+  .chat-line-name.pk-caution,
+  .chat-line-name.pk-murderer1,
+  .chat-line-name.pk-murderer2,
+  .chat-line-name.is-gm {
+    animation: none;
+    background-position: 0 50%;
+  }
+}
