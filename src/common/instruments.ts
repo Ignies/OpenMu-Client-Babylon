@@ -30,6 +30,12 @@ export type InstrumentPose = {
   /** The frames copied, as fractions of the clip: 0 = first key, 1 = last. */
   from: number;
   to: number;
+  /**
+   * How far the upper body follows those frames, 0..1: the copy is a hold
+   * with this much of the source motion left in it (`instrumentClip.ts`).
+   * Every bone's position and the legs hold regardless of it.
+   */
+  sway: number;
 };
 
 export type InstrumentDefinition = {
@@ -76,8 +82,9 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     // `?instRot=` / `?instOff=` or `__bandLink`.
     link: { angle: [-84, -35, -90], offset: [-11, -1, -1] },
     // The very first frames of Hustle, where the guitar sits up across the
-    // chest; a narrow window so it is a small strum, not the whole dance.
-    pose: { clip: A.PLAYER_HUSTLE, from: 0, to: 0.04 },
+    // chest; a narrow window and a small sway so it is a strum held in
+    // place, not the dance - its hip step is what the frames mostly carry.
+    pose: { clip: A.PLAYER_HUSTLE, from: 0, to: 0.04, sway: 0.35 },
   },
   {
     id: 'flute',
@@ -92,7 +99,7 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     // The middle of the Again gesture, where the right hand is up at the
     // mouth; a narrow window so the flute holds there with a small sway
     // instead of swinging down and back.
-    pose: { clip: A.PLAYER_AGAIN1, from: 0.5, to: 0.56 },
+    pose: { clip: A.PLAYER_AGAIN1, from: 0.5, to: 0.56, sway: 0.6 },
   },
   {
     id: 'ocarina',
@@ -105,7 +112,7 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     // Mouthpiece at the lips, body out in front of the chin.
     link: { angle: [-110, 15, 58], offset: [8, 8, -6] },
     // The right hand up at the mouth, held with a small sway (see flute).
-    pose: { clip: A.PLAYER_AGAIN1, from: 0.5, to: 0.56 },
+    pose: { clip: A.PLAYER_AGAIN1, from: 0.5, to: 0.56, sway: 0.6 },
   },
 ];
 

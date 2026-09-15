@@ -146,7 +146,9 @@ async function fetchInstrument(id: InstrumentId): Promise<void> {
     bank: def.bank,
     sustained: def.sustained,
     attack: def.sustained ? 0.02 : 0.005,
-    release: def.sustained ? 0.12 : 0.25,
+    // A wind stops when the breath does; a plucked string is damped, not
+    // cut, so its note-off is a slower fade over the render's own decay.
+    release: def.sustained ? 0.12 : 0.5,
     notes,
   };
   writeFileSync(`${OUT}${id}.json`, JSON.stringify(manifest, null, 2) + '\n');

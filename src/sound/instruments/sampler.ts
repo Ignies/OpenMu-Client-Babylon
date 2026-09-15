@@ -8,8 +8,12 @@ import { noteSource, type DecodedBank } from './bank';
  * A wind (`manifest.sustained`) plays its render until note-off, then a short
  * release; a note held past the render simply ends - the pre-rendered notes
  * have no loop points. A plucked string carries its own decay and note-off
- * only shortens the tail. Polyphony is capped per performer and overall; the
- * oldest voice gives way.
+ * only damps the tail, over the bank's longer release. Polyphony is capped
+ * per performer and overall; the oldest voice gives way.
+ *
+ * The makeup gain that lifts the quiet renders lives in each voice's peak,
+ * ahead of the performer's distance gain: a far performer is a quiet one,
+ * and the limiter after the bus only meets the loud chords played nearby.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -23,34 +27,52 @@ const MAX_VOICES = 96;
 /** Seconds a stolen or retriggered voice takes to get out of the way. */
 const STEAL_FADE = 0.01;
 
-/** Peak gain of a full-velocity note; leaves headroom for the polyphony above. */
+/** Peak gain of a full-velocity note before the makeup; leaves headroom for the polyphony above. */
 const PEAK = 0.8;
 
 /** Velocity curve: MIDI 127 is loud, 64 is a little under half. */
 const VELOCITY_CURVE = 1.6;
 
-// ---- 2. the sampler --------------------------------------------------------
+// ---- 2. the envelope -------------------------------------------------------
 
 export type PerformerKey = string;
 
-type Voice = {
+/** The part of a voice's envelope known ahead: 0 at `startedAt`, `peak` from `attackEnd` on. */
+export type Envelope = { startedAt: number; attackEnd: number; peak: number };
+
+/**
+ * The envelope's level at audio time `at`, from its own schedule. An
+ * AudioParam's `.value` is its level *now*, and a note-off is scheduled a
+ * quarter second ahead: reading it there pinned the level of a note that had
+ * not started yet - the node's default, 1 - onto the start of the release.
+ */
+export function envelopeLevelAt(env: Envelope, at: number): number {
+  if (at >= env.attackEnd) return env.peak;
+  if (at <= env.startedAt) return 0;
+  return (env.peak * (at - env.startedAt)) / (env.attackEnd - env.startedAt);
+}
+
+type Voice = Envelope & {
   src: AudioBufferSourceNode;
   env: GainNode;
   performer: PerformerKey;
   channel: number;
   note: number;
-  startedAt: number;
   release: number;
   ended: boolean;
 };
+
+// ---- 3. the sampler --------------------------------------------------------
 
 export class Sampler {
   private readonly voices = new Set<Voice>();
   private readonly performers = new Map<PerformerKey, GainNode>();
 
+  /** `makeup` multiplies every voice's peak: the renders' lift to a normal loudness. */
   constructor(
     private readonly ctx: AudioContext,
-    private readonly out: AudioNode
+    private readonly out: AudioNode,
+    private readonly makeup = 1
   ) {}
 
   get voiceCount(): number {
@@ -103,10 +125,12 @@ export class Sampler {
     src.playbackRate.value = source.rate;
     src.connect(env);
 
-    const peak = PEAK * Math.pow(Math.max(0, Math.min(127, velocity)) / 127, VELOCITY_CURVE);
+    const peak = this.makeup * PEAK * Math.pow(Math.max(0, Math.min(127, velocity)) / 127, VELOCITY_CURVE);
     const start = Math.max(when, this.ctx.currentTime);
+    const attackEnd = start + manifest.attack;
+    env.gain.value = 0;
     env.gain.setValueAtTime(0, start);
-    env.gain.linearRampToValueAtTime(peak, start + manifest.attack);
+    env.gain.linearRampToValueAtTime(peak, attackEnd);
 
     const voice: Voice = {
       src,
@@ -115,6 +139,8 @@ export class Sampler {
       channel,
       note,
       startedAt: start,
+      attackEnd,
+      peak,
       release: manifest.release,
       ended: false,
     };
@@ -125,9 +151,6 @@ export class Sampler {
       env.disconnect();
     };
     src.start(start);
-    if (!manifest.sustained) {
-      // The render carries the decay; nothing to do at note-off but shorten it.
-    }
   }
 
   noteOff(key: PerformerKey, channel: number, note: number, when: number): void {
@@ -153,13 +176,19 @@ export class Sampler {
     }
   }
 
+  /**
+   * Release from `when` over `release` seconds: hold the level the envelope
+   * has there, then ramp to nothing. A release inside the attack waits for
+   * the attack to end - cancelling the attack ramp would drop the note to
+   * silence for the frames in between.
+   */
   private end(v: Voice, when: number, release: number): void {
     if (v.ended) return;
     v.ended = true;
-    const at = Math.max(when, this.ctx.currentTime);
+    const at = Math.max(when, this.ctx.currentTime, v.attackEnd);
     const g = v.env.gain;
     g.cancelScheduledValues(at);
-    g.setValueAtTime(g.value, at);
+    g.setValueAtTime(envelopeLevelAt(v, at), at);
     g.linearRampToValueAtTime(0, at + release);
     try {
       v.src.stop(at + release + 0.01);

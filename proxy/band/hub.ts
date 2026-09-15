@@ -9,6 +9,7 @@ import {
   StopReason,
   decodeClientFrame,
   encodeHello,
+  encodeJoin,
   encodeLeaveNotice,
   encodeRefused,
   encodeStopNotice,
@@ -229,7 +230,7 @@ export class BandHub {
         this.onBatch(state, message, plain, now);
         return;
       case BandSub.Join:
-        this.onJoin(state, message, plain, now);
+        this.onJoin(state, message, now);
         return;
       case BandSub.Leave:
         if (state.memberOf) this.leave(state, false);
@@ -460,7 +461,7 @@ export class BandHub {
    * master's client learns who joined and pushes the band state to everyone
    * in earshot.
    */
-  private onJoin(state: PeerState, message: Extract<BandClientMessage, { sub: 4 }>, plain: Uint8Array, now: number): void {
+  private onJoin(state: PeerState, message: Extract<BandClientMessage, { sub: 4 }>, now: number): void {
     const track = state.peer.track;
     if (now - state.lastJoinAt < BAND_LIMITS.joinIntervalMs) {
       this.refuse(state, RefuseWhat.Join, RefuseCause.Rate);
@@ -506,7 +507,10 @@ export class BandHub {
     const joinerId = this.memberIdFor(master, state);
     track.note('band', `joins the band of #${master.id}`, { master: master.id, instrument: message.instrument });
     this.log(`band: #${joinerId} joins the band of #${master.id} with instrument ${message.instrument}`);
-    this.trySend(master.state, stampPerformer(plain, joinerId), now);
+    // The joiner named the master by the master's public id; the master's own
+    // client knows itself only by its local one (0x200), so the relay says
+    // that - a frame naming any other id is a stray on that client.
+    this.trySend(master.state, stampPerformer(encodeJoin(master.selfId, message.instrument, message.mask), joinerId), now);
   }
 
   /** The id the master's client sees `member` under, falling back to the member's local id. */

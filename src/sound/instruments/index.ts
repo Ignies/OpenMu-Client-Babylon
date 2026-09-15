@@ -13,9 +13,9 @@ import { Sampler, type PerformerKey } from './sampler';
  * Instruments played by players: the band system's sound.
  *
  * The first Web Audio graph in the client, on the context Babylon's engine
- * already owns: `voice -> performer gain -> instruments bus -> compressor ->
- * Engine.audioEngine.masterGain`, so the master slider and the background
- * mute reach it like everything else. The two Babylon tracks stay untouched
+ * already owns: `voice (with the makeup) -> performer gain (distance) ->
+ * instruments bus -> limiter -> Engine.audioEngine.masterGain`, so the
+ * master slider and the background mute reach it like everything else. The two Babylon tracks stay untouched
  * - their gain nodes are private - and the bus folds master x effects x
  * instruments itself.
  *
@@ -34,8 +34,11 @@ const DISTANCE_RAMP = 0.05;
 
 /**
  * Makeup gain to lift the very quiet MusyngKite renders (peak ~0.07) up to a
- * normal loudness. Applied before the limiter, which caps the result, so a
- * generous value cannot clip - it only makes soft passages carry.
+ * normal loudness. Folded into each voice's peak (`Sampler`), ahead of the
+ * performer's distance gain, and capped by the limiter on the bus: a loud
+ * chord nearby cannot clip, and a far performer stays quiet. A makeup on the
+ * bus instead pushed every performer back up to the limiter's ceiling, near
+ * or far, which is why distance did nothing.
  */
 const MAKEUP_GAIN = 20;
 
@@ -91,21 +94,18 @@ function context(): AudioContext | null {
   bus = c.createGain();
   bus.gain.value = 0;
   // The MusyngKite renders are very quiet - they peak near 0.07 (about -23 dB),
-  // so even at full slider a note was drowned by ambient sounds. A large makeup
-  // gain lifts a note to a normal loudness; a limiter right after it catches
-  // the peaks of a loud chord so the boost never clips.
-  const makeup = c.createGain();
-  makeup.gain.value = MAKEUP_GAIN;
+  // so even at full slider a note was drowned by ambient sounds. The sampler
+  // lifts each voice by the makeup gain; the limiter here catches the peaks
+  // of a loud chord so the boost never clips.
   const limiter = c.createDynamicsCompressor();
   limiter.threshold.value = -3;
   limiter.ratio.value = 20;
   limiter.knee.value = 0;
   limiter.attack.value = 0.003;
   limiter.release.value = 0.12;
-  bus.connect(makeup);
-  makeup.connect(limiter);
+  bus.connect(limiter);
   limiter.connect(engine.masterGain);
-  sampler = new Sampler(c, bus);
+  sampler = new Sampler(c, bus, MAKEUP_GAIN);
   return ctx;
 }
 
