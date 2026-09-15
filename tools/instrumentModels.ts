@@ -77,6 +77,38 @@ class MeshBuilder {
   get triangles(): number {
     return this.indices.length / 3;
   }
+
+  /**
+   * Every triangle added since `from` must face away from `centre`: the
+   * normal comes from the winding, so a face wound the wrong way is a face
+   * the game culls from outside and shows from inside - the flute's wall,
+   * the guitar's top and the ocarina's body all shipped that way once.
+   * Closed convex shapes only; a flat disc checks its own normal.
+   */
+  assertOutward(from: number, centre: V3, what: string): void {
+    let inward = 0;
+    for (let t = from * 3; t < this.indices.length; t += 3) {
+      const n = this.normalAt(this.indices[t]);
+      const c = this.centreOf(t);
+      if ((c[0] - centre[0]) * n[0] + (c[1] - centre[1]) * n[1] + (c[2] - centre[2]) * n[2] <= 0) inward++;
+    }
+    if (inward) throw new Error(`${what}: ${inward} of ${this.triangles - from} triangles face inward`);
+  }
+
+  private normalAt(vertex: number): V3 {
+    return [this.normals[vertex * 3], this.normals[vertex * 3 + 1], this.normals[vertex * 3 + 2]];
+  }
+
+  private centreOf(index: number): V3 {
+    const c: V3 = [0, 0, 0];
+    for (let k = 0; k < 3; k++) {
+      const v = this.indices[index + k] * 3;
+      c[0] += this.positions[v] / 3;
+      c[1] += this.positions[v + 1] / 3;
+      c[2] += this.positions[v + 2] / 3;
+    }
+    return [c[0] / SCALE, c[1] / SCALE, c[2] / SCALE];
+  }
 }
 
 function normalOf(a: V3, b: V3, c: V3): V3 {
@@ -105,6 +137,7 @@ function solid(r: Rect): UV {
 function box(m: MeshBuilder, min: V3, max: V3, side: Rect, cap: Rect = side): void {
   const [x0, y0, z0] = min;
   const [x1, y1, z1] = max;
+  const from = m.triangles;
   const s = (z: number) => (z - z0) / (z1 - z0 || 1);
   const tx = (x: number) => (x - x0) / (x1 - x0 || 1);
   const ty = (y: number) => (y - y0) / (y1 - y0 || 1);
@@ -123,6 +156,7 @@ function box(m: MeshBuilder, min: V3, max: V3, side: Rect, cap: Rect = side): vo
     inRect(cap, 0, 0), inRect(cap, 1, 0), inRect(cap, 1, 1), inRect(cap, 0, 1));
   m.quad([x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [x1, y0, z0],
     inRect(cap, 0, 0), inRect(cap, 0, 1), inRect(cap, 1, 1), inRect(cap, 1, 0));
+  m.assertOutward(from, [(x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2], 'box');
 }
 
 /**
@@ -130,15 +164,19 @@ function box(m: MeshBuilder, min: V3, max: V3, side: Rect, cap: Rect = side): vo
  * `side` with s along Z and t around; the ends take `cap` as one texel.
  */
 function cylinder(m: MeshBuilder, z0: number, z1: number, radius: number, segments: number, side: Rect, cap: Rect, ry = radius): void {
+  const from = m.triangles;
   for (let i = 0; i < segments; i++) {
     const a0 = (i / segments) * Math.PI * 2;
     const a1 = ((i + 1) / segments) * Math.PI * 2;
     const p = (a: number, z: number): V3 => [Math.cos(a) * radius, Math.sin(a) * ry, z];
-    m.quad(p(a0, z0), p(a0, z1), p(a1, z1), p(a1, z0),
-      inRect(side, 0, i / segments), inRect(side, 1, i / segments), inRect(side, 1, (i + 1) / segments), inRect(side, 0, (i + 1) / segments));
+    // Around first, then along: with X = cos and Y = sin the other order
+    // winds the wall inward.
+    m.quad(p(a0, z0), p(a1, z0), p(a1, z1), p(a0, z1),
+      inRect(side, 0, i / segments), inRect(side, 0, (i + 1) / segments), inRect(side, 1, (i + 1) / segments), inRect(side, 1, i / segments));
     m.tri([0, 0, z1], p(a0, z1), p(a1, z1), solid(cap), solid(cap), solid(cap));
     m.tri([0, 0, z0], p(a1, z0), p(a0, z0), solid(cap), solid(cap), solid(cap));
   }
+  m.assertOutward(from, [0, 0, (z0 + z1) / 2], 'cylinder');
 }
 
 /**
@@ -153,14 +191,17 @@ function ellipsoid(m: MeshBuilder, rx: number, ry: number, rz: number, lat: numb
     return [rx * Math.sin(phi) * Math.cos(th), ry * Math.cos(phi), rz * Math.sin(phi) * Math.sin(th)];
   };
   const uv = (pt: V3): UV => inRect(top, (pt[2] + rz) / (2 * rz), (pt[0] + rx) / (2 * rx));
+  const from = m.triangles;
   for (let i = 0; i < lat; i++) {
     for (let j = 0; j < lon; j++) {
+      // Around (d) before down (b), like the cylinder wall.
       const a = p(i, j), b = p(i + 1, j), c = p(i + 1, j + 1), d = p(i, j + 1);
-      if (i === 0) m.tri(a, b, c, uv(a), uv(b), uv(c));
-      else if (i === lat - 1) m.tri(a, b, d, uv(a), uv(b), uv(d));
-      else m.quad(a, b, c, d, uv(a), uv(b), uv(c), uv(d));
+      if (i === 0) m.tri(a, c, b, uv(a), uv(c), uv(b));
+      else if (i === lat - 1) m.tri(a, d, b, uv(a), uv(d), uv(b));
+      else m.quad(a, d, c, b, uv(a), uv(d), uv(c), uv(b));
     }
   }
+  m.assertOutward(from, [0, 0, 0], 'ellipsoid');
 }
 
 // ---- the three instruments -------------------------------------------------
@@ -179,8 +220,11 @@ function rectOf(atlas: Atlas, name: string): Rect {
 
 /**
  * Guitar: body of two round bouts extruded along Y, a neck and a head along
- * +Z, six strings, a sound hole. Origin at the base of the neck, where the
- * left hand holds it. Both faces of the body take the top-view crop.
+ * +Z, six strings. Origin at the base of the neck, where the left hand holds
+ * it. Both faces of the body take the top-view crop, and that crop already
+ * paints the sound hole with its rosette and the bridge, so the strings are
+ * laid where the crop has them - a modelled hole disc used to sit halfway
+ * down the body, a second hole beside the painted one.
  */
 function buildGuitar(atlas: Atlas): MeshBuilder {
   const m = new MeshBuilder();
@@ -189,7 +233,6 @@ function buildGuitar(atlas: Atlas): MeshBuilder {
   const head = rectOf(atlas, 'head');
   const rim = rectOf(atlas, 'rim');
   const string = rectOf(atlas, 'string');
-  const hole = rectOf(atlas, 'hole');
 
   // Outline: lower bout r 19 at z -30, upper bout r 14 at z -11, sampled as
   // the outer envelope of the two circles - a peanut, which is what the
@@ -220,31 +263,29 @@ function buildGuitar(atlas: Atlas): MeshBuilder {
   const half = 4.5;
   const uvTop = (x: number, z: number): UV => inRect(body, (z - zMin) / (zMax - zMin), (x + xMax) / (2 * xMax));
   const cz = (lower.z + upper.z) / 2;
+  const bodyFrom = m.triangles;
   for (let i = 0; i < N; i++) {
     const [x0, z0] = outline[i];
     const [x1, z1] = outline[(i + 1) % N];
-    // caps, fanned from the centre
-    m.tri([0, half, cz], [x0, half, z0], [x1, half, z1], uvTop(0, cz), uvTop(x0, z0), uvTop(x1, z1));
-    m.tri([0, -half, cz], [x1, -half, z1], [x0, -half, z0], uvTop(0, cz), uvTop(x1, z1), uvTop(x0, z0));
-    // rim
-    m.quad([x0, -half, z0], [x1, -half, z1], [x1, half, z1], [x0, half, z0],
-      inRect(rim, i / N, 0), inRect(rim, (i + 1) / N, 0), inRect(rim, (i + 1) / N, 1), inRect(rim, i / N, 1));
+    // caps, fanned from the centre; the outline runs X -> Z, which seen from
+    // +Y is clockwise, so the top fan takes it backwards
+    m.tri([0, half, cz], [x1, half, z1], [x0, half, z0], uvTop(0, cz), uvTop(x1, z1), uvTop(x0, z0));
+    m.tri([0, -half, cz], [x0, -half, z0], [x1, -half, z1], uvTop(0, cz), uvTop(x0, z0), uvTop(x1, z1));
+    // rim: up first, then along the outline
+    m.quad([x0, -half, z0], [x0, half, z0], [x1, half, z1], [x1, -half, z1],
+      inRect(rim, i / N, 0), inRect(rim, i / N, 1), inRect(rim, (i + 1) / N, 1), inRect(rim, (i + 1) / N, 0));
   }
-  // neck: z 0..45, sits on the body top
-  box(m, [-2.5, 2.5, 0], [2.5, 4.8, 45], neck, rim);
-  // head: z 45..59, a touch wider
-  box(m, [-3.5, 2.5, 45], [3.5, 4.8, 59], head, rim);
-  // strings over the top, from the bridge (z -38) to the nut (z 45)
+  m.assertOutward(bodyFrom, [0, 0, cz], 'guitar body');
+  // neck: z 0..45, sits on the body top, as wide as the crop paints it
+  box(m, [-3.3, 2.5, 0], [3.3, 4.8, 45], neck, rim);
+  // head: z 45..59, wider, with the tuners
+  box(m, [-5, 2.5, 45], [5, 4.8, 59], head, rim);
+  // strings over the top, from the painted bridge (30% up the body, z -32)
+  // to the nut, spread like the painted ones and inside the fretboard
+  const bridgeZ = -32, nutZ = 45, spread = 2.8;
   for (let s = 0; s < 6; s++) {
-    const x = -1.5 + s * 0.6;
-    box(m, [x - 0.12, 5.2, -38], [x + 0.12, 5.45, 45], string);
-  }
-  // sound hole: a dark disc a hair above the top
-  const hz = -22, hr = 4.5, H = 12;
-  for (let i = 0; i < H; i++) {
-    const a0 = (i / H) * Math.PI * 2, a1 = ((i + 1) / H) * Math.PI * 2;
-    m.tri([0, half + 0.05, hz], [Math.cos(a0) * hr, half + 0.05, hz + Math.sin(a0) * hr], [Math.cos(a1) * hr, half + 0.05, hz + Math.sin(a1) * hr],
-      solid(hole), solid(hole), solid(hole));
+    const x = -spread + s * ((2 * spread) / 5);
+    box(m, [x - 0.12, 5.2, bridgeZ], [x + 0.12, 5.45, nutZ], string);
   }
   return m;
 }
@@ -274,12 +315,14 @@ function buildOcarina(atlas: Atlas): MeshBuilder {
   const seg = 8, r = 1.6;
   const base: V3 = [-2.2, 3.2, -8];
   const tip: V3 = [-5, 9, -12.5];
+  const from = m.triangles;
   for (let i = 0; i < seg; i++) {
     const a0 = (i / seg) * Math.PI * 2, a1 = ((i + 1) / seg) * Math.PI * 2;
     const ring = (c: V3, a: number): V3 => [c[0] + Math.cos(a) * r, c[1], c[2] + Math.sin(a) * r];
     m.quad(ring(base, a0), ring(tip, a0), ring(tip, a1), ring(base, a1), solid(clay), solid(clay), solid(clay), solid(clay));
     m.tri(tip, ring(tip, a1), ring(tip, a0), solid(clay), solid(clay), solid(clay));
   }
+  m.assertOutward(from, [(base[0] + tip[0]) / 2, (base[1] + tip[1]) / 2 - 0.5, (base[2] + tip[2]) / 2], 'mouthpiece');
   return m;
 }
 
@@ -447,7 +490,6 @@ async function main(): Promise<void> {
         head: { x: 360, y: 0, w: 150, h: 150 },
         rim: { x: 0, y: 400, w: 256, h: 48 },
         string: { x: 300, y: 400, w: 32, h: 32 },
-        hole: { x: 350, y: 400, w: 32, h: 32 },
       },
     };
     const bodyCrop = sub(guitar, 0, 0.52, 0, 1);
@@ -457,7 +499,6 @@ async function main(): Promise<void> {
       head: { kind: 'crop', crop: sub(guitar, 0.8, 1, 0.25, 0.75) },
       rim: { kind: 'solid', rgb: await averageColour(file, bodyCrop) },
       string: { kind: 'solid', rgb: { r: 226, g: 214, b: 180 } },
-      hole: { kind: 'solid', rgb: { r: 24, g: 14, b: 8 } },
     });
     await writeGlb('Instrument_Guitar', buildGuitar(atlas), png);
   }
