@@ -33,3 +33,27 @@ describe('validateSignup', () => {
     expect(validateSignup({ ...good, confirm: 'secrets' })).toBe('mismatch');
   });
 });
+
+describe('the password charset', () => {
+  const good = { username: 'player', password: 'secret1', confirm: 'secret1' };
+
+  it('takes letters, numbers and basic symbols', () => {
+    for (const password of ['secret1', 'p@ss-w0rd', 'a_b.c!1']) {
+      expect(validateSignup({ ...good, password, confirm: password })).toBeNull();
+    }
+  });
+
+  it('refuses anything the ten-byte field cannot carry', () => {
+    // One byte per character, read back as UTF-8: an accent is replaced on
+    // the way in, so the account could never be logged into.
+    for (const password of ['contraseña', 'pässw0rd', 'пароль1', 'pass w0rd']) {
+      expect(validateSignup({ ...good, password, confirm: password })).toBe('passwordChars');
+    }
+  });
+
+  it('complains about the length first, so the message names one thing', () => {
+    expect(validateSignup({ ...good, password: 'ñ', confirm: 'ñ' })).toBe(
+      'passwordShort'
+    );
+  });
+});

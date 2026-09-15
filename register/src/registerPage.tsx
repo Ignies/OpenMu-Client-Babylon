@@ -88,6 +88,7 @@ const PROBLEM_TEXT: Record<SignupProblem, string> = {
   idShort: `ID must be at least ${MIN_ACCOUNT_LENGTH} characters.`,
   idChars: 'ID may contain only letters and numbers.',
   passwordShort: `Password must be at least ${MIN_ACCOUNT_PASSWORD_LENGTH} characters.`,
+  passwordChars: 'Password may contain only letters, numbers and basic symbols.',
   mismatch: 'Passwords do not match.',
 };
 

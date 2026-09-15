@@ -88,6 +88,8 @@ export const japaneseLayer: LanguageLayer = {
     'register.idTooShort': 'IDは{min}文字以上にしてください。',
     'register.idChars': 'IDに使えるのは英数字だけです。',
     'register.passwordTooShort': 'パスワードは{min}文字以上にしてください。',
+
+    'register.passwordChars': 'パスワードに使えるのは英数字と基本的な記号だけです。',
     'register.mismatch': 'パスワードが一致しません。',
     'register.unreachable': 'サーバーに接続できませんでした。',
     'register.failed': '登録に失敗しました（{status}）。',

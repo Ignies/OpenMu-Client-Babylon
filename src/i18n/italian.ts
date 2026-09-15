@@ -84,6 +84,8 @@ export const italianLayer: LanguageLayer = {
     'register.idTooShort': 'L’ID deve avere almeno {min} caratteri.',
     'register.idChars': 'L’ID può contenere solo lettere e numeri.',
     'register.passwordTooShort': 'La password deve avere almeno {min} caratteri.',
+
+    'register.passwordChars': 'La password può contenere solo lettere, numeri e simboli semplici.',
     'register.mismatch': 'Le password non coincidono.',
     'register.unreachable': 'Impossibile raggiungere il server.',
     'register.failed': 'Registrazione non riuscita ({status}).',

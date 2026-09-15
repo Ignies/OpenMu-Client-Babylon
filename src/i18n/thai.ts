@@ -88,6 +88,8 @@ export const thaiLayer: LanguageLayer = {
     'register.idTooShort': 'ID ต้องมีอย่างน้อย {min} ตัวอักษร',
     'register.idChars': 'ID ใช้ได้เฉพาะตัวอักษรและตัวเลข',
     'register.passwordTooShort': 'รหัสผ่านต้องมีอย่างน้อย {min} ตัวอักษร',
+
+    'register.passwordChars': 'รหัสผ่านใช้ได้เฉพาะตัวอักษร ตัวเลข และสัญลักษณ์พื้นฐานเท่านั้น',
     'register.mismatch': 'รหัสผ่านไม่ตรงกัน',
     'register.unreachable': 'ติดต่อเซิร์ฟเวอร์ไม่ได้',
     'register.failed': 'สมัครไม่สำเร็จ ({status})',

@@ -22,11 +22,24 @@ export const MIN_ACCOUNT_PASSWORD_LENGTH = 4;
 /** MU account names are ASCII; the server rejects anything else anyway. */
 const ACCOUNT_RE = /^[A-Za-z0-9]+$/;
 
+/**
+ * Printable ASCII, space excluded.
+ *
+ * The login packet carries the password as one byte per character in a
+ * ten-byte field, and the server reads that field back as UTF-8. A byte of
+ * 0x80 or over is not valid UTF-8 on its own, so any accented or non-Latin
+ * character is replaced on the way in and the password the server checks is
+ * not the one that was typed. Signing up with one produces an account that
+ * exists and can never be logged into, which is what this stops.
+ */
+const PASSWORD_RE = /^[!-~]+$/;
+
 export type SignupProblem =
   | 'empty'
   | 'idShort'
   | 'idChars'
   | 'passwordShort'
+  | 'passwordChars'
   | 'mismatch';
 
 export type Signup = {
@@ -43,6 +56,7 @@ export function validateSignup(signup: Signup): SignupProblem | null {
   if (username.length < MIN_ACCOUNT_LENGTH) return 'idShort';
   if (!ACCOUNT_RE.test(username)) return 'idChars';
   if (password.length < MIN_ACCOUNT_PASSWORD_LENGTH) return 'passwordShort';
+  if (!PASSWORD_RE.test(password)) return 'passwordChars';
   if (password !== confirm) return 'mismatch';
 
   return null;

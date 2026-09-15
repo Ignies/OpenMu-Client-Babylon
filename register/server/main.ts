@@ -58,6 +58,16 @@ const MAX_USERNAME_LENGTH = 10;
 const MIN_PASSWORD_LENGTH = 4;
 const MAX_PASSWORD_LENGTH = 10;
 
+/**
+ * Printable ASCII, space excluded - the same rule the two forms apply.
+ *
+ * The login packet carries the password one byte per character and the game
+ * server reads it back as UTF-8, so a byte of 0x80 or over does not survive
+ * the trip. An account signed up with one exists and can never be logged
+ * into, so it must not be created in the first place.
+ */
+const PASSWORD_RE = /^[!-~]+$/;
+
 const USERNAME_RE = /^[A-Za-z0-9]+$/;
 
 /**
@@ -125,6 +135,10 @@ function validate(body: {
     password.length > MAX_PASSWORD_LENGTH
   ) {
     return `Password must be ${MIN_PASSWORD_LENGTH}-${MAX_PASSWORD_LENGTH} characters.`;
+  }
+
+  if (!PASSWORD_RE.test(password)) {
+    return 'Password may contain only letters, numbers and basic symbols.';
   }
 
   return null;
