@@ -32,8 +32,12 @@ const BUS_RAMP = 0.1;
 /** Seconds a performer's gain takes to follow their distance. */
 const DISTANCE_RAMP = 0.05;
 
-/** Makeup gain after the compressor, so a note is as loud as a game sound effect. */
-const MAKEUP_GAIN = 2.2;
+/**
+ * Makeup gain to lift the very quiet MusyngKite renders (peak ~0.07) up to a
+ * normal loudness. Applied before the limiter, which caps the result, so a
+ * generous value cannot clip - it only makes soft passages carry.
+ */
+const MAKEUP_GAIN = 20;
 
 /** A performer quieter than this (by distance) does not duck the music. */
 const DUCK_MIN_GAIN = 0.05;
@@ -86,17 +90,21 @@ function context(): AudioContext | null {
   ctx = c;
   bus = c.createGain();
   bus.gain.value = 0;
-  const compressor = c.createDynamicsCompressor();
-  compressor.threshold.value = -10;
-  compressor.ratio.value = 3;
-  // The compressor tames a chord's peaks; on its own it also leaves a single
-  // note far quieter than a game sound effect. A makeup gain after it brings
-  // the whole instrument back up to a comparable loudness.
+  // The MusyngKite renders are very quiet - they peak near 0.07 (about -23 dB),
+  // so even at full slider a note was drowned by ambient sounds. A large makeup
+  // gain lifts a note to a normal loudness; a limiter right after it catches
+  // the peaks of a loud chord so the boost never clips.
   const makeup = c.createGain();
   makeup.gain.value = MAKEUP_GAIN;
-  bus.connect(compressor);
-  compressor.connect(makeup);
-  makeup.connect(engine.masterGain);
+  const limiter = c.createDynamicsCompressor();
+  limiter.threshold.value = -3;
+  limiter.ratio.value = 20;
+  limiter.knee.value = 0;
+  limiter.attack.value = 0.003;
+  limiter.release.value = 0.12;
+  bus.connect(makeup);
+  makeup.connect(limiter);
+  limiter.connect(engine.masterGain);
   sampler = new Sampler(c, bus);
   return ctx;
 }
