@@ -16,12 +16,14 @@ import type { TextKey } from '../i18n';
  * "off", so no define, uniform or pass exists and the frame is untouched.
  *
  * `styleStrength` (1..9) is the dial on how far the Anime style goes:
- * flatter textures, a stronger rim. The ink lines have two sliders of
- * their own, `lineStrength` (1..9, how dark) and `lineWidth` (1..5
- * texels); the grass outline and the effect contours follow both.
+ * flatter textures, a stronger rim. The ink lines have three sliders of
+ * their own, `lineStrength` (1..9, how dark), `lineWidth` (1..5 texels)
+ * and `linePlacement` (which side of a silhouette the line sits on); the
+ * grass outline and the effect contours follow the first two.
  *
  * Dev seams: `?style=` replaces the option, `?strength=` the dial,
  * `?lineStrength=` the darkness, `?lineWidth=` the width,
+ * `?linePlacement=` the side,
  * `?shadeSteps=` the band count, `?toonSoft=` the band edge width in
  * pixels, `?toonRim=strength,edge`, `?toonTex=bias,levels`,
  * `?toonGrass=darkness,start`, `?grassOutline=0|1`, `?animeEffects=0|1`,
@@ -63,6 +65,24 @@ export const LINE_WIDTH_MAX = 5;
 export const LINE_STRENGTH_MIN = 1;
 export const LINE_STRENGTH_MAX = 9;
 
+/**
+ * Where a line sits on a silhouette. Inside it, the line eats into the thing
+ * it draws, which is what a near-side-only test gives and what makes a wide
+ * line trim a wing or a blade. Across it, half the width lands on each side.
+ * Outside it, the thing keeps its whole shape and the line lies on whatever
+ * stands behind.
+ */
+export const LINE_PLACEMENT_LABEL_KEYS: readonly TextKey[] = [
+  'options.linePlacement.inset',
+  'options.linePlacement.centered',
+  'options.linePlacement.outset',
+];
+
+export const LINE_PLACEMENT_MAX = LINE_PLACEMENT_LABEL_KEYS.length - 1;
+
+/** What the pass wants: 1 inside the silhouette, 0 across it, -1 outside. */
+const LINE_SIDES: readonly number[] = [1, 0, -1];
+
 /** Ink darkness per step of the line strength: 0.2 at the bottom, black at the top. */
 const INK_DARKNESS_STEP = 0.1;
 
@@ -94,6 +114,7 @@ const styleDev = devQueryNumber('style');
 const strengthDev = devQueryNumber('strength');
 const widthDev = devQueryNumber('lineWidth');
 const lineStrengthDev = devQueryNumber('lineStrength');
+const placementDev = devQueryNumber('linePlacement');
 const stepsDev = devQueryNumber('shadeSteps');
 const softDev = devQueryNumber('toonSoft');
 const rimDev = devQueryNumbers('toonRim', 2);
@@ -170,6 +191,15 @@ export function animeEffects(): boolean {
     : GameOptions.animeEffects;
 }
 
+/** The line placement as stored, 0..2. */
+export function linePlacement(): number {
+  return clamp(
+    Math.round(placementDev ?? GameOptions.linePlacement),
+    0,
+    LINE_PLACEMENT_MAX
+  );
+}
+
 /** vec4: x bands, y band edge softness (px), z rim strength, w rim edge. */
 export const TOON_UNIFORM = 'muToon';
 
@@ -210,6 +240,7 @@ const toon = {
   rimEdge: TOON_RIM_EDGE,
   inkDarkness: 0.6,
   inkWidth: 2,
+  inkSide: 0,
   /** One ink texel in pixels at the current frame height. */
   inkPixel: 1,
   texBias: 1.25,
@@ -243,6 +274,7 @@ export function syncRenderingStyle(frameHeight = REFERENCE_HEIGHT): void {
   toon.rimEdge = rimDev?.[1] ?? TOON_RIM_EDGE;
   toon.inkDarkness = (lineStrength() + 1) * INK_DARKNESS_STEP;
   toon.inkWidth = lineWidth();
+  toon.inkSide = LINE_SIDES[linePlacement()] ?? 0;
   toon.inkPixel = pixel;
   toon.texBias = texDev?.[0] ?? 0.5 + 1.5 * t;
   toon.texLevels = texDev?.[1] ?? Math.round(9 - 4 * t);
@@ -300,6 +332,11 @@ export function inkDarkness(): number {
 /** How wide the ink lines are in G-buffer texels at the reference height, from its slider. */
 export function inkWidth(): number {
   return toon.inkWidth;
+}
+
+/** Which side of a silhouette the lines sit on: 1 inside, 0 across, -1 outside. */
+export function inkSide(): number {
+  return toon.inkSide;
 }
 
 /** The ground and grass shaders' defines for the style; empty when off. */

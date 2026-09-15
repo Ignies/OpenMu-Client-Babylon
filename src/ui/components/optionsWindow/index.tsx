@@ -55,6 +55,8 @@ import {
   MATERIAL_QUALITY_MAX,
 } from '../../../common/materialQuality';
 import {
+  LINE_PLACEMENT_LABEL_KEYS,
+  LINE_PLACEMENT_MAX,
   LINE_STRENGTH_MAX,
   LINE_STRENGTH_MIN,
   LINE_WIDTH_MAX,
@@ -220,6 +222,7 @@ type SliderRow = {
     | 'styleStrength'
     | 'lineWidth'
     | 'lineStrength'
+    | 'linePlacement'
     | 'sharpness'
     | 'filmGrain'
     | 'bloom'
@@ -677,6 +680,15 @@ const TABS: Tab[] = [
                   needsTier: true,
                   needsStyle: 'outline',
                   display: v => v,
+                }),
+                slider({
+                  key: 'linePlacement',
+                  textId: -1,
+                  labelKey: 'options.linePlacement',
+                  max: LINE_PLACEMENT_MAX,
+                  needsTier: true,
+                  needsStyle: 'outline',
+                  display: v => t(LINE_PLACEMENT_LABEL_KEYS[v]) ?? v,
                 }),
                 {
                   kind: 'check',
