@@ -45,6 +45,26 @@ const banks = new Map<InstrumentId, DecodedBank>();
 const loading = new Map<InstrumentId, Promise<boolean>>();
 const performers = new Map<PerformerKey, PerformerState>();
 
+/** Causes already written to the console, as `key:cause`. */
+const reported = new Set<string>();
+
+/**
+ * One console line per performer and cause saying why their notes are not
+ * heard: the thing to read on a client that stays silent.
+ */
+function report(key: PerformerKey, cause: string, text: string): void {
+  const tag = `${key}:${cause}`;
+  if (reported.has(tag)) return;
+  reported.add(tag);
+  console.warn(`band: ${key}: ${text}`);
+}
+
+function forget(key: PerformerKey): void {
+  for (const tag of Array.from(reported)) {
+    if (tag.startsWith(`${key}:`)) reported.delete(tag);
+  }
+}
+
 /** The context, once Babylon has made one; null before the scene exists. */
 function context(): AudioContext | null {
   if (ctx) return ctx;
@@ -94,6 +114,7 @@ export function ensureBank(id: InstrumentId): Promise<boolean> {
   const task = loadBank(c, id)
     .then(bank => {
       banks.set(id, bank);
+      console.info(`band: ${id} notes ready`);
       return true;
     })
     .catch(err => {
@@ -123,8 +144,9 @@ export function setPerformerPosition(key: PerformerKey, x: number, z: number, lo
 }
 
 /**
- * A note starts at audio time `when`. Silently nothing when the bank is not
- * in, the context is locked, or the player has turned other performers off.
+ * A note starts at audio time `when`. Nothing when the bank is not in, the
+ * context is locked, or the player has turned other performers off - each
+ * said once on the console.
  */
 export function noteOn(
   key: PerformerKey,
@@ -134,11 +156,28 @@ export function noteOn(
   velocity: number,
   when: number
 ): void {
-  const bank = banks.get(instrument);
-  if (!bank || !contextReady() || !sampler) return;
   const p = performer(key);
-  if (!p.local && !GameOptions.hearInstruments) return;
-  sampler.noteOn(key, bank, channel, note, velocity, when);
+  const bank = banks.get(instrument);
+  if (!bank) {
+    const state = loading.has(instrument) ? 'still loading' : 'not loaded';
+    report(key, 'bank', `notes dropped, the ${instrument} notes are ${state}`);
+    return;
+  }
+  if (!contextReady() || !sampler) {
+    report(key, 'locked', 'notes dropped, audio is locked until the page is clicked');
+    return;
+  }
+  if (!p.local && !GameOptions.hearInstruments) {
+    report(key, 'muted', "notes dropped, other players' instruments are off in the options");
+    return;
+  }
+  if (busLevel >= 0 && busLevel <= 0.001) {
+    report(key, 'bus', 'notes play into a silent bus: a volume slider at zero, or the page in the background');
+  }
+  // The performer's node is made on their first note, at the level their
+  // distance gives right now rather than full until the next frame.
+  if (p.gain < 0) p.gain = gainFor(p);
+  sampler.noteOn(key, bank, channel, note, velocity, when, p.gain);
 }
 
 export function noteOff(key: PerformerKey, channel: number, note: number, when: number): void {
@@ -153,6 +192,15 @@ export function allNotesOff(key: PerformerKey): void {
 export function dropPerformer(key: PerformerKey): void {
   sampler?.dropPerformer(key);
   performers.delete(key);
+  forget(key);
+}
+
+/** A performer's level from where they stand; the hero is always full. */
+function gainFor(p: PerformerState, hero = listenerHero()): number {
+  if (p.local || !hero) return 1;
+  const dx = p.x - hero.transform.pos.x;
+  const dz = p.z - hero.transform.pos.z;
+  return distanceGain(Math.sqrt(dx * dx + dz * dz));
 }
 
 /** Voices sounding right now (debug). */
@@ -175,12 +223,7 @@ function update(_map: ENUM_WORLD, _dt: number): void {
 
   const hero = listenerHero();
   for (const [key, p] of performers) {
-    let g = 1;
-    if (!p.local && hero) {
-      const dx = p.x - hero.transform.pos.x;
-      const dz = p.z - hero.transform.pos.z;
-      g = distanceGain(Math.sqrt(dx * dx + dz * dz));
-    }
+    const g = gainFor(p, hero);
     if (Math.abs(g - p.gain) > 0.01) {
       p.gain = g;
       sampler.setPerformerGain(key, g, DISTANCE_RAMP);
@@ -192,6 +235,7 @@ function update(_map: ENUM_WORLD, _dt: number): void {
 function reset(): void {
   if (sampler) for (const key of Array.from(performers.keys())) sampler.dropPerformer(key);
   performers.clear();
+  reported.clear();
 }
 
 // ---- 3. the layer ----------------------------------------------------------

@@ -389,9 +389,14 @@ type Remote = {
   instrument: InstrumentId;
   receiver: Receiver;
   band: BandState;
+  /** Batches taken so far; the first one is announced on the console. */
+  batches: number;
 };
 
 const remotes = new Map<number, Remote>();
+
+/** Performers whose notes arrived with no start here, each said once. */
+const orphans = new Set<number>();
 let remoteTimer: ReturnType<typeof setInterval> | null = null;
 
 const keyOf = (netId: number) => `net:${netId}`;
@@ -410,6 +415,7 @@ export function remoteStart(entity: NetEntity, instrument: InstrumentId): void {
     entity,
     instrument,
     band,
+    batches: 0,
     receiver: new Receiver(
       { now: audioNow },
       {
@@ -420,6 +426,7 @@ export function remoteStart(entity: NetEntity, instrument: InstrumentId): void {
     ),
   };
   remotes.set(netId, remote);
+  orphans.delete(netId);
   void ensureBank(instrument);
   if (!remoteTimer) {
     remoteTimer = setInterval(() => {
@@ -429,7 +436,21 @@ export function remoteStart(entity: NetEntity, instrument: InstrumentId): void {
 }
 
 export function remoteBatch(netId: number, seq: number, baseMs: number, events: BatchEvent[]): void {
-  remotes.get(netId)?.receiver.onBatch(seq, baseMs, events);
+  const remote = remotes.get(netId);
+  if (!remote) {
+    // Their start never took here (not in scope at the time): nothing to voice.
+    if (!orphans.has(netId)) {
+      orphans.add(netId);
+      console.warn(`band: notes from #${netId} arrive without a start, dropped`);
+    }
+    return;
+  }
+  if (remote.batches++ === 0) {
+    console.info(
+      `band: first notes from #${netId}: ${events.length} events, ${(baseMs / 1000).toFixed(1)} s into their song`
+    );
+  }
+  remote.receiver.onBatch(seq, baseMs, events);
 }
 
 export function remoteStop(netId: number): void {
