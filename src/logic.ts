@@ -220,6 +220,7 @@ import {
   PingPacket,
 } from './common/packets/ClientToServerPackets';
 import { Social } from './social';
+import { Commands } from './commands';
 import { heroStateMessage } from './common/nameTags';
 import { events } from './events';
 import { Economy, type ShopStock } from './economy';
@@ -2948,6 +2949,10 @@ function handleRespawnAfterDeath(packet: DataView) {
     const exp = Number(p.Experience ?? 0);
     if (exp > 0) Store.playerData.exp = exp;
   });
+
+  // g_iFollowCharacter = -1: a follow does not survive the hero dying.
+  // Done here rather than on the kill packet so every respawn path clears it.
+  Commands.stopFollowing();
 
   const world = Store.world;
   const playerEntity = world?.playerEntity;

@@ -325,6 +325,13 @@ export const Commands = new (class _Commands {
     const world = Store.world;
     const hero = world?.playerEntity;
     if (!target || !world || !hero) return;
+    // The hero dying ends the follow (MoveHero returns on c->Dead > 0):
+    // without this the walk queued here survives the respawn and drags the
+    // hero from the safe zone back across the map.
+    if (hero.dying) {
+      this.stopFollowing();
+      return;
+    }
     // The followed player is tested on its own components, not on
     // `playersQuery.has`: a miniplex query only indexes entities once
     // something has read its `entities` (`Query.connect`), and nothing
