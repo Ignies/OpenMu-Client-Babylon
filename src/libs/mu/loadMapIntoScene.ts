@@ -45,6 +45,16 @@ import { lookDirector } from '../../lighting/director';
 let warpSerial = 0;
 
 /**
+ * A warp the server ordered has already moved the character on its side, so a
+ * load that fails cannot simply be dropped: the client would keep standing on
+ * the map it was told to leave while every object the server sends belongs to
+ * the new one. Leaving Chaos Castle is the case that shows it - the arena has
+ * collapsed by then, so what is left on screen is an empty floor. These are
+ * the delays before each further attempt.
+ */
+const WARP_RETRY_DELAYS_MS = [400, 1200, 3000] as const;
+
+/**
  * The map whose terrain and entities are actually in the scene - the map the
  * next load has to tear down. `world.mapIndex` is the newest destination and
  * runs ahead of this while a load is in flight.
@@ -212,21 +222,35 @@ function unloadMap(world: World, oldMap: ENUM_WORLD, newMap: ENUM_WORLD) {
 
 /**
  * A warp whose terrain cannot be loaded (a missing world folder, a corrupt
- * file, the dev server answering HTML) must leave the client on the map it
- * was on, out of the loading screen, with the failure logged - not on a
- * loading screen forever with a half-torn scene behind it.
+ * file, the dev server answering HTML) leaves the client on the map it was
+ * on, out of the loading screen, with the failure logged - not on a loading
+ * screen forever with a half-torn scene behind it. That is where it waits,
+ * never where it stops: the destination is retried on a short backoff so the
+ * client ends up where the server has already put the character.
  */
 function failWarp(
   world: World,
   map: ENUM_WORLD,
   oldMap: ENUM_WORLD,
-  error: unknown
+  error: unknown,
+  pos?: { x: number; y: number },
+  attempt = 0
 ) {
   console.error(`Could not load world ${map}; staying on ${oldMap}:`, error);
   world.mapIndex = oldMap;
   setShadowWorld(oldMap);
   Store.setSceneLoading(false);
   EventBus.emit('warpFailed', { map, error });
+
+  const delay = WARP_RETRY_DELAYS_MS[attempt];
+  if (delay === undefined) return;
+
+  setTimeout(() => {
+    // A warp of its own since, or the map arrived some other way: that one
+    // owns the scene now.
+    if (world.mapIndex !== oldMap || sceneMap === map) return;
+    loadMapIntoScene(world, map, pos, attempt + 1);
+  }, delay);
 }
 
 /**
@@ -257,7 +281,8 @@ export function reloadMapObjects(): Promise<void> {
 export function loadMapIntoScene(
   world: World,
   map: ENUM_WORLD,
-  pos?: { x: number; y: number }
+  pos?: { x: number; y: number },
+  attempt = 0
 ): Promise<void> {
   const serial = ++warpSerial;
 
@@ -271,11 +296,11 @@ export function loadMapIntoScene(
   world.mapIndex = map;
 
   loadQueue = loadQueue
-    .then(() => runLoad(world, map, pos, serial))
+    .then(() => runLoad(world, map, pos, serial, attempt))
     // Unexpected failures (a map entry's `create`, object creation) used to
     // be unhandled rejections that also left the loading screen up: same
     // recovery as a failed terrain build.
-    .catch(error => failWarp(world, map, sceneMap, error));
+    .catch(error => failWarp(world, map, sceneMap, error, pos, attempt));
   return loadQueue;
 }
 
@@ -283,7 +308,8 @@ async function runLoad(
   world: World,
   map: ENUM_WORLD,
   pos: { x: number; y: number } | undefined,
-  serial: number
+  serial: number,
+  attempt: number
 ) {
   // Superseded while queued: the newest request does the whole job itself,
   // and already owns `world.mapIndex`.
@@ -302,7 +328,7 @@ async function runLoad(
     try {
       prepared = await prepareTerrain(world.scene, map);
     } catch (error) {
-      if (serial === warpSerial) failWarp(world, map, oldMap, error);
+      if (serial === warpSerial) failWarp(world, map, oldMap, error, pos, attempt);
       return;
     }
 
@@ -351,7 +377,7 @@ async function runLoad(
     } catch (error) {
       // The old map is already gone; the client is at least out of the
       // loading screen and can be warped again.
-      failWarp(world, map, oldMap, error);
+      failWarp(world, map, oldMap, error, pos, attempt);
       return;
     }
 
