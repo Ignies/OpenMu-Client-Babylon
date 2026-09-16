@@ -50,7 +50,6 @@ import {
   dialogScript,
   questDataReady,
   questDefinition,
-  questDefinitions,
 } from './questData';
 import { legacyKillCount } from './killCounters';
 import type { QuestObjective } from './objectives';
@@ -201,23 +200,30 @@ function heroClass(): BaseClass {
   return getBaseClass(Store.playerData.charClass);
 }
 
+/**
+ * `setQuestLists`: the quest indexes this class walks, in order. A Knight
+ * takes the whole chain, the three later classes start at 4, and everyone
+ * else skips the combo quest.
+ */
+function chainIndexes(cls: BaseClass, count: number): number[] {
+  const out: number[] = [];
+  const later =
+    cls === BaseClass.MagicGladiator ||
+    cls === BaseClass.DarkLord ||
+    cls === BaseClass.RageFighter;
+  const from = later ? 4 : 0;
+  for (let i = from; i < count; i++) {
+    if (cls !== BaseClass.Knight && i === QUEST_COMBO) continue;
+    out.push(i);
+  }
+  return out;
+}
+
 /** `m_byCurrQuestIndex` after `setQuestLists`: the first unfinished quest of the chain. */
 function firstOpenQuest(count: number, cls: BaseClass): number {
   const stateOf = (i: number) => state.states[i] ?? LegacyQuestState.None;
-
-  if (cls === BaseClass.Knight) {
-    for (let i = 0; i < count; i++) if (stateOf(i) !== LegacyQuestState.Finished) return i;
-    return count;
-  }
-  if (cls === BaseClass.MagicGladiator || cls === BaseClass.DarkLord || cls === BaseClass.RageFighter) {
-    for (let i = 4; i < count; i++) if (stateOf(i) !== LegacyQuestState.Finished) return i;
-    return count;
-  }
-  for (let i = 0; i < count; i++) {
-    if (i === QUEST_COMBO) continue;
-    if (stateOf(i) !== LegacyQuestState.Finished) return i;
-  }
-  return count;
+  const open = chainIndexes(cls, count).find(i => stateOf(i) !== LegacyQuestState.Finished);
+  return open ?? count;
 }
 
 /** `setQuestLists`: the packed 2-bit list from `LegacyQuestStateList`. */
@@ -518,9 +524,25 @@ export function requestLegacyQuestStates(): void {
   Store.sendToGS(LegacyQuestStateRequestPacket.createPacket().buffer);
 }
 
-/** The legacy quest an NPC of this type hands out, if any. */
+/**
+ * Which of this NPC's quests to open on him. The original never asks: it
+ * opens the chain where it stands (`ShowQuestNpcWindow()` with no index), and
+ * the server is what decides the NPC. Ours has to pick both, and picking the
+ * NPC's *first* quest meant Sebina kept re-opening the finished Scroll of the
+ * Emperor page and never offered the Three Treasures of Mu behind it. So:
+ * the first quest of his the hero has not finished, and his last one once
+ * they all are, which is the page that thanks them.
+ */
 export function legacyQuestForNpc(npcType: number): QuestDefinition | undefined {
-  return questDefinitions().find(q => q.npcType === npcType && q.name);
+  const mine = chainIndexes(heroClass(), MAX_QUESTS)
+    .map(i => questDefinition(i))
+    .filter((q): q is QuestDefinition => !!q && q.npcType === npcType && !!q.name);
+  if (!mine.length) return undefined;
+
+  return (
+    mine.find(q => legacyQuestState(q.index) !== LegacyQuestState.Finished) ??
+    mine[mine.length - 1]
+  );
 }
 
 /** `Hero->byExtensionSkill`: the combo is unlocked by finishing `QUEST_COMBO`. */
