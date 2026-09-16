@@ -70,24 +70,36 @@ const state = observable(
      * it, which the screenshot runs need.
      */
     event: devQueryNumber('invasion') ?? 0,
+    /**
+     * The map the server lit it for, -1 for the dev seam (every map). OpenMU
+     * only sends this packet to the players standing on the invasion map, and
+     * only sends the off to the ones still standing there, so a flag kept for
+     * the whole session leaves one client with dragons over a map where
+     * nobody else has any.
+     */
+    map: -1,
   },
   {},
   { deep: false }
 );
 
-/** The invasion the server has lit: 0 none, 1 Red Dragon, 3 Golden Dragon. */
+/** The invasion the server has lit here: 0 none, 1 Red Dragon, 3 Golden Dragon. */
 export function invasionEvent(): number {
-  return state.event;
+  if (!state.event) return 0;
+  if (state.map < 0) return state.event;
+  return Store.world?.mapIndex === state.map ? state.event : 0;
 }
 
 /** MoveBoids' meteor pass, one roll per frame. */
 function update(_map: ENUM_WORLD, dt: number): void {
+  const event = invasionEvent();
+
   // Asserted every frame rather than on the packet: a new scene builds a new
   // look director, and an invasion that started before it must still be lit.
   // `setOmen` is a no-op when nothing changed.
-  lighting.omen(state.event ? 'invasion' : null);
+  lighting.omen(event ? 'invasion' : null);
 
-  if (!state.event) return;
+  if (!event) return;
   const world = Store.world;
   const hero = world?.playerEntity;
   if (!world || !hero) return;
@@ -114,14 +126,16 @@ function update(_map: ENUM_WORLD, dt: number): void {
   }
 }
 
-// `EnableEvent` survives a warp in the original; nothing to drop on reset.
-
 // ---- packets ---------------------------------------------------------------
 
 EventBus.on('MapEventState', packet => {
   const p = new MapEventStatePacket(packet);
   runInAction(() => {
     state.event = p.Enable ? p.Event : 0;
+    // `ReceiveTeleport` clears `EnableEvent` on every warp (WSclient.cpp:1919)
+    // and the server announces it again on arrival; the map it was announced
+    // for is the same rule without the round trip.
+    state.map = Store.world?.mapIndex ?? -1;
   });
 });
 
@@ -130,5 +144,5 @@ EventBus.on('MapEventState', packet => {
 export const invasionLayer: EventLayer = {
   name: 'invasion',
   update,
-  state: () => ({ open: false, running: state.event !== 0 }),
+  state: () => ({ open: false, running: invasionEvent() !== 0 }),
 };
