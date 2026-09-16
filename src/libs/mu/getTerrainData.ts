@@ -104,7 +104,9 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
       `World${worldNum}/TerrainLight.OZJ`,
       terrainLightBytes
     ),
-    Promise.all(
+    // `allSettled`, not `all`: one bad tile used to leave every texture that
+    // did decode on the GPU with nothing left holding it.
+    Promise.allSettled(
       textureNames.map((t, i) =>
         createOZJTexture(
           scene,
@@ -112,58 +114,73 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
           tileBytes[i]
         )
       )
-    ),
+    ).then(results => {
+      const made = results.flatMap(r =>
+        r.status === 'fulfilled' ? [r.value] : []
+      );
+      const failed = results.find(r => r.status === 'rejected');
+      if (failed) {
+        for (const texture of made) texture.dispose();
+        throw failed.reason;
+      }
+      return made;
+    }),
   ]);
   lightTextureData.Texture.dispose();
 
-  // The bake's border vignette comes off on the tiers that can frame it
-  // (`common/terrain/borderVignette.ts`); Classic keeps the original's fade.
-  const terrainLight = unpackTerrainLight(
-    await parseTerrainLightOffThread(
-      lightTextureData.BufferFloat,
-      bulk.height,
-      lightingTier() !== null
-    )
-  );
-
-  // Packs the same tiles into one sampler2DArray so the splat shader does two
-  // fetches per pixel instead of a guarded one per layer (tileTextureArray.ts).
-  // OZJ is a JPEG behind a 24-byte header. A failure here is not fatal: the
-  // material falls back to the per-tile sampler chain.
-  const tileArray = await createTileTextureArray(
-    scene,
-    tileBytes.map(bytes => bytes.slice(24))
-  ).catch((error: unknown) => {
-    console.warn(
-      'Tile texture array unavailable, using per-tile samplers:',
-      error
+  try {
+    // The bake's border vignette comes off on the tiers that can frame it
+    // (`common/terrain/borderVignette.ts`); Classic keeps the original's fade.
+    const terrainLight = unpackTerrainLight(
+      await parseTerrainLightOffThread(
+        lightTextureData.BufferFloat,
+        bulk.height,
+        lightingTier() !== null
+      )
     );
-    return null;
-  });
 
-  // Animated water (terrainWater.ts): the option and the registry are read
-  // here, at load, so a map without water - or the option off - hands the
-  // material nothing and the shader compiles exactly as before.
-  const waterSpec = terrainWaterFor(map);
-  const waterFrames = waterSpec
-    ? await loadTerrainWaterFlipbook(scene, waterSpec)
-    : [];
+    // Packs the same tiles into one sampler2DArray so the splat shader does two
+    // fetches per pixel instead of a guarded one per layer (tileTextureArray.ts).
+    // OZJ is a JPEG behind a 24-byte header. A failure here is not fatal: the
+    // material falls back to the per-tile sampler chain.
+    const tileArray = await createTileTextureArray(
+      scene,
+      tileBytes.map(bytes => bytes.slice(24))
+    ).catch((error: unknown) => {
+      console.warn(
+        'Tile texture array unavailable, using per-tile samplers:',
+        error
+      );
+      return null;
+    });
 
-  // The grass cards: which layer-1 slots grow anything here, and what colour.
-  // Deliberately not in `terrainFilesFor` - that list is destructured
-  // positionally above, and these are optional files besides.
-  const grassCards = await loadGrassCards(scene, worldNum);
+    // Animated water (terrainWater.ts): the option and the registry are read
+    // here, at load, so a map without water - or the option off - hands the
+    // material nothing and the shader compiles exactly as before.
+    const waterSpec = terrainWaterFor(map);
+    const waterFrames = waterSpec
+      ? await loadTerrainWaterFlipbook(scene, waterSpec)
+      : [];
 
-  return {
-    worldNum,
-    bulk,
-    terrainLight,
-    terrainTextures,
-    tileArray,
-    waterSpec,
-    waterFrames,
-    grassCards,
-  };
+    // The grass cards: which layer-1 slots grow anything here, and what colour.
+    // Deliberately not in `terrainFilesFor` - that list is destructured
+    // positionally above, and these are optional files besides.
+    const grassCards = await loadGrassCards(scene, worldNum);
+
+    return {
+      worldNum,
+      bulk,
+      terrainLight,
+      terrainTextures,
+      tileArray,
+      waterSpec,
+      waterFrames,
+      grassCards,
+    };
+  } catch (error) {
+    for (const texture of terrainTextures) texture.dispose();
+    throw error;
+  }
 }
 
 export function disposePreparedTerrain(prepared: PreparedTerrain): void {
