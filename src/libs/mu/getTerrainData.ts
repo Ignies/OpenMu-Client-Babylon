@@ -359,13 +359,32 @@ export async function getTerrainData(
     flag: number,
     set: boolean
   ) {
+    const openedIds: number[] = [];
+    const closedIds: number[] = [];
+
     for (let yi = y; yi < y + h; yi++) {
       if (yi < 0 || yi >= TERRAIN_SIZE) continue;
       for (let xi = x; xi < x + w; xi++) {
         if (xi < 0 || xi >= TERRAIN_SIZE) continue;
         const i = GetTerrainIndex(xi, yi);
         terrainAttrs[i] = set ? terrainAttrs[i] | flag : terrainAttrs[i] & ~flag;
+
+        if (world.pathfinder) {
+          const id = xi * TERRAIN_SIZE + yi;
+          if (IsWalkable(xi, yi)) {
+            openedIds.push(id);
+          } else {
+            closedIds.push(id);
+          }
+        }
       }
+    }
+
+    if (openedIds.length > 0) {
+      world.pathfinder.applyOpenedPatch(openedIds);
+    }
+    if (closedIds.length > 0) {
+      world.pathfinder.applyClosedPatch(closedIds);
     }
   }
 
