@@ -1,3 +1,6 @@
+<img width="1280" height="640" alt="Proyecto nuevo (2)" src="https://github.com/user-attachments/assets/94062c4b-5307-428a-ba95-3bcf214a05c6" />
+
+
 # Open Mu Client Babylon
 One Client to rule them all.
 ## Main server selection screen:
