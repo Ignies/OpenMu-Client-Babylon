@@ -5,24 +5,37 @@ title: "[BUG] "
 labels: "bug"
 assignees: "Ignies"
 ---
-# ISSUE_NAME
+`CLIENT` · `BUG` <!-- tags, leave as is: `TODO` · `MEDIUM PRIORITY` -->
 
-`CLIENT` . `BUG` <!-- tags, leave as is `TODO` · `MEDIUM PRIORITY`-->
+> <!-- Briefly describe the problem. -->
 
-> <!-- describe after this the problem -->
+## Expected behavior
 
----
+<!-- Describe the expected behavior or outcome. -->
 
-## Goal
+*
 
-<!-- describe the expected outcome -->
+## Actual behavior
 
-## Tasks
-<!-- Don't touch anything from here -->
-* [ ] Investigate
-* [ ] Implement
-* [ ] Test
-* [ ] Review
-* [ ] Requirements are completed
-* [ ] No regressions introduced
-* [ ] Ready to merge
+<!-- What happens instead? -->
+
+*
+
+## Steps to reproduce
+
+<!-- Keep this as simple and reproducible as possible. -->
+
+1.
+2.
+3.
+
+## Context
+
+* Map / system:
+* Character / class:
+* Reproducible: Yes / No / Sometimes
+
+## Evidence
+
+<!-- Screenshots, videos, logs, console errors, packets, etc. -->
+
