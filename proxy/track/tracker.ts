@@ -30,7 +30,11 @@ export class Tracker {
   constructor(private readonly options: SessionOptions = {}) {}
 
   /** A socket opened; feed it and `close` it when the socket goes. */
-  open(nonce: string | null, port: number | null): TrackedSession {
+open(
+  nonce: string | null,
+  port: number | null,
+  options: SessionOptions = this.options
+): TrackedSession {
     const session = new TrackedSession(
       nonce,
       port,
@@ -50,7 +54,7 @@ export class Tracker {
           this.schedule();
         },
       },
-      this.options
+      options
     );
 
     this.sessions.add(session);
