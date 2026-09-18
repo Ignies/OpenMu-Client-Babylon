@@ -27,7 +27,7 @@ Current working ~somewhat version is S6EP3; 0.97d ships beside it (tag V097D) an
 ## Installing
 
 Needs [Docker Desktop](https://www.docker.com/products/docker-desktop/) and
-[Bun](https://bun.sh) ≥ 1.0.
+[Bun](https://bun.sh) ≥ 1.0. You can use Docker to run the project with the command `docker compose up --build` to start and compile the project.
 
 ### 1. The server
 

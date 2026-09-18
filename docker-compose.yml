@@ -1,0 +1,15 @@
+services:
+  openmu-client-babylon:
+    image: openmu-client-babylon:latest
+    container_name: openmu-client-babylon
+    network_mode: bridge
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "5173:5173"
+      - "3000:3000"
+    volumes:
+      - ./:/app
+      - /app/node_modules # to protect node_modules from being overwritten
+    restart: unless-stopped
