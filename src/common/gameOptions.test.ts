@@ -31,7 +31,9 @@ const oldBlob = (over: Record<string, unknown> = {}): Record<string, unknown> =>
 });
 
 describe('gameOptions migration', () => {
-  afterEach(() => vi.restoreAllMocks());
+ afterEach(() => {
+  vi.restoreAllMocks();
+});
 
   it('leaves a current blob alone', () => {
     const blob = { toneMapper: 3, brightness: 4, vignette: 9 };

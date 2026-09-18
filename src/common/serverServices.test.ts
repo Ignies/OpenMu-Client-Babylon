@@ -29,7 +29,9 @@ describe('registerUrl', () => {
 describe('registerApiUrl', () => {
   // The fallback is a build-time variable, so a developer's own `.env` would
   // otherwise decide what this test proves.
-  afterEach(() => vi.unstubAllEnvs());
+  afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
   it("posts to a domain world's own register service", () => {
     vi.stubEnv('VITE_REGISTER_API', 'https://somewhere.example/api/register');

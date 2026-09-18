@@ -14,7 +14,9 @@ beforeEach(() => {
   NetStats.reset();
 });
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 /** One closed pair of `kind`, `ms` apart. */
 function sample(kind: 'chat' | 'itemMove' | 'warp', ms: number): void {
