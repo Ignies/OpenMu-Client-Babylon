@@ -1,0 +1,18 @@
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+
+    schedule:
+      interval: "weekly"
+
+    open-pull-requests-limit: 3
+
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+
+    labels:
+      - "dependencies"
