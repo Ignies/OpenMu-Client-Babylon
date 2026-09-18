@@ -1,0 +1,529 @@
+name: Auto Label Issues
+
+on:
+  issues:
+    types: [opened, edited]
+
+  pull_request:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Auto label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const item = context.payload.issue || context.payload.pull_request;
+
+            if (!item) {
+              return;
+            }
+
+            const title = item.title || '';
+            const body = item.body || '';
+
+            const text = `${title}\n${body}`.toLowerCase();
+            const titleLower = title.toLowerCase();
+
+            /*
+             * ------------------------------------------------------------
+             * 1. EXPLICIT PREFIXES
+             * ------------------------------------------------------------
+             *
+             * These always take priority.
+             *
+             * Examples:
+             *
+             * [BUG] Character disappears after teleport
+             * [RENDERING] Noria lighting is broken
+             * [NETWORK] Player position desync
+             * [UI] Inventory doesn't open
+             * [FEATURE] Add Season 6 support
+             */
+
+            const prefixes = {
+              '[bug]': 'bug',
+              '[feature]': 'feature',
+              '[enhancement]': 'enhancement',
+              '[refactor]': 'refactor',
+              '[performance]': 'performance',
+              '[stability]': 'stability',
+
+              '[rendering]': 'rendering',
+              '[animation]': 'animation',
+              '[vfx]': 'vfx',
+              '[audio]': 'audio',
+
+              '[combat]': 'combat',
+              '[character]': 'character',
+              '[monster]': 'monster',
+
+              '[map]': 'map',
+              '[world]': 'world',
+
+              '[network]': 'networking',
+              '[networking]': 'networking',
+              '[sync]': 'synchronization',
+              '[protocol]': 'protocol',
+
+              '[ui]': 'ui',
+              '[ux]': 'ux',
+              '[localization]': 'localization',
+              '[assets]': 'assets',
+
+              '[version]': 'client-version',
+              '[client-version]': 'client-version',
+              '[server]': 'server-compatibility',
+
+              '[data]': 'data-format',
+              '[data-format]': 'data-format',
+
+              '[items]': 'item-system',
+              '[item]': 'item-system',
+
+              '[skills]': 'skill-system',
+              '[skill]': 'skill-system',
+
+              '[npc]': 'npc',
+              '[event]': 'event',
+              '[cashshop]': 'cash-shop',
+              '[cash-shop]': 'cash-shop',
+              '[marketplace]': 'marketplace',
+              '[admin]': 'admin',
+
+              '[test]': 'testing',
+              '[testing]': 'testing',
+              '[regression]': 'regression',
+
+              '[docs]': 'documentation',
+              '[documentation]': 'documentation',
+
+              '[blocked]': 'blocked'
+            };
+
+            const labelsToAdd = new Set();
+
+            for (const [prefix, label] of Object.entries(prefixes)) {
+              if (titleLower.startsWith(prefix)) {
+                labelsToAdd.add(label);
+              }
+            }
+
+            /*
+             * ------------------------------------------------------------
+             * 2. KEYWORD FALLBACK
+             * ------------------------------------------------------------
+             *
+             * Only used when an explicit prefix wasn't supplied for
+             * that category.
+             */
+
+            const keywordRules = {
+
+              bug: [
+                'crash',
+                'crashes',
+                'exception',
+                'error',
+                'broken',
+                'does not work',
+                "doesn't work",
+                'not working',
+                'fails',
+                'failure',
+                'incorrect',
+                'wrong'
+              ],
+
+              feature: [
+                'feature request',
+                'add support',
+                'implement',
+                'implementation',
+                'new functionality'
+              ],
+
+              enhancement: [
+                'improve',
+                'improvement',
+                'enhance'
+              ],
+
+              refactor: [
+                'refactor',
+                'cleanup',
+                'clean up',
+                'rewrite',
+                'rework'
+              ],
+
+              performance: [
+                'performance',
+                'optimization',
+                'optimize',
+                'fps',
+                'frame rate',
+                'stuttering',
+                'stutter',
+                'memory usage',
+                'slow rendering'
+              ],
+
+              stability: [
+                'freeze',
+                'freezes',
+                'hang',
+                'hanging',
+                'unstable',
+                'stability'
+              ],
+
+              rendering: [
+                'rendering',
+                'renderer',
+                'shader',
+                'lighting',
+                'shadow',
+                'shadows',
+                'material',
+                'draw call',
+                'depth buffer',
+                'post processing'
+              ],
+
+              animation: [
+                'animation',
+                'animations',
+                'animated',
+                'bone',
+                'skeleton'
+              ],
+
+              vfx: [
+                'vfx',
+                'visual effect',
+                'visual effects',
+                'particle',
+                'particles',
+                'skill effect'
+              ],
+
+              audio: [
+                'sound effect',
+                'sound effects',
+                'music',
+                'audio',
+                'sfx'
+              ],
+
+              combat: [
+                'combat',
+                'attack animation',
+                'attack speed',
+                'damage',
+                'targeting',
+                'target system'
+              ],
+
+              character: [
+                'character',
+                'player character',
+                'player model',
+                'equipment',
+                'armor',
+                'weapon'
+              ],
+
+              monster: [
+                'monster',
+                'monsters',
+                'mob',
+                'boss'
+              ],
+
+              map: [
+                'map',
+                'mapeditor',
+                'map editor',
+                'terrain',
+                'noria',
+                'lorencia',
+                'devias',
+                'dungeon',
+                'tarkan',
+                'icarus'
+              ],
+
+              world: [
+                'world object',
+                'environment',
+                'safezone',
+                'safe zone',
+                'world interaction'
+              ],
+
+              networking: [
+                'network',
+                'networking',
+                'connection',
+                'disconnect',
+                'socket',
+                'latency',
+                'ping',
+                'connection lost'
+              ],
+
+              synchronization: [
+                'desync',
+                'desynchronization',
+                'out of sync',
+                'position mismatch',
+                'state mismatch'
+              ],
+
+              protocol: [
+                'packet',
+                'packets',
+                'opcode',
+                'protocol',
+                'serialization',
+                'deserialization'
+              ],
+
+              ui: [
+                'interface',
+                'menu',
+                'window',
+                'button',
+                'hud',
+                'minimap',
+                'inventory ui',
+                'loading screen'
+              ],
+
+              ux: [
+                'usability',
+                'user experience',
+                'confusing ui',
+                'hard to use',
+                'workflow'
+              ],
+
+              localization: [
+                'translation',
+                'translate',
+                'localization',
+                'locale',
+                'language'
+              ],
+
+              assets: [
+                'texture',
+                'textures',
+                'model',
+                'models',
+                'bmd',
+                'ozj',
+                'ozt',
+                'object file',
+                'asset pipeline'
+              ],
+
+              'client-version': [
+                'client version',
+                'version compatibility',
+                'version support',
+                '0.97',
+                '0.98',
+                '0.99',
+                'season 1',
+                'season 2',
+                'season 3',
+                'season 4',
+                'season 5',
+                'season 6'
+              ],
+
+              'server-compatibility': [
+                'server compatibility',
+                'server support',
+                'server connection',
+                'connect to server'
+              ],
+
+              'data-format': [
+                'data format',
+                'file format',
+                'parser',
+                'parsing',
+                'file loader',
+                'resource loader'
+              ],
+
+              'item-system': [
+                'item system',
+                'item data',
+                'equipment system',
+                'inventory system',
+                'item drop',
+                'item pickup'
+              ],
+
+              'skill-system': [
+                'skill system',
+                'skill data',
+                'spell system',
+                'skill loading'
+              ],
+
+              npc: [
+                'npc',
+                'npc interaction',
+                'npc dialogue'
+              ],
+
+              event: [
+                'blood castle',
+                'chaos castle',
+                'devil square',
+                'castle siege',
+                'invasion event'
+              ],
+
+              'cash-shop': [
+                'cash shop',
+                'cashshop'
+              ],
+
+              marketplace: [
+                'marketplace',
+                'market system',
+                'trading system',
+                'trade window',
+                'zen transaction'
+              ],
+
+              admin: [
+                'admin panel',
+                'gm panel',
+                'game master',
+                'gamemaster'
+              ],
+
+              testing: [
+                'testing',
+                'test server',
+                'test build',
+                'tester'
+              ],
+
+              regression: [
+                'regression',
+                'worked before',
+                'used to work',
+                'previously worked',
+                'broke after'
+              ],
+
+              documentation: [
+                'documentation',
+                'docs',
+                'readme'
+              ],
+
+              blocked: [
+                'blocked',
+                'blocking',
+                'cannot continue',
+                'waiting for dependency'
+              ]
+            };
+
+            /*
+             * Only use keyword detection for categories that were not
+             * explicitly selected through a prefix.
+             */
+
+            const explicitLabels = new Set(labelsToAdd);
+
+            for (const [label, keywords] of Object.entries(keywordRules)) {
+
+              if (explicitLabels.has(label)) {
+                continue;
+              }
+
+              const matched = keywords.some(keyword => {
+
+                // Word-boundary matching prevents things like
+                // "item" matching "itemization".
+                const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+                const regex = new RegExp(`(^|\\W)${escaped}(\\W|$)`, 'i');
+
+                return regex.test(text);
+              });
+
+              if (matched) {
+                labelsToAdd.add(label);
+              }
+            }
+
+            /*
+             * ------------------------------------------------------------
+             * 3. LIMIT GENERIC LABELS
+             * ------------------------------------------------------------
+             *
+             * Avoid an issue receiving a huge pile of unrelated labels.
+             *
+             * A maximum of 5 automatic labels is enough for most issues.
+             */
+
+            const finalLabels = [...labelsToAdd].slice(0, 5);
+
+            if (finalLabels.length === 0) {
+              console.log('No matching labels found.');
+              return;
+            }
+
+            /*
+             * ------------------------------------------------------------
+             * 4. DON'T DUPLICATE EXISTING LABELS
+             * ------------------------------------------------------------
+             */
+
+            const existingLabels = (item.labels || []).map(label => {
+              return typeof label === 'string'
+                ? label.toLowerCase()
+                : label.name.toLowerCase();
+            });
+
+            const newLabels = finalLabels.filter(label => {
+              return !existingLabels.includes(label.toLowerCase());
+            });
+
+            if (newLabels.length === 0) {
+              console.log('No new labels to add.');
+              return;
+            }
+
+            /*
+             * ------------------------------------------------------------
+             * 5. APPLY LABELS
+             * ------------------------------------------------------------
+             */
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: item.number,
+              labels: newLabels
+            });
+
+            console.log(`Added labels: ${newLabels.join(', ')}`);
