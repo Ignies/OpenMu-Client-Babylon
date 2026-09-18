@@ -1,4 +1,4 @@
-import json from './image_cache.json' assert { type: 'json' };
+import json from './image_cache.json' with { type: 'json' };
 import sharp from 'sharp';
 import { decodeTga } from '@lunapaint/tga-codec';
 import { PNG } from 'pngjs';

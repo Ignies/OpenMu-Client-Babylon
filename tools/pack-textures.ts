@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import json from './image_cache.json' assert { type: 'json' };
+import json from './image_cache.json' with { type: 'json' };
 
 function getAvailableFolders() {
   const folders = new Set<string>();
