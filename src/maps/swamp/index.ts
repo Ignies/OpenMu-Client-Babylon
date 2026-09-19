@@ -8,22 +8,26 @@ import {
 } from './spec';
 
 /**
- * Swamp of Calmness (World57 / Object57) - the map entry: identity and the per-world data the
- * renderer, the terrain loader, the weather and the sound tables read.
+ * Swamp of Calmness (`WD_56MAP_SWAMP_OF_QUIET`, `World57`/`Object57`) - the
+ * map entry: identity and the per-world data the renderer, the terrain
+ * loader, the weather and the sound tables read.
  *
- * No `create`: every runtime behaviour of this map is table data (spec.ts) or
- * lives in another system; the notes below say what is and is not built.
+ * The seven hidden vents and the brazier light are table data in `spec.ts`;
+ * `create` binds the one of them the tables cannot place, the type 72 marsh
+ * gas, whose plume spawns half a tile above its marker.
  *
- * Swamp of Calmness (`WD_56MAP_SWAMP_OF_QUIET`, `World57`/`Object57`).
+ * Not built: `RenderBaseSmoke` (GMSwampOfQuiet.cpp:38-52) - two full-screen
+ * scrolling `BITMAP_CHROME+2/+3` layers (`Effect/Map_Smoke1.jpg` and
+ * `Map_Smoke2.tga`, MapManager.cpp:638-641) tinted `(0.4, 0.4, 0.45)`, the
+ * same screen-space overlay Tarkan's sandstorm is. That is the map's
+ * defining look and it belongs to the post/mood lane; a `swamp` mood row
+ * with dense green-grey fog is the closest the grade can get (listed in the
+ * report).
  *
- * Every behaviour is table data in `spec.ts`: the seven hidden vents and the
- * brazier light.
- *
- * Not built: `RenderBaseSmoke` (GMSwampOfQuiet.cpp:37-49) - two full-screen
- * scrolling `BITMAP_CHROME+2/+3` layers tinted `(0.4, 0.4, 0.45)`, the same
- * screen-space overlay Tarkan's sandstorm is. That is the map's defining
- * look and it belongs to the post/mood lane; a `swamp` mood row with dense
- * green-grey fog is the closest the grade can get (listed in the report).
+ * The rest of GMSwampOfQuiet.cpp is monsters - the Sapi, the Shadow pieces,
+ * the Napins, Medusa and the Sapi Queen: spawn scales, attack effects, blur
+ * trails, bone sprites and the w57 sound set. All of it belongs to the
+ * character lane, none of it to a map entry.
  *
  * `PlayObjectSound` is commented out in the source; no world bed either.
  * `Music/SwampOfCalmness`.
@@ -61,4 +65,5 @@ export const swampLayer: MapLayer = {
   blendMeshes: SWAMP_BLEND_MESHES,
   effectOnly: SWAMP_EFFECT_ONLY_TYPES,
   emissions: SWAMP_EMISSIONS,
+  create: world => import('./create').then(m => m.createSwamp(world)),
 };

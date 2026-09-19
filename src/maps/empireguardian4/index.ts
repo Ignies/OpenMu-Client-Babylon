@@ -2,10 +2,10 @@ import { ENUM_WORLD } from '../../common/types';
 import type { MapLayer } from '../layer';
 import { FULL_TILES } from '../recipes';
 import {
-  EMPIRE_GUARDIAN_BLEND_MESHES,
+  EMPIRE_GUARDIAN_4_BLEND_MESHES,
   EMPIRE_GUARDIAN_4_EFFECT_ONLY_TYPES,
   EMPIRE_GUARDIAN_4_EMISSIONS,
-} from '../empireguardian/spec';
+} from './spec';
 
 /**
  * Fortress of Imperial Guardian, day 4 (World73 / Object73) - the map entry: identity and the per-world data the
@@ -15,14 +15,16 @@ import {
 
 // ---- 1. data ---------------------------------------------------------------
 
-// Day 4: the same setup as days 1-3 (`../empireguardian/create`), but its own
-// effect-only and emission tables - the login scene reuses this art set.
-const WORLDS: readonly ENUM_WORLD[] = [
-  ENUM_WORLD.WD_72EMPIREGUARDIAN4,
-];
+// Day 4 has its own everything: its own `World73` folder, its own tables (the
+// login scene draws with them too) and its own `create`. Days 1-3 are
+// `../empireguardian`.
+const WORLDS: readonly ENUM_WORLD[] = [ENUM_WORLD.WD_72EMPIREGUARDIAN4];
 
 // OpenMU's spawn gate (VersionSeasonSix/Gates.cs, the `isSpawnGate: true` row), centred.
 const SPAWN = { x: 93, y: 67 } as const;
+
+// Not `outdoor`: day 4 has no `CreateRain` and `PlayObjectSound` answers it
+// with the indoor bed, not the three weather ones (GMEmpireGuardian1.cpp:2962).
 
 // ---- 2. state + readers ----------------------------------------------------
 // None: the map's runtime state lives in the objects `create` binds.
@@ -34,8 +36,8 @@ export const empireguardian4Layer: MapLayer = {
   worlds: WORLDS,
   tiles: FULL_TILES,
   spawn: SPAWN,
-  blendMeshes: EMPIRE_GUARDIAN_BLEND_MESHES,
+  blendMeshes: EMPIRE_GUARDIAN_4_BLEND_MESHES,
   effectOnly: EMPIRE_GUARDIAN_4_EFFECT_ONLY_TYPES,
   emissions: EMPIRE_GUARDIAN_4_EMISSIONS,
-  create: world => import('../empireguardian/create').then(m => m.createEmpireGuardian(world)),
+  create: world => import('./create').then(m => m.createEmpireGuardian4(world)),
 };

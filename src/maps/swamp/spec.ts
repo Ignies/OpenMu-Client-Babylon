@@ -8,19 +8,20 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
  * EncTerrain57.obj places 4176 objects of 87 types (fourteen records outside
  * the block grid). Object57 ships 91 models; types 58, 59 and 64 (one record
  * each, by the shrine at 15/83 and 12/110) have no model. The C++ is
- * GMSwampOfQuiet.cpp: `CreateObject` (:51-63, empty - the 103 operate box is
- * commented out), `MoveObject` (:66-104), `RenderObjectVisual` (:127-199).
+ * GMSwampOfQuiet.cpp: `CreateObject` (:54-67, empty - the 103 operate box is
+ * commented out), `MoveObject` (:69-107), `RenderObjectVisual` (:130-202).
  */
 
 /** No `o->BlendMesh` writes in the Swamp code. */
 export const SWAMP_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
- * `MoveObject` :78-102 hides 57, 71, 72, 73, 74, 77, 78:
+ * `MoveObject` :81-104 hides 57, 71, 72, 73, 74, 77, 78:
  *  - **57** (×18): the brazier - see `SWAMP_LIGHTS`.
  *  - **71** (×8): `BITMAP_TRUE_FIRE` SubType 5 - fire without light.
- *  - **72** (×59): `BITMAP_SMOKE` SubType 49 from an offset - marsh gas.
- *  - **73** (×51): hidden, nothing drawn.
+ *  - **72** (×59): `BITMAP_SMOKE` SubType 49 lifted 50 - marsh gas, in
+ *    `marshGasObject.ts` because of that lift.
+ *  - **73** (×51): hidden, nothing drawn (:171-172 is a bare `break`).
  *  - **74** (×11): `BITMAP_SMOKE` SubType 21 at twice scale.
  *  - **77** (×87), **78** (×117): `BITMAP_CLOUD` SubType 20 - the fog
  *    banks that make the map.
@@ -30,24 +31,36 @@ export const SWAMP_EFFECT_ONLY_TYPES: readonly number[] = [
 ];
 
 /**
- * The vents. 77/78 are 204 emitters, and they do repeat - `rand_fps_check(6)`
- * with no `HiddenMesh` guard (:179-196) - so what keeps them off the screen
- * is the light the C++ gives them, `(0.04, 0.06, 0.03)` and
- * `(0.03, 0.03, 0.05)`. On an additive sprite that is a breath of colour over
- * the ground; the white they defaulted to before was 204 searchlights.
+ * The vents, `RenderObjectVisual` :149-199. 72 is not here: its plume spawns
+ * half a tile above the marker and that needs a class (`marshGasObject.ts`).
+ *
+ * 77/78 are 204 emitters, and they do repeat - `rand_fps_check(6)` with no
+ * `HiddenMesh` guard (:182-199) - so what keeps them off the screen is the
+ * light the C++ gives them, `(0.04, 0.06, 0.03)` and `(0.03, 0.03, 0.05)`.
+ * On an additive sprite that is a breath of colour over the ground; the white
+ * they defaulted to before was 204 searchlights.
+ *
+ * Both fog banks are `BITMAP_CLOUD` SubType **20**, and `cloud21` is SubType
+ * 21 (ZzzEffectParticle.cpp:3028-3062, :7833-7864): same sheet, same shape,
+ * a third of the life (100 ticks against 300), half the scatter (±100 against
+ * ±250) and twice the climb. The bank turns over faster than the original's
+ * and holds fewer cards at once; no kind in `effectParticles` is the slow
+ * one, and adding one is a shared-file change.
  */
 export const SWAMP_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
   71: [{ kinds: ['fire1', 'fire2'], every: 3, light: [1, 0.6, 0.3] }],
-  72: [{ kinds: ['smoke21'], every: 4 }],
-  74: [{ kinds: ['smoke21'], every: 4, scale: 2 }],
+  74: [{ kinds: ['smoke21'], every: 3, scale: 2 }],
   77: [{ kinds: ['cloud21'], every: 6, light: [0.04, 0.06, 0.03] }],
   78: [{ kinds: ['cloud21'], every: 6, light: [0.03, 0.03, 0.05] }],
 };
 
 /**
- * Type 57 (×18), `MoveObject` :78-83: `L = (rand%4+3)*0.1;
+ * Type 57 (×18), `MoveObject` :81-86: `L = (rand%4+3)*0.1;
  * AddTerrainLight(x, y, (L, 0.6L, 0.2L), 3)` + hidden; the render side
- * (:136-145) adds `TRUE_FIRE` SubType 5 and `SMOKE` SubType 21.
+ * (:139-148) adds `TRUE_FIRE` SubType 5 and `SMOKE` SubType 21, both at
+ * `rand_fps_check(3)`. The point light and the 2/6 split of that one rate
+ * are this port's, not the original's: a brazier reads as a flame with smoke
+ * drifting off it rather than as equal parts of both.
  */
 export const SWAMP_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {
   57: [

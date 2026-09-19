@@ -1,4 +1,5 @@
 import { MapTileObject } from '../../common/mapTileObject';
+import { ModelObject } from '../../common/modelObject';
 import type { Entity, World } from '../../ecs/world';
 
 /**
@@ -74,4 +75,32 @@ export class PlaySpeedObject extends MapTileObject {
     await super.init(world, entity);
     this.setAnimationSpeed(this.playSpeed());
   }
+}
+
+/**
+ * A type the `.obj` places but `Data/Object<n>` has no model for. The
+ * original registers models lazily (`AccessModel`, MapManager.cpp:1122) and
+ * simply never opens the absent file, so the record becomes an object that
+ * draws nothing. Here an unbound type would ask the dev server for a GLB it
+ * does not have and log a failed load per record, so the gaps are declared.
+ *
+ * Also the home for types at or above `MAX_WORLD_OBJECTS` (160, `_enum.h`):
+ * `LoadWorld` only ever fills slots 0-159 from the folder, so a higher id -
+ * type 247, which three worlds carry 75 stacked records of - can never have
+ * had a model on this path.
+ */
+export class AbsentModelObject extends ModelObject {
+  async init() {
+    this.CastsShadow = false;
+    this.Visible = false;
+    this.Ready = true;
+  }
+}
+
+/** Binds every `types` entry to `AbsentModelObject`. */
+export function bindAbsentModels(
+  tiles: (typeof ModelObject)[],
+  types: readonly number[]
+): void {
+  for (const type of types) tiles[type] = AbsentModelObject;
 }

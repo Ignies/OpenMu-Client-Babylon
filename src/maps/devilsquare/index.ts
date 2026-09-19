@@ -7,44 +7,47 @@ import {
 } from './spec';
 
 /**
- * Devil Square (World10 / Object10) - the map entry: identity and the per-world data the
- * renderer, the terrain loader, the weather and the sound tables read.
+ * Devil Square (World10 / Object10) - the map entry: identity and the
+ * per-world data the renderer, the terrain loader, the weather and the sound
+ * tables read.
  *
- * No `create`: every runtime behaviour of this map is table data (spec.ts) or
- * lives in another system; the notes below say what is and is not built.
+ * Devil Square is `WD_9DEVILSQUARE` (world 9) plus OpenMU's map 32 for
+ * squares 5-7. There is no `World33` anywhere: the original's `LoadWorld`
+ * folds 32 into 9 outright (MapManager.cpp:1178), so `assetWorldNum`
+ * (worldAssets.ts) draws map 32 from this same `World10`/`Object10` and every
+ * per-world registry row is spread over `DEVIL_SQUARE_WORLDS`.
  *
- * Devil Square (`WD_9DEVILSQUARE`, world 9 / `World10` + `Object10`).
+ * Every one of the 564 objects is the default `MapTileObject` - see
+ * `create.ts` for why - and the map's own runtime is one thing:
+ * `DevilSquareStorm`, the lightning `MoveObject` runs over the hero
+ * (ZzzObject.cpp:3630-3644). The waves, the timer and the rank table are the
+ * *event*, and live in `events/devilSquare.ts`.
  *
- * The whole map is the default `MapTileObject`: `CreateObject` and `MoveObject`
- * have no case for it, and its single `RenderObjectVisual` case - the rain
- * ripples on the 200 fence pillars - is documented and deliberately skipped in
- * `spec.ts`. What the square does at runtime is the *event*: the waves, the
- * timer and the rank table live in `events/devilSquare.ts`, and the rain in
- * the weather layer (the square is `outdoor` on its entry, per
- * `MoveLeaves`'s `MAX_LEAVES` budget for it).
+ * Weather: it always rains here, and not because of any packet.
+ * `CreateDevilSquareRain` (ZzzEffectFireLeave.cpp:120-127) checks the world
+ * and nothing else - the `weather` byte only gates its Crywolf half - and
+ * `MoveLeaves` hands this world the full `MAX_LEAVES` budget (:428) where
+ * every other map gets 80. `weather/rainState.ts` has the world in
+ * `ALWAYS_RAINING` for exactly that; `outdoor` here is what lets the rain
+ * slot run at all.
  *
- * Sound: no `PlayWorldAmbientSounds` case, but `StopInactiveAmbientSounds`
+ * Sound: no `PlayWorldAmbientSounds` case, but `MoveObject` `PlayBuffer`s
+ * `SOUND_RAIN01` every frame and `StopInactiveAmbientSounds`
  * (SceneManager.cpp:658) is the one place that spares the rain loop here, so
- * the `aRain` bed in `sound/ambientBeds.ts` is the original's, and there is no
- * music (`ManageBackgroundMusic` has no case; `devil_square_intro/outro.ogg`
- * are the event's stingers, not a map track).
+ * the `aRain` bed in `sound/ambientBeds.ts` is the original's. No music
+ * (`ManageBackgroundMusic` has no case; `devil_square_intro/outro.ogg` are
+ * the event's stingers, not a map track).
  *
- * The four arenas share one terrain: DS1 at (44-87, 72-110), DS2 (118-152,
- * 72-110), DS3 (44-87, 140-184), DS4 (118-152, 140-184) - the server picks the
- * square by ticket level and sends the spawn with the warp. Offline lands in
- * DS1 at (133, 86).
- *
- * Squares 5-7 are OpenMU's map 32 (`WD_32DEVILSQUARE_5_7`). There is no
- * `World33` anywhere - the original's `LoadWorld` folds 32 into 9
- * (MapManager.cpp:1177) - so `assetWorldNum` (worldAssets.ts) draws map 32
- * from this same `World10`/`Object10`, and every per-world registry row is
- * spread over `DEVIL_SQUARE_WORLDS`.
+ * The four arenas share one terrain: (44-87, 72-110), (118-152, 72-110),
+ * (44-87, 140-184) and (118-152, 140-184) - the server picks the square by
+ * ticket level and sends the spawn with the warp. Offline lands in the
+ * north-east one.
  */
 
 // ---- 1. data ---------------------------------------------------------------
 
 // Squares 1-4 (map 9) and 5-7 (OpenMU map 32): `LoadWorld` folds 32 into 9
-// (MapManager.cpp:1177) - one terrain, one object set, one entry.
+// (MapManager.cpp:1178) - one terrain, one object set, one entry.
 const WORLDS: readonly ENUM_WORLD[] = [
   ENUM_WORLD.WD_9DEVILSQUARE,
   ENUM_WORLD.WD_32DEVILSQUARE_5_7,
@@ -69,16 +72,16 @@ const TILES: readonly string[] = [
   'TileRock04',
 ];
 
-// Devil Square 1 arena floor (the four squares share World10; DS1 is the
-// north-east one at x 118-152, y 72-110).
+// The north-east arena floor (x 118-152, y 72-110); which Devil Square level
+// that is depends on the ticket the server took.
 const SPAWN = { x: 133, y: 86 } as const;
 
-// `MoveLeaves` gives the square the full `MAX_LEAVES` rain budget
-// (ZzzEffectFireLeave.cpp:422): it rains here whenever the packet says so.
+// There is a sky and rain falls out of it (`MoveLeaves`,
+// ZzzEffectFireLeave.cpp:428).
 const OUTDOOR = true;
 
 // ---- 2. state + readers ----------------------------------------------------
-// None: the map's runtime state lives in the objects `create` binds.
+// None: the map's runtime state is the storm's, and it owns it.
 
 // ---- 3. the layer ----------------------------------------------------------
 
@@ -92,4 +95,5 @@ export const devilsquareLayer: MapLayer = {
   blendMeshes: DEVIL_SQUARE_BLEND_MESHES,
   effectOnly: DEVIL_SQUARE_EFFECT_ONLY_TYPES,
   emissions: DEVIL_SQUARE_EMISSIONS,
+  create: world => import('./create').then(m => m.createDevilSquare(world)),
 };

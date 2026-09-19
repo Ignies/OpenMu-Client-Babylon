@@ -38,7 +38,13 @@ import { DOPPELGANGER4_LIGHTS } from '../maps/doppelganger4/spec';
 import { EMPIRE_GUARDIAN_LIGHTS } from '../maps/empireguardian/spec';
 import { LOREN_MARKET_LIGHTS } from '../maps/lorenmarket/spec';
 import { KARUTAN_LIGHTS } from '../maps/karutan1/spec';
-import { KALIMA_WORLDS, onWorlds } from '../common/worldAssets';
+import { CURSED_TEMPLE_LIGHTS } from '../maps/cursedtemple/spec';
+import { EMPIRE_GUARDIAN_4_LIGHTS } from '../maps/empireguardian4/spec';
+import {
+  CURSED_TEMPLE_WORLDS,
+  KALIMA_WORLDS,
+  onWorlds,
+} from '../common/worldAssets';
 import type { LightingLayer } from './layer';
 import {
   LightSource,
@@ -89,45 +95,6 @@ export type LightEmitter = {
     readonly falloff?: number;
     readonly floorGain?: number;
   };
-};
-
-const EMPIRE_GUARDIAN_4_LIGHTS: Partial<
-  Record<number, readonly LightEmitter[]>
-> = {
-  79: [
-    {
-      // Breathing, like the wall torch below it. A flare card that holds one
-      // value while the plume moves is what makes a brazier read as a jet
-      // rather than as something burning.
-      sprite: {
-        scale: 2,
-        color: [1, 0.2, 0],
-        pulse: { speed: 0.039, amount: 0.2, base: 0.6 },
-      },
-      pointRange: 6,
-      wander: 0.08,
-      terrain: {
-        range: 3,
-        color: [1, 0.6, 0.2],
-        flicker: { min: 0.3, max: 0.6, steps: 4 },
-      },
-    },
-  ],
-
-  80: [
-    {
-      sprite: {
-        scale: 8,
-        color: [0.1, 0.1, 0.5],
-        pulse: { speed: 0.04, amount: 0.3, base: 0.4 },
-      },
-      pointRange: 4,
-      terrain: {
-        range: 2,
-        color: [0.1, 0.1, 0.5],
-      },
-    },
-  ],
 };
 
 function createFire(
@@ -361,6 +328,7 @@ const LIGHTS_BY_WORLD: Partial<
   [ENUM_WORLD.WD_40AREA_FOR_GM]: KANTURU1_LIGHTS,
   [ENUM_WORLD.WD_41CHANGEUP3RD_1ST]: BALGAS_LIGHTS,
   [ENUM_WORLD.WD_42CHANGEUP3RD_2ND]: BALGAS_LIGHTS,
+  ...onWorlds(CURSED_TEMPLE_WORLDS, CURSED_TEMPLE_LIGHTS),
   [ENUM_WORLD.WD_51ELBELAND]: ELBELAND_LIGHTS,
   [ENUM_WORLD.WD_56MAP_SWAMP_OF_QUIET]: SWAMP_LIGHTS,
   [ENUM_WORLD.WD_63PK_FIELD]: VULCANUS_LIGHTS,

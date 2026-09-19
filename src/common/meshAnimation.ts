@@ -4,6 +4,10 @@ import {
   EMPIRE_GUARDIAN_WORLDS,
   onWorlds,
 } from './worldAssets';
+import { VULCANUS_MESH_ANIMATIONS } from '../maps/vulcanus/spec';
+import { KARUTAN_MESH_ANIMATION } from '../maps/karutan1/spec';
+import { DOPPELGANGER1_MESH_ANIMATION } from '../maps/doppelganger1/spec';
+import { DOPPELGANGER2_MESH_ANIMATION } from '../maps/doppelganger2/spec';
 
 /**
  * The per-frame mesh writes the original does from `MoveObject`:
@@ -191,6 +195,24 @@ const ELBELAND: Partial<Record<number, MeshAnimation>> = {
 /** Raklion + hatchery (GM_Raklion.cpp:250-254) and Doppelganger 1 (:176-180): the ice crystal. */
 const RAKLION: Partial<Record<number, MeshAnimation>> = {
   22: { mesh: 0, kind: 'blend', light: t => Math.sin(t * 0.001) + 1 },
+  // The hatchery's `icebot01/02/03_R` floor lamps: `RenderBody(RENDER_TEXTURE,
+  // Alpha, 0, fLumi, ...)` (GM_Raklion.cpp:1328-1334) forces mesh 0 additive
+  // on a 0.3...1.3 pulse. All three are single-mesh; World58 places none.
+  68: {
+    mesh: 0,
+    kind: 'blend',
+    light: t => (Math.sin(t * 0.001) + 1) * 0.5 + 0.3,
+  },
+  69: {
+    mesh: 0,
+    kind: 'blend',
+    light: t => (Math.sin(t * 0.001) + 1) * 0.5 + 0.3,
+  },
+  71: {
+    mesh: 0,
+    kind: 'blend',
+    light: t => (Math.sin(t * 0.001) + 1) * 0.5 + 0.3,
+  },
 };
 
 /** Doppelganger 3 (GMDoppelGanger3.cpp:75-93): the Atlans sines verbatim. */
@@ -247,10 +269,14 @@ const BY_WORLD: Partial<
   [ENUM_WORLD.WD_51ELBELAND]: ELBELAND,
   [ENUM_WORLD.WD_57ICECITY]: RAKLION,
   [ENUM_WORLD.WD_58ICECITY_BOSS]: RAKLION,
-  [ENUM_WORLD.WD_65DOPPLEGANGER1]: RAKLION,
+  [ENUM_WORLD.WD_63PK_FIELD]: VULCANUS_MESH_ANIMATIONS,
+  [ENUM_WORLD.WD_65DOPPLEGANGER1]: DOPPELGANGER1_MESH_ANIMATION,
+  [ENUM_WORLD.WD_66DOPPLEGANGER2]: DOPPELGANGER2_MESH_ANIMATION,
   [ENUM_WORLD.WD_67DOPPLEGANGER3]: DOPPELGANGER3,
   [ENUM_WORLD.WD_68DOPPLEGANGER4]: KANTURU1,
   ...onWorlds(EMPIRE_GUARDIAN_WORLDS, EMPIRE_GUARDIAN),
+  [ENUM_WORLD.WD_80KARUTAN1]: KARUTAN_MESH_ANIMATION,
+  [ENUM_WORLD.WD_81KARUTAN2]: KARUTAN_MESH_ANIMATION,
 };
 
 export function meshAnimationFor(

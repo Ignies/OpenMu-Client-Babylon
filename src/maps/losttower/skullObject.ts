@@ -68,6 +68,11 @@ const SPIN_AT_REST = 1e-3;
  * running at its design frame rate, and identical to itself at any of ours.
  */
 export class LostTowerSkullObject extends MapTileObject {
+  // Load-bearing: `MapTileObject` is batchable by default and the prop batches
+  // strip `modelFactory` off the entity, so `Update` would never run and the
+  // kick would be dead. Types 38/39 match no `tableExclusion` rule.
+  static Batchable = false;
+
   #entity: Entity | null = null;
 
   /** `o->Direction` x/y in tiles per tick (z is always 0 here). */

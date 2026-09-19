@@ -8,22 +8,18 @@ import {
 } from '../raklion/spec';
 
 /**
- * Raklion's hatchery (World59 / Object59) - the map entry: identity and the per-world data the
- * renderer, the terrain loader, the weather and the sound tables read.
- *
- * No `create`: every runtime behaviour of this map is table data (spec.ts) or
- * lives in another system; the notes below say what is and is not built.
+ * Raklion's hatchery (World59 / Object59) - the map entry: identity and the
+ * per-world data the renderer, the terrain loader, the weather and the sound
+ * tables read.
  *
  * Raklion's hatchery (`WD_58ICECITY_BOSS`, `World59`/`Object59`) - Selupan's
- * cave, 162 objects.
+ * cave, 162 objects. It runs the same `CGM_Raklion` as Raklion, so the
+ * tables come from `maps/raklion/spec.ts` and the object classes from
+ * `maps/raklion`; `create.ts` binds them and lists what is left out.
  *
- * Runs the same `CGM_Raklion::MoveObject` as Raklion; the tables are in
- * `maps/raklion/spec.ts` and registered for this world from there.
- *
- * Not built: the Selupan fight (`m_byState`, the boss lowered from
- * `Position[2] = 1000` on READY, the egg clusters, `MoveEffect`) - all
- * server-driven; `Music/Raklion_Hatchery` is the idle track `PlayBGM`
- * (:2872-2890) starts with. `aWind` is the bed (SceneManager.cpp:620-622).
+ * Sound: `aWind` is the bed (SceneManager.cpp:620-622);
+ * `Music/Raklion_Hatchery` is the idle track `PlayBGM` (:2927-2946) plays
+ * until the boss state machine swaps it.
  */
 
 // ---- 1. data ---------------------------------------------------------------
@@ -58,4 +54,5 @@ export const raklionbossLayer: MapLayer = {
   blendMeshes: RAKLION_BLEND_MESHES,
   effectOnly: RAKLION_EFFECT_ONLY_TYPES,
   emissions: RAKLION_EMISSIONS,
+  create: world => import('./create').then(m => m.createRaklionBoss(world)),
 };
