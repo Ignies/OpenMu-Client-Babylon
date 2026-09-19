@@ -2,8 +2,9 @@ import { noteSource, type DecodedBank } from './bank';
 
 /**
  * The voices. One `AudioBufferSourceNode` per sounding note, through its own
- * envelope gain, into the performer's gain (distance) and on to the bus the
- * layer owns. Pure Web Audio over a context and an output node handed in.
+ * envelope gain, into the performer's chain - a limiter for their chords,
+ * then their gain (distance) and pan (side) - and on to the bus the layer
+ * owns. Pure Web Audio over a context and an output node handed in.
  *
  * A wind (`manifest.sustained`) plays its render until note-off, then a short
  * release; a note held past the render simply ends - the pre-rendered notes
@@ -12,8 +13,11 @@ import { noteSource, type DecodedBank } from './bank';
  * per performer and overall; the oldest voice gives way.
  *
  * The makeup gain that lifts the quiet renders lives in each voice's peak,
- * ahead of the performer's distance gain: a far performer is a quiet one,
- * and the limiter after the bus only meets the loud chords played nearby.
+ * and the limiter that catches a loud chord is the performer's own, AHEAD of
+ * their distance gain. With one limiter after the bus instead, a nearby
+ * performer sat above its threshold and was held at the ceiling until far
+ * enough away to fall under it - the first fifteen tiles of a walk away
+ * changed nothing.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -32,6 +36,19 @@ const PEAK = 0.8;
 
 /** Velocity curve: MIDI 127 is loud, 64 is a little under half. */
 const VELOCITY_CURVE = 1.6;
+
+/** The performer's limiter: a chord's peaks are held here, a single note passes. */
+const LIMIT_THRESHOLD_DB = -3;
+const LIMIT_RATIO = 20;
+const LIMIT_ATTACK = 0.003;
+const LIMIT_RELEASE = 0.12;
+
+/**
+ * The equal-power pan puts a centred mono source 3 dB under the stereo
+ * render it came from; this puts it back, so the level in front of a
+ * performer is what it was.
+ */
+const PAN_MAKEUP = Math.SQRT2;
 
 // ---- 2. the envelope -------------------------------------------------------
 
@@ -62,11 +79,17 @@ type Voice = Envelope & {
   ended: boolean;
 };
 
+/** Where a performer is heard from: their level and stereo position. */
+export type PerformerSpace = { gain: number; pan: number };
+
+/** A performer's chain: voices -> limiter -> gain -> pan -> out. */
+type PerformerChain = { limiter: DynamicsCompressorNode; gain: GainNode; pan: StereoPannerNode };
+
 // ---- 3. the sampler --------------------------------------------------------
 
 export class Sampler {
   private readonly voices = new Set<Voice>();
-  private readonly performers = new Map<PerformerKey, GainNode>();
+  private readonly performers = new Map<PerformerKey, PerformerChain>();
 
   /** `makeup` multiplies every voice's peak: the renders' lift to a normal loudness. */
   constructor(
@@ -79,25 +102,44 @@ export class Sampler {
     return this.voices.size;
   }
 
-  /** The performer's gain node, made on first use at `initialGain`. */
-  performerNode(key: PerformerKey, initialGain = 1): GainNode {
-    let node = this.performers.get(key);
-    if (!node) {
-      node = this.ctx.createGain();
-      node.gain.value = initialGain;
-      node.connect(this.out);
-      this.performers.set(key, node);
+  /** The node a performer's voices play into, made on first use at `space`. */
+  performerNode(key: PerformerKey, space: PerformerSpace = { gain: 1, pan: 0 }): AudioNode {
+    let chain = this.performers.get(key);
+    if (!chain) {
+      const limiter = this.ctx.createDynamicsCompressor();
+      limiter.threshold.value = LIMIT_THRESHOLD_DB;
+      limiter.ratio.value = LIMIT_RATIO;
+      limiter.knee.value = 0;
+      limiter.attack.value = LIMIT_ATTACK;
+      limiter.release.value = LIMIT_RELEASE;
+      const gain = this.ctx.createGain();
+      gain.gain.value = space.gain * PAN_MAKEUP;
+      const pan = this.ctx.createStereoPanner();
+      pan.pan.value = space.pan;
+      // The renders are stereo, and a stereo input to the panner is not
+      // equal-power: it adds one side into the other, so a performer off to
+      // a side came out twice as loud as one in front. Fold to mono first.
+      pan.channelCount = 1;
+      pan.channelCountMode = 'explicit';
+      limiter.connect(gain);
+      gain.connect(pan);
+      pan.connect(this.out);
+      chain = { limiter, gain, pan };
+      this.performers.set(key, chain);
     }
-    return node;
+    return chain.limiter;
   }
 
-  setPerformerGain(key: PerformerKey, gain: number, ramp = 0.05): void {
-    const node = this.performers.get(key);
-    if (!node) return;
-    node.gain.setTargetAtTime(gain, this.ctx.currentTime, ramp);
+  /** Move a performer in the ear over `ramp` seconds. */
+  setPerformerSpace(key: PerformerKey, space: PerformerSpace, ramp = 0.05): void {
+    const chain = this.performers.get(key);
+    if (!chain) return;
+    const now = this.ctx.currentTime;
+    chain.gain.gain.setTargetAtTime(space.gain * PAN_MAKEUP, now, ramp);
+    chain.pan.pan.setTargetAtTime(space.pan, now, ramp);
   }
 
-  /** `gain` is the performer's level should this be their first note. */
+  /** `space` is where the performer is heard from should this be their first note. */
   noteOn(
     key: PerformerKey,
     bank: DecodedBank,
@@ -105,7 +147,7 @@ export class Sampler {
     note: number,
     velocity: number,
     when: number,
-    gain = 1
+    space?: PerformerSpace
   ): void {
     const source = noteSource(bank, note);
     if (!source) return;
@@ -118,7 +160,7 @@ export class Sampler {
 
     const { manifest } = bank;
     const env = this.ctx.createGain();
-    env.connect(this.performerNode(key, gain));
+    env.connect(this.performerNode(key, space));
 
     const src = this.ctx.createBufferSource();
     src.buffer = source.buffer;
@@ -169,9 +211,11 @@ export class Sampler {
   /** The performer is gone: silence and drop its node. */
   dropPerformer(key: PerformerKey): void {
     this.allNotesOff(key);
-    const node = this.performers.get(key);
-    if (node) {
-      node.disconnect();
+    const chain = this.performers.get(key);
+    if (chain) {
+      chain.limiter.disconnect();
+      chain.gain.disconnect();
+      chain.pan.disconnect();
       this.performers.delete(key);
     }
   }

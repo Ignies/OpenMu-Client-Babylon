@@ -1,23 +1,33 @@
 import { GameOptions } from '../../common/gameOptions';
 import type { InstrumentId } from '../../common/instruments';
 import type { ENUM_WORLD } from '../../common/types';
-import { Engine } from '../../libs/babylon/exports';
+import { Engine, Vector3 } from '../../libs/babylon/exports';
 import { SoundsManager } from '../../libs/soundsManager';
 import { busGain, masterGain } from '../buses';
 import type { SoundLayer } from '../layer';
-import { distanceGain, listenerHero } from '../listener';
+import { listenerHero, listenerWorld } from '../listener';
 import { loadBank, type DecodedBank } from './bank';
 import { Sampler, type PerformerKey } from './sampler';
+import { instrumentGain, instrumentPan } from './space';
 
 /**
  * Instruments played by players: the band system's sound.
  *
  * The first Web Audio graph in the client, on the context Babylon's engine
- * already owns: `voice (with the makeup) -> performer gain (distance) ->
- * instruments bus -> limiter -> Engine.audioEngine.masterGain`, so the
- * master slider and the background mute reach it like everything else. The two Babylon tracks stay untouched
+ * already owns: `voice (with the makeup) -> performer limiter -> performer
+ * gain (distance) -> performer pan (side) -> instruments bus -> limiter ->
+ * Engine.audioEngine.masterGain`, so the master slider and the background
+ * mute reach it like everything else. The two Babylon tracks stay untouched
  * - their gain nodes are private - and the bus folds master x effects x
  * instruments itself.
+ *
+ * Each performer is heard from where they stand (`space.ts`): quieter by
+ * the inverse law as the hero walks away, and panned to the side of the
+ * screen they are on. The side is the camera's, not the hero's facing - the
+ * player looks at the screen, and Babylon keeps the Web Audio listener at
+ * the camera for its own sounds, so a `PannerNode` would sit the ear a
+ * camera-distance above the hero; a stereo pan from the camera's right vector
+ * is the same picture without touching the shared listener.
  *
  * Driven by: `common/band` (the sequencer for the hero, one receiver per
  * remote performer) through the commands below. Positions come from
@@ -29,18 +39,27 @@ import { Sampler, type PerformerKey } from './sampler';
 /** Seconds the bus takes to follow a slider or the background mute. */
 const BUS_RAMP = 0.1;
 
-/** Seconds a performer's gain takes to follow their distance. */
+/** Seconds a performer's gain and pan take to follow where they stand. */
 const DISTANCE_RAMP = 0.05;
 
 /**
  * Makeup gain to lift the very quiet MusyngKite renders (peak ~0.07) up to a
- * normal loudness. Folded into each voice's peak (`Sampler`), ahead of the
- * performer's distance gain, and capped by the limiter on the bus: a loud
- * chord nearby cannot clip, and a far performer stays quiet. A makeup on the
- * bus instead pushed every performer back up to the limiter's ceiling, near
- * or far, which is why distance did nothing.
+ * normal loudness. Folded into each voice's peak (`Sampler`), and capped by
+ * the performer's own limiter before their distance gain: a loud chord nearby
+ * cannot clip, and a far performer stays quiet.
  */
 const MAKEUP_GAIN = 20;
+
+/**
+ * The bus limiter only guards the sum: a band doubles its master, so three
+ * members nearby play the same note three times over. One performer at full
+ * sits just under this, so a walk away from them is heard from the first
+ * tile past the full radius.
+ */
+const BUS_LIMIT_DB = -1;
+
+/** Level or pan change that is worth a ramp. */
+const SPACE_EPSILON = 0.01;
 
 /** A performer quieter than this (by distance) does not duck the music. */
 const DUCK_MIN_GAIN = 0.05;
@@ -50,7 +69,11 @@ const DUCK_HOLD_SEC = 1.2;
 
 // ---- 2. state + readers ----------------------------------------------------
 
-type PerformerState = { x: number; z: number; local: boolean; gain: number };
+/** `placed` once the chain has been made at a real gain and pan. */
+type PerformerState = { x: number; z: number; local: boolean; placed: boolean; gain: number; pan: number };
+
+/** The camera's right on the ground, read once a frame for every performer's pan. */
+const camRight = new Vector3(1, 0, 0);
 
 let ctx: AudioContext | null = null;
 let sampler: Sampler | null = null;
@@ -95,10 +118,10 @@ function context(): AudioContext | null {
   bus.gain.value = 0;
   // The MusyngKite renders are very quiet - they peak near 0.07 (about -23 dB),
   // so even at full slider a note was drowned by ambient sounds. The sampler
-  // lifts each voice by the makeup gain; the limiter here catches the peaks
-  // of a loud chord so the boost never clips.
+  // lifts each voice by the makeup gain and each performer limits their own
+  // chords; the limiter here only catches several performers adding up.
   const limiter = c.createDynamicsCompressor();
-  limiter.threshold.value = -3;
+  limiter.threshold.value = BUS_LIMIT_DB;
   limiter.ratio.value = 20;
   limiter.knee.value = 0;
   limiter.attack.value = 0.003;
@@ -154,7 +177,7 @@ export function ensureBank(id: InstrumentId): Promise<boolean> {
 function performer(key: PerformerKey): PerformerState {
   let p = performers.get(key);
   if (!p) {
-    p = { x: 0, z: 0, local: false, gain: -1 };
+    p = { x: 0, z: 0, local: false, placed: false, gain: 1, pan: 0 };
     performers.set(key, p);
   }
   return p;
@@ -199,10 +222,13 @@ export function noteOn(
   if (busLevel >= 0 && busLevel <= 0.001) {
     report(key, 'bus', 'notes play into a silent bus: a volume slider at zero, or the page in the background');
   }
-  // The performer's node is made on their first note, at the level their
-  // distance gives right now rather than full until the next frame.
-  if (p.gain < 0) p.gain = gainFor(p);
-  sampler.noteOn(key, bank, channel, note, velocity, when, p.gain);
+  // The performer's chain is made on their first note, where their distance
+  // and side put them right now rather than full and centred until the next frame.
+  if (!p.placed) {
+    readCamera();
+    place(p, listenerHero());
+  }
+  sampler.noteOn(key, bank, channel, note, velocity, when, p);
 }
 
 export function noteOff(key: PerformerKey, channel: number, note: number, when: number): void {
@@ -220,12 +246,40 @@ export function dropPerformer(key: PerformerKey): void {
   forget(key);
 }
 
-/** A performer's level from where they stand; the hero is always full. */
-function gainFor(p: PerformerState, hero = listenerHero()): number {
-  if (p.local || !hero) return 1;
-  const dx = p.x - hero.transform.pos.x;
-  const dz = p.z - hero.transform.pos.z;
-  return distanceGain(Math.sqrt(dx * dx + dz * dz));
+/** The camera's right on the ground plane; screen right, for the pan. */
+function readCamera(): void {
+  const cam = listenerWorld()?.scene.activeCamera;
+  if (!cam) {
+    camRight.set(1, 0, 0);
+    return;
+  }
+  cam.getDirectionToRef(Vector3.RightReadOnly, camRight);
+  camRight.y = 0;
+  const len = camRight.length();
+  if (len > 0.001) camRight.scaleInPlace(1 / len);
+  else camRight.set(1, 0, 0);
+}
+
+/**
+ * Where a performer is heard from, written into their state: level by
+ * distance to the hero, pan by their side of the screen. The hero's own
+ * instrument, and a hero-as-member voice, are full and centred.
+ * Returns whether either moved enough to be worth a ramp.
+ */
+function place(p: PerformerState, hero: ReturnType<typeof listenerHero>): boolean {
+  let gain = 1;
+  let pan = 0;
+  if (!p.local && hero) {
+    const dx = p.x - hero.transform.pos.x;
+    const dz = p.z - hero.transform.pos.z;
+    gain = instrumentGain(Math.sqrt(dx * dx + dz * dz));
+    pan = instrumentPan(dx * camRight.x + dz * camRight.z);
+  }
+  const moved = !p.placed || Math.abs(gain - p.gain) > SPACE_EPSILON || Math.abs(pan - p.pan) > SPACE_EPSILON;
+  p.gain = gain;
+  p.pan = pan;
+  p.placed = true;
+  return moved;
 }
 
 /** Voices sounding right now (debug). */
@@ -247,14 +301,11 @@ function update(_map: ENUM_WORLD, _dt: number): void {
   }
 
   const hero = listenerHero();
+  readCamera();
   let audible = 0;
   for (const [key, p] of performers) {
-    const g = gainFor(p, hero);
-    if (Math.abs(g - p.gain) > 0.01) {
-      p.gain = g;
-      sampler.setPerformerGain(key, g, DISTANCE_RAMP);
-    }
-    audible = Math.max(audible, g);
+    if (place(p, hero)) sampler.setPerformerSpace(key, p, DISTANCE_RAMP);
+    audible = Math.max(audible, p.gain);
   }
 
   // Duck the background music while an instrument is heard nearby, and let it
