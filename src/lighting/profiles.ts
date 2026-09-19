@@ -208,9 +208,17 @@ const ENCLOSED_PROFILE: LookProfile = {
   sun: INTERIOR_SUN,
 };
 
+/**
+ * The pre-game backdrops: the enclosed look with a key of their own. The
+ * interior sun's 0.15 share left the hall's cascades at a cut the eye does
+ * not register; a low key from across the carpet lays the pedestals, the
+ * arches and the chandeliers out on the floor, which is what a tour shot at
+ * head height looks at.
+ */
 const PREGAME_PROFILE: LookProfile = {
   ...ENCLOSED_PROFILE,
   ev: 1.0,
+  sun: sun(60, 40, 0.45),
 };
 
 /** An open map that takes the default level and haze and only names its sky. */
