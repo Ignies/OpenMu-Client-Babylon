@@ -228,6 +228,30 @@ describe('applyPackToTexture', () => {
     expect(cutout.hasAlpha).toBe(true);
   });
 
+  it('swaps a texture too small for the upscaler, if a pack carries one', async () => {
+    // The build skips sources under 16px because the model invents detail
+    // rather than recovering it at that size. That is a decision the
+    // generator makes, not a rule here: a pack with a hand-drawn replacement
+    // for a 8x8 card must still be honoured, and nothing in the lookup may
+    // start filtering by size.
+    serve({
+      'packs/index.json': INDEX,
+      'packs/hd-512/pack.json': {
+        textures: { 'Object1/doorknob|8x8': 'Object1/doorknob.ozt.webp' },
+      },
+    });
+    const m = await fresh();
+    await m.loadPackIndex();
+    await m.setActivePack('hd-512');
+
+    const tiny = fakeTexture('Object1/doorknob', 8, 8, true);
+    await m.applyPackToTexture(tiny as never);
+
+    expect(tiny.loads).toHaveLength(1);
+    expect(tiny.loads[0].url).toBe('./packs/hd-512/Object1/doorknob.ozt.webp');
+    expect(tiny.hasAlpha).toBe(true);
+  });
+
   it('survives a pack whose manifest will not load', async () => {
     serve({ 'packs/index.json': INDEX });
     const m = await fresh();
