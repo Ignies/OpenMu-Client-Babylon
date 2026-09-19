@@ -190,6 +190,7 @@ export const italianLayer: LanguageLayer = {
     'options.advancedEffects': 'Effetti avanzati',
     'options.renderDistance': 'Distanza di rendering',
     'options.propBatching': 'Raggruppamento scenario',
+    'options.monsterEffects': 'Effetti dei mostri',
     'options.lightingQuality': 'Illuminazione',
     'options.materialQuality': 'Materiali',
     'options.materialDetail': 'Dettaglio',

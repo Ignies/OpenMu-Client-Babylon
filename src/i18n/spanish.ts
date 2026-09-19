@@ -200,6 +200,7 @@ export const spanishLayer: LanguageLayer = {
     'options.advancedEffects': 'Efectos avanzados',
     'options.renderDistance': 'Distancia de renderizado',
     'options.propBatching': 'Agrupar escenario',
+    'options.monsterEffects': 'Efectos de monstruos',
     'options.lightingQuality': 'Iluminación',
     'options.materialQuality': 'Materiales',
     'options.materialDetail': 'Detalle',

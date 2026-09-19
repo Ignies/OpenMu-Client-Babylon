@@ -190,6 +190,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.advancedEffects': 'Разширени ефекти',
     'options.renderDistance': 'Далечина на рендиране',
     'options.propBatching': 'Групиране на декора',
+    'options.monsterEffects': 'Ефекти на чудовищата',
     'options.lightingQuality': 'Осветление',
     'options.materialQuality': 'Материали',
     'options.materialDetail': 'Детайл',

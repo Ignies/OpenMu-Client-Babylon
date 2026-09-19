@@ -190,6 +190,7 @@ export const chineseLayer: LanguageLayer = {
     'options.advancedEffects': '高级特效',
     'options.renderDistance': '渲染距离',
     'options.propBatching': '场景合批',
+    'options.monsterEffects': '怪物特效',
     'options.lightingQuality': '光照',
     'options.materialQuality': '材质',
     'options.materialDetail': '细节',

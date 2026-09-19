@@ -189,6 +189,7 @@ export const russianLayer: LanguageLayer = {
     'options.advancedEffects': 'Расширенные эффекты',
     'options.renderDistance': 'Дальность прорисовки',
     'options.propBatching': 'Группировка декораций',
+    'options.monsterEffects': 'Эффекты монстров',
     'options.lightingQuality': 'Освещение',
     'options.materialQuality': 'Материалы',
     'options.materialDetail': 'Детализация',

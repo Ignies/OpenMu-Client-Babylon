@@ -770,3 +770,75 @@ export const SHINY_GLINT: ParticleRecipe = {
   endScale: 0.6,
   capacity: 64,
 };
+
+// ---- monster body effects (effects/monsterVisuals.ts) --------------------------
+
+/**
+ * `BITMAP_SMOKE` SubType 0 (smoke01.jpg, additive) as a monster breathes or
+ * snorts it (ZzzEffectParticle.cpp:1147 init, :5273 move): LT 16 ticks,
+ * Scale 0.48-0.80 of the 64 px sheet (31-51 cm), `Light = LT/8` so full for
+ * the first half then to black, `Gravity += 0.2` cm/tick² upward from rest,
+ * Scale +0.05 a tick (x2.25 by death), a random spin. Same smoke01 additive
+ * rule as SMOKE: the JPEG has no alpha, so it is light, not matter, and its
+ * colour is the grey the sheet reads as.
+ */
+export const BODY_SMOKE: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.32, 0.3, 0.28],
+  colourEnd: [0.1, 0.1, 0.1],
+  size: 0.41,
+  sizeJitter: 0.25,
+  life: 0.64,
+  lifeJitter: 0,
+  box: [0.02, 0, 0.02],
+  dir1: [0, 1, 0],
+  dir2: [0, 1, 0],
+  power: 0,
+  powerJitter: 0,
+  gravity: 1.25,
+  endScale: 2.25,
+  spin: 1,
+  blend: 'add',
+  capacity: 256,
+};
+
+/**
+ * `BITMAP_SMOKE + 1` SubType 1 (:1690) - the puff `MonsterDieSandSmoke` and
+ * the golden bosses' `Appear` throw 20 of a tick: SAND_SMOKE with LT 40, no
+ * drift, ±8 cm in every axis, and the same +0.08 Scale a tick, so x7.7 by
+ * death. The terrain re-pin becomes a climb matching the swell, as in
+ * SAND_SMOKE.
+ */
+export const SAND_SMOKE_BURST: ParticleRecipe = {
+  ...SAND_SMOKE,
+  life: 1.6,
+  box: [0.08, 0.08, 0.08],
+  power: 0.74,
+  endScale: 7.7,
+  capacity: 512,
+};
+
+/**
+ * `BITMAP_FLAME` SubType 1 (:610 init, :4786 move) - the small flame a Beam
+ * Knight carries on two bones and Death Beam Knight on every wing bone: LT
+ * 15 ticks, Scale +0.32-0.64 on the call's own, drifting 0.6-1 cm a tick,
+ * `Light -= 0.05` a tick, re-rolled rotation every tick (the flicker). The
+ * card is Flame01 at the row's `scale`; the rotation re-roll is a fast spin.
+ */
+export const FLAME_LICK: ParticleRecipe = {
+  texture: TEX.flame,
+  colour: RGBS.fire,
+  colourEnd: RGBS.ember,
+  size: 0.55,
+  sizeJitter: 0.25,
+  life: 0.6,
+  lifeJitter: 0,
+  box: [0.02, 0.02, 0.02],
+  dir1: [0, 1, 0],
+  dir2: [0, 1, 0],
+  power: 0.2,
+  powerJitter: 0.5,
+  gravity: 0,
+  spin: 20,
+  capacity: 512,
+};
