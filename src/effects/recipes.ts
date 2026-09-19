@@ -779,13 +779,14 @@ export const SHINY_GLINT: ParticleRecipe = {
  * Scale 0.48-0.80 of the 64 px sheet (31-51 cm), `Light = LT/8` so full for
  * the first half then to black, `Gravity += 0.2` cm/tick² upward from rest,
  * Scale +0.05 a tick (x2.25 by death), a random spin. Same smoke01 additive
- * rule as SMOKE: the JPEG has no alpha, so it is light, not matter, and its
- * colour is the grey the sheet reads as.
+ * rule as SMOKE: the JPEG has no alpha, so it is light, not matter. The tint
+ * is the original's `Light` (1, 1, 1) at its brightest: the sheet's own grey
+ * is all the darkness the puff has.
  */
 export const BODY_SMOKE: ParticleRecipe = {
   texture: TEX.smoke,
-  colour: [0.32, 0.3, 0.28],
-  colourEnd: [0.1, 0.1, 0.1],
+  colour: [0.85, 0.82, 0.78],
+  colourEnd: [0.15, 0.15, 0.15],
   size: 0.41,
   sizeJitter: 0.25,
   life: 0.64,
