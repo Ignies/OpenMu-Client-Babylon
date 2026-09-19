@@ -29,19 +29,22 @@ import type { EffectHandle, EffectLayer } from './layer';
 // ---- 1. tuning -------------------------------------------------------------
 
 /** Seconds a note floats before it is gone. */
-const SECONDS = 1.5;
+const SECONDS = 1.6;
 
-/** Card edge in tiles at full velocity: 30 cm, a glyph the size of a hand. */
-const SIZE = 0.3;
+/** Card edge in tiles at full velocity: 7.5 cm, a glyph the size of a coin. */
+const SIZE = 0.075;
 
 /** The quietest note's share of that. */
 const MIN_SIZE = 0.6;
 
-/** Tiles per second the note rises. */
-const RISE = 0.45;
+/** Tiles per second the note rises: fast enough that the next note never lands on it. */
+const RISE = 0.8;
 
-/** Tiles per second it drifts sideways, one way or the other per note. */
-const DRIFT = 0.12;
+/** Tiles per second it drifts sideways; consecutive notes take turns going left and right. */
+const DRIFT = 0.25;
+
+/** Tiles a note starts off to its side, so two close in time never share a start. */
+const SPREAD = 0.05;
 
 /** The sway on top of the drift: amplitude in tiles, rate in radians per second. */
 const SWAY = 0.05;
@@ -206,7 +209,7 @@ function spawn(scene: Scene, at: Vector3, opts: BandNoteOptions): EffectHandle {
   setCardCell(card, CELLS, hash(s) < SINGLE_SHARE ? 0 : 1);
   const velocity = Math.max(0, Math.min(127, opts.velocity ?? 100)) / 127;
   const size = SIZE * lerp(MIN_SIZE, 1, velocity);
-  const side = hash(s + 0.5) < 0.5 ? -1 : 1;
+  const side = s % 2 === 0 ? -1 : 1;
   const phase = hash(s + 0.25) * Math.PI * 2;
   const x = at.x, y = at.y, z = at.z;
   card.position.set(x, y, z);
@@ -220,7 +223,7 @@ function spawn(scene: Scene, at: Vector3, opts: BandNoteOptions): EffectHandle {
       if (p >= 1) return false;
       const grown = p < GROW ? p / GROW : p > 1 - SHRINK ? (1 - p) / SHRINK : 1;
       card.scaling.setAll(size * grown);
-      card.position.set(x + side * (DRIFT * t + SWAY * Math.sin(phase + SWAY_RATE * t)), y + RISE * t, z);
+      card.position.set(x + side * (SPREAD + DRIFT * t + SWAY * Math.sin(phase + SWAY_RATE * t)), y + RISE * t, z);
       return true;
     },
     release() {
