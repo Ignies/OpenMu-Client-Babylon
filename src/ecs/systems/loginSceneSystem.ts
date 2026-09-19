@@ -40,8 +40,13 @@ const speedFor = (waypoint: CameraWaypoint) =>
 const TOUR_DISTANCE_PER_LEVEL = 110 / MU_SCALE;
 const TOUR_EYE_BASE = -550 / MU_SCALE;
 
-/** `SetAngleFrustum(-112.5)` (CameraUtility.cpp:193): 22.5 degrees above the horizon. */
-const TOUR_PITCH = (22.5 * Math.PI) / 180;
+/**
+ * `SetAngleFrustum(-112.5)` (CameraUtility.cpp:193) is 22.5 degrees above
+ * the horizon, framed for an eye that the heading term above keeps swinging
+ * up and down. Held at head height on every leg that read as staring at the
+ * ceiling, so the pitch is eased down to eight degrees.
+ */
+const TOUR_PITCH = (8 * Math.PI) / 180;
 
 /**
  * `UpdateTourWayPoint` (CameraMove.cpp:757-770): the heading turns toward the
