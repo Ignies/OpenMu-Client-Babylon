@@ -42,6 +42,7 @@ import {
   ENERGY_CHIPS,
   FIRE_PUFF,
   FLAME_LICK,
+  HIT_SPARKS,
   MODEL,
   RGBS,
   SAND_SMOKE,
@@ -82,6 +83,19 @@ const APPEAR_TICKS = 60;
 /** ...with 20 tries a tick, each 1/10 a puff and 1/10 a stone (ZzzCharacter.cpp:5641-5651). */
 const APPEAR_TRIES = 20;
 const APPEAR_EVERY = 10;
+
+/**
+ * `BITMAP_JOINT_SPARK` SubType 0 (ZzzEffectJoint.cpp:950): Scale 2, Velocity
+ * 6-25 cm a tick, LT 8-15 ticks, MaxTails 2, white; no gravity, no fade.
+ */
+const SPARK_VELOCITY: readonly [number, number] = [
+  (6 * 25) / TILE_CM,
+  (25 * 25) / TILE_CM,
+];
+const SPARK_SECONDS: readonly [number, number] = [8 * TICK, 15 * TICK];
+const SPARK_TAILS = 2;
+/** Scale 2 is a 2 cm filament; the ribbon is drawn a little wider so it reads. */
+const SPARK_WIDTH = 0.06;
 
 // ---- 2. the table ----------------------------------------------------------
 
@@ -147,6 +161,23 @@ type Emitter =
       /** `c->Appear`: the arrival dust and stones for the first ticks in scope. */
       readonly kind: 'appear';
       readonly ticks: number;
+    }
+  | {
+      /**
+       * The smith's and the trader's anvil: `tries` x per tick, each
+       * `CreateJoint(BITMAP_JOINT_SPARK, p, p, Angle)` and, with `chip`
+       * odds, a `BITMAP_SPARK` chip. `Angle` is `(pitch, 0, yaw)` in the
+       * original's degrees.
+       */
+      readonly kind: 'sparks';
+      readonly every: number;
+      readonly tries: number;
+      readonly bone: number;
+      readonly local?: Cm3;
+      readonly pitch: readonly [number, number];
+      readonly yaw: readonly [number, number];
+      readonly chip: number;
+      readonly gate?: Gate;
     };
 
 export type MonsterVisual = readonly Emitter[];
@@ -345,6 +376,37 @@ export const MONSTER_VISUALS: Partial<Record<number, MonsterVisual>> = {
       colour: [0.1, 0.8, 0.6],
       gate: { action: [A.Die], frames: [[0, 12]] },
     }),
+  ],
+  // 251 Hanzo the Blacksmith (MODEL_SMITH): on the idle clip's frames 5-6,
+  // four sparks off the anvil at bone 17, `Angle (150-210, 0, 0-30)`, each
+  // with a chip (:6096-6109). The forge light is `lighting/characters.ts`.
+  251: [
+    {
+      kind: 'sparks',
+      every: 1,
+      tries: 4,
+      bone: 17,
+      pitch: [150, 210],
+      yaw: [0, 30],
+      chip: 1,
+      gate: { action: [A.Stop1], frames: [[5, 6.001]] },
+    },
+  ],
+  // 231 Devias trader (MODEL_DEVIAS_TRADER): while idle, four tries a tick
+  // at bone 37 + (0, 5, 10) cm, `Angle (90-150, 0, 0-30)`, a chip one time
+  // in two (:6111-6127).
+  231: [
+    {
+      kind: 'sparks',
+      every: 1,
+      tries: 4,
+      bone: 37,
+      local: [0, 5, 10],
+      pitch: [90, 150],
+      yaw: [0, 30],
+      chip: 0.5,
+      gate: { action: [A.Stop1] },
+    },
   ],
 };
 // The variants that share a model share its case.
@@ -546,6 +608,46 @@ function emit(scene: Scene, e: Entity, em: Emitter, f: Frame): void {
       }
       return;
     }
+    case 'sparks': {
+      if (!open(em.gate, f)) return;
+      const local = em.local ?? [0, 0, 0];
+      tmpLocal.set(local[0] / TILE_CM, local[1] / TILE_CM, local[2] / TILE_CM);
+      boneLocalPos(e, em.bone, tmpLocal, tmp);
+      for (let i = 0; i < em.tries; i++) {
+        if (Math.random() >= 1 / em.every) continue;
+        const pitch =
+          ((em.pitch[0] + Math.random() * (em.pitch[1] - em.pitch[0])) *
+            Math.PI) /
+          180;
+        const yaw =
+          ((em.yaw[0] + Math.random() * (em.yaw[1] - em.yaw[0])) * Math.PI) /
+          180;
+        // `AngleMatrix((pitch, 0, yaw))` on the joint's forward (0, 1, 0):
+        // the original's y is horizontal and z is up.
+        const fwd = Math.cos(pitch);
+        const up = Math.sin(pitch);
+        const heading = new Vector3(
+          -fwd * Math.sin(yaw),
+          up,
+          fwd * Math.cos(yaw)
+        );
+        spawnJoint(scene, tmp, {
+          velocity:
+            SPARK_VELOCITY[0] +
+            Math.random() * (SPARK_VELOCITY[1] - SPARK_VELOCITY[0]),
+          heading,
+          seconds:
+            SPARK_SECONDS[0] +
+            Math.random() * (SPARK_SECONDS[1] - SPARK_SECONDS[0]),
+          maxTails: SPARK_TAILS,
+          width: SPARK_WIDTH,
+          colour: RGBS.white,
+          texture: TEX.spark,
+        });
+        if (Math.random() < em.chip) emitBurst(scene, HIT_SPARKS, tmp, 1);
+      }
+      return;
+    }
     case 'bolts':
       // Spawned once at start; nothing per tick.
       return;
@@ -611,7 +713,8 @@ export function visualMonster(
 
       const frame = model.actionFrame();
       const f: Frame = {
-        action: e.monsterAnimation?.action,
+        // An NPC has no `monsterAnimation`; its idle is the model's action 0.
+        action: e.monsterAnimation?.action ?? (model.CurrentAction as A),
         frame,
         prevFrame,
         alive: !e.dying,
