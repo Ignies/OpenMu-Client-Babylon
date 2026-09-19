@@ -191,6 +191,7 @@ export const frenchLayer: LanguageLayer = {
     'options.advancedEffects': 'Effets avancés',
     'options.renderDistance': 'Distance d’affichage',
     'options.propBatching': 'Regroupement du décor',
+    'options.monsterEffects': 'Effets des monstres',
     'options.lightingQuality': 'Éclairage',
     'options.materialQuality': 'Matériaux',
     'options.materialDetail': 'Détail',

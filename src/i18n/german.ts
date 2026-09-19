@@ -189,6 +189,7 @@ export const germanLayer: LanguageLayer = {
     'options.advancedEffects': 'Erweiterte Effekte',
     'options.renderDistance': 'Sichtweite',
     'options.propBatching': 'Gebündelte Szenerie',
+    'options.monsterEffects': 'Monster-Effekte',
     'options.lightingQuality': 'Beleuchtung',
     'options.materialQuality': 'Materialien',
     'options.materialDetail': 'Detail',

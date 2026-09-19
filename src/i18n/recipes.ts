@@ -325,6 +325,7 @@ export const EN_TEXT = {
   'options.advancedEffects': 'Advanced effects',
   'options.renderDistance': 'Render distance',
   'options.propBatching': 'Scenery batching',
+  'options.monsterEffects': 'Monster effects',
   'options.lightingQuality': 'Lighting',
   'options.materialQuality': 'Materials',
   'options.materialDetail': 'Detail',

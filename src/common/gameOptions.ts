@@ -193,6 +193,14 @@ export type GameOptions = {
    * reloads the current map's objects.
    */
   propBatching: boolean;
+  /**
+   * The effects a monster draws on itself in the original - the dust a Dark
+   * Knight stands in, a Yeti's breath, a Bull Fighter's snort, the burning
+   * Death Knight, the sand a Tarkan monster raises walking and dying
+   * (`effects/monsterVisuals.ts`). Off is the client as it was: posed bodies
+   * and nothing more.
+   */
+  monsterEffects: boolean;
   autoAttack: boolean;
   /**
    * An amount box in front of every `+` in the character info window, so a
@@ -457,6 +465,7 @@ const DEFAULTS: GameOptions = {
   advancedEffects: true,
   renderDistance: 0,
   propBatching: true,
+  monsterEffects: true,
   autoAttack: false,
   statPointAmounts: true,
   whisperBeep: true,

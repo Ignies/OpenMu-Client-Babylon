@@ -350,7 +350,10 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
       emitter.position.z + slot.wz
     );
 
-    const peak = Math.max(r, g, b, 0.001);
+    // On magnitude: a negative source (the fire around Tantallos and Death
+    // Beam Knight, `lighting/characters.ts`) keeps its sign in the colour
+    // and its strength in the intensity, and the shader subtracts it.
+    const peak = Math.max(Math.abs(r), Math.abs(g), Math.abs(b), 0.001);
 
     light.diffuse.set(r / peak, g / peak, b / peak);
     // The Standard material has no specular term, so the pool ships black

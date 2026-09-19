@@ -190,6 +190,7 @@ export const romanianLayer: LanguageLayer = {
     'options.advancedEffects': 'Efecte avansate',
     'options.renderDistance': 'Distanță de randare',
     'options.propBatching': 'Grupare decor',
+    'options.monsterEffects': 'Efecte ale monștrilor',
     'options.lightingQuality': 'Iluminare',
     'options.materialQuality': 'Materiale',
     'options.materialDetail': 'Detaliu',

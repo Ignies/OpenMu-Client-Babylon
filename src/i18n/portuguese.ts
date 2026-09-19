@@ -198,6 +198,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.advancedEffects': 'Efeitos avançados',
     'options.renderDistance': 'Distância de renderização',
     'options.propBatching': 'Agrupar cenário',
+    'options.monsterEffects': 'Efeitos dos monstros',
     'options.lightingQuality': 'Iluminação',
     'options.materialQuality': 'Materiais',
     'options.materialDetail': 'Detalhe',

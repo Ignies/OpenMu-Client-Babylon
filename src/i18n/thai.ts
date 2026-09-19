@@ -192,6 +192,7 @@ export const thaiLayer: LanguageLayer = {
     'options.advancedEffects': 'เอฟเฟกต์ขั้นสูง',
     'options.renderDistance': 'ระยะการแสดงผล',
     'options.propBatching': 'รวมวาดฉาก',
+    'options.monsterEffects': 'เอฟเฟกต์มอนสเตอร์',
     'options.lightingQuality': 'แสง',
     'options.materialQuality': 'วัสดุ',
     'options.materialDetail': 'รายละเอียด',

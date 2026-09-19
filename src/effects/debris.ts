@@ -114,7 +114,7 @@ function cmPerTick(v: number): number {
   return (v * CM) / TICK;
 }
 
-function spawn(scene: Scene, at: Vector3, opts: DebrisOptions): EffectHandle {
+export function spawnDebris(scene: Scene, at: Vector3, opts: DebrisOptions): EffectHandle {
   const world = Store.world;
   const count = opts.count ?? 1;
   const colour = opts.colour ?? WHITE;
@@ -216,5 +216,5 @@ export const debrisLayer: EffectLayer<DebrisOptions, 'debris'> = {
   name: 'debris',
   update,
   reset,
-  spawn,
+  spawn: spawnDebris,
 };

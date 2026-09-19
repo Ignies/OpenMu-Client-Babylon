@@ -191,6 +191,7 @@ export const koreanLayer: LanguageLayer = {
     'options.advancedEffects': '고급 효과',
     'options.renderDistance': '렌더링 거리',
     'options.propBatching': '배경 일괄 렌더링',
+    'options.monsterEffects': '몬스터 효과',
     'options.lightingQuality': '조명',
     'options.materialQuality': '재질',
     'options.materialDetail': '디테일',

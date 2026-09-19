@@ -70,6 +70,8 @@ const GLOW_TEXTURES = {
   haze: { file: TEX.magicGround2, px: [128, 128] },
   /** BITMAP_LIGHT (flare01): the plain round glow. */
   flare: { file: TEX.flare, px: [64, 64] },
+  /** BITMAP_SHINY+3 (eye01, 32x16): `RenderEye`'s glowing eye (:8463). */
+  eye: { file: TEX.eye, px: [32, 16] },
 } as const;
 
 type GlowTexture = keyof typeof GLOW_TEXTURES;
@@ -100,14 +102,36 @@ export type MonsterGlow = {
   readonly skip?: readonly (readonly [number, number])[];
   /** Offset in the bone's own frame, tiles (the original's `x, y, z` / 100). */
   readonly local?: readonly [number, number, number];
+  /** One offset per bone instead, aligned with `bones` (`RenderEye`'s +5 / -5). */
+  readonly locals?: readonly (readonly [number, number, number])[];
   readonly cards: readonly GlowCard[];
   /** Peak colour. Defaults to `RenderLight`'s amber. */
   readonly colour?: readonly [number, number, number];
   /** `RenderLight` breathes; the hand-written cases hold a fixed luminosity. */
   readonly breathe?: boolean;
+  /** The breath's base: `RenderLight` 0.7, `RenderEye` 0.8 (:8467). */
+  readonly breathBase?: number;
   /** Fixed luminosity when `breathe` is false (the case's `Luminosity`). */
   readonly luminosity?: number;
 };
+
+/**
+ * `RenderEye(o, Left, Right, fSize)` (:8463-8479): one `eye01` card 5 cm out
+ * along each eye bone's own x, greyscale, breathing `sin(t*0.002)*0.3+0.8`.
+ */
+function renderEye(left: number, right: number, size = 1): MonsterGlow {
+  return {
+    bones: [left, right],
+    locals: [
+      [0.05, 0, 0],
+      [-0.05, 0, 0],
+    ],
+    cards: [{ tex: 'eye', scale: size }],
+    colour: [1, 1, 1],
+    breathe: true,
+    breathBase: 0.8,
+  };
+}
 
 /** `RenderLight(o, tex, scale, bone, x, y, z)` for one or more bones. */
 function renderLight(
@@ -122,7 +146,14 @@ function renderLight(
  * Keyed by NPC/monster type number (`MonstersDatabase`). Every row is a
  * transcription; the file:line is the original's site.
  */
-export const MONSTER_GLOWS: Partial<Record<number, MonsterGlow>> = {
+export const MONSTER_GLOWS: Partial<Record<number, MonsterGlow | readonly MonsterGlow[]>> = {
+  // 4 Elite Bull Fighter (MODEL_BULL_FIGHTER, `c->Level == 1`) and 30 Death
+  // Cow (MODEL_DEATH_COW): eyes on bones 22 / 23 (:11206-11209).
+  4: renderEye(22, 23),
+  30: renderEye(22, 23),
+  // 71 Crust, 74 Mega Crust, 301 Alpha Crust, 496 Golden Crust (MODEL_CRUST):
+  // eyes on 26 / 27 at twice the size (:11212).
+  71: renderEye(26, 27, 2),
   // 45 Bahamut / 51 Great Bahamut (MODEL_BAHAMUT): the lure on bone 9, :11028.
   45: renderLight([9], [{ tex: 'core', scale: 4 }, { tex: 'bar', scale: 3 }], [0, 0, 0.05]),
   // 46 Vepar / 80 Golden Vepar (MODEL_VEPAR): one in each hand, :11009.
@@ -135,8 +166,12 @@ export const MONSTER_GLOWS: Partial<Record<number, MonsterGlow>> = {
     ],
     [0, 0, -0.05]
   ),
-  // 48 Lizard King / 81 Golden Lizard King (MODEL_LIZARD): four spikes, :11017.
-  48: renderLight([26, 31, 36, 41], [{ tex: 'core', scale: 2 }, { tex: 'bar', scale: 1 }]),
+  // 48 Lizard King / 81 Golden Lizard King (MODEL_LIZARD): four spikes,
+  // :11017, and the eyes on 42 / 43, :11227.
+  48: [
+    renderLight([26, 31, 36, 41], [{ tex: 'core', scale: 2 }, { tex: 'bar', scale: 1 }]),
+    renderEye(42, 43),
+  ],
   // 49 Hydra (MODEL_HYDRA): one big flare over the head, :11005.
   49: renderLight([63], [{ tex: 'halo', scale: 1 }, { tex: 'bar', scale: 4 }], [0, 0, 0.2]),
   // 36 Shadow (MODEL_SHADOW, `c->Level == 0`): `SubType 1`, so the body is
@@ -186,10 +221,15 @@ export const MONSTER_GLOWS: Partial<Record<number, MonsterGlow>> = {
 MONSTER_GLOWS[51] = MONSTER_GLOWS[45];
 MONSTER_GLOWS[80] = MONSTER_GLOWS[46];
 MONSTER_GLOWS[81] = MONSTER_GLOWS[48];
+MONSTER_GLOWS[74] = MONSTER_GLOWS[71];
+MONSTER_GLOWS[301] = MONSTER_GLOWS[71];
+MONSTER_GLOWS[496] = MONSTER_GLOWS[71];
 
-/** The glow a character type carries, if any. */
-export function monsterGlowFor(npcType: number): MonsterGlow | undefined {
-  return MONSTER_GLOWS[npcType];
+/** The glows a character type carries, if any - one per `RenderLight` / `RenderEye` group. */
+export function monsterGlowFor(npcType: number): readonly MonsterGlow[] | undefined {
+  const row = MONSTER_GLOWS[npcType];
+  if (!row) return undefined;
+  return Array.isArray(row) ? (row as readonly MonsterGlow[]) : [row as MonsterGlow];
 }
 
 // ---- 2. state + readers ----------------------------------------------------
@@ -274,6 +314,8 @@ function disposeManagers(): void {
 /** One card of one glow: a sprite waiting for, or riding, a bone. */
 type GlowSprite = {
   readonly bone: number;
+  /** This bone's own offset (`locals`), else the glow's `local`. */
+  readonly local?: readonly [number, number, number];
   readonly tex: GlowTexture;
   readonly scale: number;
   readonly blend: GlowBlend;
@@ -339,11 +381,8 @@ const tmpLocal = new Vector3();
 const tmpWorld = new Vector3();
 
 function place(g: LiveGlow): void {
-  const [lx, ly, lz] = g.glow.local ?? [0, 0, 0];
-  tmpLocal.set(lx, ly, lz);
-
   const lumi = g.glow.breathe
-    ? Math.sin(g.clock * BREATH_SPEED) * BREATH_AMOUNT + BREATH_BASE
+    ? Math.sin(g.clock * BREATH_SPEED) * BREATH_AMOUNT + (g.glow.breathBase ?? BREATH_BASE)
     : (g.glow.luminosity ?? 1);
 
   const [r, gr, b] = g.rgb;
@@ -368,6 +407,8 @@ function place(g: LiveGlow): void {
     sprite.isVisible = !hidden;
     if (hidden) continue;
 
+    const [lx, ly, lz] = s.local ?? g.glow.local ?? [0, 0, 0];
+    tmpLocal.set(lx, ly, lz);
     boneLocalPos(g.entity, s.bone, tmpLocal, tmpWorld);
     sprite.position.copyFrom(tmpWorld);
     spriteLevel(g.scene, sprite.color.set(r * lumi, gr * lumi, b * lumi, 1));
@@ -395,17 +436,18 @@ export function glowMonster(
   if (!bones.length) return DEAD_HANDLE;
 
   const sprites: GlowSprite[] = [];
-  for (const bone of bones) {
+  bones.forEach((bone, i) => {
     for (const card of glow.cards) {
       sprites.push({
         bone,
+        local: glow.locals?.[i],
         tex: card.tex,
         scale: card.scale,
         blend: card.blend ?? 'add',
         sprite: null,
       });
     }
-  }
+  });
 
   const g: LiveGlow = {
     scene,

@@ -192,6 +192,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.advancedEffects': '高度なエフェクト',
     'options.renderDistance': '描画距離',
     'options.propBatching': '背景の一括描画',
+    'options.monsterEffects': 'モンスターの効果',
     'options.lightingQuality': 'ライティング',
     'options.materialQuality': 'マテリアル',
     'options.materialDetail': 'ディテール',

@@ -1220,10 +1220,13 @@ export class ModelObject {
    * leaving it lit would make a waterfall go dark at night.
    */
   protected applyMeshAnimation() {
-    if (!this.gltf) return;
-
     const anim = meshAnimationFor(this.WorldIndex, this.Type);
-    if (!anim) return;
+    if (anim) this.bindMeshAnimation(anim);
+  }
+
+  /** Binds one entry: the map table's, or a monster's (`monsters/monsterBlendMesh.ts`). */
+  protected bindMeshAnimation(anim: MeshAnimation) {
+    if (!this.gltf) return;
 
     const mesh = this.getMesh(anim.mesh);
 

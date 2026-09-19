@@ -579,6 +579,7 @@ const TABS: Tab[] = [
                 check('animatedWater', -1, 'options.animatedWater'),
                 check('advancedEffects', -1, 'options.advancedEffects'),
                 check('propBatching', -1, 'options.propBatching'),
+                check('monsterEffects', -1, 'options.monsterEffects'),
               ],
             },
             {

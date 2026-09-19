@@ -14,6 +14,7 @@ import { itemAuraLayer } from './itemAura';
 import { itemCrackleLayer } from './itemCrackle';
 import { itemSparkleLayer } from './itemSparkle';
 import { monsterGlowLayer } from './monsterGlow';
+import { monsterVisualsLayer } from './monsterVisuals';
 import { bandNotesLayer } from './bandNotes';
 
 /**
@@ -41,5 +42,6 @@ export const EFFECT_LAYERS = [
   itemCrackleLayer, // reset only; itemGlowSystem drives it
   itemSparkleLayer, // counters only; the shared particle pool draws the glints
   bandNotesLayer,
+  monsterVisualsLayer, // reads this frame's bones and actions; spawns into the pools above
   monsterGlowLayer, // last: its cards ride the bones this frame's animation posed
 ] as const;
