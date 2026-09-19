@@ -24,10 +24,11 @@ import { LightSource, type LightRecipe } from './lightSource';
  * They breathe on the same curve the cards do, and Classic withholds them so
  * that tier stays as shipped.
  *
- * Not carried over: the negative light under Bloody Wolf and Tantallos
- * (`Vector(-1.3, -1.3, -1.3)`, range 3) - sources only add, and the terrain
- * delta texture has no sign bit. it is recorded as an open
- * decision.
+ * A negative row (Tantallos 59, Death Beam Knight: `Vector(-1.3, -1.3,
+ * -1.3)`, range 3) darkens the floor. The tile map takes the subtraction
+ * (its sum clamps at black) but its delta byte has no sign, so Classic sees
+ * nothing; the per-pixel pool on the tiers above carries the whole of it
+ * as a point light with a negative colour.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -106,6 +107,24 @@ export const CHARACTER_LIGHTS: Partial<Record<number, CharacterLight>> = {
     flicker: FORGE_FLICKER,
     priority: PRIORITY_CHARACTER,
   },
+  // 59 Tantallos (`SubType 1`, :5968-5969) and 63 Death Beam Knight
+  // (:5910-5911): the fire around them *takes* light off the floor -
+  // `AddTerrainLight(…, (-1.3, -1.3, -1.3), 3)`, flat, every tick. The pool
+  // keeps the terrain radius: the usual +2 made a black hole of it.
+  59: {
+    color: [-1.3, -1.3, -1.3],
+    range: 3,
+    pointRange: 3,
+    heightOffset: BODY_HEIGHT,
+    priority: PRIORITY_CHARACTER,
+  },
+  63: {
+    color: [-1.3, -1.3, -1.3],
+    range: 3,
+    pointRange: 3,
+    heightOffset: BODY_HEIGHT,
+    priority: PRIORITY_CHARACTER,
+  },
   // 35 Death Gorgon (MODEL_GORGON, `c->Level == 2`): the one monster in the
   // classic set that lights the floor itself - (0.8, 0.16, 0), range 2
   // (ZzzCharacter.cpp:5956-5957). Every tier: this one is the original's.
@@ -133,8 +152,8 @@ export const CHARACTER_LIGHTS: Partial<Record<number, CharacterLight>> = {
   // 49 Hydra: the big `lightning2` flare over the head of a boss.
   49: carried(4, 1.2, LIGHTNING_GLOW_RGB),
   // 36 Shadow has no row on purpose: its body cards are `SubType 1`,
-  // `dst * (1 - src)` - it removes light rather than adding it, and a
-  // negative source is the one thing the two sinks cannot carry (see above).
+  // `dst * (1 - src)` - a texture blend on the cards, not an
+  // `AddTerrainLight`; the original throws no floor light for it.
   // 39 Poison Shadow: the same body, but additive, in `Vector(0.2, 0.7, 0.1)`.
   39: carried(3, BODY_HEIGHT, [0.2, 0.7, 0.1], undefined),
   // 27 Scorpion: the tail lamp, `Luminosity` 0.8 flat (:6037).
