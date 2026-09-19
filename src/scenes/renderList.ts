@@ -22,10 +22,19 @@ import type {
  * This fills the same list in place by index, which the observer does not
  * see, and raises the one notification that matters itself: when a list
  * really goes from empty to holding something, or back.
+ *
+ * Two scopes. A `scene` list is chosen from every mesh, before the frame's
+ * targets: a shadow map needs the casters behind the camera too. An `active`
+ * list is chosen from what the camera found in its frustum: a screen-space
+ * buffer (G-buffer, glow, effect mask) can show nothing else, and the G-buffer
+ * was drawing the whole render ring, 494 meshes against the main pass's 132.
  */
+export type RenderListScope = 'scene' | 'active';
+
 type Driven = {
   readonly rt: RenderTargetTexture;
   predicate: (mesh: AbstractMesh) => boolean;
+  readonly scope: RenderListScope;
   readonly list: AbstractMesh[];
   wasEmpty: boolean;
   release: () => void;
@@ -34,17 +43,22 @@ type Driven = {
 type SceneDrivers = {
   driven: Driven[];
   frame: number;
-  observer: Observer<Scene>;
+  beforeTargets: Observer<Scene>;
+  afterEvaluation: Observer<Scene>;
 };
 
 const drivers = new WeakMap<Scene, SceneDrivers>();
 
-function fill(scene: Scene, d: Driven): void {
-  const meshes = scene.meshes;
+function fill(
+  scene: Scene,
+  d: Driven,
+  meshes: readonly AbstractMesh[],
+  count: number
+): void {
   const list = d.list;
   let n = 0;
 
-  for (let i = 0; i < meshes.length; i++) {
+  for (let i = 0; i < count; i++) {
     const mesh = meshes[i];
     if (d.predicate(mesh)) list[n++] = mesh;
   }
@@ -53,33 +67,52 @@ function fill(scene: Scene, d: Driven): void {
 
   const empty = n === 0;
 
+  // The dirtying is for the lights (a caster set appearing or vanishing turns
+  // shadow defines on or off); a screen-space list compiles nothing.
   if (empty !== d.wasEmpty) {
     d.wasEmpty = empty;
-    for (const mesh of meshes) {
-      (mesh as unknown as { _markSubMeshesAsLightDirty(): void })
-        ._markSubMeshesAsLightDirty();
+
+    if (d.scope === 'scene') {
+      for (const mesh of scene.meshes) {
+        (mesh as unknown as { _markSubMeshesAsLightDirty(): void })
+          ._markSubMeshesAsLightDirty();
+      }
     }
   }
 }
 
 function driversFor(scene: Scene): SceneDrivers {
-  let entry = drivers.get(scene);
+  const entry = drivers.get(scene);
   if (entry) return entry;
 
   const created: SceneDrivers = {
     driven: [],
     frame: -1,
-    observer: null as unknown as Observer<Scene>,
+    beforeTargets: null as unknown as Observer<Scene>,
+    afterEvaluation: null as unknown as Observer<Scene>,
   };
 
   // Fires before the custom targets in `render()` and again before each
   // camera's own targets; one fill per frame serves both.
-  created.observer = scene.onBeforeRenderTargetsRenderObservable.add(() => {
+  created.beforeTargets = scene.onBeforeRenderTargetsRenderObservable.add(() => {
     const frame = scene.getFrameId();
     if (frame === created.frame) return;
     created.frame = frame;
 
-    for (const d of created.driven) fill(scene, d);
+    const meshes = scene.meshes;
+
+    for (const d of created.driven) {
+      if (d.scope === 'scene') fill(scene, d, meshes, meshes.length);
+    }
+  });
+
+  // End of `_evaluateActiveMeshes`, once per camera, before its targets.
+  created.afterEvaluation = scene.onAfterActiveMeshesEvaluationObservable.add(() => {
+    const active = scene.getActiveMeshes();
+
+    for (const d of created.driven) {
+      if (d.scope === 'active') fill(scene, d, active.data, active.length);
+    }
   });
 
   drivers.set(scene, created);
@@ -94,7 +127,8 @@ function driversFor(scene: Scene): SceneDrivers {
 export function driveRenderList(
   scene: Scene,
   rt: RenderTargetTexture,
-  predicate: (mesh: AbstractMesh) => boolean
+  predicate: (mesh: AbstractMesh) => boolean,
+  scope: RenderListScope = 'scene'
 ): () => void {
   const entry = driversFor(scene);
 
@@ -110,16 +144,19 @@ export function driveRenderList(
   // stood in it.
   const existing = entry.driven.find(d => d.rt === rt);
 
-  if (existing) {
+  if (existing && existing.scope === scope) {
     existing.predicate = predicate;
     rt.renderList = existing.list;
 
     return existing.release;
   }
 
+  existing?.release();
+
   const d: Driven = {
     rt,
     predicate,
+    scope,
     list: [],
     wasEmpty: true,
     release: () => {},

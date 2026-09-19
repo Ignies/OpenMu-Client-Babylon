@@ -258,15 +258,18 @@ const settledSkinnedBounds = new WeakMap<
  * the screen. The real placement of a BMD object's parts comes from its
  * animation (frame 0 even for static props), which is not applied yet inside
  * `load()`, so the box is grown after each of the first few rendered frames
- * - this also covers swaying trees and flags - and then left alone; Babylon's
- * `_updateBoundingInfo` carries it along with the world matrix each frame.
+ * - this also covers swaying trees and flags - and then left alone. The box
+ * is built on the mesh's world matrix: a fresh BoundingInfo is local until
+ * the next world-matrix recompute, and a standing prop never has one.
  */
 function fixSkinnedLocalBounds(mesh: AbstractMesh): void {
   if (!mesh.skeleton) return;
 
   const settled = settledSkinnedBounds.get(vertexDataKey(mesh));
   if (settled) {
-    mesh.setBoundingInfo(new BoundingInfo(settled.min, settled.max));
+    mesh.setBoundingInfo(
+      new BoundingInfo(settled.min, settled.max, mesh.getWorldMatrix())
+    );
     return;
   }
 
@@ -302,7 +305,9 @@ function fixSkinnedLocalBounds(mesh: AbstractMesh): void {
           entry.min.y !== prevMinY || entry.max.y !== prevMaxY ||
           entry.min.z !== prevMinZ || entry.max.z !== prevMaxZ
         ) {
-          entry.mesh.setBoundingInfo(new BoundingInfo(entry.min, entry.max));
+          entry.mesh.setBoundingInfo(
+            new BoundingInfo(entry.min, entry.max, entry.mesh.getWorldMatrix())
+          );
         }
         if (entry.frames >= SKINNED_BOUNDS_FRAMES) {
           settledSkinnedBounds.set(vertexDataKey(entry.mesh), {
@@ -1717,14 +1722,32 @@ export class ModelObject {
    */
   HoverHeight = 0;
 
+  // Written only on a change: Babylon flags a vector dirty on any write, and
+  // a dirty root recomputes every child mesh's world matrix and bounds.
   updateLocation(pos: IVector3Like, scale: Float, angles: IVector3Like) {
-    this._node.position.set(pos.x, pos.y + this.HoverHeight, pos.z);
+    const node = this._node;
+    const y = pos.y + this.HoverHeight;
+    const position = node.position;
 
-    this._node.rotation.x = angles.x;
-    this._node.rotation.y = angles.y;
-    this._node.rotation.z = angles.z;
+    if (position.x !== pos.x || position.y !== y || position.z !== pos.z) {
+      position.set(pos.x, y, pos.z);
+    }
 
-    this._node.scaling.setAll(scale);
+    const rotation = node.rotation;
+
+    if (
+      rotation.x !== angles.x ||
+      rotation.y !== angles.y ||
+      rotation.z !== angles.z
+    ) {
+      rotation.set(angles.x, angles.y, angles.z);
+    }
+
+    const scaling = node.scaling;
+
+    if (scaling.x !== scale || scaling.y !== scale || scaling.z !== scale) {
+      scaling.setAll(scale);
+    }
   }
 
   Unload() {
