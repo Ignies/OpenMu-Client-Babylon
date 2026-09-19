@@ -32,6 +32,10 @@ export const loginsceneLayer: MapLayer = {
   name: 'loginscene',
   worlds: WORLDS,
   tiles: FULL_TILES,
+  // `LoadWorld` (MapManager.cpp:1413-1417) puts `AlphaTile01.tga` in slot 10
+  // on these two worlds and `RenderFace` alpha-tests it: the ground outside
+  // the hall is a hole, which the tour sees over the walls from its crane.
+  cutoutTile: 10,
   effectOnly: LOGIN_SCENE_EFFECT_ONLY_TYPES,
   emissions: LOGIN_SCENE_EMISSIONS,
   create: world => import('./create').then(m => m.createLoginScene(world)),
