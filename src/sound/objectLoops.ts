@@ -5,6 +5,8 @@ import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerHero, listenerWorld } from './listener';
+import { KALIMA_WORLDS } from '../common/worldAssets';
+import { KALIMA_OBJECT_LOOPS } from '../maps/kalima/spec';
 
 /**
  * The object loops: the sounds the original attaches to map objects from a
@@ -181,6 +183,10 @@ export const OBJECT_LOOPS: ReadonlyMap<ENUM_WORLD, readonly ObjectLoop[]> =
         small([92], 'Sound/w42/firepillar', 0.35, firePillarBurning),
       ],
     ],
+    // GMHellas.cpp:479, :487 (`RenderHellasVisual`) - every Kalima floor.
+    ...KALIMA_WORLDS.map(
+      w => [w, KALIMA_OBJECT_LOOPS] as [ENUM_WORLD, readonly ObjectLoop[]]
+    ),
   ]);
 
 /** Maps this exists on: the keys of the table. */

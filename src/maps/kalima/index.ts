@@ -10,34 +10,18 @@ import {
  * Kalima (World25 / Object25) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
- * No `create`: every runtime behaviour of this map is table data (spec.ts) or
- * lives in another system; the notes below say what is and is not built.
- *
  * Kalima (`WD_24HELLAS … WD_24HELLAS_END` and Kalima 7 = world 36, all on
  * `World25`/`Object25` - `assetWorldNum` in worldAssets.ts). Seven floors of
  * one cave, the floor picked by the server from the Lost Map's level.
  *
- * Everything the map does at runtime is table data in `spec.ts`: the six
- * hidden emitters and the two crystal flares. What is *not* built:
- *
- *  - **`CheckGrass`** (GMHellas.cpp:400-425) - types 15, 29 (×287) and 32 are
- *    water plants that lean away from the hero as they walk through, then
- *    settle at 0.6 decay, and are pinned to `GetWaterTerrain() + 180`. The
- *    same shape as Lost Tower's `CheckSkull`, and portable the same way; not
- *    done here because there is no water-height field in the clone for the
- *    pin, and the lean alone reads as jitter.
- *  - **The hero-relative motes** (`MoveHellasObjectSetting`, :305-355): one
- *    `BITMAP_LIGHT` SubType 7 per 1-in-5 tick within ±4 tiles of the hero,
- *    and the falling stone (`CreateEffect(9)` + `aKalimaStone`) one in 75.
- *    The stone's *sound* is in `sound/ambientBeds.ts` as a one-shot; the
- *    motes are a weather-layer recipe once a hero-relative one exists.
- *  - The `AmbientSoundInterval` one-shots (`aKalima01`/`02` every 4 s) and
- *    Kundun's roar in the boss room (25-51 × 44-119) - the first is in
- *    `ambientBeds.ts`, the second needs the floor number the server sends.
+ * Most of what the map does at runtime is table data in `spec.ts`: the six
+ * hidden emitters, the two crystal flares and the waterfall loop. `create`
+ * binds the one family that needs a class - the water plants - and carries
+ * the list of what is deliberately not built.
  *
  * Clear colour `(30, 40, 40)/256` is set by `loadMapIntoScene`
- * (SceneManager.cpp:344); music `Music/kalima` and the `aKalima` bed are in
- * the sound tables.
+ * (SceneManager.cpp:344); music `Music/kalima`, the `aKalima` bed and the
+ * `aKalima01`/`02`/`Stone` one-shots are in the sound tables.
  */
 
 // ---- 1. data ---------------------------------------------------------------
@@ -92,4 +76,5 @@ export const kalimaLayer: MapLayer = {
   blendMeshes: KALIMA_BLEND_MESHES,
   effectOnly: KALIMA_EFFECT_ONLY_TYPES,
   emissions: KALIMA_EMISSIONS,
+  create: world => import('./create').then(m => m.createKalima(world)),
 };

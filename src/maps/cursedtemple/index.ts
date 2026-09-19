@@ -11,16 +11,18 @@ import {
  * renderer, the terrain loader, the weather and the sound tables read.
  *
  * No `create`: every runtime behaviour of this map is table data (spec.ts) or
- * lives in another system; the notes below say what is and is not built.
+ * lives in another system; the notes below and `spec.ts`'s header say what is
+ * and is not built.
  *
  * Illusion Temple (`WD_45CURSEDTEMPLE_LV1 … LV6`, all six on
  * `World47`/`Object47`).
  *
- * Outside a match the map is ten hidden markers and three breathing lamps
- * (`spec.ts`, `meshAnimation.ts`). The match itself - the relic, the
- * statues, the score gauge (`m_bGaugebarEnabled`, :330), `cursedtempleplay`
- * replacing `cursedtemplewait` - is server-driven and not built; the waiting
- * music `Music/cursedtemplewait` is what `PlayBGM` starts with.
+ * Outside a match the map is ten hidden markers - mist, torches, falling
+ * rubble - three breathing lamps and a floating star (`spec.ts`,
+ * `meshAnimation.ts`). The match itself - the relic, the statues, the score
+ * gauge (`m_bGaugebarEnabled`, :330), `cursedtempleplay` replacing
+ * `cursedtemplewait` - is server-driven and not built; the waiting music
+ * `Music/cursedtemplewait` is what `PlayBGM` starts with.
  *
  * Clear colour `(9, 8, 33)/256` (SceneManager.cpp:356) is set by
  * `loadMapIntoScene`. Offline: `?offline&map=45` lands at OpenMU's spawn gate
@@ -43,8 +45,9 @@ const WORLDS: readonly ENUM_WORLD[] = [
 // MapManager.cpp:1220).
 const ASSET_WORLD = ENUM_WORLD.WD_45CURSEDTEMPLE_LV1 + 2;
 
-// Slot 4 is `AlphaTileGround03.Tga` (MapManager.cpp:1392, `IsCursedTemple()`)
-// and there is no Wood01; Ground03 / Ground01 stand in.
+// Slot 4 is `AlphaTileGround03.Tga` (MapManager.cpp:1390-1394,
+// `IsCursedTemple()`) - see `CUTOUT` below - and there is no Wood01;
+// Ground03 / Ground01 stand in.
 const TILES: readonly string[] = [
   'TileGrass01',
   'TileGrass02',
@@ -62,6 +65,13 @@ const TILES: readonly string[] = [
   'TileRock07',
 ];
 
+// `RenderFace` (ZzzLodTerrain.cpp:1248-1258) puts slot 4 through
+// `EnableAlphaTest` on all six levels, and `World47/AlphaTileGround03.OZT` is
+// zero in every byte, so the 9112 tiles that name it draw nothing. The temple
+// is six platforms and the walkways between them over an empty drop; without
+// the cutout the drop is floored.
+const CUTOUT = 4;
+
 // OpenMU's spawn gate (VersionSeasonSix/Gates.cs, the `isSpawnGate: true` row), centred.
 const SPAWN = { x: 103, y: 132 } as const;
 
@@ -78,9 +88,11 @@ export const cursedtempleLayer: MapLayer = {
   worlds: WORLDS,
   assetWorld: ASSET_WORLD,
   tiles: TILES,
+  cutoutTile: CUTOUT,
   spawn: SPAWN,
   clearColor: CLEAR_COLOR,
   blendMeshes: CURSED_TEMPLE_BLEND_MESHES,
   effectOnly: CURSED_TEMPLE_EFFECT_ONLY_TYPES,
   emissions: CURSED_TEMPLE_EMISSIONS,
+  create: world => import('./create').then(m => m.createCursedTemple(world)),
 };

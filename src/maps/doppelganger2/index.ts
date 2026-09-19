@@ -14,8 +14,16 @@ import {
  * lives in another system; the notes below say what is and is not built.
  *
  * Doppelganger 2 (`WD_66DOPPLEGANGER2`, `World67`/`Object67`) - the lava
- * arena. Vulcanus' tables via `spec.ts`; `CreateFireSpark` embers not built;
+ * arena. Vulcanus' vent tables plus this map's own sheets via `spec.ts`;
  * music `null` (event-gated, see doppelganger1).
+ *
+ * Not built: `CreateFireSpark` (:656-685, embers drifting past the hero - the
+ * leaves slot, a weather recipe), the monster hooks (`MoveMonsterVisual`
+ * :80-190, `MoveBlurEffect` :192-229, `RenderMonsterVisual` :549-623), and
+ * types **67** and **68** (:261-346), the lava cannon: a scrolling stream
+ * mesh, a chrome pass, two `BITMAP_LIGHT` sprites off bone 6 and a smoke
+ * plume keyed to animation frames, with a 2-in-1000 roll holding it at frame
+ * 1. Neither is placed in World67 and neither has a model in Object67.
  */
 
 // ---- 1. data ---------------------------------------------------------------

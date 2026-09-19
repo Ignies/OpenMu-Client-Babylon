@@ -1,5 +1,6 @@
 import type { Emission } from '../../common/effectParticles';
 import type { LightEmitter } from '../../lighting/mapObjectLights';
+import type { ObjectLoop } from '../../sound/objectLoops';
 
 /**
  * Kalima (`WD_24HELLAS … _END` + Kalima 7 = world 36; one `World25`/`Object25`
@@ -11,10 +12,11 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
  * system re-used for every floor, the server picks the floor. Object25 ships
  * 59 models and every referenced type has one.
  *
- * The map's C++ lives in GMHellas.cpp: `CreateHellasObject` (:377) is an empty
+ * The map's C++ lives in GMHellas.cpp: `CreateHellasObject` (:379) is an empty
  * `return false`, `MoveHellasVisual` (:384) hides four marker types, and
- * `RenderHellasVisual` (:435-505) is where the water plants, the glowing
- * crystals and the drip emitters happen.
+ * `RenderHellasVisual` (:429-506) is where the water plants, the glowing
+ * crystals and the drip emitters happen. The water plants need a class and
+ * are in `create.ts`, which also lists what is not ported.
  */
 
 /**
@@ -55,6 +57,30 @@ export const KALIMA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
   39: [{ kinds: ['waterfall5_9'], every: 1, scale: 0.5 }],
   40: [{ kinds: ['waterfall5_9'], every: 4, scale: 0.5 }],
 };
+
+/**
+ * `PlayBuffer(SOUND_KALIMA_WATER_FALL)` on every rendered type 37 (×62) and
+ * 38 (×25) (GMHellas.cpp:479, :487) - `Data/Sound/aKalimaWaterFall.wav`,
+ * loaded with three buffers (MapManager.cpp:994). Types 39 and 40, the two
+ * silent drips, do not sound.
+ *
+ * The original plays it unpositioned, so one visible fall is heard at full
+ * volume wherever the hero stands. With 87 sources on one map that is a wall
+ * of water, so this fades: full inside four tiles, gone at twenty. The reach
+ * is the only invented number here.
+ *
+ * Read by `sound/objectLoops.ts`, which has no Kalima row yet - see the port
+ * notes for the registry line this wants.
+ */
+export const KALIMA_OBJECT_LOOPS: readonly ObjectLoop[] = [
+  {
+    types: [37, 38],
+    sound: 'Sound/aKalimaWaterFall',
+    gain: 0.35,
+    full: 4,
+    silent: 20,
+  },
+];
 
 /**
  * `RenderHellasVisual` case 12 (×49) and 32 (×19): a `BITMAP_LIGHT` sprite

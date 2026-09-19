@@ -1,10 +1,7 @@
 import { ENUM_WORLD } from '../../common/types';
 import type { MapLayer } from '../layer';
 import { FULL_TILES } from '../recipes';
-import {
-  EMPIRE_GUARDIAN_4_EFFECT_ONLY_TYPES,
-  EMPIRE_GUARDIAN_4_EMISSIONS,
-} from '../empireguardian/spec';
+import { LOGIN_SCENE_EFFECT_ONLY_TYPES, LOGIN_SCENE_EMISSIONS } from './spec';
 
 /**
  * The login and character-select backdrops - the map entry: identity and the per-world data the
@@ -15,10 +12,10 @@ import {
 // ---- 1. data ---------------------------------------------------------------
 
 // Worlds 73/74 (`World74`/`World75`) are the Season 4 login and character
-// scenes, drawn on the Fortress day-4 art set (`loginSceneSystem`); 77/78 are
-// the Season 6 ones (`World78`/`World79`), only ever asked for a tile list.
-// The scene systems own their objects; `create` only binds the types whose
-// model the data does not ship.
+// scenes, run by `GMEmpireGuardian4` on the Fortress day-4 hooks; 77/78 are
+// the Season 6 pair (`World78`/`World79`), which the original never gives any
+// object behaviour. The scene systems own the camera and the line-up; the
+// tables here and in `create` are the object half - see `spec.ts`.
 const WORLDS: readonly ENUM_WORLD[] = [
   ENUM_WORLD.WD_73NEW_LOGIN_SCENE,
   ENUM_WORLD.WD_74NEW_CHARACTER_SCENE,
@@ -35,8 +32,7 @@ export const loginsceneLayer: MapLayer = {
   name: 'loginscene',
   worlds: WORLDS,
   tiles: FULL_TILES,
-  // The day-4 tables (73/74 only, in the original registries; harmless on 77/78).
-  effectOnly: EMPIRE_GUARDIAN_4_EFFECT_ONLY_TYPES,
-  emissions: EMPIRE_GUARDIAN_4_EMISSIONS,
+  effectOnly: LOGIN_SCENE_EFFECT_ONLY_TYPES,
+  emissions: LOGIN_SCENE_EMISSIONS,
   create: world => import('./create').then(m => m.createLoginScene(world)),
 };

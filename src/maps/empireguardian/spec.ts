@@ -10,13 +10,14 @@ import type { LightEmitter } from '../../lighting/mapObjectLights';
  * the same list) and four copies of one `MoveObject`
  * (GMEmpireGuardian1.cpp:215-294, 2.cpp:116-196, 3.cpp:110-190,
  * 4.cpp:150-241) that differ in one constant - 64's `Velocity` is 0.44 on
- * day 3, 0.64 on the others. EncTerrain70-73.obj: 836 / 729 / 748 / 628
+ * day 3, 0.64 on the others. EncTerrain70-73.obj: 836 / 729 / 748 / 1670
  * objects.
  *
- * Day 4's tables already existed inline in the registries for the login
- * scene (`WD_73NEW_LOGIN_SCENE` / `WD_74NEW_CHARACTER_SCENE` reuse its art,
- * see `common/effectOnlyObjects.ts` `EMPIRE_GUARDIAN_4_*`); those rows stay
- * as they are and days 1-3 register these.
+ * Days 1-3 only. Day 4 owns its own tables in `maps/empireguardian4/spec.ts`
+ * and the login scenes theirs in `maps/loginscene/spec.ts`; the three used to
+ * be one set here, on the reading that day 4 *was* the login scene, which is
+ * also where the 628 in the object counts above came from - that is
+ * World78's total, not World73's.
  */
 
 /** No `o->BlendMesh` writes; 81's V scroll (`+0.015`/tick) is in `meshAnimation.ts`. */
@@ -46,54 +47,11 @@ export const EMPIRE_GUARDIAN_EMISSIONS: Partial<
     { kinds: ['smoke22'], every: 3 },
     { kinds: ['smoke21'], every: 3, scale: 2 },
   ],
-  132: [{ kinds: ['smoke2'], every: 2, jitter: 8 }],
-};
-
-/**
- * Day 4 (`World73` / `Object73`) and the login scene drawn on it
- * (`WD_73NEW_LOGIN_SCENE` / `WD_74NEW_CHARACTER_SCENE`): the same hidden
- * types, but 132's smoke is the login scene's twin-kind recipe.
- */
-export const EMPIRE_GUARDIAN_4_EFFECT_ONLY_TYPES: readonly number[] = [
-  79, 80, 82, 83, 84, 85, 86, 129, 130, 131, 132,
-];
-
-export const EMPIRE_GUARDIAN_4_EMISSIONS: Partial<
-  Record<number, readonly Emission[]>
-> = {
-  79: [
-    { kinds: ['fire1', 'fire2', 'fire3'], every: 1, count: 3, light: [1, 1, 1] },
-  ],
-
-  82: [{ kinds: ['waterfall5_9'], every: 1 }],
-
-  86: [{ kinds: ['cloud21'], every: 6, light: [0.05, 0.02, 0.01] }],
-
-  129: [{ kinds: ['cloud21'], every: 6, light: [0.01, 0.02, 0.05] }],
-
-  130: [{ kinds: ['cloud21'], every: 6, light: [0.01, 0.05, 0.02] }],
-
-  131: [
-    { kinds: ['smoke22'], every: 3 },
-    { kinds: ['smoke21'], every: 3, scale: 2 },
-  ],
-
   132: [
     { kinds: ['smoke60'], every: 3, count: 2 },
     { kinds: ['smoke21'], every: 3, scale: 2 },
   ],
 };
-
-/**
- * Types EncTerrain74.obj places whose model `Data/Object74` never had
- * (Season 6 data, `references/MuOnlineClient/src/bin/Data/Object74`):
- * Object02, 49 and 76 are gaps in the folder and it stops at Object160, so
- * these would ask for a file the dev server answers with index.html. The
- * original loads nothing for them and draws nothing.
- */
-export const LOGIN_SCENE_ABSENT_MODELS: readonly number[] = [
-  1, 48, 75, 160, 162, 163, 164,
-];
 
 /** The 79 torch, as the login scene lights it. */
 export const EMPIRE_GUARDIAN_LIGHTS: Partial<

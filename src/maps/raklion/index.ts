@@ -11,25 +11,18 @@ import {
  * Raklion (World58 / Object58) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
- * No `create`: every runtime behaviour of this map is table data (spec.ts) or
- * lives in another system; the notes below say what is and is not built.
+ * Raklion (`WD_57ICECITY`, `World58`/`Object58`) - the ice field. The object
+ * behaviour is in `create.ts`, which also lists what is deliberately left
+ * out; the plain tables are in `spec.ts` and `common/meshAnimation.ts`.
  *
- * Raklion (`WD_57ICECITY`, `World58`/`Object58`) - the ice field.
- *
- * `CGM_Raklion::CreateObject` (GM_Raklion.cpp:52-84): `MODEL_WARP4` spawns
- * the three-model warp-gate effect (`CreateEffect(MODEL_WARP4/5/6)` 5.2
- * tiles up) - an effect-model stack, not built. `MoveObject` (:244-269) is
- * the two hidden braziers (`spec.ts`) and the 22 sine (`meshAnimation.ts`);
- * `MoveEffect` (:2742) runs the Selupan fight's screen effects only while
- * the boss state machine is live.
- *
- * Snow: `g_Raklion.CreateSnow` is the leaves slot for both Ice City worlds,
- * so the two join `SNOW_MAPS` in `weather/ambientWeather.ts` - the sky is
- * snow and rain never falls here. Nothing falls out of it either: see the
- * `SNOWFALL` note below.
+ * Snow: `g_Raklion.CreateSnow` (:2257-2280) is the leaves slot for both Ice
+ * City worlds, so the two join `SNOW_MAPS` in `weather/ambientWeather.ts` -
+ * the sky is snow and rain never falls here. Nothing falls out of it either:
+ * see the `SNOWFALL` note below.
  *
  * Sound: no `PlayWorldAmbientSounds` case for 57 (the hatchery has the
- * wind); `PlayObjectSound` (:2671) is the boss room's. `Music/Raklion`.
+ * wind); `PlayObjectSound` (:2728) is an empty body on this map class.
+ * `Music/Raklion`.
  */
 
 // ---- 1. data ---------------------------------------------------------------
@@ -52,10 +45,10 @@ const SNOW = true;
 
 // No flakes over the ice. The original's Ice City fall is a fast, near-flat
 // blizzard (scale 3-12, tilted 50-79 degrees, 30-49 u/tick -
-// GM_Raklion.cpp:2198); what we have is the Devias flake, and a slow vertical
-// drift over a field that is already white reads as speckle on the screen
-// rather than weather. The sky stays snow so rain can never reach the ice
-// field, and with no fall nothing settles on it either.
+// GM_Raklion.cpp:2262-2277); what we have is the Devias flake, and a slow
+// vertical drift over a field that is already white reads as speckle on the
+// screen rather than weather. The sky stays snow so rain can never reach the
+// ice field, and with no fall nothing settles on it either.
 const SNOWFALL = false;
 
 // ---- 2. state + readers ----------------------------------------------------
@@ -74,4 +67,5 @@ export const raklionLayer: MapLayer = {
   blendMeshes: RAKLION_BLEND_MESHES,
   effectOnly: RAKLION_EFFECT_ONLY_TYPES,
   emissions: RAKLION_EMISSIONS,
+  create: world => import('./create').then(m => m.createRaklion(world)),
 };

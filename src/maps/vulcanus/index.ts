@@ -10,24 +10,19 @@ import {
  * Vulcanus / PK Field (World64 / Object64) - the map entry: identity and the per-world data the
  * renderer, the terrain loader, the weather and the sound tables read.
  *
- * No `create`: every runtime behaviour of this map is table data (spec.ts) or
- * lives in another system; the notes below say what is and is not built.
- *
- * Vulcanus, the PK Field (`WD_63PK_FIELD`, `World64`/`Object64`).
- *
  * `CGM_PK_Field::CreateObject` (GM_PK_Field.cpp:230-243) makes types 0-6
  * unpickable (`CollisionRange = -300`) and `MoveObject` hides them - they
- * are the seven vent kinds in `spec.ts`. Nothing else is per-object.
+ * are the seven vent kinds in `spec.ts`. `RenderObjectMesh` (:391-497) and
+ * `RenderAfterObjectMesh` (:499-515) add the four drawn types, 15, 16, 67
+ * and 68; `create.ts` carries the three of those that need a class and lists
+ * what is deliberately left out.
  *
  * This is one of the three `IsTerrainHeightExtMap` worlds (ZzzLodTerrain.cpp
  * :599-602): a 24-bit `TerrainHeight.OZB`, detected by `parseTerrainHeight`.
  * Its slot-11 tile is `Object64song_lava1.jpg` in the original
  * (MapManager.cpp:1424); `getTilesList` uses the folder's `TileWater02`.
  *
- * Not built: `CreateFireSpark` (the leaves slot - embers in the air, a
- * weather recipe), `MoveBlurEffect` on the Volcanic monsters, and the
- * `TileGrass01_R.jpg` additive grass (:1459). `Music/PK_Field`; no bed
- * (`PlayObjectSound` is empty).
+ * `Music/PK_Field`; no bed (`PlayObjectSound` is empty).
  */
 
 // ---- 1. data ---------------------------------------------------------------
@@ -81,4 +76,5 @@ export const vulcanusLayer: MapLayer = {
   blendMeshes: VULCANUS_BLEND_MESHES,
   effectOnly: VULCANUS_EFFECT_ONLY_TYPES,
   emissions: VULCANUS_EMISSIONS,
+  create: world => import('./create').then(m => m.createVulcanus(world)),
 };
