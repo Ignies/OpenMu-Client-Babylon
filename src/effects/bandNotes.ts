@@ -58,18 +58,25 @@ const MIN_SIZE = 0.6;
 const SIZE_VARY = 0.3;
 
 /** The note's size along its way, as shares of its own: it grows as it leaves. */
-const START_SCALE = 0.6;
-const END_SCALE = 2.4;
+const START_SCALE = 1;
+const END_SCALE = 2;
 
 /** Tiles the curve reaches forward over a life, fast at first and easing off. */
 const REACH = 1.3;
 
-/** Tiles it lifts by the end, steepening as it goes: the escalation. */
-const RISE = 0.55;
+/** Tiles it lifts by the end, from the first moment and steepening as it goes; and how much that varies per note, either way. */
+const RISE = 0.6;
+const RISE_VARY = 0.5;
 
 /** The fan, radians off straight ahead: the least a note turns, and how much more it may. */
-const FAN = 0.12;
-const FAN_VARY = 0.4;
+const FAN = 0.35;
+const FAN_VARY = 0.7;
+
+/** The dance: the glyph's roll wobble in radians and its bob in tiles, each at its rate in radians per second. */
+const WOBBLE = 0.25;
+const WOBBLE_RATE = 5;
+const BOB = 0.03;
+const BOB_RATE = 3.5;
 
 /** A sideways ripple along the way: amplitude in tiles, radians per second. */
 const RIPPLE = 0.035;
@@ -82,24 +89,25 @@ const SPREAD = 0.05;
 const LEAN = 0.4;
 
 /** The fade: whole until this share of the life, then eased smoothly to nothing at the end. */
-const FADE_FROM = 0.45;
+const FADE_FROM = 0.6;
 
 /** The wake: glow dots along the last stretch of curve, this many seconds apart, this many of them. */
 const WAKE_STEP = 0.05;
-const WAKE = 12;
+const WAKE = 5;
 
 /** The wake's width at the note, as a share of the note's size, and the soft glow it is drawn with. */
-const WAKE_WIDTH = 3;
+const WAKE_WIDTH = 0.9;
 const WAKE_TEXTURE = 'Effect/flare01.OZJ';
 
-/** How much of the note's colour the wake carries: a glow, not a second note. */
-const WAKE_GAIN = 0.9;
+/** The wake's tint: the note's hue moved this far toward white, at this brightness - a pale halo, not a second note. */
+const WAKE_PALE = 0.5;
+const WAKE_GAIN = 0.8;
 
 /** Share of the life spent growing in from nothing. */
 const GROW = 0.1;
 
 /** Saturation of the pitch hues, 0..1: pastel, so the note reads as a glyph, not a flare. */
-const SATURATION = 0.55;
+const SATURATION = 0.75;
 
 /** Share of notes drawn as the single glyph; the rest are the beamed pair. */
 const SINGLE_SHARE = 0.75;
@@ -284,7 +292,11 @@ function spawn(scene: Scene, at: Vector3, opts: BandNoteOptions): EffectHandle {
   const card: Card = acquireCard(scene, material, true, 0);
   const s = seed++;
   setCardCell(card, CELLS, hash(s) < SINGLE_SHARE ? 0 : 1);
-  const glow = additiveMaterial(scene, WAKE_TEXTURE, [colour[0] * WAKE_GAIN, colour[1] * WAKE_GAIN, colour[2] * WAKE_GAIN]);
+  const glow = additiveMaterial(scene, WAKE_TEXTURE, [
+    lerp(colour[0], 1, WAKE_PALE) * WAKE_GAIN,
+    lerp(colour[1], 1, WAKE_PALE) * WAKE_GAIN,
+    lerp(colour[2], 1, WAKE_PALE) * WAKE_GAIN,
+  ]);
   const wake: Card[] = [];
   for (let k = 0; k < WAKE; k++) {
     const dot = acquireCard(scene, glow);
@@ -295,6 +307,8 @@ function spawn(scene: Scene, at: Vector3, opts: BandNoteOptions): EffectHandle {
   const size = SIZE * lerp(MIN_SIZE, 1, velocity) * (1 + SIZE_VARY * (hash(s + 0.5) * 2 - 1));
   const side = s % 2 === 0 ? -1 : 1;
   const heading = (opts.yaw ?? 0) + side * (FAN + FAN_VARY * hash(s + 0.25));
+  const rise = RISE * (1 + RISE_VARY * (hash(s + 0.75) * 2 - 1));
+  const phase = hash(s + 0.125) * Math.PI * 2;
   // MU's yaw: forward is (sin, -cos) on the ground; its right-hand side turns from that.
   const fx = Math.sin(heading), fz = -Math.cos(heading);
   const rx = -fz, rz = fx;
@@ -302,11 +316,11 @@ function spawn(scene: Scene, at: Vector3, opts: BandNoteOptions): EffectHandle {
   card.position.set(x, y, z);
   card.scaling.setAll(0);
 
-  /** The curve `age` seconds in: forward and lifting, with a ripple across it. */
+  /** The curve `age` seconds in: forward and lifting, bobbing along, with a ripple across it. */
   const arcAt = (age: number, out: Vector3): void => {
     const p = Math.min(1, age / SECONDS);
     const d = SPREAD + REACH * travelled(p);
-    const lift = RISE * p * p;
+    const lift = rise * (0.35 * p + 0.65 * p * p) + BOB * Math.sin(BOB_RATE * age + phase);
     const ripple = RIPPLE * Math.sin(RIPPLE_RATE * age);
     out.set(x + fx * d + rx * ripple, y + lift, z + fz * d + rz * ripple);
   };
@@ -334,7 +348,7 @@ function spawn(scene: Scene, at: Vector3, opts: BandNoteOptions): EffectHandle {
       p1.subtractToRef(p0, span);
       const slope = span.lengthSquared() > 0 ? screenRoll(span) + Math.PI / 2 : 0;
       card.scaling.setAll(sizeAt(t));
-      card.rotation.z = slope * LEAN;
+      card.rotation.z = slope * LEAN + WOBBLE * Math.sin(WOBBLE_RATE * t + phase);
       card.position.copyFrom(p1);
       card.visibility = fadeAt(t);
 

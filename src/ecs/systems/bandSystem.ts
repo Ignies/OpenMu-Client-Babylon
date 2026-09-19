@@ -42,7 +42,7 @@ import type { Entity, ISystemFactory } from '../world';
 const CLIP_SPEED = 24 / 25;
 
 /** Seconds between two notes shown for one performer: a chord is one note, not six. */
-const NOTE_GAP = 0.09;
+const NOTE_GAP = 0.15;
 
 /** Tiles above the instrument's origin (the hand) a note is born. */
 const NOTE_HEIGHT = 0.15;
