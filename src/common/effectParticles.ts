@@ -30,6 +30,7 @@ type TextureKey =
   | 'waterfall5'
   | 'spark03'
   | 'flareBlue'
+  | 'fantaB'
   | 'clud64';
 
 const TEXTURES: Record<
@@ -47,6 +48,7 @@ const TEXTURES: Record<
   waterfall5: { file: 'Effect/waterFall5.OZJ', size: 64 },
   spark03: { file: 'Effect/Spark03.OZJ', size: 32 },
   flareBlue: { file: 'Effect/flareBlue.OZJ', size: 64 },
+  fantaB: { file: 'Effect/fantaB.OZJ', size: 64 },
   clud64: { file: 'Effect/clud64.OZJ', size: 64 },
 };
 
@@ -272,6 +274,22 @@ const KINDS = {
   fire0: stripFireKind('fire01'),
 
   fire0b: stripFireKind('fire03'),
+
+  /**
+   * The elf lamps' blue flame (`BITMAP_TRUE_BLUE`, GMNewTown.cpp:283-289):
+   * the login braziers' fire burning the original's blue sheet instead of
+   * an orange one. Tinting a firehik sheet blue only makes it muddy - the
+   * colour has to come from the texture.
+   */
+  fireBlue: fireKind('fantaB', {
+    lifeBase: 17,
+    lifeRand: 5,
+    fadeBelow: 10,
+    gravityBase: 20,
+    gravityRand: 16,
+    shrinkBase: 7,
+    shrinkRand: 3,
+  }),
 
   smoke0: {
     texture: 'smoke',

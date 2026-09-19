@@ -100,13 +100,33 @@ export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
     ],
     61: [
       {
+        // Every 61 record sits 11 west and 8 north of the bowl it belongs to
+        // (its type-34 post), so the flame burned beside the rim; the drop
+        // puts its base inside the bowl instead of on top of it. `pointDrop`
+        // keeps the pool where it was - an `offset` otherwise takes the
+        // pool's default 0.6 hover away.
+        offset: [11, -8, -10],
+        pointDrop: 0.6,
+        sprite: { scale: 0.9, color: [0.2, 0.5, 1] },
         pointRange: 5,
         terrain: {
           range: 3,
           color: [0.2, 0.6, 1],
           flicker: { min: 0.3, max: 0.6, steps: 4 },
         },
-        emissions: [{ kinds: ['wingFlareBlue'], every: 3, scale: 0.6 }],
+        // The login braziers' flame on the original's blue sheet (:283-289).
+        // A `flareBlue` card stood here before - a lens flare with long
+        // streaks, drawn at a random angle, so every lamp had a blue spike
+        // leaning out of its bowl instead of a fire in it.
+        emissions: [
+          {
+            kinds: ['fireBlue'],
+            every: 1,
+            count: 2,
+            scale: 0.5,
+            light: [0.5, 0.75, 1],
+          },
+        ],
       },
     ],
     63: [
