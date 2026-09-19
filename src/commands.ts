@@ -361,6 +361,20 @@ export const Commands = new (class _Commands {
   }
 
   /**
+   * `ReceivePartyLeave` (WSclient.cpp:6909): the party the follow was for
+   * is gone, so the follow goes with it. The original tests the followed
+   * character against a member list it has just emptied, which is the same
+   * as this when the party dissolves and the honest rule when it does not.
+   */
+  stopFollowingOutside(memberNames: readonly string[]): void {
+    const target = this.following;
+    if (!target) return;
+    const name = target.objectNameInWorld;
+    if (name && memberNames.includes(name)) return;
+    this.stopFollowing();
+  }
+
+  /**
    * `g_iFollowCharacter = -1`: a walk, attack or cast of the hero's own
    * (pointer and controller systems), on top of the tick's own tests.
    */
