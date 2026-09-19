@@ -3,8 +3,8 @@ import {
   Constants,
   CreatePlane,
   DynamicTexture,
+  type IVector3Like,
   Mesh,
-  PointLight,
   PointerEventTypes,
   Scene,
   StandardMaterial,
@@ -22,6 +22,12 @@ import {
 import { setSceneHold } from '../../common/sceneGate';
 import { PlayerAction } from '../../common/objects/enum';
 import { genderedEmoteAction } from '../../common/emotes';
+import {
+  registerPointLightEmitter,
+  type PointLightEmitter,
+} from '../../common/pointLightPool';
+import { PRIORITY_EFFECT } from '../../lighting/lightSource';
+import type { TerrainLightColor } from '../../common/terrainDynamicLight';
 
 type CircleVisual = {
   mesh: Mesh;
@@ -125,11 +131,39 @@ function createSelectionCircleTexture(scene: Scene): DynamicTexture {
 /** This system's name on the loading gate (`common/sceneGate.ts`). */
 const GATE = 'characterSelect';
 
+/** Opacity the ring settles at once its character has the focus. */
+const FOCUSED_ALPHA = 0.9;
+
+/** Ring fade, in alpha per second: in slower than out, so a sweep reads. */
+const FADE_IN_PER_SECOND = 2.5;
+const FADE_OUT_PER_SECOND = 3.0;
+
+/** Turns per second of the ring's tick marks. */
+const RING_SPIN = 0.4;
+
+/** Ring diameter and its lift off the floor, both in tiles. */
+const RING_SIZE = 1.7;
+const RING_LIFT = 0.02;
+
+/** Where the key sits over the character's feet, and how far it reaches. */
+const LIGHT_HEIGHT = 0.5;
+const LIGHT_RANGE = 3.5;
+
+/**
+ * The key against a pool slot's own peak, which is a torch standing next to
+ * the object (`pointLightPool.ts` INTENSITY). Half of one: the ring is the
+ * thing that says "selected", the light only has to keep the face from
+ * sitting in the ambient. This is the number to move if it reads hot.
+ */
+const LIGHT_GAIN = 0.5;
+
+/** The warm candle tint; the pool reads the peak channel as the magnitude. */
+const LIGHT_TINT = { r: 1.0, g: 0.88, b: 0.65 };
+
 export const CharacterSelectSystem: ISystemFactory = world => {
   const spawned: Entity[] = [];
 
   let stagedFor: string | null = null;
-
 
   /** Visual ground circle for each spawned character. */
   const circleVisuals = new Map<Entity, CircleVisual>();
@@ -137,14 +171,40 @@ export const CharacterSelectSystem: ISystemFactory = world => {
   /** Shared procedural texture for selection circles. */
   let sharedCircleTexture: DynamicTexture | null = null;
 
-  /** Subtle dynamic light that illuminates the selected character and floor. */
-  let selectionLight: PointLight | null = null;
-
+  // The texture is disposed and nulled together in `clear()`, so the field
+  // being null is the whole of "there is none".
   const getSharedTexture = (): DynamicTexture => {
-    if (!sharedCircleTexture || sharedCircleTexture.isDisposed) {
+    if (!sharedCircleTexture) {
       sharedCircleTexture = createSelectionCircleTexture(world.scene);
     }
     return sharedCircleTexture;
+  };
+
+  /**
+   * The focused character's key light. It takes a slot from the shared pool
+   * (`common/pointLightPool.ts`) instead of adding a `PointLight` of its own:
+   * every object material in the scene is compiled with `2 + budget` light
+   * slots (`common/lightingQuality.ts`), and Babylon fills a mesh's
+   * `lightSources` from layer masks, never from range - so a light outside
+   * the pool is a shader recompile plus a slot that every object pixel in the
+   * scene evaluates, reached or not. On Classic the budget is 0 by design
+   * (the original has no per-pixel lights), and going through the pool is
+   * what keeps this out of that tier rather than making it the one exception.
+   */
+  const lightPosition = { x: 0, y: 0, z: 0 };
+  const lightColor: TerrainLightColor = { r: 0, g: 0, b: 0 };
+  let releaseLight: (() => void) | null = null;
+
+  const selectionEmitter: PointLightEmitter = {
+    position: lightPosition,
+    heightOffset: LIGHT_HEIGHT,
+    range: LIGHT_RANGE,
+    gain: LIGHT_GAIN,
+    // The circle's own alpha below is the fade; the pool's 0.35 s swell on
+    // top of it would read as the light lagging the ring.
+    instant: true,
+    priority: PRIORITY_EFFECT,
+    color: () => lightColor,
   };
 
   /** Name of the character that was focused on the previous frame. */
@@ -155,26 +215,43 @@ export const CharacterSelectSystem: ISystemFactory = world => {
   // -------------------------------------------------------------------------
 
   /**
-   * Play greeting animation on the selected character.
+   * The greeting pool, as male base clips: `genderedEmoteAction` picks the
+   * female variant where the action table has one. Respect and Rock have
+   * only the one, which is why they are safe to list beside the rest.
    */
-  let characterSelectLastAction: PlayerAction | null = null;
+  const GREETINGS: readonly PlayerAction[] = [
+    PlayerAction.PLAYER_SMILE1,
+    PlayerAction.PLAYER_WIN1,
+    PlayerAction.PLAYER_RESPECT1,
+    PlayerAction.PLAYER_GREETING1,
+    PlayerAction.PLAYER_CLAP1,
+    PlayerAction.PLAYER_ROCK,
+    PlayerAction.PLAYER_GESTURE1,
+  ];
+
+  /**
+   * The clip the line-up last greeted with, male base index - so the draw
+   * below excludes it whichever character played it and whichever variant
+   * that character used.
+   */
+  let lastGreeting: PlayerAction | null = null;
+
+  /** Greet with a social clip, never the one the previous greeting used. */
   const playGreeting = (entity: Entity) => {
-    const actions: PlayerAction[] = [
-      PlayerAction.PLAYER_SMILE1,
-      PlayerAction.PLAYER_WIN1,
-      PlayerAction.PLAYER_RESPECT1,
-      PlayerAction.PLAYER_GREETING1,
-      PlayerAction.PLAYER_CLAP1,
-      PlayerAction.PLAYER_ROCK,
-      PlayerAction.PLAYER_GESTURE1
-    ];
     if (!entity.playerAnimation) return;
 
-    const availableActions = actions.filter(action => action !== characterSelectLastAction);
-    const characterAction = availableActions[Math.floor(Math.random() * availableActions.length)];
-    characterSelectLastAction = characterAction;
+    const available = GREETINGS.filter(action => action !== lastGreeting);
+    const greeting = available[Math.floor(Math.random() * available.length)];
 
-    entity.playerAnimation.action = characterAction;
+    lastGreeting = greeting;
+
+    // `SetActionClass`: a female character plays the clip right after the
+    // male one. Without this an Elf or a Summoner greets on the Dark Knight's
+    // animation, which is the mismatch `genderedEmoteAction` exists for.
+    entity.playerAnimation.action = genderedEmoteAction(
+      greeting,
+      entity.attributeSystem?.isAboveZero('isFemale') ?? false
+    );
   };
 
   /**
@@ -191,7 +268,7 @@ export const CharacterSelectSystem: ISystemFactory = world => {
    * Update circle positions, rotation, fade-in/out alpha, and dynamic illumination.
    */
   const updateCircleVisuals = (deltaTime: number, focusedName: string): void => {
-    let activeLightPos: Vector3 | null = null;
+    let activeLightPos: IVector3Like | null = null;
     let activeLightAlpha = 0;
 
     for (const entity of spawned) {
@@ -199,10 +276,10 @@ export const CharacterSelectSystem: ISystemFactory = world => {
       if (!vis) continue;
 
       const isFocused = entity.objectNameInWorld === focusedName;
-      const targetAlpha = isFocused ? 0.9 : 0.0;
+      const targetAlpha = isFocused ? FOCUSED_ALPHA : 0;
 
       // Smooth fade in / fade out
-      const fadeSpeed = isFocused ? 2.5 : 3.0;
+      const fadeSpeed = isFocused ? FADE_IN_PER_SECOND : FADE_OUT_PER_SECOND;
       if (vis.alpha < targetAlpha) {
         vis.alpha = Math.min(targetAlpha, vis.alpha + deltaTime * fadeSpeed);
       } else if (vis.alpha > targetAlpha) {
@@ -211,11 +288,12 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
       const pos = entity.transform?.pos;
       if (pos) {
-        vis.mesh.position.set(pos.x, pos.y + 0.02, pos.z);
+        vis.mesh.position.set(pos.x, pos.y + RING_LIFT, pos.z);
       }
 
-      // Gentle continuous rotation of the circle
-      vis.mesh.rotation.y += deltaTime * 0.4;
+      // Gentle continuous rotation of the circle. The plane is pitched flat,
+      // and Babylon applies yaw outermost, so this spins it in place.
+      vis.mesh.rotation.y += deltaTime * RING_SPIN;
 
       if (vis.alpha > 0.01) {
         vis.mesh.setEnabled(true);
@@ -231,19 +309,25 @@ export const CharacterSelectSystem: ISystemFactory = world => {
       }
     }
 
-    // Update the subtle PointLight
-    if (selectionLight && !selectionLight.isDisposed) {
-      if (activeLightPos && activeLightAlpha > 0.01) {
-        selectionLight.setEnabled(true);
-        selectionLight.position.set(
-          activeLightPos.x,
-          activeLightPos.y + 0.5,
-          activeLightPos.z
-        );
-        selectionLight.intensity = 0.7 * (activeLightAlpha / 0.9);
-      } else {
-        selectionLight.setEnabled(false);
-      }
+    // The key rides the same alpha as the ring. It holds a pool slot only
+    // while it is actually lighting something: the line-up stands on the
+    // Fortress art, whose torches are emitters of their own, and an emitter
+    // at zero still costs whichever slot it outranks.
+    if (activeLightPos && activeLightAlpha > 0.01) {
+      lightPosition.x = activeLightPos.x;
+      lightPosition.y = activeLightPos.y;
+      lightPosition.z = activeLightPos.z;
+
+      const level = activeLightAlpha / FOCUSED_ALPHA;
+
+      lightColor.r = LIGHT_TINT.r * level;
+      lightColor.g = LIGHT_TINT.g * level;
+      lightColor.b = LIGHT_TINT.b * level;
+
+      releaseLight ??= registerPointLightEmitter(selectionEmitter);
+    } else if (releaseLight) {
+      releaseLight();
+      releaseLight = null;
     }
   };
 
@@ -263,9 +347,9 @@ export const CharacterSelectSystem: ISystemFactory = world => {
     }
     circleVisuals.clear();
 
-    if (selectionLight) {
-      selectionLight.dispose();
-      selectionLight = null;
+    if (releaseLight) {
+      releaseLight();
+      releaseLight = null;
     }
 
     if (sharedCircleTexture) {
@@ -280,15 +364,6 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
   const stage = () => {
     clear();
-
-    if (!selectionLight || selectionLight.isDisposed) {
-      selectionLight = new PointLight('charSelectLight', Vector3.Zero(), world.scene);
-      selectionLight.range = 3.5;
-      selectionLight.diffuse = new Color3(1.0, 0.88, 0.65);
-      selectionLight.specular = new Color3(0.5, 0.44, 0.3);
-      selectionLight.intensity = 0;
-      selectionLight.setEnabled(false);
-    }
 
     for (const character of Store.charactersList) {
       const position = characterSlotPosition(character.SlotIndex);
@@ -330,11 +405,11 @@ export const CharacterSelectSystem: ISystemFactory = world => {
       // Create ground selection circle for this character
       const circleMesh = CreatePlane(
         `selectCircle_${character.Name}`,
-        { size: 1.7 },
+        { size: RING_SIZE },
         world.scene
       );
       circleMesh.rotation.x = Math.PI / 2;
-      circleMesh.position.set(position.x, position.y + 0.02, position.z);
+      circleMesh.position.set(position.x, position.y + RING_LIFT, position.z);
       circleMesh.isPickable = false;
       circleMesh.setEnabled(false);
 
@@ -344,6 +419,11 @@ export const CharacterSelectSystem: ISystemFactory = world => {
       );
       circleMat.diffuseTexture = getSharedTexture();
       circleMat.useAlphaFromDiffuseTexture = true;
+      // `disableLighting` holds the diffuse base at 1, so the tint has to
+      // come from the emissive term alone: left on the default white
+      // `diffuseColor`, the sum clamps to 1 before emissive adds anything
+      // and the ring draws as the raw texture.
+      circleMat.diffuseColor = Color3.Black();
       circleMat.emissiveColor = new Color3(1.0, 0.85, 0.55);
       circleMat.disableLighting = true;
       circleMat.backFaceCulling = false;
