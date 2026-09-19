@@ -370,3 +370,49 @@ export function worldHeight(rowCount: number): number {
  */
 export const WORLD_PAGE_PREV_X = WORLD_PLAY_X - PAGE_ARROW.width - 6;
 export const WORLD_PAGE_NEXT_X = WORLD_BACK_X + BTN_WIDTH + 6;
+
+// ---- the download tab ---------------------------------------------------
+
+/**
+ * The pre-download list: one row per asset group, a progress bar under it,
+ * and the pack picker beside the total.
+ *
+ * The rows scroll inside a fixed box rather than growing the window: there is
+ * one group per map, forty-odd of them, and a window that tall would not fit
+ * the 640x480 the rest of this screen is laid out in.
+ */
+export const DOWNLOAD_ROW_HEIGHT = 18;
+export const DOWNLOAD_VISIBLE_ROWS = 9;
+
+export function downloadMetrics() {
+  const listY = CONTENT_TOP + 4;
+  const listHeight = DOWNLOAD_ROW_HEIGHT * DOWNLOAD_VISIBLE_ROWS;
+  const packY = listY + listHeight + 8;
+  // The picker is a label over a plate; less than this and the total sits
+  // on top of it.
+  const totalY = packY + 48;
+  const barY = totalY + 18;
+  const noteY = barY + 20;
+
+  return {
+    x: CONTENT_X,
+    width: CONTENT_WIDTH,
+    listY,
+    listHeight,
+    packY,
+    totalY,
+    barY,
+    noteY,
+    height: heightFor(noteY + 14),
+  };
+}
+
+/**
+ * How many rows the pickers' dropdowns show before they scroll.
+ *
+ * These sit low in an already full window, and the language list has
+ * thirteen entries: at the widget's own default it ran past the bottom of
+ * the frame and over the Enter button. Five rows keeps the open list inside
+ * the window and the rest is a scroll.
+ */
+export const DROPDOWN_ROWS = 5;

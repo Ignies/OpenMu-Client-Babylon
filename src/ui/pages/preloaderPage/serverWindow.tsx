@@ -17,6 +17,7 @@ import { SetupFrame } from './frame';
 import { AccountTab } from './accountTab';
 import { InfoTab } from './infoTab';
 import { SetupTab } from './setupTab';
+import { DownloadTab } from './downloadTab';
 import { useWorldRows, WorldsTab } from './worldsTab';
 import {
   BTN_HEIGHT,
@@ -37,6 +38,7 @@ import {
   accountMetrics,
   infoMetrics,
   setupMetrics,
+  downloadMetrics,
   windowRows,
   worldHeight,
   worldRowsFor,
@@ -62,7 +64,7 @@ import {
  */
 
 /** The top strip: somewhere to go, or the addresses this client dials. */
-type Section = 'worlds' | 'setup';
+type Section = 'worlds' | 'setup' | 'download';
 
 /** The second strip, under Worlds. */
 type WorldsTabKey = 'list' | 'info' | 'account';
@@ -70,6 +72,7 @@ type WorldsTabKey = 'list' | 'info' | 'account';
 const SECTIONS: { key: Section; label: TextKey }[] = [
   { key: 'worlds', label: 'worlds.tabWorlds' },
   { key: 'setup', label: 'worlds.tabSetup' },
+  { key: 'download', label: 'worlds.tabDownload' },
 ];
 
 const WORLD_TABS: { key: WorldsTabKey; label: TextKey }[] = [
@@ -124,7 +127,8 @@ export const ServerWindow = observer(
       worldHeight(Math.min(rows, Math.ceil(worlds.length / WORLD_COLS)) || 1),
       infoMetrics().height,
       accountMetrics().height,
-      setupMetrics().height
+      setupMetrics().height,
+      downloadMetrics().height
     );
     const { descY, addressY, buttonsY } = windowRows(height);
 
@@ -296,7 +300,9 @@ export const ServerWindow = observer(
           </div>
         )}
 
-        {section === 'setup' ? (
+        {section === 'download' ? (
+          <DownloadTab />
+        ) : section === 'setup' ? (
           <SetupTab />
         ) : tab === 'list' ? (
           <WorldsTab

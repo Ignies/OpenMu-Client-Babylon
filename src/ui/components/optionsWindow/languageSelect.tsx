@@ -20,11 +20,22 @@ const ROW_HEIGHT = 18;
 const PLATE_HEIGHT = 18;
 const FLAG_WIDTH = 18;
 
-/** How many languages the list shows before it scrolls. */
+/** Rows before the list scrolls, when the caller does not say otherwise. */
 const VISIBLE_ROWS = 8;
 
 export const LanguageSelect = observer(
-  ({ left, top, width }: { left: number; top: number; width: number }) => {
+  ({
+    left,
+    top,
+    width,
+    visibleRows = VISIBLE_ROWS,
+  }: {
+    left: number;
+    top: number;
+    width: number;
+    /** Cap the open list so it cannot run past the window it sits in. */
+    visibleRows?: number;
+  }) => {
     const [open, setOpen] = useState(false);
     const root = useRef<HTMLDivElement>(null);
 
@@ -69,7 +80,7 @@ export const LanguageSelect = observer(
             style={{
               top: 12 + PLATE_HEIGHT + 2,
               width,
-              maxHeight: VISIBLE_ROWS * ROW_HEIGHT + 4,
+              maxHeight: visibleRows * ROW_HEIGHT + 4,
             }}
           >
             {i18n.languages.map(language => (

@@ -95,6 +95,7 @@ import {
 } from '../msgWindow/layout';
 import { t, type TextKey } from '../../../i18n';
 import { LanguageSelect } from './languageSelect';
+import { TexturePackSelect } from './texturePackSelect';
 import {
   TIER_PRESETS,
   TIER_PRESET_LABEL_KEYS,
@@ -182,6 +183,7 @@ type ExitRow = { exit: ExitKind; labelKey: TextKey };
 
 /** The language picker: one row, its own widget (`languageSelect.tsx`). */
 type LanguageRow = { id: 'language' };
+type TexturePackRow = { id: 'texturePack' };
 
 /** The tier presets: one plate per tier (`presets.ts`). */
 type PresetRow = { id: 'presets'; labelKey: TextKey };
@@ -193,6 +195,7 @@ type Row =
   | ({ kind: 'button' } & ButtonRow)
   | ({ kind: 'exit' } & ExitRow)
   | ({ kind: 'language' } & LanguageRow)
+  | ({ kind: 'texturePack' } & TexturePackRow)
   | ({ kind: 'presets' } & PresetRow);
 
 type Section = {
@@ -544,6 +547,7 @@ const TABS: Tab[] = [
                   max: MATERIAL_QUALITY_MAX,
                   display: v => t(MATERIAL_QUALITY_LABEL_KEYS[v]) ?? v,
                 }),
+                { kind: 'texturePack', id: 'texturePack' },
                 slider({
                   key: 'materialDetail',
                   textId: -1,
@@ -948,6 +952,7 @@ function rowHeight(row: Row): number {
     case 'exit':
       return BUTTON_ROW_H;
     case 'language':
+    case 'texturePack':
       return LANGUAGE_ROW_H;
     case 'presets':
       return PRESET_ROW_H;
@@ -1377,6 +1382,17 @@ export const OptionsWindow = observer(() => {
                   if (row.kind === 'language') {
                     return (
                       <LanguageSelect
+                        key={row.id}
+                        left={x}
+                        top={rowY}
+                        width={COLUMN_WIDTH}
+                      />
+                    );
+                  }
+
+                  if (row.kind === 'texturePack') {
+                    return (
+                      <TexturePackSelect
                         key={row.id}
                         left={x}
                         top={rowY}

@@ -75,6 +75,9 @@ let answer: ((available: boolean) => void) | null = null;
 /** Revocable after the answer: a tree that starts failing is switched off. */
 let enabled = true;
 
+/** The settled answer, readable without awaiting (`sidecarsAvailable`). */
+let sidecarsOn = false;
+
 let failures = 0;
 
 const MAX_FAILURES = 3;
@@ -82,6 +85,7 @@ const MAX_FAILURES = 3;
 function disable(reason: string): null {
   if (enabled) {
     enabled = false;
+    sidecarsOn = false;
     console.warn(`Compressed assets off (${reason}); serving the plain files.`);
   }
   return null;
@@ -132,6 +136,8 @@ async function fromSidecar(url: string): Promise<Uint8Array | null> {
     const missing = !res.ok || type.startsWith('text/html');
 
     settle(!missing);
+
+    if (!missing) sidecarsOn = true;
 
     if (missing) return null;
 
@@ -215,4 +221,36 @@ export async function prefetchAsset(url: string): Promise<void> {
     res => res.body?.cancel(),
     () => {}
   );
+}
+
+/**
+ * Run the sidecar probe now, against `probeUrl`, instead of letting the first
+ * compressible read run it. Returns whether this deployment ships sidecars.
+ *
+ * The pre-download screen needs this. It builds URLs for thousands of files
+ * before the game has read a single asset, so the latch is still unset, and
+ * `prefetchAsset` above deliberately does not start the probe - it would warm
+ * the plain files while the game later asks for `.gz`. That is every byte
+ * downloaded twice with a 0% hit rate. Settling it first is what makes the
+ * two agree.
+ *
+ * The caller passes the URL (something small, compressible and always
+ * present - `gate.bmd`) rather than this module resolving one: `dataFolder`
+ * reads through `utils` into here, and importing it back would close the
+ * cycle.
+ *
+ * Idempotent; only the first call costs a request.
+ */
+export async function settleSidecars(probeUrl: string): Promise<boolean> {
+  if (!CAN_UNPACK || !enabled) return false;
+  if (!answered) await fromSidecar(probeUrl).catch(() => null);
+  return sidecarsAvailable();
+}
+
+/**
+ * Whether reads are taking the sidecars, decided. False until the probe has
+ * run - see `settleSidecars`.
+ */
+export function sidecarsAvailable(): boolean {
+  return CAN_UNPACK && enabled && sidecarsOn;
 }
