@@ -636,9 +636,10 @@ export const Social = new (class _Social {
     if (!me || me.index === index) {
       this.partyMembers = [];
       this.errorMessage(t('party.left'));
-      return;
+    } else {
+      this.partyMembers = this.partyMembers.filter(m => m.index !== index);
     }
-    this.partyMembers = this.partyMembers.filter(m => m.index !== index);
+    Commands.stopFollowingOutside(this.partyMembers.map(m => m.name));
   }
 
   setPartyHealth(steps: { index: number; value: number }[]): void {
