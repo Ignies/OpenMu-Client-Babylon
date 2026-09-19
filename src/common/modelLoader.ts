@@ -22,6 +22,7 @@ import {
   sidecarFailed,
 } from './compressedAssets';
 import { resolveUrlToDataFolder } from './resolveUrlToDataFolder';
+import { applyPackToTexture } from './texturePacks';
 import {
   createItemMaterial,
   createItemPbrMaterial,
@@ -366,7 +367,26 @@ function getTexture(filePath: string, key: string, fallback: Texture) {
 
   byName.set(key, fallback);
 
+  // A texture pack replaces the pixels behind this object, keeping the
+  // converter's name and everything read off it. Not awaited: the mesh draws
+  // with the model's own texture and repaints when the pack image arrives.
+  void applyPackToTexture(fallback);
+
   return fallback;
+}
+
+/**
+ * Repoint every texture the session has parsed at the selected pack, or back
+ * at the model's own. Runs on a pack change; because the swap happens on the
+ * shared container texture, every clone already in the scene follows without
+ * being rebuilt.
+ */
+export async function syncTexturePack(): Promise<void> {
+  const all: Texture[] = [];
+  for (const byName of texturesCache.values()) {
+    for (const texture of byName.values()) all.push(texture);
+  }
+  await Promise.all(all.map(t => applyPackToTexture(t)));
 }
 
 

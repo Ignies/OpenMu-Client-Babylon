@@ -8,6 +8,8 @@ import {
 } from '../libs/babylon/exports';
 import { driveRenderList } from './renderList';
 import { GameOptions, onGameOptionsChanged } from '../common/gameOptions';
+import { onTexturePackChanged } from '../common/texturePacks';
+import { syncTexturePack } from '../common/modelLoader';
 import {
   itemHaloAt,
   itemGlowClock,
@@ -111,6 +113,10 @@ export function applySceneLook(
     syncPbrDetail();
     syncGlowIntensity(look);
   });
+
+  // A pack change repoints the textures that are already parsed, so what is
+  // on screen - the hero and the monsters included - changes where it stands.
+  onTexturePackChanged(() => syncTexturePack());
 
   return look;
 }
