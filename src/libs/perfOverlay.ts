@@ -91,6 +91,31 @@ function propLine(): string {
   }, ${s.excluded.size} types per object`;
 }
 
+let gpuName: string | null = null;
+
+/**
+ * The adapter the page landed on: a two-GPU laptop hands the browser the
+ * integrated one unless told otherwise, and that is a 4x slower frame.
+ */
+function gpuLine(scene: Scene): string {
+  if (gpuName === null) {
+    try {
+      const engine = scene.getEngine() as unknown as {
+        getGlInfo?: () => { vendor: string; renderer: string };
+      };
+      const info = engine.getGlInfo?.();
+      const raw = info?.renderer || info?.vendor || '?';
+      // ANGLE reports "ANGLE (vendor, name (0x1234) Direct3D11 ...)".
+      const angle = /^ANGLE \((?:[^,]*, )?(.*?)(?: \(0x[0-9A-Fa-f]+\))? Direct3D/.exec(raw);
+      gpuName = (angle ? angle[1] : raw).slice(0, 60);
+    } catch {
+      gpuName = '?';
+    }
+  }
+
+  return `gpu        ${gpuName}`;
+}
+
 function render(scene: Scene): void {
   const engine = scene.getEngine();
 
@@ -104,6 +129,7 @@ function render(scene: Scene): void {
     .slice(0, SYSTEM_ROWS);
 
   const lines = [
+    gpuLine(scene),
     `fps        ${engine.getFps().toFixed(0)}`,
     `frame      ${frameMs.toFixed(2)} ms`,
     `ecs        ${updateMs.toFixed(2)} ms`,

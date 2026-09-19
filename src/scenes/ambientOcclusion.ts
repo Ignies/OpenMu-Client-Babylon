@@ -129,8 +129,12 @@ const GBUFFER_CAMERA_STANDOFF = 32;
 let reachStep = -1;
 let reachSq = 0;
 
+// Read once: asked per mesh per frame, and a URL parse each time was 1.5 ms
+// of a dev frame.
+const reachDev = devQueryNumber('gbreach');
+
 function gbufferReach(): number {
-  const forced = devQueryNumber('gbreach');
+  const forced = reachDev;
 
   if (forced !== null) {
     return forced > 0 ? forced * forced : CSM_CASTER_REACH ** 2;
@@ -297,7 +301,7 @@ function createSsao(
   if (gbuffer) {
     const target = gbuffer.getGBuffer();
 
-    driveRenderList(scene, target, occludes);
+    driveRenderList(scene, target, occludes, 'active');
     depthWriteAlphaKeyed(target);
     normals = target.textures[
       gbuffer.getTextureIndex(GeometryBufferRenderer.NORMAL_TEXTURE_TYPE)

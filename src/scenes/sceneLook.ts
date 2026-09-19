@@ -211,7 +211,7 @@ function driveGlowList(scene: Scene, glow: GlowLayer): void {
   if (!texture || texture === drivenGlowTexture) return;
 
   drivenGlowTexture = texture;
-  driveRenderList(scene, texture, isGlowSource);
+  driveRenderList(scene, texture, isGlowSource, 'active');
 }
 
 /** Per frame: the glow layer's on/off gate. */

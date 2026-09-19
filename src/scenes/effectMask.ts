@@ -142,7 +142,7 @@ function createMask(scene: Scene, camera: ArcRotateCamera): Runtime {
   mask.renderSprites = true;
   mask.wrapU = Texture.CLAMP_ADDRESSMODE;
   mask.wrapV = Texture.CLAMP_ADDRESSMODE;
-  driveRenderList(scene, mask, emits);
+  driveRenderList(scene, mask, emits, 'active');
 
   // Colour only: the depth is the scene's.
   mask.onClearObservable.add(e => e.clear(mask.clearColor, true, false, false));
