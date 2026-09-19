@@ -17,7 +17,7 @@ import {
   toonEffectsActive,
   type RenderingStyle,
 } from '../common/renderingStyle';
-import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
+import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 
 /**
  * Ink lines (rendering_style ARCHITECTURE §2.3): sole owner of the outline

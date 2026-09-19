@@ -8,7 +8,7 @@ import {
 } from '../libs/babylon/exports';
 import { downloadDataFile, hasDataFile } from '../libs/mu/dataFolder';
 import { maps } from '../maps';
-import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../effects/core';
+import { EFFECT_RENDERING_GROUP, keepDepthForEffects, spriteLevel } from '../effects/core';
 import { devQueryNumber } from './devSeams';
 
 const TICKS_PER_SECOND = 25;
@@ -725,7 +725,7 @@ function ensureTicking(target: Scene) {
       }
 
       p.kind.color(p, color);
-      sprite.color.copyFrom(color);
+      sprite.color.copyFrom(spriteLevel(target, color));
     }
   });
 }

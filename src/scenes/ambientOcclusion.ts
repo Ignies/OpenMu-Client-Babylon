@@ -1,10 +1,8 @@
 import {
-  Color4,
   Constants,
   GeometryBufferRenderer,
   Material,
   PostProcess,
-  RenderTargetTexture,
   SSAO2RenderingPipeline,
   ShaderStore,
   SmartArray,
@@ -28,18 +26,19 @@ import { GameOptions } from '../common/gameOptions';
 import { renderDistanceRanges } from '../common/renderDistance';
 import { CSM_CASTER_REACH, drawsSolidGeometry } from './shadows';
 import { driveRenderList } from './renderList';
+import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 
 /**
- * Contact-scale SSAO2 and the effect mask (ARCHITECTURE §4.1, §4.8 step 1).
- * Sole owner of the SSAO pipeline, the geometry buffer's predicate and the
- * effect-mask render target; `heightFog.ts` reads the mask.
+ * Contact-scale SSAO2 (ARCHITECTURE §4.1, §4.8 step 1). Sole owner of the
+ * SSAO pipeline and the geometry buffer's predicate; the effect mask its
+ * combine reads is `effectMask.ts`.
  *
  * Contact-scale, not ambient-scale: the baked lightmap already carries the
  * near-wall darkening (that darkening is the art) and the CSM the sun, so the
  * AO reads as contact tightening, never as a halo at gameplay zoom.
  *
  * Dev seams: `?ssao=radius,strength,base` for live tuning; `?ssao=0` builds
- * none of it (G-buffer and effect mask included).
+ * none of it (G-buffer included).
  */
 const SSAO_RADIUS = 0.35;
 const SSAO_STRENGTH = 0.75;
@@ -55,44 +54,6 @@ function ssaoForcedOff(): boolean {
   return devQuery('ssao') === '0';
 }
 
-/**
- * The effect mask: where the additive half of the frame landed, and how much
- * of each pixel it is.
- *
- * The AO combine and the haze both describe a pixel by the *surface* under
- * it, read from the geometry buffer, which holds only matter. Over every
- * additive thing in the game (the `_R` meshes and `BlendMesh` flames, the
- * flare sprites, fire and smoke particles, item auras, skill effects) the
- * buffer describes whatever stands behind the flame, and both passes would
- * apply it anyway. Nothing this early in the chain is HDR (SSAO2 builds its
- * passes at 8 bits), so a brightness knee cannot find them; the mask draws
- * them instead: one target holding only the additive geometry over black,
- * composited with its own blend modes.
- *
- * Both readers *subtract* it rather than threshold it. An additive pass adds
- * to the surface under it, so `surface = colour - mask` is that surface, and
- * each half then takes its own treatment: the flame keeps its own haze
- * distance and is never occluded, the water behind it keeps the haze and the
- * AO it earned. A threshold cannot do that - it hands the whole pixel to
- * whichever side won - and the sprite sheets are JPEG, so the "black" around
- * a flame carries 1-12/255 of ringing and cleared any knee low enough to
- * catch a rain streak. That is what stamped a flame's quad into the frame as
- * an un-hazed dark rectangle.
- *
- * Hence full resolution and half float. At half resolution a one-pixel rain
- * streak lands at a tenth of its brightness, and a subtraction would leave
- * the other nine tenths to be hazed as far water; at 8 bits a flame brighter
- * than white clamps to 1.0 and the surface left under it comes out too
- * bright. Neither costs anything measurable: the pass is bound by the scene
- * traversal it does, not by the pixels it fills, and its render list is a
- * handful of cards, sprites and particles.
- */
-
-/** Mask resolution relative to the backbuffer. */
-const EFFECT_MASK_RATIO = 1;
-
-export const EFFECT_MASK_SAMPLER = 'effectMask';
-
 type Runtime = {
   scene: Scene;
   camera: ArcRotateCamera;
@@ -100,15 +61,9 @@ type Runtime = {
   /** The G-buffer's ratio: the tier's, or 1 while the ink lines read it. */
   gbufferRatio: number;
   ssao: SSAO2RenderingPipeline;
-  mask: RenderTargetTexture;
 };
 
 let runtime: Runtime | null = null;
-
-/** The live effect mask, for the haze; null while the AO is not built. */
-export function effectMask(): RenderTargetTexture | null {
-  return runtime?.mask ?? null;
-}
 
 /**
  * What SSAO and the haze see: everything the camera sees that is matter.
@@ -289,48 +244,6 @@ function patchSsaoCombine(): void {
   `;
 }
 
-/** The additive half of the frame - everything the G-buffer refuses. */
-function emits(mesh: AbstractMesh): boolean {
-  return mesh.metadata?.brightMesh === true && mesh.isEnabled();
-}
-
-/**
- * The mask itself: the effect geometry, in its own blend modes, over black.
- * No depth buffer: additive compositing is order-independent, and a flame
- * hidden behind a wall costs a little AO and haze on the wall in front of
- * it, cheaper than a second depth attachment in step with the G-buffer's.
- */
-function createEffectMask(
-  scene: Scene,
-  camera: ArcRotateCamera
-): RenderTargetTexture {
-  const mask = new RenderTargetTexture(
-    'effectMask',
-    { ratio: EFFECT_MASK_RATIO },
-    scene,
-    {
-      generateDepthBuffer: false,
-      generateMipMaps: false,
-      samplingMode: Texture.BILINEAR_SAMPLINGMODE,
-      // Both readers subtract it from an HDR frame; 8 bits would clamp a
-      // flame brighter than white and leave a surface that is too bright.
-      type: Constants.TEXTURETYPE_HALF_FLOAT,
-    }
-  );
-
-  mask.clearColor = new Color4(0, 0, 0, 1);
-  mask.activeCamera = camera;
-  driveRenderList(scene, mask, emits);
-  mask.renderParticles = true;
-  mask.renderSprites = true;
-  mask.wrapU = Texture.CLAMP_ADDRESSMODE;
-  mask.wrapV = Texture.CLAMP_ADDRESSMODE;
-
-  scene.customRenderTargets.push(mask);
-
-  return mask;
-}
-
 /**
  * Hand Babylon's combine pass the samplers and the uniform its patched shader
  * declares. An `Effect` binds by the names it was *compiled* with, so the
@@ -341,7 +254,6 @@ function createEffectMask(
 function bindCombine(
   ssao: SSAO2RenderingPipeline,
   camera: ArcRotateCamera,
-  mask: RenderTargetTexture,
   normals: Texture | null
 ): void {
   const combine = (
@@ -359,7 +271,8 @@ function bindCombine(
   const upView = new Vector3();
 
   combine.onApplyObservable.add(effect => {
-    effect.setTexture(EFFECT_MASK_SAMPLER, mask);
+    const mask = effectMask();
+    if (mask) effect.setTexture(EFFECT_MASK_SAMPLER, mask);
     if (normals) effect.setTexture(GROUND_NORMAL_SAMPLER, normals);
 
     Vector3.TransformNormalToRef(Vector3.UpReadOnly, camera.getViewMatrix(), upView);
@@ -371,7 +284,6 @@ function createSsao(
   scene: Scene,
   camera: ArcRotateCamera,
   tier: LightingTier,
-  mask: RenderTargetTexture,
   gbufferRatio: number
 ): SSAO2RenderingPipeline {
   patchSsaoCombine();
@@ -417,7 +329,7 @@ function createSsao(
   ssao.minZAspect = SSAO_MIN_Z_ASPECT;
   ssao.textureSamples = pipelineSamples();
 
-  bindCombine(ssao, camera, mask, normals);
+  bindCombine(ssao, camera, normals);
 
   return ssao;
 }
@@ -425,13 +337,9 @@ function createSsao(
 export function disposeAmbientOcclusion(): void {
   if (!runtime) return;
 
-  const { scene, ssao, mask } = runtime;
+  const { scene, ssao } = runtime;
 
   ssao.dispose(true);
-
-  const index = scene.customRenderTargets.indexOf(mask);
-  if (index >= 0) scene.customRenderTargets.splice(index, 1);
-  mask.dispose();
 
   scene.disableGeometryBufferRenderer();
 
@@ -465,10 +373,9 @@ export function syncAmbientOcclusion(
 
   if (!want || runtime) return false;
 
-  const mask = createEffectMask(scene, camera);
-  const ssao = createSsao(scene, camera, tier, mask, gbufferRatio);
+  const ssao = createSsao(scene, camera, tier, gbufferRatio);
 
-  runtime = { scene, camera, tier, gbufferRatio, ssao, mask };
+  runtime = { scene, camera, tier, gbufferRatio, ssao };
 
   return true;
 }

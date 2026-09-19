@@ -99,6 +99,7 @@ function spawn(scene: Scene, _at: Vector3, opts: BlurOptions): EffectHandle {
   mesh.isPickable = false;
   mesh.alwaysSelectAsActiveMesh = true;
   mesh.doNotSyncBoundingInfo = true;
+  mesh.metadata = { brightMesh: (opts.blend ?? 'add') === 'add' };
   (scene as TestScene).look?.glow.addExcludedMesh(mesh);
 
   // Seed every sample at the first frame's pair so the strip has no tail to nowhere.

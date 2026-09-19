@@ -52,10 +52,11 @@ import { syncSkyDome } from './skyDome';
 import { syncSkyline } from './horizon';
 import { syncShadows, syncTerrainDefines } from '../scenes/shadows';
 import { syncAmbientOcclusion } from '../scenes/ambientOcclusion';
+import { syncEffectMask } from '../scenes/effectMask';
 import { syncInkOutline, inkOutlineLive } from '../scenes/inkOutline';
 import { syncHeightFog, updateHeightFog } from '../scenes/heightFog';
 import { syncRoomMask } from '../scenes/roomMask';
-import { syncToneMap } from '../scenes/toneMap';
+import { syncToneMap, toneMapLive } from '../scenes/toneMap';
 import { syncFireflyGuard } from '../scenes/fireflyGuard';
 import { syncSunShafts, sunShaftsLive } from '../scenes/sunShafts';
 import {
@@ -379,6 +380,9 @@ export function createLookDirector(
     const fogSource = profile.fog.color ?? base.sky?.horizon ?? null;
     const fogColorLinear: Rgb = fogSource ? toLinear(fogSource) : [0, 0, 0];
 
+    // The effect mask is not a pass: it is drawn after the frame and read live.
+    syncEffectMask(scene, camera, shaped && post);
+
     let reordered = syncAmbientOcclusion(
       scene,
       camera,
@@ -440,14 +444,13 @@ export function createLookDirector(
         ? Math.max(0, Math.min(3, Math.round(tmDev ?? GameOptions.toneMapper)))
         : 0;
 
-    // The MU curve is what `toneMapper` 1 selects; it is the last scene-light
-    // pass, so it runs after the haze and the mask and before the chain.
+    // The tone pass maps the surface and composites the effects; it is the
+    // last scene-light pass, after the haze and the room mask, before the chain.
     reordered =
       syncToneMap(
         scene,
         camera,
-        toneMapperIndex === 1,
-        postExposure,
+        { live: shaped && post, mapper: toneMapperIndex, brightness: postExposure, keyGain },
         reordered
       ) || reordered;
 
@@ -459,7 +462,7 @@ export function createLookDirector(
       syncFireflyGuard(
         scene,
         camera,
-        shaped && post && GameOptions.bloom > 0 && toneMapperIndex !== 1,
+        shaped && post && GameOptions.bloom > 0 && !toneMapLive(),
         reordered
       ) || reordered;
 
