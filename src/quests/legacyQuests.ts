@@ -77,8 +77,14 @@ const STATES_PER_BYTE = 4;
 const STATE_BITS = 2;
 const STATE_MASK = 0x03;
 
-/** `QUEST_COMBO` (_enum.h:3539): finishing it unlocks the combo skill. */
-const QUEST_COMBO = 2;
+/**
+ * `QUEST_COMBO` (_enum.h:3536-3542): the quest enum runs CHANGE_UP_1, 2, 3,
+ * COMBO, 3RD_CHANGE_UP_1, 2, 3 - so the combo quest is 3, "Secret of Dark
+ * Stone", and it is the Blade Knight's. It was 2 here, which is "Gain Hero
+ * status" and belongs to everyone, so the chain skipped a quest the other
+ * classes have to do and stopped on one that is not theirs.
+ */
+const QUEST_COMBO = 3;
 
 /** `wCompleteQuestIndex` / `byType` "none" markers in the request rows. */
 const NO_PREREQUISITE = 65535;
@@ -360,14 +366,29 @@ export function legacyQuestObjectives(index: number): QuestObjective[] {
   return objectives;
 }
 
-/** `FindQuestContext(quest, column)`: the dialog page for this state column. */
-function pageFor(quest: QuestDefinition, column: number): number {
+/**
+ * `FindQuestContext(quest, column)`: the dialog page for this state column.
+ * A quest with no act for the hero's class has no page of its own, and the
+ * original answers by stepping the chain back one and asking that quest
+ * instead (`m_byCurrQuestIndex--; CheckQuestState()`), which is the walk
+ * `depth` bounds.
+ */
+function pageFor(
+  quest: QuestDefinition,
+  column: number,
+  depth: number
+): number {
   const act = actsForHero(quest)[0];
-  return act ? act.startText[column] : 0;
+  if (act) return act.startText[column];
+  if (state.currentIndex <= 0 || depth >= MAX_QUESTS) return 0;
+  runInAction(() => {
+    state.currentIndex--;
+  });
+  return checkQuestState(depth + 1);
 }
 
 /** `CheckQuestState`: pick the page and the dialog state for the current quest. */
-function checkQuestState(): number {
+function checkQuestState(depth = 0): number {
   const quest = questDefinition(state.currentIndex);
   if (!quest) return 0;
 
@@ -382,21 +403,21 @@ function checkQuestState(): number {
         page = error;
         dialogState = DIALOG_STATE_ERROR;
       } else {
-        page = pageFor(quest, 0);
+        page = pageFor(quest, 0, depth);
       }
       break;
     }
     case LegacyQuestState.InProgress: {
       if (actsFulfilled(quest)) {
-        page = pageFor(quest, 2);
+        page = pageFor(quest, 2, depth);
         dialogState = DIALOG_STATE_ITEM;
       } else {
-        page = pageFor(quest, 1);
+        page = pageFor(quest, 1, depth);
       }
       break;
     }
     case LegacyQuestState.Finished:
-      page = pageFor(quest, 3);
+      page = pageFor(quest, 3, depth);
       break;
   }
 
@@ -536,7 +557,10 @@ export function requestLegacyQuestStates(): void {
 export function legacyQuestForNpc(npcType: number): QuestDefinition | undefined {
   const mine = chainIndexes(heroClass(), MAX_QUESTS)
     .map(i => questDefinition(i))
-    .filter((q): q is QuestDefinition => !!q && q.npcType === npcType && !!q.name);
+    .filter(
+      (q): q is QuestDefinition =>
+        !!q && q.npcType === npcType && !!q.name && actsForHero(q).length > 0
+    );
   if (!mine.length) return undefined;
 
   return (
