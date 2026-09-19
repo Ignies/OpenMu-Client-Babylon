@@ -26,21 +26,36 @@ const REFERENCE_FPS = 25;
 const speedFor = (waypoint: CameraWaypoint) =>
   (waypoint.moveAccel * REFERENCE_FPS) / MU_SCALE;
 
-const TOUR_RADIUS_SCALE = 1.1;
+/**
+ * The tour camera, `CalculateCameraPosition` (CameraUtility.cpp:113-173) in
+ * tour mode. The eye is `CameraPosition` itself - the view is a rotate and a
+ * translate, no orbit - trailing the path point by `1100 * level * 0.1` MU
+ * and standing at `kTourCameraZPosition` (-300) - 100 + distance - 150: head
+ * height on the corridor legs, 1.6 units over the floor at level 8. The
+ * original also adds `-0.924 * distance * cos(heading)` to that height
+ * (`VectorIRotate` of the pitched angle matrix), which puts the camera six
+ * units under the floor on the two north-bound legs of World74; that term is
+ * left out and the head height kept on every leg.
+ */
+const TOUR_DISTANCE_PER_LEVEL = 110 / MU_SCALE;
+const TOUR_EYE_BASE = -550 / MU_SCALE;
+
+/** `SetAngleFrustum(-112.5)` (CameraUtility.cpp:193): 22.5 degrees above the horizon. */
+const TOUR_PITCH = (22.5 * Math.PI) / 180;
+
+/**
+ * `UpdateTourWayPoint` (CameraMove.cpp:757-770): the heading turns toward the
+ * leg's direction by a thirtieth of what is left, at most one degree, per
+ * 25 Hz tick.
+ */
+const TOUR_TURN_SHARE = 1 / 30;
+const TOUR_TURN_MAX = Math.PI / 180;
 
 /** `SetCameraFOV` (CameraUtility.cpp:284): the login world in tour mode. */
 const TOUR_FOV = (65 * Math.PI) / 180;
 
 /** `MoveCamera` (LoginScene.cpp:256): the scene's own camera, the one the character line-up is shot with. */
 const CHARACTER_FOV = (45 * Math.PI) / 180;
-
-/**
- * The pitch the backdrop is framed at - the scene camera's own, which is what
- * the tour was drawn with before anything else had touched it. A constant
- * because the game's camera must not reach back here: the pre-game screens
- * have to look the same on the way out of a session as on the way in.
- */
-const BACKDROP_BETA = Math.PI / 4.5;
 
 /**
  * Which pre-game screen the backdrop is standing behind, or null in the
@@ -84,8 +99,11 @@ export const LoginSceneSystem: ISystemFactory = world => {
 
   let leg = 0;
   let legProgress = 0;
+  let heading = 0;
+  let headingSet = false;
 
-  const target = new Vector3(0, 0, 0);
+  const eye = new Vector3(0, 0, 0);
+  const lookAt = new Vector3(0, 0, 0);
 
   let gameFraming: {
     alpha: number;
@@ -101,6 +119,24 @@ export const LoginSceneSystem: ISystemFactory = world => {
   const resetTour = () => {
     leg = 0;
     legProgress = 0;
+    headingSet = false;
+  };
+
+  const turnToward = (goal: number, deltaTime: number) => {
+    if (!headingSet) {
+      heading = goal;
+      headingSet = true;
+      return;
+    }
+
+    const delta = Math.atan2(Math.sin(goal - heading), Math.cos(goal - heading));
+    const step =
+      Math.min(Math.abs(delta) * TOUR_TURN_SHARE, TOUR_TURN_MAX) *
+      REFERENCE_FPS *
+      deltaTime;
+
+    heading =
+      Math.abs(delta) <= step ? goal : heading + Math.sign(delta) * step;
   };
 
   EventBus.on('warpCompleted', resetTour);
@@ -126,16 +162,21 @@ export const LoginSceneSystem: ISystemFactory = world => {
     const x = a.x + (b.x - a.x) * legProgress;
     const y = a.y + (b.y - a.y) * legProgress;
 
-    target.x = x;
-    target.z = y;
-    target.y = world.getTerrainHeight(x, y) + a.height / MU_SCALE;
+    turnToward(Math.atan2(b.y - a.y, b.x - a.x), deltaTime);
 
-    const heading = Math.atan2(b.y - a.y, b.x - a.x);
-    const radius =
-      (a.distanceLevel + (b.distanceLevel - a.distanceLevel) * legProgress) *
-      TOUR_RADIUS_SCALE;
+    const level =
+      a.distanceLevel + (b.distanceLevel - a.distanceLevel) * legProgress;
+    const distance = level * TOUR_DISTANCE_PER_LEVEL;
 
-    return { heading, radius };
+    const fx = Math.cos(heading);
+    const fy = Math.sin(heading);
+
+    eye.set(x - fx * distance, TOUR_EYE_BASE + distance, y - fy * distance);
+    lookAt.set(
+      eye.x + fx * Math.cos(TOUR_PITCH),
+      eye.y + Math.sin(TOUR_PITCH),
+      eye.z + fy * Math.cos(TOUR_PITCH)
+    );
   };
 
   return {
@@ -210,13 +251,11 @@ export const LoginSceneSystem: ISystemFactory = world => {
       cameraIsOurs = true;
 
       if (waypoints && waypoints.length > 1) {
-        const { heading, radius } = advanceTour(deltaTime, waypoints);
+        advanceTour(deltaTime, waypoints);
 
-        camera.setTarget(target);
         camera.fov = TOUR_FOV;
-        camera.alpha = heading + Math.PI;
-        camera.beta = BACKDROP_BETA;
-        camera.radius = radius;
+        camera.setTarget(lookAt);
+        camera.setPosition(eye);
         return;
       }
 
