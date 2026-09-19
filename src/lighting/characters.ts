@@ -61,6 +61,18 @@ const CARRIED_GLOW_RGB = [1, 0.6, 0.4] as const;
  */
 const LIGHTNING_GLOW_RGB = [0.35, 0.8, 1] as const;
 
+/**
+ * A negative light's strength here against the original's. The original takes
+ * its -1.3 off a gamma-space floor that sits near 0.7 and blacks out the
+ * inner half of its 3 tiles. The terrain shader on tiers >= 1 subtracts in
+ * linear light, where that floor is 0.7^2.2 = 0.46, and the same 1.3 blacks
+ * out nearly the whole radius - a hole in the ground. 0.46 / 1.3 puts the
+ * subtraction at the floor's own level: black only at the point under the
+ * body, which the body covers, and a gradient over the whole radius. The
+ * point light on bodies takes the same factor.
+ */
+const DARK_FLOOR_GAIN = 0.35;
+
 type CharacterLight = LightRecipe & {
   /**
    * Ours, not the original's: the monster carries a glow but throws no
@@ -110,12 +122,15 @@ export const CHARACTER_LIGHTS: Partial<Record<number, CharacterLight>> = {
   // 59 Tantallos (`SubType 1`, :5968-5969) and 63 Death Beam Knight
   // (:5910-5911): the fire around them *takes* light off the floor -
   // `AddTerrainLight(…, (-1.3, -1.3, -1.3), 3)`, flat, every tick. The pool
-  // keeps the terrain radius: the usual +2 made a black hole of it.
+  // keeps the terrain radius (the usual +2 made a black hole of it) and the
+  // subtraction is scaled to linear light, DARK_FLOOR_GAIN.
   59: {
     color: [-1.3, -1.3, -1.3],
     range: 3,
     pointRange: 3,
     heightOffset: BODY_HEIGHT,
+    gain: DARK_FLOOR_GAIN,
+    floorGain: DARK_FLOOR_GAIN,
     priority: PRIORITY_CHARACTER,
   },
   63: {
@@ -123,6 +138,8 @@ export const CHARACTER_LIGHTS: Partial<Record<number, CharacterLight>> = {
     range: 3,
     pointRange: 3,
     heightOffset: BODY_HEIGHT,
+    gain: DARK_FLOOR_GAIN,
+    floorGain: DARK_FLOOR_GAIN,
     priority: PRIORITY_CHARACTER,
   },
   // 35 Death Gorgon (MODEL_GORGON, `c->Level == 2`): the one monster in the
