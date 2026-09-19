@@ -13,10 +13,3 @@ dist-register
 public/**/*.gz
 Data/**/*.gz
 Data-v097d/**/*.gz
-
-# Texture packs: images built out of tree by the upscale pipeline and shipped
-# beside the app, the way the gzip sidecars above are. Hundreds of megabytes
-# that regenerate from the source art, so they are deployed rather than
-# committed; VITE_TEXTURE_PACKS_URL points the client at wherever they land.
-public/packs/
-public/packs-v097d/
