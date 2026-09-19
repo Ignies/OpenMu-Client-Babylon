@@ -55,6 +55,7 @@ BasisToolsOptions.WasmModuleURL =
   baseUrl + 'basisTranscoder/1/basis_transcoder.wasm';
 
 export { Engine } from '@babylonjs/core/Engines/engine';
+export type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
 export {
   Vector2,
   Vector3,
@@ -160,6 +161,7 @@ export { GeometryBufferRenderer } from '@babylonjs/core/Rendering/geometryBuffer
 import '@babylonjs/core/Rendering/geometryBufferRendererSceneComponent';
 export { ShaderStore } from '@babylonjs/core/Engines/shaderStore';
 export { RenderTargetTexture } from '@babylonjs/core/Materials/Textures/renderTargetTexture';
+export type { RenderTargetWrapper } from '@babylonjs/core/Engines/renderTargetWrapper';
 export type { MultiRenderTarget } from '@babylonjs/core/Materials/Textures/multiRenderTarget';
 export { SmartArray } from '@babylonjs/core/Misc/smartArray';
 export type { SubMesh } from '@babylonjs/core/Meshes/subMesh';

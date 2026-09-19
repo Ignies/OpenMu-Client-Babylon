@@ -15,7 +15,7 @@ import {
   type SubMesh,
 } from '../libs/babylon/exports';
 import { devQuery } from '../common/devSeams';
-import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
+import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 import type { LightingTier } from '../common/lightingQuality';
 import type { RoomVolume } from '../lighting/profiles';
 

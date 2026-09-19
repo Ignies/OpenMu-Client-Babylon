@@ -30,7 +30,7 @@ import {
 import { TILE_CM } from '../common/terrain/consts';
 import { downloadDataFile } from '../libs/mu/dataFolder';
 import type { Entity } from '../ecs/world';
-import { boneLocalPos, entityGone } from './core';
+import { boneLocalPos, entityGone, spriteLevel } from './core';
 import { TEX } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
@@ -361,7 +361,7 @@ function place(g: LiveGlow): void {
       sprite.isPickable = false;
       sprite.width = (px[0] * s.scale) / TILE_CM;
       sprite.height = (px[1] * s.scale) / TILE_CM;
-      sprite.color = new Color4(r * lumi, gr * lumi, b * lumi, 1);
+      sprite.color = spriteLevel(g.scene, new Color4(r * lumi, gr * lumi, b * lumi, 1));
       s.sprite = sprite;
     }
 
@@ -370,7 +370,7 @@ function place(g: LiveGlow): void {
 
     boneLocalPos(g.entity, s.bone, tmpLocal, tmpWorld);
     sprite.position.copyFrom(tmpWorld);
-    sprite.color.set(r * lumi, gr * lumi, b * lumi, 1);
+    spriteLevel(g.scene, sprite.color.set(r * lumi, gr * lumi, b * lumi, 1));
   }
 }
 

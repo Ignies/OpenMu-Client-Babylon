@@ -164,9 +164,9 @@ export function createPostChain(
     // bypassed outright on every tier: an identity pass is still a resolve.
     const graded = post && shaped;
 
-    // The MU curve (scenes/toneMap.ts) runs ahead of this pipeline and owns
-    // the exposure and the tone mapping when it is live; the pass here then
-    // does the white balance and the decoration only.
+    // The tone pass (scenes/toneMap.ts) runs ahead of this pipeline and owns
+    // the exposure, the tone mapping and the effect composite while it is
+    // live; the pass here then does the white balance and the decoration only.
     const filmic = graded && toneMapLive();
 
     // Bloom samples the linear buffer before exposure. Off on Classic (§6).
@@ -190,7 +190,7 @@ export function createPostChain(
     ip.toneMappingEnabled = toneMapper > 0;
     ip.toneMappingType = TONE_MAPPING_TYPES[toneMapper];
     if (toneMapper > 0) live.push(`toneMapper:${TONE_MAPPER_NAMES[toneMapper]}`);
-    if (filmic) live.push('toneMapper:mu');
+    if (filmic) live.push(`toneMapper:${TONE_MAPPER_NAMES[look.toneMapper]}`);
 
     ip.contrast = 1;
 

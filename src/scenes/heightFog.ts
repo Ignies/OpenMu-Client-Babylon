@@ -7,7 +7,7 @@ import {
   type ArcRotateCamera,
   type Scene,
 } from '../libs/babylon/exports';
-import { EFFECT_MASK_SAMPLER, effectMask } from './ambientOcclusion';
+import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 import { devQueryNumber } from '../common/devSeams';
 import type { LookProfile, Rgb } from '../lighting/profiles';
 
@@ -236,7 +236,8 @@ function registerFogShader(): void {
       lit = mix(lit, uwColor, uw);
     }
 
-    gl_FragColor = vec4(lit + effect * (1.0 - fEffect), color.a);
+    // The alpha carries the additive half's transmittance to the tone pass (effects_composite §4).
+    gl_FragColor = vec4(lit + effect * (1.0 - fEffect), 1.0 - fEffect);
   }
   `;
 }
@@ -321,6 +322,11 @@ export function disposeHeightFog(): void {
   runtime.camera.detachPostProcess(runtime.fog);
   runtime.fog.dispose(runtime.camera);
   runtime = null;
+}
+
+/** True while the haze is live, and with it the transmittance in the frame's alpha. */
+export function heightFogLive(): boolean {
+  return runtime !== null;
 }
 
 /**

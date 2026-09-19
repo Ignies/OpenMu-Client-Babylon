@@ -18,6 +18,7 @@ import { lookDirector } from '../lighting/director';
 import type { Entity } from '../ecs/world';
 import type { TestScene } from '../scenes/testScene';
 import { addEffectGlow, disposeEffectGlow, dropEffectGlow } from './glow';
+import { installSpriteLinearDecode } from '../libs/babylon/spriteLinear';
 import type { EffectHandle } from './layer';
 
 /**
@@ -42,6 +43,9 @@ import type { EffectHandle } from './layer';
  */
 
 /** MU's 25 Hz effect tick - the C++ counts lifetimes in these. */
+// Before any sprite manager exists: every sprite user imports this module.
+installSpriteLinearDecode();
+
 export const TICK = 1 / 25;
 
 /** One MU world unit is a centimetre; a tile is 100 of them. */
@@ -298,6 +302,23 @@ export function darkCardGain(_scene: Scene): number {
   return Math.max(1, mapKey() * (devQueryNumber('darkgain') ?? DARK_COVERAGE));
 }
 
+/**
+ * The level a sprite colour takes on the graded tiers: the map's key, so it
+ * lands where a card lands through `lightCardGain`. The decode itself is the
+ * sprite shader's (libs/babylon/spriteLinear.ts), as it is a material's, so
+ * the texel and the colour go linear together and the tone pass can take the
+ * product back out (effects_composite §2). Classic: the colour as given. In
+ * place, returns `c`.
+ */
+export function spriteLevel(scene: Scene, c: Color4): Color4 {
+  if (!linearBufferActive(scene)) return c;
+  const k = mapKey();
+  c.r *= k;
+  c.g *= k;
+  c.b *= k;
+  return c;
+}
+
 /** MU's two effect blends: `EnableAlphaBlend` (ONE, ONE) and `EnableAlphaBlendMinus` (ZERO, ONE_MINUS_SRC_COLOR). */
 export type EffectBlend = 'add' | 'subtract';
 
@@ -440,6 +461,8 @@ export function acquireCard(
   // has an edge to draw. An effect card stays out of it - it is light.
   card.metadata ??= {};
   card.metadata.depthOccluder = group === 0;
+  // Emissive art joins the effect mask, the same rule as the halo below.
+  card.metadata.brightMesh = group !== 0 && material.alphaMode === ADDITIVE_ALPHA_MODE;
   // ... which needs its bounds to be real: the G-buffer's own reach test
   // measures from the bounding sphere, and a pooled card never syncs one, so
   // it reads as a card at the map's origin and is dropped every frame.

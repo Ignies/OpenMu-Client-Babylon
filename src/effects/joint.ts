@@ -294,6 +294,8 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
   mesh.isPickable = false;
   mesh.doNotSyncBoundingInfo = true;
   mesh.alwaysSelectAsActiveMesh = true;
+  // A bright ribbon is emissive art and joins the effect mask.
+  mesh.metadata = { brightMesh: alphaMode === Constants.ALPHA_ADD };
 
   // The length-cutoff uniform lives on the greased-line side of either
   // material type; it is a reveal, not a fade, so it only gates load state.

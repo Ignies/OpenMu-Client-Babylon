@@ -2,6 +2,7 @@ import { TILE_CM } from '../../common/terrain/consts';
 import { Sprite, type Scene } from '../../libs/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 import { HIDDEN_MESH_ALL, ModelObject } from '../../common/modelObject';
+import { spriteLevel } from '../../effects/core';
 import {
   CLOUD_LIGHT_TEXTURE,
   CLOUD_TEXTURE,
@@ -182,7 +183,7 @@ export class IcarusCloudObject extends ModelObject {
 
       sprite.width = size;
       sprite.height = size;
-      sprite.color.set(CLOUD_LIGHT, CLOUD_LIGHT, CLOUD_LIGHT, 1);
+      spriteLevel(pool.manager.scene, sprite.color.set(CLOUD_LIGHT, CLOUD_LIGHT, CLOUD_LIGHT, 1));
 
       // MU x/y are the ground plane and MU z is up, so the one-sided rise goes
       // on Babylon's y. The original scales the offsets by the frame factor
@@ -284,7 +285,7 @@ export class IcarusCloudObject extends ModelObject {
 
         const fade = glow.life / GLOW_LIFE_TICKS;
 
-        glow.sprite.color.set(glow.r * fade, glow.g * fade, glow.b * fade, 1);
+        spriteLevel(scene, glow.sprite.color.set(glow.r * fade, glow.g * fade, glow.b * fade, 1));
       }
 
       if (this.#glowPool && rand(GLOW_CHANCE) === 0) {
