@@ -10,9 +10,8 @@ import { monsterModelFile, monsterScaleOf } from './monsterModelTable';
  * `MONSTER_VISUALS[35]` (`effects/monsterVisuals.ts`); the floor light is
  * `CHARACTER_LIGHTS[35]` (`lighting/characters.ts`).
  *
- * Not ported: `o->BlendMeshLight = (rand() % 10) * 0.1f` (:6061), the
- * additive mesh pass flickering on both Gorgons. `goldenMonsters.ts` records
- * the same gap.
+ * The additive body mesh and its flicker (`BlendMeshLight = (rand() % 10) *
+ * 0.1f`, :6061) come from `monsterBlendMesh.ts`, shared with the plain Gorgon.
  */
 
 // [NpcInfo(35, "Death Gorgon")] (ZzzCharacter.cpp:13623-13633)
@@ -20,8 +19,6 @@ export class DeathGorgon extends MonsterObject {
   static {
     DeathGorgon.OverrideScale = monsterScaleOf(35);
   }
-
-  BlendMesh = 1;
 
   async init(world: World, entity: Entity) {
     await super.init(world, entity);

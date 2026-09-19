@@ -1,5 +1,7 @@
 import type { Entity, World } from '../ecs/world';
 import { ModelObject } from './modelObject';
+import { monsterBlendMeshFor, type MonsterBlendMesh } from './monsters/monsterBlendMesh';
+import { monsterModelTypeOf } from './playSpeed';
 
 /** MU vertical units → world units (`TERRAIN_SCALE` is 100). */
 const MU_UNIT = 1 / 100;
@@ -21,9 +23,29 @@ export class MonsterObject extends ModelObject {
 
   #entity: Entity | null = null;
   #bobTimer = 0;
+  #blendMesh: MonsterBlendMesh | undefined;
 
   async init(_world: World, entity: Entity): Promise<void> {
     this.#entity = entity;
+    this.#blendMesh = monsterBlendMeshFor(monsterModelTypeOf(entity.npcType));
+  }
+
+  /**
+   * The additive body mesh the original gives this model in `CreateMonster`
+   * and the per-tick writes on it (`monsters/monsterBlendMesh.ts`). A class
+   * that set its own `BlendMesh` (the golden line's metal pass) keeps it;
+   * the animation binds either way.
+   */
+  load(gltf: Parameters<ModelObject['load']>[0]) {
+    const row = this.#blendMesh;
+    if (row && this.BlendMesh < 0) {
+      this.BlendMesh = row.mesh;
+      this.BlendMeshLight = row.light;
+    }
+
+    super.load(gltf);
+
+    if (row?.animate) this.bindMeshAnimation(row.animate(this));
   }
 
   Update(gameTime: World['gameTime']): void {
