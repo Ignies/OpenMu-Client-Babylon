@@ -500,3 +500,145 @@
     color: #8d8d8d;
   }
 }
+
+// ---- the download tab ---------------------------------------------------
+
+// The group list scrolls: one row per map plus the shared groups is more
+// than the 640x480 window can show, and growing the window would break the
+// tab strip's fixed height.
+.download-list {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.download-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+  font-size: 11px;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover:not(.is-fixed) {
+    background: rgba(255, 220, 120, 0.12);
+  }
+
+  // Core is not a choice, so it must not look like one.
+  &.is-fixed {
+    cursor: default;
+    opacity: 0.75;
+  }
+}
+
+.download-check {
+  // Without a colour of its own the tick inherits a near-black navy and
+  // vanishes into the stone.
+  color: #c9b98a;
+  width: 20px;
+  flex: none;
+  font-family: Consolas, monospace;
+}
+
+.download-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.download-size {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.download-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 11px;
+}
+
+.download-action {
+  cursor: pointer;
+  color: #d8c89a;
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+.download-storage {
+  margin-left: auto;
+  opacity: 0.6;
+}
+
+// The pack picker is the options window's widget, and its colours are tuned
+// for that window's own plate. Scoped here rather than changed there, so the
+// Options screen is untouched.
+.download-pack {
+  // The open list has to paint over the total and the bar, which are later
+  // siblings; the stacking order belongs to the wrapper, not the list.
+  z-index: 5;
+
+  .options-label {
+    color: #c9b98a;
+    position: static;
+    font-size: 11px;
+  }
+
+  .options-combo {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #5a5240;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 6px;
+    cursor: pointer;
+  }
+
+  .options-combo-name {
+    color: #e8e0c8;
+    font-size: 11px;
+    flex: 1 1 auto;
+  }
+
+  .options-combo-arrow {
+    color: #c9b98a;
+    font-size: 9px;
+  }
+
+  .options-combo-list {
+    // The options stylesheet nests all of this under `.options-window-page`,
+    // which does not exist on this screen, so none of it reaches the widget
+    // here. Without these the list sits in normal flow and is never clipped:
+    // the inline max-height measures correctly while ten languages spill out
+    // below it and over the Enter button.
+    position: absolute;
+    left: 0;
+    box-sizing: border-box;
+    overflow-y: auto;
+    padding: 2px;
+    background: #14110c;
+    border: 1px solid #5a5240;
+    z-index: 5;
+  }
+
+  .options-combo-row {
+    color: #d8c89a;
+    font-size: 11px;
+    padding: 1px 6px;
+    cursor: pointer;
+
+    &:hover,
+    &.is-active {
+      background: rgba(255, 220, 120, 0.16);
+      color: #fff;
+    }
+  }
+}
+
+// The language picker is the same widget with a flag in front of the name.
+.download-pack .mu-flag {
+  flex: none;
+}

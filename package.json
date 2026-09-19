@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "APP_ENV=dev vite --force",
-    "build": "APP_ENV=prod vite build && bun run copy-data && bun run compress-assets",
+    "build": "APP_ENV=prod vite build && bun run copy-data && bun run compress-assets && bun run assets-index",
     "copy-data": "bun run tools/copyData.ts && bun run tools/copyData.ts --src Data-v097d --out dist/Data-v097d",
     "compress-assets": "bun run tools/compressAssets.ts",
+    "assets-index": "bun run tools/assetsIndex.ts",
     "preview": "vite preview --port 4173 --strictPort",
     "proxy": "bun run --watch proxy/main.ts",
     "dev:register": "vite --config register/vite.config.ts",
