@@ -2,7 +2,7 @@ import type { Entity, ISystemFactory, Item } from '../world';
 import {
   itemVisualTier,
   setItemGlowClock,
-  strongestTier,
+  strongestTierOf,
   type ItemVisualTier,
 } from '../../common/itemVisualTier';
 import {
@@ -15,11 +15,13 @@ import {
   createItemAura,
   type ItemAura,
   type ItemAuraKind,
+  type ItemAuraSlot,
 } from '../../effects/itemAura';
 import { createItemCrackle, type ItemCrackle } from '../../effects/itemCrackle';
 import type { ItemSparkleKind } from '../../effects/itemSparkle';
 import { effects, type EffectHandle } from '../../effects';
-import { entityGone, entityPos, entityYaw, followEntity, tmpA } from '../../effects/core';
+import { bonePos, entityGone, entityPos, entityYaw, followEntity, tmpA } from '../../effects/core';
+import type { Vector3 } from '../../libs/babylon/exports';
 import { requestGlowProbe } from '../../scenes/sceneLook';
 import { EventBus } from '../../libs/eventBus';
 import { itemSelfLight, lightItem, type ItemLampKind } from '../../lighting/items';
@@ -58,7 +60,58 @@ type Lamp = {
   gen: number;
   aura: ItemAura | null;
   crackle: ItemCrackle | null;
+  /** The piece that won the tier: the aura is emitted off it, not off the body. */
+  auraSlot: ItemAuraSlot;
+  /** A weapon's own bone-linked node, when the winner is one. */
+  auraPart: ModelObject | null;
+  /** Flips every frame so a pair of gloves / boots emits from both ends. */
+  auraFlip: boolean;
 };
+
+/** Player skeleton bones the aura hangs on (player.glb bone names). */
+const PELVIS_BONE = 2;
+const FOOT_BONES = [5, 12] as const;
+const CHEST_BONE = 18;
+const HEAD_BONE = 20;
+const HAND_BONES = [28, 37] as const;
+
+/** Chest height: where the aura sits until the skeleton is up. */
+const AURA_FALLBACK_HEIGHT = 0.9;
+
+/** Equipment order of the tier lookup below, as aura slots. */
+const AURA_SLOTS: readonly ItemAuraSlot[] = [
+  'weapon',
+  'weapon',
+  'helm',
+  'armor',
+  'pants',
+  'gloves',
+  'boots',
+];
+
+/** Moves `out` onto the glowing item: its own node for a weapon, else a bone. */
+function auraAnchor(e: Entity, lamp: Lamp, out: Vector3): void {
+  const part = lamp.auraPart;
+  if (part?.Ready) {
+    out.copyFrom(part.node.getAbsolutePosition());
+    return;
+  }
+
+  lamp.auraFlip = !lamp.auraFlip;
+  const side = lamp.auraFlip ? 1 : 0;
+  const bone =
+    lamp.auraSlot === 'helm'
+      ? HEAD_BONE
+      : lamp.auraSlot === 'pants'
+        ? PELVIS_BONE
+        : lamp.auraSlot === 'gloves'
+          ? HAND_BONES[side]
+          : lamp.auraSlot === 'boots'
+            ? FOOT_BONES[side]
+            : CHEST_BONE;
+
+  bonePos(e, bone, out, AURA_FALLBACK_HEIGHT);
+}
 
 type Tracked = {
   signature: string;
@@ -130,17 +183,23 @@ export const ItemGlowSystem: ISystemFactory = world => {
     y: number,
     z: number,
     kind: ItemLampKind,
-    auraKind: ItemAuraKind
+    slot: ItemAuraSlot,
+    auraPart: ModelObject | null
   ): Lamp {
     const position = { x, y, z };
+    // The crackle still wraps the whole body; only the aura is per item.
+    const body: ItemAuraKind = slot === 'drop' ? 'drop' : 'character';
 
     return {
       tier,
       position,
       source: lightItem(world.scene, tier, kind, position),
       gen: worldGen,
-      aura: createItemAura(world.scene, tier, auraKind, x, y, z),
-      crackle: createItemCrackle(world.scene, tier, auraKind, x, y, z),
+      aura: createItemAura(world.scene, tier, slot, x, y, z),
+      crackle: createItemCrackle(world.scene, tier, body, x, y, z),
+      auraSlot: slot,
+      auraPart,
+      auraFlip: false,
     };
   }
 
@@ -253,7 +312,8 @@ export const ItemGlowSystem: ISystemFactory = world => {
             transform.pos.y,
             transform.pos.z,
             'drop',
-            'drop'
+            'drop',
+            null
           );
         }
 
@@ -292,7 +352,9 @@ export const ItemGlowSystem: ISystemFactory = world => {
           state.signature = signature;
           state.sparkleWanted = anyExcellent(app);
 
-          const tier = strongestTier([
+          // This list is in AURA_SLOTS order: the winner's index names the
+          // piece the aura comes off.
+          const { tier, index } = strongestTierOf([
             app.leftHand,
             app.rightHand,
             app.helm,
@@ -301,6 +363,10 @@ export const ItemGlowSystem: ISystemFactory = world => {
             app.gloves,
             app.boots,
           ]);
+          const slot = AURA_SLOTS[index] ?? 'armor';
+          const player = modelObject as PlayerObject;
+          const auraPart =
+            index === 0 ? player.Weapon1 : index === 1 ? player.Weapon2 : null;
 
           // Re-examined is not rebuilt. itemVisualTier interns its tiers, so
           // identity is the whole comparison: same tier, same generation, and
@@ -316,6 +382,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
             restamp ||
             !state.lamp ||
             state.lamp.tier !== tier ||
+            state.lamp.auraSlot !== slot ||
             state.lamp.gen !== worldGen;
 
           if (stale) {
@@ -333,7 +400,8 @@ export const ItemGlowSystem: ISystemFactory = world => {
                 transform.pos.y,
                 transform.pos.z,
                 e.localPlayer ? 'hero' : 'player',
-                'character'
+                slot,
+                auraPart
               );
             }
           }
@@ -354,7 +422,7 @@ export const ItemGlowSystem: ISystemFactory = world => {
         lamp.position.y = y;
         lamp.position.z = z;
 
-        lamp.aura?.emitter.set(x, y, z);
+        if (lamp.aura) auraAnchor(e, lamp, lamp.aura.emitter);
         lamp.crackle?.position.set(x, y, z);
 
         if (!lamp.source?.alive) continue;

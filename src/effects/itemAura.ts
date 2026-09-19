@@ -12,10 +12,15 @@ import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
 /**
  * Item aura (improved look): a slow drift of additive motes in the
- * item's glow colour around the wearer (or the drop), orbit rings of motes
+ * item's glow colour off the glowing item itself, orbit rings of motes
  * from +9 (more with each tier), plus a quick shower of falling sparks from
  * +11. Excellent items mix the cyan/green sweep into the
  * motes, ancient ones the deep green.
+ *
+ * The motes come off the piece that glows - the breastplate, the boots, the
+ * blade in hand - not off the whole body: itemGlowSystem keeps `emitter` on
+ * that part's bone, and the shape table below keeps the box they fill the
+ * size of the item.
  *
  * One system per character / drop so the emitter can follow the body; the
  * capacity is small and the texture shared (flare01 via loadEffectTexture).
@@ -100,6 +105,40 @@ const ANCIENT_TINT = new Color4(0.2, 0.8, 0.35, 1);
 
 export type ItemAuraKind = 'character' | 'drop';
 
+/** The glowing piece the aura hangs on; `drop` is the item on the ground. */
+export type ItemAuraSlot =
+  | 'helm'
+  | 'armor'
+  | 'pants'
+  | 'gloves'
+  | 'boots'
+  | 'weapon'
+  | 'drop';
+
+/**
+ * How much room the item takes around its anchor: `up` shifts the box off the
+ * anchor (a bone sits at the top of the boot, a drop sits on the floor),
+ * `x/y/z` are the box's half-extents and `ring` the radius the orbit rings
+ * circle it at. World units.
+ */
+type AuraShape = {
+  up: number;
+  x: number;
+  y: number;
+  z: number;
+  ring: number;
+};
+
+const SHAPES: Record<ItemAuraSlot, AuraShape> = {
+  helm: { up: 0.03, x: 0.13, y: 0.14, z: 0.13, ring: 0.18 },
+  armor: { up: 0, x: 0.2, y: 0.2, z: 0.16, ring: 0.26 },
+  pants: { up: -0.25, x: 0.17, y: 0.28, z: 0.15, ring: 0.23 },
+  gloves: { up: 0, x: 0.1, y: 0.1, z: 0.1, ring: 0.14 },
+  boots: { up: 0.06, x: 0.11, y: 0.14, z: 0.11, ring: 0.15 },
+  weapon: { up: 0, x: 0.12, y: 0.22, z: 0.12, ring: 0.18 },
+  drop: { up: 0.15, x: 0.14, y: 0.13, z: 0.14, ring: 0.18 },
+};
+
 export type ItemAura = EffectHandle & {
   readonly emitter: Vector3;
   /** Same as `stop()`; the name itemGlowSystem has always used. */
@@ -110,7 +149,7 @@ export type ItemAura = EffectHandle & {
 
 export interface ItemAuraOptions {
   tier: ItemVisualTier;
-  kind: ItemAuraKind;
+  slot: ItemAuraSlot;
 }
 
 /** Every aura handed out and not yet disposed - so a map change can end them. */
@@ -133,7 +172,7 @@ function tint(tier: ItemVisualTier): Color4 {
 function motes(
   scene: Scene,
   tier: ItemVisualTier,
-  kind: ItemAuraKind,
+  slot: ItemAuraSlot,
   emitter: Vector3
 ): AuraSystem {
   const ps = createAuraSystem(scene, 'itemAura', 96 + tier.glow * 48);
@@ -159,19 +198,15 @@ function motes(
 
   // Motes grow a touch with the tier so +11 reads bigger as well as denser.
   const grow = 1 + Math.max(0, tier.glow - 2) * 0.15;
-  ps.minSize = 0.09 * grow;
-  ps.maxSize = 0.2 * grow;
+  ps.minSize = 0.045 * grow;
+  ps.maxSize = 0.1 * grow;
   ps.minLifeTime = 0.9;
   ps.maxLifeTime = 1.6;
   ps.emitRate = tier.auraRate;
 
-  if (kind === 'character') {
-    ps.minEmitBox = new Vector3(-0.22, 0.15, -0.22);
-    ps.maxEmitBox = new Vector3(0.22, 1.1, 0.22);
-  } else {
-    ps.minEmitBox = new Vector3(-0.16, 0.02, -0.16);
-    ps.maxEmitBox = new Vector3(0.16, 0.3, 0.16);
-  }
+  const shape = SHAPES[slot];
+  ps.minEmitBox = new Vector3(-shape.x, shape.up - shape.y, -shape.z);
+  ps.maxEmitBox = new Vector3(shape.x, shape.up + shape.y, shape.z);
 
   ps.direction1 = new Vector3(-0.2, 0.6, -0.2);
   ps.direction2 = new Vector3(0.2, 1, 0.2);
@@ -190,7 +225,7 @@ function motes(
 function sparks(
   scene: Scene,
   tier: ItemVisualTier,
-  kind: ItemAuraKind,
+  slot: ItemAuraSlot,
   emitter: Vector3
 ): AuraSystem {
   const ps = createAuraSystem(scene, 'itemSparks', 48 + tier.glow * 24);
@@ -208,15 +243,15 @@ function sparks(
   ps.color2 = colour;
   ps.colorDead = new Color4(colour.r, colour.g, colour.b, 0);
 
-  ps.minSize = 0.03;
-  ps.maxSize = 0.07;
+  ps.minSize = 0.015;
+  ps.maxSize = 0.035;
   ps.minLifeTime = 0.35;
   ps.maxLifeTime = 0.7;
   ps.emitRate = Math.round(tier.auraRate * 0.6);
 
-  const top = kind === 'character' ? 1.1 : 0.3;
-  ps.minEmitBox = new Vector3(-0.18, top * 0.5, -0.18);
-  ps.maxEmitBox = new Vector3(0.18, top, 0.18);
+  const shape = SHAPES[slot];
+  ps.minEmitBox = new Vector3(-shape.x, shape.up, -shape.z);
+  ps.maxEmitBox = new Vector3(shape.x, shape.up + shape.y, shape.z);
 
   ps.direction1 = new Vector3(-1, 0.4, -1);
   ps.direction2 = new Vector3(1, 1, 1);
@@ -231,16 +266,17 @@ function sparks(
 }
 
 /**
- * Orbit ring (+9 and up): motes released from a point circling the body at
- * waist height, so the wearer is wrapped in a visible band rather than just
- * a haze. From +11 a second ring counter-rotates higher up; +13 adds a third.
+ * Orbit ring (+9 and up): motes released from a point circling the item, so
+ * it is wrapped in a visible band rather than just a haze. From +11 a second
+ * ring counter-rotates beside it; +13 adds a third.
  */
 function ring(
   scene: Scene,
   tier: ItemVisualTier,
-  kind: ItemAuraKind,
+  slot: ItemAuraSlot,
   emitter: Vector3,
-  index: number
+  index: number,
+  count: number
 ): AuraSystem {
   const ps = createAuraSystem(scene, 'itemRing', 160);
 
@@ -258,9 +294,9 @@ function ring(
   ps.addColorGradient(0.6, colour);
   ps.addColorGradient(1, new Color4(colour.r, colour.g, colour.b, 0));
 
-  const scale = kind === 'character' ? 1 : 0.5;
-  ps.minSize = 0.05 * scale;
-  ps.maxSize = 0.11 * scale;
+  const shape = SHAPES[slot];
+  ps.minSize = 0.025;
+  ps.maxSize = 0.055;
   ps.minLifeTime = 0.5;
   ps.maxLifeTime = 0.9;
   ps.emitRate = 40 + tier.glow * 10;
@@ -272,8 +308,9 @@ function ring(
 
   // The emitter point itself orbits; the particles it leaves behind trail
   // into a band. Each ring has its own radius, height, speed and direction.
-  const radius = (0.32 + index * 0.06) * scale;
-  const height = (0.45 + index * 0.3) * scale;
+  const radius = shape.ring + index * 0.05;
+  // Stacked around the middle of the item, not piled above it.
+  const height = shape.up + (index - (count - 1) / 2) * 0.14;
   const speed = (3.2 + index * 0.8) * (index % 2 === 0 ? 1 : -1);
   const phase = (index * Math.PI * 2) / 3;
   const point = new Vector3();
@@ -282,7 +319,7 @@ function ring(
   const observer = scene.onBeforeRenderObservable.add(() => {
     const t = itemGlowClock() * speed + phase;
     // Slight bob so the band is not a flat disc.
-    const bob = Math.sin(t * 0.7) * 0.06 * scale;
+    const bob = Math.sin(t * 0.7) * 0.04;
     point.set(
       emitter.x + Math.cos(t) * radius,
       emitter.y + height + bob,
@@ -300,11 +337,14 @@ function ring(
   return ps;
 }
 
-/** Creates the aura for `tier` at `x,y,z`; move it through `emitter`. */
+/**
+ * Creates the aura for `tier` around the `slot` item at `x,y,z`; move it
+ * through `emitter` (itemGlowSystem keeps that on the item's bone).
+ */
 export function createItemAura(
   scene: Scene,
   tier: ItemVisualTier,
-  kind: ItemAuraKind,
+  slot: ItemAuraSlot,
   x: number,
   y: number,
   z: number
@@ -312,14 +352,14 @@ export function createItemAura(
   if (tier.auraRate <= 0) return null;
 
   const emitter = new Vector3(x, y, z);
-  const systems: AuraSystem[] = [motes(scene, tier, kind, emitter)];
+  const systems: AuraSystem[] = [motes(scene, tier, slot, emitter)];
 
-  if (tier.sparks) systems.push(sparks(scene, tier, kind, emitter));
+  if (tier.sparks) systems.push(sparks(scene, tier, slot, emitter));
 
   // Orbit rings: one from +9, two from +11, three from +13.
   const rings = tier.glow >= 2 ? tier.glow - 1 : 0;
   for (let i = 0; i < rings; i++)
-    systems.push(ring(scene, tier, kind, emitter, i));
+    systems.push(ring(scene, tier, slot, emitter, i, rings));
 
   let alive = true;
   const aura: ItemAura = {
@@ -348,7 +388,7 @@ export function createItemAura(
 }
 
 function spawn(scene: Scene, at: Vector3, opts: ItemAuraOptions): EffectHandle {
-  return createItemAura(scene, opts.tier, opts.kind, at.x, at.y, at.z) ?? DEAD_HANDLE;
+  return createItemAura(scene, opts.tier, opts.slot, at.x, at.y, at.z) ?? DEAD_HANDLE;
 }
 
 function reset(): void {

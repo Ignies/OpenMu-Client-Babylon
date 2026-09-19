@@ -239,13 +239,19 @@ export function itemVisualTier(item: Item | null | undefined): ItemVisualTier {
   return tier;
 }
 
-/** The strongest tier across a set of equipped items (drives the body light). */
-export function strongestTier(
+/**
+ * The strongest tier across a set of equipped items (drives the body light),
+ * and which of them it came from (-1 when none does anything) - the aura
+ * hangs on that piece.
+ */
+export function strongestTierOf(
   items: readonly (Item | null | undefined)[]
-): ItemVisualTier {
+): { tier: ItemVisualTier; index: number } {
   let best = itemVisualTier(null);
+  let index = -1;
 
-  for (const item of items) {
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
     if (!item) continue;
     const tier = itemVisualTier(item);
     if (
@@ -256,10 +262,18 @@ export function strongestTier(
         tier.auraRate > best.auraRate)
     ) {
       best = tier;
+      index = i;
     }
   }
 
-  return best;
+  return { tier: best, index };
+}
+
+/** The strongest tier across a set of equipped items (drives the body light). */
+export function strongestTier(
+  items: readonly (Item | null | undefined)[]
+): ItemVisualTier {
+  return strongestTierOf(items).tier;
 }
 
 // --- shared clock -----------------------------------------------------------
