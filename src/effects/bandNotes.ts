@@ -1,16 +1,23 @@
 /**
- * Band notes - a music note that floats up from an instrument for every note
+ * Band notes - a music note that flows out of an instrument for every note
  * it plays: the strum the held pose does not make.
  *
  * Unlike the rest of the effects a note is not a glow: it is a solid glyph,
- * alpha-tested at full opacity in the world's own rendering group, so it
- * writes depth and lands in the G-buffer - which is what gives it an ink
- * line of its own under the Anime style (scenes/inkOutline.ts) instead of
- * the contour that pass draws around the additive cards. Tinted by the
- * pitch class, twelve hues around the octave, and sized by the velocity.
- * The glyph is drawn once per scene into a small dynamic texture as shapes
- * (head, stem, flag, beam), not a font character: every machine draws the
- * same note.
+ * alpha-tested in the world's own rendering group, so it writes depth and
+ * lands in the G-buffer - which is what gives it an ink line of its own
+ * under the Anime style (scenes/inkOutline.ts) instead of the contour that
+ * pass draws around the additive cards. Tinted by the pitch class, twelve
+ * hues around the octave, and sized by the velocity. The glyph is drawn
+ * once per scene into a small dynamic texture as shapes (head, stem, flag,
+ * beam), not a font character: every machine draws the same note.
+ *
+ * A note leaves the instrument forward, the way the performer faces, in a
+ * loose fan - one a little to the left, the next a little to the right -
+ * and lifts as it goes, on a curve that steepens toward the end. It starts
+ * small and grows as it travels, holds its colour through the first half of
+ * the way and then fades out smoothly, and drags a soft wake of its own
+ * colour along the curve behind it - so the notes are seen to flow out of
+ * the music, not to float off it.
  *
  * Driven by: `BandSystem`, one spawn per hit it lets through. Read by: nobody.
  */
@@ -20,41 +27,87 @@ import {
   Material,
   StandardMaterial,
   Texture,
+  Vector3,
   type Scene,
-  type Vector3,
 } from '../libs/babylon/exports';
-import { LiveList, acquireCard, hash, lerp, releaseCard, setCardCell, type Card, type RGB } from './core';
+import {
+  LiveList,
+  acquireCard,
+  additiveMaterial,
+  hash,
+  lerp,
+  releaseCard,
+  setCardCell,
+  type Card,
+  type RGB,
+} from './core';
 import type { EffectHandle, EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Seconds a note floats before it is gone. */
-const SECONDS = 1.5;
+/** Seconds a note flows before it is gone. */
+const SECONDS = 1.8;
 
-/** Card edge in tiles at full velocity: 30 cm, a glyph the size of a hand. */
-const SIZE = 0.3;
+/** Card edge in tiles at full velocity: 7.5 cm, a glyph the size of a coin. */
+const SIZE = 0.075;
 
 /** The quietest note's share of that. */
 const MIN_SIZE = 0.6;
 
-/** Tiles per second the note rises. */
-const RISE = 0.45;
+/** How much a note's size wanders from the velocity's, either way: no two alike. */
+const SIZE_VARY = 0.3;
 
-/** Tiles per second it drifts sideways, one way or the other per note. */
-const DRIFT = 0.12;
+/** The note's size along its way, as shares of its own: it grows as it leaves. */
+const START_SCALE = 1;
+const END_SCALE = 2;
 
-/** The sway on top of the drift: amplitude in tiles, rate in radians per second. */
-const SWAY = 0.05;
-const SWAY_RATE = 3;
+/** Tiles the curve reaches forward over a life, fast at first and easing off. */
+const REACH = 1.3;
+
+/** Tiles it lifts by the end, from the first moment and steepening as it goes; and how much that varies per note, either way. */
+const RISE = 0.6;
+const RISE_VARY = 0.5;
+
+/** The fan, radians off straight ahead: the least a note turns, and how much more it may. */
+const FAN = 0.35;
+const FAN_VARY = 0.7;
+
+/** The dance: the glyph's roll wobble in radians and its bob in tiles, each at its rate in radians per second. */
+const WOBBLE = 0.25;
+const WOBBLE_RATE = 5;
+const BOB = 0.03;
+const BOB_RATE = 3.5;
+
+/** A sideways ripple along the way: amplitude in tiles, radians per second. */
+const RIPPLE = 0.035;
+const RIPPLE_RATE = 4;
+
+/** Tiles a note starts off ahead, so two close in time never share a start. */
+const SPREAD = 0.05;
+
+/** Radians the glyph leans into where the curve is heading, as seen on screen. */
+const LEAN = 0.4;
+
+/** The fade: whole until this share of the life, then eased smoothly to nothing at the end. */
+const FADE_FROM = 0.6;
+
+/** The wake: glow dots along the last stretch of curve, this many seconds apart, this many of them. */
+const WAKE_STEP = 0.05;
+const WAKE = 5;
+
+/** The wake's width at the note, as a share of the note's size, and the soft glow it is drawn with. */
+const WAKE_WIDTH = 0.9;
+const WAKE_TEXTURE = 'Effect/flare01.OZJ';
+
+/** The wake's tint: the note's hue moved this far toward white, at this brightness - a pale halo, not a second note. */
+const WAKE_PALE = 0.5;
+const WAKE_GAIN = 0.8;
 
 /** Share of the life spent growing in from nothing. */
-const GROW = 0.12;
-
-/** Share of the life spent shrinking away at the end: a note holds its colour, so it leaves by size. */
-const SHRINK = 0.25;
+const GROW = 0.1;
 
 /** Saturation of the pitch hues, 0..1: pastel, so the note reads as a glyph, not a flare. */
-const SATURATION = 0.55;
+const SATURATION = 0.75;
 
 /** Share of notes drawn as the single glyph; the rest are the beamed pair. */
 const SINGLE_SHARE = 0.75;
@@ -70,6 +123,8 @@ export interface BandNoteOptions {
   pitch: number;
   /** MIDI velocity, 0..127; the size. */
   velocity?: number;
+  /** The performer's facing (radians, MU convention): the way the note flows. */
+  yaw?: number;
 }
 
 const live = new LiveList();
@@ -83,7 +138,14 @@ const materials = new Map<string, StandardMaterial>();
 
 let seed = 0;
 
-/** How many notes are floating (debug). */
+/** Scratch: the camera's right and up, two points of the curve, the span between them. */
+const camRight = new Vector3();
+const camUp = new Vector3();
+const p0 = new Vector3();
+const p1 = new Vector3();
+const span = new Vector3();
+
+/** How many notes are flowing (debug). */
 export function bandNoteCount(): number {
   return live.size;
 }
@@ -173,8 +235,10 @@ function sheetFor(scene: Scene): DynamicTexture {
 
 /**
  * The glyph in one tint: unlit, so the texel is simply multiplied by it
- * (`emissiveColor` with lighting off), and alpha-tested rather than blended,
- * so every note is fully opaque and cut to its own outline.
+ * (`emissiveColor` with lighting off), alpha-tested so it is cut to its own
+ * outline and blended on top of that so the card's `visibility` fades it: a
+ * faint note is still a note-shaped one. (Test alone ignores the visibility:
+ * a material with a transparency mode decides blending by that mode only.)
  */
 function noteMaterial(scene: Scene, colour: RGB): StandardMaterial {
   const key = `${(colour[0] * 255) | 0},${(colour[1] * 255) | 0},${(colour[2] * 255) | 0}`;
@@ -191,40 +255,121 @@ function noteMaterial(scene: Scene, colour: RGB): StandardMaterial {
   // texture's with this on (Babylon's ALPHATEST_AFTERALLALPHACOMPUTATIONS):
   // without it the sheet's clear half draws as a black square around the note.
   mat.useAlphaFromDiffuseTexture = true;
-  mat.alphaMode = Constants.ALPHA_DISABLE;
-  mat.transparencyMode = Material.MATERIAL_ALPHATEST;
+  mat.alphaMode = Constants.ALPHA_COMBINE;
+  mat.transparencyMode = Material.MATERIAL_ALPHATESTANDBLEND;
   mat.backFaceCulling = false;
   materials.set(key, mat);
   return mat;
 }
 
+/** The camera's right and up: the plane a lean is measured in. */
+function readCamera(scene: Scene): void {
+  const cam = scene.activeCamera;
+  if (!cam) {
+    camRight.set(1, 0, 0);
+    camUp.set(0, 1, 0);
+    return;
+  }
+  cam.getDirectionToRef(Vector3.RightReadOnly, camRight);
+  cam.getDirectionToRef(Vector3.UpReadOnly, camUp);
+}
+
+/** A direction's roll in the camera's plane: a billboard's rotation.z turns clockwise for positive values. */
+function screenRoll(dir: Vector3): number {
+  return -Math.atan2(Vector3.Dot(dir, camUp), Vector3.Dot(dir, camRight));
+}
+
+/** How far along its way a note is at share `p` of its life: fast off the instrument, easing off. */
+function travelled(p: number): number {
+  const left = 1 - Math.min(1, p);
+  return 1 - left * left;
+}
+
 function spawn(scene: Scene, at: Vector3, opts: BandNoteOptions): EffectHandle {
-  const material = noteMaterial(scene, pitchColour(opts.pitch));
+  const colour = pitchColour(opts.pitch);
+  const material = noteMaterial(scene, colour);
   // Group 0: a note is a solid thing in the world, not a glow over it.
   const card: Card = acquireCard(scene, material, true, 0);
   const s = seed++;
   setCardCell(card, CELLS, hash(s) < SINGLE_SHARE ? 0 : 1);
+  const glow = additiveMaterial(scene, WAKE_TEXTURE, [
+    lerp(colour[0], 1, WAKE_PALE) * WAKE_GAIN,
+    lerp(colour[1], 1, WAKE_PALE) * WAKE_GAIN,
+    lerp(colour[2], 1, WAKE_PALE) * WAKE_GAIN,
+  ]);
+  const wake: Card[] = [];
+  for (let k = 0; k < WAKE; k++) {
+    const dot = acquireCard(scene, glow);
+    dot.scaling.setAll(0);
+    wake.push(dot);
+  }
   const velocity = Math.max(0, Math.min(127, opts.velocity ?? 100)) / 127;
-  const size = SIZE * lerp(MIN_SIZE, 1, velocity);
-  const side = hash(s + 0.5) < 0.5 ? -1 : 1;
-  const phase = hash(s + 0.25) * Math.PI * 2;
+  const size = SIZE * lerp(MIN_SIZE, 1, velocity) * (1 + SIZE_VARY * (hash(s + 0.5) * 2 - 1));
+  const side = s % 2 === 0 ? -1 : 1;
+  const heading = (opts.yaw ?? 0) + side * (FAN + FAN_VARY * hash(s + 0.25));
+  const rise = RISE * (1 + RISE_VARY * (hash(s + 0.75) * 2 - 1));
+  const phase = hash(s + 0.125) * Math.PI * 2;
+  // MU's yaw: forward is (sin, -cos) on the ground; its right-hand side turns from that.
+  const fx = Math.sin(heading), fz = -Math.cos(heading);
+  const rx = -fz, rz = fx;
   const x = at.x, y = at.y, z = at.z;
   card.position.set(x, y, z);
   card.scaling.setAll(0);
+
+  /** The curve `age` seconds in: forward and lifting, bobbing along, with a ripple across it. */
+  const arcAt = (age: number, out: Vector3): void => {
+    const p = Math.min(1, age / SECONDS);
+    const d = SPREAD + REACH * travelled(p);
+    const lift = rise * (0.35 * p + 0.65 * p * p) + BOB * Math.sin(BOB_RATE * age + phase);
+    const ripple = RIPPLE * Math.sin(RIPPLE_RATE * age);
+    out.set(x + fx * d + rx * ripple, y + lift, z + fz * d + rz * ripple);
+  };
+  /** The note's size and opacity `age` seconds in. */
+  const sizeAt = (age: number): number => {
+    const p = Math.min(1, age / SECONDS);
+    const grownIn = p < GROW ? p / GROW : 1;
+    return size * lerp(START_SCALE, END_SCALE, travelled(p)) * grownIn;
+  };
+  const fadeAt = (age: number): number => {
+    const q = Math.min(1, Math.max(0, (age / SECONDS - FADE_FROM) / (1 - FADE_FROM)));
+    return 1 - q * q * (3 - 2 * q);
+  };
 
   let t = 0;
   return live.push({
     update(dt) {
       t += dt;
-      const p = t / SECONDS;
-      if (p >= 1) return false;
-      const grown = p < GROW ? p / GROW : p > 1 - SHRINK ? (1 - p) / SHRINK : 1;
-      card.scaling.setAll(size * grown);
-      card.position.set(x + side * (DRIFT * t + SWAY * Math.sin(phase + SWAY_RATE * t)), y + RISE * t, z);
+      if (t >= SECONDS) return false;
+      readCamera(scene);
+
+      // The note, leaning into where the curve is heading.
+      arcAt(t, p1);
+      arcAt(Math.max(0, t - WAKE_STEP), p0);
+      p1.subtractToRef(p0, span);
+      const slope = span.lengthSquared() > 0 ? screenRoll(span) + Math.PI / 2 : 0;
+      card.scaling.setAll(sizeAt(t));
+      card.rotation.z = slope * LEAN + WOBBLE * Math.sin(WOBBLE_RATE * t + phase);
+      card.position.copyFrom(p1);
+      card.visibility = fadeAt(t);
+
+      // The wake: a dot per step of curve behind it, thinning to the tail.
+      for (let k = 0; k < WAKE; k++) {
+        const dot = wake[k];
+        const age = t - (k + 1) * WAKE_STEP;
+        if (age <= 0) {
+          dot.scaling.setAll(0);
+          continue;
+        }
+        arcAt(age, p0);
+        dot.position.copyFrom(p0);
+        dot.scaling.setAll(sizeAt(age) * WAKE_WIDTH * (1 - (k + 1) / (WAKE + 1)));
+        dot.visibility = fadeAt(age);
+      }
       return true;
     },
     release() {
       releaseCard(scene, card);
+      for (const dot of wake) releaseCard(scene, dot);
     },
   });
 }

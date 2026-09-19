@@ -16,6 +16,7 @@ import { instrumentClip } from '../../common/band/instrumentClip';
 import { startPerforming, stopPerforming } from '../../common/band/performing';
 import { audioNow, dropPerformer, setPerformerPosition } from '../../sound/instruments';
 import { effects } from '../../effects';
+import { entityYaw } from '../../effects/core';
 import { playUiSound } from '../../libs/sfx';
 import type { Entity, ISystemFactory } from '../world';
 
@@ -41,7 +42,7 @@ import type { Entity, ISystemFactory } from '../world';
 const CLIP_SPEED = 24 / 25;
 
 /** Seconds between two notes shown for one performer: a chord is one note, not six. */
-const NOTE_GAP = 0.09;
+const NOTE_GAP = 0.15;
 
 /** Tiles above the instrument's origin (the hand) a note is born. */
 const NOTE_HEIGHT = 0.15;
@@ -236,7 +237,7 @@ export const BandSystem: ISystemFactory = world => {
           lastNoteAt.set(e, now);
           noteAt.copyFrom(node.getAbsolutePosition());
           noteAt.y += NOTE_HEIGHT;
-          effects.spawn('bandNotes', world.scene, noteAt, { pitch: hit.note, velocity: hit.velocity });
+          effects.spawn('bandNotes', world.scene, noteAt, { pitch: hit.note, velocity: hit.velocity, yaw: entityYaw(e) });
         }
 
         setPerformerPosition(keyOf(e), e.transform.pos.x, e.transform.pos.z, p.local);
