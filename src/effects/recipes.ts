@@ -150,6 +150,10 @@ export const TEX = {
   torch: 'Effect/Torchfire.OZJ',
   guildRing: 'Effect/guild_ring01.OZJ',
   pinLights: 'Effect/pin_lights.OZJ',
+  /** BITMAP_LIGHT_MARKS (lightmarks.jpg): the Berserker's body marks. */
+  lightMarks: 'Effect/lightmarks.ozj',
+  /** BITMAP_LUCKY_SEAL_EFFECT (partCharge1/bujuckline.jpg): the seal ribbons' sheet. */
+  luckySeal: 'Effect/partCharge1/bujuckline.ozj',
   kwave: 'Effect/Kwave.OZJ',
   powerWave: 'Effect/PoundingBall.OZJ',
 } as const;
@@ -325,6 +329,8 @@ export const MODEL = {
   atShield: 'Effect/atshild.glb',
   elShieldRing: 'Effect/elshildring.glb',
   shieldUp: 'Effect/shield_up.glb',
+  /** MODEL_ARROWSRE06 (arrowsre06.bmd): the rune Swell of Magic Power stamps on the hands every six seconds. */
+  arrowsRe06: 'Effect/arrowsre06.glb',
   volcanoStone: 'Effect/volcano_stone.glb',
   changeUp: 'Effect/Change_Up_Eff.glb',
   iceStone: 'Effect/ice_stone00.glb',

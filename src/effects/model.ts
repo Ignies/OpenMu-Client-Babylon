@@ -75,6 +75,14 @@ export interface ModelOptions {
   height?: number;
   /** Loop the clip (default) or play it once. */
   loop?: boolean;
+  /**
+   * Hold the clip on this frame instead of playing it - the original's
+   * `if (AnimationFrame >= 4) AnimationFrame = 4` on a frozen body's
+   * MODEL_ICE (ZzzEffect.cpp:7702). Done as a looping clip over a sliver of
+   * a frame, never a paused one: a paused group writes its bones but nothing
+   * drawn follows.
+   */
+  holdFrame?: number;
   /** Fade tail fraction (visibility). */
   fadeTail?: number;
   /** Peak visibility 0…1 (the original's `Alpha`; TwistingSlash's wheels are 0.6 → 0.3). */
@@ -257,7 +265,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         clip = gltf.animationGroups[0] ?? null;
         if (clip) {
           clip.speedRatio = ANIMATION_SPEED;
-          clip.play(opts.loop ?? true);
+          if (opts.holdFrame !== undefined) clip.start(true, ANIMATION_SPEED, opts.holdFrame, opts.holdFrame + 0.05);
+          else clip.play(opts.loop ?? true);
         }
         meshes.push(gltf.mesh);
       })

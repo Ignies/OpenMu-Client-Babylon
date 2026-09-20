@@ -42,7 +42,24 @@ import {
 } from '../libs/babylon/exports';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
-import { LiveList, darkCardGain, effectTexture, fadeOut, fxNow, hash, lightCardGain, luma, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
+import {
+  LiveList,
+  acquireCard,
+  additiveMaterial,
+  darkCardGain,
+  effectTexture,
+  fadeOut,
+  fxNow,
+  hash,
+  lightCardGain,
+  luma,
+  pointSource,
+  releaseCard,
+  type Card,
+  type EffectBlend,
+  type PointSource,
+  type RGB,
+} from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';
 import { releaseGreasedLineMaterial } from './greasedLineRelease';
 import { RGBS } from './recipes';
@@ -172,6 +189,28 @@ export interface JointOptions {
   textureScroll?: number;
   /** Ends it early when true (the wearer left, the charge released). */
   until?: () => boolean;
+  /**
+   * Trail: the body the ribbon belongs to. Every tick the whole history is
+   * shifted by this point's displacement before the head is sampled - the
+   * original's `Tails -= old TargetPosition; += new` on the MODEL_SPEARSKILL
+   * aura joints (ZzzEffectJoint.cpp:4463), so a ribbon is rigid with its
+   * wearer instead of streaking out behind a walk.
+   */
+  anchor?: PointSource;
+  /**
+   * Trail: a segment longer than this (tiles) is not drawn - `RenderJoints`'
+   * `distSq > 60 * 60` cull (:7108), which keeps a ribbon whose head jumped (a
+   * bone that just loaded, a warp) from drawing a line across the map.
+   */
+  maxSegment?: number;
+  /**
+   * Trail: cards riding the history - the `CreateSprite(BITMAP_FLARE_BLUE, …)`
+   * at the middle tail of the aura joints (:7136) and on every tail of the
+   * JOINT_HEALING sub9 ones (:7176). `count` cards sit at evenly spaced slots
+   * (1 = the middle one). `fadeAbove` dims a card by one per tile it sits
+   * above `anchor + fadeAbove` (the original's `Light - (z - (target + 50)) / 100`).
+   */
+  sprites?: { texture: string; colour: RGB; size: number; count?: number; fadeAbove?: number };
 }
 
 const live = new LiveList();
@@ -492,6 +531,28 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
   const ribbon = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
   const mesh = ribbon.mesh;
 
+  // The body the history rides (`anchor`), and the copy of it that is drawn
+  // when over-long segments are culled - the history itself stays whole.
+  const anchor = opts.anchor;
+  const anchorNow = new Vector3();
+  const anchorLast = new Vector3();
+  if (anchor) anchor(anchorLast);
+  const maxSeg = opts.maxSegment ?? Infinity;
+  const drawLine = Number.isFinite(maxSeg) ? line.slice() : line;
+  const drawLines = drawLine === line ? lines : [drawLine];
+  const spriteCards: Card[] = [];
+  const spriteSlots: number[] = [];
+  if (opts.sprites) {
+    const s = opts.sprites;
+    const n = Math.max(1, s.count ?? 1);
+    const m = additiveMaterial(scene, s.texture, s.colour);
+    for (let i = 0; i < n; i++) {
+      spriteCards.push(acquireCard(scene, m));
+      // One card sits at the middle slot; several spread from the head to the tail.
+      spriteSlots.push(n === 1 ? Math.floor(tails / 2) : Math.round((i * tails) / (n - 1)));
+    }
+  }
+
   let t = 0;
   let sinceSample = 0;
 
@@ -500,6 +561,20 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
       t += dt;
       const prog = t / seconds;
       if (prog >= 1 || opts.until?.()) return false;
+      if (anchor) {
+        anchor(anchorNow);
+        const dx = anchorNow.x - anchorLast.x;
+        const dy = anchorNow.y - anchorLast.y;
+        const dz = anchorNow.z - anchorLast.z;
+        if (dx !== 0 || dy !== 0 || dz !== 0) {
+          for (let i = 0; i < line.length; i += 3) {
+            line[i] += dx;
+            line[i + 1] += dy;
+            line[i + 2] += dz;
+          }
+          anchorLast.copyFrom(anchorNow);
+        }
+      }
       if (opts.head) {
         opts.head(head);
         head.y += height;
@@ -565,12 +640,43 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
       line[0] = head.x;
       line[1] = head.y;
       line[2] = head.z;
-      mesh.setPoints(lines);
+      if (drawLine !== line) {
+        // Copy the history, collapsing an over-long segment onto its newer end so it draws as nothing.
+        const maxSq = maxSeg * maxSeg;
+        drawLine[0] = line[0];
+        drawLine[1] = line[1];
+        drawLine[2] = line[2];
+        for (let i = 3; i < line.length; i += 3) {
+          const ex = line[i] - line[i - 3];
+          const ey = line[i + 1] - line[i - 2];
+          const ez = line[i + 2] - line[i - 1];
+          const long = ex * ex + ey * ey + ez * ez > maxSq;
+          drawLine[i] = long ? drawLine[i - 3] : line[i];
+          drawLine[i + 1] = long ? drawLine[i - 2] : line[i + 1];
+          drawLine[i + 2] = long ? drawLine[i - 1] : line[i + 2];
+        }
+      }
+      mesh.setPoints(drawLines);
       ribbon.scroll();
-      ribbon.fade(fadeOut(prog, opts.fadeTail ?? 0.3));
+      const vis = fadeOut(prog, opts.fadeTail ?? 0.3);
+      ribbon.fade(vis);
+      if (spriteCards.length) {
+        const s = opts.sprites!;
+        for (let i = 0; i < spriteCards.length; i++) {
+          const o = spriteSlots[i] * 3;
+          const c = spriteCards[i];
+          c.position.set(drawLine[o], drawLine[o + 1], drawLine[o + 2]);
+          c.scaling.setAll(s.size);
+          let v = vis;
+          if (s.fadeAbove !== undefined && anchor) v *= Math.max(0, 1 - Math.max(0, drawLine[o + 1] - (anchorNow.y + s.fadeAbove)));
+          c.visibility = v;
+        }
+      }
       return true;
     },
     release() {
+      for (const c of spriteCards) releaseCard(scene, c);
+      spriteCards.length = 0;
       disposeLine(scene, ribbon, lines);
     },
   });
