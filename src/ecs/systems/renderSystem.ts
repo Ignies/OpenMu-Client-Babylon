@@ -72,14 +72,16 @@ export const RenderSystem: ISystemFactory = world => {
           transform.visualRotY = transform.rot.y;
         }
 
-        const light = world.getTerrainLight(transform.pos.x, transform.pos.z);
-        const self = modelObject.SelfLight;
+        if (!modelObject.FixedLight) {
+          const light = world.getTerrainLight(transform.pos.x, transform.pos.z);
+          const self = modelObject.SelfLight;
 
-        modelObject.Light.set(
-          light.x + self.x,
-          light.y + self.y,
-          light.z + self.z
-        );
+          modelObject.Light.set(
+            light.x + self.x,
+            light.y + self.y,
+            light.z + self.z
+          );
+        }
 
         toRenderAngles(transform.rot, v3Temp);
         if (transform.visualRotY !== undefined) {

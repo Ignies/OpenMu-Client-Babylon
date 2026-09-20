@@ -43,6 +43,15 @@ export const TEX = {
   sparkSoft: 'Effect/spark.OZJ',
   /** BITMAP_LIGHTNING: the bolt strip. */
   lightning: 'Effect/lightning.OZJ',
+  /**
+   * BITMAP_FENRIR_FOOT_THUNDER1..5 (eff_lightinga01..05.jpg): the five frames
+   * of the ground splash a Fenrir's paws leave (ZzzOpenData.cpp:5413-5417).
+   */
+  footThunder1: 'Effect/eff_lightinga01.OZJ',
+  footThunder2: 'Effect/eff_lightinga02.OZJ',
+  footThunder3: 'Effect/eff_lightinga03.OZJ',
+  footThunder4: 'Effect/eff_lightinga04.OZJ',
+  footThunder5: 'Effect/eff_lightinga05.OZJ',
   lightning2: 'Effect/lightning2.OZJ',
   thunder: 'Effect/Thunder01.OZJ',
   /** energy01/02: soft energy sheets (not the original's BITMAP_ENERGY, which is `thunder`). */
@@ -351,6 +360,15 @@ export const RGBS = {
  * life, ZzzEffectParticle.cpp); the last six cells are solid white filler.
  */
 export const EXPLOSION_CELLS: SheetCells = { w: 64, h: 64, count: 10 };
+
+/** `BITMAP_FENRIR_FOOT_THUNDER1 + (m_iAnimation % 5)`, in order. */
+export const FOOT_THUNDER_FRAMES = [
+  TEX.footThunder1,
+  TEX.footThunder2,
+  TEX.footThunder3,
+  TEX.footThunder4,
+  TEX.footThunder5,
+] as const;
 
 // ---- particle recipes --------------------------------------------------------
 

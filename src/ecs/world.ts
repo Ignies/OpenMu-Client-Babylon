@@ -359,6 +359,10 @@ export type Entity = Partial<{
      * lightning tint (`fenrirMountAction` / PetSystem).
      */
     fenrirThunder?: readonly [number, number, number];
+    /** The variant's footprint subtype (`PetSpec.footSubType`). */
+    fenrirFoot?: number;
+    /** Last frame's `AnimationFrame`, for the footfall windows. */
+    fenrirFrame?: number;
   };
   /**
    * `Boids[]` - the ambient wildlife (`common/boids.ts`, GOBoid.cpp). Created

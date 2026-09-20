@@ -468,6 +468,7 @@ const FX_SPECIALS = 0x80; // render level > 0: excellent / ancient passes allowe
 const FX_CHROME2_FROM_LIGHT = 0x100; // PartObjectColor2 case 0: tint = scene light
 const FX_BODY_SHINE = 0x200; // golden bodies: metal + chrome over the model
 const FX_BODY_SHINE_STAR = 0x400; // ...or the single Shiny02 pass instead
+const FX_BODY_SHINE_CHROME = 0x800; // ...or Chrome01 alone (a Fenrir's one mesh)
 
 /** Tint of the body shine passes, per mesh (`ModelObject.BodyShine`). */
 const BODY_SHINE_UNIFORM = 'muBodyShine';
@@ -602,8 +603,11 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
       } else {
         float sWave = mod(time * 1000.0, 10000.0) * 0.0001;
         vec2 uvChrome = vec2(sN.z * 0.5 + sWave, sN.y * 0.5 + sWave * 2.0);
-        shine = texture2D(shinySampler, uvMetal).rgb +
-                texture2D(chromeSampler, uvChrome).rgb;
+        shine = texture2D(chromeSampler, uvChrome).rgb;
+        // RENDER_CHROME alone, no Shiny01 beside it.
+        if ((fx & ${FX_BODY_SHINE_CHROME}) == 0) {
+          shine += texture2D(shinySampler, uvMetal).rgb;
+        }
       }
       ${color}.rgb += shine * ${BODY_SHINE_UNIFORM} * ${LEGACY_GAIN};
     }
@@ -808,6 +812,7 @@ function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
   if (tint && !mesh.metadata?.brightMesh && tint.x + tint.y + tint.z > 0) {
     fx |= FX_BODY_SHINE;
     if (shine.star) fx |= FX_BODY_SHINE_STAR;
+    if (shine.chromeOnly) fx |= FX_BODY_SHINE_CHROME;
     const a = mesh.visibility;
     effect.setFloat3(BODY_SHINE_UNIFORM, tint.x * a, tint.y * a, tint.z * a);
   }

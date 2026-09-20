@@ -30,6 +30,7 @@ import {
   emitBurst,
   entityGone,
   entityPos,
+  inWindow,
   type ParticleRecipe,
   type PointSource,
   type RGB,
@@ -489,21 +490,6 @@ function boxed(e: Entity, box: Cm3, out: Vector3): Vector3 {
 
 function boneSource(e: Entity, at: number): PointSource {
   return out => bonePos(e, at, out);
-}
-
-/**
- * `AnimationFrame` inside `[from, to)` now, or the window was stepped over
- * since the last tick - a one-key window on a fast clip is easy to miss
- * between two frames.
- */
-function inWindow(
-  prev: number,
-  cur: number,
-  from: number,
-  to: number
-): boolean {
-  if (cur >= from && cur < to) return true;
-  return prev >= 0 && prev < from && cur >= to;
 }
 
 type Frame = {

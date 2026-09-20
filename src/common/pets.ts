@@ -74,6 +74,20 @@ export type PetSpec = {
   readonly moveAction?: number;
   /** Fenrir only: the variant's lightning tint (ZzzObject.cpp:869-893). */
   readonly thunder?: readonly [number, number, number];
+  /**
+   * Fenrir only: `iSubType` of the lightning under its feet, which is what
+   * decides the colour the footprint drains to (`Move_MODEL_FENRIR_FOOT_THUNDER`,
+   * MoveHandlers.cpp:6780-6805).
+   */
+  readonly footSubType?: number;
+  /**
+   * The one mesh an extra `RENDER_BRIGHT | RENDER_CHROME` pass is drawn over
+   * (`ModelObject.ShineMesh`). A Fenrir redraws the mesh that carries its
+   * colour: mesh 1 for red / blue / black, mesh 0 for gold.
+   */
+  readonly shineMesh?: number;
+  /** `b->BodyLight = 1,1,1`: drawn at full brightness, unlit by the map. */
+  readonly fullBright?: boolean;
 };
 
 const PETS: Readonly<Record<number, PetSpec>> = {
@@ -140,7 +154,9 @@ export function fenrirVariant(item: Item | null | undefined): FenrirVariant {
 
 function fenrirSpec(
   variant: FenrirVariant,
-  thunder: readonly [number, number, number]
+  thunder: readonly [number, number, number],
+  footSubType: number,
+  shineMesh: number
 ): PetSpec {
   // CreateMountSub: Scale 0.9; pinned to the rider like the Dark Horse
   // (MoveMount, GOBoid.cpp:174-266), clips driven by fenrirMountAction.
@@ -150,15 +166,28 @@ function fenrirSpec(
     scale: 0.9,
     riderClips: 'fenrir',
     thunder,
+    footSubType,
+    shineMesh,
+    fullBright: true,
   };
 }
 
-/** The lightning tints of ZzzObject.cpp:869-893 (black flashes yellow). */
+/**
+ * The four wolves of the Fenrir render branch (ZzzObject.cpp:793-940).
+ *
+ * `thunder` is the lightning tint and `footSubType` the matching footprint
+ * subtype (:875-893). `shineMesh` is the mesh redrawn `RENDER_BRIGHT |
+ * RENDER_CHROME` over its own pass, and it is the one place the gold wolf
+ * is written differently: gold shines on mesh 0 and draws mesh 1 flat
+ * (:805-816), the other three shine on mesh 1 (:822-830). In both cases it
+ * is the mesh carrying the variant's own sheet - `fenril_<colour>` for the
+ * three, `panril_golden` for gold - so the colour is what catches the light.
+ */
 const FENRIRS: Readonly<Record<FenrirVariant, PetSpec>> = {
-  red: fenrirSpec('red', [0.8, 0, 0]),
-  blue: fenrirSpec('blue', [0.1, 0.1, 0.8]),
-  black: fenrirSpec('black', [1.0, 1.0, 0.2]),
-  gold: fenrirSpec('gold', [0.8, 0.8, 0.1]),
+  red: fenrirSpec('red', [0.8, 0, 0], 1, 1),
+  blue: fenrirSpec('blue', [0.1, 0.1, 0.8], 2, 1),
+  black: fenrirSpec('black', [1.0, 1.0, 0.2], 3, 1),
+  gold: fenrirSpec('gold', [0.8, 0.8, 0.1], 4, 0),
 };
 
 export function petSpec(item: Item | null | undefined): PetSpec | null {
@@ -282,6 +311,19 @@ export function petFactoryFor(spec: PetSpec): typeof ModelObject {
 
     async init(world: World, _entity: Entity) {
       if (spec.blendMesh !== undefined) this.BlendMesh = spec.blendMesh;
+
+      if (spec.fullBright) {
+        this.FixedLight = true;
+        this.Light.set(1, 1, 1);
+      }
+
+      if (spec.shineMesh !== undefined) {
+        this.ShineMesh = spec.shineMesh;
+        this.BodyShine.chromeOnly = true;
+        // `glColor3fv(BodyLight)` on the chrome pass, and BodyLight is white.
+        this.BodyShine.tint.set(1, 1, 1);
+      }
+
       this.load(await loadGLTF(spec.model, world));
     }
   }

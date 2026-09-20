@@ -186,6 +186,21 @@ export function boneLocalPos(
   return entityPos(e, fallbackHeight, out);
 }
 
+/**
+ * `AnimationFrame` inside `[from, to)` now, or the window was stepped over
+ * since the last tick - a one-key window on a fast clip is easy to miss
+ * between two frames.
+ */
+export function inWindow(
+  prev: number,
+  cur: number,
+  from: number,
+  to: number
+): boolean {
+  if (cur >= from && cur < to) return true;
+  return prev >= 0 && prev < from && cur >= to;
+}
+
 /** True once the entity has left the world (despawned, out of scope, disposed). */
 export function entityGone(e: Entity): boolean {
   if (!e.transform) return true;
