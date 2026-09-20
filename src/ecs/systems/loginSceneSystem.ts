@@ -12,6 +12,7 @@ import {
   characterCameraTarget,
 } from '../../common/characterSelect';
 import { prefetchWorldTerrain } from '../../libs/mu/prefetchWorld';
+import { LOGIN_SCENE_TOUR_ROUTE } from '../../maps/loginscene/spec';
 import { loadVersionUi, versionUi } from '../../version';
 import type {
   PregameBackdrop,
@@ -115,7 +116,7 @@ export const LoginSceneSystem: ISystemFactory = world => {
 
   let requestedBackdrop: ENUM_WORLD | null = null;
 
-  let waypoints: CameraWaypoint[] | null = null;
+  let waypoints: readonly CameraWaypoint[] | null = null;
   let scriptForWorld: number | null = null;
 
   let tourStarted = false;
@@ -179,7 +180,7 @@ export const LoginSceneSystem: ISystemFactory = world => {
   };
 
   /** The direction of the leg into `path[i]`, from the waypoint before it. */
-  const legInto = (path: CameraWaypoint[], i: number) => {
+  const legInto = (path: readonly CameraWaypoint[], i: number) => {
     const from = path[(i + path.length - 1) % path.length];
     const to = path[i];
     const dx = to.x - from.x;
@@ -189,7 +190,7 @@ export const LoginSceneSystem: ISystemFactory = world => {
     return length > 0 ? { x: dx / length, y: dy / length } : null;
   };
 
-  const advanceTour = (deltaTime: number, path: CameraWaypoint[]) => {
+  const advanceTour = (deltaTime: number, path: readonly CameraWaypoint[]) => {
     const ticks = deltaTime * REFERENCE_FPS;
 
     if (!tourStarted) {
@@ -355,8 +356,11 @@ export const LoginSceneSystem: ISystemFactory = world => {
 
       if (scriptForWorld !== worldNum) {
         scriptForWorld = worldNum;
+        // A map may carry its own route (maps/loginscene/spec.ts); the
+        // script is what the original walks.
         loadCameraWalkScript(worldNum).then(loaded => {
-          if (scriptForWorld === worldNum) waypoints = loaded;
+          if (scriptForWorld !== worldNum) return;
+          waypoints = LOGIN_SCENE_TOUR_ROUTE[backdrop] ?? loaded;
         });
       }
 

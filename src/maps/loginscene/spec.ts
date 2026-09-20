@@ -1,5 +1,6 @@
 import type { Emission } from '../../common/effectParticles';
 import { ENUM_WORLD } from '../../common/types';
+import type { CameraWaypoint } from '../../libs/mu/cameraWalkScript';
 
 /**
  * The login and character-select backdrops, the plain-data half. Nothing here
@@ -134,4 +135,50 @@ export const LOGIN_SCENE_PLAY_SPEEDS: Partial<
     128: 0.96,
   },
   [ENUM_WORLD.WD_74NEW_CHARACTER_SCENE]: { 64: 0.64 },
+};
+
+/**
+ * The tour route the login backdrop walks instead of `CWScript74.cws`, in
+ * tiles, MU units per 25 Hz tick and distance level (the script's own
+ * fields). The script's loop crosses the throne court and the north
+ * corridor, which at the eye height this client keeps (the original's head
+ * height, `loginSceneSystem.ts`) runs through the gate columns, a row of
+ * standing flags, the animated racks and a wall piece - the script was cut
+ * for an eye the original's tour math swings between six units under the
+ * floor and nine over it. This route stays on the carpet corridor: west
+ * under the chandeliers, a slow turn in the pocket beside the gate, back
+ * east, and a loop at the corridor's wide east end. Nothing on it comes
+ * within a unit of the eye.
+ */
+export const LOGIN_SCENE_TOUR_ROUTE: Partial<
+  Record<ENUM_WORLD, readonly CameraWaypoint[]>
+> = {
+  [ENUM_WORLD.WD_73NEW_LOGIN_SCENE]: [
+    [240, 24.5, 18],
+    [212, 25, 17],
+    [194, 25, 12],
+    [190, 24.8, 10],
+    [188.8, 27.5, 8],
+    [189.8, 31, 8],
+    [193.3, 32, 8],
+    [193.5, 34, 8],
+    [191, 34, 8],
+    [189.3, 30.5, 8],
+    [188.9, 26.5, 10],
+    [190.5, 24.5, 10],
+    [194, 24.5, 12],
+    [212, 24.5, 17],
+    [240, 23.5, 17],
+    [246, 23.5, 10],
+    [247.5, 25.5, 8],
+    [244, 26.5, 10],
+    [220, 26.5, 17],
+  ].map(([x, y, moveAccel]) => ({
+    x,
+    y,
+    moveAccel,
+    distanceLevel: 8,
+    height: 0,
+    delay: 0,
+  })),
 };
