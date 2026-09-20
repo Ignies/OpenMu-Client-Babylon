@@ -1287,6 +1287,11 @@ function addTransformedCharacterToScope(world: World, char: ScopeCharacter, skin
     console.warn(`No model mapping for skin ${skin} on "${char.Name}"; drawing the default body.`);
   }
   const modelFactory = resolveModelFactory(skin);
+  // The transform packet has scales of its own for a few of the skins - a
+  // worn Giant is half the size of the one in Tarkan (`characterSkinBody`).
+  const scale =
+    characterSkinBody(skin)?.scale ??
+    (modelFactory.OverrideScale >= 0 ? modelFactory.OverrideScale : 1);
 
   const entity = world.add({
     netId: maskedId,
@@ -1299,7 +1304,7 @@ function addTransformedCharacterToScope(world: World, char: ScopeCharacter, skin
         char.CurrentPositionY
       ),
       rot: new Vector3(0, convertDirectionToAngle(char.Rotation), 0),
-      scale: modelFactory.OverrideScale >= 0 ? modelFactory.OverrideScale : 1,
+      scale,
     },
     modelFactory,
     pathfinding: {
@@ -1373,13 +1378,13 @@ function addCharacterToScope(
     const appearance = char.appearance;
     const playerEntity = spawnPlayer(world, { cls: appearance.cls });
 
-    // A transformation ring, or a game master's `/skin`: the equipment body
-    // is replaced by the skin's own part file and everything else about the
-    // character stays as it is (`common/transformedBody.ts`).
+    // A transformation ring, or a game master's `/skin`: the body is the
+    // skin's, either as a part file worn on the character's own rig or as
+    // the whole monster (`common/transformedBody.ts`).
     const body = skin ? characterSkinBody(skin) : null;
     if (skin) world.addComponent(playerEntity, 'skin', skin);
     if (body) {
-      playerEntity.modelFactory = body.factory;
+      playerEntity.modelFactory = body.factory as typeof PlayerObject;
       playerEntity.transform.scale = body.scale;
     } else if (skin) {
       console.warn(

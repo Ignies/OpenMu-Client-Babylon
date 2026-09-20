@@ -12,6 +12,7 @@ import {
   fenrirShine,
   petFactoryFor,
   petSpec,
+  type PetFollow,
   type PetSpec,
 } from '../../common/pets';
 import { createAngleDeg, turnAngle } from '../../common/turnAngle';
@@ -26,6 +27,8 @@ import {
   inWindow,
 } from '../../effects/core';
 import { FOOT_THUNDER_FRAMES, MODEL, TEX } from '../../effects/recipes';
+import { Store } from '../../store';
+import { playUiSound } from '../../sound/ui';
 import type { Entity, ISystemFactory, Item } from '../world';
 
 /**
@@ -56,9 +59,9 @@ import type { Entity, ISystemFactory, Item } from '../world';
  *  - **Followers** (`PetObject`, w_BasePet.cpp): the Demon, the Spirit of
  *    Guardian, Rudolph, the Panda, the Pet Unicorn and the Pet Skeleton.
  *    Each stands off its owner at a fixed height and crawls after him; none
- *    of them is ridden, fades in town, or plays more than one clip. The zen
- *    the collectors among them pick up on their own is not ported - they
- *    keep station, they do not shop.
+ *    of them is ridden, fades in town, or plays more than one clip. Four of
+ *    them also fetch zen dropped near their owner (`errand`), which is the
+ *    whole point of a Panda.
  *
  *  - **Dark Horse / Fenrir**: pinned like the horns. The horse walks on
  *    clip 1; a Fenrir mirrors its rider's `PLAYER_FENRIR_*` clip family
@@ -112,11 +115,40 @@ const RAVEN_ACTION_STAND = 2;
  * squared distance, which is 2500 units.
  */
 const CIRCLE_STAND = 50;
-const SNAP_HOME = 300 * 3;
+const SEARCH_LENGTH = 300;
+const SNAP_HOME = SEARCH_LENGTH * 3;
 const HOVER_SNAP = 50 * 50;
 const ORBIT_MS = 4000;
 /** The one clip any of the six ever plays - `Model()` never sets another. */
 const FOLLOWER_ACTION = 0;
+
+/** What a follower is walking towards this frame, and how it closes on it. */
+type Chase = {
+  x: number;
+  z: number;
+  stopAt: number;
+  turn: number;
+  speedScale: number;
+};
+
+/**
+ * `FindZen` and the three states after it (w_PetActionCollecter.cpp:55-215).
+ * `SEARCH_LENGTH` is both how far from its owner a pet looks for a drop and
+ * how far it will follow one; `GET_RADIUS` the circle it walks around the
+ * drop while it is there, once every two seconds rather than four.
+ */
+const GET_MS = 2000;
+/** `(20.0f >= Distance) ? 0` - how close it gets before it reaches down. */
+const GET_STOP = 20;
+/** `logf(Distance) * 2.5f` - its pace on an errand, faster than its stroll. */
+const ERRAND_SPEED = 2.5;
+/** `TurnAngle2(..., 20.f)` going out, `10.f` while it reaches down. */
+const ERRAND_TURN = 20;
+const GET_TURN = 10;
+/** `CompTimeControl(3000, …)`: the patience of the Get and Return states. */
+const ERRAND_PATIENCE = 3;
+/** `CompTimeControl(1000, m_dwSendDelayTime)`: the gap between asks. */
+const PICKUP_GAP = 1;
 
 /** The perch beside the owner's shoulder, in world units (see header). */
 const RAVEN_PERCH_UP = 1.4;
@@ -220,6 +252,8 @@ function ravenOf(item: Item | null | undefined): Item | null {
 export const PetSystem: ISystemFactory = world => {
   const owners = world.with('charAppearance', 'transform', 'visibility');
   const actors = world.with('petActor', 'transform');
+  /** `Items[]`: what a collector pet looks through for a pile of zen. */
+  const drops = world.with('droppedItem', 'transform');
 
   /** The pet each owner currently has an actor for, per slot. */
   const spawned = new Map<Entity, Spawned>();
@@ -484,6 +518,177 @@ export const PetSystem: ISystemFactory = world => {
    * clip 0: `Model()` returns false for every one of the six, so `SetAction`
    * is never called and `CurrentAction` stays where `Create` left it.
    */
+  /**
+   * `FindZen` (w_PetActionCollecter.cpp:297-330): the first zen pile lying
+   * within `SEARCH_LENGTH` of the *owner* - not of the pet. The original
+   * walks its whole `Items[]` array and takes the last match; taking the
+   * first is the same pile in every case that matters and stops the walk
+   * early.
+   */
+  function findZen(owner: Entity): Entity | null {
+    const at = owner.transform?.pos;
+    if (!at) return null;
+
+    const reach = SEARCH_LENGTH * MU_UNIT;
+    for (const drop of drops) {
+      if (!drop.droppedItem.isMoney) continue;
+      if (drop.netId === undefined || drop.objOutOfScope) continue;
+      if (drop.worldIndex !== world.mapIndex) continue;
+
+      const dx = drop.transform.pos.x - at.x;
+      const dz = drop.transform.pos.z - at.z;
+      if (dx * dx + dz * dz < reach * reach) return drop;
+    }
+
+    return null;
+  }
+
+  /** Still on the ground, still in scope, still on this map. */
+  function dropAlive(drop: Entity | null): drop is Entity {
+    return (
+      !!drop &&
+      !!drop.droppedItem &&
+      !!drop.transform &&
+      drop.netId !== undefined &&
+      !drop.objOutOfScope &&
+      drop.worldIndex === world.mapIndex &&
+      world.has(drop)
+    );
+  }
+
+  /**
+   * `PetActionCollecter::Move`'s state machine, which decides only *what* the
+   * pet is walking towards: the four states hand back a target and the speed
+   * to close on it, and the step itself is the same one the standing pet
+   * takes. Returns null while the pet has no errand.
+   */
+  function errand(
+    actor: Entity,
+    state: NonNullable<Entity['petActor']>,
+    follow: PetFollow,
+    owner: Entity,
+    circleX: number,
+    circleZ: number,
+    dt: number
+  ): Chase | null {
+    const collect = (state.collect ??= {
+      state: 'stand',
+      target: null,
+      x: 0,
+      z: 0,
+      since: 0,
+      sent: 0,
+    });
+
+    collect.since += dt;
+    collect.sent += dt;
+
+    if (collect.state === 'stand') {
+      const found = findZen(owner);
+      if (!found) return null;
+      collect.target = found;
+      collect.x = found.transform!.pos.x;
+      collect.z = found.transform!.pos.z;
+      collect.state = 'move';
+      collect.since = 0;
+    }
+
+    const pos = actor.transform!.pos;
+    const away = Math.hypot(
+      (collect.x - pos.x) / MU_UNIT,
+      (collect.z - pos.z) / MU_UNIT
+    );
+
+    switch (collect.state) {
+      case 'move': {
+        if (!dropAlive(collect.target)) {
+          collect.state = 'return';
+          collect.since = 0;
+          break;
+        }
+        // Circling the pile as it comes in, twice as fast as it circles its
+        // owner (`m_fRadWidthGet`).
+        const phase =
+          (((state.clock ?? 0) % GET_MS) / GET_MS) * Math.PI * 2;
+        const x = collect.x + Math.sin(phase) * CIRCLE_STAND * MU_UNIT;
+        const z = collect.z + Math.cos(phase) * CIRCLE_STAND * MU_UNIT;
+
+        // `0 == Speed`: the distance that decides is to the point on the
+        // circle it is chasing, not to the pile in the middle of it.
+        const reach = Math.hypot((x - pos.x) / MU_UNIT, (z - pos.z) / MU_UNIT);
+        if (reach <= GET_STOP) {
+          collect.state = 'get';
+          collect.since = 0;
+          collect.sent = PICKUP_GAP;
+          break;
+        }
+
+        return {
+          x,
+          z,
+          stopAt: GET_STOP,
+          turn: ERRAND_TURN,
+          speedScale: ERRAND_SPEED,
+        };
+      }
+      case 'get': {
+        const gone =
+          !dropAlive(collect.target) ||
+          away > SEARCH_LENGTH ||
+          collect.since > ERRAND_PATIENCE;
+        if (gone) {
+          collect.target = null;
+          collect.state = 'return';
+          collect.since = 0;
+          // `PlayBuffer(SOUND_DROP_GOLD01)` on the way home. The original
+          // plays it every frame of the state; once is what it meant.
+          if (owner.localPlayer) playUiSound('dropMoney');
+          break;
+        }
+
+        // Only the hero's own pet asks for the pile: the others are somebody
+        // else's client's business (`&Hero->Object == obj->Owner`).
+        if (owner.localPlayer && collect.sent >= PICKUP_GAP) {
+          collect.sent = 0;
+          if (!world.pickupTarget) {
+            Store.pickupItemRequest(collect.target!.netId!);
+          }
+        }
+
+        return {
+          x: collect.x,
+          z: collect.z,
+          stopAt: 0,
+          turn: GET_TURN,
+          speedScale: ERRAND_SPEED,
+        };
+      }
+      case 'return':
+        break;
+    }
+
+    // Back to the circle it walks around its owner, at the errand's pace.
+    // It is home once it is inside `FlyRange` of that point, or once its
+    // patience runs out wherever it has got to.
+    const home = Math.hypot(
+      (circleX - pos.x) / MU_UNIT,
+      (circleZ - pos.z) / MU_UNIT
+    );
+    if (home <= follow.flyRange || collect.since > ERRAND_PATIENCE) {
+      collect.state = 'stand';
+      collect.since = 0;
+      return null;
+    }
+
+    return {
+      x: circleX,
+      z: circleZ,
+      stopAt: follow.flyRange,
+      turn: ERRAND_TURN,
+      speedScale: ERRAND_SPEED,
+    };
+  }
+
   function updateFollower(actor: Entity, dt: number) {
     const state = actor.petActor!;
     const follow = state.follow;
@@ -509,8 +714,18 @@ export const PetSystem: ISystemFactory = world => {
 
     const orbit = follow.motion === 'orbit';
     const hover = follow.motion === 'hover';
-    const targetX = orbit ? circleX : owner.pos.x;
-    const targetZ = orbit ? circleZ : owner.pos.z;
+
+    // An errand overrides where the pet is headed, how close it gets and how
+    // fast it turns; everything below is the same step either way.
+    const chase = follow.collects
+      ? errand(actor, state, follow, state.owner, circleX, circleZ, dt)
+      : null;
+
+    const targetX = chase?.x ?? (orbit ? circleX : owner.pos.x);
+    const targetZ = chase?.z ?? (orbit ? circleZ : owner.pos.z);
+    const stopAt = chase?.stopAt ?? follow.stopAt;
+    const turn = chase?.turn ?? follow.turn;
+    const speedScale = chase?.speedScale ?? follow.speedScale;
 
     // Left too far behind - a warp, or a long stretch out of scope.
     const homeX = (pos.x - owner.pos.x) / MU_UNIT;
@@ -533,9 +748,9 @@ export const PetSystem: ISystemFactory = world => {
     // `if (80.0f >= FlyRange)`: true for every one of them, so the orbit and
     // trail pets turn on every tick and only the hover pair holds a heading
     // until it is a stop radius out.
-    if (!hover || distance2 >= follow.stopAt) {
+    if (!hover || distance2 >= stopAt) {
       const heading = createAngleDeg(pos.x, pos.z, targetX, targetZ) * DEG;
-      state.yaw = turnAngle(state.yaw, heading, follow.turn * DEG * ticks);
+      state.yaw = turnAngle(state.yaw, heading, turn * DEG * ticks);
     }
 
     // The original applies the direction it worked out last frame and only
@@ -547,9 +762,9 @@ export const PetSystem: ISystemFactory = world => {
     actor.transform!.rot.y = state.yaw;
 
     const speed =
-      follow.stopAt >= distance
+      stopAt >= distance
         ? 0
-        : Math.log(distance) * follow.speedScale + (follow.speedBias ?? 0);
+        : Math.log(distance) * speedScale + (follow.speedBias ?? 0);
     // Forward is -Y in the original's object space.
     state.dir.y = -speed;
 

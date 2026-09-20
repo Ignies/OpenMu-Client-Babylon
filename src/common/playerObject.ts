@@ -494,3 +494,15 @@ export function npcClassOf(
 ): CharacterClassNumber | null {
   return (factory as typeof PlayerObject).NpcClass ?? null;
 }
+
+/**
+ * Whether this body is a character's own rig rather than something else's.
+ *
+ * A transformation skin can be either (`common/transformedBody.ts`): a part
+ * file worn on the character's rig, which is still a `PlayerObject`, or a
+ * whole monster with a rig of its own, which is not. Everything that reaches
+ * for an equipment socket or a player clip has to ask first.
+ */
+export function isPlayerBody(model: ModelObject): model is PlayerObject {
+  return model instanceof PlayerObject;
+}

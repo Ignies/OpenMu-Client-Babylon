@@ -13,7 +13,7 @@
 import { Vector3, type Scene } from '../libs/babylon/exports';
 import { TerrainDecal } from '../common/moveTargetEffect';
 import { Store } from '../store';
-import { LiveList, fadeOut, lerp, type RGB } from './core';
+import { LiveList, fadeOut, lerp, type PointSource, type RGB } from './core';
 import { RGBS, TEX } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
@@ -42,11 +42,23 @@ export interface RingOptions {
   growFrom?: number;
   /** Degrees per second. */
   spin?: number;
+  /** Degrees the spin starts from, for a decal that has always been turning. */
+  spinFrom?: number;
   blend?: 'additive' | 'alpha';
   fadeTail?: number;
+  /**
+   * Re-read the position every frame instead of standing where it was
+   * spawned. `RenderTerrainAlphaBitmap` is an immediate-mode call in the
+   * original - the mark a character carries is redrawn under its feet each
+   * frame, so it goes where the character goes.
+   */
+  follow?: PointSource;
+  /** Ends the decal early, for one that otherwise runs for ever. */
+  until?: () => boolean;
 }
 
 const live = new LiveList();
+const followTmp = new Vector3();
 const pools = new Map<string, TerrainDecal[]>();
 let seq = 0;
 
@@ -81,19 +93,35 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const grow = opts.grow ?? 1;
   const growFrom = opts.growFrom ?? 1;
   const spin = opts.spin ?? 0;
+  const spinFrom = opts.spinFrom ?? 0;
   const tail = opts.fadeTail ?? 0.35;
-  const x = at.x;
-  const z = at.z;
+  const follow = opts.follow;
+  const until = opts.until;
+  let x = at.x;
+  let z = at.z;
   let t = 0;
 
   return live.push({
     update(dt) {
       t += dt;
+      if (until?.()) return false;
       const p = t / seconds;
       if (p >= 1) return false;
+      if (follow) {
+        follow(followTmp);
+        x = followTmp.x;
+        z = followTmp.z;
+      }
       const s = scale * lerp(growFrom, grow, p);
       decal.setAlpha(fadeOut(p, tail));
-      decal.draw(world, x, z, Math.min(MAX_SCALE, s), spin * t, colour);
+      decal.draw(
+        world,
+        x,
+        z,
+        Math.min(MAX_SCALE, s),
+        spinFrom + spin * t,
+        colour
+      );
       return true;
     },
     release() {

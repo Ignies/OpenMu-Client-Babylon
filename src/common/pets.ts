@@ -88,6 +88,15 @@ export type PetFollow = {
   readonly hoverScaled?: boolean;
   /** The distance the pet stops at, in whatever metric the motion uses. */
   readonly stopAt: number;
+  /** `FlyRange` in MU units, which is what it stops at on its way home. */
+  readonly flyRange: number;
+  /**
+   * `FindZen`: the pet fetches zen dropped near its owner. The four that do
+   * are the ones whose action class carries it - Rudolph, the Panda, the Pet
+   * Unicorn and the Pet Skeleton; the Demon and the Spirit of Guardian just
+   * keep station.
+   */
+  readonly collects?: boolean;
   /** `TurnAngle2(o->Angle[2], Angle, n)` - degrees per tick. */
   readonly turn: number;
   /** `Speed = log(Distance) * scale + bias`, in MU units per tick. */
@@ -232,6 +241,7 @@ const PETS: Readonly<Record<number, PetSpec>> = {
       hover: 230,
       hoverScaled: true,
       stopAt: 50 * 50,
+      flyRange: 50,
       turn: 10,
       speedScale: 1,
       speedBias: 5,
@@ -249,6 +259,7 @@ const PETS: Readonly<Record<number, PetSpec>> = {
       hover: 230,
       hoverScaled: true,
       stopAt: 50 * 50,
+      flyRange: 50,
       turn: 10,
       speedScale: 1.8,
     },
@@ -263,6 +274,8 @@ const PETS: Readonly<Record<number, PetSpec>> = {
       motion: 'orbit',
       hover: 20,
       stopAt: 10,
+      flyRange: 10,
+      collects: true,
       turn: 8,
       speedScale: 2.3,
     },
@@ -277,6 +290,8 @@ const PETS: Readonly<Record<number, PetSpec>> = {
       motion: 'orbit',
       hover: 20,
       stopAt: 10,
+      flyRange: 10,
+      collects: true,
       turn: 8,
       speedScale: 2.3,
     },
@@ -292,6 +307,8 @@ const PETS: Readonly<Record<number, PetSpec>> = {
       hover: 200,
       hoverScaled: true,
       stopAt: 10 * 10,
+      flyRange: 10,
+      collects: true,
       turn: 8,
       speedScale: 2.3,
       idleSpeed: 0.35,
@@ -310,6 +327,8 @@ const PETS: Readonly<Record<number, PetSpec>> = {
       hover: 50,
       hoverScaled: true,
       stopAt: 12 * 12,
+      flyRange: 12,
+      collects: true,
       turn: 8,
       speedScale: 2.3,
     },

@@ -1,7 +1,9 @@
 import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
 import type { ISystemFactory } from '../world';
-import type { PlayerObject } from '../../common/playerObject';
+import { isPlayerBody, type PlayerObject } from '../../common/playerObject';
 import { isOneShotPlayerAction } from '../../common/playerActionMapper';
+import { monsterClipFor } from '../../common/transformedBody';
+import type { ModelObject } from '../../common/modelObject';
 import {
   chooseFenrirIdleAction,
   chooseFenrirRunAction,
@@ -58,6 +60,30 @@ const MONSTER_ONE_SHOT_ACTIONS = new Set<MonsterActionType>([
   MonsterActionType.Shock,
   MonsterActionType.Appear,
 ]);
+
+/**
+ * One frame of a character that is wearing a monster's body. The action it
+ * would have played is translated (`monsterClipFor`) and, since not every
+ * monster has all eleven clips, anything the model does not carry falls back
+ * to standing - the original picks the same way, by index into whatever the
+ * BMD holds.
+ */
+function playMonsterClip(
+  model: ModelObject,
+  skin: number,
+  action: PlayerAction,
+  moving: boolean
+): void {
+  const clips = model.gltf?.animationGroups.length ?? 0;
+  let clip = monsterClipFor(action, moving);
+  if (clip >= clips) clip = MonsterActionType.Stop1;
+  if (clip >= clips) return;
+
+  model.AnimationSpeed =
+    model.actionPlaySpeed(clip) ??
+    monsterPlaySpeed(monsterModelTypeOf(skin), clip);
+  model.playAction(clip, !MONSTER_ONE_SHOT_ACTIONS.has(clip));
+}
 
 /** `GetEquipedBowType(c) == BOWTYPE_CROSSBOW` - picks the crossbow variants. */
 function equippedCrossbow(hands: Hands | undefined): boolean {
@@ -377,6 +403,21 @@ export const AnimationSystem: ISystemFactory = world => {
         const { playerAnimation, modelObject } = entity;
         const playerObject = modelObject as PlayerObject;
         if (!playerObject.Ready) continue;
+
+        // A character wearing a whole monster (a transformation ring, or a
+        // game master's `/skin`) has none of a character's clips to play:
+        // its action is translated into the monster's five.
+        if (!isPlayerBody(modelObject)) {
+          const velocity = entity.movement?.velocity;
+          const moving = !!velocity && (velocity.x !== 0 || velocity.y !== 0);
+          playMonsterClip(
+            modelObject,
+            entity.skin ?? -1,
+            playerAnimation.action,
+            moving
+          );
+          continue;
+        }
 
         const action = playerAnimation.action;
         const attrs = entity.attributeSystem;

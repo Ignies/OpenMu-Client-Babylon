@@ -55,6 +55,9 @@ const RULES: Rule[] = [
   // common/signPlates.ts → the three signpost plates it repaints, out of
   // whichever Object<n> folder the sign's map draws from.
   { dir: 'Object', ext: [], names: ['notice.ozj', 'snotice.ozj', 'snotice02.ozj'], numbered: true },
+  // effects/recipes.ts → the one effect texture that lives outside Effect/:
+  // the mark a game master stands on (BITMAP_GM_AURORA).
+  { dir: 'Skill', ext: [], names: ['gmmzine.ozj'] },
   // libs/mu/terrainWater.ts → Object8/wt00..wt31.OZJ (Atlans caustics flipbook)
   { dir: 'Object8', ext: [], names: Array.from({ length: 32 }, (_, i) => `wt${String(i).padStart(2, '0')}.ozj`) },
 ];
