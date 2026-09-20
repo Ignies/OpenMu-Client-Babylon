@@ -134,6 +134,8 @@ const RING_TAILS = 20;
 const RING_LIGHT: RGB = [1 / 11, 0.5 / 11, 1 / 11];
 const RING_GROW_TICKS = 10;
 const RING_GROW = 1.25;
+/** The tail flares take the ribbon's light at the top of its growth (a card's tint is set once). */
+const RING_FLARE_LIGHT: RGB = [RING_LIGHT[0] * RING_GROW ** RING_GROW_TICKS, RING_LIGHT[1] * RING_GROW ** RING_GROW_TICKS, RING_LIGHT[2] * RING_GROW ** RING_GROW_TICKS];
 const RING_FADE_FROM_TICK = 40;
 const RING_FADE = 1 / 1.1;
 const RING_FLARE_SIZE = px(64, 0.5);
@@ -156,6 +158,8 @@ const MARK_PX = 64;
 /** Frozen: MODEL_ICE sub1/2 on the body, Scale 0.8, pitched -20°, the second turned about; a Fire03 ember orbiting at 60 cm, 20° a tick, `z = sin(t) * 20 + 30` (ZzzEffect.cpp:2197, :7710). */
 const ICE_SCALE = 0.8;
 const ICE_PITCH = (-20 * Math.PI) / 180;
+/** The frame the ice clip is held on while the body stays frozen (`AnimationFrame = 4`). */
+const ICE_HOLD_FRAME = 4;
 const EMBER_RADIUS = 0.6;
 const EMBER_TURN = (20 * Math.PI) / 180;
 const EMBER_HEIGHT = 0.3;
@@ -596,7 +600,7 @@ function iceShell(scene: Scene, o: AuraOptions): Part {
       scale: ICE_SCALE,
       follow: o.follow,
       yaw,
-      loop: false,
+      holdFrame: ICE_HOLD_FRAME,
       blendMesh: 0,
     }) as ModelHandle;
     h.pitchTo(ICE_PITCH);
@@ -705,7 +709,7 @@ function healingRings(scene: Scene, o: AuraOptions, stopping: () => boolean): Pa
         texture: TEX.jointEnergy,
         seconds: (RING_RADIUS / RING_CLOSE) * TICK,
         until: stopping,
-        sprites: { texture: TEX.flareBlue, colour, size: RING_FLARE_SIZE, count: RING_TAILS },
+        sprites: { texture: TEX.flareBlue, colour: RING_FLARE_LIGHT, size: RING_FLARE_SIZE, count: RING_TAILS },
         trace: () => {
           const tick = Math.floor((fxNow() - born) / TICK);
           for (; lastTick < tick; lastTick++) {
