@@ -376,6 +376,20 @@ export type Entity = Partial<{
     pulseSeconds?: number;
     /** `m_timer->GetTimeElapsed()` - milliseconds since the pet was created. */
     clock?: number;
+    /**
+     * A collector pet fetching zen: which of `PetActionCollecter`'s four
+     * states it is in, the drop it set out for and where that drop was,
+     * and the two clocks the original keeps (`m_dwRootingTime`, the state's
+     * own patience, and `m_dwSendDelayTime`, the gap between asks).
+     */
+    collect?: {
+      state: 'stand' | 'move' | 'get' | 'return';
+      target: Entity | null;
+      x: number;
+      z: number;
+      since: number;
+      sent: number;
+    };
   };
   /**
    * `Boids[]` - the ambient wildlife (`common/boids.ts`, GOBoid.cpp). Created
