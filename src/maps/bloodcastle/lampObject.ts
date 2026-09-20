@@ -32,6 +32,9 @@ const POSE_WAIT_LIMIT = 120;
  * spot, not the lamps.
  */
 export class BloodCastleLampObject extends MapTileObject {
+  // A bone-anchored flare that breathes: not a batchable prop.
+  static Batchable = false;
+
   #bone: BoneNode | null = null;
   #flare: MovableFlare | null = null;
   #lit = false;
