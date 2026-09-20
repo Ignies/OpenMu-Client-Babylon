@@ -22,6 +22,7 @@ import {
 import { setSceneHold } from '../../common/sceneGate';
 import { PlayerAction } from '../../common/objects/enum';
 import { genderedEmoteAction } from '../../common/emotes';
+import { isRidingMount } from '../../common/pets';
 import {
   registerPointLightEmitter,
   type PointLightEmitter,
@@ -239,6 +240,9 @@ export const CharacterSelectSystem: ISystemFactory = world => {
   /** Greet with a social clip, never the one the previous greeting used. */
   const playGreeting = (entity: Entity) => {
     if (!entity.playerAnimation) return;
+    // A rider is pinned to his mount and the emote clips have no ride
+    // variant, so greeting would stand him up off the saddle.
+    if (isRidingMount(entity.charAppearance?.pet)) return;
 
     const available = GREETINGS.filter(action => action !== lastGreeting);
     const greeting = available[Math.floor(Math.random() * available.length)];
@@ -400,6 +404,12 @@ export const CharacterSelectSystem: ISystemFactory = world => {
       app.pants = appearance.pants;
       app.gloves = appearance.gloves;
       app.boots = appearance.boots;
+      // ReadEquipmentExtended fills the wing and helper slots on the
+      // character-list path too (ZzzCharacter.cpp:12918-12960), so the
+      // line-up wears them like the world does: wings on the back, the
+      // mount under the rider.
+      app.wings = appearance.wings;
+      app.pet = appearance.pet;
       app.changed = true;
 
       // Create ground selection circle for this character

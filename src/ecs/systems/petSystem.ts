@@ -173,6 +173,7 @@ export const PetSystem: ISystemFactory = world => {
 
   function spawn(owner: Entity, item: Item, spec: PetSpec) {
     const pos = owner.transform!.pos;
+    const offset = owner.transform!.posOffset;
     const map = owner.worldIndex ?? world.mapIndex;
 
     // CreateMountSub seeds the angel a couple of tiles away and above its
@@ -193,7 +194,10 @@ export const PetSystem: ISystemFactory = world => {
         ),
         rot: new Vector3(0, owner.transform!.rot.y, 0),
         scale: spec.scale,
-        posOffset: new Vector3(0.5, 0, 0.5),
+        // The owner half-tile render offset, not a fixed one: the character
+        // select line-up stands its characters on exact coordinates with no
+        // offset, and a mount keeping its own put the rider off the saddle.
+        posOffset: offset ? new Vector3(offset.x, offset.y, offset.z) : undefined,
       },
       modelFactory: petFactoryFor(spec),
       visibility: { state: 'hidden', lastChecked: 0 },
