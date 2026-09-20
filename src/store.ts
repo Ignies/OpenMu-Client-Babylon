@@ -1820,6 +1820,14 @@ export const Store = new (class _Store {
     this.sendToGS(new DataView(frame.buffer, frame.byteOffset, frame.byteLength));
   }
 
+  /**
+   * A map ping (`pingProtocol.ts`) to the ws proxy, which relays it itself
+   * and never forwards it. Same path as a band frame.
+   */
+  sendPingFrame(frame: Uint8Array): void {
+    this.sendToGS(new DataView(frame.buffer, frame.byteOffset, frame.byteLength));
+  }
+
   sendAnimationRequest(rotation: number, animationNumber: number): void {
     const packet = AnimationRequestPacket.createPacket();
     packet.Rotation = rotation;

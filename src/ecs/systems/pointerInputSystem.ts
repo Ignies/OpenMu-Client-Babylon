@@ -10,6 +10,7 @@ import { canAttackPlayer, isAttackableEntity } from './attackSystem';
 import { isMobileDevice } from '../../common/mobile';
 import { Commands } from '../../commands';
 import { aimX, aimY } from '../../camera';
+import { requestPing } from '../../ping/pingNet';
 
 const COLOR_RED = new Color3(1, 0, 0);
 
@@ -168,6 +169,25 @@ export const PointerInputSystem: ISystemFactory = world => {
     // by the held state, not by the button field.
     const rightDrag =
       ev.type === PointerEventTypes.POINTERMOVE && world.rightPointerPressed;
+
+    // Shift + middle: drop a map ping on the ground under the cursor, for
+    // everyone nearby to see. Ctrl + middle is the camera drag, so each
+    // gesture is told apart by its own modifier and neither ever fires the
+    // other. `preventDefault` kills the browser's middle-button autoscroll,
+    // which would otherwise swallow the gesture.
+    if (ev.event.button === 1 && ev.event.shiftKey) {
+      if (ev.type === PointerEventTypes.POINTERDOWN) {
+        ev.event.preventDefault();
+        const ground = scene.pick(
+          aimX(ev.event.clientX),
+          aimY(ev.event.clientY),
+          m => m === world.terrain?.mesh,
+          true
+        ).pickedPoint;
+        if (ground) requestPing(ground.x, ground.z);
+      }
+      return;
+    }
 
     if (ev.event.button === 2 || rightDrag) {
       // `CNewUICommandWindow::RunCommand`: with an entry armed the right
