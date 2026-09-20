@@ -7,19 +7,28 @@ import {
 } from '../libs/babylon/exports';
 import { resolveDataUrl } from '../libs/mu/dataFolder';
 import { FILTER_ANISOTROPY } from './materialQuality';
+import { derivePbrMaps, flipRows, ROUGH_MAX, type DerivedMaps } from './pbrDerive';
+import type { PbrWorkerRequest, PbrWorkerResponse } from './pbrMaps.worker';
 
 /**
  * PBR map sets for the Enhanced material ("authored maps").
  *
- * MU's art is diffuse-only, so the maps are derived from it: height-from-luma
- * normals, metalness from the palette (desaturated mid/high-luma pixels are
- * metal, saturated ones are cloth/leather/skin), roughness from metal +
- * highlight density, and an emissive mask over saturated *bright* pixels -
- * the gems and gold trim that should feed the GlowLayer.
- *
+ * MU's art is diffuse-only, so the maps are derived from it (`pbrDerive.ts`).
  * Hand-authored maps win over the derivation: `Data/PBR/manifest.json` maps a
  * texture's source name to files under `Data/PBR/`. Missing manifest = all
  * derived; missing entry = derived for that texture.
+ *
+ * The derivation reads the texture's *own bytes* - the encoded image the
+ * glTF loader (and a texture pack swap) leaves on `texture._buffer`, or the
+ * file behind `texture.url` - decoded with `createImageBitmap` in a worker.
+ * It used to read the pixels back from the GPU, and Babylon's readback is a
+ * synchronous flush of everything queued: the frame stopped for as long as
+ * the GPU took to drain, from inside a material bind, the first time each
+ * new texture came on screen. Online that is every player and monster that
+ * walks into view, so the game hitched every few seconds for as long as it
+ * ran - 1 ms a time on an RTX 5070, up to 450 ms on an integrated Radeon.
+ * The readback is kept only as the last fallback, for a texture whose bytes
+ * cannot be found or decoded.
  */
 
 export type PbrMapSet = {
@@ -29,153 +38,10 @@ export type PbrMapSet = {
   emissive: BaseTexture | null;
 };
 
-export type DerivedMaps = {
-  normal: Uint8Array;
-  metallicRoughness: Uint8Array;
-  emissive: Uint8Array | null;
-};
-
-/**
- * Height scale for the normal derivation (luma 0..1 → texels of relief),
- * applied to the *normalised* Sobel gradient - see `SOBEL_NORM`.
- */
-const NORMAL_STRENGTH = 1.4;
-
-/**
- * Sobel kernel weight, which the gradient must be divided by to read as a
- * per-texel slope. Without it the raw kernel output spans ±4 for luma in
- * 0..1, so the old `gradient * 2.2` bent the average normal of Lorencia's
- * wood and stone by 30–58° (measured over tile_wood01 / bookshelf / desk_big /
- * c_wall04) and its 95th percentile past 70°. That is not relief - it is a
- * per-texel randomisation of N·L, and it is why Enhanced read as blotchy,
- * smeared and mis-lit next to Classic. MU's art is 128², JPEG-compressed and
- * has its shading painted in, so block ringing and dither become 'geometry'
- * at any real strength. Normalised, the same textures land at 4–10° average
- * and 12–20° at p95 - a surface that catches the torches without fighting the
- * art.
- */
-const SOBEL_NORM = 1 / 8;
-
-/**
- * Cap on derived metalness. The palette heuristic cannot tell gold from
- * warm-lit oak, and every texel it gets wrong costs diffuse (up to 17 %) and
- * pays it back as a highlight nobody sees without an environment map, so
- * derived metal is 0: metal comes from authored `Data/PBR` maps only
- * (ARCHITECTURE §4.7).
- */
-const METAL_MAX = 0;
-/** Saturation below which a texel may read as metal (1 / this slope). */
-const METAL_SAT_SLOPE = 5;
-const ROUGH_MIN = 0.55;
-const ROUGH_MAX = 0.95;
-/** Share of the texture that must be emissive before a map is worth binding. */
-const EMISSIVE_MIN_COVERAGE = 0.002;
-
 type Manifest = Record<
   string,
   { normal?: string; metallicRoughness?: string; emissive?: string }
 >;
-
-function smoothstep(e0: number, e1: number, x: number): number {
-  const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0)));
-  return t * t * (3 - 2 * t);
-}
-
-/** Pure derivation over RGBA8 pixels (row-major, `width` × `height`). */
-export function derivePbrMaps(
-  rgba: Uint8Array | Uint8ClampedArray,
-  width: number,
-  height: number
-): DerivedMaps {
-  const count = width * height;
-  const luma = new Float32Array(count);
-  const sat = new Float32Array(count);
-
-  for (let i = 0; i < count; i++) {
-    const r = rgba[i * 4] / 255;
-    const g = rgba[i * 4 + 1] / 255;
-    const b = rgba[i * 4 + 2] / 255;
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-
-    luma[i] = 0.299 * r + 0.587 * g + 0.114 * b;
-    sat[i] = max > 0 ? (max - min) / max : 0;
-  }
-
-  const normal = new Uint8Array(count * 4);
-  const metallicRoughness = new Uint8Array(count * 4);
-  const emissive = new Uint8Array(count * 4);
-  let emissiveCoverage = 0;
-
-  const at = (x: number, y: number) =>
-    luma[((y + height) % height) * width + ((x + width) % width)];
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const i = y * width + x;
-
-      // Sobel height gradient (wrapping - MU textures tile).
-      const dx =
-        at(x + 1, y - 1) +
-        2 * at(x + 1, y) +
-        at(x + 1, y + 1) -
-        (at(x - 1, y - 1) + 2 * at(x - 1, y) + at(x - 1, y + 1));
-      const dy =
-        at(x - 1, y + 1) +
-        2 * at(x, y + 1) +
-        at(x + 1, y + 1) -
-        (at(x - 1, y - 1) + 2 * at(x, y - 1) + at(x + 1, y - 1));
-
-      let nx = -dx * SOBEL_NORM * NORMAL_STRENGTH;
-      let ny = -dy * SOBEL_NORM * NORMAL_STRENGTH;
-      let nz = 1;
-      const len = Math.hypot(nx, ny, nz);
-      nx /= len;
-      ny /= len;
-      nz /= len;
-
-      normal[i * 4] = (nx * 0.5 + 0.5) * 255;
-      normal[i * 4 + 1] = (ny * 0.5 + 0.5) * 255;
-      normal[i * 4 + 2] = (nz * 0.5 + 0.5) * 255;
-      normal[i * 4 + 3] = 255;
-
-      const l = luma[i];
-      const s = sat[i];
-
-      const metal =
-        Math.max(0, Math.min(1, 1 - s * METAL_SAT_SLOPE)) *
-        smoothstep(0.2, 0.55, l) *
-        METAL_MAX;
-      const rough = Math.max(
-        ROUGH_MIN,
-        Math.min(
-          ROUGH_MAX,
-          0.9 - 0.45 * metal - 0.3 * smoothstep(0.5, 0.9, l)
-        )
-      );
-
-      // glTF layout: G roughness, B metalness (R is free - AO, left white).
-      metallicRoughness[i * 4] = 255;
-      metallicRoughness[i * 4 + 1] = rough * 255;
-      metallicRoughness[i * 4 + 2] = metal * 255;
-      metallicRoughness[i * 4 + 3] = 255;
-
-      const mask = smoothstep(0.65, 0.95, l) * smoothstep(0.55, 0.85, s);
-      emissive[i * 4] = rgba[i * 4] * mask;
-      emissive[i * 4 + 1] = rgba[i * 4 + 1] * mask;
-      emissive[i * 4 + 2] = rgba[i * 4 + 2] * mask;
-      emissive[i * 4 + 3] = 255;
-      if (mask > 0.5) emissiveCoverage++;
-    }
-  }
-
-  return {
-    normal,
-    metallicRoughness,
-    emissive:
-      emissiveCoverage / count >= EMISSIVE_MIN_COVERAGE ? emissive : null,
-  };
-}
 
 // --- placeholders ----------------------------------------------------------
 
@@ -188,7 +54,7 @@ type Placeholders = {
 const placeholders = new WeakMap<Scene, Placeholders>();
 
 /**
- * `nearest` marks the 1×1 placeholders, which have nothing to filter. Every
+ * `nearest` marks the 1x1 placeholders, which have nothing to filter. Every
  * real derived map gets mipmaps, trilinear filtering and the albedo's
  * anisotropy: it is the same size as the albedo, which *is* mipped, so
  * leaving these unmipped meant a floor seen at a grazing angle sampled
@@ -250,6 +116,188 @@ export function pbrPlaceholders(scene: Scene): Placeholders {
   return set;
 }
 
+// --- source pixels ---------------------------------------------------------
+
+type Derived = DerivedMaps & { width: number; height: number };
+
+/**
+ * The encoded image a texture was made from. The glTF loader hands its
+ * bytes to `updateURL` and Babylon keeps them as `_buffer` (that is also
+ * what `texturePacks.ts` restores "Original" from); a pack swap by URL
+ * leaves the file address instead. The loader's `url` is a fake
+ * `data:<root><name>` label, not a data URI, so it is never fetched.
+ */
+async function sourceBytes(texture: BaseTexture): Promise<ArrayBuffer | null> {
+  const buffer = (texture as unknown as { _buffer?: unknown })._buffer;
+
+  if (buffer instanceof ArrayBuffer) return buffer.slice(0);
+  if (ArrayBuffer.isView(buffer)) {
+    return (buffer.buffer as ArrayBuffer).slice(
+      buffer.byteOffset,
+      buffer.byteOffset + buffer.byteLength
+    );
+  }
+  if (buffer instanceof Blob) return buffer.arrayBuffer();
+
+  const url = (texture as { url?: string | null }).url;
+  if (!url || url.startsWith('data:')) return null;
+
+  const response = await fetch(url);
+  return response.ok ? response.arrayBuffer() : null;
+}
+
+let worker: Worker | null | undefined;
+let nextId = 1;
+const waiting = new Map<
+  number,
+  { resolve: (value: Derived) => void; reject: (reason: unknown) => void }
+>();
+
+function pbrWorker(): Worker | null {
+  if (worker !== undefined) return worker;
+
+  try {
+    worker = new Worker(new URL('./pbrMaps.worker.ts', import.meta.url), {
+      type: 'module',
+      name: 'pbr-maps',
+    });
+
+    worker.onmessage = (event: MessageEvent<PbrWorkerResponse>) => {
+      const message = event.data;
+      const entry = waiting.get(message.id);
+      if (!entry) return;
+      waiting.delete(message.id);
+
+      if (message.ok) entry.resolve(message);
+      else entry.reject(new Error(message.error));
+    };
+
+    worker.onerror = event => {
+      console.warn('PBR map worker failed, deriving inline instead:', event);
+      for (const [, entry] of waiting) entry.reject(new Error('pbr worker error'));
+      waiting.clear();
+      worker?.terminate();
+      worker = null;
+    };
+  } catch (error) {
+    console.warn('PBR map worker unavailable, deriving inline instead:', error);
+    worker = null;
+  }
+
+  return worker;
+}
+
+/** A texture's image, as encoded bytes or as the pixels of the canvas it was drawn on. */
+type Source =
+  | { bytes: ArrayBuffer }
+  | { pixels: Uint8ClampedArray; width: number; height: number };
+
+/**
+ * A canvas-drawn texture (the signpost plates) has no file behind it; its
+ * pixels are on the 2D canvas Babylon uploaded from, read without the GPU.
+ */
+function canvasPixels(texture: BaseTexture): Source | null {
+  if (texture.getClassName() !== 'DynamicTexture') return null;
+
+  const context = (
+    texture as { getContext?: () => CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D }
+  ).getContext?.();
+  const { width, height } = texture.getSize();
+  if (!context || !width || !height) return null;
+
+  return { pixels: context.getImageData(0, 0, width, height).data, width, height };
+}
+
+async function source(texture: BaseTexture): Promise<Source | null> {
+  const drawn = canvasPixels(texture);
+  if (drawn) return drawn;
+
+  const bytes = await sourceBytes(texture);
+  return bytes ? { bytes } : null;
+}
+
+function deriveInWorker(src: Source, flipY: boolean): Promise<Derived> | null {
+  const w = pbrWorker();
+  if (!w) return null;
+
+  const id = nextId++;
+  const request: PbrWorkerRequest = { id, flipY, ...src };
+  const transfer = 'bytes' in src ? [src.bytes] : [src.pixels.buffer];
+
+  return new Promise<Derived>((resolve, reject) => {
+    waiting.set(id, { resolve, reject });
+    w.postMessage(request, transfer);
+  });
+}
+
+/** Main-thread decode, for a browser without module workers: still no GPU flush. */
+async function deriveInline(src: Source, flipY: boolean): Promise<Derived> {
+  let data: Uint8ClampedArray;
+  let width: number;
+  let height: number;
+
+  if ('bytes' in src) {
+    const bitmap = await createImageBitmap(new Blob([src.bytes]));
+    ({ width, height } = bitmap);
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+
+    if (!context) {
+      bitmap.close();
+      throw new Error('no 2d context');
+    }
+
+    context.drawImage(bitmap, 0, 0);
+    bitmap.close();
+    data = context.getImageData(0, 0, width, height).data;
+  } else {
+    ({ pixels: data, width, height } = src);
+  }
+
+  if (flipY) flipRows(data, width, height);
+
+  return { width, height, ...derivePbrMaps(data, width, height) };
+}
+
+/**
+ * The maps for a texture from its source image; null when the bytes are
+ * not to be had. `invertY` textures are flipped on upload, and the maps
+ * are uploaded unflipped, so they are derived in the GPU's row order.
+ */
+async function deriveFromSource(texture: BaseTexture): Promise<Derived | null> {
+  const src = await source(texture);
+  if (!src) return null;
+
+  const flipY = (texture as { invertY?: boolean }).invertY === true;
+
+  try {
+    const inWorker = deriveInWorker(src, flipY);
+    if (inWorker) return await inWorker;
+  } catch (error) {
+    console.warn(
+      `PBR map worker failed for ${textureSourceName(texture)}, deriving inline:`,
+      error
+    );
+  }
+
+  // The worker path transferred the source away; take it again.
+  const again = await source(texture);
+  return again ? deriveInline(again, flipY) : null;
+}
+
+/** Last resort: the GPU readback, a synchronous flush of the whole queue. */
+async function deriveFromGpu(texture: BaseTexture): Promise<Derived | null> {
+  const { width, height } = texture.getSize();
+  if (!width || !height) return null;
+
+  const pixels = (await texture.readPixels()) as Uint8Array | null;
+  if (!pixels) return null;
+
+  return { width, height, ...derivePbrMaps(pixels, width, height) };
+}
+
 // --- per-texture cache -----------------------------------------------------
 
 const maps = new WeakMap<BaseTexture, PbrMapSet | null>();
@@ -294,31 +342,27 @@ async function build(
   texture: BaseTexture,
   scene: Scene
 ): Promise<PbrMapSet | null> {
-  const { width, height } = texture.getSize();
-  if (!width || !height) return null;
-
   const entry = (await loadManifest())[textureSourceName(texture)];
 
   const needDerived =
     !entry?.normal || !entry.metallicRoughness || !entry.emissive;
 
-  let derived: DerivedMaps | null = null;
+  let derived: Derived | null = null;
 
   if (needDerived) {
-    const pixels = (await texture.readPixels()) as Uint8Array | null;
-    if (!pixels) return null;
-    derived = derivePbrMaps(pixels, width, height);
+    derived = (await deriveFromSource(texture)) ?? (await deriveFromGpu(texture));
+    if (!derived) return null;
   }
 
-  // readPixels hands back the GPU layout; RawTexture with invertY=false
-  // uploads it unchanged, so derived maps align with the albedo regardless
-  // of how the albedo was flipped on upload.
+  // The maps are in the GPU's row order; RawTexture with invertY=false
+  // uploads them unchanged, so they align with the albedo however it was
+  // flipped on upload.
   const d = (name: string, data: Uint8Array) =>
     raw(
       `${name}_${textureSourceName(texture)}`,
       data,
-      width,
-      height,
+      derived!.width,
+      derived!.height,
       scene,
       false
     );
