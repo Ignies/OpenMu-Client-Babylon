@@ -65,6 +65,7 @@ import {
 } from './npcs/playerNpcTables';
 import { NPC_MODEL_TABLE } from './npcs/npcModelTable';
 import { Archangel, ArchangelMessenger } from './npcs/archangel';
+import { CastleGate, StatueOfSaint } from './monsters/bloodCastleGate';
 
 export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   [226]: Trainer,
@@ -124,6 +125,13 @@ export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   [500]: GoldenNapin,
   [501]: GreatGoldenDragon,
   [502]: GoldenRabbit,
+
+  // Blood Castle's two destructibles: the gate in the wall and the crystal
+  // statue on the altar (ZzzCharacter.cpp:13407-13425).
+  [131]: CastleGate,
+  [132]: StatueOfSaint,
+  [133]: StatueOfSaint,
+  [134]: StatueOfSaint,
 
   [275]: Kundun,
   [349]: Balgass,
