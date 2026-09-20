@@ -12,7 +12,7 @@ import type { RingOptions } from '../effects/ring';
 import type { ParticlesOptions } from '../effects/particles';
 import type { ProjectileOptions } from '../effects/projectile';
 import type { JointOptions } from '../effects/joint';
-import type { AuraOptions } from '../effects/aura';
+import type { AuraOptions, BoneGlow, SpearJoints } from '../effects/aura';
 import {
   ARC_MOTES,
   BLOOD_CHIPS,
@@ -106,9 +106,6 @@ const SPIRIT_ECHOES = [1, 1, 0.85, 0.6];
 const SPIRIT_GLOW: RGB = [0.3, 0.07, 0.45];
 /** The siphon thread pulled off the cast's victim: dimmer than the spirits' own violet. */
 const SPIRIT_SIPHON: RGB = [0.6, 0.14, 0.95];
-/** Persistent-buff ribbons: the original's five MODEL_SPEARSKILL joints. */
-const BUFF_RIBBONS = 5;
-
 // ---- step helpers ---------------------------------------------------------------
 
 export interface SkillContext {
@@ -1754,72 +1751,148 @@ export function playBowShotVisual(scene: Scene, shooter: Entity, target: Entity)
 
 // ---- persistent buff visuals (MagicEffectStatus) ----------------------------------
 
-type BuffAura = (follow: PointSource) => AuraOptions;
+/** The parts of a buff's look; `keepLook` adds the wearer (`follow`, `bone`, `boneCount`, `until`). */
+type BuffLook = (entity: Entity, scene: Scene) => Partial<AuraOptions>;
 
-/** Keyed by OpenMU MagicEffectNumber (common/magicEffects.ts). */
-export const BUFF_VISUALS: Partial<Record<number, BuffAura>> = {
-  // 1 Greater Damage: red shiny orbit (the original's BITMAP_SHINY ring, warm).
-  1: follow => ({ follow, orbit: { texture: TEX.shiny, colour: [1, 0.55, 0.4], count: 3, size: 0.25 } }),
-  // 2 Greater Defense: 5× CreateJoint(MODEL_SPEARSKILL sub4, width 20): Light (0.4,0.8,0.2), LT 10000, MaxTails 30, Tex FLARE_BLUE.
-  2: follow => ({ follow, ribbons: { count: BUFF_RIBBONS, colour: [0.4, 0.8, 0.2], width: cm(20), tails: 30 } }),
-  // 3 Elf Soldier buff
-  3: follow => ({ follow, stream: { recipe: HOLY_MOTES, rate: 10 } }),
-  // 4 Soul Barrier: 5× CreateJoint(MODEL_SPEARSKILL sub0, width 20): Light white, LT 999999, MaxTails 30, Tex FLARE_BLUE.
-  4: follow => ({ follow, ribbons: { count: BUFF_RIBBONS, colour: RGBS.white, width: cm(20), tails: 30 }, stream: { recipe: SOUL_MOTES, rate: 6 } }),
-  // 5 Critical Damage Increase: gold orbit.
-  5: follow => ({ follow, orbit: { texture: TEX.shiny, colour: RGBS.gold, count: 4, size: 0.22, height: 1.1, radius: 0.35 } }),
-  // 6 Infinity Arrow: ice orbit.
-  6: follow => ({ follow, orbit: { texture: TEX.flareBlue, colour: RGBS.ice, count: 2, size: 0.3, height: 1.2, radius: 0.3 } }),
-  // 7 AG recovery
-  7: follow => ({ follow, stream: { recipe: SOUL_MOTES, rate: 8 } }),
-  // 8 Greater Fortitude (Swell Life): red shimmer over the body.
-  8: follow => ({ follow, stream: { recipe: { ...BLOOD_CHIPS, power: 0.3, gravity: 0.8, life: 0.9, box: [0.3, 0.5, 0.3] }, rate: 14 } }),
-  // 9 Elite Mana potion, 10 Bless, 11 Soul potions
-  9: follow => ({ follow, stream: { recipe: SOUL_MOTES, rate: 10 } }),
-  10: follow => ({ follow, stream: { recipe: HOLY_MOTES, rate: 10 } }),
-  11: follow => ({ follow, stream: { recipe: SOUL_MOTES, rate: 10 } }),
-  // 129 Ignore Defense, 130 Increase Health, 131 Increase Block (Rage Fighter)
-  129: follow => ({ follow, orbit: { texture: TEX.shiny, colour: RGBS.blood, count: 3, size: 0.22 } }),
-  130: follow => ({ follow, orbit: { texture: TEX.shiny, colour: RGBS.holy, count: 3, size: 0.22 } }),
-  131: follow => ({ follow, orbit: { texture: TEX.shiny, colour: RGBS.steel, count: 3, size: 0.22 } }),
-  // 138/139 Wizardry Enhance
-  138: follow => ({ follow, orbit: { texture: TEX.flareBlue, colour: RGBS.energy, count: 3, size: 0.25, height: 1 } }),
-  139: follow => ({ follow, orbit: { texture: TEX.flareBlue, colour: RGBS.energy, count: 4, size: 0.28, height: 1 } }),
-  148: follow => ({ follow, orbit: { texture: TEX.shiny, colour: RGBS.gold, count: 5, size: 0.24, height: 1.1, radius: 0.35 } }),
-  153: follow => ({ follow, orbit: { texture: TEX.shiny, colour: RGBS.steel, count: 4, size: 0.22 } }),
-  154: follow => ({ follow, orbit: { texture: TEX.shiny, colour: RGBS.steel, count: 5, size: 0.24 } }),
-  155: follow => ({ follow, orbit: { texture: TEX.shiny, colour: RGBS.holy, count: 4, size: 0.24 } }),
-  // 200 Shield skill (knight Defense)
-  200: follow => ({ follow, shell: { texture: TEX.flare, colour: RGBS.steel, size: 1.6 } }),
+/** The knot the five green MODEL_SPEARSKILL sub4 joints run: radius 80, `z = 110 + 120 v.z`, width 20, Light (0.4, 0.8, 0.2) (ZzzEffectJoint.cpp:1553, :4470). */
+const GREEN_KNOT: SpearJoints = { count: 5, width: 0.2, colour: [0.4, 0.8, 0.2], radius: 0.8, base: 1.1, lift: 1.2, flare: true };
+/** Soul Barrier's five sub0 joints: the same knot, white, width 50 from the packet path (WSclient.cpp:15481). */
+const SOUL_KNOT: SpearJoints = { count: 5, width: 0.5, colour: RGBS.white, radius: 0.8, base: 1.1, lift: 1.2, flare: true };
+/** A seal's three sub10 joints: radius 60, `z = 50 + 60 v.z`, width 12, Light (1, 0.6, 0.6), the bujuckline sheet (:1559, :4480). */
+const SEAL_KNOT: SpearJoints = { count: 3, width: 0.12, colour: [1, 0.6, 0.6], texture: TEX.luckySeal, radius: 0.6, base: 0.5, lift: 0.6 };
+
+/** The weapon link bones (weaponAttachment.ts) and the two above each: `LinkBone`, `LinkBone - 6`, `LinkBone - 7` (ZzzCharacter.cpp:10777). */
+const HAND_SHINY_BONES = [33, 27, 26, 42, 36, 35] as const;
+/** `g_byUpperBoneLocation` (ZzzEffect.cpp:34). */
+const UPPER_BONES = [25, 26, 27, 20, 34, 35, 36] as const;
+/** Bip01 R Hand 28, L Hand 37: where the crit flare and the magic rune land. */
+const HAND_BONES = [28, 37] as const;
+/** The Ourforces glow's 17 bones, in three breathing groups (ZzzEffect.cpp:9602-9636). */
+const OURFORCES_BONES = [12, 17, 5, 10, 36, 27, 37, 28, 11, 35, 2, 3, 36, 20, 27, 4, 26] as const;
+const OURFORCES_SLOW = new Set([5, 12, 7, 8, 9, 14, 15, 16]);
+const ourforcesBreathe = (t: number, i: number): number =>
+  i < 3 ? (Math.sin(t * 10) + 1) * 0.25 + 0.2 : OURFORCES_SLOW.has(i) ? (Math.sin(t * 5) + 1) * 0.25 + 0.5 : (Math.sin(t * 10) + 1) * 0.3 + 0.3;
+const OURFORCES_GLOW: BoneGlow = { bones: OURFORCES_BONES, texture: TEX.flareRed, colour: RGBS.white, size: 0.96, breathe: ourforcesBreathe };
+/** Swell of Magic Power: BITMAP_LIGHT 1.8 on every bone, `(0.7, 0.3, 0.9) * (|sin t| + 0.2) * 0.5` (ZzzEffect.cpp:9316). */
+const MAGIC_GLOW: BoneGlow = { bones: 'all', texture: TEX.flare, colour: [0.7, 0.3, 0.9], size: 1.15, breathe: t => (Math.abs(Math.sin(t)) + 0.2) * 0.5 };
+
+/** Critical Damage: every 1.2 s BITMAP_FLARE_FORCE + (19 in 20) MODEL_DARKLORD_SKILL at each weapon, Light (1, 0.6, 0.3) (ZzzCharacter.cpp:10033). */
+function critFlare(scene: Scene, entity: Entity): void {
+  const tint: RGB = [1, 0.6, 0.3];
+  for (const bone of [33, 42]) {
+    const at: PointSource = out => bonePos(entity, bone, out, CAST_HEIGHT);
+    effects.spawn('sprite', scene, at(new Vector3()), { texture: TEX.flareForce, colour: tint, size: 0.5, seconds: ticks(10), follow: at, grow: 1.6 });
+    if (Math.random() < 19 / 20) effects.spawn('model', scene, at(new Vector3()), { model: MODEL.darkLordSkill, seconds: ticks(20), scale: 0.6, colour: tint, follow: at, grow: 1.5 });
+  }
+}
+
+/** Swell of Magic Power: every 6 s a MODEL_ARROWSRE06 sub1 on each hand, Light (0.2, 0.2, 0.9) (ZzzEffect.cpp:8310). */
+function magicRune(scene: Scene, entity: Entity): void {
+  for (const bone of HAND_BONES) {
+    const at: PointSource = out => bonePos(entity, bone, out, CAST_HEIGHT);
+    effects.spawn('model', scene, at(new Vector3()), { model: MODEL.arrowsRe06, seconds: 1, colour: [0.2, 0.2, 0.9], follow: at, loop: false });
+  }
+}
+
+/**
+ * Keyed by OpenMU MagicEffectNumber, which is the original's `eBuffState`
+ * value for value (documentation/buff_visuals): the look the original keeps
+ * on a body while the effect holds (WSclient.cpp InsertBuffPhysicalEffect
+ * :15466, the per-frame block ZzzCharacter.cpp:10770-10990). The green knot
+ * of 1 / 2 / 3 is one shared set (SHARED_LOOKS). An id with no row has no
+ * body look in the original either; the mastery ids OpenMU sends on their
+ * own (135, 138, 139, 148, 153-155) take their base effect's look.
+ */
+export const BUFF_VISUALS: Partial<Record<number, BuffLook>> = {
+  // 1 Greater Damage, 3 Elf Soldier: BITMAP_SHINY+1 on the hands and forearms, `L * (1, 0.3, 0.2)`, plus the shared knot.
+  1: () => ({ handShiny: { bones: HAND_SHINY_BONES, colour: [1, 0.3, 0.2] } }),
+  3: () => ({ handShiny: { bones: HAND_SHINY_BONES, colour: [1, 0.3, 0.2] } }),
+  // 2 Greater Defense: the shared knot only.
+  // 4 Soul Barrier: five white sub0 joints.
+  4: () => ({ spearJoints: SOUL_KNOT }),
+  // 5 Critical Damage Increase (148 its mastery): the weapon flare every 1.2 s.
+  5: (e, s) => ({ pulse: { every: 1.2, fire: () => critFlare(s, e) } }),
+  148: (e, s) => ({ pulse: { every: 1.2, fire: () => critFlare(s, e) } }),
+  // 7 AG recovery: the orbiting healing rings.
+  7: () => ({ healingRings: true }),
+  // 8 Greater Fortitude / Swell Life (135 its proficiency): orange motes off the upper body.
+  8: () => ({ boneMotes: { bones: UPPER_BONES, colour: [1, 0.5, 0.1] } }),
+  135: () => ({ boneMotes: { bones: UPPER_BONES, colour: [1, 0.5, 0.1] } }),
+  // 29-31 the seals: three pink ribbons low round the legs.
+  29: () => ({ spearJoints: SEAL_KNOT }),
+  30: () => ({ spearJoints: SEAL_KNOT }),
+  31: () => ({ spearJoints: SEAL_KNOT }),
+  // 0x39 Freeze (eDeBuff_Harden): the ice shell.
+  57: () => ({ iceShell: true }),
+  // 0x3A Defense reduction: the skull.
+  58: () => ({ skull: true }),
+  // 0x3D Stun: three ribbons climbing off the head, once.
+  61: () => ({ stun: true }),
+  // 0x47 Reflection (eBuff_Thorns): rising pin lights.
+  71: () => ({ pins: { colour: [0.9, 0.6, 0.1] } }),
+  // 0x4C Weakness, 0x4D Innovation: shiny drops off random bones.
+  76: () => ({ boneSparks: { colour: [1.4, 0.2, 0.2] } }),
+  77: () => ({ boneSparks: { colour: [0.25, 1, 0.7] } }),
+  // 0x51 Berserker: hand auroras and body marks.
+  81: () => ({ berserk: true }),
+  // 0x52 Wiz Enhance / Swell of Magic Power (138 / 139 its strengthener and mastery): every bone glows violet, a rune on the hands every 6 s.
+  82: (e, s) => ({ boneGlow: MAGIC_GLOW, pulse: { every: 6, fire: () => magicRune(s, e) } }),
+  138: (e, s) => ({ boneGlow: MAGIC_GLOW, pulse: { every: 6, fire: () => magicRune(s, e) } }),
+  139: (e, s) => ({ boneGlow: MAGIC_GLOW, pulse: { every: 6, fire: () => magicRune(s, e) } }),
+  // 129-131 Ourforces (Rage Fighter): the red glow on 17 bones; 153-155 their power-ups.
+  129: () => ({ boneGlow: OURFORCES_GLOW }),
+  130: () => ({ boneGlow: OURFORCES_GLOW }),
+  131: () => ({ boneGlow: OURFORCES_GLOW }),
+  153: () => ({ boneGlow: OURFORCES_GLOW }),
+  154: () => ({ boneGlow: OURFORCES_GLOW }),
+  155: () => ({ boneGlow: OURFORCES_GLOW }),
 };
+
+/**
+ * One look kept up while any of its ids holds: the original keeps a single
+ * set of five green joints on a body under Attack, Defense or HelpNpc
+ * (`ShouldKeepAuraJointAlive`, ZzzEffectJoint.cpp:4440), never a second.
+ */
+const SHARED_LOOKS: readonly { key: number; ids: readonly number[]; look: BuffLook }[] = [
+  { key: -1, ids: [1, 2, 3], look: () => ({ spearJoints: GREEN_KNOT }) },
+];
 
 const buffHandles = new Map<Entity, Map<number, EffectHandle>>();
 
-/** Command: keep (or drop) the persistent look of `effectId` on `entity`. */
-export function setBuffVisual(scene: Scene, entity: Entity, effectId: number, active: boolean): void {
-  let byEffect = buffHandles.get(entity);
-  const have = byEffect?.get(effectId);
-  if (have && (!active || !have.alive)) {
+function keepLook(scene: Scene, entity: Entity, key: number, look: BuffLook | null): void {
+  let byKey = buffHandles.get(entity);
+  const have = byKey?.get(key);
+  if (have && (!look || !have.alive)) {
     have.stop();
-    byEffect!.delete(effectId);
+    byKey!.delete(key);
   }
-  if (!active) {
-    if (byEffect && byEffect.size === 0) buffHandles.delete(entity);
+  if (!look) {
+    if (byKey && byKey.size === 0) buffHandles.delete(entity);
     return;
   }
-  if (have?.alive) return;
-  const recipe = BUFF_VISUALS[effectId];
-  if (!recipe || !entity.transform) return;
-  if (!byEffect) {
-    byEffect = new Map();
-    buffHandles.set(entity, byEffect);
+  if (have?.alive || !entity.transform) return;
+  if (!byKey) {
+    byKey = new Map();
+    buffHandles.set(entity, byKey);
   }
-  const follow: PointSource = out => entityPos(entity, 0, out);
   const handle = effects.spawn('aura', scene, entityPos(entity, 0, new Vector3()), {
-    ...recipe(follow),
+    ...look(entity, scene),
+    follow: out => entityPos(entity, 0, out),
+    bone: (mu, out) => bonePos(entity, mu, out),
+    boneCount: () => Math.max(0, (entity.modelObject?.gltf?.skeleton?.bones.length ?? 0) - 1),
     until: () => entityGone(entity),
   });
-  byEffect.set(effectId, handle);
+  byKey.set(key, handle);
+}
+
+/** Command: keep (or drop) the persistent look of `effectId` on `entity`, whose `buffs` set is already up to date. */
+export function setBuffVisual(scene: Scene, entity: Entity, effectId: number, active: boolean): void {
+  keepLook(scene, entity, effectId, active ? (BUFF_VISUALS[effectId] ?? null) : null);
+  for (const shared of SHARED_LOOKS) {
+    if (!shared.ids.includes(effectId)) continue;
+    const on = active || shared.ids.some(id => entity.buffs?.has(id));
+    keepLook(scene, entity, shared.key, on ? shared.look : null);
+  }
 }
 
 /** Drop every buff look on an entity that left (despawn, out of scope). */
@@ -1856,6 +1929,17 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
       const caster = world?.playerEntity;
       if (!world || !caster?.transform) return false;
       playTargetedSkillVisual(world.scene, skill, caster, victim());
+      return true;
+    },
+    // A buff's persistent look on the test character, on or off (`?buffs=` does the same at load).
+    buff: (effectId: number, active = true) => {
+      const world = storeRef().world;
+      const hero = world?.playerEntity;
+      if (!world || !hero?.transform) return false;
+      if (!hero.buffs) world.addComponent(hero, 'buffs', new Set<number>());
+      if (active) hero.buffs!.add(effectId);
+      else hero.buffs!.delete(effectId);
+      setBuffVisual(world.scene, hero, effectId, active);
       return true;
     },
   };

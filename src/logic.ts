@@ -926,6 +926,27 @@ EventBus.on('warpCompleted', () => {
   }
 });
 
+/**
+ * `?offline&buffs=2,4,8` (dev builds): MagicEffectStatus ids applied to the
+ * test character once the map is up, so a buff's persistent look can be shot
+ * without a server granting it.
+ */
+EventBus.on('warpCompleted', () => {
+  if (!Store.isOffline) return;
+
+  const spec = devQuery('buffs');
+  const hero = Store.world?.playerEntity;
+
+  if (!spec || !hero) return;
+
+  for (const raw of spec.split(',')) {
+    const id = Number(raw.trim());
+    if (!Number.isInteger(id) || id <= 0) continue;
+    Store.setBuff(id, true);
+    applyObjectEffect(hero, id, true);
+  }
+});
+
 /** The economy prompts the dev seam below can raise on their own. */
 const PROMPT_DEMOS = [
   'vault-deposit',
@@ -2516,18 +2537,24 @@ function objectOnTile(world: World, except: Entity, x: number, y: number): Entit
   return best;
 }
 
+/** Record an effect on an object and keep its look up (or drop it). */
+function applyObjectEffect(obj: Parameters<typeof setBuffVisual>[1], effectId: number, active: boolean) {
+  const world = Store.world;
+  if (!world) return;
+  if (!obj.buffs) world.addComponent(obj, 'buffs', new Set<number>());
+  if (active) obj.buffs!.add(effectId);
+  else obj.buffs!.delete(effectId);
+  // The persistent look of the buff (the Greater Defense knot, the Swell Life motes) - effects layer consumer.
+  setBuffVisual(world.scene, obj, effectId, active);
+}
+
 function setObjectEffect(objectId: number, effectId: number, active: boolean) {
   const world = Store.world;
   if (!world) return;
   const maskedId = objectId & 0x7fff;
   if (maskedId === Store.playerId) Store.setBuff(effectId, active);
   const obj = world.getByNetId(maskedId);
-  if (!obj) return;
-  if (!obj.buffs) world.addComponent(obj, 'buffs', new Set<number>());
-  if (active) obj.buffs!.add(effectId);
-  else obj.buffs!.delete(effectId);
-  // The persistent look of the buff (Soul Barrier bubble, elf orbits) - effects layer consumer.
-  setBuffVisual(world.scene, obj, effectId, active);
+  if (obj) applyObjectEffect(obj, effectId, active);
 }
 
 EventBus.on('MagicEffectStatus', packet => {
