@@ -11,6 +11,7 @@ import { ServerConfig } from './serverConfig';
  * The one writer of `document.title`.
  */
 
+/** Also the installed app's name, in `public/manifest.webmanifest`. */
 export const CLIENT_NAME = 'OpenMUCB';
 
 /** A published name is capped at 60 chars; a typed one is not. */

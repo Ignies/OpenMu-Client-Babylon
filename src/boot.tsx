@@ -30,6 +30,7 @@ import {
 } from './libs/mu/preloadSprites';
 import { installPerfOverlay, recordFrame } from './libs/perfOverlay';
 import { refreshServerList } from './common/serverList';
+import { ensureCacheWorker } from './common/assetDownload';
 
 if (APP_STAGE === 'dev' || QA_ENABLED) {
   import('@babylonjs/core/Legacy/legacy');
@@ -41,6 +42,11 @@ watchStateWarnings();
 
 // The browser tab: the client's name until the player is in, the world's after.
 watchPageTitle();
+
+// The asset cache worker, on every load rather than only once the player
+// opens the download screen: a browser will not offer to install a page it
+// has never seen register one.
+void ensureCacheWorker();
 
 // What a lost game server socket does before falling back to the server
 // list. Wired here rather than in logic.ts, which the store's own module
