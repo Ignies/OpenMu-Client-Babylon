@@ -1036,8 +1036,8 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
   // carved face looks sideways and its curved edge bows outward, to the
   // back; the taper runs front to back on the photo's own scale.
   // From the base's back end up into the neck's back end.
-  const foot: V3 = [30, 0, 2];
-  const crown: V3 = [HARP_DEPTH + 2, 0, HARP_HEIGHT - 2];
+  const foot: V3 = [12, 0, 2];
+  const crown: V3 = [HARP_DEPTH, 0, HARP_HEIGHT - 5];
   const slant = unit([crown[0] - foot[0], 0, crown[2] - foot[2]]);
   const normal: V3 = [-slant[2], 0, slant[0]];
   const slantLen = Math.hypot(crown[0] - foot[0], crown[2] - foot[2]);
@@ -1062,7 +1062,7 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
   extrudeFlat(m, decimate(neckColumns, h.neck.tolerance()), neckP, 1.5, () => 3, wood);
 
   // The base: a plank under everything.
-  box(m, [-4, -5, 0], [36, 5, 4], baseRect, wood);
+  box(m, [-4, -5, 0], [17, 5, 4], baseRect, wood);
 
   // The strings: from the neck's underside straight down to the soundbox's face.
   const neckUnderside = (px: number): number => {
