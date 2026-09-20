@@ -1200,6 +1200,8 @@ export const romanianLayer: LanguageLayer = {
     'instrument.guitar': 'Chitară',
     'instrument.flute': 'Flaut',
     'instrument.ocarina': 'Ocarină',
+    'instrument.harp': 'Harpă',
+    'instrument.drums': 'Tobe',
     'instrument.title': 'Instrument',
     'instrument.load': 'Încarcă MIDI',
     'instrument.noFile': 'Niciun fișier încărcat',

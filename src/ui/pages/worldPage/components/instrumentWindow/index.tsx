@@ -190,7 +190,8 @@ const ChannelsTable = observer(({ percussion }: { percussion: boolean }) => {
       <div className="band-list">
         {rows.length === 0 && <div className="band-empty">{t('instrument.noFile')}</div>}
         {rows.map(c => {
-          const silent = c.index === PERCUSSION_CHANNEL && !percussion;
+          // A kit voices the percussion channel and nothing else; the rest the other way round.
+          const silent = (c.index === PERCUSSION_CHANNEL) !== percussion;
           return (
             <div key={c.index} className={`band-channel${silent ? ' silent' : ''}`} title={c.name}>
               <span className="band-ch">{c.index + 1}</span>

@@ -1187,6 +1187,8 @@ export const russianLayer: LanguageLayer = {
     'instrument.guitar': 'Гитара',
     'instrument.flute': 'Флейта',
     'instrument.ocarina': 'Окарина',
+    'instrument.harp': 'Арфа',
+    'instrument.drums': 'Барабаны',
     'instrument.title': 'Инструмент',
     'instrument.load': 'Загрузить MIDI',
     'instrument.noFile': 'Файл не загружен',

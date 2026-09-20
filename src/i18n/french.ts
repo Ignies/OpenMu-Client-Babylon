@@ -1205,6 +1205,8 @@ export const frenchLayer: LanguageLayer = {
     'instrument.guitar': 'Guitare',
     'instrument.flute': 'Flûte',
     'instrument.ocarina': 'Ocarina',
+    'instrument.harp': 'Harpe',
+    'instrument.drums': 'Batterie',
     'instrument.title': 'Instrument',
     'instrument.load': 'Charger un MIDI',
     'instrument.noFile': 'Aucun fichier chargé',

@@ -1208,6 +1208,8 @@ export const germanLayer: LanguageLayer = {
     'instrument.guitar': 'Gitarre',
     'instrument.flute': 'Flöte',
     'instrument.ocarina': 'Okarina',
+    'instrument.harp': 'Harfe',
+    'instrument.drums': 'Schlagzeug',
     'instrument.title': 'Instrument',
     'instrument.load': 'MIDI laden',
     'instrument.noFile': 'Keine Datei geladen',

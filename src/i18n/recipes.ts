@@ -1518,6 +1518,8 @@ export const EN_TEXT = {
   'instrument.guitar': 'Guitar',
   'instrument.flute': 'Flute',
   'instrument.ocarina': 'Ocarina',
+  'instrument.harp': 'Harp',
+  'instrument.drums': 'Drums',
   'instrument.title': 'Instrument',
   'instrument.load': 'Load MIDI',
   'instrument.noFile': 'No file loaded',

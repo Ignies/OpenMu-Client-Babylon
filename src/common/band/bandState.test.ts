@@ -41,9 +41,12 @@ describe('band state', () => {
     expect(withoutMember(again, 8).members.map(m => m.netId)).toEqual([9]);
   });
 
-  it('keeps the percussion channel silent until an instrument renders it', () => {
+  it('gives the percussion channel to the drum kit and every other channel to the rest', () => {
     expect(canRender('guitar', 0)).toBe(true);
     expect(canRender('guitar', 9)).toBe(false);
     expect(canRender('flute', 9)).toBe(false);
+    expect(canRender('drums', 9)).toBe(true);
+    expect(canRender('drums', 0)).toBe(false);
+    expect(canRender('drums', 15)).toBe(false);
   });
 });

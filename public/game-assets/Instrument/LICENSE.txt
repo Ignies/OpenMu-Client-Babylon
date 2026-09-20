@@ -7,3 +7,7 @@ Attribution-ShareAlike 3.0 license (CC BY-SA 3.0,
 https://creativecommons.org/licenses/by-sa/3.0/). The files in this folder
 are those renders, re-encoded only where the source offered no OGG; they
 stay under the same license.
+
+Drum kit: FluidR3_GM soundfont by Frank Wen (MIT license), as rendered per
+drum by surikov/webaudiofontdata (https://github.com/surikov/webaudiofontdata,
+MIT license). The files under Instrument/drums/ are those renders unchanged.

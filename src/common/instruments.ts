@@ -1,4 +1,5 @@
 import type { TextKey } from '../i18n';
+import type { BmdLink } from './boneLink';
 import { PlayerAction } from './objects/enum';
 
 /**
@@ -9,14 +10,14 @@ import { PlayerAction } from './objects/enum';
  *
  * Adding one is one row here plus its assets:
  *   - `bun run tools/instrumentSamples.ts <id>` for the notes,
- *   - a crop entry in `tools/instrumentModels.ts` for the model,
+ *   - a builder in `tools/instrumentModels.ts` for the model(s),
  *   - `instrument.<id>` in every language.
  *
  * The wire carries the row's index (`bandProtocol.ts`), so the table is
  * append-only: never reorder or remove a row.
  */
 
-export type InstrumentId = 'guitar' | 'flute' | 'ocarina';
+export type InstrumentId = 'guitar' | 'flute' | 'ocarina' | 'harp' | 'drums';
 
 /**
  * The pose is a few frames of an existing emote, copied into a clip of its
@@ -38,27 +39,54 @@ export type InstrumentPose = {
   sway: number;
 };
 
+/**
+ * One model hung on one bone. Degrees and centimetres in BMD bone space
+ * (`boneLink.ts`); the model's own origin is where the bone holds it.
+ */
+export type InstrumentPart = {
+  /** The model, under `game-assets/`. */
+  model: string;
+  /** The bone (`weaponAttachment.ts`: 33 right hand, 42 left hand, 0 the root). */
+  bone: number;
+  link: BmdLink;
+};
+
 export type InstrumentDefinition = {
   id: InstrumentId;
   labelKey: TextKey;
   /** Short glyph drawn in the wedge; the label is shown in the hub on hover. */
   glyph: string;
-  /** The MusyngKite instrument the notes come from (`tools/instrumentSamples.ts`). */
+  /**
+   * Where the notes come from (`tools/instrumentSamples.ts`): a MusyngKite
+   * instrument name, or `kit:<name>` for a General MIDI drum kit.
+   */
   bank: string;
   /**
    * A wind: the note sounds for as long as it is held and stops on note-off.
-   * Otherwise the sample carries its own decay (a plucked string) and
-   * note-off only shortens the tail.
+   * Otherwise the sample carries its own decay (a plucked string, a drum)
+   * and note-off only shortens the tail.
    */
   sustained: boolean;
-  /** Renders MIDI channel 10 through a drum map. No row does yet. */
+  /**
+   * A drum kit: renders MIDI channel 10, where the note is the drum and not
+   * a pitch, and nothing else - a melody has no place on a snare.
+   */
   percussion?: true;
-  /** The model, under `game-assets/`. */
+  /**
+   * The main model, first: the instrument itself, or for a kit the right
+   * stick. `parts` are the rest: a second stick, the kit standing at the
+   * feet.
+   */
   model: string;
-  /** The hand bone the model hangs from (`weaponAttachment.ts`: 33 right, 42 left). */
   bone: number;
-  /** Link on that bone - degrees and centimetres in BMD bone space (`boneLink.ts`). */
-  link: { angle: [number, number, number]; offset: [number, number, number] };
+  link: BmdLink;
+  parts?: readonly InstrumentPart[];
+  /**
+   * Where the note sprites are born, in the main model's own centimetres;
+   * its origin when left out. A harp's origin is on the floor under the
+   * pillar, its strings a metre up.
+   */
+  noteOffset?: [number, number, number];
   pose: InstrumentPose;
 };
 
@@ -67,6 +95,11 @@ const A = PlayerAction;
 /** Bones by name, so a row reads (`weaponAttachment.ts`). */
 const RIGHT_HAND = 33;
 const LEFT_HAND = 42;
+/** `Bip01`, the root: held still by every pose, so a model at the feet stands still. */
+const ROOT = 0;
+
+/** The right hand up at the mouth, held with a small sway: the middle of the Again gesture. */
+const BLOW: InstrumentPose = { clip: A.PLAYER_AGAIN1, from: 0.5, to: 0.56, sway: 0.6 };
 
 export const INSTRUMENTS: readonly InstrumentDefinition[] = [
   {
@@ -96,10 +129,7 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     bone: RIGHT_HAND,
     // At the mouth, out to the right and a little down.
     link: { angle: [-59, 15, 160], offset: [9, -18, 3] },
-    // The middle of the Again gesture, where the right hand is up at the
-    // mouth; a narrow window so the flute holds there with a small sway
-    // instead of swinging down and back.
-    pose: { clip: A.PLAYER_AGAIN1, from: 0.5, to: 0.56, sway: 0.6 },
+    pose: BLOW,
   },
   {
     id: 'ocarina',
@@ -115,8 +145,43 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     // body's plane rather than standing out of it
     // (tools/screenshot/_probe_ocarinalink.mjs).
     link: { angle: [-94, 26, 41], offset: [17, 10, -10] },
-    // The right hand up at the mouth, held with a small sway (see flute).
-    pose: { clip: A.PLAYER_AGAIN1, from: 0.5, to: 0.56, sway: 0.6 },
+    pose: BLOW,
+  },
+  {
+    id: 'harp',
+    labelKey: 'instrument.harp',
+    glyph: 'Hrp',
+    bank: 'orchestral_harp',
+    sustained: false,
+    model: 'Item/Instrument_Harp.glb',
+    bone: ROOT,
+    // A floor harp standing in front, its soundbox leaning back to the
+    // chest, strung along the way the player faces; solved from the root
+    // bone (tools/screenshot/_instsolve.mjs).
+    link: { angle: [0, 0, -173], offset: [56, 25, -107] },
+    noteOffset: [40, 0, 130],
+    // Clap, whose hands come together and apart at chest height: at the
+    // strings, plucking.
+    pose: { clip: A.PLAYER_CLAP1, from: 0, to: 0.2, sway: 1 },
+  },
+  {
+    id: 'drums',
+    labelKey: 'instrument.drums',
+    glyph: 'Drm',
+    bank: 'kit:standard',
+    sustained: false,
+    percussion: true,
+    model: 'Item/Instrument_Drumstick.glb',
+    bone: RIGHT_HAND,
+    // A stick in each hand, the kit standing in front at the feet.
+    link: { angle: [-145, 4, 53], offset: [0, 0, 0] },
+    parts: [
+      { model: 'Item/Instrument_Drumstick.glb', bone: LEFT_HAND, link: { angle: [-148, 4, -61], offset: [0, 0, 0] } },
+      { model: 'Item/Instrument_DrumKit.glb', bone: ROOT, link: { angle: [-1, -5, 7], offset: [14, 4, -99] } },
+    ],
+    // Hustle where both hands are low in front, the beat carried by its
+    // small forward-and-back.
+    pose: { clip: A.PLAYER_HUSTLE, from: 0.3, to: 0.4, sway: 0.8 },
   },
 ];
 
@@ -140,4 +205,9 @@ export function instrumentIndex(id: InstrumentId): number {
 
 export function isInstrumentId(value: string): value is InstrumentId {
   return byId.has(value as InstrumentId);
+}
+
+/** Every model a row hangs on the player: the main one first, then `parts`. */
+export function instrumentParts(def: InstrumentDefinition): InstrumentPart[] {
+  return [{ model: def.model, bone: def.bone, link: def.link }, ...(def.parts ?? [])];
 }
