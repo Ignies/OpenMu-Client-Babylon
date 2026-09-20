@@ -93,17 +93,23 @@ const HIT_COUNT = 14;
 const TRIPLE_SPREAD = (15 * Math.PI) / 180;
 const FIVE_SPREAD = [-20, -10, 0, 10, 20].map(d => (d * Math.PI) / 180);
 /**
- * Evil Spirit's spirit stamps, newest first. A subtract removes `texel x colour` and the material
- * clamps that term at 1, so one stamp can never take more of the frame than its own sheet does -
- * and the sheet is mid grey. The original gets its black spirits by stamping a fresh MODEL_LASER
- * every frame along a path that moves 0.7 tiles a tick, so consecutive stamps overlap and the
- * subtraction compounds; the echoes here do the same. The last two fade, which is the display
- * persistence the stamps' one-tick life leans on.
+ * Evil Spirit's ghosts. The original's four JOINT_SPIRIT flights - 70 cm a tick, homing the caster
+ * 10° a tick under damped random steering (ZzzEffectJoint.cpp:3732-3772) - loop about four tiles
+ * out, which is the whole screen at this camera; sixteen of them in four waves are the swarm that
+ * takes it over. Every ghost is one RENDER_DARK card: black, a ghost sheet as its coverage, and a
+ * cover above 1 so the body saturates on every tier where the original's MODEL_LASER stamps
+ * (Laser01 averages 0.34) only ever reached grey.
  */
-const SPIRIT_ECHOES = [1, 1, 0.85, 0.6];
-/** The violet sheen over the black spirit: the same skull drawn additive on top of its own cut-out. */
-const SPIRIT_GLOW: RGB = [0.3, 0.07, 0.45];
-/** The siphon thread pulled off the cast's victim: dimmer than the spirits' own violet. */
+const SPIRIT_COUNT = 16;
+const SPIRIT_WAVE = 4;
+/** Seconds between waves; each wave's headings sit between the previous wave's. */
+const SPIRIT_WAVE_GAP = 0.1;
+const SPIRIT_SPEED = perTick(36);
+const SPIRIT_TURN = (16 * Math.PI) / 180;
+/** Ghost card edge in tiles, and the coverage that makes it black. */
+const SPIRIT_SIZE = 2.0;
+const SPIRIT_COVER = 4;
+/** The siphon thread pulled off the cast's victim. */
 const SPIRIT_SIPHON: RGB = [0.6, 0.14, 0.95];
 // ---- step helpers ---------------------------------------------------------------
 
@@ -695,58 +701,39 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 9 Evil Spirit: impact@caster+100z - 4× JOINT_SPIRIT sub0 pairs at Angle(0,0,i*90), width 80 + 20:
   // ALPHA_BLEND_MINUS, Vel 70, LT 49, MaxTails 6, Light = LifeTime×0.1, homing the *caster*+80z
   // (MoveHumming 10°/frame) under damped random steering (±3.2° pitch ×0.6, ±12.8° yaw ×0.8 a frame)
-  // between terrain +100 and +400; each width-80 joint stamps MODEL_LASER (Scale 1.3, LT 1,
-  // RENDER_DARK) at its head every frame - the visible spirits (ZzzCharacter.cpp:4468,
-  // ZzzEffectJoint.cpp:3698, ZzzEffect.cpp:1890). Stamps land a tick apart and each holds its spot
-  // for a tick, so the screen shows the newest one plus the just-expired ones still inside display
-  // persistence: a short trail of spirit shadows. Five tick-lagged models per wide joint
-  // (`SPIRIT_ECHOES`) instead of ~50 one-tick spawns per cast.
+  // between terrain +100 and +400; each width-80 joint stamps MODEL_LASER (RENDER_DARK) at its head
+  // every frame - the black spirits (ZzzCharacter.cpp:4468, ZzzEffectJoint.cpp:3698, ZzzEffect.cpp:1890).
   //
-  // The subtraction is NEUTRAL, like the original's `Light` (greyscale, `LifeTime * 0.1` clamped,
-  // ZzzEffectJoint.cpp:3773). A tinted subtract leaves a saturated residue at a low luminance, and
-  // the tone curve maps luminance with the chroma carried through unchanged, so that residue comes
-  // back out as a bright coloured smudge instead of a shadow. The violet is additive instead: the
-  // same skull drawn over its own cut-out, plus the mote trail and the ground wash in
-  // lighting/skills. A shadow alone cannot carry this skill on a tone-mapped frame - the ground
-  // sits near the top of the curve there, where even a deep subtraction moves only a little.
+  // Drawn as the original means it, and more of it: sixteen flights in four waves instead of four,
+  // each ghost one black card riding its head (`sprite` blend `subtract`, the ghost sheets, cover
+  // above 1) in place of the per-tick grey stamps, with the dark ribbon behind it. Nothing bright:
+  // the spirits are shadow, and the glow on the caster in the reference footage is the character.
   9: {
     area: atCaster((at, c) => {
       const seconds = ticks(49);
+      const fadeTail = 10 / 49;
       const steer: JointOptions['steer'] = {
         seek: followEntity(c.caster, 0.8),
-        seekRate: (10 * Math.PI) / 180,
-        wander: { pitch: (3.2 * Math.PI) / 180, yaw: (12.8 * Math.PI) / 180 },
+        seekRate: SPIRIT_TURN,
+        wander: { pitch: (3 * Math.PI) / 180, yaw: (8 * Math.PI) / 180 },
         band: { floor: 1, ceiling: 4 },
       };
-      const fadeTail = 10 / 49;
-      const echoes = SPIRIT_ECHOES;
-      for (let i = 0; i < 4; i++) {
-        const heading = facing(c, (i * Math.PI) / 2);
-        const trail = echoes.map(() => at.clone());
-        effects.spawn('joint', c.scene, at, {
-          velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.95, colour: RGBS.white, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail, taper: true,
-          trace: h => {
-            for (let k = trail.length - 1; k > 0; k--) trail[k].copyFrom(trail[k - 1]);
-            trail[0].copyFrom(h);
-          },
-        });
-        effects.spawn('joint', c.scene, at, { velocity: perTick(70), heading, seconds, maxTails: 6, width: 0.2, colour: RGBS.white, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail, taper: true });
-        // Each spirit carries its own violet onto whatever it passes. Ultra
-        // only, and the lighting layer is the one that decides that.
-        lighting.skillTrail(c.scene, 9, out => {
-          out.x = trail[0].x;
-          out.y = trail[0].y;
-          out.z = trail[0].z;
-        });
-        // Only the newest stamp throws a shadow: the echoes stand a tick apart
-        // along the same path, so their shadows would land on top of its own.
-        echoes.forEach((k, idx) => {
-          effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: [k, k, k], blend: 'subtract', aim: true, fadeTail, shadow: idx === 0, follow: out => out.copyFrom(trail[idx]) });
-        });
-        effects.spawn('model', c.scene, at, { model: MODEL.laser, seconds, scale: 1.3, colour: SPIRIT_GLOW, alpha: 0.85, aim: true, fadeTail, follow: out => out.copyFrom(trail[0]) });
-        effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: RGBS.shade, size: 1.2, seconds, follow: out => out.copyFrom(trail[0]), fadeTail });
-        effects.spawn('particles', c.scene, at, { recipe: SHADE_MOTES, rate: 16, seconds, follow: out => out.copyFrom(trail[0]) });
+      const ghost = (i: number): void => {
+        const wave = Math.floor(i / SPIRIT_WAVE);
+        const heading = facing(c, ((i % SPIRIT_WAVE) * Math.PI * 2) / SPIRIT_WAVE + (wave * Math.PI) / (2 * SPIRIT_WAVE));
+        const head = at.clone();
+        const follow: PointSource = out => out.copyFrom(head);
+        const velocity = SPIRIT_SPEED * (0.85 + Math.random() * 0.3);
+        effects.spawn('joint', c.scene, at, { velocity, heading, seconds, maxTails: 6, width: 0.8, colour: RGBS.white, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail, taper: true, trace: h => head.copyFrom(h) });
+        effects.spawn('sprite', c.scene, at, { texture: i % 2 ? TEX.ghost2 : TEX.ghost, blend: 'subtract', cover: SPIRIT_COVER, size: SPIRIT_SIZE, seconds, follow, fadeTail, spin: i % 2 ? 0.5 : -0.5, growFrom: 0.5 });
+      };
+      for (let i = 0; i < SPIRIT_COUNT; i++) {
+        const wave = Math.floor(i / SPIRIT_WAVE);
+        if (wave === 0) ghost(i);
+        else delay(wave * SPIRIT_WAVE_GAP, () => ghost(i));
       }
+      // The darkness they bring: the view goes dark around the caster while they fly.
+      effects.spawn('shroud', c.scene, at, { seconds, fadeTail, follow: followEntity(c.caster, 0.9) });
       particles({ recipe: SHADE_MOTES, count: 24 })(at, c);
       siphonFrom(seconds)(at, c);
     }, 1),
