@@ -91,8 +91,9 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   3: { impact: arc(6, 0.4, { gain: 1.4 }) },
   // Fire Ball: BITMAP_FIRE+1 range 2 in flight (:8092).
   4: { travel: { ...ember(2, 3), speed: BOLT_SPEED }, impact: flame(2, 0.45) },
-  // Flame: BITMAP_FLAME range 3 while the column burns (:8649).
-  5: { area: flame(3, 1.5, { release: 0.5 }) },
+  // Flame: BITMAP_FLAME range 3 while the column burns (:8649). Wider and redder here: the
+  // pillars stand on molten rock and the ground around them pools red in the renewed look.
+  5: { area: { ...flame(3.5, 1.9, { gain: 1.5, floorGain: 1.3, release: 0.6 }), color: [1, 0.42, 0.14] } },
   // Ice: MODEL_ICE range 2 (:12182).
   7: { travel: { ...frost(2, 3), speed: BOLT_SPEED }, impact: frost(2, 0.5) },
   // Twister: MODEL_STORM range 5 (:10480).
