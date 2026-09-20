@@ -2,6 +2,12 @@ import { PlayerObject } from './playerObject';
 import type { ModelObject } from './modelObject';
 import type { ItemVisualTier } from './itemVisualTier';
 import { skeletonShatter } from './deathVisuals';
+import { isKnownObjectType, resolveModelFactory } from './modelFactoryPerId';
+import { MonsterActionType, PlayerAction } from './objects/enum';
+import {
+  isPlayerAttackAction,
+  isPlayerSkillAction,
+} from './playerActionMapper';
 import { TRANSFORMED_NPC_TABLE } from './npcs/playerNpcTables';
 
 /**
@@ -95,13 +101,8 @@ export function transformedBodyFactory(
 }
 
 /**
- * The transformation skins a *character* can wear, as part file and scale.
- *
- * Every one of them is a `MODEL_PLAYER` with a subtype in the original, so
- * the body swap above is all it takes. The rest of what a transformation
- * ring can turn someone into - Budge Dragon, Giant, Poison Bull Fighter,
- * Thunder Lich, Death Cow, Snowman - are whole monster models with their own
- * rigs and clips, and a player cannot be posed on one.
+ * The transformation skins that are a body part: a `MODEL_PLAYER` with a
+ * subtype in the original, so the swap above is all any of them takes.
  *
  * `TRANSFORMED_NPC_TABLE` is the same set as seen from the NPC side; the
  * Skeleton Warrior is listed here as well because as a monster it is drawn
@@ -116,11 +117,66 @@ export const CHARACTER_SKIN_PARTS: Readonly<
   14: ['Skill/', 'Skeleton01.glb', 0.95],
 };
 
-export function characterSkinBody(
-  skin: number
-): { factory: typeof PlayerObject; scale: number } | null {
-  const entry = CHARACTER_SKIN_PARTS[skin];
-  if (!entry) return null;
+/**
+ * `o->Scale` the transform packet overrides whatever the monster's own table
+ * says: a Giant worn by a character is drawn at half the size of the Giant
+ * that walks Tarkan (`ReceiveCreateTransformViewport`, WSclient.cpp:2768).
+ */
+const SKIN_SCALE: Readonly<Record<number, number>> = { 7: 0.8 };
 
-  return { factory: transformedBodyFactory(entry[0], entry[1]), scale: entry[2] };
+export type SkinBody = {
+  /**
+   * A part file worn on the character's own rig, or a whole monster with a
+   * rig of its own. The second kind has none of a character's clips, so
+   * whoever wears one has its actions translated (`monsterClipFor`).
+   */
+  kind: 'part' | 'monster';
+  factory: typeof ModelObject;
+  scale: number;
+};
+
+/**
+ * The body a transformation skin is drawn as. Half of them are part files
+ * (`CHARACTER_SKIN_PARTS`); the rest - Budge Dragon, Giant, Poison Bull
+ * Fighter, Thunder Lich, Death Cow, Snowman - are the monster's own model,
+ * which is how the original draws them too: `ReceiveCreateTransformViewport`
+ * builds the transformed character with `CreateMonster` and lets it play the
+ * monster's clips (WSclient.cpp:2760-2800).
+ */
+export function characterSkinBody(skin: number): SkinBody | null {
+  const entry = CHARACTER_SKIN_PARTS[skin];
+  if (entry) {
+    return {
+      kind: 'part',
+      factory: transformedBodyFactory(entry[0], entry[1]),
+      scale: entry[2],
+    };
+  }
+
+  if (!isKnownObjectType(skin)) return null;
+
+  const factory = resolveModelFactory(skin);
+  const own = factory.OverrideScale >= 0 ? factory.OverrideScale : 1;
+
+  return { kind: 'monster', factory, scale: SKIN_SCALE[skin] ?? own };
+}
+
+/**
+ * The monster clip that stands in for a character's action while it wears a
+ * monster's body. The original has no mapping to make - a transformed
+ * character *is* a monster object over there, and `MoveCharacter` puts it in
+ * MONSTER01_STOP1 / _WALK, its attacks in MONSTER01_ATTACK1 and its death in
+ * MONSTER01_DIE like any other. This is those same five states, read off the
+ * character's own action.
+ */
+export function monsterClipFor(
+  action: PlayerAction,
+  moving: boolean
+): MonsterActionType {
+  if (action === PlayerAction.PLAYER_DIE1) return MonsterActionType.Die;
+  if (action === PlayerAction.PLAYER_SHOCK) return MonsterActionType.Shock;
+  if (isPlayerAttackAction(action) || isPlayerSkillAction(action)) {
+    return MonsterActionType.Attack1;
+  }
+  return moving ? MonsterActionType.Walk : MonsterActionType.Stop1;
 }

@@ -1,7 +1,7 @@
 import { ItemsDatabase } from '../../common/itemsDatabase';
 import { itemVisualTier } from '../../common/itemVisualTier';
 import type { ModelObject } from '../../common/modelObject';
-import type { PlayerObject } from '../../common/playerObject';
+import { isPlayerBody, type PlayerObject } from '../../common/playerObject';
 import { applyWeaponAttachments } from '../../common/weaponAttachment';
 import { isBook, swordformGlovesModel } from '../../common/weaponClass';
 import type { ISystemFactory, Item } from '../world';
@@ -50,6 +50,9 @@ export const AppearanceSystem: ISystemFactory = world => {
         if (visibility.state === 'hidden') continue;
         if (!charAppearance.changed) continue;
         if (!modelObject.Ready) continue;
+        // A character wearing a whole monster has no equipment sockets to
+        // dress: the skin is the body (`common/transformedBody.ts`).
+        if (!isPlayerBody(modelObject)) continue;
 
         const playerObject = modelObject as PlayerObject;
 

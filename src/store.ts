@@ -1,5 +1,6 @@
 import { t } from './i18n';
 import { characterSkinBody } from './common/transformedBody';
+import type { PlayerObject } from './common/playerObject';
 import { playUiSound } from './libs/sfx';
 import {
   CharacterClassNumber,
@@ -1206,7 +1207,7 @@ export const Store = new (class _Store {
     const body = skin ? characterSkinBody(skin) : null;
     if (body) {
       this.world.addComponent(testPlayer, 'skin', skin);
-      testPlayer.modelFactory = body.factory;
+      testPlayer.modelFactory = body.factory as typeof PlayerObject;
       testPlayer.transform.scale = body.scale;
     }
 
