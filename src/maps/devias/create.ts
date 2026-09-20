@@ -1,3 +1,7 @@
+import { assetWorldNum } from '../../common/worldAssets';
+import { prefetchSignPlates } from '../../common/signPlates';
+import { SignObject } from '../../common/signObject';
+import { signTypes } from '../../common/signLabels';
 import type { World } from '../../ecs/world';
 import { mapMusic, sound } from '../../sound';
 import { setAreaMood } from '../../scenes/sceneLook';
@@ -42,6 +46,11 @@ export async function createDevias(world: World) {
   // Devias 91: CreateOperate + HiddenMesh = -2 + the fixed (40,40,160) box
   // (ZzzObject.cpp:4652-4655) - the shared operate-box recipe, on Object92.
   tiles[91] = LeanBoxObject;
+
+  // The notice boards. Which placement says what — a neighbouring map, the
+  // map itself, or the building it hangs on — is common/signLabels.ts.
+  prefetchSignPlates(`Object${assetWorldNum(map)}/`);
+  for (const type of signTypes(map)) tiles[type] = SignObject;
 
   const tavern: RoomHooks = {
     look: 'deviasTavern',

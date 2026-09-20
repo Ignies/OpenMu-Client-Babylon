@@ -1,3 +1,7 @@
+import { assetWorldNum } from '../../common/worldAssets';
+import { prefetchSignPlates } from '../../common/signPlates';
+import { SignObject } from '../../common/signObject';
+import { signTypes } from '../../common/signLabels';
 import type { World } from '../../ecs/world';
 import { StadiumBrazierObject } from './brazierObject';
 
@@ -39,4 +43,8 @@ export async function createStadium(world: World) {
   // Type 9 (n=32): the brazier, the world's only `RenderObjectVisual` case
   // (ZzzObject.cpp:2945-2953).
   tiles[9] = StadiumBrazierObject;
+
+  // The notice boards. What each one says is common/signLabels.ts.
+  prefetchSignPlates(`Object${assetWorldNum(world.mapIndex)}/`);
+  for (const type of signTypes(world.mapIndex)) tiles[type] = SignObject;
 }

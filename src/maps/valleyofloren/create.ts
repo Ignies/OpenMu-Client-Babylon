@@ -1,3 +1,7 @@
+import { assetWorldNum } from '../../common/worldAssets';
+import { prefetchSignPlates } from '../../common/signPlates';
+import { SignObject } from '../../common/signObject';
+import { signTypes } from '../../common/signLabels';
 import { OperateBoxObject } from '../../common/operateBoxObject';
 import type { World } from '../../ecs/world';
 
@@ -33,4 +37,8 @@ export async function createValleyOfLoren(world: World) {
   // GMBattleCastle.cpp:1038-1040 - `CreateOperate(o)` with the default box.
   tiles[77] = OperateBoxObject;
   tiles[84] = OperateBoxObject;
+
+  // The notice boards. What each one says is common/signLabels.ts.
+  prefetchSignPlates(`Object${assetWorldNum(world.mapIndex)}/`);
+  for (const type of signTypes(world.mapIndex)) tiles[type] = SignObject;
 }
