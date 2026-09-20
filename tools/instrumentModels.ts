@@ -1071,9 +1071,10 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
     const x = 8 + t * (HARP_DEPTH - 14);
     const zTop = neckUnderside(((x + 8) / (HARP_DEPTH + 9)) * (h.neck.width - 1)) - 0.5;
     // Where the soundbox's upper edge passes under x: along the slant, out
-    // by half its depth there (the taper, base to top).
+    // by half the photo's width there.
     const along = (x - foot[0]) / slant[0];
-    const half = (HARP_BOX_DEPTH / 2) * (1 - (0.7 * along) / slantLen);
+    const column = boxColumns[Math.max(0, Math.min(boxColumns.length - 1, Math.round((along / boxP.cm / (soundbox.width - 1)) * (boxColumns.length - 1))))];
+    const half = ((column.hi - column.lo) / 2) * (boxP.cmAcross ?? boxP.cm);
     const zBottom = foot[2] + slant[2] * along + normal[2] * half;
     if (zTop <= zBottom + 2) continue;
     box(m, [x - 0.1, -0.1, zBottom], [x + 0.1, 0.1, zTop], string);
@@ -1274,8 +1275,8 @@ async function buildFromSheets(want: (id: string) => boolean): Promise<void> {
         // The neck hangs the strings, so they are shaved off before the fill
         // and the pillar it meets is clipped away.
         neck: s.part('neck', [260, 50], { clip: [118, 8, 505, 190], erode: 2 }),
-        // The carved board only: the shaft under it on the sheet is another piece.
-        soundbox: s.part('soundbox', [460, 400], { clip: [405, 270, 510, 512] }),
+        // The carved board and the shaft under it, one piece on the sheet.
+        soundbox: s.part('soundbox', [460, 600]),
         base: s.part('base', [160, 975]),
       },
       atlas
