@@ -42,8 +42,6 @@ import {
 } from './monsters/skeletonWarrior';
 import { Spider } from './monsters/spider';
 import { Baz } from './npcs/baz';
-import { BerdyshGuard } from './npcs/berdyshGuard';
-import { CrossbowGuard } from './npcs/crossbowGuard';
 import { ElfSoldier } from './npcs/elfSoldier';
 import { Girl } from './npcs/girl';
 import { GoldenArcher } from './npcs/goldenArcher';
@@ -75,9 +73,9 @@ export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   [232]: Archangel,
   [233]: ArchangelMessenger,
   [240]: Baz,
-  [247]: CrossbowGuard,
+  // 229 Marlon and the two town guards (247, 249) render through
+  // GEARED_NPC_TABLE (playerNpcTables.ts): plate set plus a weapon.
   [248]: Martin,
-  [249]: BerdyshGuard,
   [250]: Harold,
   [251]: Hanzo,
   [253]: Girl,
@@ -138,7 +136,6 @@ export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   [459]: Selupan,
 
   [34]: PlateNpc,
-  [229]: PlateNpc,
 
   // The Crywolf altars are spawned but never drawn outside the event.
   [205]: HiddenNpc,
