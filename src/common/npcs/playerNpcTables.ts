@@ -3,6 +3,7 @@ import {
   GROUP_BOW,
   GROUP_MACE,
   GROUP_SHIELD,
+  GROUP_SPEAR,
   GROUP_STAFF,
   GROUP_SWORD,
 } from '../weaponClass';
@@ -11,6 +12,9 @@ import type { NpcGear } from './gearedNpc';
 
 /** `c->Helper` / `c->Weapon[]` kits, by items.json (group, index). */
 const ARROWS: Item = { group: GROUP_BOW, num: 15 };
+const BERDYSH: Item = { group: GROUP_SPEAR, num: 7 };
+/** Marlon's is a +8 (`c->Weapon[0].Level = 8`). */
+const BERDYSH_8: Item = { group: GROUP_SPEAR, num: 7, lvl: 8 };
 const BOLT: Item = { group: GROUP_BOW, num: 7 };
 const CELESTIAL_BOW: Item = { group: GROUP_BOW, num: 17 };
 const DARK_HORSE: Item = { group: 13, num: 4 };
@@ -39,9 +43,32 @@ const VENOM_MIST = 30;
 /**
  * NPCs the original builds as `MODEL_PLAYER` plus a fixed `c->BodyPart[]` /
  * `c->Weapon[]` kit. Sources: GMHuntingGround.cpp:279-298 (297),
- * ZzzCharacter.cpp:14478-14495 (464) and GMDoppelGanger1.cpp:91-163 (534-539).
+ * ZzzCharacter.cpp:14315-14333 (229), :14464-14494 (247, 249),
+ * :14478-14495 (464) and GMDoppelGanger1.cpp:91-163 (534-539).
  */
 export const GEARED_NPC_TABLE: Readonly<Record<number, NpcGear>> = {
+  // Marlon, the town scout: the plate set at +7 and a +8 Berdysh.
+  229: {
+    charClass: CharacterClassNumber.DarkKnight,
+    playerClass: PlayerClass.DarkKnight,
+    set: PLATE,
+    level: 7,
+    mainHand: BERDYSH_8,
+  },
+  // The two town guards. Same plate set, told apart by what they carry.
+  247: {
+    charClass: CharacterClassNumber.DarkKnight,
+    playerClass: PlayerClass.DarkKnight,
+    set: PLATE,
+    mainHand: LIGHT_CROSSBOW,
+    offHand: BOLT,
+  },
+  249: {
+    charClass: CharacterClassNumber.DarkKnight,
+    playerClass: PlayerClass.DarkKnight,
+    set: PLATE,
+    mainHand: BERDYSH,
+  },
   // PK Dark Knight. `Skin = 1` and `PK = PVP_MURDERER2` (the red name) are
   // not modelled - neither changes the mesh.
   297: {
