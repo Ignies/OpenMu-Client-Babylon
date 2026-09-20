@@ -25,11 +25,6 @@ import {
 import type { EventLayer } from './layer';
 import { EVENT_TEXT, formatText } from './recipes';
 
-export {
-  KanturuStateInfoStateTypeEnum as KanturuState,
-  KanturuMayaWideAreaAttackAttackTypeEnum as KanturuMayaAttack,
-} from '../common/packets/ServerToClientPackets';
-
 /**
  * Kanturu Refinery Tower: the Gateway Machine's entry dialog
  * (`CNewUIKanturu2ndEnterNpc`, NewUIKanturuEvent.cpp) and the in-event HUD
