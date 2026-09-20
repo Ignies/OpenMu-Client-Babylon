@@ -24,6 +24,7 @@ import {
 } from '../../../common/gameOptions';
 import { invalidateShadowState } from '../../../common/objectShadow';
 import { toggleFullscreen } from '../../../common/browserHotkeys';
+import { PwaInstall, installApp } from '../../../common/pwaInstall';
 import { reloadMapObjects } from '../../../libs/mu/loadMapIntoScene';
 import {
   KEY_ACTIONS,
@@ -86,6 +87,7 @@ import {
   BTN_BOTH_CANCEL_X,
   BTN_BOTH_OK_X,
   BTN_HEIGHT,
+  BTN_SINGLE_X,
   BTN_WIDTH,
   BTN_Y,
   CANCEL_SPRITE,
@@ -188,6 +190,9 @@ type TexturePackRow = { id: 'texturePack' };
 /** The tier presets: one plate per tier (`presets.ts`). */
 type PresetRow = { id: 'presets'; labelKey: TextKey };
 
+/** Install the client as an app: a button that reads `PwaInstall`. */
+type InstallRow = { id: 'install' };
+
 type Row =
   | ({ kind: 'check' } & CheckRow)
   | ({ kind: 'slider' } & SliderRow)
@@ -196,6 +201,7 @@ type Row =
   | ({ kind: 'exit' } & ExitRow)
   | ({ kind: 'language' } & LanguageRow)
   | ({ kind: 'texturePack' } & TexturePackRow)
+  | ({ kind: 'install' } & InstallRow)
   | ({ kind: 'presets' } & PresetRow);
 
 type Section = {
@@ -872,6 +878,7 @@ const TABS: Tab[] = [
                   labelKey: 'options.fullscreen',
                   onClick: toggleFullscreen,
                 },
+                { kind: 'install', id: 'install' },
                 {
                   kind: 'button',
                   id: 'reset-windows',
@@ -949,6 +956,7 @@ function rowHeight(row: Row): number {
     case 'key':
       return KEY_ROW_H;
     case 'button':
+    case 'install':
     case 'exit':
       return BUTTON_ROW_H;
     case 'language':
@@ -1007,6 +1015,10 @@ export const OptionsWindow = observer(() => {
   // own confirmation - a click here is one row away from the sliders, so it
   // asks.
   const [confirming, setConfirming] = useState<ExitKind | null>(null);
+
+  // A line the window has to say back, on the message box art: one OK, no
+  // question. Raised by the install row when the browser has no offer.
+  const [notice, setNotice] = useState<TextKey | null>(null);
 
   useEffect(() => {
     setCapturingKey(capturing !== null);
@@ -1349,6 +1361,47 @@ export const OptionsWindow = observer(() => {
                     );
                   }
 
+                  if (row.kind === 'install') {
+                    const done = PwaInstall.installed;
+
+                    return (
+                      <div key={row.id}>
+                        <MuButton
+                          file="op1_b_all.OZT"
+                          width={CLOSE_WIDTH}
+                          height={CLOSE_HEIGHT}
+                          frames={{ up: 0, active: 1, down: 2 }}
+                          color={TEXT_COLOR.brightGray}
+                          activeColor={TEXT_COLOR.white}
+                          label={t(
+                            done ? 'options.appInstalled' : 'options.installApp'
+                          )}
+                          disabled={done || PwaInstall.busy}
+                          onClick={() => {
+                            setCapturing(null);
+                            void installApp().then(result => {
+                              // Nothing to spend: the browser never offered,
+                              // or took the offer back. Say where its own
+                              // install lives rather than doing nothing.
+                              if (result === 'unavailable') {
+                                setNotice('options.installHint');
+                              }
+                            });
+                          }}
+                          style={{
+                            position: 'absolute',
+                            left: x + Math.floor((COLUMN_WIDTH - CLOSE_WIDTH) / 2),
+                            top: rowY,
+                          }}
+                          labelStyle={{
+                            fontSize: 11,
+                            textShadow: '1px 1px 0 rgba(0,0,0,.85)',
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+
                   if (row.kind === 'exit') {
                     return (
                       <div key={row.exit}>
@@ -1580,6 +1633,50 @@ export const OptionsWindow = observer(() => {
           }}
         />
       )}
+
+      {notice && <OptionsNotice textKey={notice} onClose={() => setNotice(null)} />}
+    </div>
+  );
+});
+
+/** The same box with one button: something said, nothing asked. */
+const OptionsNotice = observer(function OptionsNotice({
+  textKey,
+  onClose,
+}: {
+  textKey: TextKey;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== 'Escape') return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      onClose();
+    };
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener('keydown', onKeyDown, true);
+  }, [onClose]);
+
+  return (
+    <div className="options-exit-confirm" style={{ zIndex: WINDOW_Z_MODAL }}>
+      <MuSpriteFrame
+        file={BACK_SPRITE}
+        width={MSG_WIN_WIDTH}
+        height={MSG_WIN_HEIGHT}
+      >
+        <div className="options-exit-text">{t(textKey)}</div>
+        <MuButton
+          file={OK_SPRITE}
+          width={BTN_WIDTH}
+          height={BTN_HEIGHT}
+          frames={{ up: 0, active: 1, down: 2 }}
+          color={TEXT_COLOR.brightGray}
+          activeColor={TEXT_COLOR.white}
+          onClick={onClose}
+          style={{ position: 'absolute', left: BTN_SINGLE_X, top: BTN_Y }}
+        />
+      </MuSpriteFrame>
     </div>
   );
 });
