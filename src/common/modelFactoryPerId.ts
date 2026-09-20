@@ -58,6 +58,7 @@ import { Trainer } from './npcs/trainer';
 import { Zyro } from './npcs/zyro';
 import { npcFactoryFor } from './npcs/genericNpc';
 import { gearedNpcFactory } from './npcs/gearedNpc';
+import { TRAP_MODEL_TABLE, trapFactoryFor } from './npcs/trapNpc';
 import { transformedNpcFactory } from './npcs/transformedNpc';
 import {
   GEARED_NPC_TABLE,
@@ -88,7 +89,6 @@ export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   [371]: Leo,
   [414]: PlateNpc,
   // 375 Chaos Card Master renders through GEARED_NPC_TABLE (playerNpcTables.ts).
-  [543]: ElfSoldier,
   [568]: Zyro,
 
   [1]: Hound,
@@ -144,6 +144,9 @@ export function resolveModelFactory(typeNumber: number): typeof ModelObject {
   const explicit = ModelFactoryPerId[typeNumber];
   if (explicit) return explicit;
 
+  // Before the monster table: a trap's model is the map's, not its own.
+  if (TRAP_MODEL_TABLE[typeNumber]) return trapFactoryFor(typeNumber);
+
   const monster = MONSTER_MODEL_TABLE[typeNumber];
   if (monster) {
     return monsterFactoryFor(
@@ -168,6 +171,7 @@ export function resolveModelFactory(typeNumber: number): typeof ModelObject {
 export function isKnownObjectType(typeNumber: number): boolean {
   return (
     ModelFactoryPerId[typeNumber] !== undefined ||
+    TRAP_MODEL_TABLE[typeNumber] !== undefined ||
     MONSTER_MODEL_TABLE[typeNumber] !== undefined ||
     NPC_MODEL_TABLE[typeNumber] !== undefined ||
     GEARED_NPC_TABLE[typeNumber] !== undefined ||
