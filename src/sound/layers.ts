@@ -8,6 +8,7 @@ import { footstepsLayer } from './footsteps';
 import { uiLayer } from './ui';
 import { combatLayer } from './combat';
 import { monstersLayer } from './monsters';
+import { npcVoicesLayer } from './npcVoices';
 import { dropsLayer } from './drops';
 import { instrumentsLayer } from './instruments';
 
@@ -23,6 +24,7 @@ export const SOUND_LAYERS: readonly SoundLayer[] = [
   ambientBedsLayer, // reads the listener tile and weather
   crackleLayer, // reads the listener hero and the lighting layer's flames
   objectLoopsLayer, // reads the listener hero / world and the map-object entities
+  npcVoicesLayer, // reads the listener world and the NPC entities' clips
   musicLayer, // reads the listener world (terrain ready)
   footstepsLayer, // reads the listener hero's clip
   uiLayer, // command-only
