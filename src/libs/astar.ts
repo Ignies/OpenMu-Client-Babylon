@@ -9,9 +9,11 @@
 // `PathFinding2`):
 //  - the default heuristic is octile (admissible for diagonal moves at
 //    √2; manhattan over-estimated and made the hero zig-zag),
-//  - a diagonal step is only offered when both tiles it cuts past are
-//    walkable, so a path never squeezes between two blocked corners (the
-//    server refuses that step and rubber-bands the walker),
+//  - a diagonal step is offered whenever its destination tile is walkable,
+//    even when both tiles it cuts past are blocked: several maps cross a
+//    chasm through exactly one such pinch (the Elbeland rope bridges, for
+//    one), and the original expands all eight directions on the
+//    destination attribute alone, as does the server walk check,
 //  - the search stops after `maxExpansions` closed nodes and returns the
 //    path to the closest node seen so far, so a click into a walled-off
 //    region costs a bounded amount and still walks the hero toward it.
@@ -229,10 +231,11 @@ class Graph {
   }
 
   /**
-   * The walkable-or-not tiles around `node`. Diagonals are offered only when
-   * neither tile they cut between is a wall (`PathFinding2`'s rule; the
-   * server walks the same way). The returned array is scratch, valid until
-   * the next call.
+   * The walkable-or-not tiles around `node`. A diagonal is offered on its own
+   * tile alone, exactly as `PATH::FindPath` expands its eight directions: the
+   * squeeze between two blocked corners is how several maps cross a chasm, and
+   * the server only checks the tile each step lands on. The returned array is
+   * scratch, valid until the next call.
    */
   neighbors(node: GridNode) {
     const ret = this.neighborScratch;
@@ -256,19 +259,14 @@ class Graph {
     if (north) ret.push(north);
 
     if (this.diagonal) {
-      const openW = !!west && !west.isWall();
-      const openE = !!east && !east.isWall();
-      const openS = !!south && !south.isWall();
-      const openN = !!north && !north.isWall();
-
       // Southwest
-      if (openW && openS && colW[y - 1]) ret.push(colW[y - 1]);
+      if (colW && colW[y - 1]) ret.push(colW[y - 1]);
       // Southeast
-      if (openE && openS && colE[y - 1]) ret.push(colE[y - 1]);
+      if (colE && colE[y - 1]) ret.push(colE[y - 1]);
       // Northwest
-      if (openW && openN && colW[y + 1]) ret.push(colW[y + 1]);
+      if (colW && colW[y + 1]) ret.push(colW[y + 1]);
       // Northeast
-      if (openE && openN && colE[y + 1]) ret.push(colE[y + 1]);
+      if (colE && colE[y + 1]) ret.push(colE[y + 1]);
     }
 
     return ret;
