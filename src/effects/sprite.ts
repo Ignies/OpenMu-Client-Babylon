@@ -7,11 +7,14 @@
  * Driven by: `effects.spawn('sprite', …)` from the skill table and anything
  * that wants a flash. Read by: nobody; it is fire-and-forget.
  */
-import { Vector3, type Scene } from '../libs/babylon/exports';
+import { Constants, Material, StandardMaterial, Vector3, type Scene } from '../libs/babylon/exports';
 import {
   LiveList,
   acquireCard,
   additiveMaterial,
+  darkCardGain,
+  effectTexture,
+  luma,
   releaseCard,
   setCardCell,
   fadeOut,
@@ -19,6 +22,7 @@ import {
   lerp,
   pointSource,
   type Card,
+  type EffectBlend,
   type PointSource,
   type RGB,
   type SheetCells,
@@ -76,6 +80,18 @@ export interface SpriteOptions {
    * sheet with white filler cells.
    */
   cells?: SheetCells;
+  /**
+   * `add` (default) is `EnableAlphaBlend`: the sheet × `colour` added to the frame. `subtract`
+   * is `RENDER_DARK`: a black card with the sheet as its coverage, drawn
+   * `(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)` for the reason model.ts `subtractMaterial` gives - a
+   * subtraction caps at the sheet's own levels, coverage can saturate. Evil Spirit's ghosts.
+   */
+  blend?: EffectBlend;
+  /**
+   * Dark cards: the multiplier on the sheet's luminance that is the coverage. Default
+   * `luma(colour) × darkCardGain`; above 1 the body goes fully black and only the edges stay soft.
+   */
+  cover?: number;
 }
 
 const live = new LiveList();
@@ -88,6 +104,37 @@ export function spriteCount(): number {
 const tmp = new Vector3();
 let seed = 0;
 
+/**
+ * A `RENDER_DARK` card's material, owned by the spawn: black, alpha-blended, the sheet's
+ * luminance × `cover` as its alpha. `visibility` multiplies into the fragment alpha, so the
+ * card fades like a bright one, and a cover above 1 saturates the body to black where the
+ * original's subtract could only reach the sheet's own grey.
+ */
+function darkMaterial(scene: Scene, texture: string, cover: number): StandardMaterial {
+  const mat = new StandardMaterial('fxCardDark', scene);
+  mat.diffuseColor.set(0, 0, 0);
+  mat.specularColor.set(0, 0, 0);
+  mat.ambientColor.set(0, 0, 0);
+  mat.emissiveColor.set(0, 0, 0);
+  mat.disableLighting = true;
+  mat.alphaMode = Constants.ALPHA_COMBINE;
+  mat.transparencyMode = Material.MATERIAL_ALPHABLEND;
+  mat.backFaceCulling = false;
+  mat.disableDepthWrite = true;
+  mat.fogEnabled = false;
+  mat.alpha = cover;
+  let dead = false;
+  mat.onDisposeObservable.addOnce(() => {
+    dead = true;
+  });
+  void effectTexture(scene, texture).then(tex => {
+    if (dead) return;
+    tex.getAlphaFromRGB = true;
+    mat.opacityTexture = tex;
+  });
+  return mat;
+}
+
 /** Spawn helper other entries call directly (the game master aura). */
 export function spawnSprite(
   scene: Scene,
@@ -95,7 +142,10 @@ export function spawnSprite(
   opts: SpriteOptions
 ): EffectHandle {
   const colour = opts.colour ?? RGBS.white;
-  const material = additiveMaterial(scene, opts.texture, colour);
+  const dark = opts.blend === 'subtract';
+  const material = dark
+    ? darkMaterial(scene, opts.texture, opts.cover ?? luma(colour) * darkCardGain(scene))
+    : additiveMaterial(scene, opts.texture, colour);
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
   const size = opts.size ?? DEFAULT_SIZE;
   const count = Math.max(1, opts.count ?? 1);
@@ -145,7 +195,7 @@ export function spawnSprite(
         }
       }
       // Until the sheet is in, the card would be a solid square of the tint: hold it invisible.
-      const ready = material.diffuseTexture ? 1 : 0;
+      const ready = (dark ? material.opacityTexture : material.diffuseTexture) ? 1 : 0;
       source(tmp);
       const grown = p < GROW_FRACTION ? lerp(growFrom, 1, p / GROW_FRACTION) : lerp(1, grow, (p - GROW_FRACTION) / (1 - GROW_FRACTION));
       const s = size * grown;
@@ -169,6 +219,8 @@ export function spawnSprite(
     release() {
       for (const c of cards) releaseCard(scene, c);
       cards.length = 0;
+      // The dark material is this spawn's own; the additive one is core.ts's cache.
+      if (dark) material.dispose(false, false);
     },
   });
 }

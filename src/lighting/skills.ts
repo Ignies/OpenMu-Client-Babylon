@@ -98,8 +98,9 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   7: { travel: { ...frost(2, 3), speed: BOLT_SPEED }, impact: frost(2, 0.5) },
   // Twister: MODEL_STORM range 5 (:10480).
   8: { area: { color: [0.75, 0.8, 0.9], range: 5, seconds: 1.4 } },
-  // Evil Spirit: the original lights nothing here; a violet wash is ours.
-  9: { area: shade(3, 1.2), trail: { ...shade(2.4, 49 / 25), gain: 1.3, floorGain: 1.2, release: 0.4 } },
+  // Evil Spirit: nothing, as the original - the spirits are shadow. The empty row also keeps the
+  // wizardry cast flash off (castRecipeFor).
+  9: {},
   // Hellfire: BITMAP_FLAME range 3, as Flame, brighter.
   10: { area: flame(4, 1.5, { gain: 1.4, floorGain: 1.3 }) },
   // Power Wave: MODEL_WAVE range 5 (:9610).

@@ -5,6 +5,7 @@ import { debrisLayer } from './debris';
 import { feathersLayer } from './feathers';
 import { modelLayer } from './model';
 import { columnLayer } from './column';
+import { shroudLayer } from './shroud';
 import { pillarLayer } from './pillar';
 import { jointLayer } from './joint';
 import { blurLayer } from './blur';
@@ -35,6 +36,7 @@ export const EFFECT_LAYERS = [
   spriteLayer,
   particlesLayer,
   columnLayer,
+  shroudLayer, // one card over the view; the spawner's other effects draw over it
   pillarLayer, // its own meshes and the shared pools
   auraLayer, // drives the heads of the orbit ribbons it spawned through joint, so before it
   jointLayer, // reads aura's ribbon heads
