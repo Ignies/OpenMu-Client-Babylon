@@ -348,6 +348,22 @@ export type BodyShine = {
   /** Tint of the passes; black = no shine. */
   tint: Vector3;
   star: boolean;
+  /**
+   * Chrome01 on its own, without the Shiny01 pass beside it: a Fenrir's
+   * `RenderMesh(n, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME)`
+   * (ZzzObject.cpp:807-830), where RENDER_CHROME replaces the mesh texture
+   * rather than adding a second metal sheet (ZzzBMD.cpp:1390-1410).
+   */
+  chromeOnly?: boolean;
+  /**
+   * The improved look's sheen for this mesh, in place of the sphere-mapped
+   * pass above: the same in-surface formula every item's improved glow uses
+   * (itemMaterial.ts `itemGlow`), in a tint the body chooses. Black = none.
+   *
+   * A body that fills both this and `tint` is asking for "Both"; which of
+   * the two is live is the writer's business, not the material's.
+   */
+  improved?: Vector3;
 };
 
 function disposeGltf(gltf: {
@@ -588,6 +604,20 @@ export class ModelObject {
    * change it after the model is loaded.
    */
   readonly BodyShine: BodyShine = { tint: new Vector3(0, 0, 0), star: false };
+
+  /**
+   * The one mesh `BodyShine` is drawn over, when the original redraws a
+   * single mesh rather than the whole body. -1 = the whole body.
+   */
+  ShineMesh = -1;
+
+  /**
+   * Keeps `Light` at whatever the model set, instead of the terrain light
+   * under it (renderSystem). The original's Fenrir branch opens with
+   * `b->BodyLight = 1,1,1` and never reads `o->Light`, so the wolf is the
+   * same brightness at noon, at night and in a cave (ZzzObject.cpp:797).
+   */
+  FixedLight = false;
 
   CastsShadow = true;
 
@@ -1054,6 +1084,8 @@ export class ModelObject {
     const bodyLight = this.rootObject.Light;
     // Parts shine with the body they hang on, the same way they light with it.
     const bodyShine = this.rootObject.BodyShine;
+    // When only one mesh is redrawn, the rest carry no shine at all.
+    const shineMesh = this.ShineMesh >= 0 ? this.getMesh(this.ShineMesh) : null;
 
     this._frustumMeshes = gltf.mesh.getChildMeshes(false);
     this._outOfViewFrames = 0;
@@ -1066,7 +1098,8 @@ export class ModelObject {
         this.SkipBoundingBox || mesh.metadata.hiddenByScript === true;
 
       mesh.metadata.bodyLight = bodyLight;
-      mesh.metadata.bodyShine = bodyShine;
+      mesh.metadata.bodyShine =
+        this.ShineMesh >= 0 && mesh !== shineMesh ? undefined : bodyShine;
       mesh.metadata.snowCap = this.SnowCap;
 
       // Only the map receives the cascades. The original lights a character,

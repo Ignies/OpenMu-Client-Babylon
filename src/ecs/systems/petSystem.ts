@@ -2,10 +2,14 @@ import { Vector3 } from '../../libs/babylon/exports';
 import {
   DARK_HORSE,
   DARK_RAVEN,
+  FENRIR_ACTION_RUN,
+  FENRIR_ACTION_SKILL,
+  FENRIR_ACTION_WALK,
   MOUNT_ACTION_MOVE,
   MOUNT_ACTION_STAND,
   PET_GROUP,
   fenrirMountAction,
+  fenrirShine,
   petFactoryFor,
   petSpec,
   type PetSpec,
@@ -13,8 +17,15 @@ import {
 import { createAngleDeg, turnAngle } from '../../common/turnAngle';
 import { inChaosCastle } from '../../common/locomotion';
 import { effects } from '../../effects';
-import { boneLocalPos, bonePos } from '../../effects/core';
-import { MODEL, TEX } from '../../effects/recipes';
+import {
+  boneLocalPos,
+  bonePos,
+  delay,
+  entityPos,
+  fxNow,
+  inWindow,
+} from '../../effects/core';
+import { FOOT_THUNDER_FRAMES, MODEL, TEX } from '../../effects/recipes';
 import type { Entity, ISystemFactory, Item } from '../world';
 
 /**
@@ -91,14 +102,16 @@ const RAVEN_PERCH_YAW = -120 * (Math.PI / 180);
 
 /**
  * Fenrir glow cadence. The original re-creates its sprites and lightning
- * every render frame (ZzzObject.cpp:855-895); stepping at 12.5 Hz with
- * lifetimes that bridge the gap draws the same picture for a fraction of the
- * spawns.
+ * every render frame and spawns two bolts each time (ZzzObject.cpp:855-899);
+ * at 25 Hz that is ~8 bolts alive at once. Stepping at 14 Hz with two bolts
+ * a step keeps the crackle continuous at a third of the spawns.
  */
-const FENRIR_GLOW_TICK = 0.08;
+const FENRIR_GLOW_TICK = 0.07;
+const FENRIR_BOLTS_PER_TICK = 2;
 /** Eye and jaw anchors: `TransformPosition(BoneTransform[11 / 13], …)`. */
 const FENRIR_HEAD_BONE = 11;
 const FENRIR_JAW_BONE = 13;
+const FENRIR_SKILL_BONE = 14;
 const FENRIR_EYE_LOCALS = [
   new Vector3(0.5, 0.02, 0.11),
   new Vector3(0.5, 0.02, -0.11),
@@ -106,8 +119,50 @@ const FENRIR_EYE_LOCALS = [
 const FENRIR_JAW_LOCAL = new Vector3(0.4, 0.15, 0);
 const FENRIR_EYE_RGB = [0.9, 0.2, 0.1] as const;
 const FENRIR_JAW_RGB = [1.0, 0.3, 0.2] as const;
-/** Bones the body lightning rolls over (ZzzEffect.cpp:4380-4410). */
-const FENRIR_THUNDER_BONES = [2, 10, 14, 50, 51, 53];
+/** `CreateSprite(…, 1.5f)` then `1.0f` on the same point. */
+const FENRIR_JAW_SIZES = [1.05, 0.7] as const;
+
+/**
+ * Where one body bolt lands, as `rand() % 30` rolls it (ZzzEffect.cpp:4264-4306).
+ * Seven rolls in thirty pin it to a bone, two kill it outright, and the
+ * remaining twenty leave it at the wolf's own position - scattered wide in x
+ * and lifted 110 units - which is what makes the arcs read as a cloud around
+ * the body rather than a string of beads on the skeleton.
+ */
+const DEAD_ROLL = -1;
+const FENRIR_BOLT_BONES: readonly (number | null)[] = [
+  null,
+  10,
+  10,
+  14,
+  2,
+  2,
+  50,
+  51,
+  53,
+  DEAD_ROLL,
+  DEAD_ROLL,
+];
+/** The four paws `TransformPosition` anchors the footprints to. */
+const FENRIR_PAW_BONES = [22, 28, 36, 44] as const;
+const FENRIR_FRONT_PAWS = [22, 28] as const;
+const FENRIR_BACK_PAWS = [36, 44] as const;
+/** `RenderTerrainAlphaBitmap(…, 0.6f, 0.6f, …)`: the splash is 0.6 tiles across. */
+const FOOT_THUNDER_TILES = 0.6;
+/** `m_iAnimation++` every 200 ms while `Alpha` falls 0.05 a tick. */
+const FOOT_THUNDER_FRAME_SECONDS = 0.2;
+const FOOT_THUNDER_FRAMES_SHOWN = 4;
+/**
+ * Which channels `Move_MODEL_FENRIR_FOOT_THUNDER` drains, per variant
+ * subtype (MoveHandlers.cpp:6786-6805). The splash is born white and loses
+ * these at 0.05 a tick, so it burns down into the wolf's own colour.
+ */
+const FOOT_THUNDER_DRAIN: Readonly<Record<number, readonly [number, number, number]>> = {
+  1: [0, 1, 1],
+  2: [1, 1, 0],
+  3: [1, 0, 1],
+  4: [0, 0, 1],
+};
 
 const DEG = Math.PI / 180;
 
@@ -212,6 +267,8 @@ export const PetSystem: ISystemFactory = world => {
         standAction: spec.standAction ?? MOUNT_ACTION_STAND,
         moveAction: spec.moveAction ?? MOUNT_ACTION_MOVE,
         fenrirThunder: spec.thunder,
+        fenrirFoot: spec.footSubType,
+        fenrirSpec: spec.shineMesh === undefined ? undefined : spec,
       },
     });
 
@@ -367,14 +424,146 @@ export const PetSystem: ISystemFactory = world => {
   const glowClocks = new Map<Entity, number>();
 
   const tmpGlow = new Vector3();
+  const tmpFoot = new Vector3();
+
+  /**
+   * One body bolt: `CreateEffect(MODEL_FENRIR_THUNDER, o->Position, …, 0, o)`
+   * plus the `BITMAP_LIGHT` sprite the original hangs on every one of them
+   * (ZzzEffect.cpp:4249-4312). The flash lasts about a sixth of a second -
+   * alpha 0.7 up to 1 and back down at 0.3 a tick (MoveHandlers.cpp:6645-6675).
+   */
+  function spawnFenrirBolt(
+    actor: Entity,
+    colour: readonly [number, number, number]
+  ) {
+    const scene = world.scene;
+    if (!scene) return;
+
+    const roll = FENRIR_BOLT_BONES[rand(30)] ?? null;
+    if (roll === DEAD_ROLL) return;
+
+    let scale = 0.3 + Math.random() * 0.2;
+
+    if (roll === null) {
+      // The wolf's own position, thrown wide and lifted: ±120 / ±5 / +110.
+      entityPos(actor, 0, tmpGlow);
+      tmpGlow.x += (rand(240) - 120) * MU_UNIT;
+      tmpGlow.z += (rand(10) - 5) * MU_UNIT;
+      tmpGlow.y += 110 * MU_UNIT;
+      scale += 0.1;
+    } else {
+      bonePos(actor, roll, tmpGlow, 0.6);
+      scale -= 0.2;
+    }
+
+    effects.spawn('model', scene, tmpGlow, {
+      model: MODEL.lightningType,
+      colour,
+      seconds: 0.18,
+      scale: Math.max(0.1, scale),
+      yaw: Math.random() * Math.PI * 2,
+      alpha: 0.9,
+      fadeIn: 0.25,
+      fadeTail: 0.7,
+    });
+
+    // `CreateSprite(BITMAP_LIGHT, o->Position, 2.0f, Light − 0.3)`: the halo
+    // that makes a bolt read as light rather than as a lit wireframe.
+    effects.spawn('sprite', scene, tmpGlow, {
+      texture: TEX.flare,
+      colour: [
+        Math.max(0, colour[0] - 0.3),
+        Math.max(0, colour[1] - 0.3),
+        Math.max(0, colour[2] - 0.3),
+      ],
+      size: 0.7,
+      seconds: 0.18,
+      fadeTail: 0.7,
+    });
+  }
+
+  /**
+   * The splash one paw leaves: `RenderTerrainAlphaBitmap(BITMAP_FENRIR_FOOT_
+   * THUNDER1 + (m_iAnimation % 5), …)`, a frame every 200 ms while the object
+   * fades and its light drains to the variant's colour (ZzzEffect.cpp:9058,
+   * MoveHandlers.cpp:6780-6810). Four frames is where the alpha reaches zero.
+   */
+  function spawnFootThunder(at: Vector3, subType: number) {
+    const drain = FOOT_THUNDER_DRAIN[subType] ?? [0, 0, 0];
+    const x = at.x;
+    const z = at.z;
+
+    for (let i = 0; i < FOOT_THUNDER_FRAMES_SHOWN; i++) {
+      const fade = 1 - i / FOOT_THUNDER_FRAMES_SHOWN;
+      // The art is a JPG with a black ground, so it is drawn additive and
+      // the fading alpha rides the colour rather than a blend factor.
+      const colour: [number, number, number] = [
+        fade * (1 - drain[0] * (1 - fade)),
+        fade * (1 - drain[1] * (1 - fade)),
+        fade * (1 - drain[2] * (1 - fade)),
+      ];
+      const draw = () => {
+        const live = world.scene;
+        if (!live) return;
+        tmpFoot.set(x, 0, z);
+        effects.spawn('ring', live, tmpFoot, {
+          texture: FOOT_THUNDER_FRAMES[i],
+          colour,
+          scale: FOOT_THUNDER_TILES,
+          seconds: FOOT_THUNDER_FRAME_SECONDS,
+          fadeTail: 0.25,
+        });
+      };
+      if (i === 0) draw();
+      else delay(i * FOOT_THUNDER_FRAME_SECONDS, draw);
+    }
+  }
+
+  /**
+   * `MODEL_FENRIR_FOOT_THUNDER` (ZzzObject.cpp:900-940): lightning under the
+   * paws on the frames they touch down - all four across the first keys of
+   * the walk, the front and back pairs apart on the run.
+   */
+  function updateFootThunder(actor: Entity) {
+    const state = actor.petActor!;
+    const model = actor.modelObject;
+    if (!model?.gltf || state.fenrirFoot === undefined) return;
+
+    const action = model.CurrentAction;
+    const frame = model.actionFrame();
+    const prev = state.fenrirFrame ?? -1;
+    state.fenrirFrame = frame;
+
+    let paws: readonly number[] | null = null;
+
+    if (action === FENRIR_ACTION_WALK) {
+      if (inWindow(prev, frame, 0, 1.5)) paws = FENRIR_PAW_BONES;
+    } else if (action === FENRIR_ACTION_RUN) {
+      if (inWindow(prev, frame, 1, 1.4)) paws = FENRIR_FRONT_PAWS;
+      else if (inWindow(prev, frame, 4.8, 5.2)) paws = FENRIR_BACK_PAWS;
+    }
+
+    if (!paws) return;
+
+    for (const bone of paws) {
+      bonePos(actor, bone, tmpGlow, 0);
+      spawnFootThunder(tmpGlow, state.fenrirFoot);
+    }
+  }
 
   /**
    * The per-frame eye / jaw sprites and the variant-coloured body lightning
-   * of the original's Fenrir render branch (ZzzObject.cpp:855-895), as
+   * of the original's Fenrir render branch (ZzzObject.cpp:793-940), as
    * periodic effect spawns. Not called in a safe zone - the mount is faded
    * out there and the original skips the branch with it.
    */
   function updateFenrirGlow(actor: Entity, dt: number) {
+    const state = actor.petActor!;
+
+    // Read every frame: a footfall window is a fifth of a clip and the glow
+    // tick would step straight over it.
+    updateFootThunder(actor);
+
     const clock = (glowClocks.get(actor) ?? 0) + dt;
     if (clock < FENRIR_GLOW_TICK) {
       glowClocks.set(actor, clock);
@@ -385,38 +574,64 @@ export const PetSystem: ISystemFactory = world => {
     const scene = world.scene;
     if (!scene || !actor.modelObject?.gltf) return;
 
+    // `sinf(WorldTime * 0.002f) * 0.2f` on a clock in milliseconds: the eyes
+    // breathe rather than sitting on one red.
+    const lum = Math.sin(fxNow() * 2) * 0.2;
+
     for (const local of FENRIR_EYE_LOCALS) {
       boneLocalPos(actor, FENRIR_HEAD_BONE, local, tmpGlow);
       effects.spawn('sprite', scene, tmpGlow, {
         texture: TEX.flare,
-        colour: FENRIR_EYE_RGB,
-        size: 0.35,
+        colour: [
+          FENRIR_EYE_RGB[0] + lum,
+          FENRIR_EYE_RGB[1] + lum * 0.5,
+          FENRIR_EYE_RGB[2] + lum * 0.5,
+        ],
+        size: 0.35 + lum * 0.07,
         seconds: 0.16,
         fadeTail: 0.6,
       });
     }
-    boneLocalPos(actor, FENRIR_JAW_BONE, FENRIR_JAW_LOCAL, tmpGlow);
-    effects.spawn('sprite', scene, tmpGlow, {
-      texture: TEX.flare,
-      colour: FENRIR_JAW_RGB,
-      size: 0.8,
-      seconds: 0.16,
-      fadeTail: 0.6,
-    });
 
-    // MODEL_FENRIR_THUNDER: lightning_type01 flickers on a random bone, a
-    // third of the rolls discarded (ZzzEffect.cpp:4363-4415).
-    if (Math.random() < 0.85) {
-      const bone =
-        FENRIR_THUNDER_BONES[(Math.random() * FENRIR_THUNDER_BONES.length) | 0];
-      bonePos(actor, bone, tmpGlow, 0.6);
-      effects.spawn('model', scene, tmpGlow, {
-        model: MODEL.lightningType,
-        colour: actor.petActor!.fenrirThunder!,
-        seconds: 0.28,
-        scale: 0.3 + Math.random() * 0.2,
-        yaw: Math.random() * Math.PI * 2,
-        fadeIn: 0.4,
+    // Two cards on the jaw, a small one inside a big one.
+    boneLocalPos(actor, FENRIR_JAW_BONE, FENRIR_JAW_LOCAL, tmpGlow);
+    for (const size of FENRIR_JAW_SIZES) {
+      effects.spawn('sprite', scene, tmpGlow, {
+        texture: TEX.flare,
+        colour: FENRIR_JAW_RGB,
+        size,
+        seconds: 0.16,
+        fadeTail: 0.6,
+      });
+    }
+
+    for (let i = 0; i < FENRIR_BOLTS_PER_TICK; i++) {
+      spawnFenrirBolt(actor, state.fenrirThunder!);
+    }
+
+    // The skill clip: the body pass is drawn a second time and a red chip
+    // flies off the jaw (ZzzObject.cpp:812-840). The shine object is the one
+    // the material binds every frame, so raising it is that second pass; it
+    // is re-read here rather than at spawn so the Item effects option takes
+    // hold the moment it is changed.
+    const casting = actor.modelObject.CurrentAction === FENRIR_ACTION_SKILL;
+    if (state.fenrirSpec) {
+      fenrirShine(actor.modelObject, state.fenrirSpec, casting);
+    }
+
+    if (casting) {
+      tmpFoot.set(
+        (rand(10) - 10) * 0.5 * MU_UNIT,
+        0,
+        (rand(40) - 20) * 0.5 * MU_UNIT
+      );
+      boneLocalPos(actor, FENRIR_SKILL_BONE, tmpFoot, tmpGlow);
+      effects.spawn('sprite', scene, tmpGlow, {
+        texture: TEX.spark3,
+        colour: [1, 0, 0],
+        size: 0.7 + lum * 0.05,
+        seconds: 0.3,
+        rise: 0.6,
         fadeTail: 0.5,
       });
     }
