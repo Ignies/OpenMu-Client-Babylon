@@ -108,8 +108,10 @@ export const NPC_MODEL_TABLE: Readonly<
   540: ['Lugard',  1.1],
   541: ['DoppelgangerBox',  2.3],
   542: ['DoppelgangerBox',  3.3],
-  // Gens Vanert (MONSTER_GENS_VANERT -> MODAL_GENS_NPC_BARNERT,
-  // ZzzCharacter.cpp:14691 / ZzzOpenData.cpp:2190).
+  // The two Gens stewards (ZzzCharacter.cpp:14970-14981, models from
+  // ZzzOpenData.cpp:2189-2196). Duprian used to resolve to the Elf Soldier,
+  // which put a winged elf next to the Lorencia vault.
+  543: ['duprian',  1.0],
   544: ['barnert',  1.0],
   545: ['UnitedMarketPlace_christine',  1.1],
   546: ['UnitedMarkedPlace_raul',  1.0],
