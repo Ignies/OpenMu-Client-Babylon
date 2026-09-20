@@ -61,16 +61,114 @@ const TOUR_EYE_BASE = -550 / MU_SCALE;
 const TOUR_PITCH = (8 * Math.PI) / 180;
 
 /**
- * Where the eye trails is where this departs from the original. There the
- * offset is a fixed vector behind the tour point on a heading that turns at
- * most one degree per tick (CameraMove.cpp:757-770), so through a corner the
- * offset sweeps against the direction of travel and the eye slows to a
- * quarter of its speed for two seconds, then picks up again. Here the eye
- * sits on the tour point's own rounded path, `distance` behind it, and looks
- * along the path at it: same speed as the point, the turn spread over the
- * corner's blend and the trail.
+ * The loop the tour rides. The original moves its tour point by integration,
+ * blending its direction toward the next leg over the last `kTourBlendDistance`
+ * before a waypoint and toward the previous one after it; every corner
+ * leaves that point a fixed offset off the polyline, and over laps the
+ * offsets compound. So the rounding is done once, as geometry: each waypoint
+ * gets a fillet of the blend distance (or half the shorter leg), sampled as
+ * a curve, and the tour point is a distance along the result. The eye rides
+ * the same loop `distance` behind the tour point and looks at it: through
+ * a corner it keeps its speed, and the turn is spread over the fillet and
+ * the trail. Where the eye trails is where this departs from the original,
+ * whose fixed offset behind the point swept against the travel through
+ * every corner and stalled the eye for two seconds.
  */
-type TrailPoint = { x: number; y: number; s: number };
+type RouteSample = {
+  x: number;
+  y: number;
+  /** Arc length from the loop's start. */
+  s: number;
+  level: number;
+  /** `fCameraMoveAccel` of the waypoint this stretch heads to (`targetCameraAcc`). */
+  accel: number;
+};
+
+const ARC_STEPS = 8;
+
+function buildRoute(path: readonly CameraWaypoint[]): RouteSample[] {
+  const n = path.length;
+  const out: RouteSample[] = [];
+  let s = 0;
+
+  const push = (x: number, y: number, level: number, accel: number) => {
+    const last = out[out.length - 1];
+    if (last) s += Math.hypot(x - last.x, y - last.y);
+    out.push({ x, y, s, level, accel });
+  };
+
+  for (let i = 0; i < n; i++) {
+    const a = path[i];
+    const b = path[(i + 1) % n];
+    const c = path[(i + 2) % n];
+
+    const abx = b.x - a.x;
+    const aby = b.y - a.y;
+    const ab = Math.hypot(abx, aby) || 1;
+    const bcx = c.x - b.x;
+    const bcy = c.y - b.y;
+    const bc = Math.hypot(bcx, bcy) || 1;
+
+    const rIn = Math.min(TOUR_BLEND_DISTANCE, ab / 2);
+    const rOut = Math.min(TOUR_BLEND_DISTANCE, bc / 2);
+    const inX = abx / ab;
+    const inY = aby / ab;
+    const outX = bcx / bc;
+    const outY = bcy / bc;
+
+    // The straight of leg a-b, between the two fillets.
+    push(a.x + inX * rIn, a.y + inY * rIn, levelAt(a, b, rIn / ab), b.moveAccel);
+    const endX = b.x - inX * rIn;
+    const endY = b.y - inY * rIn;
+    push(endX, endY, levelAt(a, b, 1 - rIn / ab), b.moveAccel);
+
+    // The fillet at b: a quadratic curve from the straight's end, through b's
+    // corner as control point, to the next straight's start.
+    const exitX = b.x + outX * rOut;
+    const exitY = b.y + outY * rOut;
+    for (let k = 1; k <= ARC_STEPS; k++) {
+      const u = k / ARC_STEPS;
+      const w0 = (1 - u) * (1 - u);
+      const w1 = 2 * (1 - u) * u;
+      const w2 = u * u;
+      push(
+        w0 * endX + w1 * b.x + w2 * exitX,
+        w0 * endY + w1 * b.y + w2 * exitY,
+        b.distanceLevel,
+        u < 0.5 ? b.moveAccel : c.moveAccel
+      );
+    }
+  }
+
+  return out;
+}
+
+function levelAt(a: CameraWaypoint, b: CameraWaypoint, t: number): number {
+  return a.distanceLevel + (b.distanceLevel - a.distanceLevel) * t;
+}
+
+/** The loop's point `s` along it, into `out`. */
+function routePoint(
+  loop: RouteSample[],
+  s: number,
+  out: { x: number; y: number; level: number; accel: number }
+): void {
+  let hi = loop.length - 1;
+  let lo = 0;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (loop[mid].s <= s) lo = mid;
+    else hi = mid;
+  }
+
+  const a = loop[lo];
+  const b = loop[hi];
+  const t = b.s > a.s ? Math.min(1, Math.max(0, (s - a.s) / (b.s - a.s))) : 0;
+  out.x = a.x + (b.x - a.x) * t;
+  out.y = a.y + (b.y - a.y) * t;
+  out.level = a.level + (b.level - a.level) * t;
+  out.accel = b.accel;
+}
 
 /** `SetCameraFOV` (CameraUtility.cpp:284): the login world in tour mode. */
 const TOUR_FOV = (65 * Math.PI) / 180;
@@ -115,18 +213,14 @@ export const LoginSceneSystem: ISystemFactory = world => {
 
   let requestedBackdrop: ENUM_WORLD | null = null;
 
-  let waypoints: CameraWaypoint[] | null = null;
+  let waypoints: readonly CameraWaypoint[] | null = null;
   let scriptForWorld: number | null = null;
 
-  let tourStarted = false;
-  let targetIndex = 0;
-  let heading = 0;
-  /** `m_CurrentCameraPos`: on the polyline. */
-  const follower = { x: 0, y: 0 };
-  /** `m_vTourCameraPos`: the rounded path the camera trails. */
-  const tour = { x: 0, y: 0 };
-  /** Where the tour point has been, with the arc length at each sample. */
-  const trail: TrailPoint[] = [];
+  /** The loop the tour rides, built once per waypoint list. */
+  let route: RouteSample[] | null = null;
+  let routeOf: readonly CameraWaypoint[] | null = null;
+  /** Arc length of the tour point along the loop. */
+  let along = 0;
 
   const eye = new Vector3(0, 0, 0);
   const lookAt = new Vector3(0, 0, 0);
@@ -143,147 +237,46 @@ export const LoginSceneSystem: ISystemFactory = world => {
   let setPiece: PregameScene | null = null;
 
   const resetTour = () => {
-    tourStarted = false;
+    route = null;
+    routeOf = null;
+    along = 0;
   };
 
   EventBus.on('warpCompleted', resetTour);
 
-  /**
-   * The point `behind` units back along the trail, into `out`. Before the
-   * trail is that long the start is extended straight back along the first
-   * heading.
-   */
-  const trailPoint = (behind: number, out: { x: number; y: number }) => {
-    const last = trail[trail.length - 1];
-    const wanted = last.s - behind;
+  const tourPoint = { x: 0, y: 0, level: 8, accel: 0 };
+  const eyePoint = { x: 0, y: 0, level: 8, accel: 0 };
 
-    if (wanted <= trail[0].s) {
-      const first = trail[0];
-      const back = first.s - wanted;
-      out.x = first.x - Math.cos(heading) * back;
-      out.y = first.y - Math.sin(heading) * back;
-      return;
+  const advanceTour = (deltaTime: number, path: readonly CameraWaypoint[]) => {
+    if (routeOf !== path) {
+      route = buildRoute(path);
+      routeOf = path;
+      along = 0;
     }
 
-    let i = trail.length - 1;
-    while (i > 0 && trail[i - 1].s > wanted) i--;
+    const loop = route!;
+    const length = loop[loop.length - 1].s;
 
-    const a = trail[i - 1];
-    const b = trail[i];
-    const t = b.s > a.s ? (wanted - a.s) / (b.s - a.s) : 1;
-    out.x = a.x + (b.x - a.x) * t;
-    out.y = a.y + (b.y - a.y) * t;
+    routePoint(loop, along, tourPoint);
+    const step =
+      (Math.min(Math.max(tourPoint.accel, TOUR_ACCEL_MIN), TOUR_ACCEL_MAX) *
+        deltaTime *
+        REFERENCE_FPS) /
+      MU_SCALE;
+    along = (along + step) % length;
 
-    // Older than the eye and one sample of margin: never needed again.
-    if (i > 2) trail.splice(0, i - 2);
-  };
+    routePoint(loop, along, tourPoint);
+    const distance = tourPoint.level * TOUR_DISTANCE_PER_LEVEL;
+    routePoint(loop, (along - distance + length) % length, eyePoint);
 
-  /** The direction of the leg into `path[i]`, from the waypoint before it. */
-  const legInto = (path: CameraWaypoint[], i: number) => {
-    const from = path[(i + path.length - 1) % path.length];
-    const to = path[i];
-    const dx = to.x - from.x;
-    const dy = to.y - from.y;
-    const length = Math.hypot(dx, dy);
-
-    return length > 0 ? { x: dx / length, y: dy / length } : null;
-  };
-
-  const advanceTour = (deltaTime: number, path: CameraWaypoint[]) => {
-    const ticks = deltaTime * REFERENCE_FPS;
-
-    if (!tourStarted) {
-      // `PlayCameraWalk`: both points at the first waypoint, facing the second.
-      const start = path[0];
-      follower.x = tour.x = start.x;
-      follower.y = tour.y = start.y;
-      targetIndex = 1 % path.length;
-      heading = Math.atan2(
-        path[targetIndex].y - start.y,
-        path[targetIndex].x - start.x
-      );
-      trail.length = 0;
-      trail.push({ x: start.x, y: start.y, s: 0 });
-      tourStarted = true;
-    }
-
-    let level = path[targetIndex].distanceLevel;
-
-    for (let guard = 0; guard < path.length; guard++) {
-      const target = path[targetIndex];
-      const originIndex = (targetIndex + path.length - 1) % path.length;
-      const origin = path[originIndex];
-
-      const step =
-        (Math.min(Math.max(target.moveAccel, TOUR_ACCEL_MIN), TOUR_ACCEL_MAX) *
-          ticks) /
-        MU_SCALE;
-
-      const toTargetX = target.x - follower.x;
-      const toTargetY = target.y - follower.y;
-      const toTarget = Math.hypot(toTargetX, toTargetY);
-      const toOrigin = Math.hypot(origin.x - follower.x, origin.y - follower.y);
-
-      // Reached: switch and move on within the same tick, as the original's
-      // `continue` does.
-      if (toTarget <= step) {
-        targetIndex = (targetIndex + 1) % path.length;
-        continue;
-      }
-
-      const forwardX = toTargetX / toTarget;
-      const forwardY = toTargetY / toTarget;
-      let tourX = forwardX;
-      let tourY = forwardY;
-
-      const blendWith = (dir: { x: number; y: number } | null, at: number) => {
-        if (!dir) return;
-        const rate = (at / TOUR_BLEND_DISTANCE) * 0.5 + 0.5;
-        tourX = dir.x * (1 - rate) + forwardX * rate;
-        tourY = dir.y * (1 - rate) + forwardY * rate;
-        const length = Math.hypot(tourX, tourY) || 1;
-        tourX /= length;
-        tourY /= length;
-      };
-
-      if (toTarget <= TOUR_BLEND_DISTANCE) {
-        blendWith(legInto(path, (targetIndex + 1) % path.length), toTarget);
-      } else if (toOrigin <= TOUR_BLEND_DISTANCE) {
-        blendWith(legInto(path, originIndex), toOrigin);
-      }
-
-      follower.x += forwardX * step;
-      follower.y += forwardY * step;
-      tour.x += tourX * step;
-      tour.y += tourY * step;
-
-      const last = trail[trail.length - 1];
-      trail.push({ x: tour.x, y: tour.y, s: last.s + step });
-
-      const span = toOrigin + toTarget;
-      level =
-        span > 0
-          ? (origin.distanceLevel * toTarget + target.distanceLevel * toOrigin) /
-            span
-          : target.distanceLevel;
-      break;
-    }
-
-    const distance = level * TOUR_DISTANCE_PER_LEVEL;
-
-    const behind = { x: 0, y: 0 };
-    trailPoint(distance, behind);
-
-    const toTourX = tour.x - behind.x;
-    const toTourY = tour.y - behind.y;
-    if (Math.hypot(toTourX, toTourY) > 1e-3) {
-      heading = Math.atan2(toTourY, toTourX);
-    }
-
+    const heading = Math.atan2(
+      tourPoint.y - eyePoint.y,
+      tourPoint.x - eyePoint.x
+    );
     const fx = Math.cos(heading);
     const fy = Math.sin(heading);
 
-    eye.set(behind.x, TOUR_EYE_BASE + distance, behind.y);
+    eye.set(eyePoint.x, TOUR_EYE_BASE + distance, eyePoint.y);
     lookAt.set(
       eye.x + fx * Math.cos(TOUR_PITCH),
       eye.y + Math.sin(TOUR_PITCH),
