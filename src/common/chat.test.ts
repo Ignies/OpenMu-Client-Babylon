@@ -95,6 +95,10 @@ describe('chatSenderPrefix', () => {
 });
 
 describe('chatPkClass', () => {
+  it('does not read a new character as an outlaw', () => {
+    expect(chatPkClass(0)).toBe('pk-new');
+  });
+
   it('has a class for every hero and outlaw level', () => {
     expect(chatPkClass(1)).toBe('pk-hero2');
     expect(chatPkClass(2)).toBe('pk-hero1');

@@ -215,6 +215,8 @@ const ChatLog = observer(() => {
   // line's id, not its index, so a new line (or a dropped oldest one) does
   // not shift the view the reader scrolled to.
   const [endId, setEndId] = useState<number | null>(null);
+  // `m_iPointedMessageIndex`, by message rather than by row: a message that
+  // wrapped highlights whole and answers a right click on either of its rows.
   const [pointed, setPointed] = useState(-1);
   const dragRef = useRef<{ startY: number; startEnd: number } | null>(null);
 
@@ -304,7 +306,6 @@ const ChatLog = observer(() => {
       )}
 
       {visible.map((line, s) => {
-        const index = start + s;
         return (
           <div
             key={line.id}
@@ -313,9 +314,9 @@ const ChatLog = observer(() => {
               left: WND_LEFT_RIGHT_EDGE,
               top: firstLineY + SCROLL_MIDDLE_PART_HEIGHT * s,
               maxWidth: width - WND_LEFT_RIGHT_EDGE * 2 - (framed ? SCROLL_BAR_WIDTH + 4 : 0),
-              ...lineStyle(line, framed, pointed === index && !!line.sender),
+              ...lineStyle(line, framed, pointed === line.messageId && !!line.sender),
             }}
-            onMouseEnter={() => setPointed(index)}
+            onMouseEnter={() => setPointed(line.messageId)}
             onContextMenu={e => {
               // `m_bPointedMessage` + right click → `SetWhsprID`.
               e.preventDefault();
@@ -334,7 +335,7 @@ const ChatLog = observer(() => {
                 {chatTimestamp(line.at)}{' '}
               </span>
             )}
-            {line.sender ? (
+            {line.sender && !line.continued ? (
               <>
                 {line.senderGuild ? (
                   <span className="chat-line-guild">{`[${line.senderGuild}] `}</span>

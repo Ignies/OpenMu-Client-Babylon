@@ -21,6 +21,8 @@ export enum ChatLineType {
 
 export type ChatLine = {
   id: number;
+  /** The id of the message's first row; every row it was split into repeats it. */
+  messageId: number;
   sender: string;
   text: string;
   type: ChatLineType;
@@ -128,6 +130,9 @@ export function splitChatLine(
  * outlaw ones are animated in the stylesheet, a commoner is left plain.
  */
 export const CHAT_PK_CLASS: Readonly<Record<number, string>> = {
+  // `New`: OpenMU leaves every character on it until they first turn outlaw,
+  // so this is the state almost every name in the log carries.
+  0: 'pk-new',
   1: 'pk-hero2',
   2: 'pk-hero1',
   3: 'pk-neutral',

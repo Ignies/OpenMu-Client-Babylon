@@ -370,11 +370,15 @@ export const Social = new (class _Social {
     const prefix = chatSenderPrefix({ sender, ...speaker });
     const parts = splitChatLine(prefix, text, width, chatTextWidth);
 
+    // `Create(L"", strText2, ...)`: the carried half does not print the name
+    // again, but it keeps the speaker so the log can hover and whisper off a
+    // wrapped message as one thing.
+    const messageId = this.nextLineId;
     const rows: ChatLine[] = parts.map((part, index) => ({
       id: this.nextLineId++,
-      // `Create(L"", strText2, ...)`: the carried half has no sender.
-      sender: index === 0 ? sender : '',
-      ...(index === 0 ? speaker : {}),
+      messageId,
+      sender,
+      ...speaker,
       continued: index > 0,
       text: part,
       type,
