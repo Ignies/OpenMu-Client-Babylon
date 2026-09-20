@@ -1,75 +1,55 @@
-import { afterAll, beforeEach, describe, expect, test } from 'bun:test';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-
-// The store opens its database at import time, so the path has to be set
-// before anything from it is loaded.
-const dir = mkdtempSync(join(tmpdir(), 'mp-test-'));
-process.env.MARKETPLACE_DB = join(dir, 'market.sqlite');
-
-const { db } = await import('./db');
-const store = await import('./listings');
-
-afterAll(() => {
-  // Windows will not unlink a file SQLite still has open, and a temp directory
-  // left behind is not worth failing a test run over.
-  db.close();
-  try {
-    rmSync(dir, { recursive: true, force: true });
-  } catch {
-    // Left for the operating system to clear.
-  }
-});
+import { beforeEach, describe, expect, test } from 'bun:test';
+import './testDb';
+import { db } from './db';
+import * as store from './listings';
 
 beforeEach(() => {
   db.run('DELETE FROM listings');
-  db.run('DELETE FROM balances');
   db.run('DELETE FROM audit');
-  db.run('DELETE FROM leases');
 });
 
 const anItem = { group: 14, num: 13, lvl: 0 };
+let boxes = 0;
+const aBox = () => `00000000-0000-4000-8000-${String(++boxes).padStart(12, '0')}`;
 
+function pending(seller = 'alice', price = 1000) {
+  return store.createPending({ seller, sellerCharacter: seller, price, item: anItem, category: 'jewels', boxId: aBox() });
+}
+
+/** A listing whose box was seen holding the item. */
 function listed(seller = 'alice', price = 1000) {
-  const listing = store.createPending({ seller, sellerCharacter: seller, price, item: anItem, category: 'jewels' });
-  store.activate(listing.id, 'MKT001', 12);
+  const listing = pending(seller, price);
+  store.apply(listing.id, 'pending', { state: 'active', itemId: `item-${listing.id}`, why: 'test' });
   return listing.id;
 }
 
-describe('a listing is not on sale until the bot holds the item', () => {
-  test('a new listing is pending and invisible to buyers', () => {
-    const listing = store.createPending({
-      seller: 'alice',
-      sellerCharacter: 'Alice',
-      price: 1000,
-      item: anItem,
-      category: 'jewels',
-    });
-
+describe('a listing is not on sale until the box holds the item', () => {
+  test('a new listing is pending, names its box, and is invisible to buyers', () => {
+    const listing = pending();
     expect(listing.state).toBe('pending');
+    expect(listing.boxId).toMatch(/^00000000-0000-4000-8000-/);
+    expect(listing.itemId).toBeNull();
     expect(store.browse().total).toBe(0);
   });
 
-  test('it appears once the handover is recorded', () => {
+  test('it appears once the box is seen holding it, with the item row recorded', () => {
     const id = listed();
-    expect(store.byId(id)!.state).toBe('active');
+    expect(store.byId(id)).toMatchObject({ state: 'active', itemId: `item-${id}` });
     expect(store.browse().total).toBe(1);
   });
 
-  test('activating something already active does nothing', () => {
+  test('a verdict from a stale state is not applied', () => {
     const id = listed();
-    expect(store.activate(id, 'MKT002', 13)).toBe(false);
+    expect(store.apply(id, 'pending', { state: 'cancelled', why: 'stale' })).toBe(false);
+    expect(store.byId(id)!.state).toBe('active');
   });
 });
 
 describe('claiming', () => {
   test('exactly one of two buyers racing wins', () => {
     const id = listed();
-
     const first = store.claim(id, 'bob', 'Bob');
     const second = store.claim(id, 'carol', 'Carol');
-
     expect([first, second]).toEqual([true, false]);
     expect(store.byId(id)!.buyer).toBe('bob');
   });
@@ -80,80 +60,90 @@ describe('claiming', () => {
     expect(store.browse().total).toBe(0);
   });
 
-  test('releasing puts it back for everyone', () => {
+  test('only the claimant can release it, and then everyone sees it again', () => {
     const id = listed();
     store.claim(id, 'bob', 'Bob');
-
-    expect(store.release(id, 'buyer walked away')).toBe(true);
+    expect(store.release(id, 'carol', 'not hers')).toBe(false);
+    expect(store.release(id, 'bob', 'no room')).toBe(true);
     expect(store.browse().total).toBe(1);
     expect(store.byId(id)!.buyer).toBeNull();
   });
 
-  test('a listing nobody has claimed cannot be released', () => {
-    expect(store.release(listed(), 'nothing to release')).toBe(false);
+  test('a claim that timed out goes back on sale with no buyer', () => {
+    const id = listed();
+    store.claim(id, 'bob', 'Bob');
+    store.apply(id, 'claimed', { state: 'active', why: 'the buyer never came' });
+    expect(store.byId(id)).toMatchObject({ state: 'active', buyer: null, buyerCharacter: null });
   });
 });
 
 describe('selling', () => {
-  test('the price becomes the seller balance, not a delivery', () => {
+  test('the box money becomes the proceeds the seller collects', () => {
     const id = listed('alice', 5000);
     store.claim(id, 'bob', 'Bob');
-
-    expect(store.settleSale(id)).toBe(true);
-    expect(store.byId(id)!.state).toBe('sold');
-    expect(store.balance('alice')).toBe(5000);
+    store.apply(id, 'claimed', { state: 'sold', proceeds: 4750, why: 'money in the box' });
+    expect(store.byId(id)).toMatchObject({ state: 'sold', proceeds: 4750, buyer: 'bob' });
+    expect(store.owed('alice')).toBe(4750);
+    expect(store.soldBy('alice').map(l => l.id)).toEqual([id]);
   });
 
-  test('an unclaimed listing cannot be settled', () => {
-    expect(store.settleSale(listed())).toBe(false);
-  });
-
-  test('two sales add up for the same seller', () => {
-    for (const price of [1000, 2500]) {
-      const id = listed('alice', price);
-      store.claim(id, 'bob', 'Bob');
-      store.settleSale(id);
-    }
-    expect(store.balance('alice')).toBe(3500);
+  test('collected sales stop being owed and leave the seller list', () => {
+    const id = listed('alice', 5000);
+    store.claim(id, 'bob', 'Bob');
+    store.apply(id, 'claimed', { state: 'sold', proceeds: 5000, why: 'test' });
+    store.apply(id, 'sold', { state: 'paid', why: 'collected' });
+    expect(store.owed('alice')).toBe(0);
+    expect(store.bySeller('alice')).toHaveLength(0);
   });
 });
 
 describe('cancelling', () => {
   test('a seller can take back what nobody has claimed', () => {
     const id = listed('alice');
-    expect(store.cancel(id, 'alice')).toBe(true);
+    expect(store.startReturn(id, 'alice')).toBe(true);
     expect(store.byId(id)!.state).toBe('returning');
     expect(store.browse().total).toBe(0);
   });
 
-  test('somebody else cannot cancel it', () => {
+  test('somebody else cannot', () => {
     const id = listed('alice');
-    expect(store.cancel(id, 'mallory')).toBe(false);
+    expect(store.startReturn(id, 'mallory')).toBe(false);
     expect(store.byId(id)!.state).toBe('active');
   });
 
   test('a claimed listing cannot be pulled out from under the buyer', () => {
     const id = listed('alice');
     store.claim(id, 'bob', 'Bob');
-    expect(store.cancel(id, 'alice')).toBe(false);
+    expect(store.startReturn(id, 'alice')).toBe(false);
+  });
+
+  test('a pending listing whose item never left is simply dropped', () => {
+    const { id } = pending('alice');
+    expect(store.cancelPending(id, 'mallory', 'no')).toBe(false);
+    expect(store.cancelPending(id, 'alice', 'changed their mind')).toBe(true);
+    expect(store.byId(id)!.state).toBe('cancelled');
   });
 });
 
-describe('balances', () => {
-  test('taking a balance empties it and reports what was taken', () => {
-    store.credit('alice', 750);
-    expect(store.takeBalance('alice')).toBe(750);
-    expect(store.balance('alice')).toBe(0);
-  });
-
-  test('taking nothing is not an error', () => {
-    expect(store.takeBalance('nobody')).toBe(0);
+describe('the catalogue entry', () => {
+  test('is corrected from the box and can carry the server bytes', () => {
+    const id = listed();
+    store.patchItem(id, { group: 12, num: 7, lvl: 3 });
+    store.patchItem(id, { raw: [7, 24, 255, 0, 0, 0xc0, 0, 0, 0, 0, 0, 0] });
+    const item = store.byId(id)!.item;
+    expect(item).toMatchObject({ group: 12, num: 7, lvl: 3 });
+    expect(item.raw).toHaveLength(12);
+    expect(db.query('SELECT item_group, item_number, item_level FROM listings WHERE id = ?').get(id)).toEqual({
+      item_group: 12,
+      item_number: 7,
+      item_level: 3,
+    });
   });
 });
 
 describe('prices are bounded', () => {
   const bad = (price: number) => () =>
-    store.createPending({ seller: 'alice', sellerCharacter: 'Alice', price, item: anItem, category: 'jewels' });
+    store.createPending({ seller: 'alice', sellerCharacter: 'Alice', price, item: anItem, category: 'jewels', boxId: aBox() });
 
   test('zero and negative are refused', () => {
     expect(bad(0)).toThrow();
@@ -165,86 +155,37 @@ describe('prices are bounded', () => {
   });
 });
 
-describe('what the bots have to do', () => {
-  test('pending, claimed and returning listings are all work', () => {
-    const pending = store.createPending({
-      seller: 'alice',
-      sellerCharacter: 'Alice',
-      price: 10,
-      item: anItem,
-      category: 'jewels',
-    });
-    const claimed = listed('bob');
-    store.claim(claimed, 'carol', 'Carol');
-    const returning = listed('dave');
-    store.cancel(returning, 'dave');
+describe('what the sweep looks at', () => {
+  test('rows by state, only those that changed before the deadline', () => {
+    const fresh = pending('alice').id;
+    const stale = pending('bob').id;
+    db.query('UPDATE listings SET updated_at = ? WHERE id = ?').run(Date.now() - 10 * 60_000, stale);
 
-    const work = store.pendingWork().map(l => l.id).sort();
-    expect(work).toEqual([pending.id, claimed, returning].sort());
-  });
-
-  test('an active listing is not work - it is just for sale', () => {
-    listed();
-    expect(store.pendingWork()).toHaveLength(0);
-  });
-});
-
-describe('leases keep two bots off one handover', () => {
-  test('the first bot takes the keys and the second is refused all of them', () => {
-    expect(store.acquireLeases(['listing:a', 'customer:bob'], 'MKT001', 60_000)).toBe(true);
-    expect(store.acquireLeases(['listing:b', 'customer:bob'], 'MKT002', 60_000)).toBe(false);
-    // Refused as a whole: the key that was free was not kept either.
-    expect(store.leaseHolder('listing:b')).toBeNull();
-    expect(store.leaseHolder('customer:bob')).toBe('MKT001');
-  });
-
-  test('a bot may retake what it holds, and only it can release it', () => {
-    expect(store.acquireLeases(['listing:a'], 'MKT001', 60_000)).toBe(true);
-    expect(store.acquireLeases(['listing:a'], 'MKT001', 60_000)).toBe(true);
-    store.releaseLeases(['listing:a'], 'MKT002');
-    expect(store.leaseHolder('listing:a')).toBe('MKT001');
-    store.releaseLeases(['listing:a'], 'MKT001');
-    expect(store.leaseHolder('listing:a')).toBeNull();
-  });
-
-  test('a lease a dead bot left behind lapses on its own', () => {
-    expect(store.acquireLeases(['listing:a'], 'MKT001', -1)).toBe(true);
-    expect(store.leaseHolder('listing:a')).toBeNull();
-    expect(store.acquireLeases(['listing:a'], 'MKT002', 60_000)).toBe(true);
-    expect(store.leaseHolder('listing:a')).toBe('MKT002');
+    expect(store.inState('pending', Date.now() - 5 * 60_000).map(l => l.id)).toEqual([stale]);
+    expect(store.inState('pending').map(l => l.id).sort()).toEqual([fresh, stale].sort());
   });
 });
 
 describe('history', () => {
-  test('tells a seller how each listing ended, and names the bot', () => {
+  test('tells a seller how each listing ended', () => {
     const sold = listed('alice', 1000);
     store.claim(sold, 'bob', 'BobDk');
-    store.settleSale(sold);
-    const dropped = store.createPending({ seller: 'alice', sellerCharacter: 'alice', price: 5, item: anItem, category: 'jewels' }).id;
-    store.drop(dropped, 'the trade was refused');
-    const waiting = store.createPending({ seller: 'alice', sellerCharacter: 'alice', price: 7, item: anItem, category: 'jewels' }).id;
+    store.apply(sold, 'claimed', { state: 'sold', proceeds: 1000, why: 'test' });
+    const dropped = pending('alice').id;
+    store.cancelPending(dropped, 'alice', 'changed their mind');
+    const waiting = pending('alice').id;
 
-    const rows = store.historyFor('alice');
-    const byId = new Map(rows.map(r => [r.id, r]));
-    expect(byId.get(sold)).toMatchObject({ kind: 'sale', status: 'success', bot: 'MKT001', note: 'sold to BobDk' });
-    expect(byId.get(dropped)).toMatchObject({ kind: 'sale', status: 'failed', note: 'the trade was refused' });
-    expect(byId.get(waiting)).toMatchObject({ kind: 'sale', status: 'pending' });
+    const byId = new Map(store.historyFor('alice').map(r => [r.id, r]));
+    expect(byId.get(sold)).toMatchObject({ kind: 'sale', status: 'success', note: 'sold to BobDk, waiting to be collected' });
+    expect(byId.get(dropped)).toMatchObject({ kind: 'sale', status: 'failed', note: 'never listed' });
+    expect(byId.get(waiting)).toMatchObject({ kind: 'sale', status: 'pending', note: 'waiting for the item' });
+    expect(byId.get(sold)).not.toHaveProperty('bot');
   });
 
-  test('shows a buyer their purchase, and a seller their payout', () => {
+  test('shows a buyer their purchase', () => {
     const id = listed('alice', 1000);
     store.claim(id, 'bob', 'BobDk');
-    store.settleSale(id);
-    expect(store.historyFor('bob')[0]).toMatchObject({ kind: 'purchase', status: 'success', note: 'bought' });
-
-    store.requestPayout('alice', 'alice');
-    const pending = store.historyFor('alice').find(r => r.kind === 'payout');
-    expect(pending).toMatchObject({ status: 'pending', zen: 1000 });
-
-    store.takeBalance('alice');
-    store.clearPayoutRequest('alice');
-    db.query('INSERT INTO audit (at, account, event, detail) VALUES (?, ?, ?, ?)').run(Date.now(), 'alice', 'payout paid', JSON.stringify({ zen: 1000 }));
-    const paid = store.historyFor('alice').find(r => r.kind === 'payout');
-    expect(paid).toMatchObject({ status: 'success', zen: 1000, note: 'paid out' });
+    store.apply(id, 'claimed', { state: 'sold', proceeds: 1000, why: 'test' });
+    expect(store.historyFor('bob')[0]).toMatchObject({ kind: 'purchase', status: 'success', note: 'bought', zen: 1000 });
   });
 });

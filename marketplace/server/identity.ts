@@ -76,8 +76,8 @@ function sign(account: string, expiresAt: number): string {
 
 /**
  * Lowercased, because OpenMU's login is case-insensitive: "Player" and
- * "PLAYER" are one account, and a balance keyed under two spellings would be
- * two balances.
+ * "PLAYER" are one account, and a seller keyed under two spellings would be
+ * two sellers.
  */
 export function mintTicket(account: string, now = Date.now()): Ticket {
   if (!ACCOUNT_RE.test(account)) throw new Error(`refusing to mint a ticket for "${account}"`);

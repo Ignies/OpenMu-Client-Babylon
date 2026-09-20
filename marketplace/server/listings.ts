@@ -1,30 +1,32 @@
 import { randomUUID } from 'node:crypto';
 import { audit, db, type ListingRow, type ListingState } from './db';
+import type { Verdict } from './reconcile';
 
 /**
  * What the service knows about what is for sale.
  *
- * The rule this file exists to enforce: **a listing is claimed before any bot
- * is sent out.** Two buyers pressing Buy on the same item at the same moment
- * must not both get a bot dispatched, or one of them stands there waiting for
- * an item that has already gone. The claim is a conditional UPDATE - it either
- * moves the row out of `active` or it does not, and only the winner is told to
- * go and collect.
+ * The rule this file exists to enforce: **a listing is claimed before any
+ * token is minted.** Two buyers pressing Buy on the same item at the same
+ * moment must not both get a buy token, or the game server would refuse one
+ * of them after they had already been told it was theirs. The claim is a
+ * conditional UPDATE - it either moves the row out of `active` or it does
+ * not, and only the winner gets a token. Every other state change is the
+ * same shape, conditional on the state it leaves, so a sweep that read the
+ * row a moment ago cannot overwrite what a route did since.
  */
 
 export type Item = {
   group: number;
   num: number;
   lvl?: number;
-  isExcellent?: boolean;
-  isAncient?: boolean;
+  /** The server's own twelve serializer bytes, once the box confirmed them. */
+  raw?: number[];
   [key: string]: unknown;
 };
 
 export type Listing = {
   id: string;
   seller: string;
-  /** The character a bot has to meet to collect or return this. */
   sellerCharacter: string;
   price: number;
   item: Item;
@@ -33,10 +35,14 @@ export type Listing = {
   buyer: string | null;
   buyerCharacter: string | null;
   listedAt: number;
-  /** When the state last changed; what the dispatch deadlines count from. */
+  /** When the state last changed; what the reconcile deadlines count from. */
   updatedAt: number;
-  /** The bot account holding the item, once collected; its work from then on. */
-  holder: string | null;
+  /** The escrow box in OpenMU's database, minted with the row. */
+  boxId: string;
+  /** The item row in the box, known once the box was seen holding it. */
+  itemId: string | null;
+  /** What the seller collects for it, known once it sold. */
+  proceeds: number | null;
 };
 
 const toListing = (row: ListingRow): Listing => ({
@@ -51,12 +57,16 @@ const toListing = (row: ListingRow): Listing => ({
   buyerCharacter: row.buyer_char,
   listedAt: row.created_at,
   updatedAt: row.updated_at,
-  holder: row.holder,
+  boxId: row.box_id ?? '',
+  itemId: row.item_id,
+  proceeds: row.proceeds,
 });
+
+export const MAX_PRICE = 2_000_000_000;
 
 /**
  * Records a seller's intent to list. The row starts `pending`: nothing is on
- * sale until a bot has the item in hand.
+ * sale until the box holds the item.
  */
 export function createPending(input: {
   seller: string;
@@ -64,11 +74,12 @@ export function createPending(input: {
   price: number;
   item: Item;
   category: string;
+  boxId: string;
 }): Listing {
   if (!Number.isInteger(input.price) || input.price <= 0) {
     throw new Error('price must be a positive whole number of Zen');
   }
-  if (input.price > 2_000_000_000) {
+  if (input.price > MAX_PRICE) {
     throw new Error('price is above what a character can hold');
   }
 
@@ -78,8 +89,8 @@ export function createPending(input: {
   db.query(
     `INSERT INTO listings
        (id, seller, seller_char, price, item_group, item_number, item_level,
-        item_json, category, state, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`
+        item_json, category, state, box_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)`
   ).run(
     id,
     input.seller,
@@ -90,38 +101,27 @@ export function createPending(input: {
     input.item.lvl ?? 0,
     JSON.stringify(input.item),
     input.category,
+    input.boxId,
     now,
     now
   );
 
-  audit('listing pending', { listing: id, account: input.seller, detail: { price: input.price } });
-  return byId(id)!;
-}
-
-/** The bot has the item: the listing goes on sale. */
-export function activate(
-  id: string,
-  holder: string,
-  /** Null when the server never said where it put the item; see CollectResult. */
-  holderSlot: number | null
-): boolean {
-  const changed = db
-    .query(
-      `UPDATE listings SET state = 'active', holder = ?, holder_slot = ?, updated_at = ?
-       WHERE id = ? AND state = 'pending'`
-    )
-    .run(holder, holderSlot, Date.now(), id).changes;
-
-  if (changed) audit('listing active', { listing: id, detail: { holder, holderSlot } });
-  return changed > 0;
+  audit('listing pending', {
+    listing: id,
+    account: input.seller,
+    detail: { price: input.price, box: input.boxId },
+  });
+  const listing = byId(id);
+  if (!listing) throw new Error('the listing was not written');
+  return listing;
 }
 
 /**
  * Reserves a listing for one buyer.
  *
- * Conditional on the row still being `active`, so of two buyers racing, SQLite
- * decides and exactly one gets `true`. Everything after this - dispatching a
- * bot, meeting the buyer - happens only for the winner.
+ * Conditional on the row still being `active`, so of two buyers racing,
+ * SQLite decides and exactly one gets `true`. The buy token is minted only
+ * for the winner.
  */
 export function claim(id: string, buyer: string, buyerCharacter: string): boolean {
   const changed = db
@@ -135,133 +135,25 @@ export function claim(id: string, buyer: string, buyerCharacter: string): boolea
   return changed > 0;
 }
 
-/** The buyer walked away or the handover failed: back on sale. */
-export function release(id: string, why: string): boolean {
+/** The buyer gave up (no room, no money): back on sale at once. Only theirs to give back. */
+export function release(id: string, buyer: string, why: string): boolean {
   const changed = db
     .query(
       `UPDATE listings SET state = 'active', buyer = NULL, buyer_char = NULL, updated_at = ?
-       WHERE id = ? AND state = 'claimed'`
+       WHERE id = ? AND state = 'claimed' AND buyer = ?`
     )
-    .run(Date.now(), id).changes;
+    .run(Date.now(), id, buyer).changes;
 
-  if (changed) audit('claim released', { listing: id, detail: { why } });
+  if (changed) audit('claim released', { listing: id, account: buyer, detail: { why } });
   return changed > 0;
 }
 
-/**
- * The buyer has the item and the money is in. The price becomes the seller's
- * to collect - it is not delivered, because they are usually not online.
- */
-export function settleSale(id: string): boolean {
-  const row = byRow(id);
-  if (!row || row.state !== 'claimed') return false;
-
-  db.transaction(() => {
-    db.query(`UPDATE listings SET state = 'sold', updated_at = ? WHERE id = ?`).run(
-      Date.now(),
-      id
-    );
-    credit(row.seller, row.price);
-  })();
-
-  audit('listing sold', {
-    listing: id,
-    account: row.seller,
-    detail: { buyer: row.buyer, price: row.price },
-  });
-  return true;
-}
-
-/**
- * A `pending` listing that will not be collected: the seller refused or
- * cancelled the trade, walked away from it, or never turned up. Nothing left
- * their bag, so there is nothing to give back; the row just stops being work,
- * and the bot does not come asking again.
- */
-export function drop(id: string, why: string): boolean {
-  const changed = db
-    .query(
-      `UPDATE listings SET state = 'cancelled', updated_at = ?
-       WHERE id = ? AND state = 'pending'`
-    )
-    .run(Date.now(), id).changes;
-
-  if (changed) audit('listing dropped', { listing: id, detail: { why } });
-  return changed > 0;
-}
-
-/**
- * A seller who asked for their item back and then refused the trade that
- * returns it. The item stays the bot's and goes back on sale at the same
- * price; they can cancel again when they want it.
- */
-export function backOnSale(id: string, why: string): boolean {
-  const changed = db
-    .query(
-      `UPDATE listings SET state = 'active', updated_at = ?
-       WHERE id = ? AND state = 'returning'`
-    )
-    .run(Date.now(), id).changes;
-
-  if (changed) audit('return refused', { listing: id, detail: { why } });
-  return changed > 0;
-}
-
-/**
- * The bot cannot find the item the service says it holds. Off sale, and
- * left for a person rather than offered to the next buyer to fail on.
- */
-export function markStuck(id: string, why: string): boolean {
-  const changed = db
-    .query(
-      `UPDATE listings SET state = 'stuck', buyer = NULL, buyer_char = NULL, updated_at = ?
-       WHERE id = ? AND state IN ('active', 'claimed', 'returning')`
-    )
-    .run(Date.now(), id).changes;
-
-  if (changed) audit('listing stuck', { listing: id, detail: { why } });
-  return changed > 0;
-}
-
-/** The bot found the held item somewhere else in its bag: write that down. */
-export function adoptSlot(id: string, slot: number): void {
-  db.query('UPDATE listings SET holder_slot = ?, updated_at = ? WHERE id = ?').run(
-    slot,
-    Date.now(),
-    id
-  );
-  audit('slot adopted', { listing: id, detail: { slot } });
-}
-
-/** Which bot holds this listing's item, and where. Null holder: never collected. */
-export function holderOf(id: string): { holder: string | null; slot: number | null } {
-  const row = db
-    .query('SELECT holder, holder_slot AS slot FROM listings WHERE id = ?')
-    .get(id) as { holder: string | null; slot: number | null } | undefined;
-  return { holder: row?.holder ?? null, slot: row?.slot ?? null };
-}
-
-/**
- * Every bag slot this bot account is recorded as holding an item in, so a
- * bag search for one listing's item never lands on another listing's.
- */
-export function heldSlots(holder: string): Set<number> {
-  const rows = db
-    .query(
-      `SELECT holder_slot AS slot FROM listings
-       WHERE holder = ? AND holder_slot IS NOT NULL
-         AND state IN ('active', 'claimed', 'returning', 'stuck')`
-    )
-    .all(holder) as { slot: number }[];
-  return new Set(rows.map(r => r.slot));
-}
-
-/** The seller wants it back. Only possible while nobody has claimed it. */
-export function cancel(id: string, seller: string): boolean {
+/** The seller wants it back: off sale while they hold a cancel token. */
+export function startReturn(id: string, seller: string): boolean {
   const changed = db
     .query(
       `UPDATE listings SET state = 'returning', updated_at = ?
-       WHERE id = ? AND seller = ? AND state IN ('pending', 'active')`
+       WHERE id = ? AND seller = ? AND state = 'active'`
     )
     .run(Date.now(), id, seller).changes;
 
@@ -269,23 +161,88 @@ export function cancel(id: string, seller: string): boolean {
   return changed > 0;
 }
 
+/** A fresh cancel token for a return still under way restarts its deadline. */
+export function touchReturn(id: string, seller: string): boolean {
+  return (
+    db
+      .query(`UPDATE listings SET updated_at = ? WHERE id = ? AND seller = ? AND state = 'returning'`)
+      .run(Date.now(), id, seller).changes > 0
+  );
+}
+
+/** A `pending` listing whose item never left the seller's bag: nothing to give back. */
+export function cancelPending(id: string, seller: string, why: string): boolean {
+  const changed = db
+    .query(
+      `UPDATE listings SET state = 'cancelled', updated_at = ?
+       WHERE id = ? AND seller = ? AND state = 'pending'`
+    )
+    .run(Date.now(), id, seller).changes;
+
+  if (changed) audit('listing dropped', { listing: id, account: seller, detail: { why } });
+  return changed > 0;
+}
+
+/**
+ * Writes what the box said (reconcile.ts). Conditional on the state the
+ * verdict was reached from, so a route that moved the row in between wins.
+ */
+export function apply(id: string, from: ListingState, verdict: Verdict): boolean {
+  const sets = ['state = ?', 'updated_at = ?'];
+  const params: (string | number | null)[] = [verdict.state, Date.now()];
+  if (verdict.itemId !== undefined) {
+    sets.push('item_id = ?');
+    params.push(verdict.itemId);
+  }
+  if (verdict.proceeds !== undefined) {
+    sets.push('proceeds = ?');
+    params.push(verdict.proceeds);
+  }
+  // Back on sale means nobody holds it.
+  if (verdict.state === 'active') sets.push('buyer = NULL', 'buyer_char = NULL');
+
+  const changed = db
+    .query(`UPDATE listings SET ${sets.join(', ')} WHERE id = ? AND state = ?`)
+    .run(...params, id, from).changes;
+
+  if (changed) {
+    audit(`listing ${verdict.state}`, {
+      listing: id,
+      detail: { from, why: verdict.why, itemId: verdict.itemId, proceeds: verdict.proceeds },
+    });
+  }
+  return changed > 0;
+}
+
+/**
+ * Corrects what the catalogue says about the item from what the box holds,
+ * or adds the server's own bytes to it. The box is what the buyer receives.
+ */
+export function patchItem(id: string, patch: Partial<Item>): void {
+  const row = byRow(id);
+  if (!row) return;
+  const item = { ...(JSON.parse(row.item_json) as Item), ...patch };
+  db.query(
+    `UPDATE listings SET item_json = ?, item_group = ?, item_number = ?, item_level = ? WHERE id = ?`
+  ).run(JSON.stringify(item), item.group, item.num, item.lvl ?? 0, id);
+}
+
 export function byId(id: string): Listing | null {
   const row = byRow(id);
   return row ? toListing(row) : null;
 }
 
-function byRow(id: string): ListingRow | null {
+export function byRow(id: string): ListingRow | null {
   return (db.query('SELECT * FROM listings WHERE id = ?').get(id) as ListingRow) ?? null;
 }
 
 export type BrowseQuery = {
   category?: string;
-  search?: string;
   limit?: number;
   offset?: number;
 };
 
-/** What a browsing player sees: only what the service actually holds. */
+/** What a browsing player sees: only what a box actually holds. */
 export function browse(query: BrowseQuery = {}): { total: number; listings: Listing[] } {
   const where: string[] = [`state = 'active'`];
   const params: (string | number)[] = [];
@@ -311,139 +268,39 @@ export function browse(query: BrowseQuery = {}): { total: number; listings: List
   return { total, listings: rows.map(toListing) };
 }
 
-/** Everything a seller has in the market, whatever state it is in. */
+/** Everything a seller has in the market that is not finished with. */
 export function bySeller(seller: string): Listing[] {
   const rows = db
     .query(
-      `SELECT * FROM listings WHERE seller = ? AND state NOT IN ('sold', 'cancelled')
+      `SELECT * FROM listings WHERE seller = ? AND state NOT IN ('paid', 'cancelled')
        ORDER BY created_at DESC`
     )
     .all(seller) as ListingRow[];
   return rows.map(toListing);
 }
 
-/** Work for the bots: handovers that are waiting to happen. */
-export function pendingWork(): Listing[] {
+/** Sales whose money is still in the box, waiting for the seller to collect. */
+export function soldBy(seller: string): Listing[] {
   const rows = db
-    .query(
-      `SELECT * FROM listings WHERE state IN ('pending', 'claimed', 'returning')
-       ORDER BY updated_at ASC`
-    )
-    .all() as ListingRow[];
+    .query(`SELECT * FROM listings WHERE seller = ? AND state = 'sold' ORDER BY updated_at ASC`)
+    .all(seller) as ListingRow[];
   return rows.map(toListing);
 }
 
-export function balance(account: string): number {
-  const row = db.query('SELECT zen FROM balances WHERE account = ?').get(account) as
-    | { zen: number }
-    | undefined;
-  return row?.zen ?? 0;
+/** What the seller would collect right now. */
+export function owed(seller: string): number {
+  const row = db
+    .query(`SELECT coalesce(sum(proceeds), 0) AS zen FROM listings WHERE seller = ? AND state = 'sold'`)
+    .get(seller) as { zen: number };
+  return row.zen;
 }
 
-export function credit(account: string, zen: number): void {
-  db.query(
-    `INSERT INTO balances (account, zen) VALUES (?, ?)
-     ON CONFLICT(account) DO UPDATE SET zen = zen + excluded.zen`
-  ).run(account, zen);
-  audit('balance credited', { account, detail: { zen } });
-}
-
-/**
- * Takes the whole balance for paying out. Returns what was taken, so the
- * caller pays exactly that - and if the handover then fails, it is credited
- * back rather than quietly lost.
- */
-export function takeBalance(account: string): number {
-  const owed = balance(account);
-  if (owed <= 0) return 0;
-  db.query('UPDATE balances SET zen = 0 WHERE account = ?').run(account);
-  audit('balance taken for payout', { account, detail: { zen: owed } });
-  return owed;
-}
-
-// ---- payouts ---------------------------------------------------------------
-
-export type PayoutRequest = { account: string; character: string; requestedAt: number };
-
-/**
- * A seller asked for what they are owed. One open request per account; the
- * character is who the bot has to meet, and asking again just moves it to
- * whichever character they are on now.
- */
-export function requestPayout(account: string, character: string): void {
-  db.query(
-    `INSERT INTO payout_requests (account, character, requested_at) VALUES (?, ?, ?)
-     ON CONFLICT(account) DO UPDATE SET character = excluded.character,
-                                       requested_at = excluded.requested_at`
-  ).run(account, character, Date.now());
-  audit('payout requested', { account, detail: { character } });
-}
-
-/** Every open request whose account is still owed something, oldest first. */
-export function payoutRequests(): PayoutRequest[] {
+/** Rows in a state, optionally only those that changed before `before`. */
+export function inState(state: ListingState, before = Number.MAX_SAFE_INTEGER): Listing[] {
   const rows = db
-    .query(
-      `SELECT p.account, p.character, p.requested_at AS requestedAt
-       FROM payout_requests p JOIN balances b ON b.account = p.account
-       WHERE b.zen > 0 ORDER BY p.requested_at ASC`
-    )
-    .all() as PayoutRequest[];
-  return rows;
-}
-
-/** Paid, or given up on: the request is done either way. */
-export function clearPayoutRequest(account: string): void {
-  db.query('DELETE FROM payout_requests WHERE account = ?').run(account);
-}
-
-// ---- leases ----------------------------------------------------------------
-
-/**
- * Takes every key for `worker`, for `ttlMs`, or none of them.
- *
- * Several bots read the same rows, and a handover is not a thing two of them
- * can do at once. Keys are `listing:<id>`, `payout:<account>` and
- * `customer:<character>` - the customer too, because two bots at one player
- * would have the second trade request refused by the server, and a refusal
- * reads as the player saying no. A lease lapses on its own after `ttlMs`,
- * for a bot that died holding it; the row's own state is still what the next
- * bot works from. A worker may retake its own lease.
- */
-export function acquireLeases(keys: string[], worker: string, ttlMs: number): boolean {
-  const now = Date.now();
-  const until = now + ttlMs;
-  try {
-    db.transaction(() => {
-      for (const key of keys) {
-        const changed = db
-          .query(
-            `INSERT INTO leases (key, worker, until) VALUES (?, ?, ?)
-             ON CONFLICT(key) DO UPDATE SET worker = excluded.worker, until = excluded.until
-             WHERE leases.until < ? OR leases.worker = excluded.worker`
-          )
-          .run(key, worker, until, now).changes;
-        if (!changed) throw new Error('taken');
-      }
-    })();
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/** Gives the keys back; only the worker holding them can. */
-export function releaseLeases(keys: string[], worker: string): void {
-  for (const key of keys) {
-    db.query('DELETE FROM leases WHERE key = ? AND worker = ?').run(key, worker);
-  }
-}
-
-/** Who holds a key right now, or null when nobody does or it has lapsed. */
-export function leaseHolder(key: string): string | null {
-  const row = db.query('SELECT worker, until FROM leases WHERE key = ?').get(key) as
-    | { worker: string; until: number }
-    | undefined;
-  return row && row.until >= Date.now() ? row.worker : null;
+    .query(`SELECT * FROM listings WHERE state = ? AND updated_at < ? ORDER BY updated_at ASC`)
+    .all(state, before) as ListingRow[];
+  return rows.map(toListing);
 }
 
 // ---- history ---------------------------------------------------------------
@@ -452,13 +309,10 @@ export type HistoryStatus = 'success' | 'failed' | 'pending';
 
 export type HistoryEntry = {
   id: string;
-  /** What the player was in it: seller, buyer, or the one collecting Zen. */
-  kind: 'sale' | 'purchase' | 'payout';
-  item: Item | null;
-  /** The price of a listing, or the Zen of a payout. */
+  /** What the player was in it. */
+  kind: 'sale' | 'purchase';
+  item: Item;
   zen: number;
-  /** The bot that carried it, once one did. */
-  bot: string | null;
   status: HistoryStatus;
   /** The service's own words for how it ended, or where it is. */
   note: string;
@@ -467,108 +321,56 @@ export type HistoryEntry = {
 
 const HISTORY_LIMIT = 100;
 
-/** The last thing the audit says about a listing, for the note. */
-function lastWord(listing: string): string | null {
-  const row = db
-    .query(
-      `SELECT event, detail FROM audit WHERE listing = ?
-         AND event IN ('listing dropped', 'listing cancelled', 'claim released', 'listing stuck',
-                       'listing sold', 'return refused', 'listing active')
-       ORDER BY id DESC LIMIT 1`
-    )
-    .get(listing) as { event: string; detail: string | null } | undefined;
-  if (!row) return null;
-  try {
-    const detail = row.detail ? (JSON.parse(row.detail) as { why?: unknown }) : {};
-    if (typeof detail.why === 'string') return detail.why;
-  } catch {
-    // The event name is enough.
-  }
-  return row.event;
+function statusOf(state: ListingState): HistoryStatus {
+  if (state === 'sold' || state === 'paid') return 'success';
+  if (state === 'cancelled') return 'failed';
+  return 'pending';
 }
 
-function statusOf(state: ListingState): HistoryStatus {
-  if (state === 'sold') return 'success';
-  if (state === 'cancelled' || state === 'stuck') return 'failed';
-  return 'pending';
+function noteFor(row: ListingRow, purchase: boolean): string {
+  const buyer = row.buyer_char ?? row.buyer ?? 'somebody';
+  switch (row.state) {
+    case 'pending':
+      return 'waiting for the item';
+    case 'active':
+      return 'for sale';
+    case 'claimed':
+      return purchase ? 'waiting for your purchase' : `reserved by ${buyer}`;
+    case 'sold':
+      return purchase ? 'bought' : `sold to ${buyer}, waiting to be collected`;
+    case 'paid':
+      return purchase ? 'bought' : `sold to ${buyer}`;
+    case 'returning':
+      return 'coming back to you';
+    case 'cancelled':
+      return row.item_id ? 'returned to you' : 'never listed';
+    default:
+      return row.state;
+  }
 }
 
 /**
  * Everything this account has been part of, newest first: what they sold or
- * tried to sell, what they bought, and what they were paid. Every row names
- * the bot that carried it, so "the trader never came" has a name to look
- * for in the worker's log.
+ * tried to sell, and what they bought.
  */
 export function historyFor(account: string): HistoryEntry[] {
-  const listings = db
+  const rows = db
     .query(
       `SELECT * FROM listings WHERE seller = ? OR buyer = ?
        ORDER BY updated_at DESC LIMIT ?`
     )
     .all(account, account, HISTORY_LIMIT) as ListingRow[];
 
-  const entries: HistoryEntry[] = listings.map(row => {
+  return rows.map(row => {
     const purchase = row.buyer === account && row.seller !== account;
-    const state = row.state;
-    let note = lastWord(row.id) ?? state;
-    if (state === 'sold') note = purchase ? 'bought' : `sold to ${row.buyer_char ?? row.buyer ?? 'somebody'}`;
-    if (state === 'cancelled' && note === 'listing cancelled') note = 'returned to you';
     return {
       id: row.id,
       kind: purchase ? 'purchase' : 'sale',
       item: JSON.parse(row.item_json) as Item,
       zen: row.price,
-      bot: row.holder,
-      status: statusOf(state),
-      note,
+      status: statusOf(row.state),
+      note: noteFor(row, purchase),
       at: row.updated_at,
     };
   });
-
-  const payouts = db
-    .query(
-      `SELECT id, at, event, detail FROM audit WHERE account = ?
-         AND event IN ('payout paid', 'payout failed')
-       ORDER BY id DESC LIMIT ?`
-    )
-    .all(account, HISTORY_LIMIT) as { id: number; at: number; event: string; detail: string | null }[];
-  for (const row of payouts) {
-    let zen = 0;
-    let note = row.event === 'payout paid' ? 'paid out' : 'could not be paid';
-    try {
-      const detail = row.detail ? (JSON.parse(row.detail) as { zen?: unknown }) : {};
-      if (typeof detail.zen === 'number') zen = detail.zen;
-      else if (typeof row.detail === 'string' && row.event === 'payout failed') note = row.detail.replace(/^"|"$/g, '');
-    } catch {
-      // The event name is enough.
-    }
-    entries.push({
-      id: `payout-${row.id}`,
-      kind: 'payout',
-      item: null,
-      zen,
-      bot: null,
-      status: row.event === 'payout paid' ? 'success' : 'failed',
-      note,
-      at: row.at,
-    });
-  }
-
-  const open = db.query('SELECT character, requested_at FROM payout_requests WHERE account = ?').get(account) as
-    | { character: string; requested_at: number }
-    | undefined;
-  if (open) {
-    entries.push({
-      id: 'payout-open',
-      kind: 'payout',
-      item: null,
-      zen: balance(account),
-      bot: null,
-      status: 'pending',
-      note: `a trader is coming to ${open.character}`,
-      at: open.requested_at,
-    });
-  }
-
-  return entries.sort((a, b) => b.at - a.at).slice(0, HISTORY_LIMIT);
 }
