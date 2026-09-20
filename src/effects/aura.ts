@@ -107,13 +107,18 @@ const SPARK_FALL = 0.013;
 const SPARK_SPIN = (5 * Math.PI) / 180;
 const SPARK_SHRINK = px(64, 0.02);
 
-/** Stun: three MODEL_SPEARSKILL sub8 joints, 40 cm out, turning 25° and rising 15 cm a tick for 40 ticks, Scale 30 (ZzzEffectJoint.cpp:1633, :4370). */
+/**
+ * Stun: three MODEL_SPEARSKILL sub8 joints, 40 cm out, turning 25° and
+ * rising 15 cm a tick for 40 ticks, Scale 30, on the BITMAP_LIGHT sheet
+ * (ZzzEffectJoint.cpp:1633, :4370). The original's Light is 0.5; a half-grey
+ * flare strip does not read at our camera, so ours is white.
+ */
 const STUN_RADIUS = 0.4;
 const STUN_TURN = (25 * Math.PI) / 180;
 const STUN_RISE = 0.15;
 const STUN_TICKS = 40;
 const STUN_WIDTH = 0.3;
-const STUN_LIGHT: RGB = [0.5, 0.5, 0.5];
+const STUN_LIGHT: RGB = [1, 1, 1];
 
 /**
  * AG recovery rings: every 50 ticks a BITMAP_JOINT_HEALING sub9 joint (width
