@@ -12,6 +12,8 @@ import { DEFAULT_TRACK_DB, SqliteJournal } from "./track/store";
 import { startDemo } from "./track/demo";
 import { BandHub, type BandPeer } from "./band/hub";
 import { isBandFrame } from "../src/common/bandProtocol";
+import { PingHub, type PingPeer } from "./ping/hub";
+import { isPingFrame } from "../src/common/pingProtocol";
 
 const PORT = process.env.PORT || "3000";
 const HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
@@ -84,6 +86,15 @@ const BAND_MAX_PERFORMERS = Number(process.env.BAND_MAX_PERFORMERS ?? 16);
 const BAND_MAX_RECEIVERS = Number(process.env.BAND_MAX_RECEIVERS ?? 48);
 
 /**
+ * The map ping relay (documentation/ping/ARCHITECTURE.md): pointer frames
+ * (`C1 .. FB`) never reach the game server either; each is relayed to the
+ * sockets whose character can see the sender. `PING=off` swallows them.
+ * Needs `TRACK` on, same as the band.
+ */
+const PING_ENABLED = (process.env.PING ?? "on") !== "off";
+const PING_MAX_RECEIVERS = Number(process.env.PING_MAX_RECEIVERS ?? 48);
+
+/**
  * Dev seams for the panel, both loud at startup and neither for a public
  * proxy: `ADMIN_OPEN=on` lets a loopback client stream without a game master
  * socket (the offline client has no login to vouch for), `ADMIN_DEMO=on`
@@ -120,6 +131,8 @@ type RelayData = {
   track: TrackedSession | null;
   /** This socket as the band relay knows it; set in `open`, null without tracking. */
   band: BandPeer | null;
+  /** This socket as the ping relay knows it; set in `open`, null without tracking. */
+  ping: PingPeer | null;
 };
 
 type AdminData = {
@@ -267,6 +280,35 @@ if (BAND_ENABLED && tracker) {
   console.log("band: off");
 }
 
+/* ------------------------------------------------------------------ ping */
+
+let ping: PingHub | null = null;
+
+if (PING_ENABLED && tracker) {
+  ping = new PingHub({
+    maxReceivers: PING_MAX_RECEIVERS,
+    log: line => console.log(line),
+  });
+  const hub = ping;
+
+  // A stats line a minute, only when something happened.
+  let last = JSON.stringify(hub.stats());
+  setInterval(() => {
+    const stats = hub.stats();
+    const line = JSON.stringify(stats);
+    if (line !== last) {
+      last = line;
+      console.log(`ping: ${line}`);
+    }
+  }, 60_000);
+
+  console.log(`ping: on (max ${PING_MAX_RECEIVERS} receivers) - PING=off to disable`);
+} else if (PING_ENABLED) {
+  console.warn("ping: off (TRACK=off - the relay needs the tracker's scope to know who sees whom)");
+} else {
+  console.log("ping: off");
+}
+
 startPresenceServer();
 
 Bun.serve<WebSocketData>({
@@ -331,7 +373,7 @@ Bun.serve<WebSocketData>({
     const presence = new ConnectionPresence(session, targetPort);
     const track = tracker ? tracker.open(session, targetPort) : null;
 
-    const data: RelayData = { kind: "relay", targetHost, targetPort, presence, track, band: null };
+    const data: RelayData = { kind: "relay", targetHost, targetPort, presence, track, band: null, ping: null };
 
     // upgrade the request to a WebSocket
     if (server.upgrade(req, { data })) {
@@ -379,6 +421,13 @@ Bun.serve<WebSocketData>({
         relay.data.band = peer;
         band.attach(peer);
         relay.send(BandHub.hello());
+      }
+
+      if (ping && relay.data.track) {
+        const peer: PingPeer = { track: relay.data.track, send: frame => relay.send(frame) };
+        relay.data.ping = peer;
+        ping.attach(peer);
+        relay.send(PingHub.hello());
       }
 
       // Connect to TCP server
@@ -453,6 +502,10 @@ Bun.serve<WebSocketData>({
           if (band && relay.data.band) band.receive(relay.data.band, bytes);
           return;
         }
+        if (isPingFrame(bytes)) {
+          if (ping && relay.data.ping) ping.receive(relay.data.ping, bytes);
+          return;
+        }
       }
 
       const socket = relay.data.tcpSocket;
@@ -485,6 +538,7 @@ Bun.serve<WebSocketData>({
       // Before the tracker closes the session: the gone / leave notices
       // still need its map and scope.
       if (relay.data.band) band?.detach(relay.data.band);
+      if (relay.data.ping) ping?.detach(relay.data.ping);
       if (relay.data.track) tracker?.close(relay.data.track);
 
       const socket = relay.data.tcpSocket;

@@ -1,4 +1,5 @@
 import { installBandNet } from './band/bandNet';
+import { installPingNet } from './ping/pingNet';
 import { runInAction } from 'mobx';
 import { t, type TextKey } from './i18n';
 import { CharacterClassNumber, ENUM_WORLD } from './common';
@@ -4322,3 +4323,6 @@ if (hot) hot.decline();
 
 // The band system: the proxy relay listener and the transport the facade sends through.
 installBandNet();
+
+// The map ping: the proxy relay listener behind Shift + middle click.
+installPingNet();
