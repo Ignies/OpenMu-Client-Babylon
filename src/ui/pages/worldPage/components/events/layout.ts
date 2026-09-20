@@ -73,6 +73,47 @@ export const DG_BUTTON = { width: 53, height: 23 };
 export const DG_BUTTON_SPRITE = 'newui_btn_empty_very_small.OZT';
 export const DG_LINE_SPRITE = 'newui_myquest_Line.OZT';
 
+/**
+ * `CNewUIKanturu2ndEnterNpc` (NewUIKanturuEvent.cpp): the three-slice message
+ * box at `((640-230)/2, 20)` with ten middle slices, a bold blue subject from
+ * y 30 in 12 px rows, the body 20 px under it (green first, pale yellow after)
+ * and three 53x23 buttons at y 220 - Refresh, Enter, Close.
+ */
+export const KT_WINDOW = { x: (640 - 230) / 2, y: 20 };
+export const KT_MIDDLE_LINES = 10;
+export const KT_SUBJECT_Y = 30;
+export const KT_LINE_HEIGHT = 12;
+export const KT_BODY_GAP = 20;
+export const KT_PARAGRAPH_GAP = 15;
+/** `0xFF49B0FF`, `0xFF61F191` and `CLRDW_BR_YELLOW`. */
+export const KT_SUBJECT_COLOR = 'rgb(73,176,255)';
+export const KT_BODY_COLOR = 'rgb(97,241,145)';
+export const KT_BODY_COLOR_REST = 'rgb(255,238,193)';
+export const KT_BUTTON_Y = 220;
+export const KT_BUTTON_X = [17, 87, 157] as const;
+export const KT_BUTTON = { width: 53, height: 23 };
+/** `ChangeImgColor(BUTTON_STATE_UP, RGBA(100,100,100,255))` when locked. */
+export const KT_BUTTON_DISABLED = 'rgb(100,100,100)';
+
+/** `CNewUIKanturuInfoWindow`: `newui_Figure_kantru` 99x78 at (541, 351). */
+export const KT_FIGURE_SPRITE = 'newui_Figure_kantru.OZT';
+export const KT_FIGURE = { x: 541, y: 351, width: 99, height: 78 };
+export const KT_FIGURE_TEXT_X = 10;
+export const KT_FIGURE_USER_Y = 15;
+export const KT_FIGURE_MONSTER_Y = 35;
+export const KT_FIGURE_COLOR = 'rgb(134,134,199)';
+/** `RenderNumber` at +35 / +65, the colon blinking at +48 every 500 ms. */
+export const KT_CLOCK = { minuteX: 35, secondX: 65, y: 55, colonX: 48, colonY: 57 };
+export const KT_CLOCK_BLINK_MS = 500;
+
+/**
+ * `Kanturu3rdSuccess` / `Kanturu3rdFailed`: a 372x99 banner centred across
+ * the stage. The original's y is `(480 - fWidth) / 2` - it divides by the
+ * banner's *width* - which lands it at 54; keep the place, not the slip.
+ */
+export const KT_RESULT_SPRITES = ['Failure_kantru.OZT', 'Success_kantru.OZT'] as const;
+export const KT_RESULT = { x: (640 - 372) / 2, y: 54, width: 372, height: 99 };
+
 export const TIMER_SPRITE = 'newui_Figure_blood.OZT';
 export const TIMER = { x: 640 - 127, y: 480 - 132, width: 124, height: 81 };
 export const TIMER_COUNT_Y = 13;

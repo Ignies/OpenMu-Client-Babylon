@@ -1,30 +1,23 @@
-// The original's three-slice message box (`CNewUIMessageBoxMng::LoadImages`,
-// NewUIMessageBox.cpp:444): a 230-wide frame over a stretched fill, whose
-// middle slice repeats once per line of text. Only the prompt with two fields
-// needs it; everything else fits the 352x113 box in `msgWindow/layout.ts`.
-export const TALL_BACK_SPRITE = 'newui_msgbox_back.OZJ';
-export const TALL_TOP_SPRITE = 'newui_msgbox_top.OZT';
-export const TALL_MIDDLE_SPRITE = 'newui_msgbox_middle.OZT';
-export const TALL_BOTTOM_SPRITE = 'newui_msgbox_bottom.OZT';
+// The original's three-slice message box, from `ui/components/msgBoxFrame`:
+// the two-field prompt is the only economy window that needs it; everything
+// else fits the 352x113 box in `msgWindow/layout.ts`.
+import {
+  MSGBOX_BOTTOM_HEIGHT,
+  MSGBOX_MIDDLE_HEIGHT,
+  MSGBOX_TOP_HEIGHT,
+  MSGBOX_WIDTH,
+  msgBoxHeight,
+} from '../../../../components/msgBoxFrame';
 
-// `MSGBOX_WIDTH`, `MSGBOX_TOP_HEIGHT`, `MSGBOX_MIDDLE_HEIGHT`,
-// `MSGBOX_BOTTOM_HEIGHT` (NewUICommonMessageBox.h:30).
-export const TALL_WIDTH = 230;
-export const TALL_TOP_HEIGHT = 67;
-export const TALL_MIDDLE_HEIGHT = 15;
-export const TALL_BOTTOM_HEIGHT = 50;
+export const TALL_WIDTH = MSGBOX_WIDTH;
+export const TALL_TOP_HEIGHT = MSGBOX_TOP_HEIGHT;
+export const TALL_MIDDLE_HEIGHT = MSGBOX_MIDDLE_HEIGHT;
+export const TALL_BOTTOM_HEIGHT = MSGBOX_BOTTOM_HEIGHT;
 
 /** Middle slices: what a title, a wrapping message and two fields need. */
 export const TALL_MIDDLE_LINES = 8;
 
-export const TALL_HEIGHT =
-  TALL_TOP_HEIGHT + TALL_MIDDLE_HEIGHT * TALL_MIDDLE_LINES + TALL_BOTTOM_HEIGHT;
-
-// `MSGBOX_BACK_BLANK_WIDTH` / `_HEIGHT`: the fill is stretched a little
-// smaller than the frame so the frame's own edge stays on top of it.
-export const TALL_BACK_TOP = 2;
-export const TALL_BACK_WIDTH = TALL_WIDTH - 8;
-export const TALL_BACK_HEIGHT = TALL_HEIGHT - 10;
+export const TALL_HEIGHT = msgBoxHeight(TALL_MIDDLE_LINES);
 
 // `MSGBOX_TEXT_TOP_BLANK` 35, `MSGBOX_TEXT_MAXWIDTH` 180.
 export const TALL_TEXT_INSET_X = 25;

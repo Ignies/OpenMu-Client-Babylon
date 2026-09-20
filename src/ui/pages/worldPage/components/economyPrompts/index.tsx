@@ -43,12 +43,6 @@ import {
   WIN_WIDTH,
 } from '../../../../components/msgWindow/layout';
 import {
-  TALL_BACK_HEIGHT,
-  TALL_BACK_SPRITE,
-  TALL_BACK_TOP,
-  TALL_BACK_WIDTH,
-  TALL_BOTTOM_HEIGHT,
-  TALL_BOTTOM_SPRITE,
   TALL_BTN_CANCEL_X,
   TALL_BTN_OK_X,
   TALL_BTN_Y,
@@ -56,20 +50,15 @@ import {
   TALL_FIELD_ONE_LABEL_Y,
   TALL_FIELD_TWO_INPUT_Y,
   TALL_FIELD_TWO_LABEL_Y,
-  TALL_HEIGHT,
   TALL_INPUT_X,
   TALL_LABEL_HEIGHT,
-  TALL_MIDDLE_HEIGHT,
   TALL_MIDDLE_LINES,
-  TALL_MIDDLE_SPRITE,
   TALL_TEXT_INSET_X,
   TALL_TEXT_LINE_HEIGHT,
   TALL_TEXT_LINES,
   TALL_TEXT_TOP,
-  TALL_TOP_HEIGHT,
-  TALL_TOP_SPRITE,
-  TALL_WIDTH,
 } from './layout';
+import { MsgBoxFrame } from '../../../../components/msgBoxFrame';
 
 const zen = (gold: number) => `${gold.toLocaleString('en-US')} Zen`;
 
@@ -192,47 +181,9 @@ const SmallBox = ({ children }: { children: ReactNode }) => (
 
 /** The three-slice box, for the one prompt that asks for two things. */
 const TallBox = ({ children }: { children: ReactNode }) => (
-  <div className="economy-prompt" style={{ width: TALL_WIDTH, height: TALL_HEIGHT }}>
-    <MuSpriteFrame
-      file={TALL_BACK_SPRITE}
-      style={{
-        position: 'absolute',
-        left: 0,
-        top: TALL_BACK_TOP,
-        width: TALL_BACK_WIDTH,
-        height: TALL_BACK_HEIGHT,
-        backgroundSize: '100% 100%',
-      }}
-    />
-    <MuSpriteFrame
-      file={TALL_TOP_SPRITE}
-      width={TALL_WIDTH}
-      height={TALL_TOP_HEIGHT}
-      style={{ position: 'absolute', left: 0, top: 0 }}
-    />
-    <MuSpriteFrame
-      file={TALL_MIDDLE_SPRITE}
-      width={TALL_WIDTH}
-      height={TALL_MIDDLE_HEIGHT * TALL_MIDDLE_LINES}
-      style={{
-        position: 'absolute',
-        left: 0,
-        top: TALL_TOP_HEIGHT,
-        backgroundRepeat: 'repeat-y',
-      }}
-    />
-    <MuSpriteFrame
-      file={TALL_BOTTOM_SPRITE}
-      width={TALL_WIDTH}
-      height={TALL_BOTTOM_HEIGHT}
-      style={{
-        position: 'absolute',
-        left: 0,
-        top: TALL_HEIGHT - TALL_BOTTOM_HEIGHT,
-      }}
-    />
+  <MsgBoxFrame lines={TALL_MIDDLE_LINES} className="economy-prompt">
     {children}
-  </div>
+  </MsgBoxFrame>
 );
 
 type TextBlockProps = {

@@ -8,6 +8,7 @@ import { duelLayer } from './duel';
 import { doppelgangerLayer } from './doppelganger';
 import { crywolfLayer } from './crywolf';
 import { goldenArcherLayer } from './goldenArcher';
+import { kanturuLayer } from './kanturu';
 import { scheduleLayer } from './schedule';
 
 /**
@@ -28,5 +29,6 @@ export const EVENT_LAYERS: readonly EventLayer[] = [
   doppelgangerLayer,
   crywolfLayer,
   goldenArcherLayer, // Rena registration dialog, no match of its own
+  kanturuLayer, // the Refinery Tower gateway and the in-event figure
   scheduleLayer, // when the three events next open, for the HUD rows
 ];

@@ -36,6 +36,7 @@ import {
   formatText,
 } from '../../../../../events/recipes';
 import { GoldenArcherWindow } from './goldenArcherWindow';
+import { KanturuFigure, KanturuResult, KanturuWindow } from './kanturuWindow';
 import { EventTimers } from './eventTimers';
 // Aliased: this file already binds `t` to a timer record in two components.
 import { t as text } from '../../../../../i18n';
@@ -879,6 +880,9 @@ export const EventWindows = observer(() => (
     <DevilSquareWindow />
     <DoppelgangerWindow />
     <GoldenArcherWindow />
+    <KanturuWindow />
+    <KanturuFigure />
+    <KanturuResult />
     <ChaosCastlePrompt />
     <EventTimers />
     <EventTimer />

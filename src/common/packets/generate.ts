@@ -1033,7 +1033,7 @@ for (const name of files) {
 
   writer.write(`
 import { CharacterClassNumber } from '../types';
-import { SetByteValue, GetByteValue, GetBoolean, SetBoolean } from '../utils';
+import { SetByteValue, GetByteValue, GetBoolean, SetBoolean } from '../binaryUtils';
 
 `);
 

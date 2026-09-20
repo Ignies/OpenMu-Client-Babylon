@@ -138,6 +138,47 @@ export const EVENT_TEXT = textTable({
   cwContractRefused: 'event.cwContractRefused',
   /** Ours: the original folds the rate into the mix window's percentages. */
   cwBenefit: 'event.cwBenefit',
+
+  // ---- Kanturu (NewUIKanturuEvent.cpp) ------------------------------------
+  /** GlobalText[2179] / [2147] / [2148]: the window and its two buttons. */
+  ktTitle: 'event.ktTitle',
+  ktEnter: 'event.ktEnter',
+  ktRefresh: 'event.ktRefresh',
+  /** GlobalText[2149..2151]: the Tower is open. */
+  ktTowerOpen: 'event.ktTowerOpen',
+  ktPathOpened: 'event.ktPathOpened',
+  ktPathClosesIn: 'event.ktPathClosesIn',
+  /** GlobalText[2174], [2160], [2161]: the Tower is sealed. */
+  ktNoWarp: 'event.ktNoWarp',
+  ktDefeatNightmare: 'event.ktDefeatNightmare',
+  ktMoonstoneRequired: 'event.ktMoonstoneRequired',
+  /** GlobalText[2152..2157]: a battle is under way. */
+  ktMayaOngoing: 'event.ktMayaOngoing',
+  ktPlayersOpening: 'event.ktPlayersOpening',
+  ktInBattleLeft: 'event.ktInBattleLeft',
+  ktInBattleRight: 'event.ktInBattleRight',
+  ktInBattleBoth: 'event.ktInBattleBoth',
+  ktInBattleNightmare: 'event.ktInBattleNightmare',
+  /** GlobalText[2163], [2164], [2172]: the join window. */
+  ktMorePlayersNeeded: 'event.ktMorePlayersNeeded',
+  ktMayNowEnter: 'event.ktMayNowEnter',
+  ktMoonstoneFailed: 'event.ktMoonstoneFailed',
+  /** GlobalText[2165..2169]: a hand is freed. */
+  ktLostControlLeftCount: 'event.ktLostControlLeftCount',
+  ktLostControlRightCount: 'event.ktLostControlRightCount',
+  ktMorePowerNeeded: 'event.ktMorePowerNeeded',
+  ktLostControlLeft: 'event.ktLostControlLeft',
+  ktLostControlRight: 'event.ktLostControlRight',
+  /** GlobalText[2158], [2159], [2162]: standby. */
+  ktBossBattleSoon: 'event.ktBossBattleSoon',
+  ktNightmareInvaded: 'event.ktNightmareInvaded',
+  ktApproachShortly: 'event.ktApproachShortly',
+  /** GlobalText[2170]. */
+  ktFailedToEnter: 'event.ktFailedToEnter',
+  /** GlobalText[2180], [2182], [2183]: the in-event figure's two lines. */
+  ktCharacterCount: 'event.ktCharacterCount',
+  ktMonsterBoss: 'event.ktMonsterBoss',
+  ktMonsterCount: 'event.ktMonsterCount',
 });
 
 /**
