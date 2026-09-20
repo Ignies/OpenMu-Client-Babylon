@@ -31,7 +31,18 @@ import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 const SECONDS = PING_LIMITS.lifetimeMs / 1000;
 
 /** Marker diameter in tiles: a bit over a character wide, readable from the default camera. */
-const MARKER_TILES = 2.2;
+const MARKER_TILES = 2.8;
+
+/**
+ * Height in tiles of the beam standing on the marked spot. The ground decal
+ * alone cannot carry the pointer: it is additive, and additive over a
+ * sunlit stone floor adds almost nothing to pixels that are already near
+ * white. The beam stands clear of the ground and so reads against any map.
+ */
+const BEACON_TILES = 1.9;
+
+/** Beam width in tiles - thicker than the trail, since it is the thing being pointed at. */
+const BEACON_WIDTH = 0.28;
 
 /** The marker snaps in at this much of its size and settles, rather than growing out of nothing. */
 const MARKER_GROW_FROM = 1.35;
@@ -59,8 +70,13 @@ const TRAIL_LIFT = 0.25;
 const TRAIL_REPEATS = 3;
 const TRAIL_SCROLL = 1.2;
 
-/** One colour for every player: who pinged is already said by where the trail starts. */
-const COLOUR: RGB = RGBS.holy;
+/**
+ * One colour for every player: who pinged is already said by where the trail
+ * starts. Saturated blue, not the warm white the other ground effects use -
+ * MU's terrain is warm sandstone almost everywhere, and an additive warm
+ * white on it has no contrast to spend.
+ */
+const COLOUR: RGB = RGBS.tide;
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -73,8 +89,7 @@ export interface PingOptions {
 
 type Live = {
   ownerId: number;
-  marker: EffectHandle;
-  trail: EffectHandle | null;
+  parts: EffectHandle[];
 };
 
 const live = new LiveList();
@@ -93,8 +108,7 @@ export function pingLiveFor(ownerId: number): boolean {
 function stopFor(ownerId: number): void {
   const previous = byOwner.get(ownerId);
   if (!previous) return;
-  previous.marker.stop();
-  previous.trail?.stop();
+  for (const part of previous.parts) part.stop();
   byOwner.delete(ownerId);
 }
 
@@ -116,6 +130,22 @@ function spawn(scene: Scene, at: Vector3, opts: PingOptions): EffectHandle {
     spin: MARKER_SPIN,
   });
 
+  // The beam that actually marks the spot. Two fixed ends, straight up.
+  const top = new Vector3(at.x, at.y + BEACON_TILES, at.z);
+  const beacon = spawnJoint(scene, at, {
+    from: fixedPoint(at),
+    to: fixedPoint(top),
+    jitter: 0,
+    taper: true,
+    segments: 6,
+    width: BEACON_WIDTH,
+    colour: COLOUR,
+    seconds: SECONDS,
+    texture: TEX.jointSpirit,
+    textureRepeats: 1,
+    textureScroll: -TRAIL_SCROLL,
+  });
+
   const trail = opts.owner
     ? spawnJoint(scene, at, {
         from: opts.owner,
@@ -133,7 +163,8 @@ function spawn(scene: Scene, at: Vector3, opts: PingOptions): EffectHandle {
       })
     : null;
 
-  const entry: Live = { ownerId: opts.ownerId, marker, trail };
+  const parts = trail ? [marker, beacon, trail] : [marker, beacon];
+  const entry: Live = { ownerId: opts.ownerId, parts };
   byOwner.set(opts.ownerId, entry);
 
   let t = 0;
@@ -146,8 +177,7 @@ function spawn(scene: Scene, at: Vector3, opts: PingOptions): EffectHandle {
       // Only clear the register if this entry is still the owner's: a
       // replacement already took the slot and must keep it.
       if (byOwner.get(opts.ownerId) === entry) byOwner.delete(opts.ownerId);
-      marker.stop();
-      trail?.stop();
+      for (const part of parts) part.stop();
     },
   });
 }

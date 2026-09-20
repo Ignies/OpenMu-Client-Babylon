@@ -27,6 +27,9 @@ import {
 /** Tiles above the terrain the marker's own point sits at; the decal drapes from there. */
 const MARKER_HEIGHT = 0.05;
 
+/** The hero's own pointer key before the server hands out an object id. Never a real id. */
+const SELF_OWNER = -1;
+
 let installed = false;
 let available = false;
 let helloSocket: WebSocket | null = null;
@@ -52,8 +55,11 @@ function targetOf(point: PingPoint): Vector3 | null {
  */
 export function requestPing(x: number, z: number): boolean {
   const world = Store.world;
-  const self = Store.playerId ?? -1;
-  if (!world || self < 0) return false;
+  if (!world) return false;
+  // Offline, and until the server names this hero, there is no object id -
+  // but the pointer is still the player's own to see, so it is keyed by
+  // `SELF_OWNER`, which no relayed id can be.
+  const self = Store.playerId ?? SELF_OWNER;
   if (pingLiveFor(self)) return false;
 
   const at = targetOf({ x, z });
