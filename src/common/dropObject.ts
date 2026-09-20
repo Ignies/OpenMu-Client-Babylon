@@ -68,6 +68,13 @@ export class DropObject extends ModelObject {
     for (const mesh of this.getMeshes(true)) {
       if (mesh.getTotalVertices() === 0) continue;
 
+      // Babylon keeps a mesh's thin-instance buffers (`world0..3`, `muInst`) on
+      // its *Geometry*, and every drop of a model is a clone sharing the cached
+      // container's. Left shared, each new zen pile rewrote the buffers for
+      // every pile already on the ground, so they all took the newest one's
+      // scatter. One geometry copy per pile is the price of its own coins.
+      mesh.makeGeometryUnique();
+
       // The scatter is a displacement in the node's frame, so an instance is
       // `meshToNode . T . meshToNode^-1`: a plain translation by T's vector
       // taken back through the mesh's own basis. Conjugating it that way also
