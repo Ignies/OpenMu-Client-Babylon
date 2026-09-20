@@ -1028,8 +1028,8 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
   const m = new MeshBuilder();
 
   // The pillar: vertical, its face toward +Y (the player's side is the same
-  // either way), reaching the neck's top.
-  const pillarP = pillar.alongZ(pillarRect, HARP_HEIGHT - 1, 0);
+  // either way), ending just inside the neck's underside so the neck caps it.
+  const pillarP = pillar.alongZ(pillarRect, HARP_HEIGHT - 4, 0);
   extrudeFlat(m, decimate(pillar.columns(), pillar.tolerance()), pillarP, 3, () => 6, wood);
 
   // The soundbox: from the base's back edge up to the neck's back end. Its
@@ -1053,9 +1053,10 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
 
   // The neck: across the top, rooted inside the pillar, out to the crown;
   // thickness along Y.
-  // Hung from its top edge, its thick front end resting on the pillar.
+  // Hung from its top edge, its thick front end capping the pillar, flush
+  // with the pillar's front.
   const neckP: Placement = {
-    ...h.neck.alongZ(neckRect, HARP_DEPTH + 9, 0, ([a, t, l]) => [l - 13, t, HARP_NECK_TOP - a]),
+    ...h.neck.alongZ(neckRect, HARP_DEPTH + 9, 0, ([a, t, l]) => [l - 5.5, t, HARP_NECK_TOP - a]),
     originPy: 0,
   };
   const neckColumns = h.neck.columns();
@@ -1072,7 +1073,7 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
   for (let i = 0; i < HARP_STRINGS; i++) {
     const t = (i + 0.5) / HARP_STRINGS;
     const x = 8 + t * (HARP_DEPTH - 14);
-    const zTop = neckUnderside(((x + 13) / (HARP_DEPTH + 9)) * (h.neck.width - 1)) - 0.5;
+    const zTop = neckUnderside(((x + 5.5) / (HARP_DEPTH + 9)) * (h.neck.width - 1)) - 0.5;
     // Where the soundbox's upper edge passes under x: along the slant, out
     // by half the photo's width there.
     const along = (x - foot[0]) / slant[0];
