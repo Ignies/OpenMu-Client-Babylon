@@ -1,8 +1,13 @@
 import type { Entity, World } from '../ecs/world';
+import { Vector3 } from '../libs/babylon/exports';
 import { loadGLTF } from './modelLoader';
 import { ModelObject } from './modelObject';
 import type { Item } from '../ecs/world';
 import { PlayerAction } from './objects/enum';
+import {
+  improvedItemEffectsOn,
+  legacyItemEffectsOn,
+} from './itemEffectMode';
 
 /**
  * `c->Helper` - the pet / mount slot of the appearance (group 13, indices
@@ -88,6 +93,11 @@ export type PetSpec = {
   readonly shineMesh?: number;
   /** `b->BodyLight = 1,1,1`: drawn at full brightness, unlit by the map. */
   readonly fullBright?: boolean;
+  /**
+   * The improved look's sheen for `shineMesh`, in the wolf's own colour, in
+   * place of the original's grey sphere map. See `fenrirShine`.
+   */
+  readonly improvedRim?: readonly [number, number, number];
 };
 
 const PETS: Readonly<Record<number, PetSpec>> = {
@@ -156,7 +166,8 @@ function fenrirSpec(
   variant: FenrirVariant,
   thunder: readonly [number, number, number],
   footSubType: number,
-  shineMesh: number
+  shineMesh: number,
+  improvedRim: readonly [number, number, number]
 ): PetSpec {
   // CreateMountSub: Scale 0.9; pinned to the rider like the Dark Horse
   // (MoveMount, GOBoid.cpp:174-266), clips driven by fenrirMountAction.
@@ -168,6 +179,7 @@ function fenrirSpec(
     thunder,
     footSubType,
     shineMesh,
+    improvedRim,
     fullBright: true,
   };
 }
@@ -184,11 +196,58 @@ function fenrirSpec(
  * three, `panril_golden` for gold - so the colour is what catches the light.
  */
 const FENRIRS: Readonly<Record<FenrirVariant, PetSpec>> = {
-  red: fenrirSpec('red', [0.8, 0, 0], 1, 1),
-  blue: fenrirSpec('blue', [0.1, 0.1, 0.8], 2, 1),
-  black: fenrirSpec('black', [1.0, 1.0, 0.2], 3, 1),
-  gold: fenrirSpec('gold', [0.8, 0.8, 0.1], 4, 0),
+  red: fenrirSpec('red', [0.8, 0, 0], 1, 1, [1.0, 0.25, 0.12]),
+  blue: fenrirSpec('blue', [0.1, 0.1, 0.8], 2, 1, [0.25, 0.5, 1.0]),
+  black: fenrirSpec('black', [1.0, 1.0, 0.2], 3, 1, [0.95, 0.85, 0.3]),
+  gold: fenrirSpec('gold', [0.8, 0.8, 0.1], 4, 0, [1.0, 0.72, 0.18]),
 };
+
+/**
+ * Improved sheen while the original's chrome pass is drawn as well ("Both"),
+ * the same reduction the item tiers make for the same reason.
+ */
+const BOTH_SCALE = 0.65;
+
+/**
+ * Which of the wolf's two body passes are live, from Options -> Video ->
+ * Item effects:
+ *
+ *  - **Legacy** - the original's own: Chrome01 sphere-mapped over the mesh
+ *    that carries the variant's colour, additive and grey, so a dark wolf
+ *    comes up a polished one (ZzzObject.cpp:805-830).
+ *  - **Improved** - ours: the in-surface sheen every item's improved glow
+ *    uses, in the wolf's own colour. It rides the texel's own brightness, so
+ *    the black Fenrir stays black and lights along its edges instead.
+ *  - **Both** - the two together, the improved half held back.
+ *  - **Off** - neither; the plain model.
+ *
+ * `casting` is the skill clip, where the original draws the chrome pass a
+ * second time (:832-838).
+ */
+export function fenrirShine(
+  model: ModelObject,
+  spec: PetSpec,
+  casting = false
+): void {
+  if (spec.shineMesh === undefined) return;
+
+  const legacy = legacyItemEffectsOn();
+  const improved = improvedItemEffectsOn();
+  const shine = model.BodyShine;
+
+  // `glColor3fv(BodyLight)` on the chrome pass, and BodyLight is white.
+  shine.tint.setAll(legacy ? (casting ? 2 : 1) : 0);
+
+  const rim = spec.improvedRim;
+  shine.improved ??= new Vector3();
+  if (!improved || !rim) {
+    shine.improved.setAll(0);
+    return;
+  }
+
+  const scale = (legacy ? BOTH_SCALE : 1) * (casting ? 1.8 : 1);
+  shine.improved.set(rim[0] * scale, rim[1] * scale, rim[2] * scale);
+}
 
 export function petSpec(item: Item | null | undefined): PetSpec | null {
   if (!item || item.group !== PET_GROUP) return null;
@@ -320,8 +379,7 @@ export function petFactoryFor(spec: PetSpec): typeof ModelObject {
       if (spec.shineMesh !== undefined) {
         this.ShineMesh = spec.shineMesh;
         this.BodyShine.chromeOnly = true;
-        // `glColor3fv(BodyLight)` on the chrome pass, and BodyLight is white.
-        this.BodyShine.tint.set(1, 1, 1);
+        fenrirShine(this, spec);
       }
 
       this.load(await loadGLTF(spec.model, world));

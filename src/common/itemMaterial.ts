@@ -809,6 +809,8 @@ function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
   // `Bright` there rides o->Alpha, so a fading corpse loses its shine too.
   const shine = mesh.metadata?.bodyShine as BodyShine | undefined;
   const tint = shine?.tint;
+  const rim = shine?.improved;
+  const improved = rim && rim.x + rim.y + rim.z > 0 ? rim : null;
   if (tint && !mesh.metadata?.brightMesh && tint.x + tint.y + tint.z > 0) {
     fx |= FX_BODY_SHINE;
     if (shine.star) fx |= FX_BODY_SHINE_STAR;
@@ -842,6 +844,12 @@ function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
   ) {
     const g = itemEmissiveAt(tier, itemGlowClock(), glowScratch);
     effect.setFloat3('itemGlow', g.r, g.g, g.b);
+  } else if (improved && !mesh.metadata?.brightMesh) {
+    // A body with no item tier of its own asking for the improved sheen
+    // (modelObject.ts BodyShine.improved). Its writer has already decided
+    // what the Item effects option leaves standing.
+    const a = mesh.visibility;
+    effect.setFloat3('itemGlow', improved.x * a, improved.y * a, improved.z * a);
   } else {
     effect.setFloat3('itemGlow', 0, 0, 0);
   }

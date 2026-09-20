@@ -355,6 +355,15 @@ export type BodyShine = {
    * rather than adding a second metal sheet (ZzzBMD.cpp:1390-1410).
    */
   chromeOnly?: boolean;
+  /**
+   * The improved look's sheen for this mesh, in place of the sphere-mapped
+   * pass above: the same in-surface formula every item's improved glow uses
+   * (itemMaterial.ts `itemGlow`), in a tint the body chooses. Black = none.
+   *
+   * A body that fills both this and `tint` is asking for "Both"; which of
+   * the two is live is the writer's business, not the material's.
+   */
+  improved?: Vector3;
 };
 
 function disposeGltf(gltf: {

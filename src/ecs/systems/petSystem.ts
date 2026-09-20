@@ -9,6 +9,7 @@ import {
   MOUNT_ACTION_STAND,
   PET_GROUP,
   fenrirMountAction,
+  fenrirShine,
   petFactoryFor,
   petSpec,
   type PetSpec,
@@ -263,6 +264,7 @@ export const PetSystem: ISystemFactory = world => {
         moveAction: spec.moveAction ?? MOUNT_ACTION_MOVE,
         fenrirThunder: spec.thunder,
         fenrirFoot: spec.footSubType,
+        fenrirSpec: spec.shineMesh === undefined ? undefined : spec,
       },
     });
 
@@ -603,11 +605,15 @@ export const PetSystem: ISystemFactory = world => {
       spawnFenrirBolt(actor, state.fenrirThunder!);
     }
 
-    // The skill clip: the chrome pass is drawn a second time and a red chip
-    // flies off the jaw (ZzzObject.cpp:812-840). The tint object is the one
-    // the material binds every frame, so raising it is that second pass.
+    // The skill clip: the body pass is drawn a second time and a red chip
+    // flies off the jaw (ZzzObject.cpp:812-840). The shine object is the one
+    // the material binds every frame, so raising it is that second pass; it
+    // is re-read here rather than at spawn so the Item effects option takes
+    // hold the moment it is changed.
     const casting = actor.modelObject.CurrentAction === FENRIR_ACTION_SKILL;
-    actor.modelObject.BodyShine.tint.setAll(casting ? 2 : 1);
+    if (state.fenrirSpec) {
+      fenrirShine(actor.modelObject, state.fenrirSpec, casting);
+    }
 
     if (casting) {
       tmpFoot.set(

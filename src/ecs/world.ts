@@ -7,6 +7,7 @@ import { type Bucket, type With, World as ECSWorld } from 'miniplex';
 import type { IVector2Like, IVector3Like, Mesh } from '../libs/babylon/exports';
 import type { ModelObject } from '../common/modelObject';
 import type { MonsterActionType, PlayerAction } from '../common/objects/enum';
+import type { PetSpec } from '../common/pets';
 import type { MUAttributeSystem } from '../libs/attributeSystem';
 import { TransformNode } from '../libs/babylon/exports';
 import { createPathfinding } from '../libs/pathfinding';
@@ -361,6 +362,8 @@ export type Entity = Partial<{
     fenrirThunder?: readonly [number, number, number];
     /** The variant's footprint subtype (`PetSpec.footSubType`). */
     fenrirFoot?: number;
+    /** The wolf's own spec, for the body passes (`fenrirShine`). */
+    fenrirSpec?: PetSpec;
     /** Last frame's `AnimationFrame`, for the footfall windows. */
     fenrirFrame?: number;
   };
