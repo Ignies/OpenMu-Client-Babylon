@@ -61,10 +61,16 @@ export const ObjectEffectSystem: ISystemFactory = world => {
       pool.pop() ??
       new TerrainDecal(world, `dropGlow${glowSeq++}`, GLOW_TEXTURE, GLOW_SCALE);
     decal.setAlpha(0.6);
+    // On the drop, not on the middle of its tile. `RequestTerrainHeight`
+    // samples the height field with vertex `i` at world `i`, so a tile spans
+    // `[i, i+1]` and everything the client places from a server tile - drops,
+    // players, monsters - stands at the corner. Centring this one on the tile
+    // instead left the glow half a tile off its own item, which only became
+    // obvious once a zen pile was wider than a single coin.
     decal.draw(
       world,
-      e.transform.pos.x + 0.5,
-      e.transform.pos.z + 0.5,
+      e.transform.pos.x,
+      e.transform.pos.z,
       GLOW_SCALE,
       0,
       GLOW_LIGHT[tier]
@@ -89,8 +95,8 @@ export const ObjectEffectSystem: ISystemFactory = world => {
         if (tier === 'normal') continue;
         decal.draw(
           world,
-          e.transform!.pos.x + 0.5,
-          e.transform!.pos.z + 0.5,
+          e.transform!.pos.x,
+          e.transform!.pos.z,
           GLOW_SCALE,
           0,
           GLOW_LIGHT[tier]
