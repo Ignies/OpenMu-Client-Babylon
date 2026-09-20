@@ -88,7 +88,12 @@ export function spriteCount(): number {
 const tmp = new Vector3();
 let seed = 0;
 
-function spawn(scene: Scene, at: Vector3, opts: SpriteOptions): EffectHandle {
+/** Spawn helper other entries call directly (the game master aura). */
+export function spawnSprite(
+  scene: Scene,
+  at: Vector3,
+  opts: SpriteOptions
+): EffectHandle {
   const colour = opts.colour ?? RGBS.white;
   const material = additiveMaterial(scene, opts.texture, colour);
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
@@ -182,5 +187,5 @@ export const spriteLayer: EffectLayer<SpriteOptions, 'sprite'> = {
   name: 'sprite',
   update,
   reset,
-  spawn,
+  spawn: spawnSprite,
 };

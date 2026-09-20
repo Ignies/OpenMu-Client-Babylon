@@ -38,6 +38,7 @@ import {
 import { spawnDebris } from './debris';
 import { spawnJoint } from './joint';
 import { spawnRing } from './ring';
+import { spawnSprite } from './sprite';
 import {
   BODY_SMOKE,
   ENERGY_CHIPS,
@@ -74,6 +75,22 @@ const THUNDER_WIDTH = 14 / TILE_CM;
 
 /** The Chain Scorpion's lamp `Light` `(L, 0.4L, 0.2L)`, `L` 0.2-0.9 a tick, at its mean. */
 const SCORPION_LAMP: RGB = [0.55, 0.22, 0.11];
+
+/**
+ * The game master's aura (ZzzCharacter.cpp:9441-9462). The outer light is
+ * `CreateSprite(BITMAP_LIGHT, …, 6.0f, (0.4,0.6,0.8), o, 0.5f)` and the one
+ * inside it rides `sin(WorldTime * 0.05) * 0.4 + 0.9` on (0.3,0.5,0.8) -
+ * taken at its mean, as the sines here are. `RenderAurora`'s own
+ * `sin(t*0.0015)*0.3+0.7` and the marks' `*0.3+0.5` likewise. The outer
+ * light's `Alpha` of 0.5 is folded into its colour: the card is additive,
+ * so the two are the same thing.
+ */
+const GM_HALO_OUTER: RGB = [0.2, 0.3, 0.4];
+const GM_HALO_INNER: RGB = [0.27, 0.45, 0.72];
+const GM_AURORA: RGB = [0.21, 0.14, 0.7];
+const GM_MARK: RGB = [0.5, 0.5, 0.5];
+/** Both pairs turn on `WorldTime * 0.01`: degrees per millisecond. */
+const GM_SPIN = 10;
 
 /** Beam Knight's flame `(L, 0.5L, 0.5L)`, `L = sin(t*0.002)*0.3+0.7`, at its mean. */
 const BEAM_KNIGHT_FLAME: RGB = [0.7, 0.35, 0.35];
@@ -165,6 +182,36 @@ type Emitter =
     }
   | {
       /**
+       * `CreateSprite(BITMAP_*, o->Position + (0,0,height), size, Light, o)`:
+       * a card the body carries rather than a puff it throws off. The
+       * original re-makes it every render frame, which is a card that
+       * follows its owner for as long as the owner is there.
+       */
+      readonly kind: 'halo';
+      readonly texture: string;
+      readonly colour: RGB;
+      /** `Scale` of the call, in the card edge the sprite layer takes. */
+      readonly size: number;
+      /** Height over the character's feet, in cm. */
+      readonly heightCm: number;
+    }
+  | {
+      /**
+       * `RenderTerrainAlphaBitmap(BITMAP_*, x, y, sx, sy, Light, angle)` -
+       * a mark redrawn under the character every frame, so it turns with
+       * `WorldTime` and goes where the character goes. Lives as long as the
+       * body does rather than being re-made on a tick.
+       */
+      readonly kind: 'mark';
+      readonly texture: string;
+      readonly colour: RGB;
+      /** `sx` of the call, which is already in tiles. */
+      readonly tiles: number;
+      /** Degrees a second. The original's marks turn on `WorldTime * 0.01`. */
+      readonly spin: number;
+    }
+  | {
+      /**
        * The smith's and the trader's anvil: `tries` x per tick, each
        * `CreateJoint(BITMAP_JOINT_SPARK, p, p, Angle)` and, with `chip`
        * odds, a `BITMAP_SPARK` chip. `Angle` is `(pitch, 0, yaw)` in the
@@ -203,6 +250,20 @@ const bones = (
   recipe: ParticleRecipe,
   extra: Partial<Extract<Emitter, { kind: 'bones' }>> = {}
 ): Emitter => ({ kind: 'bones', every, count, recipe, ...extra });
+
+const halo = (
+  texture: string,
+  colour: RGB,
+  size: number,
+  heightCm: number
+): Emitter => ({ kind: 'halo', texture, colour, size, heightCm });
+
+const mark = (
+  texture: string,
+  colour: RGB,
+  tiles: number,
+  spin: number
+): Emitter => ({ kind: 'mark', texture, colour, tiles, spin });
 
 /** `MonsterMoveSandSmoke` (:5570): walking, one `SMOKE + 1` a tick within ±100 cm. */
 const walkSand = body(1, SAND_SMOKE, [100, 100, 0], {
@@ -408,6 +469,22 @@ export const MONSTER_VISUALS: Partial<Record<number, MonsterVisual>> = {
       chip: 0.5,
       gate: { action: [A.Stop1] },
     },
+  ],
+
+  // 378 Game Master (MODEL_GM_CHARACTER), which is also what the Game Master
+  // Transformation Ring puts a character in: a light over the head, and two
+  // pairs of counter-turning marks on the ground - the blue `RenderAurora`
+  // pair and the `BITMAP_GM_AURORA` pair inside it
+  // (ZzzCharacter.cpp:9436-9462). The two sines the original runs the
+  // brightness on are taken at their mean, as everything else here is. The
+  // physics-cloth hair of the same branch has no equivalent and is not here.
+  378: [
+    halo(TEX.flare, GM_HALO_OUTER, 4.2, 100),
+    halo(TEX.flare, GM_HALO_INNER, 1.4, 100),
+    mark(TEX.magicGround2, GM_AURORA, 2.5, GM_SPIN),
+    mark(TEX.magicGround2, GM_AURORA, 2.5, -GM_SPIN),
+    mark(TEX.gmAurora, GM_MARK, 1.5, GM_SPIN),
+    mark(TEX.gmAurora, GM_MARK, 1.0, -GM_SPIN),
   ],
 };
 // The variants that share a model share its case.
@@ -660,6 +737,38 @@ export function visualMonster(
   const children: EffectHandle[] = [];
 
   for (const em of row) {
+    if (em.kind === 'halo') {
+      children.push(
+        spawnSprite(scene, entityPos(e, em.heightCm / TILE_CM, tmp), {
+          texture: em.texture,
+          colour: em.colour,
+          size: em.size,
+          seconds: Infinity,
+          fadeTail: 0,
+          height: em.heightCm / TILE_CM,
+          follow: out => entityPos(e, 0, out),
+        })
+      );
+      continue;
+    }
+    if (em.kind === 'mark') {
+      // The original turns these off `WorldTime`, so one that has been under
+      // a character since it came into scope is already part-way round.
+      children.push(
+        spawnRing(scene, entityPos(e, 0, tmp), {
+          texture: em.texture,
+          colour: em.colour,
+          scale: em.tiles,
+          spin: em.spin,
+          spinFrom: (performance.now() * em.spin) / 1000,
+          seconds: Infinity,
+          fadeTail: 0,
+          follow: out => entityPos(e, 0, out),
+          until: () => stopped || entityGone(e),
+        })
+      );
+      continue;
+    }
     if (em.kind !== 'bolts') continue;
     for (const [a, b] of em.pairs) {
       children.push(
@@ -712,6 +821,13 @@ export function visualMonster(
         for (const em of row) {
           if (em.kind === 'appear') {
             if (ticks <= em.ticks) emit(scene, e, em, f);
+            continue;
+          }
+          // A mark is not re-made on a tick: it was started with the body.
+          if (em.kind === 'mark') continue;
+          // A halo is, but on every one of them rather than a roll.
+          if (em.kind === 'halo') {
+            emit(scene, e, em, f);
             continue;
           }
           if (em.kind === 'bolts' || em.kind === 'blood') {

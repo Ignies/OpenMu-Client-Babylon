@@ -75,6 +75,12 @@ export const TEX = {
   magicZin: 'Effect/mzine_typer2.OZJ',
   /** BITMAP_MAGIC_EMBLEM (Magic_b.jpg). */
   magicEmblem: 'Effect/magic_b.OZJ',
+  /**
+   * BITMAP_GM_AURORA (Skill/gmmzine.jpg, ZzzOpenData.cpp:5259): the mark a
+   * game master stands on. The only effect texture outside `Effect/`, which
+   * is why `tools/copyData.ts` names it.
+   */
+  gmAurora: 'Skill/gmmzine.OZJ',
   /** BITMAP_SHOCK_WAVE and the impact rings. */
   shockwave: 'Effect/Shockwave.OZJ',
   impact: 'Effect/impack01.OZJ',
