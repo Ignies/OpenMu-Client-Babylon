@@ -1,30 +1,40 @@
 import { TW_NOGROUND } from '../../common/terrain/consts';
 import { sound } from '../../sound';
-import { bloodCastleTimer } from '../../events/bloodCastle';
 import type { World } from '../../ecs/world';
-import { BLOOD_CASTLE_GATE_PIT } from './spec';
+import { BLOOD_CASTLE_MOAT } from './spec';
 
 /**
- * The Blood Castle gate's state, shared by the gate (type 36) and its two
- * debris halves (9/10). This is `g_iActionObjectType / g_iActionTime /
- * g_fActionObjectVelocity` (ZzzObject.cpp:50-58) narrowed to the one object
- * that uses them on this map.
+ * The Blood Castle drawbridge's state, shared by the gate (type 36) and the
+ * deck and chains it becomes (9/10). This is `g_iActionObjectType /
+ * g_iActionTime / g_fActionObjectVelocity` (ZzzObject.cpp:50-58) narrowed to
+ * the one object that uses them on this map.
  *
- * Driven by: `BloodCastleGateObject.Update` (the tick) and two triggers -
- *  - the match state `BloodCastleGateDestroyed` (the `BloodCastleState`
- *    packet, read through `events/bloodCastle`), which is the animated fall:
- *    `SetActionObject(world, 36, 20, 1)` - twenty ticks, pitch from 35° up to
- *    90° at a velocity that grows 1.5°/tick, a smoke burst as it passes 80°,
- *    `SOUND_DOWN_GATE` on the first tick (ZzzObject.cpp:96-131);
- *  - the server clearing `TW_NOGROUND` on the pit (`ReceiveSetAttribute`,
- *    WSclient.cpp:8333: `SetActionObject(world, 36, 0, 1)`), which is the
- *    instant version: gate hidden, pit open, debris shown.
- * Read by: the three object classes in this folder.
+ * **The trigger is the moat.** `AddTerrainAttributeRange(13, 70, 3, 6,
+ * TW_NOGROUND, false)` is what the fall ends with (:159), and it is also what
+ * the server sends on its own when the players have earned the bridge - one
+ * `ChangeTerrainAttributes` over the same eighteen tiles, written into the
+ * terrain by `libs/mu/terrainAttributeUpdates`. So the gate watches that flag:
+ *
+ *  - clear already when the gate prop is built - warped in after the bridge
+ *    was down - and it starts down, the instant `SetActionObject(world, 36, 0,
+ *    1)` of `ReceiveSetAttribute` (WSclient.cpp:8949);
+ *  - clearing while we are standing there, and it falls:
+ *    `SetActionObject(world, 36, 20, 1)` (NewBloodCastleSystem.cpp:70) -
+ *    twenty ticks, pitch from 35 degrees up to 90 at a velocity that grows
+ *    1.5 degrees a tick, a smoke burst as it passes 80, `SOUND_DOWN_GATE` on
+ *    the first tick (ZzzObject.cpp:96-131).
+ *
+ * The original hangs the animated version on match state 3 instead, which
+ * this server does not send: its gate-destroyed state is the wire value 4,
+ * the original's "already down" state, and it arrives when the Castle Gate
+ * *monster* dies - a different moment, later, on the far side of the moat.
+ *
+ * Read by: the two object classes in this folder.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** `SetActionObject(…, 36, 20, 1.f)`: ticks the fall takes. */
+/** `SetActionObject(..., 36, 20, 1.f)`: ticks the fall takes. */
 const FALL_TICKS = 20;
 /** `o->Angle[0] = 35.f` on the first tick. */
 const START_PITCH_DEG = 35;
@@ -48,8 +58,10 @@ let pitch = 0;
 let velocity = 0;
 let smoked = false;
 let accumulator = 0;
+/** Whether the first look at the moat has happened yet (see `updateBloodCastleGate`). */
+let sampled = false;
 
-/** True once the gate is gone and the pit is open. */
+/** True once the gate is gone and the bridge is there. */
 export function bloodCastleGateDown(): boolean {
   return phase === 'down';
 }
@@ -74,12 +86,16 @@ export function resetBloodCastleGate(): void {
   velocity = 0;
   smoked = false;
   accumulator = 0;
+  sampled = false;
 }
 
-function open(world: World): void {
+function moatOpen(world: World): boolean {
+  const m = BLOOD_CASTLE_MOAT;
+  return !(world.getTerrainFlag(m.x + 1, m.y + 2) & TW_NOGROUND);
+}
+
+function open(): void {
   phase = 'down';
-  const p = BLOOD_CASTLE_GATE_PIT;
-  world.setTerrainFlags(p.x, p.y, p.w, p.h, TW_NOGROUND, false);
 }
 
 function startFall(): void {
@@ -92,7 +108,7 @@ function startFall(): void {
 }
 
 /**
- * Advance by `dt` seconds. Both triggers are polled here rather than wired to
+ * Advance by `dt` seconds. The trigger is polled here rather than wired to
  * the packet bus: the gate is the only consumer, the poll is one flag read,
  * and it keeps this file free of a listener that would outlive the map.
  */
@@ -100,13 +116,15 @@ export function updateBloodCastleGate(world: World, dt: number): void {
   if (phase === 'down') return;
 
   if (phase === 'up') {
-    const p = BLOOD_CASTLE_GATE_PIT;
-    if (!(world.getTerrainFlag(p.x + 1, p.y + 2) & TW_NOGROUND)) {
-      // The server already opened the pit: the instant `SetActionObject(36, 0)`.
-      open(world);
+    // The first poll only records where the moat stood when we arrived: open
+    // then means the bridge was earned before we got here and there is
+    // nothing to watch fall. Any clearing after that is the fall itself.
+    if (!sampled) {
+      sampled = true;
+      if (moatOpen(world)) open();
       return;
     }
-    if (bloodCastleTimer().gateDestroyed) startFall();
+    if (moatOpen(world)) startFall();
     return;
   }
 
@@ -115,6 +133,6 @@ export function updateBloodCastleGate(world: World, dt: number): void {
     accumulator -= TICK;
     pitch = Math.min(END_PITCH_DEG, pitch + velocity);
     velocity += VELOCITY_GAIN;
-    if (--ticksLeft <= 0) open(world);
+    if (--ticksLeft <= 0) open();
   }
 }
