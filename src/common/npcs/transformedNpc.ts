@@ -2,6 +2,7 @@ import type { Entity, World } from '../../ecs/world';
 import { PlayerAction } from '../objects/enum';
 import { loadGLTF } from '../modelLoader';
 import { PlayerObject } from '../playerObject';
+import { transformedBodyFactory } from '../transformedBody';
 import { CharacterClassNumber } from '../types';
 
 const cache = new Map<string, typeof PlayerObject>();
@@ -15,8 +16,10 @@ const cache = new Map<string, typeof PlayerObject>();
  * Skill/Skeleton0N monsters are the same mechanism with a weapon kit
  * (see `monsters/skeletonWarrior.ts`, which predates this factory).
  *
- * The part rides the Armor slot, every other slot stays empty, and the player
- * state machine (`playerAnimation`) picks the idle / walk clips.
+ * The body swap itself is `transformedBodyFactory` - the same one the hero
+ * wears when a transformation ring puts it in one of these. What is added
+ * here is only what an NPC needs on top: the knight rig it poses on, its
+ * scale, and an idle to stand in.
  */
 export function transformedNpcFactory(
   dir: string,
@@ -27,7 +30,7 @@ export function transformedNpcFactory(
   const cached = cache.get(key);
   if (cached) return cached;
 
-  class TransformedNpc extends PlayerObject {
+  class TransformedNpc extends transformedBodyFactory(dir, part) {
     /** The transforms all pose on the male knight rig (`c->Class` is never set). */
     static NpcClass = CharacterClassNumber.DarkKnight;
 
@@ -39,7 +42,7 @@ export function transformedNpcFactory(
       this.load(await loadGLTF('Player/player.glb', world));
       this.Ready = false;
 
-      await this.loadTransformPart();
+      await this.updateBodyPartClassesAsync();
 
       world.addComponent(entity, 'charAppearance', {
         charClass: CharacterClassNumber.DarkKnight,
@@ -67,33 +70,6 @@ export function transformedNpcFactory(
       this.Ready = true;
     }
 
-    private loadTransformPart() {
-      return this.loadPartAsync(dir, this.Armor, part);
-    }
-
-    // The body is the transform part alone: AppearanceSystem's "no item →
-    // class default" fallbacks must not dress it in the default knight kit.
-    override async updateBodyPartClassesAsync() {
-      await this.loadTransformPart();
-    }
-    override async setDefaultArmor() {
-      await this.loadTransformPart();
-    }
-    override async setDefaultHelm() {
-      this.Helm.Unload();
-    }
-    override async setDefaultMask() {
-      this.HelmMask.Unload();
-    }
-    override async setDefaultPants() {
-      this.Pants.Unload();
-    }
-    override async setDefaultGloves() {
-      this.Gloves.Unload();
-    }
-    override async setDefaultBoots() {
-      this.Boots.Unload();
-    }
   }
 
   Object.defineProperty(TransformedNpc, 'name', { value: part.replace(/\.glb$/, '') });

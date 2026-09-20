@@ -282,6 +282,7 @@ import { combat } from './combat';
 import { COMBO_SOUND } from './combat/combo';
 import { SHOCK_IMMUNE_CLIPS } from './combat/recipes';
 import { isRidingMount, mountKind } from './common/pets';
+import { characterSkinBody } from './common/transformedBody';
 import { quests } from './quests';
 import { SessionExit } from './common/sessionExit';
 import { Store, UIState } from './store';
@@ -1230,10 +1231,15 @@ EventBus.on('AddTransformedCharactersToScope', packet => {
       appearance: deserializeAppearance(char.Appearance),
       effects: char.Effects.map(e => e.Id),
     };
-    // The hero keeps its own body: the whole player controller and camera
-    // are built around the player rig. Everyone else is drawn as the monster.
-    if (char.Skin === 0 || Store.playerId === (char.Id & 0x7fff)) {
+    // The hero is rebuilt as a player wearing the skin's body rather than as
+    // the monster itself: the controller, the camera and every clip it plays
+    // are the player rig's, and the original transforms it the same way -
+    // a MODEL_PLAYER with the skin as its subtype. Skins that are a whole
+    // monster instead have no body to lend, so the hero keeps its own.
+    if (char.Skin === 0) {
       addCharacterToScope(world, scoped);
+    } else if (Store.playerId === (char.Id & 0x7fff)) {
+      addCharacterToScope(world, scoped, char.Skin);
     } else {
       addTransformedCharacterToScope(world, scoped, char.Skin);
     }
@@ -1329,7 +1335,11 @@ function addTransformedCharacterToScope(world: World, char: ScopeCharacter, skin
   );
 }
 
-function addCharacterToScope(world: World, char: ScopeCharacter) {
+function addCharacterToScope(
+  world: World,
+  char: ScopeCharacter,
+  skin = 0
+) {
   const worldIndex = world.mapIndex;
   {
     const maskedId = char.Id & 0x7fff;
@@ -1341,6 +1351,21 @@ function addCharacterToScope(world: World, char: ScopeCharacter) {
 
     const appearance = char.appearance;
     const playerEntity = spawnPlayer(world, { cls: appearance.cls });
+
+    // A transformation ring, or a game master's `/skin`: the equipment body
+    // is replaced by the skin's own part file and everything else about the
+    // character stays as it is (`common/transformedBody.ts`).
+    const body = skin ? characterSkinBody(skin) : null;
+    if (skin) world.addComponent(playerEntity, 'skin', skin);
+    if (body) {
+      playerEntity.modelFactory = body.factory;
+      playerEntity.transform.scale = body.scale;
+    } else if (skin) {
+      console.warn(
+        `Skin ${skin} has no character body; drawing the character's own.`
+      );
+    }
+
     world.addComponent(playerEntity, 'netId', maskedId);
     world.addComponent(playerEntity, 'worldIndex', worldIndex);
     playerEntity.transform.pos.x = char.CurrentPositionX;

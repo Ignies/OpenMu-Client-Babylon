@@ -1,4 +1,5 @@
 import { t } from './i18n';
+import { characterSkinBody } from './common/transformedBody';
 import { playUiSound } from './libs/sfx';
 import {
   CharacterClassNumber,
@@ -595,6 +596,20 @@ function offlineMapFromUrl(): ENUM_WORLD {
 }
 
 /**
+ * `?offline&skin=503`: the transformation skin the offline hero wears, the
+ * number a ring or a `/skin` would send. 0 or unknown means its own body.
+ */
+function offlineSkinFromUrl(): number {
+  try {
+    const raw = new URLSearchParams(location.search).get('skin');
+    const n = Number(raw);
+    return raw && Number.isFinite(n) ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
  * `?offline&class=elf` / `?class=20`: the offline test character's class, by
  * `CharacterClassNumber` value or name prefix (`fairy` → FairyElf,
  * `rage` → RageFighter). A screenshot-harness seam like `?map=`; null when
@@ -1184,6 +1199,17 @@ export const Store = new (class _Store {
     applyOfflineHandOverrides(this.playerData.items);
 
     const testPlayer = spawnPlayer(this.world, { cls });
+
+    // `?offline&skin=503`: the hero in a transformation ring's body, which
+    // online only arrives on a scope packet from the server.
+    const skin = offlineSkinFromUrl();
+    const body = skin ? characterSkinBody(skin) : null;
+    if (body) {
+      this.world.addComponent(testPlayer, 'skin', skin);
+      testPlayer.modelFactory = body.factory;
+      testPlayer.transform.scale = body.scale;
+    }
+
     this.world.addComponent(testPlayer, 'localPlayer', true);
     this.world.addComponent(testPlayer, 'worldIndex', map);
     testPlayer.objectNameInWorld = 'TestPlayer';
