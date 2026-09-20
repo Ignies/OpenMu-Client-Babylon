@@ -53,6 +53,13 @@ import type { Entity, ISystemFactory, Item } from '../world';
  *    The perch is an approximation: the original glues it to bone 37, which
  *    a world object here cannot reach.
  *
+ *  - **Followers** (`PetObject`, w_BasePet.cpp): the Demon, the Spirit of
+ *    Guardian, Rudolph, the Panda, the Pet Unicorn and the Pet Skeleton.
+ *    Each stands off its owner at a fixed height and crawls after him; none
+ *    of them is ridden, fades in town, or plays more than one clip. The zen
+ *    the collectors among them pick up on their own is not ported - they
+ *    keep station, they do not shop.
+ *
  *  - **Dark Horse / Fenrir**: pinned like the horns. The horse walks on
  *    clip 1; a Fenrir mirrors its rider's `PLAYER_FENRIR_*` clip family
  *    (`fenrirMountAction`, MoveMount GOBoid.cpp:200-266) and carries the
@@ -73,6 +80,8 @@ const REROLL_TICKS = 32;
 const ANGEL_MIN_HEIGHT = 100;
 const ANGEL_MAX_HEIGHT = 200;
 const ANGEL_HEIGHT_NUDGE = 1.5;
+/** Ours, not the original's - see `updateAngel`. The raven's is 640. */
+const ANGEL_SNAP_DISTANCE = 640;
 
 /** `o->Velocity` - the PlaySpeed each pet's clip runs at. */
 const ANGEL_PLAY_SPEED = 0.5;
@@ -93,6 +102,21 @@ const RAVEN_SNAP_DISTANCE = 640;
 const RAVEN_ACTION_FLY = 0;
 const RAVEN_ACTION_FLYING = 1;
 const RAVEN_ACTION_STAND = 2;
+
+/**
+ * Follower pets (w_PetActionCollecter.h:9-10). `CIRCLE_STAND_RADIAN` is the
+ * circle the collectors walk around their owner, `SEARCH_LENGTH * 3` how far
+ * one may be from him before it is put back on him, and `ORBIT_MS` the
+ * `fmod(tick, 4000)` that carries it once round. The hover pair has a snap
+ * distance of its own: `FlyRange * FlyRange * FlyRange * FlyRange` against a
+ * squared distance, which is 2500 units.
+ */
+const CIRCLE_STAND = 50;
+const SNAP_HOME = 300 * 3;
+const HOVER_SNAP = 50 * 50;
+const ORBIT_MS = 4000;
+/** The one clip any of the six ever plays - `Model()` never sets another. */
+const FOLLOWER_ACTION = 0;
 
 /** The perch beside the owner's shoulder, in world units (see header). */
 const RAVEN_PERCH_UP = 1.4;
@@ -236,6 +260,7 @@ export const PetSystem: ISystemFactory = world => {
     // starts 300 units straight up (CSPetSystem.cpp:299).
     const angel = spec.kind === 'angel';
     const raven = spec.kind === 'raven';
+    const follower = spec.kind === 'follower';
 
     world.add({
       worldIndex: map,
@@ -245,7 +270,9 @@ export const PetSystem: ISystemFactory = world => {
           pos.y +
             (angel ? (rand(128) + 128) * MU_UNIT : 0) +
             (raven ? RAVEN_SPAWN_HEIGHT * MU_UNIT : 0),
-          pos.z + (angel ? (rand(512) - 256) * MU_UNIT : 0)
+          pos.z +
+            (angel ? (rand(512) - 256) * MU_UNIT : 0) +
+            (spec.spawnOffset ?? 0) * MU_UNIT * (owner.transform!.scale ?? 1)
         ),
         rot: new Vector3(0, owner.transform!.rot.y, 0),
         scale: spec.scale,
@@ -258,7 +285,13 @@ export const PetSystem: ISystemFactory = world => {
       visibility: { state: 'hidden', lastChecked: 0 },
       petActor: {
         owner,
-        kind: angel ? 'angel' : raven ? 'raven' : 'mount',
+        kind: angel
+          ? 'angel'
+          : raven
+            ? 'raven'
+            : follower
+              ? 'follower'
+              : 'mount',
         yaw: owner.transform!.rot.y,
         dir: { x: 0, y: 0, z: 0 },
         reroll: 0,
@@ -269,6 +302,10 @@ export const PetSystem: ISystemFactory = world => {
         fenrirThunder: spec.thunder,
         fenrirFoot: spec.footSubType,
         fenrirSpec: spec.shineMesh === undefined ? undefined : spec,
+        follow: spec.follow,
+        followSpeed: spec.playSpeed,
+        pulseSeconds: spec.pulseSeconds,
+        clock: 0,
       },
     });
 
@@ -285,7 +322,22 @@ export const PetSystem: ISystemFactory = world => {
 
     const dx = target.x - pos.x;
     const dz = target.z - pos.z;
-    const far = dx * dx + dz * dz >= state.flyRange * state.flyRange;
+    const distance2 = dx * dx + dz * dz;
+
+    // Not the original's - the angel is the one pet GOBoid gives no failsafe,
+    // because over there it is created with its owner already standing where
+    // he belongs. Here the hero holds a placeholder tile for the second or
+    // so a map takes to load, and an angel seeded on it was left a hundred
+    // tiles out, flying home at walking pace while its owner stood pet-less.
+    const snap = ANGEL_SNAP_DISTANCE * MU_UNIT;
+    if (distance2 > snap * snap) {
+      pos.x = target.x;
+      pos.z = target.z;
+      pos.y = target.y + ANGEL_MIN_HEIGHT * MU_UNIT;
+      return;
+    }
+
+    const far = distance2 >= state.flyRange * state.flyRange;
 
     if (far) {
       const heading = createAngleDeg(pos.x, pos.z, target.x, target.z) * DEG;
@@ -418,6 +470,102 @@ export const PetSystem: ISystemFactory = world => {
 
     actor.modelObject?.setAnimationSpeed(RAVEN_PLAY_SPEED);
     actor.modelObject?.playAction(RAVEN_ACTION_STAND, true);
+  }
+
+  /**
+   * A follower pet: `PetObject::UpdateMove` through whichever `PetAction` its
+   * `Data/Local/pet.bmd` record names (w_PetActionStand / _Demon / _Collecter
+   * / _Collecter_Add / _Unicorn). The three motions are described on
+   * `PetFollow`; what they share is this step - stand off the owner at a
+   * fixed height, turn towards a target point, and crawl towards it at a
+   * speed that is the log of how far away it is.
+   *
+   * None of them has a safe-zone branch and none of them plays more than its
+   * clip 0: `Model()` returns false for every one of the six, so `SetAction`
+   * is never called and `CurrentAction` stays where `Create` left it.
+   */
+  function updateFollower(actor: Entity, dt: number) {
+    const state = actor.petActor!;
+    const follow = state.follow;
+    const owner = state.owner.transform;
+    if (!follow || !owner) return;
+
+    const ticks = dt * TICKS_PER_SECOND;
+    const clock = (state.clock = (state.clock ?? 0) + dt * 1000);
+    const pos = actor.transform!.pos;
+
+    // `obj->Position[2] = obj->Owner->Position[2] + n`, the one axis the pet
+    // never steers for itself.
+    pos.y =
+      owner.pos.y +
+      follow.hover * MU_UNIT * (follow.hoverScaled ? owner.scale : 1);
+
+    // The point that circles the owner once every four seconds: what an
+    // orbiting pet chases, and where any of the four ground-level ones is
+    // put back down when it falls too far behind.
+    const phase = ((clock % ORBIT_MS) / ORBIT_MS) * Math.PI * 2;
+    const circleX = owner.pos.x + Math.sin(phase) * CIRCLE_STAND * MU_UNIT;
+    const circleZ = owner.pos.z + Math.cos(phase) * CIRCLE_STAND * MU_UNIT;
+
+    const orbit = follow.motion === 'orbit';
+    const hover = follow.motion === 'hover';
+    const targetX = orbit ? circleX : owner.pos.x;
+    const targetZ = orbit ? circleZ : owner.pos.z;
+
+    // Left too far behind - a warp, or a long stretch out of scope.
+    const homeX = (pos.x - owner.pos.x) / MU_UNIT;
+    const homeZ = (pos.z - owner.pos.z) / MU_UNIT;
+    const home2 = homeX * homeX + homeZ * homeZ;
+    if (home2 > (hover ? HOVER_SNAP * HOVER_SNAP : SNAP_HOME * SNAP_HOME)) {
+      // The hover pair lands on the owner; the rest on the circle, which is
+      // what keeps a pet that aims at his own tile from sitting inside him.
+      pos.x = hover ? owner.pos.x : circleX;
+      pos.z = hover ? owner.pos.z : circleZ;
+      state.yaw = owner.rot.y;
+    }
+
+    const dx = (targetX - pos.x) / MU_UNIT;
+    const dz = (targetZ - pos.z) / MU_UNIT;
+    // The hover pair never takes the root of it - see `PetFollow`.
+    const distance2 = dx * dx + dz * dz;
+    const distance = hover ? distance2 : Math.sqrt(distance2);
+
+    // `if (80.0f >= FlyRange)`: true for every one of them, so the orbit and
+    // trail pets turn on every tick and only the hover pair holds a heading
+    // until it is a stop radius out.
+    if (!hover || distance2 >= follow.stopAt) {
+      const heading = createAngleDeg(pos.x, pos.z, targetX, targetZ) * DEG;
+      state.yaw = turnAngle(state.yaw, heading, follow.turn * DEG * ticks);
+    }
+
+    // The original applies the direction it worked out last frame and only
+    // then computes this frame's - keep the order, it is what lets a pet
+    // overshoot its target by a step and turn back.
+    const step = state.dir.y * MU_UNIT * ticks;
+    pos.x += -Math.sin(state.yaw) * step;
+    pos.z += Math.cos(state.yaw) * step;
+    actor.transform!.rot.y = state.yaw;
+
+    const speed =
+      follow.stopAt >= distance
+        ? 0
+        : Math.log(distance) * follow.speedScale + (follow.speedBias ?? 0);
+    // Forward is -Y in the original's object space.
+    state.dir.y = -speed;
+
+    // `PetActionDemon::Model`: the body light breathes over ten seconds.
+    if (state.pulseSeconds !== undefined) {
+      const period = state.pulseSeconds * 1000;
+      actor.modelObject?.SelfLight.setAll(
+        Math.sin((Math.PI * (clock % period)) / period)
+      );
+    }
+
+    const play = state.followSpeed ?? 1;
+    const factor =
+      speed === 0 ? (follow.idleSpeed ?? 1) : (follow.moveSpeed ?? 1);
+    actor.modelObject?.setAnimationSpeed(play * factor);
+    actor.modelObject?.playAction(FOLLOWER_ACTION, true);
   }
 
   /** Per-actor clock for the Fenrir glow spawns. */
@@ -719,6 +867,14 @@ export const PetSystem: ISystemFactory = world => {
         if (state.kind === 'angel') {
           actor.modelObject?.setAlpha(1);
           updateAngel(actor, dt);
+          continue;
+        }
+
+        // Nor has a follower: `PetObject` has no safe-zone branch either, so
+        // the Panda keeps circling its owner in town.
+        if (state.kind === 'follower') {
+          actor.modelObject?.setAlpha(1);
+          updateFollower(actor, dt);
           continue;
         }
 

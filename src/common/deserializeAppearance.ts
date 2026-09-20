@@ -1,5 +1,13 @@
 import { CharacterClassNumber } from './types';
 import { GetByteValue } from './utils';
+import {
+  DEMON,
+  PET_PANDA,
+  PET_RUDOLF,
+  PET_SKELETON,
+  PET_UNICORN,
+  SPIRIT_OF_GUARDIAN,
+} from './petConstants';
 
 type Item = {
   num: number;
@@ -286,10 +294,20 @@ const WING_NUMBERS: Record<number, Record<number, number | undefined>> = {
  * it is indistinguishable from an empty slot here - the original client has
  * the same blind spot.
  *
- * Byte 16's transform pets (Demon, Spirit of Guardian, Skeleton, Rudolph, Pet
- * Unicorn, Panda) are left alone: none of them has a model in `pets.ts`, so
- * naming them would only produce an item the renderer drops again.
+ * The six follower pets are named by byte 16's top three bits instead, and
+ * they write plain 0b11 into byte 5 like everything else down here. Byte 16
+ * is theirs alone - the only other thing written into it is a Fenrir's
+ * colour, in the low two bits, and a Fenrir clears the byte first.
  */
+const FOLLOWER_PETS: Readonly<Record<number, number>> = {
+  1: DEMON,
+  2: SPIRIT_OF_GUARDIAN,
+  3: PET_SKELETON,
+  4: PET_RUDOLF,
+  5: PET_UNICORN,
+  7: PET_PANDA,
+};
+
 function petFromAppearance(app: DataView): Item | null {
   const bits = app.getUint8(5) & 0x03;
 
@@ -307,6 +325,9 @@ function petFromAppearance(app: DataView): Item | null {
   }
   if (app.getUint8(12) & 0x01) return { num: 4, group: 13, lvl: 0 };
   if (app.getUint8(10) & 0x01) return { num: 3, group: 13, lvl: 0 };
+
+  const follower = FOLLOWER_PETS[app.getUint8(16) >> 5];
+  if (follower !== undefined) return { num: follower, group: 13, lvl: 0 };
 
   return null;
 }

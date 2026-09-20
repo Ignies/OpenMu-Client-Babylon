@@ -149,6 +149,11 @@ export const CeilingHideSystem: ISystemFactory = world => {
     for (const e of query) {
       if (e.worldIndex !== world.mapIndex) continue;
       if (e.visibility.state !== 'visible') continue;
+      // A pet is never a ceiling. Half of them hold station over their
+      // owner's head - a Guardian Angel one to two tiles up, a Spirit of
+      // Guardian 2.3 - which is exactly the band this scan sweeps, so
+      // without this they fade themselves out the moment they are drawn.
+      if (e.petActor) continue;
 
       const { pos } = e.transform;
       if (room) {

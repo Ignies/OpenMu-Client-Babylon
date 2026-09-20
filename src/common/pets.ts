@@ -29,6 +29,11 @@ import {
  * (ZzzOpenData.cpp:705) and `Data/Skill/Rider0n.bmd` behind the two mounts
  * (:3969-3970) - **not** the `Item/helper0n` path items.json carries for the
  * horn items, which is the inventory icon model and does not exist as a GLB.
+ *
+ * The rest of the slot - Demon, Spirit of Guardian, Rudolph, Panda, Pet
+ * Unicorn, Pet Skeleton - goes through a system of its own: `CreatePet`
+ * rather than `CreateMount` (ZzzCharacter.cpp:12992-12999), one world object
+ * per pet holding station on its owner and never ridden. See `PetFollow`.
  */
 
 export * from './petConstants';
@@ -41,6 +46,12 @@ import {
   DARK_HORSE,
   DARK_RAVEN,
   HORN_OF_FENRIR,
+  DEMON,
+  SPIRIT_OF_GUARDIAN,
+  PET_RUDOLF,
+  PET_PANDA,
+  PET_UNICORN,
+  PET_SKELETON,
 } from './petConstants';
 
 /** `w->LinkBone = 34` for the Imp (ZzzCharacter.cpp:15148). */
@@ -49,7 +60,43 @@ export const IMP_BONE = 34;
 /** MU units → world units. */
 const MU_UNIT = 1 / 100;
 
-export type PetKind = 'angel' | 'imp' | 'mount' | 'raven';
+export type PetKind = 'angel' | 'imp' | 'mount' | 'raven' | 'follower';
+
+/**
+ * How a follower pet holds station on its owner. All six run their model's
+ * clip 0 at the `PlaySpeed` of `Data/Local/pet.bmd`; what separates them is
+ * where they sit and what they chase:
+ *
+ *  - **hover** (`PetActionStand` / `PetActionDemon`): 230 units over the
+ *    owner's feet, heading straight for him. The original never takes the
+ *    square root there, so the stop radius and the log the speed comes out
+ *    of are both in square units, which is why these two drift a long way
+ *    before they bother catching up.
+ *  - **orbit** (`PetActionCollecter` / `PetActionCollecterAdd`): down beside
+ *    him on the ground, chasing a point that circles him once every four
+ *    seconds.
+ *  - **trail** (`PetActionUnicorn` / `PetActionCollecterSkeleton`): hovering
+ *    like the first pair, but chasing the owner's own tile and stopping on a
+ *    squared radius compared against an unsquared distance
+ *    (`FlyRange * FlyRange >= Distance`), so it sits much closer in.
+ */
+export type PetFollow = {
+  readonly motion: 'hover' | 'orbit' | 'trail';
+  /** `o->Position[2] = Owner->Position[2] + hover`, in MU units. */
+  readonly hover: number;
+  /** Whether that height is taken times the owner's `Object.Scale`. */
+  readonly hoverScaled?: boolean;
+  /** The distance the pet stops at, in whatever metric the motion uses. */
+  readonly stopAt: number;
+  /** `TurnAngle2(o->Angle[2], Angle, n)` - degrees per tick. */
+  readonly turn: number;
+  /** `Speed = log(Distance) * scale + bias`, in MU units per tick. */
+  readonly speedScale: number;
+  readonly speedBias?: number;
+  /** `o->Velocity` factors while standing and while moving (the Unicorn's). */
+  readonly idleSpeed?: number;
+  readonly moveSpeed?: number;
+};
 
 export type PetSpec = {
   readonly kind: PetKind;
@@ -93,6 +140,29 @@ export type PetSpec = {
   readonly shineMesh?: number;
   /** `b->BodyLight = 1,1,1`: drawn at full brightness, unlit by the map. */
   readonly fullBright?: boolean;
+  /**
+   * `o->Light`, added on top of the terrain light under the pet.
+   * `PetObject::Create` gives every follower 3,3,3 (w_BasePet.cpp:76), which
+   * is what makes them read as glowing companions rather than as small
+   * monsters walking beside their owner.
+   */
+  readonly selfLight?: number;
+  /**
+   * Seconds of the sine `selfLight` rides when the pet pulses rather than
+   * holding still: `PetActionDemon::Model` overwrites `o->Light` with
+   * `sin(pi * (t mod 10000) / 10000)` every frame.
+   */
+  readonly pulseSeconds?: number;
+  /**
+   * MU units north of its owner a follower is created at, times the owner's
+   * scale. Only the Pet Skeleton has one (`PetObject::Create`, w_BasePet.cpp:
+   * 88-91), and it needs it: its motion aims at the owner's own tile and
+   * stops well short, so without the offset it is created inside him and
+   * has no reason to ever step out.
+   */
+  readonly spawnOffset?: number;
+  /** Set on the six `CreatePet` followers - see `PetFollow`. */
+  readonly follow?: PetFollow;
   /**
    * The improved look's sheen for `shineMesh`, in the wolf's own colour, in
    * place of the original's grey sphere map. See `fenrirShine`.
@@ -144,6 +214,105 @@ const PETS: Readonly<Record<number, PetSpec>> = {
     scale: 0.7,
     playSpeed: 0.4,
     flyRange: 150,
+  },
+
+  // The six followers. Scale, blend mesh and clip speed are `Data/Local/
+  // pet.bmd`'s own records (types 64 / 65 / 67 / 80 / 106 / 123) and the
+  // model paths are ZzzOpenData.cpp:837-843 - not the `Item/` icon models
+  // items.json carries under the same numbers.
+  [DEMON]: {
+    kind: 'follower',
+    model: 'Item/partcharge4/demon.glb',
+    scale: 0.2,
+    playSpeed: 0.5,
+    selfLight: 3,
+    pulseSeconds: 10,
+    follow: {
+      motion: 'hover',
+      hover: 230,
+      hoverScaled: true,
+      stopAt: 50 * 50,
+      turn: 10,
+      speedScale: 1,
+      speedBias: 5,
+    },
+  },
+  [SPIRIT_OF_GUARDIAN]: {
+    kind: 'follower',
+    model: 'Item/partcharge4/maria.glb',
+    scale: 0.4,
+    blendMesh: 0,
+    playSpeed: 0.5,
+    selfLight: 3,
+    follow: {
+      motion: 'hover',
+      hover: 230,
+      hoverScaled: true,
+      stopAt: 50 * 50,
+      turn: 10,
+      speedScale: 1.8,
+    },
+  },
+  [PET_RUDOLF]: {
+    kind: 'follower',
+    model: 'Item/xmas/xmas_deer.glb',
+    scale: 0.8,
+    playSpeed: 0.5,
+    selfLight: 3,
+    follow: {
+      motion: 'orbit',
+      hover: 20,
+      stopAt: 10,
+      turn: 8,
+      speedScale: 2.3,
+    },
+  },
+  [PET_PANDA]: {
+    kind: 'follower',
+    model: 'Item/PandaPet.glb',
+    scale: 0.8,
+    playSpeed: 0.5,
+    selfLight: 3,
+    follow: {
+      motion: 'orbit',
+      hover: 20,
+      stopAt: 10,
+      turn: 8,
+      speedScale: 2.3,
+    },
+  },
+  [PET_UNICORN]: {
+    kind: 'follower',
+    model: 'Item/partcharge7/pet_unicorn.glb',
+    scale: 0.6,
+    playSpeed: 0.8,
+    selfLight: 3,
+    follow: {
+      motion: 'trail',
+      hover: 200,
+      hoverScaled: true,
+      stopAt: 10 * 10,
+      turn: 8,
+      speedScale: 2.3,
+      idleSpeed: 0.35,
+      moveSpeed: 1.2,
+    },
+  },
+  [PET_SKELETON]: {
+    kind: 'follower',
+    model: 'Item/skeletonpet.glb',
+    scale: 0.4,
+    playSpeed: 0.5,
+    selfLight: 3,
+    spawnOffset: 60,
+    follow: {
+      motion: 'trail',
+      hover: 50,
+      hoverScaled: true,
+      stopAt: 12 * 12,
+      turn: 8,
+      speedScale: 2.3,
+    },
   },
 };
 
@@ -374,6 +543,10 @@ export function petFactoryFor(spec: PetSpec): typeof ModelObject {
       if (spec.fullBright) {
         this.FixedLight = true;
         this.Light.set(1, 1, 1);
+      }
+
+      if (spec.selfLight !== undefined) {
+        this.SelfLight.setAll(spec.selfLight);
       }
 
       if (spec.shineMesh !== undefined) {
