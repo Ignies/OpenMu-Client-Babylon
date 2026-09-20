@@ -109,8 +109,14 @@ const SPIRIT_TURN = (16 * Math.PI) / 180;
 /** Ghost card edge in tiles, and the coverage that makes it black. */
 const SPIRIT_SIZE = 2.0;
 const SPIRIT_COVER = 4;
-/** The siphon thread pulled off the cast's victim. */
-const SPIRIT_SIPHON: RGB = [0.6, 0.14, 0.95];
+/**
+ * The shroud's coverage and its cap. The caster's own view only dims - a player must still see
+ * what they are doing - and anyone else's near a cast goes as dark as the map's level allows.
+ */
+const SHROUD_OWN = 0.3;
+const SHROUD_OWN_MAX = 0.5;
+const SHROUD_OTHERS = 0.6;
+const SHROUD_OTHERS_MAX = 0.85;
 // ---- step helpers ---------------------------------------------------------------
 
 export interface SkillContext {
@@ -395,42 +401,6 @@ const streamerFan = (
     const heading = new Vector3(f.x * Math.cos(pitch), Math.sin(pitch), f.z * Math.cos(pitch));
     effects.spawn('joint', c.scene, at, { ...o, heading });
   }
-};
-/**
- * The swarm feeding: a thin violet thread from whatever the cast landed on
- * back to the caster, with shade motes lifting off the victim for as long as
- * the spirits are up. Drain Life (214) is the same vocabulary. Nothing at all
- * when the cast hit bare ground, which is most casts.
- *
- * `c.target` is the object standing on the cast point (`logic.ts objectOnTile`),
- * the only victim the client is told about - the rest of the swarm's hits are
- * the server's business and never reach the client as such.
- */
-const siphonFrom = (seconds: number): Step => (_at, c) => {
-  const victim = c.target;
-  if (!victim || victim === c.caster || !victim.transform) return;
-  // Latches at the last seen spot: a despawned victim's `entityPos` is the
-  // map origin, and the thread would whip across the map to reach it.
-  const held = entityPos(victim, IMPACT_HEIGHT, new Vector3());
-  const from: PointSource = out =>
-    entityGone(victim) ? out.copyFrom(held) : out.copyFrom(entityPos(victim, IMPACT_HEIGHT, held));
-  // Low jitter and a scrolling sheet: a bolt's zigzag reads as lightning, and
-  // this has to look drawn *out* of the body, not struck into it - the scroll
-  // is what sells the direction.
-  effects.spawn('joint', c.scene, held.clone(), {
-    from,
-    to: followEntity(c.caster, CAST_HEIGHT),
-    colour: SPIRIT_SIPHON,
-    seconds,
-    width: 0.34,
-    jitter: 0.02,
-    segments: 8,
-    texture: TEX.jointSpirit,
-    textureRepeats: 3,
-    textureScroll: 1.2,
-    until: () => entityGone(c.caster),
-  });
-  effects.spawn('particles', c.scene, held.clone(), { recipe: SHADE_MOTES, rate: 14, seconds, follow: from });
 };
 /**
  * Swell Life / Add Mana: 36× CreateJoint(JOINT_SPIRIT sub2, Angle(−10,0,i*10),
@@ -732,10 +702,16 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
         if (wave === 0) ghost(i);
         else delay(wave * SPIRIT_WAVE_GAP, () => ghost(i));
       }
-      // The darkness they bring: the view goes dark around the caster while they fly.
-      effects.spawn('shroud', c.scene, at, { seconds, fadeTail, follow: followEntity(c.caster, 0.9) });
-      particles({ recipe: SHADE_MOTES, count: 24 })(at, c);
-      siphonFrom(seconds)(at, c);
+      // The darkness they bring: the view goes dark around the caster while they fly - dimmed for
+      // the caster's own screen, dark for anyone else's near the cast.
+      const mine = c.caster === storeRef().world?.playerEntity;
+      effects.spawn('shroud', c.scene, at, {
+        seconds,
+        fadeTail,
+        follow: followEntity(c.caster, 0.9),
+        cover: mine ? SHROUD_OWN : SHROUD_OTHERS,
+        maxCover: mine ? SHROUD_OWN_MAX : SHROUD_OTHERS_MAX,
+      });
     }, 1),
   },
   /**

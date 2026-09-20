@@ -49,6 +49,8 @@ export interface ShroudOptions {
   seconds?: number;
   /** Coverage at full strength, 0…1. */
   cover?: number;
+  /** The most it ever covers, 0…1 (default MAX_COVER): the caster's own view is capped lower. */
+  maxCover?: number;
   /** Seconds to reach full strength. */
   attack?: number;
   /** Fade tail as a fraction of life. */
@@ -97,7 +99,7 @@ function spawn(scene: Scene, at: Vector3, opts: ShroudOptions): EffectHandle {
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
   const attack = opts.attack ?? DEFAULT_ATTACK;
   const tail = opts.fadeTail ?? 0.3;
-  const cover = Math.min(MAX_COVER, (opts.cover ?? DEFAULT_COVER) * darkCardGain(scene));
+  const cover = Math.min(opts.maxCover ?? MAX_COVER, (opts.cover ?? DEFAULT_COVER) * darkCardGain(scene));
   const source = opts.follow ?? pointSource(at);
 
   const mat = new StandardMaterial('fxShroud', scene);

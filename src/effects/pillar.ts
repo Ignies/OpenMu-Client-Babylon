@@ -1,28 +1,24 @@
 /**
- * Pillar - a tall column of fire erupting out of a lump of molten rock at a
- * ground point. The renewed Flame: where `column.ts` stacks the original's
- * BITMAP_FLAME tongue cards knee-high, this stands a white-cored sheet of
- * fire several tiles tall on a cracked lava ball that lights the ground red.
+ * Pillar - a tall column of fire erupting out of the ground at a point. The
+ * renewed Flame: where `column.ts` stacks the original's BITMAP_FLAME tongue
+ * cards knee-high, this stands a white-cored sheet of fire several tiles tall
+ * that lights the ground red around its foot.
  *
  * One pillar is a Y-billboard quad through a small fire shader (scrolling
- * turbulence, a hot core, a ragged orange rim), an opaque cracked-lava sphere
- * at its foot with an additive shell for the glow of the cracks, a flare on
- * the ground and one on the ball, and a few tongues and sparks off the base.
+ * turbulence, a hot core, a ragged orange rim), a flare on the ground under
+ * it, and a few tongues and sparks off the base.
  *
  * Driven by: `effects.spawn('pillar', …)`. Read by: nobody.
  */
 import {
   Constants,
   CreatePlane,
-  CreateSphere,
   Matrix,
   Mesh,
   ShaderMaterial,
   ShaderStore,
-  StandardMaterial,
   Vector3,
   Vector4,
-  VertexBuffer,
   type Scene,
 } from '../libs/babylon/exports';
 import { linearBufferActive } from '../common/lightModel';
@@ -35,7 +31,6 @@ import {
   acquireCard,
   additiveMaterial,
   clamp01,
-  effectTexture,
   hash,
   keepDepthForEffects,
   lerp,
@@ -74,22 +69,8 @@ const CELLS = 1.6;
 /** How much wider than the column the foot flares (0 = a straight column). */
 const FOOT_FLARE = 0.7;
 
-/** Lava ball diameter in tiles, and how high its centre sits over the ground. */
-const BALL_DIAMETER = 0.56;
-const BALL_LIFT = 0.17;
-
-/** MODEL_FIRE's cracked lava core sheet: dark crust, glowing cracks. */
-const LAVA_SHEET = 'Skill/fire02.OZJ';
-
-/** The crust's level: the sheet at a third, so it reads as rock and the cracks' glow is the shell's. */
-const CRUST_LEVEL = 0.35;
-
-/** The glow of the cracks: the sheet's red-orange lifted toward yellow. */
-const CRACK_GLOW: RGB = [1, 0.5, 0.2];
-
-/** Flare card edges in tiles: the pool on the ground, the halo on the ball. */
+/** Flare card edge in tiles: the pool on the ground. */
 const GROUND_GLOW = 2.4;
-const BALL_GLOW = 0.65;
 
 /** The pool's colour: a deep red wash, most of the ground light is the point light's. */
 const POOL_COLOUR: RGB = [0.55, 0.14, 0.03];
@@ -111,8 +92,6 @@ export interface PillarOptions {
   width?: number;
   /** Tint on the fire (white = the reference's yellow-white core). */
   colour?: RGB;
-  /** No lava ball: a pillar out of bare ground. */
-  bare?: boolean;
 }
 
 const live = new LiveList();
@@ -122,46 +101,8 @@ export function pillarCount(): number {
   return live.size;
 }
 
-const crusts = new Map<Scene, StandardMaterial>();
 const tmp = new Vector3();
 let seq = 0;
-
-/** Unlit, opaque: the sheet x CRUST_LEVEL, one per scene. */
-function crustMaterial(scene: Scene): StandardMaterial {
-  let m = crusts.get(scene);
-  if (m) return m;
-  const mat = new StandardMaterial('fx:lavaCrust', scene);
-  mat.diffuseColor.set(0, 0, 0);
-  mat.specularColor.set(0, 0, 0);
-  mat.ambientColor.set(0, 0, 0);
-  mat.emissiveColor.set(CRUST_LEVEL, CRUST_LEVEL, CRUST_LEVEL);
-  mat.disableLighting = true;
-  mat.fogEnabled = false;
-  void effectTexture(scene, LAVA_SHEET).then(tex => {
-    if (crusts.get(scene) === mat) mat.diffuseTexture = tex;
-  });
-  crusts.set(scene, mat);
-  m = mat;
-  return m;
-}
-
-/**
- * Wrap the sheet `repeats` times around the sphere, mirrored every other
- * time so it stays inside 0…1 - the shared effect textures are CLAMP.
- */
-function mirrorUVs(mesh: Mesh, repeats: number): void {
-  const uvs = mesh.getVerticesData(VertexBuffer.UVKind);
-  if (!uvs) return;
-  const out = new Float32Array(uvs.length);
-  for (let i = 0; i < uvs.length; i += 2) {
-    const u = uvs[i] * repeats;
-    const whole = Math.floor(u);
-    const f = u - whole;
-    out[i] = whole % 2 === 0 ? f : 1 - f;
-    out[i + 1] = uvs[i + 1];
-  }
-  mesh.setVerticesData(VertexBuffer.UVKind, out, false);
-}
 
 function fireMaterial(scene: Scene, seed: number, width: number, height: number, tint: RGB): ShaderMaterial {
   registerShader();
@@ -208,46 +149,11 @@ function spawn(scene: Scene, at: Vector3, opts: PillarOptions): EffectHandle {
   addEffectGlow(scene, sheet);
   const params = new Vector4(0, 0, 0, 0);
 
-  // The rock: an opaque crust that writes depth, and the glow of its cracks over it.
-  let ball: Mesh | null = null;
-  let shell: Mesh | null = null;
-  if (!opts.bare) {
-    ball = CreateSphere(`fxLava${seq}`, { diameter: BALL_DIAMETER, segments: 12 }, scene);
-    mirrorUVs(ball, 2);
-    ball.material = crustMaterial(scene);
-    ball.isPickable = false;
-    ball.receiveShadows = false;
-    ball.alwaysSelectAsActiveMesh = true;
-    // Matter, not light: the G-buffer sees it, so the AO and the haze read its own depth.
-    ball.metadata = { depthOccluder: true };
-    ball.rotation.set(0.5, seed, 0.3);
-    ball.position.set(at.x, ground + BALL_LIFT, at.z);
-    ball.scaling.setAll(0.01);
-    look?.glow.addExcludedMesh(ball);
-
-    shell = CreateSphere(`fxLavaGlow${seq}`, { diameter: BALL_DIAMETER * 1.06, segments: 12 }, scene);
-    mirrorUVs(shell, 2);
-    shell.material = additiveMaterial(scene, LAVA_SHEET, CRACK_GLOW);
-    shell.isPickable = false;
-    shell.receiveShadows = false;
-    shell.alwaysSelectAsActiveMesh = true;
-    shell.renderingGroupId = EFFECT_RENDERING_GROUP;
-    shell.metadata = { brightMesh: true };
-    shell.parent = ball;
-    look?.glow.addExcludedMesh(shell);
-    addEffectGlow(scene, shell);
-  }
-
-  // The light it throws on what is around it, as art: a pool on the ground and a halo on the rock.
+  // The light it throws on the ground around it, as art.
   const pool: Card = acquireCard(scene, additiveMaterial(scene, TEX.flare, POOL_COLOUR), false);
   pool.rotation.x = Math.PI / 2;
   pool.position.set(at.x, ground + 0.04, at.z);
   pool.scaling.setAll(GROUND_GLOW);
-  const halo: Card | null = ball ? acquireCard(scene, additiveMaterial(scene, TEX.flare, RGBS.ember)) : null;
-  if (halo) {
-    halo.position.set(at.x, ground + BALL_LIFT + 0.1, at.z);
-    halo.scaling.setAll(BALL_GLOW);
-  }
 
   const tongues = new Emitter(scene, FLAME_TONGUES, TONGUE_RATE);
   const sparks = new Emitter(scene, FIRE_SPARKS, SPARK_RATE);
@@ -265,17 +171,7 @@ function spawn(scene: Scene, at: Vector3, opts: PillarOptions): EffectHandle {
 
       params.set(t + seed, intensity, lerp(0.08, 1.25, 1 - (1 - erupt) * (1 - erupt)), dying * 1.15);
       fire.setVector4('params', params);
-
-      if (ball) {
-        const pop = clamp01(t / 0.1);
-        ball.scaling.setAll(Math.max(0.01, Math.sqrt(pop)));
-        ball.rotation.y += 1.4 * dt;
-        // Sinks back into the earth as the fire lifts off it.
-        ball.position.y = ground + BALL_LIFT - dying * BALL_DIAMETER * 0.9;
-        if (shell) shell.visibility = 1 - dying;
-      }
       pool.visibility = intensity;
-      if (halo) halo.visibility = 0.35 * intensity * (1 - dying);
 
       if (dying === 0) {
         tongues.tick(foot, dt);
@@ -287,13 +183,7 @@ function spawn(scene: Scene, at: Vector3, opts: PillarOptions): EffectHandle {
       releaseEffectGlow(sheet);
       sheet.dispose(false, false);
       fire.dispose(true, false);
-      if (shell) {
-        releaseEffectGlow(shell);
-        shell.dispose(false, false);
-      }
-      ball?.dispose(false, false);
       releaseCard(scene, pool);
-      if (halo) releaseCard(scene, halo);
     },
   });
 }
@@ -304,8 +194,6 @@ function update(_map: number, dt: number): void {
 
 function reset(): void {
   live.clear();
-  for (const m of crusts.values()) m.dispose(false, false);
-  crusts.clear();
 }
 
 /**
