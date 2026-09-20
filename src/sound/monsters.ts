@@ -33,6 +33,12 @@ export type MonsterVoice = 'idle' | 'attack' | 'death';
  * (2 + rand % 2), [4] death. Values are catalogue keys (`recipes.ts`), null = silent.
  * GENERATED - do not edit by hand, except the boss rows marked hand-ported
  * (their voices live outside the OpenMonsterModel switch).
+ *
+ * Only the 74 model types whose case actually calls `SetMonsterSound` carry
+ * sounds; every other row is `SILENT`. The generator used to fill the gaps
+ * with a placeholder - mGoblin* or mOrcCapAttack1 - which is where Raklion's
+ * Ice Giants got their Noria goblin voices. What those monsters really say
+ * is in `mapMonsters.ts`, keyed by the map they say it on.
  */
 export type MonsterSoundSlots = readonly [
   string | null,
@@ -41,6 +47,14 @@ export type MonsterSoundSlots = readonly [
   string | null,
   string | null,
 ];
+
+/**
+ * `Models[type].Sounds[]` left at its -1 default: the model's
+ * `OpenMonsterModel` case loads waves but never calls `SetMonsterSound`, so
+ * the generic path says nothing for it. Everything added after Season 3 is in
+ * this state; the ones that do speak are voiced per map, in `mapMonsters.ts`.
+ */
+const SILENT: MonsterSoundSlots = [null, null, null, null, null];
 
 export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
   // BULL_FIGHTER
@@ -154,7 +168,7 @@ export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
   // DARK_PHOENIX_SHIELD
   55: ['Sound/mPhoenix1', null, 'Sound/mPhoenixAttack1', 'Sound/mPhoenixAttack1', null],
   // DARK_PHOENIX
-  56: ['Sound/mMagicSkull', null, null, null, 'Sound/mMagicSkull'],
+  56: SILENT,
   // RED_SKELETON_KNIGHT
   57: ['Sound/mRedSkull', null, 'Sound/mRedSkullAttack', null, 'Sound/mRedSkullDie'],
   // GIANT_OGRE
@@ -162,9 +176,9 @@ export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
   // DARK_SKULL_SOLDIER
   59: [null, null, 'Sound/mBlackSkullAttack', null, 'Sound/mBlackSkullDie'],
   // STATUE_OF_SAINT
-  60: [null, null, 'Sound/mBlackSkullAttack', null, 'Sound/mBlackSkullDie'],
+  60: SILENT,
   // CASTLE_GATE
-  61: [null, null, 'Sound/mBlackSkullAttack', null, 'Sound/mBlackSkullDie'],
+  61: SILENT,
   // MAGIC_SKELETON
   62: ['Sound/mMagicSkull', null, null, null, 'Sound/mMagicSkull'],
   // DEATH_ANGEL
@@ -194,223 +208,223 @@ export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
   // BATTLE_GUARD2
   77: [null, null, null, null, null],
   // CANON_TOWER
-  79: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  79: SILENT,
   // LIFE_STONE
   86: [null, null, null, null, null],
   // BALGASS - hand-ported: MapManager.cpp:224-230, played per action in GMCrywolf1st.cpp:1618-1652
   89: ['Sound/w35/balga_idle1', 'Sound/w35/balga_idle2', 'Sound/w35/balga_at1', 'Sound/w35/balga_at2', 'Sound/w35/balga_death'],
   // DARK_ELF_1
-  92: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  92: SILENT,
   // SORAM
-  94: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  94: SILENT,
   // BALLISTA
-  99: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  99: SILENT,
   // WITCH_QUEEN
-  100: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  100: SILENT,
   // GOLDEN_STONE_GOLEM
-  101: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  101: SILENT,
   // DEATH_RIDER
-  102: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  102: SILENT,
   // DEATH_TREE
-  104: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  104: SILENT,
   // HELL_MAINE
-  105: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  105: SILENT,
   // BERSERK
-  106: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  106: SILENT,
   // SPLINTER_WOLF
-  107: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  107: SILENT,
   // IRON_RIDER
-  108: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  108: SILENT,
   // SATYROS
-  109: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  109: SILENT,
   // BLADE_HUNTER
-  110: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  110: SILENT,
   // KENTAUROS
-  111: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  111: SILENT,
   // GIGANTIS
-  112: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  112: SILENT,
   // GENOCIDER
-  113: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  113: SILENT,
   // PERSONA
-  114: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  114: SILENT,
   // TWIN_TAIL
-  115: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  115: SILENT,
   // DREADFEAR
-  116: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  116: SILENT,
   // MAYA_HAND_LEFT
-  118: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  118: SILENT,
   // MAYA_HAND_RIGHT
-  119: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  119: SILENT,
   // MAYA
-  120: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  120: SILENT,
   // DARK_SKULL_SOLDIER_5
-  121: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  121: SILENT,
   // POUCH_OF_BLESSING
-  122: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  122: SILENT,
   // LUNAR_RABBIT
-  127: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  127: SILENT,
   // RABBIT
-  128: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  128: SILENT, // voiced in mapMonsters.ts
   // BUTTERFLY
-  129: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  129: SILENT, // voiced in mapMonsters.ts
   // HIDEOUS_RABBIT
-  130: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  130: SILENT, // voiced in mapMonsters.ts
   // WEREWOLF2
-  131: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  131: SILENT, // voiced in mapMonsters.ts
   // CURSED_LICH
-  132: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  132: SILENT, // voiced in mapMonsters.ts
   // TOTEM_GOLEM
-  133: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  133: SILENT, // voiced in mapMonsters.ts
   // GRIZZLY
-  134: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  134: SILENT, // voiced in mapMonsters.ts
   // CAPTAIN_GRIZZLY
-  135: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  135: SILENT, // voiced in mapMonsters.ts
   // SAPIUNUS
-  136: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  136: SILENT, // voiced in mapMonsters.ts
   // SAPIDUO
-  137: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  137: SILENT, // voiced in mapMonsters.ts
   // SAPITRES
-  138: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  138: SILENT, // voiced in mapMonsters.ts
   // SHADOW_PAWN
-  139: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  139: SILENT, // voiced in mapMonsters.ts
   // SHADOW_KNIGHT
-  140: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  140: SILENT, // voiced in mapMonsters.ts
   // SHADOW_LOOK
-  141: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  141: SILENT, // voiced in mapMonsters.ts
   // NAPIN
-  142: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  142: SILENT, // voiced in mapMonsters.ts
   // GHOST_NAPIN
-  143: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  143: SILENT, // voiced in mapMonsters.ts
   // BLAZE_NAPIN
-  144: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  144: SILENT, // voiced in mapMonsters.ts
   // ICE_WALKER
-  145: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  145: SILENT, // voiced in mapMonsters.ts
   // GIANT_MAMMOTH
-  146: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  146: SILENT, // voiced in mapMonsters.ts
   // ICE_GIANT
-  147: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  147: SILENT, // voiced in mapMonsters.ts
   // COOLUTIN
-  148: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  148: SILENT, // voiced in mapMonsters.ts
   // IRON_KNIGHT
-  149: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  149: SILENT, // voiced in mapMonsters.ts
   // SELUPAN - hand-ported: ZzzOpenData.cpp:3767-3776 (word / rage / cure lines are event staged)
-  150: [null, null, 'Sound/w58w59/Selupan_attack1', 'Sound/w58w59/Selupan_attack2', null],
+  150: SILENT, // voiced in mapMonsters.ts
   // SPIDER_EGGS_1
-  151: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  151: SILENT,
   // SPIDER_EGGS_2
-  152: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  152: SILENT,
   // SPIDER_EGGS_3
-  153: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  153: SILENT,
   // FIRE_FLAME_GHOST
-  154: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  154: SILENT,
   // CURSED_SANTA
-  155: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  155: SILENT, // voiced in mapMonsters.ts
   // EVIL_GOBLIN
   156: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
   // ZOMBIE_FIGHTER
-  157: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  157: SILENT, // voiced in mapMonsters.ts
   // GLADIATOR
-  158: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  158: SILENT, // voiced in mapMonsters.ts
   // SLAUGTHERER
-  159: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  159: SILENT, // voiced in mapMonsters.ts
   // BLOOD_ASSASSIN
-  160: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  160: SILENT, // voiced in mapMonsters.ts
   // CRUEL_BLOOD_ASSASSIN
-  161: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  161: SILENT, // voiced in mapMonsters.ts
   // LAVA_GIANT
-  162: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  162: SILENT, // voiced in mapMonsters.ts
   // BURNING_LAVA_GIANT
-  163: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  163: SILENT, // voiced in mapMonsters.ts
   // GAYION
-  164: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  164: SILENT, // voiced in mapMonsters.ts
   // JERRY
-  165: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  165: SILENT, // voiced in mapMonsters.ts
   // RAYMOND
-  166: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  166: SILENT, // voiced in mapMonsters.ts
   // LUCAS
-  167: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  167: SILENT, // voiced in mapMonsters.ts
   // FRED
-  168: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  168: SILENT, // voiced in mapMonsters.ts
   // HAMMERIZE
-  169: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  169: SILENT, // voiced in mapMonsters.ts
   // DUAL_BERSERKER
-  170: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  170: SILENT, // voiced in mapMonsters.ts
   // DEVIL_LORD
-  171: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  171: SILENT, // voiced in mapMonsters.ts
   // QUARTER_MASTER
-  172: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  172: SILENT, // voiced in mapMonsters.ts
   // COMBAT_INSTRUCTOR
-  173: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  173: SILENT, // voiced in mapMonsters.ts
   // ATICLES_HEAD
-  174: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  174: SILENT, // voiced in mapMonsters.ts
   // DARK_GHOST
-  175: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  175: SILENT, // voiced in mapMonsters.ts
   // BANSHEE
-  176: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  176: SILENT, // voiced in mapMonsters.ts
   // HEAD_MOUNTER
-  177: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  177: SILENT, // voiced in mapMonsters.ts
   // DEFENDER
-  178: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  178: SILENT, // voiced in mapMonsters.ts
   // FORSAKER
-  179: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  179: SILENT, // voiced in mapMonsters.ts
   // OCELOT
-  180: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  180: SILENT,
   // ERIC
-  181: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  181: SILENT,
   // MAD_BUTCHER
-  189: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  189: SILENT, // voiced in mapMonsters.ts
   // TERRIBLE_BUTCHER
-  190: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  190: SILENT, // voiced in mapMonsters.ts
   // DOPPELGANGER
-  191: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  191: SILENT, // voiced in mapMonsters.ts
   // MEDUSA
-  192: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  192: SILENT,
   // BLOODY_ORC
-  193: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  193: SILENT,
   // BLOODY_DEATH_RIDER
-  194: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  194: SILENT,
   // BLOODY_GOLEM
-  195: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  195: SILENT,
   // BLOODY_WITCH_QUEEN
-  196: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  196: SILENT,
   // BERSERKER_WARRIOR
-  197: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  197: SILENT,
   // KENTAUROS_WARRIOR
-  198: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  198: SILENT,
   // GIGANTIS_WARRIOR
-  199: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  199: SILENT,
   // SOCCERBALL
-  200: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  200: SILENT,
   // SAPI_QUEEN
-  201: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  201: SILENT, // voiced in mapMonsters.ts
   // ICE_NAPIN
-  202: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  202: SILENT, // voiced in mapMonsters.ts
   // SHADOW_MASTER
-  203: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  203: SILENT, // voiced in mapMonsters.ts
   // DARK_MAMMOTH
-  205: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  205: SILENT, // voiced in mapMonsters.ts
   // DARK_GIANT
-  206: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  206: SILENT, // voiced in mapMonsters.ts
   // DARK_COOLUTIN
-  207: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  207: SILENT, // voiced in mapMonsters.ts
   // DARK_IRON_KNIGHT
-  208: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  208: SILENT, // voiced in mapMonsters.ts
   // VENOMOUS_CHAIN_SCORPION
-  209: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  209: SILENT, // voiced in mapMonsters.ts
   // BONE_SCORPION
-  210: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  210: SILENT, // voiced in mapMonsters.ts
   // ORCUS
-  211: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  211: SILENT, // voiced in mapMonsters.ts
   // GOLLOCK
-  212: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  212: SILENT, // voiced in mapMonsters.ts
   // CRYPTA
-  213: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  213: SILENT, // voiced in mapMonsters.ts
   // CRYPOS
-  214: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  214: SILENT, // voiced in mapMonsters.ts
   // CONDRA
-  215: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  215: SILENT, // voiced in mapMonsters.ts
   // NACONDRA
-  216: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
+  216: SILENT, // voiced in mapMonsters.ts
 };
 
 

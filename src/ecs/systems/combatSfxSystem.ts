@@ -15,6 +15,11 @@ import {
   playerSwingSound,
 } from '../../common/combatSounds';
 import { playSfx, setSfxListener } from '../../libs/sfx';
+import {
+  MAP_VOICE_RANGE_TILES,
+  mapMonsterCues,
+  type MonsterCue,
+} from '../../sound/mapMonsters';
 import { Store } from '../../store';
 
 /**
@@ -31,9 +36,30 @@ import { Store } from '../../store';
 
 const IDLE_CHATTER_CHANCE = 1 / 16;
 
+/** `rand_fps_check(2) ? a : b`, or the single sound a cue carries. */
+function cueSound(cue: MonsterCue) {
+  return Array.isArray(cue.play)
+    ? cue.play[Math.random() < 0.5 ? 0 : 1]
+    : (cue.play as Exclude<MonsterCue['play'], readonly unknown[]>);
+}
+
+/** `if (fDistance > 500.0f) return true` - the map voices' hard cutoff. */
+function inMapVoiceRange(
+  hero: { transform: { pos: { x: number; z: number } } } | null | undefined,
+  pos: { x: number; z: number }
+): boolean {
+  if (!hero) return false;
+  return (
+    Math.hypot(pos.x - hero.transform.pos.x, pos.z - hero.transform.pos.z) <=
+    MAP_VOICE_RANGE_TILES
+  );
+}
+
 export const CombatSfxSystem: ISystemFactory = world => {
   const query = world.with('modelObject', 'transform');
   const seen = new WeakMap<object, number>();
+  /** Frame-window cues already fired for the clip the model is playing. */
+  const stepped = new WeakMap<object, boolean[]>();
 
   function classOf(e: (typeof query.entities)[number]): CharacterClassNumber {
     return (
@@ -52,13 +78,54 @@ export const CombatSfxSystem: ISystemFactory = world => {
         const model = e.modelObject;
         const serial = model.actionSerial;
         const prev = seen.get(model);
-        if (prev === serial) continue;
-        seen.set(model, serial);
-        // First sighting: the spawn pose is not an event.
-        if (prev === undefined) continue;
+        const started = prev !== serial;
 
         const pos = e.transform.pos;
         const action = model.CurrentAction;
+
+        // The per-map voices (`PlayMonsterSound`) run before the generic
+        // table and, unlike it, have footstep cues that fire mid-clip - so
+        // they are stepped every frame, not only when the clip changes.
+        if (e.monsterAnimation && prev !== undefined) {
+          // `TheMapProcess()` is the map the hero is standing on, not a
+          // property of the monster.
+          const cues = mapMonsterCues(world.mapIndex, monsterModelTypeOf(e.npcType));
+
+          if (cues && inMapVoiceRange(hero, pos)) {
+            let fired = stepped.get(model);
+            if (started || !fired || fired.length !== cues.length) {
+              fired = new Array(cues.length).fill(false);
+              stepped.set(model, fired);
+            }
+
+            for (let i = 0; i < cues.length; i++) {
+              const cue = cues[i];
+              if (!cue.on.includes(action as MonsterActionType)) continue;
+
+              if (cue.frame) {
+                const f = model.actionFrame();
+                const inside = f >= cue.frame[0] && f < cue.frame[1];
+                if (!inside) {
+                  fired[i] = false;
+                  continue;
+                }
+                if (fired[i]) continue;
+                fired[i] = true;
+              } else if (!started) {
+                continue;
+              } else if (cue.chance && Math.random() >= 1 / cue.chance) {
+                continue;
+              }
+
+              playSfx(cueSound(cue), pos, { bus: MONSTER_BUS });
+            }
+          }
+        }
+
+        if (!started) continue;
+        seen.set(model, serial);
+        // First sighting: the spawn pose is not an event.
+        if (prev === undefined) continue;
 
         if (e.monsterAnimation) {
           const type = monsterModelTypeOf(e.npcType);
