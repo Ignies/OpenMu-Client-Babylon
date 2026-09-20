@@ -1,5 +1,10 @@
 import { describe, expect, it, afterEach } from 'vitest';
-import { setZenRandomTable, zenCoinCount, zenCoinScatter } from './zenPile';
+import {
+  setZenRandomTable,
+  zenCoinCount,
+  zenCoinScatter,
+  zenPileRadius,
+} from './zenPile';
 
 afterEach(() => setZenRandomTable(null));
 
@@ -33,8 +38,25 @@ describe('zenCoinScatter', () => {
 
     expect(coins).toHaveLength(count);
     for (const coin of coins) {
-      expect(Math.hypot(coin.x, coin.y)).toBeLessThan(count + 20);
+      expect(Math.hypot(coin.x, coin.y)).toBeLessThanOrEqual(zenPileRadius(count));
     }
+  });
+
+  it('spreads the coins over the disc instead of crowding the middle', () => {
+    // Consecutive entries jump the whole range, so one pile's twelve coins are
+    // a fair sample of the curve.
+    setZenRandomTable(Array.from({ length: 100 }, (_, i) => (i * 137) % 360));
+
+    const count = 12;
+    const r = zenPileRadius(count);
+    const coins = zenCoinScatter(1, count);
+    const radii = coins.map(c => Math.hypot(c.x, c.y));
+
+    // Half the radius is a quarter of the area, so no more than a third of the
+    // coins belong inside it; straight from the table it would be about half.
+    expect(radii.filter(v => v < r / 2).length).toBeLessThanOrEqual(count / 3);
+    // Spread over the area the mean radius sits at 2/3 of it, not a half.
+    expect(radii.reduce((a, b) => a + b, 0) / count).toBeGreaterThan(r * 0.6);
   });
 
   it('gives one drop the same pile every time it is asked', () => {
