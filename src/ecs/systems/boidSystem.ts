@@ -15,6 +15,7 @@ import { effects } from '../../effects';
 import { FIRE_PUFF, TEX } from '../../effects/recipes';
 import { invasionEvent } from '../../events/invasion';
 import { playSfx } from '../../libs/sfx';
+import { TW_SAFEZONE } from '../../common/terrain/consts';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
@@ -311,6 +312,29 @@ export const BoidSystem: ISystemFactory = world => {
     }
   }
 
+  /**
+   * The call this species makes near the hero (`BoidSpec.call`). The crow's
+   * is the one with a place attached: `TerrainWall[Index] == TW_SAFEZONE`
+   * (GOBoid.cpp:1495-1500) - it only caws over the castle's safe strip.
+   *
+   * Wildlife at a distance is part of the place, not a monster in front of
+   * you, so it rides the ambience slider like the dragon's roar.
+   */
+  function call(p: IVector3Like, ticks: number): void {
+    const c = spec?.call;
+    if (!c) return;
+
+    const hero = world.playerEntity?.transform?.pos;
+    if (!hero) return;
+    if (Math.hypot(p.x - hero.x, p.z - hero.z) >= c.withinCm * MU_UNIT) return;
+
+    if (c.onSafeZone && !(world.getTerrainFlag(~~p.x, ~~p.z) & TW_SAFEZONE)) {
+      return;
+    }
+
+    if (rolled(c.oneIn, ticks)) playSfx(c.sound, p, { bus: 'ambient' });
+  }
+
   /** `MoveBat`: pinned over the ground, dipping on a sine. */
   function bat(e: Entity, ticks: number): void {
     const s = e.boid!;
@@ -424,7 +448,9 @@ export const BoidSystem: ISystemFactory = world => {
         const s = e.boid!;
         const p = e.transform!.pos;
 
-        if (s.kind === 'bird') bird(e, ticks, hero);
+        // `case MODEL_BIRD01: case MODEL_CROW: MoveBird(o)` - one mover
+        // (GOBoid.cpp:1437-1439).
+        if (s.kind === 'bird' || s.kind === 'crow') bird(e, ticks, hero);
         else if (s.kind === 'bat') bat(e, ticks);
         else if (s.kind === 'butterfly') butterfly(e, ticks);
         else if (s.kind === 'dragon') dragon(e, ticks);
@@ -463,6 +489,8 @@ export const BoidSystem: ISystemFactory = world => {
         e.transform!.rot.y = spec.modelHalfTurn
           ? Math.PI - rad0(s.yaw)
           : -rad0(s.yaw);
+
+        call(p, ticks);
 
         // Out of range, or its time is up. Either way it is told to leave
         // rather than deleted: the original fades one in and out through

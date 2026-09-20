@@ -22,12 +22,15 @@ const SMOKE_SOUTH_TILES = 6;
 
 /**
  * Blood Castle type 36, the gate (x1, at 14.5/76.1, pitch 45 in the object
- * list). Stands over the `TW_NOGROUND` pit until the match's gate-destroyed
- * state, then swings down and vanishes (`ActionObject`, ZzzObject.cpp:96-140);
- * the pit opens and the two debris halves appear. `gate.ts` holds the state;
- * this class only writes the pitch and alpha it reads back.
+ * list). Stands over the moat until the bridge is earned, then swings down
+ * and vanishes (`ActionObject`, ZzzObject.cpp:96-140); the deck and its
+ * chains appear where it landed. `gate.ts` holds the state; this class only
+ * writes the pitch and alpha it reads back, and ticks the state machine.
  */
 export class BloodCastleGateObject extends MapTileObject {
+  // It rotates, hides itself and runs the state machine: never batched.
+  static Batchable = false;
+
   #entity: Entity | null = null;
   #smoke: ParticleEmitter | null = null;
   #smokeTicks = 0;
@@ -91,12 +94,15 @@ export class BloodCastleGateObject extends MapTileObject {
 }
 
 /**
- * Blood Castle types 9 and 10, the two broken-gate halves beside the gate
- * (x2 each). `MoveObject` keeps them `HiddenMesh = -2` until `PKKey == 4`,
- * which `ActionObject` sets on the tick the gate is gone
- * (ZzzObject.cpp:4143-4149, :84-98).
+ * Blood Castle types 9 and 10 - the bridge the fallen gate becomes: two deck
+ * spans inside the moat and the two side chains beside them. `MoveObject`
+ * keeps them `HiddenMesh = -2` until `PKKey == 4`, which `ActionObject` sets
+ * on the tick the gate is gone (ZzzObject.cpp:4143-4149, :84-98).
  */
-export class BloodCastleGateDebrisObject extends MapTileObject {
+export class BloodCastleBridgeObject extends MapTileObject {
+  // Hidden until the gate is down, so it owns its own alpha.
+  static Batchable = false;
+
   async init(world: World, entity: Entity) {
     await super.init(world, entity);
     if (!bloodCastleGateDown()) this.setAlpha(0);

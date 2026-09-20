@@ -32,6 +32,15 @@ const ARCHANGEL_WEAPONS: Record<number, readonly [number, number]> = {
   2: [ItemGroup.Bow, 18],
 };
 
+/**
+ * The same three, for the copy the Blood Castle carrier wears on the back
+ * (`c->EtcPart`, ZzzCharacter.cpp:15380-15385). Out of range = the staff,
+ * which is the original's own default.
+ */
+export function archangelWeapon(level: number): readonly [number, number] {
+  return ARCHANGEL_WEAPONS[level] ?? ARCHANGEL_WEAPONS[0];
+}
+
 export function dropModelProxy(
   group: number,
   num: number,

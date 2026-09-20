@@ -28,9 +28,10 @@ export const BLOOD_CASTLE_BLEND_MESHES: Readonly<Record<number, number>> = {};
 
 /**
  * `MoveObject` (ZzzObject.cpp:4135-4150) hides 9 and 10 unless `PKKey == 4`
- * - but they are *not* effect-only markers: they are the gate's two broken
- * halves, shown once the gate is down. `BloodCastleGateDebrisObject` owns
- * them, so the model loads and simply starts invisible.
+ * - but they are *not* effect-only markers: 9 is the bridge deck and 10 its
+ * two side chains, shown once the gate has lain down over the moat.
+ * `BloodCastleBridgeObject` owns them, so the model loads and simply starts
+ * invisible.
  */
 // Type 37: `Data/Object12` stops at Object37.bmd - there is no Object38.bmd for
 // it, so the original loads nothing and only ever runs the `RenderObjectVisual`
@@ -60,8 +61,13 @@ export const BLOOD_CASTLE_EMISSIONS: Partial<
 /** The gate, `Object12/Object37.glb` (type 36, x1 at 14.5, 76.1). */
 export const BLOOD_CASTLE_GATE_TYPE = 36;
 
-/** The two broken-gate halves the gate leaves behind (types 9 and 10). */
-export const BLOOD_CASTLE_GATE_DEBRIS_TYPES: readonly number[] = [9, 10];
+/**
+ * What the gate becomes once it is down: type 9 is the deck, two spans at
+ * (14.5, 71.5) and (14.5, 74.5) - inside the moat, not beside it - and type
+ * 10 the side chains at (12.9, 73.0) and (16.0, 73.1), pitched 10-15
+ * degrees. Both hidden until then.
+ */
+export const BLOOD_CASTLE_BRIDGE_TYPES: readonly number[] = [9, 10];
 
 /** The candelabra (x11) with seven flames on bones 1,2,4,6,9,10,11. */
 export const BLOOD_CASTLE_CANDELABRA_TYPE = 11;
@@ -71,7 +77,9 @@ export const BLOOD_CASTLE_LAMP_TYPE = 13;
 
 /**
  * `AddTerrainAttributeRange(13, 70, 3, 6, TW_NOGROUND, false)`
- * (ZzzObject.cpp:139): the pit the gate stands over, cleared when it falls.
- * EncTerrain12.att marks these 18 tiles `TW_NOGROUND | TW_ACTION` (0x28).
+ * (ZzzObject.cpp:139): the moat the gate lies down over. EncTerrain12.att
+ * marks these 18 tiles `TW_NOGROUND | TW_ACTION` (0x28), and the server
+ * clears the `TW_NOGROUND` over the same rectangle when the bridge is earned
+ * (OpenMU's Bridge Toggle Event) - which is what starts the fall.
  */
-export const BLOOD_CASTLE_GATE_PIT = { x: 13, y: 70, w: 3, h: 6 } as const;
+export const BLOOD_CASTLE_MOAT = { x: 13, y: 70, w: 3, h: 6 } as const;

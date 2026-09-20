@@ -48,6 +48,10 @@ const POSE_WAIT_LIMIT = 120;
  * brightness follows the sine - the same trade Stadium's brazier makes.
  */
 export class BloodCastleCandelabraObject extends MapTileObject {
+  // Seven flares on posed bones and a pulsing light: this one has to stay a
+  // model of its own (propBatches.ts).
+  static Batchable = false;
+
   #bones: BoneNode[] = [];
   #flares: MovableFlare[] = [];
   #source: LightSource | null = null;

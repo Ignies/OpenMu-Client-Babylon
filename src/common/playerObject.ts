@@ -21,6 +21,7 @@ import { requestGlowProbe } from '../scenes/sceneLook';
 import { WingObject } from './wingObject';
 import { WING_BONE, wingSpec } from './wings';
 import { ItemsDatabase } from './itemsDatabase';
+import { archangelWeapon } from './dropModelProxy';
 import { IMP_BONE, petSpec, type PetSpec } from './pets';
 import { angleLinkMatrix } from './boneLink';
 import { chooseIdleAction, isPhoenixSoulStar } from './weaponClass';
@@ -69,6 +70,12 @@ export class PlayerObject extends ModelObject {
   readonly PhoenixWing1: ModelObject;
   readonly PhoenixWing2: ModelObject;
   readonly Wings: WingObject;
+  /**
+   * The Blood Castle quest weapon, carried on the back bone beside the wings
+   * while this character is the one holding it (`c->EtcPart` 1..3,
+   * ZzzCharacter.cpp:15367-15391). Empty everywhere else.
+   */
+  readonly QuestItem: ModelObject;
   /** `c->Helper` when it is link-rendered on the body (the Imp / Satan). */
   readonly Pet: ModelObject;
 
@@ -95,6 +102,7 @@ export class PlayerObject extends ModelObject {
     this.PhoenixWing1 = new ModelObject(scene, this.node);
     this.PhoenixWing2 = new ModelObject(scene, this.node);
     this.Wings = new WingObject(scene, this.node);
+    this.QuestItem = new ModelObject(scene, this.node);
     this.Pet = new ModelObject(scene, this.node);
 
     this.HelmMask.NodeNamePrefix = 'HelmMask_';
@@ -108,6 +116,7 @@ export class PlayerObject extends ModelObject {
     this.PhoenixWing1.NodeNamePrefix = 'PhoenixWing1_';
     this.PhoenixWing2.NodeNamePrefix = 'PhoenixWing2_';
     this.Wings.NodeNamePrefix = 'Wings_';
+    this.QuestItem.NodeNamePrefix = 'QuestItem_';
     this.Pet.NodeNamePrefix = 'Pet_';
 
     const objs = [
@@ -122,6 +131,7 @@ export class PlayerObject extends ModelObject {
       this.PhoenixWing1,
       this.PhoenixWing2,
       this.Wings,
+      this.QuestItem,
       this.Pet,
     ];
 
@@ -135,6 +145,13 @@ export class PlayerObject extends ModelObject {
     this.Wings.LinkParent = false;
     this.Wings.ParentBoneLink = WING_BONE;
     this.Wings.SkipBoundingBox = true;
+
+    // The Blood Castle quest weapon rides the same bone as the wings: the
+    // original borrows the wing PART_t for it and draws it first, so a
+    // carrier with wings wears both (ZzzCharacter.cpp:15367-15391).
+    this.QuestItem.LinkParent = false;
+    this.QuestItem.ParentBoneLink = WING_BONE;
+    this.QuestItem.SkipBoundingBox = true;
 
     // The Imp rides bone 34 with a (20,0,0) cm offset (ZzzCharacter.cpp:15148-15170).
     this.Pet.LinkParent = false;
@@ -225,6 +242,25 @@ export class PlayerObject extends ModelObject {
       wings.isExcellent,
       itemVisualTier(wings)
     );
+  }
+
+  /**
+   * Loads (or clears) the Blood Castle quest weapon on the back.
+   * `level` is `c->EtcPart`: 1 the Divine Staff, 2 the Divine Sword, 3 the
+   * Divine Crossbow of Archangel (ZzzCharacter.cpp:15380-15385), which are
+   * the three models the Weapon of Archangel is shown as - the same table the
+   * ground drop reads (`dropModelProxy.ts`).
+   */
+  async setQuestItemAsync(level: number | null) {
+    const weapon = level ? archangelWeapon(level - 1) : null;
+    const def = weapon ? ItemsDatabase.getItem(weapon[0], weapon[1]) : null;
+
+    if (!def) {
+      this.QuestItem.Unload();
+      return;
+    }
+
+    await this.loadPartAsync(def.szModelFolder, this.QuestItem, def.szModelName);
   }
 
   /**

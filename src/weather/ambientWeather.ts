@@ -504,3 +504,38 @@ export const TAVERN_DUST: AmbientRecipe = {
   fade: 0.35,
   ramp: 3,
 };
+
+/**
+ * Blood Castle's motes. `MoveObjectOnEffect`'s `InBloodCastle` branch
+ * (ZzzObject.cpp:4321-4335) throws a white `BITMAP_FLARE` with `SubType 3`
+ * every fourth tick in a 9x9 tile box around the hero, 2.5-3 tiles up. The
+ * flare's own init and move (ZzzEffectParticle.cpp:765-772, :4997-5016) give
+ * it a 60-tick life, a climb of 1-5 cm a tick on a 40 cm spiral, a scale of
+ * 0.19 shrinking 0.002 a tick and a fade over the last 20 ticks: embers over
+ * a castle that is on fire.
+ *
+ * The box is the original's, which is not centred - `rand() % 900 - 300`
+ * reaches three tiles behind the hero and six ahead in both axes. Interior
+ * motes rather than weather: they do not come out of a sky and a roof does
+ * not stop them.
+ */
+export const BLOOD_CASTLE_MOTES: AmbientRecipe = {
+  name: 'bloodCastleMotes',
+  texture: 'Effect/flare01.OZJ',
+  blend: 'add',
+  // One every fourth 25 Hz tick is ~6/s, and 60 ticks of life is 2.4 s.
+  rate: 6,
+  capacity: 64,
+  box: [v(-3, 2.5, -3), v(6, 3, 6)],
+  direction: [v(-0.05, 1, -0.05), v(0.05, 1, 0.05)],
+  // `o->Gravity` 1-5 cm a tick = 0.25-1.25 tiles a second.
+  power: [0.25, 1.25],
+  life: [2.4, 2.4],
+  // `Scale = 0.19 + rand() % 6 * 0.01`, and it only ever shrinks.
+  size: [0.13, 0.19],
+  colour: [new Color4(1, 1, 1, 0.85), new Color4(1, 0.95, 0.85, 0.5)],
+  // The 40 cm spiral the flare rides as it climbs.
+  noise: v(0.4, 0, 0.4),
+  fade: 0.33,
+  ramp: 4,
+};

@@ -75,6 +75,11 @@ const LOWER_LIMIT_CLASSES: ReadonlySet<BaseClass> = new Set([
 ]);
 /** Seconds the result box stays before it clears itself. */
 const RESULT_SECONDS = 15;
+/** `m_wIndex` 65535 / `m_byItemType` 255 or 0: nobody is carrying it. */
+const NO_QUEST_OWNER = 65535;
+const QUEST_ITEM_LEVELS = 3;
+/** `Key &= 0x7FFF` before the lookup (NewBloodCastleSystem.cpp:51). */
+const OWNER_ID_MASK = 0x7fff;
 /** Ticket byte the NPC route sends: "no inventory slot, take any cloak". */
 const NO_TICKET_SLOT = 0xff;
 /** How long the OK-box substitutes stay on screen. */
@@ -91,6 +96,17 @@ export type BloodCastleTimer = {
   /** `GetMatchType() == 5`: the gate is down, the count is Magic Skeletons. */
   gateDestroyed: boolean;
   running: boolean;
+};
+
+/**
+ * Who is carrying the Archangel weapon, and which of the three it is
+ * (`c->EtcPart`, NewBloodCastleSystem.cpp:48-58). `level` is 1 staff, 2
+ * sword, 3 crossbow - the server sends the item's level plus one.
+ */
+export type BloodCastleQuestItem = {
+  /** The carrier's object id, masked the way `HangerBloodCastleQuestItem` does. */
+  ownerId: number;
+  level: 1 | 2 | 3;
 };
 
 export type BloodCastleScore = {
@@ -114,6 +130,7 @@ const state = observable(
       running: false,
     } as BloodCastleTimer,
     score: null as BloodCastleScore | null,
+    questItem: null as BloodCastleQuestItem | null,
   },
   {},
   { deep: false }
@@ -138,6 +155,11 @@ export function bloodCastleTimer(): BloodCastleTimer {
 /** `SetTime`: red clock under five minutes. */
 export function bloodCastleImminent(): boolean {
   return state.timer.seconds / 60 < IMMINENT_MINUTES;
+}
+
+/** Who carries the Archangel weapon, or null while nobody does. */
+export function bloodCastleQuestItem(): BloodCastleQuestItem | null {
+  return state.questItem;
 }
 
 /** The result box, or null when there is none. */
@@ -235,6 +257,7 @@ function clearTimer(): void {
       gateDestroyed: false,
       running: false,
     };
+    state.questItem = null;
   });
 }
 
@@ -305,6 +328,31 @@ EventBus.on('MiniGameOpeningState', packet => {
   );
 });
 
+/**
+ * `HangerBloodCastleQuestItem(data->m_wIndex)` then
+ * `c->EtcPart = data->m_byItemType` (NewBloodCastleSystem.cpp:48-58): the
+ * running state names whoever picked the Archangel weapon up and which of the
+ * three it is. 65535 / 255 / 0 all mean nobody.
+ */
+function readQuestItem(p: BloodCastleStatePacket): void {
+  const owner = p.ItemOwnerId;
+  const level = p.ItemLevel;
+
+  const carried =
+    owner !== NO_QUEST_OWNER && level >= 1 && level <= QUEST_ITEM_LEVELS;
+
+  const next: BloodCastleQuestItem | null = carried
+    ? { ownerId: owner & OWNER_ID_MASK, level: level as 1 | 2 | 3 }
+    : null;
+
+  const now = state.questItem;
+  if (now?.ownerId === next?.ownerId && now?.level === next?.level) return;
+
+  runInAction(() => {
+    state.questItem = next;
+  });
+}
+
 /** `SetMatchGameCommand` (NewBloodCastleSystem.cpp): states 0..4. */
 EventBus.on('BloodCastleState', packet => {
   const p = new BloodCastleStatePacket(packet);
@@ -323,6 +371,7 @@ EventBus.on('BloodCastleState', packet => {
           running: true,
         };
       });
+      readQuestItem(p);
       break;
     case BloodCastleStateStatusEnum.BloodCastleEnded:
       clearTimer();

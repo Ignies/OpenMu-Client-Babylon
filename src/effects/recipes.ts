@@ -195,6 +195,12 @@ export const MODEL = {
   /** MODEL_STONE1/2 (Stone01/02.bmd): the small chips a stone skill / a breaking prop throws. */
   stone: 'Skill/Stone01.glb',
   stone2: 'Skill/Stone02.glb',
+  /** MODEL_GATE / +1 (Object12): the masonry the Blood Castle gate bursts into. */
+  gateChunk: 'Object12/Gate01.glb',
+  gateChunk2: 'Object12/Gate02.glb',
+  /** MODEL_STONE_COFFIN / +1 (Object12): the Statue of Saint's crystal. */
+  crystal: 'Object12/StoneCoffin01.glb',
+  crystal2: 'Object12/StoneCoffin02.glb',
   groundStone: 'Skill/GroundStone.glb',
   groundStone2: 'Skill/GroundStone2.glb',
   groundCrystal: 'Skill/GroundCrystal.glb',

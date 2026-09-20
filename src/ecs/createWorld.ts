@@ -25,6 +25,7 @@ import { OutOfScopeSystem } from './systems/outOfScopeSystem';
 import { CalculateVisibilitySystem } from './systems/calculateVisibilitySystem';
 import { CalculateScreenPositionSystem } from './systems/calculateScreenPositionSystem';
 import { AppearanceSystem } from './systems/appearanceSystem';
+import { QuestItemSystem } from './systems/questItemSystem';
 import { ItemGlowSystem } from './systems/itemGlowSystem';
 import { CharacterLightSystem } from './systems/characterLightSystem';
 import { MonsterGlowSystem } from './systems/monsterGlowSystem';
@@ -108,6 +109,9 @@ const factories: ISystemFactory[] = [
   DropMotionSystem,
   HeadTrackingSystem,
   AppearanceSystem,
+  // After AppearanceSystem: the Blood Castle carrier's back item goes on
+  // beside whatever wings the appearance just loaded.
+  QuestItemSystem,
   // After AnimationSystem + AppearanceSystem: mounts follow this frame's
   // rider pose, and the angel needs its owner's safe-zone flag.
   PetSystem,

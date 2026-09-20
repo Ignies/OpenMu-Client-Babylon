@@ -1,4 +1,5 @@
 import { isHeroUnderRoof } from './ceilingHideSystem';
+import { inBloodCastle } from '../../common/locomotion';
 import { ENUM_WORLD } from '../../common';
 import {
   createAmbientSystem,
@@ -8,6 +9,7 @@ import {
 import {
   ATLANS_BUBBLES,
   ATLANS_DRIFT,
+  BLOOD_CASTLE_MOTES,
   DEVIAS_SNOW,
   DEVIAS_SNOW_BIG,
   HEARTH_DUST,
@@ -51,6 +53,8 @@ import type { ISystemFactory } from '../world';
  *    numbers (`CreateAtlanseLeaf`), but on World8's own round sprite and
  *    additive; see `ATLANS_DRIFT`.
  *  - Devias: snow (`CreateDeviasSnow`).
+ *  - Blood Castle: embers drifting up around the hero
+ *    (`MoveObjectOnEffect`'s `InBloodCastle` branch).
  *  - Rain on any outdoor map while `WeatherStatusUpdate` reports weather 1
  *    (the original only rained on event maps; the packet is OpenMU's way
  *    of switching it, so we honour it everywhere the sky is visible).
@@ -180,6 +184,13 @@ export const AmbientParticleSystem: ISystemFactory = world => {
       followHero: true,
       active: (map, indoors) =>
         GameOptions.ambientParticles && !indoors && SNOWFALL_MAPS.has(map),
+    },
+    // Blood Castle's embers. Not weather: they come off the burning castle,
+    // not out of a sky, so a roof does not switch them off.
+    {
+      recipe: BLOOD_CASTLE_MOTES,
+      followHero: true,
+      active: map => GameOptions.ambientParticles && inBloodCastle(map),
     },
     {
       recipe: RAIN,
