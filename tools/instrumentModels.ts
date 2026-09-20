@@ -1003,8 +1003,8 @@ const HARP_HEIGHT = 150;
 const HARP_DEPTH = 70;
 const HARP_STRINGS = 22;
 /** The soundbox's depth (base to top) and its width between the player's shoulders. */
-const HARP_BOX_DEPTH = 30;
-const HARP_BOX_WIDTH = 22;
+const HARP_BOX_DEPTH = 14;
+const HARP_BOX_WIDTH = 9;
 
 /**
  * Harp: a floor harp standing on its base, +Z up, +X toward the back (the
@@ -1050,7 +1050,11 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
 
   // The neck: across the top, rooted inside the pillar, out to the crown;
   // thickness along Y.
-  const neckP = h.neck.alongZ(neckRect, HARP_DEPTH + 9, 0, ([a, t, l]) => [l - 8, t, HARP_HEIGHT - a]);
+  // Hung from its top edge, so the pillar's top is inside its thick end.
+  const neckP: Placement = {
+    ...h.neck.alongZ(neckRect, HARP_DEPTH + 9, 0, ([a, t, l]) => [l - 8, t, HARP_HEIGHT - a]),
+    originPy: 0,
+  };
   const neckColumns = h.neck.columns();
   extrudeFlat(m, decimate(neckColumns, h.neck.tolerance()), neckP, 1.5, () => 3, wood);
 
