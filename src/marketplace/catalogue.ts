@@ -1,4 +1,4 @@
-import type { ApiListing } from './api';
+import type { ApiListing, ListingState } from './api';
 import { categoryOf } from './categories';
 import type { Listing } from './mockListings';
 import type { TextKey } from '../i18n';
@@ -11,11 +11,11 @@ import type { TextKey } from '../i18n';
  * Kept apart from the store so it can be tested on its own. The rule it
  * enforces is the one the window got wrong before: a listing is *for sale*
  * only when the service says `active`. A seller's own `pending` row - the
- * trader has not collected it yet - is theirs to watch on the My Listings
- * tab, and must never sit in the catalogue looking buyable.
+ * game server has not taken the item yet - is theirs to watch on the My
+ * Listings tab, and must never sit in the catalogue looking buyable.
  */
 
-export type ListingState = NonNullable<Listing['state']>;
+export type { ListingState };
 
 function fromApi(row: ApiListing, mine: boolean): Listing {
   return {
@@ -29,6 +29,7 @@ function fromApi(row: ApiListing, mine: boolean): Listing {
     median: row.price,
     mine: mine || undefined,
     state: row.state,
+    proceeds: row.proceeds ?? undefined,
   };
 }
 
@@ -65,10 +66,14 @@ export function stateLabelKey(state: ListingState | undefined): TextKey | null {
       return 'marketplace.state.active';
     case 'claimed':
       return 'marketplace.state.claimed';
+    case 'sold':
+      return 'marketplace.state.sold';
+    case 'paid':
+      return 'marketplace.state.paid';
     case 'returning':
       return 'marketplace.state.returning';
-    case 'stuck':
-      return 'marketplace.state.stuck';
+    case 'cancelled':
+      return 'marketplace.state.cancelled';
     default:
       return null;
   }
@@ -83,10 +88,14 @@ export function statePillKey(state: ListingState | undefined): TextKey | null {
       return 'marketplace.state.active';
     case 'claimed':
       return 'marketplace.pill.claimed';
+    case 'sold':
+      return 'marketplace.pill.sold';
+    case 'paid':
+      return 'marketplace.pill.paid';
     case 'returning':
       return 'marketplace.pill.returning';
-    case 'stuck':
-      return 'marketplace.pill.stuck';
+    case 'cancelled':
+      return 'marketplace.pill.cancelled';
     default:
       return null;
   }

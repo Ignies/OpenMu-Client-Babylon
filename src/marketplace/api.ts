@@ -10,7 +10,21 @@ import type { Item } from '../ecs/world';
  * game socket, so the only credential the window holds is the nonce already
  * on that socket's URL. A window that asked "list this as Bob" would be
  * ignored, which is the point.
+ *
+ * Every commit (list, buy, cancel, collect) is three steps: the service
+ * answers with a signed token, the window relays it to the game server
+ * (`gameBridge.ts`), and then tells the service to settle by reading the
+ * game database. The service never moves an item or a Zen itself.
  */
+
+export type ListingState =
+  | 'pending'
+  | 'active'
+  | 'claimed'
+  | 'sold'
+  | 'paid'
+  | 'returning'
+  | 'cancelled';
 
 export type ApiListing = {
   id: string;
@@ -18,10 +32,15 @@ export type ApiListing = {
   price: number;
   item: Item;
   category: string;
-  state: 'pending' | 'active' | 'claimed' | 'sold' | 'cancelled' | 'returning' | 'stuck';
+  state: ListingState;
   buyer: string | null;
   listedAt: number;
+  /** Zen waiting for the seller, on a sold row; null once paid. */
+  proceeds?: number | null;
 };
+
+/** A signed escrow token, lowercase hex, for `gameBridge.sendEscrow`. */
+export type Token = string;
 
 export class MarketError extends Error {
   constructor(
@@ -96,6 +115,18 @@ async function withTicket<T>(run: (t: Ticket) => Promise<T>): Promise<T> {
   }
 }
 
+function post<T>(path: string, body: Record<string, unknown>) {
+  return withTicket(t =>
+    request<T>(path, {
+      method: 'POST',
+      body: JSON.stringify({ ticket: t.ticket, ...body }),
+    })
+  );
+}
+
+const listingPath = (id: string, action: string) =>
+  `/listings/${encodeURIComponent(id)}/${action}`;
+
 export function browse(options: { category?: string; limit?: number; offset?: number } = {}) {
   return withTicket(t => {
     const query = new URLSearchParams({ ticket: t.ticket });
@@ -114,43 +145,55 @@ export function mine() {
   );
 }
 
-/** Asks for a listing. It is not on sale until a bot has collected the item. */
-export function list(item: Item, price: number, category: string, character: string) {
-  return withTicket(t =>
-    request<{ listing: ApiListing }>('/listings', {
-      method: 'POST',
-      body: JSON.stringify({ ticket: t.ticket, session: sessionNonce(), item, price, category, character }),
-    })
-  );
+export type ListInput = {
+  character: string;
+  /** The bag slot the item sits in; the game server takes it from there. */
+  slot: number;
+  price: number;
+  category: string;
+  item: Item;
+};
+
+/** Asks for a listing. It is `pending` until the game server has taken the item. */
+export function list(input: ListInput) {
+  return post<{ listing: ApiListing; token: Token }>('/listings', input);
 }
 
-/** Reserves a listing. Exactly one buyer can win this. */
+/**
+ * Tells the service to read the game database and move the listing on. Called
+ * after every result packet, whatever its status. A successful list result
+ * carries the item as the server serialised it; the service keeps those bytes.
+ */
+export function settle(id: string, item?: number[]) {
+  return post<{ listing: ApiListing }>(listingPath(id, 'settle'), item ? { item } : {});
+}
+
+/** Reserves a listing for this buyer. 409 when somebody else got it first. */
 export function claim(id: string, character: string) {
-  return withTicket(t =>
-    request<{ listing: ApiListing }>(`/listings/${encodeURIComponent(id)}/claim`, {
-      method: 'POST',
-      body: JSON.stringify({ ticket: t.ticket, session: sessionNonce(), character }),
-    })
-  );
+  return post<{ listing: ApiListing; token: Token }>(listingPath(id, 'claim'), { character });
 }
 
-export function cancel(id: string) {
-  return withTicket(t =>
-    request<{ listing: ApiListing }>(`/listings/${encodeURIComponent(id)}/cancel`, {
-      method: 'POST',
-      body: JSON.stringify({ ticket: t.ticket, session: sessionNonce() }),
-    })
-  );
+/** Gives a claim back after the game server refused the buy. */
+export function release(id: string) {
+  return post<{ listing: ApiListing }>(listingPath(id, 'release'), {});
 }
 
-/** Asks for what is owed. A bot then meets this character to hand it over. */
-export function requestPayout(character: string) {
-  return withTicket(t =>
-    request<{ owed: number; requested?: boolean }>('/payout', {
-      method: 'POST',
-      body: JSON.stringify({ ticket: t.ticket, session: sessionNonce(), character }),
-    })
-  );
+/** A null token means the row was still pending and is cancelled outright. */
+export function cancel(id: string, character: string) {
+  return post<{ listing: ApiListing; token: Token | null }>(listingPath(id, 'cancel'), {
+    character,
+  });
+}
+
+export type Payout = { listingId: string; token: Token; amount: number };
+
+/** One token per sold box; the game server pays each into the wallet. */
+export function payout(character: string) {
+  return post<{ payouts: Payout[]; total: number }>('/payout', { character });
+}
+
+export function settlePayout() {
+  return post<{ paid: number; remaining: number }>('/payout/settle', {});
 }
 
 /** One thing that happened to this player in the market, as the service tells it. */
@@ -159,8 +202,6 @@ export type HistoryEntry = {
   kind: 'sale' | 'purchase' | 'payout';
   item: Item | null;
   zen: number;
-  /** The bot that carried it, once one did. */
-  bot: string | null;
   status: 'success' | 'failed' | 'pending';
   note: string;
   at: number;

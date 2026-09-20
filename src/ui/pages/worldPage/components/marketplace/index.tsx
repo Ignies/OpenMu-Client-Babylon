@@ -47,16 +47,19 @@ const nameClass = (item: Listing['item']) =>
 const REFRESH_MS = 10_000;
 
 /**
- * What the trader is doing with a seller's own listing, as a short pill; the
- * whole sentence is the hover text. Nothing for a fixture without a state.
+ * What the market is doing with a seller's own listing, as a short pill; the
+ * whole sentence is the hover text. A sold row carries the Zen waiting to be
+ * collected. Nothing for a fixture without a state.
  */
 const StatePill = observer(({ listing }: { listing: Listing }) => {
   const pillKey = statePillKey(listing.state);
   const labelKey = stateLabelKey(listing.state);
   if (!pillKey) return null;
+  const waiting = listing.state === 'sold' && listing.proceeds ? listing.proceeds : 0;
   return (
     <span className={`mp-state is-${listing.state}`} title={labelKey ? t(labelKey) : undefined}>
       {t(pillKey)}
+      {waiting > 0 && <span className="mp-state-amount">+{formatZen(waiting)}</span>}
     </span>
   );
 });
@@ -71,14 +74,22 @@ const RowAction = observer(({ listing }: { listing: Listing }) => {
   if (listing.mine) {
     if (!cancellable(listing)) return null;
     return (
-      <button className="mp-btn is-quiet" onClick={() => Marketplace.cancelListing(listing.id)}>
+      <button
+        className="mp-btn is-quiet"
+        disabled={Marketplace.busy}
+        onClick={() => Marketplace.cancelListing(listing.id)}
+      >
         {t('common.cancel')}
       </button>
     );
   }
   const affordable = Marketplace.canAfford(listing);
   return (
-    <button className="mp-btn" disabled={!affordable} onClick={() => Marketplace.askBuy(listing)}>
+    <button
+      className="mp-btn"
+      disabled={!affordable || Marketplace.busy}
+      onClick={() => Marketplace.askBuy(listing)}
+    >
       {affordable ? t('marketplace.buy') : t('marketplace.short')}
     </button>
   );
@@ -315,7 +326,7 @@ const MarketRate = observer(() => {
 const SellTab = observer(() => {
   const { inventory, sellPick } = Marketplace;
   const bag = Marketplace.bagFiltered;
-  const picked = sellPick === null ? null : inventory[sellPick];
+  const picked = sellPick === null ? null : inventory[sellPick]?.item ?? null;
 
   return (
     <div className="mp-sell">
@@ -370,7 +381,7 @@ const SellTab = observer(() => {
 
             <button
               className="mp-btn is-wide"
-              disabled={Marketplace.sellPriceValue <= 0}
+              disabled={Marketplace.sellPriceValue <= 0 || Marketplace.busy}
               onClick={() => Marketplace.listForSale()}
             >
               {t('marketplace.listIt')}
@@ -400,8 +411,8 @@ const KIND_KEY: Record<HistoryEntry['kind'], TextKey> = {
 
 /**
  * What happened, newest first: each listing the player sold or tried to,
- * each purchase, each payout - with the bot that carried it and how it
- * ended. The service's own words for the ending sit under the item name.
+ * each purchase, each payout, and how it ended. The service's own words for
+ * the ending sit under the item name.
  */
 const HistoryTab = observer(() => {
   const rows = Marketplace.history;
@@ -410,7 +421,6 @@ const HistoryTab = observer(() => {
       <div className="mp-hist-row mp-hist-head">
         <span />
         <span>{t('marketplace.colItem')}</span>
-        <span>{t('marketplace.colBot')}</span>
         <span>{t('marketplace.colStatus')}</span>
         <span>{t('marketplace.colWhen')}</span>
         <span className="mp-row-price-head">{t('marketplace.price')}</span>
@@ -427,7 +437,6 @@ const HistoryTab = observer(() => {
               {row.item ? `${t(KIND_KEY[row.kind])} - ${row.note}` : row.note}
             </div>
           </div>
-          <div className="mp-hist-bot">{row.bot ?? '-'}</div>
           <div>
             <span className={`mp-status is-${row.status}`}>{t(STATUS_KEY[row.status])}</span>
           </div>
@@ -469,7 +478,11 @@ const ConfirmDialog = observer(() => {
           {formatZen(listing.price)} <span className="mp-zen">{t('common.zen')}</span>
         </div>
         <div className="mp-modal-buttons">
-          <button className="mp-btn" onClick={() => Marketplace.confirmBuy()}>
+          <button
+            className="mp-btn"
+            disabled={Marketplace.busy}
+            onClick={() => Marketplace.confirmBuy()}
+          >
             {t('marketplace.confirm')}
           </button>
           <button className="mp-btn is-quiet" onClick={() => Marketplace.cancelBuy()}>
@@ -495,8 +508,8 @@ export const MarketplaceWindow = observer(() => {
     return () => window.clearTimeout(timer);
   }, [flash]);
 
-  // A listing goes from "waiting for the trader" to "on sale" while the
-  // window is open, and a sale credits a balance; polling is what shows it.
+  // Somebody buys one of the player's listings while the window is open,
+  // and the sale credits a balance; polling is what shows it.
   const { open } = Marketplace;
   useEffect(() => {
     if (!open) return;
@@ -606,7 +619,11 @@ export const MarketplaceWindow = observer(() => {
         {Marketplace.tab === 'mine' && Marketplace.payoutOwed > 0 && (
           <div className="mp-owed">
             <span>{t('marketplace.owed', { amount: formatZen(Marketplace.payoutOwed) })}</span>
-            <button className="mp-btn" onClick={() => Marketplace.collectPayout()}>
+            <button
+              className="mp-btn"
+              disabled={Marketplace.busy}
+              onClick={() => Marketplace.collectPayout()}
+            >
               {t('marketplace.collect')}
             </button>
           </div>

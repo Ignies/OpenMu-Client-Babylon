@@ -27,10 +27,9 @@
     "cashshop-api": "bun run --watch cashshop/server/main.ts",
     "cashshop-serve": "bun run cashshop/server/main.ts",
     "marketplace-api": "bun run --watch marketplace/server/main.ts",
-    "marketplace-bot": "bun run marketplace/bot/cli.ts",
-    "test:server": "bun test ./marketplace/server/",
-    "marketplace-worker": "bun run marketplace/server/worker.ts",
-    "marketplace-holdings": "bun run marketplace/server/holdingsCli.ts"
+    "marketplace-serve": "bun run marketplace/server/main.ts",
+    "marketplace-audit": "bun run marketplace/server/boxAuditCli.ts",
+    "test:server": "bun test ./marketplace/server/"
   },
   "devDependencies": {
     "@eslint/js": "^9",

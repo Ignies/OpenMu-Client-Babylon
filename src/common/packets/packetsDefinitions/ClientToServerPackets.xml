@@ -4265,6 +4265,23 @@
       <CausedReaction>The server sends an AvailableChatCommand message for each available chat command.</CausedReaction>
       <Fields />
     </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>E7</Code>
+      <SubCode>01</SubCode>
+      <Name>MarketplaceEscrowRequest</Name>
+      <Direction>ClientToServer</Direction>
+      <SentWhen>The marketplace window relays a signed escrow token the marketplace service minted for a list, cancel, buy or collect.</SentWhen>
+      <CausedReaction>The server verifies the token, moves the item or the Zen in the player's own session and answers with a MarketplaceEscrowResult.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Binary</Type>
+          <Name>Token</Name>
+          <Description>The raw token bytes. Dynamic length, therefore last.</Description>
+        </Field>
+      </Fields>
+    </Packet>
   </Packets>
   <Enums>
     <Enum>

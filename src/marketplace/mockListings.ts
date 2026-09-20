@@ -1,4 +1,5 @@
 import type { Item } from '../ecs/world';
+import type { ListingState } from './api';
 import items from '../common/items.json';
 import { itemIconUrl } from '../common/itemIconPack';
 import { categoryOf, type CategoryId } from './categories';
@@ -21,7 +22,9 @@ export type Listing = {
   median: number;
   mine?: boolean;
   /** What the service says it is doing. Fixtures have none. */
-  state?: 'pending' | 'active' | 'claimed' | 'sold' | 'cancelled' | 'returning' | 'stuck';
+  state?: ListingState;
+  /** Zen waiting for the seller, on a sold row. */
+  proceeds?: number;
 };
 
 const SELLERS = [
@@ -128,12 +131,13 @@ export function buildMockListings(seed = 20260908): Listing[] {
 
   // A handful are the player's own, one in each state the service can
   // answer with, so My Listings shows every pill the window can draw.
-  const states: NonNullable<Listing['state']>[] = ['pending', 'active', 'claimed', 'returning', 'stuck'];
+  const states: ListingState[] = ['pending', 'active', 'claimed', 'returning', 'sold', 'paid'];
   for (const state of states) {
     const l = out[Math.floor(r() * out.length)];
     l.mine = true;
     l.seller = 'You';
     l.state = state;
+    if (state === 'sold') l.proceeds = Math.round(l.price * 0.95);
   }
 
   return out;

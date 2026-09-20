@@ -12666,6 +12666,62 @@
         </Field>
       </Fields>
     </Packet>
+    <Packet>
+      <HeaderType>C1HeaderWithSubCode</HeaderType>
+      <Code>E7</Code>
+      <SubCode>02</SubCode>
+      <Name>MarketplaceEscrowResult</Name>
+      <Direction>ServerToClient</Direction>
+      <SentWhen>After a MarketplaceEscrowRequest was processed, whatever the outcome.</SentWhen>
+      <CausedReaction>The marketplace window reports the outcome to the marketplace service and shows it to the player. The bag and the wallet are updated by the usual ItemRemoved, ItemAddedToInventory and InventoryMoneyUpdate packets.</CausedReaction>
+      <Fields>
+        <Field>
+          <Index>4</Index>
+          <Type>Byte</Type>
+          <Name>Operation</Name>
+          <Description>1 list, 2 cancel, 3 buy, 4 collect.</Description>
+        </Field>
+        <Field>
+          <Index>5</Index>
+          <Type>Byte</Type>
+          <Name>Status</Name>
+          <Description>0 Ok, 1 BadToken, 2 Expired, 3 WrongPlayer, 4 NotInWorld, 5 NoSuchItem, 6 NotTradable, 7 NoRoom, 8 NotEnoughMoney, 9 BoxGone, 10 MoneyCap, 11 Failed, 12 NotSold.</Description>
+        </Field>
+        <Field>
+          <Index>6</Index>
+          <Type>Binary</Type>
+          <Name>ListingId</Name>
+          <Length>16</Length>
+          <Description>The listing's guid in .NET byte order.</Description>
+        </Field>
+        <Field>
+          <Index>22</Index>
+          <Type>Binary</Type>
+          <Name>BoxId</Name>
+          <Length>16</Length>
+          <Description>The escrow box's guid in .NET byte order.</Description>
+        </Field>
+        <Field>
+          <Index>38</Index>
+          <Type>Binary</Type>
+          <Name>Amount</Name>
+          <Length>8</Length>
+          <Description>Signed 64-bit little endian: the fee taken, the price paid or the Zen collected.</Description>
+        </Field>
+        <Field>
+          <Index>46</Index>
+          <Type>Byte</Type>
+          <Name>ItemLength</Name>
+          <Description>0, or the size of the item bytes that follow.</Description>
+        </Field>
+        <Field>
+          <Index>47</Index>
+          <Type>Binary</Type>
+          <Name>ItemData</Name>
+          <Description>The item that moved, in the server's own serializer bytes. Dynamic length, therefore last.</Description>
+        </Field>
+      </Fields>
+    </Packet>
   </Packets>
   <Enums>
     <Enum>
