@@ -402,3 +402,53 @@ describe('reading', () => {
     expect(decodeToken(token).expiresAt).toBeGreaterThan(Math.floor(clock / 1000));
   });
 });
+
+/**
+ * The stub above answers on the account alone, so the rest of the file can
+ * stay short. Presence does not: it knows nonces, and a body that forgot to
+ * carry the page's nonce names nobody. This builds an app with a stub that
+ * behaves that way, because a client that drops the nonce still holds a
+ * perfectly good ticket and would otherwise look authorised.
+ */
+describe('a commit body without the page session', () => {
+  const strict = createApp({
+    boxes: { state: async id => boxes.get(id) ?? gone },
+    secret: new TextEncoder().encode('escrow-secret'),
+    listingFee: 100,
+    commissionPercent: 5,
+    confirmLive: async (nonce, account) =>
+      typeof nonce === 'string' && /^[0-9a-f]{32}$/.test(nonce) && live.has(account)
+        ? { ok: true }
+        : { ok: false, reason: 'malformed', message: 'That session is not one the marketplace recognises.' },
+    now: () => clock,
+  });
+
+  async function post(path: string, body: Record<string, unknown>) {
+    const req = new Request(`http://market.test/api/market${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const response = await strict.fetch(req, server);
+    return { status: response.status, body: (await response.json()) as { error?: string } };
+  }
+
+  const ticketOnly = (account: string) => ({ ticket: mintTicket(account, clock).ticket, character: account });
+  /** What the window sends: the ticket, the character, and the nonce on its game socket. */
+  const withSession = (account: string) => ({ ...ticketOnly(account), session: 'a'.repeat(32) });
+
+  test('is refused where a body with it is taken', async () => {
+    const item = { ...anItem };
+    const without = await post('/listings', { ...ticketOnly('alice'), slot: 20, price: 1000, category: 'jewels', item });
+    expect(without.status).toBe(403);
+    expect(without.body.error).toContain('session');
+
+    const with_ = await post('/listings', { ...withSession('alice'), slot: 20, price: 1000, category: 'jewels', item });
+    expect(with_.status).toBe(201);
+  });
+
+  test('is refused on a payout too', async () => {
+    expect((await post('/payout', ticketOnly('alice'))).status).toBe(403);
+    expect((await post('/payout', withSession('alice'))).status).toBe(200);
+  });
+});

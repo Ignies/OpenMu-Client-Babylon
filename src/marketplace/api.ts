@@ -115,11 +115,19 @@ async function withTicket<T>(run: (t: Ticket) => Promise<T>): Promise<T> {
   }
 }
 
+/**
+ * A commit body.
+ *
+ * The nonce rides on every one of these, not only on the exchange. A ticket
+ * outlives the socket it was minted for, so the service asks the proxy again
+ * before it signs an escrow token; a body without the nonce is refused as a
+ * session it cannot recognise, however fresh the ticket is.
+ */
 function post<T>(path: string, body: Record<string, unknown>) {
   return withTicket(t =>
     request<T>(path, {
       method: 'POST',
-      body: JSON.stringify({ ticket: t.ticket, ...body }),
+      body: JSON.stringify({ ticket: t.ticket, session: sessionNonce(), ...body }),
     })
   );
 }
