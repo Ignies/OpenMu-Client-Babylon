@@ -1,7 +1,16 @@
+import { Vector3 } from '../libs/babylon/exports';
 import { ENUM_WORLD } from './types';
 import { loadGLTF } from './modelLoader';
 import { ModelObject } from './modelObject';
+import { createMovableFlare, type MovableFlare } from './effectLights';
+import { boneLocalPos } from '../effects/core';
+import { TILE_CM } from './terrain/consts';
+import { Store } from '../store';
+import type { Sounds } from '../libs/soundsManager';
 import type { Entity, World } from '../ecs/world';
+
+const eyeLocal = new Vector3();
+const eyeWorld = new Vector3();
 
 /**
  * `Boids[]` - the ambient wildlife (GOBoid.cpp:814-1500).
@@ -103,6 +112,34 @@ export type BoidSpec = {
    * model flies tail first without this.
    */
   readonly modelHalfTurn?: boolean;
+  /**
+   * Two glowing sprites on one bone, `+-spreadCm` apart along the bone's own
+   * x - the crow's eyes (`CreateSprite(BITMAP_LIGHT, …, 0.1, Light, o)` at
+   * `BoneTransform[1]`, GOBoid.cpp:1573-1583). The flare is repainted every
+   * frame at a luminosity rolled in `luminosity`, which is the flicker.
+   */
+  readonly eyes?: EyeGlow;
+  /**
+   * A call this species makes while the hero is inside `withinCm`, one chance
+   * in `oneIn` a tick. `onSafeZone` is the crow's extra condition: it only
+   * caws over a `TW_SAFEZONE` tile (GOBoid.cpp:1495-1500).
+   */
+  readonly call?: BoidCall;
+};
+
+export type EyeGlow = {
+  readonly bone: number;
+  readonly spreadCm: number;
+  readonly scale: number;
+  readonly colour: readonly [number, number, number];
+  readonly luminosity: readonly [number, number];
+};
+
+export type BoidCall = {
+  readonly sound: Sounds;
+  readonly withinCm: number;
+  readonly oneIn: number;
+  readonly onSafeZone?: boolean;
 };
 
 const BIRD: BoidSpec = {
@@ -133,6 +170,11 @@ const BUTTERFLY: BoidSpec = {
   lit: false,
 };
 
+/**
+ * Blood Castle's crow. `MoveBird` moves it (GOBoid.cpp:1437-1439) - the same
+ * flight, dive and landing the Lorencia bird gets. What is its own: two red
+ * eyes, and a caw it only makes over the safe zone.
+ */
 const CROW: BoidSpec = {
   kind: 'crow',
   models: ['Object12/Crow01.glb'],
@@ -140,6 +182,19 @@ const CROW: BoidSpec = {
   velocity: 1,
   turn: 13,
   lit: true,
+  eyes: {
+    bone: 1,
+    spreadCm: 5,
+    scale: 0.1,
+    colour: [1, 0.2, 0],
+    luminosity: [1.28, 1.6],
+  },
+  call: {
+    sound: 'Sound/eCrow',
+    withinCm: 600,
+    oneIn: 128,
+    onSafeZone: true,
+  },
 };
 
 /**
@@ -244,12 +299,71 @@ export function boidFactoryFor(spec: BoidSpec, model: string): typeof ModelObjec
 
     CastsShadow = false;
 
-    async init(world: World, _entity: Entity) {
+    #entity: Entity | null = null;
+    #eyes: (MovableFlare | null)[] = [];
+    #asked = false;
+    #disposed = false;
+
+    async init(world: World, entity: Entity) {
       const shine = spec.shine;
 
       if (shine) this.BodyShine.tint.set(shine[0], shine[1], shine[2]);
 
+      this.#entity = entity;
+
       this.load(await loadGLTF(model, world));
+    }
+
+    dispose(): void {
+      this.#disposed = true;
+      for (const eye of this.#eyes) eye?.dispose();
+      this.#eyes = [];
+      this.#entity = null;
+      super.dispose();
+    }
+
+    Update(gameTime: World['gameTime']): void {
+      super.Update(gameTime);
+
+      const eyes = spec.eyes;
+      const entity = this.#entity;
+      if (!eyes || !entity || !this.Ready) return;
+
+      if (!this.#asked) {
+        this.#asked = true;
+        this.#makeEyes(eyes);
+      }
+
+      if (this.#eyes.length < 2 || this.OutOfView) return;
+
+      const [lo, hi] = eyes.luminosity;
+      const lumi = lo + Math.random() * (hi - lo);
+
+      for (let i = 0; i < 2; i++) {
+        const eye = this.#eyes[i];
+        if (!eye) continue;
+        eyeLocal.set(((i === 0 ? -1 : 1) * eyes.spreadCm) / TILE_CM, 0, 0);
+        boneLocalPos(entity, eyes.bone, eyeLocal, eyeWorld);
+        eye.moveTo(eyeWorld.x, eyeWorld.y, eyeWorld.z);
+        eye.setLuminosity(lumi);
+      }
+    }
+
+    #makeEyes(eyes: EyeGlow): void {
+      const scene = Store.world?.scene;
+      if (!scene) return;
+
+      for (let i = 0; i < 2; i++) {
+        this.#eyes.push(null);
+        void createMovableFlare(scene, eyes.scale, eyes.colour).then(flare => {
+          if (!flare) return;
+          if (this.#disposed) {
+            flare.dispose();
+            return;
+          }
+          this.#eyes[i] = flare;
+        });
+      }
     }
   }
 
