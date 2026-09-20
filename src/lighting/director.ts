@@ -301,6 +301,14 @@ export function createLookDirector(
     const lightTier = lightingTier();
     const shaped = lightTier !== null;
     const post = GameOptions.postProcessing;
+    // The level and the curve are one thing (ARCHITECTURE F12): the key puts
+    // the frame a stop or two over display white and the tone pass rolls it
+    // back down. With post off there is no pass and no linear buffer - the
+    // terrain and the materials compose in display space and clamp at 1 - so
+    // the level has nowhere to go but into blown highlights. Ungraded, the
+    // shaped tiers run at the original's unit level like Classic; the shaping
+    // (sun split, cascades, PBR) is untouched.
+    const graded = shaped && post;
     const room = shaped ? area : null;
 
     // The style lives on tiers >= 1 only; null below them. The ink lines are
@@ -322,7 +330,7 @@ export function createLookDirector(
     // 1. key. Inside a room the rig and the ground bake take the room's share
     // of the map's level (F14); the emitters stay at the map's level and
     // carry the room.
-    const keyGain = shaped ? 2 ** (profile.ev + evDev) : 1;
+    const keyGain = graded ? 2 ** (profile.ev + evDev) : 1;
     const roomShare = shaped ? shown.roomShare : 1;
     // The emitters take the room's share as well. Leaving them at the map's
     // level put the pub floor at 94 % torch delta against Classic's half and
@@ -437,10 +445,10 @@ export function createLookDirector(
       ) || reordered;
 
     // 6. post: the viewer's brightness only; the map's level is in the key.
-    const brightness = shaped ? GameOptions.brightness / 10 : 0;
+    const brightness = graded ? GameOptions.brightness / 10 : 0;
     const postExposure = 2 ** brightness;
     const toneMapperIndex =
-      shaped && post
+      graded
         ? Math.max(0, Math.min(3, Math.round(tmDev ?? GameOptions.toneMapper)))
         : 0;
 
@@ -485,7 +493,7 @@ export function createLookDirector(
       ...postChain.passes(),
     ];
 
-    const ev = shaped ? profile.ev + evDev + brightness : 0;
+    const ev = graded ? profile.ev + evDev + brightness : 0;
 
     state = {
       engine: 'polish',
