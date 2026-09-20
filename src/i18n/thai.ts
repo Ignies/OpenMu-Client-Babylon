@@ -1178,6 +1178,8 @@ export const thaiLayer: LanguageLayer = {
     'instrument.guitar': 'กีตาร์',
     'instrument.flute': 'ขลุ่ย',
     'instrument.ocarina': 'โอคารินา',
+    'instrument.harp': 'ฮาร์ป',
+    'instrument.drums': 'กลองชุด',
     'instrument.title': 'เครื่องดนตรี',
     'instrument.load': 'โหลด MIDI',
     'instrument.noFile': 'ยังไม่ได้โหลดไฟล์',

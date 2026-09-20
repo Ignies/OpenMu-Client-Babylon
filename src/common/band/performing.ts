@@ -27,6 +27,7 @@ export function startPerforming(world: World, entity: Performer, instrument: Ins
     local,
     hits: [],
     model: null,
+    parts: [],
   });
 }
 

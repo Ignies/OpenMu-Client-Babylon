@@ -1191,6 +1191,8 @@ export const bulgarianLayer: LanguageLayer = {
     'instrument.guitar': 'Китара',
     'instrument.flute': 'Флейта',
     'instrument.ocarina': 'Окарина',
+    'instrument.harp': 'Арфа',
+    'instrument.drums': 'Барабани',
     'instrument.title': 'Инструмент',
     'instrument.load': 'Зареди MIDI',
     'instrument.noFile': 'Няма зареден файл',

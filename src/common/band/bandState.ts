@@ -5,8 +5,8 @@ import { instrumentById, type InstrumentId } from '../instruments';
  * channel of their song; a member doubles it on their own instrument, from
  * where they stand, on the channels in their mask (Space Station 14's
  * band: one file, every instrument in the band plays it). Channel 9 (MIDI
- * 10, percussion) is only ever voiced by an instrument whose row says so -
- * none does yet, so it is silent.
+ * 10, percussion) is only ever voiced by a drum kit, and a kit voices
+ * nothing else: its notes are drums, not pitches.
  *
  * Pure data; the same shape travels in the `bandState` frame.
  */
@@ -51,10 +51,10 @@ export function masterMask(_state: BandState): number {
   return ALL_CHANNELS;
 }
 
-/** Whether an instrument may voice a channel at all. */
+/** Whether an instrument may voice a channel at all: a kit takes the percussion channel, the rest take the others. */
 export function canRender(instrument: InstrumentId, channel: number): boolean {
-  if (channel !== PERCUSSION_CHANNEL) return true;
-  return instrumentById(instrument).percussion === true;
+  const kit = instrumentById(instrument).percussion === true;
+  return (channel === PERCUSSION_CHANNEL) === kit;
 }
 
 export function memberOf(state: BandState, netId: number): BandMember | null {

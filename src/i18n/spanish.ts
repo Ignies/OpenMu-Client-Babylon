@@ -1211,6 +1211,8 @@ export const spanishLayer: LanguageLayer = {
     'instrument.guitar': 'Guitarra',
     'instrument.flute': 'Flauta',
     'instrument.ocarina': 'Ocarina',
+    'instrument.harp': 'Arpa',
+    'instrument.drums': 'Batería',
     'instrument.title': 'Instrumento',
     'instrument.load': 'Cargar MIDI',
     'instrument.noFile': 'Ningún archivo cargado',

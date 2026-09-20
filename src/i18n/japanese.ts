@@ -1168,6 +1168,8 @@ export const japaneseLayer: LanguageLayer = {
     'instrument.guitar': 'ギター',
     'instrument.flute': 'フルート',
     'instrument.ocarina': 'オカリナ',
+    'instrument.harp': 'ハープ',
+    'instrument.drums': 'ドラム',
     'instrument.title': '楽器',
     'instrument.load': 'MIDIを読み込む',
     'instrument.noFile': 'ファイルが読み込まれていません',

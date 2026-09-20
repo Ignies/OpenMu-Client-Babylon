@@ -12,11 +12,18 @@ export type BankManifest = {
   instrument: InstrumentId;
   bank: string;
   sustained: boolean;
+  /**
+   * A drum kit: each note is its own drum, never the nearest one pitched,
+   * and a note-off does not damp it - a cymbal rings out.
+   */
+  percussion?: true;
   /** Seconds. */
   attack: number;
   release: number;
   /** MIDI note (as a string key, JSON) -> file name. */
   notes: Record<string, string>;
+  /** MIDI note -> playback rate of its file, where the render is not at pitch (a kit's drums). */
+  rates?: Record<string, number>;
 };
 
 export type DecodedBank = {
@@ -38,11 +45,12 @@ export function bankUrl(id: InstrumentId, file?: string): string {
  * The sample for `note`: its own file when the bank has it, else the nearest
  * note pitched by the semitone distance. MusyngKite ships every semitone
  * from A0 to C8, so the second branch only carries a song's stray extremes.
+ * A kit has no nearest: a note without a drum is silent.
  */
 export function noteSource(bank: DecodedBank, note: number): NoteSource | null {
   const own = bank.buffers.get(note);
-  if (own) return { buffer: own, rate: 1 };
-  if (bank.keys.length === 0) return null;
+  if (own) return { buffer: own, rate: bank.manifest.rates?.[note] ?? 1 };
+  if (bank.keys.length === 0 || bank.manifest.percussion) return null;
 
   let best = bank.keys[0];
   for (const key of bank.keys) {

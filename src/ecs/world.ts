@@ -152,7 +152,10 @@ export type Entity = Partial<{
     local: boolean;
     /** Hits not yet shown, ascending by audio time. */
     hits: BandHit[];
+    /** The model in the hand (the row's first), where the notes are born. */
     model: ModelObject | null;
+    /** The row's other models: a bow, a second stick, the kit at the feet. */
+    parts: ModelObject[];
   };
   pathfinding: {
     from: IVector2Like;

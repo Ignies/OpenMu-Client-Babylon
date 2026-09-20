@@ -1162,6 +1162,8 @@ export const chineseLayer: LanguageLayer = {
     'instrument.guitar': '吉他',
     'instrument.flute': '长笛',
     'instrument.ocarina': '陶笛',
+    'instrument.harp': '竖琴',
+    'instrument.drums': '架子鼓',
     'instrument.title': '乐器',
     'instrument.load': '加载 MIDI',
     'instrument.noFile': '未加载文件',

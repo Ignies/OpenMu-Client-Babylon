@@ -1166,6 +1166,8 @@ export const koreanLayer: LanguageLayer = {
     'instrument.guitar': '기타',
     'instrument.flute': '플루트',
     'instrument.ocarina': '오카리나',
+    'instrument.harp': '하프',
+    'instrument.drums': '드럼',
     'instrument.title': '악기',
     'instrument.load': 'MIDI 불러오기',
     'instrument.noFile': '불러온 파일 없음',
