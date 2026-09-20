@@ -36,9 +36,9 @@ const MAX_COVER = 0.85;
 /** Seconds to reach full strength. */
 const DEFAULT_ATTACK = 0.25;
 
-/** The clear hole around the anchor and its feather, as fractions of the card's half-edge. */
-const HOLE = 0.05;
-const FEATHER = 0.12;
+/** The clear hole around the anchor and its feather when none are given, as fractions of the card's half-edge. */
+const DEFAULT_HOLE = 0.05;
+const DEFAULT_FEATHER = 0.12;
 
 /** Coverage ramp resolution. */
 const RAMP_SIZE = 256;
@@ -57,6 +57,9 @@ export interface ShroudOptions {
   fadeTail?: number;
   /** Card edge in tiles. */
   size?: number;
+  /** The clear hole around the anchor and its feather, as fractions of the half-edge (0 = no hole). */
+  hole?: number;
+  feather?: number;
   /** Follow a moving anchor (the caster). */
   follow?: PointSource;
 }
@@ -68,12 +71,18 @@ export function shroudCount(): number {
   return live.size;
 }
 
-const ramps = new Map<Scene, RawTexture>();
+const ramps = new Map<Scene, Map<string, RawTexture>>();
 const tmp = new Vector3();
 
-/** The coverage ramp: clear inside HOLE, full past HOLE + FEATHER, one per scene. */
-function rampTexture(scene: Scene): RawTexture {
-  let tex = ramps.get(scene);
+/** The coverage ramp: clear inside `hole`, full past `hole + feather`; one per shape per scene. */
+function rampTexture(scene: Scene, hole: number, feather: number): RawTexture {
+  let byShape = ramps.get(scene);
+  if (!byShape) {
+    byShape = new Map();
+    ramps.set(scene, byShape);
+  }
+  const key = hole.toFixed(3) + "|" + feather.toFixed(3);
+  let tex = byShape.get(key);
   if (tex) return tex;
   const n = RAMP_SIZE;
   const data = new Uint8Array(n * n * 4);
@@ -82,7 +91,7 @@ function rampTexture(scene: Scene): RawTexture {
       const dx = (x + 0.5) / n - 0.5;
       const dy = (y + 0.5) / n - 0.5;
       const r = Math.hypot(dx, dy) * 2;
-      const t = clamp01((r - HOLE) / FEATHER);
+      const t = feather > 0 ? clamp01((r - hole) / feather) : r >= hole ? 1 : 0;
       const a = t * t * (3 - 2 * t);
       const o = (y * n + x) * 4;
       data[o + 3] = Math.round(a * 255);
@@ -91,7 +100,7 @@ function rampTexture(scene: Scene): RawTexture {
   tex = RawTexture.CreateRGBATexture(data, n, n, scene, false, false);
   tex.hasAlpha = true;
   tex.wrapU = tex.wrapV = 0; // CLAMP
-  ramps.set(scene, tex);
+  byShape.set(key, tex);
   return tex;
 }
 
@@ -114,7 +123,7 @@ function spawn(scene: Scene, at: Vector3, opts: ShroudOptions): EffectHandle {
   mat.disableDepthWrite = true;
   mat.depthFunction = Constants.ALWAYS;
   mat.fogEnabled = false;
-  mat.opacityTexture = rampTexture(scene);
+  mat.opacityTexture = rampTexture(scene, opts.hole ?? DEFAULT_HOLE, opts.feather ?? DEFAULT_FEATHER);
   mat.alpha = 0;
 
   const card = CreatePlane('fxShroud', { size: 1 }, scene);
@@ -159,7 +168,7 @@ function update(_map: number, dt: number): void {
 
 function reset(): void {
   live.clear();
-  for (const tex of ramps.values()) tex.dispose();
+  for (const byShape of ramps.values()) for (const tex of byShape.values()) tex.dispose();
   ramps.clear();
 }
 

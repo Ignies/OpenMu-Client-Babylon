@@ -117,6 +117,9 @@ const SHROUD_OWN = 0.3;
 const SHROUD_OWN_MAX = 0.5;
 const SHROUD_OTHERS = 0.6;
 const SHROUD_OTHERS_MAX = 0.85;
+/** Anyone else's view has no clear hole: standing near the cast is what the darkness is for. */
+const SHROUD_OTHERS_HOLE = 0;
+const SHROUD_OTHERS_FEATHER = 0.04;
 // ---- step helpers ---------------------------------------------------------------
 
 export interface SkillContext {
@@ -711,6 +714,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
         follow: followEntity(c.caster, 0.9),
         cover: mine ? SHROUD_OWN : SHROUD_OTHERS,
         maxCover: mine ? SHROUD_OWN_MAX : SHROUD_OTHERS_MAX,
+        ...(mine ? {} : { hole: SHROUD_OTHERS_HOLE, feather: SHROUD_OTHERS_FEATHER }),
       });
     }, 1),
   },
