@@ -36,6 +36,7 @@ import {
   openDoppelganger,
 } from './doppelganger';
 import { closeGoldenArcher } from './goldenArcher';
+import { closeKanturu, kanturuDialog } from './kanturu';
 import { matchCountdownLine } from './matchNotices';
 
 export type { EventLayer, EventEntryState } from './layer';
@@ -194,7 +195,11 @@ class Events {
       bloodCastleWindow().open ||
       devilSquareWindow().open ||
       duelWatchWindow().open ||
-      doppelgangerWindow().open;
+      doppelgangerWindow().open ||
+      // The Gateway Machine is an NPC too: OpenMU holds the character in
+      // NpcDialogOpened until CloseNpcRequest arrives, and the 0xD1 handlers
+      // check that assignment.
+      kanturuDialog().open;
     closeBloodCastle();
     closeDevilSquare();
     closeChaosCastlePrompt();
@@ -202,6 +207,7 @@ class Events {
     closeDoppelganger();
     // The Golden Archer dialog closes with its own packet (EventChipExitDialog).
     closeGoldenArcher();
+    closeKanturu();
     if (!npcWindowOpen) return;
     if (!Store.isOffline) {
       Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);

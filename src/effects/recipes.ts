@@ -203,6 +203,11 @@ export const MODEL = {
   crystal2: 'Object12/StoneCoffin02.glb',
   groundStone: 'Skill/GroundStone.glb',
   groundStone2: 'Skill/GroundStone2.glb',
+  /** MODEL_MAYASTONE1..3 and MODEL_MAYASTONEFIRE: Maya's stone rain and its trail. */
+  mayaStone: 'Skill/mayastone01.glb',
+  mayaStone2: 'Skill/mayastone02.glb',
+  mayaStone3: 'Skill/mayastone03.glb',
+  mayaStoneFire: 'Skill/mayastonebluefire.glb',
   groundCrystal: 'Skill/GroundCrystal.glb',
   arrow: 'Skill/Arrow01.glb',
   arrowDouble: 'Skill/ArrowDouble01.glb',

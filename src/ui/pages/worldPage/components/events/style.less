@@ -172,3 +172,50 @@
     text-align: right;
   }
 }
+
+// `CNewUIKanturu2ndEnterNpc`: the gateway dialog on the message box art.
+// Every row is centred across the 230-wide box, like `RT3_SORT_CENTER`.
+.kanturu-window {
+  position: absolute;
+  transform-origin: top left;
+  pointer-events: auto;
+  font-size: 11px;
+
+  .kanturu-text {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    padding: 0 16px;
+    box-sizing: border-box;
+    text-align: center;
+    text-shadow: 1px 1px 0 #000;
+  }
+
+  .kanturu-subject {
+    font-weight: bold;
+  }
+}
+
+// `CNewUIKanturuInfoWindow`: the 99x78 figure in the bottom right corner.
+.kanturu-figure {
+  position: absolute;
+  width: 99px;
+  height: 78px;
+  transform-origin: top left;
+  pointer-events: none;
+  font-size: 10px;
+  font-weight: bold;
+
+  .kanturu-figure-line {
+    position: absolute;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+  }
+}
+
+// `Kanturu3rdSuccess` / `Kanturu3rdFailed`: the banner over the middle.
+.kanturu-result {
+  position: absolute;
+  transform-origin: top left;
+  pointer-events: none;
+}

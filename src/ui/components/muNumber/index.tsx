@@ -16,6 +16,8 @@ type MuNumberProps = {
   x: number;
   y: number;
   scale?: number;
+  /** Pad with leading zeroes to this many digits (a clock's seconds). */
+  minDigits?: number;
   className?: string;
   style?: CSSProperties;
 };
@@ -25,6 +27,7 @@ export const MuNumber = ({
   x,
   y,
   scale = 1,
+  minDigits = 1,
   className,
   style,
 }: MuNumberProps) => {
@@ -33,7 +36,7 @@ export const MuNumber = ({
   if (scale < 0.3) return null;
 
   const { width, height } = glyphSize(scale);
-  const digits = String(Math.trunc(value));
+  const digits = String(Math.trunc(value)).padStart(minDigits, '0');
   const advance = width * ADVANCE_RATIO;
 
   const backgroundSize = `${GLYPH_COUNT * width}px ${height}px`;

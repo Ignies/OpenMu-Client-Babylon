@@ -1356,6 +1356,43 @@ export const EN_TEXT = {
     'You have been registered to be a guardian to protect the wolf.',
   'event.cwContractRefused': 'Disqualified for the contract requirement.',
   'event.cwBenefit': 'Chaos machine success rate +%d%% (Crywolf benefit).',
+
+  'event.ktTitle': 'Refinery Tower',
+  'event.ktEnter': 'Enter',
+  'event.ktRefresh': 'Refresh',
+  'event.ktTowerOpen': 'You may now proceed to the Refinery Tower.',
+  'event.ktPathOpened': 'Path to the Refinery Tower is now opened.',
+  'event.ktPathClosesIn': 'Path to the Refinery Tower will be closed in %d hours.',
+  'event.ktNoWarp': "You can't warp to the Refinery Tower.",
+  'event.ktDefeatNightmare':
+    'Defeat the Nightmare that controlling the Maya to enter the Refinery Tower.',
+  'event.ktMoonstoneRequired':
+    "Entrance is restricted to ensure the security of Maya. 'Moonstone Pendant' is required.",
+  'event.ktMayaOngoing': 'Battle with Maya is ongoing.',
+  'event.ktPlayersOpening':
+    "%d players are trying to open the path to the Refinery Tower. You can't enter the Refinery Tower, automated defense system has been activated.",
+  'event.ktInBattleLeft': "Currently %d players are in battle with Maya's left hand.",
+  'event.ktInBattleRight': "Currently %d players are in battle with Maya's right hand.",
+  'event.ktInBattleBoth': "Currently %d players are in battle with Maya's both hands.",
+  'event.ktInBattleNightmare': 'Currently %d players are in battle with Nightmare.',
+  'event.ktMorePlayersNeeded': 'More players are needed to open the path to the Tower.',
+  'event.ktMayNowEnter': 'You may now enter.',
+  'event.ktMoonstoneFailed': "'Moonstone Pendant' authentication has failed.",
+  'event.ktLostControlLeftCount':
+    "Nightmare has lost the control of Maya's left hand. Currently there are %d survivors.",
+  'event.ktLostControlRightCount':
+    "Nightmare has lost the control of Maya's right hand. Currently there are %d survivors.",
+  'event.ktMorePowerNeeded': 'More power from %d players are needed.',
+  'event.ktLostControlLeft': "Nightmare has lost the control of Maya's left hand.",
+  'event.ktLostControlRight': "Nightmare has lost the control of Maya's right hand.",
+  'event.ktBossBattleSoon': 'Boss Battle will start soon.',
+  'event.ktNightmareInvaded':
+    'Force of the Nightmare has invaded the Tower. Tower is unstable therefore the entrance to the Tower will be restricted for %d minutes.',
+  'event.ktApproachShortly': 'You will be able to approach Maya shortly.',
+  'event.ktFailedToEnter': 'Failed to enter.',
+  'event.ktCharacterCount': 'Character: %d',
+  'event.ktMonsterBoss': 'Monster : Boss',
+  'event.ktMonsterCount': 'Monster : %d',
   'event.cwNotice1a': '< Mission Point : 1. Defend the Wolf statue >',
   'event.cwNotice1b': 'Make a contract with the altar to protect the wolf statue!',
   'event.cwNotice1c': 'Only the Elf can be a guardian to give power to the Wolf statue!',
