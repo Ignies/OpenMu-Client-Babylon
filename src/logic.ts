@@ -2742,7 +2742,13 @@ EventBus.on('ObjectHitExtended', packet =>
 );
 
 /** MoneyDropped (0x20) / MoneyDroppedExtended (0x2F): a zen pile on the ground. */
-function spawnMoneyDrop(id: number, x: number, y: number, fresh: boolean | Boolean) {
+function spawnMoneyDrop(
+  id: number,
+  x: number,
+  y: number,
+  amount: number,
+  fresh: boolean
+) {
   const world = Store.world;
   if (!world) return;
   const maskedId = id & 0x7fff;
@@ -2759,7 +2765,7 @@ function spawnMoneyDrop(id: number, x: number, y: number, fresh: boolean | Boole
         y
       ),
       rot: new Vector3(rot.x, rot.y, rot.z),
-      scale: 1,
+      scale: itemRestPose(ZEN_GROUP, ZEN_NUM).scale,
     },
     modelFactory: DropObject,
     modelFilePath: itemConfig.szModelFolder + itemConfig.szModelName,
@@ -2769,11 +2775,12 @@ function spawnMoneyDrop(id: number, x: number, y: number, fresh: boolean | Boole
     screenPosition: { worldOffsetZ: DROP_LABEL_HEIGHT, x: 0, y: 0 },
     droppedItem: {
       isMoney: true,
+      amount,
       fresh: !!fresh,
       group: ZEN_GROUP,
       num: ZEN_NUM,
     },
-    objectNameInWorld: 'Zen',
+    objectNameInWorld: dropName(true, amount, undefined, undefined),
   });
 }
 
@@ -2790,7 +2797,7 @@ EventBus.on('MoneyDroppedExtended', packet => {
       { x: p.PositionX, z: p.PositionY }
     );
   }
-  spawnMoneyDrop(p.Id, p.PositionX, p.PositionY, p.IsFreshDrop);
+  spawnMoneyDrop(p.Id, p.PositionX, p.PositionY, p.Amount, p.IsFreshDrop);
 });
 
 /** The "rain, intensity 0" value is logged once per session, not per packet. */
