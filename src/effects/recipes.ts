@@ -401,7 +401,7 @@ export const FIRE_SPARKS: ParticleRecipe = {
   spin: 4,
 };
 
-/** BITMAP_FIRE puffs that drift up - the trail of a fireball, a small blaze. */
+/** BITMAP_FIRE puffs that drift up - a small blaze, the fire left on a hit. */
 export const FIRE_PUFF: ParticleRecipe = {
   texture: TEX.fire,
   cells: { w: 64, h: 64, count: 4 },
@@ -414,6 +414,27 @@ export const FIRE_PUFF: ParticleRecipe = {
   dir1: [-0.3, 0.6, -0.3],
   dir2: [0.3, 1, 0.3],
   endScale: 1.6,
+};
+
+/**
+ * BITMAP_FIRE sub5 / sub8: what a flying MODEL_FIRE leaves behind it. This one
+ * must not climb - the original lifts a trail puff 12 cm over its whole life
+ * (`Gravity += 0.004`, `Position[2] += Gravity × 10` for 24 ticks,
+ * ZzzEffectParticle.cpp:4574) and shrinks it to a third, so the puffs stay on
+ * the path and read as a streak pointing back at where the ball came from.
+ */
+export const FIRE_TRAIL: ParticleRecipe = {
+  texture: TEX.fire,
+  cells: { w: 64, h: 64, count: 4 },
+  colour: RGBS.fire,
+  colourEnd: RGBS.ember,
+  size: 0.5,
+  life: 0.95,
+  power: 0.12,
+  gravity: 0.12,
+  box: [0.1, 0.1, 0.1],
+  spin: 2.2,
+  endScale: 0.35,
 };
 
 /**

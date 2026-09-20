@@ -7,7 +7,7 @@ import {
 } from '../common/packets/ServerToClientPackets';
 import { devQueryNumber } from '../common/devSeams';
 import { effects } from '../effects';
-import { FIRE_PUFF, MODEL, RGBS } from '../effects/recipes';
+import { FIRE_TRAIL, MODEL, RGBS } from '../effects/recipes';
 import { lighting } from '../lighting';
 import { ember } from '../lighting/recipes';
 import { playSfx } from '../libs/sfx';
@@ -114,8 +114,8 @@ function update(_map: ENUM_WORLD, dt: number): void {
     effects.spawn('projectile', world.scene, from, {
       to,
       speed: METEOR_SPEED,
-      model: { model: MODEL.fire, colour: RGBS.fire, scale: METEOR_SCALE, blendMesh: FIRE_BLEND_MESH },
-      trail: { recipe: FIRE_PUFF, rate: 30 },
+      model: { model: MODEL.fire, colour: RGBS.fire, scale: METEOR_SCALE, blendMesh: FIRE_BLEND_MESH, alongPath: true },
+      trail: { recipe: FIRE_TRAIL, rate: 30 },
     });
     lighting.flash(
       world.scene,

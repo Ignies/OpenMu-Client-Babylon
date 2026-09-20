@@ -91,6 +91,7 @@ export function projectileCount(): number {
 
 const target = new Vector3();
 const dir = new Vector3();
+const moved = new Vector3();
 let seed = 0;
 
 function spawn(scene: Scene, at: Vector3, opts: ProjectileOptions): EffectHandle {
@@ -123,6 +124,8 @@ function spawn(scene: Scene, at: Vector3, opts: ProjectileOptions): EffectHandle
   let arrived = false;
   // The straight-line point; `pos` is it lifted by the lob parabola.
   const flat = pos.clone();
+  // Last frame's drawn point: `dir` is the flat step, which a lob's rise is not in.
+  const was = pos.clone();
   const totalGuess = Vector3.Distance(start, goal(target)) || 1;
 
   return live.push({
@@ -154,7 +157,12 @@ function spawn(scene: Scene, at: Vector3, opts: ProjectileOptions): EffectHandle
         // A solid tinted square until the sheet is in.
         card.visibility = (card.material as { diffuseTexture?: unknown } | null)?.diffuseTexture ? 1 : 0;
       }
-      if (model) model.yawTo(dir);
+      if (model) {
+        pos.subtractToRef(was, moved);
+        if (opts.model?.alongPath) model.aimAlong(moved);
+        else model.yawTo(dir);
+      }
+      was.copyFrom(pos);
       opts.trace?.(pos);
       trail?.tick(pos, dt);
       return true;
