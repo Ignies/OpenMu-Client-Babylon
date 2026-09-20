@@ -22,6 +22,7 @@ import {
   ENERGY_CHIPS,
   FIRE_PUFF,
   FIRE_SPARKS,
+  FIRE_TRAIL,
   FLAME_TONGUES,
   HOLY_MOTES,
   ICE_MOTES,
@@ -489,9 +490,9 @@ const bolt = (head: string, colour: RGB, trail: ParticlesOptions['recipe'], size
   trail: { recipe: trail, rate: 30 },
 });
 
-const modelBolt = (m: string, colour: RGB, trail: ParticlesOptions['recipe'] | null, speed = perTick(50), scale = 1, blendMesh?: number): Travel => ({
+const modelBolt = (m: string, colour: RGB, trail: ParticlesOptions['recipe'] | null, speed = perTick(50), scale = 1, blendMesh?: number, alongPath?: boolean): Travel => ({
   speed,
-  model: { model: m, colour, scale, blendMesh },
+  model: { model: m, colour, scale, blendMesh, alongPath },
   ...(trail ? { trail: { recipe: trail, rate: 30 } } : {}),
 });
 
@@ -505,12 +506,12 @@ const arrow = (m: string = MODEL.arrow, colour: RGB = RGBS.steel): Travel => ({
  * on landing (MODEL_FIRE sub0 / MODEL_SKILL_BLAST / MODEL_FIRE sub6 with
  * Pos += (…, +z) and Dir(0,0,−50)). `from` is tiles (+x, up, −z) off `at`.
  */
-const skyfall = (m: string, colour: RGB, trail: ParticlesOptions['recipe'] | null, from: readonly [number, number, number], speed: number, scale: number, hit: Step): Step => (at, c) => {
+const skyfall = (m: string, colour: RGB, trail: ParticlesOptions['recipe'] | null, from: readonly [number, number, number], speed: number, scale: number, hit: Step, alongPath?: boolean): Step => (at, c) => {
   const start = new Vector3(at.x + from[0], at.y + from[1], at.z - from[2]);
   effects.spawn('projectile', c.scene, start, {
     to: at,
     speed,
-    model: { model: m, colour, scale },
+    model: { model: m, colour, scale, alongPath },
     ...(trail ? { trail: { recipe: trail, rate: 40 } } : {}),
     onArrive: p => hit(p, c),
   });
@@ -646,7 +647,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   1: { impact: seq(model({ model: MODEL.poison, seconds: ticks(40), scale: 1, colour: RGBS.venom }), particles({ recipe: POISON_SMOKE, count: 10 })) },
   // 2 Meteorite: MODEL_FIRE sub0 LT 40, Scale 1.0–1.7, from target + (130…162, 400) cm, Dir(0,0,−50).
   2: {
-    travel: { ...modelBolt(MODEL.fire, RGBS.fire, FIRE_PUFF, perTick(50), 1.35, FIRE_BLEND_MESH), fromSky: true, skyOffset: [cm(146), cm(400), 0] },
+    travel: { ...modelBolt(MODEL.fire, RGBS.fire, FIRE_TRAIL, perTick(50), 1.35, FIRE_BLEND_MESH, true), fromSky: true, skyOffset: [cm(146), cm(400), 0] },
     impact: fireHit,
   },
   // 3 Lightning: SOUND_THUNDER01 at cast; per frame JOINT_THUNDER weaponBone → target (width 50 + width 10,
@@ -662,7 +663,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     },
   },
   // 4 Fire Ball: MODEL_FIRE sub1 LT 60, Scale 0.8–1.1, z+120, Dir(0,−50,0); within 100 → 2× MODEL_STONE.
-  4: { travel: modelBolt(MODEL.fire, RGBS.fire, FIRE_PUFF, perTick(50), 0.95, FIRE_BLEND_MESH), impact: seq(fireHit, stones(2)) },
+  4: { travel: modelBolt(MODEL.fire, RGBS.fire, FIRE_TRAIL, perTick(50), 0.95, FIRE_BLEND_MESH, true), impact: seq(fireHit, stones(2)) },
   // 5 Flame: BITMAP_FLAME sub0 LT 40 at SkillXY - 6 BITMAP_FLAME particles a frame in a ±25 cm box, 1/8 stones.
   5: { area: seq(particles({ recipe: FLAME_TONGUES, rate: 150, seconds: ticks(40) }), scatter(stones(1, 0.3), 5, 0.3, 0.3), scorch(1), burn(1)) },
   // 6 Teleport: cast - BITMAP_SPARK+1 LT 10 at the caster (AlphaTarget 0).
@@ -865,8 +866,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // Dir(0,0,−50−rand%50), BITMAP_SMOKE trail; landing → MODEL_SKILL_INFERNO sub2, smoke, 6 stones.
   38: {
     area: seq(
-      skyfall(MODEL.fire, [0.8, 0.5, 0.1], SMOKE, [2.5, 6.5, 0.3], perTick(75), 1.85, seq(model({ model: MODEL.inferno, seconds: ticks(15), colour: RGBS.decay, flat: true, scale: 0.9 }), particles({ recipe: SMOKE, count: 15 }), stones(6, 1), venomHit)),
-      after(0.12, skyfall(MODEL.fire, [0.8, 0.5, 0.1], SMOKE, [2, 5, -0.4], perTick(75), 1.6, seq(particles({ recipe: SMOKE, count: 7 }), stones(6, 1), venomHit)))
+      skyfall(MODEL.fire, [0.8, 0.5, 0.1], SMOKE, [2.5, 6.5, 0.3], perTick(75), 1.85, seq(model({ model: MODEL.inferno, seconds: ticks(15), colour: RGBS.decay, flat: true, scale: 0.9 }), particles({ recipe: SMOKE, count: 15 }), stones(6, 1), venomHit), true),
+      after(0.12, skyfall(MODEL.fire, [0.8, 0.5, 0.1], SMOKE, [2, 5, -0.4], perTick(75), 1.6, seq(particles({ recipe: SMOKE, count: 7 }), stones(6, 1), venomHit), true))
     ),
   },
   // 39 Ice Storm @SkillXY: 10× MODEL_BLIZZARD sub0, LT 15–29, Scale 0.5, scattered ±150 xy, +600 z, falling

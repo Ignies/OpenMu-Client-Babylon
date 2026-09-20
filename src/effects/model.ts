@@ -97,6 +97,14 @@ export interface ModelOptions {
   /** Yaw follows the direction `follow` moves the node (the original re-stamps along the joint's `Angle`). */
   aim?: boolean;
   /**
+   * The mesh's own up axis is its tail, so a projectile lays it back down the
+   * path instead of only turning it. MODEL_FIRE's `Direction` is written in
+   * the model's frame - `Dir(0, 0, −50)` for the Meteorite (ZzzEffect.cpp:2546),
+   * `MoveParticle` rotating it by the effect's `Angle` - so the flame always
+   * points at where the ball came from.
+   */
+  alongPath?: boolean;
+  /**
    * Let the mesh into the sun cascades. Off by default: an effect mesh is
    * light, not matter, and `scenes/shadows.ts castsSunShadow` drops every
    * bright mesh for that reason. A spirit is the exception the wings already
@@ -110,6 +118,8 @@ export interface ModelOptions {
 export interface ModelHandle extends EffectHandle {
   /** Point the model's nose along `dir` (a flying arrow). */
   yawTo(dir: Vector3): void;
+  /** Lay the model's up axis back down `dir`, so its tail trails the flight. */
+  aimAlong(dir: Vector3): void;
   /** Tilt the model `rad` about its side axis (a tumbling stone; `o->Angle[0]`). */
   pitchTo(rad: number): void;
 }
@@ -298,6 +308,14 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     stop: () => handle.stop(),
     yawTo(dir: Vector3) {
       node.rotation.y = Math.atan2(dir.x, dir.z);
+    },
+    aimAlong(dir: Vector3) {
+      // `rotation` is pitch-then-yaw, so the mesh's up axis lands on
+      // (sin p·sin y, cos p, sin p·cos y): solve that for the reversed `dir`.
+      const len = dir.length();
+      if (len < 1e-6) return;
+      node.rotation.x = Math.acos(Math.max(-1, Math.min(1, -dir.y / len)));
+      node.rotation.y = Math.atan2(-dir.x, -dir.z);
     },
     pitchTo(rad: number) {
       node.rotation.x = rad;
