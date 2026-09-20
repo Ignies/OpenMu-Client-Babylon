@@ -1,3 +1,4 @@
+import { prefetchSignPlates } from '../../common/signPlates';
 import { ElfSoldier } from '../../common/npcs/elfSoldier';
 import {
   MODEL_HOUSE_WALL01,
@@ -183,6 +184,9 @@ export async function createLorencia(world: World) {
 
   terrain.MapTileObjects[95] = CurtainObject;
 
+  // Sign01 (bracket board) and Sign02 (plaque on two posts). Warming the
+  // plate first keeps the fake script off screen while it downloads.
+  prefetchSignPlates('Object1/');
   for (var i = 0; i < 2; i++) terrain.MapTileObjects[96 + i] = SignObject;
 
   for (var i = 0; i < 4; i++) terrain.MapTileObjects[98 + i] = CarriageObject;

@@ -52,6 +52,9 @@ const RULES: Rule[] = [
   { dir: 'PBR', ext: null },
   // minimap.ts → World*/mini_map.OZT + Minimap.bmd; weather → World*/leaf*.OZ?
   { dir: 'World', ext: [], names: ['mini_map.ozt', 'minimap.bmd', 'leaf01.ozt', 'leaf01.ozj', 'leaf02.ozj', 'leaf02.ozt'], numbered: true },
+  // common/signPlates.ts → the three signpost plates it repaints, out of
+  // whichever Object<n> folder the sign's map draws from.
+  { dir: 'Object', ext: [], names: ['notice.ozj', 'snotice.ozj', 'snotice02.ozj'], numbered: true },
   // libs/mu/terrainWater.ts → Object8/wt00..wt31.OZJ (Atlans caustics flipbook)
   { dir: 'Object8', ext: [], names: Array.from({ length: 32 }, (_, i) => `wt${String(i).padStart(2, '0')}.ozj`) },
 ];

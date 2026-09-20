@@ -1,12 +1,8 @@
-import { ModelObject } from '../../common/modelObject';
-import { MODEL_SIGN01 } from '../../common/objects/enum';
+import { LorenciaSignObject } from '../../common/signObject';
 
-export class SignObject extends ModelObject {
-  static Batchable = true;
-
-  async init() {
-    // this.LightEnabled = true;
-
-    await this.loadSpecificModelWithDynamicID(MODEL_SIGN01, 'Sign');
-  }
-}
+/**
+ * Lorencia's two notice boards, `Sign01` (the bracket board on a wall) and
+ * `Sign02` (the plaque on two posts) — MapManager.cpp:1069. What they say is
+ * common/signLabels.ts; the plate they say it on is common/signPlates.ts.
+ */
+export class SignObject extends LorenciaSignObject {}

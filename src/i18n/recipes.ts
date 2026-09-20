@@ -2300,6 +2300,22 @@ export const EN_TEXT = {
   'perf.ping': 'Ping',
   'options.performanceReadout': 'Performance readout',
   'keys.performanceReadout': 'Performance readout',
+  // ---- signposts ---------------------------------------------------------
+  // What a notice board says, painted onto its plate at map load
+  // (common/signPlates.ts). Keep these short: the plate is 43 texels wide and
+  // a long name is shrunk to fit rather than clipped, so it just gets small.
+  'sign.lorencia': 'Lorencia',
+  'sign.devias': 'Devias',
+  'sign.noria': 'Noria',
+  'sign.elbeland': 'Elbeland',
+  'sign.raklion': 'Raklion',
+  'sign.valleyOfLoren': 'Valley of Loren',
+  'sign.stadium': 'Stadium',
+  'sign.pub': 'Pub',
+  'sign.shop': 'Shop',
+  'sign.guardhouse': 'Guardhouse',
+  'sign.library': 'Library',
+  'sign.guild': 'Guild',
 } as const;
 
 /** Every key the client can ask for. Derived, so typos do not compile. */
