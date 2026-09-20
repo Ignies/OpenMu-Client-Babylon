@@ -23,7 +23,6 @@ import {
   FIRE_PUFF,
   FIRE_SPARKS,
   FIRE_TRAIL,
-  FLAME_TONGUES,
   HOLY_MOTES,
   ICE_MOTES,
   MODEL,
@@ -262,6 +261,19 @@ function weaponModelOf(e: Entity): string | null {
 const hitSparks = (recipe = SPARKS, count = HIT_COUNT): Step => particles({ recipe, count });
 const flash = (texture: string, colour: RGB, size = 1, seconds = 0.4): Step =>
   sprite({ texture, colour, size, seconds, grow: 1.6, growFrom: 0.4, fadeTail: 0.5 });
+/**
+ * `n` fire pillars (effects/pillar.ts): the first on the point, the rest scattered `radius` tiles
+ * around it a third to the full way out, `every` seconds apart, each on its own ground height.
+ */
+const firePillars = (n: number, radius: number, every: number): Step => (at, c) => {
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + Math.random() * (Math.PI / n);
+    const r = i === 0 ? 0 : radius * (0.55 + Math.random() * 0.45);
+    const p = new Vector3(at.x + Math.cos(a) * r, at.y, at.z + Math.sin(a) * r);
+    if (i === 0) effects.spawn('pillar', c.scene, p, {});
+    else delay(i * every, () => effects.spawn('pillar', c.scene, p, {}));
+  }
+};
 /** MODEL_STONE1 / MODEL_STONE2 chips thrown up from a ground hit - either model, rolled per chip (ZzzEffect.cpp:280). */
 const stones = (n: number, radius = 0.6): Step =>
   scatter(
@@ -661,8 +673,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 4 Fire Ball: MODEL_FIRE sub1 LT 60, Scale 0.8–1.1, z+120, Dir(0,−50,0); within 100 → 2× MODEL_STONE.
   4: { travel: modelBolt(MODEL.fire, RGBS.fire, FIRE_TRAIL, perTick(50), 0.95, FIRE_BLEND_MESH, true), impact: seq(fireHit, stones(2)) },
-  // 5 Flame: BITMAP_FLAME sub0 LT 40 at SkillXY - 6 BITMAP_FLAME particles a frame in a ±25 cm box, 1/8 stones.
-  5: { area: seq(particles({ recipe: FLAME_TONGUES, rate: 150, seconds: ticks(40) }), scatter(stones(1, 0.3), 5, 0.3, 0.3), scorch(1), burn(1)) },
+  // 5 Flame: the renewed look - fire pillars out of molten rock around the point (effects/pillar.ts), in place
+  // of the BITMAP_FLAME sub0 LT 40 tongue column the original stacked at SkillXY (ZzzCharacter.cpp:4485).
+  5: { area: seq(firePillars(3, 1.4, 0.1), scorch(1.5), burn(1.2)) },
   // 6 Teleport: cast - BITMAP_SPARK+1 LT 10 at the caster (AlphaTarget 0).
   6: { cast: atCaster(teleportFlash, 0.6) },
   // 7 Ice: impact@target - MODEL_ICE sub0 + 5× MODEL_ICE_SMALL. No bolt.

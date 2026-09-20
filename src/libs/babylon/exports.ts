@@ -74,6 +74,7 @@ export { GroundMesh } from '@babylonjs/core/Meshes/groundMesh';
 export { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
 export { CreateTorus } from '@babylonjs/core/Meshes/Builders/torusBuilder';
 export { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder';
+export { CreateSphere } from '@babylonjs/core/Meshes/Builders/sphereBuilder';
 export { Plane } from '@babylonjs/core/Maths/math.plane';
 export { Frustum } from '@babylonjs/core/Maths/math.frustum';
 export { CreateCylinder } from '@babylonjs/core/Meshes/Builders/cylinderBuilder';
