@@ -1,4 +1,5 @@
 import { ENUM_WORLD } from '../../common/types';
+import { DropObject } from '../../common/dropObject';
 import { itemRestHeight, itemTumbleAxis } from '../../common/itemAngle';
 import type { Entity, ISystemFactory } from '../world';
 
@@ -71,6 +72,8 @@ type Motion = {
   restRotZ: number;
   /** Which axis the tumble spins: `Angle[1]` for shields, `Angle[0]` otherwise. */
   tumbleAxis: 'x' | 'z';
+  /** Zen does not tumble - see `start`. */
+  tumbles: boolean;
   offset: { x: number; y: number; z: number };
 };
 
@@ -100,6 +103,10 @@ export const DropMotionSystem: ISystemFactory = world => {
       restRotX: t.rot.x,
       restRotZ: t.rot.z,
       tumbleAxis: itemTumbleAxis(group),
+      // A zen pile is coins, not an object: spinning the whole heap on its
+      // side the way `HandleItemFalling` spins a sword reads as one painted
+      // slab. They stay flat and rain in (`DropObject.setPileFall`).
+      tumbles: !e.droppedItem!.isMoney,
       offset,
     };
     motions.set(e, m);
@@ -145,8 +152,13 @@ export const DropMotionSystem: ISystemFactory = world => {
             transform.rot.x = m.restRotX;
             transform.rot.z = m.restRotZ;
             droppedItem.fresh = false;
-          } else {
+          } else if (m.tumbles) {
             transform.rot[m.tumbleAxis] = m.velocity * TUMBLE_DEG_PER_CM * DEG;
+          }
+
+          // A zen pile's coins come down on their own beats behind the drop.
+          if (e.modelObject instanceof DropObject) {
+            e.modelObject.setPileFall(m.offset.y);
           }
           continue;
         }

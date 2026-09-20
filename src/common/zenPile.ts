@@ -65,7 +65,12 @@ export function zenPileRadius(count: number): number {
 }
 
 /** One coin's place in the pile, centimetres on the ground plane. */
-export type ZenCoinOffset = { readonly x: number; readonly y: number };
+export type ZenCoinOffset = {
+  readonly x: number;
+  readonly y: number;
+  /** 0..1: how far behind the drop this coin lands, for the rain in. */
+  readonly lag: number;
+};
 
 /**
  * Where the coins of one pile lie. `seed` is the drop's own id, standing in
@@ -90,7 +95,11 @@ export function zenCoinScatter(seed: number, count: number): ZenCoinOffset[] {
     const angle = values[(k * 20 + i) % TABLE_SIZE] * DEG;
     const radius = maxRadius * Math.sqrt(values[(k + i) % TABLE_SIZE] / TABLE_MAX);
 
-    out.push({ x: radius * Math.cos(angle), y: radius * Math.sin(angle) });
+    out.push({
+      x: radius * Math.cos(angle),
+      y: radius * Math.sin(angle),
+      lag: values[(k * 7 + i) % TABLE_SIZE] / TABLE_MAX,
+    });
   }
 
   return out;

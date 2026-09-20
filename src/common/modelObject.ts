@@ -1492,10 +1492,18 @@ export class ModelObject {
 
       this._shadows[slot] = shadow;
       this._shadowsVisible = null;
+      this.onShadowBuilt(shadow);
     }
 
     this.syncShadowEnabled();
   }
+
+  /**
+   * A shadow slot has just been built. Slots appear lazily, frames after
+   * `load`, so a model that draws itself more than once (the zen pile's
+   * coins) has to stamp the clone when it turns up rather than at load.
+   */
+  protected onShadowBuilt(_shadow: AbstractMesh): void {}
 
   /**
    * A shadow clone draws whenever its slot is lit, the caster is solid and
