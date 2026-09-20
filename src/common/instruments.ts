@@ -158,7 +158,7 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     // A floor harp standing in front, its soundbox leaning back to the
     // chest, strung along the way the player faces; solved from the root
     // bone (tools/screenshot/_instsolve.mjs).
-    link: { angle: [0, 0, -173], offset: [56, 25, -107] },
+    link: { angle: [0, 0, -173], offset: [75, 35, -107] },
     noteOffset: [40, 0, 130],
     // Clap, whose hands come together and apart at chest height: at the
     // strings, plucking.

@@ -1001,7 +1001,7 @@ class Atlas {
 
 /** The pillar's height; the neck rides on top of it. */
 const HARP_HEIGHT = 150;
-const HARP_NECK_TOP = HARP_HEIGHT + 14;
+const HARP_NECK_TOP = HARP_HEIGHT + 11;
 const HARP_DEPTH = 70;
 const HARP_STRINGS = 22;
 /** The soundbox's depth (base to top) and its width between the player's shoulders. */
@@ -1035,8 +1035,9 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
   // The soundbox: from the base's back edge up to the neck's back end. Its
   // carved face looks sideways and its curved edge bows outward, to the
   // back; the taper runs front to back on the photo's own scale.
-  const foot: V3 = [12, 0, 2];
-  const crown: V3 = [HARP_DEPTH, 0, HARP_HEIGHT - 14];
+  // From the base's back end up into the neck's back end.
+  const foot: V3 = [30, 0, 2];
+  const crown: V3 = [HARP_DEPTH + 2, 0, HARP_HEIGHT - 2];
   const slant = unit([crown[0] - foot[0], 0, crown[2] - foot[2]]);
   const normal: V3 = [-slant[2], 0, slant[0]];
   const slantLen = Math.hypot(crown[0] - foot[0], crown[2] - foot[2]);
@@ -1054,14 +1055,14 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
   // thickness along Y.
   // Hung from its top edge, its thick front end resting on the pillar.
   const neckP: Placement = {
-    ...h.neck.alongZ(neckRect, HARP_DEPTH + 9, 0, ([a, t, l]) => [l - 8, t, HARP_NECK_TOP - a]),
+    ...h.neck.alongZ(neckRect, HARP_DEPTH + 9, 0, ([a, t, l]) => [l - 13, t, HARP_NECK_TOP - a]),
     originPy: 0,
   };
   const neckColumns = h.neck.columns();
   extrudeFlat(m, decimate(neckColumns, h.neck.tolerance()), neckP, 1.5, () => 3, wood);
 
   // The base: a plank under everything.
-  box(m, [-4, -5, 0], [HARP_DEPTH * 0.5, 5, 4], baseRect, wood);
+  box(m, [-4, -5, 0], [36, 5, 4], baseRect, wood);
 
   // The strings: from the neck's underside straight down to the soundbox's face.
   const neckUnderside = (px: number): number => {
@@ -1071,7 +1072,7 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
   for (let i = 0; i < HARP_STRINGS; i++) {
     const t = (i + 0.5) / HARP_STRINGS;
     const x = 8 + t * (HARP_DEPTH - 14);
-    const zTop = neckUnderside(((x + 8) / (HARP_DEPTH + 9)) * (h.neck.width - 1)) - 0.5;
+    const zTop = neckUnderside(((x + 13) / (HARP_DEPTH + 9)) * (h.neck.width - 1)) - 0.5;
     // Where the soundbox's upper edge passes under x: along the slant, out
     // by half the photo's width there.
     const along = (x - foot[0]) / slant[0];
