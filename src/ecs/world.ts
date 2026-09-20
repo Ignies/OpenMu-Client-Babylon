@@ -7,7 +7,7 @@ import { type Bucket, type With, World as ECSWorld } from 'miniplex';
 import type { IVector2Like, IVector3Like, Mesh } from '../libs/babylon/exports';
 import type { ModelObject } from '../common/modelObject';
 import type { MonsterActionType, PlayerAction } from '../common/objects/enum';
-import type { PetSpec } from '../common/pets';
+import type { PetFollow, PetSpec } from '../common/pets';
 import type { MUAttributeSystem } from '../libs/attributeSystem';
 import { TransformNode } from '../libs/babylon/exports';
 import { createPathfinding } from '../libs/pathfinding';
@@ -340,7 +340,7 @@ export type Entity = Partial<{
    */
   petActor: {
     owner: Entity;
-    kind: 'angel' | 'mount' | 'raven';
+    kind: 'angel' | 'mount' | 'raven' | 'follower';
     /** `o->Angle[2]` in radians (MU yaw convention, like `transform.rot.y`). */
     yaw: number;
     /** `o->Direction` in MU units per 25 Hz tick. */
@@ -366,6 +366,16 @@ export type Entity = Partial<{
     fenrirSpec?: PetSpec;
     /** Last frame's `AnimationFrame`, for the footfall windows. */
     fenrirFrame?: number;
+    /**
+     * A follower pet (`PetObject`): how it holds station on its owner, the
+     * `PlaySpeed` of its one clip, and the seconds its body light pulses
+     * over when it has one. See `PetFollow` in common/pets.ts.
+     */
+    follow?: PetFollow;
+    followSpeed?: number;
+    pulseSeconds?: number;
+    /** `m_timer->GetTimeElapsed()` - milliseconds since the pet was created. */
+    clock?: number;
   };
   /**
    * `Boids[]` - the ambient wildlife (`common/boids.ts`, GOBoid.cpp). Created

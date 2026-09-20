@@ -1,0 +1,126 @@
+import { PlayerObject } from './playerObject';
+import type { ModelObject } from './modelObject';
+import type { ItemVisualTier } from './itemVisualTier';
+import { skeletonShatter } from './deathVisuals';
+import { TRANSFORMED_NPC_TABLE } from './npcs/playerNpcTables';
+
+/**
+ * A character wearing something else's body: `c->Object.SubType = MODEL_X`,
+ * which makes `RenderCharacter` draw the one part file the subtype names in
+ * place of the whole equipment body (ZzzCharacter.cpp:9345-9440).
+ *
+ * Only the body goes. The rig, the clips, the weapons, the wings and the pet
+ * are all outside that branch and keep being drawn as they were - which is
+ * exactly why the hero can wear one: nothing about how it walks, fights or
+ * is driven changes, only what is on screen.
+ */
+
+/** The five sockets the transform part stands in for. */
+function isBodySocket(model: PlayerObject, socket: ModelObject): boolean {
+  return (
+    socket === model.Helm ||
+    socket === model.HelmMask ||
+    socket === model.Armor ||
+    socket === model.Pants ||
+    socket === model.Gloves ||
+    socket === model.Boots
+  );
+}
+
+const cache = new Map<string, typeof PlayerObject>();
+
+/**
+ * A `PlayerObject` subclass that wears `dir/part` as its whole body.
+ *
+ * The one seam is `loadPartAsync`, because the body is written to from two
+ * directions - the class defaults the model sets up for itself, and the
+ * equipment AppearanceSystem puts on afterwards - and a transform has to
+ * survive both. Taking it there covers them together: the part lands on the
+ * Armor socket whichever of them asked, and the other four stay empty.
+ */
+export function transformedBodyFactory(
+  dir: string,
+  part: string
+): typeof PlayerObject {
+  const key = `${dir}${part}`;
+  const cached = cache.get(key);
+  if (cached) return cached;
+
+  class TransformedBody extends PlayerObject {
+    /**
+     * `o->SubType` in MODEL_SKELETON1..3 dies as a bone shatter whatever is
+     * wearing it - the death branch tests the subtype, not the kind
+     * (ZzzCharacter.cpp:1406-1410), so a character in an Elite Skeleton ring
+     * comes apart the same way the monster does.
+     */
+    static DeathShatter = /^Skeleton0[123]\.glb$/.test(part)
+      ? skeletonShatter
+      : null;
+
+    override async loadPartAsync(
+      partDir: string,
+      socket: ModelObject,
+      modelPath: string,
+      itemLvl?: number,
+      isExcellent?: boolean,
+      tier?: ItemVisualTier
+    ) {
+      if (!isBodySocket(this, socket)) {
+        return super.loadPartAsync(
+          partDir,
+          socket,
+          modelPath,
+          itemLvl,
+          isExcellent,
+          tier
+        );
+      }
+
+      if (socket !== this.Armor) {
+        socket.Unload();
+        return;
+      }
+
+      await super.loadPartAsync(dir, this.Armor, part);
+    }
+  }
+
+  Object.defineProperty(TransformedBody, 'name', {
+    value: part.replace(/\.glb$/, ''),
+  });
+
+  cache.set(key, TransformedBody);
+
+  return TransformedBody;
+}
+
+/**
+ * The transformation skins a *character* can wear, as part file and scale.
+ *
+ * Every one of them is a `MODEL_PLAYER` with a subtype in the original, so
+ * the body swap above is all it takes. The rest of what a transformation
+ * ring can turn someone into - Budge Dragon, Giant, Poison Bull Fighter,
+ * Thunder Lich, Death Cow, Snowman - are whole monster models with their own
+ * rigs and clips, and a player cannot be posed on one.
+ *
+ * `TRANSFORMED_NPC_TABLE` is the same set as seen from the NPC side; the
+ * Skeleton Warrior is listed here as well because as a monster it is drawn
+ * through its own factory (`monsters/skeletonWarrior.ts`), weapons and all.
+ */
+export const CHARACTER_SKIN_PARTS: Readonly<
+  Record<number, readonly [dir: string, part: string, scale: number]>
+> = {
+  ...TRANSFORMED_NPC_TABLE,
+  // MONSTER_SKELETON_WARRIOR: MODEL_SKELETON1 at Scale 0.95
+  // (ZzzCharacter.cpp:14183-14192).
+  14: ['Skill/', 'Skeleton01.glb', 0.95],
+};
+
+export function characterSkinBody(
+  skin: number
+): { factory: typeof PlayerObject; scale: number } | null {
+  const entry = CHARACTER_SKIN_PARTS[skin];
+  if (!entry) return null;
+
+  return { factory: transformedBodyFactory(entry[0], entry[1]), scale: entry[2] };
+}
