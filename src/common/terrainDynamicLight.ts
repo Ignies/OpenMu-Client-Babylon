@@ -31,6 +31,14 @@ let primary: Float32Array | null = null;
 
 let floor: Float32Array | null = null;
 
+/**
+ * The dynamic light standing on each tile at full strength - the same sum as
+ * the delta in `primary`, but without the share the point-light pool has
+ * taken over. `requestBodyTerrainLight` is its only reader; see it for why a
+ * body needs the part of the light the ground gets per pixel.
+ */
+let bodyLift: Float32Array | null = null;
+
 const DELTA_ENCODE = 127.5;
 
 /**
@@ -68,6 +76,7 @@ export function initTerrainDynamicLight(liftedBaked: Float32Array): void {
   baked = liftedBaked;
   primary = liftedBaked.slice();
   floor = new Float32Array(liftedBaked.length);
+  bodyLift = new Float32Array(liftedBaked.length);
   deltaBytes = new Uint8Array(TERRAIN_SIZE * TERRAIN_SIZE * 4);
   // Alpha is not light (see writeTerrainOpenness). Open sky until something
   // says otherwise, so a map whose mask has not been built yet reads as
@@ -86,6 +95,7 @@ export function disposeTerrainDynamicLight(): void {
   baked = null;
   primary = null;
   floor = null;
+  bodyLift = null;
   deltaBytes = null;
   emitters.clear();
   emitterTiles.clear();
@@ -221,6 +231,12 @@ function resetTouched(): void {
       floor[o + 2] = 0;
     }
 
+    if (bodyLift) {
+      bodyLift[o] = 0;
+      bodyLift[o + 1] = 0;
+      bodyLift[o + 2] = 0;
+    }
+
     if (deltaBytes) {
       const d = touched[i] * 4;
 
@@ -233,6 +249,13 @@ function resetTouched(): void {
   deltaDirty = true;
 }
 
+/**
+ * `share` is what is left for the tile map after the point-light pool has
+ * taken this emitter over (`updateTerrainDynamicLight`'s `held`). The tile
+ * fields take the shared-out colour; `bodyLift` takes the whole of it, since
+ * an object never gets the pool's half added to it - it only ever gets it as
+ * a multiplier (`requestBodyTerrainLight`).
+ */
 function addTerrainLight(
   xf: number,
   yf: number,
@@ -241,7 +264,8 @@ function addTerrainLight(
   b: number,
   range: number,
   falloff = 1,
-  floorGain = 1
+  floorGain = 1,
+  share = 1
 ): void {
   if (!primary || !floor) return;
 
@@ -260,11 +284,19 @@ function addTerrainLight(
 
       const o = TERRAIN_INDEX_REPEAT(sx, sy) * CHANNELS;
 
-      primary[o] = Math.max(0, primary[o] + r * lf);
-      primary[o + 1] = Math.max(0, primary[o + 1] + g * lf);
-      primary[o + 2] = Math.max(0, primary[o + 2] + b * lf);
+      if (bodyLift) {
+        bodyLift[o] += r * lf;
+        bodyLift[o + 1] += g * lf;
+        bodyLift[o + 2] += b * lf;
+      }
 
-      const ff = lf * floorGain;
+      const sf = lf * share;
+
+      primary[o] = Math.max(0, primary[o] + r * sf);
+      primary[o + 1] = Math.max(0, primary[o + 1] + g * sf);
+      primary[o + 2] = Math.max(0, primary[o + 2] + b * sf);
+
+      const ff = sf * floorGain;
 
       floor[o] += r * ff;
       floor[o + 1] += g * ff;
@@ -310,19 +342,18 @@ export function updateTerrainDynamicLight(
   for (const emitter of emitters) {
     const share = 1 - (held?.get(emitter) ?? 0);
 
-    if (share <= 0) continue;
-
     const { r, g, b } = emitter.color(elapsedMs);
 
     addTerrainLight(
       emitter.position.x,
       emitter.position.z,
-      r * share,
-      g * share,
-      b * share,
+      r,
+      g,
+      b,
       emitter.range,
       emitter.falloff ?? 1,
-      emitter.floorGain ?? 1
+      emitter.floorGain ?? 1,
+      share
     );
   }
 
@@ -409,6 +440,63 @@ export function requestBakedTerrainLight(
   out: { x: number; y: number; z: number }
 ): boolean {
   return baked ? sampleBilinear(baked, x, y, out) : false;
+}
+
+const bodyDelta = { x: 0, y: 0, z: 0 };
+
+/**
+ * How much of the tile's dynamic light a surface takes as exposure.
+ *
+ * Not 1: the pooled point light reaches the same surface per pixel and the
+ * fragment multiplies the two, so a full-strength floor is the torch counted
+ * twice and a statue beside a brazier ends up brighter than the ground it
+ * stands on. Enough to give the multiply something to work with, low enough
+ * that the pool stays the thing doing the lighting.
+ */
+const BODY_LIFT_SHARE = 0.6;
+
+/**
+ * The tiers >= 1 body light: the bake, never darker than the dynamic light
+ * standing on the same tile.
+ *
+ * The ground and an object do not compose the dynamic layer the same way.
+ * The ground *adds* it (`terrainLighting.ts`: `bakeLit + dynLight`), so a
+ * torch lights it even where the lightmap is black. An object *multiplies*
+ * by it: the fragment is `texel x BodyLight x lightSum` (`itemMaterial.ts`
+ * UNCLAMP), and the pooled point lights are inside the sum that BodyLight
+ * scales - so with the bake at zero the multiply is by zero and no amount of
+ * torch reaches the surface. Atlans bakes whole stretches of walkable ground
+ * at (0, 0, 0.02): a monster standing there is a black silhouette in the
+ * middle of the player's own lamp while the sand around it lights up. The
+ * hero never shows it because `SelfLight` is added to its body light after.
+ *
+ * So the bake is floored by the light standing on the tile. It reads
+ * `bodyLift` and not the delta in `primary`, because the share `primary`
+ * gives up to the pool is exactly the share an object cannot use. It is an
+ * exact identity wherever the bake already carries the tile (a torch on a
+ * lit street) and wherever no emitter is near, so the double count the
+ * bake-only rule avoids is untouched.
+ */
+export function requestBodyTerrainLight(
+  x: number,
+  y: number,
+  out: { x: number; y: number; z: number }
+): boolean {
+  if (!requestBakedTerrainLight(x, y, out)) return false;
+
+  if (!wasActive || !bodyLift || !sampleBilinear(bodyLift, x, y, bodyDelta)) {
+    return true;
+  }
+
+  const r = bodyDelta.x * BODY_LIFT_SHARE;
+  const g = bodyDelta.y * BODY_LIFT_SHARE;
+  const b = bodyDelta.z * BODY_LIFT_SHARE;
+
+  if (r > out.x) out.x = r;
+  if (g > out.y) out.y = g;
+  if (b > out.z) out.z = b;
+
+  return true;
 }
 
 function sampleBilinear(

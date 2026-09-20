@@ -42,7 +42,7 @@ import {
 import {
   initTerrainDynamicLight,
   packBakedTerrainLight,
-  requestBakedTerrainLight,
+  requestBodyTerrainLight,
   requestTerrainLight,
 } from '../../common/terrainDynamicLight';
 import { lightingTier } from '../../common/lightingQuality';
@@ -491,9 +491,11 @@ const xd = xf - xi;
     }
 
     // Classic: PrimaryTerrainLight (bake + delta), the original's BodyLight.
-    // Tiers >= 1: the bake alone - the pool lights reach the figure per pixel.
+    // Tiers >= 1: the bake, floored by the dynamic light on the tile - the
+    // pool lights reach a surface per pixel, but only through the bake they
+    // are multiplied by.
     const lit = lightingTier()
-      ? requestBakedTerrainLight(x, y, lightScratch)
+      ? requestBodyTerrainLight(x, y, lightScratch)
       : requestTerrainLight(x, y, lightScratch);
 
     if (lit) return lightScratch;
