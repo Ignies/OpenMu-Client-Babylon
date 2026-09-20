@@ -999,7 +999,9 @@ class Atlas {
 
 // ---- harp ------------------------------------------------------------------
 
+/** The pillar's height; the neck rides on top of it. */
 const HARP_HEIGHT = 150;
+const HARP_NECK_TOP = HARP_HEIGHT + 14;
 const HARP_DEPTH = 70;
 const HARP_STRINGS = 22;
 /** The soundbox's depth (base to top) and its width between the player's shoulders. */
@@ -1031,8 +1033,8 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
   extrudeFlat(m, decimate(pillar.columns(), pillar.tolerance()), pillarP, 3, () => 6, wood);
 
   // The soundbox: from the base's back edge up to the neck's back end. Its
-  // carved face looks sideways; its taper runs front to back, wide at the
-  // base (the photo's own outline, on its own scale).
+  // carved face looks sideways and its curved edge bows outward, to the
+  // back; the taper runs front to back on the photo's own scale.
   const foot: V3 = [12, 0, 2];
   const crown: V3 = [HARP_DEPTH, 0, HARP_HEIGHT - 14];
   const slant = unit([crown[0] - foot[0], 0, crown[2] - foot[2]]);
@@ -1042,7 +1044,7 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
   const boxWidest = Math.max(...boxColumns.map(c => c.hi - c.lo));
   const boxP: Placement = {
     ...soundbox.alongZ(boxRect, slantLen, 0, ([a, t, l]) =>
-      add(foot, add(mul(normal, -a), add(mul([0, 1, 0], t), mul(slant, l))))
+      add(foot, add(mul(normal, a), add(mul([0, -1, 0], t), mul(slant, l))))
     ),
     cmAcross: HARP_BOX_DEPTH / boxWidest,
   };
@@ -1050,9 +1052,9 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
 
   // The neck: across the top, rooted inside the pillar, out to the crown;
   // thickness along Y.
-  // Hung from its top edge, so the pillar's top is inside its thick end.
+  // Hung from its top edge, its thick front end resting on the pillar.
   const neckP: Placement = {
-    ...h.neck.alongZ(neckRect, HARP_DEPTH + 9, 0, ([a, t, l]) => [l - 8, t, HARP_HEIGHT - a]),
+    ...h.neck.alongZ(neckRect, HARP_DEPTH + 9, 0, ([a, t, l]) => [l - 8, t, HARP_NECK_TOP - a]),
     originPy: 0,
   };
   const neckColumns = h.neck.columns();
@@ -1064,7 +1066,7 @@ function buildHarp(h: { pillar: Part; neck: Part; soundbox: Part; base: Part }, 
   // The strings: from the neck's underside straight down to the soundbox's face.
   const neckUnderside = (px: number): number => {
     const c = neckColumns[Math.max(0, Math.min(neckColumns.length - 1, Math.round((px / (h.neck.width - 1)) * (neckColumns.length - 1))))];
-    return HARP_HEIGHT - c.hi * neckP.cm;
+    return HARP_NECK_TOP - c.hi * neckP.cm;
   };
   for (let i = 0; i < HARP_STRINGS; i++) {
     const t = (i + 0.5) / HARP_STRINGS;
