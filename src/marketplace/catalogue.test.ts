@@ -1,14 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import type { ApiListing } from './api';
+import type { ApiListing, ListingState } from './api';
 import { cancellable, isOnSale, mergeCatalogue, stateLabelKey, statePillKey } from './catalogue';
 
 /**
  * The window's reading of the service's two lists. The bug these guard
- * against: a seller's own `pending` row - the trader has not collected it -
- * showing in the catalogue with a Buy button, as if it were for sale.
+ * against: a seller's own `pending` row - the game server has not taken the
+ * item yet - showing in the catalogue with a Buy button, as if it were for
+ * sale.
  */
 
-const row = (id: string, state: ApiListing['state'], seller = 'alice'): ApiListing => ({
+const STATES: ListingState[] = ['pending', 'active', 'claimed', 'sold', 'paid', 'returning', 'cancelled'];
+
+const row = (id: string, state: ListingState, seller = 'alice'): ApiListing => ({
   id,
   seller,
   price: 1000,
@@ -35,18 +38,17 @@ describe('mergeCatalogue', () => {
     expect(merged.map(l => l.id)).toEqual(['a', 'x']);
     expect(merged[0].mine).toBe(true);
   });
+
+  it('carries the Zen a sold row is holding', () => {
+    const merged = mergeCatalogue([], [{ ...row('s', 'sold'), proceeds: 950 }, row('p', 'paid')]);
+    expect(merged.map(l => l.proceeds)).toEqual([950, undefined]);
+  });
 });
 
 describe('what is for sale', () => {
   it('is only what the service calls active', () => {
-    const merged = mergeCatalogue([], [
-      row('p', 'pending'),
-      row('a', 'active'),
-      row('c', 'claimed'),
-      row('r', 'returning'),
-      row('s', 'stuck'),
-    ]);
-    expect(merged.filter(isOnSale).map(l => l.id)).toEqual(['a']);
+    const merged = mergeCatalogue([], STATES.map(state => row(state, state)));
+    expect(merged.filter(isOnSale).map(l => l.id)).toEqual(['active']);
   });
 
   it('counts a fixture without a state as on sale', () => {
@@ -55,15 +57,9 @@ describe('what is for sale', () => {
 });
 
 describe('what a seller may still cancel', () => {
-  it('is an own pending or active row, and nothing claimed or returning', () => {
-    const [p, a, c, r, s] = mergeCatalogue([], [
-      row('p', 'pending'),
-      row('a', 'active'),
-      row('c', 'claimed'),
-      row('r', 'returning'),
-      row('s', 'stuck'),
-    ]);
-    expect([p, a, c, r, s].map(cancellable)).toEqual([true, true, false, false, false]);
+  it('is an own pending or active row, and nothing claimed, sold or on its way back', () => {
+    const merged = mergeCatalogue([], STATES.map(state => row(state, state)));
+    expect(merged.filter(cancellable).map(l => l.id)).toEqual(['pending', 'active']);
   });
 
   it('is never somebody else\'s listing', () => {
@@ -73,7 +69,7 @@ describe('what a seller may still cancel', () => {
 
 describe('state labels', () => {
   it('has words for every state the service can answer with', () => {
-    for (const state of ['pending', 'active', 'claimed', 'returning', 'stuck'] as const) {
+    for (const state of STATES) {
       expect(stateLabelKey(state)).toMatch(/^marketplace\.state\./);
     }
   });
@@ -84,7 +80,7 @@ describe('state labels', () => {
   });
 
   it('has a short pill for every state too', () => {
-    for (const state of ['pending', 'active', 'claimed', 'returning', 'stuck'] as const) {
+    for (const state of STATES) {
       expect(statePillKey(state)).toMatch(/^marketplace\.(pill|state)\./);
     }
   });

@@ -180,6 +180,7 @@ import {
   ShowChristmasFireworksPacket,
 } from './common/packets/ServerToClientPackets';
 import { ChangeMapServerInfoPacket } from './common/packets';
+import { onEscrowResultPacket } from './marketplace/gameBridge';
 import { spawnFireworks } from './common/fireworks';
 import { InventoryConstants } from './common/inventoryConstants';
 import {
@@ -3313,6 +3314,15 @@ EventBus.on('ItemRemoved', packet => {
   });
 
   Store.syncPlayerAppearance();
+});
+
+/**
+ * The game server's answer to a marketplace escrow token (C1 E7 02). The
+ * item and the Zen it moved arrive through the inventory packets above; this
+ * only tells the window how the request went.
+ */
+EventBus.on('MarketplaceEscrowResult', packet => {
+  onEscrowResultPacket(new Uint8Array(packet.buffer, packet.byteOffset, packet.byteLength));
 });
 
 /**

@@ -889,7 +889,7 @@
   pointer-events: none;
 }
 
-/* A seller's own row: what the trader is doing with it, as a pill. */
+/* A seller's own row: what the market is doing with it, as a pill. */
 .mp-state {
   display: inline-block;
   max-width: 100%;
@@ -918,11 +918,17 @@
     border-color: fade(@mp-gold, 40%);
   }
 
-  &.is-stuck {
-    color: @mp-bad;
-    background: fade(@mp-bad, 12%);
-    border-color: fade(@mp-bad, 40%);
+  &.is-sold {
+    color: @mp-good;
+    background: fade(@mp-good, 10%);
+    border-color: fade(@mp-good, 35%);
   }
+}
+
+/* The Zen a sold row is holding for the seller, inside its pill. */
+.mp-state-amount {
+  margin-left: 4px;
+  font-weight: 400;
 }
 
 /* My Listings: the Zen a sale earned while the seller was away. */
@@ -951,7 +957,7 @@
 .mp-hist-row {
   display: grid;
   flex: 0 0 40px;
-  grid-template-columns: 30px minmax(0, 1fr) 72px 84px 62px 120px;
+  grid-template-columns: 30px minmax(0, 1fr) 84px 62px 120px;
   gap: 10px;
   align-items: center;
   padding: 0 6px;
@@ -977,11 +983,6 @@
   color: @mp-dim;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.mp-hist-bot {
-  font-size: 11px;
-  color: @mp-ink;
 }
 
 /* How a past handover ended. */
