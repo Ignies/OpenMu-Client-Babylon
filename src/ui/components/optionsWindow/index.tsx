@@ -56,12 +56,17 @@ import {
   MATERIAL_QUALITY_MAX,
 } from '../../../common/materialQuality';
 import {
+  ANIME_HALFTONE_SCALE_MAX,
+  ANIME_HALFTONE_SCALE_MIN,
+  ANIME_SLIDER_MAX,
   LINE_PLACEMENT_LABEL_KEYS,
   LINE_PLACEMENT_MAX,
   LINE_STRENGTH_MAX,
   LINE_STRENGTH_MIN,
   LINE_WIDTH_MAX,
   LINE_WIDTH_MIN,
+  OUTLINE_MODE_LABEL_KEYS,
+  OUTLINE_MODE_MAX,
   RENDERING_STYLE_LABEL_KEYS,
   RENDERING_STYLE_MAX,
   SHADE_STEPS_MAX,
@@ -177,7 +182,7 @@ type CheckRow = {
   /** Dim on the Classic lighting tier, where nothing reads the value. */
   needsTier?: boolean;
   /** Dim while the rendering style has no use for the value. */
-  needsStyle?: 'ramp' | 'outline';
+  needsStyle?: 'ramp' | 'outline' | 'dialled' | 'tuned';
 };
 
 type KeyRow = { action: KeyAction; labelKey: TextKey };
@@ -237,6 +242,16 @@ type SliderRow = {
     | 'lineWidth'
     | 'lineStrength'
     | 'linePlacement'
+    | 'animeShading'
+    | 'animeRim'
+    | 'animeRimWidth'
+    | 'animeMatcap'
+    | 'animePaint'
+    | 'animeHalftone'
+    | 'animeHalftoneScale'
+    | 'animeOutlineMode'
+    | 'animeSpeedLines'
+    | 'animeFilm'
     | 'sharpness'
     | 'filmGrain'
     | 'bloom'
@@ -269,7 +284,7 @@ type SliderRow = {
   /** Bloom and the image-processing pass exist on tiers >= 1 only. */
   needsTier?: boolean;
   /** Dim while the rendering style has no use for the value. */
-  needsStyle?: 'ramp' | 'outline';
+  needsStyle?: 'ramp' | 'outline' | 'dialled' | 'tuned';
   /** Dim and lock while the classic framing, not the facade, owns the camera. */
   needsCameraControl?: boolean;
   /** Dim while the warning this threshold belongs to is switched off. */
@@ -674,7 +689,8 @@ const TABS: Tab[] = [
                   min: STYLE_STRENGTH_MIN,
                   max: STYLE_STRENGTH_MAX,
                   needsTier: true,
-                  needsStyle: 'outline',
+                  // The one dial is Anime 1.0's; 2.0 has a slider per part.
+                  needsStyle: 'dialled',
                   display: v => v,
                 }),
               ],
@@ -728,6 +744,125 @@ const TABS: Tab[] = [
                   labelKey: 'options.animeEffects',
                   needsTier: true,
                   needsStyle: 'outline',
+                },
+              ],
+            },
+          ],
+        ],
+      },
+      {
+        id: 'anime',
+        labelKey: 'options.section.anime',
+        columns: [
+          [
+            {
+              titleKey: 'options.section.shading',
+              rows: [
+                slider({
+                  key: 'animeShading',
+                  textId: -1,
+                  labelKey: 'options.animeShading',
+                  max: ANIME_SLIDER_MAX,
+                  needsTier: true,
+                  needsStyle: 'tuned',
+                  display: v => v,
+                }),
+                slider({
+                  key: 'animeRim',
+                  textId: -1,
+                  labelKey: 'options.animeRim',
+                  max: ANIME_SLIDER_MAX,
+                  needsTier: true,
+                  needsStyle: 'tuned',
+                  display: v => (v === 0 ? t('common.off') : v),
+                }),
+                slider({
+                  key: 'animeRimWidth',
+                  textId: -1,
+                  labelKey: 'options.animeRimWidth',
+                  max: ANIME_SLIDER_MAX,
+                  needsTier: true,
+                  needsStyle: 'tuned',
+                  display: v => v,
+                }),
+                slider({
+                  key: 'animeMatcap',
+                  textId: -1,
+                  labelKey: 'options.animeMatcap',
+                  max: ANIME_SLIDER_MAX,
+                  needsTier: true,
+                  needsStyle: 'tuned',
+                  display: v => (v === 0 ? t('common.off') : v),
+                }),
+                slider({
+                  key: 'animePaint',
+                  textId: -1,
+                  labelKey: 'options.animePaint',
+                  max: ANIME_SLIDER_MAX,
+                  needsTier: true,
+                  needsStyle: 'tuned',
+                  display: v => (v === 0 ? t('common.off') : v),
+                }),
+                slider({
+                  key: 'animeHalftone',
+                  textId: -1,
+                  labelKey: 'options.animeHalftone',
+                  max: ANIME_SLIDER_MAX,
+                  needsTier: true,
+                  needsStyle: 'tuned',
+                  display: v => (v === 0 ? t('common.off') : v),
+                }),
+                slider({
+                  key: 'animeHalftoneScale',
+                  textId: -1,
+                  labelKey: 'options.animeHalftoneScale',
+                  min: ANIME_HALFTONE_SCALE_MIN,
+                  max: ANIME_HALFTONE_SCALE_MAX,
+                  needsTier: true,
+                  needsStyle: 'tuned',
+                  display: v => v,
+                }),
+              ],
+            },
+          ],
+          [
+            {
+              titleKey: 'options.section.linesAndEffects',
+              rows: [
+                slider({
+                  key: 'animeOutlineMode',
+                  textId: -1,
+                  labelKey: 'options.animeOutlineMode',
+                  max: OUTLINE_MODE_MAX,
+                  needsTier: true,
+                  needsStyle: 'tuned',
+                  display: v => t(OUTLINE_MODE_LABEL_KEYS[v]) ?? v,
+                }),
+                slider({
+                  key: 'animeSpeedLines',
+                  textId: -1,
+                  labelKey: 'options.animeSpeedLines',
+                  max: ANIME_SLIDER_MAX,
+                  needsTier: true,
+                  needsStyle: 'tuned',
+                  display: v => (v === 0 ? t('common.off') : v),
+                }),
+                slider({
+                  key: 'animeFilm',
+                  textId: -1,
+                  labelKey: 'options.animeFilm',
+                  max: ANIME_SLIDER_MAX,
+                  needsTier: true,
+                  needsStyle: 'tuned',
+                  display: v => (v === 0 ? t('common.off') : v),
+                }),
+                {
+                  kind: 'check',
+                  key: 'animeImpacts',
+                  textId: -1,
+                  labelKey: 'options.animeImpacts',
+                  needsTier: true,
+                  needsStyle: 'tuned',
                 },
               ],
             },

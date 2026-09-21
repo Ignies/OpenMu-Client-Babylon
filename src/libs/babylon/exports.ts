@@ -158,6 +158,14 @@ export { ShadowGenerator } from '@babylonjs/core/Lights/Shadows/shadowGenerator'
 import '@babylonjs/core/Lights/Shadows/shadowGeneratorSceneComponent';
 export { SSAO2RenderingPipeline } from '@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/ssao2RenderingPipeline';
 export { GeometryBufferRenderer } from '@babylonjs/core/Rendering/geometryBufferRenderer';
+// Registers AbstractMesh.renderOutline and the scene's outline renderer; the
+// inverted hull Anime 2.0 can draw (scenes/hullOutline.ts) is that and
+// nothing more. Its two shaders are imported here rather than left to the
+// lazy import Babylon does on the first outline draw, which the dev server's
+// dependency pre-bundle has no way to see coming and answers with a 404.
+import '@babylonjs/core/Rendering/outlineRenderer';
+import '@babylonjs/core/Shaders/outline.vertex';
+import '@babylonjs/core/Shaders/outline.fragment';
 import '@babylonjs/core/Rendering/geometryBufferRendererSceneComponent';
 export { ShaderStore } from '@babylonjs/core/Engines/shaderStore';
 export {

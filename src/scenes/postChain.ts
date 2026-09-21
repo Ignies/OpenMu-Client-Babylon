@@ -7,6 +7,7 @@ import {
 } from '../libs/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
 import { pipelineSamples } from '../common/lightingQuality';
+import { animeFilmBoost } from '../common/renderingStyle';
 import { toneMapLive } from './toneMap';
 import type { Rgb } from '../lighting/profiles';
 
@@ -169,8 +170,15 @@ export function createPostChain(
     // live; the pass here then does the white balance and the decoration only.
     const filmic = graded && toneMapLive();
 
+    // Anime 2.0's Cinematic slider is one more input to this writer, not a
+    // second writer: it adds to the player's own three and nothing else
+    // touches the pipeline (rendering_style ARCHITECTURE 2.6).
+    const film = animeFilmBoost();
+
     // Bloom samples the linear buffer before exposure. Off on Classic (§6).
-    const bloom = graded ? Math.max(0, GameOptions.bloom) : 0;
+    const bloom = graded
+      ? Math.min(SLIDER_MAX, Math.max(0, GameOptions.bloom) + film.bloom)
+      : 0;
 
     pipeline.bloomEnabled = bloom > 0;
     pipeline.bloomThreshold = filmic ? BLOOM_THRESHOLD_TONED : BLOOM_THRESHOLD;
@@ -214,12 +222,16 @@ export function createPostChain(
     pipeline.sharpen.edgeAmount = (sharpness / SLIDER_MAX) * SHARPEN_MAX_EDGE_AMOUNT;
     if (sharpness > 0) live.push('sharpen');
 
-    const grain = graded ? Math.max(0, GameOptions.filmGrain) : 0;
+    const grain = graded
+      ? Math.min(SLIDER_MAX, Math.max(0, GameOptions.filmGrain) + film.grain)
+      : 0;
     pipeline.grainEnabled = grain > 0;
     pipeline.grain.intensity = (grain / SLIDER_MAX) * GRAIN_INTENSITY;
     if (grain > 0) live.push('grain');
 
-    const chromatic = graded ? Math.max(0, GameOptions.chromatic) : 0;
+    const chromatic = graded
+      ? Math.min(SLIDER_MAX, Math.max(0, GameOptions.chromatic) + film.chromatic)
+      : 0;
     pipeline.chromaticAberrationEnabled = chromatic > 0;
     pipeline.chromaticAberration.aberrationAmount =
       (chromatic / SLIDER_MAX) * CHROMATIC_MAX;
