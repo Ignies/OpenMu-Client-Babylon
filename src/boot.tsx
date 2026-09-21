@@ -29,6 +29,7 @@ import {
   preloadWorldSprites,
 } from './libs/mu/preloadSprites';
 import { installPerfOverlay, recordFrame } from './libs/perfOverlay';
+import { csmCacheStats } from './scenes/shadows';
 import { refreshServerList } from './common/serverList';
 import { ensureCacheWorker } from './common/assetDownload';
 
@@ -183,6 +184,9 @@ installPerfOverlay(scene);
 // a screenshot has to be able to *cause* before it can show them, and the only
 // other way in is to cast a real spell at a real monster.
 (window as any).__weather = weather;
+// Static-cascade cache counters: casters split, cache misses, held window
+// radius per cascade. What tells a shadow-pass number apart from a lucky one.
+(window as any).__csm = csmCacheStats;
 
 /**
  * Longest step any system is handed. Coming back from an alt-tab (or from a

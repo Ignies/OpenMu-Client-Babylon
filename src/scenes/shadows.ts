@@ -22,6 +22,14 @@ import {
 } from '../common/lightingQuality';
 import type { ShadowCasters, ShadowPolicy } from '../lighting/shadowPolicy';
 import { driveRenderList } from './renderList';
+import {
+  CsmCache,
+  csmCacheActive,
+  csmCacheMapSize,
+  csmWindowMargin,
+  marginOf,
+  type CsmCacheStats,
+} from './csmCache';
 
 /**
  * The cascaded shadow map on the sun: sole owner of the
@@ -80,6 +88,30 @@ type Runtime = {
 };
 
 let runtime: Runtime | null = null;
+
+/**
+ * The static-cascade cache, while one is installed. Only under PCF: PCSS
+ * reads the map's colour channel for its blocker search, and a depth-only
+ * cache has nothing to put back there (csmCache.ts).
+ */
+let cache: CsmCache | null = null;
+let cacheTick: { remove(): void } | null = null;
+
+export function csmCacheStats(): CsmCacheStats | null {
+  return cache?.stats() ?? null;
+}
+
+function dropCache(): void {
+  cacheTick?.remove();
+  cacheTick = null;
+  cache?.dispose();
+  cache = null;
+}
+
+/** Whether this tier's cascades can be cached: PCF only, seam permitting. */
+function cacheable(tier: LightingTier): boolean {
+  return !tier.pcss && csmCacheActive();
+}
 
 /** The terrain's bake floor under a sun shadow: the sky share, linear. */
 let terrainFloor = 1;
@@ -418,14 +450,39 @@ function rebuildFrozenMaterials(scene: Scene): void {
  * set freezes to whatever stood in it when the room was entered: nothing
  * loaded afterwards ever casts, and nothing already in it ever leaves.
  */
-function hookShadowMap(csm: CascadedShadowGenerator, scene: Scene): void {
+function hookShadowMap(
+  csm: CascadedShadowGenerator,
+  scene: Scene,
+  tier: LightingTier
+): void {
   const map = csm.getShadowMap();
 
   if (!map) return;
 
-  // Not `renderListPredicate`: see scenes/renderList.ts for what that costs
-  // per frame. The list is released with the map.
-  driveRenderList(scene, map, castsSunShadow);
+  dropCache();
+
+  if (cacheable(tier)) {
+    // Read once: Babylon pulls an out-of-range cascade count into range
+    // without saying so, and reading it back per frame once stacked a
+    // render-list driver a frame (PR #216).
+    const cascades = csm.numCascades;
+    const margin = marginOf(mapSizeDev ?? tier.shadowMapSize, map.getSize().width);
+    const live = new CsmCache(csm, scene, map, cascades, margin);
+
+    cache = live;
+
+    // The split rides the driver's sweep; the driver's own observer was
+    // added first, so the lists are filled before `update` reads them.
+    driveRenderList(scene, map, mesh => live.sink(mesh, castsSunShadow(mesh)));
+    cacheTick = scene.onBeforeRenderTargetsRenderObservable.add(() =>
+      live.update()
+    );
+  } else {
+    // Not `renderListPredicate`: see scenes/renderList.ts for what that costs
+    // per frame. The list is released with the map.
+    driveRenderList(scene, map, castsSunShadow);
+  }
+
   cullPerCascade(csm, map);
   map.refreshRate = refreshDev ?? 1;
 }
@@ -459,13 +516,19 @@ function cullPerCascade(
 
     if (!list || !transform) return null;
 
+    // While this cascade's cache stands, its statics are already in the
+    // layer and only the movers are left to draw.
+    const movers = cache?.dynamicsFor(cascade);
+    const source = movers ?? list;
+    const count = movers ? movers.length : length;
+
     Frustum.GetPlanesToRef(transform, planes);
 
     const out = (lists[cascade] ??= []);
     let n = 0;
 
-    for (let i = 0; i < length; i++) {
-      const mesh = list[i];
+    for (let i = 0; i < count; i++) {
+      const mesh = source[i];
       if (mesh.isInFrustum(sides)) out[n++] = mesh;
     }
 
@@ -481,11 +544,15 @@ function createCsm(
   tier: LightingTier,
   policy: ShadowPolicy
 ): CascadedShadowGenerator {
-  const csm = new CascadedShadowGenerator(
-    mapSizeDev ?? tier.shadowMapSize,
-    sun,
-    true
-  );
+  const base = mapSizeDev ?? tier.shadowMapSize;
+  // A held window is fitted wider than its slice needs, so the map grows by
+  // the same factor and texels per tile - and with them the PCF kernel's
+  // reach in world units - land exactly where they were (csmCache.ts).
+  const size = cacheable(tier)
+    ? csmCacheMapSize(base, csmWindowMargin())
+    : base;
+
+  const csm = new CascadedShadowGenerator(size, sun, true);
 
   csm.numCascades = cascadesFor(policy.casters, tier);
   csm.lambda = CSM_LAMBDA;
@@ -509,7 +576,7 @@ function createCsm(
   // They land in the alpha-tested depth pass, keyed by their own texture.
   csm.transparencyShadow = true;
 
-  hookShadowMap(csm, scene);
+  hookShadowMap(csm, scene, tier);
 
   // The object materials are shared and carry a placeholder diffuse; the
   // real texture is per mesh (`metadata.diffuseTexture`, see itemMaterial).
@@ -544,6 +611,7 @@ function createCsm(
 function destroyCsm(): void {
   if (!runtime?.csm) return;
 
+  dropCache();
   runtime.csm.dispose();
   runtime.csm = null;
 }
@@ -593,7 +661,7 @@ export function syncShadows(
 
     if (runtime.csm.numCascades !== cascades) {
       runtime.csm.numCascades = cascades;
-      hookShadowMap(runtime.csm, scene);
+      hookShadowMap(runtime.csm, scene, runtime.tier);
     }
   }
 

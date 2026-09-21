@@ -160,6 +160,11 @@ export { SSAO2RenderingPipeline } from '@babylonjs/core/PostProcesses/RenderPipe
 export { GeometryBufferRenderer } from '@babylonjs/core/Rendering/geometryBufferRenderer';
 import '@babylonjs/core/Rendering/geometryBufferRendererSceneComponent';
 export { ShaderStore } from '@babylonjs/core/Engines/shaderStore';
+export {
+  EffectRenderer,
+  EffectWrapper,
+} from '@babylonjs/core/Materials/effectRenderer';
+export type { UniformBuffer } from '@babylonjs/core/Materials/uniformBuffer';
 export { RenderTargetTexture } from '@babylonjs/core/Materials/Textures/renderTargetTexture';
 export type { RenderTargetWrapper } from '@babylonjs/core/Engines/renderTargetWrapper';
 export type { MultiRenderTarget } from '@babylonjs/core/Materials/Textures/multiRenderTarget';

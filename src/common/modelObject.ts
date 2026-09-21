@@ -1149,9 +1149,43 @@ export class ModelObject {
 
     this.applyFrozenPose();
 
-    if (this.IsMapObject) this.settleStaticClips();
+    if (this.IsMapObject) {
+      this.settleStaticClips();
+      this.markStaticCaster();
+    }
 
     this.Ready = true;
+  }
+
+  /**
+   * A map object that stands still can have its shadow drawn once and kept
+   * (scenes/csmCache.ts). True while no clip of this object is running - the
+   * pose `settleStaticClips` left the bones in is the pose it will keep -
+   * and cleared for good by the first clip that starts. An object that moved
+   * once counts as a mover from then on: a door that swung shut again is not
+   * worth telling apart from one mid-swing.
+   */
+  private markStaticCaster() {
+    const groups = this.gltf?.animationGroups ?? [];
+
+    if (groups.some(group => group.isStarted)) {
+      this.setStaticCaster(false);
+      return;
+    }
+
+    this.setStaticCaster(true);
+
+    for (const group of groups) {
+      group.onAnimationGroupPlayObservable.addOnce(() =>
+        this.setStaticCaster(false)
+      );
+    }
+  }
+
+  private setStaticCaster(still: boolean) {
+    for (const mesh of this._frustumMeshes) {
+      if (mesh.metadata) mesh.metadata.staticCaster = still;
+    }
   }
 
   /**
