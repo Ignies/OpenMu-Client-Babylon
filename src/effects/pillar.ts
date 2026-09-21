@@ -48,11 +48,18 @@ import type { EffectHandle, EffectLayer } from './layer';
 /** Seconds a pillar stands: the original column's 40 ticks. */
 const DEFAULT_SECONDS = 1.6;
 
-/** Fire sheet height in tiles: the reference columns run off the top of the frame. */
-const DEFAULT_HEIGHT = 6;
+/**
+ * Fire sheet height in tiles: the reference columns run off the top of the frame. The fire burns
+ * out over the top of the sheet instead of filling it, so the column reads about a tile shorter
+ * than this.
+ */
+const DEFAULT_HEIGHT = 7;
 
-/** Fire sheet width in tiles: the column is about a tile across, the flare at the foot wider. */
-const DEFAULT_WIDTH = 2.2;
+/**
+ * Fire sheet width in tiles. The column's own width is in tiles inside the shader, so this is only
+ * how much room it has: wide enough that the flare at the foot never reaches the border.
+ */
+const DEFAULT_WIDTH = 2.8;
 
 /** Seconds the column takes to shoot up out of the ground. */
 const ERUPT = 0.14;
@@ -68,6 +75,15 @@ const CELLS = 1.6;
 
 /** How much wider than the column the foot flares (0 = a straight column). */
 const FOOT_FLARE = 0.7;
+
+/** How far down from the top of the sheet the fire burns out, as a fraction of the height. */
+const TIP_BAND = 0.5;
+
+/** How far that burn-out height wanders with the turbulence, as a fraction of the height. */
+const TIP_WANDER = 0.2;
+
+/** Where the fade to the sheet's own border begins, as a fraction of the way out to it. */
+const EDGE_FADE = 0.88;
 
 /** Flare card edge in tiles: the pool on the ground. */
 const GROUND_GLOW = 2.4;
@@ -169,7 +185,7 @@ function spawn(scene: Scene, at: Vector3, opts: PillarOptions): EffectHandle {
       const flicker = 0.88 + 0.12 * Math.sin(t * 23 + seed);
       const intensity = erupt * (2 - erupt) * (1 - dying * dying) * flicker;
 
-      params.set(t + seed, intensity, lerp(0.08, 1.25, 1 - (1 - erupt) * (1 - erupt)), dying * 1.15);
+      params.set(t + seed, intensity, lerp(0.05, 1, 1 - (1 - erupt) * (1 - erupt)), dying * 1.15);
       fire.setVector4('params', params);
       pool.visibility = intensity;
 
@@ -197,13 +213,17 @@ function reset(): void {
 }
 
 /**
- * The fire. `params`: time, intensity, top cutoff, bottom cutoff (both in
- * 0…1 of the height). `look`: gain, linear flag, foot flare, seed. `dims`:
- * width, height, rise, cells per tile. The turbulence is value-noise fbm
- * scrolled up the sheet and stretched tall so it reads as strands, the
+ * The fire. `params`: time, intensity, burn-out height, bottom cutoff (both
+ * in 0…1 of the sheet's height). `look`: gain, linear flag, foot flare, seed.
+ * `dims`: width, height, rise, cells per tile. The turbulence is value-noise
+ * fbm scrolled up the sheet and stretched tall so it reads as strands, the
  * column's edge is that noise pushing a width profile in and out (the
  * tongues), and the colour is a heat ramp from a red rim through orange and
  * yellow to the white core.
+ *
+ * The fire has to end inside the sheet on every side but the ground: a quad
+ * border standing in the air is a straight line across the flames, which is
+ * what the column showed at its top.
  */
 function registerShader(): void {
   if (ShaderStore.ShadersStore[`${SHADER}VertexShader`]) return;
@@ -274,10 +294,16 @@ function registerShader(): void {
     float body = 1.0 - smoothstep(0.5, 1.0, d);
     float core = 1.0 - smoothstep(0.1, 0.85, d);
 
-    float top = 1.0 - smoothstep(params.z - 0.3, params.z, yn);
+    // Where the column burns out. The crest rides the turbulence, so the fire
+    // thins into tongues instead of ending on a line, and it fades over a tight
+    // band while the column is still rising and a long one once it stands.
+    float crest = yn + (n - 0.5) * ${TIP_WANDER.toFixed(2)};
+    float band = mix(0.12, ${TIP_BAND.toFixed(2)}, clamp(params.z, 0.0, 1.0));
+    float top = 1.0 - smoothstep(params.z - band, params.z, crest);
     float bottom = smoothstep(params.w - 0.35, params.w, yn);
-    float tip = 1.0 - smoothstep(0.6, 1.0, yn);
-    float heat = body * top * bottom * (0.72 + 0.28 * n2 + 0.3 * core) * mix(0.5, 1.0, tip);
+    // Nothing is left by the sheet's own border, whatever the turbulence does.
+    float inset = 1.0 - smoothstep(${EDGE_FADE.toFixed(2)}, 1.0, max(yn, abs(vUV.x - 0.5) * 2.0));
+    float heat = body * top * bottom * inset * (0.72 + 0.28 * n2 + 0.3 * core);
     float h = clamp(heat * params.y, 0.0, 1.2);
 
     vec3 col = mix(vec3(0.8, 0.08, 0.0), vec3(1.0, 0.4, 0.03), smoothstep(0.0, 0.35, h));
