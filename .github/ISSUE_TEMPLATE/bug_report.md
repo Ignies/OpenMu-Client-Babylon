@@ -29,6 +29,10 @@ assignees: "Ignies"
 2.
 3.
 
+## Performance Overlay capture
+<!-- Ctrl + Shift + Alt + P in-game, an overlay will open, Win + Shift + S on Windows will allow you to snip it and paste here. -->
+
+
 ## Context
 
 * Map / system:
