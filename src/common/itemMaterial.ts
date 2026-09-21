@@ -14,15 +14,20 @@ import { pbrDetailStrength, specularLightScale } from './materialQuality';
 import { UNIFIED_LIGHT_MODEL, linearLightActive } from './lightModel';
 import { lightingTier } from './lightingQuality';
 import {
+  TOON_CAM_X_UNIFORM,
+  TOON_CAM_Y_UNIFORM,
   TOON_FILTER_UNIFORM,
   TOON_REF_UNIFORM,
+  TOON_SHEEN_UNIFORM,
   TOON_ULTRA_UNIFORM,
   TOON_UNIFORM,
   bindToon,
   toonFlatActive,
   toonFunctionsGlsl,
   toonRampActive,
+  toonSheenActive,
   toonTextureGlsl,
+  toonToneActive,
   toonUltraActive,
 } from './renderingStyle';
 import { pointLightPoolSize } from './pointLightPool';
@@ -136,15 +141,18 @@ const BODY_LIGHT_UNIFORM = `muBodyLight`;
  * (`linearLightActive`), `MU_WRAP` is the half-lambert response on tiers
  * >= 1, `MU_TOON` steps that response while a rendering style is on,
  * `MU_TOON_FLAT` flattens the art's tones and `MU_TOON_ULTRA` adds the
- * Ultra tier's highlight and hatching (renderingStyle.ts). Classic compiles
- * none of them and stays byte-identical to the original's
- * `texel x BodyLight x light`.
+ * Ultra tier's highlight and hatching (renderingStyle.ts). `MU_TOON_SHEEN`
+ * and `MU_TOON_TONE` are Anime 2.0's matcap and screentone, each behind its
+ * own slider. Classic compiles none of them and stays byte-identical to the
+ * original's `texel x BodyLight x light`.
  */
 const LINEAR_LIGHT_DEFINE = 'MU_LINEAR_LIGHT';
 const WRAP_DEFINE = 'MU_WRAP';
 const TOON_DEFINE = 'MU_TOON';
 const FLAT_DEFINE = 'MU_TOON_FLAT';
 const ULTRA_DEFINE = 'MU_TOON_ULTRA';
+const SHEEN_DEFINE = 'MU_TOON_SHEEN';
+const TONE_DEFINE = 'MU_TOON_TONE';
 
 /**
  * Detail strength as the shader sees it. The emissive map is *added* on top
@@ -334,6 +342,23 @@ const toonGlsl = (target: string, albedo: string) => {
     float hatch = smoothstep(0.4, 0.6, hatchWave) * hatchBand * ${TOON_ULTRA_UNIFORM}.z;
     ${target} -= toonLit * hatch${mul};
   #endif
+
+  #ifdef ${SHEEN_DEFINE}
+    // White, scaled by the key's own level, so the sheen sits in the frame's
+    // exposure and dims with the map instead of blowing out at night.
+    float sheen = muToonMatcap(
+      normalW, ${TOON_CAM_X_UNIFORM}, ${TOON_CAM_Y_UNIFORM},
+      ${TOON_SHEEN_UNIFORM}.y, ${TOON_UNIFORM}.y
+    ) * ${TOON_SHEEN_UNIFORM}.x * ${TOON_REF_UNIFORM}.x;
+    ${target} += vec3(sheen)${mul};
+  #endif
+
+  #ifdef ${TONE_DEFINE}
+    // Dots over every band below the middle, growing as the band darkens.
+    float toneDark = clamp((0.5 - toonT) * 2.0, 0.0, 1.0);
+    float tone = muToonDots(toneDark, ${TOON_SHEEN_UNIFORM}.w) * toneDark * ${TOON_SHEEN_UNIFORM}.z;
+    ${target} -= toonLit * tone${mul};
+  #endif
   }
   #endif
 `;
@@ -418,7 +443,9 @@ function litDefineState(scene: Scene): number {
     (wrapActive() ? 2 : 0) |
     (toonRampActive() ? 4 : 0) |
     (toonFlatActive() ? 8 : 0) |
-    (toonUltraActive() ? 16 : 0)
+    (toonUltraActive() ? 16 : 0) |
+    (toonSheenActive() ? 32 : 0) |
+    (toonToneActive() ? 64 : 0)
   );
 }
 
@@ -446,6 +473,8 @@ function addLitDefines(material: ItemMaterial, scene: Scene): void {
       lit[TOON_DEFINE] = (state & 4) !== 0;
       lit[FLAT_DEFINE] = (state & 8) !== 0;
       lit[ULTRA_DEFINE] = (state & 16) !== 0;
+      lit[SHEEN_DEFINE] = (state & 32) !== 0;
+      lit[TONE_DEFINE] = (state & 64) !== 0;
       lit.rebuild();
     }
 
@@ -748,6 +777,9 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
   material.AddUniform(TOON_REF_UNIFORM, 'vec2', null);
   material.AddUniform(TOON_FILTER_UNIFORM, 'vec4', null);
   material.AddUniform(TOON_ULTRA_UNIFORM, 'vec4', null);
+  material.AddUniform(TOON_SHEEN_UNIFORM, 'vec4', null);
+  material.AddUniform(TOON_CAM_X_UNIFORM, 'vec3', null);
+  material.AddUniform(TOON_CAM_Y_UNIFORM, 'vec3', null);
   material.AddUniform('time', 'float', 0);
   material.AddUniform('chromeColor', 'vec3', null);
   material.AddUniform('chrome2Color', 'vec3', null);

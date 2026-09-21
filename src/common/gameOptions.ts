@@ -108,6 +108,36 @@ export type GameOptions = {
    * unless the style draws lines.
    */
   animeEffects: boolean;
+  /**
+   * Anime 2.0's rig (`renderingStyle.ts`, ARCHITECTURE 2.6). Every one of
+   * these is unread by any other style, and every one of them at 0 compiles
+   * no define and builds no pass.
+   */
+  /** The band edge's hardness, 0..9; 9 is a hard edge, 0 eases over ~4 px. */
+  animeShading: number;
+  /** Rim strength on the figures, 0..9; 0 draws none. */
+  animeRim: number;
+  /** How broad the rim is, 0..9: low a thin edge line, high a wash. */
+  animeRimWidth: number;
+  /** The view-locked matcap sheen on the figures, 0..9; 0 is off. */
+  animeMatcap: number;
+  /** The painterly flat-tone filter, 0..9; 0 leaves the art alone. */
+  animePaint: number;
+  /** Screentone strength in the shaded bands, 0..9; 0 is off. */
+  animeHalftone: number;
+  /** The screentone's dot period in pixels, 1..9. */
+  animeHalftoneScale: number;
+  /** 0 Off / 1 Screen-space lines / 2 Inverted hull / 3 Both. */
+  animeOutlineMode: number;
+  /** Radial speed lines at full travel, 0..9; 0 builds no pass. */
+  animeSpeedLines: number;
+  /**
+   * The cinematic trim, 0..9: bloom, chromatic aberration and film grain
+   * added on top of the player's own three while Anime 2.0 is live.
+   */
+  animeFilm: number;
+  /** A stylised flare on a landed blow, beside the sparks. */
+  animeImpacts: boolean;
   /** Master sound level, 0..9, the original's one slider. */
   volume: number;
   /**
@@ -391,13 +421,24 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   materialQuality: [0, 2],
   // Literal rather than the renderingStyle.ts constants: it imports this
   // module, so naming them here would close an import cycle.
-  renderingStyle: [0, 2],
+  renderingStyle: [0, 3],
   shadeSteps: [2, 4],
   styleStrength: [1, 9],
   lineWidth: [1, 5],
   lineStrength: [1, 9],
   // Literal rather than the renderingStyle.ts constant, as above.
   linePlacement: [0, 2],
+  // Anime 2.0's rig; literals for the same reason.
+  animeShading: [0, 9],
+  animeRim: [0, 9],
+  animeRimWidth: [0, 9],
+  animeMatcap: [0, 9],
+  animePaint: [0, 9],
+  animeHalftone: [0, 9],
+  animeHalftoneScale: [1, 9],
+  animeOutlineMode: [0, 3],
+  animeSpeedLines: [0, 9],
+  animeFilm: [0, 9],
   // Literal rather than `MATERIAL_DETAIL_MAX`: materialQuality.ts imports
   // this module, so naming it here would close an import cycle.
   materialDetail: [0, 9],
@@ -447,6 +488,17 @@ const DEFAULTS: GameOptions = {
   linePlacement: 1,
   grassOutline: true,
   animeEffects: true,
+  animeShading: 7,
+  animeRim: 5,
+  animeRimWidth: 5,
+  animeMatcap: 0,
+  animePaint: 5,
+  animeHalftone: 0,
+  animeHalftoneScale: 4,
+  animeOutlineMode: 1,
+  animeSpeedLines: 0,
+  animeFilm: 3,
+  animeImpacts: true,
   volume: 5,
   musicVolume: 10,
   effectsVolume: 10,

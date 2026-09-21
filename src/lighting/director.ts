@@ -7,6 +7,7 @@ import { ENUM_WORLD } from '../common/types';
 import { GameOptions } from '../common/gameOptions';
 import { lightingTier, tierIndex } from '../common/lightingQuality';
 import {
+  inkLinesActive,
   renderingStyle,
   styleIndex,
   syncRenderingStyle,
@@ -54,6 +55,8 @@ import { syncShadows, syncTerrainDefines } from '../scenes/shadows';
 import { syncAmbientOcclusion } from '../scenes/ambientOcclusion';
 import { syncEffectMask } from '../scenes/effectMask';
 import { syncInkOutline, inkOutlineLive } from '../scenes/inkOutline';
+import { syncHullOutline } from '../scenes/hullOutline';
+import { syncSpeedLines, speedLinesLive } from '../scenes/speedLines';
 import { syncHeightFog, updateHeightFog } from '../scenes/heightFog';
 import { syncRoomMask } from '../scenes/roomMask';
 import { syncToneMap, toneMapLive } from '../scenes/toneMap';
@@ -270,8 +273,16 @@ export function createLookDirector(
   };
 
   const tick = (dt: number): void => {
-    // The snapshot the item materials bind this frame.
-    syncRenderingStyle(scene.getEngine().getRenderHeight());
+    // The snapshot the item materials bind this frame. The camera's basis
+    // rides with it for the matcap (renderingStyle.ts): the view matrix's
+    // first two rows are the camera's right and up in world space.
+    const view = camera.getViewMatrix().m;
+
+    syncRenderingStyle(
+      scene.getEngine().getRenderHeight(),
+      [view[0], view[4], view[8]],
+      [view[1], view[5], view[9]]
+    );
 
     const omenTo = omen ? 1 : 0;
 
@@ -315,7 +326,7 @@ export function createLookDirector(
     // one pixel wide and read the G-buffer, so it runs at full resolution
     // while they are on and at the tier's ratio otherwise.
     const style = renderingStyle();
-    const inkWanted = style !== null && style.outline && post;
+    const inkWanted = inkLinesActive() && post;
     const gbufferRatio = lightTier
       ? Math.max(lightTier.ssaoRatio, inkWanted ? 1 : 0)
       : 1;
@@ -404,6 +415,12 @@ export function createLookDirector(
       syncInkOutline(scene, camera, lightTier, tier, style, post, reordered) ||
       reordered;
 
+    // Anime 2.0's own two: the hull is drawn with the meshes, the speed
+    // lines sit beside the ink pass and run on the camera's own travel.
+    syncHullOutline(scene);
+    reordered =
+      syncSpeedLines(scene, camera, lightTier, post, dt, reordered) || reordered;
+
     reordered =
       syncHeightFog(
         scene,
@@ -487,6 +504,7 @@ export function createLookDirector(
     const passes = [
       ...(shaped && post ? ['ssao'] : []),
       ...(inkOutlineLive() ? ['ink'] : []),
+      ...(speedLinesLive() ? ['speedLines'] : []),
       ...(shaped && post && profile.fog.density > 0 ? ['haze'] : []),
       ...(roomMask.live ? ['roomMask'] : []),
       ...(sunShaftsLive() ? ['sunShafts'] : []),

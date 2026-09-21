@@ -1,8 +1,16 @@
-import type { Scene } from '../libs/babylon/exports';
+import type { Scene, Vector3 } from '../libs/babylon/exports';
 import type { Entity } from '../ecs/world';
 import { effects } from '../effects';
 import { entityPos, tmpA, type RGB } from '../effects/core';
-import { BLOOD_CHIPS, BLOOD_MIST, HIT_SPARKS, SMOKE } from '../effects/recipes';
+import {
+  BLOOD_CHIPS,
+  BLOOD_MIST,
+  HIT_SPARKS,
+  RGBS,
+  SMOKE,
+  TEX,
+} from '../effects/recipes';
+import { animeImpacts, styleTuned } from './renderingStyle';
 import { spawnCrystalShards } from './deathVisuals';
 import { playSfx } from '../libs/sfx';
 import { COMBAT_BUS } from './combatSounds';
@@ -58,6 +66,30 @@ function lightOf(target: Entity): RGB {
   return l ? [l.x, l.y, l.z] : [1, 1, 1];
 }
 
+/**
+ * Anime 2.0's Impact flash: one big short flare on the blow, growing as it
+ * goes, on top of what the blow already throws. It is additive art, so it
+ * lands in the effect mask and the ink pass gives it flat tones and a
+ * contour like every other effect. No other style spawns it.
+ */
+const ANIME_FLASH_SIZE = 1.6;
+const ANIME_FLASH_SECONDS = 0.22;
+const ANIME_FLASH_GROW = 1.8;
+
+function spawnAnimeFlash(scene: Scene, at: Vector3): void {
+  if (!styleTuned() || !animeImpacts()) return;
+
+  effects.spawn('sprite', scene, at, {
+    texture: TEX.impact,
+    colour: RGBS.white,
+    size: ANIME_FLASH_SIZE,
+    seconds: ANIME_FLASH_SECONDS,
+    grow: ANIME_FLASH_GROW,
+    growFrom: 0.4,
+    fadeTail: 0.6,
+  });
+}
+
 export function spawnHitImpact(
   scene: Scene,
   target: Entity,
@@ -86,6 +118,7 @@ export function spawnHitImpact(
   }
 
   const at = entityPos(target, HIT_HEIGHT, tmpA);
+  spawnAnimeFlash(scene, at);
   effects.spawn('particles', scene, at, {
     recipe: HIT_SPARKS,
     count: HIT_SPARK_COUNT,

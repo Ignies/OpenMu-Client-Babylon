@@ -11,6 +11,7 @@ import { devQueryNumbers } from '../common/devSeams';
 import type { LightingTier } from '../common/lightingQuality';
 import {
   inkDarkness,
+  inkLinesActive,
   inkSide,
   inkWidth,
   toonBands,
@@ -371,11 +372,13 @@ export function syncInkOutline(
   post: boolean,
   upstreamChanged: boolean
 ): boolean {
+  // `inkLinesActive` is `style.outline` for every style but Anime 2.0,
+  // whose Outline mode can ask for the hull instead of this pass.
   const wanted =
     tier !== null &&
     post &&
     style !== null &&
-    style.outline &&
+    inkLinesActive() &&
     effectMask() !== null;
 
   shown.strength = wanted ? inkDarkness() : 0;

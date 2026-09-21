@@ -2,18 +2,29 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Effect } from '../libs/babylon/exports';
 import { GameOptions, setGameOption } from './gameOptions';
 import {
+  ANIME_HALFTONE_SCALE_MAX,
+  ANIME_HALFTONE_SCALE_MIN,
+  ANIME_SLIDER_MAX,
   LINE_STRENGTH_MAX,
   LINE_STRENGTH_MIN,
   LINE_PLACEMENT_MAX,
   LINE_WIDTH_MAX,
   LINE_WIDTH_MIN,
+  OUTLINE_MODE_MAX,
   RENDERING_STYLES,
   RENDERING_STYLE_MAX,
   TOON_FILTER_UNIFORM,
+  TOON_SHEEN_UNIFORM,
   TOON_ULTRA_UNIFORM,
   TOON_UNIFORM,
+  animeFilmBoost,
+  animeHalftoneScale,
+  animeMatcap,
+  animeOutlineMode,
   bindToon,
+  hullOutlineActive,
   inkDarkness,
+  inkLinesActive,
   inkSide,
   inkWidth,
   linePlacement,
@@ -21,6 +32,7 @@ import {
   lineWidth,
   renderingStyle,
   shadeSteps,
+  speedLineStrength,
   styleIndex,
   styleStrength,
   syncRenderingStyle,
@@ -29,7 +41,9 @@ import {
   toonFunctionsGlsl,
   toonGrassActive,
   toonRampActive,
+  toonSheenActive,
   toonTerrainDefines,
+  toonToneActive,
   toonUltraActive,
 } from './renderingStyle';
 
@@ -43,11 +57,27 @@ const initial = {
   linePlacement: GameOptions.linePlacement,
   grassOutline: GameOptions.grassOutline,
   animeEffects: GameOptions.animeEffects,
+  animeShading: GameOptions.animeShading,
+  animeRim: GameOptions.animeRim,
+  animeRimWidth: GameOptions.animeRimWidth,
+  animeMatcap: GameOptions.animeMatcap,
+  animePaint: GameOptions.animePaint,
+  animeHalftone: GameOptions.animeHalftone,
+  animeHalftoneScale: GameOptions.animeHalftoneScale,
+  animeOutlineMode: GameOptions.animeOutlineMode,
+  animeSpeedLines: GameOptions.animeSpeedLines,
+  animeFilm: GameOptions.animeFilm,
+  animeImpacts: GameOptions.animeImpacts,
 };
 
 const stubEffect = () => {
   const setFloat4 = vi.fn();
-  return { effect: { setFloat4 } as unknown as Effect, setFloat4 };
+  const setFloat3 = vi.fn();
+  return {
+    effect: { setFloat4, setFloat3 } as unknown as Effect,
+    setFloat4,
+    setFloat3,
+  };
 };
 
 const written = (setFloat4: ReturnType<typeof vi.fn>, name: string) =>
@@ -336,10 +366,282 @@ describe('the GLSL helpers', () => {
     const glsl = toonFunctionsGlsl();
     expect(glsl).toContain('#if defined(MU_TOON) || defined(MU_TOON_FLAT) || defined(MU_TOON_GRASS)');
     expect(glsl).toContain('#ifdef MU_TOON_FLAT');
+    expect(glsl).toContain('#ifdef MU_TOON_SHEEN');
+    expect(glsl).toContain('#ifdef MU_TOON_TONE');
     expect(glsl).toContain('muToonBands');
     expect(glsl).toContain('muToonStep');
     expect(glsl).toContain('muToonFlat');
+    expect(glsl).toContain('muToonMatcap');
+    expect(glsl).toContain('muToonDots');
     expect(glsl).toContain('fwidth');
     expect(glsl).not.toMatch(/\/\/[^\n]*;/);
+  });
+});
+
+/** Every 2.0 slider away from its default, for the identity check. */
+const TUNED_AWAY = {
+  animeShading: 0,
+  animeRim: 9,
+  animeRimWidth: 0,
+  animeMatcap: 9,
+  animePaint: 0,
+  animeHalftone: 9,
+  animeHalftoneScale: 9,
+  animeOutlineMode: 2,
+  animeSpeedLines: 9,
+  animeFilm: 9,
+} as const;
+
+describe('Anime 2.0', () => {
+  const tuned = () => {
+    setGameOption('lightingQuality', 1);
+    setGameOption('renderingStyle', 3);
+  };
+
+  it('is its own row, with the dial on 1.0 and the rig on 2.0', () => {
+    expect(RENDERING_STYLES[2]).toMatchObject({ dialled: true, tuned: false });
+    expect(RENDERING_STYLES[3]).toMatchObject({
+      ramp: true,
+      outline: true,
+      flat: true,
+      extras: false,
+      dialled: false,
+      tuned: true,
+    });
+  });
+
+  it('leaves Anime 1.0 alone whatever its own sliders say', () => {
+    setGameOption('lightingQuality', 2);
+    setGameOption('renderingStyle', 2);
+    syncRenderingStyle(900);
+
+    const before = stubEffect();
+    bindToon(before.effect, true);
+    const baseline = before.setFloat4.mock.calls.map(call => [...call]);
+    const flags = [
+      toonRampActive(),
+      toonFlatActive(),
+      toonGrassActive(),
+      toonEffectsActive(),
+      toonUltraActive(),
+      toonSheenActive(),
+      toonToneActive(),
+      inkLinesActive(),
+      hullOutlineActive(),
+    ];
+
+    for (const [key, value] of Object.entries(TUNED_AWAY)) {
+      setGameOption(key as keyof typeof TUNED_AWAY, value);
+    }
+    setGameOption('animeImpacts', false);
+    syncRenderingStyle(900);
+
+    const after = stubEffect();
+    bindToon(after.effect, true);
+    expect(after.setFloat4.mock.calls.map(call => [...call])).toEqual(baseline);
+    expect(after.setFloat3).not.toHaveBeenCalled();
+    expect([
+      toonRampActive(),
+      toonFlatActive(),
+      toonGrassActive(),
+      toonEffectsActive(),
+      toonUltraActive(),
+      toonSheenActive(),
+      toonToneActive(),
+      inkLinesActive(),
+      hullOutlineActive(),
+    ]).toEqual(flags);
+    expect(animeFilmBoost()).toEqual({ bloom: 0, chromatic: 0, grain: 0 });
+    expect(speedLineStrength()).toBe(0);
+  });
+
+  it('compiles nothing for a slider sitting at zero', () => {
+    tuned();
+    setGameOption('animeMatcap', 0);
+    setGameOption('animeHalftone', 0);
+    setGameOption('animePaint', 0);
+    syncRenderingStyle();
+    expect(toonSheenActive()).toBe(false);
+    expect(toonToneActive()).toBe(false);
+    expect(toonFlatActive()).toBe(false);
+    expect(toonTerrainDefines()).toEqual(['#define MU_TOON_GRASS']);
+
+    setGameOption('animeMatcap', 5);
+    setGameOption('animeHalftone', 5);
+    setGameOption('animePaint', 5);
+    syncRenderingStyle();
+    expect(toonSheenActive()).toBe(true);
+    expect(toonToneActive()).toBe(true);
+    expect(toonFlatActive()).toBe(true);
+  });
+
+  it('never compiles its two defines on any other style', () => {
+    setGameOption('animeMatcap', 9);
+    setGameOption('animeHalftone', 9);
+    for (const style of [0, 1, 2]) {
+      setGameOption('lightingQuality', 2);
+      setGameOption('renderingStyle', style);
+      syncRenderingStyle();
+      expect(toonSheenActive()).toBe(false);
+      expect(toonToneActive()).toBe(false);
+    }
+  });
+
+  it('puts the sheen on the figures and the screentone on everyone', () => {
+    tuned();
+    setGameOption('animeMatcap', 9);
+    setGameOption('animeHalftone', 6);
+    setGameOption('animeHalftoneScale', 4);
+    syncRenderingStyle(900);
+
+    const { effect, setFloat4 } = stubEffect();
+    bindToon(effect, true);
+    bindToon(effect, false);
+    const sheen = written(setFloat4, TOON_SHEEN_UNIFORM);
+    expect(sheen).toHaveLength(2);
+    expect(sheen[0][0]).toBeGreaterThan(0);
+    expect(sheen[1][0]).toBe(0);
+    expect(sheen[0][2]).toBe(sheen[1][2]);
+    expect(sheen[0][2]).toBeGreaterThan(0);
+    expect(sheen[0][3]).toBe(4);
+
+    // The dot grid scales with the frame the way the grass outline does.
+    syncRenderingStyle(1800);
+    const big = stubEffect();
+    bindToon(big.effect, false);
+    expect(written(big.setFloat4, TOON_SHEEN_UNIFORM)[0][3]).toBe(8);
+  });
+
+  it('splits the outline between the pass and the hull', () => {
+    tuned();
+    const modes = [
+      [0, false, false],
+      [1, true, false],
+      [2, false, true],
+      [3, true, true],
+    ] as const;
+
+    for (const [mode, ink, hull] of modes) {
+      setGameOption('animeOutlineMode', mode);
+      syncRenderingStyle();
+      expect(inkLinesActive()).toBe(ink);
+      expect(hullOutlineActive()).toBe(hull);
+    }
+
+    // Every other style keeps the pass and never wears a hull.
+    setGameOption('renderingStyle', 2);
+    setGameOption('animeOutlineMode', 2);
+    syncRenderingStyle();
+    expect(inkLinesActive()).toBe(true);
+    expect(hullOutlineActive()).toBe(false);
+  });
+
+  it('drops the grass outline and the effect tones with the lines', () => {
+    tuned();
+    setGameOption('grassOutline', true);
+    setGameOption('animeEffects', true);
+    setGameOption('animeOutlineMode', 0);
+    syncRenderingStyle();
+    expect(toonGrassActive()).toBe(false);
+    expect(toonEffectsActive()).toBe(false);
+
+    setGameOption('animeOutlineMode', 1);
+    syncRenderingStyle();
+    expect(toonGrassActive()).toBe(true);
+    expect(toonEffectsActive()).toBe(true);
+  });
+
+  it('hardens the band edge as the shading grade rises', () => {
+    tuned();
+    const softAt = (value: number) => {
+      setGameOption('animeShading', value);
+      syncRenderingStyle();
+      const { effect, setFloat4 } = stubEffect();
+      bindToon(effect, false);
+      return written(setFloat4, TOON_UNIFORM)[0][1];
+    };
+
+    expect(softAt(9)).toBe(0);
+    expect(softAt(0)).toBeGreaterThan(softAt(5));
+  });
+
+  it('takes the rim strength and width from their own sliders', () => {
+    tuned();
+    const rimAt = (strength: number, width: number) => {
+      setGameOption('animeRim', strength);
+      setGameOption('animeRimWidth', width);
+      syncRenderingStyle();
+      const { effect, setFloat4 } = stubEffect();
+      bindToon(effect, true);
+      const bound = written(setFloat4, TOON_UNIFORM)[0];
+      return { rim: bound[2], edge: bound[3] };
+    };
+
+    expect(rimAt(0, 5).rim).toBe(0);
+    expect(rimAt(9, 5).rim).toBeGreaterThan(rimAt(3, 5).rim);
+    // A wide rim switches on sooner, so its edge is the lower number.
+    expect(rimAt(5, 9).edge).toBeLessThan(rimAt(5, 0).edge);
+  });
+
+  it('flattens the art further as the painterly slider rises', () => {
+    tuned();
+    const filterAt = (value: number) => {
+      setGameOption('animePaint', value);
+      syncRenderingStyle();
+      const { effect, setFloat4 } = stubEffect();
+      bindToon(effect, false);
+      const bound = written(setFloat4, TOON_FILTER_UNIFORM)[0];
+      return { bias: bound[0], levels: bound[1] };
+    };
+
+    const low = filterAt(1);
+    const high = filterAt(9);
+    expect(high.bias).toBeGreaterThan(low.bias);
+    expect(high.levels).toBeLessThan(low.levels);
+  });
+
+  it('adds the cinematic trim only while it is the live style', () => {
+    tuned();
+    setGameOption('animeFilm', 0);
+    expect(animeFilmBoost()).toEqual({ bloom: 0, chromatic: 0, grain: 0 });
+
+    setGameOption('animeFilm', 9);
+    const full = animeFilmBoost();
+    expect(full.bloom).toBeGreaterThan(0);
+    expect(full.chromatic).toBeGreaterThan(0);
+    expect(full.grain).toBeGreaterThan(0);
+
+    setGameOption('lightingQuality', 0);
+    expect(animeFilmBoost()).toEqual({ bloom: 0, chromatic: 0, grain: 0 });
+  });
+
+  it('asks for speed lines only on its own style', () => {
+    tuned();
+    setGameOption('animeSpeedLines', 0);
+    expect(speedLineStrength()).toBe(0);
+
+    setGameOption('animeSpeedLines', 9);
+    expect(speedLineStrength()).toBe(1);
+
+    setGameOption('renderingStyle', 2);
+    expect(speedLineStrength()).toBe(0);
+  });
+
+  it('rounds and clamps its own readers', () => {
+    tuned();
+    setGameOption('animeMatcap', 42);
+    expect(animeMatcap()).toBe(ANIME_SLIDER_MAX);
+    setGameOption('animeMatcap', -4);
+    expect(animeMatcap()).toBe(0);
+
+    setGameOption('animeHalftoneScale', 0);
+    expect(animeHalftoneScale()).toBe(ANIME_HALFTONE_SCALE_MIN);
+    setGameOption('animeHalftoneScale', 40);
+    expect(animeHalftoneScale()).toBe(ANIME_HALFTONE_SCALE_MAX);
+
+    setGameOption('animeOutlineMode', 9);
+    expect(animeOutlineMode()).toBe(OUTLINE_MODE_MAX);
+    setGameOption('animeOutlineMode', -1);
+    expect(animeOutlineMode()).toBe(0);
   });
 });
