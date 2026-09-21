@@ -21,6 +21,11 @@ export const QuestItemSystem: ISystemFactory = world => {
   let carrier: Entity | null = null;
   let carriedLevel = 0;
 
+  /** A real player, not a player-rig NPC or a transformed monster. */
+  function wearable(e: Entity | null): e is Entity {
+    return !!e?.playerAnimation && !!e.charAppearance && !!e.modelObject?.Ready;
+  }
+
   function take(from: Entity | null): void {
     if (from?.playerAnimation) {
       void (from.modelObject as PlayerObject | undefined)?.setQuestItemAsync(
@@ -45,9 +50,9 @@ export const QuestItemSystem: ISystemFactory = world => {
       if (owner === carrier && held.level === carriedLevel) return;
       if (carrier && carrier !== owner) take(carrier);
 
-      // Not in scope yet, or not a player rig: nothing to hang it on. The
-      // state stays, so it lands as soon as the carrier walks into view.
-      if (!owner?.playerAnimation || !owner.modelObject?.Ready) return;
+      // Not in scope yet, or not a player: nothing to hang it on. The state
+      // stays, so it lands as soon as the carrier walks into view.
+      if (!wearable(owner)) return;
 
       carrier = owner;
       carriedLevel = held.level;
