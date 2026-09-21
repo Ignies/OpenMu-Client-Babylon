@@ -4,6 +4,7 @@ import {
   type Effect,
   type Scene,
 } from '../babylon/exports';
+import { onGameOptionsChanged } from '../../common/gameOptions';
 import {
   materialQuality,
   pbrDetailStrength,
@@ -64,6 +65,17 @@ export const TERRAIN_DETAIL_UNIFORM = 'muGroundGrainStrength';
 
 let grain: RawTexture | null = null;
 let grainScene: Scene | null = null;
+
+// Generated once and kept, so an option change has to reach the texture
+// that already exists.
+onGameOptionsChanged(() => {
+  if (!grain) return;
+
+  const { sampling, anisotropy } = textureFiltering();
+
+  grain.updateSamplingMode(sampling);
+  grain.anisotropicFilteringLevel = anisotropy;
+});
 
 /** The same integer hash the cloud field is built from. */
 function hash(x: number, y: number, seed: number): number {

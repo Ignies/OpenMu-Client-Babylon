@@ -6,7 +6,8 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { resolveDataUrl } from '../libs/mu/dataFolder';
-import { FILTER_ANISOTROPY } from './materialQuality';
+import { onGameOptionsChanged } from './gameOptions';
+import { filterAnisotropy } from './materialQuality';
 import { derivePbrMaps, flipRows, ROUGH_MAX, type DerivedMaps } from './pbrDerive';
 import type { PbrWorkerRequest, PbrWorkerResponse } from './pbrMaps.worker';
 
@@ -54,6 +55,25 @@ type Placeholders = {
 const placeholders = new WeakMap<Scene, Placeholders>();
 
 /**
+ * The live maps, so the anisotropy option is a sampler write and not a
+ * reload. They have to follow the albedo they sit under (`modelLoader`): a
+ * normal map filtered differently from its colour is the crawling sheen the
+ * mip chain exists to stop.
+ */
+const filtered = new Set<Texture>();
+
+function keepFiltered(texture: Texture): void {
+  filtered.add(texture);
+  texture.onDisposeObservable.add(() => filtered.delete(texture));
+}
+
+onGameOptionsChanged(() => {
+  const anisotropy = filterAnisotropy();
+
+  for (const texture of filtered) texture.anisotropicFilteringLevel = anisotropy;
+});
+
+/**
  * `nearest` marks the 1x1 placeholders, which have nothing to filter. Every
  * real derived map gets mipmaps, trilinear filtering and the albedo's
  * anisotropy: it is the same size as the albedo, which *is* mipped, so
@@ -84,7 +104,8 @@ function raw(
   );
   texture.name = name;
   texture.gammaSpace = false;
-  texture.anisotropicFilteringLevel = nearest ? 1 : FILTER_ANISOTROPY;
+  texture.anisotropicFilteringLevel = nearest ? 1 : filterAnisotropy();
+  if (!nearest) keepFiltered(texture);
   return texture;
 }
 
@@ -334,7 +355,8 @@ function authored(file: string, scene: Scene): Texture {
   );
   texture.name = `pbr_${file}`;
   texture.gammaSpace = false;
-  texture.anisotropicFilteringLevel = FILTER_ANISOTROPY;
+  texture.anisotropicFilteringLevel = filterAnisotropy();
+  keepFiltered(texture);
   return texture;
 }
 

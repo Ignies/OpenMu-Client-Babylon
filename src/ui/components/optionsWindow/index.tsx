@@ -49,8 +49,12 @@ import {
 import {
   LIGHTING_QUALITY_LABEL_KEYS,
   LIGHTING_QUALITY_MAX,
+  MSAA_MAX,
+  MSAA_STEPS,
 } from '../../../common/lightingQuality';
 import {
+  ANISOTROPY_MAX,
+  ANISOTROPY_STEPS,
   MATERIAL_QUALITY_LABEL_KEYS,
   MATERIAL_DETAIL_MAX,
   MATERIAL_QUALITY_MAX,
@@ -234,8 +238,10 @@ type SliderRow = {
     | 'compareTooltips'
     | 'lightingQuality'
     | 'renderScale'
+    | 'msaa'
     | 'materialQuality'
     | 'materialDetail'
+    | 'anisotropy'
     | 'renderingStyle'
     | 'shadeSteps'
     | 'styleStrength'
@@ -574,6 +580,18 @@ const TABS: Tab[] = [
                   display: v => `${Math.round(renderScaleForStep(v) * 100)}%`,
                 }),
                 slider({
+                  key: 'msaa',
+                  textId: -1,
+                  labelKey: 'options.msaa',
+                  max: MSAA_MAX,
+                  display: v =>
+                    MSAA_STEPS[v] > 1 ? `${MSAA_STEPS[v]}x` : t('common.off'),
+                  // Classic takes no samples and the chain has no pass to
+                  // carry them with post off: dimmed in both.
+                  needsPostProcessing: true,
+                  needsTier: true,
+                }),
+                slider({
                   key: 'materialQuality',
                   textId: -1,
                   labelKey: 'options.materialQuality',
@@ -587,6 +605,18 @@ const TABS: Tab[] = [
                   labelKey: 'options.materialDetail',
                   max: MATERIAL_DETAIL_MAX,
                   display: v => (v === 0 ? t('common.off') : v),
+                }),
+                slider({
+                  key: 'anisotropy',
+                  textId: -1,
+                  labelKey: 'options.anisotropy',
+                  max: ANISOTROPY_MAX,
+                  display: v =>
+                    ANISOTROPY_STEPS[v] > 1
+                      ? `${ANISOTROPY_STEPS[v]}x`
+                      : t('common.off'),
+                  // Classic samples nearest and reads none of it.
+                  needsTier: true,
                 }),
                 slider({
                   key: 'effectLevel',

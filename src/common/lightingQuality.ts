@@ -59,18 +59,25 @@ export function lightingTier(): LightingTier | null {
 const POINT_LIGHT_BUDGETS: readonly number[] = [0, 8, 8];
 
 /**
- * MSAA sample count on the rendering pipeline's HDR target, per tier. The
- * engine itself is created without antialiasing (`main.tsx`), so this is the
- * only AA in the chain - and at 4x it is the most expensive single line in
- * the post setup on fill-rate-bound GPUs, because every pass in the chain
- * inherits the multisampled target. None on Classic: the original has no
- * AA, and a linear-space resolve lifts every dark edge pixel (K1 measured
- * +0.004 on every percentile with 2 samples).
+ * The MSAA slider's notches. The engine is created without antialiasing
+ * (`main.tsx`), so this is the only AA in the chain; Babylon clamps the
+ * request to `caps.maxMSAASamples`.
  */
-const PIPELINE_SAMPLE_COUNTS: readonly number[] = [1, 4, 4];
+export const MSAA_STEPS: readonly number[] = [1, 2, 4, 8];
 
+export const MSAA_MAX = MSAA_STEPS.length - 1;
+
+/**
+ * None on Classic whatever the slider says: the original has no AA, and a
+ * linear-space resolve lifts every dark edge pixel (K1 measured +0.004 on
+ * every percentile with 2 samples).
+ */
 export function pipelineSamples(): number {
-  return PIPELINE_SAMPLE_COUNTS[tierIndex()] ?? 4;
+  if (tierIndex() === 0) return 1;
+
+  const step = Math.max(0, Math.min(MSAA_MAX, Math.round(GameOptions.msaa)));
+
+  return MSAA_STEPS[step] ?? 4;
 }
 
 let pointLightBudgetSnapshot: number | null = null;

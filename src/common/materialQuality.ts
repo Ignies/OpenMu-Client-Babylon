@@ -110,8 +110,23 @@ export function pbrDetailStrength(): number {
   return value / MATERIAL_DETAIL_MAX;
 }
 
-/** Anisotropy on the art's samplers on tiers >= 1 (ARCHITECTURE §4.7). */
-export const FILTER_ANISOTROPY = 16;
+/**
+ * The anisotropy slider's notches, on the art's samplers on tiers >= 1
+ * (ARCHITECTURE §4.7). Babylon clamps the request to `caps.maxAnisotropy`.
+ */
+export const ANISOTROPY_STEPS: readonly number[] = [1, 2, 4, 8, 16];
+
+export const ANISOTROPY_MAX = ANISOTROPY_STEPS.length - 1;
+
+/** The player's anisotropy, whatever the tier. 1 is off. */
+export function filterAnisotropy(): number {
+  const step = Math.max(
+    0,
+    Math.min(ANISOTROPY_MAX, Math.round(GameOptions.anisotropy))
+  );
+
+  return ANISOTROPY_STEPS[step] ?? 16;
+}
 
 export type TextureFiltering = { sampling: number; anisotropy: number };
 
@@ -119,8 +134,9 @@ export type TextureFiltering = { sampling: number; anisotropy: number };
  * Sampler state for the art, per lighting tier. Classic reads level 0 with
  * nearest filtering, the way the original binds every texture
  * (GlobalBitmap.cpp:680: one level, no mip chain); tiers >= 1 filter
- * trilinear with anisotropy. Mip chains are built at load on every tier so
- * the flip is a sampler write, not a reload; Classic's mode never reads them.
+ * trilinear with the player's anisotropy. Mip chains are built at load on
+ * every tier so the flip is a sampler write, not a reload; Classic's mode
+ * never reads them.
  */
 export function textureFiltering(): TextureFiltering {
   if (lightingTier() === null) {
@@ -129,7 +145,7 @@ export function textureFiltering(): TextureFiltering {
 
   return {
     sampling: Texture.TRILINEAR_SAMPLINGMODE,
-    anisotropy: FILTER_ANISOTROPY,
+    anisotropy: filterAnisotropy(),
   };
 }
 

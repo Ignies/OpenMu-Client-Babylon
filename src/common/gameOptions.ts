@@ -32,6 +32,16 @@ export type GameOptions = {
   filmGrain: number;
   /** Fast approximate anti-aliasing (pipeline pass). */
   fxaa: boolean;
+  /**
+   * MSAA on the post chain's first pass, as an index into `MSAA_STEPS`.
+   * Classic takes none whatever this says (`pipelineSamples`).
+   */
+  msaa: number;
+  /**
+   * Anisotropy on the art's samplers, as an index into `ANISOTROPY_STEPS`.
+   * Classic samples nearest and reads none of it (`textureFiltering`).
+   */
+  anisotropy: number;
   /** Bloom weight; 0 disables the pass. Emitters only (threshold at scene white). */
   bloom: number;
   /** GlowLayer strength for item and effect halos; 0 disables the layer. */
@@ -419,6 +429,11 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   itemEffects: [0, 3],
   lightingQuality: [0, 2],
   materialQuality: [0, 2],
+  // Literals rather than `MSAA_MAX` / `ANISOTROPY_MAX`: lightingQuality.ts
+  // and materialQuality.ts both import this module, so naming them here
+  // would close an import cycle.
+  msaa: [0, 3],
+  anisotropy: [0, 4],
   // Literal rather than the renderingStyle.ts constants: it imports this
   // module, so naming them here would close an import cycle.
   renderingStyle: [0, 3],
@@ -469,6 +484,10 @@ const DEFAULTS: GameOptions = {
   brightness: 0,
   filmGrain: 0,
   fxaa: false,
+  // 4x and 16x: what both were hardwired to before they were the player's,
+  // so a fresh install and a returning one look the way they did.
+  msaa: 2,
+  anisotropy: 4,
   bloom: 3,
   glow: 5,
   chromatic: 0,
