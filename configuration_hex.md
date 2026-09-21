@@ -16,12 +16,12 @@ Format version: **1**
 | 0 | 1 | Format version. Anything else means a different table. |
 | 1 | 1 | Number of flag bytes that follow (currently 7). |
 | 2 | 7 | The on/off settings, one bit each, first in bit 0 of the first byte. |
-| 9 | 1 | Number of value bytes that follow (currently 39). |
-| 10 | 39 | The numeric settings, one byte each, each stored as value + 128. |
-| 49 | 2 | Language, two ASCII letters (`65 73` is `es`). |
-| 51 | 2 | Texture pack digest, `0000` when the original textures are in use. |
+| 9 | 1 | Number of value bytes that follow (currently 49). |
+| 10 | 49 | The numeric settings, one byte each, each stored as value + 128. |
+| 59 | 2 | Language, two ASCII letters (`65 73` is `es`). |
+| 61 | 2 | Texture pack digest, `0000` when the original textures are in use. |
 
-Total: **53 bytes**, 106 hex characters.
+Total: **63 bytes**, 126 hex characters.
 
 ## On/off settings
 
@@ -33,53 +33,54 @@ Bit `n` counts from the first flag byte: byte `n / 8`, bit `n % 8`, lowest bit f
 | 1 | 0.1 | `ambientParticles` |
 | 2 | 0.2 | `animatedWater` |
 | 3 | 0.3 | `animeEffects` |
-| 4 | 0.4 | `autoAttack` |
-| 5 | 0.5 | `autoReconnect` |
-| 6 | 0.6 | `blockBrowserKeys` |
-| 7 | 0.7 | `cameraControl` |
-| 8 | 1.0 | `chatTimestamps` |
-| 9 | 1.1 | `clouds` |
-| 10 | 1.2 | `confirmValuableItems` |
-| 11 | 1.3 | `dropSoundAncient` |
-| 12 | 1.4 | `dropSoundExcellent` |
-| 13 | 1.5 | `dropSoundFilter` |
-| 14 | 1.6 | `dropSoundHighLevel` |
-| 15 | 1.7 | `dropSoundJewels` |
-| 16 | 2.0 | `dropSoundOther` |
-| 17 | 2.1 | `dropSoundZen` |
-| 18 | 2.2 | `dropTooltips` |
-| 19 | 2.3 | `dynamicLights` |
-| 20 | 2.4 | `englishItemNames` |
-| 21 | 2.5 | `eventTimers` |
-| 22 | 2.6 | `firstPersonBob` |
-| 23 | 2.7 | `fxaa` |
-| 24 | 3.0 | `grassOutline` |
-| 25 | 3.1 | `hearInstruments` |
-| 26 | 3.2 | `lockWindows` |
-| 27 | 3.3 | `lootAncient` |
-| 28 | 3.4 | `lootExcellent` |
-| 29 | 3.5 | `lootFilter` |
-| 30 | 3.6 | `lootHighLevel` |
-| 31 | 3.7 | `lootJewels` |
-| 32 | 4.0 | `lootOther` |
-| 33 | 4.1 | `lowHealthWarning` |
-| 34 | 4.2 | `lowManaWarning` |
-| 35 | 4.3 | `minimapCorner` |
-| 36 | 4.4 | `monsterEffects` |
-| 37 | 4.5 | `muteInBackground` |
-| 38 | 4.6 | `performanceReadout` |
-| 39 | 4.7 | `postProcessing` |
-| 40 | 5.0 | `propBatching` |
-| 41 | 5.1 | `questTracker` |
-| 42 | 5.2 | `quickItemActions` |
-| 43 | 5.3 | `shadows` |
-| 44 | 5.4 | `slideHelp` |
-| 45 | 5.5 | `statPointAmounts` |
-| 46 | 5.6 | `stateWarnings` |
-| 47 | 5.7 | `thirdPersonMouseLook` |
-| 48 | 6.0 | `weatherEffects` |
-| 49 | 6.1 | `whisperBeep` |
-| 50 | 6.2 | `wsadMovement` |
+| 4 | 0.4 | `animeImpacts` |
+| 5 | 0.5 | `autoAttack` |
+| 6 | 0.6 | `autoReconnect` |
+| 7 | 0.7 | `blockBrowserKeys` |
+| 8 | 1.0 | `cameraControl` |
+| 9 | 1.1 | `chatTimestamps` |
+| 10 | 1.2 | `clouds` |
+| 11 | 1.3 | `confirmValuableItems` |
+| 12 | 1.4 | `dropSoundAncient` |
+| 13 | 1.5 | `dropSoundExcellent` |
+| 14 | 1.6 | `dropSoundFilter` |
+| 15 | 1.7 | `dropSoundHighLevel` |
+| 16 | 2.0 | `dropSoundJewels` |
+| 17 | 2.1 | `dropSoundOther` |
+| 18 | 2.2 | `dropSoundZen` |
+| 19 | 2.3 | `dropTooltips` |
+| 20 | 2.4 | `dynamicLights` |
+| 21 | 2.5 | `englishItemNames` |
+| 22 | 2.6 | `eventTimers` |
+| 23 | 2.7 | `firstPersonBob` |
+| 24 | 3.0 | `fxaa` |
+| 25 | 3.1 | `grassOutline` |
+| 26 | 3.2 | `hearInstruments` |
+| 27 | 3.3 | `lockWindows` |
+| 28 | 3.4 | `lootAncient` |
+| 29 | 3.5 | `lootExcellent` |
+| 30 | 3.6 | `lootFilter` |
+| 31 | 3.7 | `lootHighLevel` |
+| 32 | 4.0 | `lootJewels` |
+| 33 | 4.1 | `lootOther` |
+| 34 | 4.2 | `lowHealthWarning` |
+| 35 | 4.3 | `lowManaWarning` |
+| 36 | 4.4 | `minimapCorner` |
+| 37 | 4.5 | `monsterEffects` |
+| 38 | 4.6 | `muteInBackground` |
+| 39 | 4.7 | `performanceReadout` |
+| 40 | 5.0 | `postProcessing` |
+| 41 | 5.1 | `propBatching` |
+| 42 | 5.2 | `questTracker` |
+| 43 | 5.3 | `quickItemActions` |
+| 44 | 5.4 | `shadows` |
+| 45 | 5.5 | `slideHelp` |
+| 46 | 5.6 | `statPointAmounts` |
+| 47 | 5.7 | `stateWarnings` |
+| 48 | 6.0 | `thirdPersonMouseLook` |
+| 49 | 6.1 | `weatherEffects` |
+| 50 | 6.2 | `whisperBeep` |
+| 51 | 6.3 | `wsadMovement` |
 
 ## Value settings
 
@@ -88,44 +89,54 @@ Each is one byte; subtract 128 to get the value. Index 0 is the first byte after
 | Index | Setting |
 |---|---|
 | 0 | `ambientVolume` |
-| 1 | `bloom` |
-| 2 | `brightness` |
-| 3 | `cameraFov` |
-| 4 | `chromatic` |
-| 5 | `combatVolume` |
-| 6 | `compareTooltips` |
-| 7 | `dropVolume` |
-| 8 | `effectLevel` |
-| 9 | `effectsVolume` |
-| 10 | `filmGrain` |
-| 11 | `glow` |
-| 12 | `grassDensity` |
-| 13 | `instrumentsVolume` |
-| 14 | `itemEffects` |
-| 15 | `lightingQuality` |
-| 16 | `linePlacement` |
-| 17 | `lineStrength` |
-| 18 | `lineWidth` |
-| 19 | `lootZen` |
-| 20 | `lowHealthPercent` |
-| 21 | `lowManaPercent` |
-| 22 | `materialDetail` |
-| 23 | `materialQuality` |
-| 24 | `monsterVolume` |
-| 25 | `musicVolume` |
-| 26 | `renderDistance` |
-| 27 | `renderScale` |
-| 28 | `renderingStyle` |
-| 29 | `shadeSteps` |
-| 30 | `sharpness` |
-| 31 | `stepsVolume` |
-| 32 | `styleStrength` |
-| 33 | `sunShafts` |
-| 34 | `toneMapper` |
-| 35 | `uiScale` |
-| 36 | `uiVolume` |
-| 37 | `vignette` |
-| 38 | `volume` |
+| 1 | `animeFilm` |
+| 2 | `animeHalftone` |
+| 3 | `animeHalftoneScale` |
+| 4 | `animeMatcap` |
+| 5 | `animeOutlineMode` |
+| 6 | `animePaint` |
+| 7 | `animeRim` |
+| 8 | `animeRimWidth` |
+| 9 | `animeShading` |
+| 10 | `animeSpeedLines` |
+| 11 | `bloom` |
+| 12 | `brightness` |
+| 13 | `cameraFov` |
+| 14 | `chromatic` |
+| 15 | `combatVolume` |
+| 16 | `compareTooltips` |
+| 17 | `dropVolume` |
+| 18 | `effectLevel` |
+| 19 | `effectsVolume` |
+| 20 | `filmGrain` |
+| 21 | `glow` |
+| 22 | `grassDensity` |
+| 23 | `instrumentsVolume` |
+| 24 | `itemEffects` |
+| 25 | `lightingQuality` |
+| 26 | `linePlacement` |
+| 27 | `lineStrength` |
+| 28 | `lineWidth` |
+| 29 | `lootZen` |
+| 30 | `lowHealthPercent` |
+| 31 | `lowManaPercent` |
+| 32 | `materialDetail` |
+| 33 | `materialQuality` |
+| 34 | `monsterVolume` |
+| 35 | `musicVolume` |
+| 36 | `renderDistance` |
+| 37 | `renderScale` |
+| 38 | `renderingStyle` |
+| 39 | `shadeSteps` |
+| 40 | `sharpness` |
+| 41 | `stepsVolume` |
+| 42 | `styleStrength` |
+| 43 | `sunShafts` |
+| 44 | `toneMapper` |
+| 45 | `uiScale` |
+| 46 | `uiVolume` |
+| 47 | `vignette` |
+| 48 | `volume` |
 
 ## Worked example
 
