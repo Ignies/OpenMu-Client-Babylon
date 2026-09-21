@@ -4,6 +4,7 @@ import { App } from './App';
 import './style.less';
 import './logic';
 import { Store, UIState } from './store';
+import { GameOptions } from './common/gameOptions';
 import { Social } from './social';
 import { Commands } from './commands';
 import { GmPanel } from './gmPanel';
@@ -12,6 +13,11 @@ import { weather } from './weather';
 import { sound, installUiWindowChime } from './sound';
 import { Engine } from './libs/babylon/exports';
 import { createEngine } from './libs/babylon/utils';
+import {
+  applyRenderScale,
+  renderScaleForStep,
+  renderScaleSeam,
+} from './libs/renderScale';
 import { TestScene } from './scenes/testScene';
 import { loadMapIntoScene } from './libs/mu/loadMapIntoScene';
 import { prefetchWorldTerrain } from './libs/mu/prefetchWorld';
@@ -72,6 +78,17 @@ try {
   console.error(e);
   throw e;
 }
+
+// Before the first frame: the scene is drawn at this share of the window and
+// the browser scales it up. The HUD is DOM and keeps its own resolution.
+// The seam wins over the option so an A/B does not have to touch settings.
+const scaleSeam = renderScaleSeam();
+
+reaction(
+  () => scaleSeam ?? renderScaleForStep(GameOptions.renderScale),
+  scale => applyRenderScale(engine, scale),
+  { fireImmediately: true }
+);
 
 // The browser's own chords (Ctrl+W, Ctrl+R, F5, the zoom keys) taken off the
 // keyboard before anything else listens on it (`common/browserHotkeys.ts`).

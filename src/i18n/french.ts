@@ -194,6 +194,7 @@ export const frenchLayer: LanguageLayer = {
     'options.monsterEffects': 'Effets des monstres',
     'options.lightingQuality': 'Éclairage',
     'options.materialQuality': 'Matériaux',
+    'options.renderScale': 'Échelle de rendu',
     'options.texturePack': 'Textures des modèles',
     'worlds.tabDownload': 'Téléchargement',
     'download.group.core': 'Jeu de base',

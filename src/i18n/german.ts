@@ -192,6 +192,7 @@ export const germanLayer: LanguageLayer = {
     'options.monsterEffects': 'Monster-Effekte',
     'options.lightingQuality': 'Beleuchtung',
     'options.materialQuality': 'Materialien',
+    'options.renderScale': 'Renderskalierung',
     'options.texturePack': 'Modelltexturen',
     'worlds.tabDownload': 'Download',
     'download.group.core': 'Basisspiel',

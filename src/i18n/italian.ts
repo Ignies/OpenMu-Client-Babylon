@@ -193,6 +193,7 @@ export const italianLayer: LanguageLayer = {
     'options.monsterEffects': 'Effetti dei mostri',
     'options.lightingQuality': 'Illuminazione',
     'options.materialQuality': 'Materiali',
+    'options.renderScale': 'Scala di rendering',
     'options.texturePack': 'Texture dei modelli',
     'worlds.tabDownload': 'Download',
     'download.group.core': 'Gioco base',

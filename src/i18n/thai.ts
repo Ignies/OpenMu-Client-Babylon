@@ -195,6 +195,7 @@ export const thaiLayer: LanguageLayer = {
     'options.monsterEffects': 'เอฟเฟกต์มอนสเตอร์',
     'options.lightingQuality': 'แสง',
     'options.materialQuality': 'วัสดุ',
+    'options.renderScale': 'สเกลการเรนเดอร์',
     'options.texturePack': 'พื้นผิวโมเดล',
     'worlds.tabDownload': 'ดาวน์โหลด',
     'download.group.core': 'เกมพื้นฐาน',

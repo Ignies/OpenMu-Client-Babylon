@@ -193,6 +193,7 @@ export const romanianLayer: LanguageLayer = {
     'options.monsterEffects': 'Efecte ale monștrilor',
     'options.lightingQuality': 'Iluminare',
     'options.materialQuality': 'Materiale',
+    'options.renderScale': 'Scalare randare',
     'options.texturePack': 'Texturi de model',
     'worlds.tabDownload': 'Descărcare',
     'download.group.core': 'Joc de bază',

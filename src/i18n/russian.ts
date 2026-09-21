@@ -192,6 +192,7 @@ export const russianLayer: LanguageLayer = {
     'options.monsterEffects': 'Эффекты монстров',
     'options.lightingQuality': 'Освещение',
     'options.materialQuality': 'Материалы',
+    'options.renderScale': 'Масштаб рендеринга',
     'options.texturePack': 'Текстуры моделей',
     'worlds.tabDownload': 'Загрузка',
     'download.group.core': 'Базовая игра',

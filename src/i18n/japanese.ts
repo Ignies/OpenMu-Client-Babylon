@@ -195,6 +195,7 @@ export const japaneseLayer: LanguageLayer = {
     'options.monsterEffects': 'モンスターの効果',
     'options.lightingQuality': 'ライティング',
     'options.materialQuality': 'マテリアル',
+    'options.renderScale': 'レンダリング解像度',
     'options.texturePack': 'モデルテクスチャ',
     'worlds.tabDownload': 'ダウンロード',
     'download.group.core': '基本データ',

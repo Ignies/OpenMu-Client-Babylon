@@ -194,6 +194,7 @@ export const koreanLayer: LanguageLayer = {
     'options.monsterEffects': '몬스터 효과',
     'options.lightingQuality': '조명',
     'options.materialQuality': '재질',
+    'options.renderScale': '렌더링 배율',
     'options.texturePack': '모델 텍스처',
     'worlds.tabDownload': '다운로드',
     'download.group.core': '기본 게임',

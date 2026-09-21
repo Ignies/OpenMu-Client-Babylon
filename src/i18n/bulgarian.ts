@@ -193,6 +193,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.monsterEffects': 'Ефекти на чудовищата',
     'options.lightingQuality': 'Осветление',
     'options.materialQuality': 'Материали',
+    'options.renderScale': 'Мащаб на рендиране',
     'options.texturePack': 'Текстури на моделите',
     'worlds.tabDownload': 'Изтегляне',
     'download.group.core': 'Основна игра',
