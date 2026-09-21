@@ -16,12 +16,12 @@ Format version: **1**
 | 0 | 1 | Format version. Anything else means a different table. |
 | 1 | 1 | Number of flag bytes that follow (currently 7). |
 | 2 | 7 | The on/off settings, one bit each, first in bit 0 of the first byte. |
-| 9 | 1 | Number of value bytes that follow (currently 49). |
-| 10 | 49 | The numeric settings, one byte each, each stored as value + 128. |
-| 59 | 2 | Language, two ASCII letters (`65 73` is `es`). |
-| 61 | 2 | Texture pack digest, `0000` when the original textures are in use. |
+| 9 | 1 | Number of value bytes that follow (currently 51). |
+| 10 | 51 | The numeric settings, one byte each, each stored as value + 128. |
+| 61 | 2 | Language, two ASCII letters (`65 73` is `es`). |
+| 63 | 2 | Texture pack digest, `0000` when the original textures are in use. |
 
-Total: **63 bytes**, 126 hex characters.
+Total: **65 bytes**, 130 hex characters.
 
 ## On/off settings
 
@@ -99,44 +99,46 @@ Each is one byte; subtract 128 to get the value. Index 0 is the first byte after
 | 8 | `animeRimWidth` |
 | 9 | `animeShading` |
 | 10 | `animeSpeedLines` |
-| 11 | `bloom` |
-| 12 | `brightness` |
-| 13 | `cameraFov` |
-| 14 | `chromatic` |
-| 15 | `combatVolume` |
-| 16 | `compareTooltips` |
-| 17 | `dropVolume` |
-| 18 | `effectLevel` |
-| 19 | `effectsVolume` |
-| 20 | `filmGrain` |
-| 21 | `glow` |
-| 22 | `grassDensity` |
-| 23 | `instrumentsVolume` |
-| 24 | `itemEffects` |
-| 25 | `lightingQuality` |
-| 26 | `linePlacement` |
-| 27 | `lineStrength` |
-| 28 | `lineWidth` |
-| 29 | `lootZen` |
-| 30 | `lowHealthPercent` |
-| 31 | `lowManaPercent` |
-| 32 | `materialDetail` |
-| 33 | `materialQuality` |
-| 34 | `monsterVolume` |
-| 35 | `musicVolume` |
-| 36 | `renderDistance` |
-| 37 | `renderScale` |
-| 38 | `renderingStyle` |
-| 39 | `shadeSteps` |
-| 40 | `sharpness` |
-| 41 | `stepsVolume` |
-| 42 | `styleStrength` |
-| 43 | `sunShafts` |
-| 44 | `toneMapper` |
-| 45 | `uiScale` |
-| 46 | `uiVolume` |
-| 47 | `vignette` |
-| 48 | `volume` |
+| 11 | `anisotropy` |
+| 12 | `bloom` |
+| 13 | `brightness` |
+| 14 | `cameraFov` |
+| 15 | `chromatic` |
+| 16 | `combatVolume` |
+| 17 | `compareTooltips` |
+| 18 | `dropVolume` |
+| 19 | `effectLevel` |
+| 20 | `effectsVolume` |
+| 21 | `filmGrain` |
+| 22 | `glow` |
+| 23 | `grassDensity` |
+| 24 | `instrumentsVolume` |
+| 25 | `itemEffects` |
+| 26 | `lightingQuality` |
+| 27 | `linePlacement` |
+| 28 | `lineStrength` |
+| 29 | `lineWidth` |
+| 30 | `lootZen` |
+| 31 | `lowHealthPercent` |
+| 32 | `lowManaPercent` |
+| 33 | `materialDetail` |
+| 34 | `materialQuality` |
+| 35 | `monsterVolume` |
+| 36 | `msaa` |
+| 37 | `musicVolume` |
+| 38 | `renderDistance` |
+| 39 | `renderScale` |
+| 40 | `renderingStyle` |
+| 41 | `shadeSteps` |
+| 42 | `sharpness` |
+| 43 | `stepsVolume` |
+| 44 | `styleStrength` |
+| 45 | `sunShafts` |
+| 46 | `toneMapper` |
+| 47 | `uiScale` |
+| 48 | `uiVolume` |
+| 49 | `vignette` |
+| 50 | `volume` |
 
 ## Worked example
 

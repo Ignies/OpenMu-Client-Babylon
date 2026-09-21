@@ -186,6 +186,14 @@ export function syncFireflyGuard(
     if (!live) return true;
   }
 
+  if (runtime) {
+    // The MSAA option moves without this pass being rebuilt, and it is often
+    // the first one attached (see `createPass`).
+    const samples = pipelineSamples();
+
+    if (runtime.pass.samples !== samples) runtime.pass.samples = samples;
+  }
+
   if (runtime && upstreamChanged) {
     runtime.camera.detachPostProcess(runtime.pass);
     runtime.camera.attachPostProcess(runtime.pass);

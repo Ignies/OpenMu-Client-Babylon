@@ -375,7 +375,19 @@ export function syncAmbientOcclusion(
     if (!want) return true;
   }
 
-  if (!want || runtime) return false;
+  if (runtime) {
+    // The MSAA option moves without the tier moving, and nothing above
+    // rebuilds this colour target for it.
+    const samples = pipelineSamples();
+
+    if (runtime.ssao.textureSamples !== samples) {
+      runtime.ssao.textureSamples = samples;
+    }
+
+    return false;
+  }
+
+  if (!want) return false;
 
   const ssao = createSsao(scene, camera, tier, gbufferRatio);
 
