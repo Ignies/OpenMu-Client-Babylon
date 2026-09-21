@@ -112,8 +112,12 @@ const SPARK_VELOCITY: readonly [number, number] = [
 ];
 const SPARK_SECONDS: readonly [number, number] = [8 * TICK, 15 * TICK];
 const SPARK_TAILS = 2;
-/** Scale 2 is a 2 cm filament; the ribbon is drawn a little wider so it reads. */
-const SPARK_WIDTH = 0.06;
+/**
+ * Scale 2 is a 2 cm filament. The ribbon is drawn a little wider so it reads
+ * at our camera, but 6 cm was three times the original and the anvil threw
+ * what looked like ribbons rather than sparks; 3 cm still reads.
+ */
+const SPARK_WIDTH = 0.03;
 
 // ---- 2. the table ----------------------------------------------------------
 
