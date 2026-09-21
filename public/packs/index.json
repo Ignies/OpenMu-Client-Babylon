@@ -4,13 +4,13 @@
       "id": "upscaled-1024",
       "name": "Upscaled 1024",
       "textures": 4610,
-      "bytes": 273968998
+      "bytes": 74005010
     },
     {
       "id": "upscaled-512",
       "name": "Upscaled 512",
       "textures": 4596,
-      "bytes": 114270094
+      "bytes": 69001440
     }
   ]
 }
