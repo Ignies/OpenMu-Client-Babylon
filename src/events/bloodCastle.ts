@@ -75,8 +75,17 @@ const LOWER_LIMIT_CLASSES: ReadonlySet<BaseClass> = new Set([
 ]);
 /** Seconds the result box stays before it clears itself. */
 const RESULT_SECONDS = 15;
-/** `m_wIndex` 65535 / `m_byItemType` 255 or 0: nobody is carrying it. */
-const NO_QUEST_OWNER = 65535;
+/**
+ * Nobody is carrying it. The original tests `m_wIndex != 65535` alone
+ * (NewBloodCastleSystem.cpp:50), which is not enough here: the server writes
+ * `questItemOwner?.GetId(player) ?? 0xFF` into that 16-bit field, so an
+ * unclaimed weapon says 255, not 65535 - and it says it for the whole first
+ * half of the match, because the item exists from the moment it is dropped
+ * and only gains an owner when someone picks it up. Read 65535 as a real id
+ * and the weapon goes on the back of whichever character happens to hold
+ * object id 255.
+ */
+const NO_QUEST_OWNER: ReadonlySet<number> = new Set([0xff, 0xffff]);
 const QUEST_ITEM_LEVELS = 3;
 /** `Key &= 0x7FFF` before the lookup (NewBloodCastleSystem.cpp:51). */
 const OWNER_ID_MASK = 0x7fff;
@@ -339,7 +348,7 @@ function readQuestItem(p: BloodCastleStatePacket): void {
   const level = p.ItemLevel;
 
   const carried =
-    owner !== NO_QUEST_OWNER && level >= 1 && level <= QUEST_ITEM_LEVELS;
+    !NO_QUEST_OWNER.has(owner) && level >= 1 && level <= QUEST_ITEM_LEVELS;
 
   const next: BloodCastleQuestItem | null = carried
     ? { ownerId: owner & OWNER_ID_MASK, level: level as 1 | 2 | 3 }
