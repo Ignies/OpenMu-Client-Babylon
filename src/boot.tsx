@@ -242,9 +242,17 @@ engine.runRenderLoop(() => {
 
     const updateStarted = performance.now();
     updateSystems(deltaTime);
-    recordFrame(performance.now() - updateStarted, frameMs);
+    const updateEnded = performance.now();
 
     scene.render();
+
+    // After the render, not before: the overlay's graph wants the whole of
+    // the main thread's frame, and `scene.render` is most of it.
+    recordFrame(
+      updateEnded - updateStarted,
+      frameMs,
+      performance.now() - updateStarted
+    );
   } catch (err) {
     frameErrorsSinceLog++;
     if (now - lastFrameErrorAt >= FRAME_ERROR_LOG_INTERVAL_MS) {
