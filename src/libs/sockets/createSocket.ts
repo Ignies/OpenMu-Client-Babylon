@@ -3,6 +3,7 @@ import { ConnectServerPackets, ServerToClientPackets, SimpleModulusDecryptor, Si
 import { gameVersion } from "../../version";
 import { byteToString, getPacketSize, getSizeOfPacketType } from "../../common/utils";
 import { sessionNonce } from "../../common/sessionNonce";
+import { recordSocketDrain } from "../netStats";
 
 type Options = {
   wsAddress: string;
@@ -230,6 +231,10 @@ export function createSocket({ wsAddress, tcpIP, tcpPort }: Options) {
   }
 
   socket.addEventListener("message", (event) => {
+    // The whole drain happens here, on the main thread, before the browser
+    // gets to draw again: what it costs is what the overlay's `net` row
+    // reports (`libs/netStats.ts`).
+    const started = performance.now();
     const buffer = event.data as ArrayBuffer;
 
     const newBytes = new Uint8Array(buffer);
@@ -244,7 +249,11 @@ export function createSocket({ wsAddress, tcpIP, tcpPort }: Options) {
       bytes = combined;
     }
 
-    handlePacketsQueue();
+    try {
+      handlePacketsQueue();
+    } finally {
+      recordSocketDrain(newBytes.length, performance.now() - started);
+    }
   });
 
   socket.addEventListener("open", (event) => {

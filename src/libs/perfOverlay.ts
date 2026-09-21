@@ -1,4 +1,5 @@
 import type { Scene } from './babylon/exports';
+import { netStats } from './netStats';
 import { propBatchStats } from '../common/propBatches';
 
 /**
@@ -116,6 +117,26 @@ function gpuLine(scene: Scene): string {
   return `gpu        ${gpuName}`;
 }
 
+/**
+ * The socket's share of the frame. `held` is the number that answers "is the
+ * server costing me frames": it is milliseconds a second spent inside the
+ * message handler, which is time the browser could not draw in. Against a
+ * healthy server it is a fraction of a millisecond; a server delivering in
+ * bursts shows up as a large `worst` and a `bursts` count, which is felt as
+ * dropped frames rather than as lag.
+ */
+function netLine(): string {
+  const n = netStats();
+
+  if (!n.live) return 'net        offline';
+
+  return (
+    `net        ${n.rate.toFixed(0)}/s  ${n.kbps.toFixed(1)} KB/s  ` +
+    `held ${n.msPerSecond.toFixed(2)} ms/s  worst ${n.worstMs.toFixed(1)} ms` +
+    (n.bursts ? `  bursts ${n.bursts}` : '')
+  );
+}
+
 function render(scene: Scene): void {
   const engine = scene.getEngine();
 
@@ -143,6 +164,7 @@ function render(scene: Scene): void {
     }`,
     `particles  ${scene.particleSystems.length}`,
     `lights     ${scene.lights.length}`,
+    netLine(),
     propLine(),
     `materials  ${scene.materials.length}   textures ${scene.textures.length}`,
     '',
