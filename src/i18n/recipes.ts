@@ -331,6 +331,7 @@ export const EN_TEXT = {
   'options.monsterEffects': 'Monster effects',
   'options.lightingQuality': 'Lighting',
   'options.materialQuality': 'Materials',
+  'options.renderScale': 'Render scale',
   'options.texturePack': 'Model textures',
   'worlds.tabDownload': 'Download',
   'download.group.core': 'Base game',

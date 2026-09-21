@@ -201,6 +201,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.monsterEffects': 'Efeitos dos monstros',
     'options.lightingQuality': 'Iluminação',
     'options.materialQuality': 'Materiais',
+    'options.renderScale': 'Escala de renderização',
     'options.texturePack': 'Texturas dos modelos',
     'worlds.tabDownload': 'Download',
     'download.group.core': 'Jogo base',

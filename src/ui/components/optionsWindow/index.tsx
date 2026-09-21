@@ -70,6 +70,10 @@ import {
   STYLE_STRENGTH_MIN,
   renderingStyle,
 } from '../../../common/renderingStyle';
+import {
+  RENDER_SCALE_STEP_MAX,
+  renderScaleForStep,
+} from '../../../libs/renderScale';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
 import { BUS_VOLUME_MAX } from '../../../sound/buses';
 import {
@@ -224,6 +228,7 @@ type SliderRow = {
     | 'itemEffects'
     | 'compareTooltips'
     | 'lightingQuality'
+    | 'renderScale'
     | 'materialQuality'
     | 'materialDetail'
     | 'renderingStyle'
@@ -545,6 +550,13 @@ const TABS: Tab[] = [
                   labelKey: 'options.lightingQuality',
                   max: LIGHTING_QUALITY_MAX,
                   display: v => t(LIGHTING_QUALITY_LABEL_KEYS[v]) ?? v,
+                }),
+                slider({
+                  key: 'renderScale',
+                  textId: -1,
+                  labelKey: 'options.renderScale',
+                  max: RENDER_SCALE_STEP_MAX,
+                  display: v => `${Math.round(renderScaleForStep(v) * 100)}%`,
                 }),
                 slider({
                   key: 'materialQuality',

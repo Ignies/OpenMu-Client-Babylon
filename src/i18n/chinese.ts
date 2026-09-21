@@ -193,6 +193,7 @@ export const chineseLayer: LanguageLayer = {
     'options.monsterEffects': '怪物特效',
     'options.lightingQuality': '光照',
     'options.materialQuality': '材质',
+    'options.renderScale': '渲染比例',
     'options.texturePack': '模型贴图',
     'worlds.tabDownload': '下载',
     'download.group.core': '基础游戏',

@@ -11,6 +11,7 @@ import {
   LOW_VITAL_MIN_PERCENT,
 } from './lowVitals';
 import { LocalStorage } from '../libs/localStorage';
+import { RENDER_SCALE_STEP_MAX } from '../libs/renderScale';
 
 const OPTIONS_KEY = 'mu_options';
 
@@ -44,6 +45,14 @@ export type GameOptions = {
    */
   materialDetail: number;
   sharpness: number;
+  /**
+   * How much of the window the 3D scene is drawn at before the browser
+   * scales it up, as an index into RENDER_SCALE_STEPS (0 is native). The
+   * HUD is DOM over the canvas and keeps its own resolution. Only worth
+   * moving on a machine the pixels are holding up, which is why it defaults
+   * to native (libs/renderScale.ts).
+   */
+  renderScale: number;
   /** Sun rays through whatever occludes the sun; 0 disables the pass. */
   sunShafts: number;
   /** Multiply vignette; 0 disables the pass. */
@@ -397,6 +406,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   glow: [0, 9],
   chromatic: [0, 9],
   sharpness: [0, 9],
+  renderScale: [0, RENDER_SCALE_STEP_MAX],
   vignette: [0, 9],
   sunShafts: [0, 9],
   lootZen: [0, 9],
@@ -422,6 +432,7 @@ const DEFAULTS: GameOptions = {
   glow: 5,
   chromatic: 0,
   sharpness: 2,
+  renderScale: 0,
   vignette: 0,
   sunShafts: 3,
   dynamicLights: true,
