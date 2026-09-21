@@ -195,3 +195,11 @@ export function syncSpeedLines(
 export function speedLinesLive(): boolean {
   return runtime !== null;
 }
+
+/**
+ * What the pass is drawing right now, 0 while the camera stands still. A
+ * still frame cannot show these lines, so this is what the probe reads.
+ */
+export function speedLineShown(): number {
+  return shown.strength;
+}
