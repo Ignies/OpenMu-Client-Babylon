@@ -195,6 +195,7 @@ export const koreanLayer: LanguageLayer = {
     'options.lightingQuality': '조명',
     'options.materialQuality': '재질',
     'options.renderScale': '렌더링 배율',
+    'options.frameGeneration': '프레임 생성',
     'options.msaa': 'MSAA',
     'options.texturePack': '모델 텍스처',
     'worlds.tabDownload': '다운로드',

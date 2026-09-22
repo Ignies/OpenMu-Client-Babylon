@@ -202,6 +202,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.lightingQuality': 'Iluminação',
     'options.materialQuality': 'Materiais',
     'options.renderScale': 'Escala de renderização',
+    'options.frameGeneration': 'Geração de quadros',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Texturas dos modelos',
     'worlds.tabDownload': 'Download',

@@ -193,6 +193,7 @@ export const germanLayer: LanguageLayer = {
     'options.lightingQuality': 'Beleuchtung',
     'options.materialQuality': 'Materialien',
     'options.renderScale': 'Renderskalierung',
+    'options.frameGeneration': 'Bildgenerierung',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Modelltexturen',
     'worlds.tabDownload': 'Download',

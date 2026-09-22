@@ -579,6 +579,16 @@ const TABS: Tab[] = [
                   max: RENDER_SCALE_STEP_MAX,
                   display: v => `${Math.round(renderScaleForStep(v) * 100)}%`,
                 }),
+                {
+                  kind: 'check',
+                  key: 'frameGeneration',
+                  textId: -1,
+                  labelKey: 'options.frameGeneration',
+                  // The warp reads the velocity target the shaded tiers
+                  // build with the G-buffer, and Classic has none.
+                  needsPostProcessing: true,
+                  needsTier: true,
+                },
                 slider({
                   key: 'msaa',
                   textId: -1,

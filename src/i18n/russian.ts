@@ -193,6 +193,7 @@ export const russianLayer: LanguageLayer = {
     'options.lightingQuality': 'Освещение',
     'options.materialQuality': 'Материалы',
     'options.renderScale': 'Масштаб рендеринга',
+    'options.frameGeneration': 'Генерация кадров',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Текстуры моделей',
     'worlds.tabDownload': 'Загрузка',

@@ -332,6 +332,7 @@ export const EN_TEXT = {
   'options.lightingQuality': 'Lighting',
   'options.materialQuality': 'Materials',
   'options.renderScale': 'Render scale',
+  'options.frameGeneration': 'Frame generation',
   'options.msaa': 'MSAA',
   'options.texturePack': 'Model textures',
   'worlds.tabDownload': 'Download',

@@ -63,6 +63,14 @@ export type GameOptions = {
    * to native (libs/renderScale.ts).
    */
   renderScale: number;
+  /**
+   * Present a warped frame between drawn ones when the machine cannot keep
+   * up with its own display (`scenes/frameGen.ts`). Needs the G-buffer's
+   * velocity target, so it runs on the shaped tiers with post processing on
+   * and nowhere else, and it never alternates while the frame rate is
+   * already at the refresh rate.
+   */
+  frameGeneration: boolean;
   /** Sun rays through whatever occludes the sun; 0 disables the pass. */
   sunShafts: number;
   /** Multiply vignette; 0 disables the pass. */
@@ -493,6 +501,7 @@ const DEFAULTS: GameOptions = {
   chromatic: 0,
   sharpness: 2,
   renderScale: 0,
+  frameGeneration: false,
   vignette: 0,
   sunShafts: 3,
   dynamicLights: true,
