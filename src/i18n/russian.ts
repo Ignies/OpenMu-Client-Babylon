@@ -195,7 +195,6 @@ export const russianLayer: LanguageLayer = {
     'options.renderScale': 'Масштаб рендеринга',
     'options.upscale': 'Масштабирование',
     'options.upscale.native': 'Исходное',
-    'options.frameGeneration': 'Генерация кадров',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Текстуры моделей',
     'worlds.tabDownload': 'Загрузка',
