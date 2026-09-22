@@ -7,6 +7,7 @@ import {
   bootStrength,
   resetFootprints,
   updateFootprints,
+  warmFootprints,
   type PrintKind,
   type PrintLane,
 } from '../../weather/footprints';
@@ -517,7 +518,19 @@ export const FootprintSystem: ISystemFactory = world => {
     const walker = walkers.get(entity);
 
     if (!walker) {
-      if (marks) walkers.set(entity, newWalker(x, z));
+      if (marks) {
+        walkers.set(entity, newWalker(x, z));
+
+        // Seen here while the loading screen is still up, not on a stride.
+        if (lane === 'hero') {
+          warmFootprints(
+            world.scene,
+            track.shape,
+            SNOW_GROUND_MAPS.has(map) ? ['snow', 'wet'] : ['wet'],
+            track.dragWidth > 0
+          );
+        }
+      }
       return false;
     }
 

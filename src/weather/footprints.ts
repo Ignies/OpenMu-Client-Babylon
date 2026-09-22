@@ -1393,8 +1393,45 @@ function ensureShape(atlas: SoleAtlas, kind: PrintKind, shape: TrackShape): void
   if (atlas.baked.has(shape) || shapeRow(shape) < 0) return;
 
   atlas.baked.add(shape);
-  writeShape(atlas.data, kind, shape);
+
+  // Soles are deterministic per kind and shape: a row baked once is copied
+  // into every later map's atlas instead of being baked again.
+  const row = kind === 'drag' ? 0 : Math.max(0, shapeRow(shape));
+  const rowBytes = TEX * atlasWidth() * 4;
+  const start = row * rowBytes;
+  const key = `${kind}:${shape}`;
+  const cached = bakedRows.get(key);
+
+  if (cached) {
+    atlas.data.set(cached, start);
+  } else {
+    writeShape(atlas.data, kind, shape);
+    bakedRows.set(key, atlas.data.slice(start, start + rowBytes));
+  }
+
   atlas.texture.update(atlas.data);
+}
+
+/** Rows baked this session, by `kind:shape`. */
+const bakedRows = new Map<string, Uint8Array>();
+
+/** Bakes the hero's soles and builds its pools while the loading screen is up. */
+export function warmFootprints(
+  scene: Scene,
+  shape: TrackShape,
+  kinds: readonly PrintKind[],
+  drag: boolean
+): void {
+  for (const kind of kinds) {
+    if (shapeRow(shape) < 0) continue;
+    ensureShape(atlasFor(scene, kind), kind, shape);
+    ensurePool(scene, kind, 'hero');
+  }
+
+  if (drag) {
+    ensureShape(atlasFor(scene, 'drag'), 'drag', 'boot');
+    ensurePool(scene, 'drag', 'hero');
+  }
 }
 
 function materialFor(scene: Scene, kind: PrintKind): ShaderMaterial {
@@ -1913,6 +1950,7 @@ export function applyFootprintTuning(): void {
 
   for (const atlas of materials.values()) atlas.material.dispose();
   materials.clear();
+  bakedRows.clear();
 }
 
 /**
