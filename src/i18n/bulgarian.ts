@@ -196,6 +196,7 @@ export const bulgarianLayer: LanguageLayer = {
     'options.renderScale': 'Мащаб на рендиране',
     'options.upscale': 'Мащабиране',
     'options.upscale.native': 'Оригинално',
+    'options.frameGeneration': 'Генериране на кадри',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Текстури на моделите',
     'worlds.tabDownload': 'Изтегляне',

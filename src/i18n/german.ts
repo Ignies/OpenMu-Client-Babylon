@@ -195,6 +195,7 @@ export const germanLayer: LanguageLayer = {
     'options.renderScale': 'Renderskalierung',
     'options.upscale': 'Hochskalierung',
     'options.upscale.native': 'Nativ',
+    'options.frameGeneration': 'Bildgenerierung',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Modelltexturen',
     'worlds.tabDownload': 'Download',

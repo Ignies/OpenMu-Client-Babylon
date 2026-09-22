@@ -37,6 +37,13 @@ import {
 } from './libs/mu/preloadSprites';
 import { installPerfOverlay, recordFrame } from './libs/perfOverlay';
 import { csmCacheStats } from './scenes/shadows';
+import {
+  frameGenCapture,
+  frameGenHoldsLogic,
+  frameGenNoteFrame,
+  frameGenPresent,
+  frameGenShouldRender,
+} from './scenes/frameGen';
 import { refreshServerList } from './common/serverList';
 import { ensureCacheWorker } from './common/assetDownload';
 
@@ -238,6 +245,12 @@ let lastFrameErrorAt = -Infinity;
 let frameErrorsSinceLog = 0;
 
 let lastTime = performance.now();
+/**
+ * Simulation time owed to the next tick that runs it. A generated tick skips
+ * `updateSystems` (`scenes/frameGen.ts`), and without carrying its delta the
+ * world would simply run at half speed.
+ */
+let heldDelta = 0;
 engine.runRenderLoop(() => {
   const now = performance.now();
 
@@ -250,11 +263,29 @@ engine.runRenderLoop(() => {
   try {
     world.gameTime.TotalGameTime.TotalSeconds += deltaTime;
 
+    // The only place that can decide not to draw the world. With frame
+    // generation off - and with anything it needs missing - this is always
+    // true and the loop below is exactly what it was.
+    const drawing = frameGenShouldRender(scene);
+
+    heldDelta += deltaTime;
+
     const updateStarted = performance.now();
-    updateSystems(deltaTime);
+    if (drawing || !frameGenHoldsLogic()) {
+      updateSystems(heldDelta);
+      heldDelta = 0;
+    }
     const updateEnded = performance.now();
 
-    scene.render();
+    if (drawing) {
+      scene.render();
+      frameGenCapture(scene);
+    } else {
+      frameGenPresent(scene);
+    }
+
+    // What a real tick cost: the number the alternation is gated on.
+    if (drawing) frameGenNoteFrame(performance.now() - updateStarted);
 
     // After the render, not before: the overlay's graph wants the whole of
     // the main thread's frame, and `scene.render` is most of it.

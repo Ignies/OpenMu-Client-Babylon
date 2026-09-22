@@ -4,6 +4,7 @@ import { netStats } from './netStats';
 import { GameOptions } from '../common/gameOptions';
 import { renderScaleForStep } from './renderScale';
 import { upscaleActive } from '../scenes/upscale';
+import { frameGenState } from '../scenes/frameGen';
 import { texturePacks } from '../common/texturePacks';
 import { propBatchStats } from '../common/propBatches';
 import { configFingerprintLines } from '../common/configFingerprint';
@@ -586,6 +587,22 @@ function netLine(): string {
 }
 
 /**
+ * Frame generation's state, when it is on: whether the machine it is running
+ * on is one that gains from it. A tester turning the box on wants to know
+ * which of the two cases they are in, and the frame counter alone will not
+ * say - the presented rate rises either way (`scenes/frameGen.ts`).
+ */
+function frameGenLine(): string {
+  const fg = frameGenState();
+
+  if (!fg.on) return '';
+
+  return ` / fgen ${fg.favourable ? 'gains' : 'costs'} (cpu ${Math.round(
+    (100 * fg.costMs) / Math.max(fg.intervalMs, 0.01)
+  )}% of ${Math.round(fg.intervalMs)}ms)`;
+}
+
+/**
  * The settings that actually drive what a frame costs, on one line.
  *
  * Every one of these lives in `localStorage`, which the browser keeps *per
@@ -605,7 +622,7 @@ function settingsLine(): string {
       GameOptions.renderDistance
     } / scale ${Math.round(renderScaleForStep(GameOptions.renderScale) * 100)}%${
       upscaleActive() ? ' fsr' : ''
-    }` +
+    }${frameGenLine()}` +
     (pack ? ` / pack ${pack}` : '')
   );
 }
