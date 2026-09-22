@@ -196,6 +196,8 @@ export const japaneseLayer: LanguageLayer = {
     'options.lightingQuality': 'ライティング',
     'options.materialQuality': 'マテリアル',
     'options.renderScale': 'レンダリング解像度',
+    'options.upscale': 'アップスケール',
+    'options.upscale.native': 'ネイティブ',
     'options.msaa': 'MSAA',
     'options.texturePack': 'モデルテクスチャ',
     'worlds.tabDownload': 'ダウンロード',

@@ -63,6 +63,13 @@ export type GameOptions = {
    * to native (libs/renderScale.ts).
    */
   renderScale: number;
+  /**
+   * How a reduced `renderScale` is presented: 0 hands the small drawing
+   * buffer to the browser and lets it stretch the canvas, 1 draws the world
+   * small and reconstructs it at the window's own resolution with FSR
+   * (`scenes/upscale.ts`). Inert while the scale is native.
+   */
+  upscale: number;
   /** Sun rays through whatever occludes the sun; 0 disables the pass. */
   sunShafts: number;
   /** Multiply vignette; 0 disables the pass. */
@@ -463,6 +470,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   chromatic: [0, 9],
   sharpness: [0, 9],
   renderScale: [0, RENDER_SCALE_STEP_MAX],
+  upscale: [0, 1],
   vignette: [0, 9],
   sunShafts: [0, 9],
   lootZen: [0, 9],
@@ -493,6 +501,7 @@ const DEFAULTS: GameOptions = {
   chromatic: 0,
   sharpness: 2,
   renderScale: 0,
+  upscale: 1,
   vignette: 0,
   sunShafts: 3,
   dynamicLights: true,

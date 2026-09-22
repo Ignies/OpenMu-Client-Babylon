@@ -238,6 +238,7 @@ type SliderRow = {
     | 'compareTooltips'
     | 'lightingQuality'
     | 'renderScale'
+    | 'upscale'
     | 'msaa'
     | 'materialQuality'
     | 'materialDetail'
@@ -578,6 +579,20 @@ const TABS: Tab[] = [
                   labelKey: 'options.renderScale',
                   max: RENDER_SCALE_STEP_MAX,
                   display: v => `${Math.round(renderScaleForStep(v) * 100)}%`,
+                }),
+                slider({
+                  key: 'upscale',
+                  textId: -1,
+                  labelKey: 'options.upscale',
+                  max: 1,
+                  // Nothing to reconstruct at native, and the row says so
+                  // rather than sitting there doing nothing.
+                  display: v =>
+                    GameOptions.renderScale === 0
+                      ? t('options.upscale.native')
+                      : v > 0
+                        ? 'FSR'
+                        : t('common.off'),
                 }),
                 slider({
                   key: 'msaa',

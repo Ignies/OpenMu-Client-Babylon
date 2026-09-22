@@ -195,6 +195,8 @@ export const frenchLayer: LanguageLayer = {
     'options.lightingQuality': 'Éclairage',
     'options.materialQuality': 'Matériaux',
     'options.renderScale': 'Échelle de rendu',
+    'options.upscale': "Mise à l'échelle",
+    'options.upscale.native': 'Native',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Textures des modèles',
     'worlds.tabDownload': 'Téléchargement',

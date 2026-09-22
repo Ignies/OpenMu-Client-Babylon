@@ -194,6 +194,8 @@ export const romanianLayer: LanguageLayer = {
     'options.lightingQuality': 'Iluminare',
     'options.materialQuality': 'Materiale',
     'options.renderScale': 'Scalare randare',
+    'options.upscale': 'Scalare imagine',
+    'options.upscale.native': 'Nativ',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Texturi de model',
     'worlds.tabDownload': 'Descărcare',

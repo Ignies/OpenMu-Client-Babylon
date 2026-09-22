@@ -204,6 +204,8 @@ export const spanishLayer: LanguageLayer = {
     'options.lightingQuality': 'Iluminación',
     'options.materialQuality': 'Materiales',
     'options.renderScale': 'Escala de renderizado',
+    'options.upscale': 'Escalado',
+    'options.upscale.native': 'Nativo',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Texturas de modelos',
     'worlds.tabDownload': 'Descarga',
