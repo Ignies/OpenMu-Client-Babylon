@@ -11,8 +11,9 @@ import { GmPanel } from './gmPanel';
 import { Economy } from './economy';
 import { weather } from './weather';
 import { sound, installUiWindowChime } from './sound';
-import { Engine } from './libs/babylon/exports';
+import { Engine, SceneLoader } from './libs/babylon/exports';
 import { createEngine } from './libs/babylon/utils';
+import { devQuery } from './common/devSeams';
 import {
   applyRenderScale,
   renderScaleForStep,
@@ -76,6 +77,9 @@ try {
   const result = createEngine(canvas, useAntialiaing);
   engine = result.engine;
   engine.hideLoadingUI();
+  // Babylon's loader screen polls `scene.isReady` over the whole scene every
+  // 100 ms per model load; ours covers loads. `?loaderPoll=1` keeps it.
+  SceneLoader.ShowLoadingScreen = devQuery('loaderPoll') === '1';
 } catch (e) {
   console.error(e);
   throw e;
