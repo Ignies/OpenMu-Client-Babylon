@@ -2374,7 +2374,7 @@ export const EN_TEXT = {
   'sign.pub': 'Pub',
   'sign.shop': 'Shop',
   'sign.guardhouse': 'Guardhouse',
-  'sign.library': 'Library',
+  'sign.church': 'Church',
   'sign.guild': 'Guild',
 } as const;
 

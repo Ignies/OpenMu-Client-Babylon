@@ -2296,7 +2296,7 @@ export const russianLayer: LanguageLayer = {
     'sign.pub': 'Таверна',
     'sign.shop': 'Лавка',
     'sign.guardhouse': 'Караульня',
-    'sign.library': 'Библиотека',
+    'sign.church': 'Церковь',
     'sign.guild': 'Гильдия',
   },
 };

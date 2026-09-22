@@ -2259,7 +2259,7 @@ export const koreanLayer: LanguageLayer = {
     'sign.pub': '주점',
     'sign.shop': '상점',
     'sign.guardhouse': '경비소',
-    'sign.library': '서재',
+    'sign.church': '교회',
     'sign.guild': '길드',
   },
 };

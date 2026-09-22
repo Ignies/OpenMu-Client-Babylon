@@ -2252,7 +2252,7 @@ export const chineseLayer: LanguageLayer = {
     'sign.pub': '酒馆',
     'sign.shop': '商店',
     'sign.guardhouse': '卫兵所',
-    'sign.library': '书房',
+    'sign.church': '教堂',
     'sign.guild': '公会',
   },
 };

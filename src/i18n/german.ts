@@ -2323,7 +2323,7 @@ export const germanLayer: LanguageLayer = {
     'sign.pub': 'Taverne',
     'sign.shop': 'Laden',
     'sign.guardhouse': 'Wachhaus',
-    'sign.library': 'Bibliothek',
+    'sign.church': 'Kirche',
     'sign.guild': 'Gilde',
   },
 };

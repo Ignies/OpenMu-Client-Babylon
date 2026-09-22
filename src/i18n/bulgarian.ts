@@ -2301,7 +2301,7 @@ export const bulgarianLayer: LanguageLayer = {
     'sign.pub': 'Кръчма',
     'sign.shop': 'Магазин',
     'sign.guardhouse': 'Стражница',
-    'sign.library': 'Библиотека',
+    'sign.church': 'Църква',
     'sign.guild': 'Гилдия',
   },
 };

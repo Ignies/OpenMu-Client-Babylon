@@ -2318,7 +2318,7 @@ export const italianLayer: LanguageLayer = {
     'sign.pub': 'Taverna',
     'sign.shop': 'Negozio',
     'sign.guardhouse': 'Corpo di guardia',
-    'sign.library': 'Biblioteca',
+    'sign.church': 'Chiesa',
     'sign.guild': 'Gilda',
   },
 };

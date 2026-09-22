@@ -2314,7 +2314,7 @@ export const portugueseLayer: LanguageLayer = {
     'sign.pub': 'Taberna',
     'sign.shop': 'Loja',
     'sign.guardhouse': 'Casa da Guarda',
-    'sign.library': 'Biblioteca',
+    'sign.church': 'Igreja',
     'sign.guild': 'Guilda',
   },
 };
