@@ -2,19 +2,21 @@
 
 /**
  * PBR map derivation off the main thread: the texture's own encoded bytes
- * come in, the three maps go out. The decode is `createImageBitmap`, which
- * works in a worker, so nothing here touches the GPU - see `pbrMaps.ts` for
- * why that matters.
+ * come in, the three maps go out. The decode is `createImageBitmap`, or the
+ * Basis transcoder for a KTX2 pack file; both work in a worker, so nothing
+ * here touches the GPU - see `pbrMaps.ts` for why that matters.
  */
 
 import { derivePbrMaps, flipRows } from './pbrDerive';
+import { decodeKtx2, isKtx2, loadTranscoder, type TranscoderUrls } from './ktx2Pixels';
 
 export type PbrWorkerRequest = {
   id: number;
   /** Derive from the rows bottom-up, the GPU's order for an `invertY` upload. */
   flipY: boolean;
 } & (
-  | { bytes: ArrayBuffer }
+  /** `transcoder` is needed only when the bytes are a KTX2 pack file. */
+  | { bytes: ArrayBuffer; transcoder?: TranscoderUrls }
   /** Already decoded RGBA8, top row first (a canvas-drawn texture). */
   | { pixels: Uint8ClampedArray; width: number; height: number }
 );
@@ -32,8 +34,14 @@ export type PbrWorkerResponse =
   | { id: number; ok: false; error: string };
 
 async function decode(
-  bytes: ArrayBuffer
+  bytes: ArrayBuffer,
+  transcoder?: TranscoderUrls
 ): Promise<{ data: Uint8ClampedArray; width: number; height: number }> {
+  if (isKtx2(bytes)) {
+    if (!transcoder) throw new Error('KTX2 source without a transcoder');
+    return decodeKtx2(bytes, await loadTranscoder(transcoder));
+  }
+
   const bitmap = await createImageBitmap(new Blob([bytes]));
   const { width, height } = bitmap;
   const canvas = new OffscreenCanvas(width, height);
@@ -56,7 +64,7 @@ self.onmessage = async (event: MessageEvent<PbrWorkerRequest>) => {
 
   try {
     const { data, width, height } =
-      'bytes' in request ? await decode(request.bytes) : {
+      'bytes' in request ? await decode(request.bytes, request.transcoder) : {
         data: request.pixels,
         width: request.width,
         height: request.height,

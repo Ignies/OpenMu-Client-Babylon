@@ -1,4 +1,5 @@
 import {
+  BasisToolsOptions,
   Constants,
   RawTexture,
   Texture,
@@ -9,6 +10,7 @@ import { resolveDataUrl } from '../libs/mu/dataFolder';
 import { onGameOptionsChanged } from './gameOptions';
 import { filterAnisotropy } from './materialQuality';
 import { derivePbrMaps, flipRows, ROUGH_MAX, type DerivedMaps } from './pbrDerive';
+import { decodeKtx2, isKtx2, loadTranscoder, type TranscoderUrls } from './ktx2Pixels';
 import type { PbrWorkerRequest, PbrWorkerResponse } from './pbrMaps.worker';
 
 /**
@@ -21,7 +23,8 @@ import type { PbrWorkerRequest, PbrWorkerResponse } from './pbrMaps.worker';
  *
  * The derivation reads the texture's *own bytes* - the encoded image the
  * glTF loader (and a texture pack swap) leaves on `texture._buffer`, or the
- * file behind `texture.url` - decoded with `createImageBitmap` in a worker.
+ * file behind `texture.url` - decoded with `createImageBitmap` in a worker,
+ * or with the Basis transcoder when a texture pack shipped it as KTX2.
  * It used to read the pixels back from the GPU, and Babylon's readback is a
  * synchronous flush of everything queued: the frame stopped for as long as
  * the GPU took to drain, from inside a material bind, the first time each
@@ -237,12 +240,26 @@ async function source(texture: BaseTexture): Promise<Source | null> {
   return bytes ? { bytes } : null;
 }
 
+/**
+ * Where the Basis transcoder lives, as absolute URLs: the worker resolves
+ * relative ones against its own script, not the page.
+ */
+function transcoderUrls(): TranscoderUrls {
+  return {
+    js: new URL(BasisToolsOptions.JSModuleURL, document.baseURI).href,
+    wasm: new URL(BasisToolsOptions.WasmModuleURL, document.baseURI).href,
+  };
+}
+
 function deriveInWorker(src: Source, flipY: boolean): Promise<Derived> | null {
   const w = pbrWorker();
   if (!w) return null;
 
   const id = nextId++;
-  const request: PbrWorkerRequest = { id, flipY, ...src };
+  const request: PbrWorkerRequest =
+    'bytes' in src && isKtx2(src.bytes)
+      ? { id, flipY, ...src, transcoder: transcoderUrls() }
+      : { id, flipY, ...src };
   const transfer = 'bytes' in src ? [src.bytes] : [src.pixels.buffer];
 
   return new Promise<Derived>((resolve, reject) => {
@@ -257,7 +274,9 @@ async function deriveInline(src: Source, flipY: boolean): Promise<Derived> {
   let width: number;
   let height: number;
 
-  if ('bytes' in src) {
+  if ('bytes' in src && isKtx2(src.bytes)) {
+    ({ data, width, height } = decodeKtx2(src.bytes, await loadTranscoder(transcoderUrls())));
+  } else if ('bytes' in src) {
     const bitmap = await createImageBitmap(new Blob([src.bytes]));
     ({ width, height } = bitmap);
     const canvas = document.createElement('canvas');
@@ -312,6 +331,9 @@ async function deriveFromSource(texture: BaseTexture): Promise<Derived | null> {
 async function deriveFromGpu(texture: BaseTexture): Promise<Derived | null> {
   const { width, height } = texture.getSize();
   if (!width || !height) return null;
+  // A KTX2 pack texture sits on the GPU block-compressed, and WebGL cannot
+  // read a compressed texture back.
+  if (/\.ktx2$/i.test((texture as { url?: string | null }).url ?? '')) return null;
 
   const pixels = (await texture.readPixels()) as Uint8Array | null;
   if (!pixels) return null;

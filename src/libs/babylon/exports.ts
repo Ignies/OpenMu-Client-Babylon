@@ -54,6 +54,9 @@ BasisToolsOptions.JSModuleURL =
 BasisToolsOptions.WasmModuleURL =
   baseUrl + 'basisTranscoder/1/basis_transcoder.wasm';
 
+// Also read by the PBR map derivation, which decodes KTX2 pack files itself.
+export { BasisToolsOptions };
+
 export { Engine } from '@babylonjs/core/Engines/engine';
 export type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
 export {
