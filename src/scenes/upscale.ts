@@ -559,27 +559,3 @@ export function syncUpscale(scene: Scene, camera: ArcRotateCamera): void {
 export function upscaleActive(): boolean {
   return runtime !== null;
 }
-
-/**
- * The target the camera is drawing into while this is live, for the one other
- * thing that wants the finished frame before it reaches the screen
- * (`scenes/frameGen.ts`). Null when the upscale is off, and then that module
- * takes the camera's output itself.
- *
- * There is exactly one owner of `camera.outputRenderTarget`, and this is how
- * it is shared rather than fought over: both features blitting their own
- * target to the canvas froze the picture on whichever one stopped being
- * written (issues/frame_generation/generated_frame_sticks.md).
- */
-export function upscaleFrameTarget(): RenderTargetTexture | null {
-  return runtime?.target ?? null;
-}
-
-/**
- * Put the frame in the target on the screen now, rather than waiting for the
- * scene's own after-render. Called on a tick that drew no scene and therefore
- * fires no observable.
- */
-export function upscalePresentNow(): void {
-  if (runtime) present(runtime);
-}

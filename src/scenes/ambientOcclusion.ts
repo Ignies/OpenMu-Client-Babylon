@@ -27,7 +27,6 @@ import { renderDistanceRanges } from '../common/renderDistance';
 import { CSM_CASTER_REACH, drawsSolidGeometry } from './shadows';
 import { driveRenderList } from './renderList';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
-import { applyVelocityTarget, velocityWanted } from './motionVectors';
 
 /**
  * Contact-scale SSAO2 (ARCHITECTURE §4.1, §4.8 step 1). Sole owner of the
@@ -61,8 +60,6 @@ type Runtime = {
   tier: LightingTier;
   /** The G-buffer's ratio: the tier's, or 1 while the ink lines read it. */
   gbufferRatio: number;
-  /** Whether the buffer carries the velocity target (`motionVectors.ts`). */
-  velocity: boolean;
   ssao: SSAO2RenderingPipeline;
 };
 
@@ -302,10 +299,6 @@ function createSsao(
   let normals: Texture | null = null;
 
   if (gbuffer) {
-    // Before a single texture is read off it: the velocity setter disposes the
-    // multi-target and builds a new one.
-    applyVelocityTarget(gbuffer);
-
     const target = gbuffer.getGBuffer();
 
     driveRenderList(scene, target, occludes, 'active');
@@ -371,17 +364,11 @@ export function syncAmbientOcclusion(
 ): boolean {
   const want = tier !== null && post && !ssaoForcedOff();
 
-  // The velocity target is part of the buffer's shape, so a change in what
-  // wants it rebuilds the whole thing: the setter disposes the multi-target,
-  // and every pass that took a texture off the old one has to take it again.
-  const velocity = velocityWanted();
-
   if (
     runtime &&
     (!want ||
       runtime.tier !== tier ||
       runtime.gbufferRatio !== gbufferRatio ||
-      runtime.velocity !== velocity ||
       runtime.scene !== scene)
   ) {
     disposeAmbientOcclusion();
@@ -404,7 +391,7 @@ export function syncAmbientOcclusion(
 
   const ssao = createSsao(scene, camera, tier, gbufferRatio);
 
-  runtime = { scene, camera, tier, gbufferRatio, velocity, ssao };
+  runtime = { scene, camera, tier, gbufferRatio, ssao };
 
   return true;
 }
