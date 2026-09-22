@@ -195,12 +195,14 @@ async function spriteFromTGA(
 
   ctx.putImageData(new ImageData(pixels, width, height), 0, 0);
 
+  // WebP at quality 1 is lossless, and Chrome encodes it off the main thread
+  // (PNG was encoded on it).
   const blob = await new Promise<Blob | null>(resolve =>
-    canvas.toBlob(resolve, 'image/png')
+    canvas.toBlob(resolve, 'image/webp', 1)
   );
 
   if (!blob) {
-    throw new Error(`Could not encode ${path} as PNG`);
+    throw new Error(`Could not encode ${path} as WebP`);
   }
 
   return { url: URL.createObjectURL(blob), width, height };
