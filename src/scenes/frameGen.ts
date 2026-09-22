@@ -5,9 +5,11 @@ import {
   GeometryBufferRenderer,
   RenderTargetTexture,
   Texture,
+  type Camera,
   type Scene,
 } from '../libs/babylon/exports';
 import { devQuery } from '../common/devSeams';
+import { upscaleFrameTarget, upscalePresentNow } from './upscale';
 import { GameOptions } from '../common/gameOptions';
 
 /**
@@ -251,7 +253,15 @@ export function frameGenWantsVelocity(): boolean {
 
 type Runtime = {
   readonly scene: Scene;
+  /** The camera this was built against; a different one rebuilds. */
+  readonly camera: Camera;
   readonly capture: RenderTargetTexture;
+  /**
+   * The upscale's target when it owns the camera, and then this module never
+   * touches `camera.outputRenderTarget` and warps into that target instead of
+   * onto the canvas. Null when it owns the camera itself.
+   */
+  readonly shared: RenderTargetTexture | null;
   readonly renderer: EffectRenderer;
   readonly wrapper: EffectWrapper;
   readonly width: number;
@@ -263,6 +273,8 @@ let runtime: Runtime | null = null;
 let captured = false;
 /** Whether the tick just gone drew the world. */
 let drewLast = false;
+/** Which frame the pass about to run should read; the capture unless copying. */
+let source: RenderTargetTexture | null = null;
 /** The velocity target the pass about to run should read. */
 let bound: Texture | null = null;
 /** How far along the velocity the pass about to run should push. */
@@ -322,21 +334,33 @@ function velocityTexture(scene: Scene): Texture | null {
 
 function build(scene: Scene): Runtime | null {
   const engine = scene.getEngine();
-  const width = engine.getRenderWidth();
-  const height = engine.getRenderHeight();
+  const camera = scene.activeCamera;
+
+  if (!camera) return null;
+
+  // The upscale gets there first when it is on, and there is only one
+  // `camera.outputRenderTarget` to have. Where it owns the camera this warps
+  // in its target's place and at its size, so the frame is generated small and
+  // reconstructed once, which is also the cheaper order.
+  const shared = upscaleFrameTarget();
+  const size = shared?.getSize();
+  const width = size?.width ?? engine.getRenderWidth();
+  const height = size?.height ?? engine.getRenderHeight();
 
   if (width < 2 || height < 2) return null;
 
-  // The frame itself, not a copy of it: the camera is pointed at this below.
+  // What the last real frame looked like. A copy, not the frame itself, when
+  // the upscale owns the camera: the generated frame is warped *into* that
+  // target, so the source cannot be the same texture.
   const capture = new RenderTargetTexture(
     'frameGenCapture',
     { width, height },
     scene,
     {
-      // The whole scene renders in here, not just a copy of a finished frame,
-      // so it needs somewhere to depth test against.
-      generateDepthBuffer: true,
-      generateStencilBuffer: true,
+      // With no upscale the whole scene renders in here, not just a copy of a
+      // finished frame, so it needs somewhere to depth test against.
+      generateDepthBuffer: !shared,
+      generateStencilBuffer: !shared,
       generateMipMaps: false,
       type: Constants.TEXTURETYPE_UNSIGNED_BYTE,
       samplingMode: Texture.BILINEAR_SAMPLINGMODE,
@@ -346,9 +370,7 @@ function build(scene: Scene): Runtime | null {
   // The camera draws into this instead of the canvas, post chain and all, so
   // the finished frame is already a texture we can sample. Nothing reaches the
   // screen until `present` puts it there.
-  const camera = scene.activeCamera;
-  if (!camera) return null;
-  camera.outputRenderTarget = capture;
+  if (!shared) camera.outputRenderTarget = capture;
 
   const wrapper = new EffectWrapper({
     engine,
@@ -366,14 +388,16 @@ function build(scene: Scene): Runtime | null {
 
     const effect = wrapper.effect;
 
-    effect.setTexture('frameSampler', capture);
+    effect.setTexture('frameSampler', source ?? capture);
     effect.setTexture('velocitySampler', bound);
     effect.setFloat('warp', amount);
   });
 
   return {
     scene,
+    camera,
     capture,
+    shared,
     renderer: new EffectRenderer(engine),
     wrapper,
     width,
@@ -384,10 +408,11 @@ function build(scene: Scene): Runtime | null {
 export function disposeFrameGen(): void {
   if (!runtime) return;
 
-  // Before the texture goes: leaving the camera pointed at a disposed target
-  // is a black screen with no error.
-  const camera = runtime.scene.activeCamera;
-  if (camera && camera.outputRenderTarget === runtime.capture) {
+  // Before the texture goes: leaving a camera pointed at a disposed target is
+  // a black screen with no error. The camera this was built against, not the
+  // active one, which is how a swap gets here in the first place.
+  const camera = runtime.camera;
+  if (camera.outputRenderTarget === runtime.capture) {
     camera.outputRenderTarget = null;
   }
 
@@ -419,11 +444,33 @@ export function frameGenShouldRender(scene: Scene): boolean {
     return true;
   }
 
-  const engine = scene.getEngine();
-  const width = engine.getRenderWidth();
-  const height = engine.getRenderHeight();
+  // More than one camera on the scene and this cannot be done at all: the
+  // capture holds one camera's output, and painting it over the others leaves
+  // their frames frozen. That is the character screen, which puts the world
+  // camera and the line-up's own camera up together.
+  if ((scene.activeCameras?.length ?? 0) > 1) {
+    if (runtime) disposeFrameGen();
 
-  if (runtime && (runtime.scene !== scene || runtime.width !== width || runtime.height !== height)) {
+    return true;
+  }
+
+  const shared = upscaleFrameTarget();
+  const size = shared?.getSize();
+  const engine = scene.getEngine();
+  const width = size?.width ?? engine.getRenderWidth();
+  const height = size?.height ?? engine.getRenderHeight();
+
+  // The camera and the upscale belong to the rebuild key as much as the size
+  // does: a camera swap leaves the capture attached to a camera nothing draws
+  // through, and the upscale coming or going changes who owns the output.
+  if (
+    runtime &&
+    (runtime.scene !== scene ||
+      runtime.camera !== scene.activeCamera ||
+      runtime.shared !== shared ||
+      runtime.width !== width ||
+      runtime.height !== height)
+  ) {
     disposeFrameGen();
   }
 
@@ -459,7 +506,20 @@ export function frameGenCapture(scene: Scene): void {
   if (!runtime || !frameGenRequested()) return;
 
   counters.capture++;
-  present(scene, 0);
+
+  if (runtime.shared) {
+    // The upscale has already put this frame on the screen. All that is
+    // wanted here is a copy of it to warp from on the next tick, and warping
+    // it back over its own target would destroy the frame it just drew.
+    source = runtime.shared;
+    bound = runtime.capture;
+    amount = 0;
+    runtime.renderer.render(runtime.wrapper, runtime.capture);
+    source = null;
+  } else {
+    present(scene, 0);
+  }
+
   captured = true;
 }
 
@@ -494,6 +554,16 @@ function present(scene: Scene, warp: number): void {
   amount = velocity ? warp : 0;
 
   const engine = scene.getEngine();
+
+  // Under the upscale, a generated frame is warped into the target the
+  // reconstruction reads, and the reconstruction is then run by hand: this
+  // tick drew no scene, so nothing fired the after-render it usually rides on.
+  if (runtime.shared) {
+    runtime.renderer.render(runtime.wrapper, runtime.shared);
+    upscalePresentNow();
+
+    return;
+  }
 
   engine.restoreDefaultFramebuffer();
   engine.setViewport(camera.viewport);
