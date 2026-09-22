@@ -9,6 +9,7 @@ import {
   Quaternion,
   type Viewport,
 } from './exports';
+import { devQuery } from '../../common/devSeams';
 
 export function findInChildren(children: Node[], name: string): Node | null {
   for (const child of children) {
@@ -73,6 +74,36 @@ function createCanvas() {
   return canvas;
 }
 
+/**
+ * The G-buffer pass keys its shader on `BonesPerMesh` even under BONETEXTURE,
+ * where the count is never read, so each bone count linked its own copy of
+ * the program. The materials and shadow passes already leave it out there.
+ */
+function shareGeometryPassAcrossBoneCounts(engine: Engine): void {
+  // `?geoBones=1`: one program per bone count, as before, for the A/B.
+  if (devQuery('geoBones') === '1') return;
+
+  const original = engine.createEffect.bind(engine) as Engine['createEffect'];
+
+  engine.createEffect = ((...args: Parameters<Engine['createEffect']>) => {
+    const [baseName, options] = args;
+
+    if (
+      baseName === 'geometry' &&
+      !Array.isArray(options) &&
+      typeof options.defines === 'string' &&
+      options.defines.includes('#define BONETEXTURE true')
+    ) {
+      options.defines = options.defines.replace(
+        /^#define BonesPerMesh \d+\n?/m,
+        ''
+      );
+    }
+
+    return original(...args);
+  }) as Engine['createEffect'];
+}
+
 export function createEngine(
   baseCanvas?: HTMLCanvasElement,
   enableAntialiasing?: boolean
@@ -106,6 +137,8 @@ export function createEngine(
   if (Engine.audioEngine) {
     Engine.audioEngine.useCustomUnlockedButton = true;
   }
+
+  shareGeometryPassAcrossBoneCounts(engine);
 
   // WebGL: to support 'flat' varying
   const gl = engine._gl;
