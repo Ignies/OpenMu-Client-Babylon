@@ -197,6 +197,7 @@ export const koreanLayer: LanguageLayer = {
     'options.renderScale': '렌더링 배율',
     'options.upscale': '업스케일링',
     'options.upscale.native': '네이티브',
+    'options.frameGeneration': '프레임 생성',
     'options.msaa': 'MSAA',
     'options.texturePack': '모델 텍스처',
     'worlds.tabDownload': '다운로드',

@@ -64,6 +64,11 @@ import { syncFireflyGuard } from '../scenes/fireflyGuard';
 import { syncSunShafts, sunShaftsLive } from '../scenes/sunShafts';
 import { syncUpscale, upscaleScale } from '../scenes/upscale';
 import {
+  motionVectorsLive,
+  syncMotionVectors,
+  velocityFullRes,
+} from '../scenes/motionVectors';
+import {
   createPostChain,
   TONE_MAPPER_NAMES,
   type PostChain,
@@ -333,7 +338,13 @@ export function createLookDirector(
     // resolution" here has always meant the resolution the scene is drawn at.
     const gbufferRatio =
       upscaleScale() *
-      (lightTier ? Math.max(lightTier.ssaoRatio, inkWanted ? 1 : 0) : 1);
+      (lightTier
+        ? Math.max(
+            lightTier.ssaoRatio,
+            inkWanted ? 1 : 0,
+            velocityFullRes() ? 1 : 0
+          )
+        : 1);
 
     const profile: LookProfile = {
       ...target,
@@ -503,6 +514,10 @@ export function createLookDirector(
 
     if (reordered) postChain.moveToEnd();
 
+    // Behind the look on purpose: the velocity view is a measurement, not a
+    // look, and the tone pass would regrade it.
+    syncMotionVectors(scene, camera, shaped, reordered);
+
     postChain.set({
       shaped,
       exposure: postExposure,
@@ -519,6 +534,7 @@ export function createLookDirector(
       ...(roomMask.live ? ['roomMask'] : []),
       ...(sunShaftsLive() ? ['sunShafts'] : []),
       ...postChain.passes(),
+      ...(motionVectorsLive() ? ['velocity'] : []),
     ];
 
     const ev = graded ? profile.ev + evDev + brightness : 0;

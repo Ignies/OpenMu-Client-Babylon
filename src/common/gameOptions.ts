@@ -70,6 +70,13 @@ export type GameOptions = {
    * (`scenes/upscale.ts`). Inert while the scale is native.
    */
   upscale: number;
+  /**
+   * Present a warped frame between drawn ones, so more frames reach the
+   * screen than the scene is drawn (`scenes/frameGen.ts`). Needs the
+   * G-buffer's velocity target, so it runs on the shaped tiers with post
+   * processing on and nowhere else.
+   */
+  frameGeneration: boolean;
   /** Sun rays through whatever occludes the sun; 0 disables the pass. */
   sunShafts: number;
   /** Multiply vignette; 0 disables the pass. */
@@ -502,6 +509,7 @@ const DEFAULTS: GameOptions = {
   sharpness: 2,
   renderScale: 0,
   upscale: 1,
+  frameGeneration: false,
   vignette: 0,
   sunShafts: 3,
   dynamicLights: true,

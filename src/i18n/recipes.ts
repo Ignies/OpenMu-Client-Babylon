@@ -334,6 +334,7 @@ export const EN_TEXT = {
   'options.renderScale': 'Render scale',
   'options.upscale': 'Upscaling',
   'options.upscale.native': 'Native',
+  'options.frameGeneration': 'Frame generation',
   'options.msaa': 'MSAA',
   'options.texturePack': 'Model textures',
   'worlds.tabDownload': 'Download',

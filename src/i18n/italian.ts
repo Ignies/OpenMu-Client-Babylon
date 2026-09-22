@@ -196,6 +196,7 @@ export const italianLayer: LanguageLayer = {
     'options.renderScale': 'Scala di rendering',
     'options.upscale': 'Upscaling',
     'options.upscale.native': 'Nativa',
+    'options.frameGeneration': 'Generazione fotogrammi',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Texture dei modelli',
     'worlds.tabDownload': 'Download',
