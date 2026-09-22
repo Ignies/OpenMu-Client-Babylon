@@ -138,6 +138,7 @@ export {
 } from '@babylonjs/core/Misc/assetsManager';
 export { AssetContainer } from '@babylonjs/core/assetContainer';
 export { VertexBuffer } from '@babylonjs/core/Buffers/buffer';
+export { Geometry } from '@babylonjs/core/Meshes/geometry';
 export { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData';
 
 export { Material } from '@babylonjs/core/Materials/material';

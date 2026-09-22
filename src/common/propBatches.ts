@@ -1,10 +1,12 @@
 import {
   BoundingInfo,
+  Geometry,
   GlowLayer,
   Matrix,
   Mesh,
   TransformNode,
   Vector3,
+  VertexBuffer,
 } from '../libs/babylon/exports';
 import type { Entity, World } from '../ecs/world';
 import { ModelObject, extendByPosedLocalBounds } from './modelObject';
@@ -79,6 +81,9 @@ const CELL_MARGIN = 4;
 
 /** `?cells=0`: every chunk mesh stays on, for the A/B. */
 const CELL_CULLING = devQuery('cells') !== '0';
+
+/** `?chunkClone=copy`: chunk meshes as full clones with copied geometry, for the A/B. */
+const OLD_CHUNK_CLONE = devQuery('chunkClone') === 'copy';
 
 /** Clip samples the culling box is grown over, so a swaying crown stays inside it. */
 const POSE_SAMPLES = 4;
@@ -217,6 +222,61 @@ function typeSways(proto: ModelObject): boolean {
         targeted => !isStillAnimation(targeted.animation)
       )
   );
+}
+
+/** Vertex buffer kinds a mesh's thin instances put on its geometry; never shared. */
+const INSTANCE_KINDS = new Set(['world0', 'world1', 'world2', 'world3', 'muInst']);
+
+/**
+ * A geometry of its own for `mesh`, since thin-instance buffers live on the
+ * geometry, over `src`'s reference-counted GPU buffers and bounds.
+ */
+function shareGeometry(src: Mesh, mesh: Mesh): void {
+  const source = src.geometry;
+  if (!source) return;
+
+  const scene = src.getScene();
+  const engine = scene.getEngine();
+  const totalVertices = source.getTotalVertices();
+  const geometry = new Geometry(Geometry.RandomId(), scene);
+
+  const extend = source.extend;
+  if (extend) {
+    geometry.useBoundingInfoFromGeometry = true;
+    (geometry as unknown as { _boundingInfo: BoundingInfo })._boundingInfo =
+      new BoundingInfo(extend.minimum, extend.maximum);
+  }
+
+  const index = source.getIndexBuffer();
+  if (index) {
+    index.references++;
+    geometry.setIndexBuffer(index, totalVertices, source.getTotalIndices());
+  }
+
+  for (const kind of source.getVerticesDataKinds()) {
+    if (INSTANCE_KINDS.has(kind)) continue;
+
+    const buffer = source.getVertexBuffer(kind);
+    if (!buffer) continue;
+
+    const view = new VertexBuffer(engine, buffer.getWrapperBuffer(), kind, {
+      updatable: buffer.isUpdatable(),
+      postponeInternalCreation: true,
+      stride: buffer.byteStride,
+      instanced: buffer.getIsInstanced(),
+      offset: buffer.byteOffset,
+      size: buffer.getSize(),
+      type: buffer.type,
+      normalized: buffer.normalized,
+      useBytes: true,
+      divisor: buffer.getInstanceDivisor(),
+      takeBufferOwnership: true,
+    });
+
+    geometry.setVerticesBuffer(view, totalVertices);
+  }
+
+  geometry.applyToMesh(mesh);
 }
 
 /** Writes the placement's world matrix into an instance buffer, mirror taken out. */
@@ -681,36 +741,41 @@ class PropBatches {
   }
 
   /**
-   * A mesh sharing the prototype submesh's geometry, skeleton and material;
-   * bounds and metadata are the caller's.
+   * A mesh drawing the prototype submesh's buffers with its skeleton and
+   * material; bounds and metadata are the caller's. Not a clone: its deep
+   * copy and re-upload per chunk were most of a map load's long frames.
    */
   private cloneSubmesh(src: Mesh, name: string): Mesh {
-    const mesh = src.clone(name, this.root, true) as Mesh;
+    if (OLD_CHUNK_CLONE) return this.cloneSubmeshCopying(src, name);
 
-    // Babylon keeps a mesh's thin-instance buffers (`world0..3`, `muInst`)
-    // on its *Geometry*, and the clone shares the prototype's. Left shared,
-    // every chunk of a type drew whichever chunk set its buffers last. One
-    // geometry copy per chunk mesh is the price of per-chunk instances.
-    mesh.makeGeometryUnique();
+    const mesh = new Mesh(name, this.world.scene, this.root);
 
-    // The clone copies the source's own local transform; the instance
-    // matrices already carry it (`meshToNode`), so the mesh itself sits at
-    // the origin of its chunk root.
-    mesh.position.setAll(0);
-    mesh.rotationQuaternion = null;
-    mesh.rotation.setAll(0);
-    // The mirror every model root carries (`ModelObject.load`: scaling
-    // (1, -1, 1)) lives on the chunk mesh, not in the instance matrices:
-    // Babylon flips face culling on a negative world determinant in every
-    // pass (main, cascades, G-buffer, glow), and it reads the *mesh's*
-    // determinant, never an instance's. With the mirror inside the
-    // instances every single-sided prop drew inside out.
+    // The converter's primitives carry no index buffer, and `Mesh.render`
+    // skips an indexed-looking mesh that has none - so before the geometry.
+    mesh.isUnIndexed = src.isUnIndexed;
+    shareGeometry(src, mesh);
+
+    mesh.renderingGroupId = src.renderingGroupId;
+    mesh.layerMask = src.layerMask;
+    mesh.alphaIndex = src.alphaIndex;
+    mesh.useVertexColors = src.useVertexColors;
+    mesh.hasVertexAlpha = src.hasVertexAlpha;
+    mesh.applyFog = src.applyFog;
+    mesh.sideOrientation = src.sideOrientation;
+    mesh.computeBonesUsingShaders = src.computeBonesUsingShaders;
+
+    // The instance matrices carry each placement's transform (`meshToNode`),
+    // so the mesh itself sits at the origin of its chunk root. The mirror
+    // every model root carries (`ModelObject.load`: scaling (1, -1, 1)) lives
+    // on the chunk mesh, not in the instance matrices: Babylon flips face
+    // culling on a negative world determinant in every pass (main, cascades,
+    // G-buffer, glow), and it reads the *mesh's* determinant, never an
+    // instance's. With the mirror inside the instances every single-sided
+    // prop drew inside out.
     mesh.scaling.copyFrom(MIRROR_SCALING);
-    // Now, not later: the clone computed a world matrix under the *source's*
-    // parent (the model root's basis change) and left its bounds dirty, and
-    // Babylon's lazy bounds refresh would read that stale matrix. Then
-    // frozen: a chunk never moves, and the per-frame synchronisation check
-    // Babylon runs on every mesh is the one thing a static mesh can skip.
+    // Computed now and then frozen: a chunk never moves, and the per-frame
+    // synchronisation check Babylon runs on every mesh is the one thing a
+    // static mesh can skip.
     mesh.computeWorldMatrix(true);
     mesh.freezeWorldMatrix();
 
@@ -721,6 +786,29 @@ class PropBatches {
     mesh.alwaysSelectAsActiveMesh = false;
     // Bounds are set by hand in world space and the mesh sits at the origin;
     // a sync would also try to derive them from the collapsed raw box.
+    mesh.doNotSyncBoundingInfo = true;
+
+    return mesh;
+  }
+
+  /** The chunk mesh as it was built before `shareGeometry`, kept for the A/B. */
+  private cloneSubmeshCopying(src: Mesh, name: string): Mesh {
+    const mesh = src.clone(name, this.root, true) as Mesh;
+
+    mesh.makeGeometryUnique();
+
+    mesh.position.setAll(0);
+    mesh.rotationQuaternion = null;
+    mesh.rotation.setAll(0);
+    mesh.scaling.copyFrom(MIRROR_SCALING);
+    mesh.computeWorldMatrix(true);
+    mesh.freezeWorldMatrix();
+
+    mesh.skeleton = src.skeleton;
+    if (mesh.skeleton) mesh.numBoneInfluencers = 1;
+    mesh.isVisible = true;
+    mesh.isPickable = false;
+    mesh.alwaysSelectAsActiveMesh = false;
     mesh.doNotSyncBoundingInfo = true;
 
     return mesh;
