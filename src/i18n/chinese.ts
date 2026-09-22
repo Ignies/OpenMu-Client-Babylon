@@ -196,7 +196,6 @@ export const chineseLayer: LanguageLayer = {
     'options.renderScale': '渲染比例',
     'options.upscale': '超分辨率',
     'options.upscale.native': '原生',
-    'options.frameGeneration': '帧生成',
     'options.msaa': 'MSAA',
     'options.texturePack': '模型贴图',
     'worlds.tabDownload': '下载',

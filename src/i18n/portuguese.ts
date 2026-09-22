@@ -204,7 +204,6 @@ export const portugueseLayer: LanguageLayer = {
     'options.renderScale': 'Escala de renderização',
     'options.upscale': 'Escalonamento',
     'options.upscale.native': 'Nativo',
-    'options.frameGeneration': 'Geração de quadros',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Texturas dos modelos',
     'worlds.tabDownload': 'Download',
