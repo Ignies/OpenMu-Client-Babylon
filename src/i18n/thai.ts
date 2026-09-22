@@ -196,6 +196,8 @@ export const thaiLayer: LanguageLayer = {
     'options.lightingQuality': 'แสง',
     'options.materialQuality': 'วัสดุ',
     'options.renderScale': 'สเกลการเรนเดอร์',
+    'options.upscale': 'การขยายภาพ',
+    'options.upscale.native': 'ความละเอียดเดิม',
     'options.frameGeneration': 'การสร้างเฟรม',
     'options.msaa': 'MSAA',
     'options.texturePack': 'พื้นผิวโมเดล',
@@ -2271,7 +2273,7 @@ export const thaiLayer: LanguageLayer = {
     'sign.pub': 'โรงเตี๊ยม',
     'sign.shop': 'ร้านค้า',
     'sign.guardhouse': 'ป้อมยาม',
-    'sign.library': 'ห้องสมุด',
+    'sign.church': 'โบสถ์',
     'sign.guild': 'กิลด์',
   },
 };

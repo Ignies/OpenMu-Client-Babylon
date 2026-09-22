@@ -194,6 +194,8 @@ export const romanianLayer: LanguageLayer = {
     'options.lightingQuality': 'Iluminare',
     'options.materialQuality': 'Materiale',
     'options.renderScale': 'Scalare randare',
+    'options.upscale': 'Scalare imagine',
+    'options.upscale.native': 'Nativ',
     'options.frameGeneration': 'Generare cadre',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Texturi de model',
@@ -2311,7 +2313,7 @@ export const romanianLayer: LanguageLayer = {
     'sign.pub': 'Tavernă',
     'sign.shop': 'Prăvălie',
     'sign.guardhouse': 'Corp de gardă',
-    'sign.library': 'Bibliotecă',
+    'sign.church': 'Biserică',
     'sign.guild': 'Breaslă',
   },
 };

@@ -196,6 +196,8 @@ export const japaneseLayer: LanguageLayer = {
     'options.lightingQuality': 'ライティング',
     'options.materialQuality': 'マテリアル',
     'options.renderScale': 'レンダリング解像度',
+    'options.upscale': 'アップスケール',
+    'options.upscale.native': 'ネイティブ',
     'options.frameGeneration': 'フレーム生成',
     'options.msaa': 'MSAA',
     'options.texturePack': 'モデルテクスチャ',
@@ -2260,7 +2262,7 @@ export const japaneseLayer: LanguageLayer = {
     'sign.pub': '酒場',
     'sign.shop': '商店',
     'sign.guardhouse': '衛兵所',
-    'sign.library': '書庫',
+    'sign.church': '教会',
     'sign.guild': 'ギルド',
   },
 };

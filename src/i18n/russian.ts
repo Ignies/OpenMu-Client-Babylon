@@ -193,6 +193,8 @@ export const russianLayer: LanguageLayer = {
     'options.lightingQuality': 'Освещение',
     'options.materialQuality': 'Материалы',
     'options.renderScale': 'Масштаб рендеринга',
+    'options.upscale': 'Масштабирование',
+    'options.upscale.native': 'Исходное',
     'options.frameGeneration': 'Генерация кадров',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Текстуры моделей',
@@ -2295,7 +2297,7 @@ export const russianLayer: LanguageLayer = {
     'sign.pub': 'Таверна',
     'sign.shop': 'Лавка',
     'sign.guardhouse': 'Караульня',
-    'sign.library': 'Библиотека',
+    'sign.church': 'Церковь',
     'sign.guild': 'Гильдия',
   },
 };

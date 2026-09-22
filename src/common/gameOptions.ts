@@ -64,11 +64,17 @@ export type GameOptions = {
    */
   renderScale: number;
   /**
-   * Present a warped frame between drawn ones when the machine cannot keep
-   * up with its own display (`scenes/frameGen.ts`). Needs the G-buffer's
-   * velocity target, so it runs on the shaped tiers with post processing on
-   * and nowhere else, and it never alternates while the frame rate is
-   * already at the refresh rate.
+   * How a reduced `renderScale` is presented: 0 hands the small drawing
+   * buffer to the browser and lets it stretch the canvas, 1 draws the world
+   * small and reconstructs it at the window's own resolution with FSR
+   * (`scenes/upscale.ts`). Inert while the scale is native.
+   */
+  upscale: number;
+  /**
+   * Present a warped frame between drawn ones, so more frames reach the
+   * screen than the scene is drawn (`scenes/frameGen.ts`). Needs the
+   * G-buffer's velocity target, so it runs on the shaped tiers with post
+   * processing on and nowhere else.
    */
   frameGeneration: boolean;
   /** Sun rays through whatever occludes the sun; 0 disables the pass. */
@@ -471,6 +477,7 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   chromatic: [0, 9],
   sharpness: [0, 9],
   renderScale: [0, RENDER_SCALE_STEP_MAX],
+  upscale: [0, 1],
   vignette: [0, 9],
   sunShafts: [0, 9],
   lootZen: [0, 9],
@@ -501,6 +508,7 @@ const DEFAULTS: GameOptions = {
   chromatic: 0,
   sharpness: 2,
   renderScale: 0,
+  upscale: 1,
   frameGeneration: false,
   vignette: 0,
   sunShafts: 3,

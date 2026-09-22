@@ -202,6 +202,8 @@ export const portugueseLayer: LanguageLayer = {
     'options.lightingQuality': 'Iluminação',
     'options.materialQuality': 'Materiais',
     'options.renderScale': 'Escala de renderização',
+    'options.upscale': 'Escalonamento',
+    'options.upscale.native': 'Nativo',
     'options.frameGeneration': 'Geração de quadros',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Texturas dos modelos',
@@ -2313,7 +2315,7 @@ export const portugueseLayer: LanguageLayer = {
     'sign.pub': 'Taberna',
     'sign.shop': 'Loja',
     'sign.guardhouse': 'Casa da Guarda',
-    'sign.library': 'Biblioteca',
+    'sign.church': 'Igreja',
     'sign.guild': 'Guilda',
   },
 };

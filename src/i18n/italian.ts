@@ -194,6 +194,8 @@ export const italianLayer: LanguageLayer = {
     'options.lightingQuality': 'Illuminazione',
     'options.materialQuality': 'Materiali',
     'options.renderScale': 'Scala di rendering',
+    'options.upscale': 'Upscaling',
+    'options.upscale.native': 'Nativa',
     'options.frameGeneration': 'Generazione fotogrammi',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Texture dei modelli',
@@ -2317,7 +2319,7 @@ export const italianLayer: LanguageLayer = {
     'sign.pub': 'Taverna',
     'sign.shop': 'Negozio',
     'sign.guardhouse': 'Corpo di guardia',
-    'sign.library': 'Biblioteca',
+    'sign.church': 'Chiesa',
     'sign.guild': 'Gilda',
   },
 };

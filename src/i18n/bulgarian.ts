@@ -194,6 +194,8 @@ export const bulgarianLayer: LanguageLayer = {
     'options.lightingQuality': 'Осветление',
     'options.materialQuality': 'Материали',
     'options.renderScale': 'Мащаб на рендиране',
+    'options.upscale': 'Мащабиране',
+    'options.upscale.native': 'Оригинално',
     'options.frameGeneration': 'Генериране на кадри',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Текстури на моделите',
@@ -2300,7 +2302,7 @@ export const bulgarianLayer: LanguageLayer = {
     'sign.pub': 'Кръчма',
     'sign.shop': 'Магазин',
     'sign.guardhouse': 'Стражница',
-    'sign.library': 'Библиотека',
+    'sign.church': 'Църква',
     'sign.guild': 'Гилдия',
   },
 };

@@ -13,6 +13,7 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { driveRenderList } from './renderList';
+import { sceneRenderSize } from './upscale';
 
 /**
  * The effect mask (effects_composite ARCHITECTURE §3): where the additive
@@ -85,9 +86,13 @@ export function effectMask(): RenderTargetTexture | null {
   return runtime?.mask ?? null;
 }
 
+/**
+ * The size of the frame, which is the drawing buffer's only while the upscale
+ * is off: the mask borrows the depth of the target the scene is drawn into,
+ * and a borrowed depth buffer of the wrong size is an incomplete framebuffer.
+ */
 function canvasSize(scene: Scene): { width: number; height: number } {
-  const engine = scene.getEngine();
-  return { width: engine.getRenderWidth(true), height: engine.getRenderHeight(true) };
+  return sceneRenderSize(scene.getEngine());
 }
 
 /** Forget the lender's depth without deleting it: the mask never owned it. */
@@ -219,6 +224,21 @@ export function disposeEffectMask(): void {
 export function syncEffectMask(scene: Scene, camera: ArcRotateCamera, want: boolean): void {
   if (runtime && (!want || runtime.scene !== scene || runtime.camera !== camera)) {
     disposeEffectMask();
+  }
+
+  // The render-scale slider resizes the scene's target without resizing the
+  // drawing buffer while the upscale is on, so the engine's resize is not the
+  // only thing that can leave the borrowed depth the wrong size.
+  if (runtime) {
+    const size = canvasSize(scene);
+
+    if (
+      runtime.mask.getSize().width !== size.width ||
+      runtime.mask.getSize().height !== size.height
+    ) {
+      dropBorrow(runtime);
+      runtime.mask.resize(size);
+    }
   }
 
   if (!want || runtime) return;

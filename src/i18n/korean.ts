@@ -195,6 +195,8 @@ export const koreanLayer: LanguageLayer = {
     'options.lightingQuality': '조명',
     'options.materialQuality': '재질',
     'options.renderScale': '렌더링 배율',
+    'options.upscale': '업스케일링',
+    'options.upscale.native': '네이티브',
     'options.frameGeneration': '프레임 생성',
     'options.msaa': 'MSAA',
     'options.texturePack': '모델 텍스처',
@@ -2258,7 +2260,7 @@ export const koreanLayer: LanguageLayer = {
     'sign.pub': '주점',
     'sign.shop': '상점',
     'sign.guardhouse': '경비소',
-    'sign.library': '서재',
+    'sign.church': '교회',
     'sign.guild': '길드',
   },
 };

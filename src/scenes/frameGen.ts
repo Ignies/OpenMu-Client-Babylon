@@ -26,15 +26,15 @@ import { GameOptions } from '../common/gameOptions';
  * Every reason a generated frame cannot be built falls back to rendering a real
  * one, so the worst failure is the frame rate we already have.
  *
- * Only while the machine is behind its own display, whatever the option says:
- * a generated frame fills a gap the browser was going to leave empty, and
- * above the refresh rate there is no gap to fill.
+ * On when the option is on, on every machine. Whether it *helps* depends on
+ * what is holding the frame up, which this measures and reports but does not
+ * act on (`frameGenGenerating`, and performance.md for the three machines).
  *
  * It needs the G-buffer's velocity target, which the ambient occlusion builds,
  * so it runs on the shaped tiers with post processing on and nowhere else. The
  * option row is dimmed on Classic for that reason.
  *
- * Seam: `?framegen=0|1|nohold|always` overrides the option.
+ * Seam: `?framegen=0|1|nohold` overrides the option.
  */
 
 const SHADER = 'frameGenWarp';
@@ -48,14 +48,12 @@ const WARP = 0.5;
 
 /**
  * `?framegen=` overrides the option for an A/B: `0` off, `1` on, `nohold`
- * keeps the simulation running on a generated tick, `always` ignores the gate
- * below and alternates whatever the frame rate is.
+ * keeps the simulation running on a generated tick.
  */
 type Seam = {
   readonly set: boolean;
   readonly on: boolean;
   readonly hold: boolean;
-  readonly always: boolean;
 };
 
 let seam: Seam | null = null;
@@ -63,16 +61,12 @@ let seam: Seam | null = null;
 function read(): Seam {
   const raw = devQuery('framegen');
 
-  if (!raw) return { set: false, on: false, hold: true, always: false };
-
-  const tokens = raw.split(',');
-  const on = raw !== '0' && raw !== 'off';
+  if (!raw) return { set: false, on: false, hold: true };
 
   return {
     set: true,
-    on,
-    hold: !tokens.includes('nohold'),
-    always: tokens.includes('always'),
+    on: raw !== '0' && raw !== 'off',
+    hold: !raw.split(',').includes('nohold'),
   };
 }
 
@@ -100,24 +94,19 @@ export function frameGenHoldsLogic(): boolean {
 }
 
 /**
- * How far over a display frame the interval has to sit before generating one
- * is worth it, and how long it has to stay there.
+ * The verdict this keeps on whether the machine it is running on gains from
+ * generating frames. Reported - by the dev global and the perf overlay - and
+ * never acted on; `frameGenGenerating` says why.
  *
- * A generated frame can only fill a gap the machine was going to leave empty
- * anyway. Above the refresh rate there is no gap: alternating there would
- * present the same number of frames as before and simulate half as often,
- * which is a downgrade dressed as a feature.
+ * How far over a display frame the interval has to sit, and how long it has to
+ * stay there. The margins are wide and both sit *above* the target, because
+ * generating is not free and its cost lands in the same number: the velocity
+ * target and the frame copy put about 5 ms on a real tick, so a machine that
+ * measures 15 ms with the feature off measures 20 with it on, and narrow
+ * margins would read that back as proof of its own necessity.
  *
- * The margins are wide, and both of them sit *above* the target, because
- * generating is not free and the cost it adds lands in the same number this
- * gate reads: the velocity target and the frame copy put about 5 ms on a real
- * tick, so a machine measured at 15 ms with the feature off measures 20 with
- * it on. Narrow margins latch on that - it engages once, its own overhead
- * keeps the average above the release line, and it never lets go. Engaging at
- * 45 fps and releasing at 50 leaves that overhead inside the band.
- *
- * A tick over 100 ms is a map load or a stall, not the frame rate, and it is
- * left out rather than allowed to latch the gate for the next thirty frames.
+ * A tick over 100 ms is a map load or a stall, not the frame rate, and is left
+ * out rather than allowed to hold the verdict for the next thirty frames.
  */
 const COST_WINDOW = 30;
 const BEHIND = 1.3;
@@ -128,8 +117,8 @@ const OUTLIER_MS = 100;
  * How much of a real frame the main thread has to be, for a generated one to
  * be worth drawing.
  *
- * This is the condition that decides whether the feature helps or hurts, and
- * it took two machines to find it. A generated frame is cheap on the CPU and
+ * This is the condition that separates the machines the feature helps from
+ * the ones it hurts, and it took two machines to find it. A generated frame is cheap on the CPU and
  * not free on the GPU: it is a full-screen pass, and it needs the velocity
  * target, which is another attachment on the G-buffer and a matrix clone per
  * mesh per frame.
@@ -168,7 +157,7 @@ let lastRealAt = 0;
  * which is the conservative direction to be wrong in.
  */
 const TARGET_MS = 1000 / 60;
-let behind = false;
+let favourable = false;
 /** What the render loop decided on its last tick, for the dev global. */
 let lastDecision = false;
 
@@ -193,22 +182,27 @@ export function frameGenNoteFrame(realCostMs: number): void {
 
   if (costFilled < COST_WINDOW) return;
 
-  // Two conditions, and both have to hold. The frame has to be one the
-  // display would have shown twice, and the main thread has to be what is
-  // holding it up - see CPU_SHARE. Hysteresis on the first, because one slow
-  // frame is not a slow machine and one fast one is not a machine that has
-  // caught up.
-  const slow = behind
+  // Two conditions, and both have to hold for this machine to be one that
+  // gains: the frame has to be one the display would have shown twice, and
+  // the main thread has to be what is holding it up - see CPU_SHARE.
+  // Hysteresis on the first, because one slow frame is not a slow machine and
+  // one fast one is not a machine that has caught up.
+  //
+  // Reported, not obeyed. It used to decide, and the reasons it no longer
+  // does are above `frameGenGenerating`.
+  const slow = favourable
     ? intervalMs > TARGET_MS * CAUGHT_UP
     : intervalMs > TARGET_MS * BEHIND;
 
-  behind = slow && costMs >= intervalMs * CPU_SHARE;
+  favourable = slow && costMs >= intervalMs * CPU_SHARE;
 }
 
 /** Whether the alternation would run right now, and why, for the overlay. */
 export function frameGenState(): {
   on: boolean;
   generating: boolean;
+  /** Whether this machine measures as one that gains from it. */
+  favourable: boolean;
   costMs: number;
   intervalMs: number;
   targetMs: number;
@@ -216,45 +210,43 @@ export function frameGenState(): {
   return {
     on: frameGenRequested(),
     generating: frameGenGenerating(),
+    favourable,
     costMs,
     intervalMs,
     targetMs: TARGET_MS,
   };
 }
 
-function frameGenGenerating(): boolean {
-  if (!frameGenRequested()) return false;
-
-  return seamRead().always || behind;
-}
-
 /**
- * How long the velocity target stays on after the last frame that needed it.
+ * Whether to alternate right now. The option is the answer: ticking the box
+ * turns frame generation on, on every machine, because the point of shipping
+ * it behind a box is that people can try it and say what it does for them.
  *
- * The target is the expensive half of this feature - 2.34 ms of GPU a frame on
- * its own (performance.md) - and a machine that never falls behind should not
- * be paying it for a generated frame it never gets. But the setter disposes
- * the whole G-buffer and builds a new one, so following the gate frame by
- * frame would put a rebuild in the middle of the fight that tripped it. It
- * follows with a long tail instead: at most one rebuild a minute even for a
- * frame rate sitting exactly on the line.
+ * It was gated at first - on the frame not fitting in a display frame *and*
+ * the main thread being what held it up - and the gate was right about the
+ * facts (see `frameGenBoundState`, and performance.md for the three machines
+ * it was measured on). It was wrong as a product: a box that quietly decides
+ * against you cannot be tested, and the one machine where it refused is the
+ * one whose owner most wants to see for themselves.
+ *
+ * The measurement stays live and the dev global reports it, so a tester can
+ * tell whether their machine is the case this helps or the case it does not.
  */
-const VELOCITY_TAIL_MS = 30000;
-let lastBehindAt = -Infinity;
+function frameGenGenerating(): boolean {
+  return frameGenRequested();
+}
 
 /**
  * Whether the G-buffer should carry velocity. Asked by `motionVectors.ts`,
  * which owns the target; this only says whether anything wants it.
+ *
+ * The option, not the frame rate: the setter disposes the whole G-buffer and
+ * builds a new one, so this is not a thing to switch on and off underneath a
+ * player who is standing in a fight. It goes on when the box is ticked and off
+ * when it is unticked, and nowhere else.
  */
 export function frameGenWantsVelocity(): boolean {
-  if (!frameGenRequested()) return false;
-  if (seamRead().always) return true;
-
-  const now = performance.now();
-
-  if (behind) lastBehindAt = now;
-
-  return now - lastBehindAt < VELOCITY_TAIL_MS;
+  return frameGenRequested();
 }
 
 type Runtime = {

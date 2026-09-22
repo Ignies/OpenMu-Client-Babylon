@@ -193,6 +193,8 @@ export const germanLayer: LanguageLayer = {
     'options.lightingQuality': 'Beleuchtung',
     'options.materialQuality': 'Materialien',
     'options.renderScale': 'Renderskalierung',
+    'options.upscale': 'Hochskalierung',
+    'options.upscale.native': 'Nativ',
     'options.frameGeneration': 'Bildgenerierung',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Modelltexturen',
@@ -2322,7 +2324,7 @@ export const germanLayer: LanguageLayer = {
     'sign.pub': 'Taverne',
     'sign.shop': 'Laden',
     'sign.guardhouse': 'Wachhaus',
-    'sign.library': 'Bibliothek',
+    'sign.church': 'Kirche',
     'sign.guild': 'Gilde',
   },
 };

@@ -195,6 +195,8 @@ export const frenchLayer: LanguageLayer = {
     'options.lightingQuality': 'Éclairage',
     'options.materialQuality': 'Matériaux',
     'options.renderScale': 'Échelle de rendu',
+    'options.upscale': "Mise à l'échelle",
+    'options.upscale.native': 'Native',
     'options.frameGeneration': "Génération d'images",
     'options.msaa': 'MSAA',
     'options.texturePack': 'Textures des modèles',
@@ -2320,7 +2322,7 @@ export const frenchLayer: LanguageLayer = {
     'sign.pub': 'Taverne',
     'sign.shop': 'Boutique',
     'sign.guardhouse': 'Corps de garde',
-    'sign.library': 'Bibliothèque',
+    'sign.church': 'Église',
     'sign.guild': 'Guilde',
   },
 };

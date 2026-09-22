@@ -16,12 +16,12 @@ Format version: **1**
 | 0 | 1 | Format version. Anything else means a different table. |
 | 1 | 1 | Number of flag bytes that follow (currently 7). |
 | 2 | 7 | The on/off settings, one bit each, first in bit 0 of the first byte. |
-| 9 | 1 | Number of value bytes that follow (currently 51). |
-| 10 | 51 | The numeric settings, one byte each, each stored as value + 128. |
-| 61 | 2 | Language, two ASCII letters (`65 73` is `es`). |
-| 63 | 2 | Texture pack digest, `0000` when the original textures are in use. |
+| 9 | 1 | Number of value bytes that follow (currently 52). |
+| 10 | 52 | The numeric settings, one byte each, each stored as value + 128. |
+| 62 | 2 | Language, two ASCII letters (`65 73` is `es`). |
+| 64 | 2 | Texture pack digest, `0000` when the original textures are in use. |
 
-Total: **65 bytes**, 130 hex characters.
+Total: **66 bytes**, 132 hex characters.
 
 ## On/off settings
 
@@ -138,8 +138,9 @@ Each is one byte; subtract 128 to get the value. Index 0 is the first byte after
 | 46 | `toneMapper` |
 | 47 | `uiScale` |
 | 48 | `uiVolume` |
-| 49 | `vignette` |
-| 50 | `volume` |
+| 49 | `upscale` |
+| 50 | `vignette` |
+| 51 | `volume` |
 
 ## Worked example
 

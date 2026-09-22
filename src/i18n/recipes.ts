@@ -332,6 +332,8 @@ export const EN_TEXT = {
   'options.lightingQuality': 'Lighting',
   'options.materialQuality': 'Materials',
   'options.renderScale': 'Render scale',
+  'options.upscale': 'Upscaling',
+  'options.upscale.native': 'Native',
   'options.frameGeneration': 'Frame generation',
   'options.msaa': 'MSAA',
   'options.texturePack': 'Model textures',
@@ -2373,7 +2375,7 @@ export const EN_TEXT = {
   'sign.pub': 'Pub',
   'sign.shop': 'Shop',
   'sign.guardhouse': 'Guardhouse',
-  'sign.library': 'Library',
+  'sign.church': 'Church',
   'sign.guild': 'Guild',
 } as const;
 

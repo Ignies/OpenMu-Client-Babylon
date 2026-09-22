@@ -194,6 +194,8 @@ export const chineseLayer: LanguageLayer = {
     'options.lightingQuality': '光照',
     'options.materialQuality': '材质',
     'options.renderScale': '渲染比例',
+    'options.upscale': '超分辨率',
+    'options.upscale.native': '原生',
     'options.frameGeneration': '帧生成',
     'options.msaa': 'MSAA',
     'options.texturePack': '模型贴图',
@@ -2251,7 +2253,7 @@ export const chineseLayer: LanguageLayer = {
     'sign.pub': '酒馆',
     'sign.shop': '商店',
     'sign.guardhouse': '卫兵所',
-    'sign.library': '书房',
+    'sign.church': '教堂',
     'sign.guild': '公会',
   },
 };
