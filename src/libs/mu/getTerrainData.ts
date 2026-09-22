@@ -6,7 +6,7 @@ import {
   Vector3,
 } from '../babylon/exports';
 import type { IVector3Like, Scene } from '../babylon/exports';
-import { CreateGroundFromHeightMap } from './customGroundMesh';
+import { createGroundMesh } from './customGroundMesh';
 import { createTileTextureArray } from './tileTextureArray';
 import { updateTerrainHeightMap } from './terrainHeightMap';
 import { createTerrainMaterial } from './terrainMaterial';
@@ -31,6 +31,7 @@ import { unpackTerrainLight } from './unpackTerrainLight';
 import {
   parseTerrainBulk,
   parseTerrainLightOffThread,
+  buildGroundOffThread,
 } from './terrainParseClient';
 import { getTilesList } from '../../common/terrain/getTilesList';
 import {
@@ -131,12 +132,23 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
   try {
     // The bake's border vignette comes off on the tiers that can frame it
     // (`common/terrain/borderVignette.ts`); Classic keeps the original's fade.
-    const terrainLight = unpackTerrainLight(
-      await parseTerrainLightOffThread(
-        lightTextureData.BufferFloat,
-        bulk.height,
-        lightingTier() !== null
-      )
+    const lightPacked = await parseTerrainLightOffThread(
+      lightTextureData.BufferFloat,
+      bulk.height,
+      lightingTier() !== null
+    );
+    const terrainLight = unpackTerrainLight(lightPacked);
+
+    // The ground's vertex arrays, built in the worker while the tiles pack
+    // and the water frames load; `getTerrainData` only uploads them.
+    const ground = buildGroundOffThread(
+      bulk.height,
+      bulk.attributes,
+      bulk.layer1,
+      bulk.layer2,
+      bulk.alpha,
+      lightPacked,
+      TERRAIN_AMBIENT
     );
 
     // Packs the same tiles into one sampler2DArray so the splat shader does two
@@ -176,6 +188,7 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
       waterSpec,
       waterFrames,
       grassCards,
+      ground: await ground,
     };
   } catch (error) {
     for (const texture of terrainTextures) texture.dispose();
@@ -204,6 +217,7 @@ export async function getTerrainData(
     waterSpec,
     waterFrames,
     grassCards,
+    ground,
   } = prepared ?? (await prepareTerrain(scene, map));
 
   const terrainHeight = bulk.height;
@@ -217,17 +231,7 @@ export async function getTerrainData(
 
   updateTerrainHeightMap(scene, terrainHeight);
 
-  const terrain = CreateGroundFromHeightMap(
-    '_world_' + worldNum,
-    scene,
-    terrainHeight,
-    terrainMapping.layer1,
-    terrainMapping.layer2,
-    terrainMapping.alpha,
-    terrainLight,
-    terrainAttrs,
-    Vector3.One().setAll(TERRAIN_AMBIENT)
-  );
+  const terrain = createGroundMesh('_world_' + worldNum, scene, ground);
   terrain.isPickable = true;
 
   // Click-to-move, the cursor sampler and the right-click ground pick all
