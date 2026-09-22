@@ -13,6 +13,11 @@ import { parseTerrainHeight } from '../../common/terrain/parseTerrainHeight';
 import { parseTerrainMapping } from '../../common/terrain/parseTerrainMapping';
 import { parseTerrainObjects } from '../../common/terrain/parseTerrainObjects';
 import { parseTerrainLightPacked } from '../../common/terrain/parseTerrainLight';
+import {
+  buildGroundArrays,
+  type GroundArrays,
+} from '../../common/terrain/groundArrays';
+import { packLayers, type TilePixels } from '../../common/terrain/tilePack';
 import type { ENUM_WORLD } from '../../common/types';
 import type {
   TerrainWorkerBulkResult,
@@ -170,5 +175,61 @@ export async function parseTerrainLightOffThread(
   } catch (error) {
     console.warn('Terrain light parse fell back to the main thread:', error);
     return parseTerrainLightPacked(lightBuffer, heightData, liftBorder);
+  }
+}
+
+/** The ground mesh's vertex arrays; inputs are cloned, the arrays transferred back. */
+export async function buildGroundOffThread(
+  height: Float32Array,
+  attributes: Uint16Array,
+  layer1: Uint8Array,
+  layer2: Uint8Array,
+  alpha: Uint8Array,
+  lightPacked: Float32Array,
+  ambient: number
+): Promise<GroundArrays> {
+  try {
+    return await post<GroundArrays>({
+      id: nextId++,
+      kind: 'ground',
+      height,
+      attributes,
+      layer1,
+      layer2,
+      alpha,
+      lightPacked,
+      ambient,
+    });
+  } catch (error) {
+    console.warn('Ground build fell back to the main thread:', error);
+    return buildGroundArrays(
+      height,
+      attributes,
+      layer1,
+      layer2,
+      alpha,
+      lightPacked,
+      ambient
+    );
+  }
+}
+
+/** The tiles resampled into the texture array's layers; tiles cloned, layers transferred. */
+export async function packTilesOffThread(
+  tiles: TilePixels[],
+  size: number,
+  linear: boolean
+): Promise<Uint8Array> {
+  try {
+    return await post<Uint8Array>({
+      id: nextId++,
+      kind: 'pack',
+      tiles,
+      size,
+      linear,
+    });
+  } catch (error) {
+    console.warn('Tile packing fell back to the main thread:', error);
+    return packLayers(tiles, size, linear);
   }
 }

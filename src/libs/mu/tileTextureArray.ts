@@ -6,6 +6,8 @@ import {
 } from '../babylon/exports';
 import { onGameOptionsChanged } from '../../common/gameOptions';
 import { textureFiltering } from '../../common/materialQuality';
+import { packLayers, type TilePixels } from '../../common/terrain/tilePack';
+import { packTilesOffThread } from './terrainParseClient';
 
 /**
  * Packs a map's tile textures into one `sampler2DArray`.
@@ -72,13 +74,6 @@ export type TileTextureArray = {
   readonly layers: number;
 };
 
-/** Decoded RGBA of one tile, top row first. */
-type TilePixels = {
-  data: Uint8ClampedArray;
-  width: number;
-  height: number;
-};
-
 /**
  * Decodes a JPEG to top-down RGBA. Deliberately not `Texture.readPixels()`:
  * that reads back from the GPU bottom-up, and a silently vertically flipped
@@ -102,88 +97,6 @@ async function decodeJpeg(bytes: Uint8Array): Promise<TilePixels> {
   bitmap.close();
 
   return { data: image.data, width, height };
-}
-
-/** Nearest-neighbour resample of RGBA into a `size × size` block of `out`. */
-function blitNearest(
-  tile: TilePixels,
-  out: Uint8Array,
-  layer: number,
-  size: number
-): void {
-  const base = layer * size * size * 4;
-
-  for (let y = 0; y < size; y++) {
-    const sy = ((y * tile.height) / size) | 0;
-    const sourceRow = sy * tile.width * 4;
-    const targetRow = base + y * size * 4;
-
-    for (let x = 0; x < size; x++) {
-      const sx = ((x * tile.width) / size) | 0;
-      const s = sourceRow + sx * 4;
-      const t = targetRow + x * 4;
-
-      out[t] = tile.data[s];
-      out[t + 1] = tile.data[s + 1];
-      out[t + 2] = tile.data[s + 2];
-      out[t + 3] = tile.data[s + 3];
-    }
-  }
-}
-
-/**
- * Bilinear resample of RGBA into a `size × size` block of `out`, sampling at
- * texel centres and wrapping at the edges (the tiles repeat). A tile already
- * at `size` copies through unchanged.
- */
-function blitLinear(
-  tile: TilePixels,
-  out: Uint8Array,
-  layer: number,
-  size: number
-): void {
-  const base = layer * size * size * 4;
-  const { width, height, data } = tile;
-
-  for (let y = 0; y < size; y++) {
-    const sy = ((y + 0.5) * height) / size - 0.5;
-    const y0 = Math.floor(sy);
-    const fy = sy - y0;
-    const row0 = (((y0 % height) + height) % height) * width * 4;
-    const row1 = ((((y0 + 1) % height) + height) % height) * width * 4;
-    const targetRow = base + y * size * 4;
-
-    for (let x = 0; x < size; x++) {
-      const sx = ((x + 0.5) * width) / size - 0.5;
-      const x0 = Math.floor(sx);
-      const fx = sx - x0;
-      const c0 = (((x0 % width) + width) % width) * 4;
-      const c1 = ((((x0 + 1) % width) + width) % width) * 4;
-      const t = targetRow + x * 4;
-
-      for (let c = 0; c < 4; c++) {
-        const top = data[row0 + c0 + c] * (1 - fx) + data[row0 + c1 + c] * fx;
-        const bottom =
-          data[row1 + c0 + c] * (1 - fx) + data[row1 + c1 + c] * fx;
-        out[t + c] = Math.round(top * (1 - fy) + bottom * fy);
-      }
-    }
-  }
-}
-
-function packLayers(
-  tiles: readonly TilePixels[],
-  size: number,
-  linear: boolean
-): Uint8Array {
-  const data = new Uint8Array(size * size * 4 * tiles.length);
-  const blit = linear ? blitLinear : blitNearest;
-
-  for (let layer = 0; layer < tiles.length; layer++) {
-    blit(tiles[layer], data, layer, size);
-  }
-
-  return data;
 }
 
 /**
@@ -222,7 +135,9 @@ export async function createTileTextureArray(
 
   const { sampling, anisotropy } = textureFiltering();
   const linear = sampling !== Texture.NEAREST_NEAREST;
-  const data = packLayers(tiles, size, linear);
+  // Resampled in the terrain worker: on the main thread this was 200-300 ms
+  // of a map load, in the frames that already carry the rest of it.
+  const data = await packTilesOffThread(tiles, size, linear);
 
   const texture = new RawTexture2DArray(
     data,

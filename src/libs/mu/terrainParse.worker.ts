@@ -16,6 +16,10 @@
  *             frame on every map change.
  *   'light' - the normal/luminosity pass, once the main thread has decoded
  *             TerrainLight.OZJ into floats.
+ *   'ground' - the ground mesh's vertex arrays from the parsed terrain
+ *             (`common/terrain/groundArrays`); the main thread uploads them.
+ *   'pack'  - the tile textures resampled into the layers of the
+ *             sampler2DArray (`common/terrain/tilePack`).
  */
 
 import { parseTerrainAttribute } from '../../common/terrain/parseTerrainAttribute';
@@ -24,6 +28,11 @@ import { parseTerrainMapping } from '../../common/terrain/parseTerrainMapping';
 import { parseTerrainObjects } from '../../common/terrain/parseTerrainObjects';
 import { parseTerrainLightPacked } from '../../common/terrain/parseTerrainLight';
 import type { ENUM_WORLD } from '../../common/types';
+import {
+  buildGroundArrays,
+  type GroundArrays,
+} from '../../common/terrain/groundArrays';
+import { packLayers, type TilePixels } from '../../common/terrain/tilePack';
 
 export type TerrainWorkerRequest =
   | {
@@ -41,6 +50,24 @@ export type TerrainWorkerRequest =
       lightBuffer: Float32Array;
       heightData: Float32Array;
       liftBorder: boolean;
+    }
+  | {
+      id: number;
+      kind: 'ground';
+      height: Float32Array;
+      attributes: Uint16Array;
+      layer1: Uint8Array;
+      layer2: Uint8Array;
+      alpha: Uint8Array;
+      lightPacked: Float32Array;
+      ambient: number;
+    }
+  | {
+      id: number;
+      kind: 'pack';
+      tiles: TilePixels[];
+      size: number;
+      linear: boolean;
     };
 
 export type TerrainWorkerBulkResult = {
@@ -55,6 +82,8 @@ export type TerrainWorkerBulkResult = {
 export type TerrainWorkerResponse =
   | { id: number; ok: true; kind: 'bulk'; result: TerrainWorkerBulkResult }
   | { id: number; ok: true; kind: 'light'; result: Float32Array }
+  | { id: number; ok: true; kind: 'ground'; result: GroundArrays }
+  | { id: number; ok: true; kind: 'pack'; result: Uint8Array }
   | { id: number; ok: false; error: string };
 
 const ctx = self as unknown as DedicatedWorkerGlobalScope;
@@ -88,6 +117,38 @@ ctx.onmessage = async (ev: MessageEvent<TerrainWorkerRequest>) => {
         mapping.layer1.buffer,
         mapping.layer2.buffer,
         mapping.alpha.buffer,
+      ]);
+      return;
+    }
+
+    if (req.kind === 'ground') {
+      const ground = buildGroundArrays(
+        req.height,
+        req.attributes,
+        req.layer1,
+        req.layer2,
+        req.alpha,
+        req.lightPacked,
+        req.ambient
+      );
+
+      ctx.postMessage({ id: req.id, ok: true, kind: 'ground', result: ground }, [
+        ground.positions.buffer,
+        ground.normals.buffer,
+        ground.uvs.buffer,
+        ground.textures.buffer,
+        ground.colors.buffer,
+        ground.alphaColors.buffer,
+        ground.indices.buffer,
+      ]);
+      return;
+    }
+
+    if (req.kind === 'pack') {
+      const layers = packLayers(req.tiles, req.size, req.linear);
+
+      ctx.postMessage({ id: req.id, ok: true, kind: 'pack', result: layers }, [
+        layers.buffer,
       ]);
       return;
     }
