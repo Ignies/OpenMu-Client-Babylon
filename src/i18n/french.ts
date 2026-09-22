@@ -2321,7 +2321,7 @@ export const frenchLayer: LanguageLayer = {
     'sign.pub': 'Taverne',
     'sign.shop': 'Boutique',
     'sign.guardhouse': 'Corps de garde',
-    'sign.library': 'Bibliothèque',
+    'sign.church': 'Église',
     'sign.guild': 'Guilde',
   },
 };

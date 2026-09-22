@@ -2321,7 +2321,7 @@ export const spanishLayer: LanguageLayer = {
     'sign.pub': 'Taberna',
     'sign.shop': 'Tienda',
     'sign.guardhouse': 'Cuartel',
-    'sign.library': 'Biblioteca',
+    'sign.church': 'Iglesia',
     'sign.guild': 'Gremio',
   },
 };

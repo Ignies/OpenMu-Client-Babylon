@@ -2272,7 +2272,7 @@ export const thaiLayer: LanguageLayer = {
     'sign.pub': 'โรงเตี๊ยม',
     'sign.shop': 'ร้านค้า',
     'sign.guardhouse': 'ป้อมยาม',
-    'sign.library': 'ห้องสมุด',
+    'sign.church': 'โบสถ์',
     'sign.guild': 'กิลด์',
   },
 };

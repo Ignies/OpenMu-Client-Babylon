@@ -2261,7 +2261,7 @@ export const japaneseLayer: LanguageLayer = {
     'sign.pub': '酒場',
     'sign.shop': '商店',
     'sign.guardhouse': '衛兵所',
-    'sign.library': '書庫',
+    'sign.church': '教会',
     'sign.guild': 'ギルド',
   },
 };

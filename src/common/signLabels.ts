@@ -54,7 +54,7 @@ type LabelKey =
   | 'pub'
   | 'shop'
   | 'guardhouse'
-  | 'library'
+  | 'church'
   | 'guild';
 
 type Row = readonly [type: number, x: number, y: number, key: LabelKey];
@@ -93,7 +93,7 @@ const SIGNS: Partial<Record<ENUM_WORLD, readonly Row[]>> = {
     [35, 30, 29, 'shop'], // the north-west fort, at Natasha the Firecracker Merchant
     [35, 186, 43, 'guardhouse'], // DEVIAS_GUARD_ROOM (186,43)-(194,51)
     [35, 202, 55, 'guild'], // DEVIAS_WEST_HEARTH_HOUSE, where Mercenary Guild Manager Tercia stands
-    [35, 216, 28, 'library'], // DEVIAS_READING_ROOM (204,12)-(216,32)
+    [35, 216, 28, 'church'], // the church, DEVIAS_READING_ROOM (204,12)-(216,32)
     [35, 229, 20, 'pub'], // DEVIAS_TAVERN (225,20)-(237,28), Caren the Barmaid inside
     [35, 225, 37, 'shop'], // DEVIAS_EAST_HEARTH_HOUSE, where Wizard Izabel stands
     // type 58 — Object59
