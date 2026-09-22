@@ -206,6 +206,7 @@ export const spanishLayer: LanguageLayer = {
     'options.renderScale': 'Escala de renderizado',
     'options.upscale': 'Escalado',
     'options.upscale.native': 'Nativo',
+    'options.frameGeneration': 'Generación de fotogramas',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Texturas de modelos',
     'worlds.tabDownload': 'Descarga',
