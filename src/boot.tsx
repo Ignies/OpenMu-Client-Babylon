@@ -18,6 +18,7 @@ import {
   renderScaleForStep,
   renderScaleSeam,
 } from './libs/renderScale';
+import { upscaleLive } from './scenes/upscale';
 import { TestScene } from './scenes/testScene';
 import { loadMapIntoScene } from './libs/mu/loadMapIntoScene';
 import { prefetchWorldTerrain } from './libs/mu/prefetchWorld';
@@ -83,10 +84,19 @@ try {
 // Before the first frame: the scene is drawn at this share of the window and
 // the browser scales it up. The HUD is DOM and keeps its own resolution.
 // The seam wins over the option so an A/B does not have to touch settings.
+//
+// Unless the upscale is on, and then the drawing buffer stays the size of the
+// window and the scale is taken out of the scene alone, with the frame
+// reconstructed on the way to the screen (`scenes/upscale.ts`). The two ways
+// of spending the same slider are exclusive; this is where they are chosen
+// between.
 const scaleSeam = renderScaleSeam();
 
 reaction(
-  () => scaleSeam ?? renderScaleForStep(GameOptions.renderScale),
+  () =>
+    upscaleLive()
+      ? 1
+      : scaleSeam ?? renderScaleForStep(GameOptions.renderScale),
   scale => applyRenderScale(engine, scale),
   { fireImmediately: true }
 );

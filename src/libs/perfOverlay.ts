@@ -3,6 +3,7 @@ import { EngineInstrumentation } from '@babylonjs/core/Instrumentation/engineIns
 import { netStats } from './netStats';
 import { GameOptions } from '../common/gameOptions';
 import { renderScaleForStep } from './renderScale';
+import { upscaleActive } from '../scenes/upscale';
 import { texturePacks } from '../common/texturePacks';
 import { propBatchStats } from '../common/propBatches';
 import { configFingerprintLines } from '../common/configFingerprint';
@@ -602,7 +603,9 @@ function settingsLine(): string {
       GameOptions.materialQuality
     } / detail ${GameOptions.materialDetail} / dist ${
       GameOptions.renderDistance
-    } / scale ${Math.round(renderScaleForStep(GameOptions.renderScale) * 100)}%` +
+    } / scale ${Math.round(renderScaleForStep(GameOptions.renderScale) * 100)}%${
+      upscaleActive() ? ' fsr' : ''
+    }` +
     (pack ? ` / pack ${pack}` : '')
   );
 }

@@ -196,6 +196,8 @@ export const thaiLayer: LanguageLayer = {
     'options.lightingQuality': 'แสง',
     'options.materialQuality': 'วัสดุ',
     'options.renderScale': 'สเกลการเรนเดอร์',
+    'options.upscale': 'การขยายภาพ',
+    'options.upscale.native': 'ความละเอียดเดิม',
     'options.msaa': 'MSAA',
     'options.texturePack': 'พื้นผิวโมเดล',
     'worlds.tabDownload': 'ดาวน์โหลด',

@@ -62,6 +62,7 @@ import { syncRoomMask } from '../scenes/roomMask';
 import { syncToneMap, toneMapLive } from '../scenes/toneMap';
 import { syncFireflyGuard } from '../scenes/fireflyGuard';
 import { syncSunShafts, sunShaftsLive } from '../scenes/sunShafts';
+import { syncUpscale, upscaleScale } from '../scenes/upscale';
 import {
   createPostChain,
   TONE_MAPPER_NAMES,
@@ -327,9 +328,12 @@ export function createLookDirector(
     // while they are on and at the tier's ratio otherwise.
     const style = renderingStyle();
     const inkWanted = inkLinesActive() && post;
-    const gbufferRatio = lightTier
-      ? Math.max(lightTier.ssaoRatio, inkWanted ? 1 : 0)
-      : 1;
+    // Times the upscale's scale: the buffer is sized off the drawing buffer,
+    // which is the whole window while the upscale is on, and "full
+    // resolution" here has always meant the resolution the scene is drawn at.
+    const gbufferRatio =
+      upscaleScale() *
+      (lightTier ? Math.max(lightTier.ssaoRatio, inkWanted ? 1 : 0) : 1);
 
     const profile: LookProfile = {
       ...target,
@@ -398,6 +402,12 @@ export function createLookDirector(
     // 5. haze and AO
     const fogSource = profile.fog.color ?? base.sky?.horizon ?? null;
     const fogColorLinear: Rgb = fogSource ? toLinear(fogSource) : [0, 0, 0];
+
+    // Ahead of every pass: the target the scene is drawn into, which is what
+    // sets the resolution it is drawn at while the upscale is on. It sits at
+    // the head of the camera's list, where nothing else inserts, so it never
+    // reorders anything behind it.
+    syncUpscale(scene, camera);
 
     // The effect mask is not a pass: it is drawn after the frame and read live.
     syncEffectMask(scene, camera, shaped && post);
