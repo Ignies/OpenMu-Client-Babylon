@@ -16,6 +16,11 @@ import type { Texture } from '../libs/babylon/exports';
  * Packs are discovered, not compiled in: `packs/index.json` lists what the
  * deployment has, so another pack is added by building it and listing it.
  *
+ * A pack file is an image (webp, png) or KTX2. KTX2 stays block-compressed
+ * on the GPU, a quarter of an image's video memory on desktop. Babylon picks
+ * the loader from the extension, so nothing here treats them differently;
+ * the one reader that has to is the PBR map derivation (`pbrMaps.ts`).
+ *
  * Two things here are load-bearing and easy to lose:
  *
  *  - `updateURL` REPLACES the internal texture, and the converter's name
