@@ -45,9 +45,18 @@ const PANTS_MASK = 0x20;
 const GLOVES_MASK = 0x10;
 const BOOTS_MASK = 0x08;
 
+/**
+ * True when the preview carries no gear at all: all zeros, or all 0xFF - what
+ * OpenMU puts in `CharacterCreationSuccessful.PreviewData` for a fresh
+ * character. Read as a classic preview, the 0xFF fill has every flag bit set
+ * and comes out as a gold Fenrir, wings and the rest.
+ */
 export function isAppearanceBlank(app: DataView): boolean {
-  for (let i = 0; i < app.byteLength; i++) {
-    if (app.getUint8(i) !== 0) return false;
+  const first = app.getUint8(0);
+  if (first !== 0x00 && first !== 0xff) return false;
+
+  for (let i = 1; i < app.byteLength; i++) {
+    if (app.getUint8(i) !== first) return false;
   }
 
   return true;
