@@ -1293,7 +1293,7 @@ export const chineseLayer: LanguageLayer = {
 
     'msgWin.pleaseWait': '请稍候',
     'msgWin.deleteCharacter': '要删除角色 %s 吗？',
-    'msgWin.enterPassword': '请输入你的 WEBZEN.COM 密码。',
+    'msgWin.enterSecurityCode': '请输入你的安全码。',
     'msgWin.characterDeleted': '角色已成功删除。',
     'msgWin.accountBlocked': '该账号已被封禁',
     'msgWin.itemBlocked': '该角色的物品已被锁定',

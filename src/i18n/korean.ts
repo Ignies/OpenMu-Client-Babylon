@@ -1297,7 +1297,7 @@ export const koreanLayer: LanguageLayer = {
 
     'msgWin.pleaseWait': '잠시 기다려 주세요',
     'msgWin.deleteCharacter': '%s 캐릭터를 삭제하시겠습니까?',
-    'msgWin.enterPassword': 'WEBZEN.COM 비밀번호를 입력하세요.',
+    'msgWin.enterSecurityCode': '보안 코드를 입력하세요.',
     'msgWin.characterDeleted': '캐릭터가 삭제되었습니다.',
     'msgWin.accountBlocked': '이 계정은 차단되었습니다',
     'msgWin.itemBlocked': '이 캐릭터의 아이템이 잠겨 있습니다',

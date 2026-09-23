@@ -2144,7 +2144,7 @@ export const EN_TEXT = {
   // ---- message boxes (`msgWin.ts`) ---------------------------------------
   'msgWin.pleaseWait': 'Please wait',
   'msgWin.deleteCharacter': 'Would you like to delete %s character?',
-  'msgWin.enterPassword': 'Please enter your WEBZEN.COM password.',
+  'msgWin.enterSecurityCode': 'Please enter your security code.',
   'msgWin.characterDeleted': 'Character was deleted successfully.',
   'msgWin.accountBlocked': 'This account is blocked',
   'msgWin.itemBlocked': 'The character is item blocked',

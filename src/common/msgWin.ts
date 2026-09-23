@@ -44,7 +44,7 @@ export const MSG_WIN_MESSAGES: Record<MsgWinCode, MsgWinMessage> = {
   [MsgWinCode.DeleteCharacterResident]: {
     type: MsgWinType.StrInput,
     textId: 1713,
-    textKey: 'msgWin.enterPassword',
+    textKey: 'msgWin.enterSecurityCode',
   },
   [MsgWinCode.DeleteCharacterSuccess]: {
     type: MsgWinType.Ok,

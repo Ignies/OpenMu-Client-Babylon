@@ -1318,7 +1318,7 @@ export const russianLayer: LanguageLayer = {
 
     'msgWin.pleaseWait': 'Подождите',
     'msgWin.deleteCharacter': 'Удалить персонажа %s?',
-    'msgWin.enterPassword': 'Введите пароль WEBZEN.COM.',
+    'msgWin.enterSecurityCode': 'Введите код безопасности.',
     'msgWin.characterDeleted': 'Персонаж успешно удалён.',
     'msgWin.accountBlocked': 'Этот аккаунт заблокирован',
     'msgWin.itemBlocked': 'Предметы персонажа заблокированы',

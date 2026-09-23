@@ -1331,7 +1331,7 @@ export const romanianLayer: LanguageLayer = {
 
     'msgWin.pleaseWait': 'Așteaptă',
     'msgWin.deleteCharacter': 'Vrei să ștergi personajul %s?',
-    'msgWin.enterPassword': 'Introdu parola ta WEBZEN.COM.',
+    'msgWin.enterSecurityCode': 'Introdu codul tău de securitate.',
     'msgWin.characterDeleted': 'Personajul a fost șters.',
     'msgWin.accountBlocked': 'Acest cont este blocat',
     'msgWin.itemBlocked': 'Obiectele personajului sunt blocate',
