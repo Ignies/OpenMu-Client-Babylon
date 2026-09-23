@@ -1,3 +1,4 @@
+import { runInAction } from 'mobx';
 import type { ISystemFactory } from '../world';
 import { Store, UIState } from '../../store';
 import { ENUM_WORLD } from '../../common';
@@ -10,6 +11,8 @@ import {
 import {
   CHARACTER_CAMERA_POSITION,
   characterCameraTarget,
+  characterSelectView,
+  characterSlotPosition,
 } from '../../common/characterSelect';
 import { prefetchWorldTerrain } from '../../libs/mu/prefetchWorld';
 import { loadVersionUi, versionUi } from '../../version';
@@ -176,6 +179,12 @@ const TOUR_FOV = (65 * Math.PI) / 180;
 /** `MoveCamera` (LoginScene.cpp:256): the scene's own camera, the one the character line-up is shot with. */
 const CHARACTER_FOV = (45 * Math.PI) / 180;
 
+/** Right-click close-up: aim this high above the slot's floor, from this far. */
+const ZOOM_AIM_HEIGHT = 1.1;
+const ZOOM_DISTANCE = 5;
+/** Ease rate of the close-up, per second (exponential approach). */
+const ZOOM_SPEED = 4;
+
 /**
  * Which pre-game screen the backdrop is standing behind, or null in the
  * world. The start menu sits on the same backdrop the server list does: the
@@ -232,6 +241,14 @@ export const LoginSceneSystem: ISystemFactory = world => {
     fov: number;
   } | null = null;
   let cameraIsOurs = false;
+
+  // Close-up state: 0 = the line-up shot, 1 = on the focused character. The
+  // aim point eases too, so switching focus while zoomed glides across.
+  let zoom = 0;
+  const zoomAim = Vector3.Zero();
+  const baseTarget = characterCameraTarget();
+  const camTarget = Vector3.Zero();
+  const camPosition = Vector3.Zero();
 
   /** The standalone set piece, for a version whose backdrop is not a world. */
   let setPiece: PregameScene | null = null;
@@ -301,6 +318,14 @@ export const LoginSceneSystem: ISystemFactory = world => {
       const plan = backdropPlan;
       const phase = plan ? phaseFor(Store.uiState) : null;
 
+      // Leaving the line-up drops the close-up, so it never greets a return.
+      if (phase !== 'characters') {
+        zoom = 0;
+        if (characterSelectView.zoomedOn) {
+          runInAction(() => (characterSelectView.zoomedOn = null));
+        }
+      }
+
       if (phase === null) {
         requestedBackdrop = null;
 
@@ -366,8 +391,31 @@ export const LoginSceneSystem: ISystemFactory = world => {
 
       camera.fov = CHARACTER_FOV;
 
-      camera.setTarget(characterCameraTarget());
-      camera.setPosition(CHARACTER_CAMERA_POSITION);
+      const zoomedOn = Store.charactersList.find(
+        c => c.Name === characterSelectView.zoomedOn
+      );
+      const slot = zoomedOn ? characterSlotPosition(zoomedOn.SlotIndex) : null;
+      const ease = 1 - Math.exp(-ZOOM_SPEED * deltaTime);
+
+      if (slot) {
+        slot.y += ZOOM_AIM_HEIGHT;
+        if (zoom === 0) zoomAim.copyFrom(slot);
+        else Vector3.LerpToRef(zoomAim, slot, ease, zoomAim);
+      }
+
+      zoom += ((slot ? 1 : 0) - zoom) * ease;
+      if (zoom < 0.001) zoom = 0;
+
+      // Same viewing direction as the line-up shot, just ZOOM_DISTANCE away.
+      const closePosition = zoomAim
+        .subtract(CHARACTER_CAMERA_POSITION)
+        .normalize()
+        .scaleInPlace(-ZOOM_DISTANCE)
+        .addInPlace(zoomAim);
+      Vector3.LerpToRef(CHARACTER_CAMERA_POSITION, closePosition, zoom, camPosition);
+      Vector3.LerpToRef(baseTarget, zoomAim, zoom, camTarget);
+      camera.setTarget(camTarget);
+      camera.setPosition(camPosition);
     },
   };
 };

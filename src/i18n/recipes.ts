@@ -146,6 +146,9 @@ export const EN_TEXT = {
 
   'characters.loading': 'Loading characters...',
   'characters.select': 'Select a character',
+  'characters.hint.select': 'Select',
+  'characters.hint.zoomIn': 'Zoom in',
+  'characters.hint.zoomOut': 'Zoom out',
   'characters.create.minLength': 'Type more than 4 letters',
   'characters.create.specialName': 'Cannot use symbols.',
   'characters.create.reservedName': 'That name is reserved.',

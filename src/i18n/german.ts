@@ -93,6 +93,9 @@ export const germanLayer: LanguageLayer = {
 
     'characters.loading': 'Charaktere werden geladen...',
     'characters.select': 'Wähle einen Charakter',
+    'characters.hint.select': 'Auswählen',
+    'characters.hint.zoomIn': 'Heranzoomen',
+    'characters.hint.zoomOut': 'Herauszoomen',
     'characters.create.minLength': 'Gib mehr als 4 Buchstaben ein',
     'characters.create.specialName': 'Sonderzeichen sind nicht erlaubt.',
     'characters.create.reservedName': 'Dieser Name ist reserviert.',

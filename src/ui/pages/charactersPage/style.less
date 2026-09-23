@@ -16,20 +16,6 @@
   bottom: calc(5.5% + 11px);
 }
 
-.char-sel-info {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: #ffffff;
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-  white-space: nowrap;
-  overflow: hidden;
-}
-
 // `CCharMakeWin`. `UIMng.cpp:269` puts it at
 //   ((screenWidth - 454) / 2, (screenHeight - 406) / 2)
 // i.e. dead centre. Everything inside is absolutely positioned from the
@@ -97,4 +83,50 @@
   font-family: inherit;
   font-size: 12px;
   line-height: 1;
+}
+
+// Name plate over the hovered (else focused) line-up character. Positioned
+// each frame by CharacterSelectionPlate via `transform`; translucent black
+// panel.
+.char-sel-plate {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 4px 12px;
+  background: rgba(0, 0, 0, 0.56);
+  border: 1px solid rgba(255, 238, 193, 0.35);
+  color: #e2e2e2;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.char-sel-plate-name {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.char-sel-plate-info {
+  font-size: 11px;
+}
+
+.char-sel-plate-hint {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 3px;
+  font-size: 10px;
+  color: #ffd927;
+  opacity: 0.85;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
 }

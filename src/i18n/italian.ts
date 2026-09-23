@@ -93,6 +93,9 @@ export const italianLayer: LanguageLayer = {
 
     'characters.loading': 'Caricamento dei personaggi...',
     'characters.select': 'Scegli un personaggio',
+    'characters.hint.select': 'Seleziona',
+    'characters.hint.zoomIn': 'Avvicina',
+    'characters.hint.zoomOut': 'Allontana',
     'characters.create.minLength': 'Scrivi più di 4 lettere',
     'characters.create.specialName': 'Non si possono usare simboli.',
     'characters.create.reservedName': 'Quel nome è riservato.',

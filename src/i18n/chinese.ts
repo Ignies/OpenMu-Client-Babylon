@@ -96,6 +96,9 @@ export const chineseLayer: LanguageLayer = {
 
     'characters.loading': '正在加载角色...',
     'characters.select': '请选择角色',
+    'characters.hint.select': '选择',
+    'characters.hint.zoomIn': '拉近',
+    'characters.hint.zoomOut': '拉远',
     'characters.create.minLength': '请输入 4 个以上的字符',
     'characters.create.specialName': '不能使用符号。',
     'characters.create.reservedName': '该名称已被保留。',

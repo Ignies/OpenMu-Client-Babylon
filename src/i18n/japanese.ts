@@ -97,6 +97,9 @@ export const japaneseLayer: LanguageLayer = {
 
     'characters.loading': 'キャラクターを読み込んでいます...',
     'characters.select': 'キャラクターを選んでください',
+    'characters.hint.select': '選択',
+    'characters.hint.zoomIn': 'ズームイン',
+    'characters.hint.zoomOut': 'ズームアウト',
     'characters.create.minLength': '5 文字以上で入力してください',
     'characters.create.specialName': '記号は使用できません。',
     'characters.create.reservedName': 'その名前は予約されています。',

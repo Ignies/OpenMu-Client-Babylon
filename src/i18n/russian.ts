@@ -94,6 +94,9 @@ export const russianLayer: LanguageLayer = {
 
     'characters.loading': 'Загрузка персонажей...',
     'characters.select': 'Выберите персонажа',
+    'characters.hint.select': 'Выбрать',
+    'characters.hint.zoomIn': 'Приблизить',
+    'characters.hint.zoomOut': 'Отдалить',
     'characters.create.minLength': 'Введите больше 4 букв',
     'characters.create.specialName': 'Символы использовать нельзя.',
     'characters.create.reservedName': 'Это имя зарезервировано.',

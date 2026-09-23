@@ -94,6 +94,9 @@ export const bulgarianLayer: LanguageLayer = {
 
     'characters.loading': 'Зареждат се героите...',
     'characters.select': 'Избери герой',
+    'characters.hint.select': 'Избери',
+    'characters.hint.zoomIn': 'Приближи',
+    'characters.hint.zoomOut': 'Отдалечи',
     'characters.create.minLength': 'Напиши повече от 4 букви',
     'characters.create.specialName': 'Не може да се използват символи.',
     'characters.create.reservedName': 'Това име е запазено.',

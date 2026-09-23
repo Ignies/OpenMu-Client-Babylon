@@ -1,3 +1,4 @@
+import { observable } from 'mobx';
 import { Vector3 } from '../libs/babylon/exports';
 import { toRadians } from './utils';
 
@@ -64,3 +65,10 @@ export function characterCameraTarget(): Vector3 {
     CHARACTER_CAMERA_FORWARD.scale(distance)
   );
 }
+
+/**
+ * Right-click close-up: the name of the character the camera is closed in on,
+ * or null for the line-up shot. Set by CharacterSelectSystem, eased in and
+ * out by LoginSceneSystem's camera. Independent of the focused character.
+ */
+export const characterSelectView = observable({ zoomedOn: null as string | null });
