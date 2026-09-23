@@ -1642,9 +1642,18 @@ export class ModelObject {
   }
 
   getMeshes(recursiveWithChildren = false): Mesh[] {
-    if (!this.gltf) return [];
+    const meshes = this.gltf ? this.gltf.mesh.getChildMeshes<Mesh>(!recursiveWithChildren) : [];
+    if (!recursiveWithChildren) return meshes;
 
-    return this.gltf.mesh.getChildMeshes(!recursiveWithChildren);
+    // Body parts (armor/helm/pants/gloves/boots) are separate ModelObjects
+    // parented here (LinkParent) rather than descendants of our own gltf.mesh
+    // node - the rig itself (player.glb) has no meshes at all. Weapons/wings/
+    // pet do end up inside gltf.mesh via bone-socket reparenting (Update()),
+    // which is why they'd otherwise be the only thing a caller like
+    // HighlightSystem could ever find.
+    for (const child of this.Children) meshes.push(...child.getMeshes(true));
+
+    return meshes;
   }
 
   setActionSpeed(actionType: number, speed: number) {
