@@ -16,6 +16,23 @@
   bottom: calc(5.5% + 11px);
 }
 
+// Loading / pick-a-character prompt, only while nothing is selected. The name
+// plate carries the rest.
+.char-sel-status {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 // `CCharMakeWin`. `UIMng.cpp:269` puts it at
 //   ((screenWidth - 454) / 2, (screenHeight - 406) / 2)
 // i.e. dead centre. Everything inside is absolutely positioned from the

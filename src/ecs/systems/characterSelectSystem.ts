@@ -383,9 +383,6 @@ export const CharacterSelectSystem: ISystemFactory = world => {
       sharedCircleTexture = null;
     }
 
-    backdrop?.dispose();
-    backdrop = null;
-
     spawned.length = 0;
     stagedFor = null;
     lastFocusedChar = '';
@@ -394,7 +391,9 @@ export const CharacterSelectSystem: ISystemFactory = world => {
   const stage = () => {
     clear();
 
-    backdrop = createCharacterSelectBackdrop(world.scene);
+    // Kept across restages (a create, delete or level up) so the texture does
+    // not reload and flash black; torn down when the screen is left.
+    backdrop ??= createCharacterSelectBackdrop(world.scene);
 
     for (const character of Store.charactersList) {
       const position = characterSlotPosition(character.SlotIndex);
@@ -528,6 +527,8 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
       if (!staged) {
         if (stagedFor !== null) clear();
+        backdrop?.dispose();
+        backdrop = null;
         // The line-up is part of this screen's load, so the loading screen
         // has to wait for it: the terrain lands first and the character list
         // is still in flight, and without this hold the gate lifted on an

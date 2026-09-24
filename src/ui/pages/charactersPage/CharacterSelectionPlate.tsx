@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
-import { Matrix, Vector3 } from '../../../libs/babylon/exports';
+import { Matrix, Vector3, Viewport } from '../../../libs/babylon/exports';
 import { Store } from '../../../store';
 import { classFromAppearance } from '../../../common/deserializeAppearance';
 import { getClassName } from '../../../common/characterStats';
@@ -38,6 +38,7 @@ export const CharacterSelectionPlate = observer(() => {
     const viewProjection = Matrix.Identity();
     const anchor = Vector3.Zero();
     const screen = Vector3.Zero();
+    const viewport = new Viewport(0, 0, 0, 0);
 
     let current: string | null = null;
 
@@ -62,7 +63,7 @@ export const CharacterSelectionPlate = observer(() => {
 
       const renderW = engine.getRenderWidth();
       const renderH = engine.getRenderHeight();
-      const viewport = camera.viewport.toGlobal(renderW, renderH);
+      camera.viewport.toGlobalToRef(renderW, renderH, viewport);
 
       anchor.copyFrom(target.modelObject.node.getAbsolutePosition());
       anchor.y += HEAD_HEIGHT;
@@ -91,7 +92,8 @@ export const CharacterSelectionPlate = observer(() => {
             {character.Name}
           </div>
           <div className="char-sel-plate-info">
-            {getClassName(classFromAppearance(character.Appearance))} · Level {character.Level}
+            {getClassName(classFromAppearance(character.Appearance))} · {t('common.level')}{' '}
+            {character.Level}
           </div>
           <div className="char-sel-plate-hint">
             {character.Name !== Store.focusedChar && (

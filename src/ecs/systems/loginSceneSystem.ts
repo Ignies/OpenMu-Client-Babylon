@@ -249,6 +249,7 @@ export const LoginSceneSystem: ISystemFactory = world => {
   const baseTarget = characterCameraTarget();
   const camTarget = Vector3.Zero();
   const camPosition = Vector3.Zero();
+  const closePosition = Vector3.Zero();
 
   /** The standalone set piece, for a version whose backdrop is not a world. */
   let setPiece: PregameScene | null = null;
@@ -407,8 +408,8 @@ export const LoginSceneSystem: ISystemFactory = world => {
       if (zoom < 0.001) zoom = 0;
 
       // Same viewing direction as the line-up shot, just ZOOM_DISTANCE away.
-      const closePosition = zoomAim
-        .subtract(CHARACTER_CAMERA_POSITION)
+      zoomAim
+        .subtractToRef(CHARACTER_CAMERA_POSITION, closePosition)
         .normalize()
         .scaleInPlace(-ZOOM_DISTANCE)
         .addInPlace(zoomAim);

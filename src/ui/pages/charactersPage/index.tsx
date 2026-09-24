@@ -1,3 +1,4 @@
+import { t } from '../../../i18n';
 import './style.less';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
@@ -20,6 +21,9 @@ import { CharacterSelectionPlate } from './CharacterSelectionPlate';
 const BTN_WIDTH = 54;
 const BTN_HEIGHT = 30;
 const BTN_GAP = 1;
+const STATUS_GAP = 2;
+const STATUS_OFFSET_Y = 5;
+const STATUS_HEIGHT = 21;
 
 const DECO_WIDTH = 189;
 const DECO_HEIGHT = 103;
@@ -131,6 +135,23 @@ export const CharactersPage = observer(() => {
           }}
         />
 
+        {!selected && (
+          <div
+            className="char-sel-status"
+            style={{
+              left: BTN_WIDTH * 2 + BTN_GAP + STATUS_GAP,
+              right: BTN_WIDTH * 2 + BTN_GAP + STATUS_GAP,
+              top: STATUS_OFFSET_Y,
+              height: STATUS_HEIGHT,
+            }}
+          >
+            {Store.loadingCharactersList
+              ? t('characters.loading')
+              : Store.charactersList.length > 0
+                ? t('characters.select')
+                : null}
+          </div>
+        )}
 
         <MuButton
           file="b_connect.OZT"

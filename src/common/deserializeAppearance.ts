@@ -52,6 +52,8 @@ const BOOTS_MASK = 0x08;
  * and comes out as a gold Fenrir, wings and the rest.
  */
 export function isAppearanceBlank(app: DataView): boolean {
+  if (app.byteLength === 0) return true;
+
   const first = app.getUint8(0);
   if (first !== 0x00 && first !== 0xff) return false;
 
