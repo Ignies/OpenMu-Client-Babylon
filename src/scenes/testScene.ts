@@ -36,7 +36,18 @@ export class TestScene extends Scene {
     this.hl = new HighlightLayer('hl1', this, {
       isStroke: true,
       alphaBlendingMode: 1,
+      // The stroke mask renders at a quarter of screen resolution by default
+      // and the stroke shader snaps any blur bleed to full intensity, so a
+      // mesh only a few texels across (feet, hands) fills solid instead of
+      // getting an edge. Only the hovered model renders into it - cheap.
+      mainTextureRatio: 1,
     });
+    // The blob shadow (objectShadow.ts) ORs its 0x80 stencil bit over the
+    // soles of whoever stands on it, so the hovered mesh's 0x02 reads 0x82
+    // there and the outer-glow pass (stencil != 0x02) floods the feet. Compare
+    // without that bit; Babylon doesn't cache/restore the func mask itself.
+    this.hl.onBeforeComposeObservable.add(() => engine.setStencilFunctionMask(0x7f));
+    this.hl.onAfterComposeObservable.add(() => engine.setStencilFunctionMask(0xff));
 
     this.hl.innerGlow = false;
 

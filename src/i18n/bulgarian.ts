@@ -1322,7 +1322,7 @@ export const bulgarianLayer: LanguageLayer = {
 
     'msgWin.pleaseWait': 'Изчакай',
     'msgWin.deleteCharacter': 'Искаш ли да изтриеш героя %s?',
-    'msgWin.enterPassword': 'Въведи паролата си за WEBZEN.COM.',
+    'msgWin.enterSecurityCode': 'Въведи кода си за сигурност.',
     'msgWin.characterDeleted': 'Героят беше изтрит успешно.',
     'msgWin.accountBlocked': 'Този акаунт е блокиран',
     'msgWin.itemBlocked': 'Предметите на героя са блокирани',

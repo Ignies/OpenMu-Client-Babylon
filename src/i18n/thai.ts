@@ -1309,7 +1309,7 @@ export const thaiLayer: LanguageLayer = {
 
     'msgWin.pleaseWait': 'กรุณารอสักครู่',
     'msgWin.deleteCharacter': 'คุณต้องการลบตัวละคร %s หรือไม่?',
-    'msgWin.enterPassword': 'กรอกรหัสผ่าน WEBZEN.COM ของคุณ',
+    'msgWin.enterSecurityCode': 'กรอกรหัสความปลอดภัยของคุณ',
     'msgWin.characterDeleted': 'ลบตัวละครเรียบร้อยแล้ว',
     'msgWin.accountBlocked': 'บัญชีนี้ถูกระงับ',
     'msgWin.itemBlocked': 'ไอเทมของตัวละครนี้ถูกล็อก',

@@ -1335,7 +1335,7 @@ export const italianLayer: LanguageLayer = {
 
     'msgWin.pleaseWait': 'Attendi',
     'msgWin.deleteCharacter': 'Vuoi eliminare il personaggio %s?',
-    'msgWin.enterPassword': 'Inserisci la tua password WEBZEN.COM.',
+    'msgWin.enterSecurityCode': 'Inserisci il tuo codice di sicurezza.',
     'msgWin.characterDeleted': 'Il personaggio è stato eliminato.',
     'msgWin.accountBlocked': 'Questo account è bloccato',
     'msgWin.itemBlocked': 'Gli oggetti del personaggio sono bloccati',

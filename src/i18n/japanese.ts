@@ -1299,7 +1299,7 @@ export const japaneseLayer: LanguageLayer = {
 
     'msgWin.pleaseWait': 'お待ちください',
     'msgWin.deleteCharacter': 'キャラクター %s を削除しますか？',
-    'msgWin.enterPassword': 'WEBZEN.COM のパスワードを入力してください。',
+    'msgWin.enterSecurityCode': 'セキュリティコードを入力してください。',
     'msgWin.characterDeleted': 'キャラクターを削除しました。',
     'msgWin.accountBlocked': 'このアカウントはブロックされています',
     'msgWin.itemBlocked': 'このキャラクターのアイテムはロックされています',
