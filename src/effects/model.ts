@@ -75,6 +75,8 @@ export interface ModelOptions {
   flat?: boolean;
   follow?: PointSource;
   height?: number;
+  /** Ends it early (the body it rides left: `if (o->Owner == NULL || !o->Owner->Live) o->Live = false`). */
+  until?: () => boolean;
   /** Loop the clip (default) or play it once. */
   loop?: boolean;
   /**
@@ -419,7 +421,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     update(dt) {
       t += dt;
       const p = t / seconds;
-      if (p >= 1) return false;
+      if (p >= 1 || opts.until?.()) return false;
       source(tmp);
       node.position.set(tmp.x, tmp.y + height + rise * t, tmp.z);
       node.scaling.setAll(opts.scaleAt ? opts.scaleAt(t) * DEFAULT_SCALE : scale * lerp(1, grow, p));

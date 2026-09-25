@@ -97,6 +97,8 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_ATTACK_RIDE_ATTACK_FLASH) return 0.4 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_ATTACK_RIDE_TELEPORT) return 0.3;
   if (action === A.PLAYER_ATTACK_DARKHORSE) return 0.3;
+  // The Summoner curse clip and its mounts (ZzzCharacter.cpp:974-977).
+  if (action >= A.PLAYER_SKILL_SLEEP && action <= A.PLAYER_SKILL_SLEEP_FENRIR) return 0.3 + magicSpeedFactor(magicSpeed);
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {

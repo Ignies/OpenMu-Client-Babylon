@@ -5,7 +5,7 @@ import { lighting } from '../lighting';
 import { combat } from '../combat';
 import { weather } from '../weather';
 import { effects, type EffectHandle } from '../effects';
-import { boneLocalPos, bonePos, delay, effectTexture, entityGone, entityPos, entityYaw, followEntity, fxNow, type ParticleRecipe, type PointSource, type RGB } from '../effects/core';
+import { boneLocalPos, bonePos, delay, effectTexture, entityGone, entityPos, entityYaw, fadeOut, followEntity, fxNow, scaleRGB, type ParticleRecipe, type PointSource, type RGB } from '../effects/core';
 import type { SpriteOptions } from '../effects/sprite';
 import type { ShroudOptions } from '../effects/shroud';
 import type { SpiritSwarmOptions, SwarmSpirit } from '../effects/spiritSwarm';
@@ -45,7 +45,7 @@ import {
 } from '../effects/recipes';
 import { ItemsDatabase } from './itemsDatabase';
 import { PlayerAction } from './objects/enum';
-import { playCombat } from '../sound/combat';
+import { playCombat, playLandingSound } from '../sound/combat';
 import type { Sounds } from '../sound/recipes';
 import { skillDefinition, type SkillDefinition } from './skillsDatabase';
 import { storeRef } from './storeRef';
@@ -633,7 +633,7 @@ function spiralRibbons(n: number, colour: RGB, width: number, tails: number, sec
   };
 }
 
-/** Thorns / Sleep / Blind: BITMAP_MAGIC+1 at the caster + ALICE_BUFFSKILL_EFFECT + …2 at the target, tinted. */
+/** Thorns: BITMAP_MAGIC+1 at the caster + ALICE_BUFFSKILL_EFFECT + …2 at the target, tinted. */
 const aliceBuff = (tint: RGB): Step =>
   seq(
     atCaster(magicGround(tint), 0),
@@ -641,20 +641,6 @@ const aliceBuff = (tint: RGB): Step =>
     model({ model: MODEL.elShieldRing2, seconds: ticks(30), scale: 0.5, grow: 1.4, colour: tint, height: -IMPACT_HEIGHT + 0.1, yaw: Math.PI / 3 }),
     particles({ recipe: { ...SHADE_MOTES, colour: tint }, count: 12, height: 0.5 })
   );
-
-/**
- * Weakness / Enervation: BITMAP_MAGIC_ZIN sub1 (LT 40, scale 7), sub0 (LT 50, scale 2), sub2 ×3 (LT 30; 1.0/0.2/0.1)
- * on the ground + SHINY+6 (0.5) + PIN_LIGHT (1.0) over the body. `wide` tints the big circle, `core` the rest.
- */
-const zinCurse = (wide: RGB, core: RGB): Step => (at, c) => {
-  const feet = at.clone();
-  feet.y -= IMPACT_HEIGHT;
-  ring({ texture: TEX.magicZin, colour: wide, seconds: ticks(40), scale: 7, spin: 30, growFrom: 0.6 })(feet, c);
-  ring({ texture: TEX.magicZin, colour: core, seconds: ticks(50), scale: 2, spin: -60 })(feet, c);
-  for (const s of [1, 0.2, 0.1]) sprite({ texture: TEX.magicZin, colour: core, size: s * 2, seconds: ticks(30), flat: true, spin: 2, height: 0.05 })(feet, c);
-  sprite({ texture: TEX.shiny5, colour: core, size: 0.5, seconds: ticks(30), height: 0.9, grow: 1.6 })(feet, c);
-  sprite({ texture: TEX.pinLights, colour: core, size: 1, seconds: ticks(30), height: 0.9, spin: 1.5 })(feet, c);
-};
 
 /** Nova's charge; see row 58. */
 const novaCharge: Step = (_at, c) => {
@@ -1556,6 +1542,282 @@ const sparkAfterglow: Step = (_at, c) =>
     model({ ...glow, roll: muYaw(45) })(p, c);
     model({ ...glow, yaw: -entityYaw(c.caster) })(p, c);
   });
+// ---- sum2 steps ------------------------------------------------------------------
+
+/**
+ * `c->AttackTime >= g_iLimitAttackTime` (15): the Summoner curses land 14 ticks after the reply
+ * set AttackTime to 1 (WSclient.cpp:4899, ZzzCharacter.cpp:171, :4724-4754, :5158-5198).
+ */
+const CURSE_DELAY = ticks(14);
+
+/** Degrees a tick -> radians a second. */
+const degPerTick = (d: number): number => (d * 25 * Math.PI) / 180;
+
+/** `step` once the curse lands, with the skill being dispatched now (the landing sound reads it). */
+const onCurseLanding = (step: Step): Step => (at, c) => {
+  const skill = currentSkill;
+  after(CURSE_DELAY, (p, cc) => {
+    currentSkill = skill;
+    step(p, cc);
+  })(at, c);
+};
+
+/** A body's point that keeps its last place once the body has gone. */
+const holding = (e: Entity, height: number): PointSource => {
+  const last = entityPos(e, height, new Vector3());
+  return out => (entityGone(e) ? out.copyFrom(last) : last.copyFrom(entityPos(e, height, out)));
+};
+
+/**
+ * An effect model's `BodyLight`: the terrain light under it plus its `Light`, clamped by the colour
+ * write (ZzzObject.cpp:226-232, `LightEnable` from CreateEffect :349). A tinted model reads as lit
+ * white with the tint on it, not as the pure tint.
+ */
+function bodyLight(at: Vector3, tint: RGB): RGB {
+  const l = storeRef().world?.getTerrainLight(at.x, at.z);
+  const lx = l?.x ?? 1;
+  const ly = l?.y ?? 1;
+  const lz = l?.z ?? 1;
+  return [Math.min(1, lx + tint[0]), Math.min(1, ly + tint[1]), Math.min(1, lz + tint[2])];
+}
+
+/** Hand FX tints, the three `vLight` blocks of the PLAYER_SKILL_SLEEP hand code (ZzzCharacter.cpp:10591-10740). */
+interface CurseHand {
+  shiny: RGB;
+  pin: RGB;
+  puff: RGB;
+  /** Blind: every layer drawn with EnableAlphaBlendMinus (sprite SubType 1, LIGHT+2 sub4, CLUD64 sub5). */
+  dark: boolean;
+}
+
+/** The hand bone the curse FX ride: "Bip01 L Hand". */
+const CURSE_HAND_BONE = 37;
+/** Longest the hand FX run if the clip never ends (a body out of view keeps its action). */
+const CURSE_HAND_MAX = 3;
+
+/** CLUD64 sub3/5 dies once `Light[0]` falls under 0.05 at x 1/1.1 a tick (ZzzEffectParticle.cpp:5120-5150). */
+const cludTicks = (red: number): number => Math.max(1, Math.ceil(Math.log(red / 0.05) / Math.log(1.1)));
+
+const curseHandRecipes = new Map<string, { cra: ParticleRecipe; clud: ParticleRecipe; smoke: ParticleRecipe }>();
+
+/**
+ * The per-tick hand particles: BITMAP_LIGHT+2 sub0/4 (cra_04, LT 16, Scale 1.48..1.79, held at full
+ * light) and BITMAP_CLUD64 sub3/5 (clud64 or smoke01, Scale 0.6..0.69 growing 0.08 a tick, 20 cm under
+ * the hand +-10, light x 1/1.1 a tick) (ZzzEffectParticle.cpp:816-823, :851-856, :975-1009, :5120-5150).
+ */
+function curseHandRecipesFor(h: CurseHand): { cra: ParticleRecipe; clud: ParticleRecipe; smoke: ParticleRecipe } {
+  const key = `${h.puff.join(',')}|${h.dark}`;
+  let r = curseHandRecipes.get(key);
+  if (r) return r;
+  const n = cludTicks(h.puff[0]);
+  const blend = h.dark ? 'dark' : 'add';
+  const size = (64 * 0.645) / 100;
+  const puff = (texture: string): ParticleRecipe => ({
+    texture,
+    colour: h.puff,
+    size,
+    sizeJitter: 0.07,
+    life: ticks(n),
+    lifeJitter: 0,
+    box: [0.1, 0, 0.1],
+    power: 0,
+    endScale: (0.645 + 0.08 * n) / 0.645,
+    fade: [0, 0.25, 0.5, 0.75, 1].map(p => [p, 1.1 ** (-p * n)] as const),
+    blend,
+    capacity: 96,
+  });
+  r = {
+    cra: {
+      texture: TEX.cra04,
+      colour: h.puff,
+      size: (64 * 1.635) / 100,
+      sizeJitter: 0.095,
+      life: ticks(16),
+      lifeJitter: 0,
+      box: [0.001, 0.001, 0.001],
+      power: 0,
+      fade: [
+        [0, 1],
+        [0.97, 1],
+        [1, 0],
+      ],
+      blend,
+      capacity: 64,
+    },
+    clud: puff(TEX.clud),
+    smoke: puff(TEX.smoke),
+  };
+  curseHandRecipes.set(key, r);
+  return r;
+}
+
+const CURSE_HAND_SLEEP: CurseHand = { shiny: [0.5, 0.2, 0.8], pin: [0.7, 0, 0.8], puff: [0.6, 0.1, 0.8], dark: false };
+const CURSE_HAND_BLIND: CurseHand = { shiny: [1, 1, 1], pin: [1, 1, 1], puff: [1, 1, 1], dark: true };
+/** Weakness: the pin and puff branches test THORNS twice, so they keep the shiny's (0.8,0.1,0.1). */
+const CURSE_HAND_WEAKNESS: CurseHand = { shiny: [0.8, 0.1, 0.1], pin: [0.8, 0.1, 0.1], puff: [0.8, 0.1, 0.1], dark: false };
+/** Enervation: the shiny branch writes `Light`, not `vLight`, so its pair stays white (:10628). */
+const CURSE_HAND_ENERVATION: CurseHand = { shiny: [1, 1, 1], pin: [0.25, 1, 0.7], puff: [0.25, 1, 0.7], dark: false };
+
+/**
+ * The left-hand FX while a PLAYER_SKILL_SLEEP clip plays (ZzzCharacter.cpp:10591-10740): two shiny05
+ * cards (Scale 1.0 / 0.7) turning +-216 deg/s, two pin_lights (16x128, Scale 1.7 / 1.5) at a new roll
+ * every frame, and a cra_04 flash and a clud puff every tick. The original keys the colours on the
+ * local hero's current skill, so another Summoner's cast shows the wrong colours or none; here they
+ * are the caster's own skill's.
+ */
+const summonerHand = (h: CurseHand): Step => (_at, c) => {
+  const caster = c.caster;
+  const anim = caster.playerAnimation;
+  if (!anim || entityGone(caster)) return;
+  const inClip = (): boolean => anim.action >= PlayerAction.PLAYER_SKILL_SLEEP && anim.action <= PlayerAction.PLAYER_SKILL_SLEEP_FENRIR;
+  if (!inClip()) return;
+  const done = (): boolean => entityGone(caster) || !inClip();
+  const hand: PointSource = out => bonePos(caster, CURSE_HAND_BONE, out, CAST_HEIGHT);
+  const at = hand(new Vector3());
+  const blend = h.dark ? 'subtract' : 'add';
+  const card = (texture: string, colour: RGB, scale: number, px: number, extra: Partial<SpriteOptions>): void => {
+    effects.spawn('sprite', c.scene, at, { texture, colour, size: (px * scale) / 100, seconds: CURSE_HAND_MAX, follow: hand, until: done, fadeTail: 0, blend, ...extra });
+  };
+  // fRot = WorldTime * 0.0006 * 360 deg: 216 deg/s.
+  card(TEX.shiny5, h.shiny, 1, 64, { spin: 3.77 });
+  card(TEX.shiny5, h.shiny, 0.7, 64, { spin: -3.77 });
+  card(TEX.pinLights, h.pin, 1.7, 16, { stretch: 8, randomRoll: true });
+  card(TEX.pinLights, h.pin, 1.5, 16, { stretch: 8, randomRoll: true });
+  const r = curseHandRecipesFor(h);
+  effects.spawn('particles', c.scene, at, { recipe: r.cra, rate: 25, seconds: CURSE_HAND_MAX, follow: hand, until: done });
+  effects.spawn('particles', c.scene, at, { recipe: r.clud, rate: 12.5, seconds: CURSE_HAND_MAX, follow: hand, until: done, height: -0.2 });
+  effects.spawn('particles', c.scene, at, { recipe: r.smoke, rate: 12.5, seconds: CURSE_HAND_MAX, follow: hand, until: done, height: -0.2 });
+};
+
+/** The Sleep / Blind colours: the circle's Light, the model tint, then the model's flare01, shiny05 and joint Light. */
+interface AliceCurse {
+  circle: RGB;
+  models: RGB;
+  flare: RGB;
+  shiny: RGB;
+  streak: RGB;
+  /** Blind: MAGIC+1 sub12, ALICE sub1 RENDER_DARK, sprite SubType 1, JOINT_HEALING sub16 - all subtractive. */
+  dark: boolean;
+}
+
+const ALICE_SLEEP: AliceCurse = { circle: [0.7, 0.3, 0.8], models: [0.8, 0.3, 0.9], flare: [0.8, 0.1, 0.9], shiny: [0.7, 0.6, 0.9], streak: [0.7, 0.5, 0.7], dark: false };
+const ALICE_BLIND: AliceCurse = { circle: [1, 1, 1], models: [1, 1, 1], flare: [1, 1, 1], shiny: [1, 1, 1], streak: [1, 1, 1], dark: true };
+
+/**
+ * Sleep / Blind landing (ZzzCharacter.cpp:5158-5198). At the caster: BITMAP_MAGIC+1 sub11 (sub12 minus
+ * for Blind), Magic_Ground2 growing `(20 - LT) * 0.15` to 3 tiles over 20 ticks at the caster's yaw,
+ * its Luminosity dropping over the last 5 (ZzzEffect.cpp:9787-9882). On the target, following it one
+ * tile up: MODEL_ALICE_BUFFSKILL_EFFECT (LT 34, Scale 0.1 + 0.035 a tick, +8 deg a tick) and ..EFFECT2
+ * (LT 35, Scale 0.15, -8 deg), Alpha +0.05 a tick while LT > 20 then -0.05: up to 0.7 / 0.75 and gone
+ * by tick 28 / 30 (ZzzEffect.cpp:875-915, MoveHandlers.cpp:2213-2338). Each model draws, every tick,
+ * two flare01 at Scale 5 and shiny05 at 2.0 / 1.0 in its colour x Alpha, and starts three
+ * JOINT_HEALING sub15/16 homing on it from 200 cm, each stamping Shiny02 on the centre. The original
+ * skips all of it when the caster has lost its target (:4811, :4836).
+ */
+const aliceCurse = (k: AliceCurse): Step => (_at, c) => {
+  const target = c.target;
+  if (!target || entityGone(target) || entityGone(c.caster)) return;
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const yawDeg = (entityYaw(c.caster) * 180) / Math.PI;
+  ring({ texture: TEX.magicGround2, colour: k.circle, seconds: ticks(20), scale: 3, growFrom: 0, grow: 1, spinFrom: -yawDeg, blend: k.dark ? 'subtract' : 'additive', alphaAt: p => fadeOut(p, 0.25) })(feet, c);
+
+  const centre = holding(target, 1);
+  const at = centre(new Vector3());
+  const gone = (): boolean => entityGone(target);
+  const blend = k.dark ? 'subtract' : 'add';
+  const tint = k.dark ? k.models : bodyLight(at, k.models);
+  const bodies = [
+    { model: MODEL.elShieldRing, life: 28, scale: 0.1, spin: 1, peak: 0.7 },
+    { model: MODEL.elShieldRing2, life: 30, scale: 0.15, spin: -1, peak: 0.75 },
+  ];
+  for (const b of bodies) {
+    const seconds = ticks(b.life);
+    // 0.035 a tick over the life, and 8 deg a tick.
+    const grow = (b.scale + 0.035 * b.life) / b.scale;
+    effects.spawn('model', c.scene, at, { model: b.model, seconds, scale: b.scale, grow, spin: b.spin * degPerTick(8), colour: tint, alpha: b.peak, fadeIn: 0.5, fadeTail: 0.5, follow: centre, until: gone, blend, maxCover: 1 });
+    const glow = (texture: string, colour: RGB, scale: number, extra: Partial<SpriteOptions>): void => {
+      effects.spawn('sprite', c.scene, at, { texture, colour: scaleRGB(colour, b.peak), size: (64 * scale) / 100, seconds, follow: centre, until: gone, fadeIn: 0.5, fadeTail: 0.5, blend, ...extra });
+    };
+    glow(TEX.flare, k.flare, 5, { count: 2 });
+    glow(TEX.shiny5, k.shiny, 2, { spin: 3.77 });
+    glow(TEX.shiny5, k.shiny, 1, { spin: -3.77 });
+  }
+  // Both models' joints in one shower: six a tick while the models live.
+  effects.spawn('homing', c.scene, at, {
+    centre,
+    seconds: ticks(29),
+    perTick: 6,
+    radius: 2,
+    accel: cm(4),
+    life: 10,
+    tails: 2,
+    width: cm(5),
+    texture: TEX.jointEnergy,
+    colour: k.streak,
+    decay: 1 / 1.08,
+    blend,
+    stamp: { texture: TEX.shiny2, w: cm(32), h: cm(64), scale: [0.8, 1.4] },
+    until: gone,
+  });
+};
+
+/** Weakness / Enervation colours: MAGIC_ZIN sub1's Light, the rest of the circles and models, the rain. */
+interface ZinCurse {
+  wide: RGB;
+  core: RGB;
+  rain: RGB;
+}
+
+const ZIN_WEAKNESS: ZinCurse = { wide: [2, 0.1, 0.1], core: [2, 0.4, 0.3], rain: [1.4, 0.2, 0.2] };
+const ZIN_ENERVATION: ZinCurse = { wide: [0.25, 1, 0.7], core: [0.25, 1, 0.7], rain: [0.25, 1, 0.7] };
+
+/** BITMAP_MAGIC_ZIN's Alpha a tick (MoveHandlers.cpp:1486-1512): sub1 climbs 0.06 to 0.72 and falls 0.03 from LT 20. */
+const zinWideAlpha = (p: number): number => {
+  const n = p * 40;
+  return n < 20 ? Math.min(0.72, 0.06 * n) : 0.72 - 0.03 * (n - 20);
+};
+
+/**
+ * Weakness / Enervation, at the caster's feet (ZzzCharacter.cpp:4724-4754): BITMAP_MAGIC_ZIN sub1
+ * (7 tiles, LT 40, `Light x Alpha / 2.5`), sub0 (2 tiles, LT 50, `Light x Alpha x 2`, fading from LT
+ * 20) and three sub2 ripples from 1.0 / 0.2 / 0.1 tiles growing 0.1 a tick to 3.5 (LT 30); none of
+ * them turns (`HeadAngle[1]`, ZzzEffect.cpp:9960-9977). MODEL_SUMMONER_CASTING_EFFECT2 / 22 / 222 at
+ * Scale 0.6 (the `if (o->SubType = 0)` typo keeps the passed scale), BlendMeshLight 0 -> 0.5 over 10
+ * ticks, falling 0.03 a tick from LT 20, turning +3 / -3 / +3 deg a tick (ZzzEffect.cpp:759-773,
+ * MoveHandlers.cpp:1133-1165). The rain: BITMAP_SHINY+6 makes a shiny05 particle a tick for 24 ticks
+ * and BITMAP_PIN_LIGHT a pin_lights one every other tick for 40, anywhere within 2.5 tiles and 0.5-1.5
+ * up (ZzzEffect.cpp:6790-6797, MoveHandlers.cpp:1519-1532). The sound plays now, not at the cast.
+ */
+const zinCurse = (k: ZinCurse): Step => (_at, c) => {
+  if (entityGone(c.caster)) return;
+  const feet = entityPos(c.caster, 0, new Vector3());
+  playLandingSound(currentSkill, feet);
+  ring({ texture: TEX.magicZin, colour: scaleRGB(k.wide, 1 / 2.5), seconds: ticks(40), scale: 7, alphaAt: zinWideAlpha })(feet, c);
+  ring({ texture: TEX.magicZin, colour: scaleRGB(k.core, 2), seconds: ticks(50), scale: 2, alphaAt: p => Math.min(1, (1 - p) * 2.5) })(feet, c);
+  for (const s of [1, 0.2, 0.1]) {
+    ring({ texture: TEX.magicZin, colour: k.core, seconds: ticks(30), scale: s, grow: (s + 0.1 * 30) / s, cap: 3.5, alphaAt: p => Math.min(1, (1 - p) * 1.5) })(feet, c);
+  }
+  const lit = bodyLight(feet, k.core);
+  [MODEL.suhwanzin2, MODEL.suhwanzin22, MODEL.suhwanzin222].forEach((m, i) => {
+    effects.spawn('model', c.scene, feet, { model: m, seconds: ticks(37), scale: 0.6, colour: lit, alpha: 0.5, fadeIn: 10 / 37, fadeTail: 17 / 37, spin: (i % 2 ? -1 : 1) * degPerTick(3) });
+  });
+  const origin = feet.clone();
+  const drop = (): Vector3 => new Vector3(origin.x + (Math.random() - 0.5) * 5, origin.y + 1.5 - Math.random(), origin.z + (Math.random() - 0.5) * 5);
+  // SHINY+6 particle: LT 30, Scale 0.5 + 0/0.1/0.2 shrinking 0.02 a tick, falling 1.3 cm and turning 5 deg a tick, drawn as shiny05 and again as flare01.
+  repeat(24, TICK, (_p, cc) => {
+    const p = drop();
+    const scale = 0.5 + Math.floor(Math.random() * 3) * 0.1;
+    for (const texture of [TEX.shiny5, TEX.flare]) {
+      effects.spawn('sprite', cc.scene, p, { texture, colour: k.rain, size: (64 * scale) / 100, scaleRate: -perTick(64 * 0.02), rise: -perTick(1.3), spin: degPerTick(5), seconds: ticks(30), fadeTail: 0 });
+    }
+  })(feet, c);
+  // PIN_LIGHT particle: LT 30, Scale 1.0 + 0..0.4 shrinking 0.02 a tick, falling 10 cm a tick.
+  repeat(40, TICK, (_p, cc) => {
+    if (Math.random() < 0.5) return;
+    const scale = 1 + Math.floor(Math.random() * 5) * 0.1;
+    effects.spawn('sprite', cc.scene, drop(), { texture: TEX.pinLights, colour: k.rain, size: (16 * scale) / 100, stretch: 8, scaleRate: -perTick(16 * 0.02), rise: -perTick(10), seconds: ticks(30), fadeTail: 0 });
+  })(feet, c);
+};
 
 // ---- the table -------------------------------------------------------------------
 
@@ -2117,11 +2379,14 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     travel: { ...bolt(TEX.thunder, RGBS.arc, ENERGY_CHIPS, 0.7, perTick(60)), trail: { recipe: ENERGY_CHIPS, rate: 30 } },
     impact: seq(model({ model: MODEL.lightningType, seconds: ticks(18), scale: 1, colour: RGBS.arc, grow: 1.3 }), arcHit),
   },
-  // 217 Thorns (Damage Reflection) / 219 Sleep / 220 Blind: BITMAP_MAGIC+1 sub11/12 at the caster +
-  // MODEL_ALICE_BUFFSKILL_EFFECT/2 at the target, Light (0.8,0.3,0.9) / (1,1,1) / (0.8,0.5,0.2).
+  // 217 Thorns (Damage Reflection): BITMAP_MAGIC+1 sub11 at the caster + MODEL_ALICE_BUFFSKILL_EFFECT/2 at the target.
   217: { impact: aliceBuff([0.8, 0.3, 0.9]) },
-  219: { impact: aliceBuff([1, 1, 1]) },
-  220: { impact: aliceBuff([0.8, 0.5, 0.2]) },
+  // 219 Sleep (454 Str): the violet hand FX while the clip plays; 14 ticks after the reply the violet
+  // circle at the caster and the ALICE rings, flares and homing streaks on the target (aliceCurse).
+  219: { cast: summonerHand(CURSE_HAND_SLEEP), impact: onCurseLanding(aliceCurse(ALICE_SLEEP)) },
+  // 220 Blind (OpenMU's 461 / 463): Sleep's construction drawn entirely subtractive - black smoke at the
+  // hand, a black disc spreading under the caster, a black imploding vortex on the target.
+  220: { cast: summonerHand(CURSE_HAND_BLIND), impact: onCurseLanding(aliceCurse(ALICE_BLIND)) },
   // 218 Berserker: BITMAP_MAGIC+1 sub11 LT 20 + ALICE_BUFFSKILL_EFFECT (LT 34, z+100, Alpha 0→, Scale 0.1) +
   // …EFFECT2 (LT 35, Scale 0.15); Light (1.0, 0.1, 0.2).
   218: {
@@ -2131,10 +2396,10 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       model({ model: MODEL.elShieldRing2, seconds: ticks(35), scale: 0.15, grow: 6, colour: [1, 0.1, 0.2], height: -IMPACT_HEIGHT })
     ),
   },
-  // 221 Weakness / 222 Enervation (Innovation): BITMAP_MAGIC_ZIN sub1 (LT 40, scale 7.0), sub0 (LT 50, 2.0), sub2 ×3
-  // (LT 30; 1.0/0.2/0.1) + SUMMONER_CASTING_EFFECT2 + SHINY+6 0.5 + PIN_LIGHT 1.0. Light (2,0.1,0.1)/(2,0.4,0.3) and (0.25,1,0.7).
-  221: { impact: zinCurse([2, 0.1, 0.1], [2, 0.4, 0.3]) },
-  222: { impact: zinCurse([0.25, 1, 0.7], [0.25, 1, 0.7]) },
+  // 221 Weakness (459 Str) / 222 Enervation (Innovation, 460 Str): the hand FX, then 14 ticks later at the
+  // caster's feet the ZIN circles and ripples, the three Suhwanzin circles and the glitter rain, and the sound.
+  221: { cast: summonerHand(CURSE_HAND_WEAKNESS), impact: onCurseLanding(zinCurse(ZIN_WEAKNESS)) },
+  222: { cast: summonerHand(CURSE_HAND_ENERVATION), impact: onCurseLanding(zinCurse(ZIN_ENERVATION)) },
   // 223 Explosion: MODEL_SUMMONER_SUMMON_SAHAMUTT LT 80 from 1.5-4.5 tiles beside the caster onto the point,
   // CreateBomb3 on landing (SummonSystem.cpp CreateSummonObject); cast circle tints (1,0.6,0.4)/(1,0.5,0).
   223: {
@@ -2332,9 +2597,6 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   430: { impact: holyCircle(RGBS.gold) },
   433: { impact: holyCircle(RGBS.gold) },
   432: { area: summonCircle },
-  // 461/463 Blind (the master rows of 220)
-  461: { impact: aliceBuff([0.8, 0.5, 0.2]) },
-  463: { impact: aliceBuff([0.8, 0.5, 0.2]) },
   // 495/497 Earth Prison
   495: { impact: seq(model({ model: MODEL.groundCrystal, seconds: 1.5, colour: RGBS.gold, grow: 1.2, scale: 1.2 }), particles({ recipe: DUST, count: 20 })) },
   497: { impact: seq(model({ model: MODEL.groundCrystal, seconds: 1.5, colour: RGBS.gold, grow: 1.2, scale: 1.2 }), particles({ recipe: DUST, count: 20 })) },
@@ -2423,7 +2685,7 @@ const MASTER_ALIASES: Record<number, number> = {
   378: 5, 379: 3, 380: 233, 381: 14, 382: 40, 383: 233, 384: 1, 385: 9, 387: 38, 388: 10, 389: 7, 390: 2, 391: 39, 392: 40, 393: 39, 394: 2, 395: 58,
   403: 16, 404: 16, 406: 16,
   411: 235, 413: 26, 414: 24, 416: 52, 417: 27, 418: 24, 420: 28, 422: 28, 423: 27, 424: 51, 431: 235, 441: 77,
-  454: 219, 455: 215, 456: 230, 458: 214, 459: 221, 460: 222, 462: 214, 469: 218, 470: 218, 472: 218,
+  454: 219, 455: 215, 456: 230, 458: 214, 459: 221, 460: 222, 461: 220, 462: 214, 463: 220, 469: 218, 470: 218, 472: 218,
   479: 22, 480: 3, 481: 41, 482: 56, 483: 5, 484: 40, 486: 14, 487: 9, 489: 7, 490: 344, 491: 7, 492: 236, 493: 55, 494: 236, 496: 237,
   508: 61, 509: 66, 511: 64, 512: 62, 514: 61, 515: 64, 516: 62, 517: 64, 518: 78, 519: 65, 520: 78, 522: 64, 523: 238,
   551: 260, 552: 261, 554: 260, 555: 261, 558: 262, 559: 263, 560: 264, 569: 268, 572: 268, 573: 267,
@@ -2734,9 +2996,13 @@ export const BUFF_VISUALS: Partial<Record<number, BuffLook>> = {
   61: () => ({ stun: true }),
   // 0x47 Reflection (eBuff_Thorns): rising pin lights.
   71: () => ({ pins: { colour: [0.9, 0.6, 0.1] } }),
-  // 0x4C Weakness, 0x4D Innovation: shiny drops off random bones.
-  76: () => ({ boneSparks: { colour: [1.4, 0.2, 0.2] } }),
-  77: () => ({ boneSparks: { colour: [0.25, 1, 0.7] } }),
+  // 0x48 Sleep: violet water drops off random bones (the insert path's (0.7,0.1,0.9), WSclient.cpp:15575).
+  72: () => ({ sleepDrops: { colour: [0.7, 0.1, 0.9] } }),
+  // 0x49 Blind: black cra_04 smoke off random bones.
+  73: () => ({ blindSmoke: true }),
+  // 0x4C Weakness, 0x4D Innovation: shiny drops (with their flare01 underlay) and falling pin lights off random bones.
+  76: () => ({ boneSparks: { colour: [1.4, 0.2, 0.2], underlay: true, pins: true } }),
+  77: () => ({ boneSparks: { colour: [0.25, 1, 0.7], underlay: true, pins: true } }),
   // 0x51 Berserker: hand auroras and body marks.
   81: () => ({ berserk: true }),
   // 0x52 Wiz Enhance / Swell of Magic Power (138 / 139 its strengthener and mastery): every bone glows violet, a rune on the hands every 6 s.

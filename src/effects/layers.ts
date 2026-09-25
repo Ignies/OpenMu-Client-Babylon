@@ -22,6 +22,7 @@ import { monsterGlowLayer } from './monsterGlow';
 import { monsterVisualsLayer } from './monsterVisuals';
 import { bandNotesLayer } from './bandNotes';
 import { pingLayer } from './ping';
+import { homingLayer } from './homing';
 
 /**
  * THE list. Every visual effect entry in the game is one line here, and
@@ -48,6 +49,7 @@ export const EFFECT_LAYERS = [
   blurLayer,
   ringLayer,
   pathLayer,
+  homingLayer, // reads its centre (a body) only
   burstsLayer, // spawn only; the shared particle pool steps it
   itemAuraLayer, // reset only; itemGlowSystem drives it
   itemCrackleLayer, // reset only; itemGlowSystem drives it

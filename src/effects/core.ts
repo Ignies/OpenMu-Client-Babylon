@@ -5,6 +5,7 @@ import {
   Material,
   Mesh,
   ParticleSystem,
+  RawTexture,
   StandardMaterial,
   Vector3,
   VertexBuffer,
@@ -562,8 +563,16 @@ export interface ParticleRecipe {
   /** Size factor at death (1 = constant). */
   endScale?: number;
   capacity?: number;
-  /** Additive (MU default) or standard alpha (smoke). */
-  blend?: 'add' | 'alpha';
+  /**
+   * Additive (MU default) or standard alpha (smoke). `dark` is `EnableAlphaBlendMinus`: black with the
+   * sheet's luminance as coverage, `luma(colour) x darkCardGain` (a JPG sheet, like the dark cards).
+   */
+  blend?: 'add' | 'alpha' | 'dark';
+  /**
+   * Brightness (or coverage) keys over the life, `[progress, level]`. Default `[0, 1], [0.6, 0.8], [1, 0]`;
+   * a particle the original leaves at full light and kills (BITMAP_LIGHT+2) holds 1 to the end.
+   */
+  fade?: readonly (readonly [number, number])[];
 }
 
 const systems = new Map<Scene, Map<string, ParticleSystem>>();
@@ -650,7 +659,7 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
     byRecipe = new WeakMap();
     systemsByRecipe.set(scene, byRecipe);
   }
-  const gain = r.blend === 'alpha' ? 1 : lightCardGain(scene);
+  const gain = r.blend === 'alpha' ? 1 : r.blend === 'dark' ? darkCardGain(scene) : lightCardGain(scene);
   const known = byRecipe.get(r);
   if (known && known.gain === gain) return known.ps;
 
@@ -676,7 +685,7 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   // BLENDMODE_ADD is (SRC_ALPHA, ONE): the colour × alpha is added, so the
   // gradients below fade a sprite toward black under it.
   ps.blendMode =
-    r.blend === 'alpha' ? ParticleSystem.BLENDMODE_STANDARD : ParticleSystem.BLENDMODE_ADD;
+    r.blend === 'alpha' || r.blend === 'dark' ? ParticleSystem.BLENDMODE_STANDARD : ParticleSystem.BLENDMODE_ADD;
 
   // The fade: an additive sprite dies by its colour going to black (the
   // original's `Light × LifeTime / n`), an alpha one by its alpha. The
@@ -686,14 +695,20 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   const key = (rgb: RGB, k: number): Color4 =>
     r.blend === 'alpha'
       ? new Color4(rgb[0], rgb[1], rgb[2], k)
-      : new Color4(rgb[0] * k * gain, rgb[1] * k * gain, rgb[2] * k * gain, 1);
+      : r.blend === 'dark'
+        ? new Color4(0, 0, 0, Math.min(1, luma(rgb) * gain * k))
+        : new Color4(rgb[0] * k * gain, rgb[1] * k * gain, rgb[2] * k * gain, 1);
   const start = key(c, 1);
   ps.color1 = start;
   ps.color2 = start.scale(0.85);
   ps.colorDead = key(e, 0);
-  ps.addColorGradient(0, start);
-  ps.addColorGradient(0.6, key(e, 0.8));
-  ps.addColorGradient(1, key(e, 0));
+  if (r.fade) {
+    for (const [at, level] of r.fade) ps.addColorGradient(at, key([lerp(c[0], e[0], at), lerp(c[1], e[1], at), lerp(c[2], e[2], at)], level));
+  } else {
+    ps.addColorGradient(0, start);
+    ps.addColorGradient(0.6, key(e, 0.8));
+    ps.addColorGradient(1, key(e, 0));
+  }
 
   const sj = r.sizeJitter ?? 0.25;
   ps.minSize = r.size * (1 - sj);
@@ -744,13 +759,52 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   const created = ps;
   created.startPositionFunction = (_world, position) => nextStartPosition(created, position);
   void effectTexture(scene, r.texture).then(tex => {
-    if (systems.get(scene)?.get(k) === created) created.particleTexture = tex;
+    if (systems.get(scene)?.get(k) !== created) return;
+    if (r.blend !== 'dark') {
+      created.particleTexture = tex;
+      return;
+    }
+    void lumaAlphaTexture(scene, tex, r.texture).then(own => {
+      if (systems.get(scene)?.get(k) === created) created.particleTexture = own;
+    });
   });
 
   ps.start();
   map.set(k, ps);
   byRecipe.set(r, { ps, gain });
   return ps;
+}
+
+const lumaTextures = new Map<string, Promise<Texture>>();
+
+/**
+ * A sheet as white with its luminance for alpha: what a dark particle covers with. The particle
+ * shader has no `getAlphaFromRGB`, so a JPG sheet drew as solid black cards. Built once per sheet.
+ */
+function lumaAlphaTexture(scene: Scene, tex: Texture, file: string): Promise<Texture> {
+  let pending = lumaTextures.get(file);
+  if (pending) return pending;
+  pending = (async () => {
+    const bitmap = await createImageBitmap(await (await fetch(tex.url ?? '')).blob());
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(bitmap, 0, 0);
+    const img = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      d[i + 3] = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+      d[i] = 255;
+      d[i + 1] = 255;
+      d[i + 2] = 255;
+    }
+    const out = RawTexture.CreateRGBATexture(d, bitmap.width, bitmap.height, scene, true, true, Constants.TEXTURE_TRILINEAR_SAMPLINGMODE);
+    out.hasAlpha = true;
+    return out;
+  })();
+  lumaTextures.set(file, pending);
+  return pending;
 }
 
 /** One burst of `count` particles at `at`. */
@@ -843,6 +897,8 @@ export function disposePools(): void {
   cardPool.clear();
   for (const map of systems.values()) for (const ps of map.values()) ps.dispose(false);
   systems.clear();
+  for (const t of lumaTextures.values()) void t.then(tex => tex.dispose());
+  lumaTextures.clear();
   systemsByRecipe.clear();
 }
 

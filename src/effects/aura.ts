@@ -23,11 +23,13 @@ import {
   TICK,
   acquireCard,
   additiveMaterial,
+  emitBurst,
   fxNow,
   hash,
   releaseCard,
   setCardCell,
   type Card,
+  type ParticleRecipe,
   type PointSource,
   type RGB,
 } from './core';
@@ -106,6 +108,83 @@ const SPARK_SIZE: readonly [number, number] = [px(64, 0.5), px(64, 0.7)];
 const SPARK_FALL = 0.013;
 const SPARK_SPIN = (5 * Math.PI) / 180;
 const SPARK_SHRINK = px(64, 0.02);
+/**
+ * Their BITMAP_PIN_LIGHT companion: one tick in two a pin_lights (16x128) particle under a random bone,
+ * Scale 1.0..1.4 shrinking 0.02 a tick, falling 10 cm a tick for 30 ticks (MoveHandlers.cpp:1535-1552,
+ * ZzzEffectParticle.cpp:2730-2745, :7378-7395).
+ */
+const DROP_SCALE: readonly [number, number] = [1.0, 1.4];
+const DROP_SHRINK = 0.02;
+const DROP_FALL = 0.1;
+
+/**
+ * Sleep (eDeBuff_Sleep): one tick in two a BITMAP_TWINTAIL_WATER sub2 (water.jpg, 32 px) 20 cm under a
+ * random bone, Scale 1.0..1.62, LT 60..69, rising 2..2.9 cm a tick, light x 1/1.02 a tick
+ * (MoveHandlers.cpp:2366-2370, ZzzEffectParticle.cpp:1136-1142, :5255-5270). Its Scale runs down
+ * 0.026 a tick and the original draws it mirrored once it passes zero; here it shrinks to nothing.
+ */
+const SLEEP_DROP_TICKS = 69;
+const sleepDropRecipes = new Map<string, ParticleRecipe>();
+function sleepDrops(colour: RGB): ParticleRecipe {
+  const key = colour.join(',');
+  let r = sleepDropRecipes.get(key);
+  if (!r) {
+    r = {
+      texture: TEX.water,
+      colour,
+      size: px(32, 1.31),
+      sizeJitter: 0.24,
+      life: SLEEP_DROP_TICKS * TICK,
+      lifeJitter: 0.13,
+      box: [0.2, 0.2, 0.2],
+      dir1: [0, 1, 0],
+      dir2: [0, 1, 0],
+      power: (2.45 * 25) / 100,
+      powerJitter: 0.15,
+      endScale: 0,
+      fade: [
+        [0, 1],
+        [0.25, 0.76],
+        [0.5, 0.57],
+        [0.75, 0.44],
+        [1, 0.26],
+      ],
+      capacity: 96,
+    };
+    sleepDropRecipes.set(key, r);
+  }
+  return r;
+}
+/**
+ * Blind (eDeBuff_Blind): two BITMAP_LIGHT+2 sub6 a tick on random bones, subtractive white: cra_04 at
+ * Scale 1.58..1.61 growing 0.04 a tick, LT 21, 6 cm a tick out in a random heading (x 0.6 a tick after
+ * the first) and 2 cm up against 0.1 of gravity, fading over the last 10 ticks (MoveHandlers.cpp:2351-2363,
+ * ZzzEffectParticle.cpp:885-903, :4050-4080, :9226-9232).
+ */
+const BLIND_SMOKE_TICKS = 21;
+const BLIND_SMOKE: ParticleRecipe = {
+  texture: TEX.cra04,
+  colour: [1, 1, 1],
+  size: px(64, 1.6),
+  sizeJitter: 0.01,
+  life: BLIND_SMOKE_TICKS * TICK,
+  lifeJitter: 0,
+  box: [0.05, 0.02, 0.05],
+  dir1: [-0.4, 1, -0.4],
+  dir2: [0.4, 1, 0.4],
+  power: 0.5,
+  powerJitter: 0.1,
+  gravity: -0.62,
+  spin: 0.87,
+  endScale: 1.52,
+  blend: 'dark',
+  fade: [
+    [0, 1],
+    [0.52, 1],
+    [1, 0],
+  ],
+  capacity: 256,
+};
 
 /**
  * Stun: three MODEL_SPEARSKILL sub8 joints, 40 cm out, turning 25° and
@@ -241,8 +320,12 @@ export interface AuraOptions {
   pulse?: Pulse;
   /** Thorns: the rising pin lights. */
   pins?: { colour: RGB };
-  /** Weakness / Innovation: shiny drops off random bones. */
-  boneSparks?: { colour: RGB };
+  /** Weakness / Innovation: shiny drops off random bones, with their flare01 underlay and pin_lights when asked. */
+  boneSparks?: { colour: RGB; underlay?: boolean; pins?: boolean };
+  /** Sleep: violet water drops rising off random bones. */
+  sleepDrops?: { colour: RGB };
+  /** Blind: black smoke pouring off random bones. */
+  blindSmoke?: boolean;
   /** Frozen: the ice shell and its ember. */
   iceShell?: boolean;
   /** Defense reduction: the skull. */
@@ -538,60 +621,142 @@ function pins(scene: Scene, o: AuraOptions, colour: RGB): Part {
 
 interface Spark {
   card: Card;
-  bone: number;
-  drop: number;
+  /** The flare01 card the original draws under every SHINY+6 (ZzzEffectParticle.cpp:9301-9304). */
+  under: Card | null;
+  x: number;
+  y: number;
+  z: number;
   size: number;
   spin: number;
   age: number;
 }
 
-function boneSparks(scene: Scene, o: AuraOptions, colour: RGB): Part {
-  const m = additiveMaterial(scene, TEX.shiny5, colour);
+interface Drop {
+  card: Card;
+  x: number;
+  y: number;
+  z: number;
+  scale: number;
+  age: number;
+}
+
+function boneSparks(scene: Scene, o: AuraOptions, p: NonNullable<AuraOptions['boneSparks']>): Part {
+  const m = additiveMaterial(scene, TEX.shiny5, p.colour);
+  const mu = additiveMaterial(scene, TEX.flare, p.colour);
+  const mp = additiveMaterial(scene, TEX.pinLights, p.colour);
   const alive: Spark[] = [];
+  const drops: Drop[] = [];
   const pool: Card[] = [];
+  const poolU: Card[] = [];
+  const poolP: Card[] = [];
   const take = (): Card => pool.pop() ?? acquireCard(scene, m);
+  const takeU = (): Card => poolU.pop() ?? acquireCard(scene, mu);
+  const takeP = (): Card => poolP.pop() ?? acquireCard(scene, mp);
+  const place = (c: Card, s: Spark, ramp: number): void => {
+    c.position.set(s.x, s.y, s.z);
+    c.scaling.setAll(s.size);
+    c.rotation.z = s.spin;
+    c.visibility = ramp;
+  };
   return {
     update(_dt, ramp, ticks) {
       const count = o.boneCount?.() ?? 0;
       for (let t = 0; t < ticks; t++) {
         if (count > 0 && Math.random() < SPARK_CHANCE) {
+          // The particle stays where it was born; the original does not re-read the body.
+          boneOf(o, Math.floor(Math.random() * count), tmp);
           alive.push({
             card: take(),
-            bone: Math.floor(Math.random() * count),
-            drop: SPARK_DROP,
+            under: p.underlay ? takeU() : null,
+            x: tmp.x,
+            y: tmp.y - SPARK_DROP,
+            z: tmp.z,
             size: rand(SPARK_SIZE[0], SPARK_SIZE[1]),
             spin: rand(0, Math.PI * 2),
             age: 0,
           });
         }
+        if (p.pins && count > 0 && Math.random() < SPARK_CHANCE) {
+          boneOf(o, Math.floor(Math.random() * count), tmp);
+          drops.push({ card: takeP(), x: tmp.x, y: tmp.y - SPARK_DROP, z: tmp.z, scale: rand(DROP_SCALE[0], DROP_SCALE[1]), age: 0 });
+        }
         for (let k = alive.length - 1; k >= 0; k--) {
           const s = alive[k];
           s.age++;
-          s.drop += SPARK_FALL;
+          s.y -= SPARK_FALL;
           s.size -= SPARK_SHRINK;
           s.spin += SPARK_SPIN;
           if (s.age >= SPARK_TICKS || s.size <= 0) {
             s.card.visibility = 0;
             pool.push(s.card);
+            if (s.under) {
+              s.under.visibility = 0;
+              poolU.push(s.under);
+            }
             alive[k] = alive[alive.length - 1];
             alive.pop();
           }
         }
+        for (let k = drops.length - 1; k >= 0; k--) {
+          const d = drops[k];
+          d.age++;
+          d.y -= DROP_FALL;
+          d.scale -= DROP_SHRINK;
+          if (d.age >= SPARK_TICKS || d.scale <= 0) {
+            d.card.visibility = 0;
+            poolP.push(d.card);
+            drops[k] = drops[drops.length - 1];
+            drops.pop();
+          }
+        }
       }
       for (const s of alive) {
-        boneOf(o, s.bone, tmp);
-        s.card.position.set(tmp.x, tmp.y - s.drop, tmp.z);
-        s.card.scaling.setAll(s.size);
-        s.card.rotation.z = s.spin;
-        s.card.visibility = ramp;
+        place(s.card, s, ramp);
+        if (s.under) place(s.under, s, ramp);
+      }
+      for (const d of drops) {
+        d.card.position.set(d.x, d.y, d.z);
+        d.card.scaling.set(px(16, d.scale), px(128, d.scale), 1);
+        d.card.visibility = ramp;
       }
     },
     release() {
-      for (const s of alive) releaseCard(scene, s.card);
+      for (const s of alive) {
+        releaseCard(scene, s.card);
+        if (s.under) releaseCard(scene, s.under);
+      }
+      for (const d of drops) releaseCard(scene, d.card);
       for (const c of pool) releaseCard(scene, c);
+      for (const c of poolU) releaseCard(scene, c);
+      for (const c of poolP) releaseCard(scene, c);
       alive.length = 0;
+      drops.length = 0;
       pool.length = 0;
+      poolU.length = 0;
+      poolP.length = 0;
     },
+  };
+}
+
+/**
+ * A shared particle recipe fed from random bones: `perTick` a tick (a fraction is a chance), `drop`
+ * tiles under the bone. The Sleep drops and the Blind smoke (MoveHandlers.cpp:2339-2376).
+ */
+function boneEmitter(scene: Scene, o: AuraOptions, recipe: ParticleRecipe, perTick: number, drop: number): Part {
+  return {
+    update(_dt, _ramp, ticks) {
+      const count = o.boneCount?.() ?? 0;
+      if (count <= 0) return;
+      for (let t = 0; t < ticks; t++) {
+        let n = Math.floor(perTick) + (Math.random() < perTick % 1 ? 1 : 0);
+        while (n-- > 0) {
+          boneOf(o, Math.floor(Math.random() * count), tmp);
+          tmp.y -= drop;
+          emitBurst(scene, recipe, tmp, 1);
+        }
+      }
+    },
+    release() {},
   };
 }
 
@@ -807,7 +972,9 @@ function spawn(scene: Scene, _at: Vector3, opts: AuraOptions): EffectHandle {
   if (opts.boneGlow) parts.push(boneGlow(scene, opts, opts.boneGlow));
   if (opts.pulse) parts.push(pulse(opts.pulse));
   if (opts.pins) parts.push(pins(scene, opts, opts.pins.colour));
-  if (opts.boneSparks) parts.push(boneSparks(scene, opts, opts.boneSparks.colour));
+  if (opts.boneSparks) parts.push(boneSparks(scene, opts, opts.boneSparks));
+  if (opts.sleepDrops) parts.push(boneEmitter(scene, opts, sleepDrops(opts.sleepDrops.colour), 0.5, 0.2));
+  if (opts.blindSmoke) parts.push(boneEmitter(scene, opts, BLIND_SMOKE, 2, 0));
   if (opts.iceShell) parts.push(iceShell(scene, opts));
   if (opts.skull) parts.push(skull(scene, opts));
   if (opts.stun) parts.push(stun(scene, opts, isStopping));

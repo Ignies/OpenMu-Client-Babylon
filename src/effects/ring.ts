@@ -13,7 +13,7 @@
 import { Vector3, type Scene } from '../libs/babylon/exports';
 import { TerrainDecal } from '../common/moveTargetEffect';
 import { Store } from '../store';
-import { LiveList, fadeOut, lerp, type PointSource, type RGB } from './core';
+import { LiveList, darkCardGain, fadeOut, lerp, luma, type PointSource, type RGB } from './core';
 import { RGBS, TEX } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
@@ -44,8 +44,16 @@ export interface RingOptions {
   spin?: number;
   /** Degrees the spin starts from, for a decal that has always been turning. */
   spinFrom?: number;
-  blend?: 'additive' | 'alpha';
+  /** `subtract` is EnableAlphaBlendMinus: black with the sheet as coverage, `luma(colour)` its strength. */
+  blend?: 'additive' | 'alpha' | 'subtract';
   fadeTail?: number;
+  /**
+   * The original's `Alpha` / `Luminosity` over the life (0..1 progress), replacing `fadeTail`. It scales
+   * the light (an additive decal is drawn (ONE, ONE), which drops the material alpha) or the coverage.
+   */
+  alphaAt?: (progress: number) => number;
+  /** Largest diameter the growth reaches, tiles (BITMAP_MAGIC_ZIN sub2 stops at 3.5). */
+  cap?: number;
   /**
    * Re-read the position every frame instead of standing where it was
    * spawned. `RenderTerrainAlphaBitmap` is an immediate-mode call in the
@@ -69,7 +77,7 @@ export function ringCount(): number {
   return live.size;
 }
 
-function acquire(texture: string, blend: 'additive' | 'alpha', maxScale = MAX_SCALE): TerrainDecal | null {
+function acquire(texture: string, blend: 'additive' | 'alpha' | 'subtract', maxScale = MAX_SCALE): TerrainDecal | null {
   const world = Store.world;
   if (!world) return null;
   const key = poolKey(texture, blend, maxScale);
@@ -104,6 +112,11 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const tail = opts.fadeTail ?? 0.35;
   const follow = opts.follow;
   const until = opts.until;
+  const alphaAt = opts.alphaAt;
+  const cap = Math.min(maxScale, opts.cap ?? maxScale);
+  const dark = blend === 'subtract';
+  const cover = dark ? Math.min(1, luma(colour) * darkCardGain(_scene)) : 0;
+  const lit: [number, number, number] = [colour[0], colour[1], colour[2]];
   let x = at.x;
   let z = at.z;
   let t = 0;
@@ -120,14 +133,23 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
         z = followTmp.z;
       }
       const s = scale * lerp(growFrom, grow, p);
-      decal.setAlpha(fadeOut(p, tail));
+      let light: readonly [number, number, number] = colour;
+      if (dark) decal.setAlpha(cover * (alphaAt ? alphaAt(p) : fadeOut(p, tail)));
+      else if (alphaAt) {
+        const k = alphaAt(p);
+        lit[0] = colour[0] * k;
+        lit[1] = colour[1] * k;
+        lit[2] = colour[2] * k;
+        light = lit;
+        decal.setAlpha(1);
+      } else decal.setAlpha(fadeOut(p, tail));
       decal.draw(
         world,
         x,
         z,
-        Math.min(maxScale, s),
+        Math.min(cap, s),
         spinFrom + spin * t,
-        colour
+        light
       );
       return true;
     },

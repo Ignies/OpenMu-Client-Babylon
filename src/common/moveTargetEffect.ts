@@ -135,13 +135,14 @@ export class TerrainDecal {
   readonly #lineX: Float64Array;
   readonly #lineY: Float64Array;
   #textured = false;
+  #dark = false;
 
   constructor(
     world: World,
     name: string,
     textureFile: string,
     maxScale: number,
-    blend: 'additive' | 'alpha' = 'additive'
+    blend: 'additive' | 'alpha' | 'subtract' = 'additive'
   ) {
     this.#cols = Math.ceil(maxScale) + 2;
 
@@ -184,6 +185,10 @@ export class TerrainDecal {
       // EnableAlphaBlend(): straight alpha from the texture (blood, footprints).
       this.#material.alphaMode = Constants.ALPHA_COMBINE;
       this.#material.useAlphaFromDiffuseTexture = true;
+    } else if (blend === 'subtract') {
+      // EnableAlphaBlendMinus (the Blind circle): black, the sheet's luminance as coverage, `setAlpha` its strength.
+      this.#material.alphaMode = Constants.ALPHA_COMBINE;
+      this.#dark = true;
     }
 
     this.#material.zOffset = -2;
@@ -195,6 +200,14 @@ export class TerrainDecal {
     this.#mesh = mesh;
 
     void loadEffectTexture(world.scene, textureFile).then(texture => {
+      if (this.#dark) {
+        // A clone, so the shared sheet's other users keep their own alpha.
+        const own = texture.clone();
+        own.getAlphaFromRGB = true;
+        this.#material.opacityTexture = own;
+        this.#textured = true;
+        return;
+      }
       // Straight-alpha decals (blood, footprints) need the texture flagged,
       // otherwise useAlphaFromDiffuseTexture is ignored and the black
       // background of the TGA is drawn.
@@ -211,6 +224,7 @@ export class TerrainDecal {
   /** The mesh and its material go; the texture is the shared cache's. */
   dispose(): void {
     this.#mesh.dispose(false, false);
+    if (this.#dark) this.#material.opacityTexture?.dispose();
     this.#material.dispose();
   }
 
@@ -295,7 +309,7 @@ export class TerrainDecal {
     this.#mesh.updateVerticesData('position', positions);
     this.#mesh.updateVerticesData('uv', uvs);
 
-    this.#material.emissiveColor.set(light[0], light[1], light[2]);
+    if (!this.#dark) this.#material.emissiveColor.set(light[0], light[1], light[2]);
     this.#mesh.setEnabled(true);
   }
 }

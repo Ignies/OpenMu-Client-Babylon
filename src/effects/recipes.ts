@@ -162,6 +162,8 @@ export const TEX = {
   luckySeal: 'Effect/partCharge1/bujuckline.ozj',
   kwave: 'Effect/Kwave.OZJ',
   powerWave: 'Effect/PoundingBall.OZJ',
+  /** BITMAP_LIGHT+2 (cra_04.jpg, 64 px): the Summoner curse hand flashes and the Blind body smoke. */
+  cra04: 'Effect/cra_04.OZJ',
 } as const;
 
 export type EffectTexture = (typeof TEX)[keyof typeof TEX];
@@ -340,6 +342,10 @@ export const MODEL = {
   volcanoStone: 'Effect/volcano_stone.glb',
   changeUp: 'Effect/Change_Up_Eff.glb',
   iceStone: 'Effect/ice_stone00.glb',
+  /** MODEL_SUMMONER_CASTING_EFFECT2 / 22 / 222: Weakness and Innovation's turning circles. */
+  suhwanzin2: 'Effect/Suhwanzin2.glb',
+  suhwanzin22: 'Effect/Suhwanzin22.glb',
+  suhwanzin222: 'Effect/Suhwanzin222.glb',
 } as const;
 
 export type EffectModel = (typeof MODEL)[keyof typeof MODEL];

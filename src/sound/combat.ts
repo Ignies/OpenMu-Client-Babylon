@@ -115,6 +115,11 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   220: 'Sound/SE_Ch_summoner_skill04_blind', // Blind
   221: 'Sound/SE_Ch_summoner_weakness', // Weakness
   222: 'Sound/SE_Ch_summoner_innovation', // Innovation
+  454: 'Sound/SE_Ch_summoner_skill03_sleep', // Sleep Strengthener
+  459: 'Sound/SE_Ch_summoner_weakness', // Weakness Strengthener
+  460: 'Sound/SE_Ch_summoner_innovation', // Innovation Strengthener
+  461: 'Sound/SE_Ch_summoner_skill04_blind', // Blind (OpenMU's id for 220)
+  463: 'Sound/SE_Ch_summoner_skill04_blind', // Blind Strengthener
   223: 'Sound/SE_Ch_summoner_skill05_explosion03', // Explosion
   224: 'Sound/SE_Ch_summoner_skill06_requiem02', // Requiem
   230: 'Sound/lightning_shock', // Lightning Shock
@@ -202,8 +207,21 @@ export function playerDeathSound(cls: CharacterClassNumber): Sounds {
   return 'Sound/pMaleDie';
 }
 
+/**
+ * Skills whose sound the original plays with the effect at AttackTime 15, 14 ticks after the
+ * echo (ZzzCharacter.cpp:4724-4754), not at the cast: the skill row plays these
+ * (`playLandingSound`, common/skillVisuals.ts), so the cast is silent here.
+ */
+const LANDING_SOUNDS: ReadonlySet<number> = new Set([221, 222, 459, 460]);
+
 export function skillSound(skill: number): Sounds | null {
+  if (LANDING_SOUNDS.has(skill)) return null;
   return SKILL_SOUNDS[skill] ?? null;
+}
+
+/** The sound of a skill in `LANDING_SOUNDS`, played when its effect lands. */
+export function playLandingSound(skill: number, at?: SfxPosition | null): void {
+  if (LANDING_SOUNDS.has(skill)) playCombat(SKILL_SOUNDS[skill] ?? null, at);
 }
 
 /** Jewel pickups ring instead of clinking (WSclient.cpp:6181-6189). */
