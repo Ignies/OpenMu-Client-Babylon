@@ -155,8 +155,8 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Fire Slash / Flame Strike: BITMAP_JOINT_FIRE range 2 (ZzzEffectJoint.cpp:4612).
   55: { area: flame(3, 0.7) },
   236: { area: flame(3, 0.8, { gain: 1.3 }) },
-  // Fire Burst / Fire Blast / Fire Scream: BITMAP_FLAME range 3.
-  61: { impact: flame(3, 0.6) },
+  // Fire Burst: the original lights nothing (no AddTerrainLight on PIER_PART / DARKLORD_SKILL).
+  // Fire Blast / Fire Scream: BITMAP_FLAME range 3.
   74: { impact: flame(3, 0.6, { gain: 1.3 }) },
   78: { area: flame(4, 0.9, { gain: 1.3 }) },
   // Electric Spark / Lightning Shock / Chain Lightning: BITMAP_LIGHTNING+1 range 2-4.

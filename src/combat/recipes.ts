@@ -313,6 +313,8 @@ export const DEFAULT_HIT_KEY = 5;
 export const HIT_KEYS: Readonly<Partial<Record<PlayerAction, number>>> = {
   [A.PLAYER_ATTACK_SKILL_FURY_STRIKE]: 1, // Rageful Blow: AnimationFrame >= 1
   [A.PLAYER_ATTACK_STRIKE]: 3, // Force / Fire Burst: AnimationFrame >= 3
+  [A.PLAYER_ATTACK_RIDE_STRIKE]: 3, // the same, mounted (ZzzCharacter.cpp:2868-2870)
+  [A.PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE]: 3, // the same, on a Fenrir
   [A.PLAYER_SKILL_FLASH]: 5.5, // Thunder Strike: AnimationFrame >= 5.5
   [A.PLAYER_ATTACK_ONETOONE]: 8, // Death Stab: CheckAttackTime(8) sword whoosh
   [A.PLAYER_SKILL_HELL_START]: 14, // Nova release: AnimationFrame >= 14

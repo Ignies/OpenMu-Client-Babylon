@@ -92,6 +92,10 @@ export interface SpriteOptions {
    * `luma(colour) × darkCardGain`; above 1 the body goes fully black and only the edges stay soft.
    */
   cover?: number;
+  /** Size multiplier at progress 0..1; wins over `grow` / `growFrom` (a `Scale = sin(LifeTime)` pulse). */
+  sizeAt?: (p: number) => number;
+  /** A fixed turn of the card on its axis, radians (the original's `Rotation` rolled at birth). */
+  roll?: number;
 }
 
 const live = new LiveList();
@@ -166,6 +170,7 @@ export function spawnSprite(
   for (let i = 0; i < count; i++) {
     const card = acquireCard(scene, material, !opts.flat);
     if (opts.flat) card.rotation.x = Math.PI / 2;
+    if (opts.roll !== undefined) card.rotation.z = opts.roll;
     cards.push(card);
     const s = seed++;
     offsets.push(
@@ -198,7 +203,7 @@ export function spawnSprite(
       const ready = (dark ? material.opacityTexture : material.diffuseTexture) ? 1 : 0;
       source(tmp);
       const grown = p < GROW_FRACTION ? lerp(growFrom, 1, p / GROW_FRACTION) : lerp(1, grow, (p - GROW_FRACTION) / (1 - GROW_FRACTION));
-      const s = size * grown;
+      const s = size * (opts.sizeAt ? opts.sizeAt(p) : grown);
       // The original's `Alpha`: the card's colour fades to black (core.ts
       // `ADDITIVE_ALPHA_MODE`); it used to shrink instead.
       const vis = ready * fadeOut(p, tail);

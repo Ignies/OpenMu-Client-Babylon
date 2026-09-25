@@ -90,6 +90,9 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_SKILL_HELL) return 0.5 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_RIDE_SKILL) return 0.3 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_SKILL_HELL_BEGIN) return 0.5 + magicSpeedFactor(magicSpeed);
+  // The Dark Lord's strike (Force, Fire Burst), on foot and mounted (ZzzCharacter.cpp:948-949).
+  if (action === A.PLAYER_ATTACK_STRIKE) return 0.25 + f;
+  if (action === A.PLAYER_ATTACK_RIDE_STRIKE) return 0.2 + f;
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {

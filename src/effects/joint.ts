@@ -151,6 +151,8 @@ export interface JointOptions {
   track?: (head: Vector3) => void;
   /** Fade fraction at end of life (default 0.3). Evil Spirit's `Light = LifeTime * 0.1` is 10/49. */
   fadeTail?: number;
+  /** A 0..1 brightness at `t` seconds alive, in place of `fadeTail` and the bolt's flicker (a per-tick `Light *= …`). */
+  intensity?: (t: number) => number;
   /** Trail: segments kept behind the head (C++ `MaxTails`). */
   maxTails?: number;
   /**
@@ -512,7 +514,7 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
         mesh.setPoints(lines);
       }
       line.scroll();
-      line.fade(fadeOut(prog, opts.fadeTail ?? 0.3) * (0.6 + 0.4 * hash(t * 97)));
+      line.fade(opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3) * (0.6 + 0.4 * hash(t * 97)));
       return true;
     },
     release() {
@@ -689,7 +691,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
       if (opts.wave && drawLine !== line) waveLine(drawLine, waveScratch, opts.wave, t);
       mesh.setPoints(drawLines);
       ribbon.scroll();
-      const vis = fadeOut(prog, opts.fadeTail ?? 0.3);
+      const vis = opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3);
       ribbon.fade(vis);
       if (spriteCards.length) {
         const s = opts.sprites!;

@@ -4,6 +4,7 @@ import { projectileLayer } from './projectile';
 import { debrisLayer } from './debris';
 import { feathersLayer } from './feathers';
 import { modelLayer } from './model';
+import { stampsLayer } from './stamps';
 import { columnLayer } from './column';
 import { shroudLayer } from './shroud';
 import { pillarLayer } from './pillar';
@@ -33,6 +34,7 @@ export const EFFECT_LAYERS = [
   debrisLayer, // moves the pieces the models below follow
   feathersLayer, // moves the feathers the models below follow
   modelLayer, // reads projectile's / debris' / feathers' points
+  stampsLayer,
   spriteLayer,
   particlesLayer,
   columnLayer,

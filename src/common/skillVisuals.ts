@@ -5,9 +5,10 @@ import { lighting } from '../lighting';
 import { combat } from '../combat';
 import { weather } from '../weather';
 import { effects, type EffectHandle } from '../effects';
-import { bonePos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, type PointSource, type RGB } from '../effects/core';
+import { bonePos, boneLocalPos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, type PointSource, type RGB } from '../effects/core';
 import type { SpriteOptions } from '../effects/sprite';
-import type { ModelOptions } from '../effects/model';
+import type { ModelHandle, ModelOptions } from '../effects/model';
+import type { StampsHandle } from '../effects/stamps';
 import type { RingOptions } from '../effects/ring';
 import type { ParticlesOptions } from '../effects/particles';
 import type { ProjectileOptions } from '../effects/projectile';
@@ -41,6 +42,9 @@ import {
   EXPLOSION_CELLS,
 } from '../effects/recipes';
 import { ItemsDatabase } from './itemsDatabase';
+import { PlayerAction } from './objects/enum';
+import { playCombat } from '../sound/combat';
+import type { Sounds } from '../sound/recipes';
 import { skillDefinition, type SkillDefinition } from './skillsDatabase';
 import { storeRef } from './storeRef';
 import { tierIndex } from './lightingQuality';
@@ -533,25 +537,6 @@ function summonCircle(at: Vector3, c: SkillContext): void {
   particles({ recipe: SMOKE, count: 12 })(at, c);
 }
 
-/**
- * Force / Force Wave's hit: 2× MODEL_WAVES sub1 (LT 15, z+80, Scale 0.1–0.6, Angle[0] 90, 2× JOINT PIERCING
- * width 70–110 each, jitter ±50) + MODEL_PIERCING2 (LT 10, Scale 2.0, Dir(0,−60,0), z+130) running on.
- */
-const forceHit: Step = (at, c) => {
-  const feet = at.clone();
-  feet.y -= IMPACT_HEIGHT;
-  for (let i = 0; i < 2; i++) {
-    const p = new Vector3(feet.x + (Math.random() - 0.5), feet.y + cm(80), feet.z + (Math.random() - 0.5));
-    effects.spawn('model', c.scene, p, { model: MODEL.waves, seconds: ticks(15), scale: 0.35, grow: 1.7, colour: RGBS.shade, flat: true, spin: 3 });
-    for (let j = 0; j < 2; j++) {
-      const a = Math.random() * Math.PI * 2;
-      effects.spawn('joint', c.scene, p, { heading: new Vector3(Math.sin(a), 0.3, Math.cos(a)), velocity: perTick(40), seconds: ticks(15), maxTails: 6, width: cm(90), colour: RGBS.shade });
-    }
-  }
-  effects.spawn('model', c.scene, feet, { model: MODEL.piercing2, seconds: ticks(10), scale: 2, colour: RGBS.shade, height: cm(130), follow: flying(c, cm(130), perTick(60), 0, Vector3.Distance(entityPos(c.caster, 0, new Vector3()), feet)), yaw: entityYaw(c.caster) });
-  hitSparks(ARC_MOTES)(at, c);
-};
-
 /** Add Critical / Brand of Skill: MODEL_DARKLORD_SKILL at weapon bone 0 (sub0) and bone 1 (sub1), Light (1,0.6,0.3). */
 const addCritical: Step = (_at, c) => {
   const tint: RGB = [1, 0.6, 0.3];
@@ -641,6 +626,252 @@ const novaCharge: Step = (_at, c) => {
 };
 /** A Nova hold tops out at 12 stages × 5 ticks; anyone else's charge is shown that long. */
 const NOVA_MAX_SECONDS = ticks(60);
+
+// ---- dl1 steps -------------------------------------------------------------------
+
+/** The Dark Lord's strike clips; key 3 releases Force and Fire Burst (ZzzCharacter.cpp:2865-2883). */
+const STRIKE_CLIPS: ReadonlySet<number> = new Set([PlayerAction.PLAYER_ATTACK_STRIKE, PlayerAction.PLAYER_ATTACK_RIDE_STRIKE, PlayerAction.PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE]);
+const STRIKE_KEY = 3;
+/** AttackTime starts at 1 and fires at 15 (ZzzCharacter.cpp:4132-4140): 14 ticks at most. */
+const STRIKE_MAX_TICKS = 14;
+/** Moves an effect has made when drawn `t` seconds after its spawn: the first runs in the frame it is created. */
+const movesAt = (t: number): number => 1 + t / TICK;
+/** The caster's `Angle[2]` in degrees, for model.ts `angle`. */
+const yawDegrees = (c: SkillContext): number => (entityYaw(c.caster) * 180) / Math.PI;
+/** `rand() % n`. */
+const randInt = (n: number): number => Math.floor(Math.random() * n);
+
+/**
+ * `step` once the caster's strike clip passes key 3, or 14 ticks after the packet, whichever comes first,
+ * with `sound` as it fires. The original needs a live target for any of it (ZzzCharacter.cpp:4811-4839).
+ */
+const strikeKey = (step: Step, sound: Sounds): Step => (at, c) => {
+  if (!c.target?.transform) return;
+  const p = at.clone();
+  let waited = 0;
+  const poll = (): void => {
+    if (entityGone(c.caster)) return;
+    const m = c.caster.modelObject;
+    const struck = !!m && STRIKE_CLIPS.has(m.CurrentAction) && m.actionFrame() >= STRIKE_KEY;
+    if (!struck && waited++ < STRIKE_MAX_TICKS) {
+      delay(TICK, poll);
+      return;
+    }
+    playCombat(sound, c.caster.transform!.pos);
+    step(p, c);
+  };
+  poll();
+};
+
+/** A MODEL_WAVES scale after `n` moves: `Scale += Gravity`, `Gravity += dg`, capped (MoveHandlers.cpp:5277-5290). */
+const wavesScale = (s0: number, dg: number, cap: number, n: number): number => Math.min(cap, s0 + 0.01 * n + (dg * n * (n - 1)) / 2);
+
+/** Force's rings, streaks and lance sit 130 cm over the caster's feet (MODEL_WAVES +50 +80, PIERCING2 +130). */
+const FORCE_HEIGHT = cm(130);
+/** BITMAP_PIERCING sub0 lays 30 tails 20 cm apart straight ahead on its first tick (ZzzEffectJoint.cpp:6492-6505). */
+const PIERCING_LENGTH = cm(29 * 20);
+
+/** One BITMAP_PIERCING sub0: a static Piercing.jpg streak from `p` along `f`, width 70-109 cm, x1/1.4 a tick, LT 10. */
+function piercingStreak(p: Vector3, f: Vector3, c: SkillContext): void {
+  const far = new Vector3(p.x + f.x * PIERCING_LENGTH, p.y, p.z + f.z * PIERCING_LENGTH);
+  // U runs from the caster (0) to the far end (1), the original's (NumTails - j) / (MaxTails - 1).
+  effects.spawn('joint', c.scene, far, {
+    to: p.clone(),
+    jitter: 0,
+    segments: 2,
+    width: cm(70 + randInt(40)),
+    colour: Math.random() < 0.5 ? [1, 0.8, 0.6] : RGBS.white,
+    texture: TEX.pierce,
+    seconds: ticks(10),
+    intensity: t => Math.pow(1.4, -movesAt(t)),
+  });
+}
+
+/**
+ * Force / Force Wave at the strike (ZzzCharacter.cpp:5056-5063), all at the caster: 2x MODEL_WAVES sub1
+ * (ZzzEffect.cpp:3207-3222), each laying 2 BITMAP_PIERCING streaks before its ±50 cm jitter, then
+ * MODEL_PIERCING2 (:3248-3264) easing 1.2 m forward and dropping a MODEL_WAVES sub2 a tick for 5 ticks
+ * (MoveHandlers.cpp:5360-5396). Vertical rings facing the heading, depth-tested, near white.
+ */
+const force: Step = (_at, c) => {
+  const yaw = yawDegrees(c);
+  const f = facing(c);
+  const p = entityPos(c.caster, FORCE_HEIGHT, new Vector3());
+  for (let i = 0; i < 2; i++) {
+    piercingStreak(p, f, c);
+    piercingStreak(p, f, c);
+    const s0 = 0.1 + randInt(50) / 100;
+    const q = new Vector3(p.x + cm(randInt(100) - 50), p.y, p.z + cm(randInt(100) - 50));
+    effects.spawn('model', c.scene, q, {
+      model: MODEL.waves,
+      seconds: ticks(14),
+      angle: [90, 0, yaw],
+      scaleAt: t => wavesScale(s0, 0.07, 2, movesAt(t)),
+      intensity: t => Math.pow(1.5, -movesAt(t)),
+      fadeTail: 0,
+    });
+  }
+  // Direction[1] from -60 by +12 a tick to 0: 48, 36, 24, 12 cm, then held 1.2 m out.
+  const reach = (n: number): number => (n >= 4 ? cm(120) : cm(60 * n - 6 * n * (n + 1)));
+  const t0 = fxNow();
+  effects.spawn('model', c.scene, p, {
+    model: MODEL.piercing2,
+    seconds: ticks(9),
+    scale: 2,
+    angle: [0, 0, yaw],
+    follow: out => {
+      const d = reach(movesAt(fxNow() - t0));
+      return out.set(p.x + f.x * d, p.y, p.z + f.z * d);
+    },
+    intensity: t => Math.pow(1.6, -Math.min(5, movesAt(t))),
+    fadeTail: 0,
+  });
+  // While LT > 5 the lance drops one ring a tick where it stands, Scale 0.05 x LT.
+  for (let m = 1; m <= 5; m++) {
+    const d = reach(m - 1);
+    const s0 = 0.05 * (11 - m);
+    const ring = new Vector3(p.x + f.x * d, p.y, p.z + f.z * d);
+    delay(ticks(m - 1), () =>
+      effects.spawn('model', c.scene, ring, {
+        model: MODEL.waves,
+        seconds: ticks(14),
+        angle: [90, 0, yaw],
+        scaleAt: t => wavesScale(s0, 0.01, 1.5, movesAt(t)),
+        intensity: t => Math.pow(1.5, -movesAt(t)),
+        fadeTail: 0,
+      })
+    );
+  }
+};
+
+/** Fire Burst's origin: bone 0 + (40, 0, 10) cm in its frame (ZzzCharacter.cpp:5071-5072). */
+const FIRE_BURST_LOCAL = new Vector3(cm(40), 0, cm(10));
+/** MODEL_PIER_PART sub0 LT 20: it is drawn after moves 0..18 (ZzzEffect.cpp:3384-3395). */
+const DART_MOVES = 19;
+/** `Direction (0, -26, 0)`: each homing step. */
+const DART_STEP = cm(26);
+/** TurnAngle2: `cur` toward `target` by at most `max` degrees, in [0, 360) (ZzzAI.cpp:120-127). */
+const turnToward = (cur: number, target: number, max: number): number => {
+  let d = (((target % 360) + 360) % 360) - (((cur % 360) + 360) % 360);
+  if (d > 180) d -= 360;
+  else if (d < -180) d += 360;
+  const next = cur + Math.max(-max, Math.min(max, d));
+  return ((next % 360) + 360) % 360;
+};
+/** `to->BoundingBoxMax[2]`: 120 cm on a player (ZzzCharacter.cpp:11798); a monster's from its model's bounds. */
+function targetTop(e: Entity): number {
+  const m = e.modelObject;
+  if (e.charAppearance || !m?.gltf || !e.transform) return cm(120);
+  m.UpdateBoundings();
+  const top = m.BoundingBoxLocal.maximumWorld.y - e.transform.pos.y;
+  return top > 0.3 ? top : cm(120);
+}
+
+/**
+ * One BITMAP_FIRE+1 sub0 off a ghost (ZzzEffectParticle.cpp:571-576, :4769-4777): Fire02 at Scale 0.8
+ * growing by an accumulating 0.02, rising Gravity x 20 cm, streaming along the dart's heading at
+ * 9.6-11.7 cm a tick x1.05, Light LT x 0.2 (clamped at 1), LT 12.
+ */
+function pierFire(c: SkillContext, at: Vector3, dir: Vector3): void {
+  const v0 = cm((randInt(8) + 32) * 0.3);
+  const t0 = fxNow();
+  effects.spawn('sprite', c.scene, at, {
+    texture: TEX.fire2,
+    size: cm(64),
+    seconds: ticks(11),
+    roll: Math.random() * Math.PI * 2,
+    follow: out => {
+      const n = movesAt(fxNow() - t0);
+      const d = (v0 * (Math.pow(1.05, n) - 1)) / 0.05;
+      return out.set(at.x + dir.x * d, at.y + dir.y * d + cm(0.2 * n * (n + 1)), at.z + dir.z * d);
+    },
+    sizeAt: p => {
+      const n = movesAt(p * ticks(11));
+      return 0.8 + 0.01 * n * (n + 1);
+    },
+    // Light 0.2 x LT clamps at 1 until LT 5: a linear fade over the last 5 of its 11 drawn ticks.
+    fadeTail: 5 / 11,
+  });
+}
+
+/**
+ * One MODEL_PIER_PART sub0 dart (MoveHandlers.cpp:5598-5640): per tick `Gravity - 1` steps, each a 50%
+ * -20° pitch kick, MoveHumming toward the aim by up to `Velocity` degrees, 26 cm along the new heading,
+ * and a sub1 ghost left there. Drawn at its tick positions, alpha-tested, only its steel spike.
+ *
+ * The ghosts (ZzzEffect.cpp:3397-3405, MoveHandlers.cpp:5664-5670) are the flame frame alone at Scale 0.5,
+ * `Alpha = (20 - LT) / 5` so the first ticks' ones are cut away, x1/1.3 a tick over the dart's last ticks,
+ * dying with it; each emits one Fire02 puff. They are stamps of one trail per dart (effects/stamps.ts).
+ */
+function pierDart(c: SkillContext, target: Entity, from: Vector3, yaw: number, aimHeight: number): void {
+  const pos = from.clone();
+  const aim = entityPos(target, aimHeight, new Vector3());
+  const dir = new Vector3();
+  const step = new Vector3();
+  const heading: [number, number, number] = [0, 0, yaw];
+  let velocity = 10;
+  let gravity = 2;
+  const dart = effects.spawn('model', c.scene, from, {
+    model: MODEL.pierPart,
+    seconds: ticks(DART_MOVES),
+    scale: 1.2,
+    hideMesh: 1,
+    cutout: true,
+    angle: heading,
+    follow: out => out.copyFrom(pos),
+    fadeTail: 0,
+  }) as ModelHandle;
+  const ghosts = effects.spawn('stamps', c.scene, from, {
+    model: MODEL.pierPart,
+    mesh: 1,
+    scale: 0.5,
+    seconds: ticks(DART_MOVES),
+    intensity: t => Math.pow(1.3, -Math.max(0, t / TICK - 15)),
+  }) as StampsHandle;
+  let k = 0;
+  const move = (): void => {
+    const lifeTime = 20 - k;
+    if (!entityGone(target)) entityPos(target, aimHeight, aim);
+    for (let i = 1; i < gravity; i++) {
+      if (Math.random() < 0.5) heading[0] += heading[0] < -90 ? 20 : -20;
+      const dx = aim.x - pos.x;
+      const dz = aim.z - pos.z;
+      heading[2] = turnToward(heading[2], (Math.atan2(dx, -dz) * 180) / Math.PI, velocity);
+      heading[0] = turnToward(heading[0], 360 - (Math.atan2(aim.y - pos.y, Math.hypot(dx, dz)) * 180) / Math.PI, velocity);
+      velocity += 0.4;
+      if (lifeTime < 10) velocity += 0.1;
+      const pitch = (heading[0] * Math.PI) / 180;
+      const turn = (heading[2] * Math.PI) / 180;
+      dir.set(Math.cos(pitch) * Math.sin(turn), -Math.sin(pitch), -Math.cos(pitch) * Math.cos(turn));
+      pos.addInPlace(dir.scaleToRef(DART_STEP, step));
+      pierFire(c, pos.clone(), dir.clone());
+      ghosts.add(pos, heading, Math.min(1, k / 5));
+    }
+    gravity = Math.fround(gravity + 0.1);
+    dart.setAngle(heading);
+    if (++k < DART_MOVES) delay(TICK, move);
+  };
+  move();
+}
+
+/**
+ * Fire Burst at the strike (ZzzCharacter.cpp:5064-5085): 3 homing darts from bone 0 + (40, 0, 10) at
+ * yaw +90 / 0 / -90, the first aimed at the target's BoundingBoxMax z and the others at half of it, plus
+ * 2 MODEL_DARKLORD_SKILL cards there, Light (1, 0.6, 0.3), Scale 0.2, LT 10, turned (45, ±45, 0) in the
+ * world (ZzzEffect.cpp:3449-3470). Nothing lands on the target.
+ */
+const fireBurst: Step = (_at, c) => {
+  const target = c.target!;
+  const o = boneLocalPos(c.caster, 0, FIRE_BURST_LOCAL, new Vector3(), 1);
+  const yaw = yawDegrees(c);
+  const top = targetTop(target);
+  pierDart(c, target, o, yaw + 90, top);
+  pierDart(c, target, o, yaw, top / 2);
+  pierDart(c, target, o, yaw - 90, top / 2);
+  for (const tilt of [45, -45]) {
+    effects.spawn('model', c.scene, o, { model: MODEL.darkLordSkill, seconds: ticks(9), scale: 0.2, colour: [1, 0.6, 0.3], angle: [45, tilt, 0], fadeTail: 0 });
+  }
+};
 
 // ---- the table -------------------------------------------------------------------
 
@@ -1072,24 +1303,12 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 1.3+count·0.08) + CreateForce: 3× JOINT_HEALING sub8 from r=500, LT 17. On the hero it runs for the hold
   // (`combat.novaCharging` / `novaStage`); on anyone else for a full charge's length.
   58: { cast: novaCharge },
-  // 60 Force / 66 Force Wave: 2× MODEL_WAVES sub1 (LT 15, z+80, Scale 0.1–0.6, 2× JOINT PIERCING each) +
-  // MODEL_PIERCING2 (LT 10, Scale 2.0, Dir(0,−60,0), z+130).
-  60: { impact: forceHit },
-  66: { impact: forceHit, area: forceHit },
-  // 61 Fire Burst: 3× MODEL_PIER_PART sub0 from the caster (yaw +90/0/−90; LT 20, Vel 10, Scale 1.2) +
-  // 2× MODEL_DARKLORD_SKILL sub0/1 at the target (Light (1,0.6,0.3), LT 10, Scale 0.2).
-  61: {
-    cast: (_at, c) => {
-      for (const turn of [Math.PI / 2, 0, -Math.PI / 2]) {
-        effects.spawn('model', c.scene, entityPos(c.caster, 0.5, new Vector3()), { model: MODEL.pierPart, seconds: ticks(20), scale: 1.2, colour: RGBS.fire, follow: flying(c, 0.5, perTick(26), turn, 0.4), yaw: entityYaw(c.caster) + turn });
-      }
-    },
-    impact: seq(
-      model({ model: MODEL.darkLordSkill, seconds: ticks(10), scale: 0.2, colour: [1, 0.6, 0.3], grow: 3 }),
-      model({ model: MODEL.darkLordSkill, seconds: ticks(10), scale: 0.2, colour: [1, 0.6, 0.3], grow: 3, yaw: Math.PI / 4 }),
-      fireHit
-    ),
-  },
+  // 60 Force / 66 Force Wave (and 509): at the strike key, caster-anchored rings, streaks and lance; sDarkSpear.
+  60: { impact: strikeKey(force, 'Sound/sDarkSpear') },
+  66: { impact: strikeKey(force, 'Sound/sDarkSpear'), area: strikeKey(force, 'Sound/sDarkSpear') },
+  // 61 Fire Burst (and 508 / 514): at the strike key, three homing darts with their ghost trails and two
+  // starburst cards at the caster; eFirebustBoom from the darts.
+  61: { impact: strikeKey(fireBurst, 'Sound/eFirebustBoom') },
   // 62 Earthshake: frame ≥ 5 - the EarthQuake0N companions at the caster.
   62: {
     area: atCaster(seq(

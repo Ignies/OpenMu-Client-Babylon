@@ -16,6 +16,7 @@
 import {
   Constants,
   Material,
+  Matrix,
   Quaternion,
   StandardMaterial,
   TransformNode,
@@ -134,6 +135,24 @@ export interface ModelOptions {
    * the tier runs cascades at all.
    */
   shadow?: boolean;
+  /**
+   * The original's `o->Angle` in degrees on MU's axes (x, y, z = yaw), turned
+   * the way `AngleMatrix` does (ZzzMathLib.cpp:185). Replaces `yaw` and `flat`;
+   * `spin` and `aim` do not apply.
+   */
+  angle?: readonly [number, number, number];
+  /** `o->HiddenMesh`: this mesh (BMD order) is not drawn. */
+  hideMesh?: number;
+  /**
+   * RENDER_TEXTURE on a sheet with alpha: every mesh but `blendMesh` is
+   * alpha-tested and unlit (`EnableAlphaTest`, ZzzBMD.cpp:1507-1526) instead
+   * of additive, and `visibility` is its `Alpha`.
+   */
+  cutout?: boolean;
+  /** The scale at `t` seconds alive; wins over `scale` and `grow` (a per-tick `o->Scale` curve). */
+  scaleAt?: (t: number) => number;
+  /** A 0..1 brightness at `t` seconds alive, multiplied into the fade (`BodyLight x BlendMeshLight`, clamped as GL did). */
+  intensity?: (t: number) => number;
 }
 
 export interface ModelHandle extends EffectHandle {
@@ -143,6 +162,8 @@ export interface ModelHandle extends EffectHandle {
   aimAlong(dir: Vector3): void;
   /** Tilt the model `rad` about its side axis (a tumbling stone; `o->Angle[0]`). */
   pitchTo(rad: number): void;
+  /** Re-turn a model spawned with `angle` (a homing body's `o->Angle` each tick). */
+  setAngle(angle: readonly [number, number, number]): void;
 }
 
 const live = new LiveList();
@@ -155,6 +176,33 @@ export function modelCount(): number {
 const tmp = new Vector3();
 const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
 const FLAT = Quaternion.FromEulerAngles(0, 0, 0);
+const angleMatrix = new Matrix();
+
+/**
+ * `AngleMatrix(angle)` (Z·Y·X, degrees) as the node's rotation. The default
+ * conversion puts BMD (x, y, z) on (x, z, y), so the rotation is P·R·P⁻¹ with
+ * P swapping y and z, written transposed for Babylon's row vectors.
+ */
+export function muAngle(angle: readonly [number, number, number], out: Quaternion): Quaternion {
+  const d = Math.PI / 180;
+  const sr = Math.sin(angle[0] * d);
+  const cr = Math.cos(angle[0] * d);
+  const sp = Math.sin(angle[1] * d);
+  const cp = Math.cos(angle[1] * d);
+  const sy = Math.sin(angle[2] * d);
+  const cy = Math.cos(angle[2] * d);
+  const m00 = cp * cy;
+  const m10 = cp * sy;
+  const m20 = -sp;
+  const m01 = sr * sp * cy - cr * sy;
+  const m11 = sr * sp * sy + cr * cy;
+  const m21 = sr * cp;
+  const m02 = cr * sp * cy + sr * sy;
+  const m12 = cr * sp * sy - sr * cy;
+  const m22 = cr * cp;
+  Matrix.FromValuesToRef(m00, m20, m10, 0, m02, m22, m12, 0, m01, m21, m11, 0, 0, 0, 0, 1, angleMatrix);
+  return Quaternion.FromRotationMatrixToRef(angleMatrix, out);
+}
 
 /**
  * `RENDER_DARK`'s mesh material (ZzzBMD.cpp:1606). Owned by the spawn, never
@@ -235,7 +283,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const cover = subtract ? Math.min(opts.maxCover ?? Infinity, luma(colour) * darkCardGain(scene)) : 0;
 
   const node = new TransformNode('fxModel', scene);
-  node.rotationQuaternion = null;
+  node.rotationQuaternion = opts.angle ? muAngle(opts.angle, new Quaternion()) : null;
   node.rotation.y = opts.yaw ?? 0;
   node.scaling.setAll(scale);
   if (world) node.setParent(world.mapParent);
@@ -260,15 +308,16 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         gltf.mesh.setParent(node);
         gltf.mesh.position.setAll(0);
         gltf.mesh.scaling.set(1, -1, 1);
-        gltf.mesh.rotationQuaternion = (opts.flat ? FLAT : UPRIGHT).clone();
+        gltf.mesh.rotationQuaternion = (opts.flat && !opts.angle ? FLAT : UPRIGHT).clone();
         if (opts.rearAt !== undefined) reseat(node, gltf.mesh, opts.rearAt);
         const bodyLight = new Vector3(colour[0], colour[1], colour[2]);
         // The lighting lane's shared bright material, for a mesh whose
         // texture did not come through the GLB cache (never disposed here).
         const brightFallback = getMaterial(scene, false, Material.MATERIAL_ALPHABLEND, BlendState.ALPHA_ONEOE, true);
         // Unlit, opaque, texture × body light - `glColor3fv(BodyLight)` with lighting off.
-        const solid =
-          opts.blendMesh === undefined
+        const solid = opts.cutout
+          ? getMaterial(scene, false, Material.MATERIAL_ALPHATESTANDBLEND, BlendState.ALPHA_COMBINE, false, true)
+          : opts.blendMesh === undefined
             ? null
             : getMaterial(scene, true, Material.MATERIAL_OPAQUE, BlendState.ALPHA_DISABLE, false, true);
         // The converter names nodes in BMD mesh order (node_0, node_1…).
@@ -285,6 +334,12 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           }
           mesh.isPickable = false;
           mesh.alwaysSelectAsActiveMesh = true;
+          if (i === opts.hideMesh) mesh.isVisible = false;
+          // The cutout's `Alpha` is the whole mesh's, never the converted COLOR_0.
+          if (opts.cutout && !isBright) {
+            mesh.useVertexColors = false;
+            mesh.hasVertexAlpha = false;
+          }
           // A dark mesh's coverage is the sheet alone: the converted COLOR_0 on the skill models is noise,
           // and its alpha punched holes through the silhouette.
           if (subtract && isBright) {
@@ -326,7 +381,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       if (p >= 1) return false;
       source(tmp);
       node.position.set(tmp.x, tmp.y + height + rise * t, tmp.z);
-      node.scaling.setAll(scale * lerp(1, grow, p));
+      node.scaling.setAll(opts.scaleAt ? opts.scaleAt(t) * DEFAULT_SCALE : scale * lerp(1, grow, p));
       if (spin) node.rotation.y += spin * dt;
       if (opts.aim) {
         const dx = tmp.x - prevX;
@@ -335,7 +390,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         prevX = tmp.x;
         prevZ = tmp.z;
       }
-      const vis = fadeOut(p, tail) * alpha * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1);
+      const lit = opts.intensity ? Math.max(0, Math.min(1, opts.intensity(t))) : 1;
+      const vis = fadeOut(p, tail) * alpha * lit * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1);
       // A dark mesh fades through its coverage: `visibility` is clamped at 1 and the
       // coverage runs past it on the graded tiers.
       if (subtract) for (const m of fadeMats) m.alpha = cover * vis;
@@ -374,6 +430,9 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     },
     pitchTo(rad: number) {
       node.rotation.x = rad;
+    },
+    setAngle(angle) {
+      node.rotationQuaternion = muAngle(angle, node.rotationQuaternion ?? new Quaternion());
     },
   };
 }
