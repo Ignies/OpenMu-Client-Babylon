@@ -73,6 +73,8 @@ export interface SpriteOptions {
   flat?: boolean;
   /** Fade tail as a fraction of life (default 0.35). */
   fadeTail?: number;
+  /** Brightness e^(-decay t) on top of the fade: a `Light /= 1.05` a tick is 25 ln 1.05. */
+  decay?: number;
   /**
    * The texture is a sheet: play its cells once over the life, one card = one
    * cell (BITMAP_EXPLOTION's `Frame = (20 − LifeTime) / 2`). Without this the
@@ -165,6 +167,7 @@ export function spawnSprite(
   const spin = opts.spin ?? 0;
   const height = opts.height ?? 0;
   const tail = opts.fadeTail ?? 0.35;
+  const decay = opts.decay ?? 0;
   const cells = opts.cells;
   const source = opts.follow ? opts.follow : pointSource(at);
 
@@ -210,7 +213,7 @@ export function spawnSprite(
       const s = size * (opts.sizeAt ? opts.sizeAt(p) : grown);
       // The original's `Alpha`: the card's colour fades to black (core.ts
       // `ADDITIVE_ALPHA_MODE`); it used to shrink instead.
-      const vis = ready * fadeOut(p, tail);
+      const vis = ready * fadeOut(p, tail) * (decay > 0 ? Math.exp(-decay * t) : 1);
       const y = height + rise * t;
       for (let i = 0; i < cards.length; i++) {
         const c = cards[i];

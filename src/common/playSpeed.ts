@@ -237,6 +237,16 @@ export function playerFrameSpeedScale(action: PlayerAction, frame: number, darkL
 }
 
 /**
+ * The player clips a Freeze or Cold slows with the walk (ZzzCharacter.cpp:496-542): the walk and run blocks and
+ * the horse and Dark Lord walks. PLAYER_RUN_WAND is rewritten after the slow, so it keeps its rate.
+ */
+export function debuffSlowsClip(action: PlayerAction): boolean {
+  if (action >= A.PLAYER_WALK_MALE && action <= A.PLAYER_WALK_CROSSBOW) return true;
+  if (action >= A.PLAYER_RUN && action <= A.PLAYER_RUN_RIDE_WEAPON) return action !== A.PLAYER_RUN_WAND;
+  return action === A.PLAYER_RUN_RIDE_HORSE || action === A.PLAYER_DARKLORD_WALK;
+}
+
+/**
  * `PLAYER_STOP_RAGEFIGHTER`'s rate, which the Phoenix Soul Star's own clip is
  * keyed to (`RenderCharacterItem`, ZzzCharacter.cpp:9922).
  */

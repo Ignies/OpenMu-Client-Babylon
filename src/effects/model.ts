@@ -66,10 +66,18 @@ export interface ModelOptions {
   grow?: number;
   /** Exponent on the grow progress (1 = linear): 2 is the original's accelerating `Scale += Gravity; Gravity += 0.1` (MODEL_COMBO). */
   growEase?: number;
+  /** The growth ends at this fraction of the life and holds (default 1): MODEL_COMBO grows only while LT > 4. */
+  growUntil?: number;
   /** Visibility falls as e^(-decay t), per second on top of the fade: a `BlendMeshLight /= 1.4` a tick is 25 ln 1.4. */
   decay?: number;
   /** Tint (`bodyLight`). */
   colour?: RGB;
+  /**
+   * The V texture offset of one mesh (BMD order) as a function of the effects clock - the original's
+   * `BlendMeshTexCoordV` on the blend mesh. The texture is the GLB cache's, one per file, so every spawn
+   * of the model shares the offset, as they share the original's `WorldTime`.
+   */
+  scrollV?: { mesh: number; at: (now: number) => number };
   /** Radians/s around the up axis. */
   spin?: number;
   /** Tiles/s upward. */
@@ -318,6 +326,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const scale = (opts.scale ?? 1) * DEFAULT_SCALE;
   const grow = opts.grow ?? 1;
   const growEase = opts.growEase ?? 1;
+  const growUntil = opts.growUntil ?? 1;
   const decay = opts.decay ?? 0;
   const spin = opts.spin ?? 0;
   const rise = opts.rise ?? 0;
@@ -358,6 +367,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const copyNodes: { node: TransformNode; at: Vector3; scale: number; yaw: number }[] = [];
   const start = node.position.clone();
   let clip: AnimationGroup | null = null;
+  let scrolledV: Texture | null = null;
   let disposed = false;
   let t = 0;
 
@@ -488,6 +498,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
             copyNodes.push({ node: cn, at: c.at, scale: c.scale, yaw: c.yaw });
           }
         }
+        if (opts.scrollV) scrolledV = (meshes[opts.scrollV.mesh]?.metadata?.diffuseTexture as Texture | undefined) ?? null;
         clip = gltf.animationGroups[0] ?? null;
         if (clip) {
           clip.speedRatio = ANIMATION_SPEED;
@@ -511,7 +522,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       if (p >= 1) return false;
       source(tmp);
       node.position.set(tmp.x, tmp.y + height + rise * t, tmp.z);
-      node.scaling.setAll(opts.scaleAt ? opts.scaleAt(t) * DEFAULT_SCALE : scale * lerp(1, grow, growEase === 1 ? p : Math.pow(p, growEase)));
+      const gp = growUntil < 1 ? Math.min(1, p / growUntil) : p;
+      node.scaling.setAll(opts.scaleAt ? opts.scaleAt(t) * DEFAULT_SCALE : scale * lerp(1, grow, growEase === 1 ? gp : Math.pow(gp, growEase)));
       if (native && world) {
         const light = world.getTerrainLight(tmp.x, tmp.z);
         nativeLight.set(light.x + native.light[0], light.y + native.light[1], light.z + native.light[2]);
@@ -523,6 +535,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       }
       if (opts.rotate) opts.rotate(node.rotation);
       else if (spin) node.rotation.y += spin * dt;
+      if (scrolledV) scrolledV.vOffset = opts.scrollV!.at(fxNow());
       if (opts.aim && !opts.rotate) {
         const dx = tmp.x - prevX;
         const dz = tmp.z - prevZ;

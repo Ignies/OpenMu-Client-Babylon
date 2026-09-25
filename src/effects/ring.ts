@@ -62,6 +62,8 @@ export interface RingOptions {
    * alpha, so only this dims it (a `Light` that decays, BITMAP_FLARE_BLUE under a Strike of Destruction).
    */
   fadeColour?: boolean;
+  /** Brightness e^(-decay t) on top of the fade: a `Light /= 1.05` a tick is 25 ln 1.05. */
+  decay?: number;
 }
 
 const live = new LiveList();
@@ -110,6 +112,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const follow = opts.follow;
   const until = opts.until;
   const fadeColour = opts.fadeColour ?? false;
+  const decay = opts.decay ?? 0;
   const faded: [number, number, number] = [0, 0, 0];
   let x = at.x;
   let z = at.z;
@@ -127,7 +130,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
         z = followTmp.z;
       }
       const s = scale * lerp(growFrom, grow, p);
-      const fade = fadeOut(p, tail);
+      const fade = fadeOut(p, tail) * (decay > 0 ? Math.exp(-decay * t) : 1);
       decal.setAlpha(fade);
       if (fadeColour) {
         faded[0] = colour[0] * fade;

@@ -10,6 +10,7 @@ import { shroudLayer } from './shroud';
 import { pillarLayer } from './pillar';
 import { jointLayer } from './joint';
 import { spiritSwarmLayer } from './spiritSwarm';
+import { raysLayer } from './rays';
 import { blurLayer } from './blur';
 import { ringLayer } from './ring';
 import { pathLayer } from './path';
@@ -47,6 +48,7 @@ export const EFFECT_LAYERS = [
   auraLayer, // drives the heads of the orbit ribbons it spawned through joint, so before it
   jointLayer, // reads aura's ribbon heads
   spiritSwarmLayer, // steps where the joint trails did, after the particles that ride its heads
+  raysLayer,
   blurLayer,
   ringLayer,
   pathLayer,

@@ -8,6 +8,7 @@ import { isFastWing } from '../../common/wings';
 import { isRidingMount } from '../../common/pets';
 import type { Entity, ISystemFactory } from '../world';
 import { distanceAlongPath } from '../../common/approachPath';
+import { debuffSlow } from '../../common/debuffBody';
 
 /**
  * OpenMU walks every object by wall-clock time: each step takes
@@ -155,7 +156,8 @@ export const MoveAlongPathSystem: ISystemFactory = world => {
             ? attributeSystem.getValue('totalMovementSpeed')
             : 4;
         }
-        let deltaSpeed = speed * deltaTime;
+        // CharacterMoveSpeed's Freeze / Cold slow (ZzzCharacter.cpp:6352-6359), monsters and players alike.
+        let deltaSpeed = speed * debuffSlow(entity.buffs) * deltaTime;
 
         // The hero may not outwalk what the server has been told. A frame
         // hitch (a tab in the background, a burst of asset loading) hands

@@ -289,7 +289,7 @@ function park(points: number[]): void {
   }
 }
 
-interface Line {
+export interface Line {
   mesh: GreasedLineMesh;
   /** Set the ribbon's fade 0…1 (the original's `Alpha` on the tail quads). */
   fade(vis: number): void;
@@ -352,7 +352,8 @@ function taperWidths(lines: number[][], shape: TaperShape): number[] {
   return widths;
 }
 
-function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, opts: JointOptions, widths?: number[]): Line {
+/** One ribbon mesh for `lines`; `widths` (two per point, x `width`) overrides `opts.taper`'s. rays.ts draws a burst through it. */
+export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, opts: JointOptions, widths?: number[]): Line {
   const blend = opts.blend ?? 'add';
   const sheetFile = opts.texture;
   const textured = !!sheetFile;
@@ -487,7 +488,7 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
   };
 }
 
-function disposeLine(scene: Scene, line: Line, lines: number[][]): void {
+export function disposeLine(scene: Scene, line: Line, lines: number[][]): void {
   const mesh = line.mesh;
   for (const l of lines) park(l);
   releaseEffectGlow(mesh);

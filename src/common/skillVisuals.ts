@@ -15,6 +15,7 @@ import type { RingOptions } from '../effects/ring';
 import type { ParticlesOptions } from '../effects/particles';
 import type { ProjectileOptions } from '../effects/projectile';
 import type { JointOptions, TaperShape } from '../effects/joint';
+import type { Ray } from '../effects/rays';
 import type { AuraOptions, BoneGlow, SpearJoints } from '../effects/aura';
 import {
   ARC_MOTES,
@@ -2582,9 +2583,12 @@ const PUFF_SIZE_HELD = Math.pow(0.95, 24 * 0.3);
 const PUFF_SIZE_END = Math.pow(0.95, 24);
 /**
  * JOINT_SPARK sub1's width is its Scale 2 - two centimetres (ZzzEffectJoint.cpp:960-966), under a pixel at
- * this camera; drawn five wide so the sparks read at all.
+ * this camera; ours is five wide so the sparks read at all.
  */
 const BREATH_SPARK_WIDTH = cm(5);
+/** JOINT_SPARK sub1's `Light /= 1.4` a tick and `Velocity += 0.3` a tick (ZzzEffectJoint.cpp:4201-4208). */
+const SPARK_DECAY = 25 * Math.log(1.4);
+const SPARK_ACCEL = perTick(0.3) * 25;
 /**
  * CreateBomb2's 20 BITMAP_SPARK sub2 chips (ZzzEffect.cpp:6349-6360, ZzzEffectParticle.cpp:2016-2031,
  * :6558-6597): Spark02 (4 px) at Scale 0.8-1.4, thrown 6-12 cm a tick outward and 6-21 up, falling 2 cm a
@@ -2612,9 +2616,6 @@ const bomb2: Step = (at, c) => {
   effects.spawn('sprite', c.scene, at, { texture: TEX.dinoE, colour: RGBS.white, size: cm(256), seconds: ticks(12), cells: DINO_CELLS, fadeTail: 0.1 });
   effects.spawn('particles', c.scene, at, { recipe: BOMB2_SPARKS, count: 20 });
   playCombat('Sound/eExplosion', at);
-  // The client's fire-on-the-ground convention (see `scorch` / `burn`), not the original's.
-  scorch(1)(at, c);
-  burn(1)(at, c);
 };
 
 /**
@@ -2628,32 +2629,32 @@ const bomb2: Step = (at, c) => {
 const fireBreath: Step = (_at, c) => {
   const f = forwardOf(entityYaw(c.caster));
   const feet = entityPos(c.caster, 0, new Vector3());
+  // (f.z, -f.x) is the caster's right: the side its right-hand bone 33 is on (checked in-page, dk3.md).
   const place = (ahead: number, right: number, up: number, out = new Vector3()): Vector3 =>
-    out.set(feet.x + f.x * ahead - f.z * right, feet.y + up, feet.z + f.z * ahead + f.x * right);
+    out.set(feet.x + f.x * ahead + f.z * right, feet.y + up, feet.z + f.z * ahead - f.x * right);
   playCombat('Sound/sKnightSkill3', feet);
 
+  // All forty in one ribbon mesh (effects/rays.ts): they share their birth tick and their Light.
+  const sparks: Ray[] = [];
   for (const right of [cm(20), cm(-30)]) {
-    const from = place(cm(20), right, cm(60));
+    const from = place(cm(20), right, cm(60)).subtractInPlace(feet);
+    const offset = [from.x, from.y, from.z] as const;
     let roll = 0;
     for (let i = 0; i < 20; i++) {
       roll += (i * 18 * Math.PI) / 180;
       const pitch = ((5 + Math.floor(Math.random() * 20)) * Math.PI) / 180;
       const side = Math.sin(pitch) * Math.sin(roll);
-      const heading = new Vector3(f.x * Math.cos(pitch) - f.z * side, -Math.sin(pitch) * Math.cos(roll), f.z * Math.cos(pitch) + f.x * side);
-      // Every other one: each spark is its own ribbon mesh, and forty at once hitched the frame they spawned in.
-      if (i % 2 === 1) continue;
-      effects.spawn('joint', c.scene, from, {
-        velocity: perTick(16 + Math.floor(Math.random() * 20)),
-        heading,
-        seconds: ticks(4 + Math.floor(Math.random() * 4)),
-        maxTails: 2,
+      sparks.push({
+        offset,
+        dir: [f.x * Math.cos(pitch) - f.z * side, -Math.sin(pitch) * Math.cos(roll), f.z * Math.cos(pitch) + f.x * side],
+        speed: perTick(16 + Math.floor(Math.random() * 20)),
+        accel: SPARK_ACCEL,
         width: BREATH_SPARK_WIDTH,
-        colour: RGBS.white,
-        texture: TEX.spark,
-        fadeTail: 1,
+        life: ticks(4 + Math.floor(Math.random() * 4)),
       });
     }
   }
+  effects.spawn('rays', c.scene, feet, { rays: sparks, texture: TEX.spark, colour: RGBS.white, seconds: ticks(7), tail: ticks(2), decay: SPARK_DECAY });
 
   const t0 = fxNow();
   lighting.skillFollow(c.scene, 49, out => {
@@ -2739,6 +2740,8 @@ const DESTRUCTION_SMOKE: ParticleRecipe = {
  * 150, the ground here): only the upper half of the cube is above ground, so half the spots, in that half.
  */
 const DESTRUCTION_SPOTS = 4;
+/** The controllers' `Light /= 1.05` a tick (ZzzEffect.cpp:9214-9240). */
+const DESTRUCTION_LIGHT_DECAY = 25 * Math.log(1.05);
 
 /**
  * Strike of Destruction (ZzzCharacter.cpp:4169-4179): MODEL_BLOW_OF_DESTRUCTION is no mesh but two
@@ -2753,17 +2756,22 @@ const blowOfDestruction: Step = (at, c) => {
   const yaw = entityYaw(c.caster);
   const f = forwardOf(yaw);
   const feet = entityPos(c.caster, 0, new Vector3());
-  const a = new Vector3(feet.x + f.x - f.z * cm(20), feet.y, feet.z + f.z + f.x * cm(20));
+  // (-20, -100) in the caster's frame: a metre ahead, 20 cm to its right, (f.z, -f.x).
+  const a = new Vector3(feet.x + f.x + f.z * cm(20), feet.y, feet.z + f.z - f.x * cm(20));
   const b = at.clone();
   const tint: RGB = [0.3, 0.3, 1];
   const turn = (): number => Math.random() * Math.PI * 2;
+  // The crack streaks on mesh 1 scroll `-(WorldTime % 2000) * 0.0001` in V (ZzzObject.cpp:606-617).
+  const streaks = { mesh: 1, at: (now: number): number => -((now * 1000) % 2000) * 0.0001 };
   // The crack meshes are authored flat in MU's XY, so the default (upright) basis is what lays them down.
 
   after(ticks(16), (_p, cc) => {
     effects.spawn('sprite', cc.scene, a, { texture: TEX.swordEffMono, colour: [0.5, 0.5, 1], size: cm(64) * 3.05, height: cm(65), seconds: ticks(24), fadeTail: 0.1 });
-    effects.spawn('ring', cc.scene, a, { texture: TEX.flareBlue, colour: [1.2, 1.2, 1.2], scale: 4, seconds: ticks(24), fadeTail: 0.85, fadeColour: true });
-    effects.spawn('sprite', cc.scene, b, { texture: TEX.flare, colour: [0.6, 0.6, 1.2], size: cm(64) * 5, height: 1, seconds: ticks(24), fadeTail: 0.85 });
-    effects.spawn('ring', cc.scene, b, { texture: TEX.flareBlue, colour: [1.2, 1.2, 1.2], scale: 6, seconds: ticks(24), fadeTail: 0.85, fadeColour: true });
+    // L = 1.2 falling /1.05 a tick to 0.37 at LT 0, then cut.
+    const light = { seconds: ticks(24), fadeTail: 0.04, decay: DESTRUCTION_LIGHT_DECAY };
+    effects.spawn('ring', cc.scene, a, { texture: TEX.flareBlue, colour: [1.2, 1.2, 1.2], scale: 4, fadeColour: true, ...light });
+    effects.spawn('sprite', cc.scene, b, { texture: TEX.flare, colour: [0.6, 0.6, 1.2], size: cm(64) * 5, height: 1, ...light });
+    effects.spawn('ring', cc.scene, b, { texture: TEX.flareBlue, colour: [1.2, 1.2, 1.2], scale: 6, fadeColour: true, ...light });
     effects.spawn('quake', cc.scene, b, { seconds: ticks(10), min: -0.4, max: 0.3 });
     const spot = new Vector3(b.x, b.y + 0.75, b.z);
     for (let k = 0; k < 10; k++) {
@@ -2781,7 +2789,7 @@ const blowOfDestruction: Step = (at, c) => {
     };
     splash(a, 0.9);
     splash(a, 0.9);
-    effects.spawn('model', cc.scene, a, { model: MODEL.knightPlanCrack, scale: 1.2 + Math.floor(Math.random() * 10) * 0.05, colour: tint, yaw: turn(), height: cm(10), seconds: ticks(25), fadeTail: 1 });
+    effects.spawn('model', cc.scene, a, { model: MODEL.knightPlanCrack, scale: 1.2 + Math.floor(Math.random() * 10) * 0.05, colour: tint, yaw: turn(), height: cm(10), seconds: ticks(25), fadeTail: 1, scrollV: streaks });
     // KNIGHT_PLANCRACK_B every 55 cm from A, one per metre to B plus one: about half the way. Each is turned
     // +90 deg at its init and alternately 10-29 deg either side of the caster's facing.
     const dir = toward(a, b);
@@ -2789,7 +2797,7 @@ const blowOfDestruction: Step = (at, c) => {
     for (let i = 0; i < n; i++) {
       const side = ((10 + Math.floor(Math.random() * 20)) * Math.PI) / 180;
       const p = new Vector3(a.x + dir.x * cm(55) * i, a.y, a.z + dir.z * cm(55) * i);
-      effects.spawn('model', cc.scene, p, { model: MODEL.knightPlanCrack2, scale: 1, colour: tint, yaw: yaw + Math.PI / 2 + (i % 2 === 0 ? side : -side), height: cm(15), seconds: ticks(25), fadeTail: 1 });
+      effects.spawn('model', cc.scene, p, { model: MODEL.knightPlanCrack2, scale: 1, colour: tint, yaw: yaw + Math.PI / 2 + (i % 2 === 0 ? side : -side), height: cm(15), seconds: ticks(25), fadeTail: 1, scrollV: streaks });
     }
     splash(b, 2);
     splash(b, 1);
@@ -2801,7 +2809,7 @@ const blowOfDestruction: Step = (at, c) => {
 /**
  * The Cold debuff's one look on insert (WSclient.cpp:15631-15634): MODEL_ICE sub0 at the feet, Scale 0.8,
  * BlendMesh 0, LT 50, smoking and fading once its clip passes key 5 (ZzzEffect.cpp:2187-2195, :7637-7661).
- * The body tint and the slowed walk that go with it have no facility here yet.
+ * The body tint, the bright pass and the slowed walk that go with it are common/debuffBody.ts.
  */
 function coldIce(scene: Scene, entity: Entity): void {
   const feet = entityPos(entity, 0, new Vector3());
@@ -2812,8 +2820,8 @@ function coldIce(scene: Scene, entity: Entity): void {
 
 /** MODEL_COMBO's BlendMeshLight /= 1.4 a tick (MoveHandlers.cpp:5260), as a rate per second. */
 const COMBO_DECAY = 25 * Math.log(1.4);
-/** The original's 60 BITMAP_LIGHT rays, drawn at half. */
-const COMBO_RAYS = 30;
+/** The original's 60 BITMAP_LIGHT sub0 rays (WSclient.cpp:4829-4832). */
+const COMBO_RAYS = 60;
 
 /**
  * The combo burst at the caster (WSclient.cpp:4829-4832): MODEL_COMBO 50 cm up, unturned, every mesh bright
@@ -2824,22 +2832,21 @@ const COMBO_RAYS = 30;
  * keeping its last 30 steps, then holding until LT 0 (ZzzEffectJoint.cpp:2421-2434, :6453-6468).
  */
 const comboBurst: Step = (at, c) => {
-  effects.spawn('model', c.scene, at, { model: MODEL.combo, seconds: ticks(20), scale: 0.9, grow: 24.6, growEase: 2, decay: COMBO_DECAY, fadeTail: 0.05, colour: RGBS.white });
-  const t0 = fxNow();
-  // Drawn at half the count, like Swell Life's fan: 30 wide rays read the same and cost half.
+  // 0.9 + 0.05 n (n + 1) by tick n, stopping at tick 16 (LT 4): 14.5, 16.1 times the start.
+  effects.spawn('model', c.scene, at, { model: MODEL.combo, seconds: ticks(20), scale: 0.9, grow: 16.1, growEase: 2, growUntil: 0.8, decay: COMBO_DECAY, fadeTail: 0.05, colour: RGBS.white });
+  // One ribbon mesh for all sixty (effects/rays.ts): each head runs 10 steps a tick for 4 ticks and the last
+  // 30 steps (3 ticks) are what is drawn, from 10 to 40 steps out once it stops.
+  const rays: Ray[] = [];
   for (let i = 0; i < COMBO_RAYS; i++) {
     const heading = forwardOf(Math.random() * Math.PI * 2);
     const pitch = ((30 - Math.floor(Math.random() * 40)) * Math.PI) / 180;
-    const step = cm(10 + Math.floor(Math.random() * 10));
-    const dx = heading.x * Math.cos(pitch);
-    const dy = -Math.sin(pitch);
-    const dz = heading.z * Math.cos(pitch);
-    const head: PointSource = out => {
-      const s = Math.min(4, (fxNow() - t0) / TICK) * 10 * step;
-      return out.set(at.x + dx * s, at.y + dy * s, at.z + dz * s);
-    };
-    effects.spawn('joint', c.scene, at, { head, maxTails: 3, sampleFor: ticks(3.5), width: cm(70 + Math.floor(Math.random() * 40)), colour: [0.1, 0.5, 1], texture: TEX.flare, seconds: ticks(20), fadeTail: 0.05 });
+    rays.push({
+      dir: [heading.x * Math.cos(pitch), -Math.sin(pitch), heading.z * Math.cos(pitch)],
+      speed: perTick(10 * (10 + Math.floor(Math.random() * 10))),
+      width: cm(70 + Math.floor(Math.random() * 40)),
+    });
   }
+  effects.spawn('rays', c.scene, at, { rays, texture: TEX.flare, colour: [0.1, 0.5, 1], seconds: ticks(20), moveFor: ticks(4), tail: ticks(3), fadeTail: 0.05 });
 };
 
 // ---- the table -------------------------------------------------------------------
