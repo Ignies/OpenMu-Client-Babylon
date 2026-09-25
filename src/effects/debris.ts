@@ -87,6 +87,8 @@ export interface DebrisOptions {
   speedScale?: number;
   /** Upward launch speed `[min, span]` cm/tick (sub10: `rand() % 16 + 28`). */
   riseCm?: readonly [number, number];
+  /** The model layer's `blendMesh`; -1 draws the pieces opaque (rock) instead of additive. */
+  blendMesh?: number;
 }
 
 type Piece = {
@@ -153,6 +155,7 @@ export function spawnDebris(scene: Scene, at: Vector3, opts: DebrisOptions): Eff
         seconds: (LIFE_TICKS_MIN + LIFE_TICKS_SPAN) * TICK,
         scale: size * extra,
         colour,
+        blendMesh: opts.blendMesh,
         yaw,
         loop: false,
         fadeTail: FADE_TAIL,

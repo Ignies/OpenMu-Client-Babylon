@@ -964,6 +964,55 @@ const QUAKE_SMOKE: ParticleRecipe = {
   endScale: 2.25,
   capacity: 128,
 };
+/** Graded tiers: the stones' sub11 smoke at a dust brown; at the original's (1, 0.8, 0.6) the graded buffer washed the stones out under it. */
+const QUAKE_DUST: ParticleRecipe = { ...QUAKE_SMOKE, colour: [0.24, 0.21, 0.18], spin: 0.6, capacity: 192 };
+/** Graded tiers: the stones' DhorSS_R pulled toward orange; the tone curve took the original's white glow to a pale beige. */
+const QUAKE_STONE_HOT: RGB = [1, 0.5, 0.28];
+/** Graded tiers: the burst's dust skirt, thrown flat and out along the ground. */
+const QUAKE_DUST_SKIRT: ParticleRecipe = {
+  ...QUAKE_DUST,
+  size: 0.8,
+  sizeJitter: 0.3,
+  life: 1.1,
+  lifeJitter: 0.3,
+  box: [0.2, 0, 0.2],
+  dir1: [-1, 0.15, -1],
+  dir2: [1, 0.35, 1],
+  power: 1.4,
+  powerJitter: 0.4,
+  endScale: 2.6,
+};
+/** Graded tiers: stone chips drawn opaque in rock colour; additive, as the original draws them, they read as white paper on the graded ground. */
+const QUAKE_ROCK: RGB = [0.62, 0.56, 0.5];
+/** Graded tiers: embers lifting off the glowing cracks and fins. */
+const QUAKE_EMBERS: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [1, 0.6, 0.25],
+  colourEnd: [0.7, 0.15, 0.03],
+  size: 0.12,
+  sizeJitter: 0.4,
+  life: 0.9,
+  lifeJitter: 0.4,
+  box: [0.3, 0.02, 0.3],
+  dir1: [-0.3, 1, -0.3],
+  dir2: [0.3, 1, 0.3],
+  power: 1.1,
+  powerJitter: 0.5,
+  gravity: -0.5,
+  capacity: 256,
+};
+/** Graded tiers: the hot chips the burst throws. */
+const QUAKE_BURST_SPARKS: ParticleRecipe = {
+  ...QUAKE_EMBERS,
+  size: 0.16,
+  life: 0.7,
+  box: [0.2, 0.1, 0.2],
+  dir1: [-1, 0.6, -1],
+  dir2: [1, 1.4, 1],
+  power: 4,
+  gravity: -7,
+  capacity: 128,
+};
 /** `BlendMeshLight = LifeTime / 30` (EarthQuake01/04/07); the GL clamps the colour at 1. */
 const quakeFade = (life: number) => (p: number): number => Math.min(1, ticksLeft(p, life) / 30);
 /** 02 / 05 / 08: `(life - LifeTime) * 0.1` over the first 10 ticks, then `LifeTime * 0.1`, clamped at 1 by the GL. */
@@ -975,17 +1024,18 @@ const quakeGlow = (life: number) => (p: number): number => {
 const QUAKE_SCROLL = 0.25;
 
 /** MODEL_STONE1/2 chips (sub0, debris.ts) thrown `1 in n` a tick for `span` ticks from `from`, within 150 cm of `at` (EarthQuake02/05). */
-const quakeChips = (at: Vector3, from: number, span: number, n: number): Step => (_p, c) =>
+const quakeChips = (at: Vector3, from: number, span: number, n: number, hd = false): Step => (_p, c) =>
   delay(ticks(from), () =>
     everyTick(span, () => {
       if (Math.random() * n >= 1) return;
       const p = muRotated(at, Math.random() * 360, cm(Math.random() * 150));
-      effects.spawn('debris', c.scene, p, { model: Math.random() < 0.5 ? MODEL.stone : MODEL.stone2 });
+      const m = Math.random() < 0.5 ? MODEL.stone : MODEL.stone2;
+      effects.spawn('debris', c.scene, p, hd ? { model: m, colour: QUAKE_ROCK, blendMesh: -1 } : { model: m });
     })
   );
 
-/** MODEL_GROUND_STONE / 2 (ZzzEffect.cpp:3480-3516, MoveHandlers.cpp:5688-5712). */
-function groundStone(at: Vector3, c: SkillContext): void {
+/** MODEL_GROUND_STONE / 2 (ZzzEffect.cpp:3480-3516, MoveHandlers.cpp:5688-5712); `hd` is the graded tiers' dust and rock chips. */
+function groundStone(at: Vector3, c: SkillContext, hd = false): void {
   if (!openGround(at.x, at.z)) return;
   const second = Math.random() < 0.5;
   model({
@@ -997,23 +1047,26 @@ function groundStone(at: Vector3, c: SkillContext): void {
     blendMesh: 1,
     // Alpha x 1/1.3 a tick over the last 8.
     life: p => Math.min(1, Math.pow(1.3, ticksLeft(p, 40) - 8)),
+    ...(hd ? { colour: QUAKE_STONE_HOT } : {}),
   })(at, c);
+  if (hd) particles({ recipe: QUAKE_DUST_SKIRT, count: 2 })(at, c);
   // LifeTime 36..33: a smoke puff and a MODEL_STONE sub10 chip a tick at +(60, -60, 50) cm.
   const chip = new Vector3(at.x + 0.6, at.y + 0.5, at.z - 0.6);
   delay(ticks(4), () =>
     everyTick(4, () => {
-      particles({ recipe: QUAKE_SMOKE, count: 1, height: 0.63 })(chip, c);
-      effects.spawn('debris', c.scene, chip, { model: Math.random() < 0.5 ? MODEL.stone : MODEL.stone2, speedScale: 2, riseCm: [28, 16], scale: 0.87 });
+      particles({ recipe: hd ? QUAKE_DUST : QUAKE_SMOKE, count: 1, height: 0.63 })(chip, c);
+      const m = Math.random() < 0.5 ? MODEL.stone : MODEL.stone2;
+      effects.spawn('debris', c.scene, chip, { model: m, speedScale: 2, riseCm: [28, 16], scale: 0.87, ...(hd ? { colour: QUAKE_ROCK, blendMesh: -1 } : {}) });
     })
   );
 }
 
 /** Six stones 60 degrees apart from a random start, `radius` tiles out. */
-const stoneRing = (radius: number): Step => (at, c) => {
+const stoneRing = (radius: number, hd = false): Step => (at, c) => {
   let a = Math.random() * 360;
   for (let i = 0; i < 6; i++) {
     a += 60;
-    groundStone(muRotated(at, a, radius), c);
+    groundStone(muRotated(at, a, radius), c, hd);
   }
 };
 
@@ -1021,7 +1074,7 @@ const stoneRing = (radius: number): Step => (at, c) => {
 const quakeWave: Step = ring({ texture: TEX.shockwave, colour: RGBS.white, seconds: ticks(20), scale: 20, grow: 0, maxScale: 20, fadeTail: 0.001 });
 
 /** The crack chains at the fury's LifeTime 10: 5 chains, 4 rounds of 85-99 cm (MoveHandlers.cpp:3018-3064). */
-const quakeCracks = (b: Vector3): Step => (_at, c) => {
+const quakeCracks = (b: Vector3, hd = false): Step => (_at, c) => {
   const pos = [0, 1, 2, 3, 4].map(() => b.clone());
   const ang = [0, 0, 0, 0, 0];
   let count = 0;
@@ -1038,6 +1091,8 @@ const quakeCracks = (b: Vector3): Step => (_at, c) => {
       const yaw = muYaw(heading + 270);
       model({ model: MODEL.earthQuake7, seconds: ticks(40), yaw, life: quakeFade(40), follow: sinking(p, 40, 10) })(p, c);
       model({ model: MODEL.earthQuake8, seconds: ticks(40), yaw, life: quakeGlow(40), scrollU: QUAKE_SCROLL, follow: sinking(p, 40, 15) })(p, c);
+      // Graded tiers: embers off each glowing step while its glow is up.
+      if (hd) after(ticks(4), particles({ recipe: QUAKE_EMBERS, rate: 4, seconds: ticks(26) }))(p, c);
     }
     count++;
   }
@@ -1045,19 +1100,26 @@ const quakeCracks = (b: Vector3): Step => (_at, c) => {
 };
 
 /** The fury's burst at its LifeTime 11 (MoveHandlers.cpp:2955-3016), `QUAKE_AHEAD` in front of the horse. */
-const quakeBurst: Step = (_at, c) => {
+const quakeBurstOf = (hd: boolean): Step => (_at, c) => {
   const f = forwardOf(entityYaw(c.caster));
   const feet = entityPos(c.caster, 0, new Vector3());
   const x = feet.x + f.x * QUAKE_AHEAD - f.z * QUAKE_SIDE;
   const z = feet.z + f.z * QUAKE_AHEAD + f.x * QUAKE_SIDE;
   const ground = groundAt(x, z, feet.y);
   explosion(RGBS.white, 0.5)(new Vector3(x, ground + cm(25), z), c);
+  if (hd) {
+    // Graded tiers: a hot core under the white card, thrown chips and a dust skirt.
+    const core = new Vector3(x, ground + 0.3, z);
+    sprite({ texture: TEX.flare, colour: [1, 0.6, 0.3], size: 3.2, seconds: ticks(14), grow: 1.3, growFrom: 0.5, fadeTail: 0.7 })(core, c);
+    particles({ recipe: QUAKE_BURST_SPARKS, count: 26 })(core, c);
+    ringOf(particles({ recipe: QUAKE_DUST_SKIRT, count: 1 }), 10, 1.2)(new Vector3(x, ground, z), c);
+  }
   // Terrain + 25 - 27: the three centre pieces sit 2 cm into the ground.
   const b = new Vector3(x, ground - cm(2), z);
   model({ model: MODEL.earthQuake3, scale: 1.5, seconds: ticks(35), blendMesh: -1, alphaTest: true, life: () => 1, follow: sinking(b, 35, 13) })(b, c);
   model({ model: MODEL.earthQuake, scale: 1.5, seconds: ticks(35), life: quakeFade(35), follow: sinking(b, 35, 10) })(b, c);
   model({ model: MODEL.earthQuake2, scale: 1.5, seconds: ticks(20), life: quakeGlow(20), scrollU: QUAKE_SCROLL, follow: sinking(b, 20, 5) })(b, c);
-  quakeChips(b, 11, 5, 10)(b, c);
+  quakeChips(b, 11, 5, 10, hd)(b, c);
   // EarthQuake01 while LifeTime > 15 and a multiple of 3 (ZzzEffect.cpp:7109-7112).
   for (let lt = 33; lt > 15; lt -= 3) delay(ticks(35 - lt), () => earthQuake((Math.floor(Math.random() * 8) - 4) * 0.1));
   const sub = Math.floor(Math.random() * 100);
@@ -1069,23 +1131,30 @@ const quakeBurst: Step = (_at, c) => {
     const yaw = muYaw(45 + Math.floor(Math.random() * 30) - 15);
     model({ model: MODEL.earthQuake4, scale, yaw, seconds: ticks(35), life: quakeFade(35), follow: sinking(p, 35, 10) })(p, c);
     model({ model: MODEL.earthQuake5, scale, yaw, seconds: ticks(40), life: quakeGlow(40), scrollU: QUAKE_SCROLL, follow: sinking(p, 40, 15) })(p, c);
-    quakeChips(p, 11, 25, 15)(p, c);
+    quakeChips(p, 11, 25, 15, hd)(p, c);
+    if (hd) after(ticks(3), particles({ recipe: QUAKE_EMBERS, rate: 5, seconds: ticks(30) }))(p, c);
   }
-  after(TICK, quakeCracks(b))(b, c);
+  after(TICK, quakeCracks(b, hd))(b, c);
 };
 
-/** Earthshake's whole run, at the horse (the rider's feet). */
-const earthshake: Step = (at, c) => {
+/** Earthshake's whole run, at the horse (the rider's feet). `hd`: the graded tiers' look, whose stone light waits on the first ring. */
+const earthshakeOf = (hd: boolean): Step => (at, c) => {
+  let lit = false;
   for (const k of QUAKE_WAVES) after(ticks(k), quakeWave)(at, c);
   for (const [k, radius] of QUAKE_STONES) {
     after(ticks(k), (p, cc) => {
-      if (Math.random() < 0.5) stoneRing(radius)(p, cc);
+      if (Math.random() < 0.5) {
+        stoneRing(radius, hd)(p, cc);
+        if (hd && !lit) lighting.skillCue(cc.scene, 62, 'stones', cc.caster);
+        lit = true;
+      }
       // Horse keys 8-9.5 jolt the camera every frame (GOBoid.cpp:762).
       earthQuake((Math.floor(Math.random() * 3) - 3) * 0.7);
     })(at, c);
   }
-  after(ticks(QUAKE_BURST), quakeBurst)(at, c);
+  after(ticks(QUAKE_BURST), quakeBurstOf(hd))(at, c);
 };
+const earthshake = earthshakeOf(false);
 
 /** MODEL_CIRCLE sub2's `BlendMeshLight` at `left` ticks (MoveHandlers.cpp:3786-3796). */
 const circleLight = (left: number): number => (left > 240 ? (250 - left) * 0.1 : left * 0.1);
@@ -1132,6 +1201,26 @@ const TELEPORT_HAND: ParticleRecipe = {
   endScale: 0.1,
   capacity: 64,
 };
+/** Graded tiers: the motes at a size that reads at our camera (the original's 13 cm is a pixel), rising more gently. */
+const FLARE_BLUE_RISE_HD: ParticleRecipe = { ...FLARE_BLUE_RISE, size: cm(26), sizeJitter: 0.4, gravity: 1.1, spin: 1.5 };
+/** Graded tiers: a soft halo round the raised hand's glow. */
+const TELEPORT_HALO: ParticleRecipe = { ...TELEPORT_HAND, colour: [0.12, 0.22, 0.5], size: 1.1, sizeJitter: 0.2, endScale: 0.6 };
+/** Graded tiers: the blue chips a streak throws where it lands. */
+const STREAK_SPLASH: ParticleRecipe = {
+  texture: TEX.flareBlue,
+  colour: RGBS.white,
+  size: cm(22),
+  sizeJitter: 0.4,
+  life: 0.45,
+  lifeJitter: 0.3,
+  box: [0.05, 0, 0.05],
+  dir1: [-1, 0.8, -1],
+  dir2: [1, 1.6, 1],
+  power: 1.6,
+  powerJitter: 0.4,
+  gravity: -4,
+  capacity: 128,
+};
 const TELEPORT_CLIPS: ReadonlySet<number> = new Set([
   PlayerAction.PLAYER_ATTACK_TELEPORT,
   PlayerAction.PLAYER_ATTACK_RIDE_TELEPORT,
@@ -1140,38 +1229,58 @@ const TELEPORT_CLIPS: ReadonlySet<number> = new Set([
 /** The held pose after key 5.5 runs at a tenth, about 3.6 s; the glow stops with the clip or here. */
 const TELEPORT_HOLD_MAX = 6;
 
-/** Every tick the teleport clip is past key 5.5, a blue BITMAP_LIGHT at bone 42 (ZzzCharacter.cpp:4121-4129). */
-const teleportHand: Step = (_at, c) => {
+/** Every tick the teleport clip is past key 5.5, a blue BITMAP_LIGHT at bone 42 (ZzzCharacter.cpp:4121-4129). `hd`: a halo, and the hand's light cued. */
+const teleportHandOf = (hd: boolean): Step => (_at, c) => {
   const t0 = fxNow();
   let seen = false;
+  let lit = false;
+  let i = 0;
   const tick = (): void => {
     if (entityGone(c.caster)) return;
     const m = c.caster.modelObject;
     const on = !!m && TELEPORT_CLIPS.has(m.CurrentAction);
     if (on) seen = true;
     else if (seen || fxNow() - t0 > 1) return;
-    if (on && m && m.actionFrame() > 5.5) particles({ recipe: TELEPORT_HAND, count: 1 })(bonePos(c.caster, 42, new Vector3()), c);
+    if (on && m && m.actionFrame() > 5.5) {
+      const hand = bonePos(c.caster, 42, new Vector3());
+      particles({ recipe: TELEPORT_HAND, count: 1 })(hand, c);
+      if (hd && i++ % 3 === 0) particles({ recipe: TELEPORT_HALO, count: 1 })(hand, c);
+      if (hd && !lit) lighting.skillCue(c.scene, 63, 'hand', c.caster);
+      lit = true;
+    }
     if (fxNow() - t0 < TELEPORT_HOLD_MAX) delay(TICK, tick);
   };
   tick();
 };
+const teleportHand = teleportHandOf(false);
 
 /**
  * BITMAP_FLARE_BLUE joint sub19 (ZzzEffectJoint.cpp:1854-1860, :5525-5533): it waits LifeTime - 25
  * ticks 6 m up, then falls 35-54 cm a tick, 5 more every tick, for its last 25. Spawned when the
  * fall starts: a waiting joint draws nothing.
  */
-function blueStreak(at: Vector3, c: SkillContext): void {
+function blueStreak(at: Vector3, c: SkillContext, hd = false): void {
   const p = muRotated(at, Math.random() * 360, cm(Math.random() * 200));
   const wait = Math.floor(Math.random() * 50);
   const d0 = 35 + Math.floor(Math.random() * 20);
   delay(ticks(wait), () => {
     const t0 = fxNow();
     const top = p.y + 6;
+    // Graded tiers: the streak stops on the ground (the original's runs on under it) and splashes there.
+    const floor = hd ? groundAt(p.x, p.z, p.y) : -Infinity;
+    if (hd) {
+      let k = 0;
+      while (cm(k * d0 + 2.5 * k * (k + 1)) < top - floor) k++;
+      delay(ticks(k), () => {
+        const hit = new Vector3(p.x, floor + 0.05, p.z);
+        sprite({ texture: TEX.flareBlue, colour: RGBS.white, size: 0.9, seconds: ticks(7), grow: 1.8, growFrom: 0.4, fadeTail: 0.6 })(hit, c);
+        particles({ recipe: STREAK_SPLASH, count: 4 })(hit, c);
+      });
+    }
     effects.spawn('joint', c.scene, p, {
       head: out => {
         const k = (fxNow() - t0) / TICK;
-        return out.set(p.x, top - cm(k * d0 + 2.5 * k * (k + 1)), p.z);
+        return out.set(p.x, Math.max(floor, top - cm(k * d0 + 2.5 * k * (k + 1))), p.z);
       },
       maxTails: 20,
       width: cm(40),
@@ -1184,20 +1293,23 @@ function blueStreak(at: Vector3, c: SkillContext): void {
 }
 
 /** Party Teleport at AttackTime 6 (ZzzCharacter.cpp:4384-4389, ZzzEffect.cpp:2137-2185): the emblem, the blue curtain, the motes and the falling streaks, 10 s. */
-const partyCircle: Step = (at, c) => {
+const partyCircleOf = (hd: boolean): Step => (at, c) => {
   // Both circles take the caster's o->Angle, so the emblem turns with his facing.
   const yaw = -entityYaw(c.caster);
   seq(
     model({ model: MODEL.circle, texture: TEX.magicEmblem, yaw, seconds: ticks(250), life: emblemWhite }),
     model({ model: MODEL.circle, texture: TEX.magicEmblem, yaw, colour: [0.5, 0.5, 1], seconds: ticks(250), life: emblemBlue }),
     model({ model: MODEL.circle2, yaw, colour: [0.05, 0.05, 1], seconds: ticks(250), life: curtainLife, scrollU: QUAKE_SCROLL }),
-    particles({ recipe: FLARE_BLUE_RISE, rate: 12.5, seconds: ticks(220) }),
+    particles({ recipe: hd ? FLARE_BLUE_RISE_HD : FLARE_BLUE_RISE, rate: 12.5, seconds: ticks(220) }),
     (p, cc) => everyTick(210, () => {
-      if (Math.random() < 0.5) blueStreak(p, cc);
+      if (Math.random() < 0.5) blueStreak(p, cc, hd);
     }),
     sfx('Sound/eSummon')
   )(at, c);
+  // Graded tiers: the emblem's blue pooled on the ground under it.
+  if (hd) ring({ texture: TEX.flare, colour: [0.1, 0.16, 0.42], scale: 9, seconds: ticks(250), growFrom: 0.5, fadeTail: 0.08 })(at, c);
 };
+const partyCircle = partyCircleOf(false);
 
 /** Party Teleport's sheets and meshes, fetched at the packet so the circle is not late on a first cast. */
 const partyCircleWarm: Step = (_at, c) => {
@@ -1219,8 +1331,10 @@ const GATHER_LOCAL = new Vector3(0, 0, cm(10));
  * for 20 ticks, three one-frame Shiny02 cards at the hand a tick and, every other tick, three blue
  * JOINT_THUNDER sub3 arcs from a 120 cm sphere into it (ZzzEffectJoint.cpp:1123-1129).
  */
-const sparkCharge: Step = (_at, c) => {
+const sparkChargeOf = (hd: boolean): Step => (_at, c) => {
   const hand: PointSource = out => boneLocalPos(c.caster, 33, GATHER_LOCAL, out, CAST_HEIGHT);
+  // Graded tiers: a violet core swelling in the hand under the cards, and chips thrown off it.
+  if (hd) sprite({ texture: TEX.flare, colour: [0.3, 0.28, 0.75], size: 1, seconds: ticks(20), growFrom: 0.3, grow: 1.4, fadeTail: 0.35, follow: hand })(hand(new Vector3()), c);
   everyTick(20, i => {
     if (entityGone(c.caster)) return;
     const h = hand(new Vector3());
@@ -1232,6 +1346,7 @@ const sparkCharge: Step = (_at, c) => {
         // JOINT_THUNDER sub3 ends where the hand is at its creation (MoveHandlers.cpp:1639).
         effects.spawn('joint', c.scene, from, { to: h, colour: [0.5, 0.5, 1], width: cm(10), seconds: ticks(10), segments: 10, jitter: 0.15, texture: TEX.jointThunder, textureRepeats: 2, textureScroll: 1 });
       }
+      if (hd && j === 0 && i % 2 === 0) particles({ recipe: SPIKE_CHIPS, count: 2 })(h, c);
       effects.spawn('sprite', c.scene, h, {
         texture: TEX.shiny2,
         size: cm(32) * (8 + Math.floor(Math.random() * 8)) * 0.2,
@@ -1244,6 +1359,25 @@ const sparkCharge: Step = (_at, c) => {
   });
 };
 
+const sparkCharge = sparkChargeOf(false);
+
+/** Graded tiers: blue-white chips the charge and the bolt's tip throw. */
+const SPIKE_CHIPS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.75, 0.7, 1],
+  size: 0.12,
+  sizeJitter: 0.4,
+  life: 0.35,
+  lifeJitter: 0.4,
+  box: [0.05, 0.05, 0.05],
+  dir1: [-1, -0.2, -1],
+  dir2: [1, 1, 1],
+  power: 3,
+  powerJitter: 0.5,
+  gravity: -3,
+  capacity: 128,
+};
+
 /** Charge ticks for a caster with no flash clip: keys 1.3 and 1.5, at 0.4 a tick halved past key 1. */
 const SPARK_CHARGE_FALLBACK: readonly number[] = [3, 4];
 /** Ticks the poll waits on a clip that never leaves the window. */
@@ -1254,12 +1388,14 @@ const SPARK_CHARGE_MAX = 40;
  * Dark Lord's half rate over keys 1-3, two overlapping gatherings a tick apart. The Ready sound is one
  * channel (ZzzOpenData.cpp:4885), so the second PlayBuffer only restarts it: played once here.
  */
-const sparkCharges: Step = (at, c) => {
+const sparkChargesOf = (hd: boolean): Step => (at, c) => {
   const t0 = fxNow();
   let seen = false;
   let fired = 0;
+  const charge = hd ? sparkChargeOf(true) : sparkCharge;
   const fire = (): void => {
-    sparkCharge(at, c);
+    charge(at, c);
+    if (fired === 0 && hd) lighting.skillCue(c.scene, 65, 'charge', c.caster);
     if (fired++ === 0) atCaster(sfx('Sound/sDarkElecSpikeReady'), CAST_HEIGHT)(at, c);
   };
   const tick = (): void => {
@@ -1280,6 +1416,7 @@ const sparkCharges: Step = (at, c) => {
   };
   tick();
 };
+const sparkCharges = sparkChargesOf(false);
 
 /** BITMAP_FLARE_FORCE joints: 30 tails (ZzzEffectJoint.cpp:2496-2549). */
 const FORCE_TAILS = 30;
@@ -1296,7 +1433,7 @@ const forceShade = (i: number): number => (2 * i) / FORCE_TAILS;
  * sub0 is the 250 cm straight ribbon, sub1-4 corkscrew round it at `80 - 2.5n` cm, turning -20 deg a
  * tail from below (sub1/2, after a 2-4 tick wait) and above (sub3/4, which overlap) (:6625-6668).
  */
-const sparkBolt: Step = (_at, c) => {
+const sparkBoltOf = (hd: boolean): Step => (_at, c) => {
   const f = forwardOf(entityYaw(c.caster));
   const fwd = new Vector3(f.x, 0, f.z);
   const right = new Vector3(-f.z, 0, f.x);
@@ -1319,7 +1456,30 @@ const sparkBolt: Step = (_at, c) => {
     effects.spawn('path', c.scene, s, { ...base, points, width: 1, wait: ticks(wait), seconds: ticks(20 + wait), life: forceLife(20 + wait) });
   }
   sfx('Sound/sDarkElecSpike')(s, c);
+  if (hd) sparkBoltHead(main, c);
 };
+const sparkBolt = sparkBoltOf(false);
+
+/**
+ * Graded tiers: the bolt's growing tip carries a white-violet head that rides the reveal out, sheds
+ * chips as each run of tails appears, and flares where the bolt stops; its light is cued here.
+ */
+function sparkBoltHead(main: readonly Vector3[], c: SkillContext): void {
+  lighting.skillCue(c.scene, 65, 'bolt', c.caster);
+  const t0 = fxNow();
+  const tip: PointSource = out => out.copyFrom(main[Math.max(0, forceReveal(Math.floor((fxNow() - t0) / TICK)) - 1)]);
+  sprite({ texture: TEX.flare, colour: [0.8, 0.65, 1], size: 1.6, seconds: ticks(16), fadeTail: 0.5, follow: tip })(main[0], c);
+  let shown = 0;
+  everyTick(7, k => {
+    const n = forceReveal(k);
+    if (n > shown) particles({ recipe: SPIKE_CHIPS, count: 3 })(main[n - 1], c);
+    if (n >= FORCE_TAILS && shown < FORCE_TAILS) {
+      sprite({ texture: TEX.flare, colour: [0.9, 0.8, 1], size: 2.6, seconds: ticks(10), grow: 1.5, growFrom: 0.5, fadeTail: 0.7 })(main[n - 1], c);
+      particles({ recipe: SPIKE_CHIPS, count: 14 })(main[n - 1], c);
+    }
+    shown = n;
+  });
+}
 
 /** Keys 7-8, a tick each: two MODEL_DARKLORD_SKILL sub2 at the weapon's link bone, Light (0.8, 0.5, 1), angles (180, 45, 0) and (0, 0, yaw) (ZzzCharacter.cpp:10541-10551). */
 const sparkAfterglow: Step = (_at, c) =>
@@ -1773,10 +1933,13 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 62 Earthshake (512 / 516): on the Dark Horse's action 3 - shock rings every 10 ticks, rings of
   // MODEL_GROUND_STONE on horse keys 8-9.5, the fury's burst 1.1 tiles ahead at tick 28 and five crack
   // chains at 29 (GOBoid.cpp:727-769, MoveHandlers.cpp:2940-3170).
-  62: { area: atCaster(earthshake, 0) },
+  62: { area: atCaster(earthshake, 0), enhanced: { area: atCaster(earthshakeOf(true), 0) } },
   // 63 Party Teleport (Summon): the held hand's blue BITMAP_LIGHT after key 5.5, and at AttackTime 6
   // MODEL_CIRCLE sub2 + MODEL_CIRCLE_LIGHT sub3 for 250 ticks (ZzzCharacter.cpp:4121-4129, :4384-4389).
-  63: { area: atCaster(seq(partyCircleWarm, teleportHand, after(ticks(6), partyCircle)), 0) },
+  63: {
+    area: atCaster(seq(partyCircleWarm, teleportHand, after(ticks(6), partyCircle)), 0),
+    enhanced: { area: atCaster(seq(partyCircleWarm, teleportHandOf(true), after(ticks(6), partyCircleOf(true))), 0) },
+  },
   // 64 Add Critical (Increase Critical Damage): MODEL_DARKLORD_SKILL at weapon bone 0 (sub0) and bone 1 (sub1), Light (1,0.6,0.3).
   64: { impact: addCritical, area: addCritical },
   // 65 Electric Spike (519): a charge every tick of keys 1.2-1.6 (BITMAP_GATHERING sub2 + SOUND_ELEC_STRIKE_READY), the five
@@ -1788,6 +1951,13 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       atFrame(DL_FLASH, 5.5, ticks(19), sparkBolt),
       atFrame(DL_FLASH, 7, ticks(23), sparkAfterglow)
     ),
+    enhanced: {
+      area: seq(
+        sparkChargesOf(true),
+        atFrame(DL_FLASH, 5.5, ticks(19), sparkBoltOf(true)),
+        atFrame(DL_FLASH, 7, ticks(23), sparkAfterglow)
+      ),
+    },
   },
   // 67 Stun: CreateJoint(BITMAP_FLASH sub7 at the caster).
   67: { area: atCaster((at, c) => effects.spawn('joint', c.scene, at, { head: followEntity(c.caster, 1.2), maxTails: 10, width: 0.5, colour: RGBS.gold, seconds: ticks(20) }), 1.2) },
