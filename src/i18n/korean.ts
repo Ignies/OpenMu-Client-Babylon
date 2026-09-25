@@ -96,6 +96,9 @@ export const koreanLayer: LanguageLayer = {
 
     'characters.loading': '캐릭터를 불러오는 중...',
     'characters.select': '캐릭터를 선택하세요',
+    'characters.hint.select': '선택',
+    'characters.hint.zoomIn': '확대',
+    'characters.hint.zoomOut': '축소',
     'characters.create.minLength': '5자 이상 입력하세요',
     'characters.create.specialName': '기호는 사용할 수 없습니다.',
     'characters.create.reservedName': '예약된 이름입니다.',

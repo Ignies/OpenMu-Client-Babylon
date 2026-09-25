@@ -16,14 +16,14 @@ import { MuSpriteFrame } from '../../components/muSprite';
 import { MsgWindow } from '../../components/msgWindow';
 import { TEXT_COLOR } from '../serversPage/layout';
 import { CharMakeWin } from './CharMakeWin';
+import { CharacterSelectionPlate } from './CharacterSelectionPlate';
 
 const BTN_WIDTH = 54;
 const BTN_HEIGHT = 30;
 const BTN_GAP = 1;
-const INFO_GAP = 2;
-const INFO_OFFSET_Y = 5;
-const INFO_HEIGHT = 21;
-const INFO_ALPHA = 143 / 255;
+const STATUS_GAP = 2;
+const STATUS_OFFSET_Y = 5;
+const STATUS_HEIGHT = 21;
 
 const DECO_WIDTH = 189;
 const DECO_HEIGHT = 103;
@@ -97,6 +97,8 @@ export const CharactersPage = observer(() => {
 
   return (
     <div className="characters-page">
+      <CharacterSelectionPlate />
+
       <div className="char-sel-bar" style={{ height: BTN_HEIGHT }}>
         {}
         <MuSpriteFrame
@@ -133,23 +135,23 @@ export const CharactersPage = observer(() => {
           }}
         />
 
-        {}
-        <div
-          className="char-sel-info"
-          style={{
-            left: BTN_WIDTH * 2 + BTN_GAP + INFO_GAP,
-            right: BTN_WIDTH * 2 + BTN_GAP + INFO_GAP,
-            top: INFO_OFFSET_Y,
-            height: INFO_HEIGHT,
-            background: `rgba(0, 0, 0, ${INFO_ALPHA})`,
-          }}
-        >
-          {selected
-            ? `${selected.Name}   Level ${selected.Level}`
-            : Store.loadingCharactersList
+        {!selected && (
+          <div
+            className="char-sel-status"
+            style={{
+              left: BTN_WIDTH * 2 + BTN_GAP + STATUS_GAP,
+              right: BTN_WIDTH * 2 + BTN_GAP + STATUS_GAP,
+              top: STATUS_OFFSET_Y,
+              height: STATUS_HEIGHT,
+            }}
+          >
+            {Store.loadingCharactersList
               ? t('characters.loading')
-              : t('characters.select')}
-        </div>
+              : Store.charactersList.length > 0
+                ? t('characters.select')
+                : null}
+          </div>
+        )}
 
         <MuButton
           file="b_connect.OZT"

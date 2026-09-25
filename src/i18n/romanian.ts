@@ -93,6 +93,9 @@ export const romanianLayer: LanguageLayer = {
 
     'characters.loading': 'Se încarcă personajele...',
     'characters.select': 'Alege un personaj',
+    'characters.hint.select': 'Selectează',
+    'characters.hint.zoomIn': 'Apropie',
+    'characters.hint.zoomOut': 'Depărtează',
     'characters.create.minLength': 'Scrie mai mult de 4 litere',
     'characters.create.specialName': 'Simbolurile nu sunt permise.',
     'characters.create.reservedName': 'Acest nume este rezervat.',

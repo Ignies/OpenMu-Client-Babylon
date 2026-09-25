@@ -15,11 +15,14 @@ import { Store, UIState } from '../../store';
 import { ENUM_WORLD } from '../../common';
 import { spawnPlayer } from '../../logic';
 import { deserializeAppearance } from '../../common/deserializeAppearance';
+import { runInAction } from 'mobx';
 import {
+  characterSelectView,
   characterSlotAngle,
   characterSlotPosition,
 } from '../../common/characterSelect';
 import { setSceneHold } from '../../common/sceneGate';
+import { createCharacterSelectBackdrop } from '../../common/characterSelectBackdrop';
 import { PlayerAction } from '../../common/objects/enum';
 import { genderedEmoteAction } from '../../common/emotes';
 import { isRidingMount } from '../../common/pets';
@@ -161,6 +164,15 @@ const LIGHT_GAIN = 0.5;
 /** The warm candle tint; the pool reads the peak channel as the magnitude. */
 const LIGHT_TINT = { r: 1.0, g: 0.88, b: 0.65 };
 
+/**
+ * The ring's glow on the focused character itself, added to its body light
+ * (`SelfLight`, which RenderSystem sums onto the terrain light every frame -
+ * the original's `BodyLight`). A uniform the model already binds, so it
+ * costs nothing and lifts the character in Classic too, where the pool above
+ * has no slots. Rides the ring's fade.
+ */
+const BODY_GLOW = 0.3;
+
 export const CharacterSelectSystem: ISystemFactory = world => {
   const spawned: Entity[] = [];
 
@@ -210,6 +222,9 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
   /** Name of the character that was focused on the previous frame. */
   let lastFocusedChar = '';
+
+  /** The painted scene behind the walls, up while the line-up is staged. */
+  let backdrop: { dispose(): void } | null = null;
 
   // -------------------------------------------------------------------------
   // Helpers
@@ -307,6 +322,13 @@ export const CharacterSelectSystem: ISystemFactory = world => {
         vis.material.alpha = 0;
       }
 
+      const glow = (BODY_GLOW * vis.alpha) / FOCUSED_ALPHA;
+      entity.modelObject?.SelfLight.set(
+        LIGHT_TINT.r * glow,
+        LIGHT_TINT.g * glow,
+        LIGHT_TINT.b * glow
+      );
+
       if (isFocused && pos) {
         activeLightPos = pos;
         activeLightAlpha = vis.alpha;
@@ -368,6 +390,10 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
   const stage = () => {
     clear();
+
+    // Kept across restages (a create, delete or level up) so the texture does
+    // not reload and flash black; torn down when the screen is left.
+    backdrop ??= createCharacterSelectBackdrop(world.scene);
 
     for (const character of Store.charactersList) {
       const position = characterSlotPosition(character.SlotIndex);
@@ -461,7 +487,22 @@ export const CharacterSelectSystem: ISystemFactory = world => {
     if (Store.uiState !== UIState.Characters) return;
 
     const target = world.currentPointerTarget;
-    if (!target || !spawned.includes(target)) return;
+    const hovered = target && spawned.includes(target) ? target.objectNameInWorld : null;
+
+    // Right click on a character closes in on it; again on the same one, or
+    // anywhere else, goes back to the line-up. Selection is left alone.
+    if (event.event.button === 2) {
+      runInAction(() => {
+        characterSelectView.zoomedOn =
+          hovered && hovered !== characterSelectView.zoomedOn ? hovered : null;
+      });
+      return;
+    }
+
+    // Left click selects; middle does nothing here.
+    if (event.event.button !== 0) return;
+
+    if (!target || !hovered) return;
 
     const name = target.objectNameInWorld;
     if (!name) return;
@@ -486,6 +527,8 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
       if (!staged) {
         if (stagedFor !== null) clear();
+        backdrop?.dispose();
+        backdrop = null;
         // The line-up is part of this screen's load, so the loading screen
         // has to wait for it: the terrain lands first and the character list
         // is still in flight, and without this hold the gate lifted on an

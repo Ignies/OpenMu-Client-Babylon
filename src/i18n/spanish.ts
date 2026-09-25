@@ -103,6 +103,9 @@ export const spanishLayer: LanguageLayer = {
 
     'characters.loading': 'Cargando personajes...',
     'characters.select': 'Elige un personaje',
+    'characters.hint.select': 'Seleccionar',
+    'characters.hint.zoomIn': 'Acercar',
+    'characters.hint.zoomOut': 'Alejar',
     'characters.create.minLength': 'Escribe más de 4 letras',
     'characters.create.specialName': 'No se pueden usar símbolos.',
     'characters.create.reservedName': 'Ese nombre está reservado.',

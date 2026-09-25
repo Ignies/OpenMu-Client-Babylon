@@ -97,6 +97,9 @@ export const thaiLayer: LanguageLayer = {
 
     'characters.loading': 'กำลังโหลดตัวละคร...',
     'characters.select': 'เลือกตัวละคร',
+    'characters.hint.select': 'เลือก',
+    'characters.hint.zoomIn': 'ซูมเข้า',
+    'characters.hint.zoomOut': 'ซูมออก',
     'characters.create.minLength': 'พิมพ์มากกว่า 4 ตัวอักษร',
     'characters.create.specialName': 'ใช้สัญลักษณ์ไม่ได้',
     'characters.create.reservedName': 'ชื่อนี้ถูกสงวนไว้',

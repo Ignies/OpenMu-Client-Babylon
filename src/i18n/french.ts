@@ -93,6 +93,9 @@ export const frenchLayer: LanguageLayer = {
 
     'characters.loading': 'Chargement des personnages...',
     'characters.select': 'Choisissez un personnage',
+    'characters.hint.select': 'Sélectionner',
+    'characters.hint.zoomIn': 'Zoom avant',
+    'characters.hint.zoomOut': 'Zoom arrière',
     'characters.create.minLength': 'Saisissez plus de 4 lettres',
     'characters.create.specialName': 'Les symboles sont interdits.',
     'characters.create.reservedName': 'Ce nom est réservé.',
