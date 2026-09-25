@@ -43,6 +43,7 @@ import {
 import { ItemsDatabase } from './itemsDatabase';
 import { skillDefinition, type SkillDefinition } from './skillsDatabase';
 import { storeRef } from './storeRef';
+import { tierIndex } from './lightingQuality';
 
 /**
  * Skill → visual recipe. The **consumer** of the effects layer
@@ -470,6 +471,20 @@ export interface SkillVisual {
   travel?: Travel;
   impact?: Step;
   area?: Step;
+  /**
+   * The improved look, for the Enhanced and Ultra tiers. Classic always draws
+   * the row itself, which is the original's; each moment set here replaces
+   * the Classic one on the graded tiers, and a moment left out keeps it.
+   */
+  enhanced?: Omit<SkillVisual, 'enhanced'>;
+}
+
+/** The first lighting tier that draws a row's `enhanced` look. */
+const ENHANCED_TIER = 1;
+
+/** A row as the current tier draws it. */
+function forTier(row: SkillVisual): SkillVisual {
+  return row.enhanced && tierIndex() >= ENHANCED_TIER ? { ...row, ...row.enhanced } : row;
 }
 
 const bolt = (head: string, colour: RGB, trail: ParticlesOptions['recipe'], size = 0.6, speed = perTick(60)): Travel => ({
@@ -1469,7 +1484,8 @@ function fanArrows(at: Vector3, c: SkillContext, n: number, m: string, colour: R
   const base = Math.atan2(dx, dz);
   // Captured now: by the time an arrow lands, another skill has been dispatched.
   const skill = currentSkill;
-  const impact = SKILL_VISUALS[skill]?.impact ?? steelHit;
+  const own = SKILL_VISUALS[skill];
+  const impact = (own && forTier(own).impact) ?? steelHit;
   for (let i = 0; i < n; i++) {
     const a = base + (typeof spread === 'number' ? (i - (n - 1) / 2) * spread : spread[i] ?? 0);
     const to = new Vector3(from.x + Math.sin(a) * dist, at.y + IMPACT_HEIGHT * 0.5, from.z + Math.cos(a) * dist);
@@ -1558,9 +1574,9 @@ export function baseSkill(skill: number): number {
   return SKILL_VISUALS[skill] ? skill : MASTER_ALIASES[skill] ?? skill;
 }
 
-/** The row for a skill, through master aliases, else its type's fallback. */
+/** The row for a skill as the current tier draws it, through master aliases, else its type's fallback. */
 export function skillVisualFor(skill: number): SkillVisual {
-  return SKILL_VISUALS[skill] ?? SKILL_VISUALS[MASTER_ALIASES[skill] ?? -1] ?? fallbackFor(skillDefinition(skill));
+  return forTier(SKILL_VISUALS[skill] ?? SKILL_VISUALS[MASTER_ALIASES[skill] ?? -1] ?? fallbackFor(skillDefinition(skill)));
 }
 
 /** How many skills have their own row (aliases included). */

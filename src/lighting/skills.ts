@@ -74,7 +74,23 @@ export type SkillLight = {
    * with a tinted arrow where the original fires the plain one.
    */
   readonly arrow?: LightRecipe;
+  /**
+   * The light on the Enhanced and Ultra tiers. Classic keeps the row itself,
+   * the original's `AddTerrainLight`; each moment set here replaces the
+   * Classic one on the graded tiers (`effectLight` sizes and tints it from
+   * the effect), and a moment left out keeps it.
+   */
+  readonly enhanced?: Omit<SkillLight, 'enhanced'>;
 };
+
+/** The first lighting tier that uses a row's `enhanced` light. */
+const ENHANCED_TIER = 1;
+
+/** A skill's light row as the current tier uses it. */
+function lightRow(skill: number): SkillLight | undefined {
+  const row = SKILL_LIGHTS[skill];
+  return row?.enhanced && tierIndex() >= ENHANCED_TIER ? { ...row, ...row.enhanced } : row;
+}
 
 /** Lighting tier that carries per-body effect lights. */
 const ULTRA_TIER = 2;
@@ -253,7 +269,7 @@ function followEntity(e: Entity, height: number) {
 }
 
 function castRecipeFor(skill: number): LightRecipe | null {
-  const row = SKILL_LIGHTS[skill];
+  const row = lightRow(skill);
 
   if (row?.cast) return row.cast;
   // A skill with a recipe keeps its hands dark unless it asked for a cast
@@ -274,7 +290,7 @@ export function lightTargetedSkill(
 ): void {
   if (!caster.transform) return;
 
-  const row = SKILL_LIGHTS[skill];
+  const row = lightRow(skill);
   const cast = castRecipeFor(skill);
 
   if (cast) {
@@ -314,7 +330,7 @@ export function lightAreaSkill(
   caster: Entity,
   at: { x: number; y: number; z: number }
 ): void {
-  const row = SKILL_LIGHTS[skill];
+  const row = lightRow(skill);
   const cast = castRecipeFor(skill);
 
   if (cast && caster.transform) {
@@ -341,7 +357,7 @@ export function lightSkillTrail(
   skill: number,
   follow: (out: { x: number; y: number; z: number }) => void
 ): LightSource | null {
-  const recipe = SKILL_LIGHTS[skill]?.trail;
+  const recipe = lightRow(skill)?.trail;
 
   if (!recipe || tierIndex() < ULTRA_TIER) return null;
 
@@ -371,7 +387,7 @@ export function lightArrow(
   model: string,
   follow: (out: { x: number; y: number; z: number }) => void
 ): LightSource | null {
-  const row = SKILL_LIGHTS[skill];
+  const row = lightRow(skill);
 
   if (row?.travel) return null;
 
