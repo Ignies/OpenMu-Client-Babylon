@@ -99,8 +99,9 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   60: 'Sound/sKnightSkill1', // Force (SOUND_SKILL_SWORD1 at the packet, WSclient.cpp:4333-4350; sDarkSpear plays at the strike)
   61: 'Sound/eFirebust', // Fire Burst
   62: 'Sound/sDarkEarthQuake', // Earthshake
-  65: 'Sound/sDarkElecSpike', // Electric Spark
   66: 'Sound/sKnightSkill1', // Force Wave
+  512: 'Sound/sDarkEarthQuake', // Earthshake Str
+  516: 'Sound/sDarkEarthQuake', // Earthshake Mastery
   76: 'Sound/pWskill', // Plasma Storm (Fenrir)
   77: 'Sound/infinityArrow', // Infinity Arrow
   78: 'Sound/Darklord_firescream', // Fire Scream

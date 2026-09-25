@@ -28,6 +28,7 @@ import {
 } from '../../effects/core';
 import { FOOT_THUNDER_FRAMES, MODEL, TEX } from '../../effects/recipes';
 import { Store } from '../../store';
+import { PlayerAction } from '../../common/objects/enum';
 import { playUiSound } from '../../sound/ui';
 import type { Entity, ISystemFactory, Item } from '../world';
 
@@ -89,6 +90,9 @@ const ANGEL_SNAP_DISTANCE = 640;
 /** `o->Velocity` - the PlaySpeed each pet's clip runs at. */
 const ANGEL_PLAY_SPEED = 0.5;
 const MOUNT_PLAY_SPEED = 0.34;
+
+/** The Dark Horse's Earthshake clip, `SetAction(o, 3)` at `Velocity 0.34`. */
+const DARK_HORSE_ACTION_SKILL = 3;
 /** `CSPetSystem::PlayAnimation`: the raven's clips run at 0.4. */
 const RAVEN_PLAY_SPEED = 0.4;
 
@@ -1022,6 +1026,18 @@ export const PetSystem: ISystemFactory = world => {
       actor.modelObject?.setAnimationSpeed(mirrored.playSpeed);
       actor.modelObject?.playAction(mirrored.action, true);
       updateFenrirGlow(actor, dt);
+      return;
+    }
+
+    // The Dark Horse rears on its action 3 under Earthshake (GOBoid.cpp:337-341).
+    const pet = state.owner.charAppearance?.pet;
+    if (
+      pet?.group === PET_GROUP &&
+      pet.num === DARK_HORSE &&
+      state.owner.modelObject?.CurrentAction === PlayerAction.PLAYER_ATTACK_DARKHORSE
+    ) {
+      actor.modelObject?.setAnimationSpeed(MOUNT_PLAY_SPEED);
+      actor.modelObject?.playAction(DARK_HORSE_ACTION_SKILL, true);
       return;
     }
 

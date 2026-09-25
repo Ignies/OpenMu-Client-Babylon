@@ -206,6 +206,7 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   518: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Fire Scream Str
   238: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Chaotic Diseier
   65: { ground: A.PLAYER_SKILL_FLASH, ...MOUNTED_FLASH }, // Electric Spike
+  519: { ground: A.PLAYER_SKILL_FLASH, ...MOUNTED_FLASH }, // Electric Spike Str
   62: { ground: A.PLAYER_ATTACK_DARKHORSE }, // Earthshake
   512: { ground: A.PLAYER_ATTACK_DARKHORSE }, // Earthshake Str
   516: { ground: A.PLAYER_ATTACK_DARKHORSE }, // Earthshake Mastery

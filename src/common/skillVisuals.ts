@@ -5,7 +5,7 @@ import { lighting } from '../lighting';
 import { combat } from '../combat';
 import { weather } from '../weather';
 import { effects, type EffectHandle } from '../effects';
-import { bonePos, boneLocalPos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, type PointSource, type RGB } from '../effects/core';
+import { bonePos, boneLocalPos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, type ParticleRecipe, type PointSource, type RGB } from '../effects/core';
 import type { SpriteOptions } from '../effects/sprite';
 import type { ModelHandle, ModelOptions } from '../effects/model';
 import type { StampsHandle } from '../effects/stamps';
@@ -48,6 +48,8 @@ import type { Sounds } from '../sound/recipes';
 import { skillDefinition, type SkillDefinition } from './skillsDatabase';
 import { storeRef } from './storeRef';
 import { tierIndex } from './lightingQuality';
+import { TWFlags } from './terrain/consts';
+import { COMBAT_BUS, playSfx } from '../sound';
 
 /**
  * Skill → visual recipe. The **consumer** of the effects layer
@@ -528,8 +530,6 @@ const skyfall = (m: string, colour: RGB, trail: ParticlesOptions['recipe'] | nul
 
 /** Fire Slash's BITMAP_SKULL marks the target for LT 1000 (40 s) in the original; the defence debuff's length here. */
 const SKULL_SECONDS = 10;
-/** Party Teleport's circle: LT 250 in the original, ended by the teleport; 3 s here. */
-const PARTY_TELEPORT_SECONDS = 3;
 
 /** Summons: BITMAP_MAGIC+1 sub3 at the caster's feet + smoke at the point. */
 function summonCircle(at: Vector3, c: SkillContext): void {
@@ -872,6 +872,412 @@ const fireBurst: Step = (_at, c) => {
     effects.spawn('model', c.scene, o, { model: MODEL.darkLordSkill, seconds: ticks(9), scale: 0.2, colour: [1, 0.6, 0.3], angle: [45, tilt, 0], fadeTail: 0 });
   }
 };
+
+// ---- dl2 steps -------------------------------------------------------------------
+
+/** A sound where the step lands, timed with the effect that plays it (a move handler's `PlayBuffer`). */
+const sfx = (key: Sounds): Step => at => playSfx(key, at, { bus: COMBAT_BUS });
+
+/** `fn(i)` once a tick for `n` ticks on the effects clock, the first now. */
+function everyTick(n: number, fn: (i: number) => void): void {
+  let i = 0;
+  const tick = (): void => {
+    fn(i);
+    if (++i < n) delay(TICK, tick);
+  };
+  tick();
+}
+
+/** Terrain height under (x, z), or `fallback` before the map's heights are in. */
+function groundAt(x: number, z: number, fallback: number): number {
+  const h = storeRef().world?.getTerrainHeight(x, z);
+  return h === undefined || h < -9000 ? fallback : h;
+}
+
+/** Not a NOMOVE, NOGROUND or WATER tile: where the original lets a ground effect stand. */
+function openGround(x: number, z: number): boolean {
+  const flag = storeRef().world?.getTerrainFlag(Math.floor(x), Math.floor(z)) ?? 0;
+  return (flag & (TWFlags.NoMove | TWFlags.NoGround | TWFlags.Water)) === 0;
+}
+
+/** An `Angle[2]` in MU degrees as a model node's yaw: the conversion mirrors, so the sign flips (common/renderAngles.ts). */
+const muYaw = (deg: number): number => (-deg * Math.PI) / 180;
+
+/** `at` + `AngleMatrix((0, 0, deg))` applied to `(0, r, 0)`, flat - the original's offset on a turned axis. */
+function muRotated(at: Vector3, deg: number, r: number): Vector3 {
+  const a = (deg * Math.PI) / 180;
+  return new Vector3(at.x - Math.sin(a) * r, at.y, at.z + Math.cos(a) * r);
+}
+
+/** Ticks of a `life`-tick effect still to run at progress `p`. */
+const ticksLeft = (p: number, life: number): number => life * (1 - p);
+
+/** `step` once the caster's clip, one of `clips`, reaches key `frame` (an `AnimationFrame` gate); after `fallback` seconds if it never does. */
+const atFrame = (clips: ReadonlySet<number>, frame: number, fallback: number, step: Step): Step => (at, c) => {
+  const t0 = fxNow();
+  const poll = (): void => {
+    if (entityGone(c.caster)) return;
+    const m = c.caster.modelObject;
+    if ((m && clips.has(m.CurrentAction) && m.actionFrame() >= frame) || fxNow() - t0 >= fallback) step(at, c);
+    else delay(TICK, poll);
+  };
+  poll();
+};
+
+/** A point that sinks 0.5 cm a tick once fewer than `below` of its `life` ticks are left (the EarthQuake models' `Position[2] -= 0.5`). */
+function sinking(p: Vector3, life: number, below: number): PointSource {
+  const t0 = fxNow();
+  return out => {
+    const left = life - (fxNow() - t0) / TICK;
+    return out.set(p.x, p.y - (left < below ? cm(0.5) * (below - left) : 0), p.z);
+  };
+}
+
+/**
+ * Earthshake runs off the Dark Horse's action 3 (GOBoid.cpp:337-341, RenderDarkHorseSkill :727-769),
+ * in ticks from its start: a BITMAP_SHOCK_WAVE every 400 ms, the ground stones on horse keys 8-9.5,
+ * and MODEL_SKILL_FURY_STRIKE (Kind 2) on render 19, which bursts at its LifeTime 11 and cracks the
+ * ground at 10 (MoveHandlers.cpp:2955-3065).
+ */
+const QUAKE_WAVES = [0, 10, 20, 30] as const;
+/** The stone ticks and each ring's radius, `150 cm x (WeaponLevel / 2)` with WeaponLevel wrapped to 253 on render 19. */
+const QUAKE_STONES: readonly (readonly [number, number])[] = [[24, 1.5], [25, 1.5], [26, 3], [27, 3]];
+const QUAKE_BURST = 19 + 9;
+/** The burst point: `(-25, -80)` off the fury's position, which its swing already put `sin 135 deg x 260 x cos 80 deg` = 32 cm ahead. */
+const QUAKE_AHEAD = 0.8 + 0.32;
+const QUAKE_SIDE = -0.25;
+/** MODEL_GROUND_STONE's smoke, BITMAP_SMOKE sub11 at Scale 2: 128 cm growing 5 % a tick, fading over 50 ticks, sinking 1 cm a tick. */
+const QUAKE_SMOKE: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [1, 0.8, 0.6],
+  size: cm(128),
+  sizeJitter: 0,
+  life: ticks(50),
+  lifeJitter: 0,
+  box: [0.32, 0.32, 0.32],
+  dir1: [-1, -0.4, -1],
+  dir2: [1, -0.4, 1],
+  power: 0.4,
+  powerJitter: 0.5,
+  endScale: 2.25,
+  capacity: 128,
+};
+/** `BlendMeshLight = LifeTime / 30` (EarthQuake01/04/07); the GL clamps the colour at 1. */
+const quakeFade = (life: number) => (p: number): number => Math.min(1, ticksLeft(p, life) / 30);
+/** 02 / 05 / 08: `(life - LifeTime) * 0.1` over the first 10 ticks, then `LifeTime * 0.1`, clamped at 1 by the GL. */
+const quakeGlow = (life: number) => (p: number): number => {
+  const left = ticksLeft(p, life);
+  return Math.min(1, left >= life - 10 ? (life - left) * 0.1 : left * 0.1);
+};
+/** `BlendMeshTexCoordU = -LifeTime * 0.01`: a quarter of the sheet a second. */
+const QUAKE_SCROLL = 0.25;
+
+/** MODEL_STONE1/2 chips (sub0, debris.ts) thrown `1 in n` a tick for `span` ticks from `from`, within 150 cm of `at` (EarthQuake02/05). */
+const quakeChips = (at: Vector3, from: number, span: number, n: number): Step => (_p, c) =>
+  delay(ticks(from), () =>
+    everyTick(span, () => {
+      if (Math.random() * n >= 1) return;
+      const p = muRotated(at, Math.random() * 360, cm(Math.random() * 150));
+      effects.spawn('debris', c.scene, p, { model: Math.random() < 0.5 ? MODEL.stone : MODEL.stone2 });
+    })
+  );
+
+/** MODEL_GROUND_STONE / 2 (ZzzEffect.cpp:3480-3516, MoveHandlers.cpp:5688-5712). */
+function groundStone(at: Vector3, c: SkillContext): void {
+  if (!openGround(at.x, at.z)) return;
+  const second = Math.random() < 0.5;
+  model({
+    model: second ? MODEL.groundStone2 : MODEL.groundStone,
+    scale: (second ? 1 : 1.2) + Math.floor(Math.random() * 30) / 100,
+    yaw: Math.random() * Math.PI * 2,
+    seconds: ticks(40),
+    holdLast: true,
+    blendMesh: 1,
+    // Alpha x 1/1.3 a tick over the last 8.
+    life: p => Math.min(1, Math.pow(1.3, ticksLeft(p, 40) - 8)),
+  })(at, c);
+  // LifeTime 36..33: a smoke puff and a MODEL_STONE sub10 chip a tick at +(60, -60, 50) cm.
+  const chip = new Vector3(at.x + 0.6, at.y + 0.5, at.z - 0.6);
+  delay(ticks(4), () =>
+    everyTick(4, () => {
+      particles({ recipe: QUAKE_SMOKE, count: 1, height: 0.63 })(chip, c);
+      effects.spawn('debris', c.scene, chip, { model: Math.random() < 0.5 ? MODEL.stone : MODEL.stone2, speedScale: 2, riseCm: [28, 16], scale: 0.87 });
+    })
+  );
+}
+
+/** Six stones 60 degrees apart from a random start, `radius` tiles out. */
+const stoneRing = (radius: number): Step => (at, c) => {
+  let a = Math.random() * 360;
+  for (let i = 0; i < 6; i++) {
+    a += 60;
+    groundStone(muRotated(at, a, radius), c);
+  }
+};
+
+/** BITMAP_SHOCK_WAVE sub0: a 20-tile terrain decal shrinking a tile a tick (ZzzEffect.cpp:3538-3545, MoveHandlers.cpp:5764-5769). */
+const quakeWave: Step = ring({ texture: TEX.shockwave, colour: RGBS.white, seconds: ticks(20), scale: 20, grow: 0, maxScale: 20, fadeTail: 0.001 });
+
+/** The crack chains at the fury's LifeTime 10: 5 chains, 4 rounds of 85-99 cm (MoveHandlers.cpp:3018-3064). */
+const quakeCracks = (b: Vector3): Step => (_at, c) => {
+  const pos = [0, 1, 2, 3, 4].map(() => b.clone());
+  const ang = [0, 0, 0, 0, 0];
+  let count = 0;
+  for (let j = 0; j < 4; j++) {
+    const step = cm(85 + Math.floor(Math.random() * 15));
+    if (j >= 3) count = Math.floor(Math.random() * 32768);
+    for (let i = 0; i < 5; i++) {
+      const turn = 50 + Math.floor(Math.random() * 30);
+      ang[i] += count % 2 === 0 ? turn : -turn;
+      const heading = ang[i] + i * (62 + Math.floor(Math.random() * 10));
+      const p = muRotated(pos[i], heading, step);
+      p.y = groundAt(p.x, p.z, b.y) + cm(3);
+      pos[i] = p;
+      const yaw = muYaw(heading + 270);
+      model({ model: MODEL.earthQuake7, seconds: ticks(40), yaw, life: quakeFade(40), follow: sinking(p, 40, 10) })(p, c);
+      model({ model: MODEL.earthQuake8, seconds: ticks(40), yaw, life: quakeGlow(40), scrollU: QUAKE_SCROLL, follow: sinking(p, 40, 15) })(p, c);
+    }
+    count++;
+  }
+  sfx('Sound/eRageBlow_3')(b, c);
+};
+
+/** The fury's burst at its LifeTime 11 (MoveHandlers.cpp:2955-3016), `QUAKE_AHEAD` in front of the horse. */
+const quakeBurst: Step = (_at, c) => {
+  const f = forwardOf(entityYaw(c.caster));
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const x = feet.x + f.x * QUAKE_AHEAD - f.z * QUAKE_SIDE;
+  const z = feet.z + f.z * QUAKE_AHEAD + f.x * QUAKE_SIDE;
+  const ground = groundAt(x, z, feet.y);
+  explosion(RGBS.white, 0.5)(new Vector3(x, ground + cm(25), z), c);
+  // Terrain + 25 - 27: the three centre pieces sit 2 cm into the ground.
+  const b = new Vector3(x, ground - cm(2), z);
+  model({ model: MODEL.earthQuake3, scale: 1.5, seconds: ticks(35), blendMesh: -1, alphaTest: true, life: () => 1, follow: sinking(b, 35, 13) })(b, c);
+  model({ model: MODEL.earthQuake, scale: 1.5, seconds: ticks(35), life: quakeFade(35), follow: sinking(b, 35, 10) })(b, c);
+  model({ model: MODEL.earthQuake2, scale: 1.5, seconds: ticks(20), life: quakeGlow(20), scrollU: QUAKE_SCROLL, follow: sinking(b, 20, 5) })(b, c);
+  quakeChips(b, 11, 5, 10)(b, c);
+  const sub = Math.floor(Math.random() * 100);
+  for (let i = 0; i < 5; i++) {
+    const p = muRotated(b, sub + i * 72, cm(100 + Math.floor(Math.random() * 150)));
+    if (!openGround(p.x, p.z)) continue;
+    p.y = groundAt(p.x, p.z, b.y) + cm(3);
+    const scale = (40 + Math.floor(Math.random() * 50)) / 100;
+    const yaw = muYaw(45 + Math.floor(Math.random() * 30) - 15);
+    model({ model: MODEL.earthQuake4, scale, yaw, seconds: ticks(35), life: quakeFade(35), follow: sinking(p, 35, 10) })(p, c);
+    model({ model: MODEL.earthQuake5, scale, yaw, seconds: ticks(40), life: quakeGlow(40), scrollU: QUAKE_SCROLL, follow: sinking(p, 40, 15) })(p, c);
+    quakeChips(p, 11, 25, 15)(p, c);
+  }
+  after(TICK, quakeCracks(b))(b, c);
+};
+
+/** Earthshake's whole run, at the horse (the rider's feet). */
+const earthshake: Step = (at, c) => {
+  for (const k of QUAKE_WAVES) after(ticks(k), quakeWave)(at, c);
+  for (const [k, radius] of QUAKE_STONES) {
+    after(ticks(k), (p, cc) => {
+      if (Math.random() < 0.5) stoneRing(radius)(p, cc);
+    })(at, c);
+  }
+  after(ticks(QUAKE_BURST), quakeBurst)(at, c);
+};
+
+/** MODEL_CIRCLE sub2's `BlendMeshLight` at `left` ticks (MoveHandlers.cpp:3786-3796). */
+const circleLight = (left: number): number => (left > 240 ? (250 - left) * 0.1 : left * 0.1);
+/**
+ * The emblem is `(0.5, 0.5, 1) x BlendMeshLight` clamped by the GL: white while that is 2 or more,
+ * blue as it falls. Drawn as a white and a blue layer whose sum is exactly the clamped colour.
+ */
+const emblemWhite = (p: number): number => Math.min(1, Math.max(0, circleLight(ticksLeft(p, 250)) - 1));
+const emblemBlue = (p: number): number => {
+  const l = circleLight(ticksLeft(p, 250));
+  return l >= 2 ? 0 : l >= 1 ? 2 - l : l;
+};
+/** MODEL_CIRCLE_LIGHT sub3: `(0.1, 0.1, 10) x min(0.5, BlendMeshLight)`, the blue clamped at 1 (MoveHandlers.cpp:3864-3872, ZzzObject.cpp:1490). */
+const curtainLife = (p: number): number => Math.min(1, 10 * Math.min(0.5, circleLight(ticksLeft(p, 250))));
+/** BITMAP_FLARE_BLUE sub0 (ZzzEffectParticle.cpp:167-172, :3951-3960): 13 cm, rising from 0-2 cm a tick by 0.4 a tick up to 8. */
+const FLARE_BLUE_RISE: ParticleRecipe = {
+  texture: TEX.flareBlue,
+  colour: RGBS.white,
+  size: cm(12.8),
+  sizeJitter: 0,
+  life: ticks(39),
+  lifeJitter: 0.23,
+  box: [1.4, 0, 1.4],
+  dir1: [0, 1, 0],
+  dir2: [0, 1, 0],
+  power: perTick(2),
+  powerJitter: 1,
+  gravity: 1.8,
+  capacity: 128,
+};
+/** BITMAP_LIGHT sub0 at bone 42 (ZzzEffectParticle.cpp:3161-3166, :7943-7966): flare01 32-64 cm, Light (0.3, 0.5, 1), rising 2.5 cm a tick, shrinking out. */
+const TELEPORT_HAND: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.3, 0.5, 1],
+  size: cm(48),
+  sizeJitter: 0.33,
+  life: ticks(19),
+  lifeJitter: 0.47,
+  box: [0.02, 0.02, 0.02],
+  dir1: [-0.15, 1, -0.15],
+  dir2: [0.15, 1, 0.15],
+  power: perTick(2.5),
+  powerJitter: 0,
+  endScale: 0.1,
+  capacity: 64,
+};
+const TELEPORT_CLIPS: ReadonlySet<number> = new Set([
+  PlayerAction.PLAYER_ATTACK_TELEPORT,
+  PlayerAction.PLAYER_ATTACK_RIDE_TELEPORT,
+  PlayerAction.PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT,
+]);
+/** The held pose after key 5.5 runs at a tenth, about 3.6 s; the glow stops with the clip or here. */
+const TELEPORT_HOLD_MAX = 6;
+
+/** Every tick the teleport clip is past key 5.5, a blue BITMAP_LIGHT at bone 42 (ZzzCharacter.cpp:4121-4129). */
+const teleportHand: Step = (_at, c) => {
+  const t0 = fxNow();
+  let seen = false;
+  const tick = (): void => {
+    if (entityGone(c.caster)) return;
+    const m = c.caster.modelObject;
+    const on = !!m && TELEPORT_CLIPS.has(m.CurrentAction);
+    if (on) seen = true;
+    else if (seen || fxNow() - t0 > 1) return;
+    if (on && m && m.actionFrame() > 5.5) particles({ recipe: TELEPORT_HAND, count: 1 })(bonePos(c.caster, 42, new Vector3()), c);
+    if (fxNow() - t0 < TELEPORT_HOLD_MAX) delay(TICK, tick);
+  };
+  tick();
+};
+
+/**
+ * BITMAP_FLARE_BLUE joint sub19 (ZzzEffectJoint.cpp:1854-1860, :5525-5533): it waits LifeTime - 25
+ * ticks 6 m up, then falls 35-54 cm a tick, 5 more every tick, for its last 25. Spawned when the
+ * fall starts: a waiting joint draws nothing.
+ */
+function blueStreak(at: Vector3, c: SkillContext): void {
+  const p = muRotated(at, Math.random() * 360, cm(Math.random() * 200));
+  const wait = Math.floor(Math.random() * 50);
+  const d0 = 35 + Math.floor(Math.random() * 20);
+  delay(ticks(wait), () => {
+    const t0 = fxNow();
+    const top = p.y + 6;
+    effects.spawn('joint', c.scene, p, {
+      head: out => {
+        const k = (fxNow() - t0) / TICK;
+        return out.set(p.x, top - cm(k * d0 + 2.5 * k * (k + 1)), p.z);
+      },
+      maxTails: 20,
+      width: cm(40),
+      seconds: ticks(25),
+      colour: RGBS.white,
+      texture: TEX.flareBlue,
+      fadeTail: 0.04,
+    });
+  });
+}
+
+/** Party Teleport at AttackTime 6 (ZzzCharacter.cpp:4384-4389, ZzzEffect.cpp:2137-2185): the emblem, the blue curtain, the motes and the falling streaks, 10 s. */
+const partyCircle: Step = seq(
+  model({ model: MODEL.circle, texture: TEX.magicEmblem, seconds: ticks(250), life: emblemWhite }),
+  model({ model: MODEL.circle, texture: TEX.magicEmblem, colour: [0.5, 0.5, 1], seconds: ticks(250), life: emblemBlue }),
+  model({ model: MODEL.circle2, colour: [0.05, 0.05, 1], seconds: ticks(250), life: curtainLife, scrollU: QUAKE_SCROLL }),
+  particles({ recipe: FLARE_BLUE_RISE, rate: 12.5, seconds: ticks(220) }),
+  (at, c) => everyTick(210, () => {
+    if (Math.random() < 0.5) blueStreak(at, c);
+  }),
+  sfx('Sound/eSummon')
+);
+
+const DL_FLASH: ReadonlySet<number> = new Set([
+  PlayerAction.PLAYER_SKILL_FLASH,
+  PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_FLASH,
+  PlayerAction.PLAYER_FENRIR_ATTACK_DARKLORD_FLASH,
+]);
+/** BITMAP_GATHERING sub2 rides bone 33 + 10 cm (MoveHandlers.cpp:1611-1617). */
+const GATHER_LOCAL = new Vector3(0, 0, cm(10));
+
+/**
+ * Electric Spike's charge, BITMAP_GATHERING sub2 (ZzzCharacter.cpp:10514-10520, MoveHandlers.cpp:1604-1658):
+ * for 20 ticks, three one-frame Shiny02 cards at the hand a tick and, every other tick, three blue
+ * JOINT_THUNDER sub3 arcs from a 120 cm sphere into it (ZzzEffectJoint.cpp:1123-1129).
+ */
+const sparkCharge: Step = (_at, c) => {
+  const hand: PointSource = out => boneLocalPos(c.caster, 33, GATHER_LOCAL, out, CAST_HEIGHT);
+  everyTick(20, i => {
+    if (entityGone(c.caster)) return;
+    const h = hand(new Vector3());
+    for (let j = 0; j < 3; j++) {
+      if (i % 2 === 0) {
+        const pitch = Math.random() * Math.PI * 2;
+        const yaw = Math.random() * Math.PI * 2;
+        const from = new Vector3(h.x - Math.sin(yaw) * Math.cos(pitch) * 1.2, h.y + Math.sin(pitch) * 1.2, h.z + Math.cos(yaw) * Math.cos(pitch) * 1.2);
+        effects.spawn('joint', c.scene, from, { to: hand, colour: [0.5, 0.5, 1], width: cm(10), seconds: ticks(10), segments: 10, jitter: 0.15, texture: TEX.jointThunder, textureRepeats: 2, textureScroll: 1 });
+      }
+      effects.spawn('sprite', c.scene, h, {
+        texture: TEX.shiny2,
+        size: cm(32) * (8 + Math.floor(Math.random() * 8)) * 0.2,
+        aspect: 2,
+        seconds: TICK,
+        rotation: Math.random() * Math.PI * 2,
+        fadeTail: 0.001,
+      });
+    }
+  });
+};
+
+/** BITMAP_FLARE_FORCE joints: 30 tails (ZzzEffectJoint.cpp:2496-2549). */
+const FORCE_TAILS = 30;
+/** Tails after `k` ticks of growth: 0, 2, 4... are added a tick (`MultiUse += 2`, :6608-6624). */
+const forceReveal = (k: number): number => Math.min(FORCE_TAILS, k * (k - 1));
+/** `Light x 1/1.3` a tick over the last 10. */
+const forceLife = (life: number) => (p: number): number => Math.min(1, Math.pow(1.3, ticksLeft(p, life) - 10));
+/** `Luminosity = (NumTails - 1 - j) / MaxTails * 2` per quad (:7251-7257): bright at the tip, black at the hand. */
+const forceShade = (i: number): number => (2 * i) / FORCE_TAILS;
+
+/**
+ * The bolt at key 5.5 (ZzzCharacter.cpp:4390-4404, ZzzEffect.cpp:3418-3426): five FLARE_FORCE joints
+ * from 90 cm ahead and 100 cm up. Tail n sits `n^2 + 2n` cm down the facing (steps 3, 5, 7... cm);
+ * sub0 is the 250 cm straight ribbon, sub1-4 corkscrew round it at `80 - 2.5n` cm, turning -20 deg a
+ * tail from below (sub1/2, after a 2-4 tick wait) and above (sub3/4, which overlap) (:6625-6668).
+ */
+const sparkBolt: Step = (_at, c) => {
+  const f = forwardOf(entityYaw(c.caster));
+  const fwd = new Vector3(f.x, 0, f.z);
+  const right = new Vector3(-f.z, 0, f.x);
+  const act = c.caster.modelObject?.CurrentAction;
+  const lift = act === PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_FLASH ? cm(80) : act === PlayerAction.PLAYER_FENRIR_ATTACK_DARKLORD_FLASH ? cm(40) : 0;
+  const s = entityPos(c.caster, 1 + lift, new Vector3()).addInPlace(fwd.scale(0.9));
+  const axis = (n: number): Vector3 => s.add(fwd.scale(cm(n * n + 2 * n)));
+  const base = { texture: TEX.jointThunder, colour: [1, 0.8, 1] as RGB, reveal: forceReveal, uPerPoint: 1 / 14, scroll: 1, shade: forceShade, side: right };
+  const main: Vector3[] = [];
+  for (let n = 0; n < FORCE_TAILS; n++) main.push(axis(n));
+  effects.spawn('path', c.scene, s, { ...base, points: main, width: cm(250), seconds: ticks(20), life: forceLife(20) });
+  for (const sign of [1, 1, -1, -1]) {
+    const wait = sign > 0 ? 2 + Math.floor(Math.random() * 3) : 0;
+    const points: Vector3[] = [];
+    for (let n = 0; n < FORCE_TAILS; n++) {
+      const r = cm(80 - 2.5 * n) * sign;
+      const t = ((180 - 20 * n) * Math.PI) / 180;
+      points.push(axis(n).addInPlace(right.scale(Math.sin(t) * r)).addInPlaceFromFloats(0, Math.cos(t) * r, 0));
+    }
+    effects.spawn('path', c.scene, s, { ...base, points, width: 1, wait: ticks(wait), seconds: ticks(20 + wait), life: forceLife(20 + wait) });
+  }
+  sfx('Sound/sDarkElecSpike')(s, c);
+};
+
+/** Keys 7-8, a tick each: two MODEL_DARKLORD_SKILL sub2 at the weapon's link bone, Light (0.8, 0.5, 1), angles (180, 45, 0) and (0, 0, yaw) (ZzzCharacter.cpp:10541-10551). */
+const sparkAfterglow: Step = (_at, c) =>
+  everyTick(3, i => {
+    const m = c.caster.modelObject;
+    const frame = m && DL_FLASH.has(m.CurrentAction) ? m.actionFrame() : 7 + i * 0.4;
+    if (frame >= 8 || entityGone(c.caster)) return;
+    const p = bonePos(c.caster, 33, new Vector3(), CAST_HEIGHT);
+    const glow = { model: MODEL.darkLordSkill, colour: [0.8, 0.5, 1] as RGB, scale: 0.2, seconds: ticks(12), fadeTail: 0.001 };
+    // The (180, ...) pitch only mirrors the flat card; its 45 degree tilt is the roll.
+    model({ ...glow, roll: muYaw(45) })(p, c);
+    model({ ...glow, yaw: -entityYaw(c.caster) })(p, c);
+  });
 
 // ---- the table -------------------------------------------------------------------
 
@@ -1309,41 +1715,24 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 61 Fire Burst (and 508 / 514): at the strike key, three homing darts with their ghost trails and two
   // starburst cards at the caster; eFirebustBoom from the darts.
   61: { impact: strikeKey(fireBurst, 'Sound/eFirebustBoom') },
-  // 62 Earthshake: frame ≥ 5 - the EarthQuake0N companions at the caster.
-  62: {
-    area: atCaster(seq(
-      model({ model: MODEL.earthQuake, seconds: ticks(20), colour: RGBS.gold, flat: true, scale: 1.5 }),
-      model({ model: MODEL.earthQuake2, seconds: ticks(35), colour: RGBS.gold, flat: true, scale: 1.5 }),
-      model({ model: MODEL.earthQuake3, seconds: ticks(40), colour: RGBS.gold, flat: true, scale: 1.5 }),
-      model({ model: MODEL.earthQuake4, seconds: ticks(50), colour: RGBS.gold, flat: true, scale: 1.5 }),
-      model({ model: MODEL.earthQuake5, seconds: ticks(60), colour: RGBS.gold, flat: true, scale: 1.5 }),
-      model({ model: MODEL.earthQuake6, seconds: ticks(60), colour: RGBS.gold, flat: true, scale: 1.5 }),
-      model({ model: MODEL.earthQuake7, seconds: ticks(50), colour: RGBS.gold, flat: true, scale: 1.5 }),
-      model({ model: MODEL.earthQuake8, seconds: ticks(40), colour: RGBS.gold, flat: true, scale: 1.5 }),
-      particles({ recipe: DUST, count: 40 }),
-      stones(6, 2)
-    ), 0.05),
-  },
-  // 63 Party Teleport (Summon): MODEL_CIRCLE sub2 + MODEL_CIRCLE_LIGHT sub3 (LT 250 in the original; held 3 s
-  // here - no completion packet ends it) + BITMAP_LIGHT particles at bone 42 after frame 5.5.
-  63: {
-    area: atCaster(seq(
-      model({ model: MODEL.circle, seconds: PARTY_TELEPORT_SECONDS, colour: RGBS.soul, flat: true, scale: 1 }),
-      model({ model: MODEL.circle2, seconds: PARTY_TELEPORT_SECONDS, colour: [0.3, 0.5, 1], flat: true, scale: 1, spin: 1, alpha: 0.5 }),
-      (at, c) => effects.spawn('particles', c.scene, at, { recipe: NOVA_MOTES, rate: 25, seconds: PARTY_TELEPORT_SECONDS, follow: followEntity(c.caster, 1.2) })
-    ), 0.05),
-  },
+  // 62 Earthshake (512 / 516): on the Dark Horse's action 3 - shock rings every 10 ticks, rings of
+  // MODEL_GROUND_STONE on horse keys 8-9.5, the fury's burst 1.1 tiles ahead at tick 28 and five crack
+  // chains at 29 (GOBoid.cpp:727-769, MoveHandlers.cpp:2940-3170).
+  62: { area: atCaster(earthshake, 0) },
+  // 63 Party Teleport (Summon): the held hand's blue BITMAP_LIGHT after key 5.5, and at AttackTime 6
+  // MODEL_CIRCLE sub2 + MODEL_CIRCLE_LIGHT sub3 for 250 ticks (ZzzCharacter.cpp:4121-4129, :4384-4389).
+  63: { area: atCaster(seq(teleportHand, after(ticks(6), partyCircle)), 0) },
   // 64 Add Critical (Increase Critical Damage): MODEL_DARKLORD_SKILL at weapon bone 0 (sub0) and bone 1 (sub1), Light (1,0.6,0.3).
   64: { impact: addCritical, area: addCritical },
-  // 65 Electric Spark: impact at CalcAddPosition(0,−90,−50) - BITMAP_FLARE_FORCE one-shot → 5 ribbons: sub1 (100),
-  // sub0 (250), sub2/3/4 (100).
+  // 65 Electric Spike (519): the charge at key 1.2 (BITMAP_GATHERING sub2 + SOUND_ELEC_STRIKE_READY), the five
+  // FLARE_FORCE joints at 5.5 with SOUND_ELEC_STRIKE, two MODEL_DARKLORD_SKILL at the weapon on keys 7-8
+  // (ZzzCharacter.cpp:4390-4404, :10509-10553). Fallback times for a caster with no clip are the keys at 0.4.
   65: {
-    area: atCaster(offset(seq(
-      sprite({ texture: TEX.flareForce, colour: RGBS.arc, size: 2.5, seconds: ticks(10), grow: 2, growFrom: 0.3 }),
-      streamerFan(1, 0, { velocity: perTick(80), seconds: ticks(12), maxTails: 8, width: 2.5, colour: RGBS.arc, texture: TEX.flareForce }),
-      streamerFan(4, Math.PI / 6, { velocity: perTick(80), seconds: ticks(12), maxTails: 8, width: 1, colour: RGBS.spark, pitch: 0.15, texture: TEX.flareForce }),
-      particles({ recipe: ARC_MOTES, count: 24 })
-    ), 0.9, 0.5), 0.5),
+    area: seq(
+      atFrame(DL_FLASH, 1.2, ticks(3), seq(sparkCharge, atCaster(sfx('Sound/sDarkElecSpikeReady'), CAST_HEIGHT))),
+      atFrame(DL_FLASH, 5.5, ticks(19), sparkBolt),
+      atFrame(DL_FLASH, 7, ticks(23), sparkAfterglow)
+    ),
   },
   // 67 Stun: CreateJoint(BITMAP_FLASH sub7 at the caster).
   67: { area: atCaster((at, c) => effects.spawn('joint', c.scene, at, { head: followEntity(c.caster, 1.2), maxTails: 10, width: 0.5, colour: RGBS.gold, seconds: ticks(20) }), 1.2) },

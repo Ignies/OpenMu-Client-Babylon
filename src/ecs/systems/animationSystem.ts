@@ -26,6 +26,7 @@ import { isFlagInBinaryMask } from '../../common/utils';
 import {
   monsterModelTypeOf,
   monsterPlaySpeed,
+  playerFrameSpeedScale,
   playerPlaySpeed,
   wingsPlaySpeed,
 } from '../../common/playSpeed';
@@ -421,12 +422,12 @@ export const AnimationSystem: ISystemFactory = world => {
 
         const action = playerAnimation.action;
         const attrs = entity.attributeSystem;
-        const isRageFighter =
-          getBaseClass(
-            entity.charAppearance?.charClass ?? Store.playerData.charClass
-          ) === BaseClass.RageFighter;
+        const baseClass = getBaseClass(
+          entity.charAppearance?.charClass ?? Store.playerData.charClass
+        );
+        const isRageFighter = baseClass === BaseClass.RageFighter;
 
-        playerObject.AnimationSpeed =
+        const speed =
           playerObject.actionPlaySpeed(action) ??
           playerPlaySpeed(
             action,
@@ -434,6 +435,19 @@ export const AnimationSystem: ISystemFactory = world => {
             attrs?.getValue('magicSpeed') ?? 0,
             isRageFighter
           );
+        // A clip already playing takes its per-frame slowdown straight into the running group.
+        if (playerObject.CurrentAction === action) {
+          playerObject.setAnimationSpeed(
+            speed *
+              playerFrameSpeedScale(
+                action,
+                playerObject.actionFrame(),
+                baseClass === BaseClass.DarkLord
+              )
+          );
+        } else {
+          playerObject.AnimationSpeed = speed;
+        }
 
         // A performer's clip loops whatever band it sits in: the pose is held
         // for as long as the instrument is out.

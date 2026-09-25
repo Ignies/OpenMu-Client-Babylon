@@ -11,6 +11,7 @@ import { pillarLayer } from './pillar';
 import { jointLayer } from './joint';
 import { blurLayer } from './blur';
 import { ringLayer } from './ring';
+import { pathLayer } from './path';
 import { auraLayer } from './aura';
 import { burstsLayer } from './bursts';
 import { itemAuraLayer } from './itemAura';
@@ -44,6 +45,7 @@ export const EFFECT_LAYERS = [
   jointLayer, // reads aura's ribbon heads
   blurLayer,
   ringLayer,
+  pathLayer,
   burstsLayer, // spawn only; the shared particle pool steps it
   itemAuraLayer, // reset only; itemGlowSystem drives it
   itemCrackleLayer, // reset only; itemGlowSystem drives it

@@ -96,6 +96,10 @@ export interface SpriteOptions {
   sizeAt?: (p: number) => number;
   /** A fixed turn of the card on its axis, radians (the original's `Rotation` rolled at birth). */
   roll?: number;
+  /** Card height over width, for a sheet that is not square (Shiny02 is 32x64). */
+  aspect?: number;
+  /** The card's turn in the view plane, radians (the original's `Rotation`), when it does not `spin`. */
+  rotation?: number;
 }
 
 const live = new LiveList();
@@ -213,7 +217,9 @@ export function spawnSprite(
         const o = offsets[i];
         c.position.set(tmp.x + o.x + move[0] * t, tmp.y + o.y + y + move[1] * t, tmp.z + o.z + move[2] * t);
         c.scaling.setAll(s);
+        if (opts.aspect) c.scaling.y = s * opts.aspect;
         c.visibility = vis;
+        if (opts.rotation !== undefined && !spin && !opts.flat) c.rotation.z = opts.rotation;
         if (spin) {
           if (opts.flat) c.rotation.y = phases[i] + spin * t;
           else c.rotation.z = phases[i] + spin * t;
