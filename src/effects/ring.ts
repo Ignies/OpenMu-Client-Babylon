@@ -57,6 +57,11 @@ export interface RingOptions {
   until?: () => boolean;
   /** Decal grid in tiles, for a ring wider than `MAX_SCALE` (BITMAP_SHOCK_WAVE sub0 is 20 across). */
   maxScale?: number;
+  /**
+   * Fade through the colour instead of the alpha: an additive decal blends (ONE, ONE), which ignores
+   * alpha, so only this dims it (a `Light` that decays, BITMAP_FLARE_BLUE under a Strike of Destruction).
+   */
+  fadeColour?: boolean;
 }
 
 const live = new LiveList();
@@ -104,6 +109,8 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const tail = opts.fadeTail ?? 0.35;
   const follow = opts.follow;
   const until = opts.until;
+  const fadeColour = opts.fadeColour ?? false;
+  const faded: [number, number, number] = [0, 0, 0];
   let x = at.x;
   let z = at.z;
   let t = 0;
@@ -120,14 +127,20 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
         z = followTmp.z;
       }
       const s = scale * lerp(growFrom, grow, p);
-      decal.setAlpha(fadeOut(p, tail));
+      const fade = fadeOut(p, tail);
+      decal.setAlpha(fade);
+      if (fadeColour) {
+        faded[0] = colour[0] * fade;
+        faded[1] = colour[1] * fade;
+        faded[2] = colour[2] * fade;
+      }
       decal.draw(
         world,
         x,
         z,
         Math.min(maxScale, s),
         spinFrom + spin * t,
-        colour
+        fadeColour ? faded : colour
       );
       return true;
     },

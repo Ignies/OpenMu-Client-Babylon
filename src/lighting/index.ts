@@ -12,7 +12,7 @@ import {
   type LightAnchor,
   type LightRecipe,
 } from './lightSource';
-import { lightAreaSkill, lightArrow, lightSkillBody, lightSkillCue, lightSkillTrail, lightTargetedSkill } from './skills';
+import { lightAreaSkill, lightArrow, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
@@ -152,6 +152,15 @@ class Lighting {
     follow: (out: { x: number; y: number; z: number }) => void
   ): LightSource | null {
     return lightSkillBody(scene, skill, body, follow);
+  }
+
+  /** Light a skill's one moving emitter on every tier (the row's `follow`). Null when it has none. */
+  skillFollow(
+    scene: Scene,
+    skill: number,
+    follow: (out: { x: number; y: number; z: number }) => void
+  ): LightSource | null {
+    return lightSkillFollow(scene, skill, follow);
   }
 
   /**

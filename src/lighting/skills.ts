@@ -69,6 +69,13 @@ export type SkillLight = {
    */
   readonly trail?: LightRecipe;
   /**
+   * `follow`: the one light riding the effect's single moving emitter, on
+   * every tier - the original's AddTerrainLight on a travelling effect
+   * (Fire Breath's BITMAP_SHOTGUN). The effects layer starts it when the
+   * emitter appears and hands over its path.
+   */
+  readonly follow?: LightRecipe;
+  /**
    * `arrow`: what this skill's arrows carry while they fly, overriding the
    * launcher-model row in `ARROW_LIGHTS`. For the skills this client draws
    * with a tinted arrow where the original fires the plain one.
@@ -252,8 +259,9 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Starfall: MODEL_ARROW_IMPACT lights nothing in the original (:14596);
   // the holy wash riding the shot down is ours.
   46: { arrow: { ...holy(2, ARROW_SECONDS), release: 0.2 } },
-  // Fire Breath: BITMAP_FIRE+1 range 2.
-  49: { impact: flame(2, 0.5) },
+  // Fire Breath: BITMAP_SHOTGUN's (0.5,0.5,0.8) x Luminosity 0.7-1.0, range 2, riding the emitter
+  // for its 10 ticks and fading under LT 5 (MoveHandlers.cpp:5086-5087, ZzzEffect.cpp:6645-6650).
+  49: { follow: { color: [0.5, 0.5, 0.8], range: 2, seconds: 0.4, release: 0.2, flicker: { min: 0.7, max: 1, steps: 4 } } },
   // Ice Arrow: MODEL_ARROW range 2 (:11777). The bolt light rides the same
   // path the arrow does and fires the impact on arrival, so it keeps it.
   51: { travel: { ...frost(2, 3), speed: ARROW_SPEED }, impact: frost(2, 0.4) },
@@ -533,6 +541,25 @@ export function lightSkillBody(
   follow: (out: { x: number; y: number; z: number }) => void
 ): LightSource | null {
   const recipe = lightRow(skill)?.bodies?.[body];
+
+  if (!recipe) return null;
+
+  const position = { x: 0, y: 0, z: 0 };
+  follow(position);
+
+  return attach(scene, recipe, { position, follow });
+}
+
+/**
+ * Command: the row's `follow` light on a skill's one moving emitter, on every
+ * tier. Null when the row has none.
+ */
+export function lightSkillFollow(
+  scene: Scene,
+  skill: number,
+  follow: (out: { x: number; y: number; z: number }) => void
+): LightSource | null {
+  const recipe = lightRow(skill)?.follow;
 
   if (!recipe) return null;
 

@@ -30,6 +30,7 @@ import {
 import { FOOT_THUNDER_FRAMES, MODEL, RGBS, TEX } from '../../effects/recipes';
 import { Store } from '../../store';
 import { PlayerAction } from '../../common/objects/enum';
+import { RIDER_FLY_WORLDS } from '../../combat/recipes';
 import { playUiSound } from '../../sound/ui';
 import { playSfx } from '../../sound/listener';
 import type { Entity, ISystemFactory, Item } from '../world';
@@ -100,6 +101,9 @@ const HORSE_BLUR_TIP = new Vector3(0.6, 0, 0);
 const HORSE_BLUR_ROOT = new Vector3(0, 0, 0);
 /** Seconds a horse blur samples at most; it stops with action 3. */
 const HORSE_BLUR_MAX = 8;
+/** The Dinorant's breath clips under a Fire Breath (GOBoid.cpp:559-564). */
+const MOUNT_ACTION_BREATH = 6;
+const MOUNT_ACTION_BREATH_FLY = 7;
 /** `CSPetSystem::PlayAnimation`: the raven's clips run at 0.4. */
 const RAVEN_PLAY_SPEED = 0.4;
 
@@ -1088,6 +1092,17 @@ export const PetSystem: ISystemFactory = world => {
     const moving = !!velocity && (velocity.x !== 0 || velocity.y !== 0);
 
     actor.modelObject?.setAnimationSpeed(MOUNT_PLAY_SPEED);
+
+    // Fire Breath: the mount breathes with its rider, clip 7 in the fly worlds and 6 elsewhere
+    // (GOBoid.cpp:559-564). SetAction skips a clip the model lacks, so the Uniria stays as it is.
+    const rider = state.owner.modelObject?.CurrentAction;
+    if (rider === PlayerAction.PLAYER_SKILL_RIDER || rider === PlayerAction.PLAYER_SKILL_RIDER_FLY) {
+      const breath = RIDER_FLY_WORLDS.has(world.mapIndex) ? MOUNT_ACTION_BREATH_FLY : MOUNT_ACTION_BREATH;
+      if (actor.modelObject?.gltf?.animationGroups[breath]) {
+        actor.modelObject.playAction(breath, true);
+        return;
+      }
+    }
     actor.modelObject?.playAction(
       moving ? state.moveAction : state.standAction,
       true

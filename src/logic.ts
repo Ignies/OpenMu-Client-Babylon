@@ -2663,6 +2663,13 @@ EventBus.on('SkillAnimation', packet => {
   if (!caster) return;
   const target = world.getByNetId(targetId) ?? null;
 
+  // AT_SKILL_COMBO: the server announces a landed DK combo. The original leaves the caster's
+  // facing, target and clip alone and only plays SOUND_COMBO (WSclient.cpp:4167, :4829-4832).
+  if (combat.observeSkillAnimation(p.SkillId, target?.netId)) {
+    playSfx(COMBO_SOUND, caster.transform.pos, { bus: COMBAT_BUS });
+    playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
+    return;
+  }
   if (target && target !== caster && !caster.localPlayer) {
     const dx = target.transform.pos.x - caster.transform.pos.x;
     const dz = target.transform.pos.z - caster.transform.pos.z;
@@ -2671,10 +2678,6 @@ EventBus.on('SkillAnimation', packet => {
     }
   }
   playCastAnimation(caster, p.SkillId, false);
-  // AT_SKILL_COMBO: the server announces a landed DK combo (ReceiveMagic, WSclient.cpp:4436).
-  if (combat.observeSkillAnimation(p.SkillId, target?.netId)) {
-    playSfx(COMBO_SOUND, caster.transform.pos, { bus: COMBAT_BUS });
-  }
   playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
 });
 

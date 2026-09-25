@@ -89,7 +89,6 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   45: 'Sound/battlecastle/sCShockWave', // Javelin
   46: 'Sound/battlecastle/sCFireArrow', // Deep Impact
   48: 'Sound/eSwellLife', // Swell Life
-  49: 'Sound/sKnightSkill3', // Rider (AT_SKILL_RIDER)
   52: 'Sound/ePiercing', // Penetration
   55: 'Sound/eBloodAttack', // Fire Slash
   56: 'Sound/sKnightSkill4', // Power Slash
@@ -117,6 +116,7 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   223: 'Sound/SE_Ch_summoner_skill05_explosion03', // Explosion
   224: 'Sound/SE_Ch_summoner_skill06_requiem02', // Requiem
   230: 'Sound/lightning_shock', // Lightning Shock
+  232: 'Sound/BLOW_OF_DESTRUCTION', // Strike of Destruction (ZzzCharacter.cpp:4179)
   233: 'Sound/SwellofMagicPower', // Expansion of Wizardry
   234: 'Sound/recover', // Recovery
   236: 'Sound/flame_strike', // Flame Strike
@@ -132,6 +132,9 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   267: 'Sound/Ragefighter/Rage_Buff_2', // Increase Block
   268: 'Sound/Ragefighter/Rage_Buff_1', // Increase Defense
   269: 'Sound/battlecastle/sCHaveyBlow', // Occupy
+  337: 'Sound/BLOW_OF_DESTRUCTION', // Strike of Destruction Str
+  340: 'Sound/BLOW_OF_DESTRUCTION', // Strike of Destruction Proficiency
+  343: 'Sound/BLOW_OF_DESTRUCTION', // Strike of Destruction Mastery
   // Master skills with the base skill's cast (SKILL_REPLACEMENTS, _enum.h:680-681).
   508: 'Sound/eFirebust', // Fire Burst Strengthener
   509: 'Sound/sKnightSkill1', // Force Wave Strengthener

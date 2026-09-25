@@ -157,6 +157,12 @@ export interface JointOptions {
   /** Trail: segments kept behind the head (C++ `MaxTails`). */
   maxTails?: number;
   /**
+   * Trail: stop recording the history after this many seconds, so the ribbon keeps its shape instead of
+   * shrinking onto a head that stopped - the original's CreateTail only while `LifeTime > 16` (BITMAP_LIGHT
+   * sub0, ZzzEffectJoint.cpp:6456). Default: records for the whole life.
+   */
+  sampleFor?: number;
+  /**
    * Narrow the ribbon toward its ends instead of cutting it off square: a
    * rounded nose and a tail that comes to a point. A constant-width ribbon is
    * what the original draws, and on a short trail it reads as a rectangular
@@ -400,6 +406,9 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
     // channel a gain can push past the sheet's own levels.
     const std = mesh.material as StandardMaterial;
     const gain = dark ? Math.min(opts.maxCover ?? Infinity, luma(colour) * darkCardGain(scene)) : lightCardGain(scene);
+    // One dirty pass for the whole set-up: each dirtying setter walks every mesh in the scene, and a
+    // burst of forty sparks paid that walk hundreds of times in one frame.
+    std.blockDirtyMechanism = true;
     std.diffuseColor.set(0, 0, 0);
     std.specularColor.set(0, 0, 0);
     std.ambientColor.set(0, 0, 0);
@@ -412,6 +421,7 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
     std.backFaceCulling = false;
     std.disableDepthWrite = true;
     std.fogEnabled = false;
+    std.blockDirtyMechanism = false;
     // Hold the line unseen until the sheet is in - a texture-less Standard
     // ribbon is exactly the solid band this is here to remove.
     if (glMat) glMat.visibility = -1;
@@ -689,6 +699,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
   const anchorLast = new Vector3();
   if (anchor) anchor(anchorLast);
   const maxSeg = opts.maxSegment ?? Infinity;
+  const sampleFor = opts.sampleFor ?? Infinity;
   const cullLine = Number.isFinite(maxSeg) ? line.slice() : line;
   const smooth = Math.max(1, Math.round(opts.smooth ?? 1));
   const drawLine = smooth > 1 ? new Array<number>((tails * smooth + 1) * 3).fill(0) : cullLine;
@@ -751,7 +762,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
         head.y += vy * dt;
       }
       sinceSample += dt;
-      const stepped = sinceSample >= TAIL_SAMPLE_SECONDS;
+      const stepped = sinceSample >= TAIL_SAMPLE_SECONDS && t <= sampleFor;
       if (stepped) {
         sinceSample = 0;
         if (steer) {
@@ -795,11 +806,15 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
         line.copyWithin(3, 0, tails * 3);
         opts.trace?.(head);
       }
+      // A ribbon whose history is frozen and whose head stopped has nothing new to upload.
+      const held = t > sampleFor && !anchor && !opts.wave && head.x === line[0] && head.y === line[1] && head.z === line[2];
       line[0] = head.x;
       line[1] = head.y;
       line[2] = head.z;
       opts.track?.(head);
-      if (cullLine !== line) {
+      if (held) {
+        // Points unchanged since the last upload.
+      } else if (cullLine !== line) {
         // Copy the history, collapsing an over-long segment onto its newer end so it draws as nothing.
         const maxSq = maxSeg * maxSeg;
         cullLine[0] = line[0];
@@ -815,9 +830,11 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
           cullLine[i + 2] = long ? cullLine[i - 1] : line[i + 2];
         }
       }
-      if (smooth > 1) resampleCurve(cullLine, drawLine, smooth);
-      if (opts.wave && drawLine !== line) waveLine(drawLine, waveScratch, opts.wave, t);
-      if (stepped || !opts.tickPoints) mesh.setPoints(drawLines);
+      if (!held) {
+        if (smooth > 1) resampleCurve(cullLine, drawLine, smooth);
+        if (opts.wave && drawLine !== line) waveLine(drawLine, waveScratch, opts.wave, t);
+        if (stepped || !opts.tickPoints) mesh.setPoints(drawLines);
+      }
       ribbon.scroll();
       const vis = opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3);
       ribbon.fade(vis);

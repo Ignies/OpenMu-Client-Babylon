@@ -23,6 +23,7 @@ import { monsterVisualsLayer } from './monsterVisuals';
 import { bandNotesLayer } from './bandNotes';
 import { pingLayer } from './ping';
 import { weaponHideLayer } from './weaponHide';
+import { quakeLayer } from './quake';
 
 /**
  * THE list. Every visual effect entry in the game is one line here, and
@@ -56,6 +57,7 @@ export const EFFECT_LAYERS = [
   bandNotesLayer,
   pingLayer, // composes ring + joint, so after both
   weaponHideLayer, // hides a hand weapon; draws nothing
+  quakeLayer, // the camera shake; its offset rides the next render
   monsterVisualsLayer, // reads this frame's bones and actions; spawns into the pools above
   monsterGlowLayer, // last: its cards ride the bones this frame's animation posed
 ] as const;

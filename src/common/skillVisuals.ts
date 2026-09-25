@@ -58,6 +58,7 @@ import { earthQuake } from '../camera';
 import { warmGLTF } from './modelLoader';
 import { ENUM_WORLD } from './types';
 import { TW_NOGROUND, TW_NOMOVE, TW_WATER } from './terrain/consts';
+import type { SheetCells } from '../effects/core';
 
 /**
  * Skill → visual recipe. The **consumer** of the effects layer
@@ -2548,6 +2549,298 @@ const deathStabOf = (hd: boolean): Step => (at, c) => {
   }
 };
 const deathStab = deathStabOf(false);
+// ---- dk3 steps
+
+/** `c->AttackTime` counts from 1 at the cast and fires the effect switch at g_iLimitAttackTime 15 (ZzzCharacter.cpp:2615, :4132-4145). */
+const ATTACK_TIME_TICKS = 14;
+
+/**
+ * `step` when the caster's clip (one of `actions`) passes `key` - an AttackStage shortcut to the AttackTime
+ * cap (ZzzCharacter.cpp:2910-2915) - or once `cap` ticks have gone, whichever is first.
+ */
+const atClipKey = (key: number, actions: readonly number[], step: Step, cap = ATTACK_TIME_TICKS): Step => (at, c) => {
+  const p = at.clone();
+  const t0 = fxNow();
+  // Polled against the clock, not by counting polls: each delay lands on a frame and would drift late.
+  const poll = (): void => {
+    if (entityGone(c.caster)) return;
+    const m = c.caster.modelObject;
+    if ((m && actions.includes(m.CurrentAction) && m.actionFrame() >= key) || fxNow() - t0 >= ticks(cap) - 1e-4) step(p, c);
+    else delay(Math.min(TICK, ticks(cap) - (fxNow() - t0)), poll);
+  };
+  poll();
+};
+
+/** The two Fire Breath clips (SkillCast.cpp:314-319). */
+const RIDER_ACTIONS: readonly number[] = [PlayerAction.PLAYER_SKILL_RIDER, PlayerAction.PLAYER_SKILL_RIDER_FLY];
+/** BITMAP_FIRE+2 (Fire03, 256x64): four 64 px cells, `Frame = (23 - LifeTime) / 6` (ZzzEffectParticle.cpp:4617). */
+const FIRE3_CELLS: SheetCells = { w: 64, h: 64, count: 4 };
+/** BITMAP_EXPLOTION+1 (DinoE, 256x64): four 64 px cells over its 12 ticks (ZzzEffectParticle.cpp:4278-4280). */
+const DINO_CELLS: SheetCells = { w: 64, h: 64, count: 4 };
+/** A breath puff's `Scale *= 0.95` a tick over its 24 (ZzzEffectParticle.cpp:4615): the size at 30 % of its life and at its end. */
+const PUFF_SIZE_HELD = Math.pow(0.95, 24 * 0.3);
+const PUFF_SIZE_END = Math.pow(0.95, 24);
+/**
+ * JOINT_SPARK sub1's width is its Scale 2 - two centimetres (ZzzEffectJoint.cpp:960-966), under a pixel at
+ * this camera; drawn five wide so the sparks read at all.
+ */
+const BREATH_SPARK_WIDTH = cm(5);
+/**
+ * CreateBomb2's 20 BITMAP_SPARK sub2 chips (ZzzEffect.cpp:6349-6360, ZzzEffectParticle.cpp:2016-2031,
+ * :6558-6597): Spark02 (4 px) at Scale 0.8-1.4, thrown 6-12 cm a tick outward and 6-21 up, falling 2 cm a
+ * tick more each tick, LT 24-39, bright for LifeTime/16.
+ */
+const BOMB2_SPARKS: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: RGBS.white,
+  size: 0.044,
+  sizeJitter: 0.27,
+  life: ticks(39),
+  lifeJitter: 0.38,
+  box: [0.05, 0.05, 0.05],
+  dir1: [-3, 1.5, -3],
+  dir2: [3, 5.25, 3],
+  power: 1,
+  powerJitter: 0,
+  gravity: -12.5,
+  spin: 3,
+  capacity: 128,
+};
+
+/** CreateBomb2 (ZzzEffect.cpp:6349-6371): the chips and one DinoE card at scale 4 (2.56 m), with SOUND_EXPLOTION01. */
+const bomb2: Step = (at, c) => {
+  effects.spawn('sprite', c.scene, at, { texture: TEX.dinoE, colour: RGBS.white, size: cm(256), seconds: ticks(12), cells: DINO_CELLS, fadeTail: 0.1 });
+  effects.spawn('particles', c.scene, at, { recipe: BOMB2_SPARKS, count: 20 });
+  playCombat('Sound/eExplosion', at);
+  // The client's fire-on-the-ground convention (see `scorch` / `burn`), not the original's.
+  scorch(1)(at, c);
+  burn(1)(at, c);
+};
+
+/**
+ * Fire Breath at the key (ZzzCharacter.cpp:4405-4409): SOUND_SKILL_SWORD3 and BITMAP_SHOTGUN at the feet.
+ * The emitter is unseen: it starts 20 cm ahead and 50 up and runs 30 cm a tick along the facing for its 10
+ * ticks, dropping two BITMAP_FIRE+2 sub10 puffs 20 cm to either side each tick at Scale `(15 - LT) / 20 *
+ * (2..4)`, and CreateBomb2 30 cm over its last spot (ZzzEffect.cpp:3002-3035, MoveHandlers.cpp:5077-5110).
+ * At its birth 2x20 JOINT_SPARK sub1 leave from (-20,-20,60) and (30,-20,60), each pitched 5-24 deg off
+ * the facing and rolled a growing i*18 deg, so the two sprays are cones round the facing.
+ */
+const fireBreath: Step = (_at, c) => {
+  const f = forwardOf(entityYaw(c.caster));
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const place = (ahead: number, right: number, up: number, out = new Vector3()): Vector3 =>
+    out.set(feet.x + f.x * ahead - f.z * right, feet.y + up, feet.z + f.z * ahead + f.x * right);
+  playCombat('Sound/sKnightSkill3', feet);
+
+  for (const right of [cm(20), cm(-30)]) {
+    const from = place(cm(20), right, cm(60));
+    let roll = 0;
+    for (let i = 0; i < 20; i++) {
+      roll += (i * 18 * Math.PI) / 180;
+      const pitch = ((5 + Math.floor(Math.random() * 20)) * Math.PI) / 180;
+      const side = Math.sin(pitch) * Math.sin(roll);
+      const heading = new Vector3(f.x * Math.cos(pitch) - f.z * side, -Math.sin(pitch) * Math.cos(roll), f.z * Math.cos(pitch) + f.x * side);
+      // Every other one: each spark is its own ribbon mesh, and forty at once hitched the frame they spawned in.
+      if (i % 2 === 1) continue;
+      effects.spawn('joint', c.scene, from, {
+        velocity: perTick(16 + Math.floor(Math.random() * 20)),
+        heading,
+        seconds: ticks(4 + Math.floor(Math.random() * 4)),
+        maxTails: 2,
+        width: BREATH_SPARK_WIDTH,
+        colour: RGBS.white,
+        texture: TEX.spark,
+        fadeTail: 1,
+      });
+    }
+  }
+
+  const t0 = fxNow();
+  lighting.skillFollow(c.scene, 49, out => {
+    place(cm(20) + cm(30) * Math.min(9, (fxNow() - t0) / TICK), 0, cm(50), tmpEmitter);
+    out.x = tmpEmitter.x;
+    out.y = tmpEmitter.y;
+    out.z = tmpEmitter.z;
+  });
+  for (let k = 0; k < 10; k++) {
+    const tick = (): void => {
+      const size = cm(64) * ((5 + k) / 20) * (2 + Math.floor(Math.random() * 3));
+      for (const right of [cm(20), cm(-20)]) {
+        const speed = perTick(3.2 + Math.random() * 1.5);
+        effects.spawn('sprite', c.scene, place(cm(20) + cm(30) * k, right, cm(50)), {
+          texture: TEX.fire3,
+          colour: RGBS.white,
+          cells: FIRE3_CELLS,
+          size: size * PUFF_SIZE_HELD,
+          growFrom: 1 / PUFF_SIZE_HELD,
+          grow: PUFF_SIZE_END / PUFF_SIZE_HELD,
+          seconds: ticks(24),
+          // `Gravity += 0.004; z += Gravity * 10`: about 12 cm up over the life.
+          move: [f.x * speed, cm(12) / ticks(24), f.z * speed],
+          fadeTail: 1,
+        });
+      }
+      if (k === 9) bomb2(place(cm(20) + cm(30) * k, 0, cm(80)), c);
+    };
+    if (k === 0) tick();
+    else delay(ticks(k), tick);
+  }
+};
+const tmpEmitter = new Vector3();
+
+/** BITMAP_WATERFALL_5 sub8 (ZzzEffectParticle.cpp:3476-3481, :8437-8446): 1.2-1.9 m, rising 1-3 cm a tick less 0.6 a tick, +0.05 Scale and Light /1.1 a tick. */
+const DESTRUCTION_MIST: ParticleRecipe = {
+  texture: TEX.waterFall5,
+  colour: [0.5, 0.5, 1],
+  colourEnd: [0.11, 0.11, 0.22],
+  size: 1.54,
+  sizeJitter: 0.23,
+  life: ticks(30),
+  lifeJitter: 0,
+  box: [1.5, 0.75, 1.5],
+  dir1: [0, 0.25, 0],
+  dir2: [0, 0.75, 0],
+  power: 1,
+  powerJitter: 0,
+  gravity: -3.75,
+  endScale: 1.6,
+  capacity: 256,
+};
+/** BITMAP_WATERFALL_3 sub8 (:3663-3668, :8597-8604): 32-61 cm, rising 5-9 cm a tick less 0.6 a tick, the same growth and fade. */
+const DESTRUCTION_SPLASH: ParticleRecipe = {
+  ...DESTRUCTION_MIST,
+  texture: TEX.waterFall3,
+  size: 0.47,
+  sizeJitter: 0.3,
+  dir1: [0, 1.25, 0],
+  dir2: [0, 2.25, 0],
+  endScale: 3.1,
+};
+/** BITMAP_SMOKE sub55 (:1540-1547, :5736-5745): about 1 m, rising faster by 0.1 cm a tick, +0.05 Scale and Light /1.08 a tick. */
+const DESTRUCTION_SMOKE: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: RGBS.white,
+  colourEnd: [0.31, 0.31, 0.31],
+  size: 1.05,
+  sizeJitter: 0.1,
+  life: ticks(30),
+  lifeJitter: 0,
+  box: [1.5, 0.75, 1.5],
+  dir1: [0, 0, 0],
+  dir2: [0, 0, 0],
+  power: 0,
+  powerJitter: 0,
+  gravity: 0.625,
+  endScale: 1.9,
+  capacity: 256,
+};
+/**
+ * Spots a tick at the target (MoveHandlers.cpp:7589-7604 throws 15 into a 3 m cube round an absolute z of
+ * 150, the ground here): only the upper half of the cube is above ground, so half the spots, in that half.
+ */
+const DESTRUCTION_SPOTS = 4;
+
+/**
+ * Strike of Destruction (ZzzCharacter.cpp:4169-4179): MODEL_BLOW_OF_DESTRUCTION is no mesh but two
+ * controllers, sub0 100 cm ahead and 20 right of the caster (A) and sub1 on the target tile (B), LT 40
+ * (ZzzEffect.cpp:4771-4792). Nothing shows until LT 24: then the Swordeff_mono flash 65 cm over A and the
+ * 3.2 m BITMAP_LIGHT a metre over B, FLARE_BLUE ground marks 4 and 6 tiles wide tinted a Light that falls
+ * from 1.2 by /1.05 a tick (ZzzEffect.cpp:9214-9240, :10058-10073), the camera shaking to LT 15 and the
+ * spray at B. At LT 23 the splashes and cracks (MoveHandlers.cpp:7530-7625). The original's stones there are
+ * created at Scale 0 (sub13 multiplies by CreateEffect's Scale, 0 here: ZzzEffect.cpp:2700-2710) and never show.
+ */
+const blowOfDestruction: Step = (at, c) => {
+  const yaw = entityYaw(c.caster);
+  const f = forwardOf(yaw);
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const a = new Vector3(feet.x + f.x - f.z * cm(20), feet.y, feet.z + f.z + f.x * cm(20));
+  const b = at.clone();
+  const tint: RGB = [0.3, 0.3, 1];
+  const turn = (): number => Math.random() * Math.PI * 2;
+  // The crack meshes are authored flat in MU's XY, so the default (upright) basis is what lays them down.
+
+  after(ticks(16), (_p, cc) => {
+    effects.spawn('sprite', cc.scene, a, { texture: TEX.swordEffMono, colour: [0.5, 0.5, 1], size: cm(64) * 3.05, height: cm(65), seconds: ticks(24), fadeTail: 0.1 });
+    effects.spawn('ring', cc.scene, a, { texture: TEX.flareBlue, colour: [1.2, 1.2, 1.2], scale: 4, seconds: ticks(24), fadeTail: 0.85, fadeColour: true });
+    effects.spawn('sprite', cc.scene, b, { texture: TEX.flare, colour: [0.6, 0.6, 1.2], size: cm(64) * 5, height: 1, seconds: ticks(24), fadeTail: 0.85 });
+    effects.spawn('ring', cc.scene, b, { texture: TEX.flareBlue, colour: [1.2, 1.2, 1.2], scale: 6, seconds: ticks(24), fadeTail: 0.85, fadeColour: true });
+    effects.spawn('quake', cc.scene, b, { seconds: ticks(10), min: -0.4, max: 0.3 });
+    const spot = new Vector3(b.x, b.y + 0.75, b.z);
+    for (let k = 0; k < 10; k++) {
+      delay(ticks(k), () => {
+        effects.spawn('particles', cc.scene, spot, { recipe: DESTRUCTION_MIST, count: DESTRUCTION_SPOTS });
+        effects.spawn('particles', cc.scene, spot, { recipe: DESTRUCTION_SPLASH, count: DESTRUCTION_SPOTS });
+        effects.spawn('particles', cc.scene, spot, { recipe: DESTRUCTION_SMOKE, count: DESTRUCTION_SPOTS });
+      });
+    }
+  })(at, c);
+
+  after(ticks(17), (_p, cc) => {
+    const splash = (p: Vector3, scale: number): void => {
+      effects.spawn('model', cc.scene, p, { model: MODEL.nightwater, scale, colour: tint, yaw: turn(), seconds: ticks(25), fadeTail: 1 });
+    };
+    splash(a, 0.9);
+    splash(a, 0.9);
+    effects.spawn('model', cc.scene, a, { model: MODEL.knightPlanCrack, scale: 1.2 + Math.floor(Math.random() * 10) * 0.05, colour: tint, yaw: turn(), height: cm(10), seconds: ticks(25), fadeTail: 1 });
+    // KNIGHT_PLANCRACK_B every 55 cm from A, one per metre to B plus one: about half the way. Each is turned
+    // +90 deg at its init and alternately 10-29 deg either side of the caster's facing.
+    const dir = toward(a, b);
+    const n = Math.floor(Math.hypot(b.x - a.x, b.z - a.z)) + 1;
+    for (let i = 0; i < n; i++) {
+      const side = ((10 + Math.floor(Math.random() * 20)) * Math.PI) / 180;
+      const p = new Vector3(a.x + dir.x * cm(55) * i, a.y, a.z + dir.z * cm(55) * i);
+      effects.spawn('model', cc.scene, p, { model: MODEL.knightPlanCrack2, scale: 1, colour: tint, yaw: yaw + Math.PI / 2 + (i % 2 === 0 ? side : -side), height: cm(15), seconds: ticks(25), fadeTail: 1 });
+    }
+    splash(b, 2);
+    splash(b, 1);
+    // RAKLION_BOSS_CRACKEFFECT: Scale 0.2 + 1, 30 cm up, alpha -0.03 a tick, so gone after 33 of its 40 ticks.
+    effects.spawn('model', cc.scene, b, { model: MODEL.knightPlanCrackGrand, scale: 1.2, colour: tint, yaw: turn(), height: cm(30), seconds: ticks(33), fadeTail: 1 });
+  })(at, c);
+};
+
+/**
+ * The Cold debuff's one look on insert (WSclient.cpp:15631-15634): MODEL_ICE sub0 at the feet, Scale 0.8,
+ * BlendMesh 0, LT 50, smoking and fading once its clip passes key 5 (ZzzEffect.cpp:2187-2195, :7637-7661).
+ * The body tint and the slowed walk that go with it have no facility here yet.
+ */
+function coldIce(scene: Scene, entity: Entity): void {
+  const feet = entityPos(entity, 0, new Vector3());
+  effects.spawn('model', scene, feet, { model: MODEL.ice, seconds: ticks(50), scale: 0.8, blendMesh: 0, colour: RGBS.white, loop: false, fadeTail: 0.4 });
+  // A BITMAP_SMOKE every other tick 32-160 cm up while it fades, its last 20 ticks.
+  delay(ticks(30), () => effects.spawn('particles', scene, feet, { recipe: SMOKE, rate: 12.5, seconds: ticks(20), height: 0.96 }));
+}
+
+/** MODEL_COMBO's BlendMeshLight /= 1.4 a tick (MoveHandlers.cpp:5260), as a rate per second. */
+const COMBO_DECAY = 25 * Math.log(1.4);
+/** The original's 60 BITMAP_LIGHT rays, drawn at half. */
+const COMBO_RAYS = 30;
+
+/**
+ * The combo burst at the caster (WSclient.cpp:4829-4832): MODEL_COMBO 50 cm up, unturned, every mesh bright
+ * (BlendMesh -2), LT 20, its Scale 0.9 growing by 0.1, 0.2, 0.3... a tick while LT > 4 - 14.5 by tick 16, which
+ * `growEase` 2 over the life follows - and its light /1.4 a tick (ZzzEffect.cpp:3159-3175, MoveHandlers.cpp:5251-5263).
+ * With it 60 BITMAP_LIGHT sub0 joints (30 here): width 70-109 cm, Light (0.1,0.5,1), a random yaw and `Angle[0] = 30 -
+ * rand() % 40` (positive dives), each stepping 10 times a tick 10-19 cm along it for the first 4 ticks and
+ * keeping its last 30 steps, then holding until LT 0 (ZzzEffectJoint.cpp:2421-2434, :6453-6468).
+ */
+const comboBurst: Step = (at, c) => {
+  effects.spawn('model', c.scene, at, { model: MODEL.combo, seconds: ticks(20), scale: 0.9, grow: 24.6, growEase: 2, decay: COMBO_DECAY, fadeTail: 0.05, colour: RGBS.white });
+  const t0 = fxNow();
+  // Drawn at half the count, like Swell Life's fan: 30 wide rays read the same and cost half.
+  for (let i = 0; i < COMBO_RAYS; i++) {
+    const heading = forwardOf(Math.random() * Math.PI * 2);
+    const pitch = ((30 - Math.floor(Math.random() * 40)) * Math.PI) / 180;
+    const step = cm(10 + Math.floor(Math.random() * 10));
+    const dx = heading.x * Math.cos(pitch);
+    const dy = -Math.sin(pitch);
+    const dz = heading.z * Math.cos(pitch);
+    const head: PointSource = out => {
+      const s = Math.min(4, (fxNow() - t0) / TICK) * 10 * step;
+      return out.set(at.x + dx * s, at.y + dy * s, at.z + dz * s);
+    };
+    effects.spawn('joint', c.scene, at, { head, maxTails: 3, sampleFor: ticks(3.5), width: cm(70 + Math.floor(Math.random() * 40)), colour: [0.1, 0.5, 1], texture: TEX.flare, seconds: ticks(20), fadeTail: 0.05 });
+  }
+};
 
 // ---- the table -------------------------------------------------------------------
 
@@ -2859,18 +3152,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 48 Swell Life: impact@caster+100z - 36× JOINT_SPIRIT sub2 fan (Light 0.5) + BITMAP_MAGIC+1 sub4 LT 40.
   48: { impact: atCaster(spiritBurst([0.5, 0.5, 0.5]), 1), area: atCaster(spiritBurst([0.5, 0.5, 0.5]), 1) },
-  // 49 Rider / Dark Horse strike (Fire Breath): BITMAP_SHOTGUN LT 10, Dir(0,−30,0) + 40× JOINT_SPARK sub1 in two
-  // fans from (−20,−20,60) / (30,−20,60). Drawn as 2×6 spark ribbons.
-  49: {
-    cast: (_at, c) => {
-      const dir = facing(c);
-      effects.spawn('sprite', c.scene, entityPos(c.caster, 0.6, new Vector3()), { texture: TEX.fire2, colour: RGBS.fire, size: 1, seconds: ticks(10), move: [dir.x * perTick(30), 0, dir.z * perTick(30)], grow: 1.8 });
-      for (const side of [-0.2, 0.3]) {
-        offset(streamerFan(6, 0.12, { velocity: perTick(60), seconds: ticks(10), maxTails: 4, width: 0.12, colour: RGBS.gold, pitch: -0.3 }), 0.2, 0.6, side)(entityPos(c.caster, 0, new Vector3()), c);
-      }
-    },
-    impact: fireHit,
-  },
+  // 49 Fire Breath (AT_SKILL_RIDER): BITMAP_SHOTGUN and its sparks when the rider clip passes key 5, or
+  // after the 14-tick AttackTime cap (ZzzCharacter.cpp:2910-2915, :4405-4409); see `fireBreath`.
+  49: { cast: atClipKey(5, RIDER_ACTIONS, fireBreath) },
   // 50 Flame of Evil (monster)
   50: { impact: fireHit },
   // 51 Ice Arrow: cast - MODEL_ICE sub1 + sub2 (+180°) at the target LT 20, Scale 0.8, BlendMeshLight 0.5, 3× BITMAP_SMOKE,
@@ -2939,6 +3223,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 1.3+count·0.08) + CreateForce: 3× JOINT_HEALING sub8 from r=500, LT 17. On the hero it runs for the hold
   // (`combat.novaCharging` / `novaStage`); on anyone else for a full charge's length.
   58: { cast: novaCharge },
+  // 59 Combo: MODEL_COMBO and its 60 rays at the caster, whoever the target (WSclient.cpp:4829-4832).
+  59: { impact: atCaster(comboBurst, cm(50)), area: atCaster(comboBurst, cm(50)) },
   // 60 Force / 66 Force Wave (and 509): at the strike key, caster-anchored rings, streaks and lance; sDarkSpear.
   60: { impact: strikeKey(force, 'Sound/sDarkSpear') },
   66: { impact: strikeKey(force, 'Sound/sDarkSpear'), area: strikeKey(force, 'Sound/sDarkSpear') },
@@ -3137,30 +3423,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       ))
     ), 0.05),
   },
-  // 232 Strike of Destruction: MODEL_BLOW_OF_DESTRUCTION sub0 (LT 40, Light 1.2) is not converted - the ice
-  // shockwave + shards + sword blur stand in; its LT 23 ground burst is (ZzzEffect.cpp:15014): KNIGHT_PLANCRACK_A
-  // scale 1.2 tinted (0.3,0.3,1) and a PLANCRACK_B trail every 55 cm back to the caster, yaws jittered +-10-30 deg.
-  232: {
-    area: seq(
-      slash(RGBS.ice, TEX.swordEff2),
-      shockRing(RGBS.ice, 4),
-      scatter(iceHit, 5, 1.5, 0.04),
-      particles({ recipe: SNOWFALL, rate: 100, seconds: 0.8, height: 2 }),
-      after(ticks(17), (at, c) => {
-        const tint: RGB = [0.3, 0.3, 1];
-        model({ model: MODEL.knightPlanCrack, seconds: ticks(30), scale: 1.2, colour: tint, flat: true })(at, c);
-        const from = entityPos(c.caster, 0, new Vector3());
-        const dir = toward(at, from);
-        const dist = Math.min(4, Math.hypot(from.x - at.x, from.z - at.z));
-        const n = Math.floor(dist / 0.55) + 1;
-        for (let i = 1; i < n; i++) {
-          const p = new Vector3(at.x + dir.x * 0.55 * i, at.y, at.z + dir.z * 0.55 * i);
-          const jitter = ((10 + Math.random() * 20) * Math.PI) / 180 * (i % 2 === 0 ? 1 : -1);
-          model({ model: MODEL.knightPlanCrack2, seconds: ticks(25), scale: 1, colour: tint, flat: true, yaw: entityYaw(c.caster) + jitter })(p, c);
-        }
-      })
-    ),
-  },
+  // 232 Strike of Destruction (337/340/343 alias here, drawn at the target's feet): see `blowOfDestruction`.
+  232: { area: blowOfDestruction },
   // 233 Expansion of Wizardry: MODEL_SWELL_OF_MAGICPOWER at the caster, Light (0.3,0.2,0.9) (WSclient.cpp
   // AT_SKILL_SWELL_OF_MAGICPOWER cast).
   233: { impact: swellOfMagic, area: swellOfMagic },
@@ -3683,6 +3947,8 @@ export const BUFF_VISUALS: Partial<Record<number, BuffLook>> = {
   82: (e, s) => ({ boneGlow: MAGIC_GLOW, pulse: { every: 6, fire: () => magicRune(s, e) } }),
   138: (e, s) => ({ boneGlow: MAGIC_GLOW, pulse: { every: 6, fire: () => magicRune(s, e) } }),
   139: (e, s) => ({ boneGlow: MAGIC_GLOW, pulse: { every: 6, fire: () => magicRune(s, e) } }),
+  // 0x56 Cold (eDeBuff_BlowOfDestruction, Strike of Destruction and Chain Drive): the ice at the feet, once.
+  86: (e, s) => ({ pulse: { every: Infinity, fire: () => coldIce(s, e) } }),
   // 129-131 Ourforces (Rage Fighter): the red glow on 17 bones; 153-155 their power-ups.
   129: () => ({ boneGlow: OURFORCES_GLOW }),
   130: () => ({ boneGlow: OURFORCES_GLOW }),

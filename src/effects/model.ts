@@ -64,6 +64,10 @@ export interface ModelOptions {
   scale?: number;
   /** Scale multiplier at end of life. */
   grow?: number;
+  /** Exponent on the grow progress (1 = linear): 2 is the original's accelerating `Scale += Gravity; Gravity += 0.1` (MODEL_COMBO). */
+  growEase?: number;
+  /** Visibility falls as e^(-decay t), per second on top of the fade: a `BlendMeshLight /= 1.4` a tick is 25 ln 1.4. */
+  decay?: number;
   /** Tint (`bodyLight`). */
   colour?: RGB;
   /** Radians/s around the up axis. */
@@ -313,6 +317,8 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
   const scale = (opts.scale ?? 1) * DEFAULT_SCALE;
   const grow = opts.grow ?? 1;
+  const growEase = opts.growEase ?? 1;
+  const decay = opts.decay ?? 0;
   const spin = opts.spin ?? 0;
   const rise = opts.rise ?? 0;
   const height = opts.height ?? 0;
@@ -505,7 +511,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       if (p >= 1) return false;
       source(tmp);
       node.position.set(tmp.x, tmp.y + height + rise * t, tmp.z);
-      node.scaling.setAll(opts.scaleAt ? opts.scaleAt(t) * DEFAULT_SCALE : scale * lerp(1, grow, p));
+      node.scaling.setAll(opts.scaleAt ? opts.scaleAt(t) * DEFAULT_SCALE : scale * lerp(1, grow, growEase === 1 ? p : Math.pow(p, growEase)));
       if (native && world) {
         const light = world.getTerrainLight(tmp.x, tmp.z);
         nativeLight.set(light.x + native.light[0], light.y + native.light[1], light.z + native.light[2]);
@@ -525,7 +531,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         prevZ = tmp.z;
       }
       const lit = opts.intensity ? Math.max(0, Math.min(1, opts.intensity(t))) : 1;
-      let vis = (opts.life ? opts.life(p) * alpha : fadeOut(p, tail) * alpha * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1)) * lit;
+      let vis = (opts.life ? opts.life(p) * alpha : fadeOut(p, tail) * alpha * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1)) * lit * (decay > 0 ? Math.exp(-decay * t) : 1);
       for (const m of sheetMats) if (!m.diffuseTexture) vis = 0;
       // The sheet is shared, so the scroll runs off the effects clock, the same for every user (as joint.ts's thunder).
       for (const m of scrollMats) {

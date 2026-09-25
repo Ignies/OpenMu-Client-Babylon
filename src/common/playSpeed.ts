@@ -101,6 +101,8 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_ATTACK_RIDE_ATTACK_FLASH) return 0.4 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_ATTACK_RIDE_TELEPORT) return 0.3;
   if (action === A.PLAYER_ATTACK_DARKHORSE) return 0.3;
+  // No attack speed on it (ZzzCharacter.cpp:1003); it used to fall through to the 0.28 default.
+  if (action === A.PLAYER_SKILL_BLOW_OF_DESTRUCTION) return 0.3;
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {
