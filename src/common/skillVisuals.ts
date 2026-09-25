@@ -47,6 +47,8 @@ import { ItemsDatabase } from './itemsDatabase';
 import { PlayerAction } from './objects/enum';
 import { playCombat } from '../sound/combat';
 import type { Sounds } from '../sound/recipes';
+import { itemObjectAttribute } from './itemObjectAttribute';
+import { inHellas } from './locomotion';
 import { skillDefinition, type SkillDefinition } from './skillsDatabase';
 import { storeRef } from './storeRef';
 import { tierIndex } from './lightingQuality';
@@ -1648,12 +1650,12 @@ const weaponGlint: Step = (_at, c) => {
 /**
  * BITMAP_JOINT_SPARK sub0 (ZzzEffectJoint.cpp:950-959): Spark01, white, 6-25 cm a tick along its `Angle`,
  * LT 8-15, two tails. Drawn as a stretched particle rather than a two-point ribbon: a Twisting Slash throws
- * twenty a tick. The original is 2 cm wide; 5 cm is the least that reads at this camera.
+ * twenty a tick. The original is 2 cm wide and one tick of travel long; 3 cm x 18 cm.
  */
 const JOINT_SPARKS: ParticleRecipe = {
   texture: TEX.spark,
   colour: RGBS.white,
-  size: 0.05,
+  size: 0.03,
   sizeJitter: 0,
   stretch: 6,
   aimed: true,
@@ -1666,11 +1668,11 @@ const JOINT_SPARKS: ParticleRecipe = {
   powerJitter: 19 / 25,
   capacity: 600,
 };
-/** BITMAP_SPARK sub0 (ZzzEffectParticle.cpp): a Spark02 chip thrown up and falling, 1.6-2.8 cm; 6 cm to read. */
+/** BITMAP_SPARK sub0 (ZzzEffectParticle.cpp): a Spark02 chip thrown up and falling, 1.6-2.8 cm; 3 cm. */
 const SPARK_CHIPS: ParticleRecipe = {
   texture: TEX.spark2,
   colour: RGBS.white,
-  size: 0.06,
+  size: 0.03,
   life: 1.2,
   power: 1.5,
   gravity: -4,
@@ -1704,6 +1706,28 @@ const WHEEL_SMOKE: ParticleRecipe = {
   spin: 0,
 };
 
+/**
+ * In Hellas the sparks become BITMAP_WATERFALL_5 sub3 spray 120 cm up (MoveHandlers.cpp:2816-2827;
+ * ZzzEffectParticle.cpp:3432-3437, :8407-8412): LT 20, 64 texels x 1.6, Light 0.5, 7-11 cm a tick down
+ * along the orbit's pitched +-30° heading, turning 4° a tick.
+ */
+const WHEEL_SPRAY: ParticleRecipe = {
+  texture: 'Effect/waterFall5.OZJ',
+  colour: [0.5, 0.5, 0.5],
+  size: cm(64) * 1.6,
+  sizeJitter: 0,
+  life: ticks(20),
+  lifeJitter: 0,
+  endScale: 0.94,
+  box: [0.1, 0, 0.1],
+  dir1: [-0.5, -1, -0.5],
+  dir2: [0.5, -0.85, 0.5],
+  power: perTick(9),
+  powerJitter: 2 / 9,
+  spin: 4 * DEG * 25,
+  capacity: 200,
+};
+
 /** MODEL_SKILL_WHEEL2's alpha per copy: SubType `4 - LifeTime` of WHEEL1 runs -1..3 (MoveHandlers.cpp:2772-2800). */
 const WHEEL_ALPHAS = [1, 1, 0.6, 0.5, 0.4];
 
@@ -1727,6 +1751,7 @@ function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number,
   };
   const seconds = ticks(25);
   const start = ground(new Vector3());
+  const hellas = inHellas(storeRef().world?.mapIndex ?? -1);
   if (weapon) {
     effects.spawn('model', c.scene, start, {
       model: weapon.file,
@@ -1734,7 +1759,7 @@ function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number,
       scale: itemScale(weapon),
       alpha,
       fadeTail: 0,
-      native: { light: ITEM_LIGHT, stamp: weapon.stamp },
+      native: { light: ITEM_LIGHT, stamp: weapon.stamp, ...itemObjectAttribute(weapon.group, weapon.num) },
       follow: out => {
         ground(out);
         out.y += 1;
@@ -1743,7 +1768,7 @@ function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number,
       rotate: out => muAngles(out, 0, 90 * DEG, orbit() - 30 * DEG * (age() + 1)),
     });
   }
-  effects.spawn('sprite', c.scene, start, { texture: TEX.flare, colour: [1, 0.8, 0.6], size: cm(64) * 2, seconds, fadeTail: 0.05, height: cm(20), follow: ground });
+  effects.spawn('sprite', c.scene, start, { texture: TEX.flare, colour: [1, 0.8, 0.6], size: cm(64) * 2, seconds, fadeTail: 0.05, height: cm(hellas ? 60 : 20), follow: ground });
   lighting.skillBody(c.scene, skill, 'wheel', out => {
     const t = caster.transform;
     if (!t) return;
@@ -1758,6 +1783,10 @@ function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number,
       if (entityGone(caster)) return;
       ground(p);
       effects.spawn('particles', c.scene, p, { recipe: WHEEL_SMOKE, count: 1 });
+      if (hellas) {
+        effects.spawn('particles', c.scene, new Vector3(p.x, p.y + cm(120), p.z), { recipe: WHEEL_SPRAY, count: 1 });
+        return;
+      }
       const a = orbit();
       for (let j = 0; j < 4; j++) {
         const at = new Vector3(p.x + rand(-0.1, 0.1), p.y, p.z + rand(-0.1, 0.1));
@@ -1839,16 +1868,43 @@ function furyStone(scene: Scene, at: Vector3): void {
   effects.spawn('debris', scene, p, { model: Math.random() < 0.5 ? MODEL.stone : MODEL.stone2, count: 1 });
 }
 
-/** One of Rageful Blow's EarthQuake models: additive with its own BlendMeshLight curve, or textured (`+3`). */
-function quake(c: SkillContext, m: string, at: Vector3, life: number, scale: number, yaw: number, body: number, blendMeshLight: ((tick: number) => number) | null): void {
+/** Where one EarthQuake model of a set sits: its point, `Scale` and MU yaw. */
+interface QuakePlace {
+  at: Vector3;
+  scale: number;
+  yaw: number;
+}
+
+/**
+ * A set of one of Rageful Blow's EarthQuake models spawned on one tick: additive with its own BlendMeshLight
+ * curve, or textured (`+3`). Each sinks 0.5 cm a tick once its LifeTime is under `sinkBelow`
+ * (ZzzEffect.cpp:7105-7262). One spawn, the rest of the set drawn as its instanced copies.
+ */
+function quake(c: SkillContext, m: string, places: readonly QuakePlace[], life: number, body: number, blendMeshLight: ((tick: number) => number) | null, sinkBelow: number, scroll = false): void {
+  if (!places.length) return;
+  const at = places[0].at;
+  const t0 = fxNow();
   effects.spawn('model', c.scene, at, {
     model: m,
     seconds: ticks(life),
-    scale,
-    yaw: -yaw,
+    scale: places[0].scale,
+    yaw: -places[0].yaw,
+    copies: places.length > 1 ? places.slice(1).map(p => ({ at: p.at, scale: p.scale, yaw: -p.yaw })) : undefined,
     fadeTail: 0,
+    scrollU: scroll ? QUAKE_SCROLL : undefined,
+    follow: out => out.set(at.x, at.y - cm(0.5 * Math.max(0, (fxNow() - t0) / TICK - (life - sinkBelow))), at.z),
     ...(blendMeshLight ? { colour: RGBS.white, intensity: lit(body, blendMeshLight) } : { native: { light: ITEM_LIGHT } }),
   });
+}
+
+/** EarthQuake01's camera kick, `(rand() % 8 - 4) x 0.1`°, on the ticks its LifeTime is over 15 and a multiple of 3 (ZzzEffect.cpp:7109-7112). */
+function craterShake(): void {
+  for (let lt = 33; lt > 15; lt -= 3) {
+    const kick = (): void => earthQuake((Math.floor(Math.random() * 8) - 4) * 0.1);
+    // Re-rolled through the tick, as every frame of it writes the global.
+    delay(ticks(35 - lt), kick);
+    delay(ticks(35 - lt + 0.5), kick);
+  }
 }
 
 /** A glow wall's stone chips: one in `every` ticks between `from` and `to` ticks of its life. */
@@ -1883,7 +1939,7 @@ const furyStrike: Step = (_at, c) => {
       seconds: ticks(9),
       scale: itemScale(weapon),
       fadeTail: 0,
-      native: { light: ITEM_LIGHT, stamp: weapon.stamp },
+      native: { light: ITEM_LIGHT, stamp: weapon.stamp, ...itemObjectAttribute(weapon.group, weapon.num) },
       follow: out => pathAt((fxNow() - t0) / TICK, out),
       rotate: out => muAngles(out, 80 * DEG * ((fxNow() - t0) / TICK + 1), 0, yaw0 + 330 * DEG),
     });
@@ -1945,12 +2001,25 @@ const furyStrike: Step = (_at, c) => {
         return out.set(waveAt.x - cm(WAVE_DRIFT(a)), waveAt.y - cm(WAVE_SINK(a)), waveAt.z);
       },
     });
+    // Its AddTerrainLight(-0.5 x Luminosity, range 5) (MoveHandlers.cpp:2601-2602): light sources only add, so a dark ground card 10 m across.
+    effects.spawn('sprite', c.scene, waveAt, {
+      texture: TEX.flare,
+      flat: true,
+      blend: 'subtract',
+      cover: 0.5,
+      size: 10,
+      seconds: ticks(15),
+      fadeTail: 0,
+      follow: out => out.set(waveAt.x - cm(WAVE_DRIFT((fxNow() - t2) / TICK)), hit.y - cm(22), waveAt.z),
+    });
 
     const crater = new Vector3(hit.x, hit.y - cm(27), hit.z);
     const body = terrainLevel(crater.x, crater.z) + 0.3;
-    quake(c, MODEL.earthQuake3, crater, 35, 1.5, 0, body, null);
-    quake(c, MODEL.earthQuake, crater, 35, 1.5, 0, body, fadeThirty(35));
-    quake(c, MODEL.earthQuake2, crater, 20, 1.5, 0, body, rampThenFade(20));
+    const centre = [{ at: crater, scale: 1.5, yaw: 0 }];
+    quake(c, MODEL.earthQuake3, centre, 35, body, null, 13);
+    quake(c, MODEL.earthQuake, centre, 35, body, fadeThirty(35), 10);
+    quake(c, MODEL.earthQuake2, centre, 20, body, rampThenFade(20), 5, true);
+    craterShake();
     wallStones(c, crater, 11, 15, 10);
     lighting.skillBody(c.scene, skill, 'crater', out => {
       out.x = crater.x;
@@ -1961,6 +2030,7 @@ const furyStrike: Step = (_at, c) => {
     // Five satellites at SubType + 72°·i, 100-249 cm out, on ground that is walkable, dry and there.
     const world = storeRef().world;
     const a0 = rand(0, 100) * DEG;
+    const satellites: QuakePlace[] = [];
     for (let i = 0; i < 5; i++) {
       const a = a0 + i * 72 * DEG;
       const r = cm(rand(100, 250));
@@ -1970,8 +2040,7 @@ const furyStrike: Step = (_at, c) => {
       p.y = groundAt(p.x, p.z, feet.y) + cm(3);
       const scale = rand(40, 90) / 100;
       const yaw = (45 + rand(-15, 15)) * DEG;
-      quake(c, MODEL.earthQuake4, p, 35, scale, yaw, body, fadeThirty(35));
-      quake(c, MODEL.earthQuake5, p, 40, scale, yaw, body, rampThenFade(40));
+      satellites.push({ at: p, scale, yaw });
       wallStones(c, p, 10, 35, 15);
       lighting.skillBody(c.scene, skill, 'wall', out => {
         out.x = p.x;
@@ -1979,6 +2048,8 @@ const furyStrike: Step = (_at, c) => {
         out.z = p.z;
       });
     }
+    quake(c, MODEL.earthQuake4, satellites, 35, body, fadeThirty(35), 10);
+    quake(c, MODEL.earthQuake5, satellites, 40, body, rampThenFade(40), 15, true);
   });
 
   // LT 10: five cracks of four 85-99 cm steps, each turning +-50-79° (alternating, the last step random).
@@ -1989,6 +2060,7 @@ const furyStrike: Step = (_at, c) => {
     const pos = Array.from({ length: 5 }, () => new Vector3(hit.x, hit.y, hit.z));
     const turn = [0, 0, 0, 0, 0];
     let count = 0;
+    const cracks: QuakePlace[] = [];
     for (let j = 0; j < 4; j++) {
       const step = rand(85, 100);
       if (j >= 3) count = Math.floor(Math.random() * 2);
@@ -2000,8 +2072,7 @@ const furyStrike: Step = (_at, c) => {
         p.z += cm(Math.cos(a) * step);
         p.y = groundAt(p.x, p.z, feet.y) + cm(3);
         const at = p.clone();
-        quake(c, MODEL.earthQuake7, at, 40, 1, a + 270 * DEG, body, fadeThirty(40));
-        quake(c, MODEL.earthQuake8, at, 40, 1, a + 270 * DEG, body, rampThenFade(40));
+        cracks.push({ at, scale: 1, yaw: a + 270 * DEG });
         lighting.skillBody(c.scene, skill, 'wall', out => {
           out.x = at.x;
           out.y = at.y;
@@ -2010,6 +2081,8 @@ const furyStrike: Step = (_at, c) => {
       }
       count++;
     }
+    quake(c, MODEL.earthQuake7, cracks, 40, body, fadeThirty(40), 10);
+    quake(c, MODEL.earthQuake8, cracks, 40, body, rampThenFade(40), 15, true);
   });
 };
 
@@ -2033,64 +2106,112 @@ function swordPoint(caster: Entity, forward: number, out: Vector3): Vector3 {
   return out;
 }
 
+/** GetMagicScrew (ZzzEffectJoint.cpp:7360-7377): a unit vector wandering with WorldTime `ms`; MU (x, y, z) is world (x, z, y). */
+function magicScrew(param: number, rate: number, ms: number, out: Vector3): Vector3 {
+  const i = param + Math.floor(ms / 40);
+  const a = (i + 55555) * 0.048 * rate;
+  const b = i * 0.0613 * rate;
+  const c = (i + 11111) * 0.1113 * rate;
+  const x = Math.sin(a) * Math.cos(b);
+  const y = Math.sin(a) * Math.sin(b);
+  const z = Math.cos(a);
+  return out.set(Math.cos(c) * y - Math.sin(c) * z, x, Math.sin(c) * y + Math.cos(c) * z);
+}
+
+/** One MODEL_SPEARSKILL sub2 gather streak: where it starts, the tick it was born and its GetMagicScrew seed. */
+interface GatherStreak {
+  from: Vector3;
+  born: number;
+  screw: number;
+}
+/** MODEL_SPEARSKILL sub2's life and tails (ZzzEffectJoint.cpp:1575-1581). */
+const GATHER_LIFE = 20;
+const GATHER_TAILS = 5;
+
 /**
- * MODEL_SPEARSKILL sub2 (ZzzEffectJoint.cpp:1575-1581, :4283-4306): NSkill, Light (1, 0.3, 0.3), LT 20,
- * MaxTails 5, width `LifeTime x 3` cm; its head runs from `from` to the gathering point over LT 20..10 and rests there.
+ * Death Stab's gather streaks as one batch (ZzzEffectJoint.cpp:4283-4306): NSkill, Light (1, 0.3, 0.3), width
+ * `LifeTime x 3` cm. A head runs from its start (+ a 1 cm GetMagicScrew wobble) onto the gathering point of its
+ * tick over LT 20..10 and rests there; its tails are where it was the ticks before.
  */
-function gatherStreak(c: SkillContext, from: Vector3, gather: Vector3): void {
-  const t0 = fxNow();
-  effects.spawn('joint', c.scene, from, {
-    head: out => Vector3.LerpToRef(from, gather, Math.min(1, (fxNow() - t0) / ticks(10)), out),
-    maxTails: 5,
-    tickPoints: true,
-    seconds: ticks(20),
-    width: cm(60),
-    shrink: true,
-    fadeTail: 0.05,
+function gatherStreaks(c: SkillContext, tickOf: () => number, t0: number, streaks: GatherStreak[], gathers: Vector3[]): void {
+  const screw = new Vector3();
+  const head = (s: GatherStreak, a: number, out: Vector3): Vector3 => {
+    const g = gathers[Math.min(s.born + a, gathers.length - 1)];
+    magicScrew(s.screw, 1.4, (t0 + (s.born + a) * TICK) * 1000, screw).scaleInPlace(cm(1)).addInPlace(s.from);
+    return Vector3.LerpToRef(screw, g, Math.min(1, a / 10), out);
+  };
+  effects.spawn('joint', c.scene, Vector3.Zero(), {
+    paths: {
+      count: 3 * 7,
+      fill: (k, j, out) => {
+        const s = streaks[k];
+        if (!s) return 0;
+        const age = tickOf() - s.born;
+        if (age < 0 || age >= GATHER_LIFE) return 0;
+        head(s, Math.max(0, age - j), out);
+        return (GATHER_LIFE - age) / GATHER_LIFE;
+      },
+    },
+    maxTails: GATHER_TAILS - 1,
+    seconds: ticks(8 + GATHER_LIFE),
+    width: cm(GATHER_LIFE * 3),
+    fadeTail: 0,
     colour: [1, 0.3, 0.3],
     texture: TEX.flareForce,
     until: () => entityGone(c.caster),
   });
 }
 
-/** Streaks a tick; the original's 3. Twenty-one 14 m ribbons cost 4 ms of fill a frame, fourteen read the same. */
-const GATHER_PER_TICK = 2;
+/** One BITMAP_FLARE sub12 of the drill: its MODEL_SPEAR emitter, the facing, the tick it was born and its `Direction[0]`. */
+interface DrillFlare {
+  emitter: Vector3;
+  yaw: number;
+  born: number;
+  phase: number;
+}
+/** BITMAP_FLARE sub12's life and tails (ZzzEffectJoint.cpp:1886-1888). */
+const DRILL_LIFE = 70;
+const DRILL_TAILS = 50;
+/** A MODEL_SPEAR emitter's life (EffectRegistry.cpp:57): one flare a tick from each of the two. */
+const DRILL_EMITTER_TICKS = 10;
 
 /**
- * BITMAP_FLARE sub12 off an invisible MODEL_SPEAR (EffectBehaviors.cpp:87-95; ZzzEffectJoint.cpp:1883-1897,
- * :5570-5604): Flare.jpg, Light (0.1, 0.1, 1), width 100 cm, LT 70, MaxTails 50. Its centre walks 4 cm a
- * tick along the facing; the head circles it 26 cm out in the side/up plane at 0.1 rad a tick, sinking
- * `(90 - LifeTime) x 0.3` cm.
+ * Death Stab's blue drill as one batch (EffectBehaviors.cpp:87-95; ZzzEffectJoint.cpp:1883-1897, :5570-5604):
+ * Flare.jpg, Light (0.1, 0.1, 1), width 100 cm. A flare's centre walks 4 cm a tick along the facing; its head
+ * circles 26 cm out in the side/up plane at 0.1 rad a tick, sinking `(90 - LifeTime) x 0.3` cm.
  */
-function drillFlare(c: SkillContext, emitter: Vector3, yaw: number): void {
-  const t0 = fxNow();
-  const phase = Math.floor(Math.random() * 360);
-  const f = forwardOf(yaw);
-  const sx = Math.cos(yaw);
-  const sz = Math.sin(yaw);
-  effects.spawn('joint', c.scene, emitter, {
-    head: out => {
-      const a = (fxNow() - t0) / TICK;
-      const lifeTime = 70 - a;
-      const turn = (phase + lifeTime) * 0.1;
-      const side = -Math.cos(turn) * 26;
-      const up = Math.sin(turn) * 26 - (90 - lifeTime) * 0.3;
-      return out.set(emitter.x + f.x * cm(4 * a) + sx * cm(side), emitter.y + cm(up), emitter.z + f.z * cm(4 * a) + sz * cm(side));
+function drillFlares(c: SkillContext, tickOf: () => number, flares: DrillFlare[], count: number, seconds: number): void {
+  const head = (d: DrillFlare, a: number, out: Vector3): Vector3 => {
+    const lifeTime = DRILL_LIFE - a;
+    const turn = (d.phase + lifeTime) * 0.1;
+    const side = -Math.cos(turn) * 26;
+    const up = Math.sin(turn) * 26 - (90 - lifeTime) * 0.3;
+    const fx = Math.sin(d.yaw);
+    const fz = -Math.cos(d.yaw);
+    const sx = Math.cos(d.yaw);
+    const sz = Math.sin(d.yaw);
+    return out.set(d.emitter.x + fx * cm(4 * a) + sx * cm(side), d.emitter.y + cm(up), d.emitter.z + fz * cm(4 * a) + sz * cm(side));
+  };
+  effects.spawn('joint', c.scene, Vector3.Zero(), {
+    paths: {
+      count,
+      fill: (k, j, out) => {
+        const d = flares[k];
+        if (!d) return 0;
+        const age = tickOf() - d.born;
+        if (age < 0 || age >= DRILL_LIFE) return 0;
+        head(d, Math.max(0, age - j), out);
+        return 1;
+      },
     },
-    maxTails: DRILL_TAILS,
-    tickPoints: true,
-    seconds: ticks(70),
+    maxTails: DRILL_TAILS - 1,
+    seconds,
     width: 1,
-    fadeTail: 0.1,
+    fadeTail: 0,
     colour: [0.1, 0.1, 1],
     texture: TEX.flareBig,
   });
 }
-/** The drill's tails; the original's 50. */
-const DRILL_TAILS = 50;
-/** A MODEL_SPEAR emitter's life, and the ticks between the flares it leaves. The original is 2 emitters a roll, one flare every tick. */
-const DRILL_EMITTER_TICKS = 10;
-const DRILL_EMIT_EVERY = 2;
 
 /** A point that follows bone `bone`, knocked up to `range` tiles off it per axis, re-rolled once a tick (`GetNearRandomPos`). */
 function jitteredBone(e: Entity, bone: number, range: number): PointSource {
@@ -2108,8 +2229,9 @@ function jitteredBone(e: Entity, bone: number, range: number): PointSource {
 
 /**
  * The Death Stab victim (ZzzCharacter.cpp:4094-4119): while `m_byHurtByDeathstab` counts down from 35, on
- * half the ticks every bone with a parent gets a JOINT_THUNDER sub7 to that parent, both ends +-20 cm,
- * width 20, Light (0.5, 0.5, 1), LT 1 (ZzzEffectJoint.cpp:1164-1173). Not in Battle Castle.
+ * half the ticks every bone with a parent (dummies skipped) gets a JOINT_THUNDER sub7 to that parent, both
+ * ends +-20 cm, width 20, Light (0.5, 0.5, 1), LT 1 (ZzzEffectJoint.cpp:1164-1173): a short humming crackle,
+ * three jittered segments here. Not in Battle Castle.
  */
 function electrifiedSkeleton(c: SkillContext, target: Entity, seconds: number): void {
   if (storeRef().world?.mapIndex === ENUM_WORLD.WD_30BATTLECASTLE) return;
@@ -2117,6 +2239,7 @@ function electrifiedSkeleton(c: SkillContext, target: Entity, seconds: number): 
   if (!bones) return;
   const pairs: { from: PointSource; to: PointSource }[] = [];
   for (let i = 1; i < bones.length; i++) {
+    if (/dummy/i.test(bones[i].name)) continue;
     const parent = bones[i].getParent();
     const pi = parent ? bones.indexOf(parent) : -1;
     if (pi >= 1) pairs.push({ from: jitteredBone(target, i - 1, cm(20)), to: jitteredBone(target, pi - 1, cm(20)) });
@@ -2124,8 +2247,8 @@ function electrifiedSkeleton(c: SkillContext, target: Entity, seconds: number): 
   if (pairs.length) {
     effects.spawn('joint', c.scene, entityPos(target, 0, new Vector3()), {
       pairs,
-      segments: 1,
-      jitter: 0,
+      segments: 3,
+      jitter: 0.08,
       width: cm(20),
       colour: [0.5, 0.5, 1],
       texture: TEX.jointThunder,
@@ -2142,30 +2265,47 @@ function electrifiedSkeleton(c: SkillContext, target: Entity, seconds: number): 
 /**
  * Death Stab's AttackStage (ZzzCharacter.cpp:2618-2701), `t` = AttackTime (1 at the packet, +1 a tick):
  * t2-8 three red streaks a tick from a +-300 cm cube 1400 cm behind the knight onto the gathering point;
- * t8 SOUND_SKILL_SWORD2; t6-12 on half the ticks the blue drill's MODEL_SPEAR emitters in front of the
- * sword; t10 the victim's electrified skeleton for its 35-tick countdown, re-armed to t12.
+ * t8 SOUND_SKILL_SWORD2; t6-12 on half the ticks two MODEL_SPEAR emitters in front of the sword, each
+ * leaving a blue drill flare a tick for 10 ticks; t10 the victim's electrified skeleton for its 35-tick
+ * countdown, re-armed to t12.
  */
 const deathStab: Step = (at, c) => {
   const caster = c.caster;
   const target = c.target;
-  const gather = swordPoint(caster, 3, new Vector3());
+  const t0 = fxNow();
+  const tickOf = (): number => Math.floor((fxNow() - t0) / TICK + 1e-3);
   weaponGlint(at, c);
+
+  const gathers = [swordPoint(caster, 3, new Vector3())];
+  const streaks: GatherStreak[] = [];
+  gatherStreaks(c, tickOf, t0, streaks, gathers);
+
+  // The `rand_fps_check(2)` rolls of t6-12, drawn up front so the drill batch is sized to its flares.
+  const rolls = Array.from({ length: 7 }, () => Math.random() < 0.5);
+  const flares: DrillFlare[] = [];
+  const lastRoll = rolls.lastIndexOf(true);
+  if (lastRoll >= 0) drillFlares(c, tickOf, flares, rolls.filter(Boolean).length * 2 * DRILL_EMITTER_TICKS, ticks(5 + lastRoll + DRILL_EMITTER_TICKS + DRILL_LIFE + 1));
+
   for (let t = 2; t <= 12; t++) {
     delay(ticks(t - 1), () => {
       if (entityGone(caster)) return;
+      const n = t - 1;
       const yaw = entityYaw(caster);
       const f = forwardOf(yaw);
-      if (t <= 8) swordPoint(caster, 3, gather);
       if (t <= 8) {
+        gathers[n] = swordPoint(caster, 3, new Vector3());
         const base = entityPos(caster, cm(120), new Vector3());
-        for (let j = 0; j < GATHER_PER_TICK; j++) {
-          gatherStreak(c, new Vector3(base.x + rand(-3, 3) - f.x * 14, base.y + rand(-3, 3), base.z + rand(-3, 3) - f.z * 14), gather);
+        for (let j = 0; j < 3; j++) {
+          const from = new Vector3(base.x + rand(-3, 3) - f.x * 14, base.y + rand(-3, 3), base.z + rand(-3, 3) - f.z * 14);
+          streaks.push({ from, born: n, screw: Math.floor(Math.random() * 4096) * 17721 });
         }
       }
       if (t === 8) sayAt(c, 'Sound/sKnightSkill2');
-      if (t >= 6 && Math.random() < 0.5) {
+      if (t >= 6 && rolls[t - 6]) {
         const emitter = swordPoint(caster, cm(100 + (t - 8) * 10), new Vector3());
-        for (let k = 0; k < DRILL_EMITTER_TICKS; k += DRILL_EMIT_EVERY) delay(ticks(k), () => drillFlare(c, emitter, yaw));
+        for (let k = 0; k < DRILL_EMITTER_TICKS; k++) {
+          for (let e = 0; e < 2; e++) flares.push({ emitter, yaw, born: n + k, phase: Math.floor(Math.random() * 360) });
+        }
       }
       if (t === 10 && target && !entityGone(target)) electrifiedSkeleton(c, target, ticks(37));
     });

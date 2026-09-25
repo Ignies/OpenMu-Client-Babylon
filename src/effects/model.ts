@@ -17,6 +17,7 @@ import {
   Constants,
   Material,
   Matrix,
+  Mesh,
   Quaternion,
   StandardMaterial,
   TransformNode,
@@ -177,12 +178,21 @@ export interface ModelOptions {
   /** Play the clip once and hold its last authored key (the original's `Loop = false` MODEL_GROUND_STONE rising and staying up). */
   holdLast?: boolean;
   /**
+   * More of the same model on the same clock, drawn as instances of this spawn's meshes (one draw for all): each
+   * at its own point, scale and node yaw (as `yaw`), moved by the spawn's own offset from `at`. Rageful Blow's
+   * twenty cracks of one tick. Not with `native`.
+   */
+  copies?: readonly { at: Vector3; scale: number; yaw: number }[];
+  /**
    * Draw the GLB with its own materials, the way the world draws an item: textured and lit by the
    * terrain light under it plus `light` (`RequestTerrainLight + o->Light`). `stamp` is copied onto
    * every mesh's metadata (the wielded item's level and tier, so it keeps its glow). `alpha` below 1
-   * switches the solid meshes to the blended variant of the same material.
+   * switches the solid meshes to the blended variant of the same material. `blendMesh` / `hiddenMesh` /
+   * `blendMeshLight` are the item's `ItemObjectAttribute` mesh rules (common/itemObjectAttribute.ts):
+   * that mesh (-2 every mesh) additive at `BodyLight x BlendMeshLight(ms)` and deaf to `alpha`, as
+   * RenderMesh draws it (ZzzBMD.cpp:2022-2036, :2099), and that mesh skipped.
    */
-  native?: { light: RGB; stamp?: Record<string, unknown> };
+  native?: { light: RGB; stamp?: Record<string, unknown>; blendMesh?: number; hiddenMesh?: number; blendMeshLight?: (ms: number) => number };
 }
 
 export interface ModelHandle extends EffectHandle {
@@ -204,6 +214,8 @@ export function modelCount(): number {
 }
 
 const tmp = new Vector3();
+const copyRel = new Matrix();
+const copyRot = new Quaternion();
 const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
 const FLAT = Quaternion.FromEulerAngles(0, 0, 0);
 const angleMatrix = new Matrix();
@@ -327,11 +339,15 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   let prevZ = tmp.z;
 
   let meshes: AbstractMesh[] = [];
+  // `native.blendMesh`: the item's additive meshes, faded without `alpha`.
+  const blendMeshes: AbstractMesh[] = [];
   const fadeMats: StandardMaterial[] = [];
   const scrollMats: StandardMaterial[] = [];
   const scrollU = opts.scrollU ?? 0;
   // An override sheet loads after the mesh: until it is in, the material is a solid tinted face.
   const sheetMats: StandardMaterial[] = [];
+  const copyNodes: { node: TransformNode; at: Vector3; scale: number; yaw: number }[] = [];
+  const start = node.position.clone();
   let clip: AnimationGroup | null = null;
   let disposed = false;
   let t = 0;
@@ -350,17 +366,28 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         if (opts.rearAt !== undefined) reseat(node, gltf.mesh, opts.rearAt);
         if (native) {
           meshes = gltf.mesh.getChildMeshes(false);
-          for (const mesh of meshes) {
+          meshes.forEach((mesh, i) => {
             mesh.metadata ??= {};
             if (native.stamp) Object.assign(mesh.metadata, native.stamp);
             mesh.metadata.bodyLight = nativeLight;
             mesh.isPickable = false;
             mesh.alwaysSelectAsActiveMesh = true;
+            // Mesh order as ModelObject.getMesh reads it for a world item's BlendMesh / HiddenMesh.
+            if (i === native.hiddenMesh) {
+              mesh.setEnabled(false);
+              return;
+            }
+            if (native.blendMesh === -2 || i === native.blendMesh) {
+              mesh.material = getMaterial(scene, false, Material.MATERIAL_ALPHABLEND, BlendState.ALPHA_ONEOE, true);
+              mesh.metadata.brightMesh = true;
+              blendMeshes.push(mesh);
+              return;
+            }
             // The item materials are opaque or alpha-tested and ignore `visibility`; the blended variant takes it.
             if (alpha < 1 && mesh.material && !mesh.metadata.brightMesh) {
               mesh.material = getMaterial(scene, false, Material.MATERIAL_ALPHABLEND, BlendState.ALPHA_COMBINE, false, false, mesh.metadata.characterAsset === true);
             }
-          }
+          });
           clip = gltf.animationGroups[0] ?? null;
           meshes.push(gltf.mesh);
           return;
@@ -428,6 +455,30 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           // and a subtractive one do not (glow.ts).
           if (isBright && !subtract) addEffectGlow(scene, mesh);
         });
+        if (opts.copies) {
+          const rootInv = gltf.mesh.computeWorldMatrix(true).clone().invert();
+          for (const c of opts.copies) {
+            const cn = new TransformNode('fxModelCopy', scene);
+            cn.rotationQuaternion = null;
+            if (world) cn.setParent(world.mapParent);
+            const pivot = new TransformNode('fxModelCopyPivot', scene);
+            pivot.parent = cn;
+            pivot.position.copyFrom(gltf.mesh.position);
+            pivot.scaling.copyFrom(gltf.mesh.scaling);
+            pivot.rotationQuaternion = gltf.mesh.rotationQuaternion?.clone() ?? null;
+            for (const m of meshes) {
+              if (!(m instanceof Mesh)) continue;
+              const inst = m.createInstance('fxModelCopyMesh');
+              inst.parent = pivot;
+              m.computeWorldMatrix(true).multiplyToRef(rootInv, copyRel);
+              copyRel.decompose(inst.scaling, copyRot, inst.position);
+              inst.rotationQuaternion = copyRot.clone();
+              inst.isPickable = false;
+              inst.alwaysSelectAsActiveMesh = true;
+            }
+            copyNodes.push({ node: cn, at: c.at, scale: c.scale, yaw: c.yaw });
+          }
+        }
         clip = gltf.animationGroups[0] ?? null;
         if (clip) {
           clip.speedRatio = ANIMATION_SPEED;
@@ -456,6 +507,11 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         const light = world.getTerrainLight(tmp.x, tmp.z);
         nativeLight.set(light.x + native.light[0], light.y + native.light[1], light.z + native.light[2]);
       }
+      for (const cp of copyNodes) {
+        cp.node.position.set(cp.at.x + node.position.x - start.x, cp.at.y + height + node.position.y - start.y, cp.at.z + node.position.z - start.z);
+        cp.node.rotation.y = cp.yaw;
+        cp.node.scaling.setAll((node.scaling.x * cp.scale) / (opts.scale ?? 1));
+      }
       if (opts.rotate) opts.rotate(node.rotation);
       else if (spin) node.rotation.y += spin * dt;
       if (opts.aim && !opts.rotate) {
@@ -479,6 +535,13 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       // coverage runs past it on the graded tiers.
       if (subtract) for (const m of fadeMats) m.alpha = cover * vis;
       else for (const m of meshes) m.visibility = vis;
+      if (blendMeshes.length) {
+        const light = native?.blendMeshLight ? native.blendMeshLight(fxNow() * 1000) : 1;
+        for (const m of blendMeshes) {
+          m.visibility = vis / alpha;
+          m.metadata.blendMeshLight = light;
+        }
+      }
       return true;
     },
     release() {
@@ -491,6 +554,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       // own (their emissive is mutated per frame) and go with it.
       for (const m of fadeMats) m.dispose(false, false);
       for (const m of meshes) releaseEffectGlow(m);
+      for (const cp of copyNodes) cp.node.dispose(false, false);
       node.dispose(false, false);
     },
   });
