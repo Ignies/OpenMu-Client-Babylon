@@ -1,5 +1,5 @@
 /**
- * The language picker on Options → Game.
+ * The language picker on Options → Interface → Language.
  *
  * A `<select>` would be the browser's chrome dropped into the middle of a
  * stone window, so this is the window's own: a closed plate with the current
@@ -29,14 +29,18 @@ export const LanguageSelect = observer(
     top,
     width,
     visibleRows = VISIBLE_ROWS,
+    bare = false,
   }: {
     left: number;
     top: number;
     width: number;
     /** Cap the open list so it cannot run past the window it sits in. */
     visibleRows?: number;
+    /** No label of its own: the options row prints it beside the plate. */
+    bare?: boolean;
   }) => {
     const [open, setOpen] = useState(false);
+    const plateTop = bare ? 0 : 12;
     const root = useRef<HTMLDivElement>(null);
 
     // A click anywhere else closes the list, the way the emote menu does.
@@ -59,13 +63,15 @@ export const LanguageSelect = observer(
         className="options-language"
         style={{ left, top, width }}
       >
-        <span className="options-label" style={{ left: 0, top: 0 }}>
-          {t('options.tab.language')}
-        </span>
+        {!bare && (
+          <span className="options-label" style={{ left: 0, top: 0 }}>
+            {t('options.tab.language')}
+          </span>
+        )}
 
         <div
           className={`options-combo${open ? ' is-open' : ''}`}
-          style={{ top: 12, width, height: PLATE_HEIGHT }}
+          style={{ top: plateTop, width, height: PLATE_HEIGHT }}
           title={t('options.languageHint')}
           onClick={uiClick(() => setOpen(v => !v))}
         >
@@ -78,7 +84,7 @@ export const LanguageSelect = observer(
           <div
             className="options-combo-list scrollable"
             style={{
-              top: 12 + PLATE_HEIGHT + 2,
+              top: plateTop + PLATE_HEIGHT + 2,
               width,
               maxHeight: visibleRows * ROW_HEIGHT + 4,
             }}

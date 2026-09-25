@@ -705,6 +705,13 @@ export function setGameOption<K extends keyof GameOptions>(
   for (const listener of listeners) listener(GameOptions);
 }
 
+/** What a fresh install starts with, for the Options window's Defaults. */
+export function defaultGameOption<K extends keyof GameOptions>(
+  key: K
+): GameOptions[K] {
+  return DEFAULTS[key];
+}
+
 export function onGameOptionsChanged(listener: Listener): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);

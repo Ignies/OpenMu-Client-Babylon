@@ -13,6 +13,7 @@ import {
   withAppearanceClass,
 } from './common/deserializeAppearance';
 import { StatType } from './common/characterStats';
+import { GameOptions } from './common/gameOptions';
 import { ItemsDatabase, itemBaseName } from './common/itemsDatabase';
 import {
   ItemGroup,
@@ -1571,7 +1572,8 @@ EventBus.on('ChatMessage', packet => {
     // SOUND_WHISPER for an incoming whisper; the name is offered as the next
     // whisper target (`RegistWhisperID`).
     if (Social.blockWhisper) return;
-    playUiSound('whisper');
+    // `IsWhisperSound()` (NewUIChatLogWindow.cpp:360).
+    if (GameOptions.whisperBeep) playUiSound('whisper');
     Social.addChatLine(sender, message, ChatLineType.Whisper);
     runInAction(() => {
       Social.lastWhisperFrom = sender;

@@ -12,9 +12,9 @@ import { allowUnload } from './browserHotkeys';
 /**
  * The three ways out of a session: `CSystemMenuMsgBox`'s Exit Game, Select
  * Server and Switch Character (NewUICustomMessageBox.cpp:2386-2470). The
- * original opens that menu with Escape; here they are the Options window's
- * first tab, and Escape on a clear screen opens it - the same key, one
- * window fewer.
+ * original opens that menu with Escape; here they sit in the Options window's
+ * footer on every page, and Escape on a clear screen opens it - the same key,
+ * one window fewer.
  *
  * The wire side is the original's and nothing more: `SendLogOut(0|2|1)`, and
  * the screen only changes once the server has answered (`ReceiveLogOut`) - it

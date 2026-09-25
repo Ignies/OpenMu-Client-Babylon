@@ -1,34 +1,20 @@
-import { uiClick } from '../../../libs/sfx';
 import './style.less';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../store';
 import { useEventBus } from '../../../hooks/useEventBus';
-import { MuSpriteFrame } from '../muSprite';
-import { MuButton } from '../muButton';
+import { MuTableFrame } from '../muWindow';
 import { MuResizeGrip, useWindowChrome } from '../muWindow/useWindowChrome';
-import { TEXT_COLOR } from '../../pages/serversPage/layout';
+import { MuWindows } from '../muWindow/windowState';
 import {
-  CAMERA_FOV_MAX_DEG,
-  CAMERA_FOV_MIN_DEG,
-} from '../../../camera/recipes';
-import {
-  BRIGHTNESS_MAX,
-  BRIGHTNESS_MIN,
-  TONE_MAPPER_MAX,
-  UI_SCALE_MAX,
-  uiScaleFactor,
-  GameOptions,
+  defaultGameOption,
   setGameOption,
   type GameOptions as GameOptionsType,
 } from '../../../common/gameOptions';
 import { invalidateShadowState } from '../../../common/objectShadow';
-import { toggleFullscreen } from '../../../common/browserHotkeys';
-import { PwaInstall, installApp } from '../../../common/pwaInstall';
+import { installApp } from '../../../common/pwaInstall';
 import { reloadMapObjects } from '../../../libs/mu/loadMapIntoScene';
 import {
-  KEY_ACTIONS,
-  KEY_ACTION_LABEL_KEYS,
   KeyBindings,
   isKey,
   isReservedKey,
@@ -38,1178 +24,186 @@ import {
   setKeyBinding,
   type KeyAction,
 } from '../../../common/keyBindings';
-import {
-  ITEM_EFFECT_MODE_LABEL_KEYS,
-  ITEM_EFFECT_MODE_MAX,
-} from '../../../common/itemEffectMode';
-import {
-  COMPARE_TOOLTIP_LABEL_KEYS,
-  COMPARE_TOOLTIP_MAX,
-} from '../../../common/itemCompare';
-import {
-  LIGHTING_QUALITY_LABEL_KEYS,
-  LIGHTING_QUALITY_MAX,
-  MSAA_MAX,
-  MSAA_STEPS,
-} from '../../../common/lightingQuality';
-import {
-  ANISOTROPY_MAX,
-  ANISOTROPY_STEPS,
-  MATERIAL_QUALITY_LABEL_KEYS,
-  MATERIAL_DETAIL_MAX,
-  MATERIAL_QUALITY_MAX,
-} from '../../../common/materialQuality';
-import {
-  ANIME_HALFTONE_SCALE_MAX,
-  ANIME_HALFTONE_SCALE_MIN,
-  ANIME_SLIDER_MAX,
-  LINE_PLACEMENT_LABEL_KEYS,
-  LINE_PLACEMENT_MAX,
-  LINE_STRENGTH_MAX,
-  LINE_STRENGTH_MIN,
-  LINE_WIDTH_MAX,
-  LINE_WIDTH_MIN,
-  OUTLINE_MODE_LABEL_KEYS,
-  OUTLINE_MODE_MAX,
-  RENDERING_STYLE_LABEL_KEYS,
-  RENDERING_STYLE_MAX,
-  SHADE_STEPS_MAX,
-  SHADE_STEPS_MIN,
-  STYLE_STRENGTH_MAX,
-  STYLE_STRENGTH_MIN,
-  renderingStyle,
-} from '../../../common/renderingStyle';
-import {
-  RENDER_SCALE_STEP_MAX,
-  renderScaleForStep,
-} from '../../../libs/renderScale';
-import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
-import { BUS_VOLUME_MAX } from '../../../sound/buses';
-import {
-  LOW_VITAL_MAX_PERCENT,
-  LOW_VITAL_MIN_PERCENT,
-} from '../../../common/lowVitals';
-import {
-  RENDER_DISTANCE_MAX,
-  renderDistanceRanges,
-} from '../../../common/renderDistance';
-import { MuWindows, WINDOW_Z_MODAL } from '../muWindow/windowState';
 import { SessionExit, type ExitKind } from '../../../common/sessionExit';
-import {
-  BACK_SPRITE,
-  BTN_BOTH_CANCEL_X,
-  BTN_BOTH_OK_X,
-  BTN_HEIGHT,
-  BTN_SINGLE_X,
-  BTN_WIDTH,
-  BTN_Y,
-  CANCEL_SPRITE,
-  OK_SPRITE,
-  WIN_HEIGHT as MSG_WIN_HEIGHT,
-  WIN_WIDTH as MSG_WIN_WIDTH,
-} from '../msgWindow/layout';
 import { t, type TextKey } from '../../../i18n';
-import { LanguageSelect } from './languageSelect';
-import { TexturePackSelect } from './texturePackSelect';
+import { EN_TEXT } from '../../../i18n/recipes';
+import { applyTierPreset, type TierPreset } from './presets';
 import {
-  TIER_PRESETS,
-  TIER_PRESET_LABEL_KEYS,
-  activeTierPreset,
-  applyTierPreset,
-} from './presets';
+  ALL_PAGES,
+  categoryOf,
+  findOptionRow,
+  helpKeyOf,
+  optionKeyOf,
+  rowId,
+  type ButtonRow,
+  type Page,
+  type Row,
+  type Section,
+} from './catalogue';
+import { blockerOf, hiddenByStyle, type Blocker } from './gating';
+import { matchesQuery } from './search';
+import { OptionsFrame } from './frame';
+import { FitText, OptionsButton } from './controls';
+import { PageTree, SearchField } from './nav';
+import { OptionRow, type RowActions } from './rows';
+import { ScrollBar } from './scrollbar';
+import { ConfirmBox, NoticeBox } from './dialogs';
 
 const WINDOW_ID = 'options';
-
-/** The tone mapper names, as text keys - the slider prints `t()` of these. */
-const TONE_MAPPER_LABEL_KEYS: readonly TextKey[] = [
-  'options.toneMapper.none',
-  'options.toneMapper.standard',
-  'options.toneMapper.aces',
-  'options.toneMapper.neutral',
-];
-
-const ART_WIDTH = 213;
-
-const WIN_WIDTH = ART_WIDTH * 2;
-const COLUMN_WIDTH = 180;
-const COLUMN_X = [28, 28 + COLUMN_WIDTH + 30];
-
-const TOP_HEIGHT = 65;
-const BOTTOM_HEIGHT = 43;
-const SIDE_TILE_HEIGHT = 8;
-
-const CHECK_SIZE = 16;
-
-/**
- * The tab strip goes in the header art's own band. `op2_back1.OZT` ends its
- * bar in a hard line under the title and then hangs an ornament over bare
- * stone; sitting the strip there finishes the header instead of leaving that
- * plate empty, and the rows start under it.
- */
-const TAB_TOP = 34;
-
-const SECTION_HEADER_H = 24;
-const CHECK_ROW_H = 24;
-const SLIDER_ROW_H = 40;
-const KEY_ROW_H = 24;
-const BUTTON_ROW_H = 34;
-/** Label plus the row of tier plates under it. */
-const PRESET_ROW_H = 40;
-const PRESET_GAP = 4;
-/** Label plus the closed selector plate under it. */
-const LANGUAGE_ROW_H = 30;
-const KEY_BOX_WIDTH = 64;
-const KEY_BOX_HEIGHT = 18;
-const SECTION_GAP = 16;
-
-const CLOSE_WIDTH = 108;
-const CLOSE_HEIGHT = 30;
-
-const SLIDER_WIDTH = 98;
-const SLIDER_HEIGHT = 13;
-/** The value plate reaches past the slider: 'Tone mapper' + 'Standard' overrun 98. */
-const VALUE_WIDTH = 140;
-const THUMB_SIZE = 13;
-
-const GAUGE_INSET_X = 3;
-const GAUGE_INSET_Y = 3;
-const GAUGE_WIDTH = 95 - GAUGE_INSET_X;
-const GAUGE_HEIGHT = 10 - GAUGE_INSET_Y;
-
-type CheckRow = {
-  key: keyof GameOptionsType;
-  textId: number;
-  labelKey: TextKey;
-  needsPostProcessing?: boolean;
-  /** Dim while the walk keys, which the pointer lock leans on, are off. */
-  needsWsadMovement?: boolean;
-  /** Dim on the Classic lighting tier, where nothing reads the value. */
-  needsTier?: boolean;
-  /** Dim while the rendering style has no use for the value. */
-  needsStyle?: 'ramp' | 'outline' | 'dialled' | 'tuned';
-};
-
-type KeyRow = { action: KeyAction; labelKey: TextKey };
-
-type ButtonRow = { id: string; labelKey: TextKey; onClick: () => void };
-
-/** One of the system menu's ways out (`common/sessionExit.ts`). */
-type ExitRow = { exit: ExitKind; labelKey: TextKey };
-
-/** The language picker: one row, its own widget (`languageSelect.tsx`). */
-type LanguageRow = { id: 'language' };
-type TexturePackRow = { id: 'texturePack' };
-
-/** The tier presets: one plate per tier (`presets.ts`). */
-type PresetRow = { id: 'presets'; labelKey: TextKey };
-
-/** Install the client as an app: a button that reads `PwaInstall`. */
-type InstallRow = { id: 'install' };
-
-type Row =
-  | ({ kind: 'check' } & CheckRow)
-  | ({ kind: 'slider' } & SliderRow)
-  | ({ kind: 'key' } & KeyRow)
-  | ({ kind: 'button' } & ButtonRow)
-  | ({ kind: 'exit' } & ExitRow)
-  | ({ kind: 'language' } & LanguageRow)
-  | ({ kind: 'texturePack' } & TexturePackRow)
-  | ({ kind: 'install' } & InstallRow)
-  | ({ kind: 'presets' } & PresetRow);
-
-type Section = {
-  titleKey: TextKey;
-  rows: Row[];
-};
-
-const check = (
-  key: keyof GameOptionsType,
-  textId: number,
-  labelKey: TextKey,
-  needsPostProcessing = false
-): Row => ({ kind: 'check', key, textId, labelKey, needsPostProcessing });
-
-type SliderRow = {
-  key:
-    | 'cameraFov'
-    | 'volume'
-    | 'effectLevel'
-    | 'itemEffects'
-    | 'compareTooltips'
-    | 'lightingQuality'
-    | 'renderScale'
-    | 'upscale'
-    | 'msaa'
-    | 'materialQuality'
-    | 'materialDetail'
-    | 'anisotropy'
-    | 'renderingStyle'
-    | 'shadeSteps'
-    | 'styleStrength'
-    | 'lineWidth'
-    | 'lineStrength'
-    | 'linePlacement'
-    | 'animeShading'
-    | 'animeRim'
-    | 'animeRimWidth'
-    | 'animeMatcap'
-    | 'animePaint'
-    | 'animeHalftone'
-    | 'animeHalftoneScale'
-    | 'animeOutlineMode'
-    | 'animeSpeedLines'
-    | 'animeFilm'
-    | 'sharpness'
-    | 'filmGrain'
-    | 'bloom'
-    | 'glow'
-    | 'chromatic'
-    | 'toneMapper'
-    | 'brightness'
-    | 'vignette'
-    | 'lootZen'
-    | 'lowHealthPercent'
-    | 'lowManaPercent'
-    | 'uiScale'
-    | 'renderDistance'
-    | 'grassDensity'
-    | 'musicVolume'
-    | 'effectsVolume'
-    | 'combatVolume'
-    | 'monsterVolume'
-    | 'ambientVolume'
-    | 'stepsVolume'
-    | 'dropVolume'
-    | 'uiVolume'
-    | 'instrumentsVolume';
-  textId: number;
-  labelKey: TextKey;
-  max: number;
-  min?: number;
-  display: (value: number) => number | string;
-  needsPostProcessing?: boolean;
-  /** Bloom and the image-processing pass exist on tiers >= 1 only. */
-  needsTier?: boolean;
-  /** Dim while the rendering style has no use for the value. */
-  needsStyle?: 'ramp' | 'outline' | 'dialled' | 'tuned';
-  /** Dim and lock while the classic framing, not the facade, owns the camera. */
-  needsCameraControl?: boolean;
-  /** Dim while the warning this threshold belongs to is switched off. */
-  needsWarning?: 'lowHealthWarning' | 'lowManaWarning';
-};
-
-const slider = (row: SliderRow): Row => ({ kind: 'slider', ...row });
-
-const exitRow = (exit: ExitKind, labelKey: TextKey): Row => ({
-  kind: 'exit',
-  exit,
-  labelKey,
-});
-
-const keyRow = (action: KeyAction): Row => ({
-  kind: 'key',
-  action,
-  labelKey: KEY_ACTION_LABEL_KEYS[action],
-});
-
-const KEY_COLUMN_SPLIT = Math.ceil(KEY_ACTIONS.length / 2);
-
-const gradeSlider = (
-  key:
-    | 'sharpness'
-    | 'filmGrain'
-    | 'bloom'
-    | 'glow'
-    | 'chromatic'
-    | 'vignette',
-  labelKey: TextKey,
-  needsTier: boolean
-): Row =>
-  slider({
-    key,
-    textId: -1,
-    labelKey,
-    max: 9,
-    display: v => (v === 0 ? t('common.off') : v),
-    needsPostProcessing: true,
-    needsTier,
-  });
-
-/**
- * One mixer category (`sound/buses.ts`): 0 is off, `BUS_VOLUME_MAX` is the
- * top, where the category is transparent and the master alone decides.
- */
-const busSlider = (
-  key:
-    | 'musicVolume'
-    | 'effectsVolume'
-    | 'combatVolume'
-    | 'monsterVolume'
-    | 'ambientVolume'
-    | 'stepsVolume'
-    | 'dropVolume'
-    | 'uiVolume'
-    | 'instrumentsVolume',
-  labelKey: TextKey
-): Row =>
-  slider({
-    key,
-    textId: -1,
-    labelKey,
-    max: BUS_VOLUME_MAX,
-    display: v => (v === 0 ? t('common.off') : v),
-  });
-
-/**
- * One screen of the window: a column layout of sections.
- *
- * A tab is a *category* and a subtab is one screen inside it, so nothing has
- * to be filed under a heading it does not belong to - the sound slider is not
- * gameplay, and quitting is not a server setting. A tab with a single subtab
- * draws no second strip.
- */
-type SubTab = {
-  id: string;
-  labelKey: TextKey;
-  columns: Section[][];
-};
-
-type Tab = {
-  id: string;
-  labelKey: TextKey;
-  subtabs: SubTab[];
-};
-
-/** Every screen in the window, for the sizing pass. */
-const allScreens = (tabs: Tab[]): SubTab[] => tabs.flatMap(tab => tab.subtabs);
-
-const TABS: Tab[] = [
-  // First, and the one the window always opens on: Escape opens this window
-  // instead of the original's `CSystemMenuMsgBox`, so the way out has to be
-  // the first thing under the cursor.
-  {
-    id: 'system',
-    labelKey: 'options.tab.system',
-    subtabs: [
-      {
-        id: 'exit',
-        labelKey: 'options.section.exit',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.exit',
-              rows: [
-                exitRow('quit', 'options.exitGame'),
-                exitRow('servers', 'options.selectServer'),
-                exitRow('characters', 'options.switchCharacter'),
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'connection',
-        labelKey: 'options.section.connection',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.connection',
-              rows: [
-                check('autoReconnect', -1, 'options.autoReconnect'),
-                check('blockBrowserKeys', -1, 'options.blockBrowserKeys'),
-              ],
-            },
-          ],
-        ],
-      },
-    ],
-  },
-  {
-    id: 'game',
-    labelKey: 'options.tab.game',
-    subtabs: [
-      {
-        id: 'gameplay',
-        labelKey: 'options.section.gameplay',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.gameplay',
-              rows: [
-                check('autoAttack', 386, 'options.autoAttack'),
-                check('statPointAmounts', -1, 'options.statPointAmounts'),
-                check('wsadMovement', -1, 'options.wsadMovement'),
-                {
-                  kind: 'check',
-                  key: 'thirdPersonMouseLook',
-                  textId: -1,
-                  labelKey: 'options.thirdPersonMouseLook',
-                  needsWsadMovement: true,
-                },
-                check('firstPersonBob', -1, 'options.firstPersonBob'),
-              ],
-            },
-            {
-              titleKey: 'options.section.items',
-              rows: [
-                check('quickItemActions', -1, 'options.quickItemActions'),
-                check('confirmValuableItems', -1, 'options.confirmValuableItems'),
-              ],
-            },
-            {
-              titleKey: 'options.section.camera',
-              rows: [
-                check('cameraControl', -1, 'options.cameraControl'),
-                slider({
-                  key: 'cameraFov',
-                  textId: -1,
-                  labelKey: 'options.cameraFov',
-                  min: CAMERA_FOV_MIN_DEG,
-                  max: CAMERA_FOV_MAX_DEG,
-                  display: v => `${v}°`,
-                  needsCameraControl: true,
-                }),
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'drops',
-        labelKey: 'options.section.loot',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.loot',
-              rows: [
-                check('dropTooltips', -1, 'options.dropTooltips'),
-                check('lootFilter', -1, 'options.lootFilter'),
-                check('lootJewels', -1, 'options.lootJewels'),
-                check('lootExcellent', -1, 'options.lootExcellent'),
-                check('lootAncient', -1, 'options.lootAncient'),
-                check('lootHighLevel', -1, 'options.lootHighLevel'),
-                check('lootOther', -1, 'options.lootOther'),
-                slider({
-                  key: 'lootZen',
-                  textId: -1,
-                  labelKey: 'options.lootZen',
-                  max: LOOT_ZEN_MAX,
-                  display: v => (v === 0 ? t('common.off') : lootZenThreshold(v)),
-                }),
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'chat',
-        labelKey: 'options.section.chat',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.chat',
-              rows: [
-                check('whisperBeep', 387, 'options.whisperBeep'),
-                check('chatTimestamps', -1, 'options.chatTimestamps'),
-                check('slideHelp', 919, 'options.slideHelp'),
-                check('stateWarnings', -1, 'options.stateWarnings'),
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'vitals',
-        labelKey: 'options.section.warnings',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.vitals',
-              rows: [
-                check('lowHealthWarning', -1, 'options.lowHealthWarning'),
-                slider({
-                  key: 'lowHealthPercent',
-                  textId: -1,
-                  labelKey: 'options.lowHealthPercent',
-                  min: LOW_VITAL_MIN_PERCENT,
-                  max: LOW_VITAL_MAX_PERCENT,
-                  display: v => `${v}%`,
-                  needsWarning: 'lowHealthWarning',
-                }),
-                check('lowManaWarning', -1, 'options.lowManaWarning'),
-                slider({
-                  key: 'lowManaPercent',
-                  textId: -1,
-                  labelKey: 'options.lowManaPercent',
-                  min: LOW_VITAL_MIN_PERCENT,
-                  max: LOW_VITAL_MAX_PERCENT,
-                  display: v => `${v}%`,
-                  needsWarning: 'lowManaWarning',
-                }),
-              ],
-            },
-          ],
-        ],
-      },
-    ],
-  },
-  {
-    id: 'video',
-    labelKey: 'options.tab.video',
-    subtabs: [
-      {
-        id: 'quality',
-        labelKey: 'options.section.quality',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.quality',
-              rows: [
-                { kind: 'presets', id: 'presets', labelKey: 'options.preset' },
-                slider({
-                  key: 'lightingQuality',
-                  textId: -1,
-                  labelKey: 'options.lightingQuality',
-                  max: LIGHTING_QUALITY_MAX,
-                  display: v => t(LIGHTING_QUALITY_LABEL_KEYS[v]) ?? v,
-                }),
-                slider({
-                  key: 'renderScale',
-                  textId: -1,
-                  labelKey: 'options.renderScale',
-                  max: RENDER_SCALE_STEP_MAX,
-                  display: v => `${Math.round(renderScaleForStep(v) * 100)}%`,
-                }),
-                slider({
-                  key: 'upscale',
-                  textId: -1,
-                  labelKey: 'options.upscale',
-                  max: 1,
-                  // Nothing to reconstruct at native, and the row says so
-                  // rather than sitting there doing nothing.
-                  display: v =>
-                    GameOptions.renderScale === 0
-                      ? t('options.upscale.native')
-                      : v > 0
-                        ? 'FSR'
-                        : t('common.off'),
-                }),
-                slider({
-                  key: 'msaa',
-                  textId: -1,
-                  labelKey: 'options.msaa',
-                  max: MSAA_MAX,
-                  display: v =>
-                    MSAA_STEPS[v] > 1 ? `${MSAA_STEPS[v]}x` : t('common.off'),
-                  // Classic takes no samples and the chain has no pass to
-                  // carry them with post off: dimmed in both.
-                  needsPostProcessing: true,
-                  needsTier: true,
-                }),
-                slider({
-                  key: 'materialQuality',
-                  textId: -1,
-                  labelKey: 'options.materialQuality',
-                  max: MATERIAL_QUALITY_MAX,
-                  display: v => t(MATERIAL_QUALITY_LABEL_KEYS[v]) ?? v,
-                }),
-                { kind: 'texturePack', id: 'texturePack' },
-                slider({
-                  key: 'materialDetail',
-                  textId: -1,
-                  labelKey: 'options.materialDetail',
-                  max: MATERIAL_DETAIL_MAX,
-                  display: v => (v === 0 ? t('common.off') : v),
-                }),
-                slider({
-                  key: 'anisotropy',
-                  textId: -1,
-                  labelKey: 'options.anisotropy',
-                  max: ANISOTROPY_MAX,
-                  display: v =>
-                    ANISOTROPY_STEPS[v] > 1
-                      ? `${ANISOTROPY_STEPS[v]}x`
-                      : t('common.off'),
-                  // Classic samples nearest and reads none of it.
-                  needsTier: true,
-                }),
-                slider({
-                  key: 'effectLevel',
-                  textId: 1840,
-                  labelKey: 'options.effectLevel',
-                  max: 4,
-                  display: v => v * 2 + 5,
-                }),
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'rendering',
-        labelKey: 'options.section.rendering',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.rendering',
-              rows: [
-                check('shadows', -1, 'options.shadows'),
-                check('dynamicLights', -1, 'options.dynamicLights'),
-                check('postProcessing', -1, 'options.postProcessing'),
-                check('ambientParticles', -1, 'options.ambientParticles'),
-                check('weatherEffects', -1, 'options.weatherEffects'),
-                check('animatedWater', -1, 'options.animatedWater'),
-                check('advancedEffects', -1, 'options.advancedEffects'),
-                check('propBatching', -1, 'options.propBatching'),
-                check('monsterEffects', -1, 'options.monsterEffects'),
-              ],
-            },
-            {
-              titleKey: 'options.section.items',
-              rows: [
-                slider({
-                  key: 'itemEffects',
-                  textId: -1,
-                  labelKey: 'options.itemEffects',
-                  max: ITEM_EFFECT_MODE_MAX,
-                  display: v => t(ITEM_EFFECT_MODE_LABEL_KEYS[v]) ?? v,
-                }),
-              ],
-            },
-          ],
-          [
-            {
-              titleKey: 'options.section.world',
-              rows: [
-                slider({
-                  key: 'grassDensity',
-                  textId: -1,
-                  labelKey: 'options.grassDensity',
-                  max: 9,
-                  needsTier: true,
-                  display: v => (v === 0 ? t('common.off') : v),
-                }),
-                slider({
-                  key: 'renderDistance',
-                  textId: -1,
-                  labelKey: 'options.renderDistance',
-                  max: RENDER_DISTANCE_MAX,
-                  display: v => renderDistanceRanges(v).nearby,
-                }),
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'style',
-        labelKey: 'options.section.style',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.style',
-              rows: [
-                slider({
-                  key: 'renderingStyle',
-                  textId: -1,
-                  labelKey: 'options.renderingStyle',
-                  max: RENDERING_STYLE_MAX,
-                  needsTier: true,
-                  display: v => t(RENDERING_STYLE_LABEL_KEYS[v]) ?? v,
-                }),
-                slider({
-                  key: 'shadeSteps',
-                  textId: -1,
-                  labelKey: 'options.shadeSteps',
-                  min: SHADE_STEPS_MIN,
-                  max: SHADE_STEPS_MAX,
-                  needsTier: true,
-                  needsStyle: 'ramp',
-                  display: v => v,
-                }),
-                slider({
-                  key: 'styleStrength',
-                  textId: -1,
-                  labelKey: 'options.styleStrength',
-                  min: STYLE_STRENGTH_MIN,
-                  max: STYLE_STRENGTH_MAX,
-                  needsTier: true,
-                  // The one dial is Anime 1.0's; 2.0 has a slider per part.
-                  needsStyle: 'dialled',
-                  display: v => v,
-                }),
-              ],
-            },
-          ],
-          [
-            {
-              titleKey: 'options.section.lines',
-              rows: [
-                slider({
-                  key: 'lineStrength',
-                  textId: -1,
-                  labelKey: 'options.lineStrength',
-                  min: LINE_STRENGTH_MIN,
-                  max: LINE_STRENGTH_MAX,
-                  needsTier: true,
-                  needsStyle: 'outline',
-                  display: v => v,
-                }),
-                slider({
-                  key: 'lineWidth',
-                  textId: -1,
-                  labelKey: 'options.lineWidth',
-                  min: LINE_WIDTH_MIN,
-                  max: LINE_WIDTH_MAX,
-                  needsTier: true,
-                  needsStyle: 'outline',
-                  display: v => v,
-                }),
-                slider({
-                  key: 'linePlacement',
-                  textId: -1,
-                  labelKey: 'options.linePlacement',
-                  max: LINE_PLACEMENT_MAX,
-                  needsTier: true,
-                  needsStyle: 'outline',
-                  display: v => t(LINE_PLACEMENT_LABEL_KEYS[v]) ?? v,
-                }),
-                {
-                  kind: 'check',
-                  key: 'grassOutline',
-                  textId: -1,
-                  labelKey: 'options.grassOutline',
-                  needsTier: true,
-                  needsStyle: 'outline',
-                },
-                {
-                  kind: 'check',
-                  key: 'animeEffects',
-                  textId: -1,
-                  labelKey: 'options.animeEffects',
-                  needsTier: true,
-                  needsStyle: 'outline',
-                },
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'anime',
-        labelKey: 'options.section.anime',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.shading',
-              rows: [
-                slider({
-                  key: 'animeShading',
-                  textId: -1,
-                  labelKey: 'options.animeShading',
-                  max: ANIME_SLIDER_MAX,
-                  needsTier: true,
-                  needsStyle: 'tuned',
-                  display: v => v,
-                }),
-                slider({
-                  key: 'animeRim',
-                  textId: -1,
-                  labelKey: 'options.animeRim',
-                  max: ANIME_SLIDER_MAX,
-                  needsTier: true,
-                  needsStyle: 'tuned',
-                  display: v => (v === 0 ? t('common.off') : v),
-                }),
-                slider({
-                  key: 'animeRimWidth',
-                  textId: -1,
-                  labelKey: 'options.animeRimWidth',
-                  max: ANIME_SLIDER_MAX,
-                  needsTier: true,
-                  needsStyle: 'tuned',
-                  display: v => v,
-                }),
-                slider({
-                  key: 'animeMatcap',
-                  textId: -1,
-                  labelKey: 'options.animeMatcap',
-                  max: ANIME_SLIDER_MAX,
-                  needsTier: true,
-                  needsStyle: 'tuned',
-                  display: v => (v === 0 ? t('common.off') : v),
-                }),
-                slider({
-                  key: 'animePaint',
-                  textId: -1,
-                  labelKey: 'options.animePaint',
-                  max: ANIME_SLIDER_MAX,
-                  needsTier: true,
-                  needsStyle: 'tuned',
-                  display: v => (v === 0 ? t('common.off') : v),
-                }),
-                slider({
-                  key: 'animeHalftone',
-                  textId: -1,
-                  labelKey: 'options.animeHalftone',
-                  max: ANIME_SLIDER_MAX,
-                  needsTier: true,
-                  needsStyle: 'tuned',
-                  display: v => (v === 0 ? t('common.off') : v),
-                }),
-                slider({
-                  key: 'animeHalftoneScale',
-                  textId: -1,
-                  labelKey: 'options.animeHalftoneScale',
-                  min: ANIME_HALFTONE_SCALE_MIN,
-                  max: ANIME_HALFTONE_SCALE_MAX,
-                  needsTier: true,
-                  needsStyle: 'tuned',
-                  display: v => v,
-                }),
-              ],
-            },
-          ],
-          [
-            {
-              titleKey: 'options.section.linesAndEffects',
-              rows: [
-                slider({
-                  key: 'animeOutlineMode',
-                  textId: -1,
-                  labelKey: 'options.animeOutlineMode',
-                  max: OUTLINE_MODE_MAX,
-                  needsTier: true,
-                  needsStyle: 'tuned',
-                  display: v => t(OUTLINE_MODE_LABEL_KEYS[v]) ?? v,
-                }),
-                slider({
-                  key: 'animeSpeedLines',
-                  textId: -1,
-                  labelKey: 'options.animeSpeedLines',
-                  max: ANIME_SLIDER_MAX,
-                  needsTier: true,
-                  needsStyle: 'tuned',
-                  display: v => (v === 0 ? t('common.off') : v),
-                }),
-                slider({
-                  key: 'animeFilm',
-                  textId: -1,
-                  labelKey: 'options.animeFilm',
-                  max: ANIME_SLIDER_MAX,
-                  needsTier: true,
-                  needsStyle: 'tuned',
-                  display: v => (v === 0 ? t('common.off') : v),
-                }),
-                {
-                  kind: 'check',
-                  key: 'animeImpacts',
-                  textId: -1,
-                  labelKey: 'options.animeImpacts',
-                  needsTier: true,
-                  needsStyle: 'tuned',
-                },
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'image',
-        labelKey: 'options.section.image',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.image',
-              rows: [
-                slider({
-                  key: 'toneMapper',
-                  textId: -1,
-                  labelKey: 'options.toneMapper',
-                  max: TONE_MAPPER_MAX,
-                  display: v => t(TONE_MAPPER_LABEL_KEYS[v]) ?? v,
-                  needsPostProcessing: true,
-                  needsTier: true,
-                }),
-                slider({
-                  key: 'brightness',
-                  textId: -1,
-                  labelKey: 'options.brightness',
-                  min: BRIGHTNESS_MIN,
-                  max: BRIGHTNESS_MAX,
-                  display: v =>
-                    v === 0 ? t('common.off') : v > 0 ? `+${v}` : `-${-v}`,
-                  needsPostProcessing: true,
-                  needsTier: true,
-                }),
-                gradeSlider('bloom', 'options.bloom', true),
-                gradeSlider('glow', 'options.glow', false),
-              ],
-            },
-          ],
-          [
-            {
-              titleKey: 'options.section.grade',
-              rows: [
-                gradeSlider('sharpness', 'options.sharpness', false),
-                gradeSlider('filmGrain', 'options.filmGrain', true),
-                gradeSlider('chromatic', 'options.chromatic', true),
-                gradeSlider('vignette', 'options.vignette', true),
-                check('fxaa', -1, 'options.fxaa', true),
-              ],
-            },
-          ],
-        ],
-      },
-    ],
-  },
-  {
-    id: 'sound',
-    labelKey: 'options.tab.sound',
-    subtabs: [
-      {
-        id: 'mixer',
-        labelKey: 'options.section.mixer',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.mixer',
-              rows: [
-                slider({
-                  key: 'volume',
-                  textId: 389,
-                  labelKey: 'options.volume',
-                  max: 9,
-                  display: v => (v === 0 ? t('common.off') : v),
-                }),
-                busSlider('musicVolume', 'options.musicVolume'),
-                busSlider('effectsVolume', 'options.effectsVolume'),
-                busSlider('uiVolume', 'options.uiVolume'),
-                check('muteInBackground', -1, 'options.muteInBackground'),
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'effects',
-        labelKey: 'options.section.sfx',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.sfx',
-              rows: [
-                busSlider('combatVolume', 'options.combatVolume'),
-                busSlider('monsterVolume', 'options.monsterVolume'),
-                busSlider('ambientVolume', 'options.ambientVolume'),
-                busSlider('stepsVolume', 'options.stepsVolume'),
-                busSlider('instrumentsVolume', 'options.instrumentsVolume'),
-                check('hearInstruments', -1, 'options.hearInstruments'),
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'drops',
-        labelKey: 'options.section.dropSounds',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.dropSounds',
-              rows: [
-                busSlider('dropVolume', 'options.dropVolume'),
-                check('dropSoundFilter', -1, 'options.dropSoundFilter'),
-                check('dropSoundJewels', -1, 'options.lootJewels'),
-                check('dropSoundExcellent', -1, 'options.lootExcellent'),
-                check('dropSoundAncient', -1, 'options.lootAncient'),
-                check('dropSoundHighLevel', -1, 'options.lootHighLevel'),
-                check('dropSoundOther', -1, 'options.lootOther'),
-                check('dropSoundZen', -1, 'common.zen'),
-              ],
-            },
-          ],
-        ],
-      },
-    ],
-  },
-  {
-    id: 'interface',
-    labelKey: 'options.tab.interface',
-    subtabs: [
-      {
-        id: 'layout',
-        labelKey: 'options.section.layout',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.layout',
-              rows: [
-                slider({
-                  key: 'uiScale',
-                  textId: -1,
-                  labelKey: 'options.uiScale',
-                  max: UI_SCALE_MAX,
-                  display: v => `${Math.round(uiScaleFactor(v) * 100)}%`,
-                }),
-                check('lockWindows', -1, 'options.lockWindows'),
-                check('minimapCorner', -1, 'options.minimapCorner'),
-                check('performanceReadout', -1, 'options.performanceReadout'),
-                slider({
-                  key: 'compareTooltips',
-                  textId: -1,
-                  labelKey: 'options.compareTooltips',
-                  max: COMPARE_TOOLTIP_MAX,
-                  display: v => t(COMPARE_TOOLTIP_LABEL_KEYS[v]) ?? v,
-                }),
-                check('eventTimers', -1, 'options.eventTimers'),
-                check('questTracker', -1, 'options.questTracker'),
-                {
-                  kind: 'button',
-                  id: 'fullscreen',
-                  labelKey: 'options.fullscreen',
-                  onClick: toggleFullscreen,
-                },
-                { kind: 'install', id: 'install' },
-                {
-                  kind: 'button',
-                  id: 'reset-windows',
-                  labelKey: 'options.resetWindows',
-                  onClick: () => MuWindows.resetAll(),
-                },
-              ],
-            },
-          ],
-        ],
-      },
-      {
-        id: 'text',
-        labelKey: 'options.section.text',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.language',
-              rows: [
-                { kind: 'language', id: 'language' },
-                check('englishItemNames', -1, 'options.englishItemNames'),
-              ],
-            },
-          ],
-        ],
-      },
-    ],
-  },
-  {
-    id: 'keys',
-    labelKey: 'options.tab.keys',
-    subtabs: [
-      {
-        id: 'bindings',
-        labelKey: 'options.section.bindings',
-        columns: [
-          [
-            {
-              titleKey: 'options.section.windows',
-              rows: KEY_ACTIONS.slice(0, KEY_COLUMN_SPLIT).map(keyRow),
-            },
-          ],
-          [
-            {
-              titleKey: 'options.section.actions',
-              rows: [
-                ...KEY_ACTIONS.slice(KEY_COLUMN_SPLIT).map(keyRow),
-                {
-                  kind: 'button',
-                  id: 'reset-keys',
-                  labelKey: 'options.resetKeys',
-                  onClick: resetKeyBindings,
-                },
-              ],
-            },
-          ],
-        ],
-      },
-    ],
-  },
-];
-
-/** Tall enough, and flush, to reach the bottom of the header art. */
-const TAB_HEIGHT = 32;
-const TAB_GAP = 0;
-/** The categories share the 426 px window, whatever there are of them. */
-const TAB_WIDTH = Math.floor(
-  (WIN_WIDTH - (TABS.length - 1) * TAB_GAP) / TABS.length
-);
-
-function rowHeight(row: Row): number {
-  switch (row.kind) {
-    case 'check':
-      return CHECK_ROW_H;
-    case 'key':
-      return KEY_ROW_H;
-    case 'button':
-    case 'install':
-    case 'exit':
-      return BUTTON_ROW_H;
-    case 'language':
-    case 'texturePack':
-      return LANGUAGE_ROW_H;
-    case 'presets':
-      return PRESET_ROW_H;
-    default:
-      return SLIDER_ROW_H;
-  }
-}
-
-function columnHeight(sections: Section[]): number {
-  return sections.reduce(
-    (total, section) =>
-      total +
-      SECTION_HEADER_H +
-      section.rows.reduce((h, row) => h + rowHeight(row), 0) +
-      SECTION_GAP,
-    0
-  );
-}
-
-const CONTENT_HEIGHT = Math.max(
-  ...allScreens(TABS).flatMap(sub => sub.columns.map(columnHeight))
-);
-
-const WIN_HEIGHT =
-  Math.ceil(
-    (TAB_TOP + TAB_HEIGHT + 6 + 20 + 10 + CONTENT_HEIGHT + 20) / SIDE_TILE_HEIGHT
-  ) *
-    SIDE_TILE_HEIGHT +
-  BOTTOM_HEIGHT;
-
-const CLOSE_Y = WIN_HEIGHT - 47;
-
-/** The subtab strip sits directly under the tabs; the rows start under it. */
-const SUBTAB_TOP = TAB_TOP + TAB_HEIGHT + 6;
-const SUBTAB_HEIGHT = 20;
-const SUBTAB_GAP = 4;
-
-const TAB_CONTENT_TOP = SUBTAB_TOP + SUBTAB_HEIGHT + 10;
-/** Where a tab's rows have to stop: the Close button owns the rest. */
-const TAB_CONTENT_BOTTOM = CLOSE_Y - 12;
-
 const HOT_KEY = 'options';
 
+const WIN_WIDTH = 640;
+const WIN_HEIGHT = 540;
+
+const PANEL_TOP = 36;
+const PANEL_BOTTOM = WIN_HEIGHT - 52;
+const PANEL_PAD = 6;
+
+const RAIL_X = 16;
+const RAIL_WIDTH = 178;
+
+const CONTENT_X = RAIL_X + RAIL_WIDTH + 8;
+const CONTENT_WIDTH = WIN_WIDTH - CONTENT_X - 16;
+
+const HELP_HEIGHT = 80;
+const HELP_TOP = PANEL_BOTTOM - HELP_HEIGHT;
+const CONTENT_BOTTOM = HELP_TOP - 6;
+
+const HEADER_HEIGHT = 36;
+const ROWS_TOP = PANEL_TOP + HEADER_HEIGHT;
+const ROWS_HEIGHT = CONTENT_BOTTOM - PANEL_PAD - ROWS_TOP;
+const SCROLL_WIDTH = 15;
+const ROWS_WIDTH = CONTENT_WIDTH - PANEL_PAD * 2 - SCROLL_WIDTH - 4;
+
+const DEFAULTS_WIDTH = 96;
+
+const FOOTER_Y = WIN_HEIGHT - 47;
+const FOOTER_X = 24;
+const EXIT_WIDTH = 116;
+const EXIT_GAP = 6;
+const CLOSE_WIDTH = 108;
+
+const FLASH_MS = 1400;
+
+/** The ways out, in the footer: whichever the game can take right now. */
+const EXITS: { exit: ExitKind; labelKey: TextKey; helpKey: TextKey }[] = [
+  {
+    exit: 'characters',
+    labelKey: 'options.switchCharacter',
+    helpKey: 'options.help.switchCharacter',
+  },
+  {
+    exit: 'servers',
+    labelKey: 'options.selectServer',
+    helpKey: 'options.help.selectServer',
+  },
+  { exit: 'quit', labelKey: 'options.exitGame', helpKey: 'options.help.exitGame' },
+];
+
+const CONFIRM_TEXT: Record<ExitKind, TextKey> = {
+  quit: 'exit.confirmQuit',
+  servers: 'exit.confirmServers',
+  characters: 'exit.confirmCharacters',
+};
+
+/**
+ * The page the window reopens on, for this session. The ways out sit in the
+ * footer on every page, so reopening where the player left off costs
+ * nothing - Escape still reaches Exit game in one press.
+ */
+let lastPage: Page = ALL_PAGES[0];
+
+type Hovered =
+  | { kind: 'row'; row: Row }
+  | { kind: 'exit'; labelKey: TextKey; helpKey: TextKey }
+  | null;
+
+type Match = { page: Page; rows: Row[] };
+
+function sectionsOf(page: Page): Section[] {
+  return page.sections
+    .map(section => ({
+      ...section,
+      rows: section.rows.filter(
+        row => row.kind === 'key' || !hiddenByStyle(row.needs)
+      ),
+    }))
+    .filter(section => section.rows.length > 0);
+}
+
+function searchTexts(row: Row, page: Page, section: Section): string[] {
+  const keys: TextKey[] = [row.labelKey, helpKeyOf(row), page.labelKey];
+  if (section.titleKey) keys.push(section.titleKey);
+  keys.push(categoryOf(page).labelKey);
+
+  const texts = keys.flatMap(key => [t(key), EN_TEXT[key]]);
+  if (row.kind === 'key') texts.push(keyLabel(KeyBindings[row.action]));
+  return texts;
+}
+
+function search(query: string): Match[] {
+  return ALL_PAGES.flatMap(page => {
+    const rows = page.sections.flatMap(section =>
+      section.rows.filter(row => matchesQuery(query, searchTexts(row, page, section)))
+    );
+    return rows.length ? [{ page, rows }] : [];
+  });
+}
+
+const HelpStrip = observer(({ hovered, page }: { hovered: Hovered; page: Page | null }) => {
+  let title = '';
+  let body = t(page?.hintKey ?? 'options.help.idle');
+  let blocker: Blocker | null = null;
+  let applies: TextKey | undefined;
+
+  if (hovered?.kind === 'exit') {
+    title = t(hovered.labelKey);
+    body = t(hovered.helpKey);
+  } else if (hovered?.kind === 'row') {
+    const { row } = hovered;
+    title = t(row.labelKey);
+    body = t(helpKeyOf(row));
+    if (row.kind !== 'key') {
+      blocker = blockerOf(row.needs);
+      applies = row.appliesKey;
+    }
+  }
+
+  return (
+    <div
+      className="options-help"
+      style={{
+        left: CONTENT_X + PANEL_PAD + 4,
+        top: HELP_TOP + PANEL_PAD,
+        width: CONTENT_WIDTH - PANEL_PAD * 2 - 8,
+        height: HELP_HEIGHT - PANEL_PAD * 2,
+      }}
+    >
+      {title && <div className="options-help-title">{title}</div>}
+      <div className="options-help-body">{body}</div>
+      {blocker ? (
+        <div className="options-help-blocker">
+          {t(blocker.text, blocker.params)}
+          {blocker.target && ` ${t('options.needs.click')}`}
+        </div>
+      ) : (
+        applies && <div className="options-help-applies">{t(applies)}</div>
+      )}
+    </div>
+  );
+});
+
 export const OptionsWindow = observer(() => {
-  const [activeTab, setActiveTab] = useState(TABS[0].id);
-  const [activeSub, setActiveSub] = useState(TABS[0].subtabs[0].id);
+  const [page, setPage] = useState<Page>(lastPage);
+  const [query, setQuery] = useState('');
+  const [hovered, setHovered] = useState<Hovered>(null);
+  const [flash, setFlash] = useState<string | null>(null);
+  const rowsRef = useRef<HTMLDivElement>(null);
 
   // Key being rebound: the next key press goes to it instead of the game.
   const [capturing, setCapturing] = useState<KeyAction | null>(null);
-
-  // The way out waiting to be confirmed. The original's system menu is its
-  // own confirmation - a click here is one row away from the sliders, so it
-  // asks.
   const [confirming, setConfirming] = useState<ExitKind | null>(null);
-
-  // A line the window has to say back, on the message box art: one OK, no
-  // question. Raised by the install row when the browser has no offer.
+  const [confirmingDefaults, setConfirmingDefaults] = useState(false);
   const [notice, setNotice] = useState<TextKey | null>(null);
 
   useEffect(() => {
@@ -1251,21 +245,41 @@ export const OptionsWindow = observer(() => {
     if (Store.optionsEnabled) return;
     setCapturing(null);
     setConfirming(null);
-    // Every open starts on the first tab: Escape is meant to reach the ways
-    // out in one press, not wherever the sliders were left.
-    setActiveTab(TABS[0].id);
-    setActiveSub(TABS[0].subtabs[0].id);
+    setConfirmingDefaults(false);
+    setNotice(null);
+    setQuery('');
+    setHovered(null);
   }, [Store.optionsEnabled]);
+
+  useEffect(() => {
+    lastPage = page;
+  }, [page]);
+
+  // The jump from a greyed row: bring the unlocking row into view and light it.
+  useEffect(() => {
+    if (!flash) return;
+
+    const pane = rowsRef.current;
+    const target = pane?.querySelector<HTMLElement>(`[data-row-id="${flash}"]`);
+    if (pane && target) {
+      pane.scrollTop = Math.max(
+        0,
+        target.offsetTop - (pane.clientHeight - target.offsetHeight) / 2
+      );
+    }
+
+    const timer = window.setTimeout(() => setFlash(null), FLASH_MS);
+    return () => window.clearTimeout(timer);
+  }, [flash]);
 
   if (!Store.optionsEnabled) return null;
 
-  const tab = TABS.find(t => t.id === activeTab) ?? TABS[0];
-  const sub = tab.subtabs.find(s => s.id === activeSub) ?? tab.subtabs[0];
-
-  /** A category and the screen it opens on, together: they change as one. */
-  const openTab = (next: Tab) => {
-    setActiveTab(next.id);
-    setActiveSub(next.subtabs[0].id);
+  const openPage = (next: Page) => {
+    setPage(next);
+    setQuery('');
+    setHovered(null);
+    setCapturing(null);
+    if (rowsRef.current) rowsRef.current.scrollTop = 0;
   };
 
   const set = <K extends keyof GameOptionsType>(
@@ -1286,9 +300,76 @@ export const OptionsWindow = observer(() => {
     }
   };
 
-  const close = () => {
-    Store.optionsEnabled = false;
+  const applyPreset = (preset: TierPreset) => {
+    applyTierPreset(preset);
+    invalidateShadowState();
   };
+
+  const press = (row: ButtonRow) => {
+    setCapturing(null);
+
+    if (row.id === 'resetWindows') {
+      MuWindows.resetAll();
+      return;
+    }
+
+    void installApp().then(result => {
+      // The browser never offered, or took the offer back: say where its own
+      // install lives rather than doing nothing.
+      if (result === 'unavailable') setNotice('options.installHint');
+    });
+  };
+
+  const jump = (blocker: Blocker) => {
+    if (!blocker.target) return;
+    const found = findOptionRow(blocker.target);
+    if (!found) return;
+
+    openPage(found.page);
+    setHovered({ kind: 'row', row: found.row });
+    setFlash(rowId(found.row));
+  };
+
+  const actions: RowActions = {
+    set,
+    applyPreset,
+    capturing,
+    capture: setCapturing,
+    press,
+    hover: row => setHovered({ kind: 'row', row }),
+    jump,
+  };
+
+  const optionKeys = page.sections.flatMap(section =>
+    section.rows.flatMap(row => {
+      const key = optionKeyOf(row);
+      return key ? [key] : [];
+    })
+  );
+  const isKeysPage = page.sections.some(section =>
+    section.rows.some(row => row.kind === 'key')
+  );
+
+  const restoreDefaults = () => {
+    if (isKeysPage) resetKeyBindings();
+    for (const key of optionKeys) set(key, defaultGameOption(key));
+  };
+
+  // A hundred-odd rows: cheap enough to match on every render, which also
+  // keeps the results in the language on screen.
+  const matches = query.trim() ? search(query) : null;
+  const searching = matches !== null;
+  const category = categoryOf(page);
+
+  const renderRows = (rows: Row[]) =>
+    rows.map(row => (
+      <OptionRow
+        key={rowId(row)}
+        row={row}
+        flash={flash === rowId(row)}
+        actions={actions}
+      />
+    ));
 
   return (
     <div className="options-window-page">
@@ -1301,524 +382,178 @@ export const OptionsWindow = observer(() => {
           transformOrigin: chrome.anchored ? 'center' : '0 0',
         }}
       >
-        {}
-        <MuSpriteFrame
-          file="op1_stone.OZJ"
-          width={WIN_WIDTH - 6}
-          height={WIN_HEIGHT - 6}
-          style={{
-            position: 'absolute',
-            left: 3,
-            top: 3,
-            backgroundRepeat: 'repeat',
-          }}
-        />
-        <MuSpriteFrame
-          file="op1_back3.OZJ"
-          width={5}
-          height={WIN_HEIGHT - TOP_HEIGHT - BOTTOM_HEIGHT}
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: TOP_HEIGHT,
-            backgroundRepeat: 'repeat-y',
-          }}
-        />
-        <MuSpriteFrame
-          file="op1_back4.OZJ"
-          width={5}
-          height={WIN_HEIGHT - TOP_HEIGHT - BOTTOM_HEIGHT}
-          style={{
-            position: 'absolute',
-            right: 0,
-            top: TOP_HEIGHT,
-            backgroundRepeat: 'repeat-y',
-          }}
-        />
-        {}
-        {[false, true].map(mirrored => (
-          <MuSpriteFrame
-            key={`top-${mirrored}`}
-            file="op2_back1.OZT"
-            width={ART_WIDTH}
-            height={TOP_HEIGHT}
-            style={{
-              position: 'absolute',
-              left: mirrored ? ART_WIDTH : 0,
-              top: 0,
-              ...(mirrored && { transform: 'scaleX(-1)' }),
-            }}
-          />
-        ))}
-        {[false, true].map(mirrored => (
-          <MuSpriteFrame
-            key={`bottom-${mirrored}`}
-            file="op1_back2.OZT"
-            width={ART_WIDTH}
-            height={BOTTOM_HEIGHT}
-            style={{
-              position: 'absolute',
-              left: mirrored ? ART_WIDTH : 0,
-              bottom: 0,
-              ...(mirrored && { transform: 'scaleX(-1)' }),
-            }}
-          />
-        ))}
+        <OptionsFrame width={WIN_WIDTH} height={WIN_HEIGHT} />
 
-        {}
+        {/* The whole title bar is the handle, so the grab point stays put. */}
         <div
-          className="options-title"
-          style={{ top: 10, cursor: 'move' }}
+          className="options-titlebar"
+          style={{ width: WIN_WIDTH }}
           onPointerDown={chrome.onPointerDown}
         >
           {t('options.title')}
         </div>
 
-        {}
-        {TABS.map((tab, i) => {
-          const stripWidth =
-            TABS.length * TAB_WIDTH + (TABS.length - 1) * TAB_GAP;
-          const x =
-            Math.floor((WIN_WIDTH - stripWidth) / 2) +
-            i * (TAB_WIDTH + TAB_GAP);
-
-          return (
-            <div
-              key={tab.id}
-              className={`options-tab${tab.id === activeTab ? ' is-active' : ''}`}
-              style={{
-                left: x,
-                top: TAB_TOP,
-                width: TAB_WIDTH,
-                height: TAB_HEIGHT,
-              }}
-              onClick={uiClick(() => openTab(tab))}
-            >
-              {t(tab.labelKey)}
-            </div>
-          );
-        })}
-
-        {/* One strip per category; a category with one screen draws none. */}
-        {tab.subtabs.length > 1 &&
-          tab.subtabs.map((entry, i) => {
-            const width = Math.floor(
-              (COLUMN_WIDTH * 2 - SUBTAB_GAP * (tab.subtabs.length - 1)) /
-                tab.subtabs.length
-            );
-            const stripWidth =
-              tab.subtabs.length * width + (tab.subtabs.length - 1) * SUBTAB_GAP;
-            const x =
-              Math.floor((WIN_WIDTH - stripWidth) / 2) + i * (width + SUBTAB_GAP);
-
-            return (
-              <div
-                key={entry.id}
-                className={`options-subtab${entry.id === sub.id ? ' is-active' : ''}`}
-                style={{
-                  left: x,
-                  top: SUBTAB_TOP,
-                  width,
-                  height: SUBTAB_HEIGHT,
-                }}
-                onClick={uiClick(() => setActiveSub(entry.id))}
-              >
-                {t(entry.labelKey)}
-              </div>
-            );
-          })}
-
-        {sub.columns.map((sections, columnIndex) => {
-          const alone = sub.columns.length === 1;
-          const x = alone
-            ? Math.floor((WIN_WIDTH - COLUMN_WIDTH) / 2)
-            : COLUMN_X[columnIndex];
-
-          let y = TAB_CONTENT_TOP;
-          if (alone) {
-            const room = TAB_CONTENT_BOTTOM - TAB_CONTENT_TOP;
-            y += Math.max(0, Math.floor((room - columnHeight(sections)) / 2));
-          }
-
-          return (
-            <div key={columnIndex}>
-              {sections.map(section => {
-                const headerY = y;
-                y += SECTION_HEADER_H;
-
-                const body = section.rows.map(row => {
-                  const rowY = y;
-                  y += rowHeight(row);
-
-                  if (row.kind === 'check') {
-                    const checked = GameOptions[row.key] as boolean;
-
-                    const dim =
-                      (row.needsPostProcessing === true &&
-                        !GameOptions.postProcessing) ||
-                      (row.needsWsadMovement === true &&
-                        !GameOptions.wsadMovement) ||
-                      (row.needsTier === true &&
-                        GameOptions.lightingQuality === 0) ||
-                      (row.needsStyle !== undefined &&
-                        !renderingStyle()?.[row.needsStyle]);
-
-                    return (
-                      <div
-                        key={row.key}
-                        style={dim ? { opacity: 0.4 } : undefined}
-                      >
-                        {}
-                        <MuSpriteFrame
-                          file="op2_ch.OZT"
-                          y={checked ? CHECK_SIZE : 0}
-                          width={CHECK_SIZE}
-                          height={CHECK_SIZE}
-                          style={{
-                            position: 'absolute',
-                            left: x,
-                            top: rowY,
-                            cursor: 'pointer',
-                            pointerEvents: 'auto',
-                          }}
-                          onClick={uiClick(() => set(row.key, !checked))}
-                        />
-                        <span
-                          className="options-label options-clickable"
-                          style={{ left: x + 24, top: rowY + 4 }}
-                          onClick={uiClick(() => set(row.key, !checked))}
-                        >
-                          {t(row.labelKey)}
-                        </span>
-                      </div>
-                    );
-                  }
-
-                  if (row.kind === 'key') {
-                    const active = capturing === row.action;
-
-                    return (
-                      <div key={row.action}>
-                        <span
-                          className="options-label"
-                          style={{ left: x, top: rowY + 4 }}
-                        >
-                          {t(row.labelKey)}
-                        </span>
-                        <div
-                          className={`options-keybox${active ? ' is-active' : ''}`}
-                          style={{
-                            left: x + COLUMN_WIDTH - KEY_BOX_WIDTH,
-                            top: rowY,
-                            width: KEY_BOX_WIDTH,
-                            height: KEY_BOX_HEIGHT,
-                          }}
-                          title={t('options.keyHint')}
-                          onClick={uiClick(() =>
-                            setCapturing(active ? null : row.action)
-                          )}
-                        >
-                          {active ? '...' : keyLabel(KeyBindings[row.action])}
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  if (row.kind === 'button') {
-                    return (
-                      <div key={row.id}>
-                        <MuButton
-                          file="op1_b_all.OZT"
-                          width={CLOSE_WIDTH}
-                          height={CLOSE_HEIGHT}
-                          frames={{ up: 0, active: 1, down: 2 }}
-                          color={TEXT_COLOR.brightGray}
-                          activeColor={TEXT_COLOR.white}
-                          label={t(row.labelKey)}
-                          onClick={() => {
-                            row.onClick();
-                            setCapturing(null);
-                          }}
-                          style={{
-                            position: 'absolute',
-                            left: x + Math.floor((COLUMN_WIDTH - CLOSE_WIDTH) / 2),
-                            top: rowY,
-                          }}
-                          labelStyle={{
-                            fontSize: 11,
-                            textShadow: '1px 1px 0 rgba(0,0,0,.85)',
-                          }}
-                        />
-                      </div>
-                    );
-                  }
-
-                  if (row.kind === 'install') {
-                    const done = PwaInstall.installed;
-
-                    return (
-                      <div key={row.id}>
-                        <MuButton
-                          file="op1_b_all.OZT"
-                          width={CLOSE_WIDTH}
-                          height={CLOSE_HEIGHT}
-                          frames={{ up: 0, active: 1, down: 2 }}
-                          color={TEXT_COLOR.brightGray}
-                          activeColor={TEXT_COLOR.white}
-                          label={t(
-                            done ? 'options.appInstalled' : 'options.installApp'
-                          )}
-                          disabled={done || PwaInstall.busy}
-                          onClick={() => {
-                            setCapturing(null);
-                            void installApp().then(result => {
-                              // Nothing to spend: the browser never offered,
-                              // or took the offer back. Say where its own
-                              // install lives rather than doing nothing.
-                              if (result === 'unavailable') {
-                                setNotice('options.installHint');
-                              }
-                            });
-                          }}
-                          style={{
-                            position: 'absolute',
-                            left: x + Math.floor((COLUMN_WIDTH - CLOSE_WIDTH) / 2),
-                            top: rowY,
-                          }}
-                          labelStyle={{
-                            fontSize: 11,
-                            textShadow: '1px 1px 0 rgba(0,0,0,.85)',
-                          }}
-                        />
-                      </div>
-                    );
-                  }
-
-                  if (row.kind === 'exit') {
-                    return (
-                      <div key={row.exit}>
-                        <MuButton
-                          file="op1_b_all.OZT"
-                          width={CLOSE_WIDTH}
-                          height={CLOSE_HEIGHT}
-                          frames={{ up: 0, active: 1, down: 2 }}
-                          color={TEXT_COLOR.brightGray}
-                          activeColor={TEXT_COLOR.white}
-                          label={t(row.labelKey)}
-                          disabled={!SessionExit.available(row.exit)}
-                          onClick={() => {
-                            setCapturing(null);
-                            setConfirming(row.exit);
-                          }}
-                          style={{
-                            position: 'absolute',
-                            left: x + Math.floor((COLUMN_WIDTH - CLOSE_WIDTH) / 2),
-                            top: rowY,
-                          }}
-                          labelStyle={{
-                            fontSize: 11,
-                            textShadow: '1px 1px 0 rgba(0,0,0,.85)',
-                          }}
-                        />
-                      </div>
-                    );
-                  }
-
-                  if (row.kind === 'language') {
-                    return (
-                      <LanguageSelect
-                        key={row.id}
-                        left={x}
-                        top={rowY}
-                        width={COLUMN_WIDTH}
-                      />
-                    );
-                  }
-
-                  if (row.kind === 'texturePack') {
-                    return (
-                      <TexturePackSelect
-                        key={row.id}
-                        left={x}
-                        top={rowY}
-                        width={COLUMN_WIDTH}
-                      />
-                    );
-                  }
-
-                  if (row.kind === 'presets') {
-                    const active = activeTierPreset();
-                    const plateWidth = Math.floor(
-                      (COLUMN_WIDTH - PRESET_GAP * (TIER_PRESETS.length - 1)) /
-                        TIER_PRESETS.length
-                    );
-
-                    return (
-                      <div key={row.id}>
-                        <span
-                          className="options-label"
-                          style={{ left: x, top: rowY }}
-                        >
-                          {t(row.labelKey)}
-                        </span>
-                        {TIER_PRESETS.map((preset, i) => (
-                          <div
-                            key={TIER_PRESET_LABEL_KEYS[i]}
-                            className={`options-keybox options-preset${i === active ? ' is-active' : ''}`}
-                            style={{
-                              left: x + i * (plateWidth + PRESET_GAP),
-                              top: rowY + 16,
-                              width: plateWidth,
-                              height: KEY_BOX_HEIGHT,
-                            }}
-                            onClick={uiClick(() => {
-                              applyTierPreset(preset);
-                              invalidateShadowState();
-                            })}
-                          >
-                            {t(TIER_PRESET_LABEL_KEYS[i])}
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  }
-
-                  const min = row.min ?? 0;
-                  const value = Math.min(
-                    Math.max(min, GameOptions[row.key]),
-                    row.max
-                  );
-
-                  const span = row.max - min;
-                  const ratio = span === 0 ? 0 : (value - min) / span;
-
-                  const inert =
-                    (row.needsPostProcessing === true &&
-                      !GameOptions.postProcessing) ||
-                    (row.needsTier === true && GameOptions.lightingQuality === 0) ||
-                    (row.needsStyle !== undefined &&
-                      !renderingStyle()?.[row.needsStyle]) ||
-                    (row.needsCameraControl === true &&
-                      !GameOptions.cameraControl) ||
-                    (row.needsWarning !== undefined &&
-                      !GameOptions[row.needsWarning]);
-
-                  return (
-                    <div
-                      key={row.key}
-                      style={inert ? { opacity: 0.4 } : undefined}
-                    >
-                      <span
-                        className="options-label"
-                        style={{ left: x, top: rowY }}
-                      >
-                        {t(row.labelKey)}
-                      </span>
-                      {}
-                      <span
-                        className="options-label options-value"
-                        style={{ left: x, top: rowY, width: VALUE_WIDTH }}
-                      >
-                        {row.display(value)}
-                      </span>
-
-                      <div
-                        className="options-slider"
-                        style={{
-                          left: x,
-                          top: rowY + 16,
-                          width: SLIDER_WIDTH,
-                          height: SLIDER_HEIGHT,
-                        }}
-                      >
-                        <MuSpriteFrame
-                          file="op2_volume1.OZT"
-                          width={SLIDER_WIDTH}
-                          height={SLIDER_HEIGHT}
-                          style={{ position: 'absolute', left: 0, top: 0 }}
-                        />
-                        <MuSpriteFrame
-                          file="op2_volume2.OZJ"
-                          width={Math.round(GAUGE_WIDTH * ratio)}
-                          height={GAUGE_HEIGHT}
-                          style={{
-                            position: 'absolute',
-                            left: GAUGE_INSET_X,
-                            top: GAUGE_INSET_Y,
-                            backgroundRepeat: 'repeat',
-                          }}
-                        />
-                        <MuSpriteFrame
-                          file="op2_volume3.OZT"
-                          width={THUMB_SIZE}
-                          height={THUMB_SIZE}
-                          style={{
-                            position: 'absolute',
-                            left: Math.round(
-                              (SLIDER_WIDTH - THUMB_SIZE) * ratio
-                            ),
-                            top: 0,
-                            pointerEvents: 'none',
-                          }}
-                        />
-
-                        {}
-                        <input
-                          type="range"
-                          className="options-range"
-                          min={min}
-                          max={row.max}
-                          step={1}
-                          value={value}
-                          disabled={inert}
-                          onChange={e => set(row.key, Number(e.target.value))}
-                        />
-                      </div>
-                    </div>
-                  );
-                });
-
-                y += SECTION_GAP;
-
-                return (
-                  <div key={section.titleKey}>
-                    <span
-                      className="options-section"
-                      style={{ left: x, top: headerY, width: COLUMN_WIDTH }}
-                    >
-                      {t(section.titleKey)}
-                    </span>
-                    {body}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-
-        <MuButton
-          file="op1_b_all.OZT"
-          width={CLOSE_WIDTH}
-          height={CLOSE_HEIGHT}
-          frames={{ up: 0, active: 1, down: 2 }}
-          color={TEXT_COLOR.brightGray}
-          activeColor={TEXT_COLOR.white}
-          label={t('common.close')}
-          onClick={close}
+        <MuTableFrame
+          className="options-panel"
+          left={RAIL_X}
+          top={PANEL_TOP}
+          width={RAIL_WIDTH}
+          height={PANEL_BOTTOM - PANEL_TOP}
+        />
+        <div
+          className="options-rail"
           style={{
-            position: 'absolute',
-            left: Math.floor((WIN_WIDTH - CLOSE_WIDTH) / 2),
-            top: CLOSE_Y,
+            left: RAIL_X + PANEL_PAD,
+            top: PANEL_TOP + PANEL_PAD,
+            width: RAIL_WIDTH - PANEL_PAD * 2,
+            height: PANEL_BOTTOM - PANEL_TOP - PANEL_PAD * 2,
           }}
-          labelStyle={{ fontSize: 11, textShadow: '1px 1px 0 rgba(0,0,0,.85)' }}
+        >
+          <SearchField
+            width={RAIL_WIDTH - PANEL_PAD * 2}
+            value={query}
+            onChange={next => {
+              setQuery(next);
+              setHovered(null);
+              setCapturing(null);
+              if (rowsRef.current) rowsRef.current.scrollTop = 0;
+            }}
+          />
+          <PageTree active={searching ? null : page} onOpen={openPage} />
+        </div>
+
+        <MuTableFrame
+          className="options-panel"
+          left={CONTENT_X}
+          top={PANEL_TOP}
+          width={CONTENT_WIDTH}
+          height={CONTENT_BOTTOM - PANEL_TOP}
+        />
+        <div
+          className="options-page-title"
+          style={{
+            left: CONTENT_X + PANEL_PAD + 6,
+            top: PANEL_TOP + PANEL_PAD,
+            width: CONTENT_WIDTH - PANEL_PAD * 2 - DEFAULTS_WIDTH - 18,
+            height: HEADER_HEIGHT - PANEL_PAD * 2,
+          }}
+        >
+          <FitText align="left">
+            {searching ? (
+              t('options.search.results')
+            ) : (
+              <>
+                <span className="options-page-category">{t(category.labelKey)}</span>
+                {t(page.labelKey)}
+              </>
+            )}
+          </FitText>
+        </div>
+        {!searching && (optionKeys.length > 0 || isKeysPage) && (
+          <OptionsButton
+            label={t('options.defaults')}
+            width={DEFAULTS_WIDTH}
+            onClick={() => {
+              setCapturing(null);
+              setConfirmingDefaults(true);
+            }}
+            style={{
+              left: CONTENT_X + CONTENT_WIDTH - PANEL_PAD - DEFAULTS_WIDTH - 2,
+              top: PANEL_TOP + 3,
+            }}
+          />
+        )}
+
+        <div
+          ref={rowsRef}
+          className="options-rows scrollable"
+          style={{
+            left: CONTENT_X + PANEL_PAD,
+            top: ROWS_TOP,
+            width: ROWS_WIDTH,
+            height: ROWS_HEIGHT,
+          }}
+        >
+          {matches === null &&
+            sectionsOf(page).map((section, i) => (
+              <div key={section.titleKey ?? `untitled-${i}`} className="options-group">
+                {section.titleKey && (
+                  <div className="options-section">
+                    <span>{t(section.titleKey)}</span>
+                  </div>
+                )}
+                {renderRows(section.rows)}
+              </div>
+            ))}
+
+          {matches !== null &&
+            (matches.length === 0 ? (
+              <div className="options-empty">{t('options.search.none')}</div>
+            ) : (
+              matches.map(match => (
+                <div key={match.page.id} className="options-group">
+                  <div
+                    className="options-section is-link"
+                    data-no-drag="true"
+                    onClick={() => openPage(match.page)}
+                  >
+                    <span>
+                      {t(categoryOf(match.page).labelKey)} › {t(match.page.labelKey)}
+                    </span>
+                  </div>
+                  {renderRows(match.rows)}
+                </div>
+              ))
+            ))}
+        </div>
+        <ScrollBar
+          target={rowsRef}
+          windowId={WINDOW_ID}
+          left={CONTENT_X + CONTENT_WIDTH - PANEL_PAD - SCROLL_WIDTH - 2}
+          top={ROWS_TOP}
+          height={ROWS_HEIGHT}
+          contentKey={`${page.id}|${query}`}
+        />
+
+        <MuTableFrame
+          className="options-panel"
+          left={CONTENT_X}
+          top={HELP_TOP}
+          width={CONTENT_WIDTH}
+          height={HELP_HEIGHT}
+        />
+        <HelpStrip hovered={hovered} page={searching ? null : page} />
+
+        {EXITS.filter(entry => SessionExit.available(entry.exit)).map((entry, i) => (
+          <OptionsButton
+            key={entry.exit}
+            label={t(entry.labelKey)}
+            width={EXIT_WIDTH}
+            onHover={() =>
+              setHovered({ kind: 'exit', labelKey: entry.labelKey, helpKey: entry.helpKey })
+            }
+            onClick={() => {
+              setCapturing(null);
+              setConfirming(entry.exit);
+            }}
+            style={{ left: FOOTER_X + i * (EXIT_WIDTH + EXIT_GAP), top: FOOTER_Y }}
+          />
+        ))}
+        <OptionsButton
+          label={t('common.close')}
+          width={CLOSE_WIDTH}
+          onClick={() => {
+            Store.optionsEnabled = false;
+          }}
+          style={{ left: WIN_WIDTH - FOOTER_X - CLOSE_WIDTH, top: FOOTER_Y }}
         />
 
         <MuResizeGrip id={WINDOW_ID} width={WIN_WIDTH} />
       </div>
 
       {confirming && (
-        <ExitConfirm
-          kind={confirming}
+        <ConfirmBox
+          text={t(CONFIRM_TEXT[confirming])}
           onAnswer={yes => {
             setConfirming(null);
             if (yes) SessionExit.request(confirming);
@@ -1826,107 +561,17 @@ export const OptionsWindow = observer(() => {
         />
       )}
 
-      {notice && <OptionsNotice textKey={notice} onClose={() => setNotice(null)} />}
-    </div>
-  );
-});
-
-/** The same box with one button: something said, nothing asked. */
-const OptionsNotice = observer(function OptionsNotice({
-  textKey,
-  onClose,
-}: {
-  textKey: TextKey;
-  onClose: () => void;
-}) {
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter' && e.key !== 'Escape') return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      onClose();
-    };
-    document.addEventListener('keydown', onKeyDown, true);
-    return () => document.removeEventListener('keydown', onKeyDown, true);
-  }, [onClose]);
-
-  return (
-    <div className="options-exit-confirm" style={{ zIndex: WINDOW_Z_MODAL }}>
-      <MuSpriteFrame
-        file={BACK_SPRITE}
-        width={MSG_WIN_WIDTH}
-        height={MSG_WIN_HEIGHT}
-      >
-        <div className="options-exit-text">{t(textKey)}</div>
-        <MuButton
-          file={OK_SPRITE}
-          width={BTN_WIDTH}
-          height={BTN_HEIGHT}
-          frames={{ up: 0, active: 1, down: 2 }}
-          color={TEXT_COLOR.brightGray}
-          activeColor={TEXT_COLOR.white}
-          onClick={onClose}
-          style={{ position: 'absolute', left: BTN_SINGLE_X, top: BTN_Y }}
+      {confirmingDefaults && (
+        <ConfirmBox
+          text={t(isKeysPage ? 'options.confirmDefaultKeys' : 'options.confirmDefaults')}
+          onAnswer={yes => {
+            setConfirmingDefaults(false);
+            if (yes) restoreDefaults();
+          }}
         />
-      </MuSpriteFrame>
-    </div>
-  );
-});
+      )}
 
-const CONFIRM_TEXT: Record<ExitKind, TextKey> = {
-  quit: 'exit.confirmQuit',
-  servers: 'exit.confirmServers',
-  characters: 'exit.confirmCharacters',
-};
-
-/** `CMsgWin` over the option window, on the message-box art the rest use. */
-const ExitConfirm = observer(function ExitConfirm({
-  kind,
-  onAnswer,
-}: {
-  kind: ExitKind;
-  onAnswer: (yes: boolean) => void;
-}) {
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Enter' && e.key !== 'Escape') return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      onAnswer(e.key === 'Enter');
-    };
-    document.addEventListener('keydown', onKeyDown, true);
-    return () => document.removeEventListener('keydown', onKeyDown, true);
-  }, [onAnswer]);
-
-  return (
-    <div className="options-exit-confirm" style={{ zIndex: WINDOW_Z_MODAL }}>
-      <MuSpriteFrame
-        file={BACK_SPRITE}
-        width={MSG_WIN_WIDTH}
-        height={MSG_WIN_HEIGHT}
-      >
-        <div className="options-exit-text">{t(CONFIRM_TEXT[kind])}</div>
-        <MuButton
-          file={OK_SPRITE}
-          width={BTN_WIDTH}
-          height={BTN_HEIGHT}
-          frames={{ up: 0, active: 1, down: 2 }}
-          color={TEXT_COLOR.brightGray}
-          activeColor={TEXT_COLOR.white}
-          onClick={() => onAnswer(true)}
-          style={{ position: 'absolute', left: BTN_BOTH_OK_X, top: BTN_Y }}
-        />
-        <MuButton
-          file={CANCEL_SPRITE}
-          width={BTN_WIDTH}
-          height={BTN_HEIGHT}
-          frames={{ up: 0, active: 1, down: 2 }}
-          color={TEXT_COLOR.brightGray}
-          activeColor={TEXT_COLOR.white}
-          onClick={() => onAnswer(false)}
-          style={{ position: 'absolute', left: BTN_BOTH_CANCEL_X, top: BTN_Y }}
-        />
-      </MuSpriteFrame>
+      {notice && <NoticeBox text={t(notice)} onClose={() => setNotice(null)} />}
     </div>
   );
 });
