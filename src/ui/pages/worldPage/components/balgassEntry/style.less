@@ -1,0 +1,25 @@
+@import (reference) '../../../../components/muText/style.less';
+
+// The Werewolf / Gatekeeper entry box: modal like every common message box,
+// on the stage coordinates in layout.ts.
+.balgass-entry-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  z-index: 600; // WINDOW_Z_MODAL: over the windows and the sheets
+  .mu-font();
+  user-select: none;
+
+  .balgass-entry {
+    position: absolute;
+    transform-origin: top left;
+    font-size: 11px;
+  }
+
+  .balgass-entry-text {
+    position: absolute;
+    text-align: center;
+    overflow-wrap: break-word;
+    text-shadow: 1px 1px 0 #000;
+  }
+}

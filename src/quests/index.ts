@@ -23,6 +23,7 @@ import {
   showMyQuestWindow,
 } from './questLog';
 import { answerNpcDialogue, closeNpcDialogue, npcDialogueOpen, openNpcDialogue } from './npcDialogue';
+import { balgassEntryOpen, cancelBalgassEntry, talkToBalgassNpc } from './balgassEntry';
 import { questBubbleFor } from './questBubbles';
 import { legacyKillCount } from './killCounters';
 import { Store } from '../store';
@@ -77,7 +78,12 @@ class Quests {
   /** Whether any quest window (NPC dialog, list, progress, log) is up. */
   get anyWindowOpen(): boolean {
     return (
-      legacyQuestWindowOpen() || npcDialogueOpen() || questListOpen() || questProgressOpen() || myQuestWindowOpen()
+      legacyQuestWindowOpen() ||
+      npcDialogueOpen() ||
+      questListOpen() ||
+      questProgressOpen() ||
+      myQuestWindowOpen() ||
+      balgassEntryOpen()
     );
   }
 
@@ -91,7 +97,7 @@ class Quests {
     return myQuestWindowOpen();
   }
 
-  /** Running Season 6 quests, by `(number << 16) | group`. */
+  /** Running Season 6 quests, by `(group << 16) | number`. */
   get active(): readonly number[] {
     return activeQuests();
   }
@@ -156,6 +162,15 @@ class Quests {
     return true;
   }
 
+  /**
+   * An NPC click on its way to `Store.talkToNpc`: the Werewolf Guardsman and
+   * the Gatekeeper talk and open their entry box themselves
+   * (`balgassEntry.ts`). Returns true when the click was taken.
+   */
+  useNpc(npc: { netId: number; name: string; npcType: number }): boolean {
+    return talkToBalgassNpc(npc);
+  }
+
   /** `ProcessSelTextResult`: pick answer `index` of the open NPC dialogue. */
   answerNpcDialog(index: number): void {
     answerNpcDialogue(index);
@@ -173,6 +188,7 @@ class Quests {
     closeQuestList();
     closeQuestProgress();
     showMyQuestWindow(false);
+    cancelBalgassEntry();
   }
 
   /** Ask the server for every quest state again (legacy 0xA0 + S6 F6 1A). */
