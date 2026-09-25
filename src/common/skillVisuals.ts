@@ -5,7 +5,7 @@ import { lighting } from '../lighting';
 import { combat } from '../combat';
 import { weather } from '../weather';
 import { effects, type EffectHandle } from '../effects';
-import { bonePos, boneLocalPos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, type ParticleRecipe, type PointSource, type RGB } from '../effects/core';
+import { boneLocalPos, bonePos, delay, effectTexture, entityGone, entityPos, entityYaw, followEntity, fxNow, type ParticleRecipe, type PointSource, type RGB } from '../effects/core';
 import type { SpriteOptions } from '../effects/sprite';
 import type { ModelHandle, ModelOptions } from '../effects/model';
 import type { StampsHandle } from '../effects/stamps';
@@ -50,6 +50,8 @@ import { storeRef } from './storeRef';
 import { tierIndex } from './lightingQuality';
 import { TWFlags } from './terrain/consts';
 import { COMBAT_BUS, playSfx } from '../sound';
+import { earthQuake } from '../camera';
+import { warmGLTF } from './modelLoader';
 
 /**
  * Skill → visual recipe. The **consumer** of the effects layer
@@ -1056,6 +1058,8 @@ const quakeBurst: Step = (_at, c) => {
   model({ model: MODEL.earthQuake, scale: 1.5, seconds: ticks(35), life: quakeFade(35), follow: sinking(b, 35, 10) })(b, c);
   model({ model: MODEL.earthQuake2, scale: 1.5, seconds: ticks(20), life: quakeGlow(20), scrollU: QUAKE_SCROLL, follow: sinking(b, 20, 5) })(b, c);
   quakeChips(b, 11, 5, 10)(b, c);
+  // EarthQuake01 while LifeTime > 15 and a multiple of 3 (ZzzEffect.cpp:7109-7112).
+  for (let lt = 33; lt > 15; lt -= 3) delay(ticks(35 - lt), () => earthQuake((Math.floor(Math.random() * 8) - 4) * 0.1));
   const sub = Math.floor(Math.random() * 100);
   for (let i = 0; i < 5; i++) {
     const p = muRotated(b, sub + i * 72, cm(100 + Math.floor(Math.random() * 150)));
@@ -1076,6 +1080,8 @@ const earthshake: Step = (at, c) => {
   for (const [k, radius] of QUAKE_STONES) {
     after(ticks(k), (p, cc) => {
       if (Math.random() < 0.5) stoneRing(radius)(p, cc);
+      // Horse keys 8-9.5 jolt the camera every frame (GOBoid.cpp:762).
+      earthQuake((Math.floor(Math.random() * 3) - 3) * 0.7);
     })(at, c);
   }
   after(ticks(QUAKE_BURST), quakeBurst)(at, c);
@@ -1178,16 +1184,27 @@ function blueStreak(at: Vector3, c: SkillContext): void {
 }
 
 /** Party Teleport at AttackTime 6 (ZzzCharacter.cpp:4384-4389, ZzzEffect.cpp:2137-2185): the emblem, the blue curtain, the motes and the falling streaks, 10 s. */
-const partyCircle: Step = seq(
-  model({ model: MODEL.circle, texture: TEX.magicEmblem, seconds: ticks(250), life: emblemWhite }),
-  model({ model: MODEL.circle, texture: TEX.magicEmblem, colour: [0.5, 0.5, 1], seconds: ticks(250), life: emblemBlue }),
-  model({ model: MODEL.circle2, colour: [0.05, 0.05, 1], seconds: ticks(250), life: curtainLife, scrollU: QUAKE_SCROLL }),
-  particles({ recipe: FLARE_BLUE_RISE, rate: 12.5, seconds: ticks(220) }),
-  (at, c) => everyTick(210, () => {
-    if (Math.random() < 0.5) blueStreak(at, c);
-  }),
-  sfx('Sound/eSummon')
-);
+const partyCircle: Step = (at, c) => {
+  // Both circles take the caster's o->Angle, so the emblem turns with his facing.
+  const yaw = -entityYaw(c.caster);
+  seq(
+    model({ model: MODEL.circle, texture: TEX.magicEmblem, yaw, seconds: ticks(250), life: emblemWhite }),
+    model({ model: MODEL.circle, texture: TEX.magicEmblem, yaw, colour: [0.5, 0.5, 1], seconds: ticks(250), life: emblemBlue }),
+    model({ model: MODEL.circle2, yaw, colour: [0.05, 0.05, 1], seconds: ticks(250), life: curtainLife, scrollU: QUAKE_SCROLL }),
+    particles({ recipe: FLARE_BLUE_RISE, rate: 12.5, seconds: ticks(220) }),
+    (p, cc) => everyTick(210, () => {
+      if (Math.random() < 0.5) blueStreak(p, cc);
+    }),
+    sfx('Sound/eSummon')
+  )(at, c);
+};
+
+/** Party Teleport's sheets and meshes, fetched at the packet so the circle is not late on a first cast. */
+const partyCircleWarm: Step = (_at, c) => {
+  for (const t of [TEX.magicEmblem, TEX.flareBlue, TEX.flare]) void effectTexture(c.scene, t);
+  const world = storeRef().world;
+  if (world) for (const m of [MODEL.circle, MODEL.circle2]) void warmGLTF(m, world);
+};
 
 const DL_FLASH: ReadonlySet<number> = new Set([
   PlayerAction.PLAYER_SKILL_FLASH,
@@ -1212,7 +1229,8 @@ const sparkCharge: Step = (_at, c) => {
         const pitch = Math.random() * Math.PI * 2;
         const yaw = Math.random() * Math.PI * 2;
         const from = new Vector3(h.x - Math.sin(yaw) * Math.cos(pitch) * 1.2, h.y + Math.sin(pitch) * 1.2, h.z + Math.cos(yaw) * Math.cos(pitch) * 1.2);
-        effects.spawn('joint', c.scene, from, { to: hand, colour: [0.5, 0.5, 1], width: cm(10), seconds: ticks(10), segments: 10, jitter: 0.15, texture: TEX.jointThunder, textureRepeats: 2, textureScroll: 1 });
+        // JOINT_THUNDER sub3 ends where the hand is at its creation (MoveHandlers.cpp:1639).
+        effects.spawn('joint', c.scene, from, { to: h, colour: [0.5, 0.5, 1], width: cm(10), seconds: ticks(10), segments: 10, jitter: 0.15, texture: TEX.jointThunder, textureRepeats: 2, textureScroll: 1 });
       }
       effects.spawn('sprite', c.scene, h, {
         texture: TEX.shiny2,
@@ -1224,6 +1242,43 @@ const sparkCharge: Step = (_at, c) => {
       });
     }
   });
+};
+
+/** Charge ticks for a caster with no flash clip: keys 1.3 and 1.5, at 0.4 a tick halved past key 1. */
+const SPARK_CHARGE_FALLBACK: readonly number[] = [3, 4];
+/** Ticks the poll waits on a clip that never leaves the window. */
+const SPARK_CHARGE_MAX = 40;
+
+/**
+ * A charge on every tick the flash clip's key is in [1.2, 1.6) (ZzzCharacter.cpp:10514-10520): at the
+ * Dark Lord's half rate over keys 1-3, two overlapping gatherings a tick apart. The Ready sound is one
+ * channel (ZzzOpenData.cpp:4885), so the second PlayBuffer only restarts it: played once here.
+ */
+const sparkCharges: Step = (at, c) => {
+  const t0 = fxNow();
+  let seen = false;
+  let fired = 0;
+  const fire = (): void => {
+    sparkCharge(at, c);
+    if (fired++ === 0) atCaster(sfx('Sound/sDarkElecSpikeReady'), CAST_HEIGHT)(at, c);
+  };
+  const tick = (): void => {
+    if (entityGone(c.caster)) return;
+    const k = Math.round((fxNow() - t0) / TICK);
+    const m = c.caster.modelObject;
+    if (m && DL_FLASH.has(m.CurrentAction)) {
+      seen = true;
+      const f = m.actionFrame();
+      if (f >= 1.6) return;
+      if (f >= 1.2) fire();
+    } else if (seen || k > SPARK_CHARGE_FALLBACK[SPARK_CHARGE_FALLBACK.length - 1]) {
+      return;
+    } else if (SPARK_CHARGE_FALLBACK.includes(k)) {
+      fire();
+    }
+    if (k < SPARK_CHARGE_MAX) delay(TICK, tick);
+  };
+  tick();
 };
 
 /** BITMAP_FLARE_FORCE joints: 30 tails (ZzzEffectJoint.cpp:2496-2549). */
@@ -1721,15 +1776,15 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   62: { area: atCaster(earthshake, 0) },
   // 63 Party Teleport (Summon): the held hand's blue BITMAP_LIGHT after key 5.5, and at AttackTime 6
   // MODEL_CIRCLE sub2 + MODEL_CIRCLE_LIGHT sub3 for 250 ticks (ZzzCharacter.cpp:4121-4129, :4384-4389).
-  63: { area: atCaster(seq(teleportHand, after(ticks(6), partyCircle)), 0) },
+  63: { area: atCaster(seq(partyCircleWarm, teleportHand, after(ticks(6), partyCircle)), 0) },
   // 64 Add Critical (Increase Critical Damage): MODEL_DARKLORD_SKILL at weapon bone 0 (sub0) and bone 1 (sub1), Light (1,0.6,0.3).
   64: { impact: addCritical, area: addCritical },
-  // 65 Electric Spike (519): the charge at key 1.2 (BITMAP_GATHERING sub2 + SOUND_ELEC_STRIKE_READY), the five
+  // 65 Electric Spike (519): a charge every tick of keys 1.2-1.6 (BITMAP_GATHERING sub2 + SOUND_ELEC_STRIKE_READY), the five
   // FLARE_FORCE joints at 5.5 with SOUND_ELEC_STRIKE, two MODEL_DARKLORD_SKILL at the weapon on keys 7-8
   // (ZzzCharacter.cpp:4390-4404, :10509-10553). Fallback times for a caster with no clip are the keys at 0.4.
   65: {
     area: seq(
-      atFrame(DL_FLASH, 1.2, ticks(3), seq(sparkCharge, atCaster(sfx('Sound/sDarkElecSpikeReady'), CAST_HEIGHT))),
+      sparkCharges,
       atFrame(DL_FLASH, 5.5, ticks(19), sparkBolt),
       atFrame(DL_FLASH, 7, ticks(23), sparkAfterglow)
     ),

@@ -2491,9 +2491,11 @@ function playCastAnimation(caster: Entity, skill: number) {
       world: Store.world?.mapIndex,
       alternate: Math.random() < 0.5,
     };
-    const action = def
+    let action = def
       ? chooseSkillAction(def, attackPoseOf(caster), ctx)
       : PlayerAction.PLAYER_SKILL_HAND1;
+    // Others see Electric Spike from a horse as the ground flash; only the Fenrir has its own (WSclient.cpp:5261-5265).
+    if (action === PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_FLASH) action = PlayerAction.PLAYER_SKILL_FLASH;
     caster.playerAnimation.swordCount =
       (caster.playerAnimation.swordCount ?? 0) + 1;
     if (caster.playerAnimation.action === action) caster.modelObject?.restartAction();
