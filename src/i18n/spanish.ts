@@ -7,6 +7,7 @@
 import type { LanguageLayer } from './layer';
 import { SPANISH_PACK_REPAIRS } from './packRepairs';
 import { SPANISH_ITEM_NAMES } from './itemNames';
+import { SPANISH_DIALOG_PAGES } from './dialogPages';
 
 export const spanishLayer: LanguageLayer = {
   name: 'spanish',
@@ -22,6 +23,7 @@ export const spanishLayer: LanguageLayer = {
     encoding: 'windows-1252',
     repairs: SPANISH_PACK_REPAIRS,
     itemNames: SPANISH_ITEM_NAMES,
+    dialogPages: SPANISH_DIALOG_PAGES,
   },
   strings: {
     'preloader.serverSetup': 'Configurar servidor',
@@ -951,8 +953,6 @@ export const spanishLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': 'Objeto {id}',
     'quest.contribution': 'Contribución: {value}',
-    'quest.talkToStart': 'Habla con {npc} para empezar esta misión.',
-    'quest.talkToContinue': 'Habla con {npc} para continuar esta misión.',
     'quest.tracker.returnToNpc': 'Vuelve al NPC de la misión',
 
     'event.devilSquare': 'Devil Square',

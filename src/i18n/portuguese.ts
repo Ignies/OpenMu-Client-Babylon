@@ -6,6 +6,7 @@
 
 import type { LanguageLayer } from './layer';
 import { PORTUGUESE_PACK_REPAIRS } from './packRepairs';
+import { PORTUGUESE_DIALOG_PAGES } from './dialogPages';
 
 export const portugueseLayer: LanguageLayer = {
   name: 'portuguese',
@@ -20,6 +21,7 @@ export const portugueseLayer: LanguageLayer = {
     suffix: 'por',
     encoding: 'windows-1252',
     repairs: PORTUGUESE_PACK_REPAIRS,
+    dialogPages: PORTUGUESE_DIALOG_PAGES,
   },
   strings: {
     'preloader.serverSetup': 'Configurar servidor',
@@ -947,8 +949,6 @@ export const portugueseLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': 'Item {id}',
     'quest.contribution': 'Contribuição: {value}',
-    'quest.talkToStart': 'Fale com {npc} para começar esta missão.',
-    'quest.talkToContinue': 'Fale com {npc} para continuar esta missão.',
     'quest.tracker.returnToNpc': 'Volte ao NPC da missão',
 
     'event.devilSquare': 'Devil Square',

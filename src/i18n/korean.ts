@@ -924,8 +924,6 @@ export const koreanLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': '아이템 {id}',
     'quest.contribution': '기여도: {value}',
-    'quest.talkToStart': '{npc}에게 말을 걸면 이 퀘스트를 시작할 수 있습니다.',
-    'quest.talkToContinue': '{npc}에게 말을 걸면 이 퀘스트를 이어갈 수 있습니다.',
     'quest.tracker.returnToNpc': '퀘스트 NPC에게 돌아가세요',
 
     'event.devilSquare': '데빌 스퀘어',

@@ -933,8 +933,6 @@ export const thaiLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': 'ไอเทม {id}',
     'quest.contribution': 'การมีส่วนร่วม: {value}',
-    'quest.talkToStart': 'คุยกับ {npc} เพื่อเริ่มเควสต์นี้',
-    'quest.talkToContinue': 'คุยกับ {npc} เพื่อทำเควสต์นี้ต่อ',
     'quest.tracker.returnToNpc': 'กลับไปหา NPC ของเควสต์',
 
     'event.devilSquare': 'เดวิลสแควร์',

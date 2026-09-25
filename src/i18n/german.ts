@@ -953,8 +953,6 @@ export const germanLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': 'Gegenstand {id}',
     'quest.contribution': 'Beitrag: {value}',
-    'quest.talkToStart': 'Sprich mit {npc}, um diese Quest zu beginnen.',
-    'quest.talkToContinue': 'Sprich mit {npc}, um diese Quest fortzusetzen.',
     'quest.tracker.returnToNpc': 'Kehre zum Quest-NPC zurück',
 
     'event.devilSquare': 'Devil Square',

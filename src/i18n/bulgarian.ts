@@ -935,8 +935,6 @@ export const bulgarianLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': 'Предмет {id}',
     'quest.contribution': 'Принос: {value}',
-    'quest.talkToStart': 'Говори с {npc}, за да започнеш тази задача.',
-    'quest.talkToContinue': 'Говори с {npc}, за да продължиш тази задача.',
     'quest.tracker.returnToNpc': 'Върни се при NPC-то на задачата',
 
     'event.devilSquare': 'Devil Square',

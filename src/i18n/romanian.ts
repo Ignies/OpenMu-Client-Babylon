@@ -942,8 +942,6 @@ export const romanianLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': 'Obiect {id}',
     'quest.contribution': 'Contribuție: {value}',
-    'quest.talkToStart': 'Vorbește cu {npc} ca să începi această misiune.',
-    'quest.talkToContinue': 'Vorbește cu {npc} ca să continui această misiune.',
     'quest.tracker.returnToNpc': 'Întoarce-te la NPC-ul misiunii',
 
     'event.devilSquare': 'Devil Square',

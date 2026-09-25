@@ -1483,8 +1483,6 @@ export const EN_TEXT = {
   'quest.npcFallback': 'NPC {type}',
   'quest.itemFallback': 'Item {id}',
   'quest.contribution': 'Contribution: {value}',
-  'quest.talkToStart': 'Talk to {npc} to start this quest.',
-  'quest.talkToContinue': 'Talk to {npc} to continue this quest.',
   'quest.tracker.returnToNpc': 'Return to the quest NPC',
 
   // ---- events ------------------------------------------------------------

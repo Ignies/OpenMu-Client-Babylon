@@ -43,7 +43,7 @@ import {
   LegacyQuestStateListPacket,
   LegacySetQuestStateResponsePacket,
 } from '../common/packets/ServerToClientPackets';
-import type { CharacterClassNumber, ENUM_WORLD } from '../common/types';
+import type { CharacterClassNumber } from '../common/types';
 import { EventBus } from '../libs/eventBus';
 import { playUiSound } from '../libs/sfx';
 import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../libs/mu/questFiles';
@@ -769,6 +769,7 @@ EventBus.on('LegacyQuestReward', packet => {
 });
 
 EventBus.on('npcTalkStarted', () => hideLegacyQuestWindow());
+EventBus.on('heroWalked', () => closeLegacyQuestWindow());
 
 // `ReceiveQuestHistory` is only answered when asked: the original sends 0xA0
 // right after the character information. OpenMU also resends that on a bulk

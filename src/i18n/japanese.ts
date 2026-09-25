@@ -926,8 +926,6 @@ export const japaneseLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': 'アイテム {id}',
     'quest.contribution': '貢献度: {value}',
-    'quest.talkToStart': '{npc}に話しかけるとこのクエストを始められます。',
-    'quest.talkToContinue': '{npc}に話しかけるとこのクエストを続けられます。',
     'quest.tracker.returnToNpc': 'クエストNPCのところへ戻りましょう',
 
     'event.devilSquare': 'デビルスクエア',

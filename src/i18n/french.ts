@@ -941,8 +941,6 @@ export const frenchLayer: LanguageLayer = {
     'quest.npcFallback': 'PNJ {type}',
     'quest.itemFallback': 'Objet {id}',
     'quest.contribution': 'Contribution : {value}',
-    'quest.talkToStart': 'Parlez à {npc} pour commencer cette quête.',
-    'quest.talkToContinue': 'Parlez à {npc} pour continuer cette quête.',
     'quest.tracker.returnToNpc': 'Retournez voir le PNJ de la quête',
 
     'event.devilSquare': 'Devil Square',

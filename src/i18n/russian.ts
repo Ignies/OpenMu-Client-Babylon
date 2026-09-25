@@ -936,8 +936,6 @@ export const russianLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': 'Предмет {id}',
     'quest.contribution': 'Вклад: {value}',
-    'quest.talkToStart': 'Поговорите с {npc}, чтобы начать это задание.',
-    'quest.talkToContinue': 'Поговорите с {npc}, чтобы продолжить это задание.',
     'quest.tracker.returnToNpc': 'Вернитесь к NPC задания',
 
     'event.devilSquare': 'Devil Square',

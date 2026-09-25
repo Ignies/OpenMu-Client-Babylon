@@ -920,8 +920,6 @@ export const chineseLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': '物品 {id}',
     'quest.contribution': '贡献度：{value}',
-    'quest.talkToStart': '与{npc}对话即可开始这个任务。',
-    'quest.talkToContinue': '与{npc}对话即可继续这个任务。',
     'quest.tracker.returnToNpc': '返回任务NPC处',
 
     'event.devilSquare': '恶魔广场',

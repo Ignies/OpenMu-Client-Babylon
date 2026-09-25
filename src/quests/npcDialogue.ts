@@ -38,7 +38,7 @@ import {
   questWordLines,
   questWords,
 } from './questData';
-import { questKey, questSubject, selectQuest } from './questLog';
+import { offeredQuests, questKeyGroup, questKeyNumber, selectQuest } from './questLog';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -46,10 +46,8 @@ import { questKey, questSubject, selectQuest } from './questLog';
 const LAST_PAGE_RESULT = 900;
 /** The page `SetContents(999)` shows for an unknown result ("NPC dialog script error!"). */
 const ERROR_PAGE = 999;
-/** `LOWORD(dwQuestIndex) == 0x00FF`: the server refused the selected quest. */
-const STEP_GROUP_UNAVAILABLE = 0x00ff;
-/** `ND_QUEST_INDEX_MAX_COUNT`: the list holds at most twenty quests. */
-const MAX_QUEST_LIST = 20;
+/** `LOWORD(dwQuestIndex) == 0x00FF` (QuestMng.cpp:270): the server refused the selected quest. */
+const STEP_NUMBER_UNAVAILABLE = 0x00ff;
 
 /** QuestWords the list mode uses: 1501 "Select a quest.", 1502 none available, 1007 "Go back.". */
 const WORDS_SELECT_QUEST = 1501;
@@ -197,8 +195,7 @@ export function openNpcDialogue(npcNumber: number, contribution = 0): void {
 }
 
 /** `ProcessClosing`: hide, tell the server (`SendCloseNpcRequest`). */
-export function closeNpcDialogue(): void {
-  if (!state.open) return;
+function endNpcDialogue(): void {
   runInAction(() => {
     state.open = false;
     state.questListMode = false;
@@ -207,6 +204,11 @@ export function closeNpcDialogue(): void {
   });
   send(CloseNpcRequestPacket.createPacket().buffer);
   Store.dropNpcTalk();
+}
+
+export function closeNpcDialogue(): void {
+  if (!state.open) return;
+  endNpcDialogue();
   playUiSound('click');
 }
 
@@ -243,7 +245,7 @@ export function answerNpcDialogue(index: number): void {
     runInAction(() => {
       state.busy = true;
     });
-    selectQuest(answer.result >>> 16, answer.result & 0xffff);
+    selectQuest(questKeyNumber(answer.result), questKeyGroup(answer.result));
     return;
   }
 
@@ -290,12 +292,11 @@ export function answerNpcDialogue(index: number): void {
  */
 EventBus.on('AvailableQuests', packet => {
   if (!state.open) return;
-  const p = new AvailableQuestsPacket(packet);
-  const quests = p.getQuests().slice(0, MAX_QUEST_LIST);
-  const answers: NpcDialogueAnswer[] = quests.map((q, i) => {
-    const key = questKey(q.Number, q.Group);
-    return { text: `${i + 1}. [Q]${questSubject(key)}`, result: key };
-  });
+  const quests = offeredQuests(new AvailableQuestsPacket(packet));
+  const answers: NpcDialogueAnswer[] = quests.map((q, i) => ({
+    text: `${i + 1}. [Q]${q.subject}`,
+    result: q.key,
+  }));
   answers.push({
     text: `${answers.length + 1}. ${questWords(WORDS_GO_BACK) ?? t(TEXT_GO_BACK)}`,
     result: -1,
@@ -314,10 +315,10 @@ EventBus.on('AvailableQuests', packet => {
 });
 
 // The step / progress windows replace the dialogue (`CNewUISystem` shows one
-// NPC interface at a time); a refused step (group 0xFF) just re-enables the list.
+// NPC interface at a time); a refused step (step 0xFF) just re-enables the list.
 EventBus.on('QuestStepInfo', packet => {
   const p = new QuestStepInfoPacket(packet);
-  if (p.QuestGroup === STEP_GROUP_UNAVAILABLE) {
+  if (p.QuestStepNumber === STEP_NUMBER_UNAVAILABLE) {
     runInAction(() => {
       state.busy = false;
     });
@@ -326,7 +327,21 @@ EventBus.on('QuestStepInfo', packet => {
   hideNpcDialogue();
 });
 EventBus.on('QuestProgress', hideNpcDialogue);
-EventBus.on('CharacterInformation', hideNpcDialogue);
+
+// `HideAll` at the start of a talk; the talk already sent the close request.
+EventBus.on('npcTalkStarted', hideNpcDialogue);
+EventBus.on('heroWalked', () => {
+  if (state.open) endNpcDialogue();
+});
+
+// OpenMU resends the character information on a bulk stat add or a reset;
+// only a different hero closes the dialogue.
+let heroName: string | null = null;
+EventBus.on('CharacterInformation', () => {
+  if (Store.playerData.name === heroName) return;
+  heroName = Store.playerData.name;
+  hideNpcDialogue();
+});
 
 function reset(): void {
   hideNpcDialogue();

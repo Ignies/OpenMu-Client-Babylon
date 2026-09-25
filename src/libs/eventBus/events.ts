@@ -23,6 +23,8 @@ export type Events = CSEvents &
     warpCompleted: { map: ENUM_WORLD };
     /** The hero started talking to an NPC; the previous NPC's windows give way (`HideAll`). */
     npcTalkStarted: { npcType: number };
+    /** The hero sent a walk (`SendMove`): NPC windows close (`UpdateSendMoveInterface`). */
+    heroWalked: Record<string, never>;
     /** The terrain of `map` could not be loaded; the previous map is still up. */
     warpFailed: { map: ENUM_WORLD; error: unknown };
     /** The look director composed its first frame on a new map. */
