@@ -75,6 +75,12 @@ export type SkillLight = {
    */
   readonly arrow?: LightRecipe;
   /**
+   * `bodies`: named lights the effect itself places, each riding one of its bodies on every tier -
+   * the original's `AddTerrainLight` inside a model's own move (Twisting Slash's weapon copies,
+   * Rageful Blow's cracks). The row decides when; the table says what.
+   */
+  readonly bodies?: Readonly<Record<string, LightRecipe>>;
+  /**
    * The light on the Enhanced and Ultra tiers. Classic keeps the row itself,
    * the original's `AddTerrainLight`; each moment set here replaces the
    * Classic one on the graded tiers (`effectLight` sizes and tints it from
@@ -207,8 +213,18 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   39: { area: frost(5, 1.6) },
   // Nova: the original lights nothing; a fire ring of range 6 is ours.
   40: { area: flame(6, 0.8, { gain: 1.8, floorGain: 1.4, release: 0.6 }) },
-  // Twisting Slash: MODEL_SKILL_WHEEL2 range 3 (:9798).
-  41: { area: spark(3, 0.6) },
+  // Twisting Slash: each MODEL_SKILL_WHEEL2 copy lights Luminosity x 0.3 grey, range 3, under itself
+  // every tick of its 25 (MoveHandlers.cpp:2808-2812); Luminosity is 0.7-1, fading over the last 5 ticks.
+  41: { bodies: { wheel: { color: [0.3, 0.3, 0.3], range: 3, seconds: 1, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 } } },
+  // Rageful Blow: red Luminosity x (1,0,0), range 1, under the crater's EarthQuake02 (LT 20) and every
+  // EarthQuake05 / 08 glow wall (LT 40) (ZzzEffect.cpp:7147-7156, :7199-7212, :7247-7258). MODEL_WAVE's
+  // darkening light (-0.5, range 5, MoveHandlers.cpp:2601) has no equivalent: sources only add.
+  42: {
+    bodies: {
+      crater: { color: [1, 0, 0], range: 1, seconds: 0.8, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 },
+      wall: { color: [1, 0, 0], range: 1, seconds: 1.6, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 },
+    },
+  },
   // Starfall: MODEL_ARROW_IMPACT lights nothing in the original (:14596);
   // the holy wash riding the shot down is ours.
   46: { arrow: { ...holy(2, ARROW_SECONDS), release: 0.2 } },
@@ -475,6 +491,26 @@ export function lightSkillTrail(
   const recipe = lightRow(skill)?.trail;
 
   if (!recipe || tierIndex() < ULTRA_TIER) return null;
+
+  const position = { x: 0, y: 0, z: 0 };
+  follow(position);
+
+  return attach(scene, recipe, { position, follow });
+}
+
+/**
+ * Command: one of a skill's `bodies` lights, on every tier, riding `follow`. Null when the row has
+ * no such body.
+ */
+export function lightSkillBody(
+  scene: Scene,
+  skill: number,
+  body: string,
+  follow: (out: { x: number; y: number; z: number }) => void
+): LightSource | null {
+  const recipe = lightRow(skill)?.bodies?.[body];
+
+  if (!recipe) return null;
 
   const position = { x: 0, y: 0, z: 0 };
   follow(position);

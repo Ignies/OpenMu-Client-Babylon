@@ -85,7 +85,6 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   38: 'Sound/eBlastPoison_1', // Decay
   39: 'Sound/eSuddenIce_1', // Ice Storm
   40: 'Sound/eHellFire2_2', // Nova
-  41: 'Sound/sKnightSkill4', // Twisting Slash
   44: 'Sound/battlecastle/sCHaveyBlow', // Rush
   45: 'Sound/battlecastle/sCShockWave', // Javelin
   46: 'Sound/battlecastle/sCFireArrow', // Deep Impact

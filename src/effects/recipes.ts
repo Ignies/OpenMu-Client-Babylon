@@ -291,6 +291,8 @@ export const MODEL = {
   snow3: 'Skill/Snow03.glb',
   chainLightning: 'Skill/chain_lightning_ani.glb',
   flashing: 'Skill/flashing.glb',
+  /** MODEL_TAIL (tail.bmd): Rageful Blow's falling streaks. */
+  tail: 'Skill/tail.glb',
   combo: 'Skill/combo.glb',
   deathStab: 'Skill/deathsp_eff.glb',
   elfSkill: 'Skill/elf_skill.glb',

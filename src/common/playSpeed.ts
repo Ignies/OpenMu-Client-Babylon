@@ -70,6 +70,10 @@ export function playerPlaySpeed(
   if (action >= A.PLAYER_ATTACK_SWORD_RIGHT1 && action <= A.PLAYER_ATTACK_RIDE_CROSSBOW) {
     return 0.25 + f;
   }
+  // SetAttackSpeed's own lines for these three (ZzzCharacter.cpp:923-924, :1007); Rageful Blow ignores attack speed.
+  if (action === A.PLAYER_ATTACK_SKILL_WHEEL) return 0.24 + f;
+  if (action === A.PLAYER_ATTACK_ONETOONE) return 0.25 + f;
+  if (action === A.PLAYER_ATTACK_SKILL_FURY_STRIKE) return 0.38;
   if (action >= A.PLAYER_ATTACK_SKILL_SWORD1 && action < A.PLAYER_ATTACK_END) {
     return 0.3 + f;
   }

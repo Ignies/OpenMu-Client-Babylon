@@ -43,6 +43,8 @@ export interface ParticlesOptions {
   until?: () => boolean;
   /** Stream only: multiplies `rate` each frame (Nova's `(skillCount+1)×` per bone). */
   rateScale?: () => number;
+  /** Burst only: the heading an `aimed` recipe's particles leave along. */
+  heading?: Vector3;
 }
 
 const live = new LiveList();
@@ -59,7 +61,7 @@ function spawn(scene: Scene, at: Vector3, opts: ParticlesOptions): EffectHandle 
   if (opts.count) {
     tmp.copyFrom(at);
     tmp.y += height;
-    emitBurst(scene, opts.recipe, tmp, opts.count);
+    emitBurst(scene, opts.recipe, tmp, opts.count, opts.heading);
   }
   if (!opts.rate) return DEAD_HANDLE;
 

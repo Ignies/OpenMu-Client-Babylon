@@ -149,6 +149,8 @@ export interface ModelOptions {
    * of additive, and `visibility` is its `Alpha`.
    */
   cutout?: boolean;
+  /** Writes the node's Euler rotation (radians, Babylon) every frame; wins over `yaw`, `spin` and `aim`. */
+  rotate?: PointSource;
   /** The scale at `t` seconds alive; wins over `scale` and `grow` (a per-tick `o->Scale` curve). */
   scaleAt?: (t: number) => number;
   /** A 0..1 brightness at `t` seconds alive, multiplied into the fade (`BodyLight x BlendMeshLight`, clamped as GL did). */
@@ -174,6 +176,13 @@ export interface ModelOptions {
   alphaTest?: boolean;
   /** Play the clip once and hold its last authored key (the original's `Loop = false` MODEL_GROUND_STONE rising and staying up). */
   holdLast?: boolean;
+  /**
+   * Draw the GLB with its own materials, the way the world draws an item: textured and lit by the
+   * terrain light under it plus `light` (`RequestTerrainLight + o->Light`). `stamp` is copied onto
+   * every mesh's metadata (the wielded item's level and tier, so it keeps its glow). `alpha` below 1
+   * switches the solid meshes to the blended variant of the same material.
+   */
+  native?: { light: RGB; stamp?: Record<string, unknown> };
 }
 
 export interface ModelHandle extends EffectHandle {
@@ -303,6 +312,9 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   // level scales it so the silhouette saturates on a scene-referred buffer (core.ts).
   const cover = subtract ? Math.min(opts.maxCover ?? Infinity, luma(colour) * darkCardGain(scene)) : 0;
 
+  const native = opts.native;
+  const nativeLight = new Vector3(1, 1, 1);
+
   const node = new TransformNode('fxModel', scene);
   node.rotationQuaternion = opts.angle ? muAngle(opts.angle, new Quaternion()) : null;
   node.rotation.y = opts.yaw ?? 0;
@@ -336,6 +348,23 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         gltf.mesh.scaling.set(1, -1, 1);
         gltf.mesh.rotationQuaternion = (opts.flat && !opts.angle ? FLAT : UPRIGHT).clone();
         if (opts.rearAt !== undefined) reseat(node, gltf.mesh, opts.rearAt);
+        if (native) {
+          meshes = gltf.mesh.getChildMeshes(false);
+          for (const mesh of meshes) {
+            mesh.metadata ??= {};
+            if (native.stamp) Object.assign(mesh.metadata, native.stamp);
+            mesh.metadata.bodyLight = nativeLight;
+            mesh.isPickable = false;
+            mesh.alwaysSelectAsActiveMesh = true;
+            // The item materials are opaque or alpha-tested and ignore `visibility`; the blended variant takes it.
+            if (alpha < 1 && mesh.material && !mesh.metadata.brightMesh) {
+              mesh.material = getMaterial(scene, false, Material.MATERIAL_ALPHABLEND, BlendState.ALPHA_COMBINE, false, false, mesh.metadata.characterAsset === true);
+            }
+          }
+          clip = gltf.animationGroups[0] ?? null;
+          meshes.push(gltf.mesh);
+          return;
+        }
         const bodyLight = new Vector3(colour[0], colour[1], colour[2]);
         // The lighting lane's shared bright material, for a mesh whose
         // texture did not come through the GLB cache (never disposed here).
@@ -423,8 +452,13 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       source(tmp);
       node.position.set(tmp.x, tmp.y + height + rise * t, tmp.z);
       node.scaling.setAll(opts.scaleAt ? opts.scaleAt(t) * DEFAULT_SCALE : scale * lerp(1, grow, p));
-      if (spin) node.rotation.y += spin * dt;
-      if (opts.aim) {
+      if (native && world) {
+        const light = world.getTerrainLight(tmp.x, tmp.z);
+        nativeLight.set(light.x + native.light[0], light.y + native.light[1], light.z + native.light[2]);
+      }
+      if (opts.rotate) opts.rotate(node.rotation);
+      else if (spin) node.rotation.y += spin * dt;
+      if (opts.aim && !opts.rotate) {
         const dx = tmp.x - prevX;
         const dz = tmp.z - prevZ;
         if (dx * dx + dz * dz > 1e-8) node.rotation.y = Math.atan2(dx, dz) + (opts.aimYaw ?? 0);
