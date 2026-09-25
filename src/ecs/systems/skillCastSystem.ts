@@ -35,7 +35,7 @@ import { skills } from '../../skills';
 import { combat } from '../../combat';
 import { SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../combat/recipes';
 import { CONSECUTIVE_ATTACK_KEY } from '../../combat/skillMovement';
-import { castsOnSelfOnly } from '../../combat/castTargets';
+import { castsInPlace, castsOnSelfOnly } from '../../combat/castTargets';
 import type { PlayerAction } from '../../common/objects/enum';
 import type { CastContext } from '../../combat';
 
@@ -438,9 +438,11 @@ export const SkillCastSystem: ISystemFactory = world => {
         return;
       }
 
-      const area = isAreaSkill(def);
+      // Weakness / Innovation: an area cast on the hero's own tile, the selection ignored.
+      const inPlace = castsInPlace(def);
+      const area = inPlace || isAreaSkill(def);
 
-      let target: Entity | null = req.target ?? null;
+      let target: Entity | null = inPlace ? null : (req.target ?? null);
       if (
         target &&
         !(isAttackableEntity(world, target) || (isPlayer(target) && target !== hero))
@@ -475,7 +477,10 @@ export const SkillCastSystem: ISystemFactory = world => {
       const heroPos = hero.transform.pos;
       let tx: number | undefined;
       let ty: number | undefined;
-      if (target) {
+      if (inPlace) {
+        tx = heroPos.x;
+        ty = heroPos.z;
+      } else if (target) {
         tx = target.transform!.pos.x;
         ty = target.transform!.pos.z;
       } else if ((area || req.forced) && req.point) {
@@ -543,7 +548,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         hero.modelObject &&
         !hero.modelObject.ActionIterationWasFinished &&
         combat.clipHoldsFacing(hero.modelObject.CurrentAction);
-      if (target !== hero && dist > 0.01 && !heldClip) {
+      if (!inPlace && target !== hero && dist > 0.01 && !heldClip) {
         hero.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
       }
       // The stop is a packet, not just a dropped path. The server is still

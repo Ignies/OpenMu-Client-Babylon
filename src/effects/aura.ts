@@ -121,7 +121,8 @@ const DROP_FALL = 0.1;
  * Sleep (eDeBuff_Sleep): one tick in two a BITMAP_TWINTAIL_WATER sub2 (water.jpg, 32 px) 20 cm under a
  * random bone, Scale 1.0..1.62, LT 60..69, rising 2..2.9 cm a tick, light x 1/1.02 a tick
  * (MoveHandlers.cpp:2366-2370, ZzzEffectParticle.cpp:1136-1142, :5255-5270). Its Scale runs down
- * 0.026 a tick and the original draws it mirrored once it passes zero; here it shrinks to nothing.
+ * 0.026 a tick and the original draws it mirrored once it passes zero, so it shrinks away and comes back
+ * to about 0.3 of its size by the end.
  */
 const SLEEP_DROP_TICKS = 69;
 const sleepDropRecipes = new Map<string, ParticleRecipe>();
@@ -141,7 +142,12 @@ function sleepDrops(colour: RGB): ParticleRecipe {
       dir2: [0, 1, 0],
       power: (2.45 * 25) / 100,
       powerJitter: 0.15,
-      endScale: 0,
+      // |1.31 - 0.026 x 65 p| / 1.31: zero at p 0.78, 0.29 at the end.
+      sizeKeys: [
+        [0, 1],
+        [0.78, 0],
+        [1, 0.29],
+      ],
       fade: [
         [0, 1],
         [0.25, 0.76],

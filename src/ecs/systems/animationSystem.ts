@@ -62,6 +62,28 @@ const MONSTER_ONE_SHOT_ACTIONS = new Set<MonsterActionType>([
   MonsterActionType.Appear,
 ]);
 
+/** eDeBuff_Stun (61) and eDeBuff_Sleep (72) skip PlayAnimation: the body holds its frame (ZzzCharacter.cpp:2552-2555). */
+const isHeld = (buffs: ReadonlySet<number> | undefined): boolean => !!buffs && (buffs.has(61) || buffs.has(72));
+/** The rate each held clip had, given back on release. */
+const heldModels = new WeakMap<ModelObject, { action: number; ratio: number }>();
+
+/** Stops (or lets go of) the playing clip; a clip held at speed 0 keeps rendering, a paused one would not. */
+function holdClip(model: ModelObject, held: boolean): void {
+  const was = heldModels.get(model);
+  if (!held && !was) return;
+  const group = model.gltf?.animationGroups[model.CurrentAction];
+  if (!held) {
+    heldModels.delete(model);
+    if (group) group.speedRatio = was!.action === model.CurrentAction ? was!.ratio : model.speedRatio;
+    return;
+  }
+  if (!group) return;
+  if (!was || was.action !== model.CurrentAction) {
+    heldModels.set(model, { action: model.CurrentAction, ratio: group.speedRatio || model.speedRatio });
+  }
+  group.speedRatio = 0;
+}
+
 /**
  * One frame of a character that is wearing a monster's body. The action it
  * would have played is translated (`monsterClipFor`) and, since not every
@@ -455,6 +477,8 @@ export const AnimationSystem: ISystemFactory = world => {
           (isOneShotPlayerAction(action) && !entity.performing) ||
           action === PlayerAction.PLAYER_DIE1;
         playerObject.playAction(action, !oneShot);
+        const held = isHeld(entity.buffs);
+        holdClip(playerObject, held);
 
         // RenderCharacterItem rewrites the weapons' own clip every frame off
         // the character's: a bow only draws while the shot plays.
@@ -464,7 +488,7 @@ export const AnimationSystem: ISystemFactory = world => {
             entity.charAppearance,
             attrs?.isAboveZero('weaponsOnBack') ?? false,
             action,
-            playerObject.AnimationSpeed
+            held ? 0 : playerObject.AnimationSpeed
           );
         }
 
@@ -526,6 +550,7 @@ export const AnimationSystem: ISystemFactory = world => {
           modelObject.actionPlaySpeed(action) ??
           monsterPlaySpeed(monsterModelTypeOf(entity.npcType), action);
         modelObject.playAction(action, !MONSTER_ONE_SHOT_ACTIONS.has(action));
+        holdClip(modelObject, isHeld(entity.buffs));
       }
     },
   };

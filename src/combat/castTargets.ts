@@ -33,7 +33,9 @@ export type CastTarget =
   /** The selected party member, or the caster when nothing suitable is picked. */
   | 'allyOrSelf'
   /** The selected object; the cast does not happen without one. */
-  | 'enemy';
+  | 'enemy'
+  /** No target at all: an area cast on the caster's own tile, the selection ignored. */
+  | 'inPlace';
 
 /**
  * Skills the original sends with `HeroKey` no matter what is selected.
@@ -65,6 +67,18 @@ const ALLY_OR_SELF: ReadonlySet<number> = new Set([
   234, // Recovery
 ]);
 
+/**
+ * Buffs the original only sends at a live selection: Sleep reads `Buff` in the table but is refused
+ * without a target (ClassAttack.cpp:1694-1735, SkillCast.cpp:686-700).
+ */
+const ENEMY_ONLY: ReadonlySet<number> = new Set([219, 454]);
+
+/**
+ * Cast where the caster stands: Weakness / Innovation go out as `SendRequestMagicContinue` at the
+ * hero's own tile with no target key (SkillCast.cpp:722-741), with no walk towards a selection.
+ */
+const IN_PLACE: ReadonlySet<number> = new Set([221, 222, 459, 460]);
+
 // ---- 2. state + readers ----------------------------------------------------
 
 /**
@@ -74,6 +88,8 @@ const ALLY_OR_SELF: ReadonlySet<number> = new Set([
  */
 export function castTarget(def: SkillDefinition): CastTarget {
   if (SELF_ONLY.has(def.num)) return 'self';
+  if (ENEMY_ONLY.has(def.num)) return 'enemy';
+  if (IN_PLACE.has(def.num)) return 'inPlace';
   if (ALLY_OR_SELF.has(def.num)) return 'allyOrSelf';
   if (
     def.type === 'Buff' ||
@@ -91,6 +107,11 @@ export function castTarget(def: SkillDefinition): CastTarget {
 /** Whether a cast with nothing suitable selected lands on the caster. */
 export function castsOnSelf(def: SkillDefinition): boolean {
   return castTarget(def) !== 'enemy';
+}
+
+/** Whether the cast is an area cast on the caster's own tile, with no target at all. */
+export function castsInPlace(def: SkillDefinition): boolean {
+  return castTarget(def) === 'inPlace';
 }
 
 /** Whether the selection is ignored outright (`HeroKey`, always). */

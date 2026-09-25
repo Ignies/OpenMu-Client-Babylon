@@ -28,6 +28,7 @@ import {
   type RGB,
   type SheetCells,
 } from './core';
+import { clampAlpha } from './clampAlpha';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
 
@@ -144,6 +145,8 @@ function darkMaterial(scene: Scene, texture: string, cover: number): StandardMat
   mat.disableDepthWrite = true;
   mat.fogEnabled = false;
   mat.alpha = cover;
+  // A cover above 1 would leave `1 - alpha` negative on the half-float buffer.
+  clampAlpha(mat);
   let dead = false;
   mat.onDisposeObservable.addOnce(() => {
     dead = true;

@@ -18,6 +18,7 @@ import { loadMuSprite } from '../libs/mu/sprites';
 import { getMaterial, loadGLTF } from './modelLoader';
 import { BlendState } from './objects/enum';
 import { spawnParticle } from './effectParticles';
+import { clampAlpha } from '../effects/clampAlpha';
 import type { World } from '../ecs/world';
 
 const TICKS_PER_SECOND = 25;
@@ -188,6 +189,7 @@ export class TerrainDecal {
     } else if (blend === 'subtract') {
       // EnableAlphaBlendMinus (the Blind circle): black, the sheet's luminance as coverage, `setAlpha` its strength.
       this.#material.alphaMode = Constants.ALPHA_COMBINE;
+      clampAlpha(this.#material);
       this.#dark = true;
     }
 

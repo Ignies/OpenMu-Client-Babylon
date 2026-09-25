@@ -562,6 +562,8 @@ export interface ParticleRecipe {
   cells?: { w: number; h: number; count: number };
   /** Size factor at death (1 = constant). */
   endScale?: number;
+  /** Size factor keys over the life, `[progress, factor]`, in place of `endScale`. */
+  sizeKeys?: readonly (readonly [number, number])[];
   capacity?: number;
   /**
    * Additive (MU default) or standard alpha (smoke). `dark` is `EnableAlphaBlendMinus`: black with the
@@ -713,7 +715,9 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   const sj = r.sizeJitter ?? 0.25;
   ps.minSize = r.size * (1 - sj);
   ps.maxSize = r.size * (1 + sj);
-  if (r.endScale !== undefined) {
+  if (r.sizeKeys) {
+    for (const [at, f] of r.sizeKeys) ps.addSizeGradient(at, ps.minSize * f, ps.maxSize * f);
+  } else if (r.endScale !== undefined) {
     // A size gradient *replaces* minSize/maxSize (thinParticleSystem
     // `_createParticle`: `particle.size = gradient.getFactor()`), so the
     // keys must carry the real size range - `(0, 1) → (1, endScale)` was born
