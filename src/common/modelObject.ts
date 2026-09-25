@@ -37,6 +37,7 @@ import {
   getMaterial,
   getScrollVariant,
   loadGLTF,
+  setMeshFadeBlend,
 } from './modelLoader';
 import { NO_BLEND_MESH } from './blendMeshes';
 import { meshAnimationFor, type MeshAnimation } from './meshAnimation';
@@ -586,6 +587,24 @@ export class ModelObject {
     this.syncShadowEnabled();
     for (const child of this.Children) child.setAlpha(alpha);
   }
+
+  /** The opaque meshes sit on their blended twins (`setFadeAlpha`). */
+  #fadeBlend = false;
+
+  /**
+   * `setAlpha` for a body that fades in or out and must read as translucent on
+   * the way (teleport): below 1 the opaque meshes move to their blended twin,
+   * at 1 they go back. Parts attached as `Children` follow.
+   */
+  setFadeAlpha(alpha: number) {
+    this.setAlpha(alpha);
+    const blend = this.Alpha < 1;
+    if (blend !== this.#fadeBlend) {
+      this.#fadeBlend = blend;
+      for (const mesh of this._node.getChildMeshes(false)) setMeshFadeBlend(mesh, blend);
+    }
+    for (const child of this.Children) child.setFadeAlpha(alpha);
+  }
   Parent?: ModelObject;
   Children: ModelObject[] = [];
 
@@ -908,6 +927,15 @@ export class ModelObject {
     const keyDt = this._bakedKeyDt.get(this.CurrentAction) ?? 1 / 24;
     const keys = (group.to - group.from) / fps / keyDt;
     return this.actionProgress() * keys;
+  }
+
+  /** `o->AnimationFrame = frame`: jump the playing action to that BMD key. */
+  seekActionFrame(frame: number): void {
+    const group = this.gltf?.animationGroups[this.CurrentAction];
+    if (!group?.isStarted) return;
+    const fps = group.targetedAnimations[0]?.animation.framePerSecond ?? 60;
+    const keyDt = this._bakedKeyDt.get(this.CurrentAction) ?? 1 / 24;
+    group.goToFrame(Math.min(group.to, group.from + frame * keyDt * fps));
   }
 
   /** Wall-clock seconds of one iteration of an action at the current AnimationSpeed. */

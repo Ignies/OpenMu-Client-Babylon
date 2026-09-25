@@ -10,6 +10,8 @@ import { GameOptions } from '../../common/gameOptions';
 import { WALK_KEYS } from '../../common/keyBindings';
 import { aimX, aimY } from '../../camera';
 import { Commands } from '../../commands';
+import { teleportGate } from '../../common/teleportRules';
+import { teleportBusy } from './teleportSystem';
 
 const MOVE_DELAY = 0.25;
 
@@ -290,13 +292,19 @@ export const PlayerControllerSystem: ISystemFactory = world => {
         }
       }
 
-      for (const {
-        playerMoveTo,
-        transform,
-        pathfinding,
-        localPlayer,
-      } of query) {
+      for (const entity of query) {
+        const { playerMoveTo, transform, pathfinding, localPlayer } = entity;
         if (playerMoveTo.handled) continue;
+        // A walk asked for mid-teleport waits for it: the original holds the
+        // hero until he is back above 0.7 alpha (ZzzInterface.cpp:3080), and
+        // OpenMU puts him back on the target square when it answers, undoing
+        // any step taken before that.
+        if (
+          localPlayer &&
+          (teleportBusy(entity) || teleportGate.isPending(performance.now() / 1000))
+        ) {
+          continue;
+        }
 
         playerMoveTo.handled = true;
 

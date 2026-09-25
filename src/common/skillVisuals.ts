@@ -390,8 +390,6 @@ const shockRing = (colour: RGB = RGBS.gold, scale = 4): Step =>
 const bloodHit: Step = seq(hitSparks(BLOOD_CHIPS, 18), particles({ recipe: BLOOD_MIST, count: 5 }));
 const steelHit: Step = seq(hitSparks(STEEL_GLINTS, 14), flash(TEX.spark2, RGBS.steel, 0.8, 0.25));
 const wizardCast: Step = atCaster(sprite({ texture: TEX.magicCircle, colour: RGBS.energy, size: 0.5, seconds: 0.4, spin: 6, grow: 1.4 }));
-/** BITMAP_SPARK+1 (Spark03) LT 10 - the Teleport flash. */
-const teleportFlash: Step = sprite({ texture: TEX.spark3, colour: RGBS.energy, size: 1.6, seconds: ticks(10), count: 3, spread: 0.3, grow: 1.8, growFrom: 0.5 });
 /** A JOINT_THUNDER bolt from the sky onto `at` (GiganticStorm, Twister's strikes). */
 const skyBolt = (height: number, width = 0.3, seconds = ticks(20)): Step => (at, c) => {
   const top = at.clone();
@@ -1498,6 +1496,63 @@ const sparkAfterglow: Step = (_at, c) =>
     model({ ...glow, yaw: -entityYaw(c.caster) })(p, c);
   });
 
+// ---- teleport steps --------------------------------------------------------------
+
+/**
+ * BITMAP_SPARK+1 sub1 (ZzzEffectParticle.cpp:2121-2128, 6614-6617): Spark03 flung 50 cm a
+ * tick any way, Scale 6 (a 192 cm card) losing 2 a tick over its 2-tick life, drawn at the
+ * column's `LifeTime * 0.1` (ZzzEffect.cpp:6854-6871). One recipe per pair of ticks; the
+ * column's first spark is Scale 12 and stays at the bottom.
+ */
+const teleportSparks = (size: number, box: readonly [number, number, number]): readonly ParticleRecipe[] =>
+  [0.95, 0.75, 0.55, 0.35, 0.15].map(gain => ({
+    texture: TEX.spark3,
+    colour: [gain, gain, gain],
+    colourEnd: [gain, gain, gain],
+    size,
+    life: ticks(2),
+    box,
+    dir1: [-1, -1, -1],
+    dir2: [1, 1, 1],
+    power: perTick(50) * 0.75,
+    endScale: 4 / 6,
+    capacity: 96,
+  }));
+/** The column above the first spark: every 24 cm from 48 to 432 cm. */
+const TELEPORT_COLUMN = teleportSparks(cm(192), [0.02, cm(192), 0.02]);
+const TELEPORT_COLUMN_MID = cm(48 + 432) / 2;
+const TELEPORT_COLUMN_SPARKS = 17;
+const TELEPORT_BASE = teleportSparks(cm(384), [0, 0, 0]);
+/**
+ * `CreateEffect(BITMAP_SPARK + 1)` (ZzzEffect.cpp:973-976): LT 10, each tick a column of 18
+ * white sparks at 24 cm steps up to 432 cm, fading with the effect's life. The Teleport
+ * Begin at the old square and the End at the new one (ZzzEffectMagicSkill.cpp:161-179).
+ */
+const teleportColumn: Step = (at, c) => {
+  const feet = at.clone();
+  for (let i = 0; i < 10; i++) {
+    const level = i >> 1;
+    const burst = () => {
+      effects.spawn('particles', c.scene, feet, { recipe: TELEPORT_BASE[level], count: 1, height: cm(24) });
+      effects.spawn('particles', c.scene, feet, { recipe: TELEPORT_COLUMN[level], count: TELEPORT_COLUMN_SPARKS, height: TELEPORT_COLUMN_MID });
+    };
+    if (i === 0) burst();
+    else delay(i * TICK, burst);
+  }
+};
+
+/**
+ * The flash of `CreateTeleportBegin` (`moment` begin, the row's `cast`) or
+ * `CreateTeleportEnd` (end, the row's `impact`) at the feet of `entity`, as the
+ * current tier draws it. The body fade and the sounds are teleportSystem's.
+ */
+export function playTeleportFlash(scene: Scene, skill: number, entity: Entity, moment: 'begin' | 'end'): void {
+  if (!entity.transform) return;
+  const row = skillVisualFor(skill);
+  const step = moment === 'begin' ? row.cast : row.impact;
+  step?.(entityPos(entity, 0, new Vector3()), contextFor(scene, entity, null));
+}
+
 // ---- the table -------------------------------------------------------------------
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
@@ -1526,8 +1581,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 5 Flame: the renewed look - fire pillars out of molten rock around the point (effects/pillar.ts), in place
   // of the BITMAP_FLAME sub0 LT 40 tongue column the original stacked at SkillXY (ZzzCharacter.cpp:4485).
   5: { area: seq(firePillars(3, 1.4, 0.1), scorch(1.5), burn(1.2)) },
-  // 6 Teleport: cast - BITMAP_SPARK+1 LT 10 at the caster (AlphaTarget 0).
-  6: { cast: atCaster(teleportFlash, 0.6) },
+  // 6 Teleport: CreateTeleportBegin at the old square (cast) and CreateTeleportEnd at the new one (impact), BITMAP_SPARK+1 each.
+  6: { cast: teleportColumn, impact: teleportColumn },
   // 7 Ice: impact@target - MODEL_ICE sub0 + 5× MODEL_ICE_SMALL. No bolt.
   7: { impact: iceHit },
   // 8 Twister: impact@caster - MODEL_STORM LT 59, Dir(0,−10,0) (walks forward), smoke, JOINT_THUNDER from
@@ -1665,8 +1720,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       0.05
     ),
   },
-  // 15 Teleport Ally: CreateTeleportBegin(target) + CreateTeleportEnd(caster) - BITMAP_SPARK+1 at both.
-  15: { impact: seq(teleportFlash, atCaster(teleportFlash, 0.6)) },
+  // 15 Teleport Ally: CreateTeleportBegin(target) (cast) + CreateTeleportEnd(caster) (impact) - BITMAP_SPARK+1 at both.
+  15: { cast: teleportColumn, impact: teleportColumn },
   // 16 Soul Barrier: 5× CreateJoint(MODEL_SPEARSKILL sub0, width 20, white, LT 999999, MaxTails 30) - persistent,
   // so the ribbons live in BUFF_VISUALS[4] and end on MagicEffectStatus. Here only the arrival glimmer.
   16: { impact: particles({ recipe: SOUL_MOTES, count: 12, height: 0.6 }) },

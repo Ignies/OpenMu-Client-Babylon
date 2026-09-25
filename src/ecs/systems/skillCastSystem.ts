@@ -19,7 +19,15 @@ import {
   rotationByte256,
   TELEPORT,
 } from '../../common/skillCasting';
-import { TW_SAFEZONE } from '../../common/terrain/consts';
+import {
+  inSquareRange,
+  pickAllySquare,
+  teleportGate,
+  teleportRefusal,
+  TELEPORT_PREVENTING_EFFECTS,
+} from '../../common/teleportRules';
+import { beginTeleport, endTeleport, teleportBusy } from './teleportSystem';
+import { Social } from '../../social';
 import {
   isAttackableEntity,
   isAttackablePlayer,
@@ -36,7 +44,7 @@ import { combat } from '../../combat';
 import { SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../combat/recipes';
 import { CONSECUTIVE_ATTACK_KEY } from '../../combat/skillMovement';
 import { castsOnSelfOnly } from '../../combat/castTargets';
-import type { PlayerAction } from '../../common/objects/enum';
+import { PlayerAction } from '../../common/objects/enum';
 import type { CastContext } from '../../combat';
 
 /**
@@ -165,14 +173,15 @@ export const SkillCastSystem: ISystemFactory = world => {
   }
 
   /**
-   * Teleport (6) / Teleport Ally (15): the square under the cursor is the
-   * destination. The original refuses the click in silence when the square
-   * is not walkable, lies in a safe zone or is out of the skill's Distance
-   * (`AT_SKILL_TELEPORT`, ZzzInterface.cpp); OpenMU adds that the caster
-   * must stand outside a safe zone too, and Teleport Ally wants a party
-   * member as the target. The hero lands on the square as the cast goes out
-   * instead of a round trip later; the server's `MapChanged` confirms it, or
-   * puts him back on the old square when it refuses.
+   * Teleport (6): the square under the cursor, refused in silence the way the
+   * server would refuse it (`AT_SKILL_TELEPORT`, ClassAttack.cpp:1479-1549;
+   * WizardTeleportAction.cs). The original stops the hero and drops his
+   * target (NewUIMainFrameWindow.cpp:1950-1956, `SetPlayerStop` on the
+   * reply); the Begin fades him out here and teleportSystem lands him on the
+   * square without waiting for the server's late `MapChanged`.
+   *
+   * Teleport Ally (15): a party member pulled onto a free square next to the
+   * caster (ClassAttack.cpp:1407-1479).
    */
   function castTeleport(
     hero: Entity,
@@ -180,59 +189,109 @@ export const SkillCastSystem: ISystemFactory = world => {
     target: Entity | null,
     point: { x: number; y: number } | null
   ): boolean {
-    if (!point) return false;
-    const x = ~~point.x;
-    const y = ~~point.y;
+    const now = performance.now() / 1000;
     const heroPos = hero.transform!.pos;
-    const dist = Math.hypot(x - heroPos.x, y - heroPos.z);
-    const range = def.distance > 0 ? def.distance + 0.5 : DEFAULT_RANGE;
-    const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
-    if (
-      inSafeZone ||
-      dist > range ||
-      !world.isWalkable(x, y) ||
-      (world.getTerrainFlag(x, y) & TW_SAFEZONE) !== 0
-    ) {
-      return false;
-    }
+    const from = { x: Math.floor(heroPos.x), y: Math.floor(heroPos.z) };
     const ally = def.num !== TELEPORT;
-    if (ally && !(target && isPlayer(target) && target !== hero)) return false;
+    const disabled = TELEPORT_PREVENTING_EFFECTS.some(id => skills.hasBuff(id));
+    const inSafeZone = !!hero.attributeSystem?.isAboveZero('inSafeZone');
+
+    let to: { x: number; y: number } | null;
+    if (!ally) {
+      if (!point) return false;
+      to = { x: Math.floor(point.x), y: Math.floor(point.y) };
+      const refusal = teleportRefusal({
+        from,
+        to,
+        range: def.distance,
+        flag: world.getTerrainFlag(to.x, to.y),
+        heroInSafeZone: inSafeZone,
+        disabled,
+        holdingItem: !!Store.pickedItem,
+        busy: teleportGate.isPending(now) || teleportBusy(hero),
+        sinceMapChange: teleportGate.sinceMapChange(now),
+      });
+      if (refusal) return false;
+    } else {
+      if (inSafeZone || Store.pickedItem || !isPartyAlly(target, hero)) return false;
+      const mate = target!;
+      const allyPos = mate.transform!.pos;
+      if (
+        teleportBusy(mate) ||
+        mate.modelObject?.CurrentAction === PlayerAction.PLAYER_SKILL_TELEPORT ||
+        // OpenMU checks the ally's effects too (CanPlayerBeTeleported).
+        TELEPORT_PREVENTING_EFFECTS.some(id => mate.buffs?.has(id))
+      ) {
+        return false;
+      }
+      to = pickAllySquare(from, (x, y) => world.getTerrainFlag(x, y));
+      // OpenMU: the square within the skill's Range + 1 of the ally.
+      if (!to || !inSquareRange({ x: Math.floor(allyPos.x), y: Math.floor(allyPos.z) }, to, def.distance + 1)) {
+        return false;
+      }
+    }
     if (!skills.canUse(def.num)) return false;
     skills.startCooldown(def.num);
 
+    // The hero stops: no path, no swing target, no walk into a cast, no pickup.
+    world.attackTarget = null;
+    world.castApproach = null;
+    world.pickupTarget = null;
+    const pathfinding = hero.pathfinding!;
+    if (pathfinding.path && pathfinding.path.length > 0) {
+      pathfinding.path = null;
+      pathfinding.from = { x: from.x, y: from.y };
+      pathfinding.to = { x: from.x, y: from.y };
+      Store.sendWalkStop(heroPos.x, heroPos.z, hero.transform!.rot.y);
+    }
+
+    if (ally) {
+      // `to->Angle[2]` toward where it is headed, then `SetPlayerTeleport(tc)`.
+      const allyTransform = target!.transform!;
+      const adx = to.x - allyTransform.pos.x;
+      const adz = to.y - allyTransform.pos.z;
+      if (adx * adx + adz * adz > 0.01) allyTransform.rot.y = Math.atan2(adz, adx) + Math.PI / 2;
+      if (target!.playerAnimation) {
+        target!.playerAnimation.action = PlayerAction.PLAYER_SKILL_TELEPORT;
+        target!.modelObject?.restartAction();
+      }
+      if (!Store.isOffline) {
+        const packet = TeleportTargetPacket.createPacket();
+        packet.TargetId = target!.netId!;
+        packet.TeleportTargetX = to.x;
+        packet.TeleportTargetY = to.y;
+        Store.sendToGS(packet.buffer);
+      }
+      // What the caster's reply would draw (`CreateTeleportEnd(so)`, WSclient.cpp:4312-4316):
+      // OpenMU names the ally as both caster and target instead, so the caster's half is drawn here.
+      endTeleport(hero, def.num, { telekinesis: true });
+      return true;
+    }
+
     // The original takes the facing before the teleport, while the hero is
     // still on the old square (`o->Angle[2] = CreateAngle2D`).
-    const dx = x - heroPos.x;
-    const dz = y - heroPos.z;
+    const dx = to.x - heroPos.x;
+    const dz = to.y - heroPos.z;
     if (dx * dx + dz * dz > 0.01) hero.transform!.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
 
     if (!Store.isOffline) {
-      if (ally) {
-        const packet = TeleportTargetPacket.createPacket();
-        packet.TargetId = target!.netId!;
-        packet.TeleportTargetX = x;
-        packet.TeleportTargetY = y;
-        Store.sendToGS(packet.buffer);
-      } else {
-        const packet = EnterGateRequestPacket.createPacket();
-        packet.GateNumber = 0;
-        packet.TeleportTargetX = x;
-        packet.TeleportTargetY = y;
-        Store.sendToGS(packet.buffer);
-      }
+      const packet = EnterGateRequestPacket.createPacket();
+      packet.GateNumber = 0;
+      packet.TeleportTargetX = to.x;
+      packet.TeleportTargetY = to.y;
+      Store.sendToGS(packet.buffer);
     }
-
-    if (!ally) {
-      // The swap the MapChanged handler would do, done here so the hero is
-      // not a round trip behind the click.
-      heroPos.x = x;
-      heroPos.z = y;
-      heroPos.y = world.getTerrainHeight(x, y);
-      const pathfinding = hero.pathfinding!;
-      pathfinding.from = { x, y };
-      pathfinding.to = { x, y };
-    }
+    teleportGate.begin(from, to, now);
+    beginTeleport(hero, def.num, { move: to });
     return true;
+  }
+
+  /** `IsPartyMember(SelectedCharacter)`: another player in scope who is in the hero's party. */
+  function isPartyAlly(target: Entity | null, hero: Entity): boolean {
+    if (!target || target === hero || !isPlayer(target) || !target.transform) return false;
+    // The classic scope packet pads names; the party list does not.
+    const name = target.objectNameInWorld?.trimEnd();
+    return !!name && Social.partyMembers.some(m => m.name.trimEnd() === name);
   }
 
   /** The attackable object nearest to (x, y), within `radius` tiles of it. */
@@ -426,12 +485,10 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       // ---- Teleport: a one-shot at the square under the cursor.
       if (isTeleportSkill(def.num)) {
-        const point = req.point;
-        if (castTeleport(hero, def, req.target ?? null, point)) {
-          const heroPos = hero.transform.pos;
-          hero.pathfinding.path = null;
-          const duration = playClip(hero, clipFor(hero, def));
-          playSkill(def.num, heroPos);
+        // Clip, flash and sound are the Begin / End's (teleportSystem).
+        if (castTeleport(hero, def, req.target ?? null, req.point)) {
+          const duration =
+            hero.modelObject?.getActionDuration(PlayerAction.PLAYER_SKILL_TELEPORT) ?? 0;
           cooldown = duration > 0 ? duration : FALLBACK_CAST_COOLDOWN;
         }
         world.castRequest = null;

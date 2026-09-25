@@ -61,6 +61,7 @@ import { CeilingHideSystem } from './systems/ceilingHideSystem';
 import { EmojiBubbleSystem } from './systems/emojiBubbleSystem';
 import { QuestSystem } from './systems/questSystem';
 import { PetSystem } from './systems/petSystem';
+import { TeleportSystem } from './systems/teleportSystem';
 import { GuildFlagSystem } from './systems/guildFlagSystem';
 import { perfOverlayVisible, recordSystemTime } from '../libs/perfOverlay';
 
@@ -112,6 +113,9 @@ const factories: ISystemFactory[] = [
   // After AppearanceSystem: the Blood Castle carrier's back item goes on
   // beside whatever wings the appearance just loaded.
   QuestItemSystem,
+  // After AnimationSystem (a teleport clip is up to seek) and before PetSystem
+  // (a mount reads its rider's teleport alpha): the teleport fades.
+  TeleportSystem,
   // After AnimationSystem + AppearanceSystem: mounts follow this frame's
   // rider pose, and the angel needs its owner's safe-zone flag.
   PetSystem,

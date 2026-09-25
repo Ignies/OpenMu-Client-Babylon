@@ -9,6 +9,8 @@ import type { EntityTypeFromQuery, ISystemFactory } from '../world';
 import { canAttackPlayer, isAttackableEntity } from './attackSystem';
 import { isMobileDevice } from '../../common/mobile';
 import { Commands } from '../../commands';
+import { Store } from '../../store';
+import { TELEPORT_ALLY } from '../../common/skillCasting';
 import { aimX, aimY } from '../../camera';
 import { requestPing } from '../../ping/pingNet';
 
@@ -206,10 +208,12 @@ export const PointerInputSystem: ISystemFactory = world => {
       // opens the quick command menu at the cursor instead of casting - but
       // not on one the hero may attack, where the click is the attack. Ctrl
       // is the force-cast modifier below, so it still aims past the player.
+      // Teleport Ally is cast on a party member, so it gets the click.
       if (
         ev.type === PointerEventTypes.POINTERDOWN &&
         !ev.event.ctrlKey &&
         !pvp &&
+        Store.currentSkill !== TELEPORT_ALLY &&
         Commands.openQuickOn(hovered, ev.event.clientX, ev.event.clientY)
       ) {
         return;
