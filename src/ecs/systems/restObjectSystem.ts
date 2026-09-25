@@ -1,4 +1,5 @@
 import {
+  Matrix,
   PointerEventTypes,
   Ray,
   Vector3,
@@ -9,13 +10,18 @@ import {
 } from '../../common/objects/enum';
 import { resolveGenderedAction } from '../../common/playerActionMapper';
 import { TWFlags } from '../../common/terrain/consts';
+import { devQuery } from '../../common/devSeams';
 import {
   findRestObject,
   type RestKind,
 } from '../../libs/mu/restObjects';
+import { aimX, aimY } from '../../camera';
 import { sound } from '../../sound';
 import { Store } from '../../store';
 import type { ISystemFactory } from '../world';
+
+/** `?autoPick=1`: the old full scene pick, read only for its ray. */
+const AUTO_POINTER_PICK = devQuery('autoPick') === '1';
 
 const SERVER_ACTION: Record<RestKind, ServerPlayerActionType> = {
   sit: ServerPlayerActionType.Sit,
@@ -47,7 +53,8 @@ export const RestObjectSystem: ISystemFactory = world => {
     'worldIndex'
   );
 
-  const tmpRay = new Ray(Vector3.Zero(), Vector3.Up(), 1);
+  const tmpRay = new Ray(Vector3.Zero(), Vector3.Up(), Number.MAX_VALUE);
+  const identity = Matrix.Identity();
 
   let pending: {
     x: number;
@@ -70,13 +77,25 @@ export const RestObjectSystem: ISystemFactory = world => {
     // click; the bench / wall behind it must not steal it into a lean.
     if (world.currentPointerTarget) return;
 
-    const pickInfo = scene.pick(ev.event.clientX, ev.event.clientY);
-    const ray = pickInfo.ray;
-    if (!ray) return;
+    if (AUTO_POINTER_PICK) {
+      const pickInfo = scene.pick(ev.event.clientX, ev.event.clientY);
+      const ray = pickInfo.ray;
+      if (!ray) return;
 
-    tmpRay.origin.copyFrom(ray.origin);
-    tmpRay.direction.copyFrom(ray.direction);
-    tmpRay.length = ray.length;
+      tmpRay.origin.copyFrom(ray.origin);
+      tmpRay.direction.copyFrom(ray.direction);
+      tmpRay.length = ray.length;
+    } else {
+      // The ray scene.pick would return, without its walk over the terrain.
+      // Aimed like the other picks: the crosshair under the pointer lock.
+      scene.createPickingRayToRef(
+        aimX(ev.event.clientX),
+        aimY(ev.event.clientY),
+        identity,
+        tmpRay,
+        null
+      );
+    }
 
     for (const e of propsQuery) {
       if (e.worldIndex !== world.mapIndex) continue;

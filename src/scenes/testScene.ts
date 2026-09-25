@@ -11,6 +11,10 @@ import { applySceneLook, type SceneLook } from './sceneLook';
 import { initPointLightPool } from '../common/pointLightPool';
 import { createKeyRig } from '../lighting/keyRig';
 import { createLookDirector, type LookDirector } from '../lighting/director';
+import { devQuery } from '../common/devSeams';
+
+/** `?autoPick=1`: Babylon's own scene pick on every pointer down and up. */
+const AUTO_POINTER_PICK = devQuery('autoPick') === '1';
 
 export class TestScene extends Scene {
   defaultCamera: ArcRotateCamera;
@@ -81,6 +85,10 @@ export class TestScene extends Scene {
     // cannot silently turn every mouse-move into a full-scene pick.
     this.autoClear = true;
     this.skipPointerMovePicking = true;
+    // Down and up still pick without these: with any pointer observer added,
+    // each runs a full scene pick (131k terrain triangles) that nothing reads.
+    this.skipPointerDownPicking = !AUTO_POINTER_PICK;
+    this.skipPointerUpPicking = !AUTO_POINTER_PICK;
 
     this.clearColor = new Color4(0, 0, 0, 1);
     this.ambientColor = new Color3(1, 1, 1);
