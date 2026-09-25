@@ -7,7 +7,8 @@
  * whether it is in progress) and by the entities in scope. Read by nobody:
  * it only *commands* `EmojiBubbleSystem` by attaching bubbles.
  *
- * - `exclaim`: the hero's current quest is not started and this NPC gives it.
+ * - `exclaim`: the hero's next chain quest is not started, the hero may take
+ *   it now, and this NPC gives it.
  * - `question`: the quest is in progress (bring the items back here).
  */
 import type { ENUM_WORLD } from '../common/types';
@@ -18,8 +19,9 @@ import type { QuestLayer } from './layer';
 import { questDefinition } from './questData';
 import {
   LegacyQuestState,
-  legacyQuestCurrentIndex,
+  legacyQuestAvailable,
   legacyQuestListReceived,
+  legacyQuestNextIndex,
   legacyQuestState,
 } from './legacyQuests';
 
@@ -40,13 +42,16 @@ let sinceRefresh = REFRESH_SECONDS;
 export function questBubbleFor(npcType: number): EmojiBubbleId | null {
   if (!legacyQuestListReceived()) return null;
 
-  const index = legacyQuestCurrentIndex();
+  const index = legacyQuestNextIndex();
   const quest = questDefinition(index);
-  if (!quest || quest.npcType !== npcType) return null;
+  if (!quest?.name || quest.npcType !== npcType) return null;
 
+  // OpenMU sends a quest not taken yet as `QUEST_NO` (3), not 0.
   const state = legacyQuestState(index);
-  if (state === LegacyQuestState.None) return 'exclaim';
   if (state === LegacyQuestState.InProgress) return 'question';
+  if ((state === LegacyQuestState.None || state === LegacyQuestState.No) && legacyQuestAvailable(index)) {
+    return 'exclaim';
+  }
   return null;
 }
 

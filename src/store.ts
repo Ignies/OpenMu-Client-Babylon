@@ -1970,6 +1970,8 @@ export const Store = new (class _Store {
     if (this.pendingItemMove || this.npcShop) return;
 
     this.pendingNpcTalk = npc;
+    // `ReceiveTalk` / `ReceiveQuestState` open with `HideAll`.
+    EventBus.emit('npcTalkStarted', { npcType: npc.npcType });
 
     if (this.isOffline) {
       const which = this.offlineNpcWindow++ % 3;

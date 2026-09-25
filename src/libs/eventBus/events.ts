@@ -21,6 +21,8 @@ export type Events = CSEvents &
     groundPointClicked: { point: IVector3Like };
     requestWarp: { map: ENUM_WORLD; pos?: { x: number; y: number } };
     warpCompleted: { map: ENUM_WORLD };
+    /** The hero started talking to an NPC; the previous NPC's windows give way (`HideAll`). */
+    npcTalkStarted: { npcType: number };
     /** The terrain of `map` could not be loaded; the previous map is still up. */
     warpFailed: { map: ENUM_WORLD; error: unknown };
     /** The look director composed its first frame on a new map. */
