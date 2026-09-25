@@ -41,6 +41,8 @@ const HIDDEN_TIMEOUT = 3;
 const END_FRAME = 5;
 /** A Teleport Ally self cast on a player who entered scope this recently is OpenMU's arrival marker. */
 const ARRIVAL_WINDOW = 1;
+/** After an End the position change is the jump, not a stride, for this long. */
+const JUMP_WINDOW = 0.1;
 
 const MAGIC_SOUND: Sounds = 'Sound/sMagic';
 const TELEKINESIS_SOUND: Sounds = 'Sound/eTelekinesis';
@@ -60,6 +62,8 @@ interface Fade {
   leave: boolean;
   /** CreateTeleportEnd's frame 5, applied once the clip is up. */
   seek: boolean;
+  /** `clock` at the last End: the jump to the new square. */
+  endAt: number;
 }
 
 const fades = new Map<Entity, Fade>();
@@ -80,6 +84,7 @@ function fadeOf(e: Entity): Fade {
       move: null,
       leave: false,
       seek: false,
+      endAt: -Infinity,
     };
     fades.set(e, f);
   }
@@ -141,6 +146,7 @@ export function endTeleport(
   f.skill = skill;
   f.move = null;
   f.mountAlpha = 1;
+  f.endAt = clock;
   // Re-added on the new square a moment ago: it comes in from nothing, not whole.
   if (justArrived(e)) f.alpha = 0;
   playClip(e, f, true);
@@ -169,9 +175,10 @@ export function deferLeave(e: Entity): boolean {
   return true;
 }
 
-/** The body is in any teleport state (no stride between two positions). */
+/** Fading out, gone, or on the frame of the jump: no stride between two positions. */
 export function isTeleporting(e: Entity): boolean {
-  return fades.has(e);
+  const f = fades.get(e);
+  return !!f && (f.phase !== 'end' || clock - f.endAt <= JUMP_WINDOW);
 }
 
 /** BEGIN / TELEPORT, or back but below 0.7 alpha: no new Teleport, no walk. */

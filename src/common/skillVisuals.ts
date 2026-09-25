@@ -1498,6 +1498,8 @@ const sparkAfterglow: Step = (_at, c) =>
 
 // ---- teleport steps --------------------------------------------------------------
 
+/** The cards cross the ground: fade the last 40 cm above it rather than cut them on a hard line. */
+const TELEPORT_GROUND_FADE = cm(40);
 /**
  * BITMAP_SPARK+1 sub1 (ZzzEffectParticle.cpp:2121-2128, 6614-6617): Spark03 flung 50 cm a
  * tick any way, Scale 6 (a 192 cm card) losing 2 a tick over its 2-tick life, drawn at the
@@ -1517,6 +1519,7 @@ const teleportSparks = (size: number, box: readonly [number, number, number]): r
     power: perTick(50) * 0.75,
     endScale: 4 / 6,
     capacity: 96,
+    groundFade: TELEPORT_GROUND_FADE,
   }));
 /** The column above the first spark: every 24 cm from 48 to 432 cm. */
 const TELEPORT_COLUMN = teleportSparks(cm(192), [0.02, cm(192), 0.02]);

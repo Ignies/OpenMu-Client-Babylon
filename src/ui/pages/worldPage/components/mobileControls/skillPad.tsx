@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../../i18n';
 import { Store } from '../../../../../store';
+import { Social } from '../../../../../social';
 import { skills } from '../../../../../skills';
 import { onCooldownTick } from '../../../../../skills/cooldowns';
-import { isHotbarSkill, TELEPORT } from '../../../../../common/skillCasting';
+import { isHotbarSkill, TELEPORT, TELEPORT_ALLY } from '../../../../../common/skillCasting';
 import { aimAlongFacing, teleportSquareOpen } from '../../../../../common/teleportRules';
 import { skillDefinition } from '../../../../../common/skillsDatabase';
 import { MobileSkillSlots, MOBILE_SKILL_SLOTS } from '../../../../../common/mobileSkillSlots';
@@ -52,6 +53,25 @@ function castSkill(number: number): void {
       (x, y) => teleportSquareOpen(world.getTerrainFlag(x, y))
     );
     if (to) world.castRequest = { target: null, point: { x: to.x, y: to.y }, forced: false };
+    return;
+  }
+
+  // Teleport Ally has no player to pick here: it pulls the nearest party member in sight.
+  if (number === TELEPORT_ALLY) {
+    const heroPos = hero.transform.pos;
+    let mate: (typeof world.netObjsQuery.entities)[number] | null = null;
+    let best = Infinity;
+    for (const e of world.netObjsQuery.entities) {
+      const name = e.objectNameInWorld?.trimEnd();
+      if (e.localPlayer || !e.playerAnimation || !e.transform || !name) continue;
+      if (!Social.partyMembers.some(m => m.name.trimEnd() === name)) continue;
+      const d = (e.transform.pos.x - heroPos.x) ** 2 + (e.transform.pos.z - heroPos.z) ** 2;
+      if (d < best) {
+        best = d;
+        mate = e;
+      }
+    }
+    if (mate) world.castRequest = { target: mate, point: null, forced: false };
     return;
   }
 

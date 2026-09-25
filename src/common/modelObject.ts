@@ -935,7 +935,17 @@ export class ModelObject {
     if (!group?.isStarted) return;
     const fps = group.targetedAnimations[0]?.animation.framePerSecond ?? 60;
     const keyDt = this._bakedKeyDt.get(this.CurrentAction) ?? 1 / 24;
-    group.goToFrame(Math.min(group.to, group.from + frame * keyDt * fps));
+    const target = Math.min(group.to, group.from + frame * keyDt * fps);
+    // A clip started this frame has not animated yet: Babylon measures goToFrame's jump
+    // from frame 0 rather than `from`, overshoots the end and reports the one-shot done.
+    if (!this.LoopAction && !group.animatables[0]?.animationStarted) {
+      const last = this._lastRealFrame.get(this.CurrentAction) ?? group.to;
+      group.stop(true);
+      group.start(false, group.speedRatio, Math.min(target, last), last);
+    } else {
+      group.goToFrame(target);
+    }
+    this.ActionIterationWasFinished = false;
   }
 
   /** Wall-clock seconds of one iteration of an action at the current AnimationSpeed. */
