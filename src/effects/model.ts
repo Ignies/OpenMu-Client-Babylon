@@ -184,6 +184,8 @@ export interface ModelOptions {
   scrollU?: number;
   /** Radians about the node's z axis, after the yaw (the original's `Angle[1]`, negated by the mirror). */
   roll?: number;
+  /** Radians about the node's x axis, set with `yaw` and `roll` as one Euler triple (skillVisuals `muAngle` turns an MU `Angle` into one). */
+  pitch?: number;
   /**
    * With `blendMesh`: a non-bright mesh whose sheet carries alpha is alpha-tested and blended
    * (`EnableAlphaTest`, ZzzBMD.cpp RenderMesh `Components == 4`) instead of opaque.
@@ -350,6 +352,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   node.rotationQuaternion = opts.angle ? muAngle(opts.angle, new Quaternion()) : null;
   node.rotation.y = opts.yaw ?? 0;
   node.rotation.z = opts.roll ?? 0;
+  node.rotation.x = opts.pitch ?? 0;
   node.scaling.setAll(scale);
   if (world) node.setParent(world.mapParent);
   source(tmp);

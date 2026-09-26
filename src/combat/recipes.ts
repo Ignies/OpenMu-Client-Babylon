@@ -218,6 +218,10 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   515: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Increase Critical Damage Str2
   517: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Increase Critical Damage Str3
   75: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Add Skill (Brand of Skill)
+  // Iron Defense is newer than the reference, which has no clip for it: the Dark Lord's buff clip, not a weapon swing.
+  323: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Iron Defense (every master class)
+  521: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Iron Defense
+  524: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Iron Defense Str
 
   // --- Castle siege commands (AttackCommon, ZzzInterface.cpp:6442-6690) ----
   67: { ground: A.PLAYER_SKILL_VITALITY, ...MOUNTED_COMMAND }, // Stun

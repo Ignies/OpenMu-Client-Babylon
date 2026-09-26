@@ -587,6 +587,8 @@ export interface ParticleRecipe {
   aimed?: boolean;
   /** Additive only: fade to nothing over this many tiles above the burst's ground (groundFade.ts). */
   groundFade?: number;
+  /** With `alpha`: the peak opacity (default 1), for a sheet whose alpha is fuller than the art it stands in for. */
+  alpha?: number;
 }
 
 const systems = new Map<Scene, Map<string, ParticleSystem>>();
@@ -735,9 +737,10 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   // start / mid / end keys carry the same 1 → 0.8 → 0 curve either way.
   const c = r.colour;
   const e = r.colourEnd ?? c;
+  const peak = r.alpha ?? 1;
   const key = (rgb: RGB, k: number): Color4 =>
     r.blend === 'alpha'
-      ? new Color4(rgb[0], rgb[1], rgb[2], k)
+      ? new Color4(rgb[0], rgb[1], rgb[2], k * peak)
       : r.blend === 'dark'
         ? new Color4(0, 0, 0, Math.min(1, luma(rgb) * gain * k))
         : new Color4(rgb[0] * k * gain, rgb[1] * k * gain, rgb[2] * k * gain, 1);

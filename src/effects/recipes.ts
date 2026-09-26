@@ -150,6 +150,12 @@ export const TEX = {
   forcePillar: 'Effect/force_Pillar.OZJ',
   ghost: 'Effect/ghosteffect01.OZJ',
   ghost2: 'Effect/Ghosteffect02.OZJ',
+  /** BITMAP_FIRECRACKER (Fire04.jpg): Add Critical's weapon helices (FLARE_FORCE sub5-7). */
+  fire4: 'Effect/Fire04.OZJ',
+  /** BITMAP_2LINE_GHOST (Skill\2line_gost.jpg, the same image as this copy): Chaotic Diseier's ribbons. */
+  twoLineGhost: 'Effect/2line_gost.OZJ',
+  /** BITMAP_EXPLOTION_MONO (explotion01mono.jpg): the grey 4x4 explosion sheet. */
+  explosionMono: 'Effect/explotion01mono.OZJ',
   eye: 'Effect/eye01.OZJ',
   hole: 'Effect/hole.OZJ',
   lines: 'Effect/lines.OZJ',
@@ -296,6 +302,8 @@ export const MODEL = {
   saw: 'Skill/Saw01.glb',
   laser: 'Skill/Laser01.glb',
   darkLordSkill: 'Skill/DarkLordSkill.glb',
+  /** MODEL_DESAIR (desair.bmd): the dark bird riding Chaotic Diseier's ribbons. */
+  desair: 'Skill/desair.glb',
   darkSpirit: 'Skill/darkspirit.glb',
   darkScreamFire: 'Skill/darkfirescrem01.glb', // MODEL_DARK_SCREAM_FIRE
   darkScream: 'Skill/darkfirescrem02.glb', // MODEL_DARK_SCREAM

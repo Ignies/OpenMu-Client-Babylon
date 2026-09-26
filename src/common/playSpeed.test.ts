@@ -19,4 +19,16 @@ describe('Dark Lord clip speeds', () => {
     expect(playerPlaySpeed(PlayerAction.PLAYER_ATTACK_RIDE_TELEPORT)).toBe(0.3);
     expect(playerPlaySpeed(PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_FLASH)).toBe(0.4);
   });
+
+  it('runs the command, strike and buff clips at the original rates', () => {
+    expect(playerPlaySpeed(PlayerAction.PLAYER_SKILL_VITALITY)).toBe(0.34);
+    expect(playerPlaySpeed(PlayerAction.PLAYER_ATTACK_STRIKE)).toBe(0.25);
+    expect(playerPlaySpeed(PlayerAction.PLAYER_ATTACK_RIDE_STRIKE)).toBe(0.2);
+    expect(playerPlaySpeed(PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_MAGIC)).toBe(0.3);
+  });
+
+  it('halves the command clip after key 6 for any class', () => {
+    expect(playerFrameSpeedScale(PlayerAction.PLAYER_SKILL_VITALITY, 6, false)).toBe(1);
+    expect(playerFrameSpeedScale(PlayerAction.PLAYER_SKILL_VITALITY, 6.5, false)).toBe(0.5);
+  });
 });

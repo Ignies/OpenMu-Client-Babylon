@@ -6,6 +6,7 @@ import { MODEL } from '../effects/recipes';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 import { tierIndex } from '../common/lightingQuality';
+import { masterBase } from '../common/skillAliases';
 import { arc, effectLight, ember, flame, frost, holy, spark, tide, venom } from './recipes';
 
 /**
@@ -126,6 +127,8 @@ export type TimedLight = LightRecipe & {
   readonly side?: number;
   /** Fired by its effect through `lightSkillCue` instead of the packet, `delay` after the cue: a moment gated on the caster's clip. */
   readonly cue?: string;
+  /** Rides the caster (keeping its forward / side offset from the moment it fired) instead of staying where it started. */
+  readonly ride?: boolean;
 };
 
 /** The first lighting tier that uses a row's `enhanced` light. */
@@ -133,7 +136,7 @@ const ENHANCED_TIER = 1;
 
 /** A skill's light row as the current tier uses it. */
 function lightRow(skill: number): SkillLight | undefined {
-  const row = SKILL_LIGHTS[skill];
+  const row = SKILL_LIGHTS[skill] ?? SKILL_LIGHTS[masterBase(skill)];
   return row?.enhanced && tierIndex() >= ENHANCED_TIER ? { ...row, ...row.enhanced } : row;
 }
 
@@ -216,6 +219,39 @@ const CHAIN_LIGHTNING_LIGHT: SkillLight = {
 
 /** Teleport's column on the graded tiers: its sparks' tint, 2.16 tiles up either way, LT 10. */
 const TELEPORT_LIGHT = effectLight([0.5, 0.75, 1], 2.16, 0.4, { heightOffset: CAST_HEIGHT, release: 0.25 });
+
+/**
+ * Increase Critical Damage: the original lights nothing. On the graded tiers the orange KingS_R cards
+ * light the hands at AttackTime 15, and each buff pulse's Fire04 helices (30 cm round the hand, 16
+ * ticks) light them again, riding the body.
+ */
+const CRIT_LIGHT: SkillLight = {
+  enhanced: {
+    timed: [
+      { ...effectLight([1, 0.6, 0.3], 0.8, 10 * TICK_SECONDS, { attack: 1 * TICK_SECONDS, release: 6 * TICK_SECONDS, heightOffset: 1.1 }), delay: 14 * TICK_SECONDS, ride: true },
+      { ...effectLight([1, 0.7, 0.4], 0.6, 16 * TICK_SECONDS, { attack: 3 * TICK_SECONDS, release: 7 * TICK_SECONDS, heightOffset: 1.1, flicker: { min: 0.75, max: 1, steps: 3 } }), delay: 0, cue: 'pulse', ride: true },
+    ],
+  },
+};
+
+/**
+ * Removal Buff: the original lights nothing. On the graded tiers the six pale bands light the caster
+ * while they wind in and out (61 ticks from key 3.5, about 3 tiles round him), and the two shock
+ * rings flash wide as they leave.
+ */
+const REMOVAL_LIGHT: SkillLight = {
+  enhanced: {
+    timed: [
+      { ...effectLight([0.95, 0.92, 1], 3, 61 * TICK_SECONDS, { attack: 10 * TICK_SECONDS, release: 12 * TICK_SECONDS, heightOffset: 1 }), delay: 0, cue: 'bands', ride: true },
+      { ...effectLight([1, 0.95, 1], 4, 12 * TICK_SECONDS, { release: 9 * TICK_SECONDS, heightOffset: 0.5 }), delay: 0, cue: 'ring' },
+    ],
+  },
+};
+
+/** Iron Defense: nothing in Classic (the original predates it); the graded tiers' steel flash lights the caster, whom it buffs. */
+const IRON_DEFENSE_LIGHT: SkillLight = {
+  enhanced: { cast: effectLight([0.85, 0.85, 0.95], 1.2, 0.6, { attack: 0.05, release: 0.4 }) },
+};
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
 export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
@@ -385,6 +421,12 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   216: {},
   230: {},
   456: {},
+  // Increase Critical Damage (511 / 515 / 517 / 522 through the aliases), Removal Buff, Iron Defense: graded tiers only.
+  64: CRIT_LIGHT,
+  72: REMOVAL_LIGHT,
+  323: IRON_DEFENSE_LIGHT,
+  521: IRON_DEFENSE_LIGHT,
+  524: IRON_DEFENSE_LIGHT,
 };
 
 /**
@@ -480,8 +522,23 @@ function fireTimed(scene: Scene, light: TimedLight, caster: Entity): void {
   const fz = -Math.cos(yaw);
   const f = light.forward ?? 0;
   const s = light.side ?? 0;
+  const dx = fx * f - fz * s;
+  const dz = fz * f + fx * s;
   const at = entityPos(caster, 0);
-  attach(scene, light, { position: { x: at.x + fx * f - fz * s, y: at.y, z: at.z + fz * f + fx * s } });
+  const position = { x: at.x + dx, y: at.y, z: at.z + dz };
+  if (!light.ride) {
+    attach(scene, light, { position });
+    return;
+  }
+  const feet = followEntity(caster, 0);
+  attach(scene, light, {
+    position,
+    follow: out => {
+      feet(out);
+      out.x += dx;
+      out.z += dz;
+    },
+  });
 }
 
 function attach(

@@ -14,6 +14,7 @@ import type { SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { playSfx, type SfxOptions, type SfxPosition } from './listener';
+import { masterBase } from '../common/skillAliases';
 
 /**
  * Player combat and skill sounds, transcribed from the original client:
@@ -236,7 +237,7 @@ const LANDING_SOUNDS: ReadonlySet<number> = new Set([214, 216, 221, 222, 458, 45
 
 export function skillSound(skill: number): Sounds | null {
   if (LANDING_SOUNDS.has(skill)) return null;
-  return SKILL_SOUNDS[skill] ?? null;
+  return SKILL_SOUNDS[skill] ?? SKILL_SOUNDS[masterBase(skill)] ?? null;
 }
 
 /** The sound of a skill in `LANDING_SOUNDS`, played when its effect lands. */

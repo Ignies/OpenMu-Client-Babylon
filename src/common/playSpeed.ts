@@ -74,6 +74,8 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_ATTACK_SKILL_WHEEL) return 0.24 + f;
   if (action === A.PLAYER_ATTACK_ONETOONE) return 0.25 + f;
   if (action === A.PLAYER_ATTACK_SKILL_FURY_STRIKE) return 0.38;
+  // Set after the loop below, over it (ZzzCharacter.cpp:1008).
+  if (action === A.PLAYER_SKILL_VITALITY) return 0.34;
   if (action >= A.PLAYER_ATTACK_SKILL_SWORD1 && action < A.PLAYER_ATTACK_END) {
     return 0.3 + f;
   }
@@ -112,6 +114,7 @@ export function playerPlaySpeed(
   if (action >= A.PLAYER_SKILL_CHAIN_LIGHTNING_UNI && action <= A.PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR) return 0.15 + magicSpeedFactor(magicSpeed);
   if (action >= A.PLAYER_SKILL_DRAIN_LIFE && action <= A.PLAYER_SKILL_DRAIN_LIFE_FENRIR) return 0.25 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_SKILL_LIGHTNING_SHOCK) return 0.35 + magicSpeedFactor(magicSpeed);
+  if (action === A.PLAYER_ATTACK_RIDE_ATTACK_MAGIC) return 0.3 + magicSpeedFactor(magicSpeed);
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {
@@ -218,12 +221,13 @@ export function playerPlaySpeed(
 
 /**
  * The per-frame slowdowns `PlayAnimation` multiplies into the table rate
- * (ZzzCharacter.cpp:2501-2517): the Dark Lord's Party Teleport holds its
- * raised hand at a tenth after key 5.5, and his Electric Spike charges at half
- * speed over keys 1-3. `frame` is the clip's `AnimationFrame`. The Electric
+ * (ZzzCharacter.cpp:2497-2517): PLAYER_SKILL_VITALITY runs at half after key 6,
+ * the Dark Lord's Party Teleport holds its raised hand at a tenth after key 5.5,
+ * and his Electric Spike charges at half speed over keys 1-3. `frame` is the clip's `AnimationFrame`. The Electric
  * Spike x0.125 a caster in the hero's party gets is not ported.
  */
 export function playerFrameSpeedScale(action: PlayerAction, frame: number, darkLord: boolean): number {
+  if (action === A.PLAYER_SKILL_VITALITY && frame > 6) return 0.5;
   if (
     (action === A.PLAYER_ATTACK_TELEPORT ||
       action === A.PLAYER_ATTACK_RIDE_TELEPORT ||
