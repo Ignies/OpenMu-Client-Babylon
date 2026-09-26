@@ -78,6 +78,7 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_SKILL_VITALITY) return 0.34;
   if (action === A.PLAYER_ATTACK_SKILL_SWORD3) return 0.27 + f; // Uppercut (ZzzCharacter.cpp:920)
   if (action === A.PLAYER_ATTACK_SKILL_SWORD5) return 0.24 + f; // Slash (ZzzCharacter.cpp:922)
+  if (action === A.PLAYER_ATTACK_RUSH) return 0.3 + f; // Crescent Moon Slash (ZzzCharacter.cpp:971)
   if (action >= A.PLAYER_ATTACK_SKILL_SWORD1 && action < A.PLAYER_ATTACK_END) {
     return 0.3 + f;
   }

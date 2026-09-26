@@ -87,10 +87,9 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   38: 'Sound/eBlastPoison_1', // Decay
   39: 'Sound/eSuddenIce_1', // Ice Storm
   40: 'Sound/eHellFire2_2', // Nova
-  44: 'Sound/battlecastle/sCHaveyBlow', // Rush
+  44: 'Sound/sKnightSkill2', // Rush (ReceiveMagic's SOUND_SKILL_SWORD2; the row plays sCHaveyBlow in Battle Castle)
   45: 'Sound/battlecastle/sCShockWave', // Javelin
   46: 'Sound/battlecastle/sCFireArrow', // Deep Impact
-  48: 'Sound/eSwellLife', // Swell Life
   52: 'Sound/ePiercing', // Penetration
   55: 'Sound/eBloodAttack', // Fire Slash
   56: 'Sound/sKnightSkill4', // Power Slash

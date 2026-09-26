@@ -72,6 +72,11 @@ export interface RingOptions {
   fadeColour?: boolean;
   /** Light multiplied by this every tick (`Light /= 1.05` is 1 / 1.05), on top of the fade. Default 1. */
   decay?: number;
+  /**
+   * A brightness at `t` seconds multiplied into `colour`, each channel clamped at 1 as the fixed-function colour
+   * was (BITMAP_MAGIC+1 sub4's `sin((60 - LT) x 0.05) + 0.5` pulse, ZzzEffect.cpp:9787-9805).
+   */
+  brightness?: (t: number) => number;
 }
 
 const live = new LiveList();
@@ -125,6 +130,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const cover = dark ? Math.min(1, luma(colour) * darkCardGain(_scene)) : 0;
   const fadeColour = opts.fadeColour === true;
   const decay = opts.decay ?? 1;
+  const brightness = opts.brightness;
   const lit: [number, number, number] = [colour[0], colour[1], colour[2]];
   let x = at.x;
   let z = at.z;
@@ -145,15 +151,18 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
       // One level over the life: the `alphaAt` keys or the tail fade, times the per-tick `decay`.
       const level = (alphaAt ? alphaAt(p) : fadeOut(p, tail)) * (decay !== 1 ? decay ** (t / TICK) : 1);
       let light: readonly [number, number, number] = colour;
+      if (brightness) {
+        const k = brightness(t);
+        for (let i = 0; i < 3; i++) lit[i] = Math.min(1, colour[i] * k);
+        light = lit;
+      }
       if (dark) decal.setAlpha(cover * level);
       else {
         // An additive decal is drawn (ONE, ONE), which drops the alpha: `alphaAt` and `fadeColour` dim the light.
         const dim = !!alphaAt || fadeColour;
         decal.setAlpha(alphaAt ? 1 : level);
         if (dim) {
-          lit[0] = colour[0] * level;
-          lit[1] = colour[1] * level;
-          lit[2] = colour[2] * level;
+          for (let i = 0; i < 3; i++) lit[i] = light[i] * level;
           light = lit;
         }
       }

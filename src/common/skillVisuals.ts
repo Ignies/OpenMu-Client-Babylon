@@ -53,6 +53,7 @@ import { playCombat, playLandingSound, SKILL_SOUNDS } from '../sound/combat';
 import type { Sounds } from '../sound/recipes';
 import { itemObjectAttribute } from './itemObjectAttribute';
 import { inHellas } from './locomotion';
+import { mountKind } from './pets';
 import { skillDefinition, type SkillDefinition } from './skillsDatabase';
 import { storeRef } from './storeRef';
 import { tierIndex } from './lightingQuality';
@@ -5494,6 +5495,702 @@ const guardGlint: Step = (_at, c) => {
   });
 };
 
+/** UseSkillWarrior's SOUND_BRANDISH_SWORD01 + rand() % 2 on the hero's own cast (SkillCast.cpp:375). */
+const heroSwing: Step = (_at, c) => {
+  if (c.caster.localPlayer) sayAt(c, Math.random() < 0.5 ? 'Sound/eSwingWeapon1' : 'Sound/eSwingWeapon2');
+};
+
+/**
+ * BITMAP_FIRE sub2, the default branch (ZzzEffectParticle.cpp:387-500, :4690-4698): Fire01's four cells over LT 24,
+ * 64 texels x Scale 1.5 = 96 cm, the scale growing by a Gravity that climbs 0.004 a tick (1.5 -> 2.7) and the card
+ * rising 12 cm, drifting under 1.6 cm a tick. Light is the spawner's, cached per level.
+ */
+const RUSH_FIRES = new Map<number, ParticleRecipe>();
+function rushFire(light: number): ParticleRecipe {
+  let r = RUSH_FIRES.get(light);
+  if (!r) {
+    r = {
+      texture: TEX.fire,
+      cells: { w: 64, h: 64, count: 4 },
+      colour: [light, light, light],
+      colourEnd: [light, light, light],
+      size: cm(64) * 1.5,
+      sizeJitter: 0,
+      life: ticks(24),
+      lifeJitter: 0,
+      endScale: 1.8,
+      box: [0, 0, 0],
+      dir1: [-1, -1, -1],
+      dir2: [1, 1, 1],
+      power: perTick(1.6),
+      powerJitter: 1,
+      gravity: 0.25,
+      capacity: 256,
+    };
+    RUSH_FIRES.set(light, r);
+  }
+  return r;
+}
+
+/**
+ * The Rush spray (ZzzCharacter.cpp:2942-2957, MoveHandlers.cpp:7193-7206): at `p` +-15 cm, four JOINT_SPARK sub0 at
+ * `Angle (150..209, 0, yaw)` (backward, pitched +-30 deg), each with a BITMAP_FIRE sub2 of Light `light`.
+ */
+function rushSpray(scene: Scene, p: Vector3, yaw: number, light: number, hd = false): void {
+  const at = new Vector3(p.x + rand(-0.15, 0.15), p.y, p.z + rand(-0.15, 0.15));
+  if (hd) {
+    rushSprayHd(scene, at, yaw, light);
+    return;
+  }
+  const fire = rushFire(light);
+  for (let i = 0; i < 4; i++) {
+    effects.spawn('particles', scene, at, { recipe: JOINT_SPARKS, count: 1, heading: sparkHeading(rand(150, 210) * DEG, yaw) });
+    effects.spawn('particles', scene, at, { recipe: fire, count: 1 });
+  }
+}
+
+/**
+ * Graded tiers: the Rush fire warmer and smaller, and lifted by its own half height: the 96 cm cards at +20 cm cut a
+ * hard line into the ground and 56 of them buried the knight's legs in one orange block.
+ */
+const RUSH_FIRE_HD: ParticleRecipe = {
+  texture: TEX.fire,
+  cells: { w: 64, h: 64, count: 4 },
+  colour: [1, 0.72, 0.42],
+  colourEnd: [0.85, 0.3, 0.08],
+  size: cm(64),
+  sizeJitter: 0.2,
+  life: ticks(20),
+  lifeJitter: 0.2,
+  endScale: 1.5,
+  box: [0.05, 0, 0.05],
+  dir1: [-0.4, 0.6, -0.4],
+  dir2: [0.4, 1, 0.4],
+  power: perTick(2),
+  powerJitter: 0.5,
+  gravity: 0.4,
+  capacity: 192,
+};
+/** Graded tiers: embers the Rush throws up and back. */
+const RUSH_EMBERS: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [1, 0.75, 0.4],
+  colourEnd: [0.9, 0.25, 0.05],
+  size: 0.05,
+  sizeJitter: 0.4,
+  life: 0.6,
+  lifeJitter: 0.4,
+  box: [0.15, 0.05, 0.15],
+  dir1: [-0.5, 0.8, -0.5],
+  dir2: [0.5, 1.6, 0.5],
+  power: 1.6,
+  powerJitter: 0.5,
+  gravity: -2,
+  capacity: 256,
+};
+/** Graded tiers: the spray at Light `light`: the sparks cool white to orange, the fires thin out with the light instead of dimming. */
+function rushSprayHd(scene: Scene, at: Vector3, yaw: number, light: number): void {
+  for (let i = 0; i < 4; i++) effects.spawn('particles', scene, at, { recipe: JOINT_SPARKS_HD, count: 1, heading: sparkHeading(rand(150, 210) * DEG, yaw) });
+  const fires = Math.round(2 * light + Math.random() * 0.5);
+  if (fires) effects.spawn('particles', scene, new Vector3(at.x, at.y + cm(32), at.z), { recipe: RUSH_FIRE_HD, count: fires });
+  if (Math.random() < light) effects.spawn('particles', scene, at, { recipe: RUSH_EMBERS, count: 2 });
+}
+
+/**
+ * MODEL_SWORD_FORCE sub0 (ZzzEffect.cpp:4531-4548, MoveHandlers.cpp:7154-7212): SwordForce.glb, one additive mesh,
+ * at the feet + 100 cm along the facing, LT 15. Move k (1-15): `Direction[1] -= 2` so it runs 10 + 2k cm; on k 1-3
+ * the scale grows 0.9 a tick and a sub1 copy stays behind (scale 3.5, LT 5, BlendMeshLight LT / 10); after that the
+ * scale falls 0.05 a tick, BlendMeshLight = Light = LT / 18 and the blade sprays sparks and fire on the ground.
+ * AddTerrainLight (1, 0.8, 0.6), range 1, every move. SOUND_BCS_RUSH is only loaded in Battle Castle (MapManager.cpp:277).
+ */
+function swordForce(c: SkillContext, skill: number, hd = false): void {
+  const caster = c.caster;
+  const yaw = entityYaw(caster);
+  const f = forwardOf(yaw);
+  const origin = entityPos(caster, 1, new Vector3());
+  const body = terrainLevel(origin.x, origin.z);
+  const t0 = fxNow();
+  // Where it is after `k` moves: the sum of 10 + 2i cm.
+  const blade = (k: number, out: Vector3): Vector3 => {
+    const d = cm(10 * k + k * (k + 1));
+    return out.set(origin.x + f.x * d, origin.y, origin.z + f.z * d);
+  };
+  const moves = (): number => 1 + (fxNow() - t0) / TICK;
+  if (storeRef().world?.mapIndex === ENUM_WORLD.WD_30BATTLECASTLE) sayAt(c, 'Sound/battlecastle/sCHaveyBlow');
+  // BodyLight (terrain + Light) x BlendMeshLight, clamped: Light and BlendMeshLight are 1, then LT / 18.
+  const level = (k: number): number => (k <= 3 ? 1 : (16 - k) / 18);
+  effects.spawn('model', c.scene, blade(1, new Vector3()), {
+    model: MODEL.swordForce,
+    seconds: ticks(14),
+    fadeTail: 0,
+    plainColour: hd,
+    follow: out => blade(moves(), out),
+    rotate: out => muAngles(out, 0, 0, yaw),
+    scaleAt: t => {
+      const k = 1 + t / TICK;
+      return k <= 3 ? 0.9 * k : 2.7 - 0.05 * (k - 3);
+    },
+    intensity: t => {
+      const l = level(Math.floor(1 + t / TICK + 1e-3));
+      return Math.min(1, (body + l) * l);
+    },
+  });
+  lighting.skillBody(c.scene, skill, 'force', out => {
+    const p = blade(Math.min(15, moves()), tmpForce);
+    out.x = p.x;
+    out.y = p.y - 1;
+    out.z = p.z;
+  });
+  if (hd) swordForceHd(c, blade, moves, yaw, level);
+  for (let k = 1; k <= 15; k++) {
+    delay(ticks(k - 1), () => {
+      const p = blade(k - 1, new Vector3());
+      if (k <= 3) {
+        // The sub1 copy left where the blade was: scale 3.5, BlendMeshLight 0.5 -> 0.1 (MoveHandlers.cpp:7200-7207).
+        effects.spawn('model', c.scene, p, {
+          model: MODEL.swordForce,
+          seconds: ticks(5),
+          scale: 3.5,
+          fadeTail: 0,
+          plainColour: hd,
+          rotate: out => muAngles(out, 0, 0, yaw),
+          intensity: t => {
+            const l = (5 - Math.floor(t / TICK + 1e-3)) / 10;
+            return Math.min(1, (body + l) * l);
+          },
+        });
+        return;
+      }
+      p.y -= 1;
+      rushSpray(c.scene, p, yaw, level(k), hd);
+    });
+  }
+}
+const tmpForce = new Vector3();
+
+/**
+ * Graded tiers, riding the sword force: a warm glow on the blade that dims with its BlendMeshLight, a scorch streak
+ * along the ground it runs over and hot chips off its leading edge.
+ */
+function swordForceHd(c: SkillContext, blade: (k: number, out: Vector3) => Vector3, moves: () => number, yaw: number, level: (k: number) => number): void {
+  const at = blade(1, new Vector3());
+  const follow: PointSource = out => blade(Math.min(15, moves()), out);
+  effects.spawn('sprite', c.scene, at, {
+    texture: TEX.flare,
+    colour: [0.9, 0.55, 0.22],
+    size: 1.6,
+    seconds: ticks(14),
+    fadeTail: 0,
+    follow,
+    intensity: p => level(Math.floor(1 + p * 14)),
+  });
+  effects.spawn('joint', c.scene, at, {
+    head: out => follow(out).set(out.x, out.y - 0.95, out.z),
+    maxTails: 12,
+    smooth: 2,
+    taper: true,
+    width: 0.7,
+    colour: [0.75, 0.38, 0.12],
+    texture: TEX.flare2,
+    seconds: ticks(20),
+    fadeTail: 0.4,
+  });
+  const f = forwardOf(yaw);
+  for (let k = 2; k <= 12; k += 2) {
+    delay(ticks(k - 1), () => {
+      const p = blade(k, new Vector3());
+      p.set(p.x + f.x * 0.3, p.y - 0.9, p.z + f.z * 0.3);
+      effects.spawn('particles', c.scene, p, { recipe: SPARK_CHIPS_HD, count: Math.round(6 * level(k)) + 1 });
+    });
+  }
+}
+
+/**
+ * Crescent Moon Slash (Rush). ReceiveMagic plays SOUND_SKILL_SWORD2 (WSclient.cpp:4502-4506, sound/combat.ts). Every
+ * tick of the charge the spray rises 20 cm over the feet (ZzzCharacter.cpp:2934-2958) until the clip passes key 5 or
+ * AttackTime reaches 15 by itself (14 ticks at base speed); that tick the sword force leaves (:4686-4689).
+ */
+const crescentMoonSlashOf = (hd: boolean): Step => (at, c) => {
+  const caster = c.caster;
+  const skill = baseSkill(currentSkill);
+  const t0 = fxNow();
+  weaponGlint(at, c);
+  heroSwing(at, c);
+  let n = 0;
+  let seen = false;
+  // Graded tiers: the charge lights the knight's feet and a hot glow gathers on the ground under him until the force leaves.
+  let charge: ReturnType<typeof lighting.skillBody> = null;
+  let glow: EffectHandle | null = null;
+  if (hd) {
+    const feet: PointSource = out => entityPos(caster, 0.1, out);
+    charge = lighting.skillBody(c.scene, skill, 'charge', out => {
+      if (entityGone(caster)) return;
+      const p = feet(tmpForce);
+      out.x = p.x;
+      out.y = p.y;
+      out.z = p.z;
+    });
+    glow = effects.spawn('sprite', c.scene, feet(new Vector3()), {
+      texture: TEX.flare,
+      colour: [1, 0.5, 0.18],
+      size: 1.8,
+      seconds: ticks(20),
+      flat: true,
+      sizeAt: p => 0.6 + 0.4 * Math.min(1, p * 2),
+      fadeTail: 0.3,
+      follow: feet,
+    });
+  }
+  const tick = (): void => {
+    if (entityGone(caster)) return;
+    const m = caster.modelObject;
+    const inClip = !!m && m.CurrentAction === PlayerAction.PLAYER_ATTACK_RUSH;
+    seen ||= inClip;
+    rushSpray(c.scene, entityPos(caster, cm(20), new Vector3()), entityYaw(caster), 1, hd);
+    if ((inClip && m!.actionFrame() > 5) || (seen && !inClip) || n >= 13) {
+      charge?.stop();
+      glow?.stop();
+      swordForce(c, skill, hd);
+      return;
+    }
+    n++;
+    delay(t0 + ticks(n) - fxNow(), tick);
+  };
+  tick();
+};
+const crescentMoonSlash = crescentMoonSlashOf(false);
+
+/** One BITMAP_JOINT_HEALING sub6 of the Impale gather: where it starts, its heading and the tick it was born. */
+interface SpearThread {
+  from: Vector3;
+  dir: Vector3;
+  born: number;
+}
+/**
+ * Impale's gather (MoveHandlers.cpp:670-690; ZzzEffectJoint.cpp:481-504, :3632-3690): MODEL__SPEAR, never drawn, sits
+ * where `Weapon[0]`'s link bone was at t4 for LT 5 and sends three JOINT_HEALING sub6 a tick at it from 100 cm out,
+ * `Angle (0..89, 0, 0..359)` (the upper half). JointEnergy01, Light (1, 1, 0.5), 5 cm, LT 12, four tails; the head
+ * goes 2 cm a tick faster each move from rest, through the point and on. From LT 10 each joint lights a Shiny02
+ * glint at the point, `(6 - |LT - 6|) x 0.15` bright and 0.4-0.75 of 32 x 64 texels.
+ */
+function spearGather(c: SkillContext, at: Vector3, hd = false): void {
+  const t0 = fxNow();
+  const tickOf = (): number => Math.floor((fxNow() - t0) / TICK + 1e-3);
+  const threads: SpearThread[] = [];
+  for (let b = 0; b < 5; b++) {
+    for (let j = 0; j < 3; j++) {
+      const dir = sparkHeading(rand(0, 90) * DEG, rand(0, 360) * DEG);
+      threads.push({ from: at.subtract(dir), dir, born: b });
+    }
+  }
+  const head = (s: SpearThread, m: number, out: Vector3): Vector3 => {
+    const d = cm(m * (m - 1));
+    return out.set(s.from.x + s.dir.x * d, s.from.y + s.dir.y * d, s.from.z + s.dir.z * d);
+  };
+  effects.spawn('joint', c.scene, Vector3.Zero(), {
+    paths: {
+      count: threads.length,
+      fill: (k, j, out) => {
+        const s = threads[k];
+        const m = tickOf() - s.born + 1;
+        if (m < 1 || m > 13) return 0;
+        head(s, Math.max(0, m - j), out);
+        return 1;
+      },
+    },
+    maxTails: 3,
+    seconds: ticks(4 + 13),
+    width: cm(5),
+    fadeTail: 0,
+    colour: [1, 1, 0.5],
+    texture: TEX.jointEnergy,
+  });
+  for (const s of threads) {
+    delay(ticks(s.born + 2), () => {
+      effects.spawn('sprite', c.scene, at, {
+        texture: TEX.shiny2,
+        size: cm(32) * rand(0.4, 0.75),
+        aspect: 2,
+        seconds: ticks(11),
+        fadeTail: 0,
+        intensity: p => (6 - Math.abs(10 - Math.floor(p * 11) - 6)) * 0.15,
+      });
+    });
+  }
+  if (hd) {
+    // Graded tiers: the point swells gold as the threads pass through it, with motes around it and its light.
+    effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: [1, 0.78, 0.4], size: 1.1, seconds: ticks(12), sizeAt: p => 0.3 + 0.7 * Math.min(1, p * 2), fadeTail: 0.4 });
+    effects.spawn('particles', c.scene, at, { recipe: IMPALE_MOTES, rate: 50, seconds: ticks(7) });
+    lighting.skillBody(c.scene, baseSkill(currentSkill), 'gather', out => {
+      out.x = at.x;
+      out.y = at.y;
+      out.z = at.z;
+    });
+  }
+}
+
+/** Graded tiers: gold motes around Impale's gathering point, and the sparks the cone throws forward. */
+const IMPALE_MOTES: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [1, 0.88, 0.5],
+  colourEnd: [1, 0.45, 0.1],
+  size: 0.06,
+  sizeJitter: 0.4,
+  life: 0.3,
+  lifeJitter: 0.3,
+  box: [0.3, 0.3, 0.3],
+  dir1: [-1, -1, -1],
+  dir2: [1, 1, 1],
+  power: 0.6,
+  capacity: 128,
+};
+const CONE_SPARKS: ParticleRecipe = {
+  ...JOINT_SPARKS,
+  colour: [1, 0.9, 0.7],
+  colourEnd: [1, 0.5, 0.15],
+  size: 0.03,
+  life: 0.35,
+  lifeJitter: 0.4,
+  box: [0.25, 0.25, 0.25],
+  dir1: [-0.25, -0.25, -0.25],
+  dir2: [0.25, 0.25, 0.25],
+  power: 7,
+  powerJitter: 0.5,
+  capacity: 256,
+};
+/** Graded tiers: the spears' comet streak and their tint, RidingSpear01's own blue-white. */
+const SPEAR_STREAK: RGB = [0.3, 0.42, 0.85];
+const SPEAR_TINT_HD: RGB = [0.38, 0.45, 0.65];
+
+/** One BITMAP_FLARE sub4 of the Impale cone: its MODEL_SPEAR emitter, the facing, the tick it was born and its `Direction[0]`. */
+interface ConeFlare {
+  emitter: Vector3;
+  yaw: number;
+  born: number;
+  phase: number;
+}
+/**
+ * RenderJoints' U for tail j is `(NumTails - j) / (MaxTails - 1)` (ZzzEffectJoint.cpp:7087-7091) while `paths` puts slot i
+ * at `1 - i / (MaxTails - 1)`: a joint still filling starts at slot `MaxTails - 1 - NumTails`, the slots before it closed on its head.
+ */
+const tailOfSlot = (i: number, numTails: number, maxTails: number): number => Math.max(0, i - (maxTails - 1 - numTails));
+/** BITMAP_FLARE sub4's life and tails (ZzzEffectJoint.cpp:1905-1914): 110, spent 2 sub-steps on the birth tick, 12 on each after. */
+const CONE_LIFE = 110;
+const CONE_TAILS = 200;
+const coneSubSteps = (age: number): number => 2 + 12 * age;
+const CONE_TICKS = 10;
+
+/**
+ * Impale's cone (ZzzCharacter.cpp:2720-2731; EffectBehaviors.cpp:87-95; ZzzEffectJoint.cpp:1883-1921, :5570-5604):
+ * two MODEL_SPEAR emitters, never drawn, 50 cm ahead and 110 cm up for LT 10, each leaving a white BITMAP_FLARE sub4
+ * (Flare.jpg, width 50) a tick. A flare's centre walks 2 cm a sub-step along the facing while its head circles the
+ * side/up plane at `(LT + 40) x 0.65` cm (97 -> 26), 0.1 rad a sub-step; MaxTails 200 keeps its whole path.
+ */
+function spearCone(c: SkillContext, hd = false): void {
+  const caster = c.caster;
+  const yaw = entityYaw(caster);
+  const f = forwardOf(yaw);
+  const emitter = entityPos(caster, cm(110), new Vector3());
+  emitter.x += f.x * cm(50);
+  emitter.z += f.z * cm(50);
+  const t0 = fxNow();
+  const tickOf = (): number => Math.floor((fxNow() - t0) / TICK + 1e-3);
+  const flares: ConeFlare[] = [];
+  for (let k = 0; k < DRILL_EMITTER_TICKS; k++) {
+    for (let e = 0; e < 2; e++) flares.push({ emitter, yaw, born: k, phase: Math.floor(Math.random() * 360) });
+  }
+  const sx = Math.cos(yaw);
+  const sz = Math.sin(yaw);
+  const head = (d: ConeFlare, a: number, out: Vector3): Vector3 => {
+    const lifeTime = CONE_LIFE - a;
+    const r = Math.max(lifeTime + 40, 10) * 0.65;
+    const turn = (d.phase + lifeTime) * 0.1;
+    const side = cm(-Math.cos(turn) * r);
+    const walk = cm(2 * (a + 1));
+    return out.set(d.emitter.x + f.x * walk + sx * side, d.emitter.y + cm(Math.sin(turn) * r), d.emitter.z + f.z * walk + sz * side);
+  };
+  effects.spawn('joint', c.scene, Vector3.Zero(), {
+    paths: {
+      count: flares.length,
+      fill: (k, j, out) => {
+        const d = flares[k];
+        const age = tickOf() - d.born;
+        if (age < 0 || age >= CONE_TICKS) return 0;
+        const n = coneSubSteps(age);
+        head(d, Math.max(0, n - 1 - tailOfSlot(j, n, CONE_TAILS)), out);
+        return 1;
+      },
+    },
+    maxTails: CONE_TAILS - 1,
+    seconds: ticks(DRILL_EMITTER_TICKS + CONE_TICKS),
+    width: cm(50),
+    fadeTail: 0,
+    colour: RGBS.white,
+    texture: TEX.flareBig,
+  });
+  if (!hd) return;
+  // Graded tiers: sparks flung forward off the spiral while it runs, and the cone's warm light at its middle.
+  const heading = new Vector3(f.x, 0, f.z);
+  for (let k = 0; k < DRILL_EMITTER_TICKS + 2; k++) {
+    delay(ticks(k), () => {
+      if (entityGone(caster)) return;
+      const p = new Vector3(emitter.x + f.x * 0.6, emitter.y, emitter.z + f.z * 0.6);
+      effects.spawn('particles', c.scene, p, { recipe: CONE_SPARKS, count: 3, heading });
+    });
+  }
+  const mid = new Vector3(emitter.x + f.x * 1.1, emitter.y, emitter.z + f.z * 1.1);
+  lighting.skillBody(c.scene, baseSkill(currentSkill), 'cone', out => {
+    out.x = mid.x;
+    out.y = mid.y;
+    out.z = mid.z;
+  });
+}
+
+/**
+ * Impale's AttackStage (ZzzCharacter.cpp:2702-2760), `t` = AttackTime (1 at the packet): t4 the gather at the weapon's
+ * link bone, t8 the cone, t10 SOUND_RIDINGSPEAR, t13 and t14 three MODEL_SPEARSKILL each (ZzzEffect.cpp:641-646,
+ * :8683-8694): RidingSpear01 at Scale 1.5, 145 cm ahead and 110 cm up +-30 cm, drawn RENDER_BRIGHT at 0.3 grey x
+ * LT x 0.05, drifting 5 cm a tick along the facing. No light. The glint and swing only come with the mounted cast,
+ * the one UseSkillWarrior takes (SkillCast.cpp:135, :374-375).
+ */
+const impaleOf = (hd: boolean): Step => (at, c) => {
+  const caster = c.caster;
+  if (mountKind(caster.charAppearance?.pet)) {
+    weaponGlint(at, c);
+    heroSwing(at, c);
+  }
+  delay(ticks(3), () => {
+    if (!entityGone(caster)) spearGather(c, bonePos(caster, WEAPON_LINK_BONE, new Vector3(), CAST_HEIGHT), hd);
+  });
+  delay(ticks(7), () => {
+    if (!entityGone(caster)) spearCone(c, hd);
+  });
+  delay(ticks(9), () => {
+    if (!entityGone(caster)) sayAt(c, 'Sound/eRidingSpear');
+  });
+  for (const t of [13, 14]) {
+    delay(ticks(t - 1), () => {
+      if (entityGone(caster)) return;
+      const yaw = entityYaw(caster);
+      const f = forwardOf(yaw);
+      for (let i = 0; i < 3; i++) {
+        const start = entityPos(caster, cm(110) + rand(-0.3, 0.3), new Vector3());
+        start.x += f.x * cm(145) + rand(-0.3, 0.3);
+        start.z += f.z * cm(145) + rand(-0.3, 0.3);
+        const t1 = fxNow();
+        const follow: PointSource = out => {
+          const d = perTick(5) * (fxNow() - t1 + TICK);
+          return out.set(start.x + f.x * d, start.y, start.z + f.z * d);
+        };
+        effects.spawn('model', c.scene, start, {
+          model: MODEL.ridingSpear,
+          seconds: ticks(20),
+          scale: 1.5,
+          colour: hd ? SPEAR_TINT_HD : [0.3, 0.3, 0.3],
+          plainColour: hd,
+          fadeTail: 1,
+          rotate: out => muAngles(out, 0, 0, yaw),
+          follow,
+        });
+        if (hd) {
+          // Graded tiers: each spear draws a short blue-white streak behind it.
+          effects.spawn('joint', c.scene, start, {
+            head: follow,
+            maxTails: 6,
+            taper: true,
+            width: 0.3,
+            colour: SPEAR_STREAK,
+            texture: TEX.flare2,
+            seconds: ticks(16),
+            fadeTail: 0.6,
+          });
+        }
+      }
+      if (hd && t === 13) {
+        // Graded tiers: the thrust lands as a blue-white flash ahead of the knight, and the spears carry their light.
+        const tip = entityPos(caster, cm(110), new Vector3());
+        tip.x += f.x * cm(145);
+        tip.z += f.z * cm(145);
+        effects.spawn('sprite', c.scene, tip, { texture: TEX.flare, colour: [0.4, 0.5, 0.85], size: 1.1, seconds: ticks(6), grow: 1.4, fadeTail: 0.7 });
+        const t1 = fxNow();
+        lighting.skillBody(c.scene, baseSkill(currentSkill), 'spears', out => {
+          const d = perTick(5) * (fxNow() - t1 + TICK);
+          out.x = tip.x + f.x * d;
+          out.y = tip.y;
+          out.z = tip.z + f.z * d;
+        });
+      }
+    });
+  }
+};
+const impale = impaleOf(false);
+
+/** JOINT_SPIRIT sub2's life, tails and speed (ZzzEffectJoint.cpp:668-679, :3935-3945): 21 moves, Velocity 50 then +5 a move. */
+const SPIRIT_MOVES = 21;
+const spiritReach = (m: number): number => cm(50 * m + 2.5 * m * (m - 1));
+/** One BITMAP_FLARE sub2 of the Swell Life column: its spot under the feet, LifeTime and first `Direction[2]`. */
+interface RisingFlare {
+  x: number;
+  z: number;
+  life: number;
+  rise: number;
+}
+/** Swell Life casts a caster has pending: a packet restarts `AttackTime`, so only the latest one bursts. */
+const swellLifePending = new WeakMap<Entity, number>();
+
+/**
+ * The Swell Life burst (ZzzCharacter.cpp:4190-4213), from the caster + 100 cm:
+ * - 36 JOINT_SPIRIT sub2 at `Angle (-10, 0, i x 10)`: JointSpirit01, width 60, three tails, Light 0.5 then x 1/1.2 a
+ *   move once LT < 10. Each move the head draws a flare01 BITMAP_LIGHT of scale `4 + (20 - LT) / 5`, (1, 0.5, 0.1)
+ *   while LT >= 10 and the joint's own grey after (ZzzEffectJoint.cpp:3895-3947).
+ * - At LT 19 each spawns a BITMAP_FLARE sub2 +-100 cm around, 100 cm under the feet: Flare.jpg, white, width 40, 20
+ *   tails, LT 25-74, still until LT 25, then up `Direction[2] + 5` a tick from 35-54 (ZzzEffectJoint.cpp:1786-1798, :5455-5462).
+ * - Joints 0 and 20 put a BITMAP_MAGIC+1 sub4 at the feet: Magic_Ground2 2-4 tiles across, turned 0 and -200 deg,
+ *   LT 40, (1, 0.5, 0.1) x `sin((60 - LT) x 0.05) + 0.5`, the last four ticks 0.8..0.2 (ZzzEffect.cpp:1188-1195, :9787-9882).
+ */
+function swellLifeBurst(c: SkillContext, hd = false): void {
+  const caster = c.caster;
+  sayAt(c, 'Sound/eSwellLife');
+  const origin = entityPos(caster, 1, new Vector3());
+  const feet = entityPos(caster, 0, new Vector3());
+  const t0 = fxNow();
+  const moves = (): number => Math.floor((fxNow() - t0) / TICK + 1e-3) + 1;
+  const headings = Array.from({ length: 36 }, (_, i) => sparkHeading(-10 * DEG, i * 10 * DEG));
+  const spirit = (i: number, m: number, out: Vector3): Vector3 => {
+    const h = headings[i];
+    const d = spiritReach(Math.max(0, m));
+    return out.set(origin.x + h.x * d, origin.y + h.y * d, origin.z + h.z * d);
+  };
+  effects.spawn('joint', c.scene, Vector3.Zero(), {
+    paths: {
+      count: headings.length,
+      fill: (k, j, out) => {
+        const m = moves();
+        if (m > SPIRIT_MOVES) return 0;
+        spirit(k, m - j, out);
+        return hd ? (SPIRIT_SPINDLE_HD[j] ?? 0) : 1;
+      },
+    },
+    maxTails: 2,
+    seconds: ticks(SPIRIT_MOVES),
+    width: hd ? SPIRIT_WIDTH_HD : cm(60),
+    // Light x 1/1.2 a move over the last 10 of 21, drawn as a linear fade.
+    fadeTail: 10 / SPIRIT_MOVES,
+    colour: hd ? SPIRIT_TINT_HD : [0.5, 0.5, 0.5],
+    texture: TEX.jointSpirit,
+  });
+  const headSize = cm(64) * (hd ? SPIRIT_HEAD_HD : 1);
+  for (let i = 0; i < headings.length; i++) {
+    const follow: PointSource = out => spirit(i, Math.min(SPIRIT_MOVES, moves()), out);
+    effects.spawn('sprite', c.scene, origin, { texture: TEX.flare, colour: hd ? SPIRIT_GLOW_HD : [1, 0.5, 0.1], size: headSize, seconds: ticks(11), fadeTail: 0, follow, sizeAt: p => 4 + Math.floor(p * 11) / 5 });
+    delay(ticks(11), () =>
+      effects.spawn('sprite', c.scene, origin, {
+        texture: TEX.flare,
+        colour: hd ? SPIRIT_FADE_HD : [0.5, 0.5, 0.5],
+        size: headSize,
+        seconds: ticks(10),
+        fadeTail: 0,
+        follow,
+        sizeAt: p => 4 + (11 + Math.floor(p * 10)) / 5,
+        intensity: p => Math.pow(1 / 1.2, 1 + Math.floor(p * 10)),
+      })
+    );
+  }
+  const flares: RisingFlare[] = headings.map(() => ({ x: origin.x + rand(-1, 1), z: origin.z + rand(-1, 1), life: 25 + Math.floor(Math.random() * 50), rise: 35 + Math.floor(Math.random() * 20) }));
+  const floor = origin.y - 2;
+  effects.spawn('joint', c.scene, Vector3.Zero(), {
+    paths: {
+      count: flares.length,
+      fill: (k, j, out) => {
+        const fl = flares[k];
+        // Born on the joint's second move; moves once a tick from the next.
+        const age = moves() - 2;
+        if (age < 0 || age > fl.life) return 0;
+        const r = Math.min(26, Math.max(0, age - tailOfSlot(j, Math.min(20, age + 1), 20) - (fl.life - 25)));
+        out.set(fl.x, floor + cm(r * fl.rise + 2.5 * r * (r + 1)), fl.z);
+        return 1;
+      },
+    },
+    maxTails: 19,
+    seconds: ticks(2 + 75),
+    width: cm(40),
+    fadeTail: 0,
+    colour: RGBS.white,
+    texture: TEX.flareBig,
+  });
+  const pulse = (t: number): number => {
+    const lifeTime = 39 - Math.floor(t / TICK + 1e-3);
+    return lifeTime < 5 ? 1 - (5 - lifeTime) * 0.2 : Math.sin((60 - lifeTime) * 0.05) + 0.5;
+  };
+  for (const turn of [0, -200]) {
+    effects.spawn('ring', c.scene, feet, { texture: TEX.magicGround2, colour: [1, 0.5, 0.1], seconds: ticks(40), scale: rand(2, 4), spinFrom: turn, fadeTail: 0, brightness: pulse });
+  }
+  if (hd) swellLifeHd(c, origin, feet);
+}
+
+/**
+ * Graded tiers: 36 flare01 cards 2.5-5 m across summed to a yellow sheet over the whole screen and the grey spirit
+ * bands to a white disc 8 m wide; the same heads a third the size in a deeper orange, the bands narrower and warm.
+ */
+const SPIRIT_HEAD_HD = 0.3;
+const SPIRIT_GLOW_HD: RGB = [1, 0.42, 0.08];
+const SPIRIT_FADE_HD: RGB = [0.55, 0.32, 0.12];
+const SPIRIT_TINT_HD: RGB = [0.45, 0.32, 0.17];
+const SPIRIT_WIDTH_HD = cm(40);
+/** JointSpirit01 is bright up to its head end and its long edges: pinched at both ends, a band reads as a blade, not a pane. */
+const SPIRIT_SPINDLE_HD = [0.3, 1, 0.2];
+/** Graded tiers: gold motes rising with the column. */
+const SWELL_MOTES: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [1, 0.85, 0.5],
+  colourEnd: [1, 0.45, 0.1],
+  size: 0.07,
+  sizeJitter: 0.4,
+  life: 1.2,
+  lifeJitter: 0.4,
+  box: [1, 0.1, 1],
+  dir1: [-0.1, 1, -0.1],
+  dir2: [0.1, 1, 0.1],
+  power: 2.5,
+  powerJitter: 0.6,
+  gravity: 0.5,
+  capacity: 160,
+};
+/** Graded tiers: the burst's flash on the knight, the motes, and the lights of the ring, the ground marks and the column. */
+function swellLifeHd(c: SkillContext, origin: Vector3, feet: Vector3): void {
+  const skill = baseSkill(currentSkill);
+  effects.spawn('sprite', c.scene, origin, { texture: TEX.flare, colour: [1, 0.55, 0.18], size: 2.6, seconds: ticks(8), grow: 1.5, growFrom: 0.4, fadeTail: 0.7 });
+  delay(ticks(2), () => effects.spawn('particles', c.scene, feet, { recipe: SWELL_MOTES, rate: 45, seconds: ticks(45) }));
+  const at = (p: Vector3) => (out: { x: number; y: number; z: number }) => {
+    out.x = p.x;
+    out.y = p.y;
+    out.z = p.z;
+  };
+  lighting.skillBody(c.scene, skill, 'burst', at(origin));
+  lighting.skillBody(c.scene, skill, 'ground', at(feet));
+  delay(ticks(2), () => lighting.skillBody(c.scene, skill, 'column', at(feet)));
+}
+
+/**
+ * Swell Life (48, 356, 360, 363): ReceiveMagic starts PLAYER_SKILL_VITALITY with AttackTime 1 (WSclient.cpp:4800-4814).
+ * The burst fires at AttackTime 10 while the knight is still in the clip, else when AttackTime reaches 15 by itself
+ * (ZzzCharacter.cpp:2851-2858).
+ */
+const swellLifeOf = (hd: boolean): Step => (_at, c) => {
+  const caster = c.caster;
+  const token = (swellLifePending.get(caster) ?? 0) + 1;
+  swellLifePending.set(caster, token);
+  const fire = (): void => {
+    if (entityGone(caster) || swellLifePending.get(caster) !== token) return;
+    swellLifeBurst(c, hd);
+  };
+  delay(ticks(9), () => {
+    if (caster.modelObject?.CurrentAction === PlayerAction.PLAYER_SKILL_VITALITY) fire();
+    else delay(ticks(5), fire);
+  });
+};
+const swellLife = swellLifeOf(false);
+
 // ---- the table -------------------------------------------------------------------
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
@@ -5778,16 +6475,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     // Graded tiers: the gathering point swells red, the drill throws blue motes, the stab flashes on the victim; each lit.
     enhanced: { cast: deathStabOf(true) },
   },
-  // 44 Rush (Crescent Moon Slash): charge per frame 4× JOINT_SPARK (±15 xy, +20 z, Angle(150–210)) + BITMAP_FIRE
-  // sub2 particles; impact MODEL_SWORD_FORCE sub0 LT 15, Scale 0 growing, z+100, Dir(0,−10,0).
-  44: {
-    cast: repeat(4, ticks(2), atCaster(streamerFan(4, 0.35, { velocity: perTick(40), seconds: ticks(8), maxTails: 4, width: 0.15, colour: RGBS.gold, pitch: -0.9 }), 0.2)),
-    impact: seq(
-      (at, c) => effects.spawn('model', c.scene, at, { model: MODEL.swordForce, seconds: ticks(15), scale: 1, colour: RGBS.gold, grow: 3, follow: flying(c, 1, perTick(10)), yaw: entityYaw(c.caster) }),
-      particles({ recipe: FIRE_PUFF, count: 8 }),
-      steelHit
-    ),
-  },
+  // 44 Crescent Moon Slash (Rush): the charge sprays sparks and fire at the feet until key 5 or 14 ticks, then the
+  // sword force runs 3.9 m ahead growing, fading and lighting the ground; see crescentMoonSlash.
+  44: { cast: crescentMoonSlash, enhanced: { cast: crescentMoonSlashOf(true) } },
   // 45 Javelin (Lance): 3× MODEL_SKILL_JAVELIN sub0/1/2 - LT 35, Vel 10, Scale 1.2, z+150, HeadAngle ±Ang.
   45: {
     area: (at, c) => fanArrows(at, c, 3, MODEL.javelin, RGBS.steel, 0.3, 1.2),
@@ -5795,22 +6485,10 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 46 Deep Impact (Starfall): the arrow, then MODEL_ARROW_IMPACT at its position.
   46: { travel: arrow(MODEL.arrowLaser, RGBS.holy), impact: seq(model({ model: MODEL.arrowImpact, seconds: ticks(20), scale: 1, colour: RGBS.holy, grow: 1.4 }), steelHit) },
-  // 47 Impale: t=4 MODEL_SPEAR at the weapon bone (Light (1,1,0.5), LT 5); t=8 2× MODEL_SPEAR at +50 fwd +110 z
-  // LT 10; t∈[13,14] 3× MODEL_SPEARSKILL at +145 fwd +110 z ±30 (Light 0.3, LT 20, Scale 1.5, Dir 5·facing).
-  47: {
-    cast: seq(
-      after(ticks(4), (_at, c) => effects.spawn('model', c.scene, entityPos(c.caster, 1.1, new Vector3()), { model: MODEL.spear, seconds: ticks(5), scale: 1, colour: [1, 1, 0.5], follow: weaponBone(c.caster), yaw: entityYaw(c.caster) })),
-      after(ticks(8), (_at, c) => {
-        for (let i = 0; i < 2; i++) effects.spawn('model', c.scene, entityPos(c.caster, 1.1, new Vector3()), { model: MODEL.spear, seconds: ticks(10), scale: 1, colour: RGBS.steel, follow: flying(c, 1.1, perTick(30), (i - 0.5) * 0.15, 0.5), yaw: entityYaw(c.caster) });
-      }),
-      after(ticks(13), (_at, c) => {
-        for (let i = 0; i < 3; i++) effects.spawn('model', c.scene, entityPos(c.caster, 1.1, new Vector3()), { model: MODEL.ridingSpear, seconds: ticks(20), scale: 1.5, colour: [0.3, 0.3, 0.3], follow: flying(c, 1.1, perTick(5), (i - 1) * 0.2, 1.45), yaw: entityYaw(c.caster) });
-      })
-    ),
-    impact: steelHit,
-  },
-  // 48 Swell Life: impact@caster+100z - 36× JOINT_SPIRIT sub2 fan (Light 0.5) + BITMAP_MAGIC+1 sub4 LT 40.
-  48: { impact: atCaster(spiritBurst([0.5, 0.5, 0.5]), 1), area: atCaster(spiritBurst([0.5, 0.5, 0.5]), 1) },
+  // 47 Impale: t4 threads gather on the spear point, t8 a white spiral cone, t10 the sound, t13-14 six spears; see impale.
+  47: { cast: impale, enhanced: { cast: impaleOf(true) } },
+  // 48 Swell Life: at AttackTime 10 the spirit ring, its orange glows, the rising column and two ground rings; see swellLife.
+  48: { cast: swellLife, enhanced: { cast: swellLifeOf(true) } },
   // 49 Fire Breath (AT_SKILL_RIDER): BITMAP_SHOTGUN and its sparks when the rider clip passes key 5, or
   // after the 14-tick AttackTime cap (ZzzCharacter.cpp:2910-2915, :4405-4409); see `fireBreath`.
   49: { cast: atClipKey(5, RIDER_ACTIONS, fireBreath), enhanced: { cast: atClipKey(5, RIDER_ACTIONS, fireBreathPlus) } },

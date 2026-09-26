@@ -177,6 +177,7 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   48: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life
   356: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life Str
   360: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life Proficiency
+  363: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life Mastery
   44: { ground: A.PLAYER_ATTACK_RUSH }, // Rush
   232: { ground: A.PLAYER_SKILL_BLOW_OF_DESTRUCTION }, // Strike of Destruction
   337: { ground: A.PLAYER_SKILL_BLOW_OF_DESTRUCTION }, // Strike of Destruction Str

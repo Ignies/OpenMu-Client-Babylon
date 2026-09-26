@@ -346,6 +346,40 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
       },
     },
   },
+  // Crescent Moon Slash: MODEL_SWORD_FORCE lights (1, 0.8, 0.6), range 1, under itself every move of its 15
+  // (MoveHandlers.cpp:7208-7209); no Luminosity roll.
+  44: {
+    bodies: { force: { color: [1, 0.8, 0.6], range: 1, seconds: 0.6, release: 0.1 } },
+    // The charge's fire at the feet until the force leaves (stopped by the row), then the gold blade over its reach.
+    enhanced: {
+      bodies: {
+        charge: effectLight([1, 0.55, 0.2], 0.9, 0.7, { heightOffset: 0.4, attack: 0.1, release: 0.2, flicker: { min: 0.8, max: 1, steps: 4 } }),
+        force: effectLight([1, 0.78, 0.45], 1.3, 0.6, { heightOffset: 0.8, release: 0.25 }),
+      },
+    },
+  },
+  // Impale: the original lights nothing. On the graded tiers the gold gathering point, the orange-white cone over
+  // its 2.2 m (centred 1.1 m out) and the blue-white spears riding forward light like their art.
+  47: {
+    enhanced: {
+      bodies: {
+        gather: effectLight([1, 0.82, 0.45], 0.5, 0.5, { heightOffset: 0, attack: 0.1, release: 0.2 }),
+        cone: effectLight([1, 0.78, 0.5], 1.2, 0.6, { heightOffset: 0, attack: 0.08, release: 0.3, flicker: { min: 0.8, max: 1, steps: 4 } }),
+        spears: effectLight([0.62, 0.72, 1], 1, 0.8, { heightOffset: 0, release: 0.5 }),
+      },
+    },
+  },
+  // Swell Life: the original lights nothing. On the graded tiers the orange spirit ring as it leaves the knight, the
+  // two Magic_Ground2 marks (2-4 tiles across) for their 40 ticks, and the rising white column around him.
+  48: {
+    enhanced: {
+      bodies: {
+        burst: effectLight([1, 0.5, 0.12], 3, 0.6, { heightOffset: 0, release: 0.4 }),
+        ground: effectLight([1, 0.5, 0.1], 1.5, 1.6, { heightOffset: 0.3, attack: 0.2, release: 0.5 }),
+        column: effectLight([1, 0.85, 0.6], 1.2, 2.6, { heightOffset: 1.2, attack: 0.4, release: 1 }),
+      },
+    },
+  },
   // Starfall: MODEL_ARROW_IMPACT lights nothing in the original (:14596);
   // the holy wash riding the shot down is ours.
   46: { arrow: { ...holy(2, ARROW_SECONDS), release: 0.2 } },

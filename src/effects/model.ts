@@ -170,6 +170,8 @@ export interface ModelOptions {
   scaleAt?: (t: number) => number;
   /** A 0..1 brightness at `t` seconds alive, multiplied into the fade (`BodyLight x BlendMeshLight`, clamped as GL did). */
   intensity?: (t: number) => number;
+  /** Draw the bright meshes without their converted COLOR_0 (noise on the skill models: teal and violet blotches). Off by default. */
+  plainColour?: boolean;
   /**
    * The sheet the bright meshes draw instead of their own - the original's
    * `RenderBody(…, Texture)` override (MODEL_CIRCLE sub2 with BITMAP_MAGIC_EMBLEM, ZzzObject.cpp:1497).
@@ -453,7 +455,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           }
           // A dark mesh's coverage is the sheet alone: the converted COLOR_0 on the skill models is noise,
           // and its alpha punched holes through the silhouette.
-          if (subtract && isBright) {
+          if ((subtract || opts.plainColour) && isBright) {
             mesh.useVertexColors = false;
             mesh.hasVertexAlpha = false;
           }

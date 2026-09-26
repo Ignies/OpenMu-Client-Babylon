@@ -116,6 +116,8 @@ export interface SpriteOptions {
   rotation?: number;
   /** Fade the card to nothing towards its border (a sheet whose art runs to its edge). Additive cards only. */
   softEdge?: boolean;
+  /** A brightness at progress 0..1, multiplied into the fade (a `Light` that changes over the life). */
+  intensity?: (p: number) => number;
 }
 
 const live = new LiveList();
@@ -236,6 +238,7 @@ export function spawnSprite(
       let vis = ready * fadeOut(p, tail);
       if (fadeIn > 0 && p < fadeIn) vis *= p / fadeIn;
       if (decay !== 1) vis *= decay ** (t / TICK);
+      if (opts.intensity) vis *= Math.max(0, Math.min(1, opts.intensity(p)));
       const y = height + rise * t;
       for (let i = 0; i < cards.length; i++) {
         const c = cards[i];
