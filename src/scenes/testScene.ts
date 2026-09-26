@@ -11,6 +11,7 @@ import { applySceneLook, type SceneLook } from './sceneLook';
 import { initPointLightPool } from '../common/pointLightPool';
 import { createKeyRig } from '../lighting/keyRig';
 import { createLookDirector, type LookDirector } from '../lighting/director';
+import { cullHighlightMask } from './highlightMask';
 
 export class TestScene extends Scene {
   defaultCamera: ArcRotateCamera;
@@ -39,9 +40,11 @@ export class TestScene extends Scene {
       // The stroke mask renders at a quarter of screen resolution by default
       // and the stroke shader snaps any blur bleed to full intensity, so a
       // mesh only a few texels across (feet, hands) fills solid instead of
-      // getting an edge. Only the hovered model renders into it - cheap.
+      // getting an edge. Only the hovered model and what covers it render
+      // into it (highlightMask.ts).
       mainTextureRatio: 1,
     });
+    cullHighlightMask(this, this.hl);
     // The blob shadow (objectShadow.ts) ORs its 0x80 stencil bit over the
     // soles of whoever stands on it, so the hovered mesh's 0x02 reads 0x82
     // there and the outer-glow pass (stencil != 0x02) floods the feet. Compare
