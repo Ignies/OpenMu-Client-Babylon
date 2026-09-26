@@ -43,15 +43,16 @@ export type CastTarget =
  * `case` lists name them.
  */
 const SELF_ONLY: ReadonlySet<number> = new Set([
-  48, 356, 360, // Swell Life, Str, Proficiency
+  48, 356, 360, 363, // Swell Life, Str, Proficiency, Mastery
   30, 31, 32, 33, 34, 35, 36, 37, // the elf summons (AT_SKILL_SUMMON + 0..7)
   53, // Improve AG
   77, 441, // Infinity Arrow, Str
-  218, 469, // Berserker, Str
+  218, 469, 470, 472, // Berserker, Str, Proficiency, Mastery
   266, // Ignore Defense
   267, 573, // Increase Health, Str
   268, 569, 572, // Increase Block, Str, Mastery
   205, 206, 207, 208, 209, // the Halloween event skills
+  233, 380, 383, // Expansion of Wizardry, Str, Mastery (ClassAttack.cpp:1291-1300)
 ]);
 
 /**

@@ -9,7 +9,7 @@
  *
  * One mesh per spawn with vertex colours for the shade; the material is
  * core.ts's shared additive one. Positions are rewritten only when the
- * revealed count changes.
+ * revealed count changes, or every frame for a path that is `rebuild`.
  *
  * Driven by: `effects.spawn('path', …)`. Read by: nobody.
  */
@@ -55,6 +55,22 @@ export interface PathOptions {
   shade?: (i: number) => number;
   /** Visibility over life, 0…1 progress in. */
   life?: (p: number) => number;
+  /**
+   * Recompute the path every frame (a joint whose tails are laid anew each move): write into
+   * `points` (the `points` option, as capacity) and `widths` (tiles, per point), point the faces
+   * with `axes`, and return how many points are drawn. Replaces `reveal` and `wait`; without
+   * `uPerPoint` the sheet stretches over the drawn points, `(NumTails - j) / (MaxTails - 1)`
+   * with MaxTails growing.
+   */
+  rebuild?: (t: number, points: Vector3[], widths: Float32Array, axes: PathAxes) => number;
+  /** `vertical`: only the face along `axes.up` (RENDER_FACE_ONE). Default both. */
+  faces?: 'both' | 'vertical';
+}
+
+/** The two faces' across axes (the tail matrix's X and Z), unit. */
+export interface PathAxes {
+  side: Vector3;
+  up: Vector3;
 }
 
 const live = new LiveList();
@@ -65,24 +81,34 @@ export function pathCount(): number {
 }
 
 const X = new Vector3(1, 0, 0);
+const Y = new Vector3(0, 1, 0);
 
-function writePositions(out: Float32Array, points: readonly Vector3[], shown: number, side: Vector3, half: number): void {
+function writePositions(out: Float32Array, points: readonly Vector3[], shown: number, side: Vector3, up: Vector3, widths: Float32Array): void {
   const last = Math.max(0, shown - 1);
   for (let i = 0; i < points.length; i++) {
-    const p = points[Math.min(i, last)];
+    const k = Math.min(i, last);
+    const p = points[k];
+    const half = widths[k] / 2;
     const o = i * 12;
     out[o] = p.x - side.x * half;
-    out[o + 1] = p.y;
+    out[o + 1] = p.y - side.y * half;
     out[o + 2] = p.z - side.z * half;
     out[o + 3] = p.x + side.x * half;
-    out[o + 4] = p.y;
+    out[o + 4] = p.y + side.y * half;
     out[o + 5] = p.z + side.z * half;
-    out[o + 6] = p.x;
-    out[o + 7] = p.y - half;
-    out[o + 8] = p.z;
-    out[o + 9] = p.x;
-    out[o + 10] = p.y + half;
-    out[o + 11] = p.z;
+    out[o + 6] = p.x - up.x * half;
+    out[o + 7] = p.y - up.y * half;
+    out[o + 8] = p.z - up.z * half;
+    out[o + 9] = p.x + up.x * half;
+    out[o + 10] = p.y + up.y * half;
+    out[o + 11] = p.z + up.z * half;
+  }
+}
+
+function writeUvs(out: Float32Array, n: number, du: number): void {
+  for (let i = 0; i < n; i++) {
+    const u = i * du;
+    out.set([u, 0, u, 1, u, 0, u, 1], i * 8);
   }
 }
 
@@ -92,8 +118,10 @@ function spawn(scene: Scene, _at: Vector3, opts: PathOptions): EffectHandle {
   const n = points.length;
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
   const wait = opts.wait ?? 0;
-  const half = (opts.width ?? DEFAULT_WIDTH) / 2;
-  const side = opts.side ?? X;
+  const widths = new Float32Array(n).fill(opts.width ?? DEFAULT_WIDTH);
+  const axes: PathAxes = { side: (opts.side ?? X).clone(), up: Y.clone() };
+  const rebuild = opts.rebuild;
+  const stretch = !!rebuild && opts.uPerPoint === undefined;
   const du = opts.uPerPoint ?? 1 / Math.max(1, n - 1);
   // The tint rides in the vertex colours, so every path of a sheet shares one material.
   const material = additiveMaterial(scene, opts.texture, WHITE);
@@ -103,9 +131,8 @@ function spawn(scene: Scene, _at: Vector3, opts: PathOptions): EffectHandle {
   const uvs = new Float32Array(n * 8);
   const colours = new Float32Array(n * 16);
   const indices: number[] = [];
+  writeUvs(uvs, n, du);
   for (let i = 0; i < n; i++) {
-    const u = i * du;
-    uvs.set([u, 0, u, 1, u, 0, u, 1], i * 8);
     const s = opts.shade ? opts.shade(i) : 1;
     const cr = Math.min(1, tint[0] * s);
     const cg = Math.min(1, tint[1] * s);
@@ -114,10 +141,11 @@ function spawn(scene: Scene, _at: Vector3, opts: PathOptions): EffectHandle {
     if (i < n - 1) {
       const a = i * 4;
       const b = a + 4;
-      indices.push(a, a + 1, b + 1, a, b + 1, b, a + 2, a + 3, b + 3, a + 2, b + 3, b + 2);
+      if (opts.faces !== 'vertical') indices.push(a, a + 1, b + 1, a, b + 1, b);
+      indices.push(a + 2, a + 3, b + 3, a + 2, b + 3, b + 2);
     }
   }
-  writePositions(positions, points, 0, side, half);
+  writePositions(positions, points, 0, axes.side, axes.up, widths);
 
   const mesh = new Mesh('fxPath', scene);
   const data = new VertexData();
@@ -145,12 +173,23 @@ function spawn(scene: Scene, _at: Vector3, opts: PathOptions): EffectHandle {
       t += dt;
       const p = t / seconds;
       if (p >= 1) return false;
-      const grown = t - wait;
-      const want = grown < 0 ? 0 : Math.min(n, opts.reveal ? opts.reveal(Math.floor(grown / TICK) + 1) : n);
-      if (want !== shown) {
+      if (rebuild) {
+        const want = Math.max(0, Math.min(n, rebuild(t, points as Vector3[], widths, axes)));
+        if (stretch && want !== shown && want >= 2) {
+          writeUvs(uvs, n, 1 / (want - 1));
+          mesh.updateVerticesData(VertexBuffer.UVKind, uvs);
+        }
         shown = want;
-        writePositions(positions, points, shown, side, half);
+        writePositions(positions, points, shown, axes.side, axes.up, widths);
         mesh.updateVerticesData(VertexBuffer.PositionKind, positions);
+      } else {
+        const grown = t - wait;
+        const want = grown < 0 ? 0 : Math.min(n, opts.reveal ? opts.reveal(Math.floor(grown / TICK) + 1) : n);
+        if (want !== shown) {
+          shown = want;
+          writePositions(positions, points, shown, axes.side, axes.up, widths);
+          mesh.updateVerticesData(VertexBuffer.PositionKind, positions);
+        }
       }
       // Held unseen until the sheet is in: without it the ribbon is a solid band.
       mesh.isVisible = shown >= 2 && !!material.diffuseTexture;

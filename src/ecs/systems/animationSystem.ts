@@ -57,6 +57,8 @@ import { Store } from '../../store';
 // Death (delay, Die clip, corpse, fade, despawn) is owned by DeathSystem.
 
 const MONSTER_ONE_SHOT_ACTIONS = new Set<MonsterActionType>([
+  // A finished STOP2 goes back to STOP1 (ZzzCharacter.cpp:3530); the Assassin summon arrives in it.
+  MonsterActionType.Stop2,
   MonsterActionType.Attack1,
   MonsterActionType.Attack2,
   MonsterActionType.Attack3,
@@ -108,6 +110,25 @@ function holdPart(part: ModelObject | undefined, held: boolean): void {
     was.set(group, group.speedRatio);
     group.speedRatio = 0;
   }
+}
+
+/**
+ * Another player's Nova charge is never stopped (ZzzCharacter.cpp:3488) and rewinds when it ends
+ * (:3496-3499), so it loops until the release replaces it; the hero's is kept up by SkillCastSystem.
+ * OpenMU releases within 6 s, so 7 s only bounds a release that never arrives.
+ */
+const NOVA_HOLD_MS = 7000;
+const novaHeldSince = new WeakMap<object, number>();
+
+function holdsNovaCharge(entity: { localPlayer?: unknown }, action: PlayerAction): boolean {
+  if (action !== PlayerAction.PLAYER_SKILL_HELL_BEGIN || entity.localPlayer) {
+    novaHeldSince.delete(entity);
+    return false;
+  }
+  const now = performance.now();
+  const since = novaHeldSince.get(entity);
+  if (since === undefined) novaHeldSince.set(entity, now);
+  return since === undefined || now - since < NOVA_HOLD_MS;
 }
 
 /**
@@ -394,6 +415,8 @@ export const AnimationSystem: ISystemFactory = world => {
         // Performing: BandSystem holds the pose; nothing to re-evaluate until a step.
         if (entity.performing && !moving) continue;
 
+        if (!moving && holdsNovaCharge(entity, playerAnimation.action)) continue;
+
         if (isOneShotPlayerAction(playerAnimation.action) && !moving) {
           // Hold the one-shot clip until it has played through once, then
           // fall back to idle/walk (ActionIterationWasFinished is set by the
@@ -502,8 +525,9 @@ export const AnimationSystem: ISystemFactory = world => {
 
         // A performer's clip loops whatever band it sits in: the pose is held
         // for as long as the instrument is out.
+        const novaLoop = action === PlayerAction.PLAYER_SKILL_HELL_BEGIN && !entity.localPlayer;
         const oneShot =
-          (isOneShotPlayerAction(action) && !entity.performing) ||
+          (isOneShotPlayerAction(action) && !entity.performing && !novaLoop) ||
           action === PlayerAction.PLAYER_DIE1;
         playerObject.playAction(action, !oneShot);
         const held = isHeld(entity.buffs);

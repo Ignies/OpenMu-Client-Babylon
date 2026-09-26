@@ -193,6 +193,61 @@ const BLIND_SMOKE: ParticleRecipe = {
 };
 
 /**
+ * Requiem's burn (eDeBuff_NeilDOT): one BITMAP_LIGHT+2 sub5 a tick off a random bone - fi01 (128 px) at
+ * Scale 0.08..0.11 growing 0.04 a tick, LT 21, thrown 6 cm a tick out (x 0.6 a tick after the first) and
+ * 4 cm up against 0.4 of gravity, Alpha -0.1 a tick over the last 10, in (1, 0, 0.6) x Alpha
+ * (MoveHandlers.cpp:1115-1127, ZzzEffectParticle.cpp:857-883, :4020-4045). The damped throw is drawn as
+ * the slower constant drift it averages to.
+ */
+const NEIL_SPARKS: ParticleRecipe = {
+  texture: TEX.advSmoke,
+  colour: [1, 0, 0.6],
+  size: px(128, 0.095),
+  sizeJitter: 0.16,
+  life: 21 * TICK,
+  lifeJitter: 0,
+  box: [0.02, 0.02, 0.02],
+  dir1: [-0.18, 1, -0.18],
+  dir2: [0.18, 1, 0.18],
+  power: (4 * 25) / 100,
+  powerJitter: 0,
+  gravity: -(0.4 * 625) / 100,
+  endScale: (0.095 + 0.04 * 21) / 0.095,
+  fade: [
+    [0, 1],
+    [0.52, 1],
+    [1, 0],
+  ],
+  capacity: 128,
+};
+/**
+ * Explosion's burn (eDeBuff_SahamuttDOT): every other tick a FIRE_CURSEDLICH effect sits on a random bone
+ * for 10 ticks making one sub3 firehik02 (64 px) a tick - Scale 0.4..0.98 shrinking 0.03 a tick, LT 16..27,
+ * rising 3..5.8 cm a tick, 0.3 grey (MoveHandlers.cpp:847-867, :1052-1066, ZzzEffectParticle.cpp:311-318,
+ * :4338-4352). About five a tick, each off its own random bone here.
+ */
+const SMOULDER: ParticleRecipe = {
+  texture: TEX.fireCursedLich,
+  colour: [0.3, 0.3, 0.3],
+  size: px(64, 0.69),
+  sizeJitter: 0.42,
+  life: 27 * TICK,
+  lifeJitter: 0.4,
+  box: [0.02, 0.02, 0.02],
+  dir1: [0, 1, 0],
+  dir2: [0, 1, 0],
+  power: (5.8 * 25) / 100,
+  powerJitter: 0.48,
+  endScale: 0.15,
+  fade: [
+    [0, 1],
+    [0.85, 1],
+    [1, 0],
+  ],
+  capacity: 256,
+};
+
+/**
  * Stun: three MODEL_SPEARSKILL sub8 joints, 40 cm out, turning 25° and
  * rising 15 cm a tick for 40 ticks, Scale 30, on the BITMAP_LIGHT sheet
  * (ZzzEffectJoint.cpp:1633, :4370). The original's Light is 0.5; a half-grey
@@ -258,10 +313,16 @@ const EMBER_SIZE = 0.6;
 const EMBER_CELLS = { w: 64, h: 64, count: 4 };
 const EMBER_FPS = 12;
 
-/** The skull over a Defense-reduced head: the original creates BITMAP_SKULL but this build never draws it; ours is a small one that bobs. */
-const SKULL_SIZE = 0.5;
-const SKULL_HEIGHT = 2.3;
-const SKULL_BOB = 0.08;
+/**
+ * BITMAP_SKULL sub0 over a Defense-reduced body (MoveHandlers.cpp:583-634): three Skull.jpg sprites, 16 px at scale 1
+ * (16 cm), in a triangle fixed to the world at `i * 120 deg + LT * 0.17 rad`, radius `50 + 20 sin(i * 15.37 +
+ * WorldTime * 0.0031)` cm, 200 cm x the body's Scale up. LT is pinned at 10 while the debuff holds; once it ends the
+ * triangle turns 0.17 rad a tick as LT runs out.
+ */
+const SKULL_SIZE = 0.16;
+const SKULL_HEIGHT = 2;
+const SKULL_LT = 10;
+const SKULL_TURN = 0.17;
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -309,6 +370,8 @@ export interface BoneGlow {
 export interface Pulse {
   every: number;
   fire: () => void;
+  /** Seconds before the first fire (default 0: at once). */
+  first?: number;
 }
 
 export interface AuraOptions {
@@ -334,10 +397,14 @@ export interface AuraOptions {
   sleepDrops?: { colour: RGB };
   /** Blind: black smoke pouring off random bones. */
   blindSmoke?: boolean;
+  /** Requiem's burn: magenta sparks thrown off random bones. */
+  neilSparks?: boolean;
+  /** Explosion's burn: grey flames rising off random bones. */
+  smoulder?: boolean;
   /** Frozen: the ice shell and its ember. */
   iceShell?: boolean;
-  /** Defense reduction: the skull. */
-  skull?: boolean;
+  /** Defense reduction: the skulls; `hidden` while the body is cloaked, `scale` the body's Scale. */
+  skull?: boolean | { hidden?: () => boolean; scale?: () => number };
   /** Stun: the three rising ribbons, once. */
   stun?: boolean;
   /** AG recovery: the orbiting healing rings. */
@@ -541,7 +608,7 @@ function boneGlow(scene: Scene, o: AuraOptions, p: BoneGlow): Part {
 
 function pulse(p: Pulse): Part {
   // The original's `LastCritDamageEffect < WorldTime - interval` fires at once on a fresh buff.
-  let due = 0;
+  let due = p.first ?? 0;
   return {
     update(dt) {
       due -= dt;
@@ -806,17 +873,29 @@ function iceShell(scene: Scene, o: AuraOptions): Part {
   };
 }
 
-function skull(scene: Scene, o: AuraOptions): Part {
-  const card = acquireCard(scene, additiveMaterial(scene, TEX.skull, [1, 1, 1]));
+function skull(scene: Scene, o: AuraOptions, stopping: () => boolean): Part {
+  const look = typeof o.skull === 'object' ? o.skull : {};
+  const cards = [0, 1, 2].map(() => acquireCard(scene, additiveMaterial(scene, TEX.skull, [1, 1, 1])));
+  let lt = SKULL_LT;
   return {
-    update(_dt, ramp) {
+    update(_dt, _ramp, ticks) {
+      if (stopping()) lt = Math.max(0, lt - ticks);
       o.follow(tmp);
-      card.position.set(tmp.x, tmp.y + SKULL_HEIGHT + Math.sin(fxNow() * 3) * SKULL_BOB, tmp.z);
-      card.scaling.setAll(SKULL_SIZE);
-      card.visibility = ramp;
+      const up = SKULL_HEIGHT * (look.scale?.() ?? 1);
+      const shown = lt > 0 && !look.hidden?.() ? 1 : 0;
+      const ms = fxNow() * 1000;
+      for (let i = 0; i < 3; i++) {
+        const a = (i * Math.PI * 2) / 3 + lt * SKULL_TURN;
+        const r = 0.5 + 0.2 * Math.sin(i * 15.37 + ms * 0.0031);
+        // MU (x, y) is the client's (x, z).
+        cards[i].position.set(tmp.x + r * Math.sin(a), tmp.y + up, tmp.z + r * Math.cos(a));
+        cards[i].scaling.setAll(SKULL_SIZE);
+        cards[i].visibility = shown;
+      }
     },
     release() {
-      releaseCard(scene, card);
+      for (const c of cards) releaseCard(scene, c);
+      cards.length = 0;
     },
   };
 }
@@ -983,8 +1062,10 @@ function spawn(scene: Scene, _at: Vector3, opts: AuraOptions): EffectHandle {
   if (opts.boneSparks) parts.push(boneSparks(scene, opts, opts.boneSparks));
   if (opts.sleepDrops) parts.push(boneEmitter(scene, opts, sleepDrops(opts.sleepDrops.colour), 0.5, 0.2));
   if (opts.blindSmoke) parts.push(boneEmitter(scene, opts, BLIND_SMOKE, 2, 0));
+  if (opts.neilSparks) parts.push(boneEmitter(scene, opts, NEIL_SPARKS, 1, 0));
+  if (opts.smoulder) parts.push(boneEmitter(scene, opts, SMOULDER, 5, 0));
   if (opts.iceShell) parts.push(iceShell(scene, opts));
-  if (opts.skull) parts.push(skull(scene, opts));
+  if (opts.skull) parts.push(skull(scene, opts, isStopping));
   if (opts.stun) parts.push(stun(scene, opts, isStopping));
   if (opts.healingRings) parts.push(healingRings(scene, opts, isStopping));
   if (opts.berserk) parts.push(berserk(scene, opts));

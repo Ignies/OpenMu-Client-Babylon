@@ -264,7 +264,7 @@ import { createAttributeSystem, type MUAttributeSystem } from './libs/attributeS
 import { classWorldScale } from './common/characterScale';
 import { skillDefinition } from './common/skillsDatabase';
 import { traceHeroInstantMove } from './common/heroMoveTrace';
-import { chooseSkillAction, isTeleportSkill, TELEPORT } from './common/skillCasting';
+import { advancesSwordCount, chooseSkillAction, isTeleportSkill, TELEPORT } from './common/skillCasting';
 import { skillClip } from './combat/skillClips';
 import { teleportGate } from './common/teleportRules';
 import {
@@ -277,7 +277,15 @@ import {
 } from './ecs/systems/teleportSystem';
 import { getBaseClass, BaseClass } from './common/characterStats';
 import { SKILL_TO_EFFECT } from './common/magicEffects';
-import { playAreaSkillVisual, playBowShotVisual, playChainLightningHop, playTargetedSkillVisual, setBuffVisual } from './common/skillVisuals';
+import {
+  playAreaSkillVisual,
+  playBowShotVisual,
+  playChainLightningHop,
+  playSoulBarrierShell,
+  playSummonArrival,
+  playTargetedSkillVisual,
+  setBuffVisual,
+} from './common/skillVisuals';
 import { monsterModelTypeOf, playerPlaySpeed } from './common/playSpeed';
 import { TRAP_MODEL_TABLE } from './common/npcs/trapNpc';
 import {
@@ -323,7 +331,7 @@ import { SessionResume } from './common/sessionResume';
 import { WEATHER_RAIN } from './weather/rainState';
 import { combat } from './combat';
 import { COMBO_SOUND } from './combat/combo';
-import { SHOCK_IMMUNE_CLIPS } from './combat/recipes';
+import { SHOCK_IMMUNE_CLIPS, SKILL_DEFENSE } from './combat/recipes';
 import { mountKind } from './common/pets';
 import { inChaosCastle } from './common/locomotion';
 import { characterSkinBody } from './common/transformedBody';
@@ -1184,6 +1192,7 @@ function addNpcToScope(world: World, npc: ScopeNpc) {
     npc.TargetPositionX,
     npc.TargetPositionY
   );
+  return npcEntity;
 }
 
 EventBus.on('AddNpcsToScope', packet => {
@@ -1203,7 +1212,11 @@ EventBus.on('AddSummonedMonstersToScope', packet => {
   const world = Store.world;
   if (!world) return;
 
-  p.getSummonedMonsters().forEach(m => addNpcToScope(world, m));
+  p.getSummonedMonsters().forEach(m => {
+    const e = addNpcToScope(world, m);
+    // Key >> 15 is the create flag: a fresh summon plays its arrival (WSclient.cpp:3113-3117).
+    if (m.Id & 0x8000) playSummonArrival(world.scene, e);
+  });
 });
 
 // F3 20 (ReceiveSummonLife): percent health of the hero's own summon. The
@@ -2527,6 +2540,10 @@ EventBus.on('ObjectAnimation', packet => {
   // often stale, direction.
   if (obj.localPlayer) return;
 
+  // AttackPlayer: the last object whose attack animation arrived (ReceiveAction AT_ATTACK1/2, WSclient.cpp:3596-3608).
+  const attackAction = obj.monsterAnimation ? MonsterActionType.Attack1 : ServerPlayerActionType.Attack1;
+  if (clientActionToPlay === attackAction || clientActionToPlay === attackAction + 1) lastAttacker = obj;
+
   if (obj.monsterAnimation) {
     if (isDeadMonster(obj)) return;
     const monsterAction = clientActionToPlay as unknown as MonsterActionType;
@@ -2632,6 +2649,13 @@ function applySkillListPacket(packet: DataView) {
  */
 function playCastAnimation(caster: Entity, skill: number, area: boolean) {
   const def = skillDefinition(skill);
+  if (
+    skill === SKILL_DEFENSE &&
+    !caster.localPlayer &&
+    mountKind(caster.charAppearance?.pet, !!caster.attributeSystem?.isAboveZero('inSafeZone')) === 'horse'
+  ) {
+    return;
+  }
   // ExecuteSkill's cast sound for everyone else (the hero's plays in SkillCastSystem).
   if (!caster.localPlayer && caster.transform) {
     const tele = area
@@ -2669,8 +2693,9 @@ function playCastAnimation(caster: Entity, skill: number, area: boolean) {
       : (skillClip(skill, ctx) ?? PlayerAction.PLAYER_SKILL_HAND1);
     // Others see Electric Spike from a horse as the ground flash; only the Fenrir has its own (WSclient.cpp:5261-5265).
     if (action === PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_FLASH) action = PlayerAction.PLAYER_SKILL_FLASH;
-    caster.playerAnimation.swordCount =
-      (caster.playerAnimation.swordCount ?? 0) + 1;
+    if (def && advancesSwordCount(def, ctx)) {
+      caster.playerAnimation.swordCount = (caster.playerAnimation.swordCount ?? 0) + 1;
+    }
     // SetPlayerMagic then `so->AnimationFrame = 0`; a monster body plays casts on its attack clips.
     const model = caster.modelObject;
     if (
@@ -2702,6 +2727,7 @@ EventBus.on('SkillAnimation', packet => {
   const caster = world.getByNetId(casterId);
   if (!caster) return;
   const target = world.getByNetId(targetId) ?? null;
+  if (!caster.localPlayer) lastAttacker = caster; // AttackPlayer (ReceiveMagic, WSclient.cpp:4161)
 
   if (isTeleportSkill(p.SkillId)) {
     playTeleportAnimation(world, p.SkillId, caster, target);
@@ -2986,6 +3012,9 @@ EventBus.on('RageAttackRangeResponse', packet => {
   );
 });
 
+/** The original's `AttackPlayer`: who last sent an attack or skill animation, for Soul Barrier's hit shell. */
+let lastAttacker: Entity | null = null;
+
 function applyObjectHit(p: ObjectHitView) {
   const world = Store.world;
   if (!world) return;
@@ -2993,6 +3022,7 @@ function applyObjectHit(p: ObjectHitView) {
   const maskedId = p.ObjectId & 0x7fff;
   const obj = world.getByNetId(maskedId);
   if (!obj) return;
+  if (obj.localPlayer) playSoulBarrierShell(world.scene, obj, lastAttacker);
 
   const totalDamage = p.HealthDamage + p.ShieldDamage;
   combat.observeRageHit(p.IsRageFighterStreakHit, p.IsRageFighterStreakFinalHit);

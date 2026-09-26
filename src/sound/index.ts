@@ -53,6 +53,7 @@ export {
 export {
   COMBAT_BUS,
   SKILL_SOUNDS,
+  heroCastSound,
   hitSound,
   pickupSound,
   playCombat,

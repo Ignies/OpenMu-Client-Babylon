@@ -55,6 +55,13 @@ export interface BlurOptions {
   blend?: EffectBlend;
   /** Stops sampling early when true (the swing clip was cut short). */
   until?: () => boolean;
+  /**
+   * The original's history instead of one sample a frame: 10 samples a tick along the blade's
+   * path, at most 29 kept, the oldest dropped every tick (two once the trail is 15 ticks old),
+   * an additive trail ramping from 1 at the newest sample to 1/N at the oldest
+   * (ZzzCharacter.cpp:3996-4021, ZzzEffectBlurSpark.cpp:136-275).
+   */
+  tickHistory?: boolean;
 }
 
 const live = new LiveList();
@@ -67,7 +74,127 @@ export function blurCount(): number {
 const tip = new Vector3();
 const hilt = new Vector3();
 
+// ---- the original's history (`tickHistory`) ----------------------------------
+
+const TICK = 1 / 25;
+/** MAX_BLUR_TAILS 30, of which AddBlur fills 29. */
+const TAILS = 29;
+/** CreateWeaponBlur's `inter`: samples laid over each tick of the swing. */
+const SUB_STEP = TICK / 10;
+/** CreateBlur's `Short` LifeTime: past it MoveBlurs drops two samples a tick. */
+const SHORT_LIFE = 15;
+
+function spawnTicked(scene: Scene, opts: BlurOptions): EffectHandle {
+  const seconds = opts.seconds ?? DEFAULT_SECONDS;
+  const blend = opts.blend ?? 'add';
+  const material = additiveMaterial(scene, opts.texture ?? TEX.swordBlur, opts.colour ?? RGBS.steel, blend);
+  // RenderBlurs ramps a level-0 owner's (additive) trail and draws the dark one flat.
+  const ramp = blend === 'add';
+
+  const positions = new Float32Array(TAILS * 2 * 3);
+  const uvs = new Float32Array(TAILS * 2 * 2);
+  const colours = ramp ? new Float32Array(TAILS * 2 * 4).fill(1) : null;
+  const indices: number[] = [];
+  for (let i = 0; i < TAILS - 1; i++) {
+    const a = i * 2;
+    indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+  }
+  for (let i = 0; i < TAILS; i++) uvs[i * 4 + 3] = 1;
+  const mesh = new Mesh('fxBlur', scene);
+  const data = new VertexData();
+  data.positions = positions;
+  data.uvs = uvs;
+  if (colours) data.colors = colours;
+  data.indices = indices;
+  data.applyToMesh(mesh, true);
+  mesh.material = material;
+  mesh.isPickable = false;
+  mesh.alwaysSelectAsActiveMesh = true;
+  mesh.doNotSyncBoundingInfo = true;
+  mesh.metadata = { brightMesh: ramp };
+  (scene as TestScene).look?.glow.addExcludedMesh(mesh);
+
+  // Samples newest first: hilt xyz, tip xyz.
+  const samples = new Float32Array(TAILS * 6);
+  let n = 0;
+  const prevTip = new Vector3();
+  const prevHilt = new Vector3();
+  const read = (tipOut: Vector3, hiltOut: Vector3): void => {
+    opts.follow(tipOut);
+    if (opts.base) opts.base(hiltOut);
+    else hiltOut.set(tipOut.x, tipOut.y - 0.6, tipOut.z);
+  };
+  const push = (f: number): void => {
+    samples.copyWithin(6, 0, (TAILS - 1) * 6);
+    samples[0] = prevHilt.x + (hilt.x - prevHilt.x) * f;
+    samples[1] = prevHilt.y + (hilt.y - prevHilt.y) * f;
+    samples[2] = prevHilt.z + (hilt.z - prevHilt.z) * f;
+    samples[3] = prevTip.x + (tip.x - prevTip.x) * f;
+    samples[4] = prevTip.y + (tip.y - prevTip.y) * f;
+    samples[5] = prevTip.z + (tip.z - prevTip.z) * f;
+    n = Math.min(n + 1, TAILS);
+  };
+  read(prevTip, prevHilt);
+  tip.copyFrom(prevTip);
+  hilt.copyFrom(prevHilt);
+  push(1);
+
+  let t = 0;
+  let sampling = true;
+  let sinceSample = 0;
+  let tickClock = 0;
+  let age = 0;
+  return live.push({
+    update(dt) {
+      t += dt;
+      if (sampling && (t >= seconds || opts.until?.())) sampling = false;
+      if (sampling && dt > 0) {
+        read(tip, hilt);
+        // Lay the samples that fall in this frame along the straight path from the last frame.
+        const total = sinceSample + dt;
+        const k = Math.floor(total / SUB_STEP);
+        for (let m = Math.max(1, k - TAILS + 1); m <= k; m++) push((m * SUB_STEP - sinceSample) / dt);
+        sinceSample = total - k * SUB_STEP;
+        prevTip.copyFrom(tip);
+        prevHilt.copyFrom(hilt);
+      }
+      // MoveBlurs, once a tick.
+      tickClock += dt;
+      while (tickClock >= TICK) {
+        tickClock -= TICK;
+        age++;
+        n = Math.max(0, n - (age >= SHORT_LIFE ? 2 : 1));
+      }
+      if (!sampling && n < 2) return false;
+
+      const last = Math.max(0, n - 1);
+      for (let j = 0; j < TAILS; j++) {
+        const s = Math.min(j, last) * 6;
+        for (let c = 0; c < 6; c++) positions[j * 6 + c] = samples[s + c];
+        const u = j < n ? j / n : last / Math.max(1, n);
+        uvs[j * 4] = u;
+        uvs[j * 4 + 2] = u;
+        if (colours) {
+          const b = j < n ? (n - j) / n : 0;
+          colours.fill(b, j * 8, j * 8 + 3);
+          colours.fill(b, j * 8 + 4, j * 8 + 7);
+        }
+      }
+      mesh.updateVerticesData(VertexBuffer.PositionKind, positions, false, false);
+      mesh.updateVerticesData(VertexBuffer.UVKind, uvs, false, false);
+      if (colours) mesh.updateVerticesData(VertexBuffer.ColorKind, colours, false, false);
+      // Nothing to draw before two samples, nor before the sheet is in (a solid wedge of the tint).
+      mesh.visibility = n >= 2 && material.diffuseTexture ? 1 : 0;
+      return true;
+    },
+    release() {
+      mesh.dispose(false, false);
+    },
+  });
+}
+
 function spawn(scene: Scene, _at: Vector3, opts: BlurOptions): EffectHandle {
+  if (opts.tickHistory) return spawnTicked(scene, opts);
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
   const material = additiveMaterial(
     scene,

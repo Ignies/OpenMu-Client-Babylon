@@ -27,6 +27,16 @@ export const SKILL_DARK_SIDE = 263;
 export const RAGE_BUFF_SKILLS: ReadonlySet<number> = new Set([266, 267, 268]);
 /** AT_SKILL_RIDER: the one skill whose clip depends on the map, not the caster. */
 export const SKILL_RIDER = 49;
+/**
+ * AT_SKILL_BLOCKING: ReceiveAction returns before the clip and the sound for a Dark Horse rider
+ * outside a safe zone (WSclient.cpp:3577-3582); the hero's own cast still takes the guard pose.
+ */
+export const SKILL_DEFENSE = 18;
+/**
+ * AT_SKILL_SLASH / _STR: ReceiveMagic swings SWORD5 on an even SwordCount and TWO_HAND_SWORD3 on
+ * an odd one, then advances it (WSclient.cpp:4398-4410).
+ */
+export const SLASH_SKILLS: ReadonlySet<number> = new Set([23, 327]);
 
 // ---- per-skill cast clips --------------------------------------------------
 
@@ -121,6 +131,14 @@ const CHAIN_LIGHTNING_CLIPS: SkillClipSet = {
   fenrir: A.PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR,
 };
 
+/** The three summons, and their mounts (SummonSystem.cpp:46-62). */
+const SUMMON_CLIPS: SkillClipSet = {
+  ground: A.PLAYER_SKILL_SUMMON,
+  uniria: A.PLAYER_SKILL_SUMMON_UNI,
+  dinorant: A.PLAYER_SKILL_SUMMON_DINO,
+  fenrir: A.PLAYER_SKILL_SUMMON_FENRIR,
+};
+
 /** Sleep, Blind, Thorns, Berserker, Weakness, Enervation - one clip for all six. */
 const SLEEP_CLIPS: SkillClipSet = { ground: A.PLAYER_SKILL_SLEEP, ...MOUNTED_SLEEP };
 
@@ -136,32 +154,44 @@ const SLEEP_CLIPS: SkillClipSet = { ground: A.PLAYER_SKILL_SLEEP, ...MOUNTED_SLE
  */
 export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   // --- Dark Knight (UseSkillWarrior, ZzzInterface.cpp:2221-2300) -----------
+  // Defense: the guard pose on every mount, no Helper branch (SkillCast.cpp:224-231, WSclient.cpp:3610-3612).
+  18: { ground: A.PLAYER_DEFENSE1 },
   // The default branch is PLAYER_ATTACK_SKILL_SWORD1 + baseSkill - FALLING_SLASH.
-  19: { ground: A.PLAYER_ATTACK_SKILL_SWORD1, ...MOUNTED_SWORD }, // Falling Slash
-  328: { ground: A.PLAYER_ATTACK_SKILL_SWORD1, ...MOUNTED_SWORD }, // Falling Slash Str
-  20: { ground: A.PLAYER_ATTACK_SKILL_SWORD2, ...MOUNTED_SWORD }, // Lunge
-  329: { ground: A.PLAYER_ATTACK_SKILL_SWORD2, ...MOUNTED_SWORD }, // Lunge Str
-  21: { ground: A.PLAYER_ATTACK_SKILL_SWORD3, ...MOUNTED_SWORD }, // Uppercut
-  22: { ground: A.PLAYER_ATTACK_SKILL_SWORD4, ...MOUNTED_SWORD }, // Cyclone
-  326: { ground: A.PLAYER_ATTACK_SKILL_SWORD4, ...MOUNTED_SWORD }, // Cyclone Str
+  // 19-21: ReceiveMagic sets the sword clip for every caster, the hero's echo too, with no mount
+  // branch (WSclient.cpp:4370-4388), so UseSkillWarrior's Fenrir clip lasts one round trip.
+  19: { ground: A.PLAYER_ATTACK_SKILL_SWORD1 }, // Falling Slash
+  328: { ground: A.PLAYER_ATTACK_SKILL_SWORD1 }, // Falling Slash Str
+  20: { ground: A.PLAYER_ATTACK_SKILL_SWORD2 }, // Lunge
+  329: { ground: A.PLAYER_ATTACK_SKILL_SWORD2 }, // Lunge Str
+  21: { ground: A.PLAYER_ATTACK_SKILL_SWORD3 }, // Uppercut
+  // 22 / 23 likewise (WSclient.cpp:4390-4410); Slash's odd swing is chooseSkillAction's (SLASH_SKILLS).
+  22: { ground: A.PLAYER_ATTACK_SKILL_SWORD4 }, // Cyclone
+  326: { ground: A.PLAYER_ATTACK_SKILL_SWORD4 }, // Cyclone Str
   479: { ground: A.PLAYER_ATTACK_SKILL_SWORD4, ...MOUNTED_SWORD }, // Cyclone Str (Duel Master)
-  23: { ground: A.PLAYER_ATTACK_SKILL_SWORD5, ...MOUNTED_SWORD }, // Slash
-  327: { ground: A.PLAYER_ATTACK_SKILL_SWORD5, ...MOUNTED_SWORD }, // Slash Str
+  23: { ground: A.PLAYER_ATTACK_SKILL_SWORD5 }, // Slash
+  327: { ground: A.PLAYER_ATTACK_SKILL_SWORD5 }, // Slash Str
   41: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Twisting Slash
   330: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Twisting Slash Str
   332: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Twisting Slash Mastery
   481: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Twisting Slash Str (Duel Master)
   55: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Fire Slash
   490: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Fire Slash Str
+  // Blood Storm has no original (skillVisuals.ts bloodStorm): the Twisting Slash spin, which the Blade
+  // Master and the Duel Master both have.
+  344: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Blood Storm
+  346: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Blood Storm Strengthener
   42: { ground: A.PLAYER_ATTACK_SKILL_FURY_STRIKE }, // Rageful Blow
   331: { ground: A.PLAYER_ATTACK_SKILL_FURY_STRIKE }, // Rageful Blow Str
   333: { ground: A.PLAYER_ATTACK_SKILL_FURY_STRIKE }, // Rageful Blow Mastery
   43: { ground: A.PLAYER_ATTACK_ONETOONE }, // Death Stab
   336: { ground: A.PLAYER_ATTACK_ONETOONE }, // Death Stab Str
+  339: { ground: A.PLAYER_ATTACK_ONETOONE }, // Death Stab Proficiency
+  342: { ground: A.PLAYER_ATTACK_ONETOONE }, // Death Stab Mastery
   47: { ground: A.PLAYER_ATTACK_SKILL_SPEAR, fenrir: A.PLAYER_FENRIR_ATTACK_SPEAR }, // Impale
   48: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life
   356: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life Str
   360: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life Proficiency
+  363: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life Mastery
   44: { ground: A.PLAYER_ATTACK_RUSH }, // Rush
   232: { ground: A.PLAYER_SKILL_BLOW_OF_DESTRUCTION }, // Strike of Destruction
   337: { ground: A.PLAYER_SKILL_BLOW_OF_DESTRUCTION }, // Strike of Destruction Str
@@ -218,6 +248,10 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   515: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Increase Critical Damage Str2
   517: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Increase Critical Damage Str3
   75: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Add Skill (Brand of Skill)
+  // Iron Defense is newer than the reference, which has no clip for it: the Dark Lord's buff clip, not a weapon swing.
+  323: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Iron Defense (every master class)
+  521: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Iron Defense
+  524: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Iron Defense Str
 
   // --- Castle siege commands (AttackCommon, ZzzInterface.cpp:6442-6690) ----
   67: { ground: A.PLAYER_SKILL_VITALITY, ...MOUNTED_COMMAND }, // Stun
@@ -245,9 +279,15 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   220: { ground: A.PLAYER_SKILL_SLEEP }, // Blind
   461: { ground: A.PLAYER_SKILL_SLEEP }, // Blind (OpenMU)
   463: { ground: A.PLAYER_SKILL_SLEEP }, // Blind Str
-  217: SLEEP_CLIPS, // Thorns
-  218: SLEEP_CLIPS, // Berserker
-  469: SLEEP_CLIPS, // Berserker Str
+  // Thorns / Berserker: the 0x19 reply sets plain PLAYER_SKILL_SLEEP for every caster (WSclient.cpp:4929-4949).
+  217: { ground: A.PLAYER_SKILL_SLEEP }, // Thorns
+  218: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker
+  469: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker Str
+  470: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker Proficiency
+  472: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker Mastery
+  223: SUMMON_CLIPS, // Explosion
+  224: SUMMON_CLIPS, // Requiem
+  225: SUMMON_CLIPS, // Pollution
   221: SLEEP_CLIPS, // Weakness
   222: SLEEP_CLIPS, // Enervation
   459: SLEEP_CLIPS, // Weakness Str

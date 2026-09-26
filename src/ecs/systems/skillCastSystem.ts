@@ -12,6 +12,7 @@ import {
 } from '../../common/packets/ClientToServerPackets';
 import { skillDefinition, type SkillDefinition } from '../../common/skillsDatabase';
 import {
+  advancesSwordCount,
   chooseSkillAction,
   isAreaSkill,
   isSelfCastable,
@@ -38,14 +39,25 @@ import { getBaseClass } from '../../common/characterStats';
 import { isWingItem } from '../../common/wings';
 import type { AttackPose } from '../../common/weaponClass';
 import { mountKind } from '../../common/pets';
-import { playSkill } from '../../sound/combat';
+import { heroCastSound, playCombat, playSkill } from '../../sound/combat';
 import { skills } from '../../skills';
 import { combat } from '../../combat';
-import { SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../combat/recipes';
+import { SKILL_DEFENSE, SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../combat/recipes';
 import { CONSECUTIVE_ATTACK_KEY } from '../../combat/skillMovement';
 import { castsInPlace, castsOnSelfOnly } from '../../combat/castTargets';
 import { PlayerAction } from '../../common/objects/enum';
 import type { CastContext } from '../../combat';
+import { Vector3 } from '../../libs/babylon/exports';
+import { effects } from '../../effects';
+import { boneLocalPos } from '../../effects/core';
+import { hasWarriorGlint, warriorGlint, warriorGlintStar, WARRIOR_GLINT_BONE, WARRIOR_GLINT_TIP } from '../../common/weaponBlur';
+import { tierIndex } from '../../common/lightingQuality';
+import { lighting } from '../../lighting';
+import { isPlayerAttackAction } from '../../common/playerActionMapper';
+
+/** The first lighting tier that draws the improved looks (common/skillVisuals.ts). */
+const ENHANCED_TIER = 1;
+const glintTmp = new Vector3();
 
 /**
  * Right-click skill use (Attack() / ExecuteSkill, ZzzInterface.cpp:6703-7130):
@@ -136,11 +148,38 @@ export const SkillCastSystem: ISystemFactory = world => {
     };
   }
 
+  /**
+   * UseSkillWarrior's glint and brandish (SkillCast.cpp:357-376): the hero's own warrior casts
+   * only. The swing clips already brandish in CombatSfxSystem; Rider's clip is no swing. Twisting
+   * Slash takes it only on a picked target, as a ground cast never passes UseSkillWarrior.
+   */
+  function warriorCast(hero: Entity, skill: number, action: PlayerAction, targeted: boolean): void {
+    if (!hasWarriorGlint(skill, mountKind(hero.charAppearance?.pet) !== null)) return;
+    if (!targeted && action === PlayerAction.PLAYER_ATTACK_SKILL_WHEEL) return;
+    const tip = new Vector3(0, -WARRIOR_GLINT_TIP, 0);
+    const pos = hero.transform!.pos;
+    const at = (out: Vector3): Vector3 => boneLocalPos(hero, WARRIOR_GLINT_BONE, tip, out);
+    effects.spawn('sprite', world.scene, Vector3.Zero(), warriorGlint(at));
+    if (tierIndex() >= ENHANCED_TIER) {
+      effects.spawn('sprite', world.scene, Vector3.Zero(), warriorGlintStar(at));
+      lighting.skillSpot(world.scene, 0, 'glint', out => {
+        const p = at(glintTmp);
+        out.x = p.x;
+        out.y = p.y;
+        out.z = p.z;
+      });
+    }
+    if (!isPlayerAttackAction(action) && action !== PlayerAction.PLAYER_FENRIR_ATTACK_SPEAR) {
+      playCombat(Math.random() < 0.5 ? 'Sound/eSwingWeapon1' : 'Sound/eSwingWeapon2', pos);
+    }
+  }
+
   function clipFor(hero: Entity, def: SkillDefinition): PlayerAction {
-    const action = chooseSkillAction(def, attackPose(hero), castContext(hero));
+    const ctx = castContext(hero);
+    const action = chooseSkillAction(def, attackPose(hero), ctx);
     // `c->SwordCount++`: every SetPlayerAttack / SetPlayerHighBowAttack the
-    // skill switch falls through to ends on it.
-    if (hero.playerAnimation) {
+    // skill switch falls through to ends on it, and Slash.
+    if (hero.playerAnimation && advancesSwordCount(def, ctx)) {
       hero.playerAnimation.swordCount = (hero.playerAnimation.swordCount ?? 0) + 1;
     }
     alternate = !alternate;
@@ -672,6 +711,7 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       const action = clipFor(hero, def);
       const duration = playClip(hero, action);
+      warriorCast(hero, def.num, action, !!target && target !== hero);
 
       if (step === 'midClip' && stepSquare) {
         pendingStep = {
@@ -681,8 +721,9 @@ export const SkillCastSystem: ISystemFactory = world => {
         };
       }
 
-      // ExecuteSkill plays the skill's sound as the cast starts.
-      playSkill(def.num, hero.transform.pos);
+      // ExecuteSkill plays the skill's sound as the cast starts (Fire Scream's only at its spawn); a Dark Horse rider's guard has none.
+      const horseGuard = def.num === SKILL_DEFENSE && castContext(hero).mount === 'horse';
+      if (!horseGuard) playCombat(heroCastSound(def.num), hero.transform.pos);
 
       cooldown = Math.max(
         duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,

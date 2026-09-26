@@ -55,7 +55,10 @@ export function playerPlaySpeed(
 
   // --- basic attacks (SetAttackSpeed, ZzzCharacter.cpp:830-960)
   if (action === A.PLAYER_ATTACK_FIST) return 0.6 + f;
-  if (action === A.PLAYER_ATTACK_TWO_HAND_SWORD_TWO) return 0.24 + f;
+  // SetAttackSpeed's own lines for the Magic Gladiator clips (ZzzCharacter.cpp:929, :970, :972; the WHEEL's is below).
+  if (action === A.PLAYER_ATTACK_TWO_HAND_SWORD_TWO) return 0.25 + f;
+  if (action === A.PLAYER_ATTACK_ONE_FLASH) return 0.4 + f;
+  if (action === A.PLAYER_ATTACK_DEATH_CANNON) return 0.2 + f;
   if (
     action === A.PLAYER_ATTACK_BOW ||
     action === A.PLAYER_ATTACK_CROSSBOW ||
@@ -74,6 +77,15 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_ATTACK_SKILL_WHEEL) return 0.24 + f;
   if (action === A.PLAYER_ATTACK_ONETOONE) return 0.25 + f;
   if (action === A.PLAYER_ATTACK_SKILL_FURY_STRIKE) return 0.38;
+  // Set after the loop below, over it (ZzzCharacter.cpp:1008).
+  if (action === A.PLAYER_SKILL_VITALITY) return 0.34;
+  if (action === A.PLAYER_ATTACK_SKILL_SWORD3) return 0.27 + f; // Uppercut (ZzzCharacter.cpp:920)
+  if (action === A.PLAYER_ATTACK_SKILL_SWORD5) return 0.24 + f; // Slash (ZzzCharacter.cpp:922)
+  if (action === A.PLAYER_ATTACK_RUSH) return 0.3 + f; // Crescent Moon Slash (ZzzCharacter.cpp:971)
+  // Nova's two clips sit inside the range below but are set on their own lines: the charge at
+  // 0.5 + MagicSpeed, halved every frame it plays (ZzzCharacter.cpp:947, 2522-2525), the release flat (:1009).
+  if (action === A.PLAYER_SKILL_HELL_BEGIN) return (0.5 + magicSpeedFactor(magicSpeed)) / 2;
+  if (action === A.PLAYER_SKILL_HELL_START) return 0.3;
   if (action >= A.PLAYER_ATTACK_SKILL_SWORD1 && action < A.PLAYER_ATTACK_END) {
     return 0.3 + f;
   }
@@ -93,7 +105,6 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_SKILL_INFERNO) return 0.6 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_SKILL_HELL) return 0.5 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_RIDE_SKILL) return 0.3 + magicSpeedFactor(magicSpeed);
-  if (action === A.PLAYER_SKILL_HELL_BEGIN) return 0.5 + magicSpeedFactor(magicSpeed);
   // The Dark Lord's strike (Force, Fire Burst), on foot and mounted (ZzzCharacter.cpp:948-949).
   if (action === A.PLAYER_ATTACK_STRIKE) return 0.25 + f;
   if (action === A.PLAYER_ATTACK_RIDE_STRIKE) return 0.2 + f;
@@ -112,6 +123,14 @@ export function playerPlaySpeed(
   if (action >= A.PLAYER_SKILL_CHAIN_LIGHTNING_UNI && action <= A.PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR) return 0.15 + magicSpeedFactor(magicSpeed);
   if (action >= A.PLAYER_SKILL_DRAIN_LIFE && action <= A.PLAYER_SKILL_DRAIN_LIFE_FENRIR) return 0.25 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_SKILL_LIGHTNING_SHOCK) return 0.35 + magicSpeedFactor(magicSpeed);
+  if (action === A.PLAYER_ATTACK_RIDE_ATTACK_MAGIC) return 0.3 + magicSpeedFactor(magicSpeed);
+  // The summons, with no magic speed (ZzzCharacter.cpp:998-1001).
+  if (action >= A.PLAYER_SKILL_SUMMON && action <= A.PLAYER_SKILL_SUMMON_FENRIR) return 0.25;
+  // A flat 0.2 from the base table; SetAttackSpeed never touches it (ZzzCharacter.cpp:1005).
+  if (action === A.PLAYER_SKILL_SWELL_OF_MP) return 0.2;
+  // The Magic Gladiator's two spell clips (ZzzCharacter.cpp:994-995): MagicSpeed1 is AttackSpeed1's stepped factor.
+  if (action === A.PLAYER_SKILL_GIGANTICSTORM) return 0.55 + attackSpeedFactor(magicSpeed);
+  if (action === A.PLAYER_SKILL_FLAMESTRIKE) return 0.69 + magicSpeedFactor(magicSpeed);
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {
@@ -218,12 +237,13 @@ export function playerPlaySpeed(
 
 /**
  * The per-frame slowdowns `PlayAnimation` multiplies into the table rate
- * (ZzzCharacter.cpp:2501-2517): the Dark Lord's Party Teleport holds its
- * raised hand at a tenth after key 5.5, and his Electric Spike charges at half
- * speed over keys 1-3. `frame` is the clip's `AnimationFrame`. The Electric
+ * (ZzzCharacter.cpp:2497-2517): PLAYER_SKILL_VITALITY runs at half after key 6,
+ * the Dark Lord's Party Teleport holds its raised hand at a tenth after key 5.5,
+ * and his Electric Spike charges at half speed over keys 1-3. `frame` is the clip's `AnimationFrame`. The Electric
  * Spike x0.125 a caster in the hero's party gets is not ported.
  */
 export function playerFrameSpeedScale(action: PlayerAction, frame: number, darkLord: boolean): number {
+  if (action === A.PLAYER_SKILL_VITALITY && frame > 6) return 0.5;
   if (
     (action === A.PLAYER_ATTACK_TELEPORT ||
       action === A.PLAYER_ATTACK_RIDE_TELEPORT ||

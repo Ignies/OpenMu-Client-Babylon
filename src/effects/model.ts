@@ -28,11 +28,27 @@ import {
   type Texture,
 } from '../libs/babylon/exports';
 import { clampAlpha } from './clampAlpha';
+import { chromeMaterial, disposeChromeMaterials } from './chrome';
 import { getMaterial, loadGLTF } from '../common/modelLoader';
 import { BlendState } from '../common/objects/enum';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
-import { LiveList, TICK, additiveMaterial, darkCardGain, fadeOut, fxNow, lerp, luma, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
+import {
+  EFFECT_RENDERING_GROUP,
+  LiveList,
+  TICK,
+  additiveMaterial,
+  darkCardGain,
+  fadeOut,
+  fxNow,
+  keepDepthForEffects,
+  lerp,
+  luma,
+  pointSource,
+  type EffectBlend,
+  type PointSource,
+  type RGB,
+} from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
@@ -114,6 +130,26 @@ export interface ModelOptions {
    */
   blendMesh?: number;
   /**
+   * With `blendMesh`: the bright mesh's `BlendMeshLight`, a constant or re-read every frame.
+   * 0 hides it (MODEL_FIRE sub1's tail, ZzzEffect.cpp:7931-7936). Default 1.
+   */
+  blendLight?: number | ((t: number) => number);
+  /**
+   * With `blendLight`: the bright mesh takes `colour x blendLight` clamped per channel at full visibility,
+   * as `glColor3fv(BodyLight x BlendMeshLight)` does, so an overdriven tint runs to white (MODEL_SKILL_JAVELIN).
+   */
+  blendClamp?: boolean;
+  /** U offset added per 25 Hz tick, stepped per tick from the spawn's birth (`BlendMeshTexCoordU`, EnableWave); wins over `scrollU`. */
+  uvScroll?: number;
+  /** The textured meshes fade with visibility (RENDER_TEXTURE goes EnableAlphaTest when `Alpha < 0.99`, ZzzBMD.cpp:1444-1450). */
+  solidFade?: boolean;
+  /** A `RENDER_BRIGHT | RENDER_CHROME` pass over mesh `mesh` in `colour`, faded with visibility (chrome.ts). */
+  shine?: { mesh: number; colour: RGB };
+  /** Clip speed in keys per 25 Hz tick (the effect's `Velocity`), in place of the default 0.3. */
+  keysPerTick?: number;
+  /** Play the clip once up to this key, then hold it there (MODEL_ICE's `AnimationFrame >= 5` stop). */
+  playTo?: number;
+  /**
    * `add` (default) is the bright meshes' usual look; `subtract` is
    * `RENDER_DARK` - `EnableAlphaBlendMinus`, `dst × (1 − src)`
    * (ZzzBMD.cpp:1606) - the dark spirit stamps of Evil Spirit's MODEL_LASER.
@@ -170,6 +206,8 @@ export interface ModelOptions {
   scaleAt?: (t: number) => number;
   /** A 0..1 brightness at `t` seconds alive, multiplied into the fade (`BodyLight x BlendMeshLight`, clamped as GL did). */
   intensity?: (t: number) => number;
+  /** Draw the bright meshes without their converted COLOR_0 (noise on the skill models: teal and violet blotches). Off by default. */
+  plainColour?: boolean;
   /**
    * The sheet the bright meshes draw instead of their own - the original's
    * `RenderBody(…, Texture)` override (MODEL_CIRCLE sub2 with BITMAP_MAGIC_EMBLEM, ZzzObject.cpp:1497).
@@ -184,6 +222,8 @@ export interface ModelOptions {
   scrollU?: number;
   /** Radians about the node's z axis, after the yaw (the original's `Angle[1]`, negated by the mirror). */
   roll?: number;
+  /** Radians about the node's x axis, set with `yaw` and `roll` as one Euler triple (skillVisuals `muAngle` turns an MU `Angle` into one). */
+  pitch?: number;
   /**
    * With `blendMesh`: a non-bright mesh whose sheet carries alpha is alpha-tested and blended
    * (`EnableAlphaTest`, ZzzBMD.cpp RenderMesh `Components == 4`) instead of opaque.
@@ -218,6 +258,10 @@ export interface ModelHandle extends EffectHandle {
   pitchTo(rad: number): void;
   /** Re-turn a model spawned with `angle` (a homing body's `o->Angle` each tick). */
   setAngle(angle: readonly [number, number, number]): void;
+  /** Set the scale outright from now on, in place of `scale` and `grow` (a mover's own `o->Scale`). */
+  scaleTo(scale: number): void;
+  /** Change the peak visibility (`alpha`) from here on: `o->Alpha` stepped by whoever moves it. */
+  setAlpha(alpha: number): void;
 }
 
 const live = new LiveList();
@@ -227,7 +271,7 @@ export function modelCount(): number {
   return live.size;
 }
 
-/** Live `scrollU` spawns per shared GLB sheet. */
+/** Live `scrollU` / `uvScroll` spawns per shared GLB sheet. */
 const scrollUsers = new Map<Texture, number>();
 const tmp = new Vector3();
 const copyRel = new Matrix();
@@ -321,6 +365,27 @@ export function reseat(node: TransformNode, root: AbstractMesh, rearAt: number):
   root.position.set(-(min.x + max.x) / 2, -(min.y + max.y) / 2, rearAt * length - max.z);
 }
 
+/**
+ * Run `clip` at `keysPerTick` BMD keys a tick: looping, or once up to key `playTo` and held there
+ * on a looping sliver of a frame (a paused group writes its bones but nothing drawn follows).
+ */
+function playKeys(clip: AnimationGroup, keysPerTick: number, playTo: number | undefined, live: () => boolean): void {
+  const anim = clip.targetedAnimations[0]?.animation;
+  const keys = anim?.getKeys() ?? [];
+  const step = keys.length > 1 ? keys[1].frame - keys[0].frame : 1;
+  const fps = anim?.framePerSecond || 24;
+  const ratio = (keysPerTick * 25 * step) / fps;
+  if (playTo === undefined) {
+    clip.start(true, ratio, clip.from, clip.to);
+    return;
+  }
+  const hold = Math.min(clip.to, clip.from + playTo * step);
+  clip.onAnimationGroupEndObservable.addOnce(() => {
+    if (live()) clip.start(true, ratio, hold, hold + 0.05 * step);
+  });
+  clip.start(false, ratio, clip.from, hold);
+}
+
 /** Spawn helper other entries call directly (projectile heads). */
 export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): ModelHandle {
   const world = Store.world;
@@ -334,7 +399,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const rise = opts.rise ?? 0;
   const height = opts.height ?? 0;
   const tail = opts.fadeTail ?? 0.25;
-  const alpha = opts.alpha ?? 1;
+  let alpha = opts.alpha ?? 1;
   const fadeIn = opts.fadeIn ?? 0;
   const source = opts.follow ?? pointSource(at);
   const colour = opts.colour ?? RGBS.white;
@@ -350,6 +415,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   node.rotationQuaternion = opts.angle ? muAngle(opts.angle, new Quaternion()) : null;
   node.rotation.y = opts.yaw ?? 0;
   node.rotation.z = opts.roll ?? 0;
+  node.rotation.x = opts.pitch ?? 0;
   node.scaling.setAll(scale);
   if (world) node.setParent(world.mapParent);
   source(tmp);
@@ -363,15 +429,42 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const fadeMats: StandardMaterial[] = [];
   const scrollMats: StandardMaterial[] = [];
   const scrollU = opts.scrollU ?? 0;
+  const uvScroll = opts.uvScroll ?? 0;
   const scrolled = new Set<Texture>();
   // An override sheet loads after the mesh: until it is in, the material is a solid tinted face.
   const sheetMats: StandardMaterial[] = [];
   const copyNodes: { node: TransformNode; at: Vector3; scale: number; yaw: number }[] = [];
   const start = node.position.clone();
+  // With `blendMesh`: the bright meshes and their sheets, and the textured ones.
+  const brightMeshes: AbstractMesh[] = [];
+  const brightSheets: (string | Texture | undefined)[] = [];
+  const solidMeshes: AbstractMesh[] = [];
+  const blendLight = opts.blendLight;
+  // `blendClamp`: the bright meshes' material per tint step, looked up once per spawn.
+  const stepMats = new Map<number, StandardMaterial>();
+  let lastStep = -1;
+  let solidFaded = false;
+  let scaleOverride = 0;
   let clip: AnimationGroup | null = null;
   let scrolledV: Texture | null = null;
   let disposed = false;
   let t = 0;
+
+  /** Put the bright meshes on step `key`'s material, tinted (r, g, b). A scroll moves the shared sheet under it. */
+  const setStep = (key: number, r: number, g: number, b: number): void => {
+    if (key === lastStep || !brightMeshes.length) return;
+    lastStep = key;
+    for (let i = 0; i < brightMeshes.length; i++) {
+      const sheet = brightSheets[i];
+      if (!sheet) continue;
+      let m = stepMats.get(key * 8 + i);
+      if (!m) {
+        m = additiveMaterial(scene, sheet, [r, g, b]);
+        stepMats.set(key * 8 + i, m);
+      }
+      brightMeshes[i].material = m;
+    }
+  };
 
   if (world) {
     void loadGLTF(opts.model, world)
@@ -450,7 +543,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           }
           // A dark mesh's coverage is the sheet alone: the converted COLOR_0 on the skill models is noise,
           // and its alpha punched holes through the silhouette.
-          if (subtract && isBright) {
+          if ((subtract || opts.plainColour) && isBright) {
             mesh.useVertexColors = false;
             mesh.hasVertexAlpha = false;
           }
@@ -469,12 +562,18 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
             : keyed
               ? solidAlpha
               : solid;
-          if (isBright && !subtract && opts.scrollU) scrollMats.push(mesh.material as StandardMaterial);
+          if (isBright && !subtract && (scrollU || uvScroll)) scrollMats.push(mesh.material as StandardMaterial);
           if (isBright && !subtract && opts.texture) sheetMats.push(mesh.material as StandardMaterial);
           (scene as TestScene).look?.glow.addExcludedMesh(mesh as never);
           // Emissive skill art blooms; the opaque body of a blend-mesh model
           // and a subtractive one do not (glow.ts).
           if (isBright && !subtract) addEffectGlow(scene, mesh);
+          if (isBright && solid) {
+            brightMeshes.push(mesh);
+            brightSheets.push(sheet);
+            if (blendLight === 0) mesh.isVisible = false;
+          }
+          if (!isBright) solidMeshes.push(mesh);
         });
         if (opts.copies) {
           const rootInv = gltf.mesh.computeWorldMatrix(true).clone().invert();
@@ -501,8 +600,26 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           }
         }
         if (opts.scrollV) scrolledV = (meshes[opts.scrollV.mesh]?.metadata?.diffuseTexture as Texture | undefined) ?? null;
+        if (opts.shine) {
+          const src = meshes[opts.shine.mesh] as Mesh | undefined;
+          const shine = src?.clone(`${src.name}:shine`, src.parent);
+          if (shine) {
+            shine.material = chromeMaterial(scene, opts.shine.colour);
+            shine.metadata = { brightMesh: true };
+            shine.isPickable = false;
+            shine.alwaysSelectAsActiveMesh = true;
+            // After the textured pass it sits on: the effects group keeps the world's depth.
+            shine.renderingGroupId = EFFECT_RENDERING_GROUP;
+            keepDepthForEffects(scene);
+            (scene as TestScene).look?.glow.addExcludedMesh(shine as never);
+            addEffectGlow(scene, shine);
+            meshes.push(shine);
+          }
+        }
         clip = gltf.animationGroups[0] ?? null;
-        if (clip) {
+        if (clip && (opts.keysPerTick !== undefined || opts.playTo !== undefined)) {
+          playKeys(clip, opts.keysPerTick ?? 0.3, opts.playTo, () => !disposed);
+        } else if (clip) {
           clip.speedRatio = ANIMATION_SPEED;
           if (opts.holdFrame !== undefined) clip.start(true, ANIMATION_SPEED, opts.holdFrame, opts.holdFrame + 0.05);
           else if (opts.holdLast) {
@@ -525,7 +642,13 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       source(tmp);
       node.position.set(tmp.x, tmp.y + height + rise * t, tmp.z);
       const gp = growUntil < 1 ? Math.min(1, p / growUntil) : p;
-      node.scaling.setAll(opts.scaleAt ? opts.scaleAt(t) * DEFAULT_SCALE : scale * lerp(1, grow, growEase === 1 ? gp : Math.pow(gp, growEase)));
+      node.scaling.setAll(
+        scaleOverride > 0
+          ? scaleOverride
+          : opts.scaleAt
+            ? opts.scaleAt(t) * DEFAULT_SCALE
+            : scale * lerp(1, grow, growEase === 1 ? gp : Math.pow(gp, growEase))
+      );
       if (native && world) {
         const light = world.getTerrainLight(tmp.x, tmp.z);
         nativeLight.set(light.x + native.light[0], light.y + native.light[1], light.z + native.light[2]);
@@ -548,7 +671,9 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       const lit = opts.intensity ? Math.max(0, Math.min(1, opts.intensity(t))) : 1;
       let vis = (opts.life ? opts.life(p) * alpha : fadeOut(p, tail) * alpha * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1)) * lit * (decay !== 1 ? decay ** (t / TICK) : 1);
       for (const m of sheetMats) if (!m.diffuseTexture) vis = 0;
-      // The sheet is shared, so the scroll runs off the effects clock, the same for every user (as joint.ts's thunder).
+      // The sheet is shared, so `scrollU` runs off the effects clock, the same for every user (as joint.ts's thunder);
+      // `uvScroll` steps once a tick off this spawn's life.
+      const u = uvScroll ? uvScroll * Math.floor(t / TICK) : fxNow() * scrollU;
       for (const m of scrollMats) {
         const sheet = m.diffuseTexture as Texture | null;
         if (!sheet) continue;
@@ -557,7 +682,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           scrollUsers.set(sheet, (scrollUsers.get(sheet) ?? 0) + 1);
         }
         sheet.wrapU = Constants.TEXTURE_WRAP_ADDRESSMODE;
-        sheet.uOffset = (fxNow() * scrollU) % 1;
+        sheet.uOffset = u - Math.floor(u);
       }
       // A dark mesh fades through its coverage: `visibility` is clamped at 1 and the
       // coverage runs past it on the graded tiers.
@@ -566,8 +691,27 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       if (blendMeshes.length) {
         const light = native?.blendMeshLight ? native.blendMeshLight(fxNow() * 1000) : 1;
         for (const m of blendMeshes) {
-          m.visibility = vis / alpha;
+          m.visibility = alpha > 0 ? vis / alpha : 0;
           m.metadata.blendMeshLight = light;
+        }
+      }
+      if (opts.solidFade && !solidFaded && vis < 0.99 && solidMeshes.length) {
+        solidFaded = true;
+        const blended = getMaterial(scene, true, Material.MATERIAL_ALPHABLEND, BlendState.ALPHA_COMBINE, false, true);
+        for (const m of solidMeshes) m.material = blended;
+      }
+      if (blendLight !== undefined) {
+        const k = typeof blendLight === 'number' ? blendLight : blendLight(t);
+        for (const m of brightMeshes) {
+          m.visibility = opts.blendClamp ? 1 : vis * k;
+          m.isVisible = k > 0;
+        }
+        if (opts.blendClamp) {
+          // The clamped tint in 1/32 steps, one cached material per step.
+          const r = Math.round(Math.min(1, colour[0] * k) * 32);
+          const g = Math.round(Math.min(1, colour[1] * k) * 32);
+          const b = Math.round(Math.min(1, colour[2] * k) * 32);
+          setStep(r * 1089 + g * 33 + b, r / 32, g / 32, b / 32);
         }
       }
       return true;
@@ -618,6 +762,12 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     setAngle(angle) {
       node.rotationQuaternion = muAngle(angle, node.rotationQuaternion ?? new Quaternion());
     },
+    scaleTo(s: number) {
+      scaleOverride = s * DEFAULT_SCALE;
+    },
+    setAlpha(a: number) {
+      alpha = a;
+    },
   };
 }
 
@@ -631,6 +781,7 @@ function update(_map: number, dt: number): void {
 
 function reset(): void {
   live.clear();
+  disposeChromeMaterials();
 }
 
 // ---- 3. the layer ----------------------------------------------------------

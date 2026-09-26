@@ -19,6 +19,7 @@ import { PlayerAction } from '../common/objects/enum';
 import type { MountKind } from '../common/pets';
 import type { ENUM_WORLD } from '../common/types';
 import type { CombatLayer } from './layer';
+import { masterBase } from '../common/skillAliases';
 import {
   MAGIC_CLIPS,
   RAGE_BUFF_CLIPS,
@@ -94,7 +95,7 @@ export function skillClip(
       : RIDER_CLIPS.ground;
   }
 
-  const set = SKILL_CLIPS[skill];
+  const set = SKILL_CLIPS[skill] ?? SKILL_CLIPS[masterBase(skill)];
   if (!set) return null;
   if (ctx.mount) {
     const mounted = set[ctx.mount];
@@ -105,7 +106,7 @@ export function skillClip(
 
 /** Whether the skill has a dedicated clip (used to skip the alternate toggle). */
 export function hasSkillClip(skill: number): boolean {
-  return skill in SKILL_CLIPS || RAGE_BUFF_SKILLS.has(skill) || skill === SKILL_RIDER;
+  return skill in SKILL_CLIPS || masterBase(skill) in SKILL_CLIPS || RAGE_BUFF_SKILLS.has(skill) || skill === SKILL_RIDER;
 }
 
 // ---- 3. the layer ----------------------------------------------------------

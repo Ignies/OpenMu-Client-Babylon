@@ -65,6 +65,11 @@ export interface SpriteOptions {
   grow?: number;
   /** Size multiplier at birth, before growing in over the first 30 %. */
   growFrom?: number;
+  /**
+   * Every `every` seconds each card takes a new random rotation and, with `size`, a new size multiplier in
+   * [min, max]: a sprite the original makes afresh each tick with `rand() % 360` and a rolled `Scale`.
+   */
+  reroll?: { every: number; size?: readonly [number, number] };
   /** Radians per second the card turns on its axis. */
   spin?: number;
   /** Follow a moving point instead of staying where spawned. */
@@ -119,6 +124,12 @@ export interface SpriteOptions {
   aspect?: number;
   /** The card's turn in the view plane, radians (the original's `Rotation`), when it does not `spin`. */
   rotation?: number;
+  /** Fade the card to nothing towards its border (a sheet whose art runs to its edge). Additive cards only. */
+  softEdge?: boolean;
+  /** Additive cards: fade each cell (or the whole sheet) to nothing just before its edge; wins over `softEdge`. */
+  soft?: boolean;
+  /** A brightness at progress 0..1, multiplied into the fade (a `Light` that changes over the life). */
+  intensity?: (p: number) => number;
 }
 
 const live = new LiveList();
@@ -174,7 +185,7 @@ export function spawnSprite(
   const dark = opts.blend === 'subtract';
   const material = dark
     ? darkMaterial(scene, opts.texture, opts.cover ?? luma(colour) * darkCardGain(scene))
-    : additiveMaterial(scene, opts.texture, colour);
+    : additiveMaterial(scene, opts.texture, colour, 'add', opts.soft ? opts.cells ?? true : opts.softEdge ? 'card' : undefined);
   const flip = !dark && opts.frames ? opts.frames.textures.map(tex => additiveMaterial(scene, tex, colour)) : null;
   const flipUntil = opts.frames?.until ?? 1;
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
@@ -189,6 +200,9 @@ export function spawnSprite(
   const height = opts.height ?? 0;
   const tail = opts.fadeTail ?? 0.35;
   const cells = opts.cells;
+  const reroll = opts.reroll;
+  const rolled: number[] = [];
+  let nextRoll = 0;
   const source = opts.follow ? opts.follow : pointSource(at);
   const fadeIn = opts.fadeIn ?? 0;
   const stretch = opts.stretch ?? 1;
@@ -202,7 +216,10 @@ export function spawnSprite(
   for (let i = 0; i < count; i++) {
     const card = acquireCard(scene, flip ? flip[0] : material, !opts.flat);
     if (opts.flat) card.rotation.x = Math.PI / 2;
-    if (opts.roll !== undefined) card.rotation.z = opts.roll;
+    if (opts.roll !== undefined) {
+      if (opts.flat) card.rotation.y = opts.roll;
+      else card.rotation.z = opts.roll;
+    }
     cards.push(card);
     const s = seed++;
     offsets.push(
@@ -213,6 +230,7 @@ export function spawnSprite(
       )
     );
     phases.push(hash(s + 0.75) * Math.PI * 2);
+    rolled.push(1);
   }
 
   let t = 0;
@@ -246,13 +264,22 @@ export function spawnSprite(
       let vis = ready * fadeOut(p, tail);
       if (fadeIn > 0 && p < fadeIn) vis *= p / fadeIn;
       if (decay !== 1) vis *= decay ** (t / TICK);
+      if (opts.intensity) vis *= Math.max(0, Math.min(1, opts.intensity(p)));
+      if (reroll && t >= nextRoll) {
+        nextRoll = t + reroll.every;
+        for (let i = 0; i < cards.length; i++) {
+          phases[i] = Math.random() * Math.PI * 2;
+          if (reroll.size) rolled[i] = lerp(reroll.size[0], reroll.size[1], Math.random());
+          cards[i].rotation.z = phases[i];
+        }
+      }
       const y = height + rise * t;
       for (let i = 0; i < cards.length; i++) {
         const c = cards[i];
         const o = offsets[i];
         c.position.set(tmp.x + o.x + move[0] * t, tmp.y + o.y + y + move[1] * t, tmp.z + o.z + move[2] * t);
-        c.scaling.set(s, s * stretch, s);
-        if (opts.aspect) c.scaling.y = s * opts.aspect;
+        const r = rolled[i];
+        c.scaling.set(s * r, s * r * (opts.aspect ?? stretch), s * r);
         c.visibility = vis;
         if (opts.randomRoll) c.rotation.z = Math.random() * Math.PI * 2;
         else if (opts.rotation !== undefined && !spin && !opts.flat) c.rotation.z = opts.rotation;

@@ -154,6 +154,16 @@ export interface JointOptions {
   fadeTail?: number;
   /** A 0..1 brightness at `t` seconds alive, in place of `fadeTail` and the bolt's flicker (a per-tick `Light *= …`). */
   intensity?: (t: number) => number;
+  /**
+   * A caller-built polyline instead of a head or two ends: called once a tick
+   * with the point buffer (`maxTails + 1` points, oldest first), it writes its
+   * points and returns how many it wrote; the slots past them collapse onto
+   * the last. The sheet's U runs up from the oldest point, so it stays put on
+   * the path while the path grows (the tile-mapped tails, ZzzEffectJoint.cpp:7077-7116).
+   */
+  polyline?: (points: number[]) => number;
+  /** Trail: fade in over this fraction of the life (JOINT_SPIRIT sub24's `(160 - LifeTime) / 15`). Default 0. */
+  fadeIn?: number;
   /** Trail: segments kept behind the head (C++ `MaxTails`). */
   maxTails?: number;
   /**
@@ -217,6 +227,8 @@ export interface JointOptions {
   textureScroll?: number;
   /** Ends it early when true (the wearer left, the charge released). */
   until?: () => boolean;
+  /** Draw over everything: `DisableDepthTest` around the joint (JOINT_HEALING sub8, ZzzEffectJoint.cpp:7021-7024). */
+  onTop?: boolean;
   /**
    * Trail: the body the ribbon belongs to. Every tick the whole history is
    * shifted by this point's displacement before the head is sampled - the
@@ -315,12 +327,12 @@ export interface Line {
  * auto-UVs divide by the line's *initial* length, and every joint here is
  * born with all points on one spot.
  */
-function rampUVs(lines: number[][], repeats: number): number[] {
+function rampUVs(lines: number[][], repeats: number, ascending = false): number[] {
   const uvs: number[] = [];
   for (const line of lines) {
     const points = line.length / 3;
     for (let i = 0; i < points; i++) {
-      const u = (1 - i / (points - 1)) * repeats;
+      const u = (ascending ? i / (points - 1) : 1 - i / (points - 1)) * repeats;
       uvs.push(u, 0, u, 1);
     }
   }
@@ -377,7 +389,7 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
     {
       points: lines,
       updatable: true,
-      ...(textured ? { uvs: rampUVs(lines, repeats) } : {}),
+      ...(textured ? { uvs: rampUVs(lines, repeats, !!opts.polyline) } : {}),
       ...(widths ? { widths } : opts.taper ? { widths: taperWidths(lines, opts.taper === true ? {} : opts.taper) } : {}),
     },
     {
@@ -429,6 +441,7 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
     std.transparencyMode = Material.MATERIAL_ALPHABLEND;
     std.backFaceCulling = false;
     std.disableDepthWrite = true;
+    if (opts.onTop) std.depthFunction = Constants.ALWAYS;
     std.fogEnabled = false;
     std.blockDirtyMechanism = false;
     // Hold the line unseen until the sheet is in - a texture-less Standard
@@ -440,6 +453,7 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
       // the shared texture's wrap only matters to other joints of the same
       // sheet, which want the same thing.
       if (repeats !== 1 || opts.textureScroll) tex.wrapU = Texture.WRAP_ADDRESSMODE;
+      if (opts.textureScroll && opts.textureScroll !== 1) tex = scrollSheet(tex, opts.textureScroll);
       sheet = tex;
       if (dark) {
         tex.getAlphaFromRGB = true;
@@ -494,6 +508,33 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
           }
         : () => {},
   };
+}
+
+/**
+ * A sheet scrolled at a rate other than 1: `uOffset` lives on the texture and
+ * every joint of one rate writes the same value, so each extra rate draws off
+ * its own clone of the shared sheet (the same image underneath).
+ */
+const scrollSheets = new Map<Texture, Map<number, Texture>>();
+
+function scrollSheet(tex: Texture, rate: number): Texture {
+  let rates = scrollSheets.get(tex);
+  if (!rates) {
+    const made = new Map<number, Texture>();
+    rates = made;
+    scrollSheets.set(tex, made);
+    tex.onDisposeObservable.addOnce(() => {
+      for (const clone of made.values()) clone.dispose();
+      scrollSheets.delete(tex);
+    });
+  }
+  let clone = rates.get(rate);
+  if (!clone) {
+    clone = tex.clone();
+    clone.wrapU = Texture.WRAP_ADDRESSMODE;
+    rates.set(rate, clone);
+  }
+  return clone;
 }
 
 export function disposeLine(scene: Scene, line: Line, lines: number[][]): void {
@@ -847,7 +888,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
         if (stepped || !opts.tickPoints) mesh.setPoints(drawLines);
       }
       ribbon.scroll();
-      const vis = opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3);
+      const vis = (opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3)) * (opts.fadeIn ? Math.min(1, prog / opts.fadeIn) : 1);
       ribbon.fade(vis);
       if (opts.shrink) ribbon.narrow(1 - prog);
       if (spriteCards.length) {
@@ -868,6 +909,63 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
       for (const c of spriteCards) releaseCard(scene, c);
       spriteCards.length = 0;
       disposeLine(scene, ribbon, drawLines);
+    },
+  });
+}
+
+/** A polyline the caller rebuilds once a tick (`polyline`); segments over `maxSegment` are not drawn. */
+function spawnPolyline(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle {
+  const colour = opts.colour ?? RGBS.arc;
+  const seconds = opts.seconds ?? DEFAULT_SECONDS;
+  const tails = Math.max(1, opts.maxTails ?? DEFAULT_TAILS);
+  const tail = opts.fadeTail ?? 0.3;
+  const maxSq = (opts.maxSegment ?? Infinity) ** 2;
+  const line = new Array<number>((tails + 1) * 3);
+  for (let i = 0; i < line.length; i += 3) {
+    line[i] = at.x;
+    line[i + 1] = at.y;
+    line[i + 2] = at.z;
+  }
+  const lines = [line];
+  const ribbon = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const mesh = ribbon.mesh;
+  const build = opts.polyline!;
+  let t = 0;
+  let sinceSample = TAIL_SAMPLE_SECONDS;
+
+  return live.push({
+    update(dt) {
+      t += dt;
+      if (t >= seconds || opts.until?.()) return false;
+      sinceSample += dt;
+      if (sinceSample >= TAIL_SAMPLE_SECONDS) {
+        sinceSample = 0;
+        const n = Math.max(1, Math.min(tails + 1, build(line)));
+        // An over-long segment collapses onto its older end, so it draws as nothing.
+        for (let i = 3; i < n * 3; i += 3) {
+          const ex = line[i] - line[i - 3];
+          const ey = line[i + 1] - line[i - 2];
+          const ez = line[i + 2] - line[i - 1];
+          if (ex * ex + ey * ey + ez * ez > maxSq) {
+            line[i - 3] = line[i];
+            line[i - 2] = line[i + 1];
+            line[i - 1] = line[i + 2];
+          }
+        }
+        const e = (n - 1) * 3;
+        for (let i = n * 3; i < line.length; i += 3) {
+          line[i] = line[e];
+          line[i + 1] = line[e + 1];
+          line[i + 2] = line[e + 2];
+        }
+        mesh.setPoints(lines);
+      }
+      ribbon.scroll();
+      ribbon.fade(opts.intensity ? opts.intensity(t) : fadeOut(t / seconds, tail));
+      return true;
+    },
+    release() {
+      disposeLine(scene, ribbon, lines);
     },
   });
 }
@@ -927,6 +1025,7 @@ function waveLine(line: number[], scratch: number[], wave: NonNullable<JointOpti
 export function spawnJoint(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle {
   if (opts.pairs) return spawnBoltSet(scene, opts);
   if (opts.paths) return spawnPathSet(scene, opts);
+  if (opts.polyline) return spawnPolyline(scene, at, opts);
   return opts.head || opts.velocity !== undefined ? spawnTrail(scene, at, opts) : spawnBolt(scene, at, opts);
 }
 

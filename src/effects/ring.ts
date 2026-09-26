@@ -28,6 +28,9 @@ const DEFAULT_SCALE = 3;
 /** Biggest decal grid a pooled ring can draw (tiles); larger asks are clamped. */
 const MAX_SCALE = 8;
 
+/** A second, larger pool for the few decals past `MAX_SCALE` (the summon casting pool is 12 tiles, ZzzEffect.cpp:1163). */
+const BIG_SCALE = 12;
+
 // ---- 2. state + readers ----------------------------------------------------
 
 export interface RingOptions {
@@ -47,6 +50,8 @@ export interface RingOptions {
   /** `subtract` is EnableAlphaBlendMinus: black with the sheet as coverage, `luma(colour)` its strength. */
   blend?: 'additive' | 'alpha' | 'subtract';
   fadeTail?: number;
+  /** Visibility ramps up from 0 over this fraction of life (default 0: born full). */
+  fadeIn?: number;
   /**
    * The original's `Alpha` / `Luminosity` over the life (0..1 progress), replacing `fadeTail`. It scales
    * the light (an additive decal is drawn (ONE, ONE), which drops the material alpha) or the coverage.
@@ -72,6 +77,11 @@ export interface RingOptions {
   fadeColour?: boolean;
   /** Light multiplied by this every tick (`Light /= 1.05` is 1 / 1.05), on top of the fade. Default 1. */
   decay?: number;
+  /**
+   * A brightness at `t` seconds multiplied into `colour`, each channel clamped at 1 as the fixed-function colour
+   * was (BITMAP_MAGIC+1 sub4's `sin((60 - LT) x 0.05) + 0.5` pulse, ZzzEffect.cpp:9787-9805).
+   */
+  brightness?: (t: number) => number;
 }
 
 const live = new LiveList();
@@ -104,7 +114,7 @@ function poolKey(texture: string, blend: string, maxScale: number): string {
 export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): EffectHandle {
   const texture = opts.texture ?? TEX.magicCircle;
   const blend = opts.blend ?? 'additive';
-  const maxScale = opts.maxScale ?? MAX_SCALE;
+  const maxScale = opts.maxScale ?? ((opts.scale ?? DEFAULT_SCALE) > MAX_SCALE ? BIG_SCALE : MAX_SCALE);
   const decal = acquire(texture, blend, maxScale);
   const world = Store.world;
   if (!decal || !world) return DEAD_HANDLE;
@@ -117,6 +127,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const spin = opts.spin ?? 0;
   const spinFrom = opts.spinFrom ?? 0;
   const tail = opts.fadeTail ?? 0.35;
+  const fadeIn = opts.fadeIn ?? 0;
   const follow = opts.follow;
   const until = opts.until;
   const alphaAt = opts.alphaAt;
@@ -125,6 +136,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const cover = dark ? Math.min(1, luma(colour) * darkCardGain(_scene)) : 0;
   const fadeColour = opts.fadeColour === true;
   const decay = opts.decay ?? 1;
+  const brightness = opts.brightness;
   const lit: [number, number, number] = [colour[0], colour[1], colour[2]];
   let x = at.x;
   let z = at.z;
@@ -142,18 +154,21 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
         z = followTmp.z;
       }
       const s = scale * lerp(growFrom, grow, p);
-      // One level over the life: the `alphaAt` keys or the tail fade, times the per-tick `decay`.
-      const level = (alphaAt ? alphaAt(p) : fadeOut(p, tail)) * (decay !== 1 ? decay ** (t / TICK) : 1);
+      // One level over the life: the `alphaAt` keys or the tail fade, times the fade-in and the per-tick `decay`.
+      const level = (alphaAt ? alphaAt(p) : fadeOut(p, tail)) * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1) * (decay !== 1 ? decay ** (t / TICK) : 1);
       let light: readonly [number, number, number] = colour;
+      if (brightness) {
+        const k = brightness(t);
+        for (let i = 0; i < 3; i++) lit[i] = Math.min(1, colour[i] * k);
+        light = lit;
+      }
       if (dark) decal.setAlpha(cover * level);
       else {
         // An additive decal is drawn (ONE, ONE), which drops the alpha: `alphaAt` and `fadeColour` dim the light.
         const dim = !!alphaAt || fadeColour;
         decal.setAlpha(alphaAt ? 1 : level);
         if (dim) {
-          lit[0] = colour[0] * level;
-          lit[1] = colour[1] * level;
-          lit[2] = colour[2] * level;
+          for (let i = 0; i < 3; i++) lit[i] = light[i] * level;
           light = lit;
         }
       }

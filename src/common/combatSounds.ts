@@ -14,6 +14,7 @@ export {
   playerDeathSound,
   SKILL_SOUNDS,
   skillSound,
+  heroCastSound,
   pickupSound,
   type WeaponHands,
 } from '../sound';
