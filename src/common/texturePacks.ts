@@ -250,7 +250,23 @@ function reload(texture: Texture, url: string, buffer: unknown, original: Origin
  * from. Safe to call repeatedly: it does nothing when the texture is already
  * showing the right image.
  */
+/** Pack repaints still in flight; the loading screen waits for them. */
+let repaintsPending = 0;
+
+export function packRepaintsPending(): number {
+  return repaintsPending;
+}
+
 export async function applyPackToTexture(texture: Texture): Promise<void> {
+  repaintsPending++;
+  try {
+    await repaint(texture);
+  } finally {
+    repaintsPending--;
+  }
+}
+
+async function repaint(texture: Texture): Promise<void> {
   const original = remember(texture);
   if (!original) return;
 
