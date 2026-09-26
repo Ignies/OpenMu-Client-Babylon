@@ -25,6 +25,9 @@ const PACK = {
     // The colliding pair: same name, one an alpha cut-out, one opaque.
     'Object1/tree_01|32x32': 'Object1/tree_01.ozt.webp',
     'Object1/tree_01|128x64': 'Object1/tree_01.ozj.webp',
+    // A pair that collides in size too carries its container.
+    'Item/wing3chaking|128x128|ozt': 'Item/wing3chaking.ozt.webp',
+    'Item/wing3chaking|128x128|ozj': 'Item/wing3chaking.ozj.webp',
   },
 };
 
@@ -212,6 +215,23 @@ describe('applyPackToTexture', () => {
 
     expect(cutout.loads[0].url).toBe('./packs/hd-512/Object1/tree_01.ozt.webp');
     expect(opaque.loads[0].url).toBe('./packs/hd-512/Object1/tree_01.ozj.webp');
+  });
+
+  it('tells apart a same-size pair by the model alpha', async () => {
+    // Wing of Storm's membrane (OZT) and bone atlas (OZJ) are both a 128x128
+    // `Item/wing3chaking`. Keyed on name and size, the frame drew the membrane.
+    serve({ 'packs/index.json': INDEX, 'packs/hd-512/pack.json': PACK });
+    const m = await fresh();
+    await m.loadPackIndex();
+    await m.setActivePack('hd-512');
+
+    const membrane = fakeTexture('Item/wing3chaking', 128, 128, true);
+    const frame = fakeTexture('Item/wing3chaking', 128, 128, false);
+    await m.applyPackToTexture(membrane as never);
+    await m.applyPackToTexture(frame as never);
+
+    expect(membrane.loads[0].url).toBe('./packs/hd-512/Item/wing3chaking.ozt.webp');
+    expect(frame.loads[0].url).toBe('./packs/hd-512/Item/wing3chaking.ozj.webp');
   });
 
   it('never lets a swap change whether a texture has alpha', async () => {

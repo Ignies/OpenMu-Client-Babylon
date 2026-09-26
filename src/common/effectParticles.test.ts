@@ -80,6 +80,7 @@ vi.mock('../effects/core', () => ({
   EFFECT_RENDERING_GROUP: 1,
   keepDepthForEffects: () => {},
   spriteLevel: (_scene: unknown, color: unknown) => color,
+  darkCardGain: () => 1,
 }));
 vi.mock('./devSeams', () => ({ devQuery: () => null, devQueryNumber: () => null }));
 

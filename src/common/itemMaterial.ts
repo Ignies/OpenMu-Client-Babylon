@@ -576,6 +576,13 @@ const FX_AURA_BONE = 0x4000; // ...a wing's bone frame: lit red from its art
 const BODY_SHINE_UNIFORM = 'muBodyShine';
 
 /**
+ * Gain on a blended mesh's alpha, per mesh (`metadata.coverage`), capped at
+ * full cover: dark art whose alpha is its coverage takes the effects'
+ * `darkCardGain` on the graded tiers.
+ */
+const COVERAGE_UNIFORM = 'muCoverage';
+
+/**
  * Weight of the legacy additive chrome passes. 1.0 is the original's math
  * exactly; the original's framebuffer clips at 1 while ours is tone mapped
  * and exposed, so the passes are eased a little to land on the same look.
@@ -802,6 +809,8 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
         }
       }
     }
+
+    ${color}.a = min(${color}.a * ${COVERAGE_UNIFORM}, 1.0);
 `;
 
 let chromeTextures: {
@@ -881,6 +890,7 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
   material.AddUniform('ancientColor', 'vec3', null);
   material.AddUniform('itemGlow', 'vec3', null);
   material.AddUniform(BODY_SHINE_UNIFORM, 'vec3', null);
+  material.AddUniform(COVERAGE_UNIFORM, 'float', 1);
   material.AddUniform(LIGHT_TINT_UNIFORM, 'float', 0);
   material.AddUniform(CLOUD_NOISE_SAMPLER, 'sampler2D', textures.chrome);
   for (const name of CLOUD_UNIFORMS) material.AddUniform(name, 'vec4', null);
@@ -904,6 +914,7 @@ function bindItemEffect(
   const frame = itemFrame(scene);
 
   effect.setFloat('time', time + (mesh.metadata?.timeOffset ?? 0));
+  effect.setFloat(COVERAGE_UNIFORM, mesh.metadata?.coverage ?? 1);
   bindItemFrame(effect, frame);
   bindCloudTexture(effect, scene);
 
@@ -1065,7 +1076,10 @@ function bindBodyLight(effect: Effect, mesh: AbstractMesh, uniform: string) {
   const bodyLight = mesh.metadata?.bodyLight;
 
   if (bodyLight && UNIFIED_LIGHT_MODEL) {
-    const blend = mesh.metadata?.blendMeshLight ?? 1;
+    // `cardGain`: emissive effect art's exposure (effects/core `lightCardGain`),
+    // which the cap above would otherwise fold back to 1.
+    const blend =
+      (mesh.metadata?.blendMeshLight ?? 1) * (mesh.metadata?.cardGain ?? 1);
 
     packBodyLight(bodyLight.x, bodyLight.y, bodyLight.z, packedLight);
 
