@@ -35,9 +35,11 @@ import {
   chatEmojiAdvance,
   chatEmojiBubbleOf,
   chatEmojiSize,
-  splitChatLineWithEmojis,
+  emojiAtoms,
+  splitChatLineAtoms,
   stripEmojiCodes,
 } from './common/chatEmojis';
+import { itemLinkLabel, scanItemLinks, stripItemLinks } from './common/chatItemLinks';
 import { EMOJI_CATALOG } from './emojis';
 import { clipChatText, toChatWire } from './common/chatWire';
 import { chatTextWidth } from './common/chatTextWidth';
@@ -181,6 +183,8 @@ export const Social = new (class _Social {
    * dropped oldest one) does not move the view; null follows the newest row.
    */
   chatLogEndId: number | null = null;
+  /** An item link on its way into the chat box: the box shows `label`, sends `token`. */
+  pendingChatInsert: { label: string; token: string } | null = null;
   chatHistory: string[] = [];
   whisperHistory: string[] = [];
 
@@ -251,6 +255,9 @@ export const Social = new (class _Social {
       chatLogLines: observable,
       chatLogAlpha: observable,
       chatLogEndId: observable,
+      pendingChatInsert: observable.ref,
+      insertIntoChat: action,
+      takeChatInsert: action,
       scrollChatLog: action,
       scrollChatLogTo: action,
       followChatLog: action,
@@ -295,6 +302,7 @@ export const Social = new (class _Social {
   reset(): void {
     this.chatLines = [];
     this.chatLogEndId = null;
+    this.pendingChatInsert = null;
     this.lastSystemLine = { text: '', at: 0 };
     this.chatInputOpen = false;
     this.partyMembers = [];
@@ -389,18 +397,24 @@ export const Social = new (class _Social {
       (GameOptions.chatTimestamps ? chatTextWidth(`${chatTimestamp(at)} `) : 0);
 
     const prefix = chatSenderPrefix({ sender, ...speaker });
-    // Only what players say can hold emojis; a system line is left as sent.
-    const parts =
-      sender && GameOptions.chatEmojis
-        ? splitChatLineWithEmojis(
-            prefix,
-            text,
-            width,
-            chatTextWidth,
-            EMOJI_CATALOG,
-            chatEmojiAdvance(chatEmojiSize(GameOptions.chatEmojiSize))
-          )
-        : splitChatLine(prefix, text, width, chatTextWidth);
+    // Only what players say holds emojis and item links; a system line is
+    // left as sent. Each is split as one piece, at the width it is drawn.
+    const parts = sender
+      ? splitChatLineAtoms(prefix, text, width, chatTextWidth, [
+          ...(GameOptions.chatEmojis
+            ? emojiAtoms(
+                text,
+                EMOJI_CATALOG,
+                chatEmojiAdvance(chatEmojiSize(GameOptions.chatEmojiSize))
+              )
+            : []),
+          ...scanItemLinks(text).map(link => ({
+            start: link.start,
+            end: link.end,
+            width: chatTextWidth(itemLinkLabel(link.item)),
+          })),
+        ])
+      : splitChatLine(prefix, text, width, chatTextWidth);
 
     // `Create(L"", strText2, ...)`: the carried half does not print the name
     // again, but it keeps the speaker so the log can hover and whisper off a
@@ -531,6 +545,18 @@ export const Social = new (class _Social {
     this.chatInputOpen = false;
   }
 
+  /** Alt+click on an item: the chat box opens, if it is not up, with the link at the caret. */
+  insertIntoChat(insert: { label: string; token: string }): void {
+    this.pendingChatInsert = insert;
+    this.chatInputOpen = true;
+  }
+
+  takeChatInsert(): { label: string; token: string } | null {
+    const insert = this.pendingChatInsert;
+    this.pendingChatInsert = null;
+    return insert;
+  }
+
   /** `SetWhsprID` (the command window's Whisper entry). */
   setWhisperTarget(name: string): void {
     runInAction(() => {
@@ -592,8 +618,9 @@ export const Social = new (class _Social {
     // never for a `/command`. The original also skipped it while riding a
     // mount outside a safe zone; mounts are not ported, so that gate is moot.
     if (!text.startsWith('/')) {
-      // Emoji codes are not words: `:dk_cry:` would play the cry emote.
-      const emote = matchEmoteWord(stripEmojiCodes(text, EMOJI_CATALOG));
+      // Emoji codes and item links are not words: `:dk_cry:` would play the
+      // cry emote, and a link's bytes can spell anything.
+      const emote = matchEmoteWord(stripItemLinks(stripEmojiCodes(text, EMOJI_CATALOG)));
       if (emote && Store.world) Store.world.emoteRequest = emote;
 
       // A line that is nothing but an emoji token pops the bubble here too.

@@ -138,6 +138,12 @@ function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
   return optionLevel > 0 ? 'blue' : 'white';
 }
 
+/** The colour the tooltip's name line takes, for anything else that names the item. */
+export function itemNameColor(item: Item): TooltipColor {
+  const stats = itemStats(item);
+  return stats ? nameColor(item, stats.def, stats.level) : 'white';
+}
+
 function nameLine(item: Item, def: ItemDef, level: number): string {
   let name = itemBaseName(def.group, def.index) || def.name;
   if (item.isExcellent) name = t('item.excellentPrefix', { name });

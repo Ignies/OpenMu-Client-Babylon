@@ -30,6 +30,8 @@ import { isKey } from '../../../../../common/keyBindings';
 import { EmojiText } from '../../../../components/emojiText';
 import { EMOJI_CATALOG } from '../../../../../emojis';
 import { EmojiPicker, RecentEmojis } from './emojiPicker';
+import { installItemLinkGesture } from './itemLinkGesture';
+import { labelsToWire, wireToLabels } from '../../../../../common/chatItemLinks';
 import {
   chatEmojiRowHeight,
   chatEmojiSize,
@@ -632,7 +634,10 @@ const ChatInput = observer(() => {
   // The `:` list Escape put away, by where its code starts.
   const [hiddenQuery, setHiddenQuery] = useState(-1);
   const [face, setFace] = useState(0);
+  // Item links in the box, by the label it shows them as; sent as the link.
+  const links = useRef(new Map<string, string>());
   const open = Social.chatInputOpen;
+  const pendingInsert = Social.pendingChatInsert;
 
   const whisperLine = Social.whisperEnabled && !!Social.whisperTarget.trim();
   const emojis = GameOptions.chatEmojis && ALL_EMOJIS.length > 0;
@@ -662,6 +667,22 @@ const ChatInput = observer(() => {
     whisperLine || text.startsWith('/') ? '' : CHAT_INPUT_PREFIX[mode]
   );
 
+  /** The line as it will be sent: link labels back to the links. */
+  const wireOf = (line: string) => labelsToWire(line, links.current);
+
+  /** `insert` in place of `text[from, to)`, refused when the line as sent would not fit. */
+  const placeText = (from: number, to: number, insert: string): boolean => {
+    const next = spliceChatText(text, from, to, insert, budget, line => wireOf(line).length);
+    if (!next) {
+      playUiSound('error');
+      return false;
+    }
+    setText(next.text);
+    pendingCaret.current = next.caret;
+    setCompletionIndex(0);
+    return true;
+  };
+
   /** Tab / click: put the command name (and a space when it takes arguments) in the field. */
   const complete = (command: ChatCommand) => {
     setText(command.usage || command.name === '/post' ? `${command.name} ` : command.name);
@@ -672,8 +693,11 @@ const ChatInput = observer(() => {
 
   useEffect(() => {
     if (!open) return;
-    setText('');
-    setCaret(0);
+    // Opened by Alt+click on an item: the box starts with its link.
+    const insert = Social.takeChatInsert();
+    links.current = new Map(insert ? [[insert.label, insert.token]] : []);
+    setText(insert?.label ?? '');
+    setCaret(insert?.label.length ?? 0);
     setHistoryIndex(-1);
     setTip(null);
     setPickerOpen(false);
@@ -681,6 +705,22 @@ const ChatInput = observer(() => {
     const id = requestAnimationFrame(() => inputRef.current?.focus());
     return () => cancelAnimationFrame(id);
   }, [open]);
+
+  // Alt+click on an item while the box is up: its link at the caret.
+  useEffect(() => {
+    if (!open || !pendingInsert) return;
+    const insert = Social.takeChatInsert();
+    if (!insert) return;
+    links.current.set(insert.label, insert.token);
+    const field = inputRef.current;
+    const from = field?.selectionStart ?? text.length;
+    const gap = from > 0 && text[from - 1] !== ' ' ? ' ' : '';
+    placeText(from, field?.selectionEnd ?? from, gap + insert.label);
+    // The window's own press may have taken the focus.
+    const id = requestAnimationFrame(() => inputRef.current?.focus());
+    return () => cancelAnimationFrame(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, pendingInsert]);
 
   useLayoutEffect(() => {
     const at = pendingCaret.current;
@@ -712,7 +752,7 @@ const ChatInput = observer(() => {
     }
     // Rate-limited or refused: the line stays in the field for a retry
     // instead of vanishing with the box.
-    if (!Social.sendChat(text)) {
+    if (!Social.sendChat(wireOf(text))) {
       playUiSound('error');
       return;
     }
@@ -735,20 +775,14 @@ const ChatInput = observer(() => {
     let next = historyIndex < 0 ? history.length : historyIndex;
     next = (next + direction + history.length) % history.length;
     setHistoryIndex(next);
-    setText(history[next]);
+    // History keeps the line as sent; its links show as names again.
+    const recalled = wireToLabels(history[next]);
+    recalled.links.forEach((token, label) => links.current.set(label, token));
+    setText(recalled.text);
   };
 
-  /** An emoji's code in place of `text[from, to)`; refused when the line has no room for all of it. */
   const placeEmoji = (from: number, to: number, emoji: ChatEmoji) => {
-    const next = spliceChatText(text, from, to, `:${emoji.code}:`, budget);
-    if (!next) {
-      playUiSound('error');
-      return;
-    }
-    setText(next.text);
-    pendingCaret.current = next.caret;
-    setCompletionIndex(0);
-    RecentEmojis.push(emoji.code);
+    if (placeText(from, to, `:${emoji.code}:`)) RecentEmojis.push(emoji.code);
   };
 
   const pickEmoji = (emoji: ChatEmoji) => {
@@ -910,7 +944,8 @@ const ChatInput = observer(() => {
         ref={inputRef}
         className="chat-field chat-text-field"
         style={emojis ? CHAT_FIELD_BESIDE_EMOJIS : CHAT_FIELD}
-        maxLength={budget}
+        // The box holds link names, the line sends the links.
+        maxLength={Math.max(text.length, budget - (wireOf(text).length - text.length))}
         value={text}
         spellCheck={false}
         autoComplete="off"
@@ -1069,6 +1104,8 @@ export const ChatWindow = observer(() => {
     : MuWindows.scaleOf(CHAT_ID);
 
   useWindowStackEntry(CHAT_ID, true, NOTHING_TO_CLOSE);
+
+  useEffect(() => installItemLinkGesture(), []);
 
   // The keyboard system already drops keys typed into a field and any key
   // while a message box is up (`isComposing` too), so this only fires for a

@@ -161,13 +161,65 @@ export function stripEmojiCodes(text: string, catalog: EmojiCatalog): string {
 
 const GLYPH_BASE = 0xe000;
 const GLYPH_LAST = 0xf8ff;
-const GLYPHS = /[\ue000-\uf8ff]/g;
+const GLYPHS = new RegExp(`[${String.fromCharCode(GLYPH_BASE)}-${String.fromCharCode(GLYPH_LAST)}]`, 'g');
+const HAS_GLYPH = new RegExp(GLYPHS.source);
+
+/** A run of the line drawn as one piece (an emoji, an item link): never split, `width` wide. */
+export type ChatAtom = { start: number; end: number; width: number };
+
+export function emojiAtoms(
+  text: string,
+  catalog: EmojiCatalog,
+  advance = CHAT_EMOJI_ADVANCE
+): ChatAtom[] {
+  return scanEmojis(text, catalog).map(hit => ({ start: hit.start, end: hit.end, width: advance }));
+}
 
 /**
- * `splitChatLine` for a line that may hold codes. Each code is swapped for one
- * private-use character while the line is split, so a code is never broken in
- * two and is measured at the picture's width instead of its text's.
+ * `splitChatLine` for a line holding pieces drawn as one. Each is swapped for
+ * a single private-use character while the line is split, so it is never
+ * broken in two and is measured at the width it is drawn at, not its text's.
  */
+export function splitChatLineAtoms(
+  prefix: string,
+  text: string,
+  width: number,
+  measure: (text: string) => number,
+  atoms: readonly ChatAtom[]
+): string[] {
+  if (!atoms.length || HAS_GLYPH.test(text) || atoms.length > GLYPH_LAST - GLYPH_BASE) {
+    return splitChatLine(prefix, text, width, measure);
+  }
+
+  const runs: string[] = [];
+  const widths: number[] = [];
+  let packed = '';
+  let at = 0;
+  for (const atom of [...atoms].sort((a, b) => a.start - b.start)) {
+    if (atom.start < at) continue;
+    packed += text.slice(at, atom.start) + String.fromCharCode(GLYPH_BASE + runs.length);
+    runs.push(text.slice(atom.start, atom.end));
+    widths.push(atom.width);
+    at = atom.end;
+  }
+  packed += text.slice(at);
+
+  const measurePacked = (part: string) => {
+    let pieces = 0;
+    const plain = part.replace(GLYPHS, glyph => {
+      pieces += widths[glyph.charCodeAt(0) - GLYPH_BASE];
+      return '';
+    });
+    return (plain ? measure(plain) : 0) + pieces;
+  };
+
+  // Every such line is measured: a short run of pictures is wider than its length says.
+  return splitChatLine(prefix, packed, width, measurePacked, 0).map(row =>
+    row.replace(GLYPHS, glyph => runs[glyph.charCodeAt(0) - GLYPH_BASE])
+  );
+}
+
+/** `splitChatLineAtoms` with the line's emojis as the pieces. */
 export function splitChatLineWithEmojis(
   prefix: string,
   text: string,
@@ -176,34 +228,7 @@ export function splitChatLineWithEmojis(
   catalog: EmojiCatalog,
   advance = CHAT_EMOJI_ADVANCE
 ): string[] {
-  const hits = scanEmojis(text, catalog);
-  if (!hits.length || /[\ue000-\uf8ff]/.test(text) || hits.length > GLYPH_LAST - GLYPH_BASE) {
-    return splitChatLine(prefix, text, width, measure);
-  }
-
-  const codes: string[] = [];
-  let packed = '';
-  let at = 0;
-  for (const hit of hits) {
-    packed += text.slice(at, hit.start) + String.fromCharCode(GLYPH_BASE + codes.length);
-    codes.push(text.slice(hit.start, hit.end));
-    at = hit.end;
-  }
-  packed += text.slice(at);
-
-  const measurePacked = (part: string) => {
-    let pictures = 0;
-    const plain = part.replace(GLYPHS, () => {
-      pictures++;
-      return '';
-    });
-    return (plain ? measure(plain) : 0) + pictures * advance;
-  };
-
-  // Every line with a code is measured: a short run of pictures is wider than its length says.
-  return splitChatLine(prefix, packed, width, measurePacked, 0).map(row =>
-    row.replace(GLYPHS, glyph => codes[glyph.charCodeAt(0) - GLYPH_BASE])
-  );
+  return splitChatLineAtoms(prefix, text, width, measure, emojiAtoms(text, catalog, advance));
 }
 
 /** The `:partial` code being typed at the caret, or null. */
@@ -241,17 +266,19 @@ export function matchEmojiCodes(
 
 /**
  * `insert` in place of `text[from, to)`, or null when the result would not fit
- * the line: a code cut short would reach everyone as text.
+ * the line: a code cut short would reach everyone as text. `lengthOf` is how
+ * long the line is once sent, which differs from the box when it holds links.
  */
 export function spliceChatText(
   text: string,
   from: number,
   to: number,
   insert: string,
-  budget: number
+  budget: number,
+  lengthOf: (text: string) => number = t => t.length
 ): { text: string; caret: number } | null {
   const next = text.slice(0, from) + insert + text.slice(to);
-  if (next.length > budget) return null;
+  if (lengthOf(next) > budget) return null;
   return { text: next, caret: from + insert.length };
 }
 
