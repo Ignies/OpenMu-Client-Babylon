@@ -19,6 +19,7 @@ import type { Entity } from '../ecs/world';
 import type { TestScene } from '../scenes/testScene';
 import { addEffectGlow, disposeEffectGlow, dropEffectGlow } from './glow';
 import { installSpriteLinearDecode } from '../libs/babylon/spriteLinear';
+import { useGroundFade } from './groundFade';
 import type { EffectHandle } from './layer';
 
 /**
@@ -564,6 +565,8 @@ export interface ParticleRecipe {
   capacity?: number;
   /** Additive (MU default) or standard alpha (smoke). */
   blend?: 'add' | 'alpha';
+  /** Additive only: fade to nothing over this many tiles above the burst's ground (groundFade.ts). */
+  groundFade?: number;
 }
 
 const systems = new Map<Scene, Map<string, ParticleSystem>>();
@@ -747,6 +750,7 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
     if (systems.get(scene)?.get(k) === created) created.particleTexture = tex;
   });
 
+  if (r.groundFade) useGroundFade(ps, r.groundFade);
   ps.start();
   map.set(k, ps);
   byRecipe.set(r, { ps, gain });

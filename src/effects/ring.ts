@@ -46,6 +46,8 @@ export interface RingOptions {
   spinFrom?: number;
   blend?: 'additive' | 'alpha';
   fadeTail?: number;
+  /** Additive: fade by dimming the colour too - the one-one blend ignores the material's alpha. */
+  fadeColour?: boolean;
   /**
    * Re-read the position every frame instead of standing where it was
    * spawned. `RenderTerrainAlphaBitmap` is an immediate-mode call in the
@@ -104,6 +106,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const tail = opts.fadeTail ?? 0.35;
   const follow = opts.follow;
   const until = opts.until;
+  const lit: [number, number, number] = [colour[0], colour[1], colour[2]];
   let x = at.x;
   let z = at.z;
   let t = 0;
@@ -120,14 +123,16 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
         z = followTmp.z;
       }
       const s = scale * lerp(growFrom, grow, p);
-      decal.setAlpha(fadeOut(p, tail));
+      const a = fadeOut(p, tail);
+      decal.setAlpha(a);
+      if (opts.fadeColour) for (let i = 0; i < 3; i++) lit[i] = colour[i] * a;
       decal.draw(
         world,
         x,
         z,
         Math.min(maxScale, s),
         spinFrom + spin * t,
-        colour
+        opts.fadeColour ? lit : colour
       );
       return true;
     },

@@ -15,11 +15,14 @@ import {
   Emitter,
   LiveList,
   emitBurst,
+  fxNow,
+  particleSystemFor,
   pointSource,
   type ParticleRecipe,
   type PointSource,
 } from './core';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
+import { noteGroundFloor } from './groundFade';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -60,6 +63,10 @@ function spawn(scene: Scene, at: Vector3, opts: ParticlesOptions): EffectHandle 
     tmp.copyFrom(at);
     tmp.y += height;
     emitBurst(scene, opts.recipe, tmp, opts.count);
+    // A ground-faded burst takes `at` as its ground.
+    if (opts.recipe.groundFade) {
+      noteGroundFloor(particleSystemFor(scene, opts.recipe), at.y, fxNow(), opts.recipe.life);
+    }
   }
   if (!opts.rate) return DEAD_HANDLE;
 
