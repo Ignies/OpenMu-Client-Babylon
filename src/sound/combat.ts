@@ -87,8 +87,6 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   44: 'Sound/sKnightSkill2', // Rush (ReceiveMagic's SOUND_SKILL_SWORD2; the row plays sCHaveyBlow in Battle Castle)
   46: 'Sound/battlecastle/sCFireArrow', // Deep Impact
   52: 'Sound/ePiercing', // Penetration
-  55: 'Sound/eBloodAttack', // Fire Slash
-  56: 'Sound/sKnightSkill4', // Power Slash
   57: 'Sound/sKnightSkill2', // Spiral Slash
   58: 'Sound/eHellFire2_1', // Nova (charge)
   59: 'Sound/eCombo', // Combo
@@ -134,7 +132,7 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   383: 'Sound/SwellofMagicPower', // Expansion of Wizardry Mastery
   234: 'Sound/recover', // Recovery
   236: 'Sound/flame_strike', // Flame Strike
-  237: 'Sound/gigantic_storm', // Gigantic Storm
+  // 237 Gigantic Storm plays gigantic_storm from its row, at the clip key (ZzzCharacter.cpp:4777).
   238: 'Sound/caotic', // Chaotic Diseier
   260: 'Sound/Ragefighter/Rage_Thrust', // Killing Blow
   261: 'Sound/Ragefighter/Rage_Stamp', // Beast Uppercut (MonkSystem.cpp:1117)

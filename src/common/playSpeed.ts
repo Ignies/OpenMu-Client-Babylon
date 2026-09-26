@@ -55,7 +55,10 @@ export function playerPlaySpeed(
 
   // --- basic attacks (SetAttackSpeed, ZzzCharacter.cpp:830-960)
   if (action === A.PLAYER_ATTACK_FIST) return 0.6 + f;
-  if (action === A.PLAYER_ATTACK_TWO_HAND_SWORD_TWO) return 0.24 + f;
+  // SetAttackSpeed's own lines for the Magic Gladiator clips (ZzzCharacter.cpp:929, :970, :972; the WHEEL's is below).
+  if (action === A.PLAYER_ATTACK_TWO_HAND_SWORD_TWO) return 0.25 + f;
+  if (action === A.PLAYER_ATTACK_ONE_FLASH) return 0.4 + f;
+  if (action === A.PLAYER_ATTACK_DEATH_CANNON) return 0.2 + f;
   if (
     action === A.PLAYER_ATTACK_BOW ||
     action === A.PLAYER_ATTACK_CROSSBOW ||
@@ -125,6 +128,9 @@ export function playerPlaySpeed(
   if (action >= A.PLAYER_SKILL_SUMMON && action <= A.PLAYER_SKILL_SUMMON_FENRIR) return 0.25;
   // A flat 0.2 from the base table; SetAttackSpeed never touches it (ZzzCharacter.cpp:1005).
   if (action === A.PLAYER_SKILL_SWELL_OF_MP) return 0.2;
+  // The Magic Gladiator's two spell clips (ZzzCharacter.cpp:994-995): MagicSpeed1 is AttackSpeed1's stepped factor.
+  if (action === A.PLAYER_SKILL_GIGANTICSTORM) return 0.55 + attackSpeedFactor(magicSpeed);
+  if (action === A.PLAYER_SKILL_FLAMESTRIKE) return 0.69 + magicSpeedFactor(magicSpeed);
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {

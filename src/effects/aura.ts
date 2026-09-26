@@ -313,10 +313,16 @@ const EMBER_SIZE = 0.6;
 const EMBER_CELLS = { w: 64, h: 64, count: 4 };
 const EMBER_FPS = 12;
 
-/** The skull over a Defense-reduced head: the original creates BITMAP_SKULL but this build never draws it; ours is a small one that bobs. */
-const SKULL_SIZE = 0.5;
-const SKULL_HEIGHT = 2.3;
-const SKULL_BOB = 0.08;
+/**
+ * BITMAP_SKULL sub0 over a Defense-reduced body (MoveHandlers.cpp:583-634): three Skull.jpg sprites, 16 px at scale 1
+ * (16 cm), in a triangle fixed to the world at `i * 120 deg + LT * 0.17 rad`, radius `50 + 20 sin(i * 15.37 +
+ * WorldTime * 0.0031)` cm, 200 cm x the body's Scale up. LT is pinned at 10 while the debuff holds; once it ends the
+ * triangle turns 0.17 rad a tick as LT runs out.
+ */
+const SKULL_SIZE = 0.16;
+const SKULL_HEIGHT = 2;
+const SKULL_LT = 10;
+const SKULL_TURN = 0.17;
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -397,8 +403,8 @@ export interface AuraOptions {
   smoulder?: boolean;
   /** Frozen: the ice shell and its ember. */
   iceShell?: boolean;
-  /** Defense reduction: the skull. */
-  skull?: boolean;
+  /** Defense reduction: the skulls; `hidden` while the body is cloaked, `scale` the body's Scale. */
+  skull?: boolean | { hidden?: () => boolean; scale?: () => number };
   /** Stun: the three rising ribbons, once. */
   stun?: boolean;
   /** AG recovery: the orbiting healing rings. */
@@ -867,17 +873,29 @@ function iceShell(scene: Scene, o: AuraOptions): Part {
   };
 }
 
-function skull(scene: Scene, o: AuraOptions): Part {
-  const card = acquireCard(scene, additiveMaterial(scene, TEX.skull, [1, 1, 1]));
+function skull(scene: Scene, o: AuraOptions, stopping: () => boolean): Part {
+  const look = typeof o.skull === 'object' ? o.skull : {};
+  const cards = [0, 1, 2].map(() => acquireCard(scene, additiveMaterial(scene, TEX.skull, [1, 1, 1])));
+  let lt = SKULL_LT;
   return {
-    update(_dt, ramp) {
+    update(_dt, _ramp, ticks) {
+      if (stopping()) lt = Math.max(0, lt - ticks);
       o.follow(tmp);
-      card.position.set(tmp.x, tmp.y + SKULL_HEIGHT + Math.sin(fxNow() * 3) * SKULL_BOB, tmp.z);
-      card.scaling.setAll(SKULL_SIZE);
-      card.visibility = ramp;
+      const up = SKULL_HEIGHT * (look.scale?.() ?? 1);
+      const shown = lt > 0 && !look.hidden?.() ? 1 : 0;
+      const ms = fxNow() * 1000;
+      for (let i = 0; i < 3; i++) {
+        const a = (i * Math.PI * 2) / 3 + lt * SKULL_TURN;
+        const r = 0.5 + 0.2 * Math.sin(i * 15.37 + ms * 0.0031);
+        // MU (x, y) is the client's (x, z).
+        cards[i].position.set(tmp.x + r * Math.sin(a), tmp.y + up, tmp.z + r * Math.cos(a));
+        cards[i].scaling.setAll(SKULL_SIZE);
+        cards[i].visibility = shown;
+      }
     },
     release() {
-      releaseCard(scene, card);
+      for (const c of cards) releaseCard(scene, c);
+      cards.length = 0;
     },
   };
 }
@@ -1047,7 +1065,7 @@ function spawn(scene: Scene, _at: Vector3, opts: AuraOptions): EffectHandle {
   if (opts.neilSparks) parts.push(boneEmitter(scene, opts, NEIL_SPARKS, 1, 0));
   if (opts.smoulder) parts.push(boneEmitter(scene, opts, SMOULDER, 5, 0));
   if (opts.iceShell) parts.push(iceShell(scene, opts));
-  if (opts.skull) parts.push(skull(scene, opts));
+  if (opts.skull) parts.push(skull(scene, opts, isStopping));
   if (opts.stun) parts.push(stun(scene, opts, isStopping));
   if (opts.healingRings) parts.push(healingRings(scene, opts, isStopping));
   if (opts.berserk) parts.push(berserk(scene, opts));

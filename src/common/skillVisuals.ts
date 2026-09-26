@@ -21,6 +21,8 @@ import type { JointOptions, TaperShape } from '../effects/joint';
 import type { Ray } from '../effects/rays';
 import type { AuraOptions, BoneGlow, SpearJoints } from '../effects/aura';
 import type { SummonBody } from '../effects/summon';
+import type { Ribbon, RibbonOptions, StripOptions, TailStrip, TickedFx } from '../effects/ticked';
+import { spawnLinkedModel } from '../effects/linkedModel';
 import {
   ARC_MOTES,
   BLOOD_CHIPS,
@@ -86,7 +88,7 @@ import { earthQuake } from '../camera';
 import { warmGLTF } from './modelLoader';
 import { ENUM_WORLD } from './types';
 import { TW_NOGROUND, TW_NOMOVE, TW_WATER } from './terrain/consts';
-import { DARK_LORD_MASTER_ALIASES } from './skillAliases';
+import { DARK_LORD_MASTER_ALIASES, MAGIC_GLADIATOR_MASTER_ALIASES } from './skillAliases';
 import { LEFT_HAND_BONE, RIGHT_HAND_BONE } from './weaponAttachment';
 import { GROUP_BOW, GROUP_SHIELD } from './weaponClass';
 import { novaStageOf } from '../combat/novaCharge';
@@ -581,9 +583,6 @@ const skyfall = (m: string, colour: RGB, trail: ParticlesOptions['recipe'] | nul
 };
 
 // ---- shared rows ---------------------------------------------------------------
-
-/** Fire Slash's BITMAP_SKULL marks the target for LT 1000 (40 s) in the original; the defence debuff's length here. */
-const SKULL_SECONDS = 10;
 
 /** Summons: BITMAP_MAGIC+1 sub3 at the caster's feet + smoke at the point. */
 function summonCircle(at: Vector3, c: SkillContext): void {
@@ -8995,6 +8994,1048 @@ const earthPrisonEnhanced: Step = seq(
   }
 );
 
+// ---- mg steps --------------------------------------------------------------------
+
+/** RENDER_FACE both, the joint's `Light` white: `CreateJoint`'s defaults (ZzzEffectJoint.cpp:80-108). */
+const MG_THUNDER: StripOptions = { texture: TEX.jointThunder, colour: [0.5, 0.5, 1], maxTails: 10, uScale: 2, uScroll: true, batch: 24 };
+/** JOINT_FORCE sub0 draws only its flat face, `(MaxTails - j) / MaxTails * 2` bright (:7115-7129); sub10 is the generic two-face joint. */
+const MG_FORCE: StripOptions = { texture: TEX.jointForce, maxTails: 18, faces: 'flat', gain: j => ((18 - j) / 18) * 2 };
+const MG_FORCE_STR: StripOptions = { texture: TEX.jointForce, maxTails: 18 };
+/** BITMAP_FLARE sub23 (Flare.jpg), 15 tails. */
+const MG_SPIRAL_RIBBON: StripOptions = { texture: TEX.flareBig, maxTails: 15 };
+/** JOINT_FORCE sub4 (Hole.jpg), 13 tails. */
+const MG_CANNON_BEAM: StripOptions = { texture: TEX.hole, maxTails: 13 };
+/** BITMAP_FLARE_BLUE sub6, 15 tails. */
+const MG_CANNON_RING: StripOptions = { texture: TEX.flareBlue, maxTails: 15, batch: 12 };
+/** Fire01 is four 64 px cells in a row; sub0 draws `Width * 0.25` (ZzzEffectParticle.cpp:9161). */
+const MG_FIRE_CELLS = { w: 64, h: 64, count: 4 };
+/** MODEL_MAGIC2's blue and Death Cannon's (MoveHandlers.cpp:3355, ZzzEffectJoint.cpp:6421). */
+const MG_ORB_BLUE: RGB = [0.3, 0.6, 1];
+const MG_CANNON_BLUE: RGB = [0.1, 0.6, 1];
+/**
+ * BITMAP_SMOKE sub3 off each Power Slash orb: smoke01, LT 10, Scale 0.8-1.11 growing 0.1 a tick, flung 40-47 cm a
+ * tick at a random heading (pitch +-45) and slowed x0.4 a tick, light `LT / 8` x (0.8, 0.8, 1) (ZzzEffectParticle.cpp:1253,
+ * :5330). The decaying throw is drawn as the same 0.7 tiles at a constant speed.
+ */
+const MG_SMOKE_SPRAY: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.8, 0.8, 1],
+  size: 0.61,
+  sizeJitter: 0.16,
+  life: ticks(10),
+  lifeJitter: 0,
+  box: [0.01, 0.01, 0.01],
+  dir1: [-1, -0.7, -1],
+  dir2: [1, 0.7, 1],
+  power: 1.75,
+  powerJitter: 0.15,
+  endScale: 2,
+  capacity: 320,
+};
+/**
+ * BITMAP_SMOKE sub11: LT 50, Scale 1.2-1.67 growing 0.05 a tick, +-32 cm across and 32-95 cm up, the same thrown
+ * drift, sinking 1 cm a tick, light `LT / 50` x (0.3, 0.6, 1) x the orb's Luminosity (:1259, :5336); its mean 0.85 here.
+ */
+const MG_SMOKE_DRIFT: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.3 * 0.85, 0.6 * 0.85, 0.85],
+  size: 0.92,
+  sizeJitter: 0.16,
+  life: ticks(50),
+  lifeJitter: 0,
+  box: [0.32, 0.32, 0.32],
+  dir1: [-1, -1.4, -1],
+  dir2: [1, 0, 1],
+  power: 0.35,
+  powerJitter: 0.15,
+  endScale: 2.7,
+  capacity: 320,
+};
+
+// The graded tiers' extras (row.enhanced): the same elements, with glow, embers and sparks the original never drew.
+/** The gathering's crackles are JointThunder01 at (0.5, 0.5, 1): its glow at the hand is that violet-blue. */
+const MG_GATHER_GLOW: RGB = [0.45, 0.4, 1];
+/** Embers shed off Fire Slash's crescent, rising as the BITMAP_FIRE cards do. Round flares: Spark01 reads as squares this small. */
+const MG_EMBERS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: RGBS.fire,
+  colourEnd: RGBS.ember,
+  size: 0.13,
+  sizeJitter: 0.05,
+  life: 0.45,
+  lifeJitter: 0.2,
+  box: [0.1, 0.1, 0.1],
+  dir1: [-0.6, 0.3, -0.6],
+  dir2: [0.6, 1, 0.6],
+  power: 1.3,
+  powerJitter: 0.6,
+  gravity: 1.2,
+  spin: 3,
+  capacity: 256,
+};
+/** Blue motes shed behind each Power Slash orb. */
+const MG_ORB_SPARKS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.55, 0.8, 1],
+  colourEnd: [0.15, 0.35, 1],
+  size: 0.18,
+  sizeJitter: 0.06,
+  life: 0.5,
+  lifeJitter: 0.2,
+  box: [0.15, 0.25, 0.15],
+  power: 0.8,
+  powerJitter: 0.4,
+  gravity: -0.5,
+  spin: 2,
+  capacity: 320,
+};
+/** Gold chips shed from the Spiral Slash ribbon heads (Flare.jpg's own gold). */
+const MG_SPIRAL_SPARKS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: RGBS.gold,
+  colourEnd: RGBS.ember,
+  size: 0.12,
+  sizeJitter: 0.04,
+  life: 0.45,
+  lifeJitter: 0.15,
+  power: 1.2,
+  powerJitter: 0.5,
+  gravity: -1.5,
+  spin: 3,
+  capacity: 256,
+};
+const MG_SPIRAL_GOLD: RGB = [1, 0.72, 0.3];
+/** Death Cannon's muzzle and head sparks, in the beam's blue. */
+const MG_CANNON_SPARKS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.5, 0.85, 1],
+  colourEnd: [0.1, 0.4, 1],
+  size: 0.13,
+  sizeJitter: 0.05,
+  life: 0.4,
+  lifeJitter: 0.15,
+  power: 2,
+  powerJitter: 0.8,
+  gravity: -1,
+  spin: 3,
+  capacity: 256,
+};
+
+/** Flame Strike's heat glow on the blade: FlameStrike.bmd's own orange. */
+const MG_FLAME_GLOW: RGB = [1, 0.45, 0.15];
+/** Gigantic Storm: the flash where a bolt lands, and the sparks it throws, in the bolts' blue-white. */
+const MG_STORM_FLASH: RGB = [0.7, 0.75, 1];
+const MG_STORM_SPARKS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.85, 0.9, 1],
+  colourEnd: [0.35, 0.4, 1],
+  size: 0.1,
+  sizeJitter: 0.04,
+  life: 0.35,
+  lifeJitter: 0.15,
+  dir1: [-1, 0.5, -1],
+  dir2: [1, 1.5, 1],
+  power: 2.2,
+  powerJitter: 0.8,
+  gravity: -5,
+  spin: 3,
+  capacity: 320,
+};
+
+/** `PlayBuffer` with no object: positionless, as loud for a bystander as for the caster. */
+const mgSay = (key: Sounds): void => playCombat(key);
+/** sCMW and sCColdAttack are loaded on Battle Castle only (MapManager.cpp:280-281); anywhere else the original plays nothing. */
+const mgSayOnBattleCastle = (key: Sounds): void => {
+  if (storeRef().world?.mapIndex === ENUM_WORLD.WD_30BATTLECASTLE) playCombat(key);
+};
+
+/** Turn `a` toward `to` by at most `max` radians (TurnAngle2). */
+function mgTurn(a: number, to: number, max: number): number {
+  const d = Math.atan2(Math.sin(to - a), Math.cos(to - a));
+  return a + Math.max(-max, Math.min(max, d));
+}
+
+/**
+ * A JOINT_THUNDER sub3 crackle (ZzzEffectJoint.cpp:1123-1130, :4738-5018): `MaxTails` steps a tick of `Velocity`
+ * 10 cm, each homing up to 50 deg on the target (MoveHumming) and laid through a matrix jittered +-512 / Scale deg;
+ * it dies once 150 cm off.
+ */
+interface MgCrackle {
+  strip: TailStrip;
+  x: number;
+  y: number;
+  z: number;
+  yaw: number;
+  pitch: number;
+  tx: number;
+  ty: number;
+  tz: number;
+  half: number;
+  jitter: number;
+  lt: number;
+}
+function mgCrackle(fx: TickedFx, from: Vector3, to: Vector3, yaw: number, pitch: number, scaleCm: number, lt: number): MgCrackle {
+  return { strip: fx.strip(MG_THUNDER), x: from.x, y: from.y, z: from.z, yaw, pitch, tx: to.x, ty: to.y, tz: to.z, half: cm(scaleCm) / 2, jitter: (512 / scaleCm) * DEG, lt };
+}
+/** One tick of a crackle; false once it is spent. */
+function mgCrackleTick(k: MgCrackle): boolean {
+  let dist = 0;
+  for (let j = 0; j < 10; j++) {
+    const dx = k.tx - k.x;
+    const dy = k.ty - k.y;
+    const dz = k.tz - k.z;
+    const flat = Math.hypot(dx, dz);
+    dist = Math.hypot(flat, dy);
+    k.yaw = mgTurn(k.yaw, Math.atan2(dx, -dz), 50 * DEG);
+    k.pitch = mgTurn(k.pitch, -Math.atan2(dy, flat), 50 * DEG);
+    const yaw = k.yaw + (Math.random() * 2 - 1) * k.jitter;
+    const pitch = k.pitch + (Math.random() * 2 - 1) * k.jitter;
+    k.strip.push(k.x, k.y, k.z, k.half, yaw, pitch);
+    const cp = Math.cos(pitch);
+    k.x += cp * Math.sin(yaw) * cm(10);
+    k.y -= Math.sin(pitch) * cm(10);
+    k.z -= cp * Math.cos(yaw) * cm(10);
+  }
+  if (dist > cm(150)) k.lt = 0;
+  return --k.lt >= 0;
+}
+/** Step every crackle, dropping the spent ones. */
+function mgCracklesTick(fx: TickedFx, list: MgCrackle[]): void {
+  for (let i = list.length - 1; i >= 0; i--) {
+    if (mgCrackleTick(list[i])) continue;
+    fx.drop(list[i].strip);
+    list[i] = list[list.length - 1];
+    list.pop();
+  }
+}
+
+/** A moving one-tick card with its own life: BITMAP_FIRE sub0 and BITMAP_SPARK+1 sub2. */
+interface MgBit {
+  x: number;
+  y: number;
+  z: number;
+  vx: number;
+  vy: number;
+  vz: number;
+  scale: number;
+  grav: number;
+  lt: number;
+  light: number;
+}
+
+/**
+ * BITMAP_FIRE sub0 (ZzzEffectParticle.cpp:387-398, :4544-4551, :9161): LT 24, 3.2-4.7 cm a tick along the joint's
+ * heading, Scale 1.28-1.91 shrinking 0.04 a tick, a rise of `Gravity * 10` with Gravity +0.004 a tick, frame
+ * `(23 - LT) / 6`, upright, in the joint's `Light` at birth and never faded.
+ */
+function mgFire(x: number, y: number, z: number, heading: number, light: number): MgBit {
+  const f = forwardOf(heading);
+  const v = cm((32 + randInt(16)) * 0.1);
+  return { x, y, z, vx: f.x * v, vy: 0, vz: f.z * v, scale: (128 + randInt(64)) * 0.01, grav: 0, lt: 24, light };
+}
+function mgFiresTick(fx: TickedFx, list: MgBit[]): void {
+  for (let i = list.length - 1; i >= 0; i--) {
+    const b = list[i];
+    if (--b.lt <= 0) {
+      list[i] = list[list.length - 1];
+      list.pop();
+      continue;
+    }
+    b.x += b.vx;
+    b.z += b.vz;
+    b.grav += 0.004;
+    b.scale -= 0.04;
+    b.y += cm(b.grav * 10);
+    const size = cm(64) * b.scale;
+    fx.sprite(TEX.fire, RGBS.white, b.x, b.y, b.z, size, size, 0, b.light, MG_FIRE_CELLS, Math.floor((23 - b.lt) / 6));
+  }
+}
+
+/**
+ * BITMAP_GATHERING sub1 (ZzzEffect.cpp:1294-1318, MoveHandlers.cpp:1603-1669): 20 ticks at the weapon link bone, 10 cm
+ * up its own axis. Each tick three points on a 120 cm sphere round it: on even LT a JOINT_THUNDER sub3 crackle from the
+ * point to the hand (width 10, LT 10), on odd LT a BITMAP_SPARK+1 sub2 chip thrown at it; and every time a Shiny02
+ * card on the hand, Scale 1.6-3.0, rolled at random. `glow` (graded tiers) adds a violet glow swelling at the hand.
+ */
+const mgGathering = (glow = false): Step => (_at, c) => {
+  let lt = 20;
+  const local = new Vector3(0, 0, cm(10));
+  const hand = new Vector3();
+  const p = new Vector3();
+  const crackles: MgCrackle[] = [];
+  const sparks: MgBit[] = [];
+  effects.spawn('ticked', c.scene, hand, {
+    tick(fx) {
+      if (lt > 0 && entityGone(c.caster)) lt = 0;
+      if (lt > 0) {
+        boneLocalPos(c.caster, WEAPON_LINK_BONE, local, hand, CAST_HEIGHT);
+        for (let j = 0; j < 3; j++) {
+          // Rotate (0, 120, 0) by Angle(rand, 0, rand): the far side of that heading.
+          const pitch = randInt(360) * DEG;
+          const yaw = randInt(360) * DEG;
+          const cp = Math.cos(pitch);
+          p.set(hand.x - cp * Math.sin(yaw) * 1.2, hand.y + Math.sin(pitch) * 1.2, hand.z + cp * Math.cos(yaw) * 1.2);
+          if (lt % 2 === 0) {
+            crackles.push(mgCrackle(fx, p, hand, yaw, pitch, 10, 10));
+          } else {
+            // SPARK+1 sub2 (ZzzEffectParticle.cpp:2121-2133): thrown to cover the distance in 10 of its 15 ticks.
+            sparks.push({ x: p.x, y: p.y, z: p.z, vx: (hand.x - p.x) / 10, vy: (hand.y - p.y) / 10, vz: (hand.z - p.z) / 10, scale: (10 + randInt(50)) / 100, grav: 0, lt: 15, light: 1 });
+          }
+          const s = (8 + randInt(8)) * 0.2;
+          fx.sprite(TEX.shiny2, RGBS.white, hand.x, hand.y, hand.z, cm(32) * s, cm(64) * s, Math.random() * Math.PI * 2);
+        }
+        if (glow) {
+          const grow = (21 - lt) / 20;
+          fx.sprite(TEX.flare, MG_GATHER_GLOW, hand.x, hand.y, hand.z, 0.7 + grow * 0.6, 0.7 + grow * 0.6, lt * 0.3, 0.35 + grow * 0.4);
+        }
+        lt--;
+      }
+      mgCracklesTick(fx, crackles);
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const b = sparks[i];
+        if (--b.lt <= 0) {
+          sparks[i] = sparks[sparks.length - 1];
+          sparks.pop();
+          continue;
+        }
+        // The gathering gone, a chip has five ticks left at most.
+        if (lt <= 0 && b.lt > 5) b.lt = 5;
+        b.x += b.vx;
+        b.y += b.vy;
+        b.z += b.vz;
+        b.scale += 0.05;
+        const size = cm(32) * b.scale;
+        fx.sprite(TEX.spark3, RGBS.white, b.x, b.y, b.z, size, size, 0, Math.min(1, b.lt / 5));
+      }
+      return lt > 0 || crackles.length > 0 || sparks.length > 0;
+    },
+  });
+};
+
+/**
+ * UseSkillWarrior's BITMAP_SHINY+2 (SkillCast.cpp:374; ZzzEffectParticle.cpp:25-45, :7322-7325): Shiny03, 128 x 16 px,
+ * LT 18, `Scale = sin(LT * 10 deg) * 3`, at the weapon link bone + (0, -120, 0) cm. The hero's own cast only.
+ */
+function mgGlint(c: SkillContext): void {
+  if (!c.caster.localPlayer) return;
+  let lt = 18;
+  const local = new Vector3(0, cm(-120), 0);
+  const p = new Vector3();
+  effects.spawn('ticked', c.scene, p, {
+    tick(fx) {
+      if (--lt <= 0 || entityGone(c.caster)) return false;
+      const s = Math.sin(lt * 10 * DEG) * 3;
+      boneLocalPos(c.caster, WEAPON_LINK_BONE, local, p, CAST_HEIGHT);
+      fx.sprite(TEX.shiny3, RGBS.white, p.x, p.y, p.z, cm(128) * s, cm(16) * s, 0);
+      return true;
+    },
+  });
+}
+
+/**
+ * Fire Slash's key (ZzzCharacter.cpp:2796-2815, ZzzEffect.cpp:2959-2964, MoveHandlers.cpp:4993-5014,
+ * ZzzEffectJoint.cpp:2284-2302, :6244-6345): BITMAP_SWORD_FORCE at yaw + 45 lays a JOINT_FORCE crescent 100 cm up,
+ * width 150, from yaw + 75. Eight samples a tick on a 145 cm radius, 11 deg apart, until 18 are down; the cross-section
+ * stays on the local X of yaw + 75. Each sample: a 50 % BITMAP_FIRE and two JOINT_THUNDER sub3 crackles from the last
+ * sample (widths 5-14 and 4-11, LT 5). Light `LT / 30`, then /1.5 a tick below LT 10. The strengthener's sub10 draws
+ * both faces without the per-segment ramp. `enh` (graded tiers) adds a heat glow along the arc, embers off every
+ * sample and the light the arc throws.
+ */
+function mgCrescent(c: SkillContext, strengthened: boolean, enh = false): void {
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const centreY = feet.y + 1;
+  const heading = entityYaw(c.caster) + 75 * DEG;
+  const f0 = forwardOf(heading);
+  // JOINT_FORCE's init pushes Position 180 cm out; the first crackles start there.
+  const last = new Vector3(feet.x + f0.x * 1.8, centreY, feet.z + f0.z * 1.8);
+  const next = new Vector3();
+  let dir = heading;
+  let lt = 20;
+  let light = 1;
+  let strip: TailStrip | null = null;
+  const fires: MgBit[] = [];
+  const crackles: MgCrackle[] = [];
+  // Enhanced: the samples laid so far, for the heat glow; the light sits over the arc's middle (yaw - 18.5 deg).
+  const laid = enh ? new Float32Array(18 * 3) : null;
+  let nLaid = 0;
+  if (enh) {
+    const mid = forwardOf(heading - 93.5 * DEG);
+    const lx = feet.x + mid.x * 0.6;
+    const lz = feet.z + mid.z * 0.6;
+    lighting.skillFollow(c.scene, 55, out => {
+      out.x = lx;
+      out.y = centreY;
+      out.z = lz;
+    });
+  }
+  effects.spawn('ticked', c.scene, feet, {
+    tick(fx) {
+      if (lt >= 0) {
+        strip ??= fx.strip(strengthened ? MG_FORCE_STR : MG_FORCE);
+        for (let j = 0; j < 8; j++) {
+          if (strip.numTails >= 17) continue;
+          const f = forwardOf(dir);
+          next.set(feet.x + f.x * 1.45, centreY, feet.z + f.z * 1.45);
+          strip.push(next.x, next.y, next.z, 0.75, heading, 0);
+          dir -= 11 * DEG;
+          if (Math.random() < 0.5) fires.push(mgFire(next.x, next.y, next.z, heading, light));
+          crackles.push(mgCrackle(fx, last, next, heading, 0, 5 + randInt(10), 5));
+          crackles.push(mgCrackle(fx, last, next, heading, 0, 4 + randInt(8), 5));
+          last.copyFrom(next);
+          if (laid && nLaid < 18) {
+            laid[nLaid * 3] = next.x;
+            laid[nLaid * 3 + 1] = next.y;
+            laid[nLaid * 3 + 2] = next.z;
+            nLaid++;
+            emitBurst(c.scene, MG_EMBERS, next, 2);
+          }
+        }
+        if (laid) {
+          // Every third sample: a soft fire glow 0.8 tiles across, fading with the joint's light.
+          const lum = Math.min(1, light * 0.5);
+          for (let i = 1; i < nLaid; i += 3) fx.sprite(TEX.flare, RGBS.fire, laid[i * 3], laid[i * 3 + 1], laid[i * 3 + 2], 0.8, 0.8, i, lum);
+        }
+        light = lt < 10 ? light / 1.5 : lt / 30;
+        strip.light = light;
+        if (--lt < 0) {
+          strip.light = 0;
+          c.caster.modelObject?.ActionPlaySpeeds.delete(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL);
+        }
+      }
+      mgFiresTick(fx, fires);
+      mgCracklesTick(fx, crackles);
+      return lt >= 0 || fires.length > 0 || crackles.length > 0;
+    },
+  });
+}
+
+/**
+ * Fire Slash (55, and 490 through MASTER_ALIASES): the WHEEL clip's charge and key (ZzzCharacter.cpp:2782-2817). Two
+ * gatherings at AttackTime 1 and 2; at WHEEL frame 3 sKnightSkill3, the crescent, and the rest of the clip at
+ * `0.54 + AttackSpeed * 0.004`. The skull and eBloodAttack come with the debuff (BUFF_VISUALS[58]).
+ */
+const mgFireSlash = (enh: boolean): Step => (at, c) => {
+  const strengthened = currentSkill === 490;
+  const m = c.caster.modelObject;
+  m?.ActionPlaySpeeds.delete(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL);
+  mgGathering(enh)(at, c);
+  after(ticks(1), mgGathering())(at, c);
+  mgGlint(c);
+  whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 3, 15, (_p, cc) => {
+    mgSay('Sound/sKnightSkill3');
+    if (cc.caster.playerAnimation) {
+      const speed = cc.caster.attributeSystem?.getValue('attackSpeed') ?? 0;
+      cc.caster.modelObject?.setActionSpeed(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 0.54 + speed * 0.004);
+    }
+    mgCrescent(cc, strengthened, enh);
+  })(at, c);
+};
+const fireSlash = mgFireSlash(false);
+const fireSlashEnhanced = mgFireSlash(true);
+
+/**
+ * One Power Slash orb: MODEL_MAGIC2 sub2 (ZzzEffect.cpp:1991-1998, :6645, :8566; MoveHandlers.cpp:3345-3380). LT 20,
+ * 60 cm a tick along its yaw at the height it left from, its mesh hidden (`HiddenMesh = 0`). Each tick: 4 sub3 smokes,
+ * one sub11 smoke, two white Shiny02 at scale 1.5 and a flare01 at 3.5 in (0.3, 0.6, 1) x Luminosity, 50 cm up, and
+ * the terrain light under it. Luminosity rolls 0.7-1.0 and loses 0.2 a tick below LT 5. `enh` (graded tiers) adds a
+ * hot white core and blue motes shed behind it.
+ */
+function mgOrb(c: SkillContext, feet: Vector3, yaw: number, enh = false): void {
+  let lt = 20;
+  const f = forwardOf(yaw);
+  const pos = feet.clone();
+  const drift = new Vector3();
+  const ride = lighting.skillFollow(c.scene, 56, out => {
+    out.x = pos.x;
+    out.y = pos.y;
+    out.z = pos.z;
+  });
+  effects.spawn('ticked', c.scene, pos, {
+    tick(fx) {
+      if (lt <= 0) {
+        ride?.stop();
+        return false;
+      }
+      let lum = (7 + randInt(4)) * 0.1;
+      if (lt < 5) lum = Math.max(0, lum - (5 - lt) * 0.2);
+      emitBurst(c.scene, MG_SMOKE_SPRAY, pos, 4);
+      drift.set(pos.x, pos.y + cm(63), pos.z);
+      emitBurst(c.scene, MG_SMOKE_DRIFT, drift, 1);
+      // Enhanced: five overlapping flares burn to white on the graded buffer; held lower they keep their blue.
+      const hot = enh ? 0.7 : 1;
+      for (let i = 0; i < 2; i++) fx.sprite(TEX.shiny2, RGBS.white, pos.x, pos.y + 0.5, pos.z, cm(32) * 1.5, cm(64) * 1.5, Math.random() * Math.PI * 2, hot);
+      fx.sprite(TEX.flare, MG_ORB_BLUE, pos.x, pos.y + 0.5, pos.z, cm(64) * 3.5, cm(64) * 3.5, Math.random() * Math.PI * 2, enh ? lum * 0.55 : lum);
+      if (enh) {
+        fx.sprite(TEX.flare, RGBS.white, pos.x, pos.y + 0.5, pos.z, 0.6, 0.6, lt * 0.4, lum);
+        drift.set(pos.x, pos.y + 0.5, pos.z);
+        emitBurst(c.scene, MG_ORB_SPARKS, drift, 3);
+      }
+      pos.x += f.x * cm(60);
+      pos.z += f.z * cm(60);
+      lt--;
+      return true;
+    },
+  });
+}
+
+/** Power Slash (56, 482): the five orbs at yaw -40..+40 and SOUND_SKILL_SWORD3 on the clip's first tick (ZzzCharacter.cpp:2819-2843). */
+const mgPowerSlash = (enh: boolean): Step => (_at, c) => {
+  mgSay('Sound/sKnightSkill3');
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const yaw = entityYaw(c.caster);
+  for (let i = -2; i <= 2; i++) mgOrb(c, feet, yaw + i * 20 * DEG, enh);
+};
+const powerSlash = mgPowerSlash(false);
+const powerSlashEnhanced = mgPowerSlash(true);
+
+/** Spiral Slash's five ribbons: start height (cm / 100), yaw offset, pitch and yaw step signs (ZzzEffectJoint.cpp:2010-2016, :5849-5856). */
+const MG_SPIRAL_UP = [2, 0.1, 2, 0.1, 1];
+const MG_SPIRAL_YAW = [90, 90, -90, -90, 180];
+const MG_SPIRAL_PITCH = [3, -3, 3, -3, 0];
+const MG_SPIRAL_TURN = [-1, -1, 1, 1, -1];
+
+/**
+ * One BITMAP_FLARE sub23 ribbon `k` (ZzzEffectJoint.cpp:1996-2025, :5832-5877): LT 24 - k, still until LT 19. Then a
+ * tick at a time it takes `Direction[2]` steps (1, 5, 9, ...): D1 += 1.5 turns the yaw, pitch 3 deg a step, the head on
+ * a 200 cm sphere round where it spawned, until 15 tails are down, then one step a tick. Below LT 8 it stops and the tail
+ * runs into the head. Flare.jpg, width 40, white, both faces. `enh` (graded tiers) puts a gold glow on the head and
+ * sheds chips off it.
+ */
+function mgSpiralRibbon(c: SkillContext, k: number, enh = false): void {
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const sy = feet.y + MG_SPIRAL_UP[k];
+  let yaw = entityYaw(c.caster) + MG_SPIRAL_YAW[k] * DEG;
+  let pitch = 0;
+  let d1 = 5;
+  let steps = 1;
+  let lt = 24 - k;
+  const head = new Vector3(feet.x, sy, feet.z);
+  let strip: TailStrip | null = null;
+  effects.spawn('ticked', c.scene, feet, {
+    tick(fx) {
+      strip ??= fx.strip(MG_SPIRAL_RIBBON);
+      if (lt < 20) {
+        if (lt < 8) {
+          strip.push(head.x, head.y, head.z, cm(20), yaw, pitch);
+        } else {
+          for (let i = 0; i < steps; i++) {
+            d1 += 1.5;
+            pitch += MG_SPIRAL_PITCH[k] * DEG;
+            yaw += MG_SPIRAL_TURN[k] * d1 * DEG;
+            if (d1 > 15) d1 = 15;
+            const cp = Math.cos(pitch);
+            head.set(feet.x + cp * Math.sin(yaw) * 2, sy - Math.sin(pitch) * 2, feet.z - cp * Math.cos(yaw) * 2);
+            strip.push(head.x, head.y, head.z, cm(20), yaw, pitch);
+            if (strip.numTails >= 14) break;
+          }
+          steps += 4;
+        }
+        if (enh) {
+          const lum = Math.min(1, lt / 12);
+          fx.sprite(TEX.flare, MG_SPIRAL_GOLD, head.x, head.y, head.z, 0.9, 0.9, lt * 0.5, lum);
+          if (lt >= 6) emitBurst(c.scene, MG_SPIRAL_SPARKS, head, 2);
+        }
+      }
+      return --lt >= 0;
+    },
+  });
+}
+
+/** One Spiral Slash wave: its ribbons and SOUND_BCS_ONE_FLASH (ZzzCharacter.cpp:2960-2978). */
+const mgSpiralWave = (ks: readonly number[], enh = false): Step => (_at, c) => {
+  mgSayOnBattleCastle('Sound/battlecastle/sCColdAttack');
+  for (const k of ks) mgSpiralRibbon(c, k, enh);
+  if (!enh) return;
+  // One light per wave at the centre of the ribbons' 200 cm sphere.
+  const p = entityPos(c.caster, 1.2, new Vector3());
+  lighting.skillFollow(c.scene, 57, out => {
+    out.x = p.x;
+    out.y = p.y;
+    out.z = p.z;
+  });
+};
+
+/**
+ * Spiral Slash (57): ribbons 2 and 3 at ONE_FLASH frame 2.3, then 0, 1 and 4 past frame 5. The original's first wave
+ * only fires inside frames 2.3-2.6, which a fast clip can step over; here it always fires. The hero's own cast
+ * brandishes the blade (UseSkillWarrior, SkillCast.cpp:357-376).
+ */
+const mgSpiralSlash = (enh: boolean): Step => (at, c) => {
+  if (c.caster.localPlayer) {
+    mgGlint(c);
+    mgSay(randInt(2) ? 'Sound/eSwingWeapon2' : 'Sound/eSwingWeapon1');
+  }
+  whenClipKey(PlayerAction.PLAYER_ATTACK_ONE_FLASH, 2.3, 15, mgSpiralWave([2, 3], enh))(at, c);
+  whenClipKey(PlayerAction.PLAYER_ATTACK_ONE_FLASH, 5.001, 15, mgSpiralWave([0, 1, 4], enh))(at, c);
+};
+const spiralSlash = mgSpiralSlash(false);
+const spiralSlashEnhanced = mgSpiralSlash(true);
+
+/** How far down the beam the head still leaves its rings and cards: past this it is far off screen. */
+const MG_CANNON_DRESSED = 30;
+/** Enhanced: how far out the head's light follows it before it holds and fades (tiles). */
+const MG_CANNON_LIT = 5;
+
+/**
+ * Death Cannon's beam (ZzzCharacter.cpp:5018-5026; ZzzEffectJoint.cpp:2321-2366, :2999-3007, :6395-6428): JOINT_FORCE
+ * sub4 130 cm up along the caster's yaw, straight. Each tick the head moves `Velocity` (8 cm at first), then
+ * `Velocity += D2`, `D2 += 15.5` while LT >= 15 and 0.5 after; the last 13 heads are the streak, Hole.jpg, width 40,
+ * `Light / 1.3` a tick below LT 10. At every head a BITMAP_FLARE_BLUE sub6 ring, a flare01 at 1.6 and a Shiny02 at 1.5
+ * turned with WorldTime, both (0.1, 0.6, 1). `enh` (graded tiers) adds a muzzle flash with a spark burst, sparks off
+ * the head, and a light that rides the head out to MG_CANNON_LIT tiles.
+ */
+function mgCannonBeam(c: SkillContext, enh = false): void {
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const yaw = entityYaw(c.caster);
+  const f = forwardOf(yaw);
+  const sy = feet.y + 1.3;
+  let s = 0;
+  let v = 8;
+  let d = 3;
+  let lt = 20;
+  let light = 1;
+  let strip: TailStrip | null = null;
+  const rings: { strip: TailStrip; x: number; y: number; z: number; phase: number; lt: number }[] = [];
+  const muzzle = enh ? new Vector3(feet.x + f.x * 0.4, sy, feet.z + f.z * 0.4) : null;
+  const head = new Vector3();
+  let flash = enh ? 8 : 0;
+  if (muzzle) {
+    emitBurst(c.scene, MG_CANNON_SPARKS, muzzle, 14);
+    lighting.skillFollow(c.scene, 73, out => {
+      const lit = Math.min(cm(s), MG_CANNON_LIT);
+      out.x = feet.x + f.x * lit;
+      out.y = sy;
+      out.z = feet.z + f.z * lit;
+    });
+  }
+  effects.spawn('ticked', c.scene, feet, {
+    tick(fx) {
+      if (muzzle && flash > 0) {
+        const k = flash / 8;
+        fx.sprite(TEX.flare, MG_CANNON_BLUE, muzzle.x, muzzle.y, muzzle.z, 2.2 * k, 2.2 * k, flash, k);
+        fx.sprite(TEX.flare, RGBS.white, muzzle.x, muzzle.y, muzzle.z, 0.9 * k, 0.9 * k, -flash, k);
+        flash--;
+      }
+      if (lt >= 0) {
+        strip ??= fx.strip(MG_CANNON_BEAM);
+        s += v;
+        v += d;
+        d += lt >= 15 ? 15.5 : 0.5;
+        if (lt < 10) light /= 1.3;
+        const hx = feet.x + f.x * cm(s);
+        const hz = feet.z + f.z * cm(s);
+        if (cm(s) < MG_CANNON_DRESSED) {
+          rings.push({ strip: fx.strip(MG_CANNON_RING), x: hx, y: sy, z: hz, phase: randInt(360), lt: 15 });
+          fx.sprite(TEX.flare, MG_CANNON_BLUE, hx, sy, hz, cm(64) * 1.6, cm(64) * 1.6, 0);
+          fx.sprite(TEX.shiny2, MG_CANNON_BLUE, hx, sy, hz, cm(32) * 1.5, cm(64) * 1.5, fxNow() * 100 * DEG);
+          if (muzzle) emitBurst(c.scene, MG_CANNON_SPARKS, head.set(hx, sy, hz), 3);
+        }
+        strip.push(hx, sy, hz, cm(20), yaw, 0);
+        strip.light = light;
+        if (--lt < 0) strip.light = 0;
+      }
+      // FLARE_BLUE sub6 (ZzzEffectJoint.cpp:1883-1920, :5570-5605): radius 2 cm x LT, 0.8 rad a tick from a random
+      // phase, across the beam, its centre drifting 2 cm a tick along it; LT 15.
+      for (let i = rings.length - 1; i >= 0; i--) {
+        const r = rings[i];
+        r.x += f.x * cm(2);
+        r.z += f.z * cm(2);
+        const a = r.phase + r.lt * 0.8;
+        const rad = cm(Math.max(r.lt, 1) * 2);
+        const side = -Math.cos(a) * rad;
+        r.strip.push(r.x + Math.cos(yaw) * side, r.y + Math.sin(a) * rad, r.z + Math.sin(yaw) * side, cm(15), yaw, 0);
+        if (--r.lt < 0) {
+          fx.drop(r.strip);
+          rings[i] = rings[rings.length - 1];
+          rings.pop();
+        }
+      }
+      return lt >= 0 || rings.length > 0 || flash > 0;
+    },
+  });
+}
+
+/** Death Cannon (73): the beam and SOUND_BCS_DEATH_CANON once DEATH_CANNON reaches frame 3, with a target (ZzzCharacter.cpp:2990-2995, :4811). */
+const mgDeathCannon = (enh: boolean): Step => (at, c) => {
+  if (!c.target) return;
+  whenClipKey(PlayerAction.PLAYER_ATTACK_DEATH_CANNON, 3, 20, (_p, cc) => {
+    mgSayOnBattleCastle('Sound/battlecastle/sCMW');
+    mgCannonBeam(cc, enh);
+  })(at, c);
+};
+const deathCannon = mgDeathCannon(false);
+const deathCannonEnhanced = mgDeathCannon(true);
+
+/** FlameStrike.bmd's mesh 1 (flamestani, four rows): `fV = ((int)(WorldTime * 0.05) % 16 / 4) * 0.25` (ZzzEffect.cpp:9266). */
+const mgFlameRow = (ms: number): number => Math.floor((Math.floor(ms * 0.05) % 16) / 4) * 0.25;
+/** The blurs' sheets: `CreateObjectBlur` type 2 is motion_blur_r, type 5 Lava (ZzzEffectBlurSpark.cpp:383-397). ~105 samples at base speed. */
+const MG_FLAME_BLUR: RibbonOptions = { texture: TEX.motionBlurR, maxSamples: 160 };
+const MG_FLAME_LAVA: RibbonOptions = { texture: TEX.lava, maxSamples: 160 };
+/** FlameStrike.bmd bones the blurs run between: Sphere04 -> Sphere02 (type 2, twice) and Sphere01 -> Sphere03 (type 5). */
+const MG_FLAME_BONES = [9, 6, 8, 5];
+/** The blurs sample while the owner's FLAMESTRIKE frame is inside [5, 13] (MoveHandlers.cpp:7728-7729). */
+const MG_FLAME_FIRST = 5;
+const MG_FLAME_LAST = 13;
+
+/**
+ * Flame Strike (236, and 492 / 494 through the aliases): MODEL_EFFECT_FLAME_STRIKE on the clip's first tick with
+ * SOUND_SKILL_FLAME_STRIKE (ZzzCharacter.cpp:4754-4760; the sound is the cast's). FlameStrike.bmd hangs off the weapon
+ * link bone with its rotation, its clip on the owner's frame until frame 13 (MoveHandlers.cpp:7706-7792, ZzzEffect.cpp:9248-9270):
+ * both meshes bright at `Alpha`, +0.1 a tick to 1 and -0.1 a tick from LT < 20, gone below 0.1; mesh 1 steps its
+ * flame rows. While the owner's frame is 5-13, ten sub-samples a tick lay three object blurs between the model's bones,
+ * white: motion_blur_r twice from bone 9 to 6, Lava from 8 to 5. They live 30 ticks from their first sample, losing one
+ * sample a tick, and outlive the model: the destructor's RemoveObjectBlurs misses their rand() SubTypes (ZzzEffect.cpp:110-114).
+ * The frame lock waits until the clip is seen: another character's clip is applied after the packet.
+ * `enh` (graded tiers) adds a heat glow and a fire light riding the blade, embers shed off the Lava edge while it
+ * sweeps, and a spray of embers where the swing ends.
+ */
+const mgFlameStrike = (enh: boolean): Step => (at, c) => {
+  const caster = c.caster;
+  const blade = spawnLinkedModel(c.scene, at, { model: MODEL.flameStrike, entity: caster, bone: WEAPON_LINK_BONE, seconds: ticks(36), vStep: { mesh: 1, offset: mgFlameRow } });
+  let lt = 35;
+  let alpha = 0;
+  let bladeLive = blade.alive;
+  let seen = false;
+  let done = false;
+  let prevF = -1;
+  let heldAt = 0;
+  // The four bones this tick and last, and the sub-sample between them.
+  const prev = MG_FLAME_BONES.map(() => new Vector3());
+  const cur = MG_FLAME_BONES.map(() => new Vector3());
+  const p = MG_FLAME_BONES.map(() => new Vector3());
+  let havePrev = false;
+  let blurs: Ribbon[] | null = null;
+  let blurLife = 0;
+  // Enhanced: the blade's middle (its first blur's bones), where the glow and the light sit.
+  const glow = entityPos(caster, 1.2, new Vector3());
+  const ember = new Vector3();
+  const ride = enh
+    ? lighting.skillFollow(c.scene, 236, out => {
+        out.x = glow.x;
+        out.y = glow.y;
+        out.z = glow.z;
+      })
+    : null;
+  effects.spawn('ticked', c.scene, at, {
+    tick(fx) {
+      if (bladeLive) {
+        if ((lt < 20 && alpha < 0.1) || entityGone(caster)) {
+          blade.stop();
+          bladeLive = false;
+        } else {
+          if (lt < 20) alpha -= 0.1;
+          else if (alpha < 1) alpha += 0.1;
+          blade.setAlpha(alpha);
+          const m = caster.modelObject;
+          const inClip = !!m && m.CurrentAction === PlayerAction.PLAYER_SKILL_FLAMESTRIKE;
+          const f = inClip ? m!.actionFrame() : 0;
+          seen ||= inClip;
+          if (!done && seen && (!inClip || f > MG_FLAME_LAST)) {
+            done = true;
+            blade.lock(heldAt, 0);
+            if (enh) emitBurst(c.scene, MG_EMBERS, glow, 20);
+          } else if (!done && inClip) {
+            blade.lock(f, prevF >= 0 && f > prevF ? f - prevF : 0.69);
+            heldAt = f;
+            let got = true;
+            for (let i = 0; i < 4; i++) got = blade.bonePos(MG_FLAME_BONES[i], cur[i]) && got;
+            if (got && havePrev) {
+              for (let s = 0; s < 10; s++) {
+                const k = s / 10;
+                const sf = prevF + (f - prevF) * k;
+                if (sf < MG_FLAME_FIRST || sf > MG_FLAME_LAST) continue;
+                if (!blurs) {
+                  blurs = [fx.ribbon(MG_FLAME_BLUR), fx.ribbon(MG_FLAME_BLUR), fx.ribbon(MG_FLAME_LAVA)];
+                  blurLife = 30;
+                }
+                for (let i = 0; i < 4; i++) Vector3.LerpToRef(prev[i], cur[i], k, p[i]);
+                blurs[0].add(p[0].x, p[0].y, p[0].z, p[1].x, p[1].y, p[1].z);
+                blurs[1].add(p[0].x, p[0].y, p[0].z, p[1].x, p[1].y, p[1].z);
+                blurs[2].add(p[2].x, p[2].y, p[2].z, p[3].x, p[3].y, p[3].z);
+                if (enh) emitBurst(c.scene, MG_EMBERS, Vector3.LerpToRef(p[2], p[3], Math.random(), ember), 1);
+              }
+            }
+            if (got && enh) Vector3.LerpToRef(cur[0], cur[1], 0.5, glow);
+            if (got) {
+              for (let i = 0; i < 4; i++) prev[i].copyFrom(cur[i]);
+              havePrev = true;
+            }
+            prevF = f;
+          }
+        }
+        if (--lt <= 0 && bladeLive) {
+          blade.stop();
+          bladeLive = false;
+        }
+        if (enh && bladeLive) fx.sprite(TEX.flare, MG_FLAME_GLOW, glow.x, glow.y, glow.z, 1.6 * alpha, 1.6 * alpha, lt * 0.3, 0.3 * alpha);
+        if (!bladeLive) ride?.stop();
+      }
+      if (blurs && blurLife > 0) {
+        for (const b of blurs) b.age();
+        if (--blurLife <= 0) for (const b of blurs) b.light = 0;
+      }
+      return bladeLive || blurLife > 0;
+    },
+  });
+};
+const flameStrike = mgFlameStrike(false);
+const flameStrikeEnhanced = mgFlameStrike(true);
+
+/** Gigantic Storm's tint on its decals, smoke and chips: `vLight = (0.45, 0.45, 0.7)` (MoveHandlers.cpp:1697). */
+const MG_STORM_TINT: RGB = [0.45, 0.45, 0.7];
+const MG_STORM_ENERGY: RGB = [0.15, 0.15, 0.4];
+/** JOINT_THUNDER sub16: 50 tails of JointThunder01, both faces, its doubled scrolled U, white (ZzzEffectJoint.cpp:1100-1104, :1311-1314). */
+const MG_STORM_BOLT: StripOptions = { texture: TEX.jointThunder, maxTails: 50, uScale: 2, uScroll: true, batch: 8 };
+
+/**
+ * A JOINT_THUNDER sub16 bolt (ZzzEffectJoint.cpp:4738-5000): each tick up to 50 steps of `Velocity` 20-29 cm, homing
+ * 50 deg a step on the foot and laid through an angle jittered +-512 / Scale deg, until it is within 1.5 steps. LT 2-3.
+ */
+interface MgBolt {
+  strip: TailStrip;
+  x: number;
+  y: number;
+  z: number;
+  yaw: number;
+  pitch: number;
+  tx: number;
+  ty: number;
+  tz: number;
+  v: number;
+  half: number;
+  jitter: number;
+  lt: number;
+}
+function mgBoltTick(k: MgBolt): boolean {
+  for (let j = 0; j < 50; j++) {
+    const dx = k.tx - k.x;
+    const dy = k.ty - k.y;
+    const dz = k.tz - k.z;
+    const flat = Math.hypot(dx, dz);
+    const dist = Math.hypot(flat, dy);
+    k.yaw = mgTurn(k.yaw, Math.atan2(dx, -dz), 50 * DEG);
+    k.pitch = mgTurn(k.pitch, -Math.atan2(dy, flat), 50 * DEG);
+    const yaw = k.yaw + (Math.random() * 2 - 1) * k.jitter;
+    const pitch = k.pitch + (Math.random() * 2 - 1) * k.jitter;
+    k.strip.push(k.x, k.y, k.z, k.half, yaw, pitch);
+    if (dist < k.v * 1.5) break;
+    const cp = Math.cos(pitch);
+    k.x += cp * Math.sin(yaw) * k.v;
+    k.y -= Math.sin(pitch) * k.v;
+    k.z -= cp * Math.cos(yaw) * k.v;
+  }
+  return --k.lt >= 0;
+}
+
+/** A ground decal with its own life: BITMAP_MAGIC+1 sub11 and BITMAP_CHROME_ENERGY2. */
+interface MgDecal {
+  x: number;
+  z: number;
+  lt: number;
+  alpha: number;
+  light: number;
+}
+/** BITMAP_SMOKE sub54 (ZzzEffectParticle.cpp:1531-1538, :5722-5734): LT 22, rising, growing 1 % a tick, light / 1.02 a tick. */
+interface MgSmoke {
+  x: number;
+  y: number;
+  z: number;
+  scale: number;
+  grav: number;
+  roll: number;
+  light: number;
+  lt: number;
+}
+/** MODEL_STONE1/2 sub13 (ZzzEffect.cpp:2700-2715, :7278-7300): thrown, bounced by its own LifeTime, Alpha -0.1 a ground tick. */
+interface MgStone {
+  handle: ModelHandle;
+  pos: Vector3;
+  vx: number;
+  vy: number;
+  vz: number;
+  grav: number;
+  pitch: number;
+  alpha: number;
+  lt: number;
+}
+
+/**
+ * Gigantic Storm (237, and 496 through the aliases): at GIGANTICSTORM frame > 7 SOUND_SKILL_GIGANTIC_STORM and five
+ * BITMAP_JOINT_THUNDER sites at the caster + (0, 200, 0) turned yaw + i * 72: site 0 two metres behind him
+ * (ZzzCharacter.cpp:3001-3006, :4761-4779). Each site lives 20 ticks, its sky point 800 cm up (ZzzEffect.cpp:1322-1328);
+ * each tick, with both ends jittered +-50 cm (MoveHandlers.cpp:1672-1715): 50 % a bolt of width 10-50 from the sky to
+ * the ground; while LT > 10, 50 % a Magic_Ground2 decal at the foot growing to 3 tiles; 25 % a smoke there; 25 % a
+ * stone chip from the site; while LT > 5, 20 % an energy02 decal 1.5 tiles. Positionless sound, no light.
+ * `enh` (graded tiers) adds a flash and a spark spray where each bolt lands, and a flickering light on each site.
+ */
+const mgGiganticStorm = (enh: boolean): Step => (at, c) =>
+  whenClipKey(PlayerAction.PLAYER_SKILL_GIGANTICSTORM, 7.001, 15, (_p, cc) => {
+    mgSay('Sound/gigantic_storm');
+    const feet = entityPos(cc.caster, 0, new Vector3());
+    const yaw = entityYaw(cc.caster);
+    const yawDeg = yaw / DEG;
+    const world = storeRef().world;
+    const sites = [0, 1, 2, 3, 4].map(i => {
+      const f = forwardOf(yaw + i * 72 * DEG);
+      return new Vector3(feet.x - f.x * 2, feet.y, feet.z - f.z * 2);
+    });
+    let siteLt = 20;
+    const bolts: MgBolt[] = [];
+    const rings: MgDecal[] = [];
+    const energy: MgDecal[] = [];
+    const smokes: MgSmoke[] = [];
+    const stones: MgStone[] = [];
+    // Enhanced: bolt landings still flashing (x, y, z, ticks left), four numbers each.
+    const flashes: number[] = [];
+    const spray = new Vector3();
+    const lights = enh
+      ? sites.map(s =>
+          lighting.skillFollow(cc.scene, 237, out => {
+            out.x = s.x;
+            out.y = s.y + 0.5;
+            out.z = s.z;
+          })
+        )
+      : [];
+    effects.spawn('ticked', cc.scene, feet, {
+      tick(fx) {
+        if (siteLt > 0) {
+          for (const s of sites) {
+            const sx = s.x + cm(randInt(100) - 50);
+            const sz = s.z + cm(randInt(100) - 50);
+            const fx0 = s.x + cm(randInt(100) - 50);
+            const fz0 = s.z + cm(randInt(100) - 50);
+            if (randInt(2) === 0) {
+              const scale = (randInt(400) + 100) / 10;
+              bolts.push({ strip: fx.strip(MG_STORM_BOLT), x: sx, y: s.y + 8, z: sz, yaw, pitch: 0, tx: fx0, ty: s.y, tz: fz0, v: cm(20 + randInt(10)), half: cm(scale) / 2, jitter: (512 / scale) * DEG, lt: randInt(2) + 2 });
+              if (enh) {
+                flashes.push(fx0, s.y + 0.15, fz0, 3);
+                emitBurst(cc.scene, MG_STORM_SPARKS, spray.set(fx0, s.y + 0.1, fz0), 5);
+              }
+            }
+            if (siteLt > 10 && randInt(2) === 0) rings.push({ x: fx0, z: fz0, lt: 20, alpha: 1, light: 1 });
+            if (randInt(4) === 0) smokes.push({ x: fx0, y: s.y, z: fz0, scale: 2.8 + randInt(50) * 0.01, grav: (randInt(30) + 50) * 0.05, roll: randInt(360) * DEG, light: 1, lt: 22 });
+            if (randInt(4) === 0) {
+              const pos = s.clone();
+              // HeadAngle = (0, 6.4-19.1, 0) turned by the chip's own random Angle[2]: backward along the way it faces.
+              const turn = randInt(360) * DEG;
+              const dir = forwardOf(turn + Math.PI);
+              const speed = cm((randInt(128) + 64) * 0.1);
+              stones.push({
+                pos,
+                vx: dir.x * speed,
+                vy: cm(15),
+                vz: dir.z * speed,
+                grav: cm(randInt(3) + 3),
+                pitch: 0,
+                alpha: 1,
+                lt: randInt(16) + 20,
+                handle: spawnModel(cc.scene, pos, {
+                  model: randInt(2) ? MODEL.stone2 : MODEL.stone,
+                  seconds: ticks(36),
+                  scale: (randInt(13) + 3) * 0.08,
+                  colour: MG_STORM_TINT,
+                  yaw: turn,
+                  blendMesh: -1,
+                  loop: false,
+                  fadeTail: 0,
+                  follow: out => out.copyFrom(pos),
+                }),
+              });
+            }
+            if (siteLt > 5 && randInt(5) === 0) energy.push({ x: fx0, z: fz0, lt: 30, alpha: 1, light: 1 });
+          }
+          siteLt--;
+          if (siteLt === 0) for (const l of lights) l?.stop();
+        }
+        for (let i = flashes.length - 4; i >= 0; i -= 4) {
+          const k = flashes[i + 3] / 3;
+          fx.sprite(TEX.flare, MG_STORM_FLASH, flashes[i], flashes[i + 1], flashes[i + 2], 1.2 * k, 1.2 * k, i, 0.8 * k);
+          fx.sprite(TEX.flare, RGBS.white, flashes[i], flashes[i + 1], flashes[i + 2], 0.45 * k, 0.45 * k, -i, k);
+          if (--flashes[i + 3] > 0) continue;
+          const last = flashes.length - 4;
+          for (let j = 0; j < 4; j++) flashes[i + j] = flashes[last + j];
+          flashes.length = last;
+        }
+        for (let i = bolts.length - 1; i >= 0; i--) {
+          if (mgBoltTick(bolts[i])) continue;
+          fx.drop(bolts[i].strip);
+          bolts[i] = bolts[bolts.length - 1];
+          bolts.pop();
+        }
+        // BITMAP_MAGIC+1 sub11 (MoveHandlers.cpp:1388-1399, ZzzEffect.cpp:9786-9880): Scale (20 - LT) * 0.15, Alpha
+        // -0.05 a tick compounding into Light over the last 10, Luminosity down 0.2 a tick below LT 5, turned -yaw.
+        for (let i = rings.length - 1; i >= 0; i--) {
+          const r = rings[i];
+          if (--r.lt <= 0) {
+            rings[i] = rings[rings.length - 1];
+            rings.pop();
+            continue;
+          }
+          if (r.lt <= 10) {
+            r.alpha -= 0.05;
+            r.light *= r.alpha;
+          }
+          const lum = r.lt < 5 ? 1 - (5 - r.lt) * 0.2 : 1;
+          fx.decal(TEX.magicGround2, MG_STORM_TINT, r.x, r.z, (20 - r.lt) * 0.15, -yawDeg, lum * r.light);
+        }
+        // BITMAP_CHROME_ENERGY2 (ZzzEffect.cpp:4145-4151, :10074-10076, MoveHandlers.cpp:6919-6928): 1.5 tiles, x0.8 a tick below LT 10.
+        for (let i = energy.length - 1; i >= 0; i--) {
+          const e = energy[i];
+          if (--e.lt <= 0) {
+            energy[i] = energy[energy.length - 1];
+            energy.pop();
+            continue;
+          }
+          if (e.lt < 10) e.light *= 0.8;
+          fx.decal(TEX.energy2, MG_STORM_ENERGY, e.x, e.z, 1.5, 0, e.light);
+        }
+        for (let i = smokes.length - 1; i >= 0; i--) {
+          const s = smokes[i];
+          if (--s.lt <= 0) {
+            smokes[i] = smokes[smokes.length - 1];
+            smokes.pop();
+            continue;
+          }
+          s.light /= 1.02;
+          s.grav -= 0.05;
+          s.y += cm((s.scale + s.grav) * 1.5);
+          s.scale += s.scale / 100;
+          const size = cm(64) * s.scale;
+          fx.sprite(TEX.smoke, MG_STORM_TINT, s.x, s.y, s.z, size, size, s.roll, s.light);
+        }
+        for (let i = stones.length - 1; i >= 0; i--) {
+          const s = stones[i];
+          if (--s.lt <= 0 || s.alpha <= 0) {
+            s.handle.stop();
+            stones[i] = stones[stones.length - 1];
+            stones.pop();
+            continue;
+          }
+          s.vy -= s.grav;
+          s.pos.x += s.vx;
+          s.pos.y += s.vy;
+          s.pos.z += s.vz;
+          s.pitch += 0.5 * s.lt * DEG;
+          const ground = world ? world.getTerrainHeight(s.pos.x, s.pos.z) : -Infinity;
+          if (s.pos.y <= ground) {
+            s.pos.y = ground;
+            s.vx *= 0.6;
+            s.vz *= 0.6;
+            s.vy += cm(s.lt);
+            if (s.vy < cm(0.5)) s.vy = 0;
+            s.alpha -= 0.1;
+          }
+          s.handle.pitchTo(s.pitch);
+          s.handle.setAlpha(s.alpha);
+        }
+        return siteLt > 0 || bolts.length > 0 || rings.length > 0 || energy.length > 0 || smokes.length > 0 || stones.length > 0 || flashes.length > 0;
+      },
+    });
+  })(at, c);
+const giganticStorm = mgGiganticStorm(false);
+const giganticStormEnhanced = mgGiganticStorm(true);
+
 // ---- the table -------------------------------------------------------------------
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
@@ -9274,35 +10315,12 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 53 Improve AG: 4× JOINT_HEALING sub10 from ±80 offset +300 z, width 15, LT 80, MaxTails 20, Light (1,0.5,1)/11.
   53: { impact: atCaster(spiralRibbons(4, [1 / 11, 0.5 / 11, 1 / 11], cm(15), 20, ticks(80)), 0.2) },
-  // 55 Fire Slash (MG): charge BITMAP_GATHERING sub1 LT 20 at the weapon bone; BITMAP_SWORD_FORCE LT 30, Light 0.8,
-  // yaw+45; JOINT_FORCE +100 z width 150 on the first frame. Cast: BITMAP_SKULL on the target (eDeBuff_Defense).
-  55: {
-    cast: (at, c) => {
-      effects.spawn('particles', c.scene, at, { recipe: FIRE_SPARKS, rate: 40, seconds: ticks(20), follow: weaponBone(c.caster) });
-      if (c.target && c.target !== c.caster) {
-        effects.spawn('sprite', c.scene, at, { texture: TEX.skull, colour: RGBS.blood, size: 0.6, seconds: SKULL_SECONDS, follow: followEntity(c.target, 1.6), fadeTail: 0.1 });
-      }
-    },
-    area: atCaster(seq(
-      (at, c) => effects.spawn('sprite', c.scene, at, { texture: TEX.swordEff2, colour: [0.8, 0.8, 0.8], size: 2, seconds: ticks(30), flat: true, spin: 2, grow: 1.5, follow: ahead(c.caster, 0.8, 0.2) }),
-      streamerFan(1, 0, { velocity: perTick(30), seconds: ticks(20), maxTails: 8, width: 1.5, colour: RGBS.fire }),
-      slash(RGBS.fire, TEX.jointFire)
-    ), 1),
-  },
-  // 56 Power Slash: charge - 5× MODEL_MAGIC2 sub2 at yaw −40..+40 step 20, LT 20; each 2× SHINY+1 + LIGHT sprites.
-  56: {
-    area: (_at, c) => {
-      for (let i = -2; i <= 2; i++) {
-        const turn = (i * 20 * Math.PI) / 180;
-        const p = flying(c, 0.8, perTick(60), turn, 0.5);
-        effects.spawn('model', c.scene, entityPos(c.caster, 0.8, new Vector3()), { model: MODEL.magic2, seconds: ticks(20), scale: 1, colour: RGBS.arc, follow: p, yaw: entityYaw(c.caster) + turn });
-        effects.spawn('sprite', c.scene, entityPos(c.caster, 0.8, new Vector3()), { texture: TEX.shiny2, colour: RGBS.arc, size: 0.9, seconds: ticks(20), follow: p, count: 2, spread: 0.2 });
-      }
-      slash(RGBS.arc, TEX.swordEff2)(_at, c);
-    },
-  },
-  // 57 Spiral Slash: charge frame > 5 - CreateJoint(BITMAP_FLARE sub23, width 40) on the weapon.
-  57: { cast: seq(slash(RGBS.wind, TEX.flareBig), (at, c) => effects.spawn('joint', c.scene, at, { head: weaponBone(c.caster), maxTails: 10, width: 0.4, colour: RGBS.wind, seconds: SLASH_SECONDS })), impact: steelHit },
+  // 55 Fire Slash (MG): the WHEEL charge and crescent (fireSlash); the skull is the debuff's (BUFF_VISUALS[58]).
+  55: { cast: fireSlash, enhanced: { cast: fireSlashEnhanced } },
+  // 56 Power Slash: five hidden MODEL_MAGIC2 sub2 orbs at yaw -40..+40 (powerSlash). The weapon blur is weaponBlur.ts's.
+  56: { cast: powerSlash, enhanced: { cast: powerSlashEnhanced } },
+  // 57 Spiral Slash: five BITMAP_FLARE sub23 ribbons in two waves on the ONE_FLASH clip (spiralSlash).
+  57: { cast: spiralSlash, enhanced: { cast: spiralSlashEnhanced } },
   // 58 Nova (start): the charge on any caster while he is in HELL_BEGIN / HELL_START - (count+1)x BITMAP_LIGHT sub6
   // on the even bones 0..38 and CreateForce's 3 JOINT_HEALING sub8 comets every tick (novaCharge).
   58: { cast: novaCharge, enhanced: { cast: novaChargeEnhanced } },
@@ -9365,14 +10383,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 72 Removal Buff (Abolish Magic): six MODEL_SPEARSKILL sub5-7 bands spiralling in on the caster, rising and bursting
   // out, and four BITMAP_SHOCK_WAVE sub3, at clip key 3.5 (ZzzCharacter.cpp:2927-2931, :4295-4341).
   72: { impact: removalBuff, area: removalBuff, enhanced: { impact: removalBuffHd, area: removalBuffHd } },
-  // 73 Death Cannon (Mana Rays): CreateJoint(BITMAP_JOINT_FORCE sub4 at caster+130 z, Angle(0,0,yaw), width 40).
-  73: {
-    impact: (at, c) => {
-      const from = entityPos(c.caster, 1.3, new Vector3());
-      effects.spawn('joint', c.scene, from, { heading: toward(from, at), velocity: perTick(120), seconds: ticks(20), maxTails: 12, width: 0.4, colour: RGBS.soul });
-      after(0.25, seq(flash(TEX.flareBlue, RGBS.soul, 1.3, 0.4), hitSparks(ARC_MOTES)))(at, c);
-    },
-  },
+  // 73 Death Cannon (Mana Rays): the JOINT_FORCE sub4 beam at DEATH_CANNON frame 3 (deathCannon). No target effect.
+  73: { cast: deathCannon, enhanced: { cast: deathCannonEnhanced } },
   // 74 Space Split (Fire Blast): at the strike, a hidden MODEL_PIER_PART sub2 homing on the target and dropping six
   // inferno pillars (spaceSplit). BattleCastle/sCDarkAttack plays there, on every map like rows 44-46.
   74: { impact: litStrike(spaceSplit, 'Sound/battlecastle/sCDarkAttack'), enhanced: { impact: litStrike(spaceSplitGraded, 'Sound/battlecastle/sCDarkAttack') } },
@@ -9518,10 +10530,10 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     },
     impact: steelHit,
   },
-  // 236 Flame Strike: MODEL_EFFECT_FLAME_STRIKE sub0 at the caster - Alpha 0→, LT 35, Vel = the clip's speed.
-  236: { area: atCaster(model({ model: MODEL.flameStrike, seconds: ticks(35), colour: RGBS.fire, scale: 1, fadeIn: 0.3, loop: false }), 0.05) },
-  // 237 Gigantic Storm: 5× CreateEffect(BITMAP_JOINT_THUNDER) on a r=200 ring, LT 20, StartPos.z += 800.
-  237: { area: seq(ringOf(seq(skyBolt(8, 0.35), arcHit), 5, 2, 0.05), particles({ recipe: WIND_STREAKS, rate: 80, seconds: 1 })) },
+  // 236 Flame Strike: the blade on the weapon link bone and its three blurs (flameStrike above); caster-bound, so both dispatch paths.
+  236: { cast: flameStrike, enhanced: { cast: flameStrikeEnhanced } },
+  // 237 Gigantic Storm: five sites round the caster at clip frame > 7 (giganticStorm above).
+  237: { cast: giganticStorm, enhanced: { cast: giganticStormEnhanced } },
   // 238 Chaotic Diseier (523): the dark stars on the body, eight dark 2line_gost ribbons with their birds, feathers and
   // smoke flying the facing, and on the caster's own screen the dark bomb at his target (ClassAttack.cpp:698-775,
   // WSclient.cpp:4971-5025). SOUND_SKILL_CAOTIC is SKILL_SOUNDS[238].
@@ -9683,8 +10695,9 @@ const MASTER_ALIASES: Record<number, number> = {
   403: 16, 404: 16, 406: 16,
   411: 235, 413: 26, 414: 24, 416: 52, 417: 27, 418: 24, 420: 28, 422: 28, 423: 27, 424: 51, 431: 235, 441: 77,
   454: 219, 455: 215, 456: 230, 458: 214, 459: 221, 460: 222, 461: 220, 462: 214, 463: 220, 469: 218, 470: 218, 472: 218,
-  479: 22, 480: 3, 481: 41, 482: 56, 483: 5, 484: 13, 486: 14, 487: 9, 489: 7, 490: 55, 491: 7, 492: 236, 493: 55, 494: 236, 496: 237, 497: 495,
+  497: 495,
   ...DARK_LORD_MASTER_ALIASES,
+  ...MAGIC_GLADIATOR_MASTER_ALIASES,
   551: 260, 552: 261, 554: 260, 555: 261, 558: 262, 559: 263, 560: 264, 569: 268, 572: 268, 573: 267,
 };
 
@@ -9976,8 +10989,12 @@ export const BUFF_VISUALS: Partial<Record<number, BuffLook>> = {
   31: () => ({ spearJoints: SEAL_KNOT }),
   // 0x39 Freeze (eDeBuff_Harden): the ice shell.
   57: () => ({ iceShell: true }),
-  // 0x3A Defense reduction: the skull.
-  58: () => ({ skull: true }),
+  // 0x3A Defense reduction (Fire Slash): BITMAP_SKULL sub0, hidden under Cloaking (18), and eBloodAttack at the body as
+  // the debuff lands (RegisterBuff -> InsertBuffPhysicalEffect, WSclient.cpp:15522-15529).
+  58: e => {
+    if (e.transform) playCombat('Sound/eBloodAttack', { x: e.transform.pos.x, z: e.transform.pos.z });
+    return { skull: { hidden: () => !!e.buffs?.has(18), scale: () => Math.abs(e.modelObject?.node.scaling.x ?? 1) || 1 } };
+  },
   // 0x3D Stun: three ribbons climbing off the head, once.
   61: () => ({ stun: true }),
   // 0x47 Reflection (eBuff_Thorns): rising pin lights.

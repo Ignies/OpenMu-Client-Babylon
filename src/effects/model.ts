@@ -260,6 +260,8 @@ export interface ModelHandle extends EffectHandle {
   setAngle(angle: readonly [number, number, number]): void;
   /** Set the scale outright from now on, in place of `scale` and `grow` (a mover's own `o->Scale`). */
   scaleTo(scale: number): void;
+  /** Change the peak visibility (`alpha`) from here on: `o->Alpha` stepped by whoever moves it. */
+  setAlpha(alpha: number): void;
 }
 
 const live = new LiveList();
@@ -397,7 +399,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const rise = opts.rise ?? 0;
   const height = opts.height ?? 0;
   const tail = opts.fadeTail ?? 0.25;
-  const alpha = opts.alpha ?? 1;
+  let alpha = opts.alpha ?? 1;
   const fadeIn = opts.fadeIn ?? 0;
   const source = opts.follow ?? pointSource(at);
   const colour = opts.colour ?? RGBS.white;
@@ -689,7 +691,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       if (blendMeshes.length) {
         const light = native?.blendMeshLight ? native.blendMeshLight(fxNow() * 1000) : 1;
         for (const m of blendMeshes) {
-          m.visibility = vis / alpha;
+          m.visibility = alpha > 0 ? vis / alpha : 0;
           m.metadata.blendMeshLight = light;
         }
       }
@@ -762,6 +764,9 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     },
     scaleTo(s: number) {
       scaleOverride = s * DEFAULT_SCALE;
+    },
+    setAlpha(a: number) {
+      alpha = a;
     },
   };
 }

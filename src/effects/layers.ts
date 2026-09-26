@@ -6,6 +6,7 @@ import { debrisLayer } from './debris';
 import { feathersLayer } from './feathers';
 import { modelLayer } from './model';
 import { stampsLayer } from './stamps';
+import { linkedModelLayer } from './linkedModel';
 import { columnLayer } from './column';
 import { shroudLayer } from './shroud';
 import { pillarLayer } from './pillar';
@@ -29,6 +30,7 @@ import { weaponHideLayer } from './weaponHide';
 import { quakeLayer } from './quake';
 import { homingLayer } from './homing';
 import { summonLayer } from './summon';
+import { tickedLayer } from './ticked';
 
 /**
  * THE list. Every visual effect entry in the game is one line here, and
@@ -45,6 +47,7 @@ export const EFFECT_LAYERS = [
   modelLayer, // reads projectile's / debris' / feathers' points
   stampsLayer,
   summonLayer, // its spawners read its bones; nothing it reads moves after it
+  linkedModelLayer, // hangs off a character bone; the ticked driver below reads its bones
   spriteLayer,
   cardsLayer,
   particlesLayer,
@@ -60,6 +63,7 @@ export const EFFECT_LAYERS = [
   ringLayer,
   pathLayer,
   homingLayer, // reads its centre (a body) only
+  tickedLayer, // scripted a tick at a time: one-tick cards and joint tail strips
   burstsLayer, // spawn only; the shared particle pool steps it
   itemAuraLayer, // reset only; itemGlowSystem drives it
   itemCrackleLayer, // reset only; itemGlowSystem drives it

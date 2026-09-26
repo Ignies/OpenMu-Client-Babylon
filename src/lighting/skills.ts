@@ -67,10 +67,10 @@ export type SkillLight = {
    */
   readonly trail?: LightRecipe;
   /**
-   * `follow`: the one light riding the effect's single moving emitter, on
-   * every tier - the original's AddTerrainLight on a travelling effect
-   * (Fire Breath's BITMAP_SHOTGUN). The effects layer starts it when the
-   * emitter appears and hands over its path.
+   * `follow`: one light per moving emitter, on every tier - the original's
+   * AddTerrainLight on a travelling effect (Fire Breath's BITMAP_SHOTGUN,
+   * Power Slash's five orbs). The effects layer starts one when an emitter
+   * appears and hands over its path.
    */
   readonly follow?: LightRecipe;
   /**
@@ -412,6 +412,11 @@ const EARTH_PRISON_ENHANCED: Omit<SkillLight, 'enhanced'> = {
   impact: effectLight([0.79, 0.72, 0.49], 1.3, 1.6, { attack: 0.1, release: 0.5 }),
 };
 
+/** Fire Slash lights nothing in the original; this is its graded-tier light, shared with 490 (Fire Slash Strengthener). */
+const FIRE_SLASH_LIGHT: SkillLight = {
+  enhanced: { cast: effectLight([0.45, 0.4, 1], 1.2, 0.8, { release: 0.3 }), follow: effectLight([1, 0.55, 0.2], 2.2, 0.8, { release: 0.45 }) },
+};
+
 /** Keyed by skill number (common/skillsDatabase.ts). */
 export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Poison: MODEL_POISON's `(0.3, 1, 0.6) x Lum` range 2 for its 40 ticks, laid by the effect at the release
@@ -654,9 +659,28 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // a crossbow, which lights nothing); this client draws it charged
   // blue-white, so the arc is ours.
   52: { arrow: { ...arc(2, ARROW_SECONDS), release: 0.2 } },
-  // Fire Slash / Flame Strike: BITMAP_JOINT_FIRE range 2 (ZzzEffectJoint.cpp:4612).
-  55: { area: flame(3, 0.7) },
-  236: { area: flame(3, 0.8, { gain: 1.3 }) },
+  // Fire Slash lights nothing in the original (no AddTerrainLight on its gathering, sword force or joint).
+  // Power Slash: MODEL_MAGIC2 AddTerrainLight (0.3, 0.6, 1) x Luminosity, range 3, under each of the five orbs
+  // (MoveHandlers.cpp:3355-3356); Luminosity rolls 0.7-1.0 a tick and drops 0.2 a tick over the last four.
+  // Enhanced: the gathering's violet at the hand (cast) and the crescent's fire over the arc, 145 cm + half its 150 cm width (follow).
+  55: FIRE_SLASH_LIGHT,
+  56: {
+    follow: { color: [0.3, 0.6, 1], range: 3, seconds: 0.8, release: 0.16, flicker: { min: 0.7, max: 1, steps: 4 }, flickerSmoothing: 1 },
+    // Enhanced: the orb's flare reaches ~1.1 tiles, its smoke a little further; five overlap at the start.
+    enhanced: { follow: effectLight([0.3, 0.6, 1], 1.5, 0.8, { release: 0.16, flicker: { min: 0.7, max: 1, steps: 4 }, flickerSmoothing: 1 }) },
+  },
+  // Spiral Slash lights nothing in the original. Enhanced: each wave's gold over the ribbons' 200 cm sphere.
+  57: { enhanced: { follow: effectLight([1, 0.72, 0.3], 2.2, 0.9, { release: 0.45 }) } },
+  // Death Cannon: nothing, as the original; the empty row keeps the wizardry cast flash off.
+  // Enhanced: the beam's blue from the muzzle, riding the head out.
+  73: { enhanced: { follow: effectLight([0.1, 0.6, 1], 1.4, 0.6, { release: 0.35 }) } },
+  // Flame Strike and Gigantic Storm: nothing, as the original (no AddTerrainLight on MODEL_EFFECT_FLAME_STRIKE,
+  // its blurs, or BITMAP_JOINT_THUNDER sub0's storm); the empty rows keep the wizardry cast flash off.
+  // Enhanced: the blade's orange riding its middle over the ~2-tile sweep, for the blade's 35 ticks; one bolt-white
+  // light per storm site (a bolt lands 50 % of ticks, its decal grows to 3 tiles across), flickering with the strikes;
+  // gain 0.6 as all five overlap at the caster and washed a pale path white under post processing.
+  236: { enhanced: { follow: effectLight([1, 0.45, 0.15], 2, 1.4, { release: 0.4, flicker: { min: 0.8, max: 1, steps: 4 }, flickerSmoothing: 0.5 }) } },
+  237: { enhanced: { follow: effectLight([0.6, 0.65, 1], 1.5, 1, { gain: 0.6, release: 0.3, flicker: { min: 0.3, max: 1, steps: 5 }, flickerSmoothing: 0.8 }) } },
   // Force / Force Wave: the original lights nothing. Enhanced: blue-violet (the streaks over the cyan rings),
   // over the 2-tile span of rings and streaks, bright for their first ~7 ticks (x1/1.4-1.5 a tick). These lights
   // hang over the ground, so the floor takes less of them: at floorGain 1 a day ground washed out under the art.

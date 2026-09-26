@@ -4,7 +4,8 @@ import {
   chooseHighBowAttackAction,
   type AttackPose,
 } from './weaponClass';
-import type { SkillDefinition } from './skillsDatabase';
+import { skillDefinition, type SkillDefinition } from './skillsDatabase';
+import { masterBase } from './skillAliases';
 import { magicClip, skillClip, type CastContext } from '../combat/skillClips';
 import { castsOnSelf } from '../combat/castTargets';
 import { SLASH_SKILLS } from '../combat/recipes';
@@ -71,6 +72,16 @@ export function isSpell(def: SkillDefinition): boolean {
 }
 
 /**
+ * A Magic Gladiator master spell OpenMU lists as Physical (480, 483, 484, 487, 489, 491) casts as its
+ * base spell: SetPlayerMagic (SkillCast.cpp:497-533, WSclient.cpp:4278-4310).
+ */
+function castsAsBaseSpell(def: SkillDefinition): boolean {
+  const base = masterBase(def.num);
+  const baseDef = base !== def.num ? skillDefinition(base) : undefined;
+  return !!baseDef && isSpell(baseDef);
+}
+
+/**
  * The clip a cast plays, for the hero and for everyone else in scope alike.
  * Four tiers, in the order the original tries them:
  *
@@ -92,7 +103,7 @@ export function chooseSkillAction(
   if (SLASH_SKILLS.has(def.num) && pose.swordCount % 2 === 1) return PlayerAction.PLAYER_ATTACK_TWO_HAND_SWORD3;
   const dedicated = skillClip(def.num, ctx);
   if (dedicated !== null) return dedicated;
-  if (isSpell(def) || INHERITED_SPELLS.has(def.num) || WIZARD_PHYSICAL_SPELLS.has(def.num)) return magicClip(ctx);
+  if (isSpell(def) || castsAsBaseSpell(def) || INHERITED_SPELLS.has(def.num) || WIZARD_PHYSICAL_SPELLS.has(def.num)) return magicClip(ctx);
   return chooseAttackAction(pose);
 }
 
