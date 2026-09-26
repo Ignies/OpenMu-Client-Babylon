@@ -303,6 +303,8 @@ export const koreanLayer: LanguageLayer = {
     'language.bulgarian': '불가리아어',
     'language.romanian': '루마니아어',
     'language.german': '독일어',
+    'language.polish': '폴란드어',
+    'language.vietnamese': '베트남어',
 
     'bottomBar.itemShop': '아이템 상점',
     'bottomBar.characterInfo': '캐릭터 정보',

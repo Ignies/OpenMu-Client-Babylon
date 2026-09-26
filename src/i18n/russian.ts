@@ -301,6 +301,8 @@ export const russianLayer: LanguageLayer = {
     'language.bulgarian': 'Болгарский',
     'language.romanian': 'Румынский',
     'language.german': 'Немецкий',
+    'language.polish': 'Польский',
+    'language.vietnamese': 'Вьетнамский',
 
     'bottomBar.itemShop': 'Магазин',
     'bottomBar.characterInfo': 'Сведения о персонаже',

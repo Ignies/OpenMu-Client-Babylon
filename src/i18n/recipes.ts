@@ -716,6 +716,8 @@ export const EN_TEXT = {
   'language.bulgarian': 'Bulgarian',
   'language.romanian': 'Romanian',
   'language.german': 'German',
+  'language.polish': 'Polish',
+  'language.vietnamese': 'Vietnamese',
 
   // ---- bottom bar --------------------------------------------------------
   'bottomBar.itemShop': 'Item Shop',

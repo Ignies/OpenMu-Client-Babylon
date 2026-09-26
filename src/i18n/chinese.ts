@@ -299,6 +299,8 @@ export const chineseLayer: LanguageLayer = {
     'language.bulgarian': '保加利亚语',
     'language.romanian': '罗马尼亚语',
     'language.german': '德语',
+    'language.polish': '波兰语',
+    'language.vietnamese': '越南语',
 
     'bottomBar.itemShop': '商城',
     'bottomBar.characterInfo': '角色信息',

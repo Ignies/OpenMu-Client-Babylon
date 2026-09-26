@@ -2,7 +2,7 @@
 // `tools/packs/<code>.json`.
 //
 // Webzen shipped one pack per language and this tree only has `Eng`, `Spn` and
-// `Por`. The other ten languages the client offers have no pack, so their item
+// `Por`. The other twelve languages the client offers have no pack, so their item
 // and monster names fall back to English. This writes packs for them in the
 // original's own format, which means two things: the readers
 // (`src/libs/mu/itemNameFile.ts`, `npcNameFile.ts`, `moveReqFile.ts`) need no

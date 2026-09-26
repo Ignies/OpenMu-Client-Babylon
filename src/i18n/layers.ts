@@ -16,11 +16,13 @@ import { germanLayer } from './german';
 import { italianLayer } from './italian';
 import { japaneseLayer } from './japanese';
 import { koreanLayer } from './korean';
+import { polishLayer } from './polish';
 import { portugueseLayer } from './portuguese';
 import { romanianLayer } from './romanian';
 import { russianLayer } from './russian';
 import { spanishLayer } from './spanish';
 import { thaiLayer } from './thai';
+import { vietnameseLayer } from './vietnamese';
 
 export const LANGUAGE_LAYERS: readonly LanguageLayer[] = [
   englishLayer,
@@ -31,9 +33,11 @@ export const LANGUAGE_LAYERS: readonly LanguageLayer[] = [
   italianLayer,
   japaneseLayer,
   koreanLayer,
+  polishLayer,
   portugueseLayer,
   romanianLayer,
   russianLayer,
   spanishLayer,
   thaiLayer,
+  vietnameseLayer,
 ];

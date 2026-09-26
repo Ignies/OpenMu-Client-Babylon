@@ -303,6 +303,8 @@ export const thaiLayer: LanguageLayer = {
     'language.bulgarian': 'บัลแกเรีย',
     'language.romanian': 'โรมาเนีย',
     'language.german': 'เยอรมัน',
+    'language.polish': 'โปแลนด์',
+    'language.vietnamese': 'เวียดนาม',
 
     'bottomBar.itemShop': 'ร้านไอเทม',
     'bottomBar.characterInfo': 'ข้อมูลตัวละคร',

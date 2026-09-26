@@ -301,6 +301,8 @@ export const frenchLayer: LanguageLayer = {
     'language.bulgarian': 'Bulgare',
     'language.romanian': 'Roumain',
     'language.german': 'Allemand',
+    'language.polish': 'Polonais',
+    'language.vietnamese': 'Vietnamien',
 
     'bottomBar.itemShop': 'Boutique',
     'bottomBar.characterInfo': 'Informations du personnage',

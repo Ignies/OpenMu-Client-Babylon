@@ -146,6 +146,14 @@ const SHAPES: Record<FlagRegion, ReactNode> = {
   BG: bands(['#ffffff', '#00966e', '#d62612']),
   RO: stripes(['#002b7f', '#fcd116', '#ce1126']),
   DE: bands(['#000000', '#dd0000', '#ffce00']),
+  PL: bands(['#ffffff', '#dc143c']),
+
+  VN: (
+    <>
+      <rect x={0} y={0} width={W} height={H} fill="#da251d" />
+      <path d={star(12, 8.4, 4.8)} fill="#ffff00" />
+    </>
+  ),
 };
 
 /** The regions `SHAPES` actually draws - the language list is checked against it. */

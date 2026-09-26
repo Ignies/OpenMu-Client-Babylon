@@ -304,6 +304,8 @@ export const japaneseLayer: LanguageLayer = {
     'language.bulgarian': 'ブルガリア語',
     'language.romanian': 'ルーマニア語',
     'language.german': 'ドイツ語',
+    'language.polish': 'ポーランド語',
+    'language.vietnamese': 'ベトナム語',
 
     'bottomBar.itemShop': 'アイテムショップ',
     'bottomBar.characterInfo': 'キャラクター情報',

@@ -69,6 +69,8 @@ const FACES: Record<string, Face> = {
   rom: { font: 'Palatino Linotype', style: 3, size: 35 },
   rus: { font: 'Palatino Linotype', style: 3, size: 35 },
   bul: { font: 'Palatino Linotype', style: 3, size: 35 },
+  pol: { font: 'Palatino Linotype', style: 3, size: 35 },
+  vie: { font: 'Palatino Linotype', style: 3, size: 35 },
   // No italic serif reaches these scripts, so each takes the most book-like
   // face Windows ships for it and stays upright. Slanting a CJK face
   // synthetically only smears it.
@@ -81,7 +83,7 @@ const FACES: Record<string, Face> = {
 /** The folder each suffix writes into, spelled as on disk. */
 const FOLDERS: Record<string, string> = {
   ger: 'Ger', fre: 'Fre', ita: 'Ita', rom: 'Rom', rus: 'Rus',
-  bul: 'Bul', chi: 'Chi', jpn: 'Jpn', kor: 'Kor', tha: 'Tha',
+  bul: 'Bul', chi: 'Chi', jpn: 'Jpn', kor: 'Kor', tha: 'Tha', pol: 'Pol', vie: 'Vie',
 };
 
 export function readOzt(path: string): Image {
