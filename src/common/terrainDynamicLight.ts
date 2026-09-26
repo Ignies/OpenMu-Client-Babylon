@@ -66,6 +66,12 @@ const emitterTiles = new Map<TerrainLightEmitter, number>();
 let touched: Int32Array | null = null;
 let touchedDirty = true;
 
+/** `touched` as a flag per tile, for readers that test a sample point. */
+const touchedMask = new Uint8Array(TERRAIN_SIZE * TERRAIN_SIZE);
+
+/** Bumped whenever the tiles the layer may have written change, idling included. */
+let touchedVersion = 0;
+
 /** Tiles past the footprint radius kept in the touched set. */
 const TOUCHED_MARGIN = 1;
 
@@ -89,6 +95,8 @@ export function initTerrainDynamicLight(liftedBaked: Float32Array): void {
   emitterTiles.clear();
   touched = null;
   touchedDirty = true;
+  touchedMask.fill(0);
+  touchedVersion++;
 }
 
 export function disposeTerrainDynamicLight(): void {
@@ -101,6 +109,8 @@ export function disposeTerrainDynamicLight(): void {
   emitterTiles.clear();
   touched = null;
   touchedDirty = true;
+  touchedMask.fill(0);
+  touchedVersion++;
 }
 
 let deltaTexture: RawTexture | null = null;
@@ -179,6 +189,30 @@ export function terrainLightReaches(
   return false;
 }
 
+export function terrainLightTouchedVersion(): number {
+  return touchedVersion;
+}
+
+/**
+ * Whether the bilinear sample at `(x, z)` reads a tile the dynamic layer may
+ * have written: where it is false, `primary` is the bake and `bodyLift` is
+ * zero. False everywhere while the layer is idle. The set is the one
+ * `terrainLightTouchedVersion` numbers.
+ */
+export function terrainLightTouchesSample(x: number, z: number): boolean {
+  if (!wasActive) return false;
+
+  const xi = Math.floor(x);
+  const yi = Math.floor(z);
+
+  return (
+    touchedMask[TERRAIN_INDEX_REPEAT(xi, yi)] !== 0 ||
+    touchedMask[TERRAIN_INDEX_REPEAT(xi + 1, yi)] !== 0 ||
+    touchedMask[TERRAIN_INDEX_REPEAT(xi + 1, yi + 1)] !== 0 ||
+    touchedMask[TERRAIN_INDEX_REPEAT(xi, yi + 1)] !== 0
+  );
+}
+
 export function registerTerrainLight(emitter: TerrainLightEmitter): () => void {
   emitters.add(emitter);
   touchedDirty = true;
@@ -210,8 +244,15 @@ function rebuildTouched(): void {
     }
   }
 
+  if (touched) {
+    for (let i = 0; i < touched.length; i++) touchedMask[touched[i]] = 0;
+  }
+
   touched = Int32Array.from(indices);
   touchedDirty = false;
+
+  for (let i = 0; i < touched.length; i++) touchedMask[touched[i]] = 1;
+  touchedVersion++;
 }
 
 /** Clears the set last written; the rebuild that follows never precedes it. */
@@ -322,11 +363,15 @@ export function updateTerrainDynamicLight(
   const active = enabled && emitters.size > 0;
 
   if (!active) {
-    if (wasActive) resetTouched();
+    if (wasActive) {
+      resetTouched();
+      touchedVersion++;
+    }
     wasActive = false;
     return;
   }
 
+  if (!wasActive) touchedVersion++;
   wasActive = true;
 
   resetTouched();
@@ -520,18 +565,26 @@ function sampleBilinear(
   const xd = x - xi;
   const yd = y - yi;
 
-  const channel = (c: number) => {
-    const left = field[i1 + c] + (field[i4 + c] - field[i1 + c]) * yd;
-    const right = field[i2 + c] + (field[i3 + c] - field[i2 + c]) * yd;
-
-    return left + (right - left) * xd;
-  };
-
-  out.x = channel(0);
-  out.y = channel(1);
-  out.z = channel(2);
+  out.x = bilinearChannel(field, i1, i2, i3, i4, xd, yd);
+  out.y = bilinearChannel(field, i1 + 1, i2 + 1, i3 + 1, i4 + 1, xd, yd);
+  out.z = bilinearChannel(field, i1 + 2, i2 + 2, i3 + 2, i4 + 2, xd, yd);
 
   return true;
+}
+
+function bilinearChannel(
+  field: Float32Array,
+  i1: number,
+  i2: number,
+  i3: number,
+  i4: number,
+  xd: number,
+  yd: number
+): number {
+  const left = field[i1] + (field[i4] - field[i1]) * yd;
+  const right = field[i2] + (field[i3] - field[i2]) * yd;
+
+  return left + (right - left) * xd;
 }
 
 export function packBakedTerrainLight(
