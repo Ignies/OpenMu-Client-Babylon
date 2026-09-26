@@ -1613,6 +1613,11 @@ export const germanLayer: LanguageLayer = {
     'options.firstPersonBob': 'Kopfbewegung in der Egoperspektive',
     'options.chatTimestamps': 'Uhrzeit im Chat',
     'options.chatEmojis': 'Emojis im Chat',
+    'options.chatEmojiSize': 'Emoji-Größe im Chat',
+    'options.chatEmojiSize.small': 'Klein',
+    'options.chatEmojiSize.medium': 'Mittel',
+    'options.chatEmojiSize.large': 'Groß',
+    'options.chatEmojiSize.huge': 'Riesig',
     'options.quickItemActions': 'Strg-Klick verschiebt Gegenstände',
     'options.confirmValuableItems': 'Vor dem Wegwerfen oder Verkaufen von Wertsachen fragen',
     'options.blockBrowserKeys': 'Browser-Tastenkürzel blockieren',
@@ -2422,6 +2427,8 @@ export const germanLayer: LanguageLayer = {
       'Zeigt vor jeder Chatzeile die Uhrzeit an, etwa 14:03.',
     'options.help.whisperBeep':
       'Spielt einen Ton ab, wenn dir jemand etwas zuflüstert.',
+    'options.help.chatEmojiSize':
+      'Wie groß Emojis im Chatprotokoll gezeichnet werden. Eine Zeile mit Emoji wird so hoch, dass es hineinpasst. Bei Klein behält jede Zeile ihre normale Höhe, wie im klassischen Protokoll.',
     'options.help.chatEmojis':
       'Zeigt Emoji-Codes, also einen Namen zwischen zwei Doppelpunkten, als Bilder im Chat und über den Charakteren an und fügt dem Chat-Eingabefeld den Emoji-Button hinzu. Bei Aus bleiben die Codes normaler Text.',
     'options.help.slideHelp':

@@ -31,8 +31,10 @@ import { EmojiText } from '../../../../components/emojiText';
 import { EMOJI_CATALOG } from '../../../../../emojis';
 import { EmojiPicker, RecentEmojis } from './emojiPicker';
 import {
-  CHAT_EMOJI_SIZE,
+  chatEmojiRowHeight,
+  chatEmojiSize,
   emojiPackLabel,
+  hasEmojiCode,
   emojiQueryAt,
   matchEmojiCodes,
   spliceChatText,
@@ -41,6 +43,7 @@ import {
 import {
   chatEndIndex,
   chatInputBudget,
+  CHAT_LINE_HEIGHT,
   chatPkClass,
   CHAT_FILTERS,
   CHAT_INPUT_MODES,
@@ -52,6 +55,7 @@ import {
   chatWheelRows,
   ChatLineType,
   joinCopiedRows,
+  layoutChatRows,
   type ChatInputMode,
   type ChatLine,
 } from '../../../../../common/chat';
@@ -89,7 +93,8 @@ const TRANSPARENCY_START_X = FRAME_RESIZE_START_X + BUTTON_WIDTH;
 const WHISPER_FIELD: CSSProperties = { left: 5, top: 32, width: 62, height: 13 };
 const CHAT_FIELD: CSSProperties = { left: 72, top: 32, width: CHATBOX_WIDTH - 72 - 6, height: 13 };
 // The emoji button takes the end of the text slot (x 68..278 in the art).
-const EMOJI_BUTTON = { left: 261, top: 29, width: 16, height: 16 };
+// Left of the window's resize grip, which owns the 12 px corner.
+const EMOJI_BUTTON = { left: 250, top: 29, width: 16, height: 16 };
 const EMOJI_FACE = { width: 14, height: 14 };
 const CHAT_FIELD_BESIDE_EMOJIS: CSSProperties = { ...CHAT_FIELD, width: EMOJI_BUTTON.left - 72 - 2 };
 const COMPLETION_EMOJI = { width: 14, height: 14 };
@@ -267,6 +272,17 @@ function selectedRows(log: HTMLElement, range: Range): { messageId: number; text
   return rows;
 }
 
+/** Whether a row holds a picture, once per row: rows never change. */
+const EMOJI_ROWS = new WeakMap<ChatLine, boolean>();
+function hasEmoji(line: ChatLine): boolean {
+  let has = EMOJI_ROWS.get(line);
+  if (has === undefined) {
+    has = hasEmojiCode(line.text, EMOJI_CATALOG);
+    EMOJI_ROWS.set(line, has);
+  }
+  return has;
+}
+
 const ChatLog = observer(() => {
   const framed = Social.chatLogFramed;
   const showing = Social.chatLogLines;
@@ -285,9 +301,21 @@ const ChatLog = observer(() => {
   // can page the log too.
   const last = lines.length - 1;
   const end = chatEndIndex(lines, Social.chatLogEndId);
-  const start = Math.max(0, end - showing + 1);
-  const visible = lines.slice(start, end + 1);
   const below = last - end;
+
+  // A row holding an emoji is as tall as the option draws it; the log keeps
+  // its height and shows fewer rows.
+  const emojiSize = chatEmojiSize(GameOptions.chatEmojiSize);
+  const emojiRow = chatEmojiRowHeight(emojiSize);
+  const drawsEmojis = GameOptions.chatEmojis;
+  const rowHeight = (line: ChatLine) =>
+    drawsEmojis && line.sender && hasEmoji(line) ? emojiRow : CHAT_LINE_HEIGHT;
+  const layout = layoutChatRows(
+    i => rowHeight(lines[i]),
+    end,
+    SCROLL_MIDDLE_PART_HEIGHT * showing
+  );
+  const visible = end < 0 ? [] : lines.slice(layout.start, end + 1);
 
   const height =
     SCROLL_MIDDLE_PART_HEIGHT * showing +
@@ -296,10 +324,7 @@ const ChatLog = observer(() => {
   const width = CHATBOX_WIDTH;
 
   // Lines are drawn from the bottom up when fewer than `showing` exist.
-  const firstLineY =
-    SCROLL_TOP_BOTTOM_PART_HEIGHT +
-    FONT_LEADING +
-    SCROLL_MIDDLE_PART_HEIGHT * (showing - visible.length);
+  const firstLineY = SCROLL_TOP_BOTTOM_PART_HEIGHT + FONT_LEADING;
 
   // Copying log text: codes for the pictures, and a message the log wrapped
   // as one line. The event goes to the page, not to the log.
@@ -416,6 +441,7 @@ const ChatLog = observer(() => {
       )}
 
       {visible.map((line, s) => {
+        const height = rowHeight(line);
         return (
           <div
             key={line.id}
@@ -423,7 +449,8 @@ const ChatLog = observer(() => {
             data-message={line.messageId}
             style={{
               left: WND_LEFT_RIGHT_EDGE,
-              top: firstLineY + SCROLL_MIDDLE_PART_HEIGHT * s,
+              top: firstLineY + layout.tops[s],
+              ...(height !== CHAT_LINE_HEIGHT && { height, lineHeight: `${height}px` }),
               maxWidth: width - WND_LEFT_RIGHT_EDGE * 2 - (framed ? SCROLL_BAR_WIDTH + 4 : 0),
               ...lineStyle(line, framed, pointed === line.messageId && !!line.sender),
             }}
@@ -460,10 +487,10 @@ const ChatLog = observer(() => {
                   {line.sender}
                 </span>
                 {' : '}
-                <EmojiText text={line.text} size={CHAT_EMOJI_SIZE} onHover={onEmojiHover} />
+                <EmojiText text={line.text} size={emojiSize} onHover={onEmojiHover} />
               </>
             ) : line.sender ? (
-              <EmojiText text={line.text} size={CHAT_EMOJI_SIZE} onHover={onEmojiHover} />
+              <EmojiText text={line.text} size={emojiSize} onHover={onEmojiHover} />
             ) : (
               line.text
             )}

@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   CHAT_EMOJI_ADVANCE,
   EMOJI_NAME,
+  CHAT_EMOJI_SIZES,
   buildEmojiCatalog,
+  chatEmojiRowHeight,
+  chatEmojiSize,
   chatEmojiBubbleOf,
   emojiPackLabel,
   emojiQueryAt,
@@ -174,19 +177,19 @@ describe('chatEmojiBubbleOf', () => {
   it('pops a line of only emojis over the head, with no balloon', () => {
     const shown = chatEmojiBubbleOf(':cat_love: :a:', catalog);
     expect(shown.bubble?.emoji).toMatchObject({ code: 'cat_love' });
-    expect(shown.bubble?.side).toBe(false);
     expect(shown.balloonText).toBe('');
   });
 
-  it('keeps the words in the balloon and puts the emoji on the shoulder', () => {
-    const shown = chatEmojiBubbleOf('gg :cat_wave: all', catalog);
-    expect(shown.bubble).toMatchObject({ side: true, emoji: { code: 'cat_wave' } });
-    expect(shown.balloonText).toBe('gg all');
+  it('leaves a line with words to its balloon, emojis and all', () => {
+    expect(chatEmojiBubbleOf('gg :cat_wave: all', catalog)).toEqual({
+      bubble: null,
+      balloonText: 'gg :cat_wave: all',
+    });
   });
 
   it('pops a line of only system emojis, whole sequences included', () => {
     expect(chatEmojiBubbleOf(FAMILY, catalog)).toEqual({
-      bubble: { emoji: FAMILY, side: false },
+      bubble: { emoji: FAMILY },
       balloonText: '',
     });
     expect(chatEmojiBubbleOf(`${GRIN} :cat_love:`, catalog).bubble?.emoji).toBe(GRIN);
@@ -206,6 +209,14 @@ describe('chatEmojiBubbleOf', () => {
       bubble: null,
       balloonText: 'hello :nope:',
     });
+  });
+});
+
+describe('chatEmojiSize', () => {
+  it('keeps the smallest step inside a text row and grows the row for the rest', () => {
+    expect(chatEmojiRowHeight(chatEmojiSize(0))).toBe(15);
+    expect(chatEmojiRowHeight(chatEmojiSize(2))).toBe(CHAT_EMOJI_SIZES[2] + 2);
+    expect(chatEmojiSize(99)).toBe(CHAT_EMOJI_SIZES[CHAT_EMOJI_SIZES.length - 1]);
   });
 });
 

@@ -35,6 +35,7 @@ import { Economy } from '../../../economy';
 import { GuildMemberRoleEnum } from '../../../common/packets/ServerToClientPackets';
 import { devQuery } from '../../../common/devSeams';
 import { onLanguageChanged } from '../../../i18n';
+import { EmojiText } from '../emojiText';
 import {
   type TagInputs,
   type TagSlot,
@@ -56,6 +57,8 @@ const TAG_SYNC = devQuery('tagsync') !== '0';
  * Inline, because `.app img { width: 100%; height: 100% }` (style.less) beats
  * both the attributes and any class rule that loads after it. */
 const MARK_PX = 8;
+/** A chat emoji among a balloon's words: taller than the text, still one line. */
+const BALLOON_EMOJI_PX = 20;
 
 type Line = {
   text: string;
@@ -340,7 +343,7 @@ const NameTag = ({
           {line.prefix && (
             <span style={{ color: line.prefix.colour }}>{line.prefix.text}</span>
           )}
-          {line.text}
+          {line.isName ? line.text : <EmojiText text={line.text} size={BALLOON_EMOJI_PX} />}
         </div>
       ))}
     </div>

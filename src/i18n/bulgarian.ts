@@ -1592,6 +1592,11 @@ export const bulgarianLayer: LanguageLayer = {
     'options.firstPersonBob': 'Поклащане на главата от първо лице',
     'options.chatTimestamps': 'Час в чата',
     'options.chatEmojis': 'Емоджи в чата',
+    'options.chatEmojiSize': 'Размер на емоджи в чата',
+    'options.chatEmojiSize.small': 'Малък',
+    'options.chatEmojiSize.medium': 'Среден',
+    'options.chatEmojiSize.large': 'Голям',
+    'options.chatEmojiSize.huge': 'Огромен',
     'options.quickItemActions': 'Ctrl-клик мести предмети',
     'options.confirmValuableItems': 'Питай преди изхвърляне или продажба на ценни',
     'options.blockBrowserKeys': 'Блокирай клавишите на браузъра',
@@ -2388,6 +2393,8 @@ export const bulgarianLayer: LanguageLayer = {
       'Купчините Zen от поне това количество запазват името си. При Изкл. всички купчини са с име.',
     'options.help.chatTimestamps': 'Показва часа, например 14:03, пред всеки ред в чата.',
     'options.help.whisperBeep': 'Пуска звук, когато някой ти прошепне.',
+    'options.help.chatEmojiSize':
+      'Колко големи се рисуват емоджи в дневника на чата. Ред с емоджи става по-висок, за да го побере; при Малък всеки ред запазва обичайната си височина, като в класическия дневник.',
     'options.help.chatEmojis':
       'Показва кодовете на емоджи (име между две двоеточия) като картинки в чата и над героите и добавя бутона за емоджи в полето на чата. При Изкл. кодовете остават обикновен текст.',
     'options.help.slideHelp': 'Показва съобщенията на сървъра като бягащ текст в лента горе на екрана.',

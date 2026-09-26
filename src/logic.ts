@@ -1698,15 +1698,15 @@ EventBus.on('ChatMessage', packet => {
     return;
   }
 
-  // A chat emoji pops over the sender the same way (common/chatEmojis.ts):
-  // a line of nothing but emojis leaves no balloon, a line with words keeps
-  // its balloon without the codes.
-  let spoken = text;
+  // A line of nothing but chat emojis pops the first over the sender, the
+  // same way (common/chatEmojis.ts); a line with words keeps its balloon,
+  // which draws the emojis among them.
   if (type === ChatLineType.Chat && GameOptions.chatEmojis) {
     const shown = chatEmojiBubbleOf(text, EMOJI_CATALOG);
-    if (shown.bubble) popEmojiBubble(sender, shown.bubble);
-    if (!shown.balloonText) return;
-    spoken = shown.balloonText;
+    if (shown.bubble) {
+      popEmojiBubble(sender, shown.bubble);
+      return;
+    }
   }
 
   // `bGmMode` (RenderBoolean): the original reads `CtlCode` off its character
@@ -1715,7 +1715,7 @@ EventBus.on('ChatMessage', packet => {
   if (type === ChatLineType.GM) markAsGm(sender);
 
   if (!balloon) return;
-  EventBus.emit('chatMessage', { sender, message: spoken, whisper: false });
+  EventBus.emit('chatMessage', { sender, message: text, whisper: false });
 });
 
 /**

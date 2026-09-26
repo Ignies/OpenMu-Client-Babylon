@@ -1607,6 +1607,11 @@ export const italianLayer: LanguageLayer = {
     'options.firstPersonBob': 'Oscillazione della testa in prima persona',
     'options.chatTimestamps': 'Orario nella chat',
     'options.chatEmojis': 'Emoji nella chat',
+    'options.chatEmojiSize': 'Dimensione emoji nella chat',
+    'options.chatEmojiSize.small': 'Piccola',
+    'options.chatEmojiSize.medium': 'Media',
+    'options.chatEmojiSize.large': 'Grande',
+    'options.chatEmojiSize.huge': 'Enorme',
     'options.quickItemActions': 'Ctrl-clic sposta gli oggetti',
     'options.confirmValuableItems': 'Chiedi prima di gettare o vendere oggetti di valore',
     'options.blockBrowserKeys': 'Blocca le scorciatoie del browser',
@@ -2411,6 +2416,8 @@ export const italianLayer: LanguageLayer = {
     'options.help.chatTimestamps':
       'Mostra l’ora, ad esempio 14:03, davanti a ogni riga della chat.',
     'options.help.whisperBeep': 'Riproduce un suono quando ricevi un sussurro.',
+    'options.help.chatEmojiSize':
+      'Quanto sono grandi le emoji nel registro della chat. Una riga con un’emoji diventa più alta per contenerla; su Piccola ogni riga mantiene l’altezza normale, come nel registro classico.',
     'options.help.chatEmojis':
       'Mostra i codici emoji, cioè un nome tra due simboli di due punti, come immagini nella chat e sopra i personaggi, e aggiunge il pulsante delle emoji alla casella della chat. Su No, i codici restano testo semplice.',
     'options.help.slideHelp':

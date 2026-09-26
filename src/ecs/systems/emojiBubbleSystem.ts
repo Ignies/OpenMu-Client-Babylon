@@ -57,7 +57,7 @@ export function startEmojiBubble(
     life: duration,
     duration,
     serial: ++serial,
-    isSide: def ? def.placement === 'side' : !!chat?.side,
+    isSide: def?.placement === 'side',
     anchor: { x: 0, y: 0, z: 0 },
     screenX: 0,
     screenY: 0,

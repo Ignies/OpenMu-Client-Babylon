@@ -59,6 +59,7 @@ import {
   renderScaleForStep,
 } from '../../../libs/renderScale';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
+import { CHAT_EMOJI_SIZE_LABEL_KEYS, CHAT_EMOJI_SIZE_MAX } from '../../../common/chatEmojis';
 import { BUS_VOLUME_MAX } from '../../../sound/buses';
 import {
   LOW_VITAL_MAX_PERCENT,
@@ -342,7 +343,17 @@ export const CATEGORIES: Category[] = [
         sections: [
           {
             titleKey: 'options.section.chat',
-            rows: [toggle('chatTimestamps'), toggle('chatEmojis'), toggle('whisperBeep')],
+            rows: [
+              toggle('chatTimestamps'),
+              toggle('chatEmojis'),
+              choice(
+                'chatEmojiSize',
+                CHAT_EMOJI_SIZE_MAX,
+                named(CHAT_EMOJI_SIZE_LABEL_KEYS),
+                { indent: true, needs: [needOn('chatEmojis')] }
+              ),
+              toggle('whisperBeep'),
+            ],
           },
           {
             titleKey: 'options.section.notices',

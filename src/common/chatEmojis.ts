@@ -23,9 +23,34 @@ export type EmojiCatalog = {
 /** What a file stem must look like to become a code. */
 export const EMOJI_NAME = /^[a-z0-9_]{1,32}$/;
 
-/** An emoji in a log row fills the row; the advance adds its 1px margins. */
-export const CHAT_EMOJI_SIZE = CHAT_LINE_HEIGHT;
-export const CHAT_EMOJI_ADVANCE = CHAT_EMOJI_SIZE + 2;
+/**
+ * Emoji sizes in the log, the `chatEmojiSize` option's steps. The smallest
+ * fits a text row; the others make the row they sit on taller.
+ */
+export const CHAT_EMOJI_SIZES = [13, 20, 26, 32] as const;
+export const CHAT_EMOJI_SIZE_MAX = CHAT_EMOJI_SIZES.length - 1;
+export const CHAT_EMOJI_SIZE_LABEL_KEYS = [
+  'options.chatEmojiSize.small',
+  'options.chatEmojiSize.medium',
+  'options.chatEmojiSize.large',
+  'options.chatEmojiSize.huge',
+] as const;
+
+export function chatEmojiSize(step: number): number {
+  return CHAT_EMOJI_SIZES[Math.min(CHAT_EMOJI_SIZE_MAX, Math.max(0, step))];
+}
+
+/** Room an emoji takes along a row, its 1px margins included. */
+export function chatEmojiAdvance(size: number): number {
+  return size + 2;
+}
+
+/** A log row holding an emoji: the picture and a pixel above and below, never less than a text row. */
+export function chatEmojiRowHeight(size: number): number {
+  return Math.max(CHAT_LINE_HEIGHT, size + 2);
+}
+
+export const CHAT_EMOJI_ADVANCE = chatEmojiAdvance(CHAT_EMOJI_SIZES[0]);
 
 /** Letters typed after a `:` before the completion list opens. */
 export const EMOJI_QUERY_MIN = 2;
@@ -92,6 +117,11 @@ function scanEmojis(text: string, catalog: EmojiCatalog): EmojiHit[] {
     token.lastIndex = end;
   }
   return hits;
+}
+
+/** The line holds a code this client draws as a picture. */
+export function hasEmojiCode(text: string, catalog: EmojiCatalog): boolean {
+  return scanEmojis(text, catalog).length > 0;
 }
 
 export type EmojiSegment = string | ChatEmoji;
@@ -248,21 +278,17 @@ export function firstUnicodeEmoji(text: string): { index: number; glyph: string 
   return m ? { index: m.index, glyph: m[0] } : null;
 }
 
-/**
- * A chat emoji popped over its speaker: a pack picture, or a system emoji's
- * glyph. `side` rides the shoulder, clear of a text balloon.
- */
-export type ChatEmojiBubble = { emoji: ChatEmoji | string; side: boolean };
+/** A chat emoji popped over its speaker: a pack picture, or a system emoji's glyph. */
+export type ChatEmojiBubble = { emoji: ChatEmoji | string };
 
 /** Seconds a chat emoji stays over its speaker, fade included. */
 export const CHAT_EMOJI_BUBBLE_SECONDS = 3.5;
 
 /**
  * What a public line shows over its speaker. A line of nothing but emojis
- * pops the first one over the head and leaves no balloon, the way a bubble
- * word does (`emojiBubbles.ts`). A line with words keeps its balloon, less the
- * codes it cannot draw, and pops the first pack emoji on the shoulder beside
- * it; a system emoji among words is already drawn in the balloon.
+ * pops the first one over the head, large, and leaves no balloon, the way a
+ * bubble word does (`emojiBubbles.ts`). A line with words keeps its balloon,
+ * which draws the emojis among the words.
  */
 export function chatEmojiBubbleOf(
   text: string,
@@ -279,16 +305,14 @@ export function chatEmojiBubbleOf(
     .replace(UNICODE_EMOJI, ' ')
     .trim();
 
-  if (!words && (picture || unicode)) {
-    // Where the picture's code starts: the text in front of it.
-    const pictureIndex = picture
-      ? segments.slice(0, pictureAt).reduce((n, s) => n + (s as string).length, 0)
-      : Infinity;
-    const first = unicode && unicode.index < pictureIndex ? unicode.glyph : picture!;
-    return { bubble: { emoji: first, side: false }, balloonText: '' };
-  }
-  if (!picture) return { bubble: null, balloonText: text };
-  return { bubble: { emoji: picture, side: true }, balloonText: stripEmojiCodes(text, catalog) };
+  if (words || (!picture && !unicode)) return { bubble: null, balloonText: text };
+
+  // Where the picture's code starts: the text in front of it.
+  const pictureIndex = picture
+    ? segments.slice(0, pictureAt).reduce((n, s) => n + (s as string).length, 0)
+    : Infinity;
+  const first = unicode && unicode.index < pictureIndex ? unicode.glyph : picture!;
+  return { bubble: { emoji: first }, balloonText: '' };
 }
 
 /** Most recent first, no repeats. */

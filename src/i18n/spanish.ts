@@ -1613,6 +1613,11 @@ export const spanishLayer: LanguageLayer = {
     'options.firstPersonBob': 'Balanceo de la cabeza en primera persona',
     'options.chatTimestamps': 'Hora en el chat',
     'options.chatEmojis': 'Emojis en el chat',
+    'options.chatEmojiSize': 'Tamaño de los emojis en el chat',
+    'options.chatEmojiSize.small': 'Pequeño',
+    'options.chatEmojiSize.medium': 'Mediano',
+    'options.chatEmojiSize.large': 'Grande',
+    'options.chatEmojiSize.huge': 'Enorme',
     'options.quickItemActions': 'Ctrl-clic mueve los objetos',
     'options.confirmValuableItems': 'Preguntar antes de tirar o vender objetos valiosos',
     'options.blockBrowserKeys': 'Bloquear atajos del navegador',
@@ -2421,6 +2426,8 @@ export const spanishLayer: LanguageLayer = {
       'Muestra la hora (por ejemplo, 14:03) delante de cada línea del chat.',
     'options.help.whisperBeep':
       'Reproduce un sonido cuando alguien te susurra.',
+    'options.help.chatEmojiSize':
+      'Lo grandes que se dibujan los emojis en el registro del chat. Una línea con un emoji crece para que quepa; si eliges Pequeño, cada línea mantiene su altura normal, como en el registro clásico.',
     'options.help.chatEmojis':
       'Muestra los códigos de emoji (un nombre entre dos signos de dos puntos) como imágenes en el chat y sobre los personajes, y añade el botón de emojis al cuadro de texto del chat. Si lo desactivas, los códigos se ven como texto normal.',
     'options.help.slideHelp':

@@ -8,6 +8,7 @@ import {
   chatSenderPrefix,
   chatWheelRows,
   joinCopiedRows,
+  layoutChatRows,
   scrollChatEnd,
   splitChatLine,
 } from './chat';
@@ -190,5 +191,24 @@ describe('chatInputBudget', () => {
   it('leaves room for the prefix sendChat puts in front', () => {
     expect(chatInputBudget('')).toBe(MAX_CHAT_LENGTH);
     expect(chatInputBudget('~')).toBe(MAX_CHAT_LENGTH - 1);
+  });
+});
+
+describe('layoutChatRows', () => {
+  const text = () => 15;
+
+  it('is the classic layout when every row is text', () => {
+    expect(layoutChatRows(text, 9, 15 * 6)).toEqual({ start: 4, tops: [0, 15, 30, 45, 60, 75] });
+    // Fewer rows than the log holds sit at its bottom.
+    expect(layoutChatRows(text, 1, 15 * 6)).toEqual({ start: 0, tops: [60, 75] });
+  });
+
+  it('shows fewer rows when some hold a big emoji', () => {
+    const tall = (i: number) => (i === 8 ? 28 : 15);
+    expect(layoutChatRows(tall, 9, 15 * 6)).toEqual({ start: 5, tops: [2, 17, 32, 47, 75] });
+  });
+
+  it('always shows the newest row, even one taller than the log', () => {
+    expect(layoutChatRows(() => 40, 3, 30)).toEqual({ start: 3, tops: [-10] });
   });
 });

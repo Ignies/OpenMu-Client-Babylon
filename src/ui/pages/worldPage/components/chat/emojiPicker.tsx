@@ -35,7 +35,7 @@ export const RecentEmojis = makeAutoObservable({
   },
 });
 
-const PICKER_SIZE = { width: 20, height: 20 };
+const PICKER_SIZE = { width: 24, height: 24 };
 const TAB_SIZE = { width: 17, height: 17 };
 
 /**

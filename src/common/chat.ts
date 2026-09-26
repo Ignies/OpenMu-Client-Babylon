@@ -190,6 +190,35 @@ export function chatEndIndex(lines: readonly { id: number }[], endId: number | n
   return pinned < 0 ? last : pinned;
 }
 
+/**
+ * The rows the log draws: as many as fit in `budget` pixels, ending at row
+ * `end`, drawn from the bottom up. `tops` is each drawn row's offset from the
+ * top of the budget. With every row a text row this is the original's layout;
+ * a row holding a big emoji is taller and leaves room for fewer.
+ */
+export function layoutChatRows(
+  heightOf: (index: number) => number,
+  end: number,
+  budget: number
+): { start: number; tops: number[] } {
+  let used = 0;
+  let start = end + 1;
+  for (let i = end; i >= 0; i--) {
+    const height = heightOf(i);
+    // The newest row always shows, even one taller than the whole log.
+    if (used + height > budget && start <= end) break;
+    used += height;
+    start = i;
+  }
+  const tops: number[] = [];
+  let y = budget - used;
+  for (let i = start; i <= end; i++) {
+    tops.push(y);
+    y += heightOf(i);
+  }
+  return { start, tops };
+}
+
 /** A wheel notch (100 px in Chrome) moves the log two rows. */
 export const CHAT_WHEEL_PIXELS_PER_ROW = 50;
 

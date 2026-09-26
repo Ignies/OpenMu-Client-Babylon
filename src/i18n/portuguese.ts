@@ -1605,6 +1605,11 @@ export const portugueseLayer: LanguageLayer = {
     'options.firstPersonBob': 'Balanço da cabeça em primeira pessoa',
     'options.chatTimestamps': 'Horário no chat',
     'options.chatEmojis': 'Emojis no chat',
+    'options.chatEmojiSize': 'Tamanho dos emojis no chat',
+    'options.chatEmojiSize.small': 'Pequeno',
+    'options.chatEmojiSize.medium': 'Médio',
+    'options.chatEmojiSize.large': 'Grande',
+    'options.chatEmojiSize.huge': 'Enorme',
     'options.quickItemActions': 'Ctrl-clique move os itens',
     'options.confirmValuableItems': 'Perguntar antes de largar ou vender itens valiosos',
     'options.blockBrowserKeys': 'Bloquear atalhos do navegador',
@@ -2406,6 +2411,8 @@ export const portugueseLayer: LanguageLayer = {
       'Montes de Zen a partir deste valor mostram o nome. No zero, todos os montes mostram o nome.',
     'options.help.chatTimestamps': 'Mostra a hora, como 14:03, antes de cada linha do chat.',
     'options.help.whisperBeep': 'Toca um som quando alguém sussurra para você.',
+    'options.help.chatEmojiSize':
+      'O tamanho dos emojis no registro do chat. Uma linha com emoji cresce para caber nele; no Pequeno, cada linha mantém a altura normal, como no registro clássico.',
     'options.help.chatEmojis':
       'Mostra os códigos de emoji, um nome entre dois-pontos, como imagens no chat e acima dos personagens, e adiciona o botão de emojis à caixa do chat. Se desativar, os códigos aparecem como texto simples.',
     'options.help.slideHelp':

@@ -1572,6 +1572,11 @@ export const thaiLayer: LanguageLayer = {
     'options.firstPersonBob': 'การโยกศีรษะในมุมมองบุคคลที่หนึ่ง',
     'options.chatTimestamps': 'เวลาในแชท',
     'options.chatEmojis': 'อีโมจิในแชท',
+    'options.chatEmojiSize': 'ขนาดอีโมจิในแชท',
+    'options.chatEmojiSize.small': 'เล็ก',
+    'options.chatEmojiSize.medium': 'กลาง',
+    'options.chatEmojiSize.large': 'ใหญ่',
+    'options.chatEmojiSize.huge': 'ใหญ่มาก',
     'options.quickItemActions': 'Ctrl-คลิก เพื่อย้ายไอเทม',
     'options.confirmValuableItems': 'ถามก่อนทิ้งหรือขายของมีค่า',
     'options.blockBrowserKeys': 'บล็อกคีย์ลัดของเบราว์เซอร์',
@@ -2359,6 +2364,8 @@ export const thaiLayer: LanguageLayer = {
     'options.help.lootZen': 'กอง Zen ที่มีอย่างน้อยเท่านี้จะแสดงชื่อ ถ้าปิด ทุกกองจะแสดงชื่อ',
     'options.help.chatTimestamps': 'แสดงเวลา เช่น 14:03 ไว้หน้าข้อความแชททุกบรรทัด',
     'options.help.whisperBeep': 'เล่นเสียงเมื่อมีคนส่งข้อความกระซิบถึงคุณ',
+    'options.help.chatEmojiSize':
+      'ขนาดของอีโมจิที่แสดงในบันทึกแชท บรรทัดที่มีอีโมจิจะสูงขึ้นให้พอดี ถ้าเลือก "เล็ก" ทุกบรรทัดจะสูงเท่าเดิม เหมือนบันทึกแชทแบบคลาสสิก',
     'options.help.chatEmojis':
       'แสดงโค้ดอีโมจิ (ชื่อที่อยู่ระหว่างเครื่องหมายโคลอนสองตัว) เป็นรูปภาพในแชทและเหนือตัวละคร และเพิ่มปุ่มอีโมจิในช่องแชท ถ้าปิด โค้ดจะแสดงเป็นข้อความธรรมดา',
     'options.help.slideHelp': 'แสดงประกาศของเซิร์ฟเวอร์แบบเลื่อนผ่านแถบด้านบนของหน้าจอ',

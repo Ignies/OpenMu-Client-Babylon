@@ -32,7 +32,9 @@ import {
 } from './common/emojiBubbles';
 import { localCommandOf } from './common/chatCommands';
 import {
+  chatEmojiAdvance,
   chatEmojiBubbleOf,
+  chatEmojiSize,
   splitChatLineWithEmojis,
   stripEmojiCodes,
 } from './common/chatEmojis';
@@ -390,7 +392,14 @@ export const Social = new (class _Social {
     // Only what players say can hold emojis; a system line is left as sent.
     const parts =
       sender && GameOptions.chatEmojis
-        ? splitChatLineWithEmojis(prefix, text, width, chatTextWidth, EMOJI_CATALOG)
+        ? splitChatLineWithEmojis(
+            prefix,
+            text,
+            width,
+            chatTextWidth,
+            EMOJI_CATALOG,
+            chatEmojiAdvance(chatEmojiSize(GameOptions.chatEmojiSize))
+          )
         : splitChatLine(prefix, text, width, chatTextWidth);
 
     // `Create(L"", strText2, ...)`: the carried half does not print the name
@@ -596,7 +605,7 @@ export const Social = new (class _Social {
       const bubble = prefix ? null : matchEmojiBubbleWord(text);
       if (bubble && Store.world) Store.world.emojiRequest = bubble;
 
-      // A chat emoji pops over the sender at once, for the same reason.
+      // A line of only chat emojis pops over the sender at once, for the same reason.
       if (!bubble && !prefix && GameOptions.chatEmojis && Store.world) {
         const shown = chatEmojiBubbleOf(text, EMOJI_CATALOG).bubble;
         if (shown) Store.world.emojiRequest = shown;

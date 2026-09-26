@@ -14,8 +14,7 @@ type BubbleEntity = With<Entity, 'emojiBubble' | 'screenPosition'>;
 
 const OFF_SCREEN = 'translate(-10000px, -10000px)';
 
-const HEAD_PICTURE = { width: 44, height: 44 };
-const SIDE_PICTURE = { width: 34, height: 34 };
+const PICTURE = { width: 44, height: 44 };
 
 /**
  * A character's emoji bubble (`common/emojiBubbles.ts`).
@@ -74,7 +73,7 @@ const EmojiBubble = ({ entity }: { entity: BubbleEntity }) => {
           alt=""
           draggable={false}
           // `#root img` is sized 100% by the app stylesheet.
-          style={isSide ? SIDE_PICTURE : HEAD_PICTURE}
+          style={PICTURE}
         />
       )}
     </div>
