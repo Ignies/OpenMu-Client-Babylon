@@ -1595,6 +1595,8 @@ export const bulgarianLayer: LanguageLayer = {
     'session.reset': 'Нулирай',
     'keys.sortInventory': 'Подреди инвентара',
     'notify.inventorySorted': 'Инвентарът е подреден',
+    'notify.arrowsReloaded': 'Стрелите са презаредени',
+    'notify.noMoreArrows': 'Няма повече стрели',
     'keys.targetNearest': 'Насочи към следващото чудовище',
     'warp.favouriteHint': 'Десен бутон закача картата най-отгоре',
     'search.placeholder': 'Търсене...',

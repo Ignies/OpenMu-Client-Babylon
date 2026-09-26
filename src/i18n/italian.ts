@@ -1610,6 +1610,8 @@ export const italianLayer: LanguageLayer = {
     'session.reset': 'Azzera',
     'keys.sortInventory': 'Ordina inventario',
     'notify.inventorySorted': 'Inventario ordinato',
+    'notify.arrowsReloaded': 'Frecce ricaricate',
+    'notify.noMoreArrows': 'Frecce esaurite',
     'keys.targetNearest': 'Bersaglia il mostro successivo',
     'warp.favouriteHint': 'Clic destro per fissare questa mappa in alto',
     'search.placeholder': 'Cerca...',

@@ -1563,6 +1563,8 @@ export const koreanLayer: LanguageLayer = {
     'session.reset': '초기화',
     'keys.sortInventory': '인벤토리 정리',
     'notify.inventorySorted': '인벤토리를 정리했습니다',
+    'notify.arrowsReloaded': '화살을 장전했습니다',
+    'notify.noMoreArrows': '화살이 없습니다',
     'keys.targetNearest': '다음 몬스터 지정',
     'warp.favouriteHint': '오른쪽 클릭으로 이 맵을 위에 고정',
     'search.placeholder': '찾기...',

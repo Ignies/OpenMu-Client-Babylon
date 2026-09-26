@@ -87,6 +87,35 @@ export function hasAmmo(hands: Hands): boolean {
   return other!.durability === undefined || other!.durability > 0;
 }
 
+export type AmmoReload = { from: number; to: number };
+
+/**
+ * `ReloadArrow()` (ZzzInterface.cpp:1152-1204): the hand the ammunition goes
+ * in and the bag slot of the next quiver, searched from the end of the bag
+ * as `FindItemReverseIndex` does. `from` is -1 when the bag has none. Null
+ * when there is nothing to reload: no launcher, or that hand is not empty.
+ */
+export function ammoReload(
+  hands: Hands,
+  items: readonly (Item | null)[],
+  firstBagSlot: number,
+  leftHandSlot: number,
+  rightHandSlot: number
+): AmmoReload | null {
+  const launcher = equippedLauncher(hands);
+  if (!launcher || !hands) return null;
+  const launcherLeft = launcher === hands.leftHand;
+  if ((launcherLeft ? hands.rightHand : hands.leftHand) !== null) return null;
+
+  const wanted = isCrossbow(launcher) ? BOLTS_INDEX : ARROWS_INDEX;
+  const to = launcherLeft ? rightHandSlot : leftHandSlot;
+  for (let slot = items.length - 1; slot >= firstBagSlot; slot--) {
+    const item = items[slot];
+    if (item && item.group === BOW_GROUP && item.num === wanted) return { from: slot, to };
+  }
+  return { from: -1, to };
+}
+
 // ---- 3. the layer ----------------------------------------------------------
 
 /** Readers only: nothing to step, nothing to drop. */

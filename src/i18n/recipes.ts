@@ -2405,6 +2405,8 @@ export const EN_TEXT = {
   'notify.noInventoryRoom': 'There is no room in the inventory',
   'notify.noRoomForItem': 'There is no room for that item',
   'notify.inventorySorted': 'Inventory arranged',
+  'notify.arrowsReloaded': 'Arrows reloaded',
+  'notify.noMoreArrows': 'No more arrows',
   'notify.itemsMoved': '{count} items moved',
   'notify.itemsBought': '{count} bought',
   'notify.learnedSkill': 'You have learned {name}',

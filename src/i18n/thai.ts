@@ -1575,6 +1575,8 @@ export const thaiLayer: LanguageLayer = {
     'session.reset': 'รีเซ็ต',
     'keys.sortInventory': 'จัดกระเป๋า',
     'notify.inventorySorted': 'จัดกระเป๋าเรียบร้อย',
+    'notify.arrowsReloaded': 'เติมลูกธนูแล้ว',
+    'notify.noMoreArrows': 'ลูกธนูหมดแล้ว',
     'keys.targetNearest': 'เลือกมอนสเตอร์ถัดไป',
     'warp.favouriteHint': 'คลิกขวาเพื่อปักหมุดแผนที่นี้ไว้ด้านบน',
     'search.placeholder': 'ค้นหา...',

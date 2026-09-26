@@ -1616,6 +1616,8 @@ export const germanLayer: LanguageLayer = {
     'session.reset': 'Zurücksetzen',
     'keys.sortInventory': 'Inventar ordnen',
     'notify.inventorySorted': 'Inventar geordnet',
+    'notify.arrowsReloaded': 'Pfeile nachgeladen',
+    'notify.noMoreArrows': 'Keine Pfeile mehr',
     'keys.targetNearest': 'Nächstes Monster anvisieren',
     'warp.favouriteHint': 'Rechtsklick markiert diese Karte und hält sie oben',
     'search.placeholder': 'Suchen...',
