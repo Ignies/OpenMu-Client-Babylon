@@ -103,4 +103,19 @@
   .mu-item-tooltip-gap {
     display: block;
   }
+
+  // A chat link's tooltip leads with the item's picture (the grids show the
+  // item itself, so theirs do not). The tooltip is outside `#root`, so the
+  // image is sized here rather than by the app's `img` rule.
+  .mu-item-tooltip-picture {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2px auto 4px;
+
+    .item-icon {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  }
 }

@@ -24,6 +24,11 @@ const isTextField = (el: EventTarget | null): boolean => {
   );
 };
 
+function hasPageSelection(): boolean {
+  const selection = window.getSelection();
+  return !!selection && !selection.isCollapsed;
+}
+
 /** The focused element takes characters, so nothing here is a hot key. */
 export const isTypingInField = (): boolean => isTextField(document.activeElement);
 
@@ -79,6 +84,9 @@ export const KeyboardInputSystem: ISystemFactory = world => {
     if (typing) return;
     // `CMsgWin` is modal: while it is up it owns Enter and Escape.
     if (Store.msgWin) return;
+    // Ctrl+C over text selected in the chat log is the browser's copy, not
+    // the Character window's C.
+    if ((e.ctrlKey || e.metaKey) && e.code === 'KeyC' && hasPageSelection()) return;
     // A key first pressed in a field, a message box or a window that stopped it
     // is held, not pressed again: CInput::IsKeyDown is edge-only.
     if (e.repeat && !pressedKeys.has(e.code)) {

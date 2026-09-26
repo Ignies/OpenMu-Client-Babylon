@@ -850,6 +850,9 @@ export const frenchLayer: LanguageLayer = {
     'chat.tab.all': 'Tout',
     'chat.tab.chat': 'Chat',
     'chat.tab.system': 'Système',
+    'chat.emoji.button': 'Emojis',
+    'chat.emoji.recent': 'Utilisés récemment',
+    'chat.latest': 'Revenir aux messages les plus récents',
 
     'minimap.close': 'Fermer',
     'moveList.title': 'Liste des destinations',
@@ -1603,6 +1606,12 @@ export const frenchLayer: LanguageLayer = {
     'options.lootZen': 'Tas de Zen à partir de',
     'options.firstPersonBob': 'Balancement de la tête en vue subjective',
     'options.chatTimestamps': 'Horodatage du chat',
+    'options.chatEmojis': 'Emojis du chat',
+    'options.chatEmojiSize': 'Taille des emojis du chat',
+    'options.chatEmojiSize.small': 'Petite',
+    'options.chatEmojiSize.medium': 'Moyenne',
+    'options.chatEmojiSize.large': 'Grande',
+    'options.chatEmojiSize.huge': 'Énorme',
     'options.quickItemActions': 'Ctrl-clic déplace les objets',
     'options.confirmValuableItems': 'Demander avant de jeter ou vendre un objet de valeur',
     'options.blockBrowserKeys': 'Bloquer les raccourcis du navigateur',
@@ -2405,6 +2414,10 @@ export const frenchLayer: LanguageLayer = {
       'Les tas de Zen d’au moins ce montant gardent leur nom. Sur Non, tous les tas le gardent.',
     'options.help.chatTimestamps': 'Affiche l’heure, par exemple 14:03, devant chaque ligne du chat.',
     'options.help.whisperBeep': 'Émet un son quand quelqu’un vous envoie un chuchotement.',
+    'options.help.chatEmojiSize':
+      'La taille des emojis dans le journal du chat. Une ligne avec un emoji s’agrandit pour le contenir ; sur Petite, chaque ligne garde sa hauteur normale, comme dans le journal classique.',
+    'options.help.chatEmojis':
+      'Affiche les codes d’emoji (un nom encadré de deux-points) sous forme d’images dans le chat et au-dessus des personnages, et ajoute le bouton des emojis à la zone de saisie du chat. Sur Non, les codes restent en texte brut.',
     'options.help.slideHelp': 'Fait défiler les annonces du serveur sur un bandeau en haut de l’écran.',
     'options.help.stateWarnings':
       'Prévient quand l’équipement est presque cassé, l’inventaire plein, les potions épuisées ou un buff sur le point d’expirer.',

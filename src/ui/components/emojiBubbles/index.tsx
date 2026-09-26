@@ -14,6 +14,8 @@ type BubbleEntity = With<Entity, 'emojiBubble' | 'screenPosition'>;
 
 const OFF_SCREEN = 'translate(-10000px, -10000px)';
 
+const PICTURE = { width: 44, height: 44 };
+
 /**
  * A character's emoji bubble (`common/emojiBubbles.ts`).
  *
@@ -27,8 +29,8 @@ const EmojiBubble = ({ entity }: { entity: BubbleEntity }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   const bubble = entity.emojiBubble;
-  const def = emojiBubbleById(bubble.id);
-  const isSide = def.placement === 'side';
+  const def = bubble.id ? emojiBubbleById(bubble.id) : null;
+  const isSide = bubble.isSide;
 
   useEffect(() => {
     const element = ref.current;
@@ -62,7 +64,18 @@ const EmojiBubble = ({ entity }: { entity: BubbleEntity }) => {
 
   return (
     <div ref={ref} className={`emoji-bubble ${isSide ? 'side' : 'head'}`}>
-      <span className="glyph">{def.glyph}</span>
+      {def || bubble.glyph ? (
+        <span className="glyph">{def ? def.glyph : bubble.glyph}</span>
+      ) : (
+        <img
+          className="glyph picture"
+          src={bubble.picture ?? ''}
+          alt=""
+          draggable={false}
+          // `#root img` is sized 100% by the app stylesheet.
+          style={PICTURE}
+        />
+      )}
     </div>
   );
 };

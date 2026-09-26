@@ -1,5 +1,6 @@
 import type { EmoteId } from '../common/emotes';
 import type { EmojiBubbleId } from '../common/emojiBubbles';
+import type { ChatEmojiBubble } from '../common/chatEmojis';
 import type { InstrumentId } from '../common/instruments';
 import type { BandHit } from '../common/band/performing';
 import type { GuildMemberRoleEnum } from '../common/packets/ServerToClientPackets';
@@ -264,7 +265,12 @@ export type Entity = Partial<{
    * the `EmojiBubbles` overlay draws it.
    */
   emojiBubble: {
-    id: EmojiBubbleId;
+    /** A bubble word, or null for an emoji sent in chat. */
+    id: EmojiBubbleId | null;
+    /** A pack emoji's url, when one was sent. */
+    picture: string | null;
+    /** A system emoji's text, when one was sent. */
+    glyph: string | null;
     /** Seconds left before it disappears. */
     life: number;
     /** Full lifetime, so the overlay can drive the fade. */
@@ -581,8 +587,8 @@ export class World extends ECSWorld<Entity> {
   /** Emote picked in the radial menu, consumed by EmoteSystem next frame. */
   emoteRequest: EmoteId | null = null;
 
-  /** Emoji bubble picked in the radial menu, consumed by EmojiBubbleSystem. */
-  emojiRequest: EmojiBubbleId | null = null;
+  /** Emoji bubble picked in the radial menu or sent in chat, consumed by EmojiBubbleSystem. */
+  emojiRequest: EmojiBubbleId | ChatEmojiBubble | null = null;
 
   /** Instrument taken out or put away from the radial menu, consumed by BandSystem next frame. */
   bandRequest: BandRequest | null = null;

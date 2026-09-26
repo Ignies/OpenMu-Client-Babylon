@@ -845,6 +845,9 @@ export const russianLayer: LanguageLayer = {
     'chat.tab.all': 'Всё',
     'chat.tab.chat': 'Чат',
     'chat.tab.system': 'Система',
+    'chat.emoji.button': 'Эмодзи',
+    'chat.emoji.recent': 'Недавние',
+    'chat.latest': 'Вернуться к последним сообщениям',
 
     'minimap.close': 'Закрыть',
     'moveList.title': 'Список перемещений',
@@ -1582,6 +1585,12 @@ export const russianLayer: LanguageLayer = {
     'options.lootZen': 'Кучки Zen от',
     'options.firstPersonBob': 'Покачивание головы от первого лица',
     'options.chatTimestamps': 'Время в чате',
+    'options.chatEmojis': 'Эмодзи в чате',
+    'options.chatEmojiSize': 'Размер эмодзи в чате',
+    'options.chatEmojiSize.small': 'Маленький',
+    'options.chatEmojiSize.medium': 'Средний',
+    'options.chatEmojiSize.large': 'Большой',
+    'options.chatEmojiSize.huge': 'Огромный',
     'options.quickItemActions': 'Ctrl-клик перемещает предметы',
     'options.confirmValuableItems': 'Спрашивать перед выбросом или продажей ценностей',
     'options.blockBrowserKeys': 'Блокировать горячие клавиши браузера',
@@ -2391,6 +2400,10 @@ export const russianLayer: LanguageLayer = {
     'options.help.chatTimestamps':
       'Показывает время, например 14:03, перед каждой строкой чата.',
     'options.help.whisperBeep': 'Воспроизводит звук, когда вам приходит шёпот.',
+    'options.help.chatEmojiSize':
+      'Насколько крупно эмодзи рисуются в журнале чата. Строка с эмодзи растёт, чтобы оно поместилось; «Маленький» - все строки обычной высоты, как в классическом журнале.',
+    'options.help.chatEmojis':
+      'Показывает коды эмодзи (имя между двумя двоеточиями) картинками в чате и над персонажами и добавляет кнопку эмодзи в поле ввода чата. «Выкл.» - коды остаются обычным текстом.',
     'options.help.slideHelp':
       'Показывает объявления сервера бегущей строкой вверху экрана.',
     'options.help.stateWarnings':

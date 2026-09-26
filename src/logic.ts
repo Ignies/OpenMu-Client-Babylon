@@ -251,6 +251,9 @@ import {
   type EmojiBubbleId,
 } from './common/emojiBubbles';
 import { startEmojiBubble } from './ecs/systems/emojiBubbleSystem';
+import { chatEmojiBubbleOf, type ChatEmojiBubble } from './common/chatEmojis';
+import { EMOJI_CATALOG } from './emojis';
+import { fromChatWire } from './common/chatWire';
 import {
   isPlayerAttackAction,
   resolveGenderedAction,
@@ -1644,7 +1647,8 @@ EventBus.on('ObjectWalked', packet => {
 EventBus.on('ChatMessage', packet => {
   const p = new ChatMessagePacket(packet);
   const sender = cleanName(p.Sender);
-  const message = p.Message.replace(/\0+$/, '');
+  // UTF-8 on the wire (common/chatWire.ts): accents and emoji come back whole.
+  const message = fromChatWire(p.Message.replace(/\0+$/, ''));
 
   // Our own line coming back is the answer to the one we sent: that pair is
   // what the round-trip figure is measured on (common/netStats.ts).
@@ -1694,6 +1698,17 @@ EventBus.on('ChatMessage', packet => {
     return;
   }
 
+  // A line of nothing but chat emojis pops the first over the sender, the
+  // same way (common/chatEmojis.ts); a line with words keeps its balloon,
+  // which draws the emojis among them.
+  if (type === ChatLineType.Chat && GameOptions.chatEmojis) {
+    const shown = chatEmojiBubbleOf(text, EMOJI_CATALOG);
+    if (shown.bubble) {
+      popEmojiBubble(sender, shown.bubble);
+      return;
+    }
+  }
+
   // `bGmMode` (RenderBoolean): the original reads `CtlCode` off its character
   // structure, which OpenMU never sends. A `#` shout is the one GM signal it
   // does give, so the sender's balloon turns into the GM one from here on.
@@ -1711,7 +1726,7 @@ EventBus.on('ChatMessage', packet => {
  * restart the pop-in a round trip late - the same reason ObjectAnimation
  * ignores its own echo.
  */
-function popEmojiBubble(name: string, id: EmojiBubbleId): void {
+function popEmojiBubble(name: string, id: EmojiBubbleId | ChatEmojiBubble): void {
   const world = Store.world;
   if (!world) return;
   const obj = world.netObjsQuery.entities.find(

@@ -249,6 +249,12 @@ export const vietnameseLayer: LanguageLayer = {
     'options.quickItemActions': 'Ctrl-click để chuyển vật phẩm',
     'options.confirmValuableItems': 'Hỏi trước khi vứt hoặc bán đồ quý',
     'options.chatTimestamps': 'Hiện giờ trong trò chuyện',
+    'options.chatEmojis': 'Hiện emoji trong trò chuyện',
+    'options.chatEmojiSize': 'Cỡ emoji trong trò chuyện',
+    'options.chatEmojiSize.small': 'Nhỏ',
+    'options.chatEmojiSize.medium': 'Vừa',
+    'options.chatEmojiSize.large': 'Lớn',
+    'options.chatEmojiSize.huge': 'Rất lớn',
     'options.blockBrowserKeys': 'Chặn phím tắt trình duyệt',
     'options.fullscreen': 'Toàn màn hình',
     'options.installApp': 'Cài ứng dụng',
@@ -414,6 +420,10 @@ export const vietnameseLayer: LanguageLayer = {
       'Đống Zen có ít nhất số lượng này giữ tên. Tắt thì mọi đống đều hiện tên.',
     'options.help.chatTimestamps': 'Hiện giờ, ví dụ 14:03, trước mỗi dòng trò chuyện.',
     'options.help.whisperBeep': 'Phát âm thanh khi có người nhắn riêng cho bạn.',
+    'options.help.chatEmojiSize':
+      'Độ lớn của emoji trong nhật ký chat. Dòng có emoji sẽ cao lên cho vừa; Nhỏ thì mọi dòng giữ chiều cao bình thường, như nhật ký chat cổ điển.',
+    'options.help.chatEmojis':
+      'Hiện mã emoji, tức một tên nằm giữa hai dấu hai chấm, thành hình ảnh trong trò chuyện và trên đầu nhân vật, đồng thời thêm nút emoji vào khung chat. Tắt thì mã hiện như chữ thường.',
     'options.help.slideHelp': 'Hiện thông báo của máy chủ chạy chữ trên một dải ở đầu màn hình.',
     'options.help.stateWarnings':
       'Cảnh báo khi trang bị sắp hỏng, túi đồ đầy, hết bình thuốc hoặc buff sắp hết.',
@@ -1283,6 +1293,9 @@ export const vietnameseLayer: LanguageLayer = {
     'chat.tab.all': 'Tất cả',
     'chat.tab.chat': 'Chat',
     'chat.tab.system': 'Hệ thống',
+    'chat.emoji.button': 'Emoji',
+    'chat.emoji.recent': 'Dùng gần đây',
+    'chat.latest': 'Về tin nhắn mới nhất',
     'minimap.close': 'Đóng',
     'minimap.center': 'Căn giữa',
     'moveList.title': 'Danh sách điểm đến',

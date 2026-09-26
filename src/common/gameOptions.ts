@@ -322,6 +322,14 @@ export type GameOptions = {
   /** A "14:03" column in front of every chat log line. */
   chatTimestamps: boolean;
   /**
+   * Chat emoji codes (`:dk_love:`) drawn as their pictures in the log and
+   * over the speaker, plus the emoji button in the chat box (ours). Off shows
+   * the codes as text.
+   */
+  chatEmojis: boolean;
+  /** Index into `CHAT_EMOJI_SIZES`: how big an emoji is drawn in the log. */
+  chatEmojiSize: number;
+  /**
    * Index into `UI_SCALE_STEPS`: how big every window is drawn, on top of
    * the size it was dragged to. 4K screens want more than a 640x480 stage.
    */
@@ -477,6 +485,8 @@ const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   // Literal rather than `COMPARE_TOOLTIP_MAX`: itemCompare.ts imports this
   // module, so naming it here would close an import cycle.
   compareTooltips: [0, 2],
+  // Literal for the same reason: `CHAT_EMOJI_SIZE_MAX`.
+  chatEmojiSize: [0, 3],
   lowHealthPercent: [LOW_VITAL_MIN_PERCENT, LOW_VITAL_MAX_PERCENT],
   lowManaPercent: [LOW_VITAL_MIN_PERCENT, LOW_VITAL_MAX_PERCENT],
   uiScale: [0, UI_SCALE_MAX],
@@ -576,6 +586,8 @@ const DEFAULTS: GameOptions = {
   lootOther: false,
   lootZen: 0,
   chatTimestamps: false,
+  chatEmojis: true,
+  chatEmojiSize: 2,
   uiScale: 3,
   lockWindows: false,
   stateWarnings: true,

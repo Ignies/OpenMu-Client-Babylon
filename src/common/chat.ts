@@ -84,9 +84,10 @@ export function splitChatLine(
   prefix: string,
   text: string,
   width: number,
-  measure: (text: string) => number
+  measure: (text: string) => number,
+  minLength = CHAT_SPLIT_MIN_LENGTH
 ): string[] {
-  if (text.length < CHAT_SPLIT_MIN_LENGTH) return [text];
+  if (text.length < minLength) return [text];
 
   const rows: string[] = [];
   let rest = text;
@@ -163,6 +164,110 @@ export function chatSenderPrefix(line: {
 
 /** `SCROLL_MIDDLE_PART_HEIGHT`: one log line. */
 export const CHAT_LINE_HEIGHT = 15;
+
+/**
+ * `Scrolling(n)`: the row the log ends on after moving `delta` rows, clamped
+ * so a full page stays in view. Pinned by the row's id; null follows the
+ * newest row.
+ */
+export function scrollChatEnd(
+  lines: readonly { id: number }[],
+  endId: number | null,
+  showing: number,
+  delta: number
+): number | null {
+  const last = lines.length - 1;
+  if (lines.length <= showing) return null;
+  const next = Math.min(last, Math.max(showing - 1, chatEndIndex(lines, endId) + delta));
+  return next >= last ? null : lines[next].id;
+}
+
+/** The index the log ends on; a pin that is gone (dropped, filtered) follows the newest. */
+export function chatEndIndex(lines: readonly { id: number }[], endId: number | null): number {
+  const last = lines.length - 1;
+  if (endId === null) return last;
+  const pinned = lines.findIndex(line => line.id === endId);
+  return pinned < 0 ? last : pinned;
+}
+
+/**
+ * The rows the log draws: as many as fit in `budget` pixels, ending at row
+ * `end`, drawn from the bottom up. `tops` is each drawn row's offset from the
+ * top of the budget. With every row a text row this is the original's layout;
+ * a row holding a big emoji is taller and leaves room for fewer.
+ */
+export function layoutChatRows(
+  heightOf: (index: number) => number,
+  end: number,
+  budget: number
+): { start: number; tops: number[] } {
+  let used = 0;
+  let start = end + 1;
+  for (let i = end; i >= 0; i--) {
+    const height = heightOf(i);
+    // The newest row always shows, even one taller than the whole log.
+    if (used + height > budget && start <= end) break;
+    used += height;
+    start = i;
+  }
+  const tops: number[] = [];
+  let y = budget - used;
+  for (let i = start; i <= end; i++) {
+    tops.push(y);
+    y += heightOf(i);
+  }
+  return { start, tops };
+}
+
+/** A wheel notch (100 px in Chrome) moves the log two rows. */
+export const CHAT_WHEEL_PIXELS_PER_ROW = 50;
+
+/**
+ * Rows a wheel event scrolls, carrying the remainder so a touchpad's small
+ * steps add up instead of each moving a whole row.
+ */
+export function chatWheelRows(
+  deltaY: number,
+  deltaMode: number,
+  carry: number,
+  showing: number
+): { rows: number; carry: number } {
+  // DOM_DELTA_LINE (Firefox, three per notch) and DOM_DELTA_PAGE.
+  const pixels =
+    deltaMode === 1
+      ? (deltaY * 100) / 3
+      : deltaMode === 2
+        ? deltaY * showing * CHAT_WHEEL_PIXELS_PER_ROW
+        : deltaY;
+  const total = Math.sign(carry) === -Math.sign(pixels) ? pixels : carry + pixels;
+  const rows = Math.trunc(total / CHAT_WHEEL_PIXELS_PER_ROW) || 0;
+  return { rows, carry: total - rows * CHAT_WHEEL_PIXELS_PER_ROW };
+}
+
+/**
+ * Copied log rows as text: a message the log wrapped comes back as one line,
+ * separate messages one per line.
+ */
+export function joinCopiedRows(rows: readonly { messageId: number; text: string }[]): string {
+  let out = '';
+  let previous: number | null = null;
+  for (const row of rows) {
+    const text = row.text.trim();
+    if (!text) continue;
+    if (previous !== null) out += row.messageId === previous ? ' ' : '\n';
+    out += text;
+    previous = row.messageId;
+  }
+  return out;
+}
+
+/**
+ * Characters the input box may hold: `sendChat` puts the mode prefix in
+ * front and cuts the line at `MAX_CHAT_LENGTH`, which would lose the end.
+ */
+export function chatInputBudget(prefix: string): number {
+  return MAX_CHAT_LENGTH - prefix.length;
+}
 /** `m_nShowingLines` default (NewUIChatLogWindow.cpp:29). */
 export const CHAT_SHOWING_LINES = 6;
 /** `ChatCooldownMs` between two sent lines. */
