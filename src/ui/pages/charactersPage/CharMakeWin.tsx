@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
 import { Store } from '../../../store';
 import { isReservedName } from '../../../common/reservedNames';
+import { playUiSound } from '../../../libs/sfx';
 import { MuButton } from '../../components/muButton';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { TEXT_COLOR } from '../serversPage/layout';
@@ -65,6 +66,32 @@ type CharMakeWinProps = {
   onClose: () => void;
 };
 
+/**
+ * Swallows a consumed key's auto-repeats until it is released. The first press
+ * never reached the keyboard system, so once this window is gone a held key's
+ * next repeat would read there as a new press: Escape opening the system menu,
+ * Enter starting the character just created. CInput::IsKeyDown is edge-only.
+ */
+function holdUntilReleased(code: string): void {
+  const onDown = (e: KeyboardEvent) => {
+    if (e.code !== code || !e.repeat) return;
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  const onUp = (e: KeyboardEvent) => {
+    if (e.code === code) release();
+  };
+  const release = () => {
+    window.removeEventListener('keydown', onDown, true);
+    window.removeEventListener('keyup', onUp, true);
+    window.removeEventListener('blur', release);
+  };
+
+  window.addEventListener('keydown', onDown, true);
+  window.addEventListener('keyup', onUp, true);
+  window.addEventListener('blur', release);
+}
+
 export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
   const selected =
     CREATABLE_CLASSES.find(c => c.netClass === Store.newCharClass) ??
@@ -121,6 +148,42 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
     Store.createCharacterRequest(name, selected.netClass);
   };
 
+  // The listener is registered once; the ref hands it the current pair.
+  const keyActions = useRef({ onCreate, onClose });
+  useEffect(() => {
+    keyActions.current = { onCreate, onClose };
+  });
+
+  // Enter and Escape belong to this window wherever the focus is
+  // (CharMakeWin.cpp:346-356). Capture, so the system menu and the character
+  // screen's Enter never see them; a message box or the options window on top
+  // takes them instead.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== 'Escape') return;
+      if (e.isComposing || e.keyCode === 229) return;
+      if (Store.msgWin || Store.optionsEnabled) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      // Once per press (CInput::IsKeyDown), not once per auto-repeat.
+      if (e.repeat) return;
+      holdUntilReleased(e.code);
+
+      const { onCreate, onClose } = keyActions.current;
+      if (e.key === 'Escape') {
+        playUiSound('click'); // CharMakeWin.cpp:353
+        onClose();
+      } else if (!Store.charCreationPending) {
+        playUiSound('click'); // CharMakeWin.cpp:348
+        onCreate();
+      }
+    };
+
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, []);
+
   const descriptionLines = separateTextIntoLines(
     t(selected.descriptionKey),
     DESC_LINE_MAX,
@@ -131,15 +194,6 @@ export const CharMakeWin = observer(({ onClose }: CharMakeWinProps) => {
     <div
       className="char-make-win"
       style={{ width: WIN_WIDTH, height: WIN_HEIGHT }}
-      onKeyDown={e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          onCreate();
-        } else if (e.key === 'Escape') {
-          e.preventDefault();
-          onClose();
-        }
-      }}
     >
       {}
       <div

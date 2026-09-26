@@ -132,6 +132,9 @@ export const SessionExit = new (class _SessionExit {
     Store.world?.removeHero();
     runInAction(() => {
       Store.optionsEnabled = false;
+      // The sheet is the world's; left open, it holds Escape on the screens
+      // after (keyboardInputSystem.ts:84).
+      Store.minimapEnabled = false;
     });
 
     if (kind === 'characters') {
@@ -177,17 +180,30 @@ export const SessionExit = new (class _SessionExit {
  * themselves without joining that stack - the yes/no boxes another player
  * pops up, the amount prompts, the quest windows. Escape belongs to them
  * first.
+ *
+ * The server list and the character screen open it too (UIMng.cpp:692-705);
+ * the login window keeps Escape for its Cancel.
  */
 export function openSystemMenu(): boolean {
-  if (Store.uiState !== UIState.World) return false;
-  if (Store.optionsEnabled) return false;
+  const screen = Store.uiState;
   if (
-    Store.msgWin ||
-    Store.minimapEnabled ||
-    quests.anyWindowOpen ||
-    Economy.prompt ||
-    Social.anyRequest ||
-    Messenger.friendRequest
+    screen !== UIState.World &&
+    screen !== UIState.Servers &&
+    screen !== UIState.Characters
+  ) {
+    return false;
+  }
+  if (Store.optionsEnabled || Store.msgWin) return false;
+  // The world's overlays only gate it in the world, as UIMng.cpp:698 checks
+  // none of them: a request still up when the character left is reset only on
+  // the next select, and would hold Escape dead on these screens until then.
+  if (
+    screen === UIState.World &&
+    (Store.minimapEnabled ||
+      quests.anyWindowOpen ||
+      Economy.prompt ||
+      Social.anyRequest ||
+      Messenger.friendRequest)
   ) {
     return false;
   }
@@ -195,6 +211,6 @@ export function openSystemMenu(): boolean {
   runInAction(() => {
     Store.optionsEnabled = true;
   });
-  playUiSound('click'); // NewUIHotKey.cpp:125
+  playUiSound('click'); // NewUIHotKey.cpp:125, UIMng.cpp:703
   return true;
 }

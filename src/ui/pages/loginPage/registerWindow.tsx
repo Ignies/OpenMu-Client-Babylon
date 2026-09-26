@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../i18n';
+import { Store } from '../../../store';
+import { playUiSound } from '../../../libs/sfx';
 import { registerApiUrl } from '../../../common/serverServices';
 import {
   MAX_ACCOUNT_LENGTH,
@@ -160,6 +162,38 @@ export const RegisterWindow = observer(({ onCreated, onCancel }: RegisterWindowP
     }
   };
 
+  const form = useRef<HTMLFormElement>(null);
+  // The listener is registered once; the ref hands it the current pair.
+  const keyState = useRef({ sending, onCancel });
+  useEffect(() => {
+    keyState.current = { sending, onCancel };
+  });
+
+  // The login window's keys (LoginWin.cpp:207-219) on this window's OK and
+  // Cancel, wherever the focus is.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== 'Escape') return;
+      if (e.isComposing || e.keyCode === 229) return;
+      if (Store.msgWin || Store.optionsEnabled) return;
+
+      e.preventDefault();
+      if (e.repeat) return;
+
+      const { sending, onCancel } = keyState.current;
+      if (e.key === 'Escape') {
+        playUiSound('click');
+        onCancel();
+      } else if (!sending) {
+        playUiSound('click');
+        form.current?.requestSubmit();
+      }
+    };
+
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, []);
+
   return (
     <MuSpriteFrame
       file="login_back.OZT"
@@ -172,6 +206,7 @@ export const RegisterWindow = observer(({ onCreated, onCancel }: RegisterWindowP
       </span>
 
       <form
+        ref={form}
         onSubmit={e => {
           e.preventDefault();
           submit();

@@ -1246,6 +1246,9 @@ export const Store = new (class _Store {
     // Also the landing for a connection lost mid-game, which never passes
     // through `SessionExit`: the hero does not stay behind on the backdrop.
     this.world?.removeHero();
+    // The server list and login window draw no message box; one left up
+    // from the world would only swallow Enter and Escape there.
+    this.closeMsgWin();
 
     this.connectToConnectServer();
   }

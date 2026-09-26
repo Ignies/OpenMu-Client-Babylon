@@ -79,6 +79,12 @@ export const KeyboardInputSystem: ISystemFactory = world => {
     if (typing) return;
     // `CMsgWin` is modal: while it is up it owns Enter and Escape.
     if (Store.msgWin) return;
+    // A key first pressed in a field, a message box or a window that stopped it
+    // is held, not pressed again: CInput::IsKeyDown is edge-only.
+    if (e.repeat && !pressedKeys.has(e.code)) {
+      pressedKeys.add(e.code);
+      return;
+    }
     // `NewUIHotKey.cpp:131`: while the minimap sheet is up only its own key
     // (and Escape, which closes it) get through to the windows.
     if (Store.minimapEnabled) {

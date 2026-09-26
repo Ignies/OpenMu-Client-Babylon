@@ -11,7 +11,6 @@
  */
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../src/i18n';
-import { uiClick } from '../../../../src/libs/sfx';
 import { Store } from '../../../../src/store';
 import {
   MAX_PASSWORD_LENGTH,
@@ -170,7 +169,7 @@ export const V097dLoginPage = observer(() => {
             labelStyle={LABEL_STYLE}
             color={TEXT_COLOR}
             activeColor={ACTIVE_COLOR}
-            onClick={uiClick(() => (Store.rememberLogin = !Store.rememberLogin))}
+            onClick={() => (Store.rememberLogin = !Store.rememberLogin)}
             style={{
               position: 'absolute',
               left: BUTTONS.remember.x,
@@ -187,7 +186,7 @@ export const V097dLoginPage = observer(() => {
             labelStyle={LABEL_STYLE}
             color={TEXT_COLOR}
             activeColor={ACTIVE_COLOR}
-            onClick={uiClick(() => (Store.optionsEnabled = true))}
+            onClick={() => (Store.optionsEnabled = true)}
             style={{
               position: 'absolute',
               left: BUTTONS.options.x,

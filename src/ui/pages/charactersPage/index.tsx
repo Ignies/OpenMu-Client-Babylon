@@ -2,9 +2,11 @@ import { t } from '../../../i18n';
 import './style.less';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { Store } from '../../../store';
 import { useEventBus } from '../../../hooks/useEventBus';
+import { playUiSound } from '../../../libs/sfx';
+import { isTypingInField } from '../../../ecs/systems/keyboardInputSystem';
 import {
   CharacterFocusedPacket,
   CharacterListPacket,
@@ -47,6 +49,11 @@ function isDeleteBlocked(
 
 export const CharactersPage = observer(() => {
   const [creating, setCreating] = useState(false);
+  // From the request until the world replaces this screen: a second
+  // SelectCharacter finds OpenMU past CharacterSelection and it drops the
+  // connection (SelectCharacterAction.cs:20-24). The original leaves for the
+  // loading scene at once (CharacterScene.cpp:80).
+  const [selecting, setSelecting] = useState(false);
 
   useEffect(() => {
     Store.refreshCharactersListRequest();
@@ -55,6 +62,7 @@ export const CharactersPage = observer(() => {
   useEventBus('CharacterList', bytes => {
     const p = new CharacterListPacket(bytes);
     const characters = p.getCharacters();
+    setSelecting(false);
     runInAction(() => {
       Store.loadingCharactersList = false;
       Store.charactersList = characters;
@@ -75,9 +83,45 @@ export const CharactersPage = observer(() => {
   const hasFreeSlot = Store.charactersList.length < 5;
 
   const onConnect = () => {
-    if (!selected) return;
+    if (!selected || selecting) return;
+    setSelecting(true);
     Store.selectCharacterRequest(selected.Name);
   };
+
+  // Enter is the Connect button while nothing else is up
+  // (CharacterScene.cpp:193-207); the create window keeps its own Enter.
+  const onEnter = () => {
+    if (creating || selecting || Store.optionsEnabled || !selected) return;
+    playUiSound('click'); // CharacterScene.cpp:199
+    onConnect();
+  };
+  const enterAction = useRef(onEnter);
+  useEffect(() => {
+    enterAction.current = onEnter;
+  });
+
+  // Its own keydown, not the keyPressed broadcast: that one takes the first
+  // repeat of an Enter pressed in a field or a message box for a new press, so
+  // an Enter held through the login would start a character. Document bubble
+  // runs before the message box's own window listener.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || e.repeat) return;
+      if (e.isComposing || e.keyCode === 229) return;
+      if (Store.msgWin) return;
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        isTypingInField()
+      ) {
+        return;
+      }
+      enterAction.current();
+    };
+
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   const onDelete = () => {
     if (!selected) return;
@@ -158,7 +202,7 @@ export const CharactersPage = observer(() => {
           width={BTN_WIDTH}
           height={BTN_HEIGHT}
           frames={{ ...CREATE_FRAMES, check: 3 }}
-          disabled={!selected}
+          disabled={!selected || selecting}
           onClick={onConnect}
           style={{
             position: 'absolute',

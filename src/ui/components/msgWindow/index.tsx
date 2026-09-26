@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite';
 import { Store } from '../../../store';
 import { MuSpriteFrame } from '../muSprite';
 import { MuButton } from '../muButton';
+import { playUiSound } from '../../../libs/sfx';
 import { TEXT_COLOR } from '../../pages/serversPage/layout';
 import { MSG_WIN_MESSAGES, MsgWinCode, MsgWinType } from '../../../common/msgWin';
 import {
@@ -90,18 +91,22 @@ export const MsgWindow = observer(() => {
 
     const handler = (e: KeyboardEvent) => {
       if (e.isComposing || e.keyCode === 229) return;
-      const { onOk, onCancel } = actions.current;
-      if (e.key === 'Enter') {
-        if (type > MsgWinType.Cancel) onOk();
-        else if (type === MsgWinType.Cancel) onCancel();
-      } else if (e.key === 'Escape') {
-        if (type === MsgWinType.Ok) onOk();
-        else if (type > MsgWinType.None) onCancel();
-      } else {
-        return;
-      }
-
+      if (e.key !== 'Enter' && e.key !== 'Escape') return;
       e.preventDefault();
+      // Once per press (CInput::IsKeyDown): a held Enter does not walk a chain of boxes.
+      if (e.repeat) return;
+
+      // MsgWin.cpp:166-191, each acting branch with its SOUND_CLICK01.
+      const { onOk, onCancel } = actions.current;
+      let act: (() => void) | null = null;
+      if (e.key === 'Enter') {
+        if (type > MsgWinType.Cancel) act = onOk;
+        else if (type === MsgWinType.Cancel) act = onCancel;
+      } else if (type === MsgWinType.Ok) act = onOk;
+      else if (type > MsgWinType.None) act = onCancel;
+      if (!act) return;
+      playUiSound('click');
+      act();
     };
 
     window.addEventListener('keydown', handler);
