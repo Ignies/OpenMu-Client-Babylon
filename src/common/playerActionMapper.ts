@@ -63,7 +63,9 @@ export function isOneShotPlayerAction(action: PlayerAction): boolean {
     isPlayerEmoteAction(action) ||
     action === PlayerAction.PLAYER_SHOCK ||
     (action >= PlayerAction.PLAYER_RAGE_FENRIR_DAMAGE &&
-      action <= PlayerAction.PLAYER_RAGE_FENRIR_DAMAGE_ONE_LEFT)
+      action <= PlayerAction.PLAYER_RAGE_FENRIR_DAMAGE_ONE_LEFT) ||
+    // Defense's guard pose (SkillCast.cpp:227) plays through before the idle takes over.
+    action === PlayerAction.PLAYER_DEFENSE1
   );
 }
 

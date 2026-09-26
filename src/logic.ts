@@ -261,7 +261,7 @@ import { createAttributeSystem, type MUAttributeSystem } from './libs/attributeS
 import { classWorldScale } from './common/characterScale';
 import { skillDefinition } from './common/skillsDatabase';
 import { traceHeroInstantMove } from './common/heroMoveTrace';
-import { chooseSkillAction, isTeleportSkill, TELEPORT } from './common/skillCasting';
+import { advancesSwordCount, chooseSkillAction, isTeleportSkill, TELEPORT } from './common/skillCasting';
 import { skillClip } from './combat/skillClips';
 import { teleportGate } from './common/teleportRules';
 import {
@@ -320,7 +320,7 @@ import { SessionResume } from './common/sessionResume';
 import { WEATHER_RAIN } from './weather/rainState';
 import { combat } from './combat';
 import { COMBO_SOUND } from './combat/combo';
-import { SHOCK_IMMUNE_CLIPS } from './combat/recipes';
+import { SHOCK_IMMUNE_CLIPS, SKILL_DEFENSE } from './combat/recipes';
 import { mountKind } from './common/pets';
 import { inChaosCastle } from './common/locomotion';
 import { characterSkinBody } from './common/transformedBody';
@@ -2628,6 +2628,13 @@ function applySkillListPacket(packet: DataView) {
  */
 function playCastAnimation(caster: Entity, skill: number, area: boolean) {
   const def = skillDefinition(skill);
+  if (
+    skill === SKILL_DEFENSE &&
+    !caster.localPlayer &&
+    mountKind(caster.charAppearance?.pet, !!caster.attributeSystem?.isAboveZero('inSafeZone')) === 'horse'
+  ) {
+    return;
+  }
   // ExecuteSkill's cast sound for everyone else (the hero's plays in SkillCastSystem).
   if (!caster.localPlayer && caster.transform) {
     const tele = area
@@ -2665,8 +2672,9 @@ function playCastAnimation(caster: Entity, skill: number, area: boolean) {
       : (skillClip(skill, ctx) ?? PlayerAction.PLAYER_SKILL_HAND1);
     // Others see Electric Spike from a horse as the ground flash; only the Fenrir has its own (WSclient.cpp:5261-5265).
     if (action === PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_FLASH) action = PlayerAction.PLAYER_SKILL_FLASH;
-    caster.playerAnimation.swordCount =
-      (caster.playerAnimation.swordCount ?? 0) + 1;
+    if (def && advancesSwordCount(def, ctx)) {
+      caster.playerAnimation.swordCount = (caster.playerAnimation.swordCount ?? 0) + 1;
+    }
     // SetPlayerMagic then `so->AnimationFrame = 0`; a monster body plays casts on its attack clips.
     const model = caster.modelObject;
     if (

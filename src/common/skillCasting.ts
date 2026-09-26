@@ -7,6 +7,7 @@ import {
 import type { SkillDefinition } from './skillsDatabase';
 import { magicClip, skillClip, type CastContext } from '../combat/skillClips';
 import { castsOnSelf } from '../combat/castTargets';
+import { SLASH_SKILLS } from '../combat/recipes';
 
 /**
  * Client-side casting rules. The wire format is decided by the OpenMU skill
@@ -77,10 +78,21 @@ export function chooseSkillAction(
   ctx: CastContext = {}
 ): PlayerAction {
   if (def.num === STARFALL) return chooseHighBowAttackAction(pose);
+  if (SLASH_SKILLS.has(def.num) && pose.swordCount % 2 === 1) return PlayerAction.PLAYER_ATTACK_TWO_HAND_SWORD3;
   const dedicated = skillClip(def.num, ctx);
   if (dedicated !== null) return dedicated;
   if (isSpell(def)) return magicClip(ctx);
   return chooseAttackAction(pose);
+}
+
+/**
+ * Whether the cast ends on `c->SwordCount++`: only SetPlayerAttack / SetPlayerHighBowAttack
+ * (ZzzCharacter.cpp:1066, :1316) and Slash (WSclient.cpp:4409) advance it for a player;
+ * SetPlayerMagic and the other ReceiveMagic cases leave it alone.
+ */
+export function advancesSwordCount(def: SkillDefinition, ctx: CastContext = {}): boolean {
+  if (def.num === STARFALL || SLASH_SKILLS.has(def.num)) return true;
+  return skillClip(def.num, ctx) === null && !isSpell(def);
 }
 
 /** AreaSkill.Rotation: (BYTE)(Angle / 360 * 256) of the hero's yaw. */

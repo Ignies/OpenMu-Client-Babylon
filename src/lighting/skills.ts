@@ -103,7 +103,7 @@ export type SkillLight = {
   /**
    * `strike`: fired by the visual step itself (`lightSkillStrike`), where and
    * when its art appears, for a skill released on a clip key rather than at
-   * the packet (the Dark Lord's strike). The packet commands never fire it.
+   * the packet (the Dark Lord's strike, a sword blow landing). The packet commands never fire it.
    */
   readonly strike?: LightRecipe;
   /**
@@ -289,6 +289,16 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   13: { area: flame(4, 1.0, { attack: 0.15 }) },
   // Inferno: BITMAP_FLAME range 3 (:8695), wide.
   14: { area: flame(4, 1.5, { gain: 1.6, floorGain: 1.5 }) },
+  // Defense: the original lights nothing and draws nothing. Enhanced: the guard glint's steel.
+  // A glint is a small art: a soft pool, not a lamp.
+  18: { enhanced: { strike: effectLight([0.85, 0.85, 0.95], 0.5, 0.35, { gain: 0.45, floorGain: 0.4, attack: 0.08 }) } },
+  // Falling Slash / Lunge / Uppercut: CreateSpark lights nothing. Enhanced: the blow flash, on the target.
+  19: { enhanced: { strike: effectLight([0.9, 0.95, 1], 0.9, 0.25) } },
+  20: { enhanced: { strike: effectLight([0.9, 0.95, 1], 0.9, 0.25) } },
+  21: { enhanced: { strike: effectLight([0.9, 0.95, 1], 0.9, 0.25) } },
+  // Cyclone / Slash (326 / 327 through their base): the same blow flash, the same light.
+  22: { enhanced: { strike: effectLight([0.9, 0.95, 1], 0.9, 0.25) } },
+  23: { enhanced: { strike: effectLight([0.9, 0.95, 1], 0.9, 0.25) } },
   // BITMAP_ENERGY: range 2 in flight (:8820).
   17: { travel: { ...spark(2, 3), speed: BOLT_SPEED }, impact: spark(2, 0.3) },
   // Heal: MODEL_MAGIC_CIRCLE1 range 3 (:9705).

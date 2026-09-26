@@ -12,6 +12,7 @@ import {
 } from '../../common/packets/ClientToServerPackets';
 import { skillDefinition, type SkillDefinition } from '../../common/skillsDatabase';
 import {
+  advancesSwordCount,
   chooseSkillAction,
   isAreaSkill,
   isSelfCastable,
@@ -41,7 +42,7 @@ import { mountKind } from '../../common/pets';
 import { heroCastSound, playCombat, playSkill } from '../../sound/combat';
 import { skills } from '../../skills';
 import { combat } from '../../combat';
-import { SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../combat/recipes';
+import { SKILL_DEFENSE, SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../combat/recipes';
 import { CONSECUTIVE_ATTACK_KEY } from '../../combat/skillMovement';
 import { castsInPlace, castsOnSelfOnly } from '../../combat/castTargets';
 import { PlayerAction } from '../../common/objects/enum';
@@ -137,10 +138,11 @@ export const SkillCastSystem: ISystemFactory = world => {
   }
 
   function clipFor(hero: Entity, def: SkillDefinition): PlayerAction {
-    const action = chooseSkillAction(def, attackPose(hero), castContext(hero));
+    const ctx = castContext(hero);
+    const action = chooseSkillAction(def, attackPose(hero), ctx);
     // `c->SwordCount++`: every SetPlayerAttack / SetPlayerHighBowAttack the
-    // skill switch falls through to ends on it.
-    if (hero.playerAnimation) {
+    // skill switch falls through to ends on it, and Slash.
+    if (hero.playerAnimation && advancesSwordCount(def, ctx)) {
       hero.playerAnimation.swordCount = (hero.playerAnimation.swordCount ?? 0) + 1;
     }
     alternate = !alternate;
@@ -681,8 +683,9 @@ export const SkillCastSystem: ISystemFactory = world => {
         };
       }
 
-      // ExecuteSkill plays the skill's sound as the cast starts (Fire Scream's only at its spawn).
-      playCombat(heroCastSound(def.num), hero.transform.pos);
+      // ExecuteSkill plays the skill's sound as the cast starts (Fire Scream's only at its spawn); a Dark Horse rider's guard has none.
+      const horseGuard = def.num === SKILL_DEFENSE && castContext(hero).mount === 'horse';
+      if (!horseGuard) playCombat(heroCastSound(def.num), hero.transform.pos);
 
       cooldown = Math.max(
         duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,

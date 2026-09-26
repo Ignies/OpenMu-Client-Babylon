@@ -76,6 +76,8 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_ATTACK_SKILL_FURY_STRIKE) return 0.38;
   // Set after the loop below, over it (ZzzCharacter.cpp:1008).
   if (action === A.PLAYER_SKILL_VITALITY) return 0.34;
+  if (action === A.PLAYER_ATTACK_SKILL_SWORD3) return 0.27 + f; // Uppercut (ZzzCharacter.cpp:920)
+  if (action === A.PLAYER_ATTACK_SKILL_SWORD5) return 0.24 + f; // Slash (ZzzCharacter.cpp:922)
   if (action >= A.PLAYER_ATTACK_SKILL_SWORD1 && action < A.PLAYER_ATTACK_END) {
     return 0.3 + f;
   }

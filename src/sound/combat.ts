@@ -78,6 +78,7 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   15: 'Sound/eTelekinesis', // Teleport Ally
   16: 'Sound/eSoulBarrier', // Soul Barrier
   17: 'Sound/sMagic', // Energy Ball
+  18: 'Sound/sKnightDefense', // Defense (SOUND_SKILL_DEFENSE, WSclient.cpp:3612)
   19: 'Sound/sKnightSkill1', // Falling Slash
   20: 'Sound/sKnightSkill2', // Lunge
   21: 'Sound/sKnightSkill3', // Uppercut

@@ -5374,6 +5374,126 @@ const comboBurstPlus: Step = (at, c) => {
   effects.spawn('particles', c.scene, at, { recipe: COMBO_CHIPS, count: 24 });
 };
 
+// ---- dk1 steps -------------------------------------------------------------------
+
+/** AttackTime runs from 1 at ReceiveMagic and the hit block fires at 15 (ZzzCharacter.cpp:2615, :4133-4139). */
+const BLOW_TICKS = 14;
+/** ATTACK_IMPACT_FRAME: a player attack clip past key 5 forces AttackTime to 15 (ZzzCharacter.cpp:2588, :3049-3062). */
+const BLOW_KEY = 5;
+
+/**
+ * `step` at a sword skill's blow: 14 ticks after the echo, or sooner once the caster's clip passes
+ * key 5. A remote caster's clip is applied after the packet handler, so the key counts only once
+ * the model plays the clip it was given. Dropped when the caster is no longer in SWORD1..5 by
+ * then, CreateSpark's own test (:4884).
+ */
+const atSwordBlow = (step: Step): Step => (at, c) => {
+  const t0 = fxNow();
+  const poll = (): void => {
+    if (entityGone(c.caster)) return;
+    const m = c.caster.modelObject;
+    const action = m?.CurrentAction ?? -1;
+    const inSword = action >= PlayerAction.PLAYER_ATTACK_SKILL_SWORD1 && action <= PlayerAction.PLAYER_ATTACK_SKILL_SWORD5;
+    const keyed = inSword && action === c.caster.playerAnimation?.action && m!.actionFrame() >= BLOW_KEY;
+    if (keyed || fxNow() - t0 >= ticks(BLOW_TICKS) - 1e-6) {
+      if (inSword) step(at, c);
+      return;
+    }
+    delay(TICK / 2, poll);
+  };
+  poll();
+};
+
+/** The row's `strike` light on `on`, riding it at chest height. */
+const strikeOn = (scene: Scene, skill: number, on: Entity): void => {
+  if (!on.transform) return;
+  const p = entityPos(on, IMPACT_HEIGHT, new Vector3());
+  lighting.skillStrike(scene, skill, {
+    position: { x: p.x, y: p.y, z: p.z },
+    follow: out => {
+      entityPos(on, IMPACT_HEIGHT, p);
+      out.x = p.x;
+      out.y = p.y;
+      out.z = p.z;
+    },
+  });
+};
+
+/** Tiles above the target's feet the hit flash sits. */
+const SPARK_FLASH_HEIGHT = 0.3;
+
+/**
+ * CreateSpark's flash (ZzzEffectBlurSpark.cpp:444-449): BITMAP_SPARK+1 (Spark03, 32 px) at the
+ * target's feet, Scale 1 losing 0.5 a tick and gone under 0.2 (ZzzEffectParticle.cpp:6612-6615).
+ * Its 20 Spark02 chips are impactVisuals' HIT_SPARKS, thrown by the damage packet.
+ */
+const swordSpark: Step = (_at, c) => {
+  if (!c.target || entityGone(c.target)) return;
+  // The original's 32 cm for two ticks, half in the ground, did not read at our camera: 64 cm, three ticks, shin high.
+  effects.spawn('sprite', c.scene, entityPos(c.target, SPARK_FLASH_HEIGHT, new Vector3()), { texture: TEX.spark3, size: cm(64), seconds: ticks(3), grow: 0.5, fadeTail: 0 });
+};
+
+/** Enhanced: where the blade meets the body - tiles above the target's feet, and out of it toward the caster so the body does not hide the flash. */
+const BLOW_HEIGHT = 0.6;
+const BLOW_OUT = 0.4;
+/** Enhanced: the soft flare round the blow flash. */
+const BLOW_HALO: RGB = [0.8, 0.85, 1];
+/** Enhanced: the blow's chips (Spark02, as CreateSpark's) off the blow, thrown the way each blade travels: Falling Slash low and wide, Lunge flat and fast, Uppercut a tall fountain. */
+const FALLING_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colour: RGBS.white, size: 0.07, life: 0.4, dir1: [-1.3, -0.2, -1.3], dir2: [1.3, 1.2, 1.3], power: 2.4, gravity: -7, capacity: 96 };
+const LUNGE_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colour: RGBS.white, size: 0.07, life: 0.3, dir1: [-2.2, 0.2, -2.2], dir2: [2.2, 1, 2.2], power: 2.2, gravity: -4, capacity: 96 };
+const UPPER_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colour: RGBS.white, size: 0.07, life: 0.45, dir1: [-0.7, 3, -0.7], dir2: [0.7, 5.5, 0.7], power: 1, gravity: -11, capacity: 96 };
+/** Cyclone's spin sprays its chips in a flat ring all round; Slash's big cut throws a wide fan up and over. */
+const CYCLONE_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colour: RGBS.white, size: 0.07, life: 0.4, dir1: [-2.6, 0, -2.6], dir2: [2.6, 0.7, 2.6], power: 2.4, gravity: -5, capacity: 96 };
+const SLASH_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colour: RGBS.white, size: 0.07, life: 0.45, dir1: [-1.8, 0.8, -1.8], dir2: [1.8, 2.6, 1.8], power: 2, gravity: -9, capacity: 96 };
+
+/**
+ * Enhanced blow, at the same moment and place as swordSpark: the Spark03 flash hotter inside a soft
+ * flare, chips thrown the way the blade travels, and the blow's light on the target (the row's `strike`).
+ */
+const swordBlowLit = (skill: number, chips: ParticleRecipe): Step => (_at, c) => {
+  const target = c.target;
+  if (!target || entityGone(target)) return;
+  const at = entityPos(target, BLOW_HEIGHT, new Vector3());
+  const out = toward(at, entityPos(c.caster, 0, new Vector3()));
+  at.x += out.x * BLOW_OUT;
+  at.z += out.z * BLOW_OUT;
+  effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: BLOW_HALO, size: 0.7, seconds: 0.2, growFrom: 0.6, grow: 1.1, fadeTail: 0.7 });
+  effects.spawn('sprite', c.scene, at, { texture: TEX.spark3, size: 0.75, seconds: ticks(4), growFrom: 1.2, grow: 0.45, fadeTail: 0.3 });
+  effects.spawn('sprite', c.scene, at, { texture: TEX.shiny, size: 0.8, seconds: ticks(4), growFrom: 1.3, grow: 0.3, spin: 4, fadeTail: 0.4 });
+  effects.spawn('particles', c.scene, at, { recipe: chips, count: 14 });
+  strikeOn(c.scene, skill, target);
+};
+
+/** The enhanced blow, timed as the Classic one; the skill is read now, before another is dispatched. */
+const litBlow = (chips: ParticleRecipe): Step => (at, c) =>
+  atSwordBlow(swordBlowLit(baseSkill(currentSkill), chips))(at, c);
+
+/** Seconds into PLAYER_DEFENSE1 the guard is up. */
+const GUARD_SET = 0.2;
+/** Tiles above the weapon hand the guard glint sits. */
+const GUARD_GLINT_UP = 0.3;
+
+/**
+ * Enhanced Defense: the original draws nothing, so the guard only gets a steel glint on the
+ * weapon hand as it sets, and its light, while the caster is still in the guard.
+ */
+const guardGlint: Step = (_at, c) => {
+  const skill = baseSkill(currentSkill);
+  delay(GUARD_SET, () => {
+    if (entityGone(c.caster) || c.caster.modelObject?.CurrentAction !== PlayerAction.PLAYER_DEFENSE1) return;
+    // Up the raised blade, clear of the body that would clip a glint on the hand itself.
+    const follow: PointSource = out => {
+      bonePos(c.caster, RIGHT_HAND_BONE, out, CAST_HEIGHT);
+      out.y += GUARD_GLINT_UP;
+      return out;
+    };
+    const at = follow(new Vector3());
+    effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: RGBS.steel, size: 0.8, seconds: 0.35, growFrom: 0.4, fadeTail: 0.6, follow });
+    effects.spawn('sprite', c.scene, at, { texture: TEX.shiny, colour: RGBS.white, size: 0.6, seconds: 0.4, growFrom: 0.3, grow: 0.5, spin: 3, fadeTail: 0.5, follow });
+    strikeOn(c.scene, skill, c.caster);
+  });
+};
+
 // ---- the table -------------------------------------------------------------------
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
@@ -5564,14 +5684,21 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     travel: { ...bolt(TEX.thunder, RGBS.arc, ENERGY_CHIPS, 0.5, perTick(60)), trail: { recipe: ENERGY_CHIPS, rate: 25 } },
     impact: seq(sprite({ texture: TEX.spark3, colour: RGBS.arc, size: 0.6, seconds: ticks(10), grow: 2 }), hitSparks(ARC_MOTES, 8)),
   },
-  // 18 Defense (knight): BITMAP_SHINY flash on the body.
-  18: { impact: seq(flash(TEX.shiny, RGBS.steel, 1.4, 0.6), particles({ recipe: SPARKS, count: 12, height: 0.6 })) },
-  // 19 Falling Slash / 20 Lunge / 21 Uppercut / 22 Cyclone / 23 Slash: cast only - the weapon blur (BlurType 1).
-  19: { cast: slash() },
-  20: { cast: slash(RGBS.steel, TEX.swordBlur, 1.1) },
-  21: { cast: slash(RGBS.gold) },
-  22: { cast: seq(slash(RGBS.wind, TEX.swordEff), atCaster(particles({ recipe: WIND_STREAKS, count: 16 }), 0.8)) },
-  23: { cast: slash() },
+  // 18 Defense: the guard clip and sKnightDefense only; the original draws nothing (SkillCast.cpp:224-231,
+  // WSclient.cpp:3610-3612). OpenMU answers with 0x19, so the echo carries ReceiveAction's clip and sound.
+  // Enhanced adds a steel glint as the guard sets.
+  18: { enhanced: { impact: guardGlint } },
+  // 19 Falling Slash / 20 Lunge / 21 Uppercut: the SWORD1..3 clip and its weapon trail (weaponTrailSystem),
+  // then CreateSpark at the blow (ZzzCharacter.cpp:4884). The hero's blade-tip glint (SkillCast.cpp:374) is the cast's, not the row's.
+  19: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(FALLING_CHIPS) } },
+  20: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(LUNGE_CHIPS) } },
+  21: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(UPPER_CHIPS) } },
+  // 22 Cyclone (326 by alias): the SWORD4 clip, its weapon trail and CreateSpark at the blow, as 19-21;
+  // the name has no effect of its own (WSclient.cpp:4390-4396, ZzzCharacter.cpp:4884). Enhanced: 19-21's lit blow.
+  22: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(CYCLONE_CHIPS) } },
+  // 23 Slash (327 by alias): the same on the even SWORD5 swing; atSwordBlow drops the odd
+  // TWO_HAND_SWORD3 swing, which gets no CreateSpark (WSclient.cpp:4398-4410, ZzzCharacter.cpp:4884). Enhanced: likewise.
+  23: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(SLASH_CHIPS) } },
   // 24 Triple Shot: CreateArrows(Skill=1) → 3 arrows at ±15°.
   24: { area: (at, c) => fanArrows(at, c, 3, MODEL.arrow, RGBS.steel, TRIPLE_SPREAD), impact: steelHit },
   // 26 Heal: BITMAP_MAGIC+1 sub1 LT 20 at the target → per frame 3× JOINT_HEALING from a r=200 sphere to the
