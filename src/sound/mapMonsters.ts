@@ -562,7 +562,8 @@ const EMPIRE_GUARDIAN: VoiceSet = {
   175: [
     { on: [A.Walk], play: 'Sound/w69w70w71w72/GaionKalein_move' },
     { on: [A.Attack1], play: 'Sound/eMeteorite' },
-    { on: [A.Attack1, A.Attack3], play: 'Sound/eExplosion' },
+    // SOUND_EXPLOTION01 is the global 1-channel wave (ZzzOpenData.cpp:4813).
+    { on: [A.Attack1, A.Attack3], play: 'Sound/eExplosion', channels: 1 },
     { on: [A.Attack2], play: 'Sound/w42/firepillar' },
     { on: [A.Die], play: 'Sound/w69w70w71w72/GrandWizard_death' },
   ],

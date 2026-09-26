@@ -37,6 +37,7 @@ import {
   type CuePlayer,
   type CueState,
 } from '../../sound/mapMonsters';
+import { MonsterAttackEffects } from '../../sound/monsterEffects';
 import { Store } from '../../store';
 
 /**
@@ -159,6 +160,7 @@ export const CombatSfxSystem: ISystemFactory = world => {
   const cueStates = new WeakMap<object, CueState>();
   /** When a repeating per-entity sound (the Balrog's bones) ends. */
   const loopUntil = new WeakMap<object, number>();
+  const attackEffects = new MonsterAttackEffects<SfxPosition>(playCue);
 
   function classOf(e: (typeof query.entities)[number]): CharacterClassNumber {
     return (
@@ -179,6 +181,7 @@ export const CombatSfxSystem: ISystemFactory = world => {
       if (hero) setSfxListener(hero.transform.pos.x, hero.transform.pos.z);
       const now = performance.now();
       const chaosCastle = CHAOS_CASTLE_WORLDS.includes(world.mapIndex);
+      attackEffects.drain(now, world.mapIndex);
 
       for (const e of query) {
         const model = e.modelObject;
@@ -220,6 +223,8 @@ export const CombatSfxSystem: ISystemFactory = world => {
             const drawn = !model.OutOfView;
             stepCues(s, cues, action, started, frame, dt, now, inRange, drawn, pos, playCue);
           }
+          // AttackEffect runs for every live monster, drawn or not (:4133).
+          if (e.monsterAnimation) attackEffects.note(e, npc, world.mapIndex, model, pos, now);
 
           if (walking) {
             if (type === BALROG_MODEL) {
