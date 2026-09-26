@@ -20,11 +20,11 @@ import { KALIMA_OBJECT_LOOPS } from '../maps/kalima/spec';
  * cages, volcano and fire pillar (`CGM3rdChangeUp::PlayEffectSound`).
  *
  * Every instance of a registered type is a candidate; each frame the nearest
- * `MAX_SOURCES` within their row's reach get a slot - an independent looping
- * mixer instance (`SoundsManager.loopInstance`) at the row's gain under the
- * listener's attenuation curve. The older worlds (Lorencia … Icarus) have no
- * such hook in `ZzzObject.cpp`: their only object sounds are the door and
- * gate one-shots, which live with the door system.
+ * `MAX_SOURCES` within their row's reach get a slot, at most `channels` per
+ * sound - a looping mixer instance (`SoundsManager.loopInstance`) at the row's
+ * gain under the listener's attenuation curve. The older worlds (Lorencia …
+ * Icarus) have no such hook in `ZzzObject.cpp`: their only object sounds are
+ * the door and gate one-shots, which live with the door system.
  *
  * Driven by: the ECS map-object entities (`modelId` + `worldIndex` +
  * `transform`, read-only, rescanned every `SCAN_SECONDS`), the listener hero
@@ -51,6 +51,11 @@ export type ObjectLoop = {
   readonly full: number;
   /** Tiles beyond which the source is silent and does not take a slot. */
   readonly silent: number;
+  /**
+   * The original's `LoadWaveFile` channel count: its `PlayBuffer` does nothing
+   * while that many copies play, so at most this many sources sound. Omit = 1.
+   */
+  readonly channels?: number;
   /**
    * Extra gate evaluated each frame with the hero's state. Omit = always. The
    * Elbeland rows are muted while the hero stands on a `TW_SAFEZONE` tile
@@ -87,7 +92,7 @@ const SMALL_SILENT = 14;
  * Reach of a large source (a waterfall, the great wheel, the volcano): the
  * original plays these unpositioned on Kanturu (`PlayBuffer(sound)` with no
  * object, GM_kanturu_1st.cpp:67-115) so they carry over the whole ruin; here
- * they fade over 30 tiles so two waterfalls do not stack to a roar.
+ * the nearest one fades over 30 tiles.
  */
 const LARGE_FULL = 6;
 const LARGE_SILENT = 30;
@@ -131,6 +136,12 @@ const CHANGE_UP_LOOPS: readonly ObjectLoop[] = [
   large([79], 'Sound/w42/volcano', 0.4),
   small([92], 'Sound/w42/firepillar', 0.35, firePillarBurning),
 ];
+
+/** The one object sound loaded with 3 channels (MapManager.cpp:994). */
+const KALIMA_LOOPS: readonly ObjectLoop[] = KALIMA_OBJECT_LOOPS.map(row => ({
+  channels: 3,
+  ...row,
+}));
 
 /**
  * THE table: which object types sound on which map. Pure data - the source
@@ -188,18 +199,14 @@ export const OBJECT_LOOPS: ReadonlyMap<ENUM_WORLD, readonly ObjectLoop[]> =
     [ENUM_WORLD.WD_42CHANGEUP3RD_2ND, CHANGE_UP_LOOPS],
     // GMHellas.cpp:479, :487 (`RenderHellasVisual`) - every Kalima floor.
     ...KALIMA_WORLDS.map(
-      w => [w, KALIMA_OBJECT_LOOPS] as [ENUM_WORLD, readonly ObjectLoop[]]
+      w => [w, KALIMA_LOOPS] as [ENUM_WORLD, readonly ObjectLoop[]]
     ),
   ]);
 
 /** Maps this exists on: the keys of the table. */
 const MAPS: ReadonlySet<ENUM_WORLD> = new Set(OBJECT_LOOPS.keys());
 
-/**
- * Simultaneous object loops. Six covers Elbeland's brook-lined square (three
- * brooks, the waterway, a gate) with a slot to spare; past the sixth-nearest
- * the attenuation has the rest below notice.
- */
+/** Simultaneous object loops; past the sixth-nearest the rest are faint. */
 const MAX_SOURCES = 6;
 
 /**
@@ -225,25 +232,30 @@ let candidates: Candidate[] = [];
 let scannedMap: ENUM_WORLD | null = null;
 let untilScan = 0;
 
-/** The nearest sources, slot by slot; `sound` is what the slot is playing. */
+/** The nearest sources, slot by slot. */
 const slots: {
   x: number;
   z: number;
   volume: number;
   row: ObjectLoop | null;
-  /** The key the mixer instance in this slot was started with. */
-  playing: Sounds | null;
+  /** Copy of `row.sound` this slot plays, 0 = that sound's nearest source. */
+  ch: number;
 }[] = Array.from({ length: MAX_SOURCES }, () => ({
   x: 0,
   z: 0,
   volume: 0,
   row: null,
-  playing: null,
+  ch: 0,
 }));
 let sounding = 0;
 
 /** Scratch: the chosen sources' squared distances, ascending. */
 const slotDist2 = new Float64Array(MAX_SOURCES);
+
+/** The (sound, copy) mixer instances started last frame. */
+const liveSound: (Sounds | null)[] = new Array(MAX_SOURCES).fill(null);
+const liveCh = new Uint8Array(MAX_SOURCES);
+let liveCount = 0;
 
 const sources: ObjectLoopSource[] = [];
 
@@ -286,9 +298,36 @@ function rescan(map: ENUM_WORLD): void {
   }
 }
 
-/** Insert (d2, candidate) into the k-nearest scratch, keeping it sorted. */
+/** Remove slot `j` from the k-nearest scratch, closing the gap. */
+function dropSlot(j: number): void {
+  for (let i = j + 1; i < sounding; i++) {
+    slotDist2[i - 1] = slotDist2[i];
+    slots[i - 1].x = slots[i].x;
+    slots[i - 1].z = slots[i].z;
+    slots[i - 1].row = slots[i].row;
+  }
+  sounding--;
+}
+
+/**
+ * Insert (d2, candidate) into the k-nearest scratch, keeping it sorted and
+ * holding each sound to its row's `channels` nearest sources.
+ */
 function offer(d2: number, c: Candidate): void {
-  if (sounding === MAX_SOURCES && d2 >= slotDist2[MAX_SOURCES - 1]) return;
+  const sound = c.row.sound;
+  let held = 0;
+  let farthest = -1;
+  for (let i = 0; i < sounding; i++) {
+    if (slots[i].row?.sound !== sound) continue;
+    held++;
+    farthest = i;
+  }
+  if (held >= (c.row.channels ?? 1)) {
+    if (d2 >= slotDist2[farthest]) return;
+    dropSlot(farthest);
+  } else if (sounding === MAX_SOURCES && d2 >= slotDist2[MAX_SOURCES - 1]) {
+    return;
+  }
 
   let i = Math.min(sounding, MAX_SOURCES - 1);
   while (i > 0 && slotDist2[i - 1] > d2) {
@@ -305,11 +344,12 @@ function offer(d2: number, c: Candidate): void {
   if (sounding < MAX_SOURCES) sounding++;
 }
 
-function stopSlot(i: number): void {
-  const slot = slots[i];
-  if (slot.playing) SoundsManager.stopLoopInstance(slot.playing, i);
-  slot.playing = null;
-  slot.volume = 0;
+/** Whether this frame's slots still play copy `ch` of `sound`. */
+function chosen(sound: Sounds, ch: number): boolean {
+  for (let i = 0; i < sounding; i++) {
+    if (slots[i].row?.sound === sound && slots[i].ch === ch) return true;
+  }
+  return false;
 }
 
 function update(map: ENUM_WORLD, dt: number): void {
@@ -335,7 +375,8 @@ function update(map: ENUM_WORLD, dt: number): void {
   const gain = busGain(BUS);
 
   sounding = 0;
-  for (const c of gain > 0 ? candidates : []) {
+  for (let k = 0; gain > 0 && k < candidates.length; k++) {
+    const c = candidates[k];
     const dx = c.x - hx;
     const dz = c.z - hz;
     const d2 = dx * dx + dz * dz;
@@ -344,33 +385,50 @@ function update(map: ENUM_WORLD, dt: number): void {
     offer(d2, c);
   }
 
-  for (let i = 0; i < MAX_SOURCES; i++) {
-    const slot = slots[i];
-    const row = i < sounding ? slot.row : null;
-    if (!row) {
-      stopSlot(i);
-      continue;
+  // Copies are numbered per sound, nearest first, and the mixer keys its
+  // instances by (sound, copy): a reorder moves a volume, never restarts.
+  for (let i = 0; i < sounding; i++) {
+    let ch = 0;
+    for (let j = 0; j < i; j++) {
+      if (slots[j].row?.sound === slots[i].row?.sound) ch++;
     }
+    slots[i].ch = ch;
+  }
 
-    // A slot that changes file stops the old instance first: the mixer keys
-    // instances by (file, slot), so the two would otherwise both sound.
-    if (slot.playing && slot.playing !== row.sound) stopSlot(i);
+  for (let k = 0; k < liveCount; k++) {
+    const sound = liveSound[k];
+    if (sound && !chosen(sound, liveCh[k])) {
+      SoundsManager.stopLoopInstance(sound, liveCh[k]);
+    }
+  }
 
+  liveCount = 0;
+  for (let i = 0; i < sounding; i++) {
+    const slot = slots[i];
+    const row = slot.row;
+    if (!row) continue;
     slot.volume = row.gain * gain * gainAt(row, Math.sqrt(slotDist2[i]));
 
-    const s = SoundsManager.loopInstance(row.sound, i);
+    const s = SoundsManager.loopInstance(row.sound, slot.ch);
     if (!s) continue;
     s.setVolume(slot.volume);
     if (!s.isPlaying) s.play();
-    slot.playing = row.sound;
+    liveSound[liveCount] = row.sound;
+    liveCh[liveCount++] = slot.ch;
   }
 }
 
 /** Leaving a map: its objects are gone, so are their loops. */
 function reset(): void {
+  for (let k = 0; k < liveCount; k++) {
+    const sound = liveSound[k];
+    if (sound) SoundsManager.stopLoopInstance(sound, liveCh[k]);
+    liveSound[k] = null;
+  }
+  liveCount = 0;
   for (let i = 0; i < MAX_SOURCES; i++) {
-    stopSlot(i);
     slots[i].row = null;
+    slots[i].volume = 0;
   }
   candidates = [];
   scannedMap = null;

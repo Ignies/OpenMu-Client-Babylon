@@ -24,6 +24,7 @@ import {
   KanturuMayaWideAreaAttackAttackTypeEnum as MayaAttack,
 } from '../common/packets/ServerToClientPackets';
 import type { Sounds } from '../sound/recipes';
+import { startGatewayTurn } from '../maps/kanturu2/gateway';
 import type { EventLayer } from './layer';
 import { EVENT_TEXT, formatText } from './recipes';
 
@@ -340,6 +341,14 @@ export function refreshKanturu(): void {
  */
 export function enterKanturu(): void {
   if (!state.canEnter || Store.isOffline) return;
+  const p = Store.playerData;
+  startGatewayTurn({
+    tower: state.state === KanturuState.Tower,
+    helper: p.petSlot,
+    wings: p.wingsSlot,
+    ring1: p.ring1Slot,
+    ring2: p.ring2Slot,
+  });
   Store.sendToGS(KanturuEnterRequestPacket.createPacket().buffer);
 }
 

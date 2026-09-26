@@ -11,11 +11,13 @@ import { PlaySpeedObject } from '../shared/objectVariants';
  * sine, 44 (×3) `Velocity = 0.02`; the rest are the hidden steam types in
  * `spec.ts` and the sines/scroll in `meshAnimation.ts`.
  *
- * Not built: the object loops (`kan_relic_gear` on 9, `kan_relic_incubator`
- * on 31/35/36/37 - `Sound_Kanturu2nd_Object`, :194-210) which need a
- * positional-loop hook; 55's `MODEL_FENRIR_THUNDER`; the Gateway Machine NPC
- * and the trap cannons, which are server characters. The map bed
- * `w38/kan_relic_global` and `Music/kanturu_2nd` are in the sound tables.
+ * The object loops (`kan_relic_gear` on 9, `kan_relic_incubator` on
+ * 31/35/36/37 - `Sound_Kanturu2nd_Object`, :194-210) are in
+ * `sound/objectLoops.ts`; the map bed `w38/kan_relic_global` and
+ * `Music/kanturu_2nd` are in the sound tables; the Gateway Machine's turn
+ * sound (`kan_relic_hole`) is `gateway.ts`. Not built: 55's
+ * `MODEL_FENRIR_THUNDER`; the Gateway Machine NPC and the trap cannons, which
+ * are server characters.
  */
 export async function createKanturu2(world: World) {
   const terrain = world.terrain;

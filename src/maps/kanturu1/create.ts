@@ -13,13 +13,11 @@ import { AlphaObject, PlaySpeedObject } from '../shared/objectVariants';
  *    0.04`.
  *  - **76** (×10) and **96** (×1): `Alpha = 0.5`.
  *
+ * The object-attached loops (`SOUND_KANTURU_1ST_BG_WHEEL` on 46, `_WATERFALL`
+ * on 77, `_ELEC` on 92, `_PLANT` on 98) are in `sound/objectLoops.ts`; the map
+ * bed `w37/kan_ruin_global` is in `ambientBeds.ts`.
+ *
  * Not built:
- *  - The object-attached loops - `SOUND_KANTURU_1ST_BG_WHEEL` on 46,
- *    `_WATERFALL` on 77, `_ELEC` on 92, `_PLANT` on 98 - are
- *    `PlayBuffer(sound)` with no position, i.e. they play at full volume for
- *    as long as the object is in the update set. The map bed
- *    `w37/kan_ruin_global` is in `ambientBeds.ts`; the four object loops
- *    need a positional-loop hook the sound system does not have yet.
  *  - 92's `CreateJoint` lightning between bones 1 and 2 (:213-225; no ribbon
  *    primitive - the same gap as Icarus), 85's chrome pass (:202-212), 96's
  *    alpha-test tweak (:226-236), and the butterflies on 37.
