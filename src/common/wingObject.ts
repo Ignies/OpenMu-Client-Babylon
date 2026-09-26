@@ -203,7 +203,13 @@ export class WingObject extends ModelObject {
     // outlaw highlight around the silhouette.
     for (const mesh of this.gltf?.mesh.getChildMeshes(false) ?? []) {
       mesh.metadata ??= {};
-      mesh.metadata.auraRimOnly = on;
+      mesh.metadata.auraWing = on;
+    }
+    // The frame a `tint` pass lights: drawn as glowing red bone.
+    for (const { pass } of this.#passes) {
+      if (pass.kind !== 'tint') continue;
+      const bone = this.gltf?.mesh.getChildMeshes(false)[pass.mesh];
+      if (bone?.metadata) bone.metadata.auraBone = on;
     }
     for (const live of this.#passes) {
       const { target } = live;

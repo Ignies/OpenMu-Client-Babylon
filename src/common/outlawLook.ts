@@ -2,26 +2,23 @@ import {
   Color3,
   HighlightLayer,
   Vector3,
+  type GlowLayer,
   type Mesh,
   type Scene,
 } from '../libs/babylon/exports';
 import type { ModelObject } from './modelObject';
 import { tierIndex } from './lightingQuality';
 import { requestGlowProbe } from '../scenes/sceneLook';
-import { itemVisualTier, type ItemVisualTier } from './itemVisualTier';
-import {
-  createItemCrackle,
-  type CrackleBody,
-  type ItemCrackle,
-} from '../effects/itemCrackle';
 
 /**
- * Ultra's outlaw: in place of the original's flat red body light, the body
- * goes almost black and a red sheen and halo run over body, weapons and
- * wings. Classic and Enhanced keep the original red (`outlawBodyLight`).
+ * Ultra's outlaw: in place of the original's flat red body light, the art
+ * goes greyscale and near black (the aura branch of the item material) and
+ * red is drawn over it - hot edges, veins, glowing wing bones - with a red
+ * aura around the whole silhouette. Classic and Enhanced keep the original
+ * red (`outlawBodyLight`).
  *
- * The sheen and halo ride `BodyShine`, which every part hangs on its wearer
- * by reference, so writing the character's own reaches the whole outfit.
+ * The red rides `BodyShine`, which every part hangs on its wearer by
+ * reference, so writing the character's own reaches the whole outfit.
  */
 const ULTRA_TIER = 2;
 
@@ -39,37 +36,23 @@ export function outlawUltraActive(outlaw: boolean): boolean {
 }
 
 /**
- * The item crackle (+13 shape) in the outlaw's red, over a body wide and
- * tall enough to take in the wings: arcs run over the dark armour and the
- * wing membranes instead of sprites sitting on the joints.
+ * The aura is two layers. The glow layer blooms each mesh through its own
+ * material, so the black surface adds nothing and the red on it bleeds
+ * outward; a highlight layer adds a wide red glow outside the silhouette.
+ * Its own highlight layer, apart from the hover outline (`scene.hl`), whose
+ * meshes come and go with the cursor.
  */
-const CRACKLE_TIER: ItemVisualTier = {
-  ...itemVisualTier(null),
-  glow: 4,
-  emissive: [1, 0.05, 0.02],
-  crackleRate: 70,
-};
-const CRACKLE_BODY: CrackleBody = { radius: 0.55, bottom: 0.25, top: 1.45 };
-
-const crackles = new WeakMap<ModelObject, ItemCrackle>();
-
-/**
- * The red glow around body, weapons and wings: a highlight layer draws it
- * outside the silhouette only, so the edges burn and the surfaces stay dark.
- * Its own layer, apart from the hover outline (`scene.hl`), whose meshes come
- * and go with the cursor.
- */
-const EDGE = new Color3(1, 0.06, 0.02);
+const EDGE = new Color3(1, 0.05, 0.02);
 const layers = new WeakMap<Scene, HighlightLayer>();
-const outlined = new WeakMap<ModelObject, Set<Mesh>>();
+const dressedMeshes = new WeakMap<ModelObject, Set<Mesh>>();
 
-function edgeLayer(scene: Scene): HighlightLayer {
+function auraLayer(scene: Scene): HighlightLayer {
   let layer = layers.get(scene);
   if (layer) return layer;
-  layer = new HighlightLayer('outlawEdge', scene, {
+  layer = new HighlightLayer('outlawAura', scene, {
     alphaBlendingMode: 1,
-    blurHorizontalSize: 2,
-    blurVerticalSize: 2,
+    blurHorizontalSize: 3,
+    blurVerticalSize: 3,
   });
   layer.innerGlow = false;
   // Same stencil fix as the hover outline (scenes/testScene.ts): the blob
@@ -83,44 +66,53 @@ function edgeLayer(scene: Scene): HighlightLayer {
   return layer;
 }
 
-function outline(model: ModelObject, on: boolean): void {
+function glowOf(scene: Scene): GlowLayer | null {
+  return (scene as { look?: { glow: GlowLayer } }).look?.glow ?? null;
+}
+
+function surround(model: ModelObject, on: boolean): void {
   const scene = model.node.getScene();
-  let set = outlined.get(model);
+  const glow = glowOf(scene);
+  let set = dressedMeshes.get(model);
   if (!on) {
     if (!set) return;
     const layer = layers.get(scene);
-    for (const mesh of set) if (!mesh.isDisposed()) layer?.removeMesh(mesh);
-    // An empty layer stops rendering on its own (thinHighlightLayer removeMesh).
-    outlined.delete(model);
+    for (const mesh of set) {
+      if (mesh.isDisposed()) continue;
+      // An empty layer stops rendering on its own (thinHighlightLayer removeMesh).
+      layer?.removeMesh(mesh);
+      glow?.unReferenceMeshFromUsingItsOwnMaterial(mesh);
+      mesh.metadata.glowOwnMaterial = false;
+    }
+    dressedMeshes.delete(model);
     return;
   }
-  const layer = edgeLayer(scene);
-  if (!set) outlined.set(model, (set = new Set()));
+  const layer = auraLayer(scene);
+  if (!set) dressedMeshes.set(model, (set = new Set()));
   // Gear reloads its meshes, so the set is topped up every frame.
   for (const mesh of model.getMeshes(true)) {
-    if (set.has(mesh) || mesh.metadata?.brightMesh) continue;
+    if (set.has(mesh) || !mesh.metadata || mesh.metadata.brightMesh) continue;
     set.add(mesh);
     layer.addMesh(mesh, EDGE);
+    glow?.referenceMeshToUseItsOwnMaterial(mesh);
+    mesh.metadata.glowOwnMaterial = true;
   }
 }
 
 const dressed = new WeakSet<ModelObject>();
 
-/** Puts the sheen and halo on the character, or takes them off again. */
+/** Puts the dark look and its aura on the character, or takes them off again. */
 export function applyOutlawLook(
   model: ModelObject,
   on: boolean,
-  timeMs: number,
-  at: { x: number; y: number; z: number }
+  timeMs: number
 ): void {
   const shine = model.BodyShine;
 
   if (!on) {
     if (!dressed.has(model)) return;
     dressed.delete(model);
-    crackles.get(model)?.dispose();
-    crackles.delete(model);
-    outline(model, false);
+    surround(model, false);
     shine.improved?.set(0, 0, 0);
     shine.aura?.set(0, 0, 0);
     return;
@@ -131,25 +123,7 @@ export function applyOutlawLook(
     requestGlowProbe();
   }
 
-  outline(model, true);
-
-  // A map change ends every crackle (effects facade reset); start another.
-  let crackle = crackles.get(model);
-  if (!crackle?.alive) {
-    const scene = model.node.getScene();
-    crackle =
-      createItemCrackle(
-        scene,
-        CRACKLE_TIER,
-        'character',
-        at.x,
-        at.y,
-        at.z,
-        CRACKLE_BODY
-      ) ?? undefined;
-    if (crackle) crackles.set(model, crackle);
-  }
-  crackle?.position.set(at.x, at.y, at.z);
+  surround(model, true);
 
   const p = pulse(timeMs);
   shine.improved ??= new Vector3();

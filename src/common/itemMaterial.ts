@@ -569,7 +569,8 @@ const FX_BODY_SHINE = 0x200; // golden bodies: metal + chrome over the model
 const FX_BODY_SHINE_STAR = 0x400; // ...or the single Shiny02 pass instead
 const FX_BODY_SHINE_CHROME = 0x800; // ...or Chrome01 alone (a Fenrir's one mesh)
 const FX_AURA = 0x1000; // Ultra's outlaw: black body, itemGlow on the edge and brightest art only
-const FX_AURA_RIM_ONLY = 0x2000; // ...edge only, for art that is bright all over (wing glow cards)
+const FX_AURA_WING = 0x2000; // ...a wing: the membrane's own pattern is the vein
+const FX_AURA_BONE = 0x4000; // ...a wing's bone frame: lit red from its art
 
 /** Tint of the body shine passes, per mesh (`ModelObject.BodyShine`). */
 const BODY_SHINE_UNIFORM = 'muBodyShine';
@@ -690,16 +691,21 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
       // back face would otherwise read as all edge.
       float rim = 1.0 - clamp(abs(dot(normalize(viewDirectionW), normalW)), 0.0, 1.0);
       float texLum = dot(${texel}.rgb, vec3(0.299, 0.587, 0.114));
-      bool wing = (fx & ${FX_AURA_RIM_ONLY}) != 0;
+      bool wing = (fx & ${FX_AURA_WING}) != 0;
       // On a wing the membrane's own pattern is the vein; on armour, only
       // the brightest trim.
-      float vein = wing ? smoothstep(0.45, 0.95, texLum) * 0.55 : smoothstep(0.8, 1.0, texLum);
+      float vein = wing ? smoothstep(0.4, 0.9, texLum) : smoothstep(0.75, 1.0, texLum);
       float edge = rim * rim * rim;
-      edge = wing ? 0.0 : edge * edge;
-      // The art itself, darkened and cooled, stands in for the lit colour:
-      // the texture still reads, the light does not.
-      vec3 dark = ${texel}.rgb * (wing ? vec3(0.1, 0.08, 0.08) : vec3(0.12, 0.09, 0.09));
-      ${color}.rgb = dark + itemGlow * (0.7 * vein + 0.9 * edge);
+      edge *= edge;
+      // The art in greyscale, contrast up and brightness down: near black,
+      // with the texture's detail still there. The red is drawn over it.
+      float grey = clamp((texLum - 0.5) * 1.8 + 0.5, 0.0, 1.0);
+      vec3 dark = vec3(grey * 0.13);
+      if ((fx & ${FX_AURA_BONE}) != 0) {
+        ${color}.rgb = dark + itemGlow * (0.35 + 1.4 * texLum);
+      } else {
+        ${color}.rgb = dark + itemGlow * (1.5 * vein + 2.6 * edge);
+      }
     } else if (itemGlow.r + itemGlow.g + itemGlow.b > 0.0) {
       float rim = 1.0 - clamp(dot(normalize(viewDirectionW), normalW), 0.0, 1.0);
       rim = rim * rim * rim;
@@ -952,7 +958,8 @@ function bindItemEffect(
   }
   if (auraOn && !mesh.metadata?.brightMesh) {
     fx |= FX_AURA;
-    if (mesh.metadata?.auraRimOnly) fx |= FX_AURA_RIM_ONLY;
+    if (mesh.metadata?.auraWing) fx |= FX_AURA_WING;
+    if (mesh.metadata?.auraBone) fx |= FX_AURA_BONE;
   }
 
   effect.setFloat(ITEM_FX_UNIFORM, fx);

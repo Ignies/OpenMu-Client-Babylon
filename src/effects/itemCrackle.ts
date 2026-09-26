@@ -90,8 +90,6 @@ const FLICKER_B = 7.1;
 
 const PARKED_Y = -1000;
 
-export type CrackleBody = Body;
-
 type Body = {
   radius: number;
   bottom: number;
@@ -172,13 +170,11 @@ export function createItemCrackle(
   kind: ItemAuraKind,
   x: number,
   y: number,
-  z: number,
-  /** A body of the caller's own instead of `kind`'s (Ultra's outlaw spans the wings). */
-  bodyOverride?: Body
+  z: number
 ): ItemCrackle | null {
   if (tier.crackleRate <= 0) return null;
 
-  const body = bodyOverride ?? BODIES[kind];
+  const body = BODIES[kind];
   const position = new Vector3(x, y, z);
   const shapeOf = SHAPES[tier.glow] ?? SHAPES[2];
   const BOLTS = shapeOf.bolts;
