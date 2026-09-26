@@ -142,6 +142,9 @@ const spots: Spot[] = Array.from({ length: MELT_SPOTS }, () => ({
 /** `setArray4` wants a flat array and must not allocate one per frame. */
 const uniform: number[] = new Array(MELT_SPOTS * 4).fill(0);
 
+/** Slots from the front of `uniform` the shader has to read. */
+let uniformCount = MELT_SPOTS;
+
 /**
  * How much of a patch's life is left, 1…0 - full until the snow starts
  * closing it, then down the fill ramp to nothing.
@@ -241,32 +244,44 @@ export function snowMeltAt(x: number, z: number): number {
   return melt;
 }
 
-/** Whether anything is melted anywhere - the shader's "no melt" fast path. */
-export function snowMeltActive(): boolean {
-  for (const s of spots) if (s.strength > 0) return true;
-  return false;
-}
-
 /**
  * The patches as `vec4(x, z, radius, strength)` for `ovMeltSpot`. Healed and
- * unused slots carry strength 0, which the shader's `max` ignores, so the
- * loop never needs a branch. `on` is the draw-side effects switch: off, every
- * slot reads as empty and the layer is exactly the one it was before melting
- * existed.
+ * unused slots carry strength 0, which the shader's `max` ignores. `on` is
+ * the draw-side effects switch: off, every slot reads as empty and the layer
+ * is exactly the one it was before melting existed.
+ *
+ * `compact` packs the live patches at the front, in slot order, and zeroes
+ * the rest, so the shader can stop at `snowMeltCount()`. Its `max` over the
+ * slots is the same in any order.
  */
-export function snowMeltUniform(on: boolean): number[] {
+export function snowMeltUniform(on: boolean, compact = false): number[] {
+  let n = 0;
+
   for (let i = 0; i < MELT_SPOTS; i++) {
     const s = spots[i];
     const k = on ? s.strength * envelope(s.age) : 0;
-    const o = i * 4;
+    const w = k > 0 ? k : 0;
+    if (compact && w === 0) continue;
+    const o = n++ * 4;
 
     uniform[o] = s.x;
     uniform[o + 1] = s.z;
     uniform[o + 2] = s.radius;
-    uniform[o + 3] = k > 0 ? k : 0;
+    uniform[o + 3] = w;
   }
 
+  uniform.fill(0, n * 4);
+  uniformCount = n;
+
   return uniform;
+}
+
+/**
+ * Slots the shader has to read from the last `snowMeltUniform`: the live
+ * patches when it packed them, all of them when it did not.
+ */
+export function snowMeltCount(): number {
+  return uniformCount;
 }
 
 function update(_map: ENUM_WORLD, dt: number): void {
