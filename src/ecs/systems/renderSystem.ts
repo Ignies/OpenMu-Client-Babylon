@@ -2,6 +2,7 @@ import { Plane, Vector3 } from '../../libs/babylon/exports';
 import { ISystemFactory } from '../world';
 import { toRenderAngles } from '../../common/renderAngles';
 import { weather } from '../../weather';
+import { debuffBodyLight, debuffBrightBody } from '../../common/debuffBody';
 
 const v3Temp = Vector3.Zero();
 const v3Temp2 = Vector3.Zero();
@@ -72,7 +73,13 @@ export const RenderSystem: ISystemFactory = world => {
           transform.visualRotY = transform.rot.y;
         }
 
-        if (!modelObject.FixedLight) {
+        // A Freeze or Cold body is drawn at its own BodyLight instead of the terrain's.
+        const player = !!entity.playerAnimation;
+        const debuffLight = debuffBodyLight(entity.buffs, player);
+        modelObject.setBrightBody(debuffBrightBody(entity.buffs, player));
+        if (debuffLight) {
+          modelObject.Light.set(debuffLight[0], debuffLight[1], debuffLight[2]);
+        } else if (!modelObject.FixedLight) {
           const light = world.getTerrainLight(transform.pos.x, transform.pos.z);
           const self = modelObject.SelfLight;
 

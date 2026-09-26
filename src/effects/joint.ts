@@ -36,6 +36,7 @@ import {
   StandardMaterial,
   Texture,
   Vector3,
+  VertexBuffer,
   type GreasedLineMesh,
   type IGreasedLineMaterial,
   type Scene,
@@ -156,6 +157,12 @@ export interface JointOptions {
   /** Trail: segments kept behind the head (C++ `MaxTails`). */
   maxTails?: number;
   /**
+   * Trail: stop recording the history after this many seconds, so the ribbon keeps its shape instead of
+   * shrinking onto a head that stopped - the original's CreateTail only while `LifeTime > 16` (BITMAP_LIGHT
+   * sub0, ZzzEffectJoint.cpp:6456). Default: records for the whole life.
+   */
+  sampleFor?: number;
+  /**
    * Narrow the ribbon toward its ends instead of cutting it off square: a
    * rounded nose and a tail that comes to a point. A constant-width ribbon is
    * what the original draws, and on a short trail it reads as a rectangular
@@ -182,12 +189,12 @@ export interface JointOptions {
   /**
    * Bolt: lays the `segments + 1` points itself instead of the jittered
    * straight line - a walk like JOINT_THUNDER's MoveHumming steps
-   * (ZzzEffectJoint.cpp:4767-5020). Called at every re-roll.
+   * (ZzzEffectJoint.cpp:4767-5020). Called at every re-roll, for each of `pairs` too.
    */
   path?: (from: Vector3, to: Vector3, out: number[], segments: number) => void;
   /** Bolt: seconds between re-rolls (default two ticks). */
   reroll?: number;
-  /** Bolt: drawn at its full light, without the flicker. */
+  /** Bolt: drawn at its full light, without the flicker (`pairs` too). */
   steady?: boolean;
   /** Tiles above both points. */
   height?: number;
@@ -232,6 +239,23 @@ export interface JointOptions {
    * above `anchor + fadeAbove` (the original's `Light - (z - (target + 50)) / 100`).
    */
   sprites?: { texture: string; colour: RGB; size: number; count?: number; fadeAbove?: number };
+  /** Narrow the whole ribbon linearly to nothing over its life (the original's `Scale = LifeTime * k`). */
+  shrink?: boolean;
+  /** Bolt: the chance a re-roll leaves it dark until the next (a bolt respawned on a `rand_fps_check(2)`). */
+  blink?: number;
+  /**
+   * Bolt: many independent bolts, one per pair of ends, drawn as one mesh and re-pointed together - a whole
+   * skeleton's worth of bone-to-parent arcs for one draw. `blink` hides the whole set.
+   */
+  pairs?: readonly { from: PointSource; to: PointSource }[];
+  /** Trail: re-point the ribbon only when its history steps (once a tick), not every frame - a long, slow ribbon. */
+  tickPoints?: boolean;
+  /**
+   * Many trails whose history is a known curve, drawn as one mesh and re-pointed once a tick: `fill(k, j, out)`
+   * writes point `j` (0 = head, up to `maxTails`) of trail `k` and returns its width multiplier, 0 for a trail
+   * not drawn this tick. Seventy of Death Stab's drill flares for one draw.
+   */
+  paths?: { count: number; fill: (k: number, j: number, out: Vector3) => number };
 }
 
 const live = new LiveList();
@@ -273,12 +297,14 @@ function park(points: number[]): void {
   }
 }
 
-interface Line {
+export interface Line {
   mesh: GreasedLineMesh;
   /** Set the ribbon's fade 0…1 (the original's `Alpha` on the tail quads). */
   fade(vis: number): void;
   /** Step the thunder scroll; a no-op without `textureScroll`. */
   scroll(): void;
+  /** Set the ribbon's width as a fraction of its own (`shrink`). */
+  narrow(k: number): void;
 }
 
 /**
@@ -334,7 +360,8 @@ function taperWidths(lines: number[][], shape: TaperShape): number[] {
   return widths;
 }
 
-function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, opts: JointOptions): Line {
+/** One ribbon mesh for `lines`; `widths` (two per point, x `width`) overrides `opts.taper`'s. rays.ts draws a burst through it. */
+export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, opts: JointOptions, widths?: number[]): Line {
   const blend = opts.blend ?? 'add';
   const sheetFile = opts.texture;
   const textured = !!sheetFile;
@@ -351,7 +378,7 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
       points: lines,
       updatable: true,
       ...(textured ? { uvs: rampUVs(lines, repeats) } : {}),
-      ...(opts.taper ? { widths: taperWidths(lines, opts.taper === true ? {} : opts.taper) } : {}),
+      ...(widths ? { widths } : opts.taper ? { widths: taperWidths(lines, opts.taper === true ? {} : opts.taper) } : {}),
     },
     {
       // With a texture the colour rides in `emissiveColor` below - the plugin's
@@ -388,6 +415,9 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
     // channel a gain can push past the sheet's own levels.
     const std = mesh.material as StandardMaterial;
     const gain = dark ? Math.min(opts.maxCover ?? Infinity, luma(colour) * darkCardGain(scene)) : lightCardGain(scene);
+    // One dirty pass for the whole set-up: each dirtying setter walks every mesh in the scene, and a
+    // burst of forty sparks paid that walk hundreds of times in one frame.
+    std.blockDirtyMechanism = true;
     std.diffuseColor.set(0, 0, 0);
     std.specularColor.set(0, 0, 0);
     std.ambientColor.set(0, 0, 0);
@@ -400,6 +430,7 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
     std.backFaceCulling = false;
     std.disableDepthWrite = true;
     std.fogEnabled = false;
+    std.blockDirtyMechanism = false;
     // Hold the line unseen until the sheet is in - a texture-less Standard
     // ribbon is exactly the solid band this is here to remove.
     if (glMat) glMat.visibility = -1;
@@ -451,6 +482,9 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
   return {
     mesh,
     fade,
+    narrow: k => {
+      if (glMat) glMat.width = width * k;
+    },
     scroll:
       scrollRate > 0
         ? () => {
@@ -462,7 +496,7 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
   };
 }
 
-function disposeLine(scene: Scene, line: Line, lines: number[][]): void {
+export function disposeLine(scene: Scene, line: Line, lines: number[][]): void {
   const mesh = line.mesh;
   for (const l of lines) park(l);
   releaseEffectGlow(mesh);
@@ -491,6 +525,8 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
 
   let t = 0;
   const reroll = opts.reroll ?? REROLL_SECONDS;
+  const blink = opts.blink ?? 0;
+  let dark = false;
   let sinceRoll = reroll;
   let s = seed++ * 7.13;
   const forkFrom = new Vector3();
@@ -509,6 +545,7 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
       if (sinceRoll >= reroll) {
         sinceRoll = 0;
         s += 3.3;
+        dark = blink > 0 && Math.random() < blink;
         if (opts.path) opts.path(a, b, lines[0], segments);
         else fillLine(lines[0], a, b, segments, jitter, s);
         for (let f = 1; f <= forks; f++) {
@@ -526,7 +563,106 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
         mesh.setPoints(lines);
       }
       line.scroll();
-      line.fade(opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3) * (opts.steady ? 1 : 0.6 + 0.4 * hash(t * 97)));
+      line.fade(dark ? 0 : opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3) * (opts.steady ? 1 : 0.6 + 0.4 * hash(t * 97)));
+      if (opts.shrink) line.narrow(1 - prog);
+      return true;
+    },
+    release() {
+      disposeLine(scene, line, lines);
+    },
+  });
+}
+
+/** `pairs`: every bolt of the set in one mesh, re-pointed together each re-roll. */
+function spawnBoltSet(scene: Scene, opts: JointOptions): EffectHandle {
+  const pairs = opts.pairs!;
+  const colour = opts.colour ?? RGBS.arc;
+  const seconds = opts.seconds ?? DEFAULT_SECONDS;
+  const segments = opts.segments ?? DEFAULT_SEGMENTS;
+  const jitter = opts.jitter ?? DEFAULT_JITTER;
+  const height = opts.height ?? 0;
+  const reroll = opts.reroll ?? REROLL_SECONDS;
+  const blink = opts.blink ?? 0;
+  const lines: number[][] = pairs.map(() => new Array<number>((segments + 1) * 3).fill(0));
+  for (const l of lines) park(l);
+  const line = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const mesh = line.mesh;
+  let t = 0;
+  let sinceRoll = reroll;
+  let dark = false;
+  let s = seed++ * 7.13;
+  return live.push({
+    update(dt) {
+      t += dt;
+      const prog = t / seconds;
+      if (prog >= 1 || opts.until?.()) return false;
+      sinceRoll += dt;
+      if (sinceRoll >= reroll) {
+        sinceRoll = 0;
+        s += 3.3;
+        dark = blink > 0 && Math.random() < blink;
+        for (let i = 0; i < pairs.length; i++) {
+          pairs[i].from(a);
+          pairs[i].to(b);
+          a.y += height;
+          b.y += height;
+          if (opts.path) opts.path(a, b, lines[i], segments);
+          else fillLine(lines[i], a, b, segments, jitter, s + i * 5.1);
+        }
+        mesh.setPoints(lines);
+      }
+      line.scroll();
+      line.fade(dark ? 0 : fadeOut(prog, opts.fadeTail ?? 0.3) * (opts.steady ? 1 : 0.6 + 0.4 * hash(t * 97)));
+      return true;
+    },
+    release() {
+      disposeLine(scene, line, lines);
+    },
+  });
+}
+
+/** `paths`: every trail of the set in one mesh, its points and widths written by the caller once a tick. */
+function spawnPathSet(scene: Scene, opts: JointOptions): EffectHandle {
+  const paths = opts.paths!;
+  const seconds = opts.seconds ?? DEFAULT_SECONDS;
+  const points = Math.max(1, opts.maxTails ?? DEFAULT_TAILS) + 1;
+  const lines: number[][] = [];
+  for (let k = 0; k < paths.count; k++) lines.push(new Array<number>(points * 3).fill(0));
+  for (const l of lines) park(l);
+  const widths = new Array<number>(paths.count * points * 2).fill(0);
+  const line = makeLine(scene, lines, opts.colour ?? RGBS.arc, opts.width ?? DEFAULT_WIDTH, opts, widths);
+  const mesh = line.mesh;
+  // GreasedLineMesh._setPoints copies the whole uv table once per line (7 ms for 140 lines): drop it, write the ramp after.
+  const uvs = opts.texture ? new Float32Array(rampUVs(lines, opts.textureRepeats ?? 1)) : null;
+  if (uvs) (mesh as unknown as { _options: { uvs?: number[] } })._options.uvs = undefined;
+  let t = 0;
+  let sinceSample = TAIL_SAMPLE_SECONDS;
+  return live.push({
+    update(dt) {
+      t += dt;
+      const prog = t / seconds;
+      if (prog >= 1 || opts.until?.()) return false;
+      sinceSample += dt;
+      if (sinceSample >= TAIL_SAMPLE_SECONDS) {
+        sinceSample = 0;
+        for (let k = 0; k < paths.count; k++) {
+          const l = lines[k];
+          for (let j = 0; j < points; j++) {
+            const w = paths.fill(k, j, p);
+            l[j * 3] = p.x;
+            l[j * 3 + 1] = p.y;
+            l[j * 3 + 2] = p.z;
+            const o = (k * points + j) * 2;
+            widths[o] = w;
+            widths[o + 1] = w;
+          }
+        }
+        mesh.widths = widths;
+        mesh.setPoints(lines);
+        if (uvs) mesh.updateVerticesData(VertexBuffer.UVKind, uvs);
+      }
+      line.scroll();
+      line.fade(fadeOut(prog, opts.fadeTail ?? 0.3));
       return true;
     },
     release() {
@@ -574,6 +710,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
   const anchorLast = new Vector3();
   if (anchor) anchor(anchorLast);
   const maxSeg = opts.maxSegment ?? Infinity;
+  const sampleFor = opts.sampleFor ?? Infinity;
   const cullLine = Number.isFinite(maxSeg) ? line.slice() : line;
   const smooth = Math.max(1, Math.round(opts.smooth ?? 1));
   const drawLine = smooth > 1 ? new Array<number>((tails * smooth + 1) * 3).fill(0) : cullLine;
@@ -636,7 +773,8 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
         head.y += vy * dt;
       }
       sinceSample += dt;
-      if (sinceSample >= TAIL_SAMPLE_SECONDS) {
+      const stepped = sinceSample >= TAIL_SAMPLE_SECONDS && t <= sampleFor;
+      if (stepped) {
         sinceSample = 0;
         if (steer) {
           if (steer.seek) {
@@ -679,11 +817,15 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
         line.copyWithin(3, 0, tails * 3);
         opts.trace?.(head);
       }
+      // A ribbon whose history is frozen and whose head stopped has nothing new to upload.
+      const held = t > sampleFor && !anchor && !opts.wave && head.x === line[0] && head.y === line[1] && head.z === line[2];
       line[0] = head.x;
       line[1] = head.y;
       line[2] = head.z;
       opts.track?.(head);
-      if (cullLine !== line) {
+      if (held) {
+        // Points unchanged since the last upload.
+      } else if (cullLine !== line) {
         // Copy the history, collapsing an over-long segment onto its newer end so it draws as nothing.
         const maxSq = maxSeg * maxSeg;
         cullLine[0] = line[0];
@@ -699,12 +841,15 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
           cullLine[i + 2] = long ? cullLine[i - 1] : line[i + 2];
         }
       }
-      if (smooth > 1) resampleCurve(cullLine, drawLine, smooth);
-      if (opts.wave && drawLine !== line) waveLine(drawLine, waveScratch, opts.wave, t);
-      mesh.setPoints(drawLines);
+      if (!held) {
+        if (smooth > 1) resampleCurve(cullLine, drawLine, smooth);
+        if (opts.wave && drawLine !== line) waveLine(drawLine, waveScratch, opts.wave, t);
+        if (stepped || !opts.tickPoints) mesh.setPoints(drawLines);
+      }
       ribbon.scroll();
       const vis = opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3);
       ribbon.fade(vis);
+      if (opts.shrink) ribbon.narrow(1 - prog);
       if (spriteCards.length) {
         const s = opts.sprites!;
         for (let i = 0; i < spriteCards.length; i++) {
@@ -780,6 +925,8 @@ function waveLine(line: number[], scratch: number[], wave: NonNullable<JointOpti
 
 /** Spawn helper other entries call directly (aura's orbit ribbons). */
 export function spawnJoint(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle {
+  if (opts.pairs) return spawnBoltSet(scene, opts);
+  if (opts.paths) return spawnPathSet(scene, opts);
   return opts.head || opts.velocity !== undefined ? spawnTrail(scene, at, opts) : spawnBolt(scene, at, opts);
 }
 
