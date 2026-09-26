@@ -47,7 +47,7 @@ const SELF_ONLY: ReadonlySet<number> = new Set([
   30, 31, 32, 33, 34, 35, 36, 37, // the elf summons (AT_SKILL_SUMMON + 0..7)
   53, // Improve AG
   77, 441, // Infinity Arrow, Str
-  218, 469, // Berserker, Str
+  218, 469, 470, 472, // Berserker, Str, Proficiency, Mastery
   266, // Ignore Defense
   267, 573, // Increase Health, Str
   268, 569, 572, // Increase Block, Str, Mastery

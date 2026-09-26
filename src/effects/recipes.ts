@@ -183,6 +183,12 @@ export const TEX = {
   powerWave: 'Effect/PoundingBall.OZJ',
   /** BITMAP_LIGHT+2 (cra_04.jpg, 64 px): the Summoner curse hand flashes and the Blind body smoke. */
   cra04: 'Effect/cra_04.OZJ',
+  /** BITMAP_FIRE_CURSEDLICH (firehik02.jpg, 64 px): the flames off the Sahamutt and its burn. */
+  fireCursedLich: 'Effect/firehik02.OZJ',
+  /** BITMAP_SUMMON_SAHAMUTT_EXPLOSION (loungexflow.jpg, 256 px, 4x4 cells of 64): the Sahamutt's blasts. */
+  sahamuttBlast: 'Effect/loungexflow.OZJ',
+  /** BITMAP_ADV_SMOKE (fi01.jpg, 128 px): the Neil burn's sparks. */
+  advSmoke: 'Effect/fi01.OZJ',
 } as const;
 
 export type EffectTexture = (typeof TEX)[keyof typeof TEX];
@@ -373,6 +379,18 @@ export const MODEL = {
   suhwanzin2: 'Effect/Suhwanzin2.glb',
   suhwanzin22: 'Effect/Suhwanzin22.glb',
   suhwanzin222: 'Effect/Suhwanzin222.glb',
+  /** MODEL_SUMMONER_CASTING_EFFECT1 / 11 / 111 / 4: the rest of the summon casting circle. */
+  suhwanzin1: 'Effect/Suhwanzin1.glb',
+  suhwanzin11: 'Effect/Suhwanzin11.glb',
+  suhwanzin111: 'Effect/Suhwanzin111.glb',
+  suhwanzin4: 'Effect/Suhwanzin4.glb',
+  /** MODEL_SUMMONER_SUMMON_NEIL_NIFE1..3 / NEIL_GROUND1..3: Requiem's knives and ground rings. */
+  neilKnife1: 'Skill/nelleff_nife01.glb',
+  neilKnife2: 'Skill/nelleff_nife02.glb',
+  neilKnife3: 'Skill/nelleff_nife03.glb',
+  neilGround1: 'Skill/nell_nifegrund01.glb',
+  neilGround2: 'Skill/nell_nifegrund02.glb',
+  neilGround3: 'Skill/nell_nifegrund03.glb',
 } as const;
 
 export type EffectModel = (typeof MODEL)[keyof typeof MODEL];

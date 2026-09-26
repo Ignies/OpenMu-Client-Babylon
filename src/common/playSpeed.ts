@@ -118,6 +118,8 @@ export function playerPlaySpeed(
   if (action >= A.PLAYER_SKILL_DRAIN_LIFE && action <= A.PLAYER_SKILL_DRAIN_LIFE_FENRIR) return 0.25 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_SKILL_LIGHTNING_SHOCK) return 0.35 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_ATTACK_RIDE_ATTACK_MAGIC) return 0.3 + magicSpeedFactor(magicSpeed);
+  // The summons, with no magic speed (ZzzCharacter.cpp:998-1001).
+  if (action >= A.PLAYER_SKILL_SUMMON && action <= A.PLAYER_SKILL_SUMMON_FENRIR) return 0.25;
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {

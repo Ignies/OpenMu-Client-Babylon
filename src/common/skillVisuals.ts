@@ -7,7 +7,7 @@ import type { LightRecipe, LightSource } from '../lighting/lightSource';
 import { combat } from '../combat';
 import { weather } from '../weather';
 import { effects, type EffectHandle } from '../effects';
-import { boneLocalPos, bonePos, delay, effectTexture, entityGone, entityPos, entityYaw, fadeOut, followEntity, fxNow, scaleRGB, type ParticleRecipe, type PointSource, type RGB } from '../effects/core';
+import { boneLocalPos, bonePos, delay, effectTexture, emitBurst, entityGone, entityPos, entityYaw, fadeOut, fixedPoint, followEntity, fxNow, scaleRGB, type ParticleRecipe, type PointSource, type RGB, type SheetCells } from '../effects/core';
 import type { SpriteOptions } from '../effects/sprite';
 import type { ShroudOptions } from '../effects/shroud';
 import type { SpiritSwarmOptions, SwarmSpirit } from '../effects/spiritSwarm';
@@ -20,6 +20,7 @@ import type { ProjectileOptions } from '../effects/projectile';
 import type { JointOptions, TaperShape } from '../effects/joint';
 import type { Ray } from '../effects/rays';
 import type { AuraOptions, BoneGlow, SpearJoints } from '../effects/aura';
+import type { SummonBody } from '../effects/summon';
 import {
   ARC_MOTES,
   BLOOD_CHIPS,
@@ -63,7 +64,6 @@ import { earthQuake } from '../camera';
 import { warmGLTF } from './modelLoader';
 import { ENUM_WORLD } from './types';
 import { TW_NOGROUND, TW_NOMOVE, TW_WATER } from './terrain/consts';
-import type { SheetCells } from '../effects/core';
 import { DARK_LORD_MASTER_ALIASES } from './skillAliases';
 import { LEFT_HAND_BONE, RIGHT_HAND_BONE } from './weaponAttachment';
 import { GROUP_BOW, GROUP_SHIELD } from './weaponClass';
@@ -483,18 +483,6 @@ const spiritBurst = (colour: RGB): Step =>
     streamerFan(18, (Math.PI * 2) / 18, { velocity: perTick(50), seconds: ticks(20), maxTails: 3, width: 0.6, colour, pitch: (10 * Math.PI) / 180, texture: TEX.jointSpirit }),
     magicGround(colour, ticks(40), 3)
   );
-
-/**
- * The Summoner book cast (SummonSystem.cpp CreateCastingEffect): BITMAP_MAGIC
- * sub10 white + sub9 tinted at the feet, then the SUMMONER_CASTING_EFFECT
- * models tinted `core` (not converted here - motes stand in).
- */
-const summonerCast = (circle: RGB, core: RGB): Step =>
-  atCaster(seq(
-    ring({ texture: TEX.magicGround, colour: RGBS.white, seconds: ticks(20), scale: 2.5, spin: 40, growFrom: 0.6 }),
-    ring({ texture: TEX.magicGround, colour: circle, seconds: ticks(25), scale: 2, spin: -50 }),
-    particles({ recipe: { ...SHADE_MOTES, colour: core }, count: 16, height: 0.5 })
-  ), 0);
 
 /** CreateBomb (ZzzEffect.cpp:6394): 20 BITMAP_SPARK chips + one grey BITMAP_EXPLOTION card. */
 const bomb = (colour: RGB = [0.5, 0.5, 0.5]): Step =>
@@ -6454,6 +6442,553 @@ const bloodStormPlus: Step = (at, c) => {
   effects.spawn('particles', c.scene, at, { recipe: BLOOD_CHIPS, rate: 30, seconds: ticks(18), height: 0.9 });
 };
 
+// ---- sum2 summons: 223 Explosion, 224 Requiem, 225 Pollution (SummonSystem.cpp CastSummonSkill) ------
+
+/** The book's tier: `Weapon[1].Level` >= 11 is 2, >= 7 is 1, else 0 (SummonSystem.cpp:128-135). */
+function bookTier(e: Entity): number {
+  const lvl = e.charAppearance?.leftHand?.lvl ?? 0;
+  return lvl >= 11 ? 2 : lvl >= 7 ? 1 : 0;
+}
+
+
+/** The facing yaw that walks from `from` to `to` (the inverse of `forwardOf`). */
+const yawToward = (from: Vector3, to: Vector3): number => Math.atan2(to.x - from.x, -(to.z - from.z));
+
+/** CreateCastingEffect's Lights: BITMAP_MAGIC sub9, CASTING_EFFECT1 / 11 / 111, 2 / 22 / 222 and 4 (SummonSystem.cpp:200-272). */
+interface SummonCast {
+  impact: RGB;
+  outer: RGB;
+  inner: RGB;
+  burst: RGB;
+}
+
+const CAST_EXPLOSION: SummonCast = { impact: [1, 0.6, 0.4], outer: [1, 0.5, 0], inner: [1, 0.5, 0], burst: [1, 0.5, 0.8] };
+const CAST_REQUIEM: SummonCast = { impact: [0.7, 0.7, 1], outer: [0, 0.7, 1], inner: [0, 0, 1], burst: [0.8, 0.5, 1] };
+const CAST_POLLUTION: SummonCast = { impact: [0.6, 0.6, 0.9], outer: [0.6, 0.3, 0.9], inner: [0.8, 0.1, 0.6], burst: [0.9, 0.1, 1] };
+
+/** BITMAP_MAGIC sub10's Alpha at tick `n`: +0.05 to 1, then -0.03 a tick from LT 20 (MoveHandlers.cpp:1386-1390). */
+const castPoolAlpha = (n: number): number => (n < 24 ? Math.min(1, 0.05 * n) : 1 - 0.03 * (n - 24));
+/** Ticks each of sub10's five flare01 layers is drawn: layer i drops out below LT 3i (ZzzEffect.cpp:9759-9771). */
+const CAST_POOL_LAYERS = [44, 41, 38, 35, 32];
+
+/**
+ * CreateCastingEffect at the caster's feet (SummonSystem.cpp:200-272). BITMAP_MAGIC sub10: flare01 on
+ * the terrain, 12 tiles, subtractive white, up to five layers deep (LT 44, ZzzEffect.cpp:1163-1168,
+ * :9759-9771). Sub9: empact01 at 2.4 and 2.88 tiles in the first Light, turning -8 and +4 deg a tick,
+ * full from the start and fading over the last 20 of its 40 ticks (:1157-1162, :9746-9752,
+ * MoveHandlers.cpp:1373-1380). The CASTING_EFFECT models: 1 / 11 / 111 and 2 / 22 / 222 at Scale 0.9
+ * (the `if (o->SubType = 0)` typo keeps the default), BlendMeshLight +0.05 a tick to 0.5 and -0.03 a
+ * tick from LT 20, turning 3 deg a tick; 4 at LT 25 growing 0.6 a tick, up to 0.25 over 5 ticks and
+ * dark by tick 13 (ZzzEffect.cpp:759-782, MoveHandlers.cpp:1133-1165). All lit terrain + Light.
+ */
+const summonCast = (k: SummonCast): Step => (_at, c) => {
+  if (entityGone(c.caster)) return;
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const yaw = entityYaw(c.caster);
+  for (const life of CAST_POOL_LAYERS) {
+    ring({ texture: TEX.flare, colour: RGBS.white, scale: 12, seconds: ticks(life), blend: 'subtract', spinFrom: (-yaw * 180) / Math.PI, alphaAt: p => castPoolAlpha(p * life) })(feet, c);
+  }
+  ring({ texture: TEX.empact, colour: k.impact, scale: 2.4, seconds: ticks(40), spin: -8 * 25, alphaAt: p => Math.min(1, (1 - p) * 2) })(feet, c);
+  ring({ texture: TEX.empact, colour: k.impact, scale: 2.88, seconds: ticks(40), spin: 4 * 25, alphaAt: p => Math.min(1, (1 - p) * 2) })(feet, c);
+  const outer = bodyLight(feet, k.outer);
+  const inner = bodyLight(feet, k.inner);
+  const circles: [string, RGB, number][] = [
+    [MODEL.suhwanzin1, outer, -1],
+    [MODEL.suhwanzin11, outer, 1],
+    [MODEL.suhwanzin111, outer, -1],
+    [MODEL.suhwanzin2, inner, 1],
+    [MODEL.suhwanzin22, inner, -1],
+    [MODEL.suhwanzin222, inner, 1],
+  ];
+  for (const [m, colour, turn] of circles) {
+    effects.spawn('model', c.scene, feet, { model: m, seconds: ticks(37), scale: 0.9, colour, alpha: 0.5, fadeIn: 10 / 37, fadeTail: 17 / 37, spin: turn * degPerTick(3), yaw });
+  }
+  effects.spawn('model', c.scene, feet, { model: MODEL.suhwanzin4, seconds: ticks(13), scale: 1, grow: 1 + 0.6 * 13, colour: bodyLight(feet, k.burst), alpha: 0.25, fadeIn: 5 / 13, fadeTail: 8 / 13, yaw });
+};
+
+/** MODEL_SUMMONER_SUMMON_SAHAMUTT's Scale by book tier (ZzzEffect.cpp:783-795). */
+const SAHAMUTT_SCALE = [0.35, 0.5, 0.7];
+/** The bones its fire comes off, three FIRE_CURSEDLICH sub2 each a tick (MoveHandlers.cpp:1247-1258). */
+const SAHAMUTT_FIRE_BONES = [13, 23, 39, 49, 3, 4, 5, 61];
+/**
+ * FIRE_CURSEDLICH sub2 (firehik02, 64 px): LT 8..19, Scale (0.2..0.49) x 5 / 4 / 3 shrinking 0.04..0.12 a
+ * tick, rising 3.75..7.25 cm a tick, in `Alpha x 0.3` grey (ZzzEffectParticle.cpp:303-309, :4331-4336).
+ * The colour is the peak Alpha's; the emission count follows the Alpha instead of each card's light.
+ */
+const SAHAMUTT_FIRE: ParticleRecipe = {
+  texture: TEX.fireCursedLich,
+  colour: [0.18, 0.18, 0.18],
+  size: 0.9,
+  sizeJitter: 0.55,
+  life: ticks(19),
+  lifeJitter: 0.58,
+  box: [0.04, 0.04, 0.04],
+  dir1: [0, 1, 0],
+  dir2: [0, 1, 0],
+  power: perTick(7.25),
+  powerJitter: 0.48,
+  endScale: 0.35,
+  fade: [
+    [0, 1],
+    [0.85, 1],
+    [1, 0],
+  ],
+  capacity: 640,
+};
+/** CreateBomb3 by tier (ZzzEffect.cpp:6373-6431): cards a tick, the chance of each, the spread and the height range, cm. */
+const SAHAMUTT_BOMBS = [
+  { cards: 1, chance: 1 / 3, spread: 15, low: 30, high: 110 },
+  { cards: 1, chance: 4 / 5, spread: 40, low: 30, high: 150 },
+  { cards: 2, chance: 9 / 10, spread: 75, low: 30, high: 160 },
+];
+/** BITMAP_SUMMON_SAHAMUTT_EXPLOSION: loungexflow's 4x4 cells, one a tick over its 16 ticks (ZzzEffectParticle.cpp:4272). */
+const SAHAMUTT_BLAST_CELLS: SheetCells = { w: 64, h: 64, count: 16 };
+
+/**
+ * One CreateBomb3 at the Sahamutt's feet: up to two loungexflow cards (Width 256 cm x 0.15 x rand() % 10),
+ * and with them a Magic_Ground2 flash in (1, 0.5, 0.2) (LT 10, Scale 1.05..1.08 growing 0.1 a tick,
+ * light x 0.9 a tick, ZzzEffectParticle.cpp:928-933, :4138-4144) and five BITMAP_SPARK sub2. Its three
+ * stones are Scale 0 and draw nothing. The original makes the flash and sparks even on a tick with no
+ * card, at an unset `vBombPos`; here they come only with a card.
+ */
+function sahamuttBomb(c: SkillContext, at: Vector3, tier: number): void {
+  const b = SAHAMUTT_BOMBS[tier];
+  let last: Vector3 | null = null;
+  for (let i = 0; i < b.cards; i++) {
+    if (Math.random() >= b.chance) break;
+    const p = new Vector3(at.x + cm(randInt(b.spread * 2) - b.spread), at.y + cm(b.low + randInt(b.high - b.low)), at.z + cm(randInt(b.spread * 2) - b.spread));
+    last = p;
+    const scale = 0.15 * randInt(10);
+    if (scale > 0) effects.spawn('sprite', c.scene, p, { texture: TEX.sahamuttBlast, cells: SAHAMUTT_BLAST_CELLS, size: cm(256) * scale, seconds: ticks(16), fadeTail: 0 });
+  }
+  if (!last) return;
+  effects.spawn('sprite', c.scene, last, { texture: TEX.magicGround2, colour: [1, 0.5, 0.2], size: cm(128) * 1.064, scaleRate: perTick(12.8), decay: 0.9, seconds: ticks(10), fadeTail: 0 });
+  particles({ recipe: BOMB_SPARKS, count: 5 })(last, c);
+}
+
+// Enhanced and Ultra: the summons throw the light of their art and gain embers, soot and ground contact.
+// Classic draws none of this.
+
+/** An `effectLight` whose strength follows `level()` (a summon's Alpha, 0..1), riding `follow`. */
+function levelLight(scene: Scene, colour: RGB, extent: number, seconds: number, at: Vector3, follow: PointSource, level: () => number, extra?: Partial<LightRecipe>): LightSource {
+  const peak = Math.max(colour[0], colour[1], colour[2], 1e-3);
+  const r = colour[0] / peak;
+  const g = colour[1] / peak;
+  const b = colour[2] / peak;
+  const color = (out: { r: number; g: number; b: number }): { r: number; g: number; b: number } => {
+    const k = Math.max(0, Math.min(1, level()));
+    out.r = r * k;
+    out.g = g * k;
+    out.b = b * k;
+    return out;
+  };
+  return curseLight(scene, colour, extent, seconds, at, follow, { ...extra, color });
+}
+
+/** The casting circle's light (the empact rings are 2.9 tiles across) and motes lifting off it. */
+const summonCastGrace = (k: SummonCast): Step => (_at, c) => {
+  if (entityGone(c.caster)) return;
+  const feet = entityPos(c.caster, 0.05, new Vector3());
+  effects.spawn('particles', c.scene, feet, { recipe: risingEmbersFor(k.outer, 1.3), rate: 24, seconds: ticks(30), height: 0.1 });
+  curseLight(c.scene, k.outer, 1.5, ticks(40), feet, undefined, { attack: ticks(8), release: ticks(20), heightOffset: 0.5, floorGain: 0.35 });
+};
+
+const SAHAMUTT_TINT: RGB = [1, 0.45, 0.15];
+/** The bone fire with its grey pulled to orange at a little less luminance: the grey washed to pale peach under the tone curve. */
+const SAHAMUTT_FIRE_GRADED: ParticleRecipe = { ...SAHAMUTT_FIRE, colour: [0.24, 0.13, 0.05] };
+/** Embers shed by the running Sahamutt. */
+const SAHAMUTT_EMBERS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [1, 0.55, 0.2],
+  colourEnd: [0.6, 0.12, 0.02],
+  size: 0.16,
+  sizeJitter: 0.5,
+  life: 0.7,
+  lifeJitter: 0.4,
+  box: [0.3, 0.3, 0.3],
+  dir1: [-0.4, 0.6, -0.4],
+  dir2: [0.4, 1, 0.4],
+  power: 1.2,
+  powerJitter: 0.5,
+  gravity: 0.6,
+  endScale: 0.3,
+  capacity: 160,
+};
+/** Soot rolling up off the blasts, drawn as coverage. */
+const SAHAMUTT_SOOT: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.5, 0.5, 0.5],
+  size: 1.1,
+  sizeJitter: 0.3,
+  life: 1.6,
+  lifeJitter: 0.3,
+  box: [0.5, 0.3, 0.5],
+  dir1: [-0.15, 1, -0.15],
+  dir2: [0.15, 1, 0.15],
+  power: 0.9,
+  spin: 0.8,
+  endScale: 2.4,
+  fade: [
+    [0, 0],
+    [0.2, 0.8],
+    [1, 0],
+  ],
+  blend: 'dark',
+  capacity: 96,
+};
+
+/** The Sahamutt's own light (its fire, at its Alpha) and the embers it sheds while it runs. */
+function sahamuttGrace(c: SkillContext, b: SummonBody, gone: () => boolean, tier: number): void {
+  const ride: PointSource = out => out.set(b.at.x, b.at.y + 0.5, b.at.z);
+  effects.spawn('particles', c.scene, b.at, { recipe: SAHAMUTT_EMBERS, rate: 40, seconds: ticks(32), follow: ride, until: gone, rateScale: () => b.alpha / 0.6 });
+  levelLight(c.scene, SAHAMUTT_TINT, SAHAMUTT_SCALE[tier] * 2, ticks(34), ride(new Vector3()), ride, () => b.alpha / 0.6, { release: ticks(4) });
+}
+
+/** The blasts' light for their 32 ticks, a glow on the ground under them and soot rolling up. */
+function sahamuttBlastGrace(c: SkillContext, at: Vector3, tier: number): void {
+  const p = at.clone();
+  const extent = 1.2 + 0.3 * tier;
+  effects.spawn('sprite', c.scene, p, { texture: TEX.flare, colour: scaleRGB(SAHAMUTT_TINT, 0.25), size: 2 + 0.6 * tier, seconds: ticks(40), fadeIn: 0.1, fadeTail: 0.5, flat: true });
+  effects.spawn('particles', c.scene, p, { recipe: SAHAMUTT_SOOT, rate: 10 + 4 * tier, seconds: ticks(32), height: 0.6 });
+  curseLight(c.scene, [1, 0.55, 0.2], extent, ticks(40), p, undefined, { attack: ticks(2), release: ticks(10), heightOffset: 0.8, flicker: { min: 0.75, max: 1.1, steps: 4 } });
+}
+
+/**
+ * 223 Explosion (SummonSystem.cpp:136-155, MoveHandlers.cpp:1168-1261): MODEL_SUMMONER_SUMMON_SAHAMUTT
+ * (LT 80) starts 1.5..4.5 tiles off the caster on each axis and runs on the terrain at the point:
+ * action 0 at 0.5 keys a tick while its Alpha climbs to 0.3 (6 ticks), then action 1: Alpha +0.05 while
+ * the frame is under 3, the run (Distance / 13 a tick over frames 4..10, / 45 over 10..12), and from
+ * frame 11 (tick 28) Alpha -0.3 a tick and a CreateBomb3 every tick until LT 20, with explosion03 on
+ * half of them. Drawn textured plus the RENDER_BRIGHT | CHROME7 pass, both at Alpha (ZzzObject.cpp:1698-1702).
+ */
+const sahamuttOf = (graded: boolean): Step => (at, c) => {
+  if (entityGone(c.caster)) return;
+  const tier = bookTier(c.caster);
+  const world = storeRef().world;
+  const start = entityPos(c.caster, 0, new Vector3());
+  start.x += Math.random() < 0.5 ? cm(randInt(300) + 150) : -cm(randInt(250) + 150);
+  start.z += Math.random() < 0.5 ? cm(randInt(300) + 150) : -cm(randInt(250) + 150);
+  start.y = world?.getTerrainHeight(start.x, start.z) ?? at.y;
+  const dx = at.x - start.x;
+  const dz = at.z - start.z;
+  const bone = new Vector3();
+  let action = 0;
+  let done = 0;
+  let lit = false;
+  const beast = effects.spawn('summon', c.scene, start, {
+    model: MODEL.summonSahamutt,
+    seconds: ticks(80),
+    scale: SAHAMUTT_SCALE[tier],
+    yaw: yawToward(start, at),
+    alpha: 0,
+    meshes: [{ draw: 'both' }, { draw: 'both' }],
+    clip: 0,
+    keysPerTick: 0.5,
+    drive: (b, t) => {
+      const u = t - 6;
+      if (u >= 0 && action === 0) {
+        action = 1;
+        b.play(1, 0.5, false, 12);
+      }
+      b.alpha = u < 0 ? 0.05 * t : u < 6 ? 0.3 + 0.05 * u : u < 22 ? 0.6 : Math.max(0, 0.6 - 0.3 * (u - 22));
+      const f = u < 8 ? 0 : u < 19 ? (u - 8) / 13 : 11 / 13 + (Math.min(u, 23) - 19) / 45;
+      b.at.x = start.x + dx * f;
+      b.at.z = start.z + dz * f;
+      b.at.y = world?.getTerrainHeight(b.at.x, b.at.z) ?? at.y;
+      if (graded && !lit) {
+        lit = true;
+        sahamuttGrace(c, b, () => !beast.alive, tier);
+      }
+      for (; done < Math.floor(t); done++) {
+        const tick = done + 1;
+        if (graded && tick === 28) sahamuttBlastGrace(c, b.at, tier);
+        if (b.alpha > 0 && b.loaded) {
+          for (const i of SAHAMUTT_FIRE_BONES) {
+            const n = 5 * b.alpha;
+            const count = Math.floor(n) + (Math.random() < n % 1 ? 1 : 0);
+            if (count > 0 && b.bone(i, bone)) emitBurst(c.scene, graded ? SAHAMUTT_FIRE_GRADED : SAHAMUTT_FIRE, bone, count);
+          }
+        }
+        if (tick >= 28 && tick <= 60) {
+          sahamuttBomb(c, b.at, tier);
+          if (Math.random() < 0.5) playCombat('Sound/SE_Ch_summoner_skill05_explosion03', b.at);
+        }
+      }
+    },
+  });
+};
+
+/** Neil's light: his white body and the red blade glow. */
+const NEIL_TINT: RGB = [1, 0.2, 0.25];
+/** The knives and ground rings on the point: white meshes with red ones. */
+const NEIL_GROUND_TINT: RGB = [1, 0.45, 0.5];
+/** Red chips thrown off the point as the knives land. */
+const NEIL_SPARKS: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [1, 0.35, 0.35],
+  colourEnd: [0.7, 0, 0.05],
+  size: 0.16,
+  life: 0.5,
+  lifeJitter: 0.3,
+  power: 3.2,
+  powerJitter: 0.4,
+  gravity: -5,
+  dir1: [-0.7, 0.4, -0.7],
+  dir2: [0.7, 1, 0.7],
+  spin: 6,
+  capacity: 96,
+};
+
+/** The knives land (tick 23): a red flash on the point and chips thrown off it. */
+function neilKnivesGrace(c: SkillContext, point: Vector3): void {
+  effects.spawn('sprite', c.scene, point, { texture: TEX.flare, colour: [1, 0.25, 0.3], size: 1.8, seconds: ticks(8), fadeTail: 0.8, height: 0.6 });
+  particles({ recipe: NEIL_SPARKS, count: 18 })(new Vector3(point.x, point.y + 0.4, point.z), c);
+}
+
+/** The ground rings (tick 29, 50 ticks): their light, a red glow under them and embers rising off them. */
+function neilGroundGrace(c: SkillContext, point: Vector3, tier: number): void {
+  const at = new Vector3(point.x, point.y + 0.05, point.z);
+  effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: [0.22, 0.03, 0.05], size: 2.6 + 0.4 * tier, seconds: ticks(50), fadeIn: 0.1, fadeTail: 0.4, flat: true });
+  effects.spawn('particles', c.scene, at, { recipe: risingEmbersFor([1, 0.15, 0.2], 1.3), rate: 26, seconds: ticks(36), height: 0.1 });
+  curseLight(c.scene, NEIL_GROUND_TINT, 1.5 + 0.3 * tier, ticks(50), at, undefined, { attack: ticks(4), release: ticks(20), heightOffset: 0.6, floorGain: 0.5 });
+}
+
+/** The nine bones Neil's red flare01 sprites sit on; 51 and 59 are also the blade blur's ends (ZzzObject.cpp:1719-1750). */
+const NEIL_GLOW_BONES = [51, 52, 53, 54, 55, 56, 57, 58, 59];
+const NEIL_KNIVES = [MODEL.neilKnife1, MODEL.neilKnife2, MODEL.neilKnife3];
+const NEIL_GROUNDS = [MODEL.neilGround1, MODEL.neilGround2, MODEL.neilGround3];
+
+/**
+ * 224 Requiem (SummonSystem.cpp:158-174, ZzzEffect.cpp:797-806, MoveHandlers.cpp:1263-1303):
+ * MODEL_SUMMONER_SUMMON_NEIL one tile before the caster, 10 cm up, LT 80, action 0 once at 0.35 keys a
+ * tick, Alpha +0.04 a tick to 0.72 and -0.05 from LT 20. Meshes 0 / 2 bright while Alpha < 0.7 and
+ * textured from there, mesh 1 bright red; nine red flare01 on bones 51-59 and a red blur from bone 51 to 59
+ * through frames 0-10 (ZzzObject.cpp:1703-1753). Frame 8 (tick 23): NIFE1 (+2 at +7, +3 at +11) on the
+ * point, LT 50, mesh 0 textured and mesh 1 bright red (EffectBehaviors.cpp:97-103). Frame 10 (tick 29):
+ * GROUND1 60 cm before Neil and GROUND1 (+2, +3) on the point, LT 50, Alpha +0.3 a tick, both meshes
+ * bright, mesh 1's U running -1 a second (ZzzObject.cpp:1761-1765), and requiem02.
+ */
+const requiemOf = (graded: boolean): Step => (at, c) => {
+  if (entityGone(c.caster)) return;
+  const tier = bookTier(c.caster);
+  const yaw = entityYaw(c.caster);
+  const f = forwardOf(yaw);
+  const home = entityPos(c.caster, cm(10), new Vector3());
+  home.x += f.x;
+  home.z += f.z;
+  const point = at.clone();
+  let glows = false;
+  let knives = false;
+  let grounds = false;
+  const neil = effects.spawn('summon', c.scene, home, {
+    model: MODEL.summonNeil,
+    seconds: ticks(80),
+    yaw,
+    alpha: 0,
+    meshes: [{ draw: 'add' }, { draw: 'add', colour: [1, 0, 0] }, { draw: 'add' }],
+    keysPerTick: 0.35,
+    loop: false,
+    drive: (b, t) => {
+      b.alpha = t < 60 ? Math.min(0.72, 0.04 * t) : 0.72 - 0.05 * (t - 60);
+      const d = b.alpha < 0.7 ? 'add' : 'alpha';
+      b.draw(0, d);
+      b.draw(2, d);
+      if (!glows && b.loaded) {
+        glows = true;
+        const gone = (): boolean => !neil.alive;
+        const on = (n: number): PointSource => out => (b.bone(n, out) ? out : out.copyFrom(b.at));
+        for (const n of NEIL_GLOW_BONES) {
+          effects.spawn('sprite', c.scene, b.at, { texture: TEX.flare, colour: [1, 0, 0], size: cm(64), seconds: ticks(80 - t), fadeTail: 0, follow: on(n), until: gone });
+        }
+        if (t < 28) effects.spawn('blur', c.scene, b.at, { follow: on(59), base: on(51), colour: [1, 0, 0], texture: TEX.motionBlurR, seconds: ticks(28.6 - t), until: gone });
+        if (graded) levelLight(c.scene, NEIL_TINT, 1.2, ticks(80 - t), b.at.clone(), on(55), () => b.alpha / 0.72, { release: ticks(4), heightOffset: 0.6, floorGain: 0.35 });
+      }
+      if (!knives && t >= 23) {
+        knives = true;
+        if (graded) neilKnivesGrace(c, point);
+        for (let i = 0; i <= tier; i++) {
+          effects.spawn('summon', c.scene, point, {
+            model: NEIL_KNIVES[i],
+            seconds: ticks(50),
+            yaw,
+            meshes: [{ draw: 'alpha' }, { draw: 'add', colour: [1, 0, 0] }],
+            loop: false,
+            drive: (k, kt) => {
+              k.alpha = kt < 30 ? 1 : 1 - 0.05 * (kt - 30);
+            },
+          });
+        }
+      }
+      if (!grounds && t >= 29) {
+        grounds = true;
+        const ground = (m: string, p: Vector3): void => {
+          effects.spawn('summon', c.scene, p, {
+            model: m,
+            seconds: ticks(50),
+            yaw,
+            alpha: 0,
+            meshes: [{ draw: 'add' }, { draw: 'add', scrollU: -1 }],
+            drive: (g, gt) => {
+              g.alpha = gt < 30 ? Math.min(1.2, 0.3 * gt) : 1.2 - 0.05 * (gt - 30);
+            },
+          });
+        };
+        ground(MODEL.neilGround1, new Vector3(b.at.x + f.x * cm(60), b.at.y, b.at.z + f.z * cm(60)));
+        for (let i = 0; i <= tier; i++) ground(NEIL_GROUNDS[i], point);
+        playCombat('Sound/SE_Ch_summoner_skill06_requiem02', point);
+        if (graded) neilGroundGrace(c, point, tier);
+      }
+    },
+  });
+};
+
+/** JOINT_ENERGY sub48-53 ride these Lagul bones (ZzzEffectJoint.cpp:3161-3196); the blue shiny05 sit on 54-59 (ZzzEffect.cpp:8927-8936). */
+const LAGUL_TRAIL_BONES = [24, 28, 32, 44, 48, 52];
+const LAGUL_SHINY_BONES = [54, 55, 56, 57, 58, 59];
+/** Spirit ribbons by book tier (SummonSystem.cpp:186-192) and the controller's odds a tick (MoveHandlers.cpp:1310). */
+const LAGUL_RIBBONS = [1, 2, 4];
+const LAGUL_ODDS = [5, 4, 3];
+
+/**
+ * BITMAP_SMOKE sub57 (smoke01, 64 px): LT 32, Scale `s x (1.48..1.79)` growing 0.05 a tick, rising on a
+ * gravity that gains 0.1 cm a tick (53 cm over its life), light (0.5, 0.1, 0.8) x LT / 32 whatever it was
+ * made with (ZzzEffectParticle.cpp:1355-1359, :5753-5758).
+ */
+function pollutionSmoke(c: SkillContext, p: Vector3, s: number): void {
+  effects.spawn('sprite', c.scene, p, { texture: TEX.smoke, colour: [0.5, 0.1, 0.8], size: cm(64) * s * (1.48 + randInt(32) * 0.01), scaleRate: perTick(3.2), rise: cm(53) / ticks(32), seconds: ticks(32), fadeTail: 1 });
+}
+/**
+ * BITMAP_TWINTAIL_WATER sub1 (water.jpg, 32 px): within 40 cm and 0..80 cm up, LT 20..29, Scale 0.5..0.81
+ * shrinking 0.013 a tick, rising 2..2.9 cm a tick, light x 1/1.02 a tick (ZzzEffectParticle.cpp:1127-1143, :5255-5270).
+ */
+function pollutionDrop(c: SkillContext, p: Vector3, colour: RGB): void {
+  const at = new Vector3(p.x + cm(randInt(80) - 40), p.y + cm(randInt(80)), p.z + cm(randInt(80) - 40));
+  effects.spawn('sprite', c.scene, at, { texture: TEX.water, colour, size: cm(32) * (0.5 + randInt(32) * 0.01), scaleRate: -perTick(32 * 0.013), rise: perTick(2 + randInt(10) * 0.1), decay: 1 / 1.02, seconds: ticks(20 + randInt(10)), fadeTail: 0 });
+}
+
+/** The Lagul's light: its blue shiny05 and laser trails. */
+const LAGUL_TINT: RGB = [0.5, 0.55, 1];
+/** The cloud field's violet (the clouds.jpg decals and smoke). */
+const POLLUTION_TINT: RGB = [0.6, 0.12, 1];
+/** Violet motes drifting up out of the cloud field. */
+const POLLUTION_MOTES: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.6, 0.2, 1],
+  size: 0.22,
+  sizeJitter: 0.5,
+  life: 1.8,
+  lifeJitter: 0.4,
+  box: [2.2, 0.15, 2.2],
+  dir1: [-0.1, 0.3, -0.1],
+  dir2: [0.1, 0.7, 0.1],
+  power: 0.5,
+  endScale: 0.4,
+  fade: [
+    [0, 0],
+    [0.25, 1],
+    [0.7, 0.6],
+    [1, 0],
+  ],
+  capacity: 128,
+};
+
+/** The cloud field's light for its 160 ticks, flickering with the decals, a violet pool under it and motes rising. */
+function pollutionGrace(c: SkillContext, point: Vector3): void {
+  const at = new Vector3(point.x, point.y + 0.05, point.z);
+  effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: scaleRGB(POLLUTION_TINT, 0.12), size: 5, seconds: ticks(160), fadeIn: 0.1, fadeTail: 0.2, flat: true });
+  effects.spawn('particles', c.scene, at, { recipe: POLLUTION_MOTES, rate: 20, seconds: ticks(150), height: 0.1 });
+  curseLight(c.scene, POLLUTION_TINT, 2.5, ticks(160), at, undefined, { attack: ticks(15), release: ticks(30), heightOffset: 0.8, floorGain: 0.25, flicker: { min: 0.8, max: 1.05, steps: 4 } });
+}
+
+/**
+ * 225 Pollution (SummonSystem.cpp:175-195). At the point for 160 ticks, a controller that on one tick in
+ * 5 / 4 / 3 (book tier) drops a violet smoke01 puff (Scale 3.5) within 2.5 tiles, and within 2 tiles a
+ * clouds.jpg decal (2 tiles growing 0.03 a tick, LT 60, (0.6, 0.1, 1) x 1/1.05 a tick, flickering 0.8..1.1)
+ * with a water drop (MoveHandlers.cpp:1306-1330, ZzzEffect.cpp:1137-1143, :9902-9907, MoveHandlers.cpp:1964-1974).
+ * And 1 / 2 / 4 JOINT_SPIRIT sub24 (width 100, JointSpirit01, 40 tails, 10 cm a tick, LT 160) from 1.5
+ * tiles round the point at world headings 90 deg apart, humming round the point 80 cm up (5 deg a tick
+ * and damped +-3.2 / +-12.8 deg kicks), (0.7, 0.7, 0.9) in over 16 ticks and out over 30
+ * (ZzzEffectJoint.cpp:903-924, :4138-4170). Each carries a MODEL_SUMMONER_SUMMON_LAGUL at Scale 100 / 70:
+ * meshes 0 / 1 bright in terrain + (0, 0, 0.1), mesh 2 not drawn, Alpha 0 -> 0.75 over 15 ticks and
+ * LT / 40 over the last 30 (MoveHandlers.cpp:1332-1339, ZzzObject.cpp:1767-1771); six blue shiny05 on bones
+ * 54-59, a violet smoke (Scale 2) and a water drop off a random bone on one tick in five, and six
+ * JointLaser01 trails (width 10, 3 tails) on bones 24-52 (ZzzEffect.cpp:808-827, :8922-8945). The width-20
+ * twin of each ribbon never gets a Lagul (20 / 70 < 0.9) and dies on its first tick, so it is not drawn.
+ */
+const pollutionOf = (graded: boolean): Step => (at, c) => {
+  if (entityGone(c.caster)) return;
+  const tier = bookTier(c.caster);
+  const point = at.clone();
+  const odds = LAGUL_ODDS[tier];
+  if (graded) pollutionGrace(c, point);
+  repeat(160, TICK, (_p, cc) => {
+    if (randInt(odds) !== 0) return;
+    pollutionSmoke(cc, new Vector3(point.x + cm(randInt(500) - 250), point.y, point.z + cm(randInt(500) - 250)), 3.5);
+    const spot = new Vector3(point.x + cm(randInt(400) - 200), point.y, point.z + cm(randInt(400) - 200));
+    ring({ texture: TEX.cloud, colour: [0.6, 0.1, 1], scale: 2, grow: (2 + 0.03 * 60) / 2, seconds: ticks(60), spinFrom: randInt(360), alphaAt: p => 1.05 ** (-60 * p) * (0.8 + randInt(4) * 0.1) })(spot, cc);
+    pollutionDrop(cc, spot, [0.6, 0.1, 1]);
+  })(point, c);
+
+  const seek = fixedPoint(new Vector3(point.x, point.y + cm(80), point.z));
+  const lagulLight = bodyLight(point, [0, 0, 0.1]);
+  for (let i = 0; i < LAGUL_RIBBONS[tier]; i++) {
+    const start = new Vector3(point.x + cm(randInt(300) - 150), point.y, point.z + cm(randInt(300) - 150));
+    const head = start.clone();
+    const heading = new Vector3(Math.sin(rad(i * 90)), 0, Math.cos(rad(i * 90)));
+    effects.spawn('joint', c.scene, start, {
+      velocity: perTick(10),
+      heading,
+      steer: { seek, seekRate: rad(5), wander: { pitch: rad(3.2), yaw: rad(12.8) } },
+      maxTails: 40,
+      width: 1,
+      texture: TEX.jointSpirit,
+      colour: [0.7, 0.7, 0.9],
+      seconds: ticks(160),
+      fadeIn: 16 / 160,
+      fadeTail: 30 / 160,
+      track: h => head.copyFrom(h),
+    });
+    const prev = start.clone();
+    const bone = new Vector3();
+    let rigged = false;
+    let done = 0;
+    let body: SummonBody | null = null;
+    if (graded) levelLight(c.scene, LAGUL_TINT, 0.9, ticks(160), head.clone(), out => out.copyFrom(head), () => (body ? body.alpha / 0.75 : 0), { release: ticks(4) });
+    const lagul = effects.spawn('summon', c.scene, start, {
+      model: MODEL.summonLagul,
+      seconds: ticks(160),
+      scale: 100 / 70,
+      alpha: 0,
+      meshes: [{ draw: 'add', colour: lagulLight }, { draw: 'add', colour: lagulLight }, { draw: 'hide' }],
+      drive: (b, t) => {
+        b.alpha = t <= 15 ? t / 20 : t < 130 ? 0.75 : (160 - t) / 40;
+        body = b;
+        b.at.copyFrom(head);
+        if ((head.x - prev.x) ** 2 + (head.z - prev.z) ** 2 > 1e-8) b.yaw = yawToward(prev, head);
+        prev.copyFrom(head);
+        if (!b.loaded) return;
+        if (!rigged) {
+          rigged = true;
+          const gone = (): boolean => !lagul.alive;
+          const left = ticks(160 - t);
+          const on = (n: number): PointSource => out => (b.bone(n, out) ? out : out.copyFrom(b.at));
+          for (const n of LAGUL_SHINY_BONES) {
+            effects.spawn('sprite', c.scene, b.at, { texture: TEX.shiny5, colour: [0.2, 0.3, 1], size: cm(64) * (100 / 70) * 0.3, seconds: left, fadeTail: 0, follow: on(n), until: gone });
+          }
+          for (const n of LAGUL_TRAIL_BONES) {
+            effects.spawn('joint', c.scene, b.at, { head: on(n), maxTails: 3, width: cm(10), texture: TEX.jointLaser, colour: [0.5, 0.5, 0.9], seconds: left, fadeTail: 0, until: gone });
+          }
+        }
+        for (; done < Math.floor(t); done++) {
+          if (randInt(5) !== 0 || !b.bone(randInt(b.boneCount), bone)) continue;
+          pollutionSmoke(c, bone, 2);
+          pollutionDrop(c, bone, [0.7, 0.7, 1]);
+        }
+      },
+    });
+  }
+};
+
 // ---- the table -------------------------------------------------------------------
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
@@ -6983,54 +7518,26 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     impact: onCurseLanding(zinCurse(ZIN_ENERVATION)),
     enhanced: { cast: seq(summonerHand(CURSE_HAND_ENERVATION), curseHandLight(CURSE_HAND_ENERVATION)), impact: onCurseLanding(seq(zinCurse(ZIN_ENERVATION), zinGrace(ZIN_ENERVATION))) },
   },
-  // 223 Explosion: MODEL_SUMMONER_SUMMON_SAHAMUTT LT 80 from 1.5-4.5 tiles beside the caster onto the point,
-  // CreateBomb3 on landing (SummonSystem.cpp CreateSummonObject); cast circle tints (1,0.6,0.4)/(1,0.5,0).
+  // 223 Explosion: the casting circle at the caster, then the Sahamutt runs from beside the caster to the
+  // point, burning, and blasts it for 32 ticks (summonCast, sahamutt). The graded tiers also scorch the ground.
   223: {
-    cast: summonerCast([1, 0.6, 0.4], [1, 0.5, 0]),
-    area: (at, c) => {
-      const from = entityPos(c.caster, 0.4, new Vector3());
-      from.x += (Math.random() < 0.5 ? 1 : -1) * (1.5 + Math.random() * 3);
-      from.z += (Math.random() < 0.5 ? 1 : -1) * (1.5 + Math.random() * 3);
-      const to = at.clone();
-      to.y += 0.3;
-      effects.spawn('projectile', c.scene, from, {
-        to,
-        speed: 6,
-        model: { model: MODEL.summonSahamutt, colour: RGBS.white, scale: 0.5, fadeIn: 0.3 },
-        trail: { recipe: FIRE_PUFF, rate: 25 },
-        onArrive: p => seq(bomb([1, 0.5, 0]), particles({ recipe: FIRE_SPARKS, count: 16 }), scorch(1), burn(1))(p, c),
-      });
-    },
+    cast: summonCast(CAST_EXPLOSION),
+    area: sahamuttOf(false),
+    enhanced: { cast: seq(summonCast(CAST_EXPLOSION), summonCastGrace(CAST_EXPLOSION)), area: seq(sahamuttOf(true), after(ticks(28), seq(scorch(1), burn(1)))) },
   },
-  // 224 Requiem: MODEL_SUMMONER_SUMMON_NEIL LT 80 one tile before the caster fading in to 0.7; frame 8 the
-  // NEIL_NIFE knives at the target, frame 10 the NEIL_GROUND rings, all (0,0.7,1) (ZzzEffect.cpp:7995).
+  // 224 Requiem: the casting circle, Neil before the caster swinging his blade, the knives and ground rings on
+  // the point (summonCast, requiem).
   224: {
-    cast: summonerCast([0.7, 0.7, 1], [0, 0.7, 1]),
-    area: (at, c) => {
-      const front = entityPos(c.caster, 0, new Vector3());
-      const f = facing(c);
-      front.x += f.x;
-      front.z += f.z;
-      effects.spawn('model', c.scene, front, { model: MODEL.summonNeil, seconds: ticks(80), scale: 1, colour: RGBS.white, alpha: 0.7, fadeIn: 0.25, fadeTail: 0.25, yaw: entityYaw(c.caster), loop: false });
-      // The knife models are not converted - a pierce flash stands in for each.
-      after(0.9, seq(flash(TEX.pierce, [0, 0.7, 1], 1.3, 0.4), hitSparks(STEEL_GLINTS, 12)))(at, c);
-      after(1.15, seq(
-        ring({ texture: TEX.magicGround2, colour: [0, 0.7, 1], seconds: ticks(50), scale: 2.5, spin: 40, growFrom: 0.6 }),
-        particles({ recipe: { ...SOUL_MOTES, colour: [0, 0.7, 1] }, count: 16, height: 0.4 })
-      ))(at, c);
-    },
+    cast: summonCast(CAST_REQUIEM),
+    area: requiemOf(false),
+    enhanced: { cast: seq(summonCast(CAST_REQUIEM), summonCastGrace(CAST_REQUIEM)), area: requiemOf(true) },
   },
-  // 225 Pollution: MODEL_SUMMONER_SUMMON_LAGUL LT 160 at the point + 4 JOINT_SPIRIT pairs (width 100/20) at
-  // 90 deg steps; purple BITMAP_CLOUD (0.6,0.1,1) and smoke raining over +-2.5 tiles for its life.
+  // 225 Pollution: the casting circle, and at the point for 160 ticks violet smoke, clouds and drops with the
+  // Laguls riding their spirit ribbons round it (summonCast, pollution).
   225: {
-    cast: summonerCast([0.6, 0.6, 0.9], [0.6, 0.3, 0.9]),
-    area: (at, c) => {
-      effects.spawn('model', c.scene, at, { model: MODEL.summonLagul, seconds: 4, scale: 1, colour: RGBS.white, fadeIn: 0.2, fadeTail: 0.15 });
-      streamerFan(4, Math.PI / 2, { velocity: perTick(24), seconds: ticks(40), maxTails: 8, width: 1, colour: RGBS.shade, turn: 0.9, texture: TEX.jointSpirit })(at, c);
-      streamerFan(4, Math.PI / 2, { velocity: perTick(24), seconds: ticks(40), maxTails: 8, width: 0.2, colour: RGBS.dark, turn: 0.9, texture: TEX.jointSpirit })(at, c);
-      repeat(10, 0.35, scatter(sprite({ texture: TEX.cloud, colour: [0.6, 0.1, 1], size: 2, seconds: 1.2, grow: 1.5, height: 0.4, rise: 0.3 }), 1, 2.2))(at, c);
-      effects.spawn('particles', c.scene, at, { recipe: SHADE_MOTES, rate: 12, seconds: 4 });
-    },
+    cast: summonCast(CAST_POLLUTION),
+    area: pollutionOf(false),
+    enhanced: { cast: seq(summonCast(CAST_POLLUTION), summonCastGrace(CAST_POLLUTION)), area: pollutionOf(true) },
   },
   // 230 Lightning Shock: MODEL_LIGHTNING_SHOCK falling red from 280 cm over the caster and opening the ground
   // (lightningShock). The five magic_ground cards and the stones get Scale 0 there and are not drawn.
@@ -7532,6 +8039,9 @@ export const BUFF_VISUALS: Partial<Record<number, BuffLook>> = {
   72: () => ({ sleepDrops: { colour: [0.7, 0.1, 0.9] } }),
   // 0x49 Blind: black cra_04 smoke off random bones.
   73: () => ({ blindSmoke: true }),
+  // 74 eDeBuff_NeilDOT (Requiem) and 75 eDeBuff_SahamuttDOT (Explosion) (ZzzCharacter.cpp:10932-10948).
+  74: () => ({ neilSparks: true }),
+  75: () => ({ smoulder: true }),
   // 0x4C Weakness, 0x4D Innovation: shiny drops (with their flare01 underlay) and falling pin lights off random bones.
   76: () => ({ boneSparks: { colour: [1.4, 0.2, 0.2], underlay: true, pins: true } }),
   77: () => ({ boneSparks: { colour: [0.25, 1, 0.7], underlay: true, pins: true } }),

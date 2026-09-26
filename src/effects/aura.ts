@@ -193,6 +193,61 @@ const BLIND_SMOKE: ParticleRecipe = {
 };
 
 /**
+ * Requiem's burn (eDeBuff_NeilDOT): one BITMAP_LIGHT+2 sub5 a tick off a random bone - fi01 (128 px) at
+ * Scale 0.08..0.11 growing 0.04 a tick, LT 21, thrown 6 cm a tick out (x 0.6 a tick after the first) and
+ * 4 cm up against 0.4 of gravity, Alpha -0.1 a tick over the last 10, in (1, 0, 0.6) x Alpha
+ * (MoveHandlers.cpp:1115-1127, ZzzEffectParticle.cpp:857-883, :4020-4045). The damped throw is drawn as
+ * the slower constant drift it averages to.
+ */
+const NEIL_SPARKS: ParticleRecipe = {
+  texture: TEX.advSmoke,
+  colour: [1, 0, 0.6],
+  size: px(128, 0.095),
+  sizeJitter: 0.16,
+  life: 21 * TICK,
+  lifeJitter: 0,
+  box: [0.02, 0.02, 0.02],
+  dir1: [-0.18, 1, -0.18],
+  dir2: [0.18, 1, 0.18],
+  power: (4 * 25) / 100,
+  powerJitter: 0,
+  gravity: -(0.4 * 625) / 100,
+  endScale: (0.095 + 0.04 * 21) / 0.095,
+  fade: [
+    [0, 1],
+    [0.52, 1],
+    [1, 0],
+  ],
+  capacity: 128,
+};
+/**
+ * Explosion's burn (eDeBuff_SahamuttDOT): every other tick a FIRE_CURSEDLICH effect sits on a random bone
+ * for 10 ticks making one sub3 firehik02 (64 px) a tick - Scale 0.4..0.98 shrinking 0.03 a tick, LT 16..27,
+ * rising 3..5.8 cm a tick, 0.3 grey (MoveHandlers.cpp:847-867, :1052-1066, ZzzEffectParticle.cpp:311-318,
+ * :4338-4352). About five a tick, each off its own random bone here.
+ */
+const SMOULDER: ParticleRecipe = {
+  texture: TEX.fireCursedLich,
+  colour: [0.3, 0.3, 0.3],
+  size: px(64, 0.69),
+  sizeJitter: 0.42,
+  life: 27 * TICK,
+  lifeJitter: 0.4,
+  box: [0.02, 0.02, 0.02],
+  dir1: [0, 1, 0],
+  dir2: [0, 1, 0],
+  power: (5.8 * 25) / 100,
+  powerJitter: 0.48,
+  endScale: 0.15,
+  fade: [
+    [0, 1],
+    [0.85, 1],
+    [1, 0],
+  ],
+  capacity: 256,
+};
+
+/**
  * Stun: three MODEL_SPEARSKILL sub8 joints, 40 cm out, turning 25° and
  * rising 15 cm a tick for 40 ticks, Scale 30, on the BITMAP_LIGHT sheet
  * (ZzzEffectJoint.cpp:1633, :4370). The original's Light is 0.5; a half-grey
@@ -334,6 +389,10 @@ export interface AuraOptions {
   sleepDrops?: { colour: RGB };
   /** Blind: black smoke pouring off random bones. */
   blindSmoke?: boolean;
+  /** Requiem's burn: magenta sparks thrown off random bones. */
+  neilSparks?: boolean;
+  /** Explosion's burn: grey flames rising off random bones. */
+  smoulder?: boolean;
   /** Frozen: the ice shell and its ember. */
   iceShell?: boolean;
   /** Defense reduction: the skull. */
@@ -983,6 +1042,8 @@ function spawn(scene: Scene, _at: Vector3, opts: AuraOptions): EffectHandle {
   if (opts.boneSparks) parts.push(boneSparks(scene, opts, opts.boneSparks));
   if (opts.sleepDrops) parts.push(boneEmitter(scene, opts, sleepDrops(opts.sleepDrops.colour), 0.5, 0.2));
   if (opts.blindSmoke) parts.push(boneEmitter(scene, opts, BLIND_SMOKE, 2, 0));
+  if (opts.neilSparks) parts.push(boneEmitter(scene, opts, NEIL_SPARKS, 1, 0));
+  if (opts.smoulder) parts.push(boneEmitter(scene, opts, SMOULDER, 5, 0));
   if (opts.iceShell) parts.push(iceShell(scene, opts));
   if (opts.skull) parts.push(skull(scene, opts));
   if (opts.stun) parts.push(stun(scene, opts, isStopping));

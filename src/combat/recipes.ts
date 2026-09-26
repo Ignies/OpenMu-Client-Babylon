@@ -131,6 +131,14 @@ const CHAIN_LIGHTNING_CLIPS: SkillClipSet = {
   fenrir: A.PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR,
 };
 
+/** The three summons, and their mounts (SummonSystem.cpp:46-62). */
+const SUMMON_CLIPS: SkillClipSet = {
+  ground: A.PLAYER_SKILL_SUMMON,
+  uniria: A.PLAYER_SKILL_SUMMON_UNI,
+  dinorant: A.PLAYER_SKILL_SUMMON_DINO,
+  fenrir: A.PLAYER_SKILL_SUMMON_FENRIR,
+};
+
 /** Sleep, Blind, Thorns, Berserker, Weakness, Enervation - one clip for all six. */
 const SLEEP_CLIPS: SkillClipSet = { ground: A.PLAYER_SKILL_SLEEP, ...MOUNTED_SLEEP };
 
@@ -277,6 +285,9 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   469: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker Str
   470: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker Proficiency
   472: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker Mastery
+  223: SUMMON_CLIPS, // Explosion
+  224: SUMMON_CLIPS, // Requiem
+  225: SUMMON_CLIPS, // Pollution
   221: SLEEP_CLIPS, // Weakness
   222: SLEEP_CLIPS, // Enervation
   459: SLEEP_CLIPS, // Weakness Str

@@ -28,6 +28,9 @@ const DEFAULT_SCALE = 3;
 /** Biggest decal grid a pooled ring can draw (tiles); larger asks are clamped. */
 const MAX_SCALE = 8;
 
+/** A second, larger pool for the few decals past `MAX_SCALE` (the summon casting pool is 12 tiles, ZzzEffect.cpp:1163). */
+const BIG_SCALE = 12;
+
 // ---- 2. state + readers ----------------------------------------------------
 
 export interface RingOptions {
@@ -109,7 +112,7 @@ function poolKey(texture: string, blend: string, maxScale: number): string {
 export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): EffectHandle {
   const texture = opts.texture ?? TEX.magicCircle;
   const blend = opts.blend ?? 'additive';
-  const maxScale = opts.maxScale ?? MAX_SCALE;
+  const maxScale = opts.maxScale ?? ((opts.scale ?? DEFAULT_SCALE) > MAX_SCALE ? BIG_SCALE : MAX_SCALE);
   const decal = acquire(texture, blend, maxScale);
   const world = Store.world;
   if (!decal || !world) return DEAD_HANDLE;

@@ -28,6 +28,7 @@ import { pingLayer } from './ping';
 import { weaponHideLayer } from './weaponHide';
 import { quakeLayer } from './quake';
 import { homingLayer } from './homing';
+import { summonLayer } from './summon';
 
 /**
  * THE list. Every visual effect entry in the game is one line here, and
@@ -43,6 +44,7 @@ export const EFFECT_LAYERS = [
   feathersLayer, // moves the feathers the models below follow
   modelLayer, // reads projectile's / debris' / feathers' points
   stampsLayer,
+  summonLayer, // its spawners read its bones; nothing it reads moves after it
   spriteLayer,
   cardsLayer,
   particlesLayer,

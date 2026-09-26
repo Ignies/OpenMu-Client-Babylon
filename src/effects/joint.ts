@@ -154,6 +154,8 @@ export interface JointOptions {
   fadeTail?: number;
   /** A 0..1 brightness at `t` seconds alive, in place of `fadeTail` and the bolt's flicker (a per-tick `Light *= …`). */
   intensity?: (t: number) => number;
+  /** Trail: fade in over this fraction of the life (JOINT_SPIRIT sub24's `(160 - LifeTime) / 15`). Default 0. */
+  fadeIn?: number;
   /** Trail: segments kept behind the head (C++ `MaxTails`). */
   maxTails?: number;
   /**
@@ -847,7 +849,7 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
         if (stepped || !opts.tickPoints) mesh.setPoints(drawLines);
       }
       ribbon.scroll();
-      const vis = opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3);
+      const vis = (opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3)) * (opts.fadeIn ? Math.min(1, prog / opts.fadeIn) : 1);
       ribbon.fade(vis);
       if (opts.shrink) ribbon.narrow(1 - prog);
       if (spriteCards.length) {

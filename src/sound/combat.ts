@@ -120,8 +120,10 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   460: 'Sound/SE_Ch_summoner_innovation', // Innovation Strengthener
   461: 'Sound/SE_Ch_summoner_skill04_blind', // Blind (OpenMU's id for 220)
   463: 'Sound/SE_Ch_summoner_skill04_blind', // Blind Strengthener
-  223: 'Sound/SE_Ch_summoner_skill05_explosion03', // Explosion
-  224: 'Sound/SE_Ch_summoner_skill06_requiem02', // Requiem
+  // The summons play their summoning sound at the cast; explosion03 and requiem02 come later with the effect (skillVisuals.ts).
+  223: 'Sound/SE_Ch_summoner_skill05_explosion01', // Explosion (SOUND_SUMMON_SAHAMUTT)
+  224: 'Sound/SE_Ch_summoner_skill06_requiem01', // Requiem (SOUND_SUMMON_NEIL)
+  225: 'Sound/Rargle', // Pollution (SOUND_SUMMOM_RARGLE)
   230: 'Sound/lightning_shock', // Lightning Shock
   232: 'Sound/BLOW_OF_DESTRUCTION', // Strike of Destruction (ZzzCharacter.cpp:4179)
   455: 'Sound/SE_Ch_summoner_skill08_chainlightning', // Chain Lightning Strengthener
