@@ -4,6 +4,8 @@ import { CM, TICK, type ParticleRecipe, type PointSource, type RGB } from '../ef
 import { spawnModel } from '../effects/model';
 import { EXPLOSION_CELLS, TEX } from '../effects/recipes';
 import { playSfx } from '../libs/sfx';
+import { lighting } from '../lighting';
+import type { LightRecipe } from '../lighting/lightSource';
 import { Store } from '../store';
 
 /**
@@ -128,6 +130,15 @@ const STAR_FADE_PER_TICK = 1 / 1.05;
 const CANDY_STAR = 'Skill/hstar.glb';
 const GIFTS = ['Skill/xmasebox.glb', 'Skill/xmasecandy.glb', 'Skill/xmasetree.glb', 'Skill/xmaseyangbal.glb'];
 
+/**
+ * Ours: the original lights nothing here, but a burst three tiles up that
+ * leaves the ground dark reads as a sticker, not a firework. The rocket
+ * carries a faint glow; each burst flashes the ground around it and dies
+ * with the sparks.
+ */
+const ROCKET_GLOW: LightRecipe = { color: [0.45, 0.4, 0.5], range: 1.5, seconds: ticks(ROCKET_TICKS), release: ticks(5) };
+const BURST_FLASH: LightRecipe = { color: [1, 0.9, 1.1], range: 5, seconds: 1.2, release: 1 };
+
 /** The Christmas firecracker loads with MAX_CHANNEL and no 3D: every burst rings at full volume. */
 const BURST_SOUND_CHANNELS = 4;
 
@@ -178,10 +189,22 @@ function launchRocket(scene: Scene, from: Vector3, christmas: boolean): void {
   effects.spawn('sprite', scene, from, { texture: TEX.flare, colour: ROCKET_LIGHT, size: cm(FLARE_PX * 0.5), seconds: ticks(ROCKET_TICKS), follow: head, fadeTail: tail });
   effects.spawn('sprite', scene, from, { texture: TEX.shockwave, colour: ROCKET_LIGHT, size: cm(SHOCK_PX * 0.15), seconds: ticks(ROCKET_TICKS), follow: head, fadeTail: tail });
 
+  const glow = from.clone();
+  lighting.flash(scene, ROCKET_GLOW, {
+    position: glow,
+    follow: out => {
+      head(glow);
+      out.x = glow.x;
+      out.y = glow.y;
+      out.z = glow.z;
+    },
+  });
+
   delay(ticks(BURST_TICK), () => burst(scene, head(new Vector3()), christmas));
 }
 
 function burst(scene: Scene, at: Vector3, christmas: boolean): void {
+  lighting.flash(scene, BURST_FLASH, { position: { x: at.x, y: at.y, z: at.z } });
   effects.spawn('sprite', scene, at, {
     texture: TEX.explosionMono,
     colour: ROCKET_LIGHT,
