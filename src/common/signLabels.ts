@@ -90,9 +90,9 @@ const SIGNS: Partial<Record<ENUM_WORLD, readonly Row[]>> = {
   // castle, the white one in the south-east as the southern.
   [ENUM_WORLD.WD_2DEVIAS]: [
     // type 27 — Object28
-    [27, 48, 24, 'devias'],
+    [27, 48, 24, 'northCastle'], // at the black castle's gate
     [27, 220, 79, 'devias'],
-    [27, 221, 205, 'devias'],
+    [27, 221, 205, 'southCastle'], // on the white castle's wall
     // type 35 — Object36
     [35, 30, 29, 'shop'], // the north-west fort, at Natasha the Firecracker Merchant
     [35, 186, 43, 'guardhouse'], // DEVIAS_GUARD_ROOM (186,43)-(194,51)
