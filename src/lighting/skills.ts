@@ -88,6 +88,12 @@ export type SkillLight = {
    */
   readonly bodies?: Readonly<Record<string, LightRecipe>>;
   /**
+   * `spots`: lights the effect switches on itself, by name, where and when its art shows (a
+   * controller that wakes 16 ticks after the packet, the burst at the end of a breath), through
+   * `lightSkillSpot`.
+   */
+  readonly spots?: Readonly<Record<string, LightRecipe>>;
+  /**
    * The light on the Enhanced and Ultra tiers. Classic keeps the row itself,
    * the original's `AddTerrainLight`; each moment set here replaces the
    * Classic one on the graded tiers (`effectLight` sizes and tints it from
@@ -261,7 +267,28 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   46: { arrow: { ...holy(2, ARROW_SECONDS), release: 0.2 } },
   // Fire Breath: BITMAP_SHOTGUN's (0.5,0.5,0.8) x Luminosity 0.7-1.0, range 2, riding the emitter
   // for its 10 ticks and fading under LT 5 (MoveHandlers.cpp:5086-5087, ZzzEffect.cpp:6645-6650).
-  49: { follow: { color: [0.5, 0.5, 0.8], range: 2, seconds: 0.4, release: 0.2, flicker: { min: 0.7, max: 1, steps: 4 } } },
+  // Graded: the breath's lavender over the ~1 tile its puffs reach, bright while the last puffs live
+  // (18 ticks), and the DinoE burst's 1.3 tiles for its 12.
+  49: {
+    follow: { color: [0.5, 0.5, 0.8], range: 2, seconds: 0.4, release: 0.2, flicker: { min: 0.7, max: 1, steps: 4 } },
+    enhanced: {
+      follow: effectLight([0.6, 0.6, 1], 1.1, 0.72, { release: 0.36, flicker: { min: 0.8, max: 1, steps: 4 } }),
+      spots: { bomb: effectLight([1, 0.85, 1], 1.3, 0.48, { release: 0.32, heightOffset: 0.2 }) },
+    },
+  },
+  // Combo: the original lights nothing. Graded: the rays' blue over the ~3 tiles they reach, for their 20 ticks.
+  59: { enhanced: { spots: { burst: effectLight([0.3, 0.6, 1], 3, 0.8, { release: 0.56 }) } } },
+  // Strike of Destruction: the original lights nothing. Graded: the two FLARE_BLUE marks (4 and 6 tiles
+  // wide) for their 24 ticks, fading as their /1.05 does, and a white-blue pop as the strike lands at B.
+  232: {
+    enhanced: {
+      spots: {
+        a: effectLight([0.5, 0.5, 1], 2, 0.96, { release: 0.7 }),
+        b: effectLight([0.55, 0.6, 1], 3, 0.96, { release: 0.7, heightOffset: 0.5 }),
+        strike: effectLight([0.85, 0.9, 1], 1.5, 0.2, { release: 0.15, heightOffset: 1 }),
+      },
+    },
+  },
   // Ice Arrow: MODEL_ARROW range 2 (:11777). The bolt light rides the same
   // path the arrow does and fires the impact on arrival, so it keeps it.
   51: { travel: { ...frost(2, 3), speed: ARROW_SPEED }, impact: frost(2, 0.4) },
@@ -560,6 +587,26 @@ export function lightSkillFollow(
   follow: (out: { x: number; y: number; z: number }) => void
 ): LightSource | null {
   const recipe = lightRow(skill)?.follow;
+
+  if (!recipe) return null;
+
+  const position = { x: 0, y: 0, z: 0 };
+  follow(position);
+
+  return attach(scene, recipe, { position, follow });
+}
+
+/**
+ * Command: the row's `spots[name]` light, anchored where `follow` says, as its effect reaches that
+ * moment. Null when the row, as this tier uses it, has no such spot.
+ */
+export function lightSkillSpot(
+  scene: Scene,
+  skill: number,
+  name: string,
+  follow: (out: { x: number; y: number; z: number }) => void
+): LightSource | null {
+  const recipe = lightRow(skill)?.spots?.[name];
 
   if (!recipe) return null;
 

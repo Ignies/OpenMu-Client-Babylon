@@ -12,7 +12,7 @@ import {
   type LightAnchor,
   type LightRecipe,
 } from './lightSource';
-import { lightAreaSkill, lightArrow, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillTrail, lightTargetedSkill } from './skills';
+import { lightAreaSkill, lightArrow, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillSpot, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
@@ -161,6 +161,16 @@ class Lighting {
     follow: (out: { x: number; y: number; z: number }) => void
   ): LightSource | null {
     return lightSkillFollow(scene, skill, follow);
+  }
+
+  /** Light one of a skill's `spots` as its effect reaches it. Null when the row, on this tier, has none by that name. */
+  skillSpot(
+    scene: Scene,
+    skill: number,
+    name: string,
+    follow: (out: { x: number; y: number; z: number }) => void
+  ): LightSource | null {
+    return lightSkillSpot(scene, skill, name, follow);
   }
 
   /**

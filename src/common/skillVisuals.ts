@@ -2849,6 +2849,185 @@ const comboBurst: Step = (at, c) => {
   effects.spawn('rays', c.scene, at, { rays, texture: TEX.flare, colour: [0.1, 0.5, 1], seconds: ticks(20), moveFor: ticks(4), tail: ticks(3), fadeTail: 0.05 });
 };
 
+// Enhanced and Ultra: each runs the Classic step above untouched and adds to it.
+
+/** A skill light's anchor held on one point. */
+const lightAt = (p: Vector3) => (out: { x: number; y: number; z: number }): void => {
+  out.x = p.x;
+  out.y = p.y;
+  out.z = p.z;
+};
+
+/** Fire Breath's lavender glitter shed along the emitter's path, drifting up as it fades. */
+const BREATH_GLITTER: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.75, 0.75, 1.1],
+  colourEnd: [0.12, 0.12, 0.3],
+  size: 0.09,
+  sizeJitter: 0.4,
+  life: 0.6,
+  lifeJitter: 0.3,
+  box: [0.22, 0.15, 0.22],
+  dir1: [-1, -0.2, -1],
+  dir2: [1, 1, 1],
+  power: 0.5,
+  powerJitter: 0.5,
+  gravity: 0.5,
+  capacity: 128,
+};
+/** Hot chips out of the closing burst, DinoE's warm rim cooling to its violet. */
+const BREATH_BOMB_CHIPS: ParticleRecipe = {
+  texture: TEX.spark,
+  colour: [1, 0.8, 0.6],
+  colourEnd: [0.3, 0.2, 0.5],
+  size: 0.12,
+  sizeJitter: 0.3,
+  life: 0.5,
+  lifeJitter: 0.3,
+  dir1: [-1, 0.2, -1],
+  dir2: [1, 1.2, 1],
+  power: 3,
+  powerJitter: 0.4,
+  gravity: -6,
+  spin: 5,
+  capacity: 64,
+};
+
+/**
+ * Fire Breath, graded: the same emitter, puffs, forty sparks and CreateBomb2, with a soft lavender body
+ * riding the emitter so the stream reads as one breath, glitter shed along it, and at the burst a flash,
+ * hot chips, a smoke puff and a shock on the ground under it. Its lights are the row's `follow` and `bomb`.
+ */
+const fireBreathPlus: Step = (at, c) => {
+  fireBreath(at, c);
+  const f = forwardOf(entityYaw(c.caster));
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const t0 = fxNow();
+  // The emitter's head (fireBreath's `place(20 + 30 k, 0, 50)`), held at its last spot.
+  const head: PointSource = out => {
+    const d = cm(20) + cm(30) * Math.min(9, (fxNow() - t0) / TICK);
+    return out.set(feet.x + f.x * d, feet.y + cm(50), feet.z + f.z * d);
+  };
+  effects.spawn('sprite', c.scene, feet, { texture: TEX.flare, colour: [0.24, 0.24, 0.45], size: 0.8, grow: 1.8, seconds: ticks(13), fadeTail: 0.45, follow: head });
+  effects.spawn('particles', c.scene, feet, { recipe: BREATH_GLITTER, rate: 75, seconds: ticks(10), follow: head });
+  delay(ticks(9), () => {
+    const p = head(new Vector3());
+    p.y = feet.y + cm(80);
+    lighting.skillSpot(c.scene, 49, 'bomb', lightAt(p));
+    effects.spawn('sprite', c.scene, p, { texture: TEX.flare, colour: [0.45, 0.36, 0.6], size: 1.4, seconds: ticks(6), fadeTail: 0.8 });
+    effects.spawn('particles', c.scene, p, { recipe: BREATH_BOMB_CHIPS, count: 14 });
+    effects.spawn('particles', c.scene, p, { recipe: SMOKE, count: 3 });
+    effects.spawn('ring', c.scene, p, { texture: TEX.shockwave, colour: [0.32, 0.28, 0.5], scale: 1.2, grow: 2.4, seconds: ticks(10), fadeColour: true });
+  });
+};
+
+/** Strike of Destruction's ice chips out of the strike, bright and falling back. */
+const DESTRUCTION_CHIPS: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [0.75, 0.85, 1.2],
+  colourEnd: [0.15, 0.25, 0.6],
+  size: 0.11,
+  sizeJitter: 0.35,
+  life: 0.75,
+  lifeJitter: 0.3,
+  box: [0.5, 0.05, 0.5],
+  dir1: [-1, 1, -1],
+  dir2: [1, 2.2, 1],
+  power: 3.2,
+  powerJitter: 0.4,
+  gravity: -9,
+  spin: 6,
+  capacity: 128,
+};
+/** Cold breathing off the cracks as they fade. */
+const DESTRUCTION_FROST: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.3, 0.4, 0.9],
+  colourEnd: [0.04, 0.06, 0.18],
+  size: 0.16,
+  sizeJitter: 0.4,
+  life: 1,
+  lifeJitter: 0.3,
+  box: [0.25, 0.02, 0.25],
+  dir1: [-0.1, 0.6, -0.1],
+  dir2: [0.1, 1, 0.1],
+  power: 0.6,
+  powerJitter: 0.3,
+  gravity: 0.2,
+  endScale: 1.8,
+  capacity: 128,
+};
+
+/**
+ * Strike of Destruction, graded: the same controllers, marks, spray and cracks, with the strike landing
+ * at B as a short white-blue core, a shock running out over the 6-tile mark and ice chips thrown up (a
+ * smaller shock and chips at A), and frost breathing off each crack while it fades. Lights: `a`, `b`
+ * over the two marks for their 24 ticks and a `strike` pop at B.
+ */
+const blowOfDestructionPlus: Step = (at, c) => {
+  blowOfDestruction(at, c);
+  const f = forwardOf(entityYaw(c.caster));
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const a = new Vector3(feet.x + f.x + f.z * cm(20), feet.y, feet.z + f.z - f.x * cm(20));
+  const b = at.clone();
+  delay(ticks(16), () => {
+    lighting.skillSpot(c.scene, 232, 'a', lightAt(a));
+    lighting.skillSpot(c.scene, 232, 'b', lightAt(b));
+    lighting.skillSpot(c.scene, 232, 'strike', lightAt(b));
+    effects.spawn('sprite', c.scene, b, { texture: TEX.flare, colour: [0.4, 0.5, 0.85], size: 1.8, height: 0.8, seconds: ticks(5), fadeTail: 0.8 });
+    effects.spawn('ring', c.scene, b, { texture: TEX.shockwave, colour: [0.4, 0.5, 1.1], scale: 2, grow: 3.5, seconds: ticks(12), fadeColour: true });
+    effects.spawn('ring', c.scene, a, { texture: TEX.shockwave, colour: [0.3, 0.36, 0.85], scale: 1.2, grow: 3, seconds: ticks(10), fadeColour: true });
+    effects.spawn('particles', c.scene, b, { recipe: DESTRUCTION_CHIPS, count: 28 });
+    effects.spawn('particles', c.scene, a, { recipe: DESTRUCTION_CHIPS, count: 10 });
+  });
+  // The crack trail's spots, as blowOfDestruction lays them.
+  delay(ticks(17), () => {
+    const dir = toward(a, b);
+    const n = Math.floor(Math.hypot(b.x - a.x, b.z - a.z)) + 1;
+    const p = new Vector3();
+    for (let i = 0; i < n; i++) {
+      p.set(a.x + dir.x * cm(55) * i, a.y, a.z + dir.z * cm(55) * i);
+      effects.spawn('particles', c.scene, p, { recipe: DESTRUCTION_FROST, count: 3 });
+    }
+    effects.spawn('particles', c.scene, b, { recipe: DESTRUCTION_FROST, count: 8 });
+  });
+};
+
+/** Combo's chips thrown out of the burst with its rays. */
+const COMBO_CHIPS: ParticleRecipe = {
+  texture: TEX.spark,
+  colour: [0.55, 0.8, 1.2],
+  colourEnd: [0.05, 0.2, 0.5],
+  size: 0.17,
+  sizeJitter: 0.3,
+  life: 0.45,
+  lifeJitter: 0.3,
+  dir1: [-1, 0.1, -1],
+  dir2: [1, 0.9, 1],
+  power: 5,
+  powerJitter: 0.3,
+  gravity: -4,
+  spin: 4,
+  capacity: 64,
+};
+
+/**
+ * Combo, graded: the same disc and sixty rays, with a white-blue core at the caster, a shock running out
+ * on the ground under the rays that dive into it, and chips thrown with them. Its light is the row's `burst`.
+ */
+const comboBurstPlus: Step = (at, c) => {
+  comboBurst(at, c);
+  lighting.skillSpot(c.scene, 59, 'burst', out => {
+    const p = entityPos(c.caster, cm(50), tmpEmitter);
+    out.x = p.x;
+    out.y = p.y;
+    out.z = p.z;
+  });
+  effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: [0.35, 0.6, 1.1], size: 2.2, grow: 1.5, seconds: ticks(6), fadeTail: 0.9 });
+  effects.spawn('ring', c.scene, at, { texture: TEX.shockwave, colour: [0.25, 0.5, 1], scale: 1.5, grow: 4, seconds: ticks(12), fadeColour: true });
+  effects.spawn('particles', c.scene, at, { recipe: COMBO_CHIPS, count: 24 });
+};
+
 // ---- the table -------------------------------------------------------------------
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
@@ -3161,7 +3340,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   48: { impact: atCaster(spiritBurst([0.5, 0.5, 0.5]), 1), area: atCaster(spiritBurst([0.5, 0.5, 0.5]), 1) },
   // 49 Fire Breath (AT_SKILL_RIDER): BITMAP_SHOTGUN and its sparks when the rider clip passes key 5, or
   // after the 14-tick AttackTime cap (ZzzCharacter.cpp:2910-2915, :4405-4409); see `fireBreath`.
-  49: { cast: atClipKey(5, RIDER_ACTIONS, fireBreath) },
+  49: { cast: atClipKey(5, RIDER_ACTIONS, fireBreath), enhanced: { cast: atClipKey(5, RIDER_ACTIONS, fireBreathPlus) } },
   // 50 Flame of Evil (monster)
   50: { impact: fireHit },
   // 51 Ice Arrow: cast - MODEL_ICE sub1 + sub2 (+180°) at the target LT 20, Scale 0.8, BlendMeshLight 0.5, 3× BITMAP_SMOKE,
@@ -3231,7 +3410,11 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // (`combat.novaCharging` / `novaStage`); on anyone else for a full charge's length.
   58: { cast: novaCharge },
   // 59 Combo: MODEL_COMBO and its 60 rays at the caster, whoever the target (WSclient.cpp:4829-4832).
-  59: { impact: atCaster(comboBurst, cm(50)), area: atCaster(comboBurst, cm(50)) },
+  59: {
+    impact: atCaster(comboBurst, cm(50)),
+    area: atCaster(comboBurst, cm(50)),
+    enhanced: { impact: atCaster(comboBurstPlus, cm(50)), area: atCaster(comboBurstPlus, cm(50)) },
+  },
   // 60 Force / 66 Force Wave (and 509): at the strike key, caster-anchored rings, streaks and lance; sDarkSpear.
   60: { impact: strikeKey(force, 'Sound/sDarkSpear') },
   66: { impact: strikeKey(force, 'Sound/sDarkSpear'), area: strikeKey(force, 'Sound/sDarkSpear') },
@@ -3431,7 +3614,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     ), 0.05),
   },
   // 232 Strike of Destruction (337/340/343 alias here, drawn at the target's feet): see `blowOfDestruction`.
-  232: { area: blowOfDestruction },
+  232: { area: blowOfDestruction, enhanced: { area: blowOfDestructionPlus } },
   // 233 Expansion of Wizardry: MODEL_SWELL_OF_MAGICPOWER at the caster, Light (0.3,0.2,0.9) (WSclient.cpp
   // AT_SKILL_SWELL_OF_MAGICPOWER cast).
   233: { impact: swellOfMagic, area: swellOfMagic },
