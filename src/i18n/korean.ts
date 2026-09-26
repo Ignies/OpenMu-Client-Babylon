@@ -2259,6 +2259,8 @@ export const koreanLayer: LanguageLayer = {
     'sign.guardhouse': '경비소',
     'sign.church': '교회',
     'sign.guild': '길드',
+    'sign.northCastle': '북쪽 성',
+    'sign.southCastle': '남쪽 성',
     'options.tab.controls': '조작',
     'options.page.general': '일반',
     'options.page.loot': '드롭 아이템',

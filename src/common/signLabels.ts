@@ -50,6 +50,8 @@ type LabelKey =
   | 'raklion'
   | 'valleyOfLoren'
   | 'stadium'
+  | 'northCastle'
+  | 'southCastle'
   // what a building is
   | 'pub'
   | 'shop'
@@ -83,12 +85,14 @@ const SIGNS: Partial<Record<ENUM_WORLD, readonly Row[]>> = {
   // Types 58 and 59 are the two halves of the two-plank road sign — 58 takes
   // the upper board, 59 the lower — and there are 52 of them marking the path
   // network across the whole map. 27 is the standing plaque, 35 the bracket
-  // board on a wall.
+  // board on a wall. The two castles have no names of their own in the game;
+  // the black one in the north-west (rooms.ts) is signed as the northern
+  // castle, the white one in the south-east as the southern.
   [ENUM_WORLD.WD_2DEVIAS]: [
     // type 27 — Object28
-    [27, 48, 24, 'devias'],
+    [27, 48, 24, 'northCastle'], // at the black castle's gate
     [27, 220, 79, 'devias'],
-    [27, 221, 205, 'devias'],
+    [27, 221, 205, 'southCastle'], // on the white castle's wall
     // type 35 — Object36
     [35, 30, 29, 'shop'], // the north-west fort, at Natasha the Firecracker Merchant
     [35, 186, 43, 'guardhouse'], // DEVIAS_GUARD_ROOM (186,43)-(194,51)
@@ -123,7 +127,7 @@ const SIGNS: Partial<Record<ENUM_WORLD, readonly Row[]>> = {
     [58, 216, 86, 'devias'],
     [58, 214, 94, 'devias'],
     [58, 213, 110, 'devias'],
-    [58, 220, 200, 'devias'],
+    [58, 220, 200, 'southCastle'], // points at the white castle
     [58, 238, 39, 'lorencia'], // 7 tiles from the lorencia gate
     [58, 240, 95, 'devias'],
     // type 59 — Object60
@@ -148,7 +152,7 @@ const SIGNS: Partial<Record<ENUM_WORLD, readonly Row[]>> = {
     [59, 181, 109, 'devias'],
     [59, 187, 226, 'elbeland'], // 30 tiles from the elbeland gate
     [59, 215, 85, 'devias'],
-    [59, 219, 199, 'devias'],
+    [59, 219, 199, 'northCastle'], // points back up the road to the black castle
     [59, 238, 39, 'lorencia'], // 7 tiles from the lorencia gate
   ],
 

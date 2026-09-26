@@ -2608,6 +2608,8 @@ export const EN_TEXT = {
   'sign.guardhouse': 'Guardhouse',
   'sign.church': 'Church',
   'sign.guild': 'Guild',
+  'sign.northCastle': 'Northern Castle',
+  'sign.southCastle': 'Southern Castle',
 } as const;
 
 /** Every key the client can ask for. Derived, so typos do not compile. */

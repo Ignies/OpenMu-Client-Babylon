@@ -2300,6 +2300,8 @@ export const bulgarianLayer: LanguageLayer = {
     'sign.guardhouse': 'Стражница',
     'sign.church': 'Църква',
     'sign.guild': 'Гилдия',
+    'sign.northCastle': 'Северен замък',
+    'sign.southCastle': 'Южен замък',
     'options.tab.controls': 'Управление',
     'options.page.general': 'Общи',
     'options.page.loot': 'Плячка',
