@@ -60,6 +60,22 @@ export function onAnyScreenPosition(
   return () => anyListeners.delete(listener);
 }
 
+const frameEndListeners = new Set<() => void>();
+
+/**
+ * Called once at the end of every projection pass, after the last emit and
+ * also when nothing emitted, so a consumer can lay out (or park) its whole
+ * table in the frame that is being rendered.
+ */
+export function onScreenPositionFrameEnd(listener: () => void): () => void {
+  frameEndListeners.add(listener);
+  return () => frameEndListeners.delete(listener);
+}
+
+export function emitScreenPositionFrameEnd(): void {
+  for (const listener of frameEndListeners) listener();
+}
+
 /** True when anything is listening - lets the producer skip the projection. */
 export function hasScreenPositionListener(entity: Entity): boolean {
   return listeners.has(entity) || anyListeners.size > 0;
