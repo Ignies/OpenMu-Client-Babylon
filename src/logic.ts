@@ -265,7 +265,19 @@ import { chooseSkillAction } from './common/skillCasting';
 import { getBaseClass, BaseClass } from './common/characterStats';
 import { SKILL_TO_EFFECT } from './common/magicEffects';
 import { playAreaSkillVisual, playBowShotVisual, playTargetedSkillVisual, setBuffVisual } from './common/skillVisuals';
-import { playerPlaySpeed } from './common/playSpeed';
+import { monsterModelTypeOf, playerPlaySpeed } from './common/playSpeed';
+import { TRAP_MODEL_TABLE } from './common/npcs/trapNpc';
+import {
+  KEEP_CLIP,
+  monsterAreaCast,
+  monsterAttackState,
+  monsterCast,
+  monsterCastRewinds,
+  monsterFlinches,
+  monsterSwing,
+  playableMonsterClip,
+  type MonsterAttackInput,
+} from './common/monsterAttackClip';
 import { delay } from './effects/core';
 import { Vector3 } from './libs/babylon/exports';
 import { EventBus } from './libs/eventBus';
@@ -2303,6 +2315,41 @@ function attackPoseOf(obj: Entity): AttackPose {
   };
 }
 
+/** `c->MonsterIndex`: a transformed player answers to the monster it wears. */
+function monsterNumberOf(obj: Entity): number {
+  return obj.npcType ?? obj.skin ?? -1;
+}
+
+const monsterAttackInput: MonsterAttackInput = {
+  world: 0,
+  monster: -1,
+  model: -1,
+  trapObject: undefined,
+  random: Math.random,
+  now: 0,
+};
+
+/** What the monster attack hooks read off a character, in one reused record. */
+function attackInputOf(obj: Entity): MonsterAttackInput {
+  const monster = monsterNumberOf(obj);
+  monsterAttackInput.world = Store.world?.mapIndex ?? -1;
+  monsterAttackInput.monster = monster;
+  monsterAttackInput.model = monsterModelTypeOf(monster);
+  monsterAttackInput.trapObject =
+    obj.npcType === undefined ? undefined : TRAP_MODEL_TABLE[obj.npcType]?.[0];
+  monsterAttackInput.now = performance.now();
+  return monsterAttackInput;
+}
+
+/** `SetAction`; `rewind` is the `AnimationFrame = 0` that restarts a playing clip. */
+function setMonsterClip(obj: Entity, action: number, rewind: boolean) {
+  const model = obj.modelObject;
+  const clip = playableMonsterClip(action, model?.gltf?.animationGroups.length);
+  if (clip === KEEP_CLIP || !obj.monsterAnimation) return;
+  if (rewind && model?.CurrentAction === clip) model.restartAction();
+  obj.monsterAnimation.action = clip as MonsterActionType;
+}
+
 /** `SetAction_Fenrir_Damage` (ZzzAI.cpp:283-311): the rider's flinch, by what is in hand. */
 function fenrirDamageAction(obj: Entity): PlayerAction {
   const hands = obj.charAppearance;
@@ -2406,14 +2453,20 @@ EventBus.on('ObjectAnimation', packet => {
   if (obj.monsterAnimation) {
     if (isDeadMonster(obj)) return;
     const monsterAction = clientActionToPlay as unknown as MonsterActionType;
-    if (
-      obj.monsterAnimation.action === monsterAction &&
-      obj.modelObject?.CurrentAction === monsterAction
-    ) {
-      // Same one-shot clip again (e.g. repeated attacks): restart it.
-      obj.modelObject.restartAction();
+    if (monsterAction === MonsterActionType.Attack1) {
+      // AT_ATTACK1 / AT_ATTACK2 (ReceiveAction, WSclient.cpp:3596-3600):
+      // SetPlayerAttack picks the clip, then AnimationFrame = 0.
+      setMonsterClip(obj, monsterSwing(monsterAttackState(obj), attackInputOf(obj)), true);
+    } else {
+      if (
+        obj.monsterAnimation.action === monsterAction &&
+        obj.modelObject?.CurrentAction === monsterAction
+      ) {
+        // Same one-shot clip again: restart it.
+        obj.modelObject.restartAction();
+      }
+      obj.monsterAnimation.action = monsterAction;
     }
-    obj.monsterAnimation.action = monsterAction;
   } else if (obj.playerAnimation) {
     let action = ServerToClientActionMap[clientActionToPlay];
     if (
@@ -2484,8 +2537,12 @@ function applySkillListPacket(packet: DataView) {
   }
 }
 
-/** Cast clip for an object in scope (SetPlayerMagic / monster Attack1). */
-function playCastAnimation(caster: Entity, skill: number) {
+/**
+ * Cast clip for an object in scope: SetPlayerMagic for a player, and for a
+ * monster the clip `ReceiveMagic` (0x19) or, for `area`, `ReceiveMagicContinue`
+ * (0x1E) gives it.
+ */
+function playCastAnimation(caster: Entity, skill: number, area: boolean) {
   const def = skillDefinition(skill);
   // ExecuteSkill's cast sound for everyone else (the hero's plays in SkillCastSystem).
   if (!caster.localPlayer && caster.transform) {
@@ -2520,7 +2577,10 @@ function playCastAnimation(caster: Entity, skill: number) {
     caster.playerAnimation.action = action;
     if (caster.pathfinding) caster.pathfinding.path = null;
   } else if (caster.monsterAnimation && !isDeadMonster(caster)) {
-    caster.monsterAnimation.action = MonsterActionType.Attack1;
+    const state = monsterAttackState(caster);
+    const input = attackInputOf(caster);
+    if (area) setMonsterClip(caster, monsterAreaCast(state, skill, input), true);
+    else setMonsterClip(caster, monsterCast(state, skill, input), monsterCastRewinds(skill));
   }
 }
 
@@ -2541,7 +2601,7 @@ EventBus.on('SkillAnimation', packet => {
       caster.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
     }
   }
-  playCastAnimation(caster, p.SkillId);
+  playCastAnimation(caster, p.SkillId, false);
   // AT_SKILL_COMBO: the server announces a landed DK combo (ReceiveMagic, WSclient.cpp:4436).
   if (combat.observeSkillAnimation(p.SkillId, target?.netId)) {
     playSfx(COMBO_SOUND, caster.transform.pos, { bus: COMBAT_BUS });
@@ -2561,7 +2621,7 @@ EventBus.on('AreaSkillAnimation', packet => {
     // Rotation byte: Angle / 360 * 256 of the caster's yaw.
     caster.transform.rot.y = (p.Rotation / 256) * Math.PI * 2;
   }
-  playCastAnimation(caster, p.SkillId);
+  playCastAnimation(caster, p.SkillId, true);
   playAreaSkillVisual(
     world.scene,
     p.SkillId,
@@ -2841,20 +2901,17 @@ function applyObjectHit(p: ObjectHitView) {
     }
   }
 
-  if (obj.monsterAnimation && totalDamage > 0 && !obj.dying) {
+  // SetPlayerShock on a monster: an Attack1 / Attack2 swing is never cut
+  // short, and a monster already flinching is not rewound (SetAction of the
+  // clip in hand). One-shot: AnimationSystem returns it to Stop1.
+  if (
+    obj.monsterAnimation &&
+    p.HealthDamage > 0 &&
+    !isDeadMonster(obj) &&
+    monsterFlinches((p.ObjectId & 0x8000) !== 0, monsterNumberOf(obj), Math.random)
+  ) {
     const anim = obj.monsterAnimation;
-    const swinging =
-      anim.action === MonsterActionType.Attack1 ||
-      anim.action === MonsterActionType.Attack2;
-    if (anim.action !== MonsterActionType.Die && !swinging) {
-      if (
-        anim.action === MonsterActionType.Shock &&
-        obj.modelObject?.CurrentAction === MonsterActionType.Shock
-      ) {
-        // Hit again mid-flinch: restart the clip so every hit reads.
-        obj.modelObject.restartAction();
-      }
-      // One-shot: AnimationSystem returns the monster to Stop1 when the clip ends.
+    if (anim.action !== MonsterActionType.Attack1 && anim.action !== MonsterActionType.Attack2) {
       anim.action = MonsterActionType.Shock;
     }
   }
@@ -4437,7 +4494,7 @@ EventBus.on('RageAttack', packet => {
       caster.transform.rot.y = Math.atan2(dz, dx) + Math.PI / 2;
     }
   }
-  playCastAnimation(caster, p.SkillId);
+  playCastAnimation(caster, p.SkillId, false);
   playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
 });
 
