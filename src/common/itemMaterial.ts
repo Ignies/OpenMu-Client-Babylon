@@ -887,11 +887,16 @@ function bindItemEffect(
 
   const tier = mesh.metadata?.itemTier as ItemVisualTier | null | undefined;
 
+  // The wearer's aura (Ultra's outlaw) replaces the item's own level look.
+  const aura = (mesh.metadata?.bodyShine as BodyShine | undefined)?.aura;
+  const auraOn = !!aura && aura.x + aura.y + aura.z > 0;
+
   let fx = 0;
 
   // Blend (bright) meshes are additive glow cards already; the original
   // skips NoneBlendMesh meshes in its chrome passes the same way.
   if (
+    !auraOn &&
     tier &&
     tier.active &&
     legacyItemEffectsOn() &&
@@ -944,7 +949,11 @@ function bindItemEffect(
   }
   effect.setFloat(SNOW_CAP_UNIFORM, cap);
 
-  if (
+  if (improved && auraOn && !mesh.metadata?.brightMesh) {
+    // The wearer's aura outranks the item's own glow: an outlaw's weapons glow red.
+    const a = mesh.visibility;
+    effect.setFloat3('itemGlow', improved.x * a, improved.y * a, improved.z * a);
+  } else if (
     tier &&
     tier.improvedActive &&
     improvedItemEffectsOn() &&

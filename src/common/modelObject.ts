@@ -370,6 +370,12 @@ export type BodyShine = {
    * the two is live is the writer's business, not the material's.
    */
   improved?: Vector3;
+  /**
+   * A halo of this colour around every mesh that carries the shine, drawn by
+   * the glow layer, with `improved` then winning over the item's own glow.
+   * Black = none. Ultra's outlaw look (`outlawLook.ts`).
+   */
+  aura?: Vector3;
 };
 
 function disposeGltf(gltf: {

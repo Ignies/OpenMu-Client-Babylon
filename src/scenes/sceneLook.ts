@@ -73,6 +73,12 @@ export function applySceneLook(
   // emissive, so the layer is a no-op until a mesh carries an `itemTier` -
   // then it glows with the tier's pulsing colour on the shared clock.
   glow.customEmissiveColorSelector = (mesh, _subMesh, _material, result) => {
+    const aura = auraOf(mesh);
+    if (aura) {
+      result.set(aura.x, aura.y, aura.z, 1);
+      return;
+    }
+
     const tier = mesh.metadata?.itemTier as ItemVisualTier | null | undefined;
 
     if (!tier || !tier.improvedActive || !improvedItemEffectsOn()) {
@@ -94,6 +100,9 @@ export function applySceneLook(
   glow.customEmissiveTextureSelector = (mesh, _subMesh, material) => {
     const tier = mesh.metadata?.itemTier as ItemVisualTier | null | undefined;
     const own = (material as { emissiveTexture?: Texture | null }).emissiveTexture ?? null;
+
+    // The aura is a solid halo over the whole silhouette.
+    if (auraOf(mesh)) return null!;
 
     // Babylon types the return as non-null but handles null (no texture).
     if (tier && tier.improvedActive && improvedItemEffectsOn()) return own!;
@@ -170,10 +179,19 @@ function syncGlowSourceOptions(): void {
   glowPbr = pbrMaterialsOn();
 }
 
+/** The wearer's aura colour on this mesh (`BodyShine.aura`), or null. */
+function auraOf(mesh: AbstractMesh) {
+  const aura = mesh.metadata?.bodyShine?.aura;
+  if (!aura || mesh.metadata.brightMesh) return null;
+  return aura.x + aura.y + aura.z > 0 ? aura : null;
+}
+
 /** What the layer has any colour for: its selectors paint the rest black. */
 function isGlowSource(mesh: AbstractMesh): boolean {
   const meta = mesh.metadata;
   if (!meta) return false;
+
+  if (auraOf(mesh)) return true;
 
   if (meta.glowOwnMaterial) return true;
 
