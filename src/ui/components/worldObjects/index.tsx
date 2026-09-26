@@ -88,11 +88,13 @@ const DropLabel = observer(({
   const [anchor, setAnchor] = useState<Point | null>(null);
 
   // `currentPointerTarget` is plain state sampled per frame; piggyback on the
-  // per-frame screen-position event instead of polling.
+  // per-frame screen-position event instead of polling. A drop going off
+  // screen gets one last (0, 0) event and then none, so that one unhovers it.
   useEffect(
     () =>
-      onScreenPosition(entity, () => {
-        const now = Store.world?.currentPointerTarget === entity;
+      onScreenPosition(entity, pos => {
+        const onScreen = pos.x * pos.x + pos.y * pos.y >= 0.1;
+        const now = onScreen && Store.world?.currentPointerTarget === entity;
         if (now !== hoveredRef.current) {
           hoveredRef.current = now;
           setHovered(now);
