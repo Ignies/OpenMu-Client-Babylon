@@ -1,0 +1,2 @@
+# Game tables are binary: never convert their line endings.
+*.bmd binary
