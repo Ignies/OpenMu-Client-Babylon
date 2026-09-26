@@ -1650,14 +1650,15 @@ const weaponGlint: Step = (_at, c) => {
 /**
  * BITMAP_JOINT_SPARK sub0 (ZzzEffectJoint.cpp:950-959): Spark01, white, 6-25 cm a tick along its `Angle`,
  * LT 8-15, two tails. Drawn as a stretched particle rather than a two-point ribbon: a Twisting Slash throws
- * twenty a tick. The original is 2 cm wide and one tick of travel long; 3 cm x 18 cm.
+ * twenty a tick. 2 cm wide and one tick of travel long, 6-25 cm with its speed.
  */
 const JOINT_SPARKS: ParticleRecipe = {
   texture: TEX.spark,
   colour: RGBS.white,
-  size: 0.03,
+  size: 0.02,
   sizeJitter: 0,
-  stretch: 6,
+  stretch: 12.5,
+  stretchBySpeed: true,
   aimed: true,
   life: ticks(15),
   lifeJitter: 7 / 15,
@@ -2172,13 +2173,19 @@ interface DrillFlare {
 /** BITMAP_FLARE sub12's life and tails (ZzzEffectJoint.cpp:1886-1888). */
 const DRILL_LIFE = 70;
 const DRILL_TAILS = 50;
+/**
+ * MoveJoint re-runs itself until LifeTime hits a multiple of 12 (ZzzEffectJoint.cpp:6959-6968), each sub-step
+ * moving and leaving a tail: 10 sub-steps on the birth tick, 12 on each tick after, dead on its seventh tick.
+ */
+const drillSubSteps = (age: number): number => 10 + 12 * age;
+const DRILL_TICKS = 6;
 /** A MODEL_SPEAR emitter's life (EffectRegistry.cpp:57): one flare a tick from each of the two. */
 const DRILL_EMITTER_TICKS = 10;
 
 /**
  * Death Stab's blue drill as one batch (EffectBehaviors.cpp:87-95; ZzzEffectJoint.cpp:1883-1897, :5570-5604):
- * Flare.jpg, Light (0.1, 0.1, 1), width 100 cm. A flare's centre walks 4 cm a tick along the facing; its head
- * circles 26 cm out in the side/up plane at 0.1 rad a tick, sinking `(90 - LifeTime) x 0.3` cm.
+ * Flare.jpg, Light (0.1, 0.1, 1), width 100 cm. A flare's centre walks 4 cm a sub-step along the facing; its
+ * head circles 26 cm out in the side/up plane at 0.1 rad a sub-step, sinking `(90 - LifeTime) x 0.3` cm.
  */
 function drillFlares(c: SkillContext, tickOf: () => number, flares: DrillFlare[], count: number, seconds: number): void {
   const head = (d: DrillFlare, a: number, out: Vector3): Vector3 => {
@@ -2190,7 +2197,8 @@ function drillFlares(c: SkillContext, tickOf: () => number, flares: DrillFlare[]
     const fz = -Math.cos(d.yaw);
     const sx = Math.cos(d.yaw);
     const sz = Math.sin(d.yaw);
-    return out.set(d.emitter.x + fx * cm(4 * a) + sx * cm(side), d.emitter.y + cm(up), d.emitter.z + fz * cm(4 * a) + sz * cm(side));
+    const walk = cm(4 * (a + 1));
+    return out.set(d.emitter.x + fx * walk + sx * cm(side), d.emitter.y + cm(up), d.emitter.z + fz * walk + sz * cm(side));
   };
   effects.spawn('joint', c.scene, Vector3.Zero(), {
     paths: {
@@ -2199,8 +2207,8 @@ function drillFlares(c: SkillContext, tickOf: () => number, flares: DrillFlare[]
         const d = flares[k];
         if (!d) return 0;
         const age = tickOf() - d.born;
-        if (age < 0 || age >= DRILL_LIFE) return 0;
-        head(d, Math.max(0, age - j), out);
+        if (age < 0 || age >= DRILL_TICKS) return 0;
+        head(d, Math.max(0, drillSubSteps(age) - 1 - j), out);
         return 1;
       },
     },
@@ -2284,7 +2292,7 @@ const deathStab: Step = (at, c) => {
   const rolls = Array.from({ length: 7 }, () => Math.random() < 0.5);
   const flares: DrillFlare[] = [];
   const lastRoll = rolls.lastIndexOf(true);
-  if (lastRoll >= 0) drillFlares(c, tickOf, flares, rolls.filter(Boolean).length * 2 * DRILL_EMITTER_TICKS, ticks(5 + lastRoll + DRILL_EMITTER_TICKS + DRILL_LIFE + 1));
+  if (lastRoll >= 0) drillFlares(c, tickOf, flares, rolls.filter(Boolean).length * 2 * DRILL_EMITTER_TICKS, ticks(5 + lastRoll + DRILL_EMITTER_TICKS + DRILL_TICKS + 1));
 
   for (let t = 2; t <= 12; t++) {
     delay(ticks(t - 1), () => {

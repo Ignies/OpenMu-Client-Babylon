@@ -566,6 +566,8 @@ export interface ParticleRecipe {
   blend?: 'add' | 'alpha';
   /** Draw each card stretched along its flight, this many times longer than wide (a JOINT_SPARK streak). */
   stretch?: number;
+  /** With `aimed`: each card's length follows its own speed, `stretch` at full power (one tick of travel). */
+  stretchBySpeed?: boolean;
   /** An `emitBurst` direction wins over `dir1`/`dir2`, which then only jitter it (per-spark headings). */
   aimed?: boolean;
 }
@@ -752,7 +754,8 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   ps.direction2 = new Vector3(d2[0], d2[1], d2[2]);
   const p = r.power ?? 1;
   const pj = r.powerJitter ?? 0.4;
-  ps.minEmitPower = p * (1 - pj);
+  // A speed-stretched card rolls its own speed in the direction function, where its length is set to match.
+  ps.minEmitPower = r.stretchBySpeed ? p : p * (1 - pj);
   ps.maxEmitPower = p;
   ps.gravity = new Vector3(0, r.gravity ?? 0, 0);
   const spin = r.spin ?? 0;
@@ -776,7 +779,16 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
 
   const created = ps;
   created.startPositionFunction = (_world, position) => nextStartPosition(created, position);
-  if (r.aimed) created.startDirectionFunction = (_world, direction) => nextStartDirection(created, direction);
+  if (r.aimed && r.stretchBySpeed && r.stretch) {
+    const stretch = r.stretch;
+    // Babylon sets a particle's direction before its scale, so the range written here is this card's alone.
+    created.startDirectionFunction = (_world, direction) => {
+      nextStartDirection(created, direction);
+      const f = 1 - pj * Math.random();
+      direction.scaleInPlace(f);
+      created.minScaleX = created.maxScaleX = stretch * f;
+    };
+  } else if (r.aimed) created.startDirectionFunction = (_world, direction) => nextStartDirection(created, direction);
   if (r.stretch) {
     // Stretched cards align their local Y with the flight; a quarter turn puts the sheet's long U axis there.
     ps.billboardMode = ParticleSystem.BILLBOARDMODE_STRETCHED;

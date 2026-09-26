@@ -213,6 +213,8 @@ export function modelCount(): number {
   return live.size;
 }
 
+/** Live `scrollU` spawns per shared GLB sheet. */
+const scrollUsers = new Map<Texture, number>();
 const tmp = new Vector3();
 const copyRel = new Matrix();
 const copyRot = new Quaternion();
@@ -344,6 +346,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const fadeMats: StandardMaterial[] = [];
   const scrollMats: StandardMaterial[] = [];
   const scrollU = opts.scrollU ?? 0;
+  const scrolled = new Set<Texture>();
   // An override sheet loads after the mesh: until it is in, the material is a solid tinted face.
   const sheetMats: StandardMaterial[] = [];
   const copyNodes: { node: TransformNode; at: Vector3; scale: number; yaw: number }[] = [];
@@ -528,6 +531,10 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       for (const m of scrollMats) {
         const sheet = m.diffuseTexture as Texture | null;
         if (!sheet) continue;
+        if (!scrolled.has(sheet)) {
+          scrolled.add(sheet);
+          scrollUsers.set(sheet, (scrollUsers.get(sheet) ?? 0) + 1);
+        }
         sheet.wrapU = Constants.TEXTURE_WRAP_ADDRESSMODE;
         sheet.uOffset = (fxNow() * scrollU) % 1;
       }
@@ -547,6 +554,15 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     release() {
       disposed = true;
       clip?.stop();
+      // The last scrolling spawn hands the shared sheet back unscrolled to the rows that draw it still.
+      for (const tex of scrolled) {
+        const n = (scrollUsers.get(tex) ?? 1) - 1;
+        if (n > 0) scrollUsers.set(tex, n);
+        else {
+          scrollUsers.delete(tex);
+          tex.uOffset = 0;
+        }
+      }
       // Never the shared materials and textures: the bright / solid materials
       // are shared caches (core.ts, modelLoader.ts) and the textures the GLB
       // cache's - `dispose(false, true)` used to take them down with the
