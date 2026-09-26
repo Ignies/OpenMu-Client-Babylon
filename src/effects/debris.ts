@@ -89,6 +89,8 @@ export interface DebrisOptions {
   riseCm?: readonly [number, number];
   /** The model layer's `blendMesh`; -1 draws the pieces opaque (rock) instead of additive. */
   blendMesh?: number;
+  /** No sideways throw, straight up and down: MODEL_STONE1/2 SubType 1 (ZzzEffect.cpp:2756-2759). */
+  still?: boolean;
 }
 
 type Piece = {
@@ -137,7 +139,7 @@ export function spawnDebris(scene: Scene, at: Vector3, opts: DebrisOptions): Eff
       pos.y += Math.random() * scatter[2] * CM;
     }
     const yaw = Math.random() * Math.PI * 2;
-    const speed = cmPerTick(SPEED_CM_MIN + Math.random() * SPEED_CM_SPAN) * (opts.speedScale ?? 1);
+    const speed = opts.still ? 0 : cmPerTick(SPEED_CM_MIN + Math.random() * SPEED_CM_SPAN) * (opts.speedScale ?? 1);
     const rise = opts.riseCm ?? [RISE_CM_MIN, RISE_CM_SPAN];
     const size = SCALE_MIN + Math.random() * SCALE_SPAN;
     const lifeTicks = LIFE_TICKS_MIN + Math.random() * LIFE_TICKS_SPAN;

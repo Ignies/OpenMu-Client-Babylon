@@ -69,10 +69,10 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   3: 'Sound/eThunder', // Lightning
   5: 'Sound/sFlame', // Flame
   6: 'Sound/sMagic', // Teleport (SOUND_MAGIC in CreateTeleportBegin)
-  8: 'Sound/sTornado', // Twister (AT_SKILL_STORM)
+  // 8 Twister (sTornado) and 12 Aqua Beam (sAquaFlash): none at the cast, the effect plays them at AttackTime 15
+  // (ZzzCharacter.cpp:4496, :4553; common/skillVisuals.ts).
   9: 'Sound/sEvil', // Evil Spirit
   10: 'Sound/sHellFire', // Hellfire
-  12: 'Sound/sAquaFlash', // Aqua Beam (AT_SKILL_FLASH)
   15: 'Sound/eTelekinesis', // Teleport Ally
   16: 'Sound/eSoulBarrier', // Soul Barrier
   18: 'Sound/sKnightDefense', // Defense (SOUND_SKILL_DEFENSE, WSclient.cpp:3612)
@@ -81,8 +81,8 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   21: 'Sound/sKnightSkill3', // Uppercut
   22: 'Sound/sKnightSkill4', // Cyclone
   23: 'Sound/sKnightSkill4', // Slash
-  38: 'Sound/eBlastPoison_1', // Decay
-  39: 'Sound/eSuddenIce_1', // Ice Storm
+  // 38 Decay (eBlastPoison_1) and 39 Ice Storm (eSuddenIce_1): none at the cast, the effect plays them at AttackTime 15
+  // (ZzzCharacter.cpp:4449, :4475; common/skillVisuals.ts).
   40: 'Sound/eHellFire2_2', // Nova
   44: 'Sound/sKnightSkill2', // Rush (ReceiveMagic's SOUND_SKILL_SWORD2; the row plays sCHaveyBlow in Battle Castle)
   46: 'Sound/battlecastle/sCFireArrow', // Deep Impact

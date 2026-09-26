@@ -93,8 +93,8 @@ export type SkillLight = {
   readonly bodies?: Readonly<Record<string, LightRecipe>>;
   /**
    * `spots`: lights the effect switches on itself, by name, where and when its art shows (a
-   * controller that wakes 16 ticks after the packet, the burst at the end of a breath), through
-   * `lightSkillSpot`.
+   * controller that wakes 16 ticks after the packet, the burst at the end of a breath, a walking storm, a
+   * comet and its landing), through `lightSkillSpot`.
    */
   readonly spots?: Readonly<Record<string, LightRecipe>>;
   /**
@@ -316,6 +316,62 @@ const LANCE_LIGHT: LightRecipe = {
   release: 0.04,
 };
 
+/** MoveEffect's `Luminosity = (rand() % 4 + 7) * 0.1` a frame (ZzzEffect.cpp:6645). */
+const EFFECT_LUMINOSITY = { min: 0.7, max: 1, steps: 4 };
+
+const COMETFALL_LIGHT: SkillLight = {
+  spots: {
+    comet: { color: [0.2, 0.4, 1], range: 2, seconds: 30 * TICK_SECONDS, release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY },
+    blast: { color: [0.5, 0.3, 0.1], range: 4, seconds: 20 * TICK_SECONDS, release: 20 * TICK_SECONDS },
+  },
+  // Enhanced: the comet carries its blue glow down (the trail's violet read pink on sand), and the landing lights as its warm explosion and ring reach.
+  enhanced: {
+    spots: {
+      comet: effectLight([0.3, 0.42, 1], 1, 30 * TICK_SECONDS, { release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY }),
+      blast: effectLight([1, 0.72, 0.4], 1.8, 20 * TICK_SECONDS, { release: 16 * TICK_SECONDS }),
+    },
+  },
+};
+
+/** BITMAP_EXPLOTION's (0.5, 0.3, 0.1) x LT/20 in range 4 (ZzzEffectParticle.cpp:4265-4269). */
+const EXPLOSION_LIGHT: LightRecipe = { color: [0.5, 0.3, 0.1], range: 4, seconds: 20 * TICK_SECONDS, release: 20 * TICK_SECONDS };
+
+// Inferno (381 / 486 too): each of the eight bombs' explosion light, and MODEL_SKILL_INFERNO sub0 taking
+// (0.5, 0.5, 0.5) x Luminosity off the ground in range 5 for its 15 ticks (MoveHandlers.cpp:2679-2682).
+const INFERNO_LIGHT: SkillLight = {
+  spots: {
+    blast: EXPLOSION_LIGHT,
+    inferno: { color: [-0.5, -0.5, -0.5], range: 5, seconds: 15 * TICK_SECONDS, release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY },
+  },
+  // Enhanced: each bomb lights as its orange explosion reaches, and the Inferno01 ring lights the circle out to the bombs.
+  enhanced: {
+    spots: {
+      blast: effectLight([1, 0.6, 0.28], 1, 20 * TICK_SECONDS, { release: 16 * TICK_SECONDS }),
+      inferno: effectLight([1, 0.55, 0.2], 2.8, 15 * TICK_SECONDS, { release: 10 * TICK_SECONDS, flicker: EFFECT_LUMINOSITY }),
+    },
+  },
+};
+
+// Decay (387 too): each comet's (0.1, 1, 0) x Luminosity range 2 while it falls (ZzzEffect.cpp:7939-7945), then its
+// green-tinted explosion's usual warm light.
+const DECAY_LIGHT: SkillLight = {
+  spots: {
+    comet: { color: [0.1, 1, 0], range: 2, seconds: 40 * TICK_SECONDS, release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY },
+    blast: EXPLOSION_LIGHT,
+  },
+  // Enhanced: the comet carries its green glow down, and the landing lights green as its tinted explosion and ring reach.
+  enhanced: {
+    spots: {
+      comet: effectLight([0.3, 1, 0.15], 1, 40 * TICK_SECONDS, { release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY }),
+      blast: effectLight([0.35, 1, 0.3], 1.8, 20 * TICK_SECONDS, { release: 16 * TICK_SECONDS }),
+    },
+  },
+};
+
+const ICE_STORM_LIGHT: SkillLight = {
+  enhanced: { spots: { storm: effectLight([0.45, 0.7, 1], 2, 50 * TICK_SECONDS, { release: 20 * TICK_SECONDS }) } },
+};
+
 /** Keyed by skill number (common/skillsDatabase.ts). */
 export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Poison: MODEL_POISON's `(0.3, 1, 0.6) x Lum` range 2 for its 40 ticks, laid by the effect at the release
@@ -362,8 +418,14 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Enhanced: the crystal is bright additive art, so it lights the ground its ice blue while it stands.
   7: { land: ICE_LIGHT, enhanced: { land: effectLight([0.55, 0.8, 1], 1.1, 1, { release: 0.15, flicker: { min: 0.85, max: 1, steps: 4 } }) } },
   389: {},
-  // Twister: MODEL_STORM range 5 (:10480).
-  8: { area: { color: [0.75, 0.8, 0.9], range: 5, seconds: 1.4 } },
+  // Twister: MODEL_STORM takes (0.4, 0.3, 0.2) x Luminosity off the ground in range 5 under itself for its
+  // 59 ticks (MoveHandlers.cpp:3413-3414). Negative: the tile map clamps it away on Classic, as characters.ts says;
+  // the graded tiers' point light blacked out a hole round the storm, so they take the enhanced light instead.
+  8: {
+    spots: { storm: { color: [-0.4, -0.3, -0.2], range: 5, seconds: 59 * TICK_SECONDS, release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY } },
+    // Enhanced: the white funnel and its bolts light the ground round it as it walks, flickering as MoveEffect's Luminosity.
+    enhanced: { spots: { storm: effectLight([0.8, 0.85, 1], 1.2, 59 * TICK_SECONDS, { release: 10 * TICK_SECONDS, flicker: EFFECT_LUMINOSITY }) } },
+  },
   // Evil Spirit: nothing, as the original - the spirits are shadow. The empty row also keeps the
   // wizardry cast flash off (castRecipeFor).
   9: {},
@@ -372,12 +434,21 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Power Wave: MODEL_MAGIC2's light rides the wave from the release, laid by the effect (MoveHandlers.cpp:3360-3361).
   // Enhanced: the sheet's cold blue over the ~1.2 tiles its art and glow reach, fading with it over the last 10 ticks.
   11: { land: POWER_WAVE_LIGHT, enhanced: { land: effectLight([0.35, 0.6, 1], 1.2, 20 * 0.04, { release: 10 * 0.04, flicker: { min: 0.8, max: 1, steps: 4 } }) } },
-  // Aqua Beam: MODEL_WATER_WAVE range 3 (:11644).
-  12: { area: tide(4, 1.0) },
-  // Cometfall: MODEL_GROUND_STONE2 range 4 (:13710).
-  13: { area: flame(4, 1.0, { attack: 0.15 }) },
-  // Inferno: BITMAP_FLAME range 3 (:8695), wide.
-  14: { area: flame(4, 1.5, { gain: 1.6, floorGain: 1.5 }) },
+  // Aqua Beam: (0.5, 0.7, 1) range 2 at each of the beam's 20 points, 50 cm apart, for its 20 ticks
+  // (ZzzEffect.cpp:8999). Five here, 2 tiles apart; the doubled colour stands for the overlaps they sum to.
+  // Enhanced: three lane lights in the beam's blue, sized to the cards' 2.5-tile reach.
+  12: {
+    spots: { lane: { color: [1, 1.4, 2], range: 2.5, seconds: 20 * TICK_SECONDS, release: TICK_SECONDS } },
+    enhanced: { spots: { lane: effectLight([0.5, 0.7, 1], 2.2, 20 * TICK_SECONDS, { release: 4 * TICK_SECONDS }) } },
+  },
+  // Cometfall (382 / 484 too): each comet's (0.2, 0.4, 1) range 2 while it falls (MoveHandlers.cpp:2576-2577),
+  // then its BITMAP_EXPLOTION's (0.5, 0.3, 0.1) range 4 fading over 20 ticks (ZzzEffectParticle.cpp:4265-4269).
+  13: COMETFALL_LIGHT,
+  382: COMETFALL_LIGHT,
+  484: COMETFALL_LIGHT,
+  14: INFERNO_LIGHT,
+  381: INFERNO_LIGHT,
+  486: INFERNO_LIGHT,
   // Energy Ball: BITMAP_ENERGY's light rides the ball and dies with it; nothing on arrival (ZzzEffect.cpp:6879-6883).
   // Enhanced: the held glow's blue riding the ball, and a short flash where it pops.
   17: {
@@ -402,8 +473,13 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Greater Defense / Greater Damage: the same magic circle.
   27: { impact: holy(3, 1.0) },
   28: { impact: { ...holy(3, 1.0), color: [1, 0.75, 0.55] } },
-  // Ice Storm: MODEL_ICE range 4 on the storm's core (:12423).
-  39: { area: frost(5, 1.6) },
+  38: DECAY_LIGHT,
+  387: DECAY_LIGHT,
+  // Ice Storm (391 / 393 too): MODEL_BLIZZARD lights nothing (MoveHandlers.cpp:5134-5189). The empty row keeps the
+  // wizardry cast flash off. Enhanced: one frost light over the shards' 2-tile fall, through their landing.
+  39: ICE_STORM_LIGHT,
+  391: ICE_STORM_LIGHT,
+  393: ICE_STORM_LIGHT,
   // Nova: the original lights nothing; a fire ring of range 6 is ours.
   40: { area: flame(6, 0.8, { gain: 1.8, floorGain: 1.4, release: 0.6 }) },
   // Twisting Slash: each MODEL_SKILL_WHEEL2 copy lights Luminosity x 0.3 grey, range 3, under itself

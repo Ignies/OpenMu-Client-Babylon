@@ -65,6 +65,11 @@ export interface SpriteOptions {
   grow?: number;
   /** Size multiplier at birth, before growing in over the first 30 %. */
   growFrom?: number;
+  /**
+   * Every `every` seconds each card takes a new random rotation and, with `size`, a new size multiplier in
+   * [min, max]: a sprite the original makes afresh each tick with `rand() % 360` and a rolled `Scale`.
+   */
+  reroll?: { every: number; size?: readonly [number, number] };
   /** Radians per second the card turns on its axis. */
   spin?: number;
   /** Follow a moving point instead of staying where spawned. */
@@ -188,6 +193,9 @@ export function spawnSprite(
   const height = opts.height ?? 0;
   const tail = opts.fadeTail ?? 0.35;
   const cells = opts.cells;
+  const reroll = opts.reroll;
+  const rolled: number[] = [];
+  let nextRoll = 0;
   const source = opts.follow ? opts.follow : pointSource(at);
   const fadeIn = opts.fadeIn ?? 0;
   const stretch = opts.stretch ?? 1;
@@ -212,6 +220,7 @@ export function spawnSprite(
       )
     );
     phases.push(hash(s + 0.75) * Math.PI * 2);
+    rolled.push(1);
   }
 
   let t = 0;
@@ -241,13 +250,21 @@ export function spawnSprite(
       if (fadeIn > 0 && p < fadeIn) vis *= p / fadeIn;
       if (decay !== 1) vis *= decay ** (t / TICK);
       if (opts.intensity) vis *= Math.max(0, Math.min(1, opts.intensity(p)));
+      if (reroll && t >= nextRoll) {
+        nextRoll = t + reroll.every;
+        for (let i = 0; i < cards.length; i++) {
+          phases[i] = Math.random() * Math.PI * 2;
+          if (reroll.size) rolled[i] = lerp(reroll.size[0], reroll.size[1], Math.random());
+          cards[i].rotation.z = phases[i];
+        }
+      }
       const y = height + rise * t;
       for (let i = 0; i < cards.length; i++) {
         const c = cards[i];
         const o = offsets[i];
         c.position.set(tmp.x + o.x + move[0] * t, tmp.y + o.y + y + move[1] * t, tmp.z + o.z + move[2] * t);
-        c.scaling.set(s, s * stretch, s);
-        if (opts.aspect) c.scaling.y = s * opts.aspect;
+        const r = rolled[i];
+        c.scaling.set(s * r, s * r * (opts.aspect ?? stretch), s * r);
         c.visibility = vis;
         if (opts.randomRoll) c.rotation.z = Math.random() * Math.PI * 2;
         else if (opts.rotation !== undefined && !spin && !opts.flat) c.rotation.z = opts.rotation;

@@ -7,7 +7,7 @@ import type { LightRecipe, LightSource } from '../lighting/lightSource';
 import { combat } from '../combat';
 import { weather } from '../weather';
 import { effects, type EffectHandle } from '../effects';
-import { boneLocalPos, bonePos, delay, effectTexture, emitBurst, entityGone, entityPos, entityYaw, fadeOut, fixedPoint, followEntity, fxNow, scaleRGB, type ParticleRecipe, type PointSource, type RGB, type SheetCells } from '../effects/core';
+import { boneLocalPos, bonePos, delay, effectTexture, emitBurst, entityGone, entityPos, entityYaw, fadeOut, fixedPoint, followEntity, fxNow, lerp, scaleRGB, type ParticleRecipe, type PointSource, type RGB, type SheetCells } from '../effects/core';
 import type { SpriteOptions } from '../effects/sprite';
 import type { ShroudOptions } from '../effects/shroud';
 import type { SpiritSwarmOptions, SwarmSpirit } from '../effects/spiritSwarm';
@@ -24,6 +24,7 @@ import type { SummonBody } from '../effects/summon';
 import {
   ARC_MOTES,
   BLOOD_CHIPS,
+  BODY_SMOKE,
   BLOOD_MIST,
   BOMB_SPARKS,
   DUST,
@@ -31,6 +32,7 @@ import {
   FIRE_PUFF,
   FIRE_SPARKS,
   FIRE_BALL_TRAIL,
+  HIT_SPARKS,
   HOLY_MOTES,
   ICE_MOTES,
   ICE_SHARD_SMOKE,
@@ -4428,7 +4430,6 @@ const twistingSlashOf = (hd: boolean): Step => (_at, c) => {
 };
 const twistingSlash = twistingSlashOf(false);
 
-const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
 /** A tick curve sampled from a table, linear between samples and held at the ends. */
 function curve(values: readonly number[]): (tick: number) => number {
   return tick => {
@@ -5402,11 +5403,14 @@ const comboBurst: Step = (at, c) => {
 
 // Enhanced and Ultra: each runs the Classic step above untouched and adds to it.
 
-/** A skill light's anchor held on one point. */
-const lightAt = (p: Vector3) => (out: { x: number; y: number; z: number }): void => {
-  out.x = p.x;
-  out.y = p.y;
-  out.z = p.z;
+/** A skill light's anchor held on one point, copied when the light is made. */
+const lightAt = (p: Vector3): ((out: { x: number; y: number; z: number }) => void) => {
+  const { x, y, z } = p;
+  return out => {
+    out.x = x;
+    out.y = y;
+    out.z = z;
+  };
 };
 
 /** Fire Breath's lavender glitter shed along the emitter's path, drifting up as it fades. */
@@ -7589,6 +7593,808 @@ const LANCE_LOOK: LanceLook = {
   ),
 };
 
+// ---- dw2 steps
+
+/** AttackTime runs from 1 at the echo to g_iLimitAttackTime 15 before the skill switch fires (ZzzCharacter.cpp:4132-4145). */
+const DW2_ATTACK_TIME = ticks(14);
+
+/** `step` at AttackTime 15, with the caster's facing as it is then; nothing if the caster left meanwhile. */
+const dw2AtAttackTime = (step: Step): Step => (at, c) => {
+  const p = at.clone();
+  delay(DW2_ATTACK_TIME, () => {
+    if (entityGone(c.caster)) return;
+    step(p, { ...c, yaw: entityYaw(c.caster) });
+  });
+};
+
+const dw2Sfx = (key: Sounds, at: Vector3): void => {
+  playSfx(key, at, { bus: COMBAT_BUS });
+};
+
+/** MODEL_STORM sub0: LT 59, Direction (0,-10,0) by the caster's Angle, re-seated on the terrain every tick (ZzzEffect.cpp:2000-2009, MoveHandlers.cpp:3412). */
+const TWISTER_TICKS = 59;
+const TWISTER_SPEED = perTick(10);
+/** Default `Scale` 0.9 (ZzzEffect.cpp:361-364); `BlendMeshLight = LifeTime * 0.1` fades the last 10 ticks. */
+const TWISTER_SCALE = 0.9;
+/** `BlendMeshTexCoordU = -LifeTime * 0.1`: +0.1 U a tick. */
+const TWISTER_UV = 0.1 * 25;
+/** JOINT_THUNDER sub0 from +-200 cm world X, 700 up, onto the storm + 80 (MoveHandlers.cpp:3397-3406, ZzzEffectJoint.cpp:4786). */
+const TWISTER_BOLT_SIDE = cm(200);
+const TWISTER_BOLT_UP = cm(700);
+const TWISTER_BOLT_AIM = cm(80);
+/** The bolt's `Scale` 10 is its width in cm. */
+const TWISTER_BOLT_WIDTH = cm(10);
+
+/**
+ * BITMAP_SMOKE sub3, one a tick at the storm's base: LT 10, Scale 0.8-1.11 of the 64 px smoke01, +0.1 a tick,
+ * thrown 40-47 cm a tick at a random yaw and +-45 deg pitch and braked x0.4 a tick (about 70 cm in all),
+ * Light (0.8, 0.8, 1) x LifeTime / 8 (ZzzEffectParticle.cpp:1250-1256, :5330-5335).
+ */
+const TWISTER_SMOKE: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.8, 0.8, 1],
+  colourEnd: [0, 0, 0],
+  size: 0.61,
+  sizeJitter: 0.1,
+  life: ticks(10),
+  dir1: [-1, -0.7, -1],
+  dir2: [1, 0.7, 1],
+  power: 1.75,
+  gravity: 0,
+  endScale: 2,
+  spin: 1,
+  blend: 'add',
+};
+
+/** The storm's path: its start and facing fixed when it is made, its height the terrain's under it. */
+function twisterPath(c: SkillContext): PointSource {
+  const start = entityPos(c.caster, 0, new Vector3());
+  const dir = facing(c);
+  const t0 = fxNow();
+  return out => {
+    const t = fxNow() - t0;
+    out.set(start.x + dir.x * TWISTER_SPEED * t, 0, start.z + dir.z * TWISTER_SPEED * t);
+    out.y = groundAt(out.x, out.z, start.y);
+    return out;
+  };
+}
+
+/** What the graded tiers lay over the storm: at its moving base once, and on each tick a bolt strikes it. */
+interface TwisterExtra {
+  base: (storm: PointSource, c: SkillContext) => void;
+  bolt: (top: PointSource, c: SkillContext) => void;
+}
+
+/**
+ * Twister at AttackTime 15 (ZzzCharacter.cpp:4494-4497, MoveHandlers.cpp:3384-3428): MODEL_STORM at the caster's
+ * feet walking its facing, and every tick one smoke puff, a 50 % chance of a bolt from each side and a 25 %
+ * chance of a thrown stone. SOUND_STORM with it; the ground under it darkens (SKILL_LIGHTS 8).
+ */
+const twisterWith = (extra?: TwisterExtra): Step => (_at, c) => {
+  const storm = twisterPath(c);
+  const at = storm(new Vector3());
+  const top: PointSource = out => {
+    storm(out);
+    out.y += TWISTER_BOLT_AIM;
+    return out;
+  };
+  effects.spawn('model', c.scene, at, {
+    model: MODEL.storm,
+    seconds: ticks(TWISTER_TICKS),
+    scale: TWISTER_SCALE,
+    colour: RGBS.white,
+    follow: storm,
+    yaw: entityYaw(c.caster),
+    fadeTail: 10 / TWISTER_TICKS,
+    scrollU: TWISTER_UV,
+  });
+  effects.spawn('particles', c.scene, at, { recipe: TWISTER_SMOKE, rate: 25, seconds: ticks(TWISTER_TICKS), follow: storm });
+  lighting.skillSpot(c.scene, 8, 'storm', lightFollow(storm));
+  dw2Sfx('Sound/sTornado', at);
+  extra?.base(storm, c);
+  const p = new Vector3();
+  repeat(TWISTER_TICKS, TICK, () => {
+    storm(p);
+    let struck = false;
+    for (const side of [-TWISTER_BOLT_SIDE, TWISTER_BOLT_SIDE]) {
+      if (Math.random() >= 0.5) continue;
+      struck = true;
+      const from = new Vector3(p.x + side, p.y + TWISTER_BOLT_UP, p.z);
+      effects.spawn('joint', c.scene, from, { to: top, colour: RGBS.white, seconds: ticks(2), width: TWISTER_BOLT_WIDTH, jitter: 0.1, fadeTail: 0.01, texture: TEX.jointThunder, textureRepeats: 2, textureScroll: 1 });
+    }
+    if (struck) extra?.bolt(top, c);
+    if (Math.random() < 0.25) effects.spawn('debris', c.scene, p, { model: Math.random() < 0.5 ? MODEL.stone : MODEL.stone2, colour: RGBS.white });
+  })(at, c);
+};
+const twister = twisterWith();
+
+/** BITMAP_BOSS_LASER sub0: LT 20, Light (0.5, 0.7, 1), 20 Spark03 cards of Scale 16 (32 px -> 5.12 m) 50 cm apart (ZzzEffect.cpp:978-1031, :8967-9004). */
+const AQUA_CARDS = 20;
+const AQUA_STEP = cm(50);
+const AQUA_CARD_SIZE = cm(32 * 16);
+const AQUA_TINT: RGB = [0.5, 0.7, 1];
+/** Where the five lane lights sit along the beam, in cards from its start. */
+const AQUA_LIGHT_CARDS = [2, 6, 10, 14, 18];
+
+/**
+ * Aqua Beam at AttackTime 15 (ZzzCharacter.cpp:4550-4554): the beam starts at CalcAddPosition(-20, -90, 100),
+ * 0.9 tiles ahead, 0.2 to the side and 1 up, and runs 9.5 tiles along the facing, fixed in the world, at
+ * one brightness for its 20 ticks. SOUND_FLASH with it.
+ */
+const aquaBeamWith = (tint: RGB, lightCards: readonly number[], extra?: (from: Vector3, dir: Vector3, c: SkillContext) => void): Step => (_at, c) => {
+  const dir = facing(c);
+  const from = entityPos(c.caster, 1, new Vector3());
+  from.x += dir.x * 0.9 - dir.z * 0.2;
+  from.z += dir.z * 0.9 + dir.x * 0.2;
+  const card = sprite({ texture: TEX.spark3, colour: tint, size: AQUA_CARD_SIZE, seconds: ticks(20), fadeTail: 0.01 });
+  for (let i = 0; i < AQUA_CARDS; i++) card(new Vector3(from.x + dir.x * AQUA_STEP * i, from.y, from.z + dir.z * AQUA_STEP * i), c);
+  extra?.(from, dir, c);
+  for (const i of lightCards) {
+    const x = from.x + dir.x * AQUA_STEP * i;
+    const z = from.z + dir.z * AQUA_STEP * i;
+    lighting.skillSpot(c.scene, 12, 'lane', out => {
+      out.x = x;
+      out.y = from.y;
+      out.z = z;
+    });
+  }
+  dw2Sfx('Sound/sAquaFlash', from);
+};
+const aquaBeam = aquaBeamWith(AQUA_TINT, AQUA_LIGHT_CARDS);
+
+/** MODEL_SKILL_BLAST: LT 30, Scale 1.0-1.7, from the point + (200..299, -50..49, 300..799) cm, falling 50-99 cm a tick along Angle (0,20,0) (ZzzEffect.cpp:1355-1367, :6231-6240). */
+const COMET_TILT = (20 * Math.PI) / 180;
+/** JOINT_ENERGY sub5: MaxTails 10, width 100 cm, Light (0.5, 0.1, 1) (ZzzEffectJoint.cpp:268-289, :453). */
+const COMET_TRAIL_TINT: RGB = [0.5, 0.1, 1];
+/** BITMAP_SHINY+4 sub0 (ring.jpg, 64 px): Scale sin(LifeTime * 10 deg) * 3 + 2, LT 20 (ZzzEffectParticle.cpp:2694-2705, :7326-7332). */
+const COMET_RING_SIZE = cm(64);
+const cometRingScale = (p: number): number => Math.sin(((20 - 20 * p) * 10 * Math.PI) / 180) * 3 + 2;
+
+/** Where a comet lands: on the ground, 6 MODEL_STONE1/2, and the ring and the explosion 80 cm up (MoveHandlers.cpp:2562-2575). */
+const cometLanding = (p: Vector3, c: SkillContext): void => {
+  for (let i = 0; i < 6; i++) effects.spawn('debris', c.scene, p, { model: Math.random() < 0.5 ? MODEL.stone : MODEL.stone2, colour: RGBS.white });
+  const up = new Vector3(p.x, p.y + cm(80), p.z);
+  sprite({ texture: TEX.ring, colour: RGBS.white, size: COMET_RING_SIZE, seconds: ticks(20), fadeTail: 0.25, sizeAt: cometRingScale })(up, c);
+  explosion(RGBS.white)(up, c);
+  // BITMAP_EXPLOTION plays SOUND_EXPLOTION01 as it is made (ZzzEffectParticle.cpp:2476-2481).
+  dw2Sfx('Sound/eExplosion', up);
+  lighting.skillSpot(c.scene, 13, 'blast', out => {
+    out.x = p.x;
+    out.y = p.y;
+    out.z = p.z;
+  });
+};
+
+/** What the graded tiers add to a comet: over its flight (its head and how long it falls), and where it lands. */
+interface CometExtra {
+  flight: (head: PointSource, seconds: number, c: SkillContext) => void;
+  land: Step;
+}
+
+/** One MODEL_SKILL_BLAST: the blue ring2 comet with its JOINT_ENERGY tail and blue light, falling on its tilt to the ground. */
+const cometWith = (extra?: CometExtra): Step => (at, c) => {
+  const up = cm(300 + Math.floor(Math.random() * 500));
+  const start = new Vector3(at.x + cm(200 + Math.floor(Math.random() * 100)), at.y + up, at.z + cm(Math.floor(Math.random() * 100) - 50));
+  // Its path leans toward -x; it lands where the lean meets the ground.
+  const land = new Vector3(start.x - up * Math.tan(COMET_TILT), 0, start.z);
+  land.y = groundAt(land.x, land.z, at.y);
+  const head = start.clone();
+  const headAt: PointSource = out => out.copyFrom(head);
+  let landed = false;
+  const light = lighting.skillSpot(c.scene, 13, 'comet', lightFollow(headAt));
+  effects.spawn('joint', c.scene, start, { head: headAt, maxTails: 10, width: 1, colour: COMET_TRAIL_TINT, texture: TEX.jointLaser, seconds: ticks(30), fadeTail: 0.01, until: () => landed });
+  const speed = perTick(50 + Math.floor(Math.random() * 50));
+  extra?.flight(headAt, Vector3.Distance(start, land) / speed, c);
+  effects.spawn('projectile', c.scene, start, {
+    to: land,
+    speed,
+    model: { model: MODEL.blast, colour: RGBS.white, scale: 1 + Math.floor(Math.random() * 8) * 0.1, blendMesh: 0, alongPath: true },
+    trace: p => head.copyFrom(p),
+    onArrive: p => {
+      landed = true;
+      light?.stop();
+      cometLanding(p, c);
+      extra?.land(p, c);
+    },
+    onLost: () => {
+      landed = true;
+      light?.stop();
+    },
+  });
+};
+
+const comet = cometWith();
+
+/** Cometfall at AttackTime 15 on the cast point: two comets made the same tick (ZzzCharacter.cpp:4556-4572). No cast sound. */
+const cometfall: Step = seq(comet, comet);
+
+// dw2 on the graded tiers: the same effects, with ground contact, sparks and glow that read after the tone curve.
+
+/** Sand the storm drags off the ground, rolling out of its base and rising a little. Additive: alpha dust read as a dark stain after the tone curve. */
+const TWISTER_DUST: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.3, 0.27, 0.22],
+  colourEnd: [0.12, 0.1, 0.08],
+  size: 0.8,
+  sizeJitter: 0.3,
+  life: 0.9,
+  lifeJitter: 0.3,
+  box: [0.3, 0.05, 0.3],
+  dir1: [-1, 0.15, -1],
+  dir2: [1, 0.6, 1],
+  power: 1.6,
+  gravity: 0.4,
+  endScale: 2.2,
+  spin: 2,
+  blend: 'add',
+  capacity: 128,
+};
+/** Where a bolt meets the storm: a short blue-white flare at the aim point. */
+const TWISTER_STRIKE: RGB = [0.75, 0.82, 1];
+
+/**
+ * Enhanced Twister: a second, slightly narrower funnel inside the first (one sheet reads faint on the graded buffer, and
+ * Babylon clamps the tint at 1), a dust skirt and a turning shock ring dragged along under it, a flare where the bolts strike.
+ */
+const twisterGraded = twisterWith({
+  base: (storm, c) => {
+    const at = storm(new Vector3());
+    effects.spawn('model', c.scene, at, { model: MODEL.storm, seconds: ticks(TWISTER_TICKS), scale: TWISTER_SCALE * 0.88, colour: RGBS.white, follow: storm, yaw: entityYaw(c.caster) + 1, fadeTail: 10 / TWISTER_TICKS, scrollU: TWISTER_UV });
+    effects.spawn('particles', c.scene, at, { recipe: TWISTER_DUST, rate: 20, seconds: ticks(TWISTER_TICKS - 10), follow: storm });
+    effects.spawn('ring', c.scene, at, { texture: TEX.shockwave, colour: [0.95, 0.85, 0.7], scale: 2.6, growFrom: 0.6, grow: 1, spin: 300, seconds: ticks(TWISTER_TICKS), fadeTail: 10 / TWISTER_TICKS, follow: storm });
+  },
+  bolt: (top, c) => {
+    effects.spawn('sprite', c.scene, top(new Vector3()), { texture: TEX.flare, colour: TWISTER_STRIKE, size: 1.2, seconds: ticks(3), follow: top, fadeTail: 1 });
+  },
+});
+
+/** Aqua Beam's cards a little deeper blue, so twenty overlaps hold a blue body round the white core on the graded buffer. */
+const AQUA_TINT_GRADED: RGB = [0.35, 0.58, 1];
+/** Three lane lights, 3.5 tiles apart, each sized to the cards' 2.5-tile reach. */
+const AQUA_LIGHT_CARDS_GRADED = [3, 10, 17];
+/** Spray shed along the beam: blue drops falling off it. */
+const AQUA_SPRAY: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.75, 0.9, 1],
+  colourEnd: [0.3, 0.55, 1],
+  size: 0.3,
+  sizeJitter: 0.35,
+  life: 0.55,
+  box: [0.3, 0.2, 0.3],
+  dir1: [-0.8, -0.2, -0.8],
+  dir2: [0.8, 1, 0.8],
+  power: 2.2,
+  gravity: -4,
+  capacity: 256,
+};
+/** The splash where the beam ends: drops thrown up and out. */
+const AQUA_SPLASH: ParticleRecipe = { ...AQUA_SPRAY, size: 0.2, life: 0.7, power: 3, dir1: [-1, 0.4, -1], dir2: [1, 1.6, 1] };
+
+/** Enhanced Aqua Beam: a scrolling blue core with a white heart through the cards, spray along it, a flare at the staff and a splash at the end. */
+const aquaBeamGraded = aquaBeamWith(AQUA_TINT_GRADED, AQUA_LIGHT_CARDS_GRADED, (from, dir, c) => {
+  const len = AQUA_STEP * (AQUA_CARDS - 1);
+  const end = new Vector3(from.x + dir.x * len, from.y, from.z + dir.z * len);
+  const core = { to: end, seconds: ticks(20), segments: 4, jitter: 0, fadeTail: 0.25, texture: TEX.jointLaser, textureRepeats: 4, textureScroll: -3 };
+  effects.spawn('joint', c.scene, from, { ...core, colour: [0.3, 0.55, 1], width: 0.7 });
+  effects.spawn('joint', c.scene, from, { ...core, colour: [0.75, 0.88, 1], width: 0.22 });
+  for (let i = 1; i <= 4; i++) {
+    const k = (len * i) / 4;
+    effects.spawn('particles', c.scene, new Vector3(from.x + dir.x * k, from.y, from.z + dir.z * k), { recipe: AQUA_SPRAY, rate: 20, seconds: ticks(18) });
+  }
+  effects.spawn('sprite', c.scene, from, { texture: TEX.flare, colour: [0.5, 0.75, 1], size: 2.2, seconds: ticks(10), growFrom: 0.5, grow: 1.2, fadeTail: 0.8 });
+  effects.spawn('sprite', c.scene, end, { texture: TEX.flare, colour: [0.5, 0.75, 1], size: 1.8, seconds: ticks(20), growFrom: 0.6, fadeTail: 0.5 });
+  effects.spawn('particles', c.scene, end, { recipe: AQUA_SPLASH, count: 16 });
+});
+
+/** The comet's glow as it reads: the light's blue leaning to the trail's violet. flare01, not flareBlue: its streaks reach the quad's edge. */
+const COMET_GLOW: RGB = [0.4, 0.48, 1];
+/** Sparks the comet sheds as it falls: violet-blue, dropping behind it. */
+const COMET_SPARKS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.6, 0.5, 1],
+  colourEnd: [0.3, 0.1, 0.9],
+  size: 0.2,
+  sizeJitter: 0.35,
+  life: 0.5,
+  box: [0.12, 0.12, 0.12],
+  power: 0.8,
+  gravity: -1.5,
+  capacity: 256,
+};
+/** Chips of light the landing throws up: white going blue. */
+const COMET_IMPACT_SPARKS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.85, 0.9, 1],
+  colourEnd: [0.35, 0.4, 1],
+  size: 0.26,
+  sizeJitter: 0.35,
+  life: 0.8,
+  box: [0.2, 0.05, 0.2],
+  dir1: [-1.4, 0.8, -1.4],
+  dir2: [1.4, 2, 1.4],
+  power: 3.2,
+  gravity: -5,
+  capacity: 256,
+};
+
+/** Enhanced Cometfall: a blue head glow and shed sparks on each comet; the landing adds a shock ring, dust and a spray of sparks. */
+const cometGraded = cometWith({
+  flight: (head, seconds, c) => {
+    effects.spawn('sprite', c.scene, head(new Vector3()), { texture: TEX.flare, colour: COMET_GLOW, size: 1.8, seconds, follow: head, fadeTail: 0.05 });
+    effects.spawn('particles', c.scene, head(new Vector3()), { recipe: COMET_SPARKS, rate: 60, seconds, follow: head });
+  },
+  land: (p, c) => {
+    effects.spawn('ring', c.scene, p, { texture: TEX.shockwave, colour: [0.9, 1, 1.6], scale: 2.6, growFrom: 0.4, grow: 1.6, seconds: 0.7, fadeTail: 0.4 });
+    effects.spawn('particles', c.scene, p, { recipe: DUST, count: 8 });
+    effects.spawn('particles', c.scene, p, { recipe: COMET_IMPACT_SPARKS, count: 28 });
+  },
+});
+const cometfallGraded: Step = seq(cometGraded, cometGraded);
+
+// dw2 batch 2: Inferno, Decay, Ice Storm.
+
+/** CreateInferno: 8 CreateBomb 220 cm round the caster, (0, -220) turned j * 45 deg (ZzzEffect.cpp:6435-6476). */
+const INFERNO_BOMBS = 8;
+const INFERNO_RADIUS = cm(220);
+/** MODEL_SKILL_INFERNO sub0: LT 15, Scale 0.9, Light 0.8, clip Velocity 0.5, BlendMeshLight LT/20 (ZzzEffect.cpp:1378-1389, MoveHandlers.cpp:2675-2678). */
+const INFERNO_TICKS = 15;
+/** CreateBomb 80 cm up: 20 BITMAP_SPARK sub2 and a BITMAP_EXPLOTION at (0.7, 0.7, 0.7) (ZzzEffect.cpp:6275-6347). */
+const BOMB_LIFT = cm(80);
+const BOMB_TINT: RGB = [0.7, 0.7, 0.7];
+/** BITMAP_SPARK sub2: the sub0 Spark02 grain at Scale x2, thrown 3x as far sideways (ZzzEffectParticle.cpp:2016-2031). */
+const BOMB_GRAINS: ParticleRecipe = { ...HIT_SPARKS, size: 0.044, dir1: [-3, 1.5, -3], dir2: [3, 5.5, 3] };
+
+/** One MODEL_STONE1 or MODEL_STONE2, picked per piece (ZzzEffect.cpp:6471-6472). */
+const dw2Stone = (): string => (Math.random() < 0.5 ? MODEL.stone : MODEL.stone2);
+
+/** What the graded tiers add to Inferno: at each bomb (its ground point), and once at the caster. */
+interface InfernoExtra {
+  bomb: Step;
+  centre: Step;
+}
+
+/**
+ * Inferno at AttackTime 15 (ZzzCharacter.cpp:4573-4577): the eight bombs, each with a stone going straight up
+ * (SubType 1) and one thrown (SubType 0), then Inferno01 at the caster. No cast sound: the eight explosions play
+ * SOUND_EXPLOTION01 on its one channel, one burst.
+ */
+const infernoWith = (tint: RGB, extra?: InfernoExtra): Step => (_at, c) => {
+  const centre = entityPos(c.caster, 0, new Vector3());
+  for (let j = 0; j < INFERNO_BOMBS; j++) {
+    const a = (j * Math.PI * 2) / INFERNO_BOMBS;
+    // At the caster's height, as the original: CreateBomb never reads the terrain.
+    const p = new Vector3(centre.x + Math.sin(a) * INFERNO_RADIUS, centre.y, centre.z - Math.cos(a) * INFERNO_RADIUS);
+    const up = new Vector3(p.x, p.y + BOMB_LIFT, p.z);
+    particles({ recipe: BOMB_GRAINS, count: 20 })(up, c);
+    explosion(tint)(up, c);
+    effects.spawn('debris', c.scene, p, { model: dw2Stone(), colour: RGBS.white, still: true });
+    effects.spawn('debris', c.scene, p, { model: dw2Stone(), colour: RGBS.white });
+    lighting.skillSpot(c.scene, 14, 'blast', lightAt(p));
+    extra?.bomb(p, c);
+  }
+  effects.spawn('model', c.scene, centre, {
+    model: MODEL.inferno,
+    seconds: ticks(INFERNO_TICKS),
+    scale: 0.9,
+    colour: [0.8, 0.8, 0.8],
+    yaw: entityYaw(c.caster),
+    keysPerTick: 0.5,
+    life: p => (INFERNO_TICKS * (1 - p)) / 20,
+  });
+  lighting.skillSpot(c.scene, 14, 'inferno', lightAt(centre));
+  dw2Sfx('Sound/eExplosion', centre);
+  extra?.centre(centre, c);
+};
+const inferno = infernoWith(BOMB_TINT);
+
+/**
+ * BITMAP_FIRE sub5, two a tick +-25 cm in x at (0.1, 1, 0) x Luminosity: Fire01 cells at Scale 1.28-1.91 (64 cm a
+ * cell), LT 24, Scale -0.04 and +5 deg a tick, drifting 3.2-4.7 cm a tick (ZzzEffectParticle.cpp:407-415, :4553-4562, :9145-9151).
+ */
+const DECAY_FLAMES: ParticleRecipe = {
+  texture: TEX.fire,
+  cells: { w: 64, h: 64, count: 4 },
+  colour: [0.085, 0.85, 0],
+  colourEnd: [0, 0, 0],
+  size: 1.02,
+  sizeJitter: 0.2,
+  life: ticks(24),
+  box: [0.25, 0, 0],
+  dir1: [0, 0, -1.2],
+  dir2: [0, 0.1, -0.8],
+  power: 1,
+  gravity: 0,
+  spin: 2.2,
+  endScale: 0.4,
+  blend: 'add',
+  capacity: 256,
+};
+
+/**
+ * BITMAP_SMOKE sub11 tinted `colour`: smoke01 at Scale 2.0-2.78 (1.28-1.78 tiles) growing 0.05 a tick over LT 50,
+ * its own +-32 / +-32 / +32..95 cm start jitter, fading LT/50, sinking 1 cm a tick (ZzzEffectParticle.cpp:1257-1267,
+ * :5336-5342). Its 40-47 cm a tick burst braked x0.4 is spread over the life: the recipe has no drag.
+ */
+const landingSmoke = (colour: RGB): ParticleRecipe => ({
+  texture: TEX.smoke,
+  colour,
+  colourEnd: [0, 0, 0],
+  size: 1.53,
+  sizeJitter: 0.16,
+  life: ticks(50),
+  box: [0.32, 0.315, 0.32],
+  dir1: [-1, -1.4, -1],
+  dir2: [1, 0, 1],
+  power: 0.35,
+  gravity: 0,
+  endScale: 2.05,
+  blend: 'add',
+  capacity: 128,
+});
+/** The centre of the smoke's own +32..95 cm lift. */
+const LANDING_SMOKE_LIFT = cm(63.5);
+/** Decay's landing tint, `Light` (0.1, 0.5, 0.1) for the smoke, the stones and the explosion (ZzzEffect.cpp:7829-7849). */
+const DECAY_TINT: RGB = [0.1, 0.5, 0.1];
+const DECAY_SMOKE = landingSmoke(DECAY_TINT);
+const DECAY_SMOKE_COUNT = 15;
+/** MODEL_SKILL_INFERNO sub2: LT 12, Scale PKKey/100 = 0.3 growing 0.04 a tick, mesh 0 hidden, Light (0, 0.5, 0) (ZzzEffect.cpp:1390-1398, MoveHandlers.cpp:2632-2635). */
+const DECAY_RING_TICKS = 12;
+const DECAY_RING_SCALE = 0.3;
+
+/** Where a Decay comet lands (ZzzEffect.cpp:7811-7851). */
+const decayLanding = (p: Vector3, c: SkillContext, smoke: ParticleRecipe, lift: number): void => {
+  effects.spawn('model', c.scene, p, {
+    model: MODEL.inferno,
+    seconds: ticks(DECAY_RING_TICKS),
+    scale: DECAY_RING_SCALE,
+    grow: (DECAY_RING_SCALE + 0.04 * DECAY_RING_TICKS) / DECAY_RING_SCALE,
+    colour: [0, 0.5, 0],
+    hideMesh: 0,
+    keysPerTick: 0.5,
+    life: q => (DECAY_RING_TICKS * (1 - q)) / 20,
+  });
+  const puff = new Vector3();
+  for (let i = 0; i < DECAY_SMOKE_COUNT; i++) {
+    puff.set(p.x + cm(Math.floor(Math.random() * 160) - 80), p.y + cm(50), p.z + cm(Math.floor(Math.random() * 160) - 100));
+    particles({ recipe: smoke, count: 1, height: lift })(puff, c);
+  }
+  for (let j = 0; j < 6; j++) effects.spawn('debris', c.scene, p, { model: dw2Stone(), colour: DECAY_TINT });
+  // The explosion takes `Position`, which the smoke loop left on the last puff (ZzzEffect.cpp:7849).
+  explosion(DECAY_TINT)(puff, c);
+  lighting.skillSpot(c.scene, 38, 'blast', lightAt(puff));
+  dw2Sfx('Sound/eBlastPoison_2', p);
+  dw2Sfx('Sound/eExplosion', puff);
+};
+
+/**
+ * One MODEL_FIRE sub6 (ZzzEffect.cpp:2586-2600): LT 40, from the point + (200..299, -50..49, 500..799) cm, falling
+ * 50-99 cm a tick along HeadAngle (0, 20, 0), the mesh itself hidden (HiddenMesh -2). What shows is drawn on it each
+ * tick (:7786-7793, :7933-7956): a blue flare, a dark and an orange Shiny02 turned at random, two green flames and a
+ * green light, with a white Flare.jpg ribbon riding it.
+ */
+const decayCometWith = (extra?: CometExtra, smoke = DECAY_SMOKE, lift = LANDING_SMOKE_LIFT): Step => (at, c) => {
+  const up = cm(500 + Math.floor(Math.random() * 300));
+  const start = new Vector3(at.x + cm(200 + Math.floor(Math.random() * 100)), at.y + up, at.z + cm(Math.floor(Math.random() * 100) - 50));
+  const land = new Vector3(start.x - up * Math.tan(COMET_TILT), 0, start.z);
+  land.y = groundAt(land.x, land.z, at.y);
+  const speed = perTick(50 + Math.floor(Math.random() * 50));
+  const seconds = Vector3.Distance(start, land) / speed;
+  const head = start.clone();
+  const headAt: PointSource = out => out.copyFrom(head);
+  const light = lighting.skillSpot(c.scene, 38, 'comet', lightFollow(headAt));
+  const rider = { seconds, follow: headAt, fadeTail: 0.01 };
+  effects.spawn('sprite', c.scene, start, { ...rider, texture: TEX.flare, colour: [0.5, 0.5, 1], size: cm(64 * 3) });
+  effects.spawn('sprite', c.scene, start, { ...rider, texture: TEX.shiny2, colour: RGBS.white, size: cm(32 * 3), aspect: 2, blend: 'subtract', reroll: { every: TICK } });
+  effects.spawn('sprite', c.scene, start, { ...rider, texture: TEX.shiny2, colour: [0.8, 0.5, 0.1], size: cm(32 * 4), aspect: 2, reroll: { every: TICK } });
+  // BITMAP_SMOKE joint sub0: Flare.jpg, 100 cm wide, 20 tails, LT 20, following the comet while it lives (ZzzEffectJoint.cpp:998-1006, :4618-4623).
+  effects.spawn('joint', c.scene, start, { head: headAt, maxTails: 20, width: 1, colour: RGBS.white, texture: TEX.flareBig, seconds: ticks(20), fadeTail: 0.05 });
+  extra?.flight(headAt, seconds, c);
+  effects.spawn('projectile', c.scene, start, {
+    to: land,
+    speed,
+    trail: { recipe: DECAY_FLAMES, rate: 50 },
+    trace: p => head.copyFrom(p),
+    onArrive: p => {
+      head.copyFrom(p);
+      light?.stop();
+      decayLanding(p, c, smoke, lift);
+      extra?.land(p, c);
+    },
+    onLost: () => light?.stop(),
+  });
+};
+
+/** Decay at AttackTime 15 on the cast point: two comets made the same tick, and SOUND_DEATH_POISON1 (ZzzCharacter.cpp:4440-4450). */
+const decayOf = (comet: Step): Step => (at, c) => {
+  comet(at, c);
+  comet(at, c);
+  dw2Sfx('Sound/eBlastPoison_1', at);
+};
+const decay = decayOf(decayCometWith());
+
+/** MODEL_BLIZZARD sub0 (ZzzEffect.cpp:3098-3121): ten shards, Scale 0.5, LT 15-29, Gravity -30..-59 cm a tick. */
+const ICE_SHARDS = 10;
+/** Every tick: `o->Light += 0.1` from 0, the brightness of the shard and its two sprites (MoveHandlers.cpp:5157-5162). */
+const ICE_RAMP_TICKS = 10;
+/** Landing: MODEL_BLIZZARD sub1, LT 20, Scale 0.9, BlendMeshLight / 1.1 a tick (ZzzEffect.cpp:3123-3128, MoveHandlers.cpp:5178-5186). */
+const ICE_REST_TICKS = 20;
+/** BITMAP_ENERGY sub1 at Scale 0.5: Thunder01 at 0.3-0.65 (64 px), LT 10, Light LT/15, +20 deg and +0.1 Scale a tick (ZzzEffectParticle.cpp:723-731, :4939-4946). */
+const ICE_CHIPS: ParticleRecipe = {
+  texture: TEX.thunder,
+  colour: [0.67, 0.67, 0.67],
+  colourEnd: [0, 0, 0],
+  size: 0.3,
+  sizeJitter: 0.35,
+  life: ticks(10),
+  power: 0,
+  gravity: 0,
+  spin: 8.7,
+  endScale: 3.1,
+  blend: 'add',
+  capacity: 128,
+};
+/** BITMAP_FIRE+2 sub7 at the shard's Scale: Fire03 cells of 0.97-1.3 tiles, LT 24, Scale -0.04 a tick, white fading LT/24 (ZzzEffectParticle.cpp:416-422, :4563-4571). */
+const ICE_FLAME: ParticleRecipe = {
+  texture: TEX.fire3,
+  cells: { w: 64, h: 64, count: 4 },
+  colour: RGBS.white,
+  colourEnd: [0, 0, 0],
+  size: 1.13,
+  sizeJitter: 0.15,
+  life: ticks(24),
+  power: 0,
+  gravity: 0.1,
+  endScale: 0.46,
+  blend: 'add',
+  capacity: 128,
+};
+/** The blue landing cloud: BITMAP_SMOKE sub11 at (0.24, 0.28, 0.8) (MoveHandlers.cpp:5167-5171). */
+const ICE_STORM_MIST = landingSmoke([0.24, 0.28, 0.8]);
+
+/** What the graded tiers add to Ice Storm: on each shard's flight, where each lands, and once on the cast point. */
+interface IceExtra {
+  flight: (shard: PointSource, seconds: number, fadeIn: number, c: SkillContext) => void;
+  land: Step;
+  storm: Step;
+  /** The landing cloud in place of ICE_STORM_MIST, and its lift. */
+  mist: { recipe: ParticleRecipe; height: number };
+}
+
+/**
+ * Shard `i` of Ice Storm (MoveHandlers.cpp:5140-5176). Its flight is rolled tick by tick up front as the original
+ * moves it: +-10 cm shake round a start that drifts -10 cm a tick in x, falling by a Gravity that grows 0-4 cm a
+ * tick. It lands when it passes below the terrain, or dies in the air when its LT runs out first.
+ */
+const iceShard = (i: number, extra?: IceExtra): Step => (at, c) => {
+  const lifeTicks = 15 + Math.floor(Math.random() * 15);
+  let sx = at.x + cm(Math.floor(Math.random() * 300) - 150 + 100);
+  const sz = at.z + cm(Math.floor(Math.random() * 300) - 150);
+  let y = at.y + cm(600 + Math.floor(Math.random() * 50) * i);
+  let gravity = -20 - (Math.floor(Math.random() * 30) + 10);
+  const path = new Float32Array((lifeTicks + 1) * 3);
+  path[0] = sx;
+  path[1] = y;
+  path[2] = sz;
+  let n = 0;
+  let landed = false;
+  while (n < lifeTicks && !landed) {
+    n++;
+    const x = sx + Math.sin(Math.floor(Math.random() * 1000) * 0.01) * cm(10);
+    const z = sz + Math.sin(Math.floor(Math.random() * 1000) * 0.01) * cm(10);
+    y += cm(gravity);
+    gravity -= Math.floor(Math.random() * 5);
+    sx -= cm(10);
+    path[n * 3] = x;
+    path[n * 3 + 1] = y;
+    path[n * 3 + 2] = z;
+    landed = y < groundAt(x, z, at.y);
+  }
+  const last = n;
+  const seconds = last * TICK;
+  const t0 = fxNow();
+  const shard: PointSource = out => {
+    const k = Math.min(last, (fxNow() - t0) / TICK);
+    const a = Math.floor(k);
+    const b = Math.min(last, a + 1);
+    const f = k - a;
+    return out.set(lerp(path[a * 3], path[b * 3], f), lerp(path[a * 3 + 1], path[b * 3 + 1], f), lerp(path[a * 3 + 2], path[b * 3 + 2], f));
+  };
+  const from = new Vector3(path[0], path[1], path[2]);
+  const yaw = entityYaw(c.caster);
+  const fadeIn = Math.min(1, ICE_RAMP_TICKS / last);
+  effects.spawn('model', c.scene, from, { model: MODEL.blizzard, seconds, scale: 0.5, colour: RGBS.white, yaw, follow: shard, life: q => Math.min(1, (q * last) / ICE_RAMP_TICKS) });
+  // Each tick a white SMOKE sub0 puff, and at even odds an ENERGY sub1 chip or a FIRE+2 sub7 flame (MoveHandlers.cpp:5148-5156).
+  effects.spawn('particles', c.scene, from, { recipe: BODY_SMOKE, rate: 25, seconds, follow: shard });
+  effects.spawn('particles', c.scene, from, { recipe: ICE_CHIPS, rate: 12.5, seconds, follow: shard });
+  effects.spawn('particles', c.scene, from, { recipe: ICE_FLAME, rate: 12.5, seconds, follow: shard });
+  // SHINY+1 at Scale 0.8-1.4 and BITMAP_LIGHT at 1, both at the shard's climbing Light and a random turn each tick.
+  effects.spawn('sprite', c.scene, from, { texture: TEX.shiny2, size: cm(32), aspect: 2, seconds, follow: shard, fadeIn, fadeTail: 0.01, reroll: { every: TICK, size: [0.8, 1.4] } });
+  effects.spawn('sprite', c.scene, from, { texture: TEX.flare, size: cm(64), seconds, follow: shard, fadeIn, fadeTail: 0.01, reroll: { every: TICK } });
+  extra?.flight(shard, seconds, fadeIn, c);
+  if (!landed) return;
+  delay(seconds, () => {
+    const p = new Vector3(path[last * 3], path[last * 3 + 1] + cm(50), path[last * 3 + 2]);
+    particles({ recipe: extra?.mist.recipe ?? ICE_STORM_MIST, count: 1, height: extra?.mist.height ?? LANDING_SMOKE_LIFT })(p, c);
+    if (Math.random() < 0.2) effects.spawn('debris', c.scene, p, { model: MODEL.ice2, colour: RGBS.white, liftCm: 50 });
+    effects.spawn('model', c.scene, p, { model: MODEL.blizzard, seconds: ticks(ICE_REST_TICKS), scale: 0.9, colour: RGBS.white, yaw, life: q => Math.pow(1.1, -ICE_REST_TICKS * q) });
+    // SOUND_SUDDEN_ICE2 when shard 0's (PKKey 1) resting blizzard reaches LT 18.
+    if (i === 0) delay(ticks(2), () => dw2Sfx('Sound/eSuddenIce_2', p));
+    extra?.land(p, c);
+  });
+};
+
+/** Ice Storm at AttackTime 15 on the cast point: ten shards and SOUND_SUDDEN_ICE1 (ZzzCharacter.cpp:4456-4477). No light. */
+const iceStormWith = (extra?: IceExtra): Step => (at, c) => {
+  for (let i = 0; i < ICE_SHARDS; i++) iceShard(i, extra)(at, c);
+  dw2Sfx('Sound/eSuddenIce_1', at);
+  extra?.storm(at, c);
+};
+const iceStorm = iceStormWith();
+
+// dw2 batch 2 on the graded tiers: the same effects, with fire, poison and frost detail and ground contact that read after the tone curve.
+
+/** Eight grey (0.7) explosions summed to a cream-white blob on the graded buffer; leaning the tint to the sheet's own orange keeps each one a fireball. */
+const BOMB_TINT_GRADED: RGB = [0.55, 0.4, 0.25];
+/** Fire tongues licking up out of each bomb. */
+const INFERNO_TONGUES: ParticleRecipe = {
+  texture: TEX.fire,
+  cells: { w: 64, h: 64, count: 4 },
+  colour: [1, 0.55, 0.2],
+  colourEnd: [0.35, 0.08, 0],
+  size: 0.85,
+  sizeJitter: 0.3,
+  life: 0.55,
+  lifeJitter: 0.2,
+  box: [0.35, 0.1, 0.35],
+  dir1: [-0.3, 1, -0.3],
+  dir2: [0.3, 1.6, 0.3],
+  power: 1.8,
+  gravity: 1.2,
+  endScale: 1.8,
+  spin: 2,
+  blend: 'add',
+  capacity: 256,
+};
+/** Embers drifting up off the bombs after the blast. */
+const INFERNO_EMBERS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [1, 0.6, 0.2],
+  colourEnd: [0.6, 0.12, 0],
+  size: 0.12,
+  sizeJitter: 0.4,
+  life: 1.2,
+  lifeJitter: 0.4,
+  box: [0.4, 0.2, 0.4],
+  dir1: [-1, 1.2, -1],
+  dir2: [1, 3, 1],
+  power: 1.5,
+  gravity: 0.4,
+  capacity: 256,
+};
+
+/** Enhanced Inferno: each bomb adds fire tongues, embers and the grass fire; a shock ring runs out from the caster through the eight. */
+const infernoGraded = infernoWith(BOMB_TINT_GRADED, {
+  bomb: seq(particles({ recipe: INFERNO_TONGUES, rate: 14, seconds: 0.9 }), particles({ recipe: INFERNO_EMBERS, count: 14 }), scorch(1.2), burn(1.2)),
+  centre: ring({ texture: TEX.shockwave, colour: [1, 0.6, 0.3], scale: 5.6, growFrom: 0.3, grow: 1, seconds: 0.55, fadeTail: 0.6 }),
+});
+
+/**
+ * The landing smoke's cards reach up to 3.6 tiles and the ground cut them off in a straight edge; on the graded tiers
+ * they are a third smaller and lifted 0.4 tiles more, so they clear it.
+ */
+const smallerSmoke = (r: ParticleRecipe): ParticleRecipe => ({ ...r, size: r.size * 0.7, endScale: 1.7 });
+const LANDING_SMOKE_LIFT_GRADED = LANDING_SMOKE_LIFT + 0.4;
+const DECAY_SMOKE_GRADED = smallerSmoke(DECAY_SMOKE);
+const ICE_STORM_MIST_GRADED = smallerSmoke(ICE_STORM_MIST);
+
+/** Decay's poison green, the comet's flames and the landing's tint. */
+const DECAY_GREEN: RGB = [0.3, 1, 0.2];
+/** Green sparks the comet sheds as it falls. */
+const DECAY_SHED: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.5, 1, 0.3],
+  colourEnd: [0.05, 0.4, 0],
+  size: 0.18,
+  sizeJitter: 0.4,
+  life: 0.6,
+  box: [0.15, 0.15, 0.15],
+  power: 0.6,
+  gravity: -1.5,
+  capacity: 256,
+};
+/** The poison cloud left lying low where a comet lands; lifted so its cards clear the ground, which cut them square. */
+const DECAY_MIST_LIFT = 0.9;
+const DECAY_MIST: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.12, 0.4, 0.08],
+  colourEnd: [0, 0.1, 0],
+  size: 0.8,
+  sizeJitter: 0.3,
+  life: 1.8,
+  lifeJitter: 0.4,
+  box: [0.7, 0.1, 0.7],
+  dir1: [-0.5, 0.05, -0.5],
+  dir2: [0.5, 0.3, 0.5],
+  power: 0.4,
+  gravity: 0.1,
+  endScale: 1.6,
+  spin: 0.5,
+  blend: 'add',
+  capacity: 128,
+};
+/** Green drops the landing splashes up. */
+const DECAY_SPLASH: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.6, 1, 0.35],
+  colourEnd: [0.1, 0.45, 0],
+  size: 0.22,
+  sizeJitter: 0.4,
+  life: 0.8,
+  box: [0.2, 0.05, 0.2],
+  dir1: [-1.3, 0.8, -1.3],
+  dir2: [1.3, 2.2, 1.3],
+  power: 3,
+  gravity: -5,
+  capacity: 256,
+};
+
+/** Enhanced Decay: a green glow and shed sparks on each comet; the landing adds a green shock ring, a lingering poison cloud and a splash. */
+const decayGraded = decayOf(
+  decayCometWith({
+    flight: (head, seconds, c) => {
+      effects.spawn('sprite', c.scene, head(new Vector3()), { texture: TEX.flare, colour: DECAY_GREEN, size: 1.4, seconds, follow: head, fadeTail: 0.05 });
+      effects.spawn('particles', c.scene, head(new Vector3()), { recipe: DECAY_SHED, rate: 50, seconds, follow: head });
+    },
+    land: seq(
+      ring({ texture: TEX.shockwave, colour: [0.4, 1, 0.3], scale: 3.6, growFrom: 0.3, grow: 1, seconds: 0.6, fadeTail: 0.5 }),
+      particles({ recipe: DECAY_MIST, count: 8, height: DECAY_MIST_LIFT }),
+      particles({ recipe: DECAY_SPLASH, count: 24 })
+    ),
+  }, DECAY_SMOKE_GRADED, LANDING_SMOKE_LIFT_GRADED)
+);
+
+/** Frost glints shed by each falling shard. */
+const ICE_GLINTS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.75, 0.9, 1],
+  colourEnd: [0.2, 0.4, 1],
+  size: 0.12,
+  sizeJitter: 0.4,
+  life: 0.5,
+  box: [0.15, 0.15, 0.15],
+  power: 0.3,
+  gravity: -0.5,
+  capacity: 512,
+};
+/** Ice chips a landing shard shatters into. */
+const ICE_SHATTER: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.85, 0.95, 1],
+  colourEnd: [0.3, 0.5, 1],
+  size: 0.16,
+  sizeJitter: 0.4,
+  life: 0.7,
+  box: [0.15, 0.05, 0.15],
+  dir1: [-1.2, 1, -1.2],
+  dir2: [1.2, 2.4, 1.2],
+  power: 2.6,
+  gravity: -6,
+  capacity: 256,
+};
+
+/** Enhanced Ice Storm: a frost glow and glints on each shard, a frost ring and shatter where each lands, and the storm's light. */
+const iceStormGraded = iceStormWith({
+  flight: (shard, seconds, fadeIn, c) => {
+    effects.spawn('sprite', c.scene, shard(new Vector3()), { texture: TEX.flare, colour: [0.35, 0.6, 1], size: 1, seconds, follow: shard, fadeIn, fadeTail: 0.05 });
+    effects.spawn('particles', c.scene, shard(new Vector3()), { recipe: ICE_GLINTS, rate: 30, seconds, follow: shard });
+  },
+  land: seq(ring({ texture: TEX.shockwave, colour: [0.55, 0.75, 1], scale: 1.8, growFrom: 0.3, grow: 1, seconds: 0.5, fadeTail: 0.5 }), particles({ recipe: ICE_SHATTER, count: 12 })),
+  storm: (at, c) => {
+    lighting.skillSpot(c.scene, 39, 'storm', lightAt(at));
+  },
+  mist: { recipe: ICE_STORM_MIST_GRADED, height: LANDING_SMOKE_LIFT_GRADED },
+});
+
 // ---- the table -------------------------------------------------------------------
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
@@ -7626,18 +8432,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   6: { cast: teleportColumn, impact: teleportColumn, enhanced: { cast: teleportEnhanced('begin'), impact: teleportEnhanced('end') } },
   // 7 Ice: at the release, MODEL_ICE + 5 MODEL_ICE_SMALL at the target's feet (iceCrystal). Enhanced: frost on the ground, mist and glints.
   7: { impact: iceCrystal(), enhanced: { impact: iceCrystal(iceImproved) } },
-  // 8 Twister: impact@caster - MODEL_STORM LT 59, Dir(0,−10,0) (walks forward), smoke, JOINT_THUNDER from
-  // ±200/+700 half the frames, stones 1/4.
-  8: {
-    area: (at, c) => {
-      const storm = flying(c, 0, perTick(10));
-      effects.spawn('model', c.scene, at, { model: MODEL.storm, seconds: ticks(59), colour: RGBS.wind, follow: storm, spin: 10, scale: 1.2 });
-      effects.spawn('particles', c.scene, at, { recipe: SMOKE, rate: 20, seconds: ticks(59), follow: storm, height: 0.2 });
-      effects.spawn('particles', c.scene, at, { recipe: WIND_STREAKS, rate: 40, seconds: ticks(59), follow: storm, height: 0.8 });
-      repeat(6, 0.35, (p, cc) => skyBolt(7, 0.25, ticks(8))(storm(p), cc))(at, c);
-      after(0.5, stones(3, 1))(at, c);
-    },
-  },
+  // 8 Twister: MODEL_STORM walking the caster's facing at AttackTime 15, with its smoke, bolts and stones (`twister`); Enhanced `twisterGraded`.
+  8: { area: dw2AtAttackTime(twister), enhanced: { area: dw2AtAttackTime(twisterGraded) } },
   // 9 Evil Spirit: impact@caster+100z - 4x JOINT_SPIRIT sub0 pairs at Angle(0,0,i*90), width 80 + 20:
   // ALPHA_BLEND_MINUS, Vel 70, LT 49, MaxTails 6, homing the caster+80z (MoveHumming 10 deg/frame)
   // under damped random steering between terrain +100 and +400; each width-80 joint stamps
@@ -7739,38 +8535,13 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 11 Power Wave: at the release, MODEL_MAGIC2 slides from the caster's feet toward the target and on past it (powerWave).
   // Enhanced: a ground glow, haze and glints riding the same sheet.
   11: { impact: powerWave(), enhanced: { impact: powerWave(POWER_WAVE_LOOK) } },
-  // 12 Aqua Beam: BITMAP_BOSS_LASER sub0 at CalcAddPosition(−20,−90,100): LT 20, Light (0.5,0.7,1.0), Scale 16,
-  // laid along the facing; 4 range checks marching 150 out. A straight beam 1 tile up, 6 tiles long.
-  12: {
-    area: (_at, c) => {
-      const from = entityPos(c.caster, 1, new Vector3());
-      const dir = facing(c);
-      from.x += dir.x * 0.9 - dir.z * 0.2;
-      from.z += dir.z * 0.9 + dir.x * 0.2;
-      const to = new Vector3(from.x + dir.x * 6, from.y, from.z + dir.z * 6);
-      effects.spawn('joint', c.scene, from, { to, colour: [0.5, 0.7, 1], seconds: ticks(20), width: 1.6, jitter: 0, segments: 4, texture: TEX.jointLaser });
-      effects.spawn('joint', c.scene, from, { to, colour: RGBS.white, seconds: ticks(20), width: 0.4, jitter: 0.01, segments: 8, texture: TEX.jointLaser });
-    },
-  },
-  // 13 Cometfall @SkillXY: 2× MODEL_SKILL_BLAST LT 30, Scale 1.0–1.7, Pos += (200–300, ±50, 300–800),
-  // Dir(0,0,−50−rand%50), JOINT_ENERGY trail; on the ground 6 stones, BITMAP_SHINY+4 (ring), BITMAP_EXPLOTION.
-  13: {
-    area: seq(
-      skyfall(MODEL.blast, RGBS.fire, ARC_MOTES, [2.5, 5.5, 0.2], perTick(75), 1.35, seq(fireHit, sprite({ texture: TEX.ring, colour: RGBS.gold, size: 2, seconds: 0.5, grow: 2.5, flat: true }), stones(6, 1))),
-      after(0.15, skyfall(MODEL.blast, RGBS.fire, ARC_MOTES, [2, 3, -0.4], perTick(75), 1.1, seq(fireHit, stones(6, 1))))
-    ),
-  },
-  // 14 Inferno: impact@caster - CreateInferno: 8 bombs on r=220 at 45° + 2 stones each; then MODEL_SKILL_INFERNO
-  // sub0 LT 15, Light 0.8, Scale 0.9.
-  14: {
-    area: atCaster(
-      seq(
-        ringOf(seq(fireHit, stones(2, 0.4)), 8, cm(220), 0.02),
-        model({ model: MODEL.inferno, seconds: ticks(15), colour: [0.8, 0.8, 0.8], flat: true, scale: 0.9 })
-      ),
-      0.05
-    ),
-  },
+  // 12 Aqua Beam: BITMAP_BOSS_LASER sub0 along the facing at AttackTime 15 (`aquaBeam`); Enhanced `aquaBeamGraded`.
+  12: { area: dw2AtAttackTime(aquaBeam), enhanced: { area: dw2AtAttackTime(aquaBeamGraded) } },
+  // 13 Cometfall (382 / 484 alias here): 2x MODEL_SKILL_BLAST on the cast point at AttackTime 15 (`cometfall`); Enhanced `cometfallGraded`.
+  13: { area: dw2AtAttackTime(cometfall), enhanced: { area: dw2AtAttackTime(cometfallGraded) } },
+  // 14 Inferno (381 / 486 alias here): CreateInferno + MODEL_SKILL_INFERNO sub0 at the caster at AttackTime 15 (`inferno`).
+  // Enhanced `infernoGraded`.
+  14: { area: dw2AtAttackTime(inferno), enhanced: { area: dw2AtAttackTime(infernoGraded) } },
   // 15 Teleport Ally: CreateTeleportBegin(target) (cast) + CreateTeleportEnd(caster) (impact) - BITMAP_SPARK+1 at both.
   15: { cast: teleportColumn, impact: teleportColumn, enhanced: { cast: teleportEnhanced('begin'), impact: teleportEnhanced('end') } },
   // 16 Soul Barrier: 5× CreateJoint(MODEL_SPEARSKILL sub0, width 20, white, LT 999999, MaxTails 30) - persistent,
@@ -7820,26 +8591,10 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 30–36 Summons: impact@caster - BITMAP_MAGIC+1 sub3.
   30: { area: summonCircle }, 31: { area: summonCircle }, 32: { area: summonCircle }, 33: { area: summonCircle },
   34: { area: summonCircle }, 35: { area: summonCircle }, 36: { area: summonCircle },
-  // 38 Decay @SkillXY: 2× MODEL_FIRE sub6 LT 40, Scale 1.5–2.2, Light (0.8,0.5,0.1), Pos += (200–300, ±50, 500–800),
-  // Dir(0,0,−50−rand%50), BITMAP_SMOKE trail; landing → MODEL_SKILL_INFERNO sub2, smoke, 6 stones.
-  38: {
-    area: seq(
-      skyfall(MODEL.fire, [0.8, 0.5, 0.1], SMOKE, [2.5, 6.5, 0.3], perTick(75), 1.85, seq(model({ model: MODEL.inferno, seconds: ticks(15), colour: RGBS.decay, flat: true, scale: 0.9 }), particles({ recipe: SMOKE, count: 15 }), stones(6, 1), venomHit), true),
-      after(0.12, skyfall(MODEL.fire, [0.8, 0.5, 0.1], SMOKE, [2, 5, -0.4], perTick(75), 1.6, seq(particles({ recipe: SMOKE, count: 7 }), stones(6, 1), venomHit), true))
-    ),
-  },
-  // 39 Ice Storm @SkillXY: 10× MODEL_BLIZZARD sub0, LT 15–29, Scale 0.5, scattered ±150 xy, +600 z, falling
-  // (Gravity −20…−60); BITMAP_SHINY+1 + BITMAP_LIGHT sprites; on the ground 1/5 MODEL_ICE_SMALL + BLIZZARD sub1 LT 20.
-  39: {
-    area: seq(
-      scatter(
-        skyfall(MODEL.blizzard, RGBS.frost, ICE_MOTES, [0, 6, 0], perTick(45), 0.5, seq(model({ model: MODEL.blizzard, seconds: ticks(20), colour: RGBS.frost, scale: 0.5, fadeTail: 0.9 }), sprite({ texture: TEX.shiny2, colour: RGBS.frost, size: 1.1, seconds: 0.4, grow: 1.6 }))),
-        10, 1.5, 0.05
-      ),
-      after(0.5, scatter(model({ model: MODEL.ice2, seconds: ticks(40), scale: 0.9, colour: RGBS.white, rise: 1, spin: 3 }), 2, 1.5)),
-      particles({ recipe: SNOWFALL, rate: 120, seconds: 1.2, height: 3 })
-    ),
-  },
+  // 38 Decay (387 aliases here): 2x MODEL_FIRE sub6 on the cast point at AttackTime 15 (`decay`); Enhanced `decayGraded`.
+  38: { area: dw2AtAttackTime(decay), enhanced: { area: dw2AtAttackTime(decayGraded) } },
+  // 39 Ice Storm (391 / 393 alias here): 10x MODEL_BLIZZARD sub0 on the cast point at AttackTime 15 (`iceStorm`); Enhanced `iceStormGraded`.
+  39: { area: dw2AtAttackTime(iceStorm), enhanced: { area: dw2AtAttackTime(iceStormGraded) } },
   // 40 Nova (release): MODEL_CIRCLE sub1 LT 45 at the caster; 36× JOINT_SPIRIT sub6 (width 60, LT 20,
   // MaxTails 5) burst out while LT > 44 − skillCount. Drawn at 24 ribbons.
   40: {
@@ -8329,11 +9084,11 @@ let currentSkill = 0;
 const MASTER_ALIASES: Record<number, number> = {
   326: 22, 327: 23, 328: 19, 329: 20, 330: 41, 331: 42, 332: 41, 333: 42, 336: 43, 337: 232, 339: 43, 340: 232, 342: 43, 343: 232,
   346: 344, 356: 48, 360: 48, 363: 48,
-  378: 5, 379: 3, 380: 233, 381: 14, 382: 40, 383: 233, 384: 1, 385: 9, 387: 38, 388: 10, 389: 7, 390: 2, 391: 39, 392: 40, 393: 39, 394: 2, 395: 58,
+  378: 5, 379: 3, 380: 233, 381: 14, 382: 13, 383: 233, 384: 1, 385: 9, 387: 38, 388: 10, 389: 7, 390: 2, 391: 39, 392: 40, 393: 39, 394: 2, 395: 58,
   403: 16, 404: 16, 406: 16,
   411: 235, 413: 26, 414: 24, 416: 52, 417: 27, 418: 24, 420: 28, 422: 28, 423: 27, 424: 51, 431: 235, 441: 77,
   454: 219, 455: 215, 456: 230, 458: 214, 459: 221, 460: 222, 461: 220, 462: 214, 463: 220, 469: 218, 470: 218, 472: 218,
-  479: 22, 480: 3, 481: 41, 482: 56, 483: 5, 484: 40, 486: 14, 487: 9, 489: 7, 490: 55, 491: 7, 492: 236, 493: 55, 494: 236, 496: 237,
+  479: 22, 480: 3, 481: 41, 482: 56, 483: 5, 484: 13, 486: 14, 487: 9, 489: 7, 490: 55, 491: 7, 492: 236, 493: 55, 494: 236, 496: 237,
   ...DARK_LORD_MASTER_ALIASES,
   551: 260, 552: 261, 554: 260, 555: 261, 558: 262, 559: 263, 560: 264, 569: 268, 572: 268, 573: 267,
 };

@@ -31,11 +31,11 @@ export const TELEPORT_ALLY = 15;
 const STARFALL = 46;
 
 /**
- * Master skills the table still lists under their pre-inheritance type: the MG's Ice Strengthener and Ice
- * Mastery are Physical in OpenMU, but the original sends AT_SKILL_ICE_STR_MG through UseSkillWizard ->
- * SetPlayerMagic (ZzzInterface.cpp:1362-1386, SkillCast.cpp:503-514).
+ * Master skills the table types Physical that the original still casts with SetPlayerMagic: the MG's Blast
+ * Strengthener (SkillCast.cpp:525-531), Ice Strengthener and Ice Mastery (AT_SKILL_ICE_STR_MG goes through
+ * UseSkillWizard -> SetPlayerMagic, ZzzInterface.cpp:1362-1386, SkillCast.cpp:503-514).
  */
-const INHERITED_SPELLS: ReadonlySet<number> = new Set([489, 491]); // Ice Strengthener (MG), Ice Mastery
+const INHERITED_SPELLS: ReadonlySet<number> = new Set([484, 489, 491]); // Blast Str, Ice Str (MG), Ice Mastery
 
 export function isTeleportSkill(num: number): boolean {
   return num === TELEPORT || num === TELEPORT_ALLY;
