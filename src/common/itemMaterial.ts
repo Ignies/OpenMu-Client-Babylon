@@ -690,10 +690,16 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
       // back face would otherwise read as all edge.
       float rim = 1.0 - clamp(abs(dot(normalize(viewDirectionW), normalW)), 0.0, 1.0);
       float texLum = dot(${texel}.rgb, vec3(0.299, 0.587, 0.114));
-      float vein = (fx & ${FX_AURA_RIM_ONLY}) != 0 ? 0.0 : smoothstep(0.8, 1.0, texLum);
+      bool wing = (fx & ${FX_AURA_RIM_ONLY}) != 0;
+      // On a wing the membrane's own pattern is the vein; on armour, only
+      // the brightest trim.
+      float vein = wing ? smoothstep(0.45, 0.95, texLum) * 0.55 : smoothstep(0.8, 1.0, texLum);
       float edge = rim * rim * rim;
-      edge *= edge;
-      ${color}.rgb = ${color}.rgb * 0.1 + itemGlow * (1.1 * vein + 1.8 * edge);
+      edge = wing ? 0.0 : edge * edge;
+      // The art itself, darkened and cooled, stands in for the lit colour:
+      // the texture still reads, the light does not.
+      vec3 dark = ${texel}.rgb * (wing ? vec3(0.1, 0.08, 0.08) : vec3(0.12, 0.09, 0.09));
+      ${color}.rgb = dark + itemGlow * (0.7 * vein + 0.9 * edge);
     } else if (itemGlow.r + itemGlow.g + itemGlow.b > 0.0) {
       float rim = 1.0 - clamp(dot(normalize(viewDirectionW), normalW), 0.0, 1.0);
       rim = rim * rim * rim;

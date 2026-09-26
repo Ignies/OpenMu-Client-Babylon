@@ -73,9 +73,10 @@ export function applySceneLook(
   // emissive, so the layer is a no-op until a mesh carries an `itemTier` -
   // then it glows with the tier's pulsing colour on the shared clock.
   glow.customEmissiveColorSelector = (mesh, _subMesh, _material, result) => {
-    const aura = auraOf(mesh);
-    if (aura) {
-      result.set(aura.x * AURA_HALO, aura.y * AURA_HALO, aura.z * AURA_HALO, 1);
+    // The outlaw's edge glow is its own highlight layer (outlawLook.ts);
+    // no item halo may lie over the dark body.
+    if (auraOf(mesh)) {
+      result.set(0, 0, 0, 1);
       return;
     }
 
@@ -99,9 +100,10 @@ export function applySceneLook(
   // no tier is active - otherwise it would mask the tier colour to the trim.
   glow.customEmissiveTextureSelector = (mesh, _subMesh, material) => {
     const tier = mesh.metadata?.itemTier as ItemVisualTier | null | undefined;
-    const own = (material as { emissiveTexture?: Texture | null }).emissiveTexture ?? null;
+    const own =
+      (material as { emissiveTexture?: Texture | null }).emissiveTexture ??
+      null;
 
-    // The aura is a faint solid halo; the body stays dark under it.
     if (auraOf(mesh)) return null!;
 
     // Babylon types the return as non-null but handles null (no texture).
@@ -179,9 +181,6 @@ function syncGlowSourceOptions(): void {
   glowPbr = pbrMaterialsOn();
 }
 
-/** Halo gain on the aura: a faint edge glow, the body stays dark under it. */
-const AURA_HALO = 0.14;
-
 /** The wearer's aura colour on this mesh (`BodyShine.aura`), or null. */
 function auraOf(mesh: AbstractMesh) {
   const aura = mesh.metadata?.bodyShine?.aura;
@@ -193,8 +192,6 @@ function auraOf(mesh: AbstractMesh) {
 function isGlowSource(mesh: AbstractMesh): boolean {
   const meta = mesh.metadata;
   if (!meta) return false;
-
-  if (auraOf(mesh)) return true;
 
   if (meta.glowOwnMaterial) return true;
 
@@ -236,7 +233,10 @@ function driveGlowList(scene: Scene, glow: GlowLayer): void {
 }
 
 /** Per frame: the glow layer's on/off gate. */
-export function updateSceneLook(scene: Scene, look: SceneLook | undefined): void {
+export function updateSceneLook(
+  scene: Scene,
+  look: SceneLook | undefined
+): void {
   if (!look) return;
 
   glowProbeTimer -= scene.getEngine().getDeltaTime() / 1000;

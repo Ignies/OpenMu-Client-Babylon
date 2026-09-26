@@ -199,6 +199,12 @@ export class WingObject extends ModelObject {
   #showAura(on: boolean): void {
     if (this.#auraShown === on) return;
     this.#auraShown = on;
+    // A wing's surface stays dark under the aura; its edge glow is the
+    // outlaw highlight around the silhouette.
+    for (const mesh of this.gltf?.mesh.getChildMeshes(false) ?? []) {
+      mesh.metadata ??= {};
+      mesh.metadata.auraRimOnly = on;
+    }
     for (const live of this.#passes) {
       const { target } = live;
       if (!target || !live.glow) continue;
@@ -208,7 +214,6 @@ export class WingObject extends ModelObject {
       }
       target.material = on && live.solid ? live.solid : live.glow;
       target.metadata.brightMesh = !(on && live.solid);
-      target.metadata.auraRimOnly = on;
       target.metadata.bodyLight = on ? this.rootObject.Light : live.light;
     }
   }
