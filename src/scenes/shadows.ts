@@ -30,6 +30,7 @@ import {
   marginOf,
   type CsmCacheStats,
 } from './csmCache';
+import { CsmBounds, csmBoundsMode, type CsmBoundsStats } from './csmBounds';
 
 /**
  * The cascaded shadow map on the sun: sole owner of the
@@ -99,6 +100,13 @@ let cacheTick: { remove(): void } | null = null;
 
 export function csmCacheStats(): CsmCacheStats | null {
   return cache?.stats() ?? null;
+}
+
+/** The casters' box writer, unless `?csmBounds=babylon` left it to Babylon. */
+let bounds: CsmBounds | null = null;
+
+export function csmBoundsStats(): CsmBoundsStats | null {
+  return bounds?.stats() ?? null;
 }
 
 function dropCache(): void {
@@ -554,6 +562,14 @@ function createCsm(
 
   const csm = new CascadedShadowGenerator(size, sun, true);
 
+  // Straight after the constructor: the writer's observer takes the slot
+  // Babylon's own box sweep had (csmBounds.ts).
+  const boundsMode = csmBoundsMode();
+
+  if (boundsMode !== 'babylon') {
+    bounds = new CsmBounds(csm, scene, boundsMode === 'check');
+  }
+
   csm.numCascades = cascadesFor(policy.casters, tier);
   csm.lambda = CSM_LAMBDA;
   csm.shadowMaxZ = reachFor(policy.casters);
@@ -612,6 +628,8 @@ function destroyCsm(): void {
   if (!runtime?.csm) return;
 
   dropCache();
+  bounds?.dispose();
+  bounds = null;
   runtime.csm.dispose();
   runtime.csm = null;
 }
