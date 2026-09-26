@@ -8,7 +8,7 @@ import {
 } from '../libs/babylon/exports';
 import { downloadDataFile, hasDataFile } from '../libs/mu/dataFolder';
 import { maps } from '../maps';
-import { EFFECT_RENDERING_GROUP, keepDepthForEffects, spriteLevel } from '../effects/core';
+import { EFFECT_RENDERING_GROUP, darkCardGain, keepDepthForEffects, spriteLevel } from '../effects/core';
 import { devQuery, devQueryNumber } from './devSeams';
 import { viewDepth } from './viewPlanes';
 
@@ -58,7 +58,12 @@ const TEXTURES: Record<
   flare01: { file: 'Effect/flare01.OZJ', size: 64 },
 };
 
-type Blend = 'add' | 'subtract';
+/**
+ * `dark` is a held sprite's `EnableAlphaBlendMinus`: black, with the sheet's
+ * luminance as its coverage (`coverageSheet`), the rule the effects draw dark
+ * art by (effects/core `darkCardGain`).
+ */
+type Blend = 'add' | 'subtract' | 'dark';
 
 type Particle = {
   live: boolean;
@@ -569,28 +574,6 @@ const KINDS = {
     },
     color: plainColor,
   } satisfies ParticleKind,
-
-  /**
-   * BITMAP_LIGHT (`Effect/flare01`) re-created at a wing bone every frame,
-   * like `wingFlareBlue`: the Wing of Storm joint glows (ZzzObject.cpp:9942-9960).
-   */
-  wingLight: {
-    texture: 'flare01',
-    blend: 'add',
-    init(p, scale, light) {
-      p.lifeTime = 4;
-      p.scale = scale;
-      p.rotation = rand(360);
-      [p.tr, p.tg, p.tb] = light;
-    },
-    update(p) {
-      const t = Math.max(0, Math.min(1, p.lifeTime / 4));
-      p.lr = p.tr * t;
-      p.lg = p.tg * t;
-      p.lb = p.tb * t;
-    },
-    color: plainColor,
-  } satisfies ParticleKind,
 } satisfies Record<string, ParticleKind>;
 
 export type KindName = keyof typeof KINDS;
@@ -622,7 +605,38 @@ type Pool = {
   pixelSize: number;
   frames: number;
   free: Sprite[];
+  /** A `dark` sheet's brightest texel, which its alpha was stretched from. */
+  cover: number;
 };
+
+/**
+ * The sheet as coverage: black, alpha = luminance stretched to the sheet's
+ * brightest texel (clud64 peaks at 0.51), so a sprite's own alpha can carry
+ * a gain past the sheet's level without the product running over 1.
+ */
+async function coverageSheet(jpeg: Blob): Promise<{ url: string; cover: number }> {
+  const bitmap = await createImageBitmap(jpeg);
+  const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+  const context = canvas.getContext('2d')!;
+  context.drawImage(bitmap, 0, 0);
+  bitmap.close();
+
+  const image = context.getImageData(0, 0, canvas.width, canvas.height);
+  const px = image.data;
+  let peak = 1;
+  for (let i = 0; i < px.length; i += 4) {
+    peak = Math.max(peak, 0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]);
+  }
+  for (let i = 0; i < px.length; i += 4) {
+    const luma = 0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2];
+    px[i] = px[i + 1] = px[i + 2] = 0;
+    px[i + 3] = Math.round((luma / peak) * 255);
+  }
+  context.putImageData(image, 0, 0);
+
+  const png = await canvas.convertToBlob({ type: 'image/png' });
+  return { url: URL.createObjectURL(png), cover: peak / 255 };
+}
 
 let scene: Scene | null = null;
 const pools = new Map<string, Pool>();
@@ -659,16 +673,25 @@ async function getPool(
         type: 'image/jpeg',
       });
 
+      const sheet =
+        blend === 'dark'
+          ? await coverageSheet(blob)
+          : { url: URL.createObjectURL(blob), cover: 1 };
+
       const manager = new SpriteManager(
         `effectParticles_${key}`,
-        URL.createObjectURL(blob),
+        sheet.url,
         POOL_SIZE,
         { width: size, height: size },
         target
       );
 
       manager.blendMode =
-        blend === 'add' ? Constants.ALPHA_ONEONE : Constants.ALPHA_SUBTRACT;
+        blend === 'add'
+          ? Constants.ALPHA_ONEONE
+          : blend === 'dark'
+            ? Constants.ALPHA_COMBINE
+            : Constants.ALPHA_SUBTRACT;
 
       manager.disableDepthWrite = true;
       manager.isPickable = false;
@@ -687,6 +710,7 @@ async function getPool(
         pixelSize: size,
         frames: TEXTURES[texture].frames ?? 1,
         free: [],
+        cover: sheet.cover,
       };
       pools.set(key, pool);
 
@@ -869,7 +893,6 @@ export const KIND_REACH: Record<KindName, Reach> = {
   spark03_24: { travel: 0.6, base: 0.19, perScale: 0 },
   wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },
   wingCloud: { travel: 0, base: 0, perScale: 0.46 },
-  wingLight: { travel: 0, base: 0, perScale: 0.46 },
 };
 
 /** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */
@@ -1032,6 +1055,117 @@ export class BonedParticleEmitter {
           void spawnParticle(this.target, kind, position, 0, scale, light);
         }
       }
+    }
+  }
+}
+
+/** A sheet a held sprite can be drawn with. */
+export type HeldTexture = 'clud64' | 'flare01' | 'flareBlue';
+
+/** One sprite riding a node: `CreateSprite`'s sheet and SubType blend. */
+export type HeldPoint = {
+  readonly node: { getAbsolutePosition(): { x: number; y: number; z: number } };
+  readonly texture: HeldTexture;
+  /** `CreateSprite`'s SubType 0 (`EnableAlphaBlend`) or 1 (`EnableAlphaBlendMinus`). */
+  readonly blend: 'add' | 'subtract';
+};
+
+/** What a held sprite draws with this frame; `rotation` in degrees. */
+export type HeldLook = { scale: number; r: number; g: number; b: number; rotation: number };
+
+/**
+ * Sprites the original re-issues every frame (`CreateSprite` from a render
+ * pass lives for the frame it is drawn in): one per point, moved onto its
+ * node each frame. A pooled particle with a life trails the node and stacks
+ * with the ones spawned before it, which is what made the Wing of Storm's
+ * joint glows two and a half times too bright.
+ *
+ * A subtract sprite is drawn as dark art: black over its coverage, which is
+ * the sheet times the light's luminance times `darkCardGain`. Babylon's
+ * subtract decodes the sheet into the linear buffer first, and a mid-grey
+ * cloud texel at the map's level took every pixel under it to black.
+ */
+export class HeldSprites {
+  readonly #sprites: (Sprite | null)[];
+  readonly #owners: (Pool | null)[];
+  readonly #blends: Blend[];
+  readonly #look: HeldLook = { scale: 1, r: 1, g: 1, b: 1, rotation: 0 };
+  readonly #color = new Color4(1, 1, 1, 1);
+
+  constructor(
+    private readonly target: Scene,
+    private readonly points: readonly HeldPoint[]
+  ) {
+    this.#sprites = points.map(() => null);
+    this.#owners = points.map(() => null);
+    this.#blends = points.map(point => (point.blend === 'subtract' ? 'dark' : 'add'));
+  }
+
+  /** Places every sprite, or hides them all; `look(i, out)` fills point i's look. */
+  update(visible: boolean, look: (i: number, out: HeldLook) => void): void {
+    const darkGain = darkCardGain(this.target);
+
+    for (let i = 0; i < this.points.length; i++) {
+      const point = this.points[i];
+      const blend = this.#blends[i];
+      const pool = pools.get(poolKey(point.texture, blend)) ?? null;
+
+      // The pools go with the map; a sprite of a disposed manager is gone.
+      if (this.#owners[i] !== pool) {
+        this.#sprites[i] = null;
+        this.#owners[i] = null;
+      }
+
+      if (!pool) {
+        if (visible) void getPool(this.target, point.texture, blend);
+        continue;
+      }
+
+      let sprite = this.#sprites[i];
+
+      if (!sprite) {
+        if (!visible) continue;
+        sprite = acquire(pool);
+        if (!sprite) continue;
+        this.#sprites[i] = sprite;
+        this.#owners[i] = pool;
+      }
+
+      sprite.isVisible = visible;
+      if (!visible) continue;
+
+      const out = this.#look;
+      look(i, out);
+
+      const p = point.node.getAbsolutePosition();
+      sprite.position.set(p.x, p.y, p.z);
+
+      const size = (pool.pixelSize * out.scale) / TILE_CM;
+      sprite.width = size;
+      sprite.height = size;
+      sprite.angle = (out.rotation * Math.PI) / 180;
+
+      if (blend === 'dark') {
+        const luma = 0.2126 * out.r + 0.7152 * out.g + 0.0722 * out.b;
+        sprite.color.set(0, 0, 0, Math.min(1, luma * darkGain * pool.cover));
+      } else {
+        sprite.color.copyFrom(spriteLevel(this.target, this.#color.set(out.r, out.g, out.b, 1)));
+      }
+    }
+  }
+
+  dispose(): void {
+    for (let i = 0; i < this.#sprites.length; i++) {
+      const sprite = this.#sprites[i];
+      const pool = this.#owners[i];
+
+      if (sprite && pool && pools.get(poolKey(this.points[i].texture, this.#blends[i])) === pool) {
+        sprite.isVisible = false;
+        pool.free.push(sprite);
+      }
+
+      this.#sprites[i] = null;
+      this.#owners[i] = null;
     }
   }
 }

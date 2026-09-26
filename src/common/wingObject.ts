@@ -4,25 +4,58 @@ import {
   type AbstractMesh,
   type Material,
   type Scene,
+  type TransformNode,
 } from '../libs/babylon/exports';
 import type { World } from '../ecs/world';
 import { ModelObject } from './modelObject';
 import { getMaterial, getScrollVariant } from './modelLoader';
 import { BlendState } from './objects/enum';
 import { loadMuSprite } from '../libs/mu/sprites';
-import { BonedParticleEmitter, type BonedEmission } from './effectParticles';
+import {
+  BonedParticleEmitter,
+  HeldSprites,
+  type BonedEmission,
+  type HeldLook,
+  type HeldPoint,
+} from './effectParticles';
+import { effects } from '../effects';
+import { TICK, darkCardGain, lightCardGain } from '../effects/core';
+import { spawnModel } from '../effects/model';
+import { MODEL, TEX } from '../effects/recipes';
 import {
   wingBone,
   wingLinkMatrix,
   type WingMeshPass,
   type WingSpec,
+  type WingSprite,
+  type WingThunder,
 } from './wings';
 
 const DARK = [0, 0, 0] as const;
 
+/** flare01 is 64 px; the thunder's halo is `CreateSprite(BITMAP_LIGHT, ..., 2.0f)`. */
+const THUNDER_HALO_TILES = (64 * 2) / 100;
+
+/** `rand() % 40 - 20` cm, in tiles. */
+const thunderJitter = (): number => (Math.floor(Math.random() * 40) - 20) / 100;
+
+/** Bone nodes of a loaded wing by MU bone index. */
+function bonesByIndex(root: AbstractMesh): Map<number, TransformNode> {
+  const out = new Map<number, TransformNode>();
+  for (const node of root.getDescendants(false)) {
+    const match = /^bone_(\d+)_/.exec(node.name);
+    if (match && 'getAbsolutePosition' in node) {
+      out.set(Number(match[1]), node as TransformNode);
+    }
+  }
+  return out;
+}
+
 /** A pass bound to its mesh, with the light vector the mesh reads. */
 type LivePass = {
   pass: WingMeshPass;
+  /** The model's own mesh the pass is on. */
+  mesh: AbstractMesh;
   light: Vector3;
   /** The mesh a glow pass draws, its additive material and the lit one it had. */
   target?: AbstractMesh;
@@ -86,6 +119,25 @@ export class WingObject extends ModelObject {
   #wakeSpec: WingSpec | null = null;
   #elapsedMs = 0;
 
+  #held: HeldSprites | null = null;
+  /** The sprite each held point draws, by point. */
+  #heldDefs: WingSprite[] = [];
+  #heldOf: ModelObject['gltf'] = null;
+  #thunderNodes: TransformNode[] = [];
+  #thunderDue = 0;
+  #lastSeconds = -1;
+
+  readonly #heldLook = (i: number, out: HeldLook): void => {
+    const def = this.#heldDefs[i];
+    const t = this.#elapsedMs;
+    const [r, g, b] = this.#wakeLight(def.light(t));
+    out.scale = def.scale(t);
+    out.r = r;
+    out.g = g;
+    out.b = b;
+    out.rotation = def.rotation?.(t) ?? 0;
+  };
+
   /**
    * Applies a wing spec *before* the model is loaded - `BlendMesh` is read by
    * `load()`, so it has to be in place first. Returns the bone the part should
@@ -102,25 +154,139 @@ export class WingObject extends ModelObject {
     // The aura is rebuilt against the new model in the first Update after load.
     this.#wake = null;
     this.#wakeSpec = null;
+    this.#dropHeld();
   }
 
   Update(gameTime: World['gameTime']): void {
     super.Update(gameTime);
 
-    if (!this.Ready || this.OutOfView) return;
+    const seconds = gameTime.TotalGameTime.TotalSeconds;
+    const dt = this.#lastSeconds < 0 ? 0 : Math.max(0, seconds - this.#lastSeconds);
+    this.#lastSeconds = seconds;
+    this.#elapsedMs = seconds * 1000;
+
+    // Hidden with the body in first person, or off screen: the sprites the
+    // original re-issues every frame are simply not issued.
+    if (!this.Ready || this.OutOfView || !this.#drawn()) {
+      this.#held?.update(false, this.#heldLook);
+      this.#thunderDue = 0;
+      return;
+    }
 
     if (this.#passesOf !== this.gltf) this.#applyPasses();
-    this.#updatePasses(gameTime.TotalGameTime.TotalSeconds * 1000);
+    this.#updatePasses(this.#elapsedMs);
+
+    if (this.#heldOf !== this.gltf) this.#createHeld();
+    this.#held?.update(true, this.#heldLook);
+    this.#updateThunder(dt);
 
     if (this.spec?.wakes && this.#wakeSpec !== this.spec) {
       this.#wakeSpec = this.spec;
       this.#wake = this.#createWake(this.node.getScene());
     }
 
-    if (!this.#wake) return;
+    this.#wake?.update();
+  }
 
-    this.#elapsedMs = gameTime.TotalGameTime.TotalSeconds * 1000;
-    this.#wake.update();
+  dispose(): void {
+    this.#dropHeld();
+    super.dispose();
+  }
+
+  Unload(): void {
+    this.#dropHeld();
+    super.Unload();
+  }
+
+  /** Any of the model's meshes is being drawn (the hero body hides them all in first person). */
+  #drawn(): boolean {
+    const root = this.gltf?.mesh;
+    if (!root || !this.node.isEnabled()) return false;
+    for (const mesh of root.getChildMeshes(true)) if (mesh.isVisible) return true;
+    return false;
+  }
+
+  #dropHeld(): void {
+    this.#held?.dispose();
+    this.#held = null;
+    this.#heldDefs = [];
+    this.#heldOf = null;
+    this.#thunderNodes = [];
+    this.#thunderDue = 0;
+  }
+
+  /** The spec's per-frame sprites and thunder bones, against the loaded model. */
+  #createHeld(): void {
+    this.#dropHeld();
+    this.#heldOf = this.gltf;
+    const root = this.gltf?.mesh;
+    const spec = this.spec;
+    if (!root || !spec || (!spec.sprites && !spec.thunder)) return;
+
+    const bones = bonesByIndex(root);
+    const points: HeldPoint[] = [];
+    for (const def of spec.sprites ?? []) {
+      for (const bone of def.bones) {
+        const node = bones.get(bone);
+        if (!node) continue;
+        points.push({ node, texture: def.texture, blend: def.blend });
+        this.#heldDefs.push(def);
+      }
+    }
+    if (points.length) this.#held = new HeldSprites(this.node.getScene(), points);
+
+    for (const bone of spec.thunder?.bones ?? []) {
+      const node = bones.get(bone);
+      if (node) this.#thunderNodes.push(node);
+    }
+  }
+
+  /**
+   * `if (rand_fps_check(2))` a 25 Hz frame, then `rand_fps_check(20)` a bone:
+   * a MODEL_FENRIR_THUNDER SubType 1 bolt (ZzzEffect.cpp:4314-4335) - scale
+   * 0.3-0.5, jittered 20 cm, gone in four frames as its Alpha drops 0.3 a
+   * frame - with its flare01 halo in `Light - 0.3` for the frame it is made.
+   */
+  #updateThunder(dt: number): void {
+    const thunder: WingThunder | undefined = this.spec?.thunder;
+    if (!thunder || !this.#thunderNodes.length) return;
+
+    const aura = this.rootObject.BodyShine.aura;
+    if (aura && aura.x + aura.y + aura.z > 0) return;
+
+    this.#thunderDue = Math.min(4, this.#thunderDue + dt / TICK);
+
+    const scene = this.node.getScene();
+    const [r, g, b] = thunder.light;
+    const halo = [Math.max(0, r - 0.3), Math.max(0, g - 0.3), Math.max(0, b - 0.3)] as const;
+
+    while (this.#thunderDue >= 1) {
+      this.#thunderDue -= 1;
+      if (Math.random() >= 0.5) continue;
+
+      for (const node of this.#thunderNodes) {
+        if (Math.random() >= 0.05) continue;
+
+        const p = node.getAbsolutePosition();
+        const at = new Vector3(p.x + thunderJitter(), p.y + thunderJitter(), p.z + thunderJitter());
+
+        spawnModel(scene, at, {
+          model: MODEL.lightningType,
+          seconds: 4 * TICK,
+          scale: 0.3 + Math.floor(Math.random() * 100) * 0.002,
+          colour: thunder.light,
+          yaw: Math.random() * Math.PI * 2,
+          fadeTail: 0.75,
+        }).pitchTo(Math.random() * Math.PI * 2);
+
+        effects.spawn('cards', scene, at, {
+          texture: TEX.flare,
+          colour: halo,
+          size: THUNDER_HALO_TILES,
+          ticks: 1,
+        });
+      }
+    }
   }
 
   /**
@@ -150,7 +316,7 @@ export class WingObject extends ModelObject {
       }
 
       const light = new Vector3(1, 1, 1);
-      const live: LivePass = { pass, light };
+      const live: LivePass = { pass, mesh, light };
       this.#passes.push(live);
 
       if (pass.kind === 'tint') {
@@ -240,11 +406,22 @@ export class WingObject extends ModelObject {
   #updatePasses(timeMs: number): void {
     // The wearer's aura (Ultra's outlaw) takes the glow passes over.
     const aura = this.rootObject.BodyShine.aura;
-    this.#showAura(!!aura && aura.x + aura.y + aura.z > 0);
-    for (const { pass, light } of this.#passes) {
+    const auraOn = !!aura && aura.x + aura.y + aura.z > 0;
+    this.#showAura(auraOn);
+
+    // The passes are effect art authored for the original's display frame:
+    // on the graded tiers the glow takes the map's level and the dark
+    // membrane its coverage, the rule every skill effect follows (1 on Classic).
+    const scene = this.node.getScene();
+    const cardGain = auraOn ? 1 : lightCardGain(scene);
+    const coverage = auraOn ? 1 : darkCardGain(scene);
+
+    for (const { pass, mesh, light, target } of this.#passes) {
       const [r, g, b] = pass.light?.(timeMs) ?? [1, 1, 1];
       light.set(r, g, b);
       if (pass.u) this.UvScroll.u = pass.u(timeMs);
+      if (target?.metadata) target.metadata.cardGain = cardGain;
+      if (pass.dark && mesh.metadata) mesh.metadata.coverage = coverage;
     }
   }
 
@@ -261,15 +438,7 @@ export class WingObject extends ModelObject {
     const root = this.gltf?.mesh;
     if (!wakes || !root) return null;
 
-    const nodeByBone = new Map<number, BonedEmission['node']>();
-
-    for (const node of root.getDescendants(false)) {
-      const match = /^bone_(\d+)_/.exec(node.name);
-      if (match && 'getAbsolutePosition' in node) {
-        nodeByBone.set(Number(match[1]), node as BonedEmission['node']);
-      }
-    }
-
+    const nodeByBone = bonesByIndex(root);
     const points: BonedEmission[] = [];
 
     for (const wake of wakes) {
