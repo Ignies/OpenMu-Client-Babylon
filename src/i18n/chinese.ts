@@ -1080,6 +1080,8 @@ export const chineseLayer: LanguageLayer = {
     'event.cwNotice4c': '以上惩罚持续到下一次克里沃夫战役。',
 
     'item.thisItem': '这件物品',
+    'item.ringOfGlory': '荣耀之戒',
+    'item.darkStone': '暗黑石',
     'item.equipped': '已装备',
     'item.excellentPrefix': '卓越的{name}',
     'item.attackPower': '攻击力',

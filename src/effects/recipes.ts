@@ -122,6 +122,8 @@ export const TEX = {
   swordBlur: 'Effect/sword_blur.OZJ',
   swordEff: 'Effect/SwordEff.OZJ',
   swordEff2: 'Effect/SwordEffor2.OZJ',
+  /** BITMAP_SWORD_EFFECT_MONO (Swordeff_mono.jpg): Strike of Destruction's flash at the caster. */
+  swordEffMono: 'Effect/Swordeff_mono.OZJ',
   /**
    * The `CreateWeaponBlur` sheets by BlurMapping (ZzzOpenData.cpp:5047-5052):
    * BITMAP_BLUR (blur01, mapping 0), +1 (motion_blur, 1), +2 (motion_blur_r, 2),
@@ -135,9 +137,14 @@ export const TEX = {
   motionMono: 'Effect/motion_mono.OZJ',
   /** Misc. */
   explosion: 'Effect/Explotion01.OZJ',
+  /** BITMAP_EXPLOTION+1 (DinoE.jpg, four 64 px cells): CreateBomb2's fireball, Fire Breath's end. */
+  dinoE: 'Effect/DinoE.OZJ',
   pierce: 'Effect/Piercing.OZJ',
   waves: 'Effect/waves.OZJ',
   water: 'Effect/water.OZJ',
+  /** BITMAP_WATERFALL_3 / _5 (waterFall3/5.jpg): Strike of Destruction's spray. */
+  waterFall3: 'Effect/waterFall3.OZJ',
+  waterFall5: 'Effect/waterFall5.OZJ',
   wind: 'Effect/wind01.OZJ',
   groundWind: 'Effect/ground_wind.OZJ',
   forcePillar: 'Effect/force_Pillar.OZJ',
@@ -278,6 +285,10 @@ export const MODEL = {
   knightPlanCrack: 'Effect/knight_plancrack_a.glb',
   /** MODEL_KNIGHT_PLANCRACK_B: Strike of Destruction's crack trail. */
   knightPlanCrack2: 'Effect/knight_plancrack_b.glb',
+  /** MODEL_RAKLION_BOSS_CRACKEFFECT (knight_plancrack_grand): the big crack under a Strike of Destruction. */
+  knightPlanCrackGrand: 'Effect/knight_plancrack_grand.glb',
+  /** MODEL_NIGHTWATER_01: the standing splash of a Strike of Destruction. */
+  nightwater: 'Effect/nightwater01.glb',
   waveForce: 'Skill/WaveForce.glb',
   swordForce: 'Skill/SwordForce.glb',
   piercing: 'Skill/Piercing.glb',
@@ -299,6 +310,8 @@ export const MODEL = {
   snow3: 'Skill/Snow03.glb',
   chainLightning: 'Skill/chain_lightning_ani.glb',
   flashing: 'Skill/flashing.glb',
+  /** MODEL_TAIL (tail.bmd): Rageful Blow's falling streaks. */
+  tail: 'Skill/tail.glb',
   combo: 'Skill/combo.glb',
   deathStab: 'Skill/deathsp_eff.glb',
   elfSkill: 'Skill/elf_skill.glb',

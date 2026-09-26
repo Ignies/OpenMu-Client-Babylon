@@ -1084,6 +1084,8 @@ export const koreanLayer: LanguageLayer = {
     'event.cwNotice4c': '위 벌칙은 다음 크라이울프 전투까지 유지됩니다.',
 
     'item.thisItem': '이 아이템',
+    'item.ringOfGlory': '영광의 반지',
+    'item.darkStone': '다크 스톤',
     'item.equipped': '착용 중',
     'item.excellentPrefix': '엑설런트 {name}',
     'item.attackPower': '공격력',

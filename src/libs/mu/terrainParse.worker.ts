@@ -8,14 +8,15 @@
  * import `common/binaryUtils` rather than `common/utils` - the latter pulls
  * in `Scene`/`Texture` and would drag the whole engine into this chunk.
  *
- * Two request kinds rather than one, because the light bake depends on a
- * JPEG decode that only the engine can do:
+ * Request kinds:
  *
  *   'bulk'  - height + attributes + mapping + objects, straight from the
  *             downloaded bytes. This is the part that used to block the
  *             frame on every map change.
- *   'light' - the normal/luminosity pass, once the main thread has decoded
- *             TerrainLight.OZJ into floats.
+ *   'lightJpeg' - TerrainLight.OZJ's JPEG decoded (`terrainJpeg.ts`) and
+ *             then the normal/luminosity pass over it.
+ *   'light' - the same pass over floats the main thread read back from a
+ *             GPU texture (the `?lightDecode=gpu` seam).
  *   'ground' - the ground mesh's vertex arrays from the parsed terrain
  *             (`common/terrain/groundArrays`); the main thread uploads them.
  *   'pack'  - the tile textures resampled into the layers of the
@@ -33,6 +34,11 @@ import {
   type GroundArrays,
 } from '../../common/terrain/groundArrays';
 import { packLayers, type TilePixels } from '../../common/terrain/tilePack';
+import {
+  LIGHT_JPEG_DECODE,
+  decodeJpegPixels,
+  lightFromPixels,
+} from './terrainJpeg';
 
 export type TerrainWorkerRequest =
   | {
@@ -43,6 +49,13 @@ export type TerrainWorkerRequest =
       attributeBytes: Uint8Array;
       mappingBytes: Uint8Array;
       objectBytes: Uint8Array;
+    }
+  | {
+      id: number;
+      kind: 'lightJpeg';
+      jpeg: Uint8Array;
+      heightData: Float32Array;
+      liftBorder: boolean;
     }
   | {
       id: number;
@@ -81,6 +94,7 @@ export type TerrainWorkerBulkResult = {
 
 export type TerrainWorkerResponse =
   | { id: number; ok: true; kind: 'bulk'; result: TerrainWorkerBulkResult }
+  | { id: number; ok: true; kind: 'lightJpeg'; result: Float32Array }
   | { id: number; ok: true; kind: 'light'; result: Float32Array }
   | { id: number; ok: true; kind: 'ground'; result: GroundArrays }
   | { id: number; ok: true; kind: 'pack'; result: Uint8Array }
@@ -153,13 +167,18 @@ ctx.onmessage = async (ev: MessageEvent<TerrainWorkerRequest>) => {
       return;
     }
 
+    const lightBuffer =
+      req.kind === 'lightJpeg'
+        ? lightFromPixels(await decodeJpegPixels(req.jpeg, LIGHT_JPEG_DECODE))
+        : req.lightBuffer;
+
     const packed = parseTerrainLightPacked(
-      req.lightBuffer,
+      lightBuffer,
       req.heightData,
       req.liftBorder
     );
 
-    ctx.postMessage({ id: req.id, ok: true, kind: 'light', result: packed }, [
+    ctx.postMessage({ id: req.id, ok: true, kind: req.kind, result: packed }, [
       packed.buffer,
     ]);
   } catch (error) {

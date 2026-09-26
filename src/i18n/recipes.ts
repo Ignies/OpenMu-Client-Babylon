@@ -1662,6 +1662,8 @@ export const EN_TEXT = {
 
   // ---- item tooltip ------------------------------------------------------
   'item.thisItem': 'this item',
+  'item.ringOfGlory': 'Ring of Glory',
+  'item.darkStone': 'Dark Stone',
   'item.equipped': 'Equipped',
   'item.excellentPrefix': 'Excellent {name}',
   'item.ancientPrefix': 'Ancient {name}',

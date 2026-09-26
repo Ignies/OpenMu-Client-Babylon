@@ -12,7 +12,7 @@ import {
   type LightAnchor,
   type LightRecipe,
 } from './lightSource';
-import { lightAreaSkill, lightArrow, lightSkillAt, lightSkillCue, lightSkillLand, lightSkillTrail, lightTargetedSkill } from './skills';
+import { lightAreaSkill, lightArrow, lightSkillAt, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillLand, lightSkillSpot, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
@@ -147,6 +147,35 @@ class Lighting {
   /** An effect reached a moment its row's `timed` lights wait on (`TimedLight.cue`). */
   skillCue(scene: Scene, skill: number, cue: string, caster: Entity): void {
     lightSkillCue(scene, skill, cue, caster);
+  }
+
+  /** Light one of a skill's named effect bodies on every tier (`SKILL_LIGHTS[skill].bodies`). */
+  skillBody(
+    scene: Scene,
+    skill: number,
+    body: string,
+    follow: (out: { x: number; y: number; z: number }) => void
+  ): LightSource | null {
+    return lightSkillBody(scene, skill, body, follow);
+  }
+
+  /** Light a skill's one moving emitter on every tier (the row's `follow`). Null when it has none. */
+  skillFollow(
+    scene: Scene,
+    skill: number,
+    follow: (out: { x: number; y: number; z: number }) => void
+  ): LightSource | null {
+    return lightSkillFollow(scene, skill, follow);
+  }
+
+  /** Light one of a skill's `spots` as its effect reaches it. Null when the row, on this tier, has none by that name. */
+  skillSpot(
+    scene: Scene,
+    skill: number,
+    name: string,
+    follow: (out: { x: number; y: number; z: number }) => void
+  ): LightSource | null {
+    return lightSkillSpot(scene, skill, name, follow);
   }
 
   /**

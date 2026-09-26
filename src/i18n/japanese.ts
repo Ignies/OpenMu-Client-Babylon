@@ -1086,6 +1086,8 @@ export const japaneseLayer: LanguageLayer = {
     'event.cwNotice4c': '上のペナルティは次のクライウルフ戦まで続きます。',
 
     'item.thisItem': 'このアイテム',
+    'item.ringOfGlory': '栄光の指輪',
+    'item.darkStone': 'ダークストーン',
     'item.equipped': '装備中',
     'item.excellentPrefix': 'エクセレント{name}',
     'item.attackPower': '攻撃力',

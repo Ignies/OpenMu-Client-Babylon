@@ -1117,6 +1117,8 @@ export const frenchLayer: LanguageLayer = {
       'La pénalité vaut jusqu’à la prochaine bataille de Crywolf.',
 
     'item.thisItem': 'cet objet',
+    'item.ringOfGlory': 'Anneau de Gloire',
+    'item.darkStone': 'Pierre Sombre',
     'item.equipped': 'Équipé',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Puissance d’attaque',

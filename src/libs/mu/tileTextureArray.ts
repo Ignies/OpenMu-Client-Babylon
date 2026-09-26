@@ -7,6 +7,7 @@ import {
 import { onGameOptionsChanged } from '../../common/gameOptions';
 import { textureFiltering } from '../../common/materialQuality';
 import { packLayers, type TilePixels } from '../../common/terrain/tilePack';
+import { decodeJpegPixels } from './terrainJpeg';
 import { packTilesOffThread } from './terrainParseClient';
 
 /**
@@ -75,31 +76,6 @@ export type TileTextureArray = {
 };
 
 /**
- * Decodes a JPEG to top-down RGBA. Deliberately not `Texture.readPixels()`:
- * that reads back from the GPU bottom-up, and a silently vertically flipped
- * noise tile is exactly the kind of mistake that survives review.
- */
-async function decodeJpeg(bytes: Uint8Array): Promise<TilePixels> {
-  const blob = new Blob([bytes], { type: 'image/jpeg' });
-  const bitmap = await createImageBitmap(blob);
-  // A closed ImageBitmap reports 0 x 0, so the size is taken first.
-  const { width, height } = bitmap;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-
-  const context = canvas.getContext('2d', { willReadFrequently: true })!;
-  context.drawImage(bitmap, 0, 0);
-
-  const image = context.getImageData(0, 0, width, height);
-
-  bitmap.close();
-
-  return { data: image.data, width, height };
-}
-
-/**
  * `scale` mirrors what `getTerrainData` computed per texture: a 256² tile
  * repeats every 64 terrain tiles, everything else every `size` of them. It
  * has to stay keyed on the tile's *own* size, not the array's, so upscaling
@@ -119,7 +95,7 @@ export async function createTileTextureArray(
   const engine = scene.getEngine() as { webGLVersion?: number };
   if ((engine.webGLVersion ?? 2) < 2) return null;
 
-  const tiles = await Promise.all(jpegs.map(decodeJpeg));
+  const tiles = await Promise.all(jpegs.map(jpeg => decodeJpegPixels(jpeg)));
 
   let size = 0;
   for (const tile of tiles) size = Math.max(size, tile.width, tile.height);
@@ -149,8 +125,8 @@ export async function createTileTextureArray(
     // generateMipMaps: built in both modes so the Classic/Enhanced flip is a
     // sampling-mode change rather than a map reload.
     true,
-    // Rows are top-down, which is the orientation the individual `Texture`s
-    // were uploaded with (invertY false in readOJZBufferAsJPEGBuffer).
+    // Rows are top-down, which is the orientation the per-tile fallback
+    // `Texture`s are uploaded with (invertY false in createOZJTexture).
     false,
     sampling
   );

@@ -51,9 +51,8 @@ export async function downloadDataBytesBuffer(url: string) {
 
 /**
  * A GPU texture from an OZJ (a JPEG behind a 24-byte header) and nothing
- * else: the browser decodes the JPEG, no `readPixels` round trip. The terrain
- * tiles go through here; `readOJZBufferAsJPEGBuffer` below is for the one
- * caller (the terrain light map) that needs the pixels back on the CPU.
+ * else: the browser decodes the JPEG, no `readPixels` round trip. The water
+ * flipbook and the terrain tiles without a tile array go through here.
  */
 export function createOZJTexture(
   scene: Scene,
@@ -88,7 +87,11 @@ export function createOZJTexture(
   });
 }
 
-// TODO we only need bytes buffer? Try to omit bjs dependency...
+/**
+ * The terrain light map through a GPU texture and a synchronous `readPixels`.
+ * Only the `?lightDecode=gpu` seam still comes here; map loads decode it on
+ * the CPU (`libs/mu/terrainJpeg.ts`).
+ */
 export async function readOJZBufferAsJPEGBuffer(
   scene: Scene,
   filename: string,

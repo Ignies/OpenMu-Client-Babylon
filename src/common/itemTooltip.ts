@@ -25,6 +25,7 @@ import {
   type ItemStats,
 } from './itemStats';
 import { itemBaseName } from './itemsDatabase';
+import { itemLevelName } from './itemLevelLook';
 import { learnableSkill } from './skillItems';
 import { skillDisplayName } from './skillNames';
 
@@ -140,7 +141,7 @@ function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
 function nameLine(item: Item, def: ItemDef, level: number): string {
   let name = itemBaseName(def.group, def.index) || def.name;
   if (item.isExcellent) name = t('item.excellentPrefix', { name });
-  return level > 0 ? `${name} +${level}` : name;
+  return itemLevelName(def.group, def.index, level, name);
 }
 
 /**

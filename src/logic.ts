@@ -15,9 +15,11 @@ import {
 import { StatType } from './common/characterStats';
 import { GameOptions } from './common/gameOptions';
 import { ItemsDatabase, itemBaseName } from './common/itemsDatabase';
+import { itemLevelName } from './common/itemLevelLook';
 import {
   ItemGroup,
   itemRestHeight,
+  angleRotation,
   itemRestPose,
   itemRestRotation,
 } from './common/itemAngle';
@@ -2704,6 +2706,13 @@ EventBus.on('SkillAnimation', packet => {
     return;
   }
 
+  // AT_SKILL_COMBO: the server announces a landed DK combo. The original leaves the caster's
+  // facing, target and clip alone and only plays SOUND_COMBO (WSclient.cpp:4167, :4829-4832).
+  if (combat.observeSkillAnimation(p.SkillId, target?.netId)) {
+    playSfx(COMBO_SOUND, caster.transform.pos, { bus: COMBAT_BUS });
+    playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
+    return;
+  }
   if (target && target !== caster && !caster.localPlayer) {
     const dx = target.transform.pos.x - caster.transform.pos.x;
     const dz = target.transform.pos.z - caster.transform.pos.z;
@@ -2712,10 +2721,6 @@ EventBus.on('SkillAnimation', packet => {
     }
   }
   playCastAnimation(caster, p.SkillId, false);
-  // AT_SKILL_COMBO: the server announces a landed DK combo (ReceiveMagic, WSclient.cpp:4436).
-  if (combat.observeSkillAnimation(p.SkillId, target?.netId)) {
-    playSfx(COMBO_SOUND, caster.transform.pos, { bus: COMBAT_BUS });
-  }
   playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
 });
 
@@ -3435,7 +3440,8 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
     // ItemAngle (common/itemAngle.ts): the resting pose and height for this
     // item's class - armour face-down, a sword leaning back, everything 30 cm
     // (a weapon 70) off the terrain.
-    const rot = itemRestRotation(poseGroup, poseNum);
+    const pose = proxy?.pose ?? itemRestPose(poseGroup, poseNum);
+    const rot = angleRotation(pose.angle);
     world.add({
       netId: maskedId,
       worldIndex: world.mapIndex,
@@ -3447,7 +3453,7 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
           item.PositionY
         ),
         rot: new Vector3(rot.x, rot.y, rot.z),
-        scale: itemRestPose(poseGroup, poseNum).scale,
+        scale: pose.scale,
       },
       modelFactory: DropObject,
       modelFilePath:
@@ -3489,8 +3495,7 @@ function dropName(
   const zen = t('common.zen');
   if (isMoney) return amount > 0 ? `${zen} ${amount}` : zen;
   const name = String(baseName);
-  const lvl = item?.lvl ?? 0;
-  return lvl > 0 ? `${name} +${lvl}` : name;
+  return item ? itemLevelName(item.group, item.num, item.lvl, name) : name;
 }
 
 EventBus.on('ItemsDropped', packet => {

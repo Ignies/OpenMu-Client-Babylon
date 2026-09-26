@@ -30,6 +30,7 @@ import {
   toonFunctionsGlsl,
   toonTerrainDefines,
 } from '../../common/renderingStyle';
+import { devQuery } from '../../common/devSeams';
 
 /**
  * How the ground is lit, in one place.
@@ -75,6 +76,33 @@ const GROUND_CEIL_ASYMPTOTE = 1.1;
  * this many at most; an empty slot binds range 0 and adds nothing.
  */
 export const GROUND_POINT_LIGHTS = 8;
+
+/**
+ * Dev seam `?terrainBranch=0`: the old branch-free shader, where every pixel
+ * runs both tiers' light and every pool slot and the uniforms mix one side
+ * away. Kept for the GPU-time pairs.
+ */
+export const TERRAIN_BRANCH = devQuery('terrainBranch') !== '0';
+
+/** The `?terrainBranch=0` fragments, as they were. */
+const MIXED_GLSL = {
+  groundLightLoop: `    for (int i = 0; i < ${GROUND_POINT_LIGHTS}; i++) {
+      vec4 gl = groundLightPos[i];
+      float gd = length(vWorldXZ - gl.xy);
+      float gf = max(0.0, (gl.z - gd) / max(gl.z, 0.001));
+      dynLight += groundLightCol[i].rgb * pow(gf, gl.w) * linearLight * roomParams.y;
+    }`,
+  groundSum: `    vec3 bakeLit = mix(bake, pow(bake, vec3(2.2)), linearLight) * roomParams.z;
+    vec3 groundLight = max(bakeLit + dynLight, vec3(0.0));
+    float peak = max(groundLight.r, max(groundLight.g, groundLight.b));
+    float bent = peak > GROUND_CEIL_KNEE
+      ? GROUND_CEIL_KNEE + GROUND_CEIL_ROOM * (1.0 - exp(-(peak - GROUND_CEIL_KNEE) / GROUND_CEIL_ROOM))
+      : peak;
+    vec3 softCeil = peak > 0.0 ? groundLight * (bent / peak) : groundLight;
+    groundLight = mix(min(groundLight, vec3(1.0)), softCeil, linearLight);`,
+  groundEncode: `    vec3 groundLit = mix(groundLight, pow(groundLight, vec3(1.0 / 2.2)), linearLight);
+    vec3 extraLit = mix(dynLight, pow(dynLight * keyGain, vec3(1.0 / 2.2)), linearLight);`,
+};
 
 export const TERRAIN_LIGHT_UNIFORMS = [
   'time',
@@ -156,12 +184,21 @@ export function terrainSkyLightGlsl(): string {
     // footprint the tile map would have stamped for them - the stamp is one
     // texel a tile, and on a dark floor its bilinear skirt read as tile
     // squares. The tile map above carries only what the pool does not hold.
-    for (int i = 0; i < ${GROUND_POINT_LIGHTS}; i++) {
-      vec4 gl = groundLightPos[i];
-      float gd = length(vWorldXZ - gl.xy);
-      float gf = max(0.0, (gl.z - gd) / max(gl.z, 0.001));
-      dynLight += groundLightCol[i].rgb * pow(gf, gl.w) * linearLight * roomParams.y;
-    }
+${
+  TERRAIN_BRANCH
+    ? `    // Branches on uniforms: a whole draw takes one side, so Classic
+    // skips the loop, and an empty slot (range 0) would add exactly nothing.
+    if (linearLight > 0.5) {
+      for (int i = 0; i < ${GROUND_POINT_LIGHTS}; i++) {
+        vec4 gl = groundLightPos[i];
+        if (gl.z <= 0.0) continue;
+        float gd = length(vWorldXZ - gl.xy);
+        float gf = max(0.0, (gl.z - gd) / max(gl.z, 0.001));
+        dynLight += groundLightCol[i].rgb * pow(gf, gl.w) * roomParams.y;
+      }
+    }`
+    : MIXED_GLSL.groundLightLoop
+}
 `;
 }
 
@@ -203,17 +240,25 @@ ${o.clouds ? '    sunShadow *= mix(1.0, muCloudShadow(vWorldPos), skyOpen);' : '
     // untouched. The bake is the ground's key: inside a room it takes the
     // room's share of the level and the delta, the candles, does not (§13 F14).
     vec3 bake = max(${o.bake}, vec3(0.0));
-    vec3 bakeLit = mix(bake, pow(bake, vec3(2.2)), linearLight) * roomParams.z;
-    vec3 groundLight = max(bakeLit + dynLight, vec3(0.0));
+${
+  TERRAIN_BRANCH
+    ? `    vec3 groundLight;
 
-    // The original clamps glColor at 1.0 per channel; tiers >= 1 bend the
+    // The original clamps glColor at 1.0 per channel. Tiers >= 1 bend the
     // sum toward the asymptote above the knee so a torch core keeps its hue.
-    float peak = max(groundLight.r, max(groundLight.g, groundLight.b));
-    float bent = peak > GROUND_CEIL_KNEE
-      ? GROUND_CEIL_KNEE + GROUND_CEIL_ROOM * (1.0 - exp(-(peak - GROUND_CEIL_KNEE) / GROUND_CEIL_ROOM))
-      : peak;
-    vec3 softCeil = peak > 0.0 ? groundLight * (bent / peak) : groundLight;
-    groundLight = mix(min(groundLight, vec3(1.0)), softCeil, linearLight);
+    if (linearLight > 0.5) {
+      vec3 bakeLit = pow(bake, vec3(2.2)) * roomParams.z;
+      groundLight = max(bakeLit + dynLight, vec3(0.0));
+      float peak = max(groundLight.r, max(groundLight.g, groundLight.b));
+      float bent = peak > GROUND_CEIL_KNEE
+        ? GROUND_CEIL_KNEE + GROUND_CEIL_ROOM * (1.0 - exp(-(peak - GROUND_CEIL_KNEE) / GROUND_CEIL_ROOM))
+        : peak;
+      groundLight = peak > 0.0 ? groundLight * (bent / peak) : groundLight;
+    } else {
+      groundLight = min(max(bake * roomParams.z + dynLight, vec3(0.0)), vec3(1.0));
+    }`
+    : MIXED_GLSL.groundSum
+}
 
     // The cascades cut the ceiled sum, not the bake under it (§13 F15): on
     // open ground the ceiling compresses lit and shadowed alike, so a factor
@@ -227,9 +272,29 @@ ${o.clouds ? '    sunShadow *= mix(1.0, muCloudShadow(vWorldPos), skyOpen);' : '
     // The overlays and the reflections below work in the art's display
     // space; the linear sum is re-encoded for them and the final decode
     // lands the product exactly at lin(texel) x groundLight.
-    vec3 groundLit = mix(groundLight, pow(groundLight, vec3(1.0 / 2.2)), linearLight);
-    vec3 extraLit = mix(dynLight, pow(dynLight * keyGain, vec3(1.0 / 2.2)), linearLight);
+${
+  TERRAIN_BRANCH
+    ? `    vec3 groundLit = groundLight;
+    vec3 extraLit = dynLight;
+
+    if (linearLight > 0.5) {
+      groundLit = pow(groundLight, vec3(1.0 / 2.2));
+      extraLit = pow(dynLight * keyGain, vec3(1.0 / 2.2));
+    }`
+    : MIXED_GLSL.groundEncode
+}
 `;
+}
+
+/**
+ * The final decode. When image processing runs in post the buffer is linear,
+ * and Babylon's Standard fragment ends with toLinearSpace(color) - the same
+ * pow(2.2). linearOut is 0 whenever the objects skip the decode too.
+ */
+export function terrainOutputDecodeGlsl(color: string): string {
+  return TERRAIN_BRANCH
+    ? `    if (linearOut > 0.5) ${color} = pow(max(${color}, vec3(0.0)), vec3(2.2));`
+    : `    ${color} = mix(${color}, pow(max(${color}, vec3(0.0)), vec3(2.2)), linearOut);`;
 }
 
 /**

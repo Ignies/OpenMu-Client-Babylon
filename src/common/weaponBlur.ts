@@ -64,8 +64,8 @@ const WHITE: RGB = [1, 1, 1];
 /** `o->AnimationFrame >= 3.f`: the trail starts three keys into the swing. */
 const START_KEY = 3;
 
-/** Blow of Destruction only trails between keys 2 and 8 (:3697). */
-const BLOW_KEYS: readonly [number, number] = [2, 8];
+/** Blow of Destruction trails between keys 2 and 8 (:3816) inside the `>= 3` gate (:3767), so 3 to 8. */
+const BLOW_KEYS: readonly [number, number] = [3, 8];
 
 // ---- the row -------------------------------------------------------------------
 
