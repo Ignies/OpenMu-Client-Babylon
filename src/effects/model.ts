@@ -25,6 +25,7 @@ import {
   type Scene,
   type Texture,
 } from '../libs/babylon/exports';
+import { clampAlpha } from './clampAlpha';
 import { getMaterial, loadGLTF } from '../common/modelLoader';
 import { BlendState } from '../common/objects/enum';
 import { Store } from '../store';
@@ -102,8 +103,20 @@ export interface ModelOptions {
    * (ZzzBMD.cpp:1606) - the dark spirit stamps of Evil Spirit's MODEL_LASER.
    */
   blend?: EffectBlend;
+  /** With `subtract`: cover the whole mesh evenly instead of by the sheet (a solid silhouette). */
+  solid?: boolean;
   /** Yaw follows the direction `follow` moves the node (the original re-stamps along the joint's `Angle`). */
   aim?: boolean;
+  /** Added to the `aim` yaw, for a mesh whose nose is not its +Z. */
+  aimYaw?: number;
+  /**
+   * Re-seat the mesh on the node: centred across, its back end (+Z) this far
+   * behind the node as a fraction of its length. For a head riding a ribbon's
+   * tip when the model was not built around its own pivot.
+   */
+  rearAt?: number;
+  /** With `subtract`: the most the coverage gain may reach, whatever the map's dark gain asks for. */
+  maxCover?: number;
   /**
    * The mesh's own up axis is its tail, so a projectile lays it back down the
    * path instead of only turning it. MODEL_FIRE's `Direction` is written in
@@ -159,7 +172,7 @@ const FLAT = Quaternion.FromEulerAngles(0, 0, 0);
  * luminance(sheet)`), so `darkCardGain` can saturate the silhouette on the
  * graded tiers, where a partial subtraction is flattened by the tone curve.
  */
-function subtractMaterial(scene: Scene, tex: Texture, owned: StandardMaterial[]): StandardMaterial {
+function subtractMaterial(scene: Scene, tex: Texture | null, owned: StandardMaterial[]): StandardMaterial {
   const mat = new StandardMaterial('fxModelMinus', scene);
   mat.diffuseColor.set(0, 0, 0);
   mat.specularColor.set(0, 0, 0);
@@ -171,10 +184,35 @@ function subtractMaterial(scene: Scene, tex: Texture, owned: StandardMaterial[])
   mat.backFaceCulling = false;
   mat.disableDepthWrite = true;
   mat.fogEnabled = false;
-  mat.opacityTexture = tex;
-  mat.opacityTexture.getAlphaFromRGB = true;
+  if (tex) {
+    mat.opacityTexture = tex;
+    mat.opacityTexture.getAlphaFromRGB = true;
+  }
+  clampAlpha(mat);
   owned.push(mat);
   return mat;
+}
+
+/** `rearAt`: the mesh's bounds in the node's own frame, then the shift that seats it. */
+function reseat(node: TransformNode, root: AbstractMesh, rearAt: number): void {
+  node.computeWorldMatrix(true);
+  const toNode = node.getWorldMatrix().clone().invert();
+  const min = new Vector3(Infinity, Infinity, Infinity);
+  const max = new Vector3(-Infinity, -Infinity, -Infinity);
+  const v = new Vector3();
+  for (const m of root.getChildMeshes(false)) {
+    const pos = m.getVerticesData('position');
+    if (!pos) continue;
+    const rel = m.computeWorldMatrix(true).multiply(toNode);
+    for (let i = 0; i < pos.length; i += 3) {
+      Vector3.TransformCoordinatesFromFloatsToRef(pos[i], pos[i + 1], pos[i + 2], rel, v);
+      min.minimizeInPlace(v);
+      max.maximizeInPlace(v);
+    }
+  }
+  if (!Number.isFinite(min.x)) return;
+  const length = max.z - min.z;
+  root.position.set(-(min.x + max.x) / 2, -(min.y + max.y) / 2, rearAt * length - max.z);
 }
 
 /** Spawn helper other entries call directly (projectile heads). */
@@ -194,7 +232,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const subtract = opts.blend === 'subtract';
   // The original's greyscale `Light` is the coverage a RENDER_DARK stamp takes out; the map's
   // level scales it so the silhouette saturates on a scene-referred buffer (core.ts).
-  const cover = subtract ? luma(colour) * darkCardGain(scene) : 0;
+  const cover = subtract ? Math.min(opts.maxCover ?? Infinity, luma(colour) * darkCardGain(scene)) : 0;
 
   const node = new TransformNode('fxModel', scene);
   node.rotationQuaternion = null;
@@ -223,6 +261,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         gltf.mesh.position.setAll(0);
         gltf.mesh.scaling.set(1, -1, 1);
         gltf.mesh.rotationQuaternion = (opts.flat ? FLAT : UPRIGHT).clone();
+        if (opts.rearAt !== undefined) reseat(node, gltf.mesh, opts.rearAt);
         const bodyLight = new Vector3(colour[0], colour[1], colour[2]);
         // The lighting lane's shared bright material, for a mesh whose
         // texture did not come through the GLB cache (never disposed here).
@@ -238,13 +277,20 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           const isBright = !solid || i === opts.blendMesh;
           mesh.metadata ??= {};
           mesh.metadata.bodyLight = bodyLight;
-          mesh.metadata.brightMesh = isBright;
+          // A dark mesh is not emissive art: kept out of the effect mask, or the tone pass adds its sheet back.
+          mesh.metadata.brightMesh = isBright && !subtract;
           if (opts.shadow) {
             mesh.metadata.csmCaster = true;
             mesh.metadata.shadowBlendCaster = true;
           }
           mesh.isPickable = false;
           mesh.alwaysSelectAsActiveMesh = true;
+          // A dark mesh's coverage is the sheet alone: the converted COLOR_0 on the skill models is noise,
+          // and its alpha punched holes through the silhouette.
+          if (subtract && isBright) {
+            mesh.useVertexColors = false;
+            mesh.hasVertexAlpha = false;
+          }
           // A bright mesh takes the effects' own additive material - the
           // sheet × `colour` under (SRC_ALPHA, ONE) - so `visibility` is the
           // original's `Alpha` and the tint is its `Light`. Cached per
@@ -253,7 +299,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
           mesh.material = isBright
             ? tex
               ? subtract
-                ? subtractMaterial(scene, tex, fadeMats)
+                ? subtractMaterial(scene, opts.solid ? null : tex, fadeMats)
                 : additiveMaterial(scene, tex, colour)
               : brightFallback
             : solid;
@@ -285,7 +331,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       if (opts.aim) {
         const dx = tmp.x - prevX;
         const dz = tmp.z - prevZ;
-        if (dx * dx + dz * dz > 1e-8) node.rotation.y = Math.atan2(dx, dz);
+        if (dx * dx + dz * dz > 1e-8) node.rotation.y = Math.atan2(dx, dz) + (opts.aimYaw ?? 0);
         prevX = tmp.x;
         prevZ = tmp.z;
       }
