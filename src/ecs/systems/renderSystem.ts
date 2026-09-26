@@ -113,7 +113,11 @@ export const RenderSystem: ISystemFactory = world => {
         const player = !!entity.playerAnimation;
         const outlawLight = player ? outlawBodyLight(entity.heroState) : null;
         const ultraOutlaw = outlawUltraActive(outlawLight !== null);
-        applyOutlawLook(modelObject, ultraOutlaw, world.gameTime.TotalGameTime.TotalSeconds * 1000);
+        applyOutlawLook(
+          modelObject,
+          ultraOutlaw,
+          world.gameTime.TotalGameTime.TotalSeconds * 1000
+        );
         const debuffLight =
           debuffBodyLight(entity.buffs, player) ??
           (ultraOutlaw ? OUTLAW_ULTRA_LIGHT : outlawLight);
