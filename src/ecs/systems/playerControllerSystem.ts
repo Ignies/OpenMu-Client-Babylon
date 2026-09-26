@@ -12,6 +12,7 @@ import { aimX, aimY } from '../../camera';
 import { Commands } from '../../commands';
 import { teleportGate } from '../../common/teleportRules';
 import { teleportBusy } from './teleportSystem';
+import { pickGround } from '../../libs/mu/terrainPick';
 
 const MOVE_DELAY = 0.25;
 
@@ -83,16 +84,7 @@ export const PlayerControllerSystem: ISystemFactory = world => {
 
     if (Store.pickedItem) return;
 
-    const pickInfo = scene.pick(
-      aimX(lastClientX),
-      aimY(lastClientY),
-      m => m === world.terrain?.mesh,
-      true
-    );
-
-    if (!pickInfo) return;
-
-    const point = pickInfo.pickedPoint;
+    const point = pickGround(world, aimX(lastClientX), aimY(lastClientY));
 
     if (!point) return;
 

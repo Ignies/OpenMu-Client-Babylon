@@ -11,6 +11,7 @@ import {
   createTileTextureArray,
   type TileTextureArray,
 } from './tileTextureArray';
+import { TERRAIN_MESH_PICK, TerrainPicker } from './terrainPick';
 import { updateTerrainHeightMap } from './terrainHeightMap';
 import {
   USE_TILE_TEXTURE_ARRAY,
@@ -297,12 +298,13 @@ export async function getTerrainData(
   updateTerrainHeightMap(scene, terrainHeight);
 
   const terrain = createGroundMesh('_world_' + worldNum, scene, ground);
-  terrain.isPickable = true;
+  // Ground picks go through `picker` (terrainPick.ts); a Babylon pick of this
+  // mesh walks all 131 072 triangles and first caches 262 144 Vector3s.
+  terrain.isPickable = TERRAIN_MESH_PICK;
+  const picker = new TerrainPicker(ground.positions);
 
-  // Click-to-move, the cursor sampler and the right-click ground pick all
-  // ray-cast against this mesh, several times a second while a button is
-  // held. Without an octree `Mesh.intersects` walks every one of its 131 072
-  // triangles per pick; with one it descends to a handful of blocks.
+  // One submesh, so this octree never narrowed a pick. It still chooses the
+  // frames the ground is drawn in (`getActiveSubMeshCandidates`).
   terrain.createOrUpdateSubmeshesOctree(64, 4);
 
   terrain.metadata = {
@@ -583,6 +585,7 @@ const xd = xf - xi;
   return {
     objects,
     terrain,
+    picker,
     terrainHeight,
     RequestTerrainHeight,
     IsWalkable,
