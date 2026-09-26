@@ -788,7 +788,6 @@ const RING_DENSITY_GAIN = 2.2;
 
 const OVERLAYS_BY_WORLD: Partial<Record<ENUM_WORLD, readonly TerrainOverlay[]>> =
   {
-    [ENUM_WORLD.WD_0LORENCIA]: [WET_GROUND, PUDDLES],
     [ENUM_WORLD.WD_3NORIA]: [WET_GROUND, PUDDLES],
   };
 

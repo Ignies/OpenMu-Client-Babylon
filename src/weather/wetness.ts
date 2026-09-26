@@ -24,10 +24,7 @@ import { rainStrength, rainTarget } from './rainState';
 /** Maps that get wet ground. Snow maps are excluded - Devias gets snow cover. */
 // ---- 1. tuning -------------------------------------------------------------
 
-const WET_MAPS: ReadonlySet<ENUM_WORLD> = new Set([
-  ENUM_WORLD.WD_0LORENCIA,
-  ENUM_WORLD.WD_3NORIA,
-]);
+const WET_MAPS: ReadonlySet<ENUM_WORLD> = new Set([ENUM_WORLD.WD_3NORIA]);
 
 /** Seconds of full rain to soak dry ground. Stone darkens fast. */
 const WET_BUILD_SECONDS = 22;
