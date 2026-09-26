@@ -13,7 +13,11 @@ import {
 } from '../libs/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
 import { devQueryNumber } from '../common/devSeams';
-import { pipelineSamples } from '../common/lightingQuality';
+import {
+  MSAA_HEAD_ONLY,
+  pipelineSamples,
+  sceneTargetSamples,
+} from '../common/lightingQuality';
 import { renderScaleForStep, renderScaleSeam } from '../libs/renderScale';
 
 /**
@@ -395,7 +399,7 @@ function build(
 
   // The scene is drawn into this one, so it is the pass that has to carry the
   // multisampling - the same reason `fireflyGuard` does when it is first.
-  entry.samples = pipelineSamples();
+  if (!MSAA_HEAD_ONLY) entry.samples = pipelineSamples();
 
   // The sharpened frame, still small. RCAS runs before the reconstruction
   // rather than after it, which is not where FidelityFX puts it: after it, it
@@ -547,12 +551,23 @@ export function syncUpscale(scene: Scene, camera: ArcRotateCamera): void {
   if (runtime) {
     const samples = pipelineSamples();
 
-    if (runtime.entry.samples !== samples) runtime.entry.samples = samples;
+    if (!MSAA_HEAD_ONLY && runtime.entry.samples !== samples) {
+      runtime.entry.samples = samples;
+    }
 
     return;
   }
 
   runtime = build(scene, camera, scale);
+}
+
+/** The entry's MSAA, once the camera's chain is final. */
+export function syncUpscaleSamples(): void {
+  if (!runtime || !MSAA_HEAD_ONLY) return;
+
+  const samples = sceneTargetSamples(runtime.camera, runtime.entry);
+
+  if (runtime.entry.samples !== samples) runtime.entry.samples = samples;
 }
 
 /** Whether the upscale is drawing right now; the perf overlay prints it. */

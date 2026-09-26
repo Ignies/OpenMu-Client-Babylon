@@ -7,7 +7,11 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { devQueryNumber, devQueryNumbers } from '../common/devSeams';
-import { pipelineSamples } from '../common/lightingQuality';
+import {
+  MSAA_HEAD_ONLY,
+  pipelineSamples,
+  sceneTargetSamples,
+} from '../common/lightingQuality';
 import { BLOOM_THRESHOLD } from './postChain';
 
 /**
@@ -143,7 +147,7 @@ function createPass(scene: Scene, camera: ArcRotateCamera): PostProcess {
   // The chain's own sample count, for the frames where nothing else is
   // attached ahead of the pipeline: the scene renders into the first pass's
   // target, so that pass is the one that has to be multisampled.
-  pass.samples = pipelineSamples();
+  if (!MSAA_HEAD_ONLY) pass.samples = pipelineSamples();
 
   const [spread, floor] = knobsDev ?? [SPREAD, FLOOR];
 
@@ -186,7 +190,7 @@ export function syncFireflyGuard(
     if (!live) return true;
   }
 
-  if (runtime) {
+  if (runtime && !MSAA_HEAD_ONLY) {
     // The MSAA option moves without this pass being rebuilt, and it is often
     // the first one attached (see `createPass`).
     const samples = pipelineSamples();
@@ -205,4 +209,16 @@ export function syncFireflyGuard(
   runtime = { scene, camera, pass: createPass(scene, camera) };
 
   return true;
+}
+
+/**
+ * The pass's MSAA, only while the scene is drawn into it. Called once the
+ * camera's chain is final.
+ */
+export function syncFireflyGuardSamples(): void {
+  if (!runtime || !MSAA_HEAD_ONLY) return;
+
+  const samples = sceneTargetSamples(runtime.camera, runtime.pass);
+
+  if (runtime.pass.samples !== samples) runtime.pass.samples = samples;
 }

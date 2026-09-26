@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite';
 import type { Item } from '../../../ecs/world';
 import { itemIconKey, itemIconPackChain } from '../../../common/itemIconPack';
 import { ITEM_ICON_FIT } from '../../../common/itemIconFit';
+import { itemLevelLook } from '../../../common/itemLevelLook';
 
 /**
  * `<img fetchpriority>` is not a React 18 prop (it arrives with React 19), so
@@ -23,8 +24,10 @@ const IMG_PRIORITY = { fetchpriority: 'high' } as const;
  * The zoom never overflows: it is capped by the canvas, and the canvas is
  * what `max-width/height: 100%` has already fitted into the box.
  */
-function fitTransform(item: { group: number; num: number }): string | undefined {
-  const fit = ITEM_ICON_FIT[`${item.group}_${item.num}`];
+function fitTransform(item: Item): string | undefined {
+  const key = `${item.group}_${item.num}`;
+  const levelKey = itemLevelLook(item.group, item.num, item.lvl) ? `${key}_${item.lvl}` : key;
+  const fit = ITEM_ICON_FIT[levelKey];
   if (!fit) return undefined;
   const [zoom, dx, dy] = fit;
   return `scale(${zoom}) translate(${dx * 100}%, ${dy * 100}%)`;

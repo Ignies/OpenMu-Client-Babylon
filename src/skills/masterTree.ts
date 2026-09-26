@@ -26,7 +26,8 @@
  * Read by the master tree window (`ui/…/masterSkills`) through the `skills`
  * facade.
  */
-import { onLanguageChanged, textTable } from '../i18n';
+import { onLanguageChanged, t, textTable } from '../i18n';
+import type { TextKey } from '../i18n/recipes';
 import { observable, runInAction } from 'mobx';
 import { CharacterClassNumber, type ENUM_WORLD } from '../common/types';
 import { EventBus } from '../libs/eventBus';
@@ -129,39 +130,40 @@ const TREE_CLASS: Readonly<Record<number, MasterTreeClass>> = {
 /**
  * `ClassNameTextIndex` / `CategoryTextIndex`: GlobalText 1668…1672, 1689,
  * 3151 and the three category lines after 1751 / 1755 / 1759 / 1763 / 1767
- * / 3136 / 3330, read out of `Text_Eng_decrypted.bmd`.
+ * / 3136 / 3330, read out of `Text_Eng_decrypted.bmd`. The class names are
+ * MU jargon and stay English; the categories are catalogue keys.
  */
 const TREE_TEXT: Readonly<
-  Record<MasterTreeClass, { className: string; categories: readonly [string, string, string] }>
+  Record<MasterTreeClass, { className: string; categories: readonly TextKey[] }>
 > = {
-  [MasterTreeClass.None]: { className: '', categories: ['', '', ''] },
+  [MasterTreeClass.None]: { className: '', categories: [] },
   [MasterTreeClass.GrandMaster]: {
     className: 'Grand Master',
-    categories: ['Peace', 'Wisdom', 'Overcome'],
+    categories: ['master.category.peace', 'master.category.wisdom', 'master.category.overcome'],
   },
   [MasterTreeClass.BladeMaster]: {
     className: 'Blade Master',
-    categories: ['Protection', 'Bravery', 'Anger'],
+    categories: ['master.category.protection', 'master.category.bravery', 'master.category.anger'],
   },
   [MasterTreeClass.HighElf]: {
     className: 'High Elf',
-    categories: ['Blessing', 'Salvation', 'Storm'],
+    categories: ['master.category.blessing', 'master.category.salvation', 'master.category.storm'],
   },
   [MasterTreeClass.DuelMaster]: {
     className: 'Dual Master',
-    categories: ['Solidity', 'Fighting Spirit', 'Ultimatum'],
+    categories: ['master.category.solidity', 'master.category.fightingSpirit', 'master.category.ultimatum'],
   },
   [MasterTreeClass.LordEmperor]: {
     className: 'Lord Emperor',
-    categories: ['Determination', 'Justice', 'Conquer'],
+    categories: ['master.category.determination', 'master.category.justice', 'master.category.conquer'],
   },
   [MasterTreeClass.DimensionMaster]: {
     className: 'Dimension Master',
-    categories: ['Guardian', 'Chaos', 'Honor'],
+    categories: ['master.category.guardian', 'master.category.chaos', 'master.category.honor'],
   },
   [MasterTreeClass.FistMaster]: {
     className: 'Fist Master',
-    categories: ['Willpower', 'Determination', 'Destruction'],
+    categories: ['master.category.willpower', 'master.category.determination', 'master.category.destruction'],
   },
 };
 
@@ -374,7 +376,9 @@ export function masterTreeText(): {
   className: string;
   categories: readonly [string, string, string];
 } {
-  return TREE_TEXT[masterTreeClass()];
+  const { className, categories } = TREE_TEXT[masterTreeClass()];
+  const [a = '', b = '', c = ''] = categories.map(key => t(key));
+  return { className, categories: [a, b, c] };
 }
 
 /** `SetMasterSkillTreeData`: the nodes of the hero's tree, in index order. */

@@ -54,6 +54,8 @@ const PACKS: Record<string, { folder: string; encoding: string }> = {
   jpn: { folder: 'Jpn', encoding: 'utf-8' },
   kor: { folder: 'Kor', encoding: 'utf-8' },
   tha: { folder: 'Tha', encoding: 'windows-874' },
+  pol: { folder: 'Pol', encoding: 'windows-1250' },
+  vie: { folder: 'Vie', encoding: 'utf-8' },
 };
 
 function bux(buffer: Uint8Array): void {

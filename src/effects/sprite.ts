@@ -100,6 +100,11 @@ export interface SpriteOptions {
    */
   cells?: SheetCells;
   /**
+   * Additive only: a flipbook of separate sheets played over the first `until` of the life (0..1),
+   * the last one held after - BITMAP_FIRECRACKER0001..0007. `texture` is then unused.
+   */
+  frames?: { textures: readonly string[]; until: number };
+  /**
    * `add` (default) is `EnableAlphaBlend`: the sheet × `colour` added to the frame. `subtract`
    * is `RENDER_DARK`: a black card with the sheet as its coverage, drawn
    * `(SRC_ALPHA, ONE_MINUS_SRC_ALPHA)` for the reason model.ts `subtractMaterial` gives - a
@@ -181,6 +186,8 @@ export function spawnSprite(
   const material = dark
     ? darkMaterial(scene, opts.texture, opts.cover ?? luma(colour) * darkCardGain(scene))
     : additiveMaterial(scene, opts.texture, colour, 'add', opts.soft ? opts.cells ?? true : opts.softEdge ? 'card' : undefined);
+  const flip = !dark && opts.frames ? opts.frames.textures.map(tex => additiveMaterial(scene, tex, colour)) : null;
+  const flipUntil = opts.frames?.until ?? 1;
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
   const size = opts.size ?? DEFAULT_SIZE;
   const count = Math.max(1, opts.count ?? 1);
@@ -207,7 +214,7 @@ export function spawnSprite(
   const offsets: Vector3[] = [];
   const phases: number[] = [];
   for (let i = 0; i < count; i++) {
-    const card = acquireCard(scene, material, !opts.flat);
+    const card = acquireCard(scene, flip ? flip[0] : material, !opts.flat);
     if (opts.flat) card.rotation.x = Math.PI / 2;
     if (opts.roll !== undefined) {
       if (opts.flat) card.rotation.y = opts.roll;
@@ -242,8 +249,13 @@ export function spawnSprite(
           if (applied) frame = f;
         }
       }
+      let shown = material;
+      if (flip) {
+        shown = flip[Math.min(flip.length - 1, Math.floor((p / flipUntil) * flip.length))];
+        for (const c of cards) c.material = shown;
+      }
       // Until the sheet is in, the card would be a solid square of the tint: hold it invisible.
-      const ready = (dark ? material.opacityTexture : material.diffuseTexture) ? 1 : 0;
+      const ready = (dark ? shown.opacityTexture : shown.diffuseTexture) ? 1 : 0;
       source(tmp);
       const grown = p < GROW_FRACTION ? lerp(growFrom, 1, p / GROW_FRACTION) : lerp(1, grow, (p - GROW_FRACTION) / (1 - GROW_FRACTION));
       const s = scaleRate === undefined ? size * (opts.sizeAt ? opts.sizeAt(p) : grown) : Math.abs(size + scaleRate * t);

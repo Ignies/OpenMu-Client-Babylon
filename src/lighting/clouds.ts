@@ -336,6 +336,15 @@ function shadowStrength(sunElevationDeg: number): number {
   return SHADOW_STRENGTH * (0.35 + 0.65 * lift);
 }
 
+/** What a reader hands over of the look. */
+export type CloudLook = {
+  base: number | null;
+  sunDirection: readonly [number, number, number];
+  sunElevationDeg: number;
+};
+
+const cloudValues: number[] = new Array(12).fill(0);
+
 /**
  * What every reader binds. `muCloudA` is (wind x, wind z, coverage, shadow
  * strength) and `muCloudB` is (sun step x, sun step z, altitude, thickness):
@@ -345,14 +354,24 @@ function shadowStrength(sunElevationDeg: number): number {
 export function bindClouds(
   effect: Effect,
   scene: Scene,
-  look: {
-    base: number | null;
-    sunDirection: readonly [number, number, number];
-    sunElevationDeg: number;
-  }
+  look: CloudLook
 ): void {
-  effect.setTexture(CLOUD_NOISE_SAMPLER, cloudNoise(scene));
+  bindCloudTexture(effect, scene);
+  cloudUniformValues(look, cloudValues);
+  bindCloudValues(effect, cloudValues);
+}
 
+/** The field alone. Per draw: a texture unit is engine state. */
+export function bindCloudTexture(effect: Effect, scene: Scene): void {
+  effect.setTexture(CLOUD_NOISE_SAMPLER, cloudNoise(scene));
+}
+
+/**
+ * The three vec4s of `bindClouds` into `out`: `muCloudA` at 0, `muCloudB` at
+ * 4, `muCloudC` at 8. They depend on the clock, the options and the look
+ * alone, so a reader that draws many times a frame can work them out once.
+ */
+export function cloudUniformValues(look: CloudLook, out: number[]): void {
   const live = cloudsActive(look.base);
   const cover = live ? coverage(look.base ?? 0) : 0;
   const t = serverNow() / 1000;
@@ -361,24 +380,10 @@ export function bindClouds(
   // rides it slightly faster, so it also changes shape on the way. Each offset
   // is handed over already in UV units and already wrapped - `WIND` is tiles a
   // second and a UV unit is `1 / OCTAVE_SCALE` tiles.
-  effect.setFloat4(
-    'muCloudA',
-    wrapUv(WIND[0] * t * OCTAVE_SCALE[0]),
-    wrapUv(WIND[1] * t * OCTAVE_SCALE[0]),
-    cover,
-    live ? shadowStrength(look.sunElevationDeg) : 0
-  );
-
-  effect.setFloat4(
-    'muCloudC',
-    wrapUv(WIND[0] * DETAIL_WIND * t * OCTAVE_SCALE[1]),
-    wrapUv(WIND[1] * DETAIL_WIND * t * OCTAVE_SCALE[1]),
-    // How finely this tier reads the field. Enhanced reads it exactly as it
-    // always has; a uniform that never binds is 0, and the field guards
-    // against that by treating anything at or below 1 as the authored scale.
-    volumetricClouds() ? VOLUME_SCALE : 1,
-    0
-  );
+  out[0] = wrapUv(WIND[0] * t * OCTAVE_SCALE[0]);
+  out[1] = wrapUv(WIND[1] * t * OCTAVE_SCALE[0]);
+  out[2] = cover;
+  out[3] = live ? shadowStrength(look.sunElevationDeg) : 0;
 
   // The light travels along `sunDirection`, so a point walks against it to
   // reach the deck. A near-horizontal sun would send the step to infinity;
@@ -386,13 +391,25 @@ export function bindClouds(
   const d = look.sunDirection;
   const down = Math.max(0.15, -d[1]);
 
-  effect.setFloat4(
-    'muCloudB',
-    -d[0] / down,
-    -d[2] / down,
-    CLOUD_ALT,
-    CLOUD_THICK
-  );
+  out[4] = -d[0] / down;
+  out[5] = -d[2] / down;
+  out[6] = CLOUD_ALT;
+  out[7] = CLOUD_THICK;
+
+  out[8] = wrapUv(WIND[0] * DETAIL_WIND * t * OCTAVE_SCALE[1]);
+  out[9] = wrapUv(WIND[1] * DETAIL_WIND * t * OCTAVE_SCALE[1]);
+  // How finely this tier reads the field. Enhanced reads it exactly as it
+  // always has; a uniform that never binds is 0, and the field guards
+  // against that by treating anything at or below 1 as the authored scale.
+  out[10] = volumetricClouds() ? VOLUME_SCALE : 1;
+  out[11] = 0;
+}
+
+/** Writes what `cloudUniformValues` worked out. */
+export function bindCloudValues(effect: Effect, v: readonly number[]): void {
+  effect.setFloat4('muCloudA', v[0], v[1], v[2], v[3]);
+  effect.setFloat4('muCloudC', v[8], v[9], v[10], v[11]);
+  effect.setFloat4('muCloudB', v[4], v[5], v[6], v[7]);
 }
 
 /**

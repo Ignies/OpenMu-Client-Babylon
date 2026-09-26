@@ -393,6 +393,7 @@ async function runLoad(
     const {
       objects,
       terrain,
+      picker,
       RequestTerrainHeight,
       IsWalkable,
       RequestTerrainFlag,
@@ -425,6 +426,7 @@ async function runLoad(
 
     world.terrain = {
       mesh: terrain,
+      picker,
       MapTileObjects: new Array(256).fill(MapTileObject),
       extraHeight: 0,
     };

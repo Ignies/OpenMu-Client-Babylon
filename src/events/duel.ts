@@ -97,6 +97,16 @@ const state = observable(
 
 let resultLeft = 0;
 
+/**
+ * The duel reached its score. OpenMU then warps both sides out after ten
+ * seconds and never sends `DuelEnd` (DuelRoom.FinishDuelAsync), so the
+ * scoreboard goes with that warp instead.
+ */
+let finished = false;
+/** Past OpenMU's ten-second warp: the scoreboard goes even if the warp changed no map. */
+const FINISHED_SECONDS = 15;
+let finishedLeft = 0;
+
 /** The incoming challenge the prompt shows, or null. */
 export function duelRequest(): { requesterId: number; requesterName: string } | null {
   return state.request;
@@ -188,6 +198,7 @@ export function quitDuelChannel(): void {
 }
 
 function clearDuel(): void {
+  finished = false;
   runInAction(() => {
     state.duel = null;
     state.bars = null;
@@ -196,6 +207,10 @@ function clearDuel(): void {
 }
 
 function update(_map: ENUM_WORLD, dt: number): void {
+  if (finished) {
+    finishedLeft -= dt;
+    if (finishedLeft <= 0) clearDuel();
+  }
   if (!state.result) return;
   resultLeft -= dt;
   if (resultLeft <= 0) {
@@ -205,8 +220,9 @@ function update(_map: ENUM_WORLD, dt: number): void {
   }
 }
 
-/** Map changed: transient UI only - `duel` itself survives the arena warp. */
+/** Map changed: transient UI only - `duel` itself survives the arena warp in. */
 function reset(): void {
+  if (finished) clearDuel();
   runInAction(() => {
     state.request = null;
     state.watchOpen = false;
@@ -259,6 +275,7 @@ EventBus.on('DuelInit', packet => {
   const side2: DuelSide = { id: p.Player2Id & ID_MASK, name: cleanName(p.Player2Name) };
   const hero = heroNetId();
   const watching = hero !== side1.id && hero !== side2.id;
+  finished = false;
   runInAction(() => {
     state.duel = { side1, side2, score1: 0, score2: 0, watching };
     state.bars = watching ? FULL_BARS : null;
@@ -314,6 +331,8 @@ EventBus.on('DuelFinished', packet => {
   const p = new DuelFinishedPacket(packet);
   playUiSound('duelWindow');
   resultLeft = RESULT_SECONDS;
+  finished = state.duel !== null;
+  finishedLeft = FINISHED_SECONDS;
   runInAction(() => {
     state.result = { winner: cleanName(p.Winner), loser: cleanName(p.Loser) };
   });

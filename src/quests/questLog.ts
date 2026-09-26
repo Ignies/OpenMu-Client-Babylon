@@ -28,6 +28,7 @@ import { t, type TextKey } from '../i18n';
 import { observable, reaction, runInAction } from 'mobx';
 import { GameOptions } from '../common/gameOptions';
 import { itemBaseName } from '../common/itemsDatabase';
+import { itemLevelName } from '../common/itemLevelLook';
 import { ItemSerializer } from '../common/itemSerializer';
 import { monsterDisplayName } from '../common/monstersDatabase';
 import {
@@ -491,8 +492,7 @@ function itemName(data: DataView): string {
     const name =
       itemBaseName(item.group, item.num) ||
       t('quest.itemFallback', { id: item.group * 512 + item.num });
-    const level = item.lvl ? ` +${item.lvl}` : '';
-    return `${name}${level}`;
+    return itemLevelName(item.group, item.num, item.lvl, name);
   } catch {
     return t('quest.item');
   }

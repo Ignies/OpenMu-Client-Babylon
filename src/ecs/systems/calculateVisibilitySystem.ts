@@ -26,6 +26,7 @@ export const CalculateVisibilitySystem: ISystemFactory = world => {
 
           visibility.state = 'visible';
           visibility.lastChecked = 1;
+          visibility.swept = true;
         }
 
         return;
@@ -35,6 +36,8 @@ export const CalculateVisibilitySystem: ISystemFactory = world => {
         visibility.lastChecked -= dt;
 
         if (visibility.lastChecked > 0) continue;
+
+        visibility.swept = true;
 
         const distance = Math.sqrt(
           Math.pow(transform.pos.x - playerEntity.transform.pos.x, 2) +

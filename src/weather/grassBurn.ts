@@ -8,6 +8,7 @@ import {
 } from '../libs/babylon/exports';
 import type { ThinEngine } from '@babylonjs/core/Engines/thinEngine';
 import { GameOptions } from '../common/gameOptions';
+import { devQuery } from '../common/devSeams';
 import { effects } from '../effects';
 import { FIRE_SPARKS } from '../effects/recipes';
 import type { ParticleRecipe } from '../effects/core';
@@ -103,6 +104,15 @@ const STARVE_RATE = 2.5;
 const FUEL_SAMPLES = 8;
 
 /**
+ * `?burnThrottle=0`: stamp every front every frame over its whole box. On, a
+ * front waits for half a texel or a tenth of a second and the walk skips what
+ * cannot be in the ring; the union of the rings is the same texels.
+ */
+const BURN_THROTTLE = devQuery('burnThrottle') !== '0';
+const STAMP_STEP = 0.5 / BURN_RES;
+const STAMP_EVERY = 0.1;
+
+/**
  * Seconds between ember bursts from one front, and sparks a burst.
  *
  * Per front, which is what makes the rate matter: six fires at four sparks
@@ -156,6 +166,9 @@ const LOBE_5 = 0.08;
 /** The most `reach` can return; the stamp box has to allow for it. */
 const MAX_REACH = 1 + LOBE_2 + LOBE_3 + LOBE_5;
 
+/** The least `reach` can return; nothing inside it is left to stamp. */
+const MIN_REACH = 1 - LOBE_2 - LOBE_3 - LOBE_5;
+
 /** How black a texel goes when the fire passes over it. */
 const CHAR = 255;
 
@@ -189,6 +202,8 @@ type Fire = {
   burnt: number;
   vigour: number;
   sinceEmber: number;
+  /** Seconds since the annulus up to `radius` was last stamped. */
+  sinceStamp: number;
   /** Phases of this fire's own lobes; see `reach`. */
   p1: number;
   p2: number;
@@ -337,6 +352,50 @@ export function grassBurnAt(x: number, z: number): number {
 
 // ---- 3. burning ------------------------------------------------------------
 
+/** Char the texels `a..b` of row `tz` that lie in the annulus; whether any did. */
+function burnRow(
+  map: Uint8Array,
+  fire: Fire,
+  from: number,
+  to: number,
+  tz: number,
+  a: number,
+  b: number
+): boolean {
+  const wz = (tz + 0.5) / BURN_RES;
+  const dz = wz - fire.z;
+  const row = tz * BURN_SIZE;
+
+  let touched = false;
+
+  for (let tx = a; tx <= b; tx++) {
+    const wx = (tx + 0.5) / BURN_RES;
+    const dx = wx - fire.x;
+    const d2 = dx * dx + dz * dz;
+
+    // The front's own reach in this direction, not a radius. Both ends of
+    // the annulus take it, so the burnt inside and the advancing edge are
+    // the same shape and the ring does not cross itself as the fire grows.
+    const k = reach(fire, Math.atan2(dz, dx));
+    const inner = (from * k) ** 2;
+    const outer = (to * k) ** 2;
+
+    if (d2 < inner || d2 > outer) continue;
+    if (!hasFuel(wx, wz)) continue;
+
+    const i = row + tx;
+
+    // Written with `max`, so a second fire over the same ground does not
+    // stack past black and does not shorten what is already there.
+    if (map[i] >= CHAR) continue;
+
+    map[i] = CHAR;
+    touched = true;
+  }
+
+  return touched;
+}
+
 /**
  * Stamp the annulus between `from` and `to` tiles of a fire's centre.
  *
@@ -360,34 +419,44 @@ function stamp(fire: Fire, from: number, to: number): void {
 
   let touched = false;
 
-  for (let tz = z0; tz <= z1; tz++) {
-    const wz = (tz + 0.5) / BURN_RES;
-    const dz = wz - fire.z;
-    const row = tz * BURN_SIZE;
+  if (!BURN_THROTTLE) {
+    for (let tz = z0; tz <= z1; tz++) {
+      if (burnRow(map, fire, from, to, tz, x0, x1)) touched = true;
+    }
+  } else {
+    // Each row walks the chord of the longest lobe less the chord of the
+    // shortest, so the trig runs only on the band that can hold the ring.
+    // Both circles are padded a texel the safe way, so rounding can only hand
+    // the exact test an extra texel, never take one from it.
+    const outer = to * MAX_REACH + 1 / BURN_RES;
+    const hole = from * MIN_REACH - 1 / BURN_RES;
+    const outer2 = outer * outer;
+    const hole2 = hole > 0 ? hole * hole : 0;
 
-    for (let tx = x0; tx <= x1; tx++) {
-      const wx = (tx + 0.5) / BURN_RES;
-      const dx = wx - fire.x;
-      const d2 = dx * dx + dz * dz;
+    for (let tz = z0; tz <= z1; tz++) {
+      const dz = (tz + 0.5) / BURN_RES - fire.z;
+      const dz2 = dz * dz;
 
-      // The front's own reach in this direction, not a radius. Both ends of
-      // the annulus take it, so the burnt inside and the advancing edge are
-      // the same shape and the ring does not cross itself as the fire grows.
-      const k = reach(fire, Math.atan2(dz, dx));
-      const inner = (from * k) ** 2;
-      const outer = (to * k) ** 2;
+      if (dz2 >= outer2) continue;
 
-      if (d2 < inner || d2 > outer) continue;
-      if (!hasFuel(wx, wz)) continue;
+      const half = Math.sqrt(outer2 - dz2);
+      const a = Math.max(x0, Math.floor((fire.x - half) * BURN_RES));
+      const b = Math.min(x1, Math.ceil((fire.x + half) * BURN_RES));
 
-      const i = row + tx;
+      if (dz2 < hole2) {
+        const gap = Math.sqrt(hole2 - dz2);
+        const h0 = Math.ceil((fire.x - gap) * BURN_RES);
+        const h1 = Math.floor((fire.x + gap) * BURN_RES) - 1;
 
-      // Written with `max`, so a second fire over the same ground does not
-      // stack past black and does not shorten what is already there.
-      if (map[i] >= CHAR) continue;
+        if (h0 <= h1) {
+          const l = burnRow(map, fire, from, to, tz, a, Math.min(b, h0 - 1));
+          const r = burnRow(map, fire, from, to, tz, Math.max(a, h1 + 1), b);
+          if (l || r) touched = true;
+          continue;
+        }
+      }
 
-      map[i] = CHAR;
-      touched = true;
+      if (burnRow(map, fire, from, to, tz, a, b)) touched = true;
     }
   }
 
@@ -396,6 +465,25 @@ function stamp(fire: Fire, from: number, to: number): void {
   growRect(dirty, x0, z0, x1, z1);
   growRect(painted, x0, z0, x1, z1);
 }
+
+/** Stamp whatever the front has crossed since it was last stamped. */
+function catchUp(fire: Fire): void {
+  if (fire.radius > fire.burnt) {
+    stamp(fire, fire.burnt, fire.radius);
+    fire.burnt = fire.radius;
+  }
+
+  fire.sinceStamp = 0;
+}
+
+/**
+ * Whether a throttled front is stamped this frame. Until something is painted
+ * the decay clock is stopped, so the first char has to land on its own frame.
+ */
+const stampDue = (fire: Fire): boolean =>
+  rectEmpty(painted) ||
+  fire.radius - fire.burnt >= STAMP_STEP ||
+  fire.sinceStamp >= STAMP_EVERY;
 
 /** Is there anything left to burn around this ring? */
 function ringHasFuel(fire: Fire): boolean {
@@ -449,6 +537,7 @@ export function burnGrass(
     burnt: 0,
     vigour: strength,
     sinceEmber: 0,
+    sinceStamp: 0,
     // Its own shape. Rolled once, so a fire keeps the outline it started with
     // as it grows rather than writhing.
     p1: Math.random() * Math.PI * 2,
@@ -462,6 +551,7 @@ export function burnGrass(
     for (let i = 1; i < fires.length; i++) {
       if (fires[i].vigour < fires[worst].vigour) worst = i;
     }
+    catchUp(fires[worst]);
     fires.splice(worst, 1);
   }
 
@@ -595,20 +685,26 @@ function update(dt: number): void {
     // And it goes out where there is nothing left to take.
     if (!ringHasFuel(f)) f.vigour -= dt * STARVE_RATE;
 
-    if (f.radius > f.burnt) {
-      stamp(f, f.burnt, f.radius);
-      f.burnt = f.radius;
-    }
+    const out = f.vigour <= 0 || f.radius >= FIRE_MAX_RADIUS;
+
+    f.sinceStamp += dt;
+
+    // A front going out lays down what it still owes first.
+    if (!BURN_THROTTLE || out || stampDue(f)) catchUp(f);
 
     embers(f, dt);
 
-    if (f.vigour <= 0 || f.radius >= FIRE_MAX_RADIUS) fires.splice(i, 1);
+    if (out) fires.splice(i, 1);
   }
 
   if (!rectEmpty(painted)) {
     sinceDecay += dt;
 
     if (sinceDecay >= DECAY_EVERY) {
+      // Owed rings go down before the pass, so it decays the same map the
+      // every-frame stamp would have left.
+      for (const f of fires) catchUp(f);
+
       // The fraction is carried rather than rounded away. A pass every two
       // seconds owes 255 * 2 / 300 = 1.7 of a byte, and rounding that to 2
       // regrows the field in 255 seconds instead of 300 - measured at 239,

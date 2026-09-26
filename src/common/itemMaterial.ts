@@ -12,7 +12,7 @@ import type { BodyShine } from './modelObject';
 import { pbrMapsFor, pbrPlaceholders } from './pbrMaps';
 import { pbrDetailStrength, specularLightScale } from './materialQuality';
 import { UNIFIED_LIGHT_MODEL, linearLightActive } from './lightModel';
-import { lightingTier } from './lightingQuality';
+import { lightingTier, type LightingTier } from './lightingQuality';
 import {
   TOON_CAM_X_UNIFORM,
   TOON_CAM_Y_UNIFORM,
@@ -46,8 +46,10 @@ const glowScratch = { r: 0, g: 0, b: 0, a: 1 };
 import { loadMuSprite } from '../libs/mu/sprites';
 import { skyLightOf, sunLightOf } from '../lighting/keyRig';
 import {
-  bindClouds,
+  bindCloudTexture,
+  bindCloudValues,
   cloudFieldGlsl,
+  cloudUniformValues,
   CLOUD_NOISE_SAMPLER,
   CLOUD_UNIFORMS,
 } from '../lighting/clouds';
@@ -59,6 +61,7 @@ import {
   lightTintStrength,
 } from '../lighting/lightTint';
 import { devQuery, devQueryNumbers } from './devSeams';
+import { frameSnapshot } from './frameSnapshot';
 import {
   SNOW_CAP_COLOUR,
   SNOW_CAP_KNEE_FULL,
@@ -371,48 +374,115 @@ const sunResponseGlsl = (target: string, albedo: string) =>
 const luma = (c: { r: number; g: number; b: number }): number =>
   c.r * 0.299 + c.g * 0.587 + c.b * 0.114;
 
+/**
+ * The item bind's per-frame values, worked out on a frame's first item draw
+ * and bound from here by every draw. `?itemFrameBind=0` refills per draw.
+ */
+type ItemFrame = {
+  tint: number;
+  /** `muCloudA`, `muCloudB`, `muCloudC` (clouds.ts `cloudUniformValues`). */
+  clouds: number[];
+  /** Which sun uniforms get written: none, the colour at 0, or both. */
+  sun: 'off' | 'dark' | 'lit';
+  sunDir: [number, number, number];
+  sunColor: [number, number, number];
+  toonRef: boolean;
+  ref: [number, number];
+  detail: number;
+};
+
+const ITEM_FRAME_BIND = devQuery('itemFrameBind') !== '0';
+
+const itemFrame = frameSnapshot<ItemFrame>(
+  {
+    tint: 0,
+    clouds: new Array(12).fill(0),
+    sun: 'off',
+    sunDir: [0, 0, 0],
+    sunColor: [0, 0, 0],
+    toonRef: false,
+    ref: [0, 0],
+    detail: 0,
+  },
+  (frame, scene) => {
+    frame.tint = lightTintStrength();
+    frameClouds(frame);
+    frameSunWrap(frame, scene);
+    frameToonRef(frame, scene);
+    frame.detail = pbrDetailStrength();
+  },
+  ITEM_FRAME_BIND
+);
+
+function bindItemFrame(effect: Effect, frame: ItemFrame): void {
+  effect.setFloat(LIGHT_TINT_UNIFORM, frame.tint);
+  bindCloudValues(effect, frame.clouds);
+
+  if (frame.sun === 'lit') {
+    const d = frame.sunDir;
+    effect.setFloat3(SUN_DIR_UNIFORM, d[0], d[1], d[2]);
+  }
+  if (frame.sun !== 'off') {
+    const c = frame.sunColor;
+    effect.setFloat3(SUN_COLOR_UNIFORM, c[0], c[1], c[2]);
+  }
+
+  if (frame.toonRef) {
+    effect.setFloat2(TOON_REF_UNIFORM, frame.ref[0], frame.ref[1]);
+  }
+}
+
 /** The key's level and its floor for the toon remap; unread without `MU_TOON`. */
-function bindToonRef(effect: Effect, scene: Scene): void {
-  if (!toonRampActive()) return;
+function frameToonRef(frame: ItemFrame, scene: Scene): void {
+  frame.toonRef = toonRampActive();
+  if (!frame.toonRef) return;
 
   const sky = skyLightOf(scene);
   const sun = sunLightOf(scene);
   const skyTop = sky ? sky.intensity * luma(sky.diffuse) : 0;
   const skyGround = sky ? sky.intensity * luma(sky.groundColor) : 0;
-  // `sun.intensity` carries `directLightGain`; see bindSunWrap.
+  // `sun.intensity` carries `directLightGain`; see frameSunWrap.
   const sunPlain =
     sun && sun.intensity > 0
       ? sun.intensity * specularLightScale() * luma(sun.diffuse)
       : 0;
   const level = skyTop + sunPlain;
 
-  effect.setFloat2(TOON_REF_UNIFORM, level, level > 0 ? skyGround / level : 0);
+  frame.ref[0] = level;
+  frame.ref[1] = level > 0 ? skyGround / level : 0;
 }
 
 /**
  * The cloud deck the wrap term subtracts. Null while the map has no sky and
  * inside a room, so the shadow is identity there.
  */
-function bindItemClouds(effect: Effect, scene: Scene): void {
+function frameClouds(frame: ItemFrame): void {
   const look = lookDirector()?.state();
 
-  bindClouds(effect, scene, {
-    base: look?.profile.sky
-      ? look.profile.sky.clouds ?? SKY_CLOUDS_DEFAULT
-      : null,
-    sunDirection: look?.key.direction ?? [0, -1, 0],
-    sunElevationDeg: look?.profile.sun.elevationDeg ?? 45,
-  });
+  cloudUniformValues(
+    {
+      base: look?.profile.sky
+        ? look.profile.sky.clouds ?? SKY_CLOUDS_DEFAULT
+        : null,
+      sunDirection: look?.key.direction ?? [0, -1, 0],
+      sunElevationDeg: look?.profile.sun.elevationDeg ?? 45,
+    },
+    frame.clouds
+  );
 }
 
-/** Per-draw sun uniforms for the sun response; unread without `MU_WRAP` or `MU_TOON`. */
-function bindSunWrap(effect: Effect, mesh: AbstractMesh) {
+/** The sun's direction and colour; unread without `MU_WRAP` or `MU_TOON`. */
+function frameSunWrap(frame: ItemFrame, scene: Scene): void {
+  frame.sun = 'off';
   if (!wrapActive() && !toonRampActive()) return;
 
-  const sun = sunLightOf(mesh.getScene());
+  const sun = sunLightOf(scene);
 
   if (!sun || sun.intensity <= 0) {
-    effect.setFloat3(SUN_COLOR_UNIFORM, 0, 0, 0);
+    frame.sun = 'dark';
+    frame.sunColor[0] = 0;
+    frame.sunColor[1] = 0;
+    frame.sunColor[2] = 0;
     return;
   }
 
@@ -425,13 +495,13 @@ function bindSunWrap(effect: Effect, mesh: AbstractMesh) {
   // (the sun share x the map's key gain).
   const fill = sun.intensity * specularLightScale();
 
-  effect.setFloat3(SUN_DIR_UNIFORM, d.x * norm, d.y * norm, d.z * norm);
-  effect.setFloat3(
-    SUN_COLOR_UNIFORM,
-    sun.diffuse.r * fill,
-    sun.diffuse.g * fill,
-    sun.diffuse.b * fill
-  );
+  frame.sun = 'lit';
+  frame.sunDir[0] = d.x * norm;
+  frame.sunDir[1] = d.y * norm;
+  frame.sunDir[2] = d.z * norm;
+  frame.sunColor[0] = sun.diffuse.r * fill;
+  frame.sunColor[1] = sun.diffuse.g * fill;
+  frame.sunColor[2] = sun.diffuse.b * fill;
 }
 
 type LitDefines = Record<string, boolean> & { rebuild(): void };
@@ -498,6 +568,9 @@ const FX_CHROME2_FROM_LIGHT = 0x100; // PartObjectColor2 case 0: tint = scene li
 const FX_BODY_SHINE = 0x200; // golden bodies: metal + chrome over the model
 const FX_BODY_SHINE_STAR = 0x400; // ...or the single Shiny02 pass instead
 const FX_BODY_SHINE_CHROME = 0x800; // ...or Chrome01 alone (a Fenrir's one mesh)
+const FX_AURA = 0x1000; // Ultra's outlaw: black body, itemGlow on the edge and brightest art only
+const FX_AURA_WING = 0x2000; // ...a wing: the membrane's own pattern is the vein
+const FX_AURA_BONE = 0x4000; // ...a wing's bone frame: lit red from its art
 
 /** Tint of the body shine passes, per mesh (`ModelObject.BodyShine`). */
 const BODY_SHINE_UNIFORM = 'muBodyShine';
@@ -611,7 +684,29 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
     // tint lands on trim and metal detail while dark leather keeps its
     // texture (a flat add drowned everything into one bright shape), and
     // the view-dependent rim stays a thin edge light.
-    if (itemGlow.r + itemGlow.g + itemGlow.b > 0.0) {
+    if ((fx & ${FX_AURA}) != 0) {
+      // Ultra's outlaw (outlawLook.ts): the surface goes black and the red
+      // lives on the silhouette edge and on the art's brightest detail, so
+      // trim and seams read as glowing veins. abs(): a double-sided card's
+      // back face would otherwise read as all edge.
+      float rim = 1.0 - clamp(abs(dot(normalize(viewDirectionW), normalW)), 0.0, 1.0);
+      float texLum = dot(${texel}.rgb, vec3(0.299, 0.587, 0.114));
+      bool wing = (fx & ${FX_AURA_WING}) != 0;
+      // On a wing the membrane's own pattern is the vein; on armour, only
+      // the brightest trim.
+      float vein = wing ? smoothstep(0.4, 0.9, texLum) : smoothstep(0.75, 1.0, texLum);
+      float edge = rim * rim * rim;
+      edge *= edge;
+      // The art in greyscale, contrast up and brightness down: near black,
+      // with the texture's detail still there. The red is drawn over it.
+      float grey = clamp((texLum - 0.5) * 1.8 + 0.5, 0.0, 1.0);
+      vec3 dark = vec3(grey * 0.08);
+      if ((fx & ${FX_AURA_BONE}) != 0) {
+        ${color}.rgb = dark + itemGlow * (0.35 + 1.4 * texLum);
+      } else {
+        ${color}.rgb = dark + itemGlow * (1.2 * vein + 2.2 * edge);
+      }
+    } else if (itemGlow.r + itemGlow.g + itemGlow.b > 0.0) {
       float rim = 1.0 - clamp(dot(normalize(viewDirectionW), normalW), 0.0, 1.0);
       rim = rim * rim * rim;
       float texLum = dot(${texel}.rgb, vec3(0.299, 0.587, 0.114));
@@ -800,22 +895,33 @@ function addItemUniforms(material: ItemMaterial, scene: Scene) {
  * variants run this from their bind observer; the materials are frozen and
  * shared, so everything per mesh has to go through here.
  */
-function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
-  effect.setFloat('time', time + (mesh.metadata?.timeOffset ?? 0));
-  effect.setFloat(LIGHT_TINT_UNIFORM, lightTintStrength());
-  bindItemClouds(effect, mesh.getScene());
+function bindItemEffect(
+  effect: Effect,
+  mesh: AbstractMesh,
+  time: number
+): ItemFrame {
+  const scene = mesh.getScene();
+  const frame = itemFrame(scene);
 
-  bindSunWrap(effect, mesh);
+  effect.setFloat('time', time + (mesh.metadata?.timeOffset ?? 0));
+  bindItemFrame(effect, frame);
+  bindCloudTexture(effect, scene);
+
+  // Per mesh: the toon vectors carry the figures' own rim, glint and matcap.
   bindToon(effect, mesh.metadata?.characterAsset === true);
-  bindToonRef(effect, mesh.getScene());
 
   const tier = mesh.metadata?.itemTier as ItemVisualTier | null | undefined;
+
+  // The wearer's aura (Ultra's outlaw) replaces the item's own level look.
+  const aura = (mesh.metadata?.bodyShine as BodyShine | undefined)?.aura;
+  const auraOn = !!aura && aura.x + aura.y + aura.z > 0;
 
   let fx = 0;
 
   // Blend (bright) meshes are additive glow cards already; the original
   // skips NoneBlendMesh meshes in its chrome passes the same way.
   if (
+    !auraOn &&
     tier &&
     tier.active &&
     legacyItemEffectsOn() &&
@@ -850,6 +956,11 @@ function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
     const a = mesh.visibility;
     effect.setFloat3(BODY_SHINE_UNIFORM, tint.x * a, tint.y * a, tint.z * a);
   }
+  if (auraOn && !mesh.metadata?.brightMesh) {
+    fx |= FX_AURA;
+    if (mesh.metadata?.auraWing) fx |= FX_AURA_WING;
+    if (mesh.metadata?.auraBone) fx |= FX_AURA_BONE;
+  }
 
   effect.setFloat(ITEM_FX_UNIFORM, fx);
 
@@ -868,7 +979,11 @@ function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
   }
   effect.setFloat(SNOW_CAP_UNIFORM, cap);
 
-  if (
+  if (improved && auraOn && !mesh.metadata?.brightMesh) {
+    // The wearer's aura outranks the item's own glow: an outlaw's weapons glow red.
+    const a = mesh.visibility;
+    effect.setFloat3('itemGlow', improved.x * a, improved.y * a, improved.z * a);
+  } else if (
     tier &&
     tier.improvedActive &&
     improvedItemEffectsOn() &&
@@ -885,6 +1000,8 @@ function bindItemEffect(effect: Effect, mesh: AbstractMesh, time: number) {
   } else {
     effect.setFloat3('itemGlow', 0, 0, 0);
   }
+
+  return frame;
 }
 
 /**
@@ -911,6 +1028,18 @@ export function packBodyLight(
   out: Float32Array | number[],
   o = 0
 ): void {
+  packBodyLightFor(lightingTier(), x, y, z, out, o);
+}
+
+/** `packBodyLight` under a tier the caller has read once for many packs. */
+export function packBodyLightFor(
+  tier: LightingTier | null,
+  x: number,
+  y: number,
+  z: number,
+  out: Float32Array | number[],
+  o = 0
+): void {
   if (!UNIFIED_LIGHT_MODEL) {
     out[o] = 1;
     out[o + 1] = 1;
@@ -918,7 +1047,7 @@ export function packBodyLight(
     return;
   }
 
-  if (lightingTier()) {
+  if (tier) {
     const peak = Math.max(1, x, y, z);
     out[o] = x / peak;
     out[o + 1] = y / peak;
@@ -1289,12 +1418,12 @@ ${sunResponseGlsl('finalColor.rgb', 'surfaceAlbedo')}
       const effect = material.getEffect();
       if (!effect) return;
 
-      bindItemEffect(effect, mesh, now());
+      const frame = bindItemEffect(effect, mesh, now());
 
       const diffuse = mesh.metadata!.diffuseTexture as Texture;
       const maps = pbrMapsFor(diffuse, scene);
 
-      effect.setFloat(DETAIL_UNIFORM, pbrDetailStrength());
+      effect.setFloat(DETAIL_UNIFORM, frame.detail);
 
       effect.setTexture('albedoSampler', diffuse);
       effect.setTexture('bumpSampler', maps?.normal ?? flat.normal);

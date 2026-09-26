@@ -296,7 +296,7 @@ function drawBoard(
   // long name on a narrow plank ends up smaller rather than clipped.
   let fontSize = Math.round(boxHeight * 0.82);
   for (; fontSize > 8; fontSize--) {
-    ctx.font = font(fontSize);
+    ctx.font = font(fontSize, label);
     if (ctx.measureText(label).width <= boxWidth * 0.94) break;
   }
 
@@ -314,7 +314,13 @@ function drawBoard(
 /**
  * A serif face for the wood, with the UI stack behind it so a pack whose
  * script Georgia has no glyphs for (CJK, Thai) still draws (muText/style.less).
+ * Georgia also lacks the Vietnamese stacked marks, and a per-letter fallback
+ * would print one word in two faces, so those labels start at Times.
  */
-function font(size: number): string {
-  return `bold ${size}px Georgia, 'Times New Roman', Tahoma, 'Malgun Gothic', 'Microsoft YaHei', 'Leelawadee UI', serif`;
+function font(size: number, label: string): string {
+  const serif = VIETNAMESE_MARKS.test(label) ? "'Times New Roman'" : "Georgia, 'Times New Roman'";
+  return `bold ${size}px ${serif}, Tahoma, 'Malgun Gothic', 'Microsoft YaHei', 'Leelawadee UI', serif`;
 }
+
+// Latin Extended Additional, U+1EA0 to U+1EF9: the Vietnamese letters with two marks.
+const VIETNAMESE_MARKS =/[Ạ-ỹ]/;

@@ -1,3 +1,4 @@
+import { devQuery } from '../../common/devSeams';
 import { MapTileObject } from '../../common/mapTileObject';
 import { PlayerAction } from '../../common/objects/enum';
 import { waterSurfaceHeight } from '../../libs/mu/terrainWater';
@@ -49,6 +50,9 @@ const WATER_SURFACE = (175 + 180) / MU_PER_TILE;
  * are pinned to is half the surface's swing.
  */
 const WAVE_WEIGHT = 0.5;
+
+/** `?kalimabob=0` pins and pushes off-screen plants every frame again. */
+const IN_VIEW_ONLY = devQuery('kalimabob') !== '0';
 
 /**
  * `CheckGrass(o)` - Kalima types 15 (x13), 29 (x287) and 32 (x19), the water
@@ -119,10 +123,17 @@ export class KalimaWaterPlantObject extends MapTileObject {
     // of it would teleport a plant mid-slide.
     if (this.#due > MAX_TICKS_PER_FRAME) this.#due = MAX_TICKS_PER_FRAME;
 
+    // Like the original, only drawn plants are pushed and pinned
+    // (GMHellas.cpp:447-461). Hidden ticks are spent, not owed, so the tick
+    // phase stays the old path's and re-entry cannot burst.
+    const hidden = IN_VIEW_ONLY && this.OutOfView;
+
     while (this.#due >= 1) {
       this.#due -= 1;
-      this.#push(transform);
+      if (!hidden) this.#push(transform);
     }
+
+    if (hidden) return;
 
     // The ripple page - the ambient rings and the waves a footfall raises -
     // is a quarter of the original's height and is not reproduced: nothing in

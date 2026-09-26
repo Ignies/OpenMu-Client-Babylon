@@ -8,6 +8,7 @@ import { TWFlags } from '../../common/terrain/consts';
 import { isFlagInBinaryMask } from '../../common/utils';
 import { aimX, aimY } from '../../camera';
 import { LEAN_CURSOR_OBJECTS, findRestObject } from '../../libs/mu/restObjects';
+import { pickGround } from '../../libs/mu/terrainPick';
 import { Store } from '../../store';
 import type { CursorHover } from '../../ui/components/gameCursor/cursors';
 import type { Entity, ISystemFactory, World } from '../world';
@@ -115,14 +116,7 @@ export const CursorSystem: ISystemFactory = world => {
 
       if (!world.pointerPressed) return;
 
-      const pickInfo = scene.pick(
-        aimX(lastClientX),
-        aimY(lastClientY),
-        m => m === world.terrain?.mesh,
-        true
-      );
-
-      const point = pickInfo?.pickedPoint;
+      const point = pickGround(world, aimX(lastClientX), aimY(lastClientY));
 
       world.cursorBlocked = point
         ? isDontMoveTile(world, ~~point.x, ~~point.z)

@@ -1,11 +1,29 @@
 import { Plane, Vector3 } from '../../libs/babylon/exports';
 import { ISystemFactory } from '../world';
 import { toRenderAngles } from '../../common/renderAngles';
+import { publishViewPlanes } from '../../common/viewPlanes';
+import { ENUM_WORLD } from '../../common/types';
 import { weather } from '../../weather';
 import { debuffBodyLight, debuffBrightBody } from '../../common/debuffBody';
+import { outlawBodyLight } from '../../common/nameTags';
+import {
+  applyOutlawLook,
+  OUTLAW_ULTRA_LIGHT,
+  outlawUltraActive,
+} from '../../common/outlawLook';
 
 const v3Temp = Vector3.Zero();
 const v3Temp2 = Vector3.Zero();
+
+/**
+ * The original's TestFrustrum2D keeps everything in view on the login screen
+ * (ZzzLodTerrain.cpp:2473-2475), so the emitters there are never gated.
+ */
+const UNGATED_WORLDS: ReadonlySet<number> = new Set([
+  ENUM_WORLD.WD_55LOGINSCENE,
+  ENUM_WORLD.WD_73NEW_LOGIN_SCENE,
+  ENUM_WORLD.WD_77NEW_LOGIN_SCENE,
+]);
 
 /**
  * Tiles the camera frustum is widened by before a model is called off screen.
@@ -25,6 +43,8 @@ export const RenderSystem: ISystemFactory = world => {
 
   /** Reused copy of `scene.frustumPlanes`, pushed out by OFF_SCREEN_MARGIN. */
   const widenedPlanes: Plane[] = [];
+
+  let multiCameraBefore = false;
 
   function widenFrustum(): Plane[] | null {
     const source = world.scene.frustumPlanes;
@@ -56,9 +76,24 @@ export const RenderSystem: ISystemFactory = world => {
       const extraHeight = terrain.extraHeight;
 
       // Built from the previous `scene.render()`. One frame of lag is fine:
-      // this only pauses looping clips and hides blob shadows, and
-      // `updateFrustumVisibility` waits OUT_OF_VIEW_GRACE frames first.
+      // this only pauses looping clips, hides blob shadows and gates the map
+      // emitters, and `updateFrustumVisibility` waits OUT_OF_VIEW_GRACE
+      // frames first.
       const frustumPlanes = widenFrustum();
+
+      // With a second camera up (the class preview) `scene.frustumPlanes` are
+      // the last camera's, not the world's. Held a frame: the preview's
+      // dispose clears `activeCameras` between frames, after a two-camera render.
+      const multiCamera = (world.scene.activeCameras?.length ?? 0) > 1;
+
+      publishViewPlanes(
+        world.scene,
+        UNGATED_WORLDS.has(map) || multiCamera || multiCameraBefore
+          ? null
+          : frustumPlanes
+      );
+
+      multiCameraBefore = multiCamera;
 
       for (const entity of query) {
         const { transform, modelObject } = entity;
@@ -77,9 +112,19 @@ export const RenderSystem: ISystemFactory = world => {
           transform.visualRotY = transform.rot.y;
         }
 
-        // A Freeze or Cold body is drawn at its own BodyLight instead of the terrain's.
+        // A Freeze or Cold body is drawn at its own BodyLight instead of the
+        // terrain's, and so is an outlaw's; the debuff is the later write.
         const player = !!entity.playerAnimation;
-        const debuffLight = debuffBodyLight(entity.buffs, player);
+        const outlawLight = player ? outlawBodyLight(entity.heroState) : null;
+        const ultraOutlaw = outlawUltraActive(outlawLight !== null);
+        applyOutlawLook(
+          modelObject,
+          ultraOutlaw,
+          world.gameTime.TotalGameTime.TotalSeconds * 1000
+        );
+        const debuffLight =
+          debuffBodyLight(entity.buffs, player) ??
+          (ultraOutlaw ? OUTLAW_ULTRA_LIGHT : outlawLight);
         modelObject.setBrightBody(debuffBrightBody(entity.buffs, player));
         if (debuffLight) {
           modelObject.Light.set(debuffLight[0], debuffLight[1], debuffLight[2]);

@@ -38,6 +38,7 @@ import {
   terrainLightDeclarationsGlsl,
   terrainLightDefines,
   terrainLightSamplers,
+  terrainOutputDecodeGlsl,
   terrainSkyLightGlsl,
 } from './terrainLighting';
 
@@ -838,7 +839,7 @@ ${
     }
   #endif
 
-    f = mix(f, pow(max(f, vec3(0.0)), vec3(2.2)), linearOut);
+${terrainOutputDecodeGlsl('f')}
 
     // The blade being eaten, from the tip down.
     //

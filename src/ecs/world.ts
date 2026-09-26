@@ -9,6 +9,7 @@ import type { ModelObject } from '../common/modelObject';
 import type { MonsterActionType, PlayerAction } from '../common/objects/enum';
 import type { PetFollow, PetSpec } from '../common/pets';
 import type { MUAttributeSystem } from '../libs/attributeSystem';
+import type { TerrainPicker } from '../libs/mu/terrainPick';
 import { TransformNode } from '../libs/babylon/exports';
 import { createPathfinding } from '../libs/pathfinding';
 import { CharacterClassNumber, ENUM_WORLD } from '../common';
@@ -248,6 +249,8 @@ export type Entity = Partial<{
   visibility: {
     state: 'visible' | 'nearby' | 'hidden';
     lastChecked: number;
+    /** Set by the first distance check; the loading screen waits for it. */
+    swept?: boolean;
   };
   screenPosition: {
     x: number;
@@ -525,6 +528,8 @@ export class World extends ECSWorld<Entity> {
 
   terrain: {
     mesh: Mesh;
+    /** Every ground pick: `pickGround` (terrainPick.ts). */
+    picker: TerrainPicker;
     MapTileObjects: (typeof ModelObject)[];
     extraHeight: number;
   } | null = null;

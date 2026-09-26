@@ -76,7 +76,7 @@ function opaqueBox(file: string) {
   return { width, height, x0, y0, x1, y1 };
 }
 
-function fitOf(group: number, num: number, file: string): Box | null {
+function fitOf(group: number, num: number, file: string, scaleOverride?: number): Box | null {
   const measured = opaqueBox(file);
   if (!measured) return null;
 
@@ -89,7 +89,7 @@ function fitOf(group: number, num: number, file: string): Box | null {
 
   // What `max-width/height: 100%` does to the canvas inside the item's squares.
   const contain = Math.min((item.X * SQUARE) / width, (item.Y * SQUARE) / height);
-  const scale = ITEM_ICON_SCALE[`${group}_${num}`] ?? ITEM_ICON_SCALE_DEFAULT;
+  const scale = scaleOverride ?? ITEM_ICON_SCALE[`${group}_${num}`] ?? ITEM_ICON_SCALE_DEFAULT;
   const cap = Math.min(width / w, height / h) * MARGIN;
 
   return {
@@ -124,10 +124,25 @@ for (const [key, { file, group, num }] of candidates) {
   fits.set(key, box);
 }
 
+/**
+ * The icons of a model the original swaps in at one level (itemLevelLook.ts),
+ * keyed `group_num_level`, at that model's own RenderObjectScreen scale
+ * (ZzzInventory.cpp:9268-9275).
+ */
+const LEVEL_ICON_SCALE: Record<string, number> = {
+  '14_23_1': 0.0012,
+  '14_24_1': 0.0025,
+};
+for (const [key, scale] of Object.entries(LEVEL_ICON_SCALE)) {
+  const [group, num] = key.split('_').map(Number);
+  const box = fitOf(group, num, `item_${key}.png`, scale);
+  if (box && box.zoom >= MIN_ZOOM) fits.set(key, box);
+}
+
 const keys = [...fits.keys()].sort((a, b) => {
-  const [ga, na] = a.split('_').map(Number);
-  const [gb, nb] = b.split('_').map(Number);
-  return ga - gb || na - nb;
+  const [ga, na, la = -1] = a.split('_').map(Number);
+  const [gb, nb, lb = -1] = b.split('_').map(Number);
+  return ga - gb || na - nb || la - lb;
 });
 
 const round = (n: number, places: number) => Number(n.toFixed(places));

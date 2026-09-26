@@ -62,6 +62,16 @@ export const PVP_CAUTION = 4;
 export const PVP_MURDERER1 = 5;
 export const PVP_MURDERER2 = 6;
 
+/**
+ * An outlaw's whole body is drawn red instead of in the terrain light:
+ * `Vector(1.f, 0.1f, 0.1f, c->Light)` for `c->PK >= PVP_MURDERER2`
+ * (ZzzCharacter.cpp:9988-9991). Null for everyone else.
+ */
+export function outlawBodyLight(pk: number | undefined): readonly [number, number, number] | null {
+  return (pk ?? PVP_NEUTRAL) >= PVP_MURDERER2 ? OUTLAW_LIGHT : null;
+}
+const OUTLAW_LIGHT = [1, 0.1, 0.1] as const;
+
 export function pkTextColour(pk: number): string {
   return PK_TEXT_COLOURS[pk] ?? PK_MURDERER2_COLOUR;
 }

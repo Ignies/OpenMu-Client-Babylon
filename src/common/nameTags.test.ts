@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
+  outlawBodyLight,
   heroStateMessage,
   parseSelfDefense,
   pkTextColour,
@@ -70,5 +71,14 @@ describe('pkTextColour', () => {
   it('falls back to the murderer colour past the table', () => {
     expect(pkTextColour(6)).toBe(PK_MURDERER2_COLOUR);
     expect(pkTextColour(7)).toBe(PK_MURDERER2_COLOUR);
+  });
+});
+
+describe('outlawBodyLight', () => {
+  it('turns only a second-stage murderer red', () => {
+    expect(outlawBodyLight(6)).toEqual([1, 0.1, 0.1]);
+    expect(outlawBodyLight(5)).toBeNull();
+    expect(outlawBodyLight(3)).toBeNull();
+    expect(outlawBodyLight(undefined)).toBeNull();
   });
 });

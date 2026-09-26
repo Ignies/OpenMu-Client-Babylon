@@ -2,10 +2,13 @@ import {
   GlowLayer,
   type AbstractMesh,
   type Mesh,
+  type Observer,
+  type RenderTargetTexture,
   type Scene,
 } from '../libs/babylon/exports';
 import { GameOptions, onGameOptionsChanged } from '../common/gameOptions';
-import { devQueryNumber } from '../common/devSeams';
+import { devQuery, devQueryNumber } from '../common/devSeams';
+import { driveRenderList } from '../scenes/renderList';
 
 /**
  * The halo around effect art - the light a bolt or a flare throws into the
@@ -81,6 +84,31 @@ const included = new Set<AbstractMesh>();
  */
 let referenced = new WeakSet<AbstractMesh>();
 
+// With no list the target walks every active mesh and drops all but the
+// included few (`?fxHaloList=0`). A resize rebuilds it list-less, so a new
+// target is driven again, as the item layer's is (`sceneLook.ts`).
+const HALO_LIST = devQuery('fxHaloList') !== '0';
+
+let frameTick: Observer<Scene> | null = null;
+let drivenTexture: RenderTargetTexture | null = null;
+let releaseHaloList: (() => void) | null = null;
+
+const isIncluded = (mesh: AbstractMesh): boolean => included.has(mesh);
+
+// Before the frame's active meshes are chosen, never from `addEffectGlow`: a
+// list driven after them is empty for that frame, an undriven target is not.
+function driveHaloList(): void {
+  if (!layer || !layerScene || !layer.isEnabled) return;
+
+  const texture = (layer as unknown as { _mainTexture?: RenderTargetTexture })
+    ._mainTexture;
+
+  if (!texture || texture === drivenTexture) return;
+
+  drivenTexture = texture;
+  releaseHaloList = driveRenderList(layerScene, texture, isIncluded, 'active');
+}
+
 function syncIntensity(): void {
   if (!layer) return;
 
@@ -113,6 +141,8 @@ function ensureLayer(scene: Scene): GlowLayer | null {
   layer.isEnabled = false;
   layerScene = scene;
   offOptions = onGameOptionsChanged(syncIntensity);
+
+  if (HALO_LIST) frameTick = scene.onBeforeRenderObservable.add(driveHaloList);
 
   syncIntensity();
 
@@ -168,6 +198,11 @@ export function disposeEffectGlow(): void {
   referenced = new WeakSet();
   offOptions?.();
   offOptions = null;
+  layerScene?.onBeforeRenderObservable.remove(frameTick);
+  frameTick = null;
+  releaseHaloList?.();
+  releaseHaloList = null;
+  drivenTexture = null;
   layer?.dispose();
   layer = null;
   layerScene = null;

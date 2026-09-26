@@ -7,12 +7,13 @@ import {
   TransformNode,
   Vector3,
   VertexBuffer,
+  type IVector3Like,
 } from '../libs/babylon/exports';
 import type { Entity, World } from '../ecs/world';
 import { ModelObject, extendByPosedLocalBounds } from './modelObject';
 import { GameOptions } from './gameOptions';
 import { lightingTier, type LightingTier } from './lightingQuality';
-import { packBodyLight } from './itemMaterial';
+import { packBodyLight, packBodyLightFor } from './itemMaterial';
 import { blendMeshFor } from './blendMeshes';
 import { isEffectOnlyObject } from './effectOnlyObjects';
 import { meshAnimationFor } from './meshAnimation';
@@ -30,7 +31,19 @@ import {
   meshCasts,
   shadowStateVersion,
 } from './objectShadow';
-import { terrainLightReaches } from './terrainDynamicLight';
+import {
+  requestBodyTerrainLight,
+  requestTerrainLight,
+  terrainLightReaches,
+  terrainLightTouchedVersion,
+  terrainLightTouchesSample,
+} from './terrainDynamicLight';
+import {
+  ChunkLight,
+  type LightBox,
+  type LightFrame,
+  type LightHost,
+} from './propBatchLight';
 import {
   isRoofSlab,
   isTileOpen,
@@ -84,6 +97,12 @@ const CELL_CULLING = devQuery('cells') !== '0';
 
 /** `?chunkClone=copy`: chunk meshes as full clones with copied geometry, for the A/B. */
 const OLD_CHUNK_CLONE = devQuery('chunkClone') === 'copy';
+
+/**
+ * `?repackAll=1`: a reached or lit chunk re-packs every placement and uploads
+ * every frame, culled cells included, for the A/B (`propBatchLight.ts`).
+ */
+const REPACK_ALL = devQuery('repackAll') === '1';
 
 /** Clip samples the culling box is grown over, so a swaying crown stays inside it. */
 const POSE_SAMPLES = 4;
@@ -158,8 +177,10 @@ type Chunk = {
   minZ: number;
   maxX: number;
   maxZ: number;
-  /** A light carrier stood in this chunk last frame: one more re-pack after it goes. */
+  /** `?repackAll=1`: a light carrier stood here last frame, one more re-pack after it goes. */
   litLastFrame: boolean;
+  /** Which placements the frame re-packs; null under `?repackAll=1`. */
+  readonly light: ChunkLight<Placement> | null;
 };
 
 class PropType {
@@ -209,6 +230,7 @@ const MIRROR = Matrix.Scaling(1, -1, 1);
 const nodeM = Matrix.Identity();
 const instM = Matrix.Identity();
 const bufM = Matrix.Identity();
+const sampled = { x: 0, y: 0, z: 0 };
 
 /** Whether the prototype's running clip moves any bone (a settled clip keeps one still animation). */
 function typeSways(proto: ModelObject): boolean {
@@ -307,6 +329,9 @@ class PropBatches {
   /** A chunk was built or disposed: the cells are re-indexed before use. */
   private cellsDirty = false;
   private tier: LightingTier | null;
+  /** The tier the packs of this build or update are made under, read once. */
+  private packTier: LightingTier | null;
+  private readonly lightFrame: LightFrame<Placement>;
   private shadowSerial = -1;
   private snowTimer = 0;
   private maskVersion = -1;
@@ -321,6 +346,18 @@ class PropBatches {
     this.snow = SNOW_GROUND_MAPS.has(map);
     this.mask = needsTerrainMask(map);
     this.tier = lightingTier();
+    this.packTier = this.tier;
+    this.lightFrame = {
+      classic: this.tier === null,
+      snow: this.snow,
+      maskVersion: 0,
+      touchedVersion: 0,
+      serial: 0,
+      touches: terrainLightTouchesSample,
+      reaches: (box: LightBox) =>
+        terrainLightReaches(box.minX, box.minZ, box.maxX, box.maxZ),
+      pack: (p, host, out) => this.packInto(p, host, out),
+    };
   }
 
   exclusion(type: number, factory: typeof ModelObject): string | null {
@@ -559,6 +596,9 @@ class PropBatches {
     const n = placements.length;
 
     const inst = new Float32Array(n * 4);
+    const light = REPACK_ALL
+      ? null
+      : new ChunkLight(placements, inst, pt.lit, pt.emitsLight);
     const matrices = subs.map(() => new Float32Array(n * 16));
     const shadowLists = subs.map(() => [] as number[]);
     const chunkMin = subs.map(() => new Vector3(Infinity, Infinity, Infinity));
@@ -581,11 +621,19 @@ class PropBatches {
     let minY = Infinity;
     let maxY = -Infinity;
 
+    // The mask version is read before the roofs below are painted, so the
+    // first re-pass refreshes the snow alpha the way the whole-chunk one did.
+    if (light) {
+      this.syncLightFrame(lightingTier());
+      light.beginFull(this.lightFrame);
+    }
+
     for (let i = 0; i < n; i++) {
       const p = placements[i];
 
       placementMatrix(p, nodeM);
-      this.packLight(p, inst, i * 4);
+      if (light) light.packFull(i, this.lightFrame);
+      else this.packLight(p, inst, i * 4);
 
       resetBox(placeMin, placeMax);
 
@@ -648,6 +696,8 @@ class PropBatches {
       if (p.pos.y < minY) minY = p.pos.y;
       if (p.pos.y > maxY) maxY = p.pos.y;
     }
+
+    light?.endFull();
 
     const meshes: Mesh[] = [];
     const shadowMeshes: Mesh[] = [];
@@ -737,6 +787,7 @@ class PropBatches {
       maxX,
       maxZ,
       litLastFrame: false,
+      light,
     };
   }
 
@@ -853,7 +904,94 @@ class PropBatches {
       this.packLight(placements[i], inst, i * 4);
     }
 
+    this.uploadLight(chunk);
+  }
+
+  /**
+   * `packLight` into `out[0..3]`, under `packTier`, and sampling the field
+   * `getTerrainLight` would sample without asking the option per placement.
+   */
+  private packInto(
+    p: Placement,
+    host: LightHost | null,
+    out: Float32Array
+  ): void {
+    const tier = this.packTier;
+    const { x, z } = p.pos;
+    let light: IVector3Like;
+
+    if (host) {
+      light = host.Light;
+    } else if (
+      tier
+        ? requestBodyTerrainLight(x, z, sampled)
+        : requestTerrainLight(x, z, sampled)
+    ) {
+      light = sampled;
+    } else {
+      light = this.world.getTerrainLight(x, z);
+    }
+
+    packBodyLightFor(tier, light.x, light.y, light.z, out, 0);
+    out[3] = this.snow && !isTileOpen(x, z) ? 0 : 1;
+  }
+
+  private uploadLight(chunk: Chunk): void {
     for (const mesh of chunk.meshes) mesh.thinInstanceBufferUpdated('muInst');
+  }
+
+  private syncLightFrame(tier: LightingTier | null): void {
+    const frame = this.lightFrame;
+
+    this.packTier = tier;
+    frame.classic = tier === null;
+    frame.touchedVersion = terrainLightTouchedVersion();
+    if (this.snow) frame.maskVersion = terrainMaskVersion();
+  }
+
+  /**
+   * Classic re-packs a chunk a torch reaches; every tier re-packs one a light
+   * carrier stands in. A chunk whose cell is off waits until it is back on.
+   */
+  private repackChanged(tier: LightingTier | null): void {
+    this.syncLightFrame(tier);
+
+    for (const pt of this.types.values()) {
+      if (pt.state !== 'built') continue;
+
+      for (const chunk of pt.chunks.values()) {
+        const light = chunk.light!;
+
+        if (chunk.cell !== null && !chunk.cell.enabled) {
+          light.skipped = true;
+          continue;
+        }
+
+        if (light.update(this.lightFrame, chunk)) this.uploadLight(chunk);
+      }
+    }
+  }
+
+  /** The loop `repackChanged` replaced, for `?repackAll=1`. */
+  private repackReached(): void {
+    for (const pt of this.types.values()) {
+      if (pt.state !== 'built') continue;
+      for (const chunk of pt.chunks.values()) {
+        let repack =
+          this.tier === null &&
+          terrainLightReaches(chunk.minX, chunk.minZ, chunk.maxX, chunk.maxZ);
+
+        if (pt.lit) {
+          const litNow = chunk.placements.some(
+            p => p.entity.modelObject?.Ready === true
+          );
+          if (litNow || chunk.litLastFrame) repack = true;
+          chunk.litLastFrame = litNow;
+        }
+
+        if (repack) this.repackLight(chunk);
+      }
+    }
   }
 
   update(dt: number): void {
@@ -880,28 +1018,8 @@ class PropBatches {
 
     if (CELL_CULLING) this.cullCells();
 
-    // Classic: BodyLight carries the torch delta, which flickers. Only the
-    // chunks a torch reaches are re-packed; tiers >= 1 read the bake alone.
-    // A lit type's chunks re-pack while a light carrier stands in them on
-    // every tier: the lamp's own colour flickers into its body.
-    for (const pt of this.types.values()) {
-      if (pt.state !== 'built') continue;
-      for (const chunk of pt.chunks.values()) {
-        let repack =
-          this.tier === null &&
-          terrainLightReaches(chunk.minX, chunk.minZ, chunk.maxX, chunk.maxZ);
-
-        if (pt.lit) {
-          const litNow = chunk.placements.some(
-            p => p.entity.modelObject?.Ready === true
-          );
-          if (litNow || chunk.litLastFrame) repack = true;
-          chunk.litLastFrame = litNow;
-        }
-
-        if (repack) this.repackLight(chunk);
-      }
-    }
+    if (REPACK_ALL) this.repackReached();
+    else this.repackChanged(tier);
 
     if (this.snow) {
       this.snowTimer += dt;
@@ -910,13 +1028,22 @@ class PropBatches {
         const mask = terrainMaskVersion();
         if (mask !== this.maskVersion) {
           this.maskVersion = mask;
+          this.lightFrame.maskVersion = mask;
           for (const pt of this.types.values()) {
             if (pt.state !== 'built') continue;
-            for (const chunk of pt.chunks.values()) this.repackLight(chunk);
+            for (const chunk of pt.chunks.values()) {
+              if (!chunk.light) this.repackLight(chunk);
+              else if (chunk.light.packAll(this.lightFrame)) {
+                this.uploadLight(chunk);
+              }
+            }
           }
         }
       }
     }
+
+    // `RenderSystem` runs before the next flush and writes the carriers' light.
+    this.lightFrame.serial++;
   }
 
   /** Every built type back to pending: the next flush rebuilds the chunks. */

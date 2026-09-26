@@ -2,6 +2,7 @@ import { Matrix, Vector2, Vector3 } from '../../libs/babylon/exports';
 import {
   clearScreenPositionListeners,
   emitScreenPosition,
+  emitScreenPositionFrameEnd,
 } from '../../libs/screenPositionBus';
 import { Entity, ISystemFactory } from '../world';
 
@@ -174,6 +175,8 @@ export const CalculateScreenPositionSystem: ISystemFactory = world => {
 
         emitScreenPosition(entity, result.screenPosition);
       });
+
+      emitScreenPositionFrameEnd();
     },
   };
 };

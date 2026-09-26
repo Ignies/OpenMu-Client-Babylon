@@ -164,12 +164,13 @@
     margin-bottom: 6px;
   }
 
+  // Long titles and monster names wrap rather than lose their tail.
   .quest-tracker-title,
-  .quest-tracker-objective {
+  .quest-tracker-line,
+  .quest-tracker-count {
     display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: anywhere;
     text-shadow: 1px 1px 0 #000;
   }
 
@@ -178,12 +179,23 @@
     pointer-events: auto;
     cursor: pointer;
 
+    > .mu-text {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
     &:hover {
       background: rgba(255, 255, 255, 0.12);
     }
   }
 
   .quest-tracker-objective {
+    display: block;
     padding-left: 8px;
+    margin-top: 3px;
+  }
+
+  .quest-tracker-count {
+    text-align: right;
   }
 }

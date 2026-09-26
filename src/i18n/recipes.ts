@@ -716,6 +716,8 @@ export const EN_TEXT = {
   'language.bulgarian': 'Bulgarian',
   'language.romanian': 'Romanian',
   'language.german': 'German',
+  'language.polish': 'Polish',
+  'language.vietnamese': 'Vietnamese',
 
   // ---- bottom bar --------------------------------------------------------
   'bottomBar.itemShop': 'Item Shop',
@@ -1063,6 +1065,26 @@ export const EN_TEXT = {
   'master.expPercent': 'EXP: %6.2f%%',
   'master.expTip': 'EXP:%I64d / %I64d',
   'master.spendPoint': 'Spend {points} master point on {skill}?',
+  'master.category.peace': 'Peace',
+  'master.category.wisdom': 'Wisdom',
+  'master.category.overcome': 'Overcome',
+  'master.category.protection': 'Protection',
+  'master.category.bravery': 'Bravery',
+  'master.category.anger': 'Anger',
+  'master.category.blessing': 'Blessing',
+  'master.category.salvation': 'Salvation',
+  'master.category.storm': 'Storm',
+  'master.category.solidity': 'Solidity',
+  'master.category.fightingSpirit': 'Fighting Spirit',
+  'master.category.ultimatum': 'Ultimatum',
+  'master.category.determination': 'Determination',
+  'master.category.justice': 'Justice',
+  'master.category.conquer': 'Conquer',
+  'master.category.guardian': 'Guardian',
+  'master.category.chaos': 'Chaos',
+  'master.category.honor': 'Honor',
+  'master.category.willpower': 'Willpower',
+  'master.category.destruction': 'Destruction',
   'master.spendPoints': 'Spend {points} master points on {skill}?',
   'master.skillFallback': 'skill {number}',
 
@@ -1662,6 +1684,8 @@ export const EN_TEXT = {
 
   // ---- item tooltip ------------------------------------------------------
   'item.thisItem': 'this item',
+  'item.ringOfGlory': 'Ring of Glory',
+  'item.darkStone': 'Dark Stone',
   'item.equipped': 'Equipped',
   'item.excellentPrefix': 'Excellent {name}',
   'item.ancientPrefix': 'Ancient {name}',
@@ -2405,6 +2429,8 @@ export const EN_TEXT = {
   'notify.noInventoryRoom': 'There is no room in the inventory',
   'notify.noRoomForItem': 'There is no room for that item',
   'notify.inventorySorted': 'Inventory arranged',
+  'notify.arrowsReloaded': 'Arrows reloaded',
+  'notify.noMoreArrows': 'No more arrows',
   'notify.itemsMoved': '{count} items moved',
   'notify.itemsBought': '{count} bought',
   'notify.learnedSkill': 'You have learned {name}',
@@ -2604,6 +2630,8 @@ export const EN_TEXT = {
   'sign.guardhouse': 'Guardhouse',
   'sign.church': 'Church',
   'sign.guild': 'Guild',
+  'sign.northCastle': 'Northern Castle',
+  'sign.southCastle': 'Southern Castle',
 } as const;
 
 /** Every key the client can ask for. Derived, so typos do not compile. */

@@ -20,13 +20,19 @@ import {
 // `SSAO2RenderingPipeline` then `import()`s the same specifier, gets the
 // cached module, and does *not* re-run the registration over the top of ours.
 import '@babylonjs/core/Shaders/ssaoCombine.fragment.js';
-import { pipelineSamples, type LightingTier } from '../common/lightingQuality';
+import {
+  MSAA_HEAD_ONLY,
+  pipelineSamples,
+  sceneTargetSamples,
+  type LightingTier,
+} from '../common/lightingQuality';
 import { devQuery, devQueryNumber, devQueryNumbers } from '../common/devSeams';
 import { GameOptions } from '../common/gameOptions';
 import { renderDistanceRanges } from '../common/renderDistance';
 import { CSM_CASTER_REACH, drawsSolidGeometry } from './shadows';
 import { driveRenderList } from './renderList';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
+import { gbufferFormats } from './gbufferFormats';
 
 /**
  * Contact-scale SSAO2 (ARCHITECTURE §4.1, §4.8 step 1). Sole owner of the
@@ -38,7 +44,8 @@ import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
  * AO reads as contact tightening, never as a halo at gameplay zoom.
  *
  * Dev seams: `?ssao=radius,strength,base` for live tuning; `?ssao=0` builds
- * none of it (G-buffer included).
+ * none of it (G-buffer included); `?gbufFormats=old` keeps the G-buffer's
+ * RGBA32F targets (`gbufferFormats.ts`).
  */
 const SSAO_RADIUS = 0.35;
 const SSAO_STRENGTH = 0.75;
@@ -292,10 +299,20 @@ function createSsao(
 ): SSAO2RenderingPipeline {
   patchSsaoCombine();
 
-  // This call sizes the G-buffer. The pipeline below takes whatever exists
-  // (`enableGeometryBufferRenderer` returns the live renderer at any ratio);
-  // its own `ssaoRatio` sizes its blur targets only.
-  const gbuffer = scene.enableGeometryBufferRenderer(gbufferRatio);
+  // This call sizes the G-buffer and sets its formats. The pipeline below
+  // takes whatever exists (`enableGeometryBufferRenderer` returns the live
+  // renderer at any ratio); its own `ssaoRatio` sizes its blur targets only.
+  const engine = scene.getEngine();
+  const formats = gbufferFormats(engine.version, engine.getCaps());
+  const gbuffer = formats
+    ? scene.enableGeometryBufferRenderer(
+        gbufferRatio,
+        // What the default already resolves to on WebGL2. Never DEPTH24: it
+        // would change which surface wins at near-coplanar pixels.
+        Constants.TEXTUREFORMAT_DEPTH32_FLOAT,
+        formats
+      )
+    : scene.enableGeometryBufferRenderer(gbufferRatio);
   let normals: Texture | null = null;
 
   if (gbuffer) {
@@ -331,7 +348,7 @@ function createSsao(
   ssao.expensiveBlur = tier.ssaoRatio >= 1;
   ssao.maxZ = SSAO_MAX_Z;
   ssao.minZAspect = SSAO_MIN_Z_ASPECT;
-  ssao.textureSamples = pipelineSamples();
+  if (!MSAA_HEAD_ONLY) ssao.textureSamples = pipelineSamples();
 
   bindCombine(ssao, camera, normals);
 
@@ -380,7 +397,7 @@ export function syncAmbientOcclusion(
     // rebuilds this colour target for it.
     const samples = pipelineSamples();
 
-    if (runtime.ssao.textureSamples !== samples) {
+    if (!MSAA_HEAD_ONLY && runtime.ssao.textureSamples !== samples) {
       runtime.ssao.textureSamples = samples;
     }
 
@@ -394,4 +411,21 @@ export function syncAmbientOcclusion(
   runtime = { scene, camera, tier, gbufferRatio, ssao };
 
   return true;
+}
+
+/**
+ * The MSAA of the original-colour pass, the one `textureSamples` sets: the
+ * scene target unless the upscale's entry sits ahead of it. Called once the
+ * camera's chain is final.
+ */
+export function syncAmbientOcclusionSamples(): void {
+  if (!runtime || !MSAA_HEAD_ONLY) return;
+
+  const { camera, ssao } = runtime;
+  const original = (
+    ssao as unknown as { _originalColorPostProcess: PostProcess | null }
+  )._originalColorPostProcess;
+  const samples = sceneTargetSamples(camera, original);
+
+  if (ssao.textureSamples !== samples) ssao.textureSamples = samples;
 }

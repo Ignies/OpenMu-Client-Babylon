@@ -469,7 +469,14 @@ export function itemRestRotation(
   group: number,
   num: number
 ): { x: number; y: number; z: number } {
-  const [pitch, roll, yaw] = itemRestPose(group, num).angle;
+  return angleRotation(itemRestPose(group, num).angle);
+}
+
+/** A MU `o->Angle` as entity `transform.rot`. */
+export function angleRotation(
+  angle: ItemRestPose['angle']
+): { x: number; y: number; z: number } {
+  const [pitch, roll, yaw] = angle;
   return { x: -pitch * DEG, y: yaw * DEG, z: -roll * DEG };
 }
 

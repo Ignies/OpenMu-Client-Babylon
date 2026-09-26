@@ -137,6 +137,8 @@ export const TEX = {
   motionMono: 'Effect/motion_mono.OZJ',
   /** Misc. */
   explosion: 'Effect/Explotion01.OZJ',
+  /** BITMAP_EXPLOTION_MONO (explotion01mono.jpg): the same 4x4 sheet in white, tinted by `Light`. */
+  explosionMono: 'Effect/explotion01mono.OZJ',
   /** BITMAP_EXPLOTION+1 (DinoE.jpg, four 64 px cells): CreateBomb2's fireball, Fire Breath's end. */
   dinoE: 'Effect/DinoE.OZJ',
   pierce: 'Effect/Piercing.OZJ',
@@ -154,8 +156,6 @@ export const TEX = {
   fire4: 'Effect/Fire04.OZJ',
   /** BITMAP_2LINE_GHOST (Skill\2line_gost.jpg, the same image as this copy): Chaotic Diseier's and Expansion of Wizardry's ribbons. */
   twoLineGhost: 'Effect/2line_gost.OZJ',
-  /** BITMAP_EXPLOTION_MONO (explotion01mono.jpg): the grey 4x4 explosion sheet. */
-  explosionMono: 'Effect/explotion01mono.OZJ',
   eye: 'Effect/eye01.OZJ',
   hole: 'Effect/hole.OZJ',
   lines: 'Effect/lines.OZJ',

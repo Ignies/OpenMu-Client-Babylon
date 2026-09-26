@@ -19,6 +19,10 @@ import { skillDefinition } from '../../common/skillsDatabase';
 import { truncatePathWithinRange } from '../../common/approachPath';
 import { isHostilePlayer } from '../../combat/playerTarget';
 import { duelEnemyId } from '../../events/duel';
+import { ammoReload, type Hands } from '../../combat/weaponRange';
+import { InventoryConstants } from '../../common/inventoryConstants';
+import { StorageKind } from '../../common/itemStorage';
+import { t } from '../../i18n';
 
 /**
  * Left-click basic attack (`Action()` MOVEMENT_ATTACK, ZzzInterface.cpp:3283-3356):
@@ -44,6 +48,39 @@ export function truncatePathForAttack(
 }
 
 const APPROACH_INTERVAL = 0.4;
+
+/** A refused reload comes back to the same bag slot; wait this long before asking again. */
+const RELOAD_RETRY_MS = 3000;
+let lastReload = { from: -1, at: 0 };
+
+/**
+ * `ReloadArrow()`: move the next quiver from the bag into the empty hand, the
+ * same move a drag sends. True while the swing should wait for it.
+ */
+function reloadAmmo(hands: Hands): boolean {
+  if (Store.pendingItemMove) return true;
+  if (Store.pickedItem) return false;
+
+  const reload = ammoReload(
+    hands,
+    Store.itemsOfStorage(StorageKind.Inventory),
+    InventoryConstants.EquippableSlotsCount,
+    InventoryConstants.LeftHandSlot,
+    InventoryConstants.RightHandSlot
+  );
+  if (!reload) return false;
+  if (reload.from < 0) {
+    Store.addNotification(t('notify.noMoreArrows'), 'error');
+    return false;
+  }
+
+  const now = performance.now();
+  if (reload.from === lastReload.from && now - lastReload.at < RELOAD_RETRY_MS) return false;
+  lastReload = { from: reload.from, at: now };
+  if (!Store.moveItemToSquare(StorageKind.Inventory, reload.from, reload.to)) return false;
+  Store.addNotification(t('notify.arrowsReloaded'));
+  return true;
+}
 
 const NPC_TYPE_OVERRIDES = new Set([
   367, 368, 369, 370, 371, 375, 376, 377, 378, 379, 380, 381, 382, 383, 384,
@@ -236,10 +273,10 @@ export const AttackSystem: ISystemFactory = world => {
       if (attackCooldown > 0 || !combat.inputGateOpen) return;
 
       // CheckArrow(): a bow without arrows / a crossbow without bolts does
-      // not swing. The original tries ReloadArrow() from the inventory; we
-      // drop the target and let the player equip ammunition.
+      // not swing. ReloadArrow() equips the next quiver from the bag and the
+      // attack goes on once it is in the hand.
       if (!combat.hasAmmo(hands)) {
-        world.attackTarget = null;
+        if (!reloadAmmo(hands)) world.attackTarget = null;
         return;
       }
 

@@ -144,6 +144,8 @@ function createMask(scene: Scene, camera: ArcRotateCamera): Runtime {
   mask.clearColor = new Color4(0, 0, 0, 1);
   mask.activeCamera = camera;
   mask.renderParticles = true;
+  // Every pool, subtract ones too (they darken the additive art under them); each
+  // draws the vertices the camera uploaded this frame (`libs/babylon/spriteReplay.ts`).
   mask.renderSprites = true;
   mask.wrapU = Texture.CLAMP_ADDRESSMODE;
   mask.wrapV = Texture.CLAMP_ADDRESSMODE;

@@ -10,6 +10,7 @@ import {
   MELT_LOBE_3,
   MELT_LOBE_5,
   MELT_SPOTS,
+  snowMeltCount,
   snowMeltUniform,
 } from '../../weather/snowMelt';
 import { puddleCover, wetness } from '../../weather/wetness';
@@ -18,6 +19,8 @@ import { pointLightPoolLights } from '../../common/pointLightPool';
 import { linearBufferActive } from '../../common/lightModel';
 import { SNOW_ART, type ArtMatch } from './artMatch';
 import { lookDirector } from '../../lighting/director';
+import { TERRAIN_BRANCH } from './terrainLighting';
+import { devQuery } from '../../common/devSeams';
 
 /**
  * Terrain overlays: masked layers mixed into the ground's albedo before it is
@@ -851,7 +854,10 @@ export function terrainOverlayUniforms(
 
   // The fire skills' melt patches. Not under `hasRelief`: melting is about a
   // layer's coverage, and a flat layer that declared it would need it too.
-  if (hasMelt(overlays)) names.push('ovMeltSpot');
+  if (hasMelt(overlays)) {
+    names.push('ovMeltSpot');
+    if (SNOW_GATE) names.push('ovMeltCount');
+  }
 
   // Only when something actually has a surface. A map with no relief layer
   // keeps the uniform list it had, which keeps the promise at the top of this
@@ -939,6 +945,12 @@ const TRAIL_GAIN = 2.4;
  * the map already has.
  */
 const MELT_DAMP: readonly [number, number, number] = [0.63, 0.65, 0.7];
+
+/**
+ * Dev seam `?snowGate=0`: the melt loop walks every slot again, empty or not,
+ * for the GPU-time pairs.
+ */
+const SNOW_GATE = devQuery('snowGate') !== '0';
 
 /**
  * How hard the sun term swings the albedo either side of 1.
@@ -1331,15 +1343,19 @@ ${
         0.0, 1.0);
 `;
 
-    // The fire skills' melt patches (weather/snowMelt.ts). Branchless: an
-    // empty slot carries strength 0, so it contributes nothing to the `max`
-    // and the loop costs the same whatever is burning. `length()` of a vec2
-    // per slot on a six-slot array is well inside what the ground can spend.
+    // The fire skills' melt patches (weather/snowMelt.ts). The live ones come
+    // packed at the front, so the loop stops at ovMeltCount, a uniform break
+    // every pixel takes alike. An empty slot only ever added max(x, 0).
     const meltGlsl = !o.melt
       ? ''
       : `
       float ovMelt${i} = 0.0;
-      for (int m = 0; m < ${MELT_SPOTS}; m++) {
+      for (int m = 0; m < ${MELT_SPOTS}; m++) {${
+        SNOW_GATE
+          ? `
+        if (float(m) >= ovMeltCount) break;`
+          : ''
+      }
         float ovMr${i} = max(ovMeltSpot[m].z, 0.001);
         vec2 ovMv${i} = vWorldXZ - ovMeltSpot[m].xy;
 
@@ -1496,22 +1512,35 @@ export function terrainOverlayLitGlsl(
   const l = OVERLAY_LIGHT.lit;
   const lin = (c: readonly [number, number, number]) =>
     `vec3(${f(c[0] ** 2.2)}, ${f(c[1] ** 2.2)}, ${f(c[2] ** 2.2)})`;
+  const gammaLit = `min(
+          mix(vec3(${f(s[0])}, ${f(s[1])}, ${f(s[2])}),
+              vec3(${f(l[0])}, ${f(l[1])}, ${f(l[2])}), ovKey) + ovExtra,
+          vec3(${f(OVERLAY_LIGHT.cap)}))`;
+  const linearLit = `min(
+          mix(${lin(s)}, ${lin(l)}, ovKey) + pow(ovExtra, vec3(2.2)),
+          vec3(${f(OVERLAY_LIGHT.cap ** 2.2)}))`;
+  // `?terrainBranch=0` (terrainLighting.ts): both computed, then mixed.
+  const layerLit = TERRAIN_BRANCH
+    ? `
+      vec3 ovLayerLit;
+      if (linearLight > 0.5) {
+        vec3 ovLayerLin = ${linearLit};
+        ovLayerLit = pow(ovLayerLin, vec3(1.0 / 2.2));
+      } else {
+        ovLayerLit = ${gammaLit};
+      }`
+    : `
+      vec3 ovLayerLit =
+        ${gammaLit};
+      vec3 ovLayerLin =
+        ${linearLit};
+      ovLayerLit = mix(ovLayerLit, pow(ovLayerLin, vec3(1.0 / 2.2)), linearLight);`;
   return `
     vec3 ${outVar} = ${mapLitExpr};
     {
       float ovBakeLum = dot(${bakeVar}.rgb, vec3(0.299, 0.587, 0.114));
       float ovKey = smoothstep(0.0, 1.0, ovBakeLum * ${f(OVERLAY_LIGHT.gain)}) * ${sunVar};
-      vec3 ovExtra = max(${extraExpr}, vec3(0.0));
-      vec3 ovLayerLit =
-        min(
-          mix(vec3(${f(s[0])}, ${f(s[1])}, ${f(s[2])}),
-              vec3(${f(l[0])}, ${f(l[1])}, ${f(l[2])}), ovKey) + ovExtra,
-          vec3(${f(OVERLAY_LIGHT.cap)}));
-      vec3 ovLayerLin =
-        min(
-          mix(${lin(s)}, ${lin(l)}, ovKey) + pow(ovExtra, vec3(2.2)),
-          vec3(${f(OVERLAY_LIGHT.cap ** 2.2)}));
-      ovLayerLit = mix(ovLayerLit, pow(ovLayerLin, vec3(1.0 / 2.2)), linearLight);
+      vec3 ovExtra = max(${extraExpr}, vec3(0.0));${layerLit}
       ${outVar} = mix(${outVar}, ovLayerLit, ovNeutral);
     }`;
 }
@@ -1529,7 +1558,11 @@ export function terrainOverlayDeclarationsGlsl(
     ...overlays.map((_, i) => `  uniform float ovCoverage${i};`),
     // vec4(worldX, worldZ, radius, strength) per patch; strength 0 = no patch.
     ...(hasMelt(overlays)
-      ? [`  uniform vec4 ovMeltSpot[${MELT_SPOTS}];`]
+      ? [
+          `  uniform vec4 ovMeltSpot[${MELT_SPOTS}];`,
+          // Live patches, packed at the front of ovMeltSpot.
+          ...(SNOW_GATE ? ['  uniform float ovMeltCount;'] : []),
+        ]
       : []),
   ].join('\n');
 
@@ -1830,7 +1863,9 @@ export function bindTerrainOverlays(
   // Before the relief early-out: melting is a coverage term, and a layer that
   // declared it without a surface would still need its patches.
   if (hasMelt(overlays)) {
-    effect.setArray4('ovMeltSpot', snowMeltUniform(on));
+    effect.setArray4('ovMeltSpot', snowMeltUniform(on, SNOW_GATE));
+    // Unbound reads as 0, which is no melt rather than a broken ground.
+    if (SNOW_GATE) effect.setFloat('ovMeltCount', snowMeltCount());
   }
 
   if (hasReflect(overlays)) bindReflect(effect, overlays, scene, on);

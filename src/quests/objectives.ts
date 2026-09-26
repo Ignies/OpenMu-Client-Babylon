@@ -37,10 +37,40 @@ export function objectiveProgress(objective: QuestObjective): string {
   return `${Math.min(objective.current, objective.required)} / ${objective.required}`;
 }
 
-/** The line a condition draws, or null for an empty slot. */
-export function objectiveText(objective: QuestObjective): string | null {
+/** Conditions whose line carries no `x / y` count. */
+const UNCOUNTED: ReadonlySet<number> = new Set([
+  ConditionTypeEnum.None,
+  ConditionTypeEnum.Level,
+  ConditionTypeEnum.Money,
+  ConditionTypeEnum.Skill,
+  ConditionTypeEnum.ClientAction,
+  ConditionTypeEnum.RequestBuff,
+  ConditionTypeEnum.BloodCastleGate,
+  ConditionTypeEnum.WinBloodCastle,
+  ConditionTypeEnum.WinChaosCastle,
+  ConditionTypeEnum.WinDevilSquare,
+  ConditionTypeEnum.WinIllusionTemple,
+  ConditionTypeEnum.NpcTalk,
+]);
+
+/** Whether the condition's line has a count in it. */
+export function objectiveCounted(objective: QuestObjective): boolean {
+  return !UNCOUNTED.has(objective.type);
+}
+
+/**
+ * The line a condition draws, or null for an empty slot. Pass `progress` as
+ * '' to leave the count out, for a reader that prints it on its own line.
+ */
+export function objectiveText(
+  objective: QuestObjective,
+  progress = objectiveProgress(objective)
+): string | null {
+  return conditionLine(objective, progress)?.trim() ?? null;
+}
+
+function conditionLine(objective: QuestObjective, progress: string): string | null {
   const name = objective.name;
-  const progress = objectiveProgress(objective);
 
   switch (objective.type) {
     case ConditionTypeEnum.None:

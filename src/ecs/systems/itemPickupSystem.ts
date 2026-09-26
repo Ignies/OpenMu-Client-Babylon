@@ -1,6 +1,7 @@
 import { PointerEventTypes } from '../../libs/babylon/exports';
 import { Store } from '../../store';
 import { QuickItemActions } from '../../common/quickItemActions';
+import { pickGround } from '../../libs/mu/terrainPick';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
@@ -24,14 +25,7 @@ export const ItemPickupSystem: ISystemFactory = world => {
     const picked = Store.pickedItem;
 
     if (picked) {
-      const pickInfo = world.scene.pick(
-        event.event.clientX,
-        event.event.clientY,
-        m => m === world.terrain?.mesh,
-        true
-      );
-
-      const point = pickInfo?.pickedPoint;
+      const point = pickGround(world, event.event.clientX, event.event.clientY);
       if (!point) return;
 
       QuickItemActions.dropPickedItem(~~point.x, ~~point.z);

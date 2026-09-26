@@ -9,9 +9,13 @@ import {
 import { downloadDataFile, hasDataFile } from '../libs/mu/dataFolder';
 import { maps } from '../maps';
 import { EFFECT_RENDERING_GROUP, keepDepthForEffects, spriteLevel } from '../effects/core';
-import { devQueryNumber } from './devSeams';
+import { devQuery, devQueryNumber } from './devSeams';
+import { viewDepth } from './viewPlanes';
 
 const TICKS_PER_SECOND = 25;
+
+/** Dev seam: `?emitterGate=0` lets every emitter spawn whether in view or not. */
+const EMITTER_GATE = devQuery('emitterGate') !== '0';
 
 
 const OZJ_HEADER_SIZE = 24;
@@ -31,7 +35,8 @@ type TextureKey =
   | 'spark03'
   | 'flareBlue'
   | 'fantaB'
-  | 'clud64';
+  | 'clud64'
+  | 'flare01';
 
 const TEXTURES: Record<
   TextureKey,
@@ -50,6 +55,7 @@ const TEXTURES: Record<
   flareBlue: { file: 'Effect/flareBlue.OZJ', size: 64 },
   fantaB: { file: 'Effect/fantaB.OZJ', size: 64 },
   clud64: { file: 'Effect/clud64.OZJ', size: 64 },
+  flare01: { file: 'Effect/flare01.OZJ', size: 64 },
 };
 
 type Blend = 'add' | 'subtract';
@@ -563,6 +569,28 @@ const KINDS = {
     },
     color: plainColor,
   } satisfies ParticleKind,
+
+  /**
+   * BITMAP_LIGHT (`Effect/flare01`) re-created at a wing bone every frame,
+   * like `wingFlareBlue`: the Wing of Storm joint glows (ZzzObject.cpp:9942-9960).
+   */
+  wingLight: {
+    texture: 'flare01',
+    blend: 'add',
+    init(p, scale, light) {
+      p.lifeTime = 4;
+      p.scale = scale;
+      p.rotation = rand(360);
+      [p.tr, p.tg, p.tb] = light;
+    },
+    update(p) {
+      const t = Math.max(0, Math.min(1, p.lifeTime / 4));
+      p.lr = p.tr * t;
+      p.lg = p.tg * t;
+      p.lb = p.tb * t;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
 } satisfies Record<string, ParticleKind>;
 
 export type KindName = keyof typeof KINDS;
@@ -809,8 +837,61 @@ export async function spawnParticle(
   particles.push(p);
 }
 
+type Reach = {
+  readonly travel: number;
+  readonly base: number;
+  readonly perScale: number;
+};
+
+/**
+ * Farthest any part of a kind's sprite gets from its spawn point, in tiles:
+ * the centre's travel over its whole life plus the sprite's half-diagonal at
+ * its largest, `base` plus `perScale` per unit of spawn scale. The view gate
+ * adds it to the frustum; effectParticles.test.ts plays each kind out against it.
+ */
+export const KIND_REACH: Record<KindName, Reach> = {
+  fire1: { travel: 2.7, base: 0, perScale: 0.65 },
+  fire3: { travel: 1.85, base: 0, perScale: 0.65 },
+  fire2: { travel: 1.4, base: 0, perScale: 0.65 },
+  fire157: { travel: 1.2, base: 0, perScale: 0.56 },
+  ember: { travel: 1, base: 0, perScale: 0.34 },
+  fire0: { travel: 1.4, base: 0, perScale: 0.87 },
+  fire0b: { travel: 1.4, base: 0, perScale: 0.87 },
+  fireBlue: { travel: 0.75, base: 0, perScale: 0.65 },
+  smoke0: { travel: 0.55, base: 0.72, perScale: 0 },
+  smoke2: { travel: 3.4, base: 0.58, perScale: 0 },
+  smoke65: { travel: 0.75, base: 0, perScale: 0.29 },
+  cloud21: { travel: 1.75, base: 0, perScale: 3.61 },
+  smoke21: { travel: 4.2, base: 0, perScale: 0.29 },
+  smoke22: { travel: 3.7, base: 1.09, perScale: 0.29 },
+  smoke60: { travel: 3.7, base: 1.09, perScale: 0.29 },
+  waterfall5_9: { travel: 2.9, base: 0.28, perScale: 0.46 },
+  spark03_24: { travel: 0.6, base: 0.19, perScale: 0 },
+  wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },
+  wingCloud: { travel: 0, base: 0, perScale: 0.46 },
+  wingLight: { travel: 0, base: 0, perScale: 0.46 },
+};
+
+/** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */
+function reachOf(kinds: readonly KindName[]): { base: number; perScale: number } {
+  let base = 0;
+  let perScale = 0;
+
+  for (const kind of kinds) {
+    const reach = KIND_REACH[kind];
+
+    base = Math.max(base, reach.travel + reach.base);
+    perScale = Math.max(perScale, reach.perScale);
+  }
+
+  return { base, perScale };
+}
+
 export class ParticleEmitter {
   #due: number[];
+
+  /** Per emission, tiles past the widened frustum its sprites can still reach. */
+  #reach: number[];
 
   constructor(
     private readonly target: Scene,
@@ -820,13 +901,35 @@ export class ParticleEmitter {
     private readonly scale: number
   ) {
     this.#due = emissions.map(() => 0);
+
+    this.#reach = emissions.map(emission => {
+      const { base, perScale } = reachOf(emission.kinds);
+      const scaled = Math.abs(scale * (emission.scale ?? 1));
+
+      return (
+        base +
+        perScale * scaled +
+        (Math.sqrt(3) * (emission.jitter ?? 0)) / TILE_CM
+      );
+    });
   }
 
   update(): void {
     const deltaSeconds = this.target.getEngine().getDeltaTime() / 1000;
 
+    // The original emits only for objects TestFrustrum2D keeps in view. The
+    // backlog is dropped too, so nothing bursts when the emitter comes back.
+    const depth = EMITTER_GATE
+      ? viewDepth(this.target, this.position.x, this.position.y, this.position.z)
+      : Infinity;
+
     for (let i = 0; i < this.emissions.length; i++) {
       const emission = this.emissions[i];
+
+      if (depth <= -this.#reach[i]) {
+        this.#due[i] = 0;
+        continue;
+      }
 
       this.#due[i] += (deltaSeconds * TICKS_PER_SECOND) / emission.every;
 
@@ -877,10 +980,14 @@ export class BonedParticleEmitter {
   #due = 0;
   #tick = 0;
 
+  #reach: { base: number; perScale: number }[];
+
   constructor(
     private readonly target: Scene,
     private readonly points: readonly BonedEmission[]
-  ) {}
+  ) {
+    this.#reach = points.map(point => reachOf(point.kinds));
+  }
 
   update(): void {
     this.#due += (this.target.getEngine().getDeltaTime() / 1000) * TICKS_PER_SECOND;
@@ -891,7 +998,9 @@ export class BonedParticleEmitter {
       this.#due -= 1;
       this.#tick++;
 
-      for (const point of this.points) {
+      for (let i = 0; i < this.points.length; i++) {
+        const point = this.points[i];
+
         if (point.every && point.every > 1 && this.#tick % point.every !== 0) {
           continue;
         }
@@ -903,6 +1012,16 @@ export class BonedParticleEmitter {
 
         const scale =
           typeof point.scale === 'function' ? point.scale() : point.scale;
+
+        // Gated per point at its spawn position. The ticks still drain, so a
+        // point out of view cannot burst when it comes back.
+        if (EMITTER_GATE) {
+          const reach = this.#reach[i];
+          const depth = viewDepth(this.target, position.x, position.y, position.z);
+
+          if (depth <= -(reach.base + reach.perScale * Math.abs(scale))) continue;
+        }
+
         const light =
           typeof point.light === 'function' ? point.light() : point.light;
 

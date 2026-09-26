@@ -2,6 +2,7 @@ import type { AbstractMesh } from '../../libs/babylon/exports';
 import { ENUM_WORLD } from '../../common/types';
 import { lookDirector } from '../../lighting/director';
 import type { RoomVolume } from '../../lighting/profiles';
+import { shadowReceiverChanged } from '../../scenes/csmBounds';
 import type { ISystemFactory } from '../world';
 
 /**
@@ -329,10 +330,14 @@ export const CeilingHideSystem: ISystemFactory = world => {
           // mask, cascades): they test isVisible, not visibility, and a
           // roof gone from the frame but present in the depth would black
           // out the floor under it.
-          if (mesh.visibility <= 0) mesh.isVisible = false;
+          if (mesh.visibility <= 0) {
+            if (mesh.isVisible) shadowReceiverChanged(mesh);
+            mesh.isVisible = false;
+          }
           // Re-evaluated next frame; anything no longer part of the roof fades back.
           entry.hide = false;
         } else {
+          if (!mesh.isVisible) shadowReceiverChanged(mesh);
           mesh.isVisible = true;
           mesh.visibility = Math.min(1, mesh.visibility + step);
           if (mesh.visibility >= 1) fading.delete(mesh);

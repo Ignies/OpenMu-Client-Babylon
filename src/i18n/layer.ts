@@ -30,7 +30,9 @@ export type FlagRegion =
   | 'KR'
   | 'BG'
   | 'RO'
-  | 'DE';
+  | 'DE'
+  | 'PL'
+  | 'VN';
 
 export interface LanguageLayer {
   /** Unique camelCase, identical to the file name. */

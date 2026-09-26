@@ -1,11 +1,12 @@
 import './style.less';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { With } from 'miniplex';
 import { Store } from '../../../store';
 import { useRenderId } from '../../../hooks';
 import {
   onAnyScreenPosition,
   onScreenPosition,
+  onScreenPositionFrameEnd,
 } from '../../../libs/screenPositionBus';
 import type { Entity } from '../../../ecs/world';
 import {
@@ -32,8 +33,23 @@ import { Social } from '../../../social';
 import { guildMarkDataUrl, isEmptyGuildMark } from '../../../common/guildMark';
 import { Economy } from '../../../economy';
 import { GuildMemberRoleEnum } from '../../../common/packets/ServerToClientPackets';
+import { devQuery } from '../../../common/devSeams';
+import { onLanguageChanged } from '../../../i18n';
+import {
+  type TagInputs,
+  type TagSlot,
+  layoutTags,
+  lifeBucket,
+  newTagInputs,
+  newTagSlot,
+  syncTagInputs,
+} from './tagSync';
 
 type TagEntity = With<Entity, 'nameTag' | 'screenPosition'>;
+
+// `?tagsync=0`: the lines rebuilt every frame, a new ref per render and the
+// layout in the next frame's rAF, reading every size.
+const TAG_SYNC = devQuery('tagsync') !== '0';
 
 /** `RenderBitmap(BITMAP_GUILD, x, y, 8, 8)` (UIControls.cpp:1214) - the mark is
  * drawn 8x8 in the guild lists, and the same size in front of the name.
@@ -182,6 +198,47 @@ function shouldBlink(entity: TagEntity): boolean {
   return !!world.playerEntity?.attributeSystem.isAboveZero('inSafeZone');
 }
 
+// The guild lines are translated, so a language switch is an input too.
+let languageEpoch = 0;
+onLanguageChanged(() => languageEpoch++);
+
+/** Every value buildLines and shouldBlink read, written into `out`. */
+function readTagInputs(entity: TagEntity, out: TagInputs): void {
+  const tag = entity.nameTag;
+  const isHero = entity === Store.world?.playerEntity;
+  const isGm = !!entity.isGm;
+  const guildId = entity.guild?.id;
+  const guild = guildId !== undefined ? Store.guilds.get(guildId) : undefined;
+
+  out.name = entity.objectNameInWorld;
+  out.color = tag.color;
+  out.isGm = isGm;
+  out.isHero = isHero;
+  out.guildId = guildId;
+  out.guildRole = entity.guild?.role;
+  out.guild = guild;
+  out.guildName = guild?.name;
+  out.alliance = guild?.alliance;
+  out.logo = guild?.logo;
+  out.relation = isHero
+    ? GuildRelation.Union
+    : Social.guildRelationOf(guildId);
+  out.team = Social.guildTeamOf(guildId);
+  // Polled: it expires by time alone.
+  out.selfDefense =
+    !isGm && Social.isSelfDefenseActive(entity.objectNameInWorld);
+  out.shopTitle =
+    entity.netId !== undefined ? Economy.shopTitles.get(entity.netId) : undefined;
+  out.text0 = tag.text[0];
+  out.text1 = tag.text[1];
+  out.life0 = lifeBucket(tag.life[0]);
+  out.life1 = lifeBucket(tag.life[1]);
+  out.blink = shouldBlink(entity);
+  out.language = languageEpoch;
+}
+
+const scratchInputs = newTagInputs();
+
 // Stable React keys for entities (miniplex entities carry no id).
 const entityIds = new WeakMap<object, number>();
 let nextEntityId = 1;
@@ -205,60 +262,9 @@ const linesKey = (lines: Line[], blink: boolean) =>
     )
     .join('\n');
 
-type Slot = {
-  entity: TagEntity;
-  el: HTMLDivElement;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  visible: boolean;
-};
+type Slot = TagSlot<TagEntity, HTMLDivElement>;
 
-/**
- * `RenderBooleans` (ZzzInterface.cpp:8777): every balloon is centred on its
- * owner's anchor with its bottom edge on it, then balloons that overlap are
- * pushed above or below each other (one bubble pass), and finally clamped to
- * the screen. Positions come from CalculateScreenPositionSystem per entity;
- * the layout runs once per frame after the last of them.
- */
-function layout(slots: Map<Entity, Slot>, viewW: number, viewH: number) {
-  const list: Slot[] = [];
-  for (const s of slots.values()) {
-    if (!s.visible) {
-      s.el.style.transform = 'translate(-10000px, -10000px)';
-      continue;
-    }
-    s.width = s.el.offsetWidth;
-    s.height = s.el.offsetHeight;
-    s.x = s.entity.screenPosition.x - s.width / 2;
-    s.y = s.entity.screenPosition.y - s.height;
-    list.push(s);
-  }
-
-  for (const ci of list) {
-    for (const cj of list) {
-      if (ci === cj) continue;
-      if (
-        ci.x + ci.width > cj.x &&
-        ci.x < cj.x + cj.width &&
-        ci.y + ci.height > cj.y &&
-        ci.y < cj.y + cj.height
-      ) {
-        if (ci.y < cj.y + cj.height / 2) ci.y = cj.y - ci.height;
-        else ci.y = cj.y + cj.height;
-      }
-    }
-  }
-
-  for (const s of list) {
-    if (s.x < 0) s.x = 0;
-    if (s.x >= viewW - s.width) s.x = viewW - s.width;
-    if (s.y < 0) s.y = 0;
-    if (s.y >= viewH - s.height) s.y = viewH - s.height;
-    s.el.style.transform = `translate(${Math.floor(s.x)}px, ${Math.floor(s.y)}px)`;
-  }
-}
+const BORDER_BOX: ResizeObserverOptions = { box: 'border-box' };
 
 const NameTag = ({
   entity,
@@ -272,12 +278,17 @@ const NameTag = ({
     blink: shouldBlink(entity),
   }));
   const keyRef = useRef(linesKey(state.lines, state.blink));
+  const [inputs] = useState(newTagInputs);
 
   // Content can change every tick (chat fade, new lines, guild info
   // arriving); re-render only when the rendered text/colours differ.
   useEffect(() => {
     const handler = () => {
       if (!entity.nameTag) return;
+      if (TAG_SYNC) {
+        readTagInputs(entity, scratchInputs);
+        if (!syncTagInputs(inputs, scratchInputs)) return;
+      }
       const next = { lines: buildLines(entity), blink: shouldBlink(entity) };
       const key = linesKey(next.lines, next.blink);
       if (key !== keyRef.current) {
@@ -288,8 +299,18 @@ const NameTag = ({
     return onScreenPosition(entity, handler);
   }, [entity]);
 
+  // Stable, so a content change never drops and re-adds the slot: that
+  // parked the balloon for a frame and moved it to the end of the order.
+  const stableRef = useCallback(
+    (el: HTMLDivElement | null) => register(entity, el),
+    [entity, register]
+  );
+
   return (
-    <div className="name-tag" ref={el => register(entity, el)}>
+    <div
+      className="name-tag"
+      ref={TAG_SYNC ? stableRef : el => register(entity, el)}
+    >
       {state.lines.map((line, i) => (
         <div
           key={i}
@@ -345,55 +366,119 @@ export const NameTags = () => {
 
   const rootRef = useRef<HTMLDivElement>(null);
   const slotsRef = useRef(new Map<Entity, Slot>());
+  // Sizes are cached off the ResizeObserver, so the per-frame layout never
+  // reads layout. Null on the `?tagsync=0` path.
+  const observerRef = useRef<ResizeObserver | null>(null);
+  const elSlotsRef = useRef(new WeakMap<Element, Slot>());
 
   const register = useMemo(
     () => (entity: TagEntity, el: HTMLDivElement | null) => {
       const slots = slotsRef.current;
+      const elSlots = elSlotsRef.current;
+      const observer = observerRef.current;
       if (!el) {
+        const gone = slots.get(entity);
+        if (gone) {
+          observer?.unobserve(gone.el);
+          elSlots.delete(gone.el);
+        }
         slots.delete(entity);
         return;
       }
-      const slot = slots.get(entity);
-      if (slot) slot.el = el;
-      else
-        slots.set(entity, {
-          entity,
-          el,
-          x: 0,
-          y: 0,
-          width: 0,
-          height: 0,
-          visible: false,
-        });
+      let slot = slots.get(entity);
+      if (slot) {
+        if (slot.el === el) return;
+        observer?.unobserve(slot.el);
+        elSlots.delete(slot.el);
+        slot.el = el;
+        slot.parked = false;
+        slot.tx = slot.ty = NaN;
+      } else {
+        slot = newTagSlot(entity, el);
+        slots.set(entity, slot);
+      }
+      elSlots.set(el, slot);
+      observer?.observe(el, BORDER_BOX);
     },
     []
   );
 
   // One layout per frame, after the per-entity position events.
   useEffect(() => {
-    let scheduled = false;
-    const flush = () => {
-      scheduled = false;
-      const root = rootRef.current;
-      if (!root) return;
-      layout(slotsRef.current, root.clientWidth, root.clientHeight);
-    };
-    const handler = (
+    const slots = slotsRef.current;
+    const visibility = (
       entity: Entity,
       screenPosition: { x: number; y: number }
     ) => {
-      const slot = slotsRef.current.get(entity);
-      if (!slot) return;
+      const slot = slots.get(entity);
+      if (!slot) return false;
       slot.visible =
         screenPosition.x * screenPosition.x +
           screenPosition.y * screenPosition.y >=
         0.1;
-      if (!scheduled) {
-        scheduled = true;
-        requestAnimationFrame(flush);
-      }
+      return true;
     };
-    return onAnyScreenPosition(handler);
+
+    if (!TAG_SYNC) {
+      let scheduled = false;
+      const flush = () => {
+        scheduled = false;
+        const root = rootRef.current;
+        if (!root) return;
+        layoutTags(slots.values(), root.clientWidth, root.clientHeight, true);
+      };
+      return onAnyScreenPosition((entity, screenPosition) => {
+        if (visibility(entity, screenPosition) && !scheduled) {
+          scheduled = true;
+          requestAnimationFrame(flush);
+        }
+      });
+    }
+
+    const root = rootRef.current;
+    if (!root) return;
+    const elSlots = elSlotsRef.current;
+    // Read once here; the observer keeps it after that.
+    let viewW = root.clientWidth;
+    let viewH = root.clientHeight;
+
+    // Runs after layout and before paint, with this frame's positions still
+    // in the entities, so a balloon whose size changed is right in the same
+    // frame. offsetWidth/Height rather than borderBoxSize: the same integer
+    // rounding the layout always used.
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const el = entry.target as HTMLElement;
+        if (el === root) {
+          viewW = root.clientWidth;
+          viewH = root.clientHeight;
+          continue;
+        }
+        const slot = elSlots.get(el);
+        if (!slot) continue;
+        slot.width = el.offsetWidth;
+        slot.height = el.offsetHeight;
+      }
+      layoutTags(slots.values(), viewW, viewH);
+    });
+    observer.observe(root, BORDER_BOX);
+    for (const slot of slots.values()) {
+      observer.observe(slot.el, BORDER_BOX);
+    }
+    observerRef.current = observer;
+
+    const offAny = onAnyScreenPosition(visibility);
+    // Inside the ECS pass, before scene.render: the balloons land in the
+    // frame their positions were projected for.
+    const offEnd = onScreenPositionFrameEnd(() =>
+      layoutTags(slots.values(), viewW, viewH)
+    );
+    return () => {
+      offAny();
+      offEnd();
+      observer.disconnect();
+      observerRef.current = null;
+    };
   }, []);
 
   return (
