@@ -5,6 +5,7 @@ import { publishViewPlanes } from '../../common/viewPlanes';
 import { ENUM_WORLD } from '../../common/types';
 import { weather } from '../../weather';
 import { debuffBodyLight, debuffBrightBody } from '../../common/debuffBody';
+import { outlawBodyLight } from '../../common/nameTags';
 
 const v3Temp = Vector3.Zero();
 const v3Temp2 = Vector3.Zero();
@@ -102,9 +103,12 @@ export const RenderSystem: ISystemFactory = world => {
           transform.visualRotY = transform.rot.y;
         }
 
-        // A Freeze or Cold body is drawn at its own BodyLight instead of the terrain's.
+        // A Freeze or Cold body is drawn at its own BodyLight instead of the
+        // terrain's, and so is an outlaw's; the debuff is the later write.
         const player = !!entity.playerAnimation;
-        const debuffLight = debuffBodyLight(entity.buffs, player);
+        const debuffLight =
+          debuffBodyLight(entity.buffs, player) ??
+          (player ? outlawBodyLight(entity.heroState) : null);
         modelObject.setBrightBody(debuffBrightBody(entity.buffs, player));
         if (debuffLight) {
           modelObject.Light.set(debuffLight[0], debuffLight[1], debuffLight[2]);
