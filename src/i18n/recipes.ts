@@ -39,7 +39,6 @@ export const EN_TEXT = {
   // ---- pre-game: preloader, server list, login, character select ----------
   'preloader.playOffline': 'Play Offline',
   'preloader.serverSetup': 'Server Setup',
-  'preloader.worlds': 'Worlds',
 
   'server.title': 'Server Setup',
   'server.list': 'Servers',
@@ -61,9 +60,7 @@ export const EN_TEXT = {
   'server.listOffline': 'The published server list could not be read.',
   'server.copy': 'Copy',
 
-  'worlds.title': 'Worlds',
   'worlds.enter': 'Enter',
-  'worlds.hint': 'Pick a world, then enter.',
   'worlds.empty': 'No world to show here.',
   'worlds.needsClient': 'This world needs {world}; this client has {client}.',
   'worlds.yours': 'YOURS',
@@ -75,13 +72,16 @@ export const EN_TEXT = {
   'worlds.noAnswer': 'No answer',
   'worlds.tabWorlds': 'Worlds',
   'worlds.tabSetup': 'Setup',
-  'worlds.tabList': 'List',
   'worlds.tabInfo': 'Details',
   'worlds.tabAccount': 'Accounts',
   'worlds.search': 'Search worlds',
   'worlds.clearSearch': 'Clear the search',
   'worlds.noMatch': 'Nothing matches "{text}".',
   'worlds.count': '{shown} of {total}',
+  'worlds.scenePreparing': 'Preparing the login scene',
+  'worlds.sceneReady': 'Login scene ready',
+  'worlds.showPassword': 'Show password',
+  'worlds.hidePassword': 'Hide password',
   'worlds.hasAccount': 'An account is saved for this world',
   /** One glyph on the card, so it must stay short in every language. */
   'worlds.accountMark': 'ID',
@@ -103,7 +103,6 @@ export const EN_TEXT = {
   'info.gameServers': 'Game servers',
   'info.noGameServers':
     'This world published no server names; they arrive once connected.',
-  'info.moreServers': 'and {count} more',
 
   // The accounts tab: the logins saved for one world, a main and its mules.
   'account.list': 'Accounts on {world}',

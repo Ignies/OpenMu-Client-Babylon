@@ -1,155 +1,278 @@
 import './style.less';
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../store';
-import { ENUM_WORLD } from '../../../common';
-import { displayAddress, ServerConfig } from '../../../common/serverConfig';
-import { ServerList } from '../../../common/serverList';
-import { useEventBus } from '../../../hooks/useEventBus';
-import { MuSpriteFrame } from '../../components/muSprite';
-import { MuButton } from '../../components/muButton';
-import { MuText } from '../../components/muText';
-import { MuLogo } from '../../components/muLogo';
-import { LoadingArt, useSheetSizes } from '../../components/loadingScreen/art';
-import { TEXT_COLOR } from '../serversPage/layout';
-import { t } from '../../../i18n';
-import { ServerWindow } from './serverWindow';
+import { i18n, t, type TextKey } from '../../../i18n';
 import {
-  MENU_BTN_HEIGHT,
-  MENU_BTN_STEP,
-  MENU_BTN_WIDTH,
-  MENU_BTN_X,
-  MENU_ENDPOINT_LINE_Y,
-  MENU_SERVER_LINE_Y,
-  MENU_WIN_HEIGHT,
-  MENU_WIN_WIDTH,
-  menuButtonsTop,
-  SPRITE,
-} from './layout';
+  displayAddress,
+  matchesSearch,
+  playableHere,
+  ServerConfig,
+} from '../../../common/serverConfig';
+import { ServerList } from '../../../common/serverList';
+import { versionTags, versionUi } from '../../../version';
+import { uiClick } from '../../../libs/sfx';
+import { setSceneCovered } from '../../../common/sceneCover';
+import { MuFlag } from '../../components/muFlag';
+import { Backdrop } from './backdrop';
+import { Button, Icon, Select, type IconName } from './controls';
+import { WorldsView } from './worldsView';
+import { SetupView } from './setupView';
+import { DownloadView } from './downloadView';
 
-/** The menu, or the tabbed server window Worlds opens. */
-type View = 'menu' | 'worlds';
+const LOGO_ART = '/ui/world_select/logo.webp';
+
+/** How long the page takes to fade off the login scene once a world is entered. */
+const LEAVE_MS = 320;
+
+type Section = 'worlds' | 'setup' | 'download';
+
+const SECTIONS: { key: Section; label: TextKey; icon: IconName }[] = [
+  { key: 'worlds', label: 'worlds.tabWorlds', icon: 'world' },
+  { key: 'setup', label: 'worlds.tabSetup', icon: 'server' },
+  { key: 'download', label: 'worlds.tabDownload', icon: 'download' },
+];
+
+/** The filter's "no filter" entry, kept apart from the language codes. */
+const ALL = '';
+
+const LanguagePicker = observer(() => (
+  <Select
+    className="ws-language"
+    value={i18n.current.code}
+    options={i18n.languages.map(layer => ({
+      value: layer.code,
+      label: layer.label,
+      lead: <MuFlag region={layer.region} width={18} />,
+    }))}
+    onChange={code => i18n.setLanguage(code)}
+  />
+));
 
 /**
- * The start menu: MU's login window frame over the login scene the original
- * opens on (`WD_73NEW_LOGIN_SCENE` - `loginSceneSystem` warps to it for this
- * state too, so the camera is already touring the map behind this window).
+ * Whether the login scene behind this page has finished loading. `mapIndex` is
+ * not observable, but every warp flips `sceneLoading`, which is.
+ */
+function loginSceneReady(): boolean {
+  if (Store.sceneLoading) return false;
+
+  const backdrop = versionUi()?.pregame.backdrop;
+  if (!backdrop) return false;
+  if (backdrop.kind !== 'world') return true;
+
+  return Store.world?.mapIndex === backdrop.login;
+}
+
+/**
+ * The first screen: pick a world. Drawn in the Babylon site's style over its
+ * world map, and opaque - the login scene loads behind it (`loginSceneSystem`
+ * warps there for this state and prefetches the character scene), so entering
+ * a world shows a scene that is already up rather than a loading bar.
  *
- * The scene needs a moment to load, and a black screen is not what MU shows
- * while a map loads - its loading artwork is. So that art is the backdrop
- * until the warp completes, then it fades off the camera tour.
+ * The filters live here rather than in the worlds view because they outlive
+ * it: search, look at the setup tab, come back, and the search is still there.
  */
 export const PreloaderPage = observer(() => {
-  const [view, setView] = useState<View>('menu');
-  const [sceneReady, setSceneReady] = useState(false);
-  const { contain, cover } = useSheetSizes();
+  const [section, setSection] = useState<Section>('worlds');
+  const [language, setLanguage] = useState(ALL);
+  const [search, setSearch] = useState('');
+  const [leaving, setLeaving] = useState(false);
+  const leaveTimer = useRef(0);
 
-  useEventBus('warpCompleted', () => {
-    if (Store.world?.mapIndex === ENUM_WORLD.WD_73NEW_LOGIN_SCENE) {
-      setSceneReady(true);
-    }
+  // Opaque over the scene until it starts to fade off it.
+  useEffect(() => {
+    setSceneCovered(true);
+
+    return () => {
+      setSceneCovered(false);
+      window.clearTimeout(leaveTimer.current);
+    };
+  }, []);
+
+  const all = ServerConfig.all;
+  const selected = ServerConfig.active;
+
+  // A saved world carries no language, so it belongs to no tag but `All`.
+  const worlds = useMemo(
+    () =>
+      all.filter(
+        w =>
+          (language === ALL || w.language?.toLowerCase() === language) &&
+          matchesSearch(w, search)
+      ),
+    [all, language, search]
+  );
+
+  const playable = playableHere(selected);
+  const canEnter = playable && !ServerConfig.isEmpty && !leaving;
+
+  const leave = (then: () => void) => {
+    setLeaving(true);
+    setSceneCovered(false);
+    leaveTimer.current = window.setTimeout(then, LEAVE_MS);
+  };
+
+  /**
+   * A world built for another client is refused rather than discouraged: the
+   * connect would succeed and then come apart mid-handshake, which reads as a
+   * broken client rather than the wrong one.
+   */
+  const enter = (id = selected.id) => {
+    if (ServerConfig.isEmpty || leaving) return;
+
+    const world = ServerConfig.all.find(w => w.id === id);
+    if (world && !playableHere(world)) return;
+
+    ServerConfig.select(id);
+    ServerConfig.markPlayed(id);
+    leave(() => Store.playOnline());
+  };
+
+  const offline = () => {
+    if (!leaving) leave(() => Store.playOffline());
+  };
+
+  // Enter enters from the grid or the search box. Anywhere else it belongs to
+  // what has the focus: Enter in a server address or a password is not a
+  // request to connect, and on a button it presses that button. Escape leaves
+  // a field.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const typing = target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA';
+      const searching = !!target?.classList.contains('world-search');
+      const onCard = !!target?.closest?.('[data-world]');
+      const free = !typing && target?.tagName !== 'BUTTON';
+
+      if (e.key === 'Escape' && typing) {
+        target?.blur();
+      } else if (e.key === 'Enter' && section === 'worlds' && (free || searching || onCard)) {
+        enter();
+      } else {
+        return;
+      }
+
+      e.preventDefault();
+    };
+
+    window.addEventListener('keydown', onKey);
+
+    return () => window.removeEventListener('keydown', onKey);
   });
 
-  const profile = ServerConfig.active;
-
-  // Nothing is drawn before the interface sprites are decoded: every frame of
-  // this page is a piece of MU art, and unstyled text over the map is not a
-  // loading state anyone would recognise. Black, then the artwork, then the
-  // scene - the order the original boots in.
-  const artReady = !Store.spritesLoading;
-  const backGone = artReady && sceneReady;
-
-  // Two entries. Picking a world and entering it is one act, so both live on
-  // the Worlds screen - which is also where a server the published list does
-  // not carry gets typed in - and the menu keeps only the two ways in.
-  const buttons = [
-    { key: 'worlds', label: t('preloader.worlds'), onClick: () => setView('worlds') },
-    { key: 'offline', label: t('preloader.playOffline'), onClick: () => Store.playOffline() },
-  ];
-  const buttonsTop = menuButtonsTop(buttons.length);
+  const sceneReady = loginSceneReady();
+  const status = [
+    versionTags().join(', '),
+    sceneReady
+      ? t('worlds.sceneReady')
+      : `${t('worlds.scenePreparing')}${
+          Store.sceneLoading ? ` ${Math.round(Store.loadingProgress * 100)}%` : ''
+        }`,
+    ServerList.state === 'loading'
+      ? t('servers.loading')
+      : ServerList.state === 'error'
+        ? t('server.listOffline')
+        : null,
+  ].filter((part): part is string => !!part);
 
   return (
-    <div className="preloader-page">
-      {/* The loading artwork, fading out once the 3D scene behind is up. */}
-      <div className={`preloader-back${backGone ? ' preloader-back-gone' : ''}`}>
-        {artReady && (
-          <>
-            <LoadingArt size={cover} className="loading-art loading-art-blur" />
-            <LoadingArt size={contain} className="loading-art" />
-          </>
-        )}
-      </div>
+    <div className={`ws-page${leaving ? ' is-leaving' : ''}`}>
+      <Backdrop />
 
-      {!artReady ? null : view === 'worlds' ? (
-        <ServerWindow
-          onPlay={() => Store.playOnline()}
-          onClose={() => setView('menu')}
-        />
-      ) : (
-        <>
-          <MuLogo />
+      <header className="ws-top">
+        <LanguagePicker />
+        <Button
+          icon="gear"
+          variant="ghost"
+          small
+          onClick={() => {
+            Store.optionsEnabled = true;
+          }}
+        >
+          {t('options.title')}
+        </Button>
+      </header>
 
-          <MuSpriteFrame
-            file={SPRITE.menuWindow}
-            width={MENU_WIN_WIDTH}
-            height={MENU_WIN_HEIGHT}
-            className="preloader-win"
-          >
-            {buttons.map((button, i) => (
-              <MuButton
-                key={button.key}
-                file={SPRITE.menuButton}
-                width={MENU_BTN_WIDTH}
-                height={MENU_BTN_HEIGHT}
-                frames={{ up: 0, active: 1, down: 2 }}
-                color={TEXT_COLOR.brightGray}
-                activeColor={TEXT_COLOR.white}
-                label={button.label}
-                onClick={button.onClick}
-                style={{
-                  position: 'absolute',
-                  left: MENU_BTN_X,
-                  top: buttonsTop + MENU_BTN_STEP * i,
-                }}
-                labelStyle={{ fontSize: 12 }}
-              />
+      <main className="ws-main">
+        <img className="ws-logo" src={LOGO_ART} alt="OpenMU Babylon" draggable={false} />
+
+        <section className="ws-card">
+          <nav className="ws-tabs">
+            {SECTIONS.map(entry => (
+              <button
+                type="button"
+                key={entry.key}
+                className={`ws-tab anim-host${section === entry.key ? ' is-on' : ''}`}
+                onClick={uiClick(() => setSection(entry.key))}
+              >
+                <Icon name={entry.icon} />
+                {t(entry.label)}
+              </button>
             ))}
+          </nav>
 
-            {/* Which server the next click connects to, and where that is -
-                or, with nothing to name yet, what the list is doing. */}
-            {ServerConfig.isEmpty ? (
-              <MuText
-                className="preloader-line"
-                color={TEXT_COLOR.brightGray}
-                style={{ top: MENU_SERVER_LINE_Y }}
-                text={
-                  ServerList.state === 'error'
-                    ? t('server.listOffline')
-                    : ServerList.state === 'ok'
-                      ? t('worlds.empty')
-                      : t('servers.loading')
-                }
-              />
+          <div className="ws-body">
+            {section === 'download' ? (
+              <DownloadView />
+            ) : section === 'setup' ? (
+              <SetupView />
             ) : (
-              <>
-                <MuText
-                  face="fix"
-                  className="preloader-line"
-                  color={TEXT_COLOR.brightYellow}
-                  style={{ top: MENU_SERVER_LINE_Y }}
-                  text={profile.name.trim() || t('server.unnamed')}
-                />
-                <MuText
-                  className="preloader-line"
-                  color={TEXT_COLOR.brightGray}
-                  style={{ top: MENU_ENDPOINT_LINE_Y }}
-                  text={displayAddress(profile)}
-                />
-              </>
+              <WorldsView
+                worlds={worlds}
+                total={all.length}
+                search={search}
+                onSearch={setSearch}
+                language={language}
+                onLanguage={setLanguage}
+                onEnter={enter}
+              />
             )}
-          </MuSpriteFrame>
-        </>
-      )}
+          </div>
+
+          <footer className="ws-foot">
+            <div className="ws-foot-world">
+              {ServerConfig.isEmpty ? (
+                <span className="ws-muted">{t('worlds.empty')}</span>
+              ) : (
+                <>
+                  <span className="ws-foot-name">
+                    {selected.name.trim() || t('server.unnamed')}
+                  </span>
+                  {playable ? (
+                    <span className="ws-mono ws-muted">{displayAddress(selected)}</span>
+                  ) : (
+                    <span className="ws-foot-warn">
+                      <Icon name="warning" />
+                      {t('worlds.needsClient', {
+                        world: selected.version ?? '',
+                        client: versionTags().join(', '),
+                      })}
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+            <Button variant="ghost" disabled={leaving} onClick={offline}>
+              {t('preloader.playOffline')}
+            </Button>
+            <Button
+              variant="primary"
+              icon="play"
+              className="ws-enter"
+              disabled={!canEnter}
+              onClick={() => enter()}
+            >
+              {t('worlds.enter')}
+            </Button>
+          </footer>
+        </section>
+
+        <p className="ws-status ws-mono">
+          {status.map(part => (
+            <span key={part}>{part}</span>
+          ))}
+        </p>
+      </main>
     </div>
   );
 });
