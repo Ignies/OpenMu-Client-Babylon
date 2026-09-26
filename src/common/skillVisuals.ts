@@ -1732,13 +1732,45 @@ const WHEEL_SPRAY: ParticleRecipe = {
 /** MODEL_SKILL_WHEEL2's alpha per copy: SubType `4 - LifeTime` of WHEEL1 runs -1..3 (MoveHandlers.cpp:2772-2800). */
 const WHEEL_ALPHAS = [1, 1, 0.6, 0.5, 0.4];
 
+/** Graded tiers: the sparks cool from white to orange as they die, a little wider. */
+const JOINT_SPARKS_HD: ParticleRecipe = { ...JOINT_SPARKS, colour: [1, 0.92, 0.75], colourEnd: [1, 0.45, 0.12], size: 0.024 };
+/** Graded tiers: hot chips that bounce off the blade, one in three sparks. */
+const SPARK_CHIPS_HD: ParticleRecipe = { ...SPARK_CHIPS, colour: [1, 0.85, 0.55], colourEnd: [1, 0.35, 0.08], size: 0.04, life: 0.7, power: 2.2, gravity: -7, capacity: 256 };
+/**
+ * Graded tiers: smoke01 is an additive square that the tone curve lifts to a grey slab over the grass; the
+ * same puff as a soft dust cloud with real alpha, kicked low along the ground under each copy.
+ */
+const WHEEL_DUST: ParticleRecipe = {
+  texture: TEX.smokeAlpha,
+  colour: [0.42, 0.38, 0.33],
+  colourEnd: [0.3, 0.27, 0.24],
+  size: 0.55,
+  sizeJitter: 0.3,
+  life: 0.7,
+  lifeJitter: 0.3,
+  endScale: 2.2,
+  box: [0.15, 0, 0.15],
+  dir1: [-1, 0.1, -1],
+  dir2: [1, 0.5, 1],
+  power: 0.9,
+  powerJitter: 0.4,
+  spin: 1,
+  blend: 'alpha',
+  capacity: 192,
+};
+/** Graded tiers: the flare01 glow warmer and smaller, so it no longer blows out the grass under it. */
+const WHEEL_GLOW_HD: RGB = [0.85, 0.62, 0.4];
+/** Graded tiers: the band each copy sweeps, the blade's reach either side of its orbit, at its height. */
+const WHEEL_SWEEP_HALF = 0.45;
+const WHEEL_SWEEP: RGB = [0.34, 0.38, 0.48];
+
 /**
  * One MODEL_SKILL_WHEEL2 (MoveHandlers.cpp:2779-2857, RenderWheelWeapon ZzzEffect.cpp:8616-8648): LT 25,
  * 150 cm ahead of the owner (180 with a spear) at an `Angle[2]` that starts at the cast facing and turns
  * -18° a tick; drawn 100 cm up with `Angle[1] = 90` (the blade flat) and an extra yaw of -30° per tick on
  * top. Every tick under it: one smoke, four sparks trailing the turn, a flare01 glow and the grey light.
  */
-function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number, weapon: ReturnType<typeof wieldedWeapon>, alpha: number): void {
+function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number, weapon: ReturnType<typeof wieldedWeapon>, alpha: number, hd: boolean): void {
   const caster = c.caster;
   const t0 = fxNow();
   const age = (): number => (fxNow() - t0) / TICK;
@@ -1769,7 +1801,27 @@ function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number,
       rotate: out => muAngles(out, 0, 90 * DEG, orbit() - 30 * DEG * (age() + 1)),
     });
   }
-  effects.spawn('sprite', c.scene, start, { texture: TEX.flare, colour: [1, 0.8, 0.6], size: cm(64) * 2, seconds, fadeTail: 0.05, height: cm(hellas ? 60 : 20), follow: ground });
+  const glow = hd ? { colour: WHEEL_GLOW_HD, size: cm(64) * 1.5 } : { colour: [1, 0.8, 0.6] as RGB, size: cm(64) * 2 };
+  effects.spawn('sprite', c.scene, start, { texture: TEX.flare, ...glow, seconds, fadeTail: 0.05, height: cm(hellas ? 60 : 20), follow: ground });
+  if (hd) {
+    // Graded tiers: the band the whirling blade sweeps, so the five copies read as one wheel.
+    const band = (r: number): PointSource => out => {
+      entityPos(caster, 1, out);
+      const f = forwardOf(orbit());
+      out.x += f.x * r;
+      out.z += f.z * r;
+      return out;
+    };
+    const w = alpha * 0.8 + 0.2;
+    effects.spawn('blur', c.scene, start, {
+      follow: band(radius + WHEEL_SWEEP_HALF),
+      base: band(radius - WHEEL_SWEEP_HALF),
+      texture: TEX.swordBlur,
+      colour: [WHEEL_SWEEP[0] * w, WHEEL_SWEEP[1] * w, WHEEL_SWEEP[2] * w],
+      seconds: seconds - ticks(3),
+      until: () => entityGone(caster),
+    });
+  }
   lighting.skillBody(c.scene, skill, 'wheel', out => {
     const t = caster.transform;
     if (!t) return;
@@ -1783,7 +1835,9 @@ function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number,
     delay(ticks(k), () => {
       if (entityGone(caster)) return;
       ground(p);
-      effects.spawn('particles', c.scene, p, { recipe: WHEEL_SMOKE, count: 1 });
+      if (hd) {
+        if (k % 2 === 0) effects.spawn('particles', c.scene, p, { recipe: WHEEL_DUST, count: 1 });
+      } else effects.spawn('particles', c.scene, p, { recipe: WHEEL_SMOKE, count: 1 });
       if (hellas) {
         effects.spawn('particles', c.scene, new Vector3(p.x, p.y + cm(120), p.z), { recipe: WHEEL_SPRAY, count: 1 });
         return;
@@ -1791,7 +1845,10 @@ function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number,
       const a = orbit();
       for (let j = 0; j < 4; j++) {
         const at = new Vector3(p.x + rand(-0.1, 0.1), p.y, p.z + rand(-0.1, 0.1));
-        jointSpark(c.scene, at, sparkHeading(rand(-30, 30) * DEG, a + rand(90, 120) * DEG), 0.25);
+        if (hd) {
+          effects.spawn('particles', c.scene, at, { recipe: JOINT_SPARKS_HD, count: 1, heading: sparkHeading(rand(-30, 30) * DEG, a + rand(90, 120) * DEG) });
+          if (Math.random() < 1 / 3) effects.spawn('particles', c.scene, at, { recipe: SPARK_CHIPS_HD, count: 1 });
+        } else jointSpark(c.scene, at, sparkHeading(rand(-30, 30) * DEG, a + rand(90, 120) * DEG), 0.25);
       }
     });
   }
@@ -1801,7 +1858,7 @@ function wheelCopy(c: SkillContext, skill: number, yaw0: number, radius: number,
  * Twisting Slash at its impact key (ZzzCharacter.cpp:4410-4422): SOUND_SKILL_SWORD4, MODEL_SKILL_WHEEL1 (LT 5,
  * one WHEEL2 copy a tick) and `PostMoveProcess_Active(15)`, which keeps `Weapon[0]` out of the hand.
  */
-const twistingSlash: Step = (_at, c) => {
+const twistingSlashOf = (hd: boolean): Step => (_at, c) => {
   const skill = baseSkill(currentSkill);
   const yaw0 = entityYaw(c.caster);
   const weapon = wieldedWeapon(c.caster);
@@ -1811,10 +1868,11 @@ const twistingSlash: Step = (_at, c) => {
   for (let i = 0; i < WHEEL_ALPHAS.length; i++) {
     const alpha = WHEEL_ALPHAS[i];
     delay(ticks(i), () => {
-      if (!entityGone(c.caster)) wheelCopy(c, skill, yaw0, radius, weapon, alpha);
+      if (!entityGone(c.caster)) wheelCopy(c, skill, yaw0, radius, weapon, alpha, hd);
     });
   }
 };
+const twistingSlash = twistingSlashOf(false);
 
 const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
 /** A tick curve sampled from a table, linear between samples and held at the ends. */
@@ -1881,7 +1939,7 @@ interface QuakePlace {
  * curve, or textured (`+3`). Each sinks 0.5 cm a tick once its LifeTime is under `sinkBelow`
  * (ZzzEffect.cpp:7105-7262). One spawn, the rest of the set drawn as its instanced copies.
  */
-function quake(c: SkillContext, m: string, places: readonly QuakePlace[], life: number, body: number, blendMeshLight: ((tick: number) => number) | null, sinkBelow: number, scroll = false): void {
+function quake(c: SkillContext, m: string, places: readonly QuakePlace[], life: number, body: number, blendMeshLight: ((tick: number) => number) | null, sinkBelow: number, scroll = false, tint: RGB = RGBS.white): void {
   if (!places.length) return;
   const at = places[0].at;
   const t0 = fxNow();
@@ -1894,7 +1952,7 @@ function quake(c: SkillContext, m: string, places: readonly QuakePlace[], life: 
     fadeTail: 0,
     scrollU: scroll ? QUAKE_SCROLL : undefined,
     follow: out => out.set(at.x, at.y - cm(0.5 * Math.max(0, (fxNow() - t0) / TICK - (life - sinkBelow))), at.z),
-    ...(blendMeshLight ? { colour: RGBS.white, intensity: lit(body, blendMeshLight) } : { native: { light: ITEM_LIGHT } }),
+    ...(blendMeshLight ? { colour: tint, intensity: lit(body, blendMeshLight) } : { native: { light: ITEM_LIGHT } }),
   });
 }
 
@@ -1915,6 +1973,59 @@ function wallStones(c: SkillContext, at: Vector3, from: number, to: number, ever
   }
 }
 
+/** Graded tiers: embers lifting off the crater, the satellites and the crack tips while they glow. */
+const FURY_EMBERS: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [1, 0.62, 0.28],
+  colourEnd: [0.75, 0.16, 0.03],
+  size: 0.09,
+  sizeJitter: 0.4,
+  life: 0.9,
+  lifeJitter: 0.4,
+  box: [0.35, 0.02, 0.35],
+  dir1: [-0.3, 1, -0.3],
+  dir2: [0.3, 1, 0.3],
+  power: 1.1,
+  powerJitter: 0.5,
+  gravity: -0.4,
+  capacity: 256,
+};
+/** Graded tiers: the hot chips the impact throws. */
+const FURY_BURST_SPARKS: ParticleRecipe = {
+  ...FURY_EMBERS,
+  size: 0.12,
+  life: 0.7,
+  box: [0.2, 0.1, 0.2],
+  dir1: [-1, 0.6, -1],
+  dir2: [1, 1.5, 1],
+  power: 4.5,
+  gravity: -8,
+  capacity: 128,
+};
+/** Graded tiers: the dust skirt the impact throws flat along the ground. */
+const FURY_DUST: ParticleRecipe = {
+  texture: TEX.smokeAlpha,
+  colour: [0.36, 0.3, 0.25],
+  colourEnd: [0.26, 0.22, 0.19],
+  size: 0.8,
+  sizeJitter: 0.3,
+  life: 1.1,
+  lifeJitter: 0.3,
+  box: [0.2, 0, 0.2],
+  dir1: [-1, 0.15, -1],
+  dir2: [1, 0.35, 1],
+  power: 1.4,
+  powerJitter: 0.4,
+  endScale: 2.6,
+  spin: 0.6,
+  blend: 'alpha',
+  capacity: 128,
+};
+/** Graded tiers: the glow walls and cracks pulled toward orange; the tone curve took the untinted fire sheets to a pale peach. */
+const FURY_GLOW_HD: RGB = [1, 0.62, 0.38];
+/** Graded tiers: the thrown weapon's smear, steel grey. */
+const FURY_SMEAR: RGB = [0.4, 0.44, 0.55];
+
 /**
  * Rageful Blow from clip key 1 (ZzzCharacter.cpp:4159-4168, :3045-3048): SOUND_FURY_STRIKE1 and
  * MODEL_SKILL_FURY_STRIKE at the feet - the wielded weapon thrown up tumbling 80° a tick; at LT 13 the
@@ -1922,13 +2033,14 @@ function wallStones(c: SkillContext, at: Vector3, from: number, to: number, ever
  * +3/+1/+2 and five +4/+5 satellites); at LT 10 twenty +7/+8 cracks in five branches and SOUND_FURY_STRIKE3
  * (MoveHandlers.cpp:2939-3175).
  */
-const furyStrike: Step = (_at, c) => {
+const furyStrikeOf = (hd: boolean): Step => (_at, c) => {
   const caster = c.caster;
   const skill = baseSkill(currentSkill);
   const yaw0 = entityYaw(caster);
   const feet = entityPos(caster, 0, new Vector3());
   const fwd = forwardOf(yaw0);
   const weapon = wieldedWeapon(caster);
+  const glowTint = hd ? FURY_GLOW_HD : RGBS.white;
   const pathAt = (tick: number, out: Vector3): Vector3 =>
     out.set(feet.x + fwd.x * cm(FURY_FORWARD(tick)), feet.y + cm(FURY_UP(tick)), feet.z + fwd.z * cm(FURY_FORWARD(tick)));
   sayAt(c, 'Sound/eRageBlow_1');
@@ -1944,6 +2056,19 @@ const furyStrike: Step = (_at, c) => {
       follow: out => pathAt((fxNow() - t0) / TICK, out),
       rotate: out => muAngles(out, 80 * DEG * ((fxNow() - t0) / TICK + 1), 0, yaw0 + 330 * DEG),
     });
+    if (hd) {
+      effects.spawn('joint', c.scene, pathAt(0, new Vector3()), {
+        head: out => pathAt((fxNow() - t0) / TICK, out),
+        maxTails: 5,
+        smooth: 3,
+        taper: true,
+        width: 0.45,
+        colour: FURY_SMEAR,
+        texture: TEX.flare2,
+        seconds: ticks(10),
+        fadeTail: 0.3,
+      });
+    }
   }
 
   // LT 13: eight MODEL_TAIL at the weapon's LT-14 point + (-25, -40), four 50 cm apart and four 30 cm apart
@@ -1983,6 +2108,18 @@ const furyStrike: Step = (_at, c) => {
     addMuOffset(pathAt(8, hit), yaw, -25, -80);
     hit.y = groundAt(hit.x, hit.z, feet.y) + cm(25);
     explosion(RGBS.white, 0.5)(hit, c);
+    if (hd) {
+      // Graded tiers: a hot core under the white card, thrown chips, a dust skirt and the burst's light.
+      sprite({ texture: TEX.flare, colour: [1, 0.5, 0.22], size: 2, seconds: ticks(12), grow: 1.3, growFrom: 0.5, fadeTail: 0.7 })(hit, c);
+      particles({ recipe: FURY_BURST_SPARKS, count: 24 })(hit, c);
+      ringOf(particles({ recipe: FURY_DUST, count: 1 }), 10, 1.1)(new Vector3(hit.x, hit.y - cm(20), hit.z), c);
+      const burst = hit.clone();
+      lighting.skillBody(c.scene, skill, 'burst', out => {
+        out.x = burst.x;
+        out.y = burst.y;
+        out.z = burst.z;
+      });
+    }
     for (let j = 0; j < 8; j++) {
       const at = new Vector3(hit.x + rand(-0.1, 0.1), hit.y, hit.z + rand(-0.1, 0.1));
       jointSpark(c.scene, at, sparkHeading(rand(-60, 0) * DEG, yaw0 + (330 + rand(90, 120)) * DEG), 1 / 8);
@@ -2018,10 +2155,11 @@ const furyStrike: Step = (_at, c) => {
     const body = terrainLevel(crater.x, crater.z) + 0.3;
     const centre = [{ at: crater, scale: 1.5, yaw: 0 }];
     quake(c, MODEL.earthQuake3, centre, 35, body, null, 13);
-    quake(c, MODEL.earthQuake, centre, 35, body, fadeThirty(35), 10);
-    quake(c, MODEL.earthQuake2, centre, 20, body, rampThenFade(20), 5, true);
+    quake(c, MODEL.earthQuake, centre, 35, body, fadeThirty(35), 10, false, glowTint);
+    quake(c, MODEL.earthQuake2, centre, 20, body, rampThenFade(20), 5, true, glowTint);
     craterShake();
     wallStones(c, crater, 11, 15, 10);
+    if (hd) effects.spawn('particles', c.scene, crater, { recipe: FURY_EMBERS, rate: 10, seconds: ticks(24) });
     lighting.skillBody(c.scene, skill, 'crater', out => {
       out.x = crater.x;
       out.y = crater.y;
@@ -2043,14 +2181,15 @@ const furyStrike: Step = (_at, c) => {
       const yaw = (45 + rand(-15, 15)) * DEG;
       satellites.push({ at: p, scale, yaw });
       wallStones(c, p, 10, 35, 15);
+      if (hd) after(ticks(4), particles({ recipe: FURY_EMBERS, rate: 4, seconds: ticks(28) }))(p, c);
       lighting.skillBody(c.scene, skill, 'wall', out => {
         out.x = p.x;
         out.y = p.y;
         out.z = p.z;
       });
     }
-    quake(c, MODEL.earthQuake4, satellites, 35, body, fadeThirty(35), 10);
-    quake(c, MODEL.earthQuake5, satellites, 40, body, rampThenFade(40), 15, true);
+    quake(c, MODEL.earthQuake4, satellites, 35, body, fadeThirty(35), 10, false, glowTint);
+    quake(c, MODEL.earthQuake5, satellites, 40, body, rampThenFade(40), 15, true, glowTint);
   });
 
   // LT 10: five cracks of four 85-99 cm steps, each turning +-50-79° (alternating, the last step random).
@@ -2082,10 +2221,21 @@ const furyStrike: Step = (_at, c) => {
       }
       count++;
     }
-    quake(c, MODEL.earthQuake7, cracks, 40, body, fadeThirty(40), 10);
-    quake(c, MODEL.earthQuake8, cracks, 40, body, rampThenFade(40), 15, true);
+    quake(c, MODEL.earthQuake7, cracks, 40, body, fadeThirty(40), 10, false, glowTint);
+    quake(c, MODEL.earthQuake8, cracks, 40, body, rampThenFade(40), 15, true, glowTint);
+    if (hd) {
+      // Graded tiers: embers off each crack's last step, and one light over the whole glowing field.
+      for (const tip of pos) after(ticks(4), particles({ recipe: FURY_EMBERS, rate: 4, seconds: ticks(26) }))(tip, c);
+      const centre = hit.clone();
+      lighting.skillBody(c.scene, skill, 'field', out => {
+        out.x = centre.x;
+        out.y = centre.y;
+        out.z = centre.z;
+      });
+    }
   });
 };
+const furyStrike = furyStrikeOf(false);
 
 /** RenderCharacter skips `Weapon[0]` while the FURY clip is at key 4 or less (ZzzCharacter.cpp:10077-10080). */
 const furyEmptyHand: Step = (_at, c) => {
@@ -2270,6 +2420,41 @@ function electrifiedSkeleton(c: SkillContext, target: Entity, seconds: number): 
   }
 }
 
+/** Graded tiers: blue motes the drill throws off as it spins out, and the victim's crackle sparks. */
+const DRILL_MOTES: ParticleRecipe = {
+  texture: TEX.flareBlue,
+  colour: [0.55, 0.65, 1],
+  colourEnd: [0.15, 0.2, 0.8],
+  size: 0.12,
+  sizeJitter: 0.4,
+  life: 0.45,
+  lifeJitter: 0.4,
+  box: [0.1, 0.1, 0.1],
+  dir1: [-0.5, -0.4, -0.5],
+  dir2: [0.5, 0.5, 0.5],
+  aimed: true,
+  power: 5,
+  powerJitter: 0.6,
+  gravity: -1,
+  capacity: 256,
+};
+const STAB_SPARKS: ParticleRecipe = { ...DRILL_MOTES, aimed: false, dir1: [-1, -0.2, -1], dir2: [1, 1.2, 1], power: 2.5, gravity: -5, life: 0.5 };
+/** Graded tiers: red chips drawn in to the gathering point, a hotter red than the streaks' so the curve keeps it red. */
+const GATHER_MOTES: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [1, 0.32, 0.18],
+  colourEnd: [0.6, 0.05, 0.02],
+  size: 0.07,
+  sizeJitter: 0.4,
+  life: 0.3,
+  lifeJitter: 0.3,
+  box: [0.35, 0.35, 0.35],
+  dir1: [-1, -1, -1],
+  dir2: [1, 1, 1],
+  power: 0.6,
+  capacity: 128,
+};
+
 /**
  * Death Stab's AttackStage (ZzzCharacter.cpp:2618-2701), `t` = AttackTime (1 at the packet, +1 a tick):
  * t2-8 three red streaks a tick from a +-300 cm cube 1400 cm behind the knight onto the gathering point;
@@ -2277,16 +2462,33 @@ function electrifiedSkeleton(c: SkillContext, target: Entity, seconds: number): 
  * leaving a blue drill flare a tick for 10 ticks; t10 the victim's electrified skeleton for its 35-tick
  * countdown, re-armed to t12.
  */
-const deathStab: Step = (at, c) => {
+const deathStabOf = (hd: boolean): Step => (at, c) => {
   const caster = c.caster;
   const target = c.target;
   const t0 = fxNow();
   const tickOf = (): number => Math.floor((fxNow() - t0) / TICK + 1e-3);
+  const skill = baseSkill(currentSkill);
   weaponGlint(at, c);
 
   const gathers = [swordPoint(caster, 3, new Vector3())];
   const streaks: GatherStreak[] = [];
   gatherStreaks(c, tickOf, t0, streaks, gathers);
+  if (hd) {
+    // Graded tiers: the gathering point swells red as the streaks arrive, with chips drawn in and its light.
+    const gather: PointSource = out => out.copyFrom(gathers[Math.min(tickOf(), gathers.length - 1)]);
+    delay(ticks(1), () => {
+      if (entityGone(caster)) return;
+      const p = gather(new Vector3());
+      effects.spawn('sprite', c.scene, p, { texture: TEX.flare, colour: [1, 0.2, 0.08], size: 1.4, seconds: ticks(12), sizeAt: q => 0.35 + 0.65 * Math.min(1, q * 1.6), fadeTail: 0.35, follow: gather });
+      effects.spawn('particles', c.scene, p, { recipe: GATHER_MOTES, rate: 40, seconds: ticks(8), follow: gather });
+      lighting.skillBody(c.scene, skill, 'gather', out => {
+        const g = gathers[Math.min(tickOf(), gathers.length - 1)];
+        out.x = g.x;
+        out.y = g.y;
+        out.z = g.z;
+      });
+    });
+  }
 
   // The `rand_fps_check(2)` rolls of t6-12, drawn up front so the drill batch is sized to its flares.
   const rolls = Array.from({ length: 7 }, () => Math.random() < 0.5);
@@ -2314,11 +2516,38 @@ const deathStab: Step = (at, c) => {
         for (let k = 0; k < DRILL_EMITTER_TICKS; k++) {
           for (let e = 0; e < 2; e++) flares.push({ emitter, yaw, born: n + k, phase: Math.floor(Math.random() * 360) });
         }
+        if (hd) {
+          // Graded tiers: motes flung forward off the spin, and one light down the drill's 2.8 m from its first roll.
+          effects.spawn('particles', c.scene, emitter, { recipe: DRILL_MOTES, count: 10, heading: new Vector3(f.x, 0, f.z) });
+          if (t - 6 === rolls.indexOf(true)) {
+            const mid = new Vector3(emitter.x + f.x * 1.4, emitter.y, emitter.z + f.z * 1.4);
+            lighting.skillBody(c.scene, skill, 'drill', out => {
+              out.x = mid.x;
+              out.y = mid.y;
+              out.z = mid.z;
+            });
+          }
+        }
       }
-      if (t === 10 && target && !entityGone(target)) electrifiedSkeleton(c, target, ticks(37));
+      if (t === 10 && target && !entityGone(target)) {
+        electrifiedSkeleton(c, target, ticks(37));
+        if (hd) {
+          // Graded tiers: the stab lands as a blue flash and sparks on the chest, and the crackle lights the body.
+          const chest = entityPos(target, IMPACT_HEIGHT, new Vector3());
+          sprite({ texture: TEX.flareBlue, colour: [0.5, 0.6, 1], size: 1.1, seconds: ticks(8), grow: 1.4, growFrom: 0.4, fadeTail: 0.6 })(chest, c);
+          particles({ recipe: STAB_SPARKS, count: 16 })(chest, c);
+          lighting.skillBody(c.scene, skill, 'victim', out => {
+            entityPos(target, IMPACT_HEIGHT, chest);
+            out.x = chest.x;
+            out.y = chest.y - IMPACT_HEIGHT;
+            out.z = chest.z;
+          });
+        }
+      }
     });
   }
 };
+const deathStab = deathStabOf(false);
 
 // ---- the table -------------------------------------------------------------------
 
@@ -2578,13 +2807,25 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 41 Twisting Slash: at clip key 5 (or AttackTime 15) five copies of the wielded weapon whirl round the knight
   // with sparks, smoke, a glow and a grey light under each; see twistingSlash.
-  41: { area: seq((at, c) => (c.target ? weaponGlint(at, c) : undefined), whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 5, 14, twistingSlash)) },
+  41: {
+    area: seq((at, c) => (c.target ? weaponGlint(at, c) : undefined), whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 5, 14, twistingSlash)),
+    // Graded tiers: the swept band, warm sparks and chips, dust for smoke, a warm light on each copy.
+    enhanced: { area: seq((at, c) => (c.target ? weaponGlint(at, c) : undefined), whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 5, 14, twistingSlashOf(true))) },
+  },
   // 42 Rageful Blow: the hand empties as the FURY clip starts; at key 1 the weapon is thrown up and the ground
   // breaks in front of the knight; see furyStrike.
-  42: { area: seq(furyEmptyHand, whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_FURY_STRIKE, 1, 14, furyStrike)) },
+  42: {
+    area: seq(furyEmptyHand, whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_FURY_STRIKE, 1, 14, furyStrike)),
+    // Graded tiers: the weapon's smear, a hot core, chips and dust at the impact, embers off the glowing ground.
+    enhanced: { area: seq(furyEmptyHand, whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_FURY_STRIKE, 1, 14, furyStrikeOf(true))) },
+  },
   // 43 Death Stab: red streaks gathering in front of the sword, the blue drill and the victim's electrified
   // skeleton, staged on AttackTime; see deathStab.
-  43: { cast: deathStab },
+  43: {
+    cast: deathStab,
+    // Graded tiers: the gathering point swells red, the drill throws blue motes, the stab flashes on the victim; each lit.
+    enhanced: { cast: deathStabOf(true) },
+  },
   // 44 Rush (Crescent Moon Slash): charge per frame 4× JOINT_SPARK (±15 xy, +20 z, Angle(150–210)) + BITMAP_FIRE
   // sub2 particles; impact MODEL_SWORD_FORCE sub0 LT 15, Scale 0 growing, z+100, Dir(0,−10,0).
   44: {

@@ -215,7 +215,11 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   40: { area: flame(6, 0.8, { gain: 1.8, floorGain: 1.4, release: 0.6 }) },
   // Twisting Slash: each MODEL_SKILL_WHEEL2 copy lights Luminosity x 0.3 grey, range 3, under itself
   // every tick of its 25 (MoveHandlers.cpp:2808-2812); Luminosity is 0.7-1, fading over the last 5 ticks.
-  41: { bodies: { wheel: { color: [0.3, 0.3, 0.3], range: 3, seconds: 1, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 } } },
+  41: {
+    bodies: { wheel: { color: [0.3, 0.3, 0.3], range: 3, seconds: 1, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 } },
+    // Each copy carries the warm white of its flare01 glow and sparks at blade height, out to the blade's reach.
+    enhanced: { bodies: { wheel: effectLight([1, 0.82, 0.6], 0.9, 1, { heightOffset: 1, release: 0.2, flicker: { min: 0.8, max: 1, steps: 4 } }) } },
+  },
   // Rageful Blow: red Luminosity x (1,0,0), range 1, under the crater's EarthQuake02 (LT 20) and every
   // EarthQuake05 / 08 glow wall (LT 40) (ZzzEffect.cpp:7147-7156, :7199-7212, :7247-7258). MODEL_WAVE's
   // darkening light (-0.5, range 5, MoveHandlers.cpp:2601) has no equivalent: sources only add.
@@ -223,6 +227,26 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
     bodies: {
       crater: { color: [1, 0, 0], range: 1, seconds: 0.8, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 },
       wall: { color: [1, 0, 0], range: 1, seconds: 1.6, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 },
+    },
+    // One light per piece of art instead of 26 pure-red pools that summed to a pink flood: the white-hot burst,
+    // the crater's orange, and the glowing field the cracks and satellites cover out to ~3.7 tiles.
+    enhanced: {
+      bodies: {
+        burst: effectLight([1, 0.85, 0.6], 1.3, 0.45, { heightOffset: 0.4, release: 0.3 }),
+        crater: effectLight([1, 0.5, 0.18], 1.5, 1.4, { attack: 0.08, release: 0.6, flicker: { min: 0.75, max: 1, steps: 4 } }),
+        field: effectLight([1, 0.42, 0.12], 3.7, 1.6, { attack: 0.3, release: 0.7, flicker: { min: 0.8, max: 1, steps: 4 } }),
+      },
+    },
+  },
+  // Death Stab: the original lights nothing. On the graded tiers the red gathering point, the blue drill over its
+  // 2.8 m (centred 1.4 m out, lit from the first roll to the last flare) and the victim's crackle each light like their art.
+  43: {
+    enhanced: {
+      bodies: {
+        gather: effectLight([1, 0.22, 0.1], 0.6, 0.48, { heightOffset: 0, attack: 0.16, release: 0.2 }),
+        drill: effectLight([0.3, 0.4, 1], 1.5, 0.9, { heightOffset: 0, release: 0.35, flicker: { min: 0.75, max: 1, steps: 4 } }),
+        victim: effectLight([0.5, 0.55, 1], 0.8, 1.48, { heightOffset: 0.9, release: 0.3, flicker: { min: 0.4, max: 1, steps: 3 } }),
+      },
     },
   },
   // Starfall: MODEL_ARROW_IMPACT lights nothing in the original (:14596);
