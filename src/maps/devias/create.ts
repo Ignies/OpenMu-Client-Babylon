@@ -3,7 +3,6 @@ import { prefetchSignPlates } from '../../common/signPlates';
 import { SignObject } from '../../common/signObject';
 import { signTypes } from '../../common/signLabels';
 import type { World } from '../../ecs/world';
-import { mapMusic, sound } from '../../sound';
 import { setAreaMood } from '../../scenes/sceneLook';
 import type { AreaLookName } from '../../lighting/profiles';
 import { LeanBoxObject } from '../../common/operateBoxObject';
@@ -29,10 +28,11 @@ import type { RoomFrame } from '../roomEnumeration';
 
 /**
  * Devias (World 3 / Object3). The original lights nothing indoors here;
- * the candelabra, hearth fire, warm interior grade, pub music and dust are
- * the Lorencia tavern treatment applied to every roofed building the hero
- * can walk into (see rooms.ts), the two castle halls included. Dust lives in
- * AmbientParticleSystem.
+ * the candelabra, hearth fire, warm interior grade and dust are the Lorencia
+ * tavern treatment applied to every roofed building the hero can walk into
+ * (see rooms.ts), the two castle halls included. Dust lives in
+ * AmbientParticleSystem. No room carries music: the original has no pub
+ * track in Devias, and the church track is `sound/music.ts`'s.
  */
 export async function createDevias(world: World) {
   const terrain = world.terrain;
@@ -47,26 +47,20 @@ export async function createDevias(world: World) {
   // (ZzzObject.cpp:4652-4655) - the shared operate-box recipe, on Object92.
   tiles[91] = LeanBoxObject;
 
-  // The notice boards. Which placement says what — a neighbouring map, the
-  // map itself, or the building it hangs on — is common/signLabels.ts.
+  // The notice boards. Which placement says what - a neighbouring map, the
+  // map itself, or the building it hangs on - is common/signLabels.ts.
   prefetchSignPlates(`Object${assetWorldNum(map)}/`);
   for (const type of signTypes(map)) tiles[type] = SignObject;
 
-  const tavern: RoomHooks = {
-    look: 'deviasTavern',
-    onEnter: () => sound.playMusic('Music/Pub'),
-    onLeave: () => sound.playMusic(mapMusic(map) ?? 'Music/Devias'),
-  };
-
   // The rooms someone tuned keep their rows; the rest take the shared one.
   const tuned: [Room, AreaLookName][] = [
+    [DEVIAS_TAVERN, 'deviasTavern'],
     [DEVIAS_READING_ROOM, 'deviasReadingRoom'],
     [DEVIAS_WEST_HEARTH_HOUSE, 'deviasHearthHouse'],
     [DEVIAS_EAST_HEARTH_HOUSE, 'deviasHearthHouse'],
   ];
 
   const hooksFor = (room: Room): RoomHooks => {
-    if (sameRoom(room, DEVIAS_TAVERN)) return tavern;
     const row = tuned.find(([known]) => sameRoom(room, known));
 
     return { look: row ? row[1] : 'deviasGuardRoom' };
@@ -74,10 +68,7 @@ export async function createDevias(world: World) {
 
   world.add({
     worldIndex: map,
-    onDispose: () => {
-      sound.stop('Music/Pub');
-      setAreaMood(null);
-    },
+    onDispose: () => setAreaMood(null),
   });
 
   const records = await loadRoomRecords(map);

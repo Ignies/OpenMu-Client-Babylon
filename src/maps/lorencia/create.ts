@@ -10,7 +10,6 @@ import {
   MonsterActionType,
 } from '../../common/objects/enum';
 import { World } from '../../ecs/world';
-import { mapMusic, sound } from '../../sound';
 import { setAreaMood } from '../../scenes/sceneLook';
 import type { Room } from '../layer';
 import {
@@ -88,11 +87,12 @@ const PUB: Room = {
 };
 
 /**
- * The rooms: pub music and the two roof types lifted out of the way while the
- * hero is in the pub (the original never hides roofs; the lift predates the
- * ceiling fade and keeps Classic's pub frame as it was), the shared room row
- * for the cabin. `AmbientParticleSystem`'s `LORENCIA_TAVERN` room matches the
- * pub footprint.
+ * The rooms: the two roof types lifted out of the way while the hero is in
+ * the pub (the original never hides roofs; the lift predates the ceiling fade
+ * and keeps Classic's pub frame as it was), the shared room row for the
+ * cabin. `AmbientParticleSystem`'s `LORENCIA_TAVERN` room matches the pub
+ * footprint. The pub track follows the floor tile under the hero, in both
+ * rooms, from `sound/music.ts`.
  */
 async function createRooms(world: World) {
   const map = world.mapIndex;
@@ -107,22 +107,13 @@ async function createRooms(world: World) {
 
   const pub: RoomHooks = {
     look: 'lorenciaTavern',
-    onEnter: () => {
-      sound.playMusic('Music/Pub');
-      liftRoof({ x: 0, y: 100, z: 0 });
-    },
-    onLeave: () => {
-      sound.playMusic(mapMusic(map) ?? 'Music/main_theme');
-      liftRoof(undefined);
-    },
+    onEnter: () => liftRoof({ x: 0, y: 100, z: 0 }),
+    onLeave: () => liftRoof(undefined),
   };
 
   world.add({
     worldIndex: map,
-    onDispose: () => {
-      sound.stop('Music/Pub');
-      setAreaMood(null);
-    },
+    onDispose: () => setAreaMood(null),
   });
 
   const rooms = enumerateRooms(await loadRoomRecords(map), LORENCIA_ROOM_SPEC);
