@@ -10,7 +10,7 @@
 
 import type { Item } from '../ecs/world';
 import { ItemSerializer } from './itemSerializer';
-import { itemDef } from './itemStats';
+import { itemDef, itemStats } from './itemStats';
 import { itemDisplayName } from './itemTooltip';
 
 /** `{` + 16 characters + `}`. */
@@ -32,7 +32,9 @@ function fromBase64Url(text: string): Uint8Array {
 /** The link an item is sent as. */
 export function itemLinkToken(item: Item): string {
   const bytes = new Uint8Array(ItemSerializer.NeededSpace);
-  ItemSerializer.SerializeItem(bytes, item);
+  // Items built for a window (the cash shop) carry no durability: a new one is full.
+  const durability = item.durability ?? itemStats(item)?.maxDurability;
+  ItemSerializer.SerializeItem(bytes, { ...item, durability });
   // The 380 option is only in the bytes the server sent, not on the item.
   if (item.raw?.length === bytes.length) bytes[5] |= item.raw[5] & 0x0f;
   return `{${toBase64Url(bytes)}}`;
@@ -87,6 +89,23 @@ export function stripItemLinks(text: string): string {
   return text.replace(TOKEN, ' ').replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * The label a link takes in a box already holding `links`: its own name, or,
+ * when a different item already shows under that name, the name with a number
+ * (two Kris +7 with other options must not both send the second one).
+ */
+export function uniqueLinkLabel(
+  label: string,
+  token: string,
+  links: ReadonlyMap<string, string>
+): string {
+  let candidate = label;
+  for (let n = 2; links.has(candidate) && links.get(candidate) !== token; n++) {
+    candidate = `${label.slice(0, -1)} #${n}]`;
+  }
+  return candidate;
+}
+
 /** The typed line as it is sent: every label of a link in `links` becomes the link. */
 export function labelsToWire(text: string, links: ReadonlyMap<string, string>): string {
   let wire = text;
@@ -104,8 +123,9 @@ export function wireToLabels(wire: string): { text: string; links: Map<string, s
   let text = '';
   let at = 0;
   for (const hit of scanItemLinks(wire)) {
-    const label = itemLinkLabel(hit.item);
-    links.set(label, wire.slice(hit.start, hit.end));
+    const token = wire.slice(hit.start, hit.end);
+    const label = uniqueLinkLabel(itemLinkLabel(hit.item), token, links);
+    links.set(label, token);
     text += wire.slice(at, hit.start) + label;
     at = hit.end;
   }

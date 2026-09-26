@@ -9,6 +9,7 @@ import {
   labelsToWire,
   scanItemLinks,
   stripItemLinks,
+  uniqueLinkLabel,
   wireToLabels,
 } from './chatItemLinks';
 import { ChatLineType, classifyInboundChat } from './chat';
@@ -60,6 +61,11 @@ describe('itemLinkToken', () => {
     expect(back.raw![5] & 0x0f).toBe(0x08);
   });
 
+  it('sends an item built without durability (the cash shop) as a new one', () => {
+    const built = itemFromLink(itemLinkToken({ group: 12, num: 0, lvl: 0 }).slice(1, -1))!;
+    expect(built.durability).toBeGreaterThan(0);
+  });
+
   it('refuses bytes that are not an item this client knows', () => {
     expect(itemFromLink('____________________'.slice(0, 16))).toBeNull();
     expect(itemFromLink('not base64 at al')).toBeNull();
@@ -101,6 +107,21 @@ describe('labels in the chat box', () => {
     expect(labelsToWire(`wts ${label} 10kk`, links)).toBe(`wts ${token} 10kk`);
     // A label the player broke apart is only text.
     expect(labelsToWire('wts [Excellent Kris +', links)).toBe('wts [Excellent Kris +');
+  });
+
+  it('keeps two different items with one name apart', () => {
+    const other = itemLinkToken({ ...KRIS, luck: false });
+    const token = itemLinkToken(KRIS);
+    const links = new Map([['[Excellent Kris +7]', token]]);
+    expect(uniqueLinkLabel('[Excellent Kris +7]', token, links)).toBe('[Excellent Kris +7]');
+    const second = uniqueLinkLabel('[Excellent Kris +7]', other, links);
+    expect(second).toBe('[Excellent Kris +7 #2]');
+    links.set(second, other);
+    expect(labelsToWire('[Excellent Kris +7] or [Excellent Kris +7 #2]', links)).toBe(
+      `${token} or ${other}`
+    );
+    const back = wireToLabels(`${token} or ${other}`);
+    expect(back.text).toBe('[Excellent Kris +7] or [Excellent Kris +7 #2]');
   });
 
   it('turns a sent line back into names for the history keys', () => {

@@ -124,6 +124,27 @@ export function hasEmojiCode(text: string, catalog: EmojiCatalog): boolean {
   return scanEmojis(text, catalog).length > 0;
 }
 
+// Rows never change once logged, so each is looked at once.
+const EMOJI_ROWS = new WeakMap<object, boolean>();
+
+/**
+ * How tall the log draws a row: a player's row holding an emoji is as tall as
+ * the emoji (`emojiSize`, null while emojis are off), any other one line.
+ */
+export function chatLogRowHeight(
+  line: { sender: string; text: string },
+  catalog: EmojiCatalog,
+  emojiSize: number | null
+): number {
+  if (emojiSize === null || !line.sender) return CHAT_LINE_HEIGHT;
+  let has = EMOJI_ROWS.get(line);
+  if (has === undefined) {
+    has = hasEmojiCode(line.text, catalog);
+    EMOJI_ROWS.set(line, has);
+  }
+  return has ? chatEmojiRowHeight(emojiSize) : CHAT_LINE_HEIGHT;
+}
+
 export type EmojiSegment = string | ChatEmoji;
 
 /** The line as runs of text and emojis, in order. */
@@ -237,6 +258,8 @@ export function emojiQueryAt(
   caret: number
 ): { start: number; query: string } | null {
   const word = /[A-Za-z0-9_]/;
+  // The caret inside a code already typed: completing would cut it in two.
+  if (caret < text.length && /[A-Za-z0-9_:]/.test(text[caret])) return null;
   let i = caret;
   while (i > 0 && word.test(text[i - 1])) i--;
   if (i === 0 || text[i - 1] !== ':') return null;

@@ -31,12 +31,14 @@ import { EmojiText } from '../../../../components/emojiText';
 import { EMOJI_CATALOG } from '../../../../../emojis';
 import { EmojiPicker, RecentEmojis } from './emojiPicker';
 import { installItemLinkGesture } from './itemLinkGesture';
-import { labelsToWire, wireToLabels } from '../../../../../common/chatItemLinks';
 import {
-  chatEmojiRowHeight,
+  labelsToWire,
+  uniqueLinkLabel,
+  wireToLabels,
+} from '../../../../../common/chatItemLinks';
+import {
   chatEmojiSize,
   emojiPackLabel,
-  hasEmojiCode,
   emojiQueryAt,
   matchEmojiCodes,
   spliceChatText,
@@ -257,8 +259,8 @@ function copiedText(node: Node): string {
 }
 
 /** The selected part of every log row the selection touches, top to bottom. */
-function selectedRows(log: HTMLElement, range: Range): { messageId: number; text: string }[] {
-  const rows: { messageId: number; text: string }[] = [];
+function selectedRows(log: HTMLElement, range: Range): Parameters<typeof joinCopiedRows>[0] {
+  const rows: { messageId: number; text: string; spaced: boolean }[] = [];
   log.querySelectorAll<HTMLElement>('.chat-line').forEach(row => {
     if (!range.intersectsNode(row)) return;
     const part = document.createRange();
@@ -269,20 +271,13 @@ function selectedRows(log: HTMLElement, range: Range): { messageId: number; text
     if (range.compareBoundaryPoints(Range.END_TO_END, part) < 0) {
       part.setEnd(range.endContainer, range.endOffset);
     }
-    rows.push({ messageId: Number(row.dataset.message), text: copiedText(part.cloneContents()) });
+    rows.push({
+      messageId: Number(row.dataset.message),
+      text: copiedText(part.cloneContents()),
+      spaced: row.dataset.spaced !== undefined,
+    });
   });
   return rows;
-}
-
-/** Whether a row holds a picture, once per row: rows never change. */
-const EMOJI_ROWS = new WeakMap<ChatLine, boolean>();
-function hasEmoji(line: ChatLine): boolean {
-  let has = EMOJI_ROWS.get(line);
-  if (has === undefined) {
-    has = hasEmojiCode(line.text, EMOJI_CATALOG);
-    EMOJI_ROWS.set(line, has);
-  }
-  return has;
 }
 
 const ChatLog = observer(() => {
@@ -308,16 +303,10 @@ const ChatLog = observer(() => {
   // A row holding an emoji is as tall as the option draws it; the log keeps
   // its height and shows fewer rows.
   const emojiSize = chatEmojiSize(GameOptions.chatEmojiSize);
-  const emojiRow = chatEmojiRowHeight(emojiSize);
-  const drawsEmojis = GameOptions.chatEmojis;
-  const rowHeight = (line: ChatLine) =>
-    drawsEmojis && line.sender && hasEmoji(line) ? emojiRow : CHAT_LINE_HEIGHT;
-  const layout = layoutChatRows(
-    i => rowHeight(lines[i]),
-    end,
-    SCROLL_MIDDLE_PART_HEIGHT * showing
-  );
+  const rowHeight = (line: ChatLine) => Social.chatRowHeight(line);
+  const layout = layoutChatRows(i => rowHeight(lines[i]), end, Social.chatLogBudget);
   const visible = end < 0 ? [] : lines.slice(layout.start, end + 1);
+  const floor = Social.chatLogFloor(lines);
 
   const height =
     SCROLL_MIDDLE_PART_HEIGHT * showing +
@@ -342,13 +331,28 @@ const ChatLog = observer(() => {
       e.clipboardData.setData('text/plain', text);
       e.preventDefault();
     };
+    // A selection holds the view still, or the next line would scroll the
+    // rows it covers away. On the page: the drag can end off the log.
+    const onUp = () => {
+      const log = logRef.current;
+      const selection = window.getSelection();
+      if (!log || !selection || selection.isCollapsed || !selection.rangeCount) return;
+      if (selection.getRangeAt(0).intersectsNode(log)) Social.holdChatLog();
+    };
     document.addEventListener('copy', onCopy);
-    return () => document.removeEventListener('copy', onCopy);
+    document.addEventListener('mouseup', onUp);
+    return () => {
+      document.removeEventListener('copy', onCopy);
+      document.removeEventListener('mouseup', onUp);
+    };
   }, []);
+
+  // The hovered emoji's row may have scrolled away under the pointer.
+  useEffect(() => setPreview(null), [layout.start, end]);
 
   if (!Social.chatLogVisible) return null;
 
-  const scrollable = lines.length > showing;
+  const scrollable = floor < last;
 
   // The original scrolls framed or not (NewUIChatLogWindow.cpp:679).
   const onWheel = (e: React.WheelEvent) => {
@@ -359,15 +363,6 @@ const ChatLog = observer(() => {
     if (step.rows) {
       setPreview(null);
       Social.scrollChatLog(step.rows);
-    }
-  };
-
-  // A selection holds the view still, or the next line would scroll the rows
-  // it covers away.
-  const onMouseUp = () => {
-    const selection = window.getSelection();
-    if (selection && !selection.isCollapsed && Social.chatLogEndId === null && last >= 0) {
-      Social.pinChatLog(lines[end].id);
     }
   };
 
@@ -388,7 +383,7 @@ const ChatLog = observer(() => {
   };
 
   // `UpdateScrollPos`: thumb position follows the end line.
-  const rate = scrollable ? (end - (showing - 1)) / (lines.length - showing) : 1;
+  const rate = scrollable ? (end - floor) / (last - floor) : 1;
   const trackTop = WND_TOP_BOTTOM_EDGE;
   const trackHeight = height - SCROLL_BTN_HEIGHT - WND_TOP_BOTTOM_EDGE * 2;
   const thumbX = width - SCROLL_BAR_WIDTH - WND_LEFT_RIGHT_EDGE - 4;
@@ -404,7 +399,7 @@ const ChatLog = observer(() => {
     const drag = dragRef.current;
     if (!drag) return;
     const scale = MuWindows.scaleOf(CHAT_ID) || 1;
-    const perLine = trackHeight / (lines.length - showing);
+    const perLine = trackHeight / (last - floor);
     const delta = Math.round((e.clientY - drag.startY) / scale / perLine);
     Social.scrollChatLogTo(drag.startEnd + delta);
   };
@@ -423,7 +418,6 @@ const ChatLog = observer(() => {
         backgroundColor: framed ? `rgba(0,0,0,${Social.chatLogAlpha})` : undefined,
       }}
       onWheel={onWheel}
-      onMouseUp={onMouseUp}
       onMouseLeave={() => {
         setPointed(-1);
         setPreview(null);
@@ -449,6 +443,7 @@ const ChatLog = observer(() => {
             key={line.id}
             className="chat-line"
             data-message={line.messageId}
+            data-spaced={line.spaced ? '' : undefined}
             style={{
               left: WND_LEFT_RIGHT_EDGE,
               top: firstLineY + layout.tops[s],
@@ -711,11 +706,17 @@ const ChatInput = observer(() => {
     if (!open || !pendingInsert) return;
     const insert = Social.takeChatInsert();
     if (!insert) return;
-    links.current.set(insert.label, insert.token);
+    const label = uniqueLinkLabel(insert.label, insert.token, links.current);
     const field = inputRef.current;
     const from = field?.selectionStart ?? text.length;
     const gap = from > 0 && text[from - 1] !== ' ' ? ' ' : '';
-    placeText(from, field?.selectionEnd ?? from, gap + insert.label);
+    // Known before the check, so the line is measured as it would be sent;
+    // dropped again when it does not fit.
+    const known = links.current.has(label);
+    links.current.set(label, insert.token);
+    if (!placeText(from, field?.selectionEnd ?? from, gap + label) && !known) {
+      links.current.delete(label);
+    }
     // The window's own press may have taken the focus.
     const id = requestAnimationFrame(() => inputRef.current?.focus());
     return () => cancelAnimationFrame(id);
@@ -750,9 +751,16 @@ const ChatInput = observer(() => {
       Social.closeChatInput();
       return;
     }
+    // Too long since a mode switch or a recall: sending would cut the end,
+    // maybe half a link or an emoji code. It stays in the box to shorten.
+    const wire = wireOf(text);
+    if (wire.length > budget) {
+      playUiSound('error');
+      return;
+    }
     // Rate-limited or refused: the line stays in the field for a retry
     // instead of vanishing with the box.
-    if (!Social.sendChat(wireOf(text))) {
+    if (!Social.sendChat(wire)) {
       playUiSound('error');
       return;
     }
@@ -777,7 +785,7 @@ const ChatInput = observer(() => {
     setHistoryIndex(next);
     // History keeps the line as sent; its links show as names again.
     const recalled = wireToLabels(history[next]);
-    recalled.links.forEach((token, label) => links.current.set(label, token));
+    links.current = recalled.links;
     setText(recalled.text);
   };
 
@@ -950,9 +958,12 @@ const ChatInput = observer(() => {
         spellCheck={false}
         autoComplete="off"
         onChange={e => {
+          const caretNow = e.target.selectionStart ?? e.target.value.length;
           setText(e.target.value);
-          setCaret(e.target.selectionStart ?? e.target.value.length);
+          setCaret(caretNow);
           setCompletionIndex(0);
+          // A list put away with Escape stays away only for the code it was on.
+          if (emojiQueryAt(e.target.value, caretNow)?.start !== hiddenQuery) setHiddenQuery(-1);
         }}
         onSelect={e => setCaret(e.currentTarget.selectionStart ?? 0)}
         onKeyDown={e => {
@@ -981,8 +992,7 @@ const ChatInput = observer(() => {
           } else if (e.key === 'PageUp' || e.key === 'PageDown') {
             // `m_bShowFrame` + PageUp / PageDown pages the log (NewUIChatInputBox.cpp:455), framed or not here.
             e.preventDefault();
-            const page = Math.max(1, Social.chatLogLines - 1);
-            Social.scrollChatLog(e.key === 'PageUp' ? -page : page);
+            Social.pageChatLog(e.key === 'PageUp' ? -1 : 1);
           } else if (e.key === 'F3') {
             e.preventDefault();
             Social.toggle('whisperEnabled');
@@ -1022,7 +1032,8 @@ const ChatInput = observer(() => {
           />
         </div>
       )}
-      {emojis && pickerOpen && (
+      {/* Out of the way while the `:` list is up: the list is what Enter takes. */}
+      {emojis && pickerOpen && !emojiMatches.length && (
         <EmojiPicker
           onPick={pickEmoji}
           onClose={closePicker}

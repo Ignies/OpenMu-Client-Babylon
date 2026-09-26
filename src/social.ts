@@ -15,7 +15,12 @@ import {
   CHAT_SHOWING_LINES,
   ChatLineType,
   chatSenderPrefix,
+  chatEndIndex,
+  CHAT_LINE_HEIGHT,
+  chatRowsSpaced,
+  chatScrollFloor,
   chatTimestamp,
+  layoutChatRows,
   scrollChatEnd,
   splitChatLine,
   MAX_CHAT_LENGTH,
@@ -35,6 +40,7 @@ import {
   chatEmojiAdvance,
   chatEmojiBubbleOf,
   chatEmojiSize,
+  chatLogRowHeight,
   emojiAtoms,
   splitChatLineAtoms,
   stripEmojiCodes,
@@ -260,8 +266,10 @@ export const Social = new (class _Social {
       takeChatInsert: action,
       scrollChatLog: action,
       scrollChatLogTo: action,
+      pageChatLog: action,
       followChatLog: action,
       pinChatLog: action,
+      holdChatLog: action,
       toggle: action,
       cycleChatLogSize: action,
       cycleChatLogAlpha: action,
@@ -420,12 +428,14 @@ export const Social = new (class _Social {
     // again, but it keeps the speaker so the log can hover and whisper off a
     // wrapped message as one thing.
     const messageId = this.nextLineId;
+    const spaced = chatRowsSpaced(text, parts);
     const rows: ChatLine[] = parts.map((part, index) => ({
       id: this.nextLineId++,
       messageId,
       sender,
       ...speaker,
       continued: index > 0,
+      spaced: spaced[index] || undefined,
       text: part,
       type,
       at,
@@ -435,6 +445,10 @@ export const Social = new (class _Social {
     // `RemoveFrontLine` once MAX_NUMBER_OF_LINES is reached.
     this.chatLines =
       next.length > MAX_CHAT_LINES ? next.slice(next.length - MAX_CHAT_LINES) : next;
+    // The row the view was held on scrolled out of the log: follow again.
+    if (this.chatLogEndId !== null && this.chatLines[0].id > this.chatLogEndId) {
+      this.chatLogEndId = null;
+    }
   }
 
   /**
@@ -465,6 +479,8 @@ export const Social = new (class _Social {
 
   setChatFilter(filter: ChatFilterKey): void {
     this.chatFilter = filter;
+    // Another tab is other rows: it opens on its newest.
+    this.chatLogEndId = null;
   }
 
   /**
@@ -497,22 +513,60 @@ export const Social = new (class _Social {
       | 'chatLogVisible'
   ): void {
     this[key] = !this[key];
+    if (key === 'showSystemMessages') this.chatLogEndId = null;
   }
 
-  /** The wheel, PageUp / PageDown: `delta` rows, negative is older. */
-  scrollChatLog(delta: number): void {
-    this.chatLogEndId = scrollChatEnd(
-      this.visibleChatLines,
-      this.chatLogEndId,
-      this.chatLogLines,
-      delta
+  /** How tall the log draws this row (an emoji row grows with the option). */
+  chatRowHeight(line: ChatLine): number {
+    return chatLogRowHeight(
+      line,
+      EMOJI_CATALOG,
+      GameOptions.chatEmojis ? chatEmojiSize(GameOptions.chatEmojiSize) : null
     );
+  }
+
+  /** The log's text area in pixels: `m_nShowingLines` text rows. */
+  get chatLogBudget(): number {
+    return CHAT_LINE_HEIGHT * this.chatLogLines;
+  }
+
+  /** The highest row the view can end on (`chatScrollFloor`). */
+  chatLogFloor(lines: readonly ChatLine[] = this.visibleChatLines): number {
+    return chatScrollFloor(i => this.chatRowHeight(lines[i]), lines.length, this.chatLogBudget);
+  }
+
+  /** The wheel: `delta` rows, negative is older. */
+  scrollChatLog(delta: number): void {
+    const lines = this.visibleChatLines;
+    this.chatLogEndId = scrollChatEnd(lines, this.chatLogEndId, this.chatLogFloor(lines), delta);
   }
 
   /** The scrollbar thumb: end the view on this row index. */
   scrollChatLogTo(index: number): void {
     const lines = this.visibleChatLines;
-    this.chatLogEndId = scrollChatEnd(lines, null, this.chatLogLines, index - (lines.length - 1));
+    this.chatLogEndId = scrollChatEnd(
+      lines,
+      null,
+      this.chatLogFloor(lines),
+      index - (lines.length - 1)
+    );
+  }
+
+  /** PageUp / PageDown: the rows on screen, less one kept for context. */
+  pageChatLog(direction: 1 | -1): void {
+    const lines = this.visibleChatLines;
+    if (!lines.length) return;
+    const end = chatEndIndex(lines, this.chatLogEndId);
+    const { start } = layoutChatRows(i => this.chatRowHeight(lines[i]), end, this.chatLogBudget);
+    this.scrollChatLog(direction * Math.max(1, end - start));
+  }
+
+  /** Text is being selected in the log: hold the rows still, where they are. */
+  holdChatLog(): void {
+    const lines = this.visibleChatLines;
+    if (!lines.length) return;
+    const end = chatEndIndex(lines, this.chatLogEndId);
+    if (end === lines.length - 1) this.chatLogEndId = lines[end].id;
   }
 
   followChatLog(): void {

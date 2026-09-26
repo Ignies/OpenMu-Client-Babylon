@@ -131,6 +131,11 @@ const LOGOUT_TEXT: Readonly<Record<number, string>> = {
 
 let sequence = 0;
 
+/** The NUL fill only: a chat line is UTF-8 bytes, and trimming them first cuts a letter. */
+function withoutPadding(raw: string): string {
+  return raw.replace(/\0.*$/, '');
+}
+
 function cleanName(raw: string): string {
   return raw.replace(/\0.*$/, '').trim();
 }
@@ -775,12 +780,12 @@ export class TrackedSession {
         return;
       }
       case 0x00:
-        this.onChat(fromChatWire(cleanName(new PublicChatMessagePacket(view).Message)));
+        this.onChat(fromChatWire(withoutPadding(new PublicChatMessagePacket(view).Message)).trim());
         return;
       case 0x02: {
         const p = new WhisperMessagePacket(view);
         const to = cleanName(p.ReceiverName);
-        const text = fromChatWire(cleanName(p.Message));
+        const text = fromChatWire(withoutPadding(p.Message)).trim();
         this.emit(
           'whisper',
           this.whispers ? `whispered to ${to}: ${text}` : `whispered to ${to}`,

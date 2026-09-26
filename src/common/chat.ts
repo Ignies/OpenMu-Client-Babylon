@@ -30,6 +30,8 @@ export type ChatLine = {
   at: number;
   /** A row carried over from the line above by `splitChatLine`. */
   continued?: boolean;
+  /** The split before this carried row ate a space; a copy puts it back. */
+  spaced?: boolean;
   /** The sender's guild, shown as a tag before the name. */
   senderGuild?: string;
   /** `HeroState` of the sender when they spoke, for the name colour. */
@@ -103,17 +105,32 @@ export function splitChatLine(
 
     const hasSpace = rest.includes(' ');
     let at = rest.length;
+    let starts: number[] | null = null;
 
     while (at > 0 && measure(rest.slice(0, at)) > budget) {
       // A word wider than the log on its own is cut mid-word rather than
       // dropped: `find_last_of` returns npos and the original falls to -1.
       const space = hasSpace ? rest.lastIndexOf(' ', at - 1) : -1;
-      at = space > 0 ? space : at - 1;
+      if (space > 0) {
+        at = space;
+        continue;
+      }
+      // Mid-word, by whole characters: never half an emoji or a family.
+      starts ??= characterStarts(rest);
+      let back = starts.length - 1;
+      while (back > 0 && starts[back] >= at) back--;
+      at = starts[back];
     }
 
-    // Nothing fits at all (a budget narrower than one character): keep the
-    // line whole rather than looping forever on it.
     if (at <= 0) {
+      // The name took the room its first piece needed (a long item link):
+      // the name stands alone and the text starts on a full row.
+      if (rows.length === 0 && budget < width) {
+        rows.push('');
+        continue;
+      }
+      // Nothing fits at all (a budget narrower than one character): keep the
+      // line whole rather than looping forever on it.
       rows.push(rest);
       break;
     }
@@ -123,6 +140,35 @@ export function splitChatLine(
   }
 
   return rows;
+}
+
+/**
+ * Where each character a reader sees starts: an emoji's two code units, a
+ * family joined by ZWJ or a flag count as one.
+ */
+function characterStarts(text: string): number[] {
+  if (typeof Intl.Segmenter === 'function') {
+    return [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(text)].map(
+      part => part.index
+    );
+  }
+  const starts: number[] = [];
+  for (let i = 0; i < text.length; i++) {
+    const unit = text.charCodeAt(i);
+    if (unit < 0xdc00 || unit > 0xdfff) starts.push(i);
+  }
+  return starts;
+}
+
+/** For each row, whether the split before it dropped a space (never the first). */
+export function chatRowsSpaced(text: string, rows: readonly string[]): boolean[] {
+  let at = 0;
+  return rows.map((row, i) => {
+    const found = row ? text.indexOf(row, at) : at;
+    const spaced = i > 0 && found > at;
+    at = (found < 0 ? at : found) + row.length;
+    return spaced;
+  });
 }
 
 /**
@@ -166,20 +212,38 @@ export function chatSenderPrefix(line: {
 export const CHAT_LINE_HEIGHT = 15;
 
 /**
- * `Scrolling(n)`: the row the log ends on after moving `delta` rows, clamped
- * so a full page stays in view. Pinned by the row's id; null follows the
- * newest row.
+ * `Scrolling(n)`: the row the log ends on after moving `delta` rows, never
+ * above `floor` (`chatScrollFloor`), so a full page stays in view. Pinned by
+ * the row's id; null follows the newest row.
  */
 export function scrollChatEnd(
   lines: readonly { id: number }[],
   endId: number | null,
-  showing: number,
+  floor: number,
   delta: number
 ): number | null {
   const last = lines.length - 1;
-  if (lines.length <= showing) return null;
-  const next = Math.min(last, Math.max(showing - 1, chatEndIndex(lines, endId) + delta));
+  if (last <= floor) return null;
+  const next = Math.min(last, Math.max(floor, chatEndIndex(lines, endId) + delta));
   return next >= last ? null : lines[next].id;
+}
+
+/**
+ * The highest the view can end: the last row of the page that starts at the
+ * oldest one. With text rows only it is `showing - 1`; taller emoji rows fill
+ * the page sooner. Every row fits: the log does not scroll.
+ */
+export function chatScrollFloor(
+  heightOf: (index: number) => number,
+  count: number,
+  budget: number
+): number {
+  let used = 0;
+  for (let i = 0; i < count; i++) {
+    used += heightOf(i);
+    if (used > budget) return Math.max(0, i - 1);
+  }
+  return count - 1;
 }
 
 /** The index the log ends on; a pin that is gone (dropped, filtered) follows the newest. */
@@ -245,20 +309,25 @@ export function chatWheelRows(
 }
 
 /**
- * Copied log rows as text: a message the log wrapped comes back as one line,
- * separate messages one per line.
+ * Copied log rows as text: a message the log wrapped comes back as one line
+ * (with the space its split ate, if it ate one), separate messages one per
+ * line.
  */
-export function joinCopiedRows(rows: readonly { messageId: number; text: string }[]): string {
+export function joinCopiedRows(
+  rows: readonly { messageId: number; text: string; spaced?: boolean }[]
+): string {
   let out = '';
   let previous: number | null = null;
   for (const row of rows) {
-    const text = row.text.trim();
-    if (!text) continue;
-    if (previous !== null) out += row.messageId === previous ? ' ' : '\n';
-    out += text;
+    if (!row.text.trim()) continue;
+    if (previous !== null) {
+      out = out.trimEnd();
+      out += row.messageId !== previous ? '\n' : row.spaced ? ' ' : '';
+    }
+    out += previous === null || row.messageId !== previous ? row.text.trimStart() : row.text;
     previous = row.messageId;
   }
-  return out;
+  return out.trimEnd();
 }
 
 /**
