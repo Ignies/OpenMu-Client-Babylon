@@ -114,6 +114,8 @@ export interface SpriteOptions {
   aspect?: number;
   /** The card's turn in the view plane, radians (the original's `Rotation`), when it does not `spin`. */
   rotation?: number;
+  /** Fade the card to nothing towards its border (a sheet whose art runs to its edge). Additive cards only. */
+  softEdge?: boolean;
 }
 
 const live = new LiveList();
@@ -169,7 +171,7 @@ export function spawnSprite(
   const dark = opts.blend === 'subtract';
   const material = dark
     ? darkMaterial(scene, opts.texture, opts.cover ?? luma(colour) * darkCardGain(scene))
-    : additiveMaterial(scene, opts.texture, colour);
+    : additiveMaterial(scene, opts.texture, colour, 'add', opts.softEdge);
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
   const size = opts.size ?? DEFAULT_SIZE;
   const count = Math.max(1, opts.count ?? 1);

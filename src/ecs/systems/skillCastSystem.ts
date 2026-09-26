@@ -38,7 +38,7 @@ import { getBaseClass } from '../../common/characterStats';
 import { isWingItem } from '../../common/wings';
 import type { AttackPose } from '../../common/weaponClass';
 import { mountKind } from '../../common/pets';
-import { playSkill } from '../../sound/combat';
+import { heroCastSound, playCombat, playSkill } from '../../sound/combat';
 import { skills } from '../../skills';
 import { combat } from '../../combat';
 import { SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../combat/recipes';
@@ -681,8 +681,8 @@ export const SkillCastSystem: ISystemFactory = world => {
         };
       }
 
-      // ExecuteSkill plays the skill's sound as the cast starts.
-      playSkill(def.num, hero.transform.pos);
+      // ExecuteSkill plays the skill's sound as the cast starts (Fire Scream's only at its spawn).
+      playCombat(heroCastSound(def.num), hero.transform.pos);
 
       cooldown = Math.max(
         duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,

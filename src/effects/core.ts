@@ -2,6 +2,7 @@ import {
   Color4,
   Constants,
   CreatePlane,
+  DynamicTexture,
   Material,
   Mesh,
   ParticleSystem,
@@ -370,7 +371,8 @@ export function additiveMaterial(
   scene: Scene,
   texture: string | Texture,
   colour: RGB,
-  blend: EffectBlend = 'add'
+  blend: EffectBlend = 'add',
+  softEdge = false
 ): StandardMaterial {
   let byKey = materials.get(scene);
   if (!byKey) {
@@ -380,7 +382,7 @@ export function additiveMaterial(
   const gain = blend === 'add' ? lightCardGain(scene) : 1;
   const tint: RGB = gain === 1 ? colour : [colour[0] * gain, colour[1] * gain, colour[2] * gain];
   const texKey = typeof texture === 'string' ? texture : `#${texture.uniqueId}`;
-  const key = `${texKey}|${colourKey(tint)}|${blend}`;
+  const key = `${texKey}|${colourKey(tint)}|${blend}${softEdge ? '|soft' : ''}`;
   let m = byKey.get(key);
   if (m) return m;
 
@@ -395,6 +397,7 @@ export function additiveMaterial(
   mat.backFaceCulling = false;
   mat.disableDepthWrite = true;
   mat.fogEnabled = false;
+  if (softEdge) mat.opacityTexture = softEdgeMask(scene);
 
   if (typeof texture === 'string') {
     void effectTexture(scene, texture).then(tex => {
@@ -946,6 +949,31 @@ export function clearTimers(): void {
 
 /* ------------------------------------------------------------------ reset */
 
+/**
+ * A round falloff (full inside 40 % of the radius, none at the edge) as an opacity mask: for a sheet whose
+ * art runs to its quad's border, which reads as a square card once many of them overlap.
+ */
+const softEdgeMasks = new Map<Scene, DynamicTexture>();
+function softEdgeMask(scene: Scene): DynamicTexture {
+  let tex = softEdgeMasks.get(scene);
+  if (tex) return tex;
+  const size = 64;
+  tex = new DynamicTexture('fx:softEdge', { width: size, height: size }, scene, false);
+  const ctx = tex.getContext();
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(0.4, '#ffffff');
+  g.addColorStop(1, '#000000');
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  tex.update(false);
+  tex.getAlphaFromRGB = true;
+  softEdgeMasks.set(scene, tex);
+  return tex;
+}
+
 /** Dispose every shared pool (materials, cards, particle systems). The facade's reset. */
 export function disposePools(): void {
   // The halo draws the pooled meshes, so it goes with them.
@@ -954,6 +982,8 @@ export function disposePools(): void {
   // skill mesh's from the GLB cache; both are shared with the map.
   for (const byKey of materials.values()) for (const m of byKey.values()) m.dispose(false, false);
   materials.clear();
+  for (const t of softEdgeMasks.values()) t.dispose();
+  softEdgeMasks.clear();
   for (const pool of cardPool.values()) for (const c of pool) c.dispose(false, false);
   cardPool.clear();
   for (const map of systems.values()) for (const ps of map.values()) ps.dispose(false);

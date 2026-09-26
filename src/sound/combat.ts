@@ -99,6 +99,7 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   61: 'Sound/eFirebust', // Fire Burst
   62: 'Sound/sDarkEarthQuake', // Earthshake
   66: 'Sound/sKnightSkill1', // Force Wave
+  74: 'Sound/eFirebust', // Space Split (SOUND_ATTACK_FIRE_BUST at the packet, WSclient.cpp:4532-4547)
   512: 'Sound/sDarkEarthQuake', // Earthshake Str
   516: 'Sound/sDarkEarthQuake', // Earthshake Mastery
   76: 'Sound/pWskill', // Plasma Storm (Fenrir)
@@ -148,7 +149,20 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   508: 'Sound/eFirebust', // Fire Burst Strengthener
   509: 'Sound/sKnightSkill1', // Force Wave Strengthener
   514: 'Sound/eFirebust', // Fire Burst Mastery
+  518: 'Sound/Darklord_firescream', // Fire Scream Strengthener
+  520: 'Sound/Darklord_firescream', // Fire Scream Mastery
 };
+
+/**
+ * Skills whose caster hears nothing at the click: Fire Scream's cast (ClassAttack.cpp:866-901) and the
+ * caster's own echo (WSclient.cpp:5180, `sc != Hero`) are silent; it screams when the effect spawns.
+ */
+const SILENT_HERO_CASTS: ReadonlySet<number> = new Set([78, 518, 520]);
+
+/** The sound the hero's own cast plays as it starts. */
+export function heroCastSound(skill: number): Sounds | null {
+  return SILENT_HERO_CASTS.has(skill) ? null : skillSound(skill);
+}
 
 // ---- 2. selectors + commands -----------------------------------------------
 // Pure selectors (which key) and the commands that play them. One-shots:

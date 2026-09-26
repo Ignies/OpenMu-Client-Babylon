@@ -734,7 +734,13 @@ function piercingStreak(p: Vector3, f: Vector3, c: SkillContext): void {
  * MODEL_PIERCING2 (:3248-3264) easing 1.2 m forward and dropping a MODEL_WAVES sub2 a tick for 5 ticks
  * (MoveHandlers.cpp:5360-5396). Vertical rings facing the heading, depth-tested, near white.
  */
-const force: Step = (_at, c) => {
+const force: Step = (_at, c) => forceParts(c, 1.5);
+
+/** Direction[1] from -60 by +12 a tick to 0: the lance is 48, 36, 24, 12 cm on after `n` moves, then held 1.2 m out. */
+const forceReach = (n: number): number => (n >= 4 ? cm(120) : cm(60 * n - 6 * n * (n + 1)));
+
+/** Force's parts; `ringFade` is the sub1 rings' per-tick BlendMeshLight divisor (1.5 in the original). */
+function forceParts(c: SkillContext, ringFade: number): void {
   const yaw = yawDegrees(c);
   const f = facing(c);
   const p = entityPos(c.caster, FORCE_HEIGHT, new Vector3());
@@ -748,12 +754,10 @@ const force: Step = (_at, c) => {
       seconds: ticks(14),
       angle: [90, 0, yaw],
       scaleAt: t => wavesScale(s0, 0.07, 2, movesAt(t)),
-      intensity: t => Math.pow(1.5, -movesAt(t)),
+      intensity: t => Math.pow(ringFade, -movesAt(t)),
       fadeTail: 0,
     });
   }
-  // Direction[1] from -60 by +12 a tick to 0: 48, 36, 24, 12 cm, then held 1.2 m out.
-  const reach = (n: number): number => (n >= 4 ? cm(120) : cm(60 * n - 6 * n * (n + 1)));
   const t0 = fxNow();
   effects.spawn('model', c.scene, p, {
     model: MODEL.piercing2,
@@ -761,7 +765,7 @@ const force: Step = (_at, c) => {
     scale: 2,
     angle: [0, 0, yaw],
     follow: out => {
-      const d = reach(movesAt(fxNow() - t0));
+      const d = forceReach(movesAt(fxNow() - t0));
       return out.set(p.x + f.x * d, p.y, p.z + f.z * d);
     },
     intensity: t => Math.pow(1.6, -Math.min(5, movesAt(t))),
@@ -769,7 +773,7 @@ const force: Step = (_at, c) => {
   });
   // While LT > 5 the lance drops one ring a tick where it stands, Scale 0.05 x LT.
   for (let m = 1; m <= 5; m++) {
-    const d = reach(m - 1);
+    const d = forceReach(m - 1);
     const s0 = 0.05 * (11 - m);
     const ring = new Vector3(p.x + f.x * d, p.y, p.z + f.z * d);
     delay(ticks(m - 1), () =>
@@ -783,7 +787,7 @@ const force: Step = (_at, c) => {
       })
     );
   }
-};
+}
 
 /** Fire Burst's origin: bone 0 + (40, 0, 10) cm in its frame (ZzzCharacter.cpp:5071-5072). */
 const FIRE_BURST_LOCAL = new Vector3(cm(40), 0, cm(10));
@@ -799,6 +803,19 @@ const turnToward = (cur: number, target: number, max: number): number => {
   const next = cur + Math.max(-max, Math.min(max, d));
   return ((next % 360) + 360) % 360;
 };
+/**
+ * MoveHumming (ZzzAI.cpp:135-146): `heading` (MU degrees) turned toward `aim` by at most `turn` in yaw,
+ * then in pitch; its unit direction written into `dir` (the `Direction (0, -d, 0)` it moves along).
+ */
+function hummingDir(heading: [number, number, number], pos: Vector3, aim: Vector3, turn: number, dir: Vector3): Vector3 {
+  const dx = aim.x - pos.x;
+  const dz = aim.z - pos.z;
+  heading[2] = turnToward(heading[2], (Math.atan2(dx, -dz) * 180) / Math.PI, turn);
+  heading[0] = turnToward(heading[0], 360 - (Math.atan2(aim.y - pos.y, Math.hypot(dx, dz)) * 180) / Math.PI, turn);
+  const pitch = (heading[0] * Math.PI) / 180;
+  const yaw = (heading[2] * Math.PI) / 180;
+  return dir.set(Math.cos(pitch) * Math.sin(yaw), -Math.sin(pitch), -Math.cos(pitch) * Math.cos(yaw));
+}
 /** `to->BoundingBoxMax[2]`: 120 cm on a player (ZzzCharacter.cpp:11798); a monster's from its model's bounds. */
 function targetTop(e: Entity): number {
   const m = e.modelObject;
@@ -813,12 +830,13 @@ function targetTop(e: Entity): number {
  * growing by an accumulating 0.02, rising Gravity x 20 cm, streaming along the dart's heading at
  * 9.6-11.7 cm a tick x1.05, Light LT x 0.2 (clamped at 1), LT 12.
  */
-function pierFire(c: SkillContext, at: Vector3, dir: Vector3): void {
+function pierFire(c: SkillContext, at: Vector3, dir: Vector3, look?: PierLook): void {
   const v0 = cm((randInt(8) + 32) * 0.3);
   const t0 = fxNow();
   effects.spawn('sprite', c.scene, at, {
     texture: TEX.fire2,
-    size: cm(64),
+    colour: look?.puff,
+    size: cm(64) * (look?.puffSize ?? 1),
     seconds: ticks(11),
     roll: Math.random() * Math.PI * 2,
     follow: out => {
@@ -844,7 +862,7 @@ function pierFire(c: SkillContext, at: Vector3, dir: Vector3): void {
  * `Alpha = (20 - LT) / 5` so the first ticks' ones are cut away, x1/1.3 a tick over the dart's last ticks,
  * dying with it; each emits one Fire02 puff. They are stamps of one trail per dart (effects/stamps.ts).
  */
-function pierDart(c: SkillContext, target: Entity, from: Vector3, yaw: number, aimHeight: number): void {
+function pierDart(c: SkillContext, target: Entity, from: Vector3, yaw: number, aimHeight: number, look?: PierLook): Vector3 {
   const pos = from.clone();
   const aim = entityPos(target, aimHeight, new Vector3());
   const dir = new Vector3();
@@ -875,24 +893,23 @@ function pierDart(c: SkillContext, target: Entity, from: Vector3, yaw: number, a
     if (!entityGone(target)) entityPos(target, aimHeight, aim);
     for (let i = 1; i < gravity; i++) {
       if (Math.random() < 0.5) heading[0] += heading[0] < -90 ? 20 : -20;
-      const dx = aim.x - pos.x;
-      const dz = aim.z - pos.z;
-      heading[2] = turnToward(heading[2], (Math.atan2(dx, -dz) * 180) / Math.PI, velocity);
-      heading[0] = turnToward(heading[0], 360 - (Math.atan2(aim.y - pos.y, Math.hypot(dx, dz)) * 180) / Math.PI, velocity);
+      hummingDir(heading, pos, aim, velocity, dir);
       velocity += 0.4;
       if (lifeTime < 10) velocity += 0.1;
-      const pitch = (heading[0] * Math.PI) / 180;
-      const turn = (heading[2] * Math.PI) / 180;
-      dir.set(Math.cos(pitch) * Math.sin(turn), -Math.sin(pitch), -Math.cos(pitch) * Math.cos(turn));
       pos.addInPlace(dir.scaleToRef(DART_STEP, step));
-      pierFire(c, pos.clone(), dir.clone());
+      pierFire(c, pos.clone(), dir.clone(), look);
       ghosts.add(pos, heading, Math.min(1, k / 5));
     }
     gravity = Math.fround(gravity + 0.1);
     dart.setAngle(heading);
+    if (look) effects.spawn('particles', c.scene, pos, { recipe: DART_EMBERS, count: k === DART_MOVES - 1 ? 6 : 1 });
     if (++k < DART_MOVES) delay(TICK, move);
   };
+  if (look) {
+    effects.spawn('sprite', c.scene, from, { texture: TEX.flare, colour: look.head, size: 0.55, seconds: ticks(DART_MOVES), follow: out => out.copyFrom(pos), fadeTail: 0.2 });
+  }
   move();
+  return pos;
 }
 
 /**
@@ -913,6 +930,482 @@ const fireBurst: Step = (_at, c) => {
     effects.spawn('model', c.scene, o, { model: MODEL.darkLordSkill, seconds: ticks(9), scale: 0.2, colour: [1, 0.6, 0.3], angle: [45, tilt, 0], fadeTail: 0 });
   }
 };
+
+// Enhanced and Ultra: the same parts, with the glow, sparks, ground contact and light the graded frame needs.
+
+/** `strikeKey` for a graded look that lights itself: the row's key is taken at the packet, before another skill is dispatched. */
+const litStrike = (make: (skill: number) => Step, sound: Sounds): Step => (at, c) => strikeKey(make(baseSkill(currentSkill)), sound)(at, c);
+
+/** Force's lavender (the Piercing streaks' violet over the cyan rings) and its sparks' hotter white. */
+const FORCE_TINT: RGB = [0.72, 0.78, 1];
+const FORCE_SPARK: RGB = [0.88, 0.85, 1];
+/** Enhanced rings fade x1/1.65 a tick, not 1.5: at their 2x cap the slower fade reads as a milky wash on the graded frame. */
+const FORCE_RING_FADE = 1.65;
+/** Sparks thrown along the streaks, 6-13 tiles/s within ±14° of the facing. */
+const FORCE_SPARKS = 12;
+
+/**
+ * Force on the graded tiers: the original's parts, plus a star flash where the lance leaves, a hot point
+ * riding its head, sparks thrown down the streaks, a shock ring and dust at the feet, and the strike light.
+ */
+const forceGraded = (skill: number): Step => (_at, c) => {
+  forceParts(c, FORCE_RING_FADE);
+  const f = facing(c);
+  const p = entityPos(c.caster, FORCE_HEIGHT, new Vector3());
+  const feet = entityPos(c.caster, 0, new Vector3());
+  effects.spawn('sprite', c.scene, p, { texture: TEX.impact, colour: FORCE_TINT, size: 1.7, seconds: ticks(6), growFrom: 0.5, grow: 1.2, fadeTail: 0.75 });
+  const t0 = fxNow();
+  effects.spawn('sprite', c.scene, p, {
+    texture: TEX.flare,
+    colour: FORCE_SPARK,
+    size: 0.8,
+    seconds: ticks(9),
+    follow: out => {
+      const d = forceReach(movesAt(fxNow() - t0));
+      return out.set(p.x + f.x * d, p.y, p.z + f.z * d);
+    },
+    fadeTail: 0.6,
+  });
+  for (let i = 0; i < FORCE_SPARKS; i++) {
+    const a = (Math.random() - 0.5) * 0.5;
+    const cos = Math.cos(a);
+    const sin = Math.sin(a);
+    const v = 6 + Math.random() * 7;
+    effects.spawn('sprite', c.scene, p, {
+      texture: TEX.flare,
+      colour: FORCE_SPARK,
+      size: 0.1 + Math.random() * 0.08,
+      seconds: 0.25 + Math.random() * 0.2,
+      spread: 0.15,
+      move: [(f.x * cos - f.z * sin) * v, 0.4 + Math.random() * 1.2, (f.z * cos + f.x * sin) * v],
+      fadeTail: 0.6,
+    });
+  }
+  effects.spawn('ring', c.scene, feet, { texture: TEX.shockwave, colour: [0.45, 0.45, 0.85], scale: 1.4, growFrom: 1, grow: 3.2, seconds: 0.45, fadeTail: 0.8 });
+  effects.spawn('particles', c.scene, feet, { recipe: DUST, count: 5 });
+  // The light stands over the middle of the art: the rings round the caster and the streaks 5.8 m ahead.
+  lighting.skillStrike(c.scene, skill, { position: { x: p.x + f.x * 1.5, y: p.y, z: p.z + f.z * 1.5 } });
+};
+
+/** Fire Burst on the graded tiers: puffs, head glow and embers (`pierDart`). */
+interface PierLook {
+  /** The Fire02 puffs' tint and size factor. */
+  puff: RGB;
+  puffSize: number;
+  /** A flare riding each dart's head. */
+  head: RGB;
+}
+/**
+ * The puffs keep the original's Fire02 but lean orange and a little smaller: ~48 additive puffs a dart at
+ * white summed to a flat yellow-white fog over the target on the graded frame.
+ */
+const PIER_LOOK: PierLook = { puff: [1, 0.62, 0.34], puffSize: 0.85, head: [1, 0.7, 0.4] };
+/** Hot chips shed by a dart each tick, and a handful where it burns out. */
+const DART_EMBERS: ParticleRecipe = {
+  texture: TEX.spark3,
+  colour: RGBS.fire,
+  colourEnd: RGBS.ember,
+  size: 0.09,
+  sizeJitter: 0.4,
+  life: 0.4,
+  lifeJitter: 0.3,
+  power: 1.4,
+  gravity: -2.5,
+  spin: 4,
+  capacity: 256,
+};
+const fireBurstGraded = (skill: number): Step => (_at, c) => {
+  const target = c.target!;
+  const o = boneLocalPos(c.caster, 0, FIRE_BURST_LOCAL, new Vector3(), 1);
+  const yaw = yawDegrees(c);
+  const top = targetTop(target);
+  const darts = [
+    pierDart(c, target, o, yaw + 90, top, PIER_LOOK),
+    pierDart(c, target, o, yaw, top / 2, PIER_LOOK),
+    pierDart(c, target, o, yaw - 90, top / 2, PIER_LOOK),
+  ];
+  for (const tilt of [45, -45]) {
+    effects.spawn('model', c.scene, o, { model: MODEL.darkLordSkill, seconds: ticks(9), scale: 0.2, colour: [1, 0.6, 0.3], angle: [45, tilt, 0], fadeTail: 0 });
+  }
+  effects.spawn('sprite', c.scene, o, { texture: TEX.impact, colour: [1, 0.6, 0.3], size: 1.2, seconds: ticks(5), growFrom: 0.5, fadeTail: 0.7 });
+  effects.spawn('particles', c.scene, o, { recipe: DART_EMBERS, count: 10 });
+  // One light carried by the three darts: it starts on the cards at the caster and whirls in with them.
+  const centre = { x: o.x, y: o.y, z: o.z };
+  lighting.skillStrike(c.scene, skill, {
+    position: centre,
+    follow: out => {
+      out.x = (darts[0].x + darts[1].x + darts[2].x) / 3;
+      out.y = (darts[0].y + darts[1].y + darts[2].y) / 3;
+      out.z = (darts[0].z + darts[1].z + darts[2].z) / 3;
+    },
+  });
+};
+
+/** The caster's local X for an MU yaw in degrees: right-angled to its forward `(sin y, -cos y)`. */
+const sideOf = (yaw: number, out: Vector3): Vector3 => out.set(Math.cos((yaw * Math.PI) / 180), 0, Math.sin((yaw * Math.PI) / 180));
+const forwardOfDeg = (yaw: number, out: Vector3): Vector3 => out.set(Math.sin((yaw * Math.PI) / 180), 0, -Math.cos((yaw * Math.PI) / 180));
+const UP = new Vector3(0, 1, 0);
+
+/** Head rise per move of a BITMAP_JOINT_FORCE (ZzzEffectJoint.cpp:2992-3006 moves by the old velocity before :6397-6405 adds). */
+function forceHeads(v: number, d: number, d0: number, firstLt: number, moves: number): number[] {
+  const out: number[] = [];
+  let h = 0;
+  for (let k = 0; k < moves; k++) {
+    h += v;
+    out.push(h);
+    v += d;
+    d += firstLt - k < firstLt ? 0.5 : d0;
+  }
+  return out;
+}
+
+/** Space Split's pillar, JOINT_FORCE sub2 (else branch, ZzzEffectJoint.cpp:2361-2369): V 8, Dir (5, _, 5), LT 15, MaxTails 12. */
+const SPLIT_TAILS = 12;
+const SPLIT_HEADS = forceHeads(8, 5, 5, 15, SPLIT_TAILS).map(cm);
+/** It moves at LT 15..0 and dies below 0 (:6954-6957): 16 drawn ticks. */
+const SPLIT_PILLAR_TICKS = 16;
+/** MODEL_PIER_PART sub2 (ZzzEffect.cpp:3405-3415): LT 20, turn 50° +2.4 a tick, 40 cm a tick, from the feet - 20 cm. */
+const SPLIT_MOVES = 20;
+const SPLIT_STEP = cm(40);
+
+/**
+ * One Space Split pillar at `base` (the carrier's point + 10 cm), facing MU yaw `yaw`: Inferno.jpg on two
+ * crossed sheets 150 cm wide, one tail laid a tick up to 12 (7.8 m), bright end at the base, x1/1.3 a tick
+ * over its last 5 ticks (:6395-6411). On LT 15, 10, 5 and 0 a MODEL_SKILL_INFERNO sub6 at the base (:6417-6419):
+ * only its ring4 mesh, Scale 0.2 +0.01, BlendMeshLight LT/5 x 0.1, LT 5, lighting (0.8, 0.3, 0.1) range 2
+ * (ZzzEffect.cpp:1430-1439, MoveHandlers.cpp:2667-2673).
+ */
+function splitPillar(c: SkillContext, skill: number, base: Vector3, yaw: number, graded?: boolean): void {
+  const points = SPLIT_HEADS.map(h => new Vector3(base.x, base.y + h, base.z));
+  effects.spawn('tails', c.scene, base, {
+    points,
+    laid: t => movesAt(t),
+    across: sideOf(yaw, new Vector3()),
+    across2: forwardOfDeg(yaw, new Vector3()),
+    width: cm(150),
+    texture: TEX.inferno,
+    colour: graded ? SPLIT_TINT : undefined,
+    maxTails: SPLIT_TAILS,
+    seconds: ticks(SPLIT_PILLAR_TICKS),
+    intensity: t => Math.pow(1.3, -Math.max(0, Math.floor(movesAt(t)) - 11)),
+  });
+  for (let i = 0; i < 4; i++) {
+    delay(ticks(5 * i), () => {
+      // The fourth takes the joint's Light after its five x1/1.3 steps.
+      const light = i === 3 ? Math.pow(1.3, -5) : 1;
+      effects.spawn('model', c.scene, base, {
+        model: MODEL.inferno,
+        seconds: ticks(5),
+        angle: [0, 0, yaw],
+        hideMesh: 0,
+        colour: [light, light, light],
+        scaleAt: t => 0.2 + 0.01 * (t / TICK),
+        intensity: t => Math.min(0.1, (6 - t / TICK) * 0.02),
+        fadeTail: 0,
+      });
+      // The graded look carries one light along the path (spaceSplitGraded) in place of these 24.
+      if (!graded) lighting.skillStrike(c.scene, skill, { position: { x: base.x, y: base.y, z: base.z } });
+    });
+  }
+  if (graded) splitEruption(c, base);
+}
+
+/**
+ * Space Split (Fire Blast) at the strike (ZzzCharacter.cpp:2980-2988, :5027-5030): one hidden MODEL_PIER_PART
+ * sub2 carrier from the caster's feet - 20 cm, homing on the target's feet (MoveHandlers.cpp:5645-5664), a
+ * pillar where it stands on every LT % 3 == 0 (LT 18..3: six, 3 ticks apart). Nothing lands on the target.
+ */
+const spaceSplit = (skill: number): Step => (_at, c) => {
+  splitCarrier(c, skill);
+};
+
+/** The carrier's path and pillars; returns its live point. */
+function splitCarrier(c: SkillContext, skill: number, graded?: boolean): Vector3 {
+  const target = c.target!;
+  const pos = entityPos(c.caster, -cm(20), new Vector3());
+  const aim = entityPos(target, 0, new Vector3());
+  const dir = new Vector3();
+  const heading: [number, number, number] = [0, 0, yawDegrees(c)];
+  let turn = 50;
+  let k = 0;
+  const move = (): void => {
+    if (!entityGone(target)) entityPos(target, 0, aim);
+    hummingDir(heading, pos, aim, turn, dir);
+    turn += 2.4;
+    pos.addInPlace(dir.scaleInPlace(SPLIT_STEP));
+    if ((SPLIT_MOVES - k) % 3 === 0) splitPillar(c, skill, new Vector3(pos.x, pos.y + cm(10), pos.z), heading[2], graded);
+    if (++k < SPLIT_MOVES) delay(TICK, move);
+  };
+  move();
+  return pos;
+}
+
+// Space Split on the graded tiers: the same carrier and pillars, the pillars warmer, each erupting with a
+// ground glow, a hot core and rising embers, and one fire light carried along the path.
+
+/** Inferno.jpg is a pale cream; a little warmth keeps it reading as fire, not a white shaft, on the graded frame. */
+const SPLIT_TINT: RGB = [1, 0.78, 0.55];
+const SPLIT_GLOW: RGB = [1, 0.42, 0.14];
+/** Embers thrown up a pillar as it erupts. */
+const SPLIT_EMBERS: ParticleRecipe = {
+  texture: TEX.spark3,
+  colour: RGBS.fire,
+  colourEnd: RGBS.ember,
+  size: 0.16,
+  sizeJitter: 0.4,
+  life: 0.7,
+  lifeJitter: 0.3,
+  box: [0.35, 0.1, 0.35],
+  dir1: [-0.25, 1, -0.25],
+  dir2: [0.25, 1, 0.25],
+  power: 4,
+  powerJitter: 0.5,
+  gravity: -2,
+  spin: 4,
+  capacity: 256,
+};
+
+/** A pillar's ground contact: a flat glow, a hot core at the base and embers, over its 16 ticks. */
+function splitEruption(c: SkillContext, base: Vector3): void {
+  const floor = new Vector3(base.x, groundAt(base.x, base.z, base.y) + 0.04, base.z);
+  effects.spawn('sprite', c.scene, floor, { texture: TEX.flare, colour: SPLIT_GLOW, size: 2.2, seconds: ticks(SPLIT_PILLAR_TICKS), flat: true, growFrom: 0.5, fadeTail: 0.5 });
+  effects.spawn('sprite', c.scene, floor, { texture: TEX.flare, colour: [1, 0.7, 0.45], size: 1.1, seconds: ticks(8), height: 0.35, growFrom: 0.6, fadeTail: 0.6 });
+  effects.spawn('particles', c.scene, floor, { recipe: SPLIT_EMBERS, count: 12, height: 0.1 });
+}
+
+const spaceSplitGraded = (skill: number): Step => (_at, c) => {
+  const pos = splitCarrier(c, skill, true);
+  // One light rides the carrier over the newest pillar's base, from the strike until the last pillar fades.
+  lighting.skillStrike(c.scene, skill, {
+    position: { x: pos.x, y: pos.y + 1, z: pos.z },
+    follow: out => {
+      out.x = pos.x;
+      out.y = pos.y + 1;
+      out.z = pos.z;
+    },
+  });
+};
+
+/** Fire Scream's pairs (ZzzCharacter.cpp:4499-4533): yaw, and yaw ±10° moved ±80 cm along their own X. */
+const SCREAM_PAIRS: readonly (readonly [number, number])[] = [
+  [0, 0],
+  [10, 80],
+  [-10, -80],
+];
+/** MODEL_DARK_SCREAM(_FIRE) (ZzzEffect.cpp:1702-1731): LT 19, `Direction (0, -35, 0)`; moved 19 times, drawn after 18. */
+const SCREAM_MOVES = 19;
+const SCREAM_STEP = cm(35);
+/** The ground streak, JOINT_FORCE sub7 (ZzzEffectJoint.cpp:2373-2386): V 10, Dir (3.5, _, 1), LT 20, MaxTails 13. */
+const SCREAM_TAILS = 13;
+const SCREAM_HEADS = forceHeads(10, 1, 3.5, 20, SCREAM_TAILS).map(cm);
+/** It moves at LT 20..0: 21 drawn ticks. */
+const SCREAM_STREAK_TICKS = 21;
+/** A model's Scale after `n` moves: `Scale -= step`, 0 below 0.1 (MoveHandlers.cpp:4630-4640). */
+const screamScale = (s0: number, step: number, n: number): number => {
+  const s = s0 - step * n;
+  return s < 0.1 ? 0 : s;
+};
+
+/**
+ * One BITMAP_FLAME sub8 card (ZzzEffectParticle.cpp:592-607, :4838-4854): Flame01 at Scale `scale` - 0..0.19,
+ * rising Gravity/2 and shrinking Gravity/95 a tick (Gravity = 1.8-2.8 x Scale), turning 2° a tick, 7 in 10
+ * sliding along the path at -1..0.9 x Scale cm a tick, LT 33. A card born at Scale <= 0 dies at once.
+ */
+function screamFlame(c: SkillContext, at: Vector3, fwd: Vector3, scale: number, look?: ScreamLook): void {
+  const s0 = scale - randInt(20) / 100;
+  if (s0 <= 0) return;
+  const gravity = (randInt(100) / 100 + 1.8) * s0;
+  // Half the cards start half a Scale off in world x and y, and those turn the other way.
+  const nudge = (randInt(2) / 2) * s0;
+  const slide = randInt(10) >= 3 ? (randInt(20) / 10 - 1) * s0 : 0;
+  // The graded cards stand on the ground instead of being cut in half by it (a hard line along the wall).
+  const lift = look ? cm(64) * look.flameSize * s0 * look.flameLift : 0;
+  const p0 = new Vector3(at.x + cm(nudge), at.y + lift, at.z + cm(nudge));
+  const t0 = fxNow();
+  effects.spawn('sprite', c.scene, p0, {
+    texture: TEX.flame,
+    colour: look?.flame,
+    softEdge: !!look,
+    size: cm(64) * (look?.flameSize ?? 1),
+    seconds: ticks(32),
+    spin: (nudge > 0 ? 2 : -2) * ((25 * Math.PI) / 180),
+    follow: out => {
+      const n = movesAt(fxNow() - t0);
+      return out.set(p0.x - fwd.x * cm(slide * n), p0.y + cm((gravity / 2) * n), p0.z - fwd.z * cm(slide * n));
+    },
+    sizeAt: p => Math.max(0, s0 - (movesAt(p * ticks(32)) * gravity) / 95),
+    fadeTail: look?.flameFade ?? 0,
+  });
+}
+
+/** Any character but the caster and the hero within 1 m of `p`: CheckClientArrow's contact (ZzzEffect.cpp:6500-6503, :38-58). */
+function screamContact(caster: Entity, p: Vector3): boolean {
+  const world = storeRef().world;
+  if (!world) return false;
+  for (const e of world.netObjsQuery.entities) {
+    if (e === caster || e.localPlayer || e.dying || !e.transform) continue;
+    const dx = e.transform.pos.x - p.x;
+    const dz = e.transform.pos.z - p.z;
+    if (dx * dx + dz * dz <= 1) return true;
+  }
+  return false;
+}
+
+/**
+ * One Fire Scream pair from `origin` along MU yaw `yaw`: after the arrow offset rotate(-10, -60, 135)
+ * (ZzzEffect.cpp:1664-1667) MODEL_DARK_SCREAM_FIRE (motion blur streak + burst, additive, Scale 2.3 -0.14)
+ * and, 20 cm ahead, MODEL_DARK_SCREAM (the claw sheet, alpha-tested, Scale 0.9 -0.04), both 35 cm a tick at
+ * terrain + 3 and each dropping a flame card a tick; the claw dies on contact. At the start: the ground streak
+ * and one BITMAP_BLUE_BLUR sub1 puff (PoundingBall, 20 cm on, 45 cm under the lifted claw, LT 30, Scale
+ * 0.64-1.27 +0.19, rising 5 cm, Light LT/20; ZzzEffectParticle.cpp:943-950, :3988-3996).
+ */
+function screamPair(c: SkillContext, origin: Vector3, yaw: number, side: number, look?: ScreamLook): PointSource {
+  const f = forwardOfDeg(yaw, new Vector3());
+  const s = sideOf(yaw, new Vector3());
+  const x0 = origin.x + s.x * cm(side - 10) + f.x * cm(60);
+  const z0 = origin.z + s.z * cm(side - 10) + f.z * cm(60);
+  const y0 = groundAt(x0, z0, origin.y);
+  /** `d` tiles along the path, 3 cm over the ground there (re-pinned every tick). */
+  const onGround = (d: number, out: Vector3): Vector3 => {
+    out.set(x0 + f.x * d, 0, z0 + f.z * d);
+    out.y = groundAt(out.x, out.z, y0) + cm(3);
+    return out;
+  };
+  const t0 = fxNow();
+  effects.spawn('model', c.scene, origin, {
+    model: MODEL.darkScreamFire,
+    seconds: ticks(SCREAM_MOVES - 1),
+    angle: [0, 0, yaw],
+    follow: out => onGround(SCREAM_STEP * movesAt(fxNow() - t0), out),
+    scaleAt: t => screamScale(2.3, 0.14, movesAt(t)),
+    fadeTail: 0,
+  });
+  const claw = effects.spawn('model', c.scene, origin, {
+    model: MODEL.darkScream,
+    seconds: ticks(SCREAM_MOVES - 1),
+    angle: [0, 0, yaw],
+    cutout: true,
+    follow: out => onGround(cm(20) + SCREAM_STEP * movesAt(fxNow() - t0), out),
+    scaleAt: t => screamScale(0.9, 0.04, movesAt(t)),
+    fadeTail: 0,
+  });
+
+  // The streak: its tails where the head stood after moves 1..13, each on the ground there.
+  const streak = SCREAM_HEADS.map(d => onGround(d, new Vector3()));
+  effects.spawn('tails', c.scene, origin, {
+    points: streak,
+    laid: t => movesAt(t),
+    across: s,
+    across2: UP,
+    width: cm(150),
+    texture: TEX.inferno,
+    maxTails: SCREAM_TAILS,
+    seconds: ticks(SCREAM_STREAK_TICKS),
+    intensity: t => Math.pow(1.3, -Math.max(0, Math.floor(movesAt(t)) - 16)),
+  });
+  const puff = new Vector3(x0 + f.x * cm(20), y0 + cm(3 + 20 - 45), z0 + f.z * cm(20));
+  const s0 = (randInt(64) + 64) / 100;
+  effects.spawn('sprite', c.scene, puff, {
+    texture: TEX.powerWave,
+    size: cm(64),
+    seconds: ticks(29),
+    roll: Math.random() * Math.PI * 2,
+    follow: out => out.set(puff.x, puff.y + cm(5) * movesAt(fxNow() - t0), puff.z),
+    sizeAt: p => s0 + 0.19 * movesAt(p * ticks(29)),
+    // Light (30 - n) / 20 clamps at 1 until its last 20 ticks.
+    fadeTail: 20 / 29,
+  });
+
+  // Per move: each live model drops a flame at its point before stepping on, at (Scale - 0.4) x 3.5,
+  // and the claw then checks for contact (MoveHandlers.cpp:4642-4649).
+  const at = new Vector3();
+  let n = 0;
+  let clawLive = true;
+  const move = (): void => {
+    n++;
+    const before = SCREAM_STEP * (n - 1);
+    if (clawLive) {
+      screamFlame(c, onGround(cm(20) + before, at), f, (screamScale(0.9, 0.04, n) - 0.4) * 3.5, look);
+      if (screamContact(c.caster, at)) {
+        clawLive = false;
+        claw.stop();
+      }
+    }
+    screamFlame(c, onGround(before, at), f, (screamScale(2.3, 0.14, n) - 0.4) * 3.5, look);
+    if (look && screamScale(2.3, 0.14, n) > 0) effects.spawn('particles', c.scene, at, { recipe: SCREAM_EMBERS, count: 2, height: 0.2 });
+    if (n < SCREAM_MOVES) delay(TICK, move);
+  };
+  move();
+  if (look) {
+    // Ground contact: a flat fire glow under the fire model's burst, shrinking with it.
+    effects.spawn('sprite', c.scene, origin, {
+      texture: TEX.flare,
+      colour: look.glow,
+      size: 2.4,
+      seconds: ticks(SCREAM_MOVES - 1),
+      flat: true,
+      height: 0.04,
+      follow: out => onGround(SCREAM_STEP * movesAt(fxNow() - t0), out),
+      sizeAt: p => 0.35 + screamScale(2.3, 0.14, movesAt(p * ticks(SCREAM_MOVES - 1))) / 2.3,
+      fadeTail: 0.3,
+    });
+  }
+  // The fire model's point, held where it stops.
+  return out => onGround(SCREAM_STEP * Math.min(SCREAM_MOVES, movesAt(fxNow() - t0)), out);
+}
+
+/**
+ * Fire Scream, 14 ticks after the packet (AttackTime 1 -> 15, ZzzCharacter.cpp:4132-4140), from where the
+ * caster then stands: three pairs, and Darklord_firescream for everyone (:4547).
+ */
+const fireScream: Step = (_at, c) => {
+  if (entityGone(c.caster)) return;
+  const origin = entityPos(c.caster, 0, new Vector3());
+  const yaw = yawDegrees(c);
+  playCombat('Sound/Darklord_firescream', origin);
+  for (const [turn, side] of SCREAM_PAIRS) screamPair(c, origin, yaw + turn, side);
+};
+
+// Fire Scream on the graded tiers: the same pairs, streaks and puffs; the flame cards lean orange, a little
+// smaller and fade out instead of popping, embers rise off the fire, a glow rides under each burst, and one
+// fire light follows the wall.
+
+interface ScreamLook {
+  flame: RGB;
+  flameSize: number;
+  flameFade: number;
+  /** How far up a card is lifted, as a fraction of its edge at birth. */
+  flameLift: number;
+  glow: RGB;
+}
+/**
+ * ~75 additive white Flame01 cards up to 3.9 m summed to a flat yellow-white wall on the graded frame
+ * (78_port_enhanced); orange at 0.8 size they keep their shapes. Flame01 runs to its border, so the cards are
+ * soft-edged and stand on the ground; the fade stands in for the x1/1.007 dimming.
+ */
+const SCREAM_LOOK: ScreamLook = { flame: [0.9, 0.44, 0.2], flameSize: 0.8, flameFade: 0.45, flameLift: 0.35, glow: [1, 0.4, 0.12] };
+const SCREAM_EMBERS: ParticleRecipe = { ...SPLIT_EMBERS, box: [0.4, 0.15, 0.4], power: 2.5, life: 0.8 };
+
+const fireScreamGraded = (skill: number): Step => (_at, c) => {
+  if (entityGone(c.caster)) return;
+  const origin = entityPos(c.caster, 0, new Vector3());
+  const yaw = yawDegrees(c);
+  playCombat('Sound/Darklord_firescream', origin);
+  const heads = SCREAM_PAIRS.map(([turn, side]) => screamPair(c, origin, yaw + turn, side, SCREAM_LOOK));
+  // The wall's light rides the centre fire a tile back over the burning flames, a tile up.
+  const f = forwardOfDeg(yaw, new Vector3());
+  const head = heads[0];
+  lighting.skillStrike(c.scene, skill, {
+    position: { x: origin.x, y: origin.y + 1, z: origin.z },
+    follow: out => {
+      const p = head(SCRATCH);
+      out.x = p.x - f.x;
+      out.y = p.y + 1;
+      out.z = p.z - f.z;
+    },
+  });
+};
+const SCRATCH = new Vector3();
 
 // ---- dl2 steps -------------------------------------------------------------------
 
@@ -4639,11 +5132,15 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     enhanced: { impact: atCaster(comboBurstPlus, cm(50)), area: atCaster(comboBurstPlus, cm(50)) },
   },
   // 60 Force / 66 Force Wave (and 509): at the strike key, caster-anchored rings, streaks and lance; sDarkSpear.
-  60: { impact: strikeKey(force, 'Sound/sDarkSpear') },
-  66: { impact: strikeKey(force, 'Sound/sDarkSpear'), area: strikeKey(force, 'Sound/sDarkSpear') },
+  60: { impact: strikeKey(force, 'Sound/sDarkSpear'), enhanced: { impact: litStrike(forceGraded, 'Sound/sDarkSpear') } },
+  66: {
+    impact: strikeKey(force, 'Sound/sDarkSpear'),
+    area: strikeKey(force, 'Sound/sDarkSpear'),
+    enhanced: { impact: litStrike(forceGraded, 'Sound/sDarkSpear'), area: litStrike(forceGraded, 'Sound/sDarkSpear') },
+  },
   // 61 Fire Burst (and 508 / 514): at the strike key, three homing darts with their ghost trails and two
   // starburst cards at the caster; eFirebustBoom from the darts.
-  61: { impact: strikeKey(fireBurst, 'Sound/eFirebustBoom') },
+  61: { impact: strikeKey(fireBurst, 'Sound/eFirebustBoom'), enhanced: { impact: litStrike(fireBurstGraded, 'Sound/eFirebustBoom') } },
   // 62 Earthshake (512 / 516): on the Dark Horse's action 3 - shock rings every 10 ticks, rings of
   // MODEL_GROUND_STONE on horse keys 8-9.5, the fury's burst 1.1 tiles ahead at tick 28 and five crack
   // chains at 29 (GOBoid.cpp:727-769, MoveHandlers.cpp:2940-3170).
@@ -4704,8 +5201,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       after(0.25, seq(flash(TEX.flareBlue, RGBS.soul, 1.3, 0.4), hitSparks(ARC_MOTES)))(at, c);
     },
   },
-  // 74 Space Split (Fire Blast): MODEL_PIER_PART sub2 caster→target - LT 20, Vel 50, z−20, Dir(0,−40,0).
-  74: { travel: modelBolt(MODEL.pierPart, RGBS.fire, FIRE_SPARKS, perTick(40), 1), impact: fireHit },
+  // 74 Space Split (Fire Blast): at the strike, a hidden MODEL_PIER_PART sub2 homing on the target and dropping six
+  // inferno pillars (spaceSplit). BattleCastle/sCDarkAttack plays there, on every map like rows 44-46.
+  74: { impact: litStrike(spaceSplit, 'Sound/battlecastle/sCDarkAttack'), enhanced: { impact: litStrike(spaceSplitGraded, 'Sound/battlecastle/sCDarkAttack') } },
   // 75 Brand of Skill: MODEL_DARKLORD_SKILL at the weapon bones + MODEL_MANA_RUNE sub0 (LT 50, Scale 0→, Alpha 0.3, z+300).
   75: { impact: seq(addCritical, atCaster(model({ model: MODEL.manaRune, seconds: ticks(50), scale: 0.2, grow: 5, colour: RGBS.gold, alpha: 0.3, yaw: Math.PI / 4 }), 3)) },
   // 76 Plasma Storm (Fenrir): per target 2× CreateJoint(MODEL_FENRIR_SKILL_THUNDER from (0,−140,130) → target, width
@@ -4724,16 +5222,12 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 77 Infinity Arrow: blue flash; aura persists via BUFF_VISUALS.
   77: { impact: seq(flash(TEX.flareBlue, RGBS.ice, 1.4, 0.6), particles({ recipe: ICE_MOTES, count: 16, height: 0.6 })) },
-  // 78 Fire Scream (DL): 3 pairs MODEL_DARK_SCREAM + MODEL_DARK_SCREAM_FIRE at yaw, yaw+10 (+80 fwd), yaw−10 (−80).
+  // 78 Fire Scream (DL): 14 ticks after the packet, 3 pairs MODEL_DARK_SCREAM + _FIRE at yaw and yaw ±10 moved ±80 cm
+  // sideways, each with a ground streak, a puff and a flame card a tick (fireScream). Caster-anchored: 518 / 520 may
+  // arrive as a targeted packet.
   78: {
-    area: (_at, c) => {
-      const pairs: [number, number][] = [[0, 0], [(10 * Math.PI) / 180, 0.8], [(-10 * Math.PI) / 180, -0.8]];
-      for (const [turn, fwd] of pairs) {
-        const p = flying(c, 0.2, perTick(40), turn, 0.5 + fwd);
-        effects.spawn('model', c.scene, entityPos(c.caster, 0.2, new Vector3()), { model: MODEL.darkFireScream2, seconds: ticks(20), scale: 1.2, colour: RGBS.fire, follow: p, yaw: entityYaw(c.caster) + turn });
-        effects.spawn('model', c.scene, entityPos(c.caster, 0.2, new Vector3()), { model: MODEL.darkFireScream, seconds: ticks(20), scale: 1.2, colour: RGBS.ember, follow: p, yaw: entityYaw(c.caster) + turn });
-      }
-    },
+    area: after(ticks(STRIKE_MAX_TICKS), fireScream),
+    enhanced: { area: (at, c) => after(ticks(STRIKE_MAX_TICKS), fireScreamGraded(baseSkill(currentSkill)))(at, c) },
   },
   // 79 Explosion (monster)
   79: { impact: seq(fireHit, shockRing(RGBS.fire, 3)) },

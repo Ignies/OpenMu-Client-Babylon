@@ -100,6 +100,12 @@ export type SkillLight = {
    */
   readonly spots?: Readonly<Record<string, LightRecipe>>;
   /**
+   * `strike`: fired by the visual step itself (`lightSkillStrike`), where and
+   * when its art appears, for a skill released on a clip key rather than at
+   * the packet (the Dark Lord's strike). The packet commands never fire it.
+   */
+  readonly strike?: LightRecipe;
+  /**
    * The light on the Enhanced and Ultra tiers. Classic keeps the row itself,
    * the original's `AddTerrainLight`; each moment set here replaces the
    * Classic one on the graded tiers (`effectLight` sizes and tints it from
@@ -331,10 +337,25 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Fire Slash / Flame Strike: BITMAP_JOINT_FIRE range 2 (ZzzEffectJoint.cpp:4612).
   55: { area: flame(3, 0.7) },
   236: { area: flame(3, 0.8, { gain: 1.3 }) },
-  // Fire Burst: the original lights nothing (no AddTerrainLight on PIER_PART / DARKLORD_SKILL).
-  // Fire Blast / Fire Scream: BITMAP_FLAME range 3.
-  74: { impact: flame(3, 0.6, { gain: 1.3 }) },
-  78: { area: flame(4, 0.9, { gain: 1.3 }) },
+  // Force / Force Wave: the original lights nothing. Enhanced: blue-violet (the streaks over the cyan rings),
+  // over the 2-tile span of rings and streaks, bright for their first ~7 ticks (x1/1.4-1.5 a tick). These lights
+  // hang over the ground, so the floor takes less of them: at floorGain 1 a day ground washed out under the art.
+  60: { enhanced: { strike: effectLight([0.55, 0.6, 1], 2, 0.3, { floorGain: 0.45 }) } },
+  66: { enhanced: { strike: effectLight([0.55, 0.6, 1], 2, 0.3, { floorGain: 0.45 }) } },
+  // Fire Burst: the original lights nothing (no AddTerrainLight on PIER_PART / DARKLORD_SKILL). Enhanced:
+  // the three darts carry one fire light between them for their 19 ticks and their puffs' last 6, reaching ~1.5 tiles.
+  61: { enhanced: { strike: effectLight([1, 0.55, 0.2], 1.5, 1, { release: 0.25, floorGain: 0.6 }) } },
+  // Space Split: each MODEL_SKILL_INFERNO sub6 at a pillar's base throws (0.8, 0.3, 0.1) x Luminosity range 2 for
+  // its 5 ticks, Luminosity falling 0.2 a tick (MoveHandlers.cpp:2667-2673); the visual fires one per ring.
+  // Enhanced: one fire light carried along the path over the newest pillar (1.5 m wide columns, ~1.5 tiles),
+  // from the strike until the last pillar fades (~33 ticks).
+  74: {
+    strike: { color: [0.8, 0.3, 0.1], range: 2, seconds: 0.2, release: 0.2, flicker: { min: 0.7, max: 1, steps: 4 } },
+    enhanced: { strike: effectLight([1, 0.42, 0.14], 1.5, 1.35, { release: 0.4, flicker: { min: 0.75, max: 1, steps: 4 } }) },
+  },
+  // Fire Scream: nothing, as the original (no AddTerrainLight on DARK_SCREAM, FLAME sub8 or BLUE_BLUR sub1).
+  // Enhanced: one fire light riding the wall (three fanned fires ~2.5 tiles across) until its flames die down.
+  78: { enhanced: { strike: effectLight([1, 0.5, 0.2], 2.5, 1.4, { release: 0.55, flicker: { min: 0.75, max: 1, steps: 4 } }) } },
   // Earthshake (512 / 516): each ground stone's warm range 2 and each glowing crack's red range 1
   // (MoveHandlers.cpp:5712, ZzzEffect.cpp:7157, :7213, :7257), one light per group here.
   62: EARTHSHAKE_LIGHT,
@@ -681,6 +702,16 @@ export function lightSkillLand(
   if (!recipe) return null;
 
   return attach(scene, recipe, { position: { x: position.x, y: position.y, z: position.z }, follow });
+}
+
+/**
+ * Command: a row's `strike` light at the anchor the visual step names, the
+ * moment its art appears. Null when the row (as the tier uses it) has none.
+ */
+export function lightSkillStrike(scene: Scene, skill: number, anchor: Parameters<typeof LightSource.attach>[2]): LightSource | null {
+  const recipe = lightRow(skill)?.strike;
+
+  return recipe ? attach(scene, recipe, anchor) : null;
 }
 
 /**

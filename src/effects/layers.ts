@@ -13,6 +13,7 @@ import { jointLayer } from './joint';
 import { spiritSwarmLayer } from './spiritSwarm';
 import { raysLayer } from './rays';
 import { blurLayer } from './blur';
+import { tailsLayer } from './tails';
 import { ringLayer } from './ring';
 import { pathLayer } from './path';
 import { auraLayer } from './aura';
@@ -53,6 +54,7 @@ export const EFFECT_LAYERS = [
   spiritSwarmLayer, // steps where the joint trails did, after the particles that ride its heads
   raysLayer,
   blurLayer,
+  tailsLayer,
   ringLayer,
   pathLayer,
   homingLayer, // reads its centre (a body) only

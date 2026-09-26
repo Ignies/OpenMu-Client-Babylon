@@ -12,7 +12,7 @@ import {
   type LightAnchor,
   type LightRecipe,
 } from './lightSource';
-import { lightAreaSkill, lightArrow, lightSkillAt, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillLand, lightSkillSpot, lightSkillTrail, lightTargetedSkill } from './skills';
+import { lightAreaSkill, lightArrow, lightSkillAt, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillLand, lightSkillSpot, lightSkillStrike, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
@@ -189,6 +189,14 @@ class Lighting {
     follow?: (out: { x: number; y: number; z: number }) => void
   ): LightSource | null {
     return lightSkillLand(scene, skill, position, follow);
+  }
+
+  /**
+   * Light the moment a skill's art is released on a clip key (a row's
+   * `strike`), at the anchor the effect gives. Null when the row has none.
+   */
+  skillStrike(scene: Scene, skill: number, anchor: LightAnchor): LightSource | null {
+    return lightSkillStrike(scene, skill, anchor);
   }
 
   /**

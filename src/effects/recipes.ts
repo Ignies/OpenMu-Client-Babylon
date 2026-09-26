@@ -297,8 +297,8 @@ export const MODEL = {
   laser: 'Skill/Laser01.glb',
   darkLordSkill: 'Skill/DarkLordSkill.glb',
   darkSpirit: 'Skill/darkspirit.glb',
-  darkFireScream: 'Skill/darkfirescrem01.glb',
-  darkFireScream2: 'Skill/darkfirescrem02.glb',
+  darkScreamFire: 'Skill/darkfirescrem01.glb', // MODEL_DARK_SCREAM_FIRE
+  darkScream: 'Skill/darkfirescrem02.glb', // MODEL_DARK_SCREAM
   protect: 'Skill/Protect01.glb',
   protect2: 'Skill/Protect02.glb',
   phoenixShield: 'Skill/PhoenixShield01.glb',
