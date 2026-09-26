@@ -2267,6 +2267,8 @@ export const thaiLayer: LanguageLayer = {
     'sign.guardhouse': 'ป้อมยาม',
     'sign.church': 'โบสถ์',
     'sign.guild': 'กิลด์',
+    'sign.northCastle': 'ปราสาทเหนือ',
+    'sign.southCastle': 'ปราสาทใต้',
     'options.tab.controls': 'การควบคุม',
     'options.page.general': 'ทั่วไป',
     'options.page.loot': 'ไอเทมที่ตก',

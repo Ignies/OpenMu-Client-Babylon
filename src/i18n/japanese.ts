@@ -2257,6 +2257,8 @@ export const japaneseLayer: LanguageLayer = {
     'sign.guardhouse': '衛兵所',
     'sign.church': '教会',
     'sign.guild': 'ギルド',
+    'sign.northCastle': '北の城',
+    'sign.southCastle': '南の城',
     'options.tab.controls': 'コントロール',
     'options.page.general': '一般',
     'options.page.loot': 'ドロップ',

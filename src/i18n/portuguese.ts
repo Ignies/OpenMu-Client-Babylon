@@ -2311,6 +2311,8 @@ export const portugueseLayer: LanguageLayer = {
     'sign.guardhouse': 'Casa da Guarda',
     'sign.church': 'Igreja',
     'sign.guild': 'Guilda',
+    'sign.northCastle': 'Castelo do Norte',
+    'sign.southCastle': 'Castelo do Sul',
     'options.tab.controls': 'Controles',
     'options.page.general': 'Geral',
     'options.page.loot': 'Itens no chão',

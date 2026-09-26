@@ -2292,6 +2292,8 @@ export const russianLayer: LanguageLayer = {
     'sign.guardhouse': 'Караульня',
     'sign.church': 'Церковь',
     'sign.guild': 'Гильдия',
+    'sign.northCastle': 'Северный замок',
+    'sign.southCastle': 'Южный замок',
     'options.tab.controls': 'Управление',
     'options.page.general': 'Общие',
     'options.page.loot': 'Добыча',

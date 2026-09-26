@@ -2313,6 +2313,8 @@ export const italianLayer: LanguageLayer = {
     'sign.guardhouse': 'Corpo di guardia',
     'sign.church': 'Chiesa',
     'sign.guild': 'Gilda',
+    'sign.northCastle': 'Castello del Nord',
+    'sign.southCastle': 'Castello del Sud',
     'options.tab.controls': 'Comandi',
     'options.page.general': 'Generale',
     'options.page.loot': 'Oggetti a terra',

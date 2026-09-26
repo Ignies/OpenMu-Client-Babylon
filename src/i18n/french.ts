@@ -2315,6 +2315,8 @@ export const frenchLayer: LanguageLayer = {
     'sign.guardhouse': 'Corps de garde',
     'sign.church': 'Église',
     'sign.guild': 'Guilde',
+    'sign.northCastle': 'Château du Nord',
+    'sign.southCastle': 'Château du Sud',
     'options.tab.controls': 'Commandes',
     'options.page.general': 'Général',
     'options.page.loot': 'Butin',

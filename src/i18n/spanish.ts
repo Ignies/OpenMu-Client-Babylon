@@ -2318,6 +2318,8 @@ export const spanishLayer: LanguageLayer = {
     'sign.guardhouse': 'Cuartel',
     'sign.church': 'Iglesia',
     'sign.guild': 'Gremio',
+    'sign.northCastle': 'Castillo del Norte',
+    'sign.southCastle': 'Castillo del Sur',
     'options.tab.controls': 'Controles',
     'options.page.general': 'Ajustes generales',
     'options.page.loot': 'Botín',

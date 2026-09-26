@@ -2248,6 +2248,8 @@ export const chineseLayer: LanguageLayer = {
     'sign.guardhouse': '卫兵所',
     'sign.church': '教堂',
     'sign.guild': '公会',
+    'sign.northCastle': '北方城堡',
+    'sign.southCastle': '南方城堡',
     'options.tab.controls': '操作',
     'options.page.general': '常规',
     'options.page.loot': '掉落',

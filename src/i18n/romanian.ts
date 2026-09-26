@@ -2307,6 +2307,8 @@ export const romanianLayer: LanguageLayer = {
     'sign.guardhouse': 'Corp de gardă',
     'sign.church': 'Biserică',
     'sign.guild': 'Breaslă',
+    'sign.northCastle': 'Castelul de Nord',
+    'sign.southCastle': 'Castelul de Sud',
 
     'options.tab.controls': 'Comenzi',
     'options.page.general': 'Setări generale',

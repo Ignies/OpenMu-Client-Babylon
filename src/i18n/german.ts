@@ -2319,6 +2319,8 @@ export const germanLayer: LanguageLayer = {
     'sign.guardhouse': 'Wachhaus',
     'sign.church': 'Kirche',
     'sign.guild': 'Gilde',
+    'sign.northCastle': 'Nordburg',
+    'sign.southCastle': 'Südburg',
     'options.tab.controls': 'Steuerung',
     'options.page.general': 'Allgemein',
     'options.page.loot': 'Beute',
