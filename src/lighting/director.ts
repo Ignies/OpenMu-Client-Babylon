@@ -52,7 +52,10 @@ import {
 import { syncSkyDome } from './skyDome';
 import { syncSkyline } from './horizon';
 import { syncShadows, syncTerrainDefines } from '../scenes/shadows';
-import { syncAmbientOcclusion } from '../scenes/ambientOcclusion';
+import {
+  syncAmbientOcclusion,
+  syncAmbientOcclusionSamples,
+} from '../scenes/ambientOcclusion';
 import { syncEffectMask } from '../scenes/effectMask';
 import { syncInkOutline, inkOutlineLive } from '../scenes/inkOutline';
 import { syncHullOutline } from '../scenes/hullOutline';
@@ -60,9 +63,16 @@ import { syncSpeedLines, speedLinesLive } from '../scenes/speedLines';
 import { syncHeightFog, updateHeightFog } from '../scenes/heightFog';
 import { syncRoomMask } from '../scenes/roomMask';
 import { syncToneMap, toneMapLive } from '../scenes/toneMap';
-import { syncFireflyGuard } from '../scenes/fireflyGuard';
+import {
+  syncFireflyGuard,
+  syncFireflyGuardSamples,
+} from '../scenes/fireflyGuard';
 import { syncSunShafts, sunShaftsLive } from '../scenes/sunShafts';
-import { syncUpscale, upscaleScale } from '../scenes/upscale';
+import {
+  syncUpscale,
+  syncUpscaleSamples,
+  upscaleScale,
+} from '../scenes/upscale';
 import {
   createPostChain,
   TONE_MAPPER_NAMES,
@@ -509,6 +519,13 @@ export function createLookDirector(
       toneMapper: toneMapperIndex,
       whiteBalance: profile.whiteBalance,
     });
+
+    // The MSAA goes to the one pass the scene is drawn into, the head of the
+    // camera's chain, which is only known once every pass above has settled.
+    syncUpscaleSamples();
+    syncAmbientOcclusionSamples();
+    syncFireflyGuardSamples();
+    postChain.syncSamples();
 
     // 7. publish
     const passes = [

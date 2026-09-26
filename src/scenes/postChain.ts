@@ -3,10 +3,15 @@ import {
   DefaultRenderingPipeline,
   ImageProcessingConfiguration,
   type ArcRotateCamera,
+  type PostProcess,
   type Scene,
 } from '../libs/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
-import { pipelineSamples } from '../common/lightingQuality';
+import {
+  MSAA_HEAD_ONLY,
+  pipelineSamples,
+  sceneTargetSamples,
+} from '../common/lightingQuality';
 import { animeFilmBoost } from '../common/renderingStyle';
 import { toneMapLive } from './toneMap';
 import type { Rgb } from '../lighting/profiles';
@@ -80,6 +85,12 @@ export type ToneMapperName = (typeof TONE_MAPPER_NAMES)[number];
 
 const PIPELINE_NAME = 'postChain';
 
+/** Babylon's internal effect table, in the order the pipeline adds them. */
+type RenderEffects = Record<
+  string,
+  { getPostProcesses(): PostProcess[] | null }
+>;
+
 /**
  * A per-channel multiplier as Babylon colour curves. The curves' global term
  * is `2 x HSB(hue, s, v)` with the slider values squared, so any multiplier
@@ -122,6 +133,8 @@ export type PostChain = {
   set(look: PostLook): void;
   /** Re-attach behind whatever else was attached to the camera since. */
   moveToEnd(): void;
+  /** The pipeline's MSAA, once the camera's chain is final. */
+  syncSamples(): void;
   /** Names of the passes live right now, in chain order. */
   passes(): string[];
 };
@@ -137,7 +150,7 @@ export function createPostChain(
   // Every pass is driven by an option in `set`; the pipeline starts with all
   // of them off so nothing runs that no slider asked for.
   pipeline.fxaaEnabled = false;
-  pipeline.samples = pipelineSamples();
+  if (!MSAA_HEAD_ONLY) pipeline.samples = pipelineSamples();
   pipeline.bloomEnabled = false;
   pipeline.bloomScale = 0.5;
   pipeline.bloomKernel = BLOOM_KERNEL;
@@ -156,7 +169,7 @@ export function createPostChain(
 
     live.length = 0;
 
-    pipeline.samples = pipelineSamples();
+    if (!MSAA_HEAD_ONLY) pipeline.samples = pipelineSamples();
 
     // No image-processing pass on Classic (§3.1, K1): with it the buffer goes
     // linear and the blobs and effect cards blend there, lifting every dark
@@ -250,5 +263,23 @@ export function createPostChain(
     }
   };
 
-  return { pipeline, set, moveToEnd, passes: () => [...live] };
+  // The pass `_enableMSAAOnFirstPostProcess` hands the pipeline's samples to.
+  const firstPass = (): PostProcess | null => {
+    const effects = (pipeline as unknown as { _renderEffects: RenderEffects })
+      ._renderEffects;
+    for (const first in effects) {
+      return effects[first].getPostProcesses()?.[0] ?? null;
+    }
+
+    return null;
+  };
+
+  const syncSamples = (): void => {
+    if (!MSAA_HEAD_ONLY) return;
+
+    // The setter ignores an unchanged count; a new one rebuilds the pipeline.
+    pipeline.samples = sceneTargetSamples(camera, firstPass());
+  };
+
+  return { pipeline, set, moveToEnd, syncSamples, passes: () => [...live] };
 }

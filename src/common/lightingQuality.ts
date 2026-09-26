@@ -1,5 +1,6 @@
-import type { Scene } from '../libs/babylon/exports';
+import type { Camera, PostProcess, Scene } from '../libs/babylon/exports';
 import { GameOptions } from './gameOptions';
+import { devQuery } from './devSeams';
 import type { TextKey } from '../i18n';
 
 /**
@@ -78,6 +79,26 @@ export function pipelineSamples(): number {
   const step = Math.max(0, Math.min(MSAA_MAX, Math.round(GameOptions.msaa)));
 
   return MSAA_STEPS[step] ?? 4;
+}
+
+/** `?msaaHead=0`: every pass that takes these samples keeps them, first or not. */
+export const MSAA_HEAD_ONLY = devQuery('msaaHead') !== '0';
+
+/**
+ * The scene is drawn into the camera's first live pass only; a pass behind it
+ * writes one fullscreen quad, so multisampling its target only adds a resolve.
+ */
+export function sceneTargetSamples(
+  camera: Pick<Camera, '_postProcesses'>,
+  pass: PostProcess | null
+): number {
+  if (pass === null) return 1;
+
+  for (const head of camera._postProcesses) {
+    if (head) return head === pass ? pipelineSamples() : 1;
+  }
+
+  return 1;
 }
 
 let pointLightBudgetSnapshot: number | null = null;
