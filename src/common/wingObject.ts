@@ -233,21 +233,22 @@ export class WingObject extends ModelObject {
     return overlay;
   }
 
-  /** The absolute BodyLight of each pass; a `tint` rides the wearer's light. */
+  /**
+   * The absolute BodyLight of each pass: the wing branch sets `b->BodyLight`
+   * outright with `LightEnable` off, so the ground light never reaches it.
+   */
   #updatePasses(timeMs: number): void {
-    const worn = this.rootObject.Light;
-    // The wearer's aura (Ultra's outlaw) recolours the glow passes to its own.
+    // The wearer's aura (Ultra's outlaw) takes the glow passes over.
     const aura = this.rootObject.BodyShine.aura;
     this.#showAura(!!aura && aura.x + aura.y + aura.z > 0);
     for (const { pass, light } of this.#passes) {
       const [r, g, b] = pass.light?.(timeMs) ?? [1, 1, 1];
-      if (pass.kind === 'tint') light.set(worn.x * r, worn.y * g, worn.z * b);
-      else light.set(r, g, b);
+      light.set(r, g, b);
       if (pass.u) this.UvScroll.u = pass.u(timeMs);
     }
   }
 
-  /** Under the wearer's aura its crackle stands in for these sprites (outlawLook.ts). */
+  /** Under the wearer's aura (outlawLook.ts) these sprites go dark. */
   #wakeLight(
     light: readonly [number, number, number]
   ): readonly [number, number, number] {
