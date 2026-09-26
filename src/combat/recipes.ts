@@ -168,11 +168,17 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   481: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Twisting Slash Str (Duel Master)
   55: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Fire Slash
   490: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Fire Slash Str
+  // Blood Storm has no original (skillVisuals.ts bloodStorm): the Twisting Slash spin, which the Blade
+  // Master and the Duel Master both have.
+  344: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Blood Storm
+  346: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Blood Storm Strengthener
   42: { ground: A.PLAYER_ATTACK_SKILL_FURY_STRIKE }, // Rageful Blow
   331: { ground: A.PLAYER_ATTACK_SKILL_FURY_STRIKE }, // Rageful Blow Str
   333: { ground: A.PLAYER_ATTACK_SKILL_FURY_STRIKE }, // Rageful Blow Mastery
   43: { ground: A.PLAYER_ATTACK_ONETOONE }, // Death Stab
   336: { ground: A.PLAYER_ATTACK_ONETOONE }, // Death Stab Str
+  339: { ground: A.PLAYER_ATTACK_ONETOONE }, // Death Stab Proficiency
+  342: { ground: A.PLAYER_ATTACK_ONETOONE }, // Death Stab Mastery
   47: { ground: A.PLAYER_ATTACK_SKILL_SPEAR, fenrir: A.PLAYER_FENRIR_ATTACK_SPEAR }, // Impale
   48: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life
   356: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life Str

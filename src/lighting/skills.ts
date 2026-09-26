@@ -407,6 +407,21 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
       },
     },
   },
+  // Blood Storm (346 fires it as 344): no original. Graded: the vortex's crimson over the ~1.2 tiles its
+  // ribbons turn in, for its 30 ticks.
+  344: { enhanced: { spots: { storm: effectLight([1, 0.22, 0.14], 1.2, 1.2, { release: 0.6, heightOffset: 0.6 }) } } },
+  // Weapon swings (no skill of that number): the original lights neither. Graded: the warrior glint's
+  // white for its 18 ticks, and a soft light on the blade tip of a bright trail, below the skill lights
+  // in the pool (priority 1, the event gain applied by hand).
+  0: {
+    enhanced: {
+      spots: {
+        glint: effectLight([0.85, 0.8, 1], 1, 0.72, { attack: 0.2, release: 0.4, floorGain: 0.6 }),
+        swing: effectLight([0.85, 0.9, 1], 0.8, 0.5, { release: 0.3, priority: 1, gain: 0.97 * 0.35 }),
+        swingRed: effectLight([1, 0.25, 0.2], 0.8, 0.5, { release: 0.3, priority: 1, gain: 0.97 * 0.35 }),
+      },
+    },
+  },
   // Ice Arrow: MODEL_ARROW range 2 (:11777). The bolt light rides the same
   // path the arrow does and fires the impact on arrival, so it keeps it.
   51: { travel: { ...frost(2, 3), speed: ARROW_SPEED }, impact: frost(2, 0.4) },

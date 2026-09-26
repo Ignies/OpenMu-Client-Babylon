@@ -7,6 +7,13 @@ import {
   isPlayerAttackAction,
   isPlayerSkillAction,
 } from '../../common/playerActionMapper';
+import { PVP_MURDERER2, PVP_NEUTRAL } from '../../common/nameTags';
+import { tierIndex } from '../../common/lightingQuality';
+import { lighting } from '../../lighting';
+
+/** The first lighting tier that draws the improved looks (common/skillVisuals.ts). */
+const ENHANCED_TIER = 1;
+const swingTmp = new Vector3();
 
 /**
  * `CreateWeaponBlur` (ZzzCharacter.cpp:3656, called from MoveCharacterVisual
@@ -50,7 +57,7 @@ export const WeaponTrailSystem: ISystemFactory = world => {
           const action = model.CurrentAction;
           swing.row =
             isPlayerAttackAction(action) || isPlayerSkillAction(action)
-              ? weaponBlurFor(e.charAppearance, action, true)
+              ? weaponBlurFor(e.charAppearance, action, (e.heroState ?? PVP_NEUTRAL) >= PVP_MURDERER2)
               : null;
         }
         const row = swing.row;
@@ -70,12 +77,22 @@ export const WeaponTrailSystem: ISystemFactory = world => {
           texture: row.texture,
           colour: row.colour,
           blend: row.blend,
+          tickHistory: true,
           seconds: model.getActionDuration(model.CurrentAction) || undefined,
           until: () =>
             model.actionSerial !== serial ||
             model.ActionIterationWasFinished ||
             model.actionFrame() > endKey,
         });
+        // Graded tiers: a bright trail's blade tip carries a soft light through the swing.
+        if (row.blend === 'add' && tierIndex() >= ENHANCED_TIER) {
+          lighting.skillSpot(world.scene, 0, row.colour[1] < 0.5 ? 'swingRed' : 'swing', out => {
+            const p = boneLocalPos(entity, bone, tipLocal, swingTmp);
+            out.x = p.x;
+            out.y = p.y;
+            out.z = p.z;
+          });
+        }
       }
     },
   };

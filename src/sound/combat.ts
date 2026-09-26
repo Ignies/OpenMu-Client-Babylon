@@ -143,9 +143,22 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   267: 'Sound/Ragefighter/Rage_Buff_2', // Increase Block
   268: 'Sound/Ragefighter/Rage_Buff_1', // Increase Defense
   269: 'Sound/battlecastle/sCHaveyBlow', // Occupy
+  // Blade Master ranks play their base skill's sound: they share its case (WSclient.cpp:4368-4417,
+  // ZzzCharacter.cpp:4190-4212, :4410-4419).
+  326: 'Sound/sKnightSkill4', // Cyclone Str
+  327: 'Sound/sKnightSkill4', // Slash Str
+  328: 'Sound/sKnightSkill1', // Falling Slash Str
+  329: 'Sound/sKnightSkill2', // Lunge Str
+  330: 'Sound/sKnightSkill4', // Twisting Slash Str
+  332: 'Sound/sKnightSkill4', // Twisting Slash Mastery
   337: 'Sound/BLOW_OF_DESTRUCTION', // Strike of Destruction Str
   340: 'Sound/BLOW_OF_DESTRUCTION', // Strike of Destruction Proficiency
   343: 'Sound/BLOW_OF_DESTRUCTION', // Strike of Destruction Mastery
+  344: 'Sound/sKnightSkill4', // Blood Storm (no original: the Twisting Slash sound, with its clip)
+  346: 'Sound/sKnightSkill4', // Blood Storm Strengthener
+  356: 'Sound/eSwellLife', // Swell Life Str
+  360: 'Sound/eSwellLife', // Swell Life Proficiency
+  363: 'Sound/eSwellLife', // Swell Life Mastery
   // Master skills with the base skill's cast (SKILL_REPLACEMENTS, _enum.h:680-681).
   508: 'Sound/eFirebust', // Fire Burst Strengthener
   509: 'Sound/sKnightSkill1', // Force Wave Strengthener

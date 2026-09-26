@@ -3978,25 +3978,6 @@ const ITEM_LIGHT: RGB = [0.3, 0.3, 0.3];
 const WEAPON_LINK_BONE = 33;
 
 /**
- * UseSkillWarrior's BITMAP_SHINY+2 (SkillCast.cpp:374): Shiny03, LT 18, `Scale = sin(LifeTime * 10°) * 3`
- * at `Weapon[0]`'s link bone + (0, -120, 0) (ZzzEffectParticle.cpp:27-43, :7322-7325). The sheet is 128 x 16
- * texels and a particle is `texels x Scale` cm (:8996). The hero's own cast only.
- */
-const weaponGlint: Step = (_at, c) => {
-  if (!c.caster.localPlayer) return;
-  const local = new Vector3(0, -1.2, 0);
-  effects.spawn('sprite', c.scene, entityPos(c.caster, CAST_HEIGHT, new Vector3()), {
-    texture: TEX.shiny3,
-    size: cm(128) * 3,
-    aspect: 16 / 128,
-    seconds: ticks(18),
-    sizeAt: p => Math.sin(Math.PI * p),
-    fadeTail: 0,
-    follow: out => boneLocalPos(c.caster, WEAPON_LINK_BONE, local, out, CAST_HEIGHT),
-  });
-};
-
-/**
  * BITMAP_JOINT_SPARK sub0 (ZzzEffectJoint.cpp:950-959): Spark01, white, 6-25 cm a tick along its `Angle`,
  * LT 8-15, two tails. Drawn as a stretched particle rather than a two-point ribbon: a Twisting Slash throws
  * twenty a tick. 2 cm wide and one tick of travel long, 6-25 cm with its speed.
@@ -4817,7 +4798,6 @@ const deathStabOf = (hd: boolean): Step => (at, c) => {
   const t0 = fxNow();
   const tickOf = (): number => Math.floor((fxNow() - t0) / TICK + 1e-3);
   const skill = baseSkill(currentSkill);
-  weaponGlint(at, c);
 
   const gathers = [swordPoint(caster, 3, new Vector3())];
   const streaks: GatherStreak[] = [];
@@ -5495,10 +5475,6 @@ const guardGlint: Step = (_at, c) => {
   });
 };
 
-/** UseSkillWarrior's SOUND_BRANDISH_SWORD01 + rand() % 2 on the hero's own cast (SkillCast.cpp:375). */
-const heroSwing: Step = (_at, c) => {
-  if (c.caster.localPlayer) sayAt(c, Math.random() < 0.5 ? 'Sound/eSwingWeapon1' : 'Sound/eSwingWeapon2');
-};
 
 /**
  * BITMAP_FIRE sub2, the default branch (ZzzEffectParticle.cpp:387-500, :4690-4698): Fire01's four cells over LT 24,
@@ -5714,8 +5690,6 @@ const crescentMoonSlashOf = (hd: boolean): Step => (at, c) => {
   const caster = c.caster;
   const skill = baseSkill(currentSkill);
   const t0 = fxNow();
-  weaponGlint(at, c);
-  heroSwing(at, c);
   let n = 0;
   let seen = false;
   // Graded tiers: the charge lights the knight's feet and a hot glow gathers on the ground under him until the force leaves.
@@ -5950,15 +5924,11 @@ function spearCone(c: SkillContext, hd = false): void {
  * Impale's AttackStage (ZzzCharacter.cpp:2702-2760), `t` = AttackTime (1 at the packet): t4 the gather at the weapon's
  * link bone, t8 the cone, t10 SOUND_RIDINGSPEAR, t13 and t14 three MODEL_SPEARSKILL each (ZzzEffect.cpp:641-646,
  * :8683-8694): RidingSpear01 at Scale 1.5, 145 cm ahead and 110 cm up +-30 cm, drawn RENDER_BRIGHT at 0.3 grey x
- * LT x 0.05, drifting 5 cm a tick along the facing. No light. The glint and swing only come with the mounted cast,
- * the one UseSkillWarrior takes (SkillCast.cpp:135, :374-375).
+ * LT x 0.05, drifting 5 cm a tick along the facing. No light. The mounted cast's glint and swing are the cast's
+ * (skillCastSystem warriorCast).
  */
 const impaleOf = (hd: boolean): Step => (at, c) => {
   const caster = c.caster;
-  if (mountKind(caster.charAppearance?.pet)) {
-    weaponGlint(at, c);
-    heroSwing(at, c);
-  }
   delay(ticks(3), () => {
     if (!entityGone(caster)) spearGather(c, bonePos(caster, WEAPON_LINK_BONE, new Vector3(), CAST_HEIGHT), hd);
   });
@@ -6190,6 +6160,72 @@ const swellLifeOf = (hd: boolean): Step => (_at, c) => {
   });
 };
 const swellLife = swellLifeOf(false);
+
+/** Blood Storm's crimson: Double Blade's red trail Light (1,0.2,0.2) a shade darker under the bloom (ZzzCharacter.cpp:3950-3953). */
+const BLOOD_STORM_RED: RGB = [0.9, 0.18, 0.12];
+
+/**
+ * Blood Storm (344; 346 by alias). No client of record has it: sven, MuOnlineClient and Source Main 5.2
+ * stop the Blade Master ids at 338 and have no case for it, so this is a renewed look built from original
+ * art only, for the user to sign off. At the target: MODEL_STORM (Storm01) turned into a crimson vortex,
+ * four joint_sword_red ribbons spiralling up round it the way JOINT_HEALING sub10 does, and a blood spray at
+ * chest height. The caster spins through the Twisting Slash clip; no light (a dark red one would not read).
+ */
+const bloodStorm: Step = (at, c) => bloodStormWith(at, c, 1);
+/** `smooth`: curve pieces per tick on the ribbons (1, the Classic, draws each tick as a straight chord). */
+const bloodStormWith = (at: Vector3, c: SkillContext, smooth: number): void => {
+  // Scale 0.45: at the 0.8 first tried, Storm01 stood as a red beam off the top of the screen.
+  effects.spawn('model', c.scene, at, { model: MODEL.storm, seconds: ticks(30), colour: BLOOD_STORM_RED, alpha: 0.7, spin: 10, scale: 0.45, fadeIn: 0.15, fadeTail: 0.4 });
+  for (let i = 0; i < 4; i++) {
+    const phase = (i * Math.PI) / 2;
+    const t0 = fxNow();
+    const head: PointSource = out => {
+      const t = fxNow() - t0;
+      const a = phase + t * 10;
+      return out.set(at.x + Math.cos(a) * cm(80), at.y + 0.2 + t * 2, at.z + Math.sin(a) * cm(80));
+    };
+    effects.spawn('joint', c.scene, at, { head, maxTails: 12, width: 0.3, colour: [1, 0.2, 0.2], seconds: ticks(20), texture: TEX.jointFire, ...(smooth > 1 ? { smooth } : {}) });
+  }
+  particles({ recipe: BLOOD_CHIPS, count: 30, height: 0.9 })(at, c);
+  particles({ recipe: BLOOD_MIST, count: 6, height: 0.9 })(at, c);
+};
+
+/** Crimson embers flung off the turning vortex. */
+const STORM_EMBERS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [1, 0.38, 0.26],
+  colourEnd: [0.3, 0.02, 0.02],
+  size: 0.14,
+  sizeJitter: 0.4,
+  life: 0.5,
+  lifeJitter: 0.3,
+  box: [0.6, 0.6, 0.6],
+  dir1: [-1, 0.2, -1],
+  dir2: [1, 1, 1],
+  power: 2.6,
+  powerJitter: 0.4,
+  gravity: -3,
+  spin: 5,
+  capacity: 64,
+};
+
+/**
+ * Blood Storm, graded: the same vortex, ribbons and spray, over a shade of the vortex so the crimson
+ * reads on a sunlit floor, with an inner vortex turning the other way, a first crimson pulse and shock,
+ * embers and blood flung off it while it turns and a spatter left on the ground. Its light is `storm`.
+ */
+const bloodStormPlus: Step = (at, c) => {
+  effects.spawn('model', c.scene, at, { model: MODEL.storm, seconds: ticks(30), colour: [0.6, 0.6, 0.6], blend: 'subtract', maxCover: 0.4, spin: 10, scale: 0.45, fadeIn: 0.15, fadeTail: 0.4 });
+  // The ribbons as curves: turning 0.4 rad a tick, the Classic's chords read as a polygon.
+  bloodStormWith(at, c, 4);
+  lighting.skillSpot(c.scene, 344, 'storm', lightAt(at.clone()));
+  effects.spawn('model', c.scene, at, { model: MODEL.storm, seconds: ticks(26), colour: [1, 0.3, 0.18], alpha: 0.6, spin: -14, scale: 0.3, fadeIn: 0.1, fadeTail: 0.45 });
+  effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: [0.55, 0.1, 0.06], size: 1.6, height: 0.9, seconds: ticks(6), fadeTail: 0.9 });
+  effects.spawn('ring', c.scene, at, { texture: TEX.shockwave, colour: [0.7, 0.12, 0.08], scale: 1, grow: 2.5, seconds: ticks(14), fadeColour: true });
+  effects.spawn('ring', c.scene, at, { texture: TEX.blood, colour: RGBS.gore, blend: 'alpha', scale: 1.4, grow: 1.5, spin: 40, seconds: ticks(40), fadeTail: 0.5 });
+  effects.spawn('particles', c.scene, at, { recipe: STORM_EMBERS, rate: 45, seconds: ticks(22), height: 0.2 });
+  effects.spawn('particles', c.scene, at, { recipe: BLOOD_CHIPS, rate: 30, seconds: ticks(18), height: 0.9 });
+};
 
 // ---- the table -------------------------------------------------------------------
 
@@ -6457,9 +6493,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 41 Twisting Slash: at clip key 5 (or AttackTime 15) five copies of the wielded weapon whirl round the knight
   // with sparks, smoke, a glow and a grey light under each; see twistingSlash.
   41: {
-    area: seq((at, c) => (c.target ? weaponGlint(at, c) : undefined), whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 5, 14, twistingSlash)),
+    area: whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 5, 14, twistingSlash),
     // Graded tiers: the swept band, warm sparks and chips, dust for smoke, a warm light on each copy.
-    enhanced: { area: seq((at, c) => (c.target ? weaponGlint(at, c) : undefined), whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 5, 14, twistingSlashOf(true))) },
+    enhanced: { area: whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 5, 14, twistingSlashOf(true)) },
   },
   // 42 Rageful Blow: the hand empties as the FURY clip starts; at key 1 the weapon is thrown up and the ground
   // breaks in front of the knight; see furyStrike.
@@ -6857,9 +6893,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     ),
   },
   270: { area: (at, c) => { fanArrows(at, c, 1, MODEL.phoenixShot, RGBS.fire, 0, 1.5); }, impact: seq(fireHit, model({ model: MODEL.phoenix, seconds: 0.8, colour: RGBS.fire, grow: 1.5, scale: 1.5 })) },
-  // 344/346 Blood Storm
-  344: { area: seq(shockRing(RGBS.blood, 4), scatter(bloodHit, 8, 2, 0.03), particles({ recipe: BLOOD_CHIPS, count: 40 })) },
-  346: { area: seq(shockRing(RGBS.blood, 4.5), scatter(bloodHit, 8, 2, 0.03), particles({ recipe: BLOOD_CHIPS, count: 40 })) },
+  // 344 Blood Storm (346 Strengthener by alias): no original; a renewed look from original art (bloodStorm).
+  344: { area: bloodStorm, enhanced: { area: bloodStormPlus } },
   // 427/434 Poison Arrow
   427: { travel: { ...arrow(MODEL.arrowNature, RGBS.venom), trail: { recipe: VENOM_MOTES, rate: 30 } }, impact: venomHit },
   434: { travel: { ...arrow(MODEL.arrowNature, RGBS.venom), trail: { recipe: VENOM_MOTES, rate: 30 } }, impact: venomHit },
@@ -6955,12 +6990,12 @@ let currentSkill = 0;
  */
 const MASTER_ALIASES: Record<number, number> = {
   326: 22, 327: 23, 328: 19, 329: 20, 330: 41, 331: 42, 332: 41, 333: 42, 336: 43, 337: 232, 339: 43, 340: 232, 342: 43, 343: 232,
-  356: 48, 360: 48, 363: 48,
+  346: 344, 356: 48, 360: 48, 363: 48,
   378: 5, 379: 3, 380: 233, 381: 14, 382: 40, 383: 233, 384: 1, 385: 9, 387: 38, 388: 10, 389: 7, 390: 2, 391: 39, 392: 40, 393: 39, 394: 2, 395: 58,
   403: 16, 404: 16, 406: 16,
   411: 235, 413: 26, 414: 24, 416: 52, 417: 27, 418: 24, 420: 28, 422: 28, 423: 27, 424: 51, 431: 235, 441: 77,
   454: 219, 455: 215, 456: 230, 458: 214, 459: 221, 460: 222, 461: 220, 462: 214, 463: 220, 469: 218, 470: 218, 472: 218,
-  479: 22, 480: 3, 481: 41, 482: 56, 483: 5, 484: 40, 486: 14, 487: 9, 489: 7, 490: 344, 491: 7, 492: 236, 493: 55, 494: 236, 496: 237,
+  479: 22, 480: 3, 481: 41, 482: 56, 483: 5, 484: 40, 486: 14, 487: 9, 489: 7, 490: 55, 491: 7, 492: 236, 493: 55, 494: 236, 496: 237,
   ...DARK_LORD_MASTER_ALIASES,
   551: 260, 552: 261, 554: 260, 555: 261, 558: 262, 559: 263, 560: 264, 569: 268, 572: 268, 573: 267,
 };
