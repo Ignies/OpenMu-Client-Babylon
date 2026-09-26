@@ -5,6 +5,7 @@ import { VertexBuffer } from '@babylonjs/core/Buffers/buffer';
 import type { Effect } from '@babylonjs/core/Materials/effect';
 import type { Scene } from '@babylonjs/core/scene';
 import { linearBufferActive } from '../../common/lightModel';
+import { installSpriteReplay } from './spriteReplay';
 
 /**
  * Sprites enter the linear buffer decoded, like every material.
@@ -112,10 +113,15 @@ function createEffects(this: Renderer, original: (this: Renderer) => void): void
   this._drawWrapperDepth.materialContext = this._drawWrapperBase.materialContext;
 }
 
-/** Idempotent; the first sprite user calls it before its manager is built. */
+/**
+ * Idempotent; the first sprite user calls it before its manager is built.
+ * The same-frame vertex reuse (`spriteReplay.ts`) goes in with it.
+ */
 export function installSpriteLinearDecode(): void {
   if (installed) return;
   installed = true;
+
+  installSpriteReplay();
 
   const proto = SpriteRenderer.prototype as unknown as Renderer & {
     _createEffects: (this: Renderer) => void;
