@@ -2,6 +2,8 @@ import { Vector3 } from '../libs/babylon/exports';
 import type { Scene } from '../libs/babylon/exports';
 import type { Entity } from '../ecs/world';
 import { lighting } from '../lighting';
+import { effectLight } from '../lighting/recipes';
+import type { LightRecipe, LightSource } from '../lighting/lightSource';
 import { combat } from '../combat';
 import { weather } from '../weather';
 import { effects, type EffectHandle } from '../effects';
@@ -1820,6 +1822,102 @@ const zinCurse = (k: ZinCurse): Step => (_at, c) => {
   })(feet, c);
 };
 
+// Enhanced and Ultra: the same curses with a light that follows their art, ground contact and a
+// little secondary motion. Classic draws none of this.
+
+/** An `effectLight` at `at`, riding `follow` when given. */
+function curseLight(scene: Scene, colour: RGB, extent: number, seconds: number, at: Vector3, follow?: PointSource, extra?: Partial<LightRecipe>): LightSource {
+  const position = { x: at.x, y: at.y, z: at.z };
+  const scratch = at.clone();
+  const ride = follow
+    ? (out: { x: number; y: number; z: number }): void => {
+        follow(scratch);
+        out.x = scratch.x;
+        out.y = scratch.y;
+        out.z = scratch.z;
+      }
+    : undefined;
+  return lighting.flash(scene, effectLight(colour, extent, seconds, extra), { position, follow: ride });
+}
+
+/** The hand light: the pins' tint, as long as the hand FX run (Blind's hand is dark and has none). */
+const curseHandLight = (h: CurseHand): Step => (_at, c) => {
+  const caster = c.caster;
+  const anim = caster.playerAnimation;
+  if (!anim || entityGone(caster)) return;
+  const inClip = (): boolean => anim.action >= PlayerAction.PLAYER_SKILL_SLEEP && anim.action <= PlayerAction.PLAYER_SKILL_SLEEP_FENRIR;
+  if (!inClip()) return;
+  const hand: PointSource = out => bonePos(caster, CURSE_HAND_BONE, out, CAST_HEIGHT);
+  let light: LightSource | null = null;
+  const ride: PointSource = out => {
+    if (light && (entityGone(caster) || !inClip())) light.stop();
+    return hand(out);
+  };
+  light = curseLight(c.scene, h.pin, 0.6, CURSE_HAND_MAX, hand(new Vector3()), ride, { attack: 0.1, release: 0.25, floorGain: 0.15, flicker: { min: 0.8, max: 1, steps: 3 } });
+};
+
+const curseDust = new Map<string, ParticleRecipe>();
+
+/** Slow motes settling round a cursed body: Sleep's violet dust, Blind's dark smoke. */
+function curseDustFor(colour: RGB, dark: boolean): ParticleRecipe {
+  const key = `${colour.join(',')}|${dark}`;
+  let r = curseDust.get(key);
+  if (r) return r;
+  r = dark
+    ? { texture: TEX.smoke, colour, size: 0.9, sizeJitter: 0.3, life: 0.9, lifeJitter: 0.3, box: [0.7, 0.5, 0.7], dir1: [-0.3, 0.2, -0.3], dir2: [0.3, 0.6, 0.3], power: 0.3, spin: 1.2, endScale: 1.8, fade: [[0, 0], [0.3, 1], [1, 0]], blend: 'dark', capacity: 64 }
+    : { texture: TEX.flare, colour, size: 0.3, sizeJitter: 0.4, life: 1.2, lifeJitter: 0.4, box: [0.9, 0.4, 0.9], dir1: [-0.2, -1, -0.2], dir2: [0.2, -0.3, 0.2], power: 0.35, gravity: -0.15, endScale: 0.3, fade: [[0, 0], [0.2, 1], [0.7, 0.7], [1, 0]], capacity: 96 };
+  curseDust.set(key, r);
+  return r;
+}
+
+/**
+ * Sleep / Blind on the graded tiers: the Classic landing plus a glow on the ground under the vortex, a
+ * ring pulse where it lands, motes settling on the body, and the violet light it throws (Blind is
+ * subtractive art and stays unlit).
+ */
+const aliceGrace = (k: AliceCurse): Step => (_at, c) => {
+  const target = c.target;
+  if (!target || target === c.caster || entityGone(target) || entityGone(c.caster)) return;
+  const feet = entityPos(c.caster, 0, new Vector3());
+  const ground = holding(target, 0.05);
+  const centre = holding(target, 1);
+  const gone = (): boolean => entityGone(target);
+  const blend = k.dark ? 'subtract' : 'add';
+  const at = ground(new Vector3());
+  effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: scaleRGB(k.flare, 0.22), size: 2.4, seconds: ticks(30), fadeIn: 0.3, fadeTail: 0.5, flat: true, follow: ground, until: gone, blend });
+  effects.spawn('sprite', c.scene, at, { texture: TEX.ring, colour: scaleRGB(k.circle, 0.8), size: 0.8, grow: 3.2, growFrom: 1, seconds: ticks(12), fadeTail: 0.7, flat: true, follow: ground, blend });
+  effects.spawn('particles', c.scene, at, { recipe: curseDustFor(k.dark ? [0.6, 0.6, 0.6] : k.flare, k.dark), rate: 26, seconds: ticks(26), follow: centre, until: gone, height: 0.4 });
+  if (k.dark) return;
+  // The caster's Magic_Ground2 (3 tiles, 20 ticks) and the vortex's flare pair (3.2 tiles, about 30 ticks).
+  curseLight(c.scene, k.flare, 1.5, ticks(20), feet, undefined, { attack: ticks(4), release: ticks(8), heightOffset: 0.4, floorGain: 0.35 });
+  curseLight(c.scene, k.flare, 1.6, ticks(30), centre(new Vector3()), centre, { attack: ticks(6), release: ticks(12), floorGain: 0.4 });
+};
+
+const zinEmbers = new Map<string, ParticleRecipe>();
+
+/** Sparks lifting off the ZIN circle in the rain's colour. */
+function zinEmbersFor(colour: RGB): ParticleRecipe {
+  const key = colour.join(',');
+  let r = zinEmbers.get(key);
+  if (r) return r;
+  r = { texture: TEX.flare, colour: scaleRGB(colour, 1 / Math.max(colour[0], colour[1], colour[2])), size: 0.24, sizeJitter: 0.4, life: 1.0, lifeJitter: 0.4, box: [1.3, 0.05, 1.3], dir1: [-0.15, 1, -0.15], dir2: [0.15, 1, 0.15], power: 1.1, powerJitter: 0.5, gravity: -0.4, endScale: 0.4, fade: [[0, 0], [0.15, 1], [0.6, 0.8], [1, 0]], capacity: 96 };
+  zinEmbers.set(key, r);
+  return r;
+}
+
+/**
+ * Weakness / Enervation on the graded tiers: the Classic circles plus a glow pooled in the core circle,
+ * sparks lifting off it while the circles are bright, and the light the circles throw, climbing with
+ * the sub1 Alpha ramp (12 ticks) and falling with it.
+ */
+const zinGrace = (k: ZinCurse): Step => (_at, c) => {
+  if (entityGone(c.caster)) return;
+  const feet = entityPos(c.caster, 0.05, new Vector3());
+  effects.spawn('sprite', c.scene, feet, { texture: TEX.flare, colour: scaleRGB(k.core, 0.12), size: 2.4, seconds: ticks(40), fadeIn: 0.3, fadeTail: 0.5, flat: true });
+  effects.spawn('particles', c.scene, feet, { recipe: zinEmbersFor(k.rain), rate: 32, seconds: ticks(32), height: 0.1 });
+  curseLight(c.scene, k.core, 2.5, ticks(44), feet, undefined, { attack: ticks(12), release: ticks(20), heightOffset: 0.5, floorGain: 0.35 });
+};
+
 // ---- the table -------------------------------------------------------------------
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
@@ -2384,10 +2482,18 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   217: { impact: aliceBuff([0.8, 0.3, 0.9]) },
   // 219 Sleep (454 Str): the violet hand FX while the clip plays; 14 ticks after the reply the violet
   // circle at the caster and the ALICE rings, flares and homing streaks on the target (aliceCurse).
-  219: { cast: summonerHand(CURSE_HAND_SLEEP), impact: onCurseLanding(aliceCurse(ALICE_SLEEP)) },
+  219: {
+    cast: summonerHand(CURSE_HAND_SLEEP),
+    impact: onCurseLanding(aliceCurse(ALICE_SLEEP)),
+    enhanced: { cast: seq(summonerHand(CURSE_HAND_SLEEP), curseHandLight(CURSE_HAND_SLEEP)), impact: onCurseLanding(seq(aliceCurse(ALICE_SLEEP), aliceGrace(ALICE_SLEEP))) },
+  },
   // 220 Blind (OpenMU's 461 / 463): Sleep's construction drawn entirely subtractive - black smoke at the
   // hand, a black disc spreading under the caster, a black imploding vortex on the target.
-  220: { cast: summonerHand(CURSE_HAND_BLIND), impact: onCurseLanding(aliceCurse(ALICE_BLIND)) },
+  220: {
+    cast: summonerHand(CURSE_HAND_BLIND),
+    impact: onCurseLanding(aliceCurse(ALICE_BLIND)),
+    enhanced: { impact: onCurseLanding(seq(aliceCurse(ALICE_BLIND), aliceGrace(ALICE_BLIND))) },
+  },
   // 218 Berserker: BITMAP_MAGIC+1 sub11 LT 20 + ALICE_BUFFSKILL_EFFECT (LT 34, z+100, Alpha 0→, Scale 0.1) +
   // …EFFECT2 (LT 35, Scale 0.15); Light (1.0, 0.1, 0.2).
   218: {
@@ -2399,8 +2505,16 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 221 Weakness (459 Str) / 222 Enervation (Innovation, 460 Str): the hand FX, then 14 ticks later at the
   // caster's feet the ZIN circles and ripples, the three Suhwanzin circles and the glitter rain, and the sound.
-  221: { cast: summonerHand(CURSE_HAND_WEAKNESS), impact: onCurseLanding(zinCurse(ZIN_WEAKNESS)) },
-  222: { cast: summonerHand(CURSE_HAND_ENERVATION), impact: onCurseLanding(zinCurse(ZIN_ENERVATION)) },
+  221: {
+    cast: summonerHand(CURSE_HAND_WEAKNESS),
+    impact: onCurseLanding(zinCurse(ZIN_WEAKNESS)),
+    enhanced: { cast: seq(summonerHand(CURSE_HAND_WEAKNESS), curseHandLight(CURSE_HAND_WEAKNESS)), impact: onCurseLanding(seq(zinCurse(ZIN_WEAKNESS), zinGrace(ZIN_WEAKNESS))) },
+  },
+  222: {
+    cast: summonerHand(CURSE_HAND_ENERVATION),
+    impact: onCurseLanding(zinCurse(ZIN_ENERVATION)),
+    enhanced: { cast: seq(summonerHand(CURSE_HAND_ENERVATION), curseHandLight(CURSE_HAND_ENERVATION)), impact: onCurseLanding(seq(zinCurse(ZIN_ENERVATION), zinGrace(ZIN_ENERVATION))) },
+  },
   // 223 Explosion: MODEL_SUMMONER_SUMMON_SAHAMUTT LT 80 from 1.5-4.5 tiles beside the caster onto the point,
   // CreateBomb3 on landing (SummonSystem.cpp CreateSummonObject); cast circle tints (1,0.6,0.4)/(1,0.5,0).
   223: {
