@@ -61,7 +61,9 @@ export function isOneShotPlayerAction(action: PlayerAction): boolean {
     isPlayerAttackAction(action) ||
     isPlayerSkillAction(action) ||
     isPlayerEmoteAction(action) ||
-    action === PlayerAction.PLAYER_SHOCK
+    action === PlayerAction.PLAYER_SHOCK ||
+    (action >= PlayerAction.PLAYER_RAGE_FENRIR_DAMAGE &&
+      action <= PlayerAction.PLAYER_RAGE_FENRIR_DAMAGE_ONE_LEFT)
   );
 }
 

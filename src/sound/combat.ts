@@ -5,6 +5,7 @@ import { isFemaleClass } from '../common/mapPlayerNetClassToModelClass';
 import {
   GROUP_SPEAR,
   GROUP_SWORD,
+  equippedBowType,
   isBow,
   isCrossbow,
   isWeaponItem,
@@ -122,10 +123,9 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   236: 'Sound/flame_strike', // Flame Strike
   237: 'Sound/gigantic_storm', // Gigantic Storm
   238: 'Sound/caotic', // Chaotic Diseier
-  239: 'Sound/caotic', // Doppelganger self explosion
   260: 'Sound/Ragefighter/Rage_Thrust', // Killing Blow
-  261: 'Sound/Ragefighter/Rage_Giantswing', // Beast Uppercut
-  262: 'Sound/Ragefighter/Rage_Stamp', // Chain Drive
+  261: 'Sound/Ragefighter/Rage_Stamp', // Beast Uppercut (MonkSystem.cpp:1117)
+  262: 'Sound/Ragefighter/Rage_Giantswing', // Chain Drive (MonkSystem.cpp:1125)
   263: 'Sound/Ragefighter/Rage_Darkside', // Dark Side
   264: 'Sound/Ragefighter/Rage_Dragonlower', // Dragon Roar
   265: 'Sound/Ragefighter/Rage_Dragonkick', // Dragon Slasher
@@ -155,12 +155,14 @@ export function playerSwingSound(hands: WeaponHands): Sounds | null {
   const r = hands?.rightHand ?? null;
   const l = hands?.leftHand ?? null;
 
-  if (isBow(r) || isBow(l)) return 'Sound/eBow';
-  if (isCrossbow(r) || isCrossbow(l)) return 'Sound/eCrossbow';
+  const bowType = equippedBowType(hands ?? undefined);
+  if (bowType === 'bow') return 'Sound/eBow';
+  if (bowType === 'crossbow') return 'Sound/eCrossbow';
+  // `c->Weapon[0]`, which is the appearance's left hand (ZzzCharacter.cpp:1310).
   if (
-    r &&
-    ((r.group === GROUP_SWORD && r.num === LIGHT_SABER_INDEX) ||
-      (r.group === GROUP_SPEAR && r.num === LIGHT_SPEAR_INDEX))
+    l &&
+    ((l.group === GROUP_SWORD && l.num === LIGHT_SABER_INDEX) ||
+      (l.group === GROUP_SPEAR && l.num === LIGHT_SPEAR_INDEX))
   ) {
     return 'Sound/eSwingLightSword';
   }
@@ -204,9 +206,12 @@ export function skillSound(skill: number): Sounds | null {
   return SKILL_SOUNDS[skill] ?? null;
 }
 
-/** Jewel pickups ring instead of clinking (WSclient.cpp:5727-5734). */
+/** Jewel pickups ring instead of clinking (WSclient.cpp:6181-6189). */
 export function pickupSound(item: Item): 'jewel' | 'gemstone' | 'getItem' {
-  if (item.group === 12 && item.num === 15) return 'jewel'; // Jewel of Chaos
+  if (item.group === 12) {
+    // Jewel of Chaos 15, the bundled Bless 30 and Soul 31
+    if ([15, 30, 31].includes(item.num)) return 'jewel';
+  }
   if (item.group === 14) {
     // Bless 13, Soul 14, Life 16, Creation 22, Guardian 31
     if ([13, 14, 16, 22, 31].includes(item.num)) return 'jewel';

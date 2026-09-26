@@ -81,10 +81,10 @@ export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
   10: ['Sound/mOgre1', 'Sound/mOgre2', 'Sound/mOgreAttack1', 'Sound/mOgreAttack2', 'Sound/mOgreDie'],
   // GORGON
   11: ['Sound/mGorgon1', 'Sound/mGorgon2', 'Sound/mGorgonAttack1', 'Sound/mGorgonAttack2', 'Sound/mGorgonDie'],
-  // YETI
-  12: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
-  // ELITE_YETI
-  13: ['Sound/mGoblin1', 'Sound/mGoblin2', 'Sound/mGoblinAttack1', 'Sound/mGoblinAttack2', 'Sound/mGoblinDie'],
+  // YETI - hand-ported: the case names its models directly, SetMonsterSound(MODEL_YETI, ...) (ZzzOpenData.cpp:3536)
+  12: ['Sound/mYeti1', 'Sound/mYeti1', 'Sound/mYetiAttack1', 'Sound/mYetiAttack1', 'Sound/mYetiDie'],
+  // ELITE_YETI - hand-ported (ZzzOpenData.cpp:3537)
+  13: ['Sound/mYeti1', 'Sound/mYeti2', 'Sound/mYetiAttack1', 'Sound/mYetiAttack1', 'Sound/mYetiDie'],
   // ASSASSIN
   14: [null, null, 'Sound/mAssassinAttack1', 'Sound/mAssassinAttack2', 'Sound/mAssassinDie'],
   // ICE_MONSTER
@@ -183,7 +183,8 @@ export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
   62: ['Sound/mMagicSkull', null, null, null, 'Sound/mMagicSkull'],
   // DEATH_ANGEL
   63: ['Sound/mDAngelIdle', 'Sound/mDAngelIdle', 'Sound/mDAngelAttack', 'Sound/mDAngelAttack', 'Sound/mDAngelDeath'],
-  // ILLUSION_OF_KUNDUN - hand-ported: SetMonsterSound 232, 232, 233, 234, -1 (ZzzOpenData.cpp:3587-3592)
+  // ILLUSION_OF_KUNDUN - hand-ported: SetMonsterSound 232, 232, 233, 234, -1 (ZzzOpenData.cpp:3587-3592);
+  // his collapse is a render hook, in mapMonsters.ts
   64: ['Sound/mKundunIdle', 'Sound/mKundunIdle', 'Sound/mKundunAttack1', 'Sound/mKundunAttack2', null],
   // BLOOD_SOLDIER
   65: ['Sound/mBSoldierIdle1', 'Sound/mBSoldierIdle2', 'Sound/mBSoldierAttack1', 'Sound/mBSoldierAttack2', 'Sound/mBSoldierDeath'],
@@ -201,64 +202,65 @@ export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
   71: [null, null, 'Sound/mOrcCapAttack1', 'Sound/mOrcCapAttack1', null],
   // CHAOSCASTLE_WIZARD
   72: [null, null, 'Sound/mOrcArcherAttack1', 'Sound/mOrcArcherAttack1', null],
-  // CASTLE_GATE1
-  73: [null, null, null, null, null],
-  // BATTLE_GUARD1
-  76: [null, null, null, null, null],
-  // BATTLE_GUARD2
-  77: [null, null, null, null, null],
+  // CASTLE_GATE1 - hand-ported: slots 232-236 are shared with Kundun, whose
+  // case loads its own waves into them; on the siege map they hold these.
+  73: [null, null, null, null, 'Sound/battlecastle/oCDoorDis'],
+  // BATTLE_GUARD1 - hand-ported (ZzzOpenData.cpp:3906)
+  76: [null, null, 'Sound/battlecastle/mBowMercAttack', 'Sound/battlecastle/mBowMercAttack', 'Sound/battlecastle/mBowMercDeath'],
+  // BATTLE_GUARD2 - hand-ported (ZzzOpenData.cpp:3911)
+  77: [null, null, 'Sound/battlecastle/mSpearMercAttack', 'Sound/battlecastle/mSpearMercAttack', 'Sound/battlecastle/mSpearMercDeath'],
   // CANON_TOWER
   79: SILENT,
   // LIFE_STONE
   86: [null, null, null, null, null],
-  // BALGASS - hand-ported: MapManager.cpp:224-230, played per action in GMCrywolf1st.cpp:1618-1652
-  89: ['Sound/w35/balga_idle1', 'Sound/w35/balga_idle2', 'Sound/w35/balga_at1', 'Sound/w35/balga_at2', 'Sound/w35/balga_death'],
+  // BALGASS
+  89: SILENT, // voiced in mapMonsters.ts
   // DARK_ELF_1
-  92: SILENT,
+  92: SILENT, // voiced in mapMonsters.ts
   // SORAM
-  94: SILENT,
+  94: SILENT, // voiced in mapMonsters.ts
   // BALLISTA
-  99: SILENT,
+  99: SILENT, // voiced in mapMonsters.ts
   // WITCH_QUEEN
-  100: SILENT,
+  100: SILENT, // voiced in mapMonsters.ts
   // GOLDEN_STONE_GOLEM
-  101: SILENT,
+  101: SILENT, // voiced in mapMonsters.ts
   // DEATH_RIDER
-  102: SILENT,
+  102: SILENT, // voiced in mapMonsters.ts
   // DEATH_TREE
-  104: SILENT,
+  104: SILENT, // voiced in mapMonsters.ts
   // HELL_MAINE
-  105: SILENT,
+  105: SILENT, // voiced in mapMonsters.ts
   // BERSERK
-  106: SILENT,
+  106: SILENT, // voiced in mapMonsters.ts
   // SPLINTER_WOLF
-  107: SILENT,
+  107: SILENT, // voiced in mapMonsters.ts
   // IRON_RIDER
-  108: SILENT,
+  108: SILENT, // voiced in mapMonsters.ts
   // SATYROS
-  109: SILENT,
+  109: SILENT, // voiced in mapMonsters.ts
   // BLADE_HUNTER
-  110: SILENT,
+  110: SILENT, // voiced in mapMonsters.ts
   // KENTAUROS
-  111: SILENT,
+  111: SILENT, // voiced in mapMonsters.ts
   // GIGANTIS
-  112: SILENT,
+  112: SILENT, // voiced in mapMonsters.ts
   // GENOCIDER
-  113: SILENT,
+  113: SILENT, // voiced in mapMonsters.ts
   // PERSONA
-  114: SILENT,
+  114: SILENT, // voiced in mapMonsters.ts
   // TWIN_TAIL
-  115: SILENT,
+  115: SILENT, // voiced in mapMonsters.ts
   // DREADFEAR
-  116: SILENT,
+  116: SILENT, // voiced in mapMonsters.ts
   // MAYA_HAND_LEFT
-  118: SILENT,
+  118: SILENT, // voiced in mapMonsters.ts
   // MAYA_HAND_RIGHT
-  119: SILENT,
+  119: SILENT, // voiced in mapMonsters.ts
   // MAYA
   120: SILENT,
   // DARK_SKULL_SOLDIER_5
-  121: SILENT,
+  121: SILENT, // voiced in mapMonsters.ts
   // POUCH_OF_BLESSING
   122: SILENT,
   // LUNAR_RABBIT
@@ -380,21 +382,21 @@ export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
   // MEDUSA
   192: SILENT,
   // BLOODY_ORC
-  193: SILENT,
+  193: SILENT, // voiced in mapMonsters.ts
   // BLOODY_DEATH_RIDER
-  194: SILENT,
+  194: SILENT, // voiced in mapMonsters.ts
   // BLOODY_GOLEM
-  195: SILENT,
+  195: SILENT, // voiced in mapMonsters.ts
   // BLOODY_WITCH_QUEEN
-  196: SILENT,
+  196: SILENT, // voiced in mapMonsters.ts
   // BERSERKER_WARRIOR
-  197: SILENT,
+  197: SILENT, // voiced in mapMonsters.ts
   // KENTAUROS_WARRIOR
-  198: SILENT,
+  198: SILENT, // voiced in mapMonsters.ts
   // GIGANTIS_WARRIOR
-  199: SILENT,
+  199: SILENT, // voiced in mapMonsters.ts
   // SOCCERBALL
-  200: SILENT,
+  200: SILENT, // voiced in mapMonsters.ts
   // SAPI_QUEEN
   201: SILENT, // voiced in mapMonsters.ts
   // ICE_NAPIN
@@ -428,39 +430,65 @@ export const MONSTER_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
 };
 
 
+/**
+ * Kalima's large Death Centurions and Kundun's candidates are created with
+ * `SubType = 9` (GMHellas.cpp:813, :910), and every voice play adds 5 to the
+ * sound index for that subtype (ZzzCharacter.cpp:435): the next five waves,
+ * which both cases load alongside their own (ZzzOpenData.cpp:3865, :3886).
+ */
+const SUBTYPE9_NPCS: ReadonlySet<number> = new Set([
+  145, 161, 175, 181, 183, 189, 191, 197, 261, 267, 269, 336, 338,
+]);
+const SUBTYPE9_SOUNDS: Readonly<Record<number, MonsterSoundSlots>> = {
+  // DEATH_CENTURION
+  67: ['Sound/mLsIdle1', 'Sound/mLsIdle2', 'Sound/mLsAttack1', 'Sound/mLsAttack2', 'Sound/mLsDeath'],
+  // SHRIKER
+  69: ['Sound/mLvIdle1', 'Sound/mLvIdle2', 'Sound/mLvAttack1', 'Sound/mLvAttack2', 'Sound/mLvDeath'],
+};
+
 // ---- 2. selectors + commands -----------------------------------------------
 
 const rnd = (n: number) => Math.floor(Math.random() * n);
 
-export function monsterIdleSound(modelType: number): Sounds | null {
-  const slots = MONSTER_SOUNDS[modelType];
+function slotsOf(modelType: number, npcType?: number): MonsterSoundSlots | undefined {
+  if (npcType !== undefined && SUBTYPE9_NPCS.has(npcType)) {
+    return SUBTYPE9_SOUNDS[modelType] ?? MONSTER_SOUNDS[modelType];
+  }
+  return MONSTER_SOUNDS[modelType];
+}
+
+// The original gates on the first slot of a pair and then rolls between the
+// two; an empty second slot plays sound -1, which is never loaded, so that
+// half of the roll is silent.
+export function monsterIdleSound(modelType: number, npcType?: number): Sounds | null {
+  const slots = slotsOf(modelType, npcType);
   if (!slots || slots[0] === null) return null;
-  return (slots[rnd(2)] ?? slots[0]) as Sounds;
+  return slots[rnd(2)] as Sounds | null;
 }
 
-export function monsterAttackSound(modelType: number): Sounds | null {
-  const slots = MONSTER_SOUNDS[modelType];
+export function monsterAttackSound(modelType: number, npcType?: number): Sounds | null {
+  const slots = slotsOf(modelType, npcType);
   if (!slots || slots[2] === null) return null;
-  return (slots[2 + rnd(2)] ?? slots[2]) as Sounds;
+  return slots[2 + rnd(2)] as Sounds | null;
 }
 
-export function monsterDeathSound(modelType: number): Sounds | null {
-  const slots = MONSTER_SOUNDS[modelType];
-  return (slots?.[4] ?? null) as Sounds | null;
+export function monsterDeathSound(modelType: number, npcType?: number): Sounds | null {
+  return (slotsOf(modelType, npcType)?.[4] ?? null) as Sounds | null;
 }
 
 /** The voice for a moment, or null when that monster is silent there. */
 export function monsterSound(
   modelType: number,
-  voice: MonsterVoice
+  voice: MonsterVoice,
+  npcType?: number
 ): Sounds | null {
   switch (voice) {
     case 'idle':
-      return monsterIdleSound(modelType);
+      return monsterIdleSound(modelType, npcType);
     case 'attack':
-      return monsterAttackSound(modelType);
+      return monsterAttackSound(modelType, npcType);
     case 'death':
-      return monsterDeathSound(modelType);
+      return monsterDeathSound(modelType, npcType);
   }
 }
 
@@ -468,9 +496,10 @@ export function monsterSound(
 export function playMonster(
   modelType: number,
   voice: MonsterVoice,
-  at?: SfxPosition | null
+  at?: SfxPosition | null,
+  npcType?: number
 ): void {
-  const key = monsterSound(modelType, voice);
+  const key = monsterSound(modelType, voice, npcType);
   if (key) playSfx(key, at, { bus: MONSTER_BUS });
 }
 
