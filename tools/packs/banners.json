@@ -22,7 +22,8 @@
   "jpn": "バルガスの兵舎",
   "kor": "발가스 병영",
   "tha": "ค่ายบัลกัส",
-  "pol": "Koszary Balgassa"
+  "pol": "Koszary Balgassa",
+  "vie": "Doanh Trại Balgass"
  },
  "BalgasRefuge.OZT": {
   "en": "Balgass' Resting Place",
@@ -36,7 +37,8 @@
   "jpn": "バルガスの安息地",
   "kor": "발가스 안식처",
   "tha": "ที่พักบัลกัส",
-  "pol": "Leże Balgassa"
+  "pol": "Leże Balgassa",
+  "vie": "Nơi Yên Nghỉ Balgass"
  },
  "Doppelganger.OZT": {
   "en": "Doppelganger",
@@ -50,7 +52,8 @@
   "jpn": "ドッペルゲンガー",
   "kor": "도플갱어",
   "tha": "ดอปเปิลแกงเกอร์",
-  "pol": "Doppelganger"
+  "pol": "Doppelganger",
+  "vie": "Doppelganger"
  },
  "Elbeland.OZT": {
   "en": "Elbeland",
@@ -64,7 +67,8 @@
   "jpn": "エルベランド",
   "kor": "엘베란드",
   "tha": "เอลเบแลนด์",
-  "pol": "Elbeland"
+  "pol": "Elbeland",
+  "vie": "Elbeland"
  },
  "EmpireGuardian.OZT": {
   "en": "Varka",
@@ -78,7 +82,8 @@
   "jpn": "バルカ",
   "kor": "발카",
   "tha": "วาร์ก้า",
-  "pol": "Varka"
+  "pol": "Varka",
+  "vie": "Varka"
  },
  "Icarus.OZT": {
   "en": "Icarus",
@@ -92,7 +97,8 @@
   "jpn": "イカロス",
   "kor": "이카루스",
   "tha": "อิคารัส",
-  "pol": "Ikar"
+  "pol": "Ikar",
+  "vie": "Icarus"
  },
  "IllusionTemple.OZT": {
   "en": "Illusion Temple",
@@ -106,7 +112,8 @@
   "jpn": "幻影の神殿",
   "kor": "환영의 신전",
   "tha": "วิหารลวงตา",
-  "pol": "Świątynia Iluzji"
+  "pol": "Świątynia Iluzji",
+  "vie": "Đền Ảo Ảnh"
  },
  "Kalima.OZT": {
   "en": "Kalima",
@@ -120,7 +127,8 @@
   "jpn": "カリマ",
   "kor": "칼리마",
   "tha": "คาลิม่า",
-  "pol": "Kalima"
+  "pol": "Kalima",
+  "vie": "Kalima"
  },
  "MapNameAddStrife.OZT": {
   "en": "Battle zone",
@@ -134,7 +142,8 @@
   "jpn": "バトルゾーン",
   "kor": "전투 지역",
   "tha": "เขตสู้รบ",
-  "pol": "Strefa walki"
+  "pol": "Strefa walki",
+  "vie": "Chiến Trường"
  },
  "MapName_MarketRolen.OZT": {
   "en": "Loren Market",
@@ -148,7 +157,8 @@
   "jpn": "ローレン市場",
   "kor": "로렌 시장",
   "tha": "ตลาดโลเรน",
-  "pol": "Targ Loren"
+  "pol": "Targ Loren",
+  "vie": "Chợ Loren"
  },
  "SwampOfCalmness.OZT": {
   "en": "Swamp of Peace",
@@ -162,7 +172,8 @@
   "jpn": "平和の沼",
   "kor": "평화의 늪",
   "tha": "บึงสันติ",
-  "pol": "Bagno Spokoju"
+  "pol": "Bagno Spokoju",
+  "vie": "Đầm Lầy Bình Yên"
  },
  "aida.OZT": {
   "en": "Aida",
@@ -176,7 +187,8 @@
   "jpn": "アイダ",
   "kor": "아이다",
   "tha": "ไอด้า",
-  "pol": "Aida"
+  "pol": "Aida",
+  "vie": "Aida"
  },
  "atlans.OZT": {
   "en": "Atlans",
@@ -190,7 +202,8 @@
   "jpn": "アトランス",
   "kor": "아틀란스",
   "tha": "แอตแลนส์",
-  "pol": "Atlans"
+  "pol": "Atlans",
+  "vie": "Atlans"
  },
  "bloodcastle.OZT": {
   "en": "Blood Castle",
@@ -204,7 +217,8 @@
   "jpn": "ブラッドキャッスル",
   "kor": "블러드 캐슬",
   "tha": "ปราสาทเลือด",
-  "pol": "Krwawy Zamek"
+  "pol": "Krwawy Zamek",
+  "vie": "Lâu Đài Máu"
  },
  "chaoscastle.OZT": {
   "en": "Chaos Castle",
@@ -218,7 +232,8 @@
   "jpn": "カオスキャッスル",
   "kor": "카오스 캐슬",
   "tha": "ปราสาทเคออส",
-  "pol": "Zamek Chaosu"
+  "pol": "Zamek Chaosu",
+  "vie": "Lâu Đài Hỗn Mang"
  },
  "crywolffortress.OZT": {
   "en": "Crywolf Fortress",
@@ -232,7 +247,8 @@
   "jpn": "クライウルフ要塞",
   "kor": "크라이울프 요새",
   "tha": "ป้อมครายวูล์ฟ",
-  "pol": "Twierdza Crywolf"
+  "pol": "Twierdza Crywolf",
+  "vie": "Pháo Đài Crywolf"
  },
  "devias.OZT": {
   "en": "Devias",
@@ -246,7 +262,8 @@
   "jpn": "デビアス",
   "kor": "데비아스",
   "tha": "เดเวียส",
-  "pol": "Devias"
+  "pol": "Devias",
+  "vie": "Devias"
  },
  "devilsquare.OZT": {
   "en": "Devil Square",
@@ -260,7 +277,8 @@
   "jpn": "デビルスクエア",
   "kor": "데빌 스퀘어",
   "tha": "ลานปีศาจ",
-  "pol": "Plac Diabła"
+  "pol": "Plac Diabła",
+  "vie": "Quảng Trường Quỷ"
  },
  "duelarena.OZT": {
   "en": "Colosseum",
@@ -274,7 +292,8 @@
   "jpn": "コロシアム",
   "kor": "콜로세움",
   "tha": "โคลอสเซียม",
-  "pol": "Koloseum"
+  "pol": "Koloseum",
+  "vie": "Đại Đấu Trường"
  },
  "dungeun.OZT": {
   "en": "Dungeon",
@@ -288,7 +307,8 @@
   "jpn": "ダンジョン",
   "kor": "던전",
   "tha": "ดันเจี้ยน",
-  "pol": "Loch"
+  "pol": "Loch",
+  "vie": "Hầm Ngục"
  },
  "kantru.OZT": {
   "en": "Kanturu",
@@ -302,7 +322,8 @@
   "jpn": "カンツル",
   "kor": "칸투루",
   "tha": "คันทูรุ",
-  "pol": "Kanturu"
+  "pol": "Kanturu",
+  "vie": "Kanturu"
  },
  "loren.OZT": {
   "en": "Valley of Loren",
@@ -316,7 +337,8 @@
   "jpn": "ローレンの谷",
   "kor": "로렌 계곡",
   "tha": "หุบเขาโลเรน",
-  "pol": "Dolina Loren"
+  "pol": "Dolina Loren",
+  "vie": "Thung Lũng Loren"
  },
  "lorencia.OZT": {
   "en": "Lorencia",
@@ -330,7 +352,8 @@
   "jpn": "ロレンシア",
   "kor": "로렌시아",
   "tha": "ลอเรนเซีย",
-  "pol": "Lorencia"
+  "pol": "Lorencia",
+  "vie": "Lorencia"
  },
  "lostkalima.OZT": {
   "en": "Kalima",
@@ -344,7 +367,8 @@
   "jpn": "カリマ",
   "kor": "칼리마",
   "tha": "คาลิม่า",
-  "pol": "Kalima"
+  "pol": "Kalima",
+  "vie": "Kalima"
  },
  "losttower.OZT": {
   "en": "Lost Tower",
@@ -358,7 +382,8 @@
   "jpn": "失われた塔",
   "kor": "잃어버린 탑",
   "tha": "หอคอยที่สาบสูญ",
-  "pol": "Zaginiona Wieża"
+  "pol": "Zaginiona Wieża",
+  "vie": "Tháp Thất Lạc"
  },
  "mapname_karutan.ozt": {
   "en": "Karutan",
@@ -372,7 +397,8 @@
   "jpn": "カルタン",
   "kor": "카루탄",
   "tha": "คารูทัน",
-  "pol": "Karutan"
+  "pol": "Karutan",
+  "vie": "Karutan"
  },
  "mapname_raklion.OZT": {
   "en": "LaCleon",
@@ -386,7 +412,8 @@
   "jpn": "ラクリオン",
   "kor": "라클레온",
   "tha": "ลาคลีออน",
-  "pol": "La Cleon"
+  "pol": "La Cleon",
+  "vie": "La Cleon"
  },
  "mapname_raklionboss.OZT": {
   "en": "Raklionboss",
@@ -400,7 +427,8 @@
   "jpn": "ラクリオンボス",
   "kor": "라클레온 보스",
   "tha": "บอสลาคลีออน",
-  "pol": "Raklion Boss"
+  "pol": "Raklion Boss",
+  "vie": "Trùm Raklion"
  },
  "noria.OZT": {
   "en": "Noria",
@@ -414,7 +442,8 @@
   "jpn": "ノリア",
   "kor": "노리아",
   "tha": "โนเรีย",
-  "pol": "Noria"
+  "pol": "Noria",
+  "vie": "Noria"
  },
  "ordeal.OZT": {
   "en": "Land of Trial",
@@ -428,7 +457,8 @@
   "jpn": "試練の地",
   "kor": "시련의 땅",
   "tha": "ดินแดนทดสอบ",
-  "pol": "Kraina Próby"
+  "pol": "Kraina Próby",
+  "vie": "Vùng Đất Thử Thách"
  },
  "pkfield.OZT": {
   "en": "Vulcanus",
@@ -442,7 +472,8 @@
   "jpn": "ヴァルカヌス",
   "kor": "불카누스",
   "tha": "วัลคานัส",
-  "pol": "Vulcanus"
+  "pol": "Vulcanus",
+  "vie": "Vulcanus"
  },
  "santatown.OZT": {
   "en": "Santa Town",
@@ -456,7 +487,8 @@
   "jpn": "サンタの村",
   "kor": "산타 마을",
   "tha": "หมู่บ้านซานต้า",
-  "pol": "Wioska Mikołaja"
+  "pol": "Wioska Mikołaja",
+  "vie": "Làng Noel"
  },
  "stadium.OZT": {
   "en": "Stadium",
@@ -470,7 +502,8 @@
   "jpn": "スタジアム",
   "kor": "스타디움",
   "tha": "สนามกีฬา",
-  "pol": "Arena"
+  "pol": "Arena",
+  "vie": "Đấu Trường"
  },
  "tarcan.OZT": {
   "en": "Tarkan",
@@ -484,6 +517,7 @@
   "jpn": "タルカン",
   "kor": "타르칸",
   "tha": "ทาร์คาน",
-  "pol": "Tarkan"
+  "pol": "Tarkan",
+  "vie": "Tarkan"
  }
 }
