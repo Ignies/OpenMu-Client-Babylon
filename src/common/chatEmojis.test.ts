@@ -143,6 +143,10 @@ describe('emojiQueryAt', () => {
     expect(emojiQueryAt(':cat_wave:', 10)).toBeNull();
     expect(emojiQueryAt(':cat_wave:ab', 12)).toBeNull();
   });
+
+  it('stays shut with the caret inside a code, so Enter sends the line', () => {
+    expect(emojiQueryAt('hi :dk_love: there', 6)).toBeNull();
+  });
 });
 
 describe('matchEmojiCodes', () => {
