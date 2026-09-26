@@ -10,7 +10,7 @@ import { Commands } from './commands';
 import { GmPanel } from './gmPanel';
 import { Economy } from './economy';
 import { weather } from './weather';
-import { sound, installUiWindowChime } from './sound';
+import { sound } from './sound';
 import { Engine, SceneLoader } from './libs/babylon/exports';
 import { createEngine } from './libs/babylon/utils';
 import { devQuery } from './common/devSeams';
@@ -45,7 +45,6 @@ if (APP_STAGE === 'dev' || QA_ENABLED) {
   import('@babylonjs/core/Legacy/legacy');
 }
 
-installUiWindowChime();
 // Durability / full grid / last potion / buff ending, on the notice banner.
 watchStateWarnings();
 

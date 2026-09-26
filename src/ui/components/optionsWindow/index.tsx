@@ -1,3 +1,4 @@
+import { playUiSound } from '../../../libs/sfx';
 import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
@@ -229,6 +230,7 @@ export const OptionsWindow = observer(() => {
   useEventBus('keyPressed', key => {
     if (isKey(HOT_KEY, key)) {
       Store.optionsEnabled = !Store.optionsEnabled;
+      playUiSound('click');
     }
   });
 
@@ -238,6 +240,8 @@ export const OptionsWindow = observer(() => {
     height: WIN_HEIGHT,
     onClose: () => {
       Store.optionsEnabled = false;
+      // NewUIOptionWindow.cpp:525.
+      playUiSound('click');
     },
   });
 

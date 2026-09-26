@@ -1,11 +1,28 @@
 import { describe, expect, it } from 'vitest';
 import {
+  heartbeatDue,
   LOW_VITAL_MAX_PERCENT,
   LOW_VITAL_MIN_PERCENT,
   lowVitalThreshold,
   NO_WARNING,
   vitalWarning,
 } from './lowVitals';
+
+describe('heartbeatDue', () => {
+  it('beats alive and under a fifth of the bar only', () => {
+    expect(heartbeatDue(19, 100)).toBe(true);
+    expect(heartbeatDue(1, 100)).toBe(true);
+    expect(heartbeatDue(20, 100)).toBe(false);
+    expect(heartbeatDue(100, 100)).toBe(false);
+  });
+
+  it('stays quiet dead or before the bar is known', () => {
+    expect(heartbeatDue(0, 100)).toBe(false);
+    expect(heartbeatDue(-5, 100)).toBe(false);
+    expect(heartbeatDue(0, 0)).toBe(false);
+    expect(heartbeatDue(10, 0)).toBe(false);
+  });
+});
 
 describe('lowVitalThreshold', () => {
   it('clamps into the slider range and falls back on rubbish', () => {

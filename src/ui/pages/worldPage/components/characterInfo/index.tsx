@@ -14,6 +14,7 @@ import { MsgWinCode } from '../../../../../common/msgWin';
 import { devQueryNumber } from '../../../../../common/devSeams';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
+import { playUiSound } from '../../../../../libs/sfx';
 import { toggleMasterSkillsWindow } from '../masterSkills/windowState';
 import { togglePetInfoWindow } from '../petInfo/windowState';
 import {
@@ -378,6 +379,8 @@ export const CharacterInfo = observer(() => {
   useEventBus('keyPressed', key => {
     if (isKey(HOT_KEY, key)) {
       Store.characterInfoEnabled = !Store.characterInfoEnabled;
+      // NewUIHotKey.cpp:207-210.
+      playUiSound('click');
     }
   });
 
@@ -582,6 +585,8 @@ export const CharacterInfo = observer(() => {
       label={t('characterInfo.title')}
       onClose={() => {
         Store.characterInfoEnabled = false;
+        // Escape (NewUICharacterInfoWindow.cpp:227).
+        playUiSound('click');
       }}
     >
       {}

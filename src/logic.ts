@@ -172,6 +172,8 @@ import {
   AppearanceChangedExtendedPacket,
   PetInfoResponsePacket,
   PetModePacket,
+  PetAttackPacket,
+  PetAttackPetSkillTypeEnum,
   MuHelperStatusUpdatePacket,
   MuHelperConfigurationDataPacket,
   RageAttackPacket,
@@ -247,12 +249,13 @@ import {
 } from './common/emojiBubbles';
 import { startEmojiBubble } from './ecs/systems/emojiBubbleSystem';
 import {
+  isPlayerAttackAction,
   resolveGenderedAction,
   ServerToClientActionMap,
 } from './common/playerActionMapper';
-import { chooseAttackAction, type AttackPose } from './common/weaponClass';
+import { chooseAttackAction, isWeaponItem, type AttackPose } from './common/weaponClass';
 import { isWingItem } from './common/wings';
-import { PlayerObject, npcClassOf } from './common/playerObject';
+import { PlayerObject, isPlayerBody, npcClassOf } from './common/playerObject';
 import { Entity, type Item, World } from './ecs/world';
 import { createAttributeSystem, type MUAttributeSystem } from './libs/attributeSystem';
 import { classWorldScale } from './common/characterScale';
@@ -267,7 +270,7 @@ import { delay } from './effects/core';
 import { Vector3 } from './libs/babylon/exports';
 import { EventBus } from './libs/eventBus';
 import type { Events } from './libs/eventBus/events';
-import { playDrop, sound } from './sound';
+import { playDrop } from './sound';
 import { playSfx, playUiSound, UI_BUS } from './libs/sfx';
 import {
   COMBAT_BUS,
@@ -282,7 +285,8 @@ import { WEATHER_RAIN } from './weather/rainState';
 import { combat } from './combat';
 import { COMBO_SOUND } from './combat/combo';
 import { SHOCK_IMMUNE_CLIPS } from './combat/recipes';
-import { isRidingMount, mountKind } from './common/pets';
+import { mountKind } from './common/pets';
+import { inChaosCastle } from './common/locomotion';
 import { characterSkinBody } from './common/transformedBody';
 import { quests } from './quests';
 import { SessionExit } from './common/sessionExit';
@@ -1745,7 +1749,6 @@ function playerNameById(netId: number): string {
 EventBus.on('PartyRequest', packet => {
   const p = new PartyRequestPacket(packet);
   const requesterId = p.RequesterId & 0x7fff;
-  playUiSound('window');
   runInAction(() => {
     Social.partyRequest = {
       requesterId,
@@ -1794,7 +1797,6 @@ EventBus.on('PartyHealthUpdate', packet => {
 EventBus.on('GuildJoinRequest', packet => {
   const p = new GuildJoinRequestS2CPacket(packet);
   const requesterId = p.RequesterId & 0x7fff;
-  playUiSound('window');
   runInAction(() => {
     Social.guildJoinRequest = {
       requesterId,
@@ -1888,14 +1890,12 @@ EventBus.on('GuildKickResponse', packet => {
 });
 
 EventBus.on('ShowGuildMasterDialog', () => {
-  playUiSound('window');
   runInAction(() => {
     Social.guildMasterDialog = true;
   });
 });
 
 EventBus.on('ShowGuildCreationDialog', () => {
-  playUiSound('window');
   runInAction(() => {
     Social.guildMasterDialog = false;
     Social.guildCreationDialog = true;
@@ -1936,7 +1936,6 @@ EventBus.on('GuildCreationResult', packet => {
  */
 EventBus.on('GuildWarRequest', packet => {
   const p = new GuildWarRequestPacket(packet);
-  playUiSound('window');
   runInAction(() => {
     Social.guildWarRequest = {
       guildName: cleanName(p.GuildName),
@@ -2043,7 +2042,6 @@ EventBus.on('GuildWarEnded', packet => {
 EventBus.on('GuildRelationshipRequest', packet => {
   const p = new GuildRelationshipRequestPacket(packet);
   const senderId = p.SenderId & 0x7fff;
-  playUiSound('window');
   runInAction(() => {
     Social.guildRelationRequest = {
       senderId,
@@ -2190,7 +2188,8 @@ EventBus.on('FriendOnlineStateUpdate', packet => {
 /** FriendRequest (0xC2): another player wants to add the hero. */
 EventBus.on('FriendRequest', packet => {
   const p = new FriendRequestPacket(packet);
-  playUiSound('window');
+  // ReceiveRequestAcceptAddFriend (WSclient.cpp:9786): SOUND_FRIEND_LOGIN_ALERT.
+  playSfx('Sound/iFLogInAlert', null, { bus: UI_BUS, channels: 1 });
   runInAction(() => {
     Messenger.friendRequest = { name: cleanName(p.Requester) };
   });
@@ -2235,9 +2234,10 @@ EventBus.on('AddLetter', packet => {
     read: p.State === AddLetterLetterStateEnum.Read,
     isNew,
   });
-  // `New` means it landed while the hero was online, so it is announced.
+  // `New` means it landed while the hero was online, so it is announced
+  // (ReceiveLetter, WSclient.cpp:9925: SOUND_FRIEND_MAIL_ALERT).
   if (isNew) {
-    playUiSound('whisper');
+    playSfx('Sound/iFMailAlert', null, { bus: UI_BUS, channels: 1 });
     Social.systemMessage(
       t('friends.letterArrived', { name: cleanName(p.SenderName) })
     );
@@ -2301,6 +2301,24 @@ function attackPoseOf(obj: Entity): AttackPose {
     wings: isWingItem(hands?.wings),
     mount: mountKind(hands?.pet, inSafeZone),
   };
+}
+
+/** `SetAction_Fenrir_Damage` (ZzzAI.cpp:283-311): the rider's flinch, by what is in hand. */
+function fenrirDamageAction(obj: Entity): PlayerAction {
+  const hands = obj.charAppearance;
+  const main = isWeaponItem(hands?.leftHand ?? null);
+  const off = isWeaponItem(hands?.rightHand ?? null);
+  const A = PlayerAction;
+  if (getBaseClass(hands?.charClass ?? Store.playerData.charClass) === BaseClass.RageFighter) {
+    if (main && off) return A.PLAYER_RAGE_FENRIR_DAMAGE_TWO_SWORD;
+    if (main) return A.PLAYER_RAGE_FENRIR_DAMAGE_ONE_RIGHT;
+    if (off) return A.PLAYER_RAGE_FENRIR_DAMAGE_ONE_LEFT;
+    return A.PLAYER_RAGE_FENRIR_DAMAGE;
+  }
+  if (main && off) return A.PLAYER_FENRIR_DAMAGE_TWO_SWORD;
+  if (main) return A.PLAYER_FENRIR_DAMAGE_ONE_RIGHT;
+  if (off) return A.PLAYER_FENRIR_DAMAGE_ONE_LEFT;
+  return A.PLAYER_FENRIR_DAMAGE;
 }
 
 function markKilled(
@@ -2651,8 +2669,53 @@ EventBus.on('ObjectGotKilled', packet => {
   // Dead = 1; the Die clip itself starts in DeathSystem (at once, or when
   // the hero's killing swing connects - WSclient.cpp:5362-5384).
   const killerId = p.KillerId & 0x7fff;
-  markKilled(world, obj, killerId === Store.playerId, p.SkillId, killerId);
+  const heroKill = killerId === Store.playerId;
+  markKilled(world, obj, heroKill, p.SkillId, killerId);
+  if (heroKill && obj.npcType !== undefined) playKillEnergy(world, obj);
 });
+
+/** Ticks the energy orbs climb (LifeTime 120 -> 100) plus the turn back. */
+const ENERGY_BASE_TICKS = 22;
+/** Homing at up to 30 units a tick, turning as fast: fitted to MoveJoint. */
+const ENERGY_TICKS_PER_TILE = 3.5;
+/** DeathSystem's connect point and fallback: where the hero-kill Die starts. */
+const SWING_HIT_FRACTION = 0.5;
+const SWING_CONNECT_FALLBACK_TICKS = 15;
+
+/** Ticks until the hero's swing connects (ZzzCharacter.cpp:4139). */
+function heroSwingConnectTicks(hero: Entity): number {
+  const action = hero.playerAnimation?.action;
+  const model = hero.modelObject;
+  if (action === undefined || !model || !isPlayerAttackAction(action)) return 0;
+  if (model.CurrentAction !== action || model.ActionIterationWasFinished) {
+    return 0;
+  }
+  const left =
+    (SWING_HIT_FRACTION - model.actionProgress()) *
+    model.getActionDuration(action) *
+    25;
+  return Math.min(SWING_CONNECT_FALLBACK_TICKS, Math.max(0, left));
+}
+
+/**
+ * ATTACK_DIE orbs (ZzzCharacter.cpp:5242-5247), not drawn: both land on one
+ * tick, so the 1-channel SOUND_GET_ENERGY plays once (ZzzEffectJoint.cpp:3369).
+ */
+function playKillEnergy(world: World, victim: Entity): void {
+  const hero = world.playerEntity;
+  if (!hero?.transform || !victim.transform) return;
+  const tiles = Math.hypot(
+    victim.transform.pos.x - hero.transform.pos.x,
+    victim.transform.pos.z - hero.transform.pos.z
+  );
+  const ticks =
+    heroSwingConnectTicks(hero) +
+    ENERGY_BASE_TICKS +
+    ENERGY_TICKS_PER_TILE * tiles;
+  delay(ticks / 25, () =>
+    playSfx('Sound/pEnergy', null, { bus: COMBAT_BUS, channels: 1 })
+  );
+}
 
 type ObjectHitView = Pick<
   ObjectHitPacket,
@@ -2719,7 +2782,7 @@ function applyObjectHit(p: ObjectHitView) {
   const totalDamage = p.HealthDamage + p.ShieldDamage;
   combat.observeRageHit(p.IsRageFighterStreakHit, p.IsRageFighterStreakFinalHit);
 
-  // AttackEffect (ZzzCharacter.cpp:5176-5190): a landed blow clinks; the
+  // AttackEffect (ZzzCharacter.cpp:5250-5307): a landed blow clinks; the
   // hero's bow/crossbow hits use the missile set.
   if (totalDamage > 0) {
     const hero = world.playerEntity;
@@ -2745,25 +2808,35 @@ function applyObjectHit(p: ObjectHitView) {
     }
   }
 
-  // SetPlayerShock (ZzzCharacter.cpp:1283-1310): `Hit` is the health damage;
-  // nothing flinches once dead, a rider never does, a player finishing one
-  // of the SHOCK_IMMUNE_CLIPS is not interrupted - every other clip is.
+  // SetPlayerShock (ZzzCharacter.cpp:1364-1390): `Hit` is the health damage;
+  // nothing flinches once dead, a Uniria / Dinorant / Dark Horse rider never
+  // does, a Fenrir rider flinches on the wolf, a player finishing one of the
+  // SHOCK_IMMUNE_CLIPS is not interrupted - every other clip is.
+  const mount = mountKind(obj.charAppearance?.pet);
   if (
     obj.playerAnimation &&
     p.HealthDamage > 0 &&
     !obj.dying &&
-    !isRidingMount(obj.charAppearance?.pet) &&
+    mount !== 'uniria' &&
+    mount !== 'dinorant' &&
+    mount !== 'horse' &&
     !SHOCK_IMMUNE_CLIPS.has(obj.playerAnimation.action)
   ) {
     const anim = obj.playerAnimation;
     if (anim.action !== PlayerAction.PLAYER_DIE1) {
-      if (
-        anim.action === PlayerAction.PLAYER_SHOCK &&
-        obj.modelObject?.CurrentAction === PlayerAction.PLAYER_SHOCK
-      ) {
+      // In town the rider is on foot (SetPlayerStop), so he flinches on foot;
+      // a monster skin is not MODEL_PLAYER and takes MONSTER01_SHOCK (:1399).
+      const shock =
+        mount === 'fenrir' &&
+        !!obj.modelObject &&
+        isPlayerBody(obj.modelObject) &&
+        !obj.attributeSystem?.isAboveZero('inSafeZone')
+          ? fenrirDamageAction(obj)
+          : PlayerAction.PLAYER_SHOCK;
+      if (anim.action === shock && obj.modelObject?.CurrentAction === shock) {
         obj.modelObject.restartAction();
       }
-      anim.action = PlayerAction.PLAYER_SHOCK;
+      anim.action = shock;
       if (obj.pathfinding) obj.pathfinding.path = null; // c->Movement = false
     }
   }
@@ -2975,15 +3048,12 @@ function spawnFireworksAt(x: number, y: number, christmas: boolean) {
   spawnFireworks(world.scene, at, christmas);
 }
 
-// ReceivePlaySoundEffect (WSclient.cpp:9680-9697): 0 ready / 1 start / 2 end.
-const FANFARE_SOUNDS = [
-  'Sound/iEvent3min',
-  'Sound/iEventStart',
-  'Sound/iEventEnd',
-] as const;
+// ReceiveServerCommand (WSclient.cpp:8359-8360): command 2 is SOUND_MEDAL.
+const FANFARE_EFFECT = 2;
 EventBus.on('fanfare', ({ effectType }) => {
-  const sfx = FANFARE_SOUNDS[effectType];
-  if (sfx) playSfx(sfx, null, { bus: UI_BUS });
+  if (effectType === FANFARE_EFFECT) {
+    playSfx('Sound/eMedal', null, { bus: UI_BUS, channels: 1 });
+  }
 });
 
 function handleRespawnAfterDeath(packet: DataView) {
@@ -3438,6 +3508,9 @@ EventBus.on('ItemDurabilityChanged', packet => {
 EventBus.on('NpcWindowResponse', packet => {
   const p = new NpcWindowResponsePacket(packet);
 
+  // ReceiveTalk ends every case with SOUND_CLICK01 + SOUND_INTERFACE01
+  // (WSclient.cpp:6563-6564); the legacy quest window chimes on its own.
+  playUiSound('click');
   switch (p.Window) {
     case NpcWindowResponseNpcWindowEnum.Merchant:
     case NpcWindowResponseNpcWindowEnum.Merchant1:
@@ -3474,7 +3547,7 @@ EventBus.on('NpcWindowResponse', packet => {
     default:
       // A legacy quest NPC (Sebina, Marlon, Apostle Devin…): the dialog is
       // client-side, from Quest_eng.bmd (quests/legacyQuests.ts).
-      if (quests.openNpcWindow(p.Window, Store.pendingNpcType)) break;
+      if (quests.openNpcWindow(p.Window, Store.pendingNpcType)) return;
       // Lahap, the refineries…: not ported yet.
       console.warn(`NpcWindowResponse: window ${p.Window} is not supported yet`);
       Store.dropNpcTalk();
@@ -3485,6 +3558,7 @@ EventBus.on('NpcWindowResponse', packet => {
       Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
       break;
   }
+  playUiSound('window');
 });
 
 /**
@@ -3520,8 +3594,8 @@ EventBus.on('ItemBought', packet => {
 
   const item = ItemSerializer.DeserializeItem(new Uint8Array(p.ItemData.buffer));
 
-  // ReceiveBuyResult (WSclient.cpp): the pickup clink for the new item.
-  playUiSound(pickupSound(item));
+  // ReceiveBuyExtended (WSclient.cpp:6653): SOUND_GET_ITEM01 whatever was bought.
+  playUiSound('getItem');
 
   runInAction(() => {
     Store.playerData.items[p.InventorySlot] = item;
@@ -3737,9 +3811,8 @@ EventBus.on('PlayerShopBuyResult', packet => {
     return;
   }
 
+  // ReceivePurchaseItem (WSclient.cpp:9526-9597) plays nothing.
   const item = ItemSerializer.DeserializeItem(new Uint8Array(p.ItemData.buffer));
-
-  playUiSound(pickupSound(item));
 
   runInAction(() => {
     Store.playerData.items[p.ItemSlot] = item;
@@ -3766,12 +3839,12 @@ EventBus.on('ItemDropResponse', packet => {
     return;
   }
 
+  // ReceiveDropItem (WSclient.cpp:6197-6219) is silent: the thud is the item
+  // landing, when it appears on the ground.
   runInAction(() => {
     Store.playerData.items[p.InventorySlot] = null;
   });
 
-  // ZzzInterface.cpp:3876: SOUND_DROP_ITEM01 when the hero lets go of an item.
-  playUiSound('dropItem');
   Store.confirmItemMove(-1, null);
 });
 
@@ -3930,17 +4003,23 @@ EventBus.on('ShowEffect', packet => {
 
   switch (p.Effect) {
     case ShowEffectEffectTypeEnum.LevelUp:
+      // SOUND_LEVEL_UP rides the burst (objectEffectSystem), the hero's included.
       emitObjectEffect(netId, 'levelUp');
-      if (netId === Store.playerId) {
-        sound.play('Sound/pLevelUp');
-      }
       break;
     case ShowEffectEffectTypeEnum.ShieldPotion:
       emitObjectEffect(netId, 'shieldPotion');
       break;
-    case ShowEffectEffectTypeEnum.ShieldLost:
+    case ShowEffectEffectTypeEnum.ShieldLost: {
       emitObjectEffect(netId, 'shieldLost');
+      // ReceiveDisplayEffectViewport (WSclient.cpp:9662-9668): SOUND_SHIELDCLASH,
+      // except in Chaos Castle.
+      const world = Store.world;
+      const who = world?.getByNetId(netId);
+      if (world && who?.transform && !inChaosCastle(world.mapIndex)) {
+        playSfx('Sound/shieldclash', who.transform.pos, { bus: COMBAT_BUS, channels: 1 });
+      }
       break;
+    }
   }
 });
 
@@ -4264,6 +4343,20 @@ EventBus.on('PetMode', packet => {
   if (packet.byteLength < PetModePacket.Length!) return;
   const p = new PetModePacket(packet);
   Store.setPetMode(p.PetCommandMode, p.TargetId);
+});
+
+/** A8 - `CSPetSystem::SetAttack` (:276/:280); sound only, at the owner. */
+EventBus.on('PetAttack', packet => {
+  if (packet.byteLength < PetAttackPacket.Length!) return;
+  const p = new PetAttackPacket(packet);
+  const world = Store.world;
+  const owner = world?.getByNetId(p.OwnerId & 0x7fff);
+  if (!owner?.transform || !world?.getByNetId(p.TargetId & 0x7fff)) return;
+  const range = p.SkillType === PetAttackPetSkillTypeEnum.Range;
+  playSfx(range ? 'Sound/DSpirit_Missile' : 'Sound/DSpirit_Rush', owner.transform.pos, {
+    bus: COMBAT_BUS,
+    channels: range ? 4 : 3,
+  });
 });
 
 /**

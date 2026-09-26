@@ -2,6 +2,7 @@ import { t } from './i18n';
 import { characterSkinBody } from './common/transformedBody';
 import type { PlayerObject } from './common/playerObject';
 import { playUiSound } from './libs/sfx';
+import { consumeSound, upgradedItemSound } from './sound/ui';
 import {
   CharacterClassNumber,
   ENUM_WORLD,
@@ -77,7 +78,7 @@ import { Scalar } from './libs/babylon/exports';
 import { InventoryConstants } from './common/inventoryConstants';
 import { StatType } from './common/characterStats';
 import { findFreeSlot, type Footprint } from './common/inventoryFit';
-import { isJewel, jewelTargetError } from './common/jewelUpgrade';
+import { jewelTargetError } from './common/jewelUpgrade';
 import { ItemGroups } from './common/objects/enum';
 import { ItemsDatabase } from './common/itemsDatabase';
 import { prefetchItemIcons } from './common/itemIconPack';
@@ -1779,6 +1780,8 @@ export const Store = new (class _Store {
 
     console.log(`delete character [${name}]`);
     this.sendToGS(packet.buffer);
+    // DeleteCharacter (LoginScene.cpp:124): SOUND_MENU01.
+    playUiSound('menuMove');
   }
 
   popUpMsgWin(code: MsgWinCode, arg?: MsgWinArg, onOk?: () => void): void {
@@ -1978,6 +1981,10 @@ export const Store = new (class _Store {
 
     if (this.isOffline) {
       const which = this.offlineNpcWindow++ % 3;
+      // What the NpcWindowResponse handler plays for every window
+      // (ReceiveTalk, WSclient.cpp:6563-6564).
+      playUiSound('click');
+      playUiSound('window');
 
       if (which === 1) {
         this.dropNpcTalk();
@@ -2022,9 +2029,6 @@ export const Store = new (class _Store {
       this.repairMode = false;
       this.inventoryEnabled = true;
     });
-
-    // ReceiveTalk (WSclient.cpp:6096): SOUND_CLICK01 + SOUND_INTERFACE01.
-    playUiSound('window');
   }
 
   /** The server's answer came for something other than a merchant. */
@@ -2145,7 +2149,7 @@ export const Store = new (class _Store {
         this.pickedItem = null;
         this.syncPlayerAppearance();
       });
-      playUiSound('dropMoney');
+      playUiSound('getItem');
       return;
     }
 
@@ -2170,7 +2174,8 @@ export const Store = new (class _Store {
       runInAction(() => {
         this.playerData.money = money;
       });
-      playUiSound('dropMoney');
+      // ReceiveSell (WSclient.cpp:6861).
+      playUiSound('getItem');
       return;
     }
 
@@ -2591,7 +2596,8 @@ export const Store = new (class _Store {
       else pd.items[slot] = null;
     });
 
-    playUiSound(n === 0 ? 'eatApple' : 'drink');
+    const used = consumeSound(item.group, n);
+    if (used) playUiSound(used);
   }
 
   /** The hero as `RenderItemInfo` compares against (`CharacterAttribute`). */
@@ -2673,11 +2679,9 @@ export const Store = new (class _Store {
     if (now < this.consumeBlockedUntil) return;
     this.consumeBlockedUntil = now + 300;
 
-    // NewUIMyInventory.cpp:1699-1706: apple crunch or potion gulp on use.
     const consumed = this.playerData.items[slot];
-    if (consumed && consumed.group === 14 && !isJewel(consumed)) {
-      playUiSound(consumed.num === 0 ? 'eatApple' : 'drink');
-    }
+    const used = consumed ? consumeSound(consumed.group, consumed.num) : null;
+    if (used) playUiSound(used);
 
     const packet = ConsumeItemRequestPacket.createPacket();
     packet.ItemSlot = slot;
@@ -2748,7 +2752,7 @@ export const Store = new (class _Store {
       this.consumeBlockedUntil = 0;
       this.syncPlayerAppearance();
     });
-    playUiSound('jewel');
+    playUiSound(upgradedItemSound(item.group, item.num));
   }
 
   /**

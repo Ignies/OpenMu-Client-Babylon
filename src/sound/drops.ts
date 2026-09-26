@@ -35,6 +35,10 @@ import { playSfx, type SfxPosition } from './listener';
 /** A drop landing is its own category (`sound/buses.ts`). */
 const BUS: SoundBus = 'drops';
 
+/** `INDEX_COMPILED_CELE` / `INDEX_COMPILED_SOUL`: 12/30 and 12/31. */
+const BUNDLE_GROUP = 12;
+const BUNDLED_JEWELS: readonly number[] = [30, 31];
+
 /** What `logic.ts` knows about a drop when the packet lands. */
 export type DropSoundInfo = {
   isMoney: boolean;
@@ -50,6 +54,11 @@ export type DropSoundInfo = {
 /** The key a drop lands with, whatever the filter then decides. */
 export function dropSound(drop: DropSoundInfo): Sounds {
   if (drop.isMoney || !drop.item) return UI_SOUND_KEYS.dropMoney;
+  // The bundles ring when picked up, not when they land (ZzzObject.cpp:6001).
+  const { group, num } = drop.item;
+  if (group === BUNDLE_GROUP && BUNDLED_JEWELS.includes(num)) {
+    return UI_SOUND_KEYS.dropItem;
+  }
   const kind = pickupSound(drop.item);
   return kind === 'getItem' ? UI_SOUND_KEYS.dropItem : UI_SOUND_KEYS[kind];
 }

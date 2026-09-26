@@ -822,7 +822,6 @@ EventBus.on('QuestCompletionResponse', packet => {
       t('quest.completedNamed', { subject: questSubject(key) }),
       'info'
     );
-    playUiSound('levelUp');
   } else {
     Store.addNotification(t(MSG_NOT_FULFILLED), 'error');
   }

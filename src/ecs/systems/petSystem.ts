@@ -31,6 +31,7 @@ import { FOOT_THUNDER_FRAMES, MODEL, RGBS, TEX } from '../../effects/recipes';
 import { Store } from '../../store';
 import { PlayerAction } from '../../common/objects/enum';
 import { playUiSound } from '../../sound/ui';
+import { playSfx } from '../../sound/listener';
 import type { Entity, ISystemFactory, Item } from '../world';
 
 /**
@@ -166,6 +167,10 @@ const RAVEN_PERCH_SIDE = 0.25;
 /** `o->Angle[2] -= 120` while perched. */
 const RAVEN_PERCH_YAW = -120 * (Math.PI / 180);
 
+/** CSPetSystem.cpp:602-603: 1/6000 per 25 fps tick, drawn as an exponential wait. */
+const RAVEN_SHOUT_MEAN_SECONDS = 6000 / TICKS_PER_SECOND;
+const nextRavenShout = () => -Math.log(1 - Math.random()) * RAVEN_SHOUT_MEAN_SECONDS;
+
 /**
  * Fenrir glow cadence. The original re-creates its sprites and lightning
  * every render frame and spawns two bolts each time (ZzzObject.cpp:855-899);
@@ -292,6 +297,7 @@ export const PetSystem: ISystemFactory = world => {
   // map and the pet only comes back on a re-equip.
   actors.onEntityRemoved.subscribe(actor => {
     glowClocks.delete(actor);
+    ravenShoutIn.delete(actor);
     const state = actor.petActor;
     (state.kind === 'raven' ? spawnedRaven : spawned).delete(state.owner);
   });
@@ -497,6 +503,19 @@ export const PetSystem: ISystemFactory = world => {
       state.dir.y < -12 ? RAVEN_ACTION_FLYING : RAVEN_ACTION_FLY,
       true
     );
+  }
+
+  /** Seconds until each raven's next shout. */
+  const ravenShoutIn = new Map<Entity, number>();
+
+  function ravenShout(actor: Entity, dt: number) {
+    const left = (ravenShoutIn.get(actor) ?? nextRavenShout()) - dt;
+    if (left > 0) {
+      ravenShoutIn.set(actor, left);
+      return;
+    }
+    ravenShoutIn.set(actor, nextRavenShout());
+    playSfx('Sound/DSpirit_Shout', actor.transform!.pos, { bus: 'combat', channels: 1 });
   }
 
   /** PET_STAND (:556-562): perched beside the shoulder, facing 120° off. */
@@ -1113,6 +1132,7 @@ export const PetSystem: ISystemFactory = world => {
           actor.modelObject?.setAlpha(1);
           if (inSafeZone) perchRaven(actor);
           else updateRaven(actor, dt);
+          ravenShout(actor, dt);
           continue;
         }
 

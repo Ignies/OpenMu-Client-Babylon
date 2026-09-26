@@ -22,8 +22,8 @@ import { listenerHero, listenerWorld } from './listener';
 /** The hero's own stride, its own category (`sound/buses.ts`). */
 const BUS: SoundBus = 'steps';
 
-/** Clip frames at which the left / right foot lands. */
-const FOOT_DOWN_FRAMES: readonly [number, number] = [1.0, 9.0];
+/** `o->AnimationFrame` (BMD keys) at which each foot lands (ZzzCharacter.cpp:6241-6249). */
+export const FOOT_DOWN_FRAMES: readonly [number, number] = [1.5, 4.5];
 
 /** Pitch jitter so a run does not sound like a loop. */
 const PITCH_MIN = 0.95;
@@ -67,9 +67,11 @@ const STEP_BY_WORLD: Partial<Record<ENUM_WORLD, readonly StepRule[]>> = {
   ...onWorlds(KALIMA_WORLDS, [SWIM] as readonly StepRule[]),
   [ENUM_WORLD.WD_67DOPPLEGANGER3]: [SWIM],
   // `else if (isIceCity) PlayBuffer(SOUND_HUMAN_WALK_SNOW)`, and the same
-  // for Santa Town: snow on every tile.
+  // for Santa Town: snow on every tile. `IsIceCity` counts Doppelganger 1
+  // (GM_Raklion.cpp:2294-2305).
   [ENUM_WORLD.WD_57ICECITY]: [SNOW],
   [ENUM_WORLD.WD_58ICECITY_BOSS]: [SNOW],
+  [ENUM_WORLD.WD_65DOPPLEGANGER1]: [SNOW],
   [ENUM_WORLD.WD_62SANTA_TOWN]: [SNOW],
 };
 
@@ -143,28 +145,13 @@ function isWalkClip(playerAction: PlayerAction): boolean {
 }
 
 function update(_map: ENUM_WORLD, _dt: number): void {
-  const hero = listenerHero();
-  if (!hero) return;
-
-  const modelObject = hero.modelObject;
+  const modelObject = listenerHero()?.modelObject;
   if (!modelObject) return;
 
-  const animationGroups = modelObject.gltf?.animationGroups;
-  if (!animationGroups) return;
-
-  const playerAction = hero.playerAnimation.action;
-
-  const animationGroup = animationGroups[playerAction];
-  if (!animationGroup) return;
-
-  const animatable = animationGroup.animatables[0];
-  if (!animatable) return;
-
-  const anim = animatable.getAnimations()[0];
-  if (!anim) return;
-
-  const currentFrame = anim.currentFrame;
-
+  // `o->CurrentAction`, the clip the body plays: a hero in a whole monster's
+  // body plays monster clips, and like the original (not MODEL_PLAYER) takes
+  // no steps.
+  const playerAction = modelObject.CurrentAction as PlayerAction;
   if (!isWalkClip(playerAction)) {
     foot0 = false;
     foot1 = false;
@@ -172,6 +159,7 @@ function update(_map: ENUM_WORLD, _dt: number): void {
     return;
   }
 
+  const currentFrame = modelObject.actionFrame();
   if (currentFrame < lastCurrentFrame) {
     foot0 = false;
     foot1 = false;

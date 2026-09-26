@@ -8,6 +8,7 @@ import { quests } from '../quests';
 import { LogOutPacket } from './packets/ClientToServerPackets';
 import { SessionResume } from './sessionResume';
 import { allowUnload } from './browserHotkeys';
+import { playUiSound } from '../sound/ui';
 
 /**
  * The three ways out of a session: `CSystemMenuMsgBox`'s Exit Game, Select
@@ -194,5 +195,6 @@ export function openSystemMenu(): boolean {
   runInAction(() => {
     Store.optionsEnabled = true;
   });
+  playUiSound('click'); // NewUIHotKey.cpp:125
   return true;
 }
