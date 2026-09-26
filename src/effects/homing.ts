@@ -73,8 +73,6 @@ export interface HomingOptions {
   decay?: number;
   /** `subtract` is RENDER_TYPE_ALPHA_BLEND_MINUS (sub 16): black streaks and stamps with the sheets as coverage. */
   blend?: EffectBlend;
-  /** `subtract`: multiplies the coverage; above 1 the sheet saturates to black (the shader clamps). Default 1. */
-  cover?: number;
   /** The card each live streak stamps on the centre: sheet, edge in tiles at Scale 1, and the Scale roll. */
   stamp?: { texture: string; w: number; h: number; scale: readonly [number, number] };
   /** Stops new streaks early (the target left). */
@@ -190,7 +188,7 @@ function putColour(b: Batch, q: number, c: RGB, k: number, dark: boolean, cover:
   const r = dark ? 0 : c[0] * k;
   const g = dark ? 0 : c[1] * k;
   const bl = dark ? 0 : c[2] * k;
-  const a = dark ? luma(c) * k * cover : 1;
+  const a = dark ? Math.min(1, luma(c) * k * cover) : 1;
   for (let v = 0; v < 4; v++) {
     b.colors[o + v * 4] = r;
     b.colors[o + v * 4 + 1] = g;
@@ -230,7 +228,7 @@ function clearQuads(b: Batch, from: number, to: number): void {
 
 function spawn(scene: Scene, _at: Vector3, opts: HomingOptions): EffectHandle {
   const dark = opts.blend === 'subtract';
-  const cover = dark ? darkCardGain(scene) * (opts.cover ?? 1) : 1;
+  const cover = dark ? darkCardGain(scene) : 1;
   const decay = opts.decay ?? 1;
   const cap = Math.min(MAX_STREAKS, Math.ceil(opts.perTick) * (opts.life + 1));
   // U runs tail (0) to head (1), the joint sheet's `(NumTails - j) / (MaxTails - 1)`.

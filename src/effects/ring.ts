@@ -46,8 +46,6 @@ export interface RingOptions {
   spinFrom?: number;
   /** `subtract` is EnableAlphaBlendMinus: black with the sheet as coverage, `luma(colour)` its strength. */
   blend?: 'additive' | 'alpha' | 'subtract';
-  /** `subtract`: the coverage the sheet is multiplied by, above 1 saturating it (default `luma(colour) x darkCardGain`, at most 1). */
-  cover?: number;
   fadeTail?: number;
   /**
    * The original's `Alpha` / `Luminosity` over the life (0..1 progress), replacing `fadeTail`. It scales
@@ -117,7 +115,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const alphaAt = opts.alphaAt;
   const cap = Math.min(maxScale, opts.cap ?? maxScale);
   const dark = blend === 'subtract';
-  const cover = dark ? (opts.cover ?? Math.min(1, luma(colour) * darkCardGain(_scene))) : 0;
+  const cover = dark ? Math.min(1, luma(colour) * darkCardGain(_scene)) : 0;
   const lit: [number, number, number] = [colour[0], colour[1], colour[2]];
   let x = at.x;
   let z = at.z;

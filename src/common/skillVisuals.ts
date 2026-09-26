@@ -5,7 +5,7 @@ import { lighting } from '../lighting';
 import { combat } from '../combat';
 import { weather } from '../weather';
 import { effects, type EffectHandle } from '../effects';
-import { boneLocalPos, bonePos, darkCardGain, delay, effectTexture, entityGone, entityPos, entityYaw, fadeOut, followEntity, fxNow, luma, scaleRGB, type ParticleRecipe, type PointSource, type RGB } from '../effects/core';
+import { boneLocalPos, bonePos, delay, effectTexture, entityGone, entityPos, entityYaw, fadeOut, followEntity, fxNow, scaleRGB, type ParticleRecipe, type PointSource, type RGB } from '../effects/core';
 import type { SpriteOptions } from '../effects/sprite';
 import type { ShroudOptions } from '../effects/shroud';
 import type { SpiritSwarmOptions, SwarmSpirit } from '../effects/spiritSwarm';
@@ -1550,13 +1550,6 @@ const sparkAfterglow: Step = (_at, c) =>
  */
 const CURSE_DELAY = ticks(14);
 
-/**
- * EnableAlphaBlendMinus takes the sheet off the frame (`dst - src`); a dark card here covers it
- * (`dst x (1 - a)`), which only matches over white. Over ground near 0.4 the subtraction blacks out
- * what coverage leaves at 60%, so the Blind layers cover 1 / 0.4 of their light.
- */
-const MINUS_OVER_GROUND = 2.5;
-
 /** Degrees a tick -> radians a second. */
 const degPerTick = (d: number): number => (d * 25 * Math.PI) / 180;
 
@@ -1725,10 +1718,9 @@ const aliceCurse = (k: AliceCurse): Step => (_at, c) => {
   const target = c.target;
   // The original never sends these without a selection (castTargets.ts), so a cast on oneself draws nothing.
   if (!target || target === c.caster || entityGone(target) || entityGone(c.caster)) return;
-  const gain = k.dark ? MINUS_OVER_GROUND * darkCardGain(c.scene) : 1;
   const feet = entityPos(c.caster, 0, new Vector3());
   const yawDeg = (entityYaw(c.caster) * 180) / Math.PI;
-  ring({ texture: TEX.magicGround2, colour: k.circle, seconds: ticks(20), scale: 3, growFrom: 0, grow: 1, spinFrom: -yawDeg, blend: k.dark ? 'subtract' : 'additive', cover: k.dark ? luma(k.circle) * gain : undefined, alphaAt: p => fadeOut(p, 0.25) })(feet, c);
+  ring({ texture: TEX.magicGround2, colour: k.circle, seconds: ticks(20), scale: 3, growFrom: 0, grow: 1, spinFrom: -yawDeg, blend: k.dark ? 'subtract' : 'additive', alphaAt: p => fadeOut(p, 0.25) })(feet, c);
 
   const centre = holding(target, 1);
   const at = centre(new Vector3());
@@ -1743,11 +1735,9 @@ const aliceCurse = (k: AliceCurse): Step => (_at, c) => {
     const seconds = ticks(b.life);
     // 0.035 a tick over the life, and 8 deg a tick.
     const grow = (b.scale + 0.035 * b.life) / b.scale;
-    // A model's coverage is `luma(colour) x darkCardGain`, so the subtraction's extra reach rides on the colour.
-    effects.spawn('model', c.scene, at, { model: b.model, seconds, scale: b.scale, grow, spin: b.spin * degPerTick(8), colour: k.dark ? scaleRGB(tint, MINUS_OVER_GROUND) : tint, alpha: b.peak, fadeIn: 0.5, fadeTail: 0.5, follow: centre, until: gone, blend, maxCover: k.dark ? gain : 1 });
+    effects.spawn('model', c.scene, at, { model: b.model, seconds, scale: b.scale, grow, spin: b.spin * degPerTick(8), colour: tint, alpha: b.peak, fadeIn: 0.5, fadeTail: 0.5, follow: centre, until: gone, blend, maxCover: 1 });
     const glow = (texture: string, colour: RGB, scale: number, extra: Partial<SpriteOptions>): void => {
-      const light = scaleRGB(colour, b.peak);
-      effects.spawn('sprite', c.scene, at, { texture, colour: light, cover: k.dark ? luma(light) * gain : undefined, size: (64 * scale) / 100, seconds, follow: centre, until: gone, fadeIn: 0.5, fadeTail: 0.5, blend, ...extra });
+      effects.spawn('sprite', c.scene, at, { texture, colour: scaleRGB(colour, b.peak), size: (64 * scale) / 100, seconds, follow: centre, until: gone, fadeIn: 0.5, fadeTail: 0.5, blend, ...extra });
     };
     glow(TEX.flare, k.flare, 5, { count: 2 });
     glow(TEX.shiny5, k.shiny, 2, { spin: 3.77 });
@@ -1767,7 +1757,6 @@ const aliceCurse = (k: AliceCurse): Step => (_at, c) => {
     colour: k.streak,
     decay: 1 / 1.08,
     blend,
-    cover: k.dark ? MINUS_OVER_GROUND : 1,
     stamp: { texture: TEX.shiny2, w: cm(32), h: cm(64), scale: [0.8, 1.4] },
     until: gone,
   });
