@@ -156,7 +156,7 @@ export const MONSTER_GLOWS: Partial<Record<number, MonsterGlow | readonly Monste
   71: renderEye(26, 27, 2),
   // 45 Bahamut / 51 Great Bahamut (MODEL_BAHAMUT): the lure on bone 9, :11028.
   45: renderLight([9], [{ tex: 'core', scale: 4 }, { tex: 'bar', scale: 3 }], [0, 0, 0.05]),
-  // 46 Vepar / 80 Golden Vepar (MODEL_VEPAR): one in each hand, :11009.
+  // 46 Vepar / 81 Golden Vepar (MODEL_VEPAR): one in each hand, :11009.
   46: renderLight(
     [30, 39],
     [
@@ -166,7 +166,7 @@ export const MONSTER_GLOWS: Partial<Record<number, MonsterGlow | readonly Monste
     ],
     [0, 0, -0.05]
   ),
-  // 48 Lizard King / 81 Golden Lizard King (MODEL_LIZARD): four spikes,
+  // 48 Lizard King / 80 Golden Lizard King (MODEL_LIZARD): four spikes,
   // :11017, and the eyes on 42 / 43, :11227.
   48: [
     renderLight([26, 31, 36, 41], [{ tex: 'core', scale: 2 }, { tex: 'bar', scale: 1 }]),
@@ -219,8 +219,8 @@ export const MONSTER_GLOWS: Partial<Record<number, MonsterGlow | readonly Monste
 // The golden line shares the model, and the original shares the render case
 // with it: MODEL_VEPAR and MODEL_LIZARD are the same `o->Type` either way.
 MONSTER_GLOWS[51] = MONSTER_GLOWS[45];
-MONSTER_GLOWS[80] = MONSTER_GLOWS[46];
-MONSTER_GLOWS[81] = MONSTER_GLOWS[48];
+MONSTER_GLOWS[80] = MONSTER_GLOWS[48];
+MONSTER_GLOWS[81] = MONSTER_GLOWS[46];
 MONSTER_GLOWS[74] = MONSTER_GLOWS[71];
 MONSTER_GLOWS[301] = MONSTER_GLOWS[71];
 MONSTER_GLOWS[496] = MONSTER_GLOWS[71];
