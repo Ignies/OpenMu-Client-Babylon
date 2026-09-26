@@ -186,10 +186,16 @@ export class WingObject extends ModelObject {
   /** The absolute BodyLight of each pass; a `tint` rides the wearer's light. */
   #updatePasses(timeMs: number): void {
     const worn = this.rootObject.Light;
+    // The wearer's aura (Ultra's outlaw) recolours the glow passes to its own.
+    const aura = this.rootObject.BodyShine.aura;
+    const auraOn = !!aura && aura.x + aura.y + aura.z > 0;
     for (const { pass, light } of this.#passes) {
       const [r, g, b] = pass.light?.(timeMs) ?? [1, 1, 1];
       if (pass.kind === 'tint') light.set(worn.x * r, worn.y * g, worn.z * b);
-      else light.set(r, g, b);
+      else if (auraOn) {
+        const l = Math.max(r, g, b);
+        light.set(aura!.x * l, aura!.y * l, aura!.z * l);
+      } else light.set(r, g, b);
       if (pass.u) this.UvScroll.u = pass.u(timeMs);
     }
   }

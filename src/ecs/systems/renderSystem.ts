@@ -6,6 +6,11 @@ import { ENUM_WORLD } from '../../common/types';
 import { weather } from '../../weather';
 import { debuffBodyLight, debuffBrightBody } from '../../common/debuffBody';
 import { outlawBodyLight } from '../../common/nameTags';
+import {
+  applyOutlawLook,
+  OUTLAW_ULTRA_LIGHT,
+  outlawUltraActive,
+} from '../../common/outlawLook';
 
 const v3Temp = Vector3.Zero();
 const v3Temp2 = Vector3.Zero();
@@ -106,9 +111,12 @@ export const RenderSystem: ISystemFactory = world => {
         // A Freeze or Cold body is drawn at its own BodyLight instead of the
         // terrain's, and so is an outlaw's; the debuff is the later write.
         const player = !!entity.playerAnimation;
+        const outlawLight = player ? outlawBodyLight(entity.heroState) : null;
+        const ultraOutlaw = outlawUltraActive(outlawLight !== null);
+        applyOutlawLook(modelObject, ultraOutlaw, world.gameTime.TotalGameTime.TotalSeconds * 1000);
         const debuffLight =
           debuffBodyLight(entity.buffs, player) ??
-          (player ? outlawBodyLight(entity.heroState) : null);
+          (ultraOutlaw ? OUTLAW_ULTRA_LIGHT : outlawLight);
         modelObject.setBrightBody(debuffBrightBody(entity.buffs, player));
         if (debuffLight) {
           modelObject.Light.set(debuffLight[0], debuffLight[1], debuffLight[2]);
