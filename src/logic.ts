@@ -229,6 +229,7 @@ import {
 import { Social } from './social';
 import { Commands } from './commands';
 import { heroStateMessage } from './common/nameTags';
+import { holdForWarpScope } from './common/warpScopeHold';
 import { events } from './events';
 import { Economy, type ShopStock } from './economy';
 import { GmPanel } from './gmPanel';
@@ -897,6 +898,7 @@ EventBus.on('warpCompleted', ({ map }) => {
   if (awaitingClientReady && !Store.isOffline && Store.uiState === UIState.World) {
     awaitingClientReady = false;
     Store.sendToGS(ClientReadyAfterMapChangePacket.createPacket().buffer);
+    holdForWarpScope();
   }
 
   const world = Store.world;

@@ -2,8 +2,12 @@ import type { ISystemFactory } from '../world';
 import { Store, UIState } from '../../store';
 import { EventBus } from '../../libs/eventBus';
 import { isStaged, sceneHeld } from '../../common/sceneGate';
+import { packRepaintsPending } from '../../common/texturePacks';
 
 const READY_GRACE_SECONDS = 3;
+
+/** How long the texture pack's images may keep the screen up once the rest is ready. */
+const PACK_WAIT_SECONDS = 8;
 
 const MAX_WAIT_SECONDS = 30;
 
@@ -121,8 +125,13 @@ export const SceneReadySystem: ISystemFactory = world => {
 
       let loaded = 0;
       let expected = 0;
+      // Everything starts 'hidden' until its first distance check, and scope
+      // packets keep adding more: judging before that check counted only the
+      // few objects already swept, and the rest popped in on the open scene.
+      let unswept = 0;
 
       for (const entity of query) {
+        if (!entity.visibility.swept && entity.transform) unswept++;
         if (entity.visibility.state === 'hidden') continue;
 
         expected++;
@@ -134,7 +143,7 @@ export const SceneReadySystem: ISystemFactory = world => {
 
       report(MAP_SHARE + MODEL_SHARE * modelRatio);
 
-      if (loaded < expected) return;
+      if (unswept > 0 || loaded < expected) return;
 
       if (waited < MIN_SHOW_SECONDS) return;
 
@@ -148,6 +157,10 @@ export const SceneReadySystem: ISystemFactory = world => {
       }
 
       readyWait += deltaTime;
+
+      // A selected texture pack repaints each texture when its image lands,
+      // after the model already counts as loaded.
+      if (packRepaintsPending() > 0 && readyWait <= PACK_WAIT_SECONDS) return;
 
       if (world.scene.isReady() || readyWait > READY_GRACE_SECONDS) {
         finish();

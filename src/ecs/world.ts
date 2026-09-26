@@ -249,6 +249,8 @@ export type Entity = Partial<{
   visibility: {
     state: 'visible' | 'nearby' | 'hidden';
     lastChecked: number;
+    /** Set by the first distance check; the loading screen waits for it. */
+    swept?: boolean;
   };
   screenPosition: {
     x: number;
