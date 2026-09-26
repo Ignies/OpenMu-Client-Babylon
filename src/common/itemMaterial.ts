@@ -700,11 +700,11 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
       // The art in greyscale, contrast up and brightness down: near black,
       // with the texture's detail still there. The red is drawn over it.
       float grey = clamp((texLum - 0.5) * 1.8 + 0.5, 0.0, 1.0);
-      vec3 dark = vec3(grey * 0.13);
+      vec3 dark = vec3(grey * 0.08);
       if ((fx & ${FX_AURA_BONE}) != 0) {
         ${color}.rgb = dark + itemGlow * (0.35 + 1.4 * texLum);
       } else {
-        ${color}.rgb = dark + itemGlow * (1.5 * vein + 2.6 * edge);
+        ${color}.rgb = dark + itemGlow * (1.2 * vein + 2.2 * edge);
       }
     } else if (itemGlow.r + itemGlow.g + itemGlow.b > 0.0) {
       float rim = 1.0 - clamp(dot(normalize(viewDirectionW), normalW), 0.0, 1.0);
