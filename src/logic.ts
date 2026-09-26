@@ -274,7 +274,7 @@ import {
 } from './ecs/systems/teleportSystem';
 import { getBaseClass, BaseClass } from './common/characterStats';
 import { SKILL_TO_EFFECT } from './common/magicEffects';
-import { playAreaSkillVisual, playBowShotVisual, playChainLightningHop, playTargetedSkillVisual, setBuffVisual } from './common/skillVisuals';
+import { playAreaSkillVisual, playBowShotVisual, playChainLightningHop, playSoulBarrierShell, playTargetedSkillVisual, setBuffVisual } from './common/skillVisuals';
 import { monsterModelTypeOf, playerPlaySpeed } from './common/playSpeed';
 import { TRAP_MODEL_TABLE } from './common/npcs/trapNpc';
 import {
@@ -2523,6 +2523,10 @@ EventBus.on('ObjectAnimation', packet => {
   // often stale, direction.
   if (obj.localPlayer) return;
 
+  // AttackPlayer: the last object whose attack animation arrived (ReceiveAction AT_ATTACK1/2, WSclient.cpp:3596-3608).
+  const attackAction = obj.monsterAnimation ? MonsterActionType.Attack1 : ServerPlayerActionType.Attack1;
+  if (clientActionToPlay === attackAction || clientActionToPlay === attackAction + 1) lastAttacker = obj;
+
   if (obj.monsterAnimation) {
     if (isDeadMonster(obj)) return;
     const monsterAction = clientActionToPlay as unknown as MonsterActionType;
@@ -2706,6 +2710,7 @@ EventBus.on('SkillAnimation', packet => {
   const caster = world.getByNetId(casterId);
   if (!caster) return;
   const target = world.getByNetId(targetId) ?? null;
+  if (!caster.localPlayer) lastAttacker = caster; // AttackPlayer (ReceiveMagic, WSclient.cpp:4161)
 
   if (isTeleportSkill(p.SkillId)) {
     playTeleportAnimation(world, p.SkillId, caster, target);
@@ -2990,6 +2995,9 @@ EventBus.on('RageAttackRangeResponse', packet => {
   );
 });
 
+/** The original's `AttackPlayer`: who last sent an attack or skill animation, for Soul Barrier's hit shell. */
+let lastAttacker: Entity | null = null;
+
 function applyObjectHit(p: ObjectHitView) {
   const world = Store.world;
   if (!world) return;
@@ -2997,6 +3005,7 @@ function applyObjectHit(p: ObjectHitView) {
   const maskedId = p.ObjectId & 0x7fff;
   const obj = world.getByNetId(maskedId);
   if (!obj) return;
+  if (obj.localPlayer) playSoulBarrierShell(world.scene, obj, lastAttacker);
 
   const totalDamage = p.HealthDamage + p.ShieldDamage;
   combat.observeRageHit(p.IsRageFighterStreakHit, p.IsRageFighterStreakFinalHit);

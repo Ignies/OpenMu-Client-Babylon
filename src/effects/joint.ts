@@ -219,6 +219,8 @@ export interface JointOptions {
   textureScroll?: number;
   /** Ends it early when true (the wearer left, the charge released). */
   until?: () => boolean;
+  /** Draw over everything: `DisableDepthTest` around the joint (JOINT_HEALING sub8, ZzzEffectJoint.cpp:7021-7024). */
+  onTop?: boolean;
   /**
    * Trail: the body the ribbon belongs to. Every tick the whole history is
    * shifted by this point's displacement before the head is sampled - the
@@ -431,6 +433,7 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
     std.transparencyMode = Material.MATERIAL_ALPHABLEND;
     std.backFaceCulling = false;
     std.disableDepthWrite = true;
+    if (opts.onTop) std.depthFunction = Constants.ALWAYS;
     std.fogEnabled = false;
     std.blockDirtyMechanism = false;
     // Hold the line unseen until the sheet is in - a texture-less Standard

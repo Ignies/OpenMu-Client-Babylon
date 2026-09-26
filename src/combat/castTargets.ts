@@ -52,6 +52,7 @@ const SELF_ONLY: ReadonlySet<number> = new Set([
   267, 573, // Increase Health, Str
   268, 569, 572, // Increase Block, Str, Mastery
   205, 206, 207, 208, 209, // the Halloween event skills
+  233, 380, 383, // Expansion of Wizardry, Str, Mastery (ClassAttack.cpp:1291-1300)
 ]);
 
 /**

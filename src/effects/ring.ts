@@ -50,6 +50,8 @@ export interface RingOptions {
   /** `subtract` is EnableAlphaBlendMinus: black with the sheet as coverage, `luma(colour)` its strength. */
   blend?: 'additive' | 'alpha' | 'subtract';
   fadeTail?: number;
+  /** Visibility ramps up from 0 over this fraction of life (default 0: born full). */
+  fadeIn?: number;
   /**
    * The original's `Alpha` / `Luminosity` over the life (0..1 progress), replacing `fadeTail`. It scales
    * the light (an additive decal is drawn (ONE, ONE), which drops the material alpha) or the coverage.
@@ -125,6 +127,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const spin = opts.spin ?? 0;
   const spinFrom = opts.spinFrom ?? 0;
   const tail = opts.fadeTail ?? 0.35;
+  const fadeIn = opts.fadeIn ?? 0;
   const follow = opts.follow;
   const until = opts.until;
   const alphaAt = opts.alphaAt;
@@ -151,8 +154,8 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
         z = followTmp.z;
       }
       const s = scale * lerp(growFrom, grow, p);
-      // One level over the life: the `alphaAt` keys or the tail fade, times the per-tick `decay`.
-      const level = (alphaAt ? alphaAt(p) : fadeOut(p, tail)) * (decay !== 1 ? decay ** (t / TICK) : 1);
+      // One level over the life: the `alphaAt` keys or the tail fade, times the fade-in and the per-tick `decay`.
+      const level = (alphaAt ? alphaAt(p) : fadeOut(p, tail)) * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1) * (decay !== 1 ? decay ** (t / TICK) : 1);
       let light: readonly [number, number, number] = colour;
       if (brightness) {
         const k = brightness(t);

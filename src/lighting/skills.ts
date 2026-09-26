@@ -80,6 +80,11 @@ export type SkillLight = {
    */
   readonly land?: LightRecipe;
   /**
+   * `hold`: a light the effect keeps up for as long as it runs and then
+   * stops - a charge held for an unknown time. Any tier that uses the row.
+   */
+  readonly hold?: LightRecipe;
+  /**
    * `arrow`: what this skill's arrows carry while they fly, overriding the
    * launcher-model row in `ARROW_LIGHTS`. For the skills this client draws
    * with a tinted arrow where the original fires the plain one.
@@ -372,6 +377,41 @@ const ICE_STORM_LIGHT: SkillLight = {
   enhanced: { spots: { storm: effectLight([0.45, 0.7, 1], 2, 50 * TICK_SECONDS, { release: 20 * TICK_SECONDS }) } },
 };
 
+/** Soul Barrier's enhanced light: the knot's blue, ramping in to the seal 14 ticks after the packet. */
+const SOUL_BARRIER_LIGHT: Omit<SkillLight, 'enhanced'> = {
+  impact: effectLight([0.35, 0.7, 1], 1, 1.3, { attack: 0.56, release: 0.6 }),
+};
+
+/** Expansion of Wizardry's: the hand runes' blue, and the violet decals gathering from 3 tiles in over the 45 ticks. */
+const SWELL_LIGHT: Omit<SkillLight, 'enhanced'> = {
+  cast: effectLight([0.2, 0.2, 0.9], 1, 1.6, { release: 0.6 }),
+  impact: effectLight([0.55, 0.3, 1], 2.5, 1.8, { attack: 0.2, release: 0.9 }),
+};
+
+const EARTH_PRISON_LIGHT: LightRecipe = { color: [0.79, 0.72, 0.49], range: 2, seconds: 1.6, release: 0.3 };
+
+/** Nova's graded blue: the charge motes and the burst heads, held off lavender on the graded buffer. */
+const NOVA_GRADED: readonly [number, number, number] = [0.2, 0.35, 1];
+
+/** The charge: the body lit in the motes' blue while it is held, swelling over its first second. */
+const NOVA_CHARGE_LIGHT: Omit<SkillLight, 'enhanced'> = {
+  hold: effectLight(NOVA_GRADED, 1.5, Infinity, { attack: 1, release: 0.4 }),
+};
+
+/**
+ * The release: the burst's white-blue core over the caster, peaking on the burst 14 ticks after the packet
+ * and reaching as far as the first wave's cards are bright; on Ultra four heads carry the wave out.
+ */
+const NOVA_LIGHT: Omit<SkillLight, 'enhanced'> = {
+  cast: effectLight(NOVA_GRADED, 5, 1.4, { attack: 0.56, release: 0.7 }),
+  trail: effectLight(NOVA_GRADED, 1.5, 0.8, { release: 0.5 }),
+};
+
+/** Earth Prison's: the stones' dust tint over the ring they stand in. */
+const EARTH_PRISON_ENHANCED: Omit<SkillLight, 'enhanced'> = {
+  impact: effectLight([0.79, 0.72, 0.49], 1.3, 1.6, { attack: 0.1, release: 0.5 }),
+};
+
 /** Keyed by skill number (common/skillsDatabase.ts). */
 export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Poison: MODEL_POISON's `(0.3, 1, 0.6) x Lum` range 2 for its 40 ticks, laid by the effect at the release
@@ -480,8 +520,12 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   39: ICE_STORM_LIGHT,
   391: ICE_STORM_LIGHT,
   393: ICE_STORM_LIGHT,
-  // Nova: the original lights nothing; a fire ring of range 6 is ours.
-  40: { area: flame(6, 0.8, { gain: 1.8, floorGain: 1.4, release: 0.6 }) },
+  // Nova (392 / 395 its master rows): the original lights nothing (MODEL_CIRCLE sub1, ZzzCharacter.cpp:4435-4439).
+  // The rows keep the Wizardry cast flash off; Enhanced lights the burst, 58 the charge.
+  40: { enhanced: NOVA_LIGHT },
+  392: { enhanced: NOVA_LIGHT },
+  395: { enhanced: NOVA_LIGHT },
+  58: { enhanced: NOVA_CHARGE_LIGHT },
   // Twisting Slash: each MODEL_SKILL_WHEEL2 copy lights Luminosity x 0.3 grey, range 3, under itself
   // every tick of its 25 (MoveHandlers.cpp:2808-2812); Luminosity is 0.7-1, fading over the last 5 ticks.
   41: {
@@ -667,6 +711,20 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   323: IRON_DEFENSE_LIGHT,
   521: IRON_DEFENSE_LIGHT,
   524: IRON_DEFENSE_LIGHT,
+  // Soul Barrier (403 / 404 / 406 its master rows): no terrain light in the original; Enhanced only.
+  16: { enhanced: SOUL_BARRIER_LIGHT },
+  403: { enhanced: SOUL_BARRIER_LIGHT },
+  404: { enhanced: SOUL_BARRIER_LIGHT },
+  406: { enhanced: SOUL_BARRIER_LIGHT },
+  // Expansion of Wizardry (380 / 383 its master rows): no terrain light in the original; Enhanced only. The
+  // rows also keep the stale Wizardry type's cast flash off 380 / 383.
+  233: { enhanced: SWELL_LIGHT },
+  380: { enhanced: SWELL_LIGHT },
+  383: { enhanced: SWELL_LIGHT },
+  // Earth Prison (497 its Strengthener): no source; the ground stones' own AddTerrainLight, (0.79, 0.72, 0.49)
+  // range 2 for their 40 ticks (MoveHandlers.cpp:5709-5710).
+  495: { impact: EARTH_PRISON_LIGHT, enhanced: EARTH_PRISON_ENHANCED },
+  497: { impact: EARTH_PRISON_LIGHT, enhanced: EARTH_PRISON_ENHANCED },
 };
 
 /**
@@ -1009,6 +1067,25 @@ export function lightSkillStrike(scene: Scene, skill: number, anchor: Parameters
   const recipe = lightRow(skill)?.strike;
 
   return recipe ? attach(scene, recipe, anchor) : null;
+}
+
+/**
+ * Command: a light the effect holds up and `stop()`s itself - a charge.
+ * Null when the row, as the current tier uses it, has no `hold`.
+ */
+export function lightSkillHold(
+  scene: Scene,
+  skill: number,
+  follow: (out: { x: number; y: number; z: number }) => void
+): LightSource | null {
+  const recipe = lightRow(skill)?.hold;
+
+  if (!recipe) return null;
+
+  const position = { x: 0, y: 0, z: 0 };
+  follow(position);
+
+  return attach(scene, recipe, { position, follow });
 }
 
 /**

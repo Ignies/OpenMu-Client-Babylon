@@ -12,7 +12,7 @@ import {
   type LightAnchor,
   type LightRecipe,
 } from './lightSource';
-import { lightAreaSkill, lightArrow, lightSkillAt, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillLand, lightSkillSpot, lightSkillStrike, lightSkillTrail, lightTargetedSkill } from './skills';
+import { lightAreaSkill, lightArrow, lightSkillAt, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillHold, lightSkillLand, lightSkillSpot, lightSkillStrike, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
@@ -197,6 +197,15 @@ class Lighting {
    */
   skillStrike(scene: Scene, skill: number, anchor: LightAnchor): LightSource | null {
     return lightSkillStrike(scene, skill, anchor);
+  }
+
+  /** Light a held effect - a charge - until the caller stops it. Null when the row has none. */
+  skillHold(
+    scene: Scene,
+    skill: number,
+    follow: (out: { x: number; y: number; z: number }) => void
+  ): LightSource | null {
+    return lightSkillHold(scene, skill, follow);
   }
 
   /**

@@ -31,11 +31,15 @@ export const TELEPORT_ALLY = 15;
 const STARFALL = 46;
 
 /**
- * Master skills the table types Physical that the original still casts with SetPlayerMagic: the MG's Blast
- * Strengthener (SkillCast.cpp:525-531), Ice Strengthener and Ice Mastery (AT_SKILL_ICE_STR_MG goes through
- * UseSkillWizard -> SetPlayerMagic, ZzzInterface.cpp:1362-1386, SkillCast.cpp:503-514).
+ * Master skills the table types otherwise that the original still casts with their base's SetPlayerMagic: the MG's
+ * Blast Strengthener (SkillCast.cpp:525-531), Ice Strengthener and Ice Mastery (AT_SKILL_ICE_STR_MG goes through
+ * UseSkillWizard -> SetPlayerMagic, ZzzInterface.cpp:1362-1386, SkillCast.cpp:503-514), and Soul Barrier's
+ * Strengthener, Proficiency and Mastery, still under their pre-inheritance DirectHit type (OpenMU casts them as
+ * their base, SkillsInitializer.cs:1001-1025; ClassAttack.cpp:1153-1155).
  */
-const INHERITED_SPELLS: ReadonlySet<number> = new Set([484, 489, 491]); // Blast Str, Ice Str (MG), Ice Mastery
+const INHERITED_SPELLS: ReadonlySet<number> = new Set([484, 489, 491, 403, 404, 406]); // Blast Str, Ice Str (MG), Ice Mastery, Soul Barrier Str, Proficiency, Mastery
+/** Earth Prison and its Strengthener: Physical on OpenMU (SkillsInitializer.cs:539-541) with no clip in the original; a Grand Master casts them. */
+const WIZARD_PHYSICAL_SPELLS: ReadonlySet<number> = new Set([495, 497]);
 
 export function isTeleportSkill(num: number): boolean {
   return num === TELEPORT || num === TELEPORT_ALLY;
@@ -88,7 +92,7 @@ export function chooseSkillAction(
   if (SLASH_SKILLS.has(def.num) && pose.swordCount % 2 === 1) return PlayerAction.PLAYER_ATTACK_TWO_HAND_SWORD3;
   const dedicated = skillClip(def.num, ctx);
   if (dedicated !== null) return dedicated;
-  if (isSpell(def) || INHERITED_SPELLS.has(def.num)) return magicClip(ctx);
+  if (isSpell(def) || INHERITED_SPELLS.has(def.num) || WIZARD_PHYSICAL_SPELLS.has(def.num)) return magicClip(ctx);
   return chooseAttackAction(pose);
 }
 

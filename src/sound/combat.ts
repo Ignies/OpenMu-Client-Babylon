@@ -15,6 +15,7 @@ import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { playSfx, type SfxOptions, type SfxPosition } from './listener';
 import { masterBase } from '../common/skillAliases';
+import { SoundsManager } from '../libs/soundsManager';
 
 /**
  * Player combat and skill sounds, transcribed from the original client:
@@ -74,7 +75,7 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   9: 'Sound/sEvil', // Evil Spirit
   10: 'Sound/sHellFire', // Hellfire
   15: 'Sound/eTelekinesis', // Teleport Ally
-  16: 'Sound/eSoulBarrier', // Soul Barrier
+  // 16 Soul Barrier and its masters: none at the cast; the buff's arrival and the impact play it (common/skillVisuals.ts).
   18: 'Sound/sKnightDefense', // Defense (SOUND_SKILL_DEFENSE, WSclient.cpp:3612)
   19: 'Sound/sKnightSkill1', // Falling Slash
   20: 'Sound/sKnightSkill2', // Lunge
@@ -83,7 +84,6 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   23: 'Sound/sKnightSkill4', // Slash
   // 38 Decay (eBlastPoison_1) and 39 Ice Storm (eSuddenIce_1): none at the cast, the effect plays them at AttackTime 15
   // (ZzzCharacter.cpp:4449, :4475; common/skillVisuals.ts).
-  40: 'Sound/eHellFire2_2', // Nova
   44: 'Sound/sKnightSkill2', // Rush (ReceiveMagic's SOUND_SKILL_SWORD2; the row plays sCHaveyBlow in Battle Castle)
   46: 'Sound/battlecastle/sCFireArrow', // Deep Impact
   52: 'Sound/ePiercing', // Penetration
@@ -130,6 +130,8 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   470: 'Sound/Berserker', // Berserker Proficiency
   472: 'Sound/Berserker', // Berserker Mastery
   233: 'Sound/SwellofMagicPower', // Expansion of Wizardry
+  380: 'Sound/SwellofMagicPower', // Expansion of Wizardry Str (WSclient.cpp:4950-4964)
+  383: 'Sound/SwellofMagicPower', // Expansion of Wizardry Mastery
   234: 'Sound/recover', // Recovery
   236: 'Sound/flame_strike', // Flame Strike
   237: 'Sound/gigantic_storm', // Gigantic Storm
@@ -160,6 +162,8 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   356: 'Sound/eSwellLife', // Swell Life Str
   360: 'Sound/eSwellLife', // Swell Life Proficiency
   363: 'Sound/eSwellLife', // Swell Life Mastery
+  495: 'Sound/sDarkEarthQuake', // Earth Prison: no source; the earthshake whose stone ring it borrows
+  497: 'Sound/sDarkEarthQuake', // Earth Prison Strengthener
   // Master skills with the base skill's cast (SKILL_REPLACEMENTS, _enum.h:680-681).
   508: 'Sound/eFirebust', // Fire Burst Strengthener
   509: 'Sound/sKnightSkill1', // Force Wave Strengthener
@@ -284,6 +288,11 @@ const HEART_OPTS: SfxOptions = { bus: COMBAT_BUS, channels: 1 };
 export function playCombat(key: Sounds | null, at?: SfxPosition | null): void {
   if (!key) return;
   playSfx(key, at, key === 'Sound/pHeartBeat' ? HEART_OPTS : COMBAT_OPTS);
+}
+
+/** `StopBuffer(key, true)`: cut a combat sound that is still playing (Nova's charge at its burst). */
+export function stopCombat(key: Sounds): void {
+  SoundsManager.stopAmbientLoop(key);
 }
 
 /** Play a skill's cast sound at its caster; silent for unlisted skills. */

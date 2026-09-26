@@ -152,7 +152,7 @@ export const TEX = {
   ghost2: 'Effect/Ghosteffect02.OZJ',
   /** BITMAP_FIRECRACKER (Fire04.jpg): Add Critical's weapon helices (FLARE_FORCE sub5-7). */
   fire4: 'Effect/Fire04.OZJ',
-  /** BITMAP_2LINE_GHOST (Skill\2line_gost.jpg, the same image as this copy): Chaotic Diseier's ribbons. */
+  /** BITMAP_2LINE_GHOST (Skill\2line_gost.jpg, the same image as this copy): Chaotic Diseier's and Expansion of Wizardry's ribbons. */
   twoLineGhost: 'Effect/2line_gost.OZJ',
   /** BITMAP_EXPLOTION_MONO (explotion01mono.jpg): the grey 4x4 explosion sheet. */
   explosionMono: 'Effect/explotion01mono.OZJ',

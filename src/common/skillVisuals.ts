@@ -38,7 +38,6 @@ import {
   ICE_SHARD_SMOKE,
   ICE_SMOKE,
   MODEL,
-  NOVA_MOTES,
   POISON_SMOKE,
   RGBS,
   SHADE_MOTES,
@@ -73,7 +72,7 @@ import {
 } from '../effects/recipes';
 import { ItemsDatabase } from './itemsDatabase';
 import { PlayerAction } from './objects/enum';
-import { playCombat, playLandingSound, SKILL_SOUNDS } from '../sound/combat';
+import { playCombat, playLandingSound, SKILL_SOUNDS, stopCombat } from '../sound/combat';
 import type { Sounds } from '../sound/recipes';
 import { itemObjectAttribute } from './itemObjectAttribute';
 import { inHellas } from './locomotion';
@@ -90,6 +89,7 @@ import { TW_NOGROUND, TW_NOMOVE, TW_WATER } from './terrain/consts';
 import { DARK_LORD_MASTER_ALIASES } from './skillAliases';
 import { LEFT_HAND_BONE, RIGHT_HAND_BONE } from './weaponAttachment';
 import { GROUP_BOW, GROUP_SHIELD } from './weaponClass';
+import { novaStageOf } from '../combat/novaCharge';
 
 /**
  * Skill → visual recipe. The **consumer** of the effects layer
@@ -523,12 +523,6 @@ const multiShotVolley: Step = (_at, c) => {
   volley(MODEL.multishot2, cm(20), 2);
 };
 
-/** Expansion of Wizardry: MODEL_SWELL_OF_MAGICPOWER on the caster, Light (0.3,0.2,0.9). */
-const swellOfMagic: Step = atCaster((at, c) => {
-  effects.spawn('model', c.scene, at, { model: MODEL.magicPowerUp, seconds: ticks(40), scale: 1, colour: [0.3, 0.2, 0.9], fadeIn: 0.2, fadeTail: 0.3, yaw: entityYaw(c.caster) });
-  particles({ recipe: SOUL_MOTES, count: 24, height: 0.5 })(at, c);
-}, 0.05);
-
 // ---- travel ------------------------------------------------------------------
 
 export interface Travel extends Omit<ProjectileOptions, 'to' | 'onArrive' | 'from'> {
@@ -631,38 +625,6 @@ function spiralRibbons(n: number, colour: RGB, width: number, tails: number, sec
     }
   };
 }
-
-/** Nova's charge; see row 58. */
-const novaCharge: Step = (_at, c) => {
-  const hero = !!c.caster.localPlayer;
-  const done = hero ? () => !combat.novaCharging || entityGone(c.caster) : () => entityGone(c.caster);
-  const stage = hero ? () => 1 + combat.novaStage : () => 6;
-  effects.spawn('particles', c.scene, entityPos(c.caster, 0, new Vector3()), {
-    recipe: NOVA_MOTES,
-    rate: 10,
-    seconds: NOVA_MAX_SECONDS,
-    follow: followEntity(c.caster, 0.3),
-    height: 0.4,
-    until: done,
-    rateScale: stage,
-  });
-  // CreateForce: three JOINT_HEALING sub8 from a r=500 sphere onto the body, LT 17, re-cast as each set dies.
-  const force = () => {
-    if (done()) return;
-    const to = followEntity(c.caster, 0.9);
-    const centre = entityPos(c.caster, 0.9, new Vector3());
-    for (let i = 0; i < 3; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const e = Math.random() * 0.8;
-      const from = new Vector3(centre.x + Math.cos(a) * 5, centre.y + e * 3, centre.z + Math.sin(a) * 5);
-      effects.spawn('joint', c.scene, from, { to, colour: [0.3, 0.3, 1], seconds: ticks(17), width: 0.1, segments: 6, jitter: 0.08, until: done, texture: TEX.jointEnergy });
-    }
-    delay(ticks(17), force);
-  };
-  force();
-};
-/** A Nova hold tops out at 12 stages × 5 ticks; anyone else's charge is shown that long. */
-const NOVA_MAX_SECONDS = ticks(60);
 
 // ---- dl1 steps -------------------------------------------------------------------
 
@@ -8395,6 +8357,644 @@ const iceStormGraded = iceStormWith({
   mist: { recipe: ICE_STORM_MIST_GRADED, height: LANDING_SMOKE_LIFT_GRADED },
 });
 
+// ---- dw3 steps -------------------------------------------------------------------
+
+/** eBuff_WizDefense and eBuff_Cloaking (_enum.h:3899, :3913); OpenMU's effect ids are the same. */
+const SOUL_BARRIER_EFFECT = 4;
+const CLOAK_EFFECT = 18;
+/** The 0x19 sets AttackTime 1 and the impact fires at 15 (WSclient.cpp:4273, ZzzCharacter.cpp:4135-4139). */
+const SOUL_BARRIER_IMPACT = ticks(14);
+/** The impact recreates the five joints at width 20 (ZzzCharacter.cpp:4985-4989); the buff packet's are 50. */
+const SOUL_KNOT_IMPACT_WIDTH = cm(20);
+/** A knot that the seen impact has rebuilt thin, until the buff next arrives or ends. */
+const soulKnotWidth = new WeakMap<Entity, number>();
+
+/** Rebuild the Soul Barrier knot on `e` at `width` (DeleteJoint + 5x CreateJoint); null is the packet's width. */
+function rebuildSoulKnot(scene: Scene, e: Entity, width: number | null): void {
+  if (width === null) soulKnotWidth.delete(e);
+  else soulKnotWidth.set(e, width);
+  keepLook(scene, e, SOUL_BARRIER_EFFECT, null);
+  keepLook(scene, e, SOUL_BARRIER_EFFECT, BUFF_VISUALS[SOUL_BARRIER_EFFECT] ?? null);
+}
+
+/**
+ * Soul Barrier's impact on the target, 14 ticks after the packet (ZzzCharacter.cpp:4972-4990): nothing on
+ * a cloaked body, else SOUND_SOULBARRIER again and, with `thin`, the knot rebuilt at width 20.
+ */
+const soulBarrierImpact = (thin: boolean): Step =>
+  after(SOUL_BARRIER_IMPACT, (_at, c) => {
+    const to = c.target ?? c.caster;
+    if (!to.transform || entityGone(to) || to.buffs?.has(CLOAK_EFFECT)) return;
+    playCombat('Sound/eSoulBarrier', to.transform.pos);
+    if (thin) rebuildSoulKnot(c.scene, to, SOUL_KNOT_IMPACT_WIDTH);
+  });
+
+const SHELL_FACING = (10 * Math.PI) / 180;
+
+/**
+ * MODEL_MAGIC_CAPSULE2 on the hero when a blow lands while Soul Barrier holds and the last attacker
+ * (the original's AttackPlayer) faces him within 10 degrees (WSclient.cpp:3282-3291). Protect02 at the
+ * default Scale 0.9, facing the attacker, LT 20, BlendMesh 0, fading over the last 10 ticks
+ * (EffectRegistry.cpp:56, EffectBehaviors.cpp:73-84). The original compares raw angles with no wrap;
+ * this wraps, so a bearing across 0/360 still counts.
+ */
+export function playSoulBarrierShell(scene: Scene, hero: Entity, attacker: Entity | null): void {
+  if (!attacker?.transform || !hero.transform || attacker === hero || !hero.buffs?.has(SOUL_BARRIER_EFFECT)) return;
+  const bearing = Math.atan2(hero.transform.pos.z - attacker.transform.pos.z, hero.transform.pos.x - attacker.transform.pos.x) + Math.PI / 2;
+  const off = bearing - attacker.transform.rot.y;
+  if (Math.abs(Math.atan2(Math.sin(off), Math.cos(off))) >= SHELL_FACING) return;
+  effects.spawn('model', scene, entityPos(hero, 0, new Vector3()), {
+    model: MODEL.protect2,
+    seconds: ticks(20),
+    scale: 0.9,
+    colour: RGBS.white,
+    yaw: bearing + Math.PI,
+    follow: followEntity(hero, 0),
+    blendMesh: 0,
+    fadeTail: 0.5,
+  });
+}
+
+/** SOUND_SOULBARRIER as the buff lands on a player (InsertBuffPhysicalEffect, WSclient.cpp:15484-15494). */
+function soulBarrierArrives(e: Entity): void {
+  if (e.playerAnimation && e.transform) playCombat('Sound/eSoulBarrier', e.transform.pos);
+}
+
+/** MODEL_ARROWSRE06 sub1's Light (0.2, 0.2, 0.9) (ZzzEffect.cpp:8191, :8309). */
+const RUNE_LIGHT: RGB = [0.2, 0.2, 0.9];
+const RUNE_TICKS = 40;
+/** Scale 0.9 (the CreateEffect default, ZzzEffect.cpp:361-364) x1.05 a tick while LT >= 15, then x0.95 (:8226-8236). */
+const RUNE_PEAK = 0.9 * Math.pow(1.05, 26);
+const runeScale = (t: number): number => {
+  const n = t / TICK;
+  return n <= 26 ? 0.9 * Math.pow(1.05, n) : RUNE_PEAK * Math.pow(0.95, n - 26);
+};
+/** The last 10 ticks: Alpha x0.95 (ZzzEffect.cpp:8241) and BlendMeshLight x0.8 (ZzzObject.cpp:1903) a tick. */
+const runeLight = (t: number): number => {
+  const n = t / TICK;
+  return n < RUNE_TICKS - 10 ? 1 : Math.pow(0.95 * 0.8, n - (RUNE_TICKS - 10));
+};
+
+/**
+ * One MODEL_ARROWSRE06 sub1 on each hand, bones 28 and 37: the rune grows 0.9 -> 3.2 -> 1.56 and carries
+ * two BITMAP_LIGHT cards, Scale and 0.8 Scale x 64 cm, every tick of its life (ZzzEffect.cpp:8226-8243).
+ */
+function handRunes(scene: Scene, e: Entity): void {
+  for (const bone of HAND_BONES) {
+    const at: PointSource = out => bonePos(e, bone, out, CAST_HEIGHT);
+    const p = at(new Vector3());
+    effects.spawn('model', scene, p, { model: MODEL.arrowsRe06, seconds: ticks(RUNE_TICKS), colour: RUNE_LIGHT, follow: at, loop: false, yaw: entityYaw(e), scaleAt: runeScale, intensity: runeLight, fadeTail: 0 });
+    for (const k of [1, 0.8]) {
+      effects.spawn('sprite', scene, p, { texture: TEX.flare, colour: RUNE_LIGHT, size: cm(64) * k, sizeAt: p => runeScale(p * ticks(RUNE_TICKS)), seconds: ticks(RUNE_TICKS), follow: at, fadeTail: 0 });
+    }
+  }
+}
+
+/** MODEL_SWELL_OF_MAGICPOWER's LifeTime (ZzzEffect.cpp:673-679). */
+const SWELL_TICKS = 45;
+/** Its BlendMeshLight x0.86 a tick over the last 20 (ZzzObject.cpp:1893-1896). */
+const swellLight = (t: number): number => {
+  const n = t / TICK;
+  return n < SWELL_TICKS - 20 ? 1 : Math.pow(0.86, n - (SWELL_TICKS - 21));
+};
+/** The ground decals' Light (0.4, 0.3, 0.9), ramped to x1.1 by PKKey (MoveHandlers.cpp:5736-5752). */
+const SWELL_DECAL: RGB = [0.44, 0.33, 0.99];
+/** 2line_gost ribbons: Light (0.3, 0.2, 0.9) (ZzzEffect.cpp:8200). */
+const SWELL_GHOST: RGB = [0.3, 0.2, 0.9];
+/** BITMAP_LIGHT on every bone over the last 20 ticks, Scale 1.5, (0.7, 0.3, 0.9) x LT x 0.05 (ZzzEffect.cpp:8176-8187). */
+const SWELL_BONE_LIGHT: RGB = [0.7, 0.3, 0.9];
+
+/**
+ * BITMAP_SHOCK_WAVE sub14 twice and BITMAP_TWLIGHT sub3 on the ground under the caster (ZzzEffect.cpp:8167-8172):
+ * 5 -> 0.5 and 6 -> 1.5 tiles across over 30 ticks, the twilight turning 10 degrees a tick, light ramping in
+ * over the first 10 ticks and out over the last 10 (MoveHandlers.cpp:5716-5760, 5838-5854).
+ */
+const swellDecals: Step = (_at, c) => {
+  const follow = followEntity(c.caster, 0);
+  const at = entityPos(c.caster, 0, new Vector3());
+  const shock: RingOptions = { texture: TEX.shockwave, colour: SWELL_DECAL, scale: 5, grow: 0.1, seconds: ticks(30), fadeIn: 1 / 3, fadeTail: 1 / 3, follow };
+  effects.spawn('ring', c.scene, at, shock);
+  effects.spawn('ring', c.scene, at, shock);
+  effects.spawn('ring', c.scene, at, { texture: TEX.twilight, colour: SWELL_DECAL, scale: 6, grow: 0.25, spin: 250, seconds: ticks(30), fadeIn: 1 / 3, fadeTail: 1 / 3, follow });
+};
+
+const GHOST_CLOSE = cm(60);
+const GHOST_SWERVE = (65 * Math.PI) / 180;
+const GHOST_PITCH_RATE = (3 * Math.PI) / 180 / TICK;
+
+/**
+ * One BITMAP_2LINE_GHOST sub1 (ZzzEffectJoint.cpp:624-645, 3721-3740): starts 300 cm out at a random angle,
+ * aims at the caster's spot at its own height +/- 1..100 cm, flies 20-29 cm a tick on a heading 65 degrees
+ * off the bearing (an inward spiral), pitch easing 3 degrees a tick, circling within 60 cm. The original
+ * starts at absolute z 200-299; here that is 2-3 tiles over the caster's feet, so it reads on any ground.
+ */
+const swellGhost: Step = (_at, c) => {
+  const centre = entityPos(c.caster, 0, new Vector3());
+  const a = Math.random() * Math.PI * 2;
+  const pos = new Vector3(centre.x + Math.cos(a) * cm(300), centre.y + cm(200 + Math.floor(Math.random() * 100)), centre.z + Math.sin(a) * cm(300));
+  const targetY = pos.y + cm(1 + Math.floor(Math.random() * 100)) * (Math.random() < 0.5 ? 1 : -1);
+  const speed = cm(20 + Math.floor(Math.random() * 10)) / TICK;
+  let pitch = 0;
+  let last = fxNow();
+  const head: PointSource = out => {
+    const now = fxNow();
+    const dt = now - last;
+    last = now;
+    if (dt > 0) {
+      const dx = centre.x - pos.x;
+      const dz = centre.z - pos.z;
+      const dist = Math.hypot(dx, dz);
+      const heading = Math.atan2(dz, dx) - (dist > GHOST_CLOSE ? GHOST_SWERVE : Math.PI / 2);
+      if (dist > GHOST_CLOSE) {
+        const step = GHOST_PITCH_RATE * dt;
+        pitch += Math.max(-step, Math.min(step, Math.atan2(targetY - pos.y, dist) - pitch));
+      }
+      const d = speed * dt;
+      pos.x += Math.cos(heading) * Math.cos(pitch) * d;
+      pos.z += Math.sin(heading) * Math.cos(pitch) * d;
+      pos.y += Math.sin(pitch) * d;
+    }
+    return out.copyFrom(pos);
+  };
+  effects.spawn('joint', c.scene, pos, {
+    head,
+    maxTails: 15,
+    width: cm(20 + Math.floor(Math.random() * 10)),
+    colour: SWELL_GHOST,
+    seconds: ticks(25 + Math.floor(Math.random() * 10)),
+    texture: TEX.twoLineGhost,
+    fadeTail: 0,
+  });
+};
+
+/** The violet flare on every bone from tick 25, LT x 0.05 going 1 -> 0.05 (ZzzEffect.cpp:8176-8187). */
+const swellBoneLights = (colour: RGB): Step => (_at, c) => {
+  const bones = Math.max(0, (c.caster.modelObject?.gltf?.skeleton?.bones.length ?? 0) - 1);
+  for (let i = 0; i < bones; i++) {
+    const at: PointSource = out => bonePos(c.caster, i, out);
+    effects.spawn('sprite', c.scene, at(new Vector3()), { texture: TEX.flare, colour, size: cm(64) * 1.5, seconds: ticks(20), follow: at, fadeTail: 1 });
+  }
+};
+
+/**
+ * Expansion of Wizardry, any caster (WSclient.cpp:4950-4964, ZzzEffect.cpp:8157-8205): MODEL_SWELL_OF_MAGICPOWER
+ * on him for 45 ticks - Scale 0.9, BodyLight (0.7, 0.4, 0.9) (the render overrides the create Light,
+ * ZzzObject.cpp:1888-1897) - which at ticks 0, 10, 20 lays the ground decals, on tick 0 puts a rune on each
+ * hand, over ticks 0-15 sheds two ghost ribbons a tick and from tick 25 lights every bone.
+ */
+const swellWith = (body: RGB, boneLight: RGB): Step => (at, c) => {
+  effects.spawn('model', c.scene, entityPos(c.caster, 0, new Vector3()), {
+    model: MODEL.magicPowerUp,
+    seconds: ticks(SWELL_TICKS),
+    scale: 0.9,
+    colour: body,
+    follow: followEntity(c.caster, 0),
+    yaw: entityYaw(c.caster),
+    fadeTail: 0,
+    intensity: swellLight,
+  });
+  repeat(3, ticks(10), swellDecals)(at, c);
+  handRunes(c.scene, c.caster);
+  repeat(16, TICK, seq(swellGhost, swellGhost))(at, c);
+  after(ticks(SWELL_TICKS - 20), swellBoneLights(boneLight))(at, c);
+};
+const swellOfMagic = swellWith([0.7, 0.4, 0.9], SWELL_BONE_LIGHT);
+
+/** JOINT_SPIRIT sub6 / sub7 and the charge's BITMAP_LIGHT, Skill 0 (ZzzEffectJoint.cpp:760-762, ZzzCharacter.cpp:5729). */
+const NOVA_BLUE: RGB = [0.3, 0.3, 1];
+/** Enhanced: the same blue with the red pulled out, so 72 stacked cards read blue instead of lavender-white. */
+const NOVA_GRADED: RGB = [0.2, 0.35, 1];
+/** `m_bySkillCount` tops out at the server's 12 stages. */
+const NOVA_MAX_STAGE = 12;
+/** The release fires when AttackTime reaches 15, 14 ticks after the 40 (WSclient.cpp:4847, ZzzCharacter.cpp:4139). */
+const NOVA_BURST = ticks(14);
+/** Heads per wave, and where MODEL_CIRCLE sub1 emits them: its fixed spot + 100 (MoveHandlers.cpp:3767-3776). */
+const NOVA_HEADS = 36;
+const NOVA_ORIGIN = cm(100);
+/**
+ * Waves drawn, spread over the charge's count+1 ticks. The original's 13 at a full charge (468 heads, ~94
+ * ribbons) took the 5070 from 60 to 26 fps and white-washed the screen; 4 keep the burst's length and reach.
+ */
+const NOVA_DRAWN_WAVES = 4;
+/** Angle[0] = -10: the heads leave 10 degrees above level. */
+const NOVA_PITCH = (10 * Math.PI) / 180;
+const NOVA_HEAD_TICKS = 20;
+/** Velocity 50 (sub6) or 10 (sub7) cm a tick, +5 after every move (ZzzEffectJoint.cpp:3946): tiles out after t seconds. */
+const novaReach = (v0: number, t: number): number => ((v0 - 2.5) / 4) * t + 15.625 * t * t;
+/** The head's BITMAP_LIGHT, Scale 4 + (20 - LifeTime) / 5 of 64 cm (ZzzEffectJoint.cpp:3940). */
+const novaCardSize = (t: number): number => 4 + t / TICK / 5;
+/** Its Light x1/1.2 a tick below LifeTime 10 (ZzzEffectJoint.cpp:3922-3926). */
+const novaCardLight = (t: number): number => {
+  const n = t / TICK;
+  return n <= 10 ? 1 : Math.pow(1 / 1.2, n - 10);
+};
+
+/**
+ * One JOINT_SPIRIT head from `start` at `yaw`, pitched 10 degrees up: its flare card every tick and, for one
+ * sub6 in five (PKKey = rand % 5, ZzzEffectJoint.cpp:747-752), the JointSpirit01 ribbon, width 60, additive,
+ * MaxTails 5 (4 quads). sub7 draws no ribbon at all: RenderFace 0 is skipped (:768, :6997).
+ */
+function novaHead(scene: Scene, start: Vector3, yaw: number, v0: number, ribbon: boolean, colour: RGB = NOVA_BLUE): void {
+  const head = novaPath(start, yaw, v0);
+  const seconds = ticks(NOVA_HEAD_TICKS);
+  effects.spawn('sprite', scene, start, { texture: TEX.flare, colour, size: cm(64), sizeAt: p => novaCardSize(p * seconds), intensity: p => novaCardLight(p * seconds), seconds, follow: head, fadeTail: 0 });
+  if (ribbon) effects.spawn('joint', scene, start, { head, maxTails: 4, width: cm(60), colour, texture: TEX.jointSpirit, seconds, fadeTail: 0.5 });
+}
+
+/** Where a head leaving `start` at `yaw`, pitched 10 degrees up, is now. */
+function novaPath(start: Vector3, yaw: number, v0: number): PointSource {
+  const f = forwardOf(yaw);
+  const dx = f.x * Math.cos(NOVA_PITCH);
+  const dy = Math.sin(NOVA_PITCH);
+  const dz = f.z * Math.cos(NOVA_PITCH);
+  const t0 = fxNow();
+  return out => {
+    const d = novaReach(v0, fxNow() - t0);
+    return out.set(start.x + dx * d, start.y + dy * d, start.z + dz * d);
+  };
+}
+
+/**
+ * Nova's release, any caster (ZzzCharacter.cpp:4435-4439): 14 ticks after the packet, eHellFire2_1 stops,
+ * eHellFire2_2 plays and an invisible MODEL_CIRCLE sub1 (HiddenMesh -2, ZzzEffect.cpp:2145-2150) at the
+ * caster's feet emits count+1 waves of 36 sub6 heads a tick apart, at yaw i x (10..19) degrees; the last wave
+ * adds 36 slow sub7 heads in an exact 10 degree ring (MoveHandlers.cpp:3764-3785).
+ */
+const novaBurstWith = (colour: RGB, extra?: (c: SkillContext, start: Vector3) => void): Step =>
+  after(NOVA_BURST, (_at, c) => {
+    const e = c.caster;
+    if (!e.transform || entityGone(e)) return;
+    stopCombat('Sound/eHellFire2_1');
+    playCombat('Sound/eHellFire2_2', e.transform.pos);
+    const start = entityPos(e, NOVA_ORIGIN, new Vector3());
+    const count = Math.min(NOVA_MAX_STAGE, e.netId === undefined ? 0 : novaStageOf(e.netId));
+    const waves = Math.min(count + 1, NOVA_DRAWN_WAVES);
+    for (let k = 0; k < waves; k++) {
+      const w = waves === 1 ? 0 : Math.round((k * count) / (waves - 1));
+      const last = w === count;
+      const wave = () => {
+        for (let i = 0; i < NOVA_HEADS; i++) {
+          novaHead(c.scene, start, (i * (10 + Math.floor(Math.random() * 10)) * Math.PI) / 180, 50, Math.random() < 0.2, colour);
+          if (last) novaHead(c.scene, start, (i * 10 * Math.PI) / 180, 10, false, colour);
+        }
+      };
+      if (w === 0) wave();
+      else delay(w * TICK, wave);
+    }
+    extra?.(c, start);
+  });
+const novaBurst = novaBurstWith(NOVA_BLUE);
+
+/** The charge runs while the caster is in HELL_BEGIN or HELL_START (ZzzCharacter.cpp:5727). */
+function inNovaCharge(e: Entity): boolean {
+  if (entityGone(e)) return false;
+  const a = e.playerAnimation?.action;
+  return a === PlayerAction.PLAYER_SKILL_HELL_BEGIN || a === PlayerAction.PLAYER_SKILL_HELL_START || (!!e.localPlayer && combat.novaCharging);
+}
+
+/** Even bones 0..38 carry the charge (ZzzCharacter.cpp:5733). */
+const NOVA_CHARGE_BONES = 40;
+/**
+ * BITMAP_LIGHT sub6 at Scale 1.3 + 0.08 count: 64 cm x U(0.5, 1.0), LT 10-19, rising 2.5 cm a tick, Scale and
+ * Light x0.95 a tick (ZzzEffectParticle.cpp:3178-3183, 8016-8034). One recipe per stage, built once.
+ */
+const novaChargeMotes: ParticleRecipe[] = [];
+const novaChargeGraded: ParticleRecipe[] = [];
+function novaChargeRecipe(count: number, graded = false): ParticleRecipe {
+  const cache = graded ? novaChargeGraded : novaChargeMotes;
+  return (cache[count] ??= {
+    texture: TEX.flare,
+    colour: graded ? NOVA_GRADED : NOVA_BLUE,
+    size: cm(64) * 0.75 * (1.3 + count * 0.08),
+    sizeJitter: 1 / 3,
+    life: ticks(19),
+    lifeJitter: 9 / 19,
+    box: [0.01, 0.01, 0.01],
+    dir1: [0, 1, 0],
+    dir2: [0, 1, 0],
+    power: perTick(2.5),
+    powerJitter: 0,
+    gravity: 0,
+    endScale: Math.pow(0.95, 14.5),
+    capacity: 2048,
+  });
+}
+
+/** CreateForce's JOINT_HEALING sub8 (ZzzEffect.cpp:90-104, ZzzEffectJoint.cpp:510-518, 3632-3662). */
+const FORCE_RADIUS = cm(500);
+const FORCE_TICKS = 17;
+const FORCE_TURN = (10 * Math.PI) / 180;
+/** Its Light x1/1.8 a tick over the last 6 ticks, which also dims the head's card. */
+const forceLight = (t: number): number => {
+  const n = t / TICK;
+  return n <= 11 ? 1 : Math.pow(1 / 1.8, n - 11);
+};
+
+/**
+ * One sub8 comet: from 5 m out at a random yaw and a 0-89 degree elevation, +120, heading back at the feet;
+ * Velocity 0 gaining 4 cm a tick, homing on the feet + 100 by up to 10 degrees a tick while LifeTime > 10.
+ * Two quads of JointEnergy01 at width 10 drawn over everything, and a 64 cm flare card at the head.
+ */
+function forceComet(scene: Scene, feet: Vector3, ribbon: boolean, graded = false): void {
+  const yaw = Math.random() * Math.PI * 2;
+  const elev = (Math.floor(Math.random() * 90) * Math.PI) / 180;
+  const pos = new Vector3(feet.x + Math.cos(yaw) * Math.cos(elev) * FORCE_RADIUS, feet.y + Math.sin(elev) * FORCE_RADIUS + cm(120), feet.z + Math.sin(yaw) * Math.cos(elev) * FORCE_RADIUS);
+  const prev = pos.clone();
+  const tx = feet.x;
+  const ty = feet.y + cm(100);
+  const tz = feet.z;
+  let heading = yaw + Math.PI;
+  let pitch = -elev;
+  let vel = 0;
+  let n = 0;
+  let at = -1;
+  const t0 = fxNow();
+  const tick = () => {
+    prev.copyFrom(pos);
+    const d = cm(vel);
+    pos.x += Math.cos(heading) * Math.cos(pitch) * d;
+    pos.y += Math.sin(pitch) * d;
+    pos.z += Math.sin(heading) * Math.cos(pitch) * d;
+    vel += 4;
+    if (n < FORCE_TICKS - 10) {
+      const turn = Math.atan2(tz - pos.z, tx - pos.x) - heading;
+      heading += Math.max(-FORCE_TURN, Math.min(FORCE_TURN, Math.atan2(Math.sin(turn), Math.cos(turn))));
+      pitch += Math.max(-FORCE_TURN, Math.min(FORCE_TURN, Math.atan2(ty - pos.y, Math.hypot(tx - pos.x, tz - pos.z)) - pitch));
+    }
+    n++;
+  };
+  const head: PointSource = out => {
+    const now = fxNow();
+    if (now !== at) {
+      at = now;
+      const due = Math.ceil((now - t0) / TICK);
+      while (n < due) tick();
+    }
+    const k = Math.min(1, Math.max(0, (now - t0) / TICK - (n - 1)));
+    return Vector3.LerpToRef(prev, pos, k, out);
+  };
+  const blue = Math.floor(Math.random() * 128) / 255;
+  const colour: RGB = graded ? [0.3, 0.45, 0.6 + blue] : [0.5, 0.5, 0.5 + blue];
+  const seconds = ticks(FORCE_TICKS);
+  if (ribbon) effects.spawn('joint', scene, pos, { head, maxTails: 2, width: cm(10), colour, texture: TEX.jointEnergy, seconds, fadeTail: 6 / FORCE_TICKS, onTop: true });
+  effects.spawn('sprite', scene, pos, { texture: TEX.flare, colour, size: cm(64), intensity: p => forceLight(p * seconds), seconds, follow: head, fadeTail: 0 });
+}
+
+/** When each caster's charge last ticked: a second 58 while one runs must not double it. */
+const novaChargeTicked = new WeakMap<Entity, number>();
+const bonePoint = new Vector3();
+const feetPoint = new Vector3();
+
+/**
+ * Nova's charge, any caster (ZzzCharacter.cpp:5727-5748): every tick in HELL_BEGIN or HELL_START, count + 1
+ * motes on each even bone 0..38 and three force comets onto the feet. `count` is the server's stage.
+ */
+function novaChargeTick(scene: Scene, e: Entity, graded: boolean): void {
+  const step = () => {
+    if (!inNovaCharge(e)) return;
+    novaChargeTicked.set(e, fxNow());
+    const count = Math.min(NOVA_MAX_STAGE, e.netId === undefined ? 0 : novaStageOf(e.netId));
+    const recipe = novaChargeRecipe(count, graded);
+    const bones = Math.min(NOVA_CHARGE_BONES, (e.modelObject?.gltf?.skeleton?.bones.length ?? 1) - 1);
+    for (let i = 0; i < bones; i += 2) emitBurst(scene, recipe, bonePos(e, i, bonePoint), count + 1);
+    entityPos(e, 0, feetPoint);
+    // One ribbon a tick, not three: 51 live greased lines cost 1.7 ms a frame for two 10 cm quads behind each card.
+    for (let j = 0; j < 3; j++) forceComet(scene, feetPoint, j === 0, graded);
+    delay(TICK, step);
+  };
+  step();
+}
+
+/** The charge starts on the 58 echo for every caster, the hero included, with SOUND_NUKE1 (WSclient.cpp:4833-4837). */
+const novaChargeWith = (graded: boolean, extra?: (c: SkillContext) => void): Step => (_at, c) => {
+  const e = c.caster;
+  // Everyone else's plays with the packet (logic.ts playCastAnimation); the hero's cast path plays none.
+  if (e.localPlayer && e.transform) playCombat('Sound/eHellFire2_1', e.transform.pos);
+  const last = novaChargeTicked.get(e);
+  if (last !== undefined && fxNow() - last < 2 * TICK) return;
+  novaChargeTick(c.scene, e, graded);
+  extra?.(c);
+};
+const novaCharge = novaChargeWith(false);
+
+/**
+ * Earth Prison has no source: Season 6 only names EFFECT_EARTH_PRISON (_enum.h:4034). It is built from the
+ * original's own stone ring, the Dark Horse earthshake's six MODEL_GROUND_STONE / STONE2 at 60 degree steps
+ * from a random start (GOBoid.cpp:744-761), round the target instead of the horse.
+ */
+const EARTH_PRISON_RADIUS = 0.9;
+/** BITMAP_SMOKE sub11 in (1, 0.8, 0.6) (MoveHandlers.cpp:5700-5702). */
+const STONE_SMOKE: ParticleRecipe = { ...SMOKE, colour: [0.25, 0.18, 0.12], colourEnd: [0.1, 0.08, 0.06] };
+const EARTH_BLOCKED = TW_NOMOVE | TW_NOGROUND | TW_WATER;
+
+/**
+ * Each stone (ZzzEffect.cpp:3480-3521, MoveHandlers.cpp:5688-5712): skipped on a NOMOVE, NOGROUND or water
+ * tile; LT 40, Scale 1.2-1.5 (STONE2 1.0-1.3), random yaw, its clip at 0.3 a tick, opaque; smoke and a stone
+ * chip each tick at LT 36-33, 60 cm off it and 50 up; Alpha x1/1.3 a tick over the last 8.
+ */
+const earthPrisonWith = (onStone?: (p: Vector3, c: SkillContext) => void): Step => (at, c) => {
+  const world = storeRef().world;
+  const feet = at.clone();
+  feet.y -= IMPACT_HEIGHT;
+  let a = Math.random() * Math.PI * 2;
+  for (let i = 0; i < 6; i++) {
+    a += Math.PI / 3;
+    const x = feet.x + Math.cos(a) * EARTH_PRISON_RADIUS;
+    const z = feet.z + Math.sin(a) * EARTH_PRISON_RADIUS;
+    if (world && world.getTerrainFlag(Math.floor(x), Math.floor(z)) & EARTH_BLOCKED) continue;
+    const p = new Vector3(x, world ? world.getTerrainHeight(x, z) : feet.y, z);
+    const second = Math.random() < 0.5;
+    effects.spawn('model', c.scene, p, {
+      model: second ? MODEL.groundStone2 : MODEL.groundStone,
+      seconds: ticks(40),
+      scale: (second ? 1 : 1.2) + Math.floor(Math.random() * 30) / 100,
+      yaw: Math.random() * Math.PI * 2,
+      colour: RGBS.white,
+      blendMesh: -1,
+      fadeTail: 8 / 40,
+    });
+    const chip = new Vector3(x + cm(60), p.y + cm(50), z - cm(60));
+    after(ticks(4), repeat(4, TICK, seq(particles({ recipe: STONE_SMOKE, count: 1 }), stones(1, 0.1))))(chip, c);
+    onStone?.(p, c);
+  }
+  particles({ recipe: DUST, count: 20 })(feet, c);
+};
+const earthPrison = earthPrisonWith();
+
+// ---- dw3 enhanced (the graded tiers) --------------------------------------------
+
+/** The knot's blue as it reads on screen: flareBlue under its white Light. */
+const SOUL_SEAL: RGB = [0.35, 0.7, 1];
+/** The shell a little deeper than the knot: three Protect02 at once wash to white at the knot's own blue. */
+const SOUL_SHELL: RGB = [0.2, 0.55, 1];
+const SOUL_SEAL_MOTES: ParticleRecipe = { ...SOUL_MOTES, colour: SOUL_SEAL, size: 0.2, life: 1, power: 0.7, box: [0.45, 0.6, 0.45], endScale: 0.4 };
+
+/**
+ * Enhanced: the impact's width-20 rebuild read as the barrier sealing - a blue flare at the chest, the
+ * hit shell's Protect02 closing round the body from three sides, a blue pool on the ground and motes lifting off.
+ */
+const soulBarrierSeal: Step = after(SOUL_BARRIER_IMPACT, (_at, c) => {
+  const to = c.target ?? c.caster;
+  if (!to.transform || entityGone(to) || to.buffs?.has(CLOAK_EFFECT)) return;
+  const chest = followEntity(to, SOUL_KNOT.base);
+  const feet = followEntity(to, 0);
+  const p = chest(new Vector3());
+  effects.spawn('sprite', c.scene, p, { texture: TEX.flareBlue, colour: SOUL_SEAL, size: 2.2, seconds: 0.4, grow: 1.4, growFrom: 0.4, fadeTail: 0.6, follow: chest });
+  for (let i = 0; i < 3; i++) {
+    const yaw = entityYaw(to) + (i * 2 * Math.PI) / 3;
+    effects.spawn('model', c.scene, feet(new Vector3()), { model: MODEL.protect2, seconds: 0.6, scale: 0.8, grow: 0.85, colour: SOUL_SHELL, alpha: 0.7, yaw, follow: feet, blendMesh: 0, fadeIn: 0.3, fadeTail: 0.6 });
+  }
+  effects.spawn('ring', c.scene, feet(new Vector3()), { texture: TEX.flareBlue, colour: SOUL_SEAL, scale: 2.4, grow: 1.2, seconds: 0.8, fadeIn: 0.15, fadeTail: 0.7, follow: feet });
+  effects.spawn('particles', c.scene, p, { recipe: SOUL_SEAL_MOTES, count: 14, follow: chest });
+});
+
+/** Swell tints held saturated: the Classic (0.7, 0.4, 0.9) body and bone light wash to pink-white on the graded buffer. */
+const SWELL_BODY_GRADED: RGB = [0.5, 0.25, 0.95];
+const SWELL_BONE_GRADED: RGB = [0.3, 0.12, 1];
+/** Violet sparks lifting off the gathering decals over the ghosts' 16 ticks. */
+const SWELL_EMBERS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.6, 0.35, 1],
+  colourEnd: [0.25, 0.1, 0.6],
+  size: 0.28,
+  sizeJitter: 0.4,
+  life: 0.9,
+  lifeJitter: 0.3,
+  power: 1.1,
+  powerJitter: 0.4,
+  gravity: 0.4,
+  box: [1.6, 0.05, 1.6],
+  dir1: [-0.15, 1, -0.15],
+  dir2: [0.15, 1, 0.15],
+  endScale: 0.3,
+};
+
+/**
+ * Enhanced Expansion of Wizardry: the same effect in saturated violet, embers rising off the decals while
+ * the ghosts gather, and a flare at the chest as the bone lights take over at tick 25.
+ */
+const swellEnhanced: Step = (at, c) => {
+  swellWith(SWELL_BODY_GRADED, SWELL_BONE_GRADED)(at, c);
+  const feet = followEntity(c.caster, 0);
+  effects.spawn('particles', c.scene, feet(new Vector3()), { recipe: SWELL_EMBERS, rate: 40, seconds: ticks(20), follow: feet });
+  after(ticks(SWELL_TICKS - 20), (_p, k) => {
+    const chest = followEntity(k.caster, IMPACT_HEIGHT);
+    effects.spawn('sprite', k.scene, chest(new Vector3()), { texture: TEX.flare, colour: [0.55, 0.3, 1], size: 1.8, seconds: 0.5, grow: 1.3, growFrom: 0.4, fadeTail: 0.7, follow: chest });
+  })(at, c);
+};
+
+/** Nova charge, Enhanced: electric chips crackling over the body, more of them as the stage climbs. */
+const NOVA_CRACKLE: ParticleRecipe = {
+  ...ENERGY_CHIPS,
+  colour: [0.35, 0.6, 1],
+  size: 0.32,
+  sizeJitter: 0.4,
+  life: 0.22,
+  lifeJitter: 0.3,
+  box: [0.3, 0.75, 0.3],
+  power: 0.8,
+  capacity: 256,
+};
+/** Seconds between the charge's ground pools; each lives two of these, so their fades sum to a steady glow. */
+const NOVA_POOL_EVERY = 0.25;
+const chargeLightAt = new Vector3();
+
+/**
+ * Enhanced Nova charge: the Classic charge in the graded blue, plus a blue pool under the caster that widens
+ * with the stage, chips crackling over the body and the charge's light, held until the charge ends.
+ */
+const novaChargeEnhanced: Step = novaChargeWith(true, c => {
+  const e = c.caster;
+  const done = () => !inNovaCharge(e);
+  const stage = () => Math.min(NOVA_MAX_STAGE, e.netId === undefined ? 0 : novaStageOf(e.netId));
+  const feet = followEntity(e, 0);
+  const chest = followEntity(e, 1);
+  effects.spawn('particles', c.scene, chest(new Vector3()), { recipe: NOVA_CRACKLE, rate: 12, seconds: 10, follow: chest, until: done, rateScale: () => 1 + stage() / 2 });
+  const light = lighting.skillHold(c.scene, 58, out => {
+    chest(chargeLightAt);
+    out.x = chargeLightAt.x;
+    out.y = chargeLightAt.y;
+    out.z = chargeLightAt.z;
+  });
+  const pool = () => {
+    if (done()) {
+      light?.stop();
+      return;
+    }
+    const s = stage();
+    effects.spawn('ring', c.scene, feet(new Vector3()), { texture: TEX.flareBlue, colour: NOVA_GRADED, scale: 2.2 + s * 0.2, seconds: 2 * NOVA_POOL_EVERY, fadeIn: 0.5, fadeTail: 0.5, follow: feet });
+    delay(NOVA_POOL_EVERY, pool);
+  };
+  pool();
+});
+
+/** Nova burst, Enhanced: blue chips thrown flat from the core with the first wave. */
+const NOVA_SPARKS: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.45, 0.65, 1],
+  colourEnd: [0.15, 0.3, 1],
+  size: 0.22,
+  sizeJitter: 0.4,
+  life: 0.5,
+  lifeJitter: 0.3,
+  power: 9,
+  powerJitter: 0.5,
+  gravity: -3,
+  box: [0.1, 0.1, 0.1],
+  dir1: [-1, 0.05, -1],
+  dir2: [1, 0.35, 1],
+  endScale: 0.3,
+  capacity: 128,
+};
+/** Dust blown flat off the ground by the burst, kept grey: warm additive dust reads as sparks next to the blue core. */
+const NOVA_DUST: ParticleRecipe = { ...DUST, colour: [0.22, 0.22, 0.25], colourEnd: [0.12, 0.12, 0.14], power: 3, box: [0.6, 0.02, 0.6], dir1: [-1, 0.05, -1], dir2: [1, 0.25, 1] };
+/** Heads that carry the burst's light out on Ultra, a quarter turn apart. */
+const NOVA_LIT_HEADS = 4;
+
+/**
+ * Enhanced Nova burst: the Classic waves in the graded blue, and with the first one a shock ring racing over
+ * the ground as far as the heads' first quarter second, a blue flash pooled under the core, chips thrown
+ * flat and dust kicked off the ground; on Ultra four heads of the first wave carry the light out.
+ */
+const novaBurstEnhanced: Step = novaBurstWith(NOVA_GRADED, (c, start) => {
+  const feet = entityPos(c.caster, 0, new Vector3());
+  effects.spawn('ring', c.scene, feet, { texture: TEX.shockwave, colour: NOVA_GRADED, scale: 8, growFrom: 0.15, grow: 1, seconds: 0.35, fadeTail: 0.6 });
+  effects.spawn('ring', c.scene, feet, { texture: TEX.flareBlue, colour: NOVA_GRADED, scale: 5, growFrom: 0.5, grow: 1.1, seconds: 0.5, fadeTail: 0.8 });
+  effects.spawn('particles', c.scene, start, { recipe: NOVA_SPARKS, count: 40 });
+  effects.spawn('particles', c.scene, feet, { recipe: NOVA_DUST, count: 14 });
+  const yaw = entityYaw(c.caster);
+  for (let i = 0; i < NOVA_LIT_HEADS; i++) {
+    const head = novaPath(start, yaw + (i * 2 * Math.PI) / NOVA_LIT_HEADS, 50);
+    const at = new Vector3();
+    lighting.skillTrail(c.scene, 40, out => {
+      head(at);
+      out.x = at.x;
+      out.y = at.y;
+      out.z = at.z;
+    });
+  }
+});
+
+/** Earth Prison, Enhanced: the ground split under the ring, dust and chips burst from each stone's base. */
+const PRISON_CRACK: RGB = [0.45, 0.3, 0.16];
+const PRISON_DUST: ParticleRecipe = { ...DUST, colour: [0.4, 0.33, 0.24], size: 0.8, life: 0.9, power: 1.2, box: [0.25, 0.05, 0.25], dir1: [-0.8, 0.4, -0.8], dir2: [0.8, 1, 0.8] };
+
+/**
+ * Enhanced Earth Prison: every Classic stone, each breaking out of the ground in a burst of dust and chips,
+ * and the ground under the ring split by a crack mark glowing the stones' dust tint.
+ */
+const earthPrisonEnhanced: Step = seq(
+  earthPrisonWith((p, c) => {
+    particles({ recipe: PRISON_DUST, count: 6 })(p, c);
+    stones(2, 0.25)(p, c);
+  }),
+  (at, c) => {
+    const feet = at.clone();
+    feet.y -= IMPACT_HEIGHT;
+    model({ model: MODEL.knightPlanCrack, seconds: ticks(40), scale: 1.3, colour: PRISON_CRACK, flat: true, yaw: Math.random() * Math.PI * 2, fadeTail: 0.3 })(feet, c);
+  }
+);
+
 // ---- the table -------------------------------------------------------------------
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
@@ -8546,7 +9146,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   15: { cast: teleportColumn, impact: teleportColumn, enhanced: { cast: teleportEnhanced('begin'), impact: teleportEnhanced('end') } },
   // 16 Soul Barrier: 5× CreateJoint(MODEL_SPEARSKILL sub0, width 20, white, LT 999999, MaxTails 30) - persistent,
   // so the ribbons live in BUFF_VISUALS[4] and end on MagicEffectStatus. Here only the arrival glimmer.
-  16: { impact: particles({ recipe: SOUL_MOTES, count: 12, height: 0.6 }) },
+  // 16 Soul Barrier: nothing at the caster, the knot is the buff's look; 14 ticks on the impact plays the sound
+  // again and rebuilds the knot at width 20. Enhanced keeps the packet's width 50 and the old glimmer.
+  16: { impact: soulBarrierImpact(true), enhanced: { impact: seq(soulBarrierImpact(true), soulBarrierSeal) } },
   // 17 Energy Ball: at the release, BITMAP_ENERGY flies from the caster 100 cm up; one Spark03 pop within 100 cm of the target (energyBall).
   // Enhanced: a held glow and spark wake on the ball, a spark burst on the pop.
   17: { impact: energyBall(), enhanced: { impact: energyBall(ENERGY_BALL_LOOK) } },
@@ -8595,17 +9197,11 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   38: { area: dw2AtAttackTime(decay), enhanced: { area: dw2AtAttackTime(decayGraded) } },
   // 39 Ice Storm (391 / 393 alias here): 10x MODEL_BLIZZARD sub0 on the cast point at AttackTime 15 (`iceStorm`); Enhanced `iceStormGraded`.
   39: { area: dw2AtAttackTime(iceStorm), enhanced: { area: dw2AtAttackTime(iceStormGraded) } },
-  // 40 Nova (release): MODEL_CIRCLE sub1 LT 45 at the caster; 36× JOINT_SPIRIT sub6 (width 60, LT 20,
-  // MaxTails 5) burst out while LT > 44 − skillCount. Drawn at 24 ribbons.
+  // 40 Nova (release): 14 ticks after the packet, count+1 waves of 36 JOINT_SPIRIT sub6 heads from the caster's
+  // feet + 100, the last wave with 36 sub7 in a ring (novaBurst). Enhanced: novaBurstEnhanced.
   40: {
-    impact: atCaster(
-      seq(
-        model({ model: MODEL.circle, seconds: ticks(45), colour: [0.3, 0.3, 1], flat: true, scale: 1, grow: 1.5 }),
-        streamerFan(24, (Math.PI * 2) / 24, { velocity: perTick(70), seconds: ticks(20), maxTails: 5, width: 0.6, colour: RGBS.soul, texture: TEX.jointSpirit }),
-        particles({ recipe: NOVA_MOTES, count: 40, height: 0.8 })
-      ),
-      0.05
-    ),
+    impact: novaBurst,
+    enhanced: { impact: novaBurstEnhanced },
   },
   // 41 Twisting Slash: at clip key 5 (or AttackTime 15) five copies of the wielded weapon whirl round the knight
   // with sparks, smoke, a glow and a grey light under each; see twistingSlash.
@@ -8707,10 +9303,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 57 Spiral Slash: charge frame > 5 - CreateJoint(BITMAP_FLARE sub23, width 40) on the weapon.
   57: { cast: seq(slash(RGBS.wind, TEX.flareBig), (at, c) => effects.spawn('joint', c.scene, at, { head: weaponBone(c.caster), maxTails: 10, width: 0.4, colour: RGBS.wind, seconds: SLASH_SECONDS })), impact: steelHit },
-  // 58 Nova (start): the charge - bones 0..38, (skillCount+1)× BITMAP_LIGHT sub6 (Light (0.3,0.3,1.0), scale
-  // 1.3+count·0.08) + CreateForce: 3× JOINT_HEALING sub8 from r=500, LT 17. On the hero it runs for the hold
-  // (`combat.novaCharging` / `novaStage`); on anyone else for a full charge's length.
-  58: { cast: novaCharge },
+  // 58 Nova (start): the charge on any caster while he is in HELL_BEGIN / HELL_START - (count+1)x BITMAP_LIGHT sub6
+  // on the even bones 0..38 and CreateForce's 3 JOINT_HEALING sub8 comets every tick (novaCharge).
+  58: { cast: novaCharge, enhanced: { cast: novaChargeEnhanced } },
   // 59 Combo: MODEL_COMBO and its 60 rays at the caster, whoever the target (WSclient.cpp:4829-4832).
   59: {
     impact: atCaster(comboBurst, cm(50)),
@@ -8899,7 +9494,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   232: { area: blowOfDestruction, enhanced: { area: blowOfDestructionPlus } },
   // 233 Expansion of Wizardry: MODEL_SWELL_OF_MAGICPOWER at the caster, Light (0.3,0.2,0.9) (WSclient.cpp
   // AT_SKILL_SWELL_OF_MAGICPOWER cast).
-  233: { impact: swellOfMagic, area: swellOfMagic },
+  // 233 Expansion of Wizardry (380 / 383 alias): see swellOfMagic. Enhanced adds the old mote burst.
+  233: { impact: swellOfMagic, area: swellOfMagic, enhanced: { impact: swellEnhanced, area: swellEnhanced } },
   // 234 Recover: cast - BITMAP_IMPACT at caster (0,−220,130), Light (0.7,0.6,0), LT 80, Scale 0→; target - 19× JOINT
   // FLARE sub47 width 40 + MODEL_SUMMON (LT 60, Scale 0.7) + BITMAP_TWLIGHT sub0/1/2 + 2× FLARE sub3 on random bones.
   234: {
@@ -8998,9 +9594,8 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   430: { impact: holyCircle(RGBS.gold) },
   433: { impact: holyCircle(RGBS.gold) },
   432: { area: summonCircle },
-  // 495/497 Earth Prison
-  495: { impact: seq(model({ model: MODEL.groundCrystal, seconds: 1.5, colour: RGBS.gold, grow: 1.2, scale: 1.2 }), particles({ recipe: DUST, count: 20 })) },
-  497: { impact: seq(model({ model: MODEL.groundCrystal, seconds: 1.5, colour: RGBS.gold, grow: 1.2, scale: 1.2 }), particles({ recipe: DUST, count: 20 })) },
+  // 495 Earth Prison (497 its Strengthener through the aliases): no source; the ground stone ring (earthPrison). Enhanced: earthPrisonEnhanced.
+  495: { impact: earthPrison, enhanced: { impact: earthPrisonEnhanced } },
   // 323/521/524 Iron Defense: the reference client predates it (no AT_SKILL, no effect, no sound), so Classic draws
   // nothing. The old stand-in flash waits under `enhanced` for the improve phase.
   323: IRON_DEFENSE,
@@ -9084,11 +9679,11 @@ let currentSkill = 0;
 const MASTER_ALIASES: Record<number, number> = {
   326: 22, 327: 23, 328: 19, 329: 20, 330: 41, 331: 42, 332: 41, 333: 42, 336: 43, 337: 232, 339: 43, 340: 232, 342: 43, 343: 232,
   346: 344, 356: 48, 360: 48, 363: 48,
-  378: 5, 379: 3, 380: 233, 381: 14, 382: 13, 383: 233, 384: 1, 385: 9, 387: 38, 388: 10, 389: 7, 390: 2, 391: 39, 392: 40, 393: 39, 394: 2, 395: 58,
+  378: 5, 379: 3, 380: 233, 381: 14, 382: 13, 383: 233, 384: 1, 385: 9, 387: 38, 388: 10, 389: 7, 390: 2, 391: 39, 392: 40, 393: 39, 394: 2, 395: 40,
   403: 16, 404: 16, 406: 16,
   411: 235, 413: 26, 414: 24, 416: 52, 417: 27, 418: 24, 420: 28, 422: 28, 423: 27, 424: 51, 431: 235, 441: 77,
   454: 219, 455: 215, 456: 230, 458: 214, 459: 221, 460: 222, 461: 220, 462: 214, 463: 220, 469: 218, 470: 218, 472: 218,
-  479: 22, 480: 3, 481: 41, 482: 56, 483: 5, 484: 13, 486: 14, 487: 9, 489: 7, 490: 55, 491: 7, 492: 236, 493: 55, 494: 236, 496: 237,
+  479: 22, 480: 3, 481: 41, 482: 56, 483: 5, 484: 13, 486: 14, 487: 9, 489: 7, 490: 55, 491: 7, 492: 236, 493: 55, 494: 236, 496: 237, 497: 495,
   ...DARK_LORD_MASTER_ALIASES,
   551: 260, 552: 261, 554: 260, 555: 261, 558: 262, 559: 263, 560: 264, 569: 268, 572: 268, 573: 267,
 };
@@ -9324,8 +9919,8 @@ type BuffLook = (entity: Entity, scene: Scene) => Partial<AuraOptions>;
 
 /** The knot the five green MODEL_SPEARSKILL sub4 joints run: radius 80, `z = 110 + 120 v.z`, width 20, Light (0.4, 0.8, 0.2) (ZzzEffectJoint.cpp:1553, :4470). */
 const GREEN_KNOT: SpearJoints = { count: 5, width: 0.2, colour: [0.4, 0.8, 0.2], radius: 0.8, base: 1.1, lift: 1.2, flare: true };
-/** Soul Barrier's five sub0 joints: the same knot, white, width 50 from the packet path (WSclient.cpp:15481). */
-const SOUL_KNOT: SpearJoints = { count: 5, width: 0.5, colour: RGBS.white, radius: 0.8, base: 1.1, lift: 1.2, flare: true };
+/** Soul Barrier's five sub0 joints: white, width 50 from the packet path (WSclient.cpp:15491), 20 once a seen impact rebuilds them; `z = target + 10 + 110 + 120 v.z` (ZzzEffectJoint.cpp:4504, :4523). */
+const SOUL_KNOT: SpearJoints = { count: 5, width: 0.5, colour: RGBS.white, radius: 0.8, base: 1.2, lift: 1.2, flare: true };
 /** A seal's three sub10 joints: radius 60, `z = 50 + 60 v.z`, width 12, Light (1, 0.6, 0.6), the bujuckline sheet (:1559, :4480). */
 const SEAL_KNOT: SpearJoints = { count: 3, width: 0.12, colour: [1, 0.6, 0.6], texture: TEX.luckySeal, radius: 0.6, base: 0.5, lift: 0.6 };
 
@@ -9344,13 +9939,12 @@ const OURFORCES_GLOW: BoneGlow = { bones: OURFORCES_BONES, texture: TEX.flareRed
 /** Swell of Magic Power: BITMAP_LIGHT 1.8 on every bone, `(0.7, 0.3, 0.9) * (|sin t| + 0.2) * 0.5` (ZzzEffect.cpp:9316). */
 const MAGIC_GLOW: BoneGlow = { bones: 'all', texture: TEX.flare, colour: [0.7, 0.3, 0.9], size: 1.15, breathe: t => (Math.abs(Math.sin(t)) + 0.2) * 0.5 };
 
-/** Swell of Magic Power: every 6 s a MODEL_ARROWSRE06 sub1 on each hand, Light (0.2, 0.2, 0.9) (ZzzEffect.cpp:8310). */
-function magicRune(scene: Scene, entity: Entity): void {
-  for (const bone of HAND_BONES) {
-    const at: PointSource = out => bonePos(entity, bone, out, CAST_HEIGHT);
-    effects.spawn('model', scene, at(new Vector3()), { model: MODEL.arrowsRe06, seconds: 1, colour: [0.2, 0.2, 0.9], follow: at, loop: false });
-  }
-}
+/**
+ * Swell of Magic Power's buff look: every bone glows, and every 6 s from 6 s after it lands the hand runes
+ * (ZzzEffect.cpp:8298-8316, :9307-9328). None on a cloaked body (ZzzCharacter.cpp:10950-10965).
+ */
+const swellBuff: BuffLook = (e, s) =>
+  e.buffs?.has(CLOAK_EFFECT) ? {} : { boneGlow: MAGIC_GLOW, pulse: { every: 6, first: 6, fire: () => handRunes(s, e) } };
 
 /**
  * Keyed by OpenMU MagicEffectNumber, which is the original's `eBuffState`
@@ -9367,7 +9961,7 @@ export const BUFF_VISUALS: Partial<Record<number, BuffLook>> = {
   3: () => ({ handShiny: { bones: HAND_SHINY_BONES, colour: [1, 0.3, 0.2] } }),
   // 2 Greater Defense: the shared knot only.
   // 4 Soul Barrier: five white sub0 joints.
-  4: () => ({ spearJoints: SOUL_KNOT }),
+  4: e => ({ spearJoints: { ...SOUL_KNOT, width: soulKnotWidth.get(e) ?? SOUL_KNOT.width } }),
   // 5 Critical Damage Increase (148 its mastery): the weapon helices every 1.2 s (critPulse).
   5: (e, s) => ({ pulse: { every: 1.2, fire: () => critPulse(s, e) } }),
   148: (e, s) => ({ pulse: { every: 1.2, fire: () => critPulse(s, e) } }),
@@ -9401,9 +9995,9 @@ export const BUFF_VISUALS: Partial<Record<number, BuffLook>> = {
   // 0x51 Berserker: hand auroras and body marks.
   81: () => ({ berserk: true }),
   // 0x52 Wiz Enhance / Swell of Magic Power (138 / 139 its strengthener and mastery): every bone glows violet, a rune on the hands every 6 s.
-  82: (e, s) => ({ boneGlow: MAGIC_GLOW, pulse: { every: 6, fire: () => magicRune(s, e) } }),
-  138: (e, s) => ({ boneGlow: MAGIC_GLOW, pulse: { every: 6, fire: () => magicRune(s, e) } }),
-  139: (e, s) => ({ boneGlow: MAGIC_GLOW, pulse: { every: 6, fire: () => magicRune(s, e) } }),
+  82: swellBuff,
+  138: swellBuff,
+  139: swellBuff,
   // 0x56 Cold (eDeBuff_BlowOfDestruction, Strike of Destruction and Chain Drive): the ice at the feet, once.
   86: (e, s) => ({ pulse: { every: Infinity, fire: () => coldIce(s, e) } }),
   // 129-131 Ourforces (Rage Fighter): the red glow on 17 bones; 153-155 their power-ups.
@@ -9454,6 +10048,15 @@ function keepLook(scene: Scene, entity: Entity, key: number, look: BuffLook | nu
 
 /** Command: keep (or drop) the persistent look of `effectId` on `entity`, whose `buffs` set is already up to date. */
 export function setBuffVisual(scene: Scene, entity: Entity, effectId: number, active: boolean): void {
+  if (effectId === SOUL_BARRIER_EFFECT) {
+    // Every arrival deletes the knot and redraws it at the packet's width 50, with the sound.
+    soulKnotWidth.delete(entity);
+    if (active) {
+      soulBarrierArrives(entity);
+      rebuildSoulKnot(scene, entity, null);
+      return;
+    }
+  }
   keepLook(scene, entity, effectId, active ? (BUFF_VISUALS[effectId] ?? null) : null);
   for (const shared of SHARED_LOOKS) {
     if (!shared.ids.includes(effectId)) continue;

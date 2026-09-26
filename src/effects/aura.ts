@@ -364,6 +364,8 @@ export interface BoneGlow {
 export interface Pulse {
   every: number;
   fire: () => void;
+  /** Seconds before the first fire (default 0: at once). */
+  first?: number;
 }
 
 export interface AuraOptions {
@@ -600,7 +602,7 @@ function boneGlow(scene: Scene, o: AuraOptions, p: BoneGlow): Part {
 
 function pulse(p: Pulse): Part {
   // The original's `LastCritDamageEffect < WorldTime - interval` fires at once on a fresh buff.
-  let due = 0;
+  let due = p.first ?? 0;
   return {
     update(dt) {
       due -= dt;

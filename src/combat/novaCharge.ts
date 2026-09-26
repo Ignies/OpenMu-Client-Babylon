@@ -11,10 +11,10 @@
  * by the HUD / lighting that want the charge strength.
  */
 import type { ENUM_WORLD } from '../common/types';
-import { SkillStageUpdatePacket } from '../common/packets/ServerToClientPackets';
+import { SkillAnimationPacket, SkillStageUpdatePacket } from '../common/packets/ServerToClientPackets';
 import { EventBus } from '../libs/eventBus';
 import type { CombatLayer } from './layer';
-import { SKILL_NOVA } from './recipes';
+import { SKILL_NOVA, SKILL_NOVA_BEGIN } from './recipes';
 
 // ---- 1. tuning -------------------------------------------------------------
 
@@ -91,15 +91,22 @@ function reset(): void {
   remoteStages.clear();
 }
 
-// `ReceiveSkillCount`: only AT_SKILL_NOVA carries a count; NOVA_BEGIN is
-// ignored by the original too.
+// `ReceiveSkillCount` keeps only AT_SKILL_NOVA (WSclient.cpp:5680-5686); OpenMU tags the
+// stage with NOVA_BEGIN (NovaSkillStartPlugin.cs:98), so both count here.
 EventBus.on('SkillStageUpdate', packet => {
   if (packet.byteLength < SkillStageUpdatePacket.Length!) return;
   const p = new SkillStageUpdatePacket(packet);
-  if (p.SkillNumber !== SKILL_NOVA) return;
+  if (p.SkillNumber !== SKILL_NOVA && p.SkillNumber !== SKILL_NOVA_BEGIN) return;
   const netId = p.ObjectId & 0x7fff;
   if (p.Stage <= 0) remoteStages.delete(netId);
   else remoteStages.set(netId, Math.min(CHARGE_STAGES, p.Stage));
+});
+
+// A new charge counts from 0: `m_bySkillCount = 0` on the NOVA_BEGIN echo (WSclient.cpp:4833-4837).
+EventBus.on('SkillAnimation', packet => {
+  if (packet.byteLength < SkillAnimationPacket.Length!) return;
+  const p = new SkillAnimationPacket(packet);
+  if (p.SkillId === SKILL_NOVA_BEGIN) remoteStages.delete(p.PlayerId & 0x7fff);
 });
 
 // ---- 3. the layer ----------------------------------------------------------

@@ -79,6 +79,10 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_ATTACK_SKILL_SWORD3) return 0.27 + f; // Uppercut (ZzzCharacter.cpp:920)
   if (action === A.PLAYER_ATTACK_SKILL_SWORD5) return 0.24 + f; // Slash (ZzzCharacter.cpp:922)
   if (action === A.PLAYER_ATTACK_RUSH) return 0.3 + f; // Crescent Moon Slash (ZzzCharacter.cpp:971)
+  // Nova's two clips sit inside the range below but are set on their own lines: the charge at
+  // 0.5 + MagicSpeed, halved every frame it plays (ZzzCharacter.cpp:947, 2522-2525), the release flat (:1009).
+  if (action === A.PLAYER_SKILL_HELL_BEGIN) return (0.5 + magicSpeedFactor(magicSpeed)) / 2;
+  if (action === A.PLAYER_SKILL_HELL_START) return 0.3;
   if (action >= A.PLAYER_ATTACK_SKILL_SWORD1 && action < A.PLAYER_ATTACK_END) {
     return 0.3 + f;
   }
@@ -98,7 +102,6 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_SKILL_INFERNO) return 0.6 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_SKILL_HELL) return 0.5 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_RIDE_SKILL) return 0.3 + magicSpeedFactor(magicSpeed);
-  if (action === A.PLAYER_SKILL_HELL_BEGIN) return 0.5 + magicSpeedFactor(magicSpeed);
   // The Dark Lord's strike (Force, Fire Burst), on foot and mounted (ZzzCharacter.cpp:948-949).
   if (action === A.PLAYER_ATTACK_STRIKE) return 0.25 + f;
   if (action === A.PLAYER_ATTACK_RIDE_STRIKE) return 0.2 + f;
@@ -120,6 +123,8 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_ATTACK_RIDE_ATTACK_MAGIC) return 0.3 + magicSpeedFactor(magicSpeed);
   // The summons, with no magic speed (ZzzCharacter.cpp:998-1001).
   if (action >= A.PLAYER_SKILL_SUMMON && action <= A.PLAYER_SKILL_SUMMON_FENRIR) return 0.25;
+  // A flat 0.2 from the base table; SetAttackSpeed never touches it (ZzzCharacter.cpp:1005).
+  if (action === A.PLAYER_SKILL_SWELL_OF_MP) return 0.2;
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {
