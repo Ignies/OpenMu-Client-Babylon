@@ -274,7 +274,15 @@ import {
 } from './ecs/systems/teleportSystem';
 import { getBaseClass, BaseClass } from './common/characterStats';
 import { SKILL_TO_EFFECT } from './common/magicEffects';
-import { playAreaSkillVisual, playBowShotVisual, playChainLightningHop, playSoulBarrierShell, playTargetedSkillVisual, setBuffVisual } from './common/skillVisuals';
+import {
+  playAreaSkillVisual,
+  playBowShotVisual,
+  playChainLightningHop,
+  playSoulBarrierShell,
+  playSummonArrival,
+  playTargetedSkillVisual,
+  setBuffVisual,
+} from './common/skillVisuals';
 import { monsterModelTypeOf, playerPlaySpeed } from './common/playSpeed';
 import { TRAP_MODEL_TABLE } from './common/npcs/trapNpc';
 import {
@@ -1180,6 +1188,7 @@ function addNpcToScope(world: World, npc: ScopeNpc) {
     npc.TargetPositionX,
     npc.TargetPositionY
   );
+  return npcEntity;
 }
 
 EventBus.on('AddNpcsToScope', packet => {
@@ -1199,7 +1208,11 @@ EventBus.on('AddSummonedMonstersToScope', packet => {
   const world = Store.world;
   if (!world) return;
 
-  p.getSummonedMonsters().forEach(m => addNpcToScope(world, m));
+  p.getSummonedMonsters().forEach(m => {
+    const e = addNpcToScope(world, m);
+    // Key >> 15 is the create flag: a fresh summon plays its arrival (WSclient.cpp:3113-3117).
+    if (m.Id & 0x8000) playSummonArrival(world.scene, e);
+  });
 });
 
 // F3 20 (ReceiveSummonLife): percent health of the hero's own summon. The

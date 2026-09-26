@@ -82,6 +82,14 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   21: 'Sound/sKnightSkill3', // Uppercut
   22: 'Sound/sKnightSkill4', // Cyclone
   23: 'Sound/sKnightSkill4', // Slash
+  // Elf summons: SOUND_SKILL_DEFENSE on every client's 0x19 (WSclient.cpp:4244-4262).
+  30: 'Sound/sKnightDefense', // Summon Goblin
+  31: 'Sound/sKnightDefense', // Summon Stone Golem
+  32: 'Sound/sKnightDefense', // Summon Assassin
+  33: 'Sound/sKnightDefense', // Summon Elite Yeti
+  34: 'Sound/sKnightDefense', // Summon Dark Knight
+  35: 'Sound/sKnightDefense', // Summon Bali
+  36: 'Sound/sKnightDefense', // Summon Soldier
   // 38 Decay (eBlastPoison_1) and 39 Ice Storm (eSuddenIce_1): none at the cast, the effect plays them at AttackTime 15
   // (ZzzCharacter.cpp:4449, :4475; common/skillVisuals.ts).
   44: 'Sound/sKnightSkill2', // Rush (ReceiveMagic's SOUND_SKILL_SWORD2; the row plays sCHaveyBlow in Battle Castle)
@@ -97,7 +105,7 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   74: 'Sound/eFirebust', // Space Split (SOUND_ATTACK_FIRE_BUST at the packet, WSclient.cpp:4532-4547)
   512: 'Sound/sDarkEarthQuake', // Earthshake Str
   516: 'Sound/sDarkEarthQuake', // Earthshake Mastery
-  76: 'Sound/pWskill', // Plasma Storm (Fenrir)
+  // 76 Plasma Storm: SOUND_FENRIR_SKILL plays with the bolts 14 ticks later (skillVisuals plasmaStorm).
   77: 'Sound/infinityArrow', // Infinity Arrow
   78: 'Sound/Darklord_firescream', // Fire Scream
   214: 'Sound/SE_Ch_summoner_skill07_lifedrain', // Drain Life

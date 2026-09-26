@@ -209,7 +209,10 @@ export function spawnSprite(
   for (let i = 0; i < count; i++) {
     const card = acquireCard(scene, material, !opts.flat);
     if (opts.flat) card.rotation.x = Math.PI / 2;
-    if (opts.roll !== undefined) card.rotation.z = opts.roll;
+    if (opts.roll !== undefined) {
+      if (opts.flat) card.rotation.y = opts.roll;
+      else card.rotation.z = opts.roll;
+    }
     cards.push(card);
     const s = seed++;
     offsets.push(

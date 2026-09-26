@@ -57,6 +57,8 @@ import { Store } from '../../store';
 // Death (delay, Die clip, corpse, fade, despawn) is owned by DeathSystem.
 
 const MONSTER_ONE_SHOT_ACTIONS = new Set<MonsterActionType>([
+  // A finished STOP2 goes back to STOP1 (ZzzCharacter.cpp:3530); the Assassin summon arrives in it.
+  MonsterActionType.Stop2,
   MonsterActionType.Attack1,
   MonsterActionType.Attack2,
   MonsterActionType.Attack3,

@@ -819,6 +819,55 @@ export const DEFAULT_WIZARDRY_CAST: LightRecipe = {
   release: 0.3,
 };
 
+/**
+ * A summon arriving (the 0x1F create flag): BITMAP_LIGHTNING+1 sub2 lights the ground
+ * (0.5, 1, 0.8) * LifeTime / 10 at range 3 for its 20 ticks (ZzzEffectParticle.cpp:4281-4296).
+ */
+export const SUMMON_ARRIVAL_LIGHT: LightRecipe = {
+  color: [1, 2, 1.6],
+  range: 3,
+  seconds: 0.8,
+  release: 0.8,
+};
+
+/** MODEL_FIRE sub0 / sub1 in flight: (1, 0.1, 0) * Luminosity at range 2 (ZzzEffect.cpp:7936-7945). */
+export const METEOR_LIGHT: LightRecipe = {
+  color: [1, 0.1, 0],
+  range: 2,
+  seconds: 0.4,
+  release: 0.04,
+  flicker: EFFECT_LUMINOSITY,
+};
+
+/** MODEL_SKILL_BLAST and MODEL_STAFF_OF_DESTRUCTION in flight: (0.2, 0.4, 1) * Luminosity at range 2 (MoveHandlers.cpp:2576, :4361). */
+export const BLAST_LIGHT: LightRecipe = {
+  color: [0.2, 0.4, 1],
+  range: 2,
+  seconds: 0.4,
+  release: 0.04,
+  flicker: EFFECT_LUMINOSITY,
+};
+
+/** MODEL_CIRCLE_LIGHT sub0: (1, 0.8, 0.2) * Luminosity at range 4 for its 40 ticks (MoveHandlers.cpp:3862). */
+export const HELLFIRE_CIRCLE_LIGHT: LightRecipe = {
+  color: [1, 0.8, 0.2],
+  range: 4,
+  seconds: 1.6,
+  release: 0.08,
+  flicker: EFFECT_LUMINOSITY,
+};
+
+/**
+ * BITMAP_BOSS_LASER sub0: (0.5, 0.7, 1) at range 2 on each of its 20 cards, 50 cm apart, for 20
+ * ticks (ZzzEffect.cpp:8990-9003). Two range-3 lights per beam stand in for the twenty.
+ */
+export const BOSS_LASER_LIGHT: LightRecipe = {
+  color: [0.5, 0.7, 1],
+  range: 3,
+  seconds: 0.8,
+  release: 0.04,
+};
+
 // ---- 2. state + readers ----------------------------------------------------
 
 const sources = new Set<LightSource>();
