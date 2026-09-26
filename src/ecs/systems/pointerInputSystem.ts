@@ -13,6 +13,7 @@ import { Store } from '../../store';
 import { TELEPORT_ALLY } from '../../common/skillCasting';
 import { aimX, aimY } from '../../camera';
 import { requestPing } from '../../ping/pingNet';
+import { pickGround } from '../../libs/mu/terrainPick';
 
 const COLOR_RED = new Color3(1, 0, 0);
 
@@ -180,12 +181,11 @@ export const PointerInputSystem: ISystemFactory = world => {
     if (ev.event.button === 1 && ev.event.shiftKey) {
       if (ev.type === PointerEventTypes.POINTERDOWN) {
         ev.event.preventDefault();
-        const ground = scene.pick(
+        const ground = pickGround(
+          world,
           aimX(ev.event.clientX),
-          aimY(ev.event.clientY),
-          m => m === world.terrain?.mesh,
-          true
-        ).pickedPoint;
+          aimY(ev.event.clientY)
+        );
         if (ground) requestPing(ground.x, ground.z);
       }
       return;
@@ -228,12 +228,11 @@ export const PointerInputSystem: ISystemFactory = world => {
         world.rightPointerPressed = false;
       }
       if (ev.type === PointerEventTypes.POINTERDOWN || rightDrag) {
-        const ground = scene.pick(
+        const ground = pickGround(
+          world,
           aimX(ev.event.clientX),
-          aimY(ev.event.clientY),
-          m => m === world.terrain?.mesh,
-          true
-        ).pickedPoint;
+          aimY(ev.event.clientY)
+        );
         // Without `pvp` a player under the cursor is no target, so a right
         // click in a crowd never opens fire on a passer-by. Ctrl over
         // anything else drops the object under the cursor and casts at the

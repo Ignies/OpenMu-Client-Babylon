@@ -9,6 +9,7 @@ import type { ModelObject } from '../common/modelObject';
 import type { MonsterActionType, PlayerAction } from '../common/objects/enum';
 import type { PetFollow, PetSpec } from '../common/pets';
 import type { MUAttributeSystem } from '../libs/attributeSystem';
+import type { TerrainPicker } from '../libs/mu/terrainPick';
 import { TransformNode } from '../libs/babylon/exports';
 import { createPathfinding } from '../libs/pathfinding';
 import { CharacterClassNumber, ENUM_WORLD } from '../common';
@@ -525,6 +526,8 @@ export class World extends ECSWorld<Entity> {
 
   terrain: {
     mesh: Mesh;
+    /** Every ground pick: `pickGround` (terrainPick.ts). */
+    picker: TerrainPicker;
     MapTileObjects: (typeof ModelObject)[];
     extraHeight: number;
   } | null = null;
