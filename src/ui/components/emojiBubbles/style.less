@@ -25,6 +25,12 @@
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.75));
   }
 
+  // A chat emoji's picture: smooth scaling, the art is drawn at 128 px.
+  .picture {
+    max-width: none;
+    image-rendering: auto;
+  }
+
   // Two animations per glyph: the pop-in plays once, then the idle loop takes
   // over. During the pop the loop is still in its delay with no fill, so the
   // pop's `both` value is what applies; after it, the loop wins as the later
@@ -40,6 +46,14 @@
     animation:
       emoji-pop-side 200ms cubic-bezier(0.2, 1.7, 0.4, 1) both,
       emoji-throb 0.75s 200ms ease-in-out infinite;
+  }
+
+  // A picture on the shoulder sits beside a balloon: it floats, the twitch
+  // is the anger mark's.
+  &.side .picture {
+    animation:
+      emoji-pop-side 200ms cubic-bezier(0.2, 1.7, 0.4, 1) both,
+      emoji-float 1.5s 200ms ease-in-out infinite;
   }
 }
 

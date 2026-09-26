@@ -4,9 +4,9 @@
  * (`src/emojis/index.ts` finds them when the client is built). An animated
  * webp plays by itself in an `<img>`.
  *
- * They travel as their code. A chat packet carries one byte per character and
- * the server reads it as UTF-8, so only ASCII makes the round trip. A client
- * that has the file draws the picture, one that does not shows the code.
+ * They travel as their code, plain ASCII, which every client and the server
+ * pass along untouched. A client that has the file draws the picture, one
+ * that does not shows the code.
  */
 
 import { CHAT_LINE_HEIGHT, splitChatLine } from './chat';
@@ -30,8 +30,6 @@ export const CHAT_EMOJI_ADVANCE = CHAT_EMOJI_SIZE + 2;
 /** Letters typed after a `:` before the completion list opens. */
 export const EMOJI_QUERY_MIN = 2;
 export const EMOJI_RECENT_MAX = 16;
-
-export const EMPTY_EMOJI_CATALOG: EmojiCatalog = { packs: [], byCode: new Map(), skipped: [] };
 
 const byText = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 
@@ -114,19 +112,9 @@ export function emojiSegments(text: string, catalog: EmojiCatalog): EmojiSegment
   return segments;
 }
 
-/** Nothing but emojis and blanks: the balloon draws those large. */
-export function isEmojiOnly(segments: readonly EmojiSegment[]): boolean {
-  let any = false;
-  for (const segment of segments) {
-    if (typeof segment !== 'string') any = true;
-    else if (segment.trim()) return false;
-  }
-  return any;
-}
-
 /**
  * The line without its codes, for the word matches that fire emotes and
- * bubbles: `:dk_sigh:` holds "hi", which would wave.
+ * bubbles: `:dk_cry:` would play the cry emote.
  */
 export function stripEmojiCodes(text: string, catalog: EmojiCatalog): string {
   const hits = scanEmojis(text, catalog);
@@ -143,7 +131,7 @@ export function stripEmojiCodes(text: string, catalog: EmojiCatalog): string {
 
 const GLYPH_BASE = 0xe000;
 const GLYPH_LAST = 0xf8ff;
-const GLYPHS = /[-]/g;
+const GLYPHS = /[\ue000-\uf8ff]/g;
 
 /**
  * `splitChatLine` for a line that may hold codes. Each code is swapped for one
@@ -159,7 +147,7 @@ export function splitChatLineWithEmojis(
   advance = CHAT_EMOJI_ADVANCE
 ): string[] {
   const hits = scanEmojis(text, catalog);
-  if (!hits.length || /[-]/.test(text) || hits.length > GLYPH_LAST - GLYPH_BASE) {
+  if (!hits.length || /[\ue000-\uf8ff]/.test(text) || hits.length > GLYPH_LAST - GLYPH_BASE) {
     return splitChatLine(prefix, text, width, measure);
   }
 
@@ -237,8 +225,34 @@ export function spliceChatText(
   return { text: next, caret: from + insert.length };
 }
 
-/** A chat emoji popped over its speaker; `side` rides the shoulder, clear of a text balloon. */
-export type ChatEmojiBubble = { emoji: ChatEmoji; side: boolean };
+/**
+ * An emoji typed with the system picker (Win + .), ZWJ families, flags and
+ * skin tones whole. Built at run time: a browser without the `v` flag falls
+ * back to single pictographs instead of failing to load the module.
+ */
+function unicodeEmojiPattern(): RegExp {
+  try {
+    return new RegExp('\\p{RGI_Emoji}', 'gv');
+  } catch {
+    return new RegExp('\\p{Extended_Pictographic}', 'gu');
+  }
+}
+
+const UNICODE_EMOJI = unicodeEmojiPattern();
+
+/** The first system emoji in the line and where it starts, or null. */
+export function firstUnicodeEmoji(text: string): { index: number; glyph: string } | null {
+  UNICODE_EMOJI.lastIndex = 0;
+  const m = UNICODE_EMOJI.exec(text);
+  UNICODE_EMOJI.lastIndex = 0;
+  return m ? { index: m.index, glyph: m[0] } : null;
+}
+
+/**
+ * A chat emoji popped over its speaker: a pack picture, or a system emoji's
+ * glyph. `side` rides the shoulder, clear of a text balloon.
+ */
+export type ChatEmojiBubble = { emoji: ChatEmoji | string; side: boolean };
 
 /** Seconds a chat emoji stays over its speaker, fade included. */
 export const CHAT_EMOJI_BUBBLE_SECONDS = 3.5;
@@ -247,17 +261,34 @@ export const CHAT_EMOJI_BUBBLE_SECONDS = 3.5;
  * What a public line shows over its speaker. A line of nothing but emojis
  * pops the first one over the head and leaves no balloon, the way a bubble
  * word does (`emojiBubbles.ts`). A line with words keeps its balloon, less the
- * codes, and pops the first emoji on the shoulder beside it.
+ * codes it cannot draw, and pops the first pack emoji on the shoulder beside
+ * it; a system emoji among words is already drawn in the balloon.
  */
 export function chatEmojiBubbleOf(
   text: string,
   catalog: EmojiCatalog
 ): { bubble: ChatEmojiBubble | null; balloonText: string } {
   const segments = emojiSegments(text, catalog);
-  const emoji = segments.find((s): s is ChatEmoji => typeof s !== 'string');
-  if (!emoji) return { bubble: null, balloonText: text };
-  if (isEmojiOnly(segments)) return { bubble: { emoji, side: false }, balloonText: '' };
-  return { bubble: { emoji, side: true }, balloonText: stripEmojiCodes(text, catalog) };
+  const pictureAt = segments.findIndex(s => typeof s !== 'string');
+  const picture = pictureAt < 0 ? null : (segments[pictureAt] as ChatEmoji);
+  const unicode = firstUnicodeEmoji(text);
+
+  const words = segments
+    .filter((s): s is string => typeof s === 'string')
+    .join(' ')
+    .replace(UNICODE_EMOJI, ' ')
+    .trim();
+
+  if (!words && (picture || unicode)) {
+    // Where the picture's code starts: the text in front of it.
+    const pictureIndex = picture
+      ? segments.slice(0, pictureAt).reduce((n, s) => n + (s as string).length, 0)
+      : Infinity;
+    const first = unicode && unicode.index < pictureIndex ? unicode.glyph : picture!;
+    return { bubble: { emoji: first, side: false }, balloonText: '' };
+  }
+  if (!picture) return { bubble: null, balloonText: text };
+  return { bubble: { emoji: picture, side: true }, balloonText: stripEmojiCodes(text, catalog) };
 }
 
 /** Most recent first, no repeats. */

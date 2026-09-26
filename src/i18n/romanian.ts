@@ -851,6 +851,9 @@ export const romanianLayer: LanguageLayer = {
     'chat.tab.all': 'Tot',
     'chat.tab.chat': 'Chat',
     'chat.tab.system': 'Sistem',
+    'chat.emoji.button': 'Emoji',
+    'chat.emoji.recent': 'Folosite recent',
+    'chat.latest': 'Înapoi la cele mai noi mesaje',
 
     'minimap.close': 'Închide',
     'moveList.title': 'Lista de destinații',
@@ -1596,6 +1599,7 @@ export const romanianLayer: LanguageLayer = {
     'options.lootZen': 'Grămezi de Zen de la',
     'options.firstPersonBob': 'Legănarea capului la persoana întâi',
     'options.chatTimestamps': 'Ora în chat',
+    'options.chatEmojis': 'Emoji în chat',
     'options.quickItemActions': 'Ctrl-clic mută obiectele',
     'options.confirmValuableItems': 'Întreabă înainte de a arunca sau vinde obiecte valoroase',
     'options.blockBrowserKeys': 'Blochează scurtăturile browserului',
@@ -2401,6 +2405,8 @@ export const romanianLayer: LanguageLayer = {
     'options.help.chatTimestamps':
       'Afișează ora, de exemplu 14:03, la începutul fiecărui rând din chat.',
     'options.help.whisperBeep': 'Redă un sunet când cineva îți trimite o șoaptă.',
+    'options.help.chatEmojis':
+      'Afișează codurile emoji, adică un nume între două semne de două puncte, ca imagini în chat și deasupra personajelor și adaugă butonul pentru emoji în caseta de chat. Pe Oprit, codurile rămân text simplu.',
     'options.help.slideHelp':
       'Afișează anunțurile serverului, care defilează pe o bandă în partea de sus a ecranului.',
     'options.help.stateWarnings':

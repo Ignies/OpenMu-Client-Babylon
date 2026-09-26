@@ -1,6 +1,13 @@
 import './style.less';
 import { t, type TextKey } from '../../../../../i18n';
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { Social } from '../../../../../social';
@@ -20,7 +27,20 @@ import {
 import { isTypingInField } from '../../../../../ecs/systems/keyboardInputSystem';
 import { GameOptions } from '../../../../../common/gameOptions';
 import { isKey } from '../../../../../common/keyBindings';
+import { EmojiText } from '../../../../components/emojiText';
+import { EMOJI_CATALOG } from '../../../../../emojis';
+import { EmojiPicker, RecentEmojis } from './emojiPicker';
 import {
+  CHAT_EMOJI_SIZE,
+  emojiPackLabel,
+  emojiQueryAt,
+  matchEmojiCodes,
+  spliceChatText,
+  type ChatEmoji,
+} from '../../../../../common/chatEmojis';
+import {
+  chatEndIndex,
+  chatInputBudget,
   chatPkClass,
   CHAT_FILTERS,
   CHAT_INPUT_MODES,
@@ -29,8 +49,9 @@ import {
   CHATBOX_HEIGHT,
   CHATBOX_WIDTH,
   chatTimestamp,
+  chatWheelRows,
   ChatLineType,
-  MAX_CHAT_LENGTH,
+  joinCopiedRows,
   type ChatInputMode,
   type ChatLine,
 } from '../../../../../common/chat';
@@ -67,6 +88,12 @@ const TRANSPARENCY_START_X = FRAME_RESIZE_START_X + BUTTON_WIDTH;
 // `m_pWhsprIDInputBox->SetPosition(x + 5, y + 32)`, `m_pChatInputBox` at +72.
 const WHISPER_FIELD: CSSProperties = { left: 5, top: 32, width: 62, height: 13 };
 const CHAT_FIELD: CSSProperties = { left: 72, top: 32, width: CHATBOX_WIDTH - 72 - 6, height: 13 };
+// The emoji button takes the end of the text slot (x 68..278 in the art).
+const EMOJI_BUTTON = { left: 261, top: 29, width: 16, height: 16 };
+const EMOJI_FACE = { width: 14, height: 14 };
+const CHAT_FIELD_BESIDE_EMOJIS: CSSProperties = { ...CHAT_FIELD, width: EMOJI_BUTTON.left - 72 - 2 };
+const COMPLETION_EMOJI = { width: 14, height: 14 };
+const ALL_EMOJIS = [...EMOJI_CATALOG.byCode.values()];
 // `RenderColor(x + 2, y + 28, 61, 17)` in (0.5, 0.2, 0.2, 0.2) when whispering is off.
 const WHISPER_OFF_TINT: CSSProperties = { left: 2, top: 28, width: 61, height: 17 };
 
@@ -207,25 +234,60 @@ const FilterTabs = observer(() => {
   );
 });
 
+/** The picture over a hovered log emoji; the row itself is too small to read it. */
+const PREVIEW_SIZE = 48;
+
+/** A row as copied: an emoji is its code, a carried row's hidden clock is left out. */
+function copiedText(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? '';
+  if (node instanceof HTMLImageElement) return node.alt;
+  if (node instanceof HTMLElement && node.dataset.copy === 'skip') return '';
+  let out = '';
+  node.childNodes.forEach(child => {
+    out += copiedText(child);
+  });
+  return out;
+}
+
+/** The selected part of every log row the selection touches, top to bottom. */
+function selectedRows(log: HTMLElement, range: Range): { messageId: number; text: string }[] {
+  const rows: { messageId: number; text: string }[] = [];
+  log.querySelectorAll<HTMLElement>('.chat-line').forEach(row => {
+    if (!range.intersectsNode(row)) return;
+    const part = document.createRange();
+    part.selectNodeContents(row);
+    if (range.compareBoundaryPoints(Range.START_TO_START, part) > 0) {
+      part.setStart(range.startContainer, range.startOffset);
+    }
+    if (range.compareBoundaryPoints(Range.END_TO_END, part) < 0) {
+      part.setEnd(range.endContainer, range.endOffset);
+    }
+    rows.push({ messageId: Number(row.dataset.message), text: copiedText(part.cloneContents()) });
+  });
+  return rows;
+}
+
 const ChatLog = observer(() => {
   const framed = Social.chatLogFramed;
   const showing = Social.chatLogLines;
   const lines = Social.visibleChatLines;
-  // `m_iCurrentRenderEndLine`: null follows the newest line. Pinned by the
-  // line's id, not its index, so a new line (or a dropped oldest one) does
-  // not shift the view the reader scrolled to.
-  const [endId, setEndId] = useState<number | null>(null);
   // `m_iPointedMessageIndex`, by message rather than by row: a message that
   // wrapped highlights whole and answers a right click on either of its rows.
   const [pointed, setPointed] = useState(-1);
+  const [preview, setPreview] = useState<{ emoji: ChatEmoji; x: number; y: number } | null>(
+    null
+  );
   const dragRef = useRef<{ startY: number; startEnd: number } | null>(null);
+  const wheelCarry = useRef(0);
+  const logRef = useRef<HTMLDivElement>(null);
 
+  // `m_iCurrentRenderEndLine` lives on `Social.chatLogEndId` so the input box
+  // can page the log too.
   const last = lines.length - 1;
-  const pinned = endId === null ? -1 : lines.findIndex(l => l.id === endId);
-  const end = pinned < 0 ? last : pinned;
-  const setEndLine = (index: number) => setEndId(index >= last ? null : lines[index].id);
+  const end = chatEndIndex(lines, Social.chatLogEndId);
   const start = Math.max(0, end - showing + 1);
   const visible = lines.slice(start, end + 1);
+  const below = last - end;
 
   const height =
     SCROLL_MIDDLE_PART_HEIGHT * showing +
@@ -239,19 +301,66 @@ const ChatLog = observer(() => {
     FONT_LEADING +
     SCROLL_MIDDLE_PART_HEIGHT * (showing - visible.length);
 
+  // Copying log text: codes for the pictures, and a message the log wrapped
+  // as one line. The event goes to the page, not to the log.
   useEffect(() => {
-    if (!framed) setEndId(null);
-  }, [framed]);
+    const onCopy = (e: ClipboardEvent) => {
+      const log = logRef.current;
+      const selection = window.getSelection();
+      if (!log || !selection || selection.isCollapsed || !selection.rangeCount) return;
+      const range = selection.getRangeAt(0);
+      if (!log.contains(range.commonAncestorContainer)) return;
+      const text = joinCopiedRows(selectedRows(log, range));
+      if (!text || !e.clipboardData) return;
+      e.clipboardData.setData('text/plain', text);
+      e.preventDefault();
+    };
+    document.addEventListener('copy', onCopy);
+    return () => document.removeEventListener('copy', onCopy);
+  }, []);
 
   if (!Social.chatLogVisible) return null;
 
-  const scrollBy = (delta: number) => {
-    if (!framed || lines.length <= showing) return;
-    setEndLine(Math.min(last, Math.max(showing - 1, end + delta)));
+  const scrollable = lines.length > showing;
+
+  // The original scrolls framed or not (NewUIChatLogWindow.cpp:679).
+  const onWheel = (e: React.WheelEvent) => {
+    // Ctrl+wheel is the browser's zoom, which boot.tsx cancels.
+    if (e.ctrlKey || !scrollable) return;
+    const step = chatWheelRows(e.deltaY, e.deltaMode, wheelCarry.current, showing);
+    wheelCarry.current = step.carry;
+    if (step.rows) {
+      setPreview(null);
+      Social.scrollChatLog(step.rows);
+    }
+  };
+
+  // A selection holds the view still, or the next line would scroll the rows
+  // it covers away.
+  const onMouseUp = () => {
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed && Social.chatLogEndId === null && last >= 0) {
+      Social.pinChatLog(lines[end].id);
+    }
+  };
+
+  const onEmojiHover = (emoji: ChatEmoji | null, img: HTMLImageElement | null) => {
+    const log = logRef.current;
+    if (!emoji || !img || !log) {
+      setPreview(null);
+      return;
+    }
+    const box = log.getBoundingClientRect();
+    const scale = box.width / log.offsetWidth || 1;
+    const rect = img.getBoundingClientRect();
+    setPreview({
+      emoji,
+      x: (rect.left + rect.width / 2 - box.left) / scale,
+      y: (rect.top - box.top) / scale,
+    });
   };
 
   // `UpdateScrollPos`: thumb position follows the end line.
-  const scrollable = lines.length > showing;
   const rate = scrollable ? (end - (showing - 1)) / (lines.length - showing) : 1;
   const trackTop = WND_TOP_BOTTOM_EDGE;
   const trackHeight = height - SCROLL_BTN_HEIGHT - WND_TOP_BOTTOM_EDGE * 2;
@@ -270,7 +379,7 @@ const ChatLog = observer(() => {
     const scale = MuWindows.scaleOf(CHAT_ID) || 1;
     const perLine = trackHeight / (lines.length - showing);
     const delta = Math.round((e.clientY - drag.startY) / scale / perLine);
-    setEndLine(Math.min(last, Math.max(showing - 1, drag.startEnd + delta)));
+    Social.scrollChatLogTo(drag.startEnd + delta);
   };
   const onThumbUp = () => {
     dragRef.current = null;
@@ -278,6 +387,7 @@ const ChatLog = observer(() => {
 
   return (
     <div
+      ref={logRef}
       className={`chat-log${framed ? ' framed' : ''}`}
       style={{
         width,
@@ -285,12 +395,12 @@ const ChatLog = observer(() => {
         bottom: CHATBOX_HEIGHT,
         backgroundColor: framed ? `rgba(0,0,0,${Social.chatLogAlpha})` : undefined,
       }}
-      onWheel={e => {
-        if (!framed) return;
-        e.stopPropagation();
-        scrollBy(e.deltaY > 0 ? 1 : -1);
+      onWheel={onWheel}
+      onMouseUp={onMouseUp}
+      onMouseLeave={() => {
+        setPointed(-1);
+        setPreview(null);
       }}
-      onMouseLeave={() => setPointed(-1)}
     >
       {framed && (
         <>
@@ -310,6 +420,7 @@ const ChatLog = observer(() => {
           <div
             key={line.id}
             className="chat-line"
+            data-message={line.messageId}
             style={{
               left: WND_LEFT_RIGHT_EDGE,
               top: firstLineY + SCROLL_MIDDLE_PART_HEIGHT * s,
@@ -331,6 +442,7 @@ const ChatLog = observer(() => {
                 // A carried row keeps the column so the text stays in line,
                 // without printing the same minute twice.
                 style={line.continued ? { visibility: 'hidden' } : undefined}
+                data-copy={line.continued ? 'skip' : undefined}
               >
                 {chatTimestamp(line.at)}{' '}
               </span>
@@ -348,14 +460,49 @@ const ChatLog = observer(() => {
                   {line.sender}
                 </span>
                 {' : '}
-                {line.text}
+                <EmojiText text={line.text} size={CHAT_EMOJI_SIZE} onHover={onEmojiHover} />
               </>
+            ) : line.sender ? (
+              <EmojiText text={line.text} size={CHAT_EMOJI_SIZE} onHover={onEmojiHover} />
             ) : (
               line.text
             )}
           </div>
         );
       })}
+
+      {preview && (
+        <div
+          className="chat-emoji-preview"
+          style={{
+            left: Math.min(width - PREVIEW_SIZE / 2 - 4, Math.max(PREVIEW_SIZE / 2 + 4, preview.x)),
+            top: preview.y - 4,
+          }}
+        >
+          <img
+            src={preview.emoji.url}
+            alt=""
+            draggable={false}
+            style={{ width: PREVIEW_SIZE, height: PREVIEW_SIZE }}
+          />
+          <span>:{preview.emoji.code}:</span>
+        </div>
+      )}
+
+      {/* Scrolled back: how many rows are below, and the way back down. */}
+      {below > 0 && (
+        <div
+          className="chat-log-latest"
+          style={{
+            right: framed ? SCROLL_BAR_WIDTH + WND_LEFT_RIGHT_EDGE + 6 : WND_LEFT_RIGHT_EDGE,
+            bottom: WND_TOP_BOTTOM_EDGE,
+          }}
+          title={t('chat.latest')}
+          onClick={uiClick(() => Social.followChatLog())}
+        >
+          ▼ {below}
+        </div>
+      )}
 
       {framed && (
         <>
@@ -446,20 +593,47 @@ const StripButton = ({
 const ChatInput = observer(() => {
   const inputRef = useRef<HTMLInputElement>(null);
   const whisperRef = useRef<HTMLInputElement>(null);
+  const emojiButtonRef = useRef<HTMLDivElement>(null);
   const [text, setText] = useState('');
+  // Where the caret is, for the `:` list; `pendingCaret` is put back after a pick.
+  const [caret, setCaret] = useState(0);
+  const pendingCaret = useRef<number | null>(null);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [tip, setTip] = useState<{ text: string; x: number } | null>(null);
   const [completionIndex, setCompletionIndex] = useState(0);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  // The `:` list Escape put away, by where its code starts.
+  const [hiddenQuery, setHiddenQuery] = useState(-1);
+  const [face, setFace] = useState(0);
   const open = Social.chatInputOpen;
+
+  const whisperLine = Social.whisperEnabled && !!Social.whisperTarget.trim();
+  const emojis = GameOptions.chatEmojis && ALL_EMOJIS.length > 0;
+
+  // The `:` list: the codes the word at the caret could become.
+  const emojiQuery = emojis ? emojiQueryAt(text, caret) : null;
+  const emojiMatches =
+    emojiQuery && emojiQuery.start !== hiddenQuery
+      ? matchEmojiCodes(emojiQuery.query, EMOJI_CATALOG, CHAT_COMPLETION_ROWS)
+      : [];
 
   // The `/` help: every command the typed word could become, GM ones only
   // for a GM. A whisper line is never a command, so no list while whispering.
   const isGm = Store.playerData.isGameMaster;
   const completions =
-    text.startsWith('/') && !(Social.whisperEnabled && Social.whisperTarget.trim())
+    !emojiMatches.length && text.startsWith('/') && !whisperLine
       ? matchChatCommands(text, isGm).slice(0, CHAT_COMPLETION_ROWS)
       : [];
-  const selectedCompletion = completions[Math.min(completionIndex, completions.length - 1)];
+  const listLength = emojiMatches.length || completions.length;
+  const selectedIndex = Math.min(completionIndex, listLength - 1);
+  const selectedCompletion = completions[selectedIndex];
+  const selectedEmoji = emojiMatches[selectedIndex];
+
+  const mode = Social.chatInputMode;
+  // What `sendChat` will put in front of the line, which the line leaves room for.
+  const budget = chatInputBudget(
+    whisperLine || text.startsWith('/') ? '' : CHAT_INPUT_PREFIX[mode]
+  );
 
   /** Tab / click: put the command name (and a space when it takes arguments) in the field. */
   const complete = (command: ChatCommand) => {
@@ -467,18 +641,40 @@ const ChatInput = observer(() => {
     setCompletionIndex(0);
   };
 
+  const closePicker = useCallback(() => setPickerOpen(false), []);
+
   useEffect(() => {
     if (!open) return;
     setText('');
+    setCaret(0);
     setHistoryIndex(-1);
     setTip(null);
+    setPickerOpen(false);
+    setHiddenQuery(-1);
     const id = requestAnimationFrame(() => inputRef.current?.focus());
     return () => cancelAnimationFrame(id);
   }, [open]);
 
+  useLayoutEffect(() => {
+    const at = pendingCaret.current;
+    const field = inputRef.current;
+    if (at === null || !field) return;
+    pendingCaret.current = null;
+    field.focus();
+    field.setSelectionRange(at, at);
+    setCaret(at);
+  });
+
+  // Enter while the box is up but a click in the log took the focus: back
+  // into the field rather than nothing.
+  useEventBus('keyPressed', key => {
+    if (Social.chatInputOpen && OPEN_KEYS.has(key) && !isTypingInField()) {
+      inputRef.current?.focus();
+    }
+  });
+
   if (!open) return null;
 
-  const mode = Social.chatInputMode;
   const whispering = Social.whisperEnabled;
   const framed = Social.chatLogFramed;
 
@@ -493,6 +689,7 @@ const ChatInput = observer(() => {
       playUiSound('error');
       return;
     }
+    Social.followChatLog();
     Social.closeChatInput();
   };
 
@@ -512,6 +709,29 @@ const ChatInput = observer(() => {
     next = (next + direction + history.length) % history.length;
     setHistoryIndex(next);
     setText(history[next]);
+  };
+
+  /** An emoji's code in place of `text[from, to)`; refused when the line has no room for all of it. */
+  const placeEmoji = (from: number, to: number, emoji: ChatEmoji) => {
+    const next = spliceChatText(text, from, to, `:${emoji.code}:`, budget);
+    if (!next) {
+      playUiSound('error');
+      return;
+    }
+    setText(next.text);
+    pendingCaret.current = next.caret;
+    setCompletionIndex(0);
+    RecentEmojis.push(emoji.code);
+  };
+
+  const pickEmoji = (emoji: ChatEmoji) => {
+    const field = inputRef.current;
+    const from = field?.selectionStart ?? text.length;
+    placeEmoji(from, field?.selectionEnd ?? from, emoji);
+  };
+
+  const completeEmoji = (emoji: ChatEmoji) => {
+    if (emojiQuery) placeEmoji(emojiQuery.start, caret, emoji);
   };
 
   return (
@@ -662,37 +882,51 @@ const ChatInput = observer(() => {
       <input
         ref={inputRef}
         className="chat-field chat-text-field"
-        style={CHAT_FIELD}
-        maxLength={MAX_CHAT_LENGTH}
+        style={emojis ? CHAT_FIELD_BESIDE_EMOJIS : CHAT_FIELD}
+        maxLength={budget}
         value={text}
         spellCheck={false}
         autoComplete="off"
         onChange={e => {
           setText(e.target.value);
+          setCaret(e.target.selectionStart ?? e.target.value.length);
           setCompletionIndex(0);
         }}
+        onSelect={e => setCaret(e.currentTarget.selectionStart ?? 0)}
         onKeyDown={e => {
           if (e.nativeEvent.isComposing || e.keyCode === 229) return;
           if (e.key === 'Enter') {
             e.preventDefault();
-            submit();
+            // With the `:` list up, Enter takes the code: half a code is never meant to be sent.
+            if (selectedEmoji) completeEmoji(selectedEmoji);
+            else submit();
           } else if (e.key === 'Escape') {
             e.preventDefault();
-            Social.closeChatInput();
-          } else if (completions.length > 1 && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+            if (pickerOpen) setPickerOpen(false);
+            else if (emojiQuery && emojiMatches.length) setHiddenQuery(emojiQuery.start);
+            else Social.closeChatInput();
+          } else if (listLength > 1 && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
             // With a list up the arrows walk it instead of the history.
             e.preventDefault();
             const step = e.key === 'ArrowUp' ? -1 : 1;
-            setCompletionIndex(i => (i + step + completions.length) % completions.length);
+            setCompletionIndex(i => (Math.min(i, listLength - 1) + step + listLength) % listLength);
           } else if (e.key === 'ArrowUp') {
             e.preventDefault();
             recall(-1);
           } else if (e.key === 'ArrowDown') {
             e.preventDefault();
             recall(1);
+          } else if (e.key === 'PageUp' || e.key === 'PageDown') {
+            // `m_bShowFrame` + PageUp / PageDown pages the log (NewUIChatInputBox.cpp:455), framed or not here.
+            e.preventDefault();
+            const page = Math.max(1, Social.chatLogLines - 1);
+            Social.scrollChatLog(e.key === 'PageUp' ? -page : page);
           } else if (e.key === 'F3') {
             e.preventDefault();
             Social.toggle('whisperEnabled');
+          } else if (e.key === 'Tab' && selectedEmoji) {
+            e.preventDefault();
+            completeEmoji(selectedEmoji);
           } else if (e.key === 'Tab' && selectedCompletion) {
             e.preventDefault();
             complete(selectedCompletion);
@@ -703,6 +937,68 @@ const ChatInput = observer(() => {
           }
         }}
       />
+
+      {/* The emoji button, at the end of the text slot; a new face each hover. */}
+      {emojis && (
+        <div
+          ref={emojiButtonRef}
+          className={`chat-emoji-button${pickerOpen ? ' open' : ''}`}
+          style={EMOJI_BUTTON}
+          onMouseDown={e => e.preventDefault()}
+          onMouseEnter={() => {
+            setFace(f => (f + 1 + Math.floor(Math.random() * (ALL_EMOJIS.length - 1))) % ALL_EMOJIS.length);
+            setTip({ text: t('chat.emoji.button'), x: EMOJI_BUTTON.left });
+          }}
+          onMouseLeave={() => setTip(null)}
+          onClick={uiClick(() => setPickerOpen(o => !o))}
+        >
+          <img
+            src={ALL_EMOJIS[face % ALL_EMOJIS.length].url}
+            alt=""
+            draggable={false}
+            style={EMOJI_FACE}
+          />
+        </div>
+      )}
+      {emojis && pickerOpen && (
+        <EmojiPicker
+          onPick={pickEmoji}
+          onClose={closePicker}
+          refocus={() => inputRef.current?.focus()}
+          buttonRef={emojiButtonRef}
+          bottom={CHATBOX_HEIGHT + 2}
+        />
+      )}
+
+      {/* The `:` list: the matching emojis over the box; Tab, Enter or a click takes one. */}
+      {emojiMatches.length > 0 && (
+        <div
+          className="chat-completion"
+          style={{ left: CHAT_FIELD.left, bottom: CHATBOX_HEIGHT - (CHAT_FIELD.top as number) + 2 }}
+        >
+          {emojiMatches.map((emoji, i) => (
+            <div
+              key={emoji.code}
+              className={`chat-completion-row${i === selectedIndex ? ' selected' : ''}`}
+              onMouseDown={e => {
+                e.preventDefault();
+                completeEmoji(emoji);
+              }}
+            >
+              <img
+                className="chat-completion-emoji"
+                src={emoji.url}
+                alt=""
+                draggable={false}
+                style={COMPLETION_EMOJI}
+              />
+              <span className="chat-completion-name">:{emoji.code}:</span>
+              <span className="chat-completion-help">{emojiPackLabel(emoji.pack)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* The `/` command help: the matching commands over the box, newest
           first row selected; Tab or a click completes. */}
       {completions.length > 0 && (

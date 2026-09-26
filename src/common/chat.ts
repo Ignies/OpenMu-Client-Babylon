@@ -211,7 +211,7 @@ export function chatWheelRows(
         ? deltaY * showing * CHAT_WHEEL_PIXELS_PER_ROW
         : deltaY;
   const total = Math.sign(carry) === -Math.sign(pixels) ? pixels : carry + pixels;
-  const rows = Math.trunc(total / CHAT_WHEEL_PIXELS_PER_ROW);
+  const rows = Math.trunc(total / CHAT_WHEEL_PIXELS_PER_ROW) || 0;
   return { rows, carry: total - rows * CHAT_WHEEL_PIXELS_PER_ROW };
 }
 

@@ -322,6 +322,12 @@ export type GameOptions = {
   /** A "14:03" column in front of every chat log line. */
   chatTimestamps: boolean;
   /**
+   * Chat emoji codes (`:dk_love:`) drawn as their pictures in the log and
+   * over the speaker, plus the emoji button in the chat box (ours). Off shows
+   * the codes as text.
+   */
+  chatEmojis: boolean;
+  /**
    * Index into `UI_SCALE_STEPS`: how big every window is drawn, on top of
    * the size it was dragged to. 4K screens want more than a 640x480 stage.
    */
@@ -576,6 +582,7 @@ const DEFAULTS: GameOptions = {
   lootOther: false,
   lootZen: 0,
   chatTimestamps: false,
+  chatEmojis: true,
   uiScale: 3,
   lockWindows: false,
   stateWarnings: true,

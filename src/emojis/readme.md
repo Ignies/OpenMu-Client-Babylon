@@ -12,7 +12,8 @@ src/emojis/
 
 - **The file name is the code** players type or pick: `dk_love.webp` is sent
   as `:dk_love:`. Lowercase letters, digits and `_` only, at most 32
-  characters. Chat only carries plain ASCII, so nothing else would survive.
+  characters, so the code is easy to type and reads the same on every
+  system.
 - **Names are unique across all packs.** Start them with a short pack prefix
   (`dk_`, `dw_`). A duplicate or a badly named file is left out and fails the
   tests.

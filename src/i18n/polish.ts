@@ -249,6 +249,7 @@ export const polishLayer: LanguageLayer = {
     'options.quickItemActions': 'Ctrl+klik przenosi przedmioty',
     'options.confirmValuableItems': 'Pytaj przed wyrzuceniem lub sprzedażą cennych rzeczy',
     'options.chatTimestamps': 'Godzina w czacie',
+    'options.chatEmojis': 'Emoji w czacie',
     'options.blockBrowserKeys': 'Blokuj skróty przeglądarki',
     'options.fullscreen': 'Pełny ekran',
     'options.installApp': 'Zainstaluj aplikację',
@@ -416,6 +417,8 @@ export const polishLayer: LanguageLayer = {
       'Stosy Zen o co najmniej tej wartości zachowują nazwę. Wył. zostawia nazwy wszystkim stosom.',
     'options.help.chatTimestamps': 'Pokazuje godzinę, np. 14:03, przed każdą linią czatu.',
     'options.help.whisperBeep': 'Odtwarza dźwięk, gdy ktoś do ciebie szepcze.',
+    'options.help.chatEmojis':
+      'Pokazuje kody emoji, czyli nazwę między dwoma dwukropkami, jako obrazki w czacie i nad postaciami oraz dodaje przycisk emoji do pola czatu. Wył. pokazuje kody jako zwykły tekst.',
     'options.help.slideHelp': 'Pokazuje ogłoszenia serwera przewijane na pasku u góry ekranu.',
     'options.help.stateWarnings':
       'Ostrzega, gdy ekwipunek jest prawie zniszczony, torba pełna, mikstury się kończą lub wygasa wzmocnienie.',
@@ -1295,6 +1298,9 @@ export const polishLayer: LanguageLayer = {
     'chat.tab.all': 'Wszystko',
     'chat.tab.chat': 'Czat',
     'chat.tab.system': 'System',
+    'chat.emoji.button': 'Emoji',
+    'chat.emoji.recent': 'Ostatnio używane',
+    'chat.latest': 'Wróć do najnowszych wiadomości',
     'minimap.close': 'Zamknij',
     'minimap.center': 'Wyśrodkuj',
     'moveList.title': 'Lista celów',

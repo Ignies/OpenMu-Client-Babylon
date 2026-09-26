@@ -286,6 +286,7 @@ export const EN_TEXT = {
   'options.quickItemActions': 'Ctrl-click moves items',
   'options.confirmValuableItems': 'Ask before dropping or selling valuables',
   'options.chatTimestamps': 'Chat timestamps',
+  'options.chatEmojis': 'Chat emojis',
   'options.blockBrowserKeys': 'Block browser shortcuts',
   'options.fullscreen': 'Fullscreen',
   'options.installApp': 'Install app',
@@ -460,6 +461,8 @@ export const EN_TEXT = {
   'options.help.chatTimestamps':
     'Shows the time, like 14:03, in front of every chat line.',
   'options.help.whisperBeep': 'Plays a sound when someone whispers to you.',
+  'options.help.chatEmojis':
+    'Shows emoji codes, a name between two colons, as pictures in the chat and over characters, and adds the emoji button to the chat box. Off shows the codes as plain text.',
   'options.help.slideHelp':
     'Shows server announcements scrolling along a band at the top of the screen.',
   'options.help.stateWarnings':
@@ -1410,6 +1413,9 @@ export const EN_TEXT = {
   'chat.tab.all': 'All',
   'chat.tab.chat': 'Chat',
   'chat.tab.system': 'System',
+  'chat.emoji.button': 'Emojis',
+  'chat.emoji.recent': 'Recently used',
+  'chat.latest': 'Back to the newest messages',
 
   // ---- misc world UI -----------------------------------------------------
   'minimap.close': 'Close',

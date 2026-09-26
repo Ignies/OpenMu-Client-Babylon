@@ -854,6 +854,9 @@ export const italianLayer: LanguageLayer = {
     'chat.tab.all': 'Tutto',
     'chat.tab.chat': 'Chat',
     'chat.tab.system': 'Sistema',
+    'chat.emoji.button': 'Emoji',
+    'chat.emoji.recent': 'Usate di recente',
+    'chat.latest': 'Torna ai messaggi più recenti',
 
     'minimap.close': 'Chiudi',
     'moveList.title': 'Lista delle destinazioni',
@@ -1603,6 +1606,7 @@ export const italianLayer: LanguageLayer = {
     'options.lootZen': 'Mucchi di Zen da',
     'options.firstPersonBob': 'Oscillazione della testa in prima persona',
     'options.chatTimestamps': 'Orario nella chat',
+    'options.chatEmojis': 'Emoji nella chat',
     'options.quickItemActions': 'Ctrl-clic sposta gli oggetti',
     'options.confirmValuableItems': 'Chiedi prima di gettare o vendere oggetti di valore',
     'options.blockBrowserKeys': 'Blocca le scorciatoie del browser',
@@ -2407,6 +2411,8 @@ export const italianLayer: LanguageLayer = {
     'options.help.chatTimestamps':
       'Mostra l’ora, ad esempio 14:03, davanti a ogni riga della chat.',
     'options.help.whisperBeep': 'Riproduce un suono quando ricevi un sussurro.',
+    'options.help.chatEmojis':
+      'Mostra i codici emoji, cioè un nome tra due simboli di due punti, come immagini nella chat e sopra i personaggi, e aggiunge il pulsante delle emoji alla casella della chat. Su No, i codici restano testo semplice.',
     'options.help.slideHelp':
       'Mostra gli annunci del server che scorrono in una fascia in cima allo schermo.',
     'options.help.stateWarnings':

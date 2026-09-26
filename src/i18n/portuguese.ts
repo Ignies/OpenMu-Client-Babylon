@@ -858,6 +858,9 @@ export const portugueseLayer: LanguageLayer = {
     'chat.tab.all': 'Tudo',
     'chat.tab.chat': 'Chat',
     'chat.tab.system': 'Sistema',
+    'chat.emoji.button': 'Emojis',
+    'chat.emoji.recent': 'Usados recentemente',
+    'chat.latest': 'Voltar às mensagens mais recentes',
 
     'minimap.close': 'Fechar',
     'moveList.title': 'Lista de destinos',
@@ -1601,6 +1604,7 @@ export const portugueseLayer: LanguageLayer = {
     'options.lootZen': 'Montes de Zen a partir de',
     'options.firstPersonBob': 'Balanço da cabeça em primeira pessoa',
     'options.chatTimestamps': 'Horário no chat',
+    'options.chatEmojis': 'Emojis no chat',
     'options.quickItemActions': 'Ctrl-clique move os itens',
     'options.confirmValuableItems': 'Perguntar antes de largar ou vender itens valiosos',
     'options.blockBrowserKeys': 'Bloquear atalhos do navegador',
@@ -2402,6 +2406,8 @@ export const portugueseLayer: LanguageLayer = {
       'Montes de Zen a partir deste valor mostram o nome. No zero, todos os montes mostram o nome.',
     'options.help.chatTimestamps': 'Mostra a hora, como 14:03, antes de cada linha do chat.',
     'options.help.whisperBeep': 'Toca um som quando alguém sussurra para você.',
+    'options.help.chatEmojis':
+      'Mostra os códigos de emoji, um nome entre dois-pontos, como imagens no chat e acima dos personagens, e adiciona o botão de emojis à caixa do chat. Se desativar, os códigos aparecem como texto simples.',
     'options.help.slideHelp':
       'Mostra os anúncios do servidor passando em uma faixa no topo da tela.',
     'options.help.stateWarnings':

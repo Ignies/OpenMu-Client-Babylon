@@ -68,7 +68,14 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    user-select: text;
+
+    // index.html turns selection off on every element, so the lines opt in
+    // one by one, not just their list.
+    &,
+    * {
+      user-select: text;
+      -webkit-user-select: text;
+    }
   }
 
   .chat-room-line {

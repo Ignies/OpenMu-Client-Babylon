@@ -8,6 +8,7 @@ import { isFriendOnline } from '../../../../../common/messenger';
 import { Store } from '../../../../../store';
 import { uiClick } from '../../../../../libs/sfx';
 import { useWindowChrome } from '../../../../components/muWindow/useWindowChrome';
+import { EmojiText } from '../../../../components/emojiText';
 
 /**
  * `CUIChatWindow`, folded into one window with a tab per room the way the
@@ -59,7 +60,8 @@ const RoomBody = observer(({ room }: { room: ChatRoom }) => {
                 .join(', ')}`)}
       </div>
 
-      <div className="chat-room-lines" ref={listRef} data-no-drag="true">
+      {/* `scrollable`: boot.tsx cancels the wheel everywhere else. */}
+      <div className="chat-room-lines scrollable" ref={listRef} data-no-drag="true">
         {room.lines.map((line, i) =>
           line.system ? (
             <div key={i} className="chat-room-line system">
@@ -67,7 +69,8 @@ const RoomBody = observer(({ room }: { room: ChatRoom }) => {
             </div>
           ) : (
             <div key={i} className="chat-room-line">
-              <span className="sender">{line.sender}:</span> {line.text}
+              <span className="sender">{line.sender}:</span>{' '}
+              <EmojiText text={line.text} size={16} />
             </div>
           )
         )}

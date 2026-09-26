@@ -342,7 +342,7 @@ export const CATEGORIES: Category[] = [
         sections: [
           {
             titleKey: 'options.section.chat',
-            rows: [toggle('chatTimestamps'), toggle('whisperBeep')],
+            rows: [toggle('chatTimestamps'), toggle('chatEmojis'), toggle('whisperBeep')],
           },
           {
             titleKey: 'options.section.notices',

@@ -1,4 +1,8 @@
 import {
+  CHAT_EMOJI_BUBBLE_SECONDS,
+  type ChatEmojiBubble,
+} from '../../common/chatEmojis';
+import {
   HEAD_ANCHOR_HEIGHT_RATIO,
   SIDE_ANCHOR_DISTANCE,
   SIDE_ANCHOR_HEIGHT_RATIO,
@@ -34,10 +38,12 @@ let serial = 0;
 export function startEmojiBubble(
   world: World,
   entity: Entity,
-  id: EmojiBubbleId
+  what: EmojiBubbleId | ChatEmojiBubble
 ): void {
-  const def = emojiBubbleById(id);
-  const duration = Math.min(def.duration, MAX_LIFE);
+  const def = typeof what === 'string' ? emojiBubbleById(what) : null;
+  const chat = typeof what === 'string' ? null : what;
+  const glyph = chat && typeof chat.emoji === 'string' ? chat.emoji : null;
+  const duration = Math.min(def?.duration ?? CHAT_EMOJI_BUBBLE_SECONDS, MAX_LIFE);
 
   // Replace rather than mutate in place: the overlay keys its element off the
   // component's presence and serial, so a re-trigger has to look like a fresh
@@ -45,11 +51,13 @@ export function startEmojiBubble(
   if (entity.emojiBubble) world.removeComponent(entity, 'emojiBubble');
 
   world.addComponent(entity, 'emojiBubble', {
-    id,
+    id: def?.id ?? null,
+    picture: chat && typeof chat.emoji !== 'string' ? chat.emoji.url : null,
+    glyph,
     life: duration,
     duration,
     serial: ++serial,
-    isSide: def.placement === 'side',
+    isSide: def ? def.placement === 'side' : !!chat?.side,
     anchor: { x: 0, y: 0, z: 0 },
     screenX: 0,
     screenY: 0,
