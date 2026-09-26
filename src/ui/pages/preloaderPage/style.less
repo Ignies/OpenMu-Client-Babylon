@@ -293,6 +293,11 @@
   }
 }
 
+// Holds the card's place while the load runs, so the bar stays at the foot.
+.ws-card-slot {
+  flex: 1 1 auto;
+}
+
 .ws-tabs {
   flex: none;
   display: flex;
@@ -400,7 +405,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin: 10px 0 0;
+  margin: 2px 0 0;
   font-size: 12px;
   line-height: 1.7;
   color: var(--text-2);
@@ -410,6 +415,256 @@
     margin: 0 10px;
     color: var(--text-mark);
   }
+}
+
+// ---------- The loading runner ----------
+
+// The hunter stands on the bar's fill with the leading foot on its edge. The
+// stage folds away once the load is done, handing its height to the card.
+.ws-loader {
+  --run-cycle: 0.52s;
+  // The parts are drawn 117x168; past about 88px the art would soften.
+  --runner-h: clamp(56px, 9vh, 88px);
+  position: relative;
+  flex: none;
+  width: min(1200px, 100%);
+  height: calc(var(--runner-h) + 16px);
+  margin-top: 4px;
+  transition:
+    height 500ms var(--ease) 900ms,
+    opacity 400ms var(--ease) 700ms;
+
+  &.is-done {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.ws-loader-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.ws-loader-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(196, 48, 43, 0.2), var(--mu-red) 60%, var(--mu-red-soft));
+  box-shadow: 0 0 12px rgba(226, 86, 74, 0.55);
+  transition: width 600ms linear;
+}
+
+.ws-runner {
+  position: absolute;
+  bottom: 9px;
+  width: calc(var(--runner-h) * 0.7);
+  height: var(--runner-h);
+  // The front foot, not the middle of the body, marks how far the load is.
+  transform: translateX(-66%);
+  transition: left 600ms linear;
+  pointer-events: none;
+
+  .is-done & {
+    left: calc(100% + 48px) !important;
+    opacity: 0;
+    transition:
+      left 700ms linear,
+      opacity 250ms linear 450ms;
+  }
+
+  // A soft shadow on the bar under the feet.
+  &::before {
+    content: '';
+    position: absolute;
+    left: 14%;
+    right: 10%;
+    bottom: -4px;
+    height: 7px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55), transparent 70%);
+  }
+}
+
+.ws-runner-rig {
+  position: absolute;
+  inset: 0;
+  animation: ws-run-lift var(--run-cycle) linear infinite;
+}
+
+:is(#root, .app) .ws-page .ws-runner-part {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  animation-duration: var(--run-cycle);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+// Pivots on the hips and the waist, in the parts' shared frame.
+.ws-runner-left {
+  transform-origin: 53.31% 64.01%;
+  animation-name: ws-run-left;
+}
+
+.ws-runner-right {
+  transform-origin: 47.43% 64.52%;
+  animation-name: ws-run-right;
+}
+
+.ws-runner-body {
+  transform-origin: 50.37% 64.27%;
+  animation-name: ws-run-lean;
+}
+
+// A puff of dust off each footfall, drifting back along the bar.
+.ws-runner-dust {
+  position: absolute;
+  left: 12%;
+  bottom: 0;
+
+  i {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(214, 180, 160, 0.4);
+    opacity: 0;
+    animation: ws-dust var(--run-cycle) linear infinite;
+
+    & + i {
+      animation-delay: calc(var(--run-cycle) / -2);
+    }
+  }
+}
+
+@keyframes ws-dust {
+  0% {
+    opacity: 0.55;
+    transform: translate(0, 0) scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-26px, -9px) scale(1.6);
+  }
+}
+
+// Solved so the lower foot sits on the ground at every step.
+@keyframes ws-run-left {
+  0% { transform: rotate(0.0deg); }
+  4.17% { transform: rotate(-1.4deg); }
+  8.33% { transform: rotate(-5.4deg); }
+  12.50% { transform: rotate(-11.7deg); }
+  16.67% { transform: rotate(-20.0deg); }
+  20.83% { transform: rotate(-29.6deg); }
+  25% { transform: rotate(-40.0deg); }
+  29.17% { transform: rotate(-50.4deg); }
+  33.33% { transform: rotate(-60.0deg); }
+  37.50% { transform: rotate(-68.3deg); }
+  41.67% { transform: rotate(-74.6deg); }
+  45.83% { transform: rotate(-78.6deg); }
+  50% { transform: rotate(-80.0deg); }
+  54.17% { transform: rotate(-78.6deg); }
+  58.33% { transform: rotate(-74.6deg); }
+  62.50% { transform: rotate(-68.3deg); }
+  66.67% { transform: rotate(-60.0deg); }
+  70.83% { transform: rotate(-50.4deg); }
+  75% { transform: rotate(-40.0deg); }
+  79.17% { transform: rotate(-29.6deg); }
+  83.33% { transform: rotate(-20.0deg); }
+  87.50% { transform: rotate(-11.7deg); }
+  91.67% { transform: rotate(-5.4deg); }
+  95.83% { transform: rotate(-1.4deg); }
+  100% { transform: rotate(0.0deg); }
+}
+@keyframes ws-run-right {
+  0% { transform: rotate(0.0deg); }
+  4.17% { transform: rotate(1.4deg); }
+  8.33% { transform: rotate(5.4deg); }
+  12.50% { transform: rotate(11.7deg); }
+  16.67% { transform: rotate(20.0deg); }
+  20.83% { transform: rotate(29.6deg); }
+  25% { transform: rotate(40.0deg); }
+  29.17% { transform: rotate(50.4deg); }
+  33.33% { transform: rotate(60.0deg); }
+  37.50% { transform: rotate(68.3deg); }
+  41.67% { transform: rotate(74.6deg); }
+  45.83% { transform: rotate(78.6deg); }
+  50% { transform: rotate(80.0deg); }
+  54.17% { transform: rotate(78.6deg); }
+  58.33% { transform: rotate(74.6deg); }
+  62.50% { transform: rotate(68.3deg); }
+  66.67% { transform: rotate(60.0deg); }
+  70.83% { transform: rotate(50.4deg); }
+  75% { transform: rotate(40.0deg); }
+  79.17% { transform: rotate(29.6deg); }
+  83.33% { transform: rotate(20.0deg); }
+  87.50% { transform: rotate(11.7deg); }
+  91.67% { transform: rotate(5.4deg); }
+  95.83% { transform: rotate(1.4deg); }
+  100% { transform: rotate(0.0deg); }
+}
+@keyframes ws-run-lift {
+  0% { transform: translateY(0.13%); }
+  4.17% { transform: translateY(-0.63%); }
+  8.33% { transform: translateY(-2.63%); }
+  12.50% { transform: translateY(-3.60%); }
+  16.67% { transform: translateY(-4.05%); }
+  20.83% { transform: translateY(-4.38%); }
+  25% { transform: translateY(-4.50%); }
+  29.17% { transform: translateY(-4.38%); }
+  33.33% { transform: translateY(-4.05%); }
+  37.50% { transform: translateY(-3.60%); }
+  41.67% { transform: translateY(-3.15%); }
+  45.83% { transform: translateY(-2.82%); }
+  50% { transform: translateY(-2.70%); }
+  54.17% { transform: translateY(-2.82%); }
+  58.33% { transform: translateY(-3.15%); }
+  62.50% { transform: translateY(-3.60%); }
+  66.67% { transform: translateY(-4.05%); }
+  70.83% { transform: translateY(-4.38%); }
+  75% { transform: translateY(-4.50%); }
+  79.17% { transform: translateY(-4.38%); }
+  83.33% { transform: translateY(-4.05%); }
+  87.50% { transform: translateY(-3.60%); }
+  91.67% { transform: translateY(-2.63%); }
+  95.83% { transform: translateY(-0.63%); }
+  100% { transform: translateY(0.13%); }
+}
+@keyframes ws-run-lean {
+  0% { transform: rotate(0.0deg); }
+  4.17% { transform: rotate(1.5deg); }
+  8.33% { transform: rotate(2.6deg); }
+  12.50% { transform: rotate(3.0deg); }
+  16.67% { transform: rotate(2.6deg); }
+  20.83% { transform: rotate(1.5deg); }
+  25% { transform: rotate(0.0deg); }
+  29.17% { transform: rotate(-1.5deg); }
+  33.33% { transform: rotate(-2.6deg); }
+  37.50% { transform: rotate(-3.0deg); }
+  41.67% { transform: rotate(-2.6deg); }
+  45.83% { transform: rotate(-1.5deg); }
+  50% { transform: rotate(0deg); }
+  54.17% { transform: rotate(1.5deg); }
+  58.33% { transform: rotate(2.6deg); }
+  62.50% { transform: rotate(3.0deg); }
+  66.67% { transform: rotate(2.6deg); }
+  70.83% { transform: rotate(1.5deg); }
+  75% { transform: rotate(0.0deg); }
+  79.17% { transform: rotate(-1.5deg); }
+  83.33% { transform: rotate(-2.6deg); }
+  87.50% { transform: rotate(-3.0deg); }
+  91.67% { transform: rotate(-2.6deg); }
+  95.83% { transform: rotate(-1.5deg); }
+  100% { transform: rotate(0.0deg); }
 }
 
 // ---------- Controls ----------
@@ -1680,7 +1935,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ws-map {
+  .ws-map,
+  .ws-runner-rig,
+  :is(#root, .app) .ws-page .ws-runner-part,
+  .ws-runner-dust i {
     animation: none;
   }
 }

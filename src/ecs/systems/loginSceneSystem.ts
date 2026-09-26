@@ -17,6 +17,7 @@ import {
 import { prefetchWorldTerrain } from '../../libs/mu/prefetchWorld';
 import { warmWorldObjects } from '../../libs/mu/warmWorld';
 import { LOGIN_SCENE_ABSENT_MODELS } from '../../maps/loginscene/spec';
+import { pregameLoad } from '../../common/pregameLoad';
 import { loadVersionUi, versionUi } from '../../version';
 import type {
   PregameBackdrop,
@@ -366,6 +367,7 @@ export const LoginSceneSystem: ISystemFactory = world => {
       if (requestedBackdrop !== backdrop) {
         requestedBackdrop = backdrop;
         warmedCharacters = null;
+        pregameLoad.setCharacters(0);
         resetTour();
         waypoints = null;
         scriptForWorld = null;
@@ -382,11 +384,13 @@ export const LoginSceneSystem: ISystemFactory = world => {
 
         if (warmedCharacters !== plan!.characters) {
           warmedCharacters = plan!.characters;
+          pregameLoad.setCharacters(0);
           void warmWorldObjects(
             plan!.characters,
             world,
-            LOGIN_SCENE_ABSENT_MODELS[plan!.characters]
-          );
+            LOGIN_SCENE_ABSENT_MODELS[plan!.characters],
+            done => pregameLoad.setCharacters(done)
+          ).then(() => pregameLoad.setCharacters(1));
         }
       }
 

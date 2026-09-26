@@ -37,7 +37,9 @@ export function objectTypesIn(encoded: Uint8Array): Set<number> {
 export function warmWorldObjects(
   map: ENUM_WORLD,
   world: World,
-  absent: readonly number[] = []
+  absent: readonly number[] = [],
+  /** 0..1, as the object list and then each model arrive. */
+  onProgress?: (fraction: number) => void
 ): Promise<void> {
   const file = terrainFilesFor(map).find(f => f.endsWith('.obj'));
   if (!file) return Promise.resolve();
@@ -46,16 +48,19 @@ export function warmWorldObjects(
 
   return fetchTerrainFile(file).then(
     bytes => {
-      const loads: Promise<void>[] = [];
+      const files = [...objectTypesIn(bytes)]
+        .filter(type => !absent.includes(type) && !isEffectOnlyObject(map, type))
+        .map(type => `${dir}Object${(type + 1).toString().padStart(2, '0')}.glb`);
+      let done = 0;
 
-      for (const type of objectTypesIn(bytes)) {
-        if (absent.includes(type) || isEffectOnlyObject(map, type)) continue;
-        loads.push(
-          warmGLTF(`${dir}Object${(type + 1).toString().padStart(2, '0')}.glb`, world)
-        );
-      }
+      // The object list itself is the first step.
+      onProgress?.(1 / (files.length + 1));
 
-      return Promise.all(loads).then(() => undefined);
+      return Promise.all(
+        files.map(path =>
+          warmGLTF(path, world).then(() => onProgress?.(++done / files.length))
+        )
+      ).then(() => undefined);
     },
     () => undefined
   );
