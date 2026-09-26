@@ -54,6 +54,10 @@ type PackManifest = {
    * between them, so `Object1/tree_01` is a 32x32 cut-out for the planter
    * bushes and a 128x64 opaque image for something else. 56 names collide
    * that way, every one mixing an alpha container with an opaque one.
+   *
+   * Ten of them match in size as well (Wing of Storm's `Item/wing3chaking`
+   * is a 128x128 bone atlas and a 128x128 membrane); those carry the
+   * container as a third part, `|ozt` or `|ozj`.
    */
   textures: Record<string, string>;
 };
@@ -273,7 +277,11 @@ async function repaint(texture: Texture): Promise<void> {
   await ensureActiveManifest();
 
   const key = `${original.label}|${original.width}x${original.height}`.toLowerCase();
-  const wanted = activeUrls.get(key) ?? null;
+  // A name both containers ship at the same size is keyed with its container
+  // too. The model's own alpha says which one it read: the converter blends
+  // exactly the meshes whose BMD asks for `.tga`, the OZT.
+  const container = original.hasAlpha ? 'ozt' : 'ozj';
+  const wanted = activeUrls.get(`${key}|${container}`) ?? activeUrls.get(key) ?? null;
   const showing = shown.get(texture) ?? null;
   if (wanted === showing) return;
 
