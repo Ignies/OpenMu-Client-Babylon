@@ -2,6 +2,7 @@ import {
   Texture,
   Vector3,
   type AbstractMesh,
+  type Material,
   type Scene,
 } from '../libs/babylon/exports';
 import type { World } from '../ecs/world';
@@ -17,8 +18,17 @@ import {
   type WingSpec,
 } from './wings';
 
+const DARK = [0, 0, 0] as const;
+
 /** A pass bound to its mesh, with the light vector the mesh reads. */
-type LivePass = { pass: WingMeshPass; light: Vector3 };
+type LivePass = {
+  pass: WingMeshPass;
+  light: Vector3;
+  /** The mesh a glow pass draws, its additive material and the lit one it had. */
+  target?: AbstractMesh;
+  glow?: Material;
+  solid?: Material | null;
+};
 
 /** `RenderMesh(n, RENDER_BRIGHT | RENDER_CHROME)` in white BodyLight. */
 const WHITE_CHROME = {
@@ -140,7 +150,8 @@ export class WingObject extends ModelObject {
       }
 
       const light = new Vector3(1, 1, 1);
-      this.#passes.push({ pass, light });
+      const live: LivePass = { pass, light };
+      this.#passes.push(live);
 
       if (pass.kind === 'tint') {
         mesh.metadata.bodyLight = light;
@@ -149,6 +160,8 @@ export class WingObject extends ModelObject {
 
       const target = pass.kind === 'bright' ? mesh : this.#overlayOf(mesh);
       if (!target) continue;
+      live.target = target;
+      live.solid = pass.kind === 'bright' ? mesh.material : null;
       target.material = getMaterial(
         target.getScene(),
         false,
@@ -156,11 +169,11 @@ export class WingObject extends ModelObject {
         BlendState.ALPHA_ONEOE,
         true
       );
-      if (pass.u) {
-        const scroll = getScrollVariant(target.getScene(), target);
-        if (scroll) target.material = scroll;
-        target.metadata.uvScroll = this.UvScroll;
-      }
+      // The scroll variant is the additive card that takes the pass's own
+      // light; the plain one draws the texel at full strength.
+      const scroll = getScrollVariant(target.getScene(), target);
+      if (scroll) target.material = scroll;
+      target.metadata.uvScroll = pass.u ? this.UvScroll : { u: 0, v: 0 };
       if (pass.texture) {
         target.metadata.diffuseTexture = overlayTexture(
           target.getScene(),
@@ -171,6 +184,32 @@ export class WingObject extends ModelObject {
       target.metadata.blendMeshLight = 1;
       target.metadata.bodyLight = light;
       target.metadata.csmCaster = false;
+      live.glow = target.material ?? undefined;
+    }
+    this.#auraShown = false;
+  }
+
+  #auraShown = false;
+
+  /**
+   * Under the wearer's aura (Ultra's outlaw) the glow passes go dark: a
+   * bright mesh is drawn solid again, in the wearer's near-black light, so
+   * the aura shader can put red veins on it; an overlay copy is hidden.
+   */
+  #showAura(on: boolean): void {
+    if (this.#auraShown === on) return;
+    this.#auraShown = on;
+    for (const live of this.#passes) {
+      const { target } = live;
+      if (!target || !live.glow) continue;
+      if (live.solid === null) {
+        target.isVisible = !on;
+        continue;
+      }
+      target.material = on && live.solid ? live.solid : live.glow;
+      target.metadata.brightMesh = !(on && live.solid);
+      target.metadata.auraRimOnly = on;
+      target.metadata.bodyLight = on ? this.rootObject.Light : live.light;
     }
   }
 
@@ -188,16 +227,21 @@ export class WingObject extends ModelObject {
     const worn = this.rootObject.Light;
     // The wearer's aura (Ultra's outlaw) recolours the glow passes to its own.
     const aura = this.rootObject.BodyShine.aura;
-    const auraOn = !!aura && aura.x + aura.y + aura.z > 0;
+    this.#showAura(!!aura && aura.x + aura.y + aura.z > 0);
     for (const { pass, light } of this.#passes) {
       const [r, g, b] = pass.light?.(timeMs) ?? [1, 1, 1];
       if (pass.kind === 'tint') light.set(worn.x * r, worn.y * g, worn.z * b);
-      else if (auraOn) {
-        const l = Math.max(r, g, b);
-        light.set(aura!.x * l, aura!.y * l, aura!.z * l);
-      } else light.set(r, g, b);
+      else light.set(r, g, b);
       if (pass.u) this.UvScroll.u = pass.u(timeMs);
     }
+  }
+
+  /** Under the wearer's aura its crackle stands in for these sprites (outlawLook.ts). */
+  #wakeLight(
+    light: readonly [number, number, number]
+  ): readonly [number, number, number] {
+    const aura = this.rootObject.BodyShine.aura;
+    return aura && aura.x + aura.y + aura.z > 0 ? DARK : light;
   }
 
   #createWake(scene: Scene): BonedParticleEmitter | null {
@@ -226,7 +270,7 @@ export class WingObject extends ModelObject {
           kinds: [wake.kind],
           count: 1,
           scale: () => wake.scale(this.#elapsedMs),
-          light: () => wake.light(this.#elapsedMs),
+          light: () => this.#wakeLight(wake.light(this.#elapsedMs)),
           every: wake.every,
         });
       }

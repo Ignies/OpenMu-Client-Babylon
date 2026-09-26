@@ -75,7 +75,7 @@ export function applySceneLook(
   glow.customEmissiveColorSelector = (mesh, _subMesh, _material, result) => {
     const aura = auraOf(mesh);
     if (aura) {
-      result.set(aura.x, aura.y, aura.z, 1);
+      result.set(aura.x * AURA_HALO, aura.y * AURA_HALO, aura.z * AURA_HALO, 1);
       return;
     }
 
@@ -101,7 +101,7 @@ export function applySceneLook(
     const tier = mesh.metadata?.itemTier as ItemVisualTier | null | undefined;
     const own = (material as { emissiveTexture?: Texture | null }).emissiveTexture ?? null;
 
-    // The aura is a solid halo over the whole silhouette.
+    // The aura is a faint solid halo; the body stays dark under it.
     if (auraOf(mesh)) return null!;
 
     // Babylon types the return as non-null but handles null (no texture).
@@ -178,6 +178,9 @@ function syncGlowSourceOptions(): void {
   // nowhere, so the test asks the meshes instead of assuming.
   glowPbr = pbrMaterialsOn();
 }
+
+/** Halo gain on the aura: a faint edge glow, the body stays dark under it. */
+const AURA_HALO = 0.14;
 
 /** The wearer's aura colour on this mesh (`BodyShine.aura`), or null. */
 function auraOf(mesh: AbstractMesh) {

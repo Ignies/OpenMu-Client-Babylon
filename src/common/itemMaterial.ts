@@ -568,6 +568,8 @@ const FX_CHROME2_FROM_LIGHT = 0x100; // PartObjectColor2 case 0: tint = scene li
 const FX_BODY_SHINE = 0x200; // golden bodies: metal + chrome over the model
 const FX_BODY_SHINE_STAR = 0x400; // ...or the single Shiny02 pass instead
 const FX_BODY_SHINE_CHROME = 0x800; // ...or Chrome01 alone (a Fenrir's one mesh)
+const FX_AURA = 0x1000; // Ultra's outlaw: black body, itemGlow on the edge and brightest art only
+const FX_AURA_RIM_ONLY = 0x2000; // ...edge only, for art that is bright all over (wing glow cards)
 
 /** Tint of the body shine passes, per mesh (`ModelObject.BodyShine`). */
 const BODY_SHINE_UNIFORM = 'muBodyShine';
@@ -681,7 +683,18 @@ const legacyPasses = ({ color, texel, bodyLight }: ShaderVars) => `
     // tint lands on trim and metal detail while dark leather keeps its
     // texture (a flat add drowned everything into one bright shape), and
     // the view-dependent rim stays a thin edge light.
-    if (itemGlow.r + itemGlow.g + itemGlow.b > 0.0) {
+    if ((fx & ${FX_AURA}) != 0) {
+      // Ultra's outlaw (outlawLook.ts): the surface goes black and the red
+      // lives on the silhouette edge and on the art's brightest detail, so
+      // trim and seams read as glowing veins. abs(): a double-sided card's
+      // back face would otherwise read as all edge.
+      float rim = 1.0 - clamp(abs(dot(normalize(viewDirectionW), normalW)), 0.0, 1.0);
+      float texLum = dot(${texel}.rgb, vec3(0.299, 0.587, 0.114));
+      float vein = (fx & ${FX_AURA_RIM_ONLY}) != 0 ? 0.0 : smoothstep(0.8, 1.0, texLum);
+      float edge = rim * rim * rim;
+      edge *= edge;
+      ${color}.rgb = ${color}.rgb * 0.1 + itemGlow * (1.1 * vein + 1.8 * edge);
+    } else if (itemGlow.r + itemGlow.g + itemGlow.b > 0.0) {
       float rim = 1.0 - clamp(dot(normalize(viewDirectionW), normalW), 0.0, 1.0);
       rim = rim * rim * rim;
       float texLum = dot(${texel}.rgb, vec3(0.299, 0.587, 0.114));
@@ -930,6 +943,10 @@ function bindItemEffect(
     if (shine.chromeOnly) fx |= FX_BODY_SHINE_CHROME;
     const a = mesh.visibility;
     effect.setFloat3(BODY_SHINE_UNIFORM, tint.x * a, tint.y * a, tint.z * a);
+  }
+  if (auraOn && !mesh.metadata?.brightMesh) {
+    fx |= FX_AURA;
+    if (mesh.metadata?.auraRimOnly) fx |= FX_AURA_RIM_ONLY;
   }
 
   effect.setFloat(ITEM_FX_UNIFORM, fx);

@@ -14,6 +14,7 @@ import {
 
 const v3Temp = Vector3.Zero();
 const v3Temp2 = Vector3.Zero();
+const outlawAt = { x: 0, y: 0, z: 0 };
 
 /**
  * The original's TestFrustrum2D keeps everything in view on the login screen
@@ -113,7 +114,16 @@ export const RenderSystem: ISystemFactory = world => {
         const player = !!entity.playerAnimation;
         const outlawLight = player ? outlawBodyLight(entity.heroState) : null;
         const ultraOutlaw = outlawUltraActive(outlawLight !== null);
-        applyOutlawLook(modelObject, ultraOutlaw, world.gameTime.TotalGameTime.TotalSeconds * 1000);
+        const drawnAt = outlawAt;
+        drawnAt.x = transform.pos.x + (transform.posOffset?.x ?? 0);
+        drawnAt.y = transform.pos.y + (transform.posOffset?.y ?? 0);
+        drawnAt.z = transform.pos.z + (transform.posOffset?.z ?? 0);
+        applyOutlawLook(
+          modelObject,
+          ultraOutlaw,
+          world.gameTime.TotalGameTime.TotalSeconds * 1000,
+          drawnAt
+        );
         const debuffLight =
           debuffBodyLight(entity.buffs, player) ??
           (ultraOutlaw ? OUTLAW_ULTRA_LIGHT : outlawLight);
