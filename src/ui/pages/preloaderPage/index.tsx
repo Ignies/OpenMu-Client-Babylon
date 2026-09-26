@@ -25,6 +25,8 @@ import { LoadingRunner } from './loadingRunner';
 
 const LOGO_ART = '/ui/world_select/logo.webp';
 
+const GITHUB_URL = 'https://github.com/Ignies/OpenMu-Client-Babylon';
+
 /** How long the page takes to fade off the login scene once a world is entered. */
 const LEAVE_MS = 320;
 
@@ -196,7 +198,7 @@ export const PreloaderPage = observer(() => {
         target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA';
       const searching = !!target?.classList.contains('world-search');
       const onCard = !!target?.closest?.('[data-world]');
-      const free = !typing && target?.tagName !== 'BUTTON';
+      const free = !typing && target?.tagName !== 'BUTTON' && target?.tagName !== 'A';
 
       if (e.key === 'Escape' && typing) {
         target?.blur();
@@ -339,6 +341,17 @@ export const PreloaderPage = observer(() => {
           {status.map(part => (
             <span key={part}>{part}</span>
           ))}
+          {shown && (
+            <a
+              className="ws-github anim-host"
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Icon name="github" />
+              GitHub
+            </a>
+          )}
         </p>
       </main>
     </div>

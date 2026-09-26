@@ -412,10 +412,41 @@
   line-height: 1.7;
   color: var(--text-2);
 
-  > span + span::before {
+  > * + *::before {
     content: '\00b7';
     margin: 0 10px;
     color: var(--text-mark);
+  }
+}
+
+// The project's repository, once the load is done. The icon's own gap
+// already spaces it from the dot.
+.ws-status > .ws-github::before {
+  margin-right: 4px;
+}
+
+.ws-github {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-1);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease);
+  animation: ws-fade 600ms var(--ease);
+
+  .ws-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    color: var(--text-0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 3px;
   }
 }
 
