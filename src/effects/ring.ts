@@ -47,6 +47,8 @@ export interface RingOptions {
   /** `subtract` is EnableAlphaBlendMinus: black with the sheet as coverage, `luma(colour)` its strength. */
   blend?: 'additive' | 'alpha' | 'subtract';
   fadeTail?: number;
+  /** Additive: fade by dimming the colour too - the one-one blend ignores the material's alpha. */
+  fadeColour?: boolean;
   /**
    * The original's `Alpha` / `Luminosity` over the life (0..1 progress), replacing `fadeTail`. It scales
    * the light (an additive decal is drawn (ONE, ONE), which drops the material alpha) or the coverage.
@@ -116,6 +118,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const cap = Math.min(maxScale, opts.cap ?? maxScale);
   const dark = blend === 'subtract';
   const cover = dark ? Math.min(1, luma(colour) * darkCardGain(_scene)) : 0;
+  const fadeColour = opts.fadeColour === true;
   const lit: [number, number, number] = [colour[0], colour[1], colour[2]];
   let x = at.x;
   let z = at.z;
@@ -142,7 +145,16 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
         lit[2] = colour[2] * k;
         light = lit;
         decal.setAlpha(1);
-      } else decal.setAlpha(fadeOut(p, tail));
+      } else {
+        const a = fadeOut(p, tail);
+        decal.setAlpha(a);
+        if (fadeColour) {
+          lit[0] = colour[0] * a;
+          lit[1] = colour[1] * a;
+          lit[2] = colour[2] * a;
+          light = lit;
+        }
+      }
       decal.draw(
         world,
         x,

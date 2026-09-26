@@ -189,6 +189,9 @@ const CHAIN_LIGHTNING_LIGHT: SkillLight = {
   land: { color: [0.15, 0.15, 0.75], range: 2, seconds: 0.84, release: 0.1 },
 };
 
+/** Teleport's column on the graded tiers: its sparks' tint, 2.16 tiles up either way, LT 10. */
+const TELEPORT_LIGHT = effectLight([0.5, 0.75, 1], 2.16, 0.4, { heightOffset: CAST_HEIGHT, release: 0.25 });
+
 /** Keyed by skill number (common/skillsDatabase.ts). */
 export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // MODEL_POISON: AddTerrainLight range 2 (ZzzEffect.cpp:9752).
@@ -204,6 +207,10 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Flame: BITMAP_FLAME range 3 while the column burns (:8649). Wider and redder here: the
   // pillars stand on molten rock and the ground around them pools red in the renewed look.
   5: { area: { ...flame(3.5, 1.9, { gain: 1.5, floorGain: 1.3, release: 0.6 }), color: [1, 0.42, 0.14] } },
+  // Teleport / Teleport Ally: BITMAP_SPARK+1 lights nothing in the original (ZzzEffect.cpp:6854-6871).
+  // Enhanced: the spark colour at each square for the column's life, reaching its half height.
+  6: { enhanced: { cast: TELEPORT_LIGHT, impact: TELEPORT_LIGHT } },
+  15: { enhanced: { cast: TELEPORT_LIGHT, impact: TELEPORT_LIGHT } },
   // Ice: MODEL_ICE range 2 (:12182).
   7: { travel: { ...frost(2, 3), speed: BOLT_SPEED }, impact: frost(2, 0.5) },
   // Twister: MODEL_STORM range 5 (:10480).
@@ -488,6 +495,18 @@ export function lightAreaSkill(
 
   if (area) attach(scene, area, { position: { ...at } });
   if (caster.transform) schedule(scene, row, caster);
+}
+
+/** Command: one moment of a skill's light standing at `at`, for effects drawn outside the skill packets. */
+export function lightSkillAt(
+  scene: Scene,
+  skill: number,
+  moment: 'cast' | 'impact',
+  at: { x: number; y: number; z: number }
+): void {
+  const recipe = lightRow(skill)?.[moment];
+
+  if (recipe) attach(scene, recipe, { position: { ...at } });
 }
 
 /**

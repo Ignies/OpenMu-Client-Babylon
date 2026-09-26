@@ -33,6 +33,7 @@ import { PlayerAction } from '../../common/objects/enum';
 import { playUiSound } from '../../sound/ui';
 import { playSfx } from '../../sound/listener';
 import type { Entity, ISystemFactory, Item } from '../world';
+import { teleportMountAlpha } from './teleportSystem';
 
 /**
  * `Mounts[]` - the pet objects that live in the world rather than on the
@@ -1155,7 +1156,8 @@ export const PetSystem: ISystemFactory = world => {
 
         // A mount is faded out instead (o->Alpha = 0), but stays pinned to its
         // rider so it is already in place the moment he steps out of town.
-        actor.modelObject?.setAlpha(inSafeZone ? 0 : 1);
+        // And with the rider through a teleport (GOBoid.cpp:189-197).
+        actor.modelObject?.setFadeAlpha(inSafeZone ? 0 : teleportMountAlpha(state.owner));
         updateMount(actor, dt, inSafeZone);
       }
     },

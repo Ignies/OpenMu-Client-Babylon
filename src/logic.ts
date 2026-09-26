@@ -261,8 +261,17 @@ import { createAttributeSystem, type MUAttributeSystem } from './libs/attributeS
 import { classWorldScale } from './common/characterScale';
 import { skillDefinition } from './common/skillsDatabase';
 import { traceHeroInstantMove } from './common/heroMoveTrace';
-import { chooseSkillAction } from './common/skillCasting';
+import { chooseSkillAction, isTeleportSkill, TELEPORT } from './common/skillCasting';
 import { skillClip } from './combat/skillClips';
+import { teleportGate } from './common/teleportRules';
+import {
+  beginTeleport,
+  cancelTeleport,
+  deferLeave,
+  endTeleport,
+  justArrived,
+  noteScopeEntry,
+} from './ecs/systems/teleportSystem';
 import { getBaseClass, BaseClass } from './common/characterStats';
 import { SKILL_TO_EFFECT } from './common/magicEffects';
 import { playAreaSkillVisual, playBowShotVisual, playChainLightningHop, playTargetedSkillVisual, setBuffVisual } from './common/skillVisuals';
@@ -698,37 +707,37 @@ EventBus.on('MapChanged', packet => {
   // Answers a warp the player asked for; a server-initiated one pairs with
   // nothing and is ignored (common/netStats.ts).
   NetStats.markAnswered('warp');
-  // HideAll on warp: the merchant stays behind.
-  Store.closeNpcShop();
-  // `ReceiveMapChange` (WSclient.cpp:622): the notice stack and the minimap
-  // sheet do not survive a warp.
-  Notices.clear();
-  SlideHelp.clear();
-  runInAction(() => {
-    Store.minimapEnabled = false;
-  });
 
   const p = new MapChangedPacket(packet);
-
-  // The soccer scoreboard does not survive a warp off the stadium.
-  if (p.IsMapChange && p.MapNumber !== ENUM_WORLD.WD_6STADIUM) {
-    runInAction(() => {
-      Social.battleSoccer = null;
-    });
-  }
-
   const pos = { x: p.PositionX, y: p.PositionY };
+  const verdict = teleportGate.onMapChanged(p.IsMapChange, pos.x, pos.y, performance.now() / 1000);
+  const playerEntity = Store.world?.playerEntity;
 
   // The packet's byte 9 is the arrival facing (`gate.angle`, the exit gate's
   // `Rotation` column, 0-7 × 45°); the generated class has no accessor for it.
-  // The hero entity survives the warp, so the yaw can be set right away.
   const rotation = packet.byteLength > 9 ? packet.getUint8(9) : undefined;
-  const playerEntity = Store.world?.playerEntity;
-  if (playerEntity && rotation !== undefined) {
-    playerEntity.transform.rot.y = convertDirectionToAngle(rotation);
-  }
 
   if (p.IsMapChange) {
+    // HideAll on warp: the merchant stays behind.
+    Store.closeNpcShop();
+    // `ReceiveMapChange` (WSclient.cpp:622): the notice stack and the minimap
+    // sheet do not survive a warp.
+    Notices.clear();
+    SlideHelp.clear();
+    runInAction(() => {
+      Store.minimapEnabled = false;
+    });
+    // The soccer scoreboard does not survive a warp off the stadium.
+    if (p.MapNumber !== ENUM_WORLD.WD_6STADIUM) {
+      runInAction(() => {
+        Social.battleSoccer = null;
+      });
+    }
+    if (playerEntity) {
+      cancelTeleport(playerEntity);
+      // The hero entity survives the warp, so the yaw can be set right away.
+      if (rotation !== undefined) playerEntity.transform.rot.y = convertDirectionToAngle(rotation);
+    }
     awaitingClientReady = true;
     EventBus.emit('requestWarp', { map: p.MapNumber, pos });
     return;
@@ -738,16 +747,39 @@ EventBus.on('MapChanged', packet => {
 
   const world = Store.world!;
   const playerPos = playerEntity.transform.pos;
+  const onSquare = Math.floor(playerPos.x) === pos.x && Math.floor(playerPos.z) === pos.y;
 
+  // The server's late answer to the hero's own teleport (OpenMU sends it 1.8 s
+  // after the request): he already stands there, so nothing moves, turns or
+  // stops. Only a hero knocked off the square since is put back on it.
+  if (verdict === 'confirm') {
+    if (!onSquare) placeHero(world, playerEntity, pos);
+    return;
+  }
+
+  // Refused, or moved by someone else (Teleport Ally, a GM): Flag 0 of
+  // `ReceiveTeleport` (WSclient.cpp:2193-2197, 2300-2304) - position, angle,
+  // `CreateTeleportEnd` and the hero stops. No UI is closed: that is the
+  // map-change branch only (2199-2295).
+  placeHero(world, playerEntity, pos);
+  if (rotation !== undefined) playerEntity.transform.rot.y = convertDirectionToAngle(rotation);
+  world.attackTarget = null;
+  world.castApproach = null;
+  endTeleport(playerEntity, TELEPORT);
+});
+
+/** The hero onto a server square, his walk dropped. */
+function placeHero(world: World, hero: Entity, pos: { x: number; y: number }): void {
+  const playerPos = hero.transform!.pos;
   playerPos.x = pos.x;
   playerPos.z = pos.y;
   playerPos.y = world.getTerrainHeight(pos.x, pos.y);
 
-  const { pathfinding } = playerEntity;
+  const pathfinding = hero.pathfinding!;
   pathfinding.path = null;
   pathfinding.from = { x: pos.x, y: pos.y };
   pathfinding.to = { x: pos.x, y: pos.y };
-});
+}
 
 EventBus.on('CharacterInventory', packet => {
   const p = new CharacterInventoryPacket(packet);
@@ -1431,6 +1463,7 @@ function addCharacterToScope(
 
     world.addComponent(playerEntity, 'netId', maskedId);
     world.addComponent(playerEntity, 'worldIndex', worldIndex);
+    noteScopeEntry(playerEntity);
     playerEntity.transform.pos.x = char.CurrentPositionX;
     playerEntity.transform.pos.z = char.CurrentPositionY;
     playerEntity.transform.pos.y = world.getTerrainHeight(
@@ -1511,7 +1544,8 @@ EventBus.on('MapObjectOutOfScope', packet => {
 
     let objEntity = world.getByNetId(maskedId);
     if (objEntity?.objOutOfScope) objEntity = undefined;
-    if (objEntity) {
+    // A player teleporting away is dropped mid-fade; he goes once faded out.
+    if (objEntity && !deferLeave(objEntity)) {
       world.addComponent(objEntity, 'objOutOfScope', true);
     }
   });
@@ -2665,6 +2699,11 @@ EventBus.on('SkillAnimation', packet => {
   if (!caster) return;
   const target = world.getByNetId(targetId) ?? null;
 
+  if (isTeleportSkill(p.SkillId)) {
+    playTeleportAnimation(world, p.SkillId, caster, target);
+    return;
+  }
+
   if (target && target !== caster && !caster.localPlayer) {
     const dx = target.transform.pos.x - caster.transform.pos.x;
     const dz = target.transform.pos.z - caster.transform.pos.z;
@@ -2679,6 +2718,44 @@ EventBus.on('SkillAnimation', packet => {
   }
   playTargetedSkillVisual(world.scene, p.SkillId, caster, target);
 });
+
+/**
+ * Teleport (6) and Teleport Ally (15) as `ReceiveMagic` draws them
+ * (WSclient.cpp:4312-4331), fitted to what OpenMU sends: skill 6 from the
+ * teleporting player to observers as he leaves, and skill 15 cast by a player
+ * on himself both when Teleport Ally pulls him and when he re-enters scope on
+ * the new square (ObjectMovedPlugIn.cs:60-63).
+ */
+function playTeleportAnimation(world: World, skill: number, caster: Entity, target: Entity | null) {
+  if (skill === TELEPORT) {
+    // The hero's own Begin played at the click.
+    if (caster.localPlayer) return;
+    if (caster.monsterAnimation) {
+      // The Nightmare's own teleport in Kanturu (WSclient.cpp:4319-4327).
+      const nightmare = world.mapIndex === ENUM_WORLD.WD_39KANTURU_3RD;
+      beginTeleport(caster, skill, { clip: false, soundKey: nightmare ? 'Sound/w39/nightmare_tele' : undefined });
+      return;
+    }
+    beginTeleport(caster, skill);
+    return;
+  }
+
+  // Teleport Ally: `CreateTeleportBegin(to)` + `CreateTeleportEnd(so)`.
+  if (target && target !== caster) {
+    beginTeleport(target, skill);
+    endTeleport(caster, skill, { telekinesis: true });
+    return;
+  }
+  // A self cast. The hero only gets one when an ally pulls him: he fades out
+  // and the server's MapChanged lands him. Anyone else either arrives (re-added
+  // a moment ago: both halves on him, as the original's pair on one body) or
+  // is being pulled away.
+  if (!caster.localPlayer && justArrived(caster)) {
+    endTeleport(caster, skill, { magicSounds: 2, flashes: 2, telekinesis: true });
+  } else {
+    beginTeleport(caster, skill);
+  }
+}
 
 EventBus.on('AreaSkillAnimation', packet => {
   const p = new AreaSkillAnimationPacket(packet);

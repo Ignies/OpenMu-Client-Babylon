@@ -20,6 +20,7 @@ import type { Entity } from '../ecs/world';
 import type { TestScene } from '../scenes/testScene';
 import { addEffectGlow, disposeEffectGlow, dropEffectGlow } from './glow';
 import { installSpriteLinearDecode } from '../libs/babylon/spriteLinear';
+import { useGroundFade } from './groundFade';
 import type { EffectHandle } from './layer';
 
 /**
@@ -575,6 +576,8 @@ export interface ParticleRecipe {
    * a particle the original leaves at full light and kills (BITMAP_LIGHT+2) holds 1 to the end.
    */
   fade?: readonly (readonly [number, number])[];
+  /** Additive only: fade to nothing over this many tiles above the burst's ground (groundFade.ts). */
+  groundFade?: number;
 }
 
 const systems = new Map<Scene, Map<string, ParticleSystem>>();
@@ -773,6 +776,7 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
     });
   });
 
+  if (r.groundFade) useGroundFade(ps, r.groundFade);
   ps.start();
   map.set(k, ps);
   byRecipe.set(r, { ps, gain });

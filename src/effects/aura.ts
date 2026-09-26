@@ -315,6 +315,8 @@ export interface AuraOptions {
   follow: PointSource;
   /** Ends the aura on its own when true (the wearer left the world). */
   until?: () => boolean;
+  /** Seconds to fade in and out (default RAMP_SECONDS); a short flash on a body wants less. */
+  ramp?: number;
   /** A MU bone index to world; parts on bones need it. */
   bone?: (mu: number, out: Vector3) => Vector3;
   /** How many bones the wearer's skeleton has (`boneGlow` on `'all'`). */
@@ -988,10 +990,11 @@ function spawn(scene: Scene, _at: Vector3, opts: AuraOptions): EffectHandle {
   if (opts.berserk) parts.push(berserk(scene, opts));
 
   let ramp = 0;
+  const rampSeconds = opts.ramp ?? RAMP_SECONDS;
   let tickAcc = 0;
   const fx = live.push({
     update(dt) {
-      ramp += (stopping ? -dt : dt) / RAMP_SECONDS;
+      ramp += (stopping ? -dt : dt) / rampSeconds;
       if (ramp > 1) ramp = 1;
       if (ramp <= 0) return false;
       if (!stopping && opts.until?.()) stopping = true;

@@ -302,6 +302,42 @@ export function getScrollVariant(
 }
 
 /**
+ * Moves a mesh on an opaque shared material onto its alpha-tested, blended
+ * twin (`on`), or back. `mesh.visibility` never reaches an opaque material
+ * (see `ModelObject.setAlpha`), so a body fading in or out needs the blend
+ * pass for as long as the fade runs. Both are cached shared materials.
+ */
+export function setMeshFadeBlend(mesh: AbstractMesh, on: boolean): void {
+  const meta = (mesh.metadata ??= {});
+  const scene = mesh.getScene();
+  if (on) {
+    if (meta.fadeFrom) return;
+    const args = materialArgs.get(mesh.material as ItemMaterial);
+    if (!args) return;
+    const [, transparencyMode, , bright, flatLit] = args;
+    if (bright || transparencyMode >= 2) return;
+    meta.fadeFrom = mesh.material;
+    mesh.material = getMaterial(
+      scene,
+      false,
+      ALPHA_TEST_AND_BLEND,
+      BlendState.ALPHA_COMBINE,
+      bright,
+      flatLit,
+      meta.characterAsset === true
+    );
+  } else if (meta.fadeFrom) {
+    const from = meta.fadeFrom as ItemMaterial;
+    meta.fadeFrom = undefined;
+    // Re-resolved, so a quality flip during the fade lands on the right twin.
+    const args = materialArgs.get(from);
+    mesh.material = args
+      ? getMaterial(scene, ...args, meta.characterAsset === true)
+      : from;
+  }
+}
+
+/**
  * Re-resolve every mesh on a shared item material against the current
  * `GameOptions.materialQuality` (Classic ⇄ PBR). The cache keeps both
  * variants, so flipping back is a pointer swap, not a recompile.
