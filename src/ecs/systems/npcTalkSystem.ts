@@ -79,6 +79,10 @@ export const NpcTalkSystem: ISystemFactory = world => {
     }
 
     world.talkTarget = target;
+    // `MOVEMENT_TALK` replaces the current action: a chase left running would
+    // walk away and close the NPC's window again.
+    world.attackTarget = null;
+    world.pickupTarget = null;
   });
 
   let approachDelay = 0;

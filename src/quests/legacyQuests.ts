@@ -495,6 +495,14 @@ export function legacyQuestCanComplete(): boolean {
   return counted && actsFulfilled(quest);
 }
 
+/** Whether this NPC gives any chain quest, to any class. */
+function isLegacyQuestNpc(npcType: number): boolean {
+  for (let i = 0; i < MAX_QUESTS; i++) {
+    if (questDefinition(i)?.npcType === npcType) return true;
+  }
+  return false;
+}
+
 /** `m_btnComplete` clicked: `SendLegacyQuestStateSetRequest(index, 1)`. */
 export function completeLegacyQuest(): void {
   if (!legacyQuestCanComplete()) return;
@@ -695,7 +703,8 @@ EventBus.on('LegacyQuestStateDialog', packet => {
   if (npc && quest && quest.npcType !== npc && ownState(index, p.State) !== LegacyQuestState.InProgress) {
     const mine = legacyQuestForNpc(npc);
     if (mine) openLegacyQuestWindow(mine.index);
-    else endNpcTalk();
+    // Otherwise it answers an earlier talk, which the pending one's close already ended.
+    else if (isLegacyQuestNpc(npc)) endNpcTalk();
     return;
   }
 

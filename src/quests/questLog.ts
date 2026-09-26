@@ -366,13 +366,22 @@ export function closeQuestList(): void {
   closeNpcTalk();
 }
 
+/**
+ * Whether an NPC's reply opened the progress window. One the log's Open
+ * button opened has no NPC session of its own, and its close must not end the
+ * vault or chaos machine that may be up (the original hides those first).
+ */
+let progressFromNpc = false;
+
 export function closeQuestProgress(): void {
   if (!state.progressOpen) return;
+  const fromNpc = progressFromNpc;
+  progressFromNpc = false;
   runInAction(() => {
     state.progressOpen = false;
     state.busy = false;
   });
-  closeNpcTalk();
+  if (fromNpc) closeNpcTalk();
 }
 
 export function showMyQuestWindow(open: boolean): void {
@@ -409,6 +418,7 @@ export function selectMyQuest(key: number): void {
 export function openSelectedQuest(): void {
   const key = state.selectedKey;
   if (!key) return;
+  if (!state.progressOpen) progressFromNpc = false;
   setProgressContents(key);
   runInAction(() => {
     state.mode = 'requestReward';
@@ -770,6 +780,7 @@ EventBus.on('QuestStepInfo', packet => {
 
   const key = questKey(p.QuestStepNumber, p.QuestGroup);
   setProgressContents(key);
+  progressFromNpc = true;
   runInAction(() => {
     state.listOpen = false;
     state.progressOpen = true;
@@ -781,6 +792,7 @@ EventBus.on('QuestProgress', packet => {
   const p = new QuestProgressPacket(packet);
   const key = storeProgress(p);
   setProgressContents(key);
+  progressFromNpc = true;
   runInAction(() => {
     state.mode = 'requestReward';
     state.listOpen = false;
