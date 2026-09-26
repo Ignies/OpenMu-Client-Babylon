@@ -1102,6 +1102,8 @@ export const russianLayer: LanguageLayer = {
     'event.cwNotice4c': 'Наказание действует до следующей битвы за Crywolf.',
 
     'item.thisItem': 'этот предмет',
+    'item.ringOfGlory': 'Кольцо Славы',
+    'item.darkStone': 'Темный камень',
     'item.equipped': 'Надето',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Сила атаки',

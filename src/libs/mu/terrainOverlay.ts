@@ -19,6 +19,7 @@ import { pointLightPoolLights } from '../../common/pointLightPool';
 import { linearBufferActive } from '../../common/lightModel';
 import { SNOW_ART, type ArtMatch } from './artMatch';
 import { lookDirector } from '../../lighting/director';
+import { TERRAIN_BRANCH } from './terrainLighting';
 import { devQuery } from '../../common/devSeams';
 
 /**
@@ -1511,22 +1512,35 @@ export function terrainOverlayLitGlsl(
   const l = OVERLAY_LIGHT.lit;
   const lin = (c: readonly [number, number, number]) =>
     `vec3(${f(c[0] ** 2.2)}, ${f(c[1] ** 2.2)}, ${f(c[2] ** 2.2)})`;
+  const gammaLit = `min(
+          mix(vec3(${f(s[0])}, ${f(s[1])}, ${f(s[2])}),
+              vec3(${f(l[0])}, ${f(l[1])}, ${f(l[2])}), ovKey) + ovExtra,
+          vec3(${f(OVERLAY_LIGHT.cap)}))`;
+  const linearLit = `min(
+          mix(${lin(s)}, ${lin(l)}, ovKey) + pow(ovExtra, vec3(2.2)),
+          vec3(${f(OVERLAY_LIGHT.cap ** 2.2)}))`;
+  // `?terrainBranch=0` (terrainLighting.ts): both computed, then mixed.
+  const layerLit = TERRAIN_BRANCH
+    ? `
+      vec3 ovLayerLit;
+      if (linearLight > 0.5) {
+        vec3 ovLayerLin = ${linearLit};
+        ovLayerLit = pow(ovLayerLin, vec3(1.0 / 2.2));
+      } else {
+        ovLayerLit = ${gammaLit};
+      }`
+    : `
+      vec3 ovLayerLit =
+        ${gammaLit};
+      vec3 ovLayerLin =
+        ${linearLit};
+      ovLayerLit = mix(ovLayerLit, pow(ovLayerLin, vec3(1.0 / 2.2)), linearLight);`;
   return `
     vec3 ${outVar} = ${mapLitExpr};
     {
       float ovBakeLum = dot(${bakeVar}.rgb, vec3(0.299, 0.587, 0.114));
       float ovKey = smoothstep(0.0, 1.0, ovBakeLum * ${f(OVERLAY_LIGHT.gain)}) * ${sunVar};
-      vec3 ovExtra = max(${extraExpr}, vec3(0.0));
-      vec3 ovLayerLit =
-        min(
-          mix(vec3(${f(s[0])}, ${f(s[1])}, ${f(s[2])}),
-              vec3(${f(l[0])}, ${f(l[1])}, ${f(l[2])}), ovKey) + ovExtra,
-          vec3(${f(OVERLAY_LIGHT.cap)}));
-      vec3 ovLayerLin =
-        min(
-          mix(${lin(s)}, ${lin(l)}, ovKey) + pow(ovExtra, vec3(2.2)),
-          vec3(${f(OVERLAY_LIGHT.cap ** 2.2)}));
-      ovLayerLit = mix(ovLayerLit, pow(ovLayerLin, vec3(1.0 / 2.2)), linearLight);
+      vec3 ovExtra = max(${extraExpr}, vec3(0.0));${layerLit}
       ${outVar} = mix(${outVar}, ovLayerLit, ovNeutral);
     }`;
 }

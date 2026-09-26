@@ -69,6 +69,13 @@ export type SkillLight = {
    */
   readonly trail?: LightRecipe;
   /**
+   * `follow`: the one light riding the effect's single moving emitter, on
+   * every tier - the original's AddTerrainLight on a travelling effect
+   * (Fire Breath's BITMAP_SHOTGUN). The effects layer starts it when the
+   * emitter appears and hands over its path.
+   */
+  readonly follow?: LightRecipe;
+  /**
    * `land`: a light the effect lays down itself where one of its pieces
    * gets to - a Drain Life siphon reaching the caster, a Chain Lightning
    * hop. Not tier-gated: one light per call, like an arrow.
@@ -80,6 +87,18 @@ export type SkillLight = {
    * with a tinted arrow where the original fires the plain one.
    */
   readonly arrow?: LightRecipe;
+  /**
+   * `bodies`: named lights the effect itself places, each riding one of its bodies on every tier -
+   * the original's `AddTerrainLight` inside a model's own move (Twisting Slash's weapon copies,
+   * Rageful Blow's cracks). The row decides when; the table says what.
+   */
+  readonly bodies?: Readonly<Record<string, LightRecipe>>;
+  /**
+   * `spots`: lights the effect switches on itself, by name, where and when its art shows (a
+   * controller that wakes 16 ticks after the packet, the burst at the end of a breath), through
+   * `lightSkillSpot`.
+   */
+  readonly spots?: Readonly<Record<string, LightRecipe>>;
   /**
    * The light on the Enhanced and Ultra tiers. Classic keeps the row itself,
    * the original's `AddTerrainLight`; each moment set here replaces the
@@ -239,13 +258,69 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   39: { area: frost(5, 1.6) },
   // Nova: the original lights nothing; a fire ring of range 6 is ours.
   40: { area: flame(6, 0.8, { gain: 1.8, floorGain: 1.4, release: 0.6 }) },
-  // Twisting Slash: MODEL_SKILL_WHEEL2 range 3 (:9798).
-  41: { area: spark(3, 0.6) },
+  // Twisting Slash: each MODEL_SKILL_WHEEL2 copy lights Luminosity x 0.3 grey, range 3, under itself
+  // every tick of its 25 (MoveHandlers.cpp:2808-2812); Luminosity is 0.7-1, fading over the last 5 ticks.
+  41: {
+    bodies: { wheel: { color: [0.3, 0.3, 0.3], range: 3, seconds: 1, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 } },
+    // Each copy carries the warm white of its flare01 glow and sparks at blade height, out to the blade's reach.
+    enhanced: { bodies: { wheel: effectLight([1, 0.82, 0.6], 0.9, 1, { heightOffset: 1, release: 0.2, flicker: { min: 0.8, max: 1, steps: 4 } }) } },
+  },
+  // Rageful Blow: red Luminosity x (1,0,0), range 1, under the crater's EarthQuake02 (LT 20) and every
+  // EarthQuake05 / 08 glow wall (LT 40) (ZzzEffect.cpp:7147-7156, :7199-7212, :7247-7258). MODEL_WAVE's
+  // darkening light (-0.5, range 5, MoveHandlers.cpp:2601) has no equivalent: sources only add.
+  42: {
+    bodies: {
+      crater: { color: [1, 0, 0], range: 1, seconds: 0.8, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 },
+      wall: { color: [1, 0, 0], range: 1, seconds: 1.6, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 },
+    },
+    // One light per piece of art instead of 26 pure-red pools that summed to a pink flood: the white-hot burst,
+    // the crater's orange, and the glowing field the cracks and satellites cover out to ~3.7 tiles.
+    enhanced: {
+      bodies: {
+        burst: effectLight([1, 0.85, 0.6], 1.3, 0.45, { heightOffset: 0.4, release: 0.3 }),
+        crater: effectLight([1, 0.5, 0.18], 1.5, 1.4, { attack: 0.08, release: 0.6, flicker: { min: 0.75, max: 1, steps: 4 } }),
+        field: effectLight([1, 0.42, 0.12], 3.7, 1.6, { attack: 0.3, release: 0.7, flicker: { min: 0.8, max: 1, steps: 4 } }),
+      },
+    },
+  },
+  // Death Stab: the original lights nothing. On the graded tiers the red gathering point, the blue drill over its
+  // 2.8 m (centred 1.4 m out, lit from the first roll to the last flare) and the victim's crackle each light like their art.
+  43: {
+    enhanced: {
+      bodies: {
+        gather: effectLight([1, 0.22, 0.1], 0.6, 0.48, { heightOffset: 0, attack: 0.16, release: 0.2 }),
+        drill: effectLight([0.3, 0.4, 1], 1.5, 0.9, { heightOffset: 0, release: 0.35, flicker: { min: 0.75, max: 1, steps: 4 } }),
+        victim: effectLight([0.5, 0.55, 1], 0.8, 1.48, { heightOffset: 0.9, release: 0.3, flicker: { min: 0.4, max: 1, steps: 3 } }),
+      },
+    },
+  },
   // Starfall: MODEL_ARROW_IMPACT lights nothing in the original (:14596);
   // the holy wash riding the shot down is ours.
   46: { arrow: { ...holy(2, ARROW_SECONDS), release: 0.2 } },
-  // Fire Breath: BITMAP_FIRE+1 range 2.
-  49: { impact: flame(2, 0.5) },
+  // Fire Breath: BITMAP_SHOTGUN's (0.5,0.5,0.8) x Luminosity 0.7-1.0, range 2, riding the emitter
+  // for its 10 ticks and fading under LT 5 (MoveHandlers.cpp:5086-5087, ZzzEffect.cpp:6645-6650).
+  // Graded: the breath's lavender over the ~1 tile its puffs reach, bright while the last puffs live
+  // (18 ticks), and the DinoE burst's 1.3 tiles for its 12.
+  49: {
+    follow: { color: [0.5, 0.5, 0.8], range: 2, seconds: 0.4, release: 0.2, flicker: { min: 0.7, max: 1, steps: 4 } },
+    enhanced: {
+      follow: effectLight([0.6, 0.6, 1], 1.1, 0.72, { release: 0.36, flicker: { min: 0.8, max: 1, steps: 4 } }),
+      spots: { bomb: effectLight([1, 0.85, 1], 1.3, 0.48, { release: 0.32, heightOffset: 0.2 }) },
+    },
+  },
+  // Combo: the original lights nothing. Graded: the rays' blue over the ~3 tiles they reach, for their 20 ticks.
+  59: { enhanced: { spots: { burst: effectLight([0.3, 0.6, 1], 3, 0.8, { release: 0.56 }) } } },
+  // Strike of Destruction: the original lights nothing. Graded: the two FLARE_BLUE marks (4 and 6 tiles
+  // wide) for their 24 ticks, fading as their /1.05 does, and a white-blue pop as the strike lands at B.
+  232: {
+    enhanced: {
+      spots: {
+        a: effectLight([0.5, 0.5, 1], 2, 0.96, { release: 0.7 }),
+        b: effectLight([0.55, 0.6, 1], 3, 0.96, { release: 0.7, heightOffset: 0.5 }),
+        strike: effectLight([0.85, 0.9, 1], 1.5, 0.2, { release: 0.15, heightOffset: 1 }),
+      },
+    },
+  },
   // Ice Arrow: MODEL_ARROW range 2 (:11777). The bolt light rides the same
   // path the arrow does and fires the impact on arrival, so it keeps it.
   51: { travel: { ...frost(2, 3), speed: ARROW_SPEED }, impact: frost(2, 0.4) },
@@ -524,6 +599,65 @@ export function lightSkillTrail(
   const recipe = lightRow(skill)?.trail;
 
   if (!recipe || tierIndex() < ULTRA_TIER) return null;
+
+  const position = { x: 0, y: 0, z: 0 };
+  follow(position);
+
+  return attach(scene, recipe, { position, follow });
+}
+
+/**
+ * Command: one of a skill's `bodies` lights, on every tier, riding `follow`. Null when the row has
+ * no such body.
+ */
+export function lightSkillBody(
+  scene: Scene,
+  skill: number,
+  body: string,
+  follow: (out: { x: number; y: number; z: number }) => void
+): LightSource | null {
+  const recipe = lightRow(skill)?.bodies?.[body];
+
+  if (!recipe) return null;
+
+  const position = { x: 0, y: 0, z: 0 };
+  follow(position);
+
+  return attach(scene, recipe, { position, follow });
+}
+
+/**
+ * Command: the row's `follow` light on a skill's one moving emitter, on every
+ * tier. Null when the row has none.
+ */
+export function lightSkillFollow(
+  scene: Scene,
+  skill: number,
+  follow: (out: { x: number; y: number; z: number }) => void
+): LightSource | null {
+  const recipe = lightRow(skill)?.follow;
+
+  if (!recipe) return null;
+
+  const position = { x: 0, y: 0, z: 0 };
+  follow(position);
+
+  return attach(scene, recipe, { position, follow });
+}
+
+/**
+ * Command: the row's `spots[name]` light, anchored where `follow` says, as its effect reaches that
+ * moment. Null when the row, as this tier uses it, has no such spot.
+ */
+export function lightSkillSpot(
+  scene: Scene,
+  skill: number,
+  name: string,
+  follow: (out: { x: number; y: number; z: number }) => void
+): LightSource | null {
+  const recipe = lightRow(skill)?.spots?.[name];
+
+  if (!recipe) return null;
 
   const position = { x: 0, y: 0, z: 0 };
   follow(position);

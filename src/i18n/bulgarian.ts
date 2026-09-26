@@ -1104,6 +1104,8 @@ export const bulgarianLayer: LanguageLayer = {
     'event.cwNotice4c': 'Наказанието важи до следващата битка при Crywolf.',
 
     'item.thisItem': 'този предмет',
+    'item.ringOfGlory': 'Пръстен на славата',
+    'item.darkStone': 'Тъмен камък',
     'item.equipped': 'Носено',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Сила на атаката',

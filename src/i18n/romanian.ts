@@ -1114,6 +1114,8 @@ export const romanianLayer: LanguageLayer = {
       'Penalizarea ține până la următoarea bătălie de la Crywolf.',
 
     'item.thisItem': 'acest obiect',
+    'item.ringOfGlory': 'Inelul Gloriei',
+    'item.darkStone': 'Piatra Întunecată',
     'item.equipped': 'Echipat',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Putere de atac',

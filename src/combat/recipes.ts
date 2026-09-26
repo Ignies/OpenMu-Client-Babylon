@@ -165,6 +165,8 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   44: { ground: A.PLAYER_ATTACK_RUSH }, // Rush
   232: { ground: A.PLAYER_SKILL_BLOW_OF_DESTRUCTION }, // Strike of Destruction
   337: { ground: A.PLAYER_SKILL_BLOW_OF_DESTRUCTION }, // Strike of Destruction Str
+  340: { ground: A.PLAYER_SKILL_BLOW_OF_DESTRUCTION }, // Strike of Destruction Proficiency
+  343: { ground: A.PLAYER_SKILL_BLOW_OF_DESTRUCTION }, // Strike of Destruction Mastery
   56: { ground: A.PLAYER_ATTACK_TWO_HAND_SWORD_TWO, ...MOUNTED_SWORD }, // Power Slash (MG)
   482: { ground: A.PLAYER_ATTACK_TWO_HAND_SWORD_TWO, ...MOUNTED_SWORD }, // Power Slash Str
   57: { ground: A.PLAYER_ATTACK_ONE_FLASH }, // Spiral Slash (WSclient.cpp:4164)

@@ -282,7 +282,8 @@ export const CombatSfxSystem: ISystemFactory = world => {
 
           if (!started) continue;
 
-          if (isPlayerAttackAction(action) || MOUNTED_ATTACK_CLIPS.has(action)) {
+          // Rageful Blow is cast through AttackKnight, which never plays the swing (ClassAttack.cpp:960-994).
+          if ((isPlayerAttackAction(action) && action !== A.PLAYER_ATTACK_SKILL_FURY_STRIKE) || MOUNTED_ATTACK_CLIPS.has(action)) {
             const sfx = playerSwingSound(e.charAppearance);
             if (sfx) playSfx(sfx, pos, { bus: COMBAT_BUS });
           } else if (action === A.PLAYER_SHOCK || fenrirDamage(action)) {
