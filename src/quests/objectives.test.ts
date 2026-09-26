@@ -1,7 +1,13 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { i18n } from '../i18n';
 import { ConditionTypeEnum } from '../common/packets/ServerToClientPackets';
-import { objectiveDone, objectiveProgress, objectiveText, type QuestObjective } from './objectives';
+import {
+  objectiveCounted,
+  objectiveDone,
+  objectiveProgress,
+  objectiveText,
+  type QuestObjective,
+} from './objectives';
 
 beforeAll(() => i18n.setLanguage('en'));
 
@@ -24,6 +30,12 @@ describe('quest objectives', () => {
       objective({ type: ConditionTypeEnum.Item, required: 1, current: 0, name: 'Scroll of Emperor' })
     );
     expect(line).toBe('Bring Scroll of Emperor  0 / 1');
+  });
+
+  it('leaves the count out for a reader that prints it apart', () => {
+    expect(objectiveText(objective(), '')).toBe('Hunt Budge Dragon');
+    expect(objectiveCounted(objective())).toBe(true);
+    expect(objectiveCounted(objective({ type: ConditionTypeEnum.Level }))).toBe(false);
   });
 
   it('never counts past the target', () => {
