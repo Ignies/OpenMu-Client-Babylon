@@ -745,7 +745,8 @@ EventBus.on('LegacyQuestReward', packet => {
   switch (p.Reward as number) {
     case Reward.LevelUpPoints:
     case Reward.LevelUpPointsPerLevelIncrease:
-      if (isHero) {
+      // Gain Hero Status done at exactly level 220 sends 202 with 0 points.
+      if (isHero && p.Count > 0) {
         runInAction(() => {
           Store.playerData.points += p.Count;
         });
