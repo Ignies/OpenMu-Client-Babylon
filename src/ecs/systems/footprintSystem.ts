@@ -20,6 +20,7 @@ import { SNOW_GROUND_MAPS } from '../../weather/snowCover';
 import { RUN_THRESHOLD } from '../../common/locomotion';
 import { ploughSnowTrail } from '../../weather/snowTrail';
 import type { Entity, ISystemFactory } from '../world';
+import { isTeleporting } from './teleportSystem';
 
 /**
  * Lays the tracks down (`footprints.ts`) and runs the drying boot.
@@ -553,6 +554,8 @@ export const FootprintSystem: ISystemFactory = world => {
     // it is not a stride.
     if (
       moved > TELEPORT ||
+      // A teleport of any length, the skill's included.
+      isTeleporting(entity) ||
       (modelObject?.HoverHeight ?? 0) > HOVERING ||
       attributeSystem?.isAboveZero('isFlying')
     ) {

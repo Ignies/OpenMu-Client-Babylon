@@ -12,6 +12,7 @@ import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
 import { useNearbyPlayers } from '../nearbyPlayers';
+import { TELEPORT_ALLY } from '../../../../../common/skillCasting';
 
 /**
  * `CNewUIPartyInfoWindow`: the party list in an item-window frame. Each row
@@ -55,6 +56,21 @@ const HP_FILL_SPRITE = 'newui_Party_Lifebar02.OZJ';
 const FLAG_SIZE = 12;
 const X_SIZE = 10;
 
+/**
+ * `SelectCharacterInPartyList` (NewUIPartyListWindow.cpp:357-388): with
+ * Teleport Ally selected, a member picked in the list is the one it pulls,
+ * if they are in sight.
+ */
+function castAllyOn(name: string): void {
+  const world = Store.world;
+  if (!world || Store.currentSkill !== TELEPORT_ALLY) return;
+  const target = world.netObjsQuery.entities.find(
+    e => !e.localPlayer && e.playerAnimation && e.objectNameInWorld?.trimEnd() === name.trimEnd()
+  );
+  if (!target) return;
+  world.castRequest = { target, point: null, forced: false };
+}
+
 const MemberRow = observer(({ index }: { index: number }) => {
   const member = Social.partyMembers[index];
   if (!member) return null;
@@ -85,7 +101,12 @@ const MemberRow = observer(({ index }: { index: number }) => {
           title={t('party.leader')}
         />
       )}
-      <div className={`party-name${isMe ? ' me' : ''}`}>{member.name}</div>
+      <div
+        className={`party-name${isMe ? ' me' : ''}`}
+        onClick={isMe ? undefined : () => castAllyOn(member.name)}
+      >
+        {member.name}
+      </div>
       {canRemove && (
         <MuSpriteFrame
           file={X_SPRITE}

@@ -12,7 +12,7 @@ import {
   type LightAnchor,
   type LightRecipe,
 } from './lightSource';
-import { lightAreaSkill, lightArrow, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillSpot, lightSkillTrail, lightTargetedSkill } from './skills';
+import { lightAreaSkill, lightArrow, lightSkillAt, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillSpot, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
@@ -115,6 +115,11 @@ class Lighting {
   /** Light a targeted skill: cast flash, projectile, impact. */
   skillTargeted(scene: Scene, skill: number, caster: Entity, target: Entity | null): void {
     lightTargetedSkill(scene, skill, caster, target);
+  }
+
+  /** Light one moment of a skill standing at a point (Teleport's Begin and End squares). */
+  skillAt(scene: Scene, skill: number, moment: 'cast' | 'impact', at: { x: number; y: number; z: number }): void {
+    lightSkillAt(scene, skill, moment, at);
   }
 
   /** Light an area skill at a ground point. */
