@@ -80,6 +80,13 @@ export interface MapLayer {
   readonly outdoor?: boolean;
 
   /**
+   * Rain falls out of that sky. Defaults to `outdoor`; declare it false where
+   * the map has a sky that stays dry whatever the weather byte reads. Read
+   * through `maps.canRain`.
+   */
+  readonly rain?: boolean;
+
+  /**
    * The sky belongs to snow: rain never falls here however the weather byte
    * reads (`CreateDeviasSnow` gates on the world alone), objects carry snow
    * caps, footsteps read as snow. Read through `weather/ambientWeather.ts`'s

@@ -215,6 +215,10 @@ export function getScrollMaterial(
   if (cached) return cached;
 
   const material = createItemMaterial(scene, bright, flatLit, true);
+  // As in getMaterial: without a diffuse texture Babylon compiles no DIFFUSE
+  // define, the texel is never read and the mesh draws as flat BodyLight.
+  material.useAlphaFromDiffuseTexture = true;
+  material.diffuseTexture = getEmptyTexture(scene);
 
   material.name = name;
   material.backFaceCulling = backFaceCulling;

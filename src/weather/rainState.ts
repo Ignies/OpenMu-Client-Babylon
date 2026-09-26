@@ -2,6 +2,7 @@ import { ENUM_WORLD } from '../common/types';
 import type { WeatherLayer } from './layer';
 import { Store } from '../store';
 import { CHAOS_CASTLE_WORLDS, DEVIL_SQUARE_WORLDS } from '../common/worldAssets';
+import { maps } from '../maps';
 
 /**
  * Rain strength, ported from `RainTarget` / `RainCurrent`
@@ -96,6 +97,10 @@ let seeded = false;
 export function rainTarget(map: ENUM_WORLD): number {
   if (ALWAYS_RAINING.has(map)) return 1;
 
+  // The packet is global. A map where rain cannot fall stays dry under it,
+  // so the ground, the splashes and the sound all agree with the sky.
+  if (!maps.canRain(map)) return 0;
+
   const { weather, variation } = Store.weather;
 
   if (weather !== WEATHER_RAIN) return 0;
@@ -150,8 +155,8 @@ export function rainStrength(): number {
  * rate over its own `ramp`. That 2.5 s is the arrival, and it is the right
  * length for one: the shower is not starting, the player is.
  *
- * Maps that must never rain (indoor, or snow maps) are excluded by the rain
- * slot itself.
+ * Maps that must never rain (indoor, snow, dry) get a zero target from
+ * `rainTarget`.
  */
 export function resetRain(): void {
   current = 0;

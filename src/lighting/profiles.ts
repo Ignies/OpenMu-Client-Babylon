@@ -82,7 +82,7 @@ export type SkyLook = {
   readonly sun?: Rgb | null;
   /** Halo strength around the sun. */
   readonly halo?: number;
-  /** Base cloud coverage, 0..1. */
+  /** Base cloud coverage, 0..1. 0 is a clear sky: no deck, no drift, no shadows. */
   readonly clouds?: number;
   /** Far scenery on the skyline; omit for a map whose ground is all there is. */
   readonly skyline?: SkylineLook;
@@ -243,7 +243,7 @@ const PROFILES: Partial<Record<ENUM_WORLD, LookProfile>> = {
   [ENUM_WORLD.WD_2DEVIAS]: {
     ev: 0.8,
     whiteBalance: [0.97, 0.99, 1.04],
-    sky: { zenith: [0.44, 0.62, 0.88], horizon: [0.78, 0.85, 0.92], clouds: 0.28 },
+    sky: { zenith: [0.44, 0.62, 0.88], horizon: [0.78, 0.85, 0.92], clouds: 0 },
     fog: { start: 20, density: 0.012, cap: 0.9, height: 0.02, color: [0.7, 0.76, 0.86] },
     // `top` is 0: the shallowest tile anyone can stand on here is 0.135, so
     // none of the snow field is over it and none of it changes. The cliff
