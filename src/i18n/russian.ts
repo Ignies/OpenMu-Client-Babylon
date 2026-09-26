@@ -1591,6 +1591,8 @@ export const russianLayer: LanguageLayer = {
     'session.reset': 'Сброс',
     'keys.sortInventory': 'Упорядочить инвентарь',
     'notify.inventorySorted': 'Инвентарь упорядочен',
+    'notify.arrowsReloaded': 'Стрелы перезаряжены',
+    'notify.noMoreArrows': 'Стрелы закончились',
     'keys.targetNearest': 'Выбрать следующего монстра',
     'warp.favouriteHint': 'Правый клик закрепит карту вверху списка',
     'search.placeholder': 'Поиск...',

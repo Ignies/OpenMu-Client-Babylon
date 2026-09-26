@@ -1612,6 +1612,8 @@ export const frenchLayer: LanguageLayer = {
     'session.reset': 'Réinitialiser',
     'keys.sortInventory': 'Ranger l’inventaire',
     'notify.inventorySorted': 'Inventaire rangé',
+    'notify.arrowsReloaded': 'Flèches rechargées',
+    'notify.noMoreArrows': 'Plus de flèches',
     'keys.targetNearest': 'Cibler le monstre suivant',
     'warp.favouriteHint': 'Clic droit pour épingler cette carte en haut',
     'search.placeholder': 'Rechercher...',

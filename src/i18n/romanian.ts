@@ -1605,6 +1605,8 @@ export const romanianLayer: LanguageLayer = {
     'session.reset': 'Resetează',
     'keys.sortInventory': 'Aranjează inventarul',
     'notify.inventorySorted': 'Inventar aranjat',
+    'notify.arrowsReloaded': 'Săgeți reîncărcate',
+    'notify.noMoreArrows': 'Nu mai ai săgeți',
     'keys.targetNearest': 'Țintește următorul monstru',
     'warp.favouriteHint': 'Clic dreapta pentru a fixa harta în capul listei',
     'search.placeholder': 'Caută...',

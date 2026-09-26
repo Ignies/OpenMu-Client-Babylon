@@ -1610,6 +1610,8 @@ export const portugueseLayer: LanguageLayer = {
     'session.reset': 'Zerar',
     'keys.sortInventory': 'Organizar inventário',
     'notify.inventorySorted': 'Inventário organizado',
+    'notify.arrowsReloaded': 'Flechas recarregadas',
+    'notify.noMoreArrows': 'Não há mais flechas',
     'keys.targetNearest': 'Alvejar o próximo monstro',
     'warp.favouriteHint': 'Clique direito para fixar este mapa no topo',
     'search.placeholder': 'Buscar...',

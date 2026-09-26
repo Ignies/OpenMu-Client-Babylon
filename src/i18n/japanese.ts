@@ -1567,6 +1567,8 @@ export const japaneseLayer: LanguageLayer = {
     'session.reset': 'リセット',
     'keys.sortInventory': '所持品を整理',
     'notify.inventorySorted': '所持品を整理しました',
+    'notify.arrowsReloaded': '矢筒を代えました。',
+    'notify.noMoreArrows': '矢がありません。',
     'keys.targetNearest': '次のモンスターを狙う',
     'warp.favouriteHint': '右クリックでこのマップを上に固定',
     'search.placeholder': '検索...',

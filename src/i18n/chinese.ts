@@ -1559,6 +1559,8 @@ export const chineseLayer: LanguageLayer = {
     'session.reset': '重置',
     'keys.sortInventory': '整理背包',
     'notify.inventorySorted': '背包已整理',
+    'notify.arrowsReloaded': '已装填箭矢',
+    'notify.noMoreArrows': '没有箭矢了',
     'keys.targetNearest': '选中下一个怪物',
     'warp.favouriteHint': '右键收藏此地图并置顶',
     'search.placeholder': '查找...',
