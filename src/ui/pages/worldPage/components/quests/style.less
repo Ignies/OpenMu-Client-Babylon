@@ -1,3 +1,4 @@
+@import (reference) '../../../../components/muText/style.less';
 // The four quest windows (`CNewUINPCQuest`, the NPC quest list,
 // `CNewUIQuestProgress`, `CNewUIMyQuestInfoWindow`). Coordinates live in
 // layout.ts; this is only how each piece looks.
@@ -117,6 +118,33 @@
 
   .quest-button {
     position: absolute;
+  }
+}
+
+// The give-up question (`CQuestGiveUpMsgBoxLayout`). Modal, like every
+// common message box: the layer catches the clicks meant for what is under it.
+.quest-prompt-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  z-index: 600; // WINDOW_Z_MODAL: over the windows and the sheets
+  .mu-font();
+  user-select: none;
+
+  // `CNewUICommonMessageBox::Create`: centred, 100 px down a 480 px screen.
+  .quest-prompt {
+    position: absolute;
+    left: 50%;
+    top: 21%;
+    transform: translateX(-50%);
+  }
+
+  .quest-prompt-text {
+    position: absolute;
+    text-align: center;
+    color: #fff;
+    font-size: 11px;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
   }
 }
 

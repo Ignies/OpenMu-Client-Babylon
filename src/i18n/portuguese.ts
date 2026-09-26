@@ -6,6 +6,7 @@
 
 import type { LanguageLayer } from './layer';
 import { PORTUGUESE_PACK_REPAIRS } from './packRepairs';
+import { PORTUGUESE_DIALOG_PAGES } from './dialogPages';
 
 export const portugueseLayer: LanguageLayer = {
   name: 'portuguese',
@@ -20,6 +21,7 @@ export const portugueseLayer: LanguageLayer = {
     suffix: 'por',
     encoding: 'windows-1252',
     repairs: PORTUGUESE_PACK_REPAIRS,
+    dialogPages: PORTUGUESE_DIALOG_PAGES,
   },
   strings: {
     'preloader.serverSetup': 'Configurar servidor',
@@ -901,8 +903,20 @@ export const portugueseLayer: LanguageLayer = {
     'quest.completedNamed': 'Missão concluída: {subject}',
     'quest.stateFailed': 'Não foi possível mudar o estado da missão',
     'quest.rewardPoints': 'Recompensa: {count} pontos de nível',
-    'quest.rewardStats': 'Recompensa: +{count} em todos os atributos',
     'quest.evolved': 'Você evoluiu para a sua segunda classe',
+    'quest.evolvedThird': 'Você evoluiu para a sua terceira classe',
+    'quest.proceed': 'Prosseguir com a missão',
+    'quest.giveUpConfirm': 'Se você desistir, não poderá continuar esta missão nem as missões relacionadas. Deseja mesmo desistir?',
+    'quest.subjectFallback': 'Missão {number}-{group}',
+    'quest.werewolf.name': 'Guarda Lobisomem',
+    'quest.werewolf.line1': '"Você ao menos sabe quem eu sou? Fui abençoado e amaldiçoado por Lugard. Posso ajudar você, se for digno."',
+    'quest.werewolf.line2': 'Se você passou no teste do Apóstolo Devin, o Guarda Lobisomem enviará você e seu grupo ao Quartel de Balgass.',
+    'quest.werewolf.line3': 'Vocês precisam estar próximos para entrar juntos no Quartel de Balgass.',
+    'quest.werewolf.line4': 'Para receber a ajuda do Guarda Lobisomem, você deve pagar a ele 3.000.000 Zen.',
+    'quest.gatekeeper.name': 'Porteiro',
+    'quest.gatekeeper.line1': '"Hum, quem é você? Balgass ao menos aprovou você?"',
+    'quest.gatekeeper.line2': 'Os 12 apóstolos de Lugard ajudam cegando o porteiro no caminho para o Local de Descanso de Balgass.',
+    'quest.gatekeeper.line3': 'A terceira missão do Apóstolo Devin permite a entrada no Local de Descanso.',
     'quest.comboLearned': 'Você aprendeu a habilidade de combo',
     'quest.req.hunt': 'Cace {name}  {progress}',
     'quest.req.bring': 'Traga {name}  {progress}',
@@ -935,8 +949,6 @@ export const portugueseLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': 'Item {id}',
     'quest.contribution': 'Contribuição: {value}',
-    'quest.talkToStart': 'Fale com {npc} para começar esta missão.',
-    'quest.talkToContinue': 'Fale com {npc} para continuar esta missão.',
     'quest.tracker.returnToNpc': 'Volte ao NPC da missão',
 
     'event.devilSquare': 'Devil Square',

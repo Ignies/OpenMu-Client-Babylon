@@ -109,7 +109,7 @@ export function dialogScript(index: number): DialogScript | undefined {
   return tables.get()?.dialogs[index];
 }
 
-/** `m_mapQuestProgress[(number << 16) | group]`. */
+/** `m_mapQuestProgress[(group << 16) | number]`. */
 export function questProgressEntry(key: number): QuestProgressEntry | undefined {
   return tables.get()?.progress.get(key);
 }

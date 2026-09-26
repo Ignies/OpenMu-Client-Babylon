@@ -5,6 +5,7 @@ import { legacyQuestsLayer } from './legacyQuests';
 import { questLogLayer } from './questLog';
 import { npcDialogueLayer } from './npcDialogue';
 import { questBubblesLayer } from './questBubbles';
+import { balgassEntryLayer } from './balgassEntry';
 
 /**
  * THE list. Every quest entry in the game is one line here, and adding an
@@ -19,4 +20,5 @@ export const QUEST_LAYERS: readonly QuestLayer[] = [
   questLogLayer, // reads questData
   npcDialogueLayer, // reads questData + questLog (the NPC's quest list)
   questBubblesLayer, // reads legacyQuests
+  balgassEntryLayer, // reads legacyQuests (the entry boxes' locks)
 ];

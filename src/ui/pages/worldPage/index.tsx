@@ -41,6 +41,7 @@ import {
   GuildWindow,
 } from './components/guild';
 import { QuestTracker, QuestWindows } from './components/quests';
+import { BalgassEntryWindow } from './components/balgassEntry';
 import { FriendWindow } from './components/friends';
 import { ChatRoomWindow } from './components/chatRoom';
 import { SocialPrompts } from './components/socialPrompts';
@@ -114,6 +115,7 @@ const HUD = observer(() => {
       <GuildCreationDialog />
       <GuildKickPasswordDialog />
       <EventWindows />
+      <BalgassEntryWindow />
       <SoccerScoreHud />
       <DuelWindows />
       <SessionStatsWindow />

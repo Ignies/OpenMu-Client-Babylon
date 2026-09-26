@@ -1900,6 +1900,9 @@ export const Store = new (class _Store {
    */
   sendWalkPath(x: number, y: number, dirs: number[]): void {
     if (dirs.length === 0) return;
+    // Walking away ends the NPC talk: OpenMU refuses potions, trades and even
+    // death while it thinks a dialog is open.
+    EventBus.emit('heroWalked', {});
     if (dirs.length > 15) dirs = dirs.slice(0, 15);
     x = Math.round(x);
     y = Math.round(y);
@@ -1970,6 +1973,8 @@ export const Store = new (class _Store {
     if (this.pendingItemMove || this.npcShop) return;
 
     this.pendingNpcTalk = npc;
+    // `ReceiveTalk` / `ReceiveQuestState` open with `HideAll`.
+    EventBus.emit('npcTalkStarted', { npcType: npc.npcType });
 
     if (this.isOffline) {
       const which = this.offlineNpcWindow++ % 3;

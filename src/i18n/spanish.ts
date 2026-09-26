@@ -7,6 +7,7 @@
 import type { LanguageLayer } from './layer';
 import { SPANISH_PACK_REPAIRS } from './packRepairs';
 import { SPANISH_ITEM_NAMES } from './itemNames';
+import { SPANISH_DIALOG_PAGES } from './dialogPages';
 
 export const spanishLayer: LanguageLayer = {
   name: 'spanish',
@@ -22,6 +23,7 @@ export const spanishLayer: LanguageLayer = {
     encoding: 'windows-1252',
     repairs: SPANISH_PACK_REPAIRS,
     itemNames: SPANISH_ITEM_NAMES,
+    dialogPages: SPANISH_DIALOG_PAGES,
   },
   strings: {
     'preloader.serverSetup': 'Configurar servidor',
@@ -905,8 +907,20 @@ export const spanishLayer: LanguageLayer = {
     'quest.completedNamed': 'Misión completada: {subject}',
     'quest.stateFailed': 'No se pudo cambiar el estado de la misión',
     'quest.rewardPoints': 'Recompensa: {count} puntos de nivel',
-    'quest.rewardStats': 'Recompensa: +{count} a todas las características',
     'quest.evolved': 'Has evolucionado a tu segunda clase',
+    'quest.evolvedThird': 'Has evolucionado a tu tercera clase',
+    'quest.proceed': 'Continuar la misión',
+    'quest.giveUpConfirm': 'Si abandonas, no podrás continuar esta misión ni las relacionadas. ¿De verdad quieres abandonar?',
+    'quest.subjectFallback': 'Misión {number}-{group}',
+    'quest.werewolf.name': 'Guardián hombre lobo',
+    'quest.werewolf.line1': '«¿Acaso sabes quién soy? Lugard me ha bendecido y maldecido a la vez. Puedo ayudarte si eres digno.»',
+    'quest.werewolf.line2': 'Si has superado la prueba del apóstol Devin, el Guardián hombre lobo te enviará a ti y a tu grupo al Cuartel de Balgass.',
+    'quest.werewolf.line3': 'Los miembros del grupo deben estar cerca para entrar a la vez en el Cuartel de Balgass.',
+    'quest.werewolf.line4': 'Para recibir la ayuda del Guardián hombre lobo, debes pagarle 3.000.000 de Zen.',
+    'quest.gatekeeper.name': 'Guardián de la puerta',
+    'quest.gatekeeper.line1': '«Mmm, ¿quién eres? ¿Acaso Balgass te ha dado su aprobación?»',
+    'quest.gatekeeper.line2': 'Los 12 apóstoles de Lugard te ayudan cegando al guardián del camino hacia el Lugar de descanso de Balgass.',
+    'quest.gatekeeper.line3': 'La tercera misión del apóstol Devin permite entrar en el Lugar de descanso.',
     'quest.comboLearned': 'Has aprendido la habilidad de combo',
     'quest.req.hunt': 'Caza {name}  {progress}',
     'quest.req.bring': 'Trae {name}  {progress}',
@@ -939,8 +953,6 @@ export const spanishLayer: LanguageLayer = {
     'quest.npcFallback': 'NPC {type}',
     'quest.itemFallback': 'Objeto {id}',
     'quest.contribution': 'Contribución: {value}',
-    'quest.talkToStart': 'Habla con {npc} para empezar esta misión.',
-    'quest.talkToContinue': 'Habla con {npc} para continuar esta misión.',
     'quest.tracker.returnToNpc': 'Vuelve al NPC de la misión',
 
     'event.devilSquare': 'Devil Square',

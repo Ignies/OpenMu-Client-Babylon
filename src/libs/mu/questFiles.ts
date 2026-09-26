@@ -1,4 +1,4 @@
-import { onLanguageChanged } from '../../i18n';
+import { i18n, onLanguageChanged } from '../../i18n';
 import { convertBux } from '../../common/terrain/mapFileEncryption';
 import { downloadDataFile } from './dataFolder';
 import {
@@ -130,7 +130,7 @@ const PROGRESS_RECORD_SIZE = 41;
 /** `QM_MAX_ANSWER` (QuestMng.h:9). */
 const PROGRESS_MAX_ANSWERS = 5;
 
-/** `SQuestProgress` - one S6 quest step, keyed by `(number << 16) | group`. */
+/** `SQuestProgress` - one S6 quest step, keyed by `(group << 16) | number`. */
 export type QuestProgressEntry = {
   key: number;
   /** 0 = NPC-words window (`CNewUIQuestProgress`), 1 = the "etc" variant. */
@@ -286,6 +286,15 @@ function readDialogScripts(buffer: Uint8Array): DialogScript[] {
   return scripts;
 }
 
+/** The pages the active pack is known to get wrong (`i18n/dialogPages.ts`). */
+function fixDialogPages(scripts: DialogScript[]): DialogScript[] {
+  for (const [page, text] of Object.entries(i18n.dialogPageFixes ?? {})) {
+    const script = scripts[Number(page)];
+    if (script) script.text = text;
+  }
+  return scripts;
+}
+
 function readQuestProgress(buffer: Uint8Array): Map<number, QuestProgressEntry> {
   const entries = new Map<number, QuestProgressEntry>();
   const count = Math.floor(buffer.length / PROGRESS_RECORD_SIZE);
@@ -388,7 +397,7 @@ async function readQuestTables(): Promise<QuestTables> {
 
   return {
     quests: readQuestDefinitions(questsRaw),
-    dialogs: readDialogScripts(dialogsRaw),
+    dialogs: fixDialogPages(readDialogScripts(dialogsRaw)),
     progress: readQuestProgress(progressRaw),
     words: readQuestWords(wordsRaw),
     npcDialogues: readNpcDialogue(npcDialogueRaw),

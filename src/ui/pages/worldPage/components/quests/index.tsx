@@ -1,35 +1,39 @@
 import './style.less';
 import { t } from '../../../../../i18n';
-import { useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../../../store';
 import { isKey } from '../../../../../common/keyBindings';
-import { getBaseClass } from '../../../../../common/characterStats';
 import { useEventBus } from '../../../../../hooks/useEventBus';
-import { uiClick } from '../../../../../libs/sfx';
-import { itemBaseName } from '../../../../../common/itemsDatabase';
+import { playUiSound, uiClick } from '../../../../../libs/sfx';
 import { monsterDisplayName } from '../../../../../common/monstersDatabase';
+import { ConditionTypeEnum } from '../../../../../common/packets/ServerToClientPackets';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
-import { QuestActKind } from '../../../../../libs/mu/questFiles';
+import { MsgBoxFrame, msgBoxHeight } from '../../../../components/msgBoxFrame';
 import { quests } from '../../../../../quests';
+import { objectiveDone, objectiveProgress } from '../../../../../quests/objectives';
 import { questDefinition } from '../../../../../quests/questData';
 import {
   LegacyQuestState,
   answerLegacyQuest,
   closeLegacyQuestWindow,
+  completeLegacyQuest,
   legacyQuestAnswers,
+  legacyQuestCanComplete,
   legacyQuestCurrentIndex,
-  legacyQuestDialogState,
   legacyQuestLines,
+  legacyQuestListReceived,
   legacyQuestNeedZen,
+  legacyQuestObjectives,
+  legacyQuestPreviewLines,
   legacyQuestState,
   legacyQuestWindowOpen,
   legacyQuestWindowTitle,
   wrapDialogText,
 } from '../../../../../quests/legacyQuests';
-import { legacyKillCount } from '../../../../../quests/killCounters';
 import {
   answerNpcDialogue,
   closeNpcDialogue,
@@ -89,7 +93,9 @@ import {
   LINE_SPRITE,
   MONEY_BOX,
   MONEY_SPRITE,
+  MQ_JOB_LINE_Y,
   MQ_JOB_STATE_Y,
+  MQ_JOB_TEXT_STEP,
   MQ_JOB_TEXT_Y,
   MQ_JOB_TITLE_Y,
   MQ_LINE_Y,
@@ -98,6 +104,18 @@ import {
   MQ_MESSAGE_Y,
   MQ_SUMMARY_HEIGHT,
   MQ_SUMMARY_Y,
+  MSGBOX_BUTTON,
+  MSGBOX_BUTTON_BOTTOM,
+  MSGBOX_BUTTON_FRAMES,
+  MSGBOX_CANCEL_SPRITE,
+  MSGBOX_CANCEL_X,
+  MSGBOX_FRAME_LINES,
+  MSGBOX_LINE_STEP,
+  MSGBOX_OK_SPRITE,
+  MSGBOX_OK_X,
+  MSGBOX_TEXT_TOP,
+  MSGBOX_TEXT_WIDTH,
+  MSGBOX_TEXT_X,
   ND_CONTRIBUTE_BOX,
   ND_CONTRIBUTE_Y,
   ND_LINE_CHARS,
@@ -116,15 +134,19 @@ import {
   ND_SEL_X,
   ND_TEXT_GAP,
   ND_TEXT_X,
-  NPC_ANSWERS_ING_Y,
-  NPC_ITEM_LINE_Y,
-  NPC_ITEM_TEXT_Y,
+  NPC_ANSWERS_Y,
+  NPC_COMPLETE_BUTTON,
+  NPC_ING_LINE_Y,
+  NPC_ITEM_X,
   NPC_LINES_MAX,
   NPC_LINE_STEP,
+  NPC_LINE_Y,
+  NPC_MONSTER_X,
   NPC_NAME_Y,
+  NPC_OBJECTIVE_STEP,
+  NPC_OBJECTIVE_Y,
   NPC_QUEST_TITLE_Y,
   NPC_TEXT_TOP,
-  NPC_ZEN_LINE_Y,
   NPC_ZEN_TEXT_Y,
   OPEN_BUTTON,
   OPEN_BUTTON_SPRITE,
@@ -169,18 +191,24 @@ const NPC_DIALOGUE_WINDOW_ID = 'npc-dialogue';
 const MY_QUEST_WINDOW_ID = 'my-quest';
 const HOT_KEY = 'quests';
 
-/** `MAX_ITEM_INDEX`: legacy acts store `group / index`. */
-const MAX_ITEM_INDEX = 512;
 /** `DivideStringByPixel(…, 160)`: about 30 characters of `g_hFont` fit 160 px. */
 const S6_LINE_CHARS = 30;
-/** `QUEST_ITEM` dialog state: every item has been brought. */
-const DIALOG_STATE_ITEM = 4;
 
 const monsterName = (type: number) =>
   monsterDisplayName(type, t('quest.npcFallback', { type }));
 
 const lineColor = (line: QuestRequirementLine) =>
   line.kind === 'header' ? COLOR.yellow : line.kind === 'request' ? (line.done ? COLOR.done : COLOR.missing) : COLOR.text;
+
+/**
+ * The tab and button art is fixed-width, so a translated label - `Job change`
+ * is already wider than the small tab - has to be shrunk to fit; below
+ * `TAB_LABEL_MIN_FONT_PX` a tab's CSS ellipsis cuts it.
+ */
+function fitFontSize(label: string, width: number): number {
+  const fits = (width - TAB_LABEL_PADDING) / (label.length * TAB_LABEL_ADVANCE);
+  return Math.max(TAB_LABEL_MIN_FONT_PX, Math.min(TAB_LABEL_FONT_PX, Math.floor(fits)));
+}
 
 const Line = ({
   y,
@@ -247,8 +275,10 @@ const RequirementList = ({ lines, top, height }: { lines: readonly QuestRequirem
 
 /**
  * `CNewUINPCQuest`: the legacy quest NPC's page. The NPC's lines are
- * centred in the 7-line box; in progress the item / kill list sits under a
- * separator with the answers below it, and a zen box shows the offering.
+ * centred in the 7-line box. In progress the answers follow them and the
+ * item / kill list sits under the separator, over the Proceed button;
+ * otherwise the answers sit under the separator and a zen box shows the
+ * offering.
  */
 const NpcQuestWindow = observer(() => {
   if (!legacyQuestWindowOpen()) return null;
@@ -260,20 +290,24 @@ const NpcQuestWindow = observer(() => {
   const answers = legacyQuestAnswers();
   const needZen = legacyQuestNeedZen();
   const inProgress = state === LegacyQuestState.InProgress;
-  const column = getBaseClass(Store.playerData.charClass);
+  // `QUEST_NO` is OpenMU's 3; None is a quest the list never named.
+  const notStarted = state === LegacyQuestState.No || state === LegacyQuestState.None;
 
   const total = lines.length + answers.length;
   const textTop = NPC_TEXT_TOP + Math.floor(((NPC_LINES_MAX - total) * NPC_LINE_STEP) / 2);
-  const answersTop = inProgress ? NPC_ANSWERS_ING_Y : textTop + lines.length * NPC_LINE_STEP;
+  const answersTop = inProgress ? textTop + lines.length * NPC_LINE_STEP : NPC_ANSWERS_Y;
 
-  // `RenderItemMobText`: what the hero has brought so far.
-  const acts = quest ? quest.acts.slice(0, quest.conditionCount).filter(a => (a.requestClass[column] ?? 0) >= 1) : [];
+  // `RenderItemMobText` reads `GetKillMobCount`: the server's counts, not the tracker's.
+  const objectives = inProgress ? legacyQuestObjectives(index, false) : [];
+  const proceed = t('quest.proceed');
 
   return (
-    <MuItemWindow id={NPC_WINDOW_ID} className="quest-window" column={1}>
+    <MuItemWindow id={NPC_WINDOW_ID} className="quest-window" column={1} onClose={closeLegacyQuestWindow}>
       <Line y={NPC_NAME_Y} text={quest ? monsterName(quest.npcType) : ''} color={COLOR.npcName} />
       <Line y={NPC_QUEST_TITLE_Y} text={quest?.name ?? ''} color={COLOR.questTitle} />
       <div className="head-close" data-no-drag="true" style={HEAD_CLOSE} onClick={uiClick(closeLegacyQuestWindow)} />
+
+      <Separator y={NPC_LINE_Y} />
 
       {lines.map((line, i) => (
         <Line key={i} y={textTop + i * NPC_LINE_STEP} text={line} color={COLOR.text} />
@@ -281,34 +315,41 @@ const NpcQuestWindow = observer(() => {
 
       {inProgress && (
         <>
-          <Separator y={NPC_ITEM_LINE_Y} />
-          {acts.map((act, i) => {
-            const done =
-              act.kind === QuestActKind.Monster
-                ? legacyKillCount(act.itemType) >= act.itemNum
-                : legacyQuestDialogState() === DIALOG_STATE_ITEM;
-            const label =
-              act.kind === QuestActKind.Monster
-                ? `${monsterName(act.itemType)}  ${Math.min(legacyKillCount(act.itemType), act.itemNum)} / ${act.itemNum}`
-                : t('quest.reward.item', {
-                    name:
-                      itemBaseName(act.itemType, act.itemSubType) ||
-                      t('quest.itemFallback', {
-                        id: act.itemType * MAX_ITEM_INDEX + act.itemSubType,
-                      }),
-                    count: act.itemNum,
-                  });
+          <Separator y={NPC_ING_LINE_Y} />
+          {objectives.map((objective, i) => {
+            const kills = objective.type === ConditionTypeEnum.MonsterKills;
             return (
               <Line
                 key={i}
-                y={NPC_ITEM_TEXT_Y + i * NPC_LINE_STEP}
-                left={50}
-                text={label}
+                y={NPC_OBJECTIVE_Y + i * NPC_OBJECTIVE_STEP}
+                left={kills ? NPC_MONSTER_X : NPC_ITEM_X}
+                text={
+                  kills
+                    ? `${objective.name}  ${objectiveProgress(objective)}`
+                    : t('quest.reward.item', { name: objective.name, count: objective.required })
+                }
                 bold
-                color={done ? COLOR.done : COLOR.missing}
+                color={objectiveDone(objective) ? COLOR.done : COLOR.missing}
               />
             );
           })}
+          <div
+            className="quest-button"
+            data-no-drag="true"
+            style={{ left: NPC_COMPLETE_BUTTON.x, top: NPC_COMPLETE_BUTTON.y }}
+          >
+            <MuButton
+              file={EMPTY_BUTTON_SPRITE}
+              width={EMPTY_BUTTON.width}
+              height={EMPTY_BUTTON.height}
+              frames={EMPTY_BUTTON_FRAMES}
+              label={proceed}
+              color={COLOR.text}
+              disabled={!legacyQuestCanComplete()}
+              onClick={completeLegacyQuest}
+              labelStyle={{ fontSize: fitFontSize(proceed, EMPTY_BUTTON.width), fontWeight: 'bold' }}
+            />
+          </div>
         </>
       )}
 
@@ -324,9 +365,8 @@ const NpcQuestWindow = observer(() => {
         </div>
       ))}
 
-      {needZen > 0 && (
+      {notStarted && needZen > 0 && (
         <>
-          <Separator y={NPC_ZEN_LINE_Y} />
           <MuSpriteFrame
             file={MONEY_SPRITE}
             width={MONEY_BOX.width}
@@ -342,6 +382,8 @@ const NpcQuestWindow = observer(() => {
           </div>
         </>
       )}
+
+      <ExitButton onClick={closeLegacyQuestWindow} />
     </MuItemWindow>
   );
 });
@@ -355,7 +397,7 @@ const QuestListDialog = observer(() => {
   const busy = questProgressBusy();
 
   return (
-    <MuItemWindow id={LIST_WINDOW_ID} className="quest-window" column={1}>
+    <MuItemWindow id={LIST_WINDOW_ID} className="quest-window" column={1} onClose={closeQuestList}>
       <div className="window-title" style={{ top: TITLE_Y, color: COLOR.title }}>
         {t('quest.tab.quest')}
       </div>
@@ -422,7 +464,7 @@ const QuestProgressWindow = observer(() => {
   };
 
   return (
-    <MuItemWindow id={PROGRESS_WINDOW_ID} className="quest-window" column={1}>
+    <MuItemWindow id={PROGRESS_WINDOW_ID} className="quest-window" column={1} onClose={closeQuestProgress}>
       <div className="window-title" style={{ top: TITLE_Y, color: COLOR.title }}>
         {t('quest.tab.quest')}
       </div>
@@ -557,7 +599,7 @@ const NpcDialogueWindow = observer(() => {
   });
 
   return (
-    <MuItemWindow id={NPC_DIALOGUE_WINDOW_ID} className="quest-window" column={1}>
+    <MuItemWindow id={NPC_DIALOGUE_WINDOW_ID} className="quest-window" column={1} onClose={closeNpcDialogue}>
       <Line y={ND_NAME_Y} text={npcDialogueNpcName()} bold color={COLOR.npcName} />
       <div className="head-close" data-no-drag="true" style={HEAD_CLOSE} onClick={closeNpcDialogue} />
 
@@ -635,21 +677,11 @@ const NpcDialogueWindow = observer(() => {
 
 // ---- CNewUIMyQuestInfoWindow ------------------------------------------------
 
-/**
- * The tab art is fixed at 48 / 72 px, so a translated label - `Job change`
- * is already wider than the small tab - has to be shrunk to fit; below
- * `TAB_LABEL_MIN_FONT_PX` the CSS ellipsis cuts it.
- */
-function tabFontSize(label: string, width: number): number {
-  const fits = (width - TAB_LABEL_PADDING) / (label.length * TAB_LABEL_ADVANCE);
-  return Math.max(TAB_LABEL_MIN_FONT_PX, Math.min(TAB_LABEL_FONT_PX, Math.floor(fits)));
-}
-
 /** The label of one tab, shrunk to fit its sprite. */
 const TabLabel = observer(({ tab }: { tab: (typeof TABS)[number] }) => {
   const label = t(tab.labelKey);
   return (
-    <span style={{ top: TAB_LABEL_Y - TAB.y - 1, fontSize: tabFontSize(label, tab.width) }}>
+    <span style={{ top: TAB_LABEL_Y - TAB.y - 1, fontSize: fitFontSize(label, tab.width) }}>
       {label}
     </span>
   );
@@ -757,6 +789,8 @@ const QuestTab = observer(() => {
           width={OPEN_BUTTON.width}
           height={OPEN_BUTTON.height}
           frames={SMALL_BUTTON_FRAMES}
+          // The original opens only `IsQuestByEtc` (uiType 1) quests here. Every
+          // OpenMU quest is uiType 0, and its NPC stops listing it once out-levelled.
           disabled={!selected}
           onClick={openSelectedQuest}
         />
@@ -768,30 +802,29 @@ const QuestTab = observer(() => {
           height={GIVEUP_BUTTON.height}
           frames={SMALL_BUTTON_FRAMES}
           disabled={!selected}
-          onClick={() => cancelQuest(selected)}
+          onClick={() => askGiveUp(selected)}
         />
       </div>
     </>
   );
 });
 
-/** The Job change tab: the legacy chain's current quest and its state (`RenderJobChangeContents/State`). */
+/**
+ * The Job change tab (`RenderJobChangeContents` / `RenderJobChangeState`):
+ * the chain quest's title and the page `ShowQuestPreviewWindow` picks for
+ * it, then the state of the quest the NPC window is on.
+ */
 const JobChangeTab = observer(() => {
-  const index = legacyQuestCurrentIndex();
-  const state = legacyQuestState(index);
-  const quest = questDefinition(index);
-  const lines = quest
-    ? wrapDialogText(
-        t(
-          state === LegacyQuestState.InProgress
-            ? 'quest.talkToContinue'
-            : 'quest.talkToStart',
-          { npc: monsterName(quest.npcType) }
-        ),
-        3,
-        S6_LINE_CHARS
-      )
-    : [];
+  if (!legacyQuestListReceived()) {
+    return (
+      <>
+        <Line y={MQ_JOB_TEXT_Y} text={t('quest.waitingServer')} color={COLOR.tabOff} />
+        <Separator y={MQ_JOB_LINE_Y} />
+      </>
+    );
+  }
+
+  const state = legacyQuestState(legacyQuestCurrentIndex());
   const stateText =
     state === LegacyQuestState.Finished
       ? t('quest.completed')
@@ -801,11 +834,11 @@ const JobChangeTab = observer(() => {
 
   return (
     <>
-      <Line y={MQ_JOB_TITLE_Y} text={legacyQuestWindowTitle() || quest?.name || ''} bold color={COLOR.subject} />
-      {lines.map((line, i) => (
-        <Line key={i} y={MQ_JOB_TEXT_Y + i * 16} text={line} color={COLOR.tabOn} />
+      <Line y={MQ_JOB_TITLE_Y} text={legacyQuestWindowTitle()} bold color={COLOR.subject} />
+      {legacyQuestPreviewLines().map((line, i) => (
+        <Line key={i} y={MQ_JOB_TEXT_Y + i * MQ_JOB_TEXT_STEP} text={line} color={COLOR.tabOn} />
       ))}
-      <Separator y={182} />
+      <Separator y={MQ_JOB_LINE_Y} />
       <Line y={MQ_JOB_STATE_Y} left={23} text={stateText} bold color={COLOR.yellow} />
     </>
   );
@@ -834,7 +867,7 @@ const MyQuestInfoWindow = observer(() => {
   const tab = myQuestTab();
 
   return (
-    <MuItemWindow id={MY_QUEST_WINDOW_ID} className="quest-window" column={2}>
+    <MuItemWindow id={MY_QUEST_WINDOW_ID} className="quest-window" column={2} onClose={() => showMyQuestWindow(false)}>
       <div className="window-title" style={{ top: TITLE_Y, color: COLOR.title }}>
         {t('quest.tab.quest')}
       </div>
@@ -848,6 +881,93 @@ const MyQuestInfoWindow = observer(() => {
   );
 });
 
+// ---- CQuestGiveUpMsgBoxLayout -----------------------------------------------
+
+/** The quest the give-up box asks about; 0 while it is not up. */
+const giveUp = observable({ key: 0 });
+
+function askGiveUp(key: number): void {
+  runInAction(() => (giveUp.key = key));
+}
+
+/** OK sends `SendQuestCancelRequest`, Cancel only drops the box. */
+function answerGiveUp(ok: boolean): void {
+  const key = giveUp.key;
+  runInAction(() => (giveUp.key = 0));
+  if (ok) cancelQuest(key);
+}
+
+/**
+ * `CQuestGiveUpMsgBoxLayout`: a modal `CNewUICommonMessageBox` over the log,
+ * Enter for OK and Escape for Cancel. The frame grows a middle slice for
+ * every line past two, so the text is laid out first and its lines counted.
+ */
+const GiveUpPrompt = observer(() => {
+  const open = myQuestWindowOpen();
+  const key = open ? giveUp.key : 0;
+  const text = t('quest.giveUpConfirm');
+  const textRef = useRef<HTMLDivElement>(null);
+  const [textLines, setTextLines] = useState(MSGBOX_FRAME_LINES);
+
+  useEffect(() => {
+    if (!open) answerGiveUp(false);
+  }, [open]);
+
+  useLayoutEffect(() => {
+    const height = textRef.current?.scrollHeight;
+    if (height) setTextLines(Math.max(1, Math.round(height / MSGBOX_LINE_STEP)));
+  }, [key, text]);
+
+  // Captured ahead of the game's own keyboard handler, which would close the log on Escape.
+  useEffect(() => {
+    if (!key) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.isComposing || (e.key !== 'Enter' && e.key !== 'Escape')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      playUiSound('click');
+      answerGiveUp(e.key === 'Enter');
+    };
+    window.addEventListener('keydown', handler, true);
+    return () => window.removeEventListener('keydown', handler, true);
+  }, [key]);
+
+  if (!key) return null;
+
+  const middle = Math.max(0, textLines - MSGBOX_FRAME_LINES);
+  const buttonTop = msgBoxHeight(middle) - MSGBOX_BUTTON_BOTTOM;
+
+  return (
+    <div className="quest-prompt-layer">
+      <MsgBoxFrame lines={middle} className="quest-prompt">
+        <div
+          ref={textRef}
+          className="quest-prompt-text"
+          style={{ left: MSGBOX_TEXT_X, top: MSGBOX_TEXT_TOP, width: MSGBOX_TEXT_WIDTH, lineHeight: `${MSGBOX_LINE_STEP}px` }}
+        >
+          {text}
+        </div>
+        <MuButton
+          file={MSGBOX_OK_SPRITE}
+          width={MSGBOX_BUTTON.width}
+          height={MSGBOX_BUTTON.height}
+          frames={MSGBOX_BUTTON_FRAMES}
+          onClick={() => answerGiveUp(true)}
+          style={{ position: 'absolute', left: MSGBOX_OK_X, top: buttonTop }}
+        />
+        <MuButton
+          file={MSGBOX_CANCEL_SPRITE}
+          width={MSGBOX_BUTTON.width}
+          height={MSGBOX_BUTTON.height}
+          frames={MSGBOX_BUTTON_FRAMES}
+          onClick={() => answerGiveUp(false)}
+          style={{ position: 'absolute', left: MSGBOX_CANCEL_X, top: buttonTop }}
+        />
+      </MsgBoxFrame>
+    </div>
+  );
+});
+
 export { QuestTracker } from './tracker';
 
 /** Every quest window; one line in `worldPage/index.tsx`. */
@@ -858,5 +978,6 @@ export const QuestWindows = () => (
     <QuestListDialog />
     <QuestProgressWindow />
     <MyQuestInfoWindow />
+    <GiveUpPrompt />
   </>
 );

@@ -16,6 +16,7 @@ import { EN_TEXT, type TextKey } from './recipes';
 import type { LanguageDataPack, LanguageLayer } from './layer';
 import type { PackRepairs } from './packRepairs';
 import type { ItemNameFixes } from './itemNames';
+import type { DialogPageFixes } from './dialogPages';
 import { LANGUAGE_LAYERS } from './layers';
 
 const LANGUAGE_KEY = 'mu_language';
@@ -151,6 +152,11 @@ class I18n {
   /** Item names the active pack gets wrong, keyed `"group/index"`. */
   get itemNameFixes(): ItemNameFixes | null {
     return this.current.dataPack?.itemNames ?? null;
+  }
+
+  /** Quest dialogue pages the active pack gets wrong, by page number. */
+  get dialogPageFixes(): DialogPageFixes | null {
+    return this.current.dataPack?.dialogPages ?? null;
   }
 
   /**

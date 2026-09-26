@@ -35,11 +35,22 @@ export const NPC_QUEST_TITLE_Y = 29;
 export const NPC_TEXT_TOP = 66;
 export const NPC_LINE_STEP = 18;
 export const NPC_LINES_MAX = 7;
-/** In progress: the item / monster list under a line at 220, answers at 250. */
-export const NPC_ITEM_LINE_Y = 220;
-export const NPC_ITEM_TEXT_Y = 235;
-export const NPC_ANSWERS_ING_Y = 250;
-export const NPC_ZEN_LINE_Y = 325;
+/** `RenderBackImage`: the separator at 220 is always drawn. */
+export const NPC_LINE_Y = 220;
+/** Not in progress the answers sit at 250; in progress they follow the NPC's lines. */
+export const NPC_ANSWERS_Y = 250;
+/**
+ * In progress (`RenderItemMobText`): an objective every 32 px from 244, an
+ * item at x 60 and a kill count at x 50, then a second separator at 325 and
+ * `m_btnComplete` ("Proceed with quest", 108×29 `newui_btn_empty`) at 355.
+ */
+export const NPC_OBJECTIVE_Y = 244;
+export const NPC_OBJECTIVE_STEP = 32;
+export const NPC_ITEM_X = 60;
+export const NPC_MONSTER_X = 50;
+export const NPC_ING_LINE_Y = 325;
+export const NPC_COMPLETE_BUTTON = { x: 41, y: 355 };
+/** Not started (`QUEST_NO`): the offering in the zen box. */
 export const NPC_ZEN_TEXT_Y = 368;
 
 // ---- CNewUIQuestProgress ----------------------------------------------------
@@ -77,10 +88,11 @@ export const TAB_BIG_SPRITE = 'Quest_tab03.OZT';
 export const TAB = { x: 10, y: 27, width: 166, height: 22 };
 export const TAB_LABEL_Y = 34;
 /**
- * The tabs are sprite-sized, so a translated label has to fit 48 / 72 px.
- * Like the event intro lines, the label shrinks to fit and is cut with an
- * ellipsis past `TAB_LABEL_MIN_FONT_PX`; `TAB_LABEL_ADVANCE` is the average
- * glyph advance of the UI font, in px per px of font size.
+ * The tabs and the empty buttons are sprite-sized, so a translated label has
+ * to fit 48 / 72 / 108 px. Like the event intro lines, the label shrinks to
+ * fit; a tab's is cut with an ellipsis past `TAB_LABEL_MIN_FONT_PX`.
+ * `TAB_LABEL_ADVANCE` is the average glyph advance of the UI font, in px per
+ * px of font size.
  */
 export const TAB_LABEL_FONT_PX = 10;
 export const TAB_LABEL_MIN_FONT_PX = 7;
@@ -103,8 +115,11 @@ export const MQ_MESSAGE_Y = 96;
 export const MQ_LINE_Y = 160;
 export const MQ_SUMMARY_Y = 185;
 export const MQ_SUMMARY_HEIGHT = 200;
+/** `RenderJobChangeContents` / `RenderJobChangeState`. */
 export const MQ_JOB_TITLE_Y = 58;
 export const MQ_JOB_TEXT_Y = 76;
+export const MQ_JOB_TEXT_STEP = 16;
+export const MQ_JOB_LINE_Y = 182;
 export const MQ_JOB_STATE_Y = 283;
 /** `Quest_Bt_open/cast.tga`: 36×58 = two 29 px frames. */
 export const OPEN_BUTTON_SPRITE = 'Quest_Bt_open.OZT';
@@ -160,3 +175,24 @@ export const ND_SEL_PAGE_Y = 372;
 /** `Gens_point.tga` at (11, 27) 168×18, the contribution line at 30. */
 export const ND_CONTRIBUTE_BOX = { x: 11, y: 27, width: 168, height: 18 };
 export const ND_CONTRIBUTE_Y = 30;
+
+// ---- CQuestGiveUpMsgBoxLayout -----------------------------------------------
+
+/** `newui_button_ok/cancel.tga`, the common message box's buttons: 54×90 = three 30 px frames. */
+export const MSGBOX_OK_SPRITE = 'newui_button_ok.OZT';
+export const MSGBOX_CANCEL_SPRITE = 'newui_button_cancel.OZT';
+export const MSGBOX_BUTTON = { width: 54, height: 30 };
+export const MSGBOX_BUTTON_FRAMES = { up: 0, active: 1, down: 2 } as const;
+/**
+ * `CNewUICommonMessageBox`: the text from 35, 180 px wide (`MSGBOX_TEXT_MAXWIDTH`),
+ * a line every 15 px; the frame holds two, each further line adds a middle
+ * slice. OK and Cancel are centred in each half, 20 px off the bottom.
+ */
+export const MSGBOX_TEXT_TOP = 35;
+export const MSGBOX_TEXT_X = 25;
+export const MSGBOX_TEXT_WIDTH = 180;
+export const MSGBOX_LINE_STEP = 15;
+export const MSGBOX_FRAME_LINES = 2;
+export const MSGBOX_OK_X = 30;
+export const MSGBOX_CANCEL_X = 145;
+export const MSGBOX_BUTTON_BOTTOM = 50;

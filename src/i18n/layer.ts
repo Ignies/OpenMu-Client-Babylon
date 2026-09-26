@@ -10,6 +10,7 @@
 import type { TextKey } from './recipes';
 import type { PackRepairs } from './packRepairs';
 import type { ItemNameFixes } from './itemNames';
+import type { DialogPageFixes } from './dialogPages';
 
 /**
  * Which flag the selector draws. The value is an ISO 3166-1 alpha-2 region,
@@ -107,4 +108,10 @@ export interface LanguageDataPack {
    * `itemNames.ts`; read by `libs/mu/itemNameFile.ts` in front of the table.
    */
   readonly itemNames?: ItemNameFixes;
+
+  /**
+   * Quest dialogue pages this pack gets wrong, by page number. See
+   * `dialogPages.ts`; applied by `libs/mu/questFiles.ts` after decoding.
+   */
+  readonly dialogPages?: DialogPageFixes;
 }

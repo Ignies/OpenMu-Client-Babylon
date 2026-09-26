@@ -28,19 +28,22 @@ import { t, type TextKey } from '../i18n';
 import { observable, reaction, runInAction } from 'mobx';
 import { getBaseClass, BaseClass } from '../common/characterStats';
 import { itemBaseName } from '../common/itemsDatabase';
+import { classOf } from '../common/itemStats';
 import { monsterDisplayName } from '../common/monstersDatabase';
 import {
+  CloseNpcRequestPacket,
   LegacyQuestStateRequestPacket,
   LegacyQuestStateSetRequestPacket,
 } from '../common/packets/ClientToServerPackets';
 import {
   ConditionTypeEnum,
   LegacyQuestRewardPacket,
+  LegacyQuestRewardQuestRewardTypeEnum as Reward,
   LegacyQuestStateDialogPacket,
   LegacyQuestStateListPacket,
   LegacySetQuestStateResponsePacket,
 } from '../common/packets/ServerToClientPackets';
-import type { ENUM_WORLD } from '../common/types';
+import type { CharacterClassNumber } from '../common/types';
 import { EventBus } from '../libs/eventBus';
 import { playUiSound } from '../libs/sfx';
 import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../libs/mu/questFiles';
@@ -51,7 +54,7 @@ import {
   questDataReady,
   questDefinition,
 } from './questData';
-import { legacyKillCount } from './killCounters';
+import { clearLocalKills, legacyKillCount, legacyServerKillCount } from './killCounters';
 import type { QuestObjective } from './objectives';
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -64,7 +67,7 @@ export const LegacyQuestState = {
   InProgress: 1,
   /** `QUEST_END`: finished. */
   Finished: 2,
-  /** `QUEST_NO`: rejected / not yet available (never stored, dialog-only). */
+  /** `QUEST_NO`: not started yet - what OpenMU sends for every quest not taken. */
   No: 3,
 } as const;
 
@@ -102,12 +105,6 @@ const SET_STATE_ADVANCE = 1;
 export const DIALOG_MAX_LINES = 7;
 const DIALOG_LINE_CHARS = 38;
 
-/** `LegacyQuestReward.Reward` codes (`ReceiveQuestPrize`). */
-const REWARD_LEVEL_UP_POINTS = 200;
-const REWARD_CLASS_CHANGE = 201;
-const REWARD_COMBO_SKILL = 202;
-const REWARD_PLUS_STATS = 203;
-
 /** `MAX_ITEM_INDEX`: item `Type = group * 512 + index`. */
 const MAX_ITEM_INDEX = 512;
 
@@ -140,6 +137,10 @@ const state = observable({
   needZen: 0,
   /** Whether the list arrived for this character (`m_bOnce`). */
   received: false,
+  /** The list's quest count: the chain ends there. */
+  count: 0,
+  /** The last page was picked before the quest tables were decoded. */
+  pageStale: false,
 });
 
 /** Whether the NPC quest window is showing. */
@@ -190,6 +191,7 @@ export function legacyQuestWindowTitle(): string {
 /** The chain quests the hero is on (`QUEST_ING`), by index. */
 export function legacyQuestsInProgress(): number[] {
   const running: number[] = [];
+  if (!state.received) return running;
   for (let i = 0; i < MAX_QUESTS; i++) {
     if (state.states[i] === LegacyQuestState.InProgress && questDefinition(i)?.name) running.push(i);
   }
@@ -232,6 +234,14 @@ function firstOpenQuest(count: number, cls: BaseClass): number {
   return open ?? count;
 }
 
+/**
+ * The chain quest the hero is on (the list's count once it is done). Not
+ * `currentIndex`, which every dialog packet moves to the quest talked about.
+ */
+export function legacyQuestNextIndex(): number {
+  return firstOpenQuest(state.count, heroClass());
+}
+
 /** `setQuestLists`: the packed 2-bit list from `LegacyQuestStateList`. */
 function setQuestList(packed: Uint8Array, count: number): void {
   runInAction(() => {
@@ -241,20 +251,32 @@ function setQuestList(packed: Uint8Array, count: number): void {
       state.states[i] = i < count ? (byte >> shift) & STATE_MASK : LegacyQuestState.None;
     }
     const first = firstOpenQuest(count, heroClass());
+    state.count = count;
     state.currentIndex = first;
     state.windowIndex = first;
     state.received = true;
   });
 }
 
-/** `setQuestList(index, result)`: one state changed. */
-function setQuestState(index: number, result: number): void {
+/**
+ * `setQuestList(index, result)`: `result` is the whole byte of the four
+ * quests in `index`'s group (`m_byQuestList[index / 4]`), not one state.
+ */
+function setQuestState(index: number, packed: number): void {
   if (index < 0 || index >= MAX_QUESTS) return;
   runInAction(() => {
-    state.states[index] = result & STATE_MASK;
+    const base = index - (index % STATES_PER_BYTE);
+    for (let i = 0; i < STATES_PER_BYTE; i++) {
+      state.states[base + i] = (packed >> (i * STATE_BITS)) & STATE_MASK;
+    }
     state.currentIndex = index;
     state.windowIndex = Math.max(index, state.windowIndex);
   });
+}
+
+/** The state `packed` gives `index` itself. */
+function ownState(index: number, packed: number): number {
+  return (packed >> ((index % STATES_PER_BYTE) * STATE_BITS)) & STATE_MASK;
 }
 
 /** `FindQuestItemsInInven`: how many of `count` items are still missing. */
@@ -277,11 +299,11 @@ function actsForHero(quest: QuestDefinition) {
 
 /**
  * `CheckRequestCondition`: level / prerequisite / zen rows for the acts of
- * this class. Returns the error page on failure, -1 when everything passes.
- * Zen is only enforced on `lastCheck` (the accept click); before that it is
- * merely remembered for the window's offering line.
+ * this class. `errorPage` is -1 when everything passes. Zen is only enforced
+ * on `lastCheck` (the accept click); before that it is merely remembered for
+ * the window's offering line.
  */
-function checkRequests(quest: QuestDefinition, lastCheck: boolean): number {
+function requestCheck(quest: QuestDefinition, lastCheck: boolean): { errorPage: number; needZen: number } {
   let needZen = 0;
   let errorPage = -1;
 
@@ -314,31 +336,53 @@ function checkRequests(quest: QuestDefinition, lastCheck: boolean): number {
     }
   }
 
+  return { errorPage, needZen };
+}
+
+/** `CheckRequestCondition` for the window: remembers the offering, returns the error page. */
+function checkRequests(quest: QuestDefinition, lastCheck: boolean): number {
+  const { errorPage, needZen } = requestCheck(quest, lastCheck);
   runInAction(() => {
     state.needZen = needZen;
   });
   return errorPage;
 }
 
-/** `CheckActCondition`: has the hero brought everything? */
+/** Whether the hero may take quest `index` now (level, prerequisite; zen is asked at the accept). */
+export function legacyQuestAvailable(index: number): boolean {
+  const quest = questDefinition(index);
+  return !!quest && requestCheck(quest, false).errorPage < 0;
+}
+
+/**
+ * `CheckActCondition`: has the hero brought everything? Kills are the
+ * server's count at the last 0xA4, as `m_anKillMobCount` is.
+ */
 function actsFulfilled(quest: QuestDefinition): boolean {
   for (const act of actsForHero(quest)) {
     if (act.kind === QuestActKind.Item) {
       const type = act.itemType * MAX_ITEM_INDEX + act.itemSubType;
       if (missingItems(type, act.itemNum, act.itemLevel) > 0) return false;
     } else if (act.kind === QuestActKind.Monster) {
-      if (legacyKillCount(act.itemType) < act.itemNum) return false;
+      if (legacyServerKillCount(act.itemType) < act.itemNum) return false;
     }
   }
   return true;
 }
 
+/** The act's item as the bag's tooltip names it: a +1 quest item shows its level. */
+function actItemName(act: QuestDefinition['acts'][number], type: number): string {
+  const name = itemBaseName(act.itemType, act.itemSubType) || t('quest.itemFallback', { id: type });
+  return act.itemLevel > 0 ? `${name} +${act.itemLevel}` : name;
+}
+
 /**
  * `RenderItemMobText`: what this class still has to bring, as objective
- * records. The item count is the bag's, the kill count the counters', both
- * read the same way `CheckActCondition` reads them.
+ * records. The item count is the bag's. Kills are the server's count, plus
+ * the hero's kills since when `live` (the tracker; the NPC window shows what
+ * `CheckActCondition` reads).
  */
-export function legacyQuestObjectives(index: number): QuestObjective[] {
+export function legacyQuestObjectives(index: number, live = true): QuestObjective[] {
   const quest = questDefinition(index);
   if (!quest) return [];
 
@@ -349,7 +393,7 @@ export function legacyQuestObjectives(index: number): QuestObjective[] {
         type: ConditionTypeEnum.MonsterKills,
         id: act.itemType,
         required: act.itemNum,
-        current: legacyKillCount(act.itemType),
+        current: live ? legacyKillCount(act.itemType) : legacyServerKillCount(act.itemType),
         name: monsterDisplayName(act.itemType),
       });
     } else if (act.kind === QuestActKind.Item) {
@@ -359,72 +403,111 @@ export function legacyQuestObjectives(index: number): QuestObjective[] {
         id: type,
         required: act.itemNum,
         current: act.itemNum - missingItems(type, act.itemNum, act.itemLevel),
-        name: itemBaseName(act.itemType, act.itemSubType) || t('quest.itemFallback', { id: type }),
+        name: actItemName(act, type),
       });
     }
   }
   return objectives;
 }
 
+/** What `CheckQuestState` settles on: the page, the dialog state, the quest it landed on. */
+type PagePick = { index: number; page: number; dialogState: number; needZen: number };
+
 /**
- * `FindQuestContext(quest, column)`: the dialog page for this state column.
- * A quest with no act for the hero's class has no page of its own, and the
- * original answers by stepping the chain back one and asking that quest
- * instead (`m_byCurrQuestIndex--; CheckQuestState()`), which is the walk
- * `depth` bounds.
+ * `CheckQuestState` for quest `index`, without writing anything. A quest
+ * with no act for the hero's class has no page of its own; `FindQuestContext`
+ * then steps the chain back one and asks that quest instead, which is the
+ * walk `depth` bounds. Null while the tables are not decoded.
  */
-function pageFor(
-  quest: QuestDefinition,
-  column: number,
-  depth: number
-): number {
-  const act = actsForHero(quest)[0];
-  if (act) return act.startText[column];
-  if (state.currentIndex <= 0 || depth >= MAX_QUESTS) return 0;
-  runInAction(() => {
-    state.currentIndex--;
-  });
-  return checkQuestState(depth + 1);
-}
+function pickPage(index: number, depth = 0): PagePick | null {
+  const quest = questDefinition(index);
+  if (!quest) return null;
 
-/** `CheckQuestState`: pick the page and the dialog state for the current quest. */
-function checkQuestState(depth = 0): number {
-  const quest = questDefinition(state.currentIndex);
-  if (!quest) return 0;
-
-  let dialogState: number = legacyQuestState(state.currentIndex);
-  let page = 0;
+  let dialogState: number = legacyQuestState(index);
+  let needZen = 0;
+  let column = 3;
 
   switch (dialogState) {
     case LegacyQuestState.None:
     case LegacyQuestState.No: {
-      const error = checkRequests(quest, false);
-      if (error >= 0) {
-        page = error;
-        dialogState = DIALOG_STATE_ERROR;
-      } else {
-        page = pageFor(quest, 0, depth);
+      const check = requestCheck(quest, false);
+      needZen = check.needZen;
+      if (check.errorPage >= 0) {
+        return { index, page: check.errorPage, dialogState: DIALOG_STATE_ERROR, needZen };
       }
+      column = 0;
       break;
     }
-    case LegacyQuestState.InProgress: {
+    case LegacyQuestState.InProgress:
       if (actsFulfilled(quest)) {
-        page = pageFor(quest, 2, depth);
+        column = 2;
         dialogState = DIALOG_STATE_ITEM;
       } else {
-        page = pageFor(quest, 1, depth);
+        column = 1;
       }
-      break;
-    }
-    case LegacyQuestState.Finished:
-      page = pageFor(quest, 3, depth);
       break;
   }
 
+  const act = actsForHero(quest)[0];
+  if (act) return { index, page: act.startText[column], dialogState, needZen };
+  if (index <= 0 || depth >= MAX_QUESTS) return { index, page: 0, dialogState, needZen };
+
+  const back = pickPage(index - 1, depth + 1);
+  if (!back) return { index, page: 0, dialogState, needZen };
+  return { ...back, dialogState, needZen: back.needZen || needZen };
+}
+
+/** `CheckQuestState`: pick the page and the dialog state for the current quest. */
+function checkQuestState(): number {
+  const pick = pickPage(state.currentIndex);
   runInAction(() => {
-    state.dialogState = dialogState;
+    state.pageStale = !pick;
+    if (!pick) return;
+    state.currentIndex = pick.index;
+    state.dialogState = pick.dialogState;
+    state.needZen = pick.needZen;
   });
-  return page;
+  return pick?.page ?? 0;
+}
+
+/**
+ * `ShowQuestPreviewWindow`: the page the "Job change" tab shows for the
+ * chain quest (`m_byCurrQuestIndexWnd`), leaving the NPC window alone.
+ */
+export function legacyQuestPreviewLines(): string[] {
+  const pick = pickPage(state.windowIndex);
+  return pick ? wrapDialogText(dialogScript(pick.page)?.text ?? '') : [];
+}
+
+/**
+ * `BeQuestItem`: the window's quest is running and every item and kill it
+ * asks for is there. Unlocks the "Proceed with quest" button, which is what
+ * lets a kill count that lands after the page was picked complete the quest.
+ */
+export function legacyQuestCanComplete(): boolean {
+  if (!state.npcWindowOpen) return false;
+  if (legacyQuestState(state.currentIndex) !== LegacyQuestState.InProgress) return false;
+  const quest = questDefinition(state.currentIndex);
+  if (!quest) return false;
+  const counted = actsForHero(quest).some(
+    act => act.kind === QuestActKind.Item || act.kind === QuestActKind.Monster
+  );
+  return counted && actsFulfilled(quest);
+}
+
+/** Whether this NPC gives any chain quest, to any class. */
+function isLegacyQuestNpc(npcType: number): boolean {
+  for (let i = 0; i < MAX_QUESTS; i++) {
+    if (questDefinition(i)?.npcType === npcType) return true;
+  }
+  return false;
+}
+
+/** `m_btnComplete` clicked: `SendLegacyQuestStateSetRequest(index, 1)`. */
+export function completeLegacyQuest(): void {
+  if (!legacyQuestCanComplete()) return;
+  sendSetState(state.currentIndex);
+  playUiSound('window');
 }
 
 /** `SeparateTextIntoLines`: greedy word wrap to the window's 38 columns. */
@@ -479,7 +562,9 @@ function showDialogText(page: number): void {
 reaction(
   () => questDataReady(),
   ready => {
-    if (ready && state.npcWindowOpen) showDialogText(state.page);
+    if (!ready || !state.npcWindowOpen) return;
+    // A window opened before the first decode has no real page to redraw yet.
+    showDialogText(state.pageStale ? checkQuestState() : state.page);
   }
 );
 
@@ -493,13 +578,30 @@ export function openLegacyQuestWindow(index = -1): void {
   playUiSound('window');
 }
 
-/** `Hide(INTERFACE_NPCQUEST)` + `SendCloseNpcRequest`. */
+/**
+ * `SendCloseNpcRequest`: OpenMU keeps the hero in its NPC dialog state until
+ * told, and refuses potions, trades and parties meanwhile.
+ */
+function endNpcTalk(): void {
+  if (Store.npcShop) Store.closeNpcShop();
+  else if (!Store.isOffline) Store.sendToGS(CloseNpcRequestPacket.createPacket().buffer);
+  Store.dropNpcTalk();
+}
+
+/** `Hide(INTERFACE_NPCQUEST)`: `ProcessClosing` always ends the NPC talk. */
 export function closeLegacyQuestWindow(): void {
   if (!state.npcWindowOpen) return;
   runInAction(() => {
     state.npcWindowOpen = false;
   });
-  Store.closeNpcShop();
+  endNpcTalk();
+}
+
+/** Another NPC talk started: `HideAll` drops the window without a second close. */
+function hideLegacyQuestWindow(): void {
+  runInAction(() => {
+    state.npcWindowOpen = false;
+  });
 }
 
 /** `SendLegacyQuestStateSetRequest(index, 1)`. */
@@ -591,8 +693,23 @@ EventBus.on('LegacyQuestStateList', packet => {
 
 EventBus.on('LegacyQuestStateDialog', packet => {
   const p = new LegacyQuestStateDialogPacket(packet);
-  setQuestState(p.QuestIndex, p.State);
-  openLegacyQuestWindow(p.QuestIndex);
+  const index = p.QuestIndex;
+
+  // With the talked NPC's next quest still level-locked, OpenMU sends index 0
+  // and the byte of the quest last finished, another group: open that NPC's
+  // own quest instead and keep the states. A running quest opens anywhere.
+  const npc = Store.pendingNpcType;
+  const quest = questDefinition(index);
+  if (npc && quest && quest.npcType !== npc && ownState(index, p.State) !== LegacyQuestState.InProgress) {
+    const mine = legacyQuestForNpc(npc);
+    if (mine) openLegacyQuestWindow(mine.index);
+    // Otherwise it answers an earlier talk, which the pending one's close already ended.
+    else if (isLegacyQuestNpc(npc)) endNpcTalk();
+    return;
+  }
+
+  setQuestState(index, p.State);
+  openLegacyQuestWindow(index < MAX_QUESTS ? index : -1);
 });
 
 EventBus.on('LegacySetQuestStateResponse', packet => {
@@ -602,52 +719,84 @@ EventBus.on('LegacySetQuestStateResponse', packet => {
     Store.addNotification(t('quest.stateFailed'), 'error');
     return;
   }
+  // `HideAll` before `Show`: the visible window closes, and the NPC talk with it.
+  const wasOpen = state.npcWindowOpen;
   setQuestState(p.QuestIndex, p.NewState);
-  openLegacyQuestWindow(p.QuestIndex);
+  clearLocalKills();
+  if (wasOpen) endNpcTalk();
+  openLegacyQuestWindow(p.QuestIndex < MAX_QUESTS ? p.QuestIndex : -1);
 });
+
+/**
+ * `ReceiveQuestPrize` 201 / 204: the hero's new class. OpenMU fills the byte
+ * with the class of whoever receives the packet, so only the hero's own copy
+ * can be trusted; another player's evolution plays the effect alone.
+ */
+function evolveHero(cls: number, step: number): void {
+  if (classOf(cls).step !== step) return;
+  runInAction(() => {
+    Store.playerData.charClass = cls as CharacterClassNumber;
+  });
+  const hero = Store.world?.playerEntity;
+  if (hero?.charAppearance) {
+    hero.charAppearance.charClass = cls as CharacterClassNumber;
+    hero.charAppearance.changed = true;
+  }
+  Store.addNotification(t(step === 3 ? 'quest.evolvedThird' : 'quest.evolved'), 'info');
+}
 
 EventBus.on('LegacyQuestReward', packet => {
   const p = new LegacyQuestRewardPacket(packet);
-  const hero = Store.world?.playerEntity;
+  const world = Store.world;
+  const hero = world?.playerEntity;
   const isHero = !!hero && (p.PlayerId & 0x7fff) === hero.netId;
 
   switch (p.Reward as number) {
-    case REWARD_LEVEL_UP_POINTS:
-      if (isHero) {
-        Store.addNotification(
-          t('quest.rewardPoints', { count: p.Count }),
-          'info'
-        );
+    case Reward.LevelUpPoints:
+    case Reward.LevelUpPointsPerLevelIncrease:
+      // Gain Hero Status done at exactly level 220 sends 202 with 0 points.
+      if (isHero && p.Count > 0) {
+        runInAction(() => {
+          Store.playerData.points += p.Count;
+        });
+        Store.addNotification(t('quest.rewardPoints', { count: p.Count }), 'info');
       }
       break;
-    case REWARD_CLASS_CHANGE:
-      if (isHero) Store.addNotification(t('quest.evolved'), 'info');
+    case Reward.CharacterEvolutionFirstToSecond:
+      if (isHero) evolveHero(p.Count >> 3, 2);
       break;
-    case REWARD_COMBO_SKILL:
+    case Reward.CharacterEvolutionSecondToThird:
+      if (isHero) evolveHero(p.Count >> 3, 3);
+      break;
+    case Reward.ComboSkill:
       if (isHero) Store.addNotification(t('quest.comboLearned'), 'info');
       break;
-    case REWARD_PLUS_STATS:
-      if (isHero) {
-        Store.addNotification(
-          t('quest.rewardStats', { count: p.Count }),
-          'info'
-        );
-      }
-      break;
   }
-  if (hero && isHero) {
-    EventBus.emit('objectEffect', { entity: hero, effect: 'levelUp' });
-    playUiSound('levelUp');
-  }
+
+  const target = isHero ? hero : world?.getByNetId(p.PlayerId & 0x7fff);
+  if (target?.transform) EventBus.emit('objectEffect', { entity: target, effect: 'levelUp' });
+  if (isHero) playUiSound('levelUp');
 });
 
-// `ReceiveQuestHistory` is only answered when asked: the original sends
-// 0xA0 right after the character information arrives.
+EventBus.on('npcTalkStarted', () => hideLegacyQuestWindow());
+EventBus.on('heroWalked', () => closeLegacyQuestWindow());
+
+// `ReceiveQuestHistory` is only answered when asked: the original sends 0xA0
+// right after the character information. OpenMU also resends that on a bulk
+// stat add or a reset, so only a different hero starts from a blank chain.
+let heroName: string | null = null;
 EventBus.on('CharacterInformation', () => {
-  runInAction(() => {
-    state.received = false;
-    state.npcWindowOpen = false;
-  });
+  if (Store.playerData.name !== heroName) {
+    heroName = Store.playerData.name;
+    runInAction(() => {
+      state.states.fill(LegacyQuestState.None);
+      state.currentIndex = 0;
+      state.windowIndex = 0;
+      state.count = 0;
+      state.received = false;
+      state.npcWindowOpen = false;
+    });
+  }
   requestLegacyQuestStates();
 });
 

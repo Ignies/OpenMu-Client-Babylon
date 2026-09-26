@@ -1,6 +1,7 @@
 import { PointerEventTypes } from '../../libs/babylon/exports';
 import { Store } from '../../store';
 import { events } from '../../events';
+import { quests } from '../../quests';
 import type { Entity, ISystemFactory } from '../world';
 import { isNpcOrTrapType } from './attackSystem';
 
@@ -78,6 +79,10 @@ export const NpcTalkSystem: ISystemFactory = world => {
     }
 
     world.talkTarget = target;
+    // `MOVEMENT_TALK` replaces the current action: a chase left running would
+    // walk away and close the NPC's window again.
+    world.attackTarget = null;
+    world.pickupTarget = null;
   });
 
   let approachDelay = 0;
@@ -196,6 +201,7 @@ export const NpcTalkSystem: ISystemFactory = world => {
       };
       // An event NPC (the Crywolf statue) never opens a server window.
       if (events.useNpc(npc)) return;
+      if (quests.useNpc(npc)) return;
       Store.talkToNpc(npc);
     },
   };
