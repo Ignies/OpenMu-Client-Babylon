@@ -9,7 +9,7 @@ import {
   type Scene,
 } from '../libs/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
-import { devQueryNumber } from '../common/devSeams';
+import { devQuery, devQueryNumber } from '../common/devSeams';
 import type { LightingTier } from '../common/lightingQuality';
 import type { Rgb } from '../lighting/profiles';
 
@@ -48,13 +48,28 @@ const SLIDER_MAX = 9;
  */
 const OFF_SCREEN_REACH = 1.1;
 
+/**
+ * Ticks at weight 0 (a full-res identity copy: every third-person frame, the
+ * camera cannot face the sun) before the pass leaves the chain.
+ */
+const IDLE_TICKS = 30;
+
 const shaftsDev = devQueryNumber('shafts');
+
+/** `?shaftsIdle=1`: the pass stays in the chain as an identity copy at weight 0. */
+const IDLE_DETACH = devQuery('shaftsIdle') !== '1';
 
 type Runtime = {
   scene: Scene;
   camera: ArcRotateCamera;
   taps: number;
   pass: PostProcess;
+  attached: boolean;
+  /** Consecutive ticks at weight 0, capped at IDLE_TICKS. */
+  idle: number;
+  /** The chain slot it left and the chain's length then; -1 once back in. */
+  slot: number;
+  slotLength: number;
 };
 
 let runtime: Runtime | null = null;
@@ -122,11 +137,7 @@ function registerShader(taps: number): void {
   `;
 }
 
-function createPass(
-  scene: Scene,
-  camera: ArcRotateCamera,
-  taps: number
-): PostProcess {
+function createPass(scene: Scene, taps: number): PostProcess {
   registerShader(taps);
 
   const pass = new PostProcess(
@@ -156,15 +167,40 @@ function createPass(
     effect.setFloat3('sunColor', shown.color[0], shown.color[1], shown.color[2]);
   };
 
-  camera.attachPostProcess(pass);
-
   return pass;
+}
+
+/**
+ * Back into the slot it left while the list has not grown since (every append
+ * grows it), else at the end. True when the passes behind it have to re-attach.
+ */
+function attachPass(rt: Runtime): boolean {
+  const chain = rt.camera._postProcesses;
+  const inPlace =
+    rt.slot >= 0 && chain.length === rt.slotLength && chain[rt.slot] === null;
+
+  rt.camera.attachPostProcess(rt.pass, inPlace ? rt.slot : null);
+  rt.attached = true;
+  rt.slot = -1;
+
+  return !inPlace;
+}
+
+/**
+ * Leaves a null slot behind, so nothing behind it moves. A pass ahead that
+ * re-attached this tick now sits behind that slot, so it is not kept.
+ */
+function detachPass(rt: Runtime, upstreamChanged: boolean): void {
+  rt.slot = upstreamChanged ? -1 : rt.camera._postProcesses.indexOf(rt.pass);
+  rt.camera.detachPostProcess(rt.pass);
+  rt.slotLength = rt.camera._postProcesses.length;
+  rt.attached = false;
 }
 
 export function disposeSunShafts(): void {
   if (!runtime) return;
 
-  runtime.camera.detachPostProcess(runtime.pass);
+  if (runtime.attached) runtime.camera.detachPostProcess(runtime.pass);
   runtime.pass.dispose(runtime.camera);
   runtime = null;
 }
@@ -218,9 +254,11 @@ function placeSun(
 
 /**
  * Built while the map has a sky, no room owns the frame, the option is above
- * zero and there is a G-buffer to read the occluders from. Returns true when
- * the chain changed. `upstreamChanged` (a pass ahead of it was rebuilt this
- * tick) re-attaches the pass behind it without rebuilding it.
+ * zero and there is a G-buffer to read the occluders from, and in the chain
+ * only while the weight is above zero (IDLE_TICKS of hysteresis). Returns
+ * true when the passes behind it have to re-attach. `upstreamChanged` (a pass
+ * ahead of it was rebuilt this tick) re-attaches the pass behind it without
+ * rebuilding it.
  */
 export function syncSunShafts(
   scene: Scene,
@@ -257,25 +295,48 @@ export function syncSunShafts(
   }
 
   const taps = TAPS[tierIndex] ?? TAPS[1];
+  let changed = false;
 
   if (runtime && (!wanted || runtime.scene !== scene || runtime.taps !== taps)) {
+    changed = runtime.attached;
     disposeSunShafts();
-    if (!wanted) return true;
   }
 
-  if (runtime && upstreamChanged) {
+  if (!wanted) return changed;
+
+  runtime ??= {
+    scene,
+    camera,
+    taps,
+    pass: createPass(scene, taps),
+    attached: false,
+    // Built out of the chain unless there is something to draw this tick.
+    idle: IDLE_TICKS,
+    slot: -1,
+    slotLength: 0,
+  };
+
+  runtime.idle = shown.weight > 0 ? 0 : Math.min(IDLE_TICKS, runtime.idle + 1);
+
+  const attach = !IDLE_DETACH || runtime.idle < IDLE_TICKS;
+
+  if (attach !== runtime.attached) {
+    if (attach) return attachPass(runtime) || changed;
+
+    detachPass(runtime, upstreamChanged);
+    return changed;
+  }
+
+  if (runtime.attached && upstreamChanged) {
     runtime.camera.detachPostProcess(runtime.pass);
     runtime.camera.attachPostProcess(runtime.pass);
     return true;
   }
 
-  if (!wanted || runtime) return false;
-
-  runtime = { scene, camera, taps, pass: createPass(scene, camera, taps) };
-
-  return true;
+  return changed;
 }
 
+/** In the camera's chain, which is what the director publishes. */
 export function sunShaftsLive(): boolean {
-  return runtime !== null;
+  return runtime?.attached ?? false;
 }
