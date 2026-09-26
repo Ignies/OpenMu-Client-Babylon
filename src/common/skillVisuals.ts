@@ -16,7 +16,7 @@ import type { StampsHandle } from '../effects/stamps';
 import type { CardOptions } from '../effects/cards';
 import type { RingOptions } from '../effects/ring';
 import type { ParticlesOptions } from '../effects/particles';
-import type { ProjectileOptions } from '../effects/projectile';
+import type { ProjectileHead, ProjectileOptions } from '../effects/projectile';
 import type { JointOptions, TaperShape } from '../effects/joint';
 import type { Ray } from '../effects/rays';
 import type { AuraOptions, BoneGlow, SpearJoints } from '../effects/aura';
@@ -30,9 +30,11 @@ import {
   ENERGY_CHIPS,
   FIRE_PUFF,
   FIRE_SPARKS,
-  FIRE_TRAIL,
+  FIRE_BALL_TRAIL,
   HOLY_MOTES,
   ICE_MOTES,
+  ICE_SHARD_SMOKE,
+  ICE_SMOKE,
   MODEL,
   NOVA_MOTES,
   POISON_SMOKE,
@@ -47,6 +49,25 @@ import {
   VENOM_MOTES,
   WIND_STREAKS,
   EXPLOSION_CELLS,
+  FIRE_BALL_EMBERS,
+  FROST_GLINTS,
+  ICE_MIST,
+  METEOR_BLAST,
+  METEOR_DUST,
+  POISON_BUBBLES,
+  POISON_MIST,
+  POWER_WAVE_SMOKE,
+  ENERGY_BALL_CORE,
+  ENERGY_BALL_STAR,
+  ENERGY_BALL_POP,
+  LANCE_PUFF,
+  POWER_WAVE_GLINTS,
+  POWER_WAVE_SKIM,
+  ENERGY_BALL_GLOW,
+  ENERGY_BALL_WAKE,
+  ENERGY_BALL_BURST,
+  LANCE_SPARKS,
+  LANCE_STRIKE,
 } from '../effects/recipes';
 import { ItemsDatabase } from './itemsDatabase';
 import { PlayerAction } from './objects/enum';
@@ -428,12 +449,6 @@ const burn = (radius: number, strength = 1): Step => (at, c) => {
 const FIRE_BLEND_MESH = 1;
 /** Every fire skill's landing, and so the one place the snow gets melted. */
 const fireHit: Step = seq(explosion(RGBS.fire), hitSparks(FIRE_SPARKS, 16), particles({ recipe: FIRE_PUFF, count: 6 }), scorch(1.2), burn(1.2));
-/** MODEL_ICE (LT 50, Scale 0.8, white) + 5× MODEL_ICE_SMALL (LT 32–47, Scale 0.8–1.1, Gravity 8–23) - the Ice hit. */
-const iceHit: Step = seq(
-  model({ model: MODEL.ice, seconds: ticks(50), scale: 0.8, colour: RGBS.white }),
-  scatter(model({ model: MODEL.ice2, seconds: ticks(40), scale: 0.95, colour: RGBS.white, rise: 1.5, spin: 3 }), 5, 0.5),
-  hitSparks(ICE_MOTES, 10)
-);
 const arcHit: Step = seq(flash(TEX.thunder, RGBS.arc, 1.3, 0.3), hitSparks(ARC_MOTES, 20));
 const venomHit: Step = seq(flash(TEX.flare, RGBS.venom, 1.1, 0.5), particles({ recipe: VENOM_MOTES, count: 16 }));
 /** BITMAP_MAGIC+1 (Magic_Ground2) at a body's feet, LT 20 - the buff-cast circle. */
@@ -546,12 +561,6 @@ const bolt = (head: string, colour: RGB, trail: ParticlesOptions['recipe'], size
   speed,
   head: { texture: head, colour, size },
   trail: { recipe: trail, rate: 30 },
-});
-
-const modelBolt = (m: string, colour: RGB, trail: ParticlesOptions['recipe'] | null, speed = perTick(50), scale = 1, blendMesh?: number, alongPath?: boolean): Travel => ({
-  speed,
-  model: { model: m, colour, scale, blendMesh, alongPath },
-  ...(trail ? { trail: { recipe: trail, rate: 30 } } : {}),
 });
 
 const arrow = (m: string = MODEL.arrow, colour: RGB = RGBS.steel): Travel => ({
@@ -6989,16 +6998,608 @@ const pollutionOf = (graded: boolean): Step => (at, c) => {
   }
 };
 
+// ---- dw1 steps --------------------------------------------------------------------
+
+/**
+ * A spell's impact runs when `AttackTime`, set to 1 by its packet, reaches `g_iLimitAttackTime` 15
+ * (ZzzCharacter.cpp:4132-4145, WSclient.cpp:4276-4304): 14 ticks later, for the hero too.
+ */
+const DW1_RELEASE = ticks(14);
+
+/** `step` at the release, on the target's feet as they are then (`to->Position`); nothing if the caster has gone. */
+const atRelease = (step: Step): Step => (at, c) => {
+  const feet = at.clone();
+  feet.y -= IMPACT_HEIGHT;
+  delay(DW1_RELEASE, () => {
+    if (entityGone(c.caster)) return;
+    if (c.target && !entityGone(c.target)) entityPos(c.target, 0, feet);
+    step(feet, c);
+  });
+};
+
+/** The skill's `PlayBuffer` at its release, heard from the caster. */
+const releaseSound = (key: Sounds): Step => (_at, c) => {
+  if (c.caster.transform) playCombat(key, c.caster.transform.pos);
+};
+
+/** A value re-rolled once a tick, `min + k * step` for k in 0..steps-1 (`(rand() % 4 + 4) * 0.1`). */
+function perTickRoll(min: number, steps: number, step: number): (t: number) => number {
+  let tick = -1;
+  let v = min;
+  return t => {
+    const n = Math.floor(t / TICK);
+    if (n !== tick) {
+      tick = n;
+      v = min + Math.floor(Math.random() * steps) * step;
+    }
+    return v;
+  };
+}
+
+/**
+ * 1 Poison (ZzzCharacter.cpp:4992-5005): MODEL_POISON at the target's feet, facing as the caster does, only
+ * when a player casts it (LT 40, BlendMesh 1, both meshes fading over the last 10 ticks through
+ * `BlendMeshLight = Alpha = LT/10`, MoveHandlers.cpp:2742-2752); 10 BITMAP_SMOKE sub1 for anyone; SOUND_HEART.
+ * The model is terrain-lit in the original (its Light is the caster's offset); white stands in.
+ */
+const poisonCloud = (extra?: Step): Step =>
+  atRelease((feet, c) => {
+    if (c.caster.charAppearance) {
+      effects.spawn('model', c.scene, feet, { model: MODEL.poison, seconds: ticks(40), scale: 1, colour: RGBS.white, blendMesh: 1, yaw: entityYaw(c.caster), loop: false, fadeTail: 0.25 });
+    }
+    particles({ recipe: POISON_SMOKE, count: 10, height: 0.64 })(feet, c);
+    releaseSound('Sound/pHeartBeat')(feet, c);
+    lighting.skillLand(c.scene, 1, feet);
+    extra?.(feet, c);
+  });
+
+/** MODEL_STONE1 / 2, rolled per chip: opaque fire02 lava thrown out and bouncing (debris.ts; MuOnlineClient ZzzEffect.cpp:10956-11060). */
+const lavaChips = (n: number): Step => (at, c) => {
+  for (let i = 0; i < n; i++) effects.spawn('debris', c.scene, at, { model: Math.random() < 0.5 ? MODEL.stone : MODEL.stone2, count: 1, colour: RGBS.white, blendMesh: -1 });
+};
+
+/** What the graded tiers add to a MODEL_FIRE in flight: a glow card on the ball and embers shed along the path. */
+interface FireBallLook {
+  glow?: ProjectileHead;
+  embers?: ParticleRecipe;
+}
+
+/** Embers a second off a flying ball (FIRE_BALL_EMBERS). */
+const FIRE_BALL_EMBER_RATE = 40;
+
+/**
+ * MODEL_FIRE in flight: the lava core, its fire01 tail at `BlendMeshLight` `tail`, a BITMAP_FIRE sub5 a tick
+ * and the red light riding it (ZzzEffect.cpp:7931-7959). The light dies with the ball. `hitTest` ends the
+ * flight early (CheckTargetRange); `done` gets where the ball died.
+ */
+function fireBallFlight(
+  c: SkillContext,
+  skill: number,
+  from: Vector3,
+  to: Vector3,
+  o: { scale: number; tail: number | ((t: number) => number); alongPath: boolean } & FireBallLook,
+  done: (at: Vector3) => void,
+  hitTest?: (p: Vector3) => boolean
+): void {
+  const head = from.clone();
+  const light = lighting.skillLand(c.scene, skill, from, out => {
+    out.x = head.x;
+    out.y = head.y;
+    out.z = head.z;
+  });
+  let hit = false;
+  let flying = true;
+  let handle: EffectHandle | null = null;
+  handle = effects.spawn('projectile', c.scene, from, {
+    to,
+    speed: perTick(50),
+    head: o.glow,
+    model: { model: MODEL.fire, colour: RGBS.white, scale: o.scale, blendMesh: FIRE_BLEND_MESH, blendLight: o.tail, alongPath: o.alongPath },
+    trail: { recipe: FIRE_BALL_TRAIL, rate: 25 },
+    trace: p => {
+      head.copyFrom(p);
+      if (!hit && handle && hitTest?.(p)) {
+        hit = true;
+        handle.stop();
+      }
+    },
+    onArrive: p => {
+      flying = false;
+      light?.dispose();
+      if (!hitTest) done(p);
+    },
+    onLost: () => {
+      flying = false;
+      light?.dispose();
+      if (hit) done(head.clone());
+    },
+  });
+  if (o.embers) {
+    effects.spawn('particles', c.scene, from, { recipe: o.embers, rate: FIRE_BALL_EMBER_RATE, seconds: ticks(60), follow: out => out.copyFrom(head), until: () => !flying });
+  }
+}
+
+/**
+ * 2 Meteorite (ZzzCharacter.cpp:5007-5010): MODEL_FIRE sub0 from 130-161 cm along +x and 400 cm over the
+ * target's feet, Scale 1.0-1.7, falling 50 cm a tick tilted 20 deg back onto them (ZzzEffect.cpp:2546-2556),
+ * the tail flickering at 0.4-0.7. On the ground (:7808-7858) `landing` runs at the feet.
+ */
+const meteor = (landing: Step, look?: FireBallLook): Step =>
+  atRelease((feet, c) => {
+    releaseSound('Sound/eMeteorite')(feet, c);
+    const from = new Vector3(feet.x + cm(130 + Math.random() * 32), feet.y + cm(400), feet.z);
+    fireBallFlight(c, 2, from, feet, { scale: 1 + Math.random() * 0.7, tail: perTickRoll(0.4, 4, 0.1), alongPath: true, ...look }, p => landing(p, c));
+  });
+
+/** The meteor's landing: 6 chips and one untinted BITMAP_EXPLOTION 80 cm up, which plays SOUND_EXPLOTION01 (ZzzEffectParticle.cpp:2466-2485). */
+const meteorLanding = (tint: RGB = RGBS.white): Step => (p, c) => {
+  explosion(tint)(new Vector3(p.x, p.y + cm(80), p.z), c);
+  lavaChips(6)(p, c);
+  playCombat('Sound/eExplosion', p);
+};
+
+/**
+ * 4 Fire Ball (ZzzCharacter.cpp:5031-5034): MODEL_FIRE sub1 from the caster's feet +120 cm along the bearing
+ * to the target at the release, 50 cm a tick for LT 60, no homing, Scale 0.8-1.1, the tail at
+ * BlendMeshLight 0 (ZzzEffect.cpp:2640-2645, :7931-7936). Within 100 cm (2D) of the live target it dies and
+ * `arrive` runs at the ball (CheckTargetRange, ZzzEffect.cpp:244-282); a ball whose target is gone flies on.
+ */
+const fireBall = (arrive: Step, look?: FireBallLook & { tailRoll?: readonly [number, number, number] }): Step => (at, c) => {
+  delay(DW1_RELEASE, () => {
+    if (entityGone(c.caster)) return;
+    releaseSound('Sound/eMeteorite')(at, c);
+    const from = entityPos(c.caster, cm(120), new Vector3());
+    const target = c.target && !entityGone(c.target) ? c.target : null;
+    const dir = target ? toward(from, entityPos(target, 0, new Vector3())) : facing(c);
+    const to = from.add(dir.scale(ticks(60) * perTick(50)));
+    const probe = new Vector3();
+    const near = (p: Vector3): boolean => {
+      if (!target || entityGone(target)) return false;
+      entityPos(target, 0, probe);
+      return (p.x - probe.x) ** 2 + (p.z - probe.z) ** 2 <= 1;
+    };
+    const tail = look?.tailRoll ? perTickRoll(...look.tailRoll) : 0;
+    fireBallFlight(c, 4, from, to, { scale: 0.8 + Math.random() * 0.3, tail, alongPath: tail !== 0, glow: look?.glow, embers: look?.embers }, p => arrive(p, c), near);
+  });
+};
+
+/**
+ * 7 Ice (ZzzCharacter.cpp:4955-4969): MODEL_ICE at the target's feet, Scale 0.8, Light (1, 1, 1), its only
+ * mesh the additive blend mesh, clip at 1 key a tick held at key 5; from then a BITMAP_SMOKE one tick in two,
+ * and it pops out when `Alpha -= 0.05` crosses 0, about 25 ticks in (ZzzEffect.cpp:2187-2195, :7637-7661).
+ * 5 MODEL_ICE_SMALL thrown from 50 cm up at BlendMeshLight 0.3 (ZzzEffect.cpp:2719-2790). SOUND_ICE.
+ */
+const iceCrystal = (extra?: Step): Step =>
+  atRelease((feet, c) => {
+    effects.spawn('model', c.scene, feet, { model: MODEL.ice, seconds: ticks(25), scale: 0.8, colour: RGBS.white, yaw: entityYaw(c.caster), keysPerTick: 1, playTo: 5, fadeTail: 0.04 });
+    const smokeAt = feet.clone();
+    delay(ticks(5), () => effects.spawn('particles', c.scene, smokeAt, { recipe: ICE_SMOKE, rate: 12.5, seconds: ticks(20), height: 0.955 }));
+    effects.spawn('debris', c.scene, feet, { model: MODEL.ice2, count: 5, colour: [0.3, 0.3, 0.3], liftCm: 50, puff: ICE_SHARD_SMOKE });
+    releaseSound('Sound/sIce')(feet, c);
+    lighting.skillLand(c.scene, 7, feet);
+    extra?.(feet, c);
+  });
+
+/** Explotion01 through its cells, faded inside each cell (effects/softEdge.ts): its grey ground showed as a square on the graded tiers. */
+const softExplosion = (colour: RGB, scale = 1): Step =>
+  sprite({ texture: TEX.explosion, colour, size: cm(256) * scale, seconds: ticks(20), cells: EXPLOSION_CELLS, fadeTail: 0.25, soft: true });
+
+/** A soft glow laid on the ground under an effect, its contact with the ground (ring layer, flare01). */
+const groundFlare = (colour: RGB, scale: number, seconds: number): Step =>
+  ring({ texture: TEX.flare, colour, scale, seconds, growFrom: 0.6, fadeTail: 0.6 });
+
+/** One of the row's `bodies` lights (lighting/skills.ts), standing at `at`. */
+const placeBodyLight = (skill: number, body: string): Step => (at, c) => {
+  const x = at.x;
+  const y = at.y;
+  const z = at.z;
+  lighting.skillBody(c.scene, skill, body, out => {
+    out.x = x;
+    out.y = y;
+    out.z = z;
+  });
+};
+
+/** Poison on the graded tiers: the same cloud over a venom glow on the ground, a low green haze and bubbles rising through it. */
+const poisonImproved: Step = seq(
+  groundFlare([0.2, 0.75, 0.4], 2.4, ticks(40)),
+  particles({ recipe: POISON_MIST, count: 8, height: 0.1 }),
+  particles({ recipe: POISON_BUBBLES, rate: 14, seconds: ticks(34), height: 0.3 })
+);
+
+/** The meteor's glow card and embers in flight. */
+const METEOR_LOOK: FireBallLook = { glow: { texture: TEX.flare, colour: [1, 0.45, 0.12], size: 1.5, spin: 3 }, embers: FIRE_BALL_EMBERS };
+
+/**
+ * The meteor landing on the graded tiers: the same explosion 80 cm up (warm, soft-edged) and 6 chips, over a
+ * white-hot flash, a shock ring and a glowing crater, a flat roll of fire, sparks and the dust it throws up.
+ */
+const meteorImpact: Step = (p, c) => {
+  const up = new Vector3(p.x, p.y + cm(80), p.z);
+  softExplosion([0.95, 0.55, 0.25])(up, c);
+  sprite({ texture: TEX.flare, colour: [1, 0.72, 0.45], size: 1.4, seconds: 0.25, growFrom: 0.5, grow: 1.4, fadeTail: 0.7 })(up, c);
+  ring({ texture: TEX.shockwave, colour: [1, 0.5, 0.15], scale: 1.2, grow: 2.4, growFrom: 0.4, seconds: 0.45, fadeTail: 0.7 })(p, c);
+  groundFlare([1, 0.32, 0.06], 2.2, 1.4)(p, c);
+  particles({ recipe: METEOR_BLAST, count: 10, height: 0.15 })(p, c);
+  particles({ recipe: FIRE_SPARKS, count: 18, height: 0.3 })(p, c);
+  particles({ recipe: METEOR_DUST, count: 8, height: 0.1 })(p, c);
+  lavaChips(6)(p, c);
+  playCombat('Sound/eExplosion', p);
+  placeBodyLight(2, 'impact')(p, c);
+  placeBodyLight(2, 'crater')(p, c);
+  scorch(1.2)(p, c);
+  burn(1.2)(p, c);
+};
+
+/** Fire Ball on the graded tiers: the lava core under a glow card, its tail flickering low, shedding embers. */
+const FIRE_BALL_LOOK = {
+  glow: { texture: TEX.flare, colour: [1, 0.4, 0.1] as RGB, size: 0.9, spin: 3 },
+  embers: FIRE_BALL_EMBERS,
+  tailRoll: [0.3, 3, 0.1] as const,
+};
+
+/** Fire Ball's hit on the graded tiers: the same 2 chips from the ball, with a small burst, sparks and a flame puff. */
+const fireBallImpact: Step = seq(
+  softExplosion([1, 0.55, 0.2], 0.45),
+  hitSparks(FIRE_SPARKS, 12),
+  particles({ recipe: FIRE_PUFF, count: 4 }),
+  lavaChips(2),
+  placeBodyLight(4, 'hit'),
+  scorch(0.6),
+  burn(0.6)
+);
+
+/** Ice on the graded tiers: the same crystal over a frost ring and glow on the ground, cold mist rolling out and glints. */
+const iceImproved: Step = seq(
+  ring({ texture: TEX.shockwave, colour: [0.45, 0.7, 1], scale: 0.8, grow: 2.6, growFrom: 0.4, seconds: 0.4, fadeTail: 0.7 }),
+  groundFlare([0.35, 0.6, 1], 2, ticks(25)),
+  particles({ recipe: ICE_MIST, count: 8, height: 0.08 }),
+  after(ticks(3), particles({ recipe: FROST_GLINTS, rate: 20, seconds: ticks(20), height: 0.6 }))
+);
+
+/** The caster's bearing to the target at the release (`CreateAngle2D`, ZzzCharacter.cpp:4888-4890), else its facing. */
+function bearing(c: SkillContext, from: Vector3): number {
+  if (!c.target || entityGone(c.target)) return entityYaw(c.caster);
+  const to = entityPos(c.target, 0, new Vector3());
+  const dx = to.x - from.x;
+  const dz = to.z - from.z;
+  return dx * dx + dz * dz > 1e-6 ? Math.atan2(dx, -dz) : entityYaw(c.caster);
+}
+
+/** A monster caster's number, or -1 for a character. */
+const monsterOf = (e: Entity): number => (e.charAppearance ? -1 : (e.npcType ?? -1));
+
+
+/** MODEL_ICE_QUEEN throws two more Power Waves at +-10 deg (ZzzCharacter.cpp:5045-5052). */
+const ICE_QUEEN = 25;
+const POWER_WAVE_TICKS = 20;
+
+/** MODEL_MAGIC2's `BlendMeshLight = LifeTime * 0.1` (MoveHandlers.cpp:3351): 2.0 falling, drawn clamped at 1. */
+const powerWaveLight = (t: number): number => Math.min(1, (POWER_WAVE_TICKS - Math.floor(t / TICK)) * 0.1);
+
+/**
+ * One MODEL_MAGIC2 (ZzzEffect.cpp:1991-1998): from the caster's feet along `yaw` at 60 cm a tick for its
+ * 20 ticks at a constant height, through the target and past it, Scale 0.9. Its one mesh is the blend mesh,
+ * the magic_g sheet scrolling +0.2 U a tick; 4 BITMAP_SMOKE sub3 a tick and the light at its foot
+ * (MoveHandlers.cpp:3346-3361). Terrain-lit in the original; white stands in.
+ */
+function powerWaveSheet(c: SkillContext, feet: Vector3, yaw: number, look?: WaveLook): void {
+  const f = forwardOf(yaw);
+  const speed = perTick(60);
+  const t0 = fxNow();
+  const reach = (): number => Math.min(fxNow() - t0, ticks(POWER_WAVE_TICKS)) * speed;
+  const path: PointSource = out => {
+    const d = reach();
+    return out.set(feet.x + f.x * d, feet.y, feet.z + f.z * d);
+  };
+  effects.spawn('model', c.scene, feet, { model: MODEL.magic2, follow: path, yaw, scale: 0.9, colour: look?.colour ?? RGBS.white, seconds: ticks(POWER_WAVE_TICKS), blendMesh: 0, blendLight: powerWaveLight, fadeTail: 0, uvScroll: 0.2 });
+  effects.spawn('particles', c.scene, feet, { recipe: POWER_WAVE_SMOKE, rate: 100, seconds: ticks(POWER_WAVE_TICKS), follow: path });
+  look?.extra(c, feet, path);
+  lighting.skillLand(c.scene, 11, feet, out => {
+    const d = reach();
+    out.x = feet.x + f.x * d;
+    out.y = feet.y;
+    out.z = feet.z + f.z * d;
+  });
+}
+
+/** What the graded tiers change on one MODEL_MAGIC2: its tint, and what they add given its start and its moving foot. */
+interface WaveLook {
+  colour: RGB;
+  extra: (c: SkillContext, feet: Vector3, path: PointSource) => void;
+}
+
+/** 11 Power Wave (ZzzCharacter.cpp:5044-5055): at the release, MODEL_MAGIC2 from the caster's feet toward the target; SOUND_MAGIC. */
+const powerWave = (look?: WaveLook): Step => (_at, c) => {
+  delay(DW1_RELEASE, () => {
+    if (entityGone(c.caster)) return;
+    const feet = entityPos(c.caster, 0, new Vector3());
+    const yaw = bearing(c, feet);
+    if (monsterOf(c.caster) === ICE_QUEEN) {
+      powerWaveSheet(c, feet, yaw + rad(10), look);
+      powerWaveSheet(c, feet, yaw - rad(10), look);
+    }
+    powerWaveSheet(c, feet, yaw, look);
+    releaseSound('Sound/sMagic')(feet, c);
+  });
+};
+
+/** Monsters whose Energy Ball the original draws nothing for, and plays no sound (ZzzCharacter.cpp:5089-5122). */
+const ENERGY_BALL_UNDRAWN = new Set([37, 46, 61, 66, 69, 70, 73, 75, 77, 87, 89, 93, 95, 99, 112, 116, 118, 122, 124, 128, 130, 141, 143, 163, 165, 167, 169, 171, 173, 293, 303, 427]);
+const ENERGY_BALL_TICKS = 20;
+
+/** What the graded tiers add to the Energy Ball: streams riding the ball, and a step run at the ball where it pops. */
+interface EnergyBallLook {
+  streams: readonly { recipe: ParticleRecipe; rate: number }[];
+  pop: Step;
+}
+
+/**
+ * 17 Energy Ball (ZzzCharacter.cpp:5087-5143): at the release, the invisible BITMAP_ENERGY mover leaves the
+ * caster's feet +100 cm along the bearing to the target, 60 cm a tick for LT 20 (ZzzEffect.cpp:829-835).
+ * Each tick a Thunder01 card and a Spark03 star at the ball, each drawn one tick, and the blue light
+ * (:6874-6885). CheckTargetRange: within 100 cm (2D) of the live target it dies in one BITMAP_SPARK+1 sub1,
+ * flung 50 cm in a random direction (:244-285). A ball whose target is gone flies on. SOUND_MAGIC.
+ */
+const energyBall = (look?: EnergyBallLook): Step => (_at, c) => {
+  delay(DW1_RELEASE, () => {
+    if (entityGone(c.caster) || ENERGY_BALL_UNDRAWN.has(monsterOf(c.caster))) return;
+    const from = entityPos(c.caster, cm(100), new Vector3());
+    const f = forwardOf(bearing(c, from));
+    const speed = perTick(60);
+    const target = c.target && !entityGone(c.target) ? c.target : null;
+    const t0 = fxNow();
+    const flight: PointSource = out => {
+      const d = Math.min(fxNow() - t0, ticks(ENERGY_BALL_TICKS)) * speed;
+      return out.set(from.x + f.x * d, from.y, from.z + f.z * d);
+    };
+    const head = from.clone();
+    const light = lighting.skillLand(c.scene, 17, from, out => {
+      flight(head);
+      out.x = head.x;
+      out.y = head.y;
+      out.z = head.z;
+    });
+    const feet = new Vector3();
+    let seen = -1;
+    let over = false;
+    // CheckTargetRange once a tick, on the tick's own position.
+    const done = (): boolean => {
+      const n = Math.floor((fxNow() - t0) / TICK);
+      while (!over && seen < n) {
+        seen++;
+        if (seen >= ENERGY_BALL_TICKS) over = true;
+        else if (target && !entityGone(target)) {
+          entityPos(target, 0, feet);
+          const d = seen * cm(60);
+          const x = from.x + f.x * d;
+          const z = from.z + f.z * d;
+          if ((x - feet.x) ** 2 + (z - feet.z) ** 2 <= 1) {
+            over = true;
+            const yaw = Math.random() * Math.PI * 2;
+            const up = Math.asin(Math.random() * 2 - 1);
+            const pop = new Vector3(x + Math.cos(up) * Math.sin(yaw) * cm(50), from.y + Math.sin(up) * cm(50), z + Math.cos(up) * Math.cos(yaw) * cm(50));
+            effects.spawn('particles', c.scene, pop, { recipe: ENERGY_BALL_POP, count: 1 });
+            look?.pop(new Vector3(x, from.y, z), c);
+          }
+        }
+        if (over) light?.dispose();
+      }
+      return over;
+    };
+    effects.spawn('particles', c.scene, from, { recipe: ENERGY_BALL_STAR, rate: 25, seconds: ticks(ENERGY_BALL_TICKS), follow: flight, until: done });
+    effects.spawn('particles', c.scene, from, { recipe: ENERGY_BALL_CORE, rate: 25, seconds: ticks(ENERGY_BALL_TICKS), follow: flight, until: done });
+    if (look) for (const o of look.streams) effects.spawn('particles', c.scene, from, { ...o, seconds: ticks(ENERGY_BALL_TICKS), follow: flight, until: done });
+    releaseSound('Sound/sMagic')(from, c);
+  });
+};
+
+const LANCE_TICKS = 35;
+const LANCE_TINT: RGB = [1, 0.6, 0.3];
+const LANCE_PUFF_ONE: ParticlesOptions = { recipe: LANCE_PUFF, count: 1 };
+
+/** What the graded tiers add to a Lance star: sparks shed in flight, and a step run where it first strikes home. */
+interface LanceLook {
+  sparks: ParticleRecipe;
+  strike: Step;
+}
+const LANCE_SPARK_RATE = 40;
+
+/** MODEL_SKILL_JAVELIN's `BlendMeshLight = LifeTime / 10` (MoveHandlers.cpp:7108), on its pyochang_R glow. */
+const lanceBlend = (t: number): number => (LANCE_TICKS - Math.floor(t / TICK)) / 10;
+
+/** One Lance star's drawn state at a tick. */
+interface LanceFrame {
+  p: Vector3;
+  angle: number;
+  scale: number;
+}
+
+/**
+ * One MODEL_SKILL_JAVELIN, sub 0/1/2 (ZzzEffect.cpp:4232-4247; Move_MODEL_SKILL_JAVELIN, MoveHandlers.cpp:7053-7124):
+ * from the caster +150 cm heading its facing -Ang / 0 / +Ang (Ang 10-89 deg per star), LT 35, Scale 1.2 +0.015 a
+ * tick. For 10 ticks it drifts 5 cm a tick while its spin speeds up by 10 deg a tick; then the speed ramps 8 cm a
+ * tick to 53, the spin is re-rolled 30-59 deg a tick and the turn rate grows 1.5 deg a tick from 10. From LT 20 it
+ * homes in yaw and pitch on the target +150 cm (MoveHumming, ZzzAI.cpp:135-146); within 100 cm it snaps there and
+ * swells (+0.04), shedding a BITMAP_POUNDING_BALL each tick in flight and every third stuck, and still steps off
+ * each tick. Sub 1 / 2 ride the goal's height +-30 sin(LT * 0.1) from the first tick. The body is the tinted
+ * (1, 0.6, 0.3) textured pass with an additive Chrome01 pass over mesh 0 (ZzzObject.cpp:1571-1576), all fading
+ * over the last 10 ticks (`Alpha = LT/10`), and it carries the orange range-2 light.
+ */
+function lanceStar(c: SkillContext, target: Entity, sub: number, look?: LanceLook): void {
+  // Heading and pitch in degrees, as humTurn steps them.
+  const spread = 10 + Math.floor(Math.random() * 80);
+  let head = deg(entityYaw(c.caster)) + (sub - 1) * spread;
+  let pitch = 0;
+  let speed = 5;
+  let turn = 10;
+  let spin = 2;
+  let lt = LANCE_TICKS;
+  let angle = entityYaw(c.caster);
+  let scale = 1.2;
+  let struck = false;
+  const goal = entityPos(target, 1.5, new Vector3());
+  const pos = entityPos(c.caster, 1.5, new Vector3());
+  const move = (): void => {
+    const d = cm(speed);
+    const h = rad(head);
+    const v = rad(pitch);
+    pos.x += Math.sin(h) * Math.cos(v) * d;
+    pos.y += Math.sin(v) * d;
+    pos.z -= Math.cos(h) * Math.cos(v) * d;
+  };
+  const step = (into: LanceFrame): void => {
+    if (!entityGone(target)) entityPos(target, 1.5, goal);
+    scale += 0.015;
+    if (lt < 25) {
+      if (lt < 20) {
+        const dx = goal.x - pos.x;
+        const dy = goal.y - pos.y;
+        const dz = goal.z - pos.z;
+        const flat = Math.hypot(dx, dz);
+        head = humTurn(head, flat > 1e-6 ? deg(Math.atan2(dx, -dz)) : 0, turn);
+        pitch = humTurn(pitch, deg(Math.atan2(dy, flat)), turn);
+        if (Math.hypot(flat, dy) < 1) {
+          pos.copyFrom(goal);
+          scale += 0.04;
+          if (look && !struck) {
+            struck = true;
+            // Computed a tick before it is drawn.
+            const at = goal.clone();
+            delay(TICK, () => look.strike(at, c));
+          }
+          if (lt % 3 === 0) effects.spawn('particles', c.scene, pos, LANCE_PUFF_ONE);
+        } else effects.spawn('particles', c.scene, pos, LANCE_PUFF_ONE);
+      }
+      turn += 1.5;
+      move();
+      spin = 30 + Math.floor(Math.random() * 30);
+      if (speed < 50) speed += 8;
+    } else {
+      spin += 10;
+      move();
+    }
+    angle += rad(spin);
+    const bob = 0.3 * Math.sin(lt * 0.1);
+    if (sub === 1) pos.y = goal.y + bob;
+    else if (sub === 2) pos.y = goal.y - bob;
+    lt--;
+    into.p.copyFrom(pos);
+    into.angle = angle;
+    into.scale = scale;
+  };
+
+  // Drawn between tick n and tick n + 1.
+  const a: LanceFrame = { p: new Vector3(), angle: 0, scale: 0 };
+  const b: LanceFrame = { p: new Vector3(), angle: 0, scale: 0 };
+  step(a);
+  step(b);
+  let n = 0;
+  const t0 = fxNow();
+  const facingDir = new Vector3();
+  let handle: ModelHandle | null = null;
+  const source: PointSource = out => {
+    const k = (fxNow() - t0) / TICK;
+    while (n + 1 <= k && lt > 0) {
+      a.p.copyFrom(b.p);
+      a.angle = b.angle;
+      a.scale = b.scale;
+      step(b);
+      n++;
+    }
+    const w = Math.min(1, k - n);
+    Vector3.LerpToRef(a.p, b.p, w, out);
+    const yaw = a.angle + (b.angle - a.angle) * w;
+    handle?.yawTo(facingDir.set(Math.sin(yaw), 0, Math.cos(yaw)));
+    handle?.scaleTo(a.scale + (b.scale - a.scale) * w);
+    return out;
+  };
+  handle = spawnModel(c.scene, a.p, {
+    model: MODEL.javelin,
+    follow: source,
+    seconds: ticks(LANCE_TICKS),
+    scale: 1.2,
+    colour: LANCE_TINT,
+    blendMesh: 1,
+    blendLight: lanceBlend,
+    blendClamp: true,
+    solidFade: true,
+    fadeTail: 10 / LANCE_TICKS,
+    shine: { mesh: 0, colour: LANCE_TINT },
+  });
+  if (look) effects.spawn('particles', c.scene, a.p, { recipe: look.sparks, rate: LANCE_SPARK_RATE, seconds: ticks(LANCE_TICKS - 10), follow: source });
+  const lit = new Vector3();
+  lighting.skillLand(c.scene, 45, a.p, out => {
+    source(lit);
+    out.x = lit.x;
+    out.y = lit.y;
+    out.z = lit.z;
+  });
+}
+
+/**
+ * 45 Lance (ZzzCharacter.cpp:5011-5017): at the release, three MODEL_SKILL_JAVELIN at the target and
+ * SOUND_BCS_JAVELIN. The original loads that sound only in Battle Castle (MapManager.cpp:251-278), so it is
+ * silent elsewhere; it plays on every map here.
+ */
+const lance = (look?: LanceLook): Step => (_at, c) => {
+  delay(DW1_RELEASE, () => {
+    if (entityGone(c.caster) || !c.target || entityGone(c.target)) return;
+    for (let sub = 0; sub < 3; sub++) lanceStar(c, c.target, sub, look);
+    releaseSound('Sound/battlecastle/sCShockWave')(_at, c);
+  });
+};
+
+/**
+ * Power Wave on the graded tiers, around the same sheet (tinted, POWER_WAVE_LOOK): a launch ring at the caster's feet, a blue glow on the
+ * ground riding under the sheet, a low haze it drags along and cold glints thrown off it, all fading with it.
+ */
+const powerWaveExtra: WaveLook['extra'] = (c, feet, path) => {
+  const life = ticks(POWER_WAVE_TICKS);
+  effects.spawn('ring', c.scene, feet, { texture: TEX.shockwave, colour: [0.4, 0.65, 1], scale: 0.8, grow: 2.2, growFrom: 0.5, seconds: 0.35, fadeTail: 0.7 });
+  effects.spawn('ring', c.scene, feet, { texture: TEX.flare, colour: [0.4, 0.7, 1], scale: 2.2, growFrom: 0.7, seconds: life, fadeTail: 0.5, follow: path });
+  effects.spawn('particles', c.scene, feet, { recipe: POWER_WAVE_SKIM, rate: 30, seconds: life, follow: path, height: 0.05 });
+  effects.spawn('particles', c.scene, feet, { recipe: POWER_WAVE_GLINTS, rate: 45, seconds: life * 0.8, follow: path, height: 0.45 });
+};
+
+/** The sheet a shade under white, so its body keeps the magic_g streaks under the tone curve instead of clipping flat. */
+const POWER_WAVE_LOOK: WaveLook = { colour: [0.55, 0.75, 1], extra: powerWaveExtra };
+
+/** Energy Ball on the graded tiers: a held blue glow and a spark wake on the ball; its pop throws sparks, a flash and a light. */
+const ENERGY_BALL_LOOK: EnergyBallLook = {
+  // The glow is laid with the tick's cards, at their rate, so it sits on them rather than on the moving ball.
+  streams: [
+    { recipe: ENERGY_BALL_GLOW, rate: 25 },
+    { recipe: ENERGY_BALL_WAKE, rate: 40 },
+  ],
+  pop: seq(
+    particles({ recipe: ENERGY_BALL_BURST, count: 14 }),
+    sprite({ texture: TEX.flare, colour: [0.5, 0.75, 1], size: 1.3, seconds: 0.22, growFrom: 0.5, grow: 1.3, fadeTail: 0.7 }),
+    placeBodyLight(17, 'pop')
+  ),
+};
+
+/** Lance on the graded tiers: each star sheds sparks in flight and strikes home in a spray, a flash and a light. */
+const LANCE_LOOK: LanceLook = {
+  sparks: LANCE_SPARKS,
+  strike: seq(
+    particles({ recipe: LANCE_STRIKE, count: 12 }),
+    sprite({ texture: TEX.flare, colour: [1, 0.62, 0.3], size: 1.1, seconds: 0.2, growFrom: 0.5, grow: 1.3, fadeTail: 0.7 }),
+    placeBodyLight(45, 'strike')
+  ),
+};
+
 // ---- the table -------------------------------------------------------------------
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
 export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
-  // 1 Poison: impact@target - MODEL_POISON LT 40 + 10× BITMAP_SMOKE tinted (0.4, 0.6, 1.0). No bolt.
-  1: { impact: seq(model({ model: MODEL.poison, seconds: ticks(40), scale: 1, colour: RGBS.venom }), particles({ recipe: POISON_SMOKE, count: 10 })) },
-  // 2 Meteorite: MODEL_FIRE sub0 LT 40, Scale 1.0–1.7, from target + (130…162, 400) cm, Dir(0,0,−50).
+  // 1 Poison: at the release, MODEL_POISON + 10 BITMAP_SMOKE sub1 at the target's feet (poisonCloud).
+  1: { impact: poisonCloud(), enhanced: { impact: poisonCloud(poisonImproved) } },
+  // 2 Meteorite: at the release, MODEL_FIRE sub0 falls on the target's feet; 6 chips and the explosion (meteor).
+  // Enhanced: the same fall with a glow and embers, and a fuller landing (meteorImpact).
   2: {
-    travel: { ...modelBolt(MODEL.fire, RGBS.fire, FIRE_TRAIL, perTick(50), 1.35, FIRE_BLEND_MESH, true), fromSky: true, skyOffset: [cm(146), cm(400), 0] },
-    impact: fireHit,
+    impact: meteor(meteorLanding()),
+    enhanced: { impact: meteor(meteorImpact, METEOR_LOOK) },
   },
   // 3 Lightning: SOUND_THUNDER01 at cast; per frame JOINT_THUNDER weaponBone → target (width 50 + width 10,
   // LT 2, MaxTails 50, Vel 50) + BITMAP_ENERGY particles at the bone. Bolts re-roll every 2 ticks for the clip.
@@ -7012,15 +7613,19 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       arcHit(at, c);
     },
   },
-  // 4 Fire Ball: MODEL_FIRE sub1 LT 60, Scale 0.8–1.1, z+120, Dir(0,−50,0); within 100 → 2× MODEL_STONE.
-  4: { travel: modelBolt(MODEL.fire, RGBS.fire, FIRE_TRAIL, perTick(50), 0.95, FIRE_BLEND_MESH, true), impact: seq(fireHit, stones(2)) },
+  // 4 Fire Ball: at the release, MODEL_FIRE sub1 flies straight from the caster; within 100 cm of the target
+  // 2 chips drop from the ball (fireBall). Enhanced: a glow, embers and a low tail in flight, a small burst on the hit.
+  4: {
+    impact: fireBall(lavaChips(2)),
+    enhanced: { impact: fireBall(fireBallImpact, FIRE_BALL_LOOK) },
+  },
   // 5 Flame: the renewed look - fire pillars out of molten rock around the point (effects/pillar.ts), in place
   // of the BITMAP_FLAME sub0 LT 40 tongue column the original stacked at SkillXY (ZzzCharacter.cpp:4485).
   5: { area: seq(firePillars(3, 1.4, 0.1), scorch(1.5), burn(1.2)) },
   // 6 Teleport: CreateTeleportBegin at the old square (cast) and CreateTeleportEnd at the new one (impact), BITMAP_SPARK+1 each.
   6: { cast: teleportColumn, impact: teleportColumn, enhanced: { cast: teleportEnhanced('begin'), impact: teleportEnhanced('end') } },
-  // 7 Ice: impact@target - MODEL_ICE sub0 + 5× MODEL_ICE_SMALL. No bolt.
-  7: { impact: iceHit },
+  // 7 Ice: at the release, MODEL_ICE + 5 MODEL_ICE_SMALL at the target's feet (iceCrystal). Enhanced: frost on the ground, mist and glints.
+  7: { impact: iceCrystal(), enhanced: { impact: iceCrystal(iceImproved) } },
   // 8 Twister: impact@caster - MODEL_STORM LT 59, Dir(0,−10,0) (walks forward), smoke, JOINT_THUNDER from
   // ±200/+700 half the frames, stones 1/4.
   8: {
@@ -7131,11 +7736,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       )
     ),
   },
-  // 11 Power Wave: MODEL_MAGIC2 LT 20, Dir(0,−60,0) along the caster→target angle, 4× BITMAP_SMOKE sub3 a frame.
-  11: {
-    travel: { ...modelBolt(MODEL.magic2, RGBS.tide, SMOKE, perTick(60), 1), trail: { recipe: SMOKE, rate: 100 } },
-    impact: flash(TEX.kwave, RGBS.tide, 1.2, 0.3),
-  },
+  // 11 Power Wave: at the release, MODEL_MAGIC2 slides from the caster's feet toward the target and on past it (powerWave).
+  // Enhanced: a ground glow, haze and glints riding the same sheet.
+  11: { impact: powerWave(), enhanced: { impact: powerWave(POWER_WAVE_LOOK) } },
   // 12 Aqua Beam: BITMAP_BOSS_LASER sub0 at CalcAddPosition(−20,−90,100): LT 20, Light (0.5,0.7,1.0), Scale 16,
   // laid along the facing; 4 range checks marching 150 out. A straight beam 1 tile up, 6 tiles long.
   12: {
@@ -7173,12 +7776,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 16 Soul Barrier: 5× CreateJoint(MODEL_SPEARSKILL sub0, width 20, white, LT 999999, MaxTails 30) - persistent,
   // so the ribbons live in BUFF_VISUALS[4] and end on MagicEffectStatus. Here only the arrival glimmer.
   16: { impact: particles({ recipe: SOUL_MOTES, count: 12, height: 0.6 }) },
-  // 17 Energy Ball: BITMAP_ENERGY sub0 LT 20, Dir(0,−60,0), z+100; per frame ENERGY + SPARK+1 (scale 4) particles;
-  // arrival SPARK+1 sub1 scale 6.
-  17: {
-    travel: { ...bolt(TEX.thunder, RGBS.arc, ENERGY_CHIPS, 0.5, perTick(60)), trail: { recipe: ENERGY_CHIPS, rate: 25 } },
-    impact: seq(sprite({ texture: TEX.spark3, colour: RGBS.arc, size: 0.6, seconds: ticks(10), grow: 2 }), hitSparks(ARC_MOTES, 8)),
-  },
+  // 17 Energy Ball: at the release, BITMAP_ENERGY flies from the caster 100 cm up; one Spark03 pop within 100 cm of the target (energyBall).
+  // Enhanced: a held glow and spark wake on the ball, a spark burst on the pop.
+  17: { impact: energyBall(), enhanced: { impact: energyBall(ENERGY_BALL_LOOK) } },
   // 18 Defense: the guard clip and sKnightDefense only; the original draws nothing (SkillCast.cpp:224-231,
   // WSclient.cpp:3610-3612). OpenMU answers with 0x19, so the echo carries ReceiveAction's clip and sound.
   // Enhanced adds a steel glint as the guard sets.
@@ -7276,11 +7876,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   // 44 Crescent Moon Slash (Rush): the charge sprays sparks and fire at the feet until key 5 or 14 ticks, then the
   // sword force runs 3.9 m ahead growing, fading and lighting the ground; see crescentMoonSlash.
   44: { cast: crescentMoonSlash, enhanced: { cast: crescentMoonSlashOf(true) } },
-  // 45 Javelin (Lance): 3× MODEL_SKILL_JAVELIN sub0/1/2 - LT 35, Vel 10, Scale 1.2, z+150, HeadAngle ±Ang.
-  45: {
-    area: (at, c) => fanArrows(at, c, 3, MODEL.javelin, RGBS.steel, 0.3, 1.2),
-    impact: steelHit,
-  },
+  // 45 Lance: at the release, three MODEL_SKILL_JAVELIN fan out, spin up and home on the target 150 cm up (lance).
+  // Enhanced: sparks shed in flight and a spray where each star strikes home.
+  45: { impact: lance(), enhanced: { impact: lance(LANCE_LOOK) } },
   // 46 Deep Impact (Starfall): the arrow, then MODEL_ARROW_IMPACT at its position.
   46: { travel: arrow(MODEL.arrowLaser, RGBS.holy), impact: seq(model({ model: MODEL.arrowImpact, seconds: ticks(20), scale: 1, colour: RGBS.holy, grow: 1.4 }), steelHit) },
   // 47 Impale: t4 threads gather on the spear point, t8 a white spiral cone, t10 the sound, t13-14 six spears; see impale.

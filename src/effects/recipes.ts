@@ -506,6 +506,31 @@ export const FIRE_TRAIL: ParticleRecipe = {
 };
 
 /**
+ * BITMAP_FIRE sub5 as MODEL_FIRE sub0/sub1 leaves it every tick (ZzzEffect.cpp:7954; ZzzEffectParticle.cpp:407-419,
+ * :4555-4563): LT 24, 64 px x 1.28-1.91, shrinking 0.04 a tick, rising 12 cm, turning 5 deg a tick, and
+ * kept at its creation Light `(Lum, 0.1 Lum, 0)` until it dies. Deep red, not FIRE_TRAIL's orange.
+ */
+export const FIRE_BALL_TRAIL: ParticleRecipe = {
+  texture: TEX.fire,
+  cells: { w: 64, h: 64, count: 4 },
+  colour: [1, 0.1, 0],
+  size: 1.02,
+  sizeJitter: 0.2,
+  life: 0.96,
+  lifeJitter: 0,
+  power: 0,
+  powerJitter: 0,
+  gravity: 0.26,
+  box: [0.02, 0.02, 0.02],
+  spin: 2.2,
+  endScale: 0.4,
+  fade: [
+    [0, 1],
+    [1, 1],
+  ],
+};
+
+/**
  * A smoke roll behind a stone or under a flame. Additive like the original:
  * RenderParticles forces EnableAlphaBlend for every JPEG (Components == 3)
  * sheet (ZzzEffectParticle.cpp:8919), and smoke01 has no alpha channel -
@@ -705,11 +730,33 @@ export const WIND_STREAKS: ParticleRecipe = {
   endScale: 0.4,
 };
 
-/** BITMAP_SMOKE tinted the Poison hit's (0.4, 0.6, 1.0). */
+/**
+ * BITMAP_SMOKE sub1, the Poison hit's cloud (ZzzEffectParticle.cpp:1274-1283 init, :5360-5365 move):
+ * LT 50, Scale 0.80-1.11 of the 64 px sheet, upright, thrown 40-47 cm a tick and slowed x0.4 a tick
+ * (about 0.7 m out in 3 ticks), Scale +0.05 a tick. The move overwrites the creation Light with
+ * `LT/50 x (0.5, 1, 0.8)`, so the (0.4, 0.6, 1) passed at creation never shows.
+ */
 export const POISON_SMOKE: ParticleRecipe = {
-  ...SMOKE,
-  colour: [0.4, 0.6, 1],
-  colourEnd: [0.15, 0.25, 0.4],
+  texture: TEX.smoke,
+  colour: [0.5, 1, 0.8],
+  size: 0.61,
+  sizeJitter: 0.16,
+  life: 2,
+  lifeJitter: 0,
+  box: [0.32, 0.32, 0.32],
+  dir1: [-1, -0.7, -1],
+  dir2: [1, 0.7, 1],
+  power: 10,
+  powerJitter: 0.15,
+  settle: 0.07,
+  gravity: 0,
+  endScale: 3.6,
+  spin: 0,
+  upright: true,
+  fade: [
+    [0, 1],
+    [1, 0],
+  ],
   blend: 'add',
 };
 
@@ -914,6 +961,411 @@ export const BODY_SMOKE: ParticleRecipe = {
   spin: 1,
   blend: 'add',
   capacity: 256,
+};
+
+/**
+ * BITMAP_SMOKE sub0 as MODEL_ICE and its shards leave it (ZzzEffect.cpp:7644-7651, MoveHandlers.cpp:3978):
+ * BODY_SMOKE with the original's fixed rotation and `Light = LT/8`, full for 8 ticks, then to black.
+ */
+export const ICE_SHARD_SMOKE: ParticleRecipe = {
+  ...BODY_SMOKE,
+  colour: [1, 1, 1],
+  colourEnd: [1, 1, 1],
+  spin: 0,
+  fade: [
+    [0, 1],
+    [0.5, 1],
+    [1, 0],
+  ],
+};
+
+/** The crystal's puffs: +-32 cm across, 32-159 cm up (ZzzEffect.cpp:7645-7648), about a 0.96 tile centre. */
+export const ICE_SMOKE: ParticleRecipe = {
+  ...ICE_SHARD_SMOKE,
+  box: [0.32, 0.635, 0.32],
+};
+
+/**
+ * BITMAP_SMOKE sub3, 4 a tick off MODEL_MAGIC2 (ZzzEffectParticle.cpp:1250-1255, :5330-5334): rotation 0,
+ * thrown 40-47 cm a tick along a random yaw pitched +-45 deg with `Velocity *= 0.4` (about 0.7 m out),
+ * Scale +0.1 a tick, `Light = LT/8 x (0.8, 0.8, 1)` over its 9 drawn ticks.
+ */
+export const POWER_WAVE_SMOKE: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.8, 0.8, 1],
+  size: 0.675,
+  sizeJitter: 0.14,
+  life: 0.36,
+  lifeJitter: 0,
+  box: [0, 0, 0],
+  dir1: [-1, -0.7, -1],
+  dir2: [1, 0.7, 1],
+  power: 10.9,
+  powerJitter: 0.15,
+  settle: 0.37,
+  gravity: 0,
+  endScale: 1.76,
+  spin: 0,
+  upright: true,
+  fade: [
+    [0, 1],
+    [0.11, 1],
+    [1, 0],
+  ],
+  blend: 'add',
+  capacity: 512,
+  realSeconds: true,
+};
+
+/**
+ * The BITMAP_ENERGY particle a tick at the ball (ZzzEffect.cpp:6879; ZzzEffectParticle.cpp:723-726):
+ * Thunder01 x 0.6-1.3, random rotation turning 20 deg a tick, LT 2, so drawn for one tick at saturated light.
+ */
+export const ENERGY_BALL_CORE: ParticleRecipe = {
+  texture: TEX.thunder,
+  colour: [1, 1, 1],
+  size: 0.61,
+  sizeJitter: 0.37,
+  life: 0.04,
+  lifeJitter: 0,
+  box: [0, 0, 0],
+  power: 0,
+  powerJitter: 0,
+  gravity: 0,
+  spin: 8.7,
+  fade: [
+    [0, 1],
+    [1, 1],
+  ],
+  blend: 'add',
+  capacity: 64,
+  realSeconds: true,
+};
+
+/** The BITMAP_SPARK+1 sub0 a tick at the ball: Spark03 at Scale 4, down to 3.5 by its one drawn tick (ZzzEffectParticle.cpp:6613-6616). */
+export const ENERGY_BALL_STAR: ParticleRecipe = {
+  ...ENERGY_BALL_CORE,
+  texture: TEX.spark3,
+  size: 1.12,
+  sizeJitter: 0,
+  spin: 0,
+  upright: true,
+};
+
+/** CheckTargetRange's BITMAP_SPARK+1 sub1 (ZzzEffect.cpp:283-285): Scale 6, down to 4 by its one drawn tick, white. */
+export const ENERGY_BALL_POP: ParticleRecipe = {
+  ...ENERGY_BALL_STAR,
+  size: 1.28,
+};
+
+/**
+ * BITMAP_POUNDING_BALL sub1 off a Lance star (ZzzEffectParticle.cpp:3262-3269): PoundingBall x 1.28-2.55, a
+ * fixed random rotation, Light 0.5 held for its 14 drawn ticks, drifting 3-5 cm a tick. Its move branch is
+ * dead code (`SubType == 0 && SubType == 1`, :8163), so it neither shrinks nor fades.
+ */
+export const LANCE_PUFF: ParticleRecipe = {
+  texture: TEX.powerWave,
+  colour: [0.5, 0.5, 0.5],
+  size: 1.23,
+  sizeJitter: 0.33,
+  life: 0.56,
+  lifeJitter: 0,
+  box: [0, 0, 0],
+  dir1: [-1, 0, -1],
+  dir2: [1, 0, 1],
+  power: 1.2,
+  powerJitter: 0.3,
+  gravity: 0,
+  spin: 0,
+  fade: [
+    [0, 1],
+    [1, 1],
+  ],
+  blend: 'add',
+  capacity: 256,
+  realSeconds: true,
+};
+
+// ---- dw1 improved looks (Enhanced and Ultra) -----------------------------------
+
+/** Hot chips a flying MODEL_FIRE sheds on the graded tiers: small, orange going red, falling away from the path. */
+export const FIRE_BALL_EMBERS: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [1, 0.55, 0.15],
+  colourEnd: [0.7, 0.12, 0],
+  size: 0.09,
+  sizeJitter: 0.4,
+  life: 0.55,
+  lifeJitter: 0.3,
+  box: [0.12, 0.12, 0.12],
+  dir1: [-1, -0.2, -1],
+  dir2: [1, 0.8, 1],
+  power: 0.9,
+  gravity: -2.5,
+  spin: 4,
+  capacity: 256,
+};
+
+/** The meteor's blast on the graded tiers: BITMAP_FIRE rolled out flat from the landing and rising as it burns off. */
+export const METEOR_BLAST: ParticleRecipe = {
+  texture: TEX.fire,
+  cells: { w: 64, h: 64, count: 4 },
+  colour: [1, 0.5, 0.15],
+  colourEnd: [0.6, 0.08, 0],
+  size: 0.7,
+  sizeJitter: 0.3,
+  life: 0.55,
+  lifeJitter: 0.3,
+  box: [0.15, 0.05, 0.15],
+  dir1: [-1, 0.1, -1],
+  dir2: [1, 0.45, 1],
+  power: 2.6,
+  settle: 0.5,
+  gravity: 0.8,
+  spin: 2,
+  endScale: 1.8,
+};
+
+/** Dust and smoke the landing throws up: straight-alpha matter, so it darkens what it covers and never blooms. */
+export const METEOR_DUST: ParticleRecipe = {
+  texture: TEX.smokeAlpha,
+  colour: [0.26, 0.23, 0.2],
+  size: 0.8,
+  sizeJitter: 0.3,
+  life: 1.5,
+  lifeJitter: 0.25,
+  box: [0.35, 0.05, 0.35],
+  dir1: [-0.5, 0.4, -0.5],
+  dir2: [0.5, 1, 0.5],
+  power: 0.9,
+  settle: 0.4,
+  gravity: 0.35,
+  spin: 0.6,
+  endScale: 2.6,
+  fade: [
+    [0, 0],
+    [0.15, 0.7],
+    [1, 0],
+  ],
+  blend: 'alpha',
+};
+
+/** Poison's low venom haze on the graded tiers: smoke01 in the cloud's green, hugging the ground and spreading. */
+export const POISON_MIST: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.18, 0.5, 0.32],
+  size: 0.9,
+  sizeJitter: 0.25,
+  life: 1.5,
+  lifeJitter: 0.2,
+  box: [0.35, 0.05, 0.35],
+  dir1: [-1, 0.05, -1],
+  dir2: [1, 0.2, 1],
+  power: 0.7,
+  settle: 0.5,
+  gravity: 0.05,
+  spin: 0.4,
+  endScale: 2.4,
+  fade: [
+    [0, 0],
+    [0.2, 1],
+    [1, 0],
+  ],
+  blend: 'add',
+};
+
+/** Poison's bubbles: small green flares rising through the cloud and popping. */
+export const POISON_BUBBLES: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.4, 1, 0.55],
+  colourEnd: [0.2, 0.6, 0.3],
+  size: 0.18,
+  sizeJitter: 0.4,
+  life: 1,
+  lifeJitter: 0.4,
+  box: [0.45, 0.3, 0.45],
+  dir1: [-0.15, 0.6, -0.15],
+  dir2: [0.15, 1, 0.15],
+  power: 0.5,
+  gravity: 0.3,
+  endScale: 1.4,
+};
+
+/** Frost glints on and around the Ice crystal: tiny cold flares that twinkle out. */
+export const FROST_GLINTS: ParticleRecipe = {
+  texture: TEX.shiny,
+  colour: [0.75, 0.9, 1],
+  size: 0.2,
+  sizeJitter: 0.4,
+  life: 0.6,
+  lifeJitter: 0.4,
+  box: [0.4, 0.55, 0.4],
+  power: 0.15,
+  gravity: -0.3,
+  spin: 3,
+  fade: [
+    [0, 0],
+    [0.3, 1],
+    [1, 0],
+  ],
+};
+
+/** The cold breath rolling off the crystal's base: smoke01 in ice blue, pushed out along the ground. */
+export const ICE_MIST: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.22, 0.4, 0.68],
+  size: 0.7,
+  sizeJitter: 0.3,
+  life: 1.1,
+  lifeJitter: 0.2,
+  box: [0.25, 0.04, 0.25],
+  dir1: [-1, 0, -1],
+  dir2: [1, 0.15, 1],
+  power: 1.4,
+  settle: 0.35,
+  gravity: 0.05,
+  spin: 0.5,
+  endScale: 2.4,
+  fade: [
+    [0, 0],
+    [0.15, 1],
+    [1, 0],
+  ],
+  blend: 'add',
+};
+
+/** Power Wave's wake on the graded tiers: cold glints thrown off the sheet's front, rising and twinkling out behind it. */
+export const POWER_WAVE_GLINTS: ParticleRecipe = {
+  texture: TEX.shiny,
+  colour: [0.7, 0.85, 1],
+  colourEnd: [0.3, 0.5, 1],
+  size: 0.16,
+  sizeJitter: 0.45,
+  life: 0.45,
+  lifeJitter: 0.35,
+  box: [0.45, 0.35, 0.45],
+  dir1: [-0.4, 0.4, -0.4],
+  dir2: [0.4, 1, 0.4],
+  power: 0.8,
+  powerJitter: 0.4,
+  gravity: 0.4,
+  spin: 3,
+  fade: [
+    [0, 0],
+    [0.2, 1],
+    [1, 0],
+  ],
+  capacity: 256,
+  realSeconds: true,
+};
+
+/** Power Wave's ground skim: a low blue haze dragged along under the sheet, the wave's contact with the ground. */
+export const POWER_WAVE_SKIM: ParticleRecipe = {
+  texture: TEX.smoke,
+  colour: [0.2, 0.35, 0.7],
+  size: 0.8,
+  sizeJitter: 0.25,
+  life: 0.5,
+  lifeJitter: 0.2,
+  box: [0.35, 0.03, 0.35],
+  dir1: [-1, 0, -1],
+  dir2: [1, 0.1, 1],
+  power: 0.8,
+  settle: 0.4,
+  gravity: 0,
+  spin: 0.5,
+  endScale: 1.8,
+  fade: [
+    [0, 0],
+    [0.2, 1],
+    [1, 0],
+  ],
+  blend: 'add',
+  capacity: 128,
+  realSeconds: true,
+};
+
+/** The Energy Ball's halo on the graded tiers: a blue flare under each tick's cards, drawn one tick with them. */
+export const ENERGY_BALL_GLOW: ParticleRecipe = {
+  ...ENERGY_BALL_CORE,
+  texture: TEX.flare,
+  colour: [0.15, 0.35, 0.8],
+  size: 1.4,
+  sizeJitter: 0,
+  // A shade under the tick and dimming, so the last tick's halo is gone or faint when the next one is laid.
+  life: 0.032,
+  spin: 0,
+  fade: [
+    [0, 1],
+    [1, 0.4],
+  ],
+};
+
+/** The Energy Ball's wake: small blue glints shed along its path, falling behind it as they die (flare01: Spark02's art is yellow). */
+export const ENERGY_BALL_WAKE: ParticleRecipe = {
+  texture: TEX.flare,
+  colour: [0.65, 0.85, 1],
+  colourEnd: [0.15, 0.3, 1],
+  size: 0.14,
+  sizeJitter: 0.4,
+  life: 0.35,
+  lifeJitter: 0.3,
+  box: [0.1, 0.1, 0.1],
+  dir1: [-1, -0.5, -1],
+  dir2: [1, 0.8, 1],
+  power: 0.9,
+  powerJitter: 0.4,
+  gravity: -1.5,
+  spin: 4,
+  capacity: 256,
+  realSeconds: true,
+};
+
+/** The Energy Ball's pop: blue-white sparks flung out of the Spark03 flash. */
+export const ENERGY_BALL_BURST: ParticleRecipe = {
+  ...ENERGY_BALL_WAKE,
+  colour: [0.8, 0.92, 1],
+  size: 0.12,
+  life: 0.4,
+  box: [0.05, 0.05, 0.05],
+  dir1: [-1, -0.6, -1],
+  dir2: [1, 1, 1],
+  power: 3.2,
+  settle: 0.6,
+  gravity: -1,
+};
+
+/** Hot sparks a Lance star sheds on the graded tiers: the star's orange, going red, falling away from the spin. */
+export const LANCE_SPARKS: ParticleRecipe = {
+  texture: TEX.spark2,
+  colour: [1, 0.72, 0.4],
+  colourEnd: [0.8, 0.25, 0.05],
+  size: 0.15,
+  sizeJitter: 0.4,
+  life: 0.4,
+  lifeJitter: 0.3,
+  box: [0.12, 0.12, 0.12],
+  dir1: [-1, -0.3, -1],
+  dir2: [1, 0.9, 1],
+  power: 1.4,
+  powerJitter: 0.4,
+  gravity: -2.5,
+  spin: 4,
+  capacity: 384,
+  realSeconds: true,
+};
+
+/** A Lance star striking home: a short spray of its sparks. */
+export const LANCE_STRIKE: ParticleRecipe = {
+  ...LANCE_SPARKS,
+  size: 0.16,
+  life: 0.45,
+  box: [0.05, 0.05, 0.05],
+  dir1: [-1, -0.4, -1],
+  dir2: [1, 1, 1],
+  power: 3.4,
+  settle: 0.55,
+  gravity: -2,
 };
 
 /**

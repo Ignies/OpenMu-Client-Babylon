@@ -116,6 +116,8 @@ export interface SpriteOptions {
   rotation?: number;
   /** Fade the card to nothing towards its border (a sheet whose art runs to its edge). Additive cards only. */
   softEdge?: boolean;
+  /** Additive cards: fade each cell (or the whole sheet) to nothing just before its edge; wins over `softEdge`. */
+  soft?: boolean;
   /** A brightness at progress 0..1, multiplied into the fade (a `Light` that changes over the life). */
   intensity?: (p: number) => number;
 }
@@ -173,7 +175,7 @@ export function spawnSprite(
   const dark = opts.blend === 'subtract';
   const material = dark
     ? darkMaterial(scene, opts.texture, opts.cover ?? luma(colour) * darkCardGain(scene))
-    : additiveMaterial(scene, opts.texture, colour, 'add', opts.softEdge);
+    : additiveMaterial(scene, opts.texture, colour, 'add', opts.soft ? opts.cells ?? true : opts.softEdge ? 'card' : undefined);
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
   const size = opts.size ?? DEFAULT_SIZE;
   const count = Math.max(1, opts.count ?? 1);

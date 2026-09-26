@@ -63,21 +63,18 @@ const MALE_SCREAMS = [
  * recipe  lands.
  */
 export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
-  1: 'Sound/pHeartBeat', // Poison (SOUND_HEART)
-  2: 'Sound/eMeteorite', // Meteorite
+  // 1 Poison, 2 Meteorite, 4 Fire Ball, 7 Ice and their masters: none at the cast; the original plays them at the
+  // release, 14 ticks after the packet (ZzzCharacter.cpp:4955-5034), and the rows do (common/skillVisuals.ts).
+  // So do 11 Power Wave, 17 Energy Ball (sMagic) and 45 Lance (sCShockWave), ZzzCharacter.cpp:5011-5143.
   3: 'Sound/eThunder', // Lightning
-  4: 'Sound/eMeteorite', // Fire Ball
   5: 'Sound/sFlame', // Flame
   6: 'Sound/sMagic', // Teleport (SOUND_MAGIC in CreateTeleportBegin)
-  7: 'Sound/sIce', // Ice
   8: 'Sound/sTornado', // Twister (AT_SKILL_STORM)
   9: 'Sound/sEvil', // Evil Spirit
   10: 'Sound/sHellFire', // Hellfire
-  11: 'Sound/sMagic', // Power Wave
   12: 'Sound/sAquaFlash', // Aqua Beam (AT_SKILL_FLASH)
   15: 'Sound/eTelekinesis', // Teleport Ally
   16: 'Sound/eSoulBarrier', // Soul Barrier
-  17: 'Sound/sMagic', // Energy Ball
   18: 'Sound/sKnightDefense', // Defense (SOUND_SKILL_DEFENSE, WSclient.cpp:3612)
   19: 'Sound/sKnightSkill1', // Falling Slash
   20: 'Sound/sKnightSkill2', // Lunge
@@ -88,7 +85,6 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   39: 'Sound/eSuddenIce_1', // Ice Storm
   40: 'Sound/eHellFire2_2', // Nova
   44: 'Sound/sKnightSkill2', // Rush (ReceiveMagic's SOUND_SKILL_SWORD2; the row plays sCHaveyBlow in Battle Castle)
-  45: 'Sound/battlecastle/sCShockWave', // Javelin
   46: 'Sound/battlecastle/sCFireArrow', // Deep Impact
   52: 'Sound/ePiercing', // Penetration
   55: 'Sound/eBloodAttack', // Fire Slash

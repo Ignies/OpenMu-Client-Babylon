@@ -7,7 +7,7 @@ import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 import { tierIndex } from '../common/lightingQuality';
 import { masterBase } from '../common/skillAliases';
-import { arc, effectLight, ember, flame, frost, holy, spark, tide, venom } from './recipes';
+import { arc, effectLight, flame, frost, holy, tide } from './recipes';
 
 /**
  * Skills as light sources.
@@ -32,9 +32,6 @@ const CAST_HEIGHT = 1.1;
 
 /** Tiles above a target's feet where an impact light sits: the chest. */
 const IMPACT_HEIGHT = 0.9;
-
-/** Energy Ball's projectile speed in tiles/s, matching effects/energyBall.ts. */
-const BOLT_SPEED = 7;
 
 /** Arrows are faster than magic bolts: 70 cm a tick, like `common/skillVisuals.ts`. */
 const ARROW_SPEED = 17.5;
@@ -256,18 +253,104 @@ const IRON_DEFENSE_LIGHT: SkillLight = {
   enhanced: { cast: effectLight([0.85, 0.85, 0.95], 1.2, 0.6, { attack: 0.05, release: 0.4 }) },
 };
 
+/** MODEL_POISON's light: 40 ticks at the target's feet, `Luminosity` rolled every tick. */
+const POISON_LIGHT: LightRecipe = {
+  color: [0.3, 1, 0.6],
+  range: 2,
+  seconds: 40 * 0.04,
+  release: 5 * 0.04,
+  flicker: { min: 0.7, max: 1, steps: 4 },
+};
+
+/** MODEL_FIRE sub0 / sub1 in flight; the effect stops it where the ball dies, this is only a give-up time. */
+const FIRE_BALL_LIGHT: LightRecipe = {
+  color: [1, 0.1, 0],
+  range: 2,
+  seconds: 3,
+  release: 0.04,
+  flicker: { min: 0.7, max: 1, steps: 4 },
+};
+
+/**
+ * MODEL_ICE sub0's negative light, for the crystal's 25 ticks. Scaled into linear light the way the
+ * negative monster lights are (lighting/characters.ts DARK_FLOOR_GAIN).
+ */
+const ICE_LIGHT: LightRecipe = {
+  color: [-0.4, -0.3, -0.2],
+  range: 2,
+  pointRange: 2,
+  seconds: 25 * 0.04,
+  release: 0.04,
+  gain: 0.35,
+  floorGain: 0.35,
+  flicker: { min: 0.7, max: 1, steps: 4 },
+};
+
+/** MODEL_MAGIC2's `(0.3, 0.6, 1) x Luminosity` range 3, riding the wave for its 20 ticks. */
+const POWER_WAVE_LIGHT: LightRecipe = {
+  color: [0.3, 0.6, 1],
+  range: 3,
+  seconds: 20 * 0.04,
+  release: 0.04,
+  flicker: { min: 0.7, max: 1, steps: 4 },
+};
+
+/**
+ * BITMAP_ENERGY's `(0.2, 0.4, 1) x LT * 0.2` range 2: Lum runs 4 down to 2 over a 6-tile flight and
+ * AddTerrainLight has no upper clamp, so the core saturates pale cyan with a blue rim. The effect stops it.
+ */
+const ENERGY_BALL_LIGHT: LightRecipe = {
+  color: [0.2, 0.4, 1],
+  range: 2,
+  seconds: 20 * 0.04,
+  release: 0.04,
+  gain: 3,
+  floorGain: 3,
+};
+
+/** MODEL_SKILL_JAVELIN's `(1, 0.6, 0.3)` range 2 on each star for its 35 ticks. */
+const LANCE_LIGHT: LightRecipe = {
+  color: [1, 0.6, 0.3],
+  range: 2,
+  seconds: 35 * 0.04,
+  release: 0.04,
+};
+
 /** Keyed by skill number (common/skillsDatabase.ts). */
 export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
-  // MODEL_POISON: AddTerrainLight range 2 (ZzzEffect.cpp:9752).
-  1: { travel: { ...venom(2, 3), speed: BOLT_SPEED }, impact: venom(2, 0.6) },
-  // Meteorite: a falling fire model - warm impact (BITMAP_FIRE+1 range 2, :8092).
-  2: { cast: ember(1, 0.3), impact: flame(2, 0.5) },
+  // Poison: MODEL_POISON's `(0.3, 1, 0.6) x Lum` range 2 for its 40 ticks, laid by the effect at the release
+  // (MoveHandlers.cpp:2742-2752; Lum 0.7-1.0, falling over the last 5 ticks, ZzzEffect.cpp:6645-6650).
+  // Enhanced: the cloud's green over the ~1.3 tiles its smoke and haze reach, for the model's 40 ticks.
+  1: { land: POISON_LIGHT, enhanced: { land: effectLight([0.3, 1, 0.6], 1.3, 1.6, { release: 0.2, flicker: { min: 0.75, max: 1, steps: 4 } }) } },
+  384: {},
+  // Meteorite: MODEL_FIRE's `(Lum, 0.1 Lum, 0)` range 2 rides the ball down and dies with it (ZzzEffect.cpp:7948-7953).
+  // Enhanced: an orange glow riding the lit ball; on the ground the white-hot burst over the explosion's reach
+  // and the crater's red, which outlasts it.
+  2: {
+    land: FIRE_BALL_LIGHT,
+    enhanced: {
+      land: effectLight([1, 0.4, 0.1], 1.2, 3, { release: 0.04, flicker: { min: 0.8, max: 1, steps: 4 } }),
+      bodies: {
+        impact: effectLight([1, 0.6, 0.25], 1.8, 0.7, { heightOffset: 0.8, release: 0.45 }),
+        crater: effectLight([1, 0.3, 0.06], 1.1, 1.4, { attack: 0.1, release: 0.8, flicker: { min: 0.75, max: 1, steps: 4 } }),
+      },
+    },
+  },
+  390: {},
+  394: {},
   // BITMAP_LIGHTNING: range 6 on the strike (ZzzEffectParticle.cpp:4298).
   // 0.4 s is the clip: the bolt is `ticks(10)` in skillVisuals, and a light
   // that ends before its effect leaves the ground dark under a live bolt.
   3: { impact: arc(6, 0.4, { gain: 1.4 }) },
-  // Fire Ball: BITMAP_FIRE+1 range 2 in flight (:8092).
-  4: { travel: { ...ember(2, 3), speed: BOLT_SPEED }, impact: flame(2, 0.45) },
+  // Fire Ball: the same light riding the ball; nothing on arrival (ZzzEffect.cpp:7948-7953, :244-282).
+  // Enhanced: the ball's glow card and embers in its red-orange, and a short flash for the burst on the hit.
+  4: {
+    land: FIRE_BALL_LIGHT,
+    enhanced: {
+      land: effectLight([1, 0.32, 0.06], 0.8, 3, { release: 0.04, flicker: { min: 0.8, max: 1, steps: 4 } }),
+      bodies: { hit: effectLight([1, 0.55, 0.2], 0.9, 0.5, { release: 0.35 }) },
+    },
+  },
   // Flame: BITMAP_FLAME range 3 while the column burns (:8649). Wider and redder here: the
   // pillars stand on molten rock and the ground around them pools red in the renewed look.
   5: { area: { ...flame(3.5, 1.9, { gain: 1.5, floorGain: 1.3, release: 0.6 }), color: [1, 0.42, 0.14] } },
@@ -275,8 +358,10 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Enhanced: the spark colour at each square for the column's life, reaching its half height.
   6: { enhanced: { cast: TELEPORT_LIGHT, impact: TELEPORT_LIGHT } },
   15: { enhanced: { cast: TELEPORT_LIGHT, impact: TELEPORT_LIGHT } },
-  // Ice: MODEL_ICE range 2 (:12182).
-  7: { travel: { ...frost(2, 3), speed: BOLT_SPEED }, impact: frost(2, 0.5) },
+  // Ice: MODEL_ICE takes `(0.4, 0.3, 0.2) x Lum` off the ground, range 2, while the crystal stands (ZzzEffect.cpp:7658-7660).
+  // Enhanced: the crystal is bright additive art, so it lights the ground its ice blue while it stands.
+  7: { land: ICE_LIGHT, enhanced: { land: effectLight([0.55, 0.8, 1], 1.1, 1, { release: 0.15, flicker: { min: 0.85, max: 1, steps: 4 } }) } },
+  389: {},
   // Twister: MODEL_STORM range 5 (:10480).
   8: { area: { color: [0.75, 0.8, 0.9], range: 5, seconds: 1.4 } },
   // Evil Spirit: nothing, as the original - the spirits are shadow. The empty row also keeps the
@@ -284,14 +369,24 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   9: {},
   // Hellfire: BITMAP_FLAME range 3, as Flame, brighter.
   10: { area: flame(4, 1.5, { gain: 1.4, floorGain: 1.3 }) },
-  // Power Wave: MODEL_WAVE range 5 (:9610).
-  11: { travel: { ...tide(5, 3), speed: BOLT_SPEED }, impact: tide(3, 0.3) },
+  // Power Wave: MODEL_MAGIC2's light rides the wave from the release, laid by the effect (MoveHandlers.cpp:3360-3361).
+  // Enhanced: the sheet's cold blue over the ~1.2 tiles its art and glow reach, fading with it over the last 10 ticks.
+  11: { land: POWER_WAVE_LIGHT, enhanced: { land: effectLight([0.35, 0.6, 1], 1.2, 20 * 0.04, { release: 10 * 0.04, flicker: { min: 0.8, max: 1, steps: 4 } }) } },
   // Aqua Beam: MODEL_WATER_WAVE range 3 (:11644).
   12: { area: tide(4, 1.0) },
   // Cometfall: MODEL_GROUND_STONE2 range 4 (:13710).
   13: { area: flame(4, 1.0, { attack: 0.15 }) },
   // Inferno: BITMAP_FLAME range 3 (:8695), wide.
   14: { area: flame(4, 1.5, { gain: 1.6, floorGain: 1.5 }) },
+  // Energy Ball: BITMAP_ENERGY's light rides the ball and dies with it; nothing on arrival (ZzzEffect.cpp:6879-6883).
+  // Enhanced: the held glow's blue riding the ball, and a short flash where it pops.
+  17: {
+    land: ENERGY_BALL_LIGHT,
+    enhanced: {
+      land: effectLight([0.35, 0.6, 1], 0.8, 20 * 0.04, { release: 0.04 }),
+      bodies: { pop: effectLight([0.5, 0.75, 1], 1, 0.3, { release: 0.25 }) },
+    },
+  },
   // Defense: the original lights nothing and draws nothing. Enhanced: the guard glint's steel.
   // A glint is a small art: a soft pool, not a lamp.
   18: { enhanced: { strike: effectLight([0.85, 0.85, 0.95], 0.5, 0.35, { gain: 0.45, floorGain: 0.4, attack: 0.08 }) } },
@@ -302,8 +397,6 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Cyclone / Slash (326 / 327 through their base): the same blow flash, the same light.
   22: { enhanced: { strike: effectLight([0.9, 0.95, 1], 0.9, 0.25) } },
   23: { enhanced: { strike: effectLight([0.9, 0.95, 1], 0.9, 0.25) } },
-  // BITMAP_ENERGY: range 2 in flight (:8820).
-  17: { travel: { ...spark(2, 3), speed: BOLT_SPEED }, impact: spark(2, 0.3) },
   // Heal: MODEL_MAGIC_CIRCLE1 range 3 (:9705).
   26: { impact: holy(3, 1.0) },
   // Greater Defense / Greater Damage: the same magic circle.
@@ -359,6 +452,15 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
         charge: effectLight([1, 0.55, 0.2], 0.9, 0.7, { heightOffset: 0.4, attack: 0.1, release: 0.2, flicker: { min: 0.8, max: 1, steps: 4 } }),
         force: effectLight([1, 0.78, 0.45], 1.3, 0.6, { heightOffset: 0.8, release: 0.25 }),
       },
+    },
+  },
+  // Lance: one light per star, laid by the effect (MoveHandlers.cpp:7122-7123). No cast flash.
+  // Enhanced: each star's orange over its glow, fading with it over the last 10 ticks, and a flash where it strikes.
+  45: {
+    land: LANCE_LIGHT,
+    enhanced: {
+      land: effectLight([1, 0.6, 0.3], 0.9, 35 * 0.04, { release: 10 * 0.04 }),
+      bodies: { strike: effectLight([1, 0.65, 0.35], 1, 0.3, { release: 0.25 }) },
     },
   },
   // Impale: the original lights nothing. On the graded tiers the gold gathering point, the orange-white cone over

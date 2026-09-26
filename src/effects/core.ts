@@ -2,7 +2,6 @@ import {
   Color4,
   Constants,
   CreatePlane,
-  DynamicTexture,
   Material,
   Mesh,
   ParticleSystem,
@@ -20,6 +19,7 @@ import { lookDirector } from '../lighting/director';
 import type { Entity } from '../ecs/world';
 import type { TestScene } from '../scenes/testScene';
 import { addEffectGlow, disposeEffectGlow, dropEffectGlow } from './glow';
+import { disposeSoftEdgeMasks, softEdgeMask } from './softEdge';
 import { installSpriteLinearDecode } from '../libs/babylon/spriteLinear';
 import { useGroundFade } from './groundFade';
 import type { EffectHandle } from './layer';
@@ -365,14 +365,16 @@ const ADDITIVE_ALPHA_MODE = Constants.ALPHA_ADD;
  * was a solid tinted square, 2026-08-30.) `subtract` is
  * `EnableAlphaBlendMinus` (ZzzOpenglUtil.cpp:444, `dest × (1 − src)`,
  * Babylon's ALPHA_SUBTRACT): the dark trail a levelled character's sword
- * leaves in `RenderBlurs`.
+ * leaves in `RenderBlurs`. `soft` fades each cell of the sheet (`true`: the
+ * whole sheet) to nothing before its edge; `'card'` is the wider falloff for a
+ * sheet whose art runs to its quad's border (softEdge.ts).
  */
 export function additiveMaterial(
   scene: Scene,
   texture: string | Texture,
   colour: RGB,
   blend: EffectBlend = 'add',
-  softEdge = false
+  soft?: SheetCells | true | 'card'
 ): StandardMaterial {
   let byKey = materials.get(scene);
   if (!byKey) {
@@ -382,7 +384,8 @@ export function additiveMaterial(
   const gain = blend === 'add' ? lightCardGain(scene) : 1;
   const tint: RGB = gain === 1 ? colour : [colour[0] * gain, colour[1] * gain, colour[2] * gain];
   const texKey = typeof texture === 'string' ? texture : `#${texture.uniqueId}`;
-  const key = `${texKey}|${colourKey(tint)}|${blend}${softEdge ? '|soft' : ''}`;
+  const softKey = soft === 'card' ? '|softCard' : soft === true ? '|soft' : soft ? `|soft${soft.w}x${soft.h}` : '';
+  const key = `${texKey}|${colourKey(tint)}|${blend}${softKey}`;
   let m = byKey.get(key);
   if (m) return m;
 
@@ -397,11 +400,19 @@ export function additiveMaterial(
   mat.backFaceCulling = false;
   mat.disableDepthWrite = true;
   mat.fogEnabled = false;
-  if (softEdge) mat.opacityTexture = softEdgeMask(scene);
+  // A whole-card mask needs no size; a per-cell one waits for the sheet's.
+  if (soft === true || soft === 'card') mat.opacityTexture = softEdgeMask(scene, 1, 1, soft === 'card');
 
   if (typeof texture === 'string') {
     void effectTexture(scene, texture).then(tex => {
       if (materials.get(scene)?.get(key) !== mat) return; // pools were reset meanwhile
+      if (typeof soft === 'object') {
+        // Before the diffuse: the sprite shows a card once its diffuse is in.
+        const size = tex.getBaseSize();
+        const cols = Math.max(1, Math.floor(size.width / soft.w));
+        const rows = Math.max(1, Math.floor(size.height / soft.h));
+        mat.opacityTexture = softEdgeMask(scene, cols, rows);
+      }
       mat.diffuseTexture = tex;
     });
   } else {
@@ -589,6 +600,15 @@ export interface ParticleRecipe {
   groundFade?: number;
   /** With `alpha`: the peak opacity (default 1), for a sheet whose alpha is fuller than the art it stands in for. */
   alpha?: number;
+  /** Life fraction by which the particle has stopped moving, easing out from its launch (a `Velocity *= k` burst). */
+  settle?: number;
+  /** Born at rotation 0 instead of a random one (`o->Rotation` left at CreateParticle's 0). */
+  upright?: boolean;
+  /**
+   * `life`, `power` and `gravity` in real seconds. Babylon's default `updateSpeed` 0.01 ages a particle
+   * 0.6 s a second, so a recipe without this runs 1.67x slow.
+   */
+  realSeconds?: boolean;
 }
 
 const systems = new Map<Scene, Map<string, ParticleSystem>>();
@@ -790,7 +810,12 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   ps.minAngularSpeed = -spin;
   ps.maxAngularSpeed = spin;
   ps.minInitialRotation = 0;
-  ps.maxInitialRotation = Math.PI * 2;
+  ps.maxInitialRotation = r.upright ? 0 : Math.PI * 2;
+  if (r.settle !== undefined) {
+    ps.addDragGradient(0, 0);
+    ps.addDragGradient(r.settle, 1);
+    ps.addDragGradient(1, 1);
+  }
 
   if (r.cells) {
     ps.isAnimationSheetEnabled = true;
@@ -801,6 +826,8 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
     ps.spriteCellLoop = true;
     ps.spriteRandomStartCell = true;
   }
+
+  if (r.realSeconds) ps.updateSpeed = 1 / 60;
 
   ps.emitRate = 0;
   ps.manualEmitCount = 0;
@@ -952,31 +979,6 @@ export function clearTimers(): void {
 
 /* ------------------------------------------------------------------ reset */
 
-/**
- * A round falloff (full inside 40 % of the radius, none at the edge) as an opacity mask: for a sheet whose
- * art runs to its quad's border, which reads as a square card once many of them overlap.
- */
-const softEdgeMasks = new Map<Scene, DynamicTexture>();
-function softEdgeMask(scene: Scene): DynamicTexture {
-  let tex = softEdgeMasks.get(scene);
-  if (tex) return tex;
-  const size = 64;
-  tex = new DynamicTexture('fx:softEdge', { width: size, height: size }, scene, false);
-  const ctx = tex.getContext();
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, '#ffffff');
-  g.addColorStop(0.4, '#ffffff');
-  g.addColorStop(1, '#000000');
-  ctx.fillStyle = '#000000';
-  ctx.fillRect(0, 0, size, size);
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, size, size);
-  tex.update(false);
-  tex.getAlphaFromRGB = true;
-  softEdgeMasks.set(scene, tex);
-  return tex;
-}
-
 /** Dispose every shared pool (materials, cards, particle systems). The facade's reset. */
 export function disposePools(): void {
   // The halo draws the pooled meshes, so it goes with them.
@@ -985,8 +987,7 @@ export function disposePools(): void {
   // skill mesh's from the GLB cache; both are shared with the map.
   for (const byKey of materials.values()) for (const m of byKey.values()) m.dispose(false, false);
   materials.clear();
-  for (const t of softEdgeMasks.values()) t.dispose();
-  softEdgeMasks.clear();
+  disposeSoftEdgeMasks();
   for (const pool of cardPool.values()) for (const c of pool) c.dispose(false, false);
   cardPool.clear();
   for (const map of systems.values()) for (const ps of map.values()) ps.dispose(false);

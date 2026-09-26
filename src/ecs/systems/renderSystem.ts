@@ -16,6 +16,10 @@ const v3Temp2 = Vector3.Zero();
  */
 const OFF_SCREEN_MARGIN = 8;
 
+/** OpenMU MagicEffect numbers = the original's eDeBuff_Poison / eDeBuff_Freeze. */
+const POISONED = 55;
+const FROZEN = 56;
+
 export const RenderSystem: ISystemFactory = world => {
   const query = world.with('transform', 'modelObject');
 
@@ -88,6 +92,16 @@ export const RenderSystem: ISystemFactory = world => {
             light.y + self.y,
             light.z + self.z
           );
+        }
+
+        // Poison and Freeze replace the body's light while they hold: monsters (0.3, 1, 0.8) with both,
+        // player parts (0.3, 1, 1) (ZzzObject.cpp:1083-1094, :10134-10159).
+        const buffs = entity.buffs;
+        if (buffs && (buffs.has(POISONED) || buffs.has(FROZEN)) && (entity.playerAnimation || entity.monsterAnimation)) {
+          const both = buffs.has(POISONED) && buffs.has(FROZEN);
+          if (both) modelObject.Light.set(0.3, 1, entity.playerAnimation ? 1 : 0.8);
+          else if (buffs.has(POISONED)) modelObject.Light.set(0.3, 1, 0.5);
+          else modelObject.Light.set(0.3, 0.5, 1);
         }
 
         toRenderAngles(transform.rot, v3Temp);

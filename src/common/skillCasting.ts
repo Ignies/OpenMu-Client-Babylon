@@ -30,6 +30,13 @@ export const TELEPORT_ALLY = 15;
 /** `AT_SKILL_DEEPIMPACT`: the aimed-up bow shot, OpenMU's Starfall. */
 const STARFALL = 46;
 
+/**
+ * Master skills the table still lists under their pre-inheritance type: the MG's Ice Strengthener and Ice
+ * Mastery are Physical in OpenMU, but the original sends AT_SKILL_ICE_STR_MG through UseSkillWizard ->
+ * SetPlayerMagic (ZzzInterface.cpp:1362-1386, SkillCast.cpp:503-514).
+ */
+const INHERITED_SPELLS: ReadonlySet<number> = new Set([489, 491]); // Ice Strengthener (MG), Ice Mastery
+
 export function isTeleportSkill(num: number): boolean {
   return num === TELEPORT || num === TELEPORT_ALLY;
 }
@@ -81,7 +88,7 @@ export function chooseSkillAction(
   if (SLASH_SKILLS.has(def.num) && pose.swordCount % 2 === 1) return PlayerAction.PLAYER_ATTACK_TWO_HAND_SWORD3;
   const dedicated = skillClip(def.num, ctx);
   if (dedicated !== null) return dedicated;
-  if (isSpell(def)) return magicClip(ctx);
+  if (isSpell(def) || INHERITED_SPELLS.has(def.num)) return magicClip(ctx);
   return chooseAttackAction(pose);
 }
 
