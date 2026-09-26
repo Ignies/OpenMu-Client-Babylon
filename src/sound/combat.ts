@@ -128,6 +128,9 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   456: 'Sound/lightning_shock', // Lightning Shock Strengthener
   458: 'Sound/SE_Ch_summoner_skill07_lifedrain', // Drain Life Strengthener
   462: 'Sound/SE_Ch_summoner_skill07_lifedrain', // Drain Life Mastery
+  469: 'Sound/Berserker', // Berserker Strengthener
+  470: 'Sound/Berserker', // Berserker Proficiency
+  472: 'Sound/Berserker', // Berserker Mastery
   233: 'Sound/SwellofMagicPower', // Expansion of Wizardry
   234: 'Sound/recover', // Recovery
   236: 'Sound/flame_strike', // Flame Strike

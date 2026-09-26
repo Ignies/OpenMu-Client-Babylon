@@ -633,15 +633,6 @@ function spiralRibbons(n: number, colour: RGB, width: number, tails: number, sec
   };
 }
 
-/** Thorns: BITMAP_MAGIC+1 at the caster + ALICE_BUFFSKILL_EFFECT + …2 at the target, tinted. */
-const aliceBuff = (tint: RGB): Step =>
-  seq(
-    atCaster(magicGround(tint), 0),
-    model({ model: MODEL.elShieldRing, seconds: ticks(30), scale: 0.5, grow: 1.6, colour: tint, height: -IMPACT_HEIGHT + 0.1 }),
-    model({ model: MODEL.elShieldRing2, seconds: ticks(30), scale: 0.5, grow: 1.4, colour: tint, height: -IMPACT_HEIGHT + 0.1, yaw: Math.PI / 3 }),
-    particles({ recipe: { ...SHADE_MOTES, colour: tint }, count: 12, height: 0.5 })
-  );
-
 /** Nova's charge; see row 58. */
 const novaCharge: Step = (_at, c) => {
   const hero = !!c.caster.localPlayer;
@@ -2776,6 +2767,11 @@ const CURSE_HAND_BLIND: CurseHand = { shiny: [1, 1, 1], pin: [1, 1, 1], puff: [1
 const CURSE_HAND_WEAKNESS: CurseHand = { shiny: [0.8, 0.1, 0.1], pin: [0.8, 0.1, 0.1], puff: [0.8, 0.1, 0.1], dark: false };
 /** Enervation: the shiny branch writes `Light`, not `vLight`, so its pair stays white (:10628). */
 const CURSE_HAND_ENERVATION: CurseHand = { shiny: [1, 1, 1], pin: [0.25, 1, 0.7], puff: [0.25, 1, 0.7], dark: false };
+/** Thorns (0.8, 0.5, 0.2) and Berserker (1, 0.1, 0.2): the one Light on every layer. */
+const THORNS: RGB = [0.8, 0.5, 0.2];
+const BERSERKER: RGB = [1, 0.1, 0.2];
+const CURSE_HAND_THORNS: CurseHand = { shiny: THORNS, pin: THORNS, puff: THORNS, dark: false };
+const CURSE_HAND_BERSERKER: CurseHand = { shiny: BERSERKER, pin: BERSERKER, puff: BERSERKER, dark: false };
 
 /**
  * The left-hand FX while a PLAYER_SKILL_SLEEP clip plays (ZzzCharacter.cpp:10591-10740): two shiny05
@@ -2817,10 +2813,48 @@ interface AliceCurse {
   streak: RGB;
   /** Blind: MAGIC+1 sub12, ALICE sub1 RENDER_DARK, sprite SubType 1, JOINT_HEALING sub16 - all subtractive. */
   dark: boolean;
+  /**
+   * Who wears the rings: the target (the curses, nothing on a cast at oneself), the target or else the
+   * caster (Thorns), or the caster (Berserker, ZzzCharacter.cpp:4716-4723).
+   */
+  on?: 'target' | 'targetOrSelf' | 'self';
+  /** The graded tiers' light over the rings and the embers rising round the body, in place of the settling motes. */
+  grace?: { light: RGB; ember: RGB };
 }
 
 const ALICE_SLEEP: AliceCurse = { circle: [0.7, 0.3, 0.8], models: [0.8, 0.3, 0.9], flare: [0.8, 0.1, 0.9], shiny: [0.7, 0.6, 0.9], streak: [0.7, 0.5, 0.7], dark: false };
 const ALICE_BLIND: AliceCurse = { circle: [1, 1, 1], models: [1, 1, 1], flare: [1, 1, 1], shiny: [1, 1, 1], streak: [1, 1, 1], dark: true };
+/** Thorns: the circle at the caster and everything on the target in (0.8, 0.5, 0.2) (ZzzCharacter.cpp:5158-5206). */
+const ALICE_THORNS: AliceCurse = { circle: THORNS, models: THORNS, flare: THORNS, shiny: THORNS, streak: THORNS, dark: false, on: 'targetOrSelf', grace: { light: THORNS, ember: [1, 0.6, 0.25] } };
+/**
+ * Berserker: everything on the caster. The models take the red Light; subtype 0 hard-codes Sleep's violet
+ * accents (MoveHandlers.cpp:2256-2336), so the red rings sit in a violet glow.
+ */
+const ALICE_BERSERKER: AliceCurse = { ...ALICE_SLEEP, circle: BERSERKER, models: BERSERKER, on: 'self', grace: { light: [0.9, 0.12, 0.6], ember: [1, 0.15, 0.25] } };
+
+/** Berserker.wav again as the rings land (ZzzCharacter.cpp:4716-4723). */
+const berserkerWav: Step = (_at, c) => {
+  if (!entityGone(c.caster)) playCombat('Sound/Berserker', entityPos(c.caster, 0, new Vector3()));
+};
+
+/** The body an ALICE_BUFFSKILL cast lands on, or null when it draws nothing. */
+function aliceBody(k: AliceCurse, c: SkillContext): Entity | null {
+  if (entityGone(c.caster)) return null;
+  const target = c.target && c.target !== c.caster && !entityGone(c.target) ? c.target : null;
+  const on = k.on ?? 'target';
+  return on === 'self' ? c.caster : on === 'targetOrSelf' ? (target ?? c.caster) : target;
+}
+
+/** The accent flares at full Alpha sum to a white ball over the body on the graded buffer. */
+const ALICE_FLARE_DIM = 0.6;
+
+/**
+ * The rings on the graded tiers: BodyLight clamps near white on any lit field, so every tint drew the same
+ * white rings; this keeps them bright but lets the tint through.
+ */
+function aliceRingTint(body: RGB, tint: RGB): RGB {
+  return [Math.min(1, tint[0] * 1.1 + body[0] * 0.15), Math.min(1, tint[1] * 1.1 + body[1] * 0.15), Math.min(1, tint[2] * 1.1 + body[2] * 0.15)];
+}
 
 /**
  * Sleep / Blind landing (ZzzCharacter.cpp:5158-5198). At the caster: BITMAP_MAGIC+1 sub11 (sub12 minus
@@ -2831,12 +2865,13 @@ const ALICE_BLIND: AliceCurse = { circle: [1, 1, 1], models: [1, 1, 1], flare: [
  * by tick 28 / 30 (ZzzEffect.cpp:875-915, MoveHandlers.cpp:2213-2338). Each model draws, every tick,
  * two flare01 at Scale 5 and shiny05 at 2.0 / 1.0 in its colour x Alpha, and starts three
  * JOINT_HEALING sub15/16 homing on it from 200 cm, each stamping Shiny02 on the centre. The original
- * skips all of it when the caster has lost its target (:4811, :4836).
+ * skips all of it when the caster has lost its target (:4811, :4836). Thorns and Berserker draw the same
+ * cast on the body `k.on` names; `graded` tints their rings and dims the flares (`aliceRingTint`).
  */
-const aliceCurse = (k: AliceCurse): Step => (_at, c) => {
-  const target = c.target;
-  // The original never sends these without a selection (castTargets.ts), so a cast on oneself draws nothing.
-  if (!target || target === c.caster || entityGone(target) || entityGone(c.caster)) return;
+const aliceCurse = (k: AliceCurse, graded = false): Step => (_at, c) => {
+  // The original never sends the curses without a selection (castTargets.ts), so a curse on oneself draws nothing.
+  const target = aliceBody(k, c);
+  if (!target) return;
   const feet = entityPos(c.caster, 0, new Vector3());
   const yawDeg = (entityYaw(c.caster) * 180) / Math.PI;
   ring({ texture: TEX.magicGround2, colour: k.circle, seconds: ticks(20), scale: 3, growFrom: 0, grow: 1, spinFrom: -yawDeg, blend: k.dark ? 'subtract' : 'additive', alphaAt: p => fadeOut(p, 0.25) })(feet, c);
@@ -2845,7 +2880,8 @@ const aliceCurse = (k: AliceCurse): Step => (_at, c) => {
   const at = centre(new Vector3());
   const gone = (): boolean => entityGone(target);
   const blend = k.dark ? 'subtract' : 'add';
-  const tint = k.dark ? k.models : bodyLight(at, k.models);
+  const tint = k.dark ? k.models : graded ? aliceRingTint(bodyLight(at, k.models), k.models) : bodyLight(at, k.models);
+  const dim = graded ? ALICE_FLARE_DIM : 1;
   const bodies = [
     { model: MODEL.elShieldRing, life: 28, scale: 0.1, spin: 1, peak: 0.7 },
     { model: MODEL.elShieldRing2, life: 30, scale: 0.15, spin: -1, peak: 0.75 },
@@ -2858,7 +2894,7 @@ const aliceCurse = (k: AliceCurse): Step => (_at, c) => {
     const glow = (texture: string, colour: RGB, scale: number, extra: Partial<SpriteOptions>): void => {
       effects.spawn('sprite', c.scene, at, { texture, colour: scaleRGB(colour, b.peak), size: (64 * scale) / 100, seconds, follow: centre, until: gone, fadeIn: 0.5, fadeTail: 0.5, blend, ...extra });
     };
-    glow(TEX.flare, k.flare, 5, { count: 2 });
+    glow(TEX.flare, scaleRGB(k.flare, dim), 5, { count: 2 });
     glow(TEX.shiny5, k.shiny, 2, { spin: 3.77 });
     glow(TEX.shiny5, k.shiny, 1, { spin: -3.77 });
   }
@@ -2988,13 +3024,13 @@ function curseDustFor(colour: RGB, dark: boolean): ParticleRecipe {
 }
 
 /**
- * Sleep / Blind on the graded tiers: the Classic landing plus a glow on the ground under the vortex, a
- * ring pulse where it lands, motes settling on the body, and the violet light it throws (Blind is
- * subtractive art and stays unlit).
+ * Sleep / Blind (and Thorns / Berserker) on the graded tiers: the Classic landing plus a glow on the
+ * ground under the vortex, a ring pulse where it lands, motes settling on the body (embers rising round
+ * it where `k.grace` says), and the light it throws (Blind is subtractive art and stays unlit).
  */
 const aliceGrace = (k: AliceCurse): Step => (_at, c) => {
-  const target = c.target;
-  if (!target || target === c.caster || entityGone(target) || entityGone(c.caster)) return;
+  const target = aliceBody(k, c);
+  if (!target) return;
   const feet = entityPos(c.caster, 0, new Vector3());
   const ground = holding(target, 0.05);
   const centre = holding(target, 1);
@@ -3003,22 +3039,23 @@ const aliceGrace = (k: AliceCurse): Step => (_at, c) => {
   const at = ground(new Vector3());
   effects.spawn('sprite', c.scene, at, { texture: TEX.flare, colour: scaleRGB(k.flare, 0.22), size: 2.4, seconds: ticks(30), fadeIn: 0.3, fadeTail: 0.5, flat: true, follow: ground, until: gone, blend });
   effects.spawn('sprite', c.scene, at, { texture: TEX.ring, colour: scaleRGB(k.circle, 0.8), size: 0.8, grow: 3.2, growFrom: 1, seconds: ticks(12), fadeTail: 0.7, flat: true, follow: ground, blend });
-  effects.spawn('particles', c.scene, at, { recipe: curseDustFor(k.dark ? [0.6, 0.6, 0.6] : k.flare, k.dark), rate: 26, seconds: ticks(26), follow: centre, until: gone, height: 0.4 });
+  if (k.grace) effects.spawn('particles', c.scene, at, { recipe: risingEmbersFor(k.grace.ember, 0.9), rate: 25, seconds: ticks(20), follow: ground, until: gone, height: 0.1 });
+  else effects.spawn('particles', c.scene, at, { recipe: curseDustFor(k.dark ? [0.6, 0.6, 0.6] : k.flare, k.dark), rate: 26, seconds: ticks(26), follow: centre, until: gone, height: 0.4 });
   if (k.dark) return;
-  // The caster's Magic_Ground2 (3 tiles, 20 ticks) and the vortex's flare pair (3.2 tiles, about 30 ticks).
-  curseLight(c.scene, k.flare, 1.5, ticks(20), feet, undefined, { attack: ticks(4), release: ticks(8), heightOffset: 0.4, floorGain: 0.35 });
-  curseLight(c.scene, k.flare, 1.6, ticks(30), centre(new Vector3()), centre, { attack: ticks(6), release: ticks(12), floorGain: 0.4 });
+  // The caster's Magic_Ground2 (3 tiles, 20 ticks), unless the rings stand on the caster too, and the vortex's flare pair (3.2 tiles, about 30 ticks).
+  if (target !== c.caster) curseLight(c.scene, k.flare, 1.5, ticks(20), feet, undefined, { attack: ticks(4), release: ticks(8), heightOffset: 0.4, floorGain: 0.35 });
+  curseLight(c.scene, k.grace?.light ?? k.flare, 1.6, ticks(30), centre(new Vector3()), centre, { attack: ticks(6), release: ticks(12), floorGain: 0.4 });
 };
 
-const zinEmbers = new Map<string, ParticleRecipe>();
+const risingEmbers = new Map<string, ParticleRecipe>();
 
-/** Sparks lifting off the ZIN circle in the rain's colour. */
-function zinEmbersFor(colour: RGB): ParticleRecipe {
-  const key = colour.join(',');
-  let r = zinEmbers.get(key);
+/** Sparks lifting off the ground within `spread` tiles: off the ZIN circle in the rain's colour, round a buffed body. */
+function risingEmbersFor(colour: RGB, spread: number): ParticleRecipe {
+  const key = `${colour.join(',')}|${spread}`;
+  let r = risingEmbers.get(key);
   if (r) return r;
-  r = { texture: TEX.flare, colour: scaleRGB(colour, 1 / Math.max(colour[0], colour[1], colour[2])), size: 0.24, sizeJitter: 0.4, life: 1.0, lifeJitter: 0.4, box: [1.3, 0.05, 1.3], dir1: [-0.15, 1, -0.15], dir2: [0.15, 1, 0.15], power: 1.1, powerJitter: 0.5, gravity: -0.4, endScale: 0.4, fade: [[0, 0], [0.15, 1], [0.6, 0.8], [1, 0]], capacity: 96 };
-  zinEmbers.set(key, r);
+  r = { texture: TEX.flare, colour: scaleRGB(colour, 1 / Math.max(colour[0], colour[1], colour[2])), size: 0.24, sizeJitter: 0.4, life: 1.0, lifeJitter: 0.4, box: [spread, 0.05, spread], dir1: [-0.15, 1, -0.15], dir2: [0.15, 1, 0.15], power: 1.1, powerJitter: 0.5, gravity: -0.4, endScale: 0.4, fade: [[0, 0], [0.15, 1], [0.6, 0.8], [1, 0]], capacity: 96 };
+  risingEmbers.set(key, r);
   return r;
 }
 
@@ -3031,7 +3068,7 @@ const zinGrace = (k: ZinCurse): Step => (_at, c) => {
   if (entityGone(c.caster)) return;
   const feet = entityPos(c.caster, 0.05, new Vector3());
   effects.spawn('sprite', c.scene, feet, { texture: TEX.flare, colour: scaleRGB(k.core, 0.12), size: 2.4, seconds: ticks(40), fadeIn: 0.3, fadeTail: 0.5, flat: true });
-  effects.spawn('particles', c.scene, feet, { recipe: zinEmbersFor(k.rain), rate: 32, seconds: ticks(32), height: 0.1 });
+  effects.spawn('particles', c.scene, feet, { recipe: risingEmbersFor(k.rain, 1.3), rate: 32, seconds: ticks(32), height: 0.1 });
   curseLight(c.scene, k.core, 2.5, ticks(44), feet, undefined, { attack: ticks(12), release: ticks(20), heightOffset: 0.5, floorGain: 0.35 });
 };
 
@@ -3175,7 +3212,7 @@ function fenrirThunder(scene: Scene, at: Vector3, colour: RGB, wide: boolean): v
  * hands (ZzzCharacter.cpp:10743-10768), Lightning Orb's forearm (:10574-10590).
  */
 const HAND_CRACKLE_MAX = 60;
-const handCrackle = (bones: readonly number[], colour: RGB, flare: number, clips: readonly PlayerAction[]): Step => (_at, c) => {
+const handCrackle = (bones: readonly number[], colour: RGB, flare: number, clips: readonly PlayerAction[], light = 0): Step => (_at, c) => {
   const caster = c.caster;
   const playing = (): boolean => !entityGone(caster) && clips.includes(caster.playerAnimation?.action as PlayerAction);
   if (!playing()) return;
@@ -3183,6 +3220,8 @@ const handCrackle = (bones: readonly number[], colour: RGB, flare: number, clips
   for (const bone of bones) {
     const hand: PointSource = out => bonePos(caster, bone, out, CAST_HEIGHT);
     if (flare > 0) spawnCard(c.scene, hand(new Vector3()), { texture: TEX.flare, colour, size: cm(PX_FLARE * flare), ticks: HAND_CRACKLE_MAX, follow: hand, until });
+    // Enhanced rows only: the crackle's light on the hand for as long as it sparks.
+    if (light > 0) sum1Light(c.scene, colour, light, ticks(HAND_CRACKLE_MAX), hand, playing, { flicker: CRACKLE_FLICKER, release: ticks(4) });
   }
   const p = new Vector3();
   tickLoop(HAND_CRACKLE_MAX, () => {
@@ -3259,7 +3298,7 @@ const DRAIN_SIPHON_MAX = 24;
  * caster's bone 18, sideways (+-90) and +-50 on every axis, speeding up 2 cm a tick and homing
  * the target's live xy at a height fixed at birth, turning as many degrees a tick as it moves cm.
  */
-function drainGhost(scene: Scene, caster: Entity, target: Entity): void {
+function drainGhost(scene: Scene, caster: Entity, target: Entity): Carrier {
   const yaw = deg(entityYaw(caster));
   const start = bonePos(caster, 18, new Vector3(), CAST_HEIGHT);
   // vDir = the matrix's +Y column: behind the caster.
@@ -3296,6 +3335,8 @@ function drainGhost(scene: Scene, caster: Entity, target: Entity): void {
     humming(p, a, aim, v);
     v += 2;
   });
+  const end = fxNow() + ticks(lt);
+  return { at: head.at, done: () => done || fxNow() >= end };
 }
 
 /**
@@ -3304,7 +3345,7 @@ function drainGhost(scene: Scene, caster: Entity, target: Entity): void {
  * caster 120 cm up at up to 30 cm a tick; flareRed at its head. Within 35 cm it is gone, into
  * pEnergy and the arrival light.
  */
-function drainSiphon(scene: Scene, caster: Entity, target: Entity, bone: number, skill: number, arrive: (at: Vector3) => void): void {
+function drainSiphon(scene: Scene, caster: Entity, target: Entity, bone: number, skill: number, arrive: (at: Vector3) => void, enh = false): Carrier {
   const start = bonePos(target, bone, new Vector3());
   const head = new TickPoint(start);
   const a = [0, 0, deg(entityYaw(target))];
@@ -3315,7 +3356,9 @@ function drainSiphon(scene: Scene, caster: Entity, target: Entity, bone: number,
   const until = (): boolean => done;
   effects.spawn('joint', scene, start, { head: head.at, seconds: ticks(120), maxTails: 8, width: cm(10), colour: DRAIN_SIPHON_LIGHT, texture: TEX.jointLaser, fadeTail: 0.01, until });
   spawnCard(scene, start, { texture: TEX.redFlare, colour: RGBS.white, size: cm(PX_RED_FLARE * 0.3), ticks: 120, follow: head.at, until });
-  const light = lighting.skillTrail(scene, skill, lightFollow(head.at));
+  // Enhanced: a soft red halo round the head instead of a light on every siphon (the cast carries one for the bundle).
+  if (enh) spawnCard(scene, start, { texture: TEX.flare, colour: DRAIN_HEAD_HALO, size: cm(PX_FLARE * 0.9), ticks: 120, follow: head.at, until });
+  const light = enh ? null : lighting.skillTrail(scene, skill, lightFollow(head.at));
   tickLoop(120, i => {
     if (entityGone(caster)) done = true;
     if (done) {
@@ -3341,6 +3384,7 @@ function drainSiphon(scene: Scene, caster: Entity, target: Entity, bone: number,
     if (dist <= cm(70) && Math.abs(was - a[2]) > 20 && v >= 20) v -= 10;
   });
   delay(ticks(120), () => light?.stop());
+  return { at: head.at, done: until };
 }
 
 /**
@@ -3349,7 +3393,7 @@ function drainSiphon(scene: Scene, caster: Entity, target: Entity, bone: number,
  * tick 10, ghost streaks for the first 5 ticks, and at LifeTime 64 a siphon off every other
  * target bone.
  */
-const drainLife = atAttackTime((_at, c, skill) => {
+const drainLifeStep = (enh: boolean): Step => atAttackTime((_at, c, skill) => {
   const { caster, target, scene } = c;
   if (!target || entityGone(caster) || entityGone(target)) return;
   playLandingSound(skill, entityPos(caster, 0, new Vector3()));
@@ -3361,25 +3405,39 @@ const drainLife = atAttackTime((_at, c, skill) => {
     lastArrival = now;
     playCombat('Sound/pEnergy', p);
     lighting.skillLand(scene, skill, p);
+    if (enh) drainArrival(scene, caster);
   };
+  if (enh) drainAuras(scene, caster, target);
+  let ghostLit = !enh;
   tickLoop(70, i => {
     if (entityGone(caster) || entityGone(target)) return;
     const lt = 70 - i;
     const n = drainGlowCount();
     for (let k = 0; k < n; k++) drainGlow(scene, caster);
     if (lt <= 60) for (let k = 0; k < n; k++) drainGlow(scene, target);
-    if (lt >= 66) for (let k = drainGhostCount(); k > 0; k--) drainGhost(scene, caster, target);
+    if (lt >= 66) {
+      for (let k = drainGhostCount(); k > 0; k--) {
+        const ghost = drainGhost(scene, caster, target);
+        if (!ghostLit) {
+          ghostLit = true;
+          carrierLight(scene, DRAIN_GHOST_LIGHT, 0.8, ticks(40), ghost);
+        }
+      }
+    }
+    if (enh && lt < 64 && lt >= 34) drainMote(scene, target);
     if (lt === 64) {
       // Capped at DRAIN_SIPHON_MAX ribbons: a many-boned body would otherwise put 40+ lines up.
       const bones = boneCount(target);
       for (let b = 0, n = 0; b < bones && n < DRAIN_SIPHON_MAX; b++) {
         if (Math.random() >= 0.5) continue;
-        drainSiphon(scene, caster, target, b, skill, arrive);
+        const siphon = drainSiphon(scene, caster, target, b, skill, arrive, enh);
+        if (enh && n === 0) carrierLight(scene, DRAIN_SIPHON_LIGHT, 0.8, ticks(120), siphon);
         n++;
       }
     }
   });
 });
+const drainLife = drainLifeStep(false);
 
 // Chain Lightning (MoveHandlers.cpp:1978-2064, WSclient.cpp:5577-5629).
 
@@ -3535,6 +3593,7 @@ export function playChainLightningHop(scene: Scene, skill: number, from: Entity,
   delay(ticks(CHAIN_TICKS + 1), () => (done = true));
   // `(int)LifeTime == 15`: BITMAP_LIGHT sub5 on every target bone, x0.9 light and x0.95 size a tick (ZzzEffectParticle.cpp:8041);
   // dropped once under 5% light instead of drawn unseen for the rest of its 50 ticks.
+  const enh = tierIndex() >= ENHANCED_TIER;
   delay(ticks(5), () => {
     if (dead()) return;
     const bones = boneCount(to);
@@ -3542,6 +3601,7 @@ export function playChainLightningHop(scene: Scene, skill: number, from: Entity,
     for (let b = 0; b < bones; b++) {
       spawnCard(scene, bonePos(to, b, p), { texture: TEX.flare, colour: [0.2, 0.2, 0.8], size: cm(PX_FLARE * (3 + (randInt(20) - 10) * 0.1)), ticks: 50, decay: 0.9, growMul: 0.95, minLight: 0.05 });
     }
+    if (enh) chainStrike(scene, to, CHAIN_TICKS - 5);
   });
   // The width-50 walks light the ground under them every step: lights spaced along the hop.
   const a = entityPos(from, IMPACT_HEIGHT, new Vector3());
@@ -3560,6 +3620,7 @@ export function playChainLightningHop(scene: Scene, skill: number, from: Entity,
 
 /** Chain Lightning's hands on the ground clip only (ZzzCharacter.cpp:10743-10768), Light (0.4, 0.4, 0.8). */
 const chainHands = handCrackle([37, 28], [0.4, 0.4, 0.8], 1.5, [PlayerAction.PLAYER_SKILL_CHAIN_LIGHTNING]);
+const chainHandsLit = handCrackle([37, 28], [0.4, 0.4, 0.8], 1.5, [PlayerAction.PLAYER_SKILL_CHAIN_LIGHTNING], 0.7);
 
 /** The chain wav again at AttackTime 15 (ZzzCharacter.cpp:5207-5212); the reply played it once already. */
 const chainSoundAgain = atAttackTime((_at, c, skill) => {
@@ -3577,6 +3638,7 @@ const ORB_CLIPS = [
 
 /** Lightning Orb's forearm, bone 27, Light (0.2, 0.2, 1.0), on all four clips (ZzzCharacter.cpp:10574-10590). */
 const orbArm = handCrackle([27], [0.2, 0.2, 1], 0, ORB_CLIPS);
+const orbArmLit = handCrackle([27], [0.2, 0.2, 1], 0, ORB_CLIPS, 0.7);
 
 /** BITMAP_MAGIC sub0 (ZzzEffectParticle.cpp:756-763, :4987-4995): Magic_Ground1, LT 10, Scale -0.05 and Light -0.01 a tick. */
 function magicParticle(scene: Scene, at: Vector3, colour: RGB, scale: number): void {
@@ -3624,8 +3686,9 @@ function throwSmoke(scene: Scene, at: Vector3, colour: RGB): void {
  * pin_lights and a Thunder01 star while LifeTime >= 5, bouncing sparks for 4 ticks, shock waves
  * for 5, two wide MODEL_FENRIR_THUNDER every tick and blue smoke in the last 5.
  */
-function orbBurst(scene: Scene, p: Vector3): void {
+function orbBurst(scene: Scene, p: Vector3, enh = false): void {
   const at = p.clone();
+  if (enh) orbBurstGrace(scene, at);
   const roll = rad(fxNow() * 216);
   const decay = 1 / 1.08;
   for (const [s, dir] of [[3, 1], [2, -1]] as const) spawnCard(scene, at, { texture: TEX.shiny5, colour: [0.1, 0.5, 1.5], size: cm(PX_SHINY5 * s), ticks: 14, roll: roll * dir, spin: SPRITE_TURN * dir });
@@ -3650,12 +3713,16 @@ function orbBurst(scene: Scene, p: Vector3): void {
   });
 }
 
+/** The orb's tints; enhanced brings the rings and the trail under 1, where the graded buffer bleached them white. */
+const ORB_CLASSIC: Record<'shiny' | 'magic' | 'pin' | 'trail', RGB> = { shiny: [0.1, 0.7, 1.5], magic: [0.1, 0.1, 1.5], pin: [0.5, 0.5, 1.5], trail: [0.4, 0.4, 1.5] };
+const ORB_ENHANCED: typeof ORB_CLASSIC = { shiny: [0.1, 0.7, 1.5], magic: [0.1, 0.2, 1], pin: [0.4, 0.45, 1.2], trail: [0.18, 0.24, 1] };
+
 /**
  * MODEL_LIGHTNING_ORB sub0 at AttackTime 15 (ZzzEffect.cpp:837-850): 100 cm up, 60 cm a tick
  * straight along the caster's facing for LT 20, drawing its sprites, a BITMAP_MAGIC and three
  * sparks a tick. Within 100 cm (xy) of the live target it bursts where it is (CheckTargetRange).
  */
-const lightningOrb = atAttackTime((_at, c, skill) => {
+const lightningOrbStep = (enh: boolean): Step => atAttackTime((_at, c, skill) => {
   const { caster, target, scene } = c;
   if (entityGone(caster)) return;
   playLandingSound(skill, entityPos(caster, 0, new Vector3()));
@@ -3664,22 +3731,26 @@ const lightningOrb = atAttackTime((_at, c, skill) => {
   const step = muForward([0, 0, yaw], cm(60), new Vector3());
   let alive = true;
   const until = (): boolean => !alive;
-  carrierSprites(scene, orb.at, until, 20, 1, [0.1, 0.7, 1.5], [0.1, 0.1, 1.5], [0.5, 0.5, 1.5]);
+  const look = enh ? ORB_ENHANCED : ORB_CLASSIC;
+  carrierSprites(scene, orb.at, until, 20, 1, look.shiny, look.magic, look.pin);
+  if (enh) orbGrace(scene, orb.at, until);
   tickLoop(20, i => {
     const p = orb.tick().addInPlace(step);
-    magicParticle(scene, p, [0.4, 0.4, 1.5], 1);
+    magicParticle(scene, p, look.trail, 1);
     for (let k = 0; k < 3; k++) orbSpark(scene, p, yaw);
+    if (enh && i % 2 === 0) fenrirThunder(scene, p, look.magic, false);
     const t = target && !entityGone(target) && !target.dying ? target.transform : undefined;
     if (t) {
       if (Math.hypot(p.x - t.pos.x, p.z - t.pos.z) <= 1) {
         alive = false;
-        orbBurst(scene, p);
+        orbBurst(scene, p, enh);
         return false;
       }
     }
     if (i === 19) alive = false;
   });
 });
+const lightningOrb = lightningOrbStep(false);
 
 // Lightning Shock (MoveHandlers.cpp:2385-2543).
 
@@ -3695,9 +3766,10 @@ function mega(scene: Scene, at: Vector3, colour: RGB, scale: number): void {
  * decals growing 0.1 -> 5.1 tiles in 10 ticks at the caster's yaw, three plancracks 20 cm up, and
  * for 12 ticks the crackle round the impact and out to 4 m, red smoke thrown and rising.
  */
-function shockGround(scene: Scene, p: Vector3, yaw: number): void {
+function shockGround(scene: Scene, p: Vector3, yaw: number, enh = false): void {
   const at = p.clone();
   const ground = groundY(at.x, at.z);
+  if (enh) shockGrace(scene, at, ground, yaw);
   for (const colour of [[1, 0.8, 0.5], [1, 0, 0]] as const) {
     effects.spawn('ring', scene, at, { texture: TEX.damageMono, colour, seconds: ticks(10), scale: 5.1, growFrom: 0.1 / 5.1, grow: 1, spinFrom: -yaw, fadeTail: 0.3 });
   }
@@ -3731,7 +3803,7 @@ function shockGround(scene: Scene, p: Vector3, yaw: number): void {
  * LifeTime 15), then 20 cm on and 75 cm + an accelerating fall down a tick, crackling red, until
  * it is under the ground and opens it.
  */
-const lightningShock: Step = (_at, c) => {
+const lightningShockStep = (enh: boolean): Step => (_at, c) => {
   const { caster, scene } = c;
   if (entityGone(caster)) return;
   const yaw = deg(entityYaw(caster));
@@ -3743,6 +3815,7 @@ const lightningShock: Step = (_at, c) => {
   const dir = new Vector3();
   const q = new Vector3();
   carrierSprites(scene, shock.at, until, 20, 0.8, [1, 0.4, 0.4], [1, 0.2, 0.2], [1, 0.4, 0.4]);
+  if (enh) carrierLight(scene, SHOCK_LIGHT, 1, ticks(20), { at: shock.at, done: until }, { attack: ticks(2) });
   tickLoop(20, i => {
     const p = shock.tick();
     if ((caster.modelObject?.actionFrame() ?? 0) > 6 || 20 - i < 15) {
@@ -3765,12 +3838,166 @@ const lightningShock: Step = (_at, c) => {
     }
     if (p.y < groundY(p.x, p.z)) {
       alive = false;
-      shockGround(scene, p, yaw);
+      shockGround(scene, p, yaw, enh);
       return false;
     }
     if (i === 19) alive = false;
   });
 };
+const lightningShock = lightningShockStep(false);
+
+// Enhanced and Ultra (the rows' `enhanced`): Drain Life, Chain Lightning, Lightning Orb and Lightning Shock
+// with the light their art throws (`effectLight`), contact with the ground and a little secondary detail.
+// Classic never gets here.
+
+/** A moving piece of an effect: where it is and whether it is over. */
+interface Carrier {
+  at: PointSource;
+  done: () => boolean;
+}
+
+/** A crackle's light: never steady. */
+const CRACKLE_FLICKER = { min: 0.55, max: 1, steps: 3 };
+
+/** A `curseLight` riding `follow`, released as soon as `alive` says no (or when its seconds run out). */
+function sum1Light(scene: Scene, colour: RGB, extent: number, seconds: number, follow: PointSource, alive?: () => boolean, extra?: Partial<LightRecipe>): LightSource {
+  let light: LightSource | null = null;
+  const ride: PointSource = out => {
+    if (light && alive && !alive()) light.stop();
+    return follow(out);
+  };
+  light = curseLight(scene, colour, extent, seconds, follow(new Vector3()), ride, extra);
+  return light;
+}
+
+/** A light a moving piece carries. */
+const carrierLight = (scene: Scene, colour: RGB, extent: number, seconds: number, piece: Carrier, extra?: Partial<LightRecipe>): LightSource =>
+  sum1Light(scene, colour, extent, seconds, piece.at, () => !piece.done(), extra);
+
+/** `src` dropped onto the terrain, a hair above it. */
+const onGround = (src: PointSource): PointSource => out => {
+  src(out);
+  out.y = groundY(out.x, out.z) + 0.04;
+  return out;
+};
+
+/** A fixed point as a source. */
+const heldAt = (p: Vector3): PointSource => out => out.copyFrom(p);
+
+/** Up over `rise` ticks, down over the last `fall` of `n`. */
+const swell = (n: number, rise: number, fall: number) => (age: number): number => Math.min(1, age / rise, (n - age) / fall);
+
+/** A soft flare laid flat on the ground: the pool of colour an effect leaves under itself. */
+function groundGlow(scene: Scene, at: PointSource, colour: RGB, size: number, n: number, until?: () => boolean): void {
+  spawnCard(scene, at(new Vector3()), { texture: TEX.flare, colour, size, ticks: n, flat: true, brightness: swell(n, 4, n * 0.4), follow: at, until });
+}
+
+/** `n` Spark03 chips kicked up off `at`, falling and bouncing (SPARK+1 sub20's motion, as the orb's burst). */
+function kickSparks(scene: Scene, at: Vector3, colour: RGB, n: number, kick = 1): void {
+  const v = new Vector3();
+  for (let k = 0; k < n; k++) {
+    muTurn((randInt(40) - 20) * 0.25 * kick, (randInt(40) - 20) * 0.25 * kick, (randInt(10) + 15) * 0.5 * kick, randInt(360), v);
+    spawnCard(scene, at, { texture: TEX.spark3, colour, size: cm(PX_SPARK3 * (0.8 + randInt(10) * 0.04)), ticks: 30 + randInt(20), decay: 1 / 1.04, minLight: 0.05, velocity: [v.x, v.y, v.z], gravity: cm(0.75), bounce: [cm(3), 0.3, 2] });
+  }
+}
+
+// Drain Life, enhanced.
+
+/** The siphon head's halo, the glows' red as a light, and the pool it leaves under a body. */
+const DRAIN_HEAD_HALO: RGB = [0.55, 0.06, 0.1];
+const DRAIN_AURA: RGB = [1, 0.2, 0.25];
+const DRAIN_POOL: RGB = [0.22, 0.02, 0.04];
+
+/**
+ * The red the glows pool on the ground under both bodies, and the light they throw: round the caster
+ * for the effect's 70 ticks, round the target from tick 10 (MoveHandlers.cpp:2085-2103).
+ */
+function drainAuras(scene: Scene, caster: Entity, target: Entity): void {
+  for (const [body, from, n] of [[caster, 0, 70], [target, 10, 60]] as const) {
+    delay(ticks(from), () => {
+      if (entityGone(body)) return;
+      const gone = (): boolean => entityGone(body);
+      groundGlow(scene, followEntity(body, 0.04), DRAIN_POOL, 1.8, n, gone);
+      sum1Light(scene, DRAIN_AURA, 0.8, ticks(n), followEntity(body, 1), () => !gone(), { attack: ticks(6), release: ticks(12) });
+    });
+  }
+}
+
+/** Life lifting off the target while the siphons rise: a red mote off a random bone, drifting up. */
+function drainMote(scene: Scene, target: Entity): void {
+  const bones = boneCount(target);
+  if (!bones) return;
+  const p = bonePos(target, randInt(bones), new Vector3());
+  const n = 20 + randInt(10);
+  spawnCard(scene, p, { texture: TEX.flare, colour: [1, 0.15, 0.2], size: cm(PX_FLARE * (0.3 + randInt(20) * 0.01)), ticks: n, velocity: [jitterCm(2), cm(3 + randInt(3)), jitterCm(2)], drag: 0.95, brightness: swell(n, 3, n * 0.6) });
+}
+
+/** A siphon reaching home: a short red bloom on the caster's chest (the original's arrival is a Scale 0 sprite). */
+function drainArrival(scene: Scene, caster: Entity): void {
+  const chest = followEntity(caster, cm(120));
+  spawnCard(scene, chest(new Vector3()), { texture: TEX.flare, colour: [1, 0.3, 0.4], size: cm(PX_FLARE * 1.2), grow: cm(PX_FLARE * 0.25), ticks: 8, lifeFade: true, follow: chest });
+}
+
+// Chain Lightning, enhanced.
+
+/**
+ * Where a hop lands, with the bone glows: a blue-white strike on the chest, sparks off it, a shock ring and
+ * a pool of blue on the ground, and the hop's light on the body for its remaining `n` ticks.
+ */
+function chainStrike(scene: Scene, to: Entity, n: number): void {
+  const chest = followEntity(to, 1);
+  const at = chest(new Vector3());
+  const gone = (): boolean => entityGone(to);
+  spawnCard(scene, at, { texture: TEX.flare, colour: [0.6, 0.65, 1], size: cm(PX_FLARE * 3), grow: cm(PX_FLARE * 0.3), ticks: 6, lifeFade: true, follow: chest });
+  kickSparks(scene, at, [0.7, 0.75, 1], 6);
+  const feet = followEntity(to, 0.04);
+  spawnCard(scene, feet(new Vector3()), { texture: TEX.shockwave, colour: [0.25, 0.3, 0.9], size: cm(PX_SHOCKWAVE * 0.3), grow: cm(PX_SHOCKWAVE * 0.25), ticks: 8, lifeFade: true, flat: true, follow: feet });
+  groundGlow(scene, feet, [0.12, 0.14, 0.5], 1.8, n, gone);
+  sum1Light(scene, CHAIN_LIGHT, 1.3, ticks(n), chest, () => !gone(), { flicker: CRACKLE_FLICKER, release: ticks(6) });
+}
+
+// Lightning Orb, enhanced.
+
+const ORB_LIGHT: RGB = [0.2, 0.55, 1];
+
+/** The orb in flight: its light and the blue it throws on the ground under it. */
+function orbGrace(scene: Scene, orb: PointSource, until: () => boolean): void {
+  groundGlow(scene, onGround(orb), [0.05, 0.12, 0.4], 2, 20, until);
+  sum1Light(scene, ORB_LIGHT, 1.5, ticks(20), orb, () => !until(), { release: ticks(3) });
+}
+
+/** The burst: a blue shock ring and pool on the ground under it, and its flickering light over its 18 ticks. */
+function orbBurstGrace(scene: Scene, at: Vector3): void {
+  const ground = onGround(heldAt(at))(new Vector3());
+  spawnCard(scene, ground, { texture: TEX.shockwave, colour: [0.3, 0.35, 1], size: cm(PX_SHOCKWAVE * 0.4), grow: cm(PX_SHOCKWAVE * 0.35), ticks: 10, lifeFade: true, flat: true });
+  groundGlow(scene, heldAt(ground), [0.1, 0.2, 0.6], 3, 18);
+  sum1Light(scene, ORB_LIGHT, 2, ticks(18), heldAt(at), undefined, { flicker: CRACKLE_FLICKER, release: ticks(8) });
+}
+
+// Lightning Shock, enhanced.
+
+const SHOCK_LIGHT: RGB = [1, 0.3, 0.15];
+
+/**
+ * The ground opening: its light and a hot red pool, the five BITMAP_MAGIC sub12 marks 150 cm out and 72
+ * degrees apart and the MODEL_STONE sub13 thrown every tick (the original makes both at Scale 0, unseen;
+ * ZzzEffect.cpp:936-948, MoveHandlers.cpp:2508), and embers kicked off the impact.
+ */
+function shockGrace(scene: Scene, at: Vector3, ground: number, yaw: number): void {
+  const floor = new Vector3(at.x, ground + 0.04, at.z);
+  groundGlow(scene, heldAt(floor), [0.35, 0.07, 0.02], 3.5, 24);
+  sum1Light(scene, SHOCK_LIGHT, 2.5, ticks(20), heldAt(new Vector3(floor.x, floor.y + 0.5, floor.z)), undefined, { flicker: CRACKLE_FLICKER, release: ticks(10) });
+  const q = new Vector3();
+  for (let i = 0; i < 5; i++) {
+    muTurn(0, 150, 0, yaw + i * 72, q).addInPlace(floor);
+    q.y = groundY(q.x, q.z) + 0.05;
+    spawnCard(scene, q, { texture: TEX.magicGround, colour: [0.7, 0.1, 0.02], size: cm(PX_MAGIC * 0.8), ticks: 12, flat: true, brightness: swell(12, 2, 6), roll: Math.random() * Math.PI * 2, spin: SPRITE_TURN });
+  }
+  kickSparks(scene, new Vector3(at.x, ground + cm(20), at.z), [1, 0.5, 0.2], 12, 1.4);
+  tickLoop(12, () => {
+    effects.spawn('debris', scene, floor, { model: randInt(2) === 0 ? MODEL.stone : MODEL.stone2, count: 1, colour: [0.55, 0.45, 0.4] });
+  });
+}
 
 // ---- teleport steps --------------------------------------------------------------
 
@@ -6707,14 +6934,19 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   213: { impact: seq(flash(TEX.flareRed, RGBS.blood, 1.4, 0.5), particles({ recipe: BLOOD_CHIPS, count: 12, height: 0.6 })) },
   // 214 Drain Life: MODEL_ALICE_DRAIN_LIFE at AttackTime 15 - red glows, ghost streaks from behind the caster, a
   // siphon off every other target bone homing back (drainLife).
-  214: { impact: drainLife },
+  214: { impact: drainLife, enhanced: { impact: drainLifeStep(true) } },
   // 215 Chain Lightning: the hand crackle while the ground clip plays and the wav again at AttackTime 15; the
   // arcs come with the BF 0A hops (playChainLightningHop).
-  215: { cast: seq(chainHands, chainSoundAgain) },
+  215: { cast: seq(chainHands, chainSoundAgain), enhanced: { cast: seq(chainHandsLit, chainSoundAgain) } },
   // 216 Lightning Orb: the forearm crackle, then MODEL_LIGHTNING_ORB at AttackTime 15 (lightningOrb).
-  216: { cast: orbArm, impact: lightningOrb },
-  // 217 Thorns (Damage Reflection): BITMAP_MAGIC+1 sub11 at the caster + MODEL_ALICE_BUFFSKILL_EFFECT/2 at the target.
-  217: { impact: aliceBuff([0.8, 0.3, 0.9]) },
+  216: { cast: orbArm, impact: lightningOrb, enhanced: { cast: orbArmLit, impact: lightningOrbStep(true) } },
+  // 217 Thorns (Damage Reflection): the SLEEP-clip hand in (0.8,0.5,0.2), then 14 ticks after the reply the
+  // circle at the caster and the ALICE_BUFFSKILL rings on the target, or on the caster without one (aliceCurse).
+  217: {
+    cast: summonerHand(CURSE_HAND_THORNS),
+    impact: onCurseLanding(aliceCurse(ALICE_THORNS)),
+    enhanced: { cast: seq(summonerHand(CURSE_HAND_THORNS), curseHandLight(CURSE_HAND_THORNS)), impact: onCurseLanding(seq(aliceCurse(ALICE_THORNS, true), aliceGrace(ALICE_THORNS))) },
+  },
   // 219 Sleep (454 Str): the violet hand FX while the clip plays; 14 ticks after the reply the violet
   // circle at the caster and the ALICE rings, flares and homing streaks on the target (aliceCurse).
   219: {
@@ -6729,14 +6961,15 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
     impact: onCurseLanding(aliceCurse(ALICE_BLIND)),
     enhanced: { impact: onCurseLanding(seq(aliceCurse(ALICE_BLIND), aliceGrace(ALICE_BLIND))) },
   },
-  // 218 Berserker: BITMAP_MAGIC+1 sub11 LT 20 + ALICE_BUFFSKILL_EFFECT (LT 34, z+100, Alpha 0→, Scale 0.1) +
-  // …EFFECT2 (LT 35, Scale 0.15); Light (1.0, 0.1, 0.2).
+  // 218 Berserker (469 / 470 / 472): the hand in (1,0.1,0.2), then 14 ticks after the reply the circle and the
+  // rings on the caster in a violet glow, and the wav again (aliceCurse).
   218: {
-    impact: seq(
-      atCaster(magicGround([1, 0.1, 0.2]), 0),
-      model({ model: MODEL.elShieldRing, seconds: ticks(34), scale: 0.1, grow: 8, colour: [1, 0.1, 0.2], fadeIn: 0.4, height: 0.1 }),
-      model({ model: MODEL.elShieldRing2, seconds: ticks(35), scale: 0.15, grow: 6, colour: [1, 0.1, 0.2], height: -IMPACT_HEIGHT })
-    ),
+    cast: summonerHand(CURSE_HAND_BERSERKER),
+    impact: onCurseLanding(seq(aliceCurse(ALICE_BERSERKER), berserkerWav)),
+    enhanced: {
+      cast: seq(summonerHand(CURSE_HAND_BERSERKER), curseHandLight(CURSE_HAND_BERSERKER)),
+      impact: onCurseLanding(seq(aliceCurse(ALICE_BERSERKER, true), aliceGrace(ALICE_BERSERKER), berserkerWav)),
+    },
   },
   // 221 Weakness (459 Str) / 222 Enervation (Innovation, 460 Str): the hand FX, then 14 ticks later at the
   // caster's feet the ZIN circles and ripples, the three Suhwanzin circles and the glitter rain, and the sound.
@@ -6801,7 +7034,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   },
   // 230 Lightning Shock: MODEL_LIGHTNING_SHOCK falling red from 280 cm over the caster and opening the ground
   // (lightningShock). The five magic_ground cards and the stones get Scale 0 there and are not drawn.
-  230: { area: lightningShock },
+  230: { area: lightningShock, enhanced: { area: lightningShockStep(true) } },
   // 232 Strike of Destruction (337/340/343 alias here, drawn at the target's feet): see `blowOfDestruction`.
   232: { area: blowOfDestruction, enhanced: { area: blowOfDestructionPlus } },
   // 233 Expansion of Wizardry: MODEL_SWELL_OF_MAGICPOWER at the caster, Light (0.3,0.2,0.9) (WSclient.cpp

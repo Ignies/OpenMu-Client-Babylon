@@ -271,9 +271,12 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   220: { ground: A.PLAYER_SKILL_SLEEP }, // Blind
   461: { ground: A.PLAYER_SKILL_SLEEP }, // Blind (OpenMU)
   463: { ground: A.PLAYER_SKILL_SLEEP }, // Blind Str
-  217: SLEEP_CLIPS, // Thorns
-  218: SLEEP_CLIPS, // Berserker
-  469: SLEEP_CLIPS, // Berserker Str
+  // Thorns / Berserker: the 0x19 reply sets plain PLAYER_SKILL_SLEEP for every caster (WSclient.cpp:4929-4949).
+  217: { ground: A.PLAYER_SKILL_SLEEP }, // Thorns
+  218: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker
+  469: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker Str
+  470: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker Proficiency
+  472: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker Mastery
   221: SLEEP_CLIPS, // Weakness
   222: SLEEP_CLIPS, // Enervation
   459: SLEEP_CLIPS, // Weakness Str

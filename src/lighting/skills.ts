@@ -206,6 +206,8 @@ const ELECTRIC_SPIKE_LIGHT: SkillLight = {
 const DRAIN_LIFE_LIGHT: SkillLight = {
   trail: { color: [0.11, 0.28, 0.22], range: 2, release: 0.1 },
   land: { color: [0.5, 1, 0.8], range: 3, seconds: 0.4, release: 0.4 },
+  // Enhanced: the arrival lights in the siphons' red, where the effect now draws a bloom; the bundle carries one light.
+  enhanced: { land: effectLight([1, 0.25, 0.35], 1.2, 0.4, { release: 0.3 }) },
 };
 
 /**
@@ -215,6 +217,7 @@ const DRAIN_LIFE_LIGHT: SkillLight = {
  */
 const CHAIN_LIGHTNING_LIGHT: SkillLight = {
   land: { color: [0.15, 0.15, 0.75], range: 2, seconds: 0.84, release: 0.1 },
+  enhanced: { land: effectLight([0.4, 0.4, 1], 1.2, 0.84, { flicker: { min: 0.55, max: 1, steps: 3 }, release: 0.15 }) },
 };
 
 /** Teleport's column on the graded tiers: its sparks' tint, 2.16 tiles up either way, LT 10. */
