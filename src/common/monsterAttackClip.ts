@@ -303,8 +303,13 @@ export function monsterMagic(state: MonsterAttackState): number {
   return action;
 }
 
+/** Whether that 0x19 runs `SetPlayerAttack`, a trap's branch included. */
+export function monsterCastAttacks(skill: number): boolean {
+  return CAST_ATTACK.has(skill) || CAST_ATTACK_HELD.has(skill);
+}
+
 function castAction(state: MonsterAttackState, skill: number, input: MonsterAttackInput): number {
-  if (CAST_ATTACK.has(skill) || CAST_ATTACK_HELD.has(skill)) return monsterAttack(state, input);
+  if (monsterCastAttacks(skill)) return monsterAttack(state, input);
   if (CAST_MAGIC.has(skill)) return monsterMagic(state);
   if (skill === SKILL_DOPPELGANGER_SELFDESTRUCTION) return A.Appear;
   return KEEP_CLIP;
@@ -349,6 +354,11 @@ export function playableMonsterClip(action: number, clipCount: number | undefine
   if (action === KEEP_CLIP || clipCount === undefined) return KEEP_CLIP;
   if (action < clipCount) return action;
   return A.Attack1 < clipCount ? A.Attack1 : KEEP_CLIP;
+}
+
+/** A clip a swing or cast leaves the body in; the next one restarts it (`AnimationFrame = 0`). */
+export function isMonsterSwingClip(clip: number): boolean {
+  return clip === A.Attack1 || clip === A.Attack2 || clip === A.Attack3 || clip === A.Attack4;
 }
 
 /**

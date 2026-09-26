@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   KEEP_CLIP,
+  isMonsterSwingClip,
   monsterAreaCast,
   monsterAttack,
   monsterAttackState,
   monsterCast,
+  monsterCastAttacks,
   monsterCastRewinds,
   monsterFlinches,
   monsterMagic,
@@ -96,6 +98,18 @@ describe('ReceiveMagic on a monster', () => {
 
   it('plays the appear clip for the Doppelganger self-destruction', () => {
     expect(monsterCast(fresh(), 239, input(0, 3))).toBe(A.Appear);
+  });
+
+  it('says which casts run SetPlayerAttack, so a trap fires on them', () => {
+    expect(monsterCastAttacks(4)).toBe(true);
+    expect(monsterCastAttacks(200)).toBe(true);
+    // SetPlayerMagic, the AT_SKILL_BOSS AttackTime and an unhandled skill do not.
+    expect(monsterCastAttacks(26)).toBe(false);
+    expect(monsterCastAttacks(50)).toBe(false);
+    expect(monsterCastAttacks(150)).toBe(false);
+    const state = fresh();
+    expect(monsterCast(state, 4, input(0, 100, -1, rolls(), 39))).toBe(KEEP_CLIP);
+    expect(state.swordCount).toBe(1);
   });
 
   it('swings for any area skill and records it', () => {
@@ -330,6 +344,17 @@ describe('monsterFlinches', () => {
 
   it('always flinches on a hit with the success bit', () => {
     expect(monsterFlinches(true, 275, rolls())).toBe(true);
+  });
+});
+
+describe('isMonsterSwingClip', () => {
+  it('counts the four attack clips and nothing else', () => {
+    for (const clip of [A.Attack1, A.Attack2, A.Attack3, A.Attack4]) {
+      expect(isMonsterSwingClip(clip)).toBe(true);
+    }
+    for (const clip of [A.Stop1, A.Stop2, A.Walk, A.Shock, A.Die, A.Appear, A.Run, KEEP_CLIP]) {
+      expect(isMonsterSwingClip(clip)).toBe(false);
+    }
   });
 });
 

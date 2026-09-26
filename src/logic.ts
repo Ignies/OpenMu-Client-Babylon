@@ -269,26 +269,40 @@ import { monsterModelTypeOf, playerPlaySpeed } from './common/playSpeed';
 import { TRAP_MODEL_TABLE } from './common/npcs/trapNpc';
 import {
   KEEP_CLIP,
+  isMonsterSwingClip,
   monsterAreaCast,
   monsterAttackState,
   monsterCast,
+  monsterCastAttacks,
   monsterCastRewinds,
   monsterFlinches,
   monsterSwing,
   playableMonsterClip,
   type MonsterAttackInput,
 } from './common/monsterAttackClip';
+import {
+  METEORITE_STORM,
+  SWIRL_BLOOM,
+  SWIRL_BLOOM_SECONDS,
+  SWIRL_START,
+  appearSound,
+  meteoriteStormRunning,
+  monsterCastQuiet,
+  santaActionSound,
+  teleportCastSound,
+  trapAttackSound,
+} from './sound/packetSounds';
+import { SoundsManager } from './libs/soundsManager';
 import { delay } from './effects/core';
 import { Vector3 } from './libs/babylon/exports';
 import { EventBus } from './libs/eventBus';
 import type { Events } from './libs/eventBus/events';
-import { playDrop } from './sound';
+import { playDrop, playSkill } from './sound';
 import { playSfx, playUiSound, UI_BUS } from './libs/sfx';
 import {
   COMBAT_BUS,
   hitSound,
   pickupSound,
-  skillSound,
   usesMissileWeapon,
 } from './common/combatSounds';
 import { experienceForLevel } from './common/experience';
@@ -1096,6 +1110,11 @@ function addNpcToScope(world: World, npc: ScopeNpc) {
   });
 
   if (owner) world.addComponent(npcEntity, 'summonedBy', owner);
+
+  // 0x8000 is the original's CreateFlag (WSclient.cpp:3023-3026, :3111-3123). OpenMU also sets it
+  // for a monster walking into a watched bucket (ObserverToWorldViewAdapter.cs:65), which replays it.
+  const appear = npc.Id & 0x8000 ? appearSound(npc.TypeNumber, owner !== undefined) : undefined;
+  if (appear) playSfx(appear.key, npcEntity.transform.pos, appear.opts);
 
   // Player-rig NPCs (the Elf Soldier, the guards) carry a class; monsters
   // do not. Hard-zeroing isFemale here made every one of them animate male.
@@ -2350,6 +2369,25 @@ function setMonsterClip(obj: Entity, action: number, rewind: boolean) {
   obj.monsterAnimation.action = clip as MonsterActionType;
 }
 
+/**
+ * A trap's sounds after a pick: SetPlayerAttack's trap branch when it `attacked`, and the
+ * meteorite storm once as it starts (`storming`: one already ran before the packet).
+ */
+function playTrapSounds(
+  obj: Entity,
+  input: MonsterAttackInput,
+  attacked: boolean,
+  storming: boolean
+) {
+  const at = obj.transform?.pos;
+  if (input.trapObject === undefined || !at) return;
+  const trap = attacked ? trapAttackSound(input.trapObject) : undefined;
+  if (trap) playSfx(trap.key, at, trap.opts);
+  if (!storming && meteoriteStormRunning(input.monster, monsterAttackState(obj), input.now)) {
+    playSfx(METEORITE_STORM.key, at, METEORITE_STORM.opts);
+  }
+}
+
 /** `SetAction_Fenrir_Damage` (ZzzAI.cpp:283-311): the rider's flinch, by what is in hand. */
 function fenrirDamageAction(obj: Entity): PlayerAction {
   const hands = obj.charAppearance;
@@ -2456,7 +2494,11 @@ EventBus.on('ObjectAnimation', packet => {
     if (monsterAction === MonsterActionType.Attack1) {
       // AT_ATTACK1 / AT_ATTACK2 (ReceiveAction, WSclient.cpp:3596-3600):
       // SetPlayerAttack picks the clip, then AnimationFrame = 0.
-      setMonsterClip(obj, monsterSwing(monsterAttackState(obj), attackInputOf(obj)), true);
+      const state = monsterAttackState(obj);
+      const input = attackInputOf(obj);
+      const storming = meteoriteStormRunning(input.monster, state, input.now);
+      setMonsterClip(obj, monsterSwing(state, input), true);
+      playTrapSounds(obj, input, true, storming);
     } else {
       if (
         obj.monsterAnimation.action === monsterAction &&
@@ -2486,11 +2528,16 @@ EventBus.on('ObjectAnimation', packet => {
           playBowShotVisual(world.scene, obj, shotAt)
         );
       }
+      // AnimationFrame = 0 on every AT_ATTACK (WSclient.cpp:3596-3600). A monster body's clip is
+      // not the PlayerAction and every swing maps to its attack clips: restart whichever plays.
+      const model = obj.modelObject;
       if (
-        obj.playerAnimation.action === action &&
-        obj.modelObject?.CurrentAction === action
+        model &&
+        (isPlayerBody(model)
+          ? obj.playerAnimation.action === action && model.CurrentAction === action
+          : isMonsterSwingClip(model.CurrentAction))
       ) {
-        obj.modelObject.restartAction();
+        model.restartAction();
       }
     }
     if (action !== undefined) {
@@ -2506,6 +2553,8 @@ EventBus.on('ObjectAnimation', packet => {
         obj.attributeSystem?.isAboveZero('isFemale') ?? false
       );
     }
+    const santa = santaActionSound(clientActionToPlay);
+    if (santa) playSfx(santa.key, obj.transform.pos, santa.opts);
   }
 
   obj.transform.rot.y = convertDirectionToAngle(p.Direction);
@@ -2546,8 +2595,17 @@ function playCastAnimation(caster: Entity, skill: number, area: boolean) {
   const def = skillDefinition(skill);
   // ExecuteSkill's cast sound for everyone else (the hero's plays in SkillCastSystem).
   if (!caster.localPlayer && caster.transform) {
-    const sfx = skillSound(skill);
-    if (sfx) playSfx(sfx, caster.transform.pos, { bus: COMBAT_BUS });
+    const tele = area
+      ? undefined
+      : teleportCastSound(Store.world?.mapIndex ?? -1, caster.npcType ?? -1, skill);
+    if (tele) {
+      playSfx(tele.key, caster.transform.pos, tele.opts);
+    } else if (
+      caster.npcType === undefined ||
+      !monsterCastQuiet(caster.npcType, monsterModelTypeOf(caster.npcType), skill)
+    ) {
+      playSkill(skill, caster.transform.pos);
+    }
   }
   if (caster.playerAnimation) {
     if (caster.localPlayer) return; // SkillCastSystem already started the clip
@@ -2573,14 +2631,25 @@ function playCastAnimation(caster: Entity, skill: number, area: boolean) {
     if (action === PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_FLASH) action = PlayerAction.PLAYER_SKILL_FLASH;
     caster.playerAnimation.swordCount =
       (caster.playerAnimation.swordCount ?? 0) + 1;
-    if (caster.playerAnimation.action === action) caster.modelObject?.restartAction();
+    // SetPlayerMagic then `so->AnimationFrame = 0`; a monster body plays casts on its attack clips.
+    const model = caster.modelObject;
+    if (
+      model &&
+      (isPlayerBody(model)
+        ? caster.playerAnimation.action === action
+        : isMonsterSwingClip(model.CurrentAction))
+    ) {
+      model.restartAction();
+    }
     caster.playerAnimation.action = action;
     if (caster.pathfinding) caster.pathfinding.path = null;
   } else if (caster.monsterAnimation && !isDeadMonster(caster)) {
     const state = monsterAttackState(caster);
     const input = attackInputOf(caster);
+    const storming = meteoriteStormRunning(input.monster, state, input.now);
     if (area) setMonsterClip(caster, monsterAreaCast(state, skill, input), true);
     else setMonsterClip(caster, monsterCast(state, skill, input), monsterCastRewinds(skill));
+    playTrapSounds(caster, input, area || monsterCastAttacks(skill), storming);
   }
 }
 
@@ -3067,7 +3136,9 @@ EventBus.on('PlayFanfareSound', packet => {
   switch (effectType) {
     case 58: {
       const swirl = new ShowSwirlPacket(packet);
-      emitObjectEffect(swirl.TargetObjectId & 0x7fff, 'swirl');
+      const netId = swirl.TargetObjectId & 0x7fff;
+      emitObjectEffect(netId, 'swirl');
+      playSwirlSounds(netId);
       return;
     }
     case 2: {
@@ -4051,6 +4122,21 @@ function emitObjectEffect(
   const entity = world.getByNetId(netId);
   if (!entity) return;
   EventBus.emit('objectEffect', { entity, effect });
+}
+
+/** Server command 58's cherry-blossom sound, then the blooms its effect replays while the target stays. */
+function playSwirlSounds(netId: number) {
+  const world = Store.world;
+  const target = world?.getByNetId(netId);
+  if (!world || !target) return;
+  playSfx(SWIRL_START.key, target.transform.pos, SWIRL_START.opts);
+  const bloom = () => {
+    if (world.getByNetId(netId) !== target || target.objOutOfScope) return;
+    // StopBuffer before each replay (MoveHandlers.cpp:7519): one bloom at a time.
+    SoundsManager.stopSoundEffect(SWIRL_BLOOM.key);
+    playSfx(SWIRL_BLOOM.key, target.transform.pos, SWIRL_BLOOM.opts);
+  };
+  for (const seconds of SWIRL_BLOOM_SECONDS) delay(seconds, bloom);
 }
 
 // C1 48 - level-up beam, shield potion, shield lost.

@@ -13,11 +13,11 @@ import {
 import type { SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
-import { playSfx, type SfxPosition } from './listener';
+import { playSfx, type SfxOptions, type SfxPosition } from './listener';
 
 /**
  * Player combat and skill sounds, transcribed from the original client:
- * swing by weapon (ZzzCharacter.cpp:1219-1233), pain screams (:1339-1349),
+ * swing by weapon (ZzzCharacter.cpp:1219-1233), pain screams (:1420-1431),
  * death (:1477-1487), hit confirmation (:5183-5190), and skill casts keyed by
  * the wire skill number (`ExecuteSkill` / `AttackEffect`
  * ZzzCharacter.cpp:4280-5045, `ReceiveAttackSkill` WSclient.cpp:3880-4760).
@@ -67,7 +67,7 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   3: 'Sound/eThunder', // Lightning
   4: 'Sound/eMeteorite', // Fire Ball
   5: 'Sound/sFlame', // Flame
-  6: 'Sound/w39/nightmare_tele', // Teleport
+  6: 'Sound/sMagic', // Teleport (SOUND_MAGIC in CreateTeleportBegin)
   7: 'Sound/sIce', // Ice
   8: 'Sound/sTornado', // Twister (AT_SKILL_STORM)
   9: 'Sound/sEvil', // Evil Spirit
@@ -184,7 +184,7 @@ export function hitSound(missile: boolean): Sounds {
   return missile ? MISSILE_HITS[rnd(4)] : MELEE_HITS[rnd(4)];
 }
 
-/** SetPlayerShock (ZzzCharacter.cpp:1339-1349). */
+/** SetPlayerShock (ZzzCharacter.cpp:1420-1431). */
 export function playerPainSound(cls: CharacterClassNumber): Sounds {
   if (isFemaleClass(cls)) {
     return rnd(2) ? 'Sound/pFemaleScream2' : 'Sound/pFemaleScream1';
@@ -220,9 +220,17 @@ export function pickupSound(item: Item): 'jewel' | 'gemstone' | 'getItem' {
   return 'getItem';
 }
 
+const COMBAT_OPTS: SfxOptions = { bus: COMBAT_BUS };
+/**
+ * Poison's SOUND_HEART is the low-life beat's one 1-channel buffer
+ * (ZzzOpenData.cpp:4780), so a cast never stacks over it.
+ */
+const HEART_OPTS: SfxOptions = { bus: COMBAT_BUS, channels: 1 };
+
 /** Play an already-selected combat sound at a position (swing, hit, scream). */
 export function playCombat(key: Sounds | null, at?: SfxPosition | null): void {
-  if (key) playSfx(key, at, { bus: COMBAT_BUS });
+  if (!key) return;
+  playSfx(key, at, key === 'Sound/pHeartBeat' ? HEART_OPTS : COMBAT_OPTS);
 }
 
 /** Play a skill's cast sound at its caster; silent for unlisted skills. */
