@@ -1,4 +1,10 @@
 @import (reference) '../muText/style.less';
+
+@gold: #e8c877;
+@gold-dim: #b9a87e;
+@text: #e2e2e2;
+@shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+
 .options-window-page {
   position: absolute;
   inset: 0;
@@ -15,49 +21,201 @@
     pointer-events: auto;
   }
 
-  // The mirrored top caps meet at the window's centre, so the title sits over
-  // an ornament rather than the plain bar it had in the original 213px
-  // window. The backing plate keeps it legible without moving it off-centre.
-  .options-title {
+  // Over the dark bar of `op2_back1`, and the handle the window is dragged by.
+  .options-titlebar {
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 2px 16px;
-    border-radius: 2px;
-    background: rgba(12, 10, 8, 0.72);
-    text-align: center;
+    left: 0;
+    top: 0;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #ffffff;
     font-size: 12px;
     letter-spacing: 1px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    text-shadow: @shadow;
+    cursor: move;
   }
 
-  .options-label {
+  // The inset tables the rail, the page and the help strip sit in.
+  .options-panel {
+    background: rgba(0, 0, 0, 0.38);
+  }
+
+  .options-rail {
     position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .options-search {
+    position: relative;
+    flex: none;
+    height: 23px;
+    pointer-events: auto;
+  }
+
+  .options-search-input {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0 22px 0 9px;
+    border: 0;
+    outline: none;
+    background: transparent;
     color: #ffffff;
+    font: inherit;
     font-size: 11px;
-    line-height: 1;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-    white-space: nowrap;
+    text-shadow: @shadow;
+
+    &::placeholder {
+      color: #8a7f63;
+    }
   }
 
-  .options-clickable {
+  .options-search-clear {
+    position: absolute;
+    right: 7px;
+    top: 3px;
+    color: @gold;
+    font-size: 13px;
+    line-height: 16px;
     cursor: pointer;
+
+    &:hover {
+      color: #ffffff;
+    }
   }
 
-  // Section heading: gold, with a rule running out to the column's width so
-  // the two columns read as separate groups rather than one wrapped list.
-  .options-section {
+  .options-tree {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .options-tree-category {
+    margin: 7px 0 2px;
+    padding: 0 4px 3px;
+    color: @gold;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    text-shadow: @shadow;
+    background: linear-gradient(
+        to right,
+        rgba(232, 200, 119, 0.5),
+        rgba(232, 200, 119, 0)
+      )
+      bottom / 100% 1px no-repeat;
+  }
+
+  .options-tree-page {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 19px;
+    padding: 0 16px;
+    border-radius: 2px;
+    color: @gold-dim;
+    font-size: 11px;
+    text-shadow: @shadow;
+    cursor: pointer;
+    pointer-events: auto;
+
+    &:hover {
+      color: #ffffff;
+      background: linear-gradient(
+        to right,
+        rgba(232, 200, 119, 0.14),
+        rgba(232, 200, 119, 0.02)
+      );
+    }
+
+    &.is-active {
+      color: #ffffff;
+      font-weight: bold;
+      background: linear-gradient(
+        to right,
+        rgba(232, 200, 119, 0.24),
+        rgba(232, 200, 119, 0.06)
+      );
+    }
+  }
+
+  .options-tree-name {
+    flex: 1;
+  }
+
+  .options-tree-marker {
+    position: absolute;
+    top: 5px;
+
+    &.is-left {
+      left: 4px;
+    }
+
+    &.is-right {
+      right: 4px;
+    }
+  }
+
+  .options-page-title {
     position: absolute;
     display: flex;
     align-items: center;
-    gap: 6px;
-    color: #e8c877;
-    font-size: 11px;
+    color: #ffffff;
+    font-size: 13px;
     font-weight: bold;
-    letter-spacing: 0.5px;
+    text-shadow: @shadow;
+  }
+
+  .options-page-category {
+    margin-right: 8px;
+    color: @gold;
+    font-size: 10px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  }
+
+  // Scrolls natively (wheel, touch, keyboard); `scrollable` lets the wheel
+  // through boot.tsx's guard, and the MU bar beside it stands in for the
+  // browser's own.
+  .options-rows {
+    position: absolute;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: none;
+    pointer-events: auto;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .options-scrollbar {
+    position: absolute;
+    pointer-events: auto;
+  }
+
+  .options-group + .options-group {
+    margin-top: 4px;
+  }
+
+  // Section heading: gold, with a rule running out to the pane's edge.
+  .options-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 4px 3px;
+    color: @gold;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    text-shadow: @shadow;
     white-space: nowrap;
 
     &::after {
@@ -70,90 +228,94 @@
         rgba(232, 200, 119, 0)
       );
     }
-  }
 
-  // Sits in the same box as the slider's label and right-aligns inside it.
-  .options-value {
-    text-align: right;
-    color: #e8c877;
-  }
+    &.is-link {
+      cursor: pointer;
+      pointer-events: auto;
 
-  .options-tab {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    border: 1px solid rgba(232, 200, 119, 0.28);
-    // Only the active tab joins the content below it, so the strip reads as a
-    // row of folders rather than a row of buttons.
-    border-bottom-color: rgba(232, 200, 119, 0.28);
-    border-radius: 2px 2px 0 0;
-    background: #101010;
-    color: #b9a87e;
-    // Six categories share the window's width, so the longest label
-    // ("Interface", and what a language makes of it) has to fit in 71 px.
-    padding: 0 2px;
-    font-size: 10px;
-    letter-spacing: 0.2px;
-    text-transform: uppercase;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-    pointer-events: auto;
-
-    &:hover {
-      color: #e8c877;
-      background: #2d2a22;
-    }
-
-    &.is-active {
-      border-color: rgba(232, 200, 119, 0.6);
-      border-bottom-color: transparent;
-      background: #393427;
-      color: #ffffff;
-      font-weight: bold;
+      &:hover {
+        color: #ffffff;
+      }
     }
   }
 
-  // The second strip: flatter than the tabs above it, so the eye reads the
-  // category first and the screen second.
-  .options-subtab {
-    position: absolute;
+  .options-row {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 7px;
     box-sizing: border-box;
-    border: 1px solid rgba(232, 200, 119, 0.18);
+    min-height: 24px;
+    padding: 2px 4px 2px 6px;
     border-radius: 2px;
-    background: rgba(16, 16, 16, 0.6);
-    color: #9b8d69;
-    font-size: 10px;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-    cursor: pointer;
     pointer-events: auto;
 
-    &:hover {
-      color: #e8c877;
-      background: #2d2a22;
+    &.is-indented {
+      padding-left: 22px;
     }
 
-    &.is-active {
-      border-color: rgba(232, 200, 119, 0.5);
-      background: #393427;
-      color: #ffffff;
+    &:hover {
+      background: linear-gradient(
+        to right,
+        rgba(232, 200, 119, 0.13),
+        rgba(232, 200, 119, 0.02)
+      );
     }
+
+    &.is-clickable {
+      cursor: pointer;
+    }
+
+    &.is-inert {
+      .options-row-label,
+      .options-row-control {
+        opacity: 0.4;
+      }
+
+      .options-row-control {
+        pointer-events: none;
+      }
+    }
+
+    &.is-flash {
+      animation: options-flash 1.4s ease-out;
+    }
+  }
+
+  .options-row-bullet {
+    flex: none;
+  }
+
+  .options-row-label {
+    flex: 1;
+    min-width: 0;
+    color: @text;
+    font-size: 11px;
+    line-height: 13px;
+    text-shadow: @shadow;
+    overflow-wrap: anywhere;
+  }
+
+  .options-row-control {
+    position: relative;
+    flex: none;
+    display: flex;
+    align-items: center;
+    height: 20px;
+  }
+
+  .options-value {
+    color: @gold;
+    font-size: 11px;
+    text-shadow: @shadow;
   }
 
   .options-slider {
-    position: absolute;
+    position: relative;
+    flex: none;
   }
 
-  // Invisible, but still the thing being dragged - the sprites above are
+  // Invisible, but still the thing being dragged - the sprites under it are
   // painted from its value.
   .options-range {
     position: absolute;
@@ -163,6 +325,127 @@
     margin: 0;
     opacity: 0;
     cursor: pointer;
+  }
+
+  // One plate for every small box: key caps, mode names, the tier presets.
+  .options-plate {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 18px;
+    padding: 0 4px;
+    border: 1px solid rgba(232, 200, 119, 0.45);
+    border-radius: 2px;
+    background: rgba(12, 10, 8, 0.72);
+    color: #ffffff;
+    font-size: 11px;
+    text-shadow: @shadow;
+    white-space: nowrap;
+    cursor: pointer;
+    pointer-events: auto;
+
+    &:hover {
+      border-color: @gold;
+    }
+  }
+
+  .options-stepper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .options-stepper-value {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .options-keybox {
+    width: 96px;
+
+    &.is-active {
+      border-color: #ffffff;
+      background: rgba(232, 200, 119, 0.25);
+    }
+  }
+
+  .options-presets {
+    display: flex;
+  }
+
+  // The preset every stored value matches is lit.
+  .options-preset.is-active {
+    border-color: @gold;
+    background: rgba(232, 200, 119, 0.18);
+    color: @gold;
+    font-weight: bold;
+  }
+
+  .options-empty {
+    padding: 16px 8px;
+    color: @gold-dim;
+    font-size: 11px;
+    text-align: center;
+    text-shadow: @shadow;
+  }
+
+  .options-help {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 13px;
+    text-shadow: @shadow;
+  }
+
+  .options-help-title,
+  .options-help-body,
+  .options-help-blocker,
+  .options-help-applies {
+    flex: none;
+  }
+
+  .options-help-title {
+    color: @gold;
+    font-weight: bold;
+  }
+
+  .options-help-body {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    color: @text;
+  }
+
+  .options-help-blocker {
+    color: #ffb400;
+  }
+
+  .options-help-applies {
+    color: #ffff79;
+  }
+
+  .options-label {
+    position: absolute;
+    color: #ffffff;
+    font-size: 11px;
+    line-height: 1;
+    text-shadow: @shadow;
+    white-space: nowrap;
+  }
+}
+
+@keyframes options-flash {
+  0%,
+  40% {
+    background: rgba(232, 200, 119, 0.35);
+  }
+
+  100% {
+    background: transparent;
   }
 }
 
@@ -177,51 +460,9 @@
 }
 
 .options-window-page {
-  // Keys tab: the bound key sits in a small plate; clicking it waits for
-  // the next key press.
-  .options-keybox {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    border: 1px solid rgba(232, 200, 119, 0.45);
-    border-radius: 2px;
-    background: rgba(12, 10, 8, 0.72);
-    color: #ffffff;
-    font-size: 11px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-    white-space: nowrap;
-    cursor: pointer;
-    pointer-events: auto;
-
-    &:hover {
-      border-color: #e8c877;
-    }
-
-    &.is-active {
-      border-color: #ffffff;
-      background: rgba(232, 200, 119, 0.25);
-    }
-  }
-
-  // Video tab: the tier presets share the key box's plate; the one every
-  // stored value matches is lit.
-  .options-preset {
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    &.is-active {
-      color: #e8c877;
-      font-weight: bold;
-    }
-  }
-}
-
-.options-window-page {
-  // Language picker (Game tab). The closed plate matches the key box; the
-  // list that drops out of it matches the tab strip, so the window keeps one
-  // vocabulary of gold-on-black plates.
+  // The language and texture pack pickers. The closed plate matches the key
+  // box; the list that drops out of it matches the tree, so the window keeps
+  // one vocabulary of gold-on-black plates.
   .options-language {
     position: absolute;
   }
@@ -239,14 +480,14 @@
     background: rgba(12, 10, 8, 0.72);
     color: #ffffff;
     font-size: 11px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    text-shadow: @shadow;
     white-space: nowrap;
     cursor: pointer;
     pointer-events: auto;
 
     &:hover,
     &.is-open {
-      border-color: #e8c877;
+      border-color: @gold;
     }
   }
 
@@ -257,13 +498,12 @@
   }
 
   .options-combo-arrow {
-    color: #e8c877;
+    color: @gold;
     font-size: 8px;
     line-height: 1;
   }
 
-  // Over the rows below it, not pushing them down: the column's heights are
-  // laid out once, the way every other row is.
+  // Over the rows below it, not pushing them down.
   .options-combo-list {
     position: absolute;
     left: 0;
@@ -281,10 +521,11 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    min-height: 18px;
     padding: 0 4px;
-    color: #b9a87e;
+    color: @gold-dim;
     font-size: 11px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    text-shadow: @shadow;
     white-space: nowrap;
     cursor: pointer;
 
@@ -294,7 +535,7 @@
     }
 
     &.is-active {
-      color: #e8c877;
+      color: @gold;
       font-weight: bold;
     }
   }
@@ -303,22 +544,20 @@
     flex: none;
     display: block;
   }
-}
 
-.options-window-page {
   // Marks a language that also ships the game's own `Data/Local/` pack -
   // quest text, NPC dialogue and monster names, not just the interface.
   .options-combo-mark {
     flex: none;
-    color: #e8c877;
+    color: @gold;
     font-size: 9px;
     line-height: 1;
     opacity: 0.85;
   }
 }
 
-// The question an exit row asks, on `CMsgWin`'s own art. Centred on screen
-// rather than on the window: the option window can be dragged anywhere.
+// The question an exit or Defaults asks, on `CMsgWin`'s own art. Centred on
+// screen rather than on the window: the option window can be dragged anywhere.
 .options-exit-confirm {
   position: absolute;
   inset: 0;
@@ -345,6 +584,6 @@
     text-align: center;
     color: #ffffff;
     font-size: 11px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+    text-shadow: @shadow;
   }
 }

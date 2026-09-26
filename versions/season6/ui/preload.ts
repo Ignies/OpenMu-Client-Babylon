@@ -56,6 +56,26 @@ const PREGAME_SPRITES = [
   'op2_volume1.OZT',
   'op2_volume2.OZJ',
   'op2_volume3.OZT',
+
+  // The options window, which opens before the world does.
+  'newui_option_point.OZT',
+  'newui_arrow(L).OZT',
+  'newui_arrow(R).OZT',
+  'Quest_bt_L.OZT',
+  'Quest_bt_R.OZT',
+  'newui_scroll_off.OZT',
+  'newui_scroll_on.OZT',
+  'newui_scrollbar_down.OZT',
+  'newui_scrollbar_m.OZT',
+  'newui_scrollbar_up.OZT',
+  'newui_item_table01(L).OZT',
+  'newui_item_table01(R).OZT',
+  'newui_item_table02(L).OZT',
+  'newui_item_table02(R).OZT',
+  'newui_item_table03(Up).OZT',
+  'newui_item_table03(Dw).OZT',
+  'newui_item_table03(L).OZT',
+  'newui_item_table03(R).OZT',
 ];
 
 /**

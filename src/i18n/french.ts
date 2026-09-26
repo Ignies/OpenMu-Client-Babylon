@@ -156,12 +156,8 @@ export const frenchLayer: LanguageLayer = {
     'options.title': 'Options',
     'options.tab.game': 'Jeu',
     'options.tab.video': 'Vidéo',
-    'options.tab.keys': 'Touches',
     'options.tab.language': 'Langue',
-    'options.section.gameplay': 'Jouabilité',
-    'options.section.sound': 'Son',
     'options.section.performance': 'Performances',
-    'options.section.rendering': 'Rendu',
     'options.section.items': 'Objets',
     'options.section.style': 'Style',
     'options.section.lines': 'Lignes',
@@ -171,27 +167,24 @@ export const frenchLayer: LanguageLayer = {
     'options.section.language': 'Langue',
     'options.section.quality': 'Qualité',
     'options.preset': 'Préréglage',
-    'options.autoAttack': 'Attaque automatique',
     'options.statPointAmounts': 'Ajouter les points par lot',
     'options.whisperBeep': 'Bip à la réception d’un chuchotement',
-    'options.slideHelp': 'Aide glissante',
-    'options.cameraControl':
-      'Contrôle de la caméra (Ctrl+molette, Inser/Suppr)',
+    'options.slideHelp': 'Annonces défilantes',
+    'options.cameraControl': 'Contrôle de la caméra',
     'options.cameraFov': 'Champ de vision',
-    'options.wsadMovement':
-      'Déplacement WSAD (visée à la souris en vue subjective)',
+    'options.wsadMovement': 'Déplacement avec W A S D',
     'options.thirdPersonMouseLook':
       'Visée à la souris aussi à la troisième personne',
-    'options.volume': 'Volume',
+    'options.volume': 'Volume général',
     'options.effectLevel': 'Limite des +effets',
-    'options.shadows': 'Ombres des objets',
+    'options.shadows': 'Ombres',
     'options.dynamicLights': 'Lumières dynamiques',
     'options.postProcessing': 'Post-traitement',
     'options.ambientParticles': 'Particules d’ambiance',
     'options.weatherEffects': 'Météo',
     'options.animatedWater': 'Eau animée',
     'options.grassDensity': 'Herbe',
-    'options.advancedEffects': 'Effets avancés',
+    'options.advancedEffects': 'Météo au sol',
     'options.renderDistance': 'Distance d’affichage',
     'options.propBatching': 'Regroupement du décor',
     'options.monsterEffects': 'Effets des monstres',
@@ -199,7 +192,6 @@ export const frenchLayer: LanguageLayer = {
     'options.materialQuality': 'Matériaux',
     'options.renderScale': 'Échelle de rendu',
     'options.upscale': "Mise à l'échelle",
-    'options.upscale.native': 'Native',
     'options.msaa': 'MSAA',
     'options.texturePack': 'Textures des modèles',
     'worlds.tabDownload': 'Téléchargement',
@@ -230,9 +222,7 @@ export const frenchLayer: LanguageLayer = {
     'options.linePlacement.outset': 'Extérieur',
     'options.grassOutline': 'Contour de l’herbe',
     'options.animeEffects': 'Effets des compétences',
-    'options.section.anime': 'Anime 2.0',
     'options.section.shading': 'Ombrage',
-    'options.section.linesAndEffects': 'Lignes et effets',
     'options.animeShading': 'Dureté d’ombrage',
     'options.animeRim': 'Lumière de contour',
     'options.animeRimWidth': 'Largeur du contour',
@@ -253,7 +243,7 @@ export const frenchLayer: LanguageLayer = {
     'options.filmGrain': 'Grain de film',
     'options.bloom': 'Halo',
     'options.glow': 'Lueur',
-    'options.chromatic': 'Ab. chromatique',
+    'options.chromatic': 'Frange colorée',
     'options.fxaa': 'FXAA',
     'options.vignette': 'Vignettage',
     'options.toneMapper': 'Mappage tonal',
@@ -262,7 +252,6 @@ export const frenchLayer: LanguageLayer = {
     'options.toneMapper.standard': 'Standard',
     'options.toneMapper.aces': 'ACES',
     'options.toneMapper.neutral': 'Neutre',
-    'options.resetKeys': 'Valeurs par défaut',
     'options.keyHint': 'Cliquez, puis appuyez sur une touche. Échap annule.',
     'options.packMark': '★',
     'options.packHint':
@@ -1570,29 +1559,26 @@ export const frenchLayer: LanguageLayer = {
     'skills.alreadyKnown': 'Vous connaissez déjà {name}',
     'skills.needMore':
       '{label} {required} pour apprendre {name} (il en manque {more})',
-    'options.section.loot': 'Noms au sol',
     'options.dropTooltips': 'Détails des objets au sol',
     'options.lootFilter': 'Filtrer les noms au sol',
     'options.lootJewels': 'Joyaux',
     'options.lootExcellent': 'Excellent',
     'options.lootAncient': 'Ancient',
     'options.lootHighLevel': 'Niveau +7 et plus',
-    'options.lootOther': 'Tout le reste',
-    'options.lootZen': 'Zen à partir de',
+    'options.lootOther': 'Tous les autres objets',
+    'options.lootZen': 'Tas de Zen à partir de',
     'options.firstPersonBob': 'Balancement de la tête en vue subjective',
     'options.chatTimestamps': 'Horodatage du chat',
     'options.quickItemActions': 'Ctrl-clic déplace les objets',
     'options.confirmValuableItems': 'Demander avant de jeter ou vendre un objet de valeur',
-    'options.blockBrowserKeys': 'Bloquer les raccourcis du navigateur (Ctrl+W, F5, zoom)',
-    'options.fullscreen': 'Plein écran (F11)',
+    'options.blockBrowserKeys': 'Bloquer les raccourcis du navigateur',
+    'options.fullscreen': 'Plein écran',
     'options.installApp': 'Installer l\'application',
     'options.appInstalled': 'Application installée',
     'options.installHint': 'Ce navigateur ne propose pas encore l\'installation. Ouvrez son menu et choisissez Installer.',
     'keys.replyWhisper': 'Répondre au chuchotement',
     'options.uiScale': 'Taille',
     'options.lockWindows': 'Verrouiller les fenêtres',
-    'options.resetWindows': 'Réinitialiser',
-    'options.section.interface': 'Interface',
     'options.stateWarnings': 'Avertissements',
     'options.lowHealthWarning': 'Alerte de vie basse',
     'options.lowHealthPercent': 'Seuil de vie',
@@ -1765,7 +1751,6 @@ export const frenchLayer: LanguageLayer = {
     'serverMessage.pkClearYouAreNotPlayerKiller': "Tu n'es pas un tueur.",
     'serverMessage.itemDoesNotBelongToYou': "Cet objet ne t'appartient pas.",
     'serverMessage.characterNotStrongEnough': "Tu n'es pas encore assez fort pour ça.",
-    'options.section.exit': 'Quitter',
     'options.exitGame': 'Quitter le jeu',
     'options.selectServer': 'Choisir un serveur',
     'options.switchCharacter': 'Changer de personnage',
@@ -2279,7 +2264,6 @@ export const frenchLayer: LanguageLayer = {
       'Je n’ai rien pour vous. Vous avez déjà résolu toutes mes quêtes.',
     'serverMessage.npcGuildNeedsLevel100': 'Votre niveau doit être au moins 100',
     'serverMessage.npcAlreadyInGuild': 'Vous appartenez déjà à une guilde',
-    'options.tab.system': 'Système',
     'options.tab.interface': 'Interface',
     'options.tab.sound': 'Son',
     'options.section.mixer': 'Mixage',
@@ -2301,12 +2285,7 @@ export const frenchLayer: LanguageLayer = {
     'options.section.camera': 'Caméra',
     'options.section.chat': 'Chat',
     'options.section.world': 'Monde',
-    'options.section.grade': 'Étalonnage',
-    'options.section.layout': 'Disposition',
-    'options.section.text': 'Texte',
-    'options.section.bindings': 'Touches',
     'options.section.vitals': 'Vie et mana',
-    'options.section.warnings': 'Santé',
     'options.englishItemNames': 'Noms d’objets en anglais',
     'exp.title': 'Expérience',
     'perf.fps': 'FPS',
@@ -2326,5 +2305,210 @@ export const frenchLayer: LanguageLayer = {
     'sign.guardhouse': 'Corps de garde',
     'sign.church': 'Église',
     'sign.guild': 'Guilde',
+    'options.tab.controls': 'Commandes',
+    'options.page.general': 'Général',
+    'options.page.loot': 'Butin',
+    'options.page.alerts': 'Chat et alertes',
+    'options.page.camera': 'Caméra et déplacement',
+    'options.page.keys': 'Touches',
+    'options.page.world': 'Monde et effets',
+    'options.page.volume': 'Volumes',
+    'options.page.screen': 'Écran',
+    'options.section.character': 'Personnage',
+    'options.section.notices': 'Notifications',
+    'options.section.movement': 'Déplacement',
+    'options.section.keyboard': 'Clavier',
+    'options.section.lightingAndMaterials': 'Éclairage et matériaux',
+    'options.section.resolution': 'Résolution',
+    'options.section.effects': 'Effets visuels',
+    'options.section.light': 'Lumière et couleur',
+    'options.section.lens': 'Objectif et pellicule',
+    'options.section.hud': 'À l’écran',
+    'options.section.display': 'Affichage',
+    'options.sunShafts': 'Rayons de soleil',
+    'options.clouds': 'Nuages',
+    'options.windowLayout': 'Position des fenêtres',
+    'options.reset': 'Réinitialiser',
+    'options.install': 'Installer',
+    'options.defaults': 'Par défaut',
+    'options.confirmDefaults': 'Remettre tous les réglages de cette page à leur valeur par défaut ?',
+    'options.confirmDefaultKeys': 'Remettre toutes les touches par défaut pour ce personnage ?',
+    'options.search.results': 'Résultats de recherche',
+    'options.search.none': 'Aucun réglage ne correspond.',
+    'options.needs.on': 'Activez {option} pour utiliser ce réglage.',
+    'options.needs.value': 'Mettez {option} sur {value} pour utiliser ce réglage.',
+    'options.needs.raise': 'Augmentez {option} pour utiliser ce réglage.',
+    'options.needs.lower': 'Baissez {option} sous {value} pour utiliser ce réglage.',
+    'options.needs.english': 'Les noms d’objets sont déjà en anglais.',
+    'options.needs.click': 'Cliquez pour y aller.',
+    'options.applies.mapLoad': 'Prend effet au prochain chargement de carte.',
+    'options.applies.partlyMapLoad':
+      'Certains changements n’apparaissent qu’au prochain chargement de carte.',
+    'options.help.idle': 'Survolez un réglage pour voir ce qu’il fait.',
+    'options.help.keysIdle':
+      'Cliquez sur une case, puis appuyez sur la nouvelle touche. Échap annule. Les touches sont enregistrées pour chaque personnage.',
+    'options.help.styleIdle': 'Choisissez un style de rendu. Ses réglages s’affichent en dessous.',
+    'options.help.quickItemActions':
+      'Ctrl-clic envoie un objet dans la fenêtre ouverte (coffre, échange, Chaos Machine, boutique) ou en achète plusieurs en boutique.',
+    'options.help.confirmValuableItems':
+      'Demande confirmation avant de jeter ou vendre un joyau, ou un objet Excellent, Ancient ou +7.',
+    'options.help.compareTooltips':
+      'Affiche l’objet que vous portez à côté de celui survolé, en signalant les lignes meilleures ou moins bonnes.',
+    'options.help.statPointAmounts':
+      'Ajoute un champ de quantité à côté de chaque + dans la fenêtre Personnage, pour attribuer plusieurs points d’un coup.',
+    'options.help.autoReconnect':
+      'Vous reconnecte au même personnage si la connexion est coupée pendant la partie.',
+    'options.help.dropTooltips': 'Laissez le curseur sur un objet au sol pour voir tous ses détails.',
+    'options.help.lootFilter':
+      'Après un appui bref sur Alt, seuls les types de butin cochés ci-dessous gardent leur nom. Alt maintenu affiche tous les noms.',
+    'options.help.lootKind': 'Ce type de butin garde son nom.',
+    'options.help.lootOther': 'Tous les autres objets gardent aussi leur nom.',
+    'options.help.lootZen':
+      'Les tas de Zen d’au moins ce montant gardent leur nom. Sur Non, tous les tas le gardent.',
+    'options.help.chatTimestamps': 'Affiche l’heure, par exemple 14:03, devant chaque ligne du chat.',
+    'options.help.whisperBeep': 'Émet un son quand quelqu’un vous envoie un chuchotement.',
+    'options.help.slideHelp': 'Fait défiler les annonces du serveur sur un bandeau en haut de l’écran.',
+    'options.help.stateWarnings':
+      'Prévient quand l’équipement est presque cassé, l’inventaire plein, les potions épuisées ou un buff sur le point d’expirer.',
+    'options.help.lowHealthWarning':
+      'Le bord de l’écran s’éclaire en rouge quand la vie est basse, avec des battements de cœur à l’approche de la mort.',
+    'options.help.lowHealthPercent': 'Le niveau de vie à partir duquel le bord rouge apparaît.',
+    'options.help.lowManaWarning': 'Le bord de l’écran s’éclaire en bleu quand le mana est bas.',
+    'options.help.lowManaPercent': 'Le niveau de mana à partir duquel le bord bleu apparaît.',
+    'options.help.cameraControl':
+      'Ctrl + molette : zoom. Inser et Suppr : rotation de la caméra. Ctrl + glisser avec le bouton du milieu : regard libre.',
+    'options.help.cameraFov':
+      'La largeur du champ de vision de la caméra. 30° correspond au jeu original.',
+    'options.help.firstPersonBob': 'En vue subjective, la caméra monte et descend à chaque pas.',
+    'options.help.wsadMovement':
+      'W, A, S et D déplacent votre personnage ; en vue subjective, la souris oriente la vue. Leurs raccourcis se font alors avec Ctrl.',
+    'options.help.thirdPersonMouseLook':
+      'La souris oriente la vue à tout niveau de zoom, pas seulement en vue subjective.',
+    'options.help.blockBrowserKeys':
+      'Bloque en jeu les raccourcis du navigateur comme F5 et le zoom, et demande confirmation avant de fermer l’onglet.',
+    'options.help.presets': 'Règle Éclairage, Matériaux, Détail et toute la page Image sur un même niveau.',
+    'options.help.lightingQuality':
+      'Classique reprend le rendu original. Améliorée ajoute les ombres du soleil, un ombrage doux et de la brume ; Ultra les affine.',
+    'options.help.materialQuality':
+      'Surfaces réalistes avec relief et reflets : désactivées, sur les personnages et l’équipement, ou partout.',
+    'options.help.materialDetail':
+      'L’intensité des matériaux réalistes : relief, reflets métalliques et grain du sol.',
+    'options.help.renderScale':
+      'Affiche le monde 3D à une résolution plus basse pour gagner en fluidité. L’interface reste nette.',
+    'options.help.upscale':
+      'Avec une échelle de rendu réduite, FSR rend toute sa netteté à l’image au lieu de simplement l’étirer.',
+    'options.help.msaa':
+      'Lisse les bords crénelés des modèles et du décor. Les valeurs élevées sollicitent davantage la carte graphique.',
+    'options.help.anisotropy': 'Garde nettes les textures du sol et des murs vues sous un angle rasant.',
+    'options.help.renderDistance':
+      'Jusqu’où le décor est affiché autour de vous, en cases. Une valeur élevée en montre plus, mais réduit la fluidité.',
+    'options.help.grassDensity':
+      'La quantité de brins d’herbe sur les sols herbeux. Sur Non, le sol reste plat.',
+    'options.help.clouds': 'Des nuages qui dérivent dans le ciel, et leurs ombres au sol.',
+    'options.help.weatherEffects': 'La pluie qui tombe quand il pleut sur le serveur.',
+    'options.help.ambientParticles':
+      'Feuilles au vent, chutes de neige, bulles, braises, poussière et faune, sur les cartes qui en ont.',
+    'options.help.animatedWater': 'Une eau qui ondule et scintille. Il n’y a d’eau animée qu’à Atlans.',
+    'options.help.advancedEffects':
+      'La météo marque le sol : neige accumulée, pierre mouillée, flaques, traces de pas et herbe brûlée.',
+    'options.help.shadows': 'Les ombres des personnages, des monstres et des objets.',
+    'options.help.dynamicLights':
+      'Torches, feux, sorts et objets lumineux éclairent le sol et les objets autour d’eux.',
+    'options.help.monsterEffects':
+      'Les effets que les monstres produisent sur eux-mêmes, comme le souffle, la poussière, le sable et les flammes.',
+    'options.help.itemEffects':
+      'Comment brille l’équipement amélioré ou Excellent : éclat original, halo et lumière modernes, ou les deux.',
+    'options.help.effectLevel':
+      'Le niveau d’amélioration le plus haut dont l’éclat s’affiche. 13 les montre tous ; 5 masque aussi l’éclat des objets Excellent.',
+    'options.help.propBatching':
+      'Affiche les éléments de décor répétés par lots, pour bien plus d’images par seconde. Changer ce réglage recharge le décor.',
+    'options.help.postProcessing':
+      'L’interrupteur général des effets d’écran : toute cette page, plus la brume, l’ombrage doux et les contours à l’encre.',
+    'options.help.toneMapper':
+      'La courbe de couleur qui adapte les lumières vives à l’écran. Standard est le réglage par défaut, ajusté pour le jeu.',
+    'options.help.brightness':
+      'Éclaircit ou assombrit toute l’image, en plus de la lumière propre à chaque carte.',
+    'options.help.bloom':
+      'Les feux, les torches et les autres lumières vives diffusent un doux halo alentour.',
+    'options.help.glow': 'L’aura lumineuse autour des objets brillants et des effets de sorts.',
+    'options.help.sunShafts':
+      'Des rayons de soleil qui passent entre les éléments du décor, sur les cartes avec un ciel.',
+    'options.help.sharpness': 'Accentue les contours de l’image.',
+    'options.help.fxaa':
+      'Un lissage supplémentaire et peu coûteux des bords crénelés. Il peut adoucir un peu l’image.',
+    'options.help.filmGrain': 'Un grain de film animé sur l’image.',
+    'options.help.chromatic':
+      'Sépare légèrement les couleurs vers les bords de l’écran, comme un objectif photo.',
+    'options.help.vignette': 'Assombrit les coins de l’écran.',
+    'options.help.renderingStyle':
+      'Le style graphique : rendu original, bandes de lumière en cel-shading, ou anime avec contours à l’encre.',
+    'options.help.shadeSteps': 'Le nombre de paliers entre la lumière et l’ombre sur les modèles.',
+    'options.help.styleStrength':
+      'Jusqu’où va Anime 1.0 : des couleurs plus plates et une lumière de contour plus forte.',
+    'options.help.animeShading':
+      'La netteté de la limite entre lumière et ombre, d’un fondu doux à une ligne franche.',
+    'options.help.animeRim': 'Une lumière vive sur le contour des personnages et des monstres.',
+    'options.help.animeRimWidth': 'La largeur de la lumière de contour, d’un trait fin à une large bande.',
+    'options.help.animeMatcap': 'Un reflet brillant sur les personnages et les monstres, qui suit la caméra.',
+    'options.help.animePaint': 'Aplatit les couleurs des textures en tons peints.',
+    'options.help.animeHalftone': 'Un ombrage en trame de points façon manga dans les zones d’ombre.',
+    'options.help.animeHalftoneScale': 'La taille des points de la trame.',
+    'options.help.animeOutlineMode':
+      'La façon de tracer les contours : lignes à l’écran, coque sombre autour des personnages, les deux, ou aucun.',
+    'options.help.lineStrength': 'La noirceur des contours à l’encre.',
+    'options.help.lineWidth': 'L’épaisseur des contours à l’encre.',
+    'options.help.linePlacement':
+      'Place les contours à l’intérieur, à cheval ou à l’extérieur du bord de chaque forme.',
+    'options.help.grassOutline': 'Trace aussi des contours sur les brins d’herbe.',
+    'options.help.animeEffects':
+      'Les effets de sorts et de compétences prennent des couleurs plates et un contour à l’encre, pour s’accorder au style.',
+    'options.help.animeSpeedLines':
+      'Des traits de vitesse façon manga autour de l’écran quand vous courez ou filez sur une monture.',
+    'options.help.animeFilm':
+      'Du halo, de la frange colorée et du grain en plus, par-dessus les réglages de la page Image.',
+    'options.help.animeImpacts': 'Un grand éclat stylisé quand un coup porte.',
+    'options.help.volume': 'Tous les sons du jeu. Les autres curseurs en sont une fraction.',
+    'options.help.musicVolume':
+      'La musique de fond. Elle baisse quand quelqu’un joue d’un instrument près de vous.',
+    'options.help.effectsVolume':
+      'Tous les sons sauf la musique. Les curseurs ci-dessous en sont une fraction.',
+    'options.help.muteInBackground':
+      'Coupe progressivement le son quand l’onglet du jeu est masqué ou réduit.',
+    'options.help.combatVolume':
+      'Coups d’armes, impacts, cris de douleur, morts et lancements de compétences.',
+    'options.help.monsterVolume': 'Les voix des monstres : grognements, cris d’attaque et râles d’agonie.',
+    'options.help.ambientVolume':
+      'Les bruits de fond des cartes, comme le vent, le feu, la faune et l’animation des villes.',
+    'options.help.stepsVolume': 'Vos propres bruits de pas.',
+    'options.help.dropVolume': 'Le bruit des objets et du Zen qui tombent au sol.',
+    'options.help.uiVolume':
+      'Clics, sons des fenêtres, ramassages, montées de niveau, réparations et chuchotements.',
+    'options.help.instrumentsVolume': 'Les instruments joués par vous et par les autres joueurs.',
+    'options.help.hearInstruments':
+      'Fait entendre les instruments des autres joueurs. Sans cette option, vous les voyez jouer mais n’entendez que le vôtre.',
+    'options.help.dropSoundFilter':
+      'Ne joue le bruit de chute que pour les types de butin cochés ci-dessous.',
+    'options.help.dropSoundKind': 'Ce type de butin fait du bruit en touchant le sol.',
+    'options.help.dropSoundOther': 'Tous les autres objets font aussi du bruit.',
+    'options.help.uiScale': 'Agrandit ou réduit toutes les fenêtres et tous les panneaux.',
+    'options.help.lockWindows': 'Empêche de déplacer ou de redimensionner les fenêtres.',
+    'options.help.resetWindows': 'Remet chaque fenêtre à sa place et à sa taille d’origine.',
+    'options.help.minimapCorner':
+      'Une petite carte dans le coin supérieur droit. La touche Mini-carte ouvre toujours la carte complète.',
+    'options.help.eventTimers':
+      'Les comptes à rebours jusqu’aux prochains Blood Castle, Devil Square et Chaos Castle.',
+    'options.help.questTracker': 'Vos quêtes en cours et leurs compteurs d’éliminations, à l’écran.',
+    'options.help.performanceReadout':
+      'Images par seconde, temps d’image et ping, dans un petit encart en coin d’écran.',
+    'options.help.fullscreen':
+      'Bascule entre le plein écran et une fenêtre de navigateur normale. F11 fait de même.',
+    'options.help.install': 'Installe le jeu comme une application, avec sa propre fenêtre et son icône.',
+    'options.help.language':
+      'La langue de l’interface, des quêtes, des dialogues des PNJ et des noms de monstres et d’objets.',
+    'options.help.englishItemNames':
+      'Garde les noms d’objets en anglais quelle que soit la langue, comme dans les guides et les listes de prix.',
+    'options.help.exitGame': 'Vous déconnecte et vous ramène au menu principal.',
+    'options.help.selectServer': 'Vous déconnecte et vous ramène à la liste des serveurs.',
+    'options.help.switchCharacter': 'Vous ramène au choix du personnage, sans vous déconnecter.',
   },
 };
