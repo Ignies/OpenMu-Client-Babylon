@@ -242,7 +242,6 @@ export const ChatRooms = new (class _ChatRooms {
     } else {
       room.unread = true;
       Social.systemMessage(t('chatRoom.opened', { name: info.friendName }));
-      playUiSound('whisper');
     }
   }
 
@@ -292,7 +291,8 @@ export const ChatRooms = new (class _ChatRooms {
                   this.windowEnabled && this.activeKey === room.key;
                 if (!visible) {
                   room.unread = true;
-                  playUiSound('whisper');
+                  // SetNewChatAlert (UIWindows.cpp:5656).
+                  playUiSound('chatAlert');
                 }
               }
               break;

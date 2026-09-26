@@ -1,5 +1,6 @@
 import { ENUM_WORLD } from '../../common/types';
 import { playSfx } from '../../libs/sfx';
+import type { Sounds } from '../../sound/recipes';
 import type { Entity, ISystemFactory } from '../world';
 
 /**
@@ -25,6 +26,15 @@ const DOORS: Partial<Record<ENUM_WORLD, Record<number, DoorKind>>> = {
 
 /** Hero distance (MU units) inside which a door reacts. */
 const OPEN_RANGE = 200;
+/**
+ * `PlayBuffer(SOUND_DOOR01/02)` every frame the hero is in range, each on one
+ * channel (ZzzObject.cpp:3898, 3910; ZzzOpenData.cpp:4761-4762): the creak
+ * starts again as soon as the last one ends, for as long as the hero stays.
+ */
+const HINGED_SOUND: Sounds = 'Sound/aDoor';
+const SLIDING_SOUND: Sounds = 'Sound/aCastleDoor';
+/** Ms before asking again when a play did not start (bus muted, no audio). */
+const RETRY_MS = 250;
 /** TurnAngle2 step per 25 Hz tick while closing, degrees. */
 const CLOSE_TURN_PER_TICK = 10;
 /** Position lerp towards the rest position per tick while closing. */
@@ -42,7 +52,6 @@ interface DoorState {
   homeAngle: number;
   /** Current yaw in degrees (Angle[2]). */
   angle: number;
-  open: boolean;
 }
 
 function normalizeDegrees(angle: number): number {
@@ -60,6 +69,11 @@ function turnAngle2(current: number, target: number, maxDelta: number): number {
   return normalizeDegrees(current + delta);
 }
 
+/** Plays a door's creak; ms until its channel is free, or a retry delay. */
+function creak(sound: Sounds, at: { x: number; z: number }): number {
+  return playSfx(sound, { x: at.x, z: at.z }, { channels: 1 }) || RETRY_MS;
+}
+
 /** Whether the map animates this object type as a door. */
 export function isMapDoorType(map: ENUM_WORLD, type: number): boolean {
   return DOORS[map]?.[type] !== undefined;
@@ -68,6 +82,9 @@ export function isMapDoorType(map: ENUM_WORLD, type: number): boolean {
 export const MapDoorSystem: ISystemFactory = world => {
   const query = world.with('modelId', 'worldIndex', 'transform');
   const states = new WeakMap<Entity, DoorState>();
+  /** Ms until each door wave's one channel is free again. */
+  let hingedBusy = 0;
+  let slidingBusy = 0;
 
   function stateOf(e: Entity, kind: DoorKind): DoorState {
     let state = states.get(e);
@@ -82,7 +99,6 @@ export const MapDoorSystem: ISystemFactory = world => {
       homeY: t.pos.z * world.terrainScale,
       homeAngle,
       angle: homeAngle,
-      open: false,
     };
     states.set(e, state);
     return state;
@@ -100,6 +116,9 @@ export const MapDoorSystem: ISystemFactory = world => {
       const heroX = (ht.pos.x + (ht.posOffset?.x ?? 0)) * world.terrainScale;
       const heroY = (ht.pos.z + (ht.posOffset?.z ?? 0)) * world.terrainScale;
       const ticks = Math.min(1, dt * 25);
+
+      hingedBusy -= dt * 1000;
+      slidingBusy -= dt * 1000;
 
       for (const e of query) {
         if (e.worldIndex !== world.mapIndex) continue;
@@ -131,20 +150,18 @@ export const MapDoorSystem: ISystemFactory = world => {
             else if (s.homeAngle === 180) s.angle = 240 + push * 0.5;
           }
 
-          if (!s.open) {
-            s.open = true;
-            // SOUND_DOOR02 (aCastleDoor) for the gate, SOUND_DOOR01 (aDoor) otherwise.
-            playSfx(
-              kind === 'sliding' ? 'Sound/aCastleDoor' : 'Sound/aDoor',
-              { x: t.pos.x, z: t.pos.z }
-            );
+          // SOUND_DOOR02 (aCastleDoor) for the gate, SOUND_DOOR01 (aDoor)
+          // otherwise; one creak per wave at a time, whichever door asks.
+          if (kind === 'sliding') {
+            if (slidingBusy <= 0) slidingBusy = creak(SLIDING_SOUND, t.pos);
+          } else if (hingedBusy <= 0) {
+            hingedBusy = creak(HINGED_SOUND, t.pos);
           }
         } else {
           s.angle = turnAngle2(s.angle, s.homeAngle, CLOSE_TURN_PER_TICK * ticks);
           const k = Math.min(1, CLOSE_SLIDE_PER_TICK * ticks);
           x += (s.homeX - x) * k;
           y += (s.homeY - y) * k;
-          s.open = false;
         }
 
         t.pos.x = x / world.terrainScale;

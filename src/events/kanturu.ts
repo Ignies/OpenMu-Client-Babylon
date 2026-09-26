@@ -2,6 +2,7 @@ import { observable, runInAction } from 'mobx';
 import { Vector3 } from '../libs/babylon/exports';
 import { ENUM_WORLD } from '../common/types';
 import { EventBus } from '../libs/eventBus';
+import { playSfx } from '../libs/sfx';
 import { Store } from '../store';
 import { effects } from '../effects';
 import { MODEL } from '../effects/recipes';
@@ -22,6 +23,8 @@ import {
   KanturuBattleResultBattleResultEnum as BattleResult,
   KanturuMayaWideAreaAttackAttackTypeEnum as MayaAttack,
 } from '../common/packets/ServerToClientPackets';
+import type { Sounds } from '../sound/recipes';
+import { startGatewayTurn } from '../maps/kanturu2/gateway';
 import type { EventLayer } from './layer';
 import { EVENT_TEXT, formatText } from './recipes';
 
@@ -95,6 +98,30 @@ const RAIN_INTERVAL = 1;
 
 const MESSAGE_MS = 5000;
 
+/**
+ * The cutscenes' one-shots (`CKanturuDirection`): the camera flies from the
+ * hero to the spot a tile per original frame, then Maya rises
+ * (GM_Kanturu_3rd.cpp:228), explodes (:1597) or, `wait` seconds on, the
+ * Nightmare is summoned (CDirection.cpp:249).
+ */
+type DirectionCue = { key: Sounds; x: number; y: number; wait: number };
+const MAYA_RISES: DirectionCue = {
+  key: 'Sound/w39/maya_intro',
+  x: 196,
+  y: 85,
+  wait: 0,
+};
+const MAYA_DIES: DirectionCue = { ...MAYA_RISES, key: 'Sound/w39/maya_death' };
+const NIGHTMARE_SUMMONED: DirectionCue = {
+  key: 'Sound/w39/maya_death',
+  x: 80,
+  y: 142,
+  wait: 1,
+};
+const ORIGINAL_FPS = 25;
+/** The frames around the flight: the target set, the arrival, the cue. */
+const DIRECTION_FRAMES = 3;
+
 // ---- 2. state + readers ----------------------------------------------------
 
 export type KanturuDialog = {
@@ -140,6 +167,13 @@ const state = observable(
 
 /** Seconds the full banner has been held, so it can clear itself. */
 let resultHeld = 0;
+/** `KanturuSuccessMap`: the Elphis barrier is down. */
+let towerOpen = false;
+/** The state pair last seen in the tower: a resent one restarts no cutscene. */
+let lastPhase = -1;
+/** The cutscene one-shot waiting out its camera flight, and the time left. */
+let cue: DirectionCue | null = null;
+let cueDelay = 0;
 /** Bursts left of the stone rain, and the gap to the next one. */
 let rainLeft = 0;
 let rainDelay = 0;
@@ -307,6 +341,14 @@ export function refreshKanturu(): void {
  */
 export function enterKanturu(): void {
   if (!state.canEnter || Store.isOffline) return;
+  const p = Store.playerData;
+  startGatewayTurn({
+    tower: state.state === KanturuState.Tower,
+    helper: p.petSlot,
+    wings: p.wingsSlot,
+    ring1: p.ring1Slot,
+    ring2: p.ring2Slot,
+  });
   Store.sendToGS(KanturuEnterRequestPacket.createPacket().buffer);
 }
 
@@ -338,6 +380,21 @@ EventBus.on('KanturuEnterResult', packet => {
   Store.addNotification(EVENT_TEXT.ktFailedToEnter, 'error', MESSAGE_MS);
 });
 
+/** The cutscene `GetKanturuMayaState` / `GetKanturuNightmareState` start. */
+function directionCue(
+  next: KanturuState,
+  detail: number
+): DirectionCue | null {
+  if (next === KanturuState.MayaBattle) {
+    if (detail === MAYA.notify) return MAYA_RISES;
+    if (detail === MAYA.endCycleMaya3) return MAYA_DIES;
+  }
+  if (next === KanturuState.NightmareBattle && detail === NIGHTMARE.nightmare) {
+    return NIGHTMARE_SUMMONED;
+  }
+  return null;
+}
+
 /**
  * `ReceiveKanturu3rdState`: the figure is up during a monster wave, a Maya
  * hand or the Nightmare fight, and hidden for every standby and cutscene
@@ -359,6 +416,31 @@ EventBus.on('KanturuStateChange', packet => {
         detail === MAYA.monster3 ||
         detail === MAYA.maya3)) ||
     (next === KanturuState.NightmareBattle && detail === NIGHTMARE.battle);
+
+  // `CheckSuccessBattle` (GM_Kanturu_3rd.cpp:59-89): the barrier coming down
+  // is heard once, inside the tower.
+  if (Store.world?.mapIndex === EVENT_MAP) {
+    const open =
+      next === KanturuState.Tower &&
+      (detail === TOWER.revitalization || detail === TOWER.notify);
+    if (open && !towerOpen) {
+      playSfx('Sound/w39/kan_boss_disfield', null, { channels: 1 });
+    }
+    towerOpen = open;
+
+    // Any other pair cuts a cutscene short, as `ResetDirectionState` does.
+    const phase = next * 256 + detail;
+    if (phase !== lastPhase) {
+      lastPhase = phase;
+      cue = directionCue(next, detail);
+      const pos = Store.world?.playerEntity?.transform?.pos;
+      if (cue) {
+        const tiles = pos ? Math.hypot(pos.x - cue.x, pos.z - cue.y) : 0;
+        const frames = Math.ceil(tiles) + DIRECTION_FRAMES;
+        cueDelay = frames / ORIGINAL_FPS + cue.wait;
+      }
+    }
+  }
 
   runInAction(() => {
     state.hudState = next;
@@ -449,6 +531,8 @@ function mayaStorm(): void {
   const world = Store.world;
   const pos = world?.playerEntity?.transform?.pos;
   if (!world || !pos) return;
+  // `SOUND_KANTURU_3RD_MAYA_STORM` (GM_Kanturu_3rd.cpp:1541), unpositioned.
+  playSfx('Sound/w39/Maya_Storm', null, { bus: 'monsters', channels: 1 });
   for (let i = 0; i < STORM_DEBRIS; i++) {
     const at = new Vector3(
       pos.x + (Math.random() * 2 - 1) * STORM_SPREAD,
@@ -510,6 +594,14 @@ function update(map: ENUM_WORLD, dt: number): void {
     }
   }
 
+  if (cue) {
+    cueDelay -= dt;
+    if (cueDelay <= 0) {
+      playSfx(cue.key, null, { channels: 1 });
+      cue = null;
+    }
+  }
+
   if (state.result === null) return;
 
   if (state.resultAlpha < 1) {
@@ -535,6 +627,9 @@ function update(map: ENUM_WORLD, dt: number): void {
 function reset(): void {
   rainLeft = 0;
   resultHeld = 0;
+  towerOpen = false;
+  lastPhase = -1;
+  cue = null;
   runInAction(() => {
     state.open = false;
     state.hudOpen = false;

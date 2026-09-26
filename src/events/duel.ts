@@ -259,7 +259,6 @@ EventBus.on('DuelInit', packet => {
   const side2: DuelSide = { id: p.Player2Id & ID_MASK, name: cleanName(p.Player2Name) };
   const hero = heroNetId();
   const watching = hero !== side1.id && hero !== side2.id;
-  playUiSound('duelStart');
   runInAction(() => {
     state.duel = { side1, side2, score1: 0, score2: 0, watching };
     state.bars = watching ? FULL_BARS : null;

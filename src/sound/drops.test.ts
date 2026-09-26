@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { GameOptions, setGameOption } from '../common/gameOptions';
 import { dropSound, dropSoundAllowed, type DropSoundInfo } from './drops';
+import { pickupSound } from './combat';
 
 /**
  * The case the whole screen was written around: "only excellent items and
@@ -11,6 +12,9 @@ const JEWEL_GROUP = 14;
 const BLESS = 13;
 const GEMSTONE = 41;
 const SWORD_GROUP = 0;
+const BUNDLE_GROUP = 12;
+const BUNDLED_BLESS = 30;
+const BUNDLED_SOUL = 31;
 
 const zen: DropSoundInfo = { isMoney: true, group: JEWEL_GROUP, num: 15 };
 const bless: DropSoundInfo = {
@@ -64,6 +68,16 @@ describe('drop sounds', () => {
     expect(dropSound(bless)).toBe('Sound/eGem');
     expect(dropSound(gemstone)).toBe('Sound/Jewel_Sound');
     expect(dropSound(plainSword)).toBe('Sound/pDropItem');
+  });
+
+  it('rings the bundled jewels on pickup only', () => {
+    for (const num of [BUNDLED_BLESS, BUNDLED_SOUL]) {
+      const item = { group: BUNDLE_GROUP, num };
+      expect(pickupSound(item)).toBe('jewel');
+      expect(
+        dropSound({ isMoney: false, item, group: BUNDLE_GROUP, num })
+      ).toBe('Sound/pDropItem');
+    }
   });
 
   it('sounds every drop while the filter is off', () => {

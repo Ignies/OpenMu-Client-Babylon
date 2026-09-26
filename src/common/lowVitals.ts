@@ -1,8 +1,8 @@
 /**
- * When a vital bar counts as low, how hard the screen edge burns, and how
- * fast it beats. Pure: a bar fill and the player's threshold in, the two
- * numbers the overlay draws with out, so the reaction that writes the CSS
- * variables and the test read one rule.
+ * When a vital bar counts as low, how hard the screen edge burns, how fast
+ * it beats, and when the heart is heard. Pure: a bar fill and the player's
+ * threshold in, the two numbers the overlay draws with out, so the reaction
+ * that writes the CSS variables and the test read one rule.
  *
  * Driven by: `ui/pages/worldPage/components/lowHealthOverlay`.
  * Read by: nothing else - it holds no state.
@@ -89,4 +89,16 @@ export function vitalWarning(
   );
 
   return { strength, beatSeconds };
+}
+
+/** The life bar share under which the heart is heard. */
+const HEARTBEAT_SHARE = 0.2;
+
+/**
+ * Whether SOUND_HEART should be beating (`RenderLifeMana`,
+ * NewUIMainFrameWindow.cpp:330-334): alive and under a fifth of the bar,
+ * whatever the overlay options say.
+ */
+export function heartbeatDue(life: number, lifeMax: number): boolean {
+  return lifeMax > 0 && life > 0 && life / lifeMax < HEARTBEAT_SHARE;
 }

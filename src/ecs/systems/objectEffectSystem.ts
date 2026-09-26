@@ -1,8 +1,7 @@
-import { Vector3 } from '../../libs/babylon/exports';
+import { Vector3, type Scene } from '../../libs/babylon/exports';
 import { EventBus } from '../../libs/eventBus';
 import { playBurst, type BurstKind } from '../../effects/bursts';
-import { playSfx } from '../../libs/sfx';
-import { UI_BUS } from '../../sound/ui';
+import { playUiSound } from '../../sound/ui';
 import { TerrainDecal } from '../../common/moveTargetEffect';
 import { dropTier, type DropTier } from '../../common/dropTier';
 import { lighting } from '../../lighting';
@@ -26,32 +25,38 @@ const GLOW_LIGHT: Record<Exclude<DropTier, 'normal'>, [number, number, number]> 
 
 const tmp = new Vector3();
 
+function positionOf(e: Entity, height: number): Vector3 {
+  const t = e.transform!;
+  return tmp.set(
+    t.pos.x + (t.posOffset?.x ?? 0),
+    t.pos.y + height,
+    t.pos.z + (t.posOffset?.z ?? 0)
+  );
+}
+
+/**
+ * The burst at `entity` with no sound of its own, for a packet that shows the
+ * level-up flare under another sound (the quest reward's SOUND_CHANGE_UP).
+ */
+export function showObjectEffect(scene: Scene, entity: Entity, effect: BurstKind): void {
+  playBurst(scene, effect, positionOf(entity, 0).clone());
+
+  // The burst also lights the ground and whoever stands by - the lighting
+  // layer's `objectEffects` entry owns the recipe and the follow.
+  lighting.objectEffect(scene, entity, effect);
+}
+
 export const ObjectEffectSystem: ISystemFactory = world => {
   const drops = world.with('droppedItem', 'transform');
   const glows = new Map<Entity, TerrainDecal>();
   const pool: TerrainDecal[] = [];
   let glowSeq = 0;
 
-  function positionOf(e: Entity, height: number): Vector3 {
-    const t = e.transform!;
-    return tmp.set(
-      t.pos.x + (t.posOffset?.x ?? 0),
-      t.pos.y + height,
-      t.pos.z + (t.posOffset?.z ?? 0)
-    );
-  }
-
   EventBus.on('objectEffect', ({ entity, effect }) => {
-    // ReceiveLevelUp (WSclient.cpp:6476, :9027): SOUND_LEVEL_UP with the flare burst.
-    if (effect === 'levelUp') {
-      playSfx('Sound/pLevelUp', entity.transform.pos, { bus: UI_BUS });
-    }
-    const kind: BurstKind = effect;
-    playBurst(world.scene, kind, positionOf(entity, 0).clone());
-
-    // The burst also lights the ground and whoever stands by - the lighting
-    // layer's `objectEffects` entry owns the recipe and the follow.
-    lighting.objectEffect(world.scene, entity, effect);
+    // ReceiveDisplayEffectViewport 0x10 (WSclient.cpp:9653): SOUND_LEVEL_UP,
+    // 2D, for any player in view.
+    if (effect === 'levelUp') playUiSound('levelUp');
+    showObjectEffect(world.scene, entity, effect);
   });
 
   drops.onEntityAdded.subscribe(e => {

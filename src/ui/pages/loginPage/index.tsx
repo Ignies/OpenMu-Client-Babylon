@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { t } from '../../../i18n';
-import { uiClick } from '../../../libs/sfx';
+import { playUiSound, uiClick } from '../../../libs/sfx';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { Store, UIState } from '../../../store';
@@ -52,6 +52,11 @@ const REGISTER = { x: 22, y: CHECK_Y + 3 };
 /** `CLoginWin::Render`: the server line in `g_hFixFont` at (111, 80). */
 const SERVER_LINE = { x: 111, y: 80 };
 
+const onCancelClicked = () => {
+  Store.username = '';
+  Store.password = '';
+};
+
 export const LoginPage = observer(() => {
   const [registering, setRegistering] = useState(false);
   /** "Account created" - shown where the login error would be, in green. */
@@ -85,6 +90,40 @@ export const LoginPage = observer(() => {
 
     Store.loginRequest(Store.username, Store.password);
   };
+
+  const form = useRef<HTMLFormElement>(null);
+
+  // Enter and Escape are OK and Cancel wherever the focus is, click included
+  // (LoginWin.cpp:207-219): a click on the checkbox or the art leaves it on
+  // the body, outside the form.
+  useEffect(() => {
+    if (registering) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== 'Escape') return;
+      if (e.isComposing || e.keyCode === 229) return;
+      if (Store.msgWin || Store.optionsEnabled) return;
+      // A focused link keeps its own Enter.
+      if (e.target instanceof HTMLAnchorElement) return;
+
+      // Also stops the form's implicit submit, which would log in twice.
+      e.preventDefault();
+      // Once per press (CInput::IsKeyDown), not once per auto-repeat.
+      if (e.repeat) return;
+
+      if (e.key === 'Escape') {
+        playUiSound('click');
+        onCancelClicked();
+      } else if (!Store.loginProcessing) {
+        playUiSound('click');
+        // Through the form, so a password manager still sees a login submitted.
+        form.current?.requestSubmit();
+      }
+    };
+
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, [registering]);
 
   // One window swapped for another: the logo, the scene behind it and the
   // music are outside this and never notice.
@@ -131,6 +170,7 @@ export const LoginPage = observer(() => {
           />
         )}
         <form
+          ref={form}
           onSubmit={e => {
             e.preventDefault();
             onLoginClicked();
@@ -224,10 +264,7 @@ export const LoginPage = observer(() => {
             frames={{ up: 0, active: 1, down: 2 }}
             color={TEXT_COLOR.brightGray}
             activeColor={TEXT_COLOR.white}
-            onClick={() => {
-              Store.username = '';
-              Store.password = '';
-            }}
+            onClick={onCancelClicked}
             style={{ position: 'absolute', left: CANCEL_X, top: BUTTON_Y }}
           />
 

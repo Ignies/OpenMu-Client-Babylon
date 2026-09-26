@@ -32,6 +32,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
+import { playUiSound } from '../../../../../libs/sfx';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,
@@ -282,6 +283,8 @@ export const Inventory = observer(() => {
       (key === ALT_HOT_KEY && !actionOfKey(key))
     ) {
       Store.inventoryEnabled = !Store.inventoryEnabled;
+      // NewUIHotKey.cpp:198-203.
+      playUiSound('click');
     }
 
     // The grid packs itself top-left, kind by kind; a second press stops a
@@ -510,6 +513,8 @@ export const Inventory = observer(() => {
       column={Store.characterInfoEnabled ? 1 : 0}
       onClose={() => {
         Store.inventoryEnabled = false;
+        // Escape (NewUIMyInventory.cpp:582).
+        playUiSound('click');
       }}
     >
       {}

@@ -22,6 +22,5 @@ export class Spider extends MonsterObject {
     super.load(await loadGLTF('Monster/Monster10.glb', world));
 
     this.setActionSpeed(MonsterActionType.Walk, 1.2);
-    this.setActionSpeed(MonsterActionType.Attack1, 1.2);
   }
 }

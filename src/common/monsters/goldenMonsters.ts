@@ -92,18 +92,18 @@ export class GoldenDerkon extends GoldenMonster {
   protected readonly npcType = 79;
 }
 
-// [NpcInfo(80, "Golden Vepar")] (ZzzCharacter.cpp:13265-13269)
-export class GoldenVepar extends GoldenMonster {
+// [NpcInfo(80, "Golden Lizard King")] (ZzzCharacter.cpp:13531-13537)
+export class GoldenLizardKing extends GoldenMonster {
   static {
-    GoldenVepar.OverrideScale = monsterScaleOf(80);
+    GoldenLizardKing.OverrideScale = monsterScaleOf(80);
   }
   protected readonly npcType = 80;
 }
 
-// [NpcInfo(81, "Golden Lizard King")] (ZzzCharacter.cpp:13258-13264)
-export class GoldenLizardKing extends GoldenMonster {
+// [NpcInfo(81, "Golden Vepar")] (ZzzCharacter.cpp:13538-13542)
+export class GoldenVepar extends GoldenMonster {
   static {
-    GoldenLizardKing.OverrideScale = monsterScaleOf(81);
+    GoldenVepar.OverrideScale = monsterScaleOf(81);
   }
   protected readonly npcType = 81;
 }

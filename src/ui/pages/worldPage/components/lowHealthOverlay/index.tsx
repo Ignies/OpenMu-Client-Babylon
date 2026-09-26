@@ -1,15 +1,17 @@
 import './style.less';
 import { useEffect } from 'react';
+import { reaction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../../../store';
 import { GameOptions } from '../../../../../common/gameOptions';
 import {
+  heartbeatDue,
   NO_WARNING,
   vitalWarning,
   type VitalWarning,
 } from '../../../../../common/lowVitals';
 import { playSfx } from '../../../../../libs/sfx';
-import { SoundsManager } from '../../../../../libs/soundsManager';
+import { Heartbeat } from './heartbeat';
 
 /**
  * The screen-edge warning: a soft red gradient round the frame once health
@@ -24,8 +26,12 @@ import { SoundsManager } from '../../../../../libs/soundsManager';
  * so a change costs one style write and nothing per frame.
  */
 
-/** SOUND_HEART, the sample the original plays while poisoned. */
+/**
+ * SOUND_HEART: the original's low-life (and poison) heartbeat, one channel
+ * (ZzzOpenData.cpp:4780).
+ */
 const HEARTBEAT = 'Sound/pHeartBeat';
+const HEARTBEAT_CHANNELS = 1;
 
 const Edge = ({
   kind,
@@ -58,20 +64,22 @@ export const LowHealthOverlay = observer(() => {
     ? vitalWarning(Store.playerData.mpPercent, GameOptions.lowManaPercent)
     : NO_WARNING;
 
-  // One timer, restarted only when the beat changes step: the sound rides the
-  // pulse rather than the health value.
-  const beatMs = Math.round(health.beatSeconds * 1000);
-
+  // The heart is the original's and ignores the edge options: it follows the
+  // life bar crossing a fifth, then books each beat for when the last ends.
   useEffect(() => {
-    if (beatMs <= 0) return;
-
-    const id = setInterval(() => {
-      if (SoundsManager.effectsVolume <= 0) return;
-      playSfx(HEARTBEAT);
-    }, beatMs);
-
-    return () => clearInterval(id);
-  }, [beatMs]);
+    const heart = new Heartbeat(() =>
+      playSfx(HEARTBEAT, null, { channels: HEARTBEAT_CHANNELS })
+    );
+    const stop = reaction(
+      () => heartbeatDue(Store.playerData.currentHP, Store.playerData.maxHP),
+      due => heart.set(due),
+      { fireImmediately: true }
+    );
+    return () => {
+      stop();
+      heart.stop();
+    };
+  }, []);
 
   return (
     <div className="low-vitals">

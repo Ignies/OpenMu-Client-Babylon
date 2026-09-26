@@ -30,8 +30,7 @@ import { getBaseClass } from '../../common/characterStats';
 import { isWingItem } from '../../common/wings';
 import type { AttackPose } from '../../common/weaponClass';
 import { mountKind } from '../../common/pets';
-import { COMBAT_BUS, skillSound } from '../../common/combatSounds';
-import { playSfx } from '../../libs/sfx';
+import { playSkill } from '../../sound/combat';
 import { skills } from '../../skills';
 import { combat } from '../../combat';
 import { SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../combat/recipes';
@@ -369,8 +368,7 @@ export const SkillCastSystem: ISystemFactory = world => {
             duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,
             serverMinAttackInterval(hero.attributeSystem?.getValue('attackSpeed') ?? 0)
           );
-          const sfx = skillSound(def.num);
-          if (sfx) playSfx(sfx, hero.transform.pos, { bus: COMBAT_BUS });
+          playSkill(def.num, hero.transform.pos);
         }
         world.castRequest = null;
         return;
@@ -433,8 +431,7 @@ export const SkillCastSystem: ISystemFactory = world => {
           const heroPos = hero.transform.pos;
           hero.pathfinding.path = null;
           const duration = playClip(hero, clipFor(hero, def));
-          const sfx = skillSound(def.num);
-          if (sfx) playSfx(sfx, heroPos, { bus: COMBAT_BUS });
+          playSkill(def.num, heroPos);
           cooldown = duration > 0 ? duration : FALLBACK_CAST_COOLDOWN;
         }
         world.castRequest = null;
@@ -623,8 +620,7 @@ export const SkillCastSystem: ISystemFactory = world => {
       }
 
       // ExecuteSkill plays the skill's sound as the cast starts.
-      const sfx = skillSound(def.num);
-      if (sfx) playSfx(sfx, hero.transform.pos, { bus: COMBAT_BUS });
+      playSkill(def.num, hero.transform.pos);
 
       cooldown = Math.max(
         duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,

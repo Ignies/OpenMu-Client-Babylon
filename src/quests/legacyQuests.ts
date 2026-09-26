@@ -46,6 +46,7 @@ import {
 import type { CharacterClassNumber } from '../common/types';
 import { EventBus } from '../libs/eventBus';
 import { playUiSound } from '../libs/sfx';
+import { showObjectEffect } from '../ecs/systems/objectEffectSystem';
 import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../libs/mu/questFiles';
 import { Store } from '../store';
 import type { QuestLayer } from './layer';
@@ -568,14 +569,22 @@ reaction(
   }
 );
 
-/** `ShowQuestNpcWindow(index)`: open the window on a quest (default: the current one). */
+/**
+ * `ShowQuestNpcWindow(index)`: open the window on a quest (default: the
+ * current one), with the NPC talk's SOUND_INTERFACE01 (WSclient.cpp:6564).
+ */
 export function openLegacyQuestWindow(index = -1): void {
+  showLegacyQuestWindow(index);
+  playUiSound('window');
+}
+
+/** The server showing it is silent (`ReceiveQuestState` / `ReceiveQuestResult`). */
+function showLegacyQuestWindow(index: number): void {
   runInAction(() => {
     if (index >= 0) state.currentIndex = index;
     state.npcWindowOpen = true;
   });
   showDialogText(checkQuestState());
-  playUiSound('window');
 }
 
 /**
@@ -702,14 +711,14 @@ EventBus.on('LegacyQuestStateDialog', packet => {
   const quest = questDefinition(index);
   if (npc && quest && quest.npcType !== npc && ownState(index, p.State) !== LegacyQuestState.InProgress) {
     const mine = legacyQuestForNpc(npc);
-    if (mine) openLegacyQuestWindow(mine.index);
+    if (mine) showLegacyQuestWindow(mine.index);
     // Otherwise it answers an earlier talk, which the pending one's close already ended.
     else if (isLegacyQuestNpc(npc)) endNpcTalk();
     return;
   }
 
   setQuestState(index, p.State);
-  openLegacyQuestWindow(index < MAX_QUESTS ? index : -1);
+  showLegacyQuestWindow(index < MAX_QUESTS ? index : -1);
 });
 
 EventBus.on('LegacySetQuestStateResponse', packet => {
@@ -724,7 +733,7 @@ EventBus.on('LegacySetQuestStateResponse', packet => {
   setQuestState(p.QuestIndex, p.NewState);
   clearLocalKills();
   if (wasOpen) endNpcTalk();
-  openLegacyQuestWindow(p.QuestIndex < MAX_QUESTS ? p.QuestIndex : -1);
+  showLegacyQuestWindow(p.QuestIndex < MAX_QUESTS ? p.QuestIndex : -1);
 });
 
 /**
@@ -773,9 +782,12 @@ EventBus.on('LegacyQuestReward', packet => {
       break;
   }
 
+  // Every reward case ends in the flare burst and SOUND_CHANGE_UP, 2D, for
+  // whoever got it (WSclient.cpp:10408-10521); not SOUND_LEVEL_UP, so the
+  // burst is shown directly rather than through the level-up event.
   const target = isHero ? hero : world?.getByNetId(p.PlayerId & 0x7fff);
-  if (target?.transform) EventBus.emit('objectEffect', { entity: target, effect: 'levelUp' });
-  if (isHero) playUiSound('levelUp');
+  if (world && target?.transform) showObjectEffect(world.scene, target, 'levelUp');
+  playUiSound('changeUp');
 });
 
 EventBus.on('npcTalkStarted', () => hideLegacyQuestWindow());

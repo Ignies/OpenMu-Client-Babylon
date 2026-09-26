@@ -18,8 +18,8 @@ import { CrywolfDomeObject, CrywolfVentObject } from './eventObjects';
  *    OpenMU never runs the event, so the swaps would be dead paths today.
  *  - `M34CryWolf1st::CreateMist` (weather 2 only) - a weather recipe.
  *
- * `SOUND_CRY1ST_AMBIENT` (`w35/crywolf_ambi.wav`, loaded looping at
- * MapManager.cpp:193) is the bed in `ambientBeds.ts`.
+ * `SOUND_CRY1ST_AMBIENT` (`w35/crywolf_ambi.wav`) is loaded at
+ * MapManager.cpp:194 and never played, so Crywolf has no bed.
  */
 export async function createCrywolf(world: World) {
   const terrain = world.terrain;

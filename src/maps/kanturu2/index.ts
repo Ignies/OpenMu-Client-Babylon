@@ -1,6 +1,7 @@
 import { ENUM_WORLD } from '../../common/types';
 import type { MapLayer } from '../layer';
 import { ROCK04_TILES } from '../recipes';
+import { endGatewayTurn } from './gateway';
 import {
   KANTURU2_BLEND_MESHES,
   KANTURU2_EFFECT_ONLY_TYPES,
@@ -26,7 +27,8 @@ const TILES = ROCK04_TILES;
 const SPAWN = { x: 76, y: 105 } as const;
 
 // ---- 2. state + readers ----------------------------------------------------
-// None: the map's runtime state lives in the objects `create` binds.
+// The objects' state lives in what `create` binds; the Gateway Machine's
+// turn sound is `gateway.ts`, ended by a map change.
 
 // ---- 3. the layer ----------------------------------------------------------
 
@@ -39,4 +41,5 @@ export const kanturu2Layer: MapLayer = {
   effectOnly: KANTURU2_EFFECT_ONLY_TYPES,
   emissions: KANTURU2_EMISSIONS,
   create: world => import('./create').then(m => m.createKanturu2(world)),
+  reset: endGatewayTurn,
 };

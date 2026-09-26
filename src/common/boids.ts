@@ -22,11 +22,9 @@ const eyeWorld = new Vector3();
  * bats in the Dungeon, Noria's butterflies, Blood Castle's crows, the fish
  * over Atlans.
  *
- * It was never written. The giveaway was that the *sounds* had been:
- * `sound/ambientBeds.ts` plays `aBird1`/`aBird2` in Lorencia and `aBat` in
- * the Dungeon on the boids' own dice rolls, naming `MODEL_BIRD01` and
- * `MODEL_BAT01` in its comments. Lorencia has been playing birdsong at an
- * empty sky.
+ * The calls are the boids' own: each bird, bat and crow near the hero rolls
+ * its `PlayBuffer(sound, o)` at its own position (GOBoid.cpp:1481-1501), so a
+ * sky with nothing in it is silent, and so is one the dragons took over.
  *
  * ## Which map has what
  *
@@ -120,11 +118,14 @@ export type BoidSpec = {
    */
   readonly eyes?: EyeGlow;
   /**
-   * A call this species makes while the hero is inside `withinCm`, one chance
-   * in `oneIn` a tick. `onSafeZone` is the crow's extra condition: it only
-   * caws over a `TW_SAFEZONE` tile (GOBoid.cpp:1495-1500).
+   * The calls this species makes while the hero is inside `withinCm`, each
+   * its own roll of one chance in `oneIn` a tick: the original's roll for one
+   * creature, which `boidSystem` thins while more of the flock is in range
+   * than the original's usually is. `onSafeZone` is the crow's extra
+   * condition: it only caws while the hero's tile is exactly `TW_SAFEZONE`
+   * (GOBoid.cpp:1226, 1497-1501).
    */
-  readonly call?: BoidCall;
+  readonly calls?: readonly BoidCall[];
 };
 
 export type EyeGlow = {
@@ -139,9 +140,12 @@ export type BoidCall = {
   readonly sound: Sounds;
   readonly withinCm: number;
   readonly oneIn: number;
+  /** Share of the ambience bus before distance attenuation; 1 when absent. */
+  readonly gain?: number;
   readonly onSafeZone?: boolean;
 };
 
+/** `rand_fps_check(512)` for each of the two songs (GOBoid.cpp:1481-1489). */
 const BIRD: BoidSpec = {
   kind: 'bird',
   models: ['Object1/Bird01.glb'],
@@ -149,8 +153,13 @@ const BIRD: BoidSpec = {
   velocity: 1,
   turn: 13,
   lit: true,
+  calls: [
+    { sound: 'Sound/aBird1', withinCm: 600, oneIn: 512, gain: 0.5 },
+    { sound: 'Sound/aBird2', withinCm: 600, oneIn: 512, gain: 0.5 },
+  ],
 };
 
+/** `rand_fps_check(256)` (GOBoid.cpp:1490-1494). */
 const BAT: BoidSpec = {
   kind: 'bat',
   models: ['Object2/Bat01.glb'],
@@ -158,6 +167,9 @@ const BAT: BoidSpec = {
   velocity: 1,
   turn: 13,
   lit: true,
+  calls: [
+    { sound: 'Sound/aBat', withinCm: 600, oneIn: 256, gain: 0.45 },
+  ],
 };
 
 /** `Velocity` 0.3, `LightEnable` false, `Light` white (GOBoid.cpp:1334-1339). */
@@ -173,7 +185,7 @@ const BUTTERFLY: BoidSpec = {
 /**
  * Blood Castle's crow. `MoveBird` moves it (GOBoid.cpp:1437-1439) - the same
  * flight, dive and landing the Lorencia bird gets. What is its own: two red
- * eyes, and a caw it only makes over the safe zone.
+ * eyes, and a caw it only makes while the hero is in the safe zone.
  */
 const CROW: BoidSpec = {
   kind: 'crow',
@@ -189,12 +201,14 @@ const CROW: BoidSpec = {
     colour: [1, 0.2, 0],
     luminosity: [1.28, 1.6],
   },
-  call: {
-    sound: 'Sound/eCrow',
-    withinCm: 600,
-    oneIn: 128,
-    onSafeZone: true,
-  },
+  calls: [
+    {
+      sound: 'Sound/eCrow',
+      withinCm: 600,
+      oneIn: 128,
+      onSafeZone: true,
+    },
+  ],
 };
 
 /**

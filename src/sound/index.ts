@@ -50,7 +50,6 @@ export {
   playUiSound,
   uiClick,
 } from './ui';
-export { installUiWindowChime } from './windowChime';
 export {
   COMBAT_BUS,
   SKILL_SOUNDS,

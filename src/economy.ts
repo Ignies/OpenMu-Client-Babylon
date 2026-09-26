@@ -505,7 +505,6 @@ export const Economy = new (class _Economy {
       this.vaultUnlocked = false;
       Store.inventoryEnabled = true;
     });
-    playUiSound('window');
   }
 
   setVaultItems(entries: { slot: number; item: Item }[]): void {
@@ -603,7 +602,6 @@ export const Economy = new (class _Economy {
           Store.playerData.money += amount;
         }
       });
-      playUiSound('dropMoney');
       return;
     }
 
@@ -626,7 +624,6 @@ export const Economy = new (class _Economy {
       this.vaultMoney = vaultMoney;
       Store.playerData.money = inventoryMoney;
     });
-    playUiSound('dropMoney');
   }
 
   /** `CStorageUnlockMsgBoxLayout`: the numeric pin pad. */
@@ -675,7 +672,6 @@ export const Economy = new (class _Economy {
       this.mixResult = null;
       Store.inventoryEnabled = true;
     });
-    playUiSound('window');
   }
 
   /**
@@ -786,13 +782,20 @@ export const Economy = new (class _Economy {
       if (result === E.Success && item) this.mixItems[0] = item;
     });
 
+    // ReceiveMixExtended (WSclient.cpp:6793-6794).
     if (result === E.Success) {
       playUiSound('mix');
+      playUiSound('jewel');
       Social.systemMessage(t('chaos.succeeded'));
       return;
     }
 
-    playUiSound('mixFailed');
+    // The emptied tray after a failed mix (WSclient.cpp:1750-1754); a mix the
+    // machine refused (zen, level, wrong items) is silent.
+    if (result === E.Failed) {
+      playUiSound('mix');
+      playUiSound('mixFailed');
+    }
 
     const reason: Partial<Record<ItemCraftingResultCraftingResultEnum, TextKey>> = {
       [E.Failed]: 'chaos.failed',
@@ -876,7 +879,6 @@ export const Economy = new (class _Economy {
       this.tradePartner = partner;
       Store.inventoryEnabled = true;
     });
-    playUiSound('window');
   }
 
   /** `ProcessToReceiveYourItemAdd` / `…Delete` (0x39 / 0x38). */
@@ -991,7 +993,6 @@ export const Economy = new (class _Economy {
     switch (result) {
       case E.Success:
         Social.systemMessage(t('trade.completed'));
-        playUiSound('getItem');
         break;
       case E.Cancelled:
         Social.errorMessage(t('trade.cancelled'));
@@ -1032,7 +1033,6 @@ export const Economy = new (class _Economy {
       this.myShopOpen = true;
       Store.inventoryEnabled = true;
     });
-    playUiSound('window');
   }
 
   closeMyShop(): void {
@@ -1220,7 +1220,6 @@ export const Economy = new (class _Economy {
       }
     });
 
-    playUiSound('dropMoney');
     Social.systemMessage(t('personalShop.itemSold', { buyer }));
   }
 
@@ -1244,14 +1243,10 @@ export const Economy = new (class _Economy {
 
   /** `PlayerShopItemList` (0x3F 0x05). */
   showShop(browse: ShopBrowse): void {
-    const wasOpen = this.browsing?.playerId === browse.playerId;
-
     prefetchItemIcons(browse.items.map(stock => stock?.item));
     runInAction(() => {
       this.browsing = browse;
     });
-
-    if (!wasOpen) playUiSound('window');
   }
 
   closeBrowsedShop(): void {

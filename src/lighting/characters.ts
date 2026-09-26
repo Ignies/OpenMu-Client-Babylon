@@ -160,12 +160,12 @@ export const CHARACTER_LIGHTS: Partial<Record<number, CharacterLight>> = {
   // lying on the seabed, so the pool sits low.
   45: carried(3, 0.35),
   51: carried(3, 0.5),
-  // 46 Vepar / 80 Golden Vepar: one `lightning2` light in each hand.
+  // 46 Vepar / 81 Golden Vepar: one `lightning2` light in each hand.
   46: carried(3, 0.8, LIGHTNING_GLOW_RGB),
-  80: carried(3, 0.8, LIGHTNING_GLOW_RGB),
-  // 48 Lizard King / 81 Golden Lizard King: four burning spikes.
+  81: carried(3, 0.8, LIGHTNING_GLOW_RGB),
+  // 48 Lizard King / 80 Golden Lizard King: four burning spikes.
   48: carried(3, 0.9),
-  81: carried(3, 0.9),
+  80: carried(3, 0.9),
   // 49 Hydra: the big `lightning2` flare over the head of a boss.
   49: carried(4, 1.2, LIGHTNING_GLOW_RGB),
   // 36 Shadow has no row on purpose: its body cards are `SubType 1`,
