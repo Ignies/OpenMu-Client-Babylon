@@ -47,6 +47,10 @@ import { BlendState } from './objects/enum';
 import { storeRef } from './storeRef';
 import { settleStillAnimations } from './staticClips';
 import { requestGlowProbe } from '../scenes/sceneLook';
+import {
+  shadowReceiverChanged,
+  shadowReceiversChanged,
+} from '../scenes/csmBounds';
 import type { MapObjectLights } from './mapObjectLights';
 
 const BoundingUpdateInterval = 5;
@@ -309,6 +313,7 @@ function fixSkinnedLocalBounds(mesh: AbstractMesh): void {
           entry.mesh.setBoundingInfo(
             new BoundingInfo(entry.min, entry.max, entry.mesh.getWorldMatrix())
           );
+          shadowReceiverChanged(entry.mesh);
         }
         if (entry.frames >= SKINNED_BOUNDS_FRAMES) {
           settledSkinnedBounds.set(vertexDataKey(entry.mesh), {
@@ -1190,6 +1195,9 @@ export class ModelObject {
     if (this.IsMapObject) {
       this.settleStaticClips();
       this.markStaticCaster();
+      // receiveShadows, visibility and bounds changed on meshes the scene
+      // already held; the cascades' kept receiver box must hear of it.
+      shadowReceiversChanged();
     }
 
     this.Ready = true;
