@@ -10,6 +10,7 @@
 import { Constants, Material, StandardMaterial, Vector3, type Scene } from '../libs/babylon/exports';
 import {
   LiveList,
+  TICK,
   acquireCard,
   additiveMaterial,
   darkCardGain,
@@ -27,6 +28,7 @@ import {
   type RGB,
   type SheetCells,
 } from './core';
+import { clampAlpha } from './clampAlpha';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
 
@@ -73,6 +75,18 @@ export interface SpriteOptions {
   flat?: boolean;
   /** Fade tail as a fraction of life (default 0.35). */
   fadeTail?: number;
+  /** Fade in from nothing over this fraction of life (the original's `Alpha += k` ramps). Default 0. */
+  fadeIn?: number;
+  /** Card height as a multiple of its width: a non-square sheet (pin_lights 16x128 is 8). Default 1. */
+  stretch?: number;
+  /** Light multiplied by this every tick (`Light *= 1 / 1.1`), on top of the fades. Default 1. */
+  decay?: number;
+  /** Tiles a second added to the edge from birth (`Scale += k` a tick); replaces `grow` / `growFrom`. */
+  scaleRate?: number;
+  /** A new random roll every frame, the per-frame `CreateSprite(..., rand() % 360)`. */
+  randomRoll?: boolean;
+  /** Ends the cards early (the clip that carried them ended). */
+  until?: () => boolean;
   /**
    * The texture is a sheet: play its cells once over the life, one card = one
    * cell (BITMAP_EXPLOTION's `Frame = (20 − LifeTime) / 2`). Without this the
@@ -131,6 +145,8 @@ function darkMaterial(scene: Scene, texture: string, cover: number): StandardMat
   mat.disableDepthWrite = true;
   mat.fogEnabled = false;
   mat.alpha = cover;
+  // A cover above 1 would leave `1 - alpha` negative on the half-float buffer.
+  clampAlpha(mat);
   let dead = false;
   mat.onDisposeObservable.addOnce(() => {
     dead = true;
@@ -167,6 +183,11 @@ export function spawnSprite(
   const tail = opts.fadeTail ?? 0.35;
   const cells = opts.cells;
   const source = opts.follow ? opts.follow : pointSource(at);
+  const fadeIn = opts.fadeIn ?? 0;
+  const stretch = opts.stretch ?? 1;
+  const decay = opts.decay ?? 1;
+  const scaleRate = opts.scaleRate;
+  const until = opts.until;
 
   const cards: Card[] = [];
   const offsets: Vector3[] = [];
@@ -194,7 +215,7 @@ export function spawnSprite(
     update(dt) {
       t += dt;
       const p = t / seconds;
-      if (p >= 1) return false;
+      if (p >= 1 || until?.()) return false;
       if (cells) {
         const f = Math.min(cells.count - 1, Math.floor(p * cells.count));
         if (f !== frame) {
@@ -207,20 +228,23 @@ export function spawnSprite(
       const ready = (dark ? material.opacityTexture : material.diffuseTexture) ? 1 : 0;
       source(tmp);
       const grown = p < GROW_FRACTION ? lerp(growFrom, 1, p / GROW_FRACTION) : lerp(1, grow, (p - GROW_FRACTION) / (1 - GROW_FRACTION));
-      const s = size * (opts.sizeAt ? opts.sizeAt(p) : grown);
+      const s = scaleRate === undefined ? size * (opts.sizeAt ? opts.sizeAt(p) : grown) : Math.abs(size + scaleRate * t);
       // The original's `Alpha`: the card's colour fades to black (core.ts
       // `ADDITIVE_ALPHA_MODE`); it used to shrink instead.
-      const vis = ready * fadeOut(p, tail);
+      let vis = ready * fadeOut(p, tail);
+      if (fadeIn > 0 && p < fadeIn) vis *= p / fadeIn;
+      if (decay !== 1) vis *= decay ** (t / TICK);
       const y = height + rise * t;
       for (let i = 0; i < cards.length; i++) {
         const c = cards[i];
         const o = offsets[i];
         c.position.set(tmp.x + o.x + move[0] * t, tmp.y + o.y + y + move[1] * t, tmp.z + o.z + move[2] * t);
-        c.scaling.setAll(s);
+        c.scaling.set(s, s * stretch, s);
         if (opts.aspect) c.scaling.y = s * opts.aspect;
         c.visibility = vis;
-        if (opts.rotation !== undefined && !spin && !opts.flat) c.rotation.z = opts.rotation;
-        if (spin) {
+        if (opts.randomRoll) c.rotation.z = Math.random() * Math.PI * 2;
+        else if (opts.rotation !== undefined && !spin && !opts.flat) c.rotation.z = opts.rotation;
+        else if (spin) {
           if (opts.flat) c.rotation.y = phases[i] + spin * t;
           else c.rotation.z = phases[i] + spin * t;
         }
