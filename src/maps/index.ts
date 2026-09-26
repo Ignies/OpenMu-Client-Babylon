@@ -141,6 +141,7 @@ class Maps {
     if (!layer) return false;
     return (
       layer.outdoor === true &&
+      layer.rain !== false &&
       layer.snow !== true &&
       layer.underwater !== true &&
       layer.desert !== true

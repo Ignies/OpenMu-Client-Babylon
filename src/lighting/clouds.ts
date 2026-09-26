@@ -305,7 +305,9 @@ export function volumetricClouds(): boolean {
 }
 
 export function cloudsActive(base: number | null): boolean {
-  if (base === null || !lightingTier() || !GameOptions.clouds) return false;
+  if (base === null || base <= 0 || !lightingTier() || !GameOptions.clouds) {
+    return false;
+  }
 
   return coverage(base) > 0.01;
 }

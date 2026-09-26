@@ -1,6 +1,5 @@
 import { ENUM_WORLD } from '../common/types';
 import { GameOptions } from '../common/gameOptions';
-import { rainStrength } from '../weather/rainState';
 import { SoundsManager } from '../libs/soundsManager';
 import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
@@ -104,20 +103,9 @@ const BOID_MIN_TILES = 2;
 const WIND: AmbientBed = { sound: 'Sound/aWind', volume: 0.35 };
 
 export const BEDS: Partial<Record<ENUM_WORLD, readonly AmbientBed[]>> = {
-  // Lorencia: wind outdoors, rain layered on while the weather byte says so,
-  // and both cut inside the buildings (tile 4, SceneManager.cpp:885-895).
-  [ENUM_WORLD.WD_0LORENCIA]: [
-    { ...WIND, mutedOn: tile => tile === 4 },
-    // `if (RainCurrent > 0) PlayBuffer(SOUND_RAIN01, NULL, true)` - the sound
-    // follows the *current* rain, not the packet, so it fades in with the
-    // first drops and keeps going while the last shower falls out.
-    {
-      sound: 'Sound/aRain',
-      volume: 0.4,
-      mutedOn: tile => tile === 4,
-      when: () => rainStrength() > 0,
-    },
-  ],
+  // Lorencia: wind outdoors, cut inside the buildings (tile 4,
+  // SceneManager.cpp:885-895). No rain bed: the town stays dry.
+  [ENUM_WORLD.WD_0LORENCIA]: [{ ...WIND, mutedOn: tile => tile === 4 }],
 
   [ENUM_WORLD.WD_1DUNGEON]: [{ sound: 'Sound/aDungeon', volume: 0.4 }],
 

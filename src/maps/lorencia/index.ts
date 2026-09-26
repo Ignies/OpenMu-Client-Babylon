@@ -22,8 +22,9 @@ const WORLDS: readonly ENUM_WORLD[] = [
 // The square by the bar, the offline start.
 const SPAWN = { x: 135, y: 131 } as const;
 
-// Open sky: rain falls here when the weather byte says so.
+// Open sky, but it stays dry: no rain, wet stone or puddles in town.
 const OUTDOOR = true;
+const RAIN = false;
 
 // ---- 2. state + readers ----------------------------------------------------
 // None: the map's runtime state lives in the objects `create` binds.
@@ -36,6 +37,7 @@ export const lorenciaLayer: MapLayer = {
   tiles: ROCK02_TILES,
   spawn: SPAWN,
   outdoor: OUTDOOR,
+  rain: RAIN,
   blendMeshes: LORENCIA_BLEND_MESHES,
   effectOnly: LORENCIA_EFFECT_ONLY_TYPES,
   emissions: LORENCIA_EMISSIONS,

@@ -327,7 +327,7 @@ export async function getTerrainData(
       texturesData,
       tileArray,
       // Ground-contact weather for this map: wet stone and puddles on
-      // Lorencia and Noria, settled snow on Devias. Empty everywhere else,
+      // Noria, settled snow on Devias. Empty everywhere else,
       // and the shader is then exactly what it always was.
       overlays: terrainOverlaysFor(map),
       // The `AlphaTile*` slot, where this map has one: those tiles are a hole
