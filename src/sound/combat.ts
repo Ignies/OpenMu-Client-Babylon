@@ -123,6 +123,10 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   223: 'Sound/SE_Ch_summoner_skill05_explosion03', // Explosion
   224: 'Sound/SE_Ch_summoner_skill06_requiem02', // Requiem
   230: 'Sound/lightning_shock', // Lightning Shock
+  455: 'Sound/SE_Ch_summoner_skill08_chainlightning', // Chain Lightning Strengthener
+  456: 'Sound/lightning_shock', // Lightning Shock Strengthener
+  458: 'Sound/SE_Ch_summoner_skill07_lifedrain', // Drain Life Strengthener
+  462: 'Sound/SE_Ch_summoner_skill07_lifedrain', // Drain Life Mastery
   233: 'Sound/SwellofMagicPower', // Expansion of Wizardry
   234: 'Sound/recover', // Recovery
   236: 'Sound/flame_strike', // Flame Strike
@@ -209,10 +213,10 @@ export function playerDeathSound(cls: CharacterClassNumber): Sounds {
 
 /**
  * Skills whose sound the original plays with the effect at AttackTime 15, 14 ticks after the
- * echo (ZzzCharacter.cpp:4724-4754), not at the cast: the skill row plays these
+ * echo (ZzzCharacter.cpp:4724-4754, :5147-5156, :5213-5223), not at the cast: the skill row plays these
  * (`playLandingSound`, common/skillVisuals.ts), so the cast is silent here.
  */
-const LANDING_SOUNDS: ReadonlySet<number> = new Set([221, 222, 459, 460]);
+const LANDING_SOUNDS: ReadonlySet<number> = new Set([214, 216, 221, 222, 458, 459, 460, 462]);
 
 export function skillSound(skill: number): Sounds | null {
   if (LANDING_SOUNDS.has(skill)) return null;

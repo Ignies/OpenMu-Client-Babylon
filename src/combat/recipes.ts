@@ -228,6 +228,7 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   // --- Summoner (UseSkillSummon, ZzzInterface.cpp:2534-2680) --------------
   214: DRAIN_LIFE_CLIPS, // Drain Life
   458: DRAIN_LIFE_CLIPS, // Drain Life Str
+  462: DRAIN_LIFE_CLIPS, // Drain Life Mastery
   215: CHAIN_LIGHTNING_CLIPS, // Chain Lightning
   455: CHAIN_LIGHTNING_CLIPS, // Chain Lightning Str
   216: {

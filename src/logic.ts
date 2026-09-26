@@ -262,9 +262,10 @@ import { classWorldScale } from './common/characterScale';
 import { skillDefinition } from './common/skillsDatabase';
 import { traceHeroInstantMove } from './common/heroMoveTrace';
 import { chooseSkillAction } from './common/skillCasting';
+import { skillClip } from './combat/skillClips';
 import { getBaseClass, BaseClass } from './common/characterStats';
 import { SKILL_TO_EFFECT } from './common/magicEffects';
-import { playAreaSkillVisual, playBowShotVisual, playTargetedSkillVisual, setBuffVisual } from './common/skillVisuals';
+import { playAreaSkillVisual, playBowShotVisual, playChainLightningHop, playTargetedSkillVisual, setBuffVisual } from './common/skillVisuals';
 import { monsterModelTypeOf, playerPlaySpeed } from './common/playSpeed';
 import { TRAP_MODEL_TABLE } from './common/npcs/trapNpc';
 import {
@@ -2624,9 +2625,10 @@ function playCastAnimation(caster: Entity, skill: number, area: boolean) {
       world: Store.world?.mapIndex,
       alternate: Math.random() < 0.5,
     };
+    // A skill the server has no definition for still plays its own clip (Lightning Orb, 216).
     let action = def
       ? chooseSkillAction(def, attackPoseOf(caster), ctx)
-      : PlayerAction.PLAYER_SKILL_HAND1;
+      : (skillClip(skill, ctx) ?? PlayerAction.PLAYER_SKILL_HAND1);
     // Others see Electric Spike from a horse as the ground flash; only the Fenrir has its own (WSclient.cpp:5261-5265).
     if (action === PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_FLASH) action = PlayerAction.PLAYER_SKILL_FLASH;
     caster.playerAnimation.swordCount =
@@ -4543,7 +4545,8 @@ EventBus.on('BaseStatsExtended', packet => {
 /**
  * BF 0A - `ChainLightningHitInfo`: the server-picked hops of Chain Lightning
  * (skill 215). The cast came through the usual skill animation packet; here
- * only the bolt is drawn caster -> target -> target.
+ * the arcs are drawn caster -> target -> target, hop `i` from the previous
+ * body, as ReceiveChainMagic's MODEL_CHAIN_LIGHTNING sub `i` (WSclient.cpp:5577-5629).
  */
 EventBus.on('ChainLightningHitInfo', packet => {
   const p = new ChainLightningHitInfoPacket(packet);
@@ -4552,11 +4555,14 @@ EventBus.on('ChainLightningHitInfo', packet => {
   let from = world.getByNetId(p.PlayerId & 0x7fff);
   if (!from) return;
   const maxTargets = Math.max(0, Math.floor((packet.byteLength - 10) / 2));
+  let hop = 0;
   for (const t of p.getTargets(Math.min(p.TargetCount, maxTargets))) {
     const target = world.getByNetId(t.TargetId & 0x7fff);
-    if (!target) continue;
-    playTargetedSkillVisual(world.scene, p.SkillNumber, from, target);
-    from = target;
+    if (target) {
+      playChainLightningHop(world.scene, p.SkillNumber, from, target, hop);
+      from = target;
+    }
+    hop++;
   }
 });
 

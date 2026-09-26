@@ -11,8 +11,9 @@ import { boneLocalPos, bonePos, delay, effectTexture, entityGone, entityPos, ent
 import type { SpriteOptions } from '../effects/sprite';
 import type { ShroudOptions } from '../effects/shroud';
 import type { SpiritSwarmOptions, SwarmSpirit } from '../effects/spiritSwarm';
-import type { ModelHandle, ModelOptions } from '../effects/model';
+import { spawnModel, type ModelHandle, type ModelOptions } from '../effects/model';
 import type { StampsHandle } from '../effects/stamps';
+import type { CardOptions } from '../effects/cards';
 import type { RingOptions } from '../effects/ring';
 import type { ParticlesOptions } from '../effects/particles';
 import type { ProjectileOptions } from '../effects/projectile';
@@ -47,7 +48,7 @@ import {
 } from '../effects/recipes';
 import { ItemsDatabase } from './itemsDatabase';
 import { PlayerAction } from './objects/enum';
-import { playCombat, playLandingSound } from '../sound/combat';
+import { playCombat, playLandingSound, SKILL_SOUNDS } from '../sound/combat';
 import type { Sounds } from '../sound/recipes';
 import { skillDefinition, type SkillDefinition } from './skillsDatabase';
 import { storeRef } from './storeRef';
@@ -1918,6 +1919,743 @@ const zinGrace = (k: ZinCurse): Step => (_at, c) => {
   curseLight(c.scene, k.core, 2.5, ticks(44), feet, undefined, { attack: ticks(12), release: ticks(20), heightOffset: 0.5, floorGain: 0.35 });
 };
 
+// ---- sum1 steps ------------------------------------------------------------------
+
+/**
+ * `c->AttackTime >= g_iLimitAttackTime`: Drain Life and Lightning Orb start 14 ticks after the
+ * reply set AttackTime to 1 (ZzzCharacter.cpp:4132-4145, :5147-5156, :5213-5223).
+ */
+const SUM1_DELAY = ticks(14);
+
+/** Degrees -> radians, and back. */
+const rad = (d: number): number => (d * Math.PI) / 180;
+const deg = (r: number): number => (r * 180) / Math.PI;
+/** `rand() % (2n) - n` in cm, as tiles. */
+const jitterCm = (n: number): number => cm(randInt(2 * n) - n);
+
+/** A card of the cards layer: one original particle or per-frame sprite. */
+const spawnCard = (scene: Scene, at: Vector3, o: CardOptions): void => {
+  effects.spawn('cards', scene, at, o);
+};
+
+/**
+ * `fn(tick)` once for each of the next `n` original ticks on the effects clock, catching up after
+ * a slow frame (MoveEffect runs once a tick). Returning false ends it, like `o->Live = false`.
+ */
+function tickLoop(n: number, fn: (tick: number) => boolean | void): void {
+  const t0 = fxNow();
+  let i = 0;
+  const run = (): void => {
+    const due = Math.min(n, Math.floor((fxNow() - t0) / TICK + 1e-6) + 1);
+    while (i < due) if (fn(i++) === false) return;
+    if (i < n) delay(t0 + i * TICK - fxNow(), run);
+  };
+  run();
+}
+
+/** An invisible carrier the original moves once a tick (the orb, a siphon's head), drawn between its last two ticks. */
+class TickPoint {
+  readonly prev = new Vector3();
+  readonly cur = new Vector3();
+  #stamp = fxNow();
+  constructor(start: Vector3) {
+    this.prev.copyFrom(start);
+    this.cur.copyFrom(start);
+  }
+  /** Start a new tick: the point to move. */
+  tick(): Vector3 {
+    this.prev.copyFrom(this.cur);
+    this.#stamp = fxNow();
+    return this.cur;
+  }
+  readonly at: PointSource = out => Vector3.LerpToRef(this.prev, this.cur, Math.min(1, (fxNow() - this.#stamp) / TICK), out);
+}
+
+/**
+ * `VectorRotate((0, -v, 0), AngleMatrix(a))` for `a` = [pitch, roll, yaw] in degrees: the original's
+ * forward step (ZzzMathLib.cpp:185-212). MU x / y are x / z here, and MU forward is -Y.
+ */
+function muForward(a: readonly number[], v: number, out: Vector3): Vector3 {
+  const sr = Math.sin(rad(a[0]));
+  const cr = Math.cos(rad(a[0]));
+  const sp = Math.sin(rad(a[1]));
+  const cp = Math.cos(rad(a[1]));
+  const sy = Math.sin(rad(a[2]));
+  const cy = Math.cos(rad(a[2]));
+  return out.set(-(sr * sp * cy - cr * sy) * v, -(sr * cp) * v, -(sr * sp * sy + cr * cy) * v);
+}
+
+/** A local offset turned by a yaw in degrees (`VectorRotate` with `Angle (0, 0, yaw)`), x / y / up in cm, as tiles. */
+function muTurn(x: number, y: number, up: number, yaw: number, out: Vector3): Vector3 {
+  const s = Math.sin(rad(yaw));
+  const c = Math.cos(rad(yaw));
+  return out.set(cm(c * x - s * y), cm(up), cm(s * x + c * y));
+}
+
+/** TurnAngle2: step `a` toward `to` the short way by at most `d` degrees (ZzzAI.cpp:113). */
+function humTurn(a: number, to: number, d: number): number {
+  const diff = ((((to - a) % 360) + 540) % 360) - 180;
+  return Math.abs(diff) <= d ? a + diff : a + Math.sign(diff) * d;
+}
+
+/** MoveHumming (ZzzAI.cpp:135): turn `a` ([pitch, roll, yaw] degrees) at `to` by up to `turn` degrees; the distance. */
+function humming(p: Vector3, a: number[], to: Vector3, turn: number): number {
+  const dx = to.x - p.x;
+  const dy = to.y - p.y;
+  const dz = to.z - p.z;
+  a[2] = humTurn(a[2], deg(Math.atan2(dx, -dz)), turn);
+  a[0] = humTurn(a[0], -deg(Math.atan2(dy, Math.hypot(dx, dz))), turn);
+  return Math.hypot(dx, dy, dz);
+}
+
+/** A point source as the lighting layer's follow callback. */
+const lightFollow = (src: PointSource): ((out: { x: number; y: number; z: number }) => void) => {
+  const p = new Vector3();
+  return out => {
+    src(p);
+    out.x = p.x;
+    out.y = p.y;
+    out.z = p.z;
+  };
+};
+
+const groundY = (x: number, z: number): number => storeRef().world?.getTerrainHeight(x, z) ?? 0;
+
+/** The bones a body's skeleton carries (the original's `NumBones`); 0 without one. */
+const boneCount = (e: Entity): number => Math.max(0, (e.modelObject?.gltf?.skeleton?.bones.length ?? 0) - 1);
+
+/** Sheet widths in px, for `Width = bitmap width x Scale` (ZzzEffectParticle.cpp:8996). */
+const PX_FLARE = 64;
+const PX_SHINY2 = 32;
+const PX_MAGIC = 128;
+const PX_PIN = 16;
+const PX_SPARK3 = 32;
+const PX_SMOKE = 64;
+const PX_THUNDER = 64;
+const PX_SHINY5 = 64;
+const PX_SHOCKWAVE = 128;
+const PX_MEGA = 128;
+const PX_RED_FLARE = 64;
+/** A sprite turning by `fRot = WorldTime * 0.0006 * 360`: 216 degrees a second. */
+const SPRITE_TURN = rad(216 * TICK);
+
+/**
+ * MODEL_FENRIR_THUNDER sub2 (`wide` false) / sub3 (ZzzEffect.cpp:4337-4381): lightning_type01 at a
+ * random orientation, LT 4 at full alpha, with the flare01 halo at Scale 2 in `Light - 0.3` that
+ * CreateSprite draws the one frame it is made.
+ */
+function fenrirThunder(scene: Scene, at: Vector3, colour: RGB, wide: boolean): void {
+  const j = wide ? 80 : 20;
+  const p = new Vector3(at.x + jitterCm(j), at.y + jitterCm(j), at.z + jitterCm(j));
+  const scale = (wide ? 0.5 : 0.1) + randInt(100) * 0.002;
+  spawnModel(scene, p, { model: MODEL.lightningType, seconds: ticks(4), scale, colour, yaw: Math.random() * Math.PI * 2, fadeTail: 0.01 }).pitchTo(Math.random() * Math.PI * 2);
+  const halo: RGB = [Math.max(0, colour[0] - 0.3), Math.max(0, colour[1] - 0.3), Math.max(0, colour[2] - 0.3)];
+  spawnCard(scene, p, { texture: TEX.flare, colour: halo, size: cm(PX_FLARE * 2), ticks: 1 });
+}
+
+/**
+ * A crackle on a hand while the cast clip plays: per tick two MODEL_FENRIR_THUNDER sub2 on each
+ * bone, and a flare01 sprite on it every frame (Scale `flare`, 0 for none). Chain Lightning's
+ * hands (ZzzCharacter.cpp:10743-10768), Lightning Orb's forearm (:10574-10590).
+ */
+const HAND_CRACKLE_MAX = 60;
+const handCrackle = (bones: readonly number[], colour: RGB, flare: number, clips: readonly PlayerAction[]): Step => (_at, c) => {
+  const caster = c.caster;
+  const playing = (): boolean => !entityGone(caster) && clips.includes(caster.playerAnimation?.action as PlayerAction);
+  if (!playing()) return;
+  const until = (): boolean => !playing();
+  for (const bone of bones) {
+    const hand: PointSource = out => bonePos(caster, bone, out, CAST_HEIGHT);
+    if (flare > 0) spawnCard(c.scene, hand(new Vector3()), { texture: TEX.flare, colour, size: cm(PX_FLARE * flare), ticks: HAND_CRACKLE_MAX, follow: hand, until });
+  }
+  const p = new Vector3();
+  tickLoop(HAND_CRACKLE_MAX, () => {
+    if (!playing()) return false;
+    for (const bone of bones) {
+      bonePos(caster, bone, p, CAST_HEIGHT);
+      fenrirThunder(c.scene, p, colour, false);
+      fenrirThunder(c.scene, p, colour, false);
+    }
+  });
+};
+
+/** `step` at AttackTime 15, handed the skill being dispatched now (its sound and light read it). */
+const atAttackTime = (step: (at: Vector3, c: SkillContext, skill: number) => void): Step => (at, c) => {
+  const skill = currentSkill;
+  const p = at.clone();
+  delay(SUM1_DELAY, () => step(p, c, skill));
+};
+
+// Drain Life (MoveHandlers.cpp:2067-2210).
+
+/** BITMAP_LIGHT+2 sub7's light per tick: full, then `Light *= Alpha` with Alpha 0.9, 0.8, ... from LifeTime 9 (ZzzEffectParticle.cpp:4081-4118). */
+const DRAIN_GLOW_LEVELS = [1, 1, 1, 1, 1, 1, 1, 1, 1, 0.9, 0.72, 0.504, 0.302, 0.151, 0.06, 0.018, 0.004, 0, 0];
+const drainGlowLevel = (age: number): number => {
+  const i = Math.min(DRAIN_GLOW_LEVELS.length - 2, Math.floor(age));
+  return DRAIN_GLOW_LEVELS[i] + (DRAIN_GLOW_LEVELS[i + 1] - DRAIN_GLOW_LEVELS[i]) * (age - i);
+};
+/** Its `Light` (1, 0.2, 0.2) brightens by `LifeTime / 8 * 0.02` a tick until the fade starts. */
+const DRAIN_GLOW_FROM: RGB = [1, 0.2, 0.2];
+const DRAIN_GLOW_TO: RGB = [1.27, 0.47, 0.47];
+
+/** One BITMAP_LIGHT+2 sub7 glow (ZzzEffectParticle.cpp:907-926): flare01, pushed 6 cm a tick out and 2 up, braked x0.6. */
+function drainGlow(scene: Scene, body: Entity): void {
+  const at = entityPos(body, 0, new Vector3());
+  at.x += jitterCm(40);
+  at.z += jitterCm(30);
+  at.y += cm(80 + randInt(180) - 100);
+  const a = Math.random() * Math.PI * 2;
+  const push = cm((randInt(2) + 60) * 0.1);
+  spawnCard(scene, at, {
+    texture: TEX.flare,
+    colour: DRAIN_GLOW_FROM,
+    colourEnd: DRAIN_GLOW_TO,
+    colourTicks: 9,
+    size: cm(PX_FLARE * (1.8 + (randInt(4) + 8) * 0.01)),
+    grow: cm(PX_FLARE * 0.04),
+    ticks: 18,
+    brightness: drainGlowLevel,
+    velocity: [Math.sin(a) * push, cm(2), Math.cos(a) * push],
+    drag: 0.6,
+    dragY: 1,
+    gravity: cm(0.1),
+  });
+}
+
+/** 0 (10%), 1 (70%) or 2 (20%) glows a tick (MoveHandlers.cpp:2085-2103). */
+const drainGlowCount = (): number => {
+  const r = randInt(10);
+  return r === 0 ? 0 : r <= 7 ? 1 : 2;
+};
+/** 0 (10%), 1 (30%), 3 (50%, the 2 case falls through) or 4 (10%) ghosts a tick (:2126-2150). */
+const drainGhostCount = (): number => {
+  const r = randInt(10);
+  return r === 0 ? 0 : r <= 3 ? 1 : r <= 8 ? 3 : 4;
+};
+
+/** The ghost streaks' Light and the siphons' (:2176, :2201). */
+const DRAIN_GHOST_LIGHT: RGB = [0.8, 0.1, 0.2];
+const DRAIN_SIPHON_LIGHT: RGB = [1, 0, 0.1];
+const DRAIN_SIPHON_MAX = 24;
+
+/**
+ * One BITMAP_DRAIN_LIFE_GHOST (ZzzEffectJoint.cpp:2670-2699, :6837-6867): from 100 cm behind the
+ * caster's bone 18, sideways (+-90) and +-50 on every axis, speeding up 2 cm a tick and homing
+ * the target's live xy at a height fixed at birth, turning as many degrees a tick as it moves cm.
+ */
+function drainGhost(scene: Scene, caster: Entity, target: Entity): void {
+  const yaw = deg(entityYaw(caster));
+  const start = bonePos(caster, 18, new Vector3(), CAST_HEIGHT);
+  // vDir = the matrix's +Y column: behind the caster.
+  const ahead = forwardOf(entityYaw(caster));
+  start.x += -ahead.x + cm(randInt(10) * 5);
+  start.z += -ahead.z + cm(randInt(10) * 5);
+  start.y += cm(randInt(10) * 5);
+  const aimY = entityPos(target, 0, new Vector3()).y + cm(100 + (randInt(10) - 5) * 4);
+  const a = [randInt(100) - 50, randInt(100) - 50, yaw + (Math.random() < 0.5 ? 90 : -90) + randInt(100) - 50];
+  let v = 1 + randInt(10) * 0.2;
+  const lt = 30 + randInt(20) - 10;
+  const head = new TickPoint(start);
+  const aim = new Vector3();
+  const step = new Vector3();
+  let done = false;
+  effects.spawn('joint', scene, start, {
+    head: head.at,
+    seconds: ticks(lt),
+    maxTails: 20 + randInt(10) - 5,
+    width: cm(40 + randInt(60) - 30),
+    colour: DRAIN_GHOST_LIGHT,
+    texture: TEX.drainGhost,
+    fadeTail: 10 / lt,
+    until: () => done,
+  });
+  tickLoop(lt, () => {
+    if (entityGone(target)) {
+      done = true;
+      return false;
+    }
+    const p = head.tick();
+    p.addInPlace(muForward(a, cm(v), step));
+    entityPos(target, 0, aim).y = aimY;
+    humming(p, a, aim, v);
+    v += 2;
+  });
+}
+
+/**
+ * One BITMAP_JOINT_ENERGY sub45 siphon off a target bone (ZzzEffectJoint.cpp:213-247, :3235-3414):
+ * a rising helix for 20 ticks (3 cm on, 10 degrees round, 6 cm up a tick), then homing the
+ * caster 120 cm up at up to 30 cm a tick; flareRed at its head. Within 35 cm it is gone, into
+ * pEnergy and the arrival light.
+ */
+function drainSiphon(scene: Scene, caster: Entity, target: Entity, bone: number, skill: number, arrive: (at: Vector3) => void): void {
+  const start = bonePos(target, bone, new Vector3());
+  const head = new TickPoint(start);
+  const a = [0, 0, deg(entityYaw(target))];
+  const aim = new Vector3();
+  const step = new Vector3();
+  let v = 3;
+  let done = false;
+  const until = (): boolean => done;
+  effects.spawn('joint', scene, start, { head: head.at, seconds: ticks(120), maxTails: 8, width: cm(10), colour: DRAIN_SIPHON_LIGHT, texture: TEX.jointLaser, fadeTail: 0.01, until });
+  spawnCard(scene, start, { texture: TEX.redFlare, colour: RGBS.white, size: cm(PX_RED_FLARE * 0.3), ticks: 120, follow: head.at, until });
+  const light = lighting.skillTrail(scene, skill, lightFollow(head.at));
+  tickLoop(120, i => {
+    if (entityGone(caster)) done = true;
+    if (done) {
+      light?.stop();
+      return false;
+    }
+    const p = head.tick();
+    p.addInPlace(muForward(a, cm(v), step));
+    if (120 - i > 100) {
+      a[2] += 10;
+      p.y += cm(6);
+      return;
+    }
+    v = Math.min(30, v + 5);
+    const was = a[2];
+    const dist = humming(p, a, entityPos(caster, cm(120), aim), v);
+    if (dist <= cm(35)) {
+      done = true;
+      light?.stop();
+      arrive(p);
+      return false;
+    }
+    if (dist <= cm(70) && Math.abs(was - a[2]) > 20 && v >= 20) v -= 10;
+  });
+  delay(ticks(120), () => light?.stop());
+}
+
+/**
+ * Drain Life at AttackTime 15: the invisible MODEL_ALICE_DRAIN_LIFE (LT 70) on the caster
+ * (ZzzEffect.cpp:867-874) - red glows round the caster for its life and round the target from
+ * tick 10, ghost streaks for the first 5 ticks, and at LifeTime 64 a siphon off every other
+ * target bone.
+ */
+const drainLife = atAttackTime((_at, c, skill) => {
+  const { caster, target, scene } = c;
+  if (!target || entityGone(caster) || entityGone(target)) return;
+  playLandingSound(skill, entityPos(caster, 0, new Vector3()));
+  let lastArrival = -1;
+  const arrive = (p: Vector3): void => {
+    // One pEnergy and one arrival light a tick: the original replays the same buffer per siphon.
+    const now = Math.floor(fxNow() / TICK);
+    if (now === lastArrival) return;
+    lastArrival = now;
+    playCombat('Sound/pEnergy', p);
+    lighting.skillLand(scene, skill, p);
+  };
+  tickLoop(70, i => {
+    if (entityGone(caster) || entityGone(target)) return;
+    const lt = 70 - i;
+    const n = drainGlowCount();
+    for (let k = 0; k < n; k++) drainGlow(scene, caster);
+    if (lt <= 60) for (let k = 0; k < n; k++) drainGlow(scene, target);
+    if (lt >= 66) for (let k = drainGhostCount(); k > 0; k--) drainGhost(scene, caster, target);
+    if (lt === 64) {
+      // Capped at DRAIN_SIPHON_MAX ribbons: a many-boned body would otherwise put 40+ lines up.
+      const bones = boneCount(target);
+      for (let b = 0, n = 0; b < bones && n < DRAIN_SIPHON_MAX; b++) {
+        if (Math.random() >= 0.5) continue;
+        drainSiphon(scene, caster, target, b, skill, arrive);
+        n++;
+      }
+    }
+  });
+});
+
+// Chain Lightning (MoveHandlers.cpp:1978-2064, WSclient.cpp:5577-5629).
+
+/** The hops' JOINT_THUNDER Light (0.4, 0.4, 1.0); hops 1-2 pass an unset vLight and are drawn in the same blue. */
+const CHAIN_LIGHT: RGB = [0.4, 0.4, 1];
+/** MODEL_CHAIN_LIGHTNING LT 20 (ZzzEffect.cpp:852-865). */
+const CHAIN_TICKS = 20;
+/** JOINT_THUNDER: MaxTails 50 steps of Velocity 50 cm, LT 2 (ZzzEffectJoint.cpp:1100-1110). */
+const THUNDER_STEPS = 50;
+const THUNDER_STEP = cm(50);
+
+/**
+ * A JOINT_THUNDER walk (ZzzEffectJoint.cpp:4767-5020): from `from`, each 50 cm step MoveHumming
+ * turns the heading up to 50 degrees at the target and a fresh deviation (`deviate()` degrees on
+ * pitch and yaw) bends that step alone; it ends within 1.5 steps of the target. The points the
+ * walk does not use are laid along its last step. `end` gets where it stopped.
+ */
+function thunderPath(start: () => readonly [number, number], deviate: () => number, end?: (p: Vector3) => void): NonNullable<JointOptions['path']> {
+  const a = [0, 0, 0];
+  const p = new Vector3();
+  const step = new Vector3();
+  const d = [0, 0, 0];
+  return (from, to, out, segments) => {
+    const [pitch, yaw] = start();
+    a[0] = pitch;
+    a[1] = 0;
+    a[2] = yaw;
+    p.copyFrom(from);
+    let k = 0;
+    for (let j = 0; j < THUNDER_STEPS && k <= segments; j++) {
+      const dist = humming(p, a, to, 50);
+      out[k * 3] = p.x;
+      out[k * 3 + 1] = p.y;
+      out[k * 3 + 2] = p.z;
+      k++;
+      if (dist < THUNDER_STEP * 1.5) break;
+      d[0] = a[0] + deviate();
+      d[2] = a[2] + deviate();
+      p.addInPlace(muForward(d, THUNDER_STEP, step));
+    }
+    end?.(p);
+    if (k < 2) {
+      // Born on the target: a straight stub.
+      out[0] = from.x;
+      out[1] = from.y;
+      out[2] = from.z;
+      out[3] = to.x;
+      out[4] = to.y;
+      out[5] = to.z;
+      k = 2;
+    }
+    const b = (k - 2) * 3;
+    const e = (k - 1) * 3;
+    const n = segments + 1 - (k - 1);
+    const ex = out[e];
+    const ey = out[e + 1];
+    const ez = out[e + 2];
+    const bx = out[b];
+    const by = out[b + 1];
+    const bz = out[b + 2];
+    for (let i = 0; i < n; i++) {
+      const t = (i + 1) / n;
+      const o = b + 3 + i * 3;
+      out[o] = bx + (ex - bx) * t;
+      out[o + 1] = by + (ey - by) * t;
+      out[o + 2] = bz + (ez - bz) * t;
+    }
+  };
+}
+
+/** `(rand() % 1024 - 512) / Scale` degrees. */
+const thunderDeviation = (widthCm: number) => (): number => (randInt(1024) - 512) / widthCm;
+
+/**
+ * What a width-50 JOINT_THUNDER leaves where it ends, each of its two ticks (:4981-5003): a
+ * Thunder01 chip (BITMAP_ENERGY, LT 2, turning 20 degrees a tick), a white smoke puff one tick in
+ * eight, and in the first half of each second one in sixteen a small sub28 fork into the target.
+ */
+function thunderEnd(scene: Scene, target: PointSource, at: Vector3): void {
+  spawnCard(scene, at, { texture: TEX.thunder, colour: CHAIN_LIGHT, size: cm(PX_THUNDER * (randInt(8) + 6) * 0.1), ticks: 2, roll: Math.random() * Math.PI * 2, spin: rad(20) });
+  if (randInt(8) === 0) {
+    // BITMAP_SMOKE sub0: LT 16, Light = LifeTime / 8 white, rising +0.2 cm a tick faster, Scale +0.05.
+    spawnCard(scene, at, { texture: TEX.smoke, colour: RGBS.white, size: cm(PX_SMOKE * (randInt(32) + 48) * 0.01), grow: cm(PX_SMOKE * 0.05), ticks: 16, brightness: age => Math.min(1, (16 - age) / 8), gravity: -cm(0.2), roll: Math.random() * Math.PI * 2 });
+  }
+  if (fxNow() % 1 < 0.5 && randInt(16) === 0) {
+    const t = target(new Vector3());
+    const from = new Vector3(t.x + jitterCm(50), t.y + jitterCm(60), t.z + jitterCm(50));
+    effects.spawn('joint', scene, from, {
+      to: target,
+      colour: CHAIN_LIGHT,
+      seconds: ticks(2),
+      width: cm(6 + randInt(8)),
+      segments: THUNDER_STEPS,
+      path: thunderPath(() => [0, randInt(360)], () => randInt(256) - 128),
+      reroll: 1,
+      steady: true,
+      fadeTail: 0.01,
+      texture: TEX.jointThunder,
+      textureScroll: 1,
+    });
+  }
+}
+
+/**
+ * One Chain Lightning hop, MODEL_CHAIN_LIGHTNING sub `hop` (MoveHandlers.cpp:1978-2064): for 20
+ * ticks a new pair of JOINT_THUNDER (Scale 50 and 10) every tick on each arc - hop 0 four arcs
+ * off the two hands, pitched 60 up and turned 60 aside; hops 1-2 one arc from body to body, 80
+ * cm up. Each joint lives 2 ticks, so two walks overlap on every arc. At LifeTime 15 each bone of
+ * the target flares blue. Only subtypes 0-2 exist.
+ */
+export function playChainLightningHop(scene: Scene, skill: number, from: Entity, to: Entity, hop: number): void {
+  if (hop > 2 || from === to || !from.transform || !to.transform) return;
+  let done = false;
+  const dead = (): boolean => done || entityGone(from) || entityGone(to) || !!to.dying;
+  const aim = followEntity(to, cm(80));
+  const arc = (source: PointSource, start: () => readonly [number, number]): void => {
+    for (const width of [50, 10]) {
+      for (const gen of [0, 1]) {
+        const end = width === 50 ? (p: Vector3) => thunderEnd(scene, aim, p) : undefined;
+        const bolt = (): void => {
+          if (dead()) return;
+          effects.spawn('joint', scene, source(new Vector3()), {
+            from: source,
+            to: aim,
+            colour: CHAIN_LIGHT,
+            seconds: ticks(CHAIN_TICKS),
+            width: cm(width),
+            segments: THUNDER_STEPS,
+            path: thunderPath(start, thunderDeviation(width), end),
+            reroll: ticks(2),
+            steady: true,
+            fadeTail: 0.01,
+            texture: TEX.jointThunder,
+            textureScroll: 1,
+            until: dead,
+          });
+        };
+        if (gen === 0) bolt();
+        else delay(TICK, bolt);
+      }
+    }
+  };
+  if (hop === 0) {
+    const yaw = (): number => deg(entityYaw(from));
+    for (const [bone, side] of [[37, 60], [28, -60]] as const) {
+      const hand: PointSource = out => bonePos(from, bone, out, CAST_HEIGHT);
+      arc(hand, () => [-60, yaw()]);
+      arc(hand, () => [0, yaw() + side]);
+    }
+  } else {
+    arc(followEntity(from, cm(80)), () => [0, deg(entityYaw(to))]);
+  }
+  delay(ticks(CHAIN_TICKS + 1), () => (done = true));
+  // `(int)LifeTime == 15`: BITMAP_LIGHT sub5 on every target bone, x0.9 light and x0.95 size a tick (ZzzEffectParticle.cpp:8041);
+  // dropped once under 5% light instead of drawn unseen for the rest of its 50 ticks.
+  delay(ticks(5), () => {
+    if (dead()) return;
+    const bones = boneCount(to);
+    const p = new Vector3();
+    for (let b = 0; b < bones; b++) {
+      spawnCard(scene, bonePos(to, b, p), { texture: TEX.flare, colour: [0.2, 0.2, 0.8], size: cm(PX_FLARE * (3 + (randInt(20) - 10) * 0.1)), ticks: 50, decay: 0.9, growMul: 0.95, minLight: 0.05 });
+    }
+  });
+  // The width-50 walks light the ground under them every step: lights spaced along the hop.
+  const a = entityPos(from, IMPACT_HEIGHT, new Vector3());
+  const b = entityPos(to, IMPACT_HEIGHT, new Vector3());
+  const n = Math.max(1, Math.round(Vector3.Distance(a, b) / 2));
+  for (let i = 0; i < n; i++) {
+    const t = (i + 0.5) / n;
+    const at: PointSource = out => {
+      entityPos(from, IMPACT_HEIGHT, a);
+      entityPos(to, IMPACT_HEIGHT, b);
+      return Vector3.LerpToRef(a, b, t, out);
+    };
+    lighting.skillLand(scene, skill, at(new Vector3()), lightFollow(at));
+  }
+}
+
+/** Chain Lightning's hands on the ground clip only (ZzzCharacter.cpp:10743-10768), Light (0.4, 0.4, 0.8). */
+const chainHands = handCrackle([37, 28], [0.4, 0.4, 0.8], 1.5, [PlayerAction.PLAYER_SKILL_CHAIN_LIGHTNING]);
+
+/** The chain wav again at AttackTime 15 (ZzzCharacter.cpp:5207-5212); the reply played it once already. */
+const chainSoundAgain = atAttackTime((_at, c, skill) => {
+  if (!entityGone(c.caster)) playCombat(SKILL_SOUNDS[skill] ?? null, entityPos(c.caster, 0, new Vector3()));
+});
+
+// Lightning Orb (ZzzEffect.cpp:6886-6965).
+
+const ORB_CLIPS = [
+  PlayerAction.PLAYER_SKILL_LIGHTNING_ORB,
+  PlayerAction.PLAYER_SKILL_LIGHTNING_ORB_UNI,
+  PlayerAction.PLAYER_SKILL_LIGHTNING_ORB_DINO,
+  PlayerAction.PLAYER_SKILL_LIGHTNING_ORB_FENRIR,
+] as const;
+
+/** Lightning Orb's forearm, bone 27, Light (0.2, 0.2, 1.0), on all four clips (ZzzCharacter.cpp:10574-10590). */
+const orbArm = handCrackle([27], [0.2, 0.2, 1], 0, ORB_CLIPS);
+
+/** BITMAP_MAGIC sub0 (ZzzEffectParticle.cpp:756-763, :4987-4995): Magic_Ground1, LT 10, Scale -0.05 and Light -0.01 a tick. */
+function magicParticle(scene: Scene, at: Vector3, colour: RGB, scale: number): void {
+  spawnCard(scene, at, { texture: TEX.magicGround, colour, size: cm(PX_MAGIC * scale), grow: -cm(PX_MAGIC * 0.05), ticks: 10, brightness: age => 1 - 0.01 * age });
+}
+
+/** The sprites the orb and the falling shock draw at their position every frame: two Shiny02, two Magic_Ground1, two pin_lights. */
+function carrierSprites(scene: Scene, at: PointSource, until: () => boolean, life: number, scale: number, shiny: RGB, magic: RGB, pin: RGB): void {
+  const p = at(new Vector3());
+  const roll = rad(fxNow() * 216);
+  for (const [s, dir] of [[4, 1], [3, -1]] as const) spawnCard(scene, p, { texture: TEX.shiny2, colour: shiny, size: cm(PX_SHINY2 * s * scale), aspect: 2, ticks: life, follow: at, until, roll: roll * dir, spin: SPRITE_TURN * dir });
+  for (const [s, dir] of [[1, 1], [0.5, -1]] as const) spawnCard(scene, p, { texture: TEX.magicGround, colour: magic, size: cm(PX_MAGIC * s * scale), ticks: life, follow: at, until, roll: roll * dir, spin: SPRITE_TURN * dir });
+  for (let i = 0; i < 2; i++) spawnCard(scene, p, { texture: TEX.pinLights, colour: pin, size: cm(PX_PIN * 2 * scale), aspect: 8, ticks: life, follow: at, until, rerollEachTick: true });
+}
+
+/** SPARK+1 sub13 (ZzzEffectParticle.cpp:2198-2206, :6706-6715): Spark03, LT 30, drifting, light /1.05 and Scale -0.04 a tick. */
+function orbSpark(scene: Scene, at: Vector3, yaw: number): void {
+  const v = muTurn(randInt(8) - 4, randInt(4), randInt(4), yaw, new Vector3());
+  spawnCard(scene, at, { texture: TEX.spark3, colour: RGBS.white, size: cm(PX_SPARK3 * (randInt(5) / 10 + 1)), grow: -cm(PX_SPARK3 * 0.04), ticks: 30, decay: 1 / 1.05, velocity: [v.x, v.y, v.z] });
+}
+
+/**
+ * SMOKE sub40 / sub58 (ZzzEffectParticle.cpp:1408-1419, :1548-1558, :5560-5566, :5760-5766): smoke01
+ * thrown 40-47 cm on a random heading pitched +-45, x0.4 a tick, LT 50, Scale 0.8-1.1 growing 0.05
+ * a tick, `Light = colour x LifeTime / 50`.
+ */
+function throwSmoke(scene: Scene, at: Vector3, colour: RGB): void {
+  const v = muForward([randInt(90) - 45, 0, randInt(360)], cm(randInt(8) + 40), new Vector3());
+  spawnCard(scene, at, {
+    texture: TEX.smoke,
+    colour,
+    size: cm(PX_SMOKE * (randInt(32) + 80) * 0.01),
+    grow: cm(PX_SMOKE * 0.05),
+    ticks: 50,
+    lifeFade: true,
+    offset: [jitterCm(32), cm(randInt(64) + 32), jitterCm(32)],
+    velocity: [v.x, v.y, v.z],
+    drag: 0.4,
+    roll: Math.random() * Math.PI * 2,
+  });
+}
+
+/**
+ * MODEL_LIGHTNING_ORB sub1 where the orb met its target (LT 18, Light /1.08 a tick): shiny05,
+ * pin_lights and a Thunder01 star while LifeTime >= 5, bouncing sparks for 4 ticks, shock waves
+ * for 5, two wide MODEL_FENRIR_THUNDER every tick and blue smoke in the last 5.
+ */
+function orbBurst(scene: Scene, p: Vector3): void {
+  const at = p.clone();
+  const roll = rad(fxNow() * 216);
+  const decay = 1 / 1.08;
+  for (const [s, dir] of [[3, 1], [2, -1]] as const) spawnCard(scene, at, { texture: TEX.shiny5, colour: [0.1, 0.5, 1.5], size: cm(PX_SHINY5 * s), ticks: 14, roll: roll * dir, spin: SPRITE_TURN * dir });
+  for (let i = 0; i < 2; i++) spawnCard(scene, at, { texture: TEX.pinLights, colour: [0.3, 0.3, 1], size: cm(PX_PIN * 4), aspect: 8, ticks: 14, decay, rerollEachTick: true });
+  spawnCard(scene, at, { texture: TEX.thunder, colour: RGBS.white, size: cm(PX_THUNDER * 4), ticks: 14, decay, roll, spin: SPRITE_TURN });
+  tickLoop(18, i => {
+    const lt = 18 - i;
+    const light = decay ** i;
+    if (lt >= 15) {
+      for (let k = 0; k < 5; k++) {
+        // SPARK+1 sub20 (:2294-2305, :6810-6829): +-5 cm a tick, kicked 7.5-12 cm up and falling, bouncing at 0.3.
+        const v = muTurn((randInt(40) - 20) * 0.25, (randInt(40) - 20) * 0.25, (randInt(10) + 15) * 0.5, randInt(360), new Vector3());
+        spawnCard(scene, at, { texture: TEX.spark3, colour: RGBS.white, size: cm(PX_SPARK3 * (1 + randInt(10) * 0.02)), ticks: 60 + randInt(10), light, decay: 1 / 1.02, minLight: 0.05, velocity: [v.x, v.y, v.z], gravity: cm(0.75), bounce: [cm(3), 0.3, 2] });
+      }
+    }
+    if (lt >= 14) {
+      // BITMAP_SHOCK_WAVE sub0 (:3731-3741, :8694-8710): Scale 0.3 growing 0.8 a tick, LT 7, light /1.5.
+      for (let k = 0; k < 2; k++) spawnCard(scene, at, { texture: TEX.shockwave, colour: [0.4, 0.3, 1], size: cm(PX_SHOCKWAVE * 0.3), grow: cm(PX_SHOCKWAVE * 0.8), ticks: 7, decay: 1 / 1.5 });
+    }
+    for (let k = 0; k < 2; k++) fenrirThunder(scene, at, [0.2, 0.2, 1], true);
+    if (lt <= 5) for (let k = 0; k < 2; k++) throwSmoke(scene, at, [0.5, 0.5, 1]);
+  });
+}
+
+/**
+ * MODEL_LIGHTNING_ORB sub0 at AttackTime 15 (ZzzEffect.cpp:837-850): 100 cm up, 60 cm a tick
+ * straight along the caster's facing for LT 20, drawing its sprites, a BITMAP_MAGIC and three
+ * sparks a tick. Within 100 cm (xy) of the live target it bursts where it is (CheckTargetRange).
+ */
+const lightningOrb = atAttackTime((_at, c, skill) => {
+  const { caster, target, scene } = c;
+  if (entityGone(caster)) return;
+  playLandingSound(skill, entityPos(caster, 0, new Vector3()));
+  const yaw = deg(entityYaw(caster));
+  const orb = new TickPoint(entityPos(caster, cm(100), new Vector3()));
+  const step = muForward([0, 0, yaw], cm(60), new Vector3());
+  let alive = true;
+  const until = (): boolean => !alive;
+  carrierSprites(scene, orb.at, until, 20, 1, [0.1, 0.7, 1.5], [0.1, 0.1, 1.5], [0.5, 0.5, 1.5]);
+  tickLoop(20, i => {
+    const p = orb.tick().addInPlace(step);
+    magicParticle(scene, p, [0.4, 0.4, 1.5], 1);
+    for (let k = 0; k < 3; k++) orbSpark(scene, p, yaw);
+    const t = target && !entityGone(target) && !target.dying ? target.transform : undefined;
+    if (t) {
+      if (Math.hypot(p.x - t.pos.x, p.z - t.pos.z) <= 1) {
+        alive = false;
+        orbBurst(scene, p);
+        return false;
+      }
+    }
+    if (i === 19) alive = false;
+  });
+});
+
+// Lightning Shock (MoveHandlers.cpp:2385-2543).
+
+/** LIGHTNING_MEGA sub0 (ZzzEffectParticle.cpp:1826-1841, :6071-6088): LT 5, `Light = colour x Alpha`, Alpha 1 - 0.15 a tick from before its first frame. */
+const megaLevel = (age: number): number => Math.max(0, 0.85 - 0.15 * age);
+const MEGA_SHEETS = [TEX.lightningMega1, TEX.lightningMega2, TEX.lightningMega3];
+function mega(scene: Scene, at: Vector3, colour: RGB, scale: number): void {
+  spawnCard(scene, at, { texture: MEGA_SHEETS[randInt(3)], colour, size: cm(PX_MEGA * scale), ticks: 5, brightness: megaLevel, roll: Math.random() * Math.PI * 2 });
+}
+
+/**
+ * The shock's ground, sub1 (ZzzEffect.cpp:916-971, MoveHandlers.cpp:2461-2508): two damage01mono
+ * decals growing 0.1 -> 5.1 tiles in 10 ticks at the caster's yaw, three plancracks 20 cm up, and
+ * for 12 ticks the crackle round the impact and out to 4 m, red smoke thrown and rising.
+ */
+function shockGround(scene: Scene, p: Vector3, yaw: number): void {
+  const at = p.clone();
+  const ground = groundY(at.x, at.z);
+  for (const colour of [[1, 0.8, 0.5], [1, 0, 0]] as const) {
+    effects.spawn('ring', scene, at, { texture: TEX.damageMono, colour, seconds: ticks(10), scale: 5.1, growFrom: 0.1 / 5.1, grow: 1, spinFrom: -yaw, fadeTail: 0.3 });
+  }
+  // MODEL_KNIGHT_PLANCRACK_A sub1 (ZzzEffect.cpp:4826-4833): Scale 1.0-1.3 + 0-0.45, LT 20, Alpha x0.9 a tick.
+  const crack = new Vector3(at.x, ground + cm(20), at.z);
+  for (let i = 0; i < 3; i++) {
+    effects.spawn('model', scene, crack, { model: MODEL.knightPlanCrack, seconds: ticks(20), scale: randInt(4) * 0.1 + 1 + randInt(10) * 0.05, colour: [1, 0.4, 0.2], yaw: Math.random() * Math.PI * 2, flat: true, fadeTail: 1 });
+  }
+  const floor = new Vector3(at.x, ground + cm(10), at.z);
+  const q = new Vector3();
+  tickLoop(12, () => {
+    for (let i = 0; i < 11; i++) mega(scene, q.set(at.x + jitterCm(35), at.y + jitterCm(35), at.z + jitterCm(35)), [1, 0.7, 0.4], (randInt(80) + 32) * 0.01);
+    for (let i = 0; i < 6; i++) {
+      muTurn(0, randInt(400), 0, yaw + randInt(360), q).addInPlace(at);
+      q.y = groundY(q.x, q.z) + cm(20);
+      mega(scene, q, [1, 0, 0], (randInt(60) + 22) * 0.01);
+    }
+    for (let i = 0; i < 2; i++) throwSmoke(scene, floor, [1, 0, 0]);
+    if (randInt(2) === 0) {
+      // SMOKE sub54 (:1528-1535, :5722-5734): LT = Scale x 8, rising (Scale + Gravity) x 1.5 a tick, light /1.02.
+      const s = 2.8 + randInt(50) * 0.01;
+      const g = (randInt(30) + 50) * 0.05;
+      spawnCard(scene, floor, { texture: TEX.smoke, colour: [1, 0, 0], size: cm(PX_SMOKE * s), growMul: 1.01, ticks: Math.floor(2.8 * 8), decay: 1 / 1.02, minLight: 0.05, velocity: [0, cm((s + g) * 1.5), 0], gravity: cm(1.5 * (0.05 - 0.01 * s)), roll: Math.random() * Math.PI * 2 });
+    }
+  });
+}
+
+/**
+ * Lightning Shock at once (AttackStage sets AttackTime 15 on the first tick, ZzzCharacter.cpp:3008):
+ * MODEL_LIGHTNING_SHOCK sub0 280 cm over the caster, hovering until the clip passes frame 6 (or
+ * LifeTime 15), then 20 cm on and 75 cm + an accelerating fall down a tick, crackling red, until
+ * it is under the ground and opens it.
+ */
+const lightningShock: Step = (_at, c) => {
+  const { caster, scene } = c;
+  if (entityGone(caster)) return;
+  const yaw = deg(entityYaw(caster));
+  const shock = new TickPoint(entityPos(caster, cm(280), new Vector3()));
+  let fall = 0;
+  let gravity = 1;
+  let alive = true;
+  const until = (): boolean => !alive;
+  const dir = new Vector3();
+  const q = new Vector3();
+  carrierSprites(scene, shock.at, until, 20, 0.8, [1, 0.4, 0.4], [1, 0.2, 0.2], [1, 0.4, 0.4]);
+  tickLoop(20, i => {
+    const p = shock.tick();
+    if ((caster.modelObject?.actionFrame() ?? 0) > 6 || 20 - i < 15) {
+      p.addInPlace(muTurn(0, -20, -75 - fall, yaw, dir));
+      gravity += 0.1;
+      fall += gravity;
+    }
+    magicParticle(scene, p, [1, 0.3, 0.3], 0.8);
+    for (let k = 0; k < 11; k++) {
+      q.set(p.x + jitterCm(35), p.y + jitterCm(35), p.z + jitterCm(35));
+      spawnCard(scene, q, { texture: TEX.flare, colour: [1, 0.2, 0.1], size: cm(PX_FLARE * 2.2), ticks: 1 });
+      if (randInt(3) === 0) mega(scene, q, [1, 0.7, 0.4], (randInt(80) + 32) * 0.01);
+    }
+    for (let k = 0; k < 2; k++) {
+      bonePos(caster, randInt(41), q);
+      q.x += jitterCm(15);
+      q.y += jitterCm(15);
+      q.z += jitterCm(15);
+      mega(scene, q, [1, 0.5, 0.4], (randInt(60) + 22) * 0.01);
+    }
+    if (p.y < groundY(p.x, p.z)) {
+      alive = false;
+      shockGround(scene, p, yaw);
+      return false;
+    }
+    if (i === 19) alive = false;
+  });
+};
+
 // ---- the table -------------------------------------------------------------------
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
@@ -2471,13 +3209,14 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
   211: { impact: flash(TEX.flare, RGBS.shade, 1.4, 0.6) },
   212: { impact: flash(TEX.eye, RGBS.shade, 1.2, 0.6) },
   213: { impact: seq(flash(TEX.flareRed, RGBS.blood, 1.4, 0.5), particles({ recipe: BLOOD_CHIPS, count: 12, height: 0.6 })) },
-  // 214 Drain Life: MODEL_ALICE_DRAIN_LIFE sub0 LT 70 (no such model here) - a spirit joint target → caster for the 70 ticks.
-  214: { impact: (at, c) => { effects.spawn('joint', c.scene, at, { to: followEntity(c.caster, CAST_HEIGHT), colour: RGBS.blood, seconds: ticks(70), width: 0.12, jitter: 0.06 }); particles({ recipe: SHADE_MOTES, count: 16 })(at, c); } },
-  // 215 Chain Lightning: MODEL_LIGHTNING_ORB sub0 (LT 20, Dir(0,−60,0), z+100) → arrival sub1 LT 18 (the chain hops server-side).
-  215: {
-    travel: { ...bolt(TEX.thunder, RGBS.arc, ENERGY_CHIPS, 0.7, perTick(60)), trail: { recipe: ENERGY_CHIPS, rate: 30 } },
-    impact: seq(model({ model: MODEL.lightningType, seconds: ticks(18), scale: 1, colour: RGBS.arc, grow: 1.3 }), arcHit),
-  },
+  // 214 Drain Life: MODEL_ALICE_DRAIN_LIFE at AttackTime 15 - red glows, ghost streaks from behind the caster, a
+  // siphon off every other target bone homing back (drainLife).
+  214: { impact: drainLife },
+  // 215 Chain Lightning: the hand crackle while the ground clip plays and the wav again at AttackTime 15; the
+  // arcs come with the BF 0A hops (playChainLightningHop).
+  215: { cast: seq(chainHands, chainSoundAgain) },
+  // 216 Lightning Orb: the forearm crackle, then MODEL_LIGHTNING_ORB at AttackTime 15 (lightningOrb).
+  216: { cast: orbArm, impact: lightningOrb },
   // 217 Thorns (Damage Reflection): BITMAP_MAGIC+1 sub11 at the caster + MODEL_ALICE_BUFFSKILL_EFFECT/2 at the target.
   217: { impact: aliceBuff([0.8, 0.3, 0.9]) },
   // 219 Sleep (454 Str): the violet hand FX while the clip plays; 14 ticks after the reply the violet
@@ -2564,19 +3303,9 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       effects.spawn('particles', c.scene, at, { recipe: SHADE_MOTES, rate: 12, seconds: 4 });
     },
   },
-  // 230 Lightning Shock: MODEL_LIGHTNING_SHOCK sub0 at the caster (LT 20, z+280, falling); sub1 LT 12 →
-  // 2× BITMAP_DAMAGE_01_MONO, 5× BITMAP_MAGIC sub12 on a r=150 ring (Light (1,0.2,0.05)), 3× KNIGHT_PLANCRACK_A (1.0–1.3).
-  230: {
-    area: atCaster(seq(
-      model({ model: MODEL.lightningType, seconds: ticks(20), scale: 1, colour: RGBS.arc, height: 2.8, rise: -3.5 }),
-      after(ticks(12), seq(
-        sprite({ texture: TEX.damageMono, colour: [1, 0.2, 0.05], size: 2.5, seconds: ticks(12), flat: true, count: 2, spread: 0.4, grow: 1.4 }),
-        ringOf(sprite({ texture: TEX.magicGround, colour: [1, 0.2, 0.05], size: 1.2, seconds: ticks(12), flat: true, grow: 1.5 }), 5, cm(150)),
-        scatter(model({ model: MODEL.knightPlanCrack, seconds: ticks(20), scale: 1.15, colour: RGBS.gold, flat: true }), 3, 1),
-        arcHit
-      ))
-    ), 0.05),
-  },
+  // 230 Lightning Shock: MODEL_LIGHTNING_SHOCK falling red from 280 cm over the caster and opening the ground
+  // (lightningShock). The five magic_ground cards and the stones get Scale 0 there and are not drawn.
+  230: { area: lightningShock },
   // 232 Strike of Destruction: MODEL_BLOW_OF_DESTRUCTION sub0 (LT 40, Light 1.2) is not converted - the ice
   // shockwave + shards + sword blur stand in; its LT 23 ground burst is (ZzzEffect.cpp:15014): KNIGHT_PLANCRACK_A
   // scale 1.2 tinted (0.3,0.3,1) and a PLANCRACK_B trail every 55 cm back to the caster, yaws jittered +-10-30 deg.

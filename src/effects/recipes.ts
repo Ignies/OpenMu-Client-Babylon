@@ -156,6 +156,12 @@ export const TEX = {
   torch: 'Effect/Torchfire.OZJ',
   guildRing: 'Effect/guild_ring01.OZJ',
   pinLights: 'Effect/pin_lights.OZJ',
+  /** BITMAP_DRAIN_LIFE_GHOST (gostmark01.jpg, 256x64): Drain Life's ghost streaks. */
+  drainGhost: 'Effect/gostmark01.OZJ',
+  /** BITMAP_LIGHTNING_MEGA1-3 (lighting_mega01-03.jpg, 128 px): Lightning Shock's crackle. */
+  lightningMega1: 'Effect/lighting_mega01.OZJ',
+  lightningMega2: 'Effect/lighting_mega02.OZJ',
+  lightningMega3: 'Effect/lighting_mega03.OZJ',
   /** BITMAP_LIGHT_MARKS (lightmarks.jpg): the Berserker's body marks. */
   lightMarks: 'Effect/lightmarks.ozj',
   /** BITMAP_LUCKY_SEAL_EFFECT (partCharge1/bujuckline.jpg): the seal ribbons' sheet. */

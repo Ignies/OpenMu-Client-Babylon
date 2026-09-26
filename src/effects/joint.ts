@@ -179,6 +179,16 @@ export interface JointOptions {
   jitter?: number;
   /** Bolt: side branches, 0…3. */
   forks?: number;
+  /**
+   * Bolt: lays the `segments + 1` points itself instead of the jittered
+   * straight line - a walk like JOINT_THUNDER's MoveHumming steps
+   * (ZzzEffectJoint.cpp:4767-5020). Called at every re-roll.
+   */
+  path?: (from: Vector3, to: Vector3, out: number[], segments: number) => void;
+  /** Bolt: seconds between re-rolls (default two ticks). */
+  reroll?: number;
+  /** Bolt: drawn at its full light, without the flicker. */
+  steady?: boolean;
   /** Tiles above both points. */
   height?: number;
   /**
@@ -480,7 +490,8 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
   const mesh = line.mesh;
 
   let t = 0;
-  let sinceRoll = REROLL_SECONDS;
+  const reroll = opts.reroll ?? REROLL_SECONDS;
+  let sinceRoll = reroll;
   let s = seed++ * 7.13;
   const forkFrom = new Vector3();
   const forkTo = new Vector3();
@@ -495,10 +506,11 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
       far(b);
       a.y += height;
       b.y += height;
-      if (sinceRoll >= REROLL_SECONDS) {
+      if (sinceRoll >= reroll) {
         sinceRoll = 0;
         s += 3.3;
-        fillLine(lines[0], a, b, segments, jitter, s);
+        if (opts.path) opts.path(a, b, lines[0], segments);
+        else fillLine(lines[0], a, b, segments, jitter, s);
         for (let f = 1; f <= forks; f++) {
           const at = 0.3 + hash(s + f) * 0.4;
           const o = Math.floor(at * segments) * 3;
@@ -514,7 +526,7 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
         mesh.setPoints(lines);
       }
       line.scroll();
-      line.fade(opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3) * (0.6 + 0.4 * hash(t * 97)));
+      line.fade(opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3) * (opts.steady ? 1 : 0.6 + 0.4 * hash(t * 97)));
       return true;
     },
     release() {

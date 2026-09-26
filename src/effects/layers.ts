@@ -1,4 +1,5 @@
 import { spriteLayer } from './sprite';
+import { cardsLayer } from './cards';
 import { particlesLayer } from './particles';
 import { projectileLayer } from './projectile';
 import { debrisLayer } from './debris';
@@ -39,6 +40,7 @@ export const EFFECT_LAYERS = [
   modelLayer, // reads projectile's / debris' / feathers' points
   stampsLayer,
   spriteLayer,
+  cardsLayer,
   particlesLayer,
   columnLayer,
   shroudLayer, // one card over the view; the spawner's other effects draw over it

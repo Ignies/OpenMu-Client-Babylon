@@ -12,7 +12,7 @@ import {
   type LightAnchor,
   type LightRecipe,
 } from './lightSource';
-import { lightAreaSkill, lightArrow, lightSkillCue, lightSkillTrail, lightTargetedSkill } from './skills';
+import { lightAreaSkill, lightArrow, lightSkillCue, lightSkillLand, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
@@ -142,6 +142,19 @@ class Lighting {
   /** An effect reached a moment its row's `timed` lights wait on (`TimedLight.cue`). */
   skillCue(scene: Scene, skill: number, cue: string, caster: Entity): void {
     lightSkillCue(scene, skill, cue, caster);
+  }
+
+  /**
+   * The light a skill's effect lays down where one of its pieces gets to
+   * (a siphon home, a chain hop). Null when the skill has none.
+   */
+  skillLand(
+    scene: Scene,
+    skill: number,
+    position: { x: number; y: number; z: number },
+    follow?: (out: { x: number; y: number; z: number }) => void
+  ): LightSource | null {
+    return lightSkillLand(scene, skill, position, follow);
   }
 
   /**
