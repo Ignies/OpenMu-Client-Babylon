@@ -34,8 +34,9 @@ import type { PlayerObject } from '../../common/playerObject';
  *      BITMAP_LIGHT motes from random bones for 30 ticks.
  *    - Blood Castle bridge edge / Chaos Castle pit (`FallingStartCharacter`,
  *      WSclient.cpp:5440; `FallingCharacter`, :3014): the body tips over and
- *      falls off, sideways on the bridge, straight down in the pit. Chaos
- *      Castle corpses also pop `CreateBomb`s on odd ticks 15…25 (:3145-3168).
+ *      falls off, sideways on the bridge, straight down in the pit (with a
+ *      `SOUND_CHAOS_FALLING` scream). Chaos Castle corpses also pop `CreateBomb`s,
+ *      each with its eExplosion, on odd ticks 15…25 (:3145-3168).
  * 5. Alpha < 0.01: everyone but the hero is removed. The hero stays until
  *    the respawn packet clears the state.
  */
@@ -90,6 +91,14 @@ const BOMB_WINDOW_TICKS = 10;
 /** `rand() % 160 - 80` cm around the body, `+ 50` up. */
 const BOMB_SPREAD_CM = 80;
 const BOMB_RAISE_CM = 50;
+/** `SOUND_EXPLOTION01` (1 channel, ZzzOpenData.cpp:4813): every BITMAP_EXPLOTION
+ *  plays it with no object, so 2D (ZzzEffectParticle.cpp:2482). */
+const BOMB_SOUND = 'Sound/eExplosion';
+const BOMB_SOUND_CHANNELS = 1;
+/** `SOUND_CHAOS_FALLING` (pMaleScream, 1 channel, not 3D; ZzzOpenData.cpp:4868),
+ *  played with no object (WSclient.cpp:5885). */
+const PIT_SCREAM = 'Sound/pMaleScream';
+const PIT_SCREAM_CHANNELS = 1;
 
 const tmpHead = new Vector3();
 const tmpBone = new Vector3();
@@ -130,6 +139,7 @@ export const DeathSystem: ISystemFactory = world => {
     const x = ~~t.pos.x;
     const y = ~~t.pos.z;
     if (inChaosCastle(map) && world.getTerrainFlag(x, y) & TW_NOGROUND) {
+      playSfx(PIT_SCREAM, null, { bus: COMBAT_BUS, channels: PIT_SCREAM_CHANNELS });
       return {
         kind: 'fall',
         side: 0,
@@ -226,6 +236,8 @@ export const DeathSystem: ISystemFactory = world => {
       tmpBomb.z += (Math.random() * 2 - 1) * BOMB_SPREAD_CM * CM;
       tmpBomb.y += ((Math.random() * 2 - 1) * BOMB_SPREAD_CM + BOMB_RAISE_CM) * CM;
       spawnBomb(world.scene, tmpBomb);
+      // One channel: the first bomb of a burst sounds, the rest land inside its 1 s.
+      playSfx(BOMB_SOUND, null, { bus: COMBAT_BUS, channels: BOMB_SOUND_CHANNELS });
     }
   }
 
