@@ -878,7 +878,11 @@ const fireBurst: Step = (_at, c) => {
 // ---- dl2 steps -------------------------------------------------------------------
 
 /** A sound where the step lands, timed with the effect that plays it (a move handler's `PlayBuffer`). */
-const sfx = (key: Sounds): Step => at => playSfx(key, at, { bus: COMBAT_BUS });
+const sfx =
+  (key: Sounds): Step =>
+  at => {
+    playSfx(key, at, { bus: COMBAT_BUS });
+  };
 
 /** `fn(i)` once a tick for `n` ticks on the effects clock, the first now. */
 function everyTick(n: number, fn: (i: number) => void): void {
