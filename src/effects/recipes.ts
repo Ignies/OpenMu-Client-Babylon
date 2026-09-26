@@ -137,6 +137,8 @@ export const TEX = {
   motionMono: 'Effect/motion_mono.OZJ',
   /** Misc. */
   explosion: 'Effect/Explotion01.OZJ',
+  /** BITMAP_EXPLOTION_MONO (explotion01mono.jpg): the same 4x4 sheet in white, tinted by `Light`. */
+  explosionMono: 'Effect/explotion01mono.OZJ',
   /** BITMAP_EXPLOTION+1 (DinoE.jpg, four 64 px cells): CreateBomb2's fireball, Fire Breath's end. */
   dinoE: 'Effect/DinoE.OZJ',
   pierce: 'Effect/Piercing.OZJ',
