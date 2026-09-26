@@ -7,12 +7,14 @@ import { weather } from '../weather';
 import { effects, type EffectHandle } from '../effects';
 import { boneLocalPos, bonePos, delay, effectTexture, entityGone, entityPos, entityYaw, followEntity, fxNow, type ParticleRecipe, type PointSource, type RGB } from '../effects/core';
 import type { SpriteOptions } from '../effects/sprite';
+import type { ShroudOptions } from '../effects/shroud';
+import type { SpiritSwarmOptions, SwarmSpirit } from '../effects/spiritSwarm';
 import type { ModelHandle, ModelOptions } from '../effects/model';
 import type { StampsHandle } from '../effects/stamps';
 import type { RingOptions } from '../effects/ring';
 import type { ParticlesOptions } from '../effects/particles';
 import type { ProjectileOptions } from '../effects/projectile';
-import type { JointOptions } from '../effects/joint';
+import type { JointOptions, TaperShape } from '../effects/joint';
 import type { AuraOptions, BoneGlow, SpearJoints } from '../effects/aura';
 import {
   ARC_MOTES,
@@ -102,33 +104,90 @@ const HIT_COUNT = 14;
 const TRIPLE_SPREAD = (15 * Math.PI) / 180;
 const FIVE_SPREAD = [-20, -10, 0, 10, 20].map(d => (d * Math.PI) / 180);
 /**
- * Evil Spirit's ghosts. The original's four JOINT_SPIRIT flights - 70 cm a tick, homing the caster
- * 10° a tick under damped random steering (ZzzEffectJoint.cpp:3732-3772) - loop about four tiles
- * out, which is the whole screen at this camera; sixteen of them in four waves are the swarm that
- * takes it over. Every ghost is one RENDER_DARK card: black, a ghost sheet as its coverage, and a
- * cover above 1 so the body saturates on every tier where the original's MODEL_LASER stamps
- * (Laser01 averages 0.34) only ever reached grey.
+ * Evil Spirit's spirits: the original's JOINT_SPIRIT flights (ZzzEffectJoint.cpp:3732-3772) each
+ * carrying its MODEL_LASER skull (Laser01, RENDER_DARK), eight in two waves. The original homes
+ * them on the caster, which keeps the swarm on top of him; here each one chases its own point
+ * circling the caster somewhere inside the skill's reach, so together they cover the whole area it
+ * hits. Each skull is the sheet's own pattern over a faint silhouette, so it keeps its detail.
  */
-const SPIRIT_COUNT = 16;
+const SPIRIT_COUNT = 8;
 const SPIRIT_WAVE = 4;
 /** Seconds between waves; each wave's headings sit between the previous wave's. */
 const SPIRIT_WAVE_GAP = 0.1;
 const SPIRIT_SPEED = perTick(36);
 const SPIRIT_TURN = (16 * Math.PI) / 180;
-/** Ghost card edge in tiles, and the coverage that makes it black. */
-const SPIRIT_SIZE = 2.0;
-const SPIRIT_COVER = 4;
+/** Ticks of trail behind each skull: the original's 6 read as a stub once the spirits spread out. */
+const SPIRIT_TAILS = 26;
+/** Each trail is the shadow dragon's body: wide behind the head, held, then a tail, swaying as it flies. */
+const SPIRIT_BODY_WIDTH = 0.9;
+const SPIRIT_BODY_SHAPE: TaperShape = { nose: 0.9, span: 0.04, hold: 0.3, falloff: 1.2 };
+const SPIRIT_SWAY = { amplitude: 0.35, cycles: 1.5, speed: 8 };
+/** The darker spine down the middle of each body: the original's width-20 ribbon beside the width-80 one. */
+const SPIRIT_CORE_WIDTH = 0.4;
+/** The body's own coverage, lighter than the core so the spine reads through it. */
+const SPIRIT_FLESH: RGB = [0.8, 0.8, 0.8];
+/** The spine's coverage over JointLaser01's soft centre line (it peaks at 0.36). */
+const SPIRIT_SPINE: RGB = [2.2, 2.2, 2.2];
 /**
- * The shroud's coverage and its cap. The caster's own view only dims - a player must still see
- * what they are doing - and anyone else's near a cast goes as dark as the map's level allows.
+ * Caps on the body's and spine's coverage gain. Night maps lift the dark gain a long way, which
+ * saturated whole bodies to black and let a few casts black out the screen.
  */
-const SHROUD_OWN = 0.3;
-const SHROUD_OWN_MAX = 0.5;
-const SHROUD_OTHERS = 0.6;
-const SHROUD_OTHERS_MAX = 0.85;
-/** Anyone else's view has no clear hole: standing near the cast is what the darkness is for. */
-const SHROUD_OTHERS_HOLE = 0;
-const SHROUD_OTHERS_FEATHER = 0.04;
+const SPIRIT_FLESH_MAX = 1;
+const SPIRIT_SPINE_MAX = 2.2;
+/** Two thin wisps braiding round each body, half a wave apart, swinging wider than the body sways. */
+const SPIRIT_WISP_WIDTH = 0.14;
+const SPIRIT_WISPS = [0, Math.PI].map(phase => ({ amplitude: 0.6, cycles: 2.2, speed: 11, phase }));
+/** Dark smoke the dragons shed as they fly: a soft black haze along the path that spreads and fades. */
+const SPIRIT_SMOKE: ParticleRecipe = {
+  texture: TEX.smokeAlpha,
+  colour: [0.02, 0.02, 0.03],
+  size: 0.55,
+  sizeJitter: 0.4,
+  life: 0.9,
+  lifeJitter: 0.3,
+  box: [0.15, 0.1, 0.15],
+  dir1: [-1, 0.2, -1],
+  dir2: [1, 0.8, 1],
+  power: 0.25,
+  gravity: 0.1,
+  spin: 0.8,
+  endScale: 2.6,
+  blend: 'alpha',
+  capacity: 384,
+};
+/** The skill's distance in tiles (skillsDatabase, 7): the area the spirits spread over. */
+const SPIRIT_REACH = 7;
+/** Innermost and outermost orbit as fractions of the reach. */
+const SPIRIT_ORBIT_MIN = 0.3;
+const SPIRIT_ORBIT_MAX = 0.95;
+/** Tangential speed of an orbit point, tiles/s, and the most any orbit turns, rad/s. */
+const SPIRIT_ORBIT_SPEED = 5;
+const SPIRIT_ORBIT_TURN = 1.4;
+/** Skull scale (the original's 1.3) and its coverage. Laser01's snout points down its -Z. */
+const SPIRIT_SCALE = 1.1;
+const SPIRIT_DARK: RGB = [1, 1, 1];
+/** How far the skull's back end sits behind the ribbon's tip, as a fraction of its length. Its back third is swept horns, so the body has to start past them. */
+const SPIRIT_NECK = 0.6;
+/** A faint flat shadow under the skull, so its dark cells read as body; the sheet's detail stays on top. */
+const SPIRIT_BODY: RGB = [0.35, 0.35, 0.35];
+/**
+ * The shroud on each screen. The caster's own view keeps a wide clear middle - a player must still
+ * see what they are doing - and anyone else's near a cast gets thicker smoke, never a flat sheet.
+ */
+const SHROUD_OWN: ShroudOptions = { cover: 0.8, maxCover: 0.7, hole: 0.08, feather: 0.3, smoke: 0.7 };
+const SHROUD_OTHERS: ShroudOptions = { cover: 1, maxCover: 0.82, hole: 0, feather: 0.18, smoke: 0.55 };
+/** Everything a wave of spirits shares: one steer, the body with its wisps and spine, the skull (the sheet twice: one pass of it, averaging 0.34, leaves the pattern too faint to read). */
+const SPIRIT_SWARM: Omit<SpiritSwarmOptions, 'spirits' | 'seconds' | 'fadeTail'> = {
+  tails: SPIRIT_TAILS,
+  smooth: 5,
+  seekRate: SPIRIT_TURN,
+  wander: { pitch: (3 * Math.PI) / 180, yaw: (8 * Math.PI) / 180 },
+  band: { floor: 1, ceiling: 4 },
+  body: { width: SPIRIT_BODY_WIDTH, colour: SPIRIT_FLESH, maxCover: SPIRIT_FLESH_MAX, texture: TEX.jointSpirit, taper: SPIRIT_BODY_SHAPE, wave: SPIRIT_SWAY },
+  wisps: { width: SPIRIT_WISP_WIDTH, waves: SPIRIT_WISPS },
+  spine: { width: SPIRIT_CORE_WIDTH, colour: SPIRIT_SPINE, maxCover: SPIRIT_SPINE_MAX, texture: TEX.jointLaser, taper: SPIRIT_BODY_SHAPE },
+  skull: { model: MODEL.laser, scale: SPIRIT_SCALE, aimYaw: Math.PI, rearAt: SPIRIT_NECK, silhouette: SPIRIT_BODY, silhouetteCover: SPIRIT_BODY[0], sheet: SPIRIT_DARK, sheetCover: 1, passes: 2 },
+};
 // ---- step helpers ---------------------------------------------------------------
 
 export interface SkillContext {
@@ -1542,50 +1601,62 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {
       after(0.5, stones(3, 1))(at, c);
     },
   },
-  // 9 Evil Spirit: impact@caster+100z - 4× JOINT_SPIRIT sub0 pairs at Angle(0,0,i*90), width 80 + 20:
-  // ALPHA_BLEND_MINUS, Vel 70, LT 49, MaxTails 6, Light = LifeTime×0.1, homing the *caster*+80z
-  // (MoveHumming 10°/frame) under damped random steering (±3.2° pitch ×0.6, ±12.8° yaw ×0.8 a frame)
-  // between terrain +100 and +400; each width-80 joint stamps MODEL_LASER (RENDER_DARK) at its head
-  // every frame - the black spirits (ZzzCharacter.cpp:4468, ZzzEffectJoint.cpp:3698, ZzzEffect.cpp:1890).
+  // 9 Evil Spirit: impact@caster+100z - 4x JOINT_SPIRIT sub0 pairs at Angle(0,0,i*90), width 80 + 20:
+  // ALPHA_BLEND_MINUS, Vel 70, LT 49, MaxTails 6, homing the caster+80z (MoveHumming 10 deg/frame)
+  // under damped random steering between terrain +100 and +400; each width-80 joint stamps
+  // MODEL_LASER (Scale 1.3, RENDER_DARK) at its head every frame - the black spirits
+  // (ZzzCharacter.cpp:4468, ZzzEffectJoint.cpp:3698, ZzzEffect.cpp:1890).
   //
-  // Drawn as the original means it, and more of it: sixteen flights in four waves instead of four,
-  // each ghost one black card riding its head (`sprite` blend `subtract`, the ghost sheets, cover
-  // above 1) in place of the per-tick grey stamps, with the dark ribbon behind it. Nothing bright:
-  // the spirits are shadow, and the glow on the caster in the reference footage is the character.
+  // Eight of them, each the black skull on its dark ribbon, spread over the skill's reach
+  // (`SPIRIT_REACH`) instead of looping round the caster. Nothing bright: the spirits are shadow.
   9: {
     area: atCaster((at, c) => {
       const seconds = ticks(49);
       const fadeTail = 10 / 49;
-      const steer: JointOptions['steer'] = {
-        seek: followEntity(c.caster, 0.8),
-        seekRate: SPIRIT_TURN,
-        wander: { pitch: (3 * Math.PI) / 180, yaw: (8 * Math.PI) / 180 },
-        band: { floor: 1, ceiling: 4 },
-      };
-      const ghost = (i: number): void => {
+      const centre = followEntity(c.caster, 0);
+      const start = fxNow();
+      const spirit = (i: number): SwarmSpirit => {
         const wave = Math.floor(i / SPIRIT_WAVE);
-        const heading = facing(c, ((i % SPIRIT_WAVE) * Math.PI * 2) / SPIRIT_WAVE + (wave * Math.PI) / (2 * SPIRIT_WAVE));
+        const turn = ((i % SPIRIT_WAVE) * Math.PI * 2) / SPIRIT_WAVE + (wave * Math.PI) / (2 * SPIRIT_WAVE);
+        const heading = facing(c, turn);
+        // Radii interleaved across waves so every wave reaches both the inside and the rim.
+        const slot = (i * 3) % SPIRIT_COUNT;
+        const radius = SPIRIT_REACH * (SPIRIT_ORBIT_MIN + (SPIRIT_ORBIT_MAX - SPIRIT_ORBIT_MIN) * Math.sqrt((slot + 0.5) / SPIRIT_COUNT));
+        const spin = (i % 2 ? 1 : -1) * Math.min(SPIRIT_ORBIT_TURN, SPIRIT_ORBIT_SPEED / radius);
+        const phase = Math.atan2(heading.x, heading.z);
+        const lift = 1.2 + Math.random() * 1.6;
+        const seek: PointSource = out => {
+          centre(out);
+          const a = phase + spin * (fxNow() - start);
+          out.x += Math.sin(a) * radius;
+          out.z += Math.cos(a) * radius;
+          out.y += lift;
+          return out;
+        };
         const head = at.clone();
         const follow: PointSource = out => out.copyFrom(head);
         const velocity = SPIRIT_SPEED * (0.85 + Math.random() * 0.3);
-        effects.spawn('joint', c.scene, at, { velocity, heading, seconds, maxTails: 6, width: 0.8, colour: RGBS.white, blend: 'subtract', texture: TEX.jointSpirit, steer, fadeTail, taper: true, trace: h => head.copyFrom(h) });
-        effects.spawn('sprite', c.scene, at, { texture: i % 2 ? TEX.ghost2 : TEX.ghost, blend: 'subtract', cover: SPIRIT_COVER, size: SPIRIT_SIZE, seconds, follow, fadeTail, spin: i % 2 ? 0.5 : -0.5, growFrom: 0.5 });
+        effects.spawn('particles', c.scene, at, { recipe: SPIRIT_SMOKE, rate: 12, seconds, follow });
+        return { velocity, heading, seek, track: h => head.copyFrom(h) };
       };
-      for (let i = 0; i < SPIRIT_COUNT; i++) {
-        const wave = Math.floor(i / SPIRIT_WAVE);
-        if (wave === 0) ghost(i);
-        else delay(wave * SPIRIT_WAVE_GAP, () => ghost(i));
+      // One swarm per wave: its spirits' bodies, spines and skulls share a handful of meshes.
+      const launch = (w: number): void => {
+        const spirits: SwarmSpirit[] = [];
+        for (let i = w * SPIRIT_WAVE; i < Math.min(SPIRIT_COUNT, (w + 1) * SPIRIT_WAVE); i++) spirits.push(spirit(i));
+        effects.spawn('spiritSwarm', c.scene, at, { ...SPIRIT_SWARM, spirits, seconds, fadeTail });
+      };
+      for (let w = 0; w * SPIRIT_WAVE < SPIRIT_COUNT; w++) {
+        if (w === 0) launch(w);
+        else delay(w * SPIRIT_WAVE_GAP, () => launch(w));
       }
-      // The darkness they bring: the view goes dark around the caster while they fly - dimmed for
-      // the caster's own screen, dark for anyone else's near the cast.
+      // The shadow they bring: smoke closing in from the edge of the view, lighter on the caster's
+      // own screen than on anyone else's near the cast.
       const mine = c.caster === storeRef().world?.playerEntity;
       effects.spawn('shroud', c.scene, at, {
         seconds,
         fadeTail,
         follow: followEntity(c.caster, 0.9),
-        cover: mine ? SHROUD_OWN : SHROUD_OTHERS,
-        maxCover: mine ? SHROUD_OWN_MAX : SHROUD_OTHERS_MAX,
-        ...(mine ? {} : { hole: SHROUD_OTHERS_HOLE, feather: SHROUD_OTHERS_FEATHER }),
+        ...(mine ? SHROUD_OWN : SHROUD_OTHERS),
       });
     }, 1),
   },
