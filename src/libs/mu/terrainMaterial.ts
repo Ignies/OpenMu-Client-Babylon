@@ -65,7 +65,7 @@ const WATER_LAYER = 5;
  * against each other, and as a one-line escape hatch if the packed array
  * turns out to sample differently on some driver.
  */
-const USE_TILE_TEXTURE_ARRAY = true;
+export const USE_TILE_TEXTURE_ARRAY = true;
 
 /**
  * The old path: `textures[i]` cannot be indexed by a per-fragment value in
