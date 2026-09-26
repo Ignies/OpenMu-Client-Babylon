@@ -137,7 +137,7 @@ export {
   TextFileAssetTask,
 } from '@babylonjs/core/Misc/assetsManager';
 export { AssetContainer } from '@babylonjs/core/assetContainer';
-export { VertexBuffer } from '@babylonjs/core/Buffers/buffer';
+export { Buffer, VertexBuffer } from '@babylonjs/core/Buffers/buffer';
 export { Geometry } from '@babylonjs/core/Meshes/geometry';
 export { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData';
 
