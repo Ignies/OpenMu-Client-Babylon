@@ -163,12 +163,20 @@ export const TEX = {
   torch: 'Effect/Torchfire.OZJ',
   guildRing: 'Effect/guild_ring01.OZJ',
   pinLights: 'Effect/pin_lights.OZJ',
+  /** BITMAP_DRAIN_LIFE_GHOST (gostmark01.jpg, 256x64): Drain Life's ghost streaks. */
+  drainGhost: 'Effect/gostmark01.OZJ',
+  /** BITMAP_LIGHTNING_MEGA1-3 (lighting_mega01-03.jpg, 128 px): Lightning Shock's crackle. */
+  lightningMega1: 'Effect/lighting_mega01.OZJ',
+  lightningMega2: 'Effect/lighting_mega02.OZJ',
+  lightningMega3: 'Effect/lighting_mega03.OZJ',
   /** BITMAP_LIGHT_MARKS (lightmarks.jpg): the Berserker's body marks. */
   lightMarks: 'Effect/lightmarks.ozj',
   /** BITMAP_LUCKY_SEAL_EFFECT (partCharge1/bujuckline.jpg): the seal ribbons' sheet. */
   luckySeal: 'Effect/partCharge1/bujuckline.ozj',
   kwave: 'Effect/Kwave.OZJ',
   powerWave: 'Effect/PoundingBall.OZJ',
+  /** BITMAP_LIGHT+2 (cra_04.jpg, 64 px): the Summoner curse hand flashes and the Blind body smoke. */
+  cra04: 'Effect/cra_04.OZJ',
 } as const;
 
 export type EffectTexture = (typeof TEX)[keyof typeof TEX];
@@ -353,6 +361,10 @@ export const MODEL = {
   volcanoStone: 'Effect/volcano_stone.glb',
   changeUp: 'Effect/Change_Up_Eff.glb',
   iceStone: 'Effect/ice_stone00.glb',
+  /** MODEL_SUMMONER_CASTING_EFFECT2 / 22 / 222: Weakness and Innovation's turning circles. */
+  suhwanzin2: 'Effect/Suhwanzin2.glb',
+  suhwanzin22: 'Effect/Suhwanzin22.glb',
+  suhwanzin222: 'Effect/Suhwanzin222.glb',
 } as const;
 
 export type EffectModel = (typeof MODEL)[keyof typeof MODEL];

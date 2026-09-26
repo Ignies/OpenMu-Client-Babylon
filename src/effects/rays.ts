@@ -15,7 +15,7 @@
  * Driven by: `effects.spawn('rays', ...)`. Read by: nobody.
  */
 import type { Scene, Vector3 } from '../libs/babylon/exports';
-import { LiveList, fadeOut, type RGB } from './core';
+import { LiveList, TICK, fadeOut, type RGB } from './core';
 import { disposeLine, makeLine } from './joint';
 import type { EffectHandle, EffectLayer } from './layer';
 
@@ -53,7 +53,7 @@ export interface RaysOptions {
   moveFor?: number;
   /** How far behind the head the tail runs, in seconds of flight (MaxTails x the steps a tick). */
   tail: number;
-  /** Brightness e^(-decay t): a `Light /= 1.4` a tick is 25 ln 1.4. */
+  /** Brightness multiplied by this every tick (`Light /= 1.4` is 1 / 1.4). Default 1. */
   decay?: number;
   /** Fade over the last fraction of `seconds` (default 0). */
   fadeTail?: number;
@@ -72,7 +72,7 @@ function spawn(scene: Scene, at: Vector3, opts: RaysOptions): EffectHandle {
   const seconds = opts.seconds;
   const moveFor = opts.moveFor ?? Infinity;
   const tail = opts.tail;
-  const decay = opts.decay ?? 0;
+  const decay = opts.decay ?? 1;
   const fadeTail = opts.fadeTail ?? 0;
   let widest = 0;
   for (const r of rays) widest = Math.max(widest, r.width);
@@ -127,7 +127,7 @@ function spawn(scene: Scene, at: Vector3, opts: RaysOptions): EffectHandle {
         fill(t);
         mesh.setPoints(lines);
       }
-      line.fade(fadeOut(p, fadeTail) * (decay > 0 ? Math.exp(-decay * t) : 1));
+      line.fade(fadeOut(p, fadeTail) * (decay !== 1 ? decay ** (t / TICK) : 1));
       return true;
     },
     release() {

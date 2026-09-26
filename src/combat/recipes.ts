@@ -230,6 +230,7 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   // --- Summoner (UseSkillSummon, ZzzInterface.cpp:2534-2680) --------------
   214: DRAIN_LIFE_CLIPS, // Drain Life
   458: DRAIN_LIFE_CLIPS, // Drain Life Str
+  462: DRAIN_LIFE_CLIPS, // Drain Life Mastery
   215: CHAIN_LIGHTNING_CLIPS, // Chain Lightning
   455: CHAIN_LIGHTNING_CLIPS, // Chain Lightning Str
   216: {
@@ -240,12 +241,17 @@ export const SKILL_CLIPS: Readonly<Record<number, SkillClipSet>> = {
   }, // Lightning Orb
   219: SLEEP_CLIPS, // Sleep
   454: SLEEP_CLIPS, // Sleep Str
-  220: SLEEP_CLIPS, // Blind
+  // Blind: PLAYER_SKILL_SLEEP with no mount ladder (WSclient.cpp:4921-4927); OpenMU casts it as 461 / 463.
+  220: { ground: A.PLAYER_SKILL_SLEEP }, // Blind
+  461: { ground: A.PLAYER_SKILL_SLEEP }, // Blind (OpenMU)
+  463: { ground: A.PLAYER_SKILL_SLEEP }, // Blind Str
   217: SLEEP_CLIPS, // Thorns
   218: SLEEP_CLIPS, // Berserker
   469: SLEEP_CLIPS, // Berserker Str
   221: SLEEP_CLIPS, // Weakness
   222: SLEEP_CLIPS, // Enervation
+  459: SLEEP_CLIPS, // Weakness Str
+  460: SLEEP_CLIPS, // Enervation Str
   230: { ground: A.PLAYER_SKILL_LIGHTNING_SHOCK }, // Lightning Shock
   456: { ground: A.PLAYER_SKILL_LIGHTNING_SHOCK }, // Lightning Shock Str
 

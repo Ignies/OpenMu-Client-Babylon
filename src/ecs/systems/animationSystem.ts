@@ -1,3 +1,4 @@
+import type { AnimationGroup } from '@babylonjs/core/Animations/animationGroup';
 import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
 import type { ISystemFactory } from '../world';
 import { isPlayerBody, type PlayerObject } from '../../common/playerObject';
@@ -63,6 +64,51 @@ const MONSTER_ONE_SHOT_ACTIONS = new Set<MonsterActionType>([
   MonsterActionType.Shock,
   MonsterActionType.Appear,
 ]);
+
+/** eDeBuff_Stun (61) and eDeBuff_Sleep (72) skip PlayAnimation: the body holds its frame (ZzzCharacter.cpp:2552-2555). */
+const isHeld = (buffs: ReadonlySet<number> | undefined): boolean => !!buffs && (buffs.has(61) || buffs.has(72));
+/** The rate each held clip had, given back on release. */
+const heldModels = new WeakMap<ModelObject, { action: number; ratio: number }>();
+
+/** Stops (or lets go of) the playing clip; a clip held at speed 0 keeps rendering, a paused one would not. */
+function holdClip(model: ModelObject, held: boolean): void {
+  const was = heldModels.get(model);
+  if (!held && !was) return;
+  const group = model.gltf?.animationGroups[model.CurrentAction];
+  if (!held) {
+    heldModels.delete(model);
+    if (group) group.speedRatio = was!.action === model.CurrentAction ? was!.ratio : model.speedRatio;
+    return;
+  }
+  if (!group) return;
+  if (!was || was.action !== model.CurrentAction) {
+    heldModels.set(model, { action: model.CurrentAction, ratio: group.speedRatio || model.speedRatio });
+  }
+  group.speedRatio = 0;
+}
+
+/** The rates of a held item's running clips, given back on release. */
+const heldParts = new WeakMap<ModelObject, Map<AnimationGroup, number>>();
+
+/** A linked item skips its own PlayAnimation under the same buffs (ZzzCharacter.cpp:6975-6978): every clip it runs stops. */
+function holdPart(part: ModelObject | undefined, held: boolean): void {
+  if (!part) return;
+  let was = heldParts.get(part);
+  if (!held) {
+    if (!was) return;
+    for (const [group, ratio] of was) group.speedRatio = ratio;
+    heldParts.delete(part);
+    return;
+  }
+  const groups = part.gltf?.animationGroups;
+  if (!groups) return;
+  for (const group of groups) {
+    if (!group.isStarted || group.speedRatio === 0) continue;
+    if (!was) heldParts.set(part, (was = new Map()));
+    was.set(group, group.speedRatio);
+    group.speedRatio = 0;
+  }
+}
 
 /**
  * One frame of a character that is wearing a monster's body. The action it
@@ -460,6 +506,8 @@ export const AnimationSystem: ISystemFactory = world => {
           (isOneShotPlayerAction(action) && !entity.performing) ||
           action === PlayerAction.PLAYER_DIE1;
         playerObject.playAction(action, !oneShot);
+        const held = isHeld(entity.buffs);
+        holdClip(playerObject, held);
 
         // RenderCharacterItem rewrites the weapons' own clip every frame off
         // the character's: a bow only draws while the shot plays.
@@ -469,7 +517,7 @@ export const AnimationSystem: ISystemFactory = world => {
             entity.charAppearance,
             attrs?.isAboveZero('weaponsOnBack') ?? false,
             action,
-            playerObject.AnimationSpeed
+            held ? 0 : playerObject.AnimationSpeed
           );
         }
 
@@ -491,6 +539,12 @@ export const AnimationSystem: ISystemFactory = world => {
           pet.setAnimationSpeed(spec?.playSpeed ?? 0.25);
           pet.playAction(0, true);
         }
+
+        holdPart(playerObject.Weapon1, held);
+        holdPart(playerObject.Weapon2, held);
+        holdPart(playerObject.PhoenixWing1, held);
+        holdPart(playerObject.PhoenixWing2, held);
+        holdPart(playerObject.Wings, held);
       }
 
       for (const entity of monsterAnimatableQuery) {
@@ -531,6 +585,7 @@ export const AnimationSystem: ISystemFactory = world => {
           modelObject.actionPlaySpeed(action) ??
           monsterPlaySpeed(monsterModelTypeOf(entity.npcType), action);
         modelObject.playAction(action, !MONSTER_ONE_SHOT_ACTIONS.has(action));
+        holdClip(modelObject, isHeld(entity.buffs));
       }
     },
   };

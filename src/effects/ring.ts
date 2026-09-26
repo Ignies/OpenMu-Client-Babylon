@@ -13,7 +13,7 @@
 import { Vector3, type Scene } from '../libs/babylon/exports';
 import { TerrainDecal } from '../common/moveTargetEffect';
 import { Store } from '../store';
-import { LiveList, fadeOut, lerp, type PointSource, type RGB } from './core';
+import { LiveList, TICK, darkCardGain, fadeOut, lerp, luma, type PointSource, type RGB } from './core';
 import { RGBS, TEX } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
@@ -44,8 +44,16 @@ export interface RingOptions {
   spin?: number;
   /** Degrees the spin starts from, for a decal that has always been turning. */
   spinFrom?: number;
-  blend?: 'additive' | 'alpha';
+  /** `subtract` is EnableAlphaBlendMinus: black with the sheet as coverage, `luma(colour)` its strength. */
+  blend?: 'additive' | 'alpha' | 'subtract';
   fadeTail?: number;
+  /**
+   * The original's `Alpha` / `Luminosity` over the life (0..1 progress), replacing `fadeTail`. It scales
+   * the light (an additive decal is drawn (ONE, ONE), which drops the material alpha) or the coverage.
+   */
+  alphaAt?: (progress: number) => number;
+  /** Largest diameter the growth reaches, tiles (BITMAP_MAGIC_ZIN sub2 stops at 3.5). */
+  cap?: number;
   /**
    * Re-read the position every frame instead of standing where it was
    * spawned. `RenderTerrainAlphaBitmap` is an immediate-mode call in the
@@ -62,7 +70,7 @@ export interface RingOptions {
    * alpha, so only this dims it (a `Light` that decays, BITMAP_FLARE_BLUE under a Strike of Destruction).
    */
   fadeColour?: boolean;
-  /** Brightness e^(-decay t) on top of the fade: a `Light /= 1.05` a tick is 25 ln 1.05. */
+  /** Light multiplied by this every tick (`Light /= 1.05` is 1 / 1.05), on top of the fade. Default 1. */
   decay?: number;
 }
 
@@ -76,7 +84,7 @@ export function ringCount(): number {
   return live.size;
 }
 
-function acquire(texture: string, blend: 'additive' | 'alpha', maxScale = MAX_SCALE): TerrainDecal | null {
+function acquire(texture: string, blend: 'additive' | 'alpha' | 'subtract', maxScale = MAX_SCALE): TerrainDecal | null {
   const world = Store.world;
   if (!world) return null;
   const key = poolKey(texture, blend, maxScale);
@@ -111,9 +119,13 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const tail = opts.fadeTail ?? 0.35;
   const follow = opts.follow;
   const until = opts.until;
-  const fadeColour = opts.fadeColour ?? false;
-  const decay = opts.decay ?? 0;
-  const faded: [number, number, number] = [0, 0, 0];
+  const alphaAt = opts.alphaAt;
+  const cap = Math.min(maxScale, opts.cap ?? maxScale);
+  const dark = blend === 'subtract';
+  const cover = dark ? Math.min(1, luma(colour) * darkCardGain(_scene)) : 0;
+  const fadeColour = opts.fadeColour === true;
+  const decay = opts.decay ?? 1;
+  const lit: [number, number, number] = [colour[0], colour[1], colour[2]];
   let x = at.x;
   let z = at.z;
   let t = 0;
@@ -130,20 +142,28 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
         z = followTmp.z;
       }
       const s = scale * lerp(growFrom, grow, p);
-      const fade = fadeOut(p, tail) * (decay > 0 ? Math.exp(-decay * t) : 1);
-      decal.setAlpha(fade);
-      if (fadeColour) {
-        faded[0] = colour[0] * fade;
-        faded[1] = colour[1] * fade;
-        faded[2] = colour[2] * fade;
+      // One level over the life: the `alphaAt` keys or the tail fade, times the per-tick `decay`.
+      const level = (alphaAt ? alphaAt(p) : fadeOut(p, tail)) * (decay !== 1 ? decay ** (t / TICK) : 1);
+      let light: readonly [number, number, number] = colour;
+      if (dark) decal.setAlpha(cover * level);
+      else {
+        // An additive decal is drawn (ONE, ONE), which drops the alpha: `alphaAt` and `fadeColour` dim the light.
+        const dim = !!alphaAt || fadeColour;
+        decal.setAlpha(alphaAt ? 1 : level);
+        if (dim) {
+          lit[0] = colour[0] * level;
+          lit[1] = colour[1] * level;
+          lit[2] = colour[2] * level;
+          light = lit;
+        }
       }
       decal.draw(
         world,
         x,
         z,
-        Math.min(maxScale, s),
+        Math.min(cap, s),
         spinFrom + spin * t,
-        fadeColour ? faded : colour
+        light
       );
       return true;
     },

@@ -6,7 +6,7 @@ import { MODEL } from '../effects/recipes';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 import { tierIndex } from '../common/lightingQuality';
-import { arc, effectLight, ember, flame, frost, holy, shade, spark, tide, venom } from './recipes';
+import { arc, effectLight, ember, flame, frost, holy, spark, tide, venom } from './recipes';
 
 /**
  * Skills as light sources.
@@ -75,6 +75,12 @@ export type SkillLight = {
    * emitter appears and hands over its path.
    */
   readonly follow?: LightRecipe;
+  /**
+   * `land`: a light the effect lays down itself where one of its pieces
+   * gets to - a Drain Life siphon reaching the caster, a Chain Lightning
+   * hop. Not tier-gated: one light per call, like an arrow.
+   */
+  readonly land?: LightRecipe;
   /**
    * `arrow`: what this skill's arrows carry while they fly, overriding the
    * launcher-model row in `ARROW_LIGHTS`. For the skills this client draws
@@ -181,6 +187,25 @@ const ELECTRIC_SPIKE_LIGHT: SkillLight = {
       { ...effectLight([0.85, 0.7, 1], 1.8, 14 * TICK_SECONDS, { release: 8 * TICK_SECONDS, heightOffset: 1, flicker: { min: 0.7, max: 1, steps: 3 } }), forward: 8, delay: 6 * TICK_SECONDS, cue: 'bolt' },
     ],
   },
+};
+
+/**
+ * Drain Life: each JOINT_ENERGY siphon lights `L * (0.4, 1, 0.8)`, L 0.24-0.33, range 2 every tick
+ * of its flight (ZzzEffectJoint.cpp:3377-3379), and dies into a BITMAP_LIGHTNING+1 lighting
+ * `LifeTime / 10 * (0.5, 1, 0.8)` range 3 for 10 ticks (ZzzEffectParticle.cpp:4281-4287).
+ */
+const DRAIN_LIFE_LIGHT: SkillLight = {
+  trail: { color: [0.11, 0.28, 0.22], range: 2, release: 0.1 },
+  land: { color: [0.5, 1, 0.8], range: 3, seconds: 0.4, release: 0.4 },
+};
+
+/**
+ * Chain Lightning: every 50 cm step of a width-50 JOINT_THUNDER lights `L * (0.1, 0.1, 0.5)`, L
+ * 0.16-0.28, range 2 (ZzzEffectJoint.cpp:5006-5021); the steps of the hop's walks overlap into a
+ * blue band along it for the hop's 20 ticks. The effect lays one of these every two tiles of it.
+ */
+const CHAIN_LIGHTNING_LIGHT: SkillLight = {
+  land: { color: [0.15, 0.15, 0.75], range: 2, seconds: 0.84, release: 0.1 },
 };
 
 /** Teleport's column on the graded tiers: its sparks' tint, 2.16 tiles up either way, LT 10. */
@@ -329,11 +354,16 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Electric Spike (519): the original lights nothing. The arc is ours, kept for the graded tiers.
   65: ELECTRIC_SPIKE_LIGHT,
   519: ELECTRIC_SPIKE_LIGHT,
-  // Lightning Shock / Chain Lightning: BITMAP_LIGHTNING+1 range 2-4.
-  215: { impact: arc(4, 0.45) },
-  230: { area: arc(5, 0.6, { gain: 1.4 }) },
-  // Drain Life: MODEL_DARK_ELF_SKILL range 3 (:10423).
-  214: { impact: shade(3, 0.8) },
+  214: DRAIN_LIFE_LIGHT,
+  458: DRAIN_LIFE_LIGHT,
+  462: DRAIN_LIFE_LIGHT,
+  215: CHAIN_LIGHTNING_LIGHT,
+  455: CHAIN_LIGHTNING_LIGHT,
+  // Lightning Orb and Lightning Shock light nothing in the original (ZzzEffect.cpp:6886-6965,
+  // MoveHandlers.cpp:2385-2543); the empty rows keep the wizardry cast flash off.
+  216: {},
+  230: {},
+  456: {},
 };
 
 /**
@@ -633,6 +663,24 @@ export function lightSkillSpot(
   follow(position);
 
   return attach(scene, recipe, { position, follow });
+}
+
+/**
+ * Command: the light a skill's effect lays down where one of its pieces
+ * gets to (the row's `land`), at `position` or riding `follow`. Null when
+ * the row has none.
+ */
+export function lightSkillLand(
+  scene: Scene,
+  skill: number,
+  position: { x: number; y: number; z: number },
+  follow?: (out: { x: number; y: number; z: number }) => void
+): LightSource | null {
+  const recipe = lightRow(skill)?.land;
+
+  if (!recipe) return null;
+
+  return attach(scene, recipe, { position: { x: position.x, y: position.y, z: position.z }, follow });
 }
 
 /**

@@ -12,7 +12,7 @@ import {
   type LightAnchor,
   type LightRecipe,
 } from './lightSource';
-import { lightAreaSkill, lightArrow, lightSkillAt, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillSpot, lightSkillTrail, lightTargetedSkill } from './skills';
+import { lightAreaSkill, lightArrow, lightSkillAt, lightSkillBody, lightSkillCue, lightSkillFollow, lightSkillLand, lightSkillSpot, lightSkillTrail, lightTargetedSkill } from './skills';
 import { lightCharacter, snuffCharacter, characterIsLit } from './characters';
 import { lightObjectEffect } from './objectEffects';
 import { lookDirector, type LookState } from './director';
@@ -176,6 +176,19 @@ class Lighting {
     follow: (out: { x: number; y: number; z: number }) => void
   ): LightSource | null {
     return lightSkillSpot(scene, skill, name, follow);
+  }
+
+  /**
+   * The light a skill's effect lays down where one of its pieces gets to
+   * (a siphon home, a chain hop). Null when the skill has none.
+   */
+  skillLand(
+    scene: Scene,
+    skill: number,
+    position: { x: number; y: number; z: number },
+    follow?: (out: { x: number; y: number; z: number }) => void
+  ): LightSource | null {
+    return lightSkillLand(scene, skill, position, follow);
   }
 
   /**

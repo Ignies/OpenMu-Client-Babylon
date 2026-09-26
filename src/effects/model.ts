@@ -32,7 +32,7 @@ import { getMaterial, loadGLTF } from '../common/modelLoader';
 import { BlendState } from '../common/objects/enum';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
-import { LiveList, additiveMaterial, darkCardGain, fadeOut, fxNow, lerp, luma, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
+import { LiveList, TICK, additiveMaterial, darkCardGain, fadeOut, fxNow, lerp, luma, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
@@ -68,7 +68,7 @@ export interface ModelOptions {
   growEase?: number;
   /** The growth ends at this fraction of the life and holds (default 1): MODEL_COMBO grows only while LT > 4. */
   growUntil?: number;
-  /** Visibility falls as e^(-decay t), per second on top of the fade: a `BlendMeshLight /= 1.4` a tick is 25 ln 1.4. */
+  /** Visibility multiplied by this every tick, on top of the fade (`BlendMeshLight /= 1.4` is 1 / 1.4). Default 1. */
   decay?: number;
   /** Tint (`bodyLight`). */
   colour?: RGB;
@@ -88,6 +88,8 @@ export interface ModelOptions {
   flat?: boolean;
   follow?: PointSource;
   height?: number;
+  /** Ends it early (the body it rides left: `if (o->Owner == NULL || !o->Owner->Live) o->Live = false`). */
+  until?: () => boolean;
   /** Loop the clip (default) or play it once. */
   loop?: boolean;
   /**
@@ -327,7 +329,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const grow = opts.grow ?? 1;
   const growEase = opts.growEase ?? 1;
   const growUntil = opts.growUntil ?? 1;
-  const decay = opts.decay ?? 0;
+  const decay = opts.decay ?? 1;
   const spin = opts.spin ?? 0;
   const rise = opts.rise ?? 0;
   const height = opts.height ?? 0;
@@ -519,7 +521,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     update(dt) {
       t += dt;
       const p = t / seconds;
-      if (p >= 1) return false;
+      if (p >= 1 || opts.until?.()) return false;
       source(tmp);
       node.position.set(tmp.x, tmp.y + height + rise * t, tmp.z);
       const gp = growUntil < 1 ? Math.min(1, p / growUntil) : p;
@@ -544,7 +546,7 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         prevZ = tmp.z;
       }
       const lit = opts.intensity ? Math.max(0, Math.min(1, opts.intensity(t))) : 1;
-      let vis = (opts.life ? opts.life(p) * alpha : fadeOut(p, tail) * alpha * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1)) * lit * (decay > 0 ? Math.exp(-decay * t) : 1);
+      let vis = (opts.life ? opts.life(p) * alpha : fadeOut(p, tail) * alpha * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1)) * lit * (decay !== 1 ? decay ** (t / TICK) : 1);
       for (const m of sheetMats) if (!m.diffuseTexture) vis = 0;
       // The sheet is shared, so the scroll runs off the effects clock, the same for every user (as joint.ts's thunder).
       for (const m of scrollMats) {

@@ -186,6 +186,16 @@ export interface JointOptions {
   jitter?: number;
   /** Bolt: side branches, 0…3. */
   forks?: number;
+  /**
+   * Bolt: lays the `segments + 1` points itself instead of the jittered
+   * straight line - a walk like JOINT_THUNDER's MoveHumming steps
+   * (ZzzEffectJoint.cpp:4767-5020). Called at every re-roll, for each of `pairs` too.
+   */
+  path?: (from: Vector3, to: Vector3, out: number[], segments: number) => void;
+  /** Bolt: seconds between re-rolls (default two ticks). */
+  reroll?: number;
+  /** Bolt: drawn at its full light, without the flicker (`pairs` too). */
+  steady?: boolean;
   /** Tiles above both points. */
   height?: number;
   /**
@@ -231,8 +241,6 @@ export interface JointOptions {
   sprites?: { texture: string; colour: RGB; size: number; count?: number; fadeAbove?: number };
   /** Narrow the whole ribbon linearly to nothing over its life (the original's `Scale = LifeTime * k`). */
   shrink?: boolean;
-  /** Bolt: seconds between re-rolls of its noise (default 2 ticks). */
-  reroll?: number;
   /** Bolt: the chance a re-roll leaves it dark until the next (a bolt respawned on a `rand_fps_check(2)`). */
   blink?: number;
   /**
@@ -538,7 +546,8 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
         sinceRoll = 0;
         s += 3.3;
         dark = blink > 0 && Math.random() < blink;
-        fillLine(lines[0], a, b, segments, jitter, s);
+        if (opts.path) opts.path(a, b, lines[0], segments);
+        else fillLine(lines[0], a, b, segments, jitter, s);
         for (let f = 1; f <= forks; f++) {
           const at = 0.3 + hash(s + f) * 0.4;
           const o = Math.floor(at * segments) * 3;
@@ -554,7 +563,7 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
         mesh.setPoints(lines);
       }
       line.scroll();
-      line.fade(dark ? 0 : opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3) * (0.6 + 0.4 * hash(t * 97)));
+      line.fade(dark ? 0 : opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3) * (opts.steady ? 1 : 0.6 + 0.4 * hash(t * 97)));
       if (opts.shrink) line.narrow(1 - prog);
       return true;
     },
@@ -597,12 +606,13 @@ function spawnBoltSet(scene: Scene, opts: JointOptions): EffectHandle {
           pairs[i].to(b);
           a.y += height;
           b.y += height;
-          fillLine(lines[i], a, b, segments, jitter, s + i * 5.1);
+          if (opts.path) opts.path(a, b, lines[i], segments);
+          else fillLine(lines[i], a, b, segments, jitter, s + i * 5.1);
         }
         mesh.setPoints(lines);
       }
       line.scroll();
-      line.fade(dark ? 0 : fadeOut(prog, opts.fadeTail ?? 0.3) * (0.6 + 0.4 * hash(t * 97)));
+      line.fade(dark ? 0 : fadeOut(prog, opts.fadeTail ?? 0.3) * (opts.steady ? 1 : 0.6 + 0.4 * hash(t * 97)));
       return true;
     },
     release() {

@@ -103,6 +103,15 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_ATTACK_DARKHORSE) return 0.3;
   // No attack speed on it (ZzzCharacter.cpp:1003); it used to fall through to the 0.28 default.
   if (action === A.PLAYER_SKILL_BLOW_OF_DESTRUCTION) return 0.3;
+  // The Summoner curse clip and its mounts (ZzzCharacter.cpp:974-977).
+  if (action >= A.PLAYER_SKILL_SLEEP && action <= A.PLAYER_SKILL_SLEEP_FENRIR) return 0.3 + magicSpeedFactor(magicSpeed);
+  // Lightning Orb, Chain Lightning, Drain Life and Lightning Shock with their mounts (ZzzCharacter.cpp:979-996).
+  if (action === A.PLAYER_SKILL_LIGHTNING_ORB) return 0.4 + magicSpeedFactor(magicSpeed);
+  if (action >= A.PLAYER_SKILL_LIGHTNING_ORB_UNI && action <= A.PLAYER_SKILL_LIGHTNING_ORB_FENRIR) return 0.25 + magicSpeedFactor(magicSpeed);
+  if (action === A.PLAYER_SKILL_CHAIN_LIGHTNING) return 0.25 + magicSpeedFactor(magicSpeed);
+  if (action >= A.PLAYER_SKILL_CHAIN_LIGHTNING_UNI && action <= A.PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR) return 0.15 + magicSpeedFactor(magicSpeed);
+  if (action >= A.PLAYER_SKILL_DRAIN_LIFE && action <= A.PLAYER_SKILL_DRAIN_LIFE_FENRIR) return 0.25 + magicSpeedFactor(magicSpeed);
+  if (action === A.PLAYER_SKILL_LIGHTNING_SHOCK) return 0.35 + magicSpeedFactor(magicSpeed);
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {
