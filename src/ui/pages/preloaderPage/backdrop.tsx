@@ -10,8 +10,10 @@ const WORLD_MAP_ART = '/ui/world_select/world_map.webp';
  */
 export const Backdrop = () => (
   <div className="ws-art" aria-hidden>
-    <div className="ws-map" style={{ backgroundImage: `url(${WORLD_MAP_ART})` }} />
-    <div className="ws-tint" />
+    <div className="ws-map-layer">
+      <div className="ws-map" style={{ backgroundImage: `url(${WORLD_MAP_ART})` }} />
+      <div className="ws-tint" />
+    </div>
     <div className="ws-grid" />
     <Embers />
     <div className="ws-vignette" />

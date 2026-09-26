@@ -147,31 +147,33 @@
   pointer-events: none;
 }
 
-// The red world map: drained to grey, then washed in the logo's red by the
-// tint layer above it. It breathes - a slow scale in place, never a pan.
-.ws-map,
-.ws-tint {
+.ws-map-layer {
+  // One layer for the map and its tint, so the breathing and the mask move
+  // both together and the red can never slide off the map. Opaque inside:
+  // a colour blend over a transparent backdrop would paint pure red.
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  margin-inline: auto;
-  width: min(1700px, 130vw);
-  height: 100%;
-  -webkit-mask-image: radial-gradient(ellipse 72% 78% at 50% 46%, #000 34%, transparent 80%);
-  mask-image: radial-gradient(ellipse 72% 78% at 50% 46%, #000 34%, transparent 80%);
+  inset: 0;
+  background: var(--bg-0);
+  -webkit-mask-image: radial-gradient(ellipse 72% 80% at 50% 45%, #000 38%, transparent 88%);
+  mask-image: radial-gradient(ellipse 72% 80% at 50% 45%, #000 38%, transparent 88%);
+  animation: ws-breathe 48s var(--ease) infinite alternate;
 }
 
+// The world map drained to grey, then washed in the logo's red above it. It
+// breathes - a slow scale in place, never a pan.
 .ws-map {
+  position: absolute;
+  inset: 0;
   background-repeat: no-repeat;
   background-position: center 40%;
   background-size: cover;
   opacity: 0.34;
   filter: grayscale(1) contrast(1.35) brightness(0.55);
-  animation: ws-breathe 48s var(--ease) infinite alternate;
 }
 
 .ws-tint {
+  position: absolute;
+  inset: 0;
   background: var(--mu-red);
   mix-blend-mode: color;
   opacity: 0.75;
@@ -1935,7 +1937,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ws-map,
+  .ws-map-layer,
   .ws-runner-rig,
   :is(#root, .app) .ws-page .ws-runner-part,
   .ws-runner-dust i {
