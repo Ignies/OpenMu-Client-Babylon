@@ -49,7 +49,7 @@ export const CAPE_OF_LORD = 30;
 
 /** A bone-anchored particle aura the wing emits (`RenderPartObjectEffect`). */
 export type WingWake = {
-  readonly kind: 'wingFlareBlue' | 'wingCloud';
+  readonly kind: 'wingFlareBlue' | 'wingCloud' | 'wingLight';
   /** Bone indices the sprites are placed on. */
   readonly bones: readonly number[];
   /** Sprite scale at `timeMs`. */
@@ -59,6 +59,31 @@ export type WingWake = {
   /** Emit every n-th 25 Hz tick (the original re-creates them every frame). */
   readonly every: number;
 };
+
+export type Rgb = readonly [number, number, number];
+
+/**
+ * One `RenderMesh` of the wing's branch in `RenderPartObjectBody`
+ * (ZzzObject.cpp:6921-6978), each in the absolute `b->BodyLight` it sets:
+ *
+ * - `tint`: the mesh's lit pass, in this light.
+ * - `bright`: the mesh drawn additive *instead of* lit - the branch never
+ *   draws it with plain RENDER_TEXTURE.
+ * - `overlay`: the mesh drawn a second time, additive, over its lit pass,
+ *   optionally on another texture.
+ * - `chrome`: Chrome01 added over the lit pass (RENDER_BRIGHT | RENDER_CHROME).
+ */
+export type WingMeshPass = {
+  readonly mesh: number;
+  readonly kind: 'tint' | 'bright' | 'overlay' | 'chrome';
+  readonly light?: (timeMs: number) => Rgb;
+  /** `BlendMeshTexCoordU` at `timeMs`. */
+  readonly u?: (timeMs: number) => number;
+  /** `Data/` path of the texture an `overlay` is drawn with instead of the mesh's own. */
+  readonly texture?: string;
+};
+
+const grey = (l: number): Rgb => [l, l, l];
 
 export type WingSpec = {
   /** `o->BlendMesh`: the mesh drawn as an additive glow card. -1 = none. */
@@ -74,7 +99,8 @@ export type WingSpec = {
    * fold shut in town (`RenderLinkObject`, ZzzCharacter.cpp:6785).
    */
   readonly safeZoneAction?: number;
-  readonly wake?: WingWake;
+  readonly wakes?: readonly WingWake[];
+  readonly passes?: readonly WingMeshPass[];
 };
 
 const PLAIN: WingSpec = { blendMesh: -1 };
@@ -102,46 +128,93 @@ const WINGS: Readonly<Record<number, WingSpec>> = {
   [WINGS_OF_DARKNESS]: {
     blendMesh: -1,
     safeZoneAction: 1,
-    wake: {
-      kind: 'wingFlareBlue',
-      // The two five-bone runs of ZzzObject.cpp:9868-9890 (`22 - i`, `7 - i`).
-      bones: [22, 21, 20, 19, 18, 7, 6, 5, 4, 3],
-      // Scale = (sinf(WorldTime*0.004)*0.3 + 0.3) * 10 + 20, drawn at /28.
-      scale: t => ((Math.sin(t * 0.004) * 0.3 + 0.3) * 10 + 20) / 28,
-      light: () => [0.6, 0.3, 0.8],
-      every: 2,
-    },
+    wakes: [
+      {
+        kind: 'wingFlareBlue',
+        // The two five-bone runs of ZzzObject.cpp:9868-9890 (`22 - i`, `7 - i`).
+        bones: [22, 21, 20, 19, 18, 7, 6, 5, 4, 3],
+        // Scale = (sinf(WorldTime*0.004)*0.3 + 0.3) * 10 + 20, drawn at /28.
+        scale: t => ((Math.sin(t * 0.004) * 0.3 + 0.3) * 10 + 20) / 28,
+        light: () => [0.6, 0.3, 0.8],
+        every: 2,
+      },
+    ],
   },
 
   // --- 3rd level.
   [WING_OF_STORM]: {
     blendMesh: -1,
     flyPlaySpeed: 0.5, // ZzzCharacter.cpp:15115
-    wake: {
-      kind: 'wingCloud',
-      // The 25-bone table of ZzzObject.cpp:9903-9906.
-      bones: [
-        9, 20, 19, 10, 18, 28, 27, 36, 35, 38, 37, 53, 48, 62, 70, 72, 71, 78,
-        79, 80, 87, 90, 91, 106, 102,
-      ],
-      scale: () => 0.5,
-      light: t => {
-        const l = 0.5 + Math.abs(Math.sin(t * 0.0004)) * 0.4;
-        return [l, l, l];
+    wakes: [
+      {
+        kind: 'wingCloud',
+        // The 25-bone table of ZzzObject.cpp:9903-9906.
+        bones: [
+          9, 20, 19, 10, 18, 28, 27, 36, 35, 38, 37, 53, 48, 62, 70, 72, 71, 78,
+          79, 80, 87, 90, 91, 106, 102,
+        ],
+        scale: () => 0.5,
+        light: t => {
+          const l = 0.5 + Math.abs(Math.sin(t * 0.0004)) * 0.4;
+          return [l, l, l];
+        },
+        every: 3,
       },
-      every: 3,
-    },
+      // The joint glows of ZzzObject.cpp:9942-9960: four red, eighteen amber.
+      {
+        kind: 'wingLight',
+        bones: [12, 64, 98, 52],
+        scale: t => Math.abs(Math.sin(t * 0.003)) * 0.2 + 1.4,
+        light: () => [0.9, 0, 0],
+        every: 1,
+      },
+      {
+        kind: 'wingLight',
+        bones: [
+          61, 69, 77, 86, 97, 99, 104, 103, 105, 8, 17, 26, 34, 44, 51, 50, 49,
+          45,
+        ],
+        scale: t => Math.abs(Math.sin(t * 0.003)) * 0.2 + 0.3,
+        light: () => [0.8, 0.5, 0.2],
+        every: 1,
+      },
+    ],
+    passes: [
+      { mesh: 2, kind: 'tint', light: () => [1, 0.7, 0.5] },
+      { mesh: 0, kind: 'bright', light: () => [1, 0.7, 0.5] },
+      // `lightningblast` is a four-frame strip: s_iTexAni counts 0..15 ticks
+      // and the frame is ((int)s_iTexAni / 4) * 0.25.
+      {
+        mesh: 1,
+        kind: 'bright',
+        light: () => [0.9, 0.6, 0.3],
+        u: t => Math.floor((t % 640) / 160) * 0.25,
+      },
+    ],
   },
   [WING_OF_ETERNAL]: PLAIN,
   [WING_OF_ILLUSION]: PLAIN,
   [WING_OF_RUIN]: {
     blendMesh: -1,
     playSpeed: 0.15, // RenderLinkObject, ZzzCharacter.cpp:6477-6481
+    passes: [
+      {
+        mesh: 0,
+        kind: 'bright',
+        light: t => grey(0.1 + Math.abs(Math.sin(t * 0.001)) * 0.3),
+      },
+      {
+        mesh: 1,
+        kind: 'overlay',
+        light: t => grey(Math.abs(Math.sin(t * 0.001)) * 0.8),
+        texture: 'Item/msword01_r.OZJ', // BITMAP_3RDWING_LAYER
+      },
+    ],
   },
   [CAPE_OF_EMPEROR]: { blendMesh: -1, cape: 'emperor' },
   [WING_OF_CURSE]: PLAIN,
-  [WINGS_OF_DESPAIR]: PLAIN,
-  [WING_OF_DIMENSION]: PLAIN,
+  [WINGS_OF_DESPAIR]: { blendMesh: -1, passes: [{ mesh: 1, kind: 'chrome' }] },
+  [WING_OF_DIMENSION]: { blendMesh: -1, passes: [{ mesh: 1, kind: 'chrome' }] },
 };
 
 const CAPES: Readonly<Record<number, WingSpec>> = {

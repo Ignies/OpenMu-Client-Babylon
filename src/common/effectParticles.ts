@@ -35,7 +35,8 @@ type TextureKey =
   | 'spark03'
   | 'flareBlue'
   | 'fantaB'
-  | 'clud64';
+  | 'clud64'
+  | 'flare01';
 
 const TEXTURES: Record<
   TextureKey,
@@ -54,6 +55,7 @@ const TEXTURES: Record<
   flareBlue: { file: 'Effect/flareBlue.OZJ', size: 64 },
   fantaB: { file: 'Effect/fantaB.OZJ', size: 64 },
   clud64: { file: 'Effect/clud64.OZJ', size: 64 },
+  flare01: { file: 'Effect/flare01.OZJ', size: 64 },
 };
 
 type Blend = 'add' | 'subtract';
@@ -567,6 +569,28 @@ const KINDS = {
     },
     color: plainColor,
   } satisfies ParticleKind,
+
+  /**
+   * BITMAP_LIGHT (`Effect/flare01`) re-created at a wing bone every frame,
+   * like `wingFlareBlue`: the Wing of Storm joint glows (ZzzObject.cpp:9942-9960).
+   */
+  wingLight: {
+    texture: 'flare01',
+    blend: 'add',
+    init(p, scale, light) {
+      p.lifeTime = 4;
+      p.scale = scale;
+      p.rotation = rand(360);
+      [p.tr, p.tg, p.tb] = light;
+    },
+    update(p) {
+      const t = Math.max(0, Math.min(1, p.lifeTime / 4));
+      p.lr = p.tr * t;
+      p.lg = p.tg * t;
+      p.lb = p.tb * t;
+    },
+    color: plainColor,
+  } satisfies ParticleKind,
 } satisfies Record<string, ParticleKind>;
 
 export type KindName = keyof typeof KINDS;
@@ -845,6 +869,7 @@ export const KIND_REACH: Record<KindName, Reach> = {
   spark03_24: { travel: 0.6, base: 0.19, perScale: 0 },
   wingFlareBlue: { travel: 0, base: 0, perScale: 0.46 },
   wingCloud: { travel: 0, base: 0, perScale: 0.46 },
+  wingLight: { travel: 0, base: 0, perScale: 0.46 },
 };
 
 /** The reach of a spawn picking any of `kinds`, as one base plus a per-scale slope. */
