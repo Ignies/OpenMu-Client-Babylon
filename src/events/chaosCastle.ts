@@ -15,6 +15,13 @@ import {
   MiniGameOpeningStatePacket,
   MiniGameScoreTablePacket,
 } from '../common/packets/ServerToClientPackets';
+import { playSfx } from '../libs/sfx';
+import {
+  PILLAR_TYPE,
+  nextThunderSeconds,
+  thunderSound,
+  thunderStrikes,
+} from '../maps/chaoscastle/thunder';
 import type { EventLayer } from './layer';
 import { noteOpeningStateRequest, takeOpeningState } from './schedule';
 import {
@@ -37,6 +44,11 @@ import {
  * / `ChaosCastleEnterResult` / `BloodCastleState` / `MiniGameScoreTable`
  * packets. Read by the prompt, timer and result table in
  * `ui/pages/worldPage/components/events`.
+ *
+ * Also here, as in the original's CSChaosCastle.cpp: the lightning pillars'
+ * thunder (`maps/chaoscastle/thunder.ts`), for the whole stay on a castle map.
+ * The original never hides the pillars: its ring hide waits on a castle level
+ * nothing ever sets (CSChaosCastle.cpp:93, 315-331, 558-562).
  *
  * Not here: the shrinking arena (states 8..10 add `TW_NOGROUND` rings and
  * play the falling-stone sound) - that is the map's business once the
@@ -75,6 +87,12 @@ const MESSAGE_MS = 5000;
  * 1 up, and OpenMU only reads the number when the hero fits no level range.
  */
 const ASK_EVENT_LEVEL = 1;
+/**
+ * Tiles from the hero a pillar counts as on screen for the thunder roll. The
+ * original counts the pillars inside its view; over the arena floor that
+ * reaches about this far.
+ */
+const PILLAR_VIEW_TILES = 15;
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -110,6 +128,8 @@ const state = observable(
 /** The ticket the prompt was opened for: `(CastleLevel, inventory slot)`. */
 let ticket: { level: number; slot: number } | null = null;
 let resultLeft = 0;
+/** Seconds to the pillars' next landed thunder roll. */
+let thunderIn = nextThunderSeconds();
 
 export function chaosCastlePrompt(): ChaosCastlePrompt | null {
   return state.prompt;
@@ -195,6 +215,38 @@ function update(map: ENUM_WORLD, dt: number): void {
       });
     }
   }
+
+  if (MAPS.has(map)) {
+    thunderIn -= dt;
+    if (thunderIn <= 0) {
+      thunderIn = nextThunderSeconds();
+      if (thunderStrikes(pillarsInView())) {
+        playSfx(thunderSound(), null, { bus: 'ambient', channels: 1 });
+      }
+    }
+  }
+}
+
+/**
+ * Pillars drawn within `PILLAR_VIEW_TILES` of the hero. One the arena has
+ * faded out (`maps/chaoscastle/arena.ts`) does not count; a batched one has
+ * no model object of its own and is always drawn.
+ */
+function pillarsInView(): number {
+  const world = Store.world;
+  const hero = world?.playerEntity?.transform?.pos;
+  if (!world || !hero) return 0;
+
+  const reach2 = PILLAR_VIEW_TILES * PILLAR_VIEW_TILES;
+  let n = 0;
+  for (const e of world.with('modelId', 'transform', 'worldIndex')) {
+    if (e.modelId !== PILLAR_TYPE || e.worldIndex !== world.mapIndex) continue;
+    if (e.modelObject && e.modelObject.Alpha <= 0) continue;
+    const dx = e.transform.pos.x - hero.x;
+    const dz = e.transform.pos.z - hero.z;
+    if (dx * dx + dz * dz < reach2) n++;
+  }
+  return n;
 }
 
 function clearTimer(): void {
@@ -210,6 +262,7 @@ function reset(): void {
     state.result = null;
   });
   resultLeft = 0;
+  thunderIn = nextThunderSeconds();
 }
 
 // ---- packets ---------------------------------------------------------------
@@ -300,6 +353,13 @@ EventBus.on('BloodCastleState', packet => {
   const p = new BloodCastleStatePacket(packet);
 
   switch (p.State) {
+    case BloodCastleStateStatusEnum.ChaosCastleStarted:
+      // The match is on, and `iChaosCastle` takes over from `aChaos`, before
+      // the first clock arrives (NewChaosCastleSystem.cpp:62-70).
+      runInAction(() => {
+        state.timer = { ...state.timer, running: true };
+      });
+      break;
     case BloodCastleStateStatusEnum.ChaosCastleRunning:
       runInAction(() => {
         state.timer = {
@@ -312,9 +372,15 @@ EventBus.on('BloodCastleState', packet => {
       break;
     case BloodCastleStateStatusEnum.ChaosCastleEnded:
       clearTimer();
+      // `aChaosEnd` over the returning `aChaos` bed, on the castle maps
+      // only (NewChaosCastleSystem.cpp:74-80).
+      if (MAPS.has(Store.world?.mapIndex ?? ENUM_WORLD.WD_0LORENCIA)) {
+        playSfx('Sound/aChaosEnd', null, { channels: 1 });
+      }
       break;
     default:
-      // 5 = started (no clock yet), 8..10 = arena stages; 0..4 = Blood Castle.
+      // 8..10 = arena stages (`maps/chaoscastle/arena.ts`); 0..4 = Blood
+      // Castle.
       break;
   }
 });

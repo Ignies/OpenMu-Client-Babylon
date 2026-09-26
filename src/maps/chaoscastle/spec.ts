@@ -20,9 +20,10 @@ import type { Emission } from '../../common/effectParticles';
  *  - **6-12**: `RenderChaosCastleVisual` types that puff a handful of `CLOUD`
  *    particles on their first frame and hide themselves (`HiddenMesh = -2`)
  *    - smoke-box markers, never drawn.
- *  - **0-3 with `PKKey`**: the four lightning pillars; a `CreateJoint` thunder
- *    ribbon and `SOUND_CHAOS_THUNDER01/02` when the server flags one. No
- *    ribbon primitive in the clone (see Icarus), not reproduced.
+ *  - **3 with `PKKey`**: the lightning pillars; a `CreateJoint` thunder
+ *    ribbon and `SOUND_CHAOS_THUNDER01/02` when the client's own roll picks
+ *    one. The sound is `thunder.ts`; no ribbon primitive in the clone (see
+ *    Icarus), so the bolt is not reproduced.
  */
 
 /** `CreateObject` has no Chaos Castle blend meshes; "checked, none". */

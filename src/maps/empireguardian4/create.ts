@@ -61,9 +61,9 @@ import { EmpireGuardian4WallTorchObject } from './wallTorchObject';
  *  - The ambience. `PlayObjectSound` answers day 4 with
  *    `SOUND_EMPIREGUARDIAN_INDOOR_SOUND`
  *    (`Data/Sound/w69w70w71w72/ImperialGuardianFort_in.wav`,
- *    MapManager.cpp:830) on every call, i.e. a bed - the file is not in the
- *    sound catalogue. Music is handled centrally
- *    (`Music/ImperialGuardianFort`, the same track as days 1-3).
+ *    MapManager.cpp:830) on every call, i.e. a bed, now in `ambientBeds.ts`.
+ *    Music is handled centrally (`Music/ImperialGuardianFort`, the same
+ *    track as days 1-3).
  *  - **158** (x11), `¿¬±â¹Ú½º_³ì.smd` ("smoke box, green") - :1099-1106
  *    spawns one `BITMAP_SMOKE` SubType 64 a tick, a green drifting plume
  *    (ZzzEffectParticle.cpp:1590-1604, :5803-5823). No `smoke64` kind exists

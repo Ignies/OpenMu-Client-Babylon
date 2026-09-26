@@ -14,10 +14,11 @@ import { PlaySpeedObject } from '../shared/objectVariants';
  * 0.64 (0.44 on day 3) - and the hidden list in `spec.ts`.
  *
  * Not built: the event itself (gates, bosses, `RenderFrontSideVisual`), the
- * weather-dependent ambience (`ImperialGuardianFort_out1/2/3.wav`,
- * `_in.wav` - not in the sound catalogue), `CreateRain` on days 1-3 (the
- * leaves slot - days 1-3 are `outdoor` on their entry so the weather layer's rain can
- * fall). `Music/ImperialGuardianFort` on all four.
+ * days 1-3 ambience (`ImperialGuardianFort_out1/2/3`, picked by the weather
+ * byte of the 0xF7 0x02 enter result, which the client does not receive -
+ * day 4's `_in` bed is in `sound/ambientBeds.ts`), `CreateRain` on days 1-3
+ * (the leaves slot - days 1-3 are `outdoor` on their entry so the weather
+ * layer's rain can fall). `Music/ImperialGuardianFort` on all four.
  */
 export async function createEmpireGuardian(world: World) {
   const terrain = world.terrain;

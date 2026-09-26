@@ -117,6 +117,16 @@ const BREATH_RED = [1, 0, 0] as const;
  */
 const BREATH_ONE_IN = 2;
 
+/**
+ * Boids within call range the original usually has. Its five slots
+ * (GOBoid.cpp:1257-1262) spawn facing one way and stream out of a +-512 box
+ * to 1500 at 25 units a tick, so about two are inside 600 (modelled). This
+ * flock circles the hero instead: an in-page census averaged 5 to 13 of its
+ * 13 inside 600. Past this count each call is rolled that much less often,
+ * so the flock calls as often as the original's near ones.
+ */
+const ORIGINAL_CALLERS = 2;
+
 const DEG = Math.PI / 180;
 
 /** A `rand_fps_check(n)` - one chance in n, per tick, over `ticks` ticks. */
@@ -142,12 +152,16 @@ export const BoidSystem: ISystemFactory = world => {
   let spec: BoidSpec | null = null;
   let map = world.mapIndex;
   let sinceSpawn = 0;
+  /** Boids within call range: counted this frame, applied the next. */
+  let callers = 0;
+  let callShare = 1;
 
   function despawnAll(): void {
     for (const e of [...boids]) {
       world.remove(e);
       e.modelObject?.dispose();
     }
+    callers = 0;
   }
 
   function spawn(heroPos: IVector3Like): void {
@@ -313,26 +327,39 @@ export const BoidSystem: ISystemFactory = world => {
   }
 
   /**
-   * The call this species makes near the hero (`BoidSpec.call`). The crow's
-   * is the one with a place attached: `TerrainWall[Index] == TW_SAFEZONE`
-   * (GOBoid.cpp:1495-1500) - it only caws over the castle's safe strip.
+   * The calls this species makes near the hero (`BoidSpec.calls`). The
+   * crow's is the one with a place attached: `TerrainWall[Index] ==
+   * TW_SAFEZONE`, where `Index` is the hero's tile (GOBoid.cpp:1226, 1497).
+   * There the hero's own `TW_CHARACTER` mark (ZzzCharacter.cpp:6477-6490)
+   * fails that test whenever he stands still, so the original only caws
+   * while he walks the safe strip; here it caws while he waits on it too.
    *
    * Wildlife at a distance is part of the place, not a monster in front of
-   * you, so it rides the ambience slider like the dragon's roar.
+   * you, so it rides the ambience slider like the dragon's roar. Every call
+   * is a one-channel wave (ZzzOpenData.cpp:4756-4758, 4851).
    */
-  function call(p: IVector3Like, ticks: number): void {
-    const c = spec?.call;
-    if (!c) return;
+  function call(
+    p: IVector3Like,
+    ticks: number,
+    hero: IVector3Like,
+    heroSafe: boolean
+  ): void {
+    const calls = spec?.calls;
+    if (!calls) return;
 
-    const hero = world.playerEntity?.transform?.pos;
-    if (!hero) return;
-    if (Math.hypot(p.x - hero.x, p.z - hero.z) >= c.withinCm * MU_UNIT) return;
+    const range = Math.hypot(p.x - hero.x, p.z - hero.z);
+    let inRange = false;
 
-    if (c.onSafeZone && !(world.getTerrainFlag(~~p.x, ~~p.z) & TW_SAFEZONE)) {
-      return;
+    for (const c of calls) {
+      if (range >= c.withinCm * MU_UNIT) continue;
+      inRange = true;
+      if (c.onSafeZone && !heroSafe) continue;
+      if (!rolled(c.oneIn * callShare, ticks)) continue;
+
+      playSfx(c.sound, p, { bus: 'ambient', gain: c.gain, channels: 1 });
     }
 
-    if (rolled(c.oneIn, ticks)) playSfx(c.sound, p, { bus: 'ambient' });
+    if (inRange) callers++;
   }
 
   /** `MoveBat`: pinned over the ground, dipping on a sine. */
@@ -442,6 +469,13 @@ export const BoidSystem: ISystemFactory = world => {
 
       const ticks = Math.min(dt, 0.1) * TICKS_PER_SECOND;
 
+      // The hero's tile, read once before the loop and compared whole.
+      const heroSafe =
+        world.getTerrainFlag(~~hero.x, ~~hero.z) === TW_SAFEZONE;
+
+      callShare = Math.max(1, callers / ORIGINAL_CALLERS);
+      callers = 0;
+
       let live = 0;
 
       for (const e of [...boids]) {
@@ -490,7 +524,7 @@ export const BoidSystem: ISystemFactory = world => {
           ? Math.PI - rad0(s.yaw)
           : -rad0(s.yaw);
 
-        call(p, ticks);
+        call(p, ticks, hero, heroSafe);
 
         // Out of range, or its time is up. Either way it is told to leave
         // rather than deleted: the original fades one in and out through

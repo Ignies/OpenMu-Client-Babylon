@@ -16,8 +16,8 @@ import { KALIMA_OBJECT_LOOPS } from '../maps/kalima/spec';
  * as a loop). Elbeland's brooks and gates (`GMNewTown::PlayObjectSound`),
  * Kanturu's wheel / waterfall / arc / plant, gear and incubators, the Tower's
  * crystals and field (`Sound_Kanturu2nd_Object`, `M39Kanturu3rd`), Karutan's
- * insects (`CGMKarutan1::PlayObjectSound`), the Barracks' cages, volcano and
- * fire pillar (`CGM3rdChangeUp::PlayEffectSound`).
+ * insects (`CGMKarutan1::PlayObjectSound`), the Barracks' and the Refuge's
+ * cages, volcano and fire pillar (`CGM3rdChangeUp::PlayEffectSound`).
  *
  * Every instance of a registered type is a candidate; each frame the nearest
  * `MAX_SOURCES` within their row's reach get a slot - an independent looping
@@ -120,6 +120,19 @@ const large = (
 });
 
 /**
+ * GM3rdChangeUp.cpp:352-371 (`PlayEffectSound`), run by `MoveObject` on the
+ * Barracks and the Refuge alike (:57-62); cage01/02 are the original's coin
+ * flip per call - one file per cage type here so the two never fight for one
+ * channel. The Refuge is where the volcano and the fire pillars stand.
+ */
+const CHANGE_UP_LOOPS: readonly ObjectLoop[] = [
+  small([74], 'Sound/w42/cage01', 0.3),
+  small([75], 'Sound/w42/cage02', 0.3),
+  large([79], 'Sound/w42/volcano', 0.4),
+  small([92], 'Sound/w42/firepillar', 0.35, firePillarBurning),
+];
+
+/**
  * THE table: which object types sound on which map. Pure data - the source
  * lines are the original's per-world sound hook.
  */
@@ -171,18 +184,8 @@ export const OBJECT_LOOPS: ReadonlyMap<ENUM_WORLD, readonly ObjectLoop[]> =
       ENUM_WORLD.WD_80KARUTAN1,
       [small([58, 66], 'Sound/Karutan/Karutan_insect_env', 0.3)],
     ],
-    // GM3rdChangeUp.cpp:352-371 (`PlayEffectSound`); cage01/02 are the
-    // original's coin flip per call - one file per cage type here so the
-    // two never fight for one channel.
-    [
-      ENUM_WORLD.WD_41CHANGEUP3RD_1ST,
-      [
-        small([74], 'Sound/w42/cage01', 0.3),
-        small([75], 'Sound/w42/cage02', 0.3),
-        large([79], 'Sound/w42/volcano', 0.4),
-        small([92], 'Sound/w42/firepillar', 0.35, firePillarBurning),
-      ],
-    ],
+    [ENUM_WORLD.WD_41CHANGEUP3RD_1ST, CHANGE_UP_LOOPS],
+    [ENUM_WORLD.WD_42CHANGEUP3RD_2ND, CHANGE_UP_LOOPS],
     // GMHellas.cpp:479, :487 (`RenderHellasVisual`) - every Kalima floor.
     ...KALIMA_WORLDS.map(
       w => [w, KALIMA_OBJECT_LOOPS] as [ENUM_WORLD, readonly ObjectLoop[]]
