@@ -58,8 +58,9 @@ import { Store } from '../../store';
 const MONSTER_VOICE_CHANNELS = 2;
 /** SetPlayerStop's `rand_fps_check(16)` (ZzzCharacter.cpp:428), one roll as it stops. */
 const STOP_CHATTER_ONE_IN = 16;
-/** SetPlayerWalk's `rand_fps_check(16)` for anyone but the hero (:787). */
+/** SetPlayerWalk's `rand_fps_check(16)`, 64 for the hero in a monster body (:787). */
 const WALK_CHATTER_ONE_IN = 16;
+const HERO_WALK_CHATTER_ONE_IN = 64;
 /** MODEL_BALROG rattles its bones while it walks instead of talking (:761). */
 const BALROG_MODEL = 27;
 const BALROG_WALK: Sounds = 'Sound/mBone2';
@@ -188,7 +189,7 @@ export const CombatSfxSystem: ISystemFactory = world => {
         // First sighting: the spawn pose is not an event, the spawn itself may be.
         if (prev === undefined) {
           if (e.monsterAnimation) {
-            const cues = mapMonsterCues(world.mapIndex, monsterModelTypeOf(e.npcType));
+            const cues = mapMonsterCues(world.mapIndex, monsterModelTypeOf(e.npcType ?? e.skin));
             if (cues) playSpawnCues(cues, e.transform.pos, playCue);
           }
           continue;
@@ -197,8 +198,11 @@ export const CombatSfxSystem: ISystemFactory = world => {
         const pos = e.transform.pos;
         const action = model.CurrentAction;
 
-        if (e.monsterAnimation) {
-          const type = monsterModelTypeOf(e.npcType);
+        // A transformation ring makes the wearer a monster object in the
+        // original (WSclient.cpp:2765): it is voiced as the monster it wears.
+        if (e.monsterAnimation || (e.playerAnimation && !isPlayerBody(model))) {
+          const npc = e.npcType ?? e.skin;
+          const type = monsterModelTypeOf(npc);
           const walking =
             action === MonsterActionType.Walk || action === MonsterActionType.Run;
 
@@ -222,8 +226,8 @@ export const CombatSfxSystem: ISystemFactory = world => {
               if (now >= (loopUntil.get(model) ?? 0)) {
                 loopUntil.set(model, now + playVoice(BALROG_WALK, pos));
               }
-            } else if (fpsCheck(WALK_CHATTER_ONE_IN, dt)) {
-              const sfx = monsterIdleSound(type, e.npcType);
+            } else if (fpsCheck(e.localPlayer ? HERO_WALK_CHATTER_ONE_IN : WALK_CHATTER_ONE_IN, dt)) {
+              const sfx = monsterIdleSound(type, npc);
               if (sfx) playVoice(sfx, pos);
             }
             continue;
@@ -235,32 +239,31 @@ export const CombatSfxSystem: ISystemFactory = world => {
             case MonsterActionType.Attack2:
             case MonsterActionType.Attack3:
             case MonsterActionType.Attack4: {
-              const sfx = monsterAttackSound(type, e.npcType);
+              const sfx = monsterAttackSound(type, npc);
               if (sfx) playVoice(sfx, pos);
               break;
             }
             case MonsterActionType.Shock: {
               if (type === MONSTER_ASSASSIN) break;
-              const sfx = monsterAttackSound(type, e.npcType);
+              const sfx = monsterAttackSound(type, npc);
               if (sfx) playVoice(sfx, pos);
               break;
             }
             case MonsterActionType.Die: {
               // Chaos Castle swaps every death for a burst (:1537-1540).
-              const sfx = chaosCastle ? pick(CHAOS_CASTLE_DEATH) : monsterDeathSound(type, e.npcType);
+              const sfx = chaosCastle ? pick(CHAOS_CASTLE_DEATH) : monsterDeathSound(type, npc);
               if (sfx) playVoice(sfx, pos);
               break;
             }
             case MonsterActionType.Stop1: {
               if (!oneIn(STOP_CHATTER_ONE_IN)) break;
-              const sfx = monsterIdleSound(type, e.npcType);
+              const sfx = monsterIdleSound(type, npc);
               if (sfx) playVoice(sfx, pos);
               break;
             }
           }
-        } else if (e.playerAnimation && isPlayerBody(model)) {
-          // A player worn as a whole monster skin is voiced as that monster
-          // (npcVoices), not as a player. Hooves and paws, re-issued every frame the rider moves outside a
+        } else if (e.playerAnimation) {
+          // Hooves and paws, re-issued every frame the rider moves outside a
           // safe zone (:761-786); one channel per wave keeps it a gallop.
           const steps =
             action === A.PLAYER_RUN_RIDE_HORSE
