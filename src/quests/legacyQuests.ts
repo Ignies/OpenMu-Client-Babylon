@@ -28,6 +28,7 @@ import { t, type TextKey } from '../i18n';
 import { observable, reaction, runInAction } from 'mobx';
 import { getBaseClass, BaseClass } from '../common/characterStats';
 import { itemBaseName } from '../common/itemsDatabase';
+import { itemLevelName } from '../common/itemLevelLook';
 import { classOf } from '../common/itemStats';
 import { monsterDisplayName } from '../common/monstersDatabase';
 import {
@@ -374,7 +375,7 @@ function actsFulfilled(quest: QuestDefinition): boolean {
 /** The act's item as the bag's tooltip names it: a +1 quest item shows its level. */
 function actItemName(act: QuestDefinition['acts'][number], type: number): string {
   const name = itemBaseName(act.itemType, act.itemSubType) || t('quest.itemFallback', { id: type });
-  return act.itemLevel > 0 ? `${name} +${act.itemLevel}` : name;
+  return itemLevelName(act.itemType, act.itemSubType, act.itemLevel, name);
 }
 
 /**

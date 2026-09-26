@@ -15,9 +15,11 @@ import {
 import { StatType } from './common/characterStats';
 import { GameOptions } from './common/gameOptions';
 import { ItemsDatabase, itemBaseName } from './common/itemsDatabase';
+import { itemLevelName } from './common/itemLevelLook';
 import {
   ItemGroup,
   itemRestHeight,
+  angleRotation,
   itemRestPose,
   itemRestRotation,
 } from './common/itemAngle';
@@ -3435,7 +3437,8 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
     // ItemAngle (common/itemAngle.ts): the resting pose and height for this
     // item's class - armour face-down, a sword leaning back, everything 30 cm
     // (a weapon 70) off the terrain.
-    const rot = itemRestRotation(poseGroup, poseNum);
+    const pose = proxy?.pose ?? itemRestPose(poseGroup, poseNum);
+    const rot = angleRotation(pose.angle);
     world.add({
       netId: maskedId,
       worldIndex: world.mapIndex,
@@ -3447,7 +3450,7 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
           item.PositionY
         ),
         rot: new Vector3(rot.x, rot.y, rot.z),
-        scale: itemRestPose(poseGroup, poseNum).scale,
+        scale: pose.scale,
       },
       modelFactory: DropObject,
       modelFilePath:
@@ -3489,8 +3492,7 @@ function dropName(
   const zen = t('common.zen');
   if (isMoney) return amount > 0 ? `${zen} ${amount}` : zen;
   const name = String(baseName);
-  const lvl = item?.lvl ?? 0;
-  return lvl > 0 ? `${name} +${lvl}` : name;
+  return item ? itemLevelName(item.group, item.num, item.lvl, name) : name;
 }
 
 EventBus.on('ItemsDropped', packet => {

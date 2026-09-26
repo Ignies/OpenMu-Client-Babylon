@@ -1122,6 +1122,8 @@ export const germanLayer: LanguageLayer = {
     'event.cwNotice4c': 'Die Strafe gilt bis zur nächsten Crywolf-Schlacht.',
 
     'item.thisItem': 'diesen Gegenstand',
+    'item.ringOfGlory': 'Ring des Ruhms',
+    'item.darkStone': 'Dunkler Stein',
     'item.equipped': 'Getragen',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Angriffskraft',
