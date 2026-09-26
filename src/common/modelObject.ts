@@ -47,6 +47,10 @@ import { BlendState } from './objects/enum';
 import { storeRef } from './storeRef';
 import { settleStillAnimations } from './staticClips';
 import { requestGlowProbe } from '../scenes/sceneLook';
+import {
+  shadowReceiverChanged,
+  shadowReceiversChanged,
+} from '../scenes/csmBounds';
 import type { MapObjectLights } from './mapObjectLights';
 
 const BoundingUpdateInterval = 5;
@@ -309,6 +313,7 @@ function fixSkinnedLocalBounds(mesh: AbstractMesh): void {
           entry.mesh.setBoundingInfo(
             new BoundingInfo(entry.min, entry.max, entry.mesh.getWorldMatrix())
           );
+          shadowReceiverChanged(entry.mesh);
         }
         if (entry.frames >= SKINNED_BOUNDS_FRAMES) {
           settledSkinnedBounds.set(vertexDataKey(entry.mesh), {
@@ -1190,6 +1195,9 @@ export class ModelObject {
     if (this.IsMapObject) {
       this.settleStaticClips();
       this.markStaticCaster();
+      // receiveShadows, visibility and bounds changed on meshes the scene
+      // already held; the cascades' kept receiver box must hear of it.
+      shadowReceiversChanged();
     }
 
     this.Ready = true;
@@ -1426,6 +1434,36 @@ export class ModelObject {
     };
     bright.isPickable = false;
     bright.receiveShadows = false;
+  }
+
+  /** `setBrightBody`'s clones and the model they were cloned from. */
+  #brightBody: AbstractMesh[] = [];
+  #brightBodyOf: ModelObject['gltf'] = null;
+
+  /**
+   * The whole body drawn a second time, additive, over its lit pass while
+   * `on`: a frozen or cold monster's `RenderBody(RENDER_TEXTURE, Alpha, -2, 1)`
+   * (ZzzObject.cpp:2581-2589). Cloned the way `BrightMesh` is, dropped when off.
+   */
+  setBrightBody(on: boolean): void {
+    const gltf = on ? this.gltf : null;
+    if (this.#brightBodyOf === gltf) return;
+    for (const mesh of this.#brightBody) if (!mesh.isDisposed()) mesh.dispose(false, false);
+    this.#brightBody.length = 0;
+    this.#brightBodyOf = gltf;
+    if (!gltf) return;
+    const material = getMaterial(gltf.mesh.getScene(), false, 2, BlendState.ALPHA_ONEOE, true);
+    for (const mesh of gltf.mesh.getChildMeshes(false)) {
+      if (!mesh.isEnabled(false) || !mesh.isVisible || mesh.metadata?.brightMesh || !mesh.getTotalVertices()) continue;
+      const bright = mesh.clone(`${mesh.name}_brightBody`, mesh.parent, true);
+      if (!bright) continue;
+      bright.material = material;
+      bright.metadata = { ...mesh.metadata, brightMesh: true, blendMeshLight: 1, csmCaster: false, depthOccluder: false };
+      bright.isPickable = false;
+      bright.receiveShadows = false;
+      bright.visibility = this.Alpha;
+      this.#brightBody.push(bright);
+    }
   }
 
   /** `ShadowHiddenMesh`: the flag `objectShadow.meshCasts` reads. */

@@ -1,5 +1,6 @@
 import type { Item } from '../ecs/world';
 import { ITEM_ICON_MANIFEST } from './itemIconManifest';
+import { itemLevelLook } from './itemLevelLook';
 
 /**
  * The pre-rendered item icon pack (`public/items/item_<group>_<num>_<tint>[_e|_a].png`)
@@ -64,6 +65,8 @@ export function hasItemIconFile(
 
 /** URL of the file the item asks for, whether or not it exists. */
 export function itemIconPackUrl({ group, num, lvl, isExcellent }: Item): string {
+  const look = itemLevelLook(group, num, lvl);
+  if (look) return `/items/${look.icon}.png`;
   return packUrl(group, num, itemIconTint(lvl ?? 0), isExcellent ? '_e' : '');
 }
 
@@ -75,6 +78,7 @@ export function itemIconPackUrl({ group, num, lvl, isExcellent }: Item): string 
  */
 export function itemIconPackChain(item: Item): string[] {
   const { group, num } = item;
+  const look = itemLevelLook(group, num, item.lvl);
   const tint = itemIconTint(item.lvl ?? 0);
   const variant: Variant = item.isExcellent ? '_e' : item.isAncient ? '_a' : '';
 
@@ -85,7 +89,7 @@ export function itemIconPackChain(item: Item): string[] {
     if (tint !== 0) candidates.push([0, '']);
   }
 
-  const urls: string[] = [];
+  const urls: string[] = look ? [`/items/${look.icon}.png`] : [];
   for (const [t, v] of candidates) {
     if (hasItemIconFile(group, num, t, v)) urls.push(packUrl(group, num, t, v));
   }
@@ -103,6 +107,8 @@ export function itemIconUrl(item: Item): string | null {
  * item does not restart its load.
  */
 export function itemIconKey(item: Item): string {
+  const look = itemLevelLook(item.group, item.num, item.lvl);
+  if (look) return look.icon;
   return `${item.group}_${item.num}_${itemIconTint(item.lvl ?? 0)}${
     item.isExcellent ? '_e' : item.isAncient ? '_a' : ''
   }`;

@@ -1118,6 +1118,8 @@ export const portugueseLayer: LanguageLayer = {
     'event.cwNotice4c': 'A penalidade vale até a próxima batalha de Crywolf.',
 
     'item.thisItem': 'este item',
+    'item.ringOfGlory': 'Anel da Glória',
+    'item.darkStone': 'Pedra Negra',
     'item.equipped': 'Equipado',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Poder de ataque',

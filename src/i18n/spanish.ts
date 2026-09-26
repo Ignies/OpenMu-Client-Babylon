@@ -1127,6 +1127,8 @@ export const spanishLayer: LanguageLayer = {
       'La penalización dura hasta la próxima batalla de Crywolf.',
 
     'item.thisItem': 'este objeto',
+    'item.ringOfGlory': 'Anillo de Gloria',
+    'item.darkStone': 'Piedra Oscura',
     'item.equipped': 'Equipado',
     'item.excellentPrefix': 'Excellent {name}',
     'item.attackPower': 'Poder de ataque',

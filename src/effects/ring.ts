@@ -13,7 +13,7 @@
 import { Vector3, type Scene } from '../libs/babylon/exports';
 import { TerrainDecal } from '../common/moveTargetEffect';
 import { Store } from '../store';
-import { LiveList, darkCardGain, fadeOut, lerp, luma, type PointSource, type RGB } from './core';
+import { LiveList, TICK, darkCardGain, fadeOut, lerp, luma, type PointSource, type RGB } from './core';
 import { RGBS, TEX } from './recipes';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
@@ -47,8 +47,6 @@ export interface RingOptions {
   /** `subtract` is EnableAlphaBlendMinus: black with the sheet as coverage, `luma(colour)` its strength. */
   blend?: 'additive' | 'alpha' | 'subtract';
   fadeTail?: number;
-  /** Additive: fade by dimming the colour too - the one-one blend ignores the material's alpha. */
-  fadeColour?: boolean;
   /**
    * The original's `Alpha` / `Luminosity` over the life (0..1 progress), replacing `fadeTail`. It scales
    * the light (an additive decal is drawn (ONE, ONE), which drops the material alpha) or the coverage.
@@ -67,6 +65,13 @@ export interface RingOptions {
   until?: () => boolean;
   /** Decal grid in tiles, for a ring wider than `MAX_SCALE` (BITMAP_SHOCK_WAVE sub0 is 20 across). */
   maxScale?: number;
+  /**
+   * Fade through the colour instead of the alpha: an additive decal blends (ONE, ONE), which ignores
+   * alpha, so only this dims it (a `Light` that decays, BITMAP_FLARE_BLUE under a Strike of Destruction).
+   */
+  fadeColour?: boolean;
+  /** Light multiplied by this every tick (`Light /= 1.05` is 1 / 1.05), on top of the fade. Default 1. */
+  decay?: number;
 }
 
 const live = new LiveList();
@@ -119,6 +124,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
   const dark = blend === 'subtract';
   const cover = dark ? Math.min(1, luma(colour) * darkCardGain(_scene)) : 0;
   const fadeColour = opts.fadeColour === true;
+  const decay = opts.decay ?? 1;
   const lit: [number, number, number] = [colour[0], colour[1], colour[2]];
   let x = at.x;
   let z = at.z;
@@ -136,22 +142,18 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
         z = followTmp.z;
       }
       const s = scale * lerp(growFrom, grow, p);
+      // One level over the life: the `alphaAt` keys or the tail fade, times the per-tick `decay`.
+      const level = (alphaAt ? alphaAt(p) : fadeOut(p, tail)) * (decay !== 1 ? decay ** (t / TICK) : 1);
       let light: readonly [number, number, number] = colour;
-      if (dark) decal.setAlpha(cover * (alphaAt ? alphaAt(p) : fadeOut(p, tail)));
-      else if (alphaAt) {
-        const k = alphaAt(p);
-        lit[0] = colour[0] * k;
-        lit[1] = colour[1] * k;
-        lit[2] = colour[2] * k;
-        light = lit;
-        decal.setAlpha(1);
-      } else {
-        const a = fadeOut(p, tail);
-        decal.setAlpha(a);
-        if (fadeColour) {
-          lit[0] = colour[0] * a;
-          lit[1] = colour[1] * a;
-          lit[2] = colour[2] * a;
+      if (dark) decal.setAlpha(cover * level);
+      else {
+        // An additive decal is drawn (ONE, ONE), which drops the alpha: `alphaAt` and `fadeColour` dim the light.
+        const dim = !!alphaAt || fadeColour;
+        decal.setAlpha(alphaAt ? 1 : level);
+        if (dim) {
+          lit[0] = colour[0] * level;
+          lit[1] = colour[1] * level;
+          lit[2] = colour[2] * level;
           light = lit;
         }
       }

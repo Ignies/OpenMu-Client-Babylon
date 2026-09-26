@@ -19,6 +19,11 @@ import {
 } from '../../common/terrain/groundArrays';
 import { packLayers, type TilePixels } from '../../common/terrain/tilePack';
 import type { ENUM_WORLD } from '../../common/types';
+import {
+  LIGHT_JPEG_DECODE,
+  decodeJpegPixels,
+  lightFromPixels,
+} from './terrainJpeg';
 import type {
   TerrainWorkerBulkResult,
   TerrainWorkerRequest,
@@ -175,6 +180,32 @@ export async function parseTerrainLightOffThread(
   } catch (error) {
     console.warn('Terrain light parse fell back to the main thread:', error);
     return parseTerrainLightPacked(lightBuffer, heightData, liftBorder);
+  }
+}
+
+/**
+ * TerrainLight.OZJ's JPEG decoded and baked in one round trip, never through
+ * a GPU texture. Both inputs are cloned, so the inline fallback still has them.
+ */
+export async function parseTerrainLightJpegOffThread(
+  jpeg: Uint8Array,
+  heightData: Float32Array,
+  liftBorder: boolean
+): Promise<Float32Array> {
+  try {
+    return await post<Float32Array>({
+      id: nextId++,
+      kind: 'lightJpeg',
+      jpeg,
+      heightData,
+      liftBorder,
+    });
+  } catch (error) {
+    console.warn('Terrain light decode fell back to the main thread:', error);
+    const light = lightFromPixels(
+      await decodeJpegPixels(jpeg, LIGHT_JPEG_DECODE)
+    );
+    return parseTerrainLightPacked(light, heightData, liftBorder);
   }
 }
 

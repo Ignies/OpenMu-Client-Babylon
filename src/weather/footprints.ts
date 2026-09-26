@@ -15,6 +15,7 @@ import {
 } from '../libs/babylon/exports';
 import { sunLightOf } from '../lighting/keyRig';
 import { linearBufferActive } from '../common/lightModel';
+import { devQuery } from '../common/devSeams';
 
 /**
  * Footprints left on the ground: boot marks pressed into settled snow, or
@@ -1042,6 +1043,18 @@ export function soleTint(kind: PrintKind): readonly [number, number, number] {
   return TINT[kind];
 }
 
+/**
+ * Dev seam `?printFast=0`: every texel of every quad and every dead ring slot
+ * shades in full again, for the GPU-time pairs and the zero-pixel diff.
+ */
+const PRINT_FAST = devQuery('printFast') !== '0';
+
+/**
+ * 1 when the early-outs may drop fragments, 0 when they must not (see
+ * `bindPrintCull`). Declared in both stages.
+ */
+const PRINT_CULL_UNIFORM = 'uniform float printCull;\n';
+
 const VERTEX = `
 precision highp float;
 
@@ -1072,7 +1085,7 @@ uniform vec3 cameraPosition;
 // is not square any more (four variants across, one row per track shape), so
 // this is a vec2 and not the single ATLAS_FILL it used to be.
 uniform vec2 atlasSpan;
-
+${PRINT_FAST ? PRINT_CULL_UNIFORM : ''}
 varying vec2 vUV;
 varying vec4 vColor;
 // Origin of this print's quarter of the sole atlas. The relief march has to be
@@ -1115,7 +1128,18 @@ void main() {
   vNrm = normalize(finalWorld[1].xyz);
   vView = cameraPosition - worldPos.xyz;
 
-  gl_Position = viewProjection * worldPos;
+  gl_Position = viewProjection * worldPos;${
+    PRINT_FAST
+      ? `
+
+#ifdef INSTANCESCOLOR
+  // A dead ring slot keeps its last matrix at alpha 0. All four corners on one
+  // point outside the clip volume drop it before it makes a fragment.
+  if (printCull > 0.5 && instanceColor.a <= 0.0)
+    gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+#endif`
+      : ''
+  }
 }
 `;
 
@@ -1143,7 +1167,7 @@ uniform vec4 soleParams;
 // The blend multiplies whatever the terrain already wrote, so it has to know
 // which of the two that is. Same signal the terrain keys its own decode on.
 uniform float linearOut;
-
+${PRINT_FAST ? PRINT_CULL_UNIFORM : ''}
 const int RELIEF_STEPS = 12;
 const int SHADOW_STEPS = 6;
 
@@ -1229,7 +1253,15 @@ void main() {
   vec4 sole = texture2D(soleSampler, uv);
   float signedHeight = sole.r * 2.0 - 1.0;
   float depth = max(0.0, -signedHeight);
-  float coverage = sole.a;
+  float coverage = sole.a;${
+    PRINT_FAST
+      ? `
+
+  // Strength 0 comes out as alpha 0 and add 0, which the premultiplied blend
+  // leaves as it found it, and nothing here writes depth.
+  if (printCull > 0.5 && coverage * vColor.a <= 0.0) discard;`
+      : ''
+  }
 
   float nx = sole.g * 2.0 - 1.0;
   float nz = sole.b * 2.0 - 1.0;
@@ -1249,7 +1281,13 @@ void main() {
   vec2 lightSweep = toAtlas((lightT / lightUp) * soleParams.x);
 
   float blocked = 0.0;
-
+${
+  PRINT_FAST
+    ? `
+  // At depth 0 alongRay is 0, so no step can score above 0 and blocked stays 0.
+  if (depth > 0.0) {`
+    : ''
+}
   for (int i = 1; i <= SHADOW_STEPS; i++) {
     float t = float(i) / float(SHADOW_STEPS);
     float alongRay = depth * (1.0 - t);
@@ -1258,7 +1296,7 @@ void main() {
       1.0 - 2.0 * texture2D(soleSampler, soleUV(uv + lightSweep * t)).r
     );
     blocked = max(blocked, (alongRay - here) * (1.0 - t));
-  }
+  }${PRINT_FAST ? '\n  }' : ''}
 
   // Smoothstepped and shallow: a hard cut here is what made the interior read
   // as one solid blob instead of a gradient running down the wall.
@@ -1460,6 +1498,7 @@ function atlasFor(scene: Scene, kind: PrintKind): SoleAtlas {
         'atlasSpan',
         'atlasEdge',
         'linearOut',
+        ...(PRINT_FAST ? ['printCull'] : []),
       ],
       samplers: ['soleSampler'],
       needAlphaBlending: true,
@@ -1526,12 +1565,31 @@ function atlasFor(scene: Scene, kind: PrintKind): SoleAtlas {
   // it is lying on without needing a bigger Z_LIFT.
   material.zOffset = -8;
 
+  if (PRINT_FAST) bindPrintCull(material);
+
   material.onDisposeObservable.addOnce(() => texture.dispose());
 
   const atlas: SoleAtlas = { material, texture, data, baked: new Set() };
   materials.set(kind, atlas);
 
   return atlas;
+}
+
+/**
+ * Feed `printCull` on every draw. A texel that blends to nothing still writes
+ * the stencil, and the highlight layer turns the stencil test on for the
+ * transparent pass, so fragments are only dropped while that test is off.
+ */
+function bindPrintCull(material: ShaderMaterial): void {
+  const engine = material.getScene().getEngine();
+
+  // ShaderMaterial keeps the bound effect on the submesh.
+  material.onBindObservable.add(mesh => {
+    mesh.subMeshes[0]?.effect?.setFloat(
+      'printCull',
+      engine.getStencilBuffer() ? 0 : 1
+    );
+  });
 }
 
 function ensurePool(scene: Scene, kind: PrintKind, lane: PrintLane): Pool {

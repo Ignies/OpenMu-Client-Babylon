@@ -7,9 +7,15 @@ import {
 } from '../babylon/exports';
 import type { IVector3Like, Scene } from '../babylon/exports';
 import { createGroundMesh } from './customGroundMesh';
-import { createTileTextureArray } from './tileTextureArray';
+import {
+  createTileTextureArray,
+  type TileTextureArray,
+} from './tileTextureArray';
 import { updateTerrainHeightMap } from './terrainHeightMap';
-import { createTerrainMaterial } from './terrainMaterial';
+import {
+  USE_TILE_TEXTURE_ARRAY,
+  createTerrainMaterial,
+} from './terrainMaterial';
 import { terrainOverlaysFor } from './terrainOverlay';
 import { createTerrainEdge } from './terrainEdge';
 import { disposeGrassField, installGrassField } from './terrainGrass';
@@ -30,6 +36,7 @@ import { consumeTerrainFile, terrainFilesFor } from './prefetchWorld';
 import { unpackTerrainLight } from './unpackTerrainLight';
 import {
   parseTerrainBulk,
+  parseTerrainLightJpegOffThread,
   parseTerrainLightOffThread,
   buildGroundOffThread,
 } from './terrainParseClient';
@@ -50,9 +57,16 @@ import { lightingTier } from '../../common/lightingQuality';
 import { World, type TerrainLayers } from '../../ecs/world';
 import { DEBUG_SHOW_TERRAIN_ATTRIBUTES } from '../../consts';
 import { assetWorldNum } from '../../common/worldAssets';
+import { devQuery } from '../../common/devSeams';
 import { maps } from '../../maps';
 
 const TERRAIN_AMBIENT = 0;
+
+/**
+ * `?lightDecode=gpu`: the light map through a GPU texture and a synchronous
+ * `readPixels`, and a texture per tile beside the array, as loads used to be.
+ */
+const LIGHT_DECODE_GPU = devQuery('lightDecode') === 'gpu';
 
 function GetTerrainIndex(x: number, y: number) {
   return ~~(~~y * TERRAIN_SIZE + ~~x);
@@ -95,48 +109,46 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
     objsBuffer
   );
 
-  // The lightmap decode has to stay here: it goes through the engine's
-  // texture path. Only the normal/luminosity pass over the result is
-  // offloaded. The per-tile textures only need the GPU copy (no readback):
-  // `createOZJTexture`.
-  const [lightTextureData, terrainTextures] = await Promise.all([
-    readOJZBufferAsJPEGBuffer(
-      scene,
-      `World${worldNum}/TerrainLight.OZJ`,
-      terrainLightBytes
-    ),
-    // `allSettled`, not `all`: one bad tile used to leave every texture that
-    // did decode on the GPU with nothing left holding it.
-    Promise.allSettled(
-      textureNames.map((t, i) =>
-        createOZJTexture(
-          scene,
-          `World${worldNum}/${t}.OZJ`.replace('.', `_${i}.`),
-          tileBytes[i]
-        )
-      )
-    ).then(results => {
-      const made = results.flatMap(r =>
-        r.status === 'fulfilled' ? [r.value] : []
-      );
-      const failed = results.find(r => r.status === 'rejected');
-      if (failed) {
-        for (const texture of made) texture.dispose();
-        throw failed.reason;
-      }
-      return made;
-    }),
-  ]);
-  lightTextureData.Texture.dispose();
+  const lightName = `World${worldNum}/TerrainLight.OZJ`;
 
-  try {
-    // The bake's border vignette comes off on the tiers that can frame it
-    // (`common/terrain/borderVignette.ts`); Classic keeps the original's fade.
-    const lightPacked = await parseTerrainLightOffThread(
+  let terrainTextures: Texture[] = [];
+  let tileArrayReady: Promise<TileTextureArray | null> = Promise.resolve(null);
+  let lightReady: Promise<Float32Array>;
+
+  // The bake's border vignette comes off on the tiers that can frame it
+  // (`common/terrain/borderVignette.ts`); Classic keeps the original's fade.
+  if (LIGHT_DECODE_GPU) {
+    const [lightTextureData, textures] = await Promise.all([
+      readOJZBufferAsJPEGBuffer(scene, lightName, terrainLightBytes),
+      createTileTextures(scene, worldNum, textureNames, tileBytes),
+    ]);
+    lightTextureData.Texture.dispose();
+    terrainTextures = textures;
+    lightReady = parseTerrainLightOffThread(
       lightTextureData.BufferFloat,
       bulk.height,
       lightingTier() !== null
     );
+  } else {
+    if (terrainLightBytes.length < 24) {
+      throw new Error(`The file ${lightName} is too small to be as a OZJ`);
+    }
+
+    // A CPU decode in the worker, like the original's OpenTerrainLight; the
+    // tiles decode and pack for the array meanwhile.
+    const lightJpeg = terrainLightBytes.slice(24);
+    if (USE_TILE_TEXTURE_ARRAY) {
+      tileArrayReady = createTileArray(scene, tileBytes);
+    }
+    lightReady = parseTerrainLightJpegOffThread(
+      lightJpeg,
+      bulk.height,
+      lightingTier() !== null
+    );
+  }
+
+  try {
+    const lightPacked = await lightReady;
     const terrainLight = unpackTerrainLight(lightPacked);
 
     // The ground's vertex arrays, built in the worker while the tiles pack
@@ -151,20 +163,19 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
       TERRAIN_AMBIENT
     );
 
-    // Packs the same tiles into one sampler2DArray so the splat shader does two
-    // fetches per pixel instead of a guarded one per layer (tileTextureArray.ts).
-    // OZJ is a JPEG behind a 24-byte header. A failure here is not fatal: the
-    // material falls back to the per-tile sampler chain.
-    const tileArray = await createTileTextureArray(
-      scene,
-      tileBytes.map(bytes => bytes.slice(24))
-    ).catch((error: unknown) => {
-      console.warn(
-        'Tile texture array unavailable, using per-tile samplers:',
-        error
+    if (LIGHT_DECODE_GPU) tileArrayReady = createTileArray(scene, tileBytes);
+    const tileArray = await tileArrayReady;
+
+    // With an array the splat shader never binds a per-tile texture; they are
+    // built only for the sampler chain it falls back to.
+    if (!LIGHT_DECODE_GPU && !tileArray) {
+      terrainTextures = await createTileTextures(
+        scene,
+        worldNum,
+        textureNames,
+        tileBytes
       );
-      return null;
-    });
+    }
 
     // Animated water (terrainWater.ts): the option and the registry are read
     // here, at load, so a map without water - or the option off - hands the
@@ -192,8 +203,62 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
     };
   } catch (error) {
     for (const texture of terrainTextures) texture.dispose();
+    // A light map that fails first leaves the array still packing.
+    void tileArrayReady.then(array => array?.texture.dispose());
     throw error;
   }
+}
+
+/**
+ * Packs the tiles into one sampler2DArray so the splat shader does two
+ * fetches per pixel instead of a guarded one per layer (tileTextureArray.ts).
+ * OZJ is a JPEG behind a 24-byte header. A failure here is not fatal: the
+ * material falls back to the per-tile sampler chain.
+ */
+function createTileArray(
+  scene: Scene,
+  tileBytes: readonly Uint8Array[]
+): Promise<TileTextureArray | null> {
+  return createTileTextureArray(
+    scene,
+    tileBytes.map(bytes => bytes.slice(24))
+  ).catch((error: unknown) => {
+    console.warn(
+      'Tile texture array unavailable, using per-tile samplers:',
+      error
+    );
+    return null;
+  });
+}
+
+/** A texture per tile, for the per-tile sampler chain. */
+function createTileTextures(
+  scene: Scene,
+  worldNum: number,
+  textureNames: readonly string[],
+  tileBytes: readonly Uint8Array[]
+): Promise<Texture[]> {
+  // `allSettled`, not `all`: one bad tile used to leave every texture that
+  // did decode on the GPU with nothing left holding it.
+  return Promise.allSettled(
+    textureNames.map((t, i) =>
+      createOZJTexture(
+        scene,
+        `World${worldNum}/${t}.OZJ`.replace('.', `_${i}.`),
+        tileBytes[i]
+      )
+    )
+  ).then(results => {
+    const made = results.flatMap(r =>
+      r.status === 'fulfilled' ? [r.value] : []
+    );
+    const failed = results.find(r => r.status === 'rejected');
+    if (failed) {
+      for (const texture of made) texture.dispose();
+      throw failed.reason;
+    }
+    return made;
+  });
 }
 
 export function disposePreparedTerrain(prepared: PreparedTerrain): void {

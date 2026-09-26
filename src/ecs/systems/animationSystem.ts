@@ -28,9 +28,11 @@ import {
   monsterModelTypeOf,
   monsterPlaySpeed,
   playerFrameSpeedScale,
+  debuffSlowsClip,
   playerPlaySpeed,
   wingsPlaySpeed,
 } from '../../common/playSpeed';
+import { debuffSlow } from '../../common/debuffBody';
 import { attackSpeedOf, magicSpeedOf } from '../../common/characterStats';
 import { BaseClass, getBaseClass } from '../../common/characterStats';
 import { isFemaleClass } from '../../common/mapPlayerNetClassToModelClass';
@@ -481,10 +483,13 @@ export const AnimationSystem: ISystemFactory = world => {
             attrs?.getValue('magicSpeed') ?? 0,
             isRageFighter
           );
-        // A clip already playing takes its per-frame slowdown straight into the running group.
+        // A clip already playing takes its per-frame slowdown straight into the running group; a Freeze or
+        // Cold slows the walk and run, so it bites mid-run.
+        const slow = debuffSlowsClip(action) ? debuffSlow(entity.buffs) : 1;
         if (playerObject.CurrentAction === action) {
           playerObject.setAnimationSpeed(
             speed *
+              slow *
               playerFrameSpeedScale(
                 action,
                 playerObject.actionFrame(),
@@ -492,7 +497,7 @@ export const AnimationSystem: ISystemFactory = world => {
               )
           );
         } else {
-          playerObject.AnimationSpeed = speed;
+          playerObject.AnimationSpeed = speed * slow;
         }
 
         // A performer's clip loops whatever band it sits in: the pose is held

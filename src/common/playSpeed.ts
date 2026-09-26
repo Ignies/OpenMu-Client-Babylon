@@ -70,6 +70,10 @@ export function playerPlaySpeed(
   if (action >= A.PLAYER_ATTACK_SWORD_RIGHT1 && action <= A.PLAYER_ATTACK_RIDE_CROSSBOW) {
     return 0.25 + f;
   }
+  // SetAttackSpeed's own lines for these three (ZzzCharacter.cpp:923-924, :1007); Rageful Blow ignores attack speed.
+  if (action === A.PLAYER_ATTACK_SKILL_WHEEL) return 0.24 + f;
+  if (action === A.PLAYER_ATTACK_ONETOONE) return 0.25 + f;
+  if (action === A.PLAYER_ATTACK_SKILL_FURY_STRIKE) return 0.38;
   if (action >= A.PLAYER_ATTACK_SKILL_SWORD1 && action < A.PLAYER_ATTACK_END) {
     return 0.3 + f;
   }
@@ -97,6 +101,8 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_ATTACK_RIDE_ATTACK_FLASH) return 0.4 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_ATTACK_RIDE_TELEPORT) return 0.3;
   if (action === A.PLAYER_ATTACK_DARKHORSE) return 0.3;
+  // No attack speed on it (ZzzCharacter.cpp:1003); it used to fall through to the 0.28 default.
+  if (action === A.PLAYER_SKILL_BLOW_OF_DESTRUCTION) return 0.3;
   // The Summoner curse clip and its mounts (ZzzCharacter.cpp:974-977).
   if (action >= A.PLAYER_SKILL_SLEEP && action <= A.PLAYER_SKILL_SLEEP_FENRIR) return 0.3 + magicSpeedFactor(magicSpeed);
   // Lightning Orb, Chain Lightning, Drain Life and Lightning Shock with their mounts (ZzzCharacter.cpp:979-996).
@@ -237,6 +243,16 @@ export function playerFrameSpeedScale(action: PlayerAction, frame: number, darkL
     return 0.5;
   }
   return 1;
+}
+
+/**
+ * The player clips a Freeze or Cold slows with the walk (ZzzCharacter.cpp:496-542): the walk and run blocks and
+ * the horse and Dark Lord walks. PLAYER_RUN_WAND is rewritten after the slow, so it keeps its rate.
+ */
+export function debuffSlowsClip(action: PlayerAction): boolean {
+  if (action >= A.PLAYER_WALK_MALE && action <= A.PLAYER_WALK_CROSSBOW) return true;
+  if (action >= A.PLAYER_RUN && action <= A.PLAYER_RUN_RIDE_WEAPON) return action !== A.PLAYER_RUN_WAND;
+  return action === A.PLAYER_RUN_RIDE_HORSE || action === A.PLAYER_DARKLORD_WALK;
 }
 
 /**

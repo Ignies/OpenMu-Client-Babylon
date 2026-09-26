@@ -576,6 +576,12 @@ export interface ParticleRecipe {
    * a particle the original leaves at full light and kills (BITMAP_LIGHT+2) holds 1 to the end.
    */
   fade?: readonly (readonly [number, number])[];
+  /** Draw each card stretched along its flight, this many times longer than wide (a JOINT_SPARK streak). */
+  stretch?: number;
+  /** With `aimed`: each card's length follows its own speed, `stretch` at full power (one tick of travel). */
+  stretchBySpeed?: boolean;
+  /** An `emitBurst` direction wins over `dir1`/`dir2`, which then only jitter it (per-spark headings). */
+  aimed?: boolean;
   /** Additive only: fade to nothing over this many tiles above the burst's ground (groundFade.ts). */
   groundFade?: number;
 }
@@ -598,6 +604,11 @@ interface PendingEmit {
   y: number;
   z: number;
   n: number;
+  /** `aimed` recipes: the heading these particles leave along (unit), when `hasDir`. */
+  dx: number;
+  dy: number;
+  dz: number;
+  hasDir: boolean;
 }
 interface EmitQueue {
   q: PendingEmit[];
@@ -606,7 +617,7 @@ interface EmitQueue {
 }
 const emitQueues = new WeakMap<ParticleSystem, EmitQueue>();
 
-function queueEmit(ps: ParticleSystem, at: Vector3, n: number): void {
+function queueEmit(ps: ParticleSystem, at: Vector3, n: number, dir?: Vector3): void {
   let s = emitQueues.get(ps);
   if (!s) {
     s = { q: [], head: 0, len: 0 };
@@ -620,17 +631,26 @@ function queueEmit(ps: ParticleSystem, at: Vector3, n: number): void {
   }
   let p = s.q[s.len];
   if (!p) {
-    p = { x: 0, y: 0, z: 0, n: 0 };
+    p = { x: 0, y: 0, z: 0, n: 0, dx: 0, dy: 0, dz: 0, hasDir: false };
     s.q.push(p);
   }
   p.x = at.x;
   p.y = at.y;
   p.z = at.z;
   p.n = n;
+  p.hasDir = !!dir;
+  if (dir) {
+    p.dx = dir.x;
+    p.dy = dir.y;
+    p.dz = dir.z;
+  }
   s.len++;
   (ps.emitter as Vector3).copyFrom(at);
   ps.manualEmitCount = Math.max(ps.manualEmitCount, 0) + n;
 }
+
+/** The queue entry the particle being created came from - read by `nextStartDirection` right after. */
+let lastEmit: PendingEmit | null = null;
 
 function nextStartPosition(ps: ParticleSystem, out: Vector3): void {
   const s = emitQueues.get(ps);
@@ -639,8 +659,10 @@ function nextStartPosition(ps: ParticleSystem, out: Vector3): void {
   let x: number;
   let y: number;
   let z: number;
+  lastEmit = null;
   if (s && s.head < s.len) {
     const p = s.q[s.head];
+    lastEmit = p;
     if (--p.n <= 0) s.head++;
     x = p.x;
     y = p.y;
@@ -656,6 +678,19 @@ function nextStartPosition(ps: ParticleSystem, out: Vector3): void {
     y + lerp(min.y, max.y, Math.random()),
     z + lerp(min.z, max.z, Math.random())
   );
+}
+
+/** `aimed` recipes: the queued heading plus the recipe's `dir1..dir2` as jitter; without one, the recipe's range. */
+function nextStartDirection(ps: ParticleSystem, out: Vector3): void {
+  const d1 = ps.direction1;
+  const d2 = ps.direction2;
+  const e = lastEmit;
+  out.set(lerp(d1.x, d2.x, Math.random()), lerp(d1.y, d2.y, Math.random()), lerp(d1.z, d2.z, Math.random()));
+  if (e?.hasDir) {
+    out.x += e.dx;
+    out.y += e.dy;
+    out.z += e.dz;
+  }
 }
 
 export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSystem {
@@ -741,7 +776,8 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   ps.direction2 = new Vector3(d2[0], d2[1], d2[2]);
   const p = r.power ?? 1;
   const pj = r.powerJitter ?? 0.4;
-  ps.minEmitPower = p * (1 - pj);
+  // A speed-stretched card rolls its own speed in the direction function, where its length is set to match.
+  ps.minEmitPower = r.stretchBySpeed ? p : p * (1 - pj);
   ps.maxEmitPower = p;
   ps.gravity = new Vector3(0, r.gravity ?? 0, 0);
   const spin = r.spin ?? 0;
@@ -765,6 +801,23 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
 
   const created = ps;
   created.startPositionFunction = (_world, position) => nextStartPosition(created, position);
+  if (r.aimed && r.stretchBySpeed && r.stretch) {
+    const stretch = r.stretch;
+    // Babylon sets a particle's direction before its scale, so the range written here is this card's alone.
+    created.startDirectionFunction = (_world, direction) => {
+      nextStartDirection(created, direction);
+      const f = 1 - pj * Math.random();
+      direction.scaleInPlace(f);
+      created.minScaleX = created.maxScaleX = stretch * f;
+    };
+  } else if (r.aimed) created.startDirectionFunction = (_world, direction) => nextStartDirection(created, direction);
+  if (r.stretch) {
+    // Stretched cards align their local Y with the flight; a quarter turn puts the sheet's long U axis there.
+    ps.billboardMode = ParticleSystem.BILLBOARDMODE_STRETCHED;
+    ps.minScaleX = ps.maxScaleX = r.stretch;
+    ps.minInitialRotation = ps.maxInitialRotation = Math.PI / 2;
+    ps.minAngularSpeed = ps.maxAngularSpeed = 0;
+  }
   void effectTexture(scene, r.texture).then(tex => {
     if (systems.get(scene)?.get(k) !== created) return;
     if (r.blend !== 'dark') {
@@ -815,9 +868,9 @@ function lumaAlphaTexture(scene: Scene, tex: Texture, file: string): Promise<Tex
   return pending;
 }
 
-/** One burst of `count` particles at `at`. */
-export function emitBurst(scene: Scene, r: ParticleRecipe, at: Vector3, count: number): void {
-  queueEmit(particleSystemFor(scene, r), at, count);
+/** One burst of `count` particles at `at`; `dir` is their heading for an `aimed` recipe. */
+export function emitBurst(scene: Scene, r: ParticleRecipe, at: Vector3, count: number, dir?: Vector3): void {
+  queueEmit(particleSystemFor(scene, r), at, count, dir);
 }
 
 /**

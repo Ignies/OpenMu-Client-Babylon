@@ -6,7 +6,7 @@
  * like the staff, sword or crossbow it displays, not like a ring.
  */
 
-import { ItemGroup } from './itemAngle';
+import { ItemGroup, type ItemRestPose } from './itemAngle';
 import { ItemsDatabase } from './itemsDatabase';
 
 export type DropModelProxy = {
@@ -14,10 +14,34 @@ export type DropModelProxy = {
   group: number;
   num: number;
   modelFilePath: string;
+  /** `ItemAngle`'s own branch for the shown model, when it is no item row. */
+  pose?: ItemRestPose;
 };
 
 const WEAPON_OF_ARCHANGEL = 19;
 const WIZARDS_RING = 20;
+const SCROLL_OF_EMPEROR = 23;
+const BROKEN_SWORD = 24;
+
+/**
+ * Level 1 Scroll of the Emperor / Broken Sword: Ring of Honor and Dark Stone,
+ * `MODEL_EVENT + 12` / `+ 13` = `QuestItem3RD` 0 / 1 (ZzzObject.cpp:6088-6105),
+ * posed by ItemAngle's branches for them (ZzzObject.cpp:5767-5780).
+ */
+const QUEST_LEVEL_ONE: Record<number, DropModelProxy> = {
+  [SCROLL_OF_EMPEROR]: {
+    group: ItemGroup.Potion,
+    num: SCROLL_OF_EMPEROR,
+    modelFilePath: 'Item/QuestItem3rd00.glb',
+    pose: { angle: [160, -183, 198], scale: 0.38 },
+  },
+  [BROKEN_SWORD]: {
+    group: ItemGroup.Potion,
+    num: BROKEN_SWORD,
+    modelFilePath: 'Item/QuestItem3rd01.glb',
+    pose: { angle: [160, -183, 198], scale: 0.54 },
+  },
+};
 
 /**
  * Level 0 staff / 1 sword / 2 crossbow (`ITEM_WEAPON_OF_ARCHANGEL`,
@@ -46,6 +70,9 @@ export function dropModelProxy(
   num: number,
   lvl: number
 ): DropModelProxy | null {
+  if (group === ItemGroup.Potion) {
+    return lvl === 1 ? (QUEST_LEVEL_ONE[num] ?? null) : null;
+  }
   if (group !== ItemGroup.Helper) return null;
 
   if (num === WEAPON_OF_ARCHANGEL) {

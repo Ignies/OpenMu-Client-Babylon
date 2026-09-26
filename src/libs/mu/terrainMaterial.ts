@@ -27,6 +27,7 @@ import {
   terrainLightDeclarationsGlsl,
   terrainLightDefines,
   terrainLightSamplers,
+  terrainOutputDecodeGlsl,
   terrainSkyLightGlsl,
 } from './terrainLighting';
 import { registerTerrainMaterial } from '../../scenes/shadows';
@@ -65,7 +66,7 @@ const WATER_LAYER = 5;
  * against each other, and as a one-line escape hatch if the packed array
  * turns out to sample differently on some driver.
  */
-const USE_TILE_TEXTURE_ARRAY = true;
+export const USE_TILE_TEXTURE_ARRAY = true;
 
 /**
  * The old path: `textures[i]` cannot be indexed by a per-fragment value in
@@ -366,10 +367,7 @@ ${
     : ''
 }
 
-    // When image processing runs in post the buffer is linear, and
-    // Babylon's Standard fragment ends with toLinearSpace(color) - the same
-    // pow(2.2). linearOut is 0 whenever the objects skip the decode too.
-    f = mix(f, pow(max(f, vec3(0.0)), vec3(2.2)), linearOut);
+${terrainOutputDecodeGlsl('f')}
 
     gl_FragColor = vec4(f, 1.0);
   }

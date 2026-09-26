@@ -11,6 +11,7 @@ import { shroudLayer } from './shroud';
 import { pillarLayer } from './pillar';
 import { jointLayer } from './joint';
 import { spiritSwarmLayer } from './spiritSwarm';
+import { raysLayer } from './rays';
 import { blurLayer } from './blur';
 import { ringLayer } from './ring';
 import { pathLayer } from './path';
@@ -23,6 +24,8 @@ import { monsterGlowLayer } from './monsterGlow';
 import { monsterVisualsLayer } from './monsterVisuals';
 import { bandNotesLayer } from './bandNotes';
 import { pingLayer } from './ping';
+import { weaponHideLayer } from './weaponHide';
+import { quakeLayer } from './quake';
 import { homingLayer } from './homing';
 
 /**
@@ -48,6 +51,7 @@ export const EFFECT_LAYERS = [
   auraLayer, // drives the heads of the orbit ribbons it spawned through joint, so before it
   jointLayer, // reads aura's ribbon heads
   spiritSwarmLayer, // steps where the joint trails did, after the particles that ride its heads
+  raysLayer,
   blurLayer,
   ringLayer,
   pathLayer,
@@ -58,6 +62,8 @@ export const EFFECT_LAYERS = [
   itemSparkleLayer, // counters only; the shared particle pool draws the glints
   bandNotesLayer,
   pingLayer, // composes ring + joint, so after both
+  weaponHideLayer, // hides a hand weapon; draws nothing
+  quakeLayer, // the camera shake; its offset rides the next render
   monsterVisualsLayer, // reads this frame's bones and actions; spawns into the pools above
   monsterGlowLayer, // last: its cards ride the bones this frame's animation posed
 ] as const;
