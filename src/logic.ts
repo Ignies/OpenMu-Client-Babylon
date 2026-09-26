@@ -3246,8 +3246,9 @@ EventBus.on('ObjectMessage', packet => {
 
 // F3/0x40 (length 7) is shared by PlayFanfareSound (EffectType 2), ShowSwirl
 // (58), ShowFireworks (0), ShowChristmasFireworks (59) and ServerCommand; the
-// dispatcher can only pick one of them by header, so route on byte 4 here.
-EventBus.on('PlayFanfareSound', packet => {
+// dispatcher emits whichever it finds first (ServerCommand today), so every
+// name routes here on byte 4.
+function routeServerCommand(packet: DataView) {
   const effectType = packet.getUint8(4);
   switch (effectType) {
     case 58: {
@@ -3282,7 +3283,10 @@ EventBus.on('PlayFanfareSound', packet => {
       return;
     }
   }
-});
+}
+for (const name of ['ServerCommand', 'ShowFireworks', 'ShowChristmasFireworks', 'PlayFanfareSound'] as const) {
+  EventBus.on(name, routeServerCommand);
+}
 
 /** ShowFireworks / ShowChristmasFireworks: the burst at the given tile. */
 function spawnFireworksAt(x: number, y: number, christmas: boolean) {
