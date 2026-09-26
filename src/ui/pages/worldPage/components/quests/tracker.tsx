@@ -17,7 +17,13 @@ import { GameOptions, uiScaleFactor } from '../../../../../common/gameOptions';
 import { devQueryNumber } from '../../../../../common/devSeams';
 import { uiClick } from '../../../../../libs/sfx';
 import { MuText } from '../../../../components/muText';
-import { objectiveDone, objectiveText, type QuestObjective } from '../../../../../quests/objectives';
+import {
+  objectiveCounted,
+  objectiveDone,
+  objectiveProgress,
+  objectiveText,
+  type QuestObjective,
+} from '../../../../../quests/objectives';
 import { activeQuests, questProgressOf, questSubject } from '../../../../../quests/questLog';
 import { legacyQuestObjectives, legacyQuestsInProgress } from '../../../../../quests/legacyQuests';
 import { questDefinition } from '../../../../../quests/questData';
@@ -86,14 +92,25 @@ const TrackerQuest = observer(({ row, folded }: { row: TrackerRow; folded: boole
     </div>
     {!folded &&
       row.objectives.map((objective, i) => {
-        const line = objectiveText(objective);
+        // The count goes on a line of its own so a long monster name wraps
+        // instead of cutting the number off.
+        const line = objectiveText(objective, '');
         return line === null ? null : (
-          <MuText key={i} className="quest-tracker-objective" color={COLOR.tabOn} text={line} />
+          <div key={i} className="quest-tracker-objective">
+            <MuText className="quest-tracker-line" color={COLOR.tabOn} text={line} />
+            {objectiveCounted(objective) && (
+              <MuText
+                className="quest-tracker-count"
+                color={objectiveDone(objective) ? COLOR.complete : COLOR.tabOn}
+                text={objectiveProgress(objective)}
+              />
+            )}
+          </div>
         );
       })}
     {!folded && row.complete && (
       <MuText
-        className="quest-tracker-objective"
+        className="quest-tracker-objective quest-tracker-line"
         color={COLOR.complete}
         text={t('quest.tracker.returnToNpc')}
       />
