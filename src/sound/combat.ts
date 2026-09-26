@@ -96,11 +96,12 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   57: 'Sound/sKnightSkill2', // Spiral Slash
   58: 'Sound/eHellFire2_1', // Nova (charge)
   59: 'Sound/eCombo', // Combo
-  60: 'Sound/sDarkSpear', // Force
+  60: 'Sound/sKnightSkill1', // Force (SOUND_SKILL_SWORD1 at the packet, WSclient.cpp:4333-4350; sDarkSpear plays at the strike)
   61: 'Sound/eFirebust', // Fire Burst
   62: 'Sound/sDarkEarthQuake', // Earthshake
-  65: 'Sound/sDarkElecSpike', // Electric Spark
-  66: 'Sound/sDarkSpear', // Force Wave
+  66: 'Sound/sKnightSkill1', // Force Wave
+  512: 'Sound/sDarkEarthQuake', // Earthshake Str
+  516: 'Sound/sDarkEarthQuake', // Earthshake Mastery
   76: 'Sound/pWskill', // Plasma Storm (Fenrir)
   77: 'Sound/infinityArrow', // Infinity Arrow
   78: 'Sound/Darklord_firescream', // Fire Scream
@@ -132,6 +133,10 @@ export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {
   267: 'Sound/Ragefighter/Rage_Buff_2', // Increase Block
   268: 'Sound/Ragefighter/Rage_Buff_1', // Increase Defense
   269: 'Sound/battlecastle/sCHaveyBlow', // Occupy
+  // Master skills with the base skill's cast (SKILL_REPLACEMENTS, _enum.h:680-681).
+  508: 'Sound/eFirebust', // Fire Burst Strengthener
+  509: 'Sound/sKnightSkill1', // Force Wave Strengthener
+  514: 'Sound/eFirebust', // Fire Burst Mastery
 };
 
 // ---- 2. selectors + commands -----------------------------------------------

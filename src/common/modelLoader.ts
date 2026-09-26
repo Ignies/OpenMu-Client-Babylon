@@ -753,6 +753,17 @@ export async function loadGLTF(
   };
 }
 
+/** Fetch and parse a GLB into the cache without placing a clone, so a later `loadGLTF` of it is not late. */
+export function warmGLTF(filePath: string, world: World): Promise<void> {
+  if (!USE_MODEL_CONTAINER_CACHE) return Promise.resolve();
+  const characterAsset = isCharacterAsset(filePath);
+  const path = resolveUrlToDataFolder(filePath);
+  return loadContainer(path, world.scene, path.split('/').at(-1)!, characterAsset).then(
+    () => undefined,
+    () => undefined
+  );
+}
+
 /**
  * Drop every cached container whose path contains `pathPrefix` (an asset
  * folder such as `Object4/`): `loadMapIntoScene` calls it when the asset

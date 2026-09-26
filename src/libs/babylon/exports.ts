@@ -148,6 +148,7 @@ export { CustomMaterial } from '@babylonjs/materials/custom/customMaterial';
 export { PBRCustomMaterial } from '@babylonjs/materials/custom/pbrCustomMaterial';
 export { BaseTexture } from '@babylonjs/core/Materials/Textures/baseTexture';
 export { ShaderMaterial } from '@babylonjs/core/Materials/shaderMaterial';
+export { MaterialPluginBase } from '@babylonjs/core/Materials/materialPluginBase';
 
 export { Constants } from '@babylonjs/core/Engines/constants';
 

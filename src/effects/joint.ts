@@ -40,6 +40,7 @@ import {
   type IGreasedLineMaterial,
   type Scene,
 } from '../libs/babylon/exports';
+import { clampAlpha } from './clampAlpha';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
 import {
@@ -146,8 +147,12 @@ export interface JointOptions {
    * never keep it.
    */
   trace?: (head: Vector3) => void;
+  /** Trail: the head's position every frame, for things that ride it (a second ribbon, the head's model). */
+  track?: (head: Vector3) => void;
   /** Fade fraction at end of life (default 0.3). Evil Spirit's `Light = LifeTime * 0.1` is 10/49. */
   fadeTail?: number;
+  /** A 0..1 brightness at `t` seconds alive, in place of `fadeTail` and the bolt's flicker (a per-tick `Light *= …`). */
+  intensity?: (t: number) => number;
   /** Trail: segments kept behind the head (C++ `MaxTails`). */
   maxTails?: number;
   /**
@@ -156,7 +161,13 @@ export interface JointOptions {
    * what the original draws, and on a short trail it reads as a rectangular
    * plank sliding about rather than as something alive.
    */
-  taper?: boolean;
+  taper?: boolean | TaperShape;
+  /** Dark ribbon: the most its coverage gain may reach, whatever the map's dark gain asks for. */
+  maxCover?: number;
+  /** Trail: a side-to-side wave travelling down the ribbon (a serpent's body). Needs `smooth`. */
+  wave?: { amplitude: number; cycles: number; speed: number; phase?: number };
+  /** Trail: draw each tick-long segment as this many curve pieces, so a steered ribbon bends instead of kinking. */
+  smooth?: number;
   colour?: RGB;
   /** Lifetime; `Infinity` lives until `stop()` / `until` (the original's LT 999999). */
   seconds?: number;
@@ -285,14 +296,28 @@ function rampUVs(lines: number[][], repeats: number): number[] {
  * head (`spawnTrail` shifts the history down from slot 0), so the nose is
  * rounded off over the first tenth and the rest falls to a point at the tail.
  */
-function taperWidths(lines: number[][]): number[] {
+export interface TaperShape {
+  /** Width at the head, and how far along it reaches full. */
+  nose?: number;
+  span?: number;
+  /** Fraction of the length held at full width before the tail starts to narrow. */
+  hold?: number;
+  /** Tail falloff exponent. */
+  falloff?: number;
+}
+
+function taperWidths(lines: number[][], shape: TaperShape): number[] {
+  const noseWidth = shape.nose ?? NOSE_WIDTH;
+  const span = shape.span ?? NOSE_SPAN;
+  const hold = shape.hold ?? 0;
+  const falloff = shape.falloff ?? TAIL_FALLOFF;
   const widths: number[] = [];
   for (const line of lines) {
     const points = line.length / 3;
     for (let i = 0; i < points; i++) {
       const s = points > 1 ? i / (points - 1) : 0;
-      const nose = Math.min(1, NOSE_WIDTH + s * (1 - NOSE_WIDTH) / NOSE_SPAN);
-      const w = nose * Math.pow(1 - s, TAIL_FALLOFF);
+      const nose = Math.min(1, noseWidth + s * (1 - noseWidth) / span);
+      const w = nose * Math.pow(1 - Math.max(0, s - hold) / (1 - hold), falloff);
       widths.push(w, w);
     }
   }
@@ -316,7 +341,7 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
       points: lines,
       updatable: true,
       ...(textured ? { uvs: rampUVs(lines, repeats) } : {}),
-      ...(opts.taper ? { widths: taperWidths(lines) } : {}),
+      ...(opts.taper ? { widths: taperWidths(lines, opts.taper === true ? {} : opts.taper) } : {}),
     },
     {
       // With a texture the colour rides in `emissiveColor` below - the plugin's
@@ -352,12 +377,13 @@ function makeLine(scene: Scene, lines: number[][], colour: RGB, width: number, o
     // the reason model.ts `subtractMaterial` gives: coverage is the only
     // channel a gain can push past the sheet's own levels.
     const std = mesh.material as StandardMaterial;
-    const gain = dark ? luma(colour) * darkCardGain(scene) : lightCardGain(scene);
+    const gain = dark ? Math.min(opts.maxCover ?? Infinity, luma(colour) * darkCardGain(scene)) : lightCardGain(scene);
     std.diffuseColor.set(0, 0, 0);
     std.specularColor.set(0, 0, 0);
     std.ambientColor.set(0, 0, 0);
     std.emissiveColor.set(dark ? 0 : colour[0] * gain, dark ? 0 : colour[1] * gain, dark ? 0 : colour[2] * gain);
     std.alpha = dark ? gain : 1;
+    if (dark) clampAlpha(std);
     std.disableLighting = true;
     std.alphaMode = alphaMode;
     std.transparencyMode = Material.MATERIAL_ALPHABLEND;
@@ -488,7 +514,7 @@ function spawnBolt(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle 
         mesh.setPoints(lines);
       }
       line.scroll();
-      line.fade(fadeOut(prog, opts.fadeTail ?? 0.3) * (0.6 + 0.4 * hash(t * 97)));
+      line.fade(opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3) * (0.6 + 0.4 * hash(t * 97)));
       return true;
     },
     release() {
@@ -528,8 +554,6 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
     line[i * 3 + 2] = head.z;
   }
   const lines = [line];
-  const ribbon = makeLine(scene, lines, colour, opts.width ?? DEFAULT_WIDTH, opts);
-  const mesh = ribbon.mesh;
 
   // The body the history rides (`anchor`), and the copy of it that is drawn
   // when over-long segments are culled - the history itself stays whole.
@@ -538,8 +562,14 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
   const anchorLast = new Vector3();
   if (anchor) anchor(anchorLast);
   const maxSeg = opts.maxSegment ?? Infinity;
-  const drawLine = Number.isFinite(maxSeg) ? line.slice() : line;
+  const cullLine = Number.isFinite(maxSeg) ? line.slice() : line;
+  const smooth = Math.max(1, Math.round(opts.smooth ?? 1));
+  const drawLine = smooth > 1 ? new Array<number>((tails * smooth + 1) * 3).fill(0) : cullLine;
+  if (smooth > 1) resampleCurve(cullLine, drawLine, smooth);
+  const waveScratch = opts.wave ? drawLine.slice() : [];
   const drawLines = drawLine === line ? lines : [drawLine];
+  const ribbon = makeLine(scene, drawLines, colour, opts.width ?? DEFAULT_WIDTH, opts);
+  const mesh = ribbon.mesh;
   const spriteCards: Card[] = [];
   const spriteSlots: number[] = [];
   if (opts.sprites) {
@@ -640,30 +670,33 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
       line[0] = head.x;
       line[1] = head.y;
       line[2] = head.z;
-      if (drawLine !== line) {
+      opts.track?.(head);
+      if (cullLine !== line) {
         // Copy the history, collapsing an over-long segment onto its newer end so it draws as nothing.
         const maxSq = maxSeg * maxSeg;
-        drawLine[0] = line[0];
-        drawLine[1] = line[1];
-        drawLine[2] = line[2];
+        cullLine[0] = line[0];
+        cullLine[1] = line[1];
+        cullLine[2] = line[2];
         for (let i = 3; i < line.length; i += 3) {
           const ex = line[i] - line[i - 3];
           const ey = line[i + 1] - line[i - 2];
           const ez = line[i + 2] - line[i - 1];
           const long = ex * ex + ey * ey + ez * ez > maxSq;
-          drawLine[i] = long ? drawLine[i - 3] : line[i];
-          drawLine[i + 1] = long ? drawLine[i - 2] : line[i + 1];
-          drawLine[i + 2] = long ? drawLine[i - 1] : line[i + 2];
+          cullLine[i] = long ? cullLine[i - 3] : line[i];
+          cullLine[i + 1] = long ? cullLine[i - 2] : line[i + 1];
+          cullLine[i + 2] = long ? cullLine[i - 1] : line[i + 2];
         }
       }
+      if (smooth > 1) resampleCurve(cullLine, drawLine, smooth);
+      if (opts.wave && drawLine !== line) waveLine(drawLine, waveScratch, opts.wave, t);
       mesh.setPoints(drawLines);
       ribbon.scroll();
-      const vis = fadeOut(prog, opts.fadeTail ?? 0.3);
+      const vis = opts.intensity ? opts.intensity(t) : fadeOut(prog, opts.fadeTail ?? 0.3);
       ribbon.fade(vis);
       if (spriteCards.length) {
         const s = opts.sprites!;
         for (let i = 0; i < spriteCards.length; i++) {
-          const o = spriteSlots[i] * 3;
+          const o = spriteSlots[i] * smooth * 3;
           const c = spriteCards[i];
           c.position.set(drawLine[o], drawLine[o + 1], drawLine[o + 2]);
           c.scaling.setAll(s.size);
@@ -677,9 +710,60 @@ function spawnTrail(scene: Scene, at: Vector3, opts: JointOptions): EffectHandle
     release() {
       for (const c of spriteCards) releaseCard(scene, c);
       spriteCards.length = 0;
-      disposeLine(scene, ribbon, lines);
+      disposeLine(scene, ribbon, drawLines);
     },
   });
+}
+
+/** Catmull-Rom through `src`'s points into `out`, `steps` pieces per segment, ends clamped. */
+function resampleCurve(src: number[], out: number[], steps: number): void {
+  const n = src.length / 3;
+  let o = 0;
+  for (let i = 0; i < n - 1; i++) {
+    const a = Math.max(0, i - 1) * 3;
+    const b = i * 3;
+    const c = (i + 1) * 3;
+    const d = Math.min(n - 1, i + 2) * 3;
+    for (let k = 0; k < steps; k++) {
+      const t = k / steps;
+      const t2 = t * t;
+      const t3 = t2 * t;
+      for (let j = 0; j < 3; j++) {
+        const p0 = src[a + j];
+        const p1 = src[b + j];
+        const p2 = src[c + j];
+        const p3 = src[d + j];
+        out[o++] = 0.5 * (2 * p1 + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (3 * p1 - p0 - 3 * p2 + p3) * t3);
+      }
+    }
+  }
+  const e = (n - 1) * 3;
+  out[o] = src[e];
+  out[o + 1] = src[e + 1];
+  out[o + 2] = src[e + 2];
+}
+
+/**
+ * Sway `line` sideways (flat, across its own heading) by a wave travelling from
+ * head to tail. The head stays on its path; the sway grows in over the neck.
+ */
+function waveLine(line: number[], scratch: number[], wave: NonNullable<JointOptions['wave']>, t: number): void {
+  const n = line.length / 3;
+  if (n < 3) return;
+  for (let i = 0; i < line.length; i++) scratch[i] = line[i];
+  for (let p = 1; p < n; p++) {
+    const s = p / (n - 1);
+    const a = (Math.min(n - 1, p + 1)) * 3;
+    const b = (p - 1) * 3;
+    const tx = scratch[a] - scratch[b];
+    const tz = scratch[a + 2] - scratch[b + 2];
+    const len = Math.hypot(tx, tz);
+    if (len < 1e-5) continue;
+    const neck = Math.min(1, s / 0.2);
+    const off = wave.amplitude * neck * neck * (3 - 2 * neck) * Math.sin(Math.PI * 2 * wave.cycles * s - t * wave.speed + (wave.phase ?? 0));
+    line[p * 3] = scratch[p * 3] - (tz / len) * off;
+    line[p * 3 + 2] = scratch[p * 3 + 2] + (tx / len) * off;
+  }
 }
 
 /** Spawn helper other entries call directly (aura's orbit ribbons). */

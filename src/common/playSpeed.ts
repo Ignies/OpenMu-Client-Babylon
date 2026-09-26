@@ -90,6 +90,13 @@ export function playerPlaySpeed(
   if (action === A.PLAYER_SKILL_HELL) return 0.5 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_RIDE_SKILL) return 0.3 + magicSpeedFactor(magicSpeed);
   if (action === A.PLAYER_SKILL_HELL_BEGIN) return 0.5 + magicSpeedFactor(magicSpeed);
+  // The Dark Lord's strike (Force, Fire Burst), on foot and mounted (ZzzCharacter.cpp:948-949).
+  if (action === A.PLAYER_ATTACK_STRIKE) return 0.25 + f;
+  if (action === A.PLAYER_ATTACK_RIDE_STRIKE) return 0.2 + f;
+  // Dark Lord clips the 0.28 fallback below missed (ZzzCharacter.cpp:951, :1011-1012).
+  if (action === A.PLAYER_ATTACK_RIDE_ATTACK_FLASH) return 0.4 + magicSpeedFactor(magicSpeed);
+  if (action === A.PLAYER_ATTACK_RIDE_TELEPORT) return 0.3;
+  if (action === A.PLAYER_ATTACK_DARKHORSE) return 0.3;
 
   // --- idle
   if (action >= A.PLAYER_STOP_MALE && action <= A.PLAYER_STOP_RIDE_WEAPON) {
@@ -192,6 +199,35 @@ export function playerPlaySpeed(
   if (action >= A.PLAYER_SIT1) return 0.4;
 
   return 0.28;
+}
+
+/**
+ * The per-frame slowdowns `PlayAnimation` multiplies into the table rate
+ * (ZzzCharacter.cpp:2501-2517): the Dark Lord's Party Teleport holds its
+ * raised hand at a tenth after key 5.5, and his Electric Spike charges at half
+ * speed over keys 1-3. `frame` is the clip's `AnimationFrame`. The Electric
+ * Spike x0.125 a caster in the hero's party gets is not ported.
+ */
+export function playerFrameSpeedScale(action: PlayerAction, frame: number, darkLord: boolean): number {
+  if (
+    (action === A.PLAYER_ATTACK_TELEPORT ||
+      action === A.PLAYER_ATTACK_RIDE_TELEPORT ||
+      action === A.PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT) &&
+    frame > 5.5
+  ) {
+    return 0.1;
+  }
+  if (
+    darkLord &&
+    (action === A.PLAYER_SKILL_FLASH ||
+      action === A.PLAYER_ATTACK_RIDE_ATTACK_FLASH ||
+      action === A.PLAYER_FENRIR_ATTACK_DARKLORD_FLASH) &&
+    frame > 1 &&
+    frame < 3
+  ) {
+    return 0.5;
+  }
+  return 1;
 }
 
 /**

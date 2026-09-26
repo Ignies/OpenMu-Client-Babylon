@@ -22,12 +22,14 @@ import {
   boneLocalPos,
   bonePos,
   delay,
+  entityGone,
   entityPos,
   fxNow,
   inWindow,
 } from '../../effects/core';
-import { FOOT_THUNDER_FRAMES, MODEL, TEX } from '../../effects/recipes';
+import { FOOT_THUNDER_FRAMES, MODEL, RGBS, TEX } from '../../effects/recipes';
 import { Store } from '../../store';
+import { PlayerAction } from '../../common/objects/enum';
 import { playUiSound } from '../../sound/ui';
 import type { Entity, ISystemFactory, Item } from '../world';
 
@@ -89,6 +91,14 @@ const ANGEL_SNAP_DISTANCE = 640;
 /** `o->Velocity` - the PlaySpeed each pet's clip runs at. */
 const ANGEL_PLAY_SPEED = 0.5;
 const MOUNT_PLAY_SPEED = 0.34;
+
+/** The Dark Horse's Earthshake clip, `SetAction(o, 3)` at `Velocity 0.34`. */
+const DARK_HORSE_ACTION_SKILL = 3;
+/** Bone 9's blur tip, 60 cm out along the bone. */
+const HORSE_BLUR_TIP = new Vector3(0.6, 0, 0);
+const HORSE_BLUR_ROOT = new Vector3(0, 0, 0);
+/** Seconds a horse blur samples at most; it stops with action 3. */
+const HORSE_BLUR_MAX = 8;
 /** `CSPetSystem::PlayAnimation`: the raven's clips run at 0.4. */
 const RAVEN_PLAY_SPEED = 0.4;
 
@@ -258,6 +268,8 @@ export const PetSystem: ISystemFactory = world => {
   /** The pet each owner currently has an actor for, per slot. */
   const spawned = new Map<Entity, Spawned>();
   const spawnedRaven = new Map<Entity, Spawned>();
+  /** Dark Horses whose action-3 blur is running. */
+  const horseBlurs = new WeakSet<Entity>();
 
   function despawn(owner: Entity, raven: boolean) {
     (raven ? spawnedRaven : spawned).delete(owner);
@@ -1022,6 +1034,34 @@ export const PetSystem: ISystemFactory = world => {
       actor.modelObject?.setAnimationSpeed(mirrored.playSpeed);
       actor.modelObject?.playAction(mirrored.action, true);
       updateFenrirGlow(actor, dt);
+      return;
+    }
+
+    // The Dark Horse rears on its action 3 under Earthshake (GOBoid.cpp:337-341).
+    const pet = state.owner.charAppearance?.pet;
+    if (
+      pet?.group === PET_GROUP &&
+      pet.num === DARK_HORSE &&
+      state.owner.modelObject?.CurrentAction === PlayerAction.PLAYER_ATTACK_DARKHORSE
+    ) {
+      actor.modelObject?.setAnimationSpeed(MOUNT_PLAY_SPEED);
+      actor.modelObject?.playAction(DARK_HORSE_ACTION_SKILL, true);
+      if (actor.modelObject?.CurrentAction === DARK_HORSE_ACTION_SKILL && !horseBlurs.has(actor)) {
+        horseBlurs.add(actor);
+        // The white blur from (60, 0, 0) to bone 9, every frame of action 3 (GOBoid.cpp:452-461).
+        effects.spawn('blur', world.scene, HORSE_BLUR_ROOT, {
+          follow: out => boneLocalPos(actor, 9, HORSE_BLUR_TIP, out),
+          base: out => boneLocalPos(actor, 9, HORSE_BLUR_ROOT, out),
+          texture: TEX.blur,
+          colour: RGBS.white,
+          seconds: HORSE_BLUR_MAX,
+          until: () => {
+            const on = !entityGone(actor) && actor.modelObject?.CurrentAction === DARK_HORSE_ACTION_SKILL;
+            if (!on) horseBlurs.delete(actor);
+            return !on;
+          },
+        });
+      }
       return;
     }
 

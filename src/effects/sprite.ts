@@ -92,6 +92,14 @@ export interface SpriteOptions {
    * `luma(colour) × darkCardGain`; above 1 the body goes fully black and only the edges stay soft.
    */
   cover?: number;
+  /** Size multiplier at progress 0..1; wins over `grow` / `growFrom` (a `Scale = sin(LifeTime)` pulse). */
+  sizeAt?: (p: number) => number;
+  /** A fixed turn of the card on its axis, radians (the original's `Rotation` rolled at birth). */
+  roll?: number;
+  /** Card height over width, for a sheet that is not square (Shiny02 is 32x64). */
+  aspect?: number;
+  /** The card's turn in the view plane, radians (the original's `Rotation`), when it does not `spin`. */
+  rotation?: number;
 }
 
 const live = new LiveList();
@@ -166,6 +174,7 @@ export function spawnSprite(
   for (let i = 0; i < count; i++) {
     const card = acquireCard(scene, material, !opts.flat);
     if (opts.flat) card.rotation.x = Math.PI / 2;
+    if (opts.roll !== undefined) card.rotation.z = opts.roll;
     cards.push(card);
     const s = seed++;
     offsets.push(
@@ -198,7 +207,7 @@ export function spawnSprite(
       const ready = (dark ? material.opacityTexture : material.diffuseTexture) ? 1 : 0;
       source(tmp);
       const grown = p < GROW_FRACTION ? lerp(growFrom, 1, p / GROW_FRACTION) : lerp(1, grow, (p - GROW_FRACTION) / (1 - GROW_FRACTION));
-      const s = size * grown;
+      const s = size * (opts.sizeAt ? opts.sizeAt(p) : grown);
       // The original's `Alpha`: the card's colour fades to black (core.ts
       // `ADDITIVE_ALPHA_MODE`); it used to shrink instead.
       const vis = ready * fadeOut(p, tail);
@@ -208,7 +217,9 @@ export function spawnSprite(
         const o = offsets[i];
         c.position.set(tmp.x + o.x + move[0] * t, tmp.y + o.y + y + move[1] * t, tmp.z + o.z + move[2] * t);
         c.scaling.setAll(s);
+        if (opts.aspect) c.scaling.y = s * opts.aspect;
         c.visibility = vis;
+        if (opts.rotation !== undefined && !spin && !opts.flat) c.rotation.z = opts.rotation;
         if (spin) {
           if (opts.flat) c.rotation.y = phases[i] + spin * t;
           else c.rotation.z = phases[i] + spin * t;

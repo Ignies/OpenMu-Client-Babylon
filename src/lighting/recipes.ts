@@ -95,6 +95,36 @@ export const holy = (range: number, seconds: number): LightRecipe => ({
   attack: 0.08,
 });
 
+/** How far past its art a skill light reaches, as a multiple of the art's extent. */
+const EFFECT_LIGHT_REACH = 1.4;
+/** Point gain of a one-tile effect, what each further tile of extent adds, and the ceiling. */
+const EFFECT_LIGHT_GAIN = 0.85;
+const EFFECT_LIGHT_GAIN_PER_TILE = 0.15;
+const EFFECT_LIGHT_GAIN_MAX = 2;
+
+/**
+ * The Enhanced and Ultra rule for a skill light: it follows its effect.
+ * `colour` is the effect's dominant tint (any scale, the hue is kept),
+ * `extent` how far its art reaches from its centre in tiles - a ring's
+ * radius, a column's half-width, a bolt's glow - and the light reaches a
+ * little past the art, brighter the bigger the effect. Dark art throws none.
+ */
+export const effectLight = (
+  colour: readonly [number, number, number],
+  extent: number,
+  seconds: number,
+  extra?: Partial<LightRecipe>
+): LightRecipe => {
+  const peak = Math.max(colour[0], colour[1], colour[2], 1e-3);
+  return {
+    color: [colour[0] / peak, colour[1] / peak, colour[2] / peak],
+    range: Math.max(1.5, extent * EFFECT_LIGHT_REACH),
+    gain: Math.min(EFFECT_LIGHT_GAIN_MAX, EFFECT_LIGHT_GAIN + extent * EFFECT_LIGHT_GAIN_PER_TILE),
+    seconds,
+    ...extra,
+  };
+};
+
 /** Pure white - energy, slashes. Long tail. */
 export const spark = (range: number, seconds: number): LightRecipe => ({
   color: [1, 1, 1],

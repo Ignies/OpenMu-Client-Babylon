@@ -16,6 +16,7 @@
 import {
   Constants,
   Material,
+  Matrix,
   Quaternion,
   StandardMaterial,
   TransformNode,
@@ -25,11 +26,12 @@ import {
   type Scene,
   type Texture,
 } from '../libs/babylon/exports';
+import { clampAlpha } from './clampAlpha';
 import { getMaterial, loadGLTF } from '../common/modelLoader';
 import { BlendState } from '../common/objects/enum';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
-import { LiveList, additiveMaterial, darkCardGain, fadeOut, lerp, luma, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
+import { LiveList, additiveMaterial, darkCardGain, fadeOut, fxNow, lerp, luma, pointSource, type EffectBlend, type PointSource, type RGB } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';
 import { RGBS } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';
@@ -102,8 +104,20 @@ export interface ModelOptions {
    * (ZzzBMD.cpp:1606) - the dark spirit stamps of Evil Spirit's MODEL_LASER.
    */
   blend?: EffectBlend;
+  /** With `subtract`: cover the whole mesh evenly instead of by the sheet (a solid silhouette). */
+  solid?: boolean;
   /** Yaw follows the direction `follow` moves the node (the original re-stamps along the joint's `Angle`). */
   aim?: boolean;
+  /** Added to the `aim` yaw, for a mesh whose nose is not its +Z. */
+  aimYaw?: number;
+  /**
+   * Re-seat the mesh on the node: centred across, its back end (+Z) this far
+   * behind the node as a fraction of its length. For a head riding a ribbon's
+   * tip when the model was not built around its own pivot.
+   */
+  rearAt?: number;
+  /** With `subtract`: the most the coverage gain may reach, whatever the map's dark gain asks for. */
+  maxCover?: number;
   /**
    * The mesh's own up axis is its tail, so a projectile lays it back down the
    * path instead of only turning it. MODEL_FIRE's `Direction` is written in
@@ -121,6 +135,45 @@ export interface ModelOptions {
    * the tier runs cascades at all.
    */
   shadow?: boolean;
+  /**
+   * The original's `o->Angle` in degrees on MU's axes (x, y, z = yaw), turned
+   * the way `AngleMatrix` does (ZzzMathLib.cpp:185). Replaces `yaw` and `flat`;
+   * `spin` and `aim` do not apply.
+   */
+  angle?: readonly [number, number, number];
+  /** `o->HiddenMesh`: this mesh (BMD order) is not drawn. */
+  hideMesh?: number;
+  /**
+   * RENDER_TEXTURE on a sheet with alpha: every mesh but `blendMesh` is
+   * alpha-tested and unlit (`EnableAlphaTest`, ZzzBMD.cpp:1507-1526) instead
+   * of additive, and `visibility` is its `Alpha`.
+   */
+  cutout?: boolean;
+  /** The scale at `t` seconds alive; wins over `scale` and `grow` (a per-tick `o->Scale` curve). */
+  scaleAt?: (t: number) => number;
+  /** A 0..1 brightness at `t` seconds alive, multiplied into the fade (`BodyLight x BlendMeshLight`, clamped as GL did). */
+  intensity?: (t: number) => number;
+  /**
+   * The sheet the bright meshes draw instead of their own - the original's
+   * `RenderBody(…, Texture)` override (MODEL_CIRCLE sub2 with BITMAP_MAGIC_EMBLEM, ZzzObject.cpp:1497).
+   */
+  texture?: string;
+  /**
+   * Visibility over life (0…1 progress in, 0…1 out), replacing `fadeIn` / `fadeTail`: the
+   * per-tick `BlendMeshLight` ramps of the original (`LifeTime * 0.1` and the like).
+   */
+  life?: (p: number) => number;
+  /** U scroll of the bright meshes' sheet, lengths/s (`BlendMeshTexCoordU = -LifeTime * 0.01`: 0.25). */
+  scrollU?: number;
+  /** Radians about the node's z axis, after the yaw (the original's `Angle[1]`, negated by the mirror). */
+  roll?: number;
+  /**
+   * With `blendMesh`: a non-bright mesh whose sheet carries alpha is alpha-tested and blended
+   * (`EnableAlphaTest`, ZzzBMD.cpp RenderMesh `Components == 4`) instead of opaque.
+   */
+  alphaTest?: boolean;
+  /** Play the clip once and hold its last authored key (the original's `Loop = false` MODEL_GROUND_STONE rising and staying up). */
+  holdLast?: boolean;
 }
 
 export interface ModelHandle extends EffectHandle {
@@ -130,6 +183,8 @@ export interface ModelHandle extends EffectHandle {
   aimAlong(dir: Vector3): void;
   /** Tilt the model `rad` about its side axis (a tumbling stone; `o->Angle[0]`). */
   pitchTo(rad: number): void;
+  /** Re-turn a model spawned with `angle` (a homing body's `o->Angle` each tick). */
+  setAngle(angle: readonly [number, number, number]): void;
 }
 
 const live = new LiveList();
@@ -142,6 +197,33 @@ export function modelCount(): number {
 const tmp = new Vector3();
 const UPRIGHT = Quaternion.FromEulerAngles(-Math.PI / 2, 0, 0);
 const FLAT = Quaternion.FromEulerAngles(0, 0, 0);
+const angleMatrix = new Matrix();
+
+/**
+ * `AngleMatrix(angle)` (Z·Y·X, degrees) as the node's rotation. The default
+ * conversion puts BMD (x, y, z) on (x, z, y), so the rotation is P·R·P⁻¹ with
+ * P swapping y and z, written transposed for Babylon's row vectors.
+ */
+export function muAngle(angle: readonly [number, number, number], out: Quaternion): Quaternion {
+  const d = Math.PI / 180;
+  const sr = Math.sin(angle[0] * d);
+  const cr = Math.cos(angle[0] * d);
+  const sp = Math.sin(angle[1] * d);
+  const cp = Math.cos(angle[1] * d);
+  const sy = Math.sin(angle[2] * d);
+  const cy = Math.cos(angle[2] * d);
+  const m00 = cp * cy;
+  const m10 = cp * sy;
+  const m20 = -sp;
+  const m01 = sr * sp * cy - cr * sy;
+  const m11 = sr * sp * sy + cr * cy;
+  const m21 = sr * cp;
+  const m02 = cr * sp * cy + sr * sy;
+  const m12 = cr * sp * sy - sr * cy;
+  const m22 = cr * cp;
+  Matrix.FromValuesToRef(m00, m20, m10, 0, m02, m22, m12, 0, m01, m21, m11, 0, 0, 0, 0, 1, angleMatrix);
+  return Quaternion.FromRotationMatrixToRef(angleMatrix, out);
+}
 
 /**
  * `RENDER_DARK`'s mesh material (ZzzBMD.cpp:1606). Owned by the spawn, never
@@ -159,7 +241,7 @@ const FLAT = Quaternion.FromEulerAngles(0, 0, 0);
  * luminance(sheet)`), so `darkCardGain` can saturate the silhouette on the
  * graded tiers, where a partial subtraction is flattened by the tone curve.
  */
-function subtractMaterial(scene: Scene, tex: Texture, owned: StandardMaterial[]): StandardMaterial {
+function subtractMaterial(scene: Scene, tex: Texture | null, owned: StandardMaterial[]): StandardMaterial {
   const mat = new StandardMaterial('fxModelMinus', scene);
   mat.diffuseColor.set(0, 0, 0);
   mat.specularColor.set(0, 0, 0);
@@ -171,10 +253,35 @@ function subtractMaterial(scene: Scene, tex: Texture, owned: StandardMaterial[])
   mat.backFaceCulling = false;
   mat.disableDepthWrite = true;
   mat.fogEnabled = false;
-  mat.opacityTexture = tex;
-  mat.opacityTexture.getAlphaFromRGB = true;
+  if (tex) {
+    mat.opacityTexture = tex;
+    mat.opacityTexture.getAlphaFromRGB = true;
+  }
+  clampAlpha(mat);
   owned.push(mat);
   return mat;
+}
+
+/** `rearAt`: the mesh's bounds in the node's own frame, then the shift that seats it. */
+function reseat(node: TransformNode, root: AbstractMesh, rearAt: number): void {
+  node.computeWorldMatrix(true);
+  const toNode = node.getWorldMatrix().clone().invert();
+  const min = new Vector3(Infinity, Infinity, Infinity);
+  const max = new Vector3(-Infinity, -Infinity, -Infinity);
+  const v = new Vector3();
+  for (const m of root.getChildMeshes(false)) {
+    const pos = m.getVerticesData('position');
+    if (!pos) continue;
+    const rel = m.computeWorldMatrix(true).multiply(toNode);
+    for (let i = 0; i < pos.length; i += 3) {
+      Vector3.TransformCoordinatesFromFloatsToRef(pos[i], pos[i + 1], pos[i + 2], rel, v);
+      min.minimizeInPlace(v);
+      max.maximizeInPlace(v);
+    }
+  }
+  if (!Number.isFinite(min.x)) return;
+  const length = max.z - min.z;
+  root.position.set(-(min.x + max.x) / 2, -(min.y + max.y) / 2, rearAt * length - max.z);
 }
 
 /** Spawn helper other entries call directly (projectile heads). */
@@ -194,11 +301,12 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
   const subtract = opts.blend === 'subtract';
   // The original's greyscale `Light` is the coverage a RENDER_DARK stamp takes out; the map's
   // level scales it so the silhouette saturates on a scene-referred buffer (core.ts).
-  const cover = subtract ? luma(colour) * darkCardGain(scene) : 0;
+  const cover = subtract ? Math.min(opts.maxCover ?? Infinity, luma(colour) * darkCardGain(scene)) : 0;
 
   const node = new TransformNode('fxModel', scene);
-  node.rotationQuaternion = null;
+  node.rotationQuaternion = opts.angle ? muAngle(opts.angle, new Quaternion()) : null;
   node.rotation.y = opts.yaw ?? 0;
+  node.rotation.z = opts.roll ?? 0;
   node.scaling.setAll(scale);
   if (world) node.setParent(world.mapParent);
   source(tmp);
@@ -208,6 +316,10 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
 
   let meshes: AbstractMesh[] = [];
   const fadeMats: StandardMaterial[] = [];
+  const scrollMats: StandardMaterial[] = [];
+  const scrollU = opts.scrollU ?? 0;
+  // An override sheet loads after the mesh: until it is in, the material is a solid tinted face.
+  const sheetMats: StandardMaterial[] = [];
   let clip: AnimationGroup | null = null;
   let disposed = false;
   let t = 0;
@@ -222,41 +334,66 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         gltf.mesh.setParent(node);
         gltf.mesh.position.setAll(0);
         gltf.mesh.scaling.set(1, -1, 1);
-        gltf.mesh.rotationQuaternion = (opts.flat ? FLAT : UPRIGHT).clone();
+        gltf.mesh.rotationQuaternion = (opts.flat && !opts.angle ? FLAT : UPRIGHT).clone();
+        if (opts.rearAt !== undefined) reseat(node, gltf.mesh, opts.rearAt);
         const bodyLight = new Vector3(colour[0], colour[1], colour[2]);
         // The lighting lane's shared bright material, for a mesh whose
         // texture did not come through the GLB cache (never disposed here).
         const brightFallback = getMaterial(scene, false, Material.MATERIAL_ALPHABLEND, BlendState.ALPHA_ONEOE, true);
         // Unlit, opaque, texture × body light - `glColor3fv(BodyLight)` with lighting off.
-        const solid =
-          opts.blendMesh === undefined
+        const solid = opts.cutout
+          ? getMaterial(scene, false, Material.MATERIAL_ALPHATESTANDBLEND, BlendState.ALPHA_COMBINE, false, true)
+          : opts.blendMesh === undefined
             ? null
             : getMaterial(scene, true, Material.MATERIAL_OPAQUE, BlendState.ALPHA_DISABLE, false, true);
+        const solidAlpha = opts.alphaTest
+          ? getMaterial(scene, false, Material.MATERIAL_ALPHATESTANDBLEND, BlendState.ALPHA_COMBINE, false, true)
+          : null;
         // The converter names nodes in BMD mesh order (node_0, node_1…).
         meshes = gltf.mesh.getChildMeshes(false).sort((a, b) => a.name.localeCompare(b.name));
         meshes.forEach((mesh, i) => {
           const isBright = !solid || i === opts.blendMesh;
+          // The loader alpha-tests a sheet that carries alpha (modelLoader.ts); keep that for `alphaTest`.
+          const keyed = !!solidAlpha && mesh.material?.transparencyMode === Material.MATERIAL_ALPHATESTANDBLEND;
           mesh.metadata ??= {};
           mesh.metadata.bodyLight = bodyLight;
-          mesh.metadata.brightMesh = isBright;
+          // A dark mesh is not emissive art: kept out of the effect mask, or the tone pass adds its sheet back.
+          mesh.metadata.brightMesh = isBright && !subtract;
           if (opts.shadow) {
             mesh.metadata.csmCaster = true;
             mesh.metadata.shadowBlendCaster = true;
           }
           mesh.isPickable = false;
           mesh.alwaysSelectAsActiveMesh = true;
+          if (i === opts.hideMesh) mesh.isVisible = false;
+          // The cutout's `Alpha` is the whole mesh's, never the converted COLOR_0.
+          if (opts.cutout && !isBright) {
+            mesh.useVertexColors = false;
+            mesh.hasVertexAlpha = false;
+          }
+          // A dark mesh's coverage is the sheet alone: the converted COLOR_0 on the skill models is noise,
+          // and its alpha punched holes through the silhouette.
+          if (subtract && isBright) {
+            mesh.useVertexColors = false;
+            mesh.hasVertexAlpha = false;
+          }
           // A bright mesh takes the effects' own additive material - the
           // sheet × `colour` under (SRC_ALPHA, ONE) - so `visibility` is the
           // original's `Alpha` and the tint is its `Light`. Cached per
           // (texture, colour) in core.ts; the texture stays the GLB cache's.
           const tex = mesh.metadata.diffuseTexture as Texture | undefined;
+          const sheet = opts.texture ?? tex;
           mesh.material = isBright
-            ? tex
+            ? sheet
               ? subtract
-                ? subtractMaterial(scene, tex, fadeMats)
-                : additiveMaterial(scene, tex, colour)
+                ? subtractMaterial(scene, opts.solid ? null : (tex ?? null), fadeMats)
+                : additiveMaterial(scene, sheet, colour)
               : brightFallback
-            : solid;
+            : keyed
+              ? solidAlpha
+              : solid;
+          if (isBright && !subtract && opts.scrollU) scrollMats.push(mesh.material as StandardMaterial);
+          if (isBright && !subtract && opts.texture) sheetMats.push(mesh.material as StandardMaterial);
           (scene as TestScene).look?.glow.addExcludedMesh(mesh as never);
           // Emissive skill art blooms; the opaque body of a blend-mesh model
           // and a subtractive one do not (glow.ts).
@@ -266,7 +403,12 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
         if (clip) {
           clip.speedRatio = ANIMATION_SPEED;
           if (opts.holdFrame !== undefined) clip.start(true, ANIMATION_SPEED, opts.holdFrame, opts.holdFrame + 0.05);
-          else clip.play(opts.loop ?? true);
+          else if (opts.holdLast) {
+            // The converter closes every clip with a copy of key 0; a one-shot stops a key short of it (modelObject.ts).
+            const keys = clip.targetedAnimations[0]?.animation.getKeys().length ?? 0;
+            const to = keys > 2 ? clip.from + ((clip.to - clip.from) * (keys - 2)) / (keys - 1) : clip.to;
+            clip.start(false, ANIMATION_SPEED, clip.from, to);
+          } else clip.play(opts.loop ?? true);
         }
         meshes.push(gltf.mesh);
       })
@@ -280,16 +422,25 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
       if (p >= 1) return false;
       source(tmp);
       node.position.set(tmp.x, tmp.y + height + rise * t, tmp.z);
-      node.scaling.setAll(scale * lerp(1, grow, p));
+      node.scaling.setAll(opts.scaleAt ? opts.scaleAt(t) * DEFAULT_SCALE : scale * lerp(1, grow, p));
       if (spin) node.rotation.y += spin * dt;
       if (opts.aim) {
         const dx = tmp.x - prevX;
         const dz = tmp.z - prevZ;
-        if (dx * dx + dz * dz > 1e-8) node.rotation.y = Math.atan2(dx, dz);
+        if (dx * dx + dz * dz > 1e-8) node.rotation.y = Math.atan2(dx, dz) + (opts.aimYaw ?? 0);
         prevX = tmp.x;
         prevZ = tmp.z;
       }
-      const vis = fadeOut(p, tail) * alpha * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1);
+      const lit = opts.intensity ? Math.max(0, Math.min(1, opts.intensity(t))) : 1;
+      let vis = (opts.life ? opts.life(p) * alpha : fadeOut(p, tail) * alpha * (fadeIn > 0 ? Math.min(1, p / fadeIn) : 1)) * lit;
+      for (const m of sheetMats) if (!m.diffuseTexture) vis = 0;
+      // The sheet is shared, so the scroll runs off the effects clock, the same for every user (as joint.ts's thunder).
+      for (const m of scrollMats) {
+        const sheet = m.diffuseTexture as Texture | null;
+        if (!sheet) continue;
+        sheet.wrapU = Constants.TEXTURE_WRAP_ADDRESSMODE;
+        sheet.uOffset = (fxNow() * scrollU) % 1;
+      }
       // A dark mesh fades through its coverage: `visibility` is clamped at 1 and the
       // coverage runs past it on the graded tiers.
       if (subtract) for (const m of fadeMats) m.alpha = cover * vis;
@@ -328,6 +479,9 @@ export function spawnModel(scene: Scene, at: Vector3, opts: ModelOptions): Model
     },
     pitchTo(rad: number) {
       node.rotation.x = rad;
+    },
+    setAngle(angle) {
+      node.rotationQuaternion = muAngle(angle, node.rotationQuaternion ?? new Quaternion());
     },
   };
 }

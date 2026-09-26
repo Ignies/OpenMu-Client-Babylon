@@ -97,6 +97,44 @@ let distance = DISTANCE_BY_LEVEL[DEFAULT_CAMERA_LEVEL];
 
 let wroteCamera = false;
 
+/** `EarthQuake`, degrees on the view's pitch (DefaultCamera.cpp:712). */
+let quakeDeg = 0;
+/** Seconds the value set this tick holds before it decays. */
+let quakeHold = 0;
+/** The beta the shake added last frame, taken back where nothing else rewrites the camera. */
+let quakeBeta = 0;
+
+/**
+ * An effect's `EarthQuake = deg`: set it every tick the shake runs. It holds
+ * for that tick, then falls x0.2 a 25 fps frame (MainScene.cpp:197).
+ */
+export function earthQuake(deg: number): void {
+  quakeDeg = deg;
+  quakeHold = 1 / REFERENCE_FPS;
+}
+
+/**
+ * `Angle[0] += EarthQuake` turns the view about the eye, so the eye stays and
+ * the target swings; a negative value turns it toward the horizon.
+ */
+function shakeView(camera: ArcRotateCamera, dt: number): void {
+  if (quakeHold > 0) quakeHold -= dt;
+  else quakeDeg *= Math.pow(0.2, dt * REFERENCE_FPS);
+  if (Math.abs(quakeDeg) < 0.01) quakeDeg = 0;
+  quakeBeta = 0;
+  if (quakeDeg === 0) return;
+
+  const b0 = camera.beta;
+  const b1 = b0 - quakeDeg * RAD;
+  const r = camera.radius;
+  const ds = r * (Math.sin(b0) - Math.sin(b1));
+  camera.target.x += Math.cos(camera.alpha) * ds;
+  camera.target.y += r * (Math.cos(b0) - Math.cos(b1));
+  camera.target.z += Math.sin(camera.alpha) * ds;
+  camera.beta = b1;
+  quakeBeta = b1 - b0;
+}
+
 let classic: {
   alpha: number;
   beta: number;
@@ -338,6 +376,7 @@ export function updateGameCamera(
   if (isMouseLookActive() && !canMouseLook()) releaseMouseLook();
 
   if (!GameOptions.cameraControl) {
+    camera.beta -= quakeBeta;
     if (wroteCamera && classic) {
       camera.alpha = classic.alpha;
       camera.beta = classic.beta;
@@ -347,6 +386,7 @@ export function updateGameCamera(
       showHeroBody();
       wroteCamera = false;
     }
+    shakeView(camera, dt);
     return;
   }
 
@@ -421,6 +461,7 @@ export function updateGameCamera(
   }
 
   wroteCamera = true;
+  shakeView(camera, dt);
 
   if (heroModel && distance < HERO_HIDE_MU) hideHeroBody(heroModel, dt);
   else showHeroBody();

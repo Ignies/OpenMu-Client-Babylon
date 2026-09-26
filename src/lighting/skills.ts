@@ -6,7 +6,7 @@ import { MODEL } from '../effects/recipes';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 import { tierIndex } from '../common/lightingQuality';
-import { arc, ember, flame, frost, holy, shade, spark, tide, venom } from './recipes';
+import { arc, effectLight, ember, flame, frost, holy, shade, spark, tide, venom } from './recipes';
 
 /**
  * Skills as light sources.
@@ -74,10 +74,95 @@ export type SkillLight = {
    * with a tinted arrow where the original fires the plain one.
    */
   readonly arrow?: LightRecipe;
+  /**
+   * The light on the Enhanced and Ultra tiers. Classic keeps the row itself,
+   * the original's `AddTerrainLight`; each moment set here replaces the
+   * Classic one on the graded tiers (`effectLight` sizes and tints it from
+   * the effect), and a moment left out keeps it.
+   */
+  readonly enhanced?: Omit<SkillLight, 'enhanced'>;
+  /**
+   * `timed`: lights the original switches on later in the skill and away from the caster, each
+   * its own `AddTerrainLight` (Earthshake's stones and cracks, Party Teleport's circle).
+   */
+  readonly timed?: readonly TimedLight[];
 };
+
+/** A light `delay` seconds after the packet, `forward` / `side` tiles off the caster's feet along its facing then. */
+export type TimedLight = LightRecipe & {
+  readonly delay: number;
+  readonly forward?: number;
+  readonly side?: number;
+  /** Fired by its effect through `lightSkillCue` instead of the packet, `delay` after the cue: a moment gated on the caster's clip. */
+  readonly cue?: string;
+};
+
+/** The first lighting tier that uses a row's `enhanced` light. */
+const ENHANCED_TIER = 1;
+
+/** A skill's light row as the current tier uses it. */
+function lightRow(skill: number): SkillLight | undefined {
+  const row = SKILL_LIGHTS[skill];
+  return row?.enhanced && tierIndex() >= ENHANCED_TIER ? { ...row, ...row.enhanced } : row;
+}
 
 /** Lighting tier that carries per-body effect lights. */
 const ULTRA_TIER = 2;
+
+/** One original tick, seconds. */
+const TICK_SECONDS = 0.04;
+
+/**
+ * Earthshake's two groups of `AddTerrainLight`s as one light each: the stone rings (up to 3 tiles out,
+ * ticks 24-67) round the horse, and the red cracks' flickering `Luminosity` (0.7-1.0) round the burst
+ * point 1.1 tiles ahead, from tick 28 for their 40.
+ */
+const EARTHSHAKE_LIGHT: SkillLight = {
+  timed: [
+    { color: [0.79, 0.72, 0.49], range: 4, delay: 24 * TICK_SECONDS, seconds: 43 * TICK_SECONDS, release: 8 * TICK_SECONDS },
+    {
+      color: [1, 0, 0],
+      range: 3,
+      forward: 1.12,
+      side: -0.25,
+      delay: 28 * TICK_SECONDS,
+      seconds: 41 * TICK_SECONDS,
+      attack: 10 * TICK_SECONDS,
+      release: 10 * TICK_SECONDS,
+      flicker: { min: 0.7, max: 1, steps: 4 },
+    },
+  ],
+  // The stones' warm rims out to the 3-tile ring, lit only once a ring rises; the burst's white core;
+  // the cracks' orange glow over the ~3.7 tiles the chains run.
+  enhanced: {
+    timed: [
+      { ...effectLight([1, 0.8, 0.5], 3, 43 * TICK_SECONDS, { attack: 3 * TICK_SECONDS, release: 10 * TICK_SECONDS }), delay: 0, cue: 'stones' },
+      { ...effectLight([1, 0.9, 0.75], 1.3, 0.4, { release: 0.3, heightOffset: 0.3 }), forward: 1.12, side: -0.25, delay: 28 * TICK_SECONDS },
+      {
+        ...effectLight([1, 0.45, 0.15], 3.7, 41 * TICK_SECONDS, { attack: 6 * TICK_SECONDS, release: 12 * TICK_SECONDS, flicker: { min: 0.75, max: 1, steps: 4 } }),
+        forward: 1.12,
+        side: -0.25,
+        delay: 29 * TICK_SECONDS,
+      },
+    ],
+  },
+};
+
+/**
+ * Electric Spike: the original lights nothing. On the graded tiers the charge lights the hand and the
+ * bolt carries its violet out along the facing as it grows (tip at 2.3, 4.9 and 9.9 tiles on ticks
+ * 4-6), brightest where its sheet is white, then fades with its x1/1.3 tail.
+ */
+const ELECTRIC_SPIKE_LIGHT: SkillLight = {
+  enhanced: {
+    timed: [
+      { ...effectLight([0.55, 0.55, 1], 1.2, 21 * TICK_SECONDS, { attack: 3 * TICK_SECONDS, release: 6 * TICK_SECONDS, heightOffset: 1.2, flicker: { min: 0.6, max: 1, steps: 3 } }), delay: 0, cue: 'charge' },
+      { ...effectLight([0.8, 0.65, 1], 1, 16 * TICK_SECONDS, { release: 8 * TICK_SECONDS, heightOffset: 1 }), forward: 2.3, delay: 4 * TICK_SECONDS, cue: 'bolt' },
+      { ...effectLight([0.8, 0.65, 1], 1.4, 15 * TICK_SECONDS, { release: 8 * TICK_SECONDS, heightOffset: 1 }), forward: 4.9, delay: 5 * TICK_SECONDS, cue: 'bolt' },
+      { ...effectLight([0.85, 0.7, 1], 1.8, 14 * TICK_SECONDS, { release: 8 * TICK_SECONDS, heightOffset: 1, flicker: { min: 0.7, max: 1, steps: 3 } }), forward: 8, delay: 6 * TICK_SECONDS, cue: 'bolt' },
+    ],
+  },
+};
 
 /** Keyed by skill number (common/skillsDatabase.ts). */
 export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
@@ -139,12 +224,30 @@ export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Fire Slash / Flame Strike: BITMAP_JOINT_FIRE range 2 (ZzzEffectJoint.cpp:4612).
   55: { area: flame(3, 0.7) },
   236: { area: flame(3, 0.8, { gain: 1.3 }) },
-  // Fire Burst / Fire Blast / Fire Scream: BITMAP_FLAME range 3.
-  61: { impact: flame(3, 0.6) },
+  // Fire Burst: the original lights nothing (no AddTerrainLight on PIER_PART / DARKLORD_SKILL).
+  // Fire Blast / Fire Scream: BITMAP_FLAME range 3.
   74: { impact: flame(3, 0.6, { gain: 1.3 }) },
   78: { area: flame(4, 0.9, { gain: 1.3 }) },
-  // Electric Spark / Lightning Shock / Chain Lightning: BITMAP_LIGHTNING+1 range 2-4.
-  65: { area: arc(4, 0.5) },
+  // Earthshake (512 / 516): each ground stone's warm range 2 and each glowing crack's red range 1
+  // (MoveHandlers.cpp:5712, ZzzEffect.cpp:7157, :7213, :7257), one light per group here.
+  62: EARTHSHAKE_LIGHT,
+  512: EARTHSHAKE_LIGHT,
+  516: EARTHSHAKE_LIGHT,
+  // Party Teleport: MODEL_CIRCLE_LIGHT sub3's grey `min(0.5, BlendMeshLight)` range 4 for its 250 ticks (MoveHandlers.cpp:3896).
+  63: {
+    timed: [{ color: [0.5, 0.5, 0.5], range: 4, delay: 6 * TICK_SECONDS, seconds: 250 * TICK_SECONDS, attack: 5 * TICK_SECONDS, release: 5 * TICK_SECONDS }],
+    // The emblem's blue over its 4-tile radius for its 10 s, and the raised hand's glow while it is held.
+    enhanced: {
+      timed: [
+        { ...effectLight([0.4, 0.55, 1], 4, 250 * TICK_SECONDS, { attack: 10 * TICK_SECONDS, release: 20 * TICK_SECONDS }), delay: 6 * TICK_SECONDS },
+        { ...effectLight([0.3, 0.5, 1], 0.7, 3.6, { attack: 0.2, release: 0.5, heightOffset: 2 }), delay: 0, cue: 'hand' },
+      ],
+    },
+  },
+  // Electric Spike (519): the original lights nothing. The arc is ours, kept for the graded tiers.
+  65: ELECTRIC_SPIKE_LIGHT,
+  519: ELECTRIC_SPIKE_LIGHT,
+  // Lightning Shock / Chain Lightning: BITMAP_LIGHTNING+1 range 2-4.
   215: { impact: arc(4, 0.45) },
   230: { area: arc(5, 0.6, { gain: 1.4 }) },
   // Drain Life: MODEL_DARK_ELF_SKILL range 3 (:10423).
@@ -223,6 +326,31 @@ export const DEFAULT_WIZARDRY_CAST: LightRecipe = {
 
 const sources = new Set<LightSource>();
 
+/** `timed` lights waiting for their moment, on this layer's own clock. */
+const pending: { due: number; light: TimedLight; caster: Entity; scene: Scene }[] = [];
+let clock = 0;
+
+function schedule(scene: Scene, row: SkillLight | undefined, caster: Entity): void {
+  for (const light of row?.timed ?? []) if (!light.cue) pending.push({ due: clock + light.delay, light, caster, scene });
+}
+
+/** Command: the effect reached `cue` (a clip key, a first stone), so the row's `timed` lights waiting on it start their delay. */
+export function lightSkillCue(scene: Scene, skill: number, cue: string, caster: Entity): void {
+  for (const light of lightRow(skill)?.timed ?? []) if (light.cue === cue) pending.push({ due: clock + light.delay, light, caster, scene });
+}
+
+function fireTimed(scene: Scene, light: TimedLight, caster: Entity): void {
+  const t = caster.transform;
+  if (!t) return;
+  const yaw = t.visualRotY ?? t.rot.y;
+  const fx = Math.sin(yaw);
+  const fz = -Math.cos(yaw);
+  const f = light.forward ?? 0;
+  const s = light.side ?? 0;
+  const at = entityPos(caster, 0);
+  attach(scene, light, { position: { x: at.x + fx * f - fz * s, y: at.y, z: at.z + fz * f + fx * s } });
+}
+
 function attach(
   scene: Scene,
   recipe: LightRecipe,
@@ -253,7 +381,7 @@ function followEntity(e: Entity, height: number) {
 }
 
 function castRecipeFor(skill: number): LightRecipe | null {
-  const row = SKILL_LIGHTS[skill];
+  const row = lightRow(skill);
 
   if (row?.cast) return row.cast;
   // A skill with a recipe keeps its hands dark unless it asked for a cast
@@ -274,7 +402,7 @@ export function lightTargetedSkill(
 ): void {
   if (!caster.transform) return;
 
-  const row = SKILL_LIGHTS[skill];
+  const row = lightRow(skill);
   const cast = castRecipeFor(skill);
 
   if (cast) {
@@ -283,6 +411,8 @@ export function lightTargetedSkill(
       follow: followEntity(caster, CAST_HEIGHT),
     });
   }
+
+  schedule(scene, row, caster);
 
   if (!row || !target?.transform) return;
 
@@ -314,7 +444,7 @@ export function lightAreaSkill(
   caster: Entity,
   at: { x: number; y: number; z: number }
 ): void {
-  const row = SKILL_LIGHTS[skill];
+  const row = lightRow(skill);
   const cast = castRecipeFor(skill);
 
   if (cast && caster.transform) {
@@ -327,6 +457,7 @@ export function lightAreaSkill(
   const area = row?.area ?? row?.impact;
 
   if (area) attach(scene, area, { position: { ...at } });
+  if (caster.transform) schedule(scene, row, caster);
 }
 
 /**
@@ -341,7 +472,7 @@ export function lightSkillTrail(
   skill: number,
   follow: (out: { x: number; y: number; z: number }) => void
 ): LightSource | null {
-  const recipe = SKILL_LIGHTS[skill]?.trail;
+  const recipe = lightRow(skill)?.trail;
 
   if (!recipe || tierIndex() < ULTRA_TIER) return null;
 
@@ -371,7 +502,7 @@ export function lightArrow(
   model: string,
   follow: (out: { x: number; y: number; z: number }) => void
 ): LightSource | null {
-  const row = SKILL_LIGHTS[skill];
+  const row = lightRow(skill);
 
   if (row?.travel) return null;
 
@@ -386,12 +517,20 @@ export function lightArrow(
   return attach(scene, recipe, { position, follow });
 }
 
-function update(): void {
+function update(dt: number): void {
   for (const source of sources) if (!source.alive) sources.delete(source);
+  clock += dt;
+  for (let i = pending.length - 1; i >= 0; i--) {
+    const p = pending[i];
+    if (clock < p.due) continue;
+    pending.splice(i, 1);
+    fireTimed(p.scene, p.light, p.caster);
+  }
 }
 
 function reset(): void {
   sources.clear();
+  pending.length = 0;
 }
 
 function emitters(): readonly LightSource[] {
@@ -403,7 +542,7 @@ function emitters(): readonly LightSource[] {
 /** Every map: a skill lights wherever it is cast. */
 export const skillsLayer: LightingLayer = {
   name: 'skills',
-  update: (_map: ENUM_WORLD) => update(),
+  update: (_map: ENUM_WORLD, dt: number) => update(dt),
   reset,
   emitters,
 };

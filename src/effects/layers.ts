@@ -4,12 +4,14 @@ import { projectileLayer } from './projectile';
 import { debrisLayer } from './debris';
 import { feathersLayer } from './feathers';
 import { modelLayer } from './model';
+import { stampsLayer } from './stamps';
 import { columnLayer } from './column';
 import { shroudLayer } from './shroud';
 import { pillarLayer } from './pillar';
 import { jointLayer } from './joint';
 import { blurLayer } from './blur';
 import { ringLayer } from './ring';
+import { pathLayer } from './path';
 import { auraLayer } from './aura';
 import { burstsLayer } from './bursts';
 import { itemAuraLayer } from './itemAura';
@@ -33,6 +35,7 @@ export const EFFECT_LAYERS = [
   debrisLayer, // moves the pieces the models below follow
   feathersLayer, // moves the feathers the models below follow
   modelLayer, // reads projectile's / debris' / feathers' points
+  stampsLayer,
   spriteLayer,
   particlesLayer,
   columnLayer,
@@ -42,6 +45,7 @@ export const EFFECT_LAYERS = [
   jointLayer, // reads aura's ribbon heads
   blurLayer,
   ringLayer,
+  pathLayer,
   burstsLayer, // spawn only; the shared particle pool steps it
   itemAuraLayer, // reset only; itemGlowSystem drives it
   itemCrackleLayer, // reset only; itemGlowSystem drives it

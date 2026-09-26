@@ -55,6 +55,8 @@ export interface RingOptions {
   follow?: PointSource;
   /** Ends the decal early, for one that otherwise runs for ever. */
   until?: () => boolean;
+  /** Decal grid in tiles, for a ring wider than `MAX_SCALE` (BITMAP_SHOCK_WAVE sub0 is 20 across). */
+  maxScale?: number;
 }
 
 const live = new LiveList();
@@ -67,29 +69,34 @@ export function ringCount(): number {
   return live.size;
 }
 
-function acquire(texture: string, blend: 'additive' | 'alpha'): TerrainDecal | null {
+function acquire(texture: string, blend: 'additive' | 'alpha', maxScale = MAX_SCALE): TerrainDecal | null {
   const world = Store.world;
   if (!world) return null;
-  const key = `${texture}|${blend}`;
+  const key = poolKey(texture, blend, maxScale);
   let pool = pools.get(key);
   if (!pool) {
     pool = [];
     pools.set(key, pool);
   }
-  return pool.pop() ?? new TerrainDecal(world, `fxRing${seq++}`, texture, MAX_SCALE, blend);
+  return pool.pop() ?? new TerrainDecal(world, `fxRing${seq++}`, texture, maxScale, blend);
+}
+
+function poolKey(texture: string, blend: string, maxScale: number): string {
+  return maxScale === MAX_SCALE ? `${texture}|${blend}` : `${texture}|${blend}|${maxScale}`;
 }
 
 /** Spawn helper other entries call directly (the level-up circle in bursts.ts). */
 export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): EffectHandle {
   const texture = opts.texture ?? TEX.magicCircle;
   const blend = opts.blend ?? 'additive';
-  const decal = acquire(texture, blend);
+  const maxScale = opts.maxScale ?? MAX_SCALE;
+  const decal = acquire(texture, blend, maxScale);
   const world = Store.world;
   if (!decal || !world) return DEAD_HANDLE;
 
   const colour = opts.colour ?? RGBS.holy;
   const seconds = opts.seconds ?? DEFAULT_SECONDS;
-  const scale = Math.min(MAX_SCALE, opts.scale ?? DEFAULT_SCALE);
+  const scale = Math.min(maxScale, opts.scale ?? DEFAULT_SCALE);
   const grow = opts.grow ?? 1;
   const growFrom = opts.growFrom ?? 1;
   const spin = opts.spin ?? 0;
@@ -118,7 +125,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
         world,
         x,
         z,
-        Math.min(MAX_SCALE, s),
+        Math.min(maxScale, s),
         spinFrom + spin * t,
         colour
       );
@@ -126,7 +133,7 @@ export function spawnRing(_scene: Scene, at: Vector3, opts: RingOptions): Effect
     },
     release() {
       decal.hide();
-      pools.get(`${texture}|${blend}`)?.push(decal);
+      pools.get(poolKey(texture, blend, maxScale))?.push(decal);
     },
   });
 }

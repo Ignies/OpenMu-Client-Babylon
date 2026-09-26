@@ -83,6 +83,12 @@ export interface DebrisOptions {
   puff?: ParticleRecipe;
   /** Extra scale on every piece (1 = the original). */
   scale?: number;
+  /** Horizontal launch speed multiplier (MODEL_STONE1 sub10 throws at `* 0.2` instead of `* 0.1`: 2). */
+  speedScale?: number;
+  /** Upward launch speed `[min, span]` cm/tick (sub10: `rand() % 16 + 28`). */
+  riseCm?: readonly [number, number];
+  /** The model layer's `blendMesh`; -1 draws the pieces opaque (rock) instead of additive. */
+  blendMesh?: number;
 }
 
 type Piece = {
@@ -131,14 +137,15 @@ export function spawnDebris(scene: Scene, at: Vector3, opts: DebrisOptions): Eff
       pos.y += Math.random() * scatter[2] * CM;
     }
     const yaw = Math.random() * Math.PI * 2;
-    const speed = cmPerTick(SPEED_CM_MIN + Math.random() * SPEED_CM_SPAN);
+    const speed = cmPerTick(SPEED_CM_MIN + Math.random() * SPEED_CM_SPAN) * (opts.speedScale ?? 1);
+    const rise = opts.riseCm ?? [RISE_CM_MIN, RISE_CM_SPAN];
     const size = SCALE_MIN + Math.random() * SCALE_SPAN;
     const lifeTicks = LIFE_TICKS_MIN + Math.random() * LIFE_TICKS_SPAN;
     const piece: Piece = {
       pos,
       vx: Math.sin(yaw) * speed,
       vz: -Math.cos(yaw) * speed,
-      vy: cmPerTick(RISE_CM_MIN + Math.random() * RISE_CM_SPAN),
+      vy: cmPerTick(rise[0] + Math.random() * rise[1]),
       pitch: 0,
       size,
       life: lifeTicks * TICK,
@@ -148,6 +155,7 @@ export function spawnDebris(scene: Scene, at: Vector3, opts: DebrisOptions): Eff
         seconds: (LIFE_TICKS_MIN + LIFE_TICKS_SPAN) * TICK,
         scale: size * extra,
         colour,
+        blendMesh: opts.blendMesh,
         yaw,
         loop: false,
         fadeTail: FADE_TAIL,
