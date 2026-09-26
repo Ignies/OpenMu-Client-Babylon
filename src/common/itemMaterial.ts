@@ -12,7 +12,7 @@ import type { BodyShine } from './modelObject';
 import { pbrMapsFor, pbrPlaceholders } from './pbrMaps';
 import { pbrDetailStrength, specularLightScale } from './materialQuality';
 import { UNIFIED_LIGHT_MODEL, linearLightActive } from './lightModel';
-import { lightingTier } from './lightingQuality';
+import { lightingTier, type LightingTier } from './lightingQuality';
 import {
   TOON_CAM_X_UNIFORM,
   TOON_CAM_Y_UNIFORM,
@@ -911,6 +911,18 @@ export function packBodyLight(
   out: Float32Array | number[],
   o = 0
 ): void {
+  packBodyLightFor(lightingTier(), x, y, z, out, o);
+}
+
+/** `packBodyLight` under a tier the caller has read once for many packs. */
+export function packBodyLightFor(
+  tier: LightingTier | null,
+  x: number,
+  y: number,
+  z: number,
+  out: Float32Array | number[],
+  o = 0
+): void {
   if (!UNIFIED_LIGHT_MODEL) {
     out[o] = 1;
     out[o + 1] = 1;
@@ -918,7 +930,7 @@ export function packBodyLight(
     return;
   }
 
-  if (lightingTier()) {
+  if (tier) {
     const peak = Math.max(1, x, y, z);
     out[o] = x / peak;
     out[o + 1] = y / peak;
