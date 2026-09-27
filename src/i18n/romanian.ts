@@ -2104,7 +2104,7 @@ export const romanianLayer: LanguageLayer = {
     'gm.map.legendGm': 'GM',
     'gm.map.legendScope': 'Lângă tine',
     'gm.map.you': 'Tu',
-    'gm.map.warpHint': 'Dă clic pe o celulă ca să te teleportezi acolo. Dă clic pe un punct ca să alegi acel jucător.',
+    'gm.map.warpHint': 'Shift+clic pe o celulă ca să te teleportezi acolo. Dă clic pe un punct ca să alegi acel jucător.',
     'gm.map.noPicture': 'Această lume nu are imagine de hartă.',
     'gm.map.goHere': 'Mergi pe această hartă',
     'gm.map.bringTarget': 'Adu pe {name} aici',

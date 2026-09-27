@@ -2096,7 +2096,7 @@ export const bulgarianLayer: LanguageLayer = {
     'gm.map.legendGm': 'GM',
     'gm.map.legendScope': 'Близо до теб',
     'gm.map.you': 'Ти',
-    'gm.map.warpHint': 'Кликни на поле, за да се телепортираш там. Кликни на точка, за да избереш този играч.',
+    'gm.map.warpHint': 'Shift+клик на поле, за да се телепортираш там. Кликни на точка, за да избереш този играч.',
     'gm.map.noPicture': 'Този свят няма изображение на картата.',
     'gm.map.goHere': 'Отиди на тази карта',
     'gm.map.bringTarget': 'Доведи {name} тук',

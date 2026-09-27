@@ -2212,7 +2212,7 @@ export const EN_TEXT = {
   'gm.map.legendGm': 'GM',
   'gm.map.legendScope': 'Near you',
   'gm.map.you': 'You',
-  'gm.map.warpHint': 'Click a tile to warp there. Click a dot to target that player.',
+  'gm.map.warpHint': 'Shift+click a tile to warp there. Click a dot to target that player.',
   'gm.map.noPicture': 'This world has no map picture.',
   'gm.map.goHere': 'Warp to this map',
   'gm.map.bringTarget': 'Bring {name} here',

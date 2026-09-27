@@ -2038,7 +2038,7 @@ export const vietnameseLayer: LanguageLayer = {
     'gm.map.legendScope': 'Gần bạn',
     'gm.map.you': 'Bạn',
     'gm.map.warpHint':
-      'Nhấp vào một ô để dịch chuyển tới đó. Nhấp vào một chấm để chọn người chơi đó làm mục tiêu.',
+      'Shift+nhấp vào một ô để dịch chuyển tới đó. Nhấp vào một chấm để chọn người chơi đó làm mục tiêu.',
     'gm.map.noPicture': 'Thế giới này không có hình bản đồ.',
     'gm.map.goHere': 'Dịch chuyển tới bản đồ này',
     'gm.map.bringTarget': 'Gọi {name} đến đây',

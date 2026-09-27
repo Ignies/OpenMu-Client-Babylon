@@ -2090,7 +2090,7 @@ export const russianLayer: LanguageLayer = {
     'gm.map.legendGm': 'GM',
     'gm.map.legendScope': 'Рядом с тобой',
     'gm.map.you': 'Ты',
-    'gm.map.warpHint': 'Нажми на клетку, чтобы телепортироваться туда. Нажми на точку, чтобы выбрать игрока.',
+    'gm.map.warpHint': 'Shift+клик по клетке, чтобы телепортироваться туда. Нажми на точку, чтобы выбрать игрока.',
     'gm.map.noPicture': 'У этого мира нет изображения карты.',
     'gm.map.goHere': 'Перейти на эту карту',
     'gm.map.bringTarget': 'Привести {name} сюда',

@@ -2054,7 +2054,7 @@ export const polishLayer: LanguageLayer = {
     'gm.map.legendScope': 'W pobliżu',
     'gm.map.you': 'Ty',
     'gm.map.warpHint':
-      'Kliknij pole, aby się tam przenieść. Kliknij kropkę, aby wybrać tego gracza jako cel.',
+      'Shift+klik na polu, aby się tam przenieść. Kliknij kropkę, aby wybrać tego gracza jako cel.',
     'gm.map.noPicture': 'Ten świat nie ma obrazu mapy.',
     'gm.map.goHere': 'Przenieś na tę mapę',
     'gm.map.bringTarget': 'Przyzwij tutaj: {name}',

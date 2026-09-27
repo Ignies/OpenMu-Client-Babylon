@@ -2117,7 +2117,7 @@ export const germanLayer: LanguageLayer = {
     'gm.map.legendGm': 'GM',
     'gm.map.legendScope': 'In deiner Nähe',
     'gm.map.you': 'Du',
-    'gm.map.warpHint': 'Klicke auf ein Feld, um dich dorthin zu teleportieren. Klicke auf einen Punkt, um diesen Spieler auszuwählen.',
+    'gm.map.warpHint': 'Shift+Klick auf ein Feld, um dich dorthin zu teleportieren. Klicke auf einen Punkt, um diesen Spieler auszuwählen.',
     'gm.map.noPicture': 'Diese Welt hat kein Kartenbild.',
     'gm.map.goHere': 'Zu dieser Karte',
     'gm.map.bringTarget': '{name} hierher holen',

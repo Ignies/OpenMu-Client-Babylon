@@ -2109,7 +2109,7 @@ export const portugueseLayer: LanguageLayer = {
     'gm.map.legendGm': 'GM',
     'gm.map.legendScope': 'Perto de você',
     'gm.map.you': 'Você',
-    'gm.map.warpHint': 'Clique em uma casa para se teleportar até lá. Clique em um ponto para escolher esse jogador.',
+    'gm.map.warpHint': 'Shift+clique em uma casa para se teleportar até lá. Clique em um ponto para escolher esse jogador.',
     'gm.map.noPicture': 'Este mundo não tem imagem de mapa.',
     'gm.map.goHere': 'Ir para este mapa',
     'gm.map.bringTarget': 'Trazer {name} para cá',
