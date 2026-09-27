@@ -2062,7 +2062,7 @@ export const chineseLayer: LanguageLayer = {
     'gm.map.goHere': '传送到此地图',
     'gm.map.bringTarget': '把 {name} 带到这里',
     'gm.map.menu.goHere': '前往这里',
-    'gm.map.menu.movesYou': '会先把你移动到这里。',
+    'gm.map.menu.movesYou': '在这里生成会把你移过去再移回来。',
     'gm.map.menu.copy': '复制坐标',
     'gm.map.menuHint': '右键点击地块或玩家可进行更多操作。',
     'gm.section.macros': '宏',

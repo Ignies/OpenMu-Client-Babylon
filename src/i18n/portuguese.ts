@@ -2114,7 +2114,7 @@ export const portugueseLayer: LanguageLayer = {
     'gm.map.goHere': 'Ir para este mapa',
     'gm.map.bringTarget': 'Trazer {name} para cá',
     'gm.map.menu.goHere': 'Ir para cá',
-    'gm.map.menu.movesYou': 'Você é levado para cá primeiro.',
+    'gm.map.menu.movesYou': 'Invocar aqui leva você até lá e traz de volta.',
     'gm.map.menu.copy': 'Copiar coordenadas',
     'gm.map.menuHint': 'Clique com o botão direito num ponto ou num jogador para mais.',
     'gm.section.macros': 'Macros',

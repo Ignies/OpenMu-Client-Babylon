@@ -8,7 +8,9 @@ export type MenuPoint = { left: number; top: number };
 /**
  * A right-click menu's shell: placed at the click, kept inside the window,
  * and closed by a press anywhere else or by Escape - which it takes before
- * the panel does, so Escape closes the menu and not the whole panel.
+ * the panel does, so Escape closes the menu and not the whole panel. The
+ * click that closes it does nothing else: on the map it would warp the game
+ * master to wherever they clicked to dismiss it.
  */
 export function ContextMenu({
   at,
@@ -35,8 +37,21 @@ export function ContextMenu({
   }, [at]);
 
   useEffect(() => {
+    const eat = (event: MouseEvent) => {
+      event.stopPropagation();
+      event.preventDefault();
+    };
     const press = (event: PointerEvent) => {
-      if (!ref.current?.contains(event.target as Node)) onClose();
+      if (ref.current?.contains(event.target as Node)) return;
+      // The click this press becomes is the menu's, not whatever is under it.
+      // Dropped once the press is over, so a drag does not eat a later click.
+      window.addEventListener('click', eat, { capture: true, once: true });
+      window.addEventListener(
+        'pointerup',
+        () => setTimeout(() => window.removeEventListener('click', eat, true), 0),
+        { capture: true, once: true }
+      );
+      onClose();
     };
     const key = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;

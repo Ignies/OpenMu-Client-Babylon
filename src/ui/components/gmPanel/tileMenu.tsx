@@ -14,7 +14,7 @@ import {
   type SkinEntry,
 } from '../../../admin/catalogues';
 import { itemDisplayName, skinDisplayName, spawnCatalogue } from '../../../admin/skins';
-import { GmLibrary, spread, type MacroVars } from '../../../admin/gmLibrary';
+import { GmLibrary, spread, type Macro, type MacroVars } from '../../../admin/gmLibrary';
 import { uiClick } from '../../../libs/sfx';
 import { ItemIcon } from '../itemIcon';
 import { ContextMenu, type MenuPoint } from './contextMenu';
@@ -22,11 +22,11 @@ import { ContextMenu, type MenuPoint } from './contextMenu';
 /**
  * What can be done at one tile of the map, on a right-click.
  *
- * Fireworks, items and monsters all land where the game master stands
- * (`/fireworks` takes the coordinate but only on their own map; `/item` and
- * `/createmonster` take none), so anything done at a tile they are not on
- * moves them there first - the panel's queue sends the lines in order. Several
- * at once stand on the tiles round it, each one walked to in turn.
+ * Items and monsters land where the game master stands (`/item` and
+ * `/createmonster` take no coordinate), and `/fireworks` takes one only on
+ * their own map, so anything done at a tile they are not on takes them there
+ * and back to where they were - the panel's queue sends the lines in order.
+ * Several at once stand on the tiles round it, each one visited in turn.
  */
 
 type Hero = { name: string; map: number; x: number; y: number };
@@ -86,23 +86,40 @@ export const TileMenu = observer(
       [kind, query]
     );
 
-    const goTo = (tx: number, ty: number) => {
-      if (hero) GmPanel.run(move, { target: hero.name, mapIdOrName: String(map), x: String(tx), y: String(ty) });
+    const moveMe = (toMap: number, tx: number, ty: number) => {
+      if (hero) GmPanel.run(move, { target: hero.name, mapIdOrName: String(toMap), x: String(tx), y: String(ty) });
+    };
+    const goTo = (tx: number, ty: number) => moveMe(map, tx, ty);
+    // Where the game master was when the menu opened, to be put back after.
+    const goBack = () => {
+      if (hero) moveMe(hero.map, hero.x, hero.y);
     };
 
-    /** Go to the tile unless already on it, then do `then` there. */
-    const there = (then?: () => void) => {
-      if (!standing) goTo(x, y);
-      then?.();
+    /** Do `act` at the tile: at once when standing on it, otherwise there and back. */
+    const there = (act: () => void) => {
+      if (standing) {
+        act();
+      } else {
+        goTo(x, y);
+        act();
+        goBack();
+      }
       onClose();
     };
 
-    /** `spawn` on `count` tiles round this one, walking to each in turn. */
+    /** `spawn` on `count` tiles round this one, visiting each in turn, then back. */
     const several = (spawn: () => void) => {
-      spread(count).forEach(([dx, dy], i) => {
-        if (i > 0 || !standing) goTo(clampTile(x + dx), clampTile(y + dy));
+      let left = false;
+      spread(count).forEach(([dx, dy]) => {
+        const tx = clampTile(x + dx);
+        const ty = clampTile(y + dy);
+        if (!(standing && tx === x && ty === y)) {
+          goTo(tx, ty);
+          left = true;
+        }
         spawn();
       });
+      if (left) goBack();
       onClose();
     };
 
@@ -117,8 +134,32 @@ export const TileMenu = observer(
         })
       );
 
-    const fireworks = (command: '/fireworks' | '/xmasfireworks') =>
-      there(() => GmPanel.run(gmCommand(command), { x: String(x), y: String(y) }));
+    // On the game master's own map the command takes the tile itself.
+    const fireworks = (command: '/fireworks' | '/xmasfireworks') => {
+      const fire = () => GmPanel.run(gmCommand(command), { x: String(x), y: String(y) });
+      if (hero?.map === map) {
+        fire();
+        onClose();
+      } else {
+        there(fire);
+      }
+    };
+
+    /** A macro at the tile, with the way back as its last step when it went there. */
+    const macroHere = (macro: Macro) => {
+      if (!vars || !hero) return;
+      if (!standing) goTo(x, y);
+      GmPanel.runMacro(
+        standing
+          ? macro
+          : {
+              ...macro,
+              steps: [...macro.steps, { line: `/move ${hero.name} ${hero.map} ${hero.x} ${hero.y}`, delayMs: 0 }],
+            },
+        vars
+      );
+      onClose();
+    };
 
     const vars: MacroVars | null = hero ? { x, y, map, me: hero.name, target: GmPanel.target } : null;
 
@@ -139,7 +180,15 @@ export const TileMenu = observer(
 
         {hero ? (
           <>
-            <button type="button" className="gm-menu-item" onClick={uiClick(() => there())} disabled={standing}>
+            <button
+              type="button"
+              className="gm-menu-item"
+              onClick={uiClick(() => {
+                goTo(x, y);
+                onClose();
+              })}
+              disabled={standing}
+            >
               {t('gm.map.menu.goHere')}
             </button>
             {target ? (
@@ -264,7 +313,7 @@ export const TileMenu = observer(
                     key={macro.id}
                     type="button"
                     className="gm-menu-item"
-                    onClick={uiClick(() => there(() => GmPanel.runMacro(macro, vars)))}
+                    onClick={uiClick(() => macroHere(macro))}
                   >
                     <span className="gm-menu-name">▸ {macro.name}</span>
                     <small className="gm-mono">{macro.steps.length}</small>

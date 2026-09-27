@@ -2070,7 +2070,7 @@ export const japaneseLayer: LanguageLayer = {
     'gm.map.goHere': 'このマップへ移動',
     'gm.map.bringTarget': '{name} をここへ呼ぶ',
     'gm.map.menu.goHere': 'ここへ行く',
-    'gm.map.menu.movesYou': '先にここへ移動します。',
+    'gm.map.menu.movesYou': 'ここで生成すると、そこへ移動してから戻ります。',
     'gm.map.menu.copy': '座標をコピー',
     'gm.map.menuHint': 'マスやプレイヤーを右クリックすると他の操作ができます。',
     'gm.section.macros': 'マクロ',

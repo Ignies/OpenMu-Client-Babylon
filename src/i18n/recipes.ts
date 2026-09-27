@@ -2217,7 +2217,7 @@ export const EN_TEXT = {
   'gm.map.goHere': 'Warp to this map',
   'gm.map.bringTarget': 'Bring {name} here',
   'gm.map.menu.goHere': 'Go here',
-  'gm.map.menu.movesYou': 'You are moved here first.',
+  'gm.map.menu.movesYou': 'Spawning here takes you there and back.',
   'gm.map.menu.copy': 'Copy coordinates',
   'gm.map.menuHint': 'Right-click a tile or a player for more.',
   'gm.section.macros': 'Macros',

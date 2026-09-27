@@ -2059,7 +2059,7 @@ export const polishLayer: LanguageLayer = {
     'gm.map.goHere': 'Przenieś na tę mapę',
     'gm.map.bringTarget': 'Przyzwij tutaj: {name}',
     'gm.map.menu.goHere': 'Idź tutaj',
-    'gm.map.menu.movesYou': 'Najpierw nastąpi przeniesienie tutaj.',
+    'gm.map.menu.movesYou': 'Przywołanie tutaj oznacza przeniesienie tam i z powrotem.',
     'gm.map.menu.copy': 'Kopiuj współrzędne',
     'gm.map.menuHint': 'Kliknij prawym przyciskiem pole lub gracza, by zobaczyć więcej.',
     'gm.section.macros': 'Makra',
