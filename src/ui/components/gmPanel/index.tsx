@@ -350,8 +350,10 @@ export const GmPanelWindow = observer(() => {
   return (
     <>
       <GmTab />
+      {/* `scrollable`: the page swallows the wheel everywhere else (boot.tsx),
+          and every list in here scrolls with it. */}
       <div
-        className="gm-window"
+        className="gm-window scrollable"
         style={{ zIndex: MuWindows.zIndexOf(WINDOW_ID) }}
         aria-label={t('gm.title')}
         onPointerDown={() => MuWindows.raise(WINDOW_ID)}
