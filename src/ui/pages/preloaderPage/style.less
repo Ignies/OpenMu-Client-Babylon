@@ -260,28 +260,14 @@
   font-size: 12px;
 }
 
-// The names rolled under a credit (the server's contributors under its team),
-// stepped through its middle row; the frame loop dims each by its distance
-// from the middle, and the window's edges fade them out.
-.ws-credit-roll {
-  display: block;
-  margin-top: 8px;
-  overflow: hidden;
-  color: rgb(255, 226, 214);
-  font-size: 13px;
-  -webkit-mask-image: linear-gradient(transparent, #000 16%, #000 84%, transparent);
-  mask-image: linear-gradient(transparent, #000 16%, #000 84%, transparent);
-
-  > span {
-    display: block;
-    will-change: transform;
-  }
-
-  > span > span {
-    display: block;
-    white-space: nowrap;
-    opacity: 0.22;
-  }
+// A credit's roll as villages round its mark (`villages.ts`), drawn by the
+// tour loop at screen size so the names stay sharp over the tilted map.
+.ws-page .ws-villages {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .ws-tint {

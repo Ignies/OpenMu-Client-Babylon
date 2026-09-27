@@ -51,7 +51,7 @@ export type Credit = {
   reports: number;
   /** What a thanks is for, under the name. */
   note?: string;
-  /** Names rolled under the credit, one at a time. */
+  /** Names drawn round the credit's mark as villages (`villages.ts`). */
   roll?: string[];
 };
 

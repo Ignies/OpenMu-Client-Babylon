@@ -6,9 +6,8 @@ import { glowPulse } from './sparkSprites';
  * The footer lit by the strike: when the lightning coming down from the logo
  * reaches the bottom, it breaks on the ground there and spreads out to both
  * sides into a block behind the footer's line, just the size of what it says:
- * lightning running round its edges, and inside a glow that flickers between
- * the bolts' reds and white. The line is written over it in black
- * (`.ws-status` inks itself on the same cue).
+ * lightning running round its edges and white inside. The line is written
+ * over it in black (`.ws-status` inks itself on the same cue).
  */
 
 /** When the strike reaches the footer after the card opens, and how long it takes to run out. */
@@ -19,13 +18,6 @@ const SPREAD = 0.55;
 const PAD_X = 16;
 const PAD_Y = 5;
 const BOLT_MS = 80;
-
-/** The glow inside: from the bolts' red to white-hot. */
-const HOT: [number, number, number] = [255, 246, 236];
-const WARM: [number, number, number] = [236, 88, 56];
-
-const mix = (a: number[], b: number[], k: number) =>
-  a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(', ');
 
 export const FooterStrike = ({ lit }: { lit: boolean }) => {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -89,32 +81,12 @@ export const FooterStrike = ({ lit }: { lit: boolean }) => {
             ? 1
             : glowPulse(time) * (0.9 + Math.random() * 0.1);
 
-          // Inside: a glow flickering between the bolts' red and white, hottest
-          // in the middle, with a flash now and then as the ground takes a hit.
-          const flash = still
-            ? 0.4
-            : Math.random() < 0.06
-              ? 1
-              : 0.25 + 0.45 * glow * Math.random();
-          const heat = ctx.createRadialGradient(
-            cx,
-            cy,
-            0,
-            cx,
-            cy,
-            Math.max(half, tall)
-          );
-          heat.addColorStop(0, `rgba(${mix(WARM, HOT, flash)}, 0.96)`);
-          heat.addColorStop(
-            0.55,
-            `rgba(${mix(WARM, HOT, flash * 0.45)}, 0.92)`
-          );
-          heat.addColorStop(1, `rgba(${WARM.join(', ')}, 0.88)`);
+          // Inside: plain white, for the black lettering.
           ctx.save();
           ctx.globalCompositeOperation = 'source-over';
           ctx.shadowColor = `rgba(226, 70, 48, ${0.75 * glow})`;
           ctx.shadowBlur = 22;
-          ctx.fillStyle = heat;
+          ctx.fillStyle = '#fff';
           ctx.beginPath();
           ctx.roundRect(cx - half, cy - tall, half * 2, tall * 2, 2);
           ctx.fill();

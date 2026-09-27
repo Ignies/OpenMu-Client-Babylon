@@ -3,6 +3,13 @@ import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '../../../i18n';
 import { legPoint, ROUTE, tourAt, type StopNeed } from './mapTour';
 import { loadCredits, type Credit } from './contributors';
+import {
+  foundVillages,
+  roadSoFar,
+  type Box,
+  type Point,
+  type Village,
+} from './villages';
 
 /** What each kind of credit is billed as. */
 const CREDIT_ROLE: Record<Credit['kind'] | 'reporter', TextKey> = {
@@ -40,24 +47,43 @@ const MARK = 11;
 const MARK_WIDTH = 2.2;
 
 /**
- * A credit's roll of names (`.ws-credit-roll`), gliding one name at a time
- * through its middle row: the rows it shows (odd, so there is a middle) and
- * their height, px, the seconds each name gets, how much the glide slows as a
- * name crosses the middle (1 would stop on it), and when the roll starts and
- * stops within the stay, seconds after the stop is reached and before it is
- * left. The stop is held for the whole roll.
+ * A credit's roll drawn as villages round its mark (`villages.ts`), on a
+ * canvas of its own so the names are drawn upright and sharp at screen size
+ * rather than scaled with the map: a label's height and font, px, when the
+ * first is founded after the stop is reached,
+ * the seconds from one to the next, how long each road takes to draw, how long
+ * a village takes to appear once its road is in, and how long they all stand
+ * before the stop is left. The stop is held for all of it.
  */
-const ROLL_ROWS = 5;
-const ROLL_ROW = 20;
-const ROLL_STEP = 0.3;
-const ROLL_SETTLE = 0.8;
-const ROLL_IN = 0.9;
-const ROLL_OUT = 1;
-const ROLL_MID = (ROLL_ROWS - 1) / 2;
+const VILLAGE_LABEL_PX = 12.5;
+const VILLAGE_FONT = `600 ${VILLAGE_LABEL_PX}px Inter, sans-serif`;
+const VILLAGE_IN = 0.9;
+const VILLAGE_EVERY = 0.065;
+const VILLAGE_ROAD = 0.3;
+const VILLAGE_SHOW = 0.25;
+const VILLAGE_HOLD = 3.2;
 
-/** The seconds a credit's roll needs to bring every name to the middle. */
-const rollTime = (credit: Credit | null) =>
-  credit?.roll ? Math.max(0, credit.roll.length - 1) * ROLL_STEP : 0;
+/** How long a stop needs for its credit's villages, or 0 when it has none. */
+const villageTime = (credit: Credit | null) =>
+  credit?.roll?.length
+    ? VILLAGE_IN + credit.roll.length * VILLAGE_EVERY + VILLAGE_HOLD
+    : 0;
+
+/**
+ * Where villages may not stand, on screen: the page's own controls in front
+ * of the map, the lightning line down its middle (`.ws-strike`, only its bolt,
+ * not its whole canvas), and a margin inside the window's edges wide enough
+ * for the camera's slow push in while the stop is held.
+ */
+const KEEP_CLEAR = ['.ws-logo', '.ws-start', '.ws-top', '.ws-status'];
+const STRIKE_CLEAR = 18;
+const EDGE_X = 80;
+const EDGE_TOP = 90;
+const EDGE_BOTTOM = 110;
+
+/** The credit card's size as the villages leave room for it, px. */
+const CARD_W = 340;
+const CARD_H = 90;
 
 /**
  * Whose name a stop carries, if any. The credits roll in their own order from
@@ -178,7 +204,7 @@ export const Backdrop = observer(() => {
   const marksHalo = useRef<SVGPathElement>(null);
   const tip = useRef<SVGCircleElement>(null);
   const credit = useRef<HTMLDivElement>(null);
-  const roll = useRef<HTMLSpanElement>(null);
+  const villageCanvas = useRef<HTMLCanvasElement>(null);
   const [credits, setCredits] = useState<Credit[]>([]);
   const [who, setWho] = useState<Credit | null>(null);
   const cast = useRef(credits);
@@ -192,12 +218,16 @@ export const Backdrop = observer(() => {
     const box = mover.current;
     const frame = layer.current;
     const card = credit.current;
-    if (!box || !frame || !card) return;
+    const town = villageCanvas.current;
+    const paint = town?.getContext('2d');
+    if (!box || !frame || !card || !town || !paint) return;
 
     const still = !!window.matchMedia?.('(prefers-reduced-motion: reduce)')
       .matches;
     const start = performance.now();
     let raf = 0;
+    // Whether the village canvas has anything on it to clear.
+    let townShown = false;
     let blurShown = -1;
     let credited: Credit | null = null;
     let width = 0;
@@ -214,16 +244,148 @@ export const Backdrop = observer(() => {
       box.style.height = `${ih}px`;
       box.style.left = `${(width - iw) / 2}px`;
       box.style.top = `${(height - ih) / 2}px`;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      town.width = Math.round(width * dpr);
+      town.height = Math.round(height * dpr);
+      paint.setTransform(dpr, 0, 0, dpr, 0, 0);
+      townShown = true;
     };
 
     const observer = new ResizeObserver(resize);
     observer.observe(frame);
     resize();
 
-    // A stop whose credit rolls names stays until they have all gone by.
-    const need: StopNeed = (lap, stop) => {
-      const time = rollTime(creditAt(lap, stop, cast.current));
-      return time ? ROLL_IN + time + ROLL_OUT : 0;
+    // A stop whose credit founds villages stays until they have all stood a while.
+    const need: StopNeed = (lap, stop) =>
+      villageTime(creditAt(lap, stop, cast.current));
+
+    let villages: Village[] = [];
+    let villageKey = '';
+
+    /**
+     * Found the villages of `names` round the mark at map pixel `mark`, on the
+     * ground the camera shows from where it rests and nothing stands in front
+     * of: not the page's controls, nor the credit card beside the mark.
+     */
+    const found = (
+      names: string[],
+      mark: Point,
+      toScreen: (x: number, y: number) => Point,
+      card: Box,
+      scale: number
+    ) => {
+      const origin = frame.getBoundingClientRect();
+      const clear: Box[] = KEEP_CLEAR.flatMap(selector => {
+        const r = document
+          .querySelector(`.ws-page ${selector}`)
+          ?.getBoundingClientRect();
+        if (!r || !r.width) return [];
+        return [
+          [
+            r.left - origin.left - 12,
+            r.top - origin.top - 12,
+            r.right - origin.left + 12,
+            r.bottom - origin.top + 12,
+          ] as Box,
+        ];
+      });
+      const strike = document
+        .querySelector('.ws-page .ws-strike')
+        ?.getBoundingClientRect();
+      if (strike?.width) {
+        const middle = strike.left + strike.width / 2 - origin.left;
+        clear.push([middle - STRIKE_CLEAR, 0, middle + STRIKE_CLEAR, height]);
+      }
+      clear.push(card);
+
+      paint.font = VILLAGE_FONT;
+      villages = foundVillages(names, mark, {
+        toScreen,
+        scale,
+        label: VILLAGE_LABEL_PX,
+        keep: MARK * scale + 10,
+        measure: name => paint.measureText(name).width,
+        open: b =>
+          b[0] > EDGE_X &&
+          b[2] < width - EDGE_X &&
+          b[1] > EDGE_TOP &&
+          b[3] < height - EDGE_BOTTOM &&
+          !clear.some(r => b[0] < r[2] && r[0] < b[2] && b[1] < r[3] && r[1] < b[3]),
+      });
+    };
+
+    /**
+     * The villages as they stand `held` seconds into the stay: each road drawn
+     * in from the village it was founded from, then the village on its end.
+     */
+    const drawVillages = (
+      toScreen: (x: number, y: number) => Point,
+      held: number,
+      alpha: number
+    ) => {
+      paint.clearRect(0, 0, width, height);
+      townShown = true;
+      if (alpha <= 0) return;
+
+      const since = (i: number) => held - VILLAGE_IN - i * VILLAGE_EVERY;
+      paint.globalAlpha = alpha;
+      paint.lineCap = 'round';
+      paint.lineJoin = 'round';
+
+      // The roads: a faint light halo under a dashed line of paint.
+      const roads = new Path2D();
+      villages.forEach((v, i) => {
+        const points = roadSoFar(
+          v.road,
+          Math.min(1, since(i) / VILLAGE_ROAD)
+        );
+        points.forEach(([mx, my], n) => {
+          const [x, y] = toScreen(mx, my);
+          if (n) roads.lineTo(x, y);
+          else roads.moveTo(x, y);
+        });
+      });
+      paint.setLineDash([]);
+      paint.strokeStyle = 'rgba(255, 214, 190, 0.16)';
+      paint.lineWidth = 5;
+      paint.stroke(roads);
+      paint.setLineDash([5, 4]);
+      paint.strokeStyle = '#0b0706';
+      paint.lineWidth = 1.8;
+      paint.stroke(roads);
+      paint.setLineDash([]);
+
+      // The villages: an inked dot and the name beside it, upright.
+      paint.font = VILLAGE_FONT;
+      paint.textBaseline = 'middle';
+      villages.forEach((v, i) => {
+        const shown = Math.min(1, (since(i) - VILLAGE_ROAD) / VILLAGE_SHOW);
+        if (shown <= 0) return;
+
+        const [x, y] = toScreen(v.at[0], v.at[1]);
+        paint.globalAlpha = alpha * shown;
+
+        paint.beginPath();
+        paint.arc(x, y, VILLAGE_LABEL_PX * 0.3, 0, Math.PI * 2);
+        paint.fillStyle = '#0b0706';
+        paint.fill();
+        paint.strokeStyle = 'rgba(255, 214, 190, 0.7)';
+        paint.lineWidth = 1.5;
+        paint.stroke();
+
+        const tx = v.right
+          ? x + VILLAGE_LABEL_PX * 0.7
+          : x - VILLAGE_LABEL_PX * 0.7;
+        paint.textAlign = v.right ? 'left' : 'right';
+        paint.strokeStyle = 'rgba(10, 5, 4, 0.9)';
+        paint.lineWidth = 3.5;
+        paint.strokeText(v.name, tx, y);
+        paint.fillStyle = '#fff4ee';
+        paint.fillText(v.name, tx, y);
+      });
+
+      paint.globalAlpha = 1;
     };
 
     const step = (now: number) => {
@@ -285,17 +447,20 @@ export const Backdrop = observer(() => {
           setWho(person);
         }
 
-        const [mu, mv] = ROUTE[tour.stop];
-        const lx = s * ((mu - 0.5) * iw - px);
-        const ly = s * ((mv - 0.5) * ih - py);
         const b = (tour.bearing * Math.PI) / 180;
         const a = (tour.tilt * Math.PI) / 180;
-        const rx = lx * Math.cos(b) - ly * Math.sin(b);
-        const ry = lx * Math.sin(b) + ly * Math.cos(b);
-        const depth = ry * Math.sin(a);
-        const f = PERSPECTIVE / (PERSPECTIVE - depth);
-        const x = width / 2 + rx * f;
-        const y = height / 2 + ry * Math.cos(a) * f;
+        // A point on the map, in its pixels, to where it shows on screen.
+        const toScreen = (mx: number, my: number): [number, number] => {
+          const lx = s * ((mx / MAP_W - 0.5) * iw - px);
+          const ly = s * ((my / MAP_H - 0.5) * ih - py);
+          const rx = lx * Math.cos(b) - ly * Math.sin(b);
+          const ry = lx * Math.sin(b) + ly * Math.cos(b);
+          const f = PERSPECTIVE / (PERSPECTIVE - ry * Math.sin(a));
+          return [width / 2 + rx * f, height / 2 + ry * Math.cos(a) * f];
+        };
+
+        const [mu, mv] = ROUTE[tour.stop];
+        const [x, y] = toScreen(mu * MAP_W, mv * MAP_H);
 
         const held = tour.stay * tour.dwell;
         const alpha = Math.max(
@@ -304,29 +469,28 @@ export const Backdrop = observer(() => {
         );
         const left = x + 340 > width;
         // High on the screen the logo is in the way: hang the credit below.
-        // A credit with a roll is tall, so it hangs below unless low down.
-        const below = y < height * (person.roll ? 0.55 : 0.38);
+        const below = y < height * 0.38;
 
-        const count = person.roll?.length ?? 0;
-        if (roll.current && count) {
-          // Names from the first, in one smooth glide that slows as each name
-          // crosses the middle row and never quite stops. The first starts and
-          // the last ends in the middle, with empty rows past them.
-          const steps = Math.max(
-            0,
-            Math.min(count - 1, (held - ROLL_IN) / ROLL_STEP)
+        // The credit's roll, founded as villages round the mark once per stay.
+        const key = `${tour.lap}:${tour.stop}`;
+        if (person.roll?.length && key !== villageKey) {
+          const cardX = left ? x - 30 - CARD_W : x + 30;
+          const cardY = below ? y + 16 : y - 16 - CARD_H;
+          found(
+            person.roll,
+            [mu * MAP_W, mv * MAP_H],
+            toScreen,
+            [cardX - 12, cardY - 12, cardX + CARD_W + 12, cardY + CARD_H + 12],
+            (iw / MAP_W) * s
           );
-          const at =
-            steps - (ROLL_SETTLE * Math.sin(2 * Math.PI * steps)) / (2 * Math.PI);
-          roll.current.style.transform = `translateY(${((ROLL_MID - at) * ROLL_ROW).toFixed(1)}px)`;
+          villageKey = key;
+        }
 
-          // The name in the middle in full, the rest dimmer the further off.
-          const rows = roll.current.children;
-          for (let i = 0; i < rows.length; i++) {
-            const d = Math.abs(i - at);
-            const o = d < 1 ? 1 - 0.5 * d : Math.max(0.22, 0.5 - 0.14 * (d - 1));
-            (rows[i] as HTMLElement).style.opacity = o.toFixed(3);
-          }
+        if (person.roll?.length && villages.length) {
+          drawVillages(toScreen, held, alpha);
+        } else if (townShown) {
+          paint.clearRect(0, 0, width, height);
+          townShown = false;
         }
 
         card.style.opacity = alpha.toFixed(3);
@@ -334,6 +498,10 @@ export const Backdrop = observer(() => {
         card.style.textAlign = left ? 'right' : 'left';
       } else {
         card.style.opacity = '0';
+        if (townShown) {
+          paint.clearRect(0, 0, width, height);
+          townShown = false;
+        }
       }
 
       if (!still) raf = requestAnimationFrame(step);
@@ -372,6 +540,7 @@ export const Backdrop = observer(() => {
         <div className="ws-tint" />
       </div>
       <div className="ws-grid" />
+      <canvas className="ws-villages" ref={villageCanvas} />
       <Embers />
       <div className="ws-credit" ref={credit}>
         {who && (
@@ -388,18 +557,6 @@ export const Backdrop = observer(() => {
             </span>
             {who.note && (
               <span className="ws-credit-meta ws-mono">{who.note}</span>
-            )}
-            {who.roll && (
-              <span
-                className="ws-credit-roll ws-mono"
-                style={{ height: ROLL_ROWS * ROLL_ROW, lineHeight: `${ROLL_ROW}px` }}
-              >
-                <span ref={roll}>
-                  {who.roll.map(name => (
-                    <span key={name}>{name}</span>
-                  ))}
-                </span>
-              </span>
             )}
             {who.kind === 'person' && (
               <span className="ws-credit-meta ws-mono">
