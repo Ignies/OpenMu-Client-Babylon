@@ -69,10 +69,37 @@ type GithubIssue = {
   user?: { login?: string; type?: string };
 };
 
+const KINDS = new Set<unknown>(['thanks', 'person', 'playtest', 'everyone']);
+
+/** Whether a kept entry is a credit this page can draw: anything else would take the page down. */
+function isCredit(value: unknown): value is Credit {
+  const c = value as Partial<Credit> | null;
+  return (
+    !!c &&
+    KINDS.has(c.kind) &&
+    typeof c.name === 'string' &&
+    typeof c.commits === 'number' &&
+    typeof c.reports === 'number' &&
+    (c.note === undefined || typeof c.note === 'string') &&
+    (c.roll === undefined ||
+      (Array.isArray(c.roll) && c.roll.every(n => typeof n === 'string')))
+  );
+}
+
+/** The lists kept from last time, or null when there are none or they are not ones this page wrote. */
 function stored(): Stored | null {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as Stored) : null;
+    const kept = raw ? (JSON.parse(raw) as Partial<Stored>) : null;
+    if (
+      !kept ||
+      typeof kept.at !== 'number' ||
+      !Array.isArray(kept.list) ||
+      !kept.list.every(isCredit)
+    ) {
+      return null;
+    }
+    return kept as Stored;
   } catch {
     return null;
   }
