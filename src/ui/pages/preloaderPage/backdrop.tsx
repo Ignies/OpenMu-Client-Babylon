@@ -579,9 +579,6 @@ export const Backdrop = observer(() => {
       </div>
       <div className="ws-iris" />
       <div className="ws-vignette" />
-      {/* Over the vignette, so the sparks are bright at the edge they rise
-          from. They show once Start is pressed (`.is-open`). */}
-      <Embers rising />
     </div>
   );
 });
@@ -596,25 +593,6 @@ type Ember = {
   da: number;
   color: string;
 };
-
-/**
- * Sparks off the ground: a stream rising from the bottom edge, per 1600x900 of
- * screen, burning out by this share of the way up, in fire colours.
- */
-const RISING_DENSITY = 200;
-const RISING_REACH = 0.55;
-const RISING_COLORS = ['255,122,64', '255,168,96', '236,88,56', '255,212,160'];
-
-const rise = (w: number, h: number, anywhere: boolean): Ember => ({
-  x: Math.random() * w,
-  y: anywhere ? h - Math.random() * h * RISING_REACH : h + 4,
-  r: 0.7 + Math.random() * 1.7,
-  vx: (Math.random() - 0.5) * 0.5,
-  vy: -(0.7 + Math.random() * 1.5),
-  a: 0.4 + Math.random() * 0.6,
-  da: 0,
-  color: RISING_COLORS[Math.floor(Math.random() * RISING_COLORS.length)],
-});
 
 /** The logo red, a lighter red and the page grey, weighted toward red. */
 const EMBER_COLORS = ['196,48,43', '226,86,74', '226,86,74', '155,161,166'];
@@ -633,11 +611,8 @@ const spawn = (w: number, h: number, anywhere: boolean): Ember => ({
   color: EMBER_COLORS[Math.floor(Math.random() * EMBER_COLORS.length)],
 });
 
-/**
- * Sparse, slow and small: a mood behind the cards, not something to watch.
- * `rising`: the stream of sparks coming up off the bottom edge instead.
- */
-const Embers = ({ rising = false }: { rising?: boolean }) => {
+/** Sparse, slow and small: a mood behind the cards, not something to watch. */
+const Embers = () => {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -659,11 +634,8 @@ const Embers = ({ rising = false }: { rising?: boolean }) => {
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const density = rising ? RISING_DENSITY : EMBER_DENSITY;
-      const count = Math.round((density * w * h) / (1600 * 900));
-      embers = Array.from({ length: count }, () =>
-        rising ? rise(w, h, true) : spawn(w, h, true)
-      );
+      const count = Math.round((EMBER_DENSITY * w * h) / (1600 * 900));
+      embers = Array.from({ length: count }, () => spawn(w, h, true));
     };
 
     const step = (now: number) => {
@@ -675,37 +647,6 @@ const Embers = ({ rising = false }: { rising?: boolean }) => {
       const h = window.innerHeight;
 
       ctx.clearRect(0, 0, w, h);
-
-      if (rising) {
-        ctx.globalCompositeOperation = 'lighter';
-        for (let i = 0; i < embers.length; i++) {
-          const e = embers[i];
-
-          // Swaying on the heat as they go up, and burning out on the way.
-          e.vx = Math.max(-0.7, Math.min(0.7, e.vx + (Math.random() - 0.5) * 0.06 * k));
-          e.x += e.vx * k;
-          e.y += e.vy * k;
-          const up = (h - e.y) / (h * RISING_REACH);
-          if (up >= 1 || e.x < -4 || e.x > w + 4) {
-            embers[i] = rise(w, h, false);
-            continue;
-          }
-
-          const alpha =
-            e.a * Math.pow(1 - Math.max(0, up), 1.3) * (0.75 + Math.random() * 0.25);
-          ctx.fillStyle = `rgba(${e.color},${(alpha * 0.16).toFixed(3)})`;
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, e.r * 3.6, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = `rgba(${e.color},${alpha.toFixed(3)})`;
-          ctx.beginPath();
-          ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        frame = requestAnimationFrame(step);
-        return;
-      }
 
       for (let i = 0; i < embers.length; i++) {
         const e = embers[i];
@@ -740,9 +681,7 @@ const Embers = ({ rising = false }: { rising?: boolean }) => {
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', resize);
     };
-  }, [rising]);
+  }, []);
 
-  return (
-    <canvas ref={ref} className={`ws-embers${rising ? ' is-rising' : ''}`} />
-  );
+  return <canvas ref={ref} className="ws-embers" />;
 };
