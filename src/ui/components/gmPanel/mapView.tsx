@@ -31,7 +31,18 @@ export type MapViewProps = {
   selectedId: string | null;
   onPick: (player: TrackedPlayer) => void;
   onTile?: (x: number, y: number) => void;
+  /** A right-click on tile (x, y), at that point on screen. */
+  onMenu?: (x: number, y: number, clientX: number, clientY: number) => void;
+  /** A right-click on a player's dot. */
+  onPlayerMenu?: (player: TrackedPlayer, clientX: number, clientY: number) => void;
 };
+
+/** The tile under a point on the picture: its across runs along Y, its down along X. */
+function tileAt(box: DOMRect, clientX: number, clientY: number): [number, number] {
+  const y = Math.floor(((clientX - box.left) / box.width) * TERRAIN_SIZE);
+  const x = Math.floor(((clientY - box.top) / box.height) * TERRAIN_SIZE);
+  return [Math.max(0, Math.min(255, x)), Math.max(0, Math.min(255, y))];
+}
 
 function percent(tile: number): string {
   return `${(Math.min(TERRAIN_SIZE, Math.max(0, tile)) / TERRAIN_SIZE) * 100}%`;
@@ -45,8 +56,12 @@ export const MapView = observer(function MapView({
   selectedId,
   onPick,
   onTile,
+  onMenu,
+  onPlayerMenu,
 }: MapViewProps) {
   const [picture, setPicture] = useState<WorldMinimap | null | undefined>(undefined);
+  // The tile under the cursor, read out in the corner while it is over the map.
+  const [hover, setHover] = useState<[number, number] | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -69,12 +84,25 @@ export const MapView = observer(function MapView({
       style={picture ? { backgroundImage: `url(${picture.image.url})` } : undefined}
       onClick={event => {
         if (!onTile) return;
-        const box = event.currentTarget.getBoundingClientRect();
-        const y = Math.floor(((event.clientX - box.left) / box.width) * TERRAIN_SIZE);
-        const x = Math.floor(((event.clientY - box.top) / box.height) * TERRAIN_SIZE);
-        onTile(Math.max(0, Math.min(255, x)), Math.max(0, Math.min(255, y)));
+        const [x, y] = tileAt(event.currentTarget.getBoundingClientRect(), event.clientX, event.clientY);
+        onTile(x, y);
       }}
+      onContextMenu={event => {
+        if (!onMenu) return;
+        event.preventDefault();
+        const [x, y] = tileAt(event.currentTarget.getBoundingClientRect(), event.clientX, event.clientY);
+        onMenu(x, y, event.clientX, event.clientY);
+      }}
+      onMouseMove={event =>
+        setHover(tileAt(event.currentTarget.getBoundingClientRect(), event.clientX, event.clientY))
+      }
+      onMouseLeave={() => setHover(null)}
     >
+      {hover ? (
+        <span className="gm-map-readout gm-mono">
+          {hover[0]}, {hover[1]}
+        </span>
+      ) : null}
       {picture === null ? <span className="gm-map-note">{t('gm.map.noPicture')}</span> : null}
 
       {scope.map(entry => (
@@ -96,6 +124,12 @@ export const MapView = observer(function MapView({
           onClick={event => {
             event.stopPropagation();
             onPick(player);
+          }}
+          onContextMenu={event => {
+            if (!onPlayerMenu) return;
+            event.preventDefault();
+            event.stopPropagation();
+            onPlayerMenu(player, event.clientX, event.clientY);
           }}
         >
           <span className="gm-map-label">{player.character ?? player.account}</span>

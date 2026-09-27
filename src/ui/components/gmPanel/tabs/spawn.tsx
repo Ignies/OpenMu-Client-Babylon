@@ -15,6 +15,7 @@ import {
   type SkinKind,
 } from '../../../../admin/catalogues';
 import { itemDisplayName, skinDisplayName, spawnCatalogue } from '../../../../admin/skins';
+import { GmLibrary } from '../../../../admin/gmLibrary';
 import { uiClick } from '../../../../libs/sfx';
 import { ItemIcon } from '../../itemIcon';
 import { CommandCard, QuickButton } from '../commandForm';
@@ -23,10 +24,11 @@ import { CommandCard, QuickButton } from '../commandForm';
  * Items, monsters and NPCs from the tables rather than from typed numbers.
  *
  * The item grid is the whole item table with its icons; picking one opens
- * the `/item` options beside it. Monsters and NPCs are the server's monster
- * table (any number it defines can be created), with the intelligence
- * switch `/createmonster` takes. The Tools pane keeps the commands that
- * act on a monster already standing there.
+ * the `/item` options beside it. The grid scrolls on its own, so the options
+ * and their button stay in view however far down the pick was. Monsters and
+ * NPCs are the server's monster table (any number it defines can be
+ * created), with the intelligence switch `/createmonster` takes. The Tools
+ * pane keeps the commands that act on a monster already standing there.
  */
 
 type Pane = 'items' | 'monsters' | 'npcs' | 'tools';
@@ -83,6 +85,62 @@ const NumberField = observer(({
   </label>
 ));
 
+const sameSpec = (a: ItemSpec, b: ItemSpec) =>
+  a.level === b.level &&
+  a.option === b.option &&
+  a.excellent === b.excellent &&
+  a.ancient === b.ancient &&
+  a.luck === b.luck &&
+  a.skill === b.skill;
+
+/** A preset's name from what it sets: "+13 Luck Skill Excellent 63". */
+function presetName(spec: ItemSpec): string {
+  return [
+    `+${spec.level}`,
+    spec.option ? `${t('gm.param.option')} ${spec.option}` : '',
+    spec.luck ? t('gm.param.luck') : '',
+    spec.skill ? t('gm.param.skill') : '',
+    spec.excellent ? `${t('gm.param.excellent')} ${spec.excellent}` : '',
+    spec.ancient ? `${t('gm.param.ancient')} ${spec.ancient}` : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
+/** Saved item specs, one press to apply; the map menu offers them too. */
+const Presets = observer(({ spec, onPick }: { spec: ItemSpec; onPick: (spec: ItemSpec) => void }) => (
+  <div className="gm-presets">
+    {GmLibrary.presets.map(preset => (
+      <span key={preset.id} className="gm-fav">
+        <button
+          type="button"
+          className={`gm-chip${sameSpec(spec, preset.spec) ? ' is-active' : ''}`}
+          onClick={uiClick(() => onPick(preset.spec))}
+        >
+          {preset.name}
+        </button>
+        <button
+          type="button"
+          className="gm-fav-x"
+          aria-label={t('common.close')}
+          onClick={uiClick(() => GmLibrary.deletePreset(preset.id))}
+        >
+          ×
+        </button>
+      </span>
+    ))}
+    {GmLibrary.presets.some(preset => sameSpec(spec, preset.spec)) ? null : (
+      <button
+        type="button"
+        className="gm-link"
+        onClick={uiClick(() => GmLibrary.savePreset(presetName(spec), spec))}
+      >
+        {t('gm.presets.save')}
+      </button>
+    )}
+  </div>
+));
+
 const ItemsPane = observer(() => {
   const [query, setQuery] = useState('');
   const [group, setGroup] = useState<number | null>(null);
@@ -128,34 +186,36 @@ const ItemsPane = observer(() => {
           ))}
         </div>
 
-        {shown.length === 0 ? (
-          <p className="gm-empty">{t('gm.spawn.noMatch')}</p>
-        ) : (
-          <div className="gm-cards gm-item-cards">
-            {shown.map(entry => {
-              const active = picked?.group === entry.group && picked.number === entry.number;
-              return (
-                <button
-                  key={`${entry.group}-${entry.number}`}
-                  type="button"
-                  className={`gm-card-btn gm-item-card${active ? ' is-active' : ''}`}
-                  title={`${entry.group}/${entry.number}`}
-                  onClick={uiClick(() => setPicked(active ? null : entry))}
-                >
-                  <span className="gm-item-icon">
-                    <ItemIcon item={{ group: entry.group, num: entry.number, lvl: 0 }} />
-                  </span>
-                  <span className="gm-item-text">
-                    <span className="gm-card-name">{itemDisplayName(entry)}</span>
-                    <span className="gm-card-sub">
-                      {t(GROUP_KEY[entry.group])} · {t('gm.spawn.dropLevel', { level: entry.dropLevel })}
+        <div className="gm-scroll">
+          {shown.length === 0 ? (
+            <p className="gm-empty">{t('gm.spawn.noMatch')}</p>
+          ) : (
+            <div className="gm-cards gm-item-cards">
+              {shown.map(entry => {
+                const active = picked?.group === entry.group && picked.number === entry.number;
+                return (
+                  <button
+                    key={`${entry.group}-${entry.number}`}
+                    type="button"
+                    className={`gm-card-btn gm-item-card${active ? ' is-active' : ''}`}
+                    title={`${entry.group}/${entry.number}`}
+                    onClick={uiClick(() => setPicked(active ? null : entry))}
+                  >
+                    <span className="gm-item-icon">
+                      <ItemIcon item={{ group: entry.group, num: entry.number, lvl: 0 }} />
                     </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+                    <span className="gm-item-text">
+                      <span className="gm-card-name">{itemDisplayName(entry)}</span>
+                      <span className="gm-card-sub">
+                        {t(GROUP_KEY[entry.group])} · {t('gm.spawn.dropLevel', { level: entry.dropLevel })}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {picked && values ? (
@@ -170,6 +230,7 @@ const ItemsPane = observer(() => {
             {t(GROUP_KEY[picked.group])} {picked.group}/{picked.number} · {picked.width}x{picked.height} ·{' '}
             {t('gm.spawn.reqLevel', { level: picked.requiredLevel })}
           </p>
+          <Presets spec={spec} onPick={next => setSpec({ ...next })} />
           <div className="gm-spec">
             <NumberField label={t('gm.param.level')} value={spec.level} min={0} max={15} onChange={level => setSpec({ ...spec, level })} />
             <NumberField label={t('gm.param.option')} value={spec.option} min={0} max={7} onChange={option => setSpec({ ...spec, option })} />
@@ -236,30 +297,32 @@ const MonstersPane = observer(({ kind }: { kind: SkinKind }) => {
       </div>
       <p className="gm-hint">{t('gm.spawn.monsterHint')}</p>
 
-      {shown.length === 0 ? (
-        <p className="gm-empty">{t('gm.spawn.noMatch')}</p>
-      ) : (
-        <div className="gm-cards">
-          {shown.map(entry => (
-            <button
-              key={entry.number}
-              type="button"
-              className={`gm-card-btn gm-skin-${entry.kind}`}
-              title={`/createmonster ${entry.number}${intelligent ? ' 1' : ' 0'}`}
-              onClick={uiClick(() =>
-                GmPanel.run(create, { number: String(entry.number), intelligence: intelligent ? '1' : '0' })
-              )}
-            >
-              <span className="gm-card-num gm-mono">#{entry.number}</span>
-              <span className="gm-card-name">{skinDisplayName(entry)}</span>
-              <span className="gm-card-sub">
-                {entry.level ? `${t('common.level')} ${entry.level}` : ''}
-              </span>
-              <span className="gm-card-tag is-quiet">{t('gm.spawn.spawn')}</span>
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="gm-scroll">
+        {shown.length === 0 ? (
+          <p className="gm-empty">{t('gm.spawn.noMatch')}</p>
+        ) : (
+          <div className="gm-cards">
+            {shown.map(entry => (
+              <button
+                key={entry.number}
+                type="button"
+                className={`gm-card-btn gm-skin-${entry.kind}`}
+                title={`/createmonster ${entry.number}${intelligent ? ' 1' : ' 0'}`}
+                onClick={uiClick(() =>
+                  GmPanel.run(create, { number: String(entry.number), intelligence: intelligent ? '1' : '0' })
+                )}
+              >
+                <span className="gm-card-num gm-mono">#{entry.number}</span>
+                <span className="gm-card-name">{skinDisplayName(entry)}</span>
+                <span className="gm-card-sub">
+                  {entry.level ? `${t('common.level')} ${entry.level}` : ''}
+                </span>
+                <span className="gm-card-tag is-quiet">{t('gm.spawn.spawn')}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 });

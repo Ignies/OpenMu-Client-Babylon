@@ -1,0 +1,77 @@
+// MU's Option window frame around a panel at twice its size: the band ends
+// (100x86 each) on the corners, bars between them top and bottom, rails down
+// the sides between the ends.
+.mu-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  // Toned down from the sheet's bright silver so it sits with a dark panel.
+  filter: brightness(0.62) contrast(1.1);
+}
+
+.mu-frame-rail {
+  position: absolute;
+  top: 86px;
+  bottom: 86px;
+  width: 10px;
+}
+
+.mu-frame-rail-left {
+  left: 0;
+}
+
+.mu-frame-rail-right {
+  right: 0;
+}
+
+.mu-frame-bar {
+  position: absolute;
+  left: 100px;
+  right: 100px;
+  height: 86px;
+}
+
+.mu-frame-bar-bottom {
+  bottom: 0;
+}
+
+.mu-frame-bar-top {
+  top: 0;
+  transform: scaleY(-1);
+}
+
+.mu-frame-end {
+  position: absolute;
+  width: 50px;
+  height: 43px;
+}
+
+.mu-frame-bl {
+  left: 0;
+  bottom: 0;
+  transform: scale(2);
+  transform-origin: bottom left;
+}
+
+.mu-frame-br {
+  right: 0;
+  bottom: 0;
+  transform: scale(2);
+  transform-origin: bottom right;
+}
+
+// The top ends are the bottom ones flipped: MU draws the band once.
+.mu-frame-tl {
+  left: 0;
+  top: 0;
+  transform: translateY(86px) scale(2, -2);
+  transform-origin: top left;
+}
+
+.mu-frame-tr {
+  right: 0;
+  top: 0;
+  transform: translateY(86px) scale(2, -2);
+  transform-origin: top right;
+}

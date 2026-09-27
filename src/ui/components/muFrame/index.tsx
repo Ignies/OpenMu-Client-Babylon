@@ -1,8 +1,9 @@
+import './style.less';
 import type { CSSProperties } from 'react';
-import { MuSpriteFrame, useMuSprite } from '../../components/muSprite';
+import { MuSpriteFrame, useMuSprite } from '../muSprite';
 
 /**
- * MU's Option window frame around the card, at twice its size: the lower band
+ * MU's Option window frame around a panel, at twice its size: the lower band
  * of that window (`op1_back2`, rails and curls on both ends, a silver bar
  * between) along the bottom and flipped along the top, and its side rails
  * (`op1_back3` / `op1_back4`) tiled down between them.
@@ -44,19 +45,19 @@ export const MuFrame = () => {
   const right = useMuSprite(RAIL_RIGHT);
 
   return (
-    <div className="ws-mu-frame" aria-hidden>
+    <div className="mu-frame" aria-hidden>
       <div
-        className="ws-mu-rail ws-mu-rail-left"
+        className="mu-frame-rail mu-frame-rail-left"
         style={railStyle(left?.url)}
       />
       <div
-        className="ws-mu-rail ws-mu-rail-right"
+        className="mu-frame-rail mu-frame-rail-right"
         style={railStyle(right?.url)}
       />
-      <div className="ws-mu-bar ws-mu-bar-top" style={barStyle(band?.url)} />
-      <div className="ws-mu-bar ws-mu-bar-bottom" style={barStyle(band?.url)} />
+      <div className="mu-frame-bar mu-frame-bar-top" style={barStyle(band?.url)} />
+      <div className="mu-frame-bar mu-frame-bar-bottom" style={barStyle(band?.url)} />
       {(['tl', 'tr', 'bl', 'br'] as const).map(corner => (
-        <div key={corner} className={`ws-mu-end ws-mu-${corner}`}>
+        <div key={corner} className={`mu-frame-end mu-frame-${corner}`}>
           <MuSpriteFrame
             file={BAND}
             x={corner.endsWith('r') ? RIGHT_END_X : 0}

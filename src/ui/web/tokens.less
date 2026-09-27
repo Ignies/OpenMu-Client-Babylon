@@ -1,0 +1,68 @@
+// The Babylon site's design system, shared by the pages and windows drawn in
+// it (the world select, the game master panel): its fonts, and its tokens as
+// custom properties on whichever root calls `.web-tokens();`.
+.web-fonts() {
+  @font-face {
+    font-family: 'Inter';
+    src: url('/fonts/inter_regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Inter';
+    src: url('/fonts/inter_medium.woff2') format('woff2');
+    font-weight: 500;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Inter';
+    src: url('/fonts/inter_semibold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Geist';
+    src: url('/fonts/geist_semibold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/fonts/jetbrains_mono_regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+  }
+}
+
+.web-tokens() {
+  --bg-0: #101113;
+  --bg-1: #151719;
+  --bg-2: #1b1d20;
+  --bg-3: #222528;
+  --bg-4: #2a2d31;
+  --divider: #24272a;
+  --text-0: #f2f3f4;
+  --text-1: #9ba1a6;
+  --text-2: #80868b;
+  --text-mark: #5f6469;
+  --accent: #e8e9ea;
+  --accent-contrast: #131416;
+  --mu-red: #c4302b;
+  --mu-red-soft: #e2564a;
+  --ok: #4a9d6e;
+  --ok-text: #9ed4b6;
+  --warn: #c2963f;
+  --warn-text: #dfc290;
+  --danger: #c25252;
+  --danger-text: #e8b9b9;
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur: 220ms;
+  --font-ui: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Geist', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Mono', Consolas, monospace;
+  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.4);
+}

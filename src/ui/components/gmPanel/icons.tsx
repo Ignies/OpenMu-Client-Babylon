@@ -15,6 +15,7 @@ const PATHS: Record<GmSection, string> = {
   character: 'M10 3a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM3.5 17a6.5 6.5 0 0 1 13 0',
   moderation: 'M10 2l6 2.5v5c0 4-2.5 6.5-6 8-3.5-1.5-6-4-6-8v-5L10 2zm-2 7l1.5 1.5L13 7',
   events: 'M4 4h12v12H4zM4 8h12M8 2v4m4-4v4',
+  macros: 'M3 5h9M3 10h9M3 15h5M13 12.5l5 2.8-5 2.7z',
   console: 'M3 4h14v12H3zM6 8l2.5 2L6 12m4 0h4',
 };
 

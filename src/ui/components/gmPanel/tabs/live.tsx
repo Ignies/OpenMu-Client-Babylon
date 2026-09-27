@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../i18n';
 import { GmPanel } from '../../../../gmPanel';
@@ -9,6 +10,7 @@ import { gmCommand } from '../../../../common/gmCommands';
 import { uiClick } from '../../../../libs/sfx';
 import { RunButton } from '../commandForm';
 import { FeedNotice, heroStateLabel, playerMatches, sinceText } from '../shared';
+import { PlayerMenu } from '../playerMenu';
 
 /**
  * Everyone online, on every map, as the proxy's tracker sees them.
@@ -16,7 +18,8 @@ import { FeedNotice, heroStateLabel, playerMatches, sinceText } from '../shared'
  * A row is a socket the game server accepted a login on; one still at the
  * character select has no map. Clicking a row opens its details and makes
  * the character the shared target, so the Character and Moderation tabs
- * are already aimed at them.
+ * are already aimed at them. A right-click opens the player menu
+ * (`playerMenu.tsx`).
  */
 
 const PlayerDetail = observer(({ player }: { player: TrackedPlayer }) => {
@@ -109,6 +112,7 @@ export const LiveTab = observer(({ view }: { view: WorldView }) => {
   const players = AdminFeed.list.filter(p => playerMatches(p, GmPanel.search));
   const selected = GmPanel.selectedPlayerId ? AdminFeed.players.get(GmPanel.selectedPlayerId) : null;
   const me = view.hero?.name ?? '';
+  const [menu, setMenu] = useState<{ player: TrackedPlayer; left: number; top: number } | null>(null);
 
   return (
     <div className={`gm-live${selected ? ' has-detail' : ''}`}>
@@ -166,6 +170,10 @@ export const LiveTab = observer(({ view }: { view: WorldView }) => {
                         GmPanel.selectPlayer(isSelected ? null : player.id);
                         if (player.character && !isMe) GmPanel.setTarget(player.character);
                       })}
+                      onContextMenu={event => {
+                        event.preventDefault();
+                        setMenu({ player, left: event.clientX, top: event.clientY });
+                      }}
                     >
                       <td>
                         <span className="gm-cell-name">
@@ -202,6 +210,15 @@ export const LiveTab = observer(({ view }: { view: WorldView }) => {
       </div>
 
       {selected ? <PlayerDetail player={selected} /> : null}
+
+      {menu ? (
+        <PlayerMenu
+          player={menu.player}
+          at={{ left: menu.left, top: menu.top }}
+          hero={view.hero}
+          onClose={() => setMenu(null)}
+        />
+      ) : null}
     </div>
   );
 });
