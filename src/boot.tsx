@@ -40,6 +40,7 @@ import { installPerfOverlay, recordFrame } from './libs/perfOverlay';
 import { csmCacheStats } from './scenes/shadows';
 import { refreshServerList } from './common/serverList';
 import { ensureCacheWorker } from './common/assetDownload';
+import { sceneCovered } from './common/sceneCover';
 
 if (APP_STAGE === 'dev' || QA_ENABLED) {
   import('@babylonjs/core/Legacy/legacy');
@@ -240,6 +241,13 @@ const FRAME_ERROR_LOG_INTERVAL_MS = 5000;
 let lastFrameErrorAt = -Infinity;
 let frameErrorsSinceLog = 0;
 
+/**
+ * Once a covering page's scene has loaded, one frame in this many is drawn.
+ * Loading runs at full rate: its materials only compile on drawn frames.
+ */
+const COVERED_RENDER_EVERY = 6;
+let coveredFrames = 0;
+
 let lastTime = performance.now();
 engine.runRenderLoop(() => {
   const now = performance.now();
@@ -257,7 +265,11 @@ engine.runRenderLoop(() => {
     updateSystems(deltaTime);
     const updateEnded = performance.now();
 
-    scene.render();
+    const idle = sceneCovered() && !Store.sceneLoading;
+
+    if (!idle || ++coveredFrames % COVERED_RENDER_EVERY === 0) {
+      scene.render();
+    }
 
     // After the render, not before: the overlay's graph wants the whole of
     // the main thread's frame, and `scene.render` is most of it.

@@ -165,6 +165,11 @@ class Sound {
 
   // ---- readers -----------------------------------------------------------
 
+  /** Start audio now if the browser allows it without a gesture. */
+  tryUnlock(): void {
+    SoundsManager.tryUnlock();
+  }
+
   /** Whether the browser has unlocked audio (first gesture seen). */
   get unlocked(): boolean {
     return SoundsManager.pageInteracted;

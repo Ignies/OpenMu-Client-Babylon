@@ -208,6 +208,21 @@ export class SoundsManager {
     }
   }
 
+  /**
+   * Ask for the audio context without waiting for a gesture. A browser that
+   * allows autoplay here - a site the player uses often, an installed app -
+   * starts it now; any other keeps it locked until the first click or key,
+   * which `initializeSounds` listens for.
+   */
+  static tryUnlock() {
+    if (this.pageInteracted) return;
+    try {
+      Engine.audioEngine && Engine.audioEngine.unlock();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   /** Push the remembered gains onto the tracks' gain nodes (see `initializeSounds`). */
   static syncTrackGains() {
     this.musicTrack?.setVolume(

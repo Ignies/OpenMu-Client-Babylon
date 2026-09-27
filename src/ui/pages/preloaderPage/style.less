@@ -1,644 +1,2726 @@
-@import (reference) '../../components/muText/style.less';
+// The world picker, in the Babylon site's design system: its tokens, its
+// buttons and fields, its hero art. Scoped to the page; the game's windows
+// keep MU's own chrome.
 
-.preloader-page {
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter_regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter_medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/inter_semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/geist_semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains_mono_regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+.ws-page {
+  --bg-0: #101113;
+  --bg-1: #151719;
+  --bg-2: #1b1d20;
+  --bg-3: #222528;
+  --bg-4: #2a2d31;
+  --divider: #24272a;
+  --text-0: #f2f3f4;
+  --text-1: #9ba1a6;
+  --text-2: #80868b;
+  --text-mark: #5f6469;
+  --accent: #e8e9ea;
+  --accent-contrast: #131416;
+  --mu-red: #c4302b;
+  --mu-red-soft: #e2564a;
+  --ok: #4a9d6e;
+  --ok-text: #9ed4b6;
+  --warn: #c2963f;
+  --warn-text: #dfc290;
+  --danger: #c25252;
+  --danger-text: #e8b9b9;
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur: 220ms;
+  --font-ui: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Geist', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Mono', Consolas, monospace;
+  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.4);
+
   position: absolute;
   inset: 0;
-  .mu-font();
+  isolation: isolate;
+  overflow: hidden;
+  pointer-events: auto;
   user-select: none;
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: opacity 320ms var(--ease);
 
-  // MU's loading artwork, holding the screen until the login scene is drawn.
-  // It is the page's own backdrop, not the loading screen component: that one
-  // is an opaque cover, and this has a menu sitting on top of it.
-  .preloader-back {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    background: #000;
-    transition: opacity 1s ease-out;
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
 
-  .preloader-back-gone {
+
+  // Film grain: flat dark greys band into steps, a few percent of noise
+  // breaks them up. The same layer the site puts over its pages.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0.045;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 220px 220px;
+  }
+
+  &.is-leaving {
     opacity: 0;
     pointer-events: none;
   }
 
-  // `UIMng.cpp:226` puts the login window horizontally centred and two thirds
-  // of the way down; the menu takes the same frame and the same place, so
-  // nothing moves when the player goes on to log in.
-  .preloader-win {
-    position: absolute;
-    left: 50%;
-    top: calc((100% - 245px) * 2 / 3);
-    transform: translateX(-50%);
-    flex: none;
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--bg-4);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
 
-  // The two lines under the buttons: the chosen server and its address.
-  .preloader-line {
+  .ws-mono {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+  }
+
+  .ws-muted {
+    color: var(--text-2);
+  }
+}
+
+// A reset that every class below outranks.
+:where(.ws-page) button {
+  font: inherit;
+  color: inherit;
+}
+
+:where(.ws-page) input {
+  user-select: text;
+}
+
+// ---------- Background art ----------
+
+.ws-art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ws-map-layer {
+  // One layer for the map and its tint, so the mask holds both and the red
+  // can never slide off the map. Opaque inside: a colour blend over a
+  // transparent backdrop would paint pure red. The map leans back under this
+  // perspective (`PERSPECTIVE` in backdrop.tsx must match).
+  perspective: 1400px;
+  position: absolute;
+  inset: 0;
+  background: var(--bg-0);
+  -webkit-mask-image: radial-gradient(ellipse 72% 80% at 50% 45%, #000 38%, transparent 88%);
+  mask-image: radial-gradient(ellipse 72% 80% at 50% 45%, #000 38%, transparent 88%);
+  overflow: hidden;
+}
+
+// The world map drained to grey, then washed in the logo's red above it. It
+// breathes - a slow scale in place, never a pan.
+// The camera's box: the whole map image at its own proportions, sized and
+// moved by the tour loop in `backdrop.tsx`.
+.ws-map-move {
+  position: absolute;
+  transform-origin: 50% 50%;
+}
+
+.ws-map {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  opacity: 0.34;
+  filter: grayscale(1) contrast(1.35) brightness(0.55);
+}
+
+// The traveller's route, inked on the map itself so it leans and turns with
+// it: black dashes over a faint warm halo that keeps them readable on the
+// darkest ground, an X on every stop, and the pen's tip while it draws.
+.ws-page .ws-trail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ws-trail-halo {
+  fill: none;
+  stroke: rgba(255, 214, 190, 0.16);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ws-trail-ink {
+  fill: none;
+  stroke: #0b0706;
+  stroke-width: 2.8;
+  stroke-dasharray: 9 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ws-trail-marks {
+  fill: #0b0706;
+}
+
+.ws-trail-marks-halo {
+  fill: none;
+  stroke: rgba(255, 214, 190, 0.16);
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+
+.ws-trail-tip {
+  fill: #0b0706;
+  stroke: rgba(255, 214, 190, 0.35);
+  stroke-width: 2;
+}
+
+// A contributor's name beside the stop the camera rests on, as a film's
+// credits sit over a shot. Placed and faded by the tour loop.
+.ws-credit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  pointer-events: none;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.85);
+  will-change: transform, opacity;
+}
+
+.ws-credit-role {
+  color: rgba(255, 214, 196, 0.8);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.ws-credit-name {
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 2.6vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.ws-credit-meta {
+  color: rgba(255, 214, 196, 0.65);
+  font-size: 12px;
+}
+
+// A credit's roll as villages round its mark (`villages.ts`), drawn by the
+// tour loop at screen size so the names stay sharp over the tilted map, and
+// under `.ws-tint` so they are coloured with it.
+.ws-page .ws-villages {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ws-tint {
+  position: absolute;
+  inset: 0;
+  background: var(--mu-red);
+  mix-blend-mode: color;
+  opacity: 0.75;
+}
+
+// Black over everything but a small window on the map, around the bar; the
+// hunter and the bar sit in front of it. The window opens as he runs until the
+// whole map shows. The bar writes `--reveal` (0..1) and where its middle is
+// (`--reveal-x`, `--reveal-y`); once the card can open, this fades away.
+.ws-iris {
+  --iris-r: calc(6vmax + var(--reveal, 0) * 90vmax);
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--reveal-x, 50%) var(--reveal-y, 58%),
+    transparent var(--iris-r),
+    #000 calc(var(--iris-r) + 9vmax)
+  );
+  transition: opacity 900ms var(--ease);
+
+  .ws-page.is-loaded & {
+    opacity: 0;
+  }
+}
+
+.ws-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 45%, #000 15%, transparent 70%);
+  mask-image: radial-gradient(ellipse at 50% 45%, #000 15%, transparent 70%);
+}
+
+.ws-page .ws-embers {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.ws-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(11, 12, 13, 0.55) 0, transparent 22%),
+    radial-gradient(ellipse at center, transparent 45%, rgba(8, 9, 10, 0.78) 100%);
+}
+
+// ---------- Frame ----------
+
+.ws-top {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ws-main {
+  --logo-h: clamp(100px, 23vh, 240px);
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24px 12px;
+}
+
+// The logo hangs from the top edge - its red line runs off the screen - and
+// its lower tip dips into the card below it.
+.ws-logo {
+  position: relative;
+  z-index: 3;
+  flex: none;
+  height: var(--logo-h);
+  aspect-ratio: 680 / 522;
+  margin-bottom: calc(-0.07 * var(--logo-h));
+  pointer-events: none;
+  // Hidden while the load runs: only the hunter and the bar are on screen.
+  opacity: 0;
+
+  // Once it is done, the logo is drawn in from the top down. The clip reaches
+  // well past the box, so the sparks flying off it are never cut.
+  .ws-page.is-loaded & {
+    opacity: 1;
+    // Backwards only: no clip is left on once it is drawn.
+    animation: ws-logo-draw 0.9s cubic-bezier(0.65, 0, 0.35, 1) backwards;
+  }
+}
+
+// `#root img` fills its box, which is what these want anyway; the selector
+// only has to outrank it for the positioning.
+:is(#root, .app) .ws-page .ws-logo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ws-logo-art {
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.55));
+}
+
+// The light: the red parts screened back over themselves, breathing and
+// flickering, with a blurred copy as the bloom.
+.ws-logo-glow,
+.ws-logo-bloom,
+.ws-logo-surge {
+  mix-blend-mode: screen;
+}
+
+.ws-logo-glow {
+  animation: ws-glow 3.4s ease-in-out infinite;
+}
+
+.ws-logo-bloom {
+  filter: blur(8px);
+  animation: ws-glow 3.4s ease-in-out infinite;
+}
+
+// A band of light that runs down the crack and across everything red on the
+// way, then waits.
+.ws-logo-surge {
+  filter: brightness(1.7);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 44%, #000 50%, transparent 56%);
+  mask-image: linear-gradient(to bottom, transparent 44%, #000 50%, transparent 56%);
+  -webkit-mask-size: 100% 300%;
+  mask-size: 100% 300%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: ws-surge 4.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.ws-page .ws-logo-sparks {
+  position: absolute;
+  left: -15%;
+  top: -10%;
+  width: 130%;
+  height: 120%;
+}
+
+@keyframes ws-logo-draw {
+  from {
+    clip-path: inset(-30% -30% 130% -30%);
+  }
+  to {
+    clip-path: inset(-30% -30% -30% -30%);
+  }
+}
+
+@keyframes ws-glow {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  35% {
+    opacity: 0.75;
+  }
+  38% {
+    opacity: 0.45;
+  }
+  41% {
+    opacity: 0.8;
+  }
+  60% {
+    opacity: 0.5;
+  }
+  80% {
+    opacity: 0.3;
+  }
+}
+
+// The mask is three boxes tall with the band in its middle: at 100% the band
+// sits above the logo, at 0% below it.
+@keyframes ws-surge {
+  0% {
+    -webkit-mask-position: 0 100%;
+    mask-position: 0 100%;
+    opacity: 1;
+  }
+  55% {
+    -webkit-mask-position: 0 0%;
+    mask-position: 0 0%;
+    opacity: 1;
+  }
+  56%,
+  100% {
+    -webkit-mask-position: 0 0%;
+    mask-position: 0 0%;
+    opacity: 0;
+  }
+}
+
+// The logo's crack carried on down the stage as lightning (`lightningLine.tsx`):
+// from up inside the logo's tail to the footer row, behind the card.
+.ws-page .ws-strike {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: calc(-0.06 * var(--logo-h));
+  bottom: -10px;
+  width: 180px;
+  height: calc(100% + 0.06 * var(--logo-h) + 10px);
+  margin-left: -90px;
+  pointer-events: none;
+}
+
+// The worlds card's place: the loading bar runs across its middle, and the
+// card opens out of that line. Over the crack.
+.ws-stage {
+  z-index: 2;
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: min(1200px, 100%);
+  display: flex;
+  align-items: center;
+}
+
+// Waiting on the crack where the bar was, once the load is done: the press
+// that opens the worlds card, and the gesture that lets the music play.
+.ws-page .ws-start {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 36px 14px 30px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(16, 17, 19, 0.94);
+  color: var(--text-0);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  // In once the crack has reached it, then breathing with the logo.
+  animation:
+    ws-start-in 700ms var(--ease) 1.7s forwards,
+    ws-start-glow 3.4s ease-in-out 2.4s infinite;
+  box-shadow:
+    inset 0 0 0 1px rgba(226, 86, 74, 0.6),
+    0 0 20px rgba(196, 48, 43, 0.4),
+    0 0 56px rgba(196, 48, 43, 0.2);
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+
+  .ws-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--mu-red-soft);
+  }
+
+  &:hover {
+    background: rgba(44, 14, 13, 0.9);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(232, 233, 234, 0.6);
+    outline-offset: 4px;
+  }
+}
+
+@keyframes ws-start-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes ws-start-glow {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(226, 86, 74, 0.55),
+      0 0 18px rgba(196, 48, 43, 0.35),
+      0 0 50px rgba(196, 48, 43, 0.18);
+  }
+  40% {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 120, 90, 0.95),
+      0 0 30px rgba(226, 70, 48, 0.6),
+      0 0 84px rgba(196, 48, 43, 0.35);
+  }
+}
+
+// The card is one of the landing's sections set down over the art: a solid
+// dark surface holding the panel demo's layout - its head and a vertical tab
+// list on the left, the product window on the right.
+.ws-card {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  width: 100%;
+  height: 100%;
+  max-height: 760px;
+  display: grid;
+  grid-template-columns: 268px minmax(0, 1fr);
+  gap: 28px;
+  padding: 32px;
+  background: rgba(10, 11, 12, 0.95);
+  border-radius: 4px;
+  box-shadow: var(--shadow-overlay);
+
+  // Backwards only: a clip left on afterwards would cut the overlay shadow off.
+  animation: ws-card-open 1s var(--ease) 0.3s backwards;
+  // At rest the clip stands clear of the shadow; hidden, the card folds back
+  // into the line it opened from.
+  clip-path: inset(-48px -48px -48px -48px round 4px);
+  transition:
+    clip-path 650ms var(--ease),
+    opacity 300ms var(--ease);
+
+  .ws-page.is-panel-hidden & {
+    clip-path: inset(calc(50% - 1px) 0 calc(50% - 1px) 0 round 4px);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      clip-path 550ms var(--ease),
+      opacity 250ms var(--ease) 350ms;
+  }
+
+  > * {
+    animation: ws-fade 420ms var(--ease) 0.95s backwards;
+  }
+}
+
+// A line spread sideways from the middle - where Start was - then opened up
+// and down.
+@keyframes ws-card-open {
+  0% {
+    clip-path: inset(calc(50% - 2px) 50% calc(50% - 2px) 50% round 4px);
+  }
+  30% {
+    clip-path: inset(calc(50% - 2px) 0 calc(50% - 2px) 0 round 4px);
+  }
+  100% {
+    clip-path: inset(0 0 0 0 round 4px);
+  }
+}
+
+// The full bar split in two, riding the card's top and bottom edges open.
+// The card is at most 760px tall, so each half travels min(50%, 380px).
+.ws-unfold {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+
+  i {
     position: absolute;
     left: 0;
     right: 0;
-    text-align: center;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  // The setup window replaces the menu rather than covering it - the logo goes
-  // with it, so a 327px window has the whole stage to sit in.
-  .setup-win {
-    position: absolute;
-    left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%);
-    flex: none;
-    pointer-events: auto;
+    height: 3px;
+    margin-top: -1.5px;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      rgba(196, 48, 43, 0.2),
+      var(--mu-red) 25%,
+      var(--mu-red-soft) 50%,
+      var(--mu-red) 75%,
+      rgba(196, 48, 43, 0.2)
+    );
+    box-shadow: 0 0 14px rgba(226, 86, 74, 0.7);
+    opacity: 0;
+    animation: ws-edge-up 1s var(--ease) 0.3s backwards;
   }
 
-  // Same plate as the Option window's title, for the same reason: the mirrored
-  // top caps meet at the centre, so the title needs a backing to stay legible.
-  .setup-title {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 2px 16px;
-    border-radius: 2px;
-    background: rgba(12, 10, 8, 0.72);
-    color: #ffffff;
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-  }
-
-  .setup-label {
-    position: absolute;
-    color: #ffffff;
-    font-size: 11px;
-    line-height: 13px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-    white-space: nowrap;
-  }
-
-  .setup-check-label {
-    cursor: pointer;
-    pointer-events: auto;
-  }
-
-  // The plate art is the field's background, so the input itself is invisible
-  // chrome sitting exactly on top of it.
-  .setup-input {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    padding: 0 6px;
-    pointer-events: auto;
-
-    background: transparent;
-    border: none;
-    outline: none;
-
-    color: #ffffff;
-    font-family: inherit;
-    font-size: 11px;
-    line-height: 1;
-
-    &:disabled {
-      color: #a0a0a0;
-    }
-
-    &::placeholder {
-      color: #6d6d6d;
-    }
-
-    // The spinner would sit on top of the plate's bevel.
-    &::-webkit-outer-spin-button,
-    &::-webkit-inner-spin-button {
-      appearance: none;
-      margin: 0;
-    }
-  }
-
-  // A published row's language tag, pinned to the row's right edge - the mark
-  // that tells a listed server from a saved one at a glance.
-  .setup-row-tag {
-    position: absolute;
-    right: 8px;
-    font-size: 10px;
-    color: #b9a06a;
-  }
-
-  .setup-line {
-    position: absolute;
-    left: 12px;
-    right: 12px;
-    text-align: center;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  i + i {
+    animation-name: ws-edge-down;
   }
 }
 
-// The worlds grid. A card is a banner with a list row bolted under it; the
-// selected one is ringed in the same gold its name is written in.
-.preloader-page {
-  .world-card {
-    position: absolute;
-    cursor: pointer;
-    pointer-events: auto;
+@keyframes ws-edge-up {
+  0% {
+    top: 50%;
+    transform: scaleX(0);
+    opacity: 1;
   }
-
-  .world-card-art {
-    position: relative;
-    display: block;
-    object-fit: cover;
-    border: 1px solid #3a3128;
-    border-bottom: none;
-    box-sizing: border-box;
-    // The art is dimmed until the card is the one chosen, so a grid of bright
-    // banners does not shout over the choice the player already made.
-    filter: brightness(0.72) saturate(0.85);
-    transition:
-      filter 0.15s ease-out,
-      opacity 0.2s ease-out,
-      border-color 0.15s ease-out,
-      box-shadow 0.15s ease-out;
+  30% {
+    top: 50%;
+    transform: scaleX(1);
+    opacity: 1;
   }
-
-  // A banner is fetched from whatever host published it, so they arrive one at
-  // a time and in no order. Held at nothing until the bytes are in, then faded
-  // up, so the grid settles instead of flickering into place. Only an `img`
-  // does this: the stone tile is already decoded and has nothing to wait for.
-  img.world-card-art {
+  80% {
+    opacity: 1;
+  }
+  100% {
+    top: calc(50% - min(50%, 380px));
+    transform: scaleX(1);
     opacity: 0;
   }
+}
 
-  img.world-card-art-in {
+@keyframes ws-edge-down {
+  0% {
+    top: 50%;
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  30% {
+    top: 50%;
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    top: calc(50% + min(50%, 380px));
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+// MU's Option window frame around the card at twice its size: the band ends
+// (100x86 each) on the corners, bars between them top and bottom, rails down
+// the sides between the ends.
+.ws-mu-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  // Toned down from the sheet's bright silver so it sits with the dark card.
+  filter: brightness(0.62) contrast(1.1);
+}
+
+.ws-mu-rail {
+  position: absolute;
+  top: 86px;
+  bottom: 86px;
+  width: 10px;
+}
+
+.ws-mu-rail-left {
+  left: 0;
+}
+
+.ws-mu-rail-right {
+  right: 0;
+}
+
+.ws-mu-bar {
+  position: absolute;
+  left: 100px;
+  right: 100px;
+  height: 86px;
+}
+
+.ws-mu-bar-bottom {
+  bottom: 0;
+}
+
+.ws-mu-bar-top {
+  top: 0;
+  transform: scaleY(-1);
+}
+
+.ws-mu-end {
+  position: absolute;
+  width: 50px;
+  height: 43px;
+}
+
+.ws-mu-bl {
+  left: 0;
+  bottom: 0;
+  transform: scale(2);
+  transform-origin: bottom left;
+}
+
+.ws-mu-br {
+  right: 0;
+  bottom: 0;
+  transform: scale(2);
+  transform-origin: bottom right;
+}
+
+// The top ends are the bottom ones flipped: MU draws the band once.
+.ws-mu-tl {
+  left: 0;
+  top: 0;
+  transform: translateY(86px) scale(2, -2);
+  transform-origin: top left;
+}
+
+.ws-mu-tr {
+  right: 0;
+  top: 0;
+  transform: translateY(86px) scale(2, -2);
+  transform-origin: top right;
+}
+
+.ws-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+// Sections are marked the way the game marks a place: a number and a map, in
+// mono, as data rather than a label.
+.ws-marker {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--text-1);
+  font-size: 12px;
+  white-space: pre;
+}
+
+.ws-headline {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.ws-lead {
+  margin: 0 0 22px;
+  color: var(--text-1);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+// A vertical list like the panel's sidebar: the open tab unfolds its one line
+// in place and wears the sidebar's bar on its left.
+.ws-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ws-tab {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--text-1);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+
+  .ws-icon {
+    width: 17px;
+    height: 17px;
+    opacity: 0.6;
+    transition: opacity var(--dur-fast) var(--ease);
+  }
+
+  &:hover,
+  &.is-on {
+    background: var(--bg-2);
+    color: var(--text-0);
+
+    .ws-icon {
+      opacity: 1;
+    }
+  }
+
+  &.is-on::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    border-radius: 0 2px 2px 0;
+    background: var(--mu-red-soft);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+}
+
+// MU's interface icons: kept at their own colours, a little dim until lit.
+.ws-mu-icon {
+  position: relative;
+  flex: none;
+  display: inline-block;
+  overflow: hidden;
+  border-radius: 3px;
+  opacity: 0.78;
+  transition: opacity var(--dur-fast) var(--ease);
+
+  .is-on &,
+  .ws-btn:hover &,
+  &.is-lit {
     opacity: 1;
   }
 
-  .world-card:hover .world-card-art {
-    filter: brightness(0.92);
-  }
-
-  // The selected card is also the one the arrow keys are on, so this is a focus
-  // ring as much as a selection: 1px of gold across six cards is not something
-  // the eye finds at speed.
-  .world-card-on .world-card-art {
-    filter: none;
-    border-width: 2px 2px 0;
-    border-color: #b9a06a;
-    box-shadow: inset 0 0 12px rgba(185, 160, 106, 0.45);
-  }
-
-  // The world last entered, folded into the banner's top-left corner - a mark,
-  // not a label: the name row's tag slot is already spoken for.
-  .world-last {
+  > div {
     position: absolute;
     left: 0;
     top: 0;
-    width: 0;
-    height: 0;
-    border-top: 17px solid #b9a06a;
-    border-right: 17px solid transparent;
-    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.9));
+  }
+}
+
+.ws-tab-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 14px;
+}
+
+.ws-tab-desc {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 420ms var(--ease),
+    opacity 420ms var(--ease);
+
+  > span {
+    overflow: hidden;
+    min-height: 0;
+    padding-left: 28px;
+    color: var(--text-1);
+    font-size: 13px;
+    line-height: 1.55;
   }
 
-  // Does it answer? Top-right of the banner, where nothing else sits, and dark
-  // enough at the rim to read over a bright title card as well as over stone.
-  .world-dot {
+  .is-on > & {
+    grid-template-rows: 1fr;
+    opacity: 1;
+
+    > span {
+      padding-top: 6px;
+    }
+  }
+}
+
+.ws-side-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 20px;
+
+  .ws-btn {
+    width: 100%;
+  }
+}
+
+.ws-page .ws-enter {
+  padding: 11px 22px;
+}
+
+// The product window, as the landing frames the panel: a header saying which
+// world and which page, the page, and a status strip in mono under it.
+.ws-mock {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius-m);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-overlay);
+}
+
+.ws-mock-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid #292c30;
+  background: var(--bg-1);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.ws-mock-server {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-1);
+  text-overflow: ellipsis;
+}
+
+.ws-mock-sep {
+  color: var(--text-mark);
+}
+
+.ws-mock-title {
+  color: var(--text-0);
+  font-weight: 600;
+}
+
+.ws-mock-pill {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--bg-3);
+  color: var(--text-1);
+  font-size: 12px;
+
+  &.is-bad {
+    background: rgba(194, 82, 82, 0.2);
+    color: var(--danger-text);
+  }
+}
+
+.ws-mock-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  color: var(--text-2);
+  font-size: 12px;
+
+  &.is-up {
+    color: var(--ok-text);
+
+    .ws-badge-dot {
+      background: var(--ok);
+      animation: ws-pulse 2.2s var(--ease) infinite;
+    }
+  }
+
+  &.is-down {
+    color: var(--danger-text);
+
+    .ws-badge-dot {
+      background: var(--danger);
+    }
+  }
+}
+
+.ws-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
+.ws-mock-status {
+  flex: none;
+  padding: 10px 16px;
+  border-top: 1px solid #292c30;
+  background: var(--bg-0);
+  color: var(--text-2);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &.is-bad {
+    color: var(--danger-text);
+  }
+}
+
+// Hellfire where Start was pressed (`hellfire.tsx`): on the map, screened so
+// it lights it, and under the page's content so the card opens over it.
+.ws-page > .ws-hellfire {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+// The footer's lightning block (`footerStrike.tsx`), behind its lettering.
+.ws-page .ws-footer-strike {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 56px;
+  pointer-events: none;
+}
+
+// Real figures on one mono line, dot separated, as under the site's hero.
+.ws-status {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 20px;
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-2);
+
+  > * + *::before {
+    content: '\00b7';
+    margin: 0 10px;
+    color: var(--text-mark);
+  }
+}
+
+// Once the strike has run out along the footer the lettering turns to ink on
+// it, on the same beat as the band (`footerStrike.tsx`: 0.6 s down, then the
+// spread).
+.ws-page.is-open .ws-status,
+.ws-page.is-open .ws-status .ws-github,
+.ws-page.is-open .ws-status > * + *::before {
+  animation: ws-ink 400ms var(--ease) 0.95s forwards;
+}
+
+@keyframes ws-ink {
+  to {
+    color: #140a07;
+  }
+}
+
+// The project's repository, once the load is done. The icon's own gap
+// already spaces it from the dot.
+.ws-status > .ws-github::before {
+  margin-right: 4px;
+}
+
+.ws-github {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-1);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease);
+  animation: ws-fade 600ms var(--ease);
+
+  .ws-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    color: var(--text-0);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+}
+
+// ---------- The loading runner ----------
+
+// The bar is a line through the middle of the stage, with no height of its
+// own: the track straddles it, the hunter stands on it, the text hangs under.
+.ws-loader {
+  --run-cycle: 0.52s;
+  // The parts are drawn 117x168; past about 88px the art would soften.
+  --runner-h: clamp(56px, 9vh, 88px);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 0;
+  transition: opacity 450ms var(--ease) 200ms;
+
+  &.is-done {
+    opacity: 0;
+  }
+}
+
+.ws-loader-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 14px;
+  margin: 0;
+  color: var(--text-2);
+  font-size: 12px;
+  text-align: center;
+}
+
+// Wider than the bar so sparks can fly past its ends, and tall enough for
+// them to rise; its middle row is the bar's line.
+.ws-page .ws-lightning {
+  position: absolute;
+  left: -48px;
+  top: -70px;
+  width: calc(100% + 96px);
+  height: 140px;
+  pointer-events: none;
+}
+
+.ws-loader-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -2px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.ws-loader-fill {
+  height: 100%;
+  border-radius: inherit;
+  // A dim base under the lightning: the progress still reads if the bolt
+  // is between flickers.
+  background: linear-gradient(90deg, rgba(196, 48, 43, 0.15), rgba(196, 48, 43, 0.45));
+  transition: width 600ms linear;
+}
+
+.ws-runner {
+  position: absolute;
+  bottom: 2px;
+  width: calc(var(--runner-h) * 0.7);
+  height: var(--runner-h);
+  // The front foot, not the middle of the body, marks how far the load is.
+  transform: translateX(-66%);
+  transition: left 600ms linear;
+  pointer-events: none;
+
+  .is-done & {
+    left: calc(100% + 48px) !important;
+    opacity: 0;
+    transition:
+      left 700ms linear,
+      opacity 250ms linear 450ms;
+  }
+
+  // A soft shadow on the bar under the feet.
+  &::before {
+    content: '';
     position: absolute;
-    right: 5px;
-    top: 5px;
+    left: 14%;
+    right: 10%;
+    bottom: -4px;
+    height: 7px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.55), transparent 70%);
+  }
+}
+
+.ws-runner-rig {
+  position: absolute;
+  inset: 0;
+  animation: ws-run-lift var(--run-cycle) linear infinite;
+}
+
+:is(#root, .app) .ws-page .ws-runner-part {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  animation-duration: var(--run-cycle);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+// Pivots on the hips and the waist, in the parts' shared frame.
+.ws-runner-left {
+  transform-origin: 53.31% 64.01%;
+  animation-name: ws-run-left;
+}
+
+.ws-runner-right {
+  transform-origin: 47.43% 64.52%;
+  animation-name: ws-run-right;
+}
+
+.ws-runner-body {
+  transform-origin: 50.37% 64.27%;
+  animation-name: ws-run-lean;
+}
+
+// A puff of dust off each footfall, drifting back along the bar.
+.ws-runner-dust {
+  position: absolute;
+  left: 12%;
+  bottom: 0;
+
+  i {
+    position: absolute;
+    left: 0;
+    bottom: 0;
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.75);
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
-  }
+    background: rgba(214, 180, 160, 0.4);
+    opacity: 0;
+    animation: ws-dust var(--run-cycle) linear infinite;
 
-  .world-dot-up {
-    background: #57c257;
-  }
-
-  .world-dot-down {
-    background: #c04a4a;
-  }
-
-  // Still dialling: the same amber the window's own notes are written in,
-  // breathing so it does not read as a third verdict.
-  .world-dot-checking {
-    background: #c9a227;
-    animation: world-dot-pulse 1.1s ease-in-out infinite;
-  }
-
-  @keyframes world-dot-pulse {
-    50% {
-      opacity: 0.35;
+    & + i {
+      animation-delay: calc(var(--run-cycle) / -2);
     }
   }
+}
 
-  // The player's own worlds wear this where a published one wears its language.
-  .world-tag-mine {
-    color: #8fa8c0;
+@keyframes ws-dust {
+  0% {
+    opacity: 0.55;
+    transform: translate(0, 0) scale(0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-26px, -9px) scale(1.6);
+  }
+}
+
+// Solved so the lower foot sits on the ground at every step.
+@keyframes ws-run-left {
+  0% { transform: rotate(0.0deg); }
+  4.17% { transform: rotate(-1.4deg); }
+  8.33% { transform: rotate(-5.4deg); }
+  12.50% { transform: rotate(-11.7deg); }
+  16.67% { transform: rotate(-20.0deg); }
+  20.83% { transform: rotate(-29.6deg); }
+  25% { transform: rotate(-40.0deg); }
+  29.17% { transform: rotate(-50.4deg); }
+  33.33% { transform: rotate(-60.0deg); }
+  37.50% { transform: rotate(-68.3deg); }
+  41.67% { transform: rotate(-74.6deg); }
+  45.83% { transform: rotate(-78.6deg); }
+  50% { transform: rotate(-80.0deg); }
+  54.17% { transform: rotate(-78.6deg); }
+  58.33% { transform: rotate(-74.6deg); }
+  62.50% { transform: rotate(-68.3deg); }
+  66.67% { transform: rotate(-60.0deg); }
+  70.83% { transform: rotate(-50.4deg); }
+  75% { transform: rotate(-40.0deg); }
+  79.17% { transform: rotate(-29.6deg); }
+  83.33% { transform: rotate(-20.0deg); }
+  87.50% { transform: rotate(-11.7deg); }
+  91.67% { transform: rotate(-5.4deg); }
+  95.83% { transform: rotate(-1.4deg); }
+  100% { transform: rotate(0.0deg); }
+}
+@keyframes ws-run-right {
+  0% { transform: rotate(0.0deg); }
+  4.17% { transform: rotate(1.4deg); }
+  8.33% { transform: rotate(5.4deg); }
+  12.50% { transform: rotate(11.7deg); }
+  16.67% { transform: rotate(20.0deg); }
+  20.83% { transform: rotate(29.6deg); }
+  25% { transform: rotate(40.0deg); }
+  29.17% { transform: rotate(50.4deg); }
+  33.33% { transform: rotate(60.0deg); }
+  37.50% { transform: rotate(68.3deg); }
+  41.67% { transform: rotate(74.6deg); }
+  45.83% { transform: rotate(78.6deg); }
+  50% { transform: rotate(80.0deg); }
+  54.17% { transform: rotate(78.6deg); }
+  58.33% { transform: rotate(74.6deg); }
+  62.50% { transform: rotate(68.3deg); }
+  66.67% { transform: rotate(60.0deg); }
+  70.83% { transform: rotate(50.4deg); }
+  75% { transform: rotate(40.0deg); }
+  79.17% { transform: rotate(29.6deg); }
+  83.33% { transform: rotate(20.0deg); }
+  87.50% { transform: rotate(11.7deg); }
+  91.67% { transform: rotate(5.4deg); }
+  95.83% { transform: rotate(1.4deg); }
+  100% { transform: rotate(0.0deg); }
+}
+@keyframes ws-run-lift {
+  0% { transform: translateY(0.13%); }
+  4.17% { transform: translateY(-0.63%); }
+  8.33% { transform: translateY(-2.63%); }
+  12.50% { transform: translateY(-3.60%); }
+  16.67% { transform: translateY(-4.05%); }
+  20.83% { transform: translateY(-4.38%); }
+  25% { transform: translateY(-4.50%); }
+  29.17% { transform: translateY(-4.38%); }
+  33.33% { transform: translateY(-4.05%); }
+  37.50% { transform: translateY(-3.60%); }
+  41.67% { transform: translateY(-3.15%); }
+  45.83% { transform: translateY(-2.82%); }
+  50% { transform: translateY(-2.70%); }
+  54.17% { transform: translateY(-2.82%); }
+  58.33% { transform: translateY(-3.15%); }
+  62.50% { transform: translateY(-3.60%); }
+  66.67% { transform: translateY(-4.05%); }
+  70.83% { transform: translateY(-4.38%); }
+  75% { transform: translateY(-4.50%); }
+  79.17% { transform: translateY(-4.38%); }
+  83.33% { transform: translateY(-4.05%); }
+  87.50% { transform: translateY(-3.60%); }
+  91.67% { transform: translateY(-2.63%); }
+  95.83% { transform: translateY(-0.63%); }
+  100% { transform: translateY(0.13%); }
+}
+@keyframes ws-run-lean {
+  0% { transform: rotate(0.0deg); }
+  4.17% { transform: rotate(1.5deg); }
+  8.33% { transform: rotate(2.6deg); }
+  12.50% { transform: rotate(3.0deg); }
+  16.67% { transform: rotate(2.6deg); }
+  20.83% { transform: rotate(1.5deg); }
+  25% { transform: rotate(0.0deg); }
+  29.17% { transform: rotate(-1.5deg); }
+  33.33% { transform: rotate(-2.6deg); }
+  37.50% { transform: rotate(-3.0deg); }
+  41.67% { transform: rotate(-2.6deg); }
+  45.83% { transform: rotate(-1.5deg); }
+  50% { transform: rotate(0deg); }
+  54.17% { transform: rotate(1.5deg); }
+  58.33% { transform: rotate(2.6deg); }
+  62.50% { transform: rotate(3.0deg); }
+  66.67% { transform: rotate(2.6deg); }
+  70.83% { transform: rotate(1.5deg); }
+  75% { transform: rotate(0.0deg); }
+  79.17% { transform: rotate(-1.5deg); }
+  83.33% { transform: rotate(-2.6deg); }
+  87.50% { transform: rotate(-3.0deg); }
+  91.67% { transform: rotate(-2.6deg); }
+  95.83% { transform: rotate(-1.5deg); }
+  100% { transform: rotate(0.0deg); }
+}
+
+// ---------- Controls ----------
+
+.ws-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  .draw {
+    stroke-dasharray: 60;
+    stroke-dashoffset: 0;
   }
 
-  // A world this build cannot enter: greyed out and left that way on hover,
-  // because hovering it is not going to help.
-  .world-card-off {
+  .rotor {
+    transform-origin: 12px 12px;
+    transition: transform 420ms var(--ease);
+  }
+}
+
+.anim-host:hover .ws-icon .draw {
+  animation: ws-icon-draw 0.6s var(--ease) forwards;
+}
+.anim-host:hover .ws-icon .draw.d2 {
+  animation-delay: 0.15s;
+}
+.anim-host:hover .ws-icon .rotor {
+  transform: rotate(90deg);
+}
+.anim-host:hover .ws-icon .status-dot {
+  animation: ws-blink 1.6s var(--ease) infinite;
+}
+.anim-host:hover .ws-icon .status-dot.d2 {
+  animation-delay: 0.4s;
+}
+.is-busy .ws-icon .rotor {
+  animation: ws-spin 0.9s linear infinite;
+}
+
+@keyframes ws-icon-draw {
+  from {
+    stroke-dashoffset: 60;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes ws-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes ws-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ws-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: none;
+  padding: 9px 18px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: var(--bg-3);
+  color: var(--text-0);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    filter var(--dur-fast) var(--ease),
+    opacity var(--dur-fast) var(--ease);
+
+  &:hover {
+    background: var(--bg-4);
+  }
+  &:active {
+    filter: brightness(0.82);
+    transition-duration: 40ms;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  &:disabled {
+    opacity: 0.45;
     cursor: default;
-
-    .world-card-art,
-    &:hover .world-card-art {
-      filter: grayscale(1) brightness(0.45);
-    }
-  }
-
-  // The client that world is published for, bottom-left of its banner: the
-  // corner opposite the reach dot, clear of the fold in the other one.
-  .world-version {
-    position: absolute;
-    left: 5px;
-    // The card is exactly as tall as its banner (the name row is absolutely
-    // placed under it), so this is 5px up from the banner's own bottom edge.
-    bottom: 5px;
-    padding: 1px 4px;
-    border: 1px solid #6a5c46;
-    border-radius: 2px;
-    background: rgba(12, 10, 8, 0.8);
-    color: #b9a06a;
-    font-size: 10px;
-    line-height: 12px;
-    letter-spacing: 0.5px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-  }
-
-  // A version this client does not carry: the label becomes the reason the
-  // card is grey and Enter will not press.
-  .world-version-off {
-    border-color: #7a4a4a;
-    color: #d98a8a;
-  }
-
-  // The line above the grid: what is being shown, and how to ask for it again.
-  .world-head {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 16px;
-    pointer-events: auto;
-  }
-
-  .world-filter {
-    display: flex;
-    gap: 4px;
-  }
-
-  .world-chip {
-    padding: 1px 5px;
-    border: 1px solid #3a3128;
-    border-radius: 2px;
-    background: rgba(12, 10, 8, 0.55);
-    color: #8d8d8d;
-    font-size: 10px;
-    line-height: 12px;
-    cursor: pointer;
-
-    &:hover {
-      color: #ffffff;
-      border-color: #6a5c46;
-    }
-  }
-
-  .world-chip-on {
-    color: #b9a06a;
-    border-color: #b9a06a;
-  }
-
-  // Mid-fetch: the link is still there, just not worth clicking again.
-  .world-chip-busy {
-    opacity: 0.5;
     pointer-events: none;
   }
 }
 
-// The server window's two tab strips. Drawn rather than sprited: MU has no tab
-// art, and a row of stone chips reads as one family with the filter chips
-// already on the grid.
-.preloader-page {
-  .setup-tabs {
-    position: absolute;
-    display: flex;
-    gap: 2px;
-    align-items: stretch;
-    border-bottom: 1px solid #4a3f31;
-    pointer-events: auto;
-  }
+.ws-btn-primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
 
-  // The top strip sits on the frame's own top band, over the seam where its two
-  // mirrored halves meet. So it is opaque: the point of putting it there is
-  // that the ornament curling together underneath stops showing through.
-  .setup-tabs-top {
-    padding: 2px;
-    border: 1px solid #4a3f31;
-    border-radius: 3px;
-    background: #171310;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-
-    .setup-tab {
-      border-bottom: 1px solid #3a3128;
-      border-radius: 2px;
-    }
-
-    .setup-tab-on {
-      margin-bottom: 0;
-      padding-bottom: 0;
-      border-bottom-color: #b9a06a;
-    }
-  }
-
-  .setup-tab {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #3a3128;
-    border-bottom: none;
-    border-radius: 2px 2px 0 0;
-    background: rgba(12, 10, 8, 0.55);
-    color: #8d8d8d;
-    font-size: 11px;
-    line-height: 12px;
-    letter-spacing: 0.3px;
-    cursor: pointer;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-
-    &:hover {
-      color: #ffffff;
-      border-color: #6a5c46;
-    }
-  }
-
-  // The tab in front: gold, and sitting a pixel over the strip's own rule so it
-  // reads as joined to the panel under it rather than as another chip.
-  .setup-tab-on {
-    margin-bottom: -1px;
-    padding-bottom: 1px;
-    border-color: #b9a06a;
-    background: rgba(46, 38, 28, 0.85);
-    color: #b9a06a;
-  }
-
-  // The search box. The plate art backs it; this is only the caret's room.
-  .world-search {
-    padding-right: 18px;
-  }
-
-  .world-search-clear {
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    line-height: 13px;
-    text-align: center;
-    color: #8d8d8d;
-    font-size: 13px;
-    cursor: pointer;
-    pointer-events: auto;
-
-    &:hover {
-      color: #ffffff;
-    }
-  }
-
-  // What the two filters left, on the right of the chip row.
-  .world-count {
-    color: #8d8d8d;
-    font-size: 10px;
-    line-height: 12px;
-  }
-
-  // An account is saved on this world: a short mark beside the version tag,
-  // in the blue the player's own worlds already wear.
-  .world-account {
-    position: absolute;
-    left: 5px;
-    bottom: 22px;
-    padding: 1px 4px;
-    border: 1px solid #46586a;
-    border-radius: 2px;
-    background: rgba(12, 10, 8, 0.8);
-    color: #8fa8c0;
-    font-size: 10px;
-    line-height: 12px;
-    letter-spacing: 0.5px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  &:hover {
+    background: #fff;
   }
 }
 
-// The details tab: the banner, the facts beside it, and the game servers under
-// both. Everything here is a line of text with a label in front of it, so the
-// rows are one flex each rather than two absolutely placed spans.
-.preloader-page {
-  .info-art {
-    position: absolute;
-    line-height: 0;
-  }
+.ws-btn-ghost {
+  background: transparent;
+  color: var(--text-1);
 
-  .info-fact {
-    position: absolute;
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-
-  .info-fact-label {
-    flex: none;
-    color: #8d8d8d;
-    font-size: 10px;
-    line-height: 13px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-  }
-
-  .info-fact-value {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-  }
-
-  // The world's own blurb, given two lines and cut off after them: it is
-  // somebody else's text and there is no arguing with how long it is.
-  .info-desc {
-    position: absolute;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    color: #e2e2e2;
-    font-size: 11px;
-    line-height: 14px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-  }
-
-  .info-server {
-    position: absolute;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #e2e2e2;
-    font-size: 11px;
-    line-height: 14px;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
-  }
-
-  .info-server-more {
-    color: #8d8d8d;
+  &:hover {
+    background: var(--bg-3);
+    color: var(--text-0);
   }
 }
 
-// ---- the download tab ---------------------------------------------------
-
-// The group list scrolls: one row per map plus the shared groups is more
-// than the 640x480 window can show, and growing the window would break the
-// tab strip's fixed height.
-.download-list {
-  overflow-y: auto;
-  overflow-x: hidden;
+.ws-btn-sm {
+  padding: 5px 12px;
+  font-size: 13px;
 }
 
-.download-row {
+.ws-btn-icon {
+  padding: 8px;
+}
+
+.ws-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  &.is-disabled {
+    opacity: 0.55;
+  }
+}
+
+.ws-field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+
+.ws-input-wrap {
+  position: relative;
+  display: block;
+}
+
+.ws-input {
+  width: 100%;
+  padding: 9px 13px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: var(--bg-3);
+  color: var(--text-0);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  transition:
+    background var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+
+  &::placeholder {
+    color: var(--text-2);
+  }
+  &:hover {
+    background: var(--bg-4);
+  }
+  &:focus {
+    outline: none;
+    background: var(--bg-4);
+    box-shadow:
+      0 0 0 1px rgba(232, 233, 234, 0.7),
+      0 0 0 4px rgba(232, 233, 234, 0.08);
+  }
+  &:disabled {
+    pointer-events: none;
+  }
+  &.has-reveal {
+    padding-right: 42px;
+  }
+}
+
+.ws-reveal {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 4px;
-  font-size: 11px;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
   cursor: pointer;
-  user-select: none;
+  transition: color var(--dur-fast) var(--ease);
 
-  &:hover:not(.is-fixed) {
-    background: rgba(255, 220, 120, 0.12);
+  &:hover {
+    color: var(--text-0);
   }
+}
 
-  // Core is not a choice, so it must not look like one.
-  &.is-fixed {
+.ws-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-1);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
     cursor: default;
-    opacity: 0.75;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
   }
 }
 
-.download-check {
-  // Without a colour of its own the tick inherits a near-black navy and
-  // vanishes into the stone.
-  color: #c9b98a;
-  width: 20px;
+.ws-toggle-track {
+  position: relative;
   flex: none;
-  font-family: Consolas, monospace;
+  width: 32px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--bg-4);
+  transition: background var(--dur) var(--ease);
 }
 
-.download-name {
+.ws-toggle-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-1);
+  transition:
+    left var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+
+.ws-toggle.is-on {
+  color: var(--text-0);
+
+  .ws-toggle-track {
+    background: var(--accent);
+  }
+  .ws-toggle-knob {
+    left: 17px;
+    background: var(--accent-contrast);
+  }
+}
+
+.ws-select {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ws-select-plate,
+.ws-select-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: var(--bg-3);
+  color: var(--text-0);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+
+  &:hover {
+    background: var(--bg-4);
+  }
+}
+
+.ws-select-value {
   flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.download-size {
-  flex: none;
-  font-variant-numeric: tabular-nums;
+.ws-select-hint {
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
 }
 
-.download-actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-size: 11px;
+.ws-select-arrow {
+  width: 14px;
+  height: 14px;
+  color: var(--text-2);
+  transform: rotate(90deg);
+  transition: transform var(--dur) var(--ease);
 }
 
-.download-action {
-  cursor: pointer;
-  color: #d8c89a;
-
-  &:hover {
-    color: #fff;
-  }
+.ws-select.is-open .ws-select-arrow {
+  transform: rotate(-90deg);
 }
 
-.download-storage {
-  margin-left: auto;
-  opacity: 0.6;
-}
+.ws-select-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 320px;
+  overflow: auto;
+  padding: 4px;
+  border-radius: var(--radius-m);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-overlay), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  animation: ws-fade 160ms var(--ease);
 
-// The pack picker is the options window's widget, and its colours are tuned
-// for that window's own plate. Scoped here rather than changed there, so the
-// Options screen is untouched.
-.download-pack {
-  // The open list has to paint over the total and the bar, which are later
-  // siblings; the stacking order belongs to the wrapper, not the list.
-  z-index: 5;
+  .ws-select-row {
+    background: transparent;
+    color: var(--text-1);
 
-  .options-label {
-    color: #c9b98a;
-    position: static;
-    font-size: 11px;
-  }
-
-  .options-combo {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid #5a5240;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0 6px;
-    cursor: pointer;
-  }
-
-  .options-combo-name {
-    color: #e8e0c8;
-    font-size: 11px;
-    flex: 1 1 auto;
-  }
-
-  .options-combo-arrow {
-    color: #c9b98a;
-    font-size: 9px;
-  }
-
-  .options-combo-list {
-    // The options stylesheet nests all of this under `.options-window-page`,
-    // which does not exist on this screen, so none of it reaches the widget
-    // here. Without these the list sits in normal flow and is never clipped:
-    // the inline max-height measures correctly while ten languages spill out
-    // below it and over the Enter button.
-    position: absolute;
-    left: 0;
-    box-sizing: border-box;
-    overflow-y: auto;
-    padding: 2px;
-    background: #14110c;
-    border: 1px solid #5a5240;
-    z-index: 5;
-  }
-
-  .options-combo-row {
-    color: #d8c89a;
-    font-size: 11px;
-    padding: 1px 6px;
-    cursor: pointer;
-
-    &:hover,
-    &.is-active {
-      background: rgba(255, 220, 120, 0.16);
-      color: #fff;
+    &:hover {
+      background: var(--bg-3);
+      color: var(--text-0);
+    }
+    &.is-on {
+      color: var(--text-0);
+      background: var(--bg-3);
     }
   }
 }
 
-// The language picker is the same widget with a flag in front of the name.
-.download-pack .mu-flag {
+@keyframes ws-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ws-language {
+  width: 180px;
+
+  .ws-select-plate {
+    padding: 6px 10px;
+    font-size: 13px;
+    background: rgba(27, 29, 32, 0.94);
+
+    &:hover {
+      background: var(--bg-3);
+    }
+  }
+
+  .ws-select-list {
+    max-height: min(420px, 70vh);
+  }
+}
+
+.ws-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-4);
+  overflow: hidden;
+}
+
+.ws-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--mu-red), var(--mu-red-soft));
+  transition: width var(--dur) var(--ease);
+}
+
+.ws-tag,
+.ws-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--bg-3);
+  color: var(--text-1);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+
+  &.is-bad {
+    background: rgba(194, 82, 82, 0.2);
+    color: var(--danger-text);
+  }
+}
+
+.ws-badge {
+  padding: 2px 10px;
+  font-size: 12px;
+
+  &.is-up {
+    background: rgba(74, 157, 110, 0.18);
+    color: var(--ok-text);
+
+    .ws-badge-dot {
+      background: var(--ok);
+      animation: ws-pulse 2.2s var(--ease) infinite;
+    }
+  }
+  &.is-down {
+    background: rgba(194, 82, 82, 0.18);
+    color: var(--danger-text);
+
+    .ws-badge-dot {
+      background: var(--danger);
+    }
+  }
+}
+
+.ws-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-2);
+}
+
+@keyframes ws-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(74, 157, 110, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(74, 157, 110, 0);
+  }
+}
+
+// ---------- Worlds ----------
+
+.ws-worlds {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.ws-browse {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-right: 1px solid var(--divider);
+}
+
+.ws-toolbar {
   flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  padding: 16px 20px 12px;
+}
+
+.ws-search {
+  flex: 0 1 280px;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 10px 0 12px;
+  border-radius: var(--radius-s);
+  background: var(--bg-3);
+  color: var(--text-2);
+  transition:
+    background var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+
+  &:hover {
+    background: var(--bg-4);
+  }
+  &:focus-within {
+    background: var(--bg-4);
+    color: var(--text-1);
+    box-shadow:
+      0 0 0 1px rgba(232, 233, 234, 0.7),
+      0 0 0 4px rgba(232, 233, 234, 0.08);
+  }
+
+  input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--text-0);
+    font-family: var(--font-ui);
+    font-size: 14px;
+
+    &::placeholder {
+      color: var(--text-2);
+    }
+  }
+}
+
+.ws-search-clear {
+  display: flex;
+  padding: 2px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-0);
+  }
+
+  .ws-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.ws-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ws-chip {
+  padding: 4px 11px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  color: var(--text-1);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+
+  &:hover {
+    background: var(--bg-3);
+    color: var(--text-0);
+  }
+  &.is-on {
+    background: var(--accent);
+    color: var(--accent-contrast);
+    box-shadow: none;
+  }
+}
+
+.ws-toolbar-end {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ws-count {
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.ws-grid-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 20px 20px;
+}
+
+.ws-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.ws-world {
+  --edge: rgba(255, 255, 255, 0.07);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: var(--bg-2);
+  text-align: left;
+  overflow: hidden;
+  isolation: isolate;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease);
+
+  // The outline sits above the art so it meets the card edge cleanly.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px var(--edge);
+    pointer-events: none;
+    transition: box-shadow var(--dur) var(--ease);
+  }
+
+  &:hover {
+    background: #1f2124;
+    --edge: rgba(255, 255, 255, 0.14);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  // The chosen world takes the logo's red, as the site's one featured plan does.
+  &.is-on {
+    background: var(--bg-3);
+    --edge: rgba(226, 86, 74, 0.7);
+
+    &::before {
+      box-shadow:
+        inset 0 0 0 1px var(--edge),
+        0 0 0 1px rgba(196, 48, 43, 0.25);
+    }
+    .ws-world-art::after {
+      border-bottom-color: rgba(196, 48, 43, 0.45);
+    }
+  }
+
+  &.is-off {
+    .ws-banner,
+    .ws-world-body {
+      opacity: 0.5;
+    }
+  }
+}
+
+.ws-world-art {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 7;
+  background: var(--bg-1);
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    pointer-events: none;
+  }
+}
+
+:is(#root, .app) .ws-page .ws-banner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 420ms var(--ease);
+
+  &.is-in {
+    opacity: 1;
+  }
+}
+
+// No banner of its own: a corner of the world map, in the page's red. The
+// grey and the red are two layers, since a filter on the element would drain
+// the tint along with the map.
+:is(#root, .app) .ws-page .ws-banner-map {
+  position: relative;
+  opacity: 1;
+  background: var(--bg-1);
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  &::before {
+    background-image: url('/ui/world_select/world_map.webp');
+    background-repeat: no-repeat;
+    background-size: 420% auto;
+    background-position: var(--map-at, 50% 50%);
+    filter: grayscale(1) contrast(1.3) brightness(0.62);
+  }
+
+  &::after {
+    background: var(--mu-red);
+    mix-blend-mode: color;
+    opacity: 0.8;
+  }
+}
+
+.ws-tag-float {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  z-index: 2;
+  background: rgba(11, 12, 13, 0.82);
+  color: var(--text-1);
+
+  &.is-bad {
+    background: rgba(11, 12, 13, 0.82);
+    box-shadow: inset 0 0 0 1px rgba(194, 82, 82, 0.6);
+  }
+}
+
+.ws-dot {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 2;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text-2);
+  box-shadow: 0 0 0 2px rgba(11, 12, 13, 0.8);
+}
+
+.ws-dot-checking {
+  animation: ws-blink 1.2s var(--ease) infinite;
+}
+
+.ws-dot-up {
+  background: var(--ok);
+}
+
+.ws-dot-down {
+  background: var(--danger);
+}
+
+.ws-world-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px 12px;
+}
+
+.ws-world-name {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ws-world-meta {
+  display: flex;
+  gap: 0;
+  overflow: hidden;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  white-space: nowrap;
+
+  > span + span::before {
+    content: '\00b7';
+    margin: 0 7px;
+    color: var(--text-mark);
+  }
+}
+
+.ws-world-last {
+  color: var(--mu-red-soft);
+}
+
+.ws-empty,
+.ws-placeholder,
+.ws-aside-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  min-height: 160px;
+  padding: 24px;
+  color: var(--text-2);
+  text-align: center;
+
+  .ws-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.ws-placeholder {
+  flex: 1 1 auto;
+}
+
+// ---------- The chosen world ----------
+
+.ws-aside {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: rgba(16, 17, 19, 0.3);
+  border-top-right-radius: 0;
+}
+
+.ws-aside-art {
+  position: relative;
+  flex: none;
+  aspect-ratio: 16 / 7;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 35%, rgba(22, 24, 26, 0.96));
+  }
+}
+
+.ws-aside-head {
+  position: relative;
+  flex: none;
+  margin-top: -34px;
+  padding: 0 20px;
+
+  h2 {
+    margin: 0;
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+.ws-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ws-segment {
+  flex: none;
+  display: flex;
+  gap: 2px;
+  margin: 14px 20px 0;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--bg-1);
+
+  button {
+    flex: 1 1 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-1);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease);
+
+    &:hover {
+      color: var(--text-0);
+    }
+    &.is-on {
+      background: var(--bg-3);
+      color: var(--text-0);
+    }
+  }
+}
+
+.ws-segment-count {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--bg-4);
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.ws-aside-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 20px 18px;
+}
+
+.ws-desc {
+  margin: 0 0 14px;
+  color: var(--text-1);
+  font-size: 13px;
+  line-height: 1.6;
+  user-select: text;
+}
+
+.ws-facts {
+  margin: 0 0 16px;
+}
+
+.ws-fact {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 10px;
+  padding: 6px 0;
+  border-top: 1px solid var(--divider);
+  font-size: 13px;
+
+  &:first-child {
+    border-top: 0;
+  }
+
+  dt {
+    color: var(--text-2);
+  }
+
+  dd {
+    margin: 0;
+    overflow: hidden;
+    color: var(--text-0);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    &.is-ok {
+      color: var(--ok-text);
+    }
+    &.is-bad {
+      color: var(--danger-text);
+      white-space: normal;
+    }
+    &.is-gold {
+      color: var(--warn-text);
+    }
+  }
+}
+
+.ws-subhead {
+  margin: 0 0 10px;
+  color: var(--text-1);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ws-servers {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    color: var(--text-0);
+    font-size: 13px;
+
+    .ws-icon {
+      color: var(--text-2);
+    }
+  }
+}
+
+.ws-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.ws-rows-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  margin-bottom: 14px;
+}
+
+.ws-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--text-1);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+
+  &:hover {
+    background: var(--bg-3);
+    color: var(--text-0);
+  }
+  &.is-on {
+    background: var(--bg-3);
+    color: var(--text-0);
+    box-shadow: inset 2px 0 0 var(--mu-red-soft);
+  }
+  &:disabled {
+    cursor: default;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .ws-icon {
+    color: var(--text-2);
+  }
+}
+
+.ws-row-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ws-row-end {
+  color: var(--text-2);
+
+  &.is-gold {
+    color: var(--warn-text);
+  }
+}
+
+.ws-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ws-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  transition:
+    background var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+
+  .ws-icon {
+    width: 13px;
+    height: 13px;
+    stroke-width: 2.4;
+    color: var(--accent-contrast);
+  }
+}
+
+.ws-check-row.is-checked {
+  color: var(--text-0);
+
+  .ws-check {
+    background: var(--accent);
+    box-shadow: none;
+  }
+}
+
+.ws-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.ws-form-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  gap: 12px;
+}
+
+.ws-note {
+  margin: 0 0 6px;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.55;
+
+  &.is-gold,
+  &.is-warn {
+    color: var(--warn-text);
+  }
+  &.is-bad {
+    color: var(--danger-text);
+  }
+}
+
+.ws-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-s);
+  background: var(--bg-1);
+  color: var(--warn-text);
+  overflow: hidden;
+  white-space: nowrap;
+
+  .ws-icon {
+    width: 13px;
+    height: 13px;
+    color: var(--text-2);
+  }
+}
+
+// ---------- Setup and download ----------
+
+.ws-split {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+}
+
+.ws-split-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 18px 20px 4px;
+  border-right: 1px solid var(--divider);
+}
+
+.ws-split-form {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px 28px;
+
+  > .ws-form,
+  > .ws-route,
+  > .ws-note {
+    max-width: 560px;
+  }
+}
+
+.ws-total {
+  display: flex;
+  justify-content: space-between;
+  max-width: 560px;
+  margin: 6px 0 8px;
+  color: var(--text-1);
+  font-size: 13px;
+
+  .ws-mono {
+    color: var(--warn-text);
+  }
+}
+
+.ws-split-form > .ws-progress {
+  max-width: 560px;
+  margin-bottom: 16px;
+}
+
+// ---------- Small windows ----------
+
+// Narrower: the side column and the world panel give up some width, and the
+// head keeps only its title.
+@media (max-width: 1180px) {
+  .ws-card {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 20px;
+    padding: 24px;
+  }
+  .ws-lead {
+    display: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .ws-worlds {
+    grid-template-columns: minmax(0, 1fr) 280px;
+  }
+  .ws-split {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+}
+
+// One column: the grid, then the chosen world, all in one scroll.
+@media (max-width: 760px) {
+  .ws-main {
+    padding: 0 12px 10px;
+  }
+  .ws-top {
+    top: 10px;
+    right: 12px;
+  }
+  .ws-language {
+    width: 140px;
+  }
+  .ws-worlds,
+  .ws-split {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .ws-browse,
+  .ws-split-list {
+    flex: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--divider);
+  }
+  .ws-grid-scroll,
+  .ws-aside-body,
+  .ws-split-form,
+  .ws-rows-scroll {
+    flex: none;
+    overflow: visible;
+  }
+  // The side becomes a strip over the window: tabs in a row, no head.
+  .ws-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px;
+  }
+  .ws-marker,
+  .ws-headline,
+  .ws-tab-desc {
+    display: none;
+  }
+  .ws-side {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .ws-tabs {
+    flex-direction: row;
+  }
+  .ws-side-actions {
+    flex-direction: row;
+    margin: 0 0 0 auto;
+    padding: 0;
+
+    .ws-btn {
+      width: auto;
+    }
+  }
+  .ws-aside-art {
+    aspect-ratio: auto;
+    height: 120px;
+  }
+}
+
+@media (max-height: 640px) {
+  .ws-logo {
+    height: 72px;
+    margin-bottom: -5px;
+  }
+  .ws-status {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-logo-glow,
+  .ws-logo-bloom,
+  .ws-logo-surge,
+  .ws-runner-rig,
+  :is(#root, .app) .ws-page .ws-runner-part,
+  .ws-runner-dust i {
+    animation: none;
+  }
 }

@@ -1,6 +1,7 @@
 import { reaction } from 'mobx';
 import { Store, UIState } from '../store';
 import { sound } from '../sound';
+import { pregameLoad } from '../common/pregameLoad';
 
 /**
  * `MUSIC_LOGIN_THEME`: `LoginScene::Init` starts `login_theme.mp3`
@@ -22,6 +23,14 @@ const RETRY_MS = 500;
 
 const MENU_STATES = new Set([UIState.Servers, UIState.Login, UIState.Characters]);
 
+/** The theme's screens: the three menus, and the worlds page once its card is open. */
+function wanted(): boolean {
+  return (
+    MENU_STATES.has(Store.uiState) ||
+    (Store.uiState === UIState.Preloader && pregameLoad.worldsOpen)
+  );
+}
+
 let retry: number | null = null;
 
 function stopRetry(): void {
@@ -30,7 +39,7 @@ function stopRetry(): void {
 }
 
 function tryPlay(): void {
-  if (!MENU_STATES.has(Store.uiState)) {
+  if (!wanted()) {
     stopRetry();
     return;
   }
@@ -42,9 +51,9 @@ function tryPlay(): void {
 /** Call once from main.tsx after `sound.init`. */
 export function installLoginMusic(): void {
   reaction(
-    () => Store.uiState,
-    state => {
-      if (MENU_STATES.has(state)) {
+    wanted,
+    on => {
+      if (on) {
         stopRetry();
         tryPlay();
         if (retry === null && !sound.unlocked) {

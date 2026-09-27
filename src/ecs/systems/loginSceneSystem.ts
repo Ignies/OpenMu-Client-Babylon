@@ -15,6 +15,9 @@ import {
   characterSlotPosition,
 } from '../../common/characterSelect';
 import { prefetchWorldTerrain } from '../../libs/mu/prefetchWorld';
+import { warmWorldObjects } from '../../libs/mu/warmWorld';
+import { LOGIN_SCENE_ABSENT_MODELS } from '../../maps/loginscene/spec';
+import { pregameLoad } from '../../common/pregameLoad';
 import { loadVersionUi, versionUi } from '../../version';
 import type {
   PregameBackdrop,
@@ -187,9 +190,8 @@ const ZOOM_SPEED = 4;
 
 /**
  * Which pre-game screen the backdrop is standing behind, or null in the
- * world. The start menu sits on the same backdrop the server list does: the
- * original never shows a bare screen, and it is what the next click needs
- * anyway, so putting it up here costs nothing later.
+ * world. The world picker hides the login backdrop but loads it: it is what
+ * the next click shows, so it is up before that click rather than after.
  */
 function phaseFor(uiState: UIState): PregamePhase | null {
   switch (uiState) {
@@ -221,6 +223,13 @@ export const LoginSceneSystem: ISystemFactory = world => {
   }
 
   let requestedBackdrop: ENUM_WORLD | null = null;
+
+  /**
+   * The character backdrop whose scenery is already in the model cache. Each
+   * visit to the login backdrop warms it again: leaving the character scene
+   * evicted it.
+   */
+  let warmedCharacters: ENUM_WORLD | null = null;
 
   let waypoints: readonly CameraWaypoint[] | null = null;
   let scriptForWorld: number | null = null;
@@ -357,6 +366,8 @@ export const LoginSceneSystem: ISystemFactory = world => {
 
       if (requestedBackdrop !== backdrop) {
         requestedBackdrop = backdrop;
+        warmedCharacters = null;
+        pregameLoad.setCharacters(0);
         resetTour();
         waypoints = null;
         scriptForWorld = null;
@@ -366,8 +377,21 @@ export const LoginSceneSystem: ISystemFactory = world => {
 
       if (world.mapIndex !== backdrop || !world.terrain) return;
 
+      // The character screen is the next stop, so its terrain downloads and its
+      // scenery parses while the player is still on the worlds or login screen.
       if (backdrop === plan!.login) {
         prefetchWorldTerrain(plan!.characters);
+
+        if (warmedCharacters !== plan!.characters) {
+          warmedCharacters = plan!.characters;
+          pregameLoad.setCharacters(0);
+          void warmWorldObjects(
+            plan!.characters,
+            world,
+            LOGIN_SCENE_ABSENT_MODELS[plan!.characters],
+            done => pregameLoad.setCharacters(done)
+          ).then(() => pregameLoad.setCharacters(1));
+        }
       }
 
       const worldNum = backdrop + 1;
