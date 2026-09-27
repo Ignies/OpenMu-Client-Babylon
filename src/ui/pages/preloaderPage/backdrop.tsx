@@ -381,7 +381,7 @@ export const Backdrop = observer(() => {
         paint.strokeStyle = 'rgba(10, 5, 4, 0.9)';
         paint.lineWidth = 3.5;
         paint.strokeText(v.name, tx, y);
-        paint.fillStyle = '#fff4ee';
+        paint.fillStyle = '#e6c2b6';
         paint.fillText(v.name, tx, y);
       });
 
@@ -537,10 +537,12 @@ export const Backdrop = observer(() => {
             <circle className="ws-trail-tip" ref={tip} r="4" opacity="0" />
           </svg>
         </div>
+        {/* Flat over the tilted map, so its names are sharp, and under the
+            tint, so they take the map's colour. */}
+        <canvas className="ws-villages" ref={villageCanvas} />
         <div className="ws-tint" />
       </div>
       <div className="ws-grid" />
-      <canvas className="ws-villages" ref={villageCanvas} />
       <Embers />
       <div className="ws-credit" ref={credit}>
         {who && (
