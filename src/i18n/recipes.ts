@@ -2216,6 +2216,10 @@ export const EN_TEXT = {
   'gm.map.noPicture': 'This world has no map picture.',
   'gm.map.goHere': 'Warp to this map',
   'gm.map.bringTarget': 'Bring {name} here',
+  'gm.map.menu.goHere': 'Go here',
+  'gm.map.menu.movesYou': 'You are moved here first.',
+  'gm.map.menu.copy': 'Copy coordinates',
+  'gm.map.menuHint': 'Right-click a tile for fireworks, spawning and more.',
 
   'gm.logs.character': 'Character',
   'gm.logs.follow': 'Follow live',

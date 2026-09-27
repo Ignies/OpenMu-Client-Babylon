@@ -2069,6 +2069,10 @@ export const japaneseLayer: LanguageLayer = {
     'gm.map.noPicture': 'このワールドにはマップ画像がありません。',
     'gm.map.goHere': 'このマップへ移動',
     'gm.map.bringTarget': '{name} をここへ呼ぶ',
+    'gm.map.menu.goHere': 'ここへ行く',
+    'gm.map.menu.movesYou': '先にここへ移動します。',
+    'gm.map.menu.copy': '座標をコピー',
+    'gm.map.menuHint': 'マスを右クリックで花火や生成などができます。',
 
     'gm.logs.character': 'キャラクター',
     'gm.logs.follow': 'ライブで追う',

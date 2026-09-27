@@ -28,7 +28,7 @@ import { LogoLight } from './logoLight';
 import { LightningLine } from './lightningLine';
 import { Hellfire } from './hellfire';
 import { FooterStrike } from './footerStrike';
-import { MuFrame } from './muFrame';
+import { MuFrame } from '../../components/muFrame';
 import { MuIcon } from './muIcon';
 import { REACH_TEXT } from './banner';
 import { ServerProbe } from '../../../common/serverProbe';

@@ -31,7 +31,16 @@ export type MapViewProps = {
   selectedId: string | null;
   onPick: (player: TrackedPlayer) => void;
   onTile?: (x: number, y: number) => void;
+  /** A right-click on tile (x, y), at that point on screen. */
+  onMenu?: (x: number, y: number, clientX: number, clientY: number) => void;
 };
+
+/** The tile under a point on the picture: its across runs along Y, its down along X. */
+function tileAt(box: DOMRect, clientX: number, clientY: number): [number, number] {
+  const y = Math.floor(((clientX - box.left) / box.width) * TERRAIN_SIZE);
+  const x = Math.floor(((clientY - box.top) / box.height) * TERRAIN_SIZE);
+  return [Math.max(0, Math.min(255, x)), Math.max(0, Math.min(255, y))];
+}
 
 function percent(tile: number): string {
   return `${(Math.min(TERRAIN_SIZE, Math.max(0, tile)) / TERRAIN_SIZE) * 100}%`;
@@ -45,6 +54,7 @@ export const MapView = observer(function MapView({
   selectedId,
   onPick,
   onTile,
+  onMenu,
 }: MapViewProps) {
   const [picture, setPicture] = useState<WorldMinimap | null | undefined>(undefined);
 
@@ -69,10 +79,14 @@ export const MapView = observer(function MapView({
       style={picture ? { backgroundImage: `url(${picture.image.url})` } : undefined}
       onClick={event => {
         if (!onTile) return;
-        const box = event.currentTarget.getBoundingClientRect();
-        const y = Math.floor(((event.clientX - box.left) / box.width) * TERRAIN_SIZE);
-        const x = Math.floor(((event.clientY - box.top) / box.height) * TERRAIN_SIZE);
-        onTile(Math.max(0, Math.min(255, x)), Math.max(0, Math.min(255, y)));
+        const [x, y] = tileAt(event.currentTarget.getBoundingClientRect(), event.clientX, event.clientY);
+        onTile(x, y);
+      }}
+      onContextMenu={event => {
+        if (!onMenu) return;
+        event.preventDefault();
+        const [x, y] = tileAt(event.currentTarget.getBoundingClientRect(), event.clientX, event.clientY);
+        onMenu(x, y, event.clientX, event.clientY);
       }}
     >
       {picture === null ? <span className="gm-map-note">{t('gm.map.noPicture')}</span> : null}

@@ -1,185 +1,182 @@
-@import (reference) '../muText/style.less';
+@import (reference) '../../web/tokens.less';
 
-// The game master panel's own look, on purpose.
+// The game master panel in the world select's look: the Babylon site's design
+// system inside MU's Option window frame.
 //
 // The rest of the client wears the original's sprite chrome, which is fixed
 // art. This one is an instrument - a table of everyone online, a map, a
 // journal, catalogues - so it is laid out rather than drawn, and it fits
-// whatever screen it is on. It still speaks the game's gold on a near-black
-// plate so it does not read as a browser dialog that wandered in.
+// whatever screen it is on.
 
-@gm-gold: #e8c877;
-@gm-gold-dim: #b9a87e;
-@gm-ink: #ece7db;
-@gm-mute: #8f8f98;
-@gm-plate: #12141b;
-@gm-panel: #181b24;
-@gm-sunk: #0c0e13;
-@gm-raise: #1f2330;
-@gm-line: rgba(255, 255, 255, 0.07);
-@gm-line-strong: rgba(232, 200, 119, 0.45);
-@gm-danger: #ff7a70;
-@gm-reply: #8fb4d8;
+.web-fonts();
+
 @gm-blue: #6fb3ff;
-@gm-green: #5fd38d;
 @gm-npc: #8ea6c2;
 @gm-monster: #e07b6f;
-@gm-radius: 10px;
+@gm-line: #292c30;
 
 .gm-mono {
-  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-family: var(--font-mono);
 }
 
 // The way in, top right, where nothing else lives (`.money` has the top left).
 // Outside the window on purpose: drawn whether the panel is open or not.
 .gm-tab-plate {
+  .web-tokens();
+
   position: absolute;
   top: 8px;
   right: 10px;
   z-index: 1;
-  padding: 4px 11px;
-  border: 1px solid @gm-line-strong;
-  border-radius: 4px;
-  background: rgba(14, 12, 9, 0.95);
-  .mu-font();
-  color: @gm-gold;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.85);
+  padding: 4px 12px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: rgba(16, 17, 19, 0.92);
+  box-shadow: inset 0 0 0 1px var(--divider);
+  color: var(--text-1);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   user-select: none;
   cursor: pointer;
-  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
 
   &:hover {
-    border-color: @gm-gold;
-    color: #ffffff;
+    background: var(--bg-3);
+    color: var(--text-0);
   }
 
   &.is-active {
-    border-color: @gm-gold;
-    background: rgba(232, 200, 119, 0.22);
-    color: #ffffff;
+    background: var(--accent);
+    color: var(--accent-contrast);
   }
 }
 
 /* ------------------------------------------------------------- the window */
 
 .gm-window {
+  .web-tokens();
+
   position: absolute;
   inset: 0;
   margin: auto;
   width: min(1180px, 94%);
   height: min(760px, 92%);
-  display: flex;
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  gap: 24px;
+  padding: 28px;
   box-sizing: border-box;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  background: linear-gradient(160deg, #171a23 0%, @gm-plate 60%, #0e1015 100%);
-  box-shadow:
-    0 30px 90px rgba(0, 0, 0, 0.65),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  .mu-font();
-  color: @gm-ink;
-  font-size: 12px;
-  line-height: 1.35;
+  border-radius: 4px;
+  background: rgba(10, 11, 12, 0.96);
+  box-shadow: var(--shadow-overlay);
+  color: var(--text-0);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
   pointer-events: auto;
   user-select: none;
-  overflow: hidden;
 
-  h2,
-  h3,
-  h4,
-  p,
-  ul {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  // Resets at no weight (`:where`), so any class below wins over them.
+  :where(h2, h3, h4, p, ul) {
     margin: 0;
   }
 
-  ul {
+  :where(ul) {
     padding: 0;
     list-style: none;
   }
 
-  button {
+  :where(button) {
     font: inherit;
     color: inherit;
   }
 
-  input,
-  output {
+  :where(input, output) {
     font: inherit;
   }
 
-  code {
-    .gm-mono();
-    color: @gm-gold-dim;
-    font-size: 11px;
+  :where(code) {
+    font-family: var(--font-mono);
+    color: var(--text-1);
+    font-size: 11.5px;
   }
 
-  em {
-    color: @gm-mute;
+  :where(em) {
+    color: var(--text-2);
     font-style: normal;
   }
 
-  small {
-    color: @gm-mute;
-    font-size: 10.5px;
+  :where(small) {
+    color: var(--text-2);
+    font-size: 11.5px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--bg-4);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
 }
 
 /* ---------------------------------------------------------------- sidebar */
 
 .gm-side {
-  flex: none;
-  width: 196px;
+  position: relative;
+  z-index: 4;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid @gm-line;
-  background: rgba(0, 0, 0, 0.22);
+  min-height: 0;
 }
 
-.gm-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 14px 12px;
-  border-bottom: 1px solid @gm-line;
-}
-
-.gm-brand-mark {
-  flex: none;
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 9px;
-  background: linear-gradient(150deg, #f0d48a, #b48a2c);
-  color: #1a1408;
+// Where the game master stands, in mono, the way the world select marks its
+// sections with a number and a map.
+.gm-marker {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--text-1);
   font-size: 12px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 14px rgba(232, 200, 119, 0.25);
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.gm-brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-
-  b {
-    font-size: 12.5px;
-    color: #ffffff;
-    letter-spacing: 0.3px;
-  }
+.gm-headline {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
 }
 
 .gm-feed {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  color: @gm-mute;
-  font-size: 10.5px;
+  gap: 7px;
+  margin-bottom: 18px;
+  color: var(--text-1);
+  font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -189,125 +186,170 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: @gm-mute;
+    background: var(--text-2);
   }
 
-  &.gm-feed-open .gm-feed-dot {
-    background: @gm-green;
-    box-shadow: 0 0 6px @gm-green;
+  &.gm-feed-open {
+    color: var(--ok-text);
+
+    .gm-feed-dot {
+      background: var(--ok);
+      box-shadow: 0 0 6px var(--ok);
+    }
   }
 
   &.gm-feed-connecting .gm-feed-dot,
   &.gm-feed-closed .gm-feed-dot {
-    background: @gm-gold;
+    background: var(--warn);
   }
 
-  &.gm-feed-refused .gm-feed-dot,
-  &.gm-feed-error .gm-feed-dot {
-    background: @gm-danger;
+  &.gm-feed-refused,
+  &.gm-feed-error {
+    color: var(--danger-text);
+
+    .gm-feed-dot {
+      background: var(--danger);
+    }
   }
 }
 
+// A vertical list like the world select's tabs: the open one unfolds its one
+// line in place and wears the red bar on its left.
 .gm-side-nav {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 10px 8px;
+  margin: 0 -4px;
+  padding: 0 4px;
   overflow-y: auto;
 }
 
 .gm-side-btn {
   position: relative;
+  flex: none;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
+  flex-direction: column;
+  width: 100%;
+  padding: 8px 12px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-s);
   background: transparent;
-  color: @gm-mute;
+  color: var(--text-1);
   text-align: left;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s;
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: @gm-ink;
+  .gm-side-icon {
+    opacity: 0.6;
+    transition: opacity var(--dur-fast) var(--ease);
   }
 
+  &:hover,
   &.is-active {
-    background: rgba(232, 200, 119, 0.12);
-    color: #ffffff;
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 8px;
-      bottom: 8px;
-      width: 3px;
-      border-radius: 2px;
-      background: @gm-gold;
-    }
+    background: var(--bg-2);
+    color: var(--text-0);
 
     .gm-side-icon {
-      color: @gm-gold;
+      opacity: 1;
     }
   }
+
+  &.is-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 9px;
+    bottom: 9px;
+    width: 2px;
+    border-radius: 0 2px 2px 0;
+    background: var(--mu-red-soft);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+}
+
+.gm-side-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
 }
 
 .gm-side-icon {
   flex: none;
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
 }
 
 .gm-side-label {
   flex: 1;
-  font-size: 12px;
-  letter-spacing: 0.2px;
+  font-size: 14px;
 }
 
 .gm-side-badge {
-  padding: 1px 7px;
-  border-radius: 10px;
-  background: rgba(95, 211, 141, 0.18);
-  color: @gm-green;
-  font-size: 10.5px;
-  font-weight: bold;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: rgba(74, 157, 110, 0.2);
+  color: var(--ok-text);
+  font-size: 11.5px;
+  font-weight: 600;
 }
 
-.gm-side-foot {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px 14px 12px;
-  border-top: 1px solid @gm-line;
-  color: @gm-mute;
-  font-size: 10.5px;
-}
+.gm-side-desc {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 420ms var(--ease),
+    opacity 420ms var(--ease);
 
-.gm-side-where {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-
-  b {
-    color: @gm-ink;
+  > span {
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    min-height: 0;
+    padding-left: 28px;
+    color: var(--text-1);
+    font-size: 12.5px;
+    line-height: 1.5;
   }
+
+  .is-active > & {
+    grid-template-rows: 1fr;
+    opacity: 1;
+
+    > span {
+      padding-top: 4px;
+    }
+  }
+}
+
+.gm-side-key {
+  flex: none;
+  padding-top: 14px;
+  color: var(--text-2);
+  font-size: 11.5px;
 }
 
 /* ------------------------------------------------------------------- main */
 
+// The product window, as the world select frames it: a header bar, the page,
+// and a status strip in mono under it.
 .gm-main {
-  flex: 1;
+  position: relative;
+  z-index: 4;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-m);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-overlay);
 }
 
 .gm-top {
@@ -315,33 +357,41 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 10px 12px 10px 16px;
   border-bottom: 1px solid @gm-line;
+  background: var(--bg-1);
+  white-space: nowrap;
 }
 
 .gm-top-title {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  font-size: 13px;
 
-  h2 {
-    font-size: 15px;
-    color: #ffffff;
-    letter-spacing: 0.3px;
-  }
-
-  p {
-    color: @gm-mute;
-    font-size: 11px;
-    white-space: nowrap;
+  b {
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+}
+
+.gm-top-where {
+  color: var(--text-1);
+}
+
+.gm-top-sep {
+  color: var(--text-mark);
 }
 
 .gm-top .gm-top-search {
   flex: none;
   width: 220px;
   margin: 0;
+  padding: 6px 11px;
 }
 
 .gm-target-chip {
@@ -349,37 +399,36 @@
   align-items: center;
   gap: 6px;
   max-width: 220px;
-  padding: 5px 10px;
-  border: 1px dashed @gm-line;
-  border-radius: 20px;
-  color: @gm-mute;
-  font-size: 11px;
-  white-space: nowrap;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--bg-3);
+  color: var(--text-2);
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
 
   &.is-set {
-    border-style: solid;
-    border-color: @gm-line-strong;
-    background: rgba(232, 200, 119, 0.1);
-    color: @gm-gold;
+    background: rgba(226, 86, 74, 0.16);
+    color: var(--text-0);
   }
 }
 
 .gm-chip-x {
+  flex: none;
   width: 18px;
   height: 18px;
   padding: 0;
   border: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
-  color: @gm-ink;
+  color: var(--text-1);
   font-size: 13px;
   line-height: 1;
   cursor: pointer;
 
   &:hover {
     background: rgba(255, 255, 255, 0.18);
+    color: var(--text-0);
   }
 }
 
@@ -387,39 +436,66 @@
   flex: none;
   width: 30px;
   height: 30px;
-  border: 1px solid @gm-line;
-  border-radius: 8px;
+  border: 0;
+  border-radius: var(--radius-s);
   background: transparent;
-  color: @gm-mute;
+  color: var(--text-1);
   font-size: 18px;
   line-height: 1;
   cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
 
   &:hover {
-    border-color: @gm-danger;
-    color: @gm-danger;
+    background: var(--bg-3);
+    color: var(--text-0);
   }
 }
 
+// The page. Tabs that are a list beside its options (Live, Map, Spawn,
+// Console) fill it and scroll their parts on their own, so the options and
+// their button stay in view; the rest flow and the page scrolls.
 .gm-content {
   flex: 1;
   min-height: 0;
-  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
   overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+
+  > * {
+    flex: none;
+  }
+
+  > .gm-live,
+  > .gm-maptab,
+  > .gm-spawn,
+  > .gm-console {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
 }
 
+.gm-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+// The server's answers, as the world select's status strip.
 .gm-foot {
   flex: none;
   display: flex;
   flex-direction: column;
   gap: 4px;
   max-height: 120px;
-  padding: 8px 16px;
+  padding: 9px 16px;
   border-top: 1px solid @gm-line;
-  background: rgba(0, 0, 0, 0.25);
-  font-size: 11px;
+  background: var(--bg-0);
+  color: var(--text-1);
+  font-size: 12px;
   overflow: auto;
 }
 
@@ -431,11 +507,12 @@
 
 .gm-foot-label {
   flex: none;
-  width: 72px;
-  color: @gm-mute;
+  width: 84px;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
   text-transform: uppercase;
-  font-size: 9.5px;
-  letter-spacing: 1px;
+  letter-spacing: 0.06em;
 }
 
 .gm-foot-lines {
@@ -448,22 +525,22 @@
   }
 
   &.gm-replies li {
-    color: @gm-reply;
+    color: var(--text-0);
   }
 }
 
 .gm-error {
-  color: @gm-danger;
+  color: var(--danger-text);
 }
 
 /* ------------------------------------------------------------ primitives */
 
 .gm-section-title {
-  margin: 14px 0 8px;
-  color: @gm-gold-dim;
-  font-size: 10.5px;
-  font-weight: bold;
-  letter-spacing: 1.2px;
+  margin: 16px 0 8px;
+  color: var(--text-1);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 
   &:first-child {
@@ -473,46 +550,47 @@
 
 .gm-hint,
 .gm-help {
-  margin: 2px 0 8px;
-  color: @gm-mute;
-  font-size: 11px;
+  margin: 2px 0 10px;
+  color: var(--text-1);
+  font-size: 12.5px;
+  line-height: 1.5;
 }
 
 .gm-empty {
   padding: 26px 12px;
-  border: 1px dashed @gm-line;
-  border-radius: @gm-radius;
-  color: @gm-mute;
+  border-radius: var(--radius-m);
+  background: var(--bg-1);
+  color: var(--text-2);
   text-align: center;
 }
 
 .gm-notice {
   margin: 0 0 10px;
   padding: 8px 12px;
-  border-radius: 8px;
-  background: rgba(232, 200, 119, 0.1);
-  color: @gm-gold;
-  font-size: 11px;
+  border-radius: var(--radius-s);
+  background: rgba(194, 150, 63, 0.14);
+  color: var(--warn-text);
+  font-size: 12.5px;
 
   &.is-bad {
-    background: rgba(255, 122, 112, 0.12);
-    color: @gm-danger;
+    background: rgba(194, 82, 82, 0.16);
+    color: var(--danger-text);
   }
 }
 
 .gm-badge {
   display: inline-block;
-  padding: 1px 7px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  color: @gm-ink;
-  font-size: 10px;
-  font-weight: bold;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--bg-3);
+  color: var(--text-1);
+  font-size: 11.5px;
+  font-weight: 600;
 
   &.gm-badge-gm {
     margin-left: 6px;
-    background: rgba(232, 200, 119, 0.2);
-    color: @gm-gold;
+    background: rgba(111, 179, 255, 0.16);
+    color: @gm-blue;
   }
 }
 
@@ -524,7 +602,7 @@
   vertical-align: middle;
 
   &.gm-dot-player {
-    background: @gm-gold;
+    background: var(--text-0);
   }
 
   &.gm-dot-player.is-gm {
@@ -533,7 +611,7 @@
   }
 
   &.gm-dot-hero {
-    background: @gm-green;
+    background: var(--mu-red-soft);
   }
 
   &.gm-dot-monster {
@@ -547,22 +625,31 @@
 
 .gm-search,
 .gm-input {
-  box-sizing: border-box;
-  padding: 7px 10px;
-  border: 1px solid @gm-line;
-  border-radius: 8px;
-  background: @gm-sunk;
-  color: @gm-ink;
-  font-size: 12px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: var(--bg-3);
+  color: var(--text-0);
+  font-family: var(--font-ui);
+  font-size: 13px;
   outline: none;
-  transition: border-color 0.12s;
+  transition:
+    background var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
 
   &::placeholder {
-    color: @gm-mute;
+    color: var(--text-2);
+  }
+
+  &:hover {
+    background: var(--bg-4);
   }
 
   &:focus {
-    border-color: @gm-line-strong;
+    background: var(--bg-4);
+    box-shadow:
+      0 0 0 1px rgba(232, 233, 234, 0.7),
+      0 0 0 4px rgba(232, 233, 234, 0.08);
   }
 }
 
@@ -572,15 +659,15 @@
 }
 
 .gm-input-short {
-  width: 72px;
+  width: 76px;
 }
 
 .gm-field {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 8px;
-  position: relative;
+  gap: 6px;
+  margin-bottom: 10px;
 
   &.gm-field-inline {
     flex-direction: row;
@@ -590,19 +677,19 @@
 }
 
 .gm-field-label {
-  color: @gm-mute;
-  font-size: 10.5px;
-  letter-spacing: 0.4px;
+  color: var(--text-1);
+  font-size: 12.5px;
+  font-weight: 500;
 }
 
 .gm-required {
   margin-left: 3px;
-  color: @gm-danger;
+  color: var(--mu-red-soft);
 }
 
 .gm-standin {
   margin-left: 8px;
-  color: @gm-gold-dim;
+  color: var(--text-2);
   font-style: italic;
 }
 
@@ -612,63 +699,100 @@
   flex-wrap: wrap;
 }
 
-.gm-choice-option {
-  padding: 4px 10px;
-  border: 1px solid @gm-line;
-  border-radius: 6px;
-  background: @gm-sunk;
-  color: @gm-mute;
+// Pills: the world select's language tags.
+.gm-choice-option,
+.gm-chip {
+  padding: 4px 11px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--bg-3);
+  color: var(--text-1);
+  font-size: 12px;
+  white-space: nowrap;
   cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+
+  &:hover {
+    background: var(--bg-4);
+    color: var(--text-0);
+  }
 
   &.is-active {
-    border-color: @gm-line-strong;
-    background: rgba(232, 200, 119, 0.14);
-    color: @gm-gold;
+    background: var(--accent);
+    color: var(--accent-contrast);
   }
 }
 
 .gm-btn {
-  padding: 7px 14px;
-  border: 1px solid @gm-line-strong;
-  border-radius: 8px;
-  background: linear-gradient(180deg, rgba(232, 200, 119, 0.2), rgba(232, 200, 119, 0.08));
-  color: @gm-gold;
-  font-size: 12px;
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: var(--bg-3);
+  color: var(--text-0);
+  font-size: 13px;
+  font-weight: 500;
   white-space: nowrap;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    filter var(--dur-fast) var(--ease);
 
   &:hover {
-    background: rgba(232, 200, 119, 0.28);
-    color: #ffffff;
+    background: var(--bg-4);
+  }
+
+  &:active {
+    filter: brightness(0.82);
+    transition-duration: 40ms;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: default;
   }
 
   &.gm-btn-compact {
-    padding: 5px 10px;
-    font-size: 11px;
+    padding: 5px 12px;
+    font-size: 12.5px;
   }
 
+  // What takes something away: red until pressed, then solid red to confirm.
   &.gm-btn-heavy {
-    border-color: rgba(255, 122, 112, 0.5);
-    background: rgba(255, 122, 112, 0.1);
-    color: @gm-danger;
+    background: rgba(194, 82, 82, 0.18);
+    color: var(--danger-text);
 
     &:hover {
-      background: rgba(255, 122, 112, 0.22);
-      color: #ffffff;
+      background: rgba(194, 82, 82, 0.3);
+      color: #fff;
     }
   }
 
   &.is-armed {
-    border-color: @gm-danger;
-    background: @gm-danger;
-    color: #1a0806;
-    font-weight: bold;
+    background: var(--danger);
+    color: #fff;
+    font-weight: 600;
+  }
+}
+
+// A form's own button is the one thing to press: the site's primary.
+.gm-card-actions .gm-btn:not(.gm-btn-heavy):not(.is-armed) {
+  background: var(--accent);
+  color: var(--accent-contrast);
+
+  &:hover {
+    background: #fff;
   }
 }
 
@@ -676,25 +800,24 @@
   padding: 0 4px;
   border: 0;
   background: transparent;
-  color: @gm-blue;
+  color: var(--text-0);
   cursor: pointer;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
 
 .gm-quick {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .gm-card {
   margin-bottom: 10px;
-  padding: 12px;
-  border: 1px solid @gm-line;
-  border-radius: @gm-radius;
-  background: @gm-panel;
+  padding: 14px;
+  border-radius: var(--radius-m);
+  background: var(--bg-1);
 }
 
 .gm-card-head {
@@ -705,8 +828,8 @@
   margin-bottom: 4px;
 
   h4 {
-    font-size: 12.5px;
-    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
   }
 }
 
@@ -714,18 +837,18 @@
   display: flex;
   justify-content: flex-end;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .gm-preview {
   display: block;
-  margin: 6px 0;
-  padding: 6px 10px;
-  border-radius: 6px;
-  background: @gm-sunk;
-  .gm-mono();
-  color: @gm-gold-dim;
-  font-size: 11px;
+  margin: 8px 0;
+  padding: 7px 11px;
+  border-radius: var(--radius-s);
+  background: var(--bg-0);
+  font-family: var(--font-mono);
+  color: var(--text-1);
+  font-size: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -739,7 +862,7 @@
 
 .gm-pairline {
   display: grid;
-  grid-template-columns: 90px auto 1fr auto;
+  grid-template-columns: 96px auto 1fr auto;
   align-items: center;
   gap: 6px;
   margin-bottom: 6px;
@@ -750,59 +873,59 @@
 }
 
 .gm-pairline-label {
-  color: @gm-mute;
+  color: var(--text-1);
 }
 
 .gm-target-note {
-  margin: 0 0 10px;
-  color: @gm-mute;
+  margin: 0 0 12px;
+  color: var(--text-1);
 
   b {
-    color: @gm-gold;
+    color: var(--text-0);
   }
 }
 
+// Two ways of one thing: the world select's segmented switch.
 .gm-toggle {
   display: inline-flex;
   padding: 3px;
-  border: 1px solid @gm-line;
-  border-radius: 8px;
-  background: @gm-sunk;
+  border-radius: var(--radius-s);
+  background: var(--bg-1);
 }
 
 .gm-toggle-btn {
-  padding: 4px 10px;
+  padding: 4px 11px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
-  color: @gm-mute;
-  cursor: pointer;
+  color: var(--text-1);
+  font-size: 12.5px;
   white-space: nowrap;
+  cursor: pointer;
 
   &.is-active {
-    background: rgba(232, 200, 119, 0.18);
-    color: @gm-gold;
+    background: var(--bg-3);
+    color: var(--text-0);
   }
 }
 
 .gm-toggle-check {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  border: 1px solid @gm-line;
-  border-radius: 8px;
-  color: @gm-mute;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: var(--radius-s);
+  background: var(--bg-3);
+  color: var(--text-1);
   cursor: pointer;
   white-space: nowrap;
 
   input {
-    accent-color: @gm-gold;
+    accent-color: var(--accent);
   }
 
   &.is-on {
-    border-color: @gm-line-strong;
-    color: @gm-gold;
+    color: var(--text-0);
   }
 }
 
@@ -810,7 +933,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 
   .gm-search {
     flex: 1;
@@ -819,68 +942,61 @@
 }
 
 .gm-toolbar-count {
-  color: @gm-mute;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
   white-space: nowrap;
-}
-
-.gm-chip {
-  padding: 3px 9px;
-  border: 1px solid @gm-line;
-  border-radius: 12px;
-  background: transparent;
-  color: @gm-mute;
-  font-size: 10.5px;
-  cursor: pointer;
-  white-space: nowrap;
-
-  &:hover {
-    color: @gm-ink;
-  }
-
-  &.is-active {
-    border-color: @gm-line-strong;
-    background: rgba(232, 200, 119, 0.14);
-    color: @gm-gold;
-  }
 }
 
 .gm-kinds {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 10px;
+  gap: 5px;
+  margin-bottom: 12px;
 }
 
 .gm-subtabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid @gm-line;
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 2px;
+  margin-bottom: 14px;
+  padding: 3px;
+  border-radius: var(--radius-s);
+  background: var(--bg-1);
 }
 
 .gm-subtab {
-  padding: 6px 14px;
+  padding: 5px 14px;
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-radius: 4px;
   background: transparent;
-  color: @gm-mute;
+  color: var(--text-1);
   cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+
+  &:hover {
+    color: var(--text-0);
+  }
 
   &.is-active {
-    border-bottom-color: @gm-gold;
-    color: #ffffff;
+    background: var(--bg-3);
+    color: var(--text-0);
   }
 }
 
 .gm-grid-2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  align-items: start;
   gap: 0 16px;
 }
 
 .gm-grid-3 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  align-items: start;
   gap: 0 16px;
 }
 
@@ -896,33 +1012,35 @@
 .gm-stat {
   display: flex;
   flex-direction: column;
-  padding: 10px 12px;
-  border: 1px solid @gm-line;
-  border-radius: @gm-radius;
-  background: @gm-panel;
+  padding: 12px 14px;
+  border-radius: var(--radius-m);
+  background: var(--bg-1);
 }
 
 .gm-stat-label {
-  color: @gm-mute;
-  font-size: 10.5px;
-  letter-spacing: 0.6px;
+  color: var(--text-1);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .gm-stat-value {
   margin: 2px 0;
-  font-size: 20px;
-  color: #ffffff;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .gm-stat-sub {
-  color: @gm-mute;
-  font-size: 10.5px;
+  color: var(--text-2);
+  font-size: 12px;
 }
 
 .gm-table-wrap {
-  border: 1px solid @gm-line;
-  border-radius: @gm-radius;
+  border-radius: var(--radius-m);
+  background: var(--bg-1);
   overflow: auto;
   max-height: 100%;
 }
@@ -930,11 +1048,11 @@
 .gm-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 11.5px;
+  font-size: 12.5px;
 
   th,
   td {
-    padding: 6px 8px;
+    padding: 7px 10px;
     text-align: left;
     white-space: nowrap;
     border-bottom: 1px solid @gm-line;
@@ -944,11 +1062,11 @@
     position: sticky;
     top: 0;
     z-index: 1;
-    background: @gm-raise;
-    color: @gm-mute;
-    font-size: 10px;
-    font-weight: bold;
-    letter-spacing: 0.8px;
+    background: var(--bg-1);
+    color: var(--text-2);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
@@ -959,18 +1077,18 @@
 
   tbody tr {
     cursor: pointer;
-    transition: background 0.1s;
+    transition: background var(--dur-fast) var(--ease);
 
     &:hover {
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--bg-2);
     }
 
     &.is-selected {
-      background: rgba(232, 200, 119, 0.1);
+      background: var(--bg-3);
     }
 
     &.is-me td:first-child b {
-      color: @gm-green;
+      color: var(--mu-red-soft);
     }
   }
 }
@@ -981,7 +1099,7 @@
   gap: 7px;
 
   b {
-    color: #ffffff;
+    font-weight: 600;
   }
 }
 
@@ -989,7 +1107,7 @@
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: @gm-mute;
+  color: var(--text-1);
 }
 
 .gm-hp {
@@ -997,17 +1115,17 @@
   width: 56px;
   height: 6px;
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--bg-4);
   overflow: hidden;
   vertical-align: middle;
 
   i {
     display: block;
     height: 100%;
-    background: @gm-green;
+    background: var(--ok);
 
     &.is-low {
-      background: @gm-danger;
+      background: var(--danger);
     }
   }
 }
@@ -1015,7 +1133,6 @@
 .gm-live {
   display: flex;
   gap: 14px;
-  height: 100%;
   min-height: 0;
 }
 
@@ -1032,17 +1149,24 @@
   }
 }
 
+// A list's picked entry and what can be done to it, beside the list. It keeps
+// its place while the list scrolls, and scrolls itself when it is long.
 .gm-detail {
   flex: none;
-  width: 280px;
+  width: 300px;
   align-self: flex-start;
   max-height: 100%;
-  padding: 12px;
-  border: 1px solid @gm-line-strong;
-  border-radius: @gm-radius;
-  background: @gm-panel;
+  padding: 14px;
+  border-radius: var(--radius-m);
+  background: var(--bg-1);
+  box-shadow: inset 0 0 0 1px @gm-line;
   overflow: auto;
-  box-sizing: border-box;
+
+  .gm-card {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+  }
 }
 
 .gm-detail-head {
@@ -1053,8 +1177,8 @@
   margin-bottom: 8px;
 
   h3 {
-    font-size: 14px;
-    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1063,13 +1187,13 @@
 
 .gm-facts {
   display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 5px 8px;
-  margin: 0 0 6px;
+  grid-template-columns: 96px 1fr;
+  gap: 6px 10px;
+  margin: 0 0 8px;
 
   dt {
-    color: @gm-mute;
-    font-size: 10.5px;
+    color: var(--text-1);
+    font-size: 12.5px;
   }
 
   dd {
@@ -1081,7 +1205,7 @@
 
 .gm-detail-last {
   white-space: normal;
-  color: @gm-gold-dim;
+  color: var(--text-1);
 }
 
 /* ---------------------------------------------------------------- rows */
@@ -1093,13 +1217,11 @@
 }
 
 .gm-row {
-  border: 1px solid @gm-line;
-  border-radius: 8px;
-  background: @gm-panel;
+  border-radius: var(--radius-s);
+  background: var(--bg-1);
 
   &.is-selected {
-    border-color: @gm-line-strong;
-    background: rgba(232, 200, 119, 0.08);
+    background: var(--bg-3);
   }
 }
 
@@ -1108,7 +1230,7 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 6px 10px;
+  padding: 7px 11px;
   border: 0;
   background: transparent;
   text-align: left;
@@ -1117,14 +1239,13 @@
 
 .gm-row-name {
   flex: 1;
-  color: #ffffff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .gm-row-pos {
-  color: @gm-mute;
+  color: var(--text-2);
 }
 
 /* ------------------------------------------------------------------- map */
@@ -1132,13 +1253,12 @@
 .gm-maptab {
   display: flex;
   gap: 14px;
-  height: 100%;
   min-height: 0;
 }
 
 .gm-maptab-side {
   flex: none;
-  width: 200px;
+  width: 210px;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -1152,7 +1272,6 @@
   gap: 2px;
   overflow-y: auto;
   padding-right: 4px;
-  scrollbar-width: thin;
 }
 
 .gm-maplist-row {
@@ -1160,13 +1279,14 @@
   justify-content: space-between;
   align-items: center;
   gap: 6px;
-  padding: 6px 9px;
-  border: 1px solid transparent;
-  border-radius: 7px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: var(--radius-s);
   background: transparent;
-  color: @gm-ink;
+  color: var(--text-0);
   text-align: left;
   cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
 
   span {
     overflow: hidden;
@@ -1175,17 +1295,17 @@
   }
 
   &.is-quiet {
-    color: @gm-mute;
+    color: var(--text-1);
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-3);
   }
 
   &.is-active {
-    border-color: @gm-line-strong;
-    background: rgba(232, 200, 119, 0.12);
-    color: @gm-gold;
+    background: var(--bg-3);
+    color: var(--text-0);
+    box-shadow: inset 2px 0 0 var(--mu-red-soft);
   }
 }
 
@@ -1203,16 +1323,16 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 
   h3 {
-    font-size: 14px;
-    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
   }
 }
 
 .gm-maptab-count {
-  color: @gm-mute;
+  color: var(--text-2);
 }
 
 .gm-legend {
@@ -1220,8 +1340,8 @@
   align-items: center;
   gap: 5px 6px;
   margin-left: auto;
-  color: @gm-mute;
-  font-size: 10.5px;
+  color: var(--text-2);
+  font-size: 12px;
 
   .gm-dot {
     margin-left: 6px;
@@ -1234,9 +1354,9 @@
   width: min(100%, 560px);
   aspect-ratio: 1;
   margin: 0 auto;
-  border: 1px solid @gm-line;
-  border-radius: @gm-radius;
-  background: @gm-sunk center / 100% 100% no-repeat;
+  border-radius: var(--radius-m);
+  background: var(--bg-0) center / 100% 100% no-repeat;
+  box-shadow: inset 0 0 0 1px @gm-line;
   overflow: hidden;
   cursor: crosshair;
 
@@ -1253,7 +1373,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  color: @gm-mute;
+  color: var(--text-2);
 }
 
 .gm-map-dot,
@@ -1261,7 +1381,9 @@
 .gm-map-scope {
   position: absolute;
   transform: translate(-50%, -50%);
-  transition: left 0.25s linear, top 0.25s linear;
+  transition:
+    left 0.25s linear,
+    top 0.25s linear;
 }
 
 .gm-map-scope {
@@ -1280,10 +1402,10 @@
 .gm-map-hero {
   width: 12px;
   height: 12px;
-  border: 2px solid #ffffff;
+  border: 2px solid #fff;
   border-radius: 50%;
-  background: @gm-green;
-  box-shadow: 0 0 8px @gm-green;
+  background: var(--mu-red-soft);
+  box-shadow: 0 0 8px var(--mu-red-soft);
   pointer-events: none;
 }
 
@@ -1293,7 +1415,7 @@
   padding: 0;
   border: 1.5px solid rgba(0, 0, 0, 0.7);
   border-radius: 50%;
-  background: @gm-gold;
+  background: var(--text-0);
   cursor: pointer;
 
   &.is-gm {
@@ -1315,19 +1437,165 @@
   left: 50%;
   bottom: 12px;
   transform: translateX(-50%);
-  padding: 2px 6px;
+  padding: 2px 7px;
   border-radius: 4px;
-  background: rgba(0, 0, 0, 0.8);
-  color: #ffffff;
-  font-size: 10.5px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  font-size: 11.5px;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.12s;
+  transition: opacity var(--dur-fast) var(--ease);
 }
 
 .gm-maptab-players {
-  margin-top: 8px;
+  margin-top: 10px;
+}
+
+// A right-click on the map (`mapMenu.tsx`): what can be done at that tile.
+.gm-menu {
+  position: fixed;
+  z-index: 20;
+  width: 290px;
+  max-height: calc(100vh - 16px);
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  border-radius: var(--radius-m);
+  background: var(--bg-3);
+  box-shadow:
+    var(--shadow-overlay),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  overflow: auto;
+  user-select: none;
+
+  .gm-toggle {
+    align-self: flex-start;
+    background: var(--bg-2);
+  }
+
+  .gm-toggle-btn.is-active {
+    background: var(--bg-4);
+  }
+
+  .gm-search {
+    margin: 6px 0 4px;
+    padding: 6px 10px;
+    background: var(--bg-2);
+
+    &:hover,
+    &:focus {
+      background: var(--bg-1);
+    }
+  }
+}
+
+.gm-menu-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px 4px;
+
+  b {
+    font-weight: 600;
+  }
+
+  span {
+    color: var(--text-1);
+    font-size: 12px;
+  }
+}
+
+.gm-menu-note {
+  padding: 0 8px 6px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.gm-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--text-0);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+
+  &:hover {
+    background: var(--bg-4);
+  }
+
+  &:disabled {
+    color: var(--text-2);
+    cursor: default;
+    background: transparent;
+  }
+
+  small {
+    margin-left: auto;
+    color: var(--text-2);
+  }
+}
+
+.gm-menu-sep {
+  height: 1px;
+  margin: 5px 4px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.gm-menu-spawn {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 8px 2px;
+}
+
+.gm-menu-label {
+  margin: 2px 0 6px;
+  color: var(--text-1);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.gm-menu-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0 -8px;
+}
+
+.gm-menu-thing {
+  padding: 5px 8px;
+}
+
+.gm-menu-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gm-menu-icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--bg-1);
+  overflow: hidden;
+
+  .item-icon {
+    max-width: 24px;
+    max-height: 24px;
+    object-fit: contain;
+  }
 }
 
 /* ------------------------------------------------------------------ logs */
@@ -1336,7 +1604,7 @@
   display: flex;
   align-items: flex-end;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 
   .gm-field {
     margin: 0;
@@ -1355,21 +1623,22 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  border: 1px solid @gm-line-strong;
-  border-radius: 8px;
-  background: @gm-raise;
+  margin-top: 4px;
+  border-radius: var(--radius-s);
+  background: var(--bg-3);
+  box-shadow: var(--shadow-overlay);
   overflow: hidden;
 
   button {
-    padding: 6px 10px;
+    padding: 7px 11px;
     border: 0;
     background: transparent;
-    color: @gm-ink;
+    color: var(--text-0);
     text-align: left;
     cursor: pointer;
 
     &:hover {
-      background: rgba(232, 200, 119, 0.14);
+      background: var(--bg-4);
     }
   }
 }
@@ -1377,37 +1646,36 @@
 .gm-log {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  margin-bottom: 8px;
-  border: 1px solid @gm-line;
-  border-radius: @gm-radius;
-  background: @gm-sunk;
+  margin-bottom: 10px;
+  border-radius: var(--radius-m);
+  background: var(--bg-1);
   overflow: hidden;
 }
 
 .gm-log-line {
   display: grid;
-  grid-template-columns: 58px 84px auto 1fr;
+  grid-template-columns: 62px 90px auto 1fr;
   align-items: baseline;
   gap: 8px;
-  padding: 5px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  font-size: 11.5px;
+  padding: 6px 12px;
+  border-bottom: 1px solid @gm-line;
+  font-size: 12.5px;
 
   time {
-    color: @gm-mute;
-    font-size: 10.5px;
+    color: var(--text-2);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
   }
 
   &.gm-kind-death .gm-log-kind,
   &.gm-kind-command .gm-log-kind {
-    color: @gm-danger;
+    color: var(--danger-text);
   }
 
   &.gm-kind-kill .gm-log-kind,
   &.gm-kind-level .gm-log-kind,
   &.gm-kind-login .gm-log-kind {
-    color: @gm-green;
+    color: var(--ok-text);
   }
 
   &.gm-kind-chat .gm-log-kind,
@@ -1418,14 +1686,15 @@
   }
 
   &.gm-kind-server .gm-log-kind {
-    color: @gm-reply;
+    color: var(--warn-text);
   }
 }
 
 .gm-log-kind {
-  color: @gm-gold-dim;
-  font-size: 10px;
-  letter-spacing: 0.6px;
+  color: var(--text-1);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -1434,7 +1703,8 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: @gm-gold;
+  color: var(--text-0);
+  font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
 
@@ -1462,18 +1732,20 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
-  padding: 9px 10px;
-  border: 1px solid @gm-line;
-  border-radius: 9px;
-  background: @gm-panel;
-  color: @gm-ink;
+  padding: 10px 11px;
+  border: 0;
+  border-radius: var(--radius-m);
+  background: var(--bg-1);
+  color: var(--text-0);
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.12s, background 0.12s, transform 0.08s;
+  transition:
+    background var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease),
+    transform 80ms var(--ease);
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-    background: @gm-raise;
+    background: var(--bg-3);
   }
 
   &:active {
@@ -1482,8 +1754,8 @@
 
   &.is-active,
   &.is-wearing {
-    border-color: @gm-gold;
-    background: rgba(232, 200, 119, 0.12);
+    background: var(--bg-3);
+    box-shadow: inset 0 0 0 1px rgba(232, 233, 234, 0.7);
   }
 
   &.gm-skin-npc .gm-card-num {
@@ -1496,42 +1768,42 @@
 }
 
 .gm-card-num {
-  color: @gm-mute;
-  font-size: 10px;
+  color: var(--text-2);
+  font-size: 11px;
 }
 
 .gm-card-name {
-  color: #ffffff;
-  font-size: 12px;
+  max-width: 100%;
+  font-size: 13px;
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 100%;
 }
 
 .gm-card-sub {
-  color: @gm-mute;
-  font-size: 10.5px;
+  color: var(--text-2);
+  font-size: 11.5px;
 }
 
 .gm-card-tag {
   position: absolute;
-  top: 7px;
+  top: 8px;
   right: 8px;
-  padding: 1px 6px;
-  border-radius: 8px;
-  background: @gm-gold;
-  color: #1a1408;
-  font-size: 9.5px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 
   &.is-quiet {
-    background: rgba(255, 255, 255, 0.08);
-    color: @gm-mute;
+    background: var(--bg-4);
+    color: var(--text-0);
     opacity: 0;
-    transition: opacity 0.12s;
+    transition: opacity var(--dur-fast) var(--ease);
   }
 }
 
@@ -1540,7 +1812,7 @@
 }
 
 .gm-item-cards {
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
 }
 
 .gm-item-card {
@@ -1570,8 +1842,8 @@
   height: 40px;
   display: grid;
   place-items: center;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-s);
+  background: var(--bg-0);
   overflow: hidden;
 
   .item-icon {
@@ -1581,17 +1853,61 @@
   }
 }
 
+// Spawn and Console: the list scrolls on its own, beside what was picked from
+// it, which keeps its place (`.gm-detail`).
+.gm-spawn {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  > .gm-spawn-items,
+  > .gm-spawn-monsters,
+  > .gm-spawn-tools {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
 .gm-spawn-items,
 .gm-console-body {
   display: flex;
   gap: 14px;
-  align-items: flex-start;
+  min-height: 0;
 }
 
-.gm-spawn-items-main,
+.gm-spawn-items-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.gm-spawn-monsters {
+  display: flex;
+  flex-direction: column;
+}
+
+.gm-spawn-tools {
+  overflow: auto;
+}
+
+.gm-console {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  > .gm-console-body {
+    flex: 1;
+  }
+}
+
 .gm-console-list {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .gm-spec {
@@ -1613,34 +1929,37 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 1px;
-  padding: 6px 10px;
-  border: 1px solid @gm-line;
-  border-radius: 8px;
-  background: @gm-panel;
-  color: @gm-ink;
+  padding: 7px 11px;
+  border: 0;
+  border-radius: var(--radius-s);
+  background: var(--bg-1);
+  color: var(--text-0);
   cursor: pointer;
   text-align: left;
+  transition:
+    background var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--bg-3);
   }
 
   &.is-active {
-    border-color: @gm-gold;
-    background: rgba(232, 200, 119, 0.12);
+    background: var(--bg-3);
+    box-shadow: inset 0 0 0 1px rgba(232, 233, 234, 0.7);
   }
 
   &.is-heavy .gm-command-slash {
-    color: @gm-danger;
+    color: var(--danger-text);
   }
 }
 
 .gm-command-label {
-  font-size: 11.5px;
+  font-size: 12.5px;
 }
 
 .gm-command-slash {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 /* -------------------------------------------------------------- narrow */
@@ -1649,21 +1968,27 @@
   .gm-window {
     width: 100%;
     height: 100%;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
     border-radius: 0;
+
+    .mu-frame {
+      display: none;
+    }
   }
 
-  .gm-side {
-    width: 56px;
-  }
-
-  .gm-brand-text,
+  .gm-marker,
+  .gm-headline,
+  .gm-feed,
   .gm-side-label,
-  .gm-side-foot {
+  .gm-side-desc,
+  .gm-side-key {
     display: none;
   }
 
   .gm-side-btn {
-    justify-content: center;
+    align-items: center;
     padding: 9px 0;
   }
 

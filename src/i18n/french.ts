@@ -2115,6 +2115,10 @@ export const frenchLayer: LanguageLayer = {
     'gm.map.noPicture': 'Ce monde n\'a pas d\'image de carte.',
     'gm.map.goHere': 'Aller sur cette carte',
     'gm.map.bringTarget': 'Amener {name} ici',
+    'gm.map.menu.goHere': 'Aller ici',
+    'gm.map.menu.movesYou': 'Vous y êtes d’abord déplacé.',
+    'gm.map.menu.copy': 'Copier les coordonnées',
+    'gm.map.menuHint': 'Clic droit sur une case pour les feux d’artifice, les apparitions et plus.',
 
     'gm.logs.character': 'Personnage',
     'gm.logs.follow': 'Suivre en direct',

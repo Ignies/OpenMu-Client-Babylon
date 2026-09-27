@@ -2094,6 +2094,10 @@ export const russianLayer: LanguageLayer = {
     'gm.map.noPicture': 'У этого мира нет изображения карты.',
     'gm.map.goHere': 'Перейти на эту карту',
     'gm.map.bringTarget': 'Привести {name} сюда',
+    'gm.map.menu.goHere': 'Перейти сюда',
+    'gm.map.menu.movesYou': 'Сначала вы переместитесь сюда.',
+    'gm.map.menu.copy': 'Копировать координаты',
+    'gm.map.menuHint': 'Правый клик по клетке: фейерверки, призыв и другое.',
 
     'gm.logs.character': 'Персонаж',
     'gm.logs.follow': 'Следить онлайн',

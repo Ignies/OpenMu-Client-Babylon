@@ -2100,6 +2100,10 @@ export const bulgarianLayer: LanguageLayer = {
     'gm.map.noPicture': 'Този свят няма изображение на картата.',
     'gm.map.goHere': 'Отиди на тази карта',
     'gm.map.bringTarget': 'Доведи {name} тук',
+    'gm.map.menu.goHere': 'Отиди тук',
+    'gm.map.menu.movesYou': 'Първо те премества тук.',
+    'gm.map.menu.copy': 'Копирай координатите',
+    'gm.map.menuHint': 'Десен клик върху плочка за фойерверки, призоваване и още.',
 
     'gm.logs.character': 'Герой',
     'gm.logs.follow': 'Следи на живо',

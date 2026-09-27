@@ -2115,6 +2115,10 @@ export const italianLayer: LanguageLayer = {
     'gm.map.noPicture': 'Questo mondo non ha un\'immagine della mappa.',
     'gm.map.goHere': 'Vai a questa mappa',
     'gm.map.bringTarget': 'Porta {name} qui',
+    'gm.map.menu.goHere': 'Vai qui',
+    'gm.map.menu.movesYou': 'Prima vieni spostato qui.',
+    'gm.map.menu.copy': 'Copia coordinate',
+    'gm.map.menuHint': 'Clic destro su una casella per fuochi d’artificio, evocazioni e altro.',
 
     'gm.logs.character': 'Personaggio',
     'gm.logs.follow': 'Segui dal vivo',

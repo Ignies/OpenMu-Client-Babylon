@@ -11,6 +11,7 @@ import { uiClick } from '../../../libs/sfx';
 import { MuWindows } from '../muWindow/windowState';
 import { ChatLineType } from '../../../common/chat';
 import { mapName } from '../../../common/gmMaps';
+import { MuFrame } from '../muFrame';
 import { TabIcon } from './icons';
 import { LiveTab } from './tabs/live';
 import { MapTab } from './tabs/map';
@@ -34,8 +35,9 @@ import { ConsoleTab } from './tabs/console';
  * (`admin/feed.ts`), which the proxy only opens for a socket whose character
  * the server flagged as a game master.
  *
- * Not the original's window chrome, on purpose: that art is fixed-size, and
- * this is an instrument with tables, a map and a log. It still joins
+ * Drawn like the world select's card, in the Babylon site's design system
+ * inside MU's Option window frame: the original's window art is fixed-size,
+ * and this is an instrument with tables, a map and a log. It still joins
  * `MuWindows`, so Escape closes it before the windows underneath and the
  * z-order stays honest. F8 toggles it, and there is a plate for the people
  * who do not know that. Game masters only: everybody else renders null.
@@ -193,9 +195,15 @@ const SideButton = observer(({ id, active, onPick }: { id: GmSection; active: bo
       title={t(entry.hintKey)}
       onClick={uiClick(onPick)}
     >
-      <TabIcon id={id} />
-      <span className="gm-side-label">{t(entry.titleKey)}</span>
-      {badge !== null && badge > 0 ? <span className="gm-side-badge">{badge}</span> : null}
+      <span className="gm-side-row">
+        <TabIcon id={id} />
+        <span className="gm-side-label">{t(entry.titleKey)}</span>
+        {badge !== null && badge > 0 ? <span className="gm-side-badge">{badge}</span> : null}
+      </span>
+      {/* The open tab unfolds its one line in place, as the world select's do. */}
+      <span className="gm-side-desc">
+        <span>{t(entry.hintKey)}</span>
+      </span>
     </button>
   );
 });
@@ -252,14 +260,16 @@ export const GmPanelWindow = observer(() => {
         aria-label={t('gm.title')}
         onPointerDown={() => MuWindows.raise(WINDOW_ID)}
       >
+        <MuFrame />
+
         <aside className="gm-side">
-          <div className="gm-brand">
-            <span className="gm-brand-mark">GM</span>
-            <span className="gm-brand-text">
-              <b>{t('gm.title')}</b>
-              <FeedStatus />
-            </span>
-          </div>
+          <span className="gm-marker gm-mono">
+            {view.hero
+              ? `${mapName(view.hero.map)}  ${view.hero.x}, ${view.hero.y}`
+              : t('gm.notInWorld')}
+          </span>
+          <h2 className="gm-headline">{t('gm.title')}</h2>
+          <FeedStatus />
 
           <nav className="gm-side-nav" aria-label={t('gm.sections')}>
             {GM_SECTIONS.map(entry => (
@@ -272,27 +282,18 @@ export const GmPanelWindow = observer(() => {
             ))}
           </nav>
 
-          <div className="gm-side-foot">
-            {view.hero ? (
-              <span className="gm-side-where">
-                <b>{mapName(view.hero.map)}</b>
-                <span className="gm-mono">
-                  {view.hero.x}, {view.hero.y}
-                </span>
-              </span>
-            ) : (
-              <span className="gm-side-where">{t('gm.notInWorld')}</span>
-            )}
-            <span className="gm-side-key">{t('gm.keyToClose', { key: TOGGLE_KEY })}</span>
-          </div>
+          <span className="gm-side-key gm-mono">
+            {t('gm.keyToClose', { key: TOGGLE_KEY })}
+          </span>
         </aside>
 
         <div className="gm-main">
           <header className="gm-top">
-            <div className="gm-top-title">
-              <h2>{t(section.titleKey)}</h2>
-              <p>{t(section.hintKey)}</p>
-            </div>
+            <span className="gm-top-title">
+              <span className="gm-top-where">GM</span>
+              <span className="gm-top-sep">/</span>
+              <b>{t(section.titleKey)}</b>
+            </span>
 
             <input
               className="gm-search gm-top-search"
@@ -304,7 +305,9 @@ export const GmPanelWindow = observer(() => {
               onChange={e => GmPanel.setSearch(e.target.value)}
             />
 
-            <span className={`gm-target-chip${GmPanel.target ? ' is-set' : ''}`}>
+            <span
+              className={`gm-target-chip${GmPanel.target ? ' is-set' : ''}`}
+            >
               {GmPanel.target ? (
                 <>
                   {t('gm.targetIs', { name: GmPanel.target })}

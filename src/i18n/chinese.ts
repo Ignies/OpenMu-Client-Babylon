@@ -2061,6 +2061,10 @@ export const chineseLayer: LanguageLayer = {
     'gm.map.noPicture': '此世界没有地图图片。',
     'gm.map.goHere': '传送到此地图',
     'gm.map.bringTarget': '把 {name} 带到这里',
+    'gm.map.menu.goHere': '前往这里',
+    'gm.map.menu.movesYou': '会先把你移动到这里。',
+    'gm.map.menu.copy': '复制坐标',
+    'gm.map.menuHint': '右键点击地块可放烟花、生成物品等。',
 
     'gm.logs.character': '角色',
     'gm.logs.follow': '实时跟随',

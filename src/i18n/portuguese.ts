@@ -2113,6 +2113,10 @@ export const portugueseLayer: LanguageLayer = {
     'gm.map.noPicture': 'Este mundo não tem imagem de mapa.',
     'gm.map.goHere': 'Ir para este mapa',
     'gm.map.bringTarget': 'Trazer {name} para cá',
+    'gm.map.menu.goHere': 'Ir para cá',
+    'gm.map.menu.movesYou': 'Você é levado para cá primeiro.',
+    'gm.map.menu.copy': 'Copiar coordenadas',
+    'gm.map.menuHint': 'Clique com o botão direito num ponto para fogos de artifício, invocações e mais.',
 
     'gm.logs.character': 'Personagem',
     'gm.logs.follow': 'Seguir ao vivo',

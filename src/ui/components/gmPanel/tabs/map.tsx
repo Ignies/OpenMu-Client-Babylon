@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../i18n';
 import { GmPanel } from '../../../../gmPanel';
@@ -8,6 +9,7 @@ import { GM_MAPS, mapName } from '../../../../common/gmMaps';
 import { gmCommand } from '../../../../common/gmCommands';
 import { uiClick } from '../../../../libs/sfx';
 import { MapView } from '../mapView';
+import { MapMenu } from '../mapMenu';
 import { FeedNotice, playerMatches } from '../shared';
 
 /**
@@ -16,8 +18,11 @@ import { FeedNotice, playerMatches } from '../shared';
  * The picker lists the maps that have players first (with the count), then
  * the rest of the server's map table. The dots are the tracker's positions;
  * the game master's own dot and the monsters and NPCs the client itself has
- * in scope ride on top when the map is the one they stand on.
+ * in scope ride on top when the map is the one they stand on. A right-click
+ * on a tile opens what can be done there (`mapMenu.tsx`).
  */
+
+type MenuAt = { x: number; y: number; left: number; top: number };
 
 export const MapTab = observer(({ view }: { view: WorldView }) => {
   const hero = view.hero;
@@ -26,6 +31,10 @@ export const MapTab = observer(({ view }: { view: WorldView }) => {
   const onThisMap = (byMap.get(map) ?? []).filter(p => playerMatches(p, GmPanel.search));
   const selected = GmPanel.selectedPlayerId ? AdminFeed.players.get(GmPanel.selectedPlayerId) : null;
   const move = gmCommand('/move');
+  const [menu, setMenu] = useState<MenuAt | null>(null);
+
+  // A menu belongs to the map it was opened on.
+  useEffect(() => setMenu(null), [map]);
 
   const populated = [...byMap.entries()]
     .sort((a, b) => b[1].length - a[1].length || a[0] - b[0]);
@@ -124,6 +133,7 @@ export const MapTab = observer(({ view }: { view: WorldView }) => {
           scope={hero && hero.map === map ? view.nearby.filter(e => e.kind !== 'player') : []}
           selectedId={GmPanel.selectedPlayerId}
           onPick={pick}
+          onMenu={(x, y, left, top) => setMenu({ x, y, left, top })}
           onTile={
             hero
               ? (x, y) =>
@@ -136,7 +146,20 @@ export const MapTab = observer(({ view }: { view: WorldView }) => {
               : undefined
           }
         />
-        <p className="gm-hint">{t('gm.map.warpHint')}</p>
+        <p className="gm-hint">
+          {t('gm.map.warpHint')} {t('gm.map.menuHint')}
+        </p>
+
+        {menu ? (
+          <MapMenu
+            map={map}
+            x={menu.x}
+            y={menu.y}
+            at={{ left: menu.left, top: menu.top }}
+            hero={hero}
+            onClose={() => setMenu(null)}
+          />
+        ) : null}
 
         {onThisMap.length > 0 ? (
           <ul className="gm-rows gm-maptab-players">

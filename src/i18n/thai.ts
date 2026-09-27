@@ -2079,6 +2079,10 @@ export const thaiLayer: LanguageLayer = {
     'gm.map.noPicture': 'โลกนี้ไม่มีภาพแผนที่',
     'gm.map.goHere': 'วาร์ปไปแผนที่นี้',
     'gm.map.bringTarget': 'พา {name} มาที่นี่',
+    'gm.map.menu.goHere': 'ไปที่นี่',
+    'gm.map.menu.movesYou': 'จะย้ายคุณมาที่นี่ก่อน',
+    'gm.map.menu.copy': 'คัดลอกพิกัด',
+    'gm.map.menuHint': 'คลิกขวาที่ช่องเพื่อจุดพลุ เสกของ และอื่น ๆ',
 
     'gm.logs.character': 'ตัวละคร',
     'gm.logs.follow': 'ติดตามสด',

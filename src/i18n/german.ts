@@ -2121,6 +2121,10 @@ export const germanLayer: LanguageLayer = {
     'gm.map.noPicture': 'Diese Welt hat kein Kartenbild.',
     'gm.map.goHere': 'Zu dieser Karte',
     'gm.map.bringTarget': '{name} hierher holen',
+    'gm.map.menu.goHere': 'Hierher gehen',
+    'gm.map.menu.movesYou': 'Du wirst zuerst hierher versetzt.',
+    'gm.map.menu.copy': 'Koordinaten kopieren',
+    'gm.map.menuHint': 'Rechtsklick auf ein Feld für Feuerwerk, Spawnen und mehr.',
 
     'gm.logs.character': 'Charakter',
     'gm.logs.follow': 'Live folgen',

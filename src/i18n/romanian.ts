@@ -2108,6 +2108,10 @@ export const romanianLayer: LanguageLayer = {
     'gm.map.noPicture': 'Această lume nu are imagine de hartă.',
     'gm.map.goHere': 'Mergi pe această hartă',
     'gm.map.bringTarget': 'Adu pe {name} aici',
+    'gm.map.menu.goHere': 'Mergi aici',
+    'gm.map.menu.movesYou': 'Mai întâi ești mutat aici.',
+    'gm.map.menu.copy': 'Copiază coordonatele',
+    'gm.map.menuHint': 'Clic dreapta pe o dală pentru artificii, invocări și altele.',
 
     'gm.logs.character': 'Personaj',
     'gm.logs.follow': 'Urmărește live',

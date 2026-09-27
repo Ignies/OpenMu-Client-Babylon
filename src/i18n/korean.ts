@@ -2067,6 +2067,10 @@ export const koreanLayer: LanguageLayer = {
     'gm.map.noPicture': '이 월드에는 지도 이미지가 없습니다.',
     'gm.map.goHere': '이 맵으로 이동',
     'gm.map.bringTarget': '{name} 여기로 데려오기',
+    'gm.map.menu.goHere': '여기로 이동',
+    'gm.map.menu.movesYou': '먼저 이곳으로 이동합니다.',
+    'gm.map.menu.copy': '좌표 복사',
+    'gm.map.menuHint': '타일을 우클릭하면 폭죽, 소환 등을 할 수 있습니다.',
 
     'gm.logs.character': '캐릭터',
     'gm.logs.follow': '실시간 따라가기',
