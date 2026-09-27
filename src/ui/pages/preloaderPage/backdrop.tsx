@@ -40,20 +40,24 @@ const MARK = 11;
 const MARK_WIDTH = 2.2;
 
 /**
- * A credit's roll of names (`.ws-credit-roll`): the rows it shows at once and
- * their height, px, how many rows go by a second, and when it starts and stops
- * moving within the stay, seconds after the stop is reached and before it is
- * left. The stop is held for as long as the whole roll takes.
+ * A credit's roll of names (`.ws-credit-roll`), gliding one name at a time
+ * through its middle row: the rows it shows (odd, so there is a middle) and
+ * their height, px, the seconds each name gets, how much the glide slows as a
+ * name crosses the middle (1 would stop on it), and when the roll starts and
+ * stops within the stay, seconds after the stop is reached and before it is
+ * left. The stop is held for the whole roll.
  */
-const ROLL_ROWS = 7;
-const ROLL_ROW = 18;
-const ROLL_RATE = 14;
+const ROLL_ROWS = 5;
+const ROLL_ROW = 20;
+const ROLL_STEP = 0.3;
+const ROLL_SETTLE = 0.8;
 const ROLL_IN = 0.9;
-const ROLL_OUT = 0.8;
+const ROLL_OUT = 1;
+const ROLL_MID = (ROLL_ROWS - 1) / 2;
 
-/** The seconds a credit's roll needs to run past every name. */
+/** The seconds a credit's roll needs to bring every name to the middle. */
 const rollTime = (credit: Credit | null) =>
-  credit?.roll ? Math.max(0, credit.roll.length - ROLL_ROWS) / ROLL_RATE : 0;
+  credit?.roll ? Math.max(0, credit.roll.length - 1) * ROLL_STEP : 0;
 
 /**
  * Whose name a stop carries, if any. The credits roll in their own order from
@@ -303,11 +307,26 @@ export const Backdrop = observer(() => {
         // A credit with a roll is tall, so it hangs below unless low down.
         const below = y < height * (person.roll ? 0.55 : 0.38);
 
-        const time = rollTime(person);
-        if (roll.current && time) {
-          const k = Math.max(0, Math.min(1, (held - ROLL_IN) / time));
-          const rows = (person.roll?.length ?? 0) - ROLL_ROWS;
-          roll.current.style.transform = `translateY(${(-k * rows * ROLL_ROW).toFixed(1)}px)`;
+        const count = person.roll?.length ?? 0;
+        if (roll.current && count) {
+          // Names from the first, in one smooth glide that slows as each name
+          // crosses the middle row and never quite stops. The first starts and
+          // the last ends in the middle, with empty rows past them.
+          const steps = Math.max(
+            0,
+            Math.min(count - 1, (held - ROLL_IN) / ROLL_STEP)
+          );
+          const at =
+            steps - (ROLL_SETTLE * Math.sin(2 * Math.PI * steps)) / (2 * Math.PI);
+          roll.current.style.transform = `translateY(${((ROLL_MID - at) * ROLL_ROW).toFixed(1)}px)`;
+
+          // The name in the middle in full, the rest dimmer the further off.
+          const rows = roll.current.children;
+          for (let i = 0; i < rows.length; i++) {
+            const d = Math.abs(i - at);
+            const o = d < 1 ? 1 - 0.5 * d : Math.max(0.22, 0.5 - 0.14 * (d - 1));
+            (rows[i] as HTMLElement).style.opacity = o.toFixed(3);
+          }
         }
 
         card.style.opacity = alpha.toFixed(3);

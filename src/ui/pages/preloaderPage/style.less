@@ -261,15 +261,16 @@
 }
 
 // The names rolled under a credit (the server's contributors under its team),
-// fading in and out at the window's edges as they go by.
+// stepped through its middle row; the frame loop dims each by its distance
+// from the middle, and the window's edges fade them out.
 .ws-credit-roll {
   display: block;
   margin-top: 8px;
   overflow: hidden;
-  color: rgba(255, 214, 196, 0.82);
+  color: rgb(255, 226, 214);
   font-size: 13px;
-  -webkit-mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent);
-  mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent);
+  -webkit-mask-image: linear-gradient(transparent, #000 16%, #000 84%, transparent);
+  mask-image: linear-gradient(transparent, #000 16%, #000 84%, transparent);
 
   > span {
     display: block;
@@ -279,6 +280,7 @@
   > span > span {
     display: block;
     white-space: nowrap;
+    opacity: 0.22;
   }
 }
 

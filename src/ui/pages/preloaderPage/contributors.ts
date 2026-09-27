@@ -51,7 +51,7 @@ export type Credit = {
   reports: number;
   /** What a thanks is for, under the name. */
   note?: string;
-  /** Names rolled under the credit, as fast as they can be read. */
+  /** Names rolled under the credit, one at a time. */
   roll?: string[];
 };
 
@@ -201,8 +201,10 @@ export async function loadCredits(): Promise<Credit[]> {
       if (batch.length < 100) break;
     }
 
-    // The server's list is a bonus: without it the team is thanked on its own.
-    const openmu: GithubContributor[] = [];
+    // The server's list is a bonus: without it the team keeps the roll it had
+    // last time, or is thanked on its own, and the lists are not kept, so the
+    // next visit asks again rather than going a day without it.
+    let openmu: GithubContributor[] | null = [];
     try {
       for (let page = 1; page <= OPENMU_PAGES; page++) {
         const batch = await github<GithubContributor[]>(`${OPENMU}&page=${page}`);
@@ -210,10 +212,22 @@ export async function loadCredits(): Promise<Credit[]> {
         if (batch.length < 100) break;
       }
     } catch {
-      // Rate limited or offline: keep what came back.
+      openmu = null;
     }
 
-    const list = tidy(contributors, issues, openmu);
+    const list = tidy(contributors, issues, openmu ?? []);
+
+    if (!openmu) {
+      const roll = kept?.list.find(entry => entry.roll)?.roll;
+      const rolled = SPECIAL_THANKS.find(entry => entry.roll)?.name;
+      return roll
+        ? list.map(entry =>
+            entry.kind === 'thanks' && entry.name === rolled
+              ? { ...entry, roll }
+              : entry
+          )
+        : list;
+    }
 
     try {
       localStorage.setItem(
