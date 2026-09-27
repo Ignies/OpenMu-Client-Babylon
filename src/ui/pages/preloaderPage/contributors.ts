@@ -131,8 +131,8 @@ function names(contributors: GithubContributor[]): string[] {
 
 /**
  * The credits in the order they roll: the special thanks, then one entry per
- * person - the same name in two cases is one person - writers by commits and
- * then reporters by reports, then the playtesters.
+ * person - the same name in two cases is one person - writers by commits, the
+ * playtesters, then those who only reported bugs, by reports.
  */
 export function tidy(
   contributors: GithubContributor[],
@@ -175,7 +175,7 @@ export function tidy(
 
   const team = names(openmu);
 
-  return [
+  return order([
     ...SPECIAL_THANKS.map(({ name, note, roll }) => ({
       ...credit('thanks', name),
       ...(note ? { note } : {}),
@@ -184,12 +184,33 @@ export function tidy(
     ...people,
     ...PLAYTESTERS.map(name => credit('playtest', name)),
     credit('everyone', ''),
-  ];
+  ]);
+}
+
+/** Where each part of the credits rolls, in turn. */
+const rank = (c: Credit) =>
+  c.kind === 'thanks'
+    ? 0
+    : c.kind === 'person' && c.commits > 0
+      ? 1
+      : c.kind === 'playtest'
+        ? 2
+        : c.kind === 'person'
+          ? 3
+          : 4;
+
+/**
+ * The credits' running order: the special thanks, the writers, the
+ * playtesters, those who only reported bugs, and everyone else. Kept lists
+ * are put in it too, so a new order shows without waiting a day.
+ */
+function order(list: Credit[]): Credit[] {
+  return [...list].sort((a, b) => rank(a) - rank(b));
 }
 
 export async function loadCredits(): Promise<Credit[]> {
   const kept = stored();
-  if (kept && Date.now() - kept.at < FRESH_MS) return kept.list;
+  if (kept && Date.now() - kept.at < FRESH_MS) return order(kept.list);
 
   try {
     const contributors = await github<GithubContributor[]>(CONTRIBUTORS);
@@ -240,6 +261,6 @@ export async function loadCredits(): Promise<Credit[]> {
 
     return list;
   } catch {
-    return kept?.list ?? tidy([], []);
+    return kept ? order(kept.list) : tidy([], []);
   }
 }

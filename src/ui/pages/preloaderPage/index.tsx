@@ -13,7 +13,8 @@ import { ServerList } from '../../../common/serverList';
 import { loadVersionUi, versionTags, versionUi } from '../../../version';
 import type { PregameBackdrop } from '../../../version/uiContract';
 import { uiClick } from '../../../libs/sfx';
-import { sound } from '../../../sound';
+import { COMBAT_BUS, playSfx, sound, type Sounds } from '../../../sound';
+import { SoundsManager } from '../../../libs/soundsManager';
 import { setSceneCovered } from '../../../common/sceneCover';
 import { pregameLoad } from '../../../common/pregameLoad';
 import { MuFlag } from '../../components/muFlag';
@@ -36,6 +37,14 @@ const GITHUB_URL = 'https://github.com/Ignies/OpenMu-Client-Babylon';
 
 /** How long the page takes to fade off the login scene once a world is entered. */
 const LEAVE_MS = 320;
+
+/**
+ * The Dark Wizard's Hellfire, heard as it lights under the opening card, and
+ * how long it may wait for the browser to unlock audio after the Start press
+ * before it would land after the fire has gone.
+ */
+const HELLFIRE_SOUND: Sounds = 'Sound/sHellFire';
+const HELLFIRE_SOUND_WAIT_MS = 600;
 
 type Section = 'worlds' | 'setup' | 'download';
 
@@ -199,15 +208,39 @@ export const PreloaderPage = observer(() => {
     return () => window.clearTimeout(timer);
   }, []);
 
-  // The card opening is the cue for the menu music. The Start press that
-  // opened it is the gesture browsers want before they play anything.
+  // Start is up: fetch the Hellfire's sound now, so it is decoded by the press.
+  useEffect(() => {
+    if (phase === 'ready' && SoundsManager.scene) {
+      SoundsManager.loadSound(HELLFIRE_SOUND);
+    }
+  }, [phase]);
+
+  // The card opening is the cue for the menu music and the Hellfire's roar.
+  // The Start press that opened it is the gesture browsers want before they
+  // play anything, and the unlock it starts lands a moment after it.
   useEffect(() => {
     if (!open) return;
 
     pregameLoad.setWorldsOpen(true);
     sound.tryUnlock();
 
-    return () => pregameLoad.setWorldsOpen(false);
+    const roar = () => {
+      if (!sound.unlocked) return false;
+      playSfx(HELLFIRE_SOUND, null, { bus: COMBAT_BUS });
+      return true;
+    };
+    const until = performance.now() + HELLFIRE_SOUND_WAIT_MS;
+    let wait = 0;
+    if (!roar()) {
+      wait = window.setInterval(() => {
+        if (roar() || performance.now() > until) window.clearInterval(wait);
+      }, 30);
+    }
+
+    return () => {
+      window.clearInterval(wait);
+      pregameLoad.setWorldsOpen(false);
+    };
   }, [open]);
 
   const all = ServerConfig.all;
