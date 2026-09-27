@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../i18n';
 import { GmPanel } from '../../../../gmPanel';
@@ -7,7 +6,7 @@ import { CommandCard } from '../commandForm';
 
 /** A raw line, and every command in the catalogue, searchable. */
 export const ConsoleTab = observer(() => {
-  const [raw, setRaw] = useState('');
+  const raw = GmPanel.raw;
 
   return (
     <div className="gm-console">
@@ -20,13 +19,13 @@ export const ConsoleTab = observer(() => {
           placeholder="/item 7 3 13"
           spellCheck={false}
           autoComplete="off"
-          onChange={e => setRaw(e.target.value)}
+          onChange={e => GmPanel.setRaw(e.target.value)}
           onKeyDown={e => {
             if (e.key !== 'Enter') return;
             e.preventDefault();
             e.stopPropagation();
             GmPanel.sendRaw(raw);
-            setRaw('');
+            GmPanel.setRaw('');
           }}
         />
       </label>

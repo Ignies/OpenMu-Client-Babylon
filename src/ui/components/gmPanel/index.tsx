@@ -21,6 +21,8 @@ import { SpawnTab } from './tabs/spawn';
 import { CharacterTab } from './tabs/character';
 import { ModerationTab } from './tabs/moderation';
 import { EventsTab } from './tabs/events';
+import { MacrosTab } from './tabs/macros';
+import { GmLibrary, type Favourite, type MacroVars } from '../../../admin/gmLibrary';
 import { ConsoleTab } from './tabs/console';
 
 /**
@@ -67,6 +69,8 @@ const MAX_REPLIES = 4;
  * what was sent is listed beside them.
  */
 const Transcript = observer(() => {
+  const pinned = (line: string) => GmLibrary.isFavourite({ kind: 'line', line });
+
   if (GmPanel.sent.length === 0 && !GmPanel.error) return null;
 
   const since = GmPanel.sent[GmPanel.sent.length - 1]?.at ?? 0;
@@ -84,8 +88,33 @@ const Transcript = observer(() => {
           <span className="gm-foot-label">{t('gm.transcript.sent')}</span>
           <ul className="gm-foot-lines">
             {GmPanel.sent.slice(-3).map(entry => (
-              <li key={entry.id}>
-                <code>{entry.line}</code>
+              <li key={entry.id} className="gm-sent">
+                <button
+                  type="button"
+                  className="gm-sent-line"
+                  title={t('gm.recent.edit')}
+                  onClick={uiClick(() => GmPanel.loadLine(entry.line))}
+                >
+                  <code>{entry.line}</code>
+                </button>
+                <button
+                  type="button"
+                  className="gm-sent-tool"
+                  title={t('gm.recent.again')}
+                  aria-label={t('gm.recent.again')}
+                  onClick={uiClick(() => GmPanel.sendRaw(entry.line))}
+                >
+                  ↻
+                </button>
+                <button
+                  type="button"
+                  className={`gm-sent-tool${pinned(entry.line) ? ' is-on' : ''}`}
+                  title={pinned(entry.line) ? t('gm.fav.unpin') : t('gm.fav.pin')}
+                  aria-label={pinned(entry.line) ? t('gm.fav.unpin') : t('gm.fav.pin')}
+                  onClick={uiClick(() => GmLibrary.toggleFavourite({ kind: 'line', line: entry.line }))}
+                >
+                  {pinned(entry.line) ? '★' : '☆'}
+                </button>
               </li>
             ))}
           </ul>
@@ -102,6 +131,71 @@ const Transcript = observer(() => {
         </div>
       ) : null}
     </footer>
+  );
+});
+
+/**
+ * The pinned lines and macros, one press each, under the header on every
+ * tab - and the macro running, with its Stop. Placeholders fill in where the
+ * game master stands.
+ */
+const Favourites = observer(({ view }: { view: WorldView }) => {
+  const run = GmPanel.macroRun;
+  if (GmLibrary.favourites.length === 0 && !run) return null;
+
+  const hero = view.hero;
+  const vars: MacroVars | null = hero
+    ? { x: hero.x, y: hero.y, map: hero.map, me: hero.name, target: GmPanel.target }
+    : null;
+
+  const press = (favourite: Favourite) => {
+    if (!vars) return;
+    if (favourite.kind === 'line') {
+      GmPanel.runLine(favourite.line, vars);
+      return;
+    }
+    const macro = GmLibrary.macro(favourite.id);
+    if (macro) GmPanel.runMacro(macro, vars);
+  };
+
+  return (
+    <div className="gm-favs">
+      {run ? (
+        <span className="gm-favs-run">
+          <i className="gm-favs-dot" />
+          {t('gm.macros.running', { name: run.name, step: run.step, total: run.total })}
+          <button type="button" className="gm-link" onClick={uiClick(() => GmPanel.stopMacro())}>
+            {t('gm.macros.stop')}
+          </button>
+        </span>
+      ) : null}
+      {GmLibrary.favourites.map(favourite => {
+        const macro = favourite.kind === 'macro' ? GmLibrary.macro(favourite.id) : null;
+        const label = favourite.kind === 'line' ? favourite.line : `▸ ${macro?.name ?? ''}`;
+        return (
+          <span key={favourite.kind === 'line' ? `l${favourite.line}` : `m${favourite.id}`} className="gm-fav">
+            <button
+              type="button"
+              className={`gm-fav-run${favourite.kind === 'line' ? ' gm-mono' : ''}`}
+              disabled={!vars}
+              title={label}
+              onClick={uiClick(() => press(favourite))}
+            >
+              {label}
+            </button>
+            <button
+              type="button"
+              className="gm-fav-x"
+              aria-label={t('gm.fav.unpin')}
+              title={t('gm.fav.unpin')}
+              onClick={uiClick(() => GmLibrary.toggleFavourite(favourite))}
+            >
+              ×
+            </button>
+          </span>
+        );
+      })}
+    </div>
   );
 });
 
@@ -179,6 +273,8 @@ const Tab = observer(({ view }: { view: WorldView }) => {
       return <ModerationTab />;
     case 'events':
       return <EventsTab view={view} />;
+    case 'macros':
+      return <MacrosTab view={view} />;
     case 'console':
       return <ConsoleTab />;
   }
@@ -335,6 +431,8 @@ export const GmPanelWindow = observer(() => {
               ×
             </button>
           </header>
+
+          <Favourites view={view} />
 
           <section className={`gm-content gm-content-${section.id}`}>
             <Tab view={view} />

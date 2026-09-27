@@ -15,6 +15,7 @@ import {
   type SkinKind,
 } from '../../../../admin/catalogues';
 import { itemDisplayName, skinDisplayName, spawnCatalogue } from '../../../../admin/skins';
+import { GmLibrary } from '../../../../admin/gmLibrary';
 import { uiClick } from '../../../../libs/sfx';
 import { ItemIcon } from '../../itemIcon';
 import { CommandCard, QuickButton } from '../commandForm';
@@ -82,6 +83,62 @@ const NumberField = observer(({
       onChange={e => onChange(Math.max(min, Math.min(max, Number(e.target.value) || 0)))}
     />
   </label>
+));
+
+const sameSpec = (a: ItemSpec, b: ItemSpec) =>
+  a.level === b.level &&
+  a.option === b.option &&
+  a.excellent === b.excellent &&
+  a.ancient === b.ancient &&
+  a.luck === b.luck &&
+  a.skill === b.skill;
+
+/** A preset's name from what it sets: "+13 Luck Skill Excellent 63". */
+function presetName(spec: ItemSpec): string {
+  return [
+    `+${spec.level}`,
+    spec.option ? `${t('gm.param.option')} ${spec.option}` : '',
+    spec.luck ? t('gm.param.luck') : '',
+    spec.skill ? t('gm.param.skill') : '',
+    spec.excellent ? `${t('gm.param.excellent')} ${spec.excellent}` : '',
+    spec.ancient ? `${t('gm.param.ancient')} ${spec.ancient}` : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
+/** Saved item specs, one press to apply; the map menu offers them too. */
+const Presets = observer(({ spec, onPick }: { spec: ItemSpec; onPick: (spec: ItemSpec) => void }) => (
+  <div className="gm-presets">
+    {GmLibrary.presets.map(preset => (
+      <span key={preset.id} className="gm-fav">
+        <button
+          type="button"
+          className={`gm-chip${sameSpec(spec, preset.spec) ? ' is-active' : ''}`}
+          onClick={uiClick(() => onPick(preset.spec))}
+        >
+          {preset.name}
+        </button>
+        <button
+          type="button"
+          className="gm-fav-x"
+          aria-label={t('common.close')}
+          onClick={uiClick(() => GmLibrary.deletePreset(preset.id))}
+        >
+          ×
+        </button>
+      </span>
+    ))}
+    {GmLibrary.presets.some(preset => sameSpec(spec, preset.spec)) ? null : (
+      <button
+        type="button"
+        className="gm-link"
+        onClick={uiClick(() => GmLibrary.savePreset(presetName(spec), spec))}
+      >
+        {t('gm.presets.save')}
+      </button>
+    )}
+  </div>
 ));
 
 const ItemsPane = observer(() => {
@@ -173,6 +230,7 @@ const ItemsPane = observer(() => {
             {t(GROUP_KEY[picked.group])} {picked.group}/{picked.number} · {picked.width}x{picked.height} ·{' '}
             {t('gm.spawn.reqLevel', { level: picked.requiredLevel })}
           </p>
+          <Presets spec={spec} onPick={next => setSpec({ ...next })} />
           <div className="gm-spec">
             <NumberField label={t('gm.param.level')} value={spec.level} min={0} max={15} onChange={level => setSpec({ ...spec, level })} />
             <NumberField label={t('gm.param.option')} value={spec.option} min={0} max={7} onChange={option => setSpec({ ...spec, option })} />

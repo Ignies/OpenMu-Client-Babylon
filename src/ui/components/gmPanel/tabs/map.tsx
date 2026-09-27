@@ -9,7 +9,8 @@ import { GM_MAPS, mapName } from '../../../../common/gmMaps';
 import { gmCommand } from '../../../../common/gmCommands';
 import { uiClick } from '../../../../libs/sfx';
 import { MapView } from '../mapView';
-import { MapMenu } from '../mapMenu';
+import { TileMenu } from '../tileMenu';
+import { PlayerMenu } from '../playerMenu';
 import { FeedNotice, playerMatches } from '../shared';
 
 /**
@@ -19,10 +20,13 @@ import { FeedNotice, playerMatches } from '../shared';
  * the rest of the server's map table. The dots are the tracker's positions;
  * the game master's own dot and the monsters and NPCs the client itself has
  * in scope ride on top when the map is the one they stand on. A right-click
- * on a tile opens what can be done there (`mapMenu.tsx`).
+ * opens what can be done at that tile (`tileMenu.tsx`), or to that player
+ * (`playerMenu.tsx`).
  */
 
-type MenuAt = { x: number; y: number; left: number; top: number };
+type MenuAt =
+  | { kind: 'tile'; x: number; y: number; left: number; top: number }
+  | { kind: 'player'; player: TrackedPlayer; left: number; top: number };
 
 export const MapTab = observer(({ view }: { view: WorldView }) => {
   const hero = view.hero;
@@ -133,7 +137,8 @@ export const MapTab = observer(({ view }: { view: WorldView }) => {
           scope={hero && hero.map === map ? view.nearby.filter(e => e.kind !== 'player') : []}
           selectedId={GmPanel.selectedPlayerId}
           onPick={pick}
-          onMenu={(x, y, left, top) => setMenu({ x, y, left, top })}
+          onMenu={(x, y, left, top) => setMenu({ kind: 'tile', x, y, left, top })}
+          onPlayerMenu={(player, left, top) => setMenu({ kind: 'player', player, left, top })}
           onTile={
             hero
               ? (x, y) =>
@@ -150,11 +155,19 @@ export const MapTab = observer(({ view }: { view: WorldView }) => {
           {t('gm.map.warpHint')} {t('gm.map.menuHint')}
         </p>
 
-        {menu ? (
-          <MapMenu
+        {menu?.kind === 'tile' ? (
+          <TileMenu
             map={map}
             x={menu.x}
             y={menu.y}
+            at={{ left: menu.left, top: menu.top }}
+            hero={hero}
+            onClose={() => setMenu(null)}
+          />
+        ) : null}
+        {menu?.kind === 'player' ? (
+          <PlayerMenu
+            player={menu.player}
             at={{ left: menu.left, top: menu.top }}
             hero={hero}
             onClose={() => setMenu(null)}

@@ -8,6 +8,7 @@ import {
   type GmCommand,
 } from './common/gmCommands';
 import { t, type TextKey } from './i18n';
+import { expandLine, type Macro, type MacroVars } from './admin/gmLibrary';
 
 /**
  * The game master panel's state.
@@ -46,6 +47,7 @@ export type GmSection =
   | 'character'
   | 'moderation'
   | 'events'
+  | 'macros'
   | 'console';
 
 export type GmSectionInfo = { id: GmSection; titleKey: TextKey; hintKey: TextKey };
@@ -59,10 +61,17 @@ export const GM_SECTIONS: readonly GmSectionInfo[] = [
   { id: 'character', titleKey: 'gm.section.character', hintKey: 'gm.section.characterHint' },
   { id: 'moderation', titleKey: 'gm.section.moderation', hintKey: 'gm.section.moderationHint' },
   { id: 'events', titleKey: 'gm.section.events', hintKey: 'gm.section.eventsHint' },
+  { id: 'macros', titleKey: 'gm.section.macros', hintKey: 'gm.section.macrosHint' },
   { id: 'console', titleKey: 'gm.section.console', hintKey: 'gm.section.consoleHint' },
 ];
 
 export type SentLine = { id: number; line: string; at: number };
+
+/** A macro going through its steps: which one, and how far. */
+export type MacroRun = { id: string; name: string; step: number; total: number };
+
+/** How often a macro looks whether its last line has gone out yet, ms. */
+const MACRO_POLL_MS = 50;
 
 export const GmPanel = new (class _GmPanel {
   open = false;
@@ -79,6 +88,12 @@ export const GmPanel = new (class _GmPanel {
 
   /** The Console's filter box. While it holds anything, it searches every group. */
   query = '';
+
+  /** The Console's raw line, which a sent line can be loaded back into. */
+  raw = '';
+
+  /** The macro running, if one is. */
+  macroRun: MacroRun | null = null;
 
   /** The command whose form is open in the Console, if any. */
   selected: GmCommand | null = null;
@@ -115,6 +130,8 @@ export const GmPanel = new (class _GmPanel {
   private queue: string[] = [];
 
   private timer: ReturnType<typeof setTimeout> | null = null;
+
+  private macroTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -158,6 +175,66 @@ export const GmPanel = new (class _GmPanel {
 
   setQuery(value: string): void {
     this.query = value;
+  }
+
+  setRaw(value: string): void {
+    this.raw = value;
+  }
+
+  /** A line put back in the Console to edit and send again. */
+  loadLine(line: string): void {
+    this.raw = line;
+    this.setSection('console');
+  }
+
+  /** A pinned line: sent at once, its placeholders filled in for where it runs. */
+  runLine(line: string, vars: MacroVars): void {
+    this.sendRaw(expandLine(line, vars));
+  }
+
+  /**
+   * Send a macro's lines one after another. Each step waits for the line
+   * before it to have actually gone out (the queue holds lines back for the
+   * chat cooldown), then for its own delay, so a delay is the gap the players
+   * see. A step with no line, or one that is not a command, is skipped.
+   */
+  runMacro(macro: Macro, vars: MacroVars): void {
+    this.stopMacro();
+    const steps = macro.steps
+      .map(step => ({ line: expandLine(step.line, vars), delayMs: step.delayMs }))
+      .filter(step => step.line.startsWith('/'));
+    if (steps.length === 0) return;
+
+    this.error = null;
+    this.macroRun = { id: macro.id, name: macro.name, step: 0, total: steps.length };
+
+    const next = (i: number) => {
+      this.macroTimer = null;
+      if (this.queue.length > 0) {
+        this.macroTimer = setTimeout(() => next(i), MACRO_POLL_MS);
+        return;
+      }
+
+      runInAction(() => {
+        this.send(steps[i].line);
+        if (i + 1 >= steps.length) {
+          this.macroRun = null;
+        } else if (this.macroRun) {
+          this.macroRun = { ...this.macroRun, step: i + 1 };
+        }
+      });
+      if (i + 1 < steps.length) {
+        this.macroTimer = setTimeout(() => next(i + 1), steps[i].delayMs);
+      }
+    };
+
+    next(0);
+  }
+
+  stopMacro(): void {
+    if (this.macroTimer) clearTimeout(this.macroTimer);
+    this.macroTimer = null;
+    this.macroRun = null;
   }
 
   setSearch(value: string): void {
@@ -330,11 +407,13 @@ export const GmPanel = new (class _GmPanel {
 
   /** Character select and logout: the panel belongs to the character. */
   reset(): void {
+    this.stopMacro();
     runInAction(() => {
       this.open = false;
       this.section = 'live';
       this.target = '';
       this.query = '';
+      this.raw = '';
       this.search = '';
       this.selected = null;
       this.selectedPlayerId = null;

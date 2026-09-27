@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../i18n';
 import { GmPanel } from '../../../gmPanel';
@@ -10,11 +10,14 @@ import {
   searchItems,
   searchSkins,
   type ItemEntry,
+  type ItemSpec,
   type SkinEntry,
 } from '../../../admin/catalogues';
 import { itemDisplayName, skinDisplayName, spawnCatalogue } from '../../../admin/skins';
+import { GmLibrary, spread, type MacroVars } from '../../../admin/gmLibrary';
 import { uiClick } from '../../../libs/sfx';
 import { ItemIcon } from '../itemIcon';
+import { ContextMenu, type MenuPoint } from './contextMenu';
 
 /**
  * What can be done at one tile of the map, on a right-click.
@@ -22,7 +25,8 @@ import { ItemIcon } from '../itemIcon';
  * Fireworks, items and monsters all land where the game master stands
  * (`/fireworks` takes the coordinate but only on their own map; `/item` and
  * `/createmonster` take none), so anything done at a tile they are not on
- * moves them there first - the panel's queue sends the lines in order.
+ * moves them there first - the panel's queue sends the lines in order. Several
+ * at once stand on the tiles round it, each one walked to in turn.
  */
 
 type Hero = { name: string; map: number; x: number; y: number };
@@ -38,10 +42,12 @@ const KINDS: { id: Kind; key: 'gm.spawn.items' | 'gm.spawn.monsters' | 'gm.spawn
 /** Matches listed in the menu; the Spawn tab has the whole catalogue. */
 const SHOWN = 7;
 
-/** Room kept between the menu and the window's edge, px. */
-const EDGE = 8;
+/** The most spawned in one go. */
+const MAX_COUNT = 30;
 
-export const MapMenu = observer(
+const clampTile = (v: number) => Math.max(0, Math.min(255, v));
+
+export const TileMenu = observer(
   ({
     map,
     x,
@@ -53,50 +59,17 @@ export const MapMenu = observer(
     map: number;
     x: number;
     y: number;
-    /** Where the right-click was, on screen. */
-    at: { left: number; top: number };
+    at: MenuPoint;
     hero: Hero | null;
     onClose: () => void;
   }) => {
-    const ref = useRef<HTMLDivElement>(null);
-    const [place, setPlace] = useState(at);
     const [kind, setKind] = useState<Kind>('items');
     const [query, setQuery] = useState('');
+    const [count, setCount] = useState(1);
+    const [spec, setSpec] = useState<ItemSpec>(DEFAULT_ITEM_SPEC);
     const move = gmCommand('/move');
-    const onMap = !!hero && hero.map === map;
-    const standing = onMap && hero.x === x && hero.y === y;
+    const standing = !!hero && hero.map === map && hero.x === x && hero.y === y;
     const target = GmPanel.target && GmPanel.target !== hero?.name ? GmPanel.target : '';
-
-    // Kept inside the window: flipped left or up when it would run off.
-    useLayoutEffect(() => {
-      const box = ref.current?.getBoundingClientRect();
-      if (!box) return;
-      const left = at.left + box.width + EDGE > window.innerWidth ? at.left - box.width : at.left;
-      const top =
-        at.top + box.height + EDGE > window.innerHeight
-          ? Math.max(EDGE, window.innerHeight - box.height - EDGE)
-          : at.top;
-      setPlace({ left: Math.max(EDGE, left), top });
-    }, [at]);
-
-    // Closed by a press anywhere else, or by Escape before the panel sees it.
-    useEffect(() => {
-      const press = (event: PointerEvent) => {
-        if (!ref.current?.contains(event.target as Node)) onClose();
-      };
-      const key = (event: KeyboardEvent) => {
-        if (event.key !== 'Escape') return;
-        event.stopImmediatePropagation();
-        event.preventDefault();
-        onClose();
-      };
-      window.addEventListener('pointerdown', press, true);
-      window.addEventListener('keydown', key, true);
-      return () => {
-        window.removeEventListener('pointerdown', press, true);
-        window.removeEventListener('keydown', key, true);
-      };
-    }, [onClose]);
 
     const items = useMemo(
       () => (kind === 'items' ? searchItems(query, null, itemDisplayName).slice(0, SHOWN) : []),
@@ -113,20 +86,31 @@ export const MapMenu = observer(
       [kind, query]
     );
 
+    const goTo = (tx: number, ty: number) => {
+      if (hero) GmPanel.run(move, { target: hero.name, mapIdOrName: String(map), x: String(tx), y: String(ty) });
+    };
+
     /** Go to the tile unless already on it, then do `then` there. */
     const there = (then?: () => void) => {
-      if (hero && !standing) {
-        GmPanel.run(move, { target: hero.name, mapIdOrName: String(map), x: String(x), y: String(y) });
-      }
+      if (!standing) goTo(x, y);
       then?.();
       onClose();
     };
 
+    /** `spawn` on `count` tiles round this one, walking to each in turn. */
+    const several = (spawn: () => void) => {
+      spread(count).forEach(([dx, dy], i) => {
+        if (i > 0 || !standing) goTo(clampTile(x + dx), clampTile(y + dy));
+        spawn();
+      });
+      onClose();
+    };
+
     const spawnItem = (entry: ItemEntry) =>
-      there(() => GmPanel.run(gmCommand('/item'), itemCommandValues(entry, DEFAULT_ITEM_SPEC)));
+      several(() => GmPanel.run(gmCommand('/item'), itemCommandValues(entry, spec)));
 
     const spawnSkin = (entry: SkinEntry) =>
-      there(() =>
+      several(() =>
         GmPanel.run(gmCommand('/createmonster'), {
           number: String(entry.number),
           intelligence: entry.kind === 'monster' ? '1' : '0',
@@ -136,19 +120,15 @@ export const MapMenu = observer(
     const fireworks = (command: '/fireworks' | '/xmasfireworks') =>
       there(() => GmPanel.run(gmCommand(command), { x: String(x), y: String(y) }));
 
+    const vars: MacroVars | null = hero ? { x, y, map, me: hero.name, target: GmPanel.target } : null;
+
     const copy = () => {
       void navigator.clipboard?.writeText(`${map} ${x} ${y}`).catch(() => undefined);
       onClose();
     };
 
     return (
-      <div
-        ref={ref}
-        className="gm-menu"
-        role="menu"
-        style={{ left: place.left, top: place.top }}
-        onContextMenu={event => event.preventDefault()}
-      >
+      <ContextMenu at={at} onClose={onClose}>
         <header className="gm-menu-head">
           <b>{mapName(map)}</b>
           <span className="gm-mono">
@@ -184,7 +164,18 @@ export const MapMenu = observer(
             <div className="gm-menu-sep" />
 
             <div className="gm-menu-spawn">
-              <span className="gm-menu-label">{t('gm.spawn.spawn')}</span>
+              <div className="gm-menu-spawn-head">
+                <span className="gm-menu-label">{t('gm.spawn.spawn')}</span>
+                <span className="gm-stepper" title={t('gm.map.menu.count')}>
+                  <button type="button" onClick={uiClick(() => setCount(Math.max(1, count - 1)))}>
+                    −
+                  </button>
+                  <span className="gm-mono">×{count}</span>
+                  <button type="button" onClick={uiClick(() => setCount(Math.min(MAX_COUNT, count + 1)))}>
+                    +
+                  </button>
+                </span>
+              </div>
               <div className="gm-toggle">
                 {KINDS.map(entry => (
                   <button
@@ -197,6 +188,27 @@ export const MapMenu = observer(
                   </button>
                 ))}
               </div>
+              {kind === 'items' ? (
+                <div className="gm-menu-presets">
+                  <button
+                    type="button"
+                    className={`gm-chip${spec === DEFAULT_ITEM_SPEC ? ' is-active' : ''}`}
+                    onClick={uiClick(() => setSpec(DEFAULT_ITEM_SPEC))}
+                  >
+                    {t('gm.presets.plain')}
+                  </button>
+                  {GmLibrary.presets.map(preset => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      className={`gm-chip${spec === preset.spec ? ' is-active' : ''}`}
+                      onClick={uiClick(() => setSpec(preset.spec))}
+                    >
+                      {preset.name}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               <input
                 className="gm-search"
                 type="search"
@@ -243,6 +255,24 @@ export const MapMenu = observer(
               </div>
             </div>
 
+            {vars && GmLibrary.macros.length > 0 ? (
+              <>
+                <div className="gm-menu-sep" />
+                <span className="gm-menu-label gm-menu-label-pad">{t('gm.map.menu.macros')}</span>
+                {GmLibrary.macros.map(macro => (
+                  <button
+                    key={macro.id}
+                    type="button"
+                    className="gm-menu-item"
+                    onClick={uiClick(() => there(() => GmPanel.runMacro(macro, vars)))}
+                  >
+                    <span className="gm-menu-name">▸ {macro.name}</span>
+                    <small className="gm-mono">{macro.steps.length}</small>
+                  </button>
+                ))}
+              </>
+            ) : null}
+
             <div className="gm-menu-sep" />
           </>
         ) : null}
@@ -250,7 +280,7 @@ export const MapMenu = observer(
         <button type="button" className="gm-menu-item" onClick={uiClick(copy)}>
           {t('gm.map.menu.copy')}
         </button>
-      </div>
+      </ContextMenu>
     );
   }
 );
