@@ -2063,7 +2063,7 @@ export const koreanLayer: LanguageLayer = {
     'gm.map.legendGm': 'GM',
     'gm.map.legendScope': '내 주변',
     'gm.map.you': '나',
-    'gm.map.warpHint': '칸을 클릭하면 그곳으로 이동합니다. 점을 클릭하면 그 플레이어를 대상으로 지정합니다.',
+    'gm.map.warpHint': 'Shift+클릭하면 그 칸으로 이동합니다. 점을 클릭하면 그 플레이어를 대상으로 지정합니다.',
     'gm.map.noPicture': '이 월드에는 지도 이미지가 없습니다.',
     'gm.map.goHere': '이 맵으로 이동',
     'gm.map.bringTarget': '{name} 여기로 데려오기',

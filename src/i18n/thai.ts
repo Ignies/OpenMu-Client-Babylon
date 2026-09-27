@@ -2075,7 +2075,7 @@ export const thaiLayer: LanguageLayer = {
     'gm.map.legendGm': 'GM',
     'gm.map.legendScope': 'ใกล้คุณ',
     'gm.map.you': 'คุณ',
-    'gm.map.warpHint': 'คลิกช่องเพื่อวาร์ปไปที่นั่น คลิกจุดเพื่อเลือกผู้เล่นคนนั้น',
+    'gm.map.warpHint': 'Shift+คลิกช่องเพื่อวาร์ปไปที่นั่น คลิกจุดเพื่อเลือกผู้เล่นคนนั้น',
     'gm.map.noPicture': 'โลกนี้ไม่มีภาพแผนที่',
     'gm.map.goHere': 'วาร์ปไปแผนที่นี้',
     'gm.map.bringTarget': 'พา {name} มาที่นี่',

@@ -2065,7 +2065,7 @@ export const japaneseLayer: LanguageLayer = {
     'gm.map.legendGm': 'GM',
     'gm.map.legendScope': '近くのもの',
     'gm.map.you': 'あなた',
-    'gm.map.warpHint': 'マスをクリックでそこへワープ。点をクリックでそのプレイヤーを対象に。',
+    'gm.map.warpHint': 'Shift+クリックでそのマスへワープ。点をクリックでそのプレイヤーを対象に。',
     'gm.map.noPicture': 'このワールドにはマップ画像がありません。',
     'gm.map.goHere': 'このマップへ移動',
     'gm.map.bringTarget': '{name} をここへ呼ぶ',

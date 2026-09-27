@@ -2057,7 +2057,7 @@ export const chineseLayer: LanguageLayer = {
     'gm.map.legendGm': 'GM',
     'gm.map.legendScope': '你附近',
     'gm.map.you': '你',
-    'gm.map.warpHint': '点击格子传送到那里。点击圆点选中该玩家。',
+    'gm.map.warpHint': '按住 Shift 点击格子传送到那里。点击圆点选中该玩家。',
     'gm.map.noPicture': '此世界没有地图图片。',
     'gm.map.goHere': '传送到此地图',
     'gm.map.bringTarget': '把 {name} 带到这里',

@@ -30,6 +30,7 @@ export type MapViewProps = {
   scope: readonly Nearby[];
   selectedId: string | null;
   onPick: (player: TrackedPlayer) => void;
+  /** A Shift+click on tile (x, y): a plain click is too easy to make by accident to act on. */
   onTile?: (x: number, y: number) => void;
   /** A right-click on tile (x, y), at that point on screen. */
   onMenu?: (x: number, y: number, clientX: number, clientY: number) => void;
@@ -83,7 +84,7 @@ export const MapView = observer(function MapView({
       className={`gm-map${picture ? '' : ' is-blank'}`}
       style={picture ? { backgroundImage: `url(${picture.image.url})` } : undefined}
       onClick={event => {
-        if (!onTile) return;
+        if (!onTile || !event.shiftKey) return;
         const [x, y] = tileAt(event.currentTarget.getBoundingClientRect(), event.clientX, event.clientY);
         onTile(x, y);
       }}

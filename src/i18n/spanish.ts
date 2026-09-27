@@ -2116,7 +2116,7 @@ export const spanishLayer: LanguageLayer = {
     'gm.map.legendGm': 'GM',
     'gm.map.legendScope': 'Cerca de ti',
     'gm.map.you': 'Tú',
-    'gm.map.warpHint': 'Haz clic en una casilla para teletransportarte allí. Haz clic en un punto para elegir a ese jugador.',
+    'gm.map.warpHint': 'Shift+clic en una casilla para teletransportarte allí. Haz clic en un punto para elegir a ese jugador.',
     'gm.map.noPicture': 'Este mundo no tiene imagen de mapa.',
     'gm.map.goHere': 'Ir a este mapa',
     'gm.map.bringTarget': 'Traer a {name} aquí',

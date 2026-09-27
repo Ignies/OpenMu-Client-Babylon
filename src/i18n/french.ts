@@ -2111,7 +2111,7 @@ export const frenchLayer: LanguageLayer = {
     'gm.map.legendGm': 'GM',
     'gm.map.legendScope': 'Près de toi',
     'gm.map.you': 'Toi',
-    'gm.map.warpHint': 'Clique sur une case pour t\'y téléporter. Clique sur un point pour cibler ce joueur.',
+    'gm.map.warpHint': 'Shift+clic sur une case pour t’y téléporter. Clique sur un point pour cibler ce joueur.',
     'gm.map.noPicture': 'Ce monde n\'a pas d\'image de carte.',
     'gm.map.goHere': 'Aller sur cette carte',
     'gm.map.bringTarget': 'Amener {name} ici',
