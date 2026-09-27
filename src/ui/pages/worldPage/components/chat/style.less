@@ -33,7 +33,8 @@
 
   .chat-log.framed,
   .chat-filter-tabs,
-  .chat-input {
+  .chat-input,
+  .chat-log-latest {
     pointer-events: auto;
   }
 
@@ -93,6 +94,70 @@
   cursor: default;
 }
 
+// Log text can be selected and copied. index.html turns selection off on
+// every element, so the rows and all they hold opt back in. Not on touch,
+// where a long press on a row is the whisper.
+html:not(.mu-mobile) .chat-line {
+  &,
+  * {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+}
+
+// One colour for every line type, and it paints the sheened names too
+// (their own colour is transparent).
+.chat-line::selection,
+.chat-line ::selection {
+  color: #fff;
+  background: rgba(90, 140, 230, 0.65);
+}
+
+// Scrolled back: the rows below the view, and a click back to the newest.
+.chat-log-latest {
+  position: absolute;
+  z-index: 1;
+  height: 12px;
+  padding: 0 4px;
+  line-height: 12px;
+  font-size: 10px;
+  color: rgb(255, 220, 130);
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(232, 200, 119, 0.5);
+  cursor: pointer;
+
+  &:hover {
+    color: #fff;
+    border-color: rgba(255, 230, 168, 0.9);
+  }
+}
+
+// A log emoji is a line tall; hovering one shows it at a readable size.
+.chat-emoji-preview {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3px 4px 1px;
+  transform: translate(-50%, -100%);
+  background: rgba(0, 0, 0, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+
+  img {
+    max-width: none;
+    image-rendering: auto;
+  }
+
+  span {
+    font-size: 10px;
+    line-height: 12px;
+    white-space: nowrap;
+    color: rgb(255, 200, 50);
+  }
+}
+
 // `newui_chat_back` is the box; everything else is laid on top of it.
 .chat-input {
   position: absolute;
@@ -143,6 +208,149 @@
     color: rgba(255, 255, 255, 0.45);
     line-height: 13px;
     padding-left: 1px;
+  }
+
+  // Grey until pointed at, like a strip button that is off.
+  .chat-emoji-button {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    img {
+      max-width: none;
+      image-rendering: auto;
+      filter: grayscale(1) brightness(0.8);
+      transition:
+        filter 120ms,
+        transform 120ms;
+    }
+
+    &:hover img,
+    &.open img {
+      filter: none;
+      transform: scale(1.2);
+    }
+  }
+
+  // The emoji button's panel, over the log above the box.
+  .chat-emoji-picker {
+    position: absolute;
+    right: 0;
+    z-index: 3;
+    width: 214px;
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid rgba(232, 200, 119, 0.45);
+    pointer-events: auto;
+
+    img {
+      display: block;
+      max-width: none;
+      image-rendering: auto;
+    }
+  }
+
+  .chat-emoji-tabs {
+    display: flex;
+    gap: 1px;
+    padding: 2px 2px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .chat-emoji-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 21px;
+    height: 20px;
+    border-bottom: 2px solid transparent;
+    opacity: 0.55;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.9;
+    }
+
+    &.active {
+      opacity: 1;
+      border-bottom-color: rgb(232, 200, 119);
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  // The recently used tab: a small clock, no font needed.
+  .chat-emoji-clock {
+    position: relative;
+    width: 11px;
+    height: 11px;
+    box-sizing: border-box;
+    border: 1.5px solid rgb(232, 200, 119);
+    border-radius: 50%;
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      left: 3.5px;
+      bottom: 3.5px;
+      width: 1.5px;
+      background: rgb(232, 200, 119);
+      transform-origin: 50% 100%;
+    }
+
+    &::before {
+      height: 3.5px;
+    }
+
+    &::after {
+      height: 2.5px;
+      transform: rotate(90deg);
+    }
+  }
+
+  .chat-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 28px);
+    grid-auto-rows: 28px;
+    max-height: 118px;
+    padding: 3px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(232, 200, 119, 0.5) transparent;
+  }
+
+  .chat-emoji-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+
+      img {
+        transform: scale(1.12);
+      }
+    }
+  }
+
+  .chat-emoji-footer {
+    height: 14px;
+    padding: 0 5px;
+    line-height: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+
+    .code {
+      color: rgb(255, 200, 50);
+    }
+
+    .pack {
+      color: rgba(255, 255, 255, 0.6);
+    }
   }
 }
 
@@ -197,6 +405,12 @@
   }
   .chat-completion-name {
     color: rgb(255, 200, 50);
+  }
+  .chat-completion-emoji {
+    flex: none;
+    align-self: center;
+    max-width: none;
+    image-rendering: auto;
   }
   .chat-completion-usage {
     color: rgb(150, 200, 255);

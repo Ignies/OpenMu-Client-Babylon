@@ -1,6 +1,7 @@
 import { Matrix } from '../libs/babylon/exports';
 import type { Item } from '../ecs/world';
 import { angleLinkMatrix, type BmdLink } from './boneLink';
+import type { HeldTexture } from './effectParticles';
 
 /**
  * The wing part (`c->Wing`) as the original renders it - `RenderCharacterBackItem`
@@ -49,7 +50,7 @@ export const CAPE_OF_LORD = 30;
 
 /** A bone-anchored particle aura the wing emits (`RenderPartObjectEffect`). */
 export type WingWake = {
-  readonly kind: 'wingFlareBlue' | 'wingCloud' | 'wingLight';
+  readonly kind: 'wingFlareBlue' | 'wingCloud';
   /** Bone indices the sprites are placed on. */
   readonly bones: readonly number[];
   /** Sprite scale at `timeMs`. */
@@ -61,6 +62,31 @@ export type WingWake = {
 };
 
 export type Rgb = readonly [number, number, number];
+
+/**
+ * A `CreateSprite` the wing re-issues on a bone every frame: one sprite per
+ * bone, riding it, never stacking (`effectParticles.HeldSprites`).
+ */
+export type WingSprite = {
+  readonly texture: HeldTexture;
+  /** `CreateSprite`'s SubType: 0 `EnableAlphaBlend`, 1 `EnableAlphaBlendMinus`. */
+  readonly blend: 'add' | 'subtract';
+  readonly bones: readonly number[];
+  readonly scale: (timeMs: number) => number;
+  readonly light: (timeMs: number) => Rgb;
+  /** The sprite's `Rotation`, degrees. */
+  readonly rotation?: (timeMs: number) => number;
+};
+
+/**
+ * `CreateEffect(MODEL_FENRIR_THUNDER, ..., SubType 1)` on a few wing bones:
+ * each 25 Hz frame passes `rand_fps_check(2)`, then each bone
+ * `rand_fps_check(20)`.
+ */
+export type WingThunder = {
+  readonly bones: readonly number[];
+  readonly light: Rgb;
+};
 
 /**
  * One `RenderMesh` of the wing's branch in `RenderPartObjectBody`
@@ -81,6 +107,8 @@ export type WingMeshPass = {
   readonly u?: (timeMs: number) => number;
   /** `Data/` path of the texture an `overlay` is drawn with instead of the mesh's own. */
   readonly texture?: string;
+  /** A near-black `tint` mesh whose alpha is its coverage: dark art (`darkCardGain`). */
+  readonly dark?: boolean;
 };
 
 const grey = (l: number): Rgb => [l, l, l];
@@ -100,6 +128,8 @@ export type WingSpec = {
    */
   readonly safeZoneAction?: number;
   readonly wakes?: readonly WingWake[];
+  readonly sprites?: readonly WingSprite[];
+  readonly thunder?: WingThunder;
   readonly passes?: readonly WingMeshPass[];
 };
 
@@ -141,46 +171,48 @@ const WINGS: Readonly<Record<number, WingSpec>> = {
     ],
   },
 
-  // --- 3rd level.
+  // --- 3rd level. Wing of Storm cites references/sven.
   [WING_OF_STORM]: {
     blendMesh: -1,
-    flyPlaySpeed: 0.5, // ZzzCharacter.cpp:15115
-    wakes: [
+    flyPlaySpeed: 0.5, // ZzzCharacter.cpp:15405
+    sprites: [
       {
-        kind: 'wingCloud',
-        // The 25-bone table of ZzzObject.cpp:9903-9906.
+        // BITMAP_CLUD64 at SubType 1, EnableAlphaBlendMinus: a dark smoke
+        // around the frame, not a light (ZzzObject.cpp:9914-9926).
+        texture: 'clud64',
+        blend: 'subtract',
         bones: [
           9, 20, 19, 10, 18, 28, 27, 36, 35, 38, 37, 53, 48, 62, 70, 72, 71, 78,
           79, 80, 87, 90, 91, 106, 102,
         ],
         scale: () => 0.5,
-        light: t => {
-          const l = 0.5 + Math.abs(Math.sin(t * 0.0004)) * 0.4;
-          return [l, l, l];
-        },
-        every: 3,
+        light: t => grey(0.5 + Math.abs(Math.sin(t * 0.0004)) * 0.4),
+        rotation: t => t * 0.01,
       },
-      // The joint glows of ZzzObject.cpp:9942-9960: four red, eighteen amber.
+      // The joint glows (:9942-9963): four red, eighteen amber.
       {
-        kind: 'wingLight',
+        texture: 'flare01',
+        blend: 'add',
         bones: [12, 64, 98, 52],
         scale: t => Math.abs(Math.sin(t * 0.003)) * 0.2 + 1.4,
         light: () => [0.9, 0, 0],
-        every: 1,
       },
       {
-        kind: 'wingLight',
+        texture: 'flare01',
+        blend: 'add',
         bones: [
           61, 69, 77, 86, 97, 99, 104, 103, 105, 8, 17, 26, 34, 44, 51, 50, 49,
           45,
         ],
         scale: t => Math.abs(Math.sin(t * 0.003)) * 0.2 + 0.3,
         light: () => [0.8, 0.5, 0.2],
-        every: 1,
       },
     ],
+    thunder: { bones: [11, 21, 29, 63, 81, 89], light: [0.6, 0.6, 0.9] }, // :9928-9940
+    // RenderPartObjectBody's branch (ZzzObject.cpp:6921-6937): mesh 2 is the
+    // near-black keyed membrane, mesh 0 the bone frame, mesh 1 the lightning.
     passes: [
-      { mesh: 2, kind: 'tint', light: () => [1, 0.7, 0.5] },
+      { mesh: 2, kind: 'tint', light: () => [1, 0.7, 0.5], dark: true },
       { mesh: 0, kind: 'bright', light: () => [1, 0.7, 0.5] },
       // `lightningblast` is a four-frame strip: s_iTexAni counts 0..15 ticks
       // and the frame is ((int)s_iTexAni / 4) * 0.25.

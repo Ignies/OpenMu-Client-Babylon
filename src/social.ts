@@ -15,7 +15,13 @@ import {
   CHAT_SHOWING_LINES,
   ChatLineType,
   chatSenderPrefix,
+  chatEndIndex,
+  CHAT_LINE_HEIGHT,
+  chatRowsSpaced,
+  chatScrollFloor,
   chatTimestamp,
+  layoutChatRows,
+  scrollChatEnd,
   splitChatLine,
   MAX_CHAT_LENGTH,
   MAX_CHAT_LINES,
@@ -30,6 +36,18 @@ import {
   type EmojiBubbleId,
 } from './common/emojiBubbles';
 import { localCommandOf } from './common/chatCommands';
+import {
+  chatEmojiAdvance,
+  chatEmojiBubbleOf,
+  chatEmojiSize,
+  chatLogRowHeight,
+  emojiAtoms,
+  splitChatLineAtoms,
+  stripEmojiCodes,
+} from './common/chatEmojis';
+import { itemLinkLabel, scanItemLinks, stripItemLinks } from './common/chatItemLinks';
+import { EMOJI_CATALOG } from './emojis';
+import { clipChatText, toChatWire } from './common/chatWire';
 import { chatTextWidth } from './common/chatTextWidth';
 import { GameOptions } from './common/gameOptions';
 import { Commands } from './commands';
@@ -166,6 +184,13 @@ export const Social = new (class _Social {
   chatLogLines = CHAT_SHOWING_LINES;
   /** `m_fBackAlpha` of the framed log. */
   chatLogAlpha = CHAT_LOG_DEFAULT_ALPHA;
+  /**
+   * `m_iCurrentRenderEndLine`, pinned by the row's id so a new line (or a
+   * dropped oldest one) does not move the view; null follows the newest row.
+   */
+  chatLogEndId: number | null = null;
+  /** An item link on its way into the chat box: the box shows `label`, sends `token`. */
+  pendingChatInsert: { label: string; token: string } | null = null;
   chatHistory: string[] = [];
   whisperHistory: string[] = [];
 
@@ -235,6 +260,16 @@ export const Social = new (class _Social {
       chatLogVisible: observable,
       chatLogLines: observable,
       chatLogAlpha: observable,
+      chatLogEndId: observable,
+      pendingChatInsert: observable.ref,
+      insertIntoChat: action,
+      takeChatInsert: action,
+      scrollChatLog: action,
+      scrollChatLogTo: action,
+      pageChatLog: action,
+      followChatLog: action,
+      pinChatLog: action,
+      holdChatLog: action,
       toggle: action,
       cycleChatLogSize: action,
       cycleChatLogAlpha: action,
@@ -274,6 +309,8 @@ export const Social = new (class _Social {
   /** Everything is per character: cleared on select / relog. */
   reset(): void {
     this.chatLines = [];
+    this.chatLogEndId = null;
+    this.pendingChatInsert = null;
     this.lastSystemLine = { text: '', at: 0 };
     this.chatInputOpen = false;
     this.partyMembers = [];
@@ -368,18 +405,37 @@ export const Social = new (class _Social {
       (GameOptions.chatTimestamps ? chatTextWidth(`${chatTimestamp(at)} `) : 0);
 
     const prefix = chatSenderPrefix({ sender, ...speaker });
-    const parts = splitChatLine(prefix, text, width, chatTextWidth);
+    // Only what players say holds emojis and item links; a system line is
+    // left as sent. Each is split as one piece, at the width it is drawn.
+    const parts = sender
+      ? splitChatLineAtoms(prefix, text, width, chatTextWidth, [
+          ...(GameOptions.chatEmojis
+            ? emojiAtoms(
+                text,
+                EMOJI_CATALOG,
+                chatEmojiAdvance(chatEmojiSize(GameOptions.chatEmojiSize))
+              )
+            : []),
+          ...scanItemLinks(text).map(link => ({
+            start: link.start,
+            end: link.end,
+            width: chatTextWidth(itemLinkLabel(link.item)),
+          })),
+        ])
+      : splitChatLine(prefix, text, width, chatTextWidth);
 
     // `Create(L"", strText2, ...)`: the carried half does not print the name
     // again, but it keeps the speaker so the log can hover and whisper off a
     // wrapped message as one thing.
     const messageId = this.nextLineId;
+    const spaced = chatRowsSpaced(text, parts);
     const rows: ChatLine[] = parts.map((part, index) => ({
       id: this.nextLineId++,
       messageId,
       sender,
       ...speaker,
       continued: index > 0,
+      spaced: spaced[index] || undefined,
       text: part,
       type,
       at,
@@ -389,6 +445,10 @@ export const Social = new (class _Social {
     // `RemoveFrontLine` once MAX_NUMBER_OF_LINES is reached.
     this.chatLines =
       next.length > MAX_CHAT_LINES ? next.slice(next.length - MAX_CHAT_LINES) : next;
+    // The row the view was held on scrolled out of the log: follow again.
+    if (this.chatLogEndId !== null && this.chatLines[0].id > this.chatLogEndId) {
+      this.chatLogEndId = null;
+    }
   }
 
   /**
@@ -419,6 +479,8 @@ export const Social = new (class _Social {
 
   setChatFilter(filter: ChatFilterKey): void {
     this.chatFilter = filter;
+    // Another tab is other rows: it opens on its newest.
+    this.chatLogEndId = null;
   }
 
   /**
@@ -451,6 +513,69 @@ export const Social = new (class _Social {
       | 'chatLogVisible'
   ): void {
     this[key] = !this[key];
+    if (key === 'showSystemMessages') this.chatLogEndId = null;
+  }
+
+  /** How tall the log draws this row (an emoji row grows with the option). */
+  chatRowHeight(line: ChatLine): number {
+    return chatLogRowHeight(
+      line,
+      EMOJI_CATALOG,
+      GameOptions.chatEmojis ? chatEmojiSize(GameOptions.chatEmojiSize) : null
+    );
+  }
+
+  /** The log's text area in pixels: `m_nShowingLines` text rows. */
+  get chatLogBudget(): number {
+    return CHAT_LINE_HEIGHT * this.chatLogLines;
+  }
+
+  /** The highest row the view can end on (`chatScrollFloor`). */
+  chatLogFloor(lines: readonly ChatLine[] = this.visibleChatLines): number {
+    return chatScrollFloor(i => this.chatRowHeight(lines[i]), lines.length, this.chatLogBudget);
+  }
+
+  /** The wheel: `delta` rows, negative is older. */
+  scrollChatLog(delta: number): void {
+    const lines = this.visibleChatLines;
+    this.chatLogEndId = scrollChatEnd(lines, this.chatLogEndId, this.chatLogFloor(lines), delta);
+  }
+
+  /** The scrollbar thumb: end the view on this row index. */
+  scrollChatLogTo(index: number): void {
+    const lines = this.visibleChatLines;
+    this.chatLogEndId = scrollChatEnd(
+      lines,
+      null,
+      this.chatLogFloor(lines),
+      index - (lines.length - 1)
+    );
+  }
+
+  /** PageUp / PageDown: the rows on screen, less one kept for context. */
+  pageChatLog(direction: 1 | -1): void {
+    const lines = this.visibleChatLines;
+    if (!lines.length) return;
+    const end = chatEndIndex(lines, this.chatLogEndId);
+    const { start } = layoutChatRows(i => this.chatRowHeight(lines[i]), end, this.chatLogBudget);
+    this.scrollChatLog(direction * Math.max(1, end - start));
+  }
+
+  /** Text is being selected in the log: hold the rows still, where they are. */
+  holdChatLog(): void {
+    const lines = this.visibleChatLines;
+    if (!lines.length) return;
+    const end = chatEndIndex(lines, this.chatLogEndId);
+    if (end === lines.length - 1) this.chatLogEndId = lines[end].id;
+  }
+
+  followChatLog(): void {
+    this.chatLogEndId = null;
+  }
+
+  /** Hold the view on this row even while it is the newest. */
+  pinChatLog(id: number): void {
+    this.chatLogEndId = id;
   }
 
   /** `SetSizeAuto`: 3 → 6 → … → 15 → 3 showing lines. */
@@ -474,6 +599,18 @@ export const Social = new (class _Social {
     this.chatInputOpen = false;
   }
 
+  /** Alt+click on an item: the chat box opens, if it is not up, with the link at the caret. */
+  insertIntoChat(insert: { label: string; token: string }): void {
+    this.pendingChatInsert = insert;
+    this.chatInputOpen = true;
+  }
+
+  takeChatInsert(): { label: string; token: string } | null {
+    const insert = this.pendingChatInsert;
+    this.pendingChatInsert = null;
+    return insert;
+  }
+
   /** `SetWhsprID` (the command window's Whisper entry). */
   setWhisperTarget(name: string): void {
     runInAction(() => {
@@ -489,7 +626,7 @@ export const Social = new (class _Social {
    * OpenMU parses them on the server.
    */
   sendChat(rawText: string): boolean {
-    const text = rawText.replace(/[\r\n]/g, '').slice(0, MAX_CHAT_LENGTH);
+    const text = clipChatText(rawText.replace(/[\r\n]/g, ''), MAX_CHAT_LENGTH);
     if (!text.trim()) return false;
 
     const now = performance.now();
@@ -503,12 +640,13 @@ export const Social = new (class _Social {
       this.whisperEnabled && !text.startsWith('/') ? this.whisperTarget.trim() : '';
 
     if (whisperTo) {
+      const wire = toChatWire(text);
       // Name (10) + message: getRequiredSize counts from the code byte.
       const packet = WhisperMessagePacket.createPacket(
-        WhisperMessagePacket.getRequiredSize(10 + text.length)
+        WhisperMessagePacket.getRequiredSize(10 + wire.length)
       );
       packet.setReceiverName(whisperTo);
-      packet.setMessage(text);
+      packet.setMessage(wire);
       Store.sendToGS(packet.buffer);
       // The original logs an outgoing whisper under the hero's name.
       this.addChatLine(heroName, text, ChatLineType.Whisper);
@@ -527,14 +665,16 @@ export const Social = new (class _Social {
     }
 
     const prefix = text.startsWith('/') ? '' : CHAT_INPUT_PREFIX[this.chatInputMode];
-    const message = (prefix + text).slice(0, MAX_CHAT_LENGTH);
+    const message = toChatWire(clipChatText(prefix + text, MAX_CHAT_LENGTH));
 
     // `CheckChatText` (NewUIChatInputBox.cpp:571) runs on the typed line
     // before it is sent, and only for public chat - never for a whisper and
     // never for a `/command`. The original also skipped it while riding a
     // mount outside a safe zone; mounts are not ported, so that gate is moot.
     if (!text.startsWith('/')) {
-      const emote = matchEmoteWord(text);
+      // Emoji codes and item links are not words: `:dk_cry:` would play the
+      // cry emote, and a link's bytes can spell anything.
+      const emote = matchEmoteWord(stripItemLinks(stripEmojiCodes(text, EMOJI_CATALOG)));
       if (emote && Store.world) Store.world.emoteRequest = emote;
 
       // A line that is nothing but an emoji token pops the bubble here too.
@@ -545,6 +685,12 @@ export const Social = new (class _Social {
       // over nobody.
       const bubble = prefix ? null : matchEmojiBubbleWord(text);
       if (bubble && Store.world) Store.world.emojiRequest = bubble;
+
+      // A line of only chat emojis pops over the sender at once, for the same reason.
+      if (!bubble && !prefix && GameOptions.chatEmojis && Store.world) {
+        const shown = chatEmojiBubbleOf(text, EMOJI_CATALOG).bubble;
+        if (shown) Store.world.emojiRequest = shown;
+      }
     }
 
     const packet = PublicChatMessagePacket.createPacket(

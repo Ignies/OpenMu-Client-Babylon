@@ -24,6 +24,30 @@ import {
   withTax,
 } from '../../../common/itemValue';
 import { placePair } from './placement';
+import { ItemLinkHover } from '../../../common/itemLinkHover';
+import { ItemsDatabase } from '../../../common/itemsDatabase';
+import { ItemIcon } from '../itemIcon';
+
+/** One inventory square of the picture, as the grids draw it. */
+const PICTURE_SQUARE = 20;
+/** The picture's box never outgrows this, whatever the item's footprint. */
+const PICTURE_MAX = { width: 120, height: 100 };
+
+/**
+ * The item's picture over the tooltip text. The box has a fixed size from
+ * the item's footprint, so the image arriving later cannot move the tooltip.
+ */
+function TooltipPicture({ item }: { item: Item }) {
+  const def = ItemsDatabase.getItem(item.group, item.num) as { X?: number; Y?: number } | null;
+  const w = (def?.X ?? 1) * PICTURE_SQUARE;
+  const h = (def?.Y ?? 1) * PICTURE_SQUARE;
+  const zoom = Math.min(2, PICTURE_MAX.width / w, PICTURE_MAX.height / h);
+  return (
+    <div className="mu-item-tooltip-picture" style={{ width: w * zoom, height: h * zoom }}>
+      <ItemIcon item={item} />
+    </div>
+  );
+}
 
 /** The hero as `RenderItemInfo` compares against (`CharacterAttribute`). */
 export function heroStats(): HeroStats {
@@ -210,6 +234,8 @@ export const ItemTooltip = observer(
     context = 'inventory',
     price,
     slot,
+    picture = false,
+    linkable = true,
   }: {
     item: Item;
     x: number;
@@ -218,6 +244,10 @@ export const ItemTooltip = observer(
     price?: number;
     /** Inventory slot the item sits in (pets ask the server by slot). */
     slot?: number;
+    /** The item's picture above the text, for an item shown away from any window (a chat link). */
+    picture?: boolean;
+    /** Alt+click links the item into chat while this is up (a ground drop's Alt+click picks it up instead). */
+    linkable?: boolean;
   }) => {
     const ref = useRef<HTMLDivElement>(null);
     const wornRef = useRef<HTMLDivElement>(null);
@@ -254,6 +284,12 @@ export const ItemTooltip = observer(
       ] as TooltipLine[];
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [wornStamp, heroStamp]);
+
+    useEffect(() => {
+      if (!linkable) return;
+      ItemLinkHover.show(item);
+      return () => ItemLinkHover.hide(item);
+    }, [item, linkable]);
 
     const pet = context === 'inventory' ? petTypeOf(item) : undefined;
     const petSlot =
@@ -314,7 +350,7 @@ export const ItemTooltip = observer(
 
       move(cursor.current.x, cursor.current.y);
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [lines, wornLines]);
+    }, [lines, wornLines, picture]);
 
     // The initial position from the props, then the pointer itself.
     useLayoutEffect(() => {
@@ -346,6 +382,7 @@ export const ItemTooltip = observer(
     return createPortal(
       <>
         <div ref={ref} className="mu-item-tooltip">
+          {picture && <TooltipPicture item={item} />}
           {tooltipRows(lines)}
         </div>
         {!!wornLines && (

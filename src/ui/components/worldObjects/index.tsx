@@ -13,6 +13,7 @@ import { DROP_TIER_COLOURS, dropTier } from '../../../common/dropTier';
 import { dropPassesLootFilter } from '../../../common/lootFilter';
 import { GameOptions } from '../../../common/gameOptions';
 import { ItemTooltip } from '../itemTooltip';
+import { ItemLinkHover } from '../../../common/itemLinkHover';
 import type { Entity } from '../../../ecs/world';
 import { stableKeyOf } from '../partyBars/stableKey';
 
@@ -28,14 +29,22 @@ const DROP_TOOLTIP_DELAY_MS = 250;
  */
 function useDropNamesOverlay(): { overlay: boolean; showAll: boolean } {
   const [held, setHeld] = useState(false);
+  const toggled = useRef(false);
 
   useEventBus('keyPressed', code => {
     if (!isAlt(code)) return;
     setHeld(true);
+    ItemLinkHover.linkedDuringAlt = false;
+    toggled.current = true;
     Store.toggleDropNames();
   });
   useEventBus('keyReleased', code => {
-    if (isAlt(code)) setHeld(false);
+    if (!isAlt(code)) return;
+    setHeld(false);
+    // That Alt was for linking an item into chat, not for the names.
+    if (ItemLinkHover.linkedDuringAlt && toggled.current) Store.toggleDropNames();
+    ItemLinkHover.linkedDuringAlt = false;
+    toggled.current = false;
   });
 
   // Held ALT is the escape hatch: it names every drop, filter or not.
@@ -159,7 +168,7 @@ const DropLabel = observer(({
         }}
       />
       {anchor && item && (
-        <ItemTooltip item={item} x={anchor.x} y={anchor.y} context="plain" />
+        <ItemTooltip item={item} x={anchor.x} y={anchor.y} context="plain" linkable={false} />
       )}
     </>
   );
