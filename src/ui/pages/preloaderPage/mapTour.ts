@@ -57,7 +57,19 @@ const BLUR = 6;
 /** A stop's mark pops in over this long once the camera lands on it. */
 const MARK_IN = 0.45;
 
-export const LAP = ROUTE.length * DWELL + (ROUTE.length - 1) * TRAVEL + RETURN;
+/**
+ * How long a stop is stayed at when its credit needs longer than the rest, in
+ * seconds, by lap and stop; the tour never stays less than DWELL.
+ */
+export type StopNeed = (lap: number, stop: number) => number;
+
+const noNeed: StopNeed = () => 0;
+
+const lapLength = (lap: number, need: StopNeed) =>
+  ROUTE.reduce(
+    (sum, _, i) => sum + Math.max(DWELL, need(lap, i)),
+    (ROUTE.length - 1) * TRAVEL + RETURN
+  );
 
 /** The map image's size: legs wind in its pixels so a bend is round, not squashed. */
 const MAP_W = 1500;
@@ -126,20 +138,26 @@ export type TourFrame = {
   /** The stop being looked at and how far through the stay, or null between stops. */
   stop: number | null;
   stay: number;
+  /** How long this stay lasts, seconds. */
+  dwell: number;
   /** Which lap this is, so the credits can move on each time round. */
   lap: number;
 };
 
-export function tourAt(seconds: number): TourFrame {
-  const lap = Math.floor(seconds / LAP);
-  let t = seconds - lap * LAP;
+export function tourAt(seconds: number, need: StopNeed = noNeed): TourFrame {
+  let lap = 0;
+  let t = Math.max(0, seconds);
+  for (let length = lapLength(0, need); t >= length; length = lapLength(++lap, need)) {
+    t -= length;
+  }
   const marks = ROUTE.map(() => 0);
 
   for (let i = 0; i < ROUTE.length; i++) {
     const [u, v] = ROUTE[i];
+    const dwell = Math.max(DWELL, need(lap, i));
 
     // At stop i: every stop up to it is marked, the newest popping in.
-    if (t < DWELL) {
+    if (t < dwell) {
       for (let k = 0; k < i; k++) marks[k] = 1;
       marks[i] = Math.min(1, t / MARK_IN);
 
@@ -147,8 +165,8 @@ export function tourAt(seconds: number): TourFrame {
         u: 0.5 + (u - 0.5) * FRAME,
         v: 0.5 + (v - 0.5) * FRAME,
         // A slow push in while it stays.
-        zoom: ZOOM[i] + 0.06 * (t / DWELL),
-        bearing: BEARING[i] + 2 * (t / DWELL),
+        zoom: ZOOM[i] + 0.06 * (t / dwell),
+        bearing: BEARING[i] + 2 * (t / dwell),
         tilt: TILT,
         blur: 0,
         legs: i,
@@ -156,12 +174,13 @@ export function tourAt(seconds: number): TourFrame {
         trail: 1,
         marks,
         stop: i,
-        stay: t / DWELL,
+        stay: t / dwell,
+        dwell,
         lap,
       };
     }
 
-    t -= DWELL;
+    t -= dwell;
 
     // Travelling leg i, or back to the start after the last stop.
     const last = i === ROUTE.length - 1;
@@ -195,6 +214,7 @@ export function tourAt(seconds: number): TourFrame {
         marks: last ? marks.map(() => 1 - k) : marks,
         stop: null,
         stay: 0,
+        dwell: 0,
         lap,
       };
     }
@@ -216,6 +236,7 @@ export function tourAt(seconds: number): TourFrame {
     marks,
     stop: 0,
     stay: 0,
+    dwell: DWELL,
     lap,
   };
 }

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t, type TextKey } from '../../../i18n';
-import { legPoint, ROUTE, tourAt } from './mapTour';
+import { legPoint, ROUTE, tourAt, type StopNeed } from './mapTour';
 import { loadCredits, type Credit } from './contributors';
 
 /** What each kind of credit is billed as. */
@@ -38,6 +38,22 @@ const SHAKE = 0.9;
 /** The mark on a stop: an inked X this many map pixels from its middle, and its stroke's half-width at the thickest. */
 const MARK = 11;
 const MARK_WIDTH = 2.2;
+
+/**
+ * A credit's roll of names (`.ws-credit-roll`): the rows it shows at once and
+ * their height, px, how many rows go by a second, and when it starts and stops
+ * moving within the stay, seconds after the stop is reached and before it is
+ * left. The stop is held for as long as the whole roll takes.
+ */
+const ROLL_ROWS = 7;
+const ROLL_ROW = 18;
+const ROLL_RATE = 14;
+const ROLL_IN = 0.9;
+const ROLL_OUT = 0.8;
+
+/** The seconds a credit's roll needs to run past every name. */
+const rollTime = (credit: Credit | null) =>
+  credit?.roll ? Math.max(0, credit.roll.length - ROLL_ROWS) / ROLL_RATE : 0;
 
 /**
  * Whose name a stop carries, if any. The credits roll in their own order from
@@ -158,6 +174,7 @@ export const Backdrop = observer(() => {
   const marksHalo = useRef<SVGPathElement>(null);
   const tip = useRef<SVGCircleElement>(null);
   const credit = useRef<HTMLDivElement>(null);
+  const roll = useRef<HTMLSpanElement>(null);
   const [credits, setCredits] = useState<Credit[]>([]);
   const [who, setWho] = useState<Credit | null>(null);
   const cast = useRef(credits);
@@ -199,8 +216,14 @@ export const Backdrop = observer(() => {
     observer.observe(frame);
     resize();
 
+    // A stop whose credit rolls names stays until they have all gone by.
+    const need: StopNeed = (lap, stop) => {
+      const time = rollTime(creditAt(lap, stop, cast.current));
+      return time ? ROLL_IN + time + ROLL_OUT : 0;
+    };
+
     const step = (now: number) => {
-      const tour = tourAt(still ? 0 : (now - start) / 1000);
+      const tour = tourAt(still ? 0 : (now - start) / 1000, need);
       const s = tour.zoom;
       const px = (tour.u - 0.5) * iw;
       const py = (tour.v - 0.5) * ih;
@@ -270,13 +293,22 @@ export const Backdrop = observer(() => {
         const x = width / 2 + rx * f;
         const y = height / 2 + ry * Math.cos(a) * f;
 
+        const held = tour.stay * tour.dwell;
         const alpha = Math.max(
           0,
-          Math.min(1, (tour.stay - 0.12) / 0.15, (0.94 - tour.stay) / 0.12)
+          Math.min(1, (held - 0.4) / 0.5, (tour.dwell - 0.2 - held) / 0.4)
         );
         const left = x + 340 > width;
         // High on the screen the logo is in the way: hang the credit below.
-        const below = y < height * 0.38;
+        // A credit with a roll is tall, so it hangs below unless low down.
+        const below = y < height * (person.roll ? 0.55 : 0.38);
+
+        const time = rollTime(person);
+        if (roll.current && time) {
+          const k = Math.max(0, Math.min(1, (held - ROLL_IN) / time));
+          const rows = (person.roll?.length ?? 0) - ROLL_ROWS;
+          roll.current.style.transform = `translateY(${(-k * rows * ROLL_ROW).toFixed(1)}px)`;
+        }
 
         card.style.opacity = alpha.toFixed(3);
         card.style.transform = `translate(${(left ? x - 30 : x + 30).toFixed(1)}px, ${(below ? y + 16 + (1 - alpha) * 10 : y - 16 - (1 - alpha) * 10).toFixed(1)}px) translate(${left ? '-100%' : '0'}, ${below ? '0' : '-100%'})`;
@@ -335,6 +367,21 @@ export const Backdrop = observer(() => {
             <span className="ws-credit-name">
               {who.kind === 'everyone' ? t('credits.everyone') : who.name}
             </span>
+            {who.note && (
+              <span className="ws-credit-meta ws-mono">{who.note}</span>
+            )}
+            {who.roll && (
+              <span
+                className="ws-credit-roll ws-mono"
+                style={{ height: ROLL_ROWS * ROLL_ROW, lineHeight: `${ROLL_ROW}px` }}
+              >
+                <span ref={roll}>
+                  {who.roll.map(name => (
+                    <span key={name}>{name}</span>
+                  ))}
+                </span>
+              </span>
+            )}
             {who.kind === 'person' && (
               <span className="ws-credit-meta ws-mono">
                 {[
