@@ -148,9 +148,11 @@
 }
 
 .ws-map-layer {
-  // One layer for the map and its tint, so the breathing and the mask move
-  // both together and the red can never slide off the map. Opaque inside:
-  // a colour blend over a transparent backdrop would paint pure red.
+  // One layer for the map and its tint, so the mask holds both and the red
+  // can never slide off the map. Opaque inside: a colour blend over a
+  // transparent backdrop would paint pure red. The map leans back under this
+  // perspective (`PERSPECTIVE` in backdrop.tsx must match).
+  perspective: 1400px;
   position: absolute;
   inset: 0;
   background: var(--bg-0);
@@ -161,37 +163,101 @@
 
 // The world map drained to grey, then washed in the logo's red above it. It
 // breathes - a slow scale in place, never a pan.
-// Served zoomed, half as big again as the window, and drifting from region to
-// region. Every stop keeps the image over the whole window: at 150% the box
-// has a quarter to spare on each side, and no move goes past a sixth of it.
-.ws-map {
+// The camera's box: the whole map image at its own proportions, sized and
+// moved by the tour loop in `backdrop.tsx`.
+.ws-map-move {
   position: absolute;
-  inset: -25%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-  opacity: 0.34;
-  filter: grayscale(1) contrast(1.35) brightness(0.55);
-  animation: ws-pan 150s ease-in-out infinite;
+  transform-origin: 50% 50%;
 }
 
-@keyframes ws-pan {
-  0%,
-  100% {
-    transform: translate(6%, 4%) scale(1.02);
-  }
-  20% {
-    transform: translate(-8%, 6%) scale(1.1);
-  }
-  40% {
-    transform: translate(-10%, -6%) scale(1.04);
-  }
-  60% {
-    transform: translate(2%, -9%) scale(1.12);
-  }
-  80% {
-    transform: translate(9%, -2%) scale(1.06);
-  }
+.ws-map {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  opacity: 0.34;
+  filter: grayscale(1) contrast(1.35) brightness(0.55);
+}
+
+// The traveller's route, inked on the map itself so it leans and turns with
+// it: black dashes over a faint warm halo that keeps them readable on the
+// darkest ground, an X on every stop, and the pen's tip while it draws.
+.ws-page .ws-trail {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ws-trail-halo {
+  fill: none;
+  stroke: rgba(255, 214, 190, 0.16);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ws-trail-ink {
+  fill: none;
+  stroke: #0b0706;
+  stroke-width: 2.8;
+  stroke-dasharray: 9 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ws-trail-marks {
+  fill: #0b0706;
+}
+
+.ws-trail-marks-halo {
+  fill: none;
+  stroke: rgba(255, 214, 190, 0.16);
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+
+.ws-trail-tip {
+  fill: #0b0706;
+  stroke: rgba(255, 214, 190, 0.35);
+  stroke-width: 2;
+}
+
+// A contributor's name beside the stop the camera rests on, as a film's
+// credits sit over a shot. Placed and faded by the tour loop.
+.ws-credit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  pointer-events: none;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.85);
+  will-change: transform, opacity;
+}
+
+.ws-credit-role {
+  color: rgba(255, 214, 196, 0.8);
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.ws-credit-name {
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 2.6vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.ws-credit-meta {
+  color: rgba(255, 214, 196, 0.65);
+  font-size: 12px;
 }
 
 .ws-tint {
@@ -289,7 +355,8 @@
   // well past the box, so the sparks flying off it are never cut.
   .ws-page.is-loaded & {
     opacity: 1;
-    animation: ws-logo-draw 0.9s cubic-bezier(0.65, 0, 0.35, 1) both;
+    // Backwards only: no clip is left on once it is drawn.
+    animation: ws-logo-draw 0.9s cubic-bezier(0.65, 0, 0.35, 1) backwards;
   }
 }
 
@@ -396,131 +463,18 @@
   }
 }
 
-// The logo's crack, carried on in two halves inside the stage: the top one
-// draws down from the logo's tail to the middle once the load is done, the
-// bottom one on to the footer once the card opens. Behind the card.
-.ws-crack {
+// The logo's crack carried on down the stage as lightning (`lightningLine.tsx`):
+// from up inside the logo's tail to the footer row, behind the card.
+.ws-page .ws-strike {
   position: absolute;
   z-index: 0;
   left: 50%;
-  width: 4px;
-  margin-left: -2px;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent, #d40906 30%, #ff5c40 50%, #d40906 70%, transparent);
-  box-shadow:
-    0 0 8px rgba(226, 40, 30, 0.75),
-    0 0 20px rgba(196, 48, 43, 0.4);
-  // Undrawn: clipped away from the bottom up, the glow allowed out sideways.
-  clip-path: inset(0 -40px 100% -40px);
-
-  // The logo's surge, arriving here as it leaves the lettering.
-  i {
-    position: absolute;
-    left: -4px;
-    right: -4px;
-    top: -20%;
-    height: 16%;
-    border-radius: 999px;
-    background: linear-gradient(to bottom, transparent, rgba(255, 214, 170, 0.95), transparent);
-    opacity: 0;
-    animation: ws-crack-surge-top 4.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-  }
-}
-
-.ws-crack-top {
-  // Up into the logo, overlapping the tail that fades under its lettering.
   top: calc(-0.06 * var(--logo-h));
-  bottom: 50%;
-}
-
-.ws-crack-bottom {
-  top: 50%;
-  // Down past the stage to the footer row.
   bottom: -10px;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 88%, transparent);
-  mask-image: linear-gradient(to bottom, #000 0, #000 88%, transparent);
-
-  i {
-    height: 24%;
-    animation-name: ws-crack-surge-bottom;
-  }
-}
-
-.ws-page.is-loaded .ws-crack-top {
-  animation:
-    ws-crack-draw 1s cubic-bezier(0.65, 0, 0.35, 1) 0.75s forwards,
-    ws-crack-pulse 3.4s ease-in-out infinite;
-}
-
-.ws-page.is-open .ws-crack-bottom {
-  animation:
-    ws-crack-draw 0.6s cubic-bezier(0.65, 0, 0.35, 1) forwards,
-    ws-crack-pulse 3.4s ease-in-out infinite;
-}
-
-@keyframes ws-crack-draw {
-  from {
-    clip-path: inset(0 -40px 100% -40px);
-  }
-  to {
-    clip-path: inset(0 -40px 0 -40px);
-  }
-}
-
-@keyframes ws-crack-pulse {
-  0%,
-  100% {
-    opacity: 0.7;
-  }
-  35%,
-  41% {
-    opacity: 1;
-  }
-  38% {
-    opacity: 0.8;
-  }
-}
-
-// The surge leaves the logo at about 55% of its cycle (`ws-surge`), runs the
-// top half, then the bottom one.
-@keyframes ws-crack-surge-top {
-  0%,
-  50% {
-    top: -20%;
-    opacity: 0;
-  }
-  52% {
-    opacity: 1;
-  }
-  70% {
-    top: 100%;
-    opacity: 1;
-  }
-  71%,
-  100% {
-    top: 100%;
-    opacity: 0;
-  }
-}
-
-@keyframes ws-crack-surge-bottom {
-  0%,
-  69% {
-    top: -24%;
-    opacity: 0;
-  }
-  71% {
-    opacity: 1;
-  }
-  90% {
-    top: 100%;
-    opacity: 1;
-  }
-  91%,
-  100% {
-    top: 100%;
-    opacity: 0;
-  }
+  width: 180px;
+  height: calc(100% + 0.06 * var(--logo-h) + 10px);
+  margin-left: -90px;
+  pointer-events: none;
 }
 
 // The worlds card's place: the loading bar runs across its middle, and the
@@ -548,9 +502,7 @@
   padding: 14px 36px 14px 30px;
   border: 0;
   border-radius: 999px;
-  background: rgba(16, 17, 19, 0.85);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: rgba(16, 17, 19, 0.94);
   color: var(--text-0);
   font-family: var(--font-display);
   font-size: 15px;
@@ -562,8 +514,8 @@
   transform: translate(-50%, -50%);
   // In once the crack has reached it, then breathing with the logo.
   animation:
-    ws-start-in 700ms var(--ease) 1.6s forwards,
-    ws-start-glow 3.4s ease-in-out 2.3s infinite;
+    ws-start-in 700ms var(--ease) 1.7s forwards,
+    ws-start-glow 3.4s ease-in-out 2.4s infinite;
   box-shadow:
     inset 0 0 0 1px rgba(226, 86, 74, 0.6),
     0 0 20px rgba(196, 48, 43, 0.4),
@@ -617,8 +569,9 @@
   }
 }
 
-// The card floats over the art: the one surface carrying an overlay shadow,
-// letting a little of the map through.
+// The card is one of the landing's sections set down over the art: a solid
+// dark surface holding the panel demo's layout - its head and a vertical tab
+// list on the left, the product window on the right.
 .ws-card {
   position: relative;
   z-index: 1;
@@ -626,15 +579,31 @@
   width: 100%;
   height: 100%;
   max-height: 760px;
-  display: flex;
-  flex-direction: column;
-  background: rgba(27, 29, 32, 0.84);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  border-radius: var(--radius-l);
-  box-shadow: var(--shadow-overlay), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  display: grid;
+  grid-template-columns: 268px minmax(0, 1fr);
+  gap: 28px;
+  padding: 32px;
+  background: rgba(10, 11, 12, 0.95);
+  border-radius: 4px;
+  box-shadow: var(--shadow-overlay);
+
   // Backwards only: a clip left on afterwards would cut the overlay shadow off.
   animation: ws-card-open 1s var(--ease) 0.3s backwards;
+  // At rest the clip stands clear of the shadow; hidden, the card folds back
+  // into the line it opened from.
+  clip-path: inset(-48px -48px -48px -48px round 4px);
+  transition:
+    clip-path 650ms var(--ease),
+    opacity 300ms var(--ease);
+
+  .ws-page.is-panel-hidden & {
+    clip-path: inset(calc(50% - 1px) 0 calc(50% - 1px) 0 round 4px);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      clip-path 550ms var(--ease),
+      opacity 250ms var(--ease) 350ms;
+  }
 
   > * {
     animation: ws-fade 420ms var(--ease) 0.95s backwards;
@@ -645,13 +614,13 @@
 // and down.
 @keyframes ws-card-open {
   0% {
-    clip-path: inset(calc(50% - 2px) 50% calc(50% - 2px) 50% round 16px);
+    clip-path: inset(calc(50% - 2px) 50% calc(50% - 2px) 50% round 4px);
   }
   30% {
-    clip-path: inset(calc(50% - 2px) 0 calc(50% - 2px) 0 round 16px);
+    clip-path: inset(calc(50% - 2px) 0 calc(50% - 2px) 0 round 4px);
   }
   100% {
-    clip-path: inset(0 0 0 0 round 16px);
+    clip-path: inset(0 0 0 0 round 4px);
   }
 }
 
@@ -731,52 +700,326 @@
   }
 }
 
-.ws-tabs {
-  flex: none;
+// MU's Option window frame around the card at twice its size: the band ends
+// (100x86 each) on the corners, bars between them top and bottom, rails down
+// the sides between the ends.
+.ws-mu-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  // Toned down from the sheet's bright silver so it sits with the dark card.
+  filter: brightness(0.62) contrast(1.1);
+}
+
+.ws-mu-rail {
+  position: absolute;
+  top: 86px;
+  bottom: 86px;
+  width: 10px;
+}
+
+.ws-mu-rail-left {
+  left: 0;
+}
+
+.ws-mu-rail-right {
+  right: 0;
+}
+
+.ws-mu-bar {
+  position: absolute;
+  left: 100px;
+  right: 100px;
+  height: 86px;
+}
+
+.ws-mu-bar-bottom {
+  bottom: 0;
+}
+
+.ws-mu-bar-top {
+  top: 0;
+  transform: scaleY(-1);
+}
+
+.ws-mu-end {
+  position: absolute;
+  width: 50px;
+  height: 43px;
+}
+
+.ws-mu-bl {
+  left: 0;
+  bottom: 0;
+  transform: scale(2);
+  transform-origin: bottom left;
+}
+
+.ws-mu-br {
+  right: 0;
+  bottom: 0;
+  transform: scale(2);
+  transform-origin: bottom right;
+}
+
+// The top ends are the bottom ones flipped: MU draws the band once.
+.ws-mu-tl {
+  left: 0;
+  top: 0;
+  transform: translateY(86px) scale(2, -2);
+  transform-origin: top left;
+}
+
+.ws-mu-tr {
+  right: 0;
+  top: 0;
+  transform: translateY(86px) scale(2, -2);
+  transform-origin: top right;
+}
+
+.ws-side {
   display: flex;
-  gap: 28px;
-  height: 52px;
-  padding: 0 24px;
-  border-bottom: 1px solid var(--divider);
+  flex-direction: column;
+  min-height: 0;
+}
+
+// Sections are marked the way the game marks a place: a number and a map, in
+// mono, as data rather than a label.
+.ws-marker {
+  display: block;
+  margin-bottom: 14px;
+  color: var(--text-1);
+  font-size: 12px;
+  white-space: pre;
+}
+
+.ws-headline {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.ws-lead {
+  margin: 0 0 22px;
+  color: var(--text-1);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+// A vertical list like the panel's sidebar: the open tab unfolds its one line
+// in place and wears the sidebar's bar on its left.
+.ws-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .ws-tab {
   position: relative;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0;
+  flex-direction: column;
+  width: 100%;
+  padding: 10px 12px;
   border: 0;
+  border-radius: var(--radius-s);
   background: transparent;
   color: var(--text-1);
-  font-size: 14px;
-  font-weight: 500;
+  text-align: left;
   cursor: pointer;
-  transition: color var(--dur-fast) var(--ease);
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
 
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 100%;
-    bottom: -1px;
-    height: 1px;
-    background: var(--accent);
-    transition: right var(--dur) var(--ease);
+  .ws-icon {
+    width: 17px;
+    height: 17px;
+    opacity: 0.6;
+    transition: opacity var(--dur-fast) var(--ease);
   }
 
   &:hover,
   &.is-on {
+    background: var(--bg-2);
     color: var(--text-0);
+
+    .ws-icon {
+      opacity: 1;
+    }
   }
 
-  &:hover::after,
-  &.is-on::after {
-    right: 0;
+  &.is-on::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    border-radius: 0 2px 2px 0;
+    background: var(--mu-red-soft);
   }
 
-  &.is-on .ws-icon {
-    color: var(--mu-red-soft);
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+}
+
+// MU's interface icons: kept at their own colours, a little dim until lit.
+.ws-mu-icon {
+  position: relative;
+  flex: none;
+  display: inline-block;
+  overflow: hidden;
+  border-radius: 3px;
+  opacity: 0.78;
+  transition: opacity var(--dur-fast) var(--ease);
+
+  .is-on &,
+  .ws-btn:hover &,
+  &.is-lit {
+    opacity: 1;
+  }
+
+  > div {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}
+
+.ws-tab-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 14px;
+}
+
+.ws-tab-desc {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 420ms var(--ease),
+    opacity 420ms var(--ease);
+
+  > span {
+    overflow: hidden;
+    min-height: 0;
+    padding-left: 28px;
+    color: var(--text-1);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .is-on > & {
+    grid-template-rows: 1fr;
+    opacity: 1;
+
+    > span {
+      padding-top: 6px;
+    }
+  }
+}
+
+.ws-side-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 20px;
+
+  .ws-btn {
+    width: 100%;
+  }
+}
+
+.ws-page .ws-enter {
+  padding: 11px 22px;
+}
+
+// The product window, as the landing frames the panel: a header saying which
+// world and which page, the page, and a status strip in mono under it.
+.ws-mock {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius-m);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-overlay);
+}
+
+.ws-mock-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid #292c30;
+  background: var(--bg-1);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.ws-mock-server {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-1);
+  text-overflow: ellipsis;
+}
+
+.ws-mock-sep {
+  color: var(--text-mark);
+}
+
+.ws-mock-title {
+  color: var(--text-0);
+  font-weight: 600;
+}
+
+.ws-mock-pill {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--bg-3);
+  color: var(--text-1);
+  font-size: 12px;
+
+  &.is-bad {
+    background: rgba(194, 82, 82, 0.2);
+    color: var(--danger-text);
+  }
+}
+
+.ws-mock-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  color: var(--text-2);
+  font-size: 12px;
+
+  &.is-up {
+    color: var(--ok-text);
+
+    .ws-badge-dot {
+      background: var(--ok);
+      animation: ws-pulse 2.2s var(--ease) infinite;
+    }
+  }
+
+  &.is-down {
+    color: var(--danger-text);
+
+    .ws-badge-dot {
+      background: var(--danger);
+    }
   }
 }
 
@@ -786,54 +1029,50 @@
   display: flex;
 }
 
-.ws-foot {
+.ws-mock-status {
   flex: none;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 24px;
-  border-top: 1px solid var(--divider);
-}
-
-.ws-foot-world {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid #292c30;
+  background: var(--bg-0);
+  color: var(--text-2);
+  font-size: 11px;
   white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 
-  > * {
-    overflow: hidden;
-    text-overflow: ellipsis;
+  &.is-bad {
+    color: var(--danger-text);
   }
 }
 
-.ws-foot-name {
-  flex: none;
-  max-width: 50%;
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+// Hellfire where Start was pressed (`hellfire.tsx`): on the map, screened so
+// it lights it, and under the page's content so the card opens over it.
+.ws-page > .ws-hellfire {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: screen;
+  pointer-events: none;
 }
 
-.ws-foot-warn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--danger-text);
-  font-size: 13px;
-}
-
-.ws-page .ws-enter {
-  min-width: 140px;
-  padding: 11px 22px;
+// The footer's lightning block (`footerStrike.tsx`), behind its lettering.
+.ws-page .ws-footer-strike {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 56px;
+  pointer-events: none;
 }
 
 // Real figures on one mono line, dot separated, as under the site's hero.
 .ws-status {
+  position: relative;
+  z-index: 1;
   flex: none;
   display: flex;
   flex-wrap: wrap;
@@ -848,6 +1087,21 @@
     content: '\00b7';
     margin: 0 10px;
     color: var(--text-mark);
+  }
+}
+
+// Once the strike has run out along the footer the lettering turns to ink on
+// it, on the same beat as the band (`footerStrike.tsx`: 0.6 s down, then the
+// spread).
+.ws-page.is-open .ws-status,
+.ws-page.is-open .ws-status .ws-github,
+.ws-page.is-open .ws-status > * + *::before {
+  animation: ws-ink 400ms var(--ease) 0.95s forwards;
+}
+
+@keyframes ws-ink {
+  to {
+    color: #140a07;
   }
 }
 
@@ -1517,9 +1771,7 @@
   .ws-select-plate {
     padding: 6px 10px;
     font-size: 13px;
-    background: rgba(27, 29, 32, 0.72);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    background: rgba(27, 29, 32, 0.94);
 
     &:hover {
       background: var(--bg-3);
@@ -1611,7 +1863,7 @@
   flex: 1 1 auto;
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 320px;
 }
 
 .ws-browse {
@@ -2352,9 +2604,22 @@
 
 // ---------- Small windows ----------
 
+// Narrower: the side column and the world panel give up some width, and the
+// head keeps only its title.
+@media (max-width: 1180px) {
+  .ws-card {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 20px;
+    padding: 24px;
+  }
+  .ws-lead {
+    display: none;
+  }
+}
+
 @media (max-width: 980px) {
   .ws-worlds {
-    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(0, 1fr) 280px;
   }
   .ws-split {
     grid-template-columns: 260px minmax(0, 1fr);
@@ -2392,20 +2657,39 @@
     flex: none;
     overflow: visible;
   }
+  // The side becomes a strip over the window: tabs in a row, no head.
+  .ws-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px;
+  }
+  .ws-marker,
+  .ws-headline,
+  .ws-tab-desc {
+    display: none;
+  }
+  .ws-side {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
   .ws-tabs {
-    gap: 18px;
-    padding: 0 16px;
+    flex-direction: row;
+  }
+  .ws-side-actions {
+    flex-direction: row;
+    margin: 0 0 0 auto;
+    padding: 0;
+
+    .ws-btn {
+      width: auto;
+    }
   }
   .ws-aside-art {
     aspect-ratio: auto;
     height: 120px;
-  }
-  .ws-foot {
-    justify-content: flex-end;
-    padding: 12px 16px;
-  }
-  .ws-foot-world {
-    display: none;
   }
 }
 
@@ -2420,8 +2704,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ws-map,
-  .ws-crack i,
   .ws-logo-glow,
   .ws-logo-bloom,
   .ws-logo-surge,

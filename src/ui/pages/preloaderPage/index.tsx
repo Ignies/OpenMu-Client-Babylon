@@ -24,6 +24,13 @@ import { SetupView } from './setupView';
 import { DownloadView } from './downloadView';
 import { LoadingRunner } from './loadingRunner';
 import { LogoLight } from './logoLight';
+import { LightningLine } from './lightningLine';
+import { Hellfire } from './hellfire';
+import { FooterStrike } from './footerStrike';
+import { MuFrame } from './muFrame';
+import { MuIcon } from './muIcon';
+import { REACH_TEXT } from './banner';
+import { ServerProbe } from '../../../common/serverProbe';
 
 const GITHUB_URL = 'https://github.com/Ignies/OpenMu-Client-Babylon';
 
@@ -32,10 +39,39 @@ const LEAVE_MS = 320;
 
 type Section = 'worlds' | 'setup' | 'download';
 
-const SECTIONS: { key: Section; label: TextKey; icon: IconName }[] = [
-  { key: 'worlds', label: 'worlds.tabWorlds', icon: 'world' },
-  { key: 'setup', label: 'worlds.tabSetup', icon: 'server' },
-  { key: 'download', label: 'worlds.tabDownload', icon: 'download' },
+/**
+ * The card's tabs, as the landing page lists the panel's: a label, the one
+ * line the open tab unfolds, and the section marker - a number and a MU map,
+ * the way the landing marks its sections.
+ */
+const SECTIONS: {
+  key: Section;
+  label: TextKey;
+  desc: TextKey;
+  icon: IconName;
+  marker: string;
+}[] = [
+  {
+    key: 'worlds',
+    label: 'worlds.tabWorlds',
+    desc: 'worlds.tabWorldsDesc',
+    icon: 'world',
+    marker: '01  Lorencia',
+  },
+  {
+    key: 'setup',
+    label: 'worlds.tabSetup',
+    desc: 'worlds.tabSetupDesc',
+    icon: 'server',
+    marker: '02  Devias',
+  },
+  {
+    key: 'download',
+    label: 'worlds.tabDownload',
+    desc: 'worlds.tabDownloadDesc',
+    icon: 'download',
+    marker: '03  Noria',
+  },
 ];
 
 /** The filter's "no filter" entry, kept apart from the language codes. */
@@ -116,6 +152,8 @@ export const PreloaderPage = observer(() => {
   const [language, setLanguage] = useState(ALL);
   const [search, setSearch] = useState('');
   const [leaving, setLeaving] = useState(false);
+  // The card folds away to show the map and its credits, and back.
+  const [panelHidden, setPanelHidden] = useState(false);
   const leaveTimer = useRef(0);
   // The version's UI chunk arrives after the first frames, and nothing
   // observable says when: held here so its arrival redraws the page.
@@ -187,6 +225,8 @@ export const PreloaderPage = observer(() => {
   );
 
   const playable = playableHere(selected);
+  const reach = ServerProbe.of(selected.id);
+  const current = SECTIONS.find(entry => entry.key === section) ?? SECTIONS[0];
   const canEnter = playable && !ServerConfig.isEmpty && !leaving;
 
   const leave = (then: () => void) => {
@@ -269,14 +309,25 @@ export const PreloaderPage = observer(() => {
 
   return (
     <div
-      className={`ws-page${loaded ? ' is-loaded' : ''}${open ? ' is-open' : ''}${leaving ? ' is-leaving' : ''}`}
+      className={`ws-page${loaded ? ' is-loaded' : ''}${open ? ' is-open' : ''}${open && panelHidden ? ' is-panel-hidden' : ''}${leaving ? ' is-leaving' : ''}`}
     >
       <Backdrop />
+      {open && <Hellfire />}
 
       <header className="ws-top">
+        {open && (
+          <Button
+            icon={panelHidden ? 'eye' : 'eyeOff'}
+            variant="ghost"
+            small
+            onClick={() => setPanelHidden(hidden => !hidden)}
+          >
+            {t(panelHidden ? 'worlds.showPanel' : 'worlds.hidePanel')}
+          </Button>
+        )}
         <LanguagePicker />
         <Button
-          icon="gear"
+          icon="gearFill"
           variant="ghost"
           small
           onClick={() => {
@@ -291,14 +342,7 @@ export const PreloaderPage = observer(() => {
         <LogoLight />
 
         <div className="ws-stage">
-          {/* The logo's crack, carried on down: to the middle once the load is
-              done, and on to the footer once the card opens. */}
-          <div className="ws-crack ws-crack-top" aria-hidden>
-            <i />
-          </div>
-          <div className="ws-crack ws-crack-bottom" aria-hidden>
-            <i />
-          </div>
+          <LightningLine phase={phase} />
 
           {phase === 'loading' ? (
             <LoadingRunner
@@ -325,80 +369,120 @@ export const PreloaderPage = observer(() => {
                 <i />
               </div>
               <section className="ws-card">
-                <nav className="ws-tabs">
-                  {SECTIONS.map(entry => (
-                    <button
-                      type="button"
-                      key={entry.key}
-                      className={`ws-tab anim-host${section === entry.key ? ' is-on' : ''}`}
-                      onClick={uiClick(() => setSection(entry.key))}
-                    >
-                      <Icon name={entry.icon} />
-                      {t(entry.label)}
-                    </button>
-                  ))}
-                </nav>
+                <MuFrame />
+                {/* The landing's panel section: its head and a vertical tab
+                    list on the left, the product window on the right. */}
+                <div className="ws-side">
+                  <span className="ws-marker ws-mono">{current.marker}</span>
+                  <h2 className="ws-headline">{t('worlds.headline')}</h2>
+                  <p className="ws-lead">{t('worlds.lead')}</p>
 
-                <div className="ws-body">
-                  {section === 'download' ? (
-                    <DownloadView />
-                  ) : section === 'setup' ? (
-                    <SetupView />
-                  ) : (
-                    <WorldsView
-                      worlds={worlds}
-                      total={all.length}
-                      search={search}
-                      onSearch={setSearch}
-                      language={language}
-                      onLanguage={setLanguage}
-                      onEnter={enter}
-                    />
-                  )}
+                  <nav
+                    className="ws-tabs"
+                    role="tablist"
+                    aria-orientation="vertical"
+                  >
+                    {SECTIONS.map(entry => (
+                      <button
+                        type="button"
+                        role="tab"
+                        aria-selected={section === entry.key}
+                        key={entry.key}
+                        className={`ws-tab anim-host${section === entry.key ? ' is-on' : ''}`}
+                        onClick={uiClick(() => setSection(entry.key))}
+                      >
+                        <span className="ws-tab-row">
+                          <MuIcon
+                            name={entry.key}
+                            size={22}
+                            lit={section === entry.key}
+                          />
+                          <span>{t(entry.label)}</span>
+                        </span>
+                        <span className="ws-tab-desc">
+                          <span>{t(entry.desc)}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </nav>
+
+                  <div className="ws-side-actions">
+                    <Button
+                      variant="primary"
+                      icon="play"
+                      className="ws-enter"
+                      disabled={!canEnter}
+                      onClick={() => enter()}
+                    >
+                      {t('worlds.enter')}
+                    </Button>
+                    <Button disabled={leaving} onClick={offline}>
+                      {t('preloader.playOffline')}
+                    </Button>
+                  </div>
                 </div>
 
-                <footer className="ws-foot">
-                  <div className="ws-foot-world">
-                    {ServerConfig.isEmpty ? (
-                      <span className="ws-muted">{t('worlds.empty')}</span>
+                <figure className="ws-mock">
+                  <figcaption className="ws-mock-bar">
+                    <span className="ws-mock-server">
+                      {ServerConfig.isEmpty
+                        ? t('worlds.empty')
+                        : selected.name.trim() || t('server.unnamed')}
+                    </span>
+                    <span className="ws-mock-sep">/</span>
+                    <span className="ws-mock-title">{t(current.label)}</span>
+                    {!!selected.version && (
+                      <span
+                        className={`ws-mock-pill ws-mono${playable ? '' : ' is-bad'}`}
+                      >
+                        {selected.version}
+                      </span>
+                    )}
+                    {reach !== 'unknown' && (
+                      <span className={`ws-mock-count ws-mono is-${reach}`}>
+                        <span className="ws-badge-dot" />
+                        {t(REACH_TEXT[reach])}
+                      </span>
+                    )}
+                  </figcaption>
+
+                  <div className="ws-body">
+                    {section === 'download' ? (
+                      <DownloadView />
+                    ) : section === 'setup' ? (
+                      <SetupView />
                     ) : (
-                      <>
-                        <span className="ws-foot-name">
-                          {selected.name.trim() || t('server.unnamed')}
-                        </span>
-                        {playable ? (
-                          <span className="ws-mono ws-muted">
-                            {displayAddress(selected)}
-                          </span>
-                        ) : (
-                          <span className="ws-foot-warn">
-                            <Icon name="warning" />
-                            {t('worlds.needsClient', {
-                              world: selected.version ?? '',
-                              client: versionTags().join(', '),
-                            })}
-                          </span>
-                        )}
-                      </>
+                      <WorldsView
+                        worlds={worlds}
+                        total={all.length}
+                        search={search}
+                        onSearch={setSearch}
+                        language={language}
+                        onLanguage={setLanguage}
+                        onEnter={enter}
+                      />
                     )}
                   </div>
-                  <Button variant="ghost" disabled={leaving} onClick={offline}>
-                    {t('preloader.playOffline')}
-                  </Button>
-                  <Button
-                    variant="primary"
-                    icon="play"
-                    className="ws-enter"
-                    disabled={!canEnter}
-                    onClick={() => enter()}
+
+                  <div
+                    className={`ws-mock-status ws-mono${playable ? '' : ' is-bad'}`}
                   >
-                    {t('worlds.enter')}
-                  </Button>
-                </footer>
+                    {ServerConfig.isEmpty
+                      ? t('worlds.empty')
+                      : playable
+                        ? displayAddress(selected)
+                        : t('worlds.needsClient', {
+                            world: selected.version ?? '',
+                            client: versionTags().join(', '),
+                          })}
+                  </div>
+                </figure>
               </section>
             </>
           )}
         </div>
+
+        <FooterStrike lit={open} />
 
         <p className="ws-status ws-mono">
           {loaded && status.map(part => <span key={part}>{part}</span>)}

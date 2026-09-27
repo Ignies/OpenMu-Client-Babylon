@@ -30,6 +30,12 @@ const ICONS = {
       <path d="M12 3.5v2.2M12 18.3v2.2M20.5 12h-2.2M5.7 12H3.5M18 6l-1.6 1.6M7.6 16.4 6 18M18 18l-1.6-1.6M7.6 7.6 6 6" />
     </g>
   ),
+  // The Options button's: a solid cog with its axle hole cut out.
+  gearFill: (
+    <g className="rotor">
+      <path fill="currentColor" stroke="none" fillRule="evenodd" d="M19.26 9.75 22 9.97v4.06l-2.74.22-.54 1.3 1.78 2.09-2.86 2.86-2.09-1.78-1.3.54-.22 2.74H9.97l-.22-2.74-1.3-.54-2.09 1.78-2.86-2.86 1.78-2.09-.54-1.3L2 14.03V9.97l2.74-.22.54-1.3L3.5 6.36 6.36 3.5l2.09 1.78 1.3-.54.22-2.74h4.06l.22 2.74 1.3.54 2.09-1.78 2.86 2.86-1.78 2.09.54 1.3ZM15.1 12a3.1 3.1 0 1 0-6.2 0 3.1 3.1 0 1 0 6.2 0Z" />
+    </g>
+  ),
   play: <path className="draw" d="M8 5.5v13l10-6.5-10-6.5Z" />,
   world: (
     <>
@@ -99,6 +105,7 @@ export const Icon = ({ name, className }: { name: IconName; className?: string }
 export const Button = ({
   children,
   icon,
+  lead,
   variant = 'default',
   small = false,
   disabled = false,
@@ -108,6 +115,8 @@ export const Button = ({
 }: {
   children?: ReactNode;
   icon?: IconName;
+  /** Anything else to lead the label with, in place of an icon. */
+  lead?: ReactNode;
   variant?: 'default' | 'primary' | 'ghost' | 'danger';
   small?: boolean;
   disabled?: boolean;
@@ -125,6 +134,7 @@ export const Button = ({
     onClick={uiClick(onClick)}
   >
     {icon && <Icon name={icon} />}
+    {lead}
     {children}
   </button>
 );

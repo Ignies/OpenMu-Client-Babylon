@@ -1,5 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import { glowPulse, rampAt, sparkSprites } from './sparkSprites';
+import { bolt, drawBolt, fork, stroke, surgeStretch, type Point } from './bolt';
 
 /**
  * The bar's fill as red lightning, lit the way the logo is: a jagged bolt from
@@ -12,8 +13,6 @@ import { glowPulse, rampAt, sparkSprites } from './sparkSprites';
  * the window in the darkness over the map (`--reveal` on the page, read by
  * `.ws-iris`).
  */
-
-type Point = { x: number; y: number };
 
 type Spark = {
   x: number;
@@ -35,9 +34,8 @@ const FOOT_X = 0.66;
 /** A new bolt this often, ms: the flicker of the lightning. */
 const BOLT_MS = 70;
 
-/** How far the bolt may stray off the bar's line, px, and its finest kink. */
+/** How far the bolt may stray off the bar's line, px. */
 const REACH = 11;
-const FINEST = 7;
 
 /** A surge runs tail to head every `SURGE_EVERY` seconds, taking `SURGE_RUN`. */
 const SURGE_EVERY = 2.6;
@@ -46,74 +44,6 @@ const SURGE_RUN = 0.8;
 /** Sparks thrown off the head per second, and embers lifting off the length. */
 const SPARK_RATE = 55;
 const EMBER_RATE = 14;
-
-/**
- * A bolt by midpoint displacement: each pass kinks the middle of every
- * segment, less each time, so big bends carry smaller ones the way lightning
- * does. Both ends stay on the line.
- */
-function bolt(from: number, to: number, y: number): Point[] {
-  let points: Point[] = [
-    { x: from, y },
-    { x: to, y },
-  ];
-  let kink = Math.min(REACH, (to - from) * 0.12);
-
-  while (points.length < 2 || points[1].x - points[0].x > FINEST) {
-    const next: Point[] = [points[0]];
-
-    for (let i = 1; i < points.length; i++) {
-      const a = points[i - 1];
-      const b = points[i];
-      const mid = (a.y + b.y) / 2 + (Math.random() - 0.5) * 2 * kink;
-
-      next.push(
-        {
-          x: (a.x + b.x) / 2,
-          y: Math.max(y - REACH, Math.min(y + REACH, mid)),
-        },
-        b
-      );
-    }
-
-    points = next;
-    kink *= 0.58;
-    if (points.length > 512) break;
-  }
-
-  return points;
-}
-
-/** A short crooked branch thrown back off the bolt near its head. */
-function fork(from: Point): Point[] {
-  const points = [from];
-  const up = Math.random() < 0.5 ? -1 : 1;
-  let { x, y } = from;
-
-  for (let i = 0; i < 3 + Math.floor(Math.random() * 3); i++) {
-    x -= 6 + Math.random() * 10;
-    y += up * (3 + Math.random() * 7);
-    points.push({ x, y });
-  }
-
-  return points;
-}
-
-function stroke(
-  ctx: CanvasRenderingContext2D,
-  points: Point[],
-  width: number,
-  style: string
-) {
-  if (points.length < 2) return;
-
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-  ctx.lineWidth = width;
-  ctx.strokeStyle = style;
-  ctx.stroke();
-}
 
 export const LightningBar = ({
   runner,
@@ -207,7 +137,7 @@ export const LightningBar = ({
         } else {
           if (now - boltAt > BOLT_MS) {
             boltAt = now;
-            points = bolt(from, head, y);
+            points = bolt({ x: from, y }, { x: head, y }, REACH);
             forks = [];
             // Forks only near the head, where the energy is.
             for (let i = 0; i < 2; i++) {
@@ -216,7 +146,7 @@ export const LightningBar = ({
                   points.length -
                   1 -
                   Math.floor(Math.random() * Math.min(5, points.length - 1));
-                forks.push(fork(points[near]));
+                forks.push(fork(points[near], 1, 0));
               }
             }
           }
@@ -224,21 +154,13 @@ export const LightningBar = ({
           const glow = glowPulse(time) * (0.85 + Math.random() * 0.15);
           ctx.globalCompositeOperation = 'lighter';
 
-          stroke(ctx, points, 18, `rgba(196, 48, 43, ${0.12 * glow})`);
-          stroke(ctx, points, 8, `rgba(226, 70, 48, ${0.28 * glow})`);
-          stroke(ctx, points, 2.8, `rgba(255, 104, 64, ${0.95 * glow})`);
-          stroke(ctx, points, 1.2, `rgba(255, 232, 214, ${0.9 * glow})`);
-
-          for (const branch of forks) {
-            stroke(ctx, branch, 4, `rgba(226, 70, 48, ${0.3 * glow})`);
-            stroke(ctx, branch, 1.2, `rgba(255, 170, 130, ${0.8 * glow})`);
-          }
+          drawBolt(ctx, points, glow, forks);
 
           // The surge: a hot stretch running from the tail to the head.
           const surge = (time % SURGE_EVERY) / SURGE_RUN;
           if (surge < 1) {
             const at = from + length * (surge * surge * (3 - 2 * surge));
-            const stretch = points.filter(p => Math.abs(p.x - at) < 46);
+            const stretch = surgeStretch(points, 'x', at, 46);
             stroke(ctx, stretch, 6, 'rgba(255, 150, 100, 0.35)');
             stroke(ctx, stretch, 2.4, 'rgba(255, 240, 220, 0.9)');
           }
