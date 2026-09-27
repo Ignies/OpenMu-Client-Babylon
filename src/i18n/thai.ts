@@ -2080,7 +2080,7 @@ export const thaiLayer: LanguageLayer = {
     'gm.map.goHere': 'วาร์ปไปแผนที่นี้',
     'gm.map.bringTarget': 'พา {name} มาที่นี่',
     'gm.map.menu.goHere': 'ไปที่นี่',
-    'gm.map.menu.movesYou': 'จะย้ายคุณมาที่นี่ก่อน',
+    'gm.map.menu.movesYou': 'การเสกที่นี่จะพาคุณไปที่นั่นแล้วพากลับมา',
     'gm.map.menu.copy': 'คัดลอกพิกัด',
     'gm.map.menuHint': 'คลิกขวาที่ช่องหรือผู้เล่นเพื่อดูเพิ่มเติม',
     'gm.section.macros': 'มาโคร',

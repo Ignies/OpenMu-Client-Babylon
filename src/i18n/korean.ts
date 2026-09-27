@@ -2068,7 +2068,7 @@ export const koreanLayer: LanguageLayer = {
     'gm.map.goHere': '이 맵으로 이동',
     'gm.map.bringTarget': '{name} 여기로 데려오기',
     'gm.map.menu.goHere': '여기로 이동',
-    'gm.map.menu.movesYou': '먼저 이곳으로 이동합니다.',
+    'gm.map.menu.movesYou': '여기서 소환하면 그곳으로 갔다가 다시 돌아옵니다.',
     'gm.map.menu.copy': '좌표 복사',
     'gm.map.menuHint': '타일이나 플레이어를 우클릭하면 더 많은 기능을 쓸 수 있습니다.',
     'gm.section.macros': '매크로',

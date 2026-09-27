@@ -2095,7 +2095,7 @@ export const russianLayer: LanguageLayer = {
     'gm.map.goHere': 'Перейти на эту карту',
     'gm.map.bringTarget': 'Привести {name} сюда',
     'gm.map.menu.goHere': 'Перейти сюда',
-    'gm.map.menu.movesYou': 'Сначала вы переместитесь сюда.',
+    'gm.map.menu.movesYou': 'Призыв здесь перемещает вас туда и обратно.',
     'gm.map.menu.copy': 'Копировать координаты',
     'gm.map.menuHint': 'Правый клик по клетке или игроку: больше действий.',
     'gm.section.macros': 'Макросы',

@@ -2121,7 +2121,7 @@ export const spanishLayer: LanguageLayer = {
     'gm.map.goHere': 'Ir a este mapa',
     'gm.map.bringTarget': 'Traer a {name} aquí',
     'gm.map.menu.goHere': 'Ir aquí',
-    'gm.map.menu.movesYou': 'Primero te lleva aquí.',
+    'gm.map.menu.movesYou': 'Invocar aquí te lleva allí y te trae de vuelta.',
     'gm.map.menu.copy': 'Copiar coordenadas',
     'gm.map.menuHint': 'Clic derecho en una casilla o en un jugador para más.',
     'gm.section.macros': 'Macros',

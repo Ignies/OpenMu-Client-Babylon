@@ -2109,7 +2109,7 @@ export const romanianLayer: LanguageLayer = {
     'gm.map.goHere': 'Mergi pe această hartă',
     'gm.map.bringTarget': 'Adu pe {name} aici',
     'gm.map.menu.goHere': 'Mergi aici',
-    'gm.map.menu.movesYou': 'Mai întâi ești mutat aici.',
+    'gm.map.menu.movesYou': 'Invocarea aici te duce acolo și înapoi.',
     'gm.map.menu.copy': 'Copiază coordonatele',
     'gm.map.menuHint': 'Clic dreapta pe o dală sau pe un jucător pentru mai mult.',
     'gm.section.macros': 'Macrouri',

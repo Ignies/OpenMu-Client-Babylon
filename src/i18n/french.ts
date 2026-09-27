@@ -2116,7 +2116,7 @@ export const frenchLayer: LanguageLayer = {
     'gm.map.goHere': 'Aller sur cette carte',
     'gm.map.bringTarget': 'Amener {name} ici',
     'gm.map.menu.goHere': 'Aller ici',
-    'gm.map.menu.movesYou': 'Vous y êtes d’abord déplacé.',
+    'gm.map.menu.movesYou': 'Faire apparaître ici vous y emmène, puis vous ramène.',
     'gm.map.menu.copy': 'Copier les coordonnées',
     'gm.map.menuHint': 'Clic droit sur une case ou un joueur pour plus d’options.',
     'gm.section.macros': 'Macros',

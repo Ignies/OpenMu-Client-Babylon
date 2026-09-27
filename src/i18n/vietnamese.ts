@@ -2043,7 +2043,7 @@ export const vietnameseLayer: LanguageLayer = {
     'gm.map.goHere': 'Dịch chuyển tới bản đồ này',
     'gm.map.bringTarget': 'Gọi {name} đến đây',
     'gm.map.menu.goHere': 'Đến đây',
-    'gm.map.menu.movesYou': 'Bạn sẽ được đưa đến đây trước.',
+    'gm.map.menu.movesYou': 'Triệu hồi ở đây sẽ đưa bạn đến đó rồi đưa về.',
     'gm.map.menu.copy': 'Sao chép tọa độ',
     'gm.map.menuHint': 'Nhấp chuột phải vào một ô hoặc người chơi để xem thêm.',
     'gm.section.macros': 'Macro',

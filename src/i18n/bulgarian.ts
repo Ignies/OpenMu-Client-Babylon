@@ -2101,7 +2101,7 @@ export const bulgarianLayer: LanguageLayer = {
     'gm.map.goHere': 'Отиди на тази карта',
     'gm.map.bringTarget': 'Доведи {name} тук',
     'gm.map.menu.goHere': 'Отиди тук',
-    'gm.map.menu.movesYou': 'Първо те премества тук.',
+    'gm.map.menu.movesYou': 'Призоваването тук те премества там и обратно.',
     'gm.map.menu.copy': 'Копирай координатите',
     'gm.map.menuHint': 'Десен клик върху плочка или играч за още.',
     'gm.section.macros': 'Макроси',

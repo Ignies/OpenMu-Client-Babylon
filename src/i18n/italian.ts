@@ -2116,7 +2116,7 @@ export const italianLayer: LanguageLayer = {
     'gm.map.goHere': 'Vai a questa mappa',
     'gm.map.bringTarget': 'Porta {name} qui',
     'gm.map.menu.goHere': 'Vai qui',
-    'gm.map.menu.movesYou': 'Prima vieni spostato qui.',
+    'gm.map.menu.movesYou': 'Evocare qui ti porta lì e poi ti riporta indietro.',
     'gm.map.menu.copy': 'Copia coordinate',
     'gm.map.menuHint': 'Clic destro su una casella o su un giocatore per altro.',
     'gm.section.macros': 'Macro',

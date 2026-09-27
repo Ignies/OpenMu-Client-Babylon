@@ -2122,7 +2122,7 @@ export const germanLayer: LanguageLayer = {
     'gm.map.goHere': 'Zu dieser Karte',
     'gm.map.bringTarget': '{name} hierher holen',
     'gm.map.menu.goHere': 'Hierher gehen',
-    'gm.map.menu.movesYou': 'Du wirst zuerst hierher versetzt.',
+    'gm.map.menu.movesYou': 'Spawnen hier versetzt dich hin und wieder zurück.',
     'gm.map.menu.copy': 'Koordinaten kopieren',
     'gm.map.menuHint': 'Rechtsklick auf ein Feld oder einen Spieler für mehr.',
     'gm.section.macros': 'Makros',
