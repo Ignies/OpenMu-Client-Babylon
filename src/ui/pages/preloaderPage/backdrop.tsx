@@ -579,7 +579,8 @@ export const Backdrop = observer(() => {
       </div>
       <div className="ws-iris" />
       <div className="ws-vignette" />
-      {/* Over the vignette, so the sparks are bright at the edge they rise from. */}
+      {/* Over the vignette, so the sparks are bright at the edge they rise
+          from. They show once Start is pressed (`.is-open`). */}
       <Embers rising />
     </div>
   );
