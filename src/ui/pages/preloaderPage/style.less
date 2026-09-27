@@ -156,19 +156,42 @@
   background: var(--bg-0);
   -webkit-mask-image: radial-gradient(ellipse 72% 80% at 50% 45%, #000 38%, transparent 88%);
   mask-image: radial-gradient(ellipse 72% 80% at 50% 45%, #000 38%, transparent 88%);
-  animation: ws-breathe 48s var(--ease) infinite alternate;
+  overflow: hidden;
 }
 
 // The world map drained to grey, then washed in the logo's red above it. It
 // breathes - a slow scale in place, never a pan.
+// Served zoomed, half as big again as the window, and drifting from region to
+// region. Every stop keeps the image over the whole window: at 150% the box
+// has a quarter to spare on each side, and no move goes past a sixth of it.
 .ws-map {
   position: absolute;
-  inset: 0;
+  inset: -25%;
   background-repeat: no-repeat;
-  background-position: center 40%;
+  background-position: center;
   background-size: cover;
   opacity: 0.34;
   filter: grayscale(1) contrast(1.35) brightness(0.55);
+  animation: ws-pan 150s ease-in-out infinite;
+}
+
+@keyframes ws-pan {
+  0%,
+  100% {
+    transform: translate(6%, 4%) scale(1.02);
+  }
+  20% {
+    transform: translate(-8%, 6%) scale(1.1);
+  }
+  40% {
+    transform: translate(-10%, -6%) scale(1.04);
+  }
+  60% {
+    transform: translate(2%, -9%) scale(1.12);
+  }
+  80% {
+    transform: translate(9%, -2%) scale(1.06);
+  }
 }
 
 .ws-tint {
@@ -179,12 +202,23 @@
   opacity: 0.75;
 }
 
-@keyframes ws-breathe {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.06);
+// Black over everything but a small window on the map, around the bar; the
+// hunter and the bar sit in front of it. The window opens as he runs until the
+// whole map shows. The bar writes `--reveal` (0..1) and where its middle is
+// (`--reveal-x`, `--reveal-y`); once the card can open, this fades away.
+.ws-iris {
+  --iris-r: calc(6vmax + var(--reveal, 0) * 90vmax);
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--reveal-x, 50%) var(--reveal-y, 58%),
+    transparent var(--iris-r),
+    #000 calc(var(--iris-r) + 9vmax)
+  );
+  transition: opacity 900ms var(--ease);
+
+  .ws-page.is-loaded & {
+    opacity: 0;
   }
 }
 
@@ -228,6 +262,7 @@
 }
 
 .ws-main {
+  --logo-h: clamp(100px, 23vh, 240px);
   position: relative;
   z-index: 2;
   height: 100%;
@@ -238,28 +273,347 @@
 }
 
 // The logo hangs from the top edge - its red line runs off the screen - and
-// its lower tip dips into the card below it. `#root img` fills its box, so
-// the images here outrank it.
-:is(#root, .app) .ws-page .ws-logo {
+// its lower tip dips into the card below it.
+.ws-logo {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   flex: none;
-  width: auto;
-  height: clamp(90px, 19vh, 200px);
-  margin-bottom: calc(-0.07 * clamp(90px, 19vh, 200px));
+  height: var(--logo-h);
+  aspect-ratio: 680 / 522;
+  margin-bottom: calc(-0.07 * var(--logo-h));
   pointer-events: none;
-  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.55));
-  animation: ws-logo-in 0.9s var(--ease) both;
+  // Hidden while the load runs: only the hunter and the bar are on screen.
+  opacity: 0;
+
+  // Once it is done, the logo is drawn in from the top down. The clip reaches
+  // well past the box, so the sparks flying off it are never cut.
+  .ws-page.is-loaded & {
+    opacity: 1;
+    animation: ws-logo-draw 0.9s cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
 }
 
-@keyframes ws-logo-in {
+// `#root img` fills its box, which is what these want anyway; the selector
+// only has to outrank it for the positioning.
+:is(#root, .app) .ws-page .ws-logo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ws-logo-art {
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.55));
+}
+
+// The light: the red parts screened back over themselves, breathing and
+// flickering, with a blurred copy as the bloom.
+.ws-logo-glow,
+.ws-logo-bloom,
+.ws-logo-surge {
+  mix-blend-mode: screen;
+}
+
+.ws-logo-glow {
+  animation: ws-glow 3.4s ease-in-out infinite;
+}
+
+.ws-logo-bloom {
+  filter: blur(8px);
+  animation: ws-glow 3.4s ease-in-out infinite;
+}
+
+// A band of light that runs down the crack and across everything red on the
+// way, then waits.
+.ws-logo-surge {
+  filter: brightness(1.7);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 44%, #000 50%, transparent 56%);
+  mask-image: linear-gradient(to bottom, transparent 44%, #000 50%, transparent 56%);
+  -webkit-mask-size: 100% 300%;
+  mask-size: 100% 300%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: ws-surge 4.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.ws-page .ws-logo-sparks {
+  position: absolute;
+  left: -15%;
+  top: -10%;
+  width: 130%;
+  height: 120%;
+}
+
+@keyframes ws-logo-draw {
+  from {
+    clip-path: inset(-30% -30% 130% -30%);
+  }
+  to {
+    clip-path: inset(-30% -30% -30% -30%);
+  }
+}
+
+@keyframes ws-glow {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  35% {
+    opacity: 0.75;
+  }
+  38% {
+    opacity: 0.45;
+  }
+  41% {
+    opacity: 0.8;
+  }
+  60% {
+    opacity: 0.5;
+  }
+  80% {
+    opacity: 0.3;
+  }
+}
+
+// The mask is three boxes tall with the band in its middle: at 100% the band
+// sits above the logo, at 0% below it.
+@keyframes ws-surge {
+  0% {
+    -webkit-mask-position: 0 100%;
+    mask-position: 0 100%;
+    opacity: 1;
+  }
+  55% {
+    -webkit-mask-position: 0 0%;
+    mask-position: 0 0%;
+    opacity: 1;
+  }
+  56%,
+  100% {
+    -webkit-mask-position: 0 0%;
+    mask-position: 0 0%;
+    opacity: 0;
+  }
+}
+
+// The logo's crack, carried on in two halves inside the stage: the top one
+// draws down from the logo's tail to the middle once the load is done, the
+// bottom one on to the footer once the card opens. Behind the card.
+.ws-crack {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  width: 4px;
+  margin-left: -2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, #d40906 30%, #ff5c40 50%, #d40906 70%, transparent);
+  box-shadow:
+    0 0 8px rgba(226, 40, 30, 0.75),
+    0 0 20px rgba(196, 48, 43, 0.4);
+  // Undrawn: clipped away from the bottom up, the glow allowed out sideways.
+  clip-path: inset(0 -40px 100% -40px);
+
+  // The logo's surge, arriving here as it leaves the lettering.
+  i {
+    position: absolute;
+    left: -4px;
+    right: -4px;
+    top: -20%;
+    height: 16%;
+    border-radius: 999px;
+    background: linear-gradient(to bottom, transparent, rgba(255, 214, 170, 0.95), transparent);
+    opacity: 0;
+    animation: ws-crack-surge-top 4.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+}
+
+.ws-crack-top {
+  // Up into the logo, overlapping the tail that fades under its lettering.
+  top: calc(-0.06 * var(--logo-h));
+  bottom: 50%;
+}
+
+.ws-crack-bottom {
+  top: 50%;
+  // Down past the stage to the footer row.
+  bottom: -10px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 88%, transparent);
+  mask-image: linear-gradient(to bottom, #000 0, #000 88%, transparent);
+
+  i {
+    height: 24%;
+    animation-name: ws-crack-surge-bottom;
+  }
+}
+
+.ws-page.is-loaded .ws-crack-top {
+  animation:
+    ws-crack-draw 1s cubic-bezier(0.65, 0, 0.35, 1) 0.75s forwards,
+    ws-crack-pulse 3.4s ease-in-out infinite;
+}
+
+.ws-page.is-open .ws-crack-bottom {
+  animation:
+    ws-crack-draw 0.6s cubic-bezier(0.65, 0, 0.35, 1) forwards,
+    ws-crack-pulse 3.4s ease-in-out infinite;
+}
+
+@keyframes ws-crack-draw {
+  from {
+    clip-path: inset(0 -40px 100% -40px);
+  }
+  to {
+    clip-path: inset(0 -40px 0 -40px);
+  }
+}
+
+@keyframes ws-crack-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  35%,
+  41% {
+    opacity: 1;
+  }
+  38% {
+    opacity: 0.8;
+  }
+}
+
+// The surge leaves the logo at about 55% of its cycle (`ws-surge`), runs the
+// top half, then the bottom one.
+@keyframes ws-crack-surge-top {
+  0%,
+  50% {
+    top: -20%;
+    opacity: 0;
+  }
+  52% {
+    opacity: 1;
+  }
+  70% {
+    top: 100%;
+    opacity: 1;
+  }
+  71%,
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes ws-crack-surge-bottom {
+  0%,
+  69% {
+    top: -24%;
+    opacity: 0;
+  }
+  71% {
+    opacity: 1;
+  }
+  90% {
+    top: 100%;
+    opacity: 1;
+  }
+  91%,
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+// The worlds card's place: the loading bar runs across its middle, and the
+// card opens out of that line. Over the crack.
+.ws-stage {
+  z-index: 2;
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: min(1200px, 100%);
+  display: flex;
+  align-items: center;
+}
+
+// Waiting on the crack where the bar was, once the load is done: the press
+// that opens the worlds card, and the gesture that lets the music play.
+.ws-page .ws-start {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 36px 14px 30px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(16, 17, 19, 0.85);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: var(--text-0);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  // In once the crack has reached it, then breathing with the logo.
+  animation:
+    ws-start-in 700ms var(--ease) 1.6s forwards,
+    ws-start-glow 3.4s ease-in-out 2.3s infinite;
+  box-shadow:
+    inset 0 0 0 1px rgba(226, 86, 74, 0.6),
+    0 0 20px rgba(196, 48, 43, 0.4),
+    0 0 56px rgba(196, 48, 43, 0.2);
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+
+  .ws-icon {
+    width: 14px;
+    height: 14px;
+    color: var(--mu-red-soft);
+  }
+
+  &:hover {
+    background: rgba(44, 14, 13, 0.9);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(232, 233, 234, 0.6);
+    outline-offset: 4px;
+  }
+}
+
+@keyframes ws-start-in {
   from {
     opacity: 0;
-    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.55)) blur(8px);
+    transform: translate(-50%, -50%) scale(0.92);
+    filter: blur(6px);
   }
   to {
     opacity: 1;
-    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.55)) blur(0);
+    transform: translate(-50%, -50%) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes ws-start-glow {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(226, 86, 74, 0.55),
+      0 0 18px rgba(196, 48, 43, 0.35),
+      0 0 50px rgba(196, 48, 43, 0.18);
+  }
+  40% {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 120, 90, 0.95),
+      0 0 30px rgba(226, 70, 48, 0.6),
+      0 0 84px rgba(196, 48, 43, 0.35);
   }
 }
 
@@ -268,9 +622,9 @@
 .ws-card {
   position: relative;
   z-index: 1;
-  flex: 1 1 auto;
-  min-height: 0;
-  width: min(1200px, 100%);
+  flex: none;
+  width: 100%;
+  height: 100%;
   max-height: 760px;
   display: flex;
   flex-direction: column;
@@ -279,25 +633,102 @@
   backdrop-filter: blur(14px);
   border-radius: var(--radius-l);
   box-shadow: var(--shadow-overlay), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  animation: ws-card-in 0.6s var(--ease) 0.1s both;
+  // Backwards only: a clip left on afterwards would cut the overlay shadow off.
+  animation: ws-card-open 1s var(--ease) 0.3s backwards;
+
+  > * {
+    animation: ws-fade 420ms var(--ease) 0.95s backwards;
+  }
 }
 
-@keyframes ws-card-in {
-  from {
+// A line spread sideways from the middle - where Start was - then opened up
+// and down.
+@keyframes ws-card-open {
+  0% {
+    clip-path: inset(calc(50% - 2px) 50% calc(50% - 2px) 50% round 16px);
+  }
+  30% {
+    clip-path: inset(calc(50% - 2px) 0 calc(50% - 2px) 0 round 16px);
+  }
+  100% {
+    clip-path: inset(0 0 0 0 round 16px);
+  }
+}
+
+// The full bar split in two, riding the card's top and bottom edges open.
+// The card is at most 760px tall, so each half travels min(50%, 380px).
+.ws-unfold {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+
+  i {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 3px;
+    margin-top: -1.5px;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      rgba(196, 48, 43, 0.2),
+      var(--mu-red) 25%,
+      var(--mu-red-soft) 50%,
+      var(--mu-red) 75%,
+      rgba(196, 48, 43, 0.2)
+    );
+    box-shadow: 0 0 14px rgba(226, 86, 74, 0.7);
     opacity: 0;
-    transform: scale(0.985);
-    filter: blur(6px);
+    animation: ws-edge-up 1s var(--ease) 0.3s backwards;
   }
-  to {
-    opacity: 1;
-    transform: scale(1);
-    filter: blur(0);
+
+  i + i {
+    animation-name: ws-edge-down;
   }
 }
 
-// Holds the card's place while the load runs, so the bar stays at the foot.
-.ws-card-slot {
-  flex: 1 1 auto;
+@keyframes ws-edge-up {
+  0% {
+    top: 50%;
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  30% {
+    top: 50%;
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    top: calc(50% - min(50%, 380px));
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+@keyframes ws-edge-down {
+  0% {
+    top: 50%;
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  30% {
+    top: 50%;
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    top: calc(50% + min(50%, 380px));
+    transform: scaleX(1);
+    opacity: 0;
+  }
 }
 
 .ws-tabs {
@@ -407,7 +838,8 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin: 2px 0 0;
+  min-height: 20px;
+  margin: 10px 0 0;
   font-size: 12px;
   line-height: 1.7;
   color: var(--text-2);
@@ -452,32 +884,51 @@
 
 // ---------- The loading runner ----------
 
-// The hunter stands on the bar's fill with the leading foot on its edge. The
-// stage folds away once the load is done, handing its height to the card.
+// The bar is a line through the middle of the stage, with no height of its
+// own: the track straddles it, the hunter stands on it, the text hangs under.
 .ws-loader {
   --run-cycle: 0.52s;
   // The parts are drawn 117x168; past about 88px the art would soften.
   --runner-h: clamp(56px, 9vh, 88px);
-  position: relative;
-  flex: none;
-  width: min(1200px, 100%);
-  height: calc(var(--runner-h) + 16px);
-  margin-top: 4px;
-  transition:
-    height 500ms var(--ease) 900ms,
-    opacity 400ms var(--ease) 700ms;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 0;
+  transition: opacity 450ms var(--ease) 200ms;
 
   &.is-done {
-    height: 0;
     opacity: 0;
   }
+}
+
+.ws-loader-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 14px;
+  margin: 0;
+  color: var(--text-2);
+  font-size: 12px;
+  text-align: center;
+}
+
+// Wider than the bar so sparks can fly past its ends, and tall enough for
+// them to rise; its middle row is the bar's line.
+.ws-page .ws-lightning {
+  position: absolute;
+  left: -48px;
+  top: -70px;
+  width: calc(100% + 96px);
+  height: 140px;
+  pointer-events: none;
 }
 
 .ws-loader-track {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 6px;
+  top: -2px;
   height: 4px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.07);
@@ -487,14 +938,15 @@
 .ws-loader-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, rgba(196, 48, 43, 0.2), var(--mu-red) 60%, var(--mu-red-soft));
-  box-shadow: 0 0 12px rgba(226, 86, 74, 0.55);
+  // A dim base under the lightning: the progress still reads if the bolt
+  // is between flickers.
+  background: linear-gradient(90deg, rgba(196, 48, 43, 0.15), rgba(196, 48, 43, 0.45));
   transition: width 600ms linear;
 }
 
 .ws-runner {
   position: absolute;
-  bottom: 9px;
+  bottom: 2px;
   width: calc(var(--runner-h) * 0.7);
   height: var(--runner-h);
   // The front foot, not the middle of the body, marks how far the load is.
@@ -1958,7 +2410,7 @@
 }
 
 @media (max-height: 640px) {
-  :is(#root, .app) .ws-page .ws-logo {
+  .ws-logo {
     height: 72px;
     margin-bottom: -5px;
   }
@@ -1968,7 +2420,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ws-map-layer,
+  .ws-map,
+  .ws-crack i,
+  .ws-logo-glow,
+  .ws-logo-bloom,
+  .ws-logo-surge,
   .ws-runner-rig,
   :is(#root, .app) .ws-page .ws-runner-part,
   .ws-runner-dust i {

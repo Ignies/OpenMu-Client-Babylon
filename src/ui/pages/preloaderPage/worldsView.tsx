@@ -185,7 +185,7 @@ export const WorldsView = observer(
           : t('worlds.empty');
 
     return (
-      <div className="ws-worlds">
+      <div className="ws-worlds scrollable">
         <div className="ws-browse">
           <div className="ws-toolbar">
             <label className="ws-search">
@@ -243,7 +243,7 @@ export const WorldsView = observer(
             </span>
           </div>
 
-          <div className="ws-grid-scroll" ref={scroller}>
+          <div className="ws-grid-scroll scrollable" ref={scroller}>
             {worlds.length ? (
               <div className="ws-cards" ref={grid}>
                 {worlds.map(world => (

@@ -16,6 +16,7 @@ export const Backdrop = () => (
     </div>
     <div className="ws-grid" />
     <Embers />
+    <div className="ws-iris" />
     <div className="ws-vignette" />
   </div>
 );

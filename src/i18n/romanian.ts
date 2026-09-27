@@ -1442,6 +1442,7 @@ export const romanianLayer: LanguageLayer = {
     'worlds.count': '{shown} din {total}',
     'worlds.scenePreparing': 'Se pregătește jocul',
     'worlds.sceneReady': 'Gata de intrare',
+    'worlds.start': 'Start',
     'worlds.showPassword': 'Arată parola',
     'worlds.hidePassword': 'Ascunde parola',
     'worlds.hasAccount': 'Există un cont salvat pentru această lume',

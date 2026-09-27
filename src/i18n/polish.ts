@@ -73,6 +73,7 @@ export const polishLayer: LanguageLayer = {
     'worlds.count': '{shown} z {total}',
     'worlds.scenePreparing': 'Przygotowywanie gry',
     'worlds.sceneReady': 'Gotowe do wejścia',
+    'worlds.start': 'Start',
     'worlds.showPassword': 'Pokaż hasło',
     'worlds.hidePassword': 'Ukryj hasło',
     'worlds.hasAccount': 'Dla tego świata zapisano konto',

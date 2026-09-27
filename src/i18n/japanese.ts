@@ -1409,6 +1409,7 @@ export const japaneseLayer: LanguageLayer = {
     'worlds.count': '{shown} / {total}',
     'worlds.scenePreparing': 'ゲームを準備中',
     'worlds.sceneReady': '入場の準備完了',
+    'worlds.start': 'スタート',
     'worlds.showPassword': 'パスワードを表示',
     'worlds.hidePassword': 'パスワードを隠す',
     'worlds.hasAccount': 'このワールドのアカウントが保存されています',

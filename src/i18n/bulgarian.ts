@@ -1433,6 +1433,7 @@ export const bulgarianLayer: LanguageLayer = {
     'worlds.count': '{shown} от {total}',
     'worlds.scenePreparing': 'Играта се подготвя',
     'worlds.sceneReady': 'Готово за влизане',
+    'worlds.start': 'Старт',
     'worlds.showPassword': 'Покажи паролата',
     'worlds.hidePassword': 'Скрий паролата',
     'worlds.hasAccount': 'За този свят има запазен акаунт',

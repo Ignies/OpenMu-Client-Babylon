@@ -1418,6 +1418,7 @@ export const thaiLayer: LanguageLayer = {
     'worlds.count': '{shown} จาก {total}',
     'worlds.scenePreparing': 'กำลังเตรียมเกม',
     'worlds.sceneReady': 'พร้อมเข้าสู่เกม',
+    'worlds.start': 'เริ่ม',
     'worlds.showPassword': 'แสดงรหัสผ่าน',
     'worlds.hidePassword': 'ซ่อนรหัสผ่าน',
     'worlds.hasAccount': 'มีบัญชีที่บันทึกไว้สำหรับโลกนี้',

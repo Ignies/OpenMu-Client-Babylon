@@ -80,6 +80,7 @@ export const EN_TEXT = {
   'worlds.count': '{shown} of {total}',
   'worlds.scenePreparing': 'Getting the game ready',
   'worlds.sceneReady': 'Ready to enter',
+  'worlds.start': 'Start',
   'worlds.showPassword': 'Show password',
   'worlds.hidePassword': 'Hide password',
   'worlds.hasAccount': 'An account is saved for this world',

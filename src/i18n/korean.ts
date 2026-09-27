@@ -1407,6 +1407,7 @@ export const koreanLayer: LanguageLayer = {
     'worlds.count': '{shown} / {total}',
     'worlds.scenePreparing': '게임 준비 중',
     'worlds.sceneReady': '입장 준비 완료',
+    'worlds.start': '시작',
     'worlds.showPassword': '비밀번호 표시',
     'worlds.hidePassword': '비밀번호 숨기기',
     'worlds.hasAccount': '이 월드에 저장된 계정이 있습니다',

@@ -93,9 +93,9 @@ export const DownloadView = observer(() => {
   }
 
   return (
-    <div className="ws-split">
+    <div className="ws-split scrollable">
       <div className="ws-split-list">
-        <div className="ws-rows ws-rows-scroll">
+        <div className="ws-rows ws-rows-scroll scrollable">
           {groups.map(group => {
             const on = assetDownload.isChosen(group);
             // The base game is always part of the download.
@@ -123,7 +123,7 @@ export const DownloadView = observer(() => {
         </div>
       </div>
 
-      <div className="ws-split-form">
+      <div className="ws-split-form scrollable">
         <div className="ws-form">
           <Select
             label={t('options.texturePack')}

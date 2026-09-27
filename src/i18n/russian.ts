@@ -1430,6 +1430,7 @@ export const russianLayer: LanguageLayer = {
     'worlds.count': '{shown} из {total}',
     'worlds.scenePreparing': 'Подготовка игры',
     'worlds.sceneReady': 'Готово ко входу',
+    'worlds.start': 'Старт',
     'worlds.showPassword': 'Показать пароль',
     'worlds.hidePassword': 'Скрыть пароль',
     'worlds.hasAccount': 'Для этого мира сохранён аккаунт',

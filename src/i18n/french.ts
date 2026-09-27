@@ -1447,6 +1447,7 @@ export const frenchLayer: LanguageLayer = {
     'worlds.count': '{shown} sur {total}',
     'worlds.scenePreparing': 'Préparation du jeu',
     'worlds.sceneReady': 'Prêt à entrer',
+    'worlds.start': 'Commencer',
     'worlds.showPassword': 'Afficher le mot de passe',
     'worlds.hidePassword': 'Masquer le mot de passe',
     'worlds.hasAccount': 'Un compte est enregistré pour ce monde',

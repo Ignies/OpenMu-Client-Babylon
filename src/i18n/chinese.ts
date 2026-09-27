@@ -1401,6 +1401,7 @@ export const chineseLayer: LanguageLayer = {
     'worlds.count': '{shown} / {total}',
     'worlds.scenePreparing': '正在准备游戏',
     'worlds.sceneReady': '可以进入',
+    'worlds.start': '开始',
     'worlds.showPassword': '显示密码',
     'worlds.hidePassword': '隐藏密码',
     'worlds.hasAccount': '此世界已保存账号',

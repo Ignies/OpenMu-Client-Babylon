@@ -1452,6 +1452,7 @@ export const germanLayer: LanguageLayer = {
     'worlds.count': '{shown} von {total}',
     'worlds.scenePreparing': 'Spiel wird vorbereitet',
     'worlds.sceneReady': 'Bereit zum Betreten',
+    'worlds.start': 'Start',
     'worlds.showPassword': 'Passwort anzeigen',
     'worlds.hidePassword': 'Passwort verbergen',
     'worlds.hasAccount': 'Für diese Welt ist ein Konto gespeichert',

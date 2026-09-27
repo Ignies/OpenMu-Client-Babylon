@@ -262,7 +262,7 @@ export const WorldDetails = observer(
           ))}
         </div>
 
-        <div className="ws-aside-body">
+        <div className="ws-aside-body scrollable">
           {pane === 'info' ? (
             <InfoPane world={world} clients={clients} />
           ) : (

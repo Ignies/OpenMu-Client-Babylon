@@ -270,7 +270,7 @@ export const Select = ({
         <Icon name="chevron" className="ws-select-arrow" />
       </button>
       {open && (
-        <div className="ws-select-list">
+        <div className="ws-select-list scrollable">
           {options.map(option => (
             <button
               type="button"

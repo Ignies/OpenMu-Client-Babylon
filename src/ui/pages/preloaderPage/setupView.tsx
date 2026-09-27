@@ -44,11 +44,11 @@ export const SetupView = observer(() => {
           : { text: t('server.proxyHint'), tone: '' };
 
   return (
-    <div className="ws-split">
+    <div className="ws-split scrollable">
       <div className="ws-split-list">
         <h3 className="ws-subhead">{t('server.list')}</h3>
 
-        <div className="ws-rows ws-rows-scroll">
+        <div className="ws-rows ws-rows-scroll scrollable">
           {rows.map(p => (
             <button
               type="button"
@@ -85,7 +85,7 @@ export const SetupView = observer(() => {
         </div>
       </div>
 
-      <div className="ws-split-form">
+      <div className="ws-split-form scrollable">
         <div className="ws-form ws-form-grid">
           <TextField
             label={t('server.name')}

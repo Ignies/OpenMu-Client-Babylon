@@ -74,6 +74,7 @@ export const vietnameseLayer: LanguageLayer = {
     'worlds.count': '{shown} / {total}',
     'worlds.scenePreparing': 'Đang chuẩn bị trò chơi',
     'worlds.sceneReady': 'Sẵn sàng vào game',
+    'worlds.start': 'Bắt đầu',
     'worlds.showPassword': 'Hiện mật khẩu',
     'worlds.hidePassword': 'Ẩn mật khẩu',
     'worlds.hasAccount': 'Đã lưu một tài khoản cho thế giới này',
