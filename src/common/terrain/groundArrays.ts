@@ -155,6 +155,80 @@ export function buildGroundArrays(
   return { positions, normals, uvs, textures, colors, alphaColors, indices };
 }
 
+/** One tile's two triangles, in the order `buildGroundArrays` lays them. */
+const TILE_INDICES = new Uint32Array([0, 1, 2, 3, 0, 2]);
+
+/**
+ * Re-lays tile (x, y) of `buildGroundArrays`' output after its `NoGround`
+ * flag changed: back up at its height, or down out of sight, with its normals
+ * redone. The original tests the flag every time it draws a tile
+ * (`RenderTerrainTile`, ZzzLodTerrain.cpp:1623), so a flag the server or an
+ * event changes shows at once; this mesh is built once, so it has to be told.
+ */
+export function refreshGroundTile(
+  positions: Float32Array,
+  normals: Float32Array,
+  height: Float32Array,
+  flags: Uint16Array,
+  x: number,
+  y: number
+): void {
+  const noGround =
+    (flags[terrainIndex(x, y)] & TWFlags.NoGround) === TWFlags.NoGround;
+
+  const p = (y * TERRAIN_SIZE + x) * 12;
+  positions[p + 1] = noGround ? NO_GROUND_HEIGHT : height[terrainIndex(x, y)];
+  positions[p + 4] = noGround ? NO_GROUND_HEIGHT : height[terrainIndex(x + 1, y)];
+  positions[p + 7] = noGround ? NO_GROUND_HEIGHT : height[terrainIndex(x + 1, y + 1)];
+  positions[p + 10] = noGround ? NO_GROUND_HEIGHT : height[terrainIndex(x, y + 1)];
+
+  // Tiles share no vertices, so the tile's own two faces are all its
+  // normals ever summed.
+  computeNormals(
+    positions.subarray(p, p + 12),
+    TILE_INDICES,
+    normals.subarray(p, p + 12)
+  );
+}
+
+/**
+ * The quads of `tiles` (tile indices, `y * TERRAIN_SIZE + x`) out of
+ * `buildGroundArrays`' output, as arrays of their own: the same vertices,
+ * so a mesh built from them draws exactly what the ground drew there.
+ */
+export function groundTiles(
+  arrays: GroundArrays,
+  tiles: readonly number[]
+): GroundArrays {
+  const vertices = tiles.length * 4;
+  const out: GroundArrays = {
+    positions: new Float32Array(vertices * 3),
+    normals: new Float32Array(vertices * 3),
+    uvs: new Float32Array(vertices * 2),
+    textures: new Float32Array(vertices * 2),
+    colors: new Float32Array(vertices * 4),
+    alphaColors: new Float32Array(vertices * 4),
+    indices: new Uint32Array(tiles.length * 6),
+  };
+
+  tiles.forEach((tile, k) => {
+    const from = tile * 4;
+    const to = k * 4;
+    out.positions.set(arrays.positions.subarray(from * 3, from * 3 + 12), to * 3);
+    out.normals.set(arrays.normals.subarray(from * 3, from * 3 + 12), to * 3);
+    out.uvs.set(arrays.uvs.subarray(from * 2, from * 2 + 8), to * 2);
+    out.textures.set(arrays.textures.subarray(from * 2, from * 2 + 8), to * 2);
+    out.colors.set(arrays.colors.subarray(from * 4, from * 4 + 16), to * 4);
+    out.alphaColors.set(
+      arrays.alphaColors.subarray(from * 4, from * 4 + 16),
+      to * 4
+    );
+    for (let i = 0; i < 6; i++) out.indices[k * 6 + i] = to + TILE_INDICES[i];
+  });
+
+  return out;
+}
+
 /** Babylon's `VertexData.ComputeNormals` with no options, without the engine. */
 export function computeNormals(
   positions: Float32Array,

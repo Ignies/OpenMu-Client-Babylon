@@ -24,6 +24,9 @@ const SMOKE_SPREAD = 150;
  * the render system adds it to the position) and its own emitter.
  */
 export class ChaosCastleRingObject extends MapTileObject {
+  // It hides, falls and smokes on the arena's stages: never batched.
+  static Batchable = false;
+
   #entity: Entity | null = null;
   #smoke: ParticleEmitter | null = null;
   #visible = true;

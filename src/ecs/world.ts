@@ -659,6 +659,18 @@ export class World extends ECSWorld<Entity> {
     set: boolean
   ): void {}
 
+  /**
+   * A copy of the ground still standing over `rects` (`x, y, w, h` tile
+   * blocks), as a mesh of its own on the terrain's material, for a caller to
+   * animate and dispose. Null when none of those tiles has ground, or until
+   * a map is loaded.
+   */
+  detachGround(
+    rects: readonly (readonly [x: number, y: number, w: number, h: number])[]
+  ): Mesh | null {
+    return null;
+  }
+
   getTerrainTile(x: number, y: number): number {
     return 0;
   }

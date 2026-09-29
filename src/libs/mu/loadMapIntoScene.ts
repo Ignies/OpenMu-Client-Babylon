@@ -398,6 +398,7 @@ async function runLoad(
       IsWalkable,
       RequestTerrainFlag,
       SetTerrainFlags,
+      DetachGround,
       GetTerrainTile,
       GetTerrainLayers,
       RequestTerrainLight,
@@ -407,6 +408,7 @@ async function runLoad(
     world.isWalkable = IsWalkable;
     world.getTerrainFlag = RequestTerrainFlag;
     world.setTerrainFlags = SetTerrainFlags;
+    world.detachGround = DetachGround;
     world.getTerrainTile = GetTerrainTile;
     world.getTerrainLayers = GetTerrainLayers;
     world.getTerrainLight = RequestTerrainLight;

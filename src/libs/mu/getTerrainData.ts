@@ -4,8 +4,9 @@ import {
   StandardMaterial,
   Texture,
   Vector3,
+  VertexBuffer,
 } from '../babylon/exports';
-import type { IVector3Like, Scene } from '../babylon/exports';
+import type { IVector3Like, Mesh, Scene } from '../babylon/exports';
 import { createGroundMesh } from './customGroundMesh';
 import {
   createTileTextureArray,
@@ -42,6 +43,10 @@ import {
   buildGroundOffThread,
 } from './terrainParseClient';
 import { getTilesList } from '../../common/terrain/getTilesList';
+import {
+  groundTiles,
+  refreshGroundTile,
+} from '../../common/terrain/groundArrays';
 import {
   SpecialHeight,
   TERRAIN_SIZE,
@@ -449,13 +454,30 @@ export async function getTerrainData(
   ) {
     const openedIds: number[] = [];
     const closedIds: number[] = [];
+    let groundChanged = false;
 
     for (let yi = y; yi < y + h; yi++) {
       if (yi < 0 || yi >= TERRAIN_SIZE) continue;
       for (let xi = x; xi < x + w; xi++) {
         if (xi < 0 || xi >= TERRAIN_SIZE) continue;
         const i = GetTerrainIndex(xi, yi);
-        terrainAttrs[i] = set ? terrainAttrs[i] | flag : terrainAttrs[i] & ~flag;
+        const before = terrainAttrs[i];
+        terrainAttrs[i] = set ? before | flag : before & ~flag;
+
+        // The ground is drawn only where there is ground: the Chaos Castle
+        // floor goes with its ring, the Blood Castle bridge deck comes in
+        // over the moat.
+        if ((before ^ terrainAttrs[i]) & TWFlags.NoGround) {
+          refreshGroundTile(
+            ground.positions,
+            ground.normals,
+            terrainHeight,
+            terrainAttrs,
+            xi,
+            yi
+          );
+          groundChanged = true;
+        }
 
         if (world.pathfinder) {
           const id = xi * TERRAIN_SIZE + yi;
@@ -468,12 +490,53 @@ export async function getTerrainData(
       }
     }
 
+    if (groundChanged) {
+      terrain.updateVerticesData(VertexBuffer.PositionKind, ground.positions);
+      terrain.updateVerticesData(VertexBuffer.NormalKind, ground.normals);
+    }
+
     if (openedIds.length > 0) {
       world.pathfinder.applyOpenedPatch(openedIds);
     }
     if (closedIds.length > 0) {
       world.pathfinder.applyClosedPatch(closedIds);
     }
+  }
+
+  /** `World.detachGround`: the tiles over `rects` that still have ground, as their own mesh. */
+  function DetachGround(
+    rects: readonly (readonly [x: number, y: number, w: number, h: number])[]
+  ): Mesh | null {
+    const tiles = new Set<number>();
+
+    for (const [x, y, w, h] of rects) {
+      for (let yi = Math.max(0, y); yi < Math.min(TERRAIN_SIZE, y + h); yi++) {
+        for (let xi = Math.max(0, x); xi < Math.min(TERRAIN_SIZE, x + w); xi++) {
+          const i = GetTerrainIndex(xi, yi);
+          if (!isFlagInBinaryMask(terrainAttrs[i], TWFlags.NoGround)) tiles.add(i);
+        }
+      }
+    }
+
+    if (tiles.size === 0) return null;
+
+    const mesh = createGroundMesh(
+      '_worldPiece_' + worldNum,
+      scene,
+      groundTiles(ground, [...tiles])
+    );
+    mesh.material = terrain.material;
+    mesh.renderingGroupId = terrain.renderingGroupId;
+    mesh.isPickable = false;
+
+    // Goes with the ground it came from, like the edge; the material is the
+    // ground's and the teardown disposes it.
+    const observer = terrain.onDisposeObservable.addOnce(() => mesh.dispose());
+    mesh.onDisposeObservable.addOnce(() =>
+      terrain.onDisposeObservable.remove(observer)
+    );
+
+    return mesh;
   }
 
   function RequestTerrainHeight(xf: number, yf: number) {
@@ -591,6 +654,7 @@ const xd = xf - xi;
     IsWalkable,
     RequestTerrainFlag,
     SetTerrainFlags,
+    DetachGround,
     GetTerrainTile,
     GetTerrainLayers,
     RequestTerrainLight,
