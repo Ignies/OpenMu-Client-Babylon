@@ -19,7 +19,7 @@ import { lookDirector } from '../lighting/director';
 import type { Entity } from '../ecs/world';
 import type { TestScene } from '../scenes/testScene';
 import { addEffectGlow, disposeEffectGlow, dropEffectGlow } from './glow';
-import { disposeSoftEdgeMasks, softEdgeMask } from './softEdge';
+import { disposeSoftEdgeMasks, fadeSheetEdges, softEdgeMask } from './softEdge';
 import { installSpriteLinearDecode } from '../libs/babylon/spriteLinear';
 import { useGroundFade } from './groundFade';
 import type { EffectHandle } from './layer';
@@ -600,6 +600,11 @@ export interface ParticleRecipe {
   groundFade?: number;
   /** With `alpha`: the peak opacity (default 1), for a sheet whose alpha is fuller than the art it stands in for. */
   alpha?: number;
+  /**
+   * Fade the sheet to nothing towards its border (each cell's, with `cells`): a sheet whose art runs
+   * off the card - smoke02's alpha is up to 0.48 on its outermost texels - shows its square otherwise.
+   */
+  softEdge?: boolean;
   /** Life fraction by which the particle has stopped moving, easing out from its launch (a `Velocity *= k` burst). */
   settle?: number;
   /** Born at rotation 0 instead of a random one (`o->Rotation` left at CreateParticle's 0). */
@@ -853,11 +858,11 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   }
   void effectTexture(scene, r.texture).then(tex => {
     if (systems.get(scene)?.get(k) !== created) return;
-    if (r.blend !== 'dark') {
+    if (r.blend !== 'dark' && !r.softEdge) {
       created.particleTexture = tex;
       return;
     }
-    void lumaAlphaTexture(scene, tex, r.texture).then(own => {
+    void particleSheet(scene, tex, r).then(own => {
       if (systems.get(scene)?.get(k) === created) created.particleTexture = own;
     });
   });
@@ -869,14 +874,19 @@ export function particleSystemFor(scene: Scene, r: ParticleRecipe): ParticleSyst
   return ps;
 }
 
-const lumaTextures = new Map<string, Promise<Texture>>();
+const sheetTextures = new Map<string, Promise<Texture>>();
 
 /**
- * A sheet as white with its luminance for alpha: what a dark particle covers with. The particle
- * shader has no `getAlphaFromRGB`, so a JPG sheet drew as solid black cards. Built once per sheet.
+ * A sheet as the particle shader needs it, built once per sheet and shape. A `dark` recipe's
+ * sheet is white with its luminance for alpha, what a dark particle covers with: the particle
+ * shader has no `getAlphaFromRGB`, so a JPG sheet drew as solid black cards. A `softEdge` one
+ * has its alpha faded towards the border.
  */
-function lumaAlphaTexture(scene: Scene, tex: Texture, file: string): Promise<Texture> {
-  let pending = lumaTextures.get(file);
+function particleSheet(scene: Scene, tex: Texture, r: ParticleRecipe): Promise<Texture> {
+  const dark = r.blend === 'dark';
+  const cells = r.softEdge ? r.cells : undefined;
+  const key = `${r.texture}${dark ? '|luma' : ''}${r.softEdge ? `|soft${cells ? `${cells.w}x${cells.h}` : ''}` : ''}`;
+  let pending = sheetTextures.get(key);
   if (pending) return pending;
   pending = (async () => {
     const bitmap = await createImageBitmap(await (await fetch(tex.url ?? '')).blob());
@@ -887,17 +897,20 @@ function lumaAlphaTexture(scene: Scene, tex: Texture, file: string): Promise<Tex
     ctx.drawImage(bitmap, 0, 0);
     const img = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
     const d = img.data;
-    for (let i = 0; i < d.length; i += 4) {
-      d[i + 3] = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
-      d[i] = 255;
-      d[i + 1] = 255;
-      d[i + 2] = 255;
+    if (dark) {
+      for (let i = 0; i < d.length; i += 4) {
+        d[i + 3] = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+        d[i] = 255;
+        d[i + 1] = 255;
+        d[i + 2] = 255;
+      }
     }
+    if (r.softEdge) fadeSheetEdges(d, bitmap.width, bitmap.height, cells?.w, cells?.h);
     const out = RawTexture.CreateRGBATexture(d, bitmap.width, bitmap.height, scene, true, true, Constants.TEXTURE_TRILINEAR_SAMPLINGMODE);
     out.hasAlpha = true;
     return out;
   })();
-  lumaTextures.set(file, pending);
+  sheetTextures.set(key, pending);
   return pending;
 }
 
@@ -992,8 +1005,8 @@ export function disposePools(): void {
   cardPool.clear();
   for (const map of systems.values()) for (const ps of map.values()) ps.dispose(false);
   systems.clear();
-  for (const t of lumaTextures.values()) void t.then(tex => tex.dispose());
-  lumaTextures.clear();
+  for (const t of sheetTextures.values()) void t.then(tex => tex.dispose());
+  sheetTextures.clear();
   systemsByRecipe.clear();
 }
 
