@@ -32,6 +32,13 @@ describe('item requirements as OpenMU checks them', () => {
     }
   });
 
+  it('asks the level OpenMU asks of pets and third wings', () => {
+    const HORN_OF_UNICORN = { group: 13, num: 2 };
+    const WING_OF_STORM = { group: 12, num: 36 };
+    expect(stats(HORN_OF_UNICORN).reqLvl).toBe(25);
+    expect(stats(WING_OF_STORM).reqLvl).toBe(400);
+  });
+
   it('leaves the other stats alone', () => {
     const plain = stats({ ...DRAGON_ARMOR, lvl: 7 });
     const optioned = stats({ ...DRAGON_ARMOR, lvl: 7, optionLevel: 4 });
