@@ -425,7 +425,8 @@ function calcRequirements(
   def: ItemDef,
   level: number,
   isExcellent: boolean,
-  isAncient: boolean
+  isAncient: boolean,
+  optionLevel: number
 ) {
   let itemLevel = def.level;
   if (isExcellent) itemLevel = def.level + 25;
@@ -448,7 +449,11 @@ function calcRequirements(
   const scaled = (req: number, mul: number) =>
     req ? 20 + idiv(req * (itemLevel + level * 3) * mul, 100) : 0;
 
-  const reqStr = scaled(def.reqStr, 3);
+  // OpenMU asks four more strength per level of the item's option (+4
+  // damage, defense, ...) of anything that needs strength at all
+  // (`ItemExtensions.GetRequirement`); that is what the equip is checked
+  // against, not the original's `Option3 * 5` (ZzzInfomation.cpp:1191).
+  const reqStr = def.reqStr ? scaled(def.reqStr, 3) + optionLevel * 4 : 0;
   const reqAgi = scaled(def.reqAgi, 3);
   const reqVit = scaled(def.reqVit, 3);
 
@@ -497,15 +502,16 @@ function calcRequirements(
 
 const statsCache = new Map<string, ItemStats | null>();
 
-/** The item's effective stats for its level / excellent / ancient state. */
+/** The item's effective stats for its level / excellent / ancient / option state. */
 export function itemStats(item: Item): ItemStats | null {
   const level = Math.max(0, Math.min(15, item.lvl ?? 0));
   const isExcellent = item.isExcellent === true;
   const isAncient = item.isAncient === true;
+  const optionLevel = item.optionLevel ?? 0;
 
   const key = `${item.group}:${item.num}|${level}|${isExcellent ? 1 : 0}|${
     isAncient ? 1 : 0
-  }`;
+  }|${optionLevel}`;
   const cached = statsCache.get(key);
   if (cached !== undefined) return cached;
 
@@ -525,7 +531,7 @@ export function itemStats(item: Item): ItemStats | null {
     magicPower: calcMagicPower(def, level, isExcellent, isAncient),
     blocking: calcBlocking(def, isExcellent),
     defense: calcDefense(def, level, isExcellent, isAncient),
-    ...calcRequirements(def, level, isExcellent, isAncient),
+    ...calcRequirements(def, level, isExcellent, isAncient, optionLevel),
     maxDurability: calcMaxDurability(def, level, isExcellent, isAncient),
   };
 
