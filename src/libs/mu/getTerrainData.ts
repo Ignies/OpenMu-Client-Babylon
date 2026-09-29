@@ -4,6 +4,7 @@ import {
   StandardMaterial,
   Texture,
   Vector3,
+  VertexBuffer,
 } from '../babylon/exports';
 import type { IVector3Like, Scene } from '../babylon/exports';
 import { createGroundMesh } from './customGroundMesh';
@@ -42,6 +43,7 @@ import {
   buildGroundOffThread,
 } from './terrainParseClient';
 import { getTilesList } from '../../common/terrain/getTilesList';
+import { refreshGroundTile } from '../../common/terrain/groundArrays';
 import {
   SpecialHeight,
   TERRAIN_SIZE,
@@ -449,13 +451,30 @@ export async function getTerrainData(
   ) {
     const openedIds: number[] = [];
     const closedIds: number[] = [];
+    let groundChanged = false;
 
     for (let yi = y; yi < y + h; yi++) {
       if (yi < 0 || yi >= TERRAIN_SIZE) continue;
       for (let xi = x; xi < x + w; xi++) {
         if (xi < 0 || xi >= TERRAIN_SIZE) continue;
         const i = GetTerrainIndex(xi, yi);
-        terrainAttrs[i] = set ? terrainAttrs[i] | flag : terrainAttrs[i] & ~flag;
+        const before = terrainAttrs[i];
+        terrainAttrs[i] = set ? before | flag : before & ~flag;
+
+        // The ground is drawn only where there is ground: the Chaos Castle
+        // floor goes with its ring, the Blood Castle bridge deck comes in
+        // over the moat.
+        if ((before ^ terrainAttrs[i]) & TWFlags.NoGround) {
+          refreshGroundTile(
+            ground.positions,
+            ground.normals,
+            terrainHeight,
+            terrainAttrs,
+            xi,
+            yi
+          );
+          groundChanged = true;
+        }
 
         if (world.pathfinder) {
           const id = xi * TERRAIN_SIZE + yi;
@@ -466,6 +485,11 @@ export async function getTerrainData(
           }
         }
       }
+    }
+
+    if (groundChanged) {
+      terrain.updateVerticesData(VertexBuffer.PositionKind, ground.positions);
+      terrain.updateVerticesData(VertexBuffer.NormalKind, ground.normals);
     }
 
     if (openedIds.length > 0) {
