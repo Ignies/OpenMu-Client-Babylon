@@ -19,6 +19,7 @@ import {
   isSummonerBook,
   isThirdWing,
   isWeapon,
+  isWeaponOfArchangel,
   isWing,
   itemStats,
   type HeroStats,
@@ -127,7 +128,7 @@ class Lines {
 function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
   const optionLevel = item.optionLevel ?? 0;
 
-  if (isJewel(def)) return 'yellow';
+  if (isJewel(def) || isWeaponOfArchangel(def)) return 'yellow';
   if (isDivineArchangelWeapon(def)) return 'purple';
   if (item.isAncient) return 'greenBlue';
   if ((item.socketCount ?? 0) > 0) return 'violet';
@@ -335,6 +336,71 @@ function consumableLines(out: Lines, def: ItemDef, item: Item) {
   if (skill) out.add(t('item.learns', { skill }), 'blue');
 }
 
+/** Skill numbers of the Divine Sword and Crossbow of Archangel. */
+const CYCLONE = 22;
+const TRIPLE_SHOT = 24;
+
+/**
+ * What the Weapon of Archangel shows at level 0 / 1 / 2 (staff / sword /
+ * crossbow). The original writes these numbers out rather than reading
+ * them from any item (ZzzInventory.cpp:3499-3521).
+ */
+const WEAPON_OF_ARCHANGEL_STATS: readonly {
+  label: TextKey;
+  damage: readonly [number, number];
+  speed: number;
+  str: number;
+  agi: number;
+  skill?: number;
+}[] = [
+  { label: 'item.wizardryDamage', damage: [107, 110], speed: 20, str: 132, agi: 32 },
+  { label: 'item.attackPowerOneHand', damage: [110, 120], speed: 35, str: 381, agi: 149, skill: CYCLONE },
+  { label: 'item.attackPowerTwoHand', damage: [120, 140], speed: 35, str: 140, agi: 350, skill: TRIPLE_SHOT },
+];
+
+/**
+ * The Weapon of Archangel's own block (`RenderItemInfo`,
+ * ZzzInventory.cpp:3487-3560): a quest item, the reward it is worth, and the
+ * Divine weapon it stands for - with no durability line.
+ */
+function weaponOfArchangelLines(out: Lines, level: number, hero: HeroStats) {
+  out.add(t('item.questItem'));
+  out.add(t('item.archangelReward'), 'darkRed');
+
+  const stats = WEAPON_OF_ARCHANGEL_STATS[level];
+  if (!stats) return;
+
+  out.blank();
+  const [min, max] = stats.damage;
+  out.add(t('item.damageRange', { label: t(stats.label), min, max }));
+  out.add(t('item.attackSpeed', { value: stats.speed }));
+  out.add(t('item.required', { label: t('stat.strength'), value: stats.str }));
+  out.add(t('item.required', { label: t('stat.agility'), value: stats.agi }));
+
+  out.blank();
+  out.add(t('item.luckSoul'), 'blue');
+  out.add(t('item.luckCritical'), 'blue');
+
+  const skill = stats.skill === undefined ? undefined : skillDisplayName(stats.skill);
+  if (stats.skill === undefined) {
+    out.add(
+      t('item.percentBonus', { label: t('item.wizardryIncrease'), value: 53 }),
+      'blue',
+      true
+    );
+  } else {
+    out.add(skill ? t('item.skillNamed', { skill }) : t('item.skill'), 'blue');
+  }
+
+  const kind = t(stats.skill === undefined ? 'item.kind.wizardry' : 'item.kind.damage');
+  out.add(t('item.exc.perLevel', { kind, value: Math.trunc(hero.level / 20) }), 'blue');
+  out.add(t('item.exc.percent', { kind }), 'blue');
+  out.add(t('item.exc.excellentDamage'), 'blue');
+  out.add(t('item.exc.speed'), 'blue');
+  out.add(t('item.exc.life'), 'blue');
+  out.add(t('item.exc.mana'), 'blue');
+}
+
 /**
  * Builds the tooltip for `item` as seen by `hero`. `compareWith` is the worn
  * item of the slot this one would take: its numbers become the `(+N)` tails
@@ -356,6 +422,11 @@ export function buildItemTooltip(
   out.blank();
   out.add(nameLine(item, def, level), nameColor(item, def, level), true);
   out.blank();
+
+  if (isWeaponOfArchangel(def)) {
+    weaponOfArchangelLines(out, level, hero);
+    return { lines: trimBlanks(out.list), usable: true };
+  }
 
   equipmentLines(out, item, stats, hero, worn);
 

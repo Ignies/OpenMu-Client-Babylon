@@ -129,13 +129,20 @@ for (const [key, { file, group, num }] of candidates) {
  * keyed `group_num_level`, at that model's own RenderObjectScreen scale
  * (ZzzInventory.cpp:9268-9275).
  */
-const LEVEL_ICON_SCALE: Record<string, number> = {
+const LEVEL_ICON_SCALE: Record<string, number | { file: string; scale: number }> = {
   '14_23_1': 0.0012,
   '14_24_1': 0.0025,
+  // The Weapon of Archangel drawn as its Divine staff, sword and crossbow, at
+  // `SmallArchangelWeaponScale` / `SmallArchangelCrossbowScale`.
+  '13_19_0': { file: 'item_13_19_0.png', scale: 0.001 },
+  '13_19_1': { file: 'item_0_19_0.png', scale: 0.001 },
+  '13_19_2': { file: 'item_4_18_0.png', scale: 0.0015 },
 };
-for (const [key, scale] of Object.entries(LEVEL_ICON_SCALE)) {
+for (const [key, entry] of Object.entries(LEVEL_ICON_SCALE)) {
   const [group, num] = key.split('_').map(Number);
-  const box = fitOf(group, num, `item_${key}.png`, scale);
+  const { file, scale } =
+    typeof entry === 'number' ? { file: `item_${key}.png`, scale: entry } : entry;
+  const box = fitOf(group, num, file, scale);
   if (box && box.zoom >= MIN_ZOOM) fits.set(key, box);
 }
 
