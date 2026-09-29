@@ -44,6 +44,9 @@ export const CAPE_OF_EMPEROR = 40;
 export const WING_OF_CURSE = 41;
 export const WINGS_OF_DESPAIR = 42;
 export const WING_OF_DIMENSION = 43;
+/** The Rage Fighter's capes. */
+export const CAPE_OF_FIGHTER = 49;
+export const CAPE_OF_OVERRULE = 50;
 
 /** Cape of Lord lives in the helper group (13). */
 export const CAPE_OF_LORD = 30;
@@ -247,6 +250,11 @@ const WINGS: Readonly<Record<number, WingSpec>> = {
   [WING_OF_CURSE]: PLAIN,
   [WINGS_OF_DESPAIR]: { blendMesh: -1, passes: [{ mesh: 1, kind: 'chrome' }] },
   [WING_OF_DIMENSION]: { blendMesh: -1, passes: [{ mesh: 1, kind: 'chrome' }] },
+  // The model part of the Rage Fighter's capes: Cape of Fighter on the wing
+  // bone, Cape of Overrule on bone 19 (ZzzCharacter.cpp:6708-6714, :15421-15427).
+  // The cloth the original hangs under them (:9780-9809) is not drawn.
+  [CAPE_OF_FIGHTER]: PLAIN,
+  [CAPE_OF_OVERRULE]: { blendMesh: -1, cape: 'overrule' },
 };
 
 const CAPES: Readonly<Record<number, WingSpec>> = {

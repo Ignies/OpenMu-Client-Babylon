@@ -7,6 +7,7 @@ import {
   isArmorPart,
   isCapeOfFighter,
   isCapeOfLord,
+  isDivineArchangelWeapon,
   isFirstWing,
   isJewel,
   isPendant,
@@ -127,6 +128,7 @@ function nameColor(item: Item, def: ItemDef, level: number): TooltipColor {
   const optionLevel = item.optionLevel ?? 0;
 
   if (isJewel(def)) return 'yellow';
+  if (isDivineArchangelWeapon(def)) return 'purple';
   if (item.isAncient) return 'greenBlue';
   if ((item.socketCount ?? 0) > 0) return 'violet';
   if (isWing(def)) {

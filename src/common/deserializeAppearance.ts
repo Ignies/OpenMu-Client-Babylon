@@ -277,8 +277,7 @@ function wingFromAppearance(app: DataView): Item | null {
   const num = WING_NUMBERS[level]?.[id];
 
   // 3rd-level bits with no id: one of the "small" wings (WingIndex 130-135),
-  // which byte 17 distinguishes. Season 6 has no model for any of them, and
-  // neither do the 4th-level Cape of Fighter / Cape of Overrule (id 7).
+  // which byte 17 distinguishes. Season 6 has no model for any of them.
   if (num === undefined) return null;
 
   // Cape of Lord is the one wing that lives in the helper group (13) - the
@@ -292,10 +291,10 @@ const CAPE_OF_LORD = 30;
 const WING_NUMBERS: Record<number, Record<number, number | undefined>> = {
   // 1st level.
   0x04: { 1: 0, 2: 1, 3: 2, 4: 41 },
-  // 2nd level. 7 = Cape of Fighter (49), post-S6.
-  0x08: { 1: 3, 2: 4, 3: 5, 4: 6, 5: CAPE_OF_LORD, 6: 42 },
-  // 3rd level. 7 = Cape of Overrule (50), post-S6.
-  0x0c: { 1: 36, 2: 37, 3: 38, 4: 39, 5: 40, 6: 43 },
+  // 2nd level. 7 = Cape of Fighter (ZzzCharacter.cpp:12565).
+  0x08: { 1: 3, 2: 4, 3: 5, 4: 6, 5: CAPE_OF_LORD, 6: 42, 7: 49 },
+  // 3rd level. 7 = Cape of Overrule (ZzzCharacter.cpp:12583).
+  0x0c: { 1: 36, 2: 37, 3: 38, 4: 39, 5: 40, 6: 43, 7: 50 },
 };
 
 /**

@@ -3,7 +3,8 @@
 // This rewrites items.json from scratch, so the `RF` class column goes with
 // it: Item.txt names only six classes and has no Rage Fighter one. Follow
 // every run with `bun run tools/addRageFighterColumn.ts`, which puts it back
-// from the server's item definitions.
+// from the server's item definitions, then `bun run
+// tools/syncItemRequirements.ts`, which does the same for the requirements.
 import { ItemsDatabase } from '../src/common/itemsDatabase';
 import { ItemGroups } from '../src/common/objects/enum';
 
