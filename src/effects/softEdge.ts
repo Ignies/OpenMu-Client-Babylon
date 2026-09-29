@@ -91,6 +91,25 @@ export function fadeSheetEdges(
   }
 }
 
+/** Rows, as a share of the sheet's height, over which `fadeSheetSides` takes a ribbon's side to nothing. */
+const SIDE_FADE = 0.2;
+
+/**
+ * A ribbon sheet's alpha faded to nothing towards its top and bottom rows - the ribbon's two
+ * sides. Its length (U) is left alone: it runs along the trail and tiles.
+ */
+export function fadeSheetSides(rgba: Uint8ClampedArray, width: number, height: number): void {
+  for (let y = 0; y < height; y++) {
+    const edge = Math.min(y + 0.5, height - y - 0.5) / (height * SIDE_FADE);
+    const k = Math.min(1, edge);
+    const f = k * k * (3 - 2 * k);
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4 + 3;
+      rgba[i] = Math.round(rgba[i] * f);
+    }
+  }
+}
+
 /** Drop every mask (the effects facade's reset, after the materials that sample them). */
 export function disposeSoftEdgeMasks(): void {
   for (const byGrid of masks.values()) for (const t of byGrid.values()) t.dispose();

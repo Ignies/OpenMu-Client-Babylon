@@ -2,6 +2,7 @@ import {
   Color4,
   Constants,
   CreatePlane,
+  DynamicTexture,
   Material,
   Mesh,
   ParticleSystem,
@@ -19,7 +20,7 @@ import { lookDirector } from '../lighting/director';
 import type { Entity } from '../ecs/world';
 import type { TestScene } from '../scenes/testScene';
 import { addEffectGlow, disposeEffectGlow, dropEffectGlow } from './glow';
-import { disposeSoftEdgeMasks, fadeSheetEdges, softEdgeMask } from './softEdge';
+import { disposeSoftEdgeMasks, fadeSheetEdges, fadeSheetSides, softEdgeMask } from './softEdge';
 import { installSpriteLinearDecode } from '../libs/babylon/spriteLinear';
 import { useGroundFade } from './groundFade';
 import type { EffectHandle } from './layer';
@@ -233,6 +234,42 @@ export function pointSource(p: Vector3 | PointSource): PointSource {
 /** `Effect/…` or `Skill/…` file under Data/, shared through the cache. */
 export function effectTexture(scene: Scene, file: string): Promise<Texture> {
   return loadEffectTexture(scene, file);
+}
+
+const ribbonSheets = new Map<string, Promise<Texture>>();
+
+/**
+ * A dark ribbon's coverage: the sheet as white with its luminance for alpha, faded to nothing
+ * at the ribbon's two sides. JointSpirit01 is bright along its top and bottom rows (0.15-0.3),
+ * which a dark ribbon's gain turned into a hard line down each side of Evil Spirit's bodies.
+ * A canvas texture, filled in the same frame the sheet arrives, that a joint can still clone
+ * to scroll.
+ */
+export function darkRibbonSheet(scene: Scene, file: string): Promise<Texture> {
+  let pending = ribbonSheets.get(file);
+  if (pending) return pending;
+  pending = (async () => {
+    const tex = await effectTexture(scene, file);
+    const bitmap = await createImageBitmap(await (await fetch(tex.url ?? '')).blob());
+    const out = new DynamicTexture(`fx:ribbon:${file}`, { width: bitmap.width, height: bitmap.height }, scene, true);
+    const ctx = out.getContext() as unknown as CanvasRenderingContext2D;
+    ctx.drawImage(bitmap, 0, 0);
+    const img = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      d[i + 3] = 0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2];
+      d[i] = d[i + 1] = d[i + 2] = 255;
+    }
+    fadeSheetSides(d, bitmap.width, bitmap.height);
+    ctx.putImageData(img, 0, 0);
+    out.update();
+    out.hasAlpha = true;
+    out.wrapU = tex.wrapU;
+    out.wrapV = tex.wrapV;
+    return out;
+  })();
+  ribbonSheets.set(file, pending);
+  return pending;
 }
 
 /* -------------------------------------------------------------- materials */
@@ -1007,6 +1044,8 @@ export function disposePools(): void {
   systems.clear();
   for (const t of sheetTextures.values()) void t.then(tex => tex.dispose());
   sheetTextures.clear();
+  for (const t of ribbonSheets.values()) void t.then(tex => tex.dispose());
+  ribbonSheets.clear();
   systemsByRecipe.clear();
 }
 

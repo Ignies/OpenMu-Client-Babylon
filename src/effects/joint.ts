@@ -49,6 +49,7 @@ import {
   acquireCard,
   additiveMaterial,
   darkCardGain,
+  darkRibbonSheet,
   effectTexture,
   fadeOut,
   fxNow,
@@ -447,7 +448,8 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
     // Hold the line unseen until the sheet is in - a texture-less Standard
     // ribbon is exactly the solid band this is here to remove.
     if (glMat) glMat.visibility = -1;
-    void effectTexture(scene, sheetFile).then(tex => {
+    // A dark ribbon covers with the sheet's luminance, faded out at its two sides.
+    void (dark ? darkRibbonSheet(scene, sheetFile) : effectTexture(scene, sheetFile)).then(tex => {
       if (mesh.isDisposed()) return;
       // Thunder scrolls and tiles along U (loaded GL_REPEAT in the original);
       // the shared texture's wrap only matters to other joints of the same
@@ -456,7 +458,6 @@ export function makeLine(scene: Scene, lines: number[][], colour: RGB, width: nu
       if (opts.textureScroll && opts.textureScroll !== 1) tex = scrollSheet(tex, opts.textureScroll);
       sheet = tex;
       if (dark) {
-        tex.getAlphaFromRGB = true;
         std.opacityTexture = tex;
       } else {
         std.diffuseTexture = tex;

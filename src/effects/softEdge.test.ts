@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fadeSheetEdges } from './softEdge';
+import { fadeSheetEdges, fadeSheetSides } from './softEdge';
 
 /** A `size` x `size` sheet, opaque everywhere, as smoke02 is up to its border. */
 function opaqueSheet(size: number): Uint8ClampedArray {
@@ -8,7 +8,7 @@ function opaqueSheet(size: number): Uint8ClampedArray {
   return px;
 }
 
-const alphaAt = (px: Uint8ClampedArray, size: number, x: number, y: number) => px[(y * size + x) * 4 + 3];
+const alphaAt = (px: Uint8ClampedArray, width: number, x: number, y: number) => px[(y * width + x) * 4 + 3];
 
 describe('fadeSheetEdges', () => {
   it('leaves nothing on the border of the card and keeps its middle', () => {
@@ -37,5 +37,20 @@ describe('fadeSheetEdges', () => {
     px.fill(200, 0, 3);
     fadeSheetEdges(px, 8, 8);
     expect([px[0], px[1], px[2]]).toEqual([200, 200, 200]);
+  });
+});
+
+describe('fadeSheetSides', () => {
+  it('fades a ribbon sheet at its two sides and leaves its length alone', () => {
+    const [w, h] = [256, 32];
+    const px = new Uint8ClampedArray(w * h * 4);
+    for (let i = 3; i < px.length; i += 4) px[i] = 255;
+    fadeSheetSides(px, w, h);
+
+    for (const x of [0, 128, 255]) {
+      expect(alphaAt(px, w, x, 0)).toBeLessThan(16);
+      expect(alphaAt(px, w, x, h - 1)).toBeLessThan(16);
+      expect(alphaAt(px, w, x, h / 2)).toBe(255);
+    }
   });
 });
