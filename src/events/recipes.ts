@@ -62,6 +62,10 @@ export const EVENT_TEXT = textTable({
   // ---- Blood Castle (NewUIBloodCastleEnter.cpp, NewUIBloodCastleTime.cpp) -
   /** GlobalText[846] / [832]. */
   archangelMessenger: 'event.archangelMessenger',
+  /** GlobalText[833] / [834] / [856]: what the Archangel says. */
+  archangelThanks: 'event.archangelThanks',
+  archangelBringWeapon: 'event.archangelBringWeapon',
+  archangelWeaponFound: 'event.archangelWeaponFound',
   bloodCastleIntro: 'event.bloodCastleIntro',
   /** GlobalText[847] / [1779]. */
   castleButton: 'event.castleButton',

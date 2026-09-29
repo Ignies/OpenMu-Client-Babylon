@@ -52,6 +52,22 @@ for (let lvl = 1; lvl <= 15; lvl++) {
       : { nameKey: BOX_OF_LUCK[lvl], icon };
 }
 
+/**
+ * The Weapon of Archangel is the Archangel's staff, sword or crossbow by level:
+ * named for it in the bag (`RenderItemInfo`, ZzzInventory.cpp:3180-3188) and
+ * drawn as that Divine weapon (ZzzInventory.cpp:6901-6912). The pack only
+ * rendered the staff, so the sword and crossbow borrow the Divine weapons'
+ * own icons.
+ */
+const WEAPON_OF_ARCHANGEL: readonly ItemLevelLook[] = [
+  { nameKey: 'item.absoluteStaffOfArchangel', icon: 'item_13_19_0' },
+  { nameKey: 'item.absoluteSwordOfArchangel', icon: 'item_0_19_0' },
+  { nameKey: 'item.absoluteCrossbowOfArchangel', icon: 'item_4_18_0' },
+];
+WEAPON_OF_ARCHANGEL.forEach((look, lvl) => {
+  LEVEL_LOOKS[`13_19_${lvl}`] = look;
+});
+
 export function itemLevelLook(
   group: number,
   num: number,

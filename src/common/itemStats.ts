@@ -229,6 +229,14 @@ export function isDivineArchangelWeapon(def: ItemDef): boolean {
   }
 }
 
+/**
+ * The Weapon of Archangel, the Blood Castle quest item: the staff, sword or
+ * crossbow the Archangel wants back, by level (`ITEM_WEAPON_OF_ARCHANGEL`).
+ */
+export function isWeaponOfArchangel(def: ItemDef): boolean {
+  return def.group === ItemGroup.Helper && def.index === 19;
+}
+
 export function isCapeOfLord(def: ItemDef): boolean {
   return def.group === ItemGroup.Helper && def.index === 30;
 }

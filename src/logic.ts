@@ -23,7 +23,7 @@ import {
   itemRestPose,
   itemRestRotation,
 } from './common/itemAngle';
-import { dropModelProxy } from './common/dropModelProxy';
+import { archangelWeapon, dropModelProxy } from './common/dropModelProxy';
 import { DropObject } from './common/dropObject';
 import { prefetchItemIcons } from './common/itemIconPack';
 import { ItemSerializer } from './common/itemSerializer';
@@ -3263,6 +3263,9 @@ EventBus.on('ObjectMessage', packet => {
 // (58), ShowFireworks (0), ShowChristmasFireworks (59) and ServerCommand; the
 // dispatcher emits whichever it finds first (ServerCommand today), so every
 // name routes here on byte 4.
+/** `ReceiveServerCommand` case 1: `CreateOkMessageBox(GlobalText[...])`. */
+const SERVER_MESSAGE_BOX = 1;
+
 function routeServerCommand(packet: DataView) {
   const effectType = packet.getUint8(4);
   switch (effectType) {
@@ -3290,8 +3293,10 @@ function routeServerCommand(packet: DataView) {
     }
     default: {
       // The other command types open GlobalText message boxes the client has
-      // no texts for (ReceiveServerCommand, WSclient.cpp:7744).
+      // no texts for (ReceiveServerCommand, WSclient.cpp:7744) - but for the
+      // numbered boxes (type 1) an event has the text of.
       const p = new ServerCommandPacket(packet);
+      if (p.CommandType === SERVER_MESSAGE_BOX && events.serverMessageBox(p.Parameter1)) return;
       console.warn(
         `unhandled ServerCommand ${p.CommandType} (${p.Parameter1}, ${p.Parameter2})`
       );
@@ -3535,6 +3540,8 @@ const DROP_LABEL_HEIGHT = 0.6;
 /** `ITEM_ZEN` (`ITEM_GROUP_POTION`, index 15): the zen pile's own item id. */
 const ZEN_GROUP = ItemGroup.Potion;
 const ZEN_NUM = 15;
+/** `ITEM_WEAPON_OF_ARCHANGEL`: the Blood Castle quest item. */
+const WEAPON_OF_ARCHANGEL = 19;
 
 /** RenderItemName (ZzzInventory.cpp:6714): "Zen 1234", "Short Sword +4". */
 function dropName(
@@ -3545,6 +3552,12 @@ function dropName(
 ): string {
   const zen = t('common.zen');
   if (isMoney) return amount > 0 ? `${zen} ${amount}` : zen;
+  // The Weapon of Archangel lies there as the Divine weapon it stands for,
+  // named for it and with no level (ZzzObject.cpp:5496-5512).
+  if (item && item.group === ItemGroup.Helper && item.num === WEAPON_OF_ARCHANGEL) {
+    const [group, num] = archangelWeapon(item.lvl ?? 0);
+    return String(itemBaseName(group, num));
+  }
   const name = String(baseName);
   return item ? itemLevelName(item.group, item.num, item.lvl, name) : name;
 }
