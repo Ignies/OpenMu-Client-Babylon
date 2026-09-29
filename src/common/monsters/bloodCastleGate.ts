@@ -33,6 +33,15 @@ const GATE_ORIGIN_NORTH = 0.6;
 const STATUE_ORIGIN_NORTH = 1.2;
 
 /**
+ * The original stands a character on the middle of its tile
+ * (`(x + 0.5) * TERRAIN_SCALE`) and the pushes above are measured from
+ * there. This client stands what the server places on the tile's corner, so
+ * without the half tile the gate sat half a tile west of its opening -
+ * clear of one tower and into the other.
+ */
+const TILE_CENTRE = 0.5;
+
+/**
  * `RENDER_BRIGHT | RENDER_CHROME` at white and `RENDER_BRIGHT | RENDER_METAL`
  * at (0.3, 0.3, 1) over the lit body (ZzzObject.cpp:1389-1393). Both passes
  * sample BITMAP_CHROME and differ only in how the sphere map is generated, so
@@ -53,9 +62,11 @@ const ASSEMBLE_SHARDS = 2;
 /** Tiles up the storm centres, about the statue's own height. */
 const ASSEMBLE_HEIGHT = 1;
 
-/** The body the original draws is `posOffset` tiles north of the server's tile. */
+/** The body the original draws: the middle of the server's tile, `tiles` north of it. */
 function pushOriginNorth(entity: Entity, tiles: number): void {
-  if (entity.transform) entity.transform.posOffset = { x: 0, y: 0, z: tiles };
+  if (entity.transform) {
+    entity.transform.posOffset = { x: TILE_CENTRE, y: 0, z: TILE_CENTRE + tiles };
+  }
 }
 
 // [NpcInfo(131, "Castle Gate")] - the gate in the castle wall on the far side
