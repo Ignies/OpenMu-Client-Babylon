@@ -11,9 +11,11 @@ import { PlayerAction } from './objects/enum';
 import { loadGLTF } from './modelLoader';
 import { Store } from '../store';
 import {
+  BACK_BONE,
   LEFT_HAND_BONE,
   PHOENIX_WING_MODEL,
   phoenixWingLink,
+  questItemLink,
   RIGHT_HAND_BONE,
 } from './weaponAttachment';
 import { itemVisualTier, type ItemVisualTier } from './itemVisualTier';
@@ -148,9 +150,10 @@ export class PlayerObject extends ModelObject {
 
     // The Blood Castle quest weapon rides the same bone as the wings: the
     // original borrows the wing PART_t for it and draws it first, so a
-    // carrier with wings wears both (ZzzCharacter.cpp:15367-15391).
+    // carrier with wings wears both (ZzzCharacter.cpp:15367-15391). Unlike
+    // the wings it is linked with a matrix - see setQuestItemAsync.
     this.QuestItem.LinkParent = false;
-    this.QuestItem.ParentBoneLink = WING_BONE;
+    this.QuestItem.ParentBoneLink = BACK_BONE;
     this.QuestItem.SkipBoundingBox = true;
 
     // The Imp rides bone 34 with a (20,0,0) cm offset (ZzzCharacter.cpp:15148-15170).
@@ -255,11 +258,15 @@ export class PlayerObject extends ModelObject {
     const weapon = level ? archangelWeapon(level - 1) : null;
     const def = weapon ? ItemsDatabase.getItem(weapon[0], weapon[1]) : null;
 
-    if (!def) {
+    if (!weapon || !def) {
       this.QuestItem.Unload();
       return;
     }
 
+    this.QuestItem.setBoneLink(
+      BACK_BONE,
+      questItemLink({ group: weapon[0], num: weapon[1] })
+    );
     await this.loadPartAsync(def.szModelFolder, this.QuestItem, def.szModelName);
   }
 

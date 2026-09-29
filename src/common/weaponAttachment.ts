@@ -208,6 +208,16 @@ function backLink(
 }
 
 /**
+ * The Blood Castle quest weapon on the back (ZzzCharacter.cpp:15367-15391):
+ * `RenderLinkObject` with `Link` set and no `bRightHandItem`, so it sits
+ * like a stowed left-hand weapon - the Divine Staff and Sword on the weapon
+ * matrix, the Divine Crossbow on the crossbow one, both with the flip.
+ */
+export function questItemLink(item: { group: number; num: number }): Matrix {
+  return backLink(item, true, false);
+}
+
+/**
  * `RenderCharacterBackItem`'s stowed-part animation (:15044-15065): every
  * back-bound sword…shield item holds frame 0 with PlaySpeed 0; the Stinger
  * Bow is the one exception, looping its clip 2 at 0.25.
