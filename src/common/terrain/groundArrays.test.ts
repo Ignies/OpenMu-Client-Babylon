@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { buildGroundArrays, refreshGroundTile } from './groundArrays';
+import {
+  buildGroundArrays,
+  groundTiles,
+  refreshGroundTile,
+} from './groundArrays';
 import { TERRAIN_SIZE, TWFlags } from './consts';
 
 const N = TERRAIN_SIZE;
@@ -71,6 +75,20 @@ describe('refreshGroundTile', () => {
       expect(tile(ground.positions, x, y)).toEqual(tile(fresh.positions, x, y));
       expect(tile(ground.normals, x, y)).toEqual(tile(fresh.normals, x, y));
     }
+  });
+
+  it('copies tiles out with their own quads and triangles', () => {
+    const ground = build(height, new Uint16Array(N * N));
+    const picked = [70 * N + 23, 90 * N + 44];
+    const copy = groundTiles(ground, picked);
+
+    expect(copy.positions.length).toBe(24);
+    expect(Array.from(copy.positions.subarray(0, 12))).toEqual(tile(ground.positions, 23, 70));
+    expect(Array.from(copy.positions.subarray(12, 24))).toEqual(tile(ground.positions, 44, 90));
+    expect(Array.from(copy.textures.subarray(8, 16))).toEqual(
+      Array.from(ground.textures.subarray((90 * N + 44) * 8, (90 * N + 44) * 8 + 8))
+    );
+    expect(Array.from(copy.indices)).toEqual([0, 1, 2, 3, 0, 2, 4, 5, 6, 7, 4, 6]);
   });
 
   it('leaves the neighbouring tiles alone', () => {

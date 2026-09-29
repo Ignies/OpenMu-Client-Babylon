@@ -6,7 +6,7 @@ import {
   Vector3,
   VertexBuffer,
 } from '../babylon/exports';
-import type { IVector3Like, Scene } from '../babylon/exports';
+import type { IVector3Like, Mesh, Scene } from '../babylon/exports';
 import { createGroundMesh } from './customGroundMesh';
 import {
   createTileTextureArray,
@@ -43,7 +43,10 @@ import {
   buildGroundOffThread,
 } from './terrainParseClient';
 import { getTilesList } from '../../common/terrain/getTilesList';
-import { refreshGroundTile } from '../../common/terrain/groundArrays';
+import {
+  groundTiles,
+  refreshGroundTile,
+} from '../../common/terrain/groundArrays';
 import {
   SpecialHeight,
   TERRAIN_SIZE,
@@ -500,6 +503,42 @@ export async function getTerrainData(
     }
   }
 
+  /** `World.detachGround`: the tiles over `rects` that still have ground, as their own mesh. */
+  function DetachGround(
+    rects: readonly (readonly [x: number, y: number, w: number, h: number])[]
+  ): Mesh | null {
+    const tiles = new Set<number>();
+
+    for (const [x, y, w, h] of rects) {
+      for (let yi = Math.max(0, y); yi < Math.min(TERRAIN_SIZE, y + h); yi++) {
+        for (let xi = Math.max(0, x); xi < Math.min(TERRAIN_SIZE, x + w); xi++) {
+          const i = GetTerrainIndex(xi, yi);
+          if (!isFlagInBinaryMask(terrainAttrs[i], TWFlags.NoGround)) tiles.add(i);
+        }
+      }
+    }
+
+    if (tiles.size === 0) return null;
+
+    const mesh = createGroundMesh(
+      '_worldPiece_' + worldNum,
+      scene,
+      groundTiles(ground, [...tiles])
+    );
+    mesh.material = terrain.material;
+    mesh.renderingGroupId = terrain.renderingGroupId;
+    mesh.isPickable = false;
+
+    // Goes with the ground it came from, like the edge; the material is the
+    // ground's and the teardown disposes it.
+    const observer = terrain.onDisposeObservable.addOnce(() => mesh.dispose());
+    mesh.onDisposeObservable.addOnce(() =>
+      terrain.onDisposeObservable.remove(observer)
+    );
+
+    return mesh;
+  }
+
   function RequestTerrainHeight(xf: number, yf: number) {
     if (xf < 0 || yf < 0) return 0;
 
@@ -615,6 +654,7 @@ const xd = xf - xi;
     IsWalkable,
     RequestTerrainFlag,
     SetTerrainFlags,
+    DetachGround,
     GetTerrainTile,
     GetTerrainLayers,
     RequestTerrainLight,
