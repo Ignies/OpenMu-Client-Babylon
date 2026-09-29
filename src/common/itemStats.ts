@@ -432,19 +432,10 @@ function calcRequirements(
   if (isExcellent) itemLevel = def.level + 25;
   else if (isAncient) itemLevel = def.level + 30;
 
-  const addValue = isSecondWing(def) ? 5 : 4;
-
-  let reqLvl = 0;
-  if (def.reqLvl) {
-    // Gear keeps its table level; wings, helpers and consumables climb
-    // `addValue` per +1.
-    const scalesWithLevel =
-      isFirstWing(def) ||
-      isSecondWing(def) ||
-      isCapeOfFighter(def) ||
-      def.group >= ItemGroup.Helper;
-    reqLvl = scalesWithLevel ? def.reqLvl + level * addValue : def.reqLvl;
-  }
+  // The level is checked as the item's table has it: OpenMU scales only the
+  // five stats (`ItemExtensions.GetRequirement`), so a +9 wing or pet asks
+  // what a +0 one does - not the original's four or five more per +1.
+  let reqLvl = def.reqLvl;
 
   const scaled = (req: number, mul: number) =>
     req ? 20 + idiv(req * (itemLevel + level * 3) * mul, 100) : 0;

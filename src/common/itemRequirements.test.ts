@@ -24,6 +24,14 @@ describe('item requirements as OpenMU checks them', () => {
     expect(stats({ ...WINGS_OF_ELF, optionLevel: 3 }).reqStr).toBe(0);
   });
 
+  it('keeps a wing at its own level however far it is upgraded', () => {
+    const WINGS_OF_SPIRITS = { group: 12, num: 3 };
+    for (const lvl of [0, 5, 9, 13, 15]) {
+      expect(stats({ ...WINGS_OF_ELF, lvl }).reqLvl).toBe(180);
+      expect(stats({ ...WINGS_OF_SPIRITS, lvl }).reqLvl).toBe(215);
+    }
+  });
+
   it('leaves the other stats alone', () => {
     const plain = stats({ ...DRAGON_ARMOR, lvl: 7 });
     const optioned = stats({ ...DRAGON_ARMOR, lvl: 7, optionLevel: 4 });
