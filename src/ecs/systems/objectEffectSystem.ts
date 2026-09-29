@@ -21,6 +21,7 @@ const GLOW_LIGHT: Record<Exclude<DropTier, 'normal'>, [number, number, number]> 
   excellent: [0.25, 0.7, 0.3],
   high: [0.7, 0.55, 0.15],
   money: [0.6, 0.5, 0.1],
+  archangel: [0.6, 0.1, 0.6],
 };
 
 const tmp = new Vector3();

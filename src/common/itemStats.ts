@@ -209,6 +209,26 @@ export function isThirdWing(def: ItemDef): boolean {
   );
 }
 
+/**
+ * The Divine weapons of the Archangel, Blood Castle's rewards: sword, scepter,
+ * crossbow, staff and stick (`IsDivineArchangelWeapon`). Their name is purple
+ * wherever it is shown (ZzzInventory.cpp:1910, :5411, :6268).
+ */
+export function isDivineArchangelWeapon(def: ItemDef): boolean {
+  switch (def.group) {
+    case ItemGroup.Sword:
+      return def.index === 19;
+    case ItemGroup.Mace:
+      return def.index === 13;
+    case ItemGroup.Bow:
+      return def.index === 18;
+    case ItemGroup.Staff:
+      return def.index === 10 || def.index === 36;
+    default:
+      return false;
+  }
+}
+
 export function isCapeOfLord(def: ItemDef): boolean {
   return def.group === ItemGroup.Helper && def.index === 30;
 }
