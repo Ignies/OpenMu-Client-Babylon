@@ -983,6 +983,9 @@ export const frenchLayer: LanguageLayer = {
     'event.rank.reward': 'Récompense',
     'event.rank.myInfo': 'Mes infos',
     'event.archangelMessenger': 'Messager de l’Archange',
+    'event.archangelThanks': 'Ah ! Grand guerrier. Grâce à ton aide, nous avons pu protéger ces terres des soldats de Kundun. En témoignage de notre gratitude, je vais partager mon expérience avec toi.',
+    'event.archangelBringWeapon': 'Je vois que tu es un guerrier en formation. Je vais faire confiance à ton courage. Va abattre ces créatures maléfiques et rapporte-moi mon arme.',
+    'event.archangelWeaponFound': "L'arme a été retrouvée. Merci. Tu ferais mieux de quitter cet endroit au plus vite.",
     'event.bloodCastleIntro':
       'Votre volonté d’aider l’Archange est appréciée. Mais prenez garde, jeune guerrier : Blood Castle est un lieu dangereux. Que Dieu vous accompagne.',
     'event.castleButton': 'Château %d (niveau %d-%d)',

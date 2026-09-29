@@ -1440,6 +1440,9 @@ export const vietnameseLayer: LanguageLayer = {
     'event.rank.reward': 'Thưởng',
     'event.rank.myInfo': 'Của tôi',
     'event.archangelMessenger': 'Sứ giả của Tổng lãnh thiên thần',
+    'event.archangelThanks': 'À! Chiến binh vĩ đại. Nhờ sự giúp đỡ của ngươi, chúng ta đã bảo vệ được vùng đất này khỏi binh lính của Kundun. Để tỏ lòng biết ơn, ta sẽ chia sẻ kinh nghiệm của mình với ngươi.',
+    'event.archangelBringWeapon': 'Ta thấy ngươi là một chiến binh đang rèn luyện. Ta sẽ tin vào lòng dũng cảm của ngươi. Hãy đi hạ gục những sinh vật tà ác đó và mang vũ khí của ta trở về.',
+    'event.archangelWeaponFound': 'Vũ khí đã được tìm thấy. Cảm ơn ngươi. Ngươi nên mau chóng rời khỏi nơi này.',
     'event.bloodCastleIntro':
       'Ý chí giúp đỡ Tổng lãnh thiên thần của ngươi thật đáng quý. Nhưng hãy cẩn thận, chiến binh trẻ, vì Blood Castle là nơi nguy hiểm. Cầu Chúa phù hộ ngươi.',
     'event.castleButton': 'Lâu đài %d (cấp %d-%d)',

@@ -963,6 +963,9 @@ export const koreanLayer: LanguageLayer = {
     'event.rank.reward': '보상',
     'event.rank.myInfo': '내 정보',
     'event.archangelMessenger': '대천사의 전령',
+    'event.archangelThanks': '아! 위대한 전사여. 그대의 도움 덕분에 쿤둔의 병사들로부터 이 땅을 지킬 수 있었소. 감사의 표시로 나의 경험을 그대와 나누겠소.',
+    'event.archangelBringWeapon': '수련 중인 전사로군. 그대의 용기를 믿겠소. 가서 저 사악한 괴물들을 쓰러뜨리고 나의 무기를 되찾아 주시오.',
+    'event.archangelWeaponFound': '무기를 찾았소. 고맙소. 어서 이곳을 빠져나가는 것이 좋겠소.',
     'event.bloodCastleIntro':
       '대천사를 도우려는 마음에 감사합니다. 하지만 조심하십시오, 젊은 전사여. 블러드 캐슬은 위험한 곳입니다. 신의 가호가 있기를.',
     'event.castleButton': '%d 캐슬 (레벨 %d-%d)',

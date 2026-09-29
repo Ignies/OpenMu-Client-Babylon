@@ -1569,6 +1569,9 @@ export const EN_TEXT = {
   'event.rank.reward': 'Reward',
   'event.rank.myInfo': 'My Info',
   'event.archangelMessenger': 'Messenger of Archangel',
+  'event.archangelThanks': "Ah! Great warrior. Thanks to your help, we have been able to protect the lands from Kundun's soldiers. As a token of our appreciation, I will share my experience with you.",
+  'event.archangelBringWeapon': "You're a warrior in training, I see. I will trust in your courage. Go ahead and bring down those evil creatures and bring me back my weapon.",
+  'event.archangelWeaponFound': "The weapon has been found. Thank you. You'd better get yourself out of here quickly.",
   'event.bloodCastleIntro':
     'Your will to help the Archangel is appreciated. But be careful, young warrior for Blood Castle is a dangerous place. May God be with you.',
   'event.castleButton': 'Castle %d (level %d-%d)',

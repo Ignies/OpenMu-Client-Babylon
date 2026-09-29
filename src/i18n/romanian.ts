@@ -982,6 +982,9 @@ export const romanianLayer: LanguageLayer = {
     'event.rank.reward': 'Recompensă',
     'event.rank.myInfo': 'Datele mele',
     'event.archangelMessenger': 'Mesagerul Arhanghelului',
+    'event.archangelThanks': 'Ah! Mare războinic. Datorită ajutorului tău am reușit să apărăm aceste ținuturi de soldații lui Kundun. Ca semn al recunoștinței noastre, îți voi împărtăși experiența mea.',
+    'event.archangelBringWeapon': 'Văd că ești un războinic aflat la antrenament. Voi avea încredere în curajul tău. Du-te, doboară acele creaturi malefice și adu-mi înapoi arma.',
+    'event.archangelWeaponFound': 'Arma a fost găsită. Mulțumesc. Ar fi bine să pleci repede de aici.',
     'event.bloodCastleIntro':
       'Dorința ta de a-l ajuta pe Arhanghel este apreciată. Dar ai grijă, tinere războinic: Blood Castle este un loc primejdios. Domnul să fie cu tine.',
     'event.castleButton': 'Castelul %d (nivel %d-%d)',

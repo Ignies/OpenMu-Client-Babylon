@@ -5,6 +5,7 @@ import type { Item } from '../ecs/world';
 import type { EventEntryState, EventLayer } from './layer';
 import { EVENT_LAYERS } from './layers';
 import {
+  archangelDialog,
   bloodCastleWindow,
   closeBloodCastle,
   enterBloodCastle,
@@ -133,6 +134,14 @@ class Events {
 
   enterBloodCastle(grade: number): void {
     enterBloodCastle(grade);
+  }
+
+  /**
+   * `ReceiveServerCommand` case 1: a numbered message box. True when an
+   * event knows the number (the Blood Castle Archangel's answers).
+   */
+  serverMessageBox(dialog: number): boolean {
+    return archangelDialog(dialog);
   }
 
   enterDevilSquare(grade: number): void {

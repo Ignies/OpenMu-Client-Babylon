@@ -1451,6 +1451,9 @@ export const polishLayer: LanguageLayer = {
     'event.rank.reward': 'Nagroda',
     'event.rank.myInfo': 'Moje dane',
     'event.archangelMessenger': 'Posłaniec Archanioła',
+    'event.archangelThanks': 'Ach! Wielki wojowniku. Dzięki twojej pomocy zdołaliśmy obronić te ziemie przed żołnierzami Kunduna. W dowód wdzięczności podzielę się z tobą moim doświadczeniem.',
+    'event.archangelBringWeapon': 'Widzę, że jesteś wojownikiem w trakcie szkolenia. Zaufam twojej odwadze. Idź, pokonaj te złe stworzenia i przynieś mi moją broń.',
+    'event.archangelWeaponFound': 'Broń została odnaleziona. Dziękuję. Lepiej szybko się stąd wynoś.',
     'event.bloodCastleIntro':
       'Doceniam twoją chęć pomocy Archaniołowi. Ale uważaj, młody wojowniku, bo Blood Castle to niebezpieczne miejsce. Niech Bóg będzie z tobą.',
     'event.castleButton': 'Zamek %d (poziom %d-%d)',

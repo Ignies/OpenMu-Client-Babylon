@@ -93,6 +93,37 @@ const OWNER_ID_MASK = 0x7fff;
 const NO_TICKET_SLOT = 0xff;
 /** How long the OK-box substitutes stay on screen. */
 const MESSAGE_MS = 5000;
+/** The Archangel's lines are a paragraph each, so they stay longer. */
+const ARCHANGEL_MESSAGE_MS = 10000;
+
+/** [NpcInfo(232, "Archangel")]: the one the weapon goes back to. */
+const ARCHANGEL_NPC = 232;
+/** `ITEM_WEAPON_OF_ARCHANGEL`, the quest item. */
+const WEAPON_OF_ARCHANGEL = { group: 13, num: 19 } as const;
+
+/**
+ * What the Archangel answers: the dialog numbers OpenMU's
+ * `BloodCastleContext.TalkToNpcArchangelAsync` picks, shown by the original
+ * as `CreateOkMessageBox(GlobalText[830 + n - 20])` (`ReceiveServerCommand`
+ * case 1, WSclient.cpp).
+ */
+const ARCHANGEL_DIALOG = {
+  /** GlobalText[833]: the weapon is handed back. */
+  thanks: 0x17,
+  /** GlobalText[834]: no weapon on the hero, or no match running. */
+  bringWeapon: 0x18,
+  /** GlobalText[856]: somebody already brought it. */
+  weaponFound: 0x2e,
+} as const;
+
+const ARCHANGEL_TEXT: Readonly<Record<number, keyof typeof EVENT_TEXT>> = {
+  [ARCHANGEL_DIALOG.thanks]: 'archangelThanks',
+  [ARCHANGEL_DIALOG.bringWeapon]: 'archangelBringWeapon',
+  [ARCHANGEL_DIALOG.weaponFound]: 'archangelWeaponFound',
+};
+
+/** A server answer this soon after the same line said locally is that line. */
+const ARCHANGEL_ECHO_MS = 3000;
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -146,6 +177,10 @@ const state = observable(
 );
 
 let scoreLeft = 0;
+/** The weapon has gone back to the Archangel in this match. */
+let weaponReturned = false;
+/** The last Archangel line shown, and when (`performance.now()`). */
+let lastArchangelLine: { dialog: number; at: number } | null = null;
 
 /** The messenger window: whether it is up and its eight buttons. */
 export function bloodCastleWindow(): {
@@ -277,6 +312,60 @@ function reset(): void {
     state.score = null;
   });
   scoreLeft = 0;
+  weaponReturned = false;
+  lastArchangelLine = null;
+}
+
+function sayArchangelLine(dialog: number): void {
+  const key = ARCHANGEL_TEXT[dialog];
+  if (!key) return;
+  lastArchangelLine = { dialog, at: performance.now() };
+  Store.addNotification(EVENT_TEXT[key], 'info', ARCHANGEL_MESSAGE_MS);
+}
+
+/**
+ * `ReceiveServerCommand` case 1 with one of the Archangel's dialogs. False
+ * for any other message box number. The same line shown a moment ago by
+ * `useNpc` is not shown twice.
+ */
+export function archangelDialog(dialog: number): boolean {
+  if (!ARCHANGEL_TEXT[dialog]) return false;
+  const last = lastArchangelLine;
+  if (last?.dialog === dialog && performance.now() - last.at < ARCHANGEL_ECHO_MS) {
+    return true;
+  }
+  sayArchangelLine(dialog);
+  return true;
+}
+
+/**
+ * The line OpenMU picks for a talk (`TalkToNpcArchangelAsync`): the weapon
+ * already back, else the weapon handed over if the hero carries it while
+ * the match runs, else the request for it.
+ */
+function archangelAnswer(): number {
+  if (weaponReturned) return ARCHANGEL_DIALOG.weaponFound;
+  const carrying = Store.playerData.items.some(
+    item => item?.group === WEAPON_OF_ARCHANGEL.group && item.num === WEAPON_OF_ARCHANGEL.num
+  );
+  if (state.timer.running && carrying) {
+    weaponReturned = true;
+    return ARCHANGEL_DIALOG.thanks;
+  }
+  return ARCHANGEL_DIALOG.bringWeapon;
+}
+
+/**
+ * The hero talks to the Archangel. OpenMU picks the answer but has no packet
+ * for it yet, so the line the original would show is shown here; the talk
+ * still goes out, since that is what hands the weapon over.
+ */
+function useNpc(npc: { npcType: number }): boolean {
+  if (npc.npcType !== ARCHANGEL_NPC) return false;
+  const map = Store.world?.mapIndex;
+  if (map === undefined || !MAPS.has(map)) return false;
+  sayArchangelLine(archangelAnswer());
+  return false;
 }
 
 // ---- packets ---------------------------------------------------------------
@@ -365,6 +454,7 @@ function readQuestItem(p: BloodCastleStatePacket): void {
 /** `SetMatchGameCommand` (NewBloodCastleSystem.cpp): states 0..4. */
 EventBus.on('BloodCastleState', packet => {
   const p = new BloodCastleStatePacket(packet);
+  if (p.State === BloodCastleStateStatusEnum.BloodCastleStarted) weaponReturned = false;
 
   switch (p.State) {
     case BloodCastleStateStatusEnum.BloodCastleStarted:
@@ -394,6 +484,7 @@ EventBus.on('BloodCastleState', packet => {
 /** `ReceiveDevilSquareRank` with the 29-byte Blood Castle body. */
 EventBus.on('BloodCastleScore', packet => {
   const p = new BloodCastleScorePacket(packet);
+  if (p.Success) weaponReturned = true;
   scoreLeft = RESULT_SECONDS;
   runInAction(() => {
     state.score = {
@@ -418,4 +509,5 @@ export const bloodCastleLayer: EventLayer = {
   reset,
   state: () => ({ open: state.open, running: state.timer.running }),
   useTicket,
+  useNpc,
 };

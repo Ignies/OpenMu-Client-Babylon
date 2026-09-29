@@ -965,6 +965,9 @@ export const japaneseLayer: LanguageLayer = {
     'event.rank.reward': '報酬',
     'event.rank.myInfo': '自分の情報',
     'event.archangelMessenger': '大天使の使者',
+    'event.archangelThanks': 'おお！偉大なる戦士よ。そなたの助けのおかげで、クンドゥンの兵士たちからこの地を守ることができた。感謝のしるしに、私の経験をそなたに分け与えよう。',
+    'event.archangelBringWeapon': '修行中の戦士のようだな。そなたの勇気を信じよう。さあ、邪悪な者たちを倒し、私の武器を取り戻してきてくれ。',
+    'event.archangelWeaponFound': '武器は見つかった。ありがとう。早くここから立ち去るがよい。',
     'event.bloodCastleIntro':
       '大天使を助けようとする意思に感謝します。しかし気をつけてください、若き戦士よ。ブラッドキャッスルは危険な場所です。神のご加護がありますように。',
     'event.castleButton': '第 %d キャッスル（レベル %d-%d）',

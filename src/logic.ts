@@ -3263,6 +3263,9 @@ EventBus.on('ObjectMessage', packet => {
 // (58), ShowFireworks (0), ShowChristmasFireworks (59) and ServerCommand; the
 // dispatcher emits whichever it finds first (ServerCommand today), so every
 // name routes here on byte 4.
+/** `ReceiveServerCommand` case 1: `CreateOkMessageBox(GlobalText[...])`. */
+const SERVER_MESSAGE_BOX = 1;
+
 function routeServerCommand(packet: DataView) {
   const effectType = packet.getUint8(4);
   switch (effectType) {
@@ -3290,8 +3293,10 @@ function routeServerCommand(packet: DataView) {
     }
     default: {
       // The other command types open GlobalText message boxes the client has
-      // no texts for (ReceiveServerCommand, WSclient.cpp:7744).
+      // no texts for (ReceiveServerCommand, WSclient.cpp:7744) - but for the
+      // numbered boxes (type 1) an event has the text of.
       const p = new ServerCommandPacket(packet);
+      if (p.CommandType === SERVER_MESSAGE_BOX && events.serverMessageBox(p.Parameter1)) return;
       console.warn(
         `unhandled ServerCommand ${p.CommandType} (${p.Parameter1}, ${p.Parameter2})`
       );

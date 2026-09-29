@@ -959,6 +959,9 @@ export const chineseLayer: LanguageLayer = {
     'event.rank.reward': '奖励',
     'event.rank.myInfo': '我的信息',
     'event.archangelMessenger': '大天使的使者',
+    'event.archangelThanks': '啊！伟大的勇士。多亏了你的帮助，我们才得以保护这片土地免受昆顿士兵的侵犯。为了表达我们的谢意，我将与你分享我的经验。',
+    'event.archangelBringWeapon': '看来你是一名正在修炼的勇士。我会相信你的勇气。去打倒那些邪恶的生物，把我的武器带回来吧。',
+    'event.archangelWeaponFound': '武器已经找到了。谢谢你。你最好赶快离开这里。',
     'event.bloodCastleIntro':
       '感谢你愿意帮助大天使。但请小心，年轻的战士，血色城堡是个危险的地方。愿神与你同在。',
     'event.castleButton': '第 %d 城堡（%d-%d 级）',
