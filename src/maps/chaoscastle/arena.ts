@@ -1,3 +1,4 @@
+import { spawnParticle } from '../../common/effectParticles';
 import { TILE_CM, TW_NOGROUND } from '../../common/terrain/consts';
 import { inChaosCastle } from '../../common/locomotion';
 import { BloodCastleStatePacket } from '../../common/packets/ServerToClientPackets';
@@ -10,6 +11,7 @@ import {
   CHAOS_CASTLE_STAGES,
   CHAOS_CASTLE_STAGE_STATES,
   CHAOS_CASTLE_OUTER_RING,
+  type TileRect,
 } from './spec';
 
 /**
@@ -37,9 +39,14 @@ import {
  * guard is simply "this stage has not run yet", which is the same protection
  * without the client second-guessing the server's count.
  *
+ * Smoke rises along the crack, where the strip meets the floor that stays,
+ * while it is about to go, and bursts along it as it breaks away. The
+ * original smokes the whole strip instead, as a warning before the stage
+ * (`RenderTerrainVisual`, one tile in eight every frame), keyed to its own
+ * server's kill counts, which OpenMU's do not follow.
+ *
  * Not here: the quake (`EarthQuake = -0.1…-0.3` while the smoke runs) - the
- * clone has no camera-shake hook yet; and `RenderTerrainVisual`'s smoke on
- * the tiles of the strip about to close (one tile in eight, every frame).
+ * clone has no camera-shake hook yet.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -58,8 +65,24 @@ const START_VELOCITY = 1;
 const VELOCITY_GAIN = 0.4;
 /** Reference tick, seconds. */
 const TICK = 1 / 25;
+/** One crack edge in this many puffs each tick of the lead-in. */
+const CRACK_SMOKE_ODDS = 4;
+/**
+ * The crack's dust: the pale smoke that grows as it rises (Empire Guardian's
+ * vents), at twice its size. The ring's own `BITMAP_SMOKE + 4` is a dark,
+ * subtractive puff that all but vanishes against this grey floor.
+ */
+const CRACK_SMOKE = 'smoke60';
+const CRACK_SMOKE_SCALE = 2;
+const WHITE = [1, 1, 1] as const;
 
 // ---- 2. state + readers ----------------------------------------------------
+
+/**
+ * One tile edge of the crack: from (x, z), a tile long along x or along z.
+ * In tiles, as the ground mesh lays them.
+ */
+type Crack = { x: number; z: number; alongX: boolean };
 
 type Drop = {
   types: ReadonlySet<number>;
@@ -72,6 +95,8 @@ type Drop = {
   offset: number;
   /** The floor strip that closed with this stage, falling with the ring. */
   floor: Mesh | null;
+  /** Where that strip meets the floor that stays. */
+  cracks: readonly Crack[];
 };
 
 /** Stages completed so far (0..3). */
@@ -116,6 +141,45 @@ export function resetChaosCastleArena(): void {
   lastNow = -1;
 }
 
+/** The edges where the closed `rects` meet ground that stays. */
+function crackEdges(world: World, rects: readonly TileRect[]): Crack[] {
+  const ground = (x: number, y: number) =>
+    !(world.getTerrainFlag(x, y) & TW_NOGROUND);
+  const cracks: Crack[] = [];
+
+  for (const [x0, y0, w, h] of rects) {
+    for (let y = y0; y < y0 + h; y++) {
+      for (let x = x0; x < x0 + w; x++) {
+        if (ground(x - 1, y)) cracks.push({ x, z: y, alongX: false });
+        if (ground(x + 1, y)) cracks.push({ x: x + 1, z: y, alongX: false });
+        if (ground(x, y - 1)) cracks.push({ x, z: y, alongX: true });
+        if (ground(x, y + 1)) cracks.push({ x, z: y + 1, alongX: true });
+      }
+    }
+  }
+
+  return cracks;
+}
+
+/** A puff of dust somewhere on `crack`. */
+function puffCrack(crack: Crack): void {
+  const world = Store.world;
+  if (!world) return;
+
+  const along = Math.random();
+  const x = crack.alongX ? crack.x + along : crack.x;
+  const z = crack.alongX ? crack.z : crack.z + along;
+
+  void spawnParticle(
+    world.scene,
+    CRACK_SMOKE,
+    { x, y: world.getTerrainHeight(x, z), z },
+    0,
+    CRACK_SMOKE_SCALE,
+    WHITE
+  );
+}
+
 /** The ring is down: hidden for good, and its floor gone with it. */
 function endDrop(): void {
   if (!drop) return;
@@ -154,6 +218,7 @@ function advance(world: World): void {
     inView,
     offset: 0,
     floor,
+    cracks: crackEdges(world, next.noGround),
   };
 
   sound.play('Sound/eWallFall');
@@ -175,7 +240,17 @@ export function updateChaosCastleArena(now: number, dt: number): void {
     // `MoveObjects` reads `g_iActionTime`, then counts it down.
     const t = drop.ticksLeft--;
 
-    if (t >= FALL_START_TICK) continue;
+    if (t >= FALL_START_TICK) {
+      for (const crack of drop.cracks) {
+        if (Math.random() * CRACK_SMOKE_ODDS < 1) puffCrack(crack);
+      }
+      continue;
+    }
+
+    // The strip breaks away: the whole crack at once.
+    if (t === FALL_START_TICK - 1) {
+      for (const crack of drop.cracks) puffCrack(crack);
+    }
 
     if (t <= 0) {
       endDrop();
