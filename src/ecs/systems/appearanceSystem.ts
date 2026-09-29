@@ -1,5 +1,6 @@
 import { ItemsDatabase } from '../../common/itemsDatabase';
 import { itemVisualTier } from '../../common/itemVisualTier';
+import { inChaosCastle } from '../../common/locomotion';
 import type { ModelObject } from '../../common/modelObject';
 import { isPlayerBody, type PlayerObject } from '../../common/playerObject';
 import { applyWeaponAttachments } from '../../common/weaponAttachment';
@@ -36,6 +37,35 @@ function loadPart(
   return true;
 }
 
+/**
+ * Inside Chaos Castle every player is drawn as the one `Player/Angel` body
+ * instead of their equipment (`RenderCharacter`, ZzzCharacter.cpp:9536-9568):
+ * the castle's participant skin, the armour its monsters wear too. Wings and
+ * the pet go with it (`ClearChaosCastleHelper`, CSChaosCastle.cpp:113-128).
+ */
+const CHAOS_CASTLE_BODY = 'Angel.glb';
+
+/** Bodies wearing it, so the class head goes back on once out of the castle. */
+const inCastleSkin = new WeakSet<PlayerObject>();
+
+function wearChaosCastleSkin(playerObject: PlayerObject) {
+  inCastleSkin.add(playerObject);
+
+  playerObject.Helm.Unload();
+  playerObject.HelmMask.Unload();
+  playerObject.Pants.Unload();
+  playerObject.Gloves.Unload();
+  playerObject.Boots.Unload();
+  void playerObject.loadPartAsync(
+    'Player/',
+    playerObject.Armor,
+    CHAOS_CASTLE_BODY
+  );
+
+  void playerObject.setWingsAsync(null);
+  void playerObject.setBodyPetAsync(null);
+}
+
 export const AppearanceSystem: ISystemFactory = world => {
   const query = world.with('charAppearance', 'modelObject', 'visibility');
 
@@ -46,6 +76,8 @@ export const AppearanceSystem: ISystemFactory = world => {
         modelObject,
         visibility,
         attributeSystem,
+        skin,
+        npcType,
       } of query) {
         if (visibility.state === 'hidden') continue;
         if (!charAppearance.changed) continue;
@@ -56,23 +88,33 @@ export const AppearanceSystem: ISystemFactory = world => {
 
         const playerObject = modelObject as PlayerObject;
 
-        loadPart(charAppearance.helm, playerObject, playerObject.HelmMask) ||
-          playerObject.setDefaultMask();
-        loadPart(charAppearance.armor, playerObject, playerObject.Armor) ||
-          playerObject.setDefaultArmor();
-        loadPart(charAppearance.pants, playerObject, playerObject.Pants) ||
-          playerObject.setDefaultPants();
-        loadPart(charAppearance.gloves, playerObject, playerObject.Gloves) ||
-          playerObject.setDefaultGloves();
-        loadPart(charAppearance.boots, playerObject, playerObject.Boots) ||
-          playerObject.setDefaultBoots();
+        // Players only, and not one already in a transformation skin: the
+        // original keeps that body there too (`!c->Change`).
+        if (inChaosCastle(world.mapIndex) && !skin && npcType === undefined) {
+          wearChaosCastleSkin(playerObject);
+        } else {
+          if (inCastleSkin.delete(playerObject)) {
+            void playerObject.setDefaultHelm();
+          }
 
-        // c->Wing and the body-linked half of c->Helper. Both need their own
-        // loader: the wing decides its bone (back vs cape) and blend mesh
-        // before load, and the pet models live under Player/ rather than at
-        // the Item/ path items.json carries for the horn items.
-        void playerObject.setWingsAsync(charAppearance.wings);
-        void playerObject.setBodyPetAsync(charAppearance.pet);
+          loadPart(charAppearance.helm, playerObject, playerObject.HelmMask) ||
+            playerObject.setDefaultMask();
+          loadPart(charAppearance.armor, playerObject, playerObject.Armor) ||
+            playerObject.setDefaultArmor();
+          loadPart(charAppearance.pants, playerObject, playerObject.Pants) ||
+            playerObject.setDefaultPants();
+          loadPart(charAppearance.gloves, playerObject, playerObject.Gloves) ||
+            playerObject.setDefaultGloves();
+          loadPart(charAppearance.boots, playerObject, playerObject.Boots) ||
+            playerObject.setDefaultBoots();
+
+          // c->Wing and the body-linked half of c->Helper. Both need their own
+          // loader: the wing decides its bone (back vs cape) and blend mesh
+          // before load, and the pet models live under Player/ rather than at
+          // the Item/ path items.json carries for the horn items.
+          void playerObject.setWingsAsync(charAppearance.wings);
+          void playerObject.setBodyPetAsync(charAppearance.pet);
+        }
 
         // Summoner books are never drawn on the character (`RenderLinkObject`
         // returns before them, ZzzCharacter.cpp:6453-6456).

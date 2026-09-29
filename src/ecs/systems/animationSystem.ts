@@ -317,7 +317,10 @@ export const AnimationSystem: ISystemFactory = world => {
 
         const inSafeZone = attributeSystem.isAboveZero('inSafeZone');
         const hands = entity.charAppearance;
-        const wings = isWingItem(hands?.wings) ? hands!.wings : null;
+        // Chaos Castle takes the wings off (`ClearChaosCastleHelper`), so
+        // nobody flies in there.
+        const wings =
+          !chaosCastle && isWingItem(hands?.wings) ? hands!.wings : null;
         const mount = petSpec(hands?.pet);
         const riding = isRidingMount(hands?.pet);
         const ridingHorse = riding && mount?.riderClips === 'horse';
