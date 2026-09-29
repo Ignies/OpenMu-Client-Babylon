@@ -18,7 +18,9 @@
 // overwritten; a missing one is added only when the server asks for
 // something. A row is taken only when its footprint matches the server's
 // where the helper states one, so a group and index that mean different
-// items on the two sides are left alone and reported.
+// items on the two sides are left alone and reported. A definition the
+// server has commented out is read like any other: the client keeps the row
+// ready for when the server turns it on (Mace of The king).
 //
 // Run after `convertItemTXTtoJson.ts`, which rewrites items.json from scratch,
 // and `addRageFighterColumn.ts`:

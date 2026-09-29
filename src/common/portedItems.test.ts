@@ -57,3 +57,12 @@ describe('items ported from MuMain', () => {
     expect(cape(0x0c)).toEqual({ group: 12, num: 50, lvl: 0 });
   });
 });
+
+describe('Mace of the King', () => {
+  it('is known before the server gives it out', () => {
+    const def = defOf(2, 22);
+    expect(`${def.modelFolder}${def.modelName}`).toBe('Item/Mace14.glb');
+    expect([def.width, def.height]).toEqual([1, 3]);
+    expect([def.reqStr, def.reqAgi]).toEqual([80, 17]);
+  });
+});
