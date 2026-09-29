@@ -24,17 +24,22 @@ type Profile = keyof typeof PROFILES;
 const masks = new Map<Scene, Map<string, Texture>>();
 const pixels = new Map<Profile, Uint8Array>();
 
+/** The mask's opacity at `r`, the distance from the cell's centre as a share of the half cell. */
+function falloff(r: number, profile: Profile): number {
+  const { from, to, ease } = PROFILES[profile];
+  const k = Math.min(1, Math.max(0, (r - from) / (to - from)));
+  return 1 - (ease ? k * k * (3 - 2 * k) : k);
+}
+
 function maskPixels(profile: Profile): Uint8Array {
   let px = pixels.get(profile);
   if (px) return px;
-  const { from, to, ease } = PROFILES[profile];
   px = new Uint8Array(MASK_SIZE * MASK_SIZE * 4);
   const half = MASK_SIZE / 2;
   for (let y = 0; y < MASK_SIZE; y++) {
     for (let x = 0; x < MASK_SIZE; x++) {
       const r = Math.hypot(x + 0.5 - half, y + 0.5 - half) / half;
-      const k = Math.min(1, Math.max(0, (r - from) / (to - from)));
-      const a = Math.round(255 * (1 - (ease ? k * k * (3 - 2 * k) : k)));
+      const a = Math.round(255 * falloff(r, profile));
       const i = (y * MASK_SIZE + x) * 4;
       px[i] = px[i + 1] = px[i + 2] = 255;
       px[i + 3] = a;
@@ -63,6 +68,46 @@ export function softEdgeMask(scene: Scene, cols: number, rows: number, wide = fa
   tex.vScale = rows;
   byGrid.set(key, tex);
   return tex;
+}
+
+/**
+ * The `card` falloff baked into a sheet's own alpha, cell by cell (`cellW` x `cellH` texels, the
+ * whole sheet by default): for the particle shader, which samples one texture and has no mask.
+ */
+export function fadeSheetEdges(
+  rgba: Uint8ClampedArray,
+  width: number,
+  height: number,
+  cellW = width,
+  cellH = height
+): void {
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const dx = ((x % cellW) + 0.5 - cellW / 2) / (cellW / 2);
+      const dy = ((y % cellH) + 0.5 - cellH / 2) / (cellH / 2);
+      const i = (y * width + x) * 4 + 3;
+      rgba[i] = Math.round(rgba[i] * falloff(Math.hypot(dx, dy), 'card'));
+    }
+  }
+}
+
+/** Rows, as a share of the sheet's height, over which `fadeSheetSides` takes a ribbon's side to nothing. */
+const SIDE_FADE = 0.2;
+
+/**
+ * A ribbon sheet's alpha faded to nothing towards its top and bottom rows - the ribbon's two
+ * sides. Its length (U) is left alone: it runs along the trail and tiles.
+ */
+export function fadeSheetSides(rgba: Uint8ClampedArray, width: number, height: number): void {
+  for (let y = 0; y < height; y++) {
+    const edge = Math.min(y + 0.5, height - y - 0.5) / (height * SIDE_FADE);
+    const k = Math.min(1, edge);
+    const f = k * k * (3 - 2 * k);
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4 + 3;
+      rgba[i] = Math.round(rgba[i] * f);
+    }
+  }
 }
 
 /** Drop every mask (the effects facade's reset, after the materials that sample them). */

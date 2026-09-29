@@ -861,6 +861,7 @@ export const SOUL_MOTES: ParticleRecipe = {
  */
 export const SAND_SMOKE: ParticleRecipe = {
   texture: TEX.smokeAlpha,
+  softEdge: true,
   colour: RGBS.white,
   // core.ts lerps colour over the first 60 % of life, then fades alpha: 0.4
   // grey there is the original's Light at the same age.
@@ -1129,6 +1130,7 @@ export const METEOR_BLAST: ParticleRecipe = {
 /** Dust and smoke the landing throws up: straight-alpha matter, so it darkens what it covers and never blooms. */
 export const METEOR_DUST: ParticleRecipe = {
   texture: TEX.smokeAlpha,
+  softEdge: true,
   colour: [0.26, 0.23, 0.2],
   size: 0.8,
   sizeJitter: 0.3,

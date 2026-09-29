@@ -183,6 +183,7 @@ const SPIRIT_WISPS = [0, Math.PI].map(phase => ({ amplitude: 0.6, cycles: 2.2, s
 /** Dark smoke the dragons shed as they fly: a soft black haze along the path that spreads and fades. */
 const SPIRIT_SMOKE: ParticleRecipe = {
   texture: TEX.smokeAlpha,
+  softEdge: true,
   colour: [0.02, 0.02, 0.03],
   size: 0.55,
   sizeJitter: 0.4,
@@ -2398,6 +2399,7 @@ const chaoticStars: Step = (_at, c) => {
  */
 const CHAOS_SMOKE: ParticleRecipe = {
   texture: TEX.smokeAlpha,
+  softEdge: true,
   colour: [0, 0, 0],
   size: cm(61),
   sizeJitter: 0.33,
@@ -4262,6 +4264,7 @@ const SPARK_CHIPS_HD: ParticleRecipe = { ...SPARK_CHIPS, colour: [1, 0.85, 0.55]
  */
 const WHEEL_DUST: ParticleRecipe = {
   texture: TEX.smokeAlpha,
+  softEdge: true,
   colour: [0.42, 0.38, 0.33],
   colourEnd: [0.3, 0.27, 0.24],
   size: 0.55,
@@ -4524,6 +4527,7 @@ const FURY_BURST_SPARKS: ParticleRecipe = {
 /** Graded tiers: the dust skirt the impact throws flat along the ground. */
 const FURY_DUST: ParticleRecipe = {
   texture: TEX.smokeAlpha,
+  softEdge: true,
   colour: [0.36, 0.3, 0.25],
   colourEnd: [0.26, 0.22, 0.19],
   size: 0.8,

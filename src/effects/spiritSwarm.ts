@@ -40,7 +40,7 @@ import { loadGLTF } from '../common/modelLoader';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
 import { clampAlpha } from './clampAlpha';
-import { LiveList, darkCardGain, effectTexture, fadeOut, luma, type PointSource, type RGB } from './core';
+import { LiveList, darkCardGain, darkRibbonSheet, fadeOut, luma, type PointSource, type RGB } from './core';
 import { inPlaceLines, type InPlaceLines } from './greasedLineInPlace';
 import { releaseGreasedLineMaterial } from './greasedLineRelease';
 import type { TaperShape } from './joint';
@@ -201,9 +201,8 @@ function darkRibbon(scene: Scene, at: Vector3, count: number, n: number, widths:
   std.disableDepthWrite = true;
   std.fogEnabled = false;
   if (glMat) glMat.visibility = -1;
-  void effectTexture(scene, r.texture).then(tex => {
+  void darkRibbonSheet(scene, r.texture).then(tex => {
     if (mesh.isDisposed()) return;
-    tex.getAlphaFromRGB = true;
     std.opacityTexture = tex;
     if (glMat) glMat.visibility = 1;
   });
