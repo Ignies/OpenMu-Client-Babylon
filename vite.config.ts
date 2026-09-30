@@ -1,5 +1,11 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
+import { fileURLToPath } from 'node:url';
+
+const alias = {
+  '@/': fileURLToPath(new URL('./src/', import.meta.url)),
+  '@versions/': fileURLToPath(new URL('./versions/', import.meta.url)),
+};
 
 // Game versions are selected at runtime (versions/registry.ts, loaded by
 // src/main.tsx before the app boots); one build carries all of them.
@@ -7,6 +13,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   base: './',
   plugins: [],
+  resolve: { alias },
   /**
    * The two services the UI talks to, each its own process. Proxied here so
    * they are same-origin in dev; in production the shop is published under
