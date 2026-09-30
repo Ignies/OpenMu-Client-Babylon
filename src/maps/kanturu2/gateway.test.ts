@@ -8,7 +8,7 @@ import {
   type MockInstance,
 } from 'vitest';
 import type { Sound } from '@babylonjs/core/Audio/sound';
-import { EventBus } from '../../libs/eventBus';
+import { EventBus } from '../../core/eventBus';
 import { SoundsManager } from '../../libs/soundsManager';
 import { kanturu2Layer } from './index';
 import {

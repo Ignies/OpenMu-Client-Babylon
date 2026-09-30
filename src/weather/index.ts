@@ -1,5 +1,5 @@
-import type { ENUM_WORLD } from '../common/types';
-import type { Scene } from '../libs/babylon/exports';
+import type { ENUM_WORLD } from '../core/types';
+import type { Scene } from '../controllers/render/babylon/exports';
 import type { World } from '../ecs/world';
 import type { WeatherLayer } from './layer';
 import { WEATHER_LAYERS } from './layers';

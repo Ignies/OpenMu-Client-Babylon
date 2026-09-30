@@ -1,4 +1,4 @@
-import { RawTexture, Texture, type Scene } from '../libs/babylon/exports';
+import { RawTexture, Texture, type Scene } from '../controllers/render/babylon/exports';
 
 /**
  * A round opacity mask repeated once per sheet cell, for a card whose art has

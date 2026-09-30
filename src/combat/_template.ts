@@ -15,7 +15,7 @@
  * itself never imports `Store` to send. If it needs a clip, add the row to
  * `recipes.ts`.
  */
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { CombatLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

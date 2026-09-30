@@ -11,14 +11,14 @@
  */
 import { observable, runInAction } from 'mobx';
 import { t } from '../i18n';
-import { devQuery } from '../common/devSeams';
-import { ENUM_WORLD } from '../common/types';
+import { devQuery } from '../core/devSeams';
+import { ENUM_WORLD } from '../core/types';
 import {
   CloseNpcRequestPacket,
   EnterOnGatekeeperRequestPacket,
   EnterOnWerewolfRequestPacket,
-} from '../common/packets/ClientToServerPackets';
-import { EventBus } from '../libs/eventBus';
+} from '../../versions/shared/packets/ClientToServerPackets';
+import { EventBus } from '../core/eventBus';
 import { Store } from '../store';
 import type { QuestLayer } from './layer';
 import { LegacyQuestState, legacyQuestState } from './legacyQuests';

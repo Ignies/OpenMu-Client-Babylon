@@ -6,7 +6,7 @@ import {
   useState,
 } from 'react';
 import type { Entity } from '../ecs/world';
-import type { IVector2Like } from '../libs/babylon/exports';
+import type { IVector2Like } from '../controllers/render/babylon/exports';
 import { onScreenPosition } from '../libs/screenPositionBus';
 
 export function useRenderId() {

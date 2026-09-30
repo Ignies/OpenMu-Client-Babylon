@@ -1,7 +1,7 @@
 import { observable, runInAction } from 'mobx';
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import { Store } from '../store';
-import { DoppelgangerEnterRequestPacket } from '../common/packets/ClientToServerPackets';
+import { DoppelgangerEnterRequestPacket } from '../../versions/shared/packets/ClientToServerPackets';
 import type { EventLayer } from './layer';
 
 /**

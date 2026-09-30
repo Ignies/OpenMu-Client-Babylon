@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { LocalStorage } from '../../../libs/localStorage';
+import { LocalStorage } from '../../../core/localStorage';
 import { getUiViewport, onUiViewportChanged } from '../uiStage';
 import { GameOptions, uiScaleFactor } from '../../../common/gameOptions';
 

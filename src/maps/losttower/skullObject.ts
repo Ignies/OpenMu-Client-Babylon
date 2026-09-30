@@ -1,6 +1,6 @@
-import { MapTileObject } from '../../common/mapTileObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { PlayerAction } from '../../common/objects/enum';
-import { toRadians } from '../../common/utils';
+import { toRadians } from '../../controllers/assets/download';
 import { playSfx } from '../../libs/sfx';
 import { Store } from '../../store';
 import type { Entity, World } from '../../ecs/world';

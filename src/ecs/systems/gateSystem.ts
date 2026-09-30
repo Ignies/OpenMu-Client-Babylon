@@ -1,8 +1,8 @@
 import type { ISystemFactory } from '../world';
 import { Store } from '../../store';
-import { findEntranceGateAt, loadGates, type Gate } from '../../libs/mu/gates';
-import { EventBus } from '../../libs/eventBus';
-import { prefetchWorldTerrain } from '../../libs/mu/prefetchWorld';
+import { findEntranceGateAt, loadGates, type Gate } from '../../controllers/assets/mu/gates';
+import { EventBus } from '../../core/eventBus';
+import { prefetchWorldTerrain } from '../../controllers/assets/mu/prefetchWorld';
 
 export const GateSystem: ISystemFactory = world => {
   let allGates: readonly Gate[] | null = null;

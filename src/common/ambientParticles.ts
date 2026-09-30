@@ -8,7 +8,7 @@ import {
   Vector3,
   type IParticleSystem,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import type { AmbientSchedule } from '../weather/ambientSchedule';
 import { clipToRoom } from '../weather/roomClip';
 import { loadEffectTexture } from './moveTargetEffect';

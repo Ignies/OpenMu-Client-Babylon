@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ENUM_WORLD } from '../../common/types';
-import { TW_ACTION, TW_NOGROUND } from '../../common/terrain/consts';
+import { ENUM_WORLD } from '../../core/types';
+import { TW_ACTION, TW_NOGROUND } from '../../controllers/terrain/consts';
 import type { World } from '../world';
 
 const playSfx = vi.fn((..._args: unknown[]) => 1000);

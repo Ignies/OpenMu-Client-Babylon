@@ -1,4 +1,4 @@
-import { EventBus } from '../../libs/eventBus';
+import { EventBus } from '../../core/eventBus';
 import type { Entity, ISystemFactory, World } from '../world';
 import { isNpcOrTrapType } from './attackSystem';
 import { Economy } from '../../economy';

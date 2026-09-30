@@ -1,10 +1,10 @@
 import { observable, runInAction } from 'mobx';
 import { JEWEL_OF_CHAOS } from '../common/jewelUpgrade';
-import { sessionNonce } from '../common/sessionNonce';
+import { sessionNonce } from '../controllers/net/sessionNonce';
 import { shopApiUrl } from '../common/serverServices';
 import { t } from '../i18n';
 import { playSfx, playUiSound, UI_BUS } from '../libs/sfx';
-import { LocalStorage } from '../libs/localStorage';
+import { LocalStorage } from '../core/localStorage';
 import type { Item } from '../ecs/world';
 import {
   CALM_BURST_MS,

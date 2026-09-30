@@ -47,7 +47,7 @@ import {
 } from './common/chatEmojis';
 import { itemLinkLabel, scanItemLinks, stripItemLinks } from './common/chatItemLinks';
 import { EMOJI_CATALOG } from './emojis';
-import { clipChatText, toChatWire } from './common/chatWire';
+import { clipChatText, toChatWire } from './controllers/net/protocols/chatWire';
 import { chatTextWidth } from './common/chatTextWidth';
 import { GameOptions } from './common/gameOptions';
 import { Commands } from './commands';
@@ -73,14 +73,14 @@ import {
   RemoveAllianceGuildRequestPacket,
   RequestAllianceListPacket,
   WhisperMessagePacket,
-} from './common/packets/ClientToServerPackets';
-import { GuildMemberRoleEnum } from './common/packets/ServerToClientPackets';
+} from '../versions/shared/packets/ClientToServerPackets';
+import { GuildMemberRoleEnum } from '../versions/shared/packets/ServerToClientPackets';
 import {
   GuildRelation,
   parseSelfDefense,
   SELF_DEFENSE_MS,
 } from './common/nameTags';
-import { NetStats } from './common/netStats';
+import { NetStats } from './controllers/net/roundTrip';
 import { playUiSound } from './libs/sfx';
 
 export type PartyMember = {

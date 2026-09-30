@@ -12,7 +12,7 @@
  * Driven by: `playBurst` from `ecs/systems/objectEffectSystem.ts` (the
  * `objectEffect` event). Read by: nobody.
  */
-import { Vector3, type Scene } from '../libs/babylon/exports';
+import { Vector3, type Scene } from '../controllers/render/babylon/exports';
 import { emitBurst, fxNow, hash, type ParticleRecipe, type PointSource, type RGB } from './core';
 import { spawnJoint } from './joint';
 import { spawnRing } from './ring';

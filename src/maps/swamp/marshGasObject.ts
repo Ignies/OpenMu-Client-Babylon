@@ -1,6 +1,6 @@
 import { ParticleEmitter, type Emission } from '../../common/effectParticles';
-import { MapTileObject } from '../../common/mapTileObject';
-import { cmToTiles } from '../../common/terrain/consts';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
+import { cmToTiles } from '../../controllers/terrain/consts';
 import type { Entity, World } from '../../ecs/world';
 
 /** `Position[2] += 50.0f` (GMSwampOfQuiet.cpp:164). */

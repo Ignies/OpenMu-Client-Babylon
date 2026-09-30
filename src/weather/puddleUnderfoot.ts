@@ -1,10 +1,10 @@
 import type { WeatherLayer } from './layer';
-import { isTileOpen } from '../libs/mu/terrainMask';
+import { isTileOpen } from '../controllers/terrain/terrainMask';
 import {
   PUDDLES,
   WET_GROUND,
   overlayAmountAt,
-} from '../libs/mu/terrainOverlay';
+} from '../controllers/terrain/terrainOverlay';
 import type { World } from '../ecs/world';
 
 /**

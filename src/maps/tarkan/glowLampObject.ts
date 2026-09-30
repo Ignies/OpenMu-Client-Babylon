@@ -1,10 +1,10 @@
-import { MapTileObject } from '../../common/mapTileObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import {
   lightMapObjectWith,
   tarkanGlowLamp,
 } from '../../lighting/mapObjectLights';
 import type { LightSource } from '../../lighting/lightSource';
-import type { AbstractMesh } from '../../libs/babylon/exports';
+import type { AbstractMesh } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 
 /**

@@ -12,7 +12,7 @@
  *
  * Driven by: `effects.spawn('column', …)`. Read by: nobody.
  */
-import { Vector3, type Scene } from '../libs/babylon/exports';
+import { Vector3, type Scene } from '../controllers/render/babylon/exports';
 import { Emitter, LiveList, pointSource, type ParticleRecipe, type PointSource, type RGB } from './core';
 import { RGBS, TEX } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';

@@ -18,7 +18,7 @@ import {
   Vector3,
   type AbstractMesh,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { linearBufferActive } from '../common/lightModel';
 import { effectTexture, fxNow, lightCardGain, type RGB } from './core';
 

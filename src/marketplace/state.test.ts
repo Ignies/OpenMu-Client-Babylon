@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ApiListing, Payout } from './api';
 import { MarketError } from './api';
 import { displayName } from './categories';
-import type { EscrowResult, EscrowStatusName } from '../common/escrowWire';
+import type { EscrowResult, EscrowStatusName } from '../controllers/net/protocols/escrowWire';
 import { t } from '../i18n';
 import { MarketplaceStore, escrowStatusText, formatZen, type MarketApi } from './state';
 

@@ -1,5 +1,5 @@
-import type { Scene } from '../libs/babylon/exports';
-import type { ENUM_WORLD } from '../common/types';
+import type { Scene } from '../controllers/render/babylon/exports';
+import type { ENUM_WORLD } from '../core/types';
 import type { Entity } from '../ecs/world';
 import { skillDefinition } from '../common/skillsDatabase';
 import { MODEL } from '../effects/recipes';

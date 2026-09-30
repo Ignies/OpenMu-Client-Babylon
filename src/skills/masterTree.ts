@@ -29,16 +29,16 @@
 import { onLanguageChanged, t, textTable } from '../i18n';
 import type { TextKey } from '../i18n/recipes';
 import { observable, runInAction } from 'mobx';
-import { CharacterClassNumber, type ENUM_WORLD } from '../common/types';
-import { EventBus } from '../libs/eventBus';
+import { CharacterClassNumber, type ENUM_WORLD } from '../core/types';
+import { EventBus } from '../core/eventBus';
 import {
   MasterSkillLevelUpdatePacket,
   MasterSkillListPacket,
-} from '../common/packets/ServerToClientPackets';
-import { AddMasterSkillPointPacket } from '../common/packets/ClientToServerPackets';
-import { downloadDataFile } from '../libs/mu/dataFolder';
-import { decodeLocalText, downloadLocalDataFile } from '../libs/mu/localData';
-import { convertBux } from '../common/terrain/mapFileEncryption';
+} from '../../versions/shared/packets/ServerToClientPackets';
+import { AddMasterSkillPointPacket } from '../../versions/shared/packets/ClientToServerPackets';
+import { downloadDataFile } from '../controllers/assets/mu/dataFolder';
+import { decodeLocalText, downloadLocalDataFile } from '../controllers/assets/mu/localData';
+import { convertBux } from '../controllers/terrain/mapFileEncryption';
 import { skillDefinition } from '../common/skillsDatabase';
 import { Store } from '../store';
 import type { SkillLayer } from './layer';

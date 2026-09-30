@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import { GameOptions } from '../common/gameOptions';
 import { SoundsManager } from '../libs/soundsManager';
 import { busGain, type SoundBus } from './buses';
@@ -18,7 +18,7 @@ import {
   KALIMA_WORLDS,
   DEVIL_SQUARE_WORLDS,
   onWorlds,
-} from '../common/worldAssets';
+} from '../controllers/assets/worldAssets';
 
 /**
  * `PlayWorldAmbientSounds` / `StopInactiveAmbientSounds`

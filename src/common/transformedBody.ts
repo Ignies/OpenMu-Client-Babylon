@@ -1,5 +1,5 @@
 import { PlayerObject } from './playerObject';
-import type { ModelObject } from './modelObject';
+import type { ModelObject } from '../controllers/render/modelObject';
 import type { ItemVisualTier } from './itemVisualTier';
 import { skeletonShatter } from './deathVisuals';
 import { isKnownObjectType, resolveModelFactory } from './modelFactoryPerId';

@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { LocalStorage } from '../libs/localStorage';
+import { LocalStorage } from '../core/localStorage';
 import { CS_HOST, CS_PORT, WS_HOST, WS_PORT } from '../consts';
 import { versionByTag } from '../version';
 

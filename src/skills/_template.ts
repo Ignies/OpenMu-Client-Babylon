@@ -14,7 +14,7 @@
  * Whatever draws the entry (a hotbar overlay, a tooltip, a window) lives in
  * `ui/…` and imports the readers from here or from the `skills` facade.
  */
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import type { SkillLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

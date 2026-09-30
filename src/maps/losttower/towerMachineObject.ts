@@ -2,7 +2,7 @@ import {
   createMovableFlare,
   type MovableFlare,
 } from '../../common/effectLights';
-import { MapTileObject } from '../../common/mapTileObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { Store } from '../../store';
 import type { BonedEmission } from '../../common/effectParticles';
 import type { Entity, World } from '../../ecs/world';

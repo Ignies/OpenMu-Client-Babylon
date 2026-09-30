@@ -1,10 +1,10 @@
-import { Vector3 } from '../libs/babylon/exports';
-import { ENUM_WORLD } from './types';
-import { loadGLTF } from './modelLoader';
-import { ModelObject } from './modelObject';
+import { Vector3 } from '../controllers/render/babylon/exports';
+import { ENUM_WORLD } from '../core/types';
+import { loadGLTF } from '../controllers/assets/modelLoader';
+import { ModelObject } from '../controllers/render/modelObject';
 import { createMovableFlare, type MovableFlare } from './effectLights';
 import { boneLocalPos } from '../effects/core';
-import { TILE_CM } from './terrain/consts';
+import { TILE_CM } from '../controllers/terrain/consts';
 import { Store } from '../store';
 import type { Sounds } from '../libs/soundsManager';
 import type { Entity, World } from '../ecs/world';

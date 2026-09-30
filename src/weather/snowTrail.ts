@@ -1,5 +1,5 @@
 import type { WeatherLayer } from './layer';
-import { RawTexture, Texture, type Scene } from '../libs/babylon/exports';
+import { RawTexture, Texture, type Scene } from '../controllers/render/babylon/exports';
 import type { ThinEngine } from '@babylonjs/core/Engines/thinEngine';
 
 /**

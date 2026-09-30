@@ -1,5 +1,5 @@
 import { makeAutoObservable, observable } from 'mobx';
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 import { Store } from '../store';
 import { clampAmount, nextStep } from './statAmounts';
 import type { StatType } from './characterStats';

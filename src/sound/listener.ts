@@ -1,4 +1,4 @@
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import type { World } from '../ecs/world';
 import { SoundsManager } from '../libs/soundsManager';
 import { busGain, type SoundBus } from './buses';

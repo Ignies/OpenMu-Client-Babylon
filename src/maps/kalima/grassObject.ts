@@ -1,7 +1,7 @@
-import { devQuery } from '../../common/devSeams';
-import { MapTileObject } from '../../common/mapTileObject';
+import { devQuery } from '../../core/devSeams';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { PlayerAction } from '../../common/objects/enum';
-import { waterSurfaceHeight } from '../../libs/mu/terrainWater';
+import { waterSurfaceHeight } from '../../controllers/terrain/terrainWater';
 import { Store } from '../../store';
 import type { Entity, World } from '../../ecs/world';
 

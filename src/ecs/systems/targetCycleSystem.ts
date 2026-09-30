@@ -1,4 +1,4 @@
-import { EventBus } from '../../libs/eventBus';
+import { EventBus } from '../../core/eventBus';
 import { isKey } from '../../common/keyBindings';
 import { isAttackableEntity } from './attackSystem';
 import type { Entity, ISystemFactory } from '../world';

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PingSub, decodeRelayFrame, encodePoint, stampSender } from '../../../src/common/pingProtocol';
+import { PingSub, decodeRelayFrame, encodePoint, stampSender } from '../../../src/controllers/net/protocols/pingProtocol';
 import { PingRelayPacket } from './pingRelay';
 
 describe('PingRelayPacket', () => {

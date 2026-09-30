@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../../common/types';
+import { ENUM_WORLD } from '../../core/types';
 import { playSfx } from '../../libs/sfx';
 import type { Sounds } from '../../sound/recipes';
 import type { Entity, ISystemFactory } from '../world';

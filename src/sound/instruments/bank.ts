@@ -1,5 +1,5 @@
 import type { InstrumentId } from '../../common/instruments';
-import { resolveUrlToDataFolder } from '../../common/resolveUrlToDataFolder';
+import { resolveUrlToDataFolder } from '../../controllers/assets/resolveUrlToDataFolder';
 
 /**
  * An instrument's notes, as `tools/instrumentSamples.ts` wrote them: one

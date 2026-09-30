@@ -4,14 +4,14 @@ import {
   CAMERA_FOV_MAX_DEG,
   CAMERA_FOV_MIN_DEG,
 } from '../camera/recipes';
-import { RENDER_DISTANCE_MAX } from './renderDistance';
+import { RENDER_DISTANCE_MAX } from '../controllers/render/renderDistance';
 import {
   LOW_VITAL_DEFAULT_PERCENT,
   LOW_VITAL_MAX_PERCENT,
   LOW_VITAL_MIN_PERCENT,
 } from './lowVitals';
-import { LocalStorage } from '../libs/localStorage';
-import { RENDER_SCALE_STEP_MAX } from '../libs/renderScale';
+import { LocalStorage } from '../core/localStorage';
+import { RENDER_SCALE_STEP_MAX } from '../controllers/render/renderScale';
 
 const OPTIONS_KEY = 'mu_options';
 

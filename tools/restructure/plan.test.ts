@@ -30,6 +30,15 @@ describe('expandMoves', () => {
     expect(() => expandMoves(['src/a.ts', 'src/b.ts'], [{ from: 'src/a.ts', to: 'src/b.ts' }])).toThrow();
   });
 
+  it('lets a file move override its folder move', () => {
+    const m = expandMoves(['src/p/index.ts', 'src/p/gen.ts'], [
+      { from: 'src/p', to: 'versions/shared/p' },
+      { from: 'src/p/index.ts', to: 'src/net/p.ts' },
+    ]);
+    expect(m.get('src/p/index.ts')).toBe('src/net/p.ts');
+    expect(m.get('src/p/gen.ts')).toBe('versions/shared/p/gen.ts');
+  });
+
   it('does not treat a name prefix as a folder', () => {
     expect([...expandMoves(['src/ab.ts', 'src/a.ts'], [{ from: 'src/a.ts', to: 'src/q.ts' }]).keys()]).toEqual(['src/a.ts']);
   });

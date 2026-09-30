@@ -18,10 +18,10 @@
  *
  * Driven by: `ecs/systems/monsterVisualSystem.ts`. Read by: nobody.
  */
-import { Vector3, type Scene } from '../libs/babylon/exports';
-import { ENUM_WORLD } from '../common/types';
+import { Vector3, type Scene } from '../controllers/render/babylon/exports';
+import { ENUM_WORLD } from '../core/types';
 import { MonsterActionType as A } from '../common/objects/enum';
-import { TILE_CM } from '../common/terrain/consts';
+import { TILE_CM } from '../controllers/terrain/consts';
 import type { Entity } from '../ecs/world';
 import {
   LiveList,

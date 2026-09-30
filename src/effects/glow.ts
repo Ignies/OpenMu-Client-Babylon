@@ -5,9 +5,9 @@ import {
   type Observer,
   type RenderTargetTexture,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { GameOptions, onGameOptionsChanged } from '../common/gameOptions';
-import { devQuery, devQueryNumber } from '../common/devSeams';
+import { devQuery, devQueryNumber } from '../core/devSeams';
 import { driveRenderList } from '../scenes/renderList';
 
 /**

@@ -3,10 +3,10 @@ import { describe, expect, it, vi } from 'vitest';
 const seam = vi.hoisted(() => ({ burnThrottle: null as string | null }));
 
 // Only the scar is under test: the texture, the embers and the options are stubbed.
-vi.mock('../common/devSeams', () => ({
+vi.mock('../core/devSeams', () => ({
   devQuery: (key: string) => (key === 'burnThrottle' ? seam.burnThrottle : null),
 }));
-vi.mock('../libs/babylon/exports', () => ({
+vi.mock('../controllers/render/babylon/exports', () => ({
   Constants: {},
   RawTexture: {},
   Texture: {},

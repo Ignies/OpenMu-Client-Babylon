@@ -5,7 +5,7 @@ import {
   MONSTER_HIDDEN_MESH,
   MONSTER_MODEL_TABLE,
 } from './monsters/monsterModelTable';
-import { ModelObject } from './modelObject';
+import { ModelObject } from '../controllers/render/modelObject';
 import { Balgass } from './monsters/balgass';
 import { BudgeDragon } from './monsters/budgeDragon';
 import { DeathGorgon } from './monsters/deathGorgon';

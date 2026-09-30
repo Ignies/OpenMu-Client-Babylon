@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../../common/types';
+import { ENUM_WORLD } from '../../core/types';
 import type { MapLayer } from '../layer';
 import { FULL_TILES } from '../recipes';
 import { LOGIN_SCENE_EFFECT_ONLY_TYPES, LOGIN_SCENE_EMISSIONS } from './spec';

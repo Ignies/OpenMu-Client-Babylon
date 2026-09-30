@@ -7,10 +7,10 @@ import {
   type Effect,
   type Material,
   type Scene,
-} from '../libs/babylon/exports';
-import type { BodyShine } from './modelObject';
-import { pbrMapsFor, pbrPlaceholders } from './pbrMaps';
-import { pbrDetailStrength, specularLightScale } from './materialQuality';
+} from '../controllers/render/babylon/exports';
+import type { BodyShine } from '../controllers/render/modelObject';
+import { pbrMapsFor, pbrPlaceholders } from '../controllers/render/pbrMaps';
+import { pbrDetailStrength, specularLightScale } from '../controllers/render/materialQuality';
 import { UNIFIED_LIGHT_MODEL, linearLightActive } from './lightModel';
 import { lightingTier, type LightingTier } from './lightingQuality';
 import {
@@ -29,7 +29,7 @@ import {
   toonTextureGlsl,
   toonToneActive,
   toonUltraActive,
-} from './renderingStyle';
+} from '../controllers/render/renderingStyle';
 import { pointLightPoolSize } from './pointLightPool';
 import {
   itemEmissiveAt,
@@ -43,7 +43,7 @@ import {
 } from './itemEffectMode';
 
 const glowScratch = { r: 0, g: 0, b: 0, a: 1 };
-import { loadMuSprite } from '../libs/mu/sprites';
+import { loadMuSprite } from '../controllers/assets/mu/sprites';
 import { skyLightOf, sunLightOf } from '../lighting/keyRig';
 import {
   bindCloudTexture,
@@ -60,8 +60,8 @@ import {
   lightTintGlsl,
   lightTintStrength,
 } from '../lighting/lightTint';
-import { devQuery, devQueryNumbers } from './devSeams';
-import { frameSnapshot } from './frameSnapshot';
+import { devQuery, devQueryNumbers } from '../core/devSeams';
+import { frameSnapshot } from '../controllers/render/frameSnapshot';
 import {
   SNOW_CAP_COLOUR,
   SNOW_CAP_KNEE_FULL,

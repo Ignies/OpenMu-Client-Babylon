@@ -1,7 +1,7 @@
-import { ENUM_WORLD } from '../../../../common/types';
+import { ENUM_WORLD } from '../../../../core/types';
 import { registerDebugModule } from '../../../../common/debugMenu';
 import { maps } from '../../../../maps';
-import { EventBus } from '../../../../libs/eventBus';
+import { EventBus } from '../../../../core/eventBus';
 import { Store } from '../../../../store';
 
 /**

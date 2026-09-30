@@ -3,24 +3,24 @@ import type { EmojiBubbleId } from '../common/emojiBubbles';
 import type { ChatEmojiBubble } from '../common/chatEmojis';
 import type { InstrumentId } from '../common/instruments';
 import type { BandHit } from '../common/band/performing';
-import type { GuildMemberRoleEnum } from '../common/packets/ServerToClientPackets';
+import type { GuildMemberRoleEnum } from '../../versions/shared/packets/ServerToClientPackets';
 import { type Bucket, type With, World as ECSWorld } from 'miniplex';
-import type { IVector2Like, IVector3Like, Mesh } from '../libs/babylon/exports';
-import type { ModelObject } from '../common/modelObject';
+import type { IVector2Like, IVector3Like, Mesh } from '../controllers/render/babylon/exports';
+import type { ModelObject } from '../controllers/render/modelObject';
 import type { MonsterActionType, PlayerAction } from '../common/objects/enum';
 import type { PetFollow, PetSpec } from '../common/pets';
-import type { MUAttributeSystem } from '../libs/attributeSystem';
-import type { TerrainPicker } from '../libs/mu/terrainPick';
-import { TransformNode } from '../libs/babylon/exports';
-import { createPathfinding } from '../libs/pathfinding';
+import type { MUAttributeSystem } from '../core/attributeSystem';
+import type { TerrainPicker } from '../controllers/terrain/terrainPick';
+import { TransformNode } from '../controllers/render/babylon/exports';
+import { createPathfinding } from '../core/pathfinding';
 import { CharacterClassNumber, ENUM_WORLD } from '../common';
-import { TILE_CM } from '../common/terrain/consts';
+import { TILE_CM } from '../controllers/terrain/consts';
 import {
   Color3,
   Vector3,
   Viewport,
-} from '../libs/babylon/exports';
-import type { HighlightLayer } from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
+import type { HighlightLayer } from '../controllers/render/babylon/exports';
 import type { TestScene } from '../scenes/testScene';
 import type { CursorHover } from '../ui/components/gameCursor/cursors';
 

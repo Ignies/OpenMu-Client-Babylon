@@ -5,8 +5,8 @@ import {
   type GlowLayer,
   type Mesh,
   type Scene,
-} from '../libs/babylon/exports';
-import type { ModelObject } from './modelObject';
+} from '../controllers/render/babylon/exports';
+import type { ModelObject } from '../controllers/render/modelObject';
 import { tierIndex } from './lightingQuality';
 import { requestGlowProbe } from '../scenes/sceneLook';
 

@@ -1,6 +1,6 @@
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { WeatherLayer } from './layer';
-import { serverNow } from '../common/serverTime';
+import { serverNow } from '../controllers/net/serverTime';
 import { ambientStrengthAt } from './ambientSchedule';
 import { DEVIAS_SNOW, SNOWFALL_MAPS } from './ambientWeather';
 import { maps } from '../maps';

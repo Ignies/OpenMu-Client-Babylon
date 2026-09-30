@@ -1,5 +1,5 @@
-import { getMaterial } from '../../common/modelLoader';
-import { ModelObject } from '../../common/modelObject';
+import { getMaterial } from '../../controllers/assets/modelLoader';
+import { ModelObject } from '../../controllers/render/modelObject';
 import { BlendState } from '../../common/objects/enum';
 import type { World } from '../../ecs/world';
 

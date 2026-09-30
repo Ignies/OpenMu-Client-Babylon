@@ -7,7 +7,7 @@
  * This module may import app code - it is only ever loaded from inside the
  * running app (`loadVersionUi`), never from the boot path.
  */
-import { ENUM_WORLD } from '../../../src/common/types';
+import { ENUM_WORLD } from '../../../src/core/types';
 import { LoginPage } from '../../../src/ui/pages/loginPage';
 import { CharactersPage } from '../../../src/ui/pages/charactersPage';
 import type { PregameUi } from '../../../src/version/uiContract';

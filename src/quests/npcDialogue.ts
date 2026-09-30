@@ -24,11 +24,11 @@ import {
   GensRewardRequestPacket,
   GensTypeEnum,
   NpcBuffRequestPacket,
-} from '../common/packets/ClientToServerPackets';
-import { AvailableQuestsPacket, QuestStepInfoPacket } from '../common/packets/ServerToClientPackets';
-import type { ENUM_WORLD } from '../common/types';
+} from '../../versions/shared/packets/ClientToServerPackets';
+import { AvailableQuestsPacket, QuestStepInfoPacket } from '../../versions/shared/packets/ServerToClientPackets';
+import type { ENUM_WORLD } from '../core/types';
 import { monsterDisplayName } from '../common/monstersDatabase';
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 import { playUiSound } from '../libs/sfx';
 import { Store } from '../store';
 import type { QuestLayer } from './layer';

@@ -15,7 +15,7 @@
  * If it falls from the sky, add an `AmbientRecipe` in `ambientWeather.ts`.
  * If it makes a sound, add a bed row in `../sound/ambientBeds.ts`.
  */
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { WeatherLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

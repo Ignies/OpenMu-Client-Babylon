@@ -1,5 +1,5 @@
 import { createEffectLight, type EffectLight } from '../../common/effectLights';
-import { MapTileObject } from '../../common/mapTileObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { lightMapObject } from '../../lighting/mapObjectLights';
 import type { LightSource } from '../../lighting/lightSource';
 import { Store } from '../../store';

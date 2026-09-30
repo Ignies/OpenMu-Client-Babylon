@@ -1,7 +1,7 @@
 import { GameOptions } from '../../common/gameOptions';
 import type { InstrumentId } from '../../common/instruments';
-import type { ENUM_WORLD } from '../../common/types';
-import { Engine, Vector3 } from '../../libs/babylon/exports';
+import type { ENUM_WORLD } from '../../core/types';
+import { Engine, Vector3 } from '../../controllers/render/babylon/exports';
 import { SoundsManager } from '../../libs/soundsManager';
 import { busGain, masterGain } from '../buses';
 import type { SoundLayer } from '../layer';

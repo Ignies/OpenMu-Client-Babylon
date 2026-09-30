@@ -1,6 +1,6 @@
-import { DynamicTexture, Texture } from '../libs/babylon/exports';
-import type { Scene } from '../libs/babylon/exports';
-import { downloadDataFile } from '../libs/mu/dataFolder';
+import { DynamicTexture, Texture } from '../controllers/render/babylon/exports';
+import type { Scene } from '../controllers/render/babylon/exports';
+import { downloadDataFile } from '../controllers/assets/mu/dataFolder';
 import { onLanguageChanged } from '../i18n';
 
 /**

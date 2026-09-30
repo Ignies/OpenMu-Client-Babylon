@@ -1,17 +1,17 @@
-import { ArcRotateCamera, HighlightLayer } from '../libs/babylon/exports';
+import { ArcRotateCamera, HighlightLayer } from '../controllers/render/babylon/exports';
 import {
   Color3,
   Color4,
   Engine,
   Scene,
   Vector3,
-} from '../libs/babylon/exports';
-import { addInspectorForScene } from '../libs/babylon/utils';
+} from '../controllers/render/babylon/exports';
+import { addInspectorForScene } from '../controllers/render/babylon/utils';
 import { applySceneLook, type SceneLook } from './sceneLook';
 import { initPointLightPool } from '../common/pointLightPool';
 import { createKeyRig } from '../lighting/keyRig';
 import { createLookDirector, type LookDirector } from '../lighting/director';
-import { devQuery } from '../common/devSeams';
+import { devQuery } from '../core/devSeams';
 import { cullHighlightMask } from './highlightMask';
 
 /** `?autoPick=1`: Babylon's own scene pick on every pointer down and up. */

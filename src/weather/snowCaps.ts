@@ -1,6 +1,6 @@
 import type { WeatherLayer } from './layer';
 import { GameOptions } from '../common/gameOptions';
-import { isTileOpen } from '../libs/mu/terrainMask';
+import { isTileOpen } from '../controllers/terrain/terrainMask';
 import { snowCover } from './snowCover';
 
 /**

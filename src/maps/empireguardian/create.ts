@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../../common/types';
+import { ENUM_WORLD } from '../../core/types';
 import type { World } from '../../ecs/world';
 import { PlaySpeedObject } from '../shared/objectVariants';
 

@@ -21,7 +21,7 @@ import {
   LetterReadRequestPacket,
   LetterSendRequestPacket,
   SetFriendOnlineStatePacket,
-} from './common/packets/ClientToServerPackets';
+} from '../versions/shared/packets/ClientToServerPackets';
 import { playUiSound } from './libs/sfx';
 
 export type MessengerTab = 'friends' | 'letters' | 'rooms';

@@ -1,6 +1,6 @@
-import { MapTileObject } from '../../common/mapTileObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { spawnParticle } from '../../common/effectParticles';
-import type { Scene } from '../../libs/babylon/exports';
+import type { Scene } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 
 /** `for (int i = 0; i < 20; ++i) CreateParticleFpsChecked(...)` (ZzzObject.cpp:2962). */

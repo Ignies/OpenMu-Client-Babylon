@@ -3,7 +3,7 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../../../store';
 import { GameOptions, uiScaleFactor } from '../../../../../common/gameOptions';
-import type { MinimapMarker } from '../../../../../common/minimapData';
+import type { MinimapMarker } from '../../../../../controllers/terrain/minimapData';
 import { MuTipText } from '../../../../components/muText';
 import {
   CenterButton,

@@ -1,3 +1,3 @@
-export * from './types';
-export * from './packets';
-export * from './encryption';
+export * from '../core/types';
+export * from '../controllers/net/packets.ts';
+export * from '../controllers/net/encryption';

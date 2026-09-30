@@ -1,5 +1,5 @@
-import { CharacterClassNumber } from './types';
-import { GetByteValue } from './utils';
+import { CharacterClassNumber } from '../core/types';
+import { GetByteValue } from '../controllers/assets/download';
 import {
   DEMON,
   PET_PANDA,

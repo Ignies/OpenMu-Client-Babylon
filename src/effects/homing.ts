@@ -24,7 +24,7 @@ import {
   VertexData,
   type Scene,
   type Texture,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import type { TestScene } from '../scenes/testScene';
 import { clampAlpha } from './clampAlpha';
 import {

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Social } from '../../../../../social';
 import { Messenger } from '../../../../../messenger';
-import { GuildRelationshipTypeEnum } from '../../../../../common/packets/ClientToServerPackets';
+import { GuildRelationshipTypeEnum } from '../../../../../../versions/shared/packets/ClientToServerPackets';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { TEXT_COLOR } from '../../../../pages/serversPage/layout';

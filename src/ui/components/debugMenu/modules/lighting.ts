@@ -9,7 +9,7 @@ import {
   TONE_MAPPER_MAX,
   setGameOption,
 } from '../../../../common/gameOptions';
-import { ENUM_WORLD } from '../../../../common/types';
+import { ENUM_WORLD } from '../../../../core/types';
 import { lookDirector, type LookState } from '../../../../lighting/director';
 
 /**

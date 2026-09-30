@@ -5,8 +5,8 @@
  * `L = (rand()%4 + 4) * 0.05`. The timing and the sparkles stay in
  * `maps/icarus/sky.ts`, which calls `strikeThunder` when a strike is due.
  */
-import type { Scene } from '../libs/babylon/exports';
-import { ENUM_WORLD } from '../common/types';
+import type { Scene } from '../controllers/render/babylon/exports';
+import { ENUM_WORLD } from '../core/types';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 

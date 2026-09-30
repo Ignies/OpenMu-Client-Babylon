@@ -1,7 +1,7 @@
-import { TILE_CM } from './terrain/consts';
-import { Matrix, Vector3 } from '../libs/babylon/exports';
+import { TILE_CM } from '../controllers/terrain/consts';
+import { Matrix, Vector3 } from '../controllers/render/babylon/exports';
 import type { World } from '../ecs/world';
-import type { ModelObject } from './modelObject';
+import type { ModelObject } from '../controllers/render/modelObject';
 import { createEffectLight, type EffectLight } from './effectLights';
 import {
   lightEmittersFor,

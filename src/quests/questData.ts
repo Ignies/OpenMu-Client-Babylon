@@ -9,9 +9,9 @@
  * this entry only owns the loaded tables and the lookups over them.
  */
 import { observable, runInAction } from 'mobx';
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import { i18n, onLanguageChanged } from '../i18n';
-import { loadNpcNames } from '../libs/mu/npcNameFile';
+import { loadNpcNames } from '../controllers/assets/mu/npcNameFile';
 import {
   loadQuestTables,
   type DialogScript,
@@ -19,7 +19,7 @@ import {
   type QuestDefinition,
   type QuestProgressEntry,
   type QuestTables,
-} from '../libs/mu/questFiles';
+} from '../controllers/assets/mu/questFiles';
 import type { QuestLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

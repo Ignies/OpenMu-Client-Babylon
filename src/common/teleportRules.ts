@@ -1,4 +1,4 @@
-import { TW_ACTION, TW_HEIGHT, TW_SAFEZONE } from './terrain/consts';
+import { TW_ACTION, TW_HEIGHT, TW_SAFEZONE } from '../controllers/terrain/consts';
 
 /**
  * Teleport (6) and Teleport Ally (15): the rules the client checks before it

@@ -5,7 +5,7 @@
  * to bright. Clamped, a gain above 1 saturates the sheet to black instead,
  * which is what the dark cards and ribbons use it for.
  */
-import { MaterialPluginBase, type Material } from '../libs/babylon/exports';
+import { MaterialPluginBase, type Material } from '../controllers/render/babylon/exports';
 
 class ClampAlphaPlugin extends MaterialPluginBase {
   constructor(material: Material) {

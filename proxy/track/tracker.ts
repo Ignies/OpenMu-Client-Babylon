@@ -1,4 +1,4 @@
-import type { TrackEvent, TrackedPlayer } from '../../src/common/adminProtocol';
+import type { TrackEvent, TrackedPlayer } from '../../src/controllers/net/protocols/adminProtocol';
 import { TrackedSession, type SessionOptions } from './session';
 
 /**

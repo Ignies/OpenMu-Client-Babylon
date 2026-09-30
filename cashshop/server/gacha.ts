@@ -1,5 +1,5 @@
 import items from '../../src/common/items.json';
-import { hasItemIconFile } from '../../src/common/itemIconPack';
+import { hasItemIconFile } from '../../src/controllers/assets/itemIconPack';
 
 /**
  * The gacha roll: a random armour piece, +0 to +12, usually plain and now and

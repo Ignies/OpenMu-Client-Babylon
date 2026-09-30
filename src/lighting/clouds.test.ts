@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Effect } from '../libs/babylon/exports';
+import type { Effect } from '../controllers/render/babylon/exports';
 import {
   CLOUD_ALT,
   CLOUD_THICK,

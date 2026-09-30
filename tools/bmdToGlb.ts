@@ -1,5 +1,5 @@
 import { Document, Node, NodeIO, type Skin } from '@gltf-transform/core';
-import { BMD, BMDReader, BMDTextureBone } from '../src/common/BMD';
+import { BMD, BMDReader, BMDTextureBone } from '../src/controllers/assets/bmd';
 import { Glob } from 'bun';
 import { readdirSync } from 'fs';
 import {

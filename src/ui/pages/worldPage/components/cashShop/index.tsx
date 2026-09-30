@@ -39,7 +39,7 @@ import {
   WIN_WIDTH,
 } from '../../../../components/msgWindow/layout';
 import { JEWEL_OF_CHAOS } from '../../../../../common/jewelUpgrade';
-import { prefetchItemIcons } from '../../../../../common/itemIconPack';
+import { prefetchItemIcons } from '../../../../../controllers/assets/itemIconPack';
 import { t, type TextKey } from '../../../../../i18n';
 import {
   CashShopState,

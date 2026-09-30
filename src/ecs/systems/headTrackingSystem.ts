@@ -4,13 +4,13 @@ import {
   Vector3,
   type Observer,
   type Scene,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import { PlayerAction, ServerPlayerActionType } from '../../common/objects/enum';
 import {
   approachAngle,
   rotationByteOf,
   signedAngleDelta,
-} from '../../common/turnAngle';
+} from '../../core/turnAngle';
 import { Store } from '../../store';
 import type { Entity, ISystemFactory } from '../world';
 

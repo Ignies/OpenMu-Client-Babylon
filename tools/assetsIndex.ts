@@ -16,7 +16,7 @@
 
 import { existsSync, readdirSync, statSync, writeFileSync } from 'fs';
 import { join, relative, resolve, sep } from 'path';
-import { COMPRESSED_EXTENSIONS, COMPRESSED_SUFFIX } from '../src/common/compressedAssets';
+import { COMPRESSED_EXTENSIONS, COMPRESSED_SUFFIX } from '../src/controllers/assets/compressedAssets';
 import { MAP_LAYERS } from '../src/maps/layers';
 
 function arg(name: string, fallback: string): string {

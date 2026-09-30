@@ -1,7 +1,7 @@
-import { MapTileObject } from '../../common/mapTileObject';
-import { HIDDEN_MESH_ALL } from '../../common/modelObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
+import { HIDDEN_MESH_ALL } from '../../controllers/render/modelObject';
 import { createMovableFlare, type MovableFlare } from '../../common/effectLights';
-import type { TransformNode } from '../../libs/babylon/exports';
+import type { TransformNode } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 
 /**

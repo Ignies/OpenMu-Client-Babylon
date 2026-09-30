@@ -15,8 +15,8 @@ import { observable, runInAction } from 'mobx';
 import {
   LegacyQuestMonsterKillInfoPacket,
   ObjectGotKilledPacket,
-} from '../common/packets/ServerToClientPackets';
-import { EventBus } from '../libs/eventBus';
+} from '../../versions/shared/packets/ServerToClientPackets';
+import { EventBus } from '../core/eventBus';
 import { Store } from '../store';
 import type { QuestLayer } from './layer';
 

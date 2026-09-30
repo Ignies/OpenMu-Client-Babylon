@@ -1,4 +1,4 @@
-import { Matrix, Vector2, Vector3 } from '../../libs/babylon/exports';
+import { Matrix, Vector2, Vector3 } from '../../controllers/render/babylon/exports';
 import {
   clearScreenPositionListeners,
   emitScreenPosition,

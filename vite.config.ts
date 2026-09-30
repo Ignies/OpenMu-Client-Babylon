@@ -53,7 +53,7 @@ export default defineConfig({
           // and common/types, both engine-free, so they split cleanly; while
           // they still imported common/utils this dragged 2.4 MB of Babylon
           // into the chunk with them.
-          if (/\/src\/common\/packets\/(ServerToClient|ClientToServer|ConnectServer)Packets\.ts$/.test(id)) {
+          if (/\/versions\/shared\/packets\/(ServerToClient|ClientToServer|ConnectServer)Packets\.ts$/.test(id)) {
             return 'packets';
           }
           if (/@babylonjs\/(core|loaders|materials)\//.test(id)) return 'bjs';

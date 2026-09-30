@@ -11,7 +11,7 @@
  * skill's clip exactly as `g_SkillPairs` maps them back.
  */
 import { PlayerAction } from '../common/objects/enum';
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 
 // ---- skill numbers the entries key on --------------------------------------
 

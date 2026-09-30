@@ -1,4 +1,4 @@
-import { EventBus } from '../../libs/eventBus';
+import { EventBus } from '../../core/eventBus';
 import { Store } from '../../store';
 import {
   isCapturingKey,

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { GameOptions, setGameOption } from '../../../../../common/gameOptions';
 import { formatRoundTrip } from '../../../../../common/hudFormat';
 import { isKey } from '../../../../../common/keyBindings';
-import { NetStats } from '../../../../../common/netStats';
+import { NetStats } from '../../../../../controllers/net/roundTrip';
 import { Store } from '../../../../../store';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import { MuText } from '../../../../components/muText';

@@ -1,4 +1,4 @@
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 
 /**
  * The contract every sound entry implements: one file per entry, one

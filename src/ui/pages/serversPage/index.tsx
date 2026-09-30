@@ -3,7 +3,7 @@ import './style.less';
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Store } from '../../../store';
-import { ConnectionInfoRequestPacket } from '../../../common/packets/ConnectServerPackets';
+import { ConnectionInfoRequestPacket } from '../../../../versions/shared/packets/ConnectServerPackets';
 import {
   ServerConfig,
   type PublishedGameServer,

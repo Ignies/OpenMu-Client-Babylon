@@ -1,4 +1,4 @@
-import { ModelObject } from '../../common/modelObject';
+import { ModelObject } from '../../controllers/render/modelObject';
 import { MODEL_MU_WALL01 } from '../../common/objects/enum';
 
 export class MuWallObject extends ModelObject {

@@ -1,8 +1,8 @@
-import type { ENUM_WORLD } from '../common/types';
-import type { Scene } from '../libs/babylon/exports';
+import type { ENUM_WORLD } from '../core/types';
+import type { Scene } from '../controllers/render/babylon/exports';
 import type { World } from '../ecs/world';
 import { SoundsManager } from '../libs/soundsManager';
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 import { GameOptions, onGameOptionsChanged } from '../common/gameOptions';
 import { busGain, trackGains, type SoundBus } from './buses';
 import type { SoundLayer } from './layer';

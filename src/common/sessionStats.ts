@@ -1,5 +1,5 @@
 import { makeAutoObservable, reaction, runInAction } from 'mobx';
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 import { Store } from '../store';
 
 /**

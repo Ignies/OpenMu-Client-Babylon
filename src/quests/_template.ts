@@ -18,7 +18,7 @@
  * If it reacts to a packet, the handler is here - never in `logic.ts`.
  */
 import { observable, runInAction } from 'mobx';
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { QuestLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type RefObject } from 'react';
 import { makeAutoObservable } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { t } from '../../../../../i18n';
-import { LocalStorage } from '../../../../../libs/localStorage';
+import { LocalStorage } from '../../../../../core/localStorage';
 import {
   emojiPackLabel,
   pushRecentEmoji,

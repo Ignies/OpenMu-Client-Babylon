@@ -1,7 +1,7 @@
 import {
   PointerEventTypes,
   type ArcRotateCamera,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import type { ISystemFactory, World } from '../world';
 import { Store, UIState } from '../../store';
 import { isMobileDevice } from '../../common/mobile';
@@ -12,7 +12,7 @@ import { aimX, aimY } from '../../camera';
 import { Commands } from '../../commands';
 import { teleportGate } from '../../common/teleportRules';
 import { teleportBusy } from './teleportSystem';
-import { pickGround } from '../../libs/mu/terrainPick';
+import { pickGround } from '../../controllers/terrain/terrainPick';
 
 const MOVE_DELAY = 0.25;
 

@@ -1,7 +1,7 @@
 import { observable, runInAction } from 'mobx';
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import { cleanName } from '../common/chat';
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 import { playUiSound } from '../libs/sfx';
 import { Store } from '../store';
 import { t } from '../i18n';
@@ -9,7 +9,7 @@ import {
   DuelChannelJoinRequestPacket,
   DuelChannelQuitRequestPacket,
   DuelStartResponsePacket,
-} from '../common/packets/ClientToServerPackets';
+} from '../../versions/shared/packets/ClientToServerPackets';
 import {
   DuelFinishedPacket,
   DuelHealthUpdatePacket,
@@ -21,7 +21,7 @@ import {
   DuelStartRequestPacket as DuelStartRequestS2CPacket,
   DuelStartResultPacket,
   DuelStatusPacket,
-} from '../common/packets/ServerToClientPackets';
+} from '../../versions/shared/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
 import {
   duelStartFailureKey,

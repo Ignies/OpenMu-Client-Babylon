@@ -7,7 +7,7 @@ import {
   type GreasedLineSimpleMaterial,
   type Scene,
   Vector3,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import type { ItemVisualTier } from '../common/itemVisualTier';
 import type { TestScene } from '../scenes/testScene';
 import { fxNow } from './core';

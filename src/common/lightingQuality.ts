@@ -1,6 +1,6 @@
-import type { Camera, PostProcess, Scene } from '../libs/babylon/exports';
+import type { Camera, PostProcess, Scene } from '../controllers/render/babylon/exports';
 import { GameOptions } from './gameOptions';
-import { devQuery } from './devSeams';
+import { devQuery } from '../core/devSeams';
 import type { TextKey } from '../i18n';
 
 /**

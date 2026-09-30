@@ -4,7 +4,7 @@ import { MarketError, type HistoryEntry } from './api';
 import { CATEGORIES, categoryOf, displayName, type CategoryId } from './categories';
 import { isOnSale, mergeCatalogue } from './catalogue';
 import { buildMockListings, type Listing } from './mockListings';
-import type { EscrowResult, EscrowStatusName } from '../common/escrowWire';
+import type { EscrowResult, EscrowStatusName } from '../controllers/net/protocols/escrowWire';
 import type { Item } from '../ecs/world';
 import { i18n, t, type TextKey } from '../i18n';
 

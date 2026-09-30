@@ -5,10 +5,10 @@ import {
   Texture,
   Vector3,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import type { ThinEngine } from '@babylonjs/core/Engines/thinEngine';
 import { GameOptions } from '../common/gameOptions';
-import { devQuery } from '../common/devSeams';
+import { devQuery } from '../core/devSeams';
 import { effects } from '../effects';
 import { FIRE_SPARKS } from '../effects/recipes';
 import type { ParticleRecipe } from '../effects/core';

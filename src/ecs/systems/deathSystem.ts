@@ -1,11 +1,11 @@
-import { Vector3 } from '../../libs/babylon/exports';
+import { Vector3 } from '../../controllers/render/babylon/exports';
 import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
 import { isPlayerAttackAction } from '../../common/playerActionMapper';
 import { BloodDecals } from '../../common/bloodDecals';
 import { shatterDeathFor, spawnBomb } from '../../common/deathVisuals';
 import { monsterModelTypeOf } from '../../common/playSpeed';
 import { inBloodCastle, inChaosCastle } from '../../common/locomotion';
-import { TW_ACTION, TW_NOGROUND } from '../../common/terrain/consts';
+import { TW_ACTION, TW_NOGROUND } from '../../controllers/terrain/consts';
 import { playSfx } from '../../libs/sfx';
 import { COMBAT_BUS } from '../../common/combatSounds';
 import { effects } from '../../effects';

@@ -1,5 +1,5 @@
 import soundFiles from './recipes.json';
-import { resolveUrlToDataFolder } from '../common/resolveUrlToDataFolder';
+import { resolveUrlToDataFolder } from '../controllers/assets/resolveUrlToDataFolder';
 
 /**
  * Pure data shared by every sound entry: the sound catalogue. `recipes.json`

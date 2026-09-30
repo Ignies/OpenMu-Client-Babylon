@@ -1,5 +1,5 @@
-import type { AbstractMesh } from '../../libs/babylon/exports';
-import { ENUM_WORLD } from '../../common/types';
+import type { AbstractMesh } from '../../controllers/render/babylon/exports';
+import { ENUM_WORLD } from '../../core/types';
 import { lookDirector } from '../../lighting/director';
 import type { RoomVolume } from '../../lighting/profiles';
 import { shadowReceiverChanged } from '../../scenes/csmBounds';

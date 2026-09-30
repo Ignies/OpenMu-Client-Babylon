@@ -17,8 +17,8 @@
  *
  * Driven by: `ping/pingNet.ts`. Read by: `ping/pingNet.ts` (`pingLiveFor`).
  */
-import { Vector3, type Scene } from '../libs/babylon/exports';
-import { PING_LIMITS } from '../common/pingProtocol';
+import { Vector3, type Scene } from '../controllers/render/babylon/exports';
+import { PING_LIMITS } from '../controllers/net/protocols/pingProtocol';
 import { LiveList, fixedPoint, type PointSource, type RGB } from './core';
 import { RGBS, TEX } from './recipes';
 import { spawnJoint } from './joint';

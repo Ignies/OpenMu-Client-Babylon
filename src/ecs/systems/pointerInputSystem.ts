@@ -4,7 +4,7 @@ import {
   PointerEventTypes,
   Ray,
   Vector3,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import type { EntityTypeFromQuery, ISystemFactory } from '../world';
 import { canAttackPlayer, isAttackableEntity } from './attackSystem';
 import { isMobileDevice } from '../../common/mobile';
@@ -13,7 +13,7 @@ import { Store } from '../../store';
 import { TELEPORT_ALLY } from '../../common/skillCasting';
 import { aimX, aimY } from '../../camera';
 import { requestPing } from '../../ping/pingNet';
-import { pickGround } from '../../libs/mu/terrainPick';
+import { pickGround } from '../../controllers/terrain/terrainPick';
 
 const COLOR_RED = new Color3(1, 0, 0);
 

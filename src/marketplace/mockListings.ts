@@ -1,7 +1,7 @@
 import type { Item } from '../ecs/world';
 import type { ListingState } from './api';
 import items from '../common/items.json';
-import { itemIconUrl } from '../common/itemIconPack';
+import { itemIconUrl } from '../controllers/assets/itemIconPack';
 import { categoryOf, type CategoryId } from './categories';
 
 /**

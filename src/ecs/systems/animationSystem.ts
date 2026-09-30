@@ -4,7 +4,7 @@ import type { ISystemFactory } from '../world';
 import { isPlayerBody, type PlayerObject } from '../../common/playerObject';
 import { isOneShotPlayerAction } from '../../common/playerActionMapper';
 import { monsterClipFor } from '../../common/transformedBody';
-import type { ModelObject } from '../../common/modelObject';
+import type { ModelObject } from '../../controllers/render/modelObject';
 import {
   chooseFenrirIdleAction,
   chooseFenrirRunAction,
@@ -22,8 +22,8 @@ import {
   applyWeaponAttachments,
   applyWeaponPoses,
 } from '../../common/weaponAttachment';
-import { TWFlags } from '../../common/terrain/consts';
-import { isFlagInBinaryMask } from '../../common/utils';
+import { TWFlags } from '../../controllers/terrain/consts';
+import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import {
   monsterModelTypeOf,
   monsterPlaySpeed,

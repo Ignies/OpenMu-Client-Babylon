@@ -1,5 +1,5 @@
 import type { BonedEmission } from '../../common/effectParticles';
-import type { ModelObject } from '../../common/modelObject';
+import type { ModelObject } from '../../controllers/render/modelObject';
 
 export type BoneNode = BonedEmission['node'];
 

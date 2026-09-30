@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import type { Camera, PostProcess } from '../libs/babylon/exports';
+import type { Camera, PostProcess } from '../controllers/render/babylon/exports';
 import { GameOptions, setGameOption } from './gameOptions';
 import { MSAA_HEAD_ONLY, sceneTargetSamples } from './lightingQuality';
 

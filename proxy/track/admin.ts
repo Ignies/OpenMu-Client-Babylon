@@ -5,7 +5,7 @@ import {
   type EventKind,
   type LogQuery,
   type RefusalReason,
-} from '../../src/common/adminProtocol';
+} from '../../src/controllers/net/protocols/adminProtocol';
 import { clampLimit, type Journal } from './journal';
 import type { Tracker } from './tracker';
 

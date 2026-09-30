@@ -3,11 +3,11 @@ import {
   Matrix,
   Mesh,
   StandardMaterial,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import type { ISystemFactory, World } from '../world';
-import { TERRAIN_SIZE } from '../../common/terrain/consts';
+import { TERRAIN_SIZE } from '../../controllers/terrain/consts';
 import { DEBUG_PATHFINDING } from '../../consts';
-import { EventBus } from '../../libs/eventBus';
+import { EventBus } from '../../core/eventBus';
 
 export const PathfindingSystem: ISystemFactory = world => {
   const query = world.with('pathfinding');

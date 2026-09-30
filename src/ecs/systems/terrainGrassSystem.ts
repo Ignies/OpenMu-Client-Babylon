@@ -1,5 +1,5 @@
-import type { ArcRotateCamera } from '../../libs/babylon/exports';
-import { grassFieldForFrame, type GrassActor } from '../../libs/mu/terrainGrass';
+import type { ArcRotateCamera } from '../../controllers/render/babylon/exports';
+import { grassFieldForFrame, type GrassActor } from '../../controllers/terrain/terrainGrass';
 import type { Entity, ISystemFactory } from '../world';
 
 /**

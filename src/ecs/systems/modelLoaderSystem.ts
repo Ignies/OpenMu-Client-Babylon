@@ -1,11 +1,11 @@
 import { With } from 'miniplex';
 import { MapPlayerNetClassToModelClass } from '../../common/mapPlayerNetClassToModelClass';
-import { getModel, loadGLTF } from '../../common/modelLoader';
-import { ModelObject } from '../../common/modelObject';
+import { getModel, loadGLTF } from '../../controllers/assets/modelLoader';
+import { ModelObject } from '../../controllers/render/modelObject';
 import { PlayerObject } from '../../common/playerObject';
 import { MapObjectLights } from '../../common/mapObjectLights';
-import { blendMeshFor } from '../../common/blendMeshes';
-import { toRenderAngles } from '../../common/renderAngles';
+import { blendMeshFor } from '../../controllers/render/blendMeshes';
+import { toRenderAngles } from '../../controllers/render/renderAngles';
 import {
   Color3,
   CreateBox,
@@ -13,7 +13,7 @@ import {
   StandardMaterial,
   type Skeleton,
   Vector3,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import { Entity, ISystemFactory, World } from '../world';
 
 const v3Temp = { x: 0, y: 0, z: 0 };

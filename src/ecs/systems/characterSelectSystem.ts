@@ -9,7 +9,7 @@ import {
   Scene,
   StandardMaterial,
   Vector3,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import type { Entity, ISystemFactory } from '../world';
 import { Store, UIState } from '../../store';
 import { ENUM_WORLD } from '../../common';
@@ -31,7 +31,7 @@ import {
   type PointLightEmitter,
 } from '../../common/pointLightPool';
 import { PRIORITY_EFFECT } from '../../lighting/lightSource';
-import type { TerrainLightColor } from '../../common/terrainDynamicLight';
+import type { TerrainLightColor } from '../../controllers/terrain/terrainDynamicLight';
 
 type CircleVisual = {
   mesh: Mesh;

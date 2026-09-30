@@ -17,8 +17,8 @@
  * packet handler, a map object class) and calls this file's command - or the
  * facade's wrapper of it when more than one consumer needs it.
  */
-import type { Scene } from '../libs/babylon/exports';
-import { ENUM_WORLD } from '../common/types';
+import type { Scene } from '../controllers/render/babylon/exports';
+import { ENUM_WORLD } from '../core/types';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 import { flame } from './recipes';

@@ -1,4 +1,4 @@
-import type { LogQuery, TrackEvent } from '../../src/common/adminProtocol';
+import type { LogQuery, TrackEvent } from '../../src/controllers/net/protocols/adminProtocol';
 
 /**
  * Where journal lines go and come back from. The SQLite one (`store.ts`)

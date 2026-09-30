@@ -3,12 +3,12 @@ import {
   PointerEventTypes,
   Ray,
   Vector3,
-} from '../../libs/babylon/exports';
-import { TWFlags } from '../../common/terrain/consts';
-import { isFlagInBinaryMask } from '../../common/utils';
+} from '../../controllers/render/babylon/exports';
+import { TWFlags } from '../../controllers/terrain/consts';
+import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import { aimX, aimY } from '../../camera';
-import { LEAN_CURSOR_OBJECTS, findRestObject } from '../../libs/mu/restObjects';
-import { pickGround } from '../../libs/mu/terrainPick';
+import { LEAN_CURSOR_OBJECTS, findRestObject } from '../../controllers/terrain/restObjects';
+import { pickGround } from '../../controllers/terrain/terrainPick';
 import { Store } from '../../store';
 import type { CursorHover } from '../../ui/components/gameCursor/cursors';
 import type { Entity, ISystemFactory, World } from '../world';

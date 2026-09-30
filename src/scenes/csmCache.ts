@@ -14,8 +14,8 @@ import {
   type Matrix,
   type Scene,
   type UniformBuffer,
-} from '../libs/babylon/exports';
-import { devQuery, devQueryNumber } from '../common/devSeams';
+} from '../controllers/render/babylon/exports';
+import { devQuery, devQueryNumber } from '../core/devSeams';
 
 /**
  * Cached static cascades.

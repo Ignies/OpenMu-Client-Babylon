@@ -6,7 +6,7 @@
  * Compiling but never imported, on purpose.
  */
 
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { CameraLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

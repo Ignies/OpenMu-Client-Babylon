@@ -1,6 +1,6 @@
 import type { ISystemFactory } from '../world';
 import { GameOptions } from '../../common/gameOptions';
-import { renderDistanceRanges } from '../../common/renderDistance';
+import { renderDistanceRanges } from '../../controllers/render/renderDistance';
 
 export const CalculateVisibilitySystem: ISystemFactory = world => {
   const query = world.with('transform', 'visibility');

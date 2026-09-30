@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { World } from '../ecs/world';
 import type { Emission } from '../common/effectParticles';
 import type { MapLayer, Room, Spawn } from './layer';

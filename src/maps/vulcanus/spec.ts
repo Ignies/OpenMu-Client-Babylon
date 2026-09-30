@@ -1,5 +1,5 @@
 import type { Emission } from '../../common/effectParticles';
-import type { MeshAnimation } from '../../common/meshAnimation';
+import type { MeshAnimation } from '../../controllers/render/meshAnimation';
 import type { LightEmitter } from '../../lighting/mapObjectLights';
 
 /**

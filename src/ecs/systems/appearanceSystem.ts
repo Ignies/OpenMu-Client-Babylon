@@ -1,7 +1,7 @@
 import { ItemsDatabase } from '../../common/itemsDatabase';
 import { itemVisualTier } from '../../common/itemVisualTier';
 import { inChaosCastle } from '../../common/locomotion';
-import type { ModelObject } from '../../common/modelObject';
+import type { ModelObject } from '../../controllers/render/modelObject';
 import { isPlayerBody, type PlayerObject } from '../../common/playerObject';
 import { applyWeaponAttachments } from '../../common/weaponAttachment';
 import { isBook, swordformGlovesModel } from '../../common/weaponClass';

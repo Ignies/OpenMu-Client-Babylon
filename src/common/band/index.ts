@@ -1,9 +1,9 @@
 import { observable, runInAction } from 'mobx';
 import type { TextKey } from '../../i18n';
 import type { Entity, NetEntity } from '../../ecs/world';
-import { EventBus } from '../../libs/eventBus';
+import { EventBus } from '../../core/eventBus';
 import { Store } from '../../store';
-import { NetStats } from '../netStats';
+import { NetStats } from '../../controllers/net/roundTrip';
 import {
   instrumentById,
   instrumentIndex,

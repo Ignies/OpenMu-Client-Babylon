@@ -11,14 +11,14 @@ import {
   startDownload,
   storageUsed,
   type AssetGroup,
-} from '../../../common/assetDownload';
+} from '../../../controllers/assets/assetDownload';
 import {
   loadPackIndex,
   ORIGINAL_PACK,
   packsBase,
   setActivePack,
   texturePacks,
-} from '../../../common/texturePacks';
+} from '../../../controllers/assets/texturePacks';
 import { Button, Icon, Progress, Select } from './controls';
 
 /**

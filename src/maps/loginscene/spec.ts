@@ -1,5 +1,5 @@
 import type { Emission } from '../../common/effectParticles';
-import { ENUM_WORLD } from '../../common/types';
+import { ENUM_WORLD } from '../../core/types';
 
 /**
  * The login and character-select backdrops, the plain-data half. Nothing here

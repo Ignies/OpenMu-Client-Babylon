@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Matrix } from '../libs/babylon/exports';
+import { Matrix } from '../controllers/render/babylon/exports';
 import { applyWeaponAttachments, BACK_BONE, questItemLink } from './weaponAttachment';
 import type { PlayerObject } from './playerObject';
 import type { Item } from '../ecs/world';

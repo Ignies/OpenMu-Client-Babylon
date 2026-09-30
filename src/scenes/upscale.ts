@@ -10,15 +10,15 @@ import {
   type ArcRotateCamera,
   type Observer,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
-import { devQueryNumber } from '../common/devSeams';
+import { devQueryNumber } from '../core/devSeams';
 import {
   MSAA_HEAD_ONLY,
   pipelineSamples,
   sceneTargetSamples,
 } from '../common/lightingQuality';
-import { renderScaleForStep, renderScaleSeam } from '../libs/renderScale';
+import { renderScaleForStep, renderScaleSeam } from '../controllers/render/renderScale';
 
 /**
  * The render upscale (documentation/render_upscale/ARCHITECTURE.md): draw the

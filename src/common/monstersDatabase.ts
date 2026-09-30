@@ -1,6 +1,6 @@
 import monsters from './monsters.json';
 import monsterHealth from './monsterHealth.json';
-import { localisedNpcName } from '../libs/mu/npcNameFile';
+import { localisedNpcName } from '../controllers/assets/mu/npcNameFile';
 import { t } from '../i18n';
 
 export const MonstersDatabase = new (class _MonstersDatabase {

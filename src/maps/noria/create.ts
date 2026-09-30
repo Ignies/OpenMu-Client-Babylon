@@ -1,8 +1,8 @@
 import { OperateBoxObject } from '../../common/operateBoxObject';
-import { toRadians } from '../../common/utils';
+import { toRadians } from '../../controllers/assets/download';
 import type { World } from '../../ecs/world';
-import { Vector3 } from '../../libs/babylon/exports';
-import type { ModelObject } from '../../common/modelObject';
+import { Vector3 } from '../../controllers/render/babylon/exports';
+import type { ModelObject } from '../../controllers/render/modelObject';
 import {
   NoriaWarpHalo2Object,
   NoriaWarpHalo3Object,

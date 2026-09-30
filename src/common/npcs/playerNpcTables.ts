@@ -7,7 +7,7 @@ import {
   GROUP_STAFF,
   GROUP_SWORD,
 } from '../weaponClass';
-import { CharacterClassNumber, PlayerClass } from '../types';
+import { CharacterClassNumber, PlayerClass } from '../../core/types';
 import type { NpcGear } from './gearedNpc';
 
 /** `c->Helper` / `c->Weapon[]` kits, by items.json (group, index). */

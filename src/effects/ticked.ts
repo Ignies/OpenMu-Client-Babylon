@@ -22,7 +22,7 @@
  *
  * Driven by: `effects.spawn('ticked', …)` from the skill table. Read by: nobody.
  */
-import { Mesh, Texture, VertexBuffer, VertexData, type Scene, type StandardMaterial, type Vector3 } from '../libs/babylon/exports';
+import { Mesh, Texture, VertexBuffer, VertexData, type Scene, type StandardMaterial, type Vector3 } from '../controllers/render/babylon/exports';
 import type { TestScene } from '../scenes/testScene';
 import { TerrainDecal } from '../common/moveTargetEffect';
 import { Store } from '../store';

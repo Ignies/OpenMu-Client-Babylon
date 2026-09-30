@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Store } from '../../../../store';
 import { INVITE_RANGE_TILES } from '../../../../social';
-import type { GuildMemberRoleEnum } from '../../../../common/packets/ServerToClientPackets';
+import type { GuildMemberRoleEnum } from '../../../../../versions/shared/packets/ServerToClientPackets';
 
 export type NearbyPlayer = {
   netId: number;

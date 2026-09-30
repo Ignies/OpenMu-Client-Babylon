@@ -63,7 +63,7 @@ import { QuestSystem } from './systems/questSystem';
 import { PetSystem } from './systems/petSystem';
 import { TeleportSystem } from './systems/teleportSystem';
 import { GuildFlagSystem } from './systems/guildFlagSystem';
-import { perfOverlayVisible, recordSystemTime } from '../libs/perfOverlay';
+import { perfOverlayVisible, recordSystemTime } from '../controllers/render/perfOverlay';
 
 const factories: ISystemFactory[] = [
   CharacterSelectSystem,

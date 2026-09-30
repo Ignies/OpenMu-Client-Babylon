@@ -9,7 +9,7 @@
  * Driven by `attackSystem` (consumes / forces the gate); read by
  * `attackSystem` and `skillCastSystem` before they accept a click.
  */
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import { REFERENCE_FPS } from '../common/playSpeed';
 import type { CombatLayer } from './layer';
 

@@ -11,7 +11,7 @@ import {
 import { MONSTER_SOUNDS } from './monsters';
 import { SOUND_FILES, type Sounds } from './recipes';
 import { MonsterActionType as A } from '../common/objects/enum';
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 
 const WORLDS = Object.values(ENUM_WORLD).filter(
   (w): w is ENUM_WORLD => typeof w === 'number'

@@ -8,7 +8,7 @@ import {
   type MonsterAttackInput,
 } from '../common/monsterAttackClip';
 import { MonsterActionType as A } from '../common/objects/enum';
-import { ENUM_WORLD as W } from '../common/types';
+import { ENUM_WORLD as W } from '../core/types';
 
 const WORLDS = Object.values(W).filter((w): w is W => typeof w === 'number');
 

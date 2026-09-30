@@ -1,4 +1,4 @@
-import type { Scene, Vector3 } from '../libs/babylon/exports';
+import type { Scene, Vector3 } from '../controllers/render/babylon/exports';
 import type { Entity } from '../ecs/world';
 import { effects } from '../effects';
 import { entityPos, tmpA, type RGB } from '../effects/core';
@@ -10,7 +10,7 @@ import {
   SMOKE,
   TEX,
 } from '../effects/recipes';
-import { animeImpacts, styleTuned } from './renderingStyle';
+import { animeImpacts, styleTuned } from '../controllers/render/renderingStyle';
 import { spawnCrystalShards } from './deathVisuals';
 import { playSfx } from '../libs/sfx';
 import { COMBAT_BUS } from './combatSounds';

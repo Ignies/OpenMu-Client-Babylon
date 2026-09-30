@@ -26,7 +26,7 @@ import {
   ServerMessagePacket,
   TradeFinishedPacket,
   TradeRequestAnswerPacket,
-} from '../../src/common/packets/ServerToClientPackets';
+} from '../../versions/shared/packets/ServerToClientPackets';
 import {
   AreaSkillPacket,
   ConsumeItemRequestPacket,
@@ -53,16 +53,16 @@ import {
   WalkRequestPacket,
   WarpCommandRequestPacket,
   WhisperMessagePacket,
-} from '../../src/common/packets/ClientToServerPackets';
+} from '../../versions/shared/packets/ClientToServerPackets';
 import {
   className,
   heroStateName,
   type EventKind,
   type TrackEvent,
   type TrackedPlayer,
-} from '../../src/common/adminProtocol';
-import { Xor3Byte } from '../../src/common/encryption/xor3';
-import { fromChatWire } from '../../src/common/chatWire';
+} from '../../src/controllers/net/protocols/adminProtocol';
+import { Xor3Byte } from '../../src/controllers/net/encryption/xor3';
+import { fromChatWire } from '../../src/controllers/net/protocols/chatWire';
 import { FrameReader, type Frame } from './frames';
 import { itemName, mapName, monsterName, storageName } from './names';
 

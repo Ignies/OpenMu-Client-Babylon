@@ -12,9 +12,9 @@ import {
   setGameOption,
   type GameOptions as GameOptionsType,
 } from '../../../common/gameOptions';
-import { invalidateShadowState } from '../../../common/objectShadow';
+import { invalidateShadowState } from '../../../controllers/render/objectShadow';
 import { installApp } from '../../../common/pwaInstall';
-import { reloadMapObjects } from '../../../libs/mu/loadMapIntoScene';
+import { reloadMapObjects } from '../../../controllers/terrain/loadMapIntoScene';
 import {
   KeyBindings,
   isKey,

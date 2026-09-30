@@ -35,7 +35,7 @@ import {
   CloseNpcRequestPacket,
   LegacyQuestStateRequestPacket,
   LegacyQuestStateSetRequestPacket,
-} from '../common/packets/ClientToServerPackets';
+} from '../../versions/shared/packets/ClientToServerPackets';
 import {
   ConditionTypeEnum,
   LegacyQuestRewardPacket,
@@ -43,12 +43,12 @@ import {
   LegacyQuestStateDialogPacket,
   LegacyQuestStateListPacket,
   LegacySetQuestStateResponsePacket,
-} from '../common/packets/ServerToClientPackets';
-import type { CharacterClassNumber } from '../common/types';
-import { EventBus } from '../libs/eventBus';
+} from '../../versions/shared/packets/ServerToClientPackets';
+import type { CharacterClassNumber } from '../core/types';
+import { EventBus } from '../core/eventBus';
 import { playUiSound } from '../libs/sfx';
 import { showObjectEffect } from '../ecs/systems/objectEffectSystem';
-import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../libs/mu/questFiles';
+import { MAX_QUESTS, QuestActKind, type QuestDefinition } from '../controllers/assets/mu/questFiles';
 import { Store } from '../store';
 import type { QuestLayer } from './layer';
 import {

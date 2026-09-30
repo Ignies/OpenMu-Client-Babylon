@@ -7,11 +7,11 @@ import {
   sessionAccount,
   unidentifiedConnections,
 } from './presence';
-import { SimpleModulusEncryptor, SimpleModulusKeys } from '../src/common/encryption/simpleModulus';
-import { Xor32Encryptor } from '../src/common/encryption/xor32';
-import { Xor3Byte } from '../src/common/encryption/xor3';
-import { stringToBytes } from '../src/common/wireUtils';
-import { SESSION_NONCE_RE, sessionNonce } from '../src/common/sessionNonce';
+import { SimpleModulusEncryptor, SimpleModulusKeys } from '../src/controllers/net/encryption/simpleModulus';
+import { Xor32Encryptor } from '../src/controllers/net/encryption/xor32';
+import { Xor3Byte } from '../src/controllers/net/encryption/xor3';
+import { stringToBytes } from '../src/controllers/net/wireUtils';
+import { SESSION_NONCE_RE, sessionNonce } from '../src/controllers/net/sessionNonce';
 import { gameVersion } from '../versions/season6';
 
 /**

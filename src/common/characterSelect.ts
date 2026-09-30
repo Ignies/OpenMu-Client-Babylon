@@ -1,6 +1,6 @@
 import { observable } from 'mobx';
-import { Vector3 } from '../libs/babylon/exports';
-import { toRadians } from './utils';
+import { Vector3 } from '../controllers/render/babylon/exports';
+import { toRadians } from '../controllers/assets/download';
 
 const MU_SCALE = 100;
 

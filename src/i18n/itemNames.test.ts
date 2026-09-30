@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { i18n } from './index';
 import { SPANISH_ITEM_NAMES } from './itemNames';
 import { spanishLayer } from './spanish';
-import { localisedItemName, parseItemNames } from '../libs/mu/itemNameFile';
+import { localisedItemName, parseItemNames } from '../controllers/assets/mu/itemNameFile';
 
 /**
  * These names replace records of a file nothing else in the tree reads, so a

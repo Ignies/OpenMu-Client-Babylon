@@ -1,7 +1,7 @@
-import { loadGLTF } from '../../common/modelLoader';
-import { ModelObject } from '../../common/modelObject';
-import { Rand } from '../../common/rand';
-import { Vector3 } from '../../libs/babylon/exports';
+import { loadGLTF } from '../../controllers/assets/modelLoader';
+import { ModelObject } from '../../controllers/render/modelObject';
+import { Rand } from '../../core/rand';
+import { Vector3 } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 
 /** 25 Hz, the tick `FPS_ANIMATION_FACTOR` is measured in. */

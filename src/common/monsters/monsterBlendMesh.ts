@@ -1,4 +1,4 @@
-import type { MeshAnimation } from '../meshAnimation';
+import type { MeshAnimation } from '../../controllers/render/meshAnimation';
 import { MonsterActionType } from '../objects/enum';
 
 /**

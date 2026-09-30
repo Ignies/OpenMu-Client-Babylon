@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../../common/types';
+import { ENUM_WORLD } from '../../core/types';
 import { DropObject } from '../../common/dropObject';
 import { itemRestHeight, itemTumbleAxis } from '../../common/itemAngle';
 import type { Entity, ISystemFactory } from '../world';

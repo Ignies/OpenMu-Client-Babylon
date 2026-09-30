@@ -12,7 +12,7 @@
  * screen exists at all.
  */
 import type { ComponentType } from 'react';
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import type { World } from '../ecs/world';
 
 /**

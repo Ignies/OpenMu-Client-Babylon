@@ -1,13 +1,13 @@
-import type { Scene } from '../libs/babylon/exports';
+import type { Scene } from '../controllers/render/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
 import { t } from '../i18n';
 import {
   MATERIAL_QUALITY_LABEL_KEYS,
   materialQuality,
   pbrDetailStrength,
-} from '../common/materialQuality';
+} from '../controllers/render/materialQuality';
 import { livePbrMaterials } from '../common/itemMaterial';
-import { liveTileArrays } from '../libs/mu/tileTextureArray';
+import { liveTileArrays } from '../controllers/terrain/tileTextureArray';
 
 /**
  * `muMat()` in the browser console: what the Materials/Detail options are

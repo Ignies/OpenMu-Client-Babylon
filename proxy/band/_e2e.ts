@@ -11,8 +11,8 @@
  * Not a vitest test: it needs Bun's sockets. Exit code 0 when every check
  * passes.
  */
-import { LoginShortPasswordPacket } from '../../src/common/packets/ClientToServerPackets';
-import { Xor3Byte } from '../../src/common/encryption/xor3';
+import { LoginShortPasswordPacket } from '../../versions/shared/packets/ClientToServerPackets';
+import { Xor3Byte } from '../../src/controllers/net/encryption/xor3';
 import {
   BAND_LIMITS,
   BandSub,
@@ -26,7 +26,7 @@ import {
   encodeStop,
   isBandFrame,
   type BandRelayMessage,
-} from '../../src/common/bandProtocol';
+} from '../../src/controllers/net/protocols/bandProtocol';
 import { FrameReader } from '../track/frames';
 import { characterInformation, characterList, gameServerEntered, playersInScope, selectCharacter } from '../track/packets';
 import { WireEncoder } from '../track/wire';

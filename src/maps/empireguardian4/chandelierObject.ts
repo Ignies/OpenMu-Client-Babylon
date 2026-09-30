@@ -2,7 +2,7 @@ import {
   BonedParticleEmitter,
   type BonedEmission,
 } from '../../common/effectParticles';
-import { MapTileObject } from '../../common/mapTileObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { lightMapObject } from '../../lighting/mapObjectLights';
 import type { LightSource } from '../../lighting/lightSource';
 import { Store } from '../../store';

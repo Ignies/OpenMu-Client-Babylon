@@ -15,7 +15,7 @@
  *
  * Driven by: spiritSwarm.ts. Read by: nobody.
  */
-import { Buffer, VertexBuffer, type GreasedLineMesh } from '../libs/babylon/exports';
+import { Buffer, VertexBuffer, type GreasedLineMesh } from '../controllers/render/babylon/exports';
 
 export interface InPlaceLines {
   /** x, y, z per point, `lineCount` lines of `pointsPerLine` one after another: fill it, then `write()`. */

@@ -20,8 +20,8 @@ import {
   type RoomHooks,
   type RoomSpec,
 } from '../rooms';
-import { createAttributeSystem } from '../../libs/attributeSystem';
-import { Vector3 } from '../../libs/babylon/exports';
+import { createAttributeSystem } from '../../core/attributeSystem';
+import { Vector3 } from '../../controllers/render/babylon/exports';
 import { Store } from '../../store';
 import { BeerObject } from './beerObject';
 import { BonfireObject } from './bonfireObject';

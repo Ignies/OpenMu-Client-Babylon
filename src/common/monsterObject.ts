@@ -1,5 +1,5 @@
 import type { Entity, World } from '../ecs/world';
-import { ModelObject } from './modelObject';
+import { ModelObject } from '../controllers/render/modelObject';
 import { monsterBlendMeshFor, type MonsterBlendMesh } from './monsters/monsterBlendMesh';
 import { monsterModelTypeOf } from './playSpeed';
 

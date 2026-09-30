@@ -1,5 +1,5 @@
 import { memo, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
-import { decodeTGA } from '../../src/libs/mu/tga';
+import { decodeTGA } from '../../src/controllers/assets/mu/tga';
 
 /**
  * A standalone copy of the client's sprite loader, cut down to what a form

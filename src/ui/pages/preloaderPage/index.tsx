@@ -15,7 +15,7 @@ import type { PregameBackdrop } from '../../../version/uiContract';
 import { uiClick } from '../../../libs/sfx';
 import { COMBAT_BUS, playSfx, sound, type Sounds } from '../../../sound';
 import { SoundsManager } from '../../../libs/soundsManager';
-import { setSceneCovered } from '../../../common/sceneCover';
+import { setSceneCovered } from '../../../controllers/render/sceneCover';
 import { pregameLoad } from '../../../common/pregameLoad';
 import { MuFlag } from '../../components/muFlag';
 import { Backdrop } from './backdrop';

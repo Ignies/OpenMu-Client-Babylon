@@ -6,7 +6,7 @@ import {
   BonedParticleEmitter,
   type BonedEmission,
 } from '../../common/effectParticles';
-import { MapTileObject } from '../../common/mapTileObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { Store } from '../../store';
 import type { Entity, World } from '../../ecs/world';
 

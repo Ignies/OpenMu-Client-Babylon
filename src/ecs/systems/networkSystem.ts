@@ -1,4 +1,4 @@
-import type { IVector2Like } from '../../libs/babylon/exports';
+import type { IVector2Like } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory } from '../world';
 import { Store } from '../../store';
 import { truncatePathForAttack } from './attackSystem';

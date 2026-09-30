@@ -1,4 +1,4 @@
-import { MapTileObject } from '../../common/mapTileObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { ParticleEmitter, type Emission } from '../../common/effectParticles';
 import type { Entity, World } from '../../ecs/world';
 

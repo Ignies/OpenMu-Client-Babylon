@@ -12,10 +12,10 @@ import {
   Vector4,
   type Mesh,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { sunLightOf } from '../lighting/keyRig';
 import { linearBufferActive } from '../common/lightModel';
-import { devQuery } from '../common/devSeams';
+import { devQuery } from '../core/devSeams';
 
 /**
  * Footprints left on the ground: boot marks pressed into settled snow, or

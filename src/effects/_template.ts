@@ -15,7 +15,7 @@
  * of billboards, `particleSystemFor` / `emitBurst` / `Emitter` for many.
  * Shared colours, textures and particle recipes go in `recipes.ts`.
  */
-import type { Scene, Vector3 } from '../libs/babylon/exports';
+import type { Scene, Vector3 } from '../controllers/render/babylon/exports';
 import { LiveList, acquireCard, additiveMaterial, releaseCard, fadeOut, WHITE, type RGB, type Card } from './core';
 import type { EffectHandle, EffectLayer } from './layer';
 

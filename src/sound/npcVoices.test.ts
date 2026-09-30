@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MonsterActionType } from '../common/objects/enum';
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import type { World } from '../ecs/world';
 import { attachListener, playSfx } from './listener';
 import { GLOBAL_NPC_VOICES, GLOBAL_RANGE_TILES, npcVoicesLayer } from './npcVoices';

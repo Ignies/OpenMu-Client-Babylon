@@ -16,9 +16,9 @@
  * steps it a tick at a time (alpha, lock) and reads its bones for blurs.
  * Read by: nobody.
  */
-import { Quaternion, TransformNode, VertexBuffer, type AbstractMesh, type AnimationGroup, type Mesh, type Scene, type Texture, type Vector3 } from '../libs/babylon/exports';
+import { Quaternion, TransformNode, VertexBuffer, type AbstractMesh, type AnimationGroup, type Mesh, type Scene, type Texture, type Vector3 } from '../controllers/render/babylon/exports';
 import type { Entity } from '../ecs/world';
-import { loadGLTF } from '../common/modelLoader';
+import { loadGLTF } from '../controllers/assets/modelLoader';
 import { PLAY_SPEED_TO_RATIO } from '../common/playSpeed';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';

@@ -2,20 +2,20 @@ import { runInAction } from 'mobx';
 import type { ISystemFactory } from '../world';
 import { Store, UIState } from '../../store';
 import { ENUM_WORLD } from '../../common';
-import { EventBus } from '../../libs/eventBus';
-import { Vector3, type ArcRotateCamera } from '../../libs/babylon/exports';
+import { EventBus } from '../../core/eventBus';
+import { Vector3, type ArcRotateCamera } from '../../controllers/render/babylon/exports';
 import {
   loadCameraWalkScript,
   type CameraWaypoint,
-} from '../../libs/mu/cameraWalkScript';
+} from '../../controllers/terrain/cameraWalkScript';
 import {
   CHARACTER_CAMERA_POSITION,
   characterCameraTarget,
   characterSelectView,
   characterSlotPosition,
 } from '../../common/characterSelect';
-import { prefetchWorldTerrain } from '../../libs/mu/prefetchWorld';
-import { warmWorldObjects } from '../../libs/mu/warmWorld';
+import { prefetchWorldTerrain } from '../../controllers/assets/mu/prefetchWorld';
+import { warmWorldObjects } from '../../controllers/assets/mu/warmWorld';
 import { LOGIN_SCENE_ABSENT_MODELS } from '../../maps/loginscene/spec';
 import { pregameLoad } from '../../common/pregameLoad';
 import { loadVersionUi, versionUi } from '../../version';

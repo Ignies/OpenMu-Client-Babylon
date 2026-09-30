@@ -1,4 +1,4 @@
-import { sessionNonce } from '../common/sessionNonce';
+import { sessionNonce } from '../controllers/net/sessionNonce';
 import { marketApiUrl } from '../common/serverServices';
 import type { Item } from '../ecs/world';
 

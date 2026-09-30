@@ -1,5 +1,5 @@
-import type { ENUM_WORLD } from '../common/types';
-import type { Scene, Vector3 } from '../libs/babylon/exports';
+import type { ENUM_WORLD } from '../core/types';
+import type { Scene, Vector3 } from '../controllers/render/babylon/exports';
 import type { EffectHandle, EffectLayer } from './layer';
 import { EFFECT_LAYERS } from './layers';
 import { clearTimers, disposePools, stepClock } from './core';

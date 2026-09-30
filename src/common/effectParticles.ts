@@ -1,16 +1,16 @@
-import { TILE_CM } from './terrain/consts';
+import { TILE_CM } from '../controllers/terrain/consts';
 import {
   Color4,
   Constants,
   Sprite,
   SpriteManager,
   type Scene,
-} from '../libs/babylon/exports';
-import { downloadDataFile, hasDataFile } from '../libs/mu/dataFolder';
+} from '../controllers/render/babylon/exports';
+import { downloadDataFile, hasDataFile } from '../controllers/assets/mu/dataFolder';
 import { maps } from '../maps';
 import { EFFECT_RENDERING_GROUP, darkCardGain, keepDepthForEffects, spriteLevel } from '../effects/core';
-import { devQuery, devQueryNumber } from './devSeams';
-import { viewDepth } from './viewPlanes';
+import { devQuery, devQueryNumber } from '../core/devSeams';
+import { viewDepth } from '../controllers/render/viewPlanes';
 
 const TICKS_PER_SECOND = 25;
 

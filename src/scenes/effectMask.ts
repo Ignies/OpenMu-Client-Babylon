@@ -11,7 +11,7 @@ import {
   type Observer,
   type RenderTargetWrapper,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { driveRenderList } from './renderList';
 import { sceneRenderSize } from './upscale';
 

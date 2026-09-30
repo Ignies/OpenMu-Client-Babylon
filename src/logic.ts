@@ -25,7 +25,7 @@ import {
 } from './common/itemAngle';
 import { archangelWeapon, dropModelProxy } from './common/dropModelProxy';
 import { DropObject } from './common/dropObject';
-import { prefetchItemIcons } from './common/itemIconPack';
+import { prefetchItemIcons } from './controllers/assets/itemIconPack';
 import { ItemSerializer } from './common/itemSerializer';
 import { isFemaleClass } from './common/mapPlayerNetClassToModelClass';
 import {
@@ -34,7 +34,7 @@ import {
 } from './common/modelFactoryPerId';
 import { monsterDisplayName, monsterMaxHealth } from './common/monstersDatabase';
 import { translateServerText } from './i18n/serverText';
-import { loadNpcNames, onNpcNamesChanged } from './libs/mu/npcNameFile';
+import { loadNpcNames, onNpcNamesChanged } from './controllers/assets/mu/npcNameFile';
 import {
   MonsterActionType,
   PlayerAction,
@@ -44,7 +44,7 @@ import {
   ConnectionInfoPacket,
   HelloPacket,
   ServerListResponsePacket,
-} from './common/packets/ConnectServerPackets';
+} from '../versions/shared/packets/ConnectServerPackets';
 import {
   AddCharactersToScopePacket,
   AddTransformedCharactersToScopePacket,
@@ -184,8 +184,8 @@ import {
   ServerCommandPacket,
   ShowFireworksPacket,
   ShowChristmasFireworksPacket,
-} from './common/packets/ServerToClientPackets';
-import { ChangeMapServerInfoPacket } from './common/packets';
+} from '../versions/shared/packets/ServerToClientPackets';
+import { ChangeMapServerInfoPacket } from './controllers/net/packets.ts';
 import { onEscrowResultPacket } from './marketplace/gameBridge';
 import { spawnFireworks } from './common/fireworks';
 import { InventoryConstants } from './common/inventoryConstants';
@@ -197,7 +197,7 @@ import {
   NpcWindowResponsePacket,
   StoreItemListItemWindowEnum,
   StoreItemListPacket,
-} from './common/packets/ServerToClientPackets';
+} from '../versions/shared/packets/ServerToClientPackets';
 import {
   ClosePlayerShopDialogPacket,
   ItemCraftingResultPacket,
@@ -219,13 +219,13 @@ import {
   TradeRequestPacket as TradeRequestS2CPacket,
   VaultMoneyUpdatePacket,
   VaultProtectionInformationPacket,
-} from './common/packets/ServerToClientPackets';
+} from '../versions/shared/packets/ServerToClientPackets';
 import {
   ClientReadyAfterMapChangePacket,
   CloseNpcRequestPacket,
   GuildInfoRequestPacket,
   PingPacket,
-} from './common/packets/ClientToServerPackets';
+} from '../versions/shared/packets/ClientToServerPackets';
 import { Social } from './social';
 import { Commands } from './commands';
 import { heroStateMessage } from './common/nameTags';
@@ -242,7 +242,7 @@ import {
   StorageKind,
   localIndexOf,
 } from './common/itemStorage';
-import { NetStats } from './common/netStats';
+import { NetStats } from './controllers/net/roundTrip';
 import { Notices } from './common/notices';
 import { SlideHelp } from './common/slideHelp';
 import { ChatLineType, classifyInboundChat, cleanName } from './common/chat';
@@ -253,7 +253,7 @@ import {
 import { startEmojiBubble } from './ecs/systems/emojiBubbleSystem';
 import { chatEmojiBubbleOf, type ChatEmojiBubble } from './common/chatEmojis';
 import { EMOJI_CATALOG } from './emojis';
-import { fromChatWire } from './common/chatWire';
+import { fromChatWire } from './controllers/net/protocols/chatWire';
 import {
   isPlayerAttackAction,
   resolveGenderedAction,
@@ -263,7 +263,7 @@ import { chooseAttackAction, isWeaponItem, type AttackPose } from './common/weap
 import { isWingItem } from './common/wings';
 import { PlayerObject, isPlayerBody, npcClassOf } from './common/playerObject';
 import { Entity, type Item, World } from './ecs/world';
-import { createAttributeSystem, type MUAttributeSystem } from './libs/attributeSystem';
+import { createAttributeSystem, type MUAttributeSystem } from './core/attributeSystem';
 import { classWorldScale } from './common/characterScale';
 import { skillDefinition } from './common/skillsDatabase';
 import { traceHeroInstantMove } from './common/heroMoveTrace';
@@ -318,9 +318,9 @@ import {
 } from './sound/packetSounds';
 import { SoundsManager } from './libs/soundsManager';
 import { delay } from './effects/core';
-import { Vector3 } from './libs/babylon/exports';
-import { EventBus } from './libs/eventBus';
-import type { Events } from './libs/eventBus/events';
+import { Vector3 } from './controllers/render/babylon/exports';
+import { EventBus } from './core/eventBus';
+import type { Events } from './core/eventBus/events';
 import { playDrop, playSkill } from './sound';
 import { playSfx, playUiSound, UI_BUS } from './libs/sfx';
 import {
@@ -341,7 +341,7 @@ import { characterSkinBody } from './common/transformedBody';
 import { quests } from './quests';
 import { SessionExit } from './common/sessionExit';
 import { Store, UIState } from './store';
-import { devQuery } from './common/devSeams';
+import { devQuery } from './core/devSeams';
 import { QuickItemActions } from './common/quickItemActions';
 import { gameServerTarget } from './common/serverConfig';
 import { MsgWinCode } from './common/msgWin';
@@ -703,7 +703,7 @@ function applyCharacterInformation(p: CharacterInformationView) {
     SessionResume.remember(playerData.name);
     SessionResume.finish();
     // Lazy: preloadSprites pulls the window layouts in, and logic.ts sits under them.
-    void import('./libs/mu/preloadSprites').then(m => m.preloadWorldSprites());
+    void import('./controllers/assets/mu/preloadSprites').then(m => m.preloadWorldSprites());
 
     EventBus.emit('requestWarp', { map: p.MapId, pos: { x: p.X, y: p.Y } });
   });

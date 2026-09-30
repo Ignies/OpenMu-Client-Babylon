@@ -1,4 +1,4 @@
-import { Vector3 } from '../../libs/babylon/exports';
+import { Vector3 } from '../../controllers/render/babylon/exports';
 import {
   DARK_HORSE,
   DARK_RAVEN,
@@ -15,7 +15,7 @@ import {
   type PetFollow,
   type PetSpec,
 } from '../../common/pets';
-import { createAngleDeg, turnAngle } from '../../common/turnAngle';
+import { createAngleDeg, turnAngle } from '../../core/turnAngle';
 import { inChaosCastle } from '../../common/locomotion';
 import { effects } from '../../effects';
 import {

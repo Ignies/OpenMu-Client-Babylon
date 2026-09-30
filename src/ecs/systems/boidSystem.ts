@@ -1,4 +1,4 @@
-import { Vector3, type IVector3Like } from '../../libs/babylon/exports';
+import { Vector3, type IVector3Like } from '../../controllers/render/babylon/exports';
 import {
   FADE_IN,
   FADE_OUT,
@@ -15,7 +15,7 @@ import { effects } from '../../effects';
 import { FIRE_PUFF, TEX } from '../../effects/recipes';
 import { invasionEvent } from '../../events/invasion';
 import { playSfx } from '../../libs/sfx';
-import { TW_SAFEZONE } from '../../common/terrain/consts';
+import { TW_SAFEZONE } from '../../controllers/terrain/consts';
 import type { Entity, ISystemFactory } from '../world';
 
 /**

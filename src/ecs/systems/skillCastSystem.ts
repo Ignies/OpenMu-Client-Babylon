@@ -9,7 +9,7 @@ import {
   InstantMoveRequestPacket,
   TargetedSkillPacket,
   TeleportTargetPacket,
-} from '../../common/packets/ClientToServerPackets';
+} from '../../../versions/shared/packets/ClientToServerPackets';
 import { skillDefinition, type SkillDefinition } from '../../common/skillsDatabase';
 import {
   advancesSwordCount,
@@ -47,7 +47,7 @@ import { CONSECUTIVE_ATTACK_KEY } from '../../combat/skillMovement';
 import { castsInPlace, castsOnSelfOnly } from '../../combat/castTargets';
 import { PlayerAction } from '../../common/objects/enum';
 import type { CastContext } from '../../combat';
-import { Vector3 } from '../../libs/babylon/exports';
+import { Vector3 } from '../../controllers/render/babylon/exports';
 import { effects } from '../../effects';
 import { boneLocalPos } from '../../effects/core';
 import { hasWarriorGlint, warriorGlint, warriorGlintStar, WARRIOR_GLINT_BONE, WARRIOR_GLINT_TIP } from '../../common/weaponBlur';

@@ -40,7 +40,7 @@ import {
   type GreasedLineMesh,
   type IGreasedLineMaterial,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { clampAlpha } from './clampAlpha';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';

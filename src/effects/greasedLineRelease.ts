@@ -1,4 +1,4 @@
-import { GreasedLineMaterialDefaults, type GreasedLineMesh } from '../libs/babylon/exports';
+import { GreasedLineMaterialDefaults, type GreasedLineMesh } from '../controllers/render/babylon/exports';
 
 /**
  * Releases a GreasedLine mesh's material **without** taking the shared

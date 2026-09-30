@@ -1,13 +1,13 @@
 import { observable, runInAction } from 'mobx';
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 import { Store } from '../store';
 import { t } from '../i18n';
 import { ItemGroup } from '../common/itemStats';
 import {
   EventChipExitDialogPacket,
   EventChipRegistrationRequestPacket,
-} from '../common/packets/ClientToServerPackets';
-import { EventChipRegistrationResultPacket } from '../common/packets/ServerToClientPackets';
+} from '../../versions/shared/packets/ClientToServerPackets';
+import { EventChipRegistrationResultPacket } from '../../versions/shared/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
 
 /**

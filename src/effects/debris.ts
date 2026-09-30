@@ -22,7 +22,7 @@
  * Driven by: `effects.spawn('debris', …)` from `common/deathVisuals.ts`.
  * Read by: nobody.
  */
-import { Vector3, type Scene } from '../libs/babylon/exports';
+import { Vector3, type Scene } from '../controllers/render/babylon/exports';
 import { Store } from '../store';
 import { CM, LiveList, TICK, WHITE, emitBurst, type ParticleRecipe, type RGB } from './core';
 import { spawnModel, type ModelHandle } from './model';

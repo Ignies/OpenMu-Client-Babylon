@@ -1,6 +1,6 @@
 import type { World } from '../../ecs/world';
-import { loadGLTF } from '../modelLoader';
-import { ModelObject } from '../modelObject';
+import { loadGLTF } from '../../controllers/assets/modelLoader';
+import { ModelObject } from '../../controllers/render/modelObject';
 import { npcModelFile } from './npcModelTable';
 
 const cache = new Map<string, typeof ModelObject>();

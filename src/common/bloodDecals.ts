@@ -1,4 +1,4 @@
-import type { Vector3 } from '../libs/babylon/exports';
+import type { Vector3 } from '../controllers/render/babylon/exports';
 import type { World } from '../ecs/world';
 import { TerrainDecal } from './moveTargetEffect';
 

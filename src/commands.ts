@@ -6,12 +6,12 @@ import { Economy } from './economy';
 import { Messenger } from './messenger';
 import type { Entity } from './ecs/world';
 import type { CommandKind } from './common/chatCommands';
-import { GuildRelationshipTypeEnum } from './common/packets/ClientToServerPackets';
-import { GuildMemberRoleEnum } from './common/packets/ServerToClientPackets';
+import { GuildRelationshipTypeEnum } from '../versions/shared/packets/ClientToServerPackets';
+import { GuildMemberRoleEnum } from '../versions/shared/packets/ServerToClientPackets';
 import {
   DuelStartRequestPacket,
   DuelStopRequestPacket,
-} from './common/packets/ClientToServerPackets';
+} from '../versions/shared/packets/ClientToServerPackets';
 import { playUiSound } from './libs/sfx';
 import { isAttackablePlayer } from './ecs/systems/attackSystem';
 

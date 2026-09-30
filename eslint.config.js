@@ -14,7 +14,7 @@ export default tseslint.config(
       'public/**',
       'Data/**',
       // generated from OpenMU's packet XML - regenerate, never lint
-      'src/common/packets/*Packets.ts',
+      'versions/shared/packets/*Packets.ts',
       // known dead files slated for deletion 
       'src/common/walkerObject.ts',
       'src/libs/fsm/**',
@@ -48,7 +48,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['tools/**', 'proxy/**', 'src/common/packets/generate.ts', '*.config.{js,ts}'],
+    files: ['tools/**', 'proxy/**', 'versions/shared/packets/generate.ts', '*.config.{js,ts}'],
     rules: { 'no-console': 'off' },
   }
 );

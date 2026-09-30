@@ -11,7 +11,7 @@
  */
 
 import { makeAutoObservable, runInAction } from 'mobx';
-import { LocalStorage } from '../libs/localStorage';
+import { LocalStorage } from '../core/localStorage';
 import { EN_TEXT, type TextKey } from './recipes';
 import type { LanguageDataPack, LanguageLayer } from './layer';
 import type { PackRepairs } from './packRepairs';

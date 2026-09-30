@@ -3,7 +3,7 @@ import { t, type TextKey } from '../../../../../i18n';
 import { Store } from '../../../../../store';
 import { InventoryConstants } from '../../../../../common/inventoryConstants';
 import { PET_GROUP } from '../../../../../common/pets';
-import { PetCommandModeEnum } from '../../../../../common/packets/ClientToServerPackets';
+import { PetCommandModeEnum } from '../../../../../../versions/shared/packets/ClientToServerPackets';
 import { uiClick } from '../../../../../libs/sfx';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 

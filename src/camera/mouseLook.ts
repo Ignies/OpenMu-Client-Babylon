@@ -15,7 +15,7 @@
  * reports how far the mouse moved.
  */
 
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 
 let canvasElement: HTMLCanvasElement | null = null;
 

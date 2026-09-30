@@ -1,5 +1,5 @@
-import { MapTileObject } from '../../common/mapTileObject';
-import { ModelObject } from '../../common/modelObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
+import { ModelObject } from '../../controllers/render/modelObject';
 import type { Entity, World } from '../../ecs/world';
 
 /**

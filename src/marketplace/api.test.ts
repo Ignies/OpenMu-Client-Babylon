@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { SESSION_NONCE_RE, sessionNonce } from '../common/sessionNonce';
+import { SESSION_NONCE_RE, sessionNonce } from '../controllers/net/sessionNonce';
 import type { Item } from '../ecs/world';
 import { cancel, claim, list, payout, release, settle, settlePayout } from './api';
 

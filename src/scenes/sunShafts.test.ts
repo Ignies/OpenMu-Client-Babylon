@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { GeometryBufferRenderer, PostProcess } from '../libs/babylon/exports';
+import type { GeometryBufferRenderer, PostProcess } from '../controllers/render/babylon/exports';
 import type { LightingTier } from '../common/lightingQuality';
 
 type Shafts = typeof import('./sunShafts');
@@ -28,7 +28,7 @@ async function load(query = '') {
 
   const [shafts, bjs, { NullEngine }] = await Promise.all([
     import('./sunShafts'),
-    import('../libs/babylon/exports'),
+    import('../controllers/render/babylon/exports'),
     import('@babylonjs/core/Engines/nullEngine'),
   ]);
 

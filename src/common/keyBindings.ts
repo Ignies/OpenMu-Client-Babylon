@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { LocalStorage } from '../libs/localStorage';
+import { LocalStorage } from '../core/localStorage';
 import type { TextKey } from '../i18n';
 
 const KEYS_STORAGE_KEY = 'mu_keys';

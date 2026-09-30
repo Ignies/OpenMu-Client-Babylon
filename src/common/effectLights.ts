@@ -1,12 +1,12 @@
-import { TILE_CM } from './terrain/consts';
+import { TILE_CM } from '../controllers/terrain/consts';
 import {
   Color4,
   Sprite,
   SpriteManager,
   Constants,
   type Scene,
-} from '../libs/babylon/exports';
-import { downloadDataFile } from '../libs/mu/dataFolder';
+} from '../controllers/render/babylon/exports';
+import { downloadDataFile } from '../controllers/assets/mu/dataFolder';
 import { lookDirector, type LookDirector } from '../lighting/director';
 import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../effects/core';
 

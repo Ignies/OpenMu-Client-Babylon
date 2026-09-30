@@ -5,7 +5,7 @@
  * one multiply; the floor is the highest ground a live burst of the system came from.
  * Additive recipes only (the colour carries the fade).
  */
-import { ShaderStore, type Effect, type ParticleSystem } from '../libs/babylon/exports';
+import { ShaderStore, type Effect, type ParticleSystem } from '../controllers/render/babylon/exports';
 
 const FRAGMENT = 'fxGroundFadeParticles';
 

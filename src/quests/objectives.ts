@@ -11,7 +11,7 @@
  * the same databases the windows read.
  */
 import { t } from '../i18n';
-import { ConditionTypeEnum } from '../common/packets/ServerToClientPackets';
+import { ConditionTypeEnum } from '../../versions/shared/packets/ServerToClientPackets';
 
 /** A condition of a running quest: what to do and how far along it is. */
 export type QuestObjective = {

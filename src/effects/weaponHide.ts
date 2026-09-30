@@ -11,9 +11,9 @@
  *
  * Driven by: `effects.spawn('weaponHide', …)` from the skill table. Read by: nobody.
  */
-import type { AbstractMesh, Scene, Vector3 } from '../libs/babylon/exports';
+import type { AbstractMesh, Scene, Vector3 } from '../controllers/render/babylon/exports';
 import type { Entity } from '../ecs/world';
-import type { ModelObject } from '../common/modelObject';
+import type { ModelObject } from '../controllers/render/modelObject';
 import { LiveList } from './core';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 

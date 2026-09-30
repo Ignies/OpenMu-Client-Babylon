@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { EventBus } from '../../libs/eventBus';
+import { EventBus } from '../../core/eventBus';
 import { spawnHitImpact } from '../../common/impactVisuals';
 
 /**

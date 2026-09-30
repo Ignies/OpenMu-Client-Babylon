@@ -1,7 +1,7 @@
 import type { Entity, World } from '../ecs/world';
-import { Vector3 } from '../libs/babylon/exports';
-import { loadGLTF } from './modelLoader';
-import { ModelObject } from './modelObject';
+import { Vector3 } from '../controllers/render/babylon/exports';
+import { loadGLTF } from '../controllers/assets/modelLoader';
+import { ModelObject } from '../controllers/render/modelObject';
 import type { Item } from '../ecs/world';
 import { PlayerAction } from './objects/enum';
 import {

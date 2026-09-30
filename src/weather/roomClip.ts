@@ -3,7 +3,7 @@ import {
   type Effect,
   type IParticleSystem,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import type { RoomVolume } from '../lighting/profiles';
 
 /**

@@ -10,9 +10,9 @@
  * Driven by `skillCastSystem` (`beginNova` / `releaseNova`); read by it and
  * by the HUD / lighting that want the charge strength.
  */
-import type { ENUM_WORLD } from '../common/types';
-import { SkillAnimationPacket, SkillStageUpdatePacket } from '../common/packets/ServerToClientPackets';
-import { EventBus } from '../libs/eventBus';
+import type { ENUM_WORLD } from '../core/types';
+import { SkillAnimationPacket, SkillStageUpdatePacket } from '../../versions/shared/packets/ServerToClientPackets';
+import { EventBus } from '../core/eventBus';
 import type { CombatLayer } from './layer';
 import { SKILL_NOVA, SKILL_NOVA_BEGIN } from './recipes';
 

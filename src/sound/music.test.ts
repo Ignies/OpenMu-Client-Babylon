@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import {
   KanturuStateChangePacket,
   KanturuStateChangeStateTypeEnum as KanturuState,
-} from '../common/packets/ServerToClientPackets';
-import { EventBus } from '../libs/eventBus';
+} from '../../versions/shared/packets/ServerToClientPackets';
+import { EventBus } from '../core/eventBus';
 import {
   kanturuMusic,
   mapMusic,
@@ -60,7 +60,7 @@ vi.mock('./listener', () => ({
   listenerWorld: () => scene.world,
   listenerHero: () => scene.world.playerEntity,
 }));
-vi.mock('../common/worldAssets', () => ({
+vi.mock('../controllers/assets/worldAssets', () => ({
   DEVIL_SQUARE_WORLDS: [9],
   BLOOD_CASTLE_WORLDS: [11],
   CHAOS_CASTLE_WORLDS: [18],

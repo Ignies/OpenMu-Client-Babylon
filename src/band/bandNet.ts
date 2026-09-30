@@ -1,4 +1,4 @@
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 import { Store } from '../store';
 import { Social } from '../social';
 import { t, type TextKey } from '../i18n';
@@ -13,7 +13,7 @@ import {
   encodeLeave,
   encodeStart,
   encodeStop,
-} from '../common/bandProtocol';
+} from '../controllers/net/protocols/bandProtocol';
 import { instrumentById, instrumentByIndex, instrumentIndex } from '../common/instruments';
 import {
   Band,

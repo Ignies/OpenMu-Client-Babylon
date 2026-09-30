@@ -15,7 +15,7 @@
  *
  * Driven by: `effects.spawn('shroud', …)`. Read by: nobody.
  */
-import { Constants, CreatePlane, Mesh, ShaderMaterial, ShaderStore, Vector3, Vector4, type Scene } from '../libs/babylon/exports';
+import { Constants, CreatePlane, Mesh, ShaderMaterial, ShaderStore, Vector3, Vector4, type Scene } from '../controllers/render/babylon/exports';
 import type { TestScene } from '../scenes/testScene';
 import { EFFECT_RENDERING_GROUP, LiveList, clamp01, darkCardGain, fadeOut, keepDepthForEffects, pointSource, type PointSource } from './core';
 import type { EffectHandle, EffectLayer } from './layer';

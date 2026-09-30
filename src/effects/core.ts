@@ -12,16 +12,16 @@ import {
   VertexBuffer,
   type Scene,
   type Texture,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { loadEffectTexture } from '../common/moveTargetEffect';
 import { linearBufferActive } from '../common/lightModel';
-import { devQueryNumber } from '../common/devSeams';
+import { devQueryNumber } from '../core/devSeams';
 import { lookDirector } from '../lighting/director';
 import type { Entity } from '../ecs/world';
 import type { TestScene } from '../scenes/testScene';
 import { addEffectGlow, disposeEffectGlow, dropEffectGlow } from './glow';
 import { disposeSoftEdgeMasks, fadeSheetEdges, fadeSheetSides, softEdgeMask } from './softEdge';
-import { installSpriteLinearDecode } from '../libs/babylon/spriteLinear';
+import { installSpriteLinearDecode } from '../controllers/render/babylon/spriteLinear';
 import { useGroundFade } from './groundFade';
 import type { EffectHandle } from './layer';
 

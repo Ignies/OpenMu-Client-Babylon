@@ -40,7 +40,7 @@ import {
   QuestProceedRequestPacket,
   QuestSelectRequestPacket,
   QuestStateRequestPacket,
-} from '../common/packets/ClientToServerPackets';
+} from '../../versions/shared/packets/ClientToServerPackets';
 import {
   AvailableQuestsPacket,
   ConditionTypeEnum,
@@ -53,16 +53,16 @@ import {
   QuestStatePacket,
   QuestStepInfoPacket,
   RewardTypeEnum,
-} from '../common/packets/ServerToClientPackets';
-import type { ENUM_WORLD } from '../common/types';
-import { EventBus } from '../libs/eventBus';
+} from '../../versions/shared/packets/ServerToClientPackets';
+import type { ENUM_WORLD } from '../core/types';
+import { EventBus } from '../core/eventBus';
 import { playUiSound } from '../libs/sfx';
 import { Store } from '../store';
 import type { QuestLayer } from './layer';
 import { questDataReady, questProgressEntry, questProgressKeys, questWordLines, questWords } from './questData';
 import { npcDialogueOpen } from './npcDialogue';
 import { objectiveDone, objectiveText, type QuestObjective } from './objectives';
-import { devQueryNumber } from '../common/devSeams';
+import { devQueryNumber } from '../core/devSeams';
 
 // ---- 1. tuning -------------------------------------------------------------
 

@@ -8,7 +8,7 @@ import { isKey } from '../../../../../common/keyBindings';
 import { useEventBus } from '../../../../../hooks/useEventBus';
 import { playUiSound, uiClick } from '../../../../../libs/sfx';
 import { monsterDisplayName } from '../../../../../common/monstersDatabase';
-import { ConditionTypeEnum } from '../../../../../common/packets/ServerToClientPackets';
+import { ConditionTypeEnum } from '../../../../../../versions/shared/packets/ServerToClientPackets';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';

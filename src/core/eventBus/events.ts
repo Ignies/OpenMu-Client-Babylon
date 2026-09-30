@@ -1,0 +1,65 @@
+import type { IVector2Like, IVector3Like } from '../../controllers/render/babylon/exports';
+import type {
+  ConnectServerPackets,
+  ENUM_WORLD,
+  ServerToClientPackets,
+} from '../../common';
+import type { Entity } from '../../ecs/world';
+import type { With } from 'miniplex';
+
+type CSPacketKeys = (typeof ConnectServerPackets)[number]['Name'];
+type GSPacketKeys = (typeof ServerToClientPackets)[number]['Name'];
+
+export type CSEvents = Record<CSPacketKeys, DataView>;
+export type GSEvents = Record<GSPacketKeys, DataView>;
+
+export type Events = CSEvents &
+  GSEvents & {
+    wsOpened: { socket: WebSocket };
+    wsClosed: { socket: WebSocket };
+    wsError: { socket: WebSocket; error: any };
+    groundPointClicked: { point: IVector3Like };
+    requestWarp: { map: ENUM_WORLD; pos?: { x: number; y: number } };
+    warpCompleted: { map: ENUM_WORLD };
+    /** The hero started talking to an NPC; the previous NPC's windows give way (`HideAll`). */
+    npcTalkStarted: { npcType: number };
+    /** The hero sent a walk (`SendMove`): NPC windows close (`UpdateSendMoveInterface`). */
+    heroWalked: Record<string, never>;
+    /** The terrain of `map` could not be loaded; the previous map is still up. */
+    warpFailed: { map: ENUM_WORLD; error: unknown };
+    /** The look director composed its first frame on a new map. */
+    'look.mapReady': { world: ENUM_WORLD };
+    /** A lit interior (tavern) was entered or left. */
+    'look.areaChanged': { name: string | null };
+    objectDamaged: {
+      entity: With<Entity, 'transform' | 'screenPosition'>;
+      healthDamage: number;
+      shieldDamage: number;
+      kind: number;
+      isDouble: boolean;
+      isTriple: boolean;
+    };
+    /** Server asked to show an effect on an object (level-up beam, shield potion/lost). */
+    objectEffect: {
+      entity: With<Entity, 'transform'>;
+      effect: 'levelUp' | 'shieldPotion' | 'shieldLost' | 'swirl';
+    };
+    /** Local player gained experience (already applied to Store.playerData). */
+    experienceGained: { added: number; killedNetId: number };
+    /**
+     * The server answered an `IncreaseCharacterStatPoint` (already applied to
+     * Store.playerData). `added` is 0 when the point was refused.
+     */
+    statPointAnswered: { stat: number; added: number };
+    /** ObjectMessage (0x01): a speech bubble line from an object in scope. */
+    objectMessage: { netId: number; message: string };
+    /** ChatMessage (0x00): a player's chat line, addressed by name (`AssignChat`). */
+    chatMessage: { sender: string; message: string; whisper: boolean };
+    /** PlayFanfareSound (0x0F): an event sound at a map position (0 ready / 1 start / 2 end - logic.ts plays it). */
+    fanfare: { effectType: number; x: number; y: number };
+    keyPressed: string;
+    keyReleased: string;
+    /** First-person mouse look took (true) or gave back the pointer lock. */
+    mouseLookChanged: boolean;
+    pageVisibilityChanged: boolean;
+  };

@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { LocalStorage } from '../libs/localStorage';
+import { LocalStorage } from '../core/localStorage';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../consts';
 import { ServerConfig, URL_PROFILE_ID } from './serverConfig';
 

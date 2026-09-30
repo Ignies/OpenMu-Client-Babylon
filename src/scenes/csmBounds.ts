@@ -6,8 +6,8 @@ import {
   type Observer,
   type Scene,
   type TransformNode,
-} from '../libs/babylon/exports';
-import { devQuery } from '../common/devSeams';
+} from '../controllers/render/babylon/exports';
+import { devQuery } from '../core/devSeams';
 
 /**
  * The box the cascades fit their near and far planes to, bit for bit

@@ -1,8 +1,8 @@
 import { observable, runInAction } from 'mobx';
 import { GameOptions } from '../common/gameOptions';
-import { devQueryNumbers } from '../common/devSeams';
-import { serverNow } from '../common/serverTime';
-import { MiniGameOpeningStateRequestPacket } from '../common/packets/ClientToServerPackets';
+import { devQueryNumbers } from '../core/devSeams';
+import { serverNow } from '../controllers/net/serverTime';
+import { MiniGameOpeningStateRequestPacket } from '../../versions/shared/packets/ClientToServerPackets';
 import { Store, UIState } from '../store';
 import type { EventLayer } from './layer';
 import { OPENING_STATE_GAME } from './recipes';

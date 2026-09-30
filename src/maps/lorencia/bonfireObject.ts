@@ -1,4 +1,4 @@
-import { ModelObject } from '../../common/modelObject';
+import { ModelObject } from '../../controllers/render/modelObject';
 
 export class BonfireObject extends ModelObject {
   async init() {

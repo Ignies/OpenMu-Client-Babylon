@@ -13,7 +13,7 @@
  * the table in `common/weaponBlur.ts`), with the weapon bone pair as
  * `follow` / `base`. Read by: nobody.
  */
-import { Mesh, Vector3, VertexBuffer, VertexData, type Scene } from '../libs/babylon/exports';
+import { Mesh, Vector3, VertexBuffer, VertexData, type Scene } from '../controllers/render/babylon/exports';
 import type { TestScene } from '../scenes/testScene';
 import {
   LiveList,

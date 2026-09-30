@@ -25,10 +25,10 @@
  * the camera is never touched again.
  */
 
-import type { ENUM_WORLD } from '../common/types';
-import type { ArcRotateCamera, TransformNode } from '../libs/babylon/exports';
+import type { ENUM_WORLD } from '../core/types';
+import type { ArcRotateCamera, TransformNode } from '../controllers/render/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 import type { CameraLayer } from './layer';
 import { CAMERA_LAYERS } from './layers';
 import { hideHeroBody, showHeroBody } from './heroBody';

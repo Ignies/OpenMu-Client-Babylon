@@ -1,5 +1,5 @@
-import type { ENUM_WORLD } from '../common/types';
-import type { NpcWindowResponseNpcWindowEnum } from '../common/packets/ServerToClientPackets';
+import type { ENUM_WORLD } from '../core/types';
+import type { NpcWindowResponseNpcWindowEnum } from '../../versions/shared/packets/ServerToClientPackets';
 import type { QuestLayer } from './layer';
 import { QUEST_LAYERS } from './layers';
 import { loadQuestData, npcDialogueEntry, questDataReady } from './questData';

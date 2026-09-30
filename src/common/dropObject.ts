@@ -1,7 +1,7 @@
-import { type AbstractMesh, Matrix, type Mesh, Vector3 } from '../libs/babylon/exports';
+import { type AbstractMesh, Matrix, type Mesh, Vector3 } from '../controllers/render/babylon/exports';
 import type { Entity, World } from '../ecs/world';
 import { itemRestHeight, itemWornHeight } from './itemAngle';
-import { ModelObject } from './modelObject';
+import { ModelObject } from '../controllers/render/modelObject';
 import { zenCoinCount, zenCoinScatter, type ZenCoinOffset } from './zenPile';
 
 /** Centimetres per world unit - the scatter `zenPile` hands back is in cm. */

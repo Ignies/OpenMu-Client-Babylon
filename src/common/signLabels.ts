@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from './types';
+import { ENUM_WORLD } from '../core/types';
 import { t } from '../i18n';
 import type { TextKey } from '../i18n/recipes';
 

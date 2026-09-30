@@ -1,4 +1,4 @@
-import { BurstLimit, bucketFor, clientIp } from '../../src/common/rateLimit';
+import { BurstLimit, bucketFor, clientIp } from '../../src/core/rateLimit';
 import { NO_BOX, type BoxState, type Boxes } from './boxes';
 import { audit } from './db';
 import { TOKEN_TTL_S, mintEscrowToken, newBoxId, type EscrowClaims } from './escrowToken';

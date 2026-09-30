@@ -1,4 +1,4 @@
-import { CharacterClassNumber, PlayerClass } from './types';
+import { CharacterClassNumber, PlayerClass } from '../core/types';
 
 export function isFemaleClass(n: CharacterClassNumber): boolean {
   switch (n) {

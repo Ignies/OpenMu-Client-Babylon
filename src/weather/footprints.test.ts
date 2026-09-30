@@ -16,7 +16,7 @@ const made = vi.hoisted(
 
 // The shaders and their bind hook are under test. Babylon is stubbed down to
 // what building one material and one pool touches.
-vi.mock('../common/devSeams', () => ({
+vi.mock('../core/devSeams', () => ({
   devQuery: (key: string) => (key === 'printFast' ? seam.printFast : null),
 }));
 vi.mock('../lighting/keyRig', () => ({ sunLightOf: () => null }));
@@ -24,7 +24,7 @@ vi.mock('../common/lightModel', () => ({ linearBufferActive: () => false }));
 vi.mock('./recipes', () => ({
   DRAWN_SHAPES: ['boot', 'paw', 'claw', 'hoof', 'chitin', 'pad'],
 }));
-vi.mock('../libs/babylon/exports', async () => {
+vi.mock('../controllers/render/babylon/exports', async () => {
   const vectors = await import('@babylonjs/core/Maths/math.vector');
 
   class ShaderMaterial {

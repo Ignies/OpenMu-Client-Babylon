@@ -12,7 +12,7 @@
  * knock-up (`comboKnockUp`).
  */
 import type { Sounds } from '../libs/soundsManager';
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import type { CombatLayer } from './layer';
 import { SKILL_COMBO } from './recipes';
 

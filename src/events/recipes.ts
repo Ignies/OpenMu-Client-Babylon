@@ -1,5 +1,5 @@
 import { textTable, type TextKey } from '../i18n';
-import { CharacterClassNumber } from '../common/types';
+import { CharacterClassNumber } from '../core/types';
 
 /**
  * Pure data shared by the event entries: the original's `GlobalText` lines

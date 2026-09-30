@@ -2,7 +2,7 @@ import {
   createMovableFlare,
   type MovableFlare,
 } from '../../common/effectLights';
-import { MapTileObject } from '../../common/mapTileObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { lightMapObjectWith } from '../../lighting/mapObjectLights';
 import { PRIORITY_TORCH, type LightSource } from '../../lighting/lightSource';
 import { Store } from '../../store';

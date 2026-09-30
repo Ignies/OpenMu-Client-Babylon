@@ -13,7 +13,7 @@ import {
   type MultiRenderTarget,
   type Scene,
   type SubMesh,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 // Side-effect import, and the order is the whole point: this module's body is
 // `ShaderStore.ShadersStore['ssaoCombinePixelShader'] = <Babylon's version>`.
 // ESM evaluates it before this file's body, so the override below lands last;
@@ -26,9 +26,9 @@ import {
   sceneTargetSamples,
   type LightingTier,
 } from '../common/lightingQuality';
-import { devQuery, devQueryNumber, devQueryNumbers } from '../common/devSeams';
+import { devQuery, devQueryNumber, devQueryNumbers } from '../core/devSeams';
 import { GameOptions } from '../common/gameOptions';
-import { renderDistanceRanges } from '../common/renderDistance';
+import { renderDistanceRanges } from '../controllers/render/renderDistance';
 import { CSM_CASTER_REACH, drawsSolidGeometry } from './shadows';
 import { driveRenderList } from './renderList';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';

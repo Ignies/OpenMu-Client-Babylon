@@ -1,13 +1,13 @@
 import type { Entity, ISystemFactory } from '../world';
 import { Store } from '../../store';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../common/playSpeed';
-import { HitRequestPacket } from '../../common/packets/ClientToServerPackets';
+import { HitRequestPacket } from '../../../versions/shared/packets/ClientToServerPackets';
 import {
   MonsterActionType,
   ServerPlayerActionType,
 } from '../../common/objects/enum';
-import { TWFlags } from '../../common/terrain/consts';
-import { isFlagInBinaryMask } from '../../common/utils';
+import { TWFlags } from '../../controllers/terrain/consts';
+import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import { chooseAttackAction } from '../../common/weaponClass';
 import { getBaseClass } from '../../common/characterStats';
 import { isWingItem } from '../../common/wings';

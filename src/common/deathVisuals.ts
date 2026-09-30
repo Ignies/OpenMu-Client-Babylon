@@ -1,4 +1,4 @@
-import type { Scene, Vector3 } from '../libs/babylon/exports';
+import type { Scene, Vector3 } from '../controllers/render/babylon/exports';
 import { effects } from '../effects';
 import type { RGB } from '../effects/core';
 import { BOMB_SPARKS, EXPLOSION_CELLS, FIRE_PUFF, MODEL, SMOKE, TEX } from '../effects/recipes';

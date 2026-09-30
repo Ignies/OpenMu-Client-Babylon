@@ -1,7 +1,7 @@
 import { memo, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import type { Item } from '../../../ecs/world';
-import { itemIconKey, itemIconPackChain } from '../../../common/itemIconPack';
+import { itemIconKey, itemIconPackChain } from '../../../controllers/assets/itemIconPack';
 import { ITEM_ICON_FIT } from '../../../common/itemIconFit';
 import { itemLevelLook } from '../../../common/itemLevelLook';
 

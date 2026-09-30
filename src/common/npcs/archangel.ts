@@ -1,9 +1,9 @@
 import type { Entity, World } from '../../ecs/world';
-import { Vector3 } from '../../libs/babylon/exports';
+import { Vector3 } from '../../controllers/render/babylon/exports';
 import { effects } from '../../effects';
 import { TEX } from '../../effects/recipes';
-import { loadGLTF } from '../modelLoader';
-import { ModelObject } from '../modelObject';
+import { loadGLTF } from '../../controllers/assets/modelLoader';
+import { ModelObject } from '../../controllers/render/modelObject';
 import { TerrainDecal } from '../moveTargetEffect';
 import { npcModelFile } from './npcModelTable';
 

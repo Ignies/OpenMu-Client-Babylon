@@ -34,7 +34,7 @@ import {
   MATERIAL_DETAIL_MAX,
   MATERIAL_QUALITY_LABEL_KEYS,
   MATERIAL_QUALITY_MAX,
-} from '../../../common/materialQuality';
+} from '../../../controllers/render/materialQuality';
 import {
   ANIME_HALFTONE_SCALE_MAX,
   ANIME_HALFTONE_SCALE_MIN,
@@ -53,11 +53,11 @@ import {
   SHADE_STEPS_MIN,
   STYLE_STRENGTH_MAX,
   STYLE_STRENGTH_MIN,
-} from '../../../common/renderingStyle';
+} from '../../../controllers/render/renderingStyle';
 import {
   RENDER_SCALE_STEP_MAX,
   renderScaleForStep,
-} from '../../../libs/renderScale';
+} from '../../../controllers/render/renderScale';
 import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../common/lootFilter';
 import { CHAT_EMOJI_SIZE_LABEL_KEYS, CHAT_EMOJI_SIZE_MAX } from '../../../common/chatEmojis';
 import { BUS_VOLUME_MAX } from '../../../sound/buses';
@@ -68,7 +68,7 @@ import {
 import {
   RENDER_DISTANCE_MAX,
   renderDistanceRanges,
-} from '../../../common/renderDistance';
+} from '../../../controllers/render/renderDistance';
 import { t, type TextKey } from '../../../i18n';
 import {
   NEED_POST,

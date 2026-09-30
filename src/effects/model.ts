@@ -26,10 +26,10 @@ import {
   type AnimationGroup,
   type Scene,
   type Texture,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { clampAlpha } from './clampAlpha';
 import { chromeMaterial, disposeChromeMaterials } from './chrome';
-import { getMaterial, loadGLTF } from '../common/modelLoader';
+import { getMaterial, loadGLTF } from '../controllers/assets/modelLoader';
 import { BlendState } from '../common/objects/enum';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';

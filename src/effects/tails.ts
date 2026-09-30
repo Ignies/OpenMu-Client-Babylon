@@ -14,7 +14,7 @@
  * Driven by: `effects.spawn('tails', ...)` from common/skillVisuals.ts.
  * Read by: nobody.
  */
-import { Mesh, Vector3, VertexBuffer, VertexData, type Scene } from '../libs/babylon/exports';
+import { Mesh, Vector3, VertexBuffer, VertexData, type Scene } from '../controllers/render/babylon/exports';
 import type { TestScene } from '../scenes/testScene';
 import { EFFECT_RENDERING_GROUP, LiveList, WHITE, additiveMaterial, keepDepthForEffects, type RGB } from './core';
 import { addEffectGlow, releaseEffectGlow } from './glow';

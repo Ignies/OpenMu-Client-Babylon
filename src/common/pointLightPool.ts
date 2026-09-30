@@ -4,17 +4,17 @@ import {
   Color3,
   type Camera,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { GameOptions } from './gameOptions';
 import {
   directLightGain,
   pbrMaterialsOn,
   specularLightScale,
-} from './materialQuality';
+} from '../controllers/render/materialQuality';
 import { dynamicLightGain, pointLightBudget } from './lightingQuality';
-import { devQueryNumber } from './devSeams';
+import { devQueryNumber } from '../core/devSeams';
 import { lookDirector } from '../lighting/director';
-import type { TerrainLightColor, TerrainLightEmitter } from './terrainDynamicLight';
+import type { TerrainLightColor, TerrainLightEmitter } from '../controllers/terrain/terrainDynamicLight';
 
 /**
  * Torch slots this session, from the lighting tier - see `pointLightBudget`

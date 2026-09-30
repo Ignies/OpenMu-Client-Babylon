@@ -1,5 +1,5 @@
 import { BonedParticleEmitter, type BonedEmission } from '../../common/effectParticles';
-import { ModelObject } from '../../common/modelObject';
+import { ModelObject } from '../../controllers/render/modelObject';
 import type { Entity, World } from '../../ecs/world';
 
 export class CandleObject extends ModelObject {

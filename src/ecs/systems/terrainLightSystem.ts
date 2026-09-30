@@ -2,7 +2,7 @@ import type { ISystemFactory } from '../world';
 import {
   updateTerrainDynamicLight,
   uploadTerrainLightDelta,
-} from '../../common/terrainDynamicLight';
+} from '../../controllers/terrain/terrainDynamicLight';
 import {
   pointLightPoolHeldTerrain,
   updatePointLightPool,

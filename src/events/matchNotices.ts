@@ -1,13 +1,13 @@
 import { observable, runInAction } from 'mobx';
-import type { ENUM_WORLD } from '../common/types';
-import { EventBus } from '../libs/eventBus';
+import type { ENUM_WORLD } from '../core/types';
+import { EventBus } from '../core/eventBus';
 import { Notices } from '../common/notices';
 import {
   MapEventStateEventsEnum,
   MapEventStatePacket,
   UpdateMiniGameStateMiniGameTypeStateEnum,
   UpdateMiniGameStatePacket,
-} from '../common/packets/ServerToClientPackets';
+} from '../../versions/shared/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
 import { EVENT_TEXT, formatText } from './recipes';
 import { t, type TextKey } from '../i18n';

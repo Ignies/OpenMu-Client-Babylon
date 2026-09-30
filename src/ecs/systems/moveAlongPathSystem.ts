@@ -1,5 +1,5 @@
-import { TILE_CM, TWFlags } from '../../common/terrain/consts';
-import { isFlagInBinaryMask } from '../../common/utils';
+import { TILE_CM, TWFlags } from '../../controllers/terrain/consts';
+import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import { InventoryConstants } from '../../common/inventoryConstants';
 import { Store } from '../../store';
 import { BaseClass, getBaseClass } from '../../common/characterStats';

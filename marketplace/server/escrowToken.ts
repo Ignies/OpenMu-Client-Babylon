@@ -4,7 +4,7 @@ import {
   guidToBytes,
   writeInt64LE,
   type EscrowOperationName,
-} from '../../src/common/escrowWire';
+} from '../../src/controllers/net/protocols/escrowWire';
 
 /**
  * Tokens the game server's escrow plugin acts on. The service mints one per

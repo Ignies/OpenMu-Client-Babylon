@@ -3,18 +3,18 @@ import {
   PointerEventTypes,
   Ray,
   Vector3,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import {
   PlayerAction,
   ServerPlayerActionType,
 } from '../../common/objects/enum';
 import { resolveGenderedAction } from '../../common/playerActionMapper';
-import { TWFlags } from '../../common/terrain/consts';
-import { devQuery } from '../../common/devSeams';
+import { TWFlags } from '../../controllers/terrain/consts';
+import { devQuery } from '../../core/devSeams';
 import {
   findRestObject,
   type RestKind,
-} from '../../libs/mu/restObjects';
+} from '../../controllers/terrain/restObjects';
 import { aimX, aimY } from '../../camera';
 import { sound } from '../../sound';
 import { Store } from '../../store';

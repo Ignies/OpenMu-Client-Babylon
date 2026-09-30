@@ -1,4 +1,4 @@
-import { Xor32Decryptor } from '../../src/common/encryption/xor32';
+import { Xor32Decryptor } from '../../src/controllers/net/encryption/xor32';
 import { gameVersion as preSeason6 } from '../../versions/v097d';
 import {
   BAND_LIMITS,
@@ -15,7 +15,7 @@ import {
   encodeStopNotice,
   stampPerformer,
   type BandClientMessage,
-} from '../../src/common/bandProtocol';
+} from '../../src/controllers/net/protocols/bandProtocol';
 import type { TrackedSession } from '../track/session';
 import { SlidingWindow } from './window';
 

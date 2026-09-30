@@ -1,11 +1,11 @@
-import { ENUM_WORLD } from '../common/types';
-import { TW_SAFEZONE } from '../common/terrain/consts';
+import { ENUM_WORLD } from '../core/types';
+import { TW_SAFEZONE } from '../controllers/terrain/consts';
 import { SoundsManager } from '../libs/soundsManager';
 import { busGain, type SoundBus } from './buses';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerHero, listenerWorld } from './listener';
-import { KALIMA_WORLDS } from '../common/worldAssets';
+import { KALIMA_WORLDS } from '../controllers/assets/worldAssets';
 import { KALIMA_OBJECT_LOOPS } from '../maps/kalima/spec';
 
 /**

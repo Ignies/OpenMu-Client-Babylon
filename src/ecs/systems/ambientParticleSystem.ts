@@ -30,11 +30,11 @@ import {
   DEVIAS_WEST_HEARTH_HOUSE,
   type Room,
 } from '../../maps/devias/rooms';
-import { serverNow } from '../../common/serverTime';
+import { serverNow } from '../../controllers/net/serverTime';
 import { lookDirector } from '../../lighting/director';
 import { roomMaskActive } from '../../scenes/roomMask';
 import { roomClipAvailable, setRoomWeatherClip } from '../../weather/roomClip';
-import { Vector3 } from '../../libs/babylon/exports';
+import { Vector3 } from '../../controllers/render/babylon/exports';
 import { GameOptions } from '../../common/gameOptions';
 import { rainStrength, rainTarget } from '../../weather/rainState';
 import type { ISystemFactory } from '../world';

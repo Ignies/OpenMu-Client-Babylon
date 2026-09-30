@@ -1,4 +1,4 @@
-import { devQueryNumber } from '../common/devSeams';
+import { devQueryNumber } from '../core/devSeams';
 import { lightingTier } from '../common/lightingQuality';
 
 /**

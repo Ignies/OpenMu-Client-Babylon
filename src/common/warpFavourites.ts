@@ -1,5 +1,5 @@
 import { makeAutoObservable, runInAction } from 'mobx';
-import { LocalStorage } from '../libs/localStorage';
+import { LocalStorage } from '../core/localStorage';
 
 /**
  * Starred rows of the move list (`MoveReq_eng.bmd` indices), kept at the top

@@ -9,7 +9,7 @@ import {
   TransformNode,
   Vector3,
   type AbstractMesh,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import {
   CsmBounds,
   ReceiverBox,

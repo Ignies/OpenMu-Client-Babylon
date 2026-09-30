@@ -20,7 +20,7 @@ import {
   Vector3,
   Vector4,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { linearBufferActive } from '../common/lightModel';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';

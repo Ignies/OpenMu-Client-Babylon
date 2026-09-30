@@ -3,12 +3,12 @@ import {
   Vector3,
   type Scene,
   type TransformNode,
-} from '../libs/babylon/exports';
-import { ModelObject } from './modelObject';
-import { CharacterClassNumber, PlayerClass } from './types';
+} from '../controllers/render/babylon/exports';
+import { ModelObject } from '../controllers/render/modelObject';
+import { CharacterClassNumber, PlayerClass } from '../core/types';
 import { Entity, World, type Item } from '../ecs/world';
 import { PlayerAction } from './objects/enum';
-import { loadGLTF } from './modelLoader';
+import { loadGLTF } from '../controllers/assets/modelLoader';
 import { Store } from '../store';
 import {
   BACK_BONE,
@@ -25,7 +25,7 @@ import { WING_BONE, wingSpec } from './wings';
 import { ItemsDatabase } from './itemsDatabase';
 import { archangelWeapon } from './dropModelProxy';
 import { IMP_BONE, petSpec, type PetSpec } from './pets';
-import { angleLinkMatrix } from './boneLink';
+import { angleLinkMatrix } from '../controllers/render/boneLink';
 import { chooseIdleAction, isPhoenixSoulStar } from './weaponClass';
 import { getBaseClass } from './characterStats';
 import { isFemaleClass } from './mapPlayerNetClassToModelClass';

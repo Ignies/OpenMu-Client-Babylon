@@ -35,8 +35,8 @@ import {
   type Scene,
   type StandardMaterial,
   type Texture,
-} from '../libs/babylon/exports';
-import { loadGLTF } from '../common/modelLoader';
+} from '../controllers/render/babylon/exports';
+import { loadGLTF } from '../controllers/assets/modelLoader';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';
 import { clampAlpha } from './clampAlpha';

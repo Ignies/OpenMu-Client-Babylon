@@ -1,5 +1,5 @@
 import { Item } from '../ecs/world';
-import { castToByte } from './utils';
+import { castToByte } from '../controllers/assets/download';
 import { PET_GROUP, DARK_HORSE, DARK_RAVEN } from './petConstants';
 
 const LuckFlag = 4;

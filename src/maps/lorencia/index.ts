@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../../common/types';
+import { ENUM_WORLD } from '../../core/types';
 import type { MapLayer } from '../layer';
 import { ROCK02_TILES } from '../recipes';
 import {

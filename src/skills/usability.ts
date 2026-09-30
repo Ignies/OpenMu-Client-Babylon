@@ -14,10 +14,10 @@
  * (listed before this entry). Pure readers over MobX state: no clock, so no
  * `update`; nothing held, so no `reset`.
  */
-import { CharacterClassNumber } from '../common/types';
+import { CharacterClassNumber } from '../core/types';
 import { ItemsDatabase } from '../common/itemsDatabase';
 import { skillDefinition, type SkillDefinition } from '../common/skillsDatabase';
-import { TW_SAFEZONE } from '../common/terrain/consts';
+import { TW_SAFEZONE } from '../controllers/terrain/consts';
 import type { Item } from '../ecs/world';
 import type { SkillLayer } from './layer';
 import { skillCooldownRemaining } from './cooldowns';

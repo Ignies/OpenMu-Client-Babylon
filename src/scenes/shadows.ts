@@ -10,10 +10,10 @@ import {
   type RenderTargetTexture,
   type Scene,
   type ShaderMaterial,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
-import { devQueryNumber } from '../common/devSeams';
-import { toonTerrainDefines } from '../common/renderingStyle';
+import { devQueryNumber } from '../core/devSeams';
+import { toonTerrainDefines } from '../controllers/render/renderingStyle';
 import { sunLightOf } from '../lighting/keyRig';
 import {
   blobShadowRefresh,

@@ -1,5 +1,5 @@
-import { Color4, Vector3 } from '../libs/babylon/exports';
-import { ENUM_WORLD } from '../common/types';
+import { Color4, Vector3 } from '../controllers/render/babylon/exports';
+import { ENUM_WORLD } from '../core/types';
 import type { AmbientRecipe } from '../common/ambientParticles';
 import type { AmbientSchedule } from './ambientSchedule';
 import { maps } from '../maps';

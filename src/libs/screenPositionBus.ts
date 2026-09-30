@@ -1,4 +1,4 @@
-import type { IVector2Like } from './babylon/exports';
+import type { IVector2Like } from '../controllers/render/babylon/exports';
 import type { Entity } from '../ecs/world';
 
 /**

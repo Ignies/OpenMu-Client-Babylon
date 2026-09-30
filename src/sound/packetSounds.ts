@@ -1,7 +1,7 @@
 import type { MonsterAttackState } from '../common/monsterAttackClip';
 import { ServerPlayerActionType as S } from '../common/objects/enum';
 import { REFERENCE_FPS } from '../common/playSpeed';
-import { ENUM_WORLD as W } from '../common/types';
+import { ENUM_WORLD as W } from '../core/types';
 import type { SoundBus } from './buses';
 import type { SfxOptions } from './listener';
 import type { Sounds } from './recipes';

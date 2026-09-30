@@ -3,7 +3,7 @@ import type {
   Observer,
   RenderTargetTexture,
   Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 
 /**
  * A render list filled from a predicate without Babylon's per-frame dirty

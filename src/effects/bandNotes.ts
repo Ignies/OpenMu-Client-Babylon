@@ -29,7 +29,7 @@ import {
   Texture,
   Vector3,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import {
   LiveList,
   acquireCard,

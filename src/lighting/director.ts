@@ -2,8 +2,8 @@ import {
   Observable,
   type ArcRotateCamera,
   type Scene,
-} from '../libs/babylon/exports';
-import { ENUM_WORLD } from '../common/types';
+} from '../controllers/render/babylon/exports';
+import { ENUM_WORLD } from '../core/types';
 import { GameOptions } from '../common/gameOptions';
 import { lightingTier, tierIndex } from '../common/lightingQuality';
 import {
@@ -11,16 +11,16 @@ import {
   renderingStyle,
   styleIndex,
   syncRenderingStyle,
-} from '../common/renderingStyle';
+} from '../controllers/render/renderingStyle';
 import { linearBufferActive } from '../common/lightModel';
 import {
   directLightGain,
   pbrMaterialsOn,
   specularLightScale,
-} from '../common/materialQuality';
-import { devQueryNumber, devQueryNumbers } from '../common/devSeams';
+} from '../controllers/render/materialQuality';
+import { devQueryNumber, devQueryNumbers } from '../core/devSeams';
 import { maps } from '../maps';
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 import {
   DEFAULT_SUN_DIRECTION,
   setKey,

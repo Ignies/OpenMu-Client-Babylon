@@ -11,7 +11,7 @@
  * / `skills.buffRemaining`, and by the usability rules (`usability.ts`).
  */
 import { reaction } from 'mobx';
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import type { SkillLayer } from './layer';
 import { buffRecipe, type BuffKind } from './recipes';
 import { Store } from '../store';

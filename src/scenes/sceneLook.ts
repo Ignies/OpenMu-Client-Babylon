@@ -5,11 +5,11 @@ import {
   type RenderTargetTexture,
   type Scene,
   type Texture,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { driveRenderList } from './renderList';
 import { GameOptions, onGameOptionsChanged } from '../common/gameOptions';
-import { onTexturePackChanged } from '../common/texturePacks';
-import { syncTexturePack } from '../common/modelLoader';
+import { onTexturePackChanged } from '../controllers/assets/texturePacks';
+import { syncTexturePack } from '../controllers/assets/modelLoader';
 import {
   itemHaloAt,
   itemGlowClock,
@@ -20,9 +20,9 @@ import {
   meshTakesPbrMaps,
   pbrDetailStrength,
   pbrMaterialsOn,
-} from '../common/materialQuality';
-import { pbrMapsIfReady } from '../common/pbrMaps';
-import { syncMaterialQuality } from '../common/modelLoader';
+} from '../controllers/render/materialQuality';
+import { pbrMapsIfReady } from '../controllers/render/pbrMaps';
+import { syncMaterialQuality } from '../controllers/assets/modelLoader';
 import { syncPbrDetail } from '../common/itemMaterial';
 import { installMaterialDebug } from './materialDebug';
 import { lookDirector } from '../lighting/director';

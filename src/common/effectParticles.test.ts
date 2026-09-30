@@ -10,7 +10,7 @@ const fakes = vi.hoisted(() => ({ sprites: [] as FakeSprite[] }));
 
 // Babylon's sprites, the data folder and the effects layer are stubbed: the
 // real ones need a GPU scene, and `maps` / `effects/core` reach the store.
-vi.mock('../libs/babylon/exports', () => {
+vi.mock('../controllers/render/babylon/exports', () => {
   class Color4 {
     constructor(
       public r = 0,
@@ -71,7 +71,7 @@ vi.mock('../libs/babylon/exports', () => {
 
   return { Color4, Constants: { ALPHA_ONEONE: 1, ALPHA_SUBTRACT: 3 }, Sprite, SpriteManager };
 });
-vi.mock('../libs/mu/dataFolder', () => ({
+vi.mock('../controllers/assets/mu/dataFolder', () => ({
   hasDataFile: () => true,
   downloadDataFile: async () => new Uint8Array(32),
 }));
@@ -82,7 +82,7 @@ vi.mock('../effects/core', () => ({
   spriteLevel: (_scene: unknown, color: unknown) => color,
   darkCardGain: () => 1,
 }));
-vi.mock('./devSeams', () => ({ devQuery: () => null, devQueryNumber: () => null }));
+vi.mock('../core/devSeams', () => ({ devQuery: () => null, devQueryNumber: () => null }));
 
 import {
   BonedParticleEmitter,
@@ -92,8 +92,8 @@ import {
   spawnParticle,
   type KindName,
 } from './effectParticles';
-import { publishViewPlanes, type ViewPlane } from './viewPlanes';
-import type { Scene } from '../libs/babylon/exports';
+import { publishViewPlanes, type ViewPlane } from '../controllers/render/viewPlanes';
+import type { Scene } from '../controllers/render/babylon/exports';
 
 let deltaMs = 40;
 let tick: (() => void) | null = null;

@@ -6,9 +6,9 @@ import {
   Texture,
   type ArcRotateCamera,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
-import { devQueryNumber } from '../common/devSeams';
+import { devQueryNumber } from '../core/devSeams';
 import type { LookProfile, Rgb } from '../lighting/profiles';
 
 /**

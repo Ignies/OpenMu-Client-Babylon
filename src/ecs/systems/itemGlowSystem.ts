@@ -10,7 +10,7 @@ import {
   itemEffectSignature,
 } from '../../common/itemEffectMode';
 import type { PlayerObject } from '../../common/playerObject';
-import type { ModelObject } from '../../common/modelObject';
+import type { ModelObject } from '../../controllers/render/modelObject';
 import {
   createItemAura,
   type ItemAura,
@@ -21,9 +21,9 @@ import { createItemCrackle, type ItemCrackle } from '../../effects/itemCrackle';
 import type { ItemSparkleKind } from '../../effects/itemSparkle';
 import { effects, type EffectHandle } from '../../effects';
 import { bonePos, entityGone, entityPos, entityYaw, followEntity, tmpA } from '../../effects/core';
-import type { Vector3 } from '../../libs/babylon/exports';
+import type { Vector3 } from '../../controllers/render/babylon/exports';
 import { requestGlowProbe } from '../../scenes/sceneLook';
-import { EventBus } from '../../libs/eventBus';
+import { EventBus } from '../../core/eventBus';
 import { itemSelfLight, lightItem, type ItemLampKind } from '../../lighting/items';
 import type { LightSource } from '../../lighting/lightSource';
 

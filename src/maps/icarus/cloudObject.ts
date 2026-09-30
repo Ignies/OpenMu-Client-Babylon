@@ -1,7 +1,7 @@
-import { TILE_CM } from '../../common/terrain/consts';
-import { Sprite, type Scene } from '../../libs/babylon/exports';
+import { TILE_CM } from '../../controllers/terrain/consts';
+import { Sprite, type Scene } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
-import { HIDDEN_MESH_ALL, ModelObject } from '../../common/modelObject';
+import { HIDDEN_MESH_ALL, ModelObject } from '../../controllers/render/modelObject';
 import { spriteLevel } from '../../effects/core';
 import {
   CLOUD_LIGHT_TEXTURE,

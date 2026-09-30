@@ -1,7 +1,7 @@
 import { inDevilSquare } from './locomotion';
 import { MonsterActionType as A } from './objects/enum';
 import { REFERENCE_FPS } from './playSpeed';
-import { ENUM_WORLD as W } from './types';
+import { ENUM_WORLD as W } from '../core/types';
 
 // SetPlayerAttack / SetPlayerMagic for a body that is not MODEL_PLAYER (ZzzCharacter.cpp:1222-1348)
 // with their map hooks, and the monster side of ReceiveMagic (0x19) and ReceiveMagicContinue (0x1E).

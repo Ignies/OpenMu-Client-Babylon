@@ -1,5 +1,5 @@
-import { Vector3, type Scene } from '../../libs/babylon/exports';
-import { EventBus } from '../../libs/eventBus';
+import { Vector3, type Scene } from '../../controllers/render/babylon/exports';
+import { EventBus } from '../../core/eventBus';
 import { playBurst, type BurstKind } from '../../effects/bursts';
 import { playUiSound } from '../../sound/ui';
 import { TerrainDecal } from '../../common/moveTargetEffect';

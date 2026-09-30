@@ -26,9 +26,9 @@ import {
   SpriteManager,
   Vector3,
   type Scene,
-} from '../libs/babylon/exports';
-import { TILE_CM } from '../common/terrain/consts';
-import { downloadDataFile } from '../libs/mu/dataFolder';
+} from '../controllers/render/babylon/exports';
+import { TILE_CM } from '../controllers/terrain/consts';
+import { downloadDataFile } from '../controllers/assets/mu/dataFolder';
 import type { Entity } from '../ecs/world';
 import { boneLocalPos, entityGone, spriteLevel } from './core';
 import { TEX } from './recipes';

@@ -10,8 +10,8 @@
  * crackles; it asks this entry for the light and writes the wearer's
  * `SelfLight` from `itemSelfLight`.
  */
-import type { Scene } from '../libs/babylon/exports';
-import type { TerrainLightColor } from '../common/terrainDynamicLight';
+import type { Scene } from '../controllers/render/babylon/exports';
+import type { TerrainLightColor } from '../controllers/terrain/terrainDynamicLight';
 import {
   itemGlowClock,
   itemLightColorAt,

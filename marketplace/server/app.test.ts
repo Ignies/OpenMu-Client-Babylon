@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
 import { randomUUID } from 'node:crypto';
-import { bytesToGuid, readInt64LE } from '../../src/common/escrowWire';
+import { bytesToGuid, readInt64LE } from '../../src/controllers/net/protocols/escrowWire';
 import './testDb';
 import type { BoxState } from './boxes';
 import { db } from './db';

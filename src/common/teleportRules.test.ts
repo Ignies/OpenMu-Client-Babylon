@@ -7,7 +7,7 @@ import {
   TeleportGate,
   type TeleportCheck,
 } from './teleportRules';
-import { TW_ACTION, TW_HEIGHT, TW_NOMOVE, TW_SAFEZONE, TW_WATER } from './terrain/consts';
+import { TW_ACTION, TW_HEIGHT, TW_NOMOVE, TW_SAFEZONE, TW_WATER } from '../controllers/terrain/consts';
 
 const check = (over: Partial<TeleportCheck> = {}): TeleportCheck => ({
   from: { x: 100, y: 100 },

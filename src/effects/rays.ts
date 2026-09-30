@@ -14,7 +14,7 @@
  *
  * Driven by: `effects.spawn('rays', ...)`. Read by: nobody.
  */
-import type { Scene, Vector3 } from '../libs/babylon/exports';
+import type { Scene, Vector3 } from '../controllers/render/babylon/exports';
 import { LiveList, TICK, fadeOut, type RGB } from './core';
 import { disposeLine, makeLine } from './joint';
 import type { EffectHandle, EffectLayer } from './layer';

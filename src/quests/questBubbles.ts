@@ -11,7 +11,7 @@
  *   it now, and this NPC gives it.
  * - `question`: the quest is in progress (bring the items back here).
  */
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import type { EmojiBubbleId } from '../common/emojiBubbles';
 import { startEmojiBubble } from '../ecs/systems/emojiBubbleSystem';
 import { Store } from '../store';

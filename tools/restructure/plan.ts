@@ -17,12 +17,14 @@ const ALIASES: [string, string][] = [
 /** Expands file/folder moves into a file-level old -> new map. */
 export function expandMoves(files: readonly string[], moves: readonly Move[]): Map<string, string> {
   const out = new Map<string, string>();
-  for (const { from, to } of moves) {
+  // Longest source first: a file move inside a moved folder wins over the folder.
+  const ordered = [...moves].sort((a, b) => b.from.length - a.from.length);
+  for (const { from, to } of ordered) {
     const hit = files.filter(f => f === from || f.startsWith(from + '/'));
     if (!hit.length) throw new Error(`move source not found: ${from}`);
     for (const f of hit) {
-      if (out.has(f)) throw new Error(`file moved twice: ${f}`);
-      out.set(f, to + f.slice(from.length));
+      if (f === from && out.has(f)) throw new Error(`file moved twice: ${f}`);
+      if (!out.has(f)) out.set(f, to + f.slice(from.length));
     }
   }
   const targets = new Set(out.values());

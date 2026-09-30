@@ -1,5 +1,5 @@
 import type { TextKey } from '../i18n';
-import type { BmdLink } from './boneLink';
+import type { BmdLink } from '../controllers/render/boneLink';
 import { PlayerAction } from './objects/enum';
 
 /**

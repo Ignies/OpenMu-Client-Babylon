@@ -1,5 +1,5 @@
 import type { Item } from '../ecs/world';
-import { CharacterClassNumber } from '../common/types';
+import { CharacterClassNumber } from '../core/types';
 import { getBaseClass, BaseClass } from '../common/characterStats';
 import { isFemaleClass } from '../common/mapPlayerNetClassToModelClass';
 import {

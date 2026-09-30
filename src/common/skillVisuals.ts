@@ -1,5 +1,5 @@
-import { Matrix, Quaternion, Vector3 } from '../libs/babylon/exports';
-import type { Scene } from '../libs/babylon/exports';
+import { Matrix, Quaternion, Vector3 } from '../controllers/render/babylon/exports';
+import type { Scene } from '../controllers/render/babylon/exports';
 import type { Entity } from '../ecs/world';
 import { lighting } from '../lighting';
 import { effectLight } from '../lighting/recipes';
@@ -84,17 +84,17 @@ import { skillDefinition, type SkillDefinition } from './skillsDatabase';
 import { storeRef } from './storeRef';
 import { BLAST_LIGHT, BOSS_LASER_LIGHT, HELLFIRE_CIRCLE_LIGHT, METEOR_LIGHT, SUMMON_ARRIVAL_LIGHT } from '../lighting/skills';
 import { tierIndex } from './lightingQuality';
-import { TWFlags } from './terrain/consts';
+import { TWFlags } from '../controllers/terrain/consts';
 import { COMBAT_BUS, playSfx } from '../sound';
 import { earthQuake } from '../camera';
-import { warmGLTF } from './modelLoader';
-import { ENUM_WORLD } from './types';
-import { TW_NOGROUND, TW_NOMOVE, TW_WATER } from './terrain/consts';
+import { warmGLTF } from '../controllers/assets/modelLoader';
+import { ENUM_WORLD } from '../core/types';
+import { TW_NOGROUND, TW_NOMOVE, TW_WATER } from '../controllers/terrain/consts';
 import { DARK_LORD_MASTER_ALIASES, MAGIC_GLADIATOR_MASTER_ALIASES } from './skillAliases';
 import { LEFT_HAND_BONE, RIGHT_HAND_BONE } from './weaponAttachment';
 import { GROUP_BOW, GROUP_SHIELD } from './weaponClass';
 import { novaStageOf } from '../combat/novaCharge';
-import { createAngleDeg, turnAngle } from './turnAngle';
+import { createAngleDeg, turnAngle } from '../core/turnAngle';
 
 /**
  * Skill → visual recipe. The **consumer** of the effects layer

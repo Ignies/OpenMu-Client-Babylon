@@ -1,17 +1,17 @@
-import { Matrix } from '../libs/babylon/exports';
+import { Matrix } from '../controllers/render/babylon/exports';
 import {
   angleLinkMatrix,
   angleMatrix,
   concatTransforms,
   toBabylon,
   type BmdLink,
-} from './boneLink';
+} from '../controllers/render/boneLink';
 import { BaseClass, getBaseClass } from './characterStats';
 import { PlayerAction } from './objects/enum';
 import { RAGEFIGHTER_STOP_SPEED } from './playSpeed';
-import type { PartPose } from './modelObject';
+import type { PartPose } from '../controllers/render/modelObject';
 import type { PlayerObject } from './playerObject';
-import type { CharacterClassNumber } from './types';
+import type { CharacterClassNumber } from '../core/types';
 import type { Item } from '../ecs/world';
 import {
   GROUP_BOW,

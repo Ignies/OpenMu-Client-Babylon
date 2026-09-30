@@ -11,7 +11,7 @@
  * for its own reason (an operate box, a stowed weapon) stays hidden.
  */
 
-import type { AbstractMesh, TransformNode } from '../libs/babylon/exports';
+import type { AbstractMesh, TransformNode } from '../controllers/render/babylon/exports';
 import { HERO_RESCAN_SECONDS } from './recipes';
 
 const hidden: AbstractMesh[] = [];

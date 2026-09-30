@@ -4,7 +4,7 @@ import { gameVersion } from '../version';
 import { skillDefinition } from '../common/skillsDatabase';
 import { calcMaxDurability, isJewel, itemDef } from '../common/itemStats';
 import { InventoryConstants } from '../common/inventoryConstants';
-import { PetCommandModeEnum } from '../common/packets/ClientToServerPackets';
+import { PetCommandModeEnum } from '../../versions/shared/packets/ClientToServerPackets';
 import { isAttackableEntity } from '../ecs/systems/attackSystem';
 import type { Entity, World } from '../ecs/world';
 import { ensureMuHelperWatching, MuHelperState } from './state';

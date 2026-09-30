@@ -19,7 +19,7 @@
  * calling a facade command. If a packet feeds it, subscribe here.
  */
 import { observable, runInAction } from 'mobx';
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { Item } from '../ecs/world';
 import type { EventLayer } from './layer';
 

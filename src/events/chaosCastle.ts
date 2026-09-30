@@ -1,12 +1,12 @@
 import { observable, runInAction } from 'mobx';
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { Item } from '../ecs/world';
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 import { Store } from '../store';
 import {
   ChaosCastleEnterRequestPacket,
   MiniGameOpeningStateRequestPacket,
-} from '../common/packets/ClientToServerPackets';
+} from '../../versions/shared/packets/ClientToServerPackets';
 import {
   BloodCastleStatePacket,
   BloodCastleStateStatusEnum,
@@ -14,7 +14,7 @@ import {
   ChaosCastleEnterResultPacket,
   MiniGameOpeningStatePacket,
   MiniGameScoreTablePacket,
-} from '../common/packets/ServerToClientPackets';
+} from '../../versions/shared/packets/ServerToClientPackets';
 import { playSfx } from '../libs/sfx';
 import {
   PILLAR_TYPE,

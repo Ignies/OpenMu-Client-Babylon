@@ -6,7 +6,7 @@ import {
   Texture,
   VertexData,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { linearBufferActive } from '../common/lightModel';
 import { lookDirector, type LookDirector, type LookState } from './director';
 import { profileFor, toLinear, type Rgb, type SkylineLook } from './profiles';

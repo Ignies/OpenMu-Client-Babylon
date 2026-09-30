@@ -4,11 +4,11 @@ import {
   Texture,
   type Effect,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
-import { devQueryNumber } from '../common/devSeams';
+import { devQueryNumber } from '../core/devSeams';
 import { lightingTier, tierIndex } from '../common/lightingQuality';
-import { serverNow } from '../common/serverTime';
+import { serverNow } from '../controllers/net/serverTime';
 
 /**
  * The cloud field (sky_atmospherics ARCHITECTURE §4): one producer, read by

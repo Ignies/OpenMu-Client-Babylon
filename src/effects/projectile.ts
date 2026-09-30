@@ -14,7 +14,7 @@
  * Driven by: `effects.spawn('projectile', …)`. Read by: nobody; `onArrive`
  * is the callback the skill table uses to fire the impact.
  */
-import { Vector3, type Scene } from '../libs/babylon/exports';
+import { Vector3, type Scene } from '../controllers/render/babylon/exports';
 import {
   Emitter,
   LiveList,

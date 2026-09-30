@@ -1,7 +1,7 @@
 import { ParticleEmitter } from '../../common/effectParticles';
-import { loadGLTF } from '../../common/modelLoader';
-import { ModelObject } from '../../common/modelObject';
-import { Rand } from '../../common/rand';
+import { loadGLTF } from '../../controllers/assets/modelLoader';
+import { ModelObject } from '../../controllers/render/modelObject';
+import { Rand } from '../../core/rand';
 import type { Entity, World } from '../../ecs/world';
 
 /** 25 Hz, the tick `FPS_ANIMATION_FACTOR` is measured in. */

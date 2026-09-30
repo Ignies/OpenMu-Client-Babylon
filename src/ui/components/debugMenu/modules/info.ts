@@ -1,5 +1,5 @@
 import { registerDebugModule, type DebugRow } from '../../../../common/debugMenu';
-import { ENUM_WORLD } from '../../../../common/types';
+import { ENUM_WORLD } from '../../../../core/types';
 import { Store } from '../../../../store';
 
 /**

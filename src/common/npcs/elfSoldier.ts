@@ -1,10 +1,10 @@
 import type { Entity, World } from '../../ecs/world';
 import { PlayerAction } from '../objects/enum';
-import { Scene, TransformNode } from '../../libs/babylon/exports';
-import { loadGLTF } from '../modelLoader';
+import { Scene, TransformNode } from '../../controllers/render/babylon/exports';
+import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { ItemGroups } from '../objects/enum';
 import { PlayerObject } from '../playerObject';
-import { CharacterClassNumber, PlayerClass } from '../types';
+import { CharacterClassNumber, PlayerClass } from '../../core/types';
 import { WINGS_OF_SPIRITS, WING_GROUP } from '../wings';
 
 const lvl = 9;

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { AbstractMesh, GlowLayer, RenderTargetTexture } from '../libs/babylon/exports';
+import type { AbstractMesh, GlowLayer, RenderTargetTexture } from '../controllers/render/babylon/exports';
 
 type Glow = typeof import('./glow');
 
@@ -12,7 +12,7 @@ async function load(query = '') {
 
   const [glow, bjs, { NullEngine }] = await Promise.all([
     import('./glow'),
-    import('../libs/babylon/exports'),
+    import('../controllers/render/babylon/exports'),
     import('@babylonjs/core/Engines/nullEngine'),
   ]);
 

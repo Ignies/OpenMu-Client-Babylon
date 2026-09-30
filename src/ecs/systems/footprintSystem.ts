@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../../common/types';
+import { ENUM_WORLD } from '../../core/types';
 import { GameOptions } from '../../common/gameOptions';
 import {
   FADE_STEPS,
@@ -14,7 +14,7 @@ import {
 import { trackFor, type TrackRecipe } from '../../weather/recipes';
 import { monsterModelTypeOf } from '../../common/playSpeed';
 import { weather } from '../../weather';
-import { isTileOpen } from '../../libs/mu/terrainMask';
+import { isTileOpen } from '../../controllers/terrain/terrainMask';
 import { onSnowGround } from '../../weather/snowSink';
 import { SNOW_GROUND_MAPS } from '../../weather/snowCover';
 import { RUN_THRESHOLD } from '../../common/locomotion';

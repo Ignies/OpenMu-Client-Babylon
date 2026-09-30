@@ -1,4 +1,4 @@
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import { lighting } from '../lighting';
 import type { LightSource } from '../lighting/lightSource';
 import { SoundsManager } from '../libs/soundsManager';

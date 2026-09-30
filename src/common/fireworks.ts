@@ -1,4 +1,4 @@
-import { Vector3, type Scene } from '../libs/babylon/exports';
+import { Vector3, type Scene } from '../controllers/render/babylon/exports';
 import { delay, effects, fxNow } from '../effects';
 import { CM, TICK, type ParticleRecipe, type PointSource, type RGB } from '../effects/core';
 import { spawnModel } from '../effects/model';

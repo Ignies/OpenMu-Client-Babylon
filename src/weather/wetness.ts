@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { WeatherLayer } from './layer';
 import { rainStrength, rainTarget } from './rainState';
 

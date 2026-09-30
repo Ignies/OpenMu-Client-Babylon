@@ -6,9 +6,9 @@ import {
   Vector3,
   type ArcRotateCamera,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import type { LightingTier } from '../common/lightingQuality';
-import { speedLineStrength } from '../common/renderingStyle';
+import { speedLineStrength } from '../controllers/render/renderingStyle';
 
 /**
  * Speed lines (rendering_style ARCHITECTURE 2.6): sole owner of the radial

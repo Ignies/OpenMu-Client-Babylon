@@ -6,7 +6,7 @@ import {
   Quaternion,
   StandardMaterial,
   Vector3,
-} from '../../libs/babylon/exports';
+} from '../../controllers/render/babylon/exports';
 import type { ISystemFactory } from '../world';
 
 const vec3Tmp = new Vector3();

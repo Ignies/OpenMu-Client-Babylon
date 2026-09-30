@@ -1,10 +1,10 @@
-import { Vector3 } from '../../libs/babylon/exports';
-import { angleLinkMatrix } from '../../common/boneLink';
-import { devQuery, devQueryNumbers } from '../../common/devSeams';
-import type { BmdLink } from '../../common/boneLink';
+import { Vector3 } from '../../controllers/render/babylon/exports';
+import { angleLinkMatrix } from '../../controllers/render/boneLink';
+import { devQuery, devQueryNumbers } from '../../core/devSeams';
+import type { BmdLink } from '../../controllers/render/boneLink';
 import { instrumentById, instrumentParts, isInstrumentId, type InstrumentPart } from '../../common/instruments';
-import { loadGLTF } from '../../common/modelLoader';
-import { ModelObject } from '../../common/modelObject';
+import { loadGLTF } from '../../controllers/assets/modelLoader';
+import { ModelObject } from '../../controllers/render/modelObject';
 import type { PlayerAction } from '../../common/objects/enum';
 import { isStandingIdle } from '../../common/playerActionMapper';
 import type { PlayerObject } from '../../common/playerObject';

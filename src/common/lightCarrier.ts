@@ -1,4 +1,4 @@
-import { ModelObject } from './modelObject';
+import { ModelObject } from '../controllers/render/modelObject';
 
 /**
  * A map object's lights without its body.

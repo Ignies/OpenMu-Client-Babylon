@@ -6,7 +6,7 @@
  * files is the whole switch. Export exactly these names (the dispatcher in
  * `libs/sockets/createSocket.ts` reads them).
  */
-export { ServerToClientPackets } from '../../../src/common/packets/ServerToClientPackets';
+export { ServerToClientPackets } from '../../shared/packets/ServerToClientPackets';
 export { ChangeMapServerInfoPacket } from '../../season6/packets/mapServerMove';
-export { ConnectServerPackets } from '../../../src/common/packets/ConnectServerPackets';
-export { ClientToServerPackets } from '../../../src/common/packets/ClientToServerPackets';
+export { ConnectServerPackets } from '../../shared/packets/ConnectServerPackets';
+export { ClientToServerPackets } from '../../shared/packets/ClientToServerPackets';

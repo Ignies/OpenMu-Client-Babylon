@@ -12,7 +12,7 @@
  * Driven by: `effects.spawn('itemSparkle', …)` from
  * `ecs/systems/itemGlowSystem.ts` (excellent drops and wearers). Read by: nobody.
  */
-import { Vector3, type Scene } from '../libs/babylon/exports';
+import { Vector3, type Scene } from '../controllers/render/babylon/exports';
 import { LiveList, TICK, emitBurst, pointSource, type PointSource } from './core';
 import { SHINY_GLINT } from './recipes';
 import type { EffectHandle, EffectLayer } from './layer';

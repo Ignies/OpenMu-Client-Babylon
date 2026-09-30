@@ -13,7 +13,7 @@
  * running app (`loadVersionUi`), never from the boot path. The version's
  * `index.ts` may not.
  */
-import { ENUM_WORLD } from '../../../src/common/types';
+import { ENUM_WORLD } from '../../../src/core/types';
 import { LoginPage } from '../../../src/ui/pages/loginPage';
 import { CharactersPage } from '../../../src/ui/pages/charactersPage';
 import type { PregameUi } from '../../../src/version/uiContract';

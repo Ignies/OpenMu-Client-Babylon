@@ -2,7 +2,7 @@ import {
   createMovableFlare,
   type MovableFlare,
 } from '../../common/effectLights';
-import { MapTileObject } from '../../common/mapTileObject';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
 import { Store } from '../../store';
 import type { Entity, World } from '../../ecs/world';
 import { findBone, bonePosed, type BoneNode } from './bones';

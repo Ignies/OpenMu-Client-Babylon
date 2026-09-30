@@ -3,10 +3,10 @@ import {
   ShaderMaterial,
   ShaderStore,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { CreateSphereVertexData } from '@babylonjs/core/Meshes/Builders/sphereBuilder';
 import { linearBufferActive } from '../common/lightModel';
-import { devQueryNumber } from '../common/devSeams';
+import { devQueryNumber } from '../core/devSeams';
 import { lookDirector, type LookDirector, type LookState } from './director';
 import {
   bindClouds,

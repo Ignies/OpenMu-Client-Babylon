@@ -18,7 +18,7 @@
  * names (GuildJoinRequestPacket, TradeRequestPacket, ...) in both directions,
  * so a wildcard re-export would be ambiguous.
  */
-import { ServerToClientPackets as generated } from '../../../src/common/packets/ServerToClientPackets';
+import { ServerToClientPackets as generated } from '../../shared/packets/ServerToClientPackets';
 import { ChangeMapServerInfoPacket } from './mapServerMove';
 import { BandRelayPacket } from './bandRelay';
 import { PingRelayPacket } from './pingRelay';
@@ -26,5 +26,5 @@ import { PingRelayPacket } from './pingRelay';
 /** The generated set plus the hand-written map-server move (C1 B1 00) and the proxy's relays (C1 FA band, C1 FB ping). */
 export const ServerToClientPackets = [...generated, ChangeMapServerInfoPacket, BandRelayPacket, PingRelayPacket];
 export { ChangeMapServerInfoPacket, BandRelayPacket, PingRelayPacket };
-export { ConnectServerPackets } from '../../../src/common/packets/ConnectServerPackets';
-export { ClientToServerPackets } from '../../../src/common/packets/ClientToServerPackets';
+export { ConnectServerPackets } from '../../shared/packets/ConnectServerPackets';
+export { ClientToServerPackets } from '../../shared/packets/ClientToServerPackets';

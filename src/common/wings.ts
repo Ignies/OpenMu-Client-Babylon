@@ -1,6 +1,6 @@
-import { Matrix } from '../libs/babylon/exports';
+import { Matrix } from '../controllers/render/babylon/exports';
 import type { Item } from '../ecs/world';
-import { angleLinkMatrix, type BmdLink } from './boneLink';
+import { angleLinkMatrix, type BmdLink } from '../controllers/render/boneLink';
 import type { HeldTexture } from './effectParticles';
 
 /**

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { itemDef } from './itemStats';
 import { emptyAppearance, deserializeAppearance } from './deserializeAppearance';
 import { CAPE_BONE, WING_BONE, wingBone, wingSpec } from './wings';
-import { CharacterClassNumber } from './types';
+import { CharacterClassNumber } from '../core/types';
 
 function defOf(group: number, num: number) {
   const def = itemDef(group, num);

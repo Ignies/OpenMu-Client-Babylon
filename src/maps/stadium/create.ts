@@ -1,4 +1,4 @@
-import { assetWorldNum } from '../../common/worldAssets';
+import { assetWorldNum } from '../../controllers/assets/worldAssets';
 import { prefetchSignPlates } from '../../common/signPlates';
 import { SignObject } from '../../common/signObject';
 import { signTypes } from '../../common/signLabels';

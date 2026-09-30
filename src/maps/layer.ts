@@ -1,4 +1,4 @@
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import type { World } from '../ecs/world';
 import type { Emission } from '../common/effectParticles';
 

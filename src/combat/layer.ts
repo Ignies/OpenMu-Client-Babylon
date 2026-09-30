@@ -1,4 +1,4 @@
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 
 /**
  * The contract every combat-timing entry implements. One file per entry, one

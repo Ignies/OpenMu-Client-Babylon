@@ -1,11 +1,11 @@
-import { ENUM_WORLD } from '../../common/types';
+import { ENUM_WORLD } from '../../core/types';
 import {
   flushTerrainMask,
   isRoofSlab,
   paintRoof,
   resetTerrainMask,
-} from '../../libs/mu/terrainMask';
-import { needsTerrainMask } from '../../libs/mu/terrainOverlay';
+} from '../../controllers/terrain/terrainMask';
+import { needsTerrainMask } from '../../controllers/terrain/terrainOverlay';
 import { DEVIAS_ROOMS } from '../../maps/devias/rooms';
 import type { ISystemFactory } from '../world';
 

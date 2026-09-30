@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DuelStartResultDuelStartResultTypeEnum as DuelStartResult } from '../common/packets/ServerToClientPackets';
+import { DuelStartResultDuelStartResultTypeEnum as DuelStartResult } from '../../versions/shared/packets/ServerToClientPackets';
 import {
   duelStartFailureKey,
   orientPair,

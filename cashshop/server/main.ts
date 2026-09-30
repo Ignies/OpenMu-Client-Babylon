@@ -6,7 +6,7 @@ import { GACHA_POOL, newSeed, roll } from './gacha';
 import { SafetyGate, loadGateConfig } from './gate';
 import { Orders, Refusal } from './orders';
 import { confirmLive, exchangeSession, verifyTicket } from './tickets';
-import { BurstLimit, bucketFor, clientIp } from '../../src/common/rateLimit';
+import { BurstLimit, bucketFor, clientIp } from '../../src/core/rateLimit';
 
 /**
  * The cash shop service.

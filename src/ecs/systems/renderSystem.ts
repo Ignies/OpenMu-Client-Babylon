@@ -1,8 +1,8 @@
-import { Plane, Vector3 } from '../../libs/babylon/exports';
+import { Plane, Vector3 } from '../../controllers/render/babylon/exports';
 import { ISystemFactory } from '../world';
-import { toRenderAngles } from '../../common/renderAngles';
-import { publishViewPlanes } from '../../common/viewPlanes';
-import { ENUM_WORLD } from '../../common/types';
+import { toRenderAngles } from '../../controllers/render/renderAngles';
+import { publishViewPlanes } from '../../controllers/render/viewPlanes';
+import { ENUM_WORLD } from '../../core/types';
 import { weather } from '../../weather';
 import { debuffBodyLight, debuffBrightBody } from '../../common/debuffBody';
 import { outlawBodyLight } from '../../common/nameTags';

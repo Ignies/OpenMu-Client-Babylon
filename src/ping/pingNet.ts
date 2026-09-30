@@ -1,5 +1,5 @@
-import { Vector3 } from '../libs/babylon/exports';
-import { EventBus } from '../libs/eventBus';
+import { Vector3 } from '../controllers/render/babylon/exports';
+import { EventBus } from '../core/eventBus';
 import { Store } from '../store';
 import { effects } from '../effects';
 import { followEntity } from '../effects/core';
@@ -10,7 +10,7 @@ import {
   decodeRelayFrame,
   encodePoint,
   type PingPoint,
-} from '../common/pingProtocol';
+} from '../controllers/net/protocols/pingProtocol';
 
 /**
  * The map ping's one wire listener, and the one place a ping is asked for.

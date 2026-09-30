@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Xor32Encryptor } from '../../src/common/encryption/xor32';
+import { Xor32Encryptor } from '../../src/controllers/net/encryption/xor32';
 import { gameVersion as preSeason6 } from '../../versions/v097d';
 import {
   BAND_LIMITS,
@@ -15,7 +15,7 @@ import {
   encodeStop,
   type BandMidiEvent,
   type BandRelayMessage,
-} from '../../src/common/bandProtocol';
+} from '../../src/controllers/net/protocols/bandProtocol';
 import { TrackedSession } from '../track/session';
 import { WireEncoder } from '../track/wire';
 import {

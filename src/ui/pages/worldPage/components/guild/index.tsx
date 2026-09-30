@@ -15,8 +15,8 @@ import { playUiSound, uiClick } from '../../../../../libs/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
-import { GuildMemberRoleEnum } from '../../../../../common/packets/ServerToClientPackets';
-import { GuildRelationshipTypeEnum } from '../../../../../common/packets/ClientToServerPackets';
+import { GuildMemberRoleEnum } from '../../../../../../versions/shared/packets/ServerToClientPackets';
+import { GuildRelationshipTypeEnum } from '../../../../../../versions/shared/packets/ClientToServerPackets';
 import {
   GUILD_MARK_PALETTE,
   GUILD_MARK_SIZE,

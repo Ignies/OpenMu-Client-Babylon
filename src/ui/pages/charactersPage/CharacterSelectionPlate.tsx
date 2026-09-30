@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
-import { Matrix, Vector3, Viewport } from '../../../libs/babylon/exports';
+import { Matrix, Vector3, Viewport } from '../../../controllers/render/babylon/exports';
 import { Store } from '../../../store';
 import { classFromAppearance } from '../../../common/deserializeAppearance';
 import { getClassName } from '../../../common/characterStats';

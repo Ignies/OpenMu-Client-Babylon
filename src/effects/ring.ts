@@ -10,7 +10,7 @@
  *
  * Driven by: `effects.spawn('ring', …)`. Read by: nobody.
  */
-import { Vector3, type Scene } from '../libs/babylon/exports';
+import { Vector3, type Scene } from '../controllers/render/babylon/exports';
 import { TerrainDecal } from '../common/moveTargetEffect';
 import { Store } from '../store';
 import { LiveList, TICK, darkCardGain, fadeOut, lerp, luma, type PointSource, type RGB } from './core';

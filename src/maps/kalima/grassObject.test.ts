@@ -6,10 +6,10 @@ const store = vi.hoisted(() => ({ world: null as unknown }));
 
 // Only the plant's own Update is under test: the model, the store and the
 // wave field are stubbed.
-vi.mock('../../common/devSeams', () => ({
+vi.mock('../../core/devSeams', () => ({
   devQuery: (key: string) => (key === 'kalimabob' ? seam.kalimabob : null),
 }));
-vi.mock('../../common/mapTileObject', () => ({
+vi.mock('../../controllers/terrain/mapTileObject', () => ({
   MapTileObject: class {
     Ready = true;
     OutOfView = false;
@@ -19,7 +19,7 @@ vi.mock('../../common/mapTileObject', () => ({
     Update() {}
   },
 }));
-vi.mock('../../libs/mu/terrainWater', () => ({
+vi.mock('../../controllers/terrain/terrainWater', () => ({
   waterSurfaceHeight: (x: number, z: number, t: number) => Math.sin(x + z + t),
 }));
 vi.mock('../../store', () => ({

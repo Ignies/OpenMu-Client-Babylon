@@ -5,14 +5,14 @@ import {
   type ArcRotateCamera,
   type PostProcess,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
 import {
   MSAA_HEAD_ONLY,
   pipelineSamples,
   sceneTargetSamples,
 } from '../common/lightingQuality';
-import { animeFilmBoost } from '../common/renderingStyle';
+import { animeFilmBoost } from '../controllers/render/renderingStyle';
 import { toneMapLive } from './toneMap';
 import type { Rgb } from '../lighting/profiles';
 

@@ -1,5 +1,5 @@
 import items from './items.json';
-import { localisedItemName } from '../libs/mu/itemNameFile';
+import { localisedItemName } from '../controllers/assets/mu/itemNameFile';
 
 export const ItemsDatabase = new (class _ItemsDatabase {
   cache: Record<number, Record<number, (typeof items)[number]>> = {};

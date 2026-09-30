@@ -1,6 +1,6 @@
 import { t, type TextKey } from './i18n';
 import { makeObservable, observable, action, runInAction } from 'mobx';
-import { prefetchItemIcons } from './common/itemIconPack';
+import { prefetchItemIcons } from './controllers/assets/itemIconPack';
 import { Store } from './store';
 import { Social } from './social';
 import type { Item } from './ecs/world';
@@ -39,13 +39,13 @@ import {
   VaultClosedPacket,
   VaultMoveMoneyRequestPacket,
   VaultMoveMoneyRequestVaultMoneyMoveDirectionEnum,
-} from './common/packets/ClientToServerPackets';
+} from '../versions/shared/packets/ClientToServerPackets';
 import {
   ItemCraftingResultCraftingResultEnum,
   PlayerShopBuyResultResultKindEnum,
   TradeFinishedTradeResultEnum,
   VaultProtectionInformationVaultProtectionStateEnum,
-} from './common/packets/ServerToClientPackets';
+} from '../versions/shared/packets/ServerToClientPackets';
 
 /** The zen the vault charges to open (`RenderText`, NewUIStorageInventory.cpp:227). */
 export function vaultOpenCost(level: number, masterLevel: number, locked: boolean): number {

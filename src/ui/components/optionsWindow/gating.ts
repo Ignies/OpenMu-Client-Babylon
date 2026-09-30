@@ -5,7 +5,7 @@ import {
 import {
   LIGHTING_QUALITY_LABEL_KEYS,
 } from '../../../common/lightingQuality';
-import { MATERIAL_QUALITY_LABEL_KEYS } from '../../../common/materialQuality';
+import { MATERIAL_QUALITY_LABEL_KEYS } from '../../../controllers/render/materialQuality';
 import { ITEM_EFFECT_MODE_LABEL_KEYS } from '../../../common/itemEffectMode';
 import {
   OUTLINE_MODE_LABEL_KEYS,
@@ -15,7 +15,7 @@ import {
   inkLinesActive,
   renderingStyle,
   type RenderingStyle,
-} from '../../../common/renderingStyle';
+} from '../../../controllers/render/renderingStyle';
 import { i18n, t, type TextKey } from '../../../i18n';
 
 type BoolKey = {

@@ -7,7 +7,7 @@ import {
   SAND_SMOKE,
   TEX,
 } from '../../effects/recipes';
-import { loadGLTF } from '../modelLoader';
+import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { MonsterObject } from '../monsterObject';
 import { MonsterActionType } from '../objects/enum';
 import { monsterModelFile, monsterScaleOf } from './monsterModelTable';

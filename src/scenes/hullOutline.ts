@@ -3,12 +3,12 @@ import {
   type AbstractMesh,
   type Observer,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import {
   hullOutlineActive,
   inkDarkness,
   lineWidth,
-} from '../common/renderingStyle';
+} from '../controllers/render/renderingStyle';
 
 /**
  * The inverted hull (rendering_style ARCHITECTURE 2.6): sole owner of

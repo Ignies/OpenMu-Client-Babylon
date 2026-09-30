@@ -7,7 +7,7 @@
  * Driven by: `effects.spawn('sprite', …)` from the skill table and anything
  * that wants a flash. Read by: nobody; it is fire-and-forget.
  */
-import { Constants, Material, StandardMaterial, Vector3, type Scene } from '../libs/babylon/exports';
+import { Constants, Material, StandardMaterial, Vector3, type Scene } from '../controllers/render/babylon/exports';
 import {
   LiveList,
   TICK,

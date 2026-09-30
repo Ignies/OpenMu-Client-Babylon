@@ -32,8 +32,8 @@ import {
 import { Social } from '../../../social';
 import { guildMarkDataUrl, isEmptyGuildMark } from '../../../common/guildMark';
 import { Economy } from '../../../economy';
-import { GuildMemberRoleEnum } from '../../../common/packets/ServerToClientPackets';
-import { devQuery } from '../../../common/devSeams';
+import { GuildMemberRoleEnum } from '../../../../versions/shared/packets/ServerToClientPackets';
+import { devQuery } from '../../../core/devSeams';
 import { onLanguageChanged } from '../../../i18n';
 import { EmojiText } from '../emojiText';
 import {

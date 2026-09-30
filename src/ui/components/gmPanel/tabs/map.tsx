@@ -4,7 +4,7 @@ import { t } from '../../../../i18n';
 import { GmPanel } from '../../../../gmPanel';
 import { AdminFeed } from '../../../../admin/feed';
 import type { WorldView } from '../../../../gmWorld';
-import { className, type TrackedPlayer } from '../../../../common/adminProtocol';
+import { className, type TrackedPlayer } from '../../../../controllers/net/protocols/adminProtocol';
 import { GM_MAPS, mapName } from '../../../../common/gmMaps';
 import { gmCommand } from '../../../../common/gmCommands';
 import { uiClick } from '../../../../libs/sfx';

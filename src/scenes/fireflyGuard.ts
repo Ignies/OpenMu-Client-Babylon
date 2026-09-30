@@ -5,8 +5,8 @@ import {
   Texture,
   type ArcRotateCamera,
   type Scene,
-} from '../libs/babylon/exports';
-import { devQueryNumber, devQueryNumbers } from '../common/devSeams';
+} from '../controllers/render/babylon/exports';
+import { devQueryNumber, devQueryNumbers } from '../core/devSeams';
 import {
   MSAA_HEAD_ONLY,
   pipelineSamples,

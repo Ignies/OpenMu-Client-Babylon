@@ -13,8 +13,8 @@ import {
   type RenderTargetTexture,
   type Scene,
   type SubMesh,
-} from '../libs/babylon/exports';
-import { devQuery } from '../common/devSeams';
+} from '../controllers/render/babylon/exports';
+import { devQuery } from '../core/devSeams';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 import type { LightingTier } from '../common/lightingQuality';
 import type { RoomVolume } from '../lighting/profiles';

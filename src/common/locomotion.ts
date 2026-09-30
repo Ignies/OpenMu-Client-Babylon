@@ -1,5 +1,5 @@
 import { BaseClass, getBaseClass } from './characterStats';
-import { ENUM_WORLD, type CharacterClassNumber } from './types';
+import { ENUM_WORLD, type CharacterClassNumber } from '../core/types';
 import type { Item } from '../ecs/world';
 import { REFERENCE_FPS } from './playSpeed';
 import { isFastWing } from './wings';

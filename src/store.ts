@@ -40,29 +40,29 @@ import {
   SellItemToNpcRequestPacket,
   RepairItemRequestPacket,
   ServerChangeAuthenticationPacket,
-} from './common/packets/ClientToServerPackets';
+} from '../versions/shared/packets/ClientToServerPackets';
 import {
   ConnectionInfoRequestPacket,
   ServerListRequestPacket,
   ServerListResponsePacket,
-} from './common/packets/ConnectServerPackets';
+} from '../versions/shared/packets/ConnectServerPackets';
 import {
   CharacterCreationUnlockFlagsEnum,
   CharacterListPacket,
   GuildMemberRoleEnum,
-} from './common/packets/ServerToClientPackets';
+} from '../versions/shared/packets/ServerToClientPackets';
 import { classFromAppearance } from './common/deserializeAppearance';
 import { formatMsgWinText, MsgWinCode, type MsgWinArg } from './common/msgWin';
-import { stringToBytes } from './common/utils';
+import { stringToBytes } from './controllers/assets/download';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from './consts';
 import {
   connectServerAddress,
   ServerConfig,
   wsAddress,
 } from './common/serverConfig';
-import { NetStats } from './common/netStats';
+import { NetStats } from './controllers/net/roundTrip';
 import { ServerAccounts } from './common/serverAccounts';
-import { createSocket } from './libs/sockets/createSocket';
+import { createSocket } from './controllers/net/sockets/createSocket';
 import { ensureActiveVersion, gameVersion } from './version';
 import {
   makeObservable,
@@ -73,15 +73,15 @@ import {
   reaction,
 } from 'mobx';
 import { Item, World } from './ecs/world';
-import { EventBus } from './libs/eventBus';
-import { Scalar } from './libs/babylon/exports';
+import { EventBus } from './core/eventBus';
+import { Scalar } from './controllers/render/babylon/exports';
 import { InventoryConstants } from './common/inventoryConstants';
 import { StatType } from './common/characterStats';
 import { findFreeSlot, type Footprint } from './common/inventoryFit';
 import { jewelTargetError } from './common/jewelUpgrade';
 import { ItemGroups } from './common/objects/enum';
 import { ItemsDatabase } from './common/itemsDatabase';
-import { prefetchItemIcons } from './common/itemIconPack';
+import { prefetchItemIcons } from './controllers/assets/itemIconPack';
 import { ItemSerializer } from './common/itemSerializer';
 import {
   isRepairBanned,
@@ -118,7 +118,7 @@ import {
 } from './common/itemHotkeys';
 import { spawnPlayer } from './logic';
 import { registerStore } from './common/storeRef';
-import { devVitalPercent } from './common/devSeams';
+import { devVitalPercent } from './core/devSeams';
 import { Social } from './social';
 import { Economy } from './economy';
 

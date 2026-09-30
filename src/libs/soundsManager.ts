@@ -1,7 +1,7 @@
 import '@babylonjs/core/Audio/audioSceneComponent';
 import { Sound } from '@babylonjs/core/Audio/sound';
 import { SoundTrack } from '@babylonjs/core/Audio/soundTrack';
-import { Engine, PointerEventTypes, type Scene } from './babylon/exports';
+import { Engine, PointerEventTypes, type Scene } from '../controllers/render/babylon/exports';
 import { isMusicKey, soundUrl, type Sounds } from '../sound/recipes';
 import { ENABLE_BG_MUSIC } from '../consts';
 

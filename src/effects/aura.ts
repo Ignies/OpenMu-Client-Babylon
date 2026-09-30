@@ -17,7 +17,7 @@
  * Driven by: `effects.spawn('aura', …)` from `common/skillVisuals.ts`.
  * Read by: nobody.
  */
-import { Vector3, type Scene } from '../libs/babylon/exports';
+import { Vector3, type Scene } from '../controllers/render/babylon/exports';
 import {
   LiveList,
   TICK,

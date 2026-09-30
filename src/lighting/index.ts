@@ -1,7 +1,7 @@
-import type { ENUM_WORLD } from '../common/types';
-import type { Scene } from '../libs/babylon/exports';
+import type { ENUM_WORLD } from '../core/types';
+import type { Scene } from '../controllers/render/babylon/exports';
 import type { Entity } from '../ecs/world';
-import type { Events } from '../libs/eventBus/events';
+import type { Events } from '../core/eventBus/events';
 import type { LightingLayer } from './layer';
 import { LIGHTING_LAYERS } from './layers';
 import {

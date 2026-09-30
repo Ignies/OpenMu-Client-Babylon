@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Sound } from '@babylonjs/core/Audio/sound';
-import { ENUM_WORLD } from '../common/types';
-import { KALIMA_WORLDS } from '../common/worldAssets';
+import { ENUM_WORLD } from '../core/types';
+import { KALIMA_WORLDS } from '../controllers/assets/worldAssets';
 import type { World } from '../ecs/world';
 import { SoundsManager } from '../libs/soundsManager';
 import { attachListener } from './listener';

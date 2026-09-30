@@ -11,7 +11,7 @@ import {
   CharacterFocusedPacket,
   CharacterListPacket,
   GuildMemberRoleEnum,
-} from '../../../common/packets/ServerToClientPackets';
+} from '../../../../versions/shared/packets/ServerToClientPackets';
 import { MsgWinCode } from '../../../common/msgWin';
 import { MuButton } from '../../components/muButton';
 import { MuSpriteFrame } from '../../components/muSprite';

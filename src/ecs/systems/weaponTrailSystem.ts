@@ -1,4 +1,4 @@
-import { Vector3 } from '../../libs/babylon/exports';
+import { Vector3 } from '../../controllers/render/babylon/exports';
 import type { ISystemFactory } from '../world';
 import { effects } from '../../effects';
 import { boneLocalPos } from '../../effects/core';

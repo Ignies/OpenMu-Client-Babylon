@@ -26,8 +26,8 @@ import {
   type Scene,
   type Skeleton,
   type Texture,
-} from '../libs/babylon/exports';
-import { getMaterial, loadGLTF } from '../common/modelLoader';
+} from '../controllers/render/babylon/exports';
+import { getMaterial, loadGLTF } from '../controllers/assets/modelLoader';
 import { BlendState } from '../common/objects/enum';
 import { Store } from '../store';
 import type { TestScene } from '../scenes/testScene';

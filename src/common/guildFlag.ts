@@ -7,8 +7,8 @@ import {
   VertexData,
   type Scene,
   type TransformNode as TransformNodeType,
-} from '../libs/babylon/exports';
-import { angleMatrix, toBabylon } from './boneLink';
+} from '../controllers/render/babylon/exports';
+import { angleMatrix, toBabylon } from '../controllers/render/boneLink';
 import {
   GUILD_MARK_PALETTE,
   GUILD_MARK_SIZE,

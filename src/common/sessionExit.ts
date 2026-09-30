@@ -5,7 +5,7 @@ import { Economy } from '../economy';
 import { Social } from '../social';
 import { Messenger } from '../messenger';
 import { quests } from '../quests';
-import { LogOutPacket } from './packets/ClientToServerPackets';
+import { LogOutPacket } from '../../versions/shared/packets/ClientToServerPackets';
 import { SessionResume } from './sessionResume';
 import { allowUnload } from './browserHotkeys';
 import { playUiSound } from '../sound/ui';
@@ -142,13 +142,13 @@ export const SessionExit = new (class _SessionExit {
         Store.uiState = UIState.Characters;
       });
       // The window sheets go with the world; decoded again on the next entry.
-      void import('../libs/mu/preloadSprites').then(m => m.clearWorldSprites());
+      void import('../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
       return;
     }
 
     if (kind === 'servers') {
       Store.disconnectFromGameServer();
-      void import('../libs/mu/preloadSprites').then(m => m.clearWorldSprites());
+      void import('../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
       Store.playOnline();
       return;
     }
@@ -164,7 +164,7 @@ export const SessionExit = new (class _SessionExit {
 
     Store.disconnectFromGameServer();
     Store.disconnectFromConnectServer();
-    void import('../libs/mu/preloadSprites').then(m => m.clearWorldSprites());
+    void import('../controllers/assets/mu/preloadSprites').then(m => m.clearWorldSprites());
     runInAction(() => {
       Store.uiState = UIState.Preloader;
     });

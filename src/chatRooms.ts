@@ -5,9 +5,9 @@ import { Social } from './social';
 import {
   ChatRoomCreateRequestPacket,
   ChatRoomInvitationRequestPacket,
-} from './common/packets/ClientToServerPackets';
-import { CHAT_SERVER_PORT, type ChatClient } from './common/chatRoomProtocol';
-import { openChatRoomSocket, type ChatRoomSocket } from './libs/sockets/chatRoomSocket';
+} from '../versions/shared/packets/ClientToServerPackets';
+import { CHAT_SERVER_PORT, type ChatClient } from './controllers/net/protocols/chatRoomProtocol';
+import { openChatRoomSocket, type ChatRoomSocket } from './controllers/net/sockets/chatRoomSocket';
 import { playUiSound } from './libs/sfx';
 
 export type ChatRoomLine = {

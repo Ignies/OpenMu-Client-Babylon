@@ -1,5 +1,5 @@
-import type { ENUM_WORLD } from '../common/types';
-import type { Scene, Vector3 } from '../libs/babylon/exports';
+import type { ENUM_WORLD } from '../core/types';
+import type { Scene, Vector3 } from '../controllers/render/babylon/exports';
 
 /**
  * The contract every visual effect implements. One file per effect, one

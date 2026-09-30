@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../../common/types';
+import { ENUM_WORLD } from '../../core/types';
 import type { MapLayer } from '../layer';
 import {
   NORIA_BLEND_MESHES,

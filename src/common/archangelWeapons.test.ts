@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildItemTooltip, itemDisplayName, itemNameColor } from './itemTooltip';
 import { DROP_TIER_COLOURS, dropTier } from './dropTier';
-import { itemIconPackChain } from './itemIconPack';
+import { itemIconPackChain } from '../controllers/assets/itemIconPack';
 import type { HeroStats } from './itemStats';
 
 const DIVINE: [group: number, num: number][] = [

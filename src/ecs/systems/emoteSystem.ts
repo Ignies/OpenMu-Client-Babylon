@@ -1,7 +1,7 @@
 import { PlayerAction, ServerPlayerActionType } from '../../common/objects/enum';
 import { emoteById, genderedEmoteAction } from '../../common/emotes';
 import { isStandingIdle } from '../../common/playerActionMapper';
-import { rotationByteOf } from '../../common/turnAngle';
+import { rotationByteOf } from '../../core/turnAngle';
 import { Store } from '../../store';
 import type { ISystemFactory } from '../world';
 

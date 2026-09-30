@@ -6,8 +6,8 @@ import {
   Texture,
   type ArcRotateCamera,
   type Scene,
-} from '../libs/babylon/exports';
-import { devQueryNumbers } from '../common/devSeams';
+} from '../controllers/render/babylon/exports';
+import { devQueryNumbers } from '../core/devSeams';
 import type { LightingTier } from '../common/lightingQuality';
 import {
   inkDarkness,
@@ -17,7 +17,7 @@ import {
   toonBands,
   toonEffectsActive,
   type RenderingStyle,
-} from '../common/renderingStyle';
+} from '../controllers/render/renderingStyle';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 
 /**

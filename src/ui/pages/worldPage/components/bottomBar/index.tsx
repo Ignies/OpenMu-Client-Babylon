@@ -38,7 +38,7 @@ import { onCooldownTick, skillCooldowns } from '../../../../../skills/cooldowns'
 import { SkillTooltip } from '../../../../components/skillTooltip';
 import { ExpTooltip } from './expTooltip';
 import { SessionStats } from '../../../../../common/sessionStats';
-import { devQuery } from '../../../../../common/devSeams';
+import { devQuery } from '../../../../../core/devSeams';
 import { itemBaseName } from '../../../../../common/itemsDatabase';
 import {
   ITEM_HOTKEY_CODES,

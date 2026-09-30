@@ -18,7 +18,7 @@ import { useEventBus } from '../../../../src/hooks/useEventBus';
 import {
   CharacterFocusedPacket,
   CharacterListPacket,
-} from '../../../../src/common/packets/ServerToClientPackets';
+} from '../../../shared/packets/ServerToClientPackets';
 import { MuSpriteFrame } from '../../../../src/ui/components/muSprite';
 import { MuButton } from '../../../../src/ui/components/muButton';
 import './style.less';

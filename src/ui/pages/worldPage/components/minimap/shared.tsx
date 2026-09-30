@@ -2,8 +2,8 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { t } from '../../../../../i18n';
 import { Store } from '../../../../../store';
 import { Social } from '../../../../../social';
-import { loadWorldMinimap, type WorldMinimap } from '../../../../../libs/mu/minimap';
-import { MinimapMarkerKind, type MinimapMarker } from '../../../../../common/minimapData';
+import { loadWorldMinimap, type WorldMinimap } from '../../../../../controllers/terrain/minimap';
+import { MinimapMarkerKind, type MinimapMarker } from '../../../../../controllers/terrain/minimapData';
 import { useMuSprite } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 

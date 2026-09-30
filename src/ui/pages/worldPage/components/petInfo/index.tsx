@@ -9,7 +9,7 @@ import { PET_GROUP, DARK_HORSE, DARK_RAVEN } from '../../../../../common/pets';
 import {
   PetCommandModeEnum,
   PetTypeEnum,
-} from '../../../../../common/packets/ClientToServerPackets';
+} from '../../../../../../versions/shared/packets/ClientToServerPackets';
 import { uiClick } from '../../../../../libs/sfx';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';

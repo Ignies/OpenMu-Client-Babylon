@@ -7,9 +7,9 @@ import {
   Vector3,
   type ArcRotateCamera,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { GameOptions } from '../common/gameOptions';
-import { devQuery, devQueryNumber } from '../common/devSeams';
+import { devQuery, devQueryNumber } from '../core/devSeams';
 import type { LightingTier } from '../common/lightingQuality';
 import type { Rgb } from '../lighting/profiles';
 

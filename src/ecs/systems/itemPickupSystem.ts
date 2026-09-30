@@ -1,7 +1,7 @@
-import { PointerEventTypes } from '../../libs/babylon/exports';
+import { PointerEventTypes } from '../../controllers/render/babylon/exports';
 import { Store } from '../../store';
 import { QuickItemActions } from '../../common/quickItemActions';
-import { pickGround } from '../../libs/mu/terrainPick';
+import { pickGround } from '../../controllers/terrain/terrainPick';
 import type { Entity, ISystemFactory } from '../world';
 
 /**

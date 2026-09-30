@@ -1,5 +1,5 @@
-import { Vector3 } from '../libs/babylon/exports';
-import { HIDDEN_MESH_ALL, ModelObject } from './modelObject';
+import { Vector3 } from '../controllers/render/babylon/exports';
+import { HIDDEN_MESH_ALL, ModelObject } from '../controllers/render/modelObject';
 
 /**
  * `CreateObject`'s default pick box, `Vector(-40,-40,0)` … `Vector(40,40,80)`

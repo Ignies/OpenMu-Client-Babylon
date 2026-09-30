@@ -15,15 +15,15 @@
  * by `masterTree.ts` (the point gate).
  */
 import { observable, runInAction } from 'mobx';
-import type { ENUM_WORLD } from '../common/types';
-import { EventBus } from '../libs/eventBus';
+import type { ENUM_WORLD } from '../core/types';
+import { EventBus } from '../core/eventBus';
 import {
   ExperienceGainedExtendedPacket,
   ExperienceGainedPacket,
   MasterCharacterLevelUpdateExtendedPacket,
   MasterCharacterLevelUpdatePacket,
   MasterStatsUpdatePacket,
-} from '../common/packets/ServerToClientPackets';
+} from '../../versions/shared/packets/ServerToClientPackets';
 import type { SkillLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

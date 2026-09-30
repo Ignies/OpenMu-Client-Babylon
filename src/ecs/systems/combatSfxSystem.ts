@@ -7,8 +7,8 @@ import {
 import { monsterModelTypeOf } from '../../common/playSpeed';
 import { isPlayerBody } from '../../common/playerObject';
 import { HORN_OF_FENRIR, PET_GROUP } from '../../common/petConstants';
-import type { CharacterClassNumber } from '../../common/types';
-import { CHAOS_CASTLE_WORLDS } from '../../common/worldAssets';
+import type { CharacterClassNumber } from '../../core/types';
+import { CHAOS_CASTLE_WORLDS } from '../../controllers/assets/worldAssets';
 import {
   COMBAT_BUS,
   MONSTER_ASSASSIN,

@@ -1,4 +1,4 @@
-import { BAND_LIMITS, encodeBatch, type BandMidiEvent } from '../common/bandProtocol';
+import { BAND_LIMITS, encodeBatch, type BandMidiEvent } from '../controllers/net/protocols/bandProtocol';
 
 /**
  * Turns the sequencer's send windows into wire batches: numbers them,

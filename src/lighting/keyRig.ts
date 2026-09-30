@@ -4,7 +4,7 @@ import {
   HemisphericLight,
   Vector3,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 
 /**
  * The key-light rig: single owner of the two scene-wide key lights, the

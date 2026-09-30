@@ -1,8 +1,8 @@
 import type { Entity, World } from '../../ecs/world';
 import { PlayerAction } from '../objects/enum';
-import { loadGLTF } from '../modelLoader';
+import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { PlayerObject } from '../playerObject';
-import { CharacterClassNumber } from '../types';
+import { CharacterClassNumber } from '../../core/types';
 
 // [NpcInfo(236, "Golden Archer")]
 export class GoldenArcher extends PlayerObject {

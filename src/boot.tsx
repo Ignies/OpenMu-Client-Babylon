@@ -11,20 +11,20 @@ import { GmPanel } from './gmPanel';
 import { Economy } from './economy';
 import { weather } from './weather';
 import { sound } from './sound';
-import { Engine, SceneLoader } from './libs/babylon/exports';
-import { createEngine } from './libs/babylon/utils';
-import { devQuery } from './common/devSeams';
+import { Engine, SceneLoader } from './controllers/render/babylon/exports';
+import { createEngine } from './controllers/render/babylon/utils';
+import { devQuery } from './core/devSeams';
 import {
   applyRenderScale,
   renderScaleForStep,
   renderScaleSeam,
-} from './libs/renderScale';
+} from './controllers/render/renderScale';
 import { upscaleLive } from './scenes/upscale';
 import { TestScene } from './scenes/testScene';
-import { loadMapIntoScene } from './libs/mu/loadMapIntoScene';
-import { prefetchWorldTerrain } from './libs/mu/prefetchWorld';
+import { loadMapIntoScene } from './controllers/terrain/loadMapIntoScene';
+import { prefetchWorldTerrain } from './controllers/assets/mu/prefetchWorld';
 import { createWorld } from './ecs/createWorld';
-import { EventBus } from './libs/eventBus';
+import { EventBus } from './core/eventBus';
 import { installLoginMusic } from './libs/loginMusic';
 import { setKeyProfile } from './common/keyBindings';
 import { installBrowserHotkeyGuard } from './common/browserHotkeys';
@@ -35,12 +35,12 @@ import { watchPageTitle } from './common/pageTitle';
 import {
   preloadPregameSprites,
   preloadWorldSprites,
-} from './libs/mu/preloadSprites';
-import { installPerfOverlay, recordFrame } from './libs/perfOverlay';
+} from './controllers/assets/mu/preloadSprites';
+import { installPerfOverlay, recordFrame } from './controllers/render/perfOverlay';
 import { csmCacheStats } from './scenes/shadows';
 import { refreshServerList } from './common/serverList';
-import { ensureCacheWorker } from './common/assetDownload';
-import { sceneCovered } from './common/sceneCover';
+import { ensureCacheWorker } from './controllers/assets/assetDownload';
+import { sceneCovered } from './controllers/render/sceneCover';
 
 if (APP_STAGE === 'dev' || QA_ENABLED) {
   import('@babylonjs/core/Legacy/legacy');

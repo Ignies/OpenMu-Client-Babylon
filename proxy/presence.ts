@@ -1,8 +1,8 @@
-import { SimpleModulusDecryptor } from "../src/common/encryption/simpleModulus";
-import { Xor32Decryptor } from "../src/common/encryption/xor32";
-import { Xor3Byte } from "../src/common/encryption/xor3";
-import { getPacketSize, getSizeOfPacketType } from "../src/common/wireUtils";
-import { SESSION_NONCE_RE } from "../src/common/sessionNonce";
+import { SimpleModulusDecryptor } from "../src/controllers/net/encryption/simpleModulus";
+import { Xor32Decryptor } from "../src/controllers/net/encryption/xor32";
+import { Xor3Byte } from "../src/controllers/net/encryption/xor3";
+import { getPacketSize, getSizeOfPacketType } from "../src/controllers/net/wireUtils";
+import { SESSION_NONCE_RE } from "../src/controllers/net/sessionNonce";
 
 /**
  * Who is connected right now, answered on loopback.

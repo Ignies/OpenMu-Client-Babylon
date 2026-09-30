@@ -11,7 +11,7 @@ import {
   Vector3,
   type AbstractMesh,
   type Mesh,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import {
   boneBoxesFrom,
   cullHighlightMask,

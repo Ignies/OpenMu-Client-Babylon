@@ -20,7 +20,7 @@
  * Driven by: `effects.spawn('feathers', …)` from `common/npcs/archangel.ts`.
  * Read by: nobody.
  */
-import { Vector3, type Scene } from '../libs/babylon/exports';
+import { Vector3, type Scene } from '../controllers/render/babylon/exports';
 import { Store } from '../store';
 import { CM, LiveList, TICK, WHITE, type RGB } from './core';
 import { spawnModel, type ModelHandle } from './model';

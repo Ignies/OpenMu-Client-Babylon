@@ -1,10 +1,10 @@
-import type { Scene } from '../libs/babylon/exports';
-import { devQueryNumber } from '../common/devSeams';
+import type { Scene } from '../controllers/render/babylon/exports';
+import { devQueryNumber } from '../core/devSeams';
 import { registerPointLightEmitter } from '../common/pointLightPool';
 import {
   registerTerrainLight,
   type TerrainLightColor,
-} from '../common/terrainDynamicLight';
+} from '../controllers/terrain/terrainDynamicLight';
 
 /**
  * The one registration - shared by every entry in this folder.

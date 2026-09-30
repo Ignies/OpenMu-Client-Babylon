@@ -1,12 +1,12 @@
 import type { Entity, World } from '../ecs/world';
-import { MapTileObject } from './mapTileObject';
-import { ModelObject } from './modelObject';
+import { MapTileObject } from '../controllers/terrain/mapTileObject';
+import { ModelObject } from '../controllers/render/modelObject';
 import { MODEL_SIGN01 } from './objects/enum';
-import { textureSourceName } from './pbrMaps';
+import { textureSourceName } from '../controllers/render/pbrMaps';
 import { isSignPlate, labelledPlate } from './signPlates';
 import { signLabel } from './signLabels';
 import { onLanguageChanged } from '../i18n';
-import type { Mesh, Texture } from '../libs/babylon/exports';
+import type { Mesh, Texture } from '../controllers/render/babylon/exports';
 
 /**
  * A signpost that says something.

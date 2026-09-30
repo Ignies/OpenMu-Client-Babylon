@@ -13,7 +13,7 @@ import {
 import { GameOptions } from '../../../common/gameOptions';
 import type { HeroStats } from '../../../common/itemStats';
 import { PET_GROUP } from '../../../common/pets';
-import { PetTypeEnum } from '../../../common/packets/ClientToServerPackets';
+import { PetTypeEnum } from '../../../../versions/shared/packets/ClientToServerPackets';
 import { t } from '../../../i18n';
 import {
   isRepairBanned,

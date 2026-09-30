@@ -19,7 +19,7 @@ import {
   loadPackIndex,
   setActivePack,
   texturePacks,
-} from '../../../common/texturePacks';
+} from '../../../controllers/assets/texturePacks';
 
 const ROW_HEIGHT = 18;
 const PLATE_HEIGHT = 18;

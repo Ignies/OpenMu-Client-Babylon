@@ -1,5 +1,5 @@
 import { t, type TextKey } from '../i18n';
-import { CharacterClassNumber } from './types';
+import { CharacterClassNumber } from '../core/types';
 import { ItemsDatabase } from './itemsDatabase';
 import { InventoryConstants } from './inventoryConstants';
 import type { Item } from '../ecs/world';

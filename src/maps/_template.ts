@@ -15,7 +15,7 @@
  * `create` MUST stay a dynamic import (see `layer.ts`): the object classes
  * extend `ModelObject`, whose imports read this system's tables.
  */
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { MapLayer } from './layer';
 import { FULL_TILES } from './recipes';
 

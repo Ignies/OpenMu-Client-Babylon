@@ -17,7 +17,7 @@
  */
 import { PlayerAction } from '../common/objects/enum';
 import type { MountKind } from '../common/pets';
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import type { CombatLayer } from './layer';
 import { masterBase } from '../common/skillAliases';
 import {

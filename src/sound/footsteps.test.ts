@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MonsterActionType, PlayerAction } from '../common/objects/enum';
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { World } from '../ecs/world';
 import { SoundsManager } from '../libs/soundsManager';
 import { FOOT_DOWN_FRAMES, footstepSound, footstepsLayer } from './footsteps';

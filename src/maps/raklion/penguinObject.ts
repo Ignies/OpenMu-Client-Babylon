@@ -1,5 +1,5 @@
-import { MapTileObject } from '../../common/mapTileObject';
-import { Rand } from '../../common/rand';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
+import { Rand } from '../../core/rand';
 import type { Entity, World } from '../../ecs/world';
 
 /**

@@ -1,7 +1,7 @@
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import type { WeatherLayer } from './layer';
 import { Store } from '../store';
-import { CHAOS_CASTLE_WORLDS, DEVIL_SQUARE_WORLDS } from '../common/worldAssets';
+import { CHAOS_CASTLE_WORLDS, DEVIL_SQUARE_WORLDS } from '../controllers/assets/worldAssets';
 import { maps } from '../maps';
 
 /**

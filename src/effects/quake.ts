@@ -11,7 +11,7 @@
  *
  * Driven by: `effects.spawn('quake', ...)`. Read by: nobody.
  */
-import type { Camera, Scene, Vector3 } from '../libs/babylon/exports';
+import type { Camera, Scene, Vector3 } from '../controllers/render/babylon/exports';
 import { LiveList, TICK } from './core';
 import type { EffectHandle, EffectLayer } from './layer';
 

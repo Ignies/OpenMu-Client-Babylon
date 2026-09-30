@@ -4,7 +4,7 @@ import {
   ParticleSystem,
   Vector3,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import { loadEffectTexture } from '../common/moveTargetEffect';
 import { GameOptions } from '../common/gameOptions';
 

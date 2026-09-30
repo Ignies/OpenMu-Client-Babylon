@@ -18,7 +18,7 @@
  * rate for the duration of every delay.
  */
 import { observable, runInAction } from 'mobx';
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import type { SkillLayer } from './layer';
 import { SKILL_DELAY_MS } from './recipes';
 

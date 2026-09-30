@@ -7,15 +7,15 @@ import {
   DOPPELGANGER_WORLDS,
   DEVIL_SQUARE_WORLDS,
   onWorlds,
-} from '../common/worldAssets';
-import { ENUM_WORLD } from '../common/types';
-import { TW_SAFEZONE } from '../common/terrain/consts';
+} from '../controllers/assets/worldAssets';
+import { ENUM_WORLD } from '../core/types';
+import { TW_SAFEZONE } from '../controllers/terrain/consts';
 import {
   KanturuStateChangePacket,
   KanturuStateChangeStateTypeEnum as KanturuState,
-} from '../common/packets/ServerToClientPackets';
+} from '../../versions/shared/packets/ServerToClientPackets';
 import type { World } from '../ecs/world';
-import { EventBus } from '../libs/eventBus';
+import { EventBus } from '../core/eventBus';
 import { SoundsManager } from '../libs/soundsManager';
 import { busSilent, type SoundBus } from './buses';
 import type { Sounds } from './recipes';

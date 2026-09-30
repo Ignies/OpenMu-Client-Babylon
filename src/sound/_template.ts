@@ -15,7 +15,7 @@
  * `playAmbientLoop` / `stopAmbientLoop` for beds, `playMusic` for tracks,
  * and `playSfx` (this folder's `listener.ts`) for positioned one-shots.
  */
-import { ENUM_WORLD } from '../common/types';
+import { ENUM_WORLD } from '../core/types';
 import { SoundsManager } from '../libs/soundsManager';
 import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';

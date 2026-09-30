@@ -3,8 +3,8 @@ import {
   type BonedEmission,
 } from '../../common/effectParticles';
 import { createMovableFlare, type MovableFlare } from '../../common/effectLights';
-import { MapTileObject } from '../../common/mapTileObject';
-import type { TransformNode } from '../../libs/babylon/exports';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
+import type { TransformNode } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 
 /**

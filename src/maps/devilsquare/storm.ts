@@ -1,5 +1,5 @@
-import { TILE_CM } from '../../common/terrain/consts';
-import type { Observer, Scene } from '../../libs/babylon/exports';
+import { TILE_CM } from '../../controllers/terrain/consts';
+import type { Observer, Scene } from '../../controllers/render/babylon/exports';
 import type { World } from '../../ecs/world';
 import { lighting } from '../../lighting';
 import { PRIORITY_TORCH, type LightRecipe, type LightSource } from '../../lighting/lightSource';

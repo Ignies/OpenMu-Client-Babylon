@@ -1,11 +1,11 @@
 import { observable, runInAction } from 'mobx';
-import { Vector3 } from '../libs/babylon/exports';
-import type { ENUM_WORLD } from '../common/types';
-import { EventBus } from '../libs/eventBus';
+import { Vector3 } from '../controllers/render/babylon/exports';
+import type { ENUM_WORLD } from '../core/types';
+import { EventBus } from '../core/eventBus';
 import {
   MapEventStatePacket,
-} from '../common/packets/ServerToClientPackets';
-import { devQueryNumber } from '../common/devSeams';
+} from '../../versions/shared/packets/ServerToClientPackets';
+import { devQueryNumber } from '../core/devSeams';
 import { effects } from '../effects';
 import { FIRE_TRAIL, MODEL, RGBS } from '../effects/recipes';
 import { lighting } from '../lighting';

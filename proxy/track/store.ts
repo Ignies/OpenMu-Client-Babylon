@@ -3,7 +3,7 @@ import { mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { migrate } from '../../tools/sqliteMigrate';
-import type { LogQuery, TrackEvent } from '../../src/common/adminProtocol';
+import type { LogQuery, TrackEvent } from '../../src/controllers/net/protocols/adminProtocol';
 import { clampLimit, type Journal } from './journal';
 
 /**

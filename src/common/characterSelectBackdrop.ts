@@ -6,7 +6,7 @@ import {
   Texture,
   Vector3,
   type Scene,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import {
   CHARACTER_CAMERA_FORWARD,
   CHARACTER_CAMERA_POSITION,

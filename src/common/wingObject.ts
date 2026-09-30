@@ -5,12 +5,12 @@ import {
   type Material,
   type Scene,
   type TransformNode,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import type { World } from '../ecs/world';
-import { ModelObject } from './modelObject';
-import { getMaterial, getScrollVariant } from './modelLoader';
+import { ModelObject } from '../controllers/render/modelObject';
+import { getMaterial, getScrollVariant } from '../controllers/assets/modelLoader';
 import { BlendState } from './objects/enum';
-import { loadMuSprite } from '../libs/mu/sprites';
+import { loadMuSprite } from '../controllers/assets/mu/sprites';
 import {
   BonedParticleEmitter,
   HeldSprites,

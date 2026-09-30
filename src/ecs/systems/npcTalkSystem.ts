@@ -1,4 +1,4 @@
-import { PointerEventTypes } from '../../libs/babylon/exports';
+import { PointerEventTypes } from '../../controllers/render/babylon/exports';
 import { Store } from '../../store';
 import { events } from '../../events';
 import { quests } from '../../quests';

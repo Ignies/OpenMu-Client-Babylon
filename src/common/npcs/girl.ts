@@ -1,5 +1,5 @@
 import type { World } from '../../ecs/world';
-import { loadGLTF } from '../modelLoader';
+import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { PlayerObject } from '../playerObject';
 
 // [NpcInfo(253, "Potion Girl Amy")]

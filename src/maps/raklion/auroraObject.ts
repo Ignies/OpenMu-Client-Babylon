@@ -1,5 +1,5 @@
-import { MapTileObject } from '../../common/mapTileObject';
-import { Vector3 } from '../../libs/babylon/exports';
+import { MapTileObject } from '../../controllers/terrain/mapTileObject';
+import { Vector3 } from '../../controllers/render/babylon/exports';
 import type { Entity, World } from '../../ecs/world';
 
 /**

@@ -11,8 +11,8 @@
  * light is ours - the original has no per-pixel dynamic lights - and reaches
  * the walls and bodies around each flame.
  */
-import type { Scene } from '../libs/babylon/exports';
-import { ENUM_WORLD } from '../common/types';
+import type { Scene } from '../controllers/render/babylon/exports';
+import { ENUM_WORLD } from '../core/types';
 import type { Emission } from '../common/effectParticles';
 import { DUNGEON_LIGHTS } from '../maps/dungeon/spec';
 import { ICARUS_LIGHTS } from '../maps/icarus/spec';
@@ -44,7 +44,7 @@ import {
   CURSED_TEMPLE_WORLDS,
   KALIMA_WORLDS,
   onWorlds,
-} from '../common/worldAssets';
+} from '../controllers/assets/worldAssets';
 import type { LightingLayer } from './layer';
 import {
   LightSource,

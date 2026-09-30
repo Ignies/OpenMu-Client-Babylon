@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildItemPack, buildMovePack, buildNpcNames, encoderFor, type PackSource } from './localPacks';
-import { parseItemNames } from '../src/libs/mu/itemNameFile';
+import { parseItemNames } from '../src/controllers/assets/mu/itemNameFile';
 
 /**
  * The packs this tool writes are read back by the game's own readers, so that

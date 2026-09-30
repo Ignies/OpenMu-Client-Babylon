@@ -1,12 +1,12 @@
 import { spawnParticle } from '../../common/effectParticles';
-import { TILE_CM, TW_NOGROUND } from '../../common/terrain/consts';
+import { TILE_CM, TW_NOGROUND } from '../../controllers/terrain/consts';
 import { inChaosCastle } from '../../common/locomotion';
-import { BloodCastleStatePacket } from '../../common/packets/ServerToClientPackets';
-import { EventBus } from '../../libs/eventBus';
+import { BloodCastleStatePacket } from '../../../versions/shared/packets/ServerToClientPackets';
+import { EventBus } from '../../core/eventBus';
 import { sound } from '../../sound';
 import { Store } from '../../store';
 import type { World } from '../../ecs/world';
-import type { Mesh } from '../../libs/babylon/exports';
+import type { Mesh } from '../../controllers/render/babylon/exports';
 import {
   CHAOS_CASTLE_STAGES,
   CHAOS_CASTLE_STAGE_STATES,

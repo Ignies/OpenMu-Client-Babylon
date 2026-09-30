@@ -1,4 +1,4 @@
-import type { ENUM_WORLD } from '../common/types';
+import type { ENUM_WORLD } from '../core/types';
 import type { SkillLayer } from './layer';
 import { SKILL_LAYERS } from './layers';
 import { activeBuffs, buffRemaining, hasBuff, type ActiveBuff } from './buffs';

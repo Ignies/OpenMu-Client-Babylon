@@ -1,4 +1,4 @@
-import { TILE_CM } from './terrain/consts';
+import { TILE_CM } from '../controllers/terrain/consts';
 import {
   AnimationGroup,
   Constants,
@@ -12,10 +12,10 @@ import {
   VertexData,
   type AbstractMesh,
   type Scene,
-} from '../libs/babylon/exports';
-import { downloadDataFile, hasDataFile } from '../libs/mu/dataFolder';
-import { loadMuSprite } from '../libs/mu/sprites';
-import { getMaterial, loadGLTF } from './modelLoader';
+} from '../controllers/render/babylon/exports';
+import { downloadDataFile, hasDataFile } from '../controllers/assets/mu/dataFolder';
+import { loadMuSprite } from '../controllers/assets/mu/sprites';
+import { getMaterial, loadGLTF } from '../controllers/assets/modelLoader';
 import { BlendState } from './objects/enum';
 import { spawnParticle } from './effectParticles';
 import { clampAlpha } from '../effects/clampAlpha';

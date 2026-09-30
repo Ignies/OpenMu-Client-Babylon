@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Store } from '../../../store';
 import { useEventBus } from '../../../hooks/useEventBus';
 import { aimX, aimY } from '../../../camera';
-import { loadInterfaceSprite, type MuSprite } from '../../../libs/mu/sprites';
+import { loadInterfaceSprite, type MuSprite } from '../../../controllers/assets/mu/sprites';
 import {
   CURSOR_FILES,
   CURSOR_FRAME_SIZE,

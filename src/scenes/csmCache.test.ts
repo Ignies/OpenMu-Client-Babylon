@@ -3,7 +3,7 @@ import {
   CascadedShadowGenerator,
   ShadowGenerator,
   type AbstractMesh,
-} from '../libs/babylon/exports';
+} from '../controllers/render/babylon/exports';
 import {
   CSM_PRIVATE_METHODS,
   CSM_WINDOW_MARGIN,

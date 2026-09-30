@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Constants, GeometryBufferRenderer } from '../libs/babylon/exports';
+import { Constants, GeometryBufferRenderer } from '../controllers/render/babylon/exports';
 import { gbufferFormats } from './gbufferFormats';
 
 const FLOAT_CAPS = {

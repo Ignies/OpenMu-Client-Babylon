@@ -7,8 +7,8 @@ import {
   type RefusalReason,
   type TrackEvent,
   type TrackedPlayer,
-} from '../common/adminProtocol';
-import { sessionNonce } from '../common/sessionNonce';
+} from '../controllers/net/protocols/adminProtocol';
+import { sessionNonce } from '../controllers/net/sessionNonce';
 import { wsAddress } from '../common/serverConfig';
 
 /**

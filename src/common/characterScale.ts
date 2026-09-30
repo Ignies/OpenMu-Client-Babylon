@@ -1,4 +1,4 @@
-import { CharacterClassNumber } from './types';
+import { CharacterClassNumber } from '../core/types';
 import { BaseClass, getBaseClass } from './characterStats';
 
 /**

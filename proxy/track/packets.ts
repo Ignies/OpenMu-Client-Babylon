@@ -9,7 +9,7 @@ import {
   ObjectGotKilledPacket,
   RespawnAfterDeathPacket,
   ServerMessagePacket,
-} from '../../src/common/packets/ServerToClientPackets';
+} from '../../versions/shared/packets/ServerToClientPackets';
 import {
   HitRequestPacket,
   PickupItemRequestPacket,
@@ -17,7 +17,7 @@ import {
   SelectCharacterPacket,
   WalkRequestPacket,
   WhisperMessagePacket,
-} from '../../src/common/packets/ClientToServerPackets';
+} from '../../versions/shared/packets/ClientToServerPackets';
 import { nameBytes, packetBytes, rawFrame } from './wire';
 
 /**
