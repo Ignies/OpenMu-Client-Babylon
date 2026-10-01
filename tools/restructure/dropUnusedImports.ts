@@ -14,7 +14,7 @@ try {
 const hits = new Map<string, Set<string>>();
 for (const m of out.matchAll(/^(.+?)\((\d+),(\d+)\): error TS6133: '([^']+)'/gm)) {
   const [, file, , , name] = m;
-  if (!dirs.some(d => file.startsWith(d))) continue;
+  if (!dirs.some(d => file.startsWith(d)) || /Packets.ts$/.test(file)) continue; // generated files are the generator's
   (hits.get(file) ?? hits.set(file, new Set()).get(file)!).add(name);
 }
 let removed = 0;

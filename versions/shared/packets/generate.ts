@@ -1017,7 +1017,6 @@ const files = [
 import { unlinkSync } from "node:fs";
 import { byteToString } from '@/controllers/assets/download';
 
-const indexFileName = __dirname + '/index.ts';
 
 for (const name of files) {
   packetsVarName = name.split('.')[0];
@@ -1043,16 +1042,4 @@ import { SetByteValue, GetByteValue, GetBoolean, SetBoolean } from '../../../src
   rewriter.transform(new Response(csPacketsString));
 }
 
-try {
-  try {
-    unlinkSync(indexFileName);
-  } catch (e) { }
-
-  const file = Bun.file(indexFileName);
-  const writer = file.writer();
-  for (const name of files.map(n => n.split('.')[0])) {
-    writer.write(`export { ${name} } from './${name}';\n`);
-  }
-
-  writer.end();
-} catch (e) { }
+// No index here: the active version's packet set is picked by src/controllers/net/packets.ts.
