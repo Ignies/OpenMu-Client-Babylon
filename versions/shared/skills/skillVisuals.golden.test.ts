@@ -9,7 +9,15 @@ import { lighting } from '@/controllers/lighting';
 import type { Entity } from '@/ecs/world';
 import { GameOptions } from '@/features/options/gameOptions';
 import { LIGHTING_QUALITY_MAX } from '@/controllers/lighting/lightingQuality';
-import { playAreaSkillVisual, playTargetedSkillVisual, skillVisualCount } from './skillVisuals';
+import { combat } from '@/controllers/combat';
+import {
+  clearBuffVisuals,
+  playAreaSkillVisual,
+  playBowShotVisual,
+  playTargetedSkillVisual,
+  setBuffVisual,
+  skillVisualCount,
+} from './skillVisuals';
 
 // Characterization net for the skill split: what every skill id spawns and lights,
 // recorded headless. A change in this snapshot means a skill now looks different.
@@ -112,6 +120,28 @@ describe('skill visuals golden trace', () => {
       const count = (t: unknown[], k: string) => t.filter(e => (e as unknown[])[0] === k).length;
       const hash = createHash('sha1').update(JSON.stringify(full)).digest('hex').slice(0, 16);
       expect(`${count(targeted, 'spawn')}/${count(area, 'spawn')} spawns, ${count(targeted, 'light')}/${count(area, 'light')} lights, ${hash}`).toMatchSnapshot();
+    });
+  }
+
+  const digest = (t: unknown[]) => `${t.length} calls, ${createHash('sha1').update(JSON.stringify(t)).digest('hex').slice(0, 16)}`;
+
+  for (let effectId = 0; effectId <= 160; effectId++) {
+    it(`buff look ${effectId}`, () => {
+      const hero = entity(100, 100, 1);
+      (hero as { buffs?: Set<number> }).buffs = new Set([effectId]);
+      const on = run(effectId, () => setBuffVisual(scene, hero, effectId, true));
+      const off = run(effectId, () => setBuffVisual(scene, hero, effectId, false));
+      clearBuffVisuals(hero);
+      expect(digest([...on, ...off])).toMatchSnapshot();
+    });
+  }
+
+  for (let launcher = 0; launcher <= 30; launcher++) {
+    it(`bow shot ${launcher}`, () => {
+      const spy = vi.spyOn(combat, 'equippedLauncher').mockReturnValue({ num: launcher } as never);
+      const t = run(launcher, () => playBowShotVisual(scene, entity(100, 100, 1), entity(103, 104, 2)));
+      spy.mockRestore();
+      expect(digest(t)).toMatchSnapshot();
     });
   }
 });
