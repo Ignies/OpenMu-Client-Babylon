@@ -1,7 +1,7 @@
 // Structure checks. `bun run check` runs them; `bun run check --update` rewrites
 // the baselines, which may only shrink (CI compares against the base branch).
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'fs';
-import { importGraph, trackedFiles } from './graph';
+import { importGraph, runtimeSpecifiers, trackedFiles } from './graph';
 import { RULES, edgeKey } from './rules';
 
 const update = process.argv.includes('--update');
@@ -54,6 +54,30 @@ function baseline(name: string, current: string[]): string[] {
   const hits = RULES.flatMap(r => edges.filter(r.test).map(e => edgeKey(r.name, e)));
   const fresh = baseline('deps', [...new Set(hits)].sort());
   fail('dependency rules (see tools/checks/rules.ts)', fresh);
+}
+
+// 5. Server processes never load client code: the game-version layer, Babylon or React.
+{
+  const SERVERS = ['proxy/main.ts', 'register/server/main.ts', 'register/server/accountsCli.ts', 'cashshop/server/main.ts', 'marketplace/server/main.ts', 'ops/server/opsCli.ts'];
+  // `src/version/index.ts` holds `gameVersion`, which only a browser boot fills in (contract.ts is plain types).
+  const CLIENT_FILE = /^src\/(version\/index\.ts|app\/)/;
+  const CLIENT_PACKAGE = /^(@babylonjs\/|react|mobx-react)/;
+  const edges = importGraph(['src', 'versions', 'proxy', 'register/server', 'cashshop/server', 'marketplace/server', 'ops/server', 'tools'], runtimeSpecifiers);
+  const next = new Map<string, string[]>();
+  for (const e of edges) (next.get(e.from) ?? next.set(e.from, []).get(e.from)!).push(e.to);
+  const bad: string[] = [];
+  for (const entry of SERVERS) {
+    const seen = new Set([entry]);
+    const queue = [entry];
+    while (queue.length) {
+      const f = queue.shift()!;
+      if (CLIENT_FILE.test(f)) bad.push(`${entry} reaches ${f}`);
+      const bare = runtimeSpecifiers(f, readFileSync(f, 'utf8')).filter(s => CLIENT_PACKAGE.test(s));
+      for (const s of bare) bad.push(`${entry} reaches ${s} (via ${f})`);
+      for (const to of next.get(f) ?? []) if (!seen.has(to)) (seen.add(to), queue.push(to));
+    }
+  }
+  fail('server code loads client code', [...new Set(bad)]);
 }
 
 if (failures.length) {

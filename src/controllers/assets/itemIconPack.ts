@@ -1,14 +1,11 @@
 import type { Item } from '../../ecs/world';
-import { ITEM_ICON_MANIFEST } from '../interface/item_icons/itemIconManifest';
+import { hasItemIconFile, type Variant } from './itemIconFiles';
 import { itemLevelLook } from '../../features/items/itemLevelLook';
 
 /**
  * The pre-rendered item icon pack (`public/items/item_<group>_<num>_<tint>[_e|_a].png`),
- * checked against `itemIconManifest.ts`, and a warm-up for it. See assets/readme.md.
+ * checked against the manifest (`itemIconFiles.ts`), and a warm-up for it. See assets/readme.md.
  */
-
-/** Tints the pack was rendered at: +0, +3, +5, … +15 (manifest bit order). */
-export const ITEM_ICON_TINTS: readonly number[] = [0, 3, 5, 7, 9, 11, 13, 15];
 
 export function itemIconTint(lvl: number): number {
   if (lvl < 3) return 0;
@@ -21,30 +18,8 @@ export function itemIconTint(lvl: number): number {
   return 15;
 }
 
-type Variant = '' | '_e' | '_a';
-
-const VARIANT_BIT: Readonly<Record<Variant, number>> = {
-  '': 0,
-  _e: ITEM_ICON_TINTS.length,
-  _a: ITEM_ICON_TINTS.length * 2,
-};
-
 function packUrl(group: number, num: number, tint: number, variant: Variant): string {
   return `/items/item_${group}_${num}_${tint}${variant}.png`;
-}
-
-/** Whether `public/items` holds this exact file (per the generated manifest). */
-export function hasItemIconFile(
-  group: number,
-  num: number,
-  tint: number,
-  variant: Variant
-): boolean {
-  const mask = ITEM_ICON_MANIFEST[`${group}_${num}`];
-  if (mask === undefined) return false;
-  const tintIndex = ITEM_ICON_TINTS.indexOf(tint);
-  if (tintIndex < 0) return false;
-  return (mask & (1 << (tintIndex + VARIANT_BIT[variant]))) !== 0;
 }
 
 /**

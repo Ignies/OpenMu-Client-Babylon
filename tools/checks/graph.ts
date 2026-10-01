@@ -1,4 +1,5 @@
-// The import graph of src/ and versions/: every resolved module edge.
+// The import graph (src/ and versions/ unless told otherwise): every resolved module edge.
+import ts from 'typescript';
 import { execSync } from 'child_process';
 import { existsSync, readFileSync } from 'fs';
 import { posix } from 'path';
@@ -24,15 +25,32 @@ function resolve(from: string, spec: string, known: Set<string>): string | null 
   return null;
 }
 
-export function importGraph(): Edge[] {
-  const files = trackedFiles(['src', 'versions']);
+/** Static imports that load at run time: `import type`, `export type` and all-type named imports are skipped. */
+export function runtimeSpecifiers(path: string, text: string): string[] {
+  const sf = ts.createSourceFile(path, text, ts.ScriptTarget.Latest, false, path.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+  const out: string[] = [];
+  for (const s of sf.statements) {
+    if (ts.isImportDeclaration(s) && ts.isStringLiteral(s.moduleSpecifier)) {
+      const clause = s.importClause;
+      const named = clause?.namedBindings && ts.isNamedImports(clause.namedBindings) ? clause.namedBindings.elements : null;
+      const typeOnly = clause?.isTypeOnly || (clause && !clause.name && named && named.length > 0 && named.every(e => e.isTypeOnly));
+      if (!typeOnly) out.push(s.moduleSpecifier.text);
+    } else if (ts.isExportDeclaration(s) && s.moduleSpecifier && ts.isStringLiteral(s.moduleSpecifier) && !s.isTypeOnly) {
+      out.push(s.moduleSpecifier.text);
+    }
+  }
+  return out;
+}
+
+export function importGraph(roots = ['src', 'versions'], read: (path: string, text: string) => string[] = (p, t) => specifiers(p, t).map(s => s.spec)): Edge[] {
+  const files = trackedFiles(roots);
   const known = new Set(files);
   const edges: Edge[] = [];
   for (const f of files) {
     if (!/\.(ts|tsx)$/.test(f) || /Packets\.ts$/.test(f)) continue;
-    for (const s of specifiers(f, readFileSync(f, 'utf8'))) {
-      const to = resolve(f, s.spec, known);
-      if (to) edges.push({ from: f, to, spec: s.spec });
+    for (const spec of read(f, readFileSync(f, 'utf8'))) {
+      const to = resolve(f, spec, known);
+      if (to) edges.push({ from: f, to, spec });
     }
   }
   return edges;
