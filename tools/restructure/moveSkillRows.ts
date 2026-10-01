@@ -71,7 +71,7 @@ const srcImports = importsOf(sf);
 type Unit = { names: string[]; stmt: ts.Statement; refs: Set<string>; target?: string };
 const units: Unit[] = [];
 const byName = new Map<string, Unit>();
-type Row = { key: number; text: string; comment: string; refs: Set<string>; file: string };
+type Row = { key: number; text: string; comment: string; trailing: string; refs: Set<string>; file: string };
 const rows: Row[] = [];
 const kept: string[] = [];
 const keptRefs: Set<string>[] = [];
@@ -82,13 +82,27 @@ for (const s of sf.statements) {
   if (ts.isVariableStatement(s) && ns[0] === TABLE) {
     tableStmt = s;
     const init = s.declarationList.declarations[0].initializer as ts.ObjectLiteralExpression;
-    for (const p of init.properties) {
+    // A comment on the same line as a row (`3: 'x', // Lightning`) is that row's, though
+    // the parser hands it to the next row's leading trivia.
+    const props = init.properties;
+    const trivia = (i: number) => text.slice(props[i].getFullStart(), props[i].getStart(sf));
+    const sameLine = (s: string) => (s.includes('\n') ? s.slice(0, s.indexOf('\n')) : '').trim();
+    const trailingOf = (i: number) =>
+      i + 1 < props.length ? sameLine(trivia(i + 1)) : (text.slice(props[i].getEnd(), init.getEnd()).match(/^\s*,?[ \t]*(\/\/[^\n]*)/)?.[1] ?? '');
+    props.forEach((p, i) => {
       const pa = p as ts.PropertyAssignment;
       const key = Number(pa.name.getText(sf));
+      const lead = trivia(i);
+      const own = (sameLine(lead) ? lead.slice(lead.indexOf('\n') + 1) : lead).replace(/^\s*\n/, '').trimEnd();
+      const trailing = trailingOf(i);
       // Not a skill (e.g. 0 = plain weapon swings): stays in the controller's table.
-      if (!hasHome(key)) { kept.push(text.slice(p.getFullStart(), p.getEnd())); keptRefs.push(refsOf(pa.initializer)); continue; }
-      rows.push({ key, text: pa.initializer.getText(sf), comment: text.slice(p.getFullStart(), p.getStart(sf)).replace(/^\s*\n/, '').trimEnd(), refs: refsOf(pa.initializer), file: skillHome(key).file });
-    }
+      if (!hasHome(key)) {
+        kept.push(`\n${own ? own + '\n' : ''}  ${p.getText(sf)},${trailing ? ' ' + trailing : ''}`);
+        keptRefs.push(refsOf(pa.initializer));
+        return;
+      }
+      rows.push({ key, text: pa.initializer.getText(sf), comment: own, trailing, refs: refsOf(pa.initializer), file: skillHome(key).file });
+    });
     continue;
   }
   const u: Unit = { names: ns, stmt: s, refs: refsOf(s) };
@@ -228,7 +242,7 @@ for (const [file, { units: us, rows: rs }] of perFile) {
   if (rs.length) {
     if (rs.length > 1) throw new Error(`${file} gets ${rs.length} ${TABLE} rows`);
     const r = rs[0];
-    const prop = `${r.comment ? r.comment + '\n' : ''}  ${PROP}: ${r.text},\n`;
+    const prop = `${r.comment ? r.comment + '\n' : ''}  ${PROP}: ${r.text},${r.trailing ? ' ' + r.trailing : ''}\n`;
     const end = t.lastIndexOf('});');
     if (end < 0 || !/export default define(Skill|BuffLooks)\(/.test(t)) throw new Error(`no defineSkill in ${file}`);
     t = t.slice(0, end) + prop + t.slice(end);
@@ -259,7 +273,7 @@ function isUsedElsewhere(u: Unit, file: string): boolean {
 let out = text;
 const edits: [number, number, string][] = [];
 const init = tableStmt.declarationList.declarations[0].initializer!;
-edits.push([init.getStart(sf), init.getEnd(), kept.length ? `{${kept.join(',')},\n}` : '{}']);
+edits.push([init.getStart(sf), init.getEnd(), kept.length ? `{${kept.join('')}\n}` : '{}']);
 for (const u of moving) edits.push([u.stmt.getFullStart(), u.stmt.getEnd(), '']);
 for (const n of neededExports) {
   const u = byName.get(n)!;
