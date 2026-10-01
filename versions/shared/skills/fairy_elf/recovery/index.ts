@@ -24,4 +24,5 @@ export default defineSkill({
   },
   sound: 'Sound/recover', // Recovery
   clip: { ground: A.PLAYER_RECOVER_SKILL }, // Recovery (:4993-5000)
+  target: 'allyOrSelf',
 });

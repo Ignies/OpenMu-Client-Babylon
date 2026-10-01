@@ -21,4 +21,5 @@ export default defineSkill({
   },
   sound: 'Sound/battlecastle/sCHaveyBlow', // Occupy
   clip: { ground: A.PLAYER_ATTACK_RUSH }, // Occupy (WSclient.cpp:4725)
+  stepIn: 'cast',
 });

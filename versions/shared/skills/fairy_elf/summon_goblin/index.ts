@@ -11,4 +11,5 @@ export default defineSkill({
   visual: { area: elfSummon, impact: elfSummon, enhanced: SUMMON_GRADED },
   // Elf summons: SOUND_SKILL_DEFENSE on every client's 0x19 (WSclient.cpp:4244-4262).
   sound: 'Sound/sKnightDefense', // Summon Goblin
+  target: 'self',
 });

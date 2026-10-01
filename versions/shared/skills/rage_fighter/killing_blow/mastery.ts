@@ -6,4 +6,5 @@ export default defineSkill({
   id: 554,
   name: "Killing Blow Mastery",
   clip: { ground: A.PLAYER_SKILL_THRUST }, // Killing Blow Mastery
+  stepIn: 'cast',
 });

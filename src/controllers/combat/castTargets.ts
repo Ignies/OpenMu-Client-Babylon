@@ -46,23 +46,12 @@ export type CastTarget =
  * 'inPlace' = at the hero's own tile with no target key (SkillCast.cpp:722-741).
  */
 export const SKILL_TARGETS: Partial<Record<number, CastTarget>> = {
-  48: 'self', 356: 'self', 360: 'self', 363: 'self',
-  30: 'self', 31: 'self', 32: 'self', 33: 'self', 34: 'self', 35: 'self', 36: 'self', 37: 'self',
-  53: 'self',
-  77: 'self', 441: 'self',
-  218: 'self', 469: 'self', 470: 'self', 472: 'self',
-  266: 'self',
-  267: 'self', 573: 'self',
-  268: 'self', 569: 'self', 572: 'self',
-  205: 'self', 206: 'self', 207: 'self', 208: 'self', 209: 'self', // the Halloween event skills
-  233: 'self', 380: 'self', 383: 'self',
-  16: 'allyOrSelf', 403: 'allyOrSelf', 404: 'allyOrSelf',
-  26: 'allyOrSelf', 413: 'allyOrSelf',
-  27: 'allyOrSelf', 417: 'allyOrSelf', 423: 'allyOrSelf',
-  28: 'allyOrSelf', 420: 'allyOrSelf', 422: 'allyOrSelf',
-  234: 'allyOrSelf',
-  219: 'enemy', 454: 'enemy',
-  221: 'inPlace', 222: 'inPlace', 459: 'inPlace', 460: 'inPlace',
+  37: 'self',
+  205: 'self',
+  206: 'self',
+  207: 'self',
+  208: 'self',
+  209: 'self', // the Halloween event skills
 };
 
 // ---- 2. state + readers ----------------------------------------------------

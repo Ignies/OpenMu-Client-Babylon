@@ -22,4 +22,5 @@ export default defineSkill({
   sound: 'Sound/Ragefighter/Rage_Thrust', // Killing Blow
   // --- Rage Fighter (CMonkSystem::SetRageSkillAni, MonkSystem.cpp:389) ----
   clip: { ground: A.PLAYER_SKILL_THRUST }, // Killing Blow
+  stepIn: 'cast',
 });

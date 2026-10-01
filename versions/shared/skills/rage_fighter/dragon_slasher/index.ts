@@ -26,4 +26,5 @@ export default defineSkill({
   sound: 'Sound/Ragefighter/Rage_Dragonkick', // Dragon Slasher
   delayMs: 3000, // Dragon Slasher
   clip: { ground: A.PLAYER_SKILL_DRAGONKICK }, // Dragon Slasher
+  stepIn: 'midClip',
 });

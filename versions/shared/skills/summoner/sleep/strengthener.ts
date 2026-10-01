@@ -7,4 +7,5 @@ export default defineSkill({
   name: "Sleep Strengthener",
   sound: 'Sound/SE_Ch_summoner_skill03_sleep', // Sleep Strengthener
   clip: SLEEP_CLIPS, // Sleep Str
+  target: 'enemy',
 });

@@ -11,4 +11,5 @@ export default defineSkill({
     // 7 AG recovery: the orbiting healing rings.
     7: () => ({ healingRings: true }),
   },
+  target: 'self',
 });

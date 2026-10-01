@@ -22,4 +22,5 @@ export default defineSkill({
   },
   sound: 'Sound/SE_Ch_summoner_skill03_sleep', // Sleep
   clip: SLEEP_CLIPS, // Sleep
+  target: 'enemy',
 });

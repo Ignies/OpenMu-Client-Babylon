@@ -6,4 +6,5 @@ export default defineSkill({
   id: 441,
   name: "Infinity Arrow Str",
   clip: { ground: A.PLAYER_RUSH1 }, // Infinity Arrow Str
+  target: 'self',
 });

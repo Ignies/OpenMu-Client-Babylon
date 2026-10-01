@@ -22,4 +22,5 @@ export default defineSkill({
   sound: 'Sound/Ragefighter/Rage_Giantswing', // Chain Drive (MonkSystem.cpp:1125)
   delayMs: 700, // Chain Drive
   clip: { ground: A.PLAYER_SKILL_GIANTSWING }, // Chain Drive
+  stepIn: 'midClip',
 });

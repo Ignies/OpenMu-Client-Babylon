@@ -6,4 +6,5 @@ export default defineSkill({
   name: "Summon Stone Golem",
   visual: { area: elfSummon, impact: elfSummon, enhanced: SUMMON_GRADED },
   sound: 'Sound/sKnightDefense', // Summon Stone Golem
+  target: 'self',
 });

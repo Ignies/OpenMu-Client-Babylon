@@ -6,4 +6,5 @@ export default defineSkill({
   name: "Summon Dark Knight",
   visual: { area: elfSummon, impact: elfSummon, enhanced: SUMMON_GRADED },
   sound: 'Sound/sKnightDefense', // Summon Dark Knight
+  target: 'self',
 });

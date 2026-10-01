@@ -26,4 +26,5 @@ export default defineSkill({
   sound: 'Sound/SE_Ch_summoner_weakness', // Weakness
   delayMs: 4000, // Weakness
   clip: SLEEP_CLIPS, // Weakness
+  target: 'inPlace',
 });

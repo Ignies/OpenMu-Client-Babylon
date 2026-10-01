@@ -10,4 +10,5 @@ export default defineSkill({
   sound: 'Sound/SwellofMagicPower', // Expansion of Wizardry Mastery
   clip: { ground: A.PLAYER_SKILL_SWELL_OF_MP }, // Expansion of Wizardry Mastery
   light: { enhanced: SWELL_LIGHT },
+  target: 'self',
 });

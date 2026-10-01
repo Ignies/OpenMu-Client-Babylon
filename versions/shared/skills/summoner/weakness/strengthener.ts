@@ -7,4 +7,5 @@ export default defineSkill({
   name: "Weakness Strengthener",
   sound: 'Sound/SE_Ch_summoner_weakness', // Weakness Strengthener
   clip: SLEEP_CLIPS, // Weakness Str
+  target: 'inPlace',
 });

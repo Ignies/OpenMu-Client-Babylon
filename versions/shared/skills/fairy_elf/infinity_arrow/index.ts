@@ -17,4 +17,5 @@ export default defineSkill({
   // foot - mounted it falls back to SetPlayerMagic (:4967-4975), which is
   // what an absent mount row means here.
   clip: { ground: A.PLAYER_RUSH1 }, // Infinity Arrow
+  target: 'self',
 });

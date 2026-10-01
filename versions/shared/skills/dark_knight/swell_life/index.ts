@@ -204,4 +204,5 @@ export default defineSkill({
       },
     },
   },
+  target: 'self',
 });

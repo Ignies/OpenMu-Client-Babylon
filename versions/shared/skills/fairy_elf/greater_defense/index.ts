@@ -11,4 +11,5 @@ export default defineSkill({
   visual: { impact: magicGround([0.4, 0.8, 0.2]) },
   // Greater Defense / Greater Damage: the same magic circle.
   light: { impact: holy(3, 1.0) },
+  target: 'allyOrSelf',
 });

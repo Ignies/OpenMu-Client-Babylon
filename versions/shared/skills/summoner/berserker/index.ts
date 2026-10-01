@@ -40,4 +40,5 @@ export default defineSkill({
   sound: 'Sound/Berserker', // Berserker
   delayMs: 5000, // Berserker
   clip: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker
+  target: 'self',
 });

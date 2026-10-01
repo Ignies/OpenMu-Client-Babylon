@@ -6,4 +6,5 @@ export default defineSkill({
   id: 552,
   name: "Beast Uppercut Strengthener",
   clip: { ground: A.PLAYER_SKILL_STAMP }, // Beast Uppercut Str
+  stepIn: 'midClip',
 });

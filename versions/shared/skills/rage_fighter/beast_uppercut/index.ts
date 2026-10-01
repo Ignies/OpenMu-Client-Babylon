@@ -11,4 +11,5 @@ export default defineSkill({
   visual: { cast: slash(RGBS.gold, TEX.motionBlur, 0.7), impact: seq(steelHit, sprite({ texture: TEX.impact, colour: RGBS.gold, size: 1, seconds: 0.4, rise: 2, grow: 1.6 })) },
   sound: 'Sound/Ragefighter/Rage_Stamp', // Beast Uppercut (MonkSystem.cpp:1117)
   clip: { ground: A.PLAYER_SKILL_STAMP }, // Beast Uppercut
+  stepIn: 'midClip',
 });

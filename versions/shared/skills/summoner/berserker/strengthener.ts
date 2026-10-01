@@ -7,4 +7,5 @@ export default defineSkill({
   name: "Berserker Strengthener",
   sound: 'Sound/Berserker', // Berserker Strengthener
   clip: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker Str
+  target: 'self',
 });

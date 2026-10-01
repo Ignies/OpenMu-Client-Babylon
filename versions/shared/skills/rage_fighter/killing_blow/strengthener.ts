@@ -6,4 +6,5 @@ export default defineSkill({
   id: 551,
   name: "Killing Blow Strengthener",
   clip: { ground: A.PLAYER_SKILL_THRUST }, // Killing Blow Str
+  stepIn: 'cast',
 });

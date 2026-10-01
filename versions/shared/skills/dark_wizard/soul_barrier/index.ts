@@ -133,4 +133,5 @@ export default defineSkill({
   buffArrivals: { 4: soulBarrierArrival },
   // Soul Barrier (403 / 404 / 406 its master rows): no terrain light in the original; Enhanced only.
   light: { enhanced: SOUL_BARRIER_LIGHT },
+  target: 'allyOrSelf',
 });

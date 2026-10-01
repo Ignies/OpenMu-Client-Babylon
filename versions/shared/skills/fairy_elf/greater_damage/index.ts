@@ -17,4 +17,5 @@ export default defineSkill({
     3: () => ({ handShiny: { bones: HAND_SHINY_BONES, colour: [1, 0.3, 0.2] } }),
   },
   light: { impact: { ...holy(3, 1.0), color: [1, 0.75, 0.55] } },
+  target: 'allyOrSelf',
 });

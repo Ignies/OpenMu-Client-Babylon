@@ -224,4 +224,5 @@ export default defineSkill({
   // Expansion of Wizardry (380 / 383 its master rows): no terrain light in the original; Enhanced only. The
   // rows also keep the stale Wizardry type's cast flash off 380 / 383.
   light: { enhanced: SWELL_LIGHT },
+  target: 'self',
 });

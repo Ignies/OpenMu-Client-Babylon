@@ -12,4 +12,5 @@ export default defineSkill({
     154: () => ({ boneGlow: OURFORCES_GLOW }),
   },
   sound: 'Sound/Ragefighter/Rage_Buff_2', // Increase Block
+  target: 'self',
 });

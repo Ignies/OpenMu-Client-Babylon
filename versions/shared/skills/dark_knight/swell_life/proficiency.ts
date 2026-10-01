@@ -7,4 +7,5 @@ export default defineSkill({
   name: "Swell Life Proficiency",
   sound: 'Sound/eSwellLife', // Swell Life Proficiency
   clip: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life Proficiency
+  target: 'self',
 });

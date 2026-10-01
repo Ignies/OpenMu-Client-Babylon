@@ -6,4 +6,5 @@ export default defineSkill({
   name: "Summon Elite Yeti",
   visual: { area: elfSummon, impact: elfSummon, enhanced: SUMMON_GRADED },
   sound: 'Sound/sKnightDefense', // Summon Elite Yeti
+  target: 'self',
 });

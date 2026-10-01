@@ -7,4 +7,5 @@ export default defineSkill({
   name: "Berserker Mastery",
   sound: 'Sound/Berserker', // Berserker Mastery
   clip: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker Mastery
+  target: 'self',
 });

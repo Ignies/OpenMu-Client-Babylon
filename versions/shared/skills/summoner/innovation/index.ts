@@ -22,4 +22,5 @@ export default defineSkill({
   sound: 'Sound/SE_Ch_summoner_innovation', // Innovation
   delayMs: 4000, // Innovation
   clip: SLEEP_CLIPS, // Enervation
+  target: 'inPlace',
 });

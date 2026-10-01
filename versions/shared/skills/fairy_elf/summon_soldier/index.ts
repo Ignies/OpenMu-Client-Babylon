@@ -6,4 +6,5 @@ export default defineSkill({
   name: "Summon Soldier",
   visual: { area: elfSummon, impact: elfSummon, enhanced: SUMMON_GRADED },
   sound: 'Sound/sKnightDefense', // Summon Soldier
+  target: 'self',
 });

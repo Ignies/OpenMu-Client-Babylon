@@ -6,4 +6,5 @@ export default defineSkill({
   id: 403,
   name: "Soul Barrier Strength",
   light: { enhanced: SOUL_BARRIER_LIGHT },
+  target: 'allyOrSelf',
 });

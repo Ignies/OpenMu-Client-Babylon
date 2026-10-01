@@ -33,12 +33,7 @@ import type { CombatLayer } from './layer';
  * number: 'cast' as the cast is sent, 'midClip' on the consecutive-attack
  * frame partway through the clip. Each skill's file sets `stepIn`.
  */
-export const SKILL_STEP_IN: Partial<Record<number, 'cast' | 'midClip'>> = {
-  260: 'cast', 551: 'cast', 554: 'cast', 269: 'cast',
-  261: 'midClip', 552: 'midClip', 555: 'midClip',
-  262: 'midClip', 558: 'midClip',
-  265: 'midClip',
-};
+export const SKILL_STEP_IN: Partial<Record<number, 'cast' | 'midClip'>> = {};
 /**
  * The animation key the mid-clip step fires on. `InitConsecutiveState` arms
  * the check at 3.0 for every one of them (UseSkillRagefighter:2790-2830); the

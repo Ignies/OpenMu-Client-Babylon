@@ -28,4 +28,5 @@ export default defineSkill({
   },
   // Heal: MODEL_MAGIC_CIRCLE1 range 3 (:9705).
   light: { impact: holy(3, 1.0) },
+  target: 'allyOrSelf',
 });
