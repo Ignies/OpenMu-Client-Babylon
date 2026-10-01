@@ -15,6 +15,8 @@ import { playLandingSound } from '@/controllers/sound/combat';
 import { spawnModel } from '@/controllers/fx/model';
 import { storeRef } from '@/app/storeRef';
 
+import { A, SkillClipSet } from '@/controllers/combat/recipes';
+
 /** Degrees a tick -> radians a second. */
 const degPerTick = (d: number): number => (d * 25 * Math.PI) / 180;
 
@@ -684,3 +686,21 @@ export const summonCastGrace = (k: SummonCast): Step => (_at, c) => {
   effects.spawn('particles', c.scene, feet, { recipe: risingEmbersFor(k.outer, 1.3), rate: 24, seconds: ticks(30), height: 0.1 });
   curseLight(c.scene, k.outer, 1.5, ticks(40), feet, undefined, { attack: ticks(8), release: ticks(20), heightOffset: 0.5, floorGain: 0.35 });
 };
+
+/** The Summoner curses, which all share the Sleep clip and its three mounts. */
+const MOUNTED_SLEEP = {
+  uniria: A.PLAYER_SKILL_SLEEP_UNI,
+  dinorant: A.PLAYER_SKILL_SLEEP_DINO,
+  fenrir: A.PLAYER_SKILL_SLEEP_FENRIR,
+} as const;
+
+/** The three summons, and their mounts (SummonSystem.cpp:46-62). */
+export const SUMMON_CLIPS: SkillClipSet = {
+  ground: A.PLAYER_SKILL_SUMMON,
+  uniria: A.PLAYER_SKILL_SUMMON_UNI,
+  dinorant: A.PLAYER_SKILL_SUMMON_DINO,
+  fenrir: A.PLAYER_SKILL_SUMMON_FENRIR,
+};
+
+/** Sleep, Blind, Thorns, Berserker, Weakness, Enervation - one clip for all six. */
+export const SLEEP_CLIPS: SkillClipSet = { ground: A.PLAYER_SKILL_SLEEP, ...MOUNTED_SLEEP };

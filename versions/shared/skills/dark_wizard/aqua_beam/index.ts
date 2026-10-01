@@ -8,6 +8,8 @@ import { dw2Sfx } from '../../_shared';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** BITMAP_BOSS_LASER sub0: LT 20, Light (0.5, 0.7, 1), 20 Spark03 cards of Scale 16 (32 px -> 5.12 m) 50 cm apart (ZzzEffect.cpp:978-1031, :8967-9004). */
 const AQUA_CARDS = 20;
 const AQUA_STEP = cm(50);
@@ -85,4 +87,5 @@ export default defineSkill({
   name: "Aqua Beam",
   // 12 Aqua Beam: BITMAP_BOSS_LASER sub0 along the facing at AttackTime 15 (`aquaBeam`); Enhanced `aquaBeamGraded`.
   visual: { area: dw2AtAttackTime(aquaBeam), enhanced: { area: dw2AtAttackTime(aquaBeamGraded) } },
+  clip: { ground: A.PLAYER_SKILL_FLASH }, // Flash (Mass Lightning)
 });

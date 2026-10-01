@@ -11,6 +11,9 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { storeRef } from '@/app/storeRef';
 
+import { A } from '@/controllers/combat/recipes';
+import { MOUNTED_COMMAND } from '../../_shared';
+
 /** Removal Buff fires once the caster's clip passes key 3.5, or at AttackTime 15 (ZzzCharacter.cpp:2927-2931). */
 const REMOVAL_CLIPS: ReadonlySet<number> = new Set([
   PlayerAction.PLAYER_SKILL_VITALITY,
@@ -204,4 +207,5 @@ export default defineSkill({
   // 72 Removal Buff (Abolish Magic): six MODEL_SPEARSKILL sub5-7 bands spiralling in on the caster, rising and bursting
   // out, and four BITMAP_SHOCK_WAVE sub3, at clip key 3.5 (ZzzCharacter.cpp:2927-2931, :4295-4341).
   visual: { impact: removalBuff, area: removalBuff, enhanced: { impact: removalBuffHd, area: removalBuffHd } },
+  clip: { ground: A.PLAYER_SKILL_VITALITY, ...MOUNTED_COMMAND }, // Removal Buff
 });

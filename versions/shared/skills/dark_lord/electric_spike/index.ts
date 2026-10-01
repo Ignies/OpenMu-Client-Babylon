@@ -8,6 +8,8 @@ import { atFrame, everyTick, muYaw, sfx, ticksLeft } from '../_shared';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 
+import { A } from '@/controllers/combat/recipes';
+
 const DL_FLASH: ReadonlySet<number> = new Set([
   PlayerAction.PLAYER_SKILL_FLASH,
   PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_FLASH,
@@ -184,6 +186,12 @@ const sparkAfterglow: Step = (_at, c) =>
     model({ ...glow, yaw: -entityYaw(c.caster) })(p, c);
   });
 
+/** Electric Spike (ZzzInterface.cpp:5635-5648). */
+export const MOUNTED_FLASH = {
+  horse: A.PLAYER_ATTACK_RIDE_ATTACK_FLASH,
+  fenrir: A.PLAYER_FENRIR_ATTACK_DARKLORD_FLASH,
+} as const;
+
 export default defineSkill({
   id: 65,
   name: "Electric Spike",
@@ -204,4 +212,6 @@ export default defineSkill({
       ),
     },
   },
+  delayMs: 5000, // Electric Spike
+  clip: { ground: A.PLAYER_SKILL_FLASH, ...MOUNTED_FLASH }, // Electric Spike
 });

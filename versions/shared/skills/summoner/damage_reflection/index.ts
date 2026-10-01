@@ -3,6 +3,8 @@ import { AliceCurse, CurseHand, aliceCurse, aliceGrace, curseHandLight, summoner
 import { type RGB } from '@/controllers/fx/core';
 import { onCurseLanding, seq } from '@/controllers/skills/visuals';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** Thorns (0.8, 0.5, 0.2) and Berserker (1, 0.1, 0.2): the one Light on every layer. */
 const THORNS: RGB = [0.8, 0.5, 0.2];
 const CURSE_HAND_THORNS: CurseHand = { shiny: THORNS, pin: THORNS, puff: THORNS, dark: false };
@@ -24,4 +26,7 @@ export default defineSkill({
     71: () => ({ pins: { colour: [0.9, 0.6, 0.1] } }),
   },
   sound: 'Sound/SE_Ch_summoner_skill02_ssonze', // Thorns
+  delayMs: 5000, // Damage Reflection
+  // Thorns / Berserker: the 0x19 reply sets plain PLAYER_SKILL_SLEEP for every caster (WSclient.cpp:4929-4949).
+  clip: { ground: A.PLAYER_SKILL_SLEEP }, // Thorns
 });

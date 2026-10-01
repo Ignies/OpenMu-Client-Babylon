@@ -11,6 +11,8 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { storeRef } from '@/app/storeRef';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** `m_vPosSword`: `Weapon[0]`'s link bone, 300 cm along the facing (ZzzCharacter.cpp:2652-2660). */
 function swordPoint(caster: Entity, forward: number, out: Vector3): Vector3 {
   bonePos(caster, WEAPON_LINK_BONE, out, CAST_HEIGHT);
@@ -307,4 +309,5 @@ export default defineSkill({
     // Graded tiers: the gathering point swells red, the drill throws blue motes, the stab flashes on the victim; each lit.
     enhanced: { cast: deathStabOf(true) },
   },
+  clip: { ground: A.PLAYER_ATTACK_ONETOONE }, // Death Stab
 });

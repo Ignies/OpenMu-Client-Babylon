@@ -5,6 +5,8 @@ import { after, arcHit, atCaster, flying, perTick, seq, slash, sprite, ticks } f
 import { effects } from '@/controllers/fx';
 import { entityPos, entityYaw } from '@/controllers/fx/core';
 
+import { A } from '@/controllers/combat/recipes';
+
 export default defineSkill({
   id: 262,
   name: "Chain Drive",
@@ -18,4 +20,6 @@ export default defineSkill({
     impact: seq(arcHit, after(0.12, arcHit), after(0.24, arcHit)),
   },
   sound: 'Sound/Ragefighter/Rage_Giantswing', // Chain Drive (MonkSystem.cpp:1125)
+  delayMs: 700, // Chain Drive
+  clip: { ground: A.PLAYER_SKILL_GIANTSWING }, // Chain Drive
 });

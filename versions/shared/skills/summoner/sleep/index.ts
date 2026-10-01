@@ -2,6 +2,8 @@ import { defineSkill } from '@/controllers/skills/define';
 import { ALICE_SLEEP, CurseHand, aliceCurse, aliceGrace, curseHandLight, summonerHand } from '../_shared';
 import { onCurseLanding, seq } from '@/controllers/skills/visuals';
 
+import { SLEEP_CLIPS } from '../_shared';
+
 const CURSE_HAND_SLEEP: CurseHand = { shiny: [0.5, 0.2, 0.8], pin: [0.7, 0, 0.8], puff: [0.6, 0.1, 0.8], dark: false };
 
 export default defineSkill({
@@ -19,4 +21,5 @@ export default defineSkill({
     72: () => ({ sleepDrops: { colour: [0.7, 0.1, 0.9] } }),
   },
   sound: 'Sound/SE_Ch_summoner_skill03_sleep', // Sleep
+  clip: SLEEP_CLIPS, // Sleep
 });

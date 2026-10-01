@@ -8,6 +8,8 @@ import { lighting } from '@/controllers/lighting';
 import { novaStageOf } from '@/controllers/combat/novaCharge';
 import { playCombat, stopCombat } from '@/controllers/sound/combat';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** JOINT_SPIRIT sub6 / sub7 and the charge's BITMAP_LIGHT, Skill 0 (ZzzEffectJoint.cpp:760-762, ZzzCharacter.cpp:5729). */
 export const NOVA_BLUE: RGB = [0.3, 0.3, 1];
 /** Enhanced: the same blue with the red pulled out, so 72 stacked cards read blue instead of lavender-white. */
@@ -149,4 +151,5 @@ export default defineSkill({
     impact: novaBurst,
     enhanced: { impact: novaBurstEnhanced },
   },
+  clip: { ground: A.PLAYER_SKILL_HELL_START }, // Nova (release)
 });

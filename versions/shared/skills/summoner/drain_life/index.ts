@@ -10,6 +10,8 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { playCombat, playLandingSound } from '@/controllers/sound/combat';
 
+import { A, SkillClipSet } from '@/controllers/combat/recipes';
+
 const PX_RED_FLARE = 64;
 
 // Drain Life (MoveHandlers.cpp:2067-2210).
@@ -247,6 +249,14 @@ function drainArrival(scene: Scene, caster: Entity): void {
   spawnCard(scene, chest(new Vector3()), { texture: TEX.flare, colour: [1, 0.3, 0.4], size: cm(PX_FLARE * 1.2), grow: cm(PX_FLARE * 0.25), ticks: 8, lifeFade: true, follow: chest });
 }
 
+/** Drain Life, and its three mounts (ZzzInterface.cpp:2545-2560). */
+export const DRAIN_LIFE_CLIPS: SkillClipSet = {
+  ground: A.PLAYER_SKILL_DRAIN_LIFE,
+  uniria: A.PLAYER_SKILL_DRAIN_LIFE_UNI,
+  dinorant: A.PLAYER_SKILL_DRAIN_LIFE_DINO,
+  fenrir: A.PLAYER_SKILL_DRAIN_LIFE_FENRIR,
+};
+
 export default defineSkill({
   id: 214,
   name: "Drain Life",
@@ -254,4 +264,6 @@ export default defineSkill({
   // siphon off every other target bone homing back (drainLife).
   visual: { impact: drainLife, enhanced: { impact: drainLifeStep(true) } },
   sound: 'Sound/SE_Ch_summoner_skill07_lifedrain', // Drain Life
+  // --- Summoner (UseSkillSummon, ZzzInterface.cpp:2534-2680) --------------
+  clip: DRAIN_LIFE_CLIPS, // Drain Life
 });

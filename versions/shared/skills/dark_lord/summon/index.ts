@@ -11,6 +11,8 @@ import { lighting } from '@/controllers/lighting';
 import { storeRef } from '@/app/storeRef';
 import { warmGLTF } from '@/controllers/assets/modelLoader';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** MODEL_CIRCLE sub2's `BlendMeshLight` at `left` ticks (MoveHandlers.cpp:3786-3796). */
 const circleLight = (left: number): number => (left > 240 ? (250 - left) * 0.1 : left * 0.1);
 /**
@@ -173,6 +175,14 @@ const partyCircleWarm: Step = (_at, c) => {
   if (world) for (const m of [MODEL.circle, MODEL.circle2]) void warmGLTF(m, world);
 };
 
+/** Party Teleport (WSclient.cpp:4388-4402). */
+const MOUNTED_TELEPORT = {
+  uniria: A.PLAYER_ATTACK_RIDE_TELEPORT,
+  dinorant: A.PLAYER_ATTACK_RIDE_TELEPORT,
+  horse: A.PLAYER_ATTACK_RIDE_TELEPORT,
+  fenrir: A.PLAYER_FENRIR_ATTACK_DARKLORD_TELEPORT,
+} as const;
+
 export default defineSkill({
   id: 63,
   name: "Summon",
@@ -182,4 +192,6 @@ export default defineSkill({
     area: atCaster(seq(partyCircleWarm, teleportHand, after(ticks(6), partyCircle)), 0),
     enhanced: { area: atCaster(seq(partyCircleWarm, teleportHandOf(true), after(ticks(6), partyCircleOf(true))), 0) },
   },
+  delayMs: 30000, // Summon (Dark Lord)
+  clip: { ground: A.PLAYER_ATTACK_TELEPORT, ...MOUNTED_TELEPORT }, // Party Teleport
 });

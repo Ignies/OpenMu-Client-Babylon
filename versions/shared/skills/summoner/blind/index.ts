@@ -2,6 +2,8 @@ import { defineSkill } from '@/controllers/skills/define';
 import { AliceCurse, CurseHand, aliceCurse, aliceGrace, summonerHand } from '../_shared';
 import { onCurseLanding, seq } from '@/controllers/skills/visuals';
 
+import { A } from '@/controllers/combat/recipes';
+
 const CURSE_HAND_BLIND: CurseHand = { shiny: [1, 1, 1], pin: [1, 1, 1], puff: [1, 1, 1], dark: true };
 const ALICE_BLIND: AliceCurse = { circle: [1, 1, 1], models: [1, 1, 1], flare: [1, 1, 1], shiny: [1, 1, 1], streak: [1, 1, 1], dark: true };
 
@@ -20,4 +22,6 @@ export default defineSkill({
     73: () => ({ blindSmoke: true }),
   },
   sound: 'Sound/SE_Ch_summoner_skill04_blind', // Blind
+  // Blind: PLAYER_SKILL_SLEEP with no mount ladder (WSclient.cpp:4921-4927); OpenMU casts it as 461 / 463.
+  clip: { ground: A.PLAYER_SKILL_SLEEP }, // Blind
 });

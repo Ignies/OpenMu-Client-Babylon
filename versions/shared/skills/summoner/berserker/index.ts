@@ -5,6 +5,8 @@ import { Step, onCurseLanding, seq } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { playCombat } from '@/controllers/sound/combat';
 
+import { A } from '@/controllers/combat/recipes';
+
 const BERSERKER: RGB = [1, 0.1, 0.2];
 const CURSE_HAND_BERSERKER: CurseHand = { shiny: BERSERKER, pin: BERSERKER, puff: BERSERKER, dark: false };
 /**
@@ -36,4 +38,6 @@ export default defineSkill({
     81: () => ({ berserk: true }),
   },
   sound: 'Sound/Berserker', // Berserker
+  delayMs: 5000, // Berserker
+  clip: { ground: A.PLAYER_SKILL_SLEEP }, // Berserker
 });

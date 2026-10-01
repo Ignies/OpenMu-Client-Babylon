@@ -5,6 +5,8 @@ import { effects } from '@/controllers/fx';
 import { entityPos, entityYaw } from '@/controllers/fx/core';
 import { explosion, seq, slash, steelHit } from '@/controllers/skills/visuals';
 
+import { A } from '@/controllers/combat/recipes';
+
 export default defineSkill({
   id: 260,
   name: "Killing Blow",
@@ -18,4 +20,6 @@ export default defineSkill({
     impact: seq(steelHit, explosion(RGBS.gold, 0.9)),
   },
   sound: 'Sound/Ragefighter/Rage_Thrust', // Killing Blow
+  // --- Rage Fighter (CMonkSystem::SetRageSkillAni, MonkSystem.cpp:389) ----
+  clip: { ground: A.PLAYER_SKILL_THRUST }, // Killing Blow
 });

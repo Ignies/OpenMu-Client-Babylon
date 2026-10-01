@@ -6,6 +6,8 @@ import { entityPos, entityYaw } from '@/controllers/fx/core';
 import { multiShotVolley } from '../../_shared';
 import { seq, slash, steelHit } from '@/controllers/skills/visuals';
 
+import { A } from '@/controllers/combat/recipes';
+
 export default defineSkill({
   id: 265,
   name: "Dragon Slasher",
@@ -22,4 +24,6 @@ export default defineSkill({
     impact: steelHit,
   },
   sound: 'Sound/Ragefighter/Rage_Dragonkick', // Dragon Slasher
+  delayMs: 3000, // Dragon Slasher
+  clip: { ground: A.PLAYER_SKILL_DRAGONKICK }, // Dragon Slasher
 });

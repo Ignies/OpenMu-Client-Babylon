@@ -8,6 +8,9 @@ import { effects } from '@/controllers/fx';
 import { groundAt } from '../../_shared';
 import { lighting } from '@/controllers/lighting';
 
+import { A } from '@/controllers/combat/recipes';
+import { MOUNTED_STRIKE } from '../_shared';
+
 /** Space Split's pillar, JOINT_FORCE sub2 (else branch, ZzzEffectJoint.cpp:2361-2369): V 8, Dir (5, _, 5), LT 15, MaxTails 12. */
 const SPLIT_TAILS = 12;
 const SPLIT_HEADS = forceHeads(8, 5, 5, 15, SPLIT_TAILS).map(cm);
@@ -124,4 +127,5 @@ export default defineSkill({
   // inferno pillars (spaceSplit). BattleCastle/sCDarkAttack plays there, on every map like rows 44-46.
   visual: { impact: litStrike(spaceSplit, 'Sound/battlecastle/sCDarkAttack'), enhanced: { impact: litStrike(spaceSplitGraded, 'Sound/battlecastle/sCDarkAttack') } },
   sound: 'Sound/eFirebust', // Space Split (SOUND_ATTACK_FIRE_BUST at the packet, WSclient.cpp:4532-4547)
+  clip: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Space Split
 });

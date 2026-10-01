@@ -9,6 +9,8 @@ import { type RingOptions } from '@/controllers/fx/ring';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** MODEL_ARROWSRE06 sub1's Light (0.2, 0.2, 0.9) (ZzzEffect.cpp:8191, :8309). */
 const RUNE_LIGHT: RGB = [0.2, 0.2, 0.9];
 const RUNE_TICKS = 40;
@@ -209,4 +211,5 @@ export default defineSkill({
     139: swellBuff,
   },
   sound: 'Sound/SwellofMagicPower', // Expansion of Wizardry
+  clip: { ground: A.PLAYER_SKILL_SWELL_OF_MP }, // Expansion of Wizardry (WSclient.cpp:4562)
 });

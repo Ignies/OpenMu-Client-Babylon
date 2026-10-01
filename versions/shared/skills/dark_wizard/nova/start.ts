@@ -12,6 +12,8 @@ import { lighting } from '@/controllers/lighting';
 import { novaStageOf } from '@/controllers/combat/novaCharge';
 import { playCombat } from '@/controllers/sound/combat';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** The charge runs while the caster is in HELL_BEGIN or HELL_START (ZzzCharacter.cpp:5727). */
 function inNovaCharge(e: Entity): boolean {
   if (entityGone(e)) return false;
@@ -196,4 +198,5 @@ export default defineSkill({
   // on the even bones 0..38 and CreateForce's 3 JOINT_HEALING sub8 comets every tick (novaCharge).
   visual: { cast: novaCharge, enhanced: { cast: novaChargeEnhanced } },
   sound: 'Sound/eHellFire2_1', // Nova (charge)
+  clip: { ground: A.PLAYER_SKILL_HELL_BEGIN }, // Nova (charge)
 });

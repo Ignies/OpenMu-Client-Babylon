@@ -6,6 +6,8 @@ import { entityPos } from '@/controllers/fx/core';
 import { lighting } from '@/controllers/lighting';
 import { teleportColumn, teleportEnhanced } from '../_shared';
 
+import { A } from '@/controllers/combat/recipes';
+
 /**
  * The flash of `CreateTeleportBegin` (`moment` begin, the row's `cast`) or
  * `CreateTeleportEnd` (end, the row's `impact`) at the feet of `entity`, as the
@@ -26,4 +28,6 @@ export default defineSkill({
   // 6 Teleport: CreateTeleportBegin at the old square (cast) and CreateTeleportEnd at the new one (impact), BITMAP_SPARK+1 each.
   visual: { cast: teleportColumn, impact: teleportColumn, enhanced: { cast: teleportEnhanced('begin'), impact: teleportEnhanced('end') } },
   sound: 'Sound/sMagic', // Teleport (SOUND_MAGIC in CreateTeleportBegin)
+  // --- Dark Wizard --------------------------------------------------------
+  clip: { ground: A.PLAYER_SKILL_TELEPORT }, // Teleport (SetPlayerTeleport, :6243)
 });

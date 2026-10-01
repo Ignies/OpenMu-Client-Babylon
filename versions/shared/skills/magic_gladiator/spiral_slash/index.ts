@@ -10,6 +10,8 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { mgGlint, mgSay, mgSayOnBattleCastle } from '../_shared';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** BITMAP_FLARE sub23 (Flare.jpg), 15 tails. */
 const MG_SPIRAL_RIBBON: StripOptions = { texture: TEX.flareBig, maxTails: 15 };
 /** Gold chips shed from the Spiral Slash ribbon heads (Flare.jpg's own gold). */
@@ -118,4 +120,5 @@ export default defineSkill({
   // 57 Spiral Slash: five BITMAP_FLARE sub23 ribbons in two waves on the ONE_FLASH clip (spiralSlash).
   visual: { cast: spiralSlash, enhanced: { cast: spiralSlashEnhanced } },
   sound: 'Sound/sKnightSkill2', // Spiral Slash
+  clip: { ground: A.PLAYER_ATTACK_ONE_FLASH }, // Spiral Slash (WSclient.cpp:4164)
 });

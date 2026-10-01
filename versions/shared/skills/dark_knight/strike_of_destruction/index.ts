@@ -8,6 +8,8 @@ import { effects } from '@/controllers/fx';
 import { lightAt } from '../../_shared';
 import { lighting } from '@/controllers/lighting';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** BITMAP_WATERFALL_5 sub8 (ZzzEffectParticle.cpp:3476-3481, :8437-8446): 1.2-1.9 m, rising 1-3 cm a tick less 0.6 a tick, +0.05 Scale and Light /1.1 a tick. */
 const DESTRUCTION_MIST: ParticleRecipe = {
   texture: TEX.waterFall5,
@@ -219,4 +221,5 @@ export default defineSkill({
     86: (e, s) => ({ pulse: { every: Infinity, fire: () => coldIce(s, e) } }),
   },
   sound: 'Sound/BLOW_OF_DESTRUCTION', // Strike of Destruction (ZzzCharacter.cpp:4179)
+  clip: { ground: A.PLAYER_SKILL_BLOW_OF_DESTRUCTION }, // Strike of Destruction
 });

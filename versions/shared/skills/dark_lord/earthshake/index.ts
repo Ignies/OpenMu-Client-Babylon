@@ -11,6 +11,8 @@ import { everyTick, muRotated, muYaw, sfx, ticksLeft } from '../_shared';
 import { lighting } from '@/controllers/lighting';
 import { storeRef } from '@/app/storeRef';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** Not a NOMOVE, NOGROUND or WATER tile: where the original lets a ground effect stand. */
 function openGround(x: number, z: number): boolean {
   const flag = storeRef().world?.getTerrainFlag(Math.floor(x), Math.floor(z)) ?? 0;
@@ -253,4 +255,6 @@ export default defineSkill({
   // chains at 29 (GOBoid.cpp:727-769, MoveHandlers.cpp:2940-3170).
   visual: { area: atCaster(earthshake, 0), enhanced: { area: atCaster(earthshakeOf(true), 0) } },
   sound: 'Sound/sDarkEarthQuake', // Earthshake
+  delayMs: 10000, // Earthshake
+  clip: { ground: A.PLAYER_ATTACK_DARKHORSE }, // Earthshake
 });

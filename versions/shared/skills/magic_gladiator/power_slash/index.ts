@@ -8,6 +8,9 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { mgSay } from '../_shared';
 
+import { A } from '@/controllers/combat/recipes';
+import { MOUNTED_SWORD } from '../../_shared';
+
 /** MODEL_MAGIC2's blue and Death Cannon's (MoveHandlers.cpp:3355, ZzzEffectJoint.cpp:6421). */
 const MG_ORB_BLUE: RGB = [0.3, 0.6, 1];
 /**
@@ -126,4 +129,5 @@ export default defineSkill({
   name: "Power Slash",
   // 56 Power Slash: five hidden MODEL_MAGIC2 sub2 orbs at yaw -40..+40 (powerSlash). The weapon blur is weaponBlur.ts's.
   visual: { cast: powerSlash, enhanced: { cast: powerSlashEnhanced } },
+  clip: { ground: A.PLAYER_ATTACK_TWO_HAND_SWORD_TWO, ...MOUNTED_SWORD }, // Power Slash (MG)
 });

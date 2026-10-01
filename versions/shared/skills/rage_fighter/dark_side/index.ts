@@ -5,6 +5,8 @@ import { effects } from '@/controllers/fx';
 import { entityPos, entityYaw } from '@/controllers/fx/core';
 import { flash, flying, particles, perTick, seq, slash, ticks } from '@/controllers/skills/visuals';
 
+import { A } from '@/controllers/combat/recipes';
+
 export default defineSkill({
   id: 263,
   name: "Dark Side",
@@ -17,4 +19,5 @@ export default defineSkill({
     impact: seq(flash(TEX.damage2, RGBS.shade, 1.3, 0.4), particles({ recipe: SHADE_MOTES, count: 20 })),
   },
   sound: 'Sound/Ragefighter/Rage_Darkside', // Dark Side
+  clip: { ground: A.PLAYER_SKILL_DARKSIDE_READY }, // Dark Side
 });

@@ -11,6 +11,9 @@ import { hummingDir, litStrike, movesAt, strikeKey, yawDegrees } from '../_share
 import { lighting } from '@/controllers/lighting';
 import { randInt } from '../../_shared';
 
+import { A } from '@/controllers/combat/recipes';
+import { MOUNTED_STRIKE } from '../_shared';
+
 /** Fire Burst's origin: bone 0 + (40, 0, 10) cm in its frame (ZzzCharacter.cpp:5071-5072). */
 const FIRE_BURST_LOCAL = new Vector3(cm(40), 0, cm(10));
 /** MODEL_PIER_PART sub0 LT 20: it is drawn after moves 0..18 (ZzzEffect.cpp:3384-3395). */
@@ -193,4 +196,5 @@ export default defineSkill({
   // starburst cards at the caster; eFirebustBoom from the darts.
   visual: { impact: strikeKey(fireBurst, 'Sound/eFirebustBoom'), enhanced: { impact: litStrike(fireBurstGraded, 'Sound/eFirebustBoom') } },
   sound: 'Sound/eFirebust', // Fire Burst
+  clip: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Fire Burst
 });

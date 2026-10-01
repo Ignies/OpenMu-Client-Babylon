@@ -11,6 +11,8 @@ import { SkillContext, Step, TICK, baseSkill, cm, currentSkill, forwardOf, perTi
 import { lighting } from '@/controllers/lighting';
 import { storeRef } from '@/app/storeRef';
 
+import { A } from '@/controllers/combat/recipes';
+
 /**
  * BITMAP_FIRE sub2, the default branch (ZzzEffectParticle.cpp:387-500, :4690-4698): Fire01's four cells over LT 24,
  * 64 texels x Scale 1.5 = 96 cm, the scale growing by a Gravity that climbs 0.004 a tick (1.5 -> 2.7) and the card
@@ -278,4 +280,5 @@ export default defineSkill({
   // 38 Decay (eBlastPoison_1) and 39 Ice Storm (eSuddenIce_1): none at the cast, the effect plays them at AttackTime 15
   // (ZzzCharacter.cpp:4449, :4475; common/skillVisuals.ts).
   sound: 'Sound/sKnightSkill2', // Rush (ReceiveMagic's SOUND_SKILL_SWORD2; the row plays sCHaveyBlow in Battle Castle)
+  clip: { ground: A.PLAYER_ATTACK_RUSH }, // Rush
 });

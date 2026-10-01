@@ -6,6 +6,8 @@ import { bonePos } from '@/controllers/fx/core';
 import { effects } from '@/controllers/fx';
 import { stones } from '../../_shared';
 
+import { A } from '@/controllers/combat/recipes';
+
 /**
  * `c->AttackTime >= g_iLimitAttackTime` - 15 ticks (ZzzCharacter.cpp:90). The
  * wizard's leap in `player_action_154` lands around tick 12, so the ground
@@ -79,4 +81,5 @@ export default defineSkill({
     ),
   },
   sound: 'Sound/sHellFire', // Hellfire
+  clip: { ground: A.PLAYER_SKILL_HELL }, // Hell Fire
 });

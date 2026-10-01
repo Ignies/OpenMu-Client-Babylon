@@ -8,6 +8,8 @@ import { Step, cm, ticks } from '@/controllers/skills/visuals';
 import { decay, deg, heldAt, muForward, onGround, rad, randInt } from '../../_shared';
 import { playLandingSound } from '@/controllers/sound/combat';
 
+import { A } from '@/controllers/combat/recipes';
+
 const PX_SHINY5 = 64;
 
 // Lightning Orb (ZzzEffect.cpp:6886-6965).
@@ -124,4 +126,10 @@ export default defineSkill({
   // 216 Lightning Orb: the forearm crackle, then MODEL_LIGHTNING_ORB at AttackTime 15 (lightningOrb).
   visual: { cast: orbArm, impact: lightningOrb, enhanced: { cast: orbArmLit, impact: lightningOrbStep(true) } },
   sound: 'Sound/SE_Ch_summoner_skill01_lightningof', // Lightning Orb
+  clip: {
+    ground: A.PLAYER_SKILL_LIGHTNING_ORB,
+    uniria: A.PLAYER_SKILL_LIGHTNING_ORB_UNI,
+    dinorant: A.PLAYER_SKILL_LIGHTNING_ORB_DINO,
+    fenrir: A.PLAYER_SKILL_LIGHTNING_ORB_FENRIR,
+  }, // Lightning Orb
 });

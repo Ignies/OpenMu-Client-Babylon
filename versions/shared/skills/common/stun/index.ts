@@ -4,6 +4,9 @@ import { atCaster, ticks } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
 import { followEntity } from '@/controllers/fx/core';
 
+import { A } from '@/controllers/combat/recipes';
+import { MOUNTED_COMMAND } from '../../_shared';
+
 export default defineSkill({
   id: 67,
   name: "Stun",
@@ -13,4 +16,6 @@ export default defineSkill({
     // 0x3D Stun: three ribbons climbing off the head, once.
     61: () => ({ stun: true }),
   },
+  // --- Castle siege commands (AttackCommon, ZzzInterface.cpp:6442-6690) ----
+  clip: { ground: A.PLAYER_SKILL_VITALITY, ...MOUNTED_COMMAND }, // Stun
 });

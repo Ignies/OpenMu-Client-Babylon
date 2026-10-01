@@ -13,6 +13,8 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { tierIndex } from '@/controllers/lighting/lightingQuality';
 
+import { A, SkillClipSet } from '@/controllers/combat/recipes';
+
 // Chain Lightning (MoveHandlers.cpp:1978-2064, WSclient.cpp:5577-5629).
 
 /** The hops' JOINT_THUNDER Light (0.4, 0.4, 1.0); hops 1-2 pass an unset vLight and are drawn in the same blue. */
@@ -219,6 +221,14 @@ function chainStrike(scene: Scene, to: Entity, n: number): void {
   sum1Light(scene, CHAIN_LIGHT, 1.3, ticks(n), chest, () => !gone(), { flicker: CRACKLE_FLICKER, release: ticks(6) });
 }
 
+/** Chain Lightning, and its three mounts (:2592-2610). */
+export const CHAIN_LIGHTNING_CLIPS: SkillClipSet = {
+  ground: A.PLAYER_SKILL_CHAIN_LIGHTNING,
+  uniria: A.PLAYER_SKILL_CHAIN_LIGHTNING_UNI,
+  dinorant: A.PLAYER_SKILL_CHAIN_LIGHTNING_DINO,
+  fenrir: A.PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR,
+};
+
 export default defineSkill({
   id: 215,
   name: "Chain Lightning",
@@ -226,4 +236,5 @@ export default defineSkill({
   // arcs come with the BF 0A hops (playChainLightningHop).
   visual: { cast: seq(chainHands, chainSoundAgain), enhanced: { cast: seq(chainHandsLit, chainSoundAgain) } },
   sound: 'Sound/SE_Ch_summoner_skill08_chainlightning', // Chain Lightning
+  clip: CHAIN_LIGHTNING_CLIPS, // Chain Lightning
 });

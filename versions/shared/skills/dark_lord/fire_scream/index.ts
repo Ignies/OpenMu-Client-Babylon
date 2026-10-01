@@ -11,6 +11,9 @@ import { lighting } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound/combat';
 import { storeRef } from '@/app/storeRef';
 
+import { A } from '@/controllers/combat/recipes';
+import { MOUNTED_STRIKE } from '../_shared';
+
 const UP = new Vector3(0, 1, 0);
 
 /** Fire Scream's pairs (ZzzCharacter.cpp:4499-4533): yaw, and yaw ±10° moved ±80 cm along their own X. */
@@ -245,4 +248,5 @@ export default defineSkill({
     enhanced: { area: (at, c) => after(ticks(STRIKE_MAX_TICKS), fireScreamGraded(baseSkill(currentSkill)))(at, c) },
   },
   sound: 'Sound/Darklord_firescream', // Fire Scream
+  clip: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Fire Scream
 });

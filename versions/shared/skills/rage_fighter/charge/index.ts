@@ -5,6 +5,8 @@ import { effects } from '@/controllers/fx';
 import { entityYaw } from '@/controllers/fx/core';
 import { streamerFan } from '../../_shared';
 
+import { A } from '@/controllers/combat/recipes';
+
 export default defineSkill({
   id: 269,
   name: "Charge",
@@ -18,4 +20,5 @@ export default defineSkill({
     ),
   },
   sound: 'Sound/battlecastle/sCHaveyBlow', // Occupy
+  clip: { ground: A.PLAYER_ATTACK_RUSH }, // Occupy (WSclient.cpp:4725)
 });

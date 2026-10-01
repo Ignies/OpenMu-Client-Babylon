@@ -8,6 +8,8 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { strikeOn } from '../_shared';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** Seconds into PLAYER_DEFENSE1 the guard is up. */
 const GUARD_SET = 0.2;
 /** Tiles above the weapon hand the guard glint sits. */
@@ -43,4 +45,7 @@ export default defineSkill({
   visual: { enhanced: { impact: guardGlint } },
   // 16 Soul Barrier and its masters: none at the cast; the buff's arrival and the impact play it (common/skillVisuals.ts).
   sound: 'Sound/sKnightDefense', // Defense (SOUND_SKILL_DEFENSE, WSclient.cpp:3612)
+  // --- Dark Knight (UseSkillWarrior, ZzzInterface.cpp:2221-2300) -----------
+  // Defense: the guard pose on every mount, no Helper branch (SkillCast.cpp:224-231, WSclient.cpp:3610-3612).
+  clip: { ground: A.PLAYER_DEFENSE1 },
 });

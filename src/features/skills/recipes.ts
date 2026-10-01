@@ -263,25 +263,4 @@ export function buffIconCell(
 }
 
 /** Skill number → re-use delay in milliseconds (Skill.bmd `Delay`). */
-export const SKILL_DELAY_MS: Readonly<Record<number, number>> = {
-  62: 10000, // Earthshake
-  63: 30000, // Summon (Dark Lord)
-  65: 5000, // Electric Spike
-  76: 1500, // Plasma Storm
-  77: 200, // Infinity Arrow
-  217: 5000, // Damage Reflection
-  218: 5000, // Berserker
-  221: 4000, // Weakness
-  222: 4000, // Innovation
-  223: 4000, // Explosion
-  224: 4000, // Requiem
-  225: 4000, // Pollution
-  262: 700, // Chain Drive
-  264: 700, // Dragon Roar
-  265: 3000, // Dragon Slasher
-  515: 10000, // Crit DMG Inc PowUp (2)
-  516: 10000, // Earthshake Mastery
-  517: 10000, // Crit DMG Inc PowUp (3)
-  518: 10000, // Fire Scream Strengthener
-  519: 10000, // Electric Spark Strengthener
-};
+export const SKILL_DELAY_MS: Readonly<Record<number, number>> = {};

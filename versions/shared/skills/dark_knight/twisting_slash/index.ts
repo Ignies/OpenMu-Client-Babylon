@@ -12,6 +12,8 @@ import { itemObjectAttribute } from '@/controllers/actors/itemObjectAttribute';
 import { lighting } from '@/controllers/lighting';
 import { storeRef } from '@/app/storeRef';
 
+import { A } from '@/controllers/combat/recipes';
+
 /**
  * BITMAP_SMOKE sub3 (ZzzEffectParticle.cpp:1250-1255, :5330-5335): LT 10, Scale 0.8-1.1 of the 64-texel
  * smoke01 growing 0.1 a tick, thrown 40-47 cm along a random heading pitched +-45° and slowing x0.4 a tick,
@@ -206,4 +208,5 @@ export default defineSkill({
     // Graded tiers: the swept band, warm sparks and chips, dust for smoke, a warm light on each copy.
     enhanced: { area: whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 5, 14, twistingSlashOf(true)) },
   },
+  clip: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Twisting Slash
 });

@@ -11,6 +11,8 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound/combat';
 
+import { A } from '@/controllers/combat/recipes';
+
 // ---- mg steps --------------------------------------------------------------------
 
 /** RENDER_FACE both, the joint's `Light` white: `CreateJoint`'s defaults (ZzzEffectJoint.cpp:80-108). */
@@ -296,4 +298,5 @@ export default defineSkill({
     return { skull: { hidden: () => !!e.buffs?.has(18), scale: () => Math.abs(e.modelObject?.node.scaling.x ?? 1) || 1 } };
   },
   },
+  clip: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Fire Slash
 });

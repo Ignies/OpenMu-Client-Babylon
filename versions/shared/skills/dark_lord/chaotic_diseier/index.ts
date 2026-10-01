@@ -7,6 +7,9 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { muAngle, sfx } from '../_shared';
 
+import { A } from '@/controllers/combat/recipes';
+import { MOUNTED_STRIKE } from '../_shared';
+
 /**
  * Chaotic Diseier's body: 5 BITMAP_SHINY+6 sub3 for 24 ticks, each drawing a one-frame dark shiny05
  * (64 px x 2, Light 0.5) at a random bone 20 cm along the facing every tick (ZzzEffect.cpp:1251-1260,
@@ -251,4 +254,5 @@ export default defineSkill({
   visual: { area: seq(chaoticStars, chaoticGhosts, chaoticBomb), enhanced: { area: seq(chaoticStars, chaoticGhostsOf(true), chaoticBombOf(true)) } },
   // 237 Gigantic Storm plays gigantic_storm from its row, at the clip key (ZzzCharacter.cpp:4777).
   sound: 'Sound/caotic', // Chaotic Diseier
+  clip: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Chaotic Diseier
 });

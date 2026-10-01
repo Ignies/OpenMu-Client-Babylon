@@ -7,6 +7,8 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { playCombat } from '@/controllers/sound/combat';
 
+import { SUMMON_CLIPS } from '../_shared';
+
 const CAST_REQUIEM: SummonCast = { impact: [0.7, 0.7, 1], outer: [0, 0.7, 1], inner: [0, 0, 1], burst: [0.8, 0.5, 1] };
 
 /** Neil's light: his white body and the red blade glow. */
@@ -148,4 +150,6 @@ export default defineSkill({
     74: () => ({ neilSparks: true }),
   },
   sound: 'Sound/SE_Ch_summoner_skill06_requiem01', // Requiem (SOUND_SUMMON_NEIL)
+  delayMs: 4000, // Requiem
+  clip: SUMMON_CLIPS, // Requiem
 });

@@ -2,6 +2,8 @@ import { defineSkill } from '@/controllers/skills/define';
 import { CurseHand, ZinCurse, curseHandLight, summonerHand, zinCurse, zinGrace } from '../_shared';
 import { onCurseLanding, seq } from '@/controllers/skills/visuals';
 
+import { SLEEP_CLIPS } from '../_shared';
+
 /** Weakness: the pin and puff branches test THORNS twice, so they keep the shiny's (0.8,0.1,0.1). */
 const CURSE_HAND_WEAKNESS: CurseHand = { shiny: [0.8, 0.1, 0.1], pin: [0.8, 0.1, 0.1], puff: [0.8, 0.1, 0.1], dark: false };
 
@@ -22,4 +24,6 @@ export default defineSkill({
     76: () => ({ boneSparks: { colour: [1.4, 0.2, 0.2], underlay: true, pins: true } }),
   },
   sound: 'Sound/SE_Ch_summoner_weakness', // Weakness
+  delayMs: 4000, // Weakness
+  clip: SLEEP_CLIPS, // Weakness
 });

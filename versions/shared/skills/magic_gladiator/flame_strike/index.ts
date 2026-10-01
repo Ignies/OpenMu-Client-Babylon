@@ -11,6 +11,8 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { spawnLinkedModel } from '@/controllers/fx/linkedModel';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** Flame Strike's heat glow on the blade: FlameStrike.bmd's own orange. */
 const MG_FLAME_GLOW: RGB = [1, 0.45, 0.15];
 
@@ -135,4 +137,5 @@ export default defineSkill({
   // 236 Flame Strike: the blade on the weapon link bone and its three blurs (flameStrike above); caster-bound, so both dispatch paths.
   visual: { cast: flameStrike, enhanced: { cast: flameStrikeEnhanced } },
   sound: 'Sound/flame_strike', // Flame Strike
+  clip: { ground: A.PLAYER_SKILL_FLAMESTRIKE }, // Flame Strike (MG)
 });

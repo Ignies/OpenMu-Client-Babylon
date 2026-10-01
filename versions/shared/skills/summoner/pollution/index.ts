@@ -8,6 +8,8 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { rad, randInt } from '../../_shared';
 
+import { SUMMON_CLIPS } from '../_shared';
+
 const CAST_POLLUTION: SummonCast = { impact: [0.6, 0.6, 0.9], outer: [0.6, 0.3, 0.9], inner: [0.8, 0.1, 0.6], burst: [0.9, 0.1, 1] };
 
 /** JOINT_ENERGY sub48-53 ride these Lagul bones (ZzzEffectJoint.cpp:3161-3196); the blue shiny05 sit on 54-59 (ZzzEffect.cpp:8927-8936). */
@@ -168,4 +170,6 @@ export default defineSkill({
     enhanced: { cast: seq(summonCast(CAST_POLLUTION), summonCastGrace(CAST_POLLUTION)), area: pollutionOf(true) },
   },
   sound: 'Sound/Rargle', // Pollution (SOUND_SUMMOM_RARGLE)
+  delayMs: 4000, // Pollution
+  clip: SUMMON_CLIPS, // Pollution
 });

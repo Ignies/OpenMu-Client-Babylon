@@ -5,6 +5,9 @@ import { entityPos, type RGB } from '@/controllers/fx/core';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 
+import { A } from '@/controllers/combat/recipes';
+import { MOUNTED_HAND } from '../../_shared';
+
 /** Add Critical / Brand of Skill: MODEL_DARKLORD_SKILL at weapon bone 0 (sub0) and bone 1 (sub1), Light (1,0.6,0.3). */
 const addCritical: Step = (_at, c) => {
   const tint: RGB = [1, 0.6, 0.3];
@@ -18,4 +21,5 @@ export default defineSkill({
   name: "Brand of Skill",
   // 75 Brand of Skill: MODEL_DARKLORD_SKILL at the weapon bones + MODEL_MANA_RUNE sub0 (LT 50, Scale 0→, Alpha 0.3, z+300).
   visual: { impact: seq(addCritical, atCaster(model({ model: MODEL.manaRune, seconds: ticks(50), scale: 0.2, grow: 5, colour: RGBS.gold, alpha: 0.3, yaw: Math.PI / 4 }), 3)) },
+  clip: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Add Skill (Brand of Skill)
 });

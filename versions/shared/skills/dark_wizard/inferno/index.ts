@@ -8,6 +8,8 @@ import { dw2Sfx, dw2Stone, lightAt } from '../../_shared';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 
+import { A } from '@/controllers/combat/recipes';
+
 // dw2 batch 2: Inferno, Decay, Ice Storm.
 
 /** CreateInferno: 8 CreateBomb 220 cm round the caster, (0, -220) turned j * 45 deg (ZzzEffect.cpp:6435-6476). */
@@ -114,4 +116,5 @@ export default defineSkill({
   // 14 Inferno (381 / 486 alias here): CreateInferno + MODEL_SKILL_INFERNO sub0 at the caster at AttackTime 15 (`inferno`).
   // Enhanced `infernoGraded`.
   visual: { area: dw2AtAttackTime(inferno), enhanced: { area: dw2AtAttackTime(infernoGraded) } },
+  clip: { ground: A.PLAYER_SKILL_INFERNO }, // Inferno
 });

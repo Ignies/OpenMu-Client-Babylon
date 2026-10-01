@@ -10,6 +10,8 @@ import { lit, randInt } from '../../_shared';
 import { playCombat } from '@/controllers/sound/combat';
 import { storeRef } from '@/app/storeRef';
 
+import { SUMMON_CLIPS } from '../_shared';
+
 const CAST_EXPLOSION: SummonCast = { impact: [1, 0.6, 0.4], outer: [1, 0.5, 0], inner: [1, 0.5, 0], burst: [1, 0.5, 0.8] };
 
 /** MODEL_SUMMONER_SUMMON_SAHAMUTT's Scale by book tier (ZzzEffect.cpp:783-795). */
@@ -212,4 +214,6 @@ export default defineSkill({
   },
   // The summons play their summoning sound at the cast; explosion03 and requiem02 come later with the effect (skillVisuals.ts).
   sound: 'Sound/SE_Ch_summoner_skill05_explosion01', // Explosion (SOUND_SUMMON_SAHAMUTT)
+  delayMs: 4000, // Explosion
+  clip: SUMMON_CLIPS, // Explosion
 });

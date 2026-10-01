@@ -262,4 +262,5 @@ export default defineSkill({
   // into every monster within 6 tiles, and six thunder coils over him, coloured by the Fenrir (plasmaStorm).
   // Enhanced: the bolts a touch under the clip, flashes, sparks and the thunder's light at both ends.
   visual: { area: plasmaStorm, impact: plasmaStorm, enhanced: { area: plasmaStormGraded, impact: plasmaStormGraded } },
+  delayMs: 1500, // Plasma Storm
 });

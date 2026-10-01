@@ -10,6 +10,8 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound/combat';
 
+import { A } from '@/controllers/combat/recipes';
+
 // ---- dl1 steps -------------------------------------------------------------------
 
 /** The Dark Lord's strike clips; key 3 releases Force and Fire Burst (ZzzCharacter.cpp:2865-2883). */
@@ -294,3 +296,15 @@ export function muAngle(a0: number, a1: number, a2: number): { pitch: number; ya
   const e = Quaternion.FromRotationMatrix(m).toEulerAngles();
   return { pitch: e.x, yaw: e.y, roll: e.z };
 }
+
+/**
+ * Dark Lord strikes - Force, Force Wave, Fire Burst, Fire Scream, Space
+ * Split, Chaotic Diseier. `Helper >= UNIRIA && <= DARK_HORSE` is one branch
+ * (WSclient.cpp:3929-3945).
+ */
+export const MOUNTED_STRIKE = {
+  uniria: A.PLAYER_ATTACK_RIDE_STRIKE,
+  dinorant: A.PLAYER_ATTACK_RIDE_STRIKE,
+  horse: A.PLAYER_ATTACK_RIDE_STRIKE,
+  fenrir: A.PLAYER_FENRIR_ATTACK_DARKLORD_STRIKE,
+} as const;

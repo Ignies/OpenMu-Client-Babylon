@@ -10,6 +10,8 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { rand, sayAt, sparkHeading, tailOfSlot } from '../_shared';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** JOINT_SPIRIT sub2's life, tails and speed (ZzzEffectJoint.cpp:668-679, :3935-3945): 21 moves, Velocity 50 then +5 a move. */
 const SPIRIT_MOVES = 21;
 const spiritReach = (m: number): number => cm(50 * m + 2.5 * m * (m - 1));
@@ -188,4 +190,5 @@ export default defineSkill({
     8: () => ({ boneMotes: { bones: UPPER_BONES, colour: [1, 0.5, 0.1] } }),
     135: () => ({ boneMotes: { bones: UPPER_BONES, colour: [1, 0.5, 0.1] } }),
   },
+  clip: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life
 });

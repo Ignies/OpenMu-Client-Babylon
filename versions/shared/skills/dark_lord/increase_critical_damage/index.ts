@@ -13,6 +13,9 @@ import { lighting } from '@/controllers/lighting';
 import { muAngle, sfx } from '../_shared';
 import { tierIndex } from '@/controllers/lighting/lightingQuality';
 
+import { A } from '@/controllers/combat/recipes';
+import { MOUNTED_HAND } from '../../_shared';
+
 /** MODEL_DARKLORD_SKILL sub0 / sub1: `Angle (45, 45 - 90 x SubType, 0)` (ZzzEffect.cpp:3449-3470). */
 const CRIT_ANGLES = [muAngle(45, 45, 0), muAngle(45, -45, 0)] as const;
 const CRIT_TINT: RGB = [1, 0.6, 0.3];
@@ -200,4 +203,5 @@ export default defineSkill({
     5: (e, s) => ({ pulse: { every: 1.2, fire: () => critPulse(s, e) } }),
     148: (e, s) => ({ pulse: { every: 1.2, fire: () => critPulse(s, e) } }),
   },
+  clip: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Increase Critical Damage
 });

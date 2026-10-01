@@ -7,6 +7,8 @@ import { Step, cm, ticks } from '@/controllers/skills/visuals';
 import { deg, groundY, heldAt, randInt } from '../../_shared';
 import { effects } from '@/controllers/fx';
 
+import { A } from '@/controllers/combat/recipes';
+
 const PX_MEGA = 128;
 
 // Lightning Shock (MoveHandlers.cpp:2385-2543).
@@ -135,4 +137,5 @@ export default defineSkill({
   // (lightningShock). The five magic_ground cards and the stones get Scale 0 there and are not drawn.
   visual: { area: lightningShock, enhanced: { area: lightningShockStep(true) } },
   sound: 'Sound/lightning_shock', // Lightning Shock
+  clip: { ground: A.PLAYER_SKILL_LIGHTNING_SHOCK }, // Lightning Shock
 });

@@ -13,6 +13,8 @@ import { itemObjectAttribute } from '@/controllers/actors/itemObjectAttribute';
 import { lighting } from '@/controllers/lighting';
 import { storeRef } from '@/app/storeRef';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** `VectorRotate((x, y, 0), AngleMatrix(0, 0, yaw))` in cm, added to `out` in tiles. MU (x, y) is world (x, z). */
 const addMuOffset = (out: Vector3, yaw: number, x: number, y: number): Vector3 => {
   out.x += cm(x * Math.cos(yaw) - y * Math.sin(yaw));
@@ -404,4 +406,5 @@ export default defineSkill({
     // Graded tiers: the weapon's smear, a hot core, chips and dust at the impact, embers off the glowing ground.
     enhanced: { area: seq(furyEmptyHand, whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_FURY_STRIKE, 1, 14, furyStrikeOf(true))) },
   },
+  clip: { ground: A.PLAYER_ATTACK_SKILL_FURY_STRIKE }, // Rageful Blow
 });

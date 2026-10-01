@@ -7,6 +7,8 @@ import { effects } from '@/controllers/fx';
 import { lightAt } from '../../_shared';
 import { lighting } from '@/controllers/lighting';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** Blood Storm's crimson: Double Blade's red trail Light (1,0.2,0.2) a shade darker under the bloom (ZzzCharacter.cpp:3950-3953). */
 const BLOOD_STORM_RED: RGB = [0.9, 0.18, 0.12];
 
@@ -79,4 +81,7 @@ export default defineSkill({
   // 344 Blood Storm (346 Strengthener by alias): no original; a renewed look from original art (bloodStorm).
   visual: { area: bloodStorm, enhanced: { area: bloodStormPlus } },
   sound: 'Sound/sKnightSkill4', // Blood Storm (no original: the Twisting Slash sound, with its clip)
+  // Blood Storm has no original (skillVisuals.ts bloodStorm): the Twisting Slash spin, which the Blade
+  // Master and the Duel Master both have.
+  clip: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Blood Storm
 });

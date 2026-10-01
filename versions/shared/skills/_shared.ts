@@ -16,6 +16,8 @@ import { playCombat } from '@/controllers/sound/combat';
 import { storeRef } from '@/app/storeRef';
 import { tierIndex } from '@/controllers/lighting/lightingQuality';
 
+import { A } from '@/controllers/combat/recipes';
+
 /** Degrees → radians. */
 export const DEG = Math.PI / 180;
 /** MODEL_STONE1 / MODEL_STONE2 chips thrown up from a ground hit - either model, rolled per chip (ZzzEffect.cpp:280). */
@@ -557,3 +559,24 @@ export function writePath(pts: readonly number[], buf: number[]): number {
   for (let i = 0; i < n; i++) buf[i] = pts[i];
   return n / 3;
 }
+
+/**
+ * The castle-siege commands - Stun, Removal, Mana, Invisible, Removal Buff:
+ * the four-way ladder `AttackCommon` runs (ZzzInterface.cpp:6495-6690,
+ * WSclient.cpp:4170-4350).
+ */
+export const MOUNTED_COMMAND = {
+  horse: A.PLAYER_ATTACK_RIDE_ATTACK_MAGIC,
+  uniria: A.PLAYER_SKILL_RIDER,
+  dinorant: A.PLAYER_SKILL_RIDER_FLY,
+  fenrir: A.PLAYER_FENRIR_ATTACK_MAGIC,
+} as const;
+
+/** Increase Critical Damage / Add Skill: horse and Fenrir only (WSclient.cpp:4369-4386). */
+export const MOUNTED_HAND = {
+  horse: A.PLAYER_ATTACK_RIDE_ATTACK_MAGIC,
+  fenrir: A.PLAYER_FENRIR_ATTACK_MAGIC,
+} as const;
+
+/** The Dark Knight default branch: only the Fenrir has a clip of its own. */
+export const MOUNTED_SWORD = { fenrir: A.PLAYER_FENRIR_ATTACK_MAGIC } as const;
