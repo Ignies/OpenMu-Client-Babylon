@@ -29,22 +29,16 @@ import type { CombatLayer } from './layer';
 // ---- 1. tuning -------------------------------------------------------------
 
 /**
- * `AT_SKILL_KILLING_BLOW` / `_STR` / `_MASTERY` and `AT_SKILL_OCCUPY`: the
- * step lands as the cast is sent.
+ * When a skill walks the caster one square in toward the target, by skill
+ * number: 'cast' as the cast is sent, 'midClip' on the consecutive-attack
+ * frame partway through the clip. Each skill's file sets `stepIn`.
  */
-const STEP_IN_ON_CAST: ReadonlySet<number> = new Set([260, 551, 554, 269]);
-
-/**
- * `CMonkSystem::IsRageHalfwaySkillAni` (MonkSystem.cpp:428-442): Beast
- * Uppercut, Chain Drive and Dragon Slasher send their packet - and so take
- * their step - on the consecutive-attack frame partway through the clip.
- */
-const STEP_IN_MID_CLIP: ReadonlySet<number> = new Set([
-  261, 552, 555, // Beast Uppercut, Str, Mastery
-  262, 558, // Chain Drive, Str
-  265, // Dragon Slasher
-]);
-
+export const SKILL_STEP_IN: Partial<Record<number, 'cast' | 'midClip'>> = {
+  260: 'cast', 551: 'cast', 554: 'cast', 269: 'cast',
+  261: 'midClip', 552: 'midClip', 555: 'midClip',
+  262: 'midClip', 558: 'midClip',
+  265: 'midClip',
+};
 /**
  * The animation key the mid-clip step fires on. `InitConsecutiveState` arms
  * the check at 3.0 for every one of them (UseSkillRagefighter:2790-2830); the
@@ -71,9 +65,7 @@ const FACING_HELD_CLIPS: ReadonlySet<PlayerAction> = new Set([
  * stands still and only the clip plays.
  */
 export function skillStepIn(skill: number): 'cast' | 'midClip' | null {
-  if (STEP_IN_ON_CAST.has(skill)) return 'cast';
-  if (STEP_IN_MID_CLIP.has(skill)) return 'midClip';
-  return null;
+  return SKILL_STEP_IN[skill] ?? null;
 }
 
 /**

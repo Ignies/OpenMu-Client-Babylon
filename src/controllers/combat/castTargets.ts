@@ -38,47 +38,32 @@ export type CastTarget =
   | 'inPlace';
 
 /**
- * Skills the original sends with `HeroKey` no matter what is selected.
- * Strengthened / mastery ids are listed beside their base skill because the
- * `case` lists name them.
+ * Skills whose rule the original names in its switches, by skill number. Each
+ * skill's own file sets `target` (registerSkills fills this table); the rows
+ * here have no skill file. Rules: 'self' = sent with HeroKey whatever is
+ * selected; 'allyOrSelf' = the selected party member, else the caster;
+ * 'enemy' = refused without a live selection (Sleep, ClassAttack.cpp:1694-1735);
+ * 'inPlace' = at the hero's own tile with no target key (SkillCast.cpp:722-741).
  */
-const SELF_ONLY: ReadonlySet<number> = new Set([
-  48, 356, 360, 363, // Swell Life, Str, Proficiency, Mastery
-  30, 31, 32, 33, 34, 35, 36, 37, // the elf summons (AT_SKILL_SUMMON + 0..7)
-  53, // Improve AG
-  77, 441, // Infinity Arrow, Str
-  218, 469, 470, 472, // Berserker, Str, Proficiency, Mastery
-  266, // Ignore Defense
-  267, 573, // Increase Health, Str
-  268, 569, 572, // Increase Block, Str, Mastery
-  205, 206, 207, 208, 209, // the Halloween event skills
-  233, 380, 383, // Expansion of Wizardry, Str, Mastery (ClassAttack.cpp:1291-1300)
-]);
-
-/**
- * Skills cast on the selected party member when there is one, and on the
- * caster otherwise. Teleport Ally is not here: it needs a party member and
- * is refused without one, which `skillCasting.castTeleport` enforces.
- */
-const ALLY_OR_SELF: ReadonlySet<number> = new Set([
-  16, 403, 404, // Soul Barrier, Str, Proficiency
-  26, 413, // Heal, Str
-  27, 417, 423, // Greater Defense, Str, Mastery
-  28, 420, 422, // Greater Damage, Str, Mastery
-  234, // Recovery
-]);
-
-/**
- * Buffs the original only sends at a live selection: Sleep reads `Buff` in the table but is refused
- * without a target (ClassAttack.cpp:1694-1735, SkillCast.cpp:686-700).
- */
-const ENEMY_ONLY: ReadonlySet<number> = new Set([219, 454]);
-
-/**
- * Cast where the caster stands: Weakness / Innovation go out as `SendRequestMagicContinue` at the
- * hero's own tile with no target key (SkillCast.cpp:722-741), with no walk towards a selection.
- */
-const IN_PLACE: ReadonlySet<number> = new Set([221, 222, 459, 460]);
+export const SKILL_TARGETS: Partial<Record<number, CastTarget>> = {
+  48: 'self', 356: 'self', 360: 'self', 363: 'self',
+  30: 'self', 31: 'self', 32: 'self', 33: 'self', 34: 'self', 35: 'self', 36: 'self', 37: 'self',
+  53: 'self',
+  77: 'self', 441: 'self',
+  218: 'self', 469: 'self', 470: 'self', 472: 'self',
+  266: 'self',
+  267: 'self', 573: 'self',
+  268: 'self', 569: 'self', 572: 'self',
+  205: 'self', 206: 'self', 207: 'self', 208: 'self', 209: 'self', // the Halloween event skills
+  233: 'self', 380: 'self', 383: 'self',
+  16: 'allyOrSelf', 403: 'allyOrSelf', 404: 'allyOrSelf',
+  26: 'allyOrSelf', 413: 'allyOrSelf',
+  27: 'allyOrSelf', 417: 'allyOrSelf', 423: 'allyOrSelf',
+  28: 'allyOrSelf', 420: 'allyOrSelf', 422: 'allyOrSelf',
+  234: 'allyOrSelf',
+  219: 'enemy', 454: 'enemy',
+  221: 'inPlace', 222: 'inPlace', 459: 'inPlace', 460: 'inPlace',
+};
 
 // ---- 2. state + readers ----------------------------------------------------
 
@@ -88,10 +73,8 @@ const IN_PLACE: ReadonlySet<number> = new Set([221, 222, 459, 460]);
  * no named rule is cast on the caster, everything else on the selection.
  */
 export function castTarget(def: SkillDefinition): CastTarget {
-  if (SELF_ONLY.has(def.num)) return 'self';
-  if (ENEMY_ONLY.has(def.num)) return 'enemy';
-  if (IN_PLACE.has(def.num)) return 'inPlace';
-  if (ALLY_OR_SELF.has(def.num)) return 'allyOrSelf';
+  const own = SKILL_TARGETS[def.num];
+  if (own) return own;
   if (
     def.type === 'Buff' ||
     def.type === 'Regeneration' ||

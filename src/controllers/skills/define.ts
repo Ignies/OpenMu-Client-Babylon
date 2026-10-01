@@ -2,6 +2,7 @@ import type { Sounds } from '../sound/recipes';
 import type { SkillClipSet } from '../combat/recipes';
 import type { SkillLight } from '../lighting/skills';
 import type { CombatLayer } from '../combat/layer';
+import type { CastTarget } from '../combat/castTargets';
 import type { CombatHooks } from '../combat/skillHooks';
 import type { BuffArrival, BuffLook, SkillVisual } from './visuals';
 
@@ -19,6 +20,10 @@ export interface SkillDef {
   readonly clip?: SkillClipSet;
   /** Re-use delay in ms. */
   readonly delayMs?: number;
+  /** Who the cast is aimed at when its type alone would say otherwise. */
+  readonly target?: CastTarget;
+  /** Walk one square in toward the target: as the cast is sent, or mid clip. */
+  readonly stepIn?: 'cast' | 'midClip';
   /** Skill-owned combat state: a layer the combat controller steps and the hooks its facade forwards to. */
   readonly combat?: { readonly layer?: CombatLayer; readonly hooks?: CombatHooks };
   /** Persistent looks of the buffs this skill applies, by MagicEffect id. */

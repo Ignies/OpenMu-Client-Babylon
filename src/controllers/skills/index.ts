@@ -4,6 +4,8 @@ import type { SkillClipSet } from '../combat/recipes';
 import { SKILL_CLIPS } from '../combat/recipes';
 import { combat } from '../combat';
 import { skillHooks } from '../combat/skillHooks';
+import { SKILL_TARGETS } from '../combat/castTargets';
+import { SKILL_STEP_IN } from '../combat/skillMovement';
 import { SKILL_LIGHTS } from '../lighting/skills';
 import { SKILL_SOUNDS } from '../sound/combat';
 import { SKILL_DELAY_MS } from '@/features/skills/recipes';
@@ -23,6 +25,8 @@ export function registerSkills(defs: readonly SkillDef[]): void {
     if (d.sound) (SKILL_SOUNDS as Record<number, Sounds>)[d.id] = d.sound;
     if (d.clip) (SKILL_CLIPS as Record<number, SkillClipSet>)[d.id] = d.clip;
     if (d.delayMs !== undefined) (SKILL_DELAY_MS as Record<number, number>)[d.id] = d.delayMs;
+    if (d.target) SKILL_TARGETS[d.id] = d.target;
+    if (d.stepIn) SKILL_STEP_IN[d.id] = d.stepIn;
     Object.assign(BUFF_VISUALS, d.buffs);
     Object.assign(BUFF_ARRIVALS, d.buffArrivals);
     if (d.combat?.layer) combat.register(d.combat.layer);
