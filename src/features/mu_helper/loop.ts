@@ -22,7 +22,7 @@ import type { MuHelperConfig } from './config';
 
 /** `SetTimer(…, 250 ms, TimerProc)` (Winmain.cpp:1282). */
 const TICK_SECONDS = 0.25;
-/** `m_iLoopCounter++ == 4`: every 5th tick advances the seconds counters. */
+/** `m_iLoopCounter++ == 4`: every 5th tick (1.25 s, as in the original) advances the seconds counters. */
 const TICKS_PER_SECOND = 5;
 const MAX_ACTIONABLE_DISTANCE = 10;
 /** `DEFAULT_DURABILITY_THRESHOLD` (MuHelper.cpp:21). */

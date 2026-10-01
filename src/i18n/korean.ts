@@ -1354,6 +1354,8 @@ export const koreanLayer: LanguageLayer = {
     'notify.helperCost': 'MU 헬퍼가 {total} 젠을 소모했습니다',
     'notify.zenCap': '젠은 2,000,000,000을 넘겨 지닐 수 없습니다',
     'notify.cannotSell': '이 아이템은 팔 수 없습니다',
+    'notify.cannotStore': '이 아이템은 보관할 수 없습니다',
+    'notify.cannotTrade': '이 아이템은 거래할 수 없습니다',
     'notify.merchantRefuses': '상인이 그 아이템을 받지 않습니다',
     'notify.noInventoryRoom': '인벤토리에 공간이 없습니다',
     'notify.noRoomForItem': '그 아이템을 넣을 공간이 없습니다',

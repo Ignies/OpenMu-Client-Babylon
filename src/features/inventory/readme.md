@@ -64,3 +64,4 @@ jewels, Q/W/E/R hotkeys). The bag itself and the item-move code live in `Store` 
 - `inventoryFit.test.ts`: `findFreeSlot` first fit, edge clipping, ignored slots, row count.
 - `inventoryLayout.test.ts`: `planLayout` packs into the top-left, no overlaps, leaves a packed grid alone.
 - `quickItemRules.test.ts`: Ctrl-click target, `isValuableItem`, when a bulk buy stops.
+- `itemStorage.test.ts`: `storageBan` returns a translated refusal per storage.

@@ -2373,7 +2373,7 @@ export const Store = new (class _Store {
     // packet goes out, the way the original logs it and puts the item back.
     const ban = storageBan(toStorage, picked.item);
     if (ban) {
-      this.addNotification(ban, 'error');
+      this.addNotification(t(ban), 'error');
       this.cancelPickedItem();
       return;
     }
@@ -2513,7 +2513,7 @@ export const Store = new (class _Store {
 
     const ban = storageBan(toStorage, item);
     if (ban) {
-      this.addNotification(ban, 'error');
+      this.addNotification(t(ban), 'error');
       return;
     }
 

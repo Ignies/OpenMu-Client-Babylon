@@ -2493,6 +2493,8 @@ export const EN_TEXT = {
   'notify.helperCost': 'MU Helper has consumed {total} Zen',
   'notify.zenCap': 'You cannot carry more than 2,000,000,000 Zen',
   'notify.cannotSell': 'This item cannot be sold',
+  'notify.cannotStore': 'This item cannot be stored',
+  'notify.cannotTrade': 'This item cannot be traded',
   'notify.merchantRefuses': 'The merchant does not want that item',
   'notify.noInventoryRoom': 'There is no room in the inventory',
   'notify.noRoomForItem': 'There is no room for that item',

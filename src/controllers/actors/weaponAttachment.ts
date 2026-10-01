@@ -13,6 +13,7 @@ import type { PartPose } from '../render/modelObject';
 import type { PlayerObject } from './playerObject';
 import type { CharacterClassNumber } from '../../core/types';
 import type { Item } from '../../ecs/world';
+import { devQuery, devQueryNumbers } from '../../core/devSeams';
 import {
   GROUP_BOW,
   GROUP_SWORD,
@@ -107,21 +108,8 @@ const RAGE_FIGHTER_COMMON = new Set([
   '2:4', // Crystal Morning Star
 ]);
 
-function readQuery(name: string): string | null {
-  try {
-    return new URLSearchParams(location.search).get(name);
-  } catch {
-    return null;
-  }
-}
-
 function queryTriple(name: string): [number, number, number] | null {
-  const v = readQuery(name);
-  if (!v) return null;
-  const parts = v.split(',').map(Number);
-  return parts.length === 3 && parts.every(n => !isNaN(n))
-    ? (parts as [number, number, number])
-    : null;
+  return devQueryNumbers(name, 3) as [number, number, number] | null;
 }
 
 function withOverrides(link: BmdLink): BmdLink {
@@ -165,7 +153,7 @@ function backLink(
     const flip = rageCommon ? LEFT_ITEM_FLIP_RAGE : LEFT_ITEM_FLIP;
     // `?backShear=clean` A/B (dev): a non-aliased multiply instead of the
     // original's in-place concat, to compare against its sheared result.
-    if (readQuery('backShear') === 'clean') {
+    if (devQuery('backShear') === 'clean') {
       const copy = matrix.map(row => [...row]) as typeof matrix;
       concatTransforms(copy, angleMatrix(flip), matrix);
     } else {

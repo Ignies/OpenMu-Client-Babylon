@@ -29,7 +29,7 @@ type Window = {
   bursts: number;
 };
 
-export type NetStats = {
+export type SocketCost = {
   /** Messages a second. */
   rate: number;
   /** Kilobytes a second. */
@@ -90,7 +90,7 @@ export function recordSocketDrain(bytes: number, ms: number): void {
  * The last full window, so the numbers hold still long enough to read. Falls
  * back to the window in progress until the first one closes.
  */
-export function netStats(): NetStats {
+export function netStats(): SocketCost {
   const w = last ?? current;
   const span = Math.max(1, (last ? w.until : now()) - w.since) / 1000;
 

@@ -1356,6 +1356,8 @@ export const japaneseLayer: LanguageLayer = {
     'notify.helperCost': 'MU ヘルパーが {total} Zen を消費しました',
     'notify.zenCap': 'Zen は 2,000,000,000 を超えて持てません',
     'notify.cannotSell': 'このアイテムは売却できません',
+    'notify.cannotStore': 'このアイテムは保管できません',
+    'notify.cannotTrade': 'このアイテムは取引できません',
     'notify.merchantRefuses': '商人はそのアイテムを受け取りません',
     'notify.noInventoryRoom': 'インベントリに空きがありません',
     'notify.noRoomForItem': 'そのアイテムを入れる空きがありません',

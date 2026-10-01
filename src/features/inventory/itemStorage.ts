@@ -1,4 +1,5 @@
 import type { Item } from '../../ecs/world';
+import type { TextKey } from '../../i18n/recipes';
 import { ItemGroup } from '../items/itemStats';
 import { InventoryConstants } from './inventoryConstants';
 import { StorageKind, TRADE_COLUMNS, TRADE_ROWS, TRADE_SLOTS } from './storageKind';
@@ -156,15 +157,15 @@ export function isPersonalShopBanned(item: Item): boolean {
   );
 }
 
-/** The refusal reason a storage has for the carried item, or null. */
-export function storageBan(storage: StorageKind, item: Item): string | null {
+/** The text key of a storage's refusal for the carried item, or null. */
+export function storageBan(storage: StorageKind, item: Item): TextKey | null {
   switch (storage) {
     case StorageKind.Vault:
-      return isVaultBanned(item) ? 'This item cannot be stored' : null;
+      return isVaultBanned(item) ? 'notify.cannotStore' : null;
     case StorageKind.Trade:
-      return isTradeBanned(item) ? 'This item cannot be traded' : null;
+      return isTradeBanned(item) ? 'notify.cannotTrade' : null;
     case StorageKind.PersonalShop:
-      return isPersonalShopBanned(item) ? 'This item cannot be sold in a shop' : null;
+      return isPersonalShopBanned(item) ? 'personalShop.cannotSell' : null;
     default:
       return null;
   }

@@ -39,7 +39,7 @@ const CURVE = [0.75, 1.10, 1.30, 0.28] as const;
 const DESAT = [0.8, 0.55] as const;
 
 /** `GameOptions.toneMapper`: 0 none / 1 MU / 2 aces / 3 neutral. */
-const MAPPERS = ['none', 'mu', 'aces', 'neutral'] as const;
+export const TONE_MAP_CURVES = ['none', 'mu', 'aces', 'neutral'] as const;
 
 const gtDev = devQueryNumbers('gt', 4);
 const desatDev = devQueryNumbers('desat', 2);
@@ -70,12 +70,12 @@ export type ToneLook = {
 const shown = { brightness: 1, keyGain: 1 };
 
 function shaderName(mapper: number): string {
-  return `${SHADER}_${MAPPERS[mapper] ?? 'mu'}`;
+  return `${SHADER}_${TONE_MAP_CURVES[mapper] ?? 'mu'}`;
 }
 
 /** The curve for one mapper, as a GLSL function `vec3 mapped(vec3 c)` over [0, inf). */
 function curveGlsl(mapper: number): string {
-  switch (MAPPERS[mapper]) {
+  switch (TONE_MAP_CURVES[mapper]) {
     case 'none':
       return `
   vec3 mapped(vec3 c) {
@@ -269,7 +269,7 @@ export function syncToneMap(
   shown.keyGain = look.keyGain;
 
   const live = look.live && toneDev !== 0;
-  const mapper = Math.max(0, Math.min(MAPPERS.length - 1, Math.round(look.mapper)));
+  const mapper = Math.max(0, Math.min(TONE_MAP_CURVES.length - 1, Math.round(look.mapper)));
 
   if (runtime && (!live || runtime.scene !== scene || runtime.mapper !== mapper)) {
     disposeToneMap();

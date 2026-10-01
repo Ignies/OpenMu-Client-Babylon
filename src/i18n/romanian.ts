@@ -1388,6 +1388,8 @@ export const romanianLayer: LanguageLayer = {
     'notify.helperCost': 'MU Helper a consumat {total} Zen',
     'notify.zenCap': 'Nu poți purta mai mult de 2.000.000.000 Zen',
     'notify.cannotSell': 'Acest obiect nu poate fi vândut',
+    'notify.cannotStore': 'Acest obiect nu poate fi depozitat',
+    'notify.cannotTrade': 'Acest obiect nu poate fi schimbat',
     'notify.merchantRefuses': 'Negustorul nu vrea acel obiect',
     'notify.noInventoryRoom': 'Nu este loc în inventar',
     'notify.noRoomForItem': 'Nu este loc pentru acel obiect',

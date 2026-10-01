@@ -1400,6 +1400,8 @@ export const spanishLayer: LanguageLayer = {
     'notify.helperCost': 'MU Helper ha gastado {total} Zen',
     'notify.zenCap': 'No puedes llevar más de 2.000.000.000 de Zen',
     'notify.cannotSell': 'Este objeto no se puede vender',
+    'notify.cannotStore': 'Este objeto no se puede guardar',
+    'notify.cannotTrade': 'Este objeto no se puede comerciar',
     'notify.merchantRefuses': 'El mercader no quiere ese objeto',
     'notify.noInventoryRoom': 'No hay sitio en el inventario',
     'notify.noRoomForItem': 'No hay sitio para ese objeto',

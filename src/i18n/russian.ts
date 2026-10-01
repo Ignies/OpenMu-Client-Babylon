@@ -1376,6 +1376,8 @@ export const russianLayer: LanguageLayer = {
     'notify.helperCost': 'MU Helper потратил {total} Zen',
     'notify.zenCap': 'Нельзя носить больше 2 000 000 000 Zen',
     'notify.cannotSell': 'Этот предмет нельзя продать',
+    'notify.cannotStore': 'Этот предмет нельзя положить на хранение',
+    'notify.cannotTrade': 'Этот предмет нельзя обменять',
     'notify.merchantRefuses': 'Торговцу не нужен этот предмет',
     'notify.noInventoryRoom': 'В инвентаре нет места',
     'notify.noRoomForItem': 'Для этого предмета нет места',

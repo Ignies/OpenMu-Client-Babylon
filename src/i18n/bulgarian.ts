@@ -1379,6 +1379,8 @@ export const bulgarianLayer: LanguageLayer = {
     'notify.helperCost': 'MU Helper изразходва {total} Zen',
     'notify.zenCap': 'Не можеш да носиш повече от 2 000 000 000 Zen',
     'notify.cannotSell': 'Този предмет не може да се продаде',
+    'notify.cannotStore': 'Този предмет не може да се съхрани',
+    'notify.cannotTrade': 'Този предмет не може да се търгува',
     'notify.merchantRefuses': 'Търговецът не иска този предмет',
     'notify.noInventoryRoom': 'В раницата няма място',
     'notify.noRoomForItem': 'Няма място за този предмет',

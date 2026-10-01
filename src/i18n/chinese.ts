@@ -1350,6 +1350,8 @@ export const chineseLayer: LanguageLayer = {
     'notify.helperCost': '自动挂机已消耗 {total} 金币',
     'notify.zenCap': '携带的金币不能超过 2,000,000,000',
     'notify.cannotSell': '这件物品无法出售',
+    'notify.cannotStore': '这件物品无法存放',
+    'notify.cannotTrade': '这件物品无法交易',
     'notify.merchantRefuses': '商人不收这件物品',
     'notify.noInventoryRoom': '背包里没有空间',
     'notify.noRoomForItem': '没有空间存放这件物品',

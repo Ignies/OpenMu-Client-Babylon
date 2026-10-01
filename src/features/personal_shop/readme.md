@@ -49,4 +49,4 @@ only has the handlers.
 - change what the stall window shows: `versions/shared/ui/windows/personal_shop/index.tsx`.
 
 ## Tests
-- none yet.
+- `playerShopBuyResult.test.ts`: the slot and item read off `PlayerShopBuyResult`.

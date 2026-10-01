@@ -2341,6 +2341,8 @@ export const polishLayer: LanguageLayer = {
     'notify.helperCost': 'MU Helper zużył {total} Zen',
     'notify.zenCap': 'Nie możesz mieć przy sobie więcej niż 2 000 000 000 Zen',
     'notify.cannotSell': 'Tego przedmiotu nie można sprzedać',
+    'notify.cannotStore': 'Tego przedmiotu nie można przechować',
+    'notify.cannotTrade': 'Tego przedmiotu nie można wymienić',
     'notify.merchantRefuses': 'Kupiec nie chce tego przedmiotu',
     'notify.noInventoryRoom': 'Brak miejsca w ekwipunku',
     'notify.noRoomForItem': 'Brak miejsca na ten przedmiot',

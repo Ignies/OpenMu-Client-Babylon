@@ -13,7 +13,7 @@ import {
   sceneTargetSamples,
 } from '../../lighting/lightingQuality';
 import { animeFilmBoost } from '../renderingStyle';
-import { toneMapLive } from './toneMap';
+import { TONE_MAP_CURVES, toneMapLive } from './toneMap';
 import type { Rgb } from '../../lighting/profiles';
 
 /**
@@ -211,7 +211,7 @@ export function createPostChain(
     ip.toneMappingEnabled = toneMapper > 0;
     ip.toneMappingType = TONE_MAPPING_TYPES[toneMapper];
     if (toneMapper > 0) live.push(`toneMapper:${TONE_MAPPER_NAMES[toneMapper]}`);
-    if (filmic) live.push(`toneMapper:${TONE_MAPPER_NAMES[look.toneMapper]}`);
+    if (filmic) live.push(`toneMapper:${TONE_MAP_CURVES[look.toneMapper]}`);
 
     ip.contrast = 1;
 

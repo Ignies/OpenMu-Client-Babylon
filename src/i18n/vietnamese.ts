@@ -2325,6 +2325,8 @@ export const vietnameseLayer: LanguageLayer = {
     'notify.helperCost': 'MU Helper đã tiêu tốn {total} Zen',
     'notify.zenCap': 'Bạn không thể mang quá 2.000.000.000 Zen',
     'notify.cannotSell': 'Vật phẩm này không thể bán',
+    'notify.cannotStore': 'Vật phẩm này không thể cất giữ',
+    'notify.cannotTrade': 'Vật phẩm này không thể giao dịch',
     'notify.merchantRefuses': 'Thương nhân không muốn mua vật phẩm này',
     'notify.noInventoryRoom': 'Hành trang đã hết chỗ',
     'notify.noRoomForItem': 'Không còn chỗ cho vật phẩm đó',

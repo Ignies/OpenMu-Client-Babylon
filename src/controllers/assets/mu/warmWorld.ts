@@ -58,7 +58,7 @@ export function warmWorldObjects(
 
       return Promise.all(
         files.map(path =>
-          warmGLTF(path, world).then(() => onProgress?.(++done / files.length))
+          warmGLTF(path, world).then(() => onProgress?.((++done + 1) / (files.length + 1)))
         )
       ).then(() => undefined);
     },

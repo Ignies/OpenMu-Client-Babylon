@@ -1365,6 +1365,8 @@ export const thaiLayer: LanguageLayer = {
     'notify.helperCost': 'MU Helper ใช้ไป {total} เซน',
     'notify.zenCap': 'คุณพกเซนได้ไม่เกิน 2,000,000,000',
     'notify.cannotSell': 'ไอเทมนี้ขายไม่ได้',
+    'notify.cannotStore': 'ไอเทมนี้เก็บไม่ได้',
+    'notify.cannotTrade': 'ไอเทมนี้แลกเปลี่ยนไม่ได้',
     'notify.merchantRefuses': 'พ่อค้าไม่รับไอเทมนั้น',
     'notify.noInventoryRoom': 'กระเป๋าไม่มีที่ว่าง',
     'notify.noRoomForItem': 'ไม่มีที่ว่างสำหรับไอเทมนั้น',

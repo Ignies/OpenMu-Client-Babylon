@@ -84,4 +84,3 @@ readouts. Handlers for packets live in `src/features/<feature>/net.ts`, not here
 - `protocols/escrowWire.test.ts`: .NET guid byte order, int64, escrow request and result packets.
 - `roundTrip.test.ts`: request and answer pairing, median, stall cap, reset.
 - `socketCost.test.ts`: drain rates per window, worst drain, burst count, reset.
-- `playerShopBuyResult.test.ts`: the slot and item read off `PlayerShopBuyResult`.
