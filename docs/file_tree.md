@@ -14,6 +14,8 @@ public/            files served as-is: converted models, icons, fonts, texture p
 Data/ Data-v097d/  original client files per version (converter input, copied into the build)
 proxy/             WebSocket proxy between the browser and OpenMU (bun)
 cashshop/ marketplace/ register/ ops/   companion services and pages (bun)
+install/           the server installer and manager (`mu`): see install/readme.md
+openmu/            our OpenMU plugins, one DLL layered on the official OpenMU image
 docker/            local OpenMU stack
 .github/           CI workflow, PR and issue templates
 ```

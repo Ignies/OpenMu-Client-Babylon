@@ -8,6 +8,7 @@ Start with [AGENTS.md](../AGENTS.md), then [agents/](agents/readme.md) for how a
 - [versions.md](versions.md): game versions and overrides
 - [texture_packs.md](texture_packs.md): where packs live and how to add one
 - [ci.md](ci.md): every check and how baselines work
+- [install/readme.md](../install/readme.md): the server installer (`mu`); [openmu/readme.md](../openmu/readme.md): our OpenMU plugins
 - guidelines: [tdd](guidelines/tdd.md), [porting](guidelines/porting.md),
   [performance](guidelines/performance.md), [code_style](guidelines/code_style.md),
   [git](guidelines/git.md), [readme_template](guidelines/readme_template.md)

@@ -53,6 +53,7 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
       - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --cwd install
       - run: bun run tsc
 
   tests:
@@ -64,6 +65,7 @@ jobs:
         with:
           bun-version: ${{ env.BUN_VERSION }}
       - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile --cwd install
       - name: Client and tools (vitest, includes the skill golden tests)
         run: bun run test
       - name: Marketplace service (bun test)
@@ -113,3 +115,24 @@ jobs:
       - name: Commit messages
         if: github.event_name == 'pull_request'
         run: bun tools/checks/commits.ts origin/${{ github.base_ref }}
+
+  installer:
+    name: Installer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/Data/
+            !/Data-v097d/
+            !/public/
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Bootstrap scripts (shellcheck)
+        run: shellcheck install/get.sh install/install.sh
+      - run: bun install --frozen-lockfile --cwd install
+      - name: Compose files merge with OpenMU's own (docker compose config)
+        run: MU_STATE="$RUNNER_TEMP/mu" bun install/cli/e2e.ts config

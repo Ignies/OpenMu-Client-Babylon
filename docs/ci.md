@@ -12,6 +12,7 @@ run locally:
 | Structure | `bun run check` | see below |
 | Baselines (PR) | `bun tools/checks/baselineGuard.ts origin/main` | a baseline file grew |
 | Commits (PR) | `bun run check:commits origin/main` | a subject over 72 characters, an em-dash, or AI attribution |
+| Installer | `shellcheck install/*.sh`, `MU_STATE=<tmp> bun install/cli/e2e.ts config` | a script warning, or our compose no longer merges with OpenMU's |
 
 ## Structure checks (`tools/checks/index.ts`)
 
@@ -21,6 +22,8 @@ run locally:
 - **Readmes:** every controller, feature, content and version folder has a `readme.md`.
 - **Doc names:** lowercase `snake_case` (README.md, AGENTS.md, CLAUDE.md excepted).
 - **No em-dashes** in code, comments or docs (data files excepted).
+- **Servers stay off the client:** no server entry (proxy, register, cash shop, marketplace, ops)
+  may load `src/version/index.ts`, `src/app/`, Babylon or React at run time.
 
 ## Baselines
 

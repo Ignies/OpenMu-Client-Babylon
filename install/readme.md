@@ -1,0 +1,114 @@
+# install
+
+The server installer and manager (`mu`). Player-facing steps are in the root
+[README](../README.md#installing-your-own-server); this file is for whoever changes the installer
+or runs a server and wants to know what it did.
+
+## One line
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Ignies/OpenMu-Client-Babylon/main/install/get.sh | sudo bash
+```
+
+```powershell
+irm https://raw.githubusercontent.com/Ignies/OpenMu-Client-Babylon/main/install/get.ps1 | iex
+```
+
+`get.*` installs git, clones the repo (`/opt/mu-server`, `C:\mu-server`) and runs `install.*`, which
+installs Docker and Bun 1.4.2 when missing and starts `cli/main.ts`. `MU_BRANCH`, `MU_DIR` and
+`MU_REPO_URL` override the defaults (to try a branch: `MU_BRANCH=clean_slate`).
+
+## What runs
+
+One Compose project, `mu`: OpenMU's own `deploy/all-in-one/docker-compose.yml` (OpenMU's repo,
+checked out at the release tag) with `stack/compose.yml` layered over it.
+
+| service | from | notes |
+|---|---|---|
+| database | OpenMU's compose, `postgres:18` | our password; not published |
+| openmu-startup | `munique/openmu:<release>` + `../openmu` (our plugins) | not published; advertises loopback |
+| proxy | `stack/services.Dockerfile` | shares OpenMU's network namespace; band, ping, weather, presence, tracker |
+| register, cashshop, marketplace, ops | same image, other command | |
+| web | `stack/web.Dockerfile` (client + register site) on Caddy | the only published ports |
+
+OpenMU's nginx is switched off (profile `openmu-nginx`); Caddy serves the client, routes to every
+service, gets HTTPS certificates in domain mode and asks for the admin panel login. Only the web
+container publishes ports: 80/443 (domain mode) or 80, 3000, 8080, 8081 (IP mode, `stack/compose.ip.yml`).
+Postgres, presence and the OpenMU game ports are never reachable from outside; the cash shop gate
+relies on that.
+
+## Where things live on the server
+
+```
+/etc/mu-server/  (Windows: C:\ProgramData\mu-server)     outside the repo; `git clean` never touches it
+  mu.env            the config: every answer, secrets, the admin password's bcrypt hash (mode 600)
+  stack.env         what Compose interpolates (paths, OpenMU image, database password, client build args)
+  env/<service>.env each service's environment, rendered from mu.env
+  Caddyfile, serverlist.md
+  openmu/           OpenMU's repository at the release we run
+  backups/<time>/   openmu.dump, roles.sql, data/ (every SQLite file), mu.env; the last 10 are kept
+  logs/             build and update logs
+Docker volumes: mu_dbdata (Postgres), mu_data (/data in the Bun services), mu_openmu-logs, mu_caddy-*
+```
+
+`mu` itself is `/usr/local/bin/mu` (Windows: `mu.cmd` next to `bun.exe`).
+
+## The code
+
+```
+get.sh / get.ps1          clone, then install.*
+install.sh / install.ps1  Docker, Bun, then the CLI
+cli/main.ts               commands and the menu
+cli/commands/             install, adopt, manage (config, update, status, logs, backup, restore, uninstall), questions
+cli/config.ts             the config and its env-file form       cli/validate.ts   answer checks, secrets
+cli/render/               env files, Caddyfile, server list: pure functions, tested
+cli/stack.ts              names, ports, subnet (mirrors stack/compose.yml)
+cli/state.ts              writes everything in the state folder   cli/paths.ts      where things live
+cli/docker.ts             every docker call                       cli/compose.ts    the compose command line
+cli/openmu.ts             OpenMU checkout / source build          cli/health.ts     checks, wait for OpenMU
+cli/backup.ts             backup and restore                      cli/firewall.ts, ports.ts, launcher.ts
+cli/ui.ts                 the look (@clack/prompts)               cli/exec.ts       running programs
+stack/                    compose files and Dockerfiles
+```
+
+Rules: passwords travel on stdin, never in argv; secrets are only in the state folder (mode 600);
+everything the stack reads is rendered from `mu.env`, so `mu config` can change any of it.
+
+## Notable behaviour
+
+- First start: OpenMU seeds the database, including 20 public test accounts whose password is their
+  login (three are Game Masters). `register/server/accountsCli.ts lock-test-accounts` bans every one
+  still on its default password, on install and on adopt. The GM account is created the same way.
+- OpenMU 0.9.10 has no admin panel login; Caddy `basic_auth` guards it with the admin password.
+- `mu update` refuses when the checkout has local changes, backs up, fast-forwards, rebuilds, checks
+  every service and resets to the previous commit if anything fails (the backup path is printed).
+- `mu adopt` dumps the old database and its roles, copies the old SQLite files, checks that the
+  chosen OpenMU knows the database's last migration (else asks for a newer release or a source ref),
+  stops (never deletes) the old containers and `mu-*`/caddy/nginx units, then restores into the stack.
+- Changing the database password runs `ALTER USER` first; changing the address rebuilds the client.
+
+## Change it
+
+- a new question: `cli/commands/questions.ts` (+ a field in `cli/config.ts`, + where it renders).
+- a new service: a block in `stack/compose.yml`, its env in `cli/render/env.ts`, a health check in
+  `cli/health.ts`, and its SQLite path under `/data` (backups pick up every `*.sqlite`).
+- a new route: `cli/render/caddy.ts`.
+
+## Tests
+
+- `cli/config.test.ts`: config round trip, answer checks, secrets.
+- `cli/render/render.test.ts`: service env (secrets only where used, proxy pinned, trusted proxy),
+  Caddyfile (both modes, admin login, route order), server list, compose interpolation.
+- `cli/backup.test.ts`: role filtering, backup names.
+- End to end, with Docker: `MU_STATE=<scratch folder> bun install/cli/e2e.ts` (build, start, check;
+  then `backup`, `down`). It refuses to run without `MU_STATE`, so it never touches a real install.
+
+## Troubleshooting
+
+| symptom | look at |
+|---|---|
+| "Port 80 is taken by ..." | another web server (Apache, nginx, an old Caddy); stop it and rerun |
+| build failed | the log path it prints (`/etc/mu-server/logs/`) |
+| OpenMU did not start in time | `mu logs openmu-startup` |
+| a service DOWN in `mu status` | `mu logs <service>` |
+| HTTPS not working | DNS A records for play., ws., register., api., admin. must point here; `mu logs web` |

@@ -52,6 +52,8 @@ How agents work here (workflow, roles, tools, where things are): [docs/agents/](
 | add a texture pack | build it into `public/packs/<pack>/`, list it in `public/packs/index.json` |
 | redraw a window or panel | `versions/shared/ui/windows/<window>/index.tsx` |
 | change one version only | `versions/<id>/` (override), never an `if (version)` in `src/` |
+| change how servers are installed or updated | `install/` (see `install/readme.md`) |
+| change OpenMU itself | a plugin in `openmu/plugins/`; OpenMU is never forked |
 
 More recipes: [docs/how_to/](docs/how_to/).
 
