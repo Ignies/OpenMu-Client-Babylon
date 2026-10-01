@@ -1,0 +1,150 @@
+import type { Emission } from '../../../../src/controllers/fx/effectParticles';
+import type { LightEmitter } from '../../../../src/controllers/lighting/mapObjectLights';
+
+/**
+ * Elbeland (`WD_51ELBELAND` / `WD_51HOME_6TH_CHAR`, `World52`/`Object52`),
+ * the plain-data half. Nothing here may import the scene.
+ *
+ * EncTerrain52.obj places 5136 objects of 130 types (three type-11 records
+ * fall outside the block grid). Object52 ships 165 models; the one type-165
+ * record (35.7/241.5) has no `Object166.bmd` and fails its load. The C++ is
+ * GMNewTown.cpp (`SEASON3B::GMNewTown`): `CreateObject` (:49-85),
+ * `MoveObject` (:87-191), `PlayObjectSound` (:193-232),
+ * `RenderObjectVisual` (:234-723).
+ */
+
+/**
+ * `MoveObject` :127-131, type 56 (×4): `o->BlendMesh = 0; BlendMeshLight =
+ * sin(t*0.003)*0.3+0.5; Velocity = 0.05` - the Atlans gate's water sheet
+ * (56 is `SE_Amb_enteratlance01`'s object). The sine is in
+ * `meshAnimation.ts`, the play speed in `index.ts`.
+ */
+export const ELBELAND_BLEND_MESHES: Readonly<Record<number, number>> = {
+  56: 0,
+};
+
+/**
+ * Hidden every frame:
+ *  - `MoveObject`: **0** (×27, the fire pits - see `ELBELAND_LIGHTS`), **54**
+ *    (×37) `WATERFALL_2` one in four (:256-262), **58** (×141)
+ *    `WATERFALL_5` every tick (:263-266), **59** (×73) `WATERFALL_3` SubType
+ *    8 (:267-270), **60** (×162) `BITMAP_CLOUD` SubType 3 then hidden
+ *    (:271-282), **61** (×23, the blue lamps - see lights), **62** (×13) the
+ *    eagle spawner (a `Boids[]` slot with `MODEL_EAGLE`, :150-189 - no boid
+ *    system here).
+ *  - `RenderObjectVisual` :329-360: **133-147** (0 placed except through
+ *    148's neighbours) and **149-155** (0 placed) are `CreateMonster` markers
+ *    for the decorative town monsters - the server's job in the clone. Kept
+ *    in the table so a future .obj that places them stays quiet.
+ *  - **165** (×1, at 35.7/241.5): Object52 ships 165 models, so the highest
+ *    type with art is 164. The original loads no `Object166.bmd` for it
+ *    either and draws nothing; listing it here skips the fetch instead of
+ *    failing it twice per load.
+ */
+export const ELBELAND_EFFECT_ONLY_TYPES: readonly number[] = [
+  0, 54, 58, 59, 60, 61, 62, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142,
+  143, 144, 145, 146, 147, 149, 150, 151, 152, 153, 154, 155, 165,
+];
+
+/**
+ * The falls and the river spray.
+ *
+ * **60** emits nothing. `RenderObjectVisual` :271-282 spawns ten
+ * `BITMAP_CLOUD` SubType 3 at light `(0.06, 0.07, 0.08)` and latches
+ * `HiddenMesh = -2` so it can never run a second time; SubType 3 has no init
+ * and no move case, so those ten keep `CreateParticle`'s default
+ * `LifeTime = 2` (ZzzEffectParticle.cpp:74) and are gone in two ticks. One
+ * near-black two-tick flash per object is nothing to draw, and this map
+ * places 162 of them around the island rim - a stream of white `cloud21`
+ * instead buried the whole town in cloud.
+ */
+export const ELBELAND_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
+  {
+    54: [{ kinds: ['waterfall5_9'], every: 4 }],
+    58: [{ kinds: ['waterfall5_9'], every: 1, scale: 0.6 }],
+    59: [{ kinds: ['waterfall5_9'], every: 2 }],
+  };
+
+/**
+ * `MoveObject`:
+ *  - **0** (×27), :99-104: `L = (rand%4+3)*0.1; AddTerrainLight(x, y,
+ *    (L, 0.6L, 0.2L), 3)` + hidden; `RenderObjectVisual` :249-254 adds
+ *    `BITMAP_TRUE_FIRE` SubType 0 - the town's fire pits.
+ *  - **61** (×23), :132-137: `(0.2L, 0.6L, L)` at range 3 + hidden, with
+ *    `BITMAP_TRUE_BLUE` particles (:283-289) - the blue elf lamps.
+ *  - **63** (×6), `RenderObjectVisual` :290-299: one `BITMAP_LIGHT` sprite at
+ *    bone 5 sized `scale * 6` - the great lanterns; no terrain light.
+ *  - **110** (×1, at 47.5/218.5), `RenderObjectVisual` :301-311: one
+ *    `BITMAP_LIGHT` particle every other tick at
+ *    `(cos, sin)(WorldTime * 0.03) * (30 + rand()%5)` around bone 0, 70 up,
+ *    scale 0.6, white - the village-protection shrine. 0.03 rad/ms is 4.8
+ *    turns a second against 12.5 spawns, so consecutive sparks land 138°
+ *    apart and the ring never reads as an orbit in the original either: what
+ *    it looks like is a light hanging over the shrine, which is the sprite
+ *    below. The same stand-in 63 and 121 already take.
+ *  - **121** (×26): `BITMAP_LIGHT` sprites on bones 3…8 (:312-327) - the
+ *    lamp posts; one sprite each.
+ */
+export const ELBELAND_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> =
+  {
+    0: [
+      {
+        pointRange: 5,
+        terrain: {
+          range: 3,
+          color: [1, 0.6, 0.2],
+          flicker: { min: 0.3, max: 0.6, steps: 4 },
+        },
+        emissions: [{ kinds: ['fire1', 'fire3'], every: 2, jitter: 6 }],
+      },
+    ],
+    61: [
+      {
+        // Every 61 record sits 11 west and 8 north of the bowl it belongs to
+        // (its type-34 post), so the flame burned beside the rim; the drop
+        // puts its base inside the bowl instead of on top of it. `pointDrop`
+        // keeps the pool where it was - an `offset` otherwise takes the
+        // pool's default 0.6 hover away.
+        offset: [11, -8, -10],
+        pointDrop: 0.6,
+        sprite: { scale: 0.9, color: [0.2, 0.5, 1] },
+        pointRange: 5,
+        terrain: {
+          range: 3,
+          color: [0.2, 0.6, 1],
+          flicker: { min: 0.3, max: 0.6, steps: 4 },
+        },
+        // The login braziers' flame on the original's blue sheet (:283-289).
+        // A `flareBlue` card stood here before - a lens flare with long
+        // streaks, drawn at a random angle, so every lamp had a blue spike
+        // leaning out of its bowl instead of a fire in it.
+        emissions: [
+          {
+            kinds: ['fireBlue'],
+            every: 1,
+            count: 2,
+            scale: 0.5,
+            light: [0.5, 0.75, 1],
+          },
+        ],
+      },
+    ],
+    63: [
+      {
+        offset: [0, 0, 300],
+        sprite: { scale: 3, color: [1, 0.9, 0.7] },
+      },
+    ],
+    110: [
+      {
+        offset: [0, 0, 70],
+        sprite: { scale: 1.2, color: [1, 1, 1] },
+      },
+    ],
+    121: [
+      {
+        offset: [0, 0, 250],
+        sprite: { scale: 1.2, color: [1, 0.9, 0.7] },
+      },
+    ],
+  };

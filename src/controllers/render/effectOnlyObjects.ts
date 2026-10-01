@@ -1,5 +1,5 @@
 import type { ENUM_WORLD } from '../../core/types';
-import { maps } from '../../maps';
+import { maps } from '../maps';
 
 /**
  * Whether an object type on a world is an emitter with no drawn model -

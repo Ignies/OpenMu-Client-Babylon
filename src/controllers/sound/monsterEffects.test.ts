@@ -7,7 +7,7 @@ import {
   monsterSwing,
   type MonsterAttackInput,
 } from '../anim/monsterAttackClip';
-import { MonsterActionType as A } from '../../common/objects/enum';
+import { MonsterActionType as A } from '../../../versions/shared/objects/enum';
 import { ENUM_WORLD as W } from '../../core/types';
 
 const WORLDS = Object.values(W).filter((w): w is W => typeof w === 'number');

@@ -3,12 +3,12 @@ import type { ModelObject } from '../render/modelObject';
 import type { ItemVisualTier } from '../item_fx/itemVisualTier';
 import { skeletonShatter } from '../fx/deathVisuals';
 import { isKnownObjectType, resolveModelFactory } from './modelFactoryPerId';
-import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
+import { MonsterActionType, PlayerAction } from '../../../versions/shared/objects/enum';
 import {
   isPlayerAttackAction,
   isPlayerSkillAction,
 } from '../anim/playerActionMapper';
-import { TRANSFORMED_NPC_TABLE } from '../../common/npcs/playerNpcTables';
+import { TRANSFORMED_NPC_TABLE } from './playerNpcTables';
 
 /**
  * A character wearing something else's body: `c->Object.SubType = MODEL_X`,

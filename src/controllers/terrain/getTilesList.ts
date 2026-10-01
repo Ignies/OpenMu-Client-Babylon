@@ -1,5 +1,5 @@
 import { ENUM_WORLD } from '../../core/types';
-import { maps } from '../../maps';
+import { maps } from '../maps';
 
 /**
  * Tile textures by slot for a world - `MapLayer.tiles`, declared on each

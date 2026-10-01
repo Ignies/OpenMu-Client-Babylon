@@ -5,7 +5,7 @@ import {
   type Observer,
   type Scene,
 } from '../../controllers/render/babylon/exports';
-import { PlayerAction, ServerPlayerActionType } from '../../common/objects/enum';
+import { PlayerAction, ServerPlayerActionType } from '../../../versions/shared/objects/enum';
 import {
   approachAngle,
   rotationByteOf,

@@ -1,4 +1,4 @@
-import items from '../../src/common/items.json';
+import items from '../../versions/shared/items/items.json';
 
 /**
  * What the shop sells, and for how many Jewels of Chaos.

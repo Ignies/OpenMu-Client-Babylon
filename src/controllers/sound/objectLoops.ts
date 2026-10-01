@@ -6,7 +6,7 @@ import type { Sounds } from './recipes';
 import type { SoundLayer } from './layer';
 import { listenerHero, listenerWorld } from './listener';
 import { KALIMA_WORLDS } from '../assets/worldAssets';
-import { KALIMA_OBJECT_LOOPS } from '../../maps/kalima/spec';
+import { KALIMA_OBJECT_LOOPS } from '../../../versions/shared/maps/kalima/spec';
 
 /**
  * The object loops: the sounds the original attaches to map objects from a

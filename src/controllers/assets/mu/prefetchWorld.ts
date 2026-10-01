@@ -1,4 +1,4 @@
-import { ENUM_WORLD } from '../../../common';
+import { ENUM_WORLD } from '@/core/types';
 import { downloadDataBytesBuffer } from '../download';
 import { getTilesList } from '../../terrain/getTilesList';
 import { assetWorldNum } from '../worldAssets';

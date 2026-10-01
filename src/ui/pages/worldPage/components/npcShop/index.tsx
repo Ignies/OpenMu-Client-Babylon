@@ -13,7 +13,7 @@ import {
   occupancyStamp,
   usedMask,
 } from '../../../../components/itemGrid';
-import { ItemsDatabase } from '../../../../../common/itemsDatabase';
+import { ItemsDatabase } from '../../../../../../versions/shared/items/itemsDatabase';
 import { isSellingBanned } from '../../../../../features/items/itemValue';
 import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
 import { MuSpriteFrame } from '../../../../components/muSprite';

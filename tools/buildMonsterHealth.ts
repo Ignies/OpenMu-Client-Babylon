@@ -24,7 +24,7 @@
  */
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import monsters from '../src/common/monsters.json';
+import monsters from '../versions/shared/monsters/monsters.json';
 
 const LAYERS = ['Version075', 'Version095d', 'VersionSeasonSix'];
 

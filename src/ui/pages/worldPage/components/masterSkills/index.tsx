@@ -6,16 +6,16 @@ import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { useWindowStackEntry } from '../../../../components/muWindow/useWindowChrome';
 import { playUiSound } from '../../../../../controllers/sound/sfx';
-import { skillDefinition } from '../../../../../common/skillsDatabase';
+import { skillDefinition } from '../../../../../../versions/shared/skills/skillsDatabase';
 import { t } from '../../../../../i18n';
-import { skills, type MasterTreeEntry } from '../../../../../skills';
+import { skills, type MasterTreeEntry } from '../../../../../features/skills';
 import {
   formatMasterText,
   MASTER_ICON_HEIGHT,
   MASTER_ICON_WIDTH,
   MASTER_TEXT,
   masterSkillIconCell,
-} from '../../../../../skills/masterTree';
+} from '../../../../../features/skills/masterTree';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuButton } from '../../../../components/muButton';
 import { useUiStageScale } from '../../../../components/uiStage';

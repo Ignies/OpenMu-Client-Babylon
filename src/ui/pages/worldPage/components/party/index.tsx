@@ -12,7 +12,7 @@ import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
 import { useNearbyPlayers } from '../nearbyPlayers';
-import { TELEPORT_ALLY } from '../../../../../common/skillCasting';
+import { TELEPORT_ALLY } from '../../../../../features/skills/skillCasting';
 
 /**
  * `CNewUIPartyInfoWindow`: the party list in an item-window frame. Each row

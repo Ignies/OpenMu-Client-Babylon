@@ -1,7 +1,7 @@
 import { Store } from '../../app/store';
 import { Social } from '../social/social';
 import { gameVersion } from '../../version';
-import { skillDefinition } from '../../common/skillsDatabase';
+import { skillDefinition } from '../../../versions/shared/skills/skillsDatabase';
 import { calcMaxDurability, isJewel, itemDef } from '../items/itemStats';
 import { InventoryConstants } from '../inventory/inventoryConstants';
 import { PetCommandModeEnum } from '../../../versions/shared/packets/ClientToServerPackets';

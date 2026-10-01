@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { LocalStorage } from '../../core/localStorage';
-import { isHotbarSkill } from '../../common/skillCasting';
+import { isHotbarSkill } from '../skills/skillCasting';
 
 /**
  * The three skills linked to the mobile pad, per character.

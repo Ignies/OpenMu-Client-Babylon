@@ -1,6 +1,6 @@
 import { ENUM_WORLD } from '../../../../core/types';
 import { registerDebugModule } from '../../../../features/gm/debugMenu';
-import { maps } from '../../../../maps';
+import { maps } from '../../../../controllers/maps';
 import { EventBus } from '../../../../core/eventBus';
 import { Store } from '../../../../app/store';
 

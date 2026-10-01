@@ -1,12 +1,12 @@
 import type { Scene } from '../render/babylon/exports';
 import type { ENUM_WORLD } from '../../core/types';
 import type { Entity } from '../../ecs/world';
-import { skillDefinition } from '../../common/skillsDatabase';
+import { skillDefinition } from '../../../versions/shared/skills/skillsDatabase';
 import { MODEL } from '../fx/recipes';
 import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 import { tierIndex } from './lightingQuality';
-import { masterBase } from '../../common/skillAliases';
+import { masterBase } from '../../features/skills/skillAliases';
 import { arc, effectLight, flame, frost, holy, tide } from './recipes';
 
 /**

@@ -19,7 +19,7 @@ import {
   specularLightScale,
 } from '../render/materialQuality';
 import { devQueryNumber, devQueryNumbers } from '../../core/devSeams';
-import { maps } from '../../maps';
+import { maps } from '../maps';
 import { EventBus } from '../../core/eventBus';
 import {
   DEFAULT_SUN_DIRECTION,

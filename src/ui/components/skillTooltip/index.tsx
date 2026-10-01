@@ -3,10 +3,10 @@ import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { skillDefinition } from '../../../common/skillsDatabase';
-import { skillDisplayName } from '../../../common/skillNames';
-import { skills, type SkillBlock } from '../../../skills';
-import { skillDelaySeconds } from '../../../skills/cooldowns';
+import { skillDefinition } from '../../../../versions/shared/skills/skillsDatabase';
+import { skillDisplayName } from '../../../features/skills/skillNames';
+import { skills, type SkillBlock } from '../../../features/skills';
+import { skillDelaySeconds } from '../../../features/skills/cooldowns';
 
 export type TipLine = {
   text: string;

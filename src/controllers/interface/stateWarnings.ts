@@ -1,7 +1,7 @@
 import { reaction } from 'mobx';
 import { t } from '../../i18n';
 import { Store } from '../../app/store';
-import { skills } from '../../skills';
+import { skills } from '../../features/skills';
 import { GameOptions } from '../../features/options/gameOptions';
 import { Notices } from '../../features/chat/notices';
 import { InventoryConstants } from '../../features/inventory/inventoryConstants';

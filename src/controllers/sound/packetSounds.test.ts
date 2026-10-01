@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { monsterCast, monsterSwing, type MonsterAttackInput } from '../anim/monsterAttackClip';
-import { ServerPlayerActionType as S } from '../../common/objects/enum';
+import { ServerPlayerActionType as S } from '../../../versions/shared/objects/enum';
 import { ENUM_WORLD as W } from '../../core/types';
 import { SOUND_FILES } from './recipes';
 import {

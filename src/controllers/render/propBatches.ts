@@ -23,7 +23,7 @@ import {
 } from '../lighting/mapObjectLights';
 import { LEAN_CURSOR_OBJECTS, findRestObject } from '../terrain/restObjects';
 import { isMapDoorType } from '../../ecs/systems/mapDoorSystem';
-import { roomStructureTypes } from '../../maps/rooms';
+import { roomStructureTypes } from '../maps/rooms';
 import { mayBeCeilingPiece } from '../../ecs/systems/ceilingHideSystem';
 import {
   blobShadowsActive,

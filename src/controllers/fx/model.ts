@@ -30,7 +30,7 @@ import {
 import { clampAlpha } from './clampAlpha';
 import { chromeMaterial, disposeChromeMaterials } from './chrome';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
-import { BlendState } from '../../common/objects/enum';
+import { BlendState } from '../../../versions/shared/objects/enum';
 import { Store } from '../../app/store';
 import type { TestScene } from '../render/scenes/testScene';
 import {

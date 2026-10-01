@@ -1,4 +1,4 @@
-import items from '../../src/common/items.json';
+import items from '../../versions/shared/items/items.json';
 import { postgresBoxes } from './boxes';
 import { db, type ListingRow } from './db';
 import { verdict } from './reconcile';

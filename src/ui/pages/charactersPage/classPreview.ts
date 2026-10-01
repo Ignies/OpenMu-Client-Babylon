@@ -6,7 +6,7 @@ import {
   type CustomMaterial,
 } from '../../../controllers/render/babylon/exports';
 import { loadGLTF, getMaterial } from '../../../controllers/assets/modelLoader';
-import type { BlendState } from '../../../common/objects/enum';
+import type { BlendState } from '../../../../versions/shared/objects/enum';
 import { ModelObject } from '../../../controllers/render/modelObject';
 import { toRadians } from '../../../controllers/assets/download';
 import type { World } from '../../../ecs/world';

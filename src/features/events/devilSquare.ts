@@ -4,7 +4,7 @@ import { BaseClass, getBaseClass } from '../hero/characterStats';
 import type { Item } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
-import { skills } from '../../skills';
+import { skills } from '../skills';
 import {
   DevilSquareEnterRequestPacket,
   MiniGameOpeningStateRequestPacket,

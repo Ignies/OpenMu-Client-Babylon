@@ -16,7 +16,7 @@ import {
 import { downloadDataFile, hasDataFile } from '../assets/mu/dataFolder';
 import { loadMuSprite } from '../assets/mu/sprites';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
-import { BlendState } from '../../common/objects/enum';
+import { BlendState } from '../../../versions/shared/objects/enum';
 import { spawnParticle } from './effectParticles';
 import { clampAlpha } from './clampAlpha';
 import type { World } from '../../ecs/world';

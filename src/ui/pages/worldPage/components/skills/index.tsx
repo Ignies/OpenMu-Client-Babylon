@@ -6,13 +6,13 @@ import { Store } from '../../../../../app/store';
 import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { playUiSound } from '../../../../../controllers/sound/sfx';
-import { skillDefinition } from '../../../../../common/skillsDatabase';
-import { skills } from '../../../../../skills';
+import { skillDefinition } from '../../../../../../versions/shared/skills/skillsDatabase';
+import { skills } from '../../../../../features/skills';
 import { SkillIcon } from '../../../../components/skillIcon';
 import {
   SKILL_ICON_HEIGHT,
   SKILL_ICON_WIDTH,
-} from '../../../../../common/skillCasting';
+} from '../../../../../features/skills/skillCasting';
 import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
 import { MuButton } from '../../../../components/muButton';
 import { toggleMasterSkillsWindow } from '../masterSkills/windowState';

@@ -1,0 +1,418 @@
+[
+ {
+  "from": "src/maps/layer.ts",
+  "to": "src/controllers/maps/layer.ts"
+ },
+ {
+  "from": "src/maps/index.ts",
+  "to": "src/controllers/maps/index.ts"
+ },
+ {
+  "from": "src/maps/rooms.ts",
+  "to": "src/controllers/maps/rooms.ts"
+ },
+ {
+  "from": "src/maps/roomEnumeration.ts",
+  "to": "src/controllers/maps/roomEnumeration.ts"
+ },
+ {
+  "from": "src/maps/roomEnumeration.test.ts",
+  "to": "src/controllers/maps/roomEnumeration.test.ts"
+ },
+ {
+  "from": "src/maps/_template.ts",
+  "to": "src/controllers/maps/_template.ts"
+ },
+ {
+  "from": "src/maps/aida",
+  "to": "versions/shared/maps/aida"
+ },
+ {
+  "from": "src/maps/atlans",
+  "to": "versions/shared/maps/atlans"
+ },
+ {
+  "from": "src/maps/balgasbarracks",
+  "to": "versions/shared/maps/balgasbarracks"
+ },
+ {
+  "from": "src/maps/balgasrefuge",
+  "to": "versions/shared/maps/balgasrefuge"
+ },
+ {
+  "from": "src/maps/bloodcastle",
+  "to": "versions/shared/maps/bloodcastle"
+ },
+ {
+  "from": "src/maps/chaoscastle",
+  "to": "versions/shared/maps/chaoscastle"
+ },
+ {
+  "from": "src/maps/crywolf",
+  "to": "versions/shared/maps/crywolf"
+ },
+ {
+  "from": "src/maps/cursedtemple",
+  "to": "versions/shared/maps/cursedtemple"
+ },
+ {
+  "from": "src/maps/devias",
+  "to": "versions/shared/maps/devias"
+ },
+ {
+  "from": "src/maps/devilsquare",
+  "to": "versions/shared/maps/devilsquare"
+ },
+ {
+  "from": "src/maps/doppelganger1",
+  "to": "versions/shared/maps/doppelganger1"
+ },
+ {
+  "from": "src/maps/doppelganger2",
+  "to": "versions/shared/maps/doppelganger2"
+ },
+ {
+  "from": "src/maps/doppelganger3",
+  "to": "versions/shared/maps/doppelganger3"
+ },
+ {
+  "from": "src/maps/doppelganger4",
+  "to": "versions/shared/maps/doppelganger4"
+ },
+ {
+  "from": "src/maps/duelarena",
+  "to": "versions/shared/maps/duelarena"
+ },
+ {
+  "from": "src/maps/dungeon",
+  "to": "versions/shared/maps/dungeon"
+ },
+ {
+  "from": "src/maps/elbeland",
+  "to": "versions/shared/maps/elbeland"
+ },
+ {
+  "from": "src/maps/empireguardian",
+  "to": "versions/shared/maps/empireguardian"
+ },
+ {
+  "from": "src/maps/empireguardian4",
+  "to": "versions/shared/maps/empireguardian4"
+ },
+ {
+  "from": "src/maps/gmarea",
+  "to": "versions/shared/maps/gmarea"
+ },
+ {
+  "from": "src/maps/icarus",
+  "to": "versions/shared/maps/icarus"
+ },
+ {
+  "from": "src/maps/kalima",
+  "to": "versions/shared/maps/kalima"
+ },
+ {
+  "from": "src/maps/kanturu1",
+  "to": "versions/shared/maps/kanturu1"
+ },
+ {
+  "from": "src/maps/kanturu2",
+  "to": "versions/shared/maps/kanturu2"
+ },
+ {
+  "from": "src/maps/kanturu3",
+  "to": "versions/shared/maps/kanturu3"
+ },
+ {
+  "from": "src/maps/karutan1",
+  "to": "versions/shared/maps/karutan1"
+ },
+ {
+  "from": "src/maps/karutan2",
+  "to": "versions/shared/maps/karutan2"
+ },
+ {
+  "from": "src/maps/landoftrials",
+  "to": "versions/shared/maps/landoftrials"
+ },
+ {
+  "from": "src/maps/layers.ts",
+  "to": "versions/shared/maps/layers.ts"
+ },
+ {
+  "from": "src/maps/loginscene",
+  "to": "versions/shared/maps/loginscene"
+ },
+ {
+  "from": "src/maps/lorencia",
+  "to": "versions/shared/maps/lorencia"
+ },
+ {
+  "from": "src/maps/lorenmarket",
+  "to": "versions/shared/maps/lorenmarket"
+ },
+ {
+  "from": "src/maps/losttower",
+  "to": "versions/shared/maps/losttower"
+ },
+ {
+  "from": "src/maps/noria",
+  "to": "versions/shared/maps/noria"
+ },
+ {
+  "from": "src/maps/raklion",
+  "to": "versions/shared/maps/raklion"
+ },
+ {
+  "from": "src/maps/raklionboss",
+  "to": "versions/shared/maps/raklionboss"
+ },
+ {
+  "from": "src/maps/recipes.ts",
+  "to": "versions/shared/maps/recipes.ts"
+ },
+ {
+  "from": "src/maps/santatown",
+  "to": "versions/shared/maps/santatown"
+ },
+ {
+  "from": "src/maps/shared",
+  "to": "versions/shared/maps/shared"
+ },
+ {
+  "from": "src/maps/stadium",
+  "to": "versions/shared/maps/stadium"
+ },
+ {
+  "from": "src/maps/swamp",
+  "to": "versions/shared/maps/swamp"
+ },
+ {
+  "from": "src/maps/tarkan",
+  "to": "versions/shared/maps/tarkan"
+ },
+ {
+  "from": "src/maps/tileFiles.test.ts",
+  "to": "versions/shared/maps/tileFiles.test.ts"
+ },
+ {
+  "from": "src/maps/valleyofloren",
+  "to": "versions/shared/maps/valleyofloren"
+ },
+ {
+  "from": "src/maps/vulcanus",
+  "to": "versions/shared/maps/vulcanus"
+ },
+ {
+  "from": "src/common/monsters/balgass.ts",
+  "to": "versions/shared/monsters/balgass.ts"
+ },
+ {
+  "from": "src/common/monsters/bloodCastleGate.ts",
+  "to": "versions/shared/monsters/blood_castle_gate.ts"
+ },
+ {
+  "from": "src/common/monsters/budgeDragon.ts",
+  "to": "versions/shared/monsters/budge_dragon.ts"
+ },
+ {
+  "from": "src/common/monsters/deathGorgon.ts",
+  "to": "versions/shared/monsters/death_gorgon.ts"
+ },
+ {
+  "from": "src/common/monsters/genericMonster.ts",
+  "to": "versions/shared/monsters/generic_monster.ts"
+ },
+ {
+  "from": "src/common/monsters/goldenMonsters.ts",
+  "to": "versions/shared/monsters/golden_monsters.ts"
+ },
+ {
+  "from": "src/common/monsters/hound.ts",
+  "to": "versions/shared/monsters/hound.ts"
+ },
+ {
+  "from": "src/common/monsters/kundun.ts",
+  "to": "versions/shared/monsters/kundun.ts"
+ },
+ {
+  "from": "src/common/monsters/monsterBlendMesh.ts",
+  "to": "src/controllers/actors/monsterBlendMesh.ts"
+ },
+ {
+  "from": "src/common/monsters/monsterModelTable.ts",
+  "to": "src/controllers/actors/monsterModelTable.ts"
+ },
+ {
+  "from": "src/common/monsters/selupan.ts",
+  "to": "versions/shared/monsters/selupan.ts"
+ },
+ {
+  "from": "src/common/monsters/skeletonWarrior.ts",
+  "to": "versions/shared/monsters/skeleton_warrior.ts"
+ },
+ {
+  "from": "src/common/monsters/spider.ts",
+  "to": "versions/shared/monsters/spider.ts"
+ },
+ {
+  "from": "src/common/npcs/archangel.ts",
+  "to": "versions/shared/npcs/archangel.ts"
+ },
+ {
+  "from": "src/common/npcs/baz.ts",
+  "to": "versions/shared/npcs/baz.ts"
+ },
+ {
+  "from": "src/common/npcs/elfSoldier.ts",
+  "to": "versions/shared/npcs/elf_soldier.ts"
+ },
+ {
+  "from": "src/common/npcs/gearedNpc.ts",
+  "to": "versions/shared/npcs/geared_npc.ts"
+ },
+ {
+  "from": "src/common/npcs/genericNpc.ts",
+  "to": "versions/shared/npcs/generic_npc.ts"
+ },
+ {
+  "from": "src/common/npcs/girl.ts",
+  "to": "versions/shared/npcs/girl.ts"
+ },
+ {
+  "from": "src/common/npcs/goldenArcher.ts",
+  "to": "versions/shared/npcs/golden_archer.ts"
+ },
+ {
+  "from": "src/common/npcs/hanzo.ts",
+  "to": "versions/shared/npcs/hanzo.ts"
+ },
+ {
+  "from": "src/common/npcs/hiddenNpc.ts",
+  "to": "versions/shared/npcs/hidden_npc.ts"
+ },
+ {
+  "from": "src/common/npcs/leo.ts",
+  "to": "versions/shared/npcs/leo.ts"
+ },
+ {
+  "from": "src/common/npcs/lumen.ts",
+  "to": "versions/shared/npcs/lumen.ts"
+ },
+ {
+  "from": "src/common/npcs/man.ts",
+  "to": "versions/shared/npcs/man.ts"
+ },
+ {
+  "from": "src/common/npcs/npcModelTable.test.ts",
+  "to": "src/controllers/actors/npcModelTable.test.ts"
+ },
+ {
+  "from": "src/common/npcs/npcModelTable.ts",
+  "to": "src/controllers/actors/npcModelTable.ts"
+ },
+ {
+  "from": "src/common/npcs/pasi.ts",
+  "to": "versions/shared/npcs/pasi.ts"
+ },
+ {
+  "from": "src/common/npcs/plateNpc.ts",
+  "to": "versions/shared/npcs/plate_npc.ts"
+ },
+ {
+  "from": "src/common/npcs/playerNpcTables.ts",
+  "to": "src/controllers/actors/playerNpcTables.ts"
+ },
+ {
+  "from": "src/common/npcs/trainer.ts",
+  "to": "versions/shared/npcs/trainer.ts"
+ },
+ {
+  "from": "src/common/npcs/transformedNpc.ts",
+  "to": "versions/shared/npcs/transformed_npc.ts"
+ },
+ {
+  "from": "src/common/npcs/trapNpc.test.ts",
+  "to": "versions/shared/npcs/trap_npc.test.ts"
+ },
+ {
+  "from": "src/common/npcs/trapNpc.ts",
+  "to": "versions/shared/npcs/trap_npc.ts"
+ },
+ {
+  "from": "src/common/npcs/zyro.ts",
+  "to": "versions/shared/npcs/zyro.ts"
+ },
+ {
+  "from": "src/common/monsters.json",
+  "to": "versions/shared/monsters/monsters.json"
+ },
+ {
+  "from": "src/common/monsterHealth.json",
+  "to": "versions/shared/monsters/monsterHealth.json"
+ },
+ {
+  "from": "src/common/monstersDatabase.ts",
+  "to": "versions/shared/monsters/monstersDatabase.ts"
+ },
+ {
+  "from": "src/common/items.json",
+  "to": "versions/shared/items/items.json"
+ },
+ {
+  "from": "src/common/itemsDatabase.ts",
+  "to": "versions/shared/items/itemsDatabase.ts"
+ },
+ {
+  "from": "src/common/objects/enum.ts",
+  "to": "versions/shared/objects/enum.ts"
+ },
+ {
+  "from": "src/common/signLabels.ts",
+  "to": "versions/shared/objects/signs/signLabels.ts"
+ },
+ {
+  "from": "src/common/signObject.ts",
+  "to": "versions/shared/objects/signs/signObject.ts"
+ },
+ {
+  "from": "src/common/signPlates.ts",
+  "to": "versions/shared/objects/signs/signPlates.ts"
+ },
+ {
+  "from": "src/common/skillsDatabase.ts",
+  "to": "versions/shared/skills/skillsDatabase.ts"
+ },
+ {
+  "from": "src/common/skillVisuals.ts",
+  "to": "versions/shared/skills/skillVisuals.ts"
+ },
+ {
+  "from": "src/common/skillAliases.ts",
+  "to": "src/features/skills/skillAliases.ts"
+ },
+ {
+  "from": "src/common/skillCasting.ts",
+  "to": "src/features/skills/skillCasting.ts"
+ },
+ {
+  "from": "src/common/skillItems.ts",
+  "to": "src/features/skills/skillItems.ts"
+ },
+ {
+  "from": "src/common/skillNames.ts",
+  "to": "src/features/skills/skillNames.ts"
+ },
+ {
+  "from": "src/common/magicEffects.ts",
+  "to": "src/features/skills/magicEffects.ts"
+ },
+ {
+  "from": "src/skills",
+  "to": "src/features/skills"
+ },
+ {
+  "from": "src/combat",
+  "to": "src/controllers/combat"
+ }
+]

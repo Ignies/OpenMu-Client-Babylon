@@ -10,7 +10,7 @@ import {
   TargetedSkillPacket,
   TeleportTargetPacket,
 } from '../../../versions/shared/packets/ClientToServerPackets';
-import { skillDefinition, type SkillDefinition } from '../../common/skillsDatabase';
+import { skillDefinition, type SkillDefinition } from '../../../versions/shared/skills/skillsDatabase';
 import {
   advancesSwordCount,
   chooseSkillAction,
@@ -19,7 +19,7 @@ import {
   isTeleportSkill,
   rotationByte256,
   TELEPORT,
-} from '../../common/skillCasting';
+} from '../../features/skills/skillCasting';
 import {
   inSquareRange,
   pickAllySquare,
@@ -40,13 +40,13 @@ import { isWingItem } from '../../controllers/actors/wings';
 import type { AttackPose } from '../../controllers/actors/weaponClass';
 import { mountKind } from '../../features/pets/pets';
 import { heroCastSound, playCombat, playSkill } from '../../controllers/sound/combat';
-import { skills } from '../../skills';
-import { combat } from '../../combat';
-import { SKILL_DEFENSE, SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../combat/recipes';
-import { CONSECUTIVE_ATTACK_KEY } from '../../combat/skillMovement';
-import { castsInPlace, castsOnSelfOnly } from '../../combat/castTargets';
-import { PlayerAction } from '../../common/objects/enum';
-import type { CastContext } from '../../combat';
+import { skills } from '../../features/skills';
+import { combat } from '../../controllers/combat';
+import { SKILL_DEFENSE, SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../controllers/combat/recipes';
+import { CONSECUTIVE_ATTACK_KEY } from '../../controllers/combat/skillMovement';
+import { castsInPlace, castsOnSelfOnly } from '../../controllers/combat/castTargets';
+import { PlayerAction } from '../../../versions/shared/objects/enum';
+import type { CastContext } from '../../controllers/combat';
 import { Vector3 } from '../../controllers/render/babylon/exports';
 import { effects } from '../../controllers/fx';
 import { boneLocalPos } from '../../controllers/fx/core';

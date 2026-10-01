@@ -1,6 +1,6 @@
 import { isHeroUnderRoof } from './ceilingHideSystem';
 import { inBloodCastle } from '../../controllers/actors/locomotion';
-import { ENUM_WORLD } from '../../common';
+import { ENUM_WORLD } from '@/core/types';
 import {
   createAmbientSystem,
   type AmbientRecipe,
@@ -21,7 +21,7 @@ import {
   TAVERN_DUST,
   UNDERWATER_MAPS,
 } from '../../controllers/weather/ambientWeather';
-import { maps } from '../../maps';
+import { maps } from '../../controllers/maps';
 import { ambientStrengthAt } from '../../controllers/weather/ambientSchedule';
 import {
   DEVIAS_EAST_HEARTH_HOUSE,
@@ -29,7 +29,7 @@ import {
   DEVIAS_TAVERN,
   DEVIAS_WEST_HEARTH_HOUSE,
   type Room,
-} from '../../maps/devias/rooms';
+} from '../../../versions/shared/maps/devias/rooms';
 import { serverNow } from '../../controllers/net/serverTime';
 import { lookDirector } from '../../controllers/lighting/director';
 import { roomMaskActive } from '../../controllers/render/scenes/roomMask';

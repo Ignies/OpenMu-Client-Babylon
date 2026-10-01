@@ -35,7 +35,7 @@ import {
 } from '../render/materialQuality';
 import { textureSourceName } from '../render/pbrMaps';
 import { getEmptyTexture } from '../render/babylon/emptyTexture';
-import { BlendState } from '../../common/objects/enum';
+import { BlendState } from '../../../versions/shared/objects/enum';
 import { isHideTexture, isSkinOrHairTexture } from '../actors/skinTexture';
 import { parseTextureScriptFromPath } from '../render/textureScript';
 

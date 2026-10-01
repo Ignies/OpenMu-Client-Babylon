@@ -1,0 +1,25 @@
+import { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { MODEL_TREE01 } from '../../objects/enum';
+
+export class TreeObject extends ModelObject {
+  static Batchable = true;
+
+  async init() {
+    //  LightEnabled = true;
+
+    await this.loadSpecificModelWithDynamicID(MODEL_TREE01, 'Tree');
+
+    // float terrainHeight = World.Terrain.RequestTerrainHeight(Position.X, Position.Y);
+
+    // if (Position.Z < terrainHeight)
+    // {
+    //     return;
+    // }
+
+    // if (Type == 9)
+    // {
+    //     float baseHeight = terrainHeight + 10f;
+    //     Position = new Vector3(Position.X, Position.Y, baseHeight);
+    // }
+  }
+}

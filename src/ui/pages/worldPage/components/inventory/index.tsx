@@ -14,7 +14,7 @@ import {
   occupancyStamp,
   usedMask,
 } from '../../../../components/itemGrid';
-import { ItemsDatabase } from '../../../../../common/itemsDatabase';
+import { ItemsDatabase } from '../../../../../../versions/shared/items/itemsDatabase';
 import { goldColor } from '../../../../../features/items/goldColor';
 import {
   ITEM_HOTKEY_CODES,

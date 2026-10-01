@@ -1,6 +1,6 @@
 import type { TextKey } from '../../i18n';
 import type { BmdLink } from '../../controllers/render/boneLink';
-import { PlayerAction } from '../../common/objects/enum';
+import { PlayerAction } from '../../../versions/shared/objects/enum';
 
 /**
  * The instruments a player can take out and play. THE registry: the emote

@@ -1,0 +1,27 @@
+import { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { BlendState, MODEL_HOUSE01 } from '../../objects/enum';
+import { getMaterial } from '../../../../src/controllers/assets/modelLoader';
+import { World } from '../../../../src/ecs/world';
+
+export class HouseObject extends ModelObject {
+  static Batchable = true;
+
+  async init(world: World) {
+    // LightEnabled = true;
+    await this.loadSpecificModelWithDynamicID(MODEL_HOUSE01, 'House');
+
+    const idx = this.Type - MODEL_HOUSE01 + 1;
+
+    if (idx === 3) {
+      const m = this.getMesh(4);
+      if (m) {
+        m.material = getMaterial(world.scene, true, 2, BlendState.ALPHA_ADD);
+      }
+    } else if (idx === 4) {
+      const m = this.getMesh(8);
+      if (m) {
+        m.material = getMaterial(world.scene, true, 2, BlendState.ALPHA_ADD);
+      }
+    }
+  }
+}

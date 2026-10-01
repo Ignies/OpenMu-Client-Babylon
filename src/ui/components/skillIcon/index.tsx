@@ -6,15 +6,15 @@ import {
   SKILL_ICON_HEIGHT,
   SKILL_ICON_WIDTH,
   skillIconCell,
-} from '../../../common/skillCasting';
-import { skillDefinition } from '../../../common/skillsDatabase';
-import { skills } from '../../../skills';
+} from '../../../features/skills/skillCasting';
+import { skillDefinition } from '../../../../versions/shared/skills/skillsDatabase';
+import { skills } from '../../../features/skills';
 import {
   MASTER_ICON_HEIGHT,
   MASTER_ICON_WIDTH,
   masterSkillIconCell,
   masterTreeDataLoaded,
-} from '../../../skills/masterTree';
+} from '../../../features/skills/masterTree';
 
 /** `new_Master_Icon` / its greyed copy: the master tree's own 512 sheet. */
 const MASTER_SHEET = ['new_Master_Icon.OZJ', 'new_Master_non_Icon.OZJ'];

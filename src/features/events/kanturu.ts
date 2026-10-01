@@ -24,7 +24,7 @@ import {
   KanturuMayaWideAreaAttackAttackTypeEnum as MayaAttack,
 } from '../../../versions/shared/packets/ServerToClientPackets';
 import type { Sounds } from '../../controllers/sound/recipes';
-import { startGatewayTurn } from '../../maps/kanturu2/gateway';
+import { startGatewayTurn } from '../../../versions/shared/maps/kanturu2/gateway';
 import type { EventLayer } from './layer';
 import { EVENT_TEXT, formatText } from './recipes';
 

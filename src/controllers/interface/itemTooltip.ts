@@ -26,10 +26,10 @@ import {
   type ItemDef,
   type ItemStats,
 } from '../../features/items/itemStats';
-import { itemBaseName } from '../../common/itemsDatabase';
+import { itemBaseName } from '../../../versions/shared/items/itemsDatabase';
 import { itemLevelName } from '../../features/items/itemLevelLook';
-import { learnableSkill } from '../../common/skillItems';
-import { skillDisplayName } from '../../common/skillNames';
+import { learnableSkill } from '../../features/skills/skillItems';
+import { skillDisplayName } from '../../features/skills/skillNames';
 
 /**
  * `RenderItemInfo` (ZzzInventory.cpp:2091) as data: the tooltip is a list

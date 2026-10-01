@@ -3,8 +3,8 @@ import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import { MuSpriteFrame } from '../muSprite';
 import { useUiStageScale } from '../uiStage';
-import { skills, type ActiveBuff } from '../../../skills';
-import { BUFF_ICON_HEIGHT, BUFF_ICON_WIDTH, buffIconCell } from '../../../skills/recipes';
+import { skills, type ActiveBuff } from '../../../features/skills';
+import { BUFF_ICON_HEIGHT, BUFF_ICON_WIDTH, buffIconCell } from '../../../features/skills/recipes';
 import { t } from '../../../i18n';
 
 /** `CNewUIBuffWindow::SetPos(640)`: the row starts at (220, 15). */

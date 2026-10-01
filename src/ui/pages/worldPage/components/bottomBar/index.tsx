@@ -24,22 +24,22 @@ import {
 } from './mainFrameButtons';
 import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { BOTTOM_BAR_ID } from '../../../../components/muWindow';
-import { skillDefinition } from '../../../../../common/skillsDatabase';
+import { skillDefinition } from '../../../../../../versions/shared/skills/skillsDatabase';
 import {
   isHotbarSkill,
   SKILL_ICON_HEIGHT,
   SKILL_ICON_WIDTH,
-} from '../../../../../common/skillCasting';
+} from '../../../../../features/skills/skillCasting';
 import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { skills } from '../../../../../skills';
-import { onCooldownTick, skillCooldowns } from '../../../../../skills/cooldowns';
+import { skills } from '../../../../../features/skills';
+import { onCooldownTick, skillCooldowns } from '../../../../../features/skills/cooldowns';
 import { SkillTooltip } from '../../../../components/skillTooltip';
 import { ExpTooltip } from './expTooltip';
 import { SessionStats } from '../../../../../features/session/sessionStats';
 import { devQuery } from '../../../../../core/devSeams';
-import { itemBaseName } from '../../../../../common/itemsDatabase';
+import { itemBaseName } from '../../../../../../versions/shared/items/itemsDatabase';
 import {
   ITEM_HOTKEY_CODES,
   canRegisterItemHotkey,

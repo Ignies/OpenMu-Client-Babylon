@@ -1,11 +1,11 @@
 import {
   MONSTER_MODEL_TABLE,
   monsterModelFile,
-} from '../src/common/monsters/monsterModelTable';
+} from '../src/controllers/actors/monsterModelTable';
 import {
   NPC_MODEL_TABLE,
   npcModelFile,
-} from '../src/common/npcs/npcModelTable';
+} from '../src/controllers/actors/npcModelTable';
 
 /**
  * The original `Data/` tree spells one model family three ways -

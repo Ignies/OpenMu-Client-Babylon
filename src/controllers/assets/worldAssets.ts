@@ -1,5 +1,5 @@
 import { ENUM_WORLD } from '../../core/types';
-import { maps } from '../../maps';
+import { maps } from '../maps';
 
 /**
  * Which `Data/World<n>` / `Data/Object<n>` folder a world draws from, and the

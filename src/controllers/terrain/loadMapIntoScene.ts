@@ -1,8 +1,8 @@
 import { disposeGrassField } from './terrainGrass';
-import { ENUM_WORLD } from '../../common';
+import { ENUM_WORLD } from '@/core/types';
 import type { World } from '../../ecs/world';
 import { Store } from '../../app/store';
-import { maps } from '../../maps';
+import { maps } from '../maps';
 // Side effect: the `ChangeTerrainAttributes` packet → `world.setTerrainFlags`.
 import './terrainAttributeUpdates';
 import {
@@ -35,8 +35,8 @@ import { events } from '../../features/events';
 import { lighting } from '../lighting';
 import { quests } from '../../features/quests';
 import { effects } from '../fx';
-import { skills } from '../../skills';
-import { combat } from '../../combat';
+import { skills } from '../../features/skills';
+import { combat } from '../combat';
 import { resetTerrainMask } from './terrainMask';
 import { setShadowWorld } from '../render/objectShadow';
 import { lookDirector } from '../lighting/director';

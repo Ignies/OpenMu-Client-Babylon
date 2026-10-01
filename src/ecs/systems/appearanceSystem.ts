@@ -1,4 +1,4 @@
-import { ItemsDatabase } from '../../common/itemsDatabase';
+import { ItemsDatabase } from '../../../versions/shared/items/itemsDatabase';
 import { itemVisualTier } from '../../controllers/item_fx/itemVisualTier';
 import { inChaosCastle } from '../../controllers/actors/locomotion';
 import type { ModelObject } from '../../controllers/render/modelObject';

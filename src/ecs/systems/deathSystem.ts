@@ -1,5 +1,5 @@
 import { Vector3 } from '../../controllers/render/babylon/exports';
-import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
+import { MonsterActionType, PlayerAction } from '../../../versions/shared/objects/enum';
 import { isPlayerAttackAction } from '../../controllers/anim/playerActionMapper';
 import { BloodDecals } from '../../controllers/fx/bloodDecals';
 import { shatterDeathFor, spawnBomb } from '../../controllers/fx/deathVisuals';
@@ -11,7 +11,7 @@ import { COMBAT_BUS } from '../../controllers/sound/combatSounds';
 import { effects } from '../../controllers/fx';
 import { bonePos, entityYaw, type RGB } from '../../controllers/fx/core';
 import { NOVA_DEATH_MOTES } from '../../controllers/fx/recipes';
-import { SKILL_COMBO, SKILL_NOVA } from '../../combat/recipes';
+import { SKILL_COMBO, SKILL_NOVA } from '../../controllers/combat/recipes';
 import type { DeathMotion, Entity, ISystemFactory } from '../world';
 import type { PlayerObject } from '../../controllers/actors/playerObject';
 

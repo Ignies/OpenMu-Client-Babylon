@@ -1,9 +1,9 @@
-import { ENUM_WORLD } from '../../common';
+import { ENUM_WORLD } from '@/core/types';
 import {
   MODEL_FURNITURE01,
   MODEL_POSE_BOX,
   MODEL_TREE01,
-} from '../../common/objects/enum';
+} from '../../../versions/shared/objects/enum';
 
 export type RestKind = 'sit' | 'pose' | 'healing';
 

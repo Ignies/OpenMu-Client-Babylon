@@ -1,4 +1,4 @@
-import { MonsterActionType } from '../../common/objects/enum';
+import { MonsterActionType } from '../../../versions/shared/objects/enum';
 import { ENUM_WORLD } from '../../core/types';
 import type { Sounds } from './recipes';
 

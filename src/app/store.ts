@@ -3,14 +3,13 @@ import { characterSkinBody } from '../controllers/actors/transformedBody';
 import type { PlayerObject } from '../controllers/actors/playerObject';
 import { playUiSound } from '../controllers/sound/sfx';
 import { consumeSound, upgradedItemSound } from '../controllers/sound/ui';
+import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
 import {
-  CharacterClassNumber,
-  ENUM_WORLD,
   SimpleModulusEncryptor,
   SimpleModulusKeys,
   Xor32Encryptor,
   Xor3Byte,
-} from '../common';
+} from '@/controllers/net/encryption';
 import {
   AnimationRequestPacket,
   ConsumeItemRequestPacket,
@@ -79,8 +78,8 @@ import { InventoryConstants } from '../features/inventory/inventoryConstants';
 import { StatType } from '../features/hero/characterStats';
 import { findFreeSlot, type Footprint } from '../features/inventory/inventoryFit';
 import { jewelTargetError } from '../features/inventory/jewelUpgrade';
-import { ItemGroups } from '../common/objects/enum';
-import { ItemsDatabase } from '../common/itemsDatabase';
+import { ItemGroups } from '../../versions/shared/objects/enum';
+import { ItemsDatabase } from '../../versions/shared/items/itemsDatabase';
 import { prefetchItemIcons } from '../controllers/assets/itemIconPack';
 import { ItemSerializer } from '../features/items/itemSerializer';
 import {
@@ -98,9 +97,9 @@ import {
   itemStats,
   type HeroStats,
 } from '../features/items/itemStats';
-import { learnSkillError, learnableSkill } from '../common/skillItems';
-import { isHotbarSkill } from '../common/skillCasting';
-import { skillDefinition } from '../common/skillsDatabase';
+import { learnSkillError, learnableSkill } from '../features/skills/skillItems';
+import { isHotbarSkill } from '../features/skills/skillCasting';
+import { skillDefinition } from '../../versions/shared/skills/skillsDatabase';
 import {
   StorageKind,
   gridFirstIndex,

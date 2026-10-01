@@ -7,7 +7,7 @@ import {
 import {
   PlayerAction,
   ServerPlayerActionType,
-} from '../../common/objects/enum';
+} from '../../../versions/shared/objects/enum';
 import { resolveGenderedAction } from '../../controllers/anim/playerActionMapper';
 import { TWFlags } from '../../controllers/terrain/consts';
 import { devQuery } from '../../core/devSeams';

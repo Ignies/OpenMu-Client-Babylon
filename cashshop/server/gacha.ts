@@ -1,4 +1,4 @@
-import items from '../../src/common/items.json';
+import items from '../../versions/shared/items/items.json';
 import { hasItemIconFile } from '../../src/controllers/assets/itemIconPack';
 
 /**

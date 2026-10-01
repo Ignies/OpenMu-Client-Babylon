@@ -1,5 +1,5 @@
-import { MonsterActionType, PlayerAction } from '../../common/objects/enum';
-import { MONSTER_MODEL_TABLE } from '../../common/monsters/monsterModelTable';
+import { MonsterActionType, PlayerAction } from '../../../versions/shared/objects/enum';
+import { MONSTER_MODEL_TABLE } from '../actors/monsterModelTable';
 
 /**
  * Animation play speeds in the original's units: `PlaySpeed` keys per tick at

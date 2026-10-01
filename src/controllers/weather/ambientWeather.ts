@@ -2,7 +2,7 @@ import { Color4, Vector3 } from '../render/babylon/exports';
 import { ENUM_WORLD } from '../../core/types';
 import type { AmbientRecipe } from '../fx/ambientParticles';
 import type { AmbientSchedule } from './ambientSchedule';
-import { maps } from '../../maps';
+import { maps } from '../maps';
 
 /**
  * Ambient recipes for the GPU particle backbone, ported from the original's

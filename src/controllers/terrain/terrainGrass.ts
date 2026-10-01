@@ -28,7 +28,7 @@ import {
 } from '../weather/grassBurn';
 import { lookDirector } from '../lighting/director';
 import { devQueryNumber } from '../../core/devSeams';
-import { maps } from '../../maps';
+import { maps } from '../maps';
 import { LUMA_GLSL } from '../lighting/lightTint';
 import {
   TERRAIN_CSM_SAMPLERS,

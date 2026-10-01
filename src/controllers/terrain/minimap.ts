@@ -1,5 +1,5 @@
 import { assetWorldNum } from '../assets/worldAssets';
-import type { ENUM_WORLD } from '../../common';
+import type { ENUM_WORLD } from '@/core/types';
 import {
   MinimapMarkerKind,
   parseMinimapData,

@@ -7,7 +7,7 @@ import { Store } from '../../../../../app/store';
 import { isKey } from '../../../../../controllers/interface/keyBindings';
 import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { playUiSound, uiClick } from '../../../../../controllers/sound/sfx';
-import { monsterDisplayName } from '../../../../../common/monstersDatabase';
+import { monsterDisplayName } from '../../../../../../versions/shared/monsters/monstersDatabase';
 import { ConditionTypeEnum } from '../../../../../../versions/shared/packets/ServerToClientPackets';
 import { MuButton } from '../../../../components/muButton';
 import { MuSpriteFrame } from '../../../../components/muSprite';

@@ -1,9 +1,9 @@
 import type { IVector2Like, IVector3Like } from '../../controllers/render/babylon/exports';
+import type { ENUM_WORLD } from '../types';
 import type {
   ConnectServerPackets,
-  ENUM_WORLD,
   ServerToClientPackets,
-} from '../../common';
+} from '@/controllers/net/packets';
 import type { Entity } from '../../ecs/world';
 import type { With } from 'miniplex';
 

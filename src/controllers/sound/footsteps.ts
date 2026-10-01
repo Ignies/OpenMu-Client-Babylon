@@ -1,5 +1,5 @@
 import { ENUM_WORLD } from '../../core/types';
-import { PlayerAction } from '../../common/objects/enum';
+import { PlayerAction } from '../../../versions/shared/objects/enum';
 import { Rand } from '../../core/rand';
 import { KALIMA_WORLDS, onWorlds } from '../assets/worldAssets';
 import { SoundsManager } from './soundsManager';

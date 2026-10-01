@@ -4,10 +4,10 @@ import {
   EMPIRE_GUARDIAN_WORLDS,
   onWorlds,
 } from '../assets/worldAssets';
-import { VULCANUS_MESH_ANIMATIONS } from '../../maps/vulcanus/spec';
-import { KARUTAN_MESH_ANIMATION } from '../../maps/karutan1/spec';
-import { DOPPELGANGER1_MESH_ANIMATION } from '../../maps/doppelganger1/spec';
-import { DOPPELGANGER2_MESH_ANIMATION } from '../../maps/doppelganger2/spec';
+import { VULCANUS_MESH_ANIMATIONS } from '../../../versions/shared/maps/vulcanus/spec';
+import { KARUTAN_MESH_ANIMATION } from '../../../versions/shared/maps/karutan1/spec';
+import { DOPPELGANGER1_MESH_ANIMATION } from '../../../versions/shared/maps/doppelganger1/spec';
+import { DOPPELGANGER2_MESH_ANIMATION } from '../../../versions/shared/maps/doppelganger2/spec';
 
 /**
  * The per-frame mesh writes the original does from `MoveObject`:

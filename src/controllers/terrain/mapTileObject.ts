@@ -1,7 +1,7 @@
 import { Entity, World } from '../../ecs/world';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
 import { ModelObject } from '../render/modelObject';
-import { BlendState } from '../../common/objects/enum';
+import { BlendState } from '../../../versions/shared/objects/enum';
 import { ENUM_WORLD } from '../../core/types';
 import { SNOW_GROUND_MAPS } from '../weather/snowCover';
 import { isEffectOnlyObject } from '../render/effectOnlyObjects';

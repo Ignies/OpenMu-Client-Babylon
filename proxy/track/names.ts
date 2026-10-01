@@ -1,5 +1,5 @@
-import monsters from '../../src/common/monsters.json';
-import items from '../../src/common/items.json';
+import monsters from '../../versions/shared/monsters/monsters.json';
+import items from '../../versions/shared/items/items.json';
 import { mapName as gmMapName } from '../../src/features/gm/gmMaps';
 
 /**

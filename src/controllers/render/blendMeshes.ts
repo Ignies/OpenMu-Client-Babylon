@@ -1,4 +1,4 @@
-import { maps } from '../../maps';
+import { maps } from '../maps';
 
 /**
  * The renderer's "no additive mesh" sentinel (`ModelObject.BlendMesh`). The

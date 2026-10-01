@@ -10,8 +10,8 @@ import { BaseClass, getBaseClass } from '../../../../../features/hero/characterS
 import {
   skillDefinition,
   type SkillDefinition,
-} from '../../../../../common/skillsDatabase';
-import { skillDisplayName } from '../../../../../common/skillNames';
+} from '../../../../../../versions/shared/skills/skillsDatabase';
+import { skillDisplayName } from '../../../../../features/skills/skillNames';
 import { uiClick } from '../../../../../controllers/sound/sfx';
 import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { MuButton } from '../../../../components/muButton';

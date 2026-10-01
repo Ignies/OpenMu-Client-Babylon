@@ -2,7 +2,7 @@ import { installBandNet } from '../features/band/bandNet';
 import { installPingNet } from '../controllers/net/pingNet';
 import { runInAction } from 'mobx';
 import { t, type TextKey } from '../i18n';
-import { CharacterClassNumber, ENUM_WORLD } from '../common';
+import { CharacterClassNumber, ENUM_WORLD } from '@/core/types';
 import {
   APPEARANCE_EXTENDED_LENGTH,
   deserializeAppearance,
@@ -14,7 +14,7 @@ import {
 } from '../controllers/actors/deserializeAppearance';
 import { StatType } from '../features/hero/characterStats';
 import { GameOptions } from '../features/options/gameOptions';
-import { ItemsDatabase, itemBaseName } from '../common/itemsDatabase';
+import { ItemsDatabase, itemBaseName } from '../../versions/shared/items/itemsDatabase';
 import { itemLevelName } from '../features/items/itemLevelLook';
 import {
   ItemGroup,
@@ -32,14 +32,14 @@ import {
   isKnownObjectType,
   resolveModelFactory,
 } from '../controllers/actors/modelFactoryPerId';
-import { monsterDisplayName, monsterMaxHealth } from '../common/monstersDatabase';
+import { monsterDisplayName, monsterMaxHealth } from '../../versions/shared/monsters/monstersDatabase';
 import { translateServerText } from '../i18n/serverText';
 import { loadNpcNames, onNpcNamesChanged } from '../controllers/assets/mu/npcNameFile';
 import {
   MonsterActionType,
   PlayerAction,
   ServerPlayerActionType,
-} from '../common/objects/enum';
+} from '../../versions/shared/objects/enum';
 import {
   ConnectionInfoPacket,
   HelloPacket,
@@ -265,10 +265,10 @@ import { PlayerObject, isPlayerBody, npcClassOf } from '../controllers/actors/pl
 import { Entity, type Item, World } from '../ecs/world';
 import { createAttributeSystem, type MUAttributeSystem } from '../core/attributeSystem';
 import { classWorldScale } from '../controllers/actors/characterScale';
-import { skillDefinition } from '../common/skillsDatabase';
+import { skillDefinition } from '../../versions/shared/skills/skillsDatabase';
 import { traceHeroInstantMove } from '../controllers/actors/heroMoveTrace';
-import { advancesSwordCount, chooseSkillAction, isTeleportSkill, TELEPORT } from '../common/skillCasting';
-import { skillClip } from '../combat/skillClips';
+import { advancesSwordCount, chooseSkillAction, isTeleportSkill, TELEPORT } from '../features/skills/skillCasting';
+import { skillClip } from '../controllers/combat/skillClips';
 import { teleportGate } from '../features/warp/teleportRules';
 import {
   beginTeleport,
@@ -279,7 +279,7 @@ import {
   noteScopeEntry,
 } from '../ecs/systems/teleportSystem';
 import { getBaseClass, BaseClass } from '../features/hero/characterStats';
-import { SKILL_TO_EFFECT } from '../common/magicEffects';
+import { SKILL_TO_EFFECT } from '../features/skills/magicEffects';
 import {
   playAreaSkillVisual,
   playBowShotVisual,
@@ -288,9 +288,9 @@ import {
   playSummonArrival,
   playTargetedSkillVisual,
   setBuffVisual,
-} from '../common/skillVisuals';
+} from '../../versions/shared/skills/skillVisuals';
 import { monsterModelTypeOf, playerPlaySpeed } from '../controllers/anim/playSpeed';
-import { TRAP_MODEL_TABLE } from '../common/npcs/trapNpc';
+import { TRAP_MODEL_TABLE } from '../../versions/shared/npcs/trap_npc';
 import {
   KEEP_CLIP,
   isMonsterSwingClip,
@@ -332,9 +332,9 @@ import {
 import { experienceForLevel } from '../features/hero/experience';
 import { SessionResume } from '../features/session/sessionResume';
 import { WEATHER_RAIN } from '../controllers/weather/rainState';
-import { combat } from '../combat';
-import { COMBO_SOUND } from '../combat/combo';
-import { SHOCK_IMMUNE_CLIPS, SKILL_DEFENSE } from '../combat/recipes';
+import { combat } from '../controllers/combat';
+import { COMBO_SOUND } from '../controllers/combat/combo';
+import { SHOCK_IMMUNE_CLIPS, SKILL_DEFENSE } from '../controllers/combat/recipes';
 import { mountKind } from '../features/pets/pets';
 import { inChaosCastle } from '../controllers/actors/locomotion';
 import { characterSkinBody } from '../controllers/actors/transformedBody';

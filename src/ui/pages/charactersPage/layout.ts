@@ -1,6 +1,6 @@
 import { textTable, type TextKey } from '../../../i18n';
 
-import { CharacterClassNumber } from '../../../common';
+import { CharacterClassNumber } from '@/core/types';
 import { CharacterCreationUnlockFlagsEnum } from '../../../../versions/shared/packets/ServerToClientPackets';
 
 export const WIN_WIDTH = 454;

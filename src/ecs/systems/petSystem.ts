@@ -29,8 +29,8 @@ import {
 } from '../../controllers/fx/core';
 import { FOOT_THUNDER_FRAMES, MODEL, RGBS, TEX } from '../../controllers/fx/recipes';
 import { Store } from '../../app/store';
-import { PlayerAction } from '../../common/objects/enum';
-import { RIDER_FLY_WORLDS } from '../../combat/recipes';
+import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { RIDER_FLY_WORLDS } from '../../controllers/combat/recipes';
 import { playUiSound } from '../../controllers/sound/ui';
 import { playSfx } from '../../controllers/sound/listener';
 import type { Entity, ISystemFactory, Item } from '../world';

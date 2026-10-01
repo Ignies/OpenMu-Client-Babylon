@@ -21,7 +21,7 @@ import {
   nextThunderSeconds,
   thunderSound,
   thunderStrikes,
-} from '../../maps/chaoscastle/thunder';
+} from '../../../versions/shared/maps/chaoscastle/thunder';
 import type { EventLayer } from './layer';
 import { noteOpeningStateRequest, takeOpeningState } from './schedule';
 import {

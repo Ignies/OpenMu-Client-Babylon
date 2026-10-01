@@ -28,7 +28,7 @@ import {
   loadTerrainWaterFlipbook,
   terrainWaterFor,
 } from './terrainWater';
-import { ENUM_WORLD } from '../../common';
+import { ENUM_WORLD } from '@/core/types';
 import {
   createOZJTexture,
   isFlagInBinaryMask,
@@ -64,7 +64,7 @@ import { World, type TerrainLayers } from '../../ecs/world';
 import { DEBUG_SHOW_TERRAIN_ATTRIBUTES } from '../../app/consts';
 import { assetWorldNum } from '../assets/worldAssets';
 import { devQuery } from '../../core/devSeams';
-import { maps } from '../../maps';
+import { maps } from '../maps';
 
 const TERRAIN_AMBIENT = 0;
 

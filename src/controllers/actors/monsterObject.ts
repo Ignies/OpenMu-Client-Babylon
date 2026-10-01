@@ -1,6 +1,6 @@
 import type { Entity, World } from '../../ecs/world';
 import { ModelObject } from '../render/modelObject';
-import { monsterBlendMeshFor, type MonsterBlendMesh } from '../../common/monsters/monsterBlendMesh';
+import { monsterBlendMeshFor, type MonsterBlendMesh } from './monsterBlendMesh';
 import { monsterModelTypeOf } from '../anim/playSpeed';
 
 /** MU vertical units → world units (`TERRAIN_SCALE` is 100). */

@@ -10,7 +10,7 @@ import {
 } from './mapMonsters';
 import { MONSTER_SOUNDS } from './monsters';
 import { SOUND_FILES, type Sounds } from './recipes';
-import { MonsterActionType as A } from '../../common/objects/enum';
+import { MonsterActionType as A } from '../../../versions/shared/objects/enum';
 import { ENUM_WORLD } from '../../core/types';
 
 const WORLDS = Object.values(ENUM_WORLD).filter(

@@ -1,0 +1,246 @@
+import { PlayerAction } from '../../../versions/shared/objects/enum';
+import {
+  chooseAttackAction,
+  chooseHighBowAttackAction,
+  type AttackPose,
+} from '../../controllers/actors/weaponClass';
+import { skillDefinition, type SkillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import { masterBase } from './skillAliases';
+import { BaseClass } from '../hero/characterStats';
+import { magicClip, skillClip, type CastContext } from '../../controllers/combat/skillClips';
+import { castsOnSelf } from '../../controllers/combat/castTargets';
+import { SLASH_SKILLS } from '../../controllers/combat/recipes';
+
+/**
+ * Client-side casting rules. The wire format is decided by the OpenMU skill
+ * type: area skills go out as AreaSkill (0x1E, the original's
+ * SendRequestMagicContinue), everything else as TargetedSkill (0x19,
+ * SendRequestMagic) - ZzzInterface.cpp:2325-2470.
+ */
+
+/**
+ * Teleport / Teleport Ally are neither targeted nor area casts on the wire:
+ * OpenMU's `WizardTeleportAction` answers `EnterGateRequest` (C3 1C, gate 0,
+ * the target square - the original's SendRequestTeleport) and
+ * `TeleportTarget` (C3 B0, party member + square); it replies with a
+ * same-map `MapChanged` that moves the hero, or one at the old square when
+ * refused.
+ */
+export const TELEPORT = 6;
+export const TELEPORT_ALLY = 15;
+
+/** `AT_SKILL_DEEPIMPACT`: the aimed-up bow shot, OpenMU's Starfall. */
+const STARFALL = 46;
+
+/**
+ * Master skills the table types otherwise that the original still casts with their base's SetPlayerMagic: the MG's
+ * Blast Strengthener (SkillCast.cpp:525-531), Ice Strengthener and Ice Mastery (AT_SKILL_ICE_STR_MG goes through
+ * UseSkillWizard -> SetPlayerMagic, ZzzInterface.cpp:1362-1386, SkillCast.cpp:503-514), and Soul Barrier's
+ * Strengthener, Proficiency and Mastery, still under their pre-inheritance DirectHit type (OpenMU casts them as
+ * their base, SkillsInitializer.cs:1001-1025; ClassAttack.cpp:1153-1155).
+ */
+const INHERITED_SPELLS: ReadonlySet<number> = new Set([484, 489, 491, 403, 404, 406]); // Blast Str, Ice Str (MG), Ice Mastery, Soul Barrier Str, Proficiency, Mastery
+/** Earth Prison and its Strengthener: Physical on OpenMU (SkillsInitializer.cs:539-541) with no clip in the original; a Grand Master casts them. */
+const WIZARD_PHYSICAL_SPELLS: ReadonlySet<number> = new Set([495, 497]);
+
+export function isTeleportSkill(num: number): boolean {
+  return num === TELEPORT || num === TELEPORT_ALLY;
+}
+
+export function isAreaSkill(def: SkillDefinition): boolean {
+  return (
+    def.type === 'AreaSkillAutomaticHits' ||
+    def.type === 'AreaSkillExplicitTarget'
+  );
+}
+
+/**
+ * Whether a cast with nothing suitable selected lands on the hero. The rule
+ * itself - self-only versus party-member-or-self versus hostile - is
+ * `combat/castTargets`; this stays exported because the hotbar and the skill
+ * list ask the same question.
+ */
+export function isSelfCastable(def: SkillDefinition): boolean {
+  return castsOnSelf(def);
+}
+
+export function isSpell(def: SkillDefinition): boolean {
+  return (
+    def.damageType === 'Wizardry' ||
+    def.damageType === 'Curse' ||
+    (def.damageType === 'None' && def.type !== 'DirectHit')
+  );
+}
+
+/**
+ * A Magic Gladiator master spell OpenMU lists as Physical (480, 483, 484, 487, 489, 491) casts as its
+ * base spell: SetPlayerMagic (SkillCast.cpp:497-533, WSclient.cpp:4278-4310).
+ */
+function castsAsBaseSpell(def: SkillDefinition): boolean {
+  const base = masterBase(def.num);
+  const baseDef = base !== def.num ? skillDefinition(base) : undefined;
+  return !!baseDef && isSpell(baseDef);
+}
+
+/**
+ * The clip a cast plays, for the hero and for everyone else in scope alike.
+ * Four tiers, in the order the original tries them:
+ *
+ *  1. Starfall, the one skill that shoots through `SetPlayerHighBowAttack`
+ *     instead (`AT_SKILL_DEEPIMPACT`, ZzzInterface.cpp:2523-2527), and
+ *     Plasma Storm, which picks its clip by the hands (`fenrirSkillClip`),
+ *  2. the per-skill clip (`combat/skillClips` - every `UseSkill*` /
+ *     `Attack*` / `ReceiveMagic` case, with its mount and map branches),
+ *  3. `SetPlayerMagic` for a spell (ZzzCharacter.cpp:1238-1262) - the
+ *     female hand-raise, the male HAND1/HAND2 coin toss, or the mount's own
+ *     cast clip,
+ *  4. the weapon swing, for a physical skill with no clip of its own.
+ */
+export function chooseSkillAction(
+  def: SkillDefinition,
+  pose: AttackPose,
+  ctx: CastContext = {}
+): PlayerAction {
+  if (def.num === STARFALL) return chooseHighBowAttackAction(pose);
+  if (def.num === PLASMA_STORM) return fenrirSkillClip(pose);
+  if (SLASH_SKILLS.has(def.num) && pose.swordCount % 2 === 1) return PlayerAction.PLAYER_ATTACK_TWO_HAND_SWORD3;
+  const dedicated = skillClip(def.num, ctx);
+  if (dedicated !== null) return dedicated;
+  if (isSpell(def) || castsAsBaseSpell(def) || INHERITED_SPELLS.has(def.num) || WIZARD_PHYSICAL_SPELLS.has(def.num)) return magicClip(ctx);
+  return chooseAttackAction(pose);
+}
+
+/**
+ * Whether the cast ends on `c->SwordCount++`: only SetPlayerAttack / SetPlayerHighBowAttack
+ * (ZzzCharacter.cpp:1066, :1316) and Slash (WSclient.cpp:4409) advance it for a player;
+ * SetPlayerMagic, SetAction_Fenrir_Skill and the other ReceiveMagic cases leave it alone.
+ */
+export function advancesSwordCount(def: SkillDefinition, ctx: CastContext = {}): boolean {
+  if (def.num === STARFALL || SLASH_SKILLS.has(def.num)) return true;
+  if (def.num === PLASMA_STORM) return false;
+  return skillClip(def.num, ctx) === null && !isSpell(def);
+}
+
+/**
+ * SetAction_Fenrir_Skill (ZzzAI.cpp:257-281), Plasma Storm's clip on every client: by which hands hold
+ * something (`Weapon[0]` is `leftHand` here, as in chooseAttackAction), the Rage Fighter with his own four.
+ */
+function fenrirSkillClip(pose: AttackPose): PlayerAction {
+  const first = !!pose.hands?.leftHand;
+  const second = !!pose.hands?.rightHand;
+  const rage = pose.baseClass === BaseClass.RageFighter;
+  if (first && second) return rage ? PlayerAction.PLAYER_RAGE_FENRIR_TWO_SWORD : PlayerAction.PLAYER_FENRIR_SKILL_TWO_SWORD;
+  if (first) return rage ? PlayerAction.PLAYER_RAGE_FENRIR_ONE_RIGHT : PlayerAction.PLAYER_FENRIR_SKILL_ONE_RIGHT;
+  if (second) return rage ? PlayerAction.PLAYER_RAGE_FENRIR_ONE_LEFT : PlayerAction.PLAYER_FENRIR_SKILL_ONE_LEFT;
+  return rage ? PlayerAction.PLAYER_RAGE_FENRIR : PlayerAction.PLAYER_FENRIR_SKILL;
+}
+
+/** AreaSkill.Rotation: (BYTE)(Angle / 360 * 256) of the hero's yaw. */
+export function rotationByte256(rotYRadians: number): number {
+  let deg = ((rotYRadians * 180) / Math.PI) % 360;
+  if (deg < 0) deg += 360;
+  return Math.round((deg / 360) * 256) & 0xff;
+}
+
+// ---- skill icons -------------------------------------------------------
+
+/**
+ * `CNewUISkillList::RenderSkillIcon` (NewUIMainFrameWindow.cpp:2087) draws
+ * every icon as a 20 x 28 cell of a 256 x 256 sheet - never 32 x 32, which is
+ * why the icons used to come out as quarters of four neighbours.
+ */
+export const SKILL_ICON_WIDTH = 20;
+export const SKILL_ICON_HEIGHT = 28;
+
+/** `AT_SKILL_SPIRAL_SLASH`: the first skill of the second sheet. */
+const SPIRAL_SLASH = 57;
+/** `AT_SKILL_KILLING_BLOW`: the first skill of the Rage Fighter sheet. */
+const KILLING_BLOW = 260;
+/** `AT_SKILL_MASTER_BEGIN`: the master tree draws off its own 512 sheet. */
+export const MASTER_SKILL_FIRST = 300;
+/** `AT_SKILL_STUN` .. `AT_SKILL_REMOVAL_BUFF`: castle-siege commands. */
+const SIEGE_FIRST = 67;
+const SIEGE_LAST = 72;
+/** `AT_SKILL_PLASMA_STORM_FENRIR`: the only skill on the command sheet. */
+const PLASMA_STORM = 76;
+
+/** Sheet, and the greyed copy the original swaps in for `bCantSkill`. */
+const SHEETS = {
+  skill1: ['newui_skill.OZJ', 'newui_non_skill.OZJ'],
+  skill2: ['newui_skill2.OZJ', 'newui_non_skill2.OZJ'],
+  skill3: ['newui_skill3.OZJ', 'newui_non_skill3.OZJ'],
+  command: ['newui_command.OZJ', 'newui_non_command.OZJ'],
+} as const;
+
+/**
+ * Sheet-2 cells the row maths cannot reach. The eight columns the generic
+ * rule walks were full long before Season 6, so every skill added after them
+ * has its column and row written out in `RenderSkillIcon` - this table
+ * is that `else if` chain, `[column, row]`.
+ */
+const SHEET2_CELLS: Record<number, readonly [number, number]> = {
+  214: [0, 3], // Drain Life
+  215: [1, 3], // Chain Lightning
+  216: [2, 3], // (Sudden Ice)
+  217: [3, 3], // Damage Reflection
+  219: [4, 3], // Sleep
+  220: [5, 3], // (Blind)
+  223: [6, 3], // Explosion
+  224: [7, 3], // Requiem
+  221: [8, 3], // Weakness
+  222: [9, 3], // Innovation
+  218: [10, 3], // Berserker
+  225: [11, 3], // Pollution
+  230: [2, 3], // Lightning Shock
+  232: [7, 2], // Strike of Destruction
+  233: [8, 2], // Expansion of Wizardry
+  234: [9, 2], // Recovery
+  235: [0, 8], // Multi-Shot
+  236: [1, 8], // Flame Strike
+  237: [2, 8], // Gigantic Storm
+  238: [3, 8], // Chaotic Diseier
+};
+
+function cell(file: string, column: number, row: number) {
+  return { file, x: column * SKILL_ICON_WIDTH, y: row * SKILL_ICON_HEIGHT };
+}
+
+/**
+ * Where a skill's icon sits, and on which sheet. `disabled` is
+ * `bCantSkill`: the original adds 6 to the texture id, which is the
+ * `newui_non_*` copy of the same sheet - both are shipped, so the icon
+ * is the real greyed art rather than a CSS filter.
+ *
+ * Master-tree skills return `null`: their cell comes from `Skill.bmd`
+ * (`Magic_Icon`) on a sheet of its own, which `skills/masterTree` owns.
+ */
+export function skillIconCell(
+  num: number,
+  disabled = false
+): { file: string; x: number; y: number } | null {
+  if (num <= 0 || num >= MASTER_SKILL_FIRST) return null;
+  const i = disabled ? 1 : 0;
+  if (num === PLASMA_STORM) return cell(SHEETS.command[i], 4, 0);
+  const special = SHEET2_CELLS[num];
+  if (special) return cell(SHEETS.skill2[i], special[0], special[1]);
+  if (num >= KILLING_BLOW) {
+    const n = num - KILLING_BLOW;
+    return cell(SHEETS.skill3[i], n % 12, Math.floor(n / 12));
+  }
+  if (num >= SPIRAL_SLASH) {
+    const n = num - SPIRAL_SLASH;
+    return cell(SHEETS.skill2[i], n % 8, Math.floor(n / 8));
+  }
+  return cell(SHEETS.skill1[i], (num - 1) % 8, Math.floor((num - 1) / 8));
+}
+
+/**
+ * `CNewUISkillList::Render`'s filter on the learned-skill fan: the castle
+ * siege commands and every master-tree entry are learned skills the hero can
+ * never put on a bar slot, so they are kept out of the fan and out of the
+ * default hot-key layout.
+ */
+export function isHotbarSkill(num: number): boolean {
+  if (num < 1 || num >= MASTER_SKILL_FIRST) return false;
+  return num < SIEGE_FIRST || num > SIEGE_LAST;
+}

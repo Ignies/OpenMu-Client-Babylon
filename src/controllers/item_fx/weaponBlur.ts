@@ -1,4 +1,4 @@
-import { PlayerAction } from '../../common/objects/enum';
+import { PlayerAction } from '../../../versions/shared/objects/enum';
 import type { Item } from '../../ecs/world';
 import { LEFT_HAND_BONE, RIGHT_HAND_BONE } from '../actors/weaponAttachment';
 import { GROUP_MACE, GROUP_SHIELD, GROUP_SPEAR, GROUP_SWORD } from '../actors/weaponClass';

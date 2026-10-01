@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BaseClass } from '../hero/characterStats';
-import { PlayerAction as A } from '../../common/objects/enum';
+import { PlayerAction as A } from '../../../versions/shared/objects/enum';
 import {
   chooseAttackAction,
   chooseHighBowAttackAction,

@@ -5,8 +5,8 @@
 // every run with `bun run tools/addRageFighterColumn.ts`, which puts it back
 // from the server's item definitions, then `bun run
 // tools/syncItemRequirements.ts`, which does the same for the requirements.
-import { ItemsDatabase } from '../src/common/itemsDatabase';
-import { ItemGroups } from '../src/common/objects/enum';
+import { ItemsDatabase } from '../versions/shared/items/itemsDatabase';
+import { ItemGroups } from '../versions/shared/objects/enum';
 
 const itemFile = await Bun.file('Item.txt').text();
 

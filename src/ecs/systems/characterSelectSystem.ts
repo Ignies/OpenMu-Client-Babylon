@@ -12,7 +12,7 @@ import {
 } from '../../controllers/render/babylon/exports';
 import type { Entity, ISystemFactory } from '../world';
 import { Store, UIState } from '../../app/store';
-import { ENUM_WORLD } from '../../common';
+import { ENUM_WORLD } from '@/core/types';
 import { spawnPlayer } from '../../app/logic';
 import { deserializeAppearance } from '../../controllers/actors/deserializeAppearance';
 import { runInAction } from 'mobx';
@@ -23,7 +23,7 @@ import {
 } from '../../features/character_select/characterSelect';
 import { setSceneHold } from '../../controllers/loading/sceneGate';
 import { createCharacterSelectBackdrop } from '../../features/character_select/characterSelectBackdrop';
-import { PlayerAction } from '../../common/objects/enum';
+import { PlayerAction } from '../../../versions/shared/objects/enum';
 import { genderedEmoteAction } from '../../features/hero/emotes';
 import { isRidingMount } from '../../features/pets/pets';
 import {

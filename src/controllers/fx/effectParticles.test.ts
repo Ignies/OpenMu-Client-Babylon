@@ -75,7 +75,7 @@ vi.mock('../assets/mu/dataFolder', () => ({
   hasDataFile: () => true,
   downloadDataFile: async () => new Uint8Array(32),
 }));
-vi.mock('../../maps', () => ({ maps: { emissionsFor: () => undefined } }));
+vi.mock('../maps', () => ({ maps: { emissionsFor: () => undefined } }));
 vi.mock('./core', () => ({
   EFFECT_RENDERING_GROUP: 1,
   keepDepthForEffects: () => {},

@@ -27,10 +27,10 @@ import { t, type TextKey } from '../../i18n';
  */
 import { observable, reaction, runInAction } from 'mobx';
 import { getBaseClass, BaseClass } from '../hero/characterStats';
-import { itemBaseName } from '../../common/itemsDatabase';
+import { itemBaseName } from '../../../versions/shared/items/itemsDatabase';
 import { itemLevelName } from '../items/itemLevelLook';
 import { classOf } from '../items/itemStats';
-import { monsterDisplayName } from '../../common/monstersDatabase';
+import { monsterDisplayName } from '../../../versions/shared/monsters/monstersDatabase';
 import {
   CloseNpcRequestPacket,
   LegacyQuestStateRequestPacket,

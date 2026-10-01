@@ -13,8 +13,8 @@
  *
  * Keep the export names: the base imports the version's tables by these names.
  */
-export { ItemsDatabase } from '../../../src/common/itemsDatabase';
-export { SKILL_DEFINITIONS, skillDefinition } from '../../../src/common/skillsDatabase';
-export type { SkillDefinition } from '../../../src/common/skillsDatabase';
-export { MonstersDatabase } from '../../../src/common/monstersDatabase';
+export { ItemsDatabase } from '../../shared/items/itemsDatabase';
+export { SKILL_DEFINITIONS, skillDefinition } from '../../shared/skills/skillsDatabase';
+export type { SkillDefinition } from '../../shared/skills/skillsDatabase';
+export { MonstersDatabase } from '../../shared/monsters/monstersDatabase';
 export * as jewelRules from '../../../src/features/inventory/jewelUpgrade';

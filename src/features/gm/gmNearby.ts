@@ -1,4 +1,4 @@
-import { monsterDisplayName } from '../../common/monstersDatabase';
+import { monsterDisplayName } from '../../../versions/shared/monsters/monstersDatabase';
 import type { Entity } from '../../ecs/world';
 
 /**

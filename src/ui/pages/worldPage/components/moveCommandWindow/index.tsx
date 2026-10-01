@@ -9,7 +9,7 @@ import { BaseClass, getBaseClass } from '../../../../../features/hero/characterS
 import { PVP_MURDERER1 } from '../../../../../controllers/interface/nameTags';
 import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
 import { EventBus } from '../../../../../core/eventBus';
-import { ENUM_WORLD } from '../../../../../common';
+import { ENUM_WORLD } from '@/core/types';
 import { playUiSound, uiClick } from '../../../../../controllers/sound/sfx';
 import { loadMoveReqList, type MoveReqEntry } from '../../../../../controllers/assets/mu/moveReqFile';
 import { WarpFavourites } from '../../../../../features/warp/warpFavourites';

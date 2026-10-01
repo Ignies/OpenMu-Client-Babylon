@@ -25,7 +25,7 @@ import {
 } from '../../../features/items/itemValue';
 import { placePair } from './placement';
 import { ItemLinkHover } from '../../../controllers/interface/itemLinkHover';
-import { ItemsDatabase } from '../../../common/itemsDatabase';
+import { ItemsDatabase } from '../../../../versions/shared/items/itemsDatabase';
 import { ItemIcon } from '../itemIcon';
 
 /** One inventory square of the picture, as the grids draw it. */

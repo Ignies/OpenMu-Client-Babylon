@@ -7,7 +7,7 @@ import {
   type Scene,
 } from '../render/babylon/exports';
 import { downloadDataFile, hasDataFile } from '../assets/mu/dataFolder';
-import { maps } from '../../maps';
+import { maps } from '../maps';
 import { EFFECT_RENDERING_GROUP, darkCardGain, keepDepthForEffects, spriteLevel } from './core';
 import { devQuery, devQueryNumber } from '../../core/devSeams';
 import { viewDepth } from '../render/viewPlanes';

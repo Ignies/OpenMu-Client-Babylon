@@ -3,7 +3,7 @@ import type { WeatherLayer } from './layer';
 import { serverNow } from '../net/serverTime';
 import { ambientStrengthAt } from './ambientSchedule';
 import { DEVIAS_SNOW, SNOWFALL_MAPS } from './ambientWeather';
-import { maps } from '../../maps';
+import { maps } from '../maps';
 
 /**
  * How much settled snow is lying on the ground, 0…1.

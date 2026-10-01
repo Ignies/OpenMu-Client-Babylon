@@ -1,14 +1,14 @@
-import { monsterFactoryFor } from '../../common/monsters/genericMonster';
+import { monsterFactoryFor } from '../../../versions/shared/monsters/generic_monster';
 import {
   FALLBACK_MODEL_TYPE,
   FALLBACK_SCALE,
   MONSTER_HIDDEN_MESH,
   MONSTER_MODEL_TABLE,
-} from '../../common/monsters/monsterModelTable';
+} from './monsterModelTable';
 import { ModelObject } from '../render/modelObject';
-import { Balgass } from '../../common/monsters/balgass';
-import { BudgeDragon } from '../../common/monsters/budgeDragon';
-import { DeathGorgon } from '../../common/monsters/deathGorgon';
+import { Balgass } from '../../../versions/shared/monsters/balgass';
+import { BudgeDragon } from '../../../versions/shared/monsters/budge_dragon';
+import { DeathGorgon } from '../../../versions/shared/monsters/death_gorgon';
 import {
   GoldenBudgeDragon,
   GoldenCrust,
@@ -29,42 +29,42 @@ import {
   GoldenVepar,
   GoldenWheel,
   GreatGoldenDragon,
-} from '../../common/monsters/goldenMonsters';
-import { Hound } from '../../common/monsters/hound';
-import { Kundun } from '../../common/monsters/kundun';
-import { Selupan } from '../../common/monsters/selupan';
+} from '../../../versions/shared/monsters/golden_monsters';
+import { Hound } from '../../../versions/shared/monsters/hound';
+import { Kundun } from '../../../versions/shared/monsters/kundun';
+import { Selupan } from '../../../versions/shared/monsters/selupan';
 import {
   DeathBone,
   DeathKing,
   EliteSkeleton,
   SkeletonArcher,
   SkeletonWarrior,
-} from '../../common/monsters/skeletonWarrior';
-import { Spider } from '../../common/monsters/spider';
-import { Baz } from '../../common/npcs/baz';
-import { ElfSoldier } from '../../common/npcs/elfSoldier';
-import { Girl } from '../../common/npcs/girl';
-import { GoldenArcher } from '../../common/npcs/goldenArcher';
-import { Hanzo } from '../../common/npcs/hanzo';
-import { HiddenNpc } from '../../common/npcs/hiddenNpc';
-import { Leo } from '../../common/npcs/leo';
-import { Lumen } from '../../common/npcs/lumen';
-import { Alex, Harold, Martin } from '../../common/npcs/man';
-import { Pasi } from '../../common/npcs/pasi';
-import { PlateNpc } from '../../common/npcs/plateNpc';
-import { Trainer } from '../../common/npcs/trainer';
-import { Zyro } from '../../common/npcs/zyro';
-import { npcFactoryFor } from '../../common/npcs/genericNpc';
-import { gearedNpcFactory } from '../../common/npcs/gearedNpc';
-import { TRAP_MODEL_TABLE, trapFactoryFor } from '../../common/npcs/trapNpc';
-import { transformedNpcFactory } from '../../common/npcs/transformedNpc';
+} from '../../../versions/shared/monsters/skeleton_warrior';
+import { Spider } from '../../../versions/shared/monsters/spider';
+import { Baz } from '../../../versions/shared/npcs/baz';
+import { ElfSoldier } from '../../../versions/shared/npcs/elf_soldier';
+import { Girl } from '../../../versions/shared/npcs/girl';
+import { GoldenArcher } from '../../../versions/shared/npcs/golden_archer';
+import { Hanzo } from '../../../versions/shared/npcs/hanzo';
+import { HiddenNpc } from '../../../versions/shared/npcs/hidden_npc';
+import { Leo } from '../../../versions/shared/npcs/leo';
+import { Lumen } from '../../../versions/shared/npcs/lumen';
+import { Alex, Harold, Martin } from '../../../versions/shared/npcs/man';
+import { Pasi } from '../../../versions/shared/npcs/pasi';
+import { PlateNpc } from '../../../versions/shared/npcs/plate_npc';
+import { Trainer } from '../../../versions/shared/npcs/trainer';
+import { Zyro } from '../../../versions/shared/npcs/zyro';
+import { npcFactoryFor } from '../../../versions/shared/npcs/generic_npc';
+import { gearedNpcFactory } from '../../../versions/shared/npcs/geared_npc';
+import { TRAP_MODEL_TABLE, trapFactoryFor } from '../../../versions/shared/npcs/trap_npc';
+import { transformedNpcFactory } from '../../../versions/shared/npcs/transformed_npc';
 import {
   GEARED_NPC_TABLE,
   TRANSFORMED_NPC_TABLE,
-} from '../../common/npcs/playerNpcTables';
-import { NPC_MODEL_TABLE } from '../../common/npcs/npcModelTable';
-import { Archangel, ArchangelMessenger } from '../../common/npcs/archangel';
-import { CastleGate, StatueOfSaint } from '../../common/monsters/bloodCastleGate';
+} from './playerNpcTables';
+import { NPC_MODEL_TABLE } from './npcModelTable';
+import { Archangel, ArchangelMessenger } from '../../../versions/shared/npcs/archangel';
+import { CastleGate, StatueOfSaint } from '../../../versions/shared/monsters/blood_castle_gate';
 
 export const ModelFactoryPerId: Record<number, typeof ModelObject> = {
   [226]: Trainer,
