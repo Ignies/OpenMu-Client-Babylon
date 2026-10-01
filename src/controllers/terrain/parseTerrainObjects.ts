@@ -11,15 +11,12 @@ export function parseTerrainObjects(encodedData: Uint8Array) {
   let DataPtr = 0;
   const version = dv.getUint8(DataPtr);
   DataPtr += 1;
-  console.log(`parseTerrainObjects version: ${version}`);
 
   const MapNum = dv.getUint8(DataPtr);
   DataPtr += 1;
 
   const Count = dv.getInt16(DataPtr, true);
   DataPtr += 2;
-
-  console.log({ MapNum, Count, size: dv.byteLength });
 
   const objs: {
     id: number;

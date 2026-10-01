@@ -117,23 +117,23 @@ import '../features/options/net';
 import '../features/quests/net';
 import '../features/pets/net';
 import '../features/mu_helper/net';
-import { emitObjectEffect, summonDisplayName } from '../features/_shared/net_helpers';
-import { EventBus } from '../core/eventBus';
-import { type Events } from '../core/eventBus/events';
+import { summonDisplayName } from '../features/_shared/net_helpers';
+
+
 import { PingPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { PlayFanfareSoundPacket, ServerCommandPacket, ShowChristmasFireworksPacket, ShowFireworksPacket, ShowSwirlPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { SWIRL_BLOOM, SWIRL_BLOOM_SECONDS, SWIRL_START } from '../controllers/sound/packetSounds';
-import { SoundsManager } from '../controllers/sound/soundsManager';
+
 import { Store, UIState } from './store';
-import { Vector3 } from '../controllers/render/babylon/exports';
-import { delay } from '../controllers/fx/core';
-import { events } from '../features/events';
+
+
+
 import { installBandNet } from '../features/band/bandNet';
 import { installPingNet } from '../controllers/net/pingNet';
 import { loadNpcNames, onNpcNamesChanged } from '../controllers/assets/mu/npcNameFile';
 import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
-import { playSfx } from '../controllers/sound/sfx';
-import { spawnFireworks } from '../controllers/fx/fireworks';
+
+
 export { spawnPlayer } from '../features/scope/net';
 
 /**
@@ -160,78 +160,6 @@ onNpcNamesChanged(() => {
 void loadNpcNames();
 
 
-// F3/0x40 (length 7) is shared by PlayFanfareSound (EffectType 2), ShowSwirl
-// (58), ShowFireworks (0), ShowChristmasFireworks (59) and ServerCommand; the
-// dispatcher emits whichever it finds first (ServerCommand today), so every
-// name routes here on byte 4.
-/** `ReceiveServerCommand` case 1: `CreateOkMessageBox(GlobalText[...])`. */
-const SERVER_MESSAGE_BOX = 1;
-
-function routeServerCommand(packet: DataView) {
-  const effectType = packet.getUint8(4);
-  switch (effectType) {
-    case 58: {
-      const swirl = new ShowSwirlPacket(packet);
-      const netId = swirl.TargetObjectId & 0x7fff;
-      emitObjectEffect(netId, 'swirl');
-      playSwirlSounds(netId);
-      return;
-    }
-    case 2: {
-      const p = new PlayFanfareSoundPacket(packet);
-      EventBus.emit('fanfare', { effectType: p.EffectType, x: p.X, y: p.Y });
-      return;
-    }
-    case 0: {
-      const p = new ShowFireworksPacket(packet);
-      spawnFireworksAt(p.X, p.Y, false);
-      return;
-    }
-    case 59: {
-      const p = new ShowChristmasFireworksPacket(packet);
-      spawnFireworksAt(p.X, p.Y, true);
-      return;
-    }
-    default: {
-      // The other command types open GlobalText message boxes the client has
-      // no texts for (ReceiveServerCommand, WSclient.cpp:7744) - but for the
-      // numbered boxes (type 1) an event has the text of.
-      const p = new ServerCommandPacket(packet);
-      if (p.CommandType === SERVER_MESSAGE_BOX && events.serverMessageBox(p.Parameter1)) return;
-      console.warn(
-        `unhandled ServerCommand ${p.CommandType} (${p.Parameter1}, ${p.Parameter2})`
-      );
-      return;
-    }
-  }
-}
-for (const name of ['ServerCommand', 'ShowFireworks', 'ShowChristmasFireworks', 'PlayFanfareSound'] as const) {
-  EventBus.on(name, routeServerCommand);
-}
-
-/** ShowFireworks / ShowChristmasFireworks: the burst at the given tile. */
-function spawnFireworksAt(x: number, y: number, christmas: boolean) {
-  const world = Store.world;
-  if (!world) return;
-  const at = new Vector3(x, world.getTerrainHeight(x, y), y);
-  spawnFireworks(world.scene, at, christmas);
-}
-
-
-/** Server command 58's cherry-blossom sound, then the blooms its effect replays while the target stays. */
-function playSwirlSounds(netId: number) {
-  const world = Store.world;
-  const target = world?.getByNetId(netId);
-  if (!world || !target) return;
-  playSfx(SWIRL_START.key, target.transform.pos, SWIRL_START.opts);
-  const bloom = () => {
-    if (world.getByNetId(netId) !== target || target.objOutOfScope) return;
-    // StopBuffer before each replay (MoveHandlers.cpp:7519): one bloom at a time.
-    SoundsManager.stopSoundEffect(SWIRL_BLOOM.key);
-    playSfx(SWIRL_BLOOM.key, target.transform.pos, SWIRL_BLOOM.opts);
-  };
-  for (const seconds of SWIRL_BLOOM_SECONDS) delay(seconds, bloom);
-}
 
 /**
  * C3 0E - `Ping`: the keep-alive the original client sends every few seconds

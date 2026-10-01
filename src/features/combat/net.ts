@@ -24,7 +24,6 @@ import { playTeleportAnimation } from '../skills/net';
 import { playerPlaySpeed } from '@/controllers/anim/playSpeed';
 import { runInAction } from 'mobx';
 
-
 /** `SetAction_Fenrir_Damage` (ZzzAI.cpp:283-311): the rider's flinch, by what is in hand. */
 function fenrirDamageAction(obj: Entity): PlayerAction {
   const hands = obj.charAppearance;
@@ -111,11 +110,6 @@ EventBus.on('ObjectAnimation', packet => {
   if (obj.monsterAnimation) {
     clientActionToPlay = ((serverActionId & 0xe0) >> 5) & 0xff;
   }
-
-  console.log(
-    `ObjectAnimation: ${maskedId}, action: ${clientActionToPlay}, target: ${p.TargetId}, dir:${p.Direction}`,
-    packet
-  );
 
   // The hero is driven locally: AttackSystem / EmoteSystem / RestObjectSystem
   // already play the clip and face the target every frame, and the original

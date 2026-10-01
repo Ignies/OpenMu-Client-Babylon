@@ -76,8 +76,6 @@ EventBus.on('ItemMoved', packet => {
 
   const item = ItemSerializer.DeserializeItem(new Uint8Array(p.ItemData.buffer));
 
-  console.log(`ItemMoved -> storage ${storage} slot ${p.TargetSlot}`, item);
-
   // OpenMU keeps the personal store inside the inventory storage and its
   // ItemMovedPlugIn (RemoteView/Inventory/ItemMovedPlugIn.cs:43) rewrites
   // `PlayerShop` to `Inventory` before sending, so a move into the stall
@@ -146,8 +144,6 @@ EventBus.on('InventoryItemUpgraded', packet => {
   const p = new InventoryItemUpgradedPacket(packet);
 
   const item = ItemSerializer.DeserializeItem(new Uint8Array(p.ItemData.buffer));
-
-  console.log(`InventoryItemUpgraded slot ${p.InventorySlot}`, item);
 
   Store.upgradeInventoryItem(p.InventorySlot, item);
 });

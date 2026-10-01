@@ -85,11 +85,8 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
 
   if (!world) return;
 
-  console.log(`ItemsDropped: ${p.ItemCount} items dropped`, p);
-
   p.getItems(p.ItemCount).forEach(item => {
     const maskedId = item.Id & 0x7fff;
-    console.log(item);
     const data = item.ItemData;
 
     const id = data.getUint8(0);
@@ -99,18 +96,12 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
 
     const itemConfig = ItemsDatabase.getItem(group, id);
 
-    console.log(itemConfig);
-
     let amount = 0;
 
     if (isMoney) {
       amount =
         (data.getUint8(1) << 16) | (data.getUint8(2) << 8) | data.getUint8(4);
-
-      console.log(`Dropped Money: Amount=${amount}, ID=${maskedId}`);
-} else {
-      console.log(`Dropped Item: DataLen=${data.byteLength}, ID=${maskedId}`);
-}
+    }
 
     const parsed = isMoney
       ? undefined
@@ -217,7 +208,6 @@ EventBus.on('ItemDropRemoved', packet => {
     const itemEntity = world.getByNetId(maskedId);
     if (itemEntity) {
       world.addComponent(itemEntity, 'objOutOfScope', true);
-      console.log(`Removed item entity with netId: ${maskedId}`);
     } else {
       console.warn(`Item entity with netId ${maskedId} not found.`);
     }
