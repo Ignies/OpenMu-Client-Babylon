@@ -212,11 +212,6 @@ function reload(texture: Texture, url: string, buffer: unknown, original: Origin
   });
 }
 
-/**
- * Point one texture at the active pack, or back at the bytes it was parsed
- * from. Safe to call repeatedly: it does nothing when the texture is already
- * showing the right image.
- */
 /** Pack repaints still in flight; the loading screen waits for them. */
 let repaintsPending = 0;
 
@@ -224,6 +219,11 @@ export function packRepaintsPending(): number {
   return repaintsPending;
 }
 
+/**
+ * Point one texture at the active pack, or back at the bytes it was parsed
+ * from. Safe to call repeatedly: it does nothing when the texture is already
+ * showing the right image.
+ */
 export async function applyPackToTexture(texture: Texture): Promise<void> {
   repaintsPending++;
   try {

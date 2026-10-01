@@ -5,10 +5,10 @@ import {
   legacyItemEffectsOn,
   legacyRenderLevel,
 } from './itemEffectMode';
+import { legacyItemColours, type LegacyItemColours } from './itemLegacyEffects';
 
 /** Improved emissive scale while the legacy passes are also drawn ("Both"). */
 const BOTH_SCALE = 0.65;
-import { legacyItemColours, type LegacyItemColours } from './itemLegacyEffects';
 
 /**
  * Item visual identity: a pure `(item) → ItemVisualTier` lookup every renderer reads.

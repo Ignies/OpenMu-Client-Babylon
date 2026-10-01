@@ -336,7 +336,7 @@ export type QuestTables = {
 
 let pending: Promise<QuestTables> | null = null;
 
-/** Loads all four tables, once; a failure lets the next call retry. */
+/** Loads all five tables, once; a failure lets the next call retry. */
 export function loadQuestTables(): Promise<QuestTables> {
   if (!pending) {
     pending = readQuestTables().catch(err => {

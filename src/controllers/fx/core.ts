@@ -30,10 +30,10 @@ import type { EffectHandle } from './layer';
  * `EnableAlphaBlend` as `(SRC_ALPHA, ONE)`), card and particle pools, the effects clock. See fx/readme.md.
  */
 
-/** MU's 25 Hz effect tick - the C++ counts lifetimes in these. */
 // Before any sprite manager exists: every sprite user imports this module.
 installSpriteLinearDecode();
 
+/** MU's 25 Hz effect tick - the C++ counts lifetimes in these. */
 export const TICK = 1 / 25;
 
 /** One MU world unit is a centimetre; a tile is 100 of them. */

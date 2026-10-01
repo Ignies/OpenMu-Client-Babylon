@@ -55,12 +55,8 @@ let lastMap: ENUM_WORLD | null = null;
 /**
  * Advances both accumulators; call once a frame. Returns the ground wetness.
  *
- * Arriving on a map mid-shower seeds the wetness from the *packet's* target
- * rather than from `rainStrength()`. `resetRain` deliberately zeroes the live
- * ramp on a warp so the rain fades in instead of snapping, which means for the
- * first few seconds after a gate `rainStrength()` says "dry" while the sky is
- * plainly pouring. Seeding from the target avoids walking into a downpour over
- * bone-dry stone.
+ * Arriving on a map mid-shower seeds the wetness from the packet's target, so
+ * a warp into a downpour does not land on bone-dry stone.
  */
 export function updateWetness(map: ENUM_WORLD, dt: number): number {
   if (!WET_MAPS.has(map)) {

@@ -111,7 +111,7 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     model: 'Item/Instrument_Guitar.glb',
     bone: LEFT_HAND,
     // Across the chest, strings out, neck up to the left. Solved from the
-    // hand bones (tools/screenshot/_probe_bandsolve.mjs); tune live with
+    // hand bones; tune live with
     // `?instRot=` / `?instOff=` or `__bandLink`.
     link: { angle: [-84, -35, -90], offset: [-11, -1, -1] },
     // The very first frames of Hustle, where the guitar sits up across the
@@ -142,8 +142,7 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     // Mouthpiece at the lips, the body angled down and out in front of the
     // chin with its face - the holes - turned to the camera. Re-solved when
     // the model became the photo's own outline, whose mouthpiece lies in the
-    // body's plane rather than standing out of it
-    // (tools/screenshot/_probe_ocarinalink.mjs).
+    // body's plane rather than standing out of it.
     link: { angle: [-94, 26, 41], offset: [17, 10, -10] },
     pose: BLOW,
   },
@@ -157,7 +156,7 @@ export const INSTRUMENTS: readonly InstrumentDefinition[] = [
     bone: ROOT,
     // A floor harp standing in front, its soundbox leaning back to the
     // chest, strung along the way the player faces; solved from the root
-    // bone (tools/screenshot/_instsolve.mjs).
+    // bone.
     link: { angle: [0, 0, -173], offset: [56, 25, -107] },
     noteOffset: [40, 0, 130],
     // Clap, whose hands come together and apart at chest height: at the

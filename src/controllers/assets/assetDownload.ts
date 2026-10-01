@@ -64,7 +64,6 @@ class AssetDownloadStore {
   index: AssetsIndex | null = null;
   /** Group ids the player has ticked. */
   chosen: Set<string> = new Set(load());
-  /** Pack id to download with them, or '' for none. */
   running = false;
   /** 0..1 over the whole selection. */
   progress = 0;

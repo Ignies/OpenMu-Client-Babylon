@@ -23,8 +23,8 @@ Packs are per version: the code takes the version's asset folder and swaps `game
 - `loadPackIndex()` reads `index.json`; Options > Texture Pack lists the result.
 - Choosing a pack loads its `pack.json` and repoints each live texture with `updateURL`.
 - "Original" restores the bytes the glTF loader kept, so no reload is needed.
-- Details and the two easy-to-break rules (texture labels, original bytes) are in the header of
-  `texturePacks.ts` and its tests.
+- Details and the two easy-to-break rules (texture labels, original bytes) are in
+  `src/controllers/assets/readme.md` (texturePacks.ts) and its tests.
 
 ## Adding a pack
 

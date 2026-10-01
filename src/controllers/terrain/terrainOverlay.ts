@@ -194,7 +194,7 @@ export const OVERLAY_LIGHT = {
   // Near-neutral: the original bakes Devias neutral and puts no grade on the
   // ground, so its snow shadows are grey with only a hint of sky. The first
   // cut here was a saturated blue-grey and the field read as blue ice.
-  // Measured off improved_2.jpg: the deepest drift shade is ~0.62 of white.
+  // The deepest drift shade is ~0.62 of white.
   shadow: [0.6, 0.63, 0.7] as readonly [number, number, number],
   /**
    * What full sun on the layer is. NOT white: the reference field sits at
@@ -357,12 +357,9 @@ export const PUDDLES: TerrainOverlay = {
 export const SNOW_SHADE = {
   /**
    * Slope gain of the drift field (the shader divides it by `RELIEF_STEP`); the shading follows
-   * from the normal. Matched to improved.jpg / improved_2.jpg with post-processing off.
+   * from the normal. Kept low: higher bands the field into blurred stripes (the trench has `TRAIL_GAIN`).
    */
-  // Back up from 1.1: that was tuned while the field clipped to white, where
-  // any relief read as ripple. With the field at 0.86 the drifts need real
-  // slope to show volume - the reference banks visibly against walls.
-  relief: 0.55, // was 2.2: the field banded into blurred stripes; improved_2.jpg is near-flat (trench has TRAIL_GAIN)
+  relief: 0.55,
   /**
    * How far the troughs between drifts go toward skylight, 0..1.
    *
@@ -782,7 +779,7 @@ function f(n: number): string {
 const RELIEF_STEP = 0.2;
 
 /**
- * The ploughed trail, as a shape in the snow (improved_2.jpg).
+ * The ploughed trail, as a shape in the snow.
  *
  * The depth map is 0..1; `TRAIL_DEPTH` is the height, in relief units, the
  * channel floor drops - deeper than any drift, because it goes through them.
@@ -876,14 +873,9 @@ const GRAIN_SCALE = 12;
  * How much the ripple is stretched along the wind, as a frequency ratio.
  *
  * Both axes have to stay FINE. Stretching is what makes a ripple, but it also
- * divides the frequency along the wind, and at GRAIN_SCALE 9 a stretch of 0.22
- * put the long axis at 2 repeats per tile - a half-tile feature, which is
- * exactly the mottling scale that was cut two rounds ago for reading as noise
- * laid over the ground. The streaks in play were a tile long and smeared.
- *
- * Raising the scale and easing the stretch keeps the ripple and takes the long
- * axis back under a print: 20 * 0.35 = 7 repeats per tile, a feature every
- * 0.14 tiles, against 20 across at 0.05.
+ * divides the frequency along the wind: 12 * 0.35 = about 4 repeats per tile
+ * along it, against 12 across. Much lower and the long axis becomes a
+ * half-tile smear that reads as noise laid over the ground.
  */
 const GRAIN_STRETCH = 0.35;
 
@@ -1754,8 +1746,7 @@ export function terrainOverlayReflectGlsl(
         0.5 * ovGnoise(ovR2 + vec2(0.0, ${f(RIPPLE_STEP * RIPPLE_SCALE * 2.3)}));
       // The gradient is already Δh over one step of the field; dividing by
       // the raw step here scaled it ~17x and tipped every normal nearly
-      // horizontal - the whole pool lit up as mottled foil (the "flood"
-      // screenshot). 3.0 puts the slope at ~0.3 with full rain on a
+      // horizontal - the whole pool lit up as mottled foil. 3.0 puts the slope at ~0.3 with full rain on a
       // ripple-0.35 recipe: shivering glints, readable water.
       float ovRk = ovRipple * 3.0;
       vec2 ovSlope = vec2(-(ovRhx - ovRh) * ovRk, -(ovRhz - ovRh) * ovRk);

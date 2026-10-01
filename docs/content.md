@@ -45,7 +45,7 @@ is meant (`bunx vitest run versions/shared/skills -u`, and say why in the PR).
 versions/shared/ui/windows/<window>/
   index.tsx    draws the window (only drawing)
   window.ts    export default defineWindow({ id, slot, order, component })
-  layout.ts    geometry   style.less   readme.md
+  layout.ts    geometry   style.less   readme.md (when the window has rules worth writing down)
 versions/shared/ui/hud/<element>/      same shape, for always-on elements
 versions/shared/ui/pages/<page>/       login, server select, character select, preloader, world
 ```

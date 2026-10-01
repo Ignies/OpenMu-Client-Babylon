@@ -2,13 +2,6 @@ import { assetWorldNum } from '../assets/worldAssets';
 import { Matrix, Quaternion, Vector3, BoundingBox, BoundingInfo, Mesh, type StandardMaterial, TransformNode, type Scene, AbstractMesh, Skeleton, AnimationGroup, type Plane } from './babylon/exports';
 import type { IVector3Like } from './babylon/exports';
 import { PLAY_SPEED_TO_RATIO } from '../anim/playSpeed';
-
-/** Rotation half of C⁻¹, the inverse of the model-root basis change applied in load(). */
-const DEFAULT_BONE_LINK_ROTATION = Quaternion.FromEulerAngles(
-  Math.PI * 1.5,
-  0,
-  0
-);
 import {
   SHADOW_SLOTS,
   createObjectShadow,
@@ -37,6 +30,13 @@ import {
   shadowReceiversChanged,
 } from './scenes/csmBounds';
 import type { MapObjectLights } from '../lighting/mapObjectLightAdapter';
+
+/** Rotation half of C⁻¹, the inverse of the model-root basis change applied in load(). */
+const DEFAULT_BONE_LINK_ROTATION = Quaternion.FromEulerAngles(
+  Math.PI * 1.5,
+  0,
+  0
+);
 
 const BoundingUpdateInterval = 5;
 

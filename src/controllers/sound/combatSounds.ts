@@ -1,5 +1,4 @@
-// Migrated to `controllers/sound/combat.ts` + `controllers/sound/monsters.ts`
-// . Kept as a re-export for the existing import sites.
+// Leaf re-exports of `combat.ts` and `monsters.ts` for ECS systems.
 export {
   COMBAT_BUS,
   MONSTER_ASSASSIN,

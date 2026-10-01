@@ -1,8 +1,5 @@
-// Migrated to `src/sound/`: positioned one-shots live in
-// `controllers/sound/listener.ts`, interface sounds in `controllers/sound/ui.ts`. Kept as a re-export
-// for the existing import sites. Re-exported from the leaf modules, not the
-// `sound` facade: the facade reaches `Store`, and dragging that cycle into
-// every button's import breaks chunk-level init order once the app splits.
+// Leaf re-exports for UI code: a button importing the whole `sound` facade
+// drags its options/state imports along and breaks chunk init order.
 export {
   playSfx,
   setSfxListener,

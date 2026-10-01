@@ -3,9 +3,8 @@ import { loadGLTF } from '@/controllers/assets/modelLoader';
 import { PlayerObject } from '@/controllers/actors/playerObject';
 
 // [NpcInfo(253, "Potion Girl Amy")]
-// Girl01.glb is a rig-only BMD conversion (0 meshes - see
-//  the geometry ships as part files the
-// original composes at runtime. ZzzCharacter.cpp:14238 (MONSTER_POTION_GIRL_AMY)
+// Girl01.glb is a rig-only BMD conversion (0 meshes): the geometry ships as
+// part files the original composes at runtime. ZzzCharacter.cpp:14238 (MONSTER_POTION_GIRL_AMY)
 // equips MODEL_MERCHANT_GIRL_HEAD/UPPER/LOWER - the +0 variants, i.e. the 01
 // skins (Lumen uses +1 → 02). No gloves or boots parts exist for the Girl rig.
 // Idle mirrors Lumen: the entity keeps its `monsterAnimation` component and

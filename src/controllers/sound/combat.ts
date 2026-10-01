@@ -58,11 +58,7 @@ const MALE_SCREAMS = [
   'Sound/pMaleScream3',
 ] as const;
 
-/**
- * Skill cast sounds by wire skill number. Only skills whose sound the original
- * plays at cast time are listed; the rest stay silent until their effect
- * recipe  lands.
- */
+/** Skill cast sounds by wire skill number, filled by `registerSkills` from each skill's `sound`. */
 export const SKILL_SOUNDS: Readonly<Record<number, Sounds>> = {};
 
 /**

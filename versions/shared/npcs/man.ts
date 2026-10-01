@@ -2,8 +2,7 @@ import type { World } from '@/ecs/world';
 import { loadGLTF } from '@/controllers/assets/modelLoader';
 import { PlayerObject } from '@/controllers/actors/playerObject';
 
-// Man01.glb is a rig-only BMD conversion (0 meshes - see
-//  the geometry ships as
+// Man01.glb is a rig-only BMD conversion (0 meshes): the geometry ships as
 // ManHead/ManUpper/ManGloves/ManBoots 01|02 part files (there is no ManLower).
 // The original picks the parts per NPC in ZzzCharacter.cpp:
 //   14062 MONSTER_ALEX (230):                     Head+0 Upper+1 Gloves+1 Boots+0

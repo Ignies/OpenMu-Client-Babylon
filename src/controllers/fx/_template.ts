@@ -63,7 +63,7 @@ function reset(): void {
 
 // ---- 3. the layer ----------------------------------------------------------
 
-export const templateLayer: EffectLayer<TemplateOptions> = {
+export const templateLayer: EffectLayer<TemplateOptions, 'template'> = {
   name: 'template',
   update,
   reset,

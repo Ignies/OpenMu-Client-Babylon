@@ -77,9 +77,8 @@ export const FOOTPRINT_TUNING = {
    *
    * A bounding width the waist never quite reaches: the superellipse's
    * half-width is scaled by the arch modulation, which peaks around 0.92 at
-   * the ball and dips to 0.72 at the waist, so the outline this draws measures
-   * roughly 0.28 across against a length of 0.58 - about 2:1, which is the
-   * proportion the reference's prints have.
+   * the ball and dips to 0.72 at the waist, so the drawn outline is about
+   * 0.23-0.29 across against the 0.42 length.
    * Left as the bound rather than divided out, because the alternative is a
    * number that means "width, after a correction factor" and is worse to
    * reason about than one that means "width, before the boot shape".
@@ -107,14 +106,8 @@ export const FOOTPRINT_TUNING = {
    * the lambert term cancels - this occlusion IS the darkening, and it is the
    * only dial that reaches the middle of the print.
    */
-  // Down from 0.55 against improved.jpg: the reference print floor is a pale
-  // blue-white, only ~0.75 of the snow beside it, and its depth is carried
-  // by the wall gradient and the rim, not by a dark floor.
-  // Up again for improved_2.jpg: with the field held at 0.86 instead of
-  // clipping white, the trench walls have to reach ~0.5 to read as depth.
-  // Down again for the reworked trail: the decal is now a faint pocket in
-  // the trench (walk print 0.28) and the trench carries the depth, so a
-  // 0.72 floor only put a dark ring inside the channel.
+  // The trench carries the depth and the decal is a faint pocket in it, so a
+  // darker floor only puts a dark ring inside the channel.
   ao: 0.45,
   /**
    * Ambient light in the cavity. High, because snow is close to a perfect
@@ -344,7 +337,7 @@ const TINT: Record<PrintKind, readonly [number, number, number]> = {
 /** How strongly a fresh print of this kind is applied. */
 const PEAK: Record<PrintKind, number> = {
   wet: 0.85,
-  // Full: the walk trench IS the trail (improved_2.jpg), the prints are
+  // Full: the walk trench IS the trail, the prints are
   // pockets in its floor. How much of it a gait lays is decided per gait in
   // footprintSystem.ts (a run lays none), not here.
   drag: 1,
@@ -697,7 +690,7 @@ function soleHeight(
       const s = soleDepth(shape, u, v, seed);
 
       if (kind === 'drag') {
-        // The ploughed trench of a walk through deep snow (improved_2.jpg):
+        // The ploughed trench of a walk through deep snow:
         // a broad flat-floored channel, walls that rise steeply to a broken,
         // shouldered crest, tapering at both ends where it runs under the
         // prints it joins so the trail flows into them rather than butting

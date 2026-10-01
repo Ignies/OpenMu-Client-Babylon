@@ -224,7 +224,7 @@ describe('chatEmojiSize', () => {
   });
 });
 
-describe('the packs in src/emojis', () => {
+describe('the packs in src/features/chat/emojis', () => {
   it('has every file named so it becomes a code', () => {
     expect(EMOJI_CATALOG.skipped).toEqual([]);
     expect(EMOJI_CATALOG.byCode.size).toBeGreaterThan(0);

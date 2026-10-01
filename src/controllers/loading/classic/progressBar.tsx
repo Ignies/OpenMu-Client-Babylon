@@ -2,8 +2,7 @@ import './style.less';
 import { MuSpriteFrame } from '../../interface/components/mu_sprite';
 
 /**
- * The game's progress bar, on its own so the loading screen and the
- * pre-download screen are the same bar rather than two that drift apart.
+ * The loading screen's progress bar.
  *
  * Four layers, and the order matters: a blurred glow behind, the
  * `Progress_Back.OZJ` trough, the `Progress.OZJ` fill clipped to the ratio

@@ -107,8 +107,6 @@ const REPACK_ALL = devQuery('repackAll') === '1';
 /** Clip samples the culling box is grown over, so a swaying crown stays inside it. */
 const POSE_SAMPLES = 4;
 
-/** Up to this many placements a type is one mesh for the whole map, unchunked. */
-
 /** How often a snow map re-reads the roof mask. */
 const SNOW_POLL_SECONDS = 0.5;
 

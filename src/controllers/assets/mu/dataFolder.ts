@@ -9,7 +9,7 @@ import { gameVersion } from '@/version';
  * `vite dev` serves the `client/Data` junction at `/Data/` with no config, so
  * the default `./Data/` works there. For a production build the subset the
  * client actually fetches is copied into `dist/Data` by
- * [tools/copyData.ts](../../../tools/copyData.ts) (run from `bun run build`),
+ * [tools/copyData.ts](../../../../tools/copyData.ts) (run from `bun run build`),
  * so the same default works from `dist/`. A deployment that hosts the data
  * elsewhere (CDN, another origin) sets `VITE_DATA_URL` at build time; a
  * trailing slash is added if missing. Both are decided by the selected game

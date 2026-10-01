@@ -122,8 +122,7 @@ facade yet: callers import the files below directly.
   snow, wet stone and puddles are one recipe list. The mix is before lighting, so a layer takes
   the same bake, shadow and torches as the ground. Colour, patch size, softness and slope are GLSL
   literals; only `coverage` is a uniform, so a lost uniform means "no layer", never black ground.
-  `SNOW_SHADE` is the live exception (`window.muSnow`), tuned against improved.jpg /
-  improved_2.jpg. `defersToArt` keeps the layer off art that is already snow (Devias, Santa
+  `SNOW_SHADE` is the live exception (`window.muSnow`). `defersToArt` keeps the layer off art that is already snow (Devias, Santa
   Town, the ice fields). Water reflects a built sky (gradient plus parallax cloud deck), not a
   colour, and its normal stacks wind ripple and raindrop rings. On the linear tiers the lit term
   decodes the constants once, adds the delta in linear and encodes once at the end.

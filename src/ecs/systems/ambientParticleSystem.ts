@@ -44,9 +44,6 @@ import type { ISystemFactory } from '../world';
  * `CreateLorenciaLeaf`, `CreateDeviasSnow`). See ecs/readme.md.
  */
 
-/** Weather byte that means rain (assumed - see the weather notes). */
-
-
 // Maps with a sky (rain may fall) are declared per map as `MapLayer.outdoor`
 // and read through `maps.isOutdoor(map)`.
 

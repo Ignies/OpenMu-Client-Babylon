@@ -161,7 +161,7 @@ export function ploughSnowTrail(
       const cx = ax + dx * t - px;
       const cz = az + dz * t - pz;
       // The edge wanders: a hash of where this texel sits on the map, so
-      // the wall is broken and shouldered (improved_2.jpg) rather than one
+      // the wall is broken and shouldered rather than one
       // clean capsule outline. Position-stable, so re-treading the same
       // ground finds the same edge instead of widening it.
       const jit = hash2(Math.floor(px * 0.5), Math.floor(pz * 0.5));

@@ -4,7 +4,7 @@ Each folder here is one pack, each `.webp` in it one emoji. The client finds
 them when it is built, so adding emojis is only adding files.
 
 ```
-src/emojis/
+src/features/chat/emojis/
   dark_knight/
     dk_love.webp      -> :dk_love:
     dk_wave.webp      -> :dk_wave:

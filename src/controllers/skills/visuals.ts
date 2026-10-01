@@ -640,16 +640,16 @@ const GREEN_KNOT: SpearJoints = { count: 5, width: 0.2, colour: [0.4, 0.8, 0.2],
  */
 export const BUFF_VISUALS: Partial<Record<number, BuffLook>> = {};
 
-/**
- * One look kept up while any of its ids holds: the original keeps a single
- * set of five green joints on a body under Attack, Defense or HelpNpc
- * (`ShouldKeepAuraJointAlive`, ZzzEffectJoint.cpp:4440), never a second.
- */
 /** Work a buff does as it lands or lifts before its look is kept; true means the look is handled. */
 export type BuffArrival = (scene: Scene, entity: Entity, active: boolean) => boolean;
 
 export const BUFF_ARRIVALS: Partial<Record<number, BuffArrival>> = {};
 
+/**
+ * One look kept up while any of its ids holds: the original keeps a single
+ * set of five green joints on a body under Attack, Defense or HelpNpc
+ * (`ShouldKeepAuraJointAlive`, ZzzEffectJoint.cpp:4440), never a second.
+ */
 const SHARED_LOOKS: readonly { key: number; ids: readonly number[]; look: BuffLook }[] = [
   { key: -1, ids: [1, 2, 3], look: () => ({ spearJoints: GREEN_KNOT }) },
 ];

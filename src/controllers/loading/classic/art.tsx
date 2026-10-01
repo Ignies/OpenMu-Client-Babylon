@@ -3,13 +3,8 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { MuSpriteFrame } from '../../interface/components/mu_sprite';
 
 /**
- * The loading artwork itself - `LSBg01..04`, the four 400×300 quarters of the
- * 800×600 sheet the original draws while a map loads.
- *
- * Split out of the loading screen because two places want the picture and only
- * one wants the screen: the loading screen covers everything opaquely, while
- * the start menu uses the same art as its own backdrop until the 3D login
- * scene behind it is ready.
+ * The loading artwork: `LSBg01..04`, two 400×512 tiles over two 400×88 tiles
+ * of the 800×600 sheet the original draws while a map loads.
  */
 
 const SHEET_ASPECT = 800 / 600;

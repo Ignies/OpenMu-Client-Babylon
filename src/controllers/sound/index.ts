@@ -35,8 +35,7 @@ export type { AmbientBed, AmbientOneShot } from './ambientBeds';
 export type { CrackleSource } from './crackle';
 export type { ObjectLoop, ObjectLoopSource } from './objectLoops';
 
-// The entry functions, re-exported so the pre-migration modules
-// (`controllers/sound/sfx.ts`, `controllers/sound/combatSounds.ts`) can stay one-line re-exports.
+// The entry functions, also reachable through the leaf re-exports `sfx.ts` and `combatSounds.ts`.
 export {
   playSfx,
   setSfxListener,
