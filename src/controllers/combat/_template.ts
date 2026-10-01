@@ -1,6 +1,6 @@
 /**
  * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
- * to `layers.ts`. Never imported. The three parts are in combat/readme.md.
+ * to `layers.ts`. Never imported. The three parts are in controllers/combat/readme.md.
  */
 import { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';

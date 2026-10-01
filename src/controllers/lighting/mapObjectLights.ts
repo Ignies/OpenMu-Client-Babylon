@@ -1,7 +1,7 @@
 /**
  * Lights that belong to the map: torches, braziers, hearths, street lamps,
  * candelabra, the Tarkan glow lamps - anything a map object throws by being
- * there. The per-world tables live here (or in `maps/<map>/spec.ts` for the
+ * there. The per-world tables live here (or in `versions/shared/maps/<map>/spec.ts` for the
  * maps that already have one), keyed by `Object<n>.obj` type; a host (the
  * `MapObjectLights` adapter on `ModelObject`, or a map object class) resolves
  * its rows and calls `lightMapObject`.
@@ -59,7 +59,7 @@ import {
  * One row of a map's light table. `terrain` is the light itself (MU's
  * `AddTerrainLight` range and colour, plus our point-light knobs beside it);
  * `sprite` and `emissions` are the visuals that ride along - a flare card
- * (`common/effectLights.ts`) and a particle recipe (`common/effectParticles.ts`)
+ * (`controllers/lighting/effectLights.ts`) and a particle recipe (`controllers/fx/effectParticles.ts`)
  * - which the host draws, tinted by this light's colour.
  */
 export type LightEmitter = {

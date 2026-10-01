@@ -192,7 +192,7 @@ export function teleportMountAlpha(owner: Entity): number {
   return fades.get(owner)?.mountAlpha ?? 1;
 }
 
-/** A player entered scope (logic.ts): OpenMU re-adds a teleported player, then marks the arrival. */
+/** A player entered scope (app/logic.ts): OpenMU re-adds a teleported player, then marks the arrival. */
 export function noteScopeEntry(e: Entity): void {
   scopeEntered.set(e, clock);
 }

@@ -358,7 +358,7 @@ function addCharacterToScope(
 
     // A transformation ring, or a game master's `/skin`: the body is the
     // skin's, either as a part file worn on the character's own rig or as
-    // the whole monster (`common/transformedBody.ts`).
+    // the whole monster (`controllers/actors/transformedBody.ts`).
     const body = skin ? characterSkinBody(skin) : null;
     if (skin) world.addComponent(playerEntity, 'skin', skin);
     if (body) {

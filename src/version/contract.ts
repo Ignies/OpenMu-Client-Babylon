@@ -3,7 +3,7 @@
  * reads to learn which MU / OpenMU version it is talking to. One folder per
  * version under `versions/<id>/` exports it as `gameVersion` from `index.ts`,
  * listed in `versions/registry.ts` and loaded at runtime by the bootstrap
- * (src/main.tsx -> src/version/index.ts `loadGameVersion`).
+ * (app/main.tsx -> src/version/index.ts `loadGameVersion`).
  *
  * Base code never says `if (version === ...)`: it reads `features.*` and the
  * protocol / data fields below. Everything a version can differ in must be a
@@ -114,7 +114,7 @@ export interface GameVersion {
   readonly label: string;
   /**
    * The token a published server line puts first to say which client it wants
-   * (`[S6EP3:Name:…](…)`) - see `common/serverList.ts`. A field rather than
+   * (`[S6EP3:Name:…](…)`) - see `features/servers/serverList.ts`. A field rather than
    * something derived from `openMu`, because a version that is not a season
    * and an episode still has to name itself in one short word.
    *

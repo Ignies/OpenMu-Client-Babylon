@@ -15,7 +15,7 @@ import { playSfx, type SfxPosition } from './listener';
 
 // ---- 1. data ---------------------------------------------------------------
 
-/** The voice table's own category (`sound/buses.ts`). */
+/** The voice table's own category (`controllers/sound/buses.ts`). */
 export const MONSTER_BUS: SoundBus = 'monsters';
 
 /** MONSTER_ASSASSIN: flinches silently (ZzzCharacter.cpp:1328). */

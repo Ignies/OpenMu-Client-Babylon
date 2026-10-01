@@ -16,14 +16,14 @@ import { playSfx, type SfxPosition } from './listener';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** A drop landing is its own category (`sound/buses.ts`). */
+/** A drop landing is its own category (`controllers/sound/buses.ts`). */
 const BUS: SoundBus = 'drops';
 
 /** `INDEX_COMPILED_CELE` / `INDEX_COMPILED_SOUL`: 12/30 and 12/31. */
 const BUNDLE_GROUP = 12;
 const BUNDLED_JEWELS: readonly number[] = [30, 31];
 
-/** What `logic.ts` knows about a drop when the packet lands. */
+/** What `app/logic.ts` knows about a drop when the packet lands. */
 export type DropSoundInfo = {
   isMoney: boolean;
   /** Parsed item, absent for zen and for a row the serializer could not read. */

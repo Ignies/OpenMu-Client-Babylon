@@ -9,7 +9,7 @@ import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterMo
 // Staff of Kundun in the off hand (GMHellas.cpp:913-923). The staff waits on
 // the monster-rig weapon work (see monsterModelTable.ts); the play-speed
 // table (ZzzOpenData.cpp:2404-2409) is already in playSpeed.ts and his voice
-// (:3587-3592) in sound/monsters.ts.
+// (:3587-3592) in controllers/sound/monsters.ts.
 const NPC_TYPE = 275;
 
 /** MONSTER_MODEL_ILLUSION_OF_KUNDUN. */

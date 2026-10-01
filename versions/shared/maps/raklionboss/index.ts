@@ -14,8 +14,8 @@ import {
  *
  * Raklion's hatchery (`WD_58ICECITY_BOSS`, `World59`/`Object59`) - Selupan's
  * cave, 162 objects. It runs the same `CGM_Raklion` as Raklion, so the
- * tables come from `maps/raklion/spec.ts` and the object classes from
- * `maps/raklion`; `create.ts` binds them and lists what is left out.
+ * tables come from `versions/shared/maps/raklion/spec.ts` and the object classes from
+ * `versions/shared/maps/raklion`; `create.ts` binds them and lists what is left out.
  *
  * Sound: `aWind` is the bed (SceneManager.cpp:620-622);
  * `Music/Raklion_Hatchery` is the idle track `PlayBGM` (:2927-2946) plays
@@ -35,7 +35,7 @@ const SPAWN = { x: 160, y: 25 } as const;
 const SNOW = true;
 
 // The hatchery is Raklion's art set and takes Raklion's sky with it: snow
-// climate, no fall. See `maps/raklion/index.ts`.
+// climate, no fall. See `versions/shared/maps/raklion/index.ts`.
 const SNOWFALL = false;
 
 // ---- 2. state + readers ----------------------------------------------------

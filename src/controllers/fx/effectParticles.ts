@@ -61,7 +61,7 @@ const TEXTURES: Record<
 /**
  * `dark` is a held sprite's `EnableAlphaBlendMinus`: black, with the sheet's
  * luminance as its coverage (`coverageSheet`), the rule the effects draw dark
- * art by (effects/core `darkCardGain`).
+ * art by (controllers/fx/core `darkCardGain`).
  */
 type Blend = 'add' | 'subtract' | 'dark';
 
@@ -591,7 +591,7 @@ export type Emission = {
 
 /**
  * Emissions for an object type on a world - `MapLayer.emissions` on each map
- * entry (`src/maps/<name>/spec.ts`), read through the facade.
+ * entry (`versions/shared/maps/<name>/spec.ts`), read through the facade.
  */
 export function emissionsFor(
   world: number,
@@ -697,7 +697,7 @@ async function getPool(
       manager.isPickable = false;
 
       // The group the flare card over the flame already sits in
-      // (`common/effectLights.ts`). Babylon draws sprites before the
+      // (`controllers/lighting/effectLights.ts`). Babylon draws sprites before the
       // transparent queue, and MU's alpha-keyed meshes write depth in that
       // queue, so a flame left in group 0 was drawn first and then painted
       // over by the bridge rail, the fence or the bush standing in front of

@@ -1,6 +1,6 @@
 /**
  * Which tracker rows the player has folded, per character. The hot keys are
- * kept the same way (`common/keyBindings.ts`): the character's own entry if it
+ * kept the same way (`controllers/interface/keyBindings.ts`): the character's own entry if it
  * has one, the shared entry otherwise, so a new character starts from what the
  * last one left.
  *

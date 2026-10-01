@@ -37,7 +37,7 @@ export const ICARUS_BLEND_MESHES: Readonly<Record<number, number>> = {};
  *
  * So the box is never drawn and its model is never needed. `IcarusCloudObject`
  * is registered for these ids in `index.ts` and loads nothing at all, which is
- * why they do not also need an entry in `common/effectOnlyObjects.ts`.
+ * why they do not also need an entry in `controllers/render/effectOnlyObjects.ts`.
  *
  * Note this is *not* the same thing as `Object11/cloud.bmd`: that model is
  * `MODEL_CLOUD`, an effect model loaded by `MapManager.cpp:151` and used only

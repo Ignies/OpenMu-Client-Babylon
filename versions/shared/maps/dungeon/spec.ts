@@ -99,7 +99,7 @@ export const DUNGEON_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
  *  - and *unconditionally* calls `AddTerrainLight(x, y, Light, 4, primary)`.
  *
  * That is precisely the emitter `createFire()` builds in
- * `common/effectLights.ts` - terrain range 4, colour `[1, 0.6, 0.4]`, flicker
+ * `controllers/lighting/effectLights.ts` - terrain range 4, colour `[1, 0.6, 0.4]`, flicker
  * quantised to five steps over 0.6-1.0, one fire sprite every second tick,
  * jitter 8. It is module-private there and this file must stay free of scene
  * imports, so the recipe is restated rather than imported; if it is ever

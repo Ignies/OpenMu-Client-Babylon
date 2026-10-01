@@ -2047,7 +2047,7 @@ export const EN_TEXT = {
   'marketplace.escrow.failed': 'The market could not do that.',
   'marketplace.escrow.notSold': 'That listing has not sold.',
 
-  // ---- the game master panel (`gmPanel.ts`, `common/gmCommands.ts`) -------
+  // ---- the game master panel (`features/gm/gmPanel.ts`, `features/gm/gmCommands.ts`) -------
   // Map names are not here: `gmMaps.ts` carries the server's own
   // `GameMapDefinition.Name`, which is what `/move <name>` matches and what
   // the server prints back, so it is an identifier rather than prose.
@@ -2684,7 +2684,7 @@ export const EN_TEXT = {
   'keys.performanceReadout': 'Performance readout',
   // ---- signposts ---------------------------------------------------------
   // What a notice board says, painted onto its plate at map load
-  // (common/signPlates.ts). Keep these short: the plate is 43 texels wide and
+  // (versions/shared/objects/signs/signPlates.ts). Keep these short: the plate is 43 texels wide and
   // a long name is shrunk to fit rather than clipped, so it just gets small.
   'sign.lorencia': 'Lorencia',
   'sign.devias': 'Devias',

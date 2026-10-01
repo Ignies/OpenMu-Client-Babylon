@@ -86,7 +86,7 @@ import {
 /**
  * Everything the duel draws: the challenge prompt, the duelist score panel,
  * the Titus channel window, the spectator bar + name list and the winner
- * box. Render-only: state lives in `events/duel.ts`, commands go through
+ * box. Render-only: state lives in `features/events/duel.ts`, commands go through
  * the `events` facade.
  */
 
@@ -402,7 +402,7 @@ const DuelSpectatorList = observer(() => {
 
 // ---- the winner box ---------------------------------------------------------
 
-/** `CDuelResultMsgBox`: one line, self-clearing (events/duel.ts counts). */
+/** `CDuelResultMsgBox`: one line, self-clearing (features/events/duel.ts counts). */
 const DuelResultBox = observer(() => {
   const result = duelResult();
   const stage = useStage();

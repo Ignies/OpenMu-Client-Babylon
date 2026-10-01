@@ -21,7 +21,7 @@ export type InstrumentId = 'guitar' | 'flute' | 'ocarina' | 'harp' | 'drums';
 
 /**
  * The pose is a few frames of an existing emote, copied into a clip of its
- * own and looped there and back (`band/instrumentClip.ts`): the rig has no
+ * own and looped there and back (`features/band/instrumentClip.ts`): the rig has no
  * instrument animations and its clip table is full, but the end of Again is
  * hands at the mouth and the start of Hustle is arms out in front.
  */

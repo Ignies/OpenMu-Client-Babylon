@@ -262,7 +262,7 @@ export function everyTick(n: number, fn: (i: number) => void): void {
   tick();
 }
 
-/** An `Angle[2]` in MU degrees as a model node's yaw: the conversion mirrors, so the sign flips (common/renderAngles.ts). */
+/** An `Angle[2]` in MU degrees as a model node's yaw: the conversion mirrors, so the sign flips (controllers/render/renderAngles.ts). */
 export const muYaw = (deg: number): number => (-deg * Math.PI) / 180;
 
 /** `at` + `AngleMatrix((0, 0, deg))` applied to `(0, r, 0)`, flat - the original's offset on a turned axis. */

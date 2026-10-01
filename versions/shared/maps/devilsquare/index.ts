@@ -21,20 +21,20 @@ import {
  * `create.ts` for why - and the map's own runtime is one thing:
  * `DevilSquareStorm`, the lightning `MoveObject` runs over the hero
  * (ZzzObject.cpp:3630-3644). The waves, the timer and the rank table are the
- * *event*, and live in `events/devilSquare.ts`.
+ * *event*, and live in `features/events/devilSquare.ts`.
  *
  * Weather: it always rains here, and not because of any packet.
  * `CreateDevilSquareRain` (ZzzEffectFireLeave.cpp:120-127) checks the world
  * and nothing else - the `weather` byte only gates its Crywolf half - and
  * `MoveLeaves` hands this world the full `MAX_LEAVES` budget (:428) where
- * every other map gets 80. `weather/rainState.ts` has the world in
+ * every other map gets 80. `controllers/weather/rainState.ts` has the world in
  * `ALWAYS_RAINING` for exactly that; `outdoor` here is what lets the rain
  * slot run at all.
  *
  * Sound: no `PlayWorldAmbientSounds` case, but `MoveObject` `PlayBuffer`s
  * `SOUND_RAIN01` every frame and `StopInactiveAmbientSounds`
  * (SceneManager.cpp:658) is the one place that spares the rain loop here, so
- * the `aRain` bed in `sound/ambientBeds.ts` is the original's. No music
+ * the `aRain` bed in `controllers/sound/ambientBeds.ts` is the original's. No music
  * (`ManageBackgroundMusic` has no case; `devil_square_intro/outro.ogg` are
  * the event's stingers, not a map track).
  *

@@ -135,7 +135,7 @@ export type Entity = Partial<{
   modelObject: ModelObject;
   modelFactory: typeof ModelObject;
   /**
-   * The record is drawn by a prop batch (`common/propBatches.ts`) and never
+   * The record is drawn by a prop batch (`controllers/render/propBatches.ts`) and never
    * gets a `modelObject` of its own: which type's batch, and which chunk.
    */
   propBatch: { type: number; chunk: number };
@@ -143,7 +143,7 @@ export type Entity = Partial<{
   /**
    * Playing an instrument (the band system): the held pose, the model in the
    * hand and the hits still to twitch on. `BandSystem` owns it; the facade in
-   * `common/band` adds and removes it through `common/band/performing.ts`.
+   * `features/band/music` adds and removes it through `features/band/music/performing.ts`.
    */
   performing: {
     instrument: InstrumentId;
@@ -193,7 +193,7 @@ export type Entity = Partial<{
     /**
      * `c->Run` (ZzzCharacter.cpp:159, :387-408): 0…40, climbing 25 per second
      * while the character walks outside a safe zone and its class/boots allow
-     * it. At 40 the run clips take over. See common/locomotion.ts.
+     * it. At 40 the run clips take over. See controllers/actors/locomotion.ts.
      */
     run: number;
     /**
@@ -260,7 +260,7 @@ export type Entity = Partial<{
   };
   /**
    * A short-lived emoji over (or beside) a character - see
-   * `common/emojiBubbles.ts`. `EmojiBubbleSystem` owns the lifetime and the
+   * `features/chat/emojiBubbles.ts`. `EmojiBubbleSystem` owns the lifetime and the
    * side anchor, `CalculateScreenPositionSystem` projects that anchor, and
    * the `EmojiBubbles` overlay draws it.
    */
@@ -378,7 +378,7 @@ export type Entity = Partial<{
     /**
      * A follower pet (`PetObject`): how it holds station on its owner, the
      * `PlaySpeed` of its one clip, and the seconds its body light pulses
-     * over when it has one. See `PetFollow` in common/pets.ts.
+     * over when it has one. See `PetFollow` in features/pets/pets.ts.
      */
     follow?: PetFollow;
     followSpeed?: number;
@@ -401,7 +401,7 @@ export type Entity = Partial<{
     };
   };
   /**
-   * `Boids[]` - the ambient wildlife (`common/boids.ts`, GOBoid.cpp). Created
+   * `Boids[]` - the ambient wildlife (`controllers/fx/boids.ts`, GOBoid.cpp). Created
    * and driven by BoidSystem; it has no server presence and nothing else
    * reads it.
    */
@@ -466,7 +466,7 @@ export type Entity = Partial<{
 }>;
 
 export class World extends ECSWorld<Entity> {
-  /** Centimetres per tile (the original's `TERRAIN_SCALE`); see `common/terrain/consts.ts`. */
+  /** Centimetres per tile (the original's `TERRAIN_SCALE`); see `controllers/terrain/consts.ts`. */
   readonly terrainScale = TILE_CM;
 
   viewport = new Viewport(0, 0, 1, 1);

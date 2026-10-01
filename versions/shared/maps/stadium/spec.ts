@@ -19,7 +19,7 @@ import type { Emission } from '@/controllers/fx/effectParticles';
  * `case 21: o->BlendMesh = 3` (ZzzObject.cpp:3996). Type 21 (n=11) is the
  * fountain; `Object7/Object22.glb` carries four meshes and mesh 3 is water.jpg,
  * so the basin surface is the additive one. The V scroll that runs across it
- * lives in common/meshAnimation.ts.
+ * lives in controllers/render/meshAnimation.ts.
  */
 export const STADIUM_BLEND_MESHES: Readonly<Record<number, number>> = {
   21: 3,
@@ -64,7 +64,7 @@ export const STADIUM_EMISSIONS: Partial<Record<number, readonly Emission[]>> =
  *
  * Colour follows the original's sprite tint, `(L*0.6, L*0.3, L*0.1)`
  * (ZzzObject.cpp:2949), normalised so the brightest roll lands near 1 -
- * `recipeFromEmitter` (lighting/mapObjectLights.ts) multiplies colour by luminosity, so carrying the 0.6
+ * `recipeFromEmitter` (controllers/lighting/mapObjectLights.ts) multiplies colour by luminosity, so carrying the 0.6
  * through as well would halve the light twice.
  */
 export const STADIUM_LIGHTS: Partial<Record<number, readonly LightEmitter[]>> = {

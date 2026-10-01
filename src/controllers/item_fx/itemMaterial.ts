@@ -72,7 +72,7 @@ import {
 
 const ITEM_FX_UNIFORM = `itemFx`;
 /**
- * Snow on the object's up-facing surfaces, 0…1 (weather/snowCaps.ts). Per
+ * Snow on the object's up-facing surfaces, 0…1 (controllers/weather/snowCaps.ts). Per
  * mesh, from `metadata.snowCap` and the cover at the mesh's tile; zero for
  * everything that is not a map prop on a snow map, and for glow cards.
  */
@@ -99,7 +99,7 @@ const snowCapGlsl = (albedo: string) => `
 const f = (n: number) => n.toFixed(3);
 
 /**
- * Per-instance state of a prop batch (`common/propBatches.ts`): rgb is one
+ * Per-instance state of a prop batch (`controllers/render/propBatches.ts`): rgb is one
  * placement's packed BodyLight, a the snow-cap openness of its tile. It is a
  * thin-instance attribute, so it exists only on an `INSTANCES` compile; every
  * other draw gets the varying at (1, 1, 1, 1) and the uniforms it multiplies
@@ -1010,7 +1010,7 @@ function bindBodyLight(effect: Effect, mesh: AbstractMesh, uniform: string) {
   const bodyLight = mesh.metadata?.bodyLight;
 
   if (bodyLight && UNIFIED_LIGHT_MODEL) {
-    // `cardGain`: emissive effect art's exposure (effects/core `lightCardGain`),
+    // `cardGain`: emissive effect art's exposure (controllers/fx/core `lightCardGain`),
     // which the cap above would otherwise fold back to 1.
     const blend =
       (mesh.metadata?.blendMeshLight ?? 1) * (mesh.metadata?.cardGain ?? 1);

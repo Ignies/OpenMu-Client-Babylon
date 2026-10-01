@@ -99,7 +99,7 @@ export { ParticleSystem } from '@babylonjs/core/Particles/particleSystem';
 // Side-effect import: registers the WebGL2 backend GPUParticleSystem needs.
 import '@babylonjs/core/Particles/webgl2ParticleSystem';
 // Side-effect import: puts `createEffectForParticles` on the engine, which is
-// how a system gets a custom fragment shader (weather/roomClip.ts). The two
+// how a system gets a custom fragment shader (controllers/weather/roomClip.ts). The two
 // stock fragment shaders come with it: Babylon imports them lazily on the
 // first render, and roomClip needs them in the store to derive its own.
 import '@babylonjs/core/Particles/particleSystemComponent';
@@ -164,7 +164,7 @@ import '@babylonjs/core/Lights/Shadows/shadowGeneratorSceneComponent';
 export { SSAO2RenderingPipeline } from '@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/ssao2RenderingPipeline';
 export { GeometryBufferRenderer } from '@babylonjs/core/Rendering/geometryBufferRenderer';
 // Registers AbstractMesh.renderOutline and the scene's outline renderer; the
-// inverted hull Anime 2.0 can draw (scenes/hullOutline.ts) is that and
+// inverted hull Anime 2.0 can draw (controllers/render/scenes/hullOutline.ts) is that and
 // nothing more. Its two shaders are imported here rather than left to the
 // lazy import Babylon does on the first outline draw, which the dev server's
 // dependency pre-bundle has no way to see coming and answers with a 404.

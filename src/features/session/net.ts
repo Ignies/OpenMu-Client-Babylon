@@ -54,7 +54,7 @@ EventBus.on('ServerListResponse', bytes => {
 // A socket we did not close ourselves went away: `Store.onSocketLost` ignores
 // sockets that were already handed off (deliberate closes clear the field
 // first) and otherwise starts over at the server list with a notice. Errors
-// are always followed by a close, so only the close is acted on (App.tsx
+// are always followed by a close, so only the close is acted on (app/App.tsx
 // already logs the error line).
 EventBus.on('wsClosed', ({ socket }) => {
   Store.closeNpcShop();

@@ -432,7 +432,7 @@ export function updateTerrainDynamicLight(
         k = shaped / peak;
       }
 
-      // A negative source (`lighting/characters.ts`) can pull a floor sum
+      // A negative source (`controllers/lighting/characters.ts`) can pull a floor sum
       // below zero, and a Uint8 wraps a negative to bright: the byte has no
       // sign, so the tile map stops at black and the pool carries the dark.
       deltaBytes[d] = Math.max(0, r * k);

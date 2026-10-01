@@ -51,7 +51,7 @@ import { isWingItem } from '../../controllers/actors/wings';
 import { isRidingMount, petSpec } from '../../features/pets/pets';
 import { Store } from '../../app/store';
 
-// Clip rates come from the original's PlaySpeed tables (common/playSpeed.ts);
+// Clip rates come from the original's PlaySpeed tables (controllers/anim/playSpeed.ts);
 // attack/cast rates additionally scale with the attackSpeed/magicSpeed
 // attributes (agility / class divisor, plus nothing else yet).
 // Death (delay, Die clip, corpse, fade, despawn) is owned by DeathSystem.
@@ -272,7 +272,7 @@ export const AnimationSystem: ISystemFactory = world => {
   return {
     update: dt => {
       // c->Run is a wall-clock walk-up (the original counts real frames at
-      // its own FPS). The render dt is clamped to 0.1 s in main.tsx, so under
+      // its own FPS). The render dt is clamped to 0.1 s in app/main.tsx, so under
       // 10 fps the walker (already on wall-clock time) runs while this
       // counter would still say "walking" - use the real elapsed time, capped
       // so a stalled tab does not jump straight to running.

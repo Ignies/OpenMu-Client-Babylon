@@ -85,7 +85,7 @@ export const DOPPELGANGER2_LIGHTS: Partial<
 > = VULCANUS_LIGHTS;
 
 /**
- * The per-frame mesh writes, for `common/meshAnimation.ts`.
+ * The per-frame mesh writes, for `controllers/render/meshAnimation.ts`.
  *
  *  - **15** (x0, :247-254): `StreamMesh = 0` and the body's V ramped down
  *    over ten seconds. No model in Object67 and nothing placed; kept because

@@ -11,7 +11,7 @@ import { TarkanQuakeVentObject, TarkanSandVentObject } from './ventObject';
  * (ZzzObject.cpp:4727-4736) touches exactly one of the 88 types, `MoveObject`
  * (:4036-4129) fourteen and `RenderObjectVisual` (:2956-3034) six. The UV
  * scrolls and the unphased `BlendMeshLight` sines are in
- * `common/meshAnimation.ts`; the blend meshes, the effect-only markers, the
+ * `controllers/render/meshAnimation.ts`; the blend meshes, the effect-only markers, the
  * type 70 emitter and the brazier lights are in `spec.ts`. This file is the
  * seven class assignments and the notes.
  *

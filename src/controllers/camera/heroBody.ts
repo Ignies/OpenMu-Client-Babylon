@@ -2,7 +2,7 @@
  * The hero's body, hidden while the camera sits inside it (first person and
  * the step or two before it).
  *
- * Same effect as `HiddenMesh = HIDDEN_MESH_ALL` (`common/modelObject.ts`),
+ * Same effect as `HiddenMesh = HIDDEN_MESH_ALL` (`controllers/render/modelObject.ts`),
  * but reversible and applied at runtime: `isVisible` goes off, so world
  * matrices keep updating and nameplates, effect anchors and the pick ray are
  * unaffected - which `setEnabled(false)` would not give.

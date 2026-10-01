@@ -141,7 +141,7 @@ function novaChargeTick(scene: Scene, e: Entity, graded: boolean): void {
 /** The charge starts on the 58 echo for every caster, the hero included, with SOUND_NUKE1 (WSclient.cpp:4833-4837). */
 const novaChargeWith = (graded: boolean, extra?: (c: SkillContext) => void): Step => (_at, c) => {
   const e = c.caster;
-  // Everyone else's plays with the packet (logic.ts playCastAnimation); the hero's cast path plays none.
+  // Everyone else's plays with the packet (app/logic.ts playCastAnimation); the hero's cast path plays none.
   if (e.localPlayer && e.transform) playCombat('Sound/eHellFire2_1', e.transform.pos);
   const last = novaChargeTicked.get(e);
   if (last !== undefined && fxNow() - last < 2 * TICK) return;

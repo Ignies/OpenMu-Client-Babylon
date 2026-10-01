@@ -1,6 +1,6 @@
 /**
  * First-person mouse look: the pointer lock and the raw mouse deltas it hands
- * to the facade. Picks aim at the canvas middle (`aimX`/`aimY`). See camera/readme.md.
+ * to the facade. Picks aim at the canvas middle (`aimX`/`aimY`). See controllers/camera/readme.md.
  */
 
 import { EventBus } from '../../core/eventBus';

@@ -4,9 +4,9 @@ import { spawnHitImpact } from '../../controllers/fx/impactVisuals';
 
 /**
  * Hit impacts: the **consumer** that turns the `ObjectHit` packet into
- * `effects` spawns, with the recipes in `common/impactVisuals.ts`.
+ * `effects` spawns, with the recipes in `controllers/fx/impactVisuals.ts`.
  *
- * A blow is the `ObjectHit` packet: logic.ts already emits `objectDamaged`
+ * A blow is the `ObjectHit` packet: app/logic.ts already emits `objectDamaged`
  * with the struck entity and the health / shield split; the sparks come off
  * that.
  *

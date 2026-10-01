@@ -43,10 +43,10 @@ import {
  * Driven by: `useTicket`, `enterChaosCastle`, and the `MiniGameOpeningState`
  * / `ChaosCastleEnterResult` / `BloodCastleState` / `MiniGameScoreTable`
  * packets. Read by the prompt, timer and result table in
- * `ui/pages/worldPage/components/events`.
+ * `versions/shared/ui/windows/events`.
  *
  * Also here, as in the original's CSChaosCastle.cpp: the lightning pillars'
- * thunder (`maps/chaoscastle/thunder.ts`), for the whole stay on a castle map.
+ * thunder (`versions/shared/maps/chaoscastle/thunder.ts`), for the whole stay on a castle map.
  * The original never hides the pillars: its ring hide waits on a castle level
  * nothing ever sets (CSChaosCastle.cpp:93, 315-331, 558-562).
  *
@@ -229,7 +229,7 @@ function update(map: ENUM_WORLD, dt: number): void {
 
 /**
  * Pillars drawn within `PILLAR_VIEW_TILES` of the hero. One the arena has
- * faded out (`maps/chaoscastle/arena.ts`) does not count; a batched one has
+ * faded out (`versions/shared/maps/chaoscastle/arena.ts`) does not count; a batched one has
  * no model object of its own and is always drawn.
  */
 function pillarsInView(): number {
@@ -379,7 +379,7 @@ EventBus.on('BloodCastleState', packet => {
       }
       break;
     default:
-      // 8..10 = arena stages (`maps/chaoscastle/arena.ts`); 0..4 = Blood
+      // 8..10 = arena stages (`versions/shared/maps/chaoscastle/arena.ts`); 0..4 = Blood
       // Castle.
       break;
   }

@@ -85,7 +85,7 @@ type MapObjectRecord = {
  * SceneManager.cpp:336-365), then the entry's `create` - which binds the
  * map's object classes into `MapTileObjects` and adds whatever entities the
  * map owns. Every per-map decision lives on the entry
- * (`src/maps/<name>/index.ts`); nothing here tests the world number.
+ * (`versions/shared/maps/<name>/index.ts`); nothing here tests the world number.
  */
 async function loadWorld(world: World) {
   if (!world.terrain) return;
@@ -111,7 +111,7 @@ function createObjects(world: World, objs: MapObjectRecord[]) {
     // AngleMatrix is Rz·Ry·Rx in a Z-up right-handed frame; our model-root
     // mirror means every axis is negated on the way in. Pitch/roll are
     // negated here, yaw stays MU-positive and is flipped by toRenderAngles
-    // (see common/renderAngles.ts). Previously only yaw was negated, which
+    // (see controllers/render/renderAngles.ts). Previously only yaw was negated, which
     // mirrored every tilted object (fences, signs, rocks, ramps).
     const angles = new Vector3(
       -toRadians(data.rot.x),
@@ -128,7 +128,7 @@ function createObjects(world: World, objs: MapObjectRecord[]) {
     const modelFactory = world.terrain!.MapTileObjects[data.id] || MapTileObject;
 
     // Scenery the batches can draw gets no model factory and no visibility
-    // radius: the per-object systems never see it (common/propBatches.ts).
+    // radius: the per-object systems never see it (controllers/render/propBatches.ts).
     if (batching && propBatchExclusion(world, data.id, modelFactory) === null) {
       // A lit type keeps the per-object path for its light alone: a
       // `LightCarrier` (no model) under the same radius and loader, so the

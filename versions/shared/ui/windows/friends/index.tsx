@@ -23,7 +23,7 @@ import { MuItemWindow, MuTableFrame } from '@/controllers/interface/components/m
  * letter box, in the original's item-window frame with the `newui_guild_tab`
  * strip on top, plus the third tab: the chat-room list
  * (`CUIChatRoomListTabWindow`), listing the rooms open on MU's separate chat
- * server (chatRooms.ts). Talk on an online friend opens a chat room, like
+ * server (features/chat/chatRooms.ts). Talk on an online friend opens a chat room, like
  * the original's button 3; on an offline friend it falls back to the chat
  * box's whisper field.
  */

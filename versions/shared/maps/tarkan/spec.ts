@@ -133,7 +133,7 @@ export const TARKAN_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
  * already a fire.
  *
  * The sine is ported as `flicker` rather than as a pulse because
- * `recipeFromEmitter` (lighting/mapObjectLights.ts) only runs its smooth `pulse` path for emitters that also
+ * `recipeFromEmitter` (controllers/lighting/mapObjectLights.ts) only runs its smooth `pulse` path for emitters that also
  * declare a `sprite`, and a brazier has no flare in the original. `flicker`
  * over `min` 0.3 / `max` 1.0 covers exactly the sine's range
  * (0.65 ± 0.35) in five steps; what is lost is the metronome - a random walk
@@ -151,7 +151,7 @@ export const TARKAN_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
  * this table cannot see. See `glowLampObject.ts`.
  */
 const brazier: LightEmitter = {
-  // Z only, and only for the point light: `recipeFromEmitter` (lighting/mapObjectLights.ts) reads x/z, which
+  // Z only, and only for the point light: `recipeFromEmitter` (controllers/lighting/mapObjectLights.ts) reads x/z, which
   // the offset does not move, while `resolveEmitterPosition` lifts the pooled
   // light to the bowl (0.4 tiles) instead of leaving it inside the pedestal.
   offset: [0, 0, 40],

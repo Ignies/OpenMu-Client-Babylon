@@ -7,7 +7,7 @@ import { AlphaObject, PlaySpeedObject } from '../shared/objectVariants';
  * models). There is no map code of its own: `MoveKanturu1stObject` runs here
  * too (`IsKanturu1st() || M40GMArea::IsGmArea()`, GM_kanturu_1st.cpp:43),
  * so the Kanturu 1st tables are registered for this world in every registry
- * (`maps/kanturu1/spec.ts`) and the same two per-object settings apply -
+ * (`versions/shared/maps/kanturu1/spec.ts`) and the same two per-object settings apply -
  * of which only 44 is placed at all (none of 46/76/90/96 exist here).
  *
  * No `ManageBackgroundMusic` case and no `PlayWorldAmbientSounds` case:

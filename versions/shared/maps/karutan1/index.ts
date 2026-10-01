@@ -22,7 +22,7 @@ import {
  *
  * Sound (SceneManager.cpp:943-946, `ASG_ADD_MAP_KARUTAN`):
  * `Karutan_desert_env` is the bed; `PlayObjectSound` (:345-354) adds
- * `Karutan_insect_env` on 58 (×4) and 66 (×6) - `sound/objectLoops.ts`.
+ * `Karutan_insect_env` on 58 (×4) and 66 (×6) - `controllers/sound/objectLoops.ts`.
  * `Music/Karutan_A`.
  */
 
@@ -55,7 +55,7 @@ const OUTDOOR = true;
 // Desert, the same climate flag Tarkan carries: no rain whatever the weather
 // byte says. Karutan is not one of the seven maps `CreateRain` names, its
 // bed is `Karutan_desert_env` and its sky profile is `DESERT_SKY`
-// (lighting/profiles.ts:186).
+// (controllers/lighting/profiles.ts:186).
 const DESERT = true;
 
 // ---- 2. state + readers ----------------------------------------------------

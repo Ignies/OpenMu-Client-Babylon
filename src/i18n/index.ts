@@ -129,7 +129,7 @@ class I18n {
 
   /**
    * The `Data/Local/<folder>/` pack for the active language, or null when the
-   * original never shipped one - `libs/mu/localData.ts` then reads `Eng`.
+   * original never shipped one - `controllers/assets/mu/localData.ts` then reads `Eng`.
    */
   get dataPack(): LanguageDataPack | null {
     return this.current.dataPack ?? null;

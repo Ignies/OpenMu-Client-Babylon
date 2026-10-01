@@ -287,7 +287,7 @@ export function keepDepthForEffects(scene: Scene): void {
  */
 const DARK_COVERAGE = 0.7;
 
-/** The map's level, `2^ev` (lighting/director `keyGain`). 1 on Classic. */
+/** The map's level, `2^ev` (controllers/lighting/director `keyGain`). 1 on Classic. */
 function mapKey(): number {
   return lookDirector()?.state().keyGain ?? 1;
 }
@@ -344,7 +344,7 @@ export function darkCardGain(_scene: Scene): number {
 /**
  * The level a sprite colour takes on the graded tiers: the map's key, so it
  * lands where a card lands through `lightCardGain`. The decode itself is the
- * sprite shader's (libs/babylon/spriteLinear.ts), as it is a material's, so
+ * sprite shader's (controllers/render/babylon/spriteLinear.ts), as it is a material's, so
  * the texel and the colour go linear together and the tone pass can take the
  * product back out (effects_composite §2). Classic: the colour as given. In
  * place, returns `c`.

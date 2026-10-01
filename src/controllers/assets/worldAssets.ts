@@ -4,7 +4,7 @@ import { maps } from '../maps';
 /**
  * Which `Data/World<n>` / `Data/Object<n>` folder a world draws from, and the
  * per-event world lists - the old names for what the map entries declare
- * (`MapLayer.worlds` / `MapLayer.assetWorld`, `src/maps/<name>/index.ts`).
+ * (`MapLayer.worlds` / `MapLayer.assetWorld`, `versions/shared/maps/<name>/index.ts`).
  * Every export here is a thin reader over the `maps` facade, kept so
  * `modelObject`, the terrain loaders, the sound tables and the lighting
  * tables compile unchanged.

@@ -55,7 +55,7 @@ function auraLayer(scene: Scene): HighlightLayer {
     blurVerticalSize: 3,
   });
   layer.innerGlow = false;
-  // Same stencil fix as the hover outline (scenes/testScene.ts): the blob
+  // Same stencil fix as the hover outline (controllers/render/scenes/testScene.ts): the blob
   // shadow's 0x80 bit must not flood the feet.
   const engine = scene.getEngine();
   layer.onBeforeComposeObservable.add(() =>

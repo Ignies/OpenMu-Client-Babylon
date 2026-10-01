@@ -3,7 +3,7 @@
  * (ZzzObject.cpp:4204) rolls a strike over the hero every ~2 s and, for one
  * frame, `AddTerrainLight(pos, (L*0.3, L*0.3, L*0.081), 2, …)` with
  * `L = (rand()%4 + 4) * 0.05`. The timing and the sparkles stay in
- * `maps/icarus/sky.ts`, which calls `strikeThunder` when a strike is due.
+ * `versions/shared/maps/icarus/sky.ts`, which calls `strikeThunder` when a strike is due.
  */
 import type { Scene } from '../render/babylon/exports';
 import { ENUM_WORLD } from '../../core/types';

@@ -1,6 +1,6 @@
 /**
  * Which clip a cast plays: the `UseSkill*` / `Attack*` / `ReceiveMagic` switches
- * as one lookup over `SKILL_CLIPS`, plus mount, map and random picks. See combat/readme.md.
+ * as one lookup over `SKILL_CLIPS`, plus mount, map and random picks. See controllers/combat/readme.md.
  */
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { MountKind } from '../../features/pets/pets';

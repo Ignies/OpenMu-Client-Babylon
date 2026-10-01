@@ -14,13 +14,13 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
  * Flare cards: the additive `flare01` sprite the original draws over a
  * flame (`BITMAP_LIGHT` / `BITMAP_FLARE`). Purely visual - a flare lights
  * nothing. The light a flame throws is the lighting layer's
- * (`src/lighting/mapObjectLights.ts`), whose `LightEmitter.sprite` block is
+ * (`controllers/lighting/mapObjectLights.ts`), whose `LightEmitter.sprite` block is
  * the `FlareSpec` a host hands to `createEffectLight`.
  *
  * A flare is the glow of a light, so it sits at the map's level: its colour
  * is `spec x luminosity x flareLevel` (ARCHITECTURE F12, §13 F14), repainted
  * when the director's state changes. The decode to linear is the sprite
- * shader's (libs/babylon/spriteLinear.ts), as it is for any material.
+ * shader's (controllers/render/babylon/spriteLinear.ts), as it is for any material.
  *
  * One `SpriteManager` per scene, shared by every flare on the map.
  */

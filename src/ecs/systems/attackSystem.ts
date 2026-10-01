@@ -161,7 +161,7 @@ export function isAttackablePlayer(
 /**
  * `CheckAttack` on another player, in full: `isAttackablePlayer` plus the
  * rule that makes them fair game - the duel, their PK state, or Ctrl held
- * (`combat/playerTarget`). What both click paths test.
+ * (`controllers/combat/playerTarget`). What both click paths test.
  */
 export function canAttackPlayer(
   world: Parameters<ISystemFactory>[0],

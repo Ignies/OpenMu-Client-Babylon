@@ -10,7 +10,7 @@ import type { Entity, ISystemFactory } from '../world';
 /**
  * Renders server-driven object effects:
  *  - `objectEffect` events (ShowEffect / ShowSwirl / level-up) → particle bursts
- *    at the object (effects/bursts.ts).
+ *    at the object (controllers/fx/bursts.ts).
  *  - dropped items: a soft ground glow under excellent / high-level drops so
  *    valuable loot reads from a distance (tier colours from dropTier.ts).
  */

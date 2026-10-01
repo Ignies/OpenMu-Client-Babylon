@@ -7,7 +7,7 @@ import type { Entity, World } from '@/ecs/world';
  *
  * `Velocity` *is* the play speed of a map object - `PlayAnimation` takes it
  * directly, in BMD keys per 25 Hz reference tick, the same units as
- * `ModelObject.AnimationSpeed` (common/playSpeed.ts) - and `CreateObject`
+ * `ModelObject.AnimationSpeed` (controllers/anim/playSpeed.ts) - and `CreateObject`
  * hands every object 0.16 (:4470). `FPS_ANIMATION_FACTOR` is
  * `REFERENCE_FPS / FPS` clamped to 1 (ZzzAI.cpp:729), so at the reference
  * rate the exponent is 1 and the multiplier is a flat 4. Above 25 fps it

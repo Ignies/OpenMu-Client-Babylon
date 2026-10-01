@@ -117,7 +117,7 @@ export async function prepareTerrain(scene: Scene, map: ENUM_WORLD) {
   let lightReady: Promise<Float32Array>;
 
   // The bake's border vignette comes off on the tiers that can frame it
-  // (`common/terrain/borderVignette.ts`); Classic keeps the original's fade.
+  // (`controllers/terrain/borderVignette.ts`); Classic keeps the original's fade.
   if (LIGHT_DECODE_GPU) {
     const [lightTextureData, textures] = await Promise.all([
       readOJZBufferAsJPEGBuffer(scene, lightName, terrainLightBytes),

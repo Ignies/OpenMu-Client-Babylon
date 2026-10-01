@@ -18,7 +18,7 @@ function clamp01(v: number): number {
  * Pure: no Babylon, no DOM, typed arrays in and out - so it runs in the
  * terrain worker (todo C8) and the result transfers instead of cloning.
  * `lightBuffer` is the decoded TerrainLight.OZJ, 3 floats per texel
- * (`libs/mu/terrainJpeg.ts`).
+ * (`controllers/terrain/terrainJpeg.ts`).
  *
  * `liftBorder` undoes the bake's border vignette first (`borderVignette.ts`).
  * Off on Classic, which keeps the original's fade.

@@ -111,7 +111,7 @@ class Weather implements Controller {
   /**
    * Burn a circle of settled snow off the ground: `radius` in tiles,
    * `strength` 0…1 at the centre. Called by the fire rows of
-   * `common/skillVisuals.ts`; a no-op in effect on a map without snow.
+   * `controllers/skills/visuals.ts`; a no-op in effect on a map without snow.
    */
   meltSnow(x: number, z: number, radius: number, strength = 1): void {
     meltSnow(x, z, radius, strength);
@@ -121,7 +121,7 @@ class Weather implements Controller {
    * Set the grass alight. `radius` in tiles is the hit itself; the fire
    * spreads out from there under its own vigour until it runs out of that or
    * out of grass to take. Called by the same fire rows of
-   * `common/skillVisuals.ts` that melt the snow, so every fire skill in the
+   * `controllers/skills/visuals.ts` that melt the snow, so every fire skill in the
    * game reaches it; a no-op on a map with no grass.
    */
   burnGrass(
@@ -155,6 +155,6 @@ export const weather = new Weather();
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as store.ts).
+// of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

@@ -37,7 +37,7 @@ import { EmpireGuardian4WallTorchObject } from './wallTorchObject';
  *    `MoveBlurEffect`, `SetCurrentActionMonster`, `RenderFrontSideVisual`.
  *    None of it is a map object.
  *  - **12, 20, 50 and 64** - the drawn `RenderObjectVisual` cases that need a
- *    particle kind `common/effectParticles.ts` does not have, or a system
+ *    particle kind `controllers/fx/effectParticles.ts` does not have, or a system
  *    this layer has no seam for (83, 84 and 85 are the effect-only ones, and
  *    are listed in `spec.ts`):
  *    12 (x0) two `BITMAP_SHINY+6` sprite pairs on bones 2 and 3;

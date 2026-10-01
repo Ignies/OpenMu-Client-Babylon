@@ -111,7 +111,7 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
 
     // CreateItem / CreateMoneyDrop (ZzzObject.cpp:5997-6002 / :6198): a fresh
     // drop lands with a thud, zen jingles, jewels ring - for the drops the
-    // player asked to hear (`sound/drops.ts`).
+    // player asked to hear (`controllers/sound/drops.ts`).
     if (item.IsFreshDrop) {
       playDrop(
         { isMoney, item: parsed, group, num: id },
@@ -120,12 +120,12 @@ function applyItemsDropped(p: ItemsDroppedPacket) {
     }
 
     removeNetObject(world, maskedId);
-    // CreateItem's per-level model swap (common/dropModelProxy.ts): the
+    // CreateItem's per-level model swap (features/drops/dropModelProxy.ts): the
     // shown model and its pose may come from another item's row.
     const proxy = parsed ? dropModelProxy(group, id, parsed.lvl ?? 0) : null;
     const poseGroup = proxy?.group ?? group;
     const poseNum = proxy?.num ?? id;
-    // ItemAngle (common/itemAngle.ts): the resting pose and height for this
+    // ItemAngle (controllers/actors/itemAngle.ts): the resting pose and height for this
     // item's class - armour face-down, a sword leaning back, everything 30 cm
     // (a weapon 70) off the terrain.
     const pose = proxy?.pose ?? itemRestPose(poseGroup, poseNum);

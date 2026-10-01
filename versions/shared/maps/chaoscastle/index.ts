@@ -38,7 +38,7 @@ const SPAWN = { x: 34, y: 92 } as const;
 
 // Open sky: `MoveLeaves` rains on the castle unconditionally
 // (`InChaosCastle()`, ZzzEffectFireLeave.cpp:428-436); see
-// `weather/rainState.ts` ALWAYS_RAINING.
+// `controllers/weather/rainState.ts` ALWAYS_RAINING.
 const OUTDOOR = true;
 
 // ---- 2. state + readers ----------------------------------------------------

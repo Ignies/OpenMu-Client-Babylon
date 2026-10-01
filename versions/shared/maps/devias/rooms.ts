@@ -1,5 +1,5 @@
 /**
- * The lit interiors of Devias, footprints as `maps/rooms.ts` enumerates them
+ * The lit interiors of Devias, footprints as `controllers/maps/rooms.ts` enumerates them
  * from EncTerrain3.obj (tiles). Plain data so the ambient particle system can
  * import it without pulling the map module (and its scene imports) along.
  *

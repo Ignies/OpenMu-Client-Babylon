@@ -1,6 +1,6 @@
 /**
  * The one place the client decides it is played by touch (`?mobile=1|0` overrides).
- * Imported by `main.tsx` before the version loads, so it has no imports. See readme.md.
+ * Imported by `app/main.tsx` before the version loads, so it has no imports. See readme.md.
  */
 
 const ROOT_CLASS = 'mu-mobile';

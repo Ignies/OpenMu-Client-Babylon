@@ -6,7 +6,7 @@ import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterMo
 
 // [NpcInfo(459, "Selupan")] - MODEL_SELUPAN at Scale 2.0
 // (GM_Raklion.cpp:142-156). His attack voices (ZzzOpenData.cpp:3767-3776)
-// are in sound/monsters.ts; the ice-storm / web attack staging
+// are in controllers/sound/monsters.ts; the ice-storm / web attack staging
 // (GM_Raklion.cpp:498-560) belongs to the Raklion event work (plan 3.5).
 const NPC_TYPE = 459;
 

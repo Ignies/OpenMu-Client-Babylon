@@ -4,7 +4,7 @@
  * The version comes from the active server profile's tag (the persisted
  * selection; `versionIdForTag` defaults to season6), its body from a
  * dynamic import (versions/registry.ts) - one build carries every version,
- * the page loads one. The awaits are the async boundary: `boot.tsx` and the
+ * the page loads one. The awaits are the async boundary: `app/boot.tsx` and the
  * whole app graph behind it read `gameVersion` at module scope, so they are
  * imported only after it is assigned.
  */

@@ -5,7 +5,7 @@
  * player reads, so a bad name there is on screen for good. The names below
  * replace single records of it, the way `packRepairs.ts` replaces single words
  * of the quest prose: data, keyed `"group/index"` exactly as `tools/packs/`
- * keys its own tables, read by `libs/mu/itemNameFile.ts` before the pack.
+ * keys its own tables, read by `controllers/assets/mu/itemNameFile.ts` before the pack.
  *
  * Nothing else is touched - an item keeps its slot, its stats and the English
  * `ItemName` everything in the code still keys on.

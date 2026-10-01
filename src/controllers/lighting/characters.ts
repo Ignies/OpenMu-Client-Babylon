@@ -60,7 +60,7 @@ type CharacterLight = LightRecipe & {
   readonly improvedOnly?: boolean;
 };
 
-/** A monster lit by the glow it carries (`effects/monsterGlow.ts`). */
+/** A monster lit by the glow it carries (`controllers/fx/monsterGlow.ts`). */
 function carried(
   range: number,
   heightOffset: number,

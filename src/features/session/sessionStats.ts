@@ -98,7 +98,7 @@ export const SessionStats = new (class _SessionStats {
     EventBus.on('experienceGained', ({ added, killedNetId }) => {
       runInAction(() => {
         this.experience += added;
-        // The killing blow is the client's own (`quests/killCounters.ts`
+        // The killing blow is the client's own (`features/quests/killCounters.ts`
         // reads the same field); a share from a party mate carries none.
         if (killedNetId) this.kills++;
       });

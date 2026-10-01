@@ -14,7 +14,7 @@
  * `…FinalHit`, the original's `bRepeatedly` / `bEndRepeatedly`) is kept here
  * for the damage-number stack (`CMonkSystem::SetRepeatedly`).
  *
- * Driven by `skillCastSystem` (`beginDarkSide`), `logic.ts`
+ * Driven by `skillCastSystem` (`beginDarkSide`), `app/logic.ts`
  * (`observeDarkSideTargets`, `observeRageHit`); the pending follow-ups are
  * drained by the facade's `drainDarkSideHits` from the cast system.
  */

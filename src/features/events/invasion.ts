@@ -24,7 +24,7 @@ import type { EventLayer } from './layer';
  * map's own birds.
  *
  * The meteors and the dim are here. The dragons are a boid species
- * (`common/boids.ts`, `ecs/systems/boidSystem.ts`), which is where the
+ * (`controllers/fx/boids.ts`, `ecs/systems/boidSystem.ts`), which is where the
  * original keeps them and which is why they roar from over there and not from
  * this file. The banner text stays in `matchNotices.ts`.
  */

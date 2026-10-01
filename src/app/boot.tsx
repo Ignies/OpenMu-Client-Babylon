@@ -60,7 +60,7 @@ watchPageTitle();
 void ensureCacheWorker();
 
 // What a lost game server socket does before falling back to the server
-// list. Wired here rather than in logic.ts, which the store's own module
+// list. Wired here rather than in app/logic.ts, which the store's own module
 // graph reaches before `Store` exists.
 Store.resumeHook = () => SessionResume.retry() || SessionResume.begin();
 
@@ -93,7 +93,7 @@ try {
 //
 // Unless the upscale is on, and then the drawing buffer stays the size of the
 // window and the scale is taken out of the scene alone, with the frame
-// reconstructed on the way to the screen (`scenes/upscale.ts`). The two ways
+// reconstructed on the way to the screen (`controllers/render/scenes/upscale.ts`). The two ways
 // of spending the same slider are exclusive; this is where they are chosen
 // between.
 const scaleSeam = renderScaleSeam();
@@ -108,7 +108,7 @@ reaction(
 );
 
 // The browser's own chords (Ctrl+W, Ctrl+R, F5, the zoom keys) taken off the
-// keyboard before anything else listens on it (`common/browserHotkeys.ts`).
+// keyboard before anything else listens on it (`controllers/interface/browserHotkeys.ts`).
 // The game's own keydown guards - page scroll keys, Tab, Alt, IME, the window
 // stack - live in `ecs/systems/keyboardInputSystem.ts`.
 installBrowserHotkeyGuard(
@@ -317,7 +317,7 @@ preloadPregameSprites()
   .finally(() => Store.setSpritesLoading(false))
   .then(() => preloadWorldSprites());
 
-// The published server list (`common/serverList.ts`), once per launch. Nothing
+// The published server list (`features/servers/serverList.ts`), once per launch. Nothing
 // waits on it: it fills the picker when it lands, and the saved servers are
 // what the client uses until then - or instead, if it never lands.
 refreshServerList();

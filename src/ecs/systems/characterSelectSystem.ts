@@ -132,7 +132,7 @@ function createSelectionCircleTexture(scene: Scene): DynamicTexture {
   return tex;
 }
 
-/** This system's name on the loading gate (`common/sceneGate.ts`). */
+/** This system's name on the loading gate (`controllers/loading/sceneGate.ts`). */
 const GATE = 'characterSelect';
 
 /** Opacity the ring settles at once its character has the focus. */
@@ -195,9 +195,9 @@ export const CharacterSelectSystem: ISystemFactory = world => {
 
   /**
    * The focused character's key light. It takes a slot from the shared pool
-   * (`common/pointLightPool.ts`) instead of adding a `PointLight` of its own:
+   * (`controllers/lighting/pointLightPool.ts`) instead of adding a `PointLight` of its own:
    * every object material in the scene is compiled with `2 + budget` light
-   * slots (`common/lightingQuality.ts`), and Babylon fills a mesh's
+   * slots (`controllers/lighting/lightingQuality.ts`), and Babylon fills a mesh's
    * `lightSources` from layer masks, never from range - so a light outside
    * the pool is a shader recompile plus a slot that every object pixel in the
    * scene evaluates, reached or not. On Classic the budget is 0 by design

@@ -178,7 +178,7 @@ export function createPostChain(
     // bypassed outright on every tier: an identity pass is still a resolve.
     const graded = post && shaped;
 
-    // The tone pass (scenes/toneMap.ts) runs ahead of this pipeline and owns
+    // The tone pass (controllers/render/scenes/toneMap.ts) runs ahead of this pipeline and owns
     // the exposure, the tone mapping and the effect composite while it is
     // live; the pass here then does the white balance and the decoration only.
     const filmic = graded && toneMapLive();

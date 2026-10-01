@@ -5,7 +5,7 @@
  * the first frame; read by `legacyQuests.ts` (definitions + dialog pages),
  * `questLog.ts` (progress steps + words) and the quest windows (names).
  *
- * The binary decoding lives in `libs/mu/questFiles.ts` next to `gates.ts`;
+ * The binary decoding lives in `controllers/assets/mu/questFiles.ts` next to `gates.ts`;
  * this entry only owns the loaded tables and the lookups over them.
  */
 import { observable, runInAction } from 'mobx';

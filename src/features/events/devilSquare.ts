@@ -37,7 +37,7 @@ import {
  * Driven by: `NpcWindowResponse` (DevilSquare) via `openDevilSquare`, the
  * inventory ticket via `useTicket`, and the `DevilSquareEnterResult` /
  * `MiniGameOpeningState` / `MiniGameScoreTable` packets. Read by the
- * entry window and result table in `ui/pages/worldPage/components/events`.
+ * entry window and result table in `versions/shared/ui/windows/events`.
  *
  * There is no per-second match clock for the square: the original only
  * has the 30 s state countdown line (`matchNotices.ts`).

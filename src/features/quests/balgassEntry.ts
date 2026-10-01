@@ -7,7 +7,7 @@
  *
  * Driven by: the NPC click (`talkToBalgassNpc`, through `quests.useNpc`),
  * `npcTalkStarted` and the map change. Read by: the box in
- * `ui/pages/worldPage/components/balgassEntry`.
+ * `versions/shared/ui/windows/balgass_entry`.
  */
 import { observable, runInAction } from 'mobx';
 import { t } from '../../i18n';

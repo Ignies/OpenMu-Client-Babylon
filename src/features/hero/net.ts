@@ -113,7 +113,7 @@ function applyCharacterInformation(p: CharacterInformationView) {
     Store.uiState = UIState.World;
     SessionResume.remember(playerData.name);
     SessionResume.finish();
-    // Lazy: preloadSprites pulls the window layouts in, and logic.ts sits under them.
+    // Lazy: preloadSprites pulls the window layouts in, and app/logic.ts sits under them.
     void import('@/controllers/assets/mu/preloadSprites').then(m => m.preloadWorldSprites());
 
     EventBus.emit('requestWarp', { map: p.MapId, pos: { x: p.X, y: p.Y } });
@@ -422,7 +422,7 @@ function applyExperienceGained(p: { AddedExperience: number; KilledObjectId: num
   const added = p.AddedExperience;
   if (added <= 0) return;
 
-  // ReceiveDieExp (WSclient.cpp:5719-5743): a master gains master experience instead (skills/masterLevel.ts).
+  // ReceiveDieExp (WSclient.cpp:5719-5743): a master gains master experience instead (features/skills/masterLevel.ts).
   const pd = Store.playerData;
   if (!masterExperienceActive(pd.charClass, pd.level)) runInAction(() => (pd.exp += added));
 
@@ -490,7 +490,7 @@ EventBus.on('CharacterStatIncreaseResponseExtended', packet => {
 /**
  * F3 51 extended - `Receive_Master_LevelUp` with `LPPMSG_MASTERLEVEL_UP_EXTENDED`:
  * the master level plus 32-bit maximum life / mana / shield / BP. The level
- * and points go to `skills/masterLevel.ts` (its own handler); the maximums
+ * and points go to `features/skills/masterLevel.ts` (its own handler); the maximums
  * belong to the hero's stats here.
  */
 EventBus.on('MasterCharacterLevelUpdateExtended', packet => {

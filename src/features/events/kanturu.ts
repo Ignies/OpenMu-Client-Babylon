@@ -38,7 +38,7 @@ import { EVENT_TEXT, formatText } from './recipes';
  * `KanturuMonsterUserCount`, `KanturuTimeLimit` and `KanturuBattleResult`
  * drive the HUD while the hero is on the event map;
  * `KanturuMayaWideAreaAttack` is cosmetic. Read by: the windows in
- * `ui/pages/worldPage/components/events`.
+ * `versions/shared/ui/windows/events`.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

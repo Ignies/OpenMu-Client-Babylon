@@ -38,7 +38,7 @@ export type { QuestLayer } from './layer';
  * `quests.reset` on a map change (`loadMapIntoScene`); both fan out over
  * `QUEST_LAYERS` (`layers.ts`), the only list of entries in the codebase.
  * The readers and commands below are the facade's public surface for
- * consumers that want the whole system from one import (`logic.ts`, the
+ * consumers that want the whole system from one import (`app/logic.ts`, the
  * bottom bar); every entry file stays importable directly for the windows.
  */
 class Quests {
@@ -202,6 +202,6 @@ export const quests = new Quests();
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as store.ts).
+// of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

@@ -29,7 +29,7 @@ import type { Emission } from '@/controllers/fx/effectParticles';
  * `MoveObject` writes only `BlendMeshTexCoordU` for them and never a
  * `BlendMesh`, because the scroll is consumed by `StreamMesh = 1` in
  * `Draw_RenderObject` (ZzzObject.cpp:1022-1032) instead. That half lives in
- * common/meshAnimation.ts.
+ * controllers/render/meshAnimation.ts.
  */
 export const LOST_TOWER_BLEND_MESHES: Readonly<Record<number, number>> = {
   18: 1,
@@ -75,7 +75,7 @@ export const LOST_TOWER_EMISSIONS: Partial<Record<number, readonly Emission[]>> 
 /**
  * `Luminosity` as `RenderObjectVisual` rolls it (ZzzObject.cpp:2743):
  * `(rand() % 30 + 70) * 0.01f`. 30 steps across 0.70…0.99 reproduces it
- * exactly - `recipeFromEmitter` (lighting/mapObjectLights.ts) walks `min + step * (max - min) / (steps - 1)`,
+ * exactly - `recipeFromEmitter` (controllers/lighting/mapObjectLights.ts) walks `min + step * (max - min) / (steps - 1)`,
  * which for these numbers is `0.70 + step * 0.01`.
  */
 const VISUAL_LUMINOSITY = { min: 0.7, max: 0.99, steps: 30 } as const;

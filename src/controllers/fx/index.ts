@@ -16,11 +16,11 @@ export { delay, fxNow } from './core';
  *
  * The game talks to `effects.update` once a frame
  * (`ecs/systems/effectSystem.ts`) and `effects.reset` on a map change
- * (`libs/mu/loadMapIntoScene.ts`); both fan out over `EFFECT_LAYERS`
+ * (`controllers/terrain/loadMapIntoScene.ts`); both fan out over `EFFECT_LAYERS`
  * (`layers.ts`), the only list of entries. `spawn(name, …)` is the one
  * command: the name is an entry's `name`, the options its own type.
  *
- * `common/skillVisuals.ts` is the consumer that maps skill ids and buff ids
+ * `controllers/skills/visuals.ts` is the consumer that maps skill ids and buff ids
  * to spawns; this facade holds no state of its own.
  */
 
@@ -89,6 +89,6 @@ export const effects = new Effects();
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as store.ts).
+// of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

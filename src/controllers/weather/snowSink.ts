@@ -91,7 +91,7 @@ export function snowUnderfoot(world: World, x: number, z: number): number {
     acc += share * w;
   }
 
-  // What fire has taken off the ground (weather/snowMelt.ts), with the
+  // What fire has taken off the ground (controllers/weather/snowMelt.ts), with the
   // shader's own falloff - so a hero standing in a patch a fireball opened
   // neither sinks into snow that is no longer drawn there nor stamps a print
   // into it. Applied to the finished share rather than per corner: a melt is

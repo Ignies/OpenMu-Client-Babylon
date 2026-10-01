@@ -6,7 +6,7 @@ import { AlphaObject } from '../shared/objectVariants';
  * quest's final cave, 354 objects.
  *
  * Runs the same `CGM3rdChangeUp::MoveObject` as the Barracks; the tables
- * live in `maps/balgasbarracks/spec.ts` and are registered for this world
+ * live in `versions/shared/maps/balgasbarracks/spec.ts` and are registered for this world
  * from there. Per-object: **78** `Alpha = 0.5` (none placed here - kept so
  * the two maps behave identically if the .obj changes).
  *

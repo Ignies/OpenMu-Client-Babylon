@@ -40,7 +40,7 @@ import { BandSender } from './bandSender';
  * proxy has said hello - a proxy without the relay would forward the code
  * to the game server, which is nobody's business.
  *
- * Installed once from `logic.ts`. Everything it knows about instruments it
+ * Installed once from `app/logic.ts`. Everything it knows about instruments it
  * reads off the registry; everything it does with them goes through the
  * facade.
  */

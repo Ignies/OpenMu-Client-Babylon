@@ -6,7 +6,7 @@
  * `MoveEffect` / `RenderEffect` branches (ZzzEffect.cpp).
  *
  * Loading is asynchronous through the shared GLB container cache
- * (`common/modelLoader.ts`, read-only use); the mesh appears when it has
+ * (`controllers/assets/modelLoader.ts`, read-only use); the mesh appears when it has
  * decoded, if the effect is still alive, and a second spawn of the same
  * model is a clone. A spawn can `follow` a moving point (a projectile) and be
  * turned with `yawTo` by whoever moves it.
@@ -179,7 +179,7 @@ export interface ModelOptions {
   alongPath?: boolean;
   /**
    * Let the mesh into the sun cascades. Off by default: an effect mesh is
-   * light, not matter, and `scenes/shadows.ts castsSunShadow` drops every
+   * light, not matter, and `controllers/render/scenes/shadows.ts castsSunShadow` drops every
    * bright mesh for that reason. A spirit is the exception the wings already
    * are (`shadowBlendCaster`) - the card *is* the body, so it should throw a
    * shadow as it goes over the ground. The shadow layer still decides whether
@@ -242,7 +242,7 @@ export interface ModelOptions {
    * terrain light under it plus `light` (`RequestTerrainLight + o->Light`). `stamp` is copied onto
    * every mesh's metadata (the wielded item's level and tier, so it keeps its glow). `alpha` below 1
    * switches the solid meshes to the blended variant of the same material. `blendMesh` / `hiddenMesh` /
-   * `blendMeshLight` are the item's `ItemObjectAttribute` mesh rules (common/itemObjectAttribute.ts):
+   * `blendMeshLight` are the item's `ItemObjectAttribute` mesh rules (controllers/actors/itemObjectAttribute.ts):
    * that mesh (-2 every mesh) additive at `BodyLight x BlendMeshLight(ms)` and deaf to `alpha`, as
    * RenderMesh draws it (ZzzBMD.cpp:2022-2036, :2099), and that mesh skipped.
    */

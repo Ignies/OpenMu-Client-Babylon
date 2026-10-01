@@ -26,7 +26,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 /**
  * No `o->BlendMesh` writes anywhere in GMEmpireGuardian4.cpp. Type 81's
  * `o->BlendMeshTexCoordV += 0.015f` (:227-231) is a UV scroll, not a blend
- * mesh, and lives in `common/meshAnimation.ts`.
+ * mesh, and lives in `controllers/render/meshAnimation.ts`.
  */
 export const EMPIRE_GUARDIAN_4_BLEND_MESHES: Readonly<
   Record<number, number>
@@ -52,7 +52,7 @@ export const EMPIRE_GUARDIAN_4_EFFECT_ONLY_TYPES: readonly number[] = [
  * (12, 20, 37, 50, 64, 157, 158) cannot live here - 37 and 157 are classes in
  * `create.ts`, the rest are the gaps listed at the bottom of this comment.
  *
- * Not ported, each because `common/effectParticles.ts` has no kind for the
+ * Not ported, each because `controllers/fx/effectParticles.ts` has no kind for the
  * sheet and this file may not add one:
  *
  *  - **83 (x25)** :957-962 - `BITMAP_WATERFALL_3` SubType 14, white. Init is
@@ -129,7 +129,7 @@ export const EMPIRE_GUARDIAN_4_ABSENT_MODELS: readonly number[] = [
  * x20). The original is `CreateSprite(BITMAP_FLARE, bone1, 4 * Scale, grey)`
  * with `grey = ((sin(WorldTime * 0.039) + 1) * 0.2 + 0.6) * 0.7`, i.e. 0.42
  * to 0.70 - the `pulse` block below is that curve exactly. The colour and the
- * point light are `LOGIN_WALL_TORCH`'s (lighting/mapObjectLights.ts), kept
+ * point light are `LOGIN_WALL_TORCH`'s (controllers/lighting/mapObjectLights.ts), kept
  * identical so a wall torch reads the same on day 4 and on the login scene.
  *
  * Hosted by `wallTorchObject.ts` rather than by a row in the table because
@@ -153,7 +153,7 @@ export const EMPIRE_GUARDIAN_4_WALL_TORCH: LightEmitter = {
 /**
  * Type 157's light, `Chandelier.smd` (x6). The original hangs no light on it
  * at all - this is ours, at the object origin with the table candle's colour,
- * and it is the row `common/mapTileObject.ts` already uses for the login
+ * and it is the row `controllers/terrain/mapTileObject.ts` already uses for the login
  * scene under the name `LOGIN_CHANDELIER`.
  */
 export const EMPIRE_GUARDIAN_4_CHANDELIER: LightEmitter = {
@@ -166,7 +166,7 @@ export const EMPIRE_GUARDIAN_4_CHANDELIER: LightEmitter = {
 
 /**
  * The two lit marker boxes, moved here verbatim from the local
- * `EMPIRE_GUARDIAN_4_LIGHTS` in `lighting/mapObjectLights.ts` so day 4 owns
+ * `EMPIRE_GUARDIAN_4_LIGHTS` in `controllers/lighting/mapObjectLights.ts` so day 4 owns
  * its own table like every other ported map.
  *
  * 37 and 157 are not rows here on purpose: both need a bone, so they are

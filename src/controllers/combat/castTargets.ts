@@ -1,6 +1,6 @@
 /**
  * Who a cast is aimed at (the key the original puts in `SendRequestMagic`).
- * Readers only. See combat/readme.md.
+ * Readers only. See controllers/combat/readme.md.
  */
 import type { SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import type { CombatLayer } from './layer';

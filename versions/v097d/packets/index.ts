@@ -6,7 +6,7 @@
  * shared code is `gameVersion.protocol.variantRank`'s job.
  *
  * Export exactly these names: the dispatcher in
- * `libs/sockets/createSocket.ts` reads them off the resolved version.
+ * `controllers/net/sockets/createSocket.ts` reads them off the resolved version.
  */
 import { ServerToClientPackets as generated } from '../../shared/packets/ServerToClientPackets';
 import { ChangeMapServerInfoPacket } from '../../season6/packets/mapServerMove';

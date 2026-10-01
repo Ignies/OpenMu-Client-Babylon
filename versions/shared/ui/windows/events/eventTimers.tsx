@@ -33,7 +33,7 @@ import {
  * slot's place whether the minimap panel is drawn in it or not, so nothing
  * below them moves when that option is toggled.
  *
- * Reads `events/schedule.ts` and writes nothing.
+ * Reads `features/events/schedule.ts` and writes nothing.
  */
 
 const LABEL: Readonly<Record<EventScheduleKey, () => string>> = {

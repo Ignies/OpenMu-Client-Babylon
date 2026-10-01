@@ -22,7 +22,7 @@ export { StorageKind, TRADE_COLUMNS, TRADE_ROWS, TRADE_SLOTS };
  * Server-side it is the same temporary storage as the Chaos Machine
  * (MoveItemAction.cs), so the client keeps it as `StorageKind.ChaosMachine`
  * locally and only the move packets carry this byte while the card window
- * is the open one (economy.ts `mixWireStorage`).
+ * is the open one (features/economy/economy.ts `mixWireStorage`).
  */
 export const CHAOS_CARD_WIRE_STORAGE = 9;
 

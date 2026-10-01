@@ -1,6 +1,6 @@
 /**
  * Aura: the look an `eBuffState` keeps on a body until stopped (ZzzCharacter.cpp:10795, :10770;
- * ZzzEffect.cpp:7006, :9563). Rows are `BUFF_VISUALS` in skills/visuals.ts. See fx/readme.md.
+ * ZzzEffect.cpp:7006, :9563). Rows are `BUFF_VISUALS` in features/skills/visuals.ts. See fx/readme.md.
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
 import {

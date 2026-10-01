@@ -17,7 +17,7 @@ const OFF_SCREEN = 'translate(-10000px, -10000px)';
 const PICTURE = { width: 44, height: 44 };
 
 /**
- * A character's emoji bubble (`common/emojiBubbles.ts`).
+ * A character's emoji bubble (`features/chat/emojiBubbles.ts`).
  *
  * Both placements ride their own projected world anchor - over the head, or
  * on the shoulder `EmojiBubbleSystem` picks as the one facing the camera.

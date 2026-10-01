@@ -9,7 +9,7 @@ type FakeSprite = {
 const fakes = vi.hoisted(() => ({ sprites: [] as FakeSprite[] }));
 
 // Babylon's sprites, the data folder and the effects layer are stubbed: the
-// real ones need a GPU scene, and `maps` / `effects/core` reach the store.
+// real ones need a GPU scene, and `maps` / `controllers/fx/core` reach the store.
 vi.mock('../render/babylon/exports', () => {
   class Color4 {
     constructor(

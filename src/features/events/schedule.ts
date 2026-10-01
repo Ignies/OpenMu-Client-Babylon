@@ -18,7 +18,7 @@ import {
 export type { EventScheduleEntry } from './scheduleClock';
 
 /**
- * When each event next opens, on the one clock (`common/serverTime.ts`).
+ * When each event next opens, on the one clock (`controllers/net/serverTime.ts`).
  *
  * The only writer of that state. It is fed by the three
  * `MiniGameOpeningState` handlers (`bloodCastle.ts`, `devilSquare.ts`,
@@ -28,7 +28,7 @@ export type { EventScheduleEntry } from './scheduleClock';
  * OpenMU answers it from `MiniGameOpeningStateRequestHandlerPlugIn` with no
  * NPC dialog open: the only thing it asks for is a selected character.
  *
- * Read by the HUD rows in `ui/pages/worldPage/components/events`.
+ * Read by the HUD rows in `versions/shared/ui/windows/events`.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

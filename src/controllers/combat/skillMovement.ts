@@ -1,6 +1,6 @@
 /**
  * What a cast does to where the hero is: stop (ZzzInterface.cpp:1935), step in
- * (MonkSystem.cpp:445-485), root (ZzzInterface.cpp:7394-7419). See combat/readme.md.
+ * (MonkSystem.cpp:445-485), root (ZzzInterface.cpp:7394-7419). See controllers/combat/readme.md.
  */
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { CombatLayer } from './layer';

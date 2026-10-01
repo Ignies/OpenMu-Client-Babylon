@@ -16,7 +16,7 @@ import {
 /**
  * Blood Castle (`WD_11BLOODCASTLE1` … `_END` and the master-level 52 - eight
  * server instances on one art set, `World12` + `Object12`; see
- * `common/worldAssets.ts`).
+ * `controllers/assets/worldAssets.ts`).
  *
  * What the original does per object here, and where each piece went:
  *  - 11 candelabra / 13 lamps: bone-anchored light sprites on a sine
@@ -24,7 +24,7 @@ import {
  *  - 36 the gate, 9/10 the bridge it becomes: `ActionObject`
  *    (ZzzObject.cpp:60-140) - `gate.ts` + `gateObject.ts`. The server clears
  *    the moat's `TW_NOGROUND` when the bridge is earned
- *    (libs/mu/terrainAttributeUpdates), and that clearing is what the fall
+ *    (controllers/terrain/terrainAttributeUpdates), and that clearing is what the fall
  *    watches for.
  *  - 37 smoke vents: `spec.ts` emissions.
  *  - 28/29 (`RenderObject`, ZzzObject.cpp:1041-1057): two statue types drawn
@@ -36,10 +36,10 @@ import {
  *    ZzzObject.cpp:4315-4330: a `BITMAP_FLARE` every fourth tick in a 9x9 tile
  *    box around the player, 2.5-3 tiles up) are a hero-relative ambient, so
  *    they live with the weather: `BLOOD_CASTLE_MOTES` in
- *    `weather/ambientWeather.ts`.
+ *    `controllers/weather/ambientWeather.ts`.
  *
  * The Castle Gate and the Statue of Saint are monsters, not map objects:
- * `common/monsters/bloodCastleGate.ts`.
+ * `versions/shared/monsters/blood_castle_gate.ts`.
  *
  * Falling off: `deathSystem` already reads the `TW_ACTION` rails at x 13/15
  * (y 16-21) and the moat's `TW_NOGROUND` to pick the fall animation

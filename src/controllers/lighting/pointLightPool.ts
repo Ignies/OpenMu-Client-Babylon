@@ -351,7 +351,7 @@ export function updatePointLightPool(elapsedMs: number, camera: Camera): void {
     );
 
     // On magnitude: a negative source (the fire around Tantallos and Death
-    // Beam Knight, `lighting/characters.ts`) keeps its sign in the colour
+    // Beam Knight, `controllers/lighting/characters.ts`) keeps its sign in the colour
     // and its strength in the intensity, and the shader subtracts it.
     const peak = Math.max(Math.abs(r), Math.abs(g), Math.abs(b), 0.001);
 

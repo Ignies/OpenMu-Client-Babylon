@@ -2,12 +2,12 @@
  * Active buffs / debuffs of the hero with the moment each one arrived.
  *
  * Driven by `Store.buffs` (MagicEffectStatus 0x07 / MagicEffectCancelled,
- * `logic.ts`): a MobX reaction stamps every newly present effect id with the
+ * `app/logic.ts`): a MobX reaction stamps every newly present effect id with the
  * layer clock. OpenMU S6 sends no durations, so `buffRemaining` only counts
  * down for effects whose duration formula the client knows (`recipes.ts`),
  * and answers `null` otherwise.
  *
- * Read by the buff bar (`ui/components/buffBar`) through `skills.activeBuffs`
+ * Read by the buff bar (`versions/shared/ui/hud/buff_bar`) through `skills.activeBuffs`
  * / `skills.buffRemaining`, and by the usability rules (`usability.ts`).
  */
 import { reaction } from 'mobx';
@@ -49,7 +49,7 @@ let stopWatching: (() => void) | null = null;
 
 /**
  * Start following `Store.buffs`. Deferred to the first `update` on purpose:
- * `store.ts` imports (through `logic.ts` and the facade) this very file, so
+ * `app/store.ts` imports (through `app/logic.ts` and the facade) this very file, so
  * at module-evaluation time `Store` is still in its temporal dead zone and a
  * top-level reaction throws `Cannot access 'Store' before initialization`.
  * By the first frame every module has finished evaluating.

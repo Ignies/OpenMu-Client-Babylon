@@ -32,7 +32,7 @@ const POSE_WAIT_LIMIT = 120;
  * ```
  *
  * so the chandelier is lit on **day 4 only** and is deliberately cold on the
- * login and character scenes. `common/mapTileObject.ts` has it the other way
+ * login and character scenes. `controllers/terrain/mapTileObject.ts` has it the other way
  * round - it builds the bone fire when `WorldIndex === WD_73NEW_LOGIN_SCENE`
  * and never on `WD_72EMPIREGUARDIAN4` - which is why this class exists and
  * why it is registered for day 4 alone.

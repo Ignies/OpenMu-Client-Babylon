@@ -16,8 +16,8 @@ import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterMo
  * of where the server says they stand, which is how the big models line up
  * with the masonry (`RenderObject`, ZzzObject.cpp:264-279).
  *
- * Their hits are in `common/impactVisuals.ts` and their deaths in
- * `common/deathVisuals.ts`, next to every other special hit and death.
+ * Their hits are in `controllers/fx/impactVisuals.ts` and their deaths in
+ * `controllers/fx/deathVisuals.ts`, next to every other special hit and death.
  */
 
 /** [NpcInfo(131, "Castle Gate")] - MONSTER_MODEL_CASTLE_GATE. */

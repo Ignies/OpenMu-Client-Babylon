@@ -13,7 +13,7 @@ import { useUiStageScale } from '@/controllers/interface/components/ui_stage';
 
 /**
  * `CUISlideHelp::Render`: the marquee band at the top of the screen. The
- * lane state (position, speed, alpha) is simulated in `common/slideHelp.ts`
+ * lane state (position, speed, alpha) is simulated in `controllers/interface/slideHelp.ts`
  * at the original's 25 Hz factors; this component only paints it, measures
  * the text width the simulation needs, and reports mouse hover (which
  * decelerates the scroll).

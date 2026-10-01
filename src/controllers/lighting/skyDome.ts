@@ -57,7 +57,7 @@ export type ClearLook = {
  */
 const DOME_RADIUS = 2000;
 
-/** Dev seam, shared with the fog it belongs to (`scenes/heightFog.ts`). */
+/** Dev seam, shared with the fog it belongs to (`controllers/render/scenes/heightFog.ts`). */
 const uwDev = devQueryNumber('uw');
 
 const DOME_SEGMENTS = 24;

@@ -31,7 +31,7 @@ import {
  *
  * All four are `_R` textures, which `parseTextureScript` marks bright and
  * `createItemMaterial` then composes through `brightOverride`
- * (`common/itemMaterial.ts`) - and that drops the body-light multiply on any
+ * (`controllers/item_fx/itemMaterial.ts`) - and that drops the body-light multiply on any
  * bright mesh that does not also scroll. This map has no `meshAnimation` row,
  * so a class writing `metadata.bodyLight` here changes nothing on screen
  * while costing 593 of the map's 7789 records their place in the prop

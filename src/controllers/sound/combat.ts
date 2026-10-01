@@ -25,14 +25,14 @@ import { SoundsManager } from './soundsManager';
  * ZzzCharacter.cpp:4280-5045, `ReceiveAttackSkill` WSclient.cpp:3880-4760).
  * Monster voices are their own entry (`monsters.ts`).
  *
- * Driven by: `CombatSfxSystem` (swing / pain / death), `logic.ts` and
+ * Driven by: `CombatSfxSystem` (swing / pain / death), `app/logic.ts` and
  * `skillCastSystem` (skills, hits), through the selectors + `playCombat` /
  * `playSkill`. Command-only: no per-frame state.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Swings, hits, screams and casts are one category (`sound/buses.ts`). */
+/** Swings, hits, screams and casts are one category (`controllers/sound/buses.ts`). */
 export const COMBAT_BUS: SoundBus = 'combat';
 
 /** MODEL_LIGHT_SABER = MODEL_SWORD + 10, MODEL_SPEAR = spear group index 0 (_enum.h:1504, :1451). */
@@ -142,7 +142,7 @@ export function playerDeathSound(cls: CharacterClassNumber): Sounds {
 /**
  * Skills whose sound the original plays with the effect at AttackTime 15, 14 ticks after the
  * echo (ZzzCharacter.cpp:4724-4754, :5147-5156, :5213-5223), not at the cast: the skill row plays these
- * (`playLandingSound`, common/skillVisuals.ts), so the cast is silent here.
+ * (`playLandingSound`, controllers/skills/visuals.ts), so the cast is silent here.
  */
 const LANDING_SOUNDS: ReadonlySet<number> = new Set([214, 216, 221, 222, 458, 459, 460, 462]);
 

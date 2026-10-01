@@ -12,7 +12,7 @@ import { driveRenderList } from '../render/scenes/renderList';
 
 /**
  * The halo around effect art: its own `GlowLayer` that draws only the meshes entries hand it,
- * apart from the item halo (`scenes/sceneLook.ts`). Off without post processing. See fx/readme.md.
+ * apart from the item halo (`controllers/render/scenes/sceneLook.ts`). Off without post processing. See fx/readme.md.
  */
 
 const SLIDER_MAX = 9;

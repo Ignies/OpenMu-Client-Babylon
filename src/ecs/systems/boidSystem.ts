@@ -27,7 +27,7 @@ import type { Entity, ISystemFactory } from '../world';
  * the per-frame steps are per 25 Hz tick scaled by the frame's own delta -
  * the same `FPS_ANIMATION_FACTOR` the original multiplies through.
  *
- * The species and where each one flies are in `common/boids.ts`.
+ * The species and where each one flies are in `controllers/fx/boids.ts`.
  */
 
 /** Spawn box around the hero: `rand()%1024 - 512` in x and y. */

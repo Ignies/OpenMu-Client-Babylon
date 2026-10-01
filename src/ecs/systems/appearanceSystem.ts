@@ -83,7 +83,7 @@ export const AppearanceSystem: ISystemFactory = world => {
         if (!charAppearance.changed) continue;
         if (!modelObject.Ready) continue;
         // A character wearing a whole monster has no equipment sockets to
-        // dress: the skin is the body (`common/transformedBody.ts`).
+        // dress: the skin is the body (`controllers/actors/transformedBody.ts`).
         if (!isPlayerBody(modelObject)) continue;
 
         const playerObject = modelObject as PlayerObject;

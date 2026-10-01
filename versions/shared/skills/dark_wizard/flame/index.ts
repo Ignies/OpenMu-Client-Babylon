@@ -7,7 +7,7 @@ import { effects } from '@/controllers/fx';
 import { flame } from '@/controllers/lighting/recipes';
 
 /**
- * `n` fire pillars (effects/pillar.ts): the first on the point, the rest scattered `radius` tiles
+ * `n` fire pillars (controllers/fx/pillar.ts): the first on the point, the rest scattered `radius` tiles
  * around it a third to the full way out, `every` seconds apart, each on its own ground height.
  */
 const firePillars = (n: number, radius: number, every: number): Step => (at, c) => {
@@ -23,7 +23,7 @@ const firePillars = (n: number, radius: number, every: number): Step => (at, c) 
 export default defineSkill({
   id: 5,
   name: "Flame",
-  // 5 Flame: the renewed look - fire pillars out of molten rock around the point (effects/pillar.ts), in place
+  // 5 Flame: the renewed look - fire pillars out of molten rock around the point (controllers/fx/pillar.ts), in place
   // of the BITMAP_FLAME sub0 LT 40 tongue column the original stacked at SkillXY (ZzzCharacter.cpp:4485).
   visual: { area: seq(firePillars(3, 1.4, 0.1), scorch(1.5), burn(1.2)) },
   sound: 'Sound/sFlame', // Flame

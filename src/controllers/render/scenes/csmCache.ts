@@ -159,7 +159,7 @@ export class CsmCache {
    * trimmed with `length`, never `push`: Babylon hooks a render list's push
    * and splice and marks every mesh in the scene light-dirty on an
    * empty-to-filled transition (objectRenderer.js:88), which is the storm
-   * scenes/renderList.ts exists to avoid.
+   * controllers/render/scenes/renderList.ts exists to avoid.
    */
   private readonly statics: AbstractMesh[] = [];
   private readonly dynamics: AbstractMesh[] = [];

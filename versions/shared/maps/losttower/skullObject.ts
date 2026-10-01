@@ -129,7 +129,7 @@ export class LostTowerSkullObject extends MapTileObject {
     // `Hero->Object.CurrentAction` between PLAYER_WALK_MALE and
     // PLAYER_RUN_RIDE_WEAPON, or one of the two Rage-uniform runs
     // (ZzzEffectFireLeave.cpp:90-91). Note this is a *narrower* test than
-    // sound/footsteps': CheckSkull predates the two-handed-sword-two and
+    // controllers/sound/footsteps': CheckSkull predates the two-handed-sword-two and
     // ride-horse clips and was never extended to them, so a player on a horse
     // walks through the bones without touching them. Kept as the original has
     // it - the alternative is inventing behaviour for actions the function has

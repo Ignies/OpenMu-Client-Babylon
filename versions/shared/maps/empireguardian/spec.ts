@@ -13,8 +13,8 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  * day 3, 0.64 on the others. EncTerrain70-73.obj: 836 / 729 / 748 / 1670
  * objects.
  *
- * Days 1-3 only. Day 4 owns its own tables in `maps/empireguardian4/spec.ts`
- * and the login scenes theirs in `maps/loginscene/spec.ts`; the three used to
+ * Days 1-3 only. Day 4 owns its own tables in `versions/shared/maps/empireguardian4/spec.ts`
+ * and the login scenes theirs in `versions/shared/maps/loginscene/spec.ts`; the three used to
  * be one set here, on the reading that day 4 *was* the login scene, which is
  * also where the 628 in the object counts above came from - that is
  * World78's total, not World73's.

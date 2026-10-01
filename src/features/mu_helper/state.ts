@@ -10,9 +10,9 @@ import {
 
 /**
  * MU Helper state: the live config the loop follows and the window's draft.
- * Single writer of both; `logic.ts` keeps landing the raw blob in
+ * Single writer of both; `app/logic.ts` keeps landing the raw blob in
  * `Store.muHelper.config` and a reaction decodes it here (the deferred
- * pattern of `skills/buffs.ts` - at module evaluation `Store` is still in
+ * pattern of `features/skills/buffs.ts` - at module evaluation `Store` is still in
  * its temporal dead zone).
  */
 export const MuHelperState = observable({

@@ -10,7 +10,7 @@
  * drop stands to attention in the grass.
  *
  * `o->Angle` is MU's Z-up (pitch, roll, yaw); `transform.rot` is
- * `(-Angle[0], Angle[2], -Angle[1])` in radians (see common/renderAngles.ts).
+ * `(-Angle[0], Angle[2], -Angle[1])` in radians (see controllers/render/renderAngles.ts).
  */
 
 // ---- 1. tuning ---------------------------------------------------------
@@ -206,7 +206,7 @@ type PoseRule = {
  *
  * Two branches are deliberately absent. The ones whose model is a
  * `MODEL_EVENT` entry rather than an item row reach a drop only through
- * `CreateItemDrop`'s model swap (common/dropModelProxy.ts), so they have no
+ * `CreateItemDrop`'s model swap (features/drops/dropModelProxy.ts), so they have no
  * (group, num) to key on. And the closing `Check_LuckyItem` branch reads a
  * table the client loads at boot, which this client does not have.
  */

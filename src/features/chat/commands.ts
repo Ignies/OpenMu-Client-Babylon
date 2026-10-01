@@ -29,7 +29,7 @@ import { isAttackablePlayer } from '../../ecs/systems/attackSystem';
  * at the cursor whose entries run those commands straight away, with no
  * arming step.
  *
- * The windows are the UI (ui/pages/worldPage/components/commandWindow and
+ * The windows are the UI (versions/shared/ui/windows/command_window and
  * quickCommandWindow); the packets are the ones the social / economy /
  * messenger stores already send.
  */
@@ -388,6 +388,6 @@ export const Commands = new (class _Commands {
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as store.ts).
+// of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

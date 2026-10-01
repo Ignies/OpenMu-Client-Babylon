@@ -39,7 +39,7 @@ import {
 /**
  * `CMapEnterWerwolfMsgBoxLayout` / `CMapEnterGateKeeperMsgBoxLayout`: the
  * third class quests' entry boxes, OK / Cancel on the common message box.
- * Reads `quests/balgassEntry.ts` and owns no state.
+ * Reads `features/quests/balgassEntry.ts` and owns no state.
  */
 
 /** One `AddMsg`; a null key is the original's `AddMsg(L" ")` spacer row. */

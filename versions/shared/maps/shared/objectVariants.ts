@@ -49,7 +49,7 @@ export class AlphaObject extends MapTileObject {
 /**
  * `o->Velocity = k`: the play speed of a map object in BMD keys per 25 Hz
  * tick, the same units as `ModelObject.AnimationSpeed` (see
- * maps/atlans/anemoneObject.ts for why `setAnimationSpeed` and not a plain
+ * versions/shared/maps/atlans/anemoneObject.ts for why `setAnimationSpeed` and not a plain
  * assignment). `CreateObject` gives every object 0.16.
  */
 export class PlaySpeedObject extends MapTileObject {

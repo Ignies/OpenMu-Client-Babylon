@@ -5,7 +5,7 @@
  * `RenderTerrainAlphaBitmap(BITMAP_MAGIC_*, …)` calls from `RenderEffect`
  * (ZzzEffect.cpp) and the ground circles in `ZzzCharacter.cpp`.
  *
- * Decals are `TerrainDecal`s (common/moveTargetEffect.ts, read-only use)
+ * Decals are `TerrainDecal`s (controllers/fx/moveTargetEffect.ts, read-only use)
  * pooled per texture so a spam of heals reuses the same mesh.
  *
  * Driven by: `effects.spawn('ring', …)`. Read by: nobody.

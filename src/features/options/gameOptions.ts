@@ -60,14 +60,14 @@ export type GameOptions = {
    * scales it up, as an index into RENDER_SCALE_STEPS (0 is native). The
    * HUD is DOM over the canvas and keeps its own resolution. Only worth
    * moving on a machine the pixels are holding up, which is why it defaults
-   * to native (libs/renderScale.ts).
+   * to native (controllers/render/renderScale.ts).
    */
   renderScale: number;
   /**
    * How a reduced `renderScale` is presented: 0 hands the small drawing
    * buffer to the browser and lets it stretch the canvas, 1 draws the world
    * small and reconstructs it at the window's own resolution with FSR
-   * (`scenes/upscale.ts`). Inert while the scale is native.
+   * (`controllers/render/scenes/upscale.ts`). Inert while the scale is native.
    */
   upscale: number;
   /** Sun rays through whatever occludes the sun; 0 disables the pass. */
@@ -158,7 +158,7 @@ export type GameOptions = {
   /** Master sound level, 0..9, the original's one slider. */
   volume: number;
   /**
-   * The mixer's categories, 0..`BUS_VOLUME_MAX` (`sound/buses.ts`), each a
+   * The mixer's categories, 0..`BUS_VOLUME_MAX` (`controllers/sound/buses.ts`), each a
    * share of the master. 10 is the top, where the category is transparent
    * and the master alone decides - which is where they all start, so the
    * client sounds exactly as it did before they existed.
@@ -183,7 +183,7 @@ export type GameOptions = {
   muteInBackground: boolean;
   /**
    * Run a landing drop through the rules below instead of sounding every
-   * one of them (`sound/drops.ts`). The vocabulary is the loot filter's:
+   * one of them (`controllers/sound/drops.ts`). The vocabulary is the loot filter's:
    * what is worth a name on the ground is what is worth hearing land.
    */
   dropSoundFilter: boolean;
@@ -216,7 +216,7 @@ export type GameOptions = {
   animatedWater: boolean;
   /**
    * Blades of grass standing on the tiles the splat map draws as grass
-   * (`libs/mu/terrainGrass.ts`), 0-9. The original had this pass and the
+   * (`controllers/terrain/terrainGrass.ts`), 0-9. The original had this pass and the
    * clone never ported it; 0 is the ground exactly as it was, no mesh, no
    * material, no per-frame cost.
    *
@@ -244,7 +244,7 @@ export type GameOptions = {
   renderDistance: number;
   /**
    * Draw the map's scenery as instanced batches - one mesh per prop type
-   * and 32-tile chunk instead of one per placement (`common/propBatches.ts`).
+   * and 32-tile chunk instead of one per placement (`controllers/render/propBatches.ts`).
    * Off is the client exactly as it was, every prop its own model. A change
    * reloads the current map's objects.
    */
@@ -253,7 +253,7 @@ export type GameOptions = {
    * The effects a monster draws on itself in the original - the dust a Dark
    * Knight stands in, a Yeti's breath, a Bull Fighter's snort, the burning
    * Death Knight, the sand a Tarkan monster raises walking and dying
-   * (`effects/monsterVisuals.ts`). Off is the client as it was: posed bodies
+   * (`controllers/fx/monsterVisuals.ts`). Off is the client as it was: posed bodies
    * and nothing more.
    */
   monsterEffects: boolean;
@@ -359,7 +359,7 @@ export type GameOptions = {
   /**
    * Keep the browser's own shortcuts off the keyboard: Ctrl+W, Ctrl+R,
    * Ctrl+S and the rest of the chords a game key lands on by accident
-   * (`common/browserHotkeys.ts`). Off is the plain tab, reload and all.
+   * (`controllers/interface/browserHotkeys.ts`). Off is the plain tab, reload and all.
    */
   blockBrowserKeys: boolean;
   /**
@@ -370,7 +370,7 @@ export type GameOptions = {
   /**
    * Ctrl-click moves an item to whichever window is open - vault, trade, mix
    * tray, or the merchant - and back again, and Ctrl-click on a shop entry
-   * asks how many to buy (`common/quickItemActions.ts`). Off, only the drag
+   * asks how many to buy (`features/inventory/quickItemActions.ts`). Off, only the drag
    * and the right click move anything.
    */
   quickItemActions: boolean;
@@ -381,7 +381,7 @@ export type GameOptions = {
   confirmValuableItems: boolean;
   /**
    * A small corner readout with the frame rate, the frame time and the last
-   * measured server round trip (`common/netStats.ts`). Off is the HUD exactly
+   * measured server round trip (`controllers/net/roundTrip.ts`). Off is the HUD exactly
    * as it was; the `performanceReadout` key action toggles it too.
    */
   performanceReadout: boolean;
@@ -427,7 +427,7 @@ export function uiScaleFactor(step: number): number {
 
 const RANGES: Partial<Record<keyof GameOptions, readonly [number, number]>> = {
   volume: [0, 9],
-  // Literal rather than `BUS_VOLUME_MAX`: sound/buses.ts imports this
+  // Literal rather than `BUS_VOLUME_MAX`: controllers/sound/buses.ts imports this
   // module, so naming it here would close an import cycle.
   musicVolume: [0, 10],
   effectsVolume: [0, 10],

@@ -40,7 +40,7 @@ import {
  * inventory ticket via `useTicket`, and the `BloodCastleEnterResult` /
  * `MiniGameOpeningState` / `BloodCastleState` / `BloodCastleScore` packets.
  * Read by: the entry window and timer HUD in
- * `ui/pages/worldPage/components/events`, and `logic.ts` through the facade.
+ * `versions/shared/ui/windows/events`, and `app/logic.ts` through the facade.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

@@ -29,7 +29,7 @@ class Kanturu3TowerObject extends MapTileObject {
  *  - The boss fight: `M39Kanturu3rd`'s Maya / Nightmare states, the
  *    `EncTerrain401.att` swap on `IsSuccessBattle()` (MapManager.cpp:1259).
  *    The idle state is staged: `EncTerrain40.att`. The music follows the
- *    Kanturu state in `sound/music.ts`.
+ *    Kanturu state in `controllers/sound/music.ts`.
  *  - Type 0's render special-case (:207-256): the tower is drawn with mesh
  *    0 unhidden and a bone-34 smoke column only while the Maya scene runs.
  *  - The object loops (`kan_boss_incubator` on 25, `_crystal` on 40/41/42,

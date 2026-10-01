@@ -51,7 +51,7 @@ type PileCoin = { x: number; y: number; z: number; lag: number };
  * - `HideSkin = true` keeps the head, the skin and the hair out of it.
  * - `o->AnimationFrame` is never advanced, so the model is frozen.
  * - zen is drawn as a pile: `RenderZen` scatters coins around the drop before
- *   the drop itself is drawn at the centre (`common/zenPile.ts`).
+ *   the drop itself is drawn at the centre (`features/drops/zenPile.ts`).
  */
 export class DropObject extends ModelObject {
   /** `transform.scale`, which the pile's centimetres must not be shrunk by. */

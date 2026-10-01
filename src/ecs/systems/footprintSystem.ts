@@ -143,7 +143,7 @@ function newWalker(x: number, z: number): Walker {
 // ---- tuning ----------------------------------------------------------------
 
 /**
- * Stride and side spacing are per creature in `weather/recipes.ts`; why the
+ * Stride and side spacing are per creature in `controllers/weather/recipes.ts`; why the
  * hero's values are what they are is in ecs/readme.md.
  */
 
@@ -254,7 +254,7 @@ export const FootprintSystem: ISystemFactory = world => {
       // Asked of the PATCH under the foot, not of the map. The first cut
       // read `inPuddles()` - "has the ground pooled anywhere" - so once the
       // streets were wet the boot recharged on every outdoor step and never
-      // dried. Water is where the shader draws it (weather/puddleUnderfoot).
+      // dried. Water is where the shader draws it (controllers/weather/puddleUnderfoot).
       // A half-drawn edge charges the sole part way: a boot that clipped the
       // rim of a puddle is damp, not soaked.
       const open = isTileOpen(x, z);
@@ -396,7 +396,7 @@ export const FootprintSystem: ISystemFactory = world => {
 
       if (gap <= DRAG_MAX_GAP) {
         // Into the trail depth map, not a decal: the channel is one
-        // continuous shape in the snow's own relief (weather/snowTrail.ts).
+        // continuous shape in the snow's own relief (controllers/weather/snowTrail.ts).
         // Scaled by how far past the threshold the cover is, so the trail
         // fades in with the snow rather than switching on.
         ploughSnowTrail(
@@ -518,7 +518,7 @@ export const FootprintSystem: ISystemFactory = world => {
    *
    *     muTracks()
    *
-   * A wrong row in `weather/recipes.ts` fails **silently** - a creature
+   * A wrong row in `controllers/weather/recipes.ts` fails **silently** - a creature
    * classified `none` or `slide` simply leaves nothing, which is
    * indistinguishable from the whole feature being broken, and Devias' Worm
    * cost an afternoon of guessing at a screenshot before that was obvious.

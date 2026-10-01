@@ -9,7 +9,7 @@ import { maps } from '@/controllers/maps/index';
  * the terrain files go out in one `Promise.all` (`getTerrainData.ts`), so one
  * 404 rejects the load and the client stays on the map it was on. World7 had
  * that for TileGround01 and the arena was unreachable. Each entry substitutes
- * a tile its folder does have (`src/maps/<name>/index.ts`); this checks it.
+ * a tile its folder does have (`versions/shared/maps/<name>/index.ts`); this checks it.
  */
 const ASSETS = path.join(process.cwd(), 'public', 'game-assets');
 

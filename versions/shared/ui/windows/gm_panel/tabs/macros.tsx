@@ -10,7 +10,7 @@ import { uiClick } from '@/controllers/sound/sfx';
  * Macros for events: lines sent one after another, each with its own wait
  * after it (none sends the next as soon as chat allows). Placeholders are
  * filled in where it runs - here, where the game master stands; from the
- * map's menu, at the tile. Kept in this browser (`admin/gmLibrary.ts`).
+ * map's menu, at the tile. Kept in this browser (`features/gm/admin/gmLibrary.ts`).
  */
 
 /** Steps offered as a start, by the command they send. */

@@ -12,7 +12,7 @@ import { TEX } from '../fx/recipes';
  * is drawn, which sheet and which colour. The **consumer** is
  * `ecs/systems/weaponTrailSystem.ts`, which asks once per clip start and
  * spawns `effects.spawn('blur', …)` on the weapon's hand bone; the drawing
- * is `effects/blur.ts`.
+ * is `controllers/fx/blur.ts`.
  *
  * The original's two knobs are `BlurType` (where on the blade: the hilt
  * sample `Pos1` and the tip `Pos2`, centimetres down the link bone's Y) and

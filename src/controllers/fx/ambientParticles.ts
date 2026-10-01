@@ -259,7 +259,7 @@ export type AmbientRecipe = {
   /**
    * Weather that falls out of the sky, as against something a room makes of
    * its own (dust). Sky-borne systems are clipped to the active room
-   * (`weather/roomClip.ts`) so a hero standing indoors sees the shower
+   * (`controllers/weather/roomClip.ts`) so a hero standing indoors sees the shower
    * through the doorway and none of it on the floor beside him.
    */
   readonly skyBorne?: boolean;

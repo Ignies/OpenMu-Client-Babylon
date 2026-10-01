@@ -23,7 +23,7 @@ const POSE_WAIT_LIMIT = 120;
  * texture and needs nothing here (`RenderMesh(1, RENDER_TEXTURE |
  * RENDER_BRIGHT)`, GMEmpireGuardian1.cpp:1341-1348).
  *
- * `common/mapTileObject.ts` already does this for the login scene and only
+ * `controllers/terrain/mapTileObject.ts` already does this for the login scene and only
  * there (`this.WorldIndex === WD_73NEW_LOGIN_SCENE`), so day 4's twenty
  * torches were dark. This is the same lookup with the pose wait the login
  * scene's copy is missing: BMD bone transforms only exist once a render has

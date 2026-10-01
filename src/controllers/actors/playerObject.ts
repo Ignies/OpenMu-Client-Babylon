@@ -37,7 +37,7 @@ export class PlayerObject extends ModelObject {
    * The class a *player-rig NPC* poses as (`c->Class` on the NPC the
    * original creates with `CreateCharacter(..., MODEL_PLAYER, ...)`).
    * `null` on real players - their class arrives with the appearance.
-   * Read by logic.ts so `isFemale` is not hard-zeroed for these.
+   * Read by app/logic.ts so `isFemale` is not hard-zeroed for these.
    */
   static NpcClass: CharacterClassNumber | null = null;
 
@@ -505,7 +505,7 @@ export function npcClassOf(
 /**
  * Whether this body is a character's own rig rather than something else's.
  *
- * A transformation skin can be either (`common/transformedBody.ts`): a part
+ * A transformation skin can be either (`controllers/actors/transformedBody.ts`): a part
  * file worn on the character's rig, which is still a `PlayerObject`, or a
  * whole monster with a rig of its own, which is not. Everything that reaches
  * for an equipment socket or a player clip has to ask first.

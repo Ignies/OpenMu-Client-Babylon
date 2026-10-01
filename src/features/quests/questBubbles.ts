@@ -1,6 +1,6 @@
 /**
  * Quest state on the HUD: the exclamation / question emoji bubbles
- * (`common/emojiBubbles.ts`) over quest NPCs in scope, the clone's stand-in
+ * (`features/chat/emojiBubbles.ts`) over quest NPCs in scope, the clone's stand-in
  * for the original's lack of any marker.
  *
  * Driven by `legacyQuests.ts` (which NPC gives the hero's next quest, and

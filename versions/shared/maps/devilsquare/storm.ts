@@ -29,10 +29,10 @@ import { PRIORITY_TORCH, type LightRecipe, type LightSource } from '@/controller
  * One second in every four, the ground around the hero flickers cold blue -
  * lightning behind the cloud on the map where it never stops raining. It is
  * hero-relative and has no emitter to hang off, so it lives here rather than
- * in a per-type table, the way `maps/icarus/sky.ts` holds `MoveHeavenThunder`.
+ * in a per-type table, the way `versions/shared/maps/icarus/sky.ts` holds `MoveHeavenThunder`.
  *
  * The rain loop in the same block is `Sound/aRain` (`SOUND_RAIN01`,
- * ZzzOpenData.cpp:4744), already a bed in `sound/ambientBeds.ts`. The thunder
+ * ZzzOpenData.cpp:4744), already a bed in `controllers/sound/ambientBeds.ts`. The thunder
  * clap next to it is commented out in the original, so there is no sound.
  */
 
@@ -67,7 +67,7 @@ const FLASH_B = 0.5;
  * literally at 60-144 fps gives a one-frame blip that reads as a dropped
  * frame rather than as lightning, so each flash is held to a wall-clock
  * decay instead - four reference ticks, instant on and linear out. Same
- * argument, same shape and nearly the same number as `lighting/sky.ts`'s
+ * argument, same shape and nearly the same number as `controllers/lighting/sky.ts`'s
  * Icarus strike.
  */
 const FLASH_SECONDS = 0.16;

@@ -36,7 +36,7 @@ const iceImproved: Step = seq(
 
 /**
  * MODEL_ICE sub0's negative light, for the crystal's 25 ticks. Scaled into linear light the way the
- * negative monster lights are (lighting/characters.ts DARK_FLOOR_GAIN).
+ * negative monster lights are (controllers/lighting/characters.ts DARK_FLOOR_GAIN).
  */
 const ICE_LIGHT: LightRecipe = {
   color: [-0.4, -0.3, -0.2],

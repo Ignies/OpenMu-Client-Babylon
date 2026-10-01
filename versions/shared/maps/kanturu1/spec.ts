@@ -13,8 +13,8 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  *
  * The same `MoveKanturu1stObject` also runs on the GM area (`WD_40AREA_FOR_GM`,
  * `World41`, :43) and `CGMDoppelGanger4::MoveObject` is a line-for-line copy
- * of it (GMDoppelGanger4.cpp:61-133), so `maps/gmarea` and
- * `maps/doppelganger4` import these tables rather than restate them.
+ * of it (GMDoppelGanger4.cpp:61-133), so `versions/shared/maps/gmarea` and
+ * `versions/shared/maps/doppelganger4` import these tables rather than restate them.
  */
 
 /**

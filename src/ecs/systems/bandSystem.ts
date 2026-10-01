@@ -24,7 +24,7 @@ import type { Entity, ISystemFactory } from '../world';
 /**
  * Performers: the hero with an instrument out, and every player in scope the
  * proxy says is playing. Gives them the row's pose - a few frames copied out
- * of an emote, looped (`band/instrumentClip.ts`) - hangs the model on the
+ * of an emote, looped (`features/band/instrumentClip.ts`) - hangs the model on the
  * hand bone, and ends the performance the moment they step, get hit into
  * another clip, or die.
  *
@@ -245,7 +245,7 @@ export const BandSystem: ISystemFactory = world => {
         if (clip >= 0) e.playerAnimation.action = clip as PlayerAction;
 
         // Every hit whose time has come floats a note up from the instrument
-        // (effects/bandNotes.ts); the pose itself only sways. A chord's notes
+        // (controllers/fx/bandNotes.ts); the pose itself only sways. A chord's notes
         // land together, and one of them is the strum.
         const hits = p.hits;
         while (hits.length && hits[0].when <= now + dt) {

@@ -20,7 +20,7 @@ import { t, type TextKey } from '../../i18n';
  *
  * Driven by: `UpdateMiniGameState` (0x92, `ReceiveDevilSquareCountDown`)
  * and `MapEventState`. Read by: `EventCountdown` in
- * `ui/pages/worldPage/components/events` through `matchCountdownLine()`.
+ * `versions/shared/ui/windows/events` through `matchCountdownLine()`.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

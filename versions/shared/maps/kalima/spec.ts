@@ -69,7 +69,7 @@ export const KALIMA_EMISSIONS: Partial<Record<number, readonly Emission[]>> = {
  * of water, so this fades: full inside four tiles, gone at twenty. The reach
  * is the only invented number here.
  *
- * Read by `sound/objectLoops.ts` for every Kalima floor, which loads it with
+ * Read by `controllers/sound/objectLoops.ts` for every Kalima floor, which loads it with
  * 3 channels (MapManager.cpp:994).
  */
 export const KALIMA_OBJECT_LOOPS: readonly ObjectLoop[] = [

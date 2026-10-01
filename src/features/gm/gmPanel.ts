@@ -28,7 +28,7 @@ import { expandLine, type Macro, type MacroVars } from './admin/gmLibrary';
  * `makeAutoObservable` matches its overrides with `key in overrides`, which
  * walks the prototype chain, so `valueOf` would be handed the built-in as its
  * annotation and throw - at module load, which takes the client down at boot.
- * `src/observableStores.test.ts` fails on it.
+ * `app/observableStores.test.ts` fails on it.
  */
 
 /** Slightly over `CHAT_COOLDOWN_MS`, so a retry is never refused for the same reason. */

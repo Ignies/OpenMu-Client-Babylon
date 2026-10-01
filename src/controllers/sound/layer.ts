@@ -6,7 +6,7 @@ import type { ENUM_WORLD } from '../../core/types';
  *
  * Entries own *what* is heard - which bed plays under a map, which track,
  * which footstep, which swing - and command the mixer
- * (`libs/soundsManager.ts`) to play it. The layer is only the *lifecycle*:
+ * (`controllers/sound/soundsManager.ts`) to play it. The layer is only the *lifecycle*:
  * beds and music step every frame; one-shot entries (ui, combat, monsters)
  * are command-only and may have neither `update` nor `reset`.
  */

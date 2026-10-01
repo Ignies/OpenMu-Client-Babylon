@@ -7,8 +7,8 @@ import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterMo
  * Death Gorgon is `MODEL_GORGON` with `c->Level == 2`, and that level is the
  * whole difference: the body burns and the fire lights the floor
  * (ZzzCharacter.cpp:6060-6072). The fire is the body-effects row
- * `MONSTER_VISUALS[35]` (`effects/monsterVisuals.ts`); the floor light is
- * `CHARACTER_LIGHTS[35]` (`lighting/characters.ts`).
+ * `MONSTER_VISUALS[35]` (`controllers/fx/monsterVisuals.ts`); the floor light is
+ * `CHARACTER_LIGHTS[35]` (`controllers/lighting/characters.ts`).
  *
  * The additive body mesh and its flicker (`BlendMeshLight = (rand() % 10) *
  * 0.1f`, :6061) come from `monsterBlendMesh.ts`, shared with the plain Gorgon.

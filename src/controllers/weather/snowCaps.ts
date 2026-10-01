@@ -12,7 +12,7 @@ import { snowCover } from './snowCover';
  * drifts build and melt together, and by the roof mask, so nothing under a
  * ceiling gets a cap.
  *
- * Read by the shared item material (`common/itemMaterial.ts`), which whitens
+ * Read by the shared item material (`controllers/item_fx/itemMaterial.ts`), which whitens
  * every UP-facing fragment of a mesh flagged `metadata.snowCap` - the flag
  * is set by `MapTileObject` on `SNOW_GROUND_MAPS`, so characters, items and
  * effects never take one.

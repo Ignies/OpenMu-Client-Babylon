@@ -12,7 +12,7 @@ import { TEXT_COLOR } from '../server_select/layout';
 const HEAD_HEIGHT = 2.3;
 
 /**
- * Inline on purpose: `#root img { width: 100%; height: 100% }` (src/style.less)
+ * Inline on purpose: `#root img { width: 100%; height: 100% }` (app/style.less)
  * carries an id, so no class selector in style.less can size these.
  */
 const HINT_ICON = { width: 13, height: 13 } as const;

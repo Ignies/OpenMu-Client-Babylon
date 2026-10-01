@@ -8,7 +8,7 @@ import type { EffectHandle } from '../../controllers/fx';
  * that have an `npcType` and starts the body effects its table names once
  * the model is posed - the dust, the breath, the fire, the sand - and drops
  * them when the monster leaves or the option goes off. Owns no visual state;
- * `effects/monsterVisuals.ts` does.
+ * `controllers/fx/monsterVisuals.ts` does.
  */
 export const MonsterVisualSystem: ISystemFactory = world => {
   const characters = world.with('npcType', 'modelObject', 'transform');

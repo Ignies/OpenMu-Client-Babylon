@@ -33,7 +33,7 @@ import type {
 
 const MU_SCALE = 100;
 
-/** MU is Z-up, Babylon Y-up (`common/characterSelect.ts`). */
+/** MU is Z-up, Babylon Y-up (`features/character_select/characterSelect.ts`). */
 function fromMu(x: number, y: number, z: number): Vector3 {
   return new Vector3(x / MU_SCALE, z / MU_SCALE, y / MU_SCALE);
 }

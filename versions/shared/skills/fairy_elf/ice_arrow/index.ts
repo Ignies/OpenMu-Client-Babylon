@@ -5,7 +5,7 @@ import { effects } from '@/controllers/fx';
 
 import { frost } from '@/controllers/lighting/recipes';
 
-/** Arrows are faster than magic bolts: 70 cm a tick, like `common/skillVisuals.ts`. */
+/** Arrows are faster than magic bolts: 70 cm a tick, like `controllers/skills/visuals.ts`. */
 const ARROW_SPEED = 17.5;
 
 export default defineSkill({

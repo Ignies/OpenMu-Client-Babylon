@@ -4,7 +4,7 @@ import type { Emission } from '../fx/effectParticles';
 
 /**
  * The contract every map entry implements. One folder per map,
- * `maps/<name>/index.ts` exports one `<name>Layer`, listed once in
+ * `versions/shared/maps/<name>/index.ts` exports one `<name>Layer`, listed once in
  * `layers.ts`. Copy `_template.ts` for the recipe.
  *
  * A map entry is mostly *data*: which `ENUM_WORLD` values it serves, which
@@ -74,7 +74,7 @@ export interface MapLayer {
   /**
    * The sky belongs to snow: rain never falls here however the weather byte
    * reads (`CreateDeviasSnow` gates on the world alone), objects carry snow
-   * caps, footsteps read as snow. Read through `weather/ambientWeather.ts`'s
+   * caps, footsteps read as snow. Read through `controllers/weather/ambientWeather.ts`'s
    * `SNOW_MAPS`.
    */
   readonly snow?: boolean;
@@ -84,7 +84,7 @@ export interface MapLayer {
    * false where the climate is snow but the air is clear, and the map keeps
    * rain off without a fall of its own - nor anything a fall leaves behind,
    * since the cover, the caps and the prints all hang off it. Read through
-   * `weather/ambientWeather.ts`'s `SNOWFALL_MAPS` and `weather/snowCover.ts`'s
+   * `controllers/weather/ambientWeather.ts`'s `SNOWFALL_MAPS` and `controllers/weather/snowCover.ts`'s
    * `SNOW_GROUND_MAPS`.
    */
   readonly snowfall?: boolean;
@@ -93,7 +93,7 @@ export interface MapLayer {
    * The map is under water: rain never falls here however the weather byte
    * reads, and the ambient particles are the sea's (marine snow on the
    * current, bubbles off the seabed) rather than leaves. Read through
-   * `weather/ambientWeather.ts`'s `UNDERWATER_MAPS`.
+   * `controllers/weather/ambientWeather.ts`'s `UNDERWATER_MAPS`.
    *
    * Orthogonal to `outdoor`, which stays true for Atlans: there is a surface
    * far above it and god-rays coming through, it is just not a sky anything
@@ -124,17 +124,17 @@ export interface MapLayer {
 
   /**
    * Object type → mesh index drawn additively (`CreateObject`'s `BlendMesh`
-   * assignments, ZzzObject.cpp:4643-4651). Read by `common/blendMeshes.ts`.
+   * assignments, ZzzObject.cpp:4643-4651). Read by `controllers/render/blendMeshes.ts`.
    */
   readonly blendMeshes?: Readonly<Record<number, number>>;
 
   /**
    * Object types that are an emitter and nothing else - the model is never
-   * drawn, only its `emissions`. Read by `common/effectOnlyObjects.ts`.
+   * drawn, only its `emissions`. Read by `controllers/render/effectOnlyObjects.ts`.
    */
   readonly effectOnly?: readonly number[];
 
-  /** Object type → particle emissions. Read by `common/effectParticles.ts`. */
+  /** Object type → particle emissions. Read by `controllers/fx/effectParticles.ts`. */
   readonly emissions?: Partial<Record<number, readonly Emission[]>>;
 
   /**

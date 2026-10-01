@@ -28,7 +28,7 @@ import { LOGIN_SCENE_ABSENT_MODELS, LOGIN_SCENE_PLAY_SPEEDS } from './spec';
  *    type 70) and `GMEmpireGuardian4::RenderAfterObjectMesh` (:1340-1357
  *    types 0/1/3/44). Each draws one mesh `RENDER_BRIGHT` instead of lit;
  *    this client takes that from the BMD's own texture flags (`_R`), which is
- *    the call `maps/kanturu1/spec.ts` and `maps/empireguardian/spec.ts` make
+ *    the call `versions/shared/maps/kanturu1/spec.ts` and `versions/shared/maps/empireguardian/spec.ts` make
  *    for the same pattern. `blendMeshes` is for `o->BlendMesh` writes, and
  *    neither day-4 hook has one.
  *  - `GMEmpireGuardian4::RenderObjectMesh` :702-710, types 96 (x2), 97 (x1)

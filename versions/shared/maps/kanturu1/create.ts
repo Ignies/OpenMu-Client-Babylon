@@ -14,7 +14,7 @@ import { AlphaObject, PlaySpeedObject } from '../shared/objectVariants';
  *  - **76** (×10) and **96** (×1): `Alpha = 0.5`.
  *
  * The object-attached loops (`SOUND_KANTURU_1ST_BG_WHEEL` on 46, `_WATERFALL`
- * on 77, `_ELEC` on 92, `_PLANT` on 98) are in `sound/objectLoops.ts`; the map
+ * on 77, `_ELEC` on 92, `_PLANT` on 98) are in `controllers/sound/objectLoops.ts`; the map
  * bed `w37/kan_ruin_global` is in `ambientBeds.ts`.
  *
  * Not built:

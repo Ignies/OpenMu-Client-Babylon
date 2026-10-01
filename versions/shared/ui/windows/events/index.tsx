@@ -737,7 +737,7 @@ function altarSprite(packed: number): string | null {
  * `CNewUICryWolf::Render`: the MVP bar in the lower right (statue shield,
  * the five altars, dark elf count, remaining time, Balgass strip), the READY
  * notices and the end-of-war banner. No window state: everything reads
- * `events/crywolf.ts`.
+ * `features/events/crywolf.ts`.
  */
 const CrywolfBar = observer(() => {
   const hud = crywolfHud();

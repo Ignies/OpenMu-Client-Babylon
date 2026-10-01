@@ -8,7 +8,7 @@ import { versionByTag } from '../../version';
 
 const SERVERS_KEY = 'mu_servers';
 
-/** The pre-profile config blob (store.ts `CONFIG_KEY`), read once to migrate. */
+/** The pre-profile config blob (app/store.ts `CONFIG_KEY`), read once to migrate. */
 const LEGACY_KEY = '_mu_key';
 
 export type GameServerPolicy =
@@ -292,7 +292,7 @@ const NO_WORLD = defaultProfile();
 /**
  * The endpoints the pre-profile client kept in its config blob. Carried over
  * so an existing install keeps connecting where it did, then left alone -
- * store.ts no longer writes those four keys.
+ * app/store.ts no longer writes those four keys.
  */
 function legacyProfile(): ServerProfile | null {
   try {
@@ -317,7 +317,7 @@ function legacyProfile(): ServerProfile | null {
         csPort: data.csPort,
         wsUrl:
           data.wsHost && `${data.wsHost}:${data.wsPort ?? WS_PORT}`,
-        // What the old client did unconditionally (logic.ts reconnected to
+        // What the old client did unconditionally (app/logic.ts reconnected to
         // `config.csIp`), kept for the profile it is migrating.
         gsAddress: 'csHost',
       },

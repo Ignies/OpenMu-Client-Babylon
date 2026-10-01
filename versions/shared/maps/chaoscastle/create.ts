@@ -9,7 +9,7 @@ import {
 /**
  * Chaos Castle (`WD_18CHAOS_CASTLE` … `_END` and the master-level 53 - seven
  * server instances on one art set, `World19` + `Object19`; see
- * `common/worldAssets.ts`).
+ * `controllers/assets/worldAssets.ts`).
  *
  * The map *is* its state machine: a floor in a black void that loses a ring
  * of slabs at each of the match's three stage states, with the strip the
@@ -24,9 +24,9 @@ import {
  *  - 6-12 the smoke-box markers: `spec.ts` effect-only.
  *  - The black clear colour is the scene default; `SetWorldClearColor`
  *    (SceneManager.cpp:346) sets exactly that.
- *  - `aChaos` / `iChaosCastle` beds: `sound/ambientBeds.ts`, on the match state.
+ *  - `aChaos` / `iChaosCastle` beds: `controllers/sound/ambientBeds.ts`, on the match state.
  *  - The pillars' thunder (`eElec1/2`): `thunder.ts`, driven from
- *    `events/chaosCastle.ts` as the original drives it from CSChaosCastle.cpp.
+ *    `features/events/chaosCastle.ts` as the original drives it from CSChaosCastle.cpp.
  *  - Auto-attack off, `c->Run = 40` forced, no wings/pets, the CC 70-72
  *    monster skins from `Npc/`: all in the events / locomotion / character
  *    lanes, none of it map data.

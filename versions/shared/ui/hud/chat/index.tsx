@@ -356,7 +356,7 @@ const ChatLog = observer(() => {
 
   // The original scrolls framed or not (NewUIChatLogWindow.cpp:679).
   const onWheel = (e: React.WheelEvent) => {
-    // Ctrl+wheel is the browser's zoom, which boot.tsx cancels.
+    // Ctrl+wheel is the browser's zoom, which app/boot.tsx cancels.
     if (e.ctrlKey || !scrollable) return;
     const step = chatWheelRows(e.deltaY, e.deltaMode, wheelCarry.current, showing);
     wheelCarry.current = step.carry;

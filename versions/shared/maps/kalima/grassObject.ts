@@ -64,7 +64,7 @@ const IN_VIEW_ONLY = devQuery('kalimabob') !== '0';
  * surface, so the whole bed rises and falls together with the waves
  * `CSWaterTerrain` runs under it. And while the hero is walking or running,
  * anything within half a tile is pushed away and then coasts back to a stop -
- * `CheckSkull`'s shape (maps/losttower/skullObject.ts) with a stronger kick,
+ * `CheckSkull`'s shape (versions/shared/maps/losttower/skullObject.ts) with a stronger kick,
  * no sound and no tumble: `o->HeadAngle` is never written for a map object,
  * so the `VectorAdd(o->Angle, o->HeadAngle, o->Angle)` at the end of
  * `CheckGrass` is a no-op and the plant slides upright.
@@ -176,7 +176,7 @@ export class KalimaWaterPlantObject extends MapTileObject {
     if (!moving) return;
 
     // One axis, one-sided, and it is the original's - see the same test in
-    // maps/losttower/skullObject.ts for what the asymmetry looks like.
+    // versions/shared/maps/losttower/skullObject.ts for what the asymmetry looks like.
     if (this.#dirX < PUSH_ARM_DIRECTION_X) {
       const dx = hero.transform.pos.x - transform.pos.x;
       const dy = hero.transform.pos.z - transform.pos.z;

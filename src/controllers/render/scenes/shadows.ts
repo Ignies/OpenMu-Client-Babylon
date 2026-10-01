@@ -340,7 +340,7 @@ const CLUTTER_HEIGHT = 1;
 
 function isGroundClutter(mesh: AbstractMesh): boolean {
   // A prop batch's box is the union of every placement in its chunk; the
-  // type's own height rides in its metadata (common/propBatches.ts).
+  // type's own height rides in its metadata (controllers/render/propBatches.ts).
   const own = mesh.metadata?.casterHeight;
 
   let height: number;
@@ -482,7 +482,7 @@ function hookShadowMap(
       live.update()
     );
   } else {
-    // Not `renderListPredicate`: see scenes/renderList.ts for what that costs
+    // Not `renderListPredicate`: see controllers/render/scenes/renderList.ts for what that costs
     // per frame. The list is released with the map.
     driveRenderList(scene, map, castsSunShadow);
   }

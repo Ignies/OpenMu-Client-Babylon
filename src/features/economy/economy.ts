@@ -1295,7 +1295,7 @@ export const Economy = new (class _Economy {
 
   /**
    * `PlayerShopBuyResult` (0x3F 0x06), refusals only: a success is the item
-   * itself arriving, and logic.ts puts that in the inventory.
+   * itself arriving, and app/logic.ts puts that in the inventory.
    */
   shopBuyResult(result: PlayerShopBuyResultResultKindEnum): void {
     const E = PlayerShopBuyResultResultKindEnum;
@@ -1319,6 +1319,6 @@ export const Economy = new (class _Economy {
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as store.ts).
+// of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

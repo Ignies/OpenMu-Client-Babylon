@@ -20,8 +20,8 @@ import {
  * the pointer locally in the same breath - waiting for the round trip would
  * put a visible lag on the player's own gesture.
  *
- * Installed once from `logic.ts`. It decides whether a ping happens; it
- * draws nothing itself - `effects/ping.ts` owns every pointer on screen.
+ * Installed once from `app/logic.ts`. It decides whether a ping happens; it
+ * draws nothing itself - `controllers/fx/ping.ts` owns every pointer on screen.
  */
 
 /** Tiles above the terrain the marker's own point sits at; the decal drapes from there. */

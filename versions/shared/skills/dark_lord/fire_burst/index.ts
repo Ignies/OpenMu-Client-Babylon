@@ -66,7 +66,7 @@ function pierFire(c: SkillContext, at: Vector3, dir: Vector3, look?: PierLook): 
  *
  * The ghosts (ZzzEffect.cpp:3397-3405, MoveHandlers.cpp:5664-5670) are the flame frame alone at Scale 0.5,
  * `Alpha = (20 - LT) / 5` so the first ticks' ones are cut away, x1/1.3 a tick over the dart's last ticks,
- * dying with it; each emits one Fire02 puff. They are stamps of one trail per dart (effects/stamps.ts).
+ * dying with it; each emits one Fire02 puff. They are stamps of one trail per dart (controllers/fx/stamps.ts).
  */
 function pierDart(c: SkillContext, target: Entity, from: Vector3, yaw: number, aimHeight: number, look?: PierLook): Vector3 {
   const pos = from.clone();

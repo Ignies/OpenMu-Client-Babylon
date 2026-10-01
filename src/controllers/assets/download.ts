@@ -40,7 +40,7 @@ export {
 export async function downloadBytesBuffer(url: string) {
   // Takes the build's gzip sidecar when there is one and falls back to the
   // plain file otherwise; the missing-file guard lives there too
-  // (`common/compressedAssets.ts`).
+  // (`controllers/assets/compressedAssets.ts`).
   return fetchAssetBytes(url);
 }
 
@@ -89,7 +89,7 @@ export function createOZJTexture(
 /**
  * The terrain light map through a GPU texture and a synchronous `readPixels`.
  * Only the `?lightDecode=gpu` seam still comes here; map loads decode it on
- * the CPU (`libs/mu/terrainJpeg.ts`).
+ * the CPU (`controllers/terrain/terrainJpeg.ts`).
  */
 export async function readOJZBufferAsJPEGBuffer(
   scene: Scene,

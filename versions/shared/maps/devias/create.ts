@@ -32,7 +32,7 @@ import type { RoomFrame } from '@/controllers/maps/roomEnumeration';
  * tavern treatment applied to every roofed building the hero can walk into
  * (see rooms.ts), the two castle halls included. Dust lives in
  * AmbientParticleSystem. No room carries music: the original has no pub
- * track in Devias, and the church track is `sound/music.ts`'s.
+ * track in Devias, and the church track is `controllers/sound/music.ts`'s.
  */
 export async function createDevias(world: World) {
   const terrain = world.terrain;
@@ -48,7 +48,7 @@ export async function createDevias(world: World) {
   tiles[91] = LeanBoxObject;
 
   // The notice boards. Which placement says what - a neighbouring map, the
-  // map itself, or the building it hangs on - is common/signLabels.ts.
+  // map itself, or the building it hangs on - is versions/shared/objects/signs/signLabels.ts.
   prefetchSignPlates(`Object${assetWorldNum(map)}/`);
   for (const type of signTypes(map)) tiles[type] = SignObject;
 

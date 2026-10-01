@@ -19,7 +19,7 @@ import { listenerHero, listenerWorld } from './listener';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** The hero's own stride, its own category (`sound/buses.ts`). */
+/** The hero's own stride, its own category (`controllers/sound/buses.ts`). */
 const BUS: SoundBus = 'steps';
 
 /** `o->AnimationFrame` (BMD keys) at which each foot lands (ZzzCharacter.cpp:6241-6249). */

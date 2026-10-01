@@ -4,7 +4,7 @@
  * `Data/Local/<pack>/Dialog_<lang>.bmd` is Webzen's own table, and a page here
  * replaces the text of one record of it after decoding, the way `itemNames.ts`
  * replaces single item names. The page keeps its answers and their links.
- * Read by `libs/mu/questFiles.ts`.
+ * Read by `controllers/assets/mu/questFiles.ts`.
  */
 
 export type DialogPageFixes = Readonly<Record<number, string>>;

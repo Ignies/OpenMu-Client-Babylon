@@ -1,4 +1,4 @@
-// The original's three-slice message box, from `ui/components/msgBoxFrame`:
+// The original's three-slice message box, from `controllers/interface/components/msg_box_frame`:
 // the two-field prompt is the only economy window that needs it; everything
 // else fits the 352x113 box in `msgWindow/layout.ts`.
 import { msgBoxHeight } from '@/controllers/interface/components/msg_box_frame';

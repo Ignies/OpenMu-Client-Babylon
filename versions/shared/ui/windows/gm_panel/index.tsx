@@ -30,11 +30,11 @@ import { ConsoleTab } from './tabs/console';
  * window, a sidebar of tabs, and the server as the proxy's tracker sees it.
  *
  * Everything it sends is a `/line` a game master could type
- * (`common/gmCommands.ts` -> `gmPanel.ts` -> `Social.sendChat`). The panel
+ * (`features/gm/gmCommands.ts` -> `features/gm/gmPanel.ts` -> `Social.sendChat`). The panel
  * grants nothing; the server re-checks `CharacterStatus` on every command it
  * receives, so hiding this from a normal player is presentation, not security.
  * What it *shows* of other players comes from the proxy's stream
- * (`admin/feed.ts`), which the proxy only opens for a socket whose character
+ * (`features/gm/admin/feed.ts`), which the proxy only opens for a socket whose character
  * the server flagged as a game master.
  *
  * Drawn like the world select's card, in the Babylon site's design system

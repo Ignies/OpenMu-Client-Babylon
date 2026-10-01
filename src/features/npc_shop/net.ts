@@ -53,7 +53,7 @@ EventBus.on('NpcWindowResponse', packet => {
       break;
     default:
       // A legacy quest NPC (Sebina, Marlon, Apostle Devin…): the dialog is
-      // client-side, from Quest_eng.bmd (quests/legacyQuests.ts).
+      // client-side, from Quest_eng.bmd (features/quests/legacyQuests.ts).
       if (quests.openNpcWindow(p.Window, Store.pendingNpcType)) return;
       // Lahap, the refineries…: not ported yet.
       console.warn(`NpcWindowResponse: window ${p.Window} is not supported yet`);

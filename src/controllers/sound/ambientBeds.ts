@@ -27,7 +27,7 @@ import {
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** The beds and their wildlife are ambience (`sound/buses.ts`). */
+/** The beds and their wildlife are ambience (`controllers/sound/buses.ts`). */
 const BUS: SoundBus = 'ambient';
 
 /** Reference frame rate the original's `rand_fps_check` counts against. */

@@ -17,7 +17,7 @@ const THUNDER_SPREAD_MU = 150;
 
 /*
  * The flash itself - its luminosity roll, colour, reach and decay - is the
- * lighting layer's `sky` entry (`src/lighting/sky.ts`, `strikeThunder`).
+ * lighting layer's `sky` entry (`controllers/lighting/sky.ts`, `strikeThunder`).
  */
 
 /** `MoveObjectSetting`'s `rand_fps_check(10)` (ZzzObject.cpp:4299). */

@@ -47,7 +47,7 @@ import { queueHit, startPerforming, stopPerforming } from './performing';
  * Entity work (the pose, the model) goes through `world.bandRequest` and
  * `BandSystem`, like the emotes do.
  *
- * The wire is a `BandTransport` handed in by `band/bandNet.ts`; offline, or
+ * The wire is a `BandTransport` handed in by `features/band/bandNet.ts`; offline, or
  * before the proxy says hello, it is the silent one below and the hero
  * simply plays for themselves.
  */

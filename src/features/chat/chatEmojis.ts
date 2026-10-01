@@ -1,7 +1,7 @@
 /**
- * Custom chat emojis. Every `.webp` in `src/emojis/<pack>/` is one emoji,
+ * Custom chat emojis. Every `.webp` in `features/chat/emojis/<pack>/` is one emoji,
  * named by its file: `dark_knight/dk_love.webp` is `:dk_love:`
- * (`src/emojis/index.ts` finds them when the client is built). An animated
+ * (`features/chat/emojis/index.ts` finds them when the client is built). An animated
  * webp plays by itself in an `<img>`.
  *
  * They travel as their code, plain ASCII, which every client and the server

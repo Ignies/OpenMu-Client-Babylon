@@ -29,7 +29,7 @@ import {
  *  - The water tiles are terrain layer 5 on the generic scroll; Noria adds no
  *    terrain code of its own.
  *  - `Music/Noria`, the `Sound/aWind` bed and the 1-in-512 `Sound/aForest`
- *    one-shot are already wired in sound/music.ts / sound/ambientBeds.ts.
+ *    one-shot are already wired in controllers/sound/music.ts / controllers/sound/ambientBeds.ts.
  *  - Falling leaves are already Noria's: `LEAF_MAPS` in
  *    ambientParticleSystem.ts lists WD_3NORIA next to Lorencia and Atlans.
  *  - The 40 butterflies (`Object1/Butterfly01`, MapManager.cpp:88) need a

@@ -53,7 +53,7 @@ packetsCacheByCode.forEach(list => {
  * itself (field index 2): OpenMU writes `Whisper` = 0x02 there
  * (`ChatMessageRef.Type`, GameServer/RemoteView/ChatViewPlugIn.cs), so an
  * inbound whisper arrives as "code 0x02", which no generated class claims.
- * Route it to the same parser; logic.ts reads `p.Type` off that byte and
+ * Route it to the same parser; app/logic.ts reads `p.Type` off that byte and
  * colours the line as a whisper. OpenMU emits only Normal (0x00) and Whisper
  * (0x02) - party / guild / alliance lines are Normal with a text prefix.
  */
@@ -83,7 +83,7 @@ export function createSocket({ wsAddress, tcpIP, tcpPort }: Options) {
   const decryptor = new SimpleModulusDecryptor();
   decryptor.decryptionKeys = SERVER_TO_CLIENT_KEYS;
 
-  // `&session=`: the page's nonce (src/common/sessionNonce.ts), so the proxy
+  // `&session=`: the page's nonce (controllers/net/sessionNonce.ts), so the proxy
   // can put the login it reads off this socket to the cash shop's ticket
   // route. Only the sockets built here carry it, because they are the ones a
   // login travels on. `chatRoomSocket.ts` builds the same URL and does not: a
@@ -234,7 +234,7 @@ export function createSocket({ wsAddress, tcpIP, tcpPort }: Options) {
   socket.addEventListener("message", (event) => {
     // The whole drain happens here, on the main thread, before the browser
     // gets to draw again: what it costs is what the overlay's `net` row
-    // reports (`libs/netStats.ts`).
+    // reports (`controllers/net/socketCost.ts`).
     const started = performance.now();
     const buffer = event.data as ArrayBuffer;
 

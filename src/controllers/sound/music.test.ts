@@ -85,7 +85,7 @@ function step(map: ENUM_WORLD, dt = 0.016): void {
 
 /** A warp to `map` at (x, y) that runs to the end of the start delay. */
 function arrive(map: ENUM_WORLD, x = 0, y = 0): void {
-  // boot.tsx's handler sets the index before any other sees the warp.
+  // app/boot.tsx's handler sets the index before any other sees the warp.
   world.mapIndex = map;
   EventBus.emit('requestWarp', { map });
   musicLayer.reset!();

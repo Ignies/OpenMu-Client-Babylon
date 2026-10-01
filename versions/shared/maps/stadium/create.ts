@@ -9,7 +9,7 @@ import { StadiumBrazierObject } from './brazierObject';
  * Stadium (WD_6STADIUM, world 6 / `Object7`).
  *
  * The map is table data almost end to end - spec.ts holds the fountain's blend
- * mesh, the hidden marker and the brazier light, and common/meshAnimation.ts
+ * mesh, the hidden marker and the brazier light, and controllers/render/meshAnimation.ts
  * holds the fountain's V scroll. One type needs a class, and it is wired here.
  *
  * The rest of Object7 is scenery the original never touches: 24/25 the two big
@@ -44,7 +44,7 @@ export async function createStadium(world: World) {
   // (ZzzObject.cpp:2945-2953).
   tiles[9] = StadiumBrazierObject;
 
-  // The notice boards. What each one says is common/signLabels.ts.
+  // The notice boards. What each one says is versions/shared/objects/signs/signLabels.ts.
   prefetchSignPlates(`Object${assetWorldNum(world.mapIndex)}/`);
   for (const type of signTypes(world.mapIndex)) tiles[type] = SignObject;
 }

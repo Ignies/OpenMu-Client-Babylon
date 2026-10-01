@@ -28,7 +28,7 @@ import { weather } from '@/controllers/weather';
 export const TICK = 0.04;
 /** Ticks → seconds. */
 export const ticks = (n: number): number => n * TICK;
-/** Centimetres → tiles (`TILE_CM`, common/terrain/consts.ts). */
+/** Centimetres → tiles (`TILE_CM`, controllers/terrain/consts.ts). */
 export const cm = (n: number): number => n / 100;
 /** A per-tick `Direction` in cm → tiles/s. */
 export const perTick = (n: number): number => (n * 25) / 100;
@@ -93,7 +93,7 @@ export const ringOf = (step: Step, n: number, radius: number, every = 0): Step =
   }
 };
 /**
- * `step` again after `seconds` - on the effects clock (`effects/core.ts`
+ * `step` again after `seconds` - on the effects clock (`controllers/fx/core.ts`
  * `delay`), never `setTimeout`: a warp or a death resets the layer and the
  * pending step with it.
  */
@@ -111,7 +111,7 @@ export const repeat = (n: number, every: number, step: Step): Step => (at, c) =>
 };
 /**
  * The facing convention: `transform.rot.y` is `atan2(dz, dx) + π/2`
- * (skillCastSystem / logic.ts), so the forward vector is (sin yaw, −cos yaw)
+ * (skillCastSystem / app/logic.ts), so the forward vector is (sin yaw, −cos yaw)
  * - the same one deathSystem and the debris entry use.
  */
 export const forwardOf = (yaw: number): { x: number; z: number } => ({ x: Math.sin(yaw), z: -Math.cos(yaw) });
@@ -200,7 +200,7 @@ export const flash = (texture: string, colour: RGB, size = 1, seconds = 0.4): St
 export const explosion = (colour: RGB, scale = 1, seconds = ticks(20)): Step =>
   sprite({ texture: TEX.explosion, colour, size: cm(256) * scale, seconds, cells: EXPLOSION_CELLS, fadeTail: 0.25 });
 /**
- * Burn the settled snow off the ground under `at` (weather/snowMelt.ts).
+ * Burn the settled snow off the ground under `at` (controllers/weather/snowMelt.ts).
  *
  * Not from the original - nothing in `ZzzEffect.cpp` has ever touched the
  * terrain - but the ground here is a simulation rather than a texture, and a
@@ -215,7 +215,7 @@ export const scorch = (radius: number, strength = 1): Step => at => {
 /**
  * The other half of what fire does to the ground: the grass goes up, and the
  * fire spreads from the hit under its own vigour until it runs out of that or
- * out of grass (`weather/grassBurn.ts`). Radius in tiles, the same one the
+ * out of grass (`controllers/weather/grassBurn.ts`). Radius in tiles, the same one the
  * snow takes - a bigger spell lights a bigger fire and therefore burns
  * further, with no per-skill table anywhere to say so.
  */
@@ -323,7 +323,7 @@ export const onCurseLanding = (step: Step): Step => (at, c) => {
 
 // ---- the table -------------------------------------------------------------------
 
-/** Keyed by skill number (common/skillsDatabase.ts). */
+/** Keyed by skill number (versions/shared/skills/skillsDatabase.ts). */
 export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {};
 
 /**
@@ -331,7 +331,7 @@ export const SKILL_VISUALS: Partial<Record<number, SkillVisual>> = {};
  *
  * The original lights an arrow body every frame it is alive (ZzzEffect.cpp
  * MoveEffect, `AddTerrainLight(..., range 2)` per arrow model);
- * `lighting/skills.ts` holds the colours and decides which models light at
+ * `controllers/lighting/skills.ts` holds the colours and decides which models light at
  * all, so anything else through here - a fire ball, a summoned beast -
  * simply asks and is told no. Every shot in the game goes out this way, so
  * a volley, a skill shot and a plain bow shot all light the same.
@@ -537,7 +537,7 @@ export function playTargetedSkillVisual(
  * `AreaSkillAnimation` carries no target, but the explicit-target area
  * skills (Chain Lightning, Drain Life, Teleport Ally) draw a bolt or a
  * ribbon to one: `target` is the object the caller found standing on the
- * cast point (the hero's own cast knows it; for others logic.ts picks the
+ * cast point (the hero's own cast knows it; for others app/logic.ts picks the
  * nearest object to the point). Objects stand on integer tile coordinates,
  * so the point is used as is.
  */
@@ -576,7 +576,7 @@ export function playAreaSkillVisual(
 
 /**
  * `CreateArrow` (ZzzEffectMagicSkill.cpp:174-251): the launcher picks the
- * arrow, keyed here by its item index in group 4 (`common/items.json`).
+ * arrow, keyed here by its item index in group 4 (`versions/shared/items/items.json`).
  * Anything not listed throws the plain MODEL_ARROW - the five wooden bows do,
  * and so do the few late launchers whose own model this client has no sheet
  * for (the Celestial Bow's MODEL_ARROW_HOLY).
@@ -705,7 +705,7 @@ export function clearBuffVisuals(entity: Entity): void {
 // Dev hook for the live harness: no offline test character casts every skill,
 // so probes fire a row by hand (`window.__skillVisuals.area(9)`). `victim` is
 // whatever else is standing about - offline that is the second test character,
-// and it stands in for the object `logic.ts` finds on the cast point, so the
+// and it stands in for the object `app/logic.ts` finds on the cast point, so the
 // rows that draw at a target (a bolt, a siphon) can be shot at all.
 if (import.meta.env.DEV && typeof window !== 'undefined') {
   const victim = (): Entity | null => {

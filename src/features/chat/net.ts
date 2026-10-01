@@ -26,11 +26,11 @@ import { translateServerText } from '@/i18n/serverText';
 EventBus.on('ChatMessage', packet => {
   const p = new ChatMessagePacket(packet);
   const sender = cleanName(p.Sender);
-  // UTF-8 on the wire (common/chatWire.ts): accents and emoji come back whole.
+  // UTF-8 on the wire (controllers/net/protocols/chatWire.ts): accents and emoji come back whole.
   const message = fromChatWire(p.Message.replace(/\0+$/, ''));
 
   // Our own line coming back is the answer to the one we sent: that pair is
-  // what the round-trip figure is measured on (common/netStats.ts).
+  // what the round-trip figure is measured on (controllers/net/roundTrip.ts).
   if (
     p.Type !== ChatMessageChatMessageTypeEnum.Whisper &&
     sender === Store.playerData.name
@@ -63,7 +63,7 @@ EventBus.on('ChatMessage', packet => {
   Social.addChatLine(sender, text, type);
 
   // A plain chat line that is nothing but an emoji token is a bubble, not
-  // speech (common/emojiBubbles.ts): pop it over the sender and drop the
+  // speech (features/chat/emojiBubbles.ts): pop it over the sender and drop the
   // balloon, or the glyph and the text it stands for would sit on top of each
   // other. The log line stays - it is what a client that draws no bubbles
   // shows, and it is what the player actually sent.
@@ -78,7 +78,7 @@ EventBus.on('ChatMessage', packet => {
   }
 
   // A line of nothing but chat emojis pops the first over the sender, the
-  // same way (common/chatEmojis.ts); a line with words keeps its balloon,
+  // same way (features/chat/chatEmojis.ts); a line with words keeps its balloon,
   // which draws the emojis among them.
   if (type === ChatLineType.Chat && GameOptions.chatEmojis) {
     const shown = chatEmojiBubbleOf(text, EMOJI_CATALOG);

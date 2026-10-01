@@ -1,7 +1,7 @@
 /**
  * Season 6 sprite preloads: the sheets to decode up front, in two waves.
  *
- * The lists moved here from `libs/mu/preloadSprites.ts` unchanged - the
+ * The lists moved here from `controllers/assets/mu/preloadSprites.ts` unchanged - the
  * loader still owns when and how, the version owns which files. A period
  * tree shares almost no interface file names with this one, which is why
  * this is version property (versions/v097d/ui/preload.ts).

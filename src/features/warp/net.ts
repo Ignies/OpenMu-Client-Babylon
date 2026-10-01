@@ -22,7 +22,7 @@ import { teleportGate } from './teleportRules';
 
 EventBus.on('MapChanged', packet => {
   // Answers a warp the player asked for; a server-initiated one pairs with
-  // nothing and is ignored (common/netStats.ts).
+  // nothing and is ignored (controllers/net/roundTrip.ts).
   NetStats.markAnswered('warp');
 
   const p = new MapChangedPacket(packet);

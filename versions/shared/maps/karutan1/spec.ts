@@ -7,7 +7,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  * (`WD_81KARUTAN2`, `World82`/`Object82`), the plain-data half - one table
  * set: `CGMKarutan1::MoveObject` (GMKarutan1.cpp:36-59) tests
  * `IsKarutanMap()`, both worlds (:876-879), and `CreateObject` (:31-34) is
- * `return false`. `maps/karutan2` imports these.
+ * `return false`. `versions/shared/maps/karutan2` imports these.
  *
  * EncTerrain81.obj: 2086 objects, 103 types; EncTerrain82.obj: 1720 objects,
  * 83 types. Object81/82 ship 120/119 models; in World82, types 79 and 80

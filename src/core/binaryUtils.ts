@@ -1,16 +1,16 @@
 /**
  * Byte-level helpers with no Babylon (and no DOM) dependency.
  *
- * These used to live in `common/utils.ts`, which imports `Scene`/`Texture`.
+ * These used to live in `controllers/assets/download.ts`, which imports `Scene`/`Texture`.
  * Two things need them without wanting the engine:
  *
  *  - the terrain worker (todo C8), which reaches them via
  *    `mapFileEncryption`;
  *  - the generated packet modules (todo C9), which are the bulk of the app
- *    chunk. While they imported `common/utils`, any attempt to split them
+ *    chunk. While they imported `controllers/assets/download`, any attempt to split them
  *    into their own chunk dragged 2.4 MB of Babylon along with them.
  *
- * `common/utils.ts` re-exports every name here, so existing importers are
+ * `controllers/assets/download.ts` re-exports every name here, so existing importers are
  * unaffected.
  */
 

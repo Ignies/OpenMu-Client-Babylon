@@ -7,7 +7,7 @@ import type { World } from '@/ecs/world';
  * two of the 61 types present in EncTerrain2.obj, and `MoveObject`
  * (ZzzObject.cpp:3822-3849) another seven. Everything those cases need is
  * table data and lives in `spec.ts` (blend meshes, effect-only markers,
- * particles, torch lights) or in `common/meshAnimation.ts` (the 22/23/24
+ * particles, torch lights) or in `controllers/render/meshAnimation.ts` (the 22/23/24
  * UV scroll); this file is only the two class assignments and the notes on
  * what the original does here that we do not.
  *

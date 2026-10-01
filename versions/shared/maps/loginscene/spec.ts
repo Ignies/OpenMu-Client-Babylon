@@ -36,7 +36,7 @@ import { ENUM_WORLD } from '@/core/types';
  *  - `GMEmpireGuardian4::RenderObjectVisual` case 157 (:1050-1053) returns
  *    before its body on these two worlds: the six chandeliers on World74 burn
  *    on the fortress and are cold here. See the note on
- *    `common/mapTileObject.ts` in the report - that file lights them.
+ *    `controllers/terrain/mapTileObject.ts` in the report - that file lights them.
  *
  * These tables hold only the types the two folders actually place. The rows
  * for the day-4 types neither folder has (80, 83, 84, 85, 130, 131) are left

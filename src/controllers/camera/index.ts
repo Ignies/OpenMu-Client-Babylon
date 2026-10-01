@@ -1,6 +1,6 @@
 /**
  * THE FACADE - the original client's main-scene camera (CameraUtility.cpp /
- * SceneCommon.cpp), behind the `cameraControl` option. See camera/readme.md.
+ * SceneCommon.cpp), behind the `cameraControl` option. See controllers/camera/readme.md.
  */
 
 import type { ENUM_WORLD } from '../../core/types';
@@ -210,7 +210,7 @@ export function installCameraControl(
   const canvas = camera.getEngine().getRenderingCanvas();
 
   // SetViewPortLevel (SceneCommon.cpp:237-253): Ctrl+wheel, up zooms in.
-  // Canvas only, so UI scroll areas keep their wheel; main.tsx already
+  // Canvas only, so UI scroll areas keep their wheel; app/main.tsx already
   // preventDefaults the browser's Ctrl+wheel page zoom.
   window.addEventListener(
     'wheel',

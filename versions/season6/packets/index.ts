@@ -1,14 +1,14 @@
 /**
- * Season 6 packet set = the generated code in `src/common/packets/*`, which
+ * Season 6 packet set = the generated code in `versions/shared/packets/*`, which
  * `bun run generate` produces from OpenMU's un-suffixed XML
- * (`src/common/packets/packetsDefinitions/*.xml`, a copy of
+ * (`versions/shared/packets/packetsDefinitions/*.xml`, a copy of
  * `OpenMU/src/Network/Packets/{ServerToClient,ClientToServer,ConnectServer}/*.xml`).
  * The generated files also contain the `...075` / `...095` / `...Extended`
  * variants; `gameVersion.protocol.variantRank` says which one wins for a
  * shared code.
  *
  * Another version generates into *its own* `versions/<id>/packets/` and never
- * touches these files. `src/common/packets/index.ts` hands out the active
+ * touches these files. `controllers/net/packets.ts` hands out the active
  * version's lists, so every `from '../common/packets'` / `from '../common'`
  * importer (the dispatcher in createSocket.ts among them) already goes
  * through the version; the ~49 direct imports of the generated class files

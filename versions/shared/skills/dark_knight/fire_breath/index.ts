@@ -97,7 +97,7 @@ const fireBreath: Step = (_at, c) => {
     out.set(feet.x + f.x * ahead + f.z * right, feet.y + up, feet.z + f.z * ahead - f.x * right);
   playCombat('Sound/sKnightSkill3', feet);
 
-  // All forty in one ribbon mesh (effects/rays.ts): they share their birth tick and their Light.
+  // All forty in one ribbon mesh (controllers/fx/rays.ts): they share their birth tick and their Light.
   const sparks: Ray[] = [];
   for (const right of [cm(20), cm(-30)]) {
     const from = place(cm(20), right, cm(60)).subtractInPlace(feet);

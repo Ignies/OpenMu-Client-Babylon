@@ -236,7 +236,7 @@ export const AmbientParticleSystem: ISystemFactory = world => {
       const tavern = inTavern();
 
       // A room the mask is drawing keeps its own weather out, per particle
-      // (weather/roomClip.ts), so the shower goes on falling in the world
+      // (controllers/weather/roomClip.ts), so the shower goes on falling in the world
       // outside and is seen through the doorway. Without one - Classic tier,
       // or a roof nobody measured a volume for - there is nothing to clip
       // against and the old rule stands: under a roof, no sky weather.

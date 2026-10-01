@@ -468,7 +468,7 @@ function ringHasFuel(fire: Fire): boolean {
  * Set the grass alight. `radius` in tiles is the hit itself; the fire spreads
  * from there under its own vigour.
  *
- * Called by the fire rows of `common/skillVisuals.ts` through the same step
+ * Called by the fire rows of `controllers/skills/visuals.ts` through the same step
  * list that melts snow, so every fire skill in the game reaches it and any
  * added later does too.
  */

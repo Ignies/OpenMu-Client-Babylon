@@ -186,7 +186,7 @@ abstract class MagmaFishObject extends MapTileObject {
 
       // The head swims on the clip; without the forced recompute the eyes
       // sit where the last active-mesh pass left them (see
-      // maps/tarkan/impactGlowObject.ts).
+      // versions/shared/maps/tarkan/impactGlowObject.ts).
       bone.computeWorldMatrix(true);
 
       const p = bone.getAbsolutePosition();

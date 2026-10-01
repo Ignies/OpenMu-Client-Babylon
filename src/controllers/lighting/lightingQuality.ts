@@ -61,7 +61,7 @@ const POINT_LIGHT_BUDGETS: readonly number[] = [0, 8, 8];
 
 /**
  * The MSAA slider's notches. The engine is created without antialiasing
- * (`main.tsx`), so this is the only AA in the chain; Babylon clamps the
+ * (`app/main.tsx`), so this is the only AA in the chain; Babylon clamps the
  * request to `caps.maxMSAASamples`.
  */
 export const MSAA_STEPS: readonly number[] = [1, 2, 4, 8];
@@ -126,7 +126,7 @@ export const csmState = { active: false };
 
 /**
  * Set by `objectShadow` so the shadow owner can re-park the blob shadows
- * without importing it (objectShadow -> scenes/shadows cycle).
+ * without importing it (objectShadow -> controllers/render/scenes/shadows cycle).
  */
 export const blobShadowRefresh: { fn: ((scene: Scene) => void) | null } = {
   fn: null,

@@ -4,7 +4,7 @@ import type { Entity } from '../../ecs/world';
 /**
  * What is around the hero, from the entities the world holds.
  *
- * Split from `gmWorld.ts` so it can be tested: that one reads `Store`, which
+ * Split from `features/gm/gmWorld.ts` so it can be tested: that one reads `Store`, which
  * pulls in the whole client and a DOM with it. Everything here is arithmetic
  * and sorting over data it is handed.
  */

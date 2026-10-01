@@ -1,6 +1,6 @@
 /**
  * The hero's `AttackTime` latch (w_CharacterInfo.h:247, ZzzCharacter.cpp:4018-4025,
- * :2755; ZzzInterface.cpp:3355). The hit request fires on the hit key. See combat/readme.md.
+ * :2755; ZzzInterface.cpp:3355). The hit request fires on the hit key. See controllers/combat/readme.md.
  */
 import type { PlayerAction } from '@versions/shared/objects/enum';
 import { REFERENCE_FPS } from '../anim/playSpeed';
@@ -46,7 +46,7 @@ let onHit: (() => void) | null = null;
 
 /**
  * Tick at which a clip at `playSpeed` reaches its hit key: `1 + key / playSpeed`,
- * capped by `clipTicks`. The 15-tick limit must not cut it off. See combat/readme.md.
+ * capped by `clipTicks`. The 15-tick limit must not cut it off. See controllers/combat/readme.md.
  */
 export function hitTickFor(
   action: PlayerAction,

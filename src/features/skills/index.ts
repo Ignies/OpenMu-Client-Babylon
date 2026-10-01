@@ -55,7 +55,7 @@ export type {
  * buff timers, re-use delays, castability - behind one object. Copy `_template.ts` when adding to it.
  *
  * The game talks to `skills.update` once a frame (`ecs/systems/skillSystem`)
- * and `skills.reset` on a map change (`libs/mu/loadMapIntoScene`); both fan
+ * and `skills.reset` on a map change (`controllers/terrain/loadMapIntoScene`); both fan
  * out over `SKILL_LAYERS` (`layers.ts`), the only list of entries. The
  * readers and commands below are the facade's surface for the hotbar, the
  * buff bar, the tooltips and the cast system; every entry file stays
@@ -228,6 +228,6 @@ export const skills = new Skills();
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as store.ts).
+// of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

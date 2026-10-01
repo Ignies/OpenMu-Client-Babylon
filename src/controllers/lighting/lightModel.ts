@@ -19,7 +19,7 @@ export const UNIFIED_LIGHT_MODEL = true;
  * post and the unified model is on). The terrain shader keys its output
  * decode on this. Colours that skip the material fragments entirely - the
  * clear colour, the haze colour - are decoded once at their source
- * (`lighting/director.ts`), never divided by an exposure.
+ * (`controllers/lighting/director.ts`), never divided by an exposure.
  */
 export function linearBufferActive(scene: {
   imageProcessingConfiguration: { applyByPostProcess: boolean };

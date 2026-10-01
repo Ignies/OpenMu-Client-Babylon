@@ -76,7 +76,7 @@ const JITTER = 0.05;
  * boiled instead of writhing, the whole mesh strobed, and a 150 fps machine
  * and a 40 fps one showed two different effects. Both now step at the
  * original's 25 Hz and are interpolated between steps, the way the buff
- * auras drive their knots (effects/aura.ts) - same shapes, same brightness
+ * auras drive their knots (controllers/fx/aura.ts) - same shapes, same brightness
  * range, but a flow the eye can follow and the same one on every machine.
  */
 const CRACKLE_HZ = 25;

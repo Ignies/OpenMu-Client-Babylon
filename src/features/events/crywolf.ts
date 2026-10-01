@@ -35,8 +35,8 @@ export {
  * Driven by: `warpCompleted` (the info request, WSclient.cpp:789) and the
  * `CrywolfStateInfo` / `CrywolfAltarInfo` / `CrywolfContractResult` /
  * `CrywolfLeftTime` / `CrywolfBossMonsterInfo` / `CrywolfBenefit` packets.
- * Read by: `CrywolfBar` in `ui/pages/worldPage/components/events` and the
- * staging classes in `maps/crywolf`.
+ * Read by: `CrywolfBar` in `versions/shared/ui/windows/events` and the
+ * staging classes in `versions/shared/maps/crywolf`.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

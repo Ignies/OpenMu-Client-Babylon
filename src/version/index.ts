@@ -1,7 +1,7 @@
 /**
  * The resolved game version - the runtime end of `versions/registry.ts`.
  *
- * `main.tsx` awaits `loadGameVersion` before importing the app (`boot.tsx`),
+ * `app/main.tsx` awaits `loadGameVersion` before importing the app (`app/boot.tsx`),
  * so every module in the app graph - including the ones that read
  * `gameVersion` at module scope - evaluates after these bindings are
  * assigned. Base code keeps importing `gameVersion` from here and only ever
@@ -85,7 +85,7 @@ export function loadVersionUi(): Promise<VersionUi> {
 /**
  * The UI module if it is already there, for callers that run every frame and
  * cannot await (the login-scene system) or that render before it lands (the
- * shared pre-game chrome). Null until `loadVersionUi` resolves; `boot.tsx`
+ * shared pre-game chrome). Null until `loadVersionUi` resolves; `app/boot.tsx`
  * starts that load as soon as the app graph is up.
  */
 export function versionUi(): VersionUi | null {

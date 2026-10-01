@@ -14,7 +14,7 @@ import type { DialogPageFixes } from './dialogPages';
 
 /**
  * Which flag the selector draws. The value is an ISO 3166-1 alpha-2 region,
- * and `ui/components/muFlag` has one hand-drawn SVG per region - flag emoji
+ * and `controllers/interface/components/mu_flag` has one hand-drawn SVG per region - flag emoji
  * are not an option, Windows browsers render them as letter pairs.
  */
 export type FlagRegion =
@@ -80,7 +80,7 @@ export interface LanguageLayer {
    *
    * Omit when there is no folder at all for this language - that text then
    * stays English, one file at a time, while everything in `strings` is still
-   * translated. See `libs/mu/localData.ts`.
+   * translated. See `controllers/assets/mu/localData.ts`.
    */
   readonly dataPack?: LanguageDataPack;
 }
@@ -101,19 +101,19 @@ export interface LanguageDataPack {
   readonly encoding?: string;
   /**
    * Corrections for a pack that was damaged before it shipped. See
-   * `packRepairs.ts`; applied by `libs/mu/localData.ts` after decoding.
+   * `packRepairs.ts`; applied by `controllers/assets/mu/localData.ts` after decoding.
    */
   readonly repairs?: PackRepairs;
 
   /**
    * Item names this pack gets wrong, keyed `"group/index"`. See
-   * `itemNames.ts`; read by `libs/mu/itemNameFile.ts` in front of the table.
+   * `itemNames.ts`; read by `controllers/assets/mu/itemNameFile.ts` in front of the table.
    */
   readonly itemNames?: ItemNameFixes;
 
   /**
    * Quest dialogue pages this pack gets wrong, by page number. See
-   * `dialogPages.ts`; applied by `libs/mu/questFiles.ts` after decoding.
+   * `dialogPages.ts`; applied by `controllers/assets/mu/questFiles.ts` after decoding.
    */
   readonly dialogPages?: DialogPageFixes;
 }

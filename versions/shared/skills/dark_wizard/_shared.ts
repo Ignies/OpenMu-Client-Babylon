@@ -231,7 +231,7 @@ export function fireBallFlight(
   }
 }
 
-/** Explotion01 through its cells, faded inside each cell (effects/softEdge.ts): its grey ground showed as a square on the graded tiers. */
+/** Explotion01 through its cells, faded inside each cell (controllers/fx/softEdge.ts): its grey ground showed as a square on the graded tiers. */
 export const softExplosion = (colour: RGB, scale = 1): Step =>
   sprite({ texture: TEX.explosion, colour, size: cm(256) * scale, seconds: ticks(20), cells: EXPLOSION_CELLS, fadeTail: 0.25, soft: true });
 
@@ -239,7 +239,7 @@ export const softExplosion = (colour: RGB, scale = 1): Step =>
 export const groundFlare = (colour: RGB, scale: number, seconds: number): Step =>
   ring({ texture: TEX.flare, colour, scale, seconds, growFrom: 0.6, fadeTail: 0.6 });
 
-/** One of the row's `bodies` lights (lighting/skills.ts), standing at `at`. */
+/** One of the row's `bodies` lights (controllers/lighting/skills.ts), standing at `at`. */
 export const placeBodyLight = (skill: number, body: string): Step => (at, c) => {
   const x = at.x;
   const y = at.y;

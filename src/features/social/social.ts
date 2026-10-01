@@ -679,7 +679,7 @@ export const Social = new (class _Social {
 
       // A line that is nothing but an emoji token pops the bubble here too.
       // Everyone else gets it from this very message (the ChatMessage handler
-      // in logic.ts), and waiting for the server to echo it back would show
+      // in app/logic.ts), and waiting for the server to echo it back would show
       // the sender their own bubble a round trip late. Public chat only: a
       // party line reaches members three maps away, where a bubble would hang
       // over nobody.
@@ -699,7 +699,7 @@ export const Social = new (class _Social {
     packet.setCharacter(heroName);
     packet.setMessage(message);
     // The server echoes our own line back, which is the one request/answer
-    // pair a player can trigger on demand (common/netStats.ts).
+    // pair a player can trigger on demand (controllers/net/roundTrip.ts).
     NetStats.markSent('chat');
     Store.sendToGS(packet.buffer);
 
@@ -709,7 +709,7 @@ export const Social = new (class _Social {
 
   /**
    * The radial menu picked an emoji bubble: send it as the plain chat line its
-   * token stands for (common/emojiBubbles.ts). Always public chat, never the
+   * token stands for (features/chat/emojiBubbles.ts). Always public chat, never the
    * prefix of the current input mode - the bubble is drawn over a body in the
    * world, so it has to go to the players who can see that body.
    *
@@ -1120,6 +1120,6 @@ export const Social = new (class _Social {
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as store.ts).
+// of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

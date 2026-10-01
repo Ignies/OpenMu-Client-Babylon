@@ -45,7 +45,7 @@ const GATE_BLEND_MESH_LIGHT = 0.8;
  * answers each with three stacked effects at `z + 520`, offset along Y by
  * -40, -36 and -20: warp01, warp02, warp03, all from `Data/Npc/`.
  *
- * The base object is not spawned here, for the reason `maps/noria` gives:
+ * The base object is not spawned here, for the reason `versions/shared/maps/noria` gives:
  * its `Position[2]` is left at 0 while `TerrainHeight.OZB` reads 1.70 tiles
  * at every one of the three tiles, and warp01 reaches 1.22 tiles above its
  * own origin - the whole gate model is under the ice. The three effects

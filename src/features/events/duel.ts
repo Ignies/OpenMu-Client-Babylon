@@ -39,9 +39,9 @@ import {
  * result box (`CDuelResultMsgBox`).
  *
  * Driven by: the twelve `Duel*` S2C packets (all `0xAA`), the Titus
- * `NpcWindowResponse` via `openDuelWatch`, and `commands.ts` (`/duelstart`,
+ * `NpcWindowResponse` via `openDuelWatch`, and `features/chat/commands.ts` (`/duelstart`,
  * `/duelend` keep sending `DuelStartRequest` / `DuelStopRequest` unchanged).
- * Read by: `ui/pages/worldPage/components/duel`, and `duelEnemyId` by
+ * Read by: `versions/shared/ui/windows/duel`, and `duelEnemyId` by
  * `ecs/systems/attackSystem` for the click rules.
  *
  * Duel state survives `reset()`: the accept -> warp -> `DuelInit` sequence

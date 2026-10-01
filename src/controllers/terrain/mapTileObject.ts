@@ -67,7 +67,7 @@ export class MapTileObject extends ModelObject {
     // (`o->HiddenMesh = -2`, ZzzObject.cpp:3052-3110) and replaces them with
     // BITMAP_CLOUD billboards. `cloud.bmd` is MODEL_CLOUD, an *effect* model
     // loaded by MapManager.cpp:151 and used only for the lightning flash
-    // plane - never a map object. maps/icarus/cloudObject.ts owns all six now.
+    // plane - never a map object. versions/shared/maps/icarus/cloudObject.ts owns all six now.
     // Before load: the metadata loop in ModelObject.load stamps every mesh.
     this.SnowCap = SNOW_GROUND_MAPS.has(this.WorldIndex);
 

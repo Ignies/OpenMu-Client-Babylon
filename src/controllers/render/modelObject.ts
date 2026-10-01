@@ -388,7 +388,7 @@ export class ModelObject {
 
   /**
    * The class does nothing per object that a prop batch cannot reproduce
-   * (`common/propBatches.ts`): it picks a file and material tweaks in
+   * (`controllers/render/propBatches.ts`): it picks a file and material tweaks in
    * `init()` and nothing else. Off for everything that animates, lights,
    * hides or moves its own body.
    */
@@ -469,7 +469,7 @@ export class ModelObject {
   GlowBlendMesh = false;
   /**
    * Play speed in the original's units (BMD keys per 25 Hz tick, e.g. idle
-   * 0.28, walk 0.30). See common/playSpeed.ts for the tables.
+   * 0.28, walk 0.30). See controllers/anim/playSpeed.ts for the tables.
    */
   AnimationSpeed = DEFAULT_ANIMATION_SPEED;
   /** Per-action PlaySpeed overrides (the original's `Actions[i].PlaySpeed` edits). */
@@ -529,7 +529,7 @@ export class ModelObject {
   ActionIterationWasFinished = false;
   /**
    * Bumped every time an action (re)starts from its first frame - the
-   * original's `AnimationFrame == 0` moment that sound/effect code keys on
+   * original's `AnimationFrame == 0` moment that controllers/sound/effect code keys on
    * (CombatSfxSystem).
    */
   actionSerial = 0;
@@ -637,7 +637,7 @@ export class ModelObject {
   CastsShadow = true;
 
   /**
-   * Whether snow may settle on this object (weather/snowCaps.ts). Set by
+   * Whether snow may settle on this object (controllers/weather/snowCaps.ts). Set by
    * MapTileObject on the maps snow settles on; every mesh carries it as
    * `metadata.snowCap` for the item material to bind against.
    */
@@ -1144,7 +1144,7 @@ export class ModelObject {
         this.CastsShadow && !this.Lights?.emitsLight;
 
       // A map object's shadow is already in the lightmap; the cascades read
-      // this to keep it out of the shadow map (scenes/shadows.ts).
+      // this to keep it out of the shadow map (controllers/render/scenes/shadows.ts).
       mesh.metadata.mapObject = this.IsMapObject;
 
       // Lets the cascades keep this object's blend mesh as a caster, the same
@@ -1155,7 +1155,7 @@ export class ModelObject {
       // not the same set as the sun's casters: an object the map marks
       // `CastsShadow = false`, or one carrying a light, still stands in front
       // of the camera and still has to be fogged by its own depth rather than
-      // by whatever is behind it. See `occludes` in scenes/ambientOcclusion.
+      // by whatever is behind it. See `occludes` in controllers/render/scenes/ambientOcclusion.
       mesh.metadata.depthOccluder = true;
 
       fixSkinnedLocalBounds(mesh);
@@ -1196,7 +1196,7 @@ export class ModelObject {
 
   /**
    * A map object that stands still can have its shadow drawn once and kept
-   * (scenes/csmCache.ts). True while no clip of this object is running - the
+   * (controllers/render/scenes/csmCache.ts). True while no clip of this object is running - the
    * pose `settleStaticClips` left the bones in is the pose it will keep -
    * and cleared for good by the first clip that starts. An object that moved
    * once counts as a mover from then on: a door that swung shut again is not
@@ -1232,7 +1232,7 @@ export class ModelObject {
    * stays where the clip left the bone nodes; the loop goes.
    *
    * Inside a real clip, the bones keyed to one value all the way through go
-   * the same way (common/staticClips.ts): Noria's sway rigs move a few
+   * the same way (controllers/render/staticClips.ts): Noria's sway rigs move a few
    * branch tips and key everything else still. Only the running clip is
    * settled; a clip a class starts later is intact, and the settled one
    * writes its pose back on every start.

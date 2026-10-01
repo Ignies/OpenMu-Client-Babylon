@@ -9,7 +9,7 @@ import { pregameLoad } from '../loading/pregameLoad';
  * the world (LoadingScene.cpp:83). The server list, the login window and the
  * character select all sit in that one scene, so the theme spans the three
  * pages; the per-map music takes over once the world loads
- * (`sound/music.ts`).
+ * (`controllers/sound/music.ts`).
  *
  * The browser only unlocks audio on the first gesture, so the theme is asked
  * for again on a short timer until `sound.unlocked` is true.
@@ -48,7 +48,7 @@ function tryPlay(): void {
   stopRetry();
 }
 
-/** Call once from main.tsx after `sound.init`. */
+/** Call once from app/main.tsx after `sound.init`. */
 export function installLoginMusic(): void {
   reaction(
     wanted,

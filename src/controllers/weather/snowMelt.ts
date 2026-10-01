@@ -129,7 +129,7 @@ function smoothstep(a: number, b: number, x: number): number {
  * Melt a circle of snow at world (x, z). `radius` is in tiles, `strength`
  * 0…1 is how much of the snow the fire takes at the centre.
  *
- * Called by the fire rows of `common/skillVisuals.ts`. Free to call on a map
+ * Called by the fire rows of `controllers/skills/visuals.ts`. Free to call on a map
  * with no meltable layer: nothing samples the patches there, and the map
  * change clears them.
  */

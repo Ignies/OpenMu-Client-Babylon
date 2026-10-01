@@ -152,7 +152,7 @@ const ARC_MAX = 0.85;
 const ARC_DROOP = 0.45;
 
 /**
- * Fire, as the blade sees it (`weather/grassBurn.ts` owns the scar). Each blade goes at its own
+ * Fire, as the blade sees it (`controllers/weather/grassBurn.ts` owns the scar). Each blade goes at its own
  * threshold, MIN..MIN + SPREAD on the cube of its hash; `WITHER` softens the edge. See readme.md.
  */
 const BURN_MIN = 0.05;

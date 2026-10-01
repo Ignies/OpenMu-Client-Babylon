@@ -13,7 +13,7 @@ import { EmojiText } from '@/controllers/interface/components/emoji_text';
 /**
  * `CUIChatWindow`, folded into one window with a tab per room the way the
  * original's `CUIChatRoomListTabWindow` lists them. Talking happens on the
- * chat server connection held by chatRooms.ts; this component only renders
+ * chat server connection held by features/chat/chatRooms.ts; this component only renders
  * its state.
  */
 

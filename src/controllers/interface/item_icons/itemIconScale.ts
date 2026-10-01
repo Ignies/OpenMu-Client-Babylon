@@ -5,7 +5,7 @@
 //
 // `o->Scale` - the size the original renders each item's model at in the
 // inventory, hand-tuned per type. It is the relative sizing between items that
-// matters here; ui/components/itemIcon turns it into a zoom on the
+// matters here; controllers/interface/components/item_icon turns it into a zoom on the
 // pre-rendered pack.
 export const ITEM_ICON_SCALE_DEFAULT = 0.0025;
 

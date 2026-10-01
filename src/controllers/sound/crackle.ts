@@ -14,7 +14,7 @@ import { listenerHero } from './listener';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** A burning torch is part of the place, so it is ambience (`sound/buses.ts`). */
+/** A burning torch is part of the place, so it is ambience (`controllers/sound/buses.ts`). */
 const BUS: SoundBus = 'ambient';
 
 /** The looping fire file. */

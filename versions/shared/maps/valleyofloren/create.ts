@@ -38,7 +38,7 @@ export async function createValleyOfLoren(world: World) {
   tiles[77] = OperateBoxObject;
   tiles[84] = OperateBoxObject;
 
-  // The notice boards. What each one says is common/signLabels.ts.
+  // The notice boards. What each one says is versions/shared/objects/signs/signLabels.ts.
   prefetchSignPlates(`Object${assetWorldNum(world.mapIndex)}/`);
   for (const type of signTypes(world.mapIndex)) tiles[type] = SignObject;
 }

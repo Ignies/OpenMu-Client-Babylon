@@ -6,7 +6,7 @@ import { resolveUrlToDataFolder } from '../assets/resolveUrlToDataFolder';
  * maps a sound key (`Sound/eBow`, `Music/Devias`) to its file under the data
  * folder; the key set is the `Sounds` union every entry and consumer types
  * against. Nothing here plays anything - the mixer
- * (`libs/soundsManager.ts`) turns a key into a Babylon `Sound`.
+ * (`controllers/sound/soundsManager.ts`) turns a key into a Babylon `Sound`.
  */
 export const SOUND_FILES: Readonly<Record<string, string>> = soundFiles;
 

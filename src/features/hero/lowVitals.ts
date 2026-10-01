@@ -4,7 +4,7 @@
  * threshold in, the two numbers the overlay draws with out, so the reaction
  * that writes the CSS variables and the test read one rule.
  *
- * Driven by: `ui/pages/worldPage/components/lowHealthOverlay`.
+ * Driven by: `versions/shared/ui/hud/low_health_overlay`.
  * Read by: nothing else - it holds no state.
  */
 

@@ -27,7 +27,7 @@ function input(world: number, monster: number, now: number): MonsterAttackInput 
   return { world, monster, model: -1, trapObject: undefined, random: () => 0, now };
 }
 
-/** A monster in scope: the owner logic.ts keys its state by, and the clip it plays. */
+/** A monster in scope: the owner app/logic.ts keys its state by, and the clip it plays. */
 function monster(number: number, world: number, action = A.Stop1) {
   const owner: { objOutOfScope?: boolean } = {};
   const clip: ClipSource & { CurrentAction: number } = { CurrentAction: action };

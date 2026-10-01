@@ -10,9 +10,9 @@ import { bindAbsentModels } from '../shared/objectVariants';
  * objects of 70 types.
  *
  * `CGM_Raklion` is shared with the hatchery: every hook gates on
- * `IsIceCity()` (GM_Raklion.cpp:2294-2306), so `maps/raklionboss` binds the
+ * `IsIceCity()` (GM_Raklion.cpp:2294-2306), so `versions/shared/maps/raklionboss` binds the
  * same classes for the types it places. The tables are `spec.ts`
- * (blend meshes, the two braziers) and `common/meshAnimation.ts` (the
+ * (blend meshes, the two braziers) and `controllers/render/meshAnimation.ts` (the
  * `BlendMeshLight` sines on 22 and 68/69/71).
  *
  * Types with a case in the C++ and a class here:
@@ -35,7 +35,7 @@ import { bindAbsentModels } from '../shared/objectVariants';
  *    so that flip animates nothing - it is a state flag for the particles
  *    and nothing else. The particles are the whole effect and their kinds
  *    (`BITMAP_WATERFALL_2` SubType 5, `WATERFALL_3` SubType 8/9/13,
- *    `WATERFALL_5` SubType 7) are not in `common/effectParticles.ts`; only
+ *    `WATERFALL_5` SubType 7) are not in `controllers/fx/effectParticles.ts`; only
  *    `waterfall5_9` is. Adding four kinds is a shared-file change, so the
  *    three are left as plain props and the omission is reported.
  *  - **30/31** (×6/×4), ZzzObject.cpp:3351 and :3391 - `choship_01/02`, the

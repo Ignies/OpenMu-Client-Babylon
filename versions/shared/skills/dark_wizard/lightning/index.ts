@@ -22,7 +22,7 @@ export default defineSkill({
     },
   },
   // 1 Poison, 2 Meteorite, 4 Fire Ball, 7 Ice and their masters: none at the cast; the original plays them at the
-  // release, 14 ticks after the packet (ZzzCharacter.cpp:4955-5034), and the rows do (common/skillVisuals.ts).
+  // release, 14 ticks after the packet (ZzzCharacter.cpp:4955-5034), and the rows do (controllers/skills/visuals.ts).
   // So do 11 Power Wave, 17 Energy Ball (sMagic) and 45 Lance (sCShockWave), ZzzCharacter.cpp:5011-5143.
   sound: 'Sound/eThunder', // Lightning
   // BITMAP_LIGHTNING: range 6 on the strike (ZzzEffectParticle.cpp:4298).

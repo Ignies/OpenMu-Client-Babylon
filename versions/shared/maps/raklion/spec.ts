@@ -4,7 +4,7 @@ import type { Emission } from '@/controllers/fx/effectParticles';
  * Raklion (`WD_57ICECITY`, `World58`/`Object58`) and its hatchery
  * (`WD_58ICECITY_BOSS`, `World59`/`Object59`), the plain-data half - one
  * table set, because every hook in `CGM_Raklion` gates on `IsIceCity()`
- * (GM_Raklion.cpp:2294-2306), which is both worlds. `maps/raklionboss`
+ * (GM_Raklion.cpp:2294-2306), which is both worlds. `versions/shared/maps/raklionboss`
  * imports these.
  *
  * EncTerrain58.obj: 1474 objects, 70 types; EncTerrain59.obj: 162 objects,

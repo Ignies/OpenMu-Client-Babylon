@@ -3,7 +3,7 @@
  * exchanges.
  *
  * OpenMU never answers the keep-alive `Ping` (see the comment by the ping
- * interval in `logic.ts`), so there is nothing to time directly. Instead the
+ * interval in `app/logic.ts`), so there is nothing to time directly. Instead the
  * three requests that always draw exactly one answer mark themselves sent
  * here, and the handler of that answer closes the pair: a chat line and its
  * echo, an item move and `ItemMoved`, a warp and `MapChanged`. Nothing new

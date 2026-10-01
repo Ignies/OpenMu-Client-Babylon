@@ -132,7 +132,7 @@ const blowOfDestruction: Step = (at, c) => {
 /**
  * The Cold debuff's one look on insert (WSclient.cpp:15631-15634): MODEL_ICE sub0 at the feet, Scale 0.8,
  * BlendMesh 0, LT 50, smoking and fading once its clip passes key 5 (ZzzEffect.cpp:2187-2195, :7637-7661).
- * The body tint, the bright pass and the slowed walk that go with it are common/debuffBody.ts.
+ * The body tint, the bright pass and the slowed walk that go with it are controllers/actors/debuffBody.ts.
  */
 function coldIce(scene: Scene, entity: Entity): void {
   const feet = entityPos(entity, 0, new Vector3());

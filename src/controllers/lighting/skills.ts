@@ -15,7 +15,7 @@ import { effectLight } from './recipes';
  * What it is: the light a skill throws - at the caster's hands as the clip
  * starts, riding the projectile to the target, at the target on impact, or
  * on the ground point of an area skill. Driven by the two commands below,
- * which `common/skillVisuals.ts` calls from the skill packets. Read by nobody
+ * which `controllers/skills/visuals.ts` calls from the skill packets. Read by nobody
  * but the sinks; `emitters()` reports what is live.
  *
  * Ranges are the original's `AddTerrainLight` radii per effect
@@ -145,7 +145,7 @@ const ULTRA_TIER = 2;
 /** MoveEffect's `Luminosity = (rand() % 4 + 7) * 0.1` a frame (ZzzEffect.cpp:6645). */
 export const EFFECT_LUMINOSITY = { min: 0.7, max: 1, steps: 4 };
 
-/** Keyed by skill number (common/skillsDatabase.ts). */
+/** Keyed by skill number (versions/shared/skills/skillsDatabase.ts). */
 export const SKILL_LIGHTS: Partial<Record<number, SkillLight>> = {
   // Weapon swings (no skill of that number): the original lights neither. Graded: the warrior glint's
   // white for its 18 ticks, and a soft light on the blade tip of a bright trail, below the skill lights

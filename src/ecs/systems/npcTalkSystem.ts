@@ -142,7 +142,7 @@ export const NpcTalkSystem: ISystemFactory = world => {
       // hero stands beside the NPC, or the path ended early inside the
       // range) falls through to the talk request without moving.
       if (Math.max(dx, dz) > TALK_RANGE) {
-        // The A* (`libs/astar.ts`) never returns an empty path for an
+        // The A* (`core/astar.ts`) never returns an empty path for an
         // unreachable goal: it hands back the path to the *closest* node. So
         // "unreachable" is a calculated path whose last node is not the tile
         // asked for (an empty path counts too) - a tile behind a merchant's

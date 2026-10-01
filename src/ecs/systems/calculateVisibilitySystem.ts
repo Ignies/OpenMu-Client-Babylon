@@ -11,7 +11,7 @@ export const CalculateVisibilitySystem: ISystemFactory = world => {
       if (!terrain) return;
 
       // Hero-relative load radius, in tiles - the Render distance option
-      // (`common/renderDistance.ts`), whose step 0 is the pair this held
+      // (`controllers/render/renderDistance.ts`), whose step 0 is the pair this held
       // as constants. Babylon frustum-culls the loaded meshes, so the radius
       // only has to cover what the camera can possibly see, and the camera
       // facade's zoom, pitch and FOV all move that horizon.

@@ -36,7 +36,7 @@ export type { CrackleSource } from './crackle';
 export type { ObjectLoop, ObjectLoopSource } from './objectLoops';
 
 // The entry functions, re-exported so the pre-migration modules
-// (`libs/sfx.ts`, `common/combatSounds.ts`) can stay one-line re-exports.
+// (`controllers/sound/sfx.ts`, `controllers/sound/combatSounds.ts`) can stay one-line re-exports.
 export {
   playSfx,
   setSfxListener,
@@ -93,9 +93,9 @@ export { OBJECT_LOOPS } from './objectLoops';
  *
  * The game talks to `sound.update` once a frame
  * (`ecs/systems/soundSystem.ts`) and `sound.reset` on a map change
- * (`libs/mu/loadMapIntoScene.ts`); both fan out over `SOUND_LAYERS`
+ * (`controllers/terrain/loadMapIntoScene.ts`); both fan out over `SOUND_LAYERS`
  * (`layers.ts`), the only list of entries. Playback itself is the mixer's
- * (`libs/soundsManager.ts`: the Babylon tracks and buffers); entries decide
+ * (`controllers/sound/soundsManager.ts`: the Babylon tracks and buffers); entries decide
  * *what* plays and command the mixer. The facade holds no state.
  */
 class Sound implements Controller {
@@ -289,6 +289,6 @@ export const sound = new Sound();
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as store.ts).
+// of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

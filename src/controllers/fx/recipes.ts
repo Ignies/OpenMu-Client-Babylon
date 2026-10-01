@@ -2,7 +2,7 @@ import type { ParticleRecipe, RGB, SheetCells } from './core';
 
 /**
  * Pure data shared by the effect entries and the skill table in
- * `common/skillVisuals.ts`: the effect sheets under Data/Effect, the skill
+ * `controllers/skills/visuals.ts`: the effect sheets under Data/Effect, the skill
  * models under Data/Skill, the palette and the particle recipes.
  *
  * Every texture is a file the original loads in `ZzzOpenData.cpp`; `.OZJ`
@@ -618,7 +618,7 @@ export const SHADE_MOTES: ParticleRecipe = {
  * **Alpha, never additive.** Additive light can only brighten what is behind
  * it, so a red-tinted `flare` over a bright ground - Devias snow, Tarkan sand
  * - adds into all three channels at once, clips to white, and the bloom in
- * `scenes/sceneLook.ts` then spreads that clipped white into a pink haze:
+ * `controllers/render/scenes/sceneLook.ts` then spreads that clipped white into a pink haze:
  * blood came out looking like steam. The blood sheet drawn straight-alpha
  * *darkens* the ground the way fluid does, and its deep red sits well under
  * every mood's bloom threshold (0.66 at the lowest), so the pipeline leaves
@@ -875,7 +875,7 @@ export const SHINY_GLINT: ParticleRecipe = {
   capacity: 64,
 };
 
-// ---- monster body effects (effects/monsterVisuals.ts) --------------------------
+// ---- monster body effects (controllers/fx/monsterVisuals.ts) --------------------------
 
 /**
  * `BITMAP_SMOKE` SubType 0 (smoke01.jpg, additive) as a monster breathes or

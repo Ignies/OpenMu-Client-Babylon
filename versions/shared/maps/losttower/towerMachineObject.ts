@@ -68,7 +68,7 @@ const POSE_WAIT_LIMIT = 120;
  *    (1.0, 0.2, 0.1), then lays the normal textured pass over it. The clone
  *    has no per-object chrome pass; that is materials work. The `stream`
  *    half of it - unlit, UV-scrolled - is already handled by
- *    common/meshAnimation.ts.
+ *    controllers/render/meshAnimation.ts.
  *
  * The floor light these throw is in spec.ts: `addTerrainLight` is an x/z
  * footprint and the bones sit straight above the object origin, so anchoring

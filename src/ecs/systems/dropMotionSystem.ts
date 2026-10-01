@@ -21,7 +21,7 @@ const START_VELOCITY_CM = 20;
 const GRAVITY_CM = 6;
 /**
  * `Angle[0] = -Gravity × 10` degrees while airborne. `transform.rot` negates
- * the original's pitch and roll (common/renderAngles.ts), so the rotation the
+ * the original's pitch and roll (controllers/render/renderAngles.ts), so the rotation the
  * entity carries is `+Gravity × 10`.
  */
 const TUMBLE_DEG_PER_CM = 10;

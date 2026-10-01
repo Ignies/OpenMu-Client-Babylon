@@ -6,7 +6,7 @@ import { t } from '@/i18n';
 
 /**
  * What a dropped connection looks like while the client walks the login
- * flow again on its own (`common/sessionResume.ts`): a small plate over
+ * flow again on its own (`features/session/sessionResume.ts`): a small plate over
  * whatever was on screen, saying which step it is on, with the way out.
  */
 export const ReconnectOverlay = observer(() => {

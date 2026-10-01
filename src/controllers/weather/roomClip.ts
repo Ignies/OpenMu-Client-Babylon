@@ -7,7 +7,7 @@ import {
 import type { RoomVolume } from '../lighting/profiles';
 
 /**
- * Sky weather seen from inside a room: the room mask's rule (`scenes/roomMask.ts`) moved onto
+ * Sky weather seen from inside a room: the room mask's rule (`controllers/render/scenes/roomMask.ts`) moved onto
  * each particle, injected into Babylon's own CPU and GPU particle fragment shaders. See readme.md.
  */
 

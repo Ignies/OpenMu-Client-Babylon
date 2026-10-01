@@ -8,7 +8,7 @@ import { ServerConfig, URL_PROFILE_ID } from './serverConfig';
 
 const ACCOUNTS_KEY = 'mu_accounts';
 
-/** The pre-rework blob (store.ts `CONFIG_KEY`), read once to migrate. */
+/** The pre-rework blob (app/store.ts `CONFIG_KEY`), read once to migrate. */
 const LEGACY_KEY = '_mu_key';
 
 /** What the tab has room for, and more mules than anyone runs from one browser. */

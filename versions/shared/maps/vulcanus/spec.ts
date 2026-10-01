@@ -124,7 +124,7 @@ const lavaScrollDown = (t: number) => -((t % 10000) * 0.0001);
 const lavaScrollUp = (t: number) => (t % 10000) * 0.0001;
 
 /**
- * The four types `common/meshAnimation.ts` has no row for yet. Exported for
+ * The four types `controllers/render/meshAnimation.ts` has no row for yet. Exported for
  * the integrator: this map owns no shared file.
  *
  *  - **15** (x9), `RenderObjectMesh` :404-411: `StreamMesh = 0` then

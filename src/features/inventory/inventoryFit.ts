@@ -2,9 +2,9 @@ import { InventoryConstants } from './inventoryConstants';
 
 /**
  * The free-rectangle search over an inventory grid, shared by the client
- * (`Store.buyOffline` in `src/store.ts`) and the cash shop's delivery worker
+ * (`Store.buyOffline` in `app/store.ts`) and the cash shop's delivery worker
  * (`cashshop/server/fulfilment.ts`), which runs under Bun with no engine
- * behind it and so cannot import `store.ts`. One implementation on purpose:
+ * behind it and so cannot import `app/store.ts`. One implementation on purpose:
  * the client draws occupancy with this loop, and a server that placed an item
  * where the client computes something else would draw two items on one
  * square.

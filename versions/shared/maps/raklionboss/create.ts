@@ -7,14 +7,14 @@ import { PlaySpeedObject, bindAbsentModels } from '../shared/objectVariants';
  * Raklion's hatchery (`WD_58ICECITY_BOSS`, `World59`/`Object59`) - Selupan's
  * cave. 162 objects of 23 types, drawn by the same `CGM_Raklion` as Raklion
  * itself: every hook gates on `IsIceCity()` (GM_Raklion.cpp:2294-2306), so
- * the classes and the tables both come from `maps/raklion`.
+ * the classes and the tables both come from `versions/shared/maps/raklion`.
  *
  * What the C++ has a case for on the types this world actually places:
  *
  *  - **6** (×1) and **7** (×2), :1057-1076 - the ice scarps, flat grey.
  *  - **68** (×6), **69** (×4), **71** (×2), :1328-1334 - `icebot01/02/03_R`,
  *    the floor lamps: mesh 0 forced additive with a `BlendMeshLight` pulse
- *    (`spec.ts` and `common/meshAnimation.ts`). 68 is also one of the three
+ *    (`spec.ts` and `controllers/render/meshAnimation.ts`). 68 is also one of the three
  *    types driven by `Actions[].PlaySpeed` instead of `o->Velocity`
  *    (ZzzObject.cpp:3692) - and `LoadWorld` only writes that field on
  *    `WD_57ICECITY` (MapManager.cpp:1153-1163), while `Action_t` is
@@ -24,7 +24,7 @@ import { PlaySpeedObject, bindAbsentModels } from '../shared/objectVariants';
  *  - **70** (×6), :254-260 + :1748-1768 - the blue brazier, an emitter with
  *    no body (`spec.ts`).
  *
- * **Not built** (all as on Raklion, see `maps/raklion/create.ts` for the
+ * **Not built** (all as on Raklion, see `versions/shared/maps/raklion/create.ts` for the
  * reasoning): **46** (×20) and **53** (×10), the `BossSpider01/02` webs and
  * their after-character draw; **57** (×3), whose case is a dead bone
  * transform; **82** (×1), the boss gate frozen on a server flag; **247**

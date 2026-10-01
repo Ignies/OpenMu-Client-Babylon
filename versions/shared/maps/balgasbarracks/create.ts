@@ -7,7 +7,7 @@ import { AlphaObject } from '../shared/objectVariants';
  *
  * `CGM3rdChangeUp::MoveObject` (GM3rdChangeUp.cpp:63-116) is shared with the
  * Refuge; its tables are in `spec.ts` here and imported by
- * `maps/balgasrefuge`. Per-object here: **78** (×2) `Alpha = 0.5`.
+ * `versions/shared/maps/balgasrefuge`. Per-object here: **78** (×2) `Alpha = 0.5`.
  *
  * Not built:
  *  - **84** (×0 placed): `Position[2] = terrainHeight + sin(t*0.0005)*150 -

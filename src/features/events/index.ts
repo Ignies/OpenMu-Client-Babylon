@@ -47,9 +47,9 @@ export type { EventLayer, EventEntryState } from './layer';
  * they share, behind one object. Copy `_template.ts` when adding to it.
  *
  * The game talks to `events.update` once a frame (`ecs/systems/eventSystem.ts`)
- * and `events.reset` on a map change (`libs/mu/loadMapIntoScene.ts`); both
+ * and `events.reset` on a map change (`controllers/terrain/loadMapIntoScene.ts`); both
  * fan out over `EVENT_LAYERS` (`layers.ts`), the only list of events in the
- * codebase. The commands below are what `logic.ts` (NPC windows) and the
+ * codebase. The commands below are what `app/logic.ts` (NPC windows) and the
  * inventory (tickets) call; the HUD reads the entry files directly.
  */
 class Events {
@@ -229,6 +229,6 @@ export const events = new Events();
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as store.ts).
+// of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

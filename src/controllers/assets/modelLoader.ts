@@ -550,7 +550,7 @@ function prepareMeshes(
 
 /**
  * The bytes of one GLB, taken through the asset transport so the build's gzip
- * sidecar is used when there is one (`common/compressedAssets.ts`), then
+ * sidecar is used when there is one (`controllers/assets/compressedAssets.ts`), then
  * handed to Babylon as a file rather than a URL. These GLBs carry their own
  * textures, so nothing is resolved against the root URL and the loader only
  * needs the name for its `.glb` extension.

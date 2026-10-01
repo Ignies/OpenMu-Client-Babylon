@@ -31,7 +31,7 @@ import type { AreaLookName, AreaRect } from '../../lighting/profiles';
 /**
  * The glow layer and the item-tier emissive selectors, plus the area
  * hand-off to the look director. The look itself - key, shadows, haze, post
- * chain - is composed by `lighting/director.ts`; this file owns nothing that
+ * chain - is composed by `controllers/lighting/director.ts`; this file owns nothing that
  * writes a light or the pipeline.
  */
 

@@ -7,7 +7,7 @@ import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
  * plain-data half - one table set, because the C++ is one function:
  * `SEASON3A::CGM3rdChangeUp::MoveObject` (GM3rdChangeUp.cpp:63-116) tests
  * `IsBalgasBarrackMap() || IsBalgasRefugeMap()` and the two `Create*Object`
- * entries (:47-61) are bare `return true`s. `maps/balgasrefuge` imports
+ * entries (:47-61) are bare `return true`s. `versions/shared/maps/balgasrefuge` imports
  * these.
  *
  * EncTerrain42.obj: 1531 objects, 61 types; EncTerrain43.obj: 354 objects,

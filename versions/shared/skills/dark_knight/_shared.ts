@@ -15,7 +15,7 @@ import { storeRef } from '@/app/storeRef';
 
 export const rand = (min: number, max: number): number => min + Math.random() * (max - min);
 
-/** The original's `Angle` (MU Z-up; pitch, roll, yaw in radians) as a node rotation: `(-a0, -a2, -a1)` (common/renderAngles.ts). */
+/** The original's `Angle` (MU Z-up; pitch, roll, yaw in radians) as a node rotation: `(-a0, -a2, -a1)` (controllers/render/renderAngles.ts). */
 export const muAngles = (out: Vector3, pitch: number, roll: number, yaw: number): Vector3 => out.set(-pitch, -yaw, -roll);
 /** `VectorRotate((0, -1, 0), AngleMatrix(pitch, 0, yaw))`: the way a JOINT_SPARK's `Velocity` carries its head. */
 export const sparkHeading = (pitch: number, yaw: number): Vector3 =>

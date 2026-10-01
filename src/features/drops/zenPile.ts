@@ -5,7 +5,7 @@
  * centre on top - so a pile holds one coin more than `zenCoinCount` says.
  *
  * Pure geometry, no Babylon: the drop's own model turns this into thin
- * instances (`common/dropObject.ts`).
+ * instances (`features/drops/dropObject.ts`).
  */
 
 /** `MaxRenderedZenCoins`, and the floor of RenderZen's clamp. */

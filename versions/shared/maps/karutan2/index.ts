@@ -16,7 +16,7 @@ import {
  *
  * Every `CGMKarutan1` hook tests `IsKarutanMap()` (GMKarutan1.cpp:876-879),
  * which is both worlds, and the two object sets are the same models under
- * the same type numbers, so the tables live in `maps/karutan1/spec.ts` and
+ * the same type numbers, so the tables live in `versions/shared/maps/karutan1/spec.ts` and
  * are registered for this world from there.
  *
  * Sound (SceneManager.cpp:947-958): the desert bed everywhere except on tile
@@ -51,7 +51,7 @@ const SPAWN = { x: 162, y: 16 } as const;
 const OUTDOOR = true;
 
 // Desert, as Karutan 1 and Tarkan are: no rain whatever the weather byte
-// says. Same bed, same `DESERT_SKY` profile (lighting/profiles.ts:186).
+// says. Same bed, same `DESERT_SKY` profile (controllers/lighting/profiles.ts:186).
 const DESERT = true;
 
 // ---- 2. state + readers ----------------------------------------------------

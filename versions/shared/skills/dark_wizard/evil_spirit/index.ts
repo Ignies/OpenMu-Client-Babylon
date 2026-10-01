@@ -158,7 +158,7 @@ export default defineSkill({
     }, 1),
   },
   // 8 Twister (sTornado) and 12 Aqua Beam (sAquaFlash): none at the cast, the effect plays them at AttackTime 15
-  // (ZzzCharacter.cpp:4496, :4553; common/skillVisuals.ts).
+  // (ZzzCharacter.cpp:4496, :4553; controllers/skills/visuals.ts).
   sound: 'Sound/sEvil', // Evil Spirit
   // Evil Spirit: nothing, as the original - the spirits are shadow. The empty row also keeps the
   // wizardry cast flash off (castRecipeFor).

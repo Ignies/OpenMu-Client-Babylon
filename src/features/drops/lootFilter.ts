@@ -12,7 +12,7 @@ import type { Entity } from '../../ecs/world';
  * ALT *held* still shows everything, which is the escape hatch when the
  * filter hides something the player wanted.
  *
- * The vocabulary is MU Helper's pickup filter (`muHelper/config.ts`) on
+ * The vocabulary is MU Helper's pickup filter (`features/mu_helper/config.ts`) on
  * purpose: what the helper would pick up is what the eye wants marked.
  */
 

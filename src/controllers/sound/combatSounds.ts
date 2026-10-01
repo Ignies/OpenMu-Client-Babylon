@@ -1,4 +1,4 @@
-// Migrated to `src/sound/combat.ts` + `src/sound/monsters.ts`
+// Migrated to `controllers/sound/combat.ts` + `controllers/sound/monsters.ts`
 // . Kept as a re-export for the existing import sites.
 export {
   COMBAT_BUS,

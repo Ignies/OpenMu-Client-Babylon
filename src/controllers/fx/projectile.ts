@@ -22,7 +22,7 @@ import type { EffectHandle, EffectLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Magic bolts: the original's 7 units/tick... at 25 Hz - 7 tiles/s, matching lighting/skills.ts. */
+/** Magic bolts: the original's 7 units/tick... at 25 Hz - 7 tiles/s, matching controllers/lighting/skills.ts. */
 const DEFAULT_SPEED = 7;
 
 /** Give up after this long: a target that despawned mid-flight. */

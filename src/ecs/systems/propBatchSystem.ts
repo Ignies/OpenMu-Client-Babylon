@@ -2,7 +2,7 @@ import type { ISystemFactory } from '../world';
 import { flushPropBatches, updatePropBatches } from '../../controllers/render/propBatches';
 
 /**
- * Drives the prop batches (`common/propBatches.ts`): builds the types whose
+ * Drives the prop batches (`controllers/render/propBatches.ts`): builds the types whose
  * prototype model has arrived, and keeps the built chunks in step with the
  * shadow state, the Classic torch light and a snow map's cover. The
  * batches themselves are created and torn down by `loadMapIntoScene`.

@@ -55,7 +55,7 @@ import { tierIndex } from '../../controllers/lighting/lightingQuality';
 import { lighting } from '../../controllers/lighting';
 import { isPlayerAttackAction } from '../../controllers/anim/playerActionMapper';
 
-/** The first lighting tier that draws the improved looks (common/skillVisuals.ts). */
+/** The first lighting tier that draws the improved looks (controllers/skills/visuals.ts). */
 const ENHANCED_TIER = 1;
 const glintTmp = new Vector3();
 
@@ -692,7 +692,7 @@ export const SkillCastSystem: ISystemFactory = world => {
         }
       }
 
-      // Where the cast puts the caster (`combat/skillMovement`): the contact
+      // Where the cast puts the caster (`controllers/combat/skillMovement`): the contact
       // skills close the last tile themselves, either now or partway through
       // the clip.
       // The step closes the last tile, not the whole gap: `SendAttackPacket`

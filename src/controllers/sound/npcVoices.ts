@@ -14,7 +14,7 @@ import { listenerHero, listenerWorld, playSfx } from './listener';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** These belong to the place they stand in, so ambience (`sound/buses.ts`). */
+/** These belong to the place they stand in, so ambience (`controllers/sound/buses.ts`). */
 const BUS: SoundBus = 'ambient';
 
 /** One original tick: `MoveCharacterVisual` runs at 25 Hz. */
@@ -41,7 +41,7 @@ type NpcVoice = {
 /**
  * ZzzCharacter.cpp:6080-6093, with the wave names from
  * ZzzOpenData.cpp:1870-1902. Keyed by NPC type number
- * (`common/npcs/npcModelTable.ts`).
+ * (`controllers/actors/npcModelTable.ts`).
  */
 const NPC_VOICES: Readonly<Record<number, NpcVoice>> = {
   // 238 Chaos Machine goblin (MODEL_MIX_NPC): `rand_fps_check(64)`, :6081.
@@ -50,7 +50,7 @@ const NPC_VOICES: Readonly<Record<number, NpcVoice>> = {
   242: { sound: 'Sound/nHarp', oneIn: 256 },
   // 251 Hanzo the Blacksmith (MODEL_SMITH): every tick the idle clip sits in
   // frames 5-10, so one clang per swing of the hammer (:6090-6092). The
-  // sparks off that same swing are `effects/monsterVisuals.ts`.
+  // sparks off that same swing are `controllers/fx/monsterVisuals.ts`.
   251: { sound: 'Sound/nBlackSmith', frames: [5, 10] },
 };
 

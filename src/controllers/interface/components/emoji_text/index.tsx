@@ -28,8 +28,8 @@ function chatPieces(text: string, emojis: boolean): Piece[] {
 
 /**
  * A chat line with its emoji codes drawn as their pictures
- * (common/chatEmojis.ts) and its item links as the items' names
- * (common/chatItemLinks.ts). A line with neither is the plain text.
+ * (features/chat/chatEmojis.ts) and its item links as the items' names
+ * (features/chat/chatItemLinks.ts). A line with neither is the plain text.
  */
 export const EmojiText = observer(
   ({

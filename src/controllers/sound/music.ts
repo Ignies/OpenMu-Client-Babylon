@@ -27,18 +27,18 @@ import { listenerHero, listenerWorld } from './listener';
  * - one track per world, started a beat after the warp completes. The three
  * towns pick theirs by where the hero stands and only start it in the safe
  * zone; the Kanturu tower follows the event state. The login theme
- * (`libs/loginMusic.ts`) goes through the same `playMusic` / `stopMusic`
+ * (`controllers/sound/loginMusic.ts`) goes through the same `playMusic` / `stopMusic`
  * commands, so the mixer only ever has one track up.
  *
  * Driven by: the map index each frame (a town is judged once per tile the
  * hero steps onto, nothing else per frame), `requestWarp` / `warpCompleted`
  * and the `KanturuStateChange` packet.
- * Read by: `libs/loginMusic.ts` (`currentMusic`).
+ * Read by: `controllers/sound/loginMusic.ts` (`currentMusic`).
  */
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** The tracks ride their own slider, not the effects one (`sound/buses.ts`). */
+/** The tracks ride their own slider, not the effects one (`controllers/sound/buses.ts`). */
 const BUS: SoundBus = 'music';
 
 /** Seconds after `warpCompleted` before the map's track starts. */
@@ -65,7 +65,7 @@ const MAP_MUSIC: Partial<Record<ENUM_WORLD, Sounds | null>> = {
   // No case in `ManageBackgroundMusic` and no ambient bed either.
   [ENUM_WORLD.WD_6STADIUM]: null,
   // `MUSIC_LOGIN_THEME` (LoginScene.cpp:300): the login backdrop and the
-  // character select are one scene under one theme - `libs/loginMusic.ts`
+  // character select are one scene under one theme - `controllers/sound/loginMusic.ts`
   // starts it before the world exists; this row keeps the map loop from
   // stopping it once the backdrop's terrain loads.
   [ENUM_WORLD.WD_73NEW_LOGIN_SCENE]: 'Music/login_theme',

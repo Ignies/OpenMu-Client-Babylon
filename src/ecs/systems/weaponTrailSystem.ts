@@ -11,7 +11,7 @@ import { PVP_MURDERER2, PVP_NEUTRAL } from '../../controllers/interface/nameTags
 import { tierIndex } from '../../controllers/lighting/lightingQuality';
 import { lighting } from '../../controllers/lighting';
 
-/** The first lighting tier that draws the improved looks (common/skillVisuals.ts). */
+/** The first lighting tier that draws the improved looks (controllers/skills/visuals.ts). */
 const ENHANCED_TIER = 1;
 const swingTmp = new Vector3();
 
@@ -22,7 +22,7 @@ const swingTmp = new Vector3();
  * drawn as one strip. Here the sampling is the `blur` primitive's; this
  * system is the **consumer** that notices a clip (re)start (`actionSerial`,
  * the way CombatSfxSystem does for sounds), looks the swing up in
- * `common/weaponBlur.ts` and spawns the trail once the clip reaches the
+ * `controllers/item_fx/weaponBlur.ts` and spawns the trail once the clip reaches the
  * start key. The trail ends itself when the clip does or is replaced.
  *
  * Per frame: one integer compare per character, one `actionFrame()` for a

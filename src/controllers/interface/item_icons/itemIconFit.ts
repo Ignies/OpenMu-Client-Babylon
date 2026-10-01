@@ -3,7 +3,7 @@
 //
 // `group_num` → [zoom, dx, dy]: how far the icon has to be blown up to reach
 // the size the original draws that item at, and the drift off centre that has
-// to come off first. Consumed by ui/components/itemIcon.
+// to come off first. Consumed by controllers/interface/components/item_icon.
 export const ITEM_ICON_FIT: Readonly<Record<string, readonly [number, number, number]>> = {
   '0_0': [2.7, -0.012, -0.012],
   '0_1': [2.36, -0.033, -0.062],

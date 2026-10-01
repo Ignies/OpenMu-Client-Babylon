@@ -39,7 +39,7 @@ export const SNOWFALL_MAPS: ReadonlySet<ENUM_WORLD> = new Set(
  * the weather byte is global - the proxy computes one sky for every client
  * and cannot know which map anyone is standing on. Twenty metres down the
  * question does not arise, and the lighting profile already agrees
- * (`lighting/profiles.ts` gives Atlans `sky: null`).
+ * (`controllers/lighting/profiles.ts` gives Atlans `sky: null`).
  *
  * The same flag is what puts the sea ambience on a map instead of leaves.
  */

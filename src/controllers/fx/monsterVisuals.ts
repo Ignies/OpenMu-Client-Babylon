@@ -360,7 +360,7 @@ export const MONSTER_VISUALS: Partial<Record<number, MonsterVisual>> = {
   27: [haze(SCORPION_LAMP)],
   // 35 Death Gorgon (MODEL_GORGON, `c->Level == 2`): ten `BITMAP_FIRE` on
   // random bones every tick (:6060-6072). The floor light is
-  // `lighting/characters.ts`.
+  // `controllers/lighting/characters.ts`.
   35: [bones(1, 10, FIRE_PUFF)],
   // 40 Death Knight (MODEL_DEATH_KNIGHT): `BITMAP_FIRE` from bone 2, one tick in two (:6002-6010).
   40: [bone(2, FIRE_PUFF, 2)],
@@ -429,7 +429,7 @@ export const MONSTER_VISUALS: Partial<Record<number, MonsterVisual>> = {
   ],
   // 251 Hanzo the Blacksmith (MODEL_SMITH): on the idle clip's frames 5-6,
   // four sparks off the anvil at bone 17, `Angle (150-210, 0, 0-30)`, each
-  // with a chip (:6096-6109). The forge light is `lighting/characters.ts`.
+  // with a chip (:6096-6109). The forge light is `controllers/lighting/characters.ts`.
   251: [
     {
       kind: 'sparks',

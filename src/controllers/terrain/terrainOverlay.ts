@@ -118,13 +118,13 @@ export type TerrainOverlay = {
    */
   readonly reliefScale?: number;
   /**
-   * This layer carries the hero's ploughed trail (weather/snowTrail.ts): the
+   * This layer carries the hero's ploughed trail (controllers/weather/snowTrail.ts): the
    * depth map is subtracted from its relief, with a heaped rim raised along
    * the channel's edge and the floor churned. Requires `relief`.
    */
   readonly trail?: boolean;
   /**
-   * This layer can be burned off the ground (weather/snowMelt.ts): the fire
+   * This layer can be burned off the ground (controllers/weather/snowMelt.ts): the fire
    * skills' melt patches divide its **target**, so coverage, depth, relief,
    * drift lighting and any trail ploughed through it thin together, and the
    * ground the fire uncovers is damped down as wet rather than left as the
@@ -275,7 +275,7 @@ export const SNOW_COVER: TerrainOverlay = {
   // FEATURES, with the smaller octaves as their texture.
   reliefScale: 0.16, // was 0.3: broader, gentler roll the eye reads as ground, not texture
   trail: true,
-  // Fire takes it off the ground (weather/snowMelt.ts). The one layer that
+  // Fire takes it off the ground (controllers/weather/snowMelt.ts). The one layer that
   // can be melted: the wet layers ARE water, and a fireball does not dry a
   // street it lands in for more than the moment it is burning.
   melt: true,
@@ -697,7 +697,7 @@ export function snowCoverFor(map: ENUM_WORLD): TerrainOverlay {
 
 /**
  * The layers this map draws, or nothing if the player has ground weather off.
- * Settled snow follows `SNOW_GROUND_MAPS` itself (`weather/snowCover.ts`) -
+ * Settled snow follows `SNOW_GROUND_MAPS` itself (`controllers/weather/snowCover.ts`) -
  * the one set the cover, the caps, the sink and the prints all read. It was
  * reassembled from the map flags here, which is how the ice fields ended up
  * with a layer in the shader after they stopped collecting snow.
@@ -1189,7 +1189,7 @@ ${
         0.0, 1.0);
 `;
 
-    // The fire skills' melt patches (weather/snowMelt.ts). The live ones come
+    // The fire skills' melt patches (controllers/weather/snowMelt.ts). The live ones come
     // packed at the front, so the loop stops at ovMeltCount, a uniform break
     // every pixel takes alike. An empty slot only ever added max(x, 0).
     const meltGlsl = !o.melt

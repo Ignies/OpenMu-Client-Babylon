@@ -417,8 +417,8 @@ export class SoundsManager {
   }
 
   /**
-   * The two track gains, 0…1, master already folded in (`sound/buses.ts`).
-   * The one writer of `SoundTrack.setVolume`; `sound/index.ts` calls it
+   * The two track gains, 0…1, master already folded in (`controllers/sound/buses.ts`).
+   * The one writer of `SoundTrack.setVolume`; `controllers/sound/index.ts` calls it
    * whenever an option changes, and nothing else may.
    */
   static setTrackGains(music: number, effects: number) {

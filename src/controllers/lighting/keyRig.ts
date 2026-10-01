@@ -11,7 +11,7 @@ import {
  * hemispheric sky and the directional sun (ARCHITECTURE §4.1).
  *
  * Contracts:
- *  - `lighting/director.ts` is the only caller of `setKey` /
+ *  - `controllers/lighting/director.ts` is the only caller of `setKey` /
  *    `setSunDirection` / `syncSpecular`.
  *  - Everyone else (CSM, blob shadows, footprints, terrain overlay) *reads*
  *    the rig via `sunLightOf` / `skyLightOf` and never writes it.

@@ -13,7 +13,7 @@ import { KarutanInsectObject } from './insectObject';
  * action's `PlaySpeed` on exactly these two types
  * (ZzzObject.cpp:3696-3701). Everything else the map does is table data:
  * `spec.ts` (the hidden vents, the fire light, the bone sprites, the
- * `RenderAfterObjectMesh` sines and scrolls) and `sound/objectLoops.ts`.
+ * `RenderAfterObjectMesh` sines and scrolls) and `controllers/sound/objectLoops.ts`.
  *
  *  - **66** (×6): 0.15, plus the tail-of-clip action roll - `insectObject.ts`.
  *  - **107** (×17): 5.0 - `flag.SMD`, the Kardamahal banner, 31 times the

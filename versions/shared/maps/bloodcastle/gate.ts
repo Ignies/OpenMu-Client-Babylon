@@ -13,7 +13,7 @@ import { BLOOD_CASTLE_MOAT } from './spec';
  * TW_NOGROUND, false)` is what the fall ends with (:159), and it is also what
  * the server sends on its own when the players have earned the bridge - one
  * `ChangeTerrainAttributes` over the same eighteen tiles, written into the
- * terrain by `libs/mu/terrainAttributeUpdates`. So the gate watches that flag:
+ * terrain by `controllers/terrain/terrainAttributeUpdates`. So the gate watches that flag:
  *
  *  - clear already when the gate prop is built - warped in after the bridge
  *    was down - and it starts down, the instant `SetActionObject(world, 36, 0,

@@ -221,7 +221,7 @@ function swordForceHd(c: SkillContext, blade: (k: number, out: Vector3) => Vecto
 }
 
 /**
- * Crescent Moon Slash (Rush). ReceiveMagic plays SOUND_SKILL_SWORD2 (WSclient.cpp:4502-4506, sound/combat.ts). Every
+ * Crescent Moon Slash (Rush). ReceiveMagic plays SOUND_SKILL_SWORD2 (WSclient.cpp:4502-4506, controllers/sound/combat.ts). Every
  * tick of the charge the spray rises 20 cm over the feet (ZzzCharacter.cpp:2934-2958) until the clip passes key 5 or
  * AttackTime reaches 15 by itself (14 ticks at base speed); that tick the sword force leaves (:4686-4689).
  */
@@ -280,7 +280,7 @@ export default defineSkill({
   // sword force runs 3.9 m ahead growing, fading and lighting the ground; see crescentMoonSlash.
   visual: { cast: crescentMoonSlash, enhanced: { cast: crescentMoonSlashOf(true) } },
   // 38 Decay (eBlastPoison_1) and 39 Ice Storm (eSuddenIce_1): none at the cast, the effect plays them at AttackTime 15
-  // (ZzzCharacter.cpp:4449, :4475; common/skillVisuals.ts).
+  // (ZzzCharacter.cpp:4449, :4475; controllers/skills/visuals.ts).
   sound: 'Sound/sKnightSkill2', // Rush (ReceiveMagic's SOUND_SKILL_SWORD2; the row plays sCHaveyBlow in Battle Castle)
   clip: { ground: A.PLAYER_ATTACK_RUSH }, // Rush
   // Crescent Moon Slash: MODEL_SWORD_FORCE lights (1, 0.8, 0.6), range 1, under itself every move of its 15

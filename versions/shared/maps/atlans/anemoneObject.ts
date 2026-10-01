@@ -5,7 +5,7 @@ import type { Entity, World } from '@/ecs/world';
  * `o->Velocity = 0.05f` (ZzzObject.cpp:4033). `Velocity` *is* the play speed
  * of a map object: `PlayAnimation` is called with `fSpeed = o->Velocity`
  * (:3676), in BMD keys per 25 Hz reference tick - the same units as
- * `ModelObject.AnimationSpeed` (see common/playSpeed.ts). `CreateObject`
+ * `ModelObject.AnimationSpeed` (see controllers/anim/playSpeed.ts). `CreateObject`
  * hands every object 0.16 (:4470), so this is the anemone running at just
  * under a third of the speed of the kelp around it.
  */

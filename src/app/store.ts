@@ -688,14 +688,14 @@ export const Store = new (class _Store {
   /**
    * Where the game server we are on lives, kept after the connection is
    * established so a dropped socket can be dialled again without walking
-   * the connect server a second time (`common/sessionResume.ts`).
+   * the connect server a second time (`features/session/sessionResume.ts`).
    */
   lastGameServer: { host: string; port: number; fallbackHost: string | null } | null = null;
 
   /**
    * Asked before a lost game-server socket sends the player back to the
    * server list. Returns true when something else (the session resume) has
-   * taken the loss over. Set by `logic.ts`; the store stays unaware of it.
+   * taken the loss over. Set by `app/logic.ts`; the store stays unaware of it.
    */
   resumeHook: (() => boolean) | null = null;
 
@@ -1146,7 +1146,7 @@ export const Store = new (class _Store {
       shopBuyPending: observable,
       shopBuyRefused: observable,
       canRepair: computed,
-      // Packet handlers (logic.ts) and the UI call these straight from a
+      // Packet handlers (app/logic.ts) and the UI call these straight from a
       // non-action context; declaring them actions keeps strict mode quiet.
       setBuff: action,
       setSkillList: action,
@@ -2303,7 +2303,7 @@ export const Store = new (class _Store {
    * The grid behind a storage kind. The inventory is the hero's own array;
    * vault, trade, chaos machine and the personal shop belong to `Economy`.
    *
-   * `economy.ts` imports this module back, so `Economy` may only be read
+   * `features/economy/economy.ts` imports this module back, so `Economy` may only be read
    * from inside a method - by then both modules have finished evaluating.
    */
   itemsOfStorage(storage: StorageKind): (Item | null)[] {
@@ -2398,7 +2398,7 @@ export const Store = new (class _Store {
 
   /**
    * Move an item to a named square of the same grid: the drag's lift and
-   * drop in one call, for the auto-arrange run (`common/inventorySort.ts`).
+   * drop in one call, for the auto-arrange run (`features/inventory/inventorySort.ts`).
    * Returns false when the move cannot be started.
    */
   moveItemToSquare(storage: StorageKind, fromSlot: number, toSlot: number): boolean {
@@ -2439,7 +2439,7 @@ export const Store = new (class _Store {
     item: Item
   ): void {
     // The mix tray's wire byte depends on the NPC that owns it: 3 for the
-    // goblin, 9 for the Chaos Card Master (economy.ts `mixWireStorage`).
+    // goblin, 9 for the Chaos Card Master (features/economy/economy.ts `mixWireStorage`).
     const wireStorage = (storage: StorageKind): number =>
       storage === StorageKind.ChaosMachine ? Economy.mixWireStorage : storage;
 
@@ -2879,12 +2879,12 @@ export const Store = new (class _Store {
   }
 })();
 
-// `common/modelObject.ts` reaches Store through this handle instead of an
+// `controllers/render/modelObject.ts` reaches Store through this handle instead of an
 // import, which would close a cycle back to the monster classes (B14).
 registerStore(Store);
 
 // A hot update that reaches this module must reload the page: Vite would
-// otherwise re-execute the chain with a second `Store` instance (`store.ts?t=…`)
+// otherwise re-execute the chain with a second `Store` instance (`app/store.ts?t=…`)
 // that later-loaded modules import - an unconnected store whose actions do
 // nothing.
 const hot = (import.meta as { hot?: { decline(): void } }).hot;

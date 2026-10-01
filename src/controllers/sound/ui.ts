@@ -17,7 +17,7 @@ import { playSfx } from './listener';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Every sound in here is the interface talking back (`sound/buses.ts`). */
+/** Every sound in here is the interface talking back (`controllers/sound/buses.ts`). */
 export const UI_BUS: SoundBus = 'ui';
 
 /** Interface sound → catalogue key. Data, so callers name the intent. */

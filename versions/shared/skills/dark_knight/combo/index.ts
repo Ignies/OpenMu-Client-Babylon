@@ -26,7 +26,7 @@ const COMBO_RAYS = 60;
 const comboBurst: Step = (at, c) => {
   // 0.9 + 0.05 n (n + 1) by tick n, stopping at tick 16 (LT 4): 14.5, 16.1 times the start.
   effects.spawn('model', c.scene, at, { model: MODEL.combo, seconds: ticks(20), scale: 0.9, grow: 16.1, growEase: 2, growUntil: 0.8, decay: COMBO_DECAY, fadeTail: 0.05, colour: RGBS.white });
-  // One ribbon mesh for all sixty (effects/rays.ts): each head runs 10 steps a tick for 4 ticks and the last
+  // One ribbon mesh for all sixty (controllers/fx/rays.ts): each head runs 10 steps a tick for 4 ticks and the last
   // 30 steps (3 ticks) are what is drawn, from 10 to 40 steps out once it stops.
   const rays: Ray[] = [];
   for (let i = 0; i < COMBO_RAYS; i++) {

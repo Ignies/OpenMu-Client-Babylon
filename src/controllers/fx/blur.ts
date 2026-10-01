@@ -10,7 +10,7 @@
  *
  * Driven by: `effects.spawn('blur', …)` from the melee skill rows and from
  * `ecs/systems/weaponTrailSystem.ts` (`CreateWeaponBlur`: every swing clip,
- * the table in `common/weaponBlur.ts`), with the weapon bone pair as
+ * the table in `controllers/item_fx/weaponBlur.ts`), with the weapon bone pair as
  * `follow` / `base`. Read by: nobody.
  */
 import { Mesh, Vector3, VertexBuffer, VertexData, type Scene } from '../render/babylon/exports';

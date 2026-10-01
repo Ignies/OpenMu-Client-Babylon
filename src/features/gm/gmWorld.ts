@@ -18,7 +18,7 @@ export { RADAR_RANGE, type Nearby, type NearbyKind } from './gmNearby';
  * game master who wants the whole map still asks the server, with `/online`
  * or `/trace`.
  *
- * The arithmetic lives in `common/gmNearby.ts`, which imports no store and is
+ * The arithmetic lives in `features/gm/gmNearby.ts`, which imports no store and is
  * therefore testable.
  */
 

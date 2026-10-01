@@ -32,8 +32,8 @@ export type { LightRecipe, LightAnchor } from './lightSource';
  * public surface for consumers; every entry file stays importable directly
  * for anything that needs a single function.
  *
- * The two sinks - `common/terrainDynamicLight.ts` and
- * `common/pointLightPool.ts` - are consumers of this folder: `LightSource`
+ * The two sinks - `controllers/terrain/terrainDynamicLight.ts` and
+ * `controllers/lighting/pointLightPool.ts` - are consumers of this folder: `LightSource`
  * registers into them, `TerrainLightSystem` steps them after `update`.
  */
 class Lighting implements Controller {
@@ -96,7 +96,7 @@ class Lighting implements Controller {
 
   /**
    * The look the director composed this frame - key, shadow policy,
-   * exposure, haze colour (`lighting/director.ts`). Null before the scene
+   * exposure, haze colour (`controllers/lighting/director.ts`). Null before the scene
    * exists.
    */
   look(): Readonly<LookState> | null {
@@ -251,6 +251,6 @@ export const lighting = new Lighting();
 
 // A hot update that reaches this module must reload the page: Vite would
 // otherwise re-execute it and hand later-loaded importers a second instance
-// of this singleton (same guard as store.ts).
+// of this singleton (same guard as app/store.ts).
 const hot = (import.meta as { hot?: { decline(): void } }).hot;
 if (hot) hot.decline();

@@ -137,7 +137,7 @@ export function createTerrainEdge(
 
   // Scenery, not ground: nothing walks on it and click-to-move must never
   // land on it, so it stays out of every pick. `terrain` is what admits it to
-  // the G-buffer the haze reads (`scenes/ambientOcclusion.ts`), which is the
+  // the G-buffer the haze reads (`controllers/render/scenes/ambientOcclusion.ts`), which is the
   // whole reason the fill dissolves into the horizon instead of standing
   // there at full colour.
   mesh.isPickable = false;

@@ -57,7 +57,7 @@ export function isAreaSkill(def: SkillDefinition): boolean {
 /**
  * Whether a cast with nothing suitable selected lands on the hero. The rule
  * itself - self-only versus party-member-or-self versus hostile - is
- * `combat/castTargets`; this stays exported because the hotbar and the skill
+ * `controllers/combat/castTargets`; this stays exported because the hotbar and the skill
  * list ask the same question.
  */
 export function isSelfCastable(def: SkillDefinition): boolean {
@@ -89,7 +89,7 @@ function castsAsBaseSpell(def: SkillDefinition): boolean {
  *  1. Starfall, the one skill that shoots through `SetPlayerHighBowAttack`
  *     instead (`AT_SKILL_DEEPIMPACT`, ZzzInterface.cpp:2523-2527), and
  *     Plasma Storm, which picks its clip by the hands (`fenrirSkillClip`),
- *  2. the per-skill clip (`combat/skillClips` - every `UseSkill*` /
+ *  2. the per-skill clip (`controllers/combat/skillClips` - every `UseSkill*` /
  *     `Attack*` / `ReceiveMagic` case, with its mount and map branches),
  *  3. `SetPlayerMagic` for a spell (ZzzCharacter.cpp:1238-1262) - the
  *     female hand-raise, the male HAND1/HAND2 coin toss, or the mount's own
@@ -212,7 +212,7 @@ function cell(file: string, column: number, row: number) {
  * is the real greyed art rather than a CSS filter.
  *
  * Master-tree skills return `null`: their cell comes from `Skill.bmd`
- * (`Magic_Icon`) on a sheet of its own, which `skills/masterTree` owns.
+ * (`Magic_Icon`) on a sheet of its own, which `features/skills/masterTree` owns.
  */
 export function skillIconCell(
   num: number,

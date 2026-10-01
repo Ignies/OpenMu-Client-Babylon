@@ -13,10 +13,10 @@ import {
  *
  * Raklion (`WD_57ICECITY`, `World58`/`Object58`) - the ice field. The object
  * behaviour is in `create.ts`, which also lists what is deliberately left
- * out; the plain tables are in `spec.ts` and `common/meshAnimation.ts`.
+ * out; the plain tables are in `spec.ts` and `controllers/render/meshAnimation.ts`.
  *
  * Snow: `g_Raklion.CreateSnow` (:2257-2280) is the leaves slot for both Ice
- * City worlds, so the two join `SNOW_MAPS` in `weather/ambientWeather.ts` -
+ * City worlds, so the two join `SNOW_MAPS` in `controllers/weather/ambientWeather.ts` -
  * the sky is snow and rain never falls here. Nothing falls out of it either:
  * see the `SNOWFALL` note below.
  *

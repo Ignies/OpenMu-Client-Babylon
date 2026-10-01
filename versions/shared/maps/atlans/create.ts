@@ -8,7 +8,7 @@ import { AtlansBubbleVentObject } from './bubbleVentObject';
  * (ZzzObject.cpp:4718-4725) touches exactly one of the 41 types and
  * `MoveObject` (:4005-4034) six more; `RenderObjectVisual` has no World 8
  * case at all. Almost everything those seven cases need is table data and
- * lives in `spec.ts` or in `common/meshAnimation.ts` - this file is the three
+ * lives in `spec.ts` or in `controllers/render/meshAnimation.ts` - this file is the three
  * class assignments and the notes on what the original does here that we do
  * not.
  *
@@ -52,7 +52,7 @@ export async function createAtlans(world: World) {
   tiles[22] = AtlansBubbleVentObject;
 
   // Atlans 39 (ZzzObject.cpp:4719-4723), ×4 - the "lean on the wall" pose
-  // trigger, already mapped as `pose(true)` in libs/mu/restObjects.ts.
+  // trigger, already mapped as `pose(true)` in controllers/terrain/restObjects.ts.
   //
   // `OperateBoxObject`, *not* `LeanBoxObject`: the Atlans case is
   // `CreateOperate(o); o->HiddenMesh = -2;` and nothing else. The

@@ -3,7 +3,7 @@ import { quests } from '../../features/quests';
 
 /**
  * The one lifecycle call site of the quest system :
- * steps every entry in `quests/layers.ts` once a frame, before the quest
+ * steps every entry in `features/quests/layers.ts` once a frame, before the quest
  * windows and the HUD bubbles read them. The map-change half is
  * `quests.reset()` in `loadMapIntoScene.ts`.
  */

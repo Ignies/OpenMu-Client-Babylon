@@ -16,7 +16,7 @@ import { KALIMA_OBJECT_LOOPS } from '@versions/shared/maps/kalima/spec';
 
 // ---- 1. tuning -------------------------------------------------------------
 
-/** Brooks, gears and gates are part of the place, so ambience (`sound/buses.ts`). */
+/** Brooks, gears and gates are part of the place, so ambience (`controllers/sound/buses.ts`). */
 const BUS: SoundBus = 'ambient';
 
 /**

@@ -3,7 +3,7 @@
  * the wearer's surroundings - one point light and a terrain stain per
  * character, following the body - and a dropped +9…+15 item does the same,
  * static. The colour is the item tier's, breathing on the item-glow clock so
- * floor and blade agree (`common/itemVisualTier.ts`).
+ * floor and blade agree (`controllers/item_fx/itemVisualTier.ts`).
  *
  * What triggers a lamp stays in `ecs/systems/itemGlowSystem.ts`: it knows
  * which entity wears what, stamps the meshes, and owns the auras and

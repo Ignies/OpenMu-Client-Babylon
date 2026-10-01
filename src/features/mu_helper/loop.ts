@@ -14,7 +14,7 @@ import type { MuHelperConfig } from './config';
  * The MU Helper automation loop, ported from `CMuHelper` (MuHelper.cpp). It
  * drives only the seams the player's own clicks use: `world.castRequest`,
  * `world.pickupTarget`, `hero.playerMoveTo` and the store commands. It never
- * builds packets of its own, so combat/pickup behavior stays byte-identical
+ * builds packets of its own, so controllers/combat/pickup behavior stays byte-identical
  * to manual play. Active only while `Store.muHelper.active` - the
  * server-driven status that `MuHelperStatusUpdate` pauses when the zen runs
  * out; inactive, the whole body is a single boolean check.

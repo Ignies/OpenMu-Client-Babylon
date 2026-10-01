@@ -7,7 +7,7 @@
  * "Original" alone.
  *
  * Choosing a pack repoints the textures that are already on screen; nothing
- * is reloaded and no map is re-entered (`common/texturePacks.ts`).
+ * is reloaded and no map is re-entered (`controllers/assets/texturePacks.ts`).
  */
 
 import { useEffect, useRef, useState } from 'react';

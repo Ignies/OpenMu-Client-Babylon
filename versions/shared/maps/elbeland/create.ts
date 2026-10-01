@@ -14,7 +14,7 @@ import { PlaySpeedObject } from '../shared/objectVariants';
  * 0.05` here.
  *
  * `PlayObjectSound` (:193-232) is the seven object loops in
- * `sound/objectLoops.ts`, safe-zone gating included. The map has no world
+ * `controllers/sound/objectLoops.ts`, safe-zone gating included. The map has no world
  * bed and no `PlayWorldAmbientSounds` case, so `ambientBeds.ts` carries
  * nothing for it.
  *
