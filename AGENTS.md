@@ -50,7 +50,7 @@ How agents work here (workflow, roles, tools, where things are): [docs/agents/](
 | change how all effects / sounds / lights work | the controller folder in `src/controllers/` |
 | handle a new packet | `src/features/<feature>/net.ts` (import order lives in `src/app/logic.ts`) |
 | add a texture pack | build it into `public/packs/<pack>/`, list it in `public/packs/index.json` |
-| redraw a window or panel |  |
+| redraw a window or panel | `versions/shared/ui/windows/<window>/index.tsx` |
 | change one version only | `versions/<id>/` (override), never an `if (version)` in `src/` |
 
 More recipes: [docs/how_to/](docs/how_to/).
