@@ -1,0 +1,27 @@
+import { defineSkill } from '@/controllers/skills/define';
+import { ARC_MOTES, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
+import { CAST_HEIGHT, after, atCaster, cm, fanArrows, flash, offset, particles, repeat, seq, sprite, steelHit, ticks } from '@/controllers/skills/visuals';
+import { Vector3 } from '@/controllers/render/babylon/exports';
+import { effects } from '@/controllers/fx';
+
+export default defineSkill({
+  id: 52,
+  name: "Penetration",
+  // 52 Penetration: charge t=3 BITMAP_GATHERING sub0 LT 10 at (−100 fwd, +150 z) - 3 a frame JOINT_THUNDER sub3 /
+  // SPARK+1 sub2 on a r=120 ring + SHINY+1 sprite; impact: CreateArrows(sub 2).
+  visual: {
+    cast: after(ticks(3), atCaster(offset(seq(
+      repeat(5, ticks(2), (p, c) => {
+        for (let i = 0; i < 3; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const from = new Vector3(p.x + Math.cos(a) * cm(120), p.y + (Math.random() - 0.5) * 0.6, p.z + Math.sin(a) * cm(120));
+          effects.spawn('joint', c.scene, from, { to: p, colour: RGBS.arc, seconds: ticks(6), width: 0.06, jitter: 0.12 });
+        }
+      }),
+      sprite({ texture: TEX.shiny2, colour: RGBS.arc, size: 1.2, seconds: ticks(10), grow: 1.6 }),
+      particles({ recipe: ARC_MOTES, count: 12 })
+    ), -1, 0.4), CAST_HEIGHT)),
+    area: (at, c) => fanArrows(at, c, 1, MODEL.arrowSteel, RGBS.arc),
+    impact: seq(steelHit, flash(TEX.pierce, RGBS.arc, 1.2, 0.3)),
+  },
+});
