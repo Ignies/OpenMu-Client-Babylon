@@ -48,14 +48,6 @@ export async function parseTerrainAttribute(
   } else {
     const dv = new DataView(decrypted_data.buffer.slice(4));
 
-    // for (let i = 0; i < TERRAIN_SIZE; i++) {
-    //   const offset = i * TERRAIN_SIZE;
-
-    //   for (let j = 0; j < TERRAIN_SIZE; j++) {
-    //     result[offset + j] = dv.getUint16(offset + j * 2, true);
-    //   }
-    // }
-
     for (let i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; i++) {
       result[i] = dv.getUint16(i * 2, true);
     }
@@ -66,54 +58,45 @@ export async function parseTerrainAttribute(
     throw new Error(`Invalid header!`);
   }
 
-  let hasError = false;
+  let probeFailed = false;
 
   switch (map) {
     case ENUM_WORLD.WD_0LORENCIA:
       const v = result[123 * TERRAIN_SIZE + 135];
-      if (v !== 5) hasError = true;
+      if (v !== 5) probeFailed = true;
       break;
     case ENUM_WORLD.WD_1DUNGEON:
-      if (result[120 * TERRAIN_SIZE + 227] !== 4) hasError = true;
+      if (result[120 * TERRAIN_SIZE + 227] !== 4) probeFailed = true;
       break;
     case ENUM_WORLD.WD_2DEVIAS:
-      if (result[55 * TERRAIN_SIZE + 208] !== 5) hasError = true;
+      if (result[55 * TERRAIN_SIZE + 208] !== 5) probeFailed = true;
       break;
     case ENUM_WORLD.WD_3NORIA:
-      if (result[119 * TERRAIN_SIZE + 186] !== 5) hasError = true;
+      if (result[119 * TERRAIN_SIZE + 186] !== 5) probeFailed = true;
       break;
     case ENUM_WORLD.WD_4LOSTTOWER:
-      if (result[75 * TERRAIN_SIZE + 193] !== 5) hasError = true;
+      if (result[75 * TERRAIN_SIZE + 193] !== 5) probeFailed = true;
       break;
   }
 
   // The original's anti-tamper probe (`OpenTerrainAttribute`): one known tile
   // per town. A mismatch means an edited or foreign `.att`, which is worth a
   // note but not a bricked client - the map still loads with what it has.
-  if (hasError) {
+  if (probeFailed) {
     console.warn(
       `EncTerrain${map + 1}.att failed the attribute probe (edited or unexpected file)`
     );
   }
 
-  //  for (let i = 0; i < TERRAIN_SIZE; i++) {
-  //   const offset = i * TERRAIN_SIZE;
-
-  //   for (let j = 0; j < TERRAIN_SIZE; j++) {
-  //     result[offset + j] = result[offset + j];
-  //   }
-  // }
-
+  // A byte of 128 or more is no attribute the original knows: the file is corrupt, not just edited.
+  let corrupt = false;
   for (let i = 0; i < TERRAIN_SIZE * TERRAIN_SIZE; i++) {
     result[i] = castToByte(result[i]);
-
-    if (result[i] >= 128) {
-      hasError = true;
-    }
+    if (result[i] >= 128) corrupt = true;
   }
 
-  if (hasError) {
-    throw new Error(`Another error!`);
+  if (corrupt) {
+    throw new Error(`EncTerrain${map + 1}.att has attribute bytes over 127 (corrupt file)`);
   }
 
   return result;
