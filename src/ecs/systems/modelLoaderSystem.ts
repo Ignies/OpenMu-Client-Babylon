@@ -152,7 +152,8 @@ function createModelObject(
   modelObject
     .init(world, entity)
     .then(() => {
-      if (modelObject.gltf || modelObject.Ready) {
+      // Disposed while loading (a boid that flew off, an object that left scope): nothing failed.
+      if (modelObject.gltf || modelObject.Ready || modelObject.disposed) {
         return;
       }
       if (!entity.modelObject) {

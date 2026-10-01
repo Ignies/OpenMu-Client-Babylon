@@ -1907,6 +1907,11 @@ export class ModelObject {
     }
   }
 
+  /** True once disposed: a load that lands after this is dropped on purpose. */
+  get disposed(): boolean {
+    return this.#disposed;
+  }
+
   dispose(): void {
     this.#disposed = true;
     this.Lights?.dispose();
