@@ -1,6 +1,0 @@
-[
- {
-  "from": "src/controllers/interface/components/mu_window/windowState.ts",
-  "to": "src/controllers/interface/windowManager.ts"
- }
-]

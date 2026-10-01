@@ -1,5 +1,0 @@
-[
- { "from": "src/controllers/combat/novaCharge.ts", "to": "versions/shared/skills/dark_wizard/nova/charge.ts" },
- { "from": "src/controllers/combat/combo.ts", "to": "versions/shared/skills/dark_knight/combo/state.ts" },
- { "from": "src/controllers/combat/rage.ts", "to": "versions/shared/skills/rage_fighter/dark_side/rage.ts" }
-]
