@@ -8426,6 +8426,15 @@ function soulBarrierArrives(e: Entity): void {
   if (e.playerAnimation && e.transform) playCombat('Sound/eSoulBarrier', e.transform.pos);
 }
 
+/** Every arrival deletes the knot and redraws it at the packet's width 50, with the sound. Handled when active. */
+const soulBarrierArrival: BuffArrival = (scene, e, active) => {
+  soulKnotWidth.delete(e);
+  if (!active) return false;
+  soulBarrierArrives(e);
+  rebuildSoulKnot(scene, e, null);
+  return true;
+};
+
 /** MODEL_ARROWSRE06 sub1's Light (0.2, 0.2, 0.9) (ZzzEffect.cpp:8191, :8309). */
 const RUNE_LIGHT: RGB = [0.2, 0.2, 0.9];
 const RUNE_TICKS = 40;
@@ -12071,6 +12080,13 @@ export const BUFF_VISUALS: Partial<Record<number, BuffLook>> = {
  * set of five green joints on a body under Attack, Defense or HelpNpc
  * (`ShouldKeepAuraJointAlive`, ZzzEffectJoint.cpp:4440), never a second.
  */
+/** Work a buff does as it lands or lifts before its look is kept; true means the look is handled. */
+type BuffArrival = (scene: Scene, entity: Entity, active: boolean) => boolean;
+
+const BUFF_ARRIVALS: Partial<Record<number, BuffArrival>> = {
+  4: soulBarrierArrival,
+};
+
 const SHARED_LOOKS: readonly { key: number; ids: readonly number[]; look: BuffLook }[] = [
   { key: -1, ids: [1, 2, 3], look: () => ({ spearJoints: GREEN_KNOT }) },
 ];
@@ -12105,15 +12121,7 @@ function keepLook(scene: Scene, entity: Entity, key: number, look: BuffLook | nu
 
 /** Command: keep (or drop) the persistent look of `effectId` on `entity`, whose `buffs` set is already up to date. */
 export function setBuffVisual(scene: Scene, entity: Entity, effectId: number, active: boolean): void {
-  if (effectId === SOUL_BARRIER_EFFECT) {
-    // Every arrival deletes the knot and redraws it at the packet's width 50, with the sound.
-    soulKnotWidth.delete(entity);
-    if (active) {
-      soulBarrierArrives(entity);
-      rebuildSoulKnot(scene, entity, null);
-      return;
-    }
-  }
+  if (BUFF_ARRIVALS[effectId]?.(scene, entity, active)) return;
   keepLook(scene, entity, effectId, active ? (BUFF_VISUALS[effectId] ?? null) : null);
   for (const shared of SHARED_LOOKS) {
     if (!shared.ids.includes(effectId)) continue;
