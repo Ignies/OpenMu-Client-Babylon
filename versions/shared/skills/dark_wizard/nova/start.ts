@@ -195,4 +195,5 @@ export default defineSkill({
   // 58 Nova (start): the charge on any caster while he is in HELL_BEGIN / HELL_START - (count+1)x BITMAP_LIGHT sub6
   // on the even bones 0..38 and CreateForce's 3 JOINT_HEALING sub8 comets every tick (novaCharge).
   visual: { cast: novaCharge, enhanced: { cast: novaChargeEnhanced } },
+  sound: 'Sound/eHellFire2_1', // Nova (charge)
 });

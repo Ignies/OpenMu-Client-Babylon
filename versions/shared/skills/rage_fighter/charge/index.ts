@@ -17,4 +17,5 @@ export default defineSkill({
       steelHit
     ),
   },
+  sound: 'Sound/battlecastle/sCHaveyBlow', // Occupy
 });

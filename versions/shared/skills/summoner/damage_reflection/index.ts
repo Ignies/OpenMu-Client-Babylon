@@ -23,4 +23,5 @@ export default defineSkill({
     // 0x47 Reflection (eBuff_Thorns): rising pin lights.
     71: () => ({ pins: { colour: [0.9, 0.6, 0.1] } }),
   },
+  sound: 'Sound/SE_Ch_summoner_skill02_ssonze', // Thorns
 });

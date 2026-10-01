@@ -147,4 +147,5 @@ export default defineSkill({
     // 74 eDeBuff_NeilDOT (Requiem) and 75 eDeBuff_SahamuttDOT (Explosion) (ZzzCharacter.cpp:10932-10948).
     74: () => ({ neilSparks: true }),
   },
+  sound: 'Sound/SE_Ch_summoner_skill06_requiem01', // Requiem (SOUND_SUMMON_NEIL)
 });

@@ -208,4 +208,5 @@ export default defineSkill({
     138: swellBuff,
     139: swellBuff,
   },
+  sound: 'Sound/SwellofMagicPower', // Expansion of Wizardry
 });

@@ -20,4 +20,5 @@ export default defineSkill({
       effects.spawn('sprite', c.scene, feet, { texture: TEX.flareBig, colour: RGBS.holy, size: 0.5, seconds: ticks(30), count: 2, spread: 0.4, height: 1, rise: 0.5 });
     },
   },
+  sound: 'Sound/recover', // Recovery
 });

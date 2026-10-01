@@ -9,4 +9,5 @@ export default defineSkill({
     area: strikeKey(force, 'Sound/sDarkSpear'),
     enhanced: { impact: litStrike(forceGraded, 'Sound/sDarkSpear'), area: litStrike(forceGraded, 'Sound/sDarkSpear') },
   },
+  sound: 'Sound/sKnightSkill1', // Force Wave
 });

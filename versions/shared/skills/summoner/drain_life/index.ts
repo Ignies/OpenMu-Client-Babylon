@@ -253,4 +253,5 @@ export default defineSkill({
   // 214 Drain Life: MODEL_ALICE_DRAIN_LIFE at AttackTime 15 - red glows, ghost streaks from behind the caster, a
   // siphon off every other target bone homing back (drainLife).
   visual: { impact: drainLife, enhanced: { impact: drainLifeStep(true) } },
+  sound: 'Sound/SE_Ch_summoner_skill07_lifedrain', // Drain Life
 });

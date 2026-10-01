@@ -24,4 +24,5 @@ export default defineSkill({
   // 5 Flame: the renewed look - fire pillars out of molten rock around the point (effects/pillar.ts), in place
   // of the BITMAP_FLAME sub0 LT 40 tongue column the original stacked at SkillXY (ZzzCharacter.cpp:4485).
   visual: { area: seq(firePillars(3, 1.4, 0.1), scorch(1.5), burn(1.2)) },
+  sound: 'Sound/sFlame', // Flame
 });

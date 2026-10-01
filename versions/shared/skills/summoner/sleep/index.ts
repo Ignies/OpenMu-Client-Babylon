@@ -18,4 +18,5 @@ export default defineSkill({
     // 0x48 Sleep: violet water drops off random bones (the insert path's (0.7,0.1,0.9), WSclient.cpp:15575).
     72: () => ({ sleepDrops: { colour: [0.7, 0.1, 0.9] } }),
   },
+  sound: 'Sound/SE_Ch_summoner_skill03_sleep', // Sleep
 });

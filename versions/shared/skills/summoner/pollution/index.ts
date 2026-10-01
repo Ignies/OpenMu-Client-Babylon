@@ -167,4 +167,5 @@ export default defineSkill({
     area: pollutionOf(false),
     enhanced: { cast: seq(summonCast(CAST_POLLUTION), summonCastGrace(CAST_POLLUTION)), area: pollutionOf(true) },
   },
+  sound: 'Sound/Rargle', // Pollution (SOUND_SUMMOM_RARGLE)
 });

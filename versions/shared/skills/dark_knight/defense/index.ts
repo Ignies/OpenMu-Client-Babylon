@@ -41,4 +41,6 @@ export default defineSkill({
   // WSclient.cpp:3610-3612). OpenMU answers with 0x19, so the echo carries ReceiveAction's clip and sound.
   // Enhanced adds a steel glint as the guard sets.
   visual: { enhanced: { impact: guardGlint } },
+  // 16 Soul Barrier and its masters: none at the cast; the buff's arrival and the impact play it (common/skillVisuals.ts).
+  sound: 'Sound/sKnightDefense', // Defense (SOUND_SKILL_DEFENSE, WSclient.cpp:3612)
 });

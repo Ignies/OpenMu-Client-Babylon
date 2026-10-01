@@ -19,4 +19,5 @@ export default defineSkill({
     // 0x49 Blind: black cra_04 smoke off random bones.
     73: () => ({ blindSmoke: true }),
   },
+  sound: 'Sound/SE_Ch_summoner_skill04_blind', // Blind
 });

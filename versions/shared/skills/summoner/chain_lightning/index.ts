@@ -225,4 +225,5 @@ export default defineSkill({
   // 215 Chain Lightning: the hand crackle while the ground clip plays and the wav again at AttackTime 15; the
   // arcs come with the BF 0A hops (playChainLightningHop).
   visual: { cast: seq(chainHands, chainSoundAgain), enhanced: { cast: seq(chainHandsLit, chainSoundAgain) } },
+  sound: 'Sound/SE_Ch_summoner_skill08_chainlightning', // Chain Lightning
 });

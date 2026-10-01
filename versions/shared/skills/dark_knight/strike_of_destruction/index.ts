@@ -218,4 +218,5 @@ export default defineSkill({
     // 0x56 Cold (eDeBuff_BlowOfDestruction, Strike of Destruction and Chain Drive): the ice at the feet, once.
     86: (e, s) => ({ pulse: { every: Infinity, fire: () => coldIce(s, e) } }),
   },
+  sound: 'Sound/BLOW_OF_DESTRUCTION', // Strike of Destruction (ZzzCharacter.cpp:4179)
 });

@@ -9,4 +9,5 @@ export default defineSkill({
   id: 20,
   name: "Lunge",
   visual: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(LUNGE_CHIPS) } },
+  sound: 'Sound/sKnightSkill2', // Lunge
 });

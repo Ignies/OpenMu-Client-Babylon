@@ -17,4 +17,5 @@ export default defineSkill({
   buffs: {
     77: () => ({ boneSparks: { colour: [0.25, 1, 0.7], underlay: true, pins: true } }),
   },
+  sound: 'Sound/SE_Ch_summoner_innovation', // Innovation
 });

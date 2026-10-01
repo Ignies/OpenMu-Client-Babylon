@@ -157,4 +157,7 @@ export default defineSkill({
       });
     }, 1),
   },
+  // 8 Twister (sTornado) and 12 Aqua Beam (sAquaFlash): none at the cast, the effect plays them at AttackTime 15
+  // (ZzzCharacter.cpp:4496, :4553; common/skillVisuals.ts).
+  sound: 'Sound/sEvil', // Evil Spirit
 });

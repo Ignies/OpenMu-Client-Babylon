@@ -134,4 +134,5 @@ export default defineSkill({
   // 230 Lightning Shock: MODEL_LIGHTNING_SHOCK falling red from 280 cm over the caster and opening the ground
   // (lightningShock). The five magic_ground cards and the stones get Scale 0 there and are not drawn.
   visual: { area: lightningShock, enhanced: { area: lightningShockStep(true) } },
+  sound: 'Sound/lightning_shock', // Lightning Shock
 });

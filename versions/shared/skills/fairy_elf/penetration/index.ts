@@ -24,4 +24,5 @@ export default defineSkill({
     area: (at, c) => fanArrows(at, c, 1, MODEL.arrowSteel, RGBS.arc),
     impact: seq(steelHit, flash(TEX.pierce, RGBS.arc, 1.2, 0.3)),
   },
+  sound: 'Sound/ePiercing', // Penetration
 });

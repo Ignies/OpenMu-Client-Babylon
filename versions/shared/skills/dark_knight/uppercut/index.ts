@@ -9,4 +9,5 @@ export default defineSkill({
   id: 21,
   name: "Uppercut",
   visual: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(UPPER_CHIPS) } },
+  sound: 'Sound/sKnightSkill3', // Uppercut
 });

@@ -17,4 +17,5 @@ export default defineSkill({
     ),
     impact: seq(arcHit, after(0.12, arcHit), after(0.24, arcHit)),
   },
+  sound: 'Sound/Ragefighter/Rage_Giantswing', // Chain Drive (MonkSystem.cpp:1125)
 });

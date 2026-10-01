@@ -35,4 +35,5 @@ export default defineSkill({
     // 0x51 Berserker: hand auroras and body marks.
     81: () => ({ berserk: true }),
   },
+  sound: 'Sound/Berserker', // Berserker
 });

@@ -210,4 +210,6 @@ export default defineSkill({
   buffs: {
     75: () => ({ smoulder: true }),
   },
+  // The summons play their summoning sound at the cast; explosion03 and requiem02 come later with the effect (skillVisuals.ts).
+  sound: 'Sound/SE_Ch_summoner_skill05_explosion01', // Explosion (SOUND_SUMMON_SAHAMUTT)
 });

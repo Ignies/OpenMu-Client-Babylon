@@ -78,4 +78,5 @@ export default defineSkill({
       )
     ),
   },
+  sound: 'Sound/sHellFire', // Hellfire
 });

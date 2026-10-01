@@ -117,4 +117,5 @@ export default defineSkill({
   name: "Spiral Slash",
   // 57 Spiral Slash: five BITMAP_FLARE sub23 ribbons in two waves on the ONE_FLASH clip (spiralSlash).
   visual: { cast: spiralSlash, enhanced: { cast: spiralSlashEnhanced } },
+  sound: 'Sound/sKnightSkill2', // Spiral Slash
 });

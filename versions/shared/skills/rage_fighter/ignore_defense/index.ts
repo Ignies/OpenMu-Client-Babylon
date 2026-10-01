@@ -12,4 +12,5 @@ export default defineSkill({
     129: () => ({ boneGlow: OURFORCES_GLOW }),
     153: () => ({ boneGlow: OURFORCES_GLOW }),
   },
+  sound: 'Sound/Ragefighter/Rage_Buff_1', // Increase Health (party)
 });

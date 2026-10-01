@@ -11,4 +11,5 @@ export default defineSkill({
   // 23 Slash (327 by alias): the same on the even SWORD5 swing; atSwordBlow drops the odd
   // TWO_HAND_SWORD3 swing, which gets no CreateSpark (WSclient.cpp:4398-4410, ZzzCharacter.cpp:4884). Enhanced: likewise.
   visual: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(SLASH_CHIPS) } },
+  sound: 'Sound/sKnightSkill4', // Slash
 });

@@ -82,4 +82,5 @@ export default defineSkill({
     area: atCaster(comboBurst, cm(50)),
     enhanced: { impact: atCaster(comboBurstPlus, cm(50)), area: atCaster(comboBurstPlus, cm(50)) },
   },
+  sound: 'Sound/eCombo', // Combo
 });

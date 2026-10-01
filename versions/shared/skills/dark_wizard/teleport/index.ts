@@ -25,4 +25,5 @@ export default defineSkill({
   name: "Teleport",
   // 6 Teleport: CreateTeleportBegin at the old square (cast) and CreateTeleportEnd at the new one (impact), BITMAP_SPARK+1 each.
   visual: { cast: teleportColumn, impact: teleportColumn, enhanced: { cast: teleportEnhanced('begin'), impact: teleportEnhanced('end') } },
+  sound: 'Sound/sMagic', // Teleport (SOUND_MAGIC in CreateTeleportBegin)
 });

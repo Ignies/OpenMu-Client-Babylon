@@ -252,4 +252,5 @@ export default defineSkill({
   // MODEL_GROUND_STONE on horse keys 8-9.5, the fury's burst 1.1 tiles ahead at tick 28 and five crack
   // chains at 29 (GOBoid.cpp:727-769, MoveHandlers.cpp:2940-3170).
   visual: { area: atCaster(earthshake, 0), enhanced: { area: atCaster(earthshakeOf(true), 0) } },
+  sound: 'Sound/sDarkEarthQuake', // Earthshake
 });

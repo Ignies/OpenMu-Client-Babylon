@@ -6,4 +6,5 @@ export default defineSkill({
   name: "Teleport Ally",
   // 15 Teleport Ally: CreateTeleportBegin(target) (cast) + CreateTeleportEnd(caster) (impact) - BITMAP_SPARK+1 at both.
   visual: { cast: teleportColumn, impact: teleportColumn, enhanced: { cast: teleportEnhanced('begin'), impact: teleportEnhanced('end') } },
+  sound: 'Sound/eTelekinesis', // Teleport Ally
 });

@@ -21,4 +21,5 @@ export default defineSkill({
     ),
     impact: steelHit,
   },
+  sound: 'Sound/Ragefighter/Rage_Dragonkick', // Dragon Slasher
 });

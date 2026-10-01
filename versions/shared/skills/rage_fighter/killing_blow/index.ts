@@ -17,4 +17,5 @@ export default defineSkill({
     ),
     impact: seq(steelHit, explosion(RGBS.gold, 0.9)),
   },
+  sound: 'Sound/Ragefighter/Rage_Thrust', // Killing Blow
 });

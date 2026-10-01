@@ -9,4 +9,6 @@ export default defineSkill({
   // plays from the 0x1F create flag (playSummonArrival).
   // Enhanced: the same, the streaks drawn as glowing comets, a warm pool, embers, and their light.
   visual: { area: elfSummon, impact: elfSummon, enhanced: SUMMON_GRADED },
+  // Elf summons: SOUND_SKILL_DEFENSE on every client's 0x19 (WSclient.cpp:4244-4262).
+  sound: 'Sound/sKnightDefense', // Summon Goblin
 });

@@ -134,4 +134,5 @@ export default defineSkill({
   name: "Flame Strike",
   // 236 Flame Strike: the blade on the weapon link bone and its three blurs (flameStrike above); caster-bound, so both dispatch paths.
   visual: { cast: flameStrike, enhanced: { cast: flameStrikeEnhanced } },
+  sound: 'Sound/flame_strike', // Flame Strike
 });

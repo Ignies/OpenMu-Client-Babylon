@@ -77,4 +77,5 @@ export default defineSkill({
   name: "Earth Prison",
   // 495 Earth Prison (497 its Strengthener through the aliases): no source; the ground stone ring (earthPrison). Enhanced: earthPrisonEnhanced.
   visual: { impact: earthPrison, enhanced: { impact: earthPrisonEnhanced } },
+  sound: 'Sound/sDarkEarthQuake', // Earth Prison: no source; the earthshake whose stone ring it borrows
 });

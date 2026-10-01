@@ -16,4 +16,5 @@ export default defineSkill({
     ),
     impact: seq(flash(TEX.damage2, RGBS.shade, 1.3, 0.4), particles({ recipe: SHADE_MOTES, count: 20 })),
   },
+  sound: 'Sound/Ragefighter/Rage_Darkside', // Dark Side
 });

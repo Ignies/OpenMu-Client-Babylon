@@ -78,4 +78,5 @@ export default defineSkill({
   name: "Blood Storm",
   // 344 Blood Storm (346 Strengthener by alias): no original; a renewed look from original art (bloodStorm).
   visual: { area: bloodStorm, enhanced: { area: bloodStormPlus } },
+  sound: 'Sound/sKnightSkill4', // Blood Storm (no original: the Twisting Slash sound, with its clip)
 });

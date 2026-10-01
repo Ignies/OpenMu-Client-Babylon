@@ -123,4 +123,5 @@ export default defineSkill({
   name: "Lightning Orb",
   // 216 Lightning Orb: the forearm crackle, then MODEL_LIGHTNING_ORB at AttackTime 15 (lightningOrb).
   visual: { cast: orbArm, impact: lightningOrb, enhanced: { cast: orbArmLit, impact: lightningOrbStep(true) } },
+  sound: 'Sound/SE_Ch_summoner_skill01_lightningof', // Lightning Orb
 });

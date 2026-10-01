@@ -21,4 +21,5 @@ export default defineSkill({
     // 0x4C Weakness, 0x4D Innovation: shiny drops (with their flare01 underlay) and falling pin lights off random bones.
     76: () => ({ boneSparks: { colour: [1.4, 0.2, 0.2], underlay: true, pins: true } }),
   },
+  sound: 'Sound/SE_Ch_summoner_weakness', // Weakness
 });

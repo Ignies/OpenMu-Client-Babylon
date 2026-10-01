@@ -244,4 +244,5 @@ export default defineSkill({
     area: after(ticks(STRIKE_MAX_TICKS), fireScream),
     enhanced: { area: (at, c) => after(ticks(STRIKE_MAX_TICKS), fireScreamGraded(baseSkill(currentSkill)))(at, c) },
   },
+  sound: 'Sound/Darklord_firescream', // Fire Scream
 });

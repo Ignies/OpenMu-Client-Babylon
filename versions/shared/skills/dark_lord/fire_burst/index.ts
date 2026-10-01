@@ -192,4 +192,5 @@ export default defineSkill({
   // 61 Fire Burst (and 508 / 514): at the strike key, three homing darts with their ghost trails and two
   // starburst cards at the caster; eFirebustBoom from the darts.
   visual: { impact: strikeKey(fireBurst, 'Sound/eFirebustBoom'), enhanced: { impact: litStrike(fireBurstGraded, 'Sound/eFirebustBoom') } },
+  sound: 'Sound/eFirebust', // Fire Burst
 });

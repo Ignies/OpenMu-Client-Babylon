@@ -275,4 +275,7 @@ export default defineSkill({
   // 44 Crescent Moon Slash (Rush): the charge sprays sparks and fire at the feet until key 5 or 14 ticks, then the
   // sword force runs 3.9 m ahead growing, fading and lighting the ground; see crescentMoonSlash.
   visual: { cast: crescentMoonSlash, enhanced: { cast: crescentMoonSlashOf(true) } },
+  // 38 Decay (eBlastPoison_1) and 39 Ice Storm (eSuddenIce_1): none at the cast, the effect plays them at AttackTime 15
+  // (ZzzCharacter.cpp:4449, :4475; common/skillVisuals.ts).
+  sound: 'Sound/sKnightSkill2', // Rush (ReceiveMagic's SOUND_SKILL_SWORD2; the row plays sCHaveyBlow in Battle Castle)
 });
