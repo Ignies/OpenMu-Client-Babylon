@@ -6,7 +6,10 @@ export { defineSkill, defineBuffLooks, type SkillDef } from './define';
 
 /** Adds skills to every table the controllers read. A skill's folder is the only place its data lives. */
 export function registerSkills(defs: readonly SkillDef[]): void {
+  const seen = new Set<number>();
   for (const d of defs) {
+    if (seen.has(d.id)) throw new Error(`skill ${d.id} is defined twice`);
+    seen.add(d.id);
     if (d.visual) SKILL_VISUALS[d.id] = d.visual;
     Object.assign(BUFF_VISUALS, d.buffs);
     Object.assign(BUFF_ARRIVALS, d.buffArrivals);
