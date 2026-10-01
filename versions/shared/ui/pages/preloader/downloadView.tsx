@@ -1,8 +1,8 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { uiClick } from '@/controllers/sound/sfx';
 import { t, type TextKey } from '@/i18n';
-import { Store } from '@/app/store';
 import {
   assetDownload,
   cancelDownload,
@@ -164,7 +164,7 @@ export const DownloadView = observer(() => {
             variant="ghost"
             icon="gear"
             onClick={() => {
-              Store.optionsEnabled = true;
+              MuWindows.setOpen('options', true);
             }}
           >
             {t('options.title')}

@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { t } from '@/i18n';
 import './style.less';
@@ -184,20 +185,20 @@ const EMOTE_MENU_ID = 'emote-menu';
 export const EmoteMenu = observer(() => {
   const [hovered, setHovered] = useState<RadialEntry | null>(null);
 
-  const open = Store.emoteMenuEnabled;
+  const open = MuWindows.isOpen('emote_menu');
 
   useEventBus('keyPressed', key => {
     if (isKey(HOT_KEY, key)) {
       if (isTypingInField()) return;
       if (!Store.world?.playerEntity) return;
-      Store.emoteMenuEnabled = !Store.emoteMenuEnabled;
-      playUiSound(Store.emoteMenuEnabled ? 'window' : 'click');
+      MuWindows.setOpen('emote_menu', !MuWindows.isOpen('emote_menu'));
+      playUiSound(MuWindows.isOpen('emote_menu') ? 'window' : 'click');
     }
   });
 
   // A sheet over the windows: Escape closes it before anything under it.
   useWindowStackEntry(EMOTE_MENU_ID, open, () => {
-    Store.emoteMenuEnabled = false;
+    MuWindows.setOpen('emote_menu', false);
   });
 
   useEffect(() => {
@@ -214,7 +215,7 @@ export const EmoteMenu = observer(() => {
     (!!velocity && (velocity.x !== 0 || velocity.y !== 0));
 
   const close = () => {
-    Store.emoteMenuEnabled = false;
+    MuWindows.setOpen('emote_menu', false);
   };
 
   const pick = (entry: RadialEntry) => {

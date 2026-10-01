@@ -4,7 +4,7 @@
 // Usage: bun tools/restructure/storeFlagsToWindows.ts [--dry-run]
 import ts from 'typescript';
 import { execSync } from 'child_process';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 
 const FLAGS: Record<string, string> = {
   inventoryEnabled: 'inventory',
@@ -19,7 +19,7 @@ const FLAGS: Record<string, string> = {
 const MANAGER = 'src/controllers/interface/windowManager.ts';
 const dry = process.argv.includes('--dry-run');
 
-const files = execSync('git ls-files src versions', { encoding: 'utf8' }).split('\n').filter(f => /\.tsx?$/.test(f));
+const files = execSync('git ls-files -co --exclude-standard src versions', { encoding: 'utf8' }).split('\n').filter(f => /\.tsx?$/.test(f) && existsSync(f));
 let total = 0;
 for (const file of files) {
   const raw = readFileSync(file, 'utf8');

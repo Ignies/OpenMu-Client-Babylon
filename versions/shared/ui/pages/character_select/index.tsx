@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { t } from '@/i18n';
 import './style.less';
 import { runInAction } from 'mobx';
@@ -91,7 +92,7 @@ export const CharactersPage = observer(() => {
   // Enter is the Connect button while nothing else is up
   // (CharacterScene.cpp:193-207); the create window keeps its own Enter.
   const onEnter = () => {
-    if (creating || selecting || Store.optionsEnabled || !selected) return;
+    if (creating || selecting || MuWindows.isOpen('options') || !selected) return;
     playUiSound('click'); // CharacterScene.cpp:199
     onConnect();
   };
@@ -171,7 +172,7 @@ export const CharactersPage = observer(() => {
           width={BTN_WIDTH}
           height={BTN_HEIGHT}
           frames={CREATE_FRAMES}
-          onClick={() => (Store.optionsEnabled = !Store.optionsEnabled)}
+          onClick={() => (MuWindows.setOpen('options', !MuWindows.isOpen('options')))}
           style={{
             position: 'absolute',
             left: BTN_WIDTH + BTN_GAP,

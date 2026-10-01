@@ -3,7 +3,7 @@ import { useCallback, type CSSProperties } from 'react';
 import { observer } from 'mobx-react-lite';
 import { MuSpriteFrame, useMuSprite } from '../mu_sprite';
 import { MuResizeGrip, useWindowChrome } from './useWindowChrome';
-import { MuWindows, type WindowCloser } from './windowState';
+import { MuWindows, type WindowCloser } from '../../windowManager';
 
 const BACK_SPRITE = 'newui_msgbox_back.OZJ';
 const TOP_SPRITE = 'newui_item_back04.OZT';

@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
@@ -99,7 +100,7 @@ export const MyShop = observer(() => {
   const picked = Store.pickedItem;
   const banned = !!picked && isPersonalShopBanned(picked.item);
 
-  const column = 1 + (Store.inventoryEnabled ? 1 : 0) + (Store.characterInfoEnabled ? 1 : 0);
+  const column = 1 + (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
 
   return (
     <MuItemWindow
@@ -243,7 +244,7 @@ export const ShopBrowser = observer(() => {
 
   const items = browse.items.map(entry => entry?.item ?? null);
 
-  const column = 1 + (Store.inventoryEnabled ? 1 : 0) + (Store.characterInfoEnabled ? 1 : 0);
+  const column = 1 + (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
 
   return (
     <MuItemWindow

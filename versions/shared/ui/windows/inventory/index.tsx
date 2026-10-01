@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { isKey, actionOfKey } from '@/controllers/interface/keyBindings';
 import { t } from '@/i18n';
 import './style.less';
@@ -282,26 +283,26 @@ export const Inventory = observer(() => {
       isKey('inventory', key) ||
       (key === ALT_HOT_KEY && !actionOfKey(key))
     ) {
-      Store.inventoryEnabled = !Store.inventoryEnabled;
+      MuWindows.setOpen('inventory', !MuWindows.isOpen('inventory'));
       // NewUIHotKey.cpp:198-203.
       playUiSound('click');
     }
 
     // The grid packs itself top-left, kind by kind; a second press stops a
     // run that is still going.
-    if (isKey('sortInventory', key) && Store.inventoryEnabled) {
+    if (isKey('sortInventory', key) && MuWindows.isOpen('inventory')) {
       InventorySort.start();
     }
 
     // NewUIMyInventory.cpp:578: L toggles self-repair (level 50+), only
     // while no shop is open.
-    if (isKey('repair', key) && Store.inventoryEnabled && !Store.npcShop) {
+    if (isKey('repair', key) && MuWindows.isOpen('inventory') && !Store.npcShop) {
       Store.toggleRepairMode();
     }
 
     // NewUIMyInventory.cpp:622: Ctrl+Q/W/E/R over a potion binds that bar slot.
     const bind = ITEM_HOT_KEYS.indexOf(key);
-    if (bind >= 0 && Store.inventoryEnabled && hover) {
+    if (bind >= 0 && MuWindows.isOpen('inventory') && hover) {
       const keys = Store.world?.keyboardInput.pressedKeys;
       const ctrl = !!keys && (keys.has('ControlLeft') || keys.has('ControlRight'));
       if (ctrl && canRegisterItemHotkey(hover.item)) {
@@ -349,7 +350,7 @@ export const Inventory = observer(() => {
     return () => window.removeEventListener('pointermove', onMove);
   }, [!!picked]);
 
-  if (!Store.inventoryEnabled) {
+  if (!MuWindows.isOpen('inventory')) {
     return null;
   }
 
@@ -510,9 +511,9 @@ export const Inventory = observer(() => {
     <MuItemWindow
       id={WINDOW_ID}
       className={`inventory${Store.repairMode ? ' repair-mode' : ''}`}
-      column={Store.characterInfoEnabled ? 1 : 0}
+      column={MuWindows.isOpen('character_info') ? 1 : 0}
       onClose={() => {
-        Store.inventoryEnabled = false;
+        MuWindows.setOpen('inventory', false);
         // Escape (NewUIMyInventory.cpp:582).
         playUiSound('click');
       }}
@@ -532,7 +533,7 @@ export const Inventory = observer(() => {
           width: HEAD_CLOSE_WIDTH,
           height: HEAD_CLOSE_HEIGHT,
         }}
-        onClick={() => (Store.inventoryEnabled = false)}
+        onClick={() => (MuWindows.setOpen('inventory', false))}
       />
 
       {EQUIPMENT_SLOTS.map(info => (
@@ -650,7 +651,7 @@ export const Inventory = observer(() => {
           width={BUTTON_WIDTH}
           height={BUTTON_HEIGHT}
           frames={BUTTON_FRAMES}
-          onClick={() => (Store.inventoryEnabled = false)}
+          onClick={() => (MuWindows.setOpen('inventory', false))}
         >
           <span className="button-tooltip">{t(EXIT_TOOLTIP)}</span>
         </MuButton>

@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { t } from '../i18n';
 import { characterSkinBody } from '../controllers/actors/transformedBody';
 import type { PlayerObject } from '../controllers/actors/playerObject';
@@ -1001,21 +1002,8 @@ export const Store = new (class _Store {
     { name: string; alliance: string; logo: number[] }
   >();
 
-  characterInfoEnabled = false;
-  /** The learned-skill list window (K). */
-  skillListEnabled = false;
-  inventoryEnabled = false;
-  optionsEnabled = false;
-  emoteMenuEnabled = false;
-  /** TAB minimap sheet (`INTERFACE_MINI_MAP`). */
-  minimapEnabled = false;
-  /** The Move command (warp list) window, M (`INTERFACE_MOVEMAP`). */
-  warpWindowEnabled = false;
-
   /** The hide-interface key: the HUD layer is not drawn while this is set. */
   hudHidden = false;
-  /** The session panel (exp / kills / zen per hour); this client's own. */
-  sessionStatsEnabled = false;
 
   sceneLoading = false;
 
@@ -1124,15 +1112,7 @@ export const Store = new (class _Store {
       msgWin: observable,
       playerData: observable,
       world: observable,
-      characterInfoEnabled: observable,
-      skillListEnabled: observable,
-      inventoryEnabled: observable,
-      optionsEnabled: observable,
-      emoteMenuEnabled: observable,
-      minimapEnabled: observable,
-      warpWindowEnabled: observable,
       hudHidden: observable,
-      sessionStatsEnabled: observable,
       sceneLoading: observable,
       loadingProgress: observable,
       spritesLoading: observable,
@@ -1163,7 +1143,7 @@ export const Store = new (class _Store {
     // `HideAll` on the inventory hides the shop with it, and the repair
     // cursor never outlives the window it belongs to.
     reaction(
-      () => this.inventoryEnabled,
+      () => MuWindows.isOpen('inventory'),
       enabled => {
         if (enabled) return;
         this.closeNpcShop();
@@ -2027,7 +2007,7 @@ export const Store = new (class _Store {
         items: new Array<Item | null>(SHOP_SLOTS).fill(null),
       };
       this.repairMode = false;
-      this.inventoryEnabled = true;
+      MuWindows.setOpen('inventory', true);
     });
   }
 

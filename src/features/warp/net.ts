@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { ClientReadyAfterMapChangePacket } from '@versions/shared/packets/ClientToServerPackets';
 import { ENUM_WORLD } from '@/core/types';
 import { Economy } from '../economy/economy';
@@ -42,7 +43,7 @@ EventBus.on('MapChanged', packet => {
     Notices.clear();
     SlideHelp.clear();
     runInAction(() => {
-      Store.minimapEnabled = false;
+      MuWindows.setOpen('minimap', false);
     });
     // The soccer scoreboard does not survive a warp off the stadium.
     if (p.MapNumber !== ENUM_WORLD.WD_6STADIUM) {

@@ -44,7 +44,7 @@ async function bootstrap() {
 
   // In game the window anchors above the bottom bar. Here there is no bar, so
   // it is centred instead: the harness exists to look at the panel.
-  const { MuWindows } = await import('../../controllers/interface/components/mu_window/windowState');
+  const { MuWindows } = await import('../../controllers/interface/windowManager');
   requestAnimationFrame(() =>
     MuWindows.moveTo(
       window_.MARKETPLACE_ID,

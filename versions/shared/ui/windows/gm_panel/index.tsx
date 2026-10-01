@@ -8,7 +8,7 @@ import { worldView, type WorldView } from '@/features/gm/gmWorld';
 import { AdminFeed } from '@/features/gm/admin/feed';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { uiClick } from '@/controllers/sound/sfx';
-import { MuWindows } from '@/controllers/interface/components/mu_window/windowState';
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { ChatLineType } from '@/features/chat/chat';
 import { mapName } from '@/features/gm/gmMaps';
 import { MuFrame } from '@/controllers/interface/components/mu_frame';

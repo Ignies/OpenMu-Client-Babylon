@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { masterLevel } from '@/features/skills/masterLevel';
 import { t } from '@/i18n';
@@ -91,7 +92,7 @@ export const Vault = observer(() => {
   };
 
   // The original parks each item window left of the last one.
-  const column = 1 + (Store.inventoryEnabled ? 1 : 0) + (Store.characterInfoEnabled ? 1 : 0);
+  const column = 1 + (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
 
   return (
     <MuItemWindow

@@ -2,11 +2,10 @@ import { playUiSound } from '@/controllers/sound/sfx';
 import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '@/app/store';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { MuTableFrame } from '@/controllers/interface/components/mu_window';
 import { MuResizeGrip, useWindowChrome } from '@/controllers/interface/components/mu_window/useWindowChrome';
-import { MuWindows } from '@/controllers/interface/components/mu_window/windowState';
+import { MuWindows } from '@/controllers/interface/windowManager';
 import {
   defaultGameOption,
   setGameOption,
@@ -229,7 +228,7 @@ export const OptionsWindow = observer(() => {
 
   useEventBus('keyPressed', key => {
     if (isKey(HOT_KEY, key)) {
-      Store.optionsEnabled = !Store.optionsEnabled;
+      MuWindows.setOpen('options', !MuWindows.isOpen('options'));
       playUiSound('click');
     }
   });
@@ -239,21 +238,21 @@ export const OptionsWindow = observer(() => {
     width: WIN_WIDTH,
     height: WIN_HEIGHT,
     onClose: () => {
-      Store.optionsEnabled = false;
+      MuWindows.setOpen('options', false);
       // NewUIOptionWindow.cpp:525.
       playUiSound('click');
     },
   });
 
   useEffect(() => {
-    if (Store.optionsEnabled) return;
+    if (MuWindows.isOpen('options')) return;
     setCapturing(null);
     setConfirming(null);
     setConfirmingDefaults(false);
     setNotice(null);
     setQuery('');
     setHovered(null);
-  }, [Store.optionsEnabled]);
+  }, [MuWindows.isOpen('options')]);
 
   useEffect(() => {
     lastPage = page;
@@ -276,7 +275,7 @@ export const OptionsWindow = observer(() => {
     return () => window.clearTimeout(timer);
   }, [flash]);
 
-  if (!Store.optionsEnabled) return null;
+  if (!MuWindows.isOpen('options')) return null;
 
   const openPage = (next: Page) => {
     setPage(next);
@@ -547,7 +546,7 @@ export const OptionsWindow = observer(() => {
           label={t('common.close')}
           width={CLOSE_WIDTH}
           onClick={() => {
-            Store.optionsEnabled = false;
+            MuWindows.setOpen('options', false);
           }}
           style={{ left: WIN_WIDTH - FOOTER_X - CLOSE_WIDTH, top: FOOTER_Y }}
         />

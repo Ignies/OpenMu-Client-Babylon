@@ -16,7 +16,7 @@ import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
-import { MuWindows } from '@/controllers/interface/components/mu_window/windowState';
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { bottomBarScreenHeight } from '@/controllers/interface/components/mu_window';
 import { useUiViewport } from '@/controllers/interface/components/ui_stage';
 import { useIsMobile } from '@/controllers/interface/mobile';

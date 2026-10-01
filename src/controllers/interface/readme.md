@@ -9,8 +9,10 @@ windows themselves are content in `versions/shared/ui/` (see
 - `windows.ts`: `defineWindow({ id, slot, order, component })`, `registerWindows(defs)` (a later
   def with the same id replaces the earlier one), `windowsIn(slot)` (stacking order). Slots:
   `world` (on the 3D view, stays up when the interface is hidden) and `hud`.
-- `components/`: shared widgets. Frames and text: `mu_window` (item window, table frame,
-  `MuWindows` placement and z-order), `mu_frame`, `msg_box_frame`, `mu_text`, `mu_number`,
+- `windowManager.ts`: `MuWindows`: open state (`isOpen(id)`, `setOpen(id, open)`), placement,
+  scale and z-order, Escape closes the top window.
+- `components/`: shared widgets. Frames and text: `mu_window` (item window, table frame),
+  `mu_frame`, `msg_box_frame`, `mu_text`, `mu_number`,
   `mu_button`, `mu_sprite`, `mu_logo`, `mu_flag`. Items: `item_grid`, `item_icon`, `item_search`,
   `item_tooltip`, `picked_item`, `chat_item_link`. Skills: `skill_icon`, `skill_tooltip`. Other:
   `msg_window`, `game_cursor`, `guild_marks`, `world_label`, `emoji_text`, `reconnect_overlay`,
@@ -84,4 +86,5 @@ windows themselves are content in `versions/shared/ui/` (see
 - `hudFormat.test.ts`: experience percent and grouping, durations, dashes before data.
 - `nameTags.test.ts`: hero state messages, self-defence parsing, PK colours, outlaw body light.
 - `screenPositionBus.test.ts`: the frame-end listener runs once per pass.
+- `windowManager.test.ts`: open state reacts, including the first open of an unseen id.
 - `components/item_tooltip/placement.test.ts`: tooltip and compare-pair placement.

@@ -4,7 +4,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { Store } from '@/app/store';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { ItemIcon } from '../item_icon';
-import { MuWindows } from '../mu_window/windowState';
+import { MuWindows } from '../../windowManager';
 import { SQUARE } from '../item_grid';
 
 /**

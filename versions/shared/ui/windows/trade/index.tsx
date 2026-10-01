@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
@@ -92,7 +93,7 @@ export const TradeWindow = observer(() => {
   const partner = Economy.tradePartner;
   const band = levelBand(partner?.level ?? 0);
 
-  const column = 1 + (Store.inventoryEnabled ? 1 : 0) + (Store.characterInfoEnabled ? 1 : 0);
+  const column = 1 + (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
 
   return (
     <MuItemWindow

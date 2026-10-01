@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { LocalStorage } from '@/core/localStorage';
-import { getUiViewport, onUiViewportChanged } from '../ui_stage';
+import { getUiViewport, onUiViewportChanged } from './components/ui_stage';
 import { GameOptions, uiScaleFactor } from '@/features/options/gameOptions';
 
 const STORAGE_KEY = 'mu-windows';
@@ -109,6 +109,21 @@ export const MuWindows = new (class _MuWindows {
       this.placements = {};
     });
     this.save();
+  }
+
+  // ---- open state ---------------------------------------------------------
+
+  /** Window ids the player has open; a window draws while its id is open. */
+  private open: Record<string, boolean> = {};
+
+  isOpen(id: string): boolean {
+    return this.open[id] === true;
+  }
+
+  setOpen(id: string, value: boolean): void {
+    runInAction(() => {
+      this.open[id] = value;
+    });
   }
 
   // ---- the stack ----------------------------------------------------------

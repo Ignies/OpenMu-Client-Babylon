@@ -12,7 +12,7 @@ import {
   MuResizeGrip,
   useWindowStackEntry,
 } from '@/controllers/interface/components/mu_window/useWindowChrome';
-import { MuWindows } from '@/controllers/interface/components/mu_window/windowState';
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { SkillIcon } from '@/controllers/interface/components/skill_icon';
 import { MasterExpBar } from '../../windows/master_skills/masterExpBar';
 import { PetCommandBar } from './petCommands';

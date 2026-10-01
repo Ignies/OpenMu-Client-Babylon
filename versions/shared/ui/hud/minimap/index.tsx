@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
@@ -23,12 +24,12 @@ export const Minimap = observer(() => {
     if (isKey(HOT_KEY, key)) {
       if (!Store.world?.playerEntity) return;
       runInAction(() => {
-        Store.minimapEnabled = !Store.minimapEnabled;
+        MuWindows.setOpen('minimap', !MuWindows.isOpen('minimap'));
       });
       playUiSound('click');
-    } else if (key === 'Escape' && Store.minimapEnabled) {
+    } else if (key === 'Escape' && MuWindows.isOpen('minimap')) {
       runInAction(() => {
-        Store.minimapEnabled = false;
+        MuWindows.setOpen('minimap', false);
       });
       playUiSound('click');
     }

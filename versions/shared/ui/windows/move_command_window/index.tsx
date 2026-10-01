@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { t } from '@/i18n';
 import { useEffect, useRef, useState, type WheelEvent } from 'react';
@@ -152,13 +153,13 @@ function rowState(entry: MoveReqEntry, level: number, zen: number, cls: BaseClas
 
 export function openMoveWindow(): void {
   runInAction(() => {
-    Store.warpWindowEnabled = true;
+    MuWindows.setOpen('move_command', true);
   });
 }
 
 export function closeMoveWindow(): void {
   runInAction(() => {
-    Store.warpWindowEnabled = false;
+    MuWindows.setOpen('move_command', false);
   });
 }
 
@@ -216,7 +217,7 @@ export const MoveCommandWindow = observer(() => {
   const [entries, setEntries] = useState<readonly MoveReqEntry[]>([]);
   const [first, setFirst] = useState(0);
   const dragging = useRef<{ pointerId: number; startY: number; startFirst: number } | null>(null);
-  const open = Store.warpWindowEnabled;
+  const open = MuWindows.isOpen('move_command');
   const chrome = useWindowChrome(WINDOW_ID, {
     width: WIDTH,
     height: HEIGHT,
@@ -232,7 +233,7 @@ export const MoveCommandWindow = observer(() => {
   useEventBus('keyPressed', key => {
     if (!Store.world?.playerEntity) return;
     if (isKey(HOT_KEY, key)) {
-      if (Store.warpWindowEnabled) closeMoveWindow();
+      if (MuWindows.isOpen('move_command')) closeMoveWindow();
       else openMoveWindow();
     }
   });

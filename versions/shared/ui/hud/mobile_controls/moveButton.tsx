@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
-import { Store } from '@/app/store';
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { useMuSprite } from '@/controllers/interface/components/mu_sprite';
 import { MobileButton, ScaledFrame } from './mobileButton';
 import { SLOT_SCALE, SKILLBOX_SPRITE, SKILLBOX_USE_SPRITE, BOX_WIDTH, BOX_HEIGHT } from './consts';
@@ -16,7 +16,7 @@ const GLYPH = 34;
  * `MuWindows`, so `fitScaleOf` caps it to something that fits a phone.
  */
 export const MoveButton = observer(() => {
-  const open = Store.warpWindowEnabled;
+  const open = MuWindows.isOpen('move_command');
   const portal = useMuSprite(PORTAL_SPRITE);
 
   return (
@@ -24,7 +24,7 @@ export const MoveButton = observer(() => {
       className="mobile-move-button"
       title={t('warp.title')}
       onTap={() => {
-        Store.warpWindowEnabled = !Store.warpWindowEnabled;
+        MuWindows.setOpen('move_command', !MuWindows.isOpen('move_command'));
       }}
     >
       {pressed => (

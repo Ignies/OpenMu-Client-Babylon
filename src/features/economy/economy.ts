@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { t, type TextKey } from '../../i18n';
 import { makeObservable, observable, action, runInAction } from 'mobx';
 import { prefetchItemIcons } from '../../controllers/assets/itemIconPack';
@@ -503,7 +504,7 @@ export const Economy = new (class _Economy {
     runInAction(() => {
       this.vaultOpen = true;
       this.vaultUnlocked = false;
-      Store.inventoryEnabled = true;
+      MuWindows.setOpen('inventory', true);
     });
   }
 
@@ -670,7 +671,7 @@ export const Economy = new (class _Economy {
       this.mixItems = emptyGrid(MIX_SLOTS);
       this.mixPending = false;
       this.mixResult = null;
-      Store.inventoryEnabled = true;
+      MuWindows.setOpen('inventory', true);
     });
   }
 
@@ -877,7 +878,7 @@ export const Economy = new (class _Economy {
       this.closeTradeState();
       this.tradeOpen = true;
       this.tradePartner = partner;
-      Store.inventoryEnabled = true;
+      MuWindows.setOpen('inventory', true);
     });
   }
 
@@ -1031,7 +1032,7 @@ export const Economy = new (class _Economy {
 
     runInAction(() => {
       this.myShopOpen = true;
-      Store.inventoryEnabled = true;
+      MuWindows.setOpen('inventory', true);
     });
   }
 

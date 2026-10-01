@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { t } from '@/i18n';
@@ -175,7 +176,7 @@ export const RegisterWindow = observer(({ onCreated, onCancel }: RegisterWindowP
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' && e.key !== 'Escape') return;
       if (e.isComposing || e.keyCode === 229) return;
-      if (Store.msgWin || Store.optionsEnabled) return;
+      if (Store.msgWin || MuWindows.isOpen('options')) return;
 
       e.preventDefault();
       if (e.repeat) return;

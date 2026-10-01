@@ -7,7 +7,7 @@ import {
   type Ref,
 } from 'react';
 import { observer } from 'mobx-react-lite';
-import { MuWindows, type WindowCloser } from './windowState';
+import { MuWindows, type WindowCloser } from '../../windowManager';
 import { GameOptions } from '@/features/options/gameOptions';
 import { t } from '@/i18n';
 

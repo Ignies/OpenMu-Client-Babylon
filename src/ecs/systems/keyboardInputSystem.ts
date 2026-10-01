@@ -7,7 +7,7 @@ import {
 } from '../../controllers/interface/keyBindings';
 import { GameOptions } from '../../features/options/gameOptions';
 import { ITEM_HOTKEY_CODES } from '../../features/inventory/itemHotkeys';
-import { MuWindows } from '../../controllers/interface/components/mu_window/windowState';
+import { MuWindows } from '../../controllers/interface/windowManager';
 import { openSystemMenu } from '../../features/session/sessionExit';
 import type { ISystemFactory } from '../world';
 
@@ -69,7 +69,7 @@ export const KeyboardInputSystem: ISystemFactory = world => {
       // Ctrl+W is the browser's own and cannot be taken back from here.
       if (
         e.ctrlKey &&
-        Store.inventoryEnabled &&
+        MuWindows.isOpen('inventory') &&
         ITEM_HOTKEY_CODES.includes(e.code)
       ) {
         e.preventDefault();
@@ -95,7 +95,7 @@ export const KeyboardInputSystem: ISystemFactory = world => {
     }
     // `NewUIHotKey.cpp:131`: while the minimap sheet is up only its own key
     // (and Escape, which closes it) get through to the windows.
-    if (Store.minimapEnabled) {
+    if (MuWindows.isOpen('minimap')) {
       if (!isKey('minimap', e.code) && e.code !== 'Escape') return;
     } else if (e.code === 'Escape' && !pressedKeys.has('Escape')) {
       // Escape closes the top window only. A window without a closer of its

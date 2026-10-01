@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { t } from '@/i18n';
 import './style.less';
 import { useEffect, useState } from 'react';
@@ -278,7 +279,7 @@ const SheetView = ({
 };
 
 export const MinimapSheet = observer(() => {
-  const open = Store.minimapEnabled;
+  const open = MuWindows.isOpen('minimap');
   const world = Store.world;
   const map = open ? world?.mapIndex : undefined;
   const minimap = useWorldMinimap(map);
@@ -289,7 +290,7 @@ export const MinimapSheet = observer(() => {
   useEffect(() => {
     if (open && minimap === null) {
       runInAction(() => {
-        Store.minimapEnabled = false;
+        MuWindows.setOpen('minimap', false);
       });
     }
   }, [open, minimap]);
@@ -298,7 +299,7 @@ export const MinimapSheet = observer(() => {
 
   const close = () => {
     runInAction(() => {
-      Store.minimapEnabled = false;
+      MuWindows.setOpen('minimap', false);
     });
   };
 

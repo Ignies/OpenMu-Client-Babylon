@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
-import { WINDOW_Z_MODAL } from '@/controllers/interface/components/mu_window/windowState';
+import { WINDOW_Z_MODAL } from '@/controllers/interface/windowManager';
 import { TEXT_COLOR } from '../../pages/server_select/layout';
 import {
   BACK_SPRITE,

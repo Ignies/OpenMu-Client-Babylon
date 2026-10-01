@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
@@ -187,7 +188,7 @@ export const NpcShop = observer(() => {
 
   // The original parks the shop left of the inventory (and of the character
   // window when that is open too): `SetPos(640 - 190 * 3, 0)`.
-  const column = Store.characterInfoEnabled ? 2 : 1;
+  const column = MuWindows.isOpen('character_info') ? 2 : 1;
 
   return (
     <MuItemWindow

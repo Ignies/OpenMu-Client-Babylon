@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
@@ -60,7 +61,7 @@ export const ChaosMachine = observer(() => {
     : MIX_MENU.find(entry => entry.type === Economy.mixType);
   const title = cardMode ? t('chaosCard.title') : t(TITLE);
 
-  const column = 1 + (Store.inventoryEnabled ? 1 : 0) + (Store.characterInfoEnabled ? 1 : 0);
+  const column = 1 + (MuWindows.isOpen('inventory') ? 1 : 0) + (MuWindows.isOpen('character_info') ? 1 : 0);
 
   return (
     <MuItemWindow

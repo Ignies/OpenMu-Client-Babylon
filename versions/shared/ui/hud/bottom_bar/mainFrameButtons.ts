@@ -1,5 +1,5 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import type { TextKey } from '@/i18n';
-import { Store } from '@/app/store';
 import { Messenger } from '@/features/friends/messenger';
 import { toggleMarketplace } from '@/features/marketplace/gameBridge';
 
@@ -27,14 +27,14 @@ export const MAIN_FRAME_BUTTONS: readonly MainFrameButton[] = [
     file: 'partCharge1/newui_menu_Bt01.OZJ',
     titleKey: 'bottomBar.characterInfo',
     toggle: () => {
-      Store.characterInfoEnabled = !Store.characterInfoEnabled;
+      MuWindows.setOpen('character_info', !MuWindows.isOpen('character_info'));
     },
   },
   {
     file: 'partCharge1/newui_menu_Bt02.OZJ',
     titleKey: 'bottomBar.inventory',
     toggle: () => {
-      Store.inventoryEnabled = !Store.inventoryEnabled;
+      MuWindows.setOpen('inventory', !MuWindows.isOpen('inventory'));
     },
   },
   {
@@ -46,7 +46,7 @@ export const MAIN_FRAME_BUTTONS: readonly MainFrameButton[] = [
     file: 'partCharge1/newui_menu_Bt04.OZJ',
     titleKey: 'bottomBar.options',
     toggle: () => {
-      Store.optionsEnabled = !Store.optionsEnabled;
+      MuWindows.setOpen('options', !MuWindows.isOpen('options'));
     },
   },
 ];

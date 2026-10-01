@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { isKey } from '@/controllers/interface/keyBindings';
 import { t } from '@/i18n';
 import './style.less';
@@ -348,7 +349,7 @@ function stageStatPoints(): (() => void) | undefined {
 
   runInAction(() => {
     Store.playerData.points = points;
-    Store.characterInfoEnabled = true;
+    MuWindows.setOpen('character_info', true);
   });
 
   const wanted = devQueryNumber('statRun');
@@ -378,13 +379,13 @@ export const CharacterInfo = observer(() => {
 
   useEventBus('keyPressed', key => {
     if (isKey(HOT_KEY, key)) {
-      Store.characterInfoEnabled = !Store.characterInfoEnabled;
+      MuWindows.setOpen('character_info', !MuWindows.isOpen('character_info'));
       // NewUIHotKey.cpp:207-210.
       playUiSound('click');
     }
   });
 
-  const open = Store.characterInfoEnabled;
+  const open = MuWindows.isOpen('character_info');
 
   // A run belongs to the open window: closing it is one of the stops, and it
   // takes the question with it.
@@ -575,7 +576,7 @@ export const CharacterInfo = observer(() => {
     playerData.maxNegativeFruitPoints
   );
 
-  const close = () => (Store.characterInfoEnabled = false);
+  const close = () => (MuWindows.setOpen('character_info', false));
 
   return (
     <MuItemWindow
@@ -584,7 +585,7 @@ export const CharacterInfo = observer(() => {
       column={0}
       label={t('characterInfo.title')}
       onClose={() => {
-        Store.characterInfoEnabled = false;
+        MuWindows.setOpen('character_info', false);
         // Escape (NewUICharacterInfoWindow.cpp:227).
         playUiSound('click');
       }}

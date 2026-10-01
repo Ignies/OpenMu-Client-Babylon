@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
@@ -92,7 +93,7 @@ const MapMarker = ({ marker, mapSize }: { marker: MinimapMarker; mapSize: number
 export const MinimapCorner = observer(() => {
   const world = Store.world;
   // Under the sheet it would only be a dimmed ghost of the same map.
-  const shown = !!world && !Store.minimapEnabled;
+  const shown = !!world && !MuWindows.isOpen('minimap');
   // `mapIndex` is a plain field: the frame loop below carries a warp over.
   const [map, setMap] = useState<number | undefined>(undefined);
   const minimap = useWorldMinimap(shown ? map : undefined);

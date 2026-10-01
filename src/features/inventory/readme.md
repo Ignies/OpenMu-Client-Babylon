@@ -18,8 +18,8 @@ jewels, Q/W/E/R hotkeys). The bag itself and the item-move code live in `Store` 
 - `ITEM_HOTKEY_CODES`, `canRegisterItemHotkey`, `findHotkeyItem`, `countHotkeyItems`, `HOTKEY_COUNT`, `UNBOUND_HOTKEY`.
 
 ## How it works
-- State is in `Store`: `playerData.items` / `playerData.money`, `pickedItem`, `pendingItemMove`, `itemHotkeys`,
-  `inventoryEnabled`. Actions are `Store` methods: `pickItem`, `placePickedItem`, `cancelPickedItem`,
+- State is in `Store`: `playerData.items` / `playerData.money`, `pickedItem`, `pendingItemMove`, `itemHotkeys`
+  (open state: `MuWindows.isOpen('inventory')`). Actions are `Store` methods: `pickItem`, `placePickedItem`, `cancelPickedItem`,
   `moveItemToSquare`, `autoMoveItem`, `findFreeSquare`, `itemsOfStorage`, `confirmItemMove`, `rollbackItemMove`,
   `applyPickedJewel`, `consumeItemRequest`, `upgradeInventoryItem`, `setItemHotkey`, `useItemHotkey`.
 - The server owns every grid. A move is one `ItemMoveRequest`; only one is in flight (`Store.pendingItemMove`).

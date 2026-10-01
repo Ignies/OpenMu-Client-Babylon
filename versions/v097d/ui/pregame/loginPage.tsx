@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 /**
  * The 0.97d login window: the engraved `Logo/0Account.OZT` plate, drawn over
  * the ship scene.
@@ -186,7 +187,7 @@ export const V097dLoginPage = observer(() => {
             labelStyle={LABEL_STYLE}
             color={TEXT_COLOR}
             activeColor={ACTIVE_COLOR}
-            onClick={() => (Store.optionsEnabled = true)}
+            onClick={() => (MuWindows.setOpen('options', true))}
             style={{
               position: 'absolute',
               left: BUTTONS.options.x,

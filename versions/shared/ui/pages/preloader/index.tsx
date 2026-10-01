@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
@@ -364,7 +365,7 @@ export const PreloaderPage = observer(() => {
           variant="ghost"
           small
           onClick={() => {
-            Store.optionsEnabled = true;
+            MuWindows.setOpen('options', true);
           }}
         >
           {t('options.title')}

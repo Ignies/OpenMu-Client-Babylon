@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
-import { MuWindows } from '@/controllers/interface/components/mu_window/windowState';
+import { MuWindows } from '@/controllers/interface/windowManager';
 
 const BAR_WIDTH = 7;
 const CAP = 3;

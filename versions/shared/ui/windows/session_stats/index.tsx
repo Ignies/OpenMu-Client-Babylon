@@ -1,3 +1,4 @@
+import { MuWindows } from '@/controllers/interface/windowManager';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
@@ -53,17 +54,17 @@ const Row = ({ label, value, top }: { label: string; value: string; top: number 
 );
 
 export const SessionStatsWindow = observer(() => {
-  const open = Store.sessionStatsEnabled;
+  const open = MuWindows.isOpen('session_stats');
   const chrome = useWindowChrome(WINDOW_ID, {
     width: WIDTH,
     height: HEIGHT,
-    onClose: () => runInAction(() => (Store.sessionStatsEnabled = false)),
+    onClose: () => runInAction(() => (MuWindows.setOpen('session_stats', false))),
   });
 
   useEventBus('keyPressed', key => {
     if (!Store.world?.playerEntity) return;
     if (isKey(HOT_KEY, key)) {
-      runInAction(() => (Store.sessionStatsEnabled = !Store.sessionStatsEnabled));
+      runInAction(() => (MuWindows.setOpen('session_stats', !MuWindows.isOpen('session_stats'))));
     }
   });
 

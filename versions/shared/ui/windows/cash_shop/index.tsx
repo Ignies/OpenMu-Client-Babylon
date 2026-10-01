@@ -17,7 +17,7 @@ import { SoundsManager } from '@/controllers/sound/soundsManager';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow, MuTableFrame } from '@/controllers/interface/components/mu_window';
-import { MuWindows } from '@/controllers/interface/components/mu_window/windowState';
+import { MuWindows } from '@/controllers/interface/windowManager';
 import { ItemIcon } from '@/controllers/interface/components/item_icon';
 import { ItemTooltip } from '@/controllers/interface/components/item_tooltip';
 import { GridSquares, hoveredMask, usedMask } from '@/controllers/interface/components/item_grid';
