@@ -1,4 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
+import { comboFlash, comboKnockUp, comboLayer, combosLanded, observeSkillAnimation } from './state';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { entityPos, type ParticleRecipe } from '@/controllers/fx/core';
 import { type Ray } from '@/controllers/fx/rays';
@@ -87,4 +88,9 @@ export default defineSkill({
   sound: 'Sound/eCombo', // Combo
   // Combo: the original lights nothing. Graded: the rays' blue over the ~3 tiles they reach, for their 20 ticks.
   light: { enhanced: { spots: { burst: effectLight([0.3, 0.6, 1], 3, 0.8, { release: 0.56 }) } } },
+  // Combo flash and knock-up timers (state.ts).
+  combat: {
+    layer: comboLayer,
+    hooks: { combo: { flash: comboFlash, landed: combosLanded, knockUp: comboKnockUp, observeSkillAnimation } },
+  },
 });

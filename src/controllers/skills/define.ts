@@ -1,6 +1,8 @@
 import type { Sounds } from '../sound/recipes';
 import type { SkillClipSet } from '../combat/recipes';
 import type { SkillLight } from '../lighting/skills';
+import type { CombatLayer } from '../combat/layer';
+import type { CombatHooks } from '../combat/skillHooks';
 import type { BuffArrival, BuffLook, SkillVisual } from './visuals';
 
 /** One skill as its file declares it. Every field is optional except who it is. */
@@ -17,6 +19,8 @@ export interface SkillDef {
   readonly clip?: SkillClipSet;
   /** Re-use delay in ms. */
   readonly delayMs?: number;
+  /** Skill-owned combat state: a layer the combat controller steps and the hooks its facade forwards to. */
+  readonly combat?: { readonly layer?: CombatLayer; readonly hooks?: CombatHooks };
   /** Persistent looks of the buffs this skill applies, by MagicEffect id. */
   readonly buffs?: Partial<Record<number, BuffLook>>;
   /** Work a buff does as it lands, by MagicEffect id. */

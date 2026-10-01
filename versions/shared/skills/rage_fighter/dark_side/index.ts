@@ -1,4 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
+import { beginDarkSide, darkSidePendingSkill, isDarkSide, nextDarkSideHit, observeDarkSideTargets, observeRageHit, rageLayer, rageStreak } from './rage';
 import { MODEL, RGBS, SHADE_MOTES, TEX } from '@/controllers/fx/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
@@ -20,4 +21,19 @@ export default defineSkill({
   },
   sound: 'Sound/Ragefighter/Rage_Darkside', // Dark Side
   clip: { ground: A.PLAYER_SKILL_DARKSIDE_READY }, // Dark Side
+  // Dark Side follow-ups and the Rage streak (rage.ts).
+  combat: {
+    layer: rageLayer,
+    hooks: {
+      darkSide: {
+        isDarkSide,
+        begin: beginDarkSide,
+        observeTargets: observeDarkSideTargets,
+        nextHit: nextDarkSideHit,
+        pendingSkill: darkSidePendingSkill,
+        observeRageHit,
+        streak: rageStreak,
+      },
+    },
+  },
 });

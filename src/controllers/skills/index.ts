@@ -2,6 +2,8 @@ import type { RGB } from '../fx/core';
 import type { Sounds } from '../sound/recipes';
 import type { SkillClipSet } from '../combat/recipes';
 import { SKILL_CLIPS } from '../combat/recipes';
+import { combat } from '../combat';
+import { skillHooks } from '../combat/skillHooks';
 import { SKILL_LIGHTS } from '../lighting/skills';
 import { SKILL_SOUNDS } from '../sound/combat';
 import { SKILL_DELAY_MS } from '@/features/skills/recipes';
@@ -23,6 +25,8 @@ export function registerSkills(defs: readonly SkillDef[]): void {
     if (d.delayMs !== undefined) (SKILL_DELAY_MS as Record<number, number>)[d.id] = d.delayMs;
     Object.assign(BUFF_VISUALS, d.buffs);
     Object.assign(BUFF_ARRIVALS, d.buffArrivals);
+    if (d.combat?.layer) combat.register(d.combat.layer);
+    Object.assign(skillHooks, d.combat?.hooks);
   }
 }
 

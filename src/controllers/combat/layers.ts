@@ -6,10 +6,7 @@ import { skillClipsLayer } from './skillClips';
 import { skillMovementLayer } from './skillMovement';
 import { castTargetsLayer } from './castTargets';
 import { playerTargetLayer } from './playerTarget';
-import { novaChargeLayer } from './novaCharge';
 import { areaHitLayer } from './areaHit';
-import { comboLayer } from './combo';
-import { rageLayer } from './rage';
 
 /**
  * THE list. Every combat-timing entry in the game is one line here, and
@@ -29,8 +26,6 @@ export const COMBAT_LAYERS: readonly CombatLayer[] = [
   skillMovementLayer, // readers only
   castTargetsLayer, // readers only
   playerTargetLayer, // readers only
-  novaChargeLayer, // right-button hold
   areaHitLayer, // 0xDB counters
-  comboLayer, // combo flash / knock-up timers
-  rageLayer, // Dark Side follow-ups, streak timeout
+  // Skill-owned layers (Nova charge, Combo, Dark Side) join from their skill files via registerSkills.
 ];

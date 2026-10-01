@@ -1,11 +1,12 @@
 import { defineSkill } from '@/controllers/skills/define';
+import { beginNova, novaCharge, novaChargeLayer, novaCharging, novaStage, releaseNova } from './charge';
 import { DUST, TEX } from '@/controllers/fx/recipes';
 import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { SkillContext, Step, TICK, after, cm, forwardOf, ticks } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
-import { novaStageOf } from '@/controllers/combat/novaCharge';
+import { novaStageOf } from './charge';
 import { playCombat, stopCombat } from '@/controllers/sound/combat';
 
 import { A } from '@/controllers/combat/recipes';
@@ -170,4 +171,9 @@ export default defineSkill({
   // Nova (392 / 395 its master rows): the original lights nothing (MODEL_CIRCLE sub1, ZzzCharacter.cpp:4435-4439).
   // The rows keep the Wizardry cast flash off; Enhanced lights the burst, 58 the charge.
   light: { enhanced: NOVA_LIGHT },
+  // Right-button hold: the charge timer and the stage count (charge.ts).
+  combat: {
+    layer: novaChargeLayer,
+    hooks: { nova: { charging: novaCharging, charge: novaCharge, stage: novaStage, begin: beginNova, release: releaseNova } },
+  },
 });

@@ -24,18 +24,8 @@ import {
   stepInSquare,
 } from './skillMovement';
 import { castsOnSelf, castsOnSelfOnly, castTarget, type CastTarget } from './castTargets';
-import { beginNova, novaCharge, novaCharging, novaStage, releaseNova } from './novaCharge';
+import { skillHooks } from './skillHooks';
 import { areaHitRadius, buildAreaHit, needsAreaHit } from './areaHit';
-import { comboFlash, comboKnockUp, combosLanded, observeSkillAnimation } from './combo';
-import {
-  beginDarkSide,
-  darkSidePendingSkill,
-  isDarkSide,
-  nextDarkSideHit,
-  observeDarkSideTargets,
-  observeRageHit,
-  rageStreak,
-} from './rage';
 
 export type { CombatLayer } from './layer';
 export type { Hands } from './weaponRange';
@@ -217,27 +207,27 @@ class Combat implements Controller {
 
   /** The right button is down on a Nova charge. */
   get novaCharging(): boolean {
-    return novaCharging();
+    return skillHooks.nova?.charging() ?? false;
   }
 
   /** How full the Nova charge is, 0…1. */
   get novaCharge(): number {
-    return novaCharge();
+    return skillHooks.nova?.charge() ?? 0;
   }
 
   /** The Nova charge as the server's stage count, 0…12. */
   get novaStage(): number {
-    return novaStage();
+    return skillHooks.nova?.stage() ?? 0;
   }
 
   /** Right button down with Nova selected. `false` = already charging. */
   beginNova(): boolean {
-    return beginNova();
+    return skillHooks.nova?.begin() ?? false;
   }
 
   /** Button up: seconds held, or -1 when nothing was charging. */
   releaseNova(): number {
-    return releaseNova();
+    return skillHooks.nova?.release() ?? 0;
   }
 
   // ---- area hits ---------------------------------------------------------
@@ -266,59 +256,59 @@ class Combat implements Controller {
 
   /** 1 the frame a combo lands, fading to 0. */
   get comboFlash(): number {
-    return comboFlash();
+    return skillHooks.combo?.flash() ?? 0;
   }
 
   /** Combos landed since the last reset. */
   get combosLanded(): number {
-    return combosLanded();
+    return skillHooks.combo?.landed() ?? 0;
   }
 
   /** The target is being lifted by a combo knock-up. */
   comboKnockUp(netId: number): boolean {
-    return comboKnockUp(netId);
+    return skillHooks.combo?.knockUp(netId) ?? false;
   }
 
   /** A `SkillAnimation` arrived; `true` when it announced a combo. */
   observeSkillAnimation(skill: number, targetNetId: number | undefined): boolean {
-    return observeSkillAnimation(skill, targetNetId);
+    return skillHooks.combo?.observeSkillAnimation(skill, targetNetId) ?? false;
   }
 
   // ---- Rage Fighter ------------------------------------------------------
 
   /** Whether the skill is Dark Side (the 0x4A/0x4B pair). */
   isDarkSide(skill: number): boolean {
-    return isDarkSide(skill);
+    return skillHooks.darkSide?.isDarkSide(skill) ?? false;
   }
 
   /** Dark Side was cast on `targetId`. */
   beginDarkSide(skill: number, targetId: number): void {
-    beginDarkSide(skill, targetId);
+    skillHooks.darkSide?.begin(skill, targetId);
   }
 
   /** The 0x4B response named these targets. */
   observeDarkSideTargets(skill: number, targetIds: readonly number[]): void {
-    observeDarkSideTargets(skill, targetIds);
+    skillHooks.darkSide?.observeTargets(skill, targetIds);
   }
 
   /** Next follow-up target whose 0x4A is due, or -1. */
   nextDarkSideHit(): number {
-    return nextDarkSideHit();
+    return skillHooks.darkSide?.nextHit() ?? 0;
   }
 
   /** Skill id for the follow-up 0x4A. */
   get darkSidePendingSkill(): number {
-    return darkSidePendingSkill();
+    return skillHooks.darkSide?.pendingSkill() ?? 0;
   }
 
   /** An `ObjectHit` flagged as a Rage Fighter streak hit arrived. */
   observeRageHit(isStreak: boolean, isFinal: boolean): void {
-    observeRageHit(isStreak, isFinal);
+    skillHooks.darkSide?.observeRageHit(isStreak, isFinal);
   }
 
   /** Hits in the running Rage Fighter streak. */
   get rageStreak(): number {
-    return rageStreak();
+    return skillHooks.darkSide?.streak() ?? 0;
   }
 }
 

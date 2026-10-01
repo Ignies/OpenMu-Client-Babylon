@@ -9,7 +9,7 @@ import { SkillContext, Step, TICK, cm, perTick, ticks } from '@/controllers/skil
 import { combat } from '@/controllers/combat';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
-import { novaStageOf } from '@/controllers/combat/novaCharge';
+import { novaStageOf } from './charge';
 import { playCombat } from '@/controllers/sound/combat';
 
 import { A } from '@/controllers/combat/recipes';

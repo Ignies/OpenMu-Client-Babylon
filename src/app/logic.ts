@@ -333,7 +333,7 @@ import { experienceForLevel } from '../features/hero/experience';
 import { SessionResume } from '../features/session/sessionResume';
 import { WEATHER_RAIN } from '../controllers/weather/rainState';
 import { combat } from '../controllers/combat';
-import { COMBO_SOUND } from '../controllers/combat/combo';
+import { COMBO_SOUND } from '../../versions/shared/skills/dark_knight/combo/state';
 import { SHOCK_IMMUNE_CLIPS, SKILL_DEFENSE } from '../controllers/combat/recipes';
 import { mountKind } from '../features/pets/pets';
 import { inChaosCastle } from '../controllers/actors/locomotion';
