@@ -2,10 +2,10 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
 
-const alias = {
-  '@/': fileURLToPath(new URL('./src/', import.meta.url)),
-  '@versions/': fileURLToPath(new URL('./versions/', import.meta.url)),
-};
+const alias = [
+  { find: /^@\//, replacement: fileURLToPath(new URL('./src/', import.meta.url)) },
+  { find: /^@versions\//, replacement: fileURLToPath(new URL('./versions/', import.meta.url)) },
+];
 
 // Game versions are selected at runtime (versions/registry.ts, loaded by
 // src/app/main.tsx before the app boots); one build carries all of them.
