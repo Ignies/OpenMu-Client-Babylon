@@ -16,8 +16,8 @@ import {
   MAX_PASSWORD_LENGTH,
   MAX_USERNAME_LENGTH,
 } from '@/app/consts';
-import { MuSpriteFrame } from '@/ui/components/muSprite';
-import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
+import { MuButton } from '@/controllers/interface/components/mu_button';
 import './style.less';
 
 const PLATE = { file: 'Data/Logo/0Account.OZT', width: 250, height: 216 };

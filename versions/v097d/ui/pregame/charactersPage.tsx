@@ -19,8 +19,8 @@ import {
   CharacterFocusedPacket,
   CharacterListPacket,
 } from '@versions/shared/packets/ServerToClientPackets';
-import { MuSpriteFrame } from '@/ui/components/muSprite';
-import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
+import { MuButton } from '@/controllers/interface/components/mu_button';
 import './style.less';
 
 const PLATE = { file: 'Data/Logo/0New_Account01.OZT', width: 256, height: 256 };

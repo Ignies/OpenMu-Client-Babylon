@@ -14,8 +14,8 @@
  * `index.ts` may not.
  */
 import { ENUM_WORLD } from '@/core/types';
-import { LoginPage } from '@/ui/pages/loginPage';
-import { CharactersPage } from '@/ui/pages/charactersPage';
+import { LoginPage } from '../../shared/ui/pages/login';
+import { CharactersPage } from '../../shared/ui/pages/character_select';
 import type { PregameUi } from '@/version/uiContract';
 import { templatePreload } from './preload';
 

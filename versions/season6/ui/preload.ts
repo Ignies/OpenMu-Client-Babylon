@@ -6,16 +6,16 @@
  * tree shares almost no interface file names with this one, which is why
  * this is version property (versions/v097d/ui/preload.ts).
  */
-import { CURSOR_SPRITES } from '@/ui/components/gameCursor/cursors';
-import { MU_WINDOW_SPRITES } from '@/ui/components/muWindow';
-import { INVENTORY_SPRITES } from '@/ui/pages/worldPage/components/inventory/layout';
-import { NPC_SHOP_SPRITES } from '@/ui/pages/worldPage/components/npcShop/layout';
-import { CHARACTER_INFO_SPRITES } from '@/ui/pages/worldPage/components/characterInfo/layout';
-import { VAULT_SPRITES } from '@/ui/pages/worldPage/components/vault/layout';
-import { CHAOS_MACHINE_SPRITES } from '@/ui/pages/worldPage/components/chaosMachine/layout';
-import { TRADE_SPRITES } from '@/ui/pages/worldPage/components/trade/layout';
-import { PERSONAL_SHOP_SPRITES } from '@/ui/pages/worldPage/components/personalShop/layout';
-import { CASH_SHOP_SPRITES } from '@/ui/pages/worldPage/components/cashShop/layout';
+import { CURSOR_SPRITES } from '@/controllers/interface/components/game_cursor/cursors';
+import { MU_WINDOW_SPRITES } from '@/controllers/interface/components/mu_window';
+import { INVENTORY_SPRITES } from '../../shared/ui/windows/inventory/layout';
+import { NPC_SHOP_SPRITES } from '../../shared/ui/windows/npc_shop/layout';
+import { CHARACTER_INFO_SPRITES } from '../../shared/ui/windows/character_info/layout';
+import { VAULT_SPRITES } from '../../shared/ui/windows/vault/layout';
+import { CHAOS_MACHINE_SPRITES } from '../../shared/ui/windows/chaos_machine/layout';
+import { TRADE_SPRITES } from '../../shared/ui/windows/trade/layout';
+import { PERSONAL_SHOP_SPRITES } from '../../shared/ui/windows/personal_shop/layout';
+import { CASH_SHOP_SPRITES } from '../../shared/ui/windows/cash_shop/layout';
 import type { VersionPreload } from '@/version/uiContract';
 
 const PREGAME_SPRITES = [

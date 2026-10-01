@@ -10,7 +10,7 @@ import { aimX, aimY } from '../../controllers/camera';
 import { LEAN_CURSOR_OBJECTS, findRestObject } from '../../controllers/terrain/restObjects';
 import { pickGround } from '../../controllers/terrain/terrainPick';
 import { Store } from '../../app/store';
-import type { CursorHover } from '../../ui/components/gameCursor/cursors';
+import type { CursorHover } from '../../controllers/interface/components/game_cursor/cursors';
 import type { Entity, ISystemFactory, World } from '../world';
 import { isAttackableEntity, isNpcOrTrapType } from './attackSystem';
 

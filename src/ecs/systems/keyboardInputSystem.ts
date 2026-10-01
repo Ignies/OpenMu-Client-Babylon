@@ -7,7 +7,7 @@ import {
 } from '../../controllers/interface/keyBindings';
 import { GameOptions } from '../../features/options/gameOptions';
 import { ITEM_HOTKEY_CODES } from '../../features/inventory/itemHotkeys';
-import { MuWindows } from '../../ui/components/muWindow/windowState';
+import { MuWindows } from '../../controllers/interface/components/mu_window/windowState';
 import { openSystemMenu } from '../../features/session/sessionExit';
 import type { ISystemFactory } from '../world';
 

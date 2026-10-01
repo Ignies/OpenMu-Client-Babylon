@@ -8,8 +8,8 @@
  * running app (`loadVersionUi`), never from the boot path.
  */
 import { ENUM_WORLD } from '@/core/types';
-import { LoginPage } from '@/ui/pages/loginPage';
-import { CharactersPage } from '@/ui/pages/charactersPage';
+import { LoginPage } from '../../shared/ui/pages/login';
+import { CharactersPage } from '../../shared/ui/pages/character_select';
 import type { PregameUi } from '@/version/uiContract';
 import { season6Preload } from './preload';
 
@@ -37,4 +37,4 @@ export const pregame: PregameUi = {
 
 export const preload = season6Preload;
 
-export { MasterSkillsWindow } from '@/ui/pages/worldPage/components/masterSkills';
+export { MasterSkillsWindow } from '../../shared/ui/windows/master_skills';

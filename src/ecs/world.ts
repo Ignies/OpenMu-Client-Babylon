@@ -22,7 +22,7 @@ import {
 } from '../controllers/render/babylon/exports';
 import type { HighlightLayer } from '../controllers/render/babylon/exports';
 import type { TestScene } from '../controllers/render/scenes/testScene';
-import type { CursorHover } from '../ui/components/gameCursor/cursors';
+import type { CursorHover } from '../controllers/interface/components/game_cursor/cursors';
 
 export type EntityTypeFromQuery<TB extends Bucket<any> = Bucket<any>> =
   TB extends Bucket<infer T> ? T : never;

@@ -25,7 +25,7 @@ async function bootstrap() {
     import('react-dom/client'),
     import('./state'),
     import('./mockService'),
-    import('../../ui/pages/worldPage/components/marketplace'),
+    import('@versions/shared/ui/windows/marketplace'),
   ]);
   const { Marketplace } = state;
 
@@ -58,7 +58,7 @@ async function bootstrap() {
 
   // In game the window anchors above the bottom bar. Here there is no bar, so
   // it is centred instead: the harness exists to look at the panel.
-  const { MuWindows } = await import('../../ui/components/muWindow/windowState');
+  const { MuWindows } = await import('../../controllers/interface/components/mu_window/windowState');
   requestAnimationFrame(() =>
     MuWindows.moveTo(
       window_.MARKETPLACE_ID,
