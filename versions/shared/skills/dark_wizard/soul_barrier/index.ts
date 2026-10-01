@@ -1,6 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { BUFF_VISUALS, BuffArrival, Step, after, cm, keepLook, seq, ticks } from '@/controllers/skills/visuals';
-import { CLOAK_EFFECT, bearing } from '../_shared';
+import { CLOAK_EFFECT } from '../_shared';
 import { type Entity } from '@/ecs/world';
 import { MODEL, RGBS, SOUL_MOTES, TEX } from '@/controllers/fx/recipes';
 import { entityGone, entityPos, entityYaw, followEntity, type ParticleRecipe, type RGB } from '@/controllers/fx/core';

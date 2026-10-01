@@ -8,7 +8,7 @@ import { TELEPORT } from './skillCasting';
 import { applyObjectEffect, playCastAnimation } from '../_shared/net_helpers';
 import { beginTeleport, endTeleport, justArrived } from '@/ecs/systems/teleportSystem';
 import { playAreaSkillVisual, playChainLightningHop } from '@versions/shared/skills/skillVisuals';
-import { t } from '@/i18n';
+
 
 /**
  * F3 11 carries three shapes behind one sub-code: the full list, and the

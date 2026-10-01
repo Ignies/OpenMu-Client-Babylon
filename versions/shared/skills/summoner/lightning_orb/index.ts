@@ -5,7 +5,7 @@ import { entityGone, entityPos, entityYaw, fxNow, type PointSource, type RGB } f
 import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { Step, cm, ticks } from '@/controllers/skills/visuals';
-import { decay, deg, heldAt, muForward, onGround, rad, randInt } from '../../_shared';
+import { deg, heldAt, muForward, onGround, rad, randInt } from '../../_shared';
 import { playLandingSound } from '@/controllers/sound/combat';
 
 import { A } from '@/controllers/combat/recipes';

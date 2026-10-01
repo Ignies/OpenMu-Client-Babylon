@@ -6,7 +6,7 @@ import { type SummonBody } from '@/controllers/fx/summon';
 import { SummonCast, bookTier, curseLight, levelLight, summonCast, summonCastGrace, yawToward } from '../_shared';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
-import { lit, randInt } from '../../_shared';
+import { randInt } from '../../_shared';
 import { playCombat } from '@/controllers/sound/combat';
 import { storeRef } from '@/app/storeRef';
 

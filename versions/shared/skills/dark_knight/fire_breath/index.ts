@@ -3,7 +3,7 @@ import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, ty
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { RGBS, SMOKE, TEX } from '@/controllers/fx/recipes';
 import { type Ray } from '@/controllers/fx/rays';
-import { Step, TICK, ahead, cm, forwardOf, offset, perTick, ticks } from '@/controllers/skills/visuals';
+import { Step, TICK, cm, forwardOf, perTick, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { lightAt } from '../../_shared';

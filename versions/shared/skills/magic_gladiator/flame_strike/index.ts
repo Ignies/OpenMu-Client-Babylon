@@ -6,7 +6,7 @@ import { emitBurst, entityGone, entityPos, type RGB } from '@/controllers/fx/cor
 import { type Ribbon, type RibbonOptions } from '@/controllers/fx/ticked';
 import { Step, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { WEAPON_LINK_BONE, heldAt } from '../../_shared';
+import { WEAPON_LINK_BONE } from '../../_shared';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { spawnLinkedModel } from '@/controllers/fx/linkedModel';

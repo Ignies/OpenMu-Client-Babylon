@@ -11,7 +11,7 @@ import type { Mesh, Texture } from '@/controllers/render/babylon/exports';
 /**
  * A signpost that says something.
  *
- * The model, the placement and the material are the map's own — the only
+ * The model, the placement and the material are the map's own - the only
  * thing this adds is the texture swap: the board's plate is replaced by a
  * copy with the map's or the building's name written across it
  * (`signPlates.ts`), bound per mesh through `metadata.diffuseTexture` so two
@@ -22,7 +22,7 @@ import type { Mesh, Texture } from '@/controllers/render/babylon/exports';
  */
 export class SignObject extends MapTileObject {
   // Each placement binds its own plate (metadata.diffuseTexture), and a thin-
-  // instance batch has one material for the lot — two signs a tile apart
+  // instance batch has one material for the lot - two signs a tile apart
   // would read the same. 80 signs in the whole game stay on the per-object
   // path; nothing else in propBatches.ts changes.
   static Batchable = false;
@@ -71,7 +71,7 @@ export class LorenciaSignObject extends ModelObject {
  *
  * Nearly every signpost has one plate texture and one mesh drawing it, so the
  * board is simply "the mesh with a plate on it". Devias' two-plank road sign
- * is the exception: its plank is `snotice02` and its **post** is `snotice` —
+ * is the exception: its plank is `snotice02` and its **post** is `snotice` -
  * and the post is UV-mapped straight across the rows the plaque's title sits
  * on, so labelling it would paint the name down the post rather than on the
  * board. Keyed `<world>:<type>`.

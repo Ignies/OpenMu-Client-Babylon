@@ -1,10 +1,10 @@
 import { COMBAT_BUS, playSfx } from '@/controllers/sound';
-import { DEG, deg, randInt } from '../_shared';
+import { DEG, randInt } from '../_shared';
 import { DUST, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { Matrix, Quaternion, Vector3 } from '@/controllers/render/babylon/exports';
 import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { PlayerAction } from '../../objects/enum';
-import { SkillContext, Step, TICK, baseSkill, cm, currentSkill, facing, ring, ticks } from '@/controllers/skills/visuals';
+import { SkillContext, Step, TICK, baseSkill, cm, currentSkill, facing, ticks } from '@/controllers/skills/visuals';
 import { type Sounds } from '@/controllers/sound/recipes';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';

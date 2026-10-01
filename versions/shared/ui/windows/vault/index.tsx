@@ -12,7 +12,7 @@ import { ItemSearchBox, useItemSearch } from '@/controllers/interface/components
 import { BulkMove } from '@/features/inventory/bulkMove';
 import { QuickItemActions } from '@/features/inventory/quickItemActions';
 import { isJewel, itemDef } from '@/features/items/itemStats';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+
 import { goldColor } from '@/features/items/goldColor';
 import {
   BUTTON_FRAMES,

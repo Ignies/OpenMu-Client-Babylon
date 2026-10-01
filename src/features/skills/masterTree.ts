@@ -29,7 +29,7 @@
 import { onLanguageChanged, t, textTable } from '../../i18n';
 import type { TextKey } from '../../i18n/recipes';
 import { observable, runInAction } from 'mobx';
-import { CharacterClassNumber, type ENUM_WORLD } from '../../core/types';
+import { CharacterClassNumber } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import {
   MasterSkillLevelUpdatePacket,

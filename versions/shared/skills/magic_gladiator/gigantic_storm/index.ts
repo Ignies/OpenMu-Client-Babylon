@@ -1,5 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { DEG, randInt, stones, whenClipKey } from '../../_shared';
+import { DEG, randInt, whenClipKey } from '../../_shared';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { spawnModel, type ModelHandle } from '@/controllers/fx/model';
 import { emitBurst, entityPos, entityYaw, type ParticleRecipe, type RGB } from '@/controllers/fx/core';

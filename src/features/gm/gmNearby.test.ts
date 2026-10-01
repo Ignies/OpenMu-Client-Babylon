@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { nearbyOf, type Nearby } from './gmNearby';
+import { nearbyOf } from './gmNearby';
 import type { Entity } from '../../ecs/world';
 
 /**

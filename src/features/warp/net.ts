@@ -17,7 +17,7 @@ import { cancelTeleport, endTeleport } from '@/ecs/systems/teleportSystem';
 import { devQuery } from '@/core/devSeams';
 import { holdForWarpScope } from './warpScopeHold';
 import { runInAction } from 'mobx';
-import { t } from '@/i18n';
+
 import { teleportGate } from './teleportRules';
 
 EventBus.on('MapChanged', packet => {

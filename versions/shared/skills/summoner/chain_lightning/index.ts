@@ -1,5 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { CAST_HEIGHT, ENHANCED_TIER, IMPACT_HEIGHT, TICK, bolt, cm, seq, ticks } from '@/controllers/skills/visuals';
+import { CAST_HEIGHT, ENHANCED_TIER, IMPACT_HEIGHT, TICK, cm, seq, ticks } from '@/controllers/skills/visuals';
 import { CRACKLE_FLICKER, PX_FLARE, PX_SHOCKWAVE, PX_SMOKE, PX_THUNDER, atAttackTime, boneCount, groundGlow, handCrackle, humming, jitterCm, kickSparks, spawnCard, sum1Light } from '../_shared';
 import { type Entity } from '@/ecs/world';
 import { type JointOptions } from '@/controllers/fx/joint';

@@ -10,7 +10,7 @@ import { Notices } from './notices';
 import { SlideHelp } from '@/controllers/interface/slideHelp';
 import { Social } from '../social/social';
 import { Store } from '@/app/store';
-import { delay } from '@/controllers/fx/core';
+
 import { fromChatWire } from '@/controllers/net/protocols/chatWire';
 import { playUiSound } from '@/controllers/sound/sfx';
 import { runInAction } from 'mobx';

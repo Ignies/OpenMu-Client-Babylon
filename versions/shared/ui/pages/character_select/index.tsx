@@ -2,7 +2,7 @@ import { t } from '@/i18n';
 import './style.less';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Store } from '@/app/store';
 import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { playUiSound } from '@/controllers/sound/sfx';
@@ -16,7 +16,7 @@ import { MsgWinCode } from '@/controllers/interface/msgWin';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MsgWindow } from '@/controllers/interface/components/msg_window';
-import { TEXT_COLOR } from '../server_select/layout';
+
 import { CharMakeWin } from './CharMakeWin';
 import { CharacterSelectionPlate } from './CharacterSelectionPlate';
 

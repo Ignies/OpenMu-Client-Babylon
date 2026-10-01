@@ -1,9 +1,9 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { DEG, lit, rad, randInt, whenClipKey } from '../../_shared';
+import { DEG, randInt, whenClipKey } from '../../_shared';
 import { emitBurst, entityPos, entityYaw, fxNow, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { PlayerAction } from '@versions/shared/objects/enum';
 import { RGBS, TEX } from '@/controllers/fx/recipes';
-import { SkillContext, Step, cm, flash, forwardOf } from '@/controllers/skills/visuals';
+import { SkillContext, Step, cm, forwardOf } from '@/controllers/skills/visuals';
 import { type StripOptions, type TailStrip } from '@/controllers/fx/ticked';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';

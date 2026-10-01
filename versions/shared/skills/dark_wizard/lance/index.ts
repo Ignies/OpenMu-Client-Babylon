@@ -7,7 +7,7 @@ import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, ty
 import { type ParticlesOptions } from '@/controllers/fx/particles';
 import { SkillContext, Step, TICK, cm, particles, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
-import { deg, humTurn, lit, rad } from '../../_shared';
+import { deg, humTurn, rad } from '../../_shared';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 

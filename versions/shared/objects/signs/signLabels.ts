@@ -16,7 +16,7 @@ import type { TextKey } from '@/i18n/recipes';
  *  - **A destination.** A post standing on a road says where the road goes:
  *    the map's own name, or the neighbouring map when the post is near the
  *    gate that leads there. "Near" is within 35 tiles of the gate *and*
- *    closer to it than to the town — without the second half every sign in
+ *    closer to it than to the town - without the second half every sign in
  *    Devias would point at Lorencia, whose gate sits 30 tiles off the market
  *    square.
  *  - **A building.** The bracket boards (Lorencia's `Sign01`, Devias' type
@@ -30,8 +30,8 @@ import type { TextKey } from '@/i18n/recipes';
  *
  * Only the models with a whole title band on them are listed. Devias 42 and
  * 67, and both Santa Town boards (63/23 and 63/24), carry a plate texture but
- * their planks are mapped across a *corner* of the band — 42 takes its top
- * six rows, 67 a 14x4 patch of one — so a name centred in the band would be
+ * their planks are mapped across a *corner* of the band - 42 takes its top
+ * six rows, 67 a 14x4 patch of one - so a name centred in the band would be
  * sliced in half on them. They keep the texture they shipped with, which is
  * why Santa Town has no rows at all.
  *
@@ -63,17 +63,17 @@ type Row = readonly [type: number, x: number, y: number, key: LabelKey];
 
 const SIGNS: Partial<Record<ENUM_WORLD, readonly Row[]>> = {
   // ---- Lorencia (World1) --------------------------------------------------
-  // Four gates leave the map — Dungeon south (122, 232), Devias north-west
+  // Four gates leave the map - Dungeon south (122, 232), Devias north-west
   // (5, 39), Noria south-east (215, 246), Valley of Loren north-east
-  // (239, 14) — and only the last two have a post anywhere near them. The
+  // (239, 14) - and only the last two have a post anywhere near them. The
   // west-road post is the exception in the table: it is 118 tiles from the
   // Devias gate, but it is the only post on the road that leads there.
   [ENUM_WORLD.WD_0LORENCIA]: [
-    // type 96 — Object97
+    // type 96 - Object97
     [96, 116, 114, 'shop'], // the north-west corner of the square, at Pasi the Mage
     [96, 129, 122, 'pub'], // the north-east corner of the pub floor (create.ts PUB, x 121-129 y 121-137)
     [96, 141, 145, 'shop'], // the south-east building inside the square
-    // type 97 — Object98
+    // type 97 - Object98
     [97, 68, 141, 'devias'], // the west road out of town; the Devias gate is its far end
     [97, 128, 87, 'lorencia'],
     [97, 176, 130, 'lorencia'],
@@ -82,25 +82,25 @@ const SIGNS: Partial<Record<ENUM_WORLD, readonly Row[]>> = {
   ],
 
   // ---- Devias (World3) ----------------------------------------------------
-  // Types 58 and 59 are the two halves of the two-plank road sign — 58 takes
-  // the upper board, 59 the lower — and there are 52 of them marking the path
+  // Types 58 and 59 are the two halves of the two-plank road sign - 58 takes
+  // the upper board, 59 the lower - and there are 52 of them marking the path
   // network across the whole map. 27 is the standing plaque, 35 the bracket
   // board on a wall. The two castles have no names of their own in the game;
   // the black one in the north-west (rooms.ts) is signed as the northern
   // castle, the white one in the south-east as the southern.
   [ENUM_WORLD.WD_2DEVIAS]: [
-    // type 27 — Object28
+    // type 27 - Object28
     [27, 48, 24, 'northCastle'], // at the black castle's gate
     [27, 220, 79, 'devias'],
     [27, 221, 205, 'southCastle'], // on the white castle's wall
-    // type 35 — Object36
+    // type 35 - Object36
     [35, 30, 29, 'shop'], // the north-west fort, at Natasha the Firecracker Merchant
     [35, 186, 43, 'guardhouse'], // DEVIAS_GUARD_ROOM (186,43)-(194,51)
     [35, 202, 55, 'guild'], // DEVIAS_WEST_HEARTH_HOUSE, where Mercenary Guild Manager Tercia stands
     [35, 216, 28, 'church'], // the church, DEVIAS_READING_ROOM (204,12)-(216,32)
     [35, 229, 20, 'pub'], // DEVIAS_TAVERN (225,20)-(237,28), Caren the Barmaid inside
     [35, 225, 37, 'shop'], // DEVIAS_EAST_HEARTH_HOUSE, where Wizard Izabel stands
-    // type 58 — Object59
+    // type 58 - Object59
     [58, 24, 91, 'raklion'], // 29 tiles from the raklion gate
     [58, 21, 142, 'devias'],
     [58, 60, 28, 'devias'],
@@ -130,7 +130,7 @@ const SIGNS: Partial<Record<ENUM_WORLD, readonly Row[]>> = {
     [58, 220, 200, 'southCastle'], // points at the white castle
     [58, 238, 39, 'lorencia'], // 7 tiles from the lorencia gate
     [58, 240, 95, 'devias'],
-    // type 59 — Object60
+    // type 59 - Object60
     [59, 24, 91, 'raklion'], // 29 tiles from the raklion gate
     [59, 22, 141, 'devias'],
     [59, 60, 29, 'devias'],
@@ -159,7 +159,7 @@ const SIGNS: Partial<Record<ENUM_WORLD, readonly Row[]>> = {
   // ---- Stadium (World7) ---------------------------------------------------
   // No gate leaves the arena, so every board names the place itself.
   [ENUM_WORLD.WD_6STADIUM]: [
-    // type 37 — Object38
+    // type 37 - Object38
     [37, 11, 118, 'stadium'],
     [37, 36, 16, 'stadium'],
     [37, 62, 77, 'stadium'],
@@ -174,7 +174,7 @@ const SIGNS: Partial<Record<ENUM_WORLD, readonly Row[]>> = {
   // All three stand together in the middle of the valley, 90-odd tiles from
   // either gate.
   [ENUM_WORLD.WD_30BATTLECASTLE]: [
-    // type 80 — Object81
+    // type 80 - Object81
     [80, 76, 122, 'valleyOfLoren'],
     [80, 90, 121, 'valleyOfLoren'],
     [80, 90, 129, 'valleyOfLoren'],

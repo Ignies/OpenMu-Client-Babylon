@@ -1,6 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { FIRE_SPARKS, MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
-import { Step, TICK, after, atCaster, burn, model, particles, perTick, repeat, scorch, seq, ticks } from '@/controllers/skills/visuals';
+import { Step, TICK, after, atCaster, burn, model, particles, repeat, scorch, seq, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { bonePos } from '@/controllers/fx/core';
 import { effects } from '@/controllers/fx';

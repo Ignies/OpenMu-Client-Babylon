@@ -1,5 +1,5 @@
 import { defineSkill } from '@/controllers/skills/define';
-import { CAST_HEIGHT, Step, TICK, ahead, cm, forwardOf, ticks } from '@/controllers/skills/visuals';
+import { CAST_HEIGHT, Step, TICK, cm, forwardOf, ticks } from '@/controllers/skills/visuals';
 import { Carrier, PX_FLARE, TickPoint, atAttackTime, boneCount, carrierLight, groundGlow, humming, jitterCm, spawnCard, sum1Light, swell, tickLoop } from '../_shared';
 import { type Entity } from '@/ecs/world';
 import { bonePos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, type RGB } from '@/controllers/fx/core';

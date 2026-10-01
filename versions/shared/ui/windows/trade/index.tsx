@@ -9,7 +9,7 @@ import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
 import { ItemGrid } from '@/controllers/interface/components/item_grid';
 import { QuickItemActions } from '@/features/inventory/quickItemActions';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+
 import { goldColor } from '@/features/items/goldColor';
 import {
   ACCEPT_FRAMES,

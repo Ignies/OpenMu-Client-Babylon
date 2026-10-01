@@ -2,7 +2,7 @@ import { EXPLOSION_CELLS, FIRE_BALL_TRAIL, MODEL, RGBS, TEX } from '@/controller
 import { effects, type EffectHandle } from '@/controllers/fx';
 import { type Entity } from '@/ecs/world';
 import { FIRE_BLEND_MESH, LANDING_SMOKE_LIFT } from '../_shared';
-import { IMPACT_HEIGHT, SkillContext, Step, TICK, cm, flying, model, perTick, ring, seq, sprite, ticks } from '@/controllers/skills/visuals';
+import { IMPACT_HEIGHT, SkillContext, Step, TICK, cm, perTick, ring, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { bonePos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { type ProjectileHead } from '@/controllers/fx/projectile';
 import { type Sounds } from '@/controllers/sound/recipes';

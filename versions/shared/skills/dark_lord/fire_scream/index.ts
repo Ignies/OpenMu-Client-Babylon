@@ -6,7 +6,7 @@ import { SPLIT_EMBERS, STRIKE_MAX_TICKS, forceHeads, forwardOfDeg, movesAt, side
 import { SkillContext, Step, TICK, after, baseSkill, cm, currentSkill, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
-import { groundAt, onGround, randInt } from '../../_shared';
+import { groundAt, randInt } from '../../_shared';
 import { lighting } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound/combat';
 import { storeRef } from '@/app/storeRef';

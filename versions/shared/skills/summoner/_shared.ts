@@ -7,7 +7,7 @@ import { bonePos, delay, entityGone, entityPos, entityYaw, fadeOut, fxNow, scale
 import { PlayerAction } from '../../objects/enum';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { type SpriteOptions } from '@/controllers/fx/sprite';
-import { deg, humTurn, lit, muForward, rad, randInt } from '../_shared';
+import { deg, humTurn, muForward, rad, randInt } from '../_shared';
 import { effectLight } from '@/controllers/lighting/recipes';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';

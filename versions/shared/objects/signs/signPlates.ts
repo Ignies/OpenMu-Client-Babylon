@@ -4,21 +4,21 @@ import { downloadDataFile } from '@/controllers/assets/mu/dataFolder';
 import { onLanguageChanged } from '@/i18n';
 
 /**
- * The signpost plates — the small wooden notice boards the map objects carry,
+ * The signpost plates - the small wooden notice boards the map objects carry,
  * and the one place the fake script on them is replaced by a real name.
  *
  * Every signpost in the game draws its writing from one of three 64x64
  * textures: `notice` (Lorencia / Stadium / Valley of Loren), `snotice` (its
  * snowed-over twin in Devias and Santa Town) and `snotice02` (the two-plank
  * road sign, which carries *two* boards in one texture). The lettering baked
- * into all three is decorative nonsense — `Nosdodsodo`, `Kimurj`, `Muy` —
+ * into all three is decorative nonsense - `Nosdodsodo`, `Kimurj`, `Muy` -
  * drawn at 64x64, so it was never readable as anything else.
  *
  * What happens here: the original texture is fetched once, drawn into a canvas
  * eight times its size, the title band of each board is patched over with a
  * clean strip of its own plank, and the real name is written across it. The
  * result is a `DynamicTexture` bound per mesh through `metadata.diffuseTexture`
- * (itemMaterial.ts) — the shared material is untouched, so two signs a tile
+ * (itemMaterial.ts) - the shared material is untouched, so two signs a tile
  * apart can read different things.
  *
  * The rest of the texture is copied through at `NEAREST` and is byte-identical
@@ -41,7 +41,7 @@ type Board = {
   title: { x: number; w: number };
   /**
    * Clean rows of the same plank, tiled over `band` at their own size to
-   * wipe it. Tiled rather than stretched — three rows pulled to eleven read
+   * wipe it. Tiled rather than stretched - three rows pulled to eleven read
    * as a flat panel glued onto the wood, three rows repeated read as wood.
    */
   clean: { x: number; y: number; w: number; h: number };
@@ -57,7 +57,7 @@ type Plate = {
 
 /**
  * Keyed by the folder the model came out of plus the texture's own name, as
- * `signObject.ts` reads them off the mesh — `snotice` is a different file in
+ * `signObject.ts` reads them off the mesh - `snotice` is a different file in
  * `Object3` and `Object63` even though both are called that.
  */
 const PLATES: Record<string, Plate> = {
@@ -105,7 +105,7 @@ function plaque(file: string, titleY: number): Plate {
  * The stacked planks: an upper board lettered in orange and a lower one in
  * black, each under its own crust of snow. The bands start one texel below
  * the snow line (6 and 38) so the crust survives, and the clean rows are the
- * last of the plank before its bottom seam — this wood is grainy enough that
+ * last of the plank before its bottom seam - this wood is grainy enough that
  * nothing nearer the band reads as blank.
  */
 function planks(file: string): Plate {
@@ -138,7 +138,7 @@ export function isSignPlate(key: string): boolean {
 /**
  * Warm the plates a map's signs will ask for, called from its `create.ts`
  * before any object is instantiated. Without it the first sign to load starts
- * the fetch, and on a cold server it queues behind the map's own downloads —
+ * the fetch, and on a cold server it queues behind the map's own downloads -
  * the board then stands in its fake script for a second or two before the
  * real name lands.
  */
@@ -216,7 +216,7 @@ export async function labelledPlate(
   const height = source.height * SCALE;
 
   // The plank, the frame, the screws and the body text are the original's,
-  // pixel for pixel — only the title band of each board is repainted.
+  // pixel for pixel - only the title band of each board is repainted.
   const drawn = new OffscreenCanvas(width, height);
   const paint = drawn.getContext('2d') as OffscreenCanvasRenderingContext2D;
 
@@ -240,7 +240,7 @@ export async function labelledPlate(
   // V: on Lorencia's `Sign02` the repainted title band landed across the two
   // posts (which sample rows 44..60, the mirror of the band) and the board
   // itself showed bare plank. Flipping the finished image once here puts
-  // every texel back where the GLB's own texture had it — and the label,
+  // every texel back where the GLB's own texture had it - and the label,
   // drawn the right way up above, comes out the right way up too.
   ctx.imageSmoothingEnabled = false;
   ctx.translate(0, height);

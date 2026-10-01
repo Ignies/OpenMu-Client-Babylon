@@ -6,7 +6,7 @@ import { type LightRecipe } from '@/controllers/lighting/lightSource';
 import { type ModelOptions } from '@/controllers/fx/model';
 import { delay, entityGone, entityPos, entityYaw, fxNow, scaleRGB, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
-import { SkillContext, Step, TICK, cm, explosion, forwardOf, model, particles, repeat, ring, scorch, seq, sprite, ticks } from '@/controllers/skills/visuals';
+import { SkillContext, Step, TICK, cm, explosion, forwardOf, model, particles, repeat, scorch, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { type SpriteOptions } from '@/controllers/fx/sprite';
 import { effectLight } from '@/controllers/lighting/recipes';
 import { effects } from '@/controllers/fx';

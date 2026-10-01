@@ -2,7 +2,7 @@ import { defineSkill } from '@/controllers/skills/define';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { bonePos, delay, effectTexture, entityGone, entityYaw, fxNow, type ParticleRecipe } from '@/controllers/fx/core';
 import { PlayerAction } from '@versions/shared/objects/enum';
-import { QUAKE_SCROLL, groundAt, lit } from '../../_shared';
+import { QUAKE_SCROLL, groundAt } from '../../_shared';
 import { SkillContext, Step, TICK, after, atCaster, cm, model, particles, perTick, ring, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';

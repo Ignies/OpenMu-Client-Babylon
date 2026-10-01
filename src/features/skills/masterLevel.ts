@@ -15,7 +15,7 @@
  * by `masterTree.ts` (the point gate).
  */
 import { observable, runInAction } from 'mobx';
-import type { ENUM_WORLD } from '../../core/types';
+
 import { EventBus } from '../../core/eventBus';
 import {
   ExperienceGainedExtendedPacket,

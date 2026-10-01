@@ -12,7 +12,7 @@ import { MuSpriteFrame } from '@/controllers/interface/components/mu_sprite';
 import { MuButton } from '@/controllers/interface/components/mu_button';
 import { MuItemWindow } from '@/controllers/interface/components/mu_window';
 import { ItemGrid } from '@/controllers/interface/components/item_grid';
-import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+
 import {
   BROWSE_TITLE_Y,
   BUTTON_FRAMES,

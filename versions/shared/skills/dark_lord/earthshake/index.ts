@@ -1,7 +1,7 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { delay, entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { QUAKE_SCROLL, groundAt, lit } from '../../_shared';
+import { QUAKE_SCROLL, groundAt } from '../../_shared';
 import { SkillContext, Step, TICK, after, atCaster, cm, explosion, forwardOf, model, particles, ring, ringOf, sprite, ticks } from '@/controllers/skills/visuals';
 import { TWFlags } from '@/controllers/terrain/consts';
 import { Vector3 } from '@/controllers/render/babylon/exports';

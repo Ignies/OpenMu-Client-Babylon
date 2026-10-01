@@ -23,7 +23,7 @@ import { playSfx } from '@/controllers/sound/sfx';
 import { playTeleportAnimation } from '../skills/net';
 import { playerPlaySpeed } from '@/controllers/anim/playSpeed';
 import { runInAction } from 'mobx';
-import { t } from '@/i18n';
+
 
 /** `SetAction_Fenrir_Damage` (ZzzAI.cpp:283-311): the rider's flinch, by what is in hand. */
 function fenrirDamageAction(obj: Entity): PlayerAction {
