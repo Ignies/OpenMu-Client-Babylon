@@ -13,7 +13,7 @@ import { wsAddress } from '../../servers/serverConfig';
 
 /**
  * The panel's end of the proxy's admin stream
- * (documentation/admin_console/ARCHITECTURE.md).
+ *.
  *
  * Connected only while the panel is open: `start` on open, `stop` on close,
  * so a game master who is not looking costs the proxy nothing. Everything

@@ -4,7 +4,7 @@ import { devQuery } from '../../core/devSeams';
 import type { TextKey } from '../../i18n';
 
 /**
- * Lighting quality tiers (ARCHITECTURE §6). Classic is the original look:
+ * Lighting quality tiers. Classic is the original look:
  * baked lightmap + projected blob shadows, no grade. Enhanced adds the
  * structured key, a cascaded shadow map on the sun, half-res SSAO and the
  * distance haze; Ultra runs the same set at full resolution with PCSS.

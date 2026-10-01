@@ -26,7 +26,7 @@ import {
 } from './profiles';
 
 /**
- * The sky (ARCHITECTURE §4.6): sole writer of `scene.clearColor` and of the
+ * The sky: sole writer of `scene.clearColor` and of the
  * sky dome mesh. Open maps on tiers >= 1 draw an inverted hemisphere past the
  * map with the profile's zenith-to-horizon gradient, unlit and untouched by
  * the haze; it gives the void beyond the map edge the colour the far terrain

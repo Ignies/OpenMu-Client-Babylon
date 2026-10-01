@@ -9,9 +9,7 @@ import { npcModelFile } from '@/controllers/actors/npcModelTable';
 
 /**
  * The Blood Castle archangels of Devias: Archangel (232, `BloodCastle01`)
- * and Messenger of Archangel (233, `BloodCastle02`). See
- * documentation/archangel_npcs/ARCHITECTURE.md for the original's three
- * sites and what is an addition.
+ * and Messenger of Archangel (233, `BloodCastle02`).
  *
  * - `RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT)` after the lit body
  *   (ZzzObject.cpp:2606): mesh 0 drawn again, additive, over itself -

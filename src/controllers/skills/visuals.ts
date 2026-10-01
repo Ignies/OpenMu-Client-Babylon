@@ -631,7 +631,7 @@ const GREEN_KNOT: SpearJoints = { count: 5, width: 0.2, colour: [0.4, 0.8, 0.2],
 
 /**
  * Keyed by OpenMU MagicEffectNumber, which is the original's `eBuffState`
- * value for value (documentation/buff_visuals): the look the original keeps
+ * value for value: the look the original keeps
  * on a body while the effect holds (WSclient.cpp InsertBuffPhysicalEffect
  * :15466, the per-frame block ZzzCharacter.cpp:10770-10990). The green knot
  * of 1 / 2 / 3 is one shared set (SHARED_LOOKS). An id with no row has no

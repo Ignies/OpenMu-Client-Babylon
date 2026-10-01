@@ -26,7 +26,7 @@ import { GmLibrary, type Favourite, type MacroVars } from '@/features/gm/admin/g
 import { ConsoleTab } from './tabs/console';
 
 /**
- * The game master panel (documentation/admin_console/ARCHITECTURE.md): one
+ * The game master panel: one
  * window, a sidebar of tabs, and the server as the proxy's tracker sees it.
  *
  * Everything it sends is a `/line` a game master could type

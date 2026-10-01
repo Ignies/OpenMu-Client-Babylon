@@ -42,7 +42,7 @@ const SOBEL_NORM = 1 / 8;
  * warm-lit oak, and every texel it gets wrong costs diffuse (up to 17 %) and
  * pays it back as a highlight nobody sees without an environment map, so
  * derived metal is 0: metal comes from authored `Data/PBR` maps only
- * (ARCHITECTURE 4.7).
+ *.
  */
 const METAL_MAX = 0;
 /** Saturation below which a texel may read as metal (1 / this slope). */

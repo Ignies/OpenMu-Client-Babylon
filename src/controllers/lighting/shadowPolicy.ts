@@ -3,7 +3,7 @@ import { sunDirectionOf } from './profiles';
 import { DEFAULT_SUN_DIRECTION } from './keyRig';
 
 /**
- * The one shadow rule (ARCHITECTURE §3.2, §4.4): a shadow removes the sun, so
+ * The one shadow rule: a shadow removes the sun, so
  * a shadowed surface keeps the sky share of the key. Three receivers read it -
  * the CSM (`darkness` 0: the sun is cut whole, the sky untouched), the terrain
  * hook (bake floor `1 - strength` in linear) and the Classic blobs (their own

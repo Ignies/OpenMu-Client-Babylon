@@ -17,7 +17,7 @@ import { toneMapLive } from './toneMap';
 import type { Rgb } from '../../lighting/profiles';
 
 /**
- * The post chain (ARCHITECTURE §4.8): sole writer of the
+ * The post chain: sole writer of the
  * `DefaultRenderingPipeline` and of `scene.imageProcessingConfiguration`.
  *
  * bloom -> exposure -> tone mapper -> white balance -> decoration -> FXAA.
@@ -185,7 +185,7 @@ export function createPostChain(
 
     // Anime 2.0's Cinematic slider is one more input to this writer, not a
     // second writer: it adds to the player's own three and nothing else
-    // touches the pipeline (rendering_style ARCHITECTURE 2.6).
+    // touches the pipeline.
     const film = animeFilmBoost();
 
     // Bloom samples the linear buffer before exposure. Off on Classic (§6).

@@ -14,7 +14,7 @@ import type { LightingTier } from '../../lighting/lightingQuality';
 import type { Rgb } from '../../lighting/profiles';
 
 /**
- * Sun rays (sky_atmospherics ARCHITECTURE §5): sole owner of the shaft
+ * Sun rays: sole owner of the shaft
  * post-process, between the haze and the post chain.
  *
  * The occluder mask is free. The G-buffer holds no blend mesh and no sky

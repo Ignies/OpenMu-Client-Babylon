@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 
 /**
- * The debug menu registry (documentation/debug_menu/ARCHITECTURE.md).
+ * The debug menu registry.
  *
  * One window, one registry: features register a `DebugModule` here and the
  * window (`controllers/interface/components/debugMenu/`) renders whatever is registered - it

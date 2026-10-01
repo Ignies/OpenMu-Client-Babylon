@@ -28,7 +28,7 @@ export function linearBufferActive(scene: {
 }
 
 /**
- * Whether the structured light budget (ARCHITECTURE §3.2) composes the
+ * Whether the structured light budget composes the
  * frame: `lin(texel x bake) x light`, torch delta added after the decode,
  * shadow floor applied in linear. Only on the Enhanced/Ultra tiers with a
  * linear buffer; Classic keeps the original's gamma-space product so that

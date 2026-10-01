@@ -35,7 +35,7 @@ import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 import { gbufferFormats } from './gbufferFormats';
 
 /**
- * Contact-scale SSAO2 (ARCHITECTURE §4.1, §4.8 step 1). Sole owner of the
+ * Contact-scale SSAO2. Sole owner of the
  * SSAO pipeline and the geometry buffer's predicate; the effect mask its
  * combine reads is `effectMask.ts`.
  *

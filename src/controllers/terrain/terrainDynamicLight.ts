@@ -463,7 +463,7 @@ export function requestTerrainLight(
  * Samples the **baked** lightmap alone (`ZzzLodTerrain.cpp:1011-1012`), no
  * torch delta. The tiers >= 1 body light reads this: there the pool point
  * lights reach a figure per pixel, so the delta would be the same torch a
- * second time (ARCHITECTURE §3.2 `bake_baked_only`).
+ * second time.
  */
 export function requestBakedTerrainLight(
   x: number,

@@ -18,7 +18,7 @@ import { EFFECT_RENDERING_GROUP, keepDepthForEffects } from '../fx/core';
  * the `FlareSpec` a host hands to `createEffectLight`.
  *
  * A flare is the glow of a light, so it sits at the map's level: its colour
- * is `spec x luminosity x flareLevel` (ARCHITECTURE F12, §13 F14), repainted
+ * is `spec x luminosity x flareLevel`, repainted
  * when the director's state changes. The decode to linear is the sprite
  * shader's (controllers/render/babylon/spriteLinear.ts), as it is for any material.
  *

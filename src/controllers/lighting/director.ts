@@ -81,7 +81,7 @@ import {
 } from '../render/scenes/postChain';
 
 /**
- * The look director (ARCHITECTURE §4.3): the one composer. Reads the map's
+ * The look director: the one composer. Reads the map's
  * `LookProfile` and `GameOptions`, computes `LookState`, and hands each
  * writer its slice - key rig, shadows, sky, AO, haze, post chain - in a fixed
  * order once a frame. It writes no Babylon state itself.
@@ -323,7 +323,7 @@ export function createLookDirector(
     const lightTier = lightingTier();
     const shaped = lightTier !== null;
     const post = GameOptions.postProcessing;
-    // The level and the curve are one thing (ARCHITECTURE F12): the key puts
+    // The level and the curve are one thing: the key puts
     // the frame a stop or two over display white and the tone pass rolls it
     // back down. With post off there is no pass and no linear buffer - the
     // terrain and the materials compose in display space and clamp at 1 - so

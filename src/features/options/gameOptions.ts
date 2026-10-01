@@ -22,7 +22,7 @@ export type GameOptions = {
    * 0 none / 1 standard (`1 - exp2(-1.59 x)`) / 2 ACES / 3 Khronos PBR
    * Neutral. Runs on the Enhanced/Ultra tiers only: Classic is the
    * reference client's display-space frame and takes no curve. Standard is
-   * the default by measurement (ARCHITECTURE §11.1): Neutral's black offset
+   * the default by measurement: Neutral's black offset
    * put Lorencia's saturation at 0.62 and its shadow B/R at 0.27.
    */
   toneMapper: number;
@@ -126,7 +126,7 @@ export type GameOptions = {
    */
   animeEffects: boolean;
   /**
-   * Anime 2.0's rig (`renderingStyle.ts`, ARCHITECTURE 2.6). Every one of
+   * Anime 2.0's rig (`renderingStyle.ts`). Every one of
    * these is unread by any other style, and every one of them at 0 compiles
    * no define and builds no pass.
    */

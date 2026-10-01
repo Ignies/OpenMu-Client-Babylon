@@ -11,7 +11,7 @@ import { lightingTier, tierIndex } from './lightingQuality';
 import { serverNow } from '../net/serverTime';
 
 /**
- * The cloud field (sky_atmospherics ARCHITECTURE §4): one producer, read by
+ * The cloud field: one producer, read by
  * the sky dome, the terrain and the item materials.
  *
  * One tiling value-noise texture generated once from a fixed seed carries the
@@ -269,8 +269,7 @@ export function volumetricClouds(): boolean {
   //
   // Measured at 0.39 coherence on the structure tensor looking up, and none
   // of per-cloud domes, wind shear or a vertical slice moved it: reshaping a
-  // height field does not make it a volume
-  // (documentation/volumetric_clouds/ARCHITECTURE.md). Ultra draws the slab
+  // height field does not make it a volume. Ultra draws the slab
   // Enhanced draws until a 3D field lands, which is a sky with less contrast
   // and no streaks.
   //

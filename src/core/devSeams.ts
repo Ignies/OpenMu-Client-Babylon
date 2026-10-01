@@ -1,5 +1,5 @@
 /**
- * Dev-only URL seams (lighting_polish ARCHITECTURE §5). Every reader returns
+ * Dev-only URL seams. Every reader returns
  * null outside the dev build, so a seam can never reach production.
  */
 export function devQuery(key: string): string | null {

@@ -31,7 +31,7 @@ export function pointLightPoolSize(): number {
 const LIGHT_RANGE = 6;
 
 /**
- * Key units (ARCHITECTURE §4.5), measured against Classic rather than derived:
+ * Key units, measured against Classic rather than derived:
  * the pool is what carries a torch onto an object on tiers >= 1, where the
  * object samples the baked lightmap without the delta. At 1.1 it gave a chair
  * beside the pub candelabra a 1.10x lift where Classic's delta gives 1.22x,

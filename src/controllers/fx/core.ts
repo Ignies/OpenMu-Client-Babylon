@@ -300,7 +300,7 @@ export function luma(c: RGB): number {
 /**
  * The multiplier an emissive card's tint takes so it lands at `keyGain` x its
  * authored value in the buffer: effect art is light and follows the map's
- * level like the torches (ARCHITECTURE F12). The material's colour is decoded
+ * level like the torches. The material's colour is decoded
  * once downstream when the buffer is linear, so the gain enters pre-decoded
  * there. 1 on Classic.
  *

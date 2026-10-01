@@ -20,7 +20,7 @@ import type { LightingTier } from '../../lighting/lightingQuality';
 import type { RoomVolume } from '../../lighting/profiles';
 
 /**
- * The room mask (ARCHITECTURE §13 F8): outside the active room volume is black,
+ * The room mask: outside the active room volume is black,
  * except what is seen through a door or window. Dev seam: `?roomMask=0`.
  */
 

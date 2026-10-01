@@ -16,7 +16,7 @@ import {
 } from '@/features/gm/debugMenu';
 
 /**
- * The offline debug window (documentation/debug_menu/ARCHITECTURE.md): the
+ * The offline debug window: the
  * registry's single consumer. Tabs come from `DebugMenu.modules`, rows are
  * rendered by kind - the window knows no module by name. Drawn with the
  * Options window's stone chrome and plate/gold vocabulary so it reads as

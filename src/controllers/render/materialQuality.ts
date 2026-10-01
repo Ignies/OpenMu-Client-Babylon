@@ -98,7 +98,7 @@ export function pbrDetailStrength(): number {
 
 /**
  * The anisotropy slider's notches, on the art's samplers on tiers >= 1
- * (ARCHITECTURE §4.7). Babylon clamps the request to `caps.maxAnisotropy`.
+ *. Babylon clamps the request to `caps.maxAnisotropy`.
  */
 export const ANISOTROPY_STEPS: readonly number[] = [1, 2, 4, 8, 16];
 

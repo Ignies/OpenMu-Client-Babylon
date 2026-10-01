@@ -8,7 +8,7 @@ import {
 
 /**
  * The key-light rig: single owner of the two scene-wide key lights, the
- * hemispheric sky and the directional sun (ARCHITECTURE §4.1).
+ * hemispheric sky and the directional sun.
  *
  * Contracts:
  *  - `controllers/lighting/director.ts` is the only caller of `setKey` /

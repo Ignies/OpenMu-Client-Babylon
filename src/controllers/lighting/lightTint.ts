@@ -2,8 +2,7 @@ import { devQueryNumber } from '../../core/devSeams';
 import { lightingTier } from './lightingQuality';
 
 /**
- * Coloured light bleeding into what it touches (sky_atmospherics
- * ARCHITECTURE §2). A pure multiply moves level, not hue: a torch beside a
+ * Coloured light bleeding into what it touches. A pure multiply moves level, not hue: a torch beside a
  * blue tile reads as nothing. This pulls a lit surface toward the
  * illuminant's hue at its luminance, so the stone by a fire goes warm and
  * the fire's colour is in the scene rather than only in the sprite.

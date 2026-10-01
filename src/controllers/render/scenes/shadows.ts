@@ -34,7 +34,7 @@ import { CsmBounds, csmBoundsMode } from './csmBounds';
 
 /**
  * The cascaded shadow map on the sun: sole owner of the
- * `CascadedShadowGenerator` (ARCHITECTURE §4.1), and the terrain's hook into
+ * `CascadedShadowGenerator`, and the terrain's hook into
  * it. Reads the `ShadowPolicy` the director hands it; `csm.darkness` is 0 (a
  * shadow removes the sun and nothing else, §3.2) and the terrain floor is
  * `1 - strength`, the sky share, applied in linear by the terrain shader.

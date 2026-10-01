@@ -1,6 +1,6 @@
 /**
  * What the proxy's tracker tells a game master's panel, and what the panel
- * asks back (documentation/admin_console/ARCHITECTURE.md).
+ * asks back.
  *
  * Shared by `proxy/track/*` and `features/gm/admin/*`, so it imports nothing: the
  * proxy runs under Bun with no engine, and the panel must not pull proxy

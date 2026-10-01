@@ -4,7 +4,7 @@ import { maps } from '../maps';
 export type Rgb = readonly [number, number, number];
 
 /**
- * A map's look: the whole per-map surface (lighting_polish ARCHITECTURE §4.2).
+ * A map's look: the whole per-map surface.
  * Pure data; the director composes it, nothing here touches Babylon.
  */
 export type LookProfile = {
@@ -55,7 +55,7 @@ export type SunSpec = {
 };
 
 /**
- * A map's sky (sky_atmospherics ARCHITECTURE §3). `horizon` is also the haze
+ * A map's sky. `horizon` is also the haze
  * colour, so moving a graded map's pair moves its whole far field: the five
  * maps that were graded on their pair keep it and take only the new terms.
  */

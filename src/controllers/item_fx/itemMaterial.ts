@@ -138,7 +138,7 @@ function addInstanceAttribute(material: ItemMaterial): void {
 const BODY_LIGHT_UNIFORM = `muBodyLight`;
 
 /**
- * The lit variants are compiled per lighting state (ARCHITECTURE §4.7), the
+ * The lit variants are compiled per lighting state, the
  * way the terrain takes its `CSM_` defines: `MU_LINEAR_LIGHT` composes
  * `lin(texel x body) x light` while the structured budget is on
  * (`linearLightActive`), `MU_WRAP` is the half-lambert response on tiers
@@ -555,7 +555,7 @@ const brightOverride = (withScroll: boolean) => `
  * warm past 1.0. `muBodyLight` stands where `vDiffuseColor` did - that one
  * lives in the Material UBO and never took a per-mesh write.
  *
- * Two compositions (ARCHITECTURE §3.2, §4.7). Classic: the original's
+ * Two compositions. Classic: the original's
  * `texel x BodyLight x light`, decoded whole by Babylon's trailing
  * `toLinearSpace`. `MU_LINEAR_LIGHT`: `lin(texel x body) x light`, the one
  * decode on the display-authored art and the light sum kept linear -
@@ -1169,7 +1169,7 @@ ${bright || flatLit ? '' : sunResponseGlsl('diffuseBase', '') + UNCLAMP}${
  * Gain on the derived/authored emissive map. It is added after lighting so
  * gems and trim hold their colour in shadow; the GlowLayer picks the same
  * map up through `sceneLook`'s texture selector. 0.2 keeps trim from reading
- * lighter than its Classic twin (ARCHITECTURE §4.7).
+ * lighter than its Classic twin.
  */
 const PBR_EMISSIVE_GAIN = '0.2';
 

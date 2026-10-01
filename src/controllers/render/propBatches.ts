@@ -70,7 +70,7 @@ import {
 /**
  * The prop batches: the map's scenery drawn as thin instances, one mesh per
  * prop type, submesh and 32-tile chunk, instead of one cloned model per
- * placement (documentation/prop_batching/ARCHITECTURE.md).
+ * placement.
  *
  * A type is batched only when nothing per object is asked of it - see
  * `tableExclusion` and the class marker `ModelObject.Batchable`; every other

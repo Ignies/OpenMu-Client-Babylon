@@ -39,7 +39,7 @@ import { devQuery } from '../../core/devSeams';
 
 /**
  * The hue-preserving soft ceiling on the ground light sum, tiers >= 1
- * (ARCHITECTURE §4.5): linear below the knee, bent toward the asymptote
+ *: linear below the knee, bent toward the asymptote
  * above it, so a torch core keeps its hue where the original's per-channel
  * clamp would have gone white.
  */

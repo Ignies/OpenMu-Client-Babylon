@@ -36,8 +36,7 @@ const GROUND_OFFSET = 5 / TILE_CM;
  * on screen. The stencil below still means overlaps never deepen it, so this
  * is the shadow's one and only value.
  *
- * The Classic value of the one shadow rule (lighting_polish ARCHITECTURE
- * §4.4): the blob keeps this alpha whatever the policy says, because Classic
+ * The Classic value of the one shadow rule: the blob keeps this alpha whatever the policy says, because Classic
  * is the reference and does not move.
  */
 const SHADOW_ALPHA = 0.65;

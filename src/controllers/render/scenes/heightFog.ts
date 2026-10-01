@@ -12,7 +12,7 @@ import { devQueryNumber } from '@/core/devSeams';
 import type { LookProfile, Rgb } from '../../lighting/profiles';
 
 /**
- * The distance haze (ARCHITECTURE §4.8 step 2): sole owner of the fog
+ * The distance haze: sole owner of the fog
  * post-process. `f = cap x (1 - exp(-density x max(0, dist - start)))`, colour
  * the profile's horizon decoded to linear, no exposure division - the buffer
  * is linear and the tone mapper downstream sees haze and sky alike. `start`
