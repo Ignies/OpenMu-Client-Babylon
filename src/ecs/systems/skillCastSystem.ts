@@ -1,4 +1,5 @@
 import type { Entity, ISystemFactory } from '../world';
+import { rageBuffSound } from '../../controllers/combat/skillClips';
 import { Store } from '../../app/store';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
 import {
@@ -723,7 +724,7 @@ export const SkillCastSystem: ISystemFactory = world => {
 
       // ExecuteSkill plays the skill's sound as the cast starts (Fire Scream's only at its spawn); a Dark Horse rider's guard has none.
       const horseGuard = def.num === SKILL_DEFENSE && castContext(hero).mount === 'horse';
-      if (!horseGuard) playCombat(heroCastSound(def.num), hero.transform.pos);
+      if (!horseGuard) playCombat(rageBuffSound(def.num, action) ?? heroCastSound(def.num), hero.transform.pos);
 
       cooldown = Math.max(
         duration > 0 ? duration : FALLBACK_CAST_COOLDOWN,

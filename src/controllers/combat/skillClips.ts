@@ -6,6 +6,7 @@ import { PlayerAction } from '@versions/shared/objects/enum';
 import type { MountKind } from '../../features/pets/pets';
 import type { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';
+import type { Sounds } from '../sound/recipes';
 import { masterBase } from '../../features/skills/skillAliases';
 import {
   MAGIC_CLIPS,
@@ -89,6 +90,15 @@ export function skillClip(
     if (mounted !== undefined) return mounted;
   }
   return set.ground;
+}
+
+/**
+ * A party buff's sound goes with the clip its coin toss picked (SkillCast.cpp:915-931):
+ * ATT_UP with Rage_Buff_1, HP_UP with Rage_Buff_2. Null for every other skill.
+ */
+export function rageBuffSound(skill: number, clip: PlayerAction): Sounds | null {
+  if (!RAGE_BUFF_SKILLS.has(skill)) return null;
+  return clip === RAGE_BUFF_CLIPS[1] ? 'Sound/Ragefighter/Rage_Buff_2' : 'Sound/Ragefighter/Rage_Buff_1';
 }
 
 /** Whether the skill has a dedicated clip (used to skip the alternate toggle). */

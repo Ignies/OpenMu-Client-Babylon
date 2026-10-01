@@ -11,6 +11,6 @@ export default defineSkill({
     131: () => ({ boneGlow: OURFORCES_GLOW }),
     155: () => ({ boneGlow: OURFORCES_GLOW }),
   },
-  sound: 'Sound/Ragefighter/Rage_Buff_1', // Increase Defense
+  sound: 'Sound/Ragefighter/Rage_Buff_1', // default; at cast the sound follows the clip toss (rageBuffSound)
   target: 'self',
 });
