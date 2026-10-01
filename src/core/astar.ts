@@ -4,19 +4,7 @@
 // Implements the astar search algorithm in javascript using a Binary Heap.
 // Includes Binary Heap (with modifications) from Marijn Haverbeke.
 // http://eloquentjavascript.net/appendix2.html
-//
-// Changes for the MU grid (an 8-connected 256×256 tile map, the original's
-// `PathFinding2`):
-//  - the default heuristic is octile (admissible for diagonal moves at
-//    √2; manhattan over-estimated and made the hero zig-zag),
-//  - a diagonal step is offered whenever its destination tile is walkable,
-//    even when both tiles it cuts past are blocked: several maps cross a
-//    chasm through exactly one such pinch (the Elbeland rope bridges, for
-//    one), and the original expands all eight directions on the
-//    destination attribute alone, as does the server walk check,
-//  - the search stops after `maxExpansions` closed nodes and returns the
-//    path to the closest node seen so far, so a click into a walled-off
-//    region costs a bounded amount and still walks the hero toward it.
+// Changed for the MU grid (the original's `PathFinding2`); see core/readme.md.
 
 type Pos = { x: number; y: number };
 

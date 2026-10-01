@@ -6,29 +6,8 @@ import type { LightingLayer } from './layer';
 import { LightSource, type LightRecipe } from './lightSource';
 
 /**
- * Characters as light sources.
- *
- * What it is: the light an NPC or monster carries for as long as it is in
- * scope, following its body. Driven by `CharacterLightSystem`
- * (ecs/systems), which walks the entities with an `npcType` and calls the
- * two commands below. The original's `MoveCharacterVisual`
- * (ZzzCharacter.cpp:5790-6005) does this per frame under a handful of
- * models; `heightOffset` is where on the body the point light hangs.
- *
- * Player-worn gear is not this - `ecs/systems/itemGlowSystem.ts` grades it
- * by item tier .
- *
- * The rows marked `improvedOnly` are not the original's: they are the floor
- * light under a monster that only *carries* a glow there (Bahamut's lure,
- * the Lost Tower Shadow's body - `effects/monsterGlow.ts` draws the cards).
- * They breathe on the same curve the cards do, and Classic withholds them so
- * that tier stays as shipped.
- *
- * A negative row (Tantallos 59, Death Beam Knight: `Vector(-1.3, -1.3,
- * -1.3)`, range 3) darkens the floor. The tile map takes the subtraction
- * (its sum clamps at black) but its delta byte has no sign, so Classic sees
- * nothing; the per-pixel pool on the tiers above carries the whole of it
- * as a point light with a negative colour.
+ * The light an NPC or monster carries while in scope, following its body:
+ * `MoveCharacterVisual` (ZzzCharacter.cpp:5790-6005). Notes in readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

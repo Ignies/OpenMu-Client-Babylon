@@ -1,23 +1,6 @@
 /**
- * Monster glow - the additive cards a monster carries on its own bones for as
- * long as it is in scope: Bahamut's anglerfish lure, the light in each of
- * Vepar's hands, the Lost Tower Shadow's whole luminous body.
- *
- * The original draws these from `RenderCharacter` every frame
- * (ZzzCharacter.cpp:11005-11036, :11099-11132) through `RenderLight` (:8243):
- * one `CreateSprite` on a skinned bone, warm amber, breathing
- * `sinf(WorldTime * 0.002f) * 0.3f + 0.7f`. `CreateSprite` sizes a card in
- * texture pixels x `Scale` and the world is centimetres
- * (zzzeffectsprite.cpp:73), which is the `px * scale / TILE_CM` below.
- *
- * Drawn as `SpriteManager` sprites rather than `core.ts` cards for one
- * reason: the Shadow is 39 cards on its own, and Lost Tower spawns them in
- * packs. One manager per texture batches every glow on the map into one draw
- * call each.
- *
- * Driven by: `ecs/systems/monsterGlowSystem.ts`. Read by: nobody. The light
- * these throw on the floor is the lighting layer's
- * (`lighting/characters.ts`), which carries the matching rows.
+ * Monster glow: additive sprites on a monster's bones while in scope (`RenderLight` ZzzCharacter.cpp:8243,
+ * :11005-11036, :11099-11132; card size zzzeffectsprite.cpp:73). Driven by monsterGlowSystem.ts. See fx/readme.md.
  */
 import {
   Color4,

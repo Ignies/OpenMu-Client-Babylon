@@ -8,20 +8,8 @@ import type { SoundLayer } from './layer';
 import { listenerHero } from './listener';
 
 /**
- * The torch crackle: a looping fire sound under every flickering flame the
- * lighting layer has lit - the Lorencia street braziers, the 120 Dungeon
- * wall torches, Noria's and Lost Tower's - attenuated by its distance to the
- * hero, capped to the nearest few so a corridor of torches is one warm
- * chorus rather than a hundred copies of the same file.
- *
- * The original never did this: there is no `SOUND_FIRE` (only the skill's
- * `SOUND_FIRE_SCREAM`), `CreateFire` plays nothing, and a torch was silent.
- * The bed is the clone's own; it borrows the Flame skill's `sFlame` file
- * because it is the one continuous burning sound in the catalogue.
- *
- * Driven by: the lighting layer's live sources (`lighting.emitters(map)`,
- * read-only - a flame is any source whose recipe flickers) and the listener.
- * Read by: `sound.crackling` (the verification scripts).
+ * Torch crackle: a looping fire sound under the nearest flickering lights the lighting
+ * layer has lit. Not in the original (no `SOUND_FIRE`); notes in readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

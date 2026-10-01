@@ -1,21 +1,5 @@
 /**
- * Skill re-use delays (`CSkillManager::CheckSkillDelay` / `CalcSkillDelay`):
- * a skill with a `Delay` in Skill.bmd cannot be cast again until it has
- * counted down. The server is authoritative; this is display and the
- * client-side gate the cast system asks before sending.
- *
- * Driven by `startSkillCooldown` (the cast system, on a successful cast);
- * counts down in `update`. Read by the hotbar (`bottomBar`), which sweeps
- * the original's red-tinted clock overlay (`RenderSkillDelay`), and by
- * `usability.ts`.
- *
- * Two clocks: `skillCooldowns` is observable but only changes when a delay
- * *starts* or *ends*, so React learns which slots are cooling; the running
- * seconds live in a plain map and are pushed to `onCooldownTick` listeners
- * once a frame, which the hotbar paints straight into the sweep's `height`
- * through a ref. The old design wrote the observable every frame and
- * re-rendered the whole hotbar (five slots, tooltips, drag state) at frame
- * rate for the duration of every delay.
+ * Skill re-use delays (`CSkillManager::CheckSkillDelay` / `CalcSkillDelay`); the two clocks are in readme.md.
  */
 import { observable, runInAction } from 'mobx';
 import type { ENUM_WORLD } from '../../core/types';
@@ -41,7 +25,7 @@ export interface SkillCooldown {
 /**
  * Skill number → full delay in seconds, present while the skill cools.
  * Observable so a slot re-renders when its delay starts or ends; the
- * countdown itself is not observable (see the header).
+ * countdown itself is not observable (see readme.md).
  */
 export const skillCooldowns = observable.map<number, number>();
 

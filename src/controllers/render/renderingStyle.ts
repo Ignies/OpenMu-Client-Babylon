@@ -5,40 +5,8 @@ import { devQueryNumber, devQueryNumbers } from '../../core/devSeams';
 import type { TextKey } from '../../i18n';
 
 /**
- * Rendering style (rendering_style ARCHITECTURE): 0 is the frame as it is,
- * 1 steps the sun's response on every lit model, 2 (Anime 1.0) adds the ink
- * outline (scenes/inkOutline.ts), a stepped rim on the figures, flat tones
- * on the textures and, behind their own toggles, an ink outline on the
- * grass blades (`grassOutline`) and flat, contoured skill effects
- * (`animeEffects`). On the Ultra tier Anime 1.0 also draws a hard highlight
- * on the figures and hatches the darkest band (`MU_TOON_ULTRA`).
- * Live on lighting tiers >= 1 only: on Classic every reader here answers
- * "off", so no define, uniform or pass exists and the frame is untouched.
- *
- * 3 (Anime 2.0, ARCHITECTURE 2.6) is the same machinery with every part of
- * it on its own control instead of the one dial, plus a view-locked matcap
- * sheen (`MU_TOON_SHEEN`), a manga screentone (`MU_TOON_TONE`), a choice
- * between the screen-space lines and an inverted hull, radial speed lines
- * and a cinematic trim. Anime 1.0 never reads a 2.0 slider: every live
- * reader below consults them only while the style says `tuned`.
- *
- * `styleStrength` (1..9) is Anime 1.0's dial on how far it goes: flatter
- * textures, a stronger rim. The ink lines have three sliders of their own,
- * `lineStrength` (1..9, how dark), `lineWidth` (1..5 texels) and
- * `linePlacement` (which side of a silhouette the line sits on); the grass
- * outline and the effect contours follow the first two, and both anime
- * styles use them.
- *
- * Dev seams: `?style=` replaces the option, `?strength=` the dial,
- * `?lineStrength=` the darkness, `?lineWidth=` the width,
- * `?linePlacement=` the side,
- * `?shadeSteps=` the band count, `?toonSoft=` the band edge width in
- * pixels, `?toonRim=strength,edge`, `?toonTex=bias,levels`,
- * `?toonGrass=darkness,start`, `?grassOutline=0|1`, `?animeEffects=0|1`,
- * `?toonUltra=glint,hatch`, and one per 2.0 slider: `?animeShading=`,
- * `?animeRim=`, `?animeRimWidth=`, `?animeMatcap=`, `?animePaint=`,
- * `?animeHalftone=`, `?animeHalftoneScale=`, `?animeOutline=`,
- * `?animeSpeedLines=`, `?animeFilm=`, `?animeImpacts=0|1`.
+ * Rendering style: 0 Classic, 1 Cel, 2 Anime 1.0, 3 Anime 2.0 (every part on its
+ * own slider). Live on lighting tiers >= 1 only. Dev seams: render/readme.md.
  */
 export const RENDERING_STYLE_LABEL_KEYS: readonly TextKey[] = [
   'options.style.classic',

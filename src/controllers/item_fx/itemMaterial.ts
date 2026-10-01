@@ -173,27 +173,8 @@ const DETAIL_UNIFORM = `muDetail`;
 const pbrMaterials = new Set<PBRCustomMaterial>();
 
 /**
- * Dial the whole PBR deviation back toward Classic. At 0 the material is the
- * lit albedo and nothing else; at 1 it is the full derivation.
- *
- * Each of these is a separate way Enhanced comes out lighter and paler than
- * its Classic twin, which is why the dial has to move all of them together:
- *
- *  - `specularIntensity` - the Standard item material ships `specularColor 0`
- *    and has no highlight at all, so every bit of GGX the PBR path adds is
- *    white laid over the texture. That is the *pale*: it lifts the surface and
- *    desaturates it at the same time, and it is the largest of the three.
- *  - `metallic` - multiplies the map's blue channel, pulling back the palette
- *    heuristic's guesses. A texel it calls metal loses its diffuse and gets a
- *    highlight back in exchange, with no environment map to justify it.
- *  - `bumpTexture.level` - scales `perturbNormal`, thinning the
- *    height-from-luma relief that turns JPEG ringing into geometry.
- *
- * The added emissive follows too, through `DETAIL_UNIFORM` in the shader.
- *
- * Roughness is deliberately left alone: it is already a multiply against the
- * map, and scaling it would make surfaces *smoother* (shinier), which is the
- * wrong direction for toning the effect down.
+ * Dial the whole PBR deviation back toward Classic (0 = lit albedo only, 1 = full derivation):
+ * specular, metallic, bump level and the added emissive move together. See readme.md.
  */
 export function syncPbrDetail(): void {
   for (const material of pbrMaterials) applyPbrDetail(material);
@@ -220,26 +201,8 @@ function applyPbrDetail(material: PBRCustomMaterial): void {
 }
 
 /**
- * Half-lambert response (ARCHITECTURE §3.2 `wrap`).
- *
- * The original's character shading is `Luminosity = dot*0.8 + 0.4`, clamped
- * >= 0.2 (`ZzzBMD.cpp:255-257`): side faces get 0.4, back faces never drop
- * below 0.2. A raw `max(N.L, 0)` is why limbs read thin and dark.
- *
- * Compiled under `MU_WRAP` as a term added to the light sum the shader
- * already holds: `sun x (wrap(dot) - max(dot, 0)) x shadow`, so the sun's
- * lambert becomes `sun x wrap(dot) x shadow` exactly. The constants are
- * normalized by 1.2 so a fully sun-facing surface is unchanged and the key
- * budget still sums to 1.0 on an up face. It carries the sun share alone and
- * the cascades cut it with the rest of the sun; the sky hemisphere is what a
- * back face keeps.
- *
- * The sun's shadow factor is recovered from Babylon's per-light aggregate:
- * every light adds its factor to `aggShadow` and 1 to `numLights`, and the
- * sun is the only light with a generator, so `agg x n - (n - 1)` is its own.
- *
- * Dev overrides: `?halfLambert=0` disables, `?hlWrap=scale,bias,floor` tunes
- * (values are the already-normalized shader constants).
+ * Half-lambert response under `MU_WRAP`: `dot*0.8 + 0.4`, clamped >= 0.2 (`ZzzBMD.cpp:255-257`),
+ * normalized by 1.2. Dev: `?halfLambert=0`, `?hlWrap=scale,bias,floor`. See readme.md.
  */
 const SUN_DIR_UNIFORM = 'muSunDir';
 const SUN_COLOR_UNIFORM = 'muSunColor';
@@ -295,21 +258,8 @@ const halfLambertGlsl = (target: string, albedo: string) => {
 };
 
 /**
- * `MU_TOON` (renderingStyle.ts): the lit sum the wrap left - sky, sun with
- * its wrap, cloud and cascade, the torches - is remapped onto `muToon.x`
- * levels between the darkest a surface can be under the key (`muToonRef.y`,
- * the sky's ground share) and the key's level (`muToonRef.x`); whatever
- * stands above the level, a torch core, passes through. One scalar on the
- * whole sum, so a coloured light keeps its hue and a shadow or a cloud lands
- * as a band edge. The stepped rim in sun units goes on the figures
- * (`muToon.z`), added after the bands so it stays one clean line.
- *
- * `MU_TOON_ULTRA` (the Ultra tier with the Anime style) adds two more
- * drawn things: a hard highlight where the sun reflects toward the eye,
- * stepped and shadowed like the rim and on the figures alone
- * (`muToonUltra.x` is 0 on a prop), and hatching over the darkest band,
- * diagonal screen-space lines that take a share of the stepped diffuse
- * light away, so a shadow reads as pencilled rather than lit.
+ * `MU_TOON` (renderingStyle.ts): the lit sum stepped onto `muToon.x` bands, plus a stepped rim;
+ * `MU_TOON_ULTRA` adds a hard highlight and hatching. See readme.md.
  */
 const toonGlsl = (target: string, albedo: string) => {
   const mul = albedo ? ` * ${albedo}` : '';
@@ -590,24 +540,8 @@ const COVERAGE_UNIFORM = 'muCoverage';
 const LEGACY_GAIN = '0.65';
 
 /**
- * A blend mesh is drawn additive at `glColor3f(BodyLight * BlendMeshLight)`
- * with the lighting off (`RenderMesh`, ZzzBMD.cpp:1580-1596), so the card is
- * the texel scaled by the light where the object stands. This path read the
- * texel alone, which put Elbeland's waterfalls - sixteen sheets over one
- * cliff, and sixteen more flat on the plaza - at full strength on a map whose
- * bake sits near white, and they summed to a solid white wall.
- *
- * The multiply is on the scrolling variant only, which is MU's `BlendMesh` /
- * `StreamMesh` set: map water, waterfalls, sand-falls and the Dungeon
- * curtains. The plain bright card keeps the texel because the same term on
- * *its* meshes takes the wings off an elf - `metadata.bodyLight` on a
- * character part is the light at the hero's feet, not the light the original
- * hands a wing (wings go through `RenderPartObjectEffect`, not this branch),
- * and at 0.45 an already-translucent wing card disappears. That half is a
- * separate job; see found_issues.md.
- *
- * `muBodyLight` is `packBodyLight`'s output times `BlendMeshLight`, never
- * above 1, so this only ever takes brightness away.
+ * A blend mesh is the texel times `BodyLight * BlendMeshLight` (`RenderMesh`, ZzzBMD.cpp:1580-1596),
+ * on the scrolling variant only; the plain bright card keeps the texel. See readme.md.
  */
 const brightOverride = (withScroll: boolean) => `
   color.rgb = baseColor.rgb * vDiffuseColor.rgb${
@@ -1114,44 +1048,8 @@ function trackTime(scene: Scene, onReady: (now: () => number) => void) {
 }
 
 /**
- * `BlendMeshTexCoordU/V` (ZzzBMD.cpp `EnableWave`, :2146): the original adds a
- * per-object offset to every texel lookup of one mesh, which is how water,
- * waterfalls, sand-falls and the Dungeon flesh curtains move.
- *
- * Babylon's own texture matrix cannot carry it here: the shared item material
- * is frozen, its `diffuseTexture` is a single placeholder, and the real
- * texture is rebound per mesh in `onBindObservable`. With an identity
- * placeholder Babylon compiles `DIFFUSEDIRECTUV = 1`, so `vDiffuseUV` is the
- * raw attribute and there is no matrix uniform left to write.
- *
- * So the offset is its own uniform and the texel is re-fetched in the
- * fragment, at `CUSTOM_FRAGMENT_UPDATE_DIFFUSE` - the first hook that runs
- * after `baseColor = texture2D(diffuseSampler, vDiffuseUV + uvOffset)`.
- *
- * **Do not move this to the vertex stage.** Offsetting the varying there
- * looks better on paper (one fetch, and the alpha test would see the scrolled
- * texel) and it does not compile: `vDiffuseUV` is a *fragment-only* symbol.
- * Babylon declares it through `samplerFragmentDeclaration`, and when the
- * texture matrix is identity - which the shared placeholder always is, so
- * `DIFFUSEDIRECTUV = 1` - it is a `#define` onto `vMainUV1` emitted into the
- * fragment shader alone. Writing to it from `Vertex_MainEnd` is an undeclared
- * identifier, the program fails to link, and Babylon dumps the whole shader
- * to the console. Tried, reverted; this comment is the record.
- *
- * The `#ifdef DIFFUSE` guard is not decoration either: `diffuseSampler` and
- * `vDiffuseUV` both live inside that block, so an unguarded body would fail
- * the same way on any variant compiled without a diffuse texture.
- *
- * What this costs is the alpha test, which runs on the *unscrolled* texel a
- * few lines earlier. It shows only on alpha-keyed scrollers - Noria's
- * waterfall curtains (42/43) and Lost Tower's conduits (3/4) - where the
- * texture slides inside a key that stays put. Both are near-uniform masks, so
- * it is close to invisible; the fix, when it matters, is
- * `ALPHATEST_AFTERALLALPHACOMPUTATIONS`, which Babylon does not expose here.
- *
- * It exists only on the bright/flat-lit variants - the ones MU marks
- * `BlendMesh` or `StreamMesh`, which is every mesh that can scroll - so the
- * ordinary lit path compiles exactly as before.
+ * `BlendMeshTexCoordU/V` (ZzzBMD.cpp `EnableWave`, :2146): a per-mesh UV offset, re-fetched in the
+ * fragment. Do not move it to the vertex stage (`vDiffuseUV` is fragment-only); see readme.md.
  */
 const UV_SCROLL_UNIFORM = 'muUvScroll';
 
@@ -1167,28 +1065,8 @@ const UV_SCROLL_RESAMPLE = `
 export type UvScroll = { u: number; v: number };
 
 /**
- * Give a shared item material a **per-mesh** alpha-test texture.
- *
- * Every off-screen pass Babylon runs - the geometry buffer, the cascades, the
- * glow layer - alpha-tests with its own effect, not the material's, so none of
- * them ever reaches `onBindObservable`. What they bind into `diffuseSampler`
- * is whatever `getAlphaTestTexture()` hands back, and on a shared material
- * that is the 2×2 opaque placeholder: alpha 1 everywhere, so the test passes
- * everywhere and a keyed mesh writes its whole quad. That is why the G-buffer
- * could only ever hold the opaque meshes - grass and leaves went into it as
- * solid blocks and SSAO smeared them across the ground.
- *
- * Babylon always calls `needAlphaTestingForMesh(mesh)` immediately before
- * `getAlphaTestTexture()` - geometryBufferRenderer, shadowGenerator and
- * thinEffectLayer all do, and the `&&` between them fixes the order - so the
- * first is where the mesh is picked up and the second is where its texture is
- * handed over. Same trick `createCsm` uses through
- * `onBeforeShadowMapRenderMeshObservable`, expressed through the API the
- * other passes actually query.
- *
- * The lit path is untouched: `isReadyForSubMesh` reads `_diffuseTexture` /
- * `_albedoTexture` directly, and the placeholder still stands in whenever no
- * mesh is being rendered, so the ALPHATEST define never flickers.
+ * Give a shared item material a **per-mesh** alpha-test texture, so off-screen passes (G-buffer,
+ * cascades, glow layer) key grass and leaves instead of writing whole quads. See readme.md.
  */
 export function useMeshAlphaTestTexture(material: Material): void {
   const placeholder = material.getAlphaTestTexture();
@@ -1296,39 +1174,13 @@ ${bright || flatLit ? '' : sunResponseGlsl('diffuseBase', '') + UNCLAMP}${
 const PBR_EMISSIVE_GAIN = '0.2';
 
 /*
- * There is deliberately no diffuse-loss compensation for metalness any more.
- *
- * The old one scaled `surfaceAlbedo` up at the metallic-roughness anchor so a
- * texel the palette heuristic called 'metal' would not go dark without an
- * environment map to reflect. But `pbrBlockReflectivity` captures
- * `vec3 baseColor = surfaceAlbedo;` immediately *after* that anchor and builds
- * `surfaceReflectivityColor = mix(metallicF0, baseColor, metallic)` from it,
- * so the boost landed on the metallic F0 as well - up to 1.6× at the old
- * METAL_MAX. Lorencia's oak and stone got a conductor's reflectance on top of
- * a diffuse that had barely dimmed: energy added twice, which is the broad
- * yellow sheen Enhanced showed across the tavern floor and counter.
- *
- * The two cannot be separated at this anchor (`surfaceReflectivityColor` is
- * already written by the next one), and they should not be: 'keep more
- * diffuse' and 'reflect less like metal' are the same physical statement.
- * `METAL_MAX` in `pbrMaps.ts` is now the single knob for both.
+ * Deliberately no diffuse-loss compensation for metalness: it also boosted the metallic F0.
+ * `METAL_MAX` in `pbrMaps.ts` is the single knob. See readme.md.
  */
 
 /**
- * Enhanced variant: the same per-mesh contract as
- * `createItemMaterial` - shared, frozen, `diffuseTexture` / `bodyLight` /
- * `itemTier` read off `mesh.metadata` at bind - on a metallic-roughness PBR
- * shader with normal, metal/rough and emissive maps per texture
- * (`pbrMaps.ts`). Classic stays the Standard path; only lit, non-blend
- * meshes ever get this material (see `modelLoader.getMaterial`).
- *
- * Calibration choices, so the toggle is a look change and not an exposure
- * change: the albedo is sampled as-is (no gamma decode - the Standard path
- * multiplies the gamma texel, and the moods/light intensities were tuned
- * against that); light falloff stays Babylon's legacy range curve, matching
- * the pooled torches' tuned ranges; no environment map, so specular only
- * comes from the key lights and the torch pool (their `specular` is raised
- * off black while this material is on - `syncMaterialQuality`).
+ * Enhanced variant: the same per-mesh contract as `createItemMaterial` on a metallic-roughness PBR
+ * shader with maps from `pbrMaps.ts`. Only lit, non-blend meshes get it. See readme.md.
  */
 export function createItemPbrMaterial(scene: Scene) {
   const material = new PBRCustomMaterial('itemPbrMaterial', scene);

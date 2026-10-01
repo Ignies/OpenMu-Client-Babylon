@@ -10,29 +10,8 @@ import type { ItemVisualTier } from '../item_fx/itemVisualTier';
 import { DEAD_HANDLE, type EffectHandle, type EffectLayer } from './layer';
 
 /**
- * Item aura (improved look): a quick shower of falling sparks off the
- * glowing item, from +11. They come off the piece that glows - the
- * breastplate, the boots, the blade in hand - not off the whole body:
- * itemGlowSystem keeps `emitter` on that part's bone, and the shape table
- * below keeps the box they fill the size of the item.
- *
- * One system per character / drop so the emitter can follow the body; the
- * capacity is small and the texture shared (flare01 via loadEffectTexture).
- * It runs on `GPUParticleSystem` where transform feedback is available, so
- * the per-particle update leaves the CPU, the way
- * `common/ambientParticles.ts` already does for weather.
- *
- * Two other emitters used to live here and are gone, both for the same
- * reason: a crowded square multiplied them by every glowing player and every
- * drop on the ground. The orbit rings - one from +9, three at +13 - were a
- * system each whose emitter point circled the item from a per-frame scene
- * observer: forty glowing +13 items were 120 extra systems and 120 extra
- * observers, 8.7 ms of a frame. The steady drift of motes was another system
- * each and read as a haze of dots around everyone. The level still reads
- * through the sparks, the halo, the in-surface sheen and the pooled light.
- *
- * Driven by: `createItemAura` from `ecs/systems/itemGlowSystem.ts` (worn
- * and dropped item tiers), or `effects.spawn('itemAura', …)`. Read by: nobody.
+ * Item aura (improved look): falling sparks off the glowing item part from +11, one GPU (or CPU)
+ * system per item. Driven by `createItemAura` from itemGlowSystem.ts. See fx/readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

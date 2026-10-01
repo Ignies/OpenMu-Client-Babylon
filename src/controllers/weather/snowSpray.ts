@@ -9,24 +9,8 @@ import { loadEffectTexture } from '../fx/moveTargetEffect';
 import { GameOptions } from '../../features/options/gameOptions';
 
 /**
- * The puff of loose snow a boot throws when it comes down.
- *
- * Paired with the footprint it belongs to (`footprintSystem` fires both from
- * the same stride), and the reason the two are separate is that they solve
- * different halves of the same moment: the print is what is left behind, this
- * is the snow that had to go somewhere for the print to exist.
- *
- * One system, emitted **manually**. Every ambient recipe in
- * `ambientParticles.ts` is a continuous emitter with a rate that ramps; this
- * is the opposite shape - nothing at all, then eight particles in one frame,
- * then nothing again - so it drives `manualEmitCount` directly rather than
- * pretending to be a rate.
- *
- * Note what this can and cannot buy on Devias. Nothing drawn white reads
- * against sunlit snow, so the spray is nearly invisible over open ground; what
- * it does read against is the hero's own silhouette and the shadow they cast,
- * which is exactly where the reference shows it. It is a detail around the
- * feet, not a feature you see from across the square.
+ * The puff of snow a boot throws when it lands: one particle system driven by
+ * `manualEmitCount`, fired by the footprint system with each print.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

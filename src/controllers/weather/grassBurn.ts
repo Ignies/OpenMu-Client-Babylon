@@ -14,31 +14,8 @@ import { FIRE_SPARKS } from '../fx/recipes';
 import type { ParticleRecipe } from '../fx/core';
 
 /**
- * Grass that has been set on fire, and the fire still doing it.
- *
- * Two things in one file because they are one thing: the fires are the only
- * writer of the scar, and the scar is the only record the fires leave.
- *
- * A scar is not round and it is not bounded. A fight that moves leaves a
- * wandering burnt path, and a fire that spreads leaves a blot with a shape of
- * its own, so this is `snowTrail`'s world-space map rather than `snowMelt`'s
- * pool of circles: one byte per texel, stamped as the fire passes, uploaded
- * over a dirty rectangle rather than whole, and decayed by a pass that walks
- * only what has been painted.
- *
- * A leaf, on purpose. `terrainOverlay.ts` imports `snowMelt.ts` and
- * `snowCover.ts` imports `terrainOverlay.ts`, and naming another weather
- * module at module scope from inside that cycle has already crashed the client
- * on load once (`snowMelt.ts:33-43`). Nothing here imports the grass; the
- * grass imports this, and hands its own "does anything grow at this point"
- * back through `setGrassProbe`.
- *
- * Local, and it does not pretend otherwise. Two players watching the same
- * fireball see different scars. A burn is a function of what somebody did
- * rather than of the clock, so the `ambientSchedule` trick - world state as a
- * pure function of `serverNow()` - does not reach it, and the protocol carries
- * no timestamp for an impact today (`serverTime.ts:9-11`). `snowMelt` and
- * `snowTrail` are both local for the same reason.
+ * Burning grass: the spreading fire fronts and the scar they leave, a world-space byte map like
+ * `snowTrail`. A leaf module (the grass hands in `setGrassProbe`); local to each client. See readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -75,21 +52,8 @@ const DECAY_EVERY = 1;
 const MAX_FIRES = 6;
 
 /**
- * How fast a front travels at full vigour, in tiles a second, and how fast
- * spreading costs it that vigour.
- *
- * The second is the whole of "it should die down the more it spreads": vigour
- * falls at `radius / VIGOUR_SPAN`, so a fire that has got somewhere is a fire
- * that is going out, and the further it has got the faster it goes out. A
- * fireball's 1.2-tile hit reaches about four tiles before it gives up;
- * Hellfire's 2.6 reaches further because it starts further, with no special
- * case anywhere to say so.
- *
- * Both were roughly twice this, which burnt the whole patch out in about three
- * seconds - the fire was over before the eye found it, and what was left was a
- * black shape that had simply appeared. Half the rate against nearly three
- * times the span covers the same ground over about ten seconds, so the front
- * is something a player can watch cross the field.
+ * Front speed at full vigour (tiles/s), and how spreading costs vigour: it falls at
+ * `radius / VIGOUR_SPAN`, so a fire dies down as it spreads (about ten seconds a fireball).
  */
 const SPREAD_RATE = 0.55;
 const VIGOUR_SPAN = 26;

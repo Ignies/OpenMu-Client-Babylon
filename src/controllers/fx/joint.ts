@@ -1,31 +1,7 @@
 /**
- * Joint - a glowing ribbon that jitters while it lives: a lightning bolt, a
- * chain of energy, a spirit tether, a streamer. The original's
- * `CreateJoint(BITMAP_JOINT_*, from, to, …)` (ZzzEffectJoint.cpp) comes in
- * two shapes and both live here:
- *
- *  - **bolt**: a strip of `segments` points between two ends, re-pointed
- *    every tick with noise (JOINT_THUNDER, JOINT_HEALING, the beams);
- *  - **trail**: a *head* that moves (`Velocity` per tick along `Angle`, or
- *    pinned to a bone) and drags its last `MaxTails` positions behind it
- *    (JOINT_SPIRIT streamers, the FLASH ribbon dropping from the sky, the
- *    five MODEL_SPEARSKILL ribbons that orbit a Soul Barrier).
- *
- * One `GreasedLine` per joint in the joint's colour, glow-layer referenced so
- * it blooms like the item crackle. Both ends of a bolt may move, and `forks`
- * grows side branches for Lightning.
- *
- * A joint with a `texture` is drawn the way `RenderJoints` draws its tail
- * quads: the BITMAP_JOINT_* sheet runs U along the ribbon (per tail slot, not
- * per world distance - ZzzEffectJoint.cpp:7036), V across it, × the joint's
- * `Light`. The sheets are black at the edges, so under the additive blend only
- * the bright filament in the middle shows - an untextured ribbon is a solid
- * band of colour the full width of the quad strip, which is what every bolt
- * looked like (issue #4). Untextured stays supported for the plain glow
- * ribbons (aura's orbit lines).
- *
- * Driven by: `effects.spawn('joint', …)`; `aura.ts` spawns the persistent
- * orbit ribbons through `spawnJoint`. Read by: nobody.
+ * Joint: a glowing ribbon, a bolt between two ends or a trail behind a moving head
+ * (`CreateJoint(BITMAP_JOINT_*)`, ZzzEffectJoint.cpp; textured as `RenderJoints`, :7036).
+ * One GreasedLine per joint. See fx/readme.md.
  */
 import {
   Color3,

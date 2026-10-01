@@ -16,36 +16,8 @@ import { driveRenderList } from './renderList';
 import { sceneRenderSize } from './upscale';
 
 /**
- * The effect mask (effects_composite ARCHITECTURE §3): where the additive
- * half of the frame landed, and how much of each pixel it is. Sole owner of
- * the target; the AO combine, the haze, the ink lines, the room mask and the
- * tone pass read it.
- *
- * Every reader describes a pixel by the *surface* under it, and over every
- * additive thing in the game - cards, ribbons, skill meshes, flare sprites,
- * fire particles, the map objects' blend meshes - the surface is whatever
- * stands behind the flame. The mask holds only the additive geometry, in
- * its own blend modes, over black, so `surface = colour - mask` is that
- * surface; the tone pass then puts the mask back after the curve, at the
- * value the art was authored at.
- *
- * It is exact, which the readers always assumed and it never was. It is
- * drawn *after* the frame, from `onAfterDrawPhaseObservable`, depth-tested
- * against the depth the camera just wrote: the camera's first post-process
- * target lends its depth attachment (`RenderTargetWrapper.shareDepth`, what
- * Babylon's own depth peeling and fluid renderers use), so a flame behind a
- * wall is not in it. Nothing here writes depth - the effect materials, the
- * sprite managers and the particle systems all have depth writes off - and
- * the target clears colour only, with the per-group depth clear off, so the
- * borrowed depth is never touched.
- *
- * Full resolution and half float: at half resolution a one-pixel rain
- * streak lands at a tenth of its brightness, and at 8 bits a flame brighter
- * than white clamps to 1.0 and leaves a surface too bright to subtract from.
- * The size is explicit rather than a ratio: Babylon's ratio resize disposes
- * the wrapper, and a wrapper's dispose deletes the depth buffer it holds,
- * which would be the scene's. Every path that could dispose or rebuild the
- * target drops the borrowed handle first.
+ * The effect mask: the additive half of the frame, drawn after it and depth
+ * tested against the camera's depth, so a reader gets `surface = colour - mask`.
  */
 
 export const EFFECT_MASK_SAMPLER = 'effectMask';

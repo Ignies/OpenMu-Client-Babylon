@@ -1,20 +1,6 @@
 import { t, type TextKey } from '../../i18n';
-/**
- * The Season 6 NPC dialogue - `CNewUINPCDialogue` (NewUINPCDialogue.cpp) on
- * top of `CQuestMng`'s `NPCDialogue.bmd` pages.
- *
- * Driven by `OpenNpcDialog` (F9 01, `ReceiveNPCDlgUIStart`): the server says
- * which NPC the hero is talking to; the words and answers come from the
- * table, keyed `npc * 0x10000 + page`. An answer's *result* is either the
- * next page (≤ 900) or a request (`ProcessSelTextResult`): 901 asks the
- * NPC's quest list (`AvailableQuestsRequest`, answered by `AvailableQuests`
- * → `ProcessQuestListReceive`, which turns the lower half into the list),
- * 902 asks the NPC buff and closes, 903..907 are the Gens requests.
- *
- * Read by `NpcDialogueWindow` in `ui/pages/worldPage/components/quests/`.
- * `questLog.ts` keeps the quest list *data*; this entry only decides that
- * the list is shown inside the dialogue while it is open.
- */
+/** The Season 6 NPC dialogue - `CNewUINPCDialogue` (NewUINPCDialogue.cpp) on
+ * `CQuestMng`'s `NPCDialogue.bmd` pages. Answer codes: readme.md "Notes". */
 import { observable, reaction, runInAction } from 'mobx';
 import {
   AvailableQuestsRequestPacket,

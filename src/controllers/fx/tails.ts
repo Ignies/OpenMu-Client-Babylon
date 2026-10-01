@@ -1,18 +1,6 @@
 /**
- * Tails - the strip `RenderJoints` draws for a joint whose tails are known
- * when it is spawned: tail centres laid one a tick, each tail two crossed
- * faces `width` wide (the joint's local X and Z, `Tails[j][0..3]`), the
- * sheet's U per tail slot (`(NumTails - j) / (MaxTails - 1)`, 0 at the oldest
- * tail) and V across each face (ZzzEffectJoint.cpp:7087-7091, :7314-7337).
- * Space Split's rising pillars and Fire Scream's ground streaks
- * (BITMAP_JOINT_FORCE sub2 / sub7): real sheets in the world, where
- * `joint.ts` draws a camera-facing ribbon.
- *
- * One updatable mesh per spawn on the cached additive material; positions
- * are rewritten only when a tail is laid.
- *
- * Driven by: `effects.spawn('tails', ...)` from common/skillVisuals.ts.
- * Read by: nobody.
+ * Tails: a joint's tail strip whose tails are known at spawn, two crossed faces per tail, as
+ * `RenderJoints` draws it (ZzzEffectJoint.cpp:7087-7091, :7314-7337). See fx/readme.md.
  */
 import { Mesh, Vector3, VertexBuffer, VertexData, type Scene } from '../render/babylon/exports';
 import type { TestScene } from '../render/scenes/testScene';

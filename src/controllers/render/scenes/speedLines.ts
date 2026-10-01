@@ -11,23 +11,8 @@ import type { LightingTier } from '../../lighting/lightingQuality';
 import { speedLineStrength } from '../renderingStyle';
 
 /**
- * Speed lines (rendering_style ARCHITECTURE 2.6): sole owner of the radial
- * streak pass, beside the ink lines.
- *
- * It owns the scalar it runs on as well, and that is the point of the
- * module. Anime draws speed lines when something is moving fast, and the
- * fastest thing on screen here is the hero - but reaching into the ECS from
- * the lighting stage to ask how fast the hero is running would put a seam
- * between two stages that have none. The camera follows the hero, so its own
- * travel says the same thing: the world position it sat at last frame
- * against the one it sits at now, over the engine's delta, smoothed so a
- * warp or a camera cut does not flash the screen.
- *
- * The streaks themselves are the textbook figure: an angle off the frame's
- * centre, quantised into cells so each cell is one streak, each cell's
- * length and brightness hashed off its index so they vary, and the whole
- * thing faded in from an inner radius so the middle of the screen - where
- * the hero is - stays clear.
+ * Speed lines: sole owner of the radial streak pass. Strength follows the
+ * camera's own smoothed travel, which follows the hero.
  */
 
 const SHADER = 'muSpeedLines';

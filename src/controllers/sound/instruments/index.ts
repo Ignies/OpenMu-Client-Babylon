@@ -11,27 +11,8 @@ import { Sampler, type PerformerKey } from './sampler';
 import { instrumentGain, instrumentPan } from './space';
 
 /**
- * Instruments played by players: the band system's sound.
- *
- * The first Web Audio graph in the client, on the context Babylon's engine
- * already owns: `voice (with the makeup) -> performer limiter -> performer
- * gain (distance) -> performer pan (side) -> instruments bus -> limiter ->
- * Engine.audioEngine.masterGain`, so the master slider and the background
- * mute reach it like everything else. The two Babylon tracks stay untouched
- * - their gain nodes are private - and the bus folds master x effects x
- * instruments itself.
- *
- * Each performer is heard from where they stand (`space.ts`): quieter by
- * the inverse law as the hero walks away, and panned to the side of the
- * screen they are on. The side is the camera's, not the hero's facing - the
- * player looks at the screen, and Babylon keeps the Web Audio listener at
- * the camera for its own sounds, so a `PannerNode` would sit the ear a
- * camera-distance above the hero; a stereo pan from the camera's right vector
- * is the same picture without touching the shared listener.
- *
- * Driven by: `common/band` (the sequencer for the hero, one receiver per
- * remote performer) through the commands below. Positions come from
- * `BandSystem` once a frame. Read by nobody else.
+ * Instruments played by players (the band system): a Web Audio graph on Babylon's context,
+ * each performer gained by distance and panned by screen side. Notes in ../readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

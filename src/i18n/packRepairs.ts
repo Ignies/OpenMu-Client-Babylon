@@ -1,27 +1,6 @@
 /**
- * Repairs for the damaged language packs.
- *
- * `QuestWords_spn.bmd` and `QuestWords_por.bmd` reached this tree after a lossy
- * conversion: a UTF-8 decoder read their windows-1252 bytes and wrote back a
- * single `?` for every accented character - **taking the byte after it with
- * it**. "héroe" became "h?oe", "próxima" became "pr?ima", "dará una" became
- * "dar?una". Nothing can recover that from the bytes, so the words are restored
- * here from context, once, as data.
- *
- * Two passes, in order:
- *
- * 1. `phrases` - for the handful of forms that are ambiguous on their own
- *    ("m?" is *más* almost everywhere but *mí* after a preposition). Longest
- *    match wins, so these run before the token map.
- * 2. `tokens` - whole-token replacements. The key is the token with its
- *    surrounding punctuation stripped, exactly as `repairPackText` splits it,
- *    so `¿Aceptar?` and `Aceptar?` share one entry.
- *
- * A token that is *not* here is left alone - most `?` in these files are
- * ordinary question marks ("¿matar monstruos?"), and only a word the language
- * cannot spell that way is damage.
- *
- * Read by `libs/mu/localData.ts`; pointed at from each language's `dataPack`.
+ * Repairs for the damaged `QuestWords_spn.bmd` / `QuestWords_por.bmd` packs.
+ * Read by `controllers/assets/mu/localData.ts`. See i18n/readme.md.
  */
 
 export type PackRepairs = {

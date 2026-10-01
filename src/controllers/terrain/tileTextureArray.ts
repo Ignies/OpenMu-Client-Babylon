@@ -11,33 +11,8 @@ import { decodeJpegPixels } from './terrainJpeg';
 import { packTilesOffThread } from './terrainParseClient';
 
 /**
- * Packs a map's tile textures into one `sampler2DArray`.
- *
- * The splat shader used to be generated as a chain of
- * `if (m1 >= i && m1 < i+0.5) { texture2D(textures[i], …) }` over every tile
- * texture - twice, once for the opaque layer and once for the alpha layer. A
- * GLSL sampler array cannot be indexed by a value that varies per fragment,
- * which is why it was written that way; with a 2D array the layer *is* just a
- * coordinate, so 18-20 conditional fetches per pixel of a full-screen,
- * never-culled mesh collapse into two.
- *
- * Tiles come in mixed sizes (256² and 128² in the shipped worlds), so the
- * smaller ones are upscaled to the largest. The upscale follows the sampler:
- * Classic samples `NEAREST_NEAREST` with no mip chain, which is what the
- * original does, and an integer nearest upscale is exact under it - the same
- * texel is fetched either way. Tiers >= 1 filter trilinear with anisotropy
- * (`textureFiltering`), and there the upscale is bilinear: a nearest 2x
- * upscale leaves 2x2 plateaus that the linear sampler ramps between, so a
- * magnified 128² tile still read as soft-edged blocks.
- *
- * The mip chain is built either way. It is a third of the array's memory and
- * nothing samples it in Classic, but having it there is what lets the sampler
- * flip be a live `updateSamplingMode` call. The blit flip is one `update` of
- * the array from the decoded tiles kept beside it, not a map reload.
- *
- * Per-layer filtering is safe on a `sampler2DArray`: layers are independent
- * for filtering and mip generation, so no tile can bleed into its neighbour
- * in the array the way it would in an atlas.
+ * Packs a map's tile textures into one `sampler2DArray` (two fetches per pixel instead of a guarded
+ * chain). Small tiles upscale nearest on Classic, bilinear on tiers >= 1. See readme.md.
  */
 
 type LiveArray = {

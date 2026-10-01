@@ -33,33 +33,8 @@ import {
 import { devQuery } from '../../core/devSeams';
 
 /**
- * How the ground is lit, in one place.
- *
- * This was the middle of `terrainMaterial.ts` until something else had to
- * stand on the ground and be lit the same way (`terrainGrass.ts`). A grass
- * blade rooted in a tile has to take that tile's bake, that tile's torches,
- * that tile's cascade and that tile's roof, or the two disagree - and a
- * blade that is a shade off the ground it grows from is more obviously wrong
- * than either would be alone.
- *
- * The alternative was to copy the composite into the grass shader. It would
- * work today and drift the first time the lighting moves, which is the
- * stacking this project has already decided not to do again. So: one writer
- * of the ground's light, two callers.
- *
- * ## The contract
- *
- * A caller emits `terrainLightDeclarationsGlsl` once at fragment scope, then
- * `terrainSkyLightGlsl` and `terrainGroundLightGlsl` inside `main`, and lists
- * `TERRAIN_LIGHT_UNIFORMS` / `terrainLightSamplers` / `terrainLightDefines`
- * in its `ShaderMaterial` options and `bindTerrainLight` in its bind. Its
- * vertex stage must hand the fragment three varyings under these names:
- *
- * - `vWorldXZ`  - world xz, the dynamic-light and mask lookup.
- * - `vWorldPos` - world xyz, the cascade lookup.
- * - `vViewZ`    - view-space z, which cascade.
- *
- * Nothing here is terrain-mesh specific beyond those three.
+ * How the ground is lit, in one place: the terrain material and the grass both call it, so a
+ * blade takes its tile's light. The caller contract is in readme.md.
  */
 
 /**

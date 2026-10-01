@@ -14,25 +14,8 @@ import { clipToRoom } from '../weather/roomClip';
 import { loadEffectTexture } from './moveTargetEffect';
 
 /**
- * Ambient particle backbone: high-count, long-lived emitters -
- * weather, leaves, dust - that the CPU sprite pool (effectParticles.ts) is
- * the wrong tool for. Each recipe becomes one Babylon system:
- *
- *  - `GPUParticleSystem` when the engine can run it (WebGL2 transform
- *    feedback); the simulation never touches the CPU, so a few thousand
- *    raindrops cost one draw.
- *  - `ParticleSystem` otherwise (WebGL1 / blocked contexts) with a smaller
- *    capacity, so the same recipe still shows up, just thinner.
- *
- * Textures are shared through `loadEffectTexture` (one GPU texture per
- * file), and every recipe positions itself through an emitter `Vector3`
- * the owner moves each frame - weather follows the hero, room effects stay
- * put. The original's leaves / rain / snow (ZzzEffectFireLeave.cpp) ran
- * around `Hero->Object.Position`, which is the same idea.
- *
- * A `NoiseProceduralTexture` stands in for the original's per-tick random
- * walk (`Velocity += RangeFloat(-8, 7) * 0.1`): both paths read it, so a
- * leaf wanders the same way on either.
+ * Ambient particles (weather, leaves, dust): one GPU or CPU system per recipe at an emitter the
+ * owner moves, as ZzzEffectFireLeave.cpp ran around `Hero->Object.Position`. See fx/readme.md.
  */
 
 export type AmbientBlend = 'alpha' | 'add';

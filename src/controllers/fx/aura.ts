@@ -1,21 +1,6 @@
 /**
- * Aura - the persistent look of a buff or debuff on a body, kept up until
- * told to stop. Every part here is a transcription of what the original
- * draws for an `eBuffState` while it holds: the five MODEL_SPEARSKILL
- * ribbons knotted round a Greater Defense (ZzzCharacter.cpp:10795), the
- * shiny on a Greater Damage's hands (:10770), the orange motes off a Swell
- * Life's shoulders (ZzzEffect.cpp:7006), the red glow on every bone under an
- * Ourforces buff (:9563)... The table is `common/skillVisuals.ts`
- * BUFF_VISUALS, one row per effect id (the original's `eBuffState`, which is
- * what OpenMU sends); the design is documentation/buff_visuals/ARCHITECTURE.md.
- *
- * Parts follow the wearer through `follow` (the feet) and `bone` (a MU bone
- * index to world), step at the original's 25 Hz where a rate is per tick,
- * ramp in and out over RAMP_SECONDS so a buff never pops, and all end
- * together on `stop()` or when `until` says the wearer left.
- *
- * Driven by: `effects.spawn('aura', …)` from `common/skillVisuals.ts`.
- * Read by: nobody.
+ * Aura: the look an `eBuffState` keeps on a body until stopped (ZzzCharacter.cpp:10795, :10770;
+ * ZzzEffect.cpp:7006, :9563). Rows are `BUFF_VISUALS` in skills/visuals.ts. See fx/readme.md.
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
 import {

@@ -1,19 +1,5 @@
-/**
- * Standalone harness for the marketplace window.
- *
- * `bun run dev`, then open `/marketplace.html`. It mounts the window on its
- * own against fixture data - no login, no game socket, no world - so the
- * layout can be judged before any of the service behind it exists. A mock
- * plays both the service and the game server (`mockService.ts`), so every
- * flow - list, buy, cancel, collect - can be walked through with fake tokens.
- *
- * The version bootstrap is the same two awaits `main.tsx` does, and for the
- * same reason: the window draws the game's own tooltips, which read the packet
- * layer, and that is only assigned once a version is loaded. Everything after
- * it is a dynamic import so nothing in that graph is touched too early.
- *
- * Dev only. It is not an entry in the production build.
- */
+// Dev-only standalone harness for the marketplace window, against fixtures and a mock
+// service: `bun run dev`, then open `/marketplace.html`. See readme.md.
 import '../../app/style.less';
 import { loadGameVersion, versionIdForTag } from '../../version';
 

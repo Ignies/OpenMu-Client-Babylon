@@ -1,19 +1,6 @@
 /**
  * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
- * to `layers.ts`. Never imported; it only exists to be copied.
- *
- * Every combat entry has the same three parts, in this order:
- *
- *   1. Tuning constants at the top, each in real units (seconds, tiles,
- *      reference ticks at 25 Hz, 0…1) with a comment saying why.
- *   2. Module state + the functions that read or command it. State lives
- *      here, not in the facade; readers are plain functions.
- *   3. The exported `CombatLayer` at the bottom, wiring `update` / `reset`.
- *
- * If the entry needs a packet sent, it exposes a *command* that the ECS
- * consumer (`attackSystem.ts`, `skillCastSystem.ts`) calls - the entry
- * itself never imports `Store` to send. If it needs a clip, add the row to
- * `recipes.ts`.
+ * to `layers.ts`. Never imported. The three parts are in combat/readme.md.
  */
 import { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';

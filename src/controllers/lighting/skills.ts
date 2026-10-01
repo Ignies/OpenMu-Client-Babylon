@@ -177,20 +177,8 @@ function arrowLight(color: readonly [number, number, number]): LightRecipe {
 }
 
 /**
- * What an arrow throws on the ground while it flies, by the launcher's
- * arrow model.
- *
- * The original lights the arrow body itself, every frame it is alive:
- * `AddTerrainLight(..., range 2)` in the colour below, from MoveEffect's
- * arrow cases in ZzzEffect.cpp (line cited per row). `Luminosity` there is
- * `(rand() % 4 + 7) * 0.1` rolled per effect per frame (:6764), which is the
- * flicker every row carries. Range 2 is the whole reason a volley reads at
- * night: the arrow is a tile off the ground, so the pool it drags along is
- * what the grass and the shooter are lit by.
- *
- * The metal bolts fall through the original's chain without a light and have
- * no row here either: MODEL_ARROW_STEEL, _THUNDER, _LASER, _V, _SAW, _SPARK
- * and _DARKSTINGER fly dark.
+ * What an arrow throws on the ground while it flies, by arrow model: `AddTerrainLight` range 2 from
+ * MoveEffect's arrow cases (ZzzEffect.cpp, line per row; `Luminosity` roll :6764). Metal bolts fly dark.
  */
 export const ARROW_LIGHTS: Partial<Record<string, LightRecipe>> = {
   // MODEL_ARROW (:11776) - the plain wooden arrow every bow but the Elven,

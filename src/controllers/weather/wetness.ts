@@ -3,22 +3,8 @@ import type { WeatherLayer } from './layer';
 import { rainStrength, rainTarget } from './rainState';
 
 /**
- * How wet the ground is, 0…1, and how much of that has collected into
- * standing water.
- *
- * The falling drops are particles (`RAIN`); this is what they leave behind.
- * The original client has nothing like it; the roadmap lists
- * `BITMAP_RAIN_CIRCLE` splashes as missing and they were never ground
- * contact anyway - so this is our own, and like `snowCover` it is a
- * *simulation* rather than a lookup: stone darkens while the shower falls and
- * dries out slowly afterwards, which is the whole reason a passing shower
- * leaves a mark on the map instead of switching a texture on and off.
- *
- * Two numbers come out of it because wet stone and standing water behave
- * differently. Stone goes dark within seconds of the first drops and stays
- * dark long after they stop; a puddle needs the rain to keep falling long
- * enough to collect, and then sits there evaporating. `puddleCover` therefore
- * lags `wetness` on the way up and outlives it on the way down.
+ * How wet the ground is (`wetness`) and how much water stands on it (`puddleCover`), 0..1. Our
+ * own simulation: stone darkens fast and dries slowly; puddles lag behind it and outlive it.
  */
 
 /** Maps that get wet ground. Snow maps are excluded - Devias gets snow cover. */

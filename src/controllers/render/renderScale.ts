@@ -2,26 +2,8 @@ import type { AbstractEngine } from './babylon/exports';
 import { devQueryNumber } from '../../core/devSeams';
 
 /**
- * Render scale: how much of the window the 3D scene is actually drawn at,
- * before the browser scales the canvas back up to fill it.
- *
- * This is the one lever that trades picture sharpness for fill rate, and it
- * is worth having because the two machines this game runs on are limited by
- * different things. On a discrete card at 1600x900 the frame is held up by
- * the work the CPU does per mesh, not by pixels: the cascade cache handed
- * the Lorencia frame a 29 % GPU saving and bought 1.7 % more frames. On an
- * integrated one the pixels *are* the limit, and that is the machine in the
- * slow reports.
- *
- * The HUD is not touched. It is DOM over the canvas, so it keeps its own
- * resolution however far the scene is scaled down - which is the usual
- * reason not to do this, and it does not apply here.
- *
- * One writer: Babylon's hardware scaling level is `1 / scale` of the device
- * ratio it already picked, so this composes with the device ratio rather
- * than replacing it, and `resize` carries it through (`abstractEngine.js`
- * multiplies the level by the change in device ratio instead of recomputing
- * it, so a window moved between monitors keeps the scale).
+ * Render scale: the share of the window the 3D scene is drawn at, applied as a
+ * ratio on Babylon's hardware scaling level. The DOM HUD keeps full resolution.
  */
 
 /** Scales below this stop reading as the same game. */

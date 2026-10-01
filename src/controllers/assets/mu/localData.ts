@@ -1,22 +1,6 @@
 /**
- * `Data/Local/<pack>/…` - the original client's own localisation.
- *
- * Webzen shipped one folder per language under `Data/Local/`, with the language
- * tag in every file name: `Eng/Quest_eng.bmd`, `Spn/Quest_spn.bmd`,
- * `Por/Quest_por.bmd`. That is where the quest names, the NPC dialogue scripts,
- * the warp list and the master-skill tooltips live - text the client does not
- * write itself and so is not in `i18n/recipes.ts`.
- *
- * This resolves one of those files for the active language and falls back to
- * English **per file**, so a pack that is only half there still gives its half.
- * The packs are not consistent about the case of the base name (`MoveReq_por`
- * but `movereq_spn`, `Text_spn` but `text_por`), so each candidate is tried in
- * the spelling asked for and all lower case; NTFS does not care, a static host
- * usually does.
- *
- * Which pack a language uses is `dataPack` on its `LanguageLayer`; a language
- * without one reads English here and is still fully translated everywhere
- * `t()` reaches.
+ * `Data/Local/<pack>/<Base>_<lang>.bmd` lookup for the active language's `dataPack`,
+ * with an English fallback per file and the text decoders. See assets/readme.md.
  */
 
 import { i18n } from '@/i18n';

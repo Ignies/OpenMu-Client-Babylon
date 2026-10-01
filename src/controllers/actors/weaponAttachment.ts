@@ -54,30 +54,9 @@ export function phoenixWingLink(slot: 0 | 1): { bone: number; link: Matrix } {
 }
 
 /**
- * How the original places weapons (RenderLinkObject, ZzzCharacter.cpp:6439-6760):
- *
- *  - In the hands: called with Link=false (:9961) - the weapon frame *is* the
- *    hand bone frame, no matrix at all.
- *  - On the back (RenderCharacterBackItem :14953, bone 47): Link=true with an
- *    explicit matrix in BMD bone space - AngleMatrix(70,0,90) and a per-type
- *    offset (weapons (-20,5,40), bows (-10,5,10), shields (-10,0,0), cm) -
- *    and for left-hand items an extra AngleMatrix(145,0,275)+(0,10,-30)
- *    concatenated on the inside (:6740-6752).
- *
- * The GLB keeps every bone node in BMD model space (the loader's basis change
- * only touches the model root), so the link matrix is used as-is in bone
- * space; ModelObject.Update undoes the item root's own basis change
- * underneath it. The 3x4 maths below is a literal port of ZzzMathLib.cpp,
- * *including* the fact that the left-item flip is concatenated in place
- * (`R_ConcatTransforms(Matrix, mNewRot, Matrix)`): `out` aliases `in1`, so
- * later elements read already-overwritten ones (see boneLink.ts). The result
- * is a sheared,
- * non-orthogonal matrix ~64 cm away from the clean product - and that is what
- * the original renders and what its constants were tuned against. A clean
- * multiply puts the secondary item a tile away from the character.
- *
- * Debug overrides (dev only, URL query): `?backRot=70,0,90` (deg, BMD space),
- * `?backOff=-20,5,40` (cm, BMD space).
+ * Back-item links (RenderLinkObject, ZzzCharacter.cpp:6439-6760; RenderCharacterBackItem
+ * :14953; left flip :6740-6752), with the aliased ZzzMathLib.cpp concat kept on
+ * purpose. `?backRot=` / `?backOff=` override them. See actors/readme.md.
  */
 const BACK_WEAPON: BmdLink = { angle: [70, 0, 90], offset: [-20, 5, 40] };
 /** The whole bow group falls here (:6672-6677) - ammo included. */

@@ -1,24 +1,6 @@
 /**
- * Feathers - a few white feathers let go from a point that drift down,
- * tumbling, and fade: what the Blood Castle archangels shed
- * (`common/npcs/archangel.ts`, documentation/archangel_npcs).
- *
- * Modelled on the original's `MODEL_FEATHER` (ZzzEffect.cpp:4806-4848 init,
- * :15454-15500 per tick): the piece starts jittered up to 40 cm from its
- * point on every axis, faces a random way, tumbles by a random 0..5 degrees
- * a tick, holds an `Alpha` of 0.6..0.8 and fades `x0.97` a tick, over
- * `30 +- 10` ticks under a light gravity. The original lets these fall from
- * the dark wings' flap and the Desair skill, never from an NPC: the release
- * from the archangels is the reviewer's ask. The fall here is slower than a
- * hit's spray (a feather from a wing has a way to go) and the piece vanishes
- * where it meets the ground rather than lying on it.
- *
- * Each feather is a `model` spawn driven from here (this entry owns the
- * motion, `model.ts` the mesh), so the list order puts `feathers` before
- * `model`.
- *
- * Driven by: `effects.spawn('feathers', …)` from `common/npcs/archangel.ts`.
- * Read by: nobody.
+ * Feathers: white feathers that drift down, tumble and fade, shed by the Blood Castle archangels
+ * (`MODEL_FEATHER`, ZzzEffect.cpp:4806-4848 init, :15454-15500 per tick). See fx/readme.md.
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
 import { Store } from '../../app/store';

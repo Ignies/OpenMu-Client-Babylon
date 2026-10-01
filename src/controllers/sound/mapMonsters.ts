@@ -3,39 +3,9 @@ import { ENUM_WORLD } from '../../core/types';
 import type { Sounds } from './recipes';
 
 /**
- * Per-map monster voices: the original's `PlayMonsterSound(o)`
- * (ZzzCharacter.cpp:215-236), which runs before the generic
- * `Models[].Sounds[]` table at every moment a clip is (re)set - walk
- * (:760), attack (:1282), flinch (:1404) and death (:1536).
- *
- * Every monster added after Season 3 is voiced here and nowhere else: its
- * `OpenMonsterModel` case calls `LoadWaveFile` but never `SetMonsterSound`,
- * so `Models[type].Sounds[0]` stays -1 and the generic branch is silent for
- * it. Raklion's Ice Walkers and Ice Giants, the Swamp of Quiet's Sapi and
- * Shadow lines, Karutan's Orcus and Condra, Elbeland's beasts, the PK Field
- * and the Empire Guardian floors are all in this bracket - which is why they
- * used to speak with Noria goblin voices: the generated table filled the gap
- * with a placeholder instead of leaving it empty.
- *
- * The Season 2 maps - Crywolf, Kanturu, Aida, the Land of Trials, Kalima's
- * Kundun - voice their monsters from per-map move / render hooks instead
- * (section 3): `PlayBuffer` with no object, re-run every frame the monster
- * is drawn.
- *
- * The dispatch order is the original's: the global list first, then Elbeland,
- * then the Swamp of Quiet, then the active map's own (`TheMapProcess()`),
- * then the hooks that check no world at all. Since no model number appears in
- * two of them, one lookup per map is enough.
- *
- * `fDistance > 500.0f` gates every `PlayMonsterSound` voice: they are played
- * 2D at full volume in the original, with a hard five-tile cutoff instead of
- * a falloff. Here they keep their position (so they pan and attenuate like
- * every other effect) and the cutoff is kept as the range it is.
- *
- * Not here: the voices `PlayMonsterSoundGlobal` gives NPC models rather than
- * monster models - the snowman, Titus' idle, Lugard's breath and the two
- * Doppelganger chests opening (ZzzCharacter.cpp:15167-15221). They are keyed
- * by NPC model, which never reaches the monster path: `npcVoices.ts` plays them.
+ * Per-map monster voices: `PlayMonsterSound(o)` (ZzzCharacter.cpp:215-236), run before
+ * `Models[].Sounds[]` at walk (:760), attack (:1282), flinch (:1404) and death (:1536).
+ * NPC-model voices (:15167-15221) are in `npcVoices.ts`. Notes in readme.md.
  */
 
 /** One rule: an action set, the sound, and how often / when it fires. */

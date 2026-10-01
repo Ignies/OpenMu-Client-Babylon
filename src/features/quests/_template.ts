@@ -1,22 +1,5 @@
-/**
- * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
- * to `layers.ts`. Never imported; it only exists to be copied.
- *
- * Every quest entry file has the same three parts, in this order:
- *
- *   1. Tuning constants at the top, each with a comment saying what it is in
- *      real units (seconds, tiles, packet codes) and why it has that value.
- *   2. Module state + the functions that read it. State lives here, not in
- *      the facade. State a window renders is a MobX `observable` so React
- *      re-renders; readers are plain functions (`templateOpen()`).
- *      Packet handlers are `EventBus.on('<PacketName>', …)` registered at
- *      module load, like `social.ts`.
- *   3. The exported `QuestLayer` at the bottom, wiring `update` / `reset`.
- *
- * If the entry opens a window, the window lives in
- * `ui/pages/worldPage/components/quests/` and reads this file's state.
- * If it reacts to a packet, the handler is here - never in `logic.ts`.
- */
+/** TEMPLATE - copy-me file for a new quest entry; never imported.
+ * Steps: readme.md "Change it". */
 import { observable, runInAction } from 'mobx';
 import { ENUM_WORLD } from '../../core/types';
 import type { QuestLayer } from './layer';

@@ -21,42 +21,8 @@ import {
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 
 /**
- * Ink lines (rendering_style ARCHITECTURE §2.3): sole owner of the outline
- * post-process, between the AO combine and the haze so a line fades with
- * distance like the surface it sits on and is graded with the scene.
- *
- * The lines come from the G-buffer alone. Depth across a flat surface is not
- * linear in screen space but its reciprocal is, at whatever angle the surface
- * is seen, so the two neighbours on an axis predict the pixel between them by
- * a straight average: their second difference is zero on any flat surface,
- * positive where the pixel stands in front of what surrounds it and negative
- * where it stands behind. That is the whole silhouette test, and the line
- * placement decides which side of the step takes the line. A crease is a
- * *sudden* turn of the normal, the second difference again, counted only
- * where the depth stayed continuous: a smoothly rounded limb turns by the
- * same amount from tap to tap and draws nothing.
- *
- * Sky is depth 0: it never inks, and as a neighbour it is infinitely far.
- * The effect mask is subtracted and added back the way the haze does it, so
- * the additive half of a pixel keeps its own light.
- *
- * The line strength, line width and line placement sliders set the darkness,
- * the width and the side (renderingStyle.ts).
- *
- * With the skill effects toggle on (`toonEffectsActive`) the pass is built
- * in its second form and treats the additive half it just subtracted the
- * same way: its luminance is snapped to the shade steps, hue kept, so a
- * glow becomes a few solid tones, and where a tone meets nothing (the
- * effect's own edge, one line width out) the whole pixel takes the ink, so
- * every flash and bolt wears a contour in its own darker colour. Below the
- * first tone the glow is left as it is, a soft skirt outside the line: the
- * mask has no depth, so under a flame that dips into the ground it reports
- * more light than landed. The mask is depthless in the other direction too,
- * holding effects the frame never drew because something opaque stood in
- * front, and a pixel the frame left dimmer than the effect alone is exactly
- * that: those are left to the surface, so a contour never lands on the wall
- * in front of a flame. Off, the shader text is the one it always was.
- * Dev seam: `?inkk=depthThreshold,normalThreshold` replaces the edge thresholds.
+ * Ink lines: sole owner of the outline post-process, between the AO combine and
+ * the haze. Edges come from G-buffer depth and normals. Seam: `?inkk=depth,normal`.
  */
 
 const SHADER = 'muInkOutline';

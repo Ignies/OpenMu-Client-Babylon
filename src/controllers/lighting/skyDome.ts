@@ -127,21 +127,8 @@ const VOLUME_DENSITY = 0.085;
 const VOLUME_SELF_SHADOW = 4.5;
 
 /**
- * Curvature the deck is bent onto, in tiles: the radius of the shell the view
- * ray is intersected against.
- *
- * A flat deck meets a level ray at infinity, which is why the layer used to be
- * cut off at a fixed distance and faded out below 17 degrees - and in first
- * person, where the horizon sits mid-screen, that fade band is half the sky
- * and the deck read as a ceiling ending in mid-air. A shell has a horizon of
- * its own instead: the same deck is about 95 tiles away overhead and about
- * 1050 at eye level, so the clouds compress into a band as they recede and the
- * layer ends where the ground does.
- *
- * The value is not a planet's radius, which would put the deck's horizon
- * further out than the map is wide and leave the compression invisible. It is
- * picked for the 11:1 spread between the overhead and horizon distances, which
- * is what the compression is made of.
+ * Radius in tiles of the shell the cloud deck is bent onto, so the deck has its own horizon
+ * (about 95 tiles overhead, 1050 at eye level). Picked for that 11:1 spread, not a planet's size.
  */
 const CLOUD_PLANET_RADIUS = 6000;
 
@@ -173,24 +160,8 @@ type Dome = {
 let dome: Dome | null = null;
 
 /**
- * The other half of the sky: the inverted dome under the world, for a map
- * whose ground has holes in it (`LookProfile.underworld`).
- *
- * Devias' ravines are `NoGround` tiles, which the ground mesh sends past the
- * far plane, so nothing at all is drawn where they are and the pixel is the
- * scene's clear colour - the same pale blue as the sky, which is why the
- * ravines came out as panes lying *brighter* than the snow they are cut out
- * of. The clear colour cannot simply be darkened: on a camera looking down it
- * is also what fills the top of the frame, where the dome above does not
- * reach.
- *
- * So: geometry, not a mask over the frame. A ray down a hole meets this and a
- * ray to the sky does not, which is a distinction the renderer can make and a
- * post pass cannot - depth 0 is a card against the sky and a hole in the
- * ground alike, and the three cuts of this that tried to tell them apart in
- * screen space all ended up blacking out grass cards on the rim. Drawn like
- * the dome above - riding the camera, first group, out of every buffer - so
- * everything in the world draws over it and occludes it without being asked.
+ * The inverted dome under the world, for a map whose ground has holes (`LookProfile.underworld`,
+ * Devias' ravines). Geometry rather than a screen-space mask; why in readme.md.
  */
 let floor: Dome | null = null;
 

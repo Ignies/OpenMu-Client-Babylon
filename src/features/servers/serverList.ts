@@ -15,57 +15,8 @@ import {
   conventionProxyUrl,
 } from './serverServices';
 
-/**
- * The published server list - a markdown file in the project's repository, one
- * server per line:
- *
- *     [VERSION:NAME:DESCRIPTION:LANGUAGE:IMAGE](host:port@WSPROXY)
- *
- * The version says which client that world is meant to be played with - the
- * token a `versions/<id>` folder gives as `gameVersion.listTag`, `S6EP3` for
- * the Season 6 Episode 3 build. It matters because the base game is compiled
- * against exactly one version, so a world asking for another is one this build
- * cannot enter, and saying so up front beats a protocol that falls apart after
- * the connect.
- *
- * Version, banner and proxy are all optional; a line carrying none of them is
- * the original three-field form and still parses.
- *
- * Directly under its line, a world may list names for its game servers and
- * their channels, which the connect server's protocol has no room for:
- *
- *     [S6EP3:Somewhere:A world:en](example.net)
- *     - 0: Valhalla
- *       - 0: Peaceful
- *       - 1: Hard
- *
- * The outer id is the server group (`ServerId >> 8`) and the inner one the id
- * inside it (the low byte) - the number the game server was configured with,
- * which for a world that never set up groups is the whole of its `ServerId`.
- * Whatever is left unnamed keeps the numbered default.
- *
- * *Directly* is the whole rule: the first line that is not one of these ends
- * the block. Names are indented bullets and this file is prose with examples
- * in it, so a run that has to touch its own entry is a run that cannot drift
- * onto somebody else's world.
- *
- * The target is either `host:port` - the connect server as the world's proxy
- * reaches it - or the world's domain on its own, which leaves the addresses to
- * the convention in `serverServices.ts`.
- *
- * Fetched once per launch so a player who has never edited a setting still has
- * somewhere to play, and cached so the launch after that shows the same list
- * before the network answers (or without a network at all).
- *
- * It is fetched from `raw.githubusercontent.com`, not from the `blob/` page: a
- * blob URL serves GitHub's HTML and no CORS header, so the browser could not
- * read it even if it wanted to.
- *
- * The list is **untrusted text from the internet**. Every line goes through the
- * same normalisers a typed field does, and a line that does not parse is
- * dropped rather than repaired - a list nobody can edit into a broken client is
- * worth more than one that shows every row.
- */
+/** The published server list (`serverlist.md`): parsed, cached and refreshed once per launch.
+ * Untrusted text: a line that does not parse is dropped. Line format and rules: readme.md. */
 
 const CACHE_KEY = 'mu_serverlist';
 

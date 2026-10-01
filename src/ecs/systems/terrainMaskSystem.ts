@@ -10,46 +10,8 @@ import { DEVIAS_ROOMS } from '@versions/shared/maps/devias/rooms';
 import type { ISystemFactory } from '../world';
 
 /**
- * Keeps the terrain mask (`terrainMask.ts`) up to date: which tiles have a roof
- * over them, so the ground overlays - settled snow today - stop at the door.
- *
- * Nothing in the map data says where an interior is (see the note in
- * terrainMask.ts: the shipped `.att` files carry no `TW_HEIGHT` at all), so a
- * roof has to be recognised by its shape. The test is the one
- * `CeilingHideSystem` already proved for finding the ceiling over the hero - a
- * mesh whose world AABB is a thin slab sitting above head height - applied to
- * every loaded object rather than a radius around the player.
- *
- * ### Why it scans continuously instead of once
- *
- * Objects stream in with the player, so at map load most of the world's
- * geometry does not exist yet and a single pass would see almost nothing.
- * Because painting is additive, a continuous scan converges on exactly the
- * right answer wherever the player has been - and the only place that matters
- * is where they can see the ground. Each entity is measured **once** and then
- * skipped forever, so the steady-state cost is walking the entity list, not
- * its meshes.
- *
- * Measuring once also quietly handles the Lorencia pub, whose roof is lifted
- * 100 units out of view while the hero is inside it: the roof is measured on
- * the approach, and the lift afterwards cannot un-measure it.
- *
- * ### Only the map's own geometry is ever measured
- *
- * The query is keyed on `modelId`, which `loadMapIntoScene.createObjects`
- * sets and nothing else in the game does - so it holds exactly the objects
- * the map file placed, and never a player, a monster, an NPC or a dropped
- * item.
- *
- * That is not tidiness, it is a fix. A **fresh drop** is created 180 cm up
- * and thrown a further ~44 cm by `DropMotionSystem`, then falls for about
- * half a second: for that half second it is a thin mesh hanging 1.8–2.2
- * tiles over the ground, which is precisely the slab test below. Whichever
- * scan caught it painted the item's tumbling world AABB as a roof - and
- * because painting is additive and each entity is measured once, every item
- * that ever fell left a permanent square of bare ground in the snow under it.
- * Living bodies are out for the same reason: nothing that can be somewhere
- * else a second later has any business deciding what the sky over a tile is.
+ * Keeps the terrain mask (`terrainMask.ts`) up to date: which tiles have a
+ * roof over them, so ground overlays stop at the door. See ecs/readme.md.
  */
 
 /** Seconds between scans. The mask only has to be right before snow builds. */

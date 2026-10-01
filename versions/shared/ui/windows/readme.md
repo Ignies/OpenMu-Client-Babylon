@@ -1,0 +1,70 @@
+# windows
+
+One folder per in-game window. A window draws; its state and actions belong to its feature
+(`src/features/<feature>`) or the Store. Recipe: [docs/how_to/change_a_window.md](../../../../docs/how_to/change_a_window.md).
+
+## Public API
+- Each `window.ts` default-exports one `defineWindow({ id, slot, order, component })` or an array
+  of them. All windows here use `slot: 'hud'`; higher `order` draws on top.
+
+## How it works
+- `versions/shared/ui/index.ts` globs `./{windows,hud}/*/window.{ts,tsx}` and registers every
+  definition, then registers the running version's `ui.windows` (same `id` replaces).
+- The world page (`../pages/world`) draws every `hud` window in order. Each window hides itself
+  when its Store flag or feature state says it is closed.
+- Folder shape: `index.tsx` (drawing), `window.ts`, `layout.ts` (geometry, sprite lists),
+  `style.less`. Shared widgets (item grid, tooltip, frames, buttons) are in
+  `src/controllers/interface/components/`.
+
+| Folder | id (order) | Shows | Reads |
+|---|---|---|---|
+| `inventory` | inventory (80) | the hero's bag and equipment, repair mode | Store, inventory, items, economy, events |
+| `npc_shop` | npc_shop (90) | the merchant's stock; buy, sell, repair | Store.npcShop, items, inventory |
+| `vault` | vault (100) | the warehouse, zen buttons, pin lock | Store, economy, inventory |
+| `chaos_machine` | chaos_machine (110) | the goblin's mix tray and recipe menu | Store, economy, inventory |
+| `trade` | trade (120) | partner's half on top, the hero's below | Store, economy, inventory |
+| `personal_shop` | my_shop (130), shop_browser (140) | the hero's stall; another player's stall | Store, economy, inventory |
+| `character_info` | character_info (150) | stats and stat point buttons | Store.playerData, hero, options |
+| `pet_info` | pet_info (160) | Dark Horse / Dark Raven sheet and raven commands | Store pet state, pets |
+| `mu_helper` | mu_helper (170) | MU Helper settings, hunt and obtain tabs | mu_helper, skills, hero |
+| `cash_shop` | cash_shop (180) | item shop paid in Jewels of Chaos for zen | cash_shop, inventory |
+| `marketplace` | marketplace (190) | listings from the marketplace service | marketplace |
+| `move_command_window` | move_command (200) | the "M" map list with level and zen | Store, warp, hero |
+| `emote_menu` | emote_menu (210) | radial emote menu | social, hero, chat, band |
+| `instrument_window` | instrument (220) | song, channels and band for the instrument in hand | band |
+| `command_window` | command (240) | the "D" player command buttons | chat (commands) |
+| `quick_command_window` | quick_command (250) | right-click menu on another player | chat, options |
+| `party` | party (260) | members with HP, invite list of nearby players | social, economy, skills |
+| `guild` | guild (270), guild_master_dialog (370), guild_creation_dialog (380), guild_kick_password_dialog (390) | guild tabs and its dialogs | social, Store.guilds |
+| `skills` | skills (280) | the learned-skill list | Store.skills, skills |
+| `master_skills` | master_skills (290) | the version's master tree (`loadVersionUi().MasterSkillsWindow`), lazy | skills |
+| `quests` | quests (300), quest_tracker (460) | quest NPC pages and the on-screen tracker | quests, options |
+| `friends` | friends (310) | friend list, letters, chat room list | friends, chat |
+| `chat_room` | chat_room (320) | chat server rooms, one tab per room | chat, friends |
+| `social_prompts` | social_prompts (330) | yes/no boxes for party, guild, war, alliance, friend | social, friends |
+| `economy_prompts` | trade_prompt (340), economy_prompts (350) | trade request; zen, pin and price prompts | economy, items, inventory |
+| `events` | events (400) | event entry windows, Chaos Castle prompt, timers, results | events, items |
+| `balgass_entry` | balgass_entry (410) | third class quest entry boxes | quests |
+| `duel` | duel (430) | challenge prompt, score, channels, spectators, winner | events (duel), chat |
+| `session_stats` | session_stats (440) | what this sitting earned, time to next level | session |
+| `debug_menu` | debug_menu (470) | offline debug window, tabs from `modules/` | gm, Store.isOffline |
+| `gm_panel` | gm_panel (480) | game master panel; sends chat commands | gm, social, chat |
+| `options` | - | options window; no `window.ts`, drawn by `src/app/App.tsx` | options and more |
+| `_shared` | - | `nearby_players.ts`: `useNearbyPlayers` for party and guild | social |
+
+Other ids in the same stack: msg_window (360) and picked_item (500) from the interface
+controller, and the HUD elements in `../hud`.
+
+## Depends on / used by
+- uses: `src/features/*`, the Store, `src/controllers/interface` (registry, widgets, hooks)
+- used by: `../index.ts` (glob); `versions/season6/ui` (sprite lists from `layout.ts`,
+  `MasterSkillsWindow`); `src/app/App.tsx` (options)
+
+## Change it
+- redraw a window: edit its `index.tsx`, `layout.ts` or `style.less`.
+- add a window: new folder with `index.tsx` and `window.ts`; pick an unused `order`.
+- one version draws it differently: export it in `windows` from `versions/<id>/ui` with the same id.
+
+## Tests
+- `gm_panel/commands.test.ts`: every command the panel names resolves against the catalogue.
+- `options/search.test.ts`: the options search text normalising and matching.

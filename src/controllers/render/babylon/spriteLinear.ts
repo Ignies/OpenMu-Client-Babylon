@@ -8,21 +8,8 @@ import { linearBufferActive } from '../../lighting/lightModel';
 import { installSpriteReplay } from './spriteReplay';
 
 /**
- * Sprites enter the linear buffer decoded, like every material.
- *
- * Babylon's sprite shader is `texel x vColor` and nothing more: unlike the
- * Standard and particle fragments it never decodes its output under
- * `IMAGEPROCESSINGPOSTPROCESS`, so on the graded tiers a flare, a torch's
- * fire sprite or a monster's glow lands in a linear frame carrying a display
- * texel. Decoding the colour on the CPU (what the flares did until now) gets
- * the level right and the *shape* wrong - the texel's soft skirt stays
- * display-referred, and anything that later takes the frame back to display
- * space, the effect composite above all, lifts that skirt into a pale disc.
- *
- * The renderer offers no define for it, so its effect is built here with one
- * more uniform and the fragment gains the decode behind it. Read on every
- * bind, so the post processing switch reaches it live; 0 on Classic, where
- * the buffer is display-referred and the art is right as it is.
+ * Sprites decode their texel into the linear buffer like every material;
+ * Babylon's sprite shader never does. Off on Classic.
  */
 
 const UNIFORM = 'muLinear';

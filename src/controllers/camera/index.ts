@@ -1,28 +1,6 @@
 /**
- * THE FACADE - the original client's main-scene camera, behind the
- * `cameraControl` option. Copy `_template.ts` to add a map override.
- *
- * Ported from CameraUtility.cpp / SceneCommon.cpp: Ctrl+wheel steps the
- * discrete distance levels (opening mid-range), Insert/Delete rotate the
- * heading, pitch -48.5, vertical FOV 30 unless the FOV slider says otherwise.
- * Ctrl+middle-button drag is the web
- * client's addition: left/right rotates the heading, up/down pitches the
- * view. Home is taken by the MU Helper hot key, so the frame resets on warp
- * instead. `layers.ts` holds the per-map overrides.
- *
- * The ladder in `recipes.ts` extends past the ported five at both ends: the
- * steps below 1000 blend the ported geometry toward an eye-level shot and
- * the innermost one is first person, where the hero's body is hidden and,
- * with the `wsadMovement` option on, the mouse looks around under a pointer
- * lock (`mouseLook.ts`) - at every zoom level if `thirdPersonMouseLook` says
- * so. The eye rises and falls with the hero's stride there too, unless
- * `firstPersonBob` is off.
- *
- * Single writer of alpha/beta/radius/fov, and of the target's Y lift, while
- * the option is on and the game is in the World state; `cameraFollowSystem`
- * is the only caller.
- * Option off: the classic framing captured at install is restored once and
- * the camera is never touched again.
+ * THE FACADE - the original client's main-scene camera (CameraUtility.cpp /
+ * SceneCommon.cpp), behind the `cameraControl` option. See camera/readme.md.
  */
 
 import type { ENUM_WORLD } from '../../core/types';

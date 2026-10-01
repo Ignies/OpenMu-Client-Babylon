@@ -9,26 +9,8 @@ import {
 } from './localData';
 
 /**
- * The four quest tables, decoded the way the original does: every record is
- * XOR-ed with the 3-byte Bux key **restarting at each record** (`BuxConvert`
- * per `fread`), exactly like `gate.bmd`. Sizes below were verified against
- * the shipped files, not only against the C++ structs:
- *
- * | file | record | C++ |
- * |---|---|---|
- * | `Local/<lang>/Quest_<lang>.bmd` | 200 × 744 B | `QuestAttributeFile` (CSQuest.cpp:115) |
- * | `Local/<lang>/Dialog_<lang>.bmd` | 200 × 1024 B | `DIALOG_SCRIPT` (_struct.h:139) |
- * | `Local/QuestProgress.bmd` | n × 41 B | `DWORD` + packed `SQuestProgress` (QuestMng.h:19) |
- * | `Local/<lang>/QuestWords_<lang>.bmd` | `{int index; short len}` + `len` UTF-8 bytes | `LoadQuestWordsScript` |
- * | `Local/NPCDialogue.bmd` | n × 88 B | `DWORD` + `SNPCDialogue` (QuestMng.h:12), `LoadNPCDialogueScript` |
- *
- * `QuestAttributeFile` is `{short cond; short req; WORD npc; char name[32]}`
- * = 38 bytes, then `QUEST_CLASS_ACT[16]` at 38 - 24 bytes each because
- * `byRequestClass[MAX_CLASS = 7]` plus one pad byte aligns the four
- * `shQuestStartText` shorts - then `QUEST_CLASS_REQUEST[16]` at 424 (the
- * act array ends at 422, padded to the DWORD `dwZen` alignment), 20 bytes
- * each with `wRequestStrength` at +8, `dwZen` at +12 and `shErrorText` at
- * +16. 38 + 384 + 2 + 320 = 744, which is what 148800 / 200 gives.
+ * The quest tables (Quest, Dialog, QuestProgress, QuestWords, NPCDialogue): `QuestAttributeFile`
+ * (CSQuest.cpp:115), `DIALOG_SCRIPT` (_struct.h:139), QuestMng.h:12-19. See assets/readme.md.
  */
 
 // ---- Quest.bmd -------------------------------------------------------------

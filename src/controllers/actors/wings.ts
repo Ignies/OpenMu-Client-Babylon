@@ -4,20 +4,9 @@ import { angleLinkMatrix, type BmdLink } from '../render/boneLink';
 import type { HeldTexture } from '../fx/effectParticles';
 
 /**
- * The wing part (`c->Wing`) as the original renders it - `RenderCharacterBackItem`
- * ZzzCharacter.cpp:15100-15142, the per-type passes in `ItemObjectAttribute`
- * (ZzzObject.cpp:5151-5299) and `RenderPartObjectBody` (:6851-6890), and the
- * bone auras in `RenderPartObjectEffect` (:9860-9925).
- *
- * Item groups: wings are group 12 (`ITEM_WING`), the Dark Lord capes group 13.
- * `MODEL_WING + n` in the C++ is exactly `{ group: 12, num: n }` here, so the
- * indices below are the C++ enum offsets (_enum.h:1918-1956).
- *
- * **Not ported, because the original assigns them and then never reads them:**
- * the Wings of Soul / Wings of Dragon `BlendMeshLight` sines (:9816-9822) and
- * the Wings of Spirits `o->Scale = 0.5` (:5277). Both land on the shared
- * `g_ItemObject[Type]` whose `BlendMesh` is -1 and whose `Scale` is overwritten
- * by `b->BodyScale = o->Scale` from the wearer, so neither reaches the screen.
+ * Wing and cape specs (`c->Wing`): `RenderCharacterBackItem` ZzzCharacter.cpp:15100-15142,
+ * `ItemObjectAttribute` ZzzObject.cpp:5151-5299, `RenderPartObjectBody` (:6851-6890),
+ * `RenderPartObjectEffect` (:9860-9925), indices from _enum.h:1918-1956. See actors/readme.md.
  */
 
 export const WING_GROUP = 12;

@@ -6,28 +6,8 @@ import type {
 } from '../babylon/exports';
 
 /**
- * A render list filled from a predicate without Babylon's per-frame dirty
- * storm.
- *
- * Babylon's own `renderListPredicate` rebuilds the list every frame by
- * setting its length to zero and pushing every match, and it observes the
- * array: on every transition between empty and non-empty it marks the
- * lighting defines of *every mesh in the scene* dirty, because a shadow
- * map's caster set changing is what can turn a light's shadows on or off.
- * Emptying and refilling is two such transitions per pass per frame - the
- * cascades, the G-buffer and the effect mask were re-dirtying 1 500 meshes
- * six times a frame, and every material then re-checked its defines on the
- * next draw. Measured at ~2 ms of a 19 ms Noria frame.
- *
- * This fills the same list in place by index, which the observer does not
- * see, and raises the one notification that matters itself: when a list
- * really goes from empty to holding something, or back.
- *
- * Two scopes. A `scene` list is chosen from every mesh, before the frame's
- * targets: a shadow map needs the casters behind the camera too. An `active`
- * list is chosen from what the camera found in its frustum: a screen-space
- * buffer (G-buffer, glow, effect mask) can show nothing else, and the G-buffer
- * was drawing the whole render ring, 494 meshes against the main pass's 132.
+ * Fills a render list in place from a predicate and dirties the lights only when
+ * it goes empty or non-empty. `scene`: every mesh; `active`: the camera's meshes.
  */
 export type RenderListScope = 'scene' | 'active';
 

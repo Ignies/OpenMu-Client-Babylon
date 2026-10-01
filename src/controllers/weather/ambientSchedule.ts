@@ -1,19 +1,6 @@
 /**
- * Deterministic on/off schedule for ambient weather.
- *
- * Leaves and snow used to run at full rate for as long as you stood on the
- * map, which reads as a machine rather than as weather. A schedule turns each
- * recipe into *episodes* - a gust of leaves, a snow squall - separated by calm
- * stretches, and derives every roll from `serverNow()` instead of
- * `Math.random()`, so two clients on the same map see the same gust start at
- * the same second with the same strength.
- *
- * Time is cut into fixed `period` slots. Each slot rolls once: does an episode
- * happen at all (`chance`), how long does it last (`duration`), when inside the
- * slot does it start, and how hard does it blow (`strength`). The episode is
- * clamped inside its own slot, so a strength lookup only ever has to hash the
- * current slot - no history, no state, correct the instant a client joins
- * mid-episode.
+ * Deterministic on/off schedule for ambient weather: episodes rolled per time slot off
+ * `serverNow()`, so every client sees the same gust at the same second. See readme.md.
  */
 
 export type AmbientSchedule = {

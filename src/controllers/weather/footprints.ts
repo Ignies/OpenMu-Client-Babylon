@@ -18,75 +18,16 @@ import { linearBufferActive } from '../lighting/lightModel';
 import { devQuery } from '../../core/devSeams';
 
 /**
- * Footprints left on the ground: boot marks pressed into settled snow, or
- * stamped in water onto dry stone.
- *
- * Nothing in the original does this - there is no decal system in the client
- * at all - so the shape of it is ours. It is deliberately **not** a terrain
- * overlay layer (`terrainOverlay.ts`): that mask is one texel per tile, which
- * is about a person's whole stride, and a boot print is a tenth of a tile. So
- * prints are geometry - flat quads drawn as **thin instances of one mesh**, so
- * the whole trail is a single draw call, in a ring pool that bounds the cost
- * and lets a long walk trail off behind you.
- *
- * ### Why this is a shader and not a painted sprite
- *
- * The first two cuts baked the shading into the texture and drew it with a
- * `StandardMaterial`. Both read as a sticker lying on the snow rather than a
- * hole in it, and the reason is that a painted print has no light direction.
- *
- * Baking one in is not an option either: the quad rotates to the walk heading,
- * so a print baked as "lit from the left" is lit from the right the moment the
- * hero turns round, and a trail that curves would have every print lit
- * differently. That is what pushed the earlier cuts toward rotation-invariant
- * ambient occlusion, and rotation-invariant is exactly what *flat* means.
- *
- * The way out is to bake a **normal map** rather than a shading, and rotate it
- * into world space in the shader using the instance's own axes - which are
- * sitting right there in the thin-instance matrix. Every print on the map is
- * then lit from the same sun however it is turned: one wall of the hollow
- * catches the light, the opposite wall falls into shadow, and that pairing is
- * the cue that says *hole* instead of *smudge*.
- *
- * On top of that the lookup is **parallax-offset** by depth, so the far wall
- * of the hollow comes into view and the near wall hides behind its own rim.
- * That is the part that reads as the foot having gone down into the surface
- * rather than sat on it.
- *
- * ### Why it multiplies
- *
- * The blend is `ALPHA_MULTIPLY` - `blendFunc(DST_COLOR, ZERO)` - so a fragment
- * multiplies whatever the terrain already drew, and white means "leave it
- * alone". That buys correctness for free: a print inside a building's shadow,
- * or on ground the snow overlay has only half covered, darkens by the right
- * *proportion* instead of compositing toward a fixed colour that assumed full
- * sun.
- *
- * The one thing it cannot do is draw brighter than the ground, and that costs
- * nothing here. Sunlit snow is already at the top of the range: an earlier cut
- * drew a "bright" displaced-snow lip and measured it at 1.04x its
- * surroundings, which is invisible. In snow, all of the readable signal is
- * darkening.
+ * Footprints: prints in settled snow, wet prints on dry stone. Our own (the original has no
+ * decals). Thin instances of one quad per pool, a baked normal map with parallax, drawn with
+ * `ALPHA_MULTIPLY` over the terrain. See readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
 
 /**
- * The two ring pools every kind is split across, and why there are two.
- *
- * A pool is a ring: the oldest print is dropped to make room for the newest,
- * so the number of slots IS how long a trail can be. The hero at a walking
- * stride lays four prints a tile, which at 64 slots is about sixteen tiles of
- * trail behind them - everything older is carried by the ploughed channel in
- * `snowTrail.ts`, which is a depth map and does not run out.
- *
- * Once everything else in the world leaves prints too, one shared ring means
- * a yeti crossing the square evicts the hero's own trail, and the trail that
- * matters most is the one leading away from where you are standing. So the
- * hero keeps a ring of their own at exactly the size they had, and everyone
- * else shares a bigger one. Two meshes rather than one, therefore two draw
- * calls per kind - the same price the drag marks were judged worth paying,
- * and for a better reason.
+ * The two ring pools per kind: the hero keeps its own, so a crowd never evicts the hero's
+ * trail, and everyone else shares a bigger one. Two draw calls per kind. See readme.md.
  */
 export type PrintLane = 'hero' | 'crowd';
 
@@ -111,27 +52,8 @@ const POOL: Record<PrintLane, number> = {
 const Z_LIFT = 0.012;
 
 /**
- * Every number that decides how a print looks, in one mutable object.
- *
- * These were tuned by round-tripping screenshots, which is a slow and
- * imprecise way to find a look: one parameter per message, each change landing
- * blind. So they are read rather than baked in, and exposed on
- * `window.muFootprints` so they can be dialled live -
- * `muFootprints.set({ length: 0.7, depth: 0.2 })` rebuilds the soles and the
- * materials on the spot. Find the look in one session, then paste the numbers
- * back here as the defaults.
- *
- * Sizes are in tiles, and they are the size of the **print** - the outline the
- * boot leaves - not of the quad that carries it. The quad is larger, because
- * the crest of shouldered snow sits outside the outline and the relief march
- * needs margin to walk into; `SOLE_FILL` is the ratio and `quadWidth` /
- * `quadLength` do the conversion.
- *
- * That distinction is not pedantry. These two numbers used to be the quad, and
- * every size reported from this file was therefore wrong by the fill fraction:
- * "0.85 x 0.5 tiles" was really a print of 0.61 x 0.20, a 3:1 sliver, which is
- * exactly how it looked in play. A tuning value that does not mean what it
- * says cannot be dialled by looking at the screen.
+ * Every number that decides how a print looks; dial live with `window.muFootprints`. Sizes are
+ * the print outline in tiles, not the quad (`SOLE_FILL`, `quadWidth` / `quadLength` convert).
  */
 export const FOOTPRINT_TUNING = {
   /**
@@ -502,26 +424,8 @@ const smoothstep = (a: number, b: number, x: number) => {
 };
 
 /**
- * The silhouette: **a waisted superellipse** - the outline of a boot sole.
- *
- * One connected shape, not a ball plus a separate heel: pressed into snow the
- * whole sole bears down and the arch fills in, so the print has a waist rather
- * than a gap. But it is emphatically not an ellipse either. An ellipse with
- * angular wobble on it came out looking like a bird track, because the wobble
- * has to be large before it stops reading as a curve, and by then the lobes
- * are claws.
- *
- * A superellipse gets there without any wobble at all: exponent ~2.6 gives
- * squared-off, rounded ends instead of points, which is the single strongest
- * cue for "boot" as opposed to "animal". The waist and the wider ball do the
- * rest.
- *
- * **v = 1 is the toe.** The chain that decides this is worth spelling out,
- * because it is three conventions deep and an early cut had the prints walking
- * backwards: `CreatePlane` puts v=0 at local y -0.5, the baked `rotation.x` of
- * +90 deg sends local y -0.5 to z -0.5, and `addFootprint` lays the length
- * axis (local +Z) along the direction of travel. So high v is forward, and the
- * ball of the foot belongs there.
+ * The boot sole: a waisted superellipse (exponent ~2.6, squared ends). v = 1 is the toe:
+ * `CreatePlane` v, the baked +90 deg `rotation.x`, and `addFootprint`'s heading. See readme.md.
  */
 const SOLE = {
   cu: 0.5,
@@ -915,20 +819,8 @@ function soleHeight(
 }
 
 /**
- * The sole texture: **R** signed height, biased so 0.5 is the undisturbed
- * surface - below it is the cavity (parallax and AO), above it is the snow the
- * boot pushed up (the rim light and the subsurface term),
- * **G** and **B** the tangent-space normal's x and z, **A** how much of this texel
- * the boot disturbed at all.
- *
- * Generated rather than shipped as an asset - it is a handful of superellipses
- * and some noise, and adding an OZT to the data folder for that would be silly.
- *
- * Every row at once. The **runtime does not use this**: it allocates the atlas
- * empty and bakes a shape's row the first time something presses it
- * (`ensureShape`), because a quarter of a million texels of value noise for
- * silhouettes nothing in the world has is a stall for nothing. This is the
- * whole-atlas form, for the tests that read the cells back.
+ * The whole sole atlas (R height around 0.5, G/B normal x/z, A coverage), for tests. The
+ * runtime bakes one row per shape on first use instead (`ensureShape`).
  */
 export function buildSole(kind: PrintKind): Uint8Array {
   const data = new Uint8Array(atlasWidth() * atlasHeight(kind) * 4);
@@ -1399,16 +1291,8 @@ function sunDirection(scene: Scene): Vector3 {
  * call. A map change clears the pool, so no print ever outlives its own sole.
  */
 /**
- * A kind's material, its sole atlas, and which rows of that atlas have
- * actually been baked.
- *
- * The rows are baked lazily (`ensureShape`). Six silhouettes times four
- * variants is about a quarter of a million texels of value noise, and most
- * sessions press two or three shapes into the ground; paying for the spiders
- * and the hooves the first time it snows is a stall for nothing. An unbaked
- * row is all zeroes, which is coverage 0 - a print drawn from it would be
- * invisible rather than wrong, and `ensureShape` runs before any print can
- * claim a cell in it.
+ * A kind's material, its sole atlas, and which rows are baked. Rows bake lazily
+ * (`ensureShape`); an unbaked row is all zero, which draws nothing.
  */
 type SoleAtlas = {
   material: ShaderMaterial;

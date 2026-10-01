@@ -43,21 +43,8 @@ import {
 } from './terrainLighting';
 
 /**
- * The grass layer: blades standing on the tiles the splat map already draws
- * as grass.
- *
- * The original had this pass and the clone never ported it -
- * `TERRAIN_MAP_GRASS` is a constant nothing reads. `RenderTerrainFace` drew
- * one vertical alpha-tested card per grass tile from `TileGrass01/02/03`
- * (ZzzLodTerrain.cpp:1620-1675). This is that layer with the card replaced by
- * geometry: real blades are opaque, so the whole layer costs no transparency,
- * no sorting and no alpha test, and a cutout pass over the ground is by far
- * the more expensive of the two.
- *
- * Lit entirely through `terrainLighting.ts` - the same bake, torches,
- * cascades and roof mask the tile under each blade takes. A blade that is a
- * shade off the ground it grows from is more obviously wrong than either
- * would be alone, so there is no second opinion about the light here.
+ * The grass layer: opaque geometry blades on grass tiles, in place of the original's alpha cards
+ * (`RenderTerrainFace`, ZzzLodTerrain.cpp:1620-1675). Lit only through `terrainLighting.ts`.
  */
 
 /** Tiles per block edge. 256 blocks over the map. */
@@ -102,23 +89,8 @@ const FADE_END = 34;
 const RESIDENT_RANGE = FADE_END + 4;
 
 /**
- * The wind, as waves crossing the field.
- *
- * The first cut had the original's shape - `sin(WindSpeed + xf * 5)`,
- * ZzzLodTerrain.cpp:2430 - with a per-blade phase added on top, and that is
- * exactly what stops it reading as wind: a wave whose phase is randomised per
- * blade is not a wave, it is jitter. Neighbours have to move *together* for
- * the eye to see anything travel.
- *
- * So: a plane wave along `GROUND_WIND`, `sin(t*rate - dot(xz, dir)*freq)`,
- * broad enough that a crest spans several tiles. The two-tone banding a real
- * field shows comes free from that - blades leaning into the wind turn a
- * different face to the sun than blades standing up, and the form shading
- * above turns that into light and dark bands travelling with the crest.
- *
- * `CHOP` is a second, finer, faster wave carrying a small per-blade offset,
- * so the field is not a rigid sheet. It is deliberately weak: it is texture
- * on the wave, not the wave.
+ * The wind: a plane wave along `GROUND_WIND`, `sin(t*rate - dot(xz, dir)*freq)`, not the
+ * original's per-blade phase (`sin(WindSpeed + xf * 5)`, ZzzLodTerrain.cpp:2430). `CHOP` is finer.
  */
 const WAVE_RATE = 1.15;
 /** Radians per tile: 2*pi/0.42 is a crest about 15 tiles apart. */
@@ -180,25 +152,8 @@ const ARC_MAX = 0.85;
 const ARC_DROOP = 0.45;
 
 /**
- * Fire, as the blade sees it (`weather/grassBurn.ts` owns the scar itself).
- *
- * Disintegration rather than a shrink. Each blade goes when the burn at its
- * root passes *its own* threshold, drawn from the hash it already carries, so
- * a patch thins out blade by blade instead of sinking like a sheet - and
- * because the threshold is a pure function of the blade, the same blades
- * always go first and the edge does not crawl about as the map decays.
- *
- * Thresholds run over MIN to MIN + SPREAD on the *cube* of the hash, and the
- * curve is the point. SPREAD carries the top of the range past 1, so a fully
- * burnt patch keeps the blades whose threshold the fire never reached and
- * leaves them standing and charred - with every threshold under 1 a full burn
- * took every blade and the scar was bare ground, which reads as a hole in the
- * field rather than as something burnt. But spreading them evenly to get that
- * stubble left a third of the field standing and the scar stopped reading at
- * all. Cubed, about three quarters go outright and a sixth stay: a clear scar
- * with something burnt still standing in it. `WITHER` is how much
- * more burn it takes for a blade to go from whole to gone, which is what
- * keeps the edge soft at a scale finer than the map's 25 cm texel.
+ * Fire, as the blade sees it (`weather/grassBurn.ts` owns the scar). Each blade goes at its own
+ * threshold, MIN..MIN + SPREAD on the cube of its hash; `WITHER` softens the edge. See readme.md.
  */
 const BURN_MIN = 0.05;
 const BURN_SPREAD = 0.8;
@@ -224,18 +179,8 @@ const CHAR_TINT = 0.96;
  * patch does not go as one straight line drawn across the field.
  */
 /**
- * Burn value above which a cut still glows. The scar starts at 1 and decays
- * over the five minutes it takes to grow back, so this is a time in disguise.
- *
- * Tight on purpose: at about two and a half seconds, and a front travelling
- * half a tile a second, the band of blades that are actually alight is a tile
- * or so wide - a flame front crossing the field. Wider and the whole scar
- * burns at once, which is a lit patch rather than a fire going through it.
- *
- * It cannot go much tighter. The scar is one byte decaying over five minutes,
- * so a step of the counter is over a second however often the pass runs, and
- * a window narrower than a couple of steps would flicker on the quantisation
- * rather than on the flame.
+ * Burn value above which a cut still glows: a time in disguise (about 2.5 s of the five-minute
+ * decay, a band about a tile wide). Much tighter flickers on the byte quantisation.
  */
 const HEAT_FROM = 0.992;
 
@@ -308,44 +253,16 @@ const GRASS_INK_MAX_SHARE = 0.75;
 const GRASS_INK_START_GLSL = grassInkStart().toFixed(2);
 
 /**
- * Form shading on the detailed blade: how far a face turned toward the sun
- * sits above one turned away.
- *
- * This is the difference between a field of curved shapes and a field of
- * grass - without it every blade is the same value and the whole thing reads
- * flat. It is written to be **albedo-preserving**: the term runs from
- * `1 - FORM` to `1 + FORM` across `0.5 + 0.5 * dot(n, sun)`, and blade yaw is
- * a uniform hash, so the field's mean is 1 and the layer neither brightens
- * nor darkens the frame.
- *
- * That property is what keeps it out of the lighting model. It redistributes
- * light across a blade's own two faces - which flat ground does not have and
- * a lightmap cannot express - rather than adding a second opinion about how
- * much light is here. `terrainLighting.ts` remains the only writer of that.
+ * Form shading on the detailed blade: `1 - FORM` to `1 + FORM` across `0.5 + 0.5 * dot(n, sun)`.
+ * Mean 1 over the field, so `terrainLighting.ts` stays the only writer of how much light.
  */
 const FORM_SHADE = 0.34;
 /** How far the fragment rounds the normal across the blade's width. */
 const BLADE_ROUND = 0.55;
 
 /**
- * How far a blade is pulled toward the colour of the light passing *through*
- * it, at the tip where it is thinnest.
- *
- * A blade is `albedo x groundLit`, and a saturated green albedo has almost no
- * blue in it: a violet spell can light the tile, the dirt path and the pale
- * props around it and the field still reads green, because green is all the
- * albedo can reflect. That is right for reflection and wrong for a blade,
- * which is thin enough to pass light rather than only bounce it, and what
- * comes through carries the emitter's colour and not the leaf's.
- *
- * Kept honest by three things: the pull is toward the emitter hue *at the
- * blade's own luma*, so it recolours and never brightens; it is scaled by the
- * emitters' share of the light on this tile, so daylight alone does nothing
- * and the term is inert on a map with no dynamic light; and it runs to zero
- * at the root, where a blade is thick and sits in its own shadow.
- *
- * `terrainLighting.ts` is still the only writer of how much light is here -
- * this spends `extraLit`, it does not add to it. Dev seam: `?grasstransmit=`.
+ * How far a blade tip is pulled toward the hue of the light passing through it, at the blade's
+ * own luma and scaled by the emitters' share of `extraLit`. Dev seam: `?grasstransmit=`.
  */
 const GRASS_TRANSMIT = 0.6;
 
@@ -359,20 +276,8 @@ function grassTransmitStrength(): number {
 }
 
 /**
- * What walks through the grass and what flies over it.
- *
- * The cheapest thing that does this job: a short uniform array of the nearest
- * actors, tested in the vertex shader. No second texture, no per-frame
- * upload, no CPU pass over the field - the only cost is `GRASS_ACTORS`
- * distance tests per vertex, on the detailed blade alone.
- *
- * The alternative was a trample map in the `terrainDynamicLight` mould: a
- * texture actors stamp and grass samples. It buys a *trail* - grass that
- * stays flat behind you and springs back - and unlimited actors, for one
- * fetch instead of eight tests. It also costs a texture, a per-frame upload
- * and a decay pass, and it needs a moving window to have the resolution a
- * one-tile-wide character needs. Worth revisiting if the springback is
- * wanted; not the cheapest way to get what was asked for.
+ * The nearest actors that bend the grass: a short uniform array tested in the vertex shader of
+ * the detailed blade. No trample texture or upload (see readme.md).
  */
 const GRASS_ACTORS = 16;
 

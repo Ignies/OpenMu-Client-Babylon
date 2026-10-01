@@ -21,25 +21,8 @@ import {
 } from '../assets/worldAssets';
 
 /**
- * `PlayWorldAmbientSounds` / `StopInactiveAmbientSounds`
- * (Scenes/SceneManager.cpp:564-700), the environmental bed under each map.
- *
- * The original calls `PlayBuffer(..., true)` on the current world's bed every
- * frame and `StopBuffer` on every other world's, which is idempotent in
- * DirectSound. This keeps the shape - a table of beds per world, everything
- * not in the current world's list stopped - because that is what makes the
- * mute gates work: Lorencia's wind is not stopped on a map change, it is
- * stopped the moment the hero steps under a roof.
- *
- * The birds and bats call from the boids that fly them (`common/boids.ts`).
- * The Dungeon rats are ground-crawlers the clone does not simulate, so their
- * row here stands in for them: the same roll, played at a random point
- * `spread` tiles around the hero so the attenuation and the sense of
- * "somewhere over there" survive. Doors and gates stay with their objects.
- *
- * Driven by: the map, the tile under the hero, `weather` (rain), the event
- * timers, the clock (the timed one-shots) and `ambientParticles` (the rats).
- * Read by: nothing - it only plays.
+ * The environmental bed under each map: `PlayWorldAmbientSounds` /
+ * `StopInactiveAmbientSounds` (Scenes/SceneManager.cpp:564-700). Notes in readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

@@ -1,27 +1,6 @@
 /**
- * What a cast does to where the hero *is*, as opposed to what it plays.
- * Three separate rules of the original, none of which lived anywhere before:
- *
- *  - **stop** - every `UseSkill*` opens with `LetHeroStop()`
- *    (ZzzInterface.cpp:1935): the path is dropped and a one-step move is sent
- *    so the server puts the caster on the square he is standing on. A cast is
- *    never taken mid-stride.
- *  - **step in** - the Rage Fighter's contact skills relocate the caster to
- *    the square one tile short of the target and send `InstantMoveRequest`
- *    (`CMonkSystem::SendAttackPacket`, MonkSystem.cpp:445-485; the same maths
- *    is inlined for Killing Blow / Occupy at ZzzInterface.cpp:2760-2780).
- *    Beast Uppercut, Chain Drive and Dragon Slasher do it *mid-clip*, on the
- *    consecutive-attack frame (`IsRageHalfwaySkillAni`), which is why they
- *    read as a lunge; Killing Blow and Occupy do it as the cast starts.
- *  - **root** - a clip that holds the caster's facing while it plays
- *    (`bLookAtMouse = false`, :7394-7419). Everything else keeps turning to
- *    the cursor.
- *
- * Rush (44) is the fourth skill that moves its caster, and the only one the
- * client does nothing about: the server answers the cast with the new square,
- * so it needs no row here.
- *
- * Readers only. Read by `skillCastSystem`, which owns the hero's path and yaw.
+ * What a cast does to where the hero is: stop (ZzzInterface.cpp:1935), step in
+ * (MonkSystem.cpp:445-485), root (ZzzInterface.cpp:7394-7419). See combat/readme.md.
  */
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { CombatLayer } from './layer';

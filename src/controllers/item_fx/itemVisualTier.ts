@@ -11,26 +11,8 @@ const BOTH_SCALE = 0.65;
 import { legacyItemColours, type LegacyItemColours } from './itemLegacyEffects';
 
 /**
- * Item visual identity: a pure `(item) → ItemVisualTier` lookup
- * that every renderer consumes - the character's equipment, the hand, and
- * the ground drop all read the same descriptor, so a +13 blade glows, pulses
- * and lights the floor the same way wherever it is.
- *
- * Two looks share the descriptor (Options → Video → Item effects):
- *  - **legacy** - the original client's passes, reproduced in itemMaterial.ts
- *    from ZzzObject.cpp `RenderPartObjectEffect`; `legacy` carries the
- *    per-item chrome colours from its tables (itemLegacyEffects.ts).
- *  - **improved** - our own: GlowLayer halo + in-surface rim sheen, aura
- *    motes (itemAura.ts), energy arcs (itemCrackle.ts) and pooled lights, all
- *    in the item's legacy chrome colour (improvedColour):
- *      +0–6 none · +7–8 sheen · +9–10 pulse, motes, arcs, orbit ring, starts
- *      to emit light · +11–12 much denser: sparks, forked arcs, double ring ·
- *      +13–15 intense, a real light source. Every level from +9 is a visible
- *      step up from the one below so the level reads at a glance.
- *    Excellent layers a cyan↔green shimmer; ancient a deep green pulse.
- *
- * `level` is already capped by the original's render-level option, so both
- * looks obey the same "+Effect limitation" slider.
+ * Item visual identity: a pure `(item) → ItemVisualTier` lookup every renderer reads.
+ * Legacy look from ZzzObject.cpp `RenderPartObjectEffect`; the improved ladder is in readme.md.
  */
 
 export type ItemGlowTier = 0 | 1 | 2 | 3 | 4;

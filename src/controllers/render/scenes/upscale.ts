@@ -21,43 +21,8 @@ import {
 import { renderScaleForStep, renderScaleSeam } from '../renderScale';
 
 /**
- * The render upscale (documentation/render_upscale/ARCHITECTURE.md): draw the
- * world at the render-scale slider's share of the window and present it at the
- * window's own resolution, through FidelityFX Super Resolution 1.0 instead of
- * the browser's stretch of a small canvas.
- *
- * Sole owner of everything this adds: the target the camera renders into, the
- * pass that sets the resolution the scene is drawn at, the two passes that
- * present, and the one number the rest of the frame needs from them -
- * `sceneRenderSize`, the size the frame is drawn at, which is no longer the
- * size of the drawing buffer.
- *
- * How the resolution is set, because none of it is obvious. Babylon sizes a
- * post-process target as `source * ratio` (`postProcess.js:584`), where the
- * source is the camera's output render target, or the screen when there is
- * none - it is *not* the pass before it, so a chain of ratio-1 passes is a
- * chain at screen size whatever the pass in front of it did. Two things
- * together move the whole frame down to the scale:
- *
- *  - `camera.outputRenderTarget` at the reduced size, which every pass on the
- *    camera then sizes itself from, and which the last of them writes into.
- *    The AO, the ink lines, the haze, the room mask, the shafts, the tone
- *    curve and the rendering pipeline all follow it without being told.
- *  - An entry pass at ratio `scale`, first on the camera, because the *scene*
- *    is rendered into the first pass's target and that one is sized against
- *    the screen rather than against the output target (`scene.js:3690` passes
- *    no source). Without it the world would be drawn at full size and thrown
- *    away into a small buffer.
- *
- * Presenting is then ours to do: the camera's output never reaches the screen
- * on its own, so EASU and RCAS run from `onAfterRenderObservable` and draw the
- * reduced frame onto the drawing buffer at its full size.
- *
- * `libs/renderScale.ts` keeps doing the other thing - shrinking the drawing
- * buffer itself - whenever this is off. The two are exclusive and `boot.tsx`
- * is where they are chosen between.
- *
- * Seam: `?upscale=0` forces it off, `?upscale=1` on.
+ * The render upscale: draw the scene at the render-scale share of the window and
+ * present it at full size through FSR 1.0 (EASU + RCAS). Seam: `?upscale=0|1`.
  */
 
 const ENTRY_SHADER = 'muUpscaleEntry';

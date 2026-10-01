@@ -1,19 +1,6 @@
 /**
- * Summon - an effect model its spawner drives tick by tick: the Summoner's
- * summoned beasts (MODEL_SUMMONER_SUMMON_SAHAMUTT / NEIL / LAGUL), Neil's
- * knives and ground rings. Unlike `model.ts`, each mesh is drawn the way its
- * own `RenderMesh` call asks (ZzzObject.cpp:1694-1771): bright (the sheet x
- * its light added), textured at `Alpha`, both, or not at all, each in its own
- * light; the clip is picked by index and run at the original's keys a tick;
- * and the spawner reads the bones the original hangs its sprites, fire and
- * ribbons on.
- *
- * Loading goes through the shared GLB container cache (`common/modelLoader.ts`);
- * the clone, its skeleton and its animation groups are this spawn's own and go
- * with it. Materials are the effects' cached additive ones (core.ts) and the
- * loader's shared flat-lit one; nothing compiles per spawn.
- *
- * Driven by: `effects.spawn('summon', ...)` from `common/skillVisuals.ts`. Read by: nobody.
+ * Summon: an effect model its spawner drives tick by tick (MODEL_SUMMONER_SUMMON_SAHAMUTT / NEIL /
+ * LAGUL), each mesh drawn as its `RenderMesh` call asks (ZzzObject.cpp:1694-1771). See fx/readme.md.
  */
 import {
   Material,

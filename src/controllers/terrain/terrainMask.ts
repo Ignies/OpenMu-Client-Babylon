@@ -3,46 +3,8 @@ import { TERRAIN_INDEX } from './utils';
 import { writeTerrainOpenness } from './terrainDynamicLight';
 
 /**
- * A 256x256 per-tile openness mask, for the terrain shader effects that need
- * to know *where* they are allowed to appear - settled snow and rain wetness
- * today, Atlans' caustics later.
- *
- * The plane lives here; the GPU copy rides in the **alpha channel of the
- * terrain dynamic-light texture** (`writeTerrainOpenness`), which the terrain
- * fragment shader already samples at exactly this UV. That is deliberate: the
- * shader's own comments record twice that its sampler list is brittle, so the
- * mask buys its way onto the GPU without adding a sampler, a texture unit or
- * a per-frame upload.
- *
- * Layout matches the light texture: texel `(x, y)` is world tile `(x, z)`,
- * read at `(worldXZ + 0.5) / 256`.
- *
- * ### Why the roofs are measured rather than read
- *
- * The obvious source is the terrain attribute file - the original has a
- * `TW_HEIGHT` flag that raises building floors to `g_fSpecialHeight`
- * (ZzzLodTerrain.cpp:1723) and lifts the camera for them
- * (CameraUtility.cpp:169), which reads exactly like "this tile is indoors".
- * It is not usable: decoding the shipped `.att` files shows Lorencia uses only
- * `SafeZone`, `Character` and `NoMove`, with **zero** `Height` tiles in all
- * 65 536, and Devias adds only `NoGround`. Nothing in the data marks an
- * interior floor, so it has to come from the geometry.
- *
- * Two sources, painted together:
- *
- *  - **Roof slabs.** The same test `CeilingHideSystem` uses to find the
- *    ceiling over the hero - a mesh whose world AABB is a thin slab sitting
- *    above head height - applied to the whole map instead of a radius around
- *    the player. This is what covers the buildings nobody has enumerated.
- *  - **Known interiors.** The room boxes the dust recipes already use. These
- *    are painted unconditionally at map load because the roof scan has one
- *    blind spot it cannot fix: the Lorencia pub's roof is *lifted 100 units
- *    out of view* while the hero is inside it (`loadMapIntoScene`), so a
- *    player who logs in standing in the tavern would have no slab to find.
- *
- * Painting is **additive** - a tile that has ever been seen as roofed stays
- * roofed for the life of the map. That is what makes the pub's disappearing
- * roof harmless: it is measured once on the way in and never un-measured.
+ * Per-tile openness mask (255 open, 0 roofed), uploaded in the alpha of the dynamic-light texture.
+ * Roofs come from geometry, since no `.att` flag marks interiors (`TW_HEIGHT`, ZzzLodTerrain.cpp:1723).
  */
 
 /** Byte value for a tile with open sky above it. */

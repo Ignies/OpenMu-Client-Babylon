@@ -1,27 +1,6 @@
 /**
- * `Data/Local/<lang>/NpcName_<Lang>.txt` - the monster and NPC names, in the
- * language the player picked.
- *
- * The original ships this as a plain tab-separated text file rather than a
- * `.bmd`, one row per type number:
- *
- * ```
- * // MAX : 512
- * //<a Korean section comment>
- * 84	1	"Chief Skeleton Warrior"
- * 89	1	"Magic Skeleton"
- * ```
- *
- * `//` lines are comments, the middle column is a flag the client does not
- * read here, and the name is quoted. Every language pack has one, English
- * included: `Eng/NpcName_Eng.txt` is 532 rows covering types 0 to 585 and is
- * this client version's own table, where `monsters.json` is an older
- * version's - 220 types are missing from it entirely and 168 of the names it
- * does have belong to other monsters ("King Orc" for type 84, which is the
- * Chief Skeleton Warrior). So the file is the base table for every language
- * and the JSON is only the fallback under it.
- *
- * Read through `monsterDisplayName()` in `common/monstersDatabase.ts`.
+ * `Data/Local/<lang>/NpcName_<Lang>.txt` monster and NPC names, the base table over
+ * `monsters.json` (read by `monsterDisplayName()`). See assets/readme.md.
  */
 
 import { observable, runInAction } from 'mobx';

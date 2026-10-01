@@ -40,51 +40,8 @@ import { rainStrength, rainTarget } from '../../controllers/weather/rainState';
 import type { ISystemFactory } from '../world';
 
 /**
- * Ambient particles: decides each frame which of the weather /
- * leaf / dust recipes should be alive for the current map, weather and
- * area, creates or disposes them to match, and drags the hero-relative
- * ones along with the hero (the original's `MoveLeaves` spawned every
- * leaf around `Hero->Object.Position`).
- *
- *  - Lorencia: falling leaves (`CreateLorenciaLeaf`). Noria takes the same
- *    numbers (`CreateAtlanseLeaf`) on its own petal; see `NORIA_PETALS`.
- *  - Atlans: marine snow drifting on the current, and bubbles rising off the
- *    seabed. The original runs Atlans through the leaf path with Lorencia's
- *    numbers (`CreateAtlanseLeaf`), but on World8's own round sprite and
- *    additive; see `ATLANS_DRIFT`.
- *  - Devias: snow (`CreateDeviasSnow`).
- *  - Blood Castle: embers drifting up around the hero
- *    (`MoveObjectOnEffect`'s `InBloodCastle` branch).
- *  - Rain on any outdoor map while `WeatherStatusUpdate` reports weather 1
- *    (the original only rained on event maps; the packet is OpenMU's way
- *    of switching it, so we honour it everywhere the sky is visible).
- *  - Lorencia tavern, Devias tavern and reading room: golden dust while the
- *    hero stands inside the room footprint (`ROOMS`, the same boxes the
- *    map modules register as `interactiveArea` entities).
- *
- * Sky weather is no longer switched off at a room's door. It keeps falling on
- * the world outside and is clipped per particle to what the room's openings
- * actually show (`weather/roomClip.ts`), which is the same rule the room mask
- * draws the rest of the frame by: from a tavern you watch the snow through
- * the doorway and none of it lands on the floor. Only a roof with no measured
- * volume behind it - Classic tier, an arch, a shed - still turns it off.
- *
- * Nothing here switches. A slot that stops being eligible - the hero ducks
- * under a roof, walks out of the tavern, the option goes off - only has its
- * emit rate *ramped* down to zero (`AmbientSystem.update`), and the recipe is
- * not disposed until the last particle it emitted has died. Becoming eligible
- * is the same in reverse: the system is created at rate zero and thickens up.
- * Disposing a live emitter is a pop - every leaf in the air vanishes in one
- * frame - so it is kept for the one case where the particles belong to a world
- * we are no longer standing in: a map change.
- *
- * Eligibility (map / area / option) only says a recipe *may* run. A recipe
- * carrying a `schedule` then asks the shared clock how hard it blows right
- * now (`ambientSchedule.ts`): leaves and snow come in gusts and squalls with
- * calm in between, rolled from `serverNow()` so every client on the map sees
- * the same weather at the same second. Rain is left unscheduled - the server
- * already drives it through `WeatherStatusUpdate` - and so is interior dust,
- * which is a property of the room rather than of the weather.
+ * Ambient particles per map, weather and room (the original's `MoveLeaves`,
+ * `CreateLorenciaLeaf`, `CreateDeviasSnow`). See ecs/readme.md.
  */
 
 /** Weather byte that means rain (assumed - see the weather notes). */

@@ -1,26 +1,6 @@
 /**
- * Debris - a handful of solid pieces thrown from a point that fly, tumble,
- * bounce on the terrain and vanish: the bones a skeleton / Death Cow bursts
- * into (`MODEL_BONE1/2`), the boulders of a Stone Golem (`MODEL_BIG_STONE1/2`),
- * the shards of an Ice Monster (`MODEL_ICE_SMALL`), the chips of a shattered
- * stone (`MODEL_STONE1/2`).
- *
- * The original is one `CreateEffect(MODEL_*, pos, angle, light)` per piece
- * with `SubType 0`: the init block (ZzzEffect.cpp:2742-2890) lifts the piece,
- * picks a random yaw, a horizontal speed of (64..319)×0.1 cm/tick along it,
- * an upward speed of 8..23 cm/tick, a scale of 0.8..1.1 and a life of 32..47
- * ticks; the move block (:10993-11062) steps the position, damps the
- * horizontal speed ×0.9 a tick, pulls 3 cm/tick² down, bounces at half speed
- * off the terrain (costing 4 ticks of life and a kick of tumble), tumbles
- * `Scale × 32°` a tick in the air and now and then (1 in 10 ticks) leaves a
- * smoke (ice) or fire (stone) puff behind.
- *
- * Each piece is a `model` spawn driven from here (this entry owns the
- * physics, `model.ts` the mesh), so the list order puts `debris` before
- * `model`.
- *
- * Driven by: `effects.spawn('debris', …)` from `common/deathVisuals.ts`.
- * Read by: nobody.
+ * Debris: solid pieces thrown from a point that fly, tumble, bounce and vanish (`CreateEffect(MODEL_*)`
+ * SubType 0, ZzzEffect.cpp:2742-2890 init, :10993-11062 move). Listed before `model`. See fx/readme.md.
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
 import { Store } from '../../app/store';

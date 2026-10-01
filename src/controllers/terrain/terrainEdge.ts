@@ -9,41 +9,8 @@ import {
 } from '../render/babylon/exports';
 
 /**
- * The world's outer frame: sole writer of one mesh that carries the ground
- * past the map's last tile row, so the world ends in more of itself instead
- * of in a cut.
- *
- * The ground is a finite 256x256 sheet with no side faces
- * (`customGroundMesh.ts`). Past it there is no geometry at all, so those
- * pixels are the scene's clear colour - and where a border tile stands above
- * the water it meets, the sheet's zero-thickness edge faces the camera. The
- * original client framed neither, because its camera stopped at a distance
- * this one zooms well past.
- *
- * What goes out there is read off each border tile, not off the map. A map is
- * not one thing all the way round: Lorencia's north border is 98% water tiles
- * and its west border is 13% - sea on one side, forest on the other - and a
- * map-wide choice gets one of them wrong. A border tile that is water carries
- * its sea out at its own level, with the map's own water tile scrolling in
- * step; every other tile carries its own ground out. Where the two meet, an
- * apron drops the shore into the water.
- *
- * Outward it is rings, not one long quad (§ `RING_DEPTHS`): a single quad per
- * border tile extrudes that tile's art three hundred tiles into the distance,
- * and the border row's every step - a road, a shadow, a patch of sand - comes
- * out as a stripe converging on the horizon. The rings let the fill leave the
- * map as an exact copy of the tile it grew from, shuffle its art as it goes,
- * and settle into one open field by the time the haze has it.
- *
- * It shares the ground's `ShaderMaterial` instance rather than owning one.
- * That is the whole trick: the tile array, the water scroll, the bake in the
- * vertex colour, the sky and ground light and the haze all reach the frame
- * with no new shader code, and there is no seam at the boundary because both
- * sides are the same program with the same uniforms.
- *
- * A separate mesh, though, not extra rows in the ground: the ground is
- * ray-cast for click-to-move several times a second and carries a submesh
- * octree, and geometry reaching hundreds of tiles out would widen both.
+ * The world's outer frame: a separate mesh carrying the ground past the last tile row in rings
+ * (`RING_DEPTHS`), water or ground per border tile, on the ground's own material. See readme.md.
  */
 
 /**

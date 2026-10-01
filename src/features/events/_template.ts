@@ -1,23 +1,5 @@
-/**
- * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
- * to `layers.ts`. Never imported; it only exists to be copied.
- *
- * Every event file has the same three parts, in this order:
- *
- *   1. Tuning constants at the top, each with a comment saying what it is in
- *      real units (seconds, maps, counts) and why it has that value.
- *   2. Module state + the functions that read it. State lives here, not in
- *      the facade; it is a MobX `observable` so the HUD re-renders, and
- *      readers are plain functions (`templateTimer()`). Packet handlers
- *      (`EventBus.on('<PacketName>')`) resync the state; `update` counts.
- *   3. The exported `EventLayer` at the bottom, wiring `update` / `reset` /
- *      `state` and, for a ticket-opened event, `useTicket`.
- *
- * If the event has a window or HUD, draw it in
- * `ui/pages/worldPage/components/events/` reading this file's functions.
- * If an NPC opens it, add one `case` to `NpcWindowResponse` in `logic.ts`
- * calling a facade command. If a packet feeds it, subscribe here.
- */
+/** TEMPLATE - copy-me file for a new event; never imported.
+ * Steps: readme.md "Change it". */
 import { observable, runInAction } from 'mobx';
 import { ENUM_WORLD } from '../../core/types';
 import type { Item } from '../../ecs/world';

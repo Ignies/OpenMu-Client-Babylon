@@ -1,18 +1,7 @@
 /**
- * Homing - short streaks that fly in from a sphere and home on a point, each
- * stamping a card on that point every tick: the original's
- * `CreateJoint(BITMAP_JOINT_HEALING, sub 15 / 16)` shower around the Summoner
- * curse models (MoveHandlers.cpp:2317-2336). Each joint starts `radius` out on
- * the upper half sphere aimed at the centre, gains `accel` of speed a tick
- * (`Velocity += 4`), turns on the centre (`MoveHumming`, so it stays on its
- * ray), loses light by `decay` a tick and draws a BITMAP_SHINY+1 on the centre
- * every tick of its life (ZzzEffectJoint.cpp:3605-3629).
- *
- * A cast starts six a tick, so the streaks and their stamps are drawn as two
- * batched meshes per spawn (vertex colours, one material per sheet and blend
- * from this entry's cache) instead of a ribbon mesh per joint.
- *
- * Driven by: `effects.spawn('homing', ...)` from `common/skillVisuals.ts`. Read by: nobody.
+ * Homing: streaks that fly in from a sphere onto a point, stamping a card there every tick
+ * (`CreateJoint(BITMAP_JOINT_HEALING, sub 15 / 16)`, MoveHandlers.cpp:2317-2336,
+ * ZzzEffectJoint.cpp:3605-3629). Two batched meshes per spawn. See fx/readme.md.
  */
 import {
   Constants,

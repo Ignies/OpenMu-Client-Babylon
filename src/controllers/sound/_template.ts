@@ -1,19 +1,6 @@
 /**
- * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
- * to `layers.ts`. Never imported; it only exists to be copied.
- *
- * Every sound entry has the same three parts, in this order:
- *
- *   1. Tuning constants / data tables at the top, each with a comment saying
- *      what it is in real units (seconds, 0…1 of the track, tiles) and why.
- *   2. Module state + the readers / commands over it. State lives here, not
- *      in the facade. A looping entry (a bed, the music) has an `update`; a
- *      one-shot entry (a click, a swing) is command-only.
- *   3. The exported `SoundLayer` at the bottom, wiring `update` / `reset`.
- *
- * Everything audible goes through the mixer, `libs/soundsManager.ts`:
- * `playAmbientLoop` / `stopAmbientLoop` for beds, `playMusic` for tracks,
- * and `playSfx` (this folder's `listener.ts`) for positioned one-shots.
+ * TEMPLATE - copy me to `<name>.ts` and list the layer in `layers.ts`. Never imported.
+ * The steps are in this folder's readme.md ("Change it").
  */
 import { ENUM_WORLD } from '../../core/types';
 import { SoundsManager } from './soundsManager';

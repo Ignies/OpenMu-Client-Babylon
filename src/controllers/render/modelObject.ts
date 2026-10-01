@@ -1538,23 +1538,8 @@ export class ModelObject {
   static BLOB_SHADOW_MIN_HEIGHT = 0.75;
 
   /**
-   * Above this footprint, in tiles (the longer of the model's x / z extents
-   * under its scale), a map object gets no blob shadow either.
-   *
-   * The projection is MU's `CalcShadowPosition`: it flattens the caster onto
-   * the terrain height and leans it in proportion to how high each vertex
-   * sits. It was written for a character on open ground, and the original
-   * never pointed it at anything else (map-object shadows are
-   * ours"). Pointed at scenery that *is* the ground - Devias' cliff faces and
-   * mountains, the walls of a keep - it does two wrong things at once: the
-   * flattened silhouette lands on the terrain directly under the rock, which
-   * is the rock's own visible face, so the whole face goes flat grey; and its
-   * lean is several tiles, so the streak reaches whatever stands beside it.
-   * Those objects' shading is already in the terrain bake and in their own
-   * lightmap, which is where the original leaves it.
-   *
-   * Four tiles is well over the widest thing that should cast - a tree
-   * crown, a market stall, a statue - and well under the smallest cliff piece.
+   * Above this footprint (tiles) a map object gets no blob shadow: MU's
+   * `CalcShadowPosition` was made for characters and smears on cliffs and walls.
    */
   static BLOB_SHADOW_MAX_FOOTPRINT = 4;
 

@@ -1,18 +1,6 @@
 /**
- * Cards - the original's particles and per-frame sprites card for card: one
- * billboard per `CreateParticle` / `CreateSprite`, stepped on its own 25 Hz
- * `MoveParticles` rules (ZzzEffectParticle.cpp) - a velocity that decays by a
- * factor a tick, a scale that grows by a step or a factor, a light that
- * decays, fades with `LifeTime` or dies with `Alpha`, a roll that turns or is
- * re-rolled every tick, a bounce off the terrain. The sprite layer covers a
- * flash that grows and fades; this is for the skills whose look is exactly
- * those per-tick numbers.
- *
- * A card is a pooled quad (core.ts `acquireCard`) with a cached additive
- * material; a colour ramp picks among a few cached materials. The motion is
- * integrated in fractional ticks, so it does not step at 25 Hz on screen.
- *
- * Driven by: `effects.spawn('cards', ...)` from the skill table. Read by: nobody.
+ * Cards: one pooled billboard per `CreateParticle` / `CreateSprite`, stepped on its 25 Hz
+ * `MoveParticles` rules (ZzzEffectParticle.cpp). See fx/readme.md.
  */
 import { Vector3, type Scene, type StandardMaterial } from '../render/babylon/exports';
 import { Store } from '../../app/store';

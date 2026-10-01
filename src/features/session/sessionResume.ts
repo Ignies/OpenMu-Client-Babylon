@@ -3,24 +3,8 @@ import { t } from '../../i18n';
 import { Store } from '../../app/store';
 import { GameOptions } from '../options/gameOptions';
 
-/**
- * Getting back in after the connection drops.
- *
- * A browser client loses its socket for reasons a desktop one never sees: a
- * sleeping tab, a lid closing, a proxy restart, a phone changing network.
- * The old path for all of them was the same as a kick - back to the server
- * list, log in again, pick the character again.
- *
- * This walks that flow on its own instead: dial the game server we were on,
- * send the same login the form would send, then select the character we were
- * playing. Nothing new goes on the wire; the packets are the ones the login
- * screens already send, in the same order. Credentials are the ones already
- * in the store for the session - nothing extra is written to disk.
- *
- * Guard rails: only after a socket we did not close ourselves went away,
- * only while a character was actually in the world, a handful of attempts
- * with a growing gap, and a Cancel that drops back to the server list.
- */
+/** Getting back in after the connection drops: redial, send the same login, select the same
+ * character. Guard rails: readme.md. */
 
 /** Gap before each attempt, in ms; the last one repeats if needed. */
 const BACKOFF = [1000, 2000, 4000, 8000, 15000];

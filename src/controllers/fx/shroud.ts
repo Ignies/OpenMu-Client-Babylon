@@ -1,19 +1,6 @@
 /**
- * Shroud - the shadow a swarm of spirits brings: one screen-covering card at
- * its anchor, drawn over everything for a while. Evil Spirit's "the screen
- * goes dark" from the reference client, where four 80 cm ALPHA_BLEND_MINUS
- * ribbons and a RENDER_DARK stamp a frame crowd the whole view around the
- * caster (ZzzCharacter.cpp:4584, ZzzEffectJoint.cpp:651).
- *
- * Not a flat sheet: churning smoke that thickens from a clear middle out to
- * the edge of the view, its tendrils curling in and out of the hole, so the
- * darkness moves like energy and the ground always shows through its gaps.
- * Coverage over black, not a subtraction, for the reason model.ts
- * `subtractMaterial` gives. The card faces the camera and ignores depth, and
- * draws first among the transparent effects so the skill's own art lands on
- * top of it. A finished card and its material wait for the next cast.
- *
- * Driven by: `effects.spawn('shroud', …)`. Read by: nobody.
+ * Shroud: Evil Spirit's dark screen, one camera-facing smoke card over the view
+ * (ZzzCharacter.cpp:4584, ZzzEffectJoint.cpp:651). See fx/readme.md.
  */
 import { Constants, CreatePlane, Mesh, ShaderMaterial, ShaderStore, Vector3, Vector4, type Scene } from '../render/babylon/exports';
 import type { TestScene } from '../render/scenes/testScene';

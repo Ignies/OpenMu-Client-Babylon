@@ -6,21 +6,8 @@ import { shadowReceiverChanged } from '../../controllers/render/scenes/csmBounds
 import type { ISystemFactory } from '../world';
 
 /**
- * Fades out the ceiling of the building the hero is standing in, so the
- * inside stays readable from the fixed camera. The original never hides
- * roofs (its only object fade is the Chaos Castle one, ZzzObject.cpp:228);
- * this is the Devias counterpart of the Lorencia pub hack in
- * loadMapIntoScene, which lifts HOUSE_WALL05/06 out of view.
- *
- * Data-driven rather than a per-type table: Devias buildings are tiled from
- * wall/roof pieces (Object3 types 15-18, 33-34, 62-63, …) whose roof
- * sub-meshes sit 2.4-3.6 tiles up, while wall meshes start at the floor. A
- * mesh is "a ceiling piece" when its world AABB is a thin slab above head
- * height. The piece over the hero seeds a flood fill through touching pieces
- * at about the same height, so the whole roof of that building fades, not
- * just the tile above him. While a room is the active area its frame seeds
- * the set instead: every slab whose centre lies inside it, whole roof, however
- * long the room (§13 F11).
+ * Fades the ceiling of the building the hero stands in. Not in the original
+ * (its only object fade is Chaos Castle's, ZzzObject.cpp:228). See ecs/readme.md.
  */
 
 const ENABLED_WORLDS = new Set<ENUM_WORLD>([

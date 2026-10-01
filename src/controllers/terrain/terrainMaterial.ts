@@ -145,23 +145,8 @@ function textureArrayGlsl(layers: number): string {
 }
 
 /**
- * The `AlphaTile*` slot: a hole in the ground, not a texture.
- *
- * `RenderFace` (ZzzLodTerrain.cpp:1394-1435) draws that one slot through
- * `EnableAlphaTest` and every other through `DisableAlphaBlend`, and every
- * `AlphaTile*.Tga` in the data set is zero in every byte, so the face
- * contributes nothing (`MapLayer.cutoutTile`).
- *
- * The tile whose second layer covers it fully never gets here: the mesh
- * already puts layer 2 in `vOpaqueTexture` for those, which is the same rule
- * `RenderTerrainFace` picks its base texture by (customGroundMesh.ts:161).
- * Under that the original alpha-tests the base away and blends layer 2 over
- * the void at the vertex alpha; one opaque pass can only test, so a partial
- * second layer takes a 0.5 cut - 11 tiles of the 309 on Elbeland, the only
- * map that declares a cutout today.
- *
- * Emitted only for a map that has one, so every other terrain shader keeps
- * its early-Z.
+ * The `AlphaTile*` slot is a hole, not a texture (`RenderFace`, ZzzLodTerrain.cpp:1394-1435). A
+ * partial second layer takes a 0.5 cut. Emitted only for a map with a cutout (keeps early-Z).
  */
 function cutoutGlsl(slot: number): string {
   return `

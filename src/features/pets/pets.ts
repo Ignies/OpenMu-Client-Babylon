@@ -9,32 +9,9 @@ import {
   legacyItemEffectsOn,
 } from '../../controllers/item_fx/itemEffectMode';
 
-/**
- * `c->Helper` - the pet / mount slot of the appearance (group 13, indices
- * 0-3). The original splits them three ways:
- *
- *  - **Guardian Angel** (`MODEL_GUARDIAN_ANGEL` → `MODEL_HELPER`) becomes a
- *    free-flying `Mounts[]` object with its own boid AI: `CreateMountSub` +
- *    `MoveMount`, GOBoid.cpp:66-660.
- *  - **Imp / Satan** (`MODEL_IMP`) is *not* a mount - it is link-rendered on
- *    the wearer's bone 34 every frame (`RenderCharacterBackItem`,
- *    ZzzCharacter.cpp:15144-15180) with a red light sprite on top.
- *  - **Horn of Uniria / Dinorant** (`MODEL_UNICON` / `MODEL_PEGASUS`) are
- *    mounts pinned to the rider: same position and yaw, action 0 standing /
- *    2 moving (GOBoid.cpp:494-556). The rider switches to the `*_RIDE` clips
- *    and, on a Dinorant, floats 30 units off the ground
- *    (`MoveCharacterPosition`, ZzzCharacter.cpp:6263-6273).
- *
- * `Data/Player/Helper0n.bmd` is the model behind `MODEL_HELPER + n`
- * (ZzzOpenData.cpp:705) and `Data/Skill/Rider0n.bmd` behind the two mounts
- * (:3969-3970) - **not** the `Item/helper0n` path items.json carries for the
- * horn items, which is the inventory icon model and does not exist as a GLB.
- *
- * The rest of the slot - Demon, Spirit of Guardian, Rudolph, Panda, Pet
- * Unicorn, Pet Skeleton - goes through a system of its own: `CreatePet`
- * rather than `CreateMount` (ZzzCharacter.cpp:12992-12999), one world object
- * per pet holding station on its owner and never ridden. See `PetFollow`.
- */
+/** `c->Helper`, the pet / mount slot (group 13): angel, imp, mounts, followers (readme.md). Refs:
+ * GOBoid.cpp:66-660, 494-556; ZzzCharacter.cpp:6263-6273, 12992-12999, 15144-15180;
+ * ZzzOpenData.cpp:705, 3969-3970. */
 
 export * from './petConstants';
 import {

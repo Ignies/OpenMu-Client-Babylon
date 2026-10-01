@@ -105,9 +105,7 @@ export function classFromAppearance(app: DataView): CharacterClassNumber {
 }
 
 /**
- * The classic 18-byte preview ("CharSet") every Season 6 client is sent for a
- * player in scope - the exact inverse of OpenMU's `AppearanceSerializer`:
- *
+ * The 18-byte preview ("CharSet"), the inverse of OpenMU's `AppearanceSerializer`:
  *   0      class (bits 3-7) + pose (bits 0-2)
  *   1, 2   left / right hand item number, 0xFF = empty
  *   3, 4   helm / armor and pants / gloves index nibbles
@@ -120,10 +118,6 @@ export function classFromAppearance(app: DataView): CharacterClassNumber {
  *   13-15  armor index bits 5-8, one nibble per slot
  *   16     transform pet flags (high 3 bits) + black/blue Fenrir (bits 0/1)
  *   17     small-wing flags (high 3 bits) + gold Fenrir (bit 0)
- *
- * Everything the wearer's own gear can show - level glow, excellent and
- * ancient passes, wings, the pet - is in here; reading only the item numbers
- * is what left other players' effects and wings off in the first place.
  */
 export function deserializeAppearance(app: DataView) {
   const cls = classFromAppearance(app);

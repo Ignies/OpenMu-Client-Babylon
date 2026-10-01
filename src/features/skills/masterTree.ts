@@ -1,30 +1,5 @@
 /**
- * The master skill tree - `CNewUIMasterLevel` (NewUIMasterLevel.cpp) minus
- * the drawing: the tree tables, the hero's learned master skill levels, the
- * rules that decide whether a node is open, and the tooltip text.
- *
- * Data (loaded once, on first `ensureMasterTreeData`):
- *   - `Data/Local/MasterSkillTreeData.bmd` - 512 BUX records of 24 bytes
- *     (`_MASTER_SKILLTREE_DATA`, NewUIMasterLevel.h:31) plus a 4-byte
- *     `GenerateCheckSum2` trailer (`OpenMasterSkillTreeData`): the node's
- *     index in the tree, class flags, group, cost, max level, arrow art, up
- *     to two required master skills, the skill number and the level-0
- *     display value. All three files live under `Local/`; the paths below
- *     are relative to `Data/`, and a wrong one is not a 404 but the SPA
- *     fallback page, which decodes to garbage - hence the range checks.
- *   - `Data/Local/<lang>/MasterSkillTooltip_<lang>.bmd` - 512 BUX records of 616
- *     bytes (`_MASTER_SKILL_TOOLTIP_FILE`): seven printf strings per skill.
- *   - `Data/Local/Skill.bmd` - 600 BUX records of 80 bytes: only the master
- *     icon index, the use type and the base skill (`SkillBrand`) are read.
- *
- * Driven by `MasterSkillList` (F3 53, on entering the game) and
- * `MasterSkillLevelUpdate` (F3 52, after a point is spent). The command
- * `learnMasterSkill` sends `AddMasterSkillPoint` (F3 52). Reads the point
- * count from `masterLevel.ts` and the weapon rule from `usability.ts`, so it
- * is listed after both.
- *
- * Read by the master tree window (`ui/…/masterSkills`) through the `skills`
- * facade.
+ * The master skill tree, `CNewUIMasterLevel` (NewUIMasterLevel.cpp, NewUIMasterLevel.h:31) minus the drawing; see readme.md.
  */
 import { onLanguageChanged, t, textTable } from '../../i18n';
 import type { TextKey } from '../../i18n/recipes';

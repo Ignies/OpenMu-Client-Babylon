@@ -37,42 +37,8 @@ import type { Entity, ISystemFactory, Item } from '../world';
 import { teleportMountAlpha } from './teleportSystem';
 
 /**
- * `Mounts[]` - the pet objects that live in the world rather than on the
- * wearer's skeleton (GOBoid.cpp:66-680).
- *
- *  - **Guardian Angel**: a boid. It drifts on a heading it re-rolls roughly
- *    every 32 ticks, turns back towards its owner once it is more than
- *    `FlyRange` away, and is nudged to stay between 100 and 200 units above
- *    the owner's feet.
- *  - **Uniria / Dinorant**: pinned to the rider's position and yaw, standing
- *    (action 0) or moving (action 2). A Dinorant drops 30 units below the
- *    rider, who is lifted the same 30 off the terrain (AnimationSystem).
- *
- * Only the *mounts* fade out inside a safe zone (`o->Alpha = 0`, the branch
- * each rideable type opens with - GOBoid.cpp:182, :323, :497). MODEL_HELPER
- * has no such branch (:604-621): the angel keeps flying, in town too. None
- * of them are created in Chaos Castle (`CreateMountSub`:68). The Imp is *not*
- * here: it is link-rendered on the owner's bone 34 (`PlayerObject.Pet`).
- *
- *  - **Dark Raven** (`CSPetDarkSpirit`, CSPetSystem.cpp:291-610): worn in the
- *    *left hand*, so it gets its own slot beside the helper pet. It circles
- *    its owner ~250 units up (350 over a Dark Horse, FlyRange 150) and, in a
- *    safe zone, lands beside the owner's shoulder instead of fading out.
- *    The perch is an approximation: the original glues it to bone 37, which
- *    a world object here cannot reach.
- *
- *  - **Followers** (`PetObject`, w_BasePet.cpp): the Demon, the Spirit of
- *    Guardian, Rudolph, the Panda, the Pet Unicorn and the Pet Skeleton.
- *    Each stands off its owner at a fixed height and crawls after him; none
- *    of them is ridden, fades in town, or plays more than one clip. Four of
- *    them also fetch zen dropped near their owner (`errand`), which is the
- *    whole point of a Panda.
- *
- *  - **Dark Horse / Fenrir**: pinned like the horns. The horse walks on
- *    clip 1; a Fenrir mirrors its rider's `PLAYER_FENRIR_*` clip family
- *    (`fenrirMountAction`, MoveMount GOBoid.cpp:200-266) and carries the
- *    eye / jaw glow and the variant-coloured body lightning of
- *    ZzzObject.cpp:855-895.
+ * `Mounts[]` and world pets: angel, horns, raven, followers, horse, Fenrir
+ * (GOBoid.cpp:66-680, CSPetSystem.cpp:291-610, w_BasePet.cpp). See ecs/readme.md.
  */
 
 const MU_UNIT = 1 / 100;

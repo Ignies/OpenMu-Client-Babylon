@@ -1,19 +1,6 @@
 /**
- * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
- * to `layers.ts`. Never imported; it only exists to be copied.
- *
- * Every effect file has the same three parts, in this order:
- *
- *   1. Tuning constants at the top, each with a comment saying what it is in
- *      real units (seconds, tiles, 0…1) and why it has that value.
- *   2. Module state + the functions that read it. State lives here, not in
- *      the facade, and readers are plain functions (`fooStrength()`).
- *   3. The exported `WeatherLayer` at the bottom, wiring `update` / `reset`.
- *
- * If the effect touches the ground, add a `TerrainOverlay` recipe in
- * `libs/mu/terrainOverlay.ts` whose `coverage` reads this file's reader.
- * If it falls from the sky, add an `AmbientRecipe` in `ambientWeather.ts`.
- * If it makes a sound, add a bed row in `../sound/ambientBeds.ts`.
+ * TEMPLATE - copy me to `<name>.ts` and list the layer in `layers.ts`. Never imported.
+ * The steps are in readme.md ("Change it").
  */
 import { ENUM_WORLD } from '../../core/types';
 import type { WeatherLayer } from './layer';

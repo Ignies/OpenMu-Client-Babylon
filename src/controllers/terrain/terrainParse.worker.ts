@@ -1,26 +1,8 @@
 /// <reference lib="webworker" />
 
 /**
- * Terrain parsing off the main thread (todo C8).
- *
- * Every parser reachable from here is pure: typed arrays in, typed arrays
- * out, no Babylon and no DOM. That is why `mapFileEncryption` and friends
- * import `common/binaryUtils` rather than `common/utils` - the latter pulls
- * in `Scene`/`Texture` and would drag the whole engine into this chunk.
- *
- * Request kinds:
- *
- *   'bulk'  - height + attributes + mapping + objects, straight from the
- *             downloaded bytes. This is the part that used to block the
- *             frame on every map change.
- *   'lightJpeg' - TerrainLight.OZJ's JPEG decoded (`terrainJpeg.ts`) and
- *             then the normal/luminosity pass over it.
- *   'light' - the same pass over floats the main thread read back from a
- *             GPU texture (the `?lightDecode=gpu` seam).
- *   'ground' - the ground mesh's vertex arrays from the parsed terrain
- *             (`common/terrain/groundArrays`); the main thread uploads them.
- *   'pack'  - the tile textures resampled into the layers of the
- *             sampler2DArray (`common/terrain/tilePack`).
+ * Terrain parsing off the main thread: 'bulk', 'lightJpeg', 'light', 'ground' and 'pack' requests
+ * (see readme.md). Everything reachable from here stays free of Babylon and the DOM.
  */
 
 import { parseTerrainAttribute } from './parseTerrainAttribute';

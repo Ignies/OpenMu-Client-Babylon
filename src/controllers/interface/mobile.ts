@@ -1,20 +1,6 @@
 /**
- * The one place the client decides it is being played with a thumb. Nothing
- * else may sniff the user agent or query `matchMedia` for this: the whole
- * mobile HUD, the touch-only input rules and every `.mu-mobile` style rule
- * hang off this answer, so there is exactly one of it.
- *
- * Coarse pointer *and* a touch point: a desktop with a touch monitor reports
- * coarse on its own, and a laptop trackpad reports touch points on its own.
- *
- * `?mobile=1` / `?mobile=0` overrides for the life of the page, which is how
- * the screenshot harness and a reviewer on a desktop see the mobile HUD. It
- * is deliberately not remembered: a stored override would leave a desktop
- * that once opened that URL on the touch HUD for good.
- *
- * Imported by `main.tsx` before the version loads, so it keeps no imports of
- * its own - the app graph behind `boot.tsx` reads `gameVersion` at module
- * scope and must not be pulled in early.
+ * The one place the client decides it is played by touch (`?mobile=1|0` overrides).
+ * Imported by `main.tsx` before the version loads, so it has no imports. See readme.md.
  */
 
 const ROOT_CLASS = 'mu-mobile';

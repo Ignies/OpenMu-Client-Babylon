@@ -1,34 +1,6 @@
-/**
- * The game master command catalogue, as data.
- *
- * Every entry is a command OpenMU already implements in
- * `GameLogic/PlugIns/ChatCommands`. The panel builds a `/line` from an entry
- * and sends it as ordinary chat, exactly as if it had been typed - there is no
- * other way to run one, and no way for the panel to run something the server
- * would refuse from the chat box.
- *
- * Parameter order and required flags are the ones the server's argument
- * classes declare, because it parses positionally when no `name=value` pair is
- * present (`CommandExtensions.TryParseArgumentsAsync`). The `set*` commands
- * take the **value first and the character second**, which is the opposite of
- * what their name suggests.
- *
- * All of these need `CharacterStatus.GameMaster` except `/openware`, `/npc`
- * and `/clearinv`, which any player may run but which do more for a game
- * master: the warehouse opens anywhere, any NPC store opens by id, and the
- * inventory cleared can be someone else's, for free.
- *
- * Everything a person reads is a `TextKey`, resolved where it is drawn - the
- * table is module scope, and a `t()` here would freeze at whatever language
- * was current when the module first loaded. The slash names themselves are the
- * server's and are never translated.
- *
- * The shape mirrors the server's own `AvailableChatCommand` message (command,
- * name, description, and per-parameter name / type / required / valid values),
- * so once the client declares itself as OpenMU 106.3 this table can be replaced
- * by the list the server sends for the logged-in character without the panel
- * changing. See `todo/client_version_106_3_migration.md`.
- */
+// The game master command catalogue, as data: commands from OpenMU's
+// `GameLogic/PlugIns/ChatCommands`, parsed positionally
+// (`CommandExtensions.TryParseArgumentsAsync`). See readme.md.
 
 import { t, type TextKey } from '../../i18n';
 

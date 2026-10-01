@@ -1,22 +1,6 @@
 /**
- * Monster body effects - what a monster draws on and around itself for as
- * long as it is in scope: the dust haze a Dark Knight stands in, a Yeti's
- * breath, a Bull Fighter's snort, a Death Knight's burning chest, the sand
- * a Tarkan monster raises walking and dying, the blood a Cursed King drips,
- * the lightning between Queen Rainer's limbs.
- *
- * The original draws all of it from `MoveCharacterVisual`
- * (ZzzCharacter.cpp:5583) once per 25 Hz tick, in a switch on the model, and
- * nearly every arm is one `CreateParticle` line behind `rand_fps_check(n)` -
- * true on one tick in `n`. `MONSTER_VISUALS` is that switch as a table: one
- * row per npc, one emitter per line, and a tick bank per monster rolling the
- * same 1/n each tick.
- *
- * Spawns go straight into the pools the other entries own (`emitBurst`,
- * `spawnJoint`, `spawnRing`, `spawnDebris`); this entry keeps only the
- * handles and the banks.
- *
- * Driven by: `ecs/systems/monsterVisualSystem.ts`. Read by: nobody.
+ * Monster body effects: `MoveCharacterVisual` (ZzzCharacter.cpp:5583) as a table, one row per npc
+ * and one emitter per `CreateParticle` line. Driven by monsterVisualSystem.ts. See fx/readme.md.
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
 import { ENUM_WORLD } from '../../core/types';

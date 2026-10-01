@@ -97,28 +97,8 @@ export const CLOUD_UNIFORMS = ['muCloudA', 'muCloudB', 'muCloudC'] as const;
 const OCTAVE_SCALE = [0.0035, 0.0125] as const;
 
 /**
- * How much finer than the authored scale the volumetric tier reads the field.
- *
- * The scale above is right for a sky and wrong for a floor, and the reason is
- * geometry: the dome shows hundreds of tiles of the deck at once, the ground
- * shows about forty. At one period per 285 tiles the ground sees a seventh of
- * a single cloud, so what lands on it is not a shadow but a uniform tint that
- * changes over minutes - measured against clouds-off, the whole visible field
- * moved together by one part in 140, with no edge anywhere in it.
- *
- * At 2.2 a cloud is about 130 tiles across, so one or two shadows are in view
- * and cross it in about a minute at the existing wind. The repeat that made
- * the coarse scale necessary is answered by the domain warp below rather than
- * by giving up resolution.
- *
- * It was 3, which is finer than the march can read: near the horizon a ray
- * steps about fifteen tiles, and asked for detail below that the march drew
- * the beat between the two as a corrugated stipple across the whole sky. The
- * detail argument on the field functions is the general answer and this is
- * the headroom left over it.
- *
- * 1 on every other tier, which is the sky Enhanced has always drawn, to the
- * texel.
+ * How much finer than the authored scale the volumetric tier reads the field (a cloud is
+ * about 130 tiles across at 2.2); 1 on every other tier. Why 2.2: readme.md.
  */
 const VOLUME_SCALE = 2.2;
 

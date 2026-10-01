@@ -1,32 +1,6 @@
 /**
- * The browser's own keyboard, kept off the game's.
- *
- * Ctrl plus a game key is a browser command in a tab. Ctrl+S sorts the
- * inventory and opened the save dialog, Ctrl+A opens the master skill tree
- * and selected the whole page, Ctrl+D opens the command window and
- * bookmarked the client - and Ctrl+W, the second potion slot with Ctrl held,
- * closed the tab outright in the middle of a fight.
- *
- * Three layers, strongest first:
- *
- *  1. `keyboard.lock()` while the document is in fullscreen. This is the only
- *     way a page is ever handed Ctrl+W, Ctrl+T, Ctrl+N, Ctrl+Tab or
- *     Ctrl+1..9: outside fullscreen the browser eats them before any listener
- *     runs. Chromium only, and F11 below is how the fullscreen the lock needs
- *     gets asked for.
- *  2. `preventDefault` on every reserved chord a page is allowed to cancel -
- *     reload, zoom, find, print, save, open, bookmark, history, caret
- *     browsing, the address bar, the function keys.
- *  3. `beforeunload` as the last net for what neither of those reaches:
- *     Alt+F4, the window's close button, Cmd+W on a Mac, Ctrl+W on a browser
- *     with no lock. The page cannot stop those, only ask.
- *
- * Only the default action is cancelled, never the propagation: the hot keys
- * and the walk read the same event afterwards, so Ctrl+S still sorts the bag.
- *
- * Bare game keys are not this module's business - Tab, Alt and Space are
- * guarded for their own reasons in `ecs/systems/keyboardInputSystem.ts`.
- * This one owns chords and function keys.
+ * The browser's own keyboard, kept off the game's: keyboard lock in fullscreen, `preventDefault`
+ * on reserved chords, `beforeunload` as the last net. See readme.md.
  */
 
 import { GameOptions, onGameOptionsChanged } from '../../features/options/gameOptions';

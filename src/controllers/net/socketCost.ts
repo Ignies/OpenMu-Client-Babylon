@@ -1,21 +1,6 @@
 /**
- * What the game socket costs the frame.
- *
- * Packets are drained synchronously inside the WebSocket `message` event
- * (`libs/sockets/createSocket.ts`), with no budget: everything that arrived
- * is parsed and handed to its handler before the browser is given the thread
- * back. That is fine at a steady trickle and is not fine when a burst
- * arrives at once - a server catching up after a stall delivers a second's
- * worth of movement in one message, and the whole burst is paid for between
- * two animation frames, which the player sees as a frame-rate drop rather
- * than as lag.
- *
- * So "is the server hurting my frame rate" is answerable, but only with a
- * number: how long the socket held the thread, not how much data arrived.
- * That is what this counts, for the overlay to print.
- *
- * Store-free and engine-free on purpose, so it can be unit tested and so the
- * socket does not have to reach into rendering to report.
+ * What the game socket costs the frame: how long each drain held the main thread, per
+ * one-second window, for the perf overlay. Store-free and engine-free. See readme.md.
  */
 
 /** The window the rates are averaged over. */

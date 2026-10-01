@@ -12,22 +12,8 @@ import {
 import type { Entity, ISystemFactory, World } from '../world';
 
 /**
- * Owns the lifetime of every emoji bubble and its world anchor.
- *
- * The side anchor has to sit on whichever shoulder currently points at the
- * camera and swap across when the character turns around. The character's
- * side axis is the local +X of its rendered node: `RenderSystem` gives the
- * node a Y rotation of `2π − yaw` (`toRenderAngles`), and Babylon's
- * left-handed `RotationY(θ)` sends local +X to `(cos θ, 0, −sin θ)`, so with
- * θ = 2π − yaw that axis is `(cos yaw, 0, sin yaw)`.
- *
- * Which of the two shoulders is "facing the camera" is then just the sign
- * that puts the anchor on the camera's side of the spine - so the anatomical
- * polarity of the axis never has to be worked out, and the same code is
- * correct for players, NPCs and monsters alike.
- *
- * This runs before `CalculateScreenPositionSystem`, which projects `anchor`
- * with the same view-projection it uses for the name balloons.
+ * Owns the lifetime of every emoji bubble and its world anchor; runs before
+ * `CalculateScreenPositionSystem`, which projects it. See ecs/readme.md.
  */
 
 /** Bubbles never outlive this, whatever a definition asks for. */

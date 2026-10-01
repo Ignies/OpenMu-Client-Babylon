@@ -18,22 +18,8 @@ import { tierIndex } from '@/controllers/lighting/lightingQuality';
 import { weather } from '@/controllers/weather';
 
 /**
- * Skill → visual recipe. The **consumer** of the effects layer
- * : every row in `SKILL_VISUALS` is a handful of
- * `effects.spawn(...)` calls at the four moments a skill has - `cast` at the
- * caster's hands, `travel` from caster to target (a projectile whose arrival
- * fires `impact`), `impact` at the target, `area` at the ground point. A
- * skill with no row falls back on its type (`fallbackFor`), so nothing is
- * clip-only. `BUFF_VISUALS` is the persistent look of a MagicEffectStatus
- * effect, kept per entity until the server cancels it.
- *
- * The rows follow the original's per-skill spawn table (ZzzCharacter.cpp
- * `AT_SKILL_*` impact block, `AttackStage` charge stages, WSclient.cpp
- * `ReceiveMagic` cast spawns; ZzzEffect.cpp `CreateEffect` / `CreateParticle`
- * / `CreateJoint`): each row cites the MODEL_* / BITMAP_* it stands in for,
- * lifetimes are the original's 25 Hz ticks ÷ 25, distances its centimetres
- * ÷ 100, `Light` tints are the colours. Light is not decided here:
- * `lighting/skills.ts` owns `SKILL_LIGHTS` and is called alongside.
+ * Skill visual engine: step DSL, dispatch, fallbacks, buff looks (see readme.md).
+ * Ports ZzzCharacter.cpp `AT_SKILL_*` / `AttackStage`, WSclient.cpp `ReceiveMagic`, ZzzEffect.cpp `CreateEffect`.
  */
 
 // ---- units ------------------------------------------------------------------

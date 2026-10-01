@@ -14,25 +14,8 @@ import { decodeKtx2, isKtx2, loadTranscoder, type TranscoderUrls } from '../asse
 import type { PbrWorkerRequest, PbrWorkerResponse } from './pbrMaps.worker';
 
 /**
- * PBR map sets for the Enhanced material ("authored maps").
- *
- * MU's art is diffuse-only, so the maps are derived from it (`pbrDerive.ts`).
- * Hand-authored maps win over the derivation: `Data/PBR/manifest.json` maps a
- * texture's source name to files under `Data/PBR/`. Missing manifest = all
- * derived; missing entry = derived for that texture.
- *
- * The derivation reads the texture's *own bytes* - the encoded image the
- * glTF loader (and a texture pack swap) leaves on `texture._buffer`, or the
- * file behind `texture.url` - decoded with `createImageBitmap` in a worker,
- * or with the Basis transcoder when a texture pack shipped it as KTX2.
- * It used to read the pixels back from the GPU, and Babylon's readback is a
- * synchronous flush of everything queued: the frame stopped for as long as
- * the GPU took to drain, from inside a material bind, the first time each
- * new texture came on screen. Online that is every player and monster that
- * walks into view, so the game hitched every few seconds for as long as it
- * ran - 1 ms a time on an RTX 5070, up to 450 ms on an integrated Radeon.
- * The readback is kept only as the last fallback, for a texture whose bytes
- * cannot be found or decoded.
+ * PBR map sets for the Enhanced material: `Data/PBR/manifest.json` entries win,
+ * else they are derived from the texture's own bytes in a worker (`pbrDerive.ts`).
  */
 
 export type PbrMapSet = {

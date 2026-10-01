@@ -3,41 +3,8 @@ import { decodeTGA } from '../assets/mu/tga';
 import { fetchTerrainFile } from '../assets/mu/prefetchWorld';
 
 /**
- * The map's own grass art, and the answer to which tiles grow anything.
- *
- * The original draws its grass pass from a *separate* texture set -
- * `TileGrass01/02/03.OZT`, alpha cards of grass tufts - indexed by the tile's
- * first splat layer: `BITMAP_MAPGRASS + TerrainMappingLayer1[...]`
- * (ZzzLodTerrain.cpp:1620). Then:
- *
- * ```cpp
- * BITMAP_t* pBitmap = Bitmaps.FindTexture(Texture);
- * if (pBitmap) { ...draw the card... }
- * ```
- *
- * **That null check is the whole per-map rule**, and it is why the first cut
- * of this layer put grass in the Dungeon and on Devias' ice. Slot 0 is named
- * `TileGrass01`, but the name is a filename convention, not a statement about
- * what the texture depicts: `World2/TileGrass01.jpg` is dungeon flagstone and
- * `World3/TileGrass01.jpg` is ice. What actually decides is whether the world
- * folder ships the matching *card*:
- *
- * | World | Grass01 | Grass02 | Grass03 |
- * | --- | --- | --- | --- |
- * | 1 Lorencia | card | card | card |
- * | 2 Dungeon | - | - | - |
- * | 3 Devias | - | card | - |
- * | 4 Lost Tower | card | - | card |
- * | 8 Tarkan | - | - | - |
- *
- * So the Dungeon grows nothing, and Devias grows grass only where its splat
- * says layer 1 - on the ice, which is right: Devias' card is *frosted* grass,
- * pale blue-white, authored for exactly that.
- *
- * Which is also why the blade takes its colour from here and not from the
- * ground tile it stands on. The ground tile is ice; the grass is frost-white
- * grass. One is the floor, the other is the plant, and the original always
- * kept them as two different textures.
+ * The map's grass cards (`TileGrass01/02/03.OZT`, `BITMAP_MAPGRASS + layer1`, ZzzLodTerrain.cpp:1620):
+ * a slot grows grass only if the world ships its card, and the blade takes its colour from it.
  */
 
 /** `BITMAP_MAPGRASS + layer1` reaches these three, and no more. */

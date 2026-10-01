@@ -21,24 +21,8 @@ import type { LookProfile, Rgb } from '../../lighting/profiles';
  */
 
 /**
- * Share of the surface's extinction the additive half of a pixel takes.
- *
- * The depth is the surface's, and an additive pass is drawn on top of its
- * background, so the emitter sits somewhere between the camera and that
- * depth and its own distance is in no buffer. A share is the estimate that
- * stays monotone in distance: zero at the camera, never more than the
- * surface's, so an emitter can never come out brighter than the ground it
- * stands on.
- *
- * This was a fixed 12 tiles, which every outdoor profile's `fog.start`
- * (20-25) already sits past, so the extinction was identically zero: a torch
- * at the map edge burned at its full HDR value over terrain the haze had
- * washed to the horizon colour, which reads as a glowing ball with nothing
- * under it. Under 1 because the share is an upper bound - rain and motes a
- * few tiles out are drawn over whatever the frame has behind them, and the
- * far ground's whole extinction would put them out.
- *
- * Dev seam: `?ehaze=<share>`.
+ * Share of the surface's haze an additive pixel takes; the emitter is nearer
+ * than the surface, so never more. Dev seam: `?ehaze=<share>`.
  */
 const EFFECT_HAZE_SHARE = 0.85;
 

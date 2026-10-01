@@ -1,21 +1,6 @@
 /**
- * Ping - the pointer a player drops on the ground with Shift + middle click,
- * and the trail running back to their body, so everyone nearby sees both
- * where they are pointing and who is pointing.
- * See `documentation/ping/ARCHITECTURE.md`.
- *
- * Composed out of two entries rather than owning meshes of its own (the
- * `aura.ts` precedent): a `ring` decal drapes the marker over the terrain,
- * so it follows a slope instead of clipping into it, and a straight `joint`
- * bolt draws the trail with both ends live - the near one follows the owner
- * while they walk, the far one stays on the spot they marked.
- *
- * This entry is also the register of who has a pointer out: one per owner,
- * and a second ping from the same owner replaces the first. That is what the
- * "no new pointer while one is live" rule is checked against, on the sending
- * client before a frame goes out and on every receiver.
- *
- * Driven by: `ping/pingNet.ts`. Read by: `ping/pingNet.ts` (`pingLiveFor`).
+ * Ping: the Shift + middle click ground pointer and its trail to the owner, built from a `ring` and
+ * a `joint`; one per owner. Driven and read (`pingLiveFor`) by net/pingNet.ts. See fx/readme.md.
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
 import { PING_LIMITS } from '../net/protocols/pingProtocol';

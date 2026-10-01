@@ -1,18 +1,5 @@
 /**
- * The hero's master level, master experience and unspent master points -
- * the original's `Master_Level_Data` (`nMLevel`, `lMasterLevel_Experince`,
- * `lNext_MasterLevel_Experince`, `nMLevelUpMPoint`).
- *
- * Driven by the packets: `MasterStatsUpdate` (F3 50, on entering the game
- * with a master character), `MasterCharacterLevelUpdate` (F3 51, a master
- * level-up), `ExperienceGained` / `ExperienceGainedExtended` (C3 16, every
- * kill share - master experience once the hero is in master progression)
- * and, through `masterTree.ts`, the point count `MasterSkillLevelUpdate`
- * echoes back after a point is spent.
- *
- * Read by the master exp bar (`ui/…/masterSkills/masterExpBar`) and the
- * master tree window through `skills.masterLevel` / `skills.masterExp…`, and
- * by `masterTree.ts` (the point gate).
+ * The hero's master level, master experience and unspent points (`Master_Level_Data`); see readme.md.
  */
 import { observable, runInAction } from 'mobx';
 

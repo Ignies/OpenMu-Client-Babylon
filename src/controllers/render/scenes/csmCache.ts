@@ -18,30 +18,8 @@ import {
 import { devQuery, devQueryNumber } from '@/core/devSeams';
 
 /**
- * Cached static cascades.
- *
- * The cascades are redrawn from scratch every frame and most of what they
- * hold never moves: at the Devias spawn the shadow pass was 342 of the
- * frame's 542 draws, nearly all of it map geometry standing still. This
- * keeps one depth cache per cascade holding exactly those static casters,
- * and every frame copies the cache into the cascade layer *instead of
- * clearing it*, then draws the movers on top.
- *
- * The image is unchanged because the sampling side is untouched: same map,
- * same filter, same shader, same matrices. A cached depth image is what a
- * fresh render would have produced as long as the cascade's transform matrix
- * and the static set are the same, and that is exactly what `update` tests -
- * the matrix is compared element by element, so an input nobody thought of
- * (the director moving the sun, a tier switch, a Babylon internal) comes out
- * as a miss rather than as a stale shadow.
- *
- * Hits are made common by holding the cascade windows still: each is fitted
- * a little wider than its frustum slice needs and kept until the slice would
- * leave it. The map is enlarged by the same factor, so texels per tile - and
- * with them the PCF kernel's reach in world units - stay where they were.
- *
- * Pinned to `@babylonjs/core` 7.51.1; `csmCache.test.ts` fails if the private
- * members this leans on move.
+ * Cached static cascades: static casters are drawn once per cascade and copied
+ * in each frame, movers on top. Pinned to `@babylonjs/core` 7.51.1.
  */
 
 /** How much wider than its slice a cascade window is fitted. */
@@ -111,20 +89,8 @@ export const CSM_PRIVATE_METHODS = [
 ] as const;
 
 /**
- * A caster that cannot move, so its depth can be drawn once and kept.
- *
- * Two kinds. A prop-batch chunk is a thin-instance clone with a frozen world
- * matrix and `doNotSyncBoundingInfo` (common/propBatches.ts), placed when its
- * cell is built and never touched again. A per-object map object carries
- * `staticCaster` while no clip of its own is running (`ModelObject`); the
- * node itself never moves, because the render system writes a map object's
- * location only when it changes and a map object's never does. At the Devias
- * spawn the two are 46 and 143 of the 221 casters, so leaving either out
- * leaves most of the pass behind.
- *
- * Anything mid-fade is a mover: the depth pass dithers a transparent
- * caster's shadow by the mesh's `visibility`, so a ceiling piece fading out
- * writes a different map every frame.
+ * A caster that cannot move: a prop-batch chunk, or a map object marked
+ * `staticCaster`. Anything mid-fade (`visibility < 1`) is a mover.
  */
 export function isStaticCaster(mesh: AbstractMesh): boolean {
   const meta = mesh.metadata;

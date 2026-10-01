@@ -1,18 +1,6 @@
 /**
- * Rays - a burst of straight trail joints born together and drawn as one
- * ribbon mesh: the original's loops of `CreateJoint(BITMAP_LIGHT, ...)` (the
- * combo's 60 rays) and `CreateJoint(BITMAP_JOINT_SPARK, ...)` (Fire Breath's
- * 40 sparks), each a head flying along its own `Angle` and dragging its tails.
- *
- * joint.ts draws a trail as its own GreasedLine; forty of them created in one
- * frame cost a 30 ms hitch and forty draw calls. Here every ray is a line of
- * one GreasedLine (joint.ts `makeLine`, same material and fade), so a burst is
- * one mesh, one material set-up and one draw. What a single mesh cannot do is
- * give each ray its own brightness, which none of these needs: they are born
- * on one tick with one `Light` and decay together. A ray whose life is over is
- * collapsed onto its head and draws nothing.
- *
- * Driven by: `effects.spawn('rays', ...)`. Read by: nobody.
+ * Rays: a burst of straight trail joints drawn as one GreasedLine (`CreateJoint(BITMAP_LIGHT, ...)`
+ * for Combo, `CreateJoint(BITMAP_JOINT_SPARK, ...)` for Fire Breath). See fx/readme.md.
  */
 import type { Scene, Vector3 } from '../render/babylon/exports';
 import { LiveList, TICK, fadeOut, type RGB } from './core';

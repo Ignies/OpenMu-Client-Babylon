@@ -9,27 +9,8 @@ import {
 import { resolveDataUrl } from './mu/dataFolder';
 
 /**
- * Downloading the game's assets before entering the world.
- *
- * The player picks groups on the pre-game screen; this fetches them into the
- * service worker's cache (`public/sw.js`) so the first walk through a map is
- * not a slideshow. Groups and their sizes come from `assets-index.json`,
- * written by `tools/assetsIndex.ts` at the end of the build.
- *
- * Two things here are not obvious and both are load-bearing:
- *
- *  - **The gzip latch has to be settled first.** The build ships a `.gz`
- *    beside every compressible asset and the client asks for whichever of the
- *    two URLs it decided on, once, on its first compressible read. A download
- *    that runs before that decision warms the plain URLs while the game later
- *    asks for the sidecars: every byte downloaded twice and nothing hit. So
- *    `settleSidecars()` runs before the first fetch and the answer decides
- *    every URL built here.
- *
- *  - **The size shown is the transfer size, not the size on disk.** A GLB is
- *    a quarter of its weight gzipped; the whole model set is 329 MB on disk
- *    and 93 MB over the wire. Quoting the disk number would talk players out
- *    of the cheapest group there is.
+ * Pre-game download of asset groups (`assets-index.json`, `tools/assetsIndex.ts`)
+ * into the service worker cache (`public/sw.js`). See assets/readme.md.
  */
 
 export type AssetGroup = {

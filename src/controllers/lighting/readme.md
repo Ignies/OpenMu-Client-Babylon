@@ -1,0 +1,121 @@
+# lighting
+
+Everything that throws light onto the map (torches, items, characters, skills, server effects,
+the Icarus thunder) and the per-map look around it: key lights, sky, clouds, haze and shadow
+policy. It knows how to light something, never which skill or item asks for it.
+
+## Public API
+- `lighting` (`index.ts`): the facade. `update(map, dt)`, `reset()`, `register(layer)`,
+  `layersFor(map)`; readers `emitters(map)`, `liveCount`, `characterIsLit(e)`, `look()`;
+  commands `omen(name)`, `skillTargeted`, `skillArea`, `skillAt`, `skillTrail`, `skillCue`,
+  `skillBody`, `skillFollow`, `skillSpot`, `skillLand`, `skillStrike`, `skillHold`, `arrow`,
+  `objectEffect`, `lightCharacter`, `snuffCharacter`, and `flash(scene, recipe, anchor)` for an
+  ad-hoc light.
+- `lightSource.ts`: `LightSource.attach`, `LightRecipe`, `LightAnchor`, `PRIORITY_*`.
+- `recipes.ts`: the colour presets (`flame`, `ember`, `arc`, `frost`, `venom`, `tide`, `shade`,
+  `holy`, `spark`) and `effectLight(colour, extent, seconds)` for the graded tiers.
+- `skills.ts`: `SkillLight` (the type of a skill's `light` field), `SKILL_LIGHTS` (filled by
+  `registerSkills`), `ARROW_LIGHTS`, `EFFECT_LUMINOSITY`, `CAST_HEIGHT`.
+- `mapObjectLights.ts`: `LightEmitter` (map specs build their light tables from it),
+  `lightMapObject`, `lightEmittersFor`. `mapObjectLightAdapter.ts`: `MapObjectLights`, the
+  `ModelObject` host. `lightCarrier.ts`: `LightCarrier`, a light without a drawn body.
+- `effectLights.ts`: `createEffectLight`, `createMovableFlare` (flare cards; they light nothing).
+- `items.ts`: `lightItem`, `itemSelfLight`. `sky.ts`: `strikeThunder`.
+- `lightingQuality.ts`: the tiers (`lightingTier()`, `tierIndex()`: Classic, Enhanced, Ultra),
+  `pointLightBudget`, MSAA and CSM state.
+- `pointLightPool.ts`: `initPointLightPool`, `updatePointLightPool`, `registerPointLightEmitter`.
+- Look: `director.ts` (`createLookDirector`, `lookDirector`), `profiles.ts` (per-map
+  `LookProfile`, area and omen looks), `keyRig.ts`, `shadowPolicy.ts`, `skyDome.ts`, `horizon.ts`,
+  `clouds.ts`, `lightModel.ts`, `lightTint.ts`; read by terrain, render, item_fx and weather.
+
+## How it works
+- Sources: a `LightSource` registers once into two sinks, the terrain delta texture
+  (`terrain/terrainDynamicLight.ts`, the original's `AddTerrainLight`) and the point-light pool
+  (`pointLightPool.ts`). It is driven by a `LightRecipe` (colour, range, flicker or pulse,
+  envelope) and an anchor (a position the host mutates, a `follow` callback or a `travel` target).
+- Entries own their sources; `LIGHTING_LAYERS` (`layers.ts`) is the only list of them. Each frame
+  `TerrainLightSystem` ticks the look director, calls `lighting.update` (all sources, then every
+  entry), then updates the pool and the terrain delta. `app/lifecycle.ts` calls `lighting.reset()`
+  on a map change, which disposes every source before the entries forget their handles.
+- Entries: `mapObjectLights` (torches and lamps, ZzzObject.cpp `MoveObjectSetting` /
+  `RenderObjectVisual`), `items` (+9..+15 gear and drops, while improved item effects are on), `characters`
+  (ZzzCharacter.cpp:5790-6005), `skills` (ZzzEffect.cpp ranges, cited per row), `objectEffects`
+  (level-up, shields, swirl; ours), `sky` (Icarus thunder, ZzzObject.cpp:4204).
+- Skill lights: `registerSkills` copies each skill's `light` field into `SKILL_LIGHTS`. A row has
+  moments (`cast`, `travel`, `impact`, `area`, `trail`, `follow`, `land`, `hold`, `arrow`,
+  `bodies`, `spots`, `strike`, `timed`); `enhanced` replaces moments from the Enhanced tier up.
+  Master skills fall back to their base row; unknown wizardry gets `DEFAULT_WIZARDRY_CAST`.
+  `trail` lights only run on Ultra.
+- The look: `director.ts` composes `LookState` once a frame from the map's `LookProfile`, the area
+  (a tavern), the omen and `GameOptions`, then hands each writer its slice (key rig, shadows, sky
+  dome, skyline, AO, haze, post chain). It writes no Babylon state itself. Classic keeps the
+  original look; Enhanced and Ultra add the structured key, CSM, SSAO and haze.
+
+## Depends on / used by
+- uses: terrain (`terrainDynamicLight`, consts), render (Babylon exports, `materialQuality`,
+  `renderingStyle`, `scenes/*` for the director's writers), fx (`MODEL`, particles, effect groups),
+  item_fx (`itemVisualTier`), maps, net (`serverTime`), assets, `core`, the `skillsDatabase` and
+  map specs in `versions/shared`. Old exceptions to the dependency rule are listed in
+  `tools/checks/baselines/deps.json` (options, skill aliases, map specs).
+- used by: `controllers.ts`, `app/lifecycle.ts`, ECS systems (terrain light, character light,
+  item glow, object effect, skill cast, weapon trail, model loader, character select), skills
+  (`define.ts`, `index.ts`, `visuals.ts`), sound (`crackle.ts`), fx, terrain, render, item_fx,
+  weather, `features/events/invasion.ts` (`omen`), every skill file that lights itself, and the
+  map specs and object classes in `versions/shared/maps/`.
+
+## Change it
+- add an entry: copy `_template.ts` to `<name>.ts`. Keep three parts in order: (1) tuning
+  constants and the recipe table, each in real units (tiles, seconds, linear RGB) with why;
+  (2) module state and its commands (make lights with `LightSource.attach` and keep the handle so
+  `emitters()` can report it); (3) the exported `LightingLayer` with `update` / `reset` /
+  `emitters`. Add it to `LIGHTING_LAYERS` in `layers.ts`. What triggers the light (an ECS system,
+  a packet handler, a map object class) stays where it happens and calls the command, or a facade
+  wrapper when more than one consumer needs it.
+- change one skill's light: its `light` field in `versions/shared/skills/<class>/<skill>/index.ts`.
+- add a map's torches: rows keyed by object type in the map's `*_LIGHTS` table (its `spec.ts`,
+  or `mapObjectLights.ts` for maps without one), listed in `LIGHTS_BY_WORLD` (`mapObjectLights.ts`).
+- add an NPC or monster light: a row in `CHARACTER_LIGHTS` (`characters.ts`).
+- change a map's look: its profile in `profiles.ts`.
+
+## Tests
+- `clouds.test.ts`: cloud uniform values for a clock, scroll wrapping, the sun step, binding.
+- `lightingQuality.test.ts`: `sceneTargetSamples` (MSAA per pass, Classic at one sample).
+- `recipes.test.ts`: `effectLight` hue, reach and gain ceiling, minimum range.
+- The skill golden tests (`versions/shared/skills/skillTables.golden.test.ts`,
+  `skillVisuals.golden.test.ts`) record every skill's light.
+
+## Notes
+- `lightSource.ts`: the original lights the ground under about 70 effects every frame they exist
+  (ZzzEffect.cpp: BITMAP_FLAME range 3, BITMAP_LIGHTNING 6, MODEL_WAVE 5, MODEL_FISSURE 10, every
+  arrow type 2) and under the blacksmith's forge and the Devias trader's brazier
+  (ZzzCharacter.cpp); each light dies with its effect. That needs a lifetime with an envelope, a
+  moving position and an instant start (the pool's 0.35 s fade-in would turn a lightning strike
+  into a swell), so `instant` defaults to true and map lights pass false.
+- `characters.ts`: driven by `CharacterLightSystem`, which calls `lightCharacter` /
+  `snuffCharacter` for entities with an `npcType`; `heightOffset` is where on the body the light
+  hangs. Player gear is `items.ts`, not this. Rows marked `improvedOnly` are ours: the floor light
+  under a monster that carries a glow (Bahamut's lure, the Lost Tower Shadow); they pulse with
+  the glow card and are withheld on Classic. A negative row (Tantallos, Death Beam Knight:
+  `Vector(-1.3, -1.3, -1.3)`, range 3) darkens the floor: the terrain delta byte has no sign, so
+  Classic shows nothing, and the pool on higher tiers carries it as a negative point light.
+- `skills.ts` (`ARROW_LIGHTS`): the original lights the arrow body every frame it flies, range 2,
+  with `Luminosity = (rand() % 4 + 7) * 0.1` (ZzzEffect.cpp:6764) as the flicker. The arrow is a
+  tile off the ground, so its pool is what lights the grass and the shooter. The metal bolts
+  (MODEL_ARROW_STEEL, _THUNDER, _LASER, _V, _SAW, _SPARK, _DARKSTINGER) have no light there and no
+  row here.
+- `clouds.ts` (`VOLUME_SCALE`): the authored scale suits the sky, not the ground. The dome shows
+  hundreds of tiles of the deck, the ground about forty, so at one period per 285 tiles a shadow
+  became a uniform tint. At 2.2 a cloud is about 130 tiles across and one or two shadows cross the
+  view in about a minute; the domain warp hides the repeat. 3 was too fine for the march near the
+  horizon (steps of about fifteen tiles) and drew a corrugated stipple.
+- `profiles.ts` (`underworld`): Devias' ravines are `NoGround` tiles that the ground mesh sends
+  past the far plane. The fog is integrated along the ray, so a ray down a hole ends black and a
+  ray that stops on a cliff a few tiles down comes back half fogged; there is no edge anywhere.
+- `skyDome.ts` (`CLOUD_PLANET_RADIUS`): a flat deck meets a level ray at infinity, so the layer
+  used to fade out below 17 degrees, which in first person was half the sky. A shell gives the
+  deck a horizon (about 95 tiles overhead, 1050 at eye level) so clouds compress into a band. A
+  planet's radius would put that horizon past the map edge.
+- `skyDome.ts` (`floor`): without it a ravine shows the clear colour, the same pale blue as the
+  sky. The clear colour cannot be darkened because it also fills the top of a downward view. A
+  screen-space mask cannot tell a hole from a card against the sky (both are depth 0), and tries
+  at it blacked out grass cards on the rim; geometry riding the camera can.

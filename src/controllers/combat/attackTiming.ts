@@ -1,22 +1,6 @@
 /**
- * The hero's `AttackTime` latch (w_CharacterInfo.h:247, ZzzCharacter.cpp:4018-4025):
- * a swing sets `AttackTime = 1`; every reference tick (25 Hz) adds one,
- * **independent of the clip's PlaySpeed**; `AttackStage` / `AttackEffect`
- * fire their sounds and sparks on `CheckAttackTime(n)` - true exactly once
- * per swing when the counter passes `n` - and the swing state ends when the
- * counter reaches `g_iLimitAttackTime` (15) or the clip reaches its hit key
- * (`AnimationFrame >= 5`, ZzzCharacter.cpp:2755 - the frame advances by
- * PlaySpeed per tick), which forces the counter to the limit.
- *
- * The original sends `SendHitRequest` on the click itself (ZzzInterface.cpp
- * :3355, right after `AttackTime = 1`); we latch the `HitRequest` to the hit
- * key instead so the packet lands with the blow: the consumer hands over a
- * callback, this entry fires it once when the clip reaches the key. Because
- * the key is reached at `key / PlaySpeed` ticks, a slow clip reaches it
- * *after* the 15-tick limit - the limit only ends the swing once the blow
- * has fired (see the table at `hitTickFor`). Driven by `attackSystem`
- * (`startAttack`); read by `attackSystem`, `combatSfxSystem` and any effect
- * that wants a hit-frame moment (`checkAttackTime`).
+ * The hero's `AttackTime` latch (w_CharacterInfo.h:247, ZzzCharacter.cpp:4018-4025,
+ * :2755; ZzzInterface.cpp:3355). The hit request fires on the hit key. See combat/readme.md.
  */
 import type { PlayerAction } from '@versions/shared/objects/enum';
 import { REFERENCE_FPS } from '../anim/playSpeed';
@@ -61,20 +45,8 @@ let hitTick = 0;
 let onHit: (() => void) | null = null;
 
 /**
- * Tick at which a clip played at `playSpeed` keys per tick reaches its hit
- * key: `AttackTime` counts 1, 2, 3… at 25 Hz while `AnimationFrame` advances
- * by `playSpeed` per tick, so `AnimationFrame >= key` is true at
- * `1 + key / playSpeed`. The 15-tick limit must NOT cut this off:
- *
- * | PlaySpeed | who                        | hit tick (key 5) | seconds |
- * |-----------|----------------------------|------------------|---------|
- * | 0.25      | level-1 swordsman          | 21.0  (> 15)     | 0.84    |
- * | 0.36      | GM / ~30 attack speed      | 14.9  (≈ limit)  | 0.60    |
- * | 0.60      | fist / mid-game speed      |  9.3             | 0.37    |
- * | 1.00      | end-game speed             |  6.0             | 0.24    |
- *
- * `clipTicks` (the clip's length in ticks at this speed) caps it: if the
- * clip would end before the key, the blow lands with the clip's last frame.
+ * Tick at which a clip at `playSpeed` reaches its hit key: `1 + key / playSpeed`,
+ * capped by `clipTicks`. The 15-tick limit must not cut it off. See combat/readme.md.
  */
 export function hitTickFor(
   action: PlayerAction,

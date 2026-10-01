@@ -1,18 +1,5 @@
 /**
- * Whether the hero can cast a skill right now, and why not - the client-side
- * half of `CNewUISkillList::RenderSkillIcon`'s `bCantSkill` (the greyed
- * icon) plus the moment-to-moment gates the cast system checks before it
- * sends (`CheckSkillUseCondition`, mana / AG, `CheckSkillDelay`).
- *
- * Two readers, on purpose: `skillRequirementsMet` is the *static* rule -
- * class, level, energy, the weapon a weapon-skill hangs off - and is what
- * greys the icon; `canUseSkill` adds the *transient* gates (mana, AG, the
- * running delay, the safe zone the hero stands in) and is what the cast
- * system and the tooltip ask.
- *
- * Driven by `Store.playerData` (stats, hands, tile, skills) and `cooldowns.ts`
- * (listed before this entry). Pure readers over MobX state: no clock, so no
- * `update`; nothing held, so no `reset`.
+ * Whether the hero can cast a skill now and why not (`bCantSkill`, `CheckSkillUseCondition`); see readme.md.
  */
 import { CharacterClassNumber } from '../../core/types';
 import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';

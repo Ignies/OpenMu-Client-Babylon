@@ -1,19 +1,6 @@
 /**
- * Re-point GreasedLines in place. `GreasedLineMesh.setPoints` rebuilds the
- * whole mesh every call: fresh typed arrays, seven new GPU buffers and a new
- * vertex array object at the next draw. A line that moves every frame with a
- * fixed point count only needs its positions and each point's previous / next
- * neighbour rewritten, so this keeps one updatable buffer per attribute and
- * writes into it.
- *
- * Same layout `GreasedLineMesh._setPoints` builds (greasedLineMesh.js): two
- * vertices per point, lines one after another, open ends (an end point is its
- * own neighbour). The length counters are written once as each point's index
- * ratio: they only gate `visibility` and dashes, and a line drawn whole needs
- * neither to follow its length. Side signs, UVs, widths, indices and colour
- * pointers stay as the first build left them.
- *
- * Driven by: spiritSwarm.ts. Read by: nobody.
+ * Re-point GreasedLines in place instead of `setPoints`, which rebuilds the mesh; same layout as
+ * `GreasedLineMesh._setPoints` (greasedLineMesh.js). Driven by spiritSwarm.ts. See fx/readme.md.
  */
 import { Buffer, VertexBuffer, type GreasedLineMesh } from '../render/babylon/exports';
 

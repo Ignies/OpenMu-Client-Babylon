@@ -2,18 +2,12 @@
  * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
  * to `layers.ts`. Never imported; it only exists to be copied.
  *
- * Every effect file has the same three parts, in this order:
- *
- *   1. Tuning constants at the top, each with a comment saying what it is in
- *      real units (seconds, tiles, 0…1, linear RGB) and why it has that value.
- *   2. Module state (a `LiveList` from core.ts plus any pool this entry owns)
- *      and the functions that read it. State lives here, not in the facade.
- *   3. The exported `EffectLayer` at the bottom, wiring `update` / `reset` /
- *      `spawn`.
- *
- * Pools come from core.ts: `additiveMaterial` + `acquireCard` for a handful
- * of billboards, `particleSystemFor` / `emitBurst` / `Emitter` for many.
- * Shared colours, textures and particle recipes go in `recipes.ts`.
+ * Three parts, in this order: 1. tuning constants in real units (seconds,
+ * tiles, 0…1, linear RGB), each saying why; 2. module state (a `LiveList`
+ * from core.ts plus any pool this entry owns) and its readers; 3. the exported
+ * `EffectLayer`, typed `EffectLayer<Options, '<name>'>` so `effects.spawn`
+ * stays typed. Pools come from core.ts; shared data goes in `recipes.ts`.
+ * See fx/readme.md.
  */
 import type { Scene, Vector3 } from '../render/babylon/exports';
 import { LiveList, acquireCard, additiveMaterial, releaseCard, fadeOut, WHITE, type RGB, type Card } from './core';

@@ -1,20 +1,8 @@
 import { convertBux } from './mapFileEncryption';
 
 /**
- * `Data/World{n}/Minimap.bmd` - the NPC / portal markers drawn over the
- * minimap (`CNewUIMiniMap::LoadImages`). The file is `MAX_MINI_MAP_DATA`
- * (100) BUX-encoded `MINI_MAP_FILE` records, a 45-byte tail and a 4-byte
- * checksum (`GenerateCheckSum2(..., 0x2BC1)`). The struct is 4-byte aligned:
- *
- *   BYTE Kind;          // 0 = end of list, 1 = NPC, 2 = portal
- *   int  Location[2];   // tile X, tile Y
- *   int  Rotation;      // marker yaw in degrees
- *   char Name[100];     // UTF-8 tooltip
- *
- * so each record is 116 bytes. The later client reads the localised
- * `Data/Local/{lang}/Minimap/Minimap_World{n}_{lang}.bmd` instead; the copies
- * shipped with this Data folder are the pre-localisation per-world files,
- * which use the same layout.
+ * Minimap marker files (`CNewUIMiniMap::LoadImages`): 100 BUX-encoded 116-byte `MINI_MAP_FILE`
+ * records (Kind, Location[2], Rotation, Name[100]). Layout in readme.md.
  */
 
 export const MAX_MINI_MAP_DATA = 100;

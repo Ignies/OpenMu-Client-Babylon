@@ -1,28 +1,7 @@
 import { ServerConfig, type ServerProfile } from './serverConfig';
 
-/**
- * The rest of a world, worked out from its domain.
- *
- * A world is one domain, and its pieces sit on fixed labels beneath it:
- *
- *     play.<domain>      the browser client
- *     ws.<domain>        the ws-to-TCP proxy every connection goes through
- *     register.<domain>  the signup page the login window links to
- *     api.<domain>       the cash shop and marketplace services
- *
- * That convention is what lets one build play any world. This client is
- * compiled once and published for everyone, so a world it has never heard of
- * has to be able to say where its own pieces are - and a line in
- * `serverlist.md` naming `example.net` says all of it at once.
- *
- * `play.` is the one label nothing here derives: a client asking the question
- * is already being served from it.
- *
- * A world that does not follow the convention publishes its addresses in full
- * instead (`host:port@wss://proxy`), and gets no services it did not name. The
- * build-time variables are the other way out, for a client published beside
- * exactly one server.
- */
+/** The rest of a world, worked out from its domain: `ws.`, `register.` and `api.<domain>`.
+ * The convention: readme.md. */
 
 const env = import.meta.env;
 

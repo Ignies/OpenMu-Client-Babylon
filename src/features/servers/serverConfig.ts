@@ -3,26 +3,8 @@ import { LocalStorage } from '../../core/localStorage';
 import { CS_HOST, CS_PORT, WS_HOST, WS_PORT } from '../../app/consts';
 import { versionByTag } from '../../version';
 
-/**
- * Where the client connects: one editable list of server profiles, the one
- * that is selected, and the rules that turn a profile into the two addresses
- * the sockets actually need.
- *
- * Three layers, highest first:
- *
- *   1. the URL (`?cs=host:port`, `?ws=wss://host:port`, `?server=<name>`) -
- *      an ephemeral profile, never saved, so a link can point a build at a
- *      server without touching what the player has stored;
- *   2. the saved profiles (localStorage) - what the in-client picker edits;
- *   3. the build defaults (`VITE_CS_HOST/PORT`, `VITE_WS_HOST/PORT` via
- *      consts.ts) - the seed of the first profile on a fresh install.
- *
- * Note what the ws address is *not*: a browser cannot open a TCP socket, so
- * every connection goes through the ws↔TCP proxy (`proxy/main.ts`), which
- * dials `?host=&port=` for us. `wsUrl` is therefore the proxy's own address,
- * and `csHost:csPort` is the MU connect server as seen **from the proxy's
- * network** - they have no reason to be the same machine.
- */
+/** Where the client connects: the saved server profiles, the selected one, and the proxy
+ * (`wsUrl`) and connect server (`csHost:csPort`) a profile turns into. Layers: readme.md. */
 
 const SERVERS_KEY = 'mu_servers';
 

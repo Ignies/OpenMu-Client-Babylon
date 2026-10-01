@@ -23,39 +23,8 @@ import { TERRAIN_BRANCH } from './terrainLighting';
 import { devQuery } from '../../core/devSeams';
 
 /**
- * Terrain overlays: masked layers mixed into the ground's albedo before it is
- * lit, for the weather effects that touch the ground rather than fall through
- * the air.
- *
- * This closes a long-standing gap - *"leaves settling on terrain,
- * and `BITMAP_RAIN_CIRCLE` splashes - GPU particles cannot read the height
- * map, so both fade instead"*. A particle genuinely cannot read the height
- * map; the terrain shader is already standing on it. So settled snow, wet
- * stone, puddles and [Atlans' caustics] are one mechanism rather than
- * four bespoke passes, which is why this is a recipe list and not a hard-coded
- * snow branch.
- *
- * Layers compile in only where a map has them: Lorencia's shader carries the
- * two wet-weather layers and nothing else, and a map with no recipe gets the
- * shader it always had, byte for byte.
- *
- * The mix happens **before** the lighting multiply, so a layer is lit by the
- * same bake, sun shadow and torchlight as the ground under it. Snow in the
- * shade of a wall is shaded snow, and a puddle in a doorway is a dark puddle,
- * which is the entire difference between this and a decal.
- *
- * ### Everything except coverage is a compile-time constant
- *
- * A layer's colour, patch size, edge softness and slope limit are baked into
- * the generated GLSL as literals. Only `coverage` - the one value that
- * genuinely changes per frame - is a uniform, and it is its own `float`.
- *
- * That is a deliberate failure-mode choice, not tidiness. A uniform that does
- * not reach the GPU reads as zero; with the colour in a uniform, "zero" meant
- * *mix the ground toward black*, and a single unbound uniform turned the whole
- * map pitch black. With only coverage in a uniform, "zero" means *no layer* -
- * the ground renders exactly as it would with the feature switched off. The
- * shader can no longer fail into a worse state than not having the feature.
+ * Terrain overlays: masked layers (snow, wet stone, puddles) mixed into the ground's albedo before
+ * lighting, compiled in only where a map has them. Only `coverage` is a uniform. See readme.md.
  */
 
 /** How a layer's colour meets the ground under it. */
@@ -110,24 +79,8 @@ export type TerrainOverlay = {
   readonly bedDefault?: number;
 
   /**
-   * Where the map's own art is already this substance, stand aside and let it
-   * show. Declared as the albedo a fragment has to have for the layer to read
-   * it as already painted: a luminance ramp and a chroma ramp, both
-   * `[start, full]`, tested against the resolved splat colour in the tile
-   * textures' own space.
-   *
-   * This is what keeps one white off another. Devias, Santa Town and the ice
-   * fields all ship tiles with snow painted into them; a layer that covers
-   * them anyway is drawing a second snow over the first, in its own flat
-   * colour and with its own tile-shaped edges, and the map's art is what
-   * loses. Deferring is a change of COLOUR and not of amount: the layer still
-   * has its full depth there, so the drifts, the trail, the prints and the
-   * melt all carry across a field unbroken - it simply has nothing to add to
-   * a pixel that is already snow.
-   *
-   * Chroma matters as much as luminance, and only together do they separate
-   * snow from the things that are merely bright: Santa Town's water and the
-   * ice fields' blue ice are as light as a drift and nothing like as grey.
+   * Where the map's art is already this substance (a luma and a chroma ramp, `[start, full]`),
+   * stand aside. A change of colour, not amount: drifts, trails and melts carry on unbroken.
    */
   readonly defersToArt?: ArtMatch;
   /**
@@ -398,50 +351,13 @@ export const PUDDLES: TerrainOverlay = {
 };
 
 /**
- * How a relief layer is shaded, live.
- *
- * These four are the only numbers in this file that are **not** baked into the
- * GLSL, and the exception is deliberate. Everything else here - colour, patch
- * size, softness, slope limit - is a compile-time literal because a uniform
- * that fails to reach the GPU reads as zero, and zero for a *colour* meant
- * mixing the ground toward black. Zero for each of these means "this term
- * contributes nothing". A uniform is allowed here precisely because it cannot
- * fail into anything worse than the feature being off.
- *
- * These are tuning, not a switch. Zeroing all four flattens the *shading* but
- * leaves the thin-snow cover modulation running, so it is not a way back to
- * the exact shader this file emitted before relief existed. The real switch is
- * `advancedEffects`, which zeroes coverage and skips the whole branch; a map
- * with no relief layer never compiles a line of it in the first place.
- *
- * The other reason is honesty about how this gets finished. The look is a
- * matter of taste that costs a shader rebuild and a map reload to sample once,
- * which is a slow enough loop to be worth designing out. `window.muSnow`
- * moves all four from the console with no rebuild at all.
+ * How a relief layer is shaded, live: uniforms, since zero here only means "no contribution".
+ * Tuning, not a switch (`advancedEffects` is). `window.muSnow` sets them from the console.
  */
 export const SNOW_SHADE = {
   /**
-   * Slope of the drift field: how steeply the snow surface rises and falls.
-   *
-   * Drives the geometry, and the shading follows from it rather than being its
-   * own dial - a steeper drift catches more sun on its lit face and loses more
-   * on its far one because that is what the normal says, not because a second
-   * number was turned up to say so.
-   *
-   * A slope gain, not a world height, and it is tied to `reliefScale`: the
-   * shader divides it by `RELIEF_STEP`, and a field of broad drifts has a
-   * gentler gradient than a field of narrow ones at the same amplitude. When
-   * the drifts went from a tile across to three, the same 0.8 dropped the
-   * faces from 20 degrees to 6.6 and the contrast from 2.2x to 1.3x. Swept
-   * again at the new scale: 2.4 puts it back at 19 degrees median and 2.1x.
-   *
-   * Then halved. Matched against reference frames (improved.jpg /
-   * improved_2.jpg, repo root) with post-processing OFF: 2.4 read as a
-   * rippled field, every drift face swinging the albedo hard either side of
-   * 1, where the reference is a near-flat white with broad, soft shading
-   * and a single visible tone step at a drift edge. 1.1 lands ~9 degrees
-   * median and ~1.35x lit-to-shaded with the floor below, which is what
-   * the reference measures.
+   * Slope gain of the drift field (the shader divides it by `RELIEF_STEP`); the shading follows
+   * from the normal. Matched to improved.jpg / improved_2.jpg with post-processing off.
    */
   // Back up from 1.1: that was tuned while the field clipped to white, where
   // any relief read as ripple. With the field at 0.86 the drifts need real
@@ -465,27 +381,8 @@ export const SNOW_SHADE = {
    */
   sheen: 0.08, // reference snow is matte
   /**
-   * Crystal grain: the texture of the surface itself, under the drifts.
-   *
-   * Not the same thing as the mottling that was cut two rounds ago, and the
-   * difference is the scale. That was a feature about a TILE across, which the
-   * eye reads as noise laid over the ground. This is nine repeats per tile -
-   * well under a footprint - which the eye reads as what the ground is MADE
-   * OF. Without it a fully covered field is a smooth wash with some large soft
-   * shading on it, and it looks smudged however good the drifts are.
-   *
-   * Small, and it has to be. The grain folds into the same normal as the
-   * drifts, so too much of it does not sit on top of the structure - it
-   * REPLACES it. Measured as detail energy in two spatial bands, sub-tile
-   * against drift-scale:
-   *
-   *     0.008   2.56x fine   1.03x coarse
-   *     0.015   4.50x fine   1.11x coarse   <- chosen
-   *     0.022   6.45x fine   1.22x coarse
-   *     0.05   13.44x fine   1.78x coarse
-   *
-   * 0.05 buys five times the surface texture for a fifth of the drift
-   * structure, which is the trade worth making.
+   * Crystal grain: sub-footprint surface texture under the drifts (`GRAIN_SCALE`). Kept small,
+   * since it folds into the drift normal and too much replaces the drift structure.
    */
   // Halved from 0.015 against the reference frames: with post-processing
   // off there is no bloom to soften it, and 0.015 read as a wind-ripple
@@ -676,30 +573,8 @@ const TORCH_GLOW = 0.35;
 const TORCH_GLOW_GLOSS = 5;
 
 /**
- * The sky the water reflects - a **fake** one, built in the shader.
- *
- * The first cut reflected `ovSky` alone: one flat colour, the map's fog,
- * scaled by Fresnel. That is a wash, and a wash is exactly what reads as a
- * texture laid on the ground rather than as water - because the one thing
- * every real puddle does is show a *different* piece of sky at every point
- * of it, and slide that piece as you walk. Nothing here is a real
- * reflection (there is no second pass and no probe); it is the two cues
- * that carry one:
- *
- *  1. **A gradient.** The mirrored view ray is steep at the far edge of a
- *     pool and grazing at the near one, so the far edge shows zenith and
- *     the near edge shows horizon. `ovSky` is the horizon (the fog colour,
- *     which is literally what the map's distance fades to) and `ovSkyHi`
- *     the zenith (the key's sky light, `LookState.key`).
- *  2. **Structure that parallaxes.** A cloud deck `CLOUD_HEIGHT` tiles up,
- *     hit by that same mirrored ray. Because the ray's elevation changes
- *     across the pool, the deck is sampled *further away* at the grazing
- *     edge - so the clouds stretch toward the near edge and swim when the
- *     camera moves, which a scrolling texture cannot fake.
- *
- * `SKY_GRADIENT_POW` above 1 keeps most of a pool in horizon colour and
- * gives the zenith only to the steepest rays, which is what the Fresnel
- * geometry actually does.
+ * The fake sky the water reflects: a horizon (`ovSky`) to zenith (`ovSkyHi`) gradient plus a cloud
+ * deck `CLOUD_HEIGHT` up that parallaxes. Above 1, most of a pool keeps the horizon colour.
  */
 const SKY_GRADIENT_POW = 1.5;
 
@@ -962,21 +837,8 @@ const SNOW_GATE = devQuery('snowGate') !== '0';
 const LIT_GAIN = 1.0;
 
 /**
- * The least of its own albedo a drift's shaded face may keep.
- *
- * Two jobs, and the first is not cosmetic: without it the multiplier goes
- * **negative** on a face steep enough and turned far enough from the sun, and
- * a negative albedo is not a dark drift - it is whatever the rest of the
- * pipeline happens to do with a negative colour. A sweep found this at a
- * relief of 1.3 and a gain of 2.2, both inside the range the console hook
- * lets someone dial to.
- *
- * The second is the note from the footprint work: a snow shadow is never
- * black. It is snow lit by the sky instead of the sun, which is why the
- * cavity tint runs after this and why the floor sits well above zero. 0.45
- * landed the darkest face at a little under half the lit one, and with
- * post-processing off that is the dark blue field in the "before" shot;
- * the reference's deepest drift shade measures ~0.72 of the lit snow.
+ * The least of its albedo a drift's shaded face keeps: stops the multiplier going negative, and
+ * keeps snow shadow sky-lit rather than black (the reference's deepest shade is ~0.72 of lit).
  */
 const SHADE_FLOOR = 0.55;
 
@@ -998,23 +860,8 @@ const SHADE_FLOOR = 0.55;
 const CAVITY_TINT = 'vec3(0.72, 0.75, 0.83)';
 
 /**
- * Range over which surface detail fades to a flat wash, in world units - a
- * tile is 1.
- *
- * Sized against the game's actual camera, not to taste. The ArcRotateCamera in
- * `testScene` sits at a radius of 10, so ground under the player is about ten
- * tiles away and the far edge of the view is somewhere near thirty. Working
- * that through: the finer relief octave has a period of 0.38 tiles, which at
- * thirty tiles and this obliquity still lands on several pixels, so the noise
- * does not actually alias anywhere the player normally looks.
- *
- * Which makes this insurance rather than a fix, and it is deliberately set
- * where insurance belongs - past everything on screen. A fade that started at
- * sixteen (the first guess here) would have flattened the far half of every
- * shot and put a visible falloff band across the middle of the ground. What
- * it still covers is the pathological case: a wider screen, a zoomed-out
- * view, or ground seen across the map, where the drift really does fall under
- * a pixel and the gradient would turn into shimmer.
+ * Range over which surface detail fades to a flat wash, in tiles: set past everything on screen,
+ * as insurance against shimmer on wide or zoomed-out views.
  */
 /**
  * Repeats of the crystal grain per world unit - a tile is 1.
@@ -1480,23 +1327,8 @@ function hasLightNeutral(overlays: readonly TerrainOverlay[]): boolean {
 }
 
 /**
- * The lighting term the terrain material multiplies its colour by, with the
- * layers' share of it taken over. Emits `vec3 <outVar> = <mapLitExpr>;` and,
- * only when a layer asks for it, a mix toward the layer's own light:
- *
- *   white where the bake is bright and the sun reaches, OVERLAY_LIGHT.shadow
- *   where either is cut. The bake contributes its luminance only - its hue
- *   is the map's own, and the whole point is that snow does not take it.
- *
- * `bakeVar` is the lightmap colour (0…1), `sunVar` the cascaded sun factor
- * (1 = lit), `extraExpr` the light that applies to ground and layer alike
- * (torches, room key) in the same space as `mapLitExpr`. Reads the
- * material's `linearLight` uniform the way the overlay body reads main()'s
- * locals: on the linear tiers the constants are decoded once, the delta is
- * added in linear and the cap applied there (a re-encoded delta is what
- * turned a lamp's footprint into a white diamond on the snow), and the sum is
- * encoded once for the material's final decode, which lands the product
- * exactly at lin(texel) x the linear sum. Must run after `terrainOverlayGlsl`.
+ * The light the terrain multiplies by, with the layers' share taken over: emits `vec3 <outVar> =
+ * <mapLitExpr>;` and a mix toward the layer's own light (bake luma only). Run after `terrainOverlayGlsl`.
  */
 export function terrainOverlayLitGlsl(
   overlays: readonly TerrainOverlay[],
@@ -1893,27 +1725,8 @@ export function bindTerrainOverlays(
 }
 
 /**
- * Standing water's reflections, emitted AFTER the lighting so the water can
- * add light the ground under it never had: a Fresnel share of a built sky,
- * the sun's halo and glint, and each nearby torch as a pin-point glint over
- * a soft glow. Reads `ovWater` (set in the layer block) and `vNormal`,
- * `vWorldPos`; the caller names the lit colour and its sun-shadow factor.
- *
- * Two things happen here, and they are the same thing seen twice.
- *
- * **The normal is water, not ground.** Three fields stack into it: two
- * scrolling octaves of gradient noise for the wind ripple, tilted by
- * `ovRipple`, and - new - the rings of individual raindrops landing on the
- * pool (`ovRingGrad`). Still water is a mirror; in a shower the rings
- * shiver everything it is showing, which is what makes it read as rain ON
- * water instead of a wet decal beside falling rain.
- *
- * **What it reflects is a sky, not a colour.** The mirrored view ray picks a
- * point on a horizon-to-zenith gradient and on a drifting cloud deck above
- * it (see the SKY_/CLOUD_ block). That gradient runs across every pool and
- * moves with the camera, and it is the whole difference between water and a
- * dark patch of paint - the flat `ovSky` wash this had before was, correctly,
- * read as "a texture given to them".
+ * Standing water's reflections, after lighting: a Fresnel share of the built sky, the sun's halo
+ * and glint, torch glints. The water normal stacks wind ripple and raindrop rings (`ovRingGrad`).
  */
 export function terrainOverlayReflectGlsl(
   overlays: readonly TerrainOverlay[],

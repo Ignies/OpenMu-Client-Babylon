@@ -4,36 +4,9 @@ import { LocalStorage } from '../../core/localStorage';
 import type { Texture } from '../render/babylon/exports';
 
 /**
- * Texture packs: swappable sets of higher-resolution model textures.
- *
- * The models are not duplicated. A pack carries images only, keyed by the
- * name the BMD converter gave each texture (`Object1/ston01`), and the client
- * repoints the live `Texture` objects at them with `updateURL`. That means
- * geometry and animation ship once, a pack costs only the pixels it changes,
- * and switching reaches everything already on screen - the hero and the
- * monsters included - without reloading the map.
- *
- * Packs are discovered, not compiled in: `packs/index.json` lists what the
- * deployment has, so another pack is added by building it and listing it.
- *
- * A pack file is an image (webp, png) or KTX2. KTX2 stays block-compressed
- * on the GPU, a quarter of an image's video memory on desktop. Babylon picks
- * the loader from the extension, so nothing here treats them differently;
- * the one reader that has to is the PBR map derivation (`pbrMaps.ts`).
- *
- * Two things here are load-bearing and easy to lose:
- *
- *  - `updateURL` REPLACES the internal texture, and the converter's name
- *    lives on it as `label`. After a swap the label reads as the URL that was
- *    just loaded, and `pbrMaps.textureSourceName()` - which decides PBR map
- *    lookups, and via `parseTextureScript` the hide/bright/no-blend rules -
- *    starts reading nonsense. Every swap re-stamps it. (Measured: label
- *    `Object1/bird` came back as the swap URL.)
- *
- *  - Going back to the base texture needs the original bytes, and they only
- *    exist because the glTF loader keeps them on `texture._buffer`. They are
- *    captured before the first swap; without them "Original" could only be
- *    reached by reloading the map.
+ * Texture packs: images keyed by the converter's texture name, swapped onto live
+ * textures with `updateURL`. Re-stamps the label and keeps the original bytes;
+ * see assets/readme.md and docs/texture_packs.md.
  */
 
 export type TexturePackInfo = {

@@ -1,34 +1,5 @@
-/**
- * Emoji bubbles - a small status glyph a character can pop for a couple of
- * seconds. Unlike the emotes in `emotes.ts` these play no animation clip and
- * have no `ServerPlayerActionType`, so no packet in the protocol carries one.
- *
- * They travel as public chat instead. Every bubble owns a short ASCII token
- * (`words`) in the spirit of the original's chat emoticons - `^^`, `T_T` and
- * `-_-` all fired social actions through `CheckChatText` - and picking one in
- * the radial menu sends that token as an ordinary chat line. A client that
- * knows the table turns the line back into a bubble over the sender
- * (`matchEmojiBubbleWord`, the ChatMessage handler in logic.ts); one that does
- * not just shows `<3`, which is what a player would have typed anyway.
- *
- * Why chat rather than a synthesised packet like the proxy's weather: the
- * bubble has to reach exactly the players who can see the sender, and the
- * server's chat scope is already that set. The proxy is a per-connection byte
- * pipe with no idea who stands near whom, so relaying there would mean either
- * tracking every viewport or popping hearts over players on another map.
- *
- * Because the token *is* the message, typing `<3` pops the same bubble. The
- * match is on the whole line, so ordinary chat that merely contains `??`
- * is left alone.
- *
- * Two placements:
- *
- *  - `head` - floats above the head, just over where the name balloon sits.
- *  - `side` - floats beside the shoulder, on whichever side currently faces
- *    the camera, so it swaps across as the character turns
- *    (`EmojiBubbleSystem` picks the side, `CalculateScreenPositionSystem`
- *    projects it).
- */
+// Emoji bubbles: a glyph popped over a character, sent as a short chat token
+// (like the emoticons `CheckChatText` read). Why and how: readme.md.
 
 import type { TextKey } from '../../i18n';
 

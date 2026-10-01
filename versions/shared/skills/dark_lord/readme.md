@@ -1,0 +1,44 @@
+# dark_lord
+
+Dark Lord skills, one folder per skill. Rules for skill folders: [../readme.md](../readme.md).
+
+## Public API
+- Each folder's default export is a `defineSkill`, found by glob in `../index.ts`.
+
+## How it works
+
+| Folder | Ids | Look |
+|---|---|---|
+| `force` | 60 | at the strike key: rings, streaks and a lance from the caster |
+| `force_wave` | 66, 509 str | same as Force |
+| `fire_burst` | 61, 508 str, 514 mastery | three homing darts with ghost trails, starburst cards at the caster |
+| `earthshake` | 62, 512 str, 516 mastery | on the Dark Horse: shock rings, ground stones, a burst and crack chains |
+| `summon` | 63 | party teleport: blue light in the hand, then a circle and its light |
+| `increase_critical_damage` | 64, 511 / 515 / 517 power ups | a skill model at each weapon bone; the lasting look is a buff look |
+| `electric_spike` | 65, 519 str | a gathering charge, five flare force joints, skill models at the weapon |
+| `abolish_magic` | 72 | six bands spiral in on the caster, rise and burst out, four shock waves |
+| `fire_blast` | 74 | a hidden homing piece drops six inferno pillars on the target |
+| `brand_of_skill` | 75 | skill models at the weapon bones and a mana rune above |
+| `fire_scream` | 78, 518 str, 520 mastery | three pairs of dark scream models, ground streaks, puffs and flames |
+| `chaotic_diseier` | 238 | dark stars on the body, eight dark ribbons with birds, feathers and smoke |
+| `iron_defense` | 521, 524 str | `IRON_DEFENSE` from `../_shared.ts`: nothing in Classic |
+
+"Enhanced" in a skill's comment is the graded look drawn on higher lighting tiers.
+
+`_shared.ts` holds:
+- strike timing: `strikeKey` (fire at the strike clip's key 3 or after `STRIKE_MAX_TICKS`),
+  `litStrike`, `atFrame`, `everyTick`, `movesAt`, `ticksLeft`;
+- Force parts: `force`, `forceGraded`, `forceHeads`, `hummingDir`;
+- `SPLIT_EMBERS`, `sfx`;
+- angle helpers: `yawDegrees`, `sideOf`, `forwardOfDeg`, `muYaw`, `muRotated`, `muAngle`;
+- `MOUNTED_STRIKE`: the strike clip per mount.
+
+## Depends on / used by
+- uses: `../_shared.ts`, `@/controllers/{skills,fx,lighting,sound,combat}`
+- used by: `../index.ts` (glob)
+
+## Change it
+- see [docs/how_to/add_skill.md](../../../../docs/how_to/add_skill.md).
+
+## Tests
+- Covered by the golden tests in `../` (`skillVisuals.golden.test.ts`, `skillTables.golden.test.ts`).

@@ -10,24 +10,8 @@ import type { SoundLayer } from './layer';
 import { playSfx, type SfxPosition } from './listener';
 
 /**
- * The noise a drop makes landing: `CreateItem` / `CreateMoneyDrop`
- * (ZzzObject.cpp:5995-6002, :6198) - a jewel rings (SOUND_JEWEL01), a
- * Gemstone rings differently (SOUND_JEWEL02), zen jingles
- * (SOUND_DROP_GOLD01) and everything else thuds (SOUND_DROP_ITEM01).
- *
- * ...and, ours, which of those are worth hearing. On a busy hunting ground
- * the original's rule (every fresh drop sounds) is a continuous rattle of
- * 100-zen piles, so the rows can be narrowed to the drops the player is
- * actually there for. The vocabulary is the loot filter's
- * (`common/lootFilter.ts`): what is worth a name on the ground is what is
- * worth hearing land, and the two screens read as one idea.
- *
- * Driven by: `logic.ts` on `ItemsDropped` / `MoneyDroppedExtended` with
- * `IsFreshDrop` set. Command-only: no per-frame state.
- * Read by: nothing - it only plays.
- *
- * Picking an item up is not this: that is the player's own click and keeps
- * its interface chime (`ui.ts`) whatever the filter says.
+ * The noise a drop makes landing: `CreateItem` / `CreateMoneyDrop` (ZzzObject.cpp:5995-6002,
+ * :6198), plus our filter of which drops are heard. Notes in readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

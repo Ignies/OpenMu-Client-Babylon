@@ -6,20 +6,8 @@ import { isMusicKey, soundUrl, type Sounds } from './recipes';
 import { ENABLE_BG_MUSIC } from '../../app/consts';
 
 /**
- * The mixer: two Babylon `SoundTrack`s (music / effects), one `Sound` per
- * catalogue key, created on first use. Entries in `src/sound/` decide *what*
- * plays; this only knows how to play a key.
- *
- * Music keys are created `streaming` (an `<audio>` element feeding the
- * context) so a 2 MB track is never decoded into a 30 MB buffer, and always
- * `loop`. Effects are decoded buffers, evicted when they have not been asked
- * for on the last `EVICT_AFTER_MAPS` maps (`evictStale`, from `sound.reset`).
- *
- * The two track gains are the *only* gains it owns, and `setTrackGains` is
- * their one writer - `sound/index.ts` hands it what the sliders say
- * (`sound/buses.ts`). The per-category share is folded into each play's own
- * volume by whoever plays it, because a sound key belongs to more than one
- * category and a track owns its sounds.
+ * The mixer: two Babylon `SoundTrack`s (music / effects) and one `Sound` per catalogue key,
+ * made on first use. Entries decide what plays; this only plays a key. Notes in readme.md.
  */
 
 const getSoundUrls = (key: Sounds) => soundUrl(key);

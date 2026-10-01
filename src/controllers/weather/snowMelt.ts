@@ -2,55 +2,8 @@ import type { ENUM_WORLD } from '../../core/types';
 import type { WeatherLayer } from './layer';
 
 /**
- * Snow melted off the ground by fire - the patch a Fire Ball, a Meteorite or
- * an Inferno leaves in a Devias snowfield.
- *
- * The original client has none of this: `snowCover.ts` already records that
- * settled snow is our own invention, and nothing in `ZzzEffect.cpp` ever
- * touches the terrain. What makes it worth having is that the snow is a
- * *simulation* - it builds while the squall blows and melts once it passes -
- * so a fireball that leaves the field untouched is the one thing on screen
- * saying the white is a texture after all.
- *
- * ### Why spots and uniforms, and not another depth map
- *
- * The ploughed trail (`snowTrail.ts`) is a 4 MB world-space map because a
- * trail is an arbitrary shape the hero draws over a whole session. A melt is
- * not: it is a handful of round patches at a time, each alive for half a
- * minute. So this keeps them as **at most `MELT_SPOTS` circles in a uniform
- * array**, the way the water reflections already carry the torch pool
- * (`ovLightPos` / `ovLightCol` in terrainOverlay.ts) - no texture, no upload,
- * no second sampler.
- *
- * That last point is the deciding one. The terrain fragment shader's sampler
- * list is brittle enough that both `terrainMaterial.ts` and
- * `terrainDynamicLight.ts` carry warnings about it - a sampler declared but
- * unbound, or two sampler types landing on one unit, is a GL draw error that
- * makes the whole terrain vanish - and on the unpacked tile path the units
- * are nearly spoken for already. A melt that costs zero of them cannot
- * provoke any of that.
- *
- * ### It imports nothing from this folder, and must not
- *
- * `terrainOverlay.ts` reads this file, and `snowCover.ts` reads
- * `terrainOverlay.ts` - so anything here that touched another weather module
- * at *module scope* would sit inside that cycle and be initialised before the
- * thing it read. Naming `SNOW_GROUND_MAPS` on the layer, which is what every
- * other snow effect does, crashed the client on load with exactly that. So
- * this file is a leaf, like `snowTrail.ts`: it owns a pool of patches and
- * knows nothing about snow. Which layer they eat - and therefore which maps
- * can show them - is `SNOW_COVER.melt`, decided at the other end.
- *
- * ### What reads it
- *
- *  - The terrain shader, through `SNOW_COVER.melt` - the spots divide the
- *    layer's *target*, so the snow's coverage, depth, relief, drift lighting
- *    and any trail ploughed through it all thin together, and the revealed
- *    ground is damped down rather than left as bare cyan tile.
- *  - `snowSink.snowUnderfoot`, on the CPU, through `snowMeltAt` - so a hero
- *    standing in a melt neither sinks into snow that is not there nor stamps
- *    a print into it. Same falloff on both sides, for the reason the bed
- *    table is shared: what you stand in has to be what you see.
+ * Snow melted off the ground by fire skills: at most `MELT_SPOTS` patches in a uniform array, no
+ * texture. A leaf module: importing another weather file here is a load-order crash. See readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

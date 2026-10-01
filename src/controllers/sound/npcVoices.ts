@@ -8,30 +8,8 @@ import type { SoundLayer } from './layer';
 import { listenerHero, listenerWorld, playSfx } from './listener';
 
 /**
- * The noises town NPCs make while they stand there: Hanzo's hammer on the
- * anvil, the Chaos Machine's goblin, the elf wizard's harp.
- *
- * The original plays these from `MoveCharacterVisual`'s per-model switch
- * (ZzzCharacter.cpp:6080-6093) - the same switch the forge sparks and the
- * forge light come out of. It is a `PlayBuffer` re-issued every tick, and a
- * `Play` on a channel that is still sounding is a no-op
- * (DSPlaySound.cpp:303), so each row reads as "start it again once it has
- * finished, while the condition still holds". `SoundsManager.isPlaying` is
- * that no-op here.
- *
- * Two of the three are 2D in the original (`PlayBuffer(sound)` with no
- * object): full volume for as long as the NPC is in the character update
- * set. That set reaches much further here than the original's draw distance
- * did, so all three are positioned instead - a harp two screens away should
- * not be as loud as the one you are standing next to.
- *
- * Also the few voices `PlayMonsterSoundGlobal` plays on every map (Titus,
- * Lugard, the Doppelganger boxes, the snowman), which stay 2D as in the
- * original: that call has its own 500-unit cut-off.
- *
- * Driven by: the ECS character entities (`npcType` or `skin` + `transform` +
- * `modelObject`, read-only) and the listener hero's position.
- * Read by: nobody; it only commands the mixer.
+ * Town NPC noises (Hanzo's anvil, the Chaos Machine goblin, the elf's harp) from `MoveCharacterVisual`
+ * (ZzzCharacter.cpp:6080-6093, DSPlaySound.cpp:303), plus the `PlayMonsterSoundGlobal` voices. Notes in readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

@@ -61,23 +61,8 @@ export function isLoopback(address: string): boolean {
 }
 
 /**
- * The caller's address, as far as it can be trusted.
- *
- * Caddy *appends* to `X-Forwarded-For`, so a client that sends a header of its
- * own arrives as `spoofed, real`: the entry Caddy added is the last one, and
- * everything before it is attacker-controlled. Reading `[0]` - the usual
- * shorthand - would let anyone mint a fresh identity per request and walk
- * straight through the limit.
- *
- * The header is believed only when the socket peer is loopback. Both services
- * bind 127.0.0.1 and Caddy on the same box is the only thing that reaches
- * them, so a loopback peer is Caddy and the entry it appended is real. A peer
- * anywhere else got to the port directly - a container mapping, a `HOSTNAME`
- * override, a firewall hole - and nothing sat in front of it to append
- * anything, so the header is whatever the client typed and the socket
- * address is the only truth there is. Were Caddy ever moved to another host,
- * every client would count as that host's one network: too strict, never too
- * loose.
+ * The caller's address, as far as it can be trusted: the last
+ * `X-Forwarded-For` entry, believed only from a loopback peer. See core/readme.md.
  */
 // Structurally typed rather than `Bun.Server`: the pinned `bun-types` does not
 // export that name, and this is the only member needed.

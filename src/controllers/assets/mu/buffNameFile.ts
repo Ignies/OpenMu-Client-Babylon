@@ -1,26 +1,6 @@
 /**
- * `Data/Local/<pack>/BuffEffect_<lang>.bmd` - the buff and debuff names in the
- * language the player picked.
- *
- * `_BUFFINFO` (`w_BuffScriptLoader.h`), read the way `BuffScriptLoader::Load`
- * reads it: an `int` record count, then that many 158-byte records each XOR-ed
- * with the 3-byte Bux key restarting at every record, then a 4-byte checksum.
- *
- * ```
- * short s_BuffIndex;        // 0  - eBuffState, == OpenMU MagicEffectNumber
- * BYTE  s_BuffEffectType;   // 2
- * BYTE  s_ItemType;         // 3
- * BYTE  s_ItemIndex;        // 4
- * char  s_BuffName[50];     // 5
- * BYTE  s_BuffClassType;    // 55 - 0 buff, 1 debuff
- * BYTE  s_NoticeType;       // 56
- * BYTE  s_ClearType;        // 57
- * char  s_BuffDescript[100];// 58
- * ```
- *
- * Only the name is read. `skills/recipes.ts` keeps the buff / debuff split and
- * the durations, because those drive the bar rather than the label, and the
- * catalogue still wins for the effects it names - see `buffRecipe`.
+ * `Data/Local/<pack>/BuffEffect_<lang>.bmd` buff names: `_BUFFINFO` (`w_BuffScriptLoader.h`),
+ * read like `BuffScriptLoader::Load`. See assets/readme.md.
  */
 
 import { observable, runInAction } from 'mobx';

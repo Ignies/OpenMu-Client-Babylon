@@ -7,33 +7,8 @@ import {
 } from '../terrain/terrainDynamicLight';
 
 /**
- * The one registration - shared by every entry in this folder.
- *
- * Everything that emits light goes through the same two sinks: the terrain
- * delta texture (`common/terrainDynamicLight.ts`, MU's `AddTerrainLight`)
- * and the pooled per-pixel `PointLight`s (`common/pointLightPool.ts`). A
- * `LightSource` is that pair registered once, driven by a `LightRecipe`
- * (plain data) and an anchor (a position the host mutates, a `follow`
- * callback, or a `travel` target), with an envelope, flicker or pulse, tile
- * re-registration while it moves, and its own removal when it ends.
- *
- * Entries own sources; the facade ticks them (`tickLightSources`) and drops
- * them on a map change (`disposeAllLightSources`). Nothing else registers
- * into the sinks - lighting is a
- * layer".
- *
- * What the original does, for reference: ZzzEffect.cpp lights the ground
- * under 70-odd effects every frame they exist (BITMAP_FLAME range 3,
- * BITMAP_LIGHTNING 6, MODEL_WAVE 5, MODEL_FISSURE 10, every arrow type 2),
- * ZzzCharacter.cpp under the blacksmith's forge and the Devias trader's
- * brazier, and each light dies with its effect. Those need three things the
- * static map-object path lacks: a lifetime with an envelope, a position that
- * moves, and an instant start - the pool's 0.35 s fade-in turns a lightning
- * strike into a swell.
- *
- * Governing rule unchanged: sources only *add*. The original's negative
- * lights (Bloody Wolf / Tantallos `Vector(-1.3, -1.3, -1.3)`) have no
- * equivalent .
+ * The one registration every entry shares: a terrain light (`AddTerrainLight`, ZzzEffect.cpp /
+ * ZzzCharacter.cpp) plus a pooled point light, driven by a `LightRecipe` and an anchor. Notes in readme.md.
  */
 
 export type LightFlicker = { min: number; max: number; steps: number };

@@ -1,20 +1,8 @@
 import { GameOptions } from '../../features/options/gameOptions';
 
 /**
- * The mixer's categories. Pure data over `GameOptions` - no Babylon, no
- * state - so anything that plays a sound can ask what its share is without
- * reaching into the mixer.
- *
- * Two levels and no more: the master slider the original had, then `music`
- * and `effects` on the two Babylon tracks, then one category under
- * `effects` per kind of sound. A category is *not* a track: a key belongs
- * to more than one of them (`eGem` is a jewel landing and a jewel going
- * into the bag), and the mixer keeps one `Sound` per key, so the category
- * is decided per play and folded into that play's volume.
- *
- * Read by: `listener.ts` (every one-shot), the three looping entries
- * (`ambientBeds`, `crackle`, `objectLoops`) once a frame, `music.ts`, and
- * `sound/index.ts` for the two track gains.
+ * The mixer's categories: pure data over `GameOptions` (master, the music / effects
+ * tracks, one category per kind of sound under `effects`). Notes in readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

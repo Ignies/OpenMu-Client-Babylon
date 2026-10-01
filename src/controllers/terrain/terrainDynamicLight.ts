@@ -501,26 +501,8 @@ const bodyDelta = { x: 0, y: 0, z: 0 };
 const BODY_LIFT_SHARE = 0.6;
 
 /**
- * The tiers >= 1 body light: the bake, never darker than the dynamic light
- * standing on the same tile.
- *
- * The ground and an object do not compose the dynamic layer the same way.
- * The ground *adds* it (`terrainLighting.ts`: `bakeLit + dynLight`), so a
- * torch lights it even where the lightmap is black. An object *multiplies*
- * by it: the fragment is `texel x BodyLight x lightSum` (`itemMaterial.ts`
- * UNCLAMP), and the pooled point lights are inside the sum that BodyLight
- * scales - so with the bake at zero the multiply is by zero and no amount of
- * torch reaches the surface. Atlans bakes whole stretches of walkable ground
- * at (0, 0, 0.02): a monster standing there is a black silhouette in the
- * middle of the player's own lamp while the sand around it lights up. The
- * hero never shows it because `SelfLight` is added to its body light after.
- *
- * So the bake is floored by the light standing on the tile. It reads
- * `bodyLift` and not the delta in `primary`, because the share `primary`
- * gives up to the pool is exactly the share an object cannot use. It is an
- * exact identity wherever the bake already carries the tile (a torch on a
- * lit street) and wherever no emitter is near, so the double count the
- * bake-only rule avoids is untouched.
+ * The tiers >= 1 body light: the bake, floored by `bodyLift` on the tile. Objects multiply by
+ * BodyLight (`itemMaterial.ts` UNCLAMP), so a black bake would hide every torch. See readme.md.
  */
 export function requestBodyTerrainLight(
   x: number,

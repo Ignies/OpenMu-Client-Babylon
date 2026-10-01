@@ -5,20 +5,8 @@ import { BOMB_SPARKS, EXPLOSION_CELLS, FIRE_PUFF, MODEL, SMOKE, TEX } from './re
 import type { Sounds } from '../sound/soundsManager';
 
 /**
- * What a character breaks into when it dies - the effects-layer consumer for
- * the special deaths of `SetPlayerDie` (ZzzCharacter.cpp:1372-1420) and
- * `CreateBlood` (ZzzEffectBlurSpark.cpp:445-450). `deathSystem.ts` asks
- * `shatterDeathFor(monsterModelType)` when the Die clip would start; a row
- * means the body vanishes at once (`o->Live = false`) and the pieces fly
- * instead of the corpse fading and sinking.
- *
- * Keyed by the *monster model type* (`MONSTER_MODEL_*`, `MODEL_MONSTER01 +
- * type` in `OpenMonsterModel`, ZzzOpenData.cpp:2313), which
- * `monsterModelTypeOf(npcType)` reads from `MONSTER_MODEL_TABLE`.
- *
- * Not here: the player transformed by a Skeleton ring (`o->SubType` in
- * `MODEL_SKELETON1..3`, :1383) - the client has no transformation rings yet;
- * it takes the same `boneShatter` when it does.
+ * Special deaths: what a body breaks into (`SetPlayerDie` ZzzCharacter.cpp:1372-1420, `CreateBlood`
+ * ZzzEffectBlurSpark.cpp:445-450), keyed by monster model type (ZzzOpenData.cpp:2313). See fx/readme.md.
  */
 
 export interface ShatterDeath {

@@ -25,20 +25,9 @@ export const MONSTER_ASSASSIN = 14;
 export type MonsterVoice = 'idle' | 'attack' | 'death';
 
 /**
- * Monster sound table, generated from the original client
- * (ZzzOpenData.cpp OpenMonsterModel switch → SetMonsterSound, LoadWaveFile;
- * DSPlaySound.h ESound, SOUND_MONSTER = 210).
- * Key: monster model number (MONSTER_MODEL_x = MODEL_x - MODEL_MONSTER01).
- * Slots (ZzzCharacter.cpp): [0..1] idle / walk (random), [2..3] attack & hit
- * (2 + rand % 2), [4] death. Values are catalogue keys (`recipes.ts`), null = silent.
- * GENERATED - do not edit by hand, except the boss rows marked hand-ported
- * (their voices live outside the OpenMonsterModel switch).
- *
- * Only the 74 model types whose case actually calls `SetMonsterSound` carry
- * sounds; every other row is `SILENT`. The generator used to fill the gaps
- * with a placeholder - mGoblin* or mOrcCapAttack1 - which is where Raklion's
- * Ice Giants got their Noria goblin voices. What those monsters really say
- * is in `mapMonsters.ts`, keyed by the map they say it on.
+ * Monster sound table, GENERATED from ZzzOpenData.cpp `OpenMonsterModel` (DSPlaySound.h SOUND_MONSTER = 210);
+ * edit only the boss rows marked hand-ported. Key: monster model number. Slots: [0..1] idle / walk,
+ * [2..3] attack / hit, [4] death; catalogue keys, null = silent. Notes in readme.md.
  */
 export type MonsterSoundSlots = readonly [
   string | null,

@@ -2,23 +2,8 @@ import { TERRAIN_SCALE, TERRAIN_SIZE } from './consts';
 import { TERRAIN_INDEX, TERRAIN_INDEX_REPEAT } from './utils';
 
 /**
- * Per-texel terrain normals, packed as 3 floats per texel.
- *
- * This is the original `Vector3[]` routine transcribed to plain float math
- * over one `Float32Array`. Two reasons: it is 65 536 fewer allocations, and
- * it makes the whole normal → light chain Babylon-free, so it can run in the
- * terrain worker (todo C8) and its result can be transferred rather than
- * cloned. The arithmetic - two face normals per texel, summed, left
- * un-normalised - is unchanged.
- *
- * Including the degenerate case: the original hoisted one `face_normal`
- * scratch vector outside both loops and `FaceNormalize` returned early
- * without writing to it when the cross product had zero length, so the
- * *previous* face's normal was added instead. `fnx/fny/fnz` below are that
- * same carried scratch. (With TERRAIN_SCALE = 1 the quad corners are always
- * distinct in XY, so this branch is unreachable in practice - it is kept
- * because "unreachable" is an assumption about the height data, not a
- * guarantee.)
+ * Per-texel terrain normals, 3 floats per texel: the original routine on plain floats so it runs
+ * in the worker. Keeps the original's carried `face_normal` scratch (`fnx/fny/fnz`). See readme.md.
  */
 export function createTerrainNormal(heightBuffer: Float32Array): Float32Array {
   const result = new Float32Array(TERRAIN_SIZE * TERRAIN_SIZE * 3);

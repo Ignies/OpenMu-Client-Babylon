@@ -12,22 +12,8 @@ import {
 } from '../render/materialQuality';
 
 /**
- * The ground's near grain: one tiling noise texture, generated once, that
- * modulates the terrain's own colour a few tiles from the camera and is gone
- * by the middle distance.
- *
- * MU's ground textures are 64 to 128 pixels over several tiles, which the
- * ported camera never has a problem with - it looks down from twelve tiles up
- * and no texel is ever more than a couple of pixels across. The first-person
- * step put the eye 1.6 tiles off the ground, where the same texel covers a
- * tenth of the screen and the ground under the player dissolves into a smear.
- * Nothing can put resolution back into the art, but the ground does not have
- * to be smooth while it is missing.
- *
- * It is a luminance modulation on the art, applied before the light: the
- * ground keeps its own colour and its own brightness, and only gains a grain
- * to hold the eye at close range. Identity on Classic, and with the material
- * detail slider at 0.
+ * The ground's near grain: a generated tiling noise that modulates the art's luminance close to
+ * the camera and fades by mid distance. Identity on Classic and with the detail slider at 0.
  */
 
 /** Texels across the tiling grain. */

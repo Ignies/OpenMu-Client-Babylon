@@ -1,26 +1,7 @@
 /**
- * Ticked - an effect scripted one original tick at a time. A `tick` callback
- * runs at 25 Hz, the way `MoveEffect` / `MoveJoint` / `MoveParticles` step
- * theirs, and what it asks for is drawn until the next tick:
- *
- *  - `sprite`: a one-tick billboard, the original's `CreateSprite` (drawn by
- *    `RenderSprites` the frame it was made, then gone);
- *  - `strip`: a joint's tail strip - `CreateTail`'s four corners per tail
- *    (ZzzEffectJoint.cpp:2925-2958) drawn as `RenderJoints` draws them, one
- *    or both faces, U running `(NumTails - j) / (MaxTails - 1)` along it and
- *    the joint's `Light` as the face colour (:7020-7330);
- *  - `ribbon`: an object blur (`CreateObjectBlur`, ZzzEffectBlurSpark.cpp),
- *    a strip through point pairs that loses one sample a tick;
- *  - `decal`: a one-tick `RenderTerrainAlphaBitmap` ground decal.
- *
- * For the effects whose per-tick maths a port keeps as written - a sweep laid
- * eight tails a tick, a head on an accelerating recurrence, a ring spun a
- * fixed step a tick - instead of re-deriving them as continuous curves.
- * Nothing is interpolated between ticks: the original steps at 25 Hz and so
- * does this. Strips of one kind share a mesh (`batch` of them per draw), so
- * a skill that throws dozens of short crackles costs a few draws, not dozens.
- *
- * Driven by: `effects.spawn('ticked', …)` from the skill table. Read by: nobody.
+ * Ticked: an effect scripted one 25 Hz tick at a time, like `MoveEffect` / `MoveJoint`: one-tick
+ * sprites, joint strips (ZzzEffectJoint.cpp:2925-2958, :7020-7330), object blurs (`CreateObjectBlur`,
+ * ZzzEffectBlurSpark.cpp) and decals. See fx/readme.md.
  */
 import { Mesh, Texture, VertexBuffer, VertexData, type Scene, type StandardMaterial, type Vector3 } from '../render/babylon/exports';
 import type { TestScene } from '../render/scenes/testScene';

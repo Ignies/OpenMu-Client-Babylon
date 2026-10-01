@@ -1,19 +1,5 @@
 /**
- * Pure data shared by the skill entries: the buff table (icon, kind, name,
- * best-effort duration) keyed by the wire effect id, and the skill delay
- * table keyed by skill number. No state, no imports from entries.
- *
- * Buff ids: OpenMU's `MagicEffectNumber` is the original client's
- * `eBuffState` (`_enum.h`), which is also the record index of
- * `Data/Local/BuffEffect.bmd` (127 BUX-encrypted `_BUFFINFO` records,
- * `w_BuffScriptLoader.cpp`) and the icon index of `newui_statusicon*.jpg`
- * (`CNewUIBuffWindow::RenderBuffIcon`). `kind` is that file's
- * `s_BuffClassType` (0 buff / 1 debuff); the names here are the enum's, the
- * last fallback under the catalogue and the language pack (`buffNameFile.ts`)
- * - the root `Local/BuffEffect.bmd` is Japanese, the per-language ones are not.
- *
- * Delays: `SkillAttribute[].Delay` from `Data/Local/Skill.bmd` (600 × 80-byte
- * BUX records, `Delay` at offset 44, milliseconds) - every non-zero entry.
+ * Pure data for the skill entries: buffs by wire effect id (`eBuffState`), delays by skill number; see readme.md.
  */
 
 import { MAGIC_EFFECTS } from './magicEffects';

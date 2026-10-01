@@ -12,33 +12,8 @@ import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 import { heightFogLive } from './heightFog';
 
 /**
- * The tone pass: where the frame goes display-referred. Sole owner of the
- * tone-mapping post-process, run on the linear HDR buffer after the last
- * scene-light pass and before the rendering pipeline, so bloom, sharpen and
- * the grade downstream read a rolled buffer.
- *
- * Two halves (effects_composite ARCHITECTURE §2):
- *
- *  1. **The curve**, on the surface. The viewer's brightness, then one of
- *     four: the MU curve, Babylon's ACES fit, the Khronos PBR neutral
- *     mapper, or a plain clip. The MU curve is the default and exists
- *     because Babylon's three are fixed shapes with no toe and shoulder of
- *     their own (sky_atmospherics §2b, lighting_polish §13 item 13): a
- *     generalised Reinhard shoulder with a separate toe, applied to
- *     luminance with the chroma carried through, so it moves level and
- *     never hue; a small desaturation at the top lets an emitter core reach
- *     white. The other three are copied from `imageProcessingFunctions`
- *     term for term, so `aces` and `neutral` look as they did in the
- *     image-processing pass.
- *
- *  2. **The composite**, after it. The additive half of the frame - what the
- *     effect mask holds, thinned by the haze's transmittance in the frame's
- *     alpha - is taken out before the curve and added back at the value the
- *     art was authored at: `lightCardGain` put `authored^2.2 x keyGain` in
- *     the buffer, and `(e / keyGain)^(1/2.2)` is the card again. The add and
- *     the clamp at 1 are the original's blend on its display buffer, which
- *     is what a bolt with a hot white core is. The halo, the pool light and
- *     the glow layer are scene light and stay in the surface.
+ * The tone pass: the linear frame goes display-referred through one of four
+ * curves, and the effect mask is taken out before it and added back after.
  */
 
 const SHADER = 'muToneMap';

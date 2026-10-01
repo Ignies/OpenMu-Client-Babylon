@@ -7,35 +7,8 @@ import {
 import type { RoomVolume } from '../lighting/profiles';
 
 /**
- * Sky weather seen from inside a room: the same rule the room mask draws by
- * (`scenes/roomMask.ts`), applied to the weather's own particles.
- *
- * Standing in a room, the mask blacks every pixel except the room itself and
- * whatever the line of sight reaches through a door or a window. Particles are
- * transparent and write no depth, so the mask reads the surface *behind* a
- * flake and cannot judge the flake: snow drawn over the floor read as the
- * floor and stayed, which is snow falling indoors. That is why weather used to
- * be switched off at the door - and switching it off takes it out of the
- * doorway too, so an interior looked out on a still, dry world.
- *
- * The test here is the mask's, moved onto the particle: a flake is drawn iff
- * the segment from the camera to the flake crosses the room's wall box (a
- * clear line through an opening; a solid wall would have stopped it) and the
- * flake is not inside the room volume. That discards
- *
- *  - flakes inside the room,
- *  - flakes over the roof, and beside it, that project onto the room - the
- *    segment to them stops short of the walls,
- *
- * and keeps the flakes past the room, in the sliver of world the mask leaves
- * visible through the openings. Outdoors, and in a room the mask is not
- * drawing (Classic tier), `roomClipCam.w` is 0 and nothing is discarded.
- *
- * The shader is Babylon's own particle fragment shader with the test injected,
- * read out of the shader store rather than copied, so image processing, fog
- * and the blend modes stay exactly as the engine wrote them. Both paths are
- * covered: the CPU and GPU vertex shaders each hand the fragment stage a
- * `vPositionW`.
+ * Sky weather seen from inside a room: the room mask's rule (`scenes/roomMask.ts`) moved onto
+ * each particle, injected into Babylon's own CPU and GPU particle fragment shaders. See readme.md.
  */
 
 const CPU_SHADER = 'muRoomClipParticle';

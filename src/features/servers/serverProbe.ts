@@ -1,29 +1,8 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 import { effective, type ServerProfile } from './serverConfig';
 
-/**
- * Is that world actually up?
- *
- * The worlds screen lists addresses; this is what turns them into somewhere a
- * player can go. The client cannot open a TCP socket, so it asks the same way
- * the game does - through the proxy, at `wsUrl?host=&port=`, exactly the URL
- * `createSocket` builds - and then throws the connection away. Nothing is sent:
- * MU's connect server greets whoever dials it, so the answer is the whole test.
- *
- * Two things make that reading less obvious than it looks:
- *
- *   1. The proxy upgrades the websocket *before* it dials TCP (`proxy/main.ts`
- *      `fetch` then `websocket.open`), so an open socket proves only that the
- *      proxy is alive. It closes the socket when the dial fails, which is what
- *      makes a close a real "down" rather than a network hiccup.
- *   2. The proxy greets every client with a weather frame of its own making
- *      (`proxy/weather.ts` - `C1 04 0F xx`) the moment it accepts. So the
- *      *first* message is not evidence of anything either. Any other packet is
- *      the connect server itself, and that is the one that answers the question.
- *
- * Every verdict is therefore about the whole path - proxy, network, connect
- * server - which is exactly the path entering that world would take.
- */
+/** Is that world up? Dials the proxy at `wsUrl?host=&port=` and waits for a packet that is not
+ * the proxy's own weather frame. Why: readme.md. */
 
 export type Reach = 'unknown' | 'checking' | 'up' | 'down';
 

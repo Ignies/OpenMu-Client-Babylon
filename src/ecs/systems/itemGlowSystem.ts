@@ -28,23 +28,8 @@ import { itemSelfLight, lightItem, type ItemLampKind } from '../../controllers/l
 import type { LightSource } from '../../controllers/lighting/lightSource';
 
 /**
- * Item glow.
- *
- *  - Stamps `metadata.itemTier` on item meshes once their model is in
- *    (`PlayerObject.loadPartAsync` does the first stamp for gear; this system
- *    re-stamps everything when the item-effects option or the level cap
- *    changes, because tiers are baked per option state). itemMaterial.ts
- *    (legacy passes) and the GlowLayer selector in sceneLook.ts read it.
- *  - Improved look only: +9…+15 gear gets a lamp - one light source from the
- *    lighting layer's `items` entry, following the body - plus an aura and a
- *    crackle (effects/). Dropped +9…+15 items do the same, static.
- *  - Both looks: an excellent item - worn or on the ground - throws the
- *    `CreateShiny` star glints (`effects/itemSparkle.ts`), on the body for a
- *    wearer, beside and above the drop for a drop.
- *
- * This system decides *which* entity is lit and keeps the lamp's position on
- * the wearer; the light itself (range, colour, priority, the terrain stain)
- * is `src/lighting/items.ts`.
+ * Item glow: tier stamps, the +9..+15 lamp / aura / crackle and the excellent
+ * `CreateShiny` glints, worn or dropped. See ecs/readme.md.
  */
 
 type Lamp = {

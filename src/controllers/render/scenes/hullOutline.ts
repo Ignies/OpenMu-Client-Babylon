@@ -11,25 +11,8 @@ import {
 } from '../renderingStyle';
 
 /**
- * The inverted hull (rendering_style ARCHITECTURE 2.6): sole owner of
- * `renderOutline`, `outlineWidth` and `outlineColor` on the meshes it
- * touches. Babylon's outline renderer draws the mesh again, back faces only,
- * pushed out along its normals, which is the cheap and exact way to get a
- * silhouette: it cannot miss an edge the depth buffer could not resolve, and
- * it costs one extra draw per body rather than a full-screen pass.
- *
- * What it cannot do is draw an interior crease, and on a mesh with split
- * normals it opens at the seams, because two vertices at the same place push
- * out in two directions. That is why it is a choice on the Outline mode
- * option and not the default; the screen-space pass (inkOutline.ts) remains
- * the one that traces folds.
- *
- * Figures only, by the rim's rule: a hull around a wall is a black frame
- * around the wall.
- *
- * The width is world space, so unlike the ink lines it thins with distance -
- * which is what a line inked onto a body does, and is the reason the two are
- * not expected to match pixel for pixel at the same slider notch.
+ * The inverted hull outline on the figures: sole owner of `renderOutline`,
+ * `outlineWidth` and `outlineColor`. The Outline mode option picks it.
  */
 
 /**

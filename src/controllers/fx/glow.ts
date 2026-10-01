@@ -11,37 +11,8 @@ import { devQuery, devQueryNumber } from '../../core/devSeams';
 import { driveRenderList } from '../render/scenes/renderList';
 
 /**
- * The halo around effect art - the light a bolt or a flare throws into the
- * frame around itself.
- *
- * The scene's other `GlowLayer` (`scenes/sceneLook.ts`) is the *item* halo:
- * it has no render list, draws every active mesh, and its emissive selectors
- * answer for item tiers and PBR trim maps. Effect art was excluded from it
- * for that reason and got no bloom of its own, which on a scene-referred
- * frame leaves a skill flat: the bolt and the ground it is drawn over land at
- * the same display value once the tone curve has compressed them
- * (documentation/effects_exposure). What the original reads as is a hot core
- * inside a wide coloured halo, and the halo is this file.
- *
- * Three things separate it from the item layer:
- *
- *  - **an include list, not the whole scene.** The only meshes it draws are
- *    the ones an entry hands it, so a halo costs the cards that are on
- *    screen, not a second pass over the map.
- *  - **their own material.** What lands in the glow map is the card as drawn
- *    - sheet x tint x `visibility`, at the map's `lightCardGain` - rather
- *    than a flat quad of the tint an emissive selector would produce.
- *  - **its own strength.** The item ladder rings a silhouette at 0.25; a
- *    skill has to read as light thrown into the scene.
- *
- * Only emissive art joins: a `RENDER_DARK` card removes light and blooming it
- * would add back what it just took, and alpha art is matter, not light. Off
- * with post processing, where the frame is display-referred and the art is
- * already at the value it was authored for.
- *
- * `effects/core.ts` (cards), `joint.ts` (ribbons) and `model.ts` (skill
- * meshes) are the only callers; `disposePools` takes the layer down with the
- * map.
+ * The halo around effect art: its own `GlowLayer` that draws only the meshes entries hand it,
+ * apart from the item halo (`scenes/sceneLook.ts`). Off without post processing. See fx/readme.md.
  */
 
 const SLIDER_MAX = 9;

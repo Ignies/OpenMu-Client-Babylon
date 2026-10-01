@@ -1,43 +1,8 @@
 import { monsterModelTypeOf } from '../anim/playSpeed';
 
 /**
- * **Who leaves what.** Pure data shared by the ground effects - the shape a
- * thing presses into settled snow, how far apart it puts its feet down, how
- * hard it presses and how wide a channel its body ploughs.
- *
- * Read by `footprints.ts` (which bakes one sole atlas row per `TrackShape`)
- * and by `ecs/systems/footprintSystem.ts` (which walks the world and lays
- * them). Neither owns the table: a boot and a paw differ in a dozen small
- * numbers, and those numbers belong in one place where they can be compared
- * against each other rather than scattered across the two files that use
- * them.
- *
- * ### The two halves
- *
- *  - **`TrackShape`** is what the print *looks like* - the silhouette baked
- *    into the sole atlas. There are six, and adding one costs an atlas row
- *    and a case in `shapeDepth`.
- *  - **`TrackRecipe`** is how a particular creature *uses* one: its size, its
- *    stride, how wide it stands, whether it puts down two feet or four, and
- *    how much of a trench it drags between footfalls. Several recipes share a
- *    shape - a yeti and a hound both leave a pad with toes, but one is a
- *    barefoot biped and the other a quadruped at half the size.
- *
- * ### Keyed by model, not by monster
- *
- * `MODEL_TRACKS` is keyed by the **monster model type** (`MONSTER_MODEL_*`,
- * `MODEL_MONSTER01 + type`), which `monsterModelTypeOf(npcType)` reads from
- * `MONSTER_MODEL_TABLE` - the same key `deathVisuals.ts` uses for its
- * shatters, and for the same reason: what a thing leaves behind is decided by
- * the body it has, and a few hundred `npcType` rows share a few dozen bodies.
- * Golden, elite and event variants of a monster therefore inherit its track
- * for free.
- *
- * The table is a first pass over the models the shipped tables name; anything
- * not listed falls back to `boot`, because most of MU's bestiary is bipedal
- * and shod. Devias is the only map with settled snow on the ground today
- * (`SNOW_GROUND_MAPS`), so its own residents are the rows that can be checked
- * by looking at the screen; the rest are waiting for their map to get snow.
+ * Who leaves what in the snow: `TrackShape` (the silhouette) and `TrackRecipe` (size, stride,
+ * feet, drag), keyed by monster model type. Read by `footprints.ts` and the footprint system.
  */
 
 // ---- 1. tuning -------------------------------------------------------------
@@ -280,29 +245,8 @@ const TRACKS = {
 export type TrackName = keyof typeof TRACKS;
 
 /**
- * Monster model type → the track it leaves.
- *
- * Ordered by model index so it can be read side by side with
- * `MONSTER_MODEL_TABLE`. Anything absent takes `boot`.
- *
- * ### `none` and `slide` are earned, not guessed
- *
- * The first cut of this table was written from monster *names*, and the two
- * silent recipes are exactly where that fails invisibly: a wrong `boot` on a
- * hound is a visible mistake somebody can report, and a wrong `none` is a
- * creature that quietly leaves nothing, which reads as the feature being
- * broken. Devias' **Worm** was the one that proved it - MU's name is a
- * mistranslation and the model is a striped, fanged quadruped, so a row
- * written from the word "worm" turned the map's most common monster into a
- * thing that left no prints at all. Its **Iron Wheel** does not roll either:
- * it is in `SAND_SMOKE_MODELS` (impactVisuals.ts), the list of monsters the
- * original drops a sand puff under *as they walk*, which is the client's own
- * evidence that they are on their feet.
- *
- * So a row here only says `none` when something proves the thing is off the
- * ground - the client lifting it (`HoverHeight`), or a model that is plainly a
- * floating shroud - and only says `slide` for a body with no legs in it. When
- * in doubt it walks, because walking is the mistake that can be seen.
+ * Monster model type -> track, in `MONSTER_MODEL_TABLE` order; absent takes `boot`. `none` only
+ * with proof it is off the ground (`HoverHeight`), `slide` only for a legless body. See readme.md.
  */
 const MODEL_TRACKS: Readonly<Record<number, TrackName>> = {
   0: 'cloven', // Bull Fighter

@@ -1,23 +1,8 @@
 import { makeAutoObservable } from 'mobx';
 
 /**
- * `CSlideHelpMgr` / `CUISlideHelp` (UIControls.cpp:4033-4530): the marquee
- * strip along the top of the screen. Two lanes - the *help* slide (`g_hFont`)
- * and the *notice* slide (`g_hFontBold`) - each with a queue of texts keyed
- * by the second they are due. `ReceiveNotice` feeds them from `ServerMessage`
- * types 10..15 (`AddSlide(Count, Delay, Text, Type - 10, Speed / 10, Color)`):
- * 0..2 go to the help lane, 3..5 to the notice lane, and within a lane the
- * sub-type 1 queues the text for right now, the others for
- * `currentSecond + i * Delay` per loop; sub-type 0 (`-1` after the shift)
- * is dropped if it sat in the queue for more than 60 s.
- *
- * A lane draws a black band (alpha `alphaRate - 25`, 1 px lines above and
- * below) at y = 0 and scrolls its text in from x = 640, accelerating at
- * 1 px/tick² to `Speed` px/tick (2.5 default) and decelerating while the
- * mouse rests on the band. `alphaRate` ramps 30/tick up to 205 while there is
- * text and back down when it has scrolled past its width; the text colour's
- * alpha is scaled by `(alphaRate + 50) / 255`. The local "help" tips file
- * (`OpenSlideTextFile`) is not shipped here, so the help lane is packet-only.
+ * `CSlideHelpMgr` / `CUISlideHelp` (UIControls.cpp:4033-4530): the marquee strip along the top,
+ * a help lane and a notice lane fed by `ServerMessage` types 10..15. See readme.md.
  */
 
 export const SLIDE_STAGE_WIDTH = 640;

@@ -1,18 +1,6 @@
 /**
- * Projectile - something that flies from a point to a target and does a
- * thing on arrival. The original's `CreateEffect(MODEL_* or BITMAP_*, …, Target)`
- * with a `Velocity`: `MoveEffect` steps toward `Target->Position` each tick
- * and, within one step of it, kills the effect and spawns the hit
- * (ZzzEffect.cpp `MoveEffect`, the `o->Target` branch).
- *
- * The head is a billboard card (BITMAP_ENERGY, BITMAP_FIRE…) and/or a skill
- * model (`Skill/*.glb`, spawned through the `model` entry and told to follow
- * this projectile's point). An optional trail streams a particle recipe from
- * the same point. `to` may be a moving point so the bolt homes on a walking
- * target like the original.
- *
- * Driven by: `effects.spawn('projectile', …)`. Read by: nobody; `onArrive`
- * is the callback the skill table uses to fire the impact.
+ * Projectile: flies to a (moving) target and calls `onArrive` there (`CreateEffect(..., Target)`,
+ * ZzzEffect.cpp `MoveEffect`, the `o->Target` branch). Listed first in layers.ts. See fx/readme.md.
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
 import {

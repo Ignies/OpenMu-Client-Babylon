@@ -1,23 +1,8 @@
 import { noteSource, type DecodedBank } from './bank';
 
 /**
- * The voices. One `AudioBufferSourceNode` per sounding note, through its own
- * envelope gain, into the performer's chain - a limiter for their chords,
- * then their gain (distance) and pan (side) - and on to the bus the layer
- * owns. Pure Web Audio over a context and an output node handed in.
- *
- * A wind (`manifest.sustained`) plays its render until note-off, then a short
- * release; a note held past the render simply ends - the pre-rendered notes
- * have no loop points. A plucked string carries its own decay and note-off
- * only damps the tail, over the bank's longer release. Polyphony is capped
- * per performer and overall; the oldest voice gives way.
- *
- * The makeup gain that lifts the quiet renders lives in each voice's peak,
- * and the limiter that catches a loud chord is the performer's own, AHEAD of
- * their distance gain. With one limiter after the bus instead, a nearby
- * performer sat above its threshold and was held at the ceiling until far
- * enough away to fall under it - the first fifteen tiles of a walk away
- * changed nothing.
+ * The voices: one `AudioBufferSourceNode` per sounding note, through an envelope into the
+ * performer's chain (limiter, distance gain, pan) and on to the bus. Notes in ../readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

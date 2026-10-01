@@ -1,18 +1,5 @@
 /**
- * TEMPLATE - copy this file to `<name>.ts`, fill in the blanks, add the layer
- * to `layers.ts`. Never imported; it only exists to be copied.
- *
- * Every entry file has the same three parts, in this order:
- *
- *   1. Tuning constants at the top, each with a comment saying what it is in
- *      real units (seconds, points, 0…1) and why it has that value.
- *   2. Module state + the functions that read it. State lives here, not in
- *      the facade; readers are plain functions (`fooRemaining()`), commands
- *      are verbs (`startFoo()`).
- *   3. The exported `SkillLayer` at the bottom, wiring `update` / `reset`.
- *
- * Whatever draws the entry (a hotbar overlay, a tooltip, a window) lives in
- * `ui/…` and imports the readers from here or from the `skills` facade.
+ * TEMPLATE - a copy-me skill layer, never imported. Steps: "Change it" in readme.md.
  */
 import type { ENUM_WORLD } from '../../core/types';
 import type { SkillLayer } from './layer';

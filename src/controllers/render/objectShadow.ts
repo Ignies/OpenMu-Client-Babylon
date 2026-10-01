@@ -43,48 +43,14 @@ const GROUND_OFFSET = 5 / TILE_CM;
 const SHADOW_ALPHA = 0.65;
 
 /**
- * `EnableAlphaTest` - glAlphaFunc(GL_GREATER, 0.25), ZzzOpenglUtil.cpp:395.
- * The silhouette is cut by the caster's own texture at the same threshold the
- * caster is drawn with, so a mesh that is a card with a shape keyed into it
- * (a sword's guard, a wing membrane, a leaf spray) throws that shape and not
- * its quad.
- *
- * The original does not do this - `RenderBodyShadow` calls `DisableTexture()`
- * and every triangle lands solid. It gets away with it because it only ever
- * shadows body parts and weapons, whose meshes *are* their silhouette; the
- * blobs here also cover map objects, where an untextured card reads as a
- * black rectangle on the floor.
- *
- * Well below the 0.25 the caster itself is drawn with, though, and
- * deliberately: the caster is keyed to hide a card's corners, the shadow is
- * keyed only to find the silhouette's outline. MU's TGAs carry partial alpha
- * across whole surfaces and not just along a key's edge - a cape's weave, a
- * skirt's hem, a wing membrane, a helmet's visor - and at 0.25 every one of
- * those surfaces fell under the test and punched a hole clean through the
- * middle of the shadow, along the seam of whichever body part wore it. At 0.1
- * only a texel the artist actually keyed out is cut, which is the outline and
- * nothing else, and the interior lands solid the way the original's does.
+ * Alpha cut for the silhouette. `EnableAlphaTest` is 0.25 (ZzzOpenglUtil.cpp:395);
+ * 0.1 cuts only keyed-out texels, so partly transparent cloth still casts.
  */
 const SHADOW_ALPHA_CUTOFF = 0.1;
 
 /**
- * ### Why there is only one slot, and only the sun direction
- *
- * There was a second projection here: the silhouette a torch throws across the
- * floor *away from the flame*, on its own stencil bit, with the blob under a
- * character warped between the two. It was removed on request - outdoors it
- * put a second shadow under everything within reach of a brazier, and indoors
- * it exposed three separate faults at once: the room's own walls and roof cast
- * across the floor they enclose (the Lorencia pub's roof is lifted 100 units
- * out of view while the hero is inside, and went on casting from up there),
- * every long weapon smeared into a streak because the projection stretches a
- * caster by its height, and the furniture that should have cast did not,
- * because `ModelObject.BLOB_SHADOW_MIN_HEIGHT` is measured against the tallest
- * single mesh, and a table is a thin top on thin legs.
- *
- * Each of those is fixable. Together they are a feature that needs a real
- * shadow map rather than a projection, and the cascades already are one. So:
- * one slot, the sun direction, and the CSM replaces it wherever it runs.
+ * One slot, the sun direction only (a torch slot was removed). The CSM replaces
+ * the blob wherever it runs.
  */
 const SHADOW_STENCIL_BITS = [0x80] as const;
 
@@ -94,29 +60,8 @@ const SHADOW_FADE_START = 250 / TILE_CM;
 const SHADOW_FADE_END = 600 / TILE_CM;
 
 /**
- * How far the silhouette is pushed out along its own surface normal, in MU
- * units, before it is projected.
- *
- * A MU body is not one skin. It is a stack of separate BMDs - body, helm,
- * armour, pants, gloves, boots, plus whatever is in each hand - and inside
- * each of those every vertex is bound rigidly to exactly one bone
- * (`bmdToGlb`: `weightsArray.push(1, 0, 0, 0)`). Nothing blends across a
- * joint, so wherever two pieces meet they simply overlap, and the overlap is
- * only as deep as the artist left it. Seen in 3D that is invisible - one
- * piece is in front of the other. Flattened onto the floor it is not: the
- * two silhouettes are laid side by side in the same plane, and every place
- * their overlap ran out shows as a bright hairline of unshadowed ground -
- * around the neck, at each elbow and knee, where a boot meets a shin. A
- * shadow that ought to be one shape arrives as a pile of parts.
- *
- * Growing each piece by a hair along its own normal makes the overlaps deep
- * enough to survive being flattened, and the seams close. Only the horizontal
- * part of the normal is used, because the vertical part cannot change a
- * silhouette that has already been squashed flat - see the vertex block.
- *
- * Kept small: this is the whole outline growing, not just the joints, so it
- * is also what the shadow's edge costs in accuracy. Three units is under a
- * tenth of a limb's width and roughly what the joints were short by.
+ * How far the silhouette is pushed out along its horizontal normal before it is
+ * projected, so the seams between rigid body parts close.
  */
 const SHADOW_DILATE = 3 / TILE_CM;
 
@@ -484,21 +429,8 @@ export function createObjectShadow(
 }
 
 /**
- * Whether one of the caster's meshes belongs in the silhouette.
- *
- * `AddMeshShadowTriangles` (ZzzBMD.cpp:2295) walks every mesh of the body
- * and skips exactly two: the one the object nominated as `BlendMesh` -
- * an additive glow card, which is light, not matter - and `HiddenMesh`,
- * which is not drawn at all. Everything else casts, alpha-keyed or not.
- * `shadowSkip` is a `HiddenMesh` set for the shadow pass alone
- * (`ModelObject.ShadowHiddenMesh`): the mesh is drawn, its silhouette is not.
- *
- * The rule here used to drop every mesh whose material needed alpha
- * blending, which after `modelLoader`'s TGA → ALPHATESTANDBLEND promotion
- * is most of what a character wears: the shadow lost the armour's keyed
- * trim and its robes, all of a BLEND-textured weapon, and every wing -
- * which is why it read as a thin, naked body. It survives for map objects
- * only, as `rules.keyed`.
+ * Whether a caster's mesh is in the silhouette. `AddMeshShadowTriangles`
+ * (ZzzBMD.cpp:2295) skips only `BlendMesh` and `HiddenMesh`; keyed meshes follow `rules.keyed`.
  */
 export function meshCasts(mesh: AbstractMesh, rules: ShadowMeshRules): boolean {
   const blendMesh = mesh.metadata?.brightMesh === true;

@@ -10,24 +10,8 @@ import { DOPPELGANGER1_MESH_ANIMATION } from '@versions/shared/maps/doppelganger
 import { DOPPELGANGER2_MESH_ANIMATION } from '@versions/shared/maps/doppelganger2/spec';
 
 /**
- * The per-frame mesh writes the original does from `MoveObject`:
- * `o->BlendMeshTexCoordU/V` (a UV offset on one mesh) and `o->BlendMeshLight`
- * (that mesh's brightness). Both are pure functions of `WorldTime`, identical
- * for every instance of a type, so they live in a table rather than in a
- * class per object.
- *
- * `mesh` names which mesh the writes land on:
- *  - `blend` - the mesh the object already declares as its `BlendMesh`
- *    (additive, unlit). The original sets `o->BlendMesh = N` in the same
- *    `MoveObject` case.
- *  - `stream` - `Models[type].StreamMesh = N`: drawn *textured but unlit*,
- *    flat `BodyLight` instead of the per-vertex terrain light
- *    (ZzzBMD.cpp:990-1001). That is the sand-fall / waterfall look.
- *
- * Time is milliseconds, matching `WorldTime`. Note `-(int)WorldTime % 1000`
- * in C parses as `((-(int)WorldTime) % 1000)` - `%` keeps the dividend's
- * sign - so it ramps 0 → -0.999 and wraps, which is what `-(t % 1000)` gives
- * for positive `t`.
+ * `MoveObject`'s per-frame mesh writes (`o->BlendMeshTexCoordU/V`,
+ * `o->BlendMeshLight`) by world and type. `stream` draws unlit (ZzzBMD.cpp:990-1001).
  */
 export type MeshAnimation = {
   /** Which mesh index the writes target. */

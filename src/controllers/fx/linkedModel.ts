@@ -1,20 +1,6 @@
 /**
- * Linked model - a skill mesh hung off a character's bone and posed by the
- * character's own clip: MODEL_EFFECT_FLAME_STRIKE's blade, which
- * `RotationPosition(BoneTransform[33])` makes the parent of its root bones
- * (ZzzBMD.cpp:724-735, :291-303) and whose `AnimationFrame` is copied from
- * the owner's every tick (MoveHandlers.cpp:7734-7746).
- *
- * The node sits in the bone's own frame exactly as a held item does
- * (modelObject.ts: rotX(270 deg) with a Y mirror undoes the loader basis the
- * model root carries), so the mesh's BMD space is the bone's. Its clip plays
- * at the owner's speed from the owner's key and is nudged back when the two
- * drift; `lock(frame, 0)` holds it on a key with a looping sliver, never a
- * paused clip (a paused group writes bones nothing drawn follows).
- *
- * Driven by: `effects.spawn('linkedModel', …)` from the skill table, which
- * steps it a tick at a time (alpha, lock) and reads its bones for blurs.
- * Read by: nobody.
+ * Linked model: a skill mesh hung off a character bone and posed by its clip, MODEL_EFFECT_FLAME_STRIKE's
+ * blade (ZzzBMD.cpp:724-735, :291-303; MoveHandlers.cpp:7734-7746). See fx/readme.md.
  */
 import { Quaternion, TransformNode, VertexBuffer, type AbstractMesh, type AnimationGroup, type Mesh, type Scene, type Texture, type Vector3 } from '../render/babylon/exports';
 import type { Entity } from '../../ecs/world';

@@ -9,27 +9,9 @@ import { KALIMA_WORLDS } from '../assets/worldAssets';
 import { KALIMA_OBJECT_LOOPS } from '@versions/shared/maps/kalima/spec';
 
 /**
- * The object loops: the sounds the original attaches to map objects from a
- * world's per-object sound hook - `PlayBuffer(SOUND_x, o)` re-issued every
- * frame for as long as the object is in the update set (DSPlaySound.cpp:303,
- * a `Play` on an already-playing channel is a no-op, so a long sample reads
- * as a loop). Elbeland's brooks and gates (`GMNewTown::PlayObjectSound`),
- * Kanturu's wheel / waterfall / arc / plant, gear and incubators, the Tower's
- * crystals and field (`Sound_Kanturu2nd_Object`, `M39Kanturu3rd`), Karutan's
- * insects (`CGMKarutan1::PlayObjectSound`), the Barracks' and the Refuge's
- * cages, volcano and fire pillar (`CGM3rdChangeUp::PlayEffectSound`).
- *
- * Every instance of a registered type is a candidate; each frame the nearest
- * `MAX_SOURCES` within their row's reach get a slot, at most `channels` per
- * sound - a looping mixer instance (`SoundsManager.loopInstance`) at the row's
- * gain under the listener's attenuation curve. The older worlds (Lorencia …
- * Icarus) have no such hook in `ZzzObject.cpp`: their only object sounds are
- * the door and gate one-shots, which live with the door system.
- *
- * Driven by: the ECS map-object entities (`modelId` + `worldIndex` +
- * `transform`, read-only, rescanned every `SCAN_SECONDS`), the listener hero
- * and its tile's `TW_SAFEZONE` flag.
- * Read by: `sound.objectLoops` (the verification scripts).
+ * Map-object loops: a world's per-object hook re-issuing `PlayBuffer(SOUND_x, o)` each frame (DSPlaySound.cpp:303;
+ * `GMNewTown::PlayObjectSound`, `Sound_Kanturu2nd_Object`, `M39Kanturu3rd`, `CGMKarutan1::PlayObjectSound`,
+ * `CGM3rdChangeUp::PlayEffectSound`). Notes in readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

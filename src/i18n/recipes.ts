@@ -1,19 +1,6 @@
 /**
- * The text catalogue - every string the client itself writes on screen, in
- * English, keyed once.
- *
- * This is the **source of truth**: `TextKey` is derived from it, so a key that
- * is not here does not compile, and a language file that misspells one does not
- * compile either. English is also the fallback: a language that has not
- * translated a key yet shows the line below rather than the raw key.
- *
- * Keys are `area.thing`. Placeholders are `{named}` and are filled by
- * `t(key, { named })`; the handful of `%s` / `%d` lines are the original
- * client's own format strings, kept verbatim because their call sites splice
- * them the way `ZzzInterface.cpp` did.
- *
- * Read by: every entry file (`english.ts` … `german.ts`) and the facade's
- * `t()` fallback. Nothing else imports it - the game calls `t()`.
+ * The text catalogue: every string the client writes, in English, keyed once.
+ * `TextKey` is derived from it. See i18n/readme.md.
  */
 
 export const EN_TEXT = {

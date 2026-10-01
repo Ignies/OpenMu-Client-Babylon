@@ -20,32 +20,8 @@ import type { LightingTier } from '../../lighting/lightingQuality';
 import type { RoomVolume } from '../../lighting/profiles';
 
 /**
- * The room mask (ARCHITECTURE §13 F8): the one writer of "outside the room is
- * black". One post pass on tiers >= 1 while an area with a volume is active,
- * after the haze and before the post chain, whatever the post-processing
- * option says. Per pixel the world position comes back from the shared depth
- * and is drawn iff it lies inside the room volume (the floor between the inner
- * wall faces, up to the roof underside) or the segment from the camera to it
- * leaves the wall box (the same floor, up to the wall top) through one of its
- * four sides: that is a view through a door or a window, and a solid wall
- * would have stopped the ray. The two faces that stop nothing are the roof,
- * which is lifted out of the way while the hero is inside, and the floor,
- * which is one-sided and writes no depth from below - so a ray over the wall
- * top reaches the world outside and a ray up through the ground reaches all
- * of it, and neither is an opening. Hence the two asymmetries: only the exit
- * face has to be a wall (a camera above may drop its rays in through the
- * missing roof), and a camera below the floor gets no crossing at all. The
- * box stops at the inner faces, so a wall's outer face and its top lie
- * outside and go black with the exterior. Cards that write no depth take the
- * depth behind them, so a flame over the floor stays and a torch outside the
- * walls goes with the exterior behind it.
- *
- * The depth is the pass's own renderer, enabled for the camera while a room
- * is active and released when the area ends, storing camera-space z. Not the
- * G-buffer: that one refuses a map object's alpha-keyed cards on purpose, and
- * a tavern's barrels, stools and racks are all of them.
- *
- * Dev seam: `?roomMask=0` never builds the pass.
+ * The room mask (ARCHITECTURE §13 F8): outside the active room volume is black,
+ * except what is seen through a door or window. Dev seam: `?roomMask=0`.
  */
 
 const SHADER = 'muRoomMask';

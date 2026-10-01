@@ -17,28 +17,7 @@ import type { PlayerObject } from '../../controllers/actors/playerObject';
 
 /**
  * DeadCharacter / SetPlayerDie / the Dead counter (ZzzCharacter.cpp:3105,
- * 1372, 3958; WSclient.cpp:5370, 5489):
- *
- * 1. Kill packet: Dead = 1, movement stops. If the hero landed the blow the
- *    Die clip waits for the swing to connect (AttackFlag = ATTACK_DIE), with
- *    the generic 15-tick fallback; anyone else's kill dies at once. A Nova /
- *    Combo kill or a castle death also starts a body motion.
- * 2. Die clip plays once and holds; two blood splats under the head bone.
- *    **Special deaths** (`common/deathVisuals.ts`): Death Cow / Stone Golem /
- *    Ice Monster burst into pieces instead - the body vanishes at once.
- * 3. Rot += 0.02/tick from the kill. At Rot >= 1 (2 s) alpha fades to 0
- *    over the next 2 s while the body sinks 0.4 cm per tick.
- * 4. Body motion, render-only (`dying.offset` / `dying.pitch`):
- *    - Nova / Combo (:3173-3193): for 15 ticks the corpse slides toward the
- *      killer, 40…54 cm/tick decelerating; a Nova death also throws blue
- *      BITMAP_LIGHT motes from random bones for 30 ticks.
- *    - Blood Castle bridge edge / Chaos Castle pit (`FallingStartCharacter`,
- *      WSclient.cpp:5440; `FallingCharacter`, :3014): the body tips over and
- *      falls off, sideways on the bridge, straight down in the pit (with a
- *      `SOUND_CHAOS_FALLING` scream). Chaos Castle corpses also pop `CreateBomb`s,
- *      each with its eExplosion, on odd ticks 15…25 (:3145-3168).
- * 5. Alpha < 0.01: everyone but the hero is removed. The hero stays until
- *    the respawn packet clears the state.
+ * 1372, 3958, 3014, 3145-3193; WSclient.cpp:5370, 5440, 5489). See ecs/readme.md.
  */
 
 const TICKS_PER_SECOND = 25;

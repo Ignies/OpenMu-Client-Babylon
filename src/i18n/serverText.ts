@@ -1,21 +1,6 @@
 /**
- * THE SERVER'S OWN SENTENCES.
- *
- * OpenMU writes its player messages as finished English
- * (`GameLogic/Properties/PlayerMessage.resx`) and sends them as a
- * `ServerMessage` packet, so they arrive already worded and know nothing about
- * the language the player picked. The server can localize them itself -
- * `/language` switches `player.Culture` - but only into the cultures it was
- * built with, and it ships English alone.
- *
- * So the recognising happens here. Every sentence the server can send is a
- * `serverMessage.*` line in `recipes.ts`, worded exactly as OpenMU words it,
- * which lets the English catalogue double as the pattern that matches the
- * incoming text: one place to fix when a server upgrade rewords a message.
- *
- * A line that matches nothing is returned untouched. GM broadcasts, guild
- * notices, a message a newer server grew - free text stays free text rather
- * than turning into a blank or a key.
+ * Recognises OpenMU's English `ServerMessage` sentences
+ * (`GameLogic/Properties/PlayerMessage.resx`) and translates them. See i18n/readme.md.
  */
 
 import { EN_TEXT, type TextKey } from './recipes';

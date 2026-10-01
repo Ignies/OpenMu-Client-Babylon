@@ -2,20 +2,8 @@ import type { MeshAnimation } from '../render/meshAnimation';
 import { MonsterActionType } from '@versions/shared/objects/enum';
 
 /**
- * The additive body mesh some monsters carry and what the original writes
- * on it every tick: `o->BlendMesh` / `o->BlendMeshLight` from `CreateMonster`
- * (ZzzCharacter.cpp:13786-14052) and the per-frame `BlendMeshTexCoordV` /
- * `BlendMeshLight` writes of `MoveCharacterVisual` (:6002-6080).
- *
- * Keyed by monster model type (`MONSTER_MODEL_*`). `MonsterObject.load`
- * applies the mesh and binds the animation through the same
- * `bindMeshAnimation` the map props use.
- *
- * Not here, because the original never gives them a blend mesh: the
- * `BlendMeshTexCoord` writes on Crust (:5818), Balrog (:6012) and Devil
- * (:6015) land on `BlendMesh = -1` and draw nothing (`RenderMeshAlternative`
- * scrolls only `i == BlendMesh || i == streamMesh`, ZzzBMD.cpp:1847). The
- * Dark Phoenix shield is its own object and has no model here.
+ * Monster additive body mesh by model type: `CreateMonster`
+ * (ZzzCharacter.cpp:13786-14052) and `MoveCharacterVisual` (:6002-6080). See actors/readme.md.
  */
 
 /** One original tick, in ms: the writes step at 25 Hz. */

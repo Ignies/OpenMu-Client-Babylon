@@ -1,24 +1,6 @@
 /**
- * Gzip sidecars for the game data.
- *
- * The converted assets are binary but not compressed: a GLB is a vertex blob
- * behind a large ASCII glTF header (`player.glb` is 8.1 MB, 5.2 MB of it
- * JSON), a `.OZT` is an uncompressed TGA, a `.att` is a tile array. gzip
- * takes the tree to roughly a third, and the character rig to a sixth. Static
- * hosts will not compress these content types on their own, so the bytes are
- * packed at build time (`tools/compressAssets.ts`) into a `<file>.gz` beside
- * each one, and unpacked here with the browser's own `DecompressionStream`.
- *
- * Nothing depends on a sidecar existing. Every read falls back to the plain
- * file - a build published without them, a half-copied tree, a host that
- * mangles them, a browser with no `DecompressionStream`: the scene still
- * loads, it just pays full size for that file. The decision is made once per
- * session so a deployment without sidecars costs one 404 rather than one per
- * asset, and a run of failures after that turns the whole thing off.
- *
- * `OZJ` and the audio are deliberately not on the list: they are JPEG and MP3
- * already and gzip hands back 0.81-0.93 of the original, which does not pay
- * for the extra request.
+ * Gzip sidecars (`<file>.gz`, written by `tools/compressAssets.ts`) with a
+ * fallback to the plain file on every read. See assets/readme.md.
  */
 
 /** Written beside every compressible asset by `tools/compressAssets.ts`. */
@@ -224,22 +206,9 @@ export async function prefetchAsset(url: string): Promise<void> {
 }
 
 /**
- * Run the sidecar probe now, against `probeUrl`, instead of letting the first
- * compressible read run it. Returns whether this deployment ships sidecars.
- *
- * The pre-download screen needs this. It builds URLs for thousands of files
- * before the game has read a single asset, so the latch is still unset, and
- * `prefetchAsset` above deliberately does not start the probe - it would warm
- * the plain files while the game later asks for `.gz`. That is every byte
- * downloaded twice with a 0% hit rate. Settling it first is what makes the
- * two agree.
- *
- * The caller passes the URL (something small, compressible and always
- * present - `gate.bmd`) rather than this module resolving one: `dataFolder`
- * reads through `utils` into here, and importing it back would close the
- * cycle.
- *
- * Idempotent; only the first call costs a request.
+ * Run the sidecar probe now against `probeUrl` (the pre-download screen passes
+ * `gate.bmd`) and return whether this deployment ships sidecars. Idempotent.
+ * See assets/readme.md.
  */
 export async function settleSidecars(probeUrl: string): Promise<boolean> {
   if (!CAN_UNPACK || !enabled) return false;

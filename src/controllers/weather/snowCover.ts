@@ -6,26 +6,8 @@ import { DEVIAS_SNOW, SNOWFALL_MAPS } from './ambientWeather';
 import { maps } from '../maps';
 
 /**
- * How much settled snow is lying on the ground, 0…1.
- *
- * The falling flakes are particles (`DEVIAS_SNOW`); this is what they leave
- * behind. The original client has no equivalent - `MoveEtcLeaf` settles a leaf
- * on the terrain and fades it out, and that is as far as ground contact ever
- * went ("leaves settling on terrain, and `BITMAP_RAIN_CIRCLE`
- * splashes" are both listed as missing) - so this is our own, and it is
- * deliberately a *simulation* rather than a lookup: cover builds while the
- * squall blows and melts once it passes, which is the whole reason the ground
- * reads as weather rather than as a texture swap.
- *
- * It reads the squall schedule directly rather than being handed the emitter's
- * strength, because the emitter stops when the hero steps indoors and the snow
- * outside plainly does not.
- *
- * Not shared across clients the way the schedule is: two players who arrived at
- * different times can disagree on the exact depth for a minute or two after a
- * squall starts. That is invisible at the thresholds this feeds, and the
- * alternative - integrating the schedule analytically over all of history -
- * buys nothing anyone can see.
+ * Settled snow on the ground, 0..1. Our own (the original only fades leaves, `MoveEtcLeaf`):
+ * builds while the squall blows, melts after. Reads the squall schedule directly. See readme.md.
  */
 
 // ---- 1. tuning -------------------------------------------------------------

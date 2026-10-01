@@ -1,19 +1,6 @@
 /**
- * How far from the hero map objects are kept loaded, in tiles.
- *
- * `CalculateVisibilitySystem` held 32/40 as constants, sized for the ported
- * camera's default framing - the original has no such radius, it draws every
- * 16x16 object block the 2D frustum touches (`RenderObjects`,
- * ZzzObject.cpp:3272). The camera facade's zoom, pitch and FOV sliders all
- * push the horizon well past that pair, so the radius is a player choice
- * rather than a constant: step 0 is exactly what the client always had, and
- * the top step is wider than the map's own diagonal (256 * sqrt(2) = 362), so
- * it holds every object on the map at once.
- *
- * Both rings load the model (`ModelLoaderSystem`) and only `hidden` disposes
- * one. `visible` is the inner ring: it loads first while the models stream in,
- * and it is what the systems that walk objects rather than frustum-cull them
- * read - the ceiling flood fill, picking, highlights.
+ * How far from the hero map objects are kept loaded, in tiles. Step 0 is the old
+ * 32/40; the original draws every block the frustum touches (ZzzObject.cpp:3272).
  */
 export type RenderDistanceRanges = {
   readonly visible: number;

@@ -1,24 +1,6 @@
 /**
- * Spirit swarm - Evil Spirit's black dragons as one flock: each spirit is a
- * steered JOINT_SPIRIT head (ZzzEffectJoint.cpp:3732-3772) dragging a dark
- * body, two braided wisps and a darker spine, with the MODEL_LASER skull
- * (RENDER_DARK) seated on its head (ZzzEffect.cpp:1890).
- *
- * The same flight and the same art as four `joint` trails and three `model`
- * stamps per spirit, drawn with four meshes for the whole wave: the bodies and
- * wisps share one ribbon mesh, the spines another, and the skulls are thin
- * instances of one silhouette mesh and one sheet mesh. Every ribbon moves in
- * place (greasedLineInPlace.ts) and each body's curve is smoothed once for its
- * wisps and spine too, where the separate trails each rebuilt their own
- * GreasedLine every frame (2.8 ms a frame for one cast). A finished wave's
- * meshes wait in a small pool for the next cast, so a cast builds nothing
- * after the first.
- *
- * The order is the trails' own: the wisps, the spine and the skull ride the
- * head where it was a frame ago, as the followers of a `track`ed head did, so
- * the followers keep a history of their own.
- *
- * Driven by: `effects.spawn('spiritSwarm', …)` (skillVisuals.ts row 9). Read by: nobody.
+ * Spirit swarm: Evil Spirit's dragons as one flock, steered JOINT_SPIRIT heads (ZzzEffectJoint.cpp:3732-3772)
+ * with MODEL_LASER skulls (ZzzEffect.cpp:1890), four meshes per wave. See fx/readme.md.
  */
 import {
   Constants,

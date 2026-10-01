@@ -1,25 +1,6 @@
 /**
- * Band notes - a music note that flows out of an instrument for every note
- * it plays: the strum the held pose does not make.
- *
- * Unlike the rest of the effects a note is not a glow: it is a solid glyph,
- * alpha-tested in the world's own rendering group, so it writes depth and
- * lands in the G-buffer - which is what gives it an ink line of its own
- * under the Anime style (scenes/inkOutline.ts) instead of the contour that
- * pass draws around the additive cards. Tinted by the pitch class, twelve
- * hues around the octave, and sized by the velocity. The glyph is drawn
- * once per scene into a small dynamic texture as shapes (head, stem, flag,
- * beam), not a font character: every machine draws the same note.
- *
- * A note leaves the instrument forward, the way the performer faces, in a
- * loose fan - one a little to the left, the next a little to the right -
- * and lifts as it goes, on a curve that steepens toward the end. It starts
- * small and grows as it travels, holds its colour through the first half of
- * the way and then fades out smoothly, and drags a soft wake of its own
- * colour along the curve behind it - so the notes are seen to flow out of
- * the music, not to float off it.
- *
- * Driven by: `BandSystem`, one spawn per hit it lets through. Read by: nobody.
+ * Band notes: a solid note glyph that flows out of an instrument for every note it plays, tinted
+ * by pitch class and sized by velocity. Driven by `BandSystem`. See fx/readme.md.
  */
 import {
   Constants,

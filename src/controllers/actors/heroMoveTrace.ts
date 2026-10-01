@@ -2,21 +2,8 @@ import { Store } from '../../app/store';
 import type { Entity } from '../../ecs/world';
 
 /**
- * Why the hero was just moved by the server.
- *
- * `ObjectMoved` (C1 15) is the only packet that repositions the hero without
- * him walking there, so every unexplained jump in game is one of these. It
- * arrives for a gate, for a teleport, for an `InstantMoveRequest` we asked
- * for - and for a resynchronisation, which is the server saying our idea of
- * where he stands drifted past its tolerance. Those cases are impossible to
- * tell apart from the outside, which is what makes a jump like this so hard
- * to chase from a bug report.
- *
- * So say it out loud. One line per jump, carrying what the client believed at
- * that moment: where it thought he stood, what walk it had last told the
- * server about, and which approach was driving him. A jump whose `sentWalk`
- * ends where the server put him is a walk we failed to stop; one with no walk
- * behind it at all is the server moving him on its own account.
+ * Logs why the server just moved the hero (`ObjectMoved`, C1 15) with what the
+ * client believed at that moment. See actors/readme.md.
  */
 
 /** Below this a jump is the server nudging a rounding difference, not a move. */

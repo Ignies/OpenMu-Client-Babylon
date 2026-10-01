@@ -1,21 +1,8 @@
 import { makeAutoObservable, runInAction } from 'mobx';
 
 /**
- * Installing the client as an app.
- *
- * The browser decides when a page may be installed and says so once, early,
- * by firing `beforeinstallprompt`. Holding that event is the whole trick:
- * the player presses a button in the options window whenever they like, and
- * this spends the held event then.
- *
- * Installing changes nothing about how the game renders - it is the same
- * engine in a window without a tab strip. What it is worth is the icon on the
- * taskbar and, because an installed app is granted persistent storage without
- * asking, the assets the download screen fetched surviving a browser that is
- * short on disk.
- *
- * The only module that touches the install APIs, and it imports nothing from
- * the app so `main.tsx` can pull it in before the game version resolves.
+ * Installing the client as an app: holds the browser's `beforeinstallprompt`
+ * and spends it when the options window asks. See app/readme.md.
  */
 
 type InstallPromptEvent = Event & {

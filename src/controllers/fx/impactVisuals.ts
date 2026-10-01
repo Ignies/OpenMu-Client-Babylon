@@ -17,22 +17,9 @@ import { COMBAT_BUS } from '../sound/combatSounds';
 import type { Sounds } from '../sound/soundsManager';
 
 /**
- * What a landed blow draws - the consumer table for
- * `ecs/systems/impactEffectSystem.ts`, in the shape of `deathVisuals.ts`.
- *
- * A blow is `BITMAP_SPARK` chips from the struck body (the spark loop next
- * to `CreateBlood`, ZzzEffectBlurSpark.cpp:436, throws 20 of them), plus a
- * few blood flecks when health - not just shield - was taken.
- *
- * Two things in Blood Castle do not bleed and get their own blow instead:
- * the Castle Gate smokes (`SetPlayerShock`, ZzzCharacter.cpp:1434-1450) and
- * the Statue of Saint throws crystal (the attacker's swing,
- * ZzzCharacter.cpp:4868-4885).
- *
- * The **hero never raises dust**: `PlayWalkSound` (ZzzCharacter.cpp:5230)
- * only picks a sound, and no `CreateParticle` in the client is tied to a
- * footfall. The sand a Tarkan monster kicks up walking is the monster's own
- * body effect, `effects/monsterVisuals.ts`.
+ * What a landed blow draws: `BITMAP_SPARK` chips (ZzzEffectBlurSpark.cpp:436) and blood flecks; the
+ * Castle Gate smokes (ZzzCharacter.cpp:1434-1450), the Statue of Saint throws crystal (:4868-4885).
+ * Driven by impactEffectSystem.ts. See fx/readme.md.
  */
 
 /** Chips per landed blow: the original's CreateSpark loop throws 20 (at 1.6–2.8 cm a chip). */

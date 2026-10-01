@@ -5,20 +5,7 @@ import type { Entity, ISystemFactory } from '../world';
 
 /**
  * How a dropped item moves (`MoveItems`, ZzzObject.cpp:6244; `CreateItem`
- * :6200; `RenderItems` :6394):
- *
- * - A **fresh** drop (`IsFreshDrop`) is created 180 cm up with
- *   `Gravity = 20` cm/tick and falls under `Gravity -= 6` a tick, tumbling
- *   - `Angle[0] = -Gravity × 10°` while airborne, `Angle[1]` for a shield -
- *   until it reaches its rest height, where `ItemAngle` sets the lying pose
- *   back (that pose is `common/itemAngle.ts`, applied at spawn). Here the
- *   fall is a render-only `posOffset.y` above the rest position logic.ts
- *   placed it at, so pathing, picking and the name tag never see it move.
- * - On Icarus (and Kanturu's Maya scene) every drop **bobs**:
- *   `Position[2] += 10 × sin((i × 1237 + WorldTime) × 0.002)`.
- *
- * Nothing here allocates per frame; a drop that is neither fresh nor on a
- * bobbing map costs one boolean.
+ * :6200; `RenderItems` :6394). See ecs/readme.md.
  */
 
 // ---- tuning ------------------------------------------------------------------

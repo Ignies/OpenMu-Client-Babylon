@@ -1,19 +1,6 @@
 /**
- * TEMPLATE - copy this folder's shape for a new map: `maps/<name>/index.ts`
- * (this file's contents), `maps/<name>/spec.ts` (the per-type tables) and
- * `maps/<name>/create.ts` (the object classes and the setup function). Add
- * `<name>Layer` to `layers.ts`. Never imported; it only exists to be copied.
- *
- * Every entry has the same three parts, in this order:
- *
- *   1. Data at the top: worlds, tiles, spawn, sky kind - each with a comment
- *      saying where in the original it comes from.
- *   2. State + readers: a map entry has none of its own - its runtime state
- *      lives in the objects `create` binds (or in an event / sound entry).
- *   3. The exported `MapLayer` at the bottom.
- *
- * `create` MUST stay a dynamic import (see `layer.ts`): the object classes
- * extend `ModelObject`, whose imports read this system's tables.
+ * TEMPLATE - copy me for a new map entry; never imported. Steps in readme.md.
+ * `create` MUST stay a dynamic import (see `layer.ts`).
  */
 import { ENUM_WORLD } from '../../core/types';
 import type { MapLayer } from './layer';

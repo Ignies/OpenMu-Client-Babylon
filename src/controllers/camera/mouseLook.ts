@@ -1,18 +1,6 @@
 /**
- * First-person mouse look: the pointer lock, and the raw mouse deltas it
- * hands back to the facade.
- *
- * The lock is what makes the look unbounded - without it the cursor walks
- * into the window edge a quarter turn in. It costs the game its cursor
- * position: while the lock is held the browser freezes `clientX/clientY` at
- * wherever the pointer was when it was taken, and only `movementX/Y` are
- * live. So every pick in the game has to aim at the middle of the canvas
- * instead, which is what `aimX`/`aimY` do - the systems that pick (pointer
- * input, cursor, the walk click) run their coordinates through them, and the
- * on-screen cursor parks itself there, crosshair-style.
- *
- * `index.ts` stays the single writer of the camera angles: this module only
- * reports how far the mouse moved.
+ * First-person mouse look: the pointer lock and the raw mouse deltas it hands
+ * to the facade. Picks aim at the canvas middle (`aimX`/`aimY`). See camera/readme.md.
  */
 
 import { EventBus } from '../../core/eventBus';

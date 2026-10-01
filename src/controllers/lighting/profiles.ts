@@ -28,22 +28,8 @@ export type LookProfile = {
     readonly color: Rgb | null;
   };
   /**
-   * The fog that fills the bottom of the world, under `top` and thickening
-   * downward - what a map with holes in its ground is standing over.
-   *
-   * Devias' ravines are `NoGround` tiles, which the ground mesh sends past the
-   * far plane, so what shows through them is the sky dome: panes of pale blue
-   * lying across the snow field, brighter than the snow they are cut out of.
-   * A ray down one of those never meets anything, so it collects this the
-   * whole way and ends black; a ray that stops on the cliff face a few tiles
-   * down collects a few tiles of it and comes back half there. That is the
-   * difference between a fog and a cut-out, and it is why this is integrated
-   * along the ray rather than keyed off the height the ray happened to end
-   * at: the same wall reads differently near and far, and nothing anywhere
-   * has an edge.
-   *
-   * `top` belongs under the map's lowest walkable ground, or the field itself
-   * is standing in it. Omit for a map whose ground has no holes in it.
+   * Fog filling the bottom of the world under `top`, thickening downward and integrated along
+   * the ray (Devias' `NoGround` ravines). `top` sits under the lowest walkable ground; omit for maps without holes.
    */
   readonly underworld?: {
     /** World height the fog starts under. */

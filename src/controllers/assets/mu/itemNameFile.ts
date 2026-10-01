@@ -1,18 +1,6 @@
 /**
- * `Data/Local/<pack>/item_<lang>.bmd` - the item names in the language the
- * player picked.
- *
- * `ITEM_ATTRIBUTE_FILE` (`GameData/ItemData/ItemStructs.h`) with the legacy
- * 30-byte name the Season 6 tree ships: 8192 fixed records of 84 bytes, no
- * count in front, a 4-byte checksum after (which the client does not verify),
- * each record XOR-ed with the 3-byte Bux key **restarting at every record** -
- * one `BuxConvert(pSeek, structsize)` per record, the same as `MoveReq` and
- * the quest tables. The record index is the item code: `group * 512 + index`.
- *
- * Only the name is read. Everything else about an item still comes from
- * `items.json`, which is what the server keys on and what `muHelper` matches
- * behaviour against, so this is an **overlay**: empty until a pack is loaded,
- * consulted first by `itemBaseName`, English underneath.
+ * `Data/Local/<pack>/item_<lang>.bmd` item names: `ITEM_ATTRIBUTE_FILE`
+ * (`GameData/ItemData/ItemStructs.h`), an overlay over `items.json`. See assets/readme.md.
  */
 
 import { observable, runInAction } from 'mobx';

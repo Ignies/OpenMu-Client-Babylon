@@ -26,24 +26,8 @@ import { useGroundFade } from './groundFade';
 import type { EffectHandle } from './layer';
 
 /**
- * Shared plumbing for the effect entries (one entry per file next to this
- * one). Not an entry itself: it owns the pools every entry draws from and the
- * live-list class each entry keeps its own state in. Nothing here allocates
- * per frame:
- *
- *  - `LiveList` steps an entry's running effects from `effects.update`;
- *  - textures come from `loadEffectTexture` (one GPU texture per file, shared
- *    with the map emitters and the item auras);
- *  - additive `StandardMaterial`s are cached per (texture, colour) - MU's
- *    `EnableAlphaBlend` drawn as `(SRC_ALPHA, ONE)` so `visibility` is the
- *    fade (`ADDITIVE_ALPHA_MODE` below), and an additive material only
- *    blends when `transparencyMode` is ALPHABLEND;
- *  - billboard cards are `CreatePlane` meshes from a free-list;
- *  - particle bursts are `ParticleSystem`s cached per recipe, emitted with
- *    `manualEmitCount` so a burst is a counter bump, not an allocation;
- *  - the effects clock (`fxNow`, `delay`) sequences a skill's steps.
- *
- * `disposePools()` + `clearTimers()` are the facade's reset for all of this.
+ * Shared plumbing for the effect entries, not an entry: `LiveList`, cached materials (MU's
+ * `EnableAlphaBlend` as `(SRC_ALPHA, ONE)`), card and particle pools, the effects clock. See fx/readme.md.
  */
 
 /** MU's 25 Hz effect tick - the C++ counts lifetimes in these. */

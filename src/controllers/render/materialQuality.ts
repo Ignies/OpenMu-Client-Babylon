@@ -4,22 +4,8 @@ import { lightingTier } from '../lighting/lightingQuality';
 import type { TextKey } from '../../i18n';
 
 /**
- * Material quality (ARCHITECTURE §4.7). Classic is the faithful flat pipeline -
- * the shared Standard-derived item material, byte-for-byte what the game
- * shipped with. Both tiers above it put every lit mesh on the PBR variant;
- * they differ only in the *scope of the derived maps* (`pbrMaps.ts`, or
- * authored overrides from `Data/PBR/`): tier 1 derives them for the figures
- * and their gear, tier 2 for the whole world. Meshes outside the scope bind
- * the flat placeholders - PBR lighting with none of the derived relief.
- *
- * Only *lit* surfaces move: additive `_R` blend cards and flat-lit UI models
- * stay on the Standard path in every mode. Terrain is the hand-written shader
- * in every mode.
- *
- * The whole-mesh rule is load-bearing: `directLightGain` raises the sun and
- * the torch pool by pi to undo Burley's 1/pi, and that gain lands on every
- * light in the scene at once, so no lit mesh may be left on the Standard
- * path while it is on.
+ * Material quality: 0 Classic (Standard path); 1 and 2 put every lit mesh on
+ * PBR, with derived maps on figures and gear (1) or on everything (2).
  */
 /** The tier names, as text keys - the Options slider prints `t()` of these. */
 export const MATERIAL_QUALITY_LABEL_KEYS: readonly TextKey[] = [

@@ -13,30 +13,8 @@ const eyeLocal = new Vector3();
 const eyeWorld = new Vector3();
 
 /**
- * `Boids[]` - the ambient wildlife (GOBoid.cpp:814-1500).
- *
- * `GOBoid.cpp` has two halves and the clone only ever ported one. `Mounts[]`
- * - pets, Fenrir, the Dark Lord's horse - is in `pets.ts` and
- * `petSystem.ts`, cited line by line. `Boids[]` is everything else that
- * moves in the world without being a monster: the birds over Lorencia, the
- * bats in the Dungeon, Noria's butterflies, Blood Castle's crows, the fish
- * over Atlans.
- *
- * The calls are the boids' own: each bird, bat and crow near the hero rolls
- * its `PlayBuffer(sound, o)` at its own position (GOBoid.cpp:1481-1501), so a
- * sky with nothing in it is silent, and so is one the dragons took over.
- *
- * ## Which map has what
- *
- * Two tables in the original agree and this is their intersection: what
- * `LoadWorld` *loads* (MapManager.cpp:45-166, which also gives the folder
- * each model comes from - never the current map's) and what `MoveBoids`
- * *spawns* (GOBoid.cpp:1313-1375).
- *
- * The ground-crawling half of the spawner - Lorencia's river fish, the
- * Dungeon's rats, Stadium's bugs, Tarkan's fireflies, Crywolf's scorpions
- * (GOBoid.cpp:1690-1745) - is a second table with its own movement and is
- * not here yet.
+ * `Boids[]`: the ambient wildlife (GOBoid.cpp:814-1500). Maps are what `LoadWorld` loads
+ * (MapManager.cpp:45-166) and `MoveBoids` spawns (GOBoid.cpp:1313-1375). See fx/readme.md.
  */
 
 /**

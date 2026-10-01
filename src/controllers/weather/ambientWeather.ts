@@ -5,46 +5,8 @@ import type { AmbientSchedule } from './ambientSchedule';
 import { maps } from '../maps';
 
 /**
- * Ambient recipes for the GPU particle backbone, ported from the original's
- * `MoveLeaves` set (ZzzEffectFireLeave.cpp) plus our own tavern dust.
- *
- * The original ran ≤ 80 (200 in events) `Leaves[]` sprites around the hero
- * at 25 ticks/s; its units are MU (100 per tile), its axes Z-up. Converted
- * here: 1 MU unit/tick = 0.25 tiles/s, MU (x, y, z) → ours (x, z, y).
- *
- *  - **Lorencia leaves** (`CreateLorenciaLeaf`): spawn x ±800, y −500…+899,
- *    z +50…+349 around the hero; velocity x −6.4…−12.7 u/tick (toward −x,
- *    flipped past the camera), y/z ±1.6; per-tick random walk ±0.8, tumble
- *    from `TurningForce`; die 447 units from the start. Noria uses the same
- *    leaf.
- *  - **Atlans drift / bubbles**: `CreateAtlanseLeaf` is the Lorencia leaf's
- *    numbers copied line for line, but on World8's own round `leaf01` and
- *    drawn additively (`RenderLeaves`:507). Marine snow on a current, plus a
- *    bubble field the original leaves to its 845 vents. See `ATLANS_DRIFT`.
- *  - **Devias snow** (`CreateDeviasSnow`): z +200…+399, falling 8…23 u/tick
- *    tilted −30° about x, scale 5 (1 in 10 a big flake at 10, leaf02).
- *  - **Rain** (`CreateHeavenRain` / `CreateDevilSquareRain`): z +200…+399,
- *    speed 20…43 (+RainSpeed wobble) tilted −30…−50°, drawn as a 1×20
- *    plane along its angle - a stretched billboard here.
- *  - **Tavern dust**: slow golden motes inside the Lorencia pub volume.
- *
- * Three things keep a recipe from popping, and they are not interchangeable.
- * `fade` is per particle - the share of a leaf's own life spent fading in and
- * out, which is what stops a single sprite blinking into existence in mid-air.
- * `ramp` is per system - the seconds the *emit rate* takes to cross its whole
- * range, which is what stops the whole field arriving or leaving at once when
- * a gust starts or the hero steps under a roof. `growth` is per particle
- * again, and it is the one that carries a shower's *shape*: how big and how
- * fast a drop is at this strength, so that easing off makes the rain smaller
- * and slower and not merely sparser.
- *
- * The original settled leaves on the terrain (`MoveEtcLeaf`) and spawned a
- * `BITMAP_RAIN_CIRCLE` where a drop landed. A GPU particle still cannot read
- * the height map, so leaves end with a fade; rain no longer does - it is
- * given enough life to fall past the ground and is occluded by it, the same
- * trick `DEVIAS_SNOW` already used. The splash itself lives in the terrain
- * shader now, as rings on the standing water (`terrainOverlay.ts`), which is
- * the one place that *can* read the height map.
+ * Ambient particle recipes from `MoveLeaves` (ZzzEffectFireLeave.cpp) plus our own room dust.
+ * 1 MU unit/tick = 0.25 tiles/s, MU (x, y, z) -> ours (x, z, y). Per-recipe sources in readme.md.
  */
 
 /**
@@ -185,24 +147,8 @@ export const LORENCIA_LEAVES: AmbientRecipe = {
 };
 
 /**
- * Noria: the same fall, on the map's own art.
- *
- * `BITMAP_LEAF1` is `<WorldName>/leaf01` (MapManager.cpp:1474-1476), so every
- * map that sheds anything sheds its own. Noria's is a pink blossom petal;
- * Lorencia's is a cream dandelion puff on a brown stem, and that is what has
- * been blowing through the fairy forest - the same texture-follows-the-recipe
- * slip Atlans was pulled out of below.
- *
- * The motion is Lorencia's on purpose: `CreateAtlanseLeaf`
- * (ZzzEffectFireLeave.cpp:292-313) is `CreateLorenciaLeaf`'s spawn box and
- * velocity copied line for line, and Noria takes that path. The one
- * difference there is that Noria's copy forgets `FPS_ANIMATION_FACTOR` on the
- * velocity, which is a frame-rate bug in a fixed-tick client and nothing to
- * port.
- *
- * `RenderLeaves` (:507) leaves Noria on `EnableAlphaTest()` with
- * `glColor3f(1, 1, 1)`, so the petal is drawn at its own colour - no cream
- * variation over it, or the pink goes grey.
+ * Noria: Lorencia's motion (`CreateAtlanseLeaf`, ZzzEffectFireLeave.cpp:292-313) on its own
+ * petal, `<WorldName>/leaf01` (MapManager.cpp:1474-1476), at its own colour (`RenderLeaves`:507).
  */
 export const NORIA_PETALS: AmbientRecipe = {
   ...LORENCIA_LEAVES,
@@ -212,28 +158,8 @@ export const NORIA_PETALS: AmbientRecipe = {
 };
 
 /**
- * Atlans: what hangs in twenty metres of water, drifting on the current.
- *
- * The original wires Atlans into the leaf path (`CreateAtlanseLeaf`,
- * ZzzEffectFireLeave.cpp:292-313) with the Lorencia leaf's own spawn box and
- * velocity copied line for line, and this port copied the *recipe* too - so
- * Atlans has been running Lorencia's `World1/leaf01.OZT`, a cream dandelion
- * puff on a brown stem, blowing sideways across the seabed.
- *
- * Two things separate the original's Atlans from its Lorencia, and both were
- * lost in that copy. The texture is per world: `BITMAP_LEAF1` is
- * `<WorldName>/leaf01` (MapManager.cpp:1474-1476), and World8's is a soft
- * round grey blob, not a leaf. And `RenderLeaves` (:507) puts WD_7ATLANSE
- * on `EnableAlphaBlend()` - `glBlendFunc(GL_ONE, GL_ONE)`,
- * ZzzOpenglUtil.cpp:426, i.e. ADDITIVE - where Lorencia gets
- * `EnableAlphaTest()`. A dim round blob added over dark water is marine
- * snow, which is what the map wanted all along.
- *
- * The motion is the one place this leaves the original behind. 1.6-3.2
- * tiles/s is a gale, and water does not do gales: particulate is near enough
- * neutrally buoyant that it goes where the water goes and no faster. At
- * 0.35-0.9 tiles/s with a long life and a heavy wander, a mote crosses 3-10
- * tiles over its 7-12 s and looks suspended rather than blown.
+ * Atlans: marine snow. World8's round `leaf01` drawn additively (`RenderLeaves`:507,
+ * ZzzOpenglUtil.cpp:426). Slower than the original's leaf motion on purpose (see readme.md).
  */
 export const ATLANS_DRIFT: AmbientRecipe = {
   name: 'atlansDrift',

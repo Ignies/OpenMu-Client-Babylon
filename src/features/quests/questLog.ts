@@ -1,30 +1,7 @@
 import { t, type TextKey } from '../../i18n';
-/**
- * The Season 6 quest system - `CQuestMng` (QuestMng.cpp), the NPC quest
- * list of `CNewUINPCDialogue::ProcessQuestListReceive`, the progress window
- * `CNewUIQuestProgress` (NewUIQuestProgress.cpp) and the quest tab of
- * `CNewUIMyQuestInfoWindow` (NewUIMyQuestInfoWindow.cpp).
- *
- * Driven by the 0xF6 sub-packets:
- *
- * | packet | original | here |
- * |---|---|---|
- * | `AvailableQuests` (0A) | `ReceiveQuestByNPCEPList` | the NPC's list opens |
- * | `QuestStepInfo` (0B) | `ReceiveQuestQSSelSentence` | step dialog from `QuestProgress.bmd` |
- * | `QuestProgress` (0C) / `QuestState` (1B) | `ReceiveQuestQSRequestReward` | conditions + rewards |
- * | `QuestCompletionResponse` (0D) | `ReceiveQuestCompleteResult` | done / not yet |
- * | `QuestCancelled` (0F) | `ReceiveQuestGiveUp` | dropped from the log |
- * | `QuestStateList` (1A) | `ReceiveProgressQuestList` | the running quests |
- *
- * and answered with `QuestSelectRequest`, `QuestProceedRequest`,
- * `QuestCompletionRequest`, `QuestCancelRequest`, `QuestStateRequest`,
- * `ActiveQuestListRequest`, `EventQuestStateListRequest`.
- *
- * A quest is keyed the way the original packs it: `(group << 16) | number`
- * (`dwQuestIndex`), which is also the key of `QuestProgress.bmd`.
- *
- * Read by the quest windows in `ui/pages/worldPage/components/quests/`.
- */
+/** The Season 6 quest log - `CQuestMng` (QuestMng.cpp), `CNewUIQuestProgress`
+ * (NewUIQuestProgress.cpp), `CNewUIMyQuestInfoWindow` (NewUIMyQuestInfoWindow.cpp).
+ * Packet map and quest key: readme.md. */
 import { observable, reaction, runInAction } from 'mobx';
 import { GameOptions } from '../options/gameOptions';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';

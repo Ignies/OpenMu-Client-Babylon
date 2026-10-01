@@ -3,31 +3,8 @@ import { LocalStorage } from '../../core/localStorage';
 import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../../app/consts';
 import { ServerConfig, URL_PROFILE_ID } from './serverConfig';
 
-/**
- * The accounts this player uses on each world: a list per world, and which of
- * them the login window fills in.
- *
- * A client that plays any world cannot keep one login. The account that works
- * on one world means nothing on somebody's local OpenMU, and the pre-rework
- * client kept exactly one pair of credentials and handed it to whichever world
- * was entered next - so the book is keyed by profile id, the same key
- * `serverConfig.ts` selects and marks last-played with.
- *
- * More than one per world, because one per world is the same mistake a size
- * smaller: a main and a mule on the same server is the ordinary case in MU, and
- * a box that holds one of them turns the other into something retyped every
- * session.
- *
- * What it stores is what the original client stored: the name, the password,
- * and whether to keep them. It lives in this browser's localStorage in plain
- * text, exactly as the old single-account blob did - the accounts tab says so
- * out loud rather than implying a safety the client cannot provide. Turning
- * "remember" off on an entry stores neither field, which is also what the
- * original did.
- *
- * The URL profile is deliberately absent: it is a link somebody followed once
- * and is gone next launch, so an account saved against it would be orphaned.
- */
+/** The saved accounts of each world (keyed by profile id) and which one the login window fills.
+ * Plain text in localStorage, as the original stored them. Details: readme.md. */
 
 const ACCOUNTS_KEY = 'mu_accounts';
 

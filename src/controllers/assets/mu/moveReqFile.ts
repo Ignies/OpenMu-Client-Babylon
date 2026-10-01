@@ -3,27 +3,8 @@ import { onLanguageChanged } from '@/i18n';
 import { decodeLocalText, downloadLocalDataFile } from './localData';
 
 /**
- * `Local/<lang>/MoveReq_<lang>.bmd` - the rows of the Move (warp) command window,
- * decoded the way `CMoveCommandData::Create` (MoveCommandData.cpp:37) does:
- * an `int count`, then `count` records of `MOVEREQINFO_FILE`, each XOR-ed
- * with the 3-byte Bux key **restarting at every record** (one `BuxConvert`
- * per `fread`), like `gate.bmd` and the quest tables.
- *
- * ```
- * #pragma pack(1)
- * int  index;              // WarpInfo index the server is asked for
- * char szMainMapName[32];  // shown in the window
- * char szSubMapName[32];   // the /move alias (`Elbeland`, `Raklion`, …)
- * int  iReqLevel;          // greyed below this level (× 2/3 for MG / DL / RF)
- * int  m_iReqMaxLevel;     // 400 except Atlans (220) / Kanturu ruins (350); the S6 window never reads it
- * int  iReqZen;
- * int  iGateNum;           // the gate the server lands the hero on (informational here)
- * ```
- * = 84 bytes. The shipped file is 4204 bytes = 4 + 50 × 84 with `count` = 37,
- * i.e. padded to fifty slots; only `count` rows are read.
- *
- * The root `Local/Movereq.bmd` is the Korean/JP sibling (38 rows, the main
- * names in a legacy code page) and is not used.
+ * `Local/<lang>/MoveReq_<lang>.bmd`, the Move window rows, decoded like
+ * `CMoveCommandData::Create` (MoveCommandData.cpp:37). See assets/readme.md.
  */
 
 const FILE = 'MoveReq';

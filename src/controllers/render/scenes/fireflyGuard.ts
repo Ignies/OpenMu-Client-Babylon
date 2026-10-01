@@ -15,34 +15,8 @@ import {
 import { BLOOM_THRESHOLD } from './postChain';
 
 /**
- * The firefly guard: sole owner of the pass that bounds what one pixel may
- * hand the bloom blur. Runs on the linear buffer ahead of the rendering
- * pipeline, so `scenes/postChain.ts` keeps its bloom exactly as it is.
- *
- * Why it exists. Bloom spreads a pixel over a 48 px kernel, so how far it
- * reaches is set by the pixel's *value* and not by the size of the thing that
- * made it. One aliased fragment can therefore be drawn as a pool of light
- * that nothing in the scene is emitting. The case this was written for is a
- * grass blade at the far zoom
- * (issues/lighting/grass_tips_bloom_into_floating_lights.md): a blade's
- * albedo goes over 1, the decode squares it, and a single fragment arrives at
- * the bloom pass carrying 32 while the hottest torch pixel in the same frame
- * carries under 4. Zoomed in, hundreds of fragments are in that state at once
- * and read as sunlit grass; zoomed out a blade is sub-pixel, a handful are
- * left, and each one is drawn as its own ball that flickers with the wind.
- *
- * No threshold can separate those two - the artefact is the *brighter* of
- * them - so this bounds instead: a pixel may exceed the bloom threshold on
- * its own, but to go further than SPREAD over its brightest neighbour it has
- * to be part of something. A lone spike sits on ordinary grass and comes
- * down; a torch core, a flare or an emissive card is bright over an area, so
- * every pixel in it has a bright neighbour and none of them move.
- *
- * Off when the MU curve is live (`toneMapper` 1): that one rolls the whole
- * buffer into [0, 1] before the pipeline, so no pixel can hand the blur more
- * than one unit and the artefact cannot happen - which is why the report only
- * ever came from the other three mappers. Off with bloom off, and off on
- * Classic, which has no bloom at all.
+ * The firefly guard: before bloom, a pixel may not exceed SPREAD times its
+ * brightest neighbour or FLOOR, whichever is higher.
  */
 
 const SHADER = 'muFireflyGuard';

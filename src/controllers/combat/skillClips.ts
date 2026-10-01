@@ -1,19 +1,6 @@
 /**
- * Which clip a cast plays. The `UseSkillWarrior` / `UseSkillWizard` /
- * `UseSkillElf` / `UseSkillSummon` / `UseSkillRagefighter` switches, the
- * `AttackKnight` / `AttackWizard` / `AttackCommon` branches and the
- * `ReceiveMagic` / `ReceiveMagicContinue` ladders of the original are one
- * table lookup over `recipes.ts` `SKILL_CLIPS`, plus the three things those
- * switches decide at run time and a table cannot:
- *
- *  - the **mount** (`c->Helper.Type`, and always `&& !c->SafeZone`),
- *  - the **map** - `AT_SKILL_RIDER` flies on Tarkan / Heaven / Maya,
- *  - the two random picks (`rand_fps_check(2)` for the Rage Fighter party
- *    buffs, `rand() % 2` for the male hand cast), which stay random.
- *
- * Readers only. Read by `common/skillCasting.chooseSkillAction`, which the
- * hero's `skillCastSystem` and the remote `playCastAnimation` both go
- * through, so everyone in scope plays the same clip for the same skill.
+ * Which clip a cast plays: the `UseSkill*` / `Attack*` / `ReceiveMagic` switches
+ * as one lookup over `SKILL_CLIPS`, plus mount, map and random picks. See combat/readme.md.
  */
 import { PlayerAction } from '@versions/shared/objects/enum';
 import type { MountKind } from '../../features/pets/pets';

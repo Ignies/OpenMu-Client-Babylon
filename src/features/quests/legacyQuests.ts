@@ -1,30 +1,7 @@
 import { t, type TextKey } from '../../i18n';
-/**
- * The legacy quest chain - Scroll of the Emperor, Three Treasures of Mu,
- * Gain Hero Status, Secret of Dark Stone, Evidence of Strength, the Balgass
- * quests - ported from `CSQuest` (CSQuest.cpp) and the window that shows it,
- * `CNewUINPCQuest` (NewUINPCQuest.cpp).
- *
- * Driven by the 0xA0…0xA4 packets: `LegacyQuestStateList` (all states, 2 bits
- * per quest), `LegacyQuestStateDialog` (the NPC opened the quest window),
- * `LegacySetQuestStateResponse` (the state changed), `LegacyQuestReward`
- * (level-up points / class change), and the hero's own bag for the
- * "bring me X" check. Read by the NPC quest window
- * (`ui/…/quests/NpcQuestWindow`) and `questBubbles.ts`.
- *
- * The dialog state machine is the original's, in its terms:
- *
- * ```
- * CheckQuestState(): state = 2 bits of the list for m_byCurrQuestIndex
- *   QUEST_NO  → CheckRequestCondition ? page = act.startText[0] : errorText
- *   QUEST_ING → CheckActCondition     ? page = act.startText[2], state=QUEST_ITEM
- *   QUEST_END →                         page = act.startText[3]
- * ShowDialogText(page): lines + answers from g_DialogScript
- * answer click: m_iReturnForAnswer 1 → ProcessNextProgress (re-check zen, then
- *   SendLegacyQuestStateSetRequest(idx, 1)), 2 → close, 3 → SetRequest(idx, 1);
- *   then m_iLinkForAnswer > 0 → ShowDialogText(link)
- * ```
- */
+/** The legacy quest chain (Scroll of the Emperor to the Balgass quests), ported from
+ * `CSQuest` (CSQuest.cpp) and `CNewUINPCQuest` (NewUINPCQuest.cpp).
+ * Dialog state machine: readme.md "Notes". */
 import { observable, reaction, runInAction } from 'mobx';
 import { getBaseClass, BaseClass } from '../hero/characterStats';
 import { itemBaseName } from '@versions/shared/items/itemsDatabase';
