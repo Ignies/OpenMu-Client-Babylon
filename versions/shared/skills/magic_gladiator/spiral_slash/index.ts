@@ -12,6 +12,8 @@ import { mgGlint, mgSay, mgSayOnBattleCastle } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** BITMAP_FLARE sub23 (Flare.jpg), 15 tails. */
 const MG_SPIRAL_RIBBON: StripOptions = { texture: TEX.flareBig, maxTails: 15 };
 /** Gold chips shed from the Spiral Slash ribbon heads (Flare.jpg's own gold). */
@@ -121,4 +123,6 @@ export default defineSkill({
   visual: { cast: spiralSlash, enhanced: { cast: spiralSlashEnhanced } },
   sound: 'Sound/sKnightSkill2', // Spiral Slash
   clip: { ground: A.PLAYER_ATTACK_ONE_FLASH }, // Spiral Slash (WSclient.cpp:4164)
+  // Spiral Slash lights nothing in the original. Enhanced: each wave's gold over the ribbons' 200 cm sphere.
+  light: { enhanced: { follow: effectLight([1, 0.72, 0.3], 2.2, 0.9, { release: 0.45 }) } },
 });

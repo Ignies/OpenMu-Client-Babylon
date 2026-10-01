@@ -4,6 +4,8 @@ import { IRON_DEFENSE } from '../../_shared';
 import { A } from '@/controllers/combat/recipes';
 import { MOUNTED_HAND } from '../../_shared';
 
+import { IRON_DEFENSE_LIGHT } from '../../_shared';
+
 export default defineSkill({
   id: 323,
   name: "Iron Defense",
@@ -12,4 +14,5 @@ export default defineSkill({
   visual: IRON_DEFENSE,
   // Iron Defense is newer than the reference, which has no clip for it: the Dark Lord's buff clip, not a weapon swing.
   clip: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Iron Defense (every master class)
+  light: IRON_DEFENSE_LIGHT,
 });

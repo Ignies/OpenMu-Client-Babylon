@@ -14,6 +14,8 @@ import { storeRef } from '@/app/storeRef';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** Gigantic Storm: the flash where a bolt lands, and the sparks it throws, in the bolts' blue-white. */
 const MG_STORM_FLASH: RGB = [0.7, 0.75, 1];
 const MG_STORM_SPARKS: ParticleRecipe = {
@@ -294,4 +296,5 @@ export default defineSkill({
   // 237 Gigantic Storm: five sites round the caster at clip frame > 7 (giganticStorm above).
   visual: { cast: giganticStorm, enhanced: { cast: giganticStormEnhanced } },
   clip: { ground: A.PLAYER_SKILL_GIGANTICSTORM }, // Gigantic Storm (MG)
+  light: { enhanced: { follow: effectLight([0.6, 0.65, 1], 1.5, 1, { gain: 0.6, release: 0.3, flicker: { min: 0.3, max: 1, steps: 5 }, flickerSmoothing: 0.8 }) } },
 });

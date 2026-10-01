@@ -13,6 +13,9 @@ import { playCombat } from '@/controllers/sound/combat';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 // ---- mg steps --------------------------------------------------------------------
 
 /** RENDER_FACE both, the joint's `Light` white: `CreateJoint`'s defaults (ZzzEffectJoint.cpp:80-108). */
@@ -285,6 +288,11 @@ const mgFireSlash = (enh: boolean): Step => (at, c) => {
 const fireSlash = mgFireSlash(false);
 const fireSlashEnhanced = mgFireSlash(true);
 
+/** Fire Slash lights nothing in the original; this is its graded-tier light, shared with 490 (Fire Slash Strengthener). */
+const FIRE_SLASH_LIGHT: SkillLight = {
+  enhanced: { cast: effectLight([0.45, 0.4, 1], 1.2, 0.8, { release: 0.3 }), follow: effectLight([1, 0.55, 0.2], 2.2, 0.8, { release: 0.45 }) },
+};
+
 export default defineSkill({
   id: 55,
   name: "Fire Slash",
@@ -299,4 +307,9 @@ export default defineSkill({
   },
   },
   clip: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Fire Slash
+  // Fire Slash lights nothing in the original (no AddTerrainLight on its gathering, sword force or joint).
+  // Power Slash: MODEL_MAGIC2 AddTerrainLight (0.3, 0.6, 1) x Luminosity, range 3, under each of the five orbs
+  // (MoveHandlers.cpp:3355-3356); Luminosity rolls 0.7-1.0 a tick and drops 0.2 a tick over the last four.
+  // Enhanced: the gathering's violet at the hand (cast) and the crescent's fire over the arc, 145 cm + half its 150 cm width (follow).
+  light: FIRE_SLASH_LIGHT,
 });

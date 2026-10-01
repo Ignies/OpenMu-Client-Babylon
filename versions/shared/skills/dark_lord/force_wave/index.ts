@@ -4,6 +4,8 @@ import { force, forceGraded, litStrike, strikeKey } from '../_shared';
 import { A } from '@/controllers/combat/recipes';
 import { MOUNTED_STRIKE } from '../_shared';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 export default defineSkill({
   id: 66,
   name: "Force Wave",
@@ -14,4 +16,5 @@ export default defineSkill({
   },
   sound: 'Sound/sKnightSkill1', // Force Wave
   clip: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Force Wave
+  light: { enhanced: { strike: effectLight([0.55, 0.6, 1], 2, 0.3, { floorGain: 0.45 }) } },
 });

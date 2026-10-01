@@ -15,6 +15,9 @@ import { tierIndex } from '@/controllers/lighting/lightingQuality';
 
 import { A, SkillClipSet } from '@/controllers/combat/recipes';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 // Chain Lightning (MoveHandlers.cpp:1978-2064, WSclient.cpp:5577-5629).
 
 /** The hops' JOINT_THUNDER Light (0.4, 0.4, 1.0); hops 1-2 pass an unset vLight and are drawn in the same blue. */
@@ -229,6 +232,16 @@ export const CHAIN_LIGHTNING_CLIPS: SkillClipSet = {
   fenrir: A.PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR,
 };
 
+/**
+ * Chain Lightning: every 50 cm step of a width-50 JOINT_THUNDER lights `L * (0.1, 0.1, 0.5)`, L
+ * 0.16-0.28, range 2 (ZzzEffectJoint.cpp:5006-5021); the steps of the hop's walks overlap into a
+ * blue band along it for the hop's 20 ticks. The effect lays one of these every two tiles of it.
+ */
+export const CHAIN_LIGHTNING_LIGHT: SkillLight = {
+  land: { color: [0.15, 0.15, 0.75], range: 2, seconds: 0.84, release: 0.1 },
+  enhanced: { land: effectLight([0.4, 0.4, 1], 1.2, 0.84, { flicker: { min: 0.55, max: 1, steps: 3 }, release: 0.15 }) },
+};
+
 export default defineSkill({
   id: 215,
   name: "Chain Lightning",
@@ -237,4 +250,5 @@ export default defineSkill({
   visual: { cast: seq(chainHands, chainSoundAgain), enhanced: { cast: seq(chainHandsLit, chainSoundAgain) } },
   sound: 'Sound/SE_Ch_summoner_skill08_chainlightning', // Chain Lightning
   clip: CHAIN_LIGHTNING_CLIPS, // Chain Lightning
+  light: CHAIN_LIGHTNING_LIGHT,
 });

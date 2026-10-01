@@ -18,6 +18,8 @@ import { tierIndex } from '@/controllers/lighting/lightingQuality';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+
 /** Degrees → radians. */
 export const DEG = Math.PI / 180;
 /** MODEL_STONE1 / MODEL_STONE2 chips thrown up from a ground hit - either model, rolled per chip (ZzzEffect.cpp:280). */
@@ -580,3 +582,11 @@ export const MOUNTED_HAND = {
 
 /** The Dark Knight default branch: only the Fenrir has a clip of its own. */
 export const MOUNTED_SWORD = { fenrir: A.PLAYER_FENRIR_ATTACK_MAGIC } as const;
+
+/** One original tick, seconds. */
+export const TICK_SECONDS = 0.04;
+
+/** Iron Defense: nothing in Classic (the original predates it); the graded tiers' steel flash lights the caster, whom it buffs. */
+export const IRON_DEFENSE_LIGHT: SkillLight = {
+  enhanced: { cast: effectLight([0.85, 0.85, 0.95], 1.2, 0.6, { attack: 0.05, release: 0.4 }) },
+};

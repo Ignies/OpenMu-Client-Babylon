@@ -15,6 +15,8 @@ import { storeRef } from '@/app/storeRef';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** `VectorRotate((x, y, 0), AngleMatrix(0, 0, yaw))` in cm, added to `out` in tiles. MU (x, y) is world (x, z). */
 const addMuOffset = (out: Vector3, yaw: number, x: number, y: number): Vector3 => {
   out.x += cm(x * Math.cos(yaw) - y * Math.sin(yaw));
@@ -407,4 +409,22 @@ export default defineSkill({
     enhanced: { area: seq(furyEmptyHand, whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_FURY_STRIKE, 1, 14, furyStrikeOf(true))) },
   },
   clip: { ground: A.PLAYER_ATTACK_SKILL_FURY_STRIKE }, // Rageful Blow
+  // Rageful Blow: red Luminosity x (1,0,0), range 1, under the crater's EarthQuake02 (LT 20) and every
+  // EarthQuake05 / 08 glow wall (LT 40) (ZzzEffect.cpp:7147-7156, :7199-7212, :7247-7258). MODEL_WAVE's
+  // darkening light (-0.5, range 5, MoveHandlers.cpp:2601) has no equivalent: sources only add.
+  light: {
+    bodies: {
+      crater: { color: [1, 0, 0], range: 1, seconds: 0.8, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 },
+      wall: { color: [1, 0, 0], range: 1, seconds: 1.6, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 },
+    },
+    // One light per piece of art instead of 26 pure-red pools that summed to a pink flood: the white-hot burst,
+    // the crater's orange, and the glowing field the cracks and satellites cover out to ~3.7 tiles.
+    enhanced: {
+      bodies: {
+        burst: effectLight([1, 0.85, 0.6], 1.3, 0.45, { heightOffset: 0.4, release: 0.3 }),
+        crater: effectLight([1, 0.5, 0.18], 1.5, 1.4, { attack: 0.08, release: 0.6, flicker: { min: 0.75, max: 1, steps: 4 } }),
+        field: effectLight([1, 0.42, 0.12], 3.7, 1.6, { attack: 0.3, release: 0.7, flicker: { min: 0.8, max: 1, steps: 4 } }),
+      },
+    },
+  },
 });

@@ -14,6 +14,8 @@ import { randInt } from '../../_shared';
 import { A } from '@/controllers/combat/recipes';
 import { MOUNTED_STRIKE } from '../_shared';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** Fire Burst's origin: bone 0 + (40, 0, 10) cm in its frame (ZzzCharacter.cpp:5071-5072). */
 const FIRE_BURST_LOCAL = new Vector3(cm(40), 0, cm(10));
 /** MODEL_PIER_PART sub0 LT 20: it is drawn after moves 0..18 (ZzzEffect.cpp:3384-3395). */
@@ -197,4 +199,7 @@ export default defineSkill({
   visual: { impact: strikeKey(fireBurst, 'Sound/eFirebustBoom'), enhanced: { impact: litStrike(fireBurstGraded, 'Sound/eFirebustBoom') } },
   sound: 'Sound/eFirebust', // Fire Burst
   clip: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Fire Burst
+  // Fire Burst: the original lights nothing (no AddTerrainLight on PIER_PART / DARKLORD_SKILL). Enhanced:
+  // the three darts carry one fire light between them for their 19 ticks and their puffs' last 6, reaching ~1.5 tiles.
+  light: { enhanced: { strike: effectLight([1, 0.55, 0.2], 1.5, 1, { release: 0.25, floorGain: 0.6 }) } },
 });

@@ -7,6 +7,9 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 
+import { type LightRecipe } from '@/controllers/lighting/lightSource';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** Monsters whose Energy Ball the original draws nothing for, and plays no sound (ZzzCharacter.cpp:5089-5122). */
 const ENERGY_BALL_UNDRAWN = new Set([37, 46, 61, 66, 69, 70, 73, 75, 77, 87, 89, 93, 95, 99, 112, 116, 118, 122, 124, 128, 130, 141, 143, 163, 165, 167, 169, 171, 173, 293, 303, 427]);
 const ENERGY_BALL_TICKS = 20;
@@ -91,10 +94,32 @@ const ENERGY_BALL_LOOK: EnergyBallLook = {
   ),
 };
 
+/**
+ * BITMAP_ENERGY's `(0.2, 0.4, 1) x LT * 0.2` range 2: Lum runs 4 down to 2 over a 6-tile flight and
+ * AddTerrainLight has no upper clamp, so the core saturates pale cyan with a blue rim. The effect stops it.
+ */
+const ENERGY_BALL_LIGHT: LightRecipe = {
+  color: [0.2, 0.4, 1],
+  range: 2,
+  seconds: 20 * 0.04,
+  release: 0.04,
+  gain: 3,
+  floorGain: 3,
+};
+
 export default defineSkill({
   id: 17,
   name: "Energy Ball",
   // 17 Energy Ball: at the release, BITMAP_ENERGY flies from the caster 100 cm up; one Spark03 pop within 100 cm of the target (energyBall).
   // Enhanced: a held glow and spark wake on the ball, a spark burst on the pop.
   visual: { impact: energyBall(), enhanced: { impact: energyBall(ENERGY_BALL_LOOK) } },
+  // Energy Ball: BITMAP_ENERGY's light rides the ball and dies with it; nothing on arrival (ZzzEffect.cpp:6879-6883).
+  // Enhanced: the held glow's blue riding the ball, and a short flash where it pops.
+  light: {
+    land: ENERGY_BALL_LIGHT,
+    enhanced: {
+      land: effectLight([0.35, 0.6, 1], 0.8, 20 * 0.04, { release: 0.04 }),
+      bodies: { pop: effectLight([0.5, 0.75, 1], 1, 0.3, { release: 0.25 }) },
+    },
+  },
 });

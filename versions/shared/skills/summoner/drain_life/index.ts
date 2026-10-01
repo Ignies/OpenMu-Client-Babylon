@@ -12,6 +12,9 @@ import { playCombat, playLandingSound } from '@/controllers/sound/combat';
 
 import { A, SkillClipSet } from '@/controllers/combat/recipes';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 const PX_RED_FLARE = 64;
 
 // Drain Life (MoveHandlers.cpp:2067-2210).
@@ -257,6 +260,18 @@ export const DRAIN_LIFE_CLIPS: SkillClipSet = {
   fenrir: A.PLAYER_SKILL_DRAIN_LIFE_FENRIR,
 };
 
+/**
+ * Drain Life: each JOINT_ENERGY siphon lights `L * (0.4, 1, 0.8)`, L 0.24-0.33, range 2 every tick
+ * of its flight (ZzzEffectJoint.cpp:3377-3379), and dies into a BITMAP_LIGHTNING+1 lighting
+ * `LifeTime / 10 * (0.5, 1, 0.8)` range 3 for 10 ticks (ZzzEffectParticle.cpp:4281-4287).
+ */
+export const DRAIN_LIFE_LIGHT: SkillLight = {
+  trail: { color: [0.11, 0.28, 0.22], range: 2, release: 0.1 },
+  land: { color: [0.5, 1, 0.8], range: 3, seconds: 0.4, release: 0.4 },
+  // Enhanced: the arrival lights in the siphons' red, where the effect now draws a bloom; the bundle carries one light.
+  enhanced: { land: effectLight([1, 0.25, 0.35], 1.2, 0.4, { release: 0.3 }) },
+};
+
 export default defineSkill({
   id: 214,
   name: "Drain Life",
@@ -266,4 +281,5 @@ export default defineSkill({
   sound: 'Sound/SE_Ch_summoner_skill07_lifedrain', // Drain Life
   // --- Summoner (UseSkillSummon, ZzzInterface.cpp:2534-2680) --------------
   clip: DRAIN_LIFE_CLIPS, // Drain Life
+  light: DRAIN_LIFE_LIGHT,
 });

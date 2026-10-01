@@ -6,6 +6,9 @@ import { Step, burn, cm, explosion, particles, ring, scorch, sprite } from '@/co
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { playCombat } from '@/controllers/sound/combat';
 
+import { FIRE_BALL_LIGHT } from '../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /**
  * 2 Meteorite (ZzzCharacter.cpp:5007-5010): MODEL_FIRE sub0 from 130-161 cm along +x and 400 cm over the
  * target's feet, Scale 1.0-1.7, falling 50 cm a tick tilted 20 deg back onto them (ZzzEffect.cpp:2546-2556),
@@ -57,5 +60,18 @@ export default defineSkill({
   visual: {
     impact: meteor(meteorLanding()),
     enhanced: { impact: meteor(meteorImpact, METEOR_LOOK) },
+  },
+  // Meteorite: MODEL_FIRE's `(Lum, 0.1 Lum, 0)` range 2 rides the ball down and dies with it (ZzzEffect.cpp:7948-7953).
+  // Enhanced: an orange glow riding the lit ball; on the ground the white-hot burst over the explosion's reach
+  // and the crater's red, which outlasts it.
+  light: {
+    land: FIRE_BALL_LIGHT,
+    enhanced: {
+      land: effectLight([1, 0.4, 0.1], 1.2, 3, { release: 0.04, flicker: { min: 0.8, max: 1, steps: 4 } }),
+      bodies: {
+        impact: effectLight([1, 0.6, 0.25], 1.8, 0.7, { heightOffset: 0.8, release: 0.45 }),
+        crater: effectLight([1, 0.3, 0.06], 1.1, 1.4, { attack: 0.1, release: 0.8, flicker: { min: 0.75, max: 1, steps: 4 } }),
+      },
+    },
   },
 });

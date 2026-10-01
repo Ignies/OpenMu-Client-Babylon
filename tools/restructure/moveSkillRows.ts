@@ -71,7 +71,7 @@ const srcImports = importsOf(sf);
 type Unit = { names: string[]; stmt: ts.Statement; refs: Set<string>; target?: string };
 const units: Unit[] = [];
 const byName = new Map<string, Unit>();
-type Row = { key: number; text: string; comment: string; trailing: string; refs: Set<string>; file: string };
+type Row = { key: number; text: string; node: ts.Expression; comment: string; trailing: string; refs: Set<string>; file: string };
 const rows: Row[] = [];
 const kept: string[] = [];
 const keptRefs: Set<string>[] = [];
@@ -101,7 +101,7 @@ for (const s of sf.statements) {
         keptRefs.push(refsOf(pa.initializer));
         return;
       }
-      rows.push({ key, text: pa.initializer.getText(sf), comment: own, trailing, refs: refsOf(pa.initializer), file: skillHome(key).file });
+      rows.push({ key, text: pa.initializer.getText(sf), node: pa.initializer, comment: own, trailing, refs: refsOf(pa.initializer), file: skillHome(key).file });
     });
     continue;
   }
@@ -198,11 +198,42 @@ if (dry) process.exit(0);
 // ---- write targets ----------------------------------------------------------------------
 const stmtText = (s: ts.Statement) => text.slice(s.getFullStart(), s.getEnd());
 const withExport = (u: Unit, exported: boolean) => {
-  const t = stmtText(u.stmt);
+  const t = renamedSlice(u.stmt, u.stmt.getFullStart(), u.stmt.getEnd());
   if (!exported || ts.getModifiers(u.stmt as ts.HasModifiers)?.some(m => m.kind === ts.SyntaxKind.ExportKeyword)) return t;
   const lead = text.slice(u.stmt.getFullStart(), u.stmt.getStart(sf));
-  return lead + 'export ' + text.slice(u.stmt.getStart(sf), u.stmt.getEnd());
+  return lead + 'export ' + t.slice(lead.length);
 };
+// A moved helper whose name the target file already uses gets the property appended.
+const renames = new Map<string, string>();
+for (const [file, { units: us }] of perFile) {
+  if (!existsSync(file)) continue;
+  const tsf = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const taken = new Set([...tsf.statements.flatMap(names), ...importsOf(tsf).keys()]);
+  for (const u of us)
+    for (const n of u.names)
+      if (taken.has(n)) renames.set(n, /^[A-Z0-9_]+$/.test(n) ? `${n}_${PROP.toUpperCase()}` : `${n}${PROP[0].toUpperCase()}${PROP.slice(1)}`);
+}
+if (renames.size) console.log(`renamed: ${[...renames].map(([a, b]) => `${a} -> ${b}`).join(', ')}`);
+const rn = (n: string) => renames.get(n) ?? n;
+
+/** Source text of a node range with renamed identifiers swapped in. */
+function renamedSlice(node: ts.Node, from: number, to: number): string {
+  let s = text.slice(from, to);
+  if (!renames.size) return s;
+  const edits: [number, number, string][] = [];
+  const visit = (n: ts.Node): void => {
+    if (ts.isIdentifier(n) && renames.has(n.text)) {
+      const p = n.parent;
+      const isKey = (ts.isPropertyAccessExpression(p) && p.name === n) || ((ts.isPropertyAssignment(p) || ts.isPropertySignature(p) || ts.isMethodDeclaration(p)) && p.name === n) || (ts.isQualifiedName(p) && p.right === n);
+      if (!isKey) edits.push([n.getStart(sf), n.getEnd(), ts.isShorthandPropertyAssignment(p) ? `${n.text}: ${rn(n.text)}` : rn(n.text)]);
+    }
+    ts.forEachChild(n, visit);
+  };
+  visit(node);
+  for (const [a, b, r] of edits.sort((x, y) => y[0] - x[0])) s = s.slice(0, a - from) + r + s.slice(b - from);
+  return s;
+}
+
 const neededExports = new Set<string>(); // staying source names that moved code imports
 for (const [file, { units: us, rows: rs }] of perFile) {
   const exists = existsSync(file);
@@ -210,7 +241,6 @@ for (const [file, { units: us, rows: rs }] of perFile) {
   const tsf = ts.createSourceFile(file, t, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   const have = importsOf(tsf);
   const declared = new Set(tsf.statements.flatMap(names));
-  for (const u of us) for (const n of u.names) if (declared.has(n) || have.has(n)) throw new Error(`${n} already exists in ${file}`);
   const refs = new Set<string>();
   for (const u of us) for (const r of u.refs) refs.add(r);
   for (const r of rs) for (const x of r.refs) refs.add(x);
@@ -219,7 +249,7 @@ for (const [file, { units: us, rows: rs }] of perFile) {
   const add = new Map<string, Set<string>>();
   const want = (spec: string, entry: string) => (add.get(spec) ?? add.set(spec, new Set()).get(spec)!).add(entry);
   for (const n of [...refs].sort()) {
-    if (have.has(n) || declared.has(n)) continue;
+    if (have.has(rn(n)) || declared.has(rn(n))) continue;
     const b = srcImports.get(n);
     if (b) {
       if (b.name === '*' || b.name === 'default') throw new Error(`unsupported import form for ${n}`);
@@ -228,7 +258,7 @@ for (const [file, { units: us, rows: rs }] of perFile) {
     }
     const u = byName.get(n);
     if (!u) continue; // global or local
-    if (moving.has(u)) { if (u.target !== file) want(specFrom(file, u.target!), n); continue; }
+    if (moving.has(u)) { if (u.target !== file) want(specFrom(file, u.target!), rn(n)); continue; }
     neededExports.add(n);
     want(specFrom(file, SRC), n);
   }
@@ -242,7 +272,8 @@ for (const [file, { units: us, rows: rs }] of perFile) {
   if (rs.length) {
     if (rs.length > 1) throw new Error(`${file} gets ${rs.length} ${TABLE} rows`);
     const r = rs[0];
-    const prop = `${r.comment ? r.comment + '\n' : ''}  ${PROP}: ${r.text},${r.trailing ? ' ' + r.trailing : ''}\n`;
+    const value = renamedSlice(r.node, r.node.getStart(sf), r.node.getEnd());
+    const prop = `${r.comment ? r.comment + '\n' : ''}  ${PROP}: ${value},${r.trailing ? ' ' + r.trailing : ''}\n`;
     const end = t.lastIndexOf('});');
     if (end < 0 || !/export default define(Skill|BuffLooks)\(/.test(t)) throw new Error(`no defineSkill in ${file}`);
     t = t.slice(0, end) + prop + t.slice(end);

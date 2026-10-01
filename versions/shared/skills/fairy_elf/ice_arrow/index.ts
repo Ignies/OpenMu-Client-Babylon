@@ -3,6 +3,11 @@ import { ICE_MOTES, MODEL, RGBS, SMOKE, TEX } from '@/controllers/fx/recipes';
 import { IMPACT_HEIGHT, arrow, cm, hitSparks, orbiting, ticks } from '@/controllers/skills/visuals';
 import { effects } from '@/controllers/fx';
 
+import { frost } from '@/controllers/lighting/recipes';
+
+/** Arrows are faster than magic bolts: 70 cm a tick, like `common/skillVisuals.ts`. */
+const ARROW_SPEED = 17.5;
+
 export default defineSkill({
   id: 51,
   name: "Ice Arrow",
@@ -20,4 +25,7 @@ export default defineSkill({
       hitSparks(ICE_MOTES, 10)(at, c);
     },
   },
+  // Ice Arrow: MODEL_ARROW range 2 (:11777). The bolt light rides the same
+  // path the arrow does and fires the impact on arrival, so it keeps it.
+  light: { travel: { ...frost(2, 3), speed: ARROW_SPEED }, impact: frost(2, 0.4) },
 });

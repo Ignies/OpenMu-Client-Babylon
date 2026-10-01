@@ -13,6 +13,10 @@ import { storeRef } from '@/app/storeRef';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+import { TICK_SECONDS } from '../../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** Not a NOMOVE, NOGROUND or WATER tile: where the original lets a ground effect stand. */
 function openGround(x: number, z: number): boolean {
   const flag = storeRef().world?.getTerrainFlag(Math.floor(x), Math.floor(z)) ?? 0;
@@ -247,6 +251,42 @@ const earthshakeOf = (hd: boolean): Step => (at, c) => {
 };
 const earthshake = earthshakeOf(false);
 
+/**
+ * Earthshake's two groups of `AddTerrainLight`s as one light each: the stone rings (up to 3 tiles out,
+ * ticks 24-67) round the horse, and the red cracks' flickering `Luminosity` (0.7-1.0) round the burst
+ * point 1.1 tiles ahead, from tick 28 for their 40.
+ */
+export const EARTHSHAKE_LIGHT: SkillLight = {
+  timed: [
+    { color: [0.79, 0.72, 0.49], range: 4, delay: 24 * TICK_SECONDS, seconds: 43 * TICK_SECONDS, release: 8 * TICK_SECONDS },
+    {
+      color: [1, 0, 0],
+      range: 3,
+      forward: 1.12,
+      side: -0.25,
+      delay: 28 * TICK_SECONDS,
+      seconds: 41 * TICK_SECONDS,
+      attack: 10 * TICK_SECONDS,
+      release: 10 * TICK_SECONDS,
+      flicker: { min: 0.7, max: 1, steps: 4 },
+    },
+  ],
+  // The stones' warm rims out to the 3-tile ring, lit only once a ring rises; the burst's white core;
+  // the cracks' orange glow over the ~3.7 tiles the chains run.
+  enhanced: {
+    timed: [
+      { ...effectLight([1, 0.8, 0.5], 3, 43 * TICK_SECONDS, { attack: 3 * TICK_SECONDS, release: 10 * TICK_SECONDS }), delay: 0, cue: 'stones' },
+      { ...effectLight([1, 0.9, 0.75], 1.3, 0.4, { release: 0.3, heightOffset: 0.3 }), forward: 1.12, side: -0.25, delay: 28 * TICK_SECONDS },
+      {
+        ...effectLight([1, 0.45, 0.15], 3.7, 41 * TICK_SECONDS, { attack: 6 * TICK_SECONDS, release: 12 * TICK_SECONDS, flicker: { min: 0.75, max: 1, steps: 4 } }),
+        forward: 1.12,
+        side: -0.25,
+        delay: 29 * TICK_SECONDS,
+      },
+    ],
+  },
+};
+
 export default defineSkill({
   id: 62,
   name: "Earthshake",
@@ -257,4 +297,7 @@ export default defineSkill({
   sound: 'Sound/sDarkEarthQuake', // Earthshake
   delayMs: 10000, // Earthshake
   clip: { ground: A.PLAYER_ATTACK_DARKHORSE }, // Earthshake
+  // Earthshake (512 / 516): each ground stone's warm range 2 and each glowing crack's red range 1
+  // (MoveHandlers.cpp:5712, ZzzEffect.cpp:7157, :7213, :7257), one light per group here.
+  light: EARTHSHAKE_LIGHT,
 });

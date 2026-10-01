@@ -10,6 +10,11 @@ import { lighting } from '@/controllers/lighting';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { EFFECT_LUMINOSITY, SkillLight } from '@/controllers/lighting/skills';
+import { EXPLOSION_LIGHT } from '../_shared';
+import { TICK_SECONDS } from '../../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 // dw2 batch 2: Inferno, Decay, Ice Storm.
 
 /** CreateInferno: 8 CreateBomb 220 cm round the caster, (0, -220) turned j * 45 deg (ZzzEffect.cpp:6435-6476). */
@@ -110,6 +115,22 @@ const infernoGraded = infernoWith(BOMB_TINT_GRADED, {
   centre: ring({ texture: TEX.shockwave, colour: [1, 0.6, 0.3], scale: 5.6, growFrom: 0.3, grow: 1, seconds: 0.55, fadeTail: 0.6 }),
 });
 
+// Inferno (381 / 486 too): each of the eight bombs' explosion light, and MODEL_SKILL_INFERNO sub0 taking
+// (0.5, 0.5, 0.5) x Luminosity off the ground in range 5 for its 15 ticks (MoveHandlers.cpp:2679-2682).
+export const INFERNO_LIGHT: SkillLight = {
+  spots: {
+    blast: EXPLOSION_LIGHT,
+    inferno: { color: [-0.5, -0.5, -0.5], range: 5, seconds: 15 * TICK_SECONDS, release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY },
+  },
+  // Enhanced: each bomb lights as its orange explosion reaches, and the Inferno01 ring lights the circle out to the bombs.
+  enhanced: {
+    spots: {
+      blast: effectLight([1, 0.6, 0.28], 1, 20 * TICK_SECONDS, { release: 16 * TICK_SECONDS }),
+      inferno: effectLight([1, 0.55, 0.2], 2.8, 15 * TICK_SECONDS, { release: 10 * TICK_SECONDS, flicker: EFFECT_LUMINOSITY }),
+    },
+  },
+};
+
 export default defineSkill({
   id: 14,
   name: "Inferno",
@@ -117,4 +138,5 @@ export default defineSkill({
   // Enhanced `infernoGraded`.
   visual: { area: dw2AtAttackTime(inferno), enhanced: { area: dw2AtAttackTime(infernoGraded) } },
   clip: { ground: A.PLAYER_SKILL_INFERNO }, // Inferno
+  light: INFERNO_LIGHT,
 });

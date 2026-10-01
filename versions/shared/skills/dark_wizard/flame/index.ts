@@ -4,6 +4,8 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { delay } from '@/controllers/fx/core';
 import { effects } from '@/controllers/fx';
 
+import { flame } from '@/controllers/lighting/recipes';
+
 /**
  * `n` fire pillars (effects/pillar.ts): the first on the point, the rest scattered `radius` tiles
  * around it a third to the full way out, `every` seconds apart, each on its own ground height.
@@ -25,4 +27,7 @@ export default defineSkill({
   // of the BITMAP_FLAME sub0 LT 40 tongue column the original stacked at SkillXY (ZzzCharacter.cpp:4485).
   visual: { area: seq(firePillars(3, 1.4, 0.1), scorch(1.5), burn(1.2)) },
   sound: 'Sound/sFlame', // Flame
+  // Flame: BITMAP_FLAME range 3 while the column burns (:8649). Wider and redder here: the
+  // pillars stand on molten rock and the ground around them pools red in the renewed look.
+  light: { area: { ...flame(3.5, 1.9, { gain: 1.5, floorGain: 1.3, release: 0.6 }), color: [1, 0.42, 0.14] } },
 });

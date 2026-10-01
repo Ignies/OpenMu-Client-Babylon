@@ -9,6 +9,9 @@ import { type SpearJoints } from '@/controllers/fx/aura';
 import { effects } from '@/controllers/fx';
 import { playCombat } from '@/controllers/sound/combat';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 // ---- dw3 steps -------------------------------------------------------------------
 
 /** eBuff_WizDefense and eBuff_Cloaking (_enum.h:3899, :3913); OpenMU's effect ids are the same. */
@@ -109,6 +112,11 @@ const soulBarrierSeal: Step = after(SOUL_BARRIER_IMPACT, (_at, c) => {
 /** Soul Barrier's five sub0 joints: white, width 50 from the packet path (WSclient.cpp:15491), 20 once a seen impact rebuilds them; `z = target + 10 + 110 + 120 v.z` (ZzzEffectJoint.cpp:4504, :4523). */
 const SOUL_KNOT: SpearJoints = { count: 5, width: 0.5, colour: RGBS.white, radius: 0.8, base: 1.2, lift: 1.2, flare: true };
 
+/** Soul Barrier's enhanced light: the knot's blue, ramping in to the seal 14 ticks after the packet. */
+export const SOUL_BARRIER_LIGHT: Omit<SkillLight, 'enhanced'> = {
+  impact: effectLight([0.35, 0.7, 1], 1, 1.3, { attack: 0.56, release: 0.6 }),
+};
+
 export default defineSkill({
   id: 16,
   name: "Soul Barrier",
@@ -123,4 +131,6 @@ export default defineSkill({
     4: e => ({ spearJoints: { ...SOUL_KNOT, width: soulKnotWidth.get(e) ?? SOUL_KNOT.width } }),
   },
   buffArrivals: { 4: soulBarrierArrival },
+  // Soul Barrier (403 / 404 / 406 its master rows): no terrain light in the original; Enhanced only.
+  light: { enhanced: SOUL_BARRIER_LIGHT },
 });

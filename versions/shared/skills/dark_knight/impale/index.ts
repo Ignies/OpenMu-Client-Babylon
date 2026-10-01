@@ -10,6 +10,8 @@ import { lighting } from '@/controllers/lighting';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** One BITMAP_JOINT_HEALING sub6 of the Impale gather: where it starts, its heading and the tick it was born. */
 interface SpearThread {
   from: Vector3;
@@ -272,4 +274,15 @@ export default defineSkill({
   // 47 Impale: t4 threads gather on the spear point, t8 a white spiral cone, t10 the sound, t13-14 six spears; see impale.
   visual: { cast: impale, enhanced: { cast: impaleOf(true) } },
   clip: { ground: A.PLAYER_ATTACK_SKILL_SPEAR, fenrir: A.PLAYER_FENRIR_ATTACK_SPEAR }, // Impale
+  // Impale: the original lights nothing. On the graded tiers the gold gathering point, the orange-white cone over
+  // its 2.2 m (centred 1.1 m out) and the blue-white spears riding forward light like their art.
+  light: {
+    enhanced: {
+      bodies: {
+        gather: effectLight([1, 0.82, 0.45], 0.5, 0.5, { heightOffset: 0, attack: 0.1, release: 0.2 }),
+        cone: effectLight([1, 0.78, 0.5], 1.2, 0.6, { heightOffset: 0, attack: 0.08, release: 0.3, flicker: { min: 0.8, max: 1, steps: 4 } }),
+        spears: effectLight([0.62, 0.72, 1], 1, 0.8, { heightOffset: 0, release: 0.5 }),
+      },
+    },
+  },
 });

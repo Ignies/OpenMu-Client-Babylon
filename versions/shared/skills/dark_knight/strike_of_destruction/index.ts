@@ -10,6 +10,8 @@ import { lighting } from '@/controllers/lighting';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** BITMAP_WATERFALL_5 sub8 (ZzzEffectParticle.cpp:3476-3481, :8437-8446): 1.2-1.9 m, rising 1-3 cm a tick less 0.6 a tick, +0.05 Scale and Light /1.1 a tick. */
 const DESTRUCTION_MIST: ParticleRecipe = {
   texture: TEX.waterFall5,
@@ -222,4 +224,15 @@ export default defineSkill({
   },
   sound: 'Sound/BLOW_OF_DESTRUCTION', // Strike of Destruction (ZzzCharacter.cpp:4179)
   clip: { ground: A.PLAYER_SKILL_BLOW_OF_DESTRUCTION }, // Strike of Destruction
+  // Strike of Destruction: the original lights nothing. Graded: the two FLARE_BLUE marks (4 and 6 tiles
+  // wide) for their 24 ticks, fading as their /1.05 does, and a white-blue pop as the strike lands at B.
+  light: {
+    enhanced: {
+      spots: {
+        a: effectLight([0.5, 0.5, 1], 2, 0.96, { release: 0.7 }),
+        b: effectLight([0.55, 0.6, 1], 3, 0.96, { release: 0.7, heightOffset: 0.5 }),
+        strike: effectLight([0.85, 0.9, 1], 1.5, 0.2, { release: 0.15, heightOffset: 1 }),
+      },
+    },
+  },
 });

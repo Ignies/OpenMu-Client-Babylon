@@ -4,6 +4,8 @@ import { IMPACT_HEIGHT, arcHit, cm, ticks, weaponBone } from '@/controllers/skil
 import { effects } from '@/controllers/fx';
 import { followEntity } from '@/controllers/fx/core';
 
+import { arc } from '@/controllers/lighting/recipes';
+
 export default defineSkill({
   id: 3,
   name: "Lightning",
@@ -23,4 +25,8 @@ export default defineSkill({
   // release, 14 ticks after the packet (ZzzCharacter.cpp:4955-5034), and the rows do (common/skillVisuals.ts).
   // So do 11 Power Wave, 17 Energy Ball (sMagic) and 45 Lance (sCShockWave), ZzzCharacter.cpp:5011-5143.
   sound: 'Sound/eThunder', // Lightning
+  // BITMAP_LIGHTNING: range 6 on the strike (ZzzEffectParticle.cpp:4298).
+  // 0.4 s is the clip: the bolt is `ticks(10)` in skillVisuals, and a light
+  // that ends before its effect leaves the ground dark under a live bolt.
+  light: { impact: arc(6, 0.4, { gain: 1.4 }) },
 });

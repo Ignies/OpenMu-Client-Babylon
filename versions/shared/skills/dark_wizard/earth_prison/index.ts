@@ -8,6 +8,10 @@ import { effects } from '@/controllers/fx';
 import { stones } from '../../_shared';
 import { storeRef } from '@/app/storeRef';
 
+import { type LightRecipe } from '@/controllers/lighting/lightSource';
+import { SkillLight } from '@/controllers/lighting/skills';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /**
  * Earth Prison has no source: Season 6 only names EFFECT_EARTH_PRISON (_enum.h:4034). It is built from the
  * original's own stone ring, the Dark Horse earthshake's six MODEL_GROUND_STONE / STONE2 at 60 degree steps
@@ -72,10 +76,20 @@ const earthPrisonEnhanced: Step = seq(
   }
 );
 
+export const EARTH_PRISON_LIGHT: LightRecipe = { color: [0.79, 0.72, 0.49], range: 2, seconds: 1.6, release: 0.3 };
+
+/** Earth Prison's: the stones' dust tint over the ring they stand in. */
+export const EARTH_PRISON_ENHANCED: Omit<SkillLight, 'enhanced'> = {
+  impact: effectLight([0.79, 0.72, 0.49], 1.3, 1.6, { attack: 0.1, release: 0.5 }),
+};
+
 export default defineSkill({
   id: 495,
   name: "Earth Prison",
   // 495 Earth Prison (497 its Strengthener through the aliases): no source; the ground stone ring (earthPrison). Enhanced: earthPrisonEnhanced.
   visual: { impact: earthPrison, enhanced: { impact: earthPrisonEnhanced } },
   sound: 'Sound/sDarkEarthQuake', // Earth Prison: no source; the earthshake whose stone ring it borrows
+  // Earth Prison (497 its Strengthener): no source; the ground stones' own AddTerrainLight, (0.79, 0.72, 0.49)
+  // range 2 for their 40 ticks (MoveHandlers.cpp:5709-5710).
+  light: { impact: EARTH_PRISON_LIGHT, enhanced: EARTH_PRISON_ENHANCED },
 });

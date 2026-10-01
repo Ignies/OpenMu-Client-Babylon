@@ -13,6 +13,8 @@ import { storeRef } from '@/app/storeRef';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** `m_vPosSword`: `Weapon[0]`'s link bone, 300 cm along the facing (ZzzCharacter.cpp:2652-2660). */
 function swordPoint(caster: Entity, forward: number, out: Vector3): Vector3 {
   bonePos(caster, WEAPON_LINK_BONE, out, CAST_HEIGHT);
@@ -310,4 +312,15 @@ export default defineSkill({
     enhanced: { cast: deathStabOf(true) },
   },
   clip: { ground: A.PLAYER_ATTACK_ONETOONE }, // Death Stab
+  // Death Stab: the original lights nothing. On the graded tiers the red gathering point, the blue drill over its
+  // 2.8 m (centred 1.4 m out, lit from the first roll to the last flare) and the victim's crackle each light like their art.
+  light: {
+    enhanced: {
+      bodies: {
+        gather: effectLight([1, 0.22, 0.1], 0.6, 0.48, { heightOffset: 0, attack: 0.16, release: 0.2 }),
+        drill: effectLight([0.3, 0.4, 1], 1.5, 0.9, { heightOffset: 0, release: 0.35, flicker: { min: 0.75, max: 1, steps: 4 } }),
+        victim: effectLight([0.5, 0.55, 1], 0.8, 1.48, { heightOffset: 0.9, release: 0.3, flicker: { min: 0.4, max: 1, steps: 3 } }),
+      },
+    },
+  },
 });

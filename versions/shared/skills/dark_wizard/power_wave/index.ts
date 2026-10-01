@@ -8,6 +8,9 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { rad } from '../../_shared';
 
+import { type LightRecipe } from '@/controllers/lighting/lightSource';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** MODEL_ICE_QUEEN throws two more Power Waves at +-10 deg (ZzzCharacter.cpp:5045-5052). */
 const ICE_QUEEN = 25;
 const POWER_WAVE_TICKS = 20;
@@ -77,10 +80,22 @@ const powerWaveExtra: WaveLook['extra'] = (c, feet, path) => {
 /** The sheet a shade under white, so its body keeps the magic_g streaks under the tone curve instead of clipping flat. */
 const POWER_WAVE_LOOK: WaveLook = { colour: [0.55, 0.75, 1], extra: powerWaveExtra };
 
+/** MODEL_MAGIC2's `(0.3, 0.6, 1) x Luminosity` range 3, riding the wave for its 20 ticks. */
+const POWER_WAVE_LIGHT: LightRecipe = {
+  color: [0.3, 0.6, 1],
+  range: 3,
+  seconds: 20 * 0.04,
+  release: 0.04,
+  flicker: { min: 0.7, max: 1, steps: 4 },
+};
+
 export default defineSkill({
   id: 11,
   name: "Power Wave",
   // 11 Power Wave: at the release, MODEL_MAGIC2 slides from the caster's feet toward the target and on past it (powerWave).
   // Enhanced: a ground glow, haze and glints riding the same sheet.
   visual: { impact: powerWave(), enhanced: { impact: powerWave(POWER_WAVE_LOOK) } },
+  // Power Wave: MODEL_MAGIC2's light rides the wave from the release, laid by the effect (MoveHandlers.cpp:3360-3361).
+  // Enhanced: the sheet's cold blue over the ~1.2 tiles its art and glow reach, fading with it over the last 10 ticks.
+  light: { land: POWER_WAVE_LIGHT, enhanced: { land: effectLight([0.35, 0.6, 1], 1.2, 20 * 0.04, { release: 10 * 0.04, flicker: { min: 0.8, max: 1, steps: 4 } }) } },
 });

@@ -11,6 +11,9 @@ import { deg, humTurn, lit, rad } from '../../_shared';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 
+import { type LightRecipe } from '@/controllers/lighting/lightSource';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 const LANCE_TICKS = 35;
 const LANCE_TINT: RGB = [1, 0.6, 0.3];
 const LANCE_PUFF_ONE: ParticlesOptions = { recipe: LANCE_PUFF, count: 1 };
@@ -177,10 +180,27 @@ const LANCE_LOOK: LanceLook = {
   ),
 };
 
+/** MODEL_SKILL_JAVELIN's `(1, 0.6, 0.3)` range 2 on each star for its 35 ticks. */
+const LANCE_LIGHT: LightRecipe = {
+  color: [1, 0.6, 0.3],
+  range: 2,
+  seconds: 35 * 0.04,
+  release: 0.04,
+};
+
 export default defineSkill({
   id: 45,
   name: "Lance",
   // 45 Lance: at the release, three MODEL_SKILL_JAVELIN fan out, spin up and home on the target 150 cm up (lance).
   // Enhanced: sparks shed in flight and a spray where each star strikes home.
   visual: { impact: lance(), enhanced: { impact: lance(LANCE_LOOK) } },
+  // Lance: one light per star, laid by the effect (MoveHandlers.cpp:7122-7123). No cast flash.
+  // Enhanced: each star's orange over its glow, fading with it over the last 10 ticks, and a flash where it strikes.
+  light: {
+    land: LANCE_LIGHT,
+    enhanced: {
+      land: effectLight([1, 0.6, 0.3], 0.9, 35 * 0.04, { release: 10 * 0.04 }),
+      bodies: { strike: effectLight([1, 0.65, 0.35], 1, 0.3, { release: 0.25 }) },
+    },
+  },
 });

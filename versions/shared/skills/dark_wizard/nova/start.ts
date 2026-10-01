@@ -14,6 +14,10 @@ import { playCombat } from '@/controllers/sound/combat';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { NOVA_GRADED_LIGHT } from './';
+import { SkillLight } from '@/controllers/lighting/skills';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** The charge runs while the caster is in HELL_BEGIN or HELL_START (ZzzCharacter.cpp:5727). */
 function inNovaCharge(e: Entity): boolean {
   if (entityGone(e)) return false;
@@ -191,6 +195,11 @@ const novaChargeEnhanced: Step = novaChargeWith(true, c => {
   pool();
 });
 
+/** The charge: the body lit in the motes' blue while it is held, swelling over its first second. */
+const NOVA_CHARGE_LIGHT: Omit<SkillLight, 'enhanced'> = {
+  hold: effectLight(NOVA_GRADED_LIGHT, 1.5, Infinity, { attack: 1, release: 0.4 }),
+};
+
 export default defineSkill({
   id: 58,
   name: "Nova (Start)",
@@ -199,4 +208,5 @@ export default defineSkill({
   visual: { cast: novaCharge, enhanced: { cast: novaChargeEnhanced } },
   sound: 'Sound/eHellFire2_1', // Nova (charge)
   clip: { ground: A.PLAYER_SKILL_HELL_BEGIN }, // Nova (charge)
+  light: { enhanced: NOVA_CHARGE_LIGHT },
 });

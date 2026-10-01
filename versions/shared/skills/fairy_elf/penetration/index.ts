@@ -4,6 +4,9 @@ import { CAST_HEIGHT, after, atCaster, cm, fanArrows, flash, offset, particles, 
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 
+import { ARROW_SECONDS } from '@/controllers/lighting/skills';
+import { arc } from '@/controllers/lighting/recipes';
+
 export default defineSkill({
   id: 52,
   name: "Penetration",
@@ -25,4 +28,8 @@ export default defineSkill({
     impact: seq(steelHit, flash(TEX.pierce, RGBS.arc, 1.2, 0.3)),
   },
   sound: 'Sound/ePiercing', // Penetration
+  // Penetration: the original fires the launcher arrow (MODEL_ARROW_STEEL on
+  // a crossbow, which lights nothing); this client draws it charged
+  // blue-white, so the arc is ours.
+  light: { arrow: { ...arc(2, ARROW_SECONDS), release: 0.2 } },
 });

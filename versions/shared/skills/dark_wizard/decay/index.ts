@@ -7,6 +7,11 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { particles, ring, seq } from '@/controllers/skills/visuals';
 
+import { EFFECT_LUMINOSITY, SkillLight } from '@/controllers/lighting/skills';
+import { EXPLOSION_LIGHT } from '../_shared';
+import { TICK_SECONDS } from '../../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 const DECAY_SMOKE_GRADED = smallerSmoke(DECAY_SMOKE);
 
 /** Decay's poison green, the comet's flames and the landing's tint. */
@@ -75,9 +80,26 @@ const decayGraded = decayOf(
   }, DECAY_SMOKE_GRADED, LANDING_SMOKE_LIFT_GRADED)
 );
 
+// Decay (387 too): each comet's (0.1, 1, 0) x Luminosity range 2 while it falls (ZzzEffect.cpp:7939-7945), then its
+// green-tinted explosion's usual warm light.
+export const DECAY_LIGHT: SkillLight = {
+  spots: {
+    comet: { color: [0.1, 1, 0], range: 2, seconds: 40 * TICK_SECONDS, release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY },
+    blast: EXPLOSION_LIGHT,
+  },
+  // Enhanced: the comet carries its green glow down, and the landing lights green as its tinted explosion and ring reach.
+  enhanced: {
+    spots: {
+      comet: effectLight([0.3, 1, 0.15], 1, 40 * TICK_SECONDS, { release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY }),
+      blast: effectLight([0.35, 1, 0.3], 1.8, 20 * TICK_SECONDS, { release: 16 * TICK_SECONDS }),
+    },
+  },
+};
+
 export default defineSkill({
   id: 38,
   name: "Decay",
   // 38 Decay (387 aliases here): 2x MODEL_FIRE sub6 on the cast point at AttackTime 15 (`decay`); Enhanced `decayGraded`.
   visual: { area: dw2AtAttackTime(decay), enhanced: { area: dw2AtAttackTime(decayGraded) } },
+  light: DECAY_LIGHT,
 });

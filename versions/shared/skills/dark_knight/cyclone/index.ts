@@ -5,6 +5,8 @@ import { atSwordBlow, litBlow, swordSpark } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** Cyclone's spin sprays its chips in a flat ring all round; Slash's big cut throws a wide fan up and over. */
 const CYCLONE_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colour: RGBS.white, size: 0.07, life: 0.4, dir1: [-2.6, 0, -2.6], dir2: [2.6, 0.7, 2.6], power: 2.4, gravity: -5, capacity: 96 };
 
@@ -17,4 +19,6 @@ export default defineSkill({
   sound: 'Sound/sKnightSkill4', // Cyclone
   // 22 / 23 likewise (WSclient.cpp:4390-4410); Slash's odd swing is chooseSkillAction's (SLASH_SKILLS).
   clip: { ground: A.PLAYER_ATTACK_SKILL_SWORD4 }, // Cyclone
+  // Cyclone / Slash (326 / 327 through their base): the same blow flash, the same light.
+  light: { enhanced: { strike: effectLight([0.9, 0.95, 1], 0.9, 0.25) } },
 });

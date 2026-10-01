@@ -11,6 +11,8 @@ import { lighting } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound/combat';
 import { tmpEmitter } from '../_shared';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 // ---- dk3 steps
 
 /** `c->AttackTime` counts from 1 at the cast and fires the effect switch at g_iLimitAttackTime 15 (ZzzCharacter.cpp:2615, :4132-4145). */
@@ -218,4 +220,15 @@ export default defineSkill({
   // 49 Fire Breath (AT_SKILL_RIDER): BITMAP_SHOTGUN and its sparks when the rider clip passes key 5, or
   // after the 14-tick AttackTime cap (ZzzCharacter.cpp:2910-2915, :4405-4409); see `fireBreath`.
   visual: { cast: atClipKey(5, RIDER_ACTIONS, fireBreath), enhanced: { cast: atClipKey(5, RIDER_ACTIONS, fireBreathPlus) } },
+  // Fire Breath: BITMAP_SHOTGUN's (0.5,0.5,0.8) x Luminosity 0.7-1.0, range 2, riding the emitter
+  // for its 10 ticks and fading under LT 5 (MoveHandlers.cpp:5086-5087, ZzzEffect.cpp:6645-6650).
+  // Graded: the breath's lavender over the ~1 tile its puffs reach, bright while the last puffs live
+  // (18 ticks), and the DinoE burst's 1.3 tiles for its 12.
+  light: {
+    follow: { color: [0.5, 0.5, 0.8], range: 2, seconds: 0.4, release: 0.2, flicker: { min: 0.7, max: 1, steps: 4 } },
+    enhanced: {
+      follow: effectLight([0.6, 0.6, 1], 1.1, 0.72, { release: 0.36, flicker: { min: 0.8, max: 1, steps: 4 } }),
+      spots: { bomb: effectLight([1, 0.85, 1], 1.3, 0.48, { release: 0.32, heightOffset: 0.2 }) },
+    },
+  },
 });

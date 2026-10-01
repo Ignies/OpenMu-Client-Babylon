@@ -138,4 +138,5 @@ export default defineSkill({
   visual: { area: lightningShock, enhanced: { area: lightningShockStep(true) } },
   sound: 'Sound/lightning_shock', // Lightning Shock
   clip: { ground: A.PLAYER_SKILL_LIGHTNING_SHOCK }, // Lightning Shock
+  light: {},
 });

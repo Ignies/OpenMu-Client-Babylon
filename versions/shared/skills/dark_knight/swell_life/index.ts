@@ -12,6 +12,8 @@ import { rand, sayAt, sparkHeading, tailOfSlot } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** JOINT_SPIRIT sub2's life, tails and speed (ZzzEffectJoint.cpp:668-679, :3935-3945): 21 moves, Velocity 50 then +5 a move. */
 const SPIRIT_MOVES = 21;
 const spiritReach = (m: number): number => cm(50 * m + 2.5 * m * (m - 1));
@@ -191,4 +193,15 @@ export default defineSkill({
     135: () => ({ boneMotes: { bones: UPPER_BONES, colour: [1, 0.5, 0.1] } }),
   },
   clip: { ground: A.PLAYER_SKILL_VITALITY }, // Swell Life
+  // Swell Life: the original lights nothing. On the graded tiers the orange spirit ring as it leaves the knight, the
+  // two Magic_Ground2 marks (2-4 tiles across) for their 40 ticks, and the rising white column around him.
+  light: {
+    enhanced: {
+      bodies: {
+        burst: effectLight([1, 0.5, 0.12], 3, 0.6, { heightOffset: 0, release: 0.4 }),
+        ground: effectLight([1, 0.5, 0.1], 1.5, 1.6, { heightOffset: 0.3, attack: 0.2, release: 0.5 }),
+        column: effectLight([1, 0.85, 0.6], 1.2, 2.6, { heightOffset: 1.2, attack: 0.4, release: 1 }),
+      },
+    },
+  },
 });

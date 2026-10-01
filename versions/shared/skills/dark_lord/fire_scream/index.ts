@@ -14,6 +14,8 @@ import { storeRef } from '@/app/storeRef';
 import { A } from '@/controllers/combat/recipes';
 import { MOUNTED_STRIKE } from '../_shared';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 const UP = new Vector3(0, 1, 0);
 
 /** Fire Scream's pairs (ZzzCharacter.cpp:4499-4533): yaw, and yaw ±10° moved ±80 cm along their own X. */
@@ -249,4 +251,7 @@ export default defineSkill({
   },
   sound: 'Sound/Darklord_firescream', // Fire Scream
   clip: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Fire Scream
+  // Fire Scream: nothing, as the original (no AddTerrainLight on DARK_SCREAM, FLAME sub8 or BLUE_BLUR sub1).
+  // Enhanced: one fire light riding the wall (three fanned fires ~2.5 tiles across) until its flames die down.
+  light: { enhanced: { strike: effectLight([1, 0.5, 0.2], 2.5, 1.4, { release: 0.55, flicker: { min: 0.75, max: 1, steps: 4 } }) } },
 });

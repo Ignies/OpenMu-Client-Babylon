@@ -16,6 +16,10 @@ import { tierIndex } from '@/controllers/lighting/lightingQuality';
 import { A } from '@/controllers/combat/recipes';
 import { MOUNTED_HAND } from '../../_shared';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+import { TICK_SECONDS } from '../../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** MODEL_DARKLORD_SKILL sub0 / sub1: `Angle (45, 45 - 90 x SubType, 0)` (ZzzEffect.cpp:3449-3470). */
 const CRIT_ANGLES = [muAngle(45, 45, 0), muAngle(45, -45, 0)] as const;
 const CRIT_TINT: RGB = [1, 0.6, 0.3];
@@ -192,6 +196,20 @@ function critPulse(scene: Scene, e: Entity): void {
   playSfx('Sound/sDarkCritical', entityPos(e, CAST_HEIGHT, new Vector3()), { bus: COMBAT_BUS });
 }
 
+/**
+ * Increase Critical Damage: the original lights nothing. On the graded tiers the orange KingS_R cards
+ * light the hands at AttackTime 15, and each buff pulse's Fire04 helices (30 cm round the hand, 16
+ * ticks) light them again, riding the body.
+ */
+const CRIT_LIGHT: SkillLight = {
+  enhanced: {
+    timed: [
+      { ...effectLight([1, 0.6, 0.3], 0.8, 10 * TICK_SECONDS, { attack: 1 * TICK_SECONDS, release: 6 * TICK_SECONDS, heightOffset: 1.1 }), delay: 14 * TICK_SECONDS, ride: true },
+      { ...effectLight([1, 0.7, 0.4], 0.6, 16 * TICK_SECONDS, { attack: 3 * TICK_SECONDS, release: 7 * TICK_SECONDS, heightOffset: 1.1, flicker: { min: 0.75, max: 1, steps: 3 } }), delay: 0, cue: 'pulse', ride: true },
+    ],
+  },
+};
+
 export default defineSkill({
   id: 64,
   name: "Increase Critical Damage",
@@ -204,4 +222,6 @@ export default defineSkill({
     148: (e, s) => ({ pulse: { every: 1.2, fire: () => critPulse(s, e) } }),
   },
   clip: { ground: A.PLAYER_SKILL_HAND1, ...MOUNTED_HAND }, // Increase Critical Damage
+  // Increase Critical Damage (511 / 515 / 517 / 522 through the aliases), Removal Buff, Iron Defense: graded tiers only.
+  light: CRIT_LIGHT,
 });

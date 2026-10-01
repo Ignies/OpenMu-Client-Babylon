@@ -8,6 +8,10 @@ import { dw2Sfx, groundAt, lightFollow } from '../../_shared';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 
+import { EFFECT_LUMINOSITY } from '@/controllers/lighting/skills';
+import { TICK_SECONDS } from '../../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** MODEL_STORM sub0: LT 59, Direction (0,-10,0) by the caster's Angle, re-seated on the terrain every tick (ZzzEffect.cpp:2000-2009, MoveHandlers.cpp:3412). */
 const TWISTER_TICKS = 59;
 const TWISTER_SPEED = perTick(10);
@@ -150,4 +154,12 @@ export default defineSkill({
   name: "Twister",
   // 8 Twister: MODEL_STORM walking the caster's facing at AttackTime 15, with its smoke, bolts and stones (`twister`); Enhanced `twisterGraded`.
   visual: { area: dw2AtAttackTime(twister), enhanced: { area: dw2AtAttackTime(twisterGraded) } },
+  // Twister: MODEL_STORM takes (0.4, 0.3, 0.2) x Luminosity off the ground in range 5 under itself for its
+  // 59 ticks (MoveHandlers.cpp:3413-3414). Negative: the tile map clamps it away on Classic, as characters.ts says;
+  // the graded tiers' point light blacked out a hole round the storm, so they take the enhanced light instead.
+  light: {
+    spots: { storm: { color: [-0.4, -0.3, -0.2], range: 5, seconds: 59 * TICK_SECONDS, release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY } },
+    // Enhanced: the white funnel and its bolts light the ground round it as it walks, flickering as MoveEffect's Luminosity.
+    enhanced: { spots: { storm: effectLight([0.8, 0.85, 1], 1.2, 59 * TICK_SECONDS, { release: 10 * TICK_SECONDS, flicker: EFFECT_LUMINOSITY }) } },
+  },
 });

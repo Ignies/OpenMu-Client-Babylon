@@ -10,6 +10,10 @@ import { lighting } from '@/controllers/lighting';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+import { TICK_SECONDS } from '../../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 const DL_FLASH: ReadonlySet<number> = new Set([
   PlayerAction.PLAYER_SKILL_FLASH,
   PlayerAction.PLAYER_ATTACK_RIDE_ATTACK_FLASH,
@@ -192,6 +196,22 @@ export const MOUNTED_FLASH = {
   fenrir: A.PLAYER_FENRIR_ATTACK_DARKLORD_FLASH,
 } as const;
 
+/**
+ * Electric Spike: the original lights nothing. On the graded tiers the charge lights the hand and the
+ * bolt carries its violet out along the facing as it grows (tip at 2.3, 4.9 and 9.9 tiles on ticks
+ * 4-6), brightest where its sheet is white, then fades with its x1/1.3 tail.
+ */
+export const ELECTRIC_SPIKE_LIGHT: SkillLight = {
+  enhanced: {
+    timed: [
+      { ...effectLight([0.55, 0.55, 1], 1.2, 21 * TICK_SECONDS, { attack: 3 * TICK_SECONDS, release: 6 * TICK_SECONDS, heightOffset: 1.2, flicker: { min: 0.6, max: 1, steps: 3 } }), delay: 0, cue: 'charge' },
+      { ...effectLight([0.8, 0.65, 1], 1, 16 * TICK_SECONDS, { release: 8 * TICK_SECONDS, heightOffset: 1 }), forward: 2.3, delay: 4 * TICK_SECONDS, cue: 'bolt' },
+      { ...effectLight([0.8, 0.65, 1], 1.4, 15 * TICK_SECONDS, { release: 8 * TICK_SECONDS, heightOffset: 1 }), forward: 4.9, delay: 5 * TICK_SECONDS, cue: 'bolt' },
+      { ...effectLight([0.85, 0.7, 1], 1.8, 14 * TICK_SECONDS, { release: 8 * TICK_SECONDS, heightOffset: 1, flicker: { min: 0.7, max: 1, steps: 3 } }), forward: 8, delay: 6 * TICK_SECONDS, cue: 'bolt' },
+    ],
+  },
+};
+
 export default defineSkill({
   id: 65,
   name: "Electric Spike",
@@ -214,4 +234,6 @@ export default defineSkill({
   },
   delayMs: 5000, // Electric Spike
   clip: { ground: A.PLAYER_SKILL_FLASH, ...MOUNTED_FLASH }, // Electric Spike
+  // Electric Spike (519): the original lights nothing. The arc is ours, kept for the graded tiers.
+  light: ELECTRIC_SPIKE_LIGHT,
 });

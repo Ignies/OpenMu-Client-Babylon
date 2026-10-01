@@ -13,6 +13,8 @@ import { spawnLinkedModel } from '@/controllers/fx/linkedModel';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** Flame Strike's heat glow on the blade: FlameStrike.bmd's own orange. */
 const MG_FLAME_GLOW: RGB = [1, 0.45, 0.15];
 
@@ -138,4 +140,10 @@ export default defineSkill({
   visual: { cast: flameStrike, enhanced: { cast: flameStrikeEnhanced } },
   sound: 'Sound/flame_strike', // Flame Strike
   clip: { ground: A.PLAYER_SKILL_FLAMESTRIKE }, // Flame Strike (MG)
+  // Flame Strike and Gigantic Storm: nothing, as the original (no AddTerrainLight on MODEL_EFFECT_FLAME_STRIKE,
+  // its blurs, or BITMAP_JOINT_THUNDER sub0's storm); the empty rows keep the wizardry cast flash off.
+  // Enhanced: the blade's orange riding its middle over the ~2-tile sweep, for the blade's 35 ticks; one bolt-white
+  // light per storm site (a bolt lands 50 % of ticks, its decal grows to 3 tiles across), flickering with the strikes;
+  // gain 0.6 as all five overlap at the caster and washed a pale path white under post processing.
+  light: { enhanced: { follow: effectLight([1, 0.45, 0.15], 2, 1.4, { release: 0.4, flicker: { min: 0.8, max: 1, steps: 4 }, flickerSmoothing: 0.5 }) } },
 });

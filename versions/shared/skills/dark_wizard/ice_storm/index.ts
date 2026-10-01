@@ -8,6 +8,10 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+import { TICK_SECONDS } from '../../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** MODEL_BLIZZARD sub0 (ZzzEffect.cpp:3098-3121): ten shards, Scale 0.5, LT 15-29, Gravity -30..-59 cm a tick. */
 const ICE_SHARDS = 10;
 /** Every tick: `o->Light += 0.1` from 0, the brightness of the shard and its two sprites (MoveHandlers.cpp:5157-5162). */
@@ -170,9 +174,16 @@ const iceStormGraded = iceStormWith({
   mist: { recipe: ICE_STORM_MIST_GRADED, height: LANDING_SMOKE_LIFT_GRADED },
 });
 
+export const ICE_STORM_LIGHT: SkillLight = {
+  enhanced: { spots: { storm: effectLight([0.45, 0.7, 1], 2, 50 * TICK_SECONDS, { release: 20 * TICK_SECONDS }) } },
+};
+
 export default defineSkill({
   id: 39,
   name: "Ice Storm",
   // 39 Ice Storm (391 / 393 alias here): 10x MODEL_BLIZZARD sub0 on the cast point at AttackTime 15 (`iceStorm`); Enhanced `iceStormGraded`.
   visual: { area: dw2AtAttackTime(iceStorm), enhanced: { area: dw2AtAttackTime(iceStormGraded) } },
+  // Ice Storm (391 / 393 too): MODEL_BLIZZARD lights nothing (MoveHandlers.cpp:5134-5189). The empty row keeps the
+  // wizardry cast flash off. Enhanced: one frost light over the shards' 2-tile fall, through their landing.
+  light: ICE_STORM_LIGHT,
 });

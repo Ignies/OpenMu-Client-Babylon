@@ -6,6 +6,9 @@ import { effects } from '@/controllers/fx';
 import { entityYaw } from '@/controllers/fx/core';
 import { lighting } from '@/controllers/lighting';
 
+import { type LightRecipe } from '@/controllers/lighting/lightSource';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /**
  * 1 Poison (ZzzCharacter.cpp:4992-5005): MODEL_POISON at the target's feet, facing as the caster does, only
  * when a player casts it (LT 40, BlendMesh 1, both meshes fading over the last 10 ticks through
@@ -30,9 +33,22 @@ const poisonImproved: Step = seq(
   particles({ recipe: POISON_BUBBLES, rate: 14, seconds: ticks(34), height: 0.3 })
 );
 
+/** MODEL_POISON's light: 40 ticks at the target's feet, `Luminosity` rolled every tick. */
+const POISON_LIGHT: LightRecipe = {
+  color: [0.3, 1, 0.6],
+  range: 2,
+  seconds: 40 * 0.04,
+  release: 5 * 0.04,
+  flicker: { min: 0.7, max: 1, steps: 4 },
+};
+
 export default defineSkill({
   id: 1,
   name: "Poison",
   // 1 Poison: at the release, MODEL_POISON + 10 BITMAP_SMOKE sub1 at the target's feet (poisonCloud).
   visual: { impact: poisonCloud(), enhanced: { impact: poisonCloud(poisonImproved) } },
+  // Poison: MODEL_POISON's `(0.3, 1, 0.6) x Lum` range 2 for its 40 ticks, laid by the effect at the release
+  // (MoveHandlers.cpp:2742-2752; Lum 0.7-1.0, falling over the last 5 ticks, ZzzEffect.cpp:6645-6650).
+  // Enhanced: the cloud's green over the ~1.3 tiles its smoke and haze reach, for the model's 40 ticks.
+  light: { land: POISON_LIGHT, enhanced: { land: effectLight([0.3, 1, 0.6], 1.3, 1.6, { release: 0.2, flicker: { min: 0.75, max: 1, steps: 4 } }) } },
 });

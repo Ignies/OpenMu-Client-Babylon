@@ -7,4 +7,5 @@ export default defineSkill({
   name: "Lightning Shock Str",
   sound: 'Sound/lightning_shock', // Lightning Shock Strengthener
   clip: { ground: A.PLAYER_SKILL_LIGHTNING_SHOCK }, // Lightning Shock Str
+  light: {},
 });

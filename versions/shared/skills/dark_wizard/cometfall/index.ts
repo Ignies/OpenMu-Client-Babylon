@@ -7,6 +7,10 @@ import { comet, cometWith } from '../../_shared';
 import { dw2AtAttackTime } from '../_shared';
 import { effects } from '@/controllers/fx';
 
+import { EFFECT_LUMINOSITY, SkillLight } from '@/controllers/lighting/skills';
+import { TICK_SECONDS } from '../../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** Cometfall at AttackTime 15 on the cast point: two comets made the same tick (ZzzCharacter.cpp:4556-4572). No cast sound. */
 const cometfall: Step = seq(comet, comet);
 
@@ -55,9 +59,26 @@ const cometGraded = cometWith({
 });
 const cometfallGraded: Step = seq(cometGraded, cometGraded);
 
+export const COMETFALL_LIGHT: SkillLight = {
+  spots: {
+    comet: { color: [0.2, 0.4, 1], range: 2, seconds: 30 * TICK_SECONDS, release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY },
+    blast: { color: [0.5, 0.3, 0.1], range: 4, seconds: 20 * TICK_SECONDS, release: 20 * TICK_SECONDS },
+  },
+  // Enhanced: the comet carries its blue glow down (the trail's violet read pink on sand), and the landing lights as its warm explosion and ring reach.
+  enhanced: {
+    spots: {
+      comet: effectLight([0.3, 0.42, 1], 1, 30 * TICK_SECONDS, { release: TICK_SECONDS, flicker: EFFECT_LUMINOSITY }),
+      blast: effectLight([1, 0.72, 0.4], 1.8, 20 * TICK_SECONDS, { release: 16 * TICK_SECONDS }),
+    },
+  },
+};
+
 export default defineSkill({
   id: 13,
   name: "Cometfall",
   // 13 Cometfall (382 / 484 alias here): 2x MODEL_SKILL_BLAST on the cast point at AttackTime 15 (`cometfall`); Enhanced `cometfallGraded`.
   visual: { area: dw2AtAttackTime(cometfall), enhanced: { area: dw2AtAttackTime(cometfallGraded) } },
+  // Cometfall (382 / 484 too): each comet's (0.2, 0.4, 1) range 2 while it falls (MoveHandlers.cpp:2576-2577),
+  // then its BITMAP_EXPLOTION's (0.5, 0.3, 0.1) range 4 fading over 20 ticks (ZzzEffectParticle.cpp:4265-4269).
+  light: COMETFALL_LIGHT,
 });

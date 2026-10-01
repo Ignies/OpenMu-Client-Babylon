@@ -5,6 +5,8 @@ import { atSwordBlow, litBlow, swordSpark } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 const SLASH_CHIPS: ParticleRecipe = { ...STEEL_GLINTS, texture: TEX.spark2, colour: RGBS.white, size: 0.07, life: 0.45, dir1: [-1.8, 0.8, -1.8], dir2: [1.8, 2.6, 1.8], power: 2, gravity: -9, capacity: 96 };
 
 export default defineSkill({
@@ -15,4 +17,5 @@ export default defineSkill({
   visual: { impact: atSwordBlow(swordSpark), enhanced: { impact: litBlow(SLASH_CHIPS) } },
   sound: 'Sound/sKnightSkill4', // Slash
   clip: { ground: A.PLAYER_ATTACK_SKILL_SWORD5 }, // Slash
+  light: { enhanced: { strike: effectLight([0.9, 0.95, 1], 0.9, 0.25) } },
 });

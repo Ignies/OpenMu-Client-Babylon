@@ -14,6 +14,8 @@ import { storeRef } from '@/app/storeRef';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /**
  * BITMAP_SMOKE sub3 (ZzzEffectParticle.cpp:1250-1255, :5330-5335): LT 10, Scale 0.8-1.1 of the 64-texel
  * smoke01 growing 0.1 a tick, thrown 40-47 cm along a random heading pitched +-45° and slowing x0.4 a tick,
@@ -209,4 +211,11 @@ export default defineSkill({
     enhanced: { area: whenClipKey(PlayerAction.PLAYER_ATTACK_SKILL_WHEEL, 5, 14, twistingSlashOf(true)) },
   },
   clip: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Twisting Slash
+  // Twisting Slash: each MODEL_SKILL_WHEEL2 copy lights Luminosity x 0.3 grey, range 3, under itself
+  // every tick of its 25 (MoveHandlers.cpp:2808-2812); Luminosity is 0.7-1, fading over the last 5 ticks.
+  light: {
+    bodies: { wheel: { color: [0.3, 0.3, 0.3], range: 3, seconds: 1, flicker: { min: 0.7, max: 1, steps: 4 }, release: 0.2 } },
+    // Each copy carries the warm white of its flare01 glow and sparks at blade height, out to the blade's reach.
+    enhanced: { bodies: { wheel: effectLight([1, 0.82, 0.6], 0.9, 1, { heightOffset: 1, release: 0.2, flicker: { min: 0.8, max: 1, steps: 4 } }) } },
+  },
 });

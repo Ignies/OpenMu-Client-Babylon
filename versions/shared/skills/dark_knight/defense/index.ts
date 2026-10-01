@@ -10,6 +10,8 @@ import { strikeOn } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** Seconds into PLAYER_DEFENSE1 the guard is up. */
 const GUARD_SET = 0.2;
 /** Tiles above the weapon hand the guard glint sits. */
@@ -48,4 +50,7 @@ export default defineSkill({
   // --- Dark Knight (UseSkillWarrior, ZzzInterface.cpp:2221-2300) -----------
   // Defense: the guard pose on every mount, no Helper branch (SkillCast.cpp:224-231, WSclient.cpp:3610-3612).
   clip: { ground: A.PLAYER_DEFENSE1 },
+  // Defense: the original lights nothing and draws nothing. Enhanced: the guard glint's steel.
+  // A glint is a small art: a soft pool, not a lamp.
+  light: { enhanced: { strike: effectLight([0.85, 0.85, 0.95], 0.5, 0.35, { gain: 0.45, floorGain: 0.4, attack: 0.08 }) } },
 });

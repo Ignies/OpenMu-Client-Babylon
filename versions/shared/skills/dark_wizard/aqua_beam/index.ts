@@ -10,6 +10,9 @@ import { lighting } from '@/controllers/lighting';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { TICK_SECONDS } from '../../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** BITMAP_BOSS_LASER sub0: LT 20, Light (0.5, 0.7, 1), 20 Spark03 cards of Scale 16 (32 px -> 5.12 m) 50 cm apart (ZzzEffect.cpp:978-1031, :8967-9004). */
 const AQUA_CARDS = 20;
 const AQUA_STEP = cm(50);
@@ -88,4 +91,11 @@ export default defineSkill({
   // 12 Aqua Beam: BITMAP_BOSS_LASER sub0 along the facing at AttackTime 15 (`aquaBeam`); Enhanced `aquaBeamGraded`.
   visual: { area: dw2AtAttackTime(aquaBeam), enhanced: { area: dw2AtAttackTime(aquaBeamGraded) } },
   clip: { ground: A.PLAYER_SKILL_FLASH }, // Flash (Mass Lightning)
+  // Aqua Beam: (0.5, 0.7, 1) range 2 at each of the beam's 20 points, 50 cm apart, for its 20 ticks
+  // (ZzzEffect.cpp:8999). Five here, 2 tiles apart; the doubled colour stands for the overlaps they sum to.
+  // Enhanced: three lane lights in the beam's blue, sized to the cards' 2.5-tile reach.
+  light: {
+    spots: { lane: { color: [1, 1.4, 2], range: 2.5, seconds: 20 * TICK_SECONDS, release: TICK_SECONDS } },
+    enhanced: { spots: { lane: effectLight([0.5, 0.7, 1], 2.2, 20 * TICK_SECONDS, { release: 4 * TICK_SECONDS }) } },
+  },
 });

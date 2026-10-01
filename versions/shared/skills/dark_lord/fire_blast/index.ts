@@ -11,6 +11,8 @@ import { lighting } from '@/controllers/lighting';
 import { A } from '@/controllers/combat/recipes';
 import { MOUNTED_STRIKE } from '../_shared';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** Space Split's pillar, JOINT_FORCE sub2 (else branch, ZzzEffectJoint.cpp:2361-2369): V 8, Dir (5, _, 5), LT 15, MaxTails 12. */
 const SPLIT_TAILS = 12;
 const SPLIT_HEADS = forceHeads(8, 5, 5, 15, SPLIT_TAILS).map(cm);
@@ -128,4 +130,12 @@ export default defineSkill({
   visual: { impact: litStrike(spaceSplit, 'Sound/battlecastle/sCDarkAttack'), enhanced: { impact: litStrike(spaceSplitGraded, 'Sound/battlecastle/sCDarkAttack') } },
   sound: 'Sound/eFirebust', // Space Split (SOUND_ATTACK_FIRE_BUST at the packet, WSclient.cpp:4532-4547)
   clip: { ground: A.PLAYER_ATTACK_STRIKE, ...MOUNTED_STRIKE }, // Space Split
+  // Space Split: each MODEL_SKILL_INFERNO sub6 at a pillar's base throws (0.8, 0.3, 0.1) x Luminosity range 2 for
+  // its 5 ticks, Luminosity falling 0.2 a tick (MoveHandlers.cpp:2667-2673); the visual fires one per ring.
+  // Enhanced: one fire light carried along the path over the newest pillar (1.5 m wide columns, ~1.5 tiles),
+  // from the strike until the last pillar fades (~33 ticks).
+  light: {
+    strike: { color: [0.8, 0.3, 0.1], range: 2, seconds: 0.2, release: 0.2, flicker: { min: 0.7, max: 1, steps: 4 } },
+    enhanced: { strike: effectLight([1, 0.42, 0.14], 1.5, 1.35, { release: 0.4, flicker: { min: 0.75, max: 1, steps: 4 } }) },
+  },
 });

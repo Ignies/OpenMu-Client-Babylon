@@ -11,6 +11,9 @@ import { effects } from '@/controllers/fx';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** MODEL_ARROWSRE06 sub1's Light (0.2, 0.2, 0.9) (ZzzEffect.cpp:8191, :8309). */
 const RUNE_LIGHT: RGB = [0.2, 0.2, 0.9];
 const RUNE_TICKS = 40;
@@ -197,6 +200,12 @@ const MAGIC_GLOW: BoneGlow = { bones: 'all', texture: TEX.flare, colour: [0.7, 0
 const swellBuff: BuffLook = (e, s) =>
   e.buffs?.has(CLOAK_EFFECT) ? {} : { boneGlow: MAGIC_GLOW, pulse: { every: 6, first: 6, fire: () => handRunes(s, e) } };
 
+/** Expansion of Wizardry's: the hand runes' blue, and the violet decals gathering from 3 tiles in over the 45 ticks. */
+export const SWELL_LIGHT: Omit<SkillLight, 'enhanced'> = {
+  cast: effectLight([0.2, 0.2, 0.9], 1, 1.6, { release: 0.6 }),
+  impact: effectLight([0.55, 0.3, 1], 2.5, 1.8, { attack: 0.2, release: 0.9 }),
+};
+
 export default defineSkill({
   id: 233,
   name: "Expansion of Wizardry",
@@ -212,4 +221,7 @@ export default defineSkill({
   },
   sound: 'Sound/SwellofMagicPower', // Expansion of Wizardry
   clip: { ground: A.PLAYER_SKILL_SWELL_OF_MP }, // Expansion of Wizardry (WSclient.cpp:4562)
+  // Expansion of Wizardry (380 / 383 its master rows): no terrain light in the original; Enhanced only. The
+  // rows also keep the stale Wizardry type's cast flash off 380 / 383.
+  light: { enhanced: SWELL_LIGHT },
 });

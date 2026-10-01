@@ -7,6 +7,8 @@ import { effects } from '@/controllers/fx';
 import { lighting } from '@/controllers/lighting';
 import { tmpEmitter } from '../_shared';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** MODEL_COMBO's BlendMeshLight /= 1.4 a tick (MoveHandlers.cpp:5260). */
 const COMBO_DECAY = 1 / 1.4;
 /** The original's 60 BITMAP_LIGHT sub0 rays (WSclient.cpp:4829-4832). */
@@ -83,4 +85,6 @@ export default defineSkill({
     enhanced: { impact: atCaster(comboBurstPlus, cm(50)), area: atCaster(comboBurstPlus, cm(50)) },
   },
   sound: 'Sound/eCombo', // Combo
+  // Combo: the original lights nothing. Graded: the rays' blue over the ~3 tiles they reach, for their 20 ticks.
+  light: { enhanced: { spots: { burst: effectLight([0.3, 0.6, 1], 3, 0.8, { release: 0.56 }) } } },
 });

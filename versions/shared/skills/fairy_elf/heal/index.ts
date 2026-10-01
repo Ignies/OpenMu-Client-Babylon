@@ -5,6 +5,8 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { effects } from '@/controllers/fx';
 import { followEntity } from '@/controllers/fx/core';
 
+import { holy } from '@/controllers/lighting/recipes';
+
 export default defineSkill({
   id: 26,
   name: "Heal",
@@ -24,4 +26,6 @@ export default defineSkill({
       })(at, c);
     },
   },
+  // Heal: MODEL_MAGIC_CIRCLE1 range 3 (:9705).
+  light: { impact: holy(3, 1.0) },
 });

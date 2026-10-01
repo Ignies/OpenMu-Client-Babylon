@@ -10,6 +10,9 @@ import { playCombat, stopCombat } from '@/controllers/sound/combat';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** JOINT_SPIRIT sub6 / sub7 and the charge's BITMAP_LIGHT, Skill 0 (ZzzEffectJoint.cpp:760-762, ZzzCharacter.cpp:5729). */
 export const NOVA_BLUE: RGB = [0.3, 0.3, 1];
 /** Enhanced: the same blue with the red pulled out, so 72 stacked cards read blue instead of lavender-white. */
@@ -142,6 +145,18 @@ const novaBurstEnhanced: Step = novaBurstWith(NOVA_GRADED, (c, start) => {
   }
 });
 
+/** Nova's graded blue: the charge motes and the burst heads, held off lavender on the graded buffer. */
+export const NOVA_GRADED_LIGHT: readonly [number, number, number] = [0.2, 0.35, 1];
+
+/**
+ * The release: the burst's white-blue core over the caster, peaking on the burst 14 ticks after the packet
+ * and reaching as far as the first wave's cards are bright; on Ultra four heads carry the wave out.
+ */
+export const NOVA_LIGHT: Omit<SkillLight, 'enhanced'> = {
+  cast: effectLight(NOVA_GRADED_LIGHT, 5, 1.4, { attack: 0.56, release: 0.7 }),
+  trail: effectLight(NOVA_GRADED_LIGHT, 1.5, 0.8, { release: 0.5 }),
+};
+
 export default defineSkill({
   id: 40,
   name: "Nova",
@@ -152,4 +167,7 @@ export default defineSkill({
     enhanced: { impact: novaBurstEnhanced },
   },
   clip: { ground: A.PLAYER_SKILL_HELL_START }, // Nova (release)
+  // Nova (392 / 395 its master rows): the original lights nothing (MODEL_CIRCLE sub1, ZzzCharacter.cpp:4435-4439).
+  // The rows keep the Wizardry cast flash off; Enhanced lights the burst, 58 the charge.
+  light: { enhanced: NOVA_LIGHT },
 });

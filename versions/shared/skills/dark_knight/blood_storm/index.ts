@@ -9,6 +9,8 @@ import { lighting } from '@/controllers/lighting';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** Blood Storm's crimson: Double Blade's red trail Light (1,0.2,0.2) a shade darker under the bloom (ZzzCharacter.cpp:3950-3953). */
 const BLOOD_STORM_RED: RGB = [0.9, 0.18, 0.12];
 
@@ -84,4 +86,7 @@ export default defineSkill({
   // Blood Storm has no original (skillVisuals.ts bloodStorm): the Twisting Slash spin, which the Blade
   // Master and the Duel Master both have.
   clip: { ground: A.PLAYER_ATTACK_SKILL_WHEEL }, // Blood Storm
+  // Blood Storm (346 fires it as 344): no original. Graded: the vortex's crimson over the ~1.2 tiles its
+  // ribbons turn in, for its 30 ticks.
+  light: { enhanced: { spots: { storm: effectLight([1, 0.22, 0.14], 1.2, 1.2, { release: 0.6, heightOffset: 0.6 }) } } },
 });

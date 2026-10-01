@@ -5,6 +5,9 @@ import { delay, entityGone, entityPos, type RGB } from '@/controllers/fx/core';
 import { Step, burn, cm, facing, hitSparks, particles, perTick, scorch, seq, ticks, toward } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 
+import { FIRE_BALL_LIGHT } from '../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /**
  * 4 Fire Ball (ZzzCharacter.cpp:5031-5034): MODEL_FIRE sub1 from the caster's feet +120 cm along the bearing
  * to the target at the release, 50 cm a tick for LT 60, no homing, Scale 0.8-1.1, the tail at
@@ -56,5 +59,14 @@ export default defineSkill({
   visual: {
     impact: fireBall(lavaChips(2)),
     enhanced: { impact: fireBall(fireBallImpact, FIRE_BALL_LOOK) },
+  },
+  // Fire Ball: the same light riding the ball; nothing on arrival (ZzzEffect.cpp:7948-7953, :244-282).
+  // Enhanced: the ball's glow card and embers in its red-orange, and a short flash for the burst on the hit.
+  light: {
+    land: FIRE_BALL_LIGHT,
+    enhanced: {
+      land: effectLight([1, 0.32, 0.06], 0.8, 3, { release: 0.04, flicker: { min: 0.8, max: 1, steps: 4 } }),
+      bodies: { hit: effectLight([1, 0.55, 0.2], 0.9, 0.5, { release: 0.35 }) },
+    },
   },
 });

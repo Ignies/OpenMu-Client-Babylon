@@ -14,6 +14,10 @@ import { storeRef } from '@/app/storeRef';
 import { A } from '@/controllers/combat/recipes';
 import { MOUNTED_COMMAND } from '../../_shared';
 
+import { SkillLight } from '@/controllers/lighting/skills';
+import { TICK_SECONDS } from '../../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** Removal Buff fires once the caster's clip passes key 3.5, or at AttackTime 15 (ZzzCharacter.cpp:2927-2931). */
 const REMOVAL_CLIPS: ReadonlySet<number> = new Set([
   PlayerAction.PLAYER_SKILL_VITALITY,
@@ -201,6 +205,20 @@ const removalBandsOf = (hd: boolean): Step => (_at, c) => {
 const removalBuff: Step = atFrame(REMOVAL_CLIPS, 3.5, ticks(14), removalBandsOf(false));
 const removalBuffHd: Step = atFrame(REMOVAL_CLIPS, 3.5, ticks(14), removalBandsOf(true));
 
+/**
+ * Removal Buff: the original lights nothing. On the graded tiers the six pale bands light the caster
+ * while they wind in and out (61 ticks from key 3.5, about 3 tiles round him), and the two shock
+ * rings flash wide as they leave.
+ */
+const REMOVAL_LIGHT: SkillLight = {
+  enhanced: {
+    timed: [
+      { ...effectLight([0.95, 0.92, 1], 3, 61 * TICK_SECONDS, { attack: 10 * TICK_SECONDS, release: 12 * TICK_SECONDS, heightOffset: 1 }), delay: 0, cue: 'bands', ride: true },
+      { ...effectLight([1, 0.95, 1], 4, 12 * TICK_SECONDS, { release: 9 * TICK_SECONDS, heightOffset: 0.5 }), delay: 0, cue: 'ring' },
+    ],
+  },
+};
+
 export default defineSkill({
   id: 72,
   name: "Abolish Magic",
@@ -208,4 +226,5 @@ export default defineSkill({
   // out, and four BITMAP_SHOCK_WAVE sub3, at clip key 3.5 (ZzzCharacter.cpp:2927-2931, :4295-4341).
   visual: { impact: removalBuff, area: removalBuff, enhanced: { impact: removalBuffHd, area: removalBuffHd } },
   clip: { ground: A.PLAYER_SKILL_VITALITY, ...MOUNTED_COMMAND }, // Removal Buff
+  light: REMOVAL_LIGHT,
 });

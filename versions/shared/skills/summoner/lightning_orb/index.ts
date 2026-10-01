@@ -132,4 +132,7 @@ export default defineSkill({
     dinorant: A.PLAYER_SKILL_LIGHTNING_ORB_DINO,
     fenrir: A.PLAYER_SKILL_LIGHTNING_ORB_FENRIR,
   }, // Lightning Orb
+  // Lightning Orb and Lightning Shock light nothing in the original (ZzzEffect.cpp:6886-6965,
+  // MoveHandlers.cpp:2385-2543); the empty rows keep the wizardry cast flash off.
+  light: {},
 });

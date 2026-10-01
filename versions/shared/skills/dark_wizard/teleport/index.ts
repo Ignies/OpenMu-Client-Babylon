@@ -8,6 +8,8 @@ import { teleportColumn, teleportEnhanced } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { TELEPORT_LIGHT } from '../_shared';
+
 /**
  * The flash of `CreateTeleportBegin` (`moment` begin, the row's `cast`) or
  * `CreateTeleportEnd` (end, the row's `impact`) at the feet of `entity`, as the
@@ -30,4 +32,7 @@ export default defineSkill({
   sound: 'Sound/sMagic', // Teleport (SOUND_MAGIC in CreateTeleportBegin)
   // --- Dark Wizard --------------------------------------------------------
   clip: { ground: A.PLAYER_SKILL_TELEPORT }, // Teleport (SetPlayerTeleport, :6243)
+  // Teleport / Teleport Ally: BITMAP_SPARK+1 lights nothing in the original (ZzzEffect.cpp:6854-6871).
+  // Enhanced: the spark colour at each square for the column's life, reaching its half height.
+  light: { enhanced: { cast: TELEPORT_LIGHT, impact: TELEPORT_LIGHT } },
 });

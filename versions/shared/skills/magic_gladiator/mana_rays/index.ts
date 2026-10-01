@@ -12,6 +12,8 @@ import { mgSayOnBattleCastle } from '../_shared';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** JOINT_FORCE sub4 (Hole.jpg), 13 tails. */
 const MG_CANNON_BEAM: StripOptions = { texture: TEX.hole, maxTails: 13 };
 /** BITMAP_FLARE_BLUE sub6, 15 tails. */
@@ -134,4 +136,7 @@ export default defineSkill({
   // 73 Death Cannon (Mana Rays): the JOINT_FORCE sub4 beam at DEATH_CANNON frame 3 (deathCannon). No target effect.
   visual: { cast: deathCannon, enhanced: { cast: deathCannonEnhanced } },
   clip: { ground: A.PLAYER_ATTACK_DEATH_CANNON }, // Death Cannon (UseSkillWizard, :2457)
+  // Death Cannon: nothing, as the original; the empty row keeps the wizardry cast flash off.
+  // Enhanced: the beam's blue from the muzzle, riding the head out.
+  light: { enhanced: { follow: effectLight([0.1, 0.6, 1], 1.4, 0.6, { release: 0.35 }) } },
 });

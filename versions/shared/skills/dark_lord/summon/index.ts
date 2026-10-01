@@ -13,6 +13,9 @@ import { warmGLTF } from '@/controllers/assets/modelLoader';
 
 import { A } from '@/controllers/combat/recipes';
 
+import { TICK_SECONDS } from '../../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 /** MODEL_CIRCLE sub2's `BlendMeshLight` at `left` ticks (MoveHandlers.cpp:3786-3796). */
 const circleLight = (left: number): number => (left > 240 ? (250 - left) * 0.1 : left * 0.1);
 /**
@@ -194,4 +197,15 @@ export default defineSkill({
   },
   delayMs: 30000, // Summon (Dark Lord)
   clip: { ground: A.PLAYER_ATTACK_TELEPORT, ...MOUNTED_TELEPORT }, // Party Teleport
+  // Party Teleport: MODEL_CIRCLE_LIGHT sub3's grey `min(0.5, BlendMeshLight)` range 4 for its 250 ticks (MoveHandlers.cpp:3896).
+  light: {
+    timed: [{ color: [0.5, 0.5, 0.5], range: 4, delay: 6 * TICK_SECONDS, seconds: 250 * TICK_SECONDS, attack: 5 * TICK_SECONDS, release: 5 * TICK_SECONDS }],
+    // The emblem's blue over its 4-tile radius for its 10 s, and the raised hand's glow while it is held.
+    enhanced: {
+      timed: [
+        { ...effectLight([0.4, 0.55, 1], 4, 250 * TICK_SECONDS, { attack: 10 * TICK_SECONDS, release: 20 * TICK_SECONDS }), delay: 6 * TICK_SECONDS },
+        { ...effectLight([0.3, 0.5, 1], 0.7, 3.6, { attack: 0.2, release: 0.5, heightOffset: 2 }), delay: 0, cue: 'hand' },
+      ],
+    },
+  },
 });

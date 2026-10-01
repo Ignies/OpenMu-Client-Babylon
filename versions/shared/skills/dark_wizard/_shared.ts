@@ -10,6 +10,11 @@ import { Vector3 } from '@/controllers/render/babylon/exports';
 import { lighting } from '@/controllers/lighting';
 import { playCombat } from '@/controllers/sound/combat';
 
+import { CAST_HEIGHT } from '@/controllers/lighting/skills';
+import { type LightRecipe } from '@/controllers/lighting/lightSource';
+import { TICK_SECONDS } from '../_shared';
+import { effectLight } from '@/controllers/lighting/recipes';
+
 // ---- teleport steps --------------------------------------------------------------
 
 /** The cards cross the ground: fade the last 40 cm above it rather than cut them on a hard line. */
@@ -279,3 +284,18 @@ export const dw2AtAttackTime = (step: Step): Step => (at, c) => {
 export const smallerSmoke = (r: ParticleRecipe): ParticleRecipe => ({ ...r, size: r.size * 0.7, endScale: 1.7 });
 export const LANDING_SMOKE_LIFT_GRADED = LANDING_SMOKE_LIFT + 0.4;
 export const CLOAK_EFFECT = 18;
+
+/** Teleport's column on the graded tiers: its sparks' tint, 2.16 tiles up either way, LT 10. */
+export const TELEPORT_LIGHT = effectLight([0.5, 0.75, 1], 2.16, 0.4, { heightOffset: CAST_HEIGHT, release: 0.25 });
+
+/** MODEL_FIRE sub0 / sub1 in flight; the effect stops it where the ball dies, this is only a give-up time. */
+export const FIRE_BALL_LIGHT: LightRecipe = {
+  color: [1, 0.1, 0],
+  range: 2,
+  seconds: 3,
+  release: 0.04,
+  flicker: { min: 0.7, max: 1, steps: 4 },
+};
+
+/** BITMAP_EXPLOTION's (0.5, 0.3, 0.1) x LT/20 in range 4 (ZzzEffectParticle.cpp:4265-4269). */
+export const EXPLOSION_LIGHT: LightRecipe = { color: [0.5, 0.3, 0.1], range: 4, seconds: 20 * TICK_SECONDS, release: 20 * TICK_SECONDS };
