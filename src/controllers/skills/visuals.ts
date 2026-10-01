@@ -654,7 +654,8 @@ const SHARED_LOOKS: readonly { key: number; ids: readonly number[]; look: BuffLo
   { key: -1, ids: [1, 2, 3], look: () => ({ spearJoints: GREEN_KNOT }) },
 ];
 
-const buffHandles = new Map<Entity, Map<number, EffectHandle>>();
+/** Live buff looks per entity. Weak: an entity that leaves scope takes its entry with it. */
+const buffHandles = new WeakMap<Entity, Map<number, EffectHandle>>();
 
 export function keepLook(scene: Scene, entity: Entity, key: number, look: BuffLook | null): void {
   let byKey = buffHandles.get(entity);

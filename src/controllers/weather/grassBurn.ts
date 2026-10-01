@@ -525,6 +525,9 @@ export function burnGrass(
 }
 
 /** Embers off the flame edge, where the fire actually is. */
+/** Scratch for the ember bursts; the particle layer copies it as it spawns. */
+const emberAt = new Vector3();
+
 function embers(fire: Fire, dt: number): void {
   const scene = emberScene;
 
@@ -559,7 +562,10 @@ function embers(fire: Fire, dt: number): void {
     // it spreading there.
     if (!hasFuel(x, z)) continue;
 
-    const at = new Vector3(x, groundAt(x, z), z);
+    const at = emberAt;
+    at.x = x;
+    at.y = groundAt(x, z);
+    at.z = z;
 
     // Only the ember. The flame itself is drawn on the blades that are
     // burning (see the vBurn block in terrainGrass.ts) rather than thrown as
