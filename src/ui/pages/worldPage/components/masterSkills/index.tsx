@@ -1,25 +1,25 @@
 import './style.less';
 import { Component, useEffect, useState, type ReactNode } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { useWindowStackEntry } from '../../../../components/muWindow/useWindowChrome';
-import { playUiSound } from '../../../../../controllers/sound/sfx';
-import { skillDefinition } from '../../../../../../versions/shared/skills/skillsDatabase';
-import { t } from '../../../../../i18n';
-import { skills, type MasterTreeEntry } from '../../../../../features/skills';
+import { Store } from '@/app/store';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useWindowStackEntry } from '@/ui/components/muWindow/useWindowChrome';
+import { playUiSound } from '@/controllers/sound/sfx';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
+import { t } from '@/i18n';
+import { skills, type MasterTreeEntry } from '@/features/skills';
 import {
   formatMasterText,
   MASTER_ICON_HEIGHT,
   MASTER_ICON_WIDTH,
   MASTER_TEXT,
   masterSkillIconCell,
-} from '../../../../../features/skills/masterTree';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuButton } from '../../../../components/muButton';
-import { useUiStageScale } from '../../../../components/uiStage';
-import { TEXT_COLOR } from '../../../../pages/serversPage/layout';
+} from '@/features/skills/masterTree';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
+import { useUiStageScale } from '@/ui/components/uiStage';
+import { TEXT_COLOR } from '@/ui/pages/serversPage/layout';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,
@@ -32,7 +32,7 @@ import {
   OK_SPRITE,
   WIN_HEIGHT,
   WIN_WIDTH,
-} from '../../../../components/msgWindow/layout';
+} from '@/ui/components/msgWindow/layout';
 import { MasterSkillsWindowState, toggleMasterSkillsWindow } from './windowState';
 import {
   ARROWS,

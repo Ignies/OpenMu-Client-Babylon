@@ -1,5 +1,5 @@
 import type { TextKey } from '../../i18n';
-import { DuelStartResultDuelStartResultTypeEnum as DuelStartResult } from '../../../versions/shared/packets/ServerToClientPackets';
+import { DuelStartResultDuelStartResultTypeEnum as DuelStartResult } from '@versions/shared/packets/ServerToClientPackets';
 
 /**
  * Pure duel logic, ported from `DuelMgr.cpp` / `WSclient.cpp:8465-8498`

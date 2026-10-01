@@ -1,6 +1,6 @@
 import { inHellas } from '../actors/locomotion';
 import { monsterAttackState, type MonsterAttackState } from '../anim/monsterAttackClip';
-import { MonsterActionType as A } from '../../../versions/shared/objects/enum';
+import { MonsterActionType as A } from '@versions/shared/objects/enum';
 import { REFERENCE_FPS } from '../anim/playSpeed';
 import type { CuePlayer } from './mapMonsters';
 import type { Sounds } from './recipes';

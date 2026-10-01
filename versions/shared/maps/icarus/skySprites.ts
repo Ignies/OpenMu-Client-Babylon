@@ -1,11 +1,11 @@
-import { TILE_CM } from '../../../../src/controllers/terrain/consts';
+import { TILE_CM } from '@/controllers/terrain/consts';
 import {
   Constants,
   Sprite,
   SpriteManager,
   type Scene,
-} from '../../../../src/controllers/render/babylon/exports';
-import { downloadDataFile } from '../../../../src/controllers/assets/mu/dataFolder';
+} from '@/controllers/render/babylon/exports';
+import { downloadDataFile } from '@/controllers/assets/mu/dataFolder';
 
 /** OZJ is a 24-byte header in front of a plain JPEG (see `effectLights.ts`). */
 const OZJ_HEADER_SIZE = 24;

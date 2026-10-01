@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
-import { t } from '../../../../i18n';
-import { GmPanel } from '../../../../features/gm/gmPanel';
-import { gmCommand } from '../../../../features/gm/gmCommands';
-import { uiClick } from '../../../../controllers/sound/sfx';
+import { t } from '@/i18n';
+import { GmPanel } from '@/features/gm/gmPanel';
+import { gmCommand } from '@/features/gm/gmCommands';
+import { uiClick } from '@/controllers/sound/sfx';
 import { CommandCard } from '../commandForm';
 
 /** Everything that takes access away. Each one confirms before it sends. */

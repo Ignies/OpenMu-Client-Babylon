@@ -1,16 +1,16 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import { effects } from '../../../src/controllers/fx';
-import { bonePos, tmpA } from '../../../src/controllers/fx/core';
-import { FLAME_TONGUES } from '../../../src/controllers/fx/recipes';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { MonsterObject } from '../../../src/controllers/actors/monsterObject';
+import type { Entity, World } from '@/ecs/world';
+import { effects } from '@/controllers/fx';
+import { bonePos, tmpA } from '@/controllers/fx/core';
+import { FLAME_TONGUES } from '@/controllers/fx/recipes';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { MonsterObject } from '@/controllers/actors/monsterObject';
 import { MonsterActionType } from '../objects/enum';
 import { BUDGE_DRAGON_MODEL } from './generic_monster';
 import {
   MONSTER_MODEL_TABLE,
   monsterModelFile,
   monsterScaleOf,
-} from '../../../src/controllers/actors/monsterModelTable';
+} from '@/controllers/actors/monsterModelTable';
 
 /**
  * The golden invasion line. The original draws every golden monster with the

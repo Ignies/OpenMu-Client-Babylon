@@ -1,19 +1,19 @@
 import './style.less';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { t, type TextKey } from '../../../../../i18n';
+import { t, type TextKey } from '@/i18n';
 import {
   balgassEntryBox,
   cancelBalgassEntry,
   enterBalgass,
   type BalgassEntryBox,
   type BalgassEntryKind,
-} from '../../../../../features/quests/balgassEntry';
-import { isTypingInField } from '../../../../../ecs/systems/keyboardInputSystem';
-import { playUiSound } from '../../../../../controllers/sound/sfx';
-import { MsgBoxFrame, msgBoxHeight } from '../../../../components/msgBoxFrame';
-import { MuButton } from '../../../../components/muButton';
-import { UI_STAGE_HEIGHT, UI_STAGE_WIDTH, useUiViewport } from '../../../../components/uiStage';
+} from '@/features/quests/balgassEntry';
+import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
+import { playUiSound } from '@/controllers/sound/sfx';
+import { MsgBoxFrame, msgBoxHeight } from '@/ui/components/msgBoxFrame';
+import { MuButton } from '@/ui/components/muButton';
+import { UI_STAGE_HEIGHT, UI_STAGE_WIDTH, useUiViewport } from '@/ui/components/uiStage';
 import {
   BOX,
   BUTTON,

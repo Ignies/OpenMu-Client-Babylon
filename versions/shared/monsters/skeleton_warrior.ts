@@ -1,5 +1,5 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import type { Item } from '../../../src/ecs/world';
+import type { Entity, World } from '@/ecs/world';
+import type { Item } from '@/ecs/world';
 import { PlayerAction } from '../objects/enum';
 import {
   GROUP_AXE,
@@ -7,11 +7,11 @@ import {
   GROUP_SHIELD,
   GROUP_SPEAR,
   GROUP_SWORD,
-} from '../../../src/controllers/actors/weaponClass';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { PlayerObject } from '../../../src/controllers/actors/playerObject';
-import { CharacterClassNumber } from '../../../src/core/types';
-import { skeletonShatter } from '../../../src/controllers/fx/deathVisuals';
+} from '@/controllers/actors/weaponClass';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { PlayerObject } from '@/controllers/actors/playerObject';
+import { CharacterClassNumber } from '@/core/types';
+import { skeletonShatter } from '@/controllers/fx/deathVisuals';
 
 /**
  * The Skill/Skeleton01..03 monsters (Skeleton Warrior, Skeleton Archer, Elite

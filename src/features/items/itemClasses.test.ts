@@ -7,7 +7,7 @@ import {
   itemDef,
   type HeroStats,
 } from './itemStats';
-import items from '../../../versions/shared/items/items.json';
+import items from '@versions/shared/items/items.json';
 
 const hero = (charClass: number, over: Partial<HeroStats> = {}): HeroStats => {
   const { base, step } = classOf(charClass);

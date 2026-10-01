@@ -8,13 +8,13 @@ import { skills } from '../skills';
 import {
   DevilSquareEnterRequestPacket,
   MiniGameOpeningStateRequestPacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import {
   DevilSquareEnterResultEnterResultEnum,
   DevilSquareEnterResultPacket,
   MiniGameOpeningStatePacket,
   MiniGameScoreTablePacket,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
 import { noteOpeningStateRequest, takeOpeningState } from './schedule';
 import {

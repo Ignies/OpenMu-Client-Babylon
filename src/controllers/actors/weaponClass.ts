@@ -1,7 +1,7 @@
 import type { Item } from '../../ecs/world';
 import { BaseClass } from '../../features/hero/characterStats';
-import { ItemsDatabase } from '../../../versions/shared/items/itemsDatabase';
-import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import type { MountKind } from '../../features/pets/pets';
 
 /**

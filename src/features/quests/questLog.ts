@@ -27,10 +27,10 @@ import { t, type TextKey } from '../../i18n';
  */
 import { observable, reaction, runInAction } from 'mobx';
 import { GameOptions } from '../options/gameOptions';
-import { itemBaseName } from '../../../versions/shared/items/itemsDatabase';
+import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '../items/itemLevelLook';
 import { ItemSerializer } from '../items/itemSerializer';
-import { monsterDisplayName } from '../../../versions/shared/monsters/monstersDatabase';
+import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
 import {
   ActiveQuestListRequestPacket,
   CloseNpcRequestPacket,
@@ -40,7 +40,7 @@ import {
   QuestProceedRequestPacket,
   QuestSelectRequestPacket,
   QuestStateRequestPacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import {
   AvailableQuestsPacket,
   ConditionTypeEnum,
@@ -53,7 +53,7 @@ import {
   QuestStatePacket,
   QuestStepInfoPacket,
   RewardTypeEnum,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import type { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';

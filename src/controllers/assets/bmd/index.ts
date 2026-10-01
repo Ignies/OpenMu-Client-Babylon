@@ -1,5 +1,5 @@
 import { Quaternion, Vector3 } from '../../render/babylon/exports';
-import { MathUtils } from '../../../core/mathUtils';
+import { MathUtils } from '@/core/mathUtils';
 import { decryptMapFile } from '../../terrain/mapFileEncryption';
 import { ArrayCopy } from '../download';
 

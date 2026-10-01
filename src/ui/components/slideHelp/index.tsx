@@ -6,8 +6,8 @@ import {
   SlideHelp as SlideStore,
   type SlideLane,
   unpackSlideColor,
-} from '../../../controllers/interface/slideHelp';
-import { GameOptions } from '../../../features/options/gameOptions';
+} from '@/controllers/interface/slideHelp';
+import { GameOptions } from '@/features/options/gameOptions';
 import { MU_FONT_CLASS } from '../muText';
 import { useUiStageScale } from '../uiStage';
 

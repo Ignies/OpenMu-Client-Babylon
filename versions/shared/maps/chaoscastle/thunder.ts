@@ -1,4 +1,4 @@
-import type { Sounds } from '../../../../src/controllers/sound/recipes';
+import type { Sounds } from '@/controllers/sound/recipes';
 
 /**
  * The lightning pillars' thunder, the plain-data half: pure timing, no scene.

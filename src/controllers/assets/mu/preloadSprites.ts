@@ -1,5 +1,5 @@
 import { clearSpriteCache, loadInterfaceSprite } from './sprites';
-import { loadVersionUi } from '../../../version';
+import { loadVersionUi } from '@/version';
 
 /**
  * Decoding the interface sheets up front, in two waves: the pre-game screens

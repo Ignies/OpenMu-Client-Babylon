@@ -2,7 +2,7 @@ import { defineSkill } from '@/controllers/skills/define';
 import { DEG } from '../../_shared';
 import { ENUM_WORLD } from '@/core/types';
 import { entityPos, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { Step, TICK, after, cm, particles, ring, sprite, ticks } from '@/controllers/skills/visuals';
 import { TEX } from '@/controllers/fx/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';

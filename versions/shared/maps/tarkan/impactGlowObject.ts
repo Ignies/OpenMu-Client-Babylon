@@ -1,8 +1,8 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { HIDDEN_MESH_ALL } from '../../../../src/controllers/render/modelObject';
-import { createMovableFlare, type MovableFlare } from '../../../../src/controllers/lighting/effectLights';
-import type { TransformNode } from '../../../../src/controllers/render/babylon/exports';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { HIDDEN_MESH_ALL } from '@/controllers/render/modelObject';
+import { createMovableFlare, type MovableFlare } from '@/controllers/lighting/effectLights';
+import type { TransformNode } from '@/controllers/render/babylon/exports';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * `Luminosity = sinf((WorldTime + (o->Angle[2] * 5)) * 0.002f) * 0.3f + 0.7f;`

@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { MuSpriteFrame } from '../muSprite';
-import { uiClick } from '../../../controllers/sound/sfx';
-import { t } from '../../../i18n';
+import { uiClick } from '@/controllers/sound/sfx';
+import { t } from '@/i18n';
 import {
   GameOptions,
   type GameOptions as GameOptionsType,
-} from '../../../features/options/gameOptions';
+} from '@/features/options/gameOptions';
 import {
   KeyBindings,
   keyLabel,
   type KeyAction,
-} from '../../../controllers/interface/keyBindings';
-import { isFullscreen, toggleFullscreen } from '../../../controllers/interface/browserHotkeys';
-import { PwaInstall } from '../../../app/pwaInstall';
+} from '@/controllers/interface/keyBindings';
+import { isFullscreen, toggleFullscreen } from '@/controllers/interface/browserHotkeys';
+import { PwaInstall } from '@/app/pwaInstall';
 import {
   TIER_PRESETS,
   TIER_PRESET_LABEL_KEYS,

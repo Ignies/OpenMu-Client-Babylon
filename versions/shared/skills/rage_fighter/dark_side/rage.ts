@@ -18,9 +18,9 @@
  * (`observeDarkSideTargets`, `observeRageHit`); the pending follow-ups are
  * drained by the facade's `drainDarkSideHits` from the cast system.
  */
-import type { ENUM_WORLD } from '../../../../../src/core/types';
-import type { CombatLayer } from '../../../../../src/controllers/combat/layer';
-import { SKILL_DARK_SIDE } from '../../../../../src/controllers/combat/recipes';
+import type { ENUM_WORLD } from '@/core/types';
+import type { CombatLayer } from '@/controllers/combat/layer';
+import { SKILL_DARK_SIDE } from '@/controllers/combat/recipes';
 
 // ---- 1. tuning -------------------------------------------------------------
 

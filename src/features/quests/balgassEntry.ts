@@ -17,7 +17,7 @@ import {
   CloseNpcRequestPacket,
   EnterOnGatekeeperRequestPacket,
   EnterOnWerewolfRequestPacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
 import type { QuestLayer } from './layer';

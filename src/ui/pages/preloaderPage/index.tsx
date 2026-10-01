@@ -1,22 +1,22 @@
 import './style.less';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../app/store';
-import { i18n, t, type TextKey } from '../../../i18n';
+import { Store } from '@/app/store';
+import { i18n, t, type TextKey } from '@/i18n';
 import {
   displayAddress,
   matchesSearch,
   playableHere,
   ServerConfig,
-} from '../../../features/servers/serverConfig';
-import { ServerList } from '../../../features/servers/serverList';
-import { loadVersionUi, versionTags, versionUi } from '../../../version';
-import type { PregameBackdrop } from '../../../version/uiContract';
-import { uiClick } from '../../../controllers/sound/sfx';
-import { COMBAT_BUS, playSfx, sound, type Sounds } from '../../../controllers/sound';
-import { SoundsManager } from '../../../controllers/sound/soundsManager';
-import { setSceneCovered } from '../../../controllers/render/sceneCover';
-import { pregameLoad } from '../../../controllers/loading/pregameLoad';
+} from '@/features/servers/serverConfig';
+import { ServerList } from '@/features/servers/serverList';
+import { loadVersionUi, versionTags, versionUi } from '@/version';
+import type { PregameBackdrop } from '@/version/uiContract';
+import { uiClick } from '@/controllers/sound/sfx';
+import { COMBAT_BUS, playSfx, sound, type Sounds } from '@/controllers/sound';
+import { SoundsManager } from '@/controllers/sound/soundsManager';
+import { setSceneCovered } from '@/controllers/render/sceneCover';
+import { pregameLoad } from '@/controllers/loading/pregameLoad';
 import { MuFlag } from '../../components/muFlag';
 import { Backdrop } from './backdrop';
 import { Button, Icon, Select, type IconName } from './controls';
@@ -31,7 +31,7 @@ import { FooterStrike } from './footerStrike';
 import { MuFrame } from '../../components/muFrame';
 import { MuIcon } from './muIcon';
 import { REACH_TEXT } from './banner';
-import { ServerProbe } from '../../../features/servers/serverProbe';
+import { ServerProbe } from '@/features/servers/serverProbe';
 
 const GITHUB_URL = 'https://github.com/Ignies/OpenMu-Client-Babylon';
 

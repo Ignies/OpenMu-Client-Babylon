@@ -1,11 +1,11 @@
 import './style.less';
 import { useMemo } from 'react';
 import { observer } from 'mobx-react-lite';
-import type { Item } from '../../../ecs/world';
-import { GameOptions } from '../../../features/options/gameOptions';
-import { emojiSegments, type ChatEmoji } from '../../../features/chat/chatEmojis';
-import { scanItemLinks } from '../../../features/chat/chatItemLinks';
-import { EMOJI_CATALOG } from '../../../features/chat/emojis';
+import type { Item } from '@/ecs/world';
+import { GameOptions } from '@/features/options/gameOptions';
+import { emojiSegments, type ChatEmoji } from '@/features/chat/chatEmojis';
+import { scanItemLinks } from '@/features/chat/chatItemLinks';
+import { EMOJI_CATALOG } from '@/features/chat/emojis';
 import { ChatItemLink } from '../chatItemLink';
 
 type Piece = string | ChatEmoji | { link: Item };

@@ -2,18 +2,18 @@ import './style.less';
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { t, type TextKey } from '../../../../../i18n';
-import { Store, type PetInfo } from '../../../../../app/store';
-import { InventoryConstants } from '../../../../../features/inventory/inventoryConstants';
-import { PET_GROUP, DARK_HORSE, DARK_RAVEN } from '../../../../../features/pets/pets';
+import { t, type TextKey } from '@/i18n';
+import { Store, type PetInfo } from '@/app/store';
+import { InventoryConstants } from '@/features/inventory/inventoryConstants';
+import { PET_GROUP, DARK_HORSE, DARK_RAVEN } from '@/features/pets/pets';
 import {
   PetCommandModeEnum,
   PetTypeEnum,
-} from '../../../../../../versions/shared/packets/ClientToServerPackets';
-import { uiClick } from '../../../../../controllers/sound/sfx';
-import { MuButton } from '../../../../components/muButton';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
+} from '@versions/shared/packets/ClientToServerPackets';
+import { uiClick } from '@/controllers/sound/sfx';
+import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuItemWindow, MuTableFrame } from '@/ui/components/muWindow';
 import { sendRavenCommand } from '../bottomBar/petCommands';
 import { PetInfoWindowState, togglePetInfoWindow } from './windowState';
 

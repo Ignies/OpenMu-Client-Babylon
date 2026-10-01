@@ -5,7 +5,7 @@ import { Economy } from '../economy/economy';
 import { Social } from '../social/social';
 import { Messenger } from '../friends/messenger';
 import { quests } from '../quests';
-import { LogOutPacket } from '../../../versions/shared/packets/ClientToServerPackets';
+import { LogOutPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { SessionResume } from './sessionResume';
 import { allowUnload } from '../../controllers/interface/browserHotkeys';
 import { playUiSound } from '../../controllers/sound/ui';

@@ -1,8 +1,8 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { MonsterObject } from '../../../src/controllers/actors/monsterObject';
+import type { Entity, World } from '@/ecs/world';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { MonsterObject } from '@/controllers/actors/monsterObject';
 import { MonsterActionType } from '../objects/enum';
-import { monsterModelFile, monsterScaleOf } from '../../../src/controllers/actors/monsterModelTable';
+import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
 
 // [NpcInfo(459, "Selupan")] - MODEL_SELUPAN at Scale 2.0
 // (GM_Raklion.cpp:142-156). His attack voices (ZzzOpenData.cpp:3767-3776)

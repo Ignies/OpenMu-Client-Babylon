@@ -3,7 +3,7 @@ import { ARC_MOTES, TEX } from '@/controllers/fx/recipes';
 import { DEG, FX_FLICKER, dropOldest, lightHere, randInt, rideLightFor, writePath } from '../../_shared';
 import { type Entity } from '@/ecs/world';
 import { type LightRecipe } from '@/controllers/lighting/lightSource';
-import { MonsterActionType } from '../../../objects/enum';
+import { MonsterActionType } from '@versions/shared/objects/enum';
 import { delay, entityGone, entityPos, entityYaw, followEntity, scaleRGB, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
 import { SkillContext, Step, TICK, after, cm, forwardOf, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';

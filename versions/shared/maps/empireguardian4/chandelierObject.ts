@@ -1,12 +1,12 @@
 import {
   BonedParticleEmitter,
   type BonedEmission,
-} from '../../../../src/controllers/fx/effectParticles';
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { lightMapObject } from '../../../../src/controllers/lighting/mapObjectLights';
-import type { LightSource } from '../../../../src/controllers/lighting/lightSource';
-import { Store } from '../../../../src/app/store';
-import type { Entity, World } from '../../../../src/ecs/world';
+} from '@/controllers/fx/effectParticles';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { lightMapObject } from '@/controllers/lighting/mapObjectLights';
+import type { LightSource } from '@/controllers/lighting/lightSource';
+import { Store } from '@/app/store';
+import type { Entity, World } from '@/ecs/world';
 import { findBone } from './bones';
 import { EMPIRE_GUARDIAN_4_CHANDELIER } from './spec';
 

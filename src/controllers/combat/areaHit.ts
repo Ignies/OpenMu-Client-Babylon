@@ -11,8 +11,8 @@
  * Driven by `skillCastSystem` (`areaHitTargets` → `buildAreaHit`); this
  * entry keeps the counters and the area rule, never sends.
  */
-import { AreaSkillHitPacket } from '../../../versions/shared/packets/ClientToServerPackets';
-import type { SkillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import { AreaSkillHitPacket } from '@versions/shared/packets/ClientToServerPackets';
+import type { SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import type { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';
 

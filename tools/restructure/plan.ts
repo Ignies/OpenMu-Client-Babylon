@@ -75,7 +75,13 @@ function relative(fromFile: string, toFile: string): string {
 function rewrite(spec: string, importer: string, target: string, suffix: string): string {
   const stem = suffix && target.endsWith(suffix) ? target.slice(0, -suffix.length) : target;
   for (const [alias, dir] of ALIASES) if (spec.startsWith(alias) && stem.startsWith(dir)) return alias + stem.slice(dir.length);
-  return relative(importer, stem);
+  const rel = relative(importer, stem);
+  // Long or root-crossing paths read better as aliases (src/ and versions/ only).
+  const rootOf = (p: string) => ALIASES.find(([, dir]) => p.startsWith(dir));
+  const from = rootOf(importer);
+  const to = rootOf(stem);
+  if (from && to && (from !== to || rel.startsWith('../../../'))) return to[0] + stem.slice(to[1].length);
+  return rel;
 }
 
 /**

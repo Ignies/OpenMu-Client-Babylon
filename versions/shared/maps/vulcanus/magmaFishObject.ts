@@ -1,11 +1,11 @@
 import {
   BonedParticleEmitter,
   type BonedEmission,
-} from '../../../../src/controllers/fx/effectParticles';
-import { createMovableFlare, type MovableFlare } from '../../../../src/controllers/lighting/effectLights';
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import type { TransformNode } from '../../../../src/controllers/render/babylon/exports';
-import type { Entity, World } from '../../../../src/ecs/world';
+} from '@/controllers/fx/effectParticles';
+import { createMovableFlare, type MovableFlare } from '@/controllers/lighting/effectLights';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import type { TransformNode } from '@/controllers/render/babylon/exports';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * `Vector(1.0f, 0.0f, 0.0f, vLightFire); CreateSprite(BITMAP_LIGHT, Position,

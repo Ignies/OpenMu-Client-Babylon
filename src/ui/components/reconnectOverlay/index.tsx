@@ -1,8 +1,8 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { SessionResume } from '../../../features/session/sessionResume';
-import { uiClick } from '../../../controllers/sound/sfx';
-import { t } from '../../../i18n';
+import { SessionResume } from '@/features/session/sessionResume';
+import { uiClick } from '@/controllers/sound/sfx';
+import { t } from '@/i18n';
 
 /**
  * What a dropped connection looks like while the client walks the login

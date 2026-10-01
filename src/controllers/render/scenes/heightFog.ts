@@ -8,7 +8,7 @@ import {
   type Scene,
 } from '../babylon/exports';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
-import { devQueryNumber } from '../../../core/devSeams';
+import { devQueryNumber } from '@/core/devSeams';
 import type { LookProfile, Rgb } from '../../lighting/profiles';
 
 /**

@@ -4,7 +4,7 @@
  * `dist/Data` (tools/copyData.ts). `VITE_DATA_URL` moves the original tree
  * to a CDN / other origin at build time.
  */
-import type { VersionData } from '../../../src/version/contract';
+import type { VersionData } from '@/version/contract';
 
 function withTrailingSlash(url: string): string {
   return url.endsWith('/') ? url : `${url}/`;

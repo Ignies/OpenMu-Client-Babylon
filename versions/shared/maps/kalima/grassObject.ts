@@ -1,9 +1,9 @@
-import { devQuery } from '../../../../src/core/devSeams';
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
+import { devQuery } from '@/core/devSeams';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import { PlayerAction } from '../../objects/enum';
-import { waterSurfaceHeight } from '../../../../src/controllers/terrain/terrainWater';
-import { Store } from '../../../../src/app/store';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { waterSurfaceHeight } from '@/controllers/terrain/terrainWater';
+import { Store } from '@/app/store';
+import type { Entity, World } from '@/ecs/world';
 
 /** MU world units per terrain tile. The original's `Position` is in these. */
 const MU_PER_TILE = 100;

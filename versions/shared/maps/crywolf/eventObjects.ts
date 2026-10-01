@@ -1,11 +1,11 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { ParticleEmitter } from '../../../../src/controllers/fx/effectParticles';
-import { Store } from '../../../../src/app/store';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { ParticleEmitter } from '@/controllers/fx/effectParticles';
+import { Store } from '@/app/store';
 import {
   CrywolfOccupation,
   crywolfHud,
-} from '../../../../src/features/events/crywolf';
-import type { Entity, World } from '../../../../src/ecs/world';
+} from '@/features/events/crywolf';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * The Crywolf event staging (GMCrywolf1st.cpp), driven by the state in

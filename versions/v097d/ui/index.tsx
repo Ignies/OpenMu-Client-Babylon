@@ -7,7 +7,7 @@
  * login world (its tree has `World1`..`World12` and nothing else), with the
  * period `Data/Logo/` plates on top instead of the Season 4 window set.
  */
-import type { PregameUi } from '../../../src/version/uiContract';
+import type { PregameUi } from '@/version/uiContract';
 import { createShipScene } from './pregame/shipScene';
 import { V097dLoginPage } from './pregame/loginPage';
 import { V097dCharactersPage } from './pregame/charactersPage';

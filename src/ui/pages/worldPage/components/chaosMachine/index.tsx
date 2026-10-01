@@ -1,15 +1,15 @@
 import './style.less';
-import { t } from '../../../../../i18n';
+import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { Economy, MIX_MENU } from '../../../../../features/economy/economy';
-import { StorageKind } from '../../../../../features/inventory/itemStorage';
-import { MuButton } from '../../../../components/muButton';
-import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
-import { ItemGrid } from '../../../../components/itemGrid';
-import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { uiClick } from '../../../../../controllers/sound/sfx';
+import { Store } from '@/app/store';
+import { Economy, MIX_MENU } from '@/features/economy/economy';
+import { StorageKind } from '@/features/inventory/itemStorage';
+import { MuButton } from '@/ui/components/muButton';
+import { MuItemWindow, MuTableFrame } from '@/ui/components/muWindow';
+import { ItemGrid } from '@/ui/components/itemGrid';
+import { QuickItemActions } from '@/features/inventory/quickItemActions';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { uiClick } from '@/controllers/sound/sfx';
 import {
   COLUMNS,
   GRID_X,

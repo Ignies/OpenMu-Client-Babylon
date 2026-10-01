@@ -1,10 +1,10 @@
 import {
   createMovableFlare,
   type MovableFlare,
-} from '../../../../src/controllers/lighting/effectLights';
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { Store } from '../../../../src/app/store';
-import type { Entity, World } from '../../../../src/ecs/world';
+} from '@/controllers/lighting/effectLights';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { Store } from '@/app/store';
+import type { Entity, World } from '@/ecs/world';
 import { findBone, bonePosed, type BoneNode } from './bones';
 
 /** `b->TransformPosition(BoneTransform[3], …)` (ZzzObject.cpp:3186). */

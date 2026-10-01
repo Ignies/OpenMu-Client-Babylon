@@ -26,8 +26,8 @@ import {
   sceneTargetSamples,
   type LightingTier,
 } from '../../lighting/lightingQuality';
-import { devQuery, devQueryNumber, devQueryNumbers } from '../../../core/devSeams';
-import { GameOptions } from '../../../features/options/gameOptions';
+import { devQuery, devQueryNumber, devQueryNumbers } from '@/core/devSeams';
+import { GameOptions } from '@/features/options/gameOptions';
 import { renderDistanceRanges } from '../renderDistance';
 import { CSM_CASTER_REACH, drawsSolidGeometry } from './shadows';
 import { driveRenderList } from './renderList';

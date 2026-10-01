@@ -1,21 +1,21 @@
 import type { Entity, ISystemFactory } from '../world';
 import { Store } from '../../app/store';
 import { applyPlayerActionSpeed, serverMinAttackInterval } from '../../controllers/anim/playSpeed';
-import { HitRequestPacket } from '../../../versions/shared/packets/ClientToServerPackets';
+import { HitRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import {
   MonsterActionType,
   ServerPlayerActionType,
-} from '../../../versions/shared/objects/enum';
+} from '@versions/shared/objects/enum';
 import { TWFlags } from '../../controllers/terrain/consts';
 import { isFlagInBinaryMask } from '../../controllers/assets/download';
 import { chooseAttackAction } from '../../controllers/actors/weaponClass';
 import { getBaseClass } from '../../features/hero/characterStats';
 import { isWingItem } from '../../controllers/actors/wings';
 import { mountKind } from '../../features/pets/pets';
-import { playBowShotVisual } from '../../../versions/shared/skills/skillVisuals';
+import { playBowShotVisual } from '@versions/shared/skills/skillVisuals';
 import { combat } from '../../controllers/combat';
 import { MOUSE_UPDATE_SECONDS_MAX } from '../../controllers/combat/inputGate';
-import { skillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { truncatePathWithinRange } from '../../controllers/actors/approachPath';
 import { isHostilePlayer } from '../../controllers/combat/playerTarget';
 import { duelEnemyId } from '../../features/events/duel';

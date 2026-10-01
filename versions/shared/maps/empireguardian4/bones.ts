@@ -1,4 +1,4 @@
-import type { ModelObject } from '../../../../src/controllers/render/modelObject';
+import type { ModelObject } from '@/controllers/render/modelObject';
 
 export type BoneNode = {
   getAbsolutePosition(): { x: number; y: number; z: number };

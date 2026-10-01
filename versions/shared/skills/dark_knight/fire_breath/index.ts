@@ -1,6 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource, type SheetCells } from '@/controllers/fx/core';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { RGBS, SMOKE, TEX } from '@/controllers/fx/recipes';
 import { type Ray } from '@/controllers/fx/rays';
 import { Step, TICK, ahead, cm, forwardOf, offset, perTick, ticks } from '@/controllers/skills/visuals';

@@ -1,13 +1,13 @@
 import { observer } from 'mobx-react-lite';
-import { uiClick } from '../../../controllers/sound/sfx';
-import { t } from '../../../i18n';
+import { uiClick } from '@/controllers/sound/sfx';
+import { t } from '@/i18n';
 import {
   effective,
   isInsecureWsUrl,
   ServerConfig,
   type ServerProfile,
-} from '../../../features/servers/serverConfig';
-import { ServerList } from '../../../features/servers/serverList';
+} from '@/features/servers/serverConfig';
+import { ServerList } from '@/features/servers/serverList';
 import { Button, Icon, TextField, Toggle } from './controls';
 
 /**

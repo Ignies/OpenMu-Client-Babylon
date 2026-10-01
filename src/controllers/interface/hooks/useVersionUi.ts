@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { loadVersionUi, versionUi } from '../../../version';
-import type { VersionUi } from '../../../version/uiContract';
+import { loadVersionUi, versionUi } from '@/version';
+import type { VersionUi } from '@/version/uiContract';
 
 /**
  * The active version's UI module for a shared component that has to ask it

@@ -1,10 +1,10 @@
 import { Store } from '../../app/store';
 import { Social } from '../social/social';
 import { gameVersion } from '../../version';
-import { skillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { calcMaxDurability, isJewel, itemDef } from '../items/itemStats';
 import { InventoryConstants } from '../inventory/inventoryConstants';
-import { PetCommandModeEnum } from '../../../versions/shared/packets/ClientToServerPackets';
+import { PetCommandModeEnum } from '@versions/shared/packets/ClientToServerPackets';
 import { isAttackableEntity } from '../../ecs/systems/attackSystem';
 import type { Entity, World } from '../../ecs/world';
 import { ensureMuHelperWatching, MuHelperState } from './state';

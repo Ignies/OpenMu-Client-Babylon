@@ -1,4 +1,4 @@
-import type { World } from '../../../../src/ecs/world';
+import type { World } from '@/ecs/world';
 import { SwampMarshGasObject } from './marshGasObject';
 import { bindAbsentModels } from '../shared/objectVariants';
 

@@ -39,13 +39,13 @@ import {
   VaultClosedPacket,
   VaultMoveMoneyRequestPacket,
   VaultMoveMoneyRequestVaultMoneyMoveDirectionEnum,
-} from '../../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import {
   ItemCraftingResultCraftingResultEnum,
   PlayerShopBuyResultResultKindEnum,
   TradeFinishedTradeResultEnum,
   VaultProtectionInformationVaultProtectionStateEnum,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 
 /** The zen the vault charges to open (`RenderText`, NewUIStorageInventory.cpp:227). */
 export function vaultOpenCost(level: number, masterLevel: number, locked: boolean): number {

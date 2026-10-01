@@ -1,8 +1,8 @@
-import { assetWorldNum } from '../../../../src/controllers/assets/worldAssets';
+import { assetWorldNum } from '@/controllers/assets/worldAssets';
 import { prefetchSignPlates } from '../../objects/signs/signPlates';
 import { SignObject } from '../../objects/signs/signObject';
 import { signTypes } from '../../objects/signs/signLabels';
-import type { World } from '../../../../src/ecs/world';
+import type { World } from '@/ecs/world';
 import { StadiumBrazierObject } from './brazierObject';
 
 /**

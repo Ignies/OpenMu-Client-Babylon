@@ -1,4 +1,4 @@
-import type { MapLayer } from '../../../src/controllers/maps/layer';
+import type { MapLayer } from '@/controllers/maps/layer';
 import { lorenciaLayer } from './lorencia';
 import { dungeonLayer } from './dungeon';
 import { deviasLayer } from './devias';

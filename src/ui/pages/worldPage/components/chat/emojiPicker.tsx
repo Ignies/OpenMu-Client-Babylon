@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { makeAutoObservable } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { t } from '../../../../../i18n';
-import { LocalStorage } from '../../../../../core/localStorage';
+import { t } from '@/i18n';
+import { LocalStorage } from '@/core/localStorage';
 import {
   emojiPackLabel,
   pushRecentEmoji,
   type ChatEmoji,
-} from '../../../../../features/chat/chatEmojis';
-import { EMOJI_CATALOG } from '../../../../../features/chat/emojis';
+} from '@/features/chat/chatEmojis';
+import { EMOJI_CATALOG } from '@/features/chat/emojis';
 
 const RECENT_KEY = 'mu_chat_emoji_recent';
 const RECENT_TAB = '';

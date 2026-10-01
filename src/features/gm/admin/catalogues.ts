@@ -1,5 +1,5 @@
-import monsters from '../../../../versions/shared/monsters/monsters.json';
-import items from '../../../../versions/shared/items/items.json';
+import monsters from '@versions/shared/monsters/monsters.json';
+import items from '@versions/shared/items/items.json';
 
 /**
  * What the Skins and Spawn tabs list, as searchable data.

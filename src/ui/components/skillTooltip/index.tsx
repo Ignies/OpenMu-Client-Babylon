@@ -1,12 +1,12 @@
-import { t } from '../../../i18n';
+import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { skillDefinition } from '../../../../versions/shared/skills/skillsDatabase';
-import { skillDisplayName } from '../../../features/skills/skillNames';
-import { skills, type SkillBlock } from '../../../features/skills';
-import { skillDelaySeconds } from '../../../features/skills/cooldowns';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
+import { skillDisplayName } from '@/features/skills/skillNames';
+import { skills, type SkillBlock } from '@/features/skills';
+import { skillDelaySeconds } from '@/features/skills/cooldowns';
 
 export type TipLine = {
   text: string;

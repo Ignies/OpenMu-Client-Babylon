@@ -21,7 +21,7 @@
  * before it sends, and by `common/skillCasting.isSelfCastable` for the
  * hotbar's greying.
  */
-import type { SkillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import type { SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import type { CombatLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

@@ -1,38 +1,38 @@
-import { isKey, actionOfKey } from '../../../../../controllers/interface/keyBindings';
-import { t } from '../../../../../i18n';
+import { isKey, actionOfKey } from '@/controllers/interface/keyBindings';
+import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { Economy } from '../../../../../features/economy/economy';
-import { events } from '../../../../../features/events';
-import { ItemIcon } from '../../../../components/itemIcon';
-import { ItemTooltip } from '../../../../components/itemTooltip';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { Item } from '../../../../../ecs/world';
+import { Store } from '@/app/store';
+import { Economy } from '@/features/economy/economy';
+import { events } from '@/features/events';
+import { ItemIcon } from '@/ui/components/itemIcon';
+import { ItemTooltip } from '@/ui/components/itemTooltip';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { Item } from '@/ecs/world';
 import {
   GridSquares,
   occupancyStamp,
   usedMask,
-} from '../../../../components/itemGrid';
-import { ItemsDatabase } from '../../../../../../versions/shared/items/itemsDatabase';
-import { goldColor } from '../../../../../features/items/goldColor';
+} from '@/ui/components/itemGrid';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
+import { goldColor } from '@/features/items/goldColor';
 import {
   ITEM_HOTKEY_CODES,
   canRegisterItemHotkey,
-} from '../../../../../features/inventory/itemHotkeys';
-import { isUpgradeJewel } from '../../../../../features/inventory/jewelUpgrade';
+} from '@/features/inventory/itemHotkeys';
+import { isUpgradeJewel } from '@/features/inventory/jewelUpgrade';
 import {
   equipDestination,
   isEquipable,
-} from '../../../../../features/inventory/equipSlots';
-import { InventorySort } from '../../../../../features/inventory/inventorySort';
-import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
-import { StorageKind } from '../../../../../features/inventory/itemStorage';
+} from '@/features/inventory/equipSlots';
+import { InventorySort } from '@/features/inventory/inventorySort';
+import { QuickItemActions } from '@/features/inventory/quickItemActions';
+import { StorageKind } from '@/features/inventory/itemStorage';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuButton } from '../../../../components/muButton';
-import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
-import { playUiSound } from '../../../../../controllers/sound/sfx';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
+import { MuItemWindow, MuTableFrame } from '@/ui/components/muWindow';
+import { playUiSound } from '@/controllers/sound/sfx';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,

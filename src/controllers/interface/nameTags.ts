@@ -1,4 +1,4 @@
-import { GuildMemberRoleEnum } from '../../../versions/shared/packets/ServerToClientPackets';
+import { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
 import { t, type TextKey } from '../../i18n';
 
 /**

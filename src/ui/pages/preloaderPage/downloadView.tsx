@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { uiClick } from '../../../controllers/sound/sfx';
-import { t, type TextKey } from '../../../i18n';
-import { Store } from '../../../app/store';
+import { uiClick } from '@/controllers/sound/sfx';
+import { t, type TextKey } from '@/i18n';
+import { Store } from '@/app/store';
 import {
   assetDownload,
   cancelDownload,
@@ -11,14 +11,14 @@ import {
   startDownload,
   storageUsed,
   type AssetGroup,
-} from '../../../controllers/assets/assetDownload';
+} from '@/controllers/assets/assetDownload';
 import {
   loadPackIndex,
   ORIGINAL_PACK,
   packsBase,
   setActivePack,
   texturePacks,
-} from '../../../controllers/assets/texturePacks';
+} from '@/controllers/assets/texturePacks';
 import { Button, Icon, Progress, Select } from './controls';
 
 /**

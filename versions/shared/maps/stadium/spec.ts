@@ -1,5 +1,5 @@
-import type { LightEmitter } from '../../../../src/controllers/lighting/mapObjectLights';
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
+import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { Emission } from '@/controllers/fx/effectParticles';
 
 /**
  * Stadium (WD_6STADIUM, world 6, `Object7`/`World7`). Object7 ships 41 BMDs,

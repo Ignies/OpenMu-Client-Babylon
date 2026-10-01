@@ -1,5 +1,5 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
-import type { MeshAnimation } from '../../../../src/controllers/render/meshAnimation';
+import type { Emission } from '@/controllers/fx/effectParticles';
+import type { MeshAnimation } from '@/controllers/render/meshAnimation';
 
 /**
  * Doppelganger 1 (`WD_65DOPPLEGANGER1`, `World66`/`Object66`), the plain-data

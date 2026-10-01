@@ -11,7 +11,7 @@
  * a client that logs in as ClientVersion(0, 97) is answered with a distinct
  * packet mix (see variantRank).
  */
-import { asciiBytes, type GameVersion } from '../../src/version/contract';
+import { asciiBytes, type GameVersion } from '@/version/contract';
 import { v097dData } from './data';
 
 // The packet lists ride along in the version chunk; UI does not (it reaches

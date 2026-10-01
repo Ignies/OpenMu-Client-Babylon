@@ -8,8 +8,8 @@ import {
   type MockInstance,
 } from 'vitest';
 import type { Sound } from '@babylonjs/core/Audio/sound';
-import { EventBus } from '../../../../src/core/eventBus';
-import { SoundsManager } from '../../../../src/controllers/sound/soundsManager';
+import { EventBus } from '@/core/eventBus';
+import { SoundsManager } from '@/controllers/sound/soundsManager';
 import { kanturu2Layer } from './index';
 import {
   GATEWAY_TURN_MS,

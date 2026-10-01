@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
-import { t } from '../../../../../i18n';
-import { useUiViewport } from '../../../../components/uiStage';
+import { t } from '@/i18n';
+import { useUiViewport } from '@/ui/components/uiStage';
 import {
   MAIN_FRAME_BUTTONS,
   MAIN_FRAME_BUTTON_FRAMES,

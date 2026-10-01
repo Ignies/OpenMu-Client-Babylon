@@ -1,12 +1,12 @@
-import { createMovableFlare, type MovableFlare } from '../../../../src/controllers/lighting/effectLights';
+import { createMovableFlare, type MovableFlare } from '@/controllers/lighting/effectLights';
 import {
   DEVIAS_CANDELABRA,
   lightMapObject,
-} from '../../../../src/controllers/lighting/mapObjectLights';
-import type { LightSource } from '../../../../src/controllers/lighting/lightSource';
-import { Store } from '../../../../src/app/store';
-import type { World } from '../../../../src/ecs/world';
-import type { BonedEmission } from '../../../../src/controllers/fx/effectParticles';
+} from '@/controllers/lighting/mapObjectLights';
+import type { LightSource } from '@/controllers/lighting/lightSource';
+import { Store } from '@/app/store';
+import type { World } from '@/ecs/world';
+import type { BonedEmission } from '@/controllers/fx/effectParticles';
 import { CandleObject } from '../lorencia/candleObject';
 
 const FLARE_SCALE = 1.6;

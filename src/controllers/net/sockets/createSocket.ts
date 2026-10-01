@@ -1,7 +1,7 @@
-import { EventBus } from "../../../core/eventBus";
+import { EventBus } from "@/core/eventBus";
 import { ConnectServerPackets, ServerToClientPackets } from "../packets";
 import { SimpleModulusDecryptor, SimpleModulusKeys } from "../encryption";
-import { gameVersion } from "../../../version";
+import { gameVersion } from "@/version";
 import { byteToString, getPacketSize, getSizeOfPacketType } from "../../assets/download";
 import { sessionNonce } from "../sessionNonce";
 import { recordSocketDrain } from "../socketCost";

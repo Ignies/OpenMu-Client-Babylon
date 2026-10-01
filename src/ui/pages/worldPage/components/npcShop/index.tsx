@@ -1,25 +1,25 @@
 import './style.less';
-import { t } from '../../../../../i18n';
+import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { useMemo, useRef, useState } from 'react';
-import { Store } from '../../../../../app/store';
-import { ItemIcon } from '../../../../components/itemIcon';
-import { ItemSearchBox, useItemSearch } from '../../../../components/itemSearch';
-import { ItemTooltip } from '../../../../components/itemTooltip';
-import { Item } from '../../../../../ecs/world';
+import { Store } from '@/app/store';
+import { ItemIcon } from '@/ui/components/itemIcon';
+import { ItemSearchBox, useItemSearch } from '@/ui/components/itemSearch';
+import { ItemTooltip } from '@/ui/components/itemTooltip';
+import { Item } from '@/ecs/world';
 import {
   GridSquares,
   hoveredMask,
   occupancyStamp,
   usedMask,
-} from '../../../../components/itemGrid';
-import { ItemsDatabase } from '../../../../../../versions/shared/items/itemsDatabase';
-import { isSellingBanned } from '../../../../../features/items/itemValue';
-import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuButton } from '../../../../components/muButton';
-import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
-import { goldColor } from '../../../../../features/items/goldColor';
+} from '@/ui/components/itemGrid';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
+import { isSellingBanned } from '@/features/items/itemValue';
+import { QuickItemActions } from '@/features/inventory/quickItemActions';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
+import { MuItemWindow, MuTableFrame } from '@/ui/components/muWindow';
+import { goldColor } from '@/features/items/goldColor';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,

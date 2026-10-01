@@ -15,8 +15,8 @@
  * `update`; nothing held, so no `reset`.
  */
 import { CharacterClassNumber } from '../../core/types';
-import { ItemsDatabase } from '../../../versions/shared/items/itemsDatabase';
-import { skillDefinition, type SkillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
+import { skillDefinition, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { TW_SAFEZONE } from '../../controllers/terrain/consts';
 import type { Item } from '../../ecs/world';
 import type { SkillLayer } from './layer';

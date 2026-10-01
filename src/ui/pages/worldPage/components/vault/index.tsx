@@ -1,19 +1,19 @@
 import './style.less';
-import { t } from '../../../../../i18n';
+import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { Economy, vaultOpenCost } from '../../../../../features/economy/economy';
-import { StorageKind, isVaultBanned } from '../../../../../features/inventory/itemStorage';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuButton } from '../../../../components/muButton';
-import { MuItemWindow } from '../../../../components/muWindow';
-import { ItemGrid } from '../../../../components/itemGrid';
-import { ItemSearchBox, useItemSearch } from '../../../../components/itemSearch';
-import { BulkMove } from '../../../../../features/inventory/bulkMove';
-import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
-import { isJewel, itemDef } from '../../../../../features/items/itemStats';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { goldColor } from '../../../../../features/items/goldColor';
+import { Store } from '@/app/store';
+import { Economy, vaultOpenCost } from '@/features/economy/economy';
+import { StorageKind, isVaultBanned } from '@/features/inventory/itemStorage';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
+import { MuItemWindow } from '@/ui/components/muWindow';
+import { ItemGrid } from '@/ui/components/itemGrid';
+import { ItemSearchBox, useItemSearch } from '@/ui/components/itemSearch';
+import { BulkMove } from '@/features/inventory/bulkMove';
+import { QuickItemActions } from '@/features/inventory/quickItemActions';
+import { isJewel, itemDef } from '@/features/items/itemStats';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { goldColor } from '@/features/items/goldColor';
 import {
   BUTTON_FRAMES,
   BUTTON_HEIGHT,

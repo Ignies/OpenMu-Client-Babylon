@@ -9,7 +9,7 @@ import {
   DuelChannelJoinRequestPacket,
   DuelChannelQuitRequestPacket,
   DuelStartResponsePacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import {
   DuelFinishedPacket,
   DuelHealthUpdatePacket,
@@ -21,7 +21,7 @@ import {
   DuelStartRequestPacket as DuelStartRequestS2CPacket,
   DuelStartResultPacket,
   DuelStatusPacket,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
 import {
   duelStartFailureKey,

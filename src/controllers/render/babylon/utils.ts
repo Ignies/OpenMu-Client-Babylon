@@ -9,7 +9,7 @@ import {
   Quaternion,
   type Viewport,
 } from './exports';
-import { devQuery } from '../../../core/devSeams';
+import { devQuery } from '@/core/devSeams';
 import { installBitmapDecode } from './bitmapDecode';
 
 export function findInChildren(children: Node[], name: string): Node | null {

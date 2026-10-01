@@ -1,8 +1,8 @@
-import { ParticleEmitter } from '../../../../src/controllers/fx/effectParticles';
-import { loadGLTF } from '../../../../src/controllers/assets/modelLoader';
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
-import { Rand } from '../../../../src/core/rand';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { ParticleEmitter } from '@/controllers/fx/effectParticles';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { ModelObject } from '@/controllers/render/modelObject';
+import { Rand } from '@/core/rand';
+import type { Entity, World } from '@/ecs/world';
 
 /** 25 Hz, the tick `FPS_ANIMATION_FACTOR` is measured in. */
 const TICKS_PER_SECOND = 25;

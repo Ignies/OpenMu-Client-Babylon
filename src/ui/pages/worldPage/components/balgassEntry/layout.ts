@@ -1,5 +1,5 @@
-import { MSGBOX_WIDTH } from '../../../../components/msgBoxFrame';
-import { UI_STAGE_WIDTH } from '../../../../components/uiStage';
+import { MSGBOX_WIDTH } from '@/ui/components/msgBoxFrame';
+import { UI_STAGE_WIDTH } from '@/ui/components/uiStage';
 
 /** `SetPos((SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2), 50)` on the 640x480 stage. */
 export const BOX = { x: (UI_STAGE_WIDTH - MSGBOX_WIDTH) / 2, y: 50 };

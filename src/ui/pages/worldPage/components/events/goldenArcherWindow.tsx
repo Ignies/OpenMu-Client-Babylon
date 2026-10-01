@@ -1,14 +1,14 @@
 import { observer } from 'mobx-react-lite';
-import { t } from '../../../../../i18n';
-import { ItemGroup } from '../../../../../features/items/itemStats';
+import { t } from '@/i18n';
+import { ItemGroup } from '@/features/items/itemStats';
 import {
   closeGoldenArcher,
   goldenArcherWindow,
   registerRena,
-} from '../../../../../features/events/goldenArcher';
-import { MuButton } from '../../../../components/muButton';
-import { MuItemWindow } from '../../../../components/muWindow';
-import { ItemIcon } from '../../../../components/itemIcon';
+} from '@/features/events/goldenArcher';
+import { MuButton } from '@/ui/components/muButton';
+import { MuItemWindow } from '@/ui/components/muWindow';
+import { ItemIcon } from '@/ui/components/itemIcon';
 import {
   BUTTON,
   BUTTON_COLOR_ENABLED,

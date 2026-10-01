@@ -1,18 +1,18 @@
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { t } from '../../../../../i18n';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '../../../../../app/store';
-import { MAX_PARTY_MEMBERS, Social } from '../../../../../features/social/social';
-import { Economy } from '../../../../../features/economy/economy';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { uiClick } from '../../../../../controllers/sound/sfx';
-import { MuButton } from '../../../../components/muButton';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
+import { Store } from '@/app/store';
+import { MAX_PARTY_MEMBERS, Social } from '@/features/social/social';
+import { Economy } from '@/features/economy/economy';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { uiClick } from '@/controllers/sound/sfx';
+import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuItemWindow, MuTableFrame } from '@/ui/components/muWindow';
 import { useNearbyPlayers } from '../nearbyPlayers';
-import { TELEPORT_ALLY } from '../../../../../features/skills/skillCasting';
+import { TELEPORT_ALLY } from '@/features/skills/skillCasting';
 
 /**
  * `CNewUIPartyInfoWindow`: the party list in an item-window frame. Each row

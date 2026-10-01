@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { t, type TextKey } from '../../../../i18n';
-import { GmPanel } from '../../../../features/gm/gmPanel';
-import type { WorldView } from '../../../../features/gm/gmWorld';
-import { gmCommand } from '../../../../features/gm/gmCommands';
+import { t, type TextKey } from '@/i18n';
+import { GmPanel } from '@/features/gm/gmPanel';
+import type { WorldView } from '@/features/gm/gmWorld';
+import { gmCommand } from '@/features/gm/gmCommands';
 import {
   DEFAULT_ITEM_SPEC,
   ITEM_GROUPS,
@@ -13,10 +13,10 @@ import {
   type ItemEntry,
   type ItemSpec,
   type SkinKind,
-} from '../../../../features/gm/admin/catalogues';
-import { itemDisplayName, skinDisplayName, spawnCatalogue } from '../../../../features/gm/admin/skins';
-import { GmLibrary } from '../../../../features/gm/admin/gmLibrary';
-import { uiClick } from '../../../../controllers/sound/sfx';
+} from '@/features/gm/admin/catalogues';
+import { itemDisplayName, skinDisplayName, spawnCatalogue } from '@/features/gm/admin/skins';
+import { GmLibrary } from '@/features/gm/admin/gmLibrary';
+import { uiClick } from '@/controllers/sound/sfx';
 import { ItemIcon } from '../../itemIcon';
 import { CommandCard, QuickButton } from '../commandForm';
 

@@ -1,9 +1,9 @@
-import type { Entity, Item, World } from '../../../src/ecs/world';
+import type { Entity, Item, World } from '@/ecs/world';
 import { PlayerAction, ItemGroups } from '../objects/enum';
-import { Scene, TransformNode } from '../../../src/controllers/render/babylon/exports';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { PlayerObject } from '../../../src/controllers/actors/playerObject';
-import { CharacterClassNumber, PlayerClass } from '../../../src/core/types';
+import { Scene, TransformNode } from '@/controllers/render/babylon/exports';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { PlayerObject } from '@/controllers/actors/playerObject';
+import { CharacterClassNumber, PlayerClass } from '@/core/types';
 
 /**
  * `CreateCharacter(Key, MODEL_PLAYER, …)` followed by a fixed

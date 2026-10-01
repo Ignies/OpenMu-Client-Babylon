@@ -1,8 +1,8 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { MonsterObject } from '../../../src/controllers/actors/monsterObject';
+import type { Entity, World } from '@/ecs/world';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { MonsterObject } from '@/controllers/actors/monsterObject';
 import { MonsterActionType } from '../objects/enum';
-import { MONSTER_HIDDEN_MESH, monsterScaleOf } from '../../../src/controllers/actors/monsterModelTable';
+import { MONSTER_HIDDEN_MESH, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
 
 // [NpcInfo(3, "Spider")]
 const NPC_TYPE = 3;

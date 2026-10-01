@@ -1,4 +1,4 @@
-import type { InstrumentId } from '../../../features/band/instruments';
+import type { InstrumentId } from '@/features/band/instruments';
 import { resolveUrlToDataFolder } from '../../assets/resolveUrlToDataFolder';
 
 /**

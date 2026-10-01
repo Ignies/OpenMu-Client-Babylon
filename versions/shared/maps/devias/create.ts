@@ -1,11 +1,11 @@
-import { assetWorldNum } from '../../../../src/controllers/assets/worldAssets';
+import { assetWorldNum } from '@/controllers/assets/worldAssets';
 import { prefetchSignPlates } from '../../objects/signs/signPlates';
 import { SignObject } from '../../objects/signs/signObject';
 import { signTypes } from '../../objects/signs/signLabels';
-import type { World } from '../../../../src/ecs/world';
-import { setAreaMood } from '../../../../src/controllers/render/scenes/sceneLook';
-import type { AreaLookName } from '../../../../src/controllers/lighting/profiles';
-import { LeanBoxObject } from '../../../../src/controllers/actors/operateBoxObject';
+import type { World } from '@/ecs/world';
+import { setAreaMood } from '@/controllers/render/scenes/sceneLook';
+import type { AreaLookName } from '@/controllers/lighting/profiles';
+import { LeanBoxObject } from '@/controllers/actors/operateBoxObject';
 import { DeviasCandleObject } from './candleObject';
 import {
   enumerateRooms,
@@ -13,7 +13,7 @@ import {
   registerRooms,
   sameRoom,
   type RoomHooks,
-} from '../../../../src/controllers/maps/rooms';
+} from '@/controllers/maps/rooms';
 import {
   DEVIAS_CASTLE_HALLS,
   DEVIAS_CASTLE_SPEC,
@@ -24,7 +24,7 @@ import {
   DEVIAS_WEST_HEARTH_HOUSE,
 } from './rooms';
 import type { Room } from './rooms';
-import type { RoomFrame } from '../../../../src/controllers/maps/roomEnumeration';
+import type { RoomFrame } from '@/controllers/maps/roomEnumeration';
 
 /**
  * Devias (World 3 / Object3). The original lights nothing indoors here;

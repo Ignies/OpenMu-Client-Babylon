@@ -17,4 +17,4 @@ export { ItemsDatabase } from '../../shared/items/itemsDatabase';
 export { SKILL_DEFINITIONS, skillDefinition } from '../../shared/skills/skillsDatabase';
 export type { SkillDefinition } from '../../shared/skills/skillsDatabase';
 export { MonstersDatabase } from '../../shared/monsters/monstersDatabase';
-export * as jewelRules from '../../../src/features/inventory/jewelUpgrade';
+export * as jewelRules from '@/features/inventory/jewelUpgrade';

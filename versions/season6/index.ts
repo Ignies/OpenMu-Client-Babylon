@@ -3,7 +3,7 @@
  * OpenMU default (`-version:season6`, `Persistence/Initialization/VersionSeasonSix`).
  * Everything the base game did before the version seam existed lives here.
  */
-import { asciiBytes, type GameVersion } from '../../src/version/contract';
+import { asciiBytes, type GameVersion } from '@/version/contract';
 import { season6Data } from './data';
 
 // The packet lists ride along in the version chunk; UI does not (it reaches

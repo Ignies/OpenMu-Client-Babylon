@@ -12,21 +12,21 @@
  * only state here is which rows the player folded (`trackerCollapse.ts`).
  */
 import { observer } from 'mobx-react-lite';
-import { t } from '../../../../../i18n';
-import { GameOptions, uiScaleFactor } from '../../../../../features/options/gameOptions';
-import { devQueryNumber } from '../../../../../core/devSeams';
-import { uiClick } from '../../../../../controllers/sound/sfx';
-import { MuText } from '../../../../components/muText';
+import { t } from '@/i18n';
+import { GameOptions, uiScaleFactor } from '@/features/options/gameOptions';
+import { devQueryNumber } from '@/core/devSeams';
+import { uiClick } from '@/controllers/sound/sfx';
+import { MuText } from '@/ui/components/muText';
 import {
   objectiveCounted,
   objectiveDone,
   objectiveProgress,
   objectiveText,
   type QuestObjective,
-} from '../../../../../features/quests/objectives';
-import { activeQuests, questProgressOf, questSubject } from '../../../../../features/quests/questLog';
-import { legacyQuestObjectives, legacyQuestsInProgress } from '../../../../../features/quests/legacyQuests';
-import { questDefinition } from '../../../../../features/quests/questData';
+} from '@/features/quests/objectives';
+import { activeQuests, questProgressOf, questSubject } from '@/features/quests/questLog';
+import { legacyQuestObjectives, legacyQuestsInProgress } from '@/features/quests/legacyQuests';
+import { questDefinition } from '@/features/quests/questData';
 import { COLOR } from './layout';
 import { toggleTrackerFold, trackerFolded } from './trackerCollapse';
 

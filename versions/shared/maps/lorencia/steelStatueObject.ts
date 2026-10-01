@@ -1,4 +1,4 @@
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { ModelObject } from '@/controllers/render/modelObject';
 
 export class SteelStatueObject extends ModelObject {
   static Batchable = true;

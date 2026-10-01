@@ -1,4 +1,4 @@
-import type { World } from '../../../../src/ecs/world';
+import type { World } from '@/ecs/world';
 import { BloodCastleCandelabraObject } from './candelabraObject';
 import { BloodCastleLampObject } from './lampObject';
 import {

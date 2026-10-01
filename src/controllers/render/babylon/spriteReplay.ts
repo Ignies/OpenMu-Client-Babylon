@@ -8,7 +8,7 @@ import type { IMatrixLike } from '@babylonjs/core/Maths/math.like';
 import type { ISize } from '@babylonjs/core/Maths/math.size';
 import type { ThinSprite } from '@babylonjs/core/Sprites/thinSprite';
 import type { Scene } from '@babylonjs/core/scene';
-import { devQuery } from '../../../core/devSeams';
+import { devQuery } from '@/core/devSeams';
 
 /**
  * A sprite pool drawn again in the same frame (the effect mask, after the

@@ -1,8 +1,8 @@
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { ModelObject } from '@/controllers/render/modelObject';
 import { MODEL_HOUSE_WALL01 } from '../../objects/enum';
-import { Rand } from '../../../../src/core/rand';
-import { World } from '../../../../src/ecs/world';
-import { Scalar } from '../../../../src/controllers/render/babylon/exports';
+import { Rand } from '@/core/rand';
+import { World } from '@/ecs/world';
+import { Scalar } from '@/controllers/render/babylon/exports';
 
 export class HouseWallObject extends ModelObject {
   _flickerEnabled = false;

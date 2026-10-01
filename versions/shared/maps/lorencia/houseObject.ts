@@ -1,7 +1,7 @@
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { ModelObject } from '@/controllers/render/modelObject';
 import { BlendState, MODEL_HOUSE01 } from '../../objects/enum';
-import { getMaterial } from '../../../../src/controllers/assets/modelLoader';
-import { World } from '../../../../src/ecs/world';
+import { getMaterial } from '@/controllers/assets/modelLoader';
+import { World } from '@/ecs/world';
 
 export class HouseObject extends ModelObject {
   static Batchable = true;

@@ -6,7 +6,7 @@ import {
   type ArcRotateCamera,
   type Scene,
 } from '../babylon/exports';
-import { devQueryNumber, devQueryNumbers } from '../../../core/devSeams';
+import { devQueryNumber, devQueryNumbers } from '@/core/devSeams';
 import {
   MSAA_HEAD_ONLY,
   pipelineSamples,

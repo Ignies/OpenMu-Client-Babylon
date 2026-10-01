@@ -1,8 +1,8 @@
 import { observer } from 'mobx-react-lite';
-import { t, type TextKey } from '../../../i18n';
-import { GmPanel } from '../../../features/gm/gmPanel';
-import { uiClick } from '../../../controllers/sound/sfx';
-import type { GmCommand, GmParam } from '../../../features/gm/gmCommands';
+import { t, type TextKey } from '@/i18n';
+import { GmPanel } from '@/features/gm/gmPanel';
+import { uiClick } from '@/controllers/sound/sfx';
+import type { GmCommand, GmParam } from '@/features/gm/gmCommands';
 
 /**
  * The pieces every screen builds its forms out of.

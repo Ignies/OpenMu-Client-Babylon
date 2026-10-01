@@ -1,15 +1,15 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
-import { GameOptions, setGameOption } from '../../../../../features/options/gameOptions';
-import { formatRoundTrip } from '../../../../../controllers/interface/hudFormat';
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { NetStats } from '../../../../../controllers/net/roundTrip';
-import { Store } from '../../../../../app/store';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { MuText } from '../../../../components/muText';
-import { useUiStageScale } from '../../../../components/uiStage';
-import { t } from '../../../../../i18n';
+import { GameOptions, setGameOption } from '@/features/options/gameOptions';
+import { formatRoundTrip } from '@/controllers/interface/hudFormat';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { NetStats } from '@/controllers/net/roundTrip';
+import { Store } from '@/app/store';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { MuText } from '@/ui/components/muText';
+import { useUiStageScale } from '@/ui/components/uiStage';
+import { t } from '@/i18n';
 
 /**
  * Frames, frame time and the server round trip, in the top left under the

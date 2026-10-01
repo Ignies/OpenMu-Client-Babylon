@@ -8,7 +8,7 @@ import {
   type Mesh,
   type Scene,
 } from '../babylon/exports';
-import { devQuery } from '../../../core/devSeams';
+import { devQuery } from '@/core/devSeams';
 
 /** `?hlList=0`: the hover mask draws every active mesh, as Babylon has it. */
 const MASK_LIST = devQuery('hlList') !== '0';

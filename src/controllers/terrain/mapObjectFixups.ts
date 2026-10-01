@@ -1,5 +1,5 @@
 import { ENUM_WORLD } from '@/core/types';
-import { MODEL_CANDLE, MODEL_FURNITURE01 } from '../../../versions/shared/objects/enum';
+import { MODEL_CANDLE, MODEL_FURNITURE01 } from '@versions/shared/objects/enum';
 
 export interface MapObjectFixup {
   type: number;

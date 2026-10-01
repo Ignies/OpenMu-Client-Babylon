@@ -1,4 +1,4 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
+import type { Emission } from '@/controllers/fx/effectParticles';
 
 /**
  * Valley of Loren (`WD_30BATTLECASTLE`, `World31`/`Object31`), the plain-data

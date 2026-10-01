@@ -1,6 +1,6 @@
-import { BonedParticleEmitter, type BonedEmission } from '../../../../src/controllers/fx/effectParticles';
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { BonedParticleEmitter, type BonedEmission } from '@/controllers/fx/effectParticles';
+import { ModelObject } from '@/controllers/render/modelObject';
+import type { Entity, World } from '@/ecs/world';
 
 export class CandleObject extends ModelObject {
   #fire: BonedParticleEmitter | null = null;

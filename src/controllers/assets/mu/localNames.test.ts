@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { i18n } from '../../../i18n';
+import { i18n } from '@/i18n';
 import { parseBuffNames } from './buffNameFile';
 import { parseItemNames } from './itemNameFile';
 import { parseSkillNames } from './skillNameFile';

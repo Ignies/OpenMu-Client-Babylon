@@ -1,6 +1,6 @@
 import type { ENUM_WORLD } from '../../core/types';
 import { Store } from '../../app/store';
-import { CloseNpcRequestPacket } from '../../../versions/shared/packets/ClientToServerPackets';
+import { CloseNpcRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import type { Item } from '../../ecs/world';
 import type { EventEntryState, EventLayer } from './layer';
 import { EVENT_LAYERS } from './layers';

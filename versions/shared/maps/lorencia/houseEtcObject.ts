@@ -1,4 +1,4 @@
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { ModelObject } from '@/controllers/render/modelObject';
 import { MODEL_HOUSE_ETC01 } from '../../objects/enum';
 
 export class HouseEtcObject extends ModelObject {

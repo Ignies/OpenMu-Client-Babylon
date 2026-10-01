@@ -1,15 +1,15 @@
-import { t } from '../../../../../i18n';
+import { t } from '@/i18n';
 import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '../../../../../app/store';
-import { uiClick } from '../../../../../controllers/sound/sfx';
-import type { WorldMinimap } from '../../../../../controllers/terrain/minimap';
-import type { MinimapMarker } from '../../../../../controllers/terrain/minimapData';
-import { useMuSprite } from '../../../../components/muSprite';
-import { MuTipText } from '../../../../components/muText';
-import { useUiStageScale } from '../../../../components/uiStage';
+import { Store } from '@/app/store';
+import { uiClick } from '@/controllers/sound/sfx';
+import type { WorldMinimap } from '@/controllers/terrain/minimap';
+import type { MinimapMarker } from '@/controllers/terrain/minimapData';
+import { useMuSprite } from '@/ui/components/muSprite';
+import { MuTipText } from '@/ui/components/muText';
+import { useUiStageScale } from '@/ui/components/uiStage';
 import {
   CENTER_BUTTON,
   CenterButton,

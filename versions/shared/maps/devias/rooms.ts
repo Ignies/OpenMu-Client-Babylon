@@ -23,10 +23,10 @@
  *    standing candelabra (56) by the desk, two more (54) on the x 204 wall,
  *    rows of benches (22) and tables (25), the door (88/65) on the x 216 wall.
  */
-import type { Room } from '../../../../src/controllers/maps/layer';
-import type { RoomSpec } from '../../../../src/controllers/maps/roomEnumeration';
+import type { Room } from '@/controllers/maps/layer';
+import type { RoomSpec } from '@/controllers/maps/roomEnumeration';
 
-export type { Room } from '../../../../src/controllers/maps/layer';
+export type { Room } from '@/controllers/maps/layer';
 
 /** Measured on the tavern: log wall 0.34 thick on a one-tile stone base, top face 2.64 over the base, roof underside 2.70. */
 export const DEVIAS_ROOM_SPEC: RoomSpec = {

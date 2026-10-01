@@ -26,7 +26,7 @@ import {
   type ItemDef,
   type ItemStats,
 } from '../../features/items/itemStats';
-import { itemBaseName } from '../../../versions/shared/items/itemsDatabase';
+import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '../../features/items/itemLevelLook';
 import { learnableSkill } from '../../features/skills/skillItems';
 import { skillDisplayName } from '../../features/skills/skillNames';

@@ -1,10 +1,10 @@
-import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import {
   chooseAttackAction,
   chooseHighBowAttackAction,
   type AttackPose,
 } from '../../controllers/actors/weaponClass';
-import { skillDefinition, type SkillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import { skillDefinition, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { masterBase } from './skillAliases';
 import { BaseClass } from '../hero/characterStats';
 import { magicClip, skillClip, type CastContext } from '../../controllers/combat/skillClips';

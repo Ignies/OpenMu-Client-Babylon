@@ -1,8 +1,8 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useLayoutEffect, useRef } from 'react';
-import { Store } from '../../../app/store';
-import { ItemsDatabase } from '../../../../versions/shared/items/itemsDatabase';
+import { Store } from '@/app/store';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { ItemIcon } from '../itemIcon';
 import { MuWindows } from '../muWindow/windowState';
 import { SQUARE } from '../itemGrid';

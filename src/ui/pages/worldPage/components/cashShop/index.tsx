@@ -10,18 +10,18 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { observer } from 'mobx-react-lite';
-import type { Item } from '../../../../../ecs/world';
-import { Store } from '../../../../../app/store';
-import { UI_SOUNDS, uiClick } from '../../../../../controllers/sound/sfx';
-import { SoundsManager } from '../../../../../controllers/sound/soundsManager';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuButton } from '../../../../components/muButton';
-import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
-import { MuWindows } from '../../../../components/muWindow/windowState';
-import { ItemIcon } from '../../../../components/itemIcon';
-import { ItemTooltip } from '../../../../components/itemTooltip';
-import { GridSquares, hoveredMask, usedMask } from '../../../../components/itemGrid';
-import { TEXT_COLOR } from '../../../../pages/serversPage/layout';
+import type { Item } from '@/ecs/world';
+import { Store } from '@/app/store';
+import { UI_SOUNDS, uiClick } from '@/controllers/sound/sfx';
+import { SoundsManager } from '@/controllers/sound/soundsManager';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
+import { MuItemWindow, MuTableFrame } from '@/ui/components/muWindow';
+import { MuWindows } from '@/ui/components/muWindow/windowState';
+import { ItemIcon } from '@/ui/components/itemIcon';
+import { ItemTooltip } from '@/ui/components/itemTooltip';
+import { GridSquares, hoveredMask, usedMask } from '@/ui/components/itemGrid';
+import { TEXT_COLOR } from '@/ui/pages/serversPage/layout';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,
@@ -37,10 +37,10 @@ import {
   TEXT_TOP,
   WIN_HEIGHT,
   WIN_WIDTH,
-} from '../../../../components/msgWindow/layout';
-import { JEWEL_OF_CHAOS } from '../../../../../features/inventory/jewelUpgrade';
-import { prefetchItemIcons } from '../../../../../controllers/assets/itemIconPack';
-import { t, type TextKey } from '../../../../../i18n';
+} from '@/ui/components/msgWindow/layout';
+import { JEWEL_OF_CHAOS } from '@/features/inventory/jewelUpgrade';
+import { prefetchItemIcons } from '@/controllers/assets/itemIconPack';
+import { t, type TextKey } from '@/i18n';
 import {
   CashShopState,
   abandonRoll,
@@ -59,7 +59,7 @@ import {
   type Product,
   type ProductLine,
   type Roll,
-} from '../../../../../features/cash_shop/state';
+} from '@/features/cash_shop/state';
 import {
   GACHA_SOUNDS,
   OPEN,
@@ -72,7 +72,7 @@ import {
   type Phase,
   type Tier,
   type TierLook,
-} from '../../../../../features/cash_shop/gacha';
+} from '@/features/cash_shop/gacha';
 import {
   BOX_FALL_FROM,
   BOX_GROUP,

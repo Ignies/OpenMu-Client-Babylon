@@ -3,7 +3,7 @@ import { ENUM_WORLD } from '../../core/types';
 import type { World } from '../../ecs/world';
 import type { Emission } from '../fx/effectParticles';
 import type { MapLayer, Room, Spawn } from './layer';
-import { MAP_LAYERS } from '../../../versions/shared/maps/layers';
+import { MAP_LAYERS } from '@versions/shared/maps/layers';
 
 export type { MapLayer, Room, Spawn } from './layer';
 

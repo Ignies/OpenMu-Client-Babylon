@@ -9,7 +9,7 @@ import { bonePos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, 
 import { type ProjectileOptions } from '@/controllers/fx/projectile';
 import { type RingOptions } from '@/controllers/fx/ring';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
-import { skillDefinition, type SkillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import { skillDefinition, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { type SpriteOptions } from '@/controllers/fx/sprite';
 import { combat } from '@/controllers/combat';
 import { lighting } from '@/controllers/lighting';

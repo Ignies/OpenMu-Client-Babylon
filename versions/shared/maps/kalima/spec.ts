@@ -1,6 +1,6 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
-import type { LightEmitter } from '../../../../src/controllers/lighting/mapObjectLights';
-import type { ObjectLoop } from '../../../../src/controllers/sound/objectLoops';
+import type { Emission } from '@/controllers/fx/effectParticles';
+import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
+import type { ObjectLoop } from '@/controllers/sound/objectLoops';
 
 /**
  * Kalima (`WD_24HELLAS … _END` + Kalima 7 = world 36; one `World25`/`Object25`

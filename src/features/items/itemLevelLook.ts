@@ -1,5 +1,5 @@
 import { t, type TextKey } from '../../i18n';
-import { itemBaseName } from '../../../versions/shared/items/itemsDatabase';
+import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 
 /**
  * Items the original shows as another item at one level: Scroll of the

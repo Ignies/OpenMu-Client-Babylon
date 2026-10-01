@@ -1,11 +1,11 @@
 import {
   createMovableFlare,
   type MovableFlare,
-} from '../../../../src/controllers/lighting/effectLights';
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { Store } from '../../../../src/app/store';
-import type { BonedEmission } from '../../../../src/controllers/fx/effectParticles';
-import type { Entity, World } from '../../../../src/ecs/world';
+} from '@/controllers/lighting/effectLights';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { Store } from '@/app/store';
+import type { BonedEmission } from '@/controllers/fx/effectParticles';
+import type { Entity, World } from '@/ecs/world';
 
 type BoneNode = BonedEmission['node'];
 

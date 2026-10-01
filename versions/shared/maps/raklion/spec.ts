@@ -1,4 +1,4 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
+import type { Emission } from '@/controllers/fx/effectParticles';
 
 /**
  * Raklion (`WD_57ICECITY`, `World58`/`Object58`) and its hatchery

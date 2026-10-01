@@ -1,7 +1,7 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { ParticleEmitter, type Emission } from '../../../../src/controllers/fx/effectParticles';
-import { TILE_CM } from '../../../../src/controllers/terrain/consts';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { ParticleEmitter, type Emission } from '@/controllers/fx/effectParticles';
+import { TILE_CM } from '@/controllers/terrain/consts';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * `float fLumi = ((sinf(WorldTime * 0.001f) + 1.f) * 0.5f) * 100.0f;`

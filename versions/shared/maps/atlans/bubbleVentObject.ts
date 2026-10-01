@@ -1,6 +1,6 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { ParticleEmitter, type Emission } from '../../../../src/controllers/fx/effectParticles';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { ParticleEmitter, type Emission } from '@/controllers/fx/effectParticles';
+import type { Entity, World } from '@/ecs/world';
 
 /** `FPS_ANIMATION_FACTOR` normalises per-frame work to REFERENCE_FPS (ZzzAI.cpp:729). */
 const TICKS_PER_SECOND = 25;

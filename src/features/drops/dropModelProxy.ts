@@ -7,7 +7,7 @@
  */
 
 import { ItemGroup, type ItemRestPose } from '../../controllers/actors/itemAngle';
-import { ItemsDatabase } from '../../../versions/shared/items/itemsDatabase';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 
 export type DropModelProxy = {
   /** The (group, num) whose ItemAngle pose the drop takes. */

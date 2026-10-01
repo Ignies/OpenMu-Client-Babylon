@@ -1,21 +1,21 @@
 import './style.less';
-import { t } from '../../../../../i18n';
+import { t } from '@/i18n';
 import { useEffect, useRef, useState, type WheelEvent } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '../../../../../app/store';
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { BaseClass, getBaseClass } from '../../../../../features/hero/characterStats';
-import { PVP_MURDERER1 } from '../../../../../controllers/interface/nameTags';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { EventBus } from '../../../../../core/eventBus';
+import { Store } from '@/app/store';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { BaseClass, getBaseClass } from '@/features/hero/characterStats';
+import { PVP_MURDERER1 } from '@/controllers/interface/nameTags';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { EventBus } from '@/core/eventBus';
 import { ENUM_WORLD } from '@/core/types';
-import { playUiSound, uiClick } from '../../../../../controllers/sound/sfx';
-import { loadMoveReqList, type MoveReqEntry } from '../../../../../controllers/assets/mu/moveReqFile';
-import { WarpFavourites } from '../../../../../features/warp/warpFavourites';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuText } from '../../../../components/muText';
-import { useWindowChrome } from '../../../../components/muWindow/useWindowChrome';
+import { playUiSound, uiClick } from '@/controllers/sound/sfx';
+import { loadMoveReqList, type MoveReqEntry } from '@/controllers/assets/mu/moveReqFile';
+import { WarpFavourites } from '@/features/warp/warpFavourites';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuText } from '@/ui/components/muText';
+import { useWindowChrome } from '@/ui/components/muWindow/useWindowChrome';
 
 /**
  * `CNewUIMoveCommandWindow` (NewUIMoveCommandWindow.cpp): the "M" window -

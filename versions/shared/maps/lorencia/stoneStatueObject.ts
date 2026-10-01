@@ -1,4 +1,4 @@
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { ModelObject } from '@/controllers/render/modelObject';
 import { MODEL_STONE_STATUE01 } from '../../objects/enum';
 
 export class StoneStatueObject extends ModelObject {

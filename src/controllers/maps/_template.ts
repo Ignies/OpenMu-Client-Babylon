@@ -17,7 +17,7 @@
  */
 import { ENUM_WORLD } from '../../core/types';
 import type { MapLayer } from './layer';
-import { FULL_TILES } from '../../../versions/shared/maps/recipes';
+import { FULL_TILES } from '@versions/shared/maps/recipes';
 
 // ---- 1. data ---------------------------------------------------------------
 

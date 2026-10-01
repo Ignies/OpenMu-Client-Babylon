@@ -1,14 +1,14 @@
 import type { Sound } from '@babylonjs/core/Audio/sound';
-import type { Item } from '../../../../src/ecs/world';
-import { EventBus } from '../../../../src/core/eventBus';
-import { SoundsManager } from '../../../../src/controllers/sound/soundsManager';
-import type { Sounds } from '../../../../src/controllers/sound/recipes';
+import type { Item } from '@/ecs/world';
+import { EventBus } from '@/core/eventBus';
+import { SoundsManager } from '@/controllers/sound/soundsManager';
+import type { Sounds } from '@/controllers/sound/recipes';
 import {
   DARK_HORSE,
   HORN_OF_DINORANT,
   HORN_OF_FENRIR,
   HORN_OF_UNIRIA,
-} from '../../../../src/features/pets/petConstants';
+} from '@/features/pets/petConstants';
 import {
   CAPE_OF_LORD,
   HELPER_GROUP,
@@ -17,7 +17,7 @@ import {
   WING_OF_ELF,
   WING_OF_STORM,
   WINGS_OF_DARKNESS,
-} from '../../../../src/controllers/actors/wings';
+} from '@/controllers/actors/wings';
 
 // The Gateway Machine's turn re-issues the 1-channel, unpositioned
 // kan_relic_hole every frame (GM_Kanturu_2nd.cpp:1125-1129, MapManager.cpp:441)

@@ -1,11 +1,11 @@
-import type { Entity, World } from '../../../src/ecs/world';
+import type { Entity, World } from '@/ecs/world';
 import { PlayerAction } from '../objects/enum';
-import { Scene, TransformNode } from '../../../src/controllers/render/babylon/exports';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
+import { Scene, TransformNode } from '@/controllers/render/babylon/exports';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
 import { ItemGroups } from '../objects/enum';
-import { PlayerObject } from '../../../src/controllers/actors/playerObject';
-import { CharacterClassNumber, PlayerClass } from '../../../src/core/types';
-import { WINGS_OF_SPIRITS, WING_GROUP } from '../../../src/controllers/actors/wings';
+import { PlayerObject } from '@/controllers/actors/playerObject';
+import { CharacterClassNumber, PlayerClass } from '@/core/types';
+import { WINGS_OF_SPIRITS, WING_GROUP } from '@/controllers/actors/wings';
 
 const lvl = 9;
 const isExcellent = false;

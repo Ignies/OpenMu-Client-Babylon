@@ -1,5 +1,5 @@
-import { ENUM_WORLD } from '../../../../src/core/types';
-import type { MapLayer } from '../../../../src/controllers/maps/layer';
+import { ENUM_WORLD } from '@/core/types';
+import type { MapLayer } from '@/controllers/maps/layer';
 import { FULL_TILES } from '../recipes';
 import {
   KANTURU1_BLEND_MESHES,

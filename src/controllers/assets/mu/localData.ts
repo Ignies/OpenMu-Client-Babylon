@@ -19,7 +19,7 @@
  * `t()` reaches.
  */
 
-import { i18n } from '../../../i18n';
+import { i18n } from '@/i18n';
 import { downloadDataFile } from './dataFolder';
 
 /** Empty means "not there" everywhere below - the readers all tolerate it. */

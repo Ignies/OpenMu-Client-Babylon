@@ -9,9 +9,9 @@ import {
   MODEL_HOUSE_WALL06,
   MonsterActionType,
 } from '../../objects/enum';
-import { World } from '../../../../src/ecs/world';
-import { setAreaMood } from '../../../../src/controllers/render/scenes/sceneLook';
-import type { Room } from '../../../../src/controllers/maps/layer';
+import { World } from '@/ecs/world';
+import { setAreaMood } from '@/controllers/render/scenes/sceneLook';
+import type { Room } from '@/controllers/maps/layer';
 import {
   enumerateRooms,
   loadRoomRecords,
@@ -19,10 +19,10 @@ import {
   sameRoom,
   type RoomHooks,
   type RoomSpec,
-} from '../../../../src/controllers/maps/rooms';
-import { createAttributeSystem } from '../../../../src/core/attributeSystem';
-import { Vector3 } from '../../../../src/controllers/render/babylon/exports';
-import { Store } from '../../../../src/app/store';
+} from '@/controllers/maps/rooms';
+import { createAttributeSystem } from '@/core/attributeSystem';
+import { Vector3 } from '@/controllers/render/babylon/exports';
+import { Store } from '@/app/store';
 import { BeerObject } from './beerObject';
 import { BonfireObject } from './bonfireObject';
 import { BridgeObject } from './bridgeObject';

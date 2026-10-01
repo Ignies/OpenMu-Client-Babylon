@@ -3,7 +3,7 @@ import { ItemSerializer } from '../../features/items/itemSerializer';
 import {
   PlayerShopBuyResultPacket,
   PlayerShopBuyResultResultKindEnum,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 
 /**
  * A buy from another player's stall is answered with this packet and nothing

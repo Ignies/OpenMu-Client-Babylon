@@ -24,10 +24,10 @@ import {
   GensRewardRequestPacket,
   GensTypeEnum,
   NpcBuffRequestPacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
-import { AvailableQuestsPacket, QuestStepInfoPacket } from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
+import { AvailableQuestsPacket, QuestStepInfoPacket } from '@versions/shared/packets/ServerToClientPackets';
 import type { ENUM_WORLD } from '../../core/types';
-import { monsterDisplayName } from '../../../versions/shared/monsters/monstersDatabase';
+import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';
 import { Store } from '../../app/store';

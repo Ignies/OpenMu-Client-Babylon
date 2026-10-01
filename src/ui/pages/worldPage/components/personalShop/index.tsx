@@ -1,18 +1,18 @@
 import './style.less';
-import { t } from '../../../../../i18n';
+import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
-import { Store } from '../../../../../app/store';
-import { Economy, MAX_SHOP_TITLE } from '../../../../../features/economy/economy';
+import { Store } from '@/app/store';
+import { Economy, MAX_SHOP_TITLE } from '@/features/economy/economy';
 import {
   StorageKind,
   isPersonalShopBanned,
-} from '../../../../../features/inventory/itemStorage';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuButton } from '../../../../components/muButton';
-import { MuItemWindow } from '../../../../components/muWindow';
-import { ItemGrid } from '../../../../components/itemGrid';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
+} from '@/features/inventory/itemStorage';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
+import { MuItemWindow } from '@/ui/components/muWindow';
+import { ItemGrid } from '@/ui/components/itemGrid';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import {
   BROWSE_TITLE_Y,
   BUTTON_FRAMES,

@@ -23,7 +23,7 @@ import {
   MasterCharacterLevelUpdateExtendedPacket,
   MasterCharacterLevelUpdatePacket,
   MasterStatsUpdatePacket,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import type { SkillLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

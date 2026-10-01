@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import type { Events } from '../../../core/eventBus/events';
-import { EventBus } from '../../../core/eventBus';
+import type { Events } from '@/core/eventBus/events';
+import { EventBus } from '@/core/eventBus';
 
 /**
  * Subscribes to one `EventBus` event for the component's lifetime. The

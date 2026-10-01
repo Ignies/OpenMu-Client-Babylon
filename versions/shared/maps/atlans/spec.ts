@@ -1,5 +1,5 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
-import type { LightEmitter } from '../../../../src/controllers/lighting/mapObjectLights';
+import type { Emission } from '@/controllers/fx/effectParticles';
+import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 
 /**
  * Atlans (World 8 / `Object8`), the plain-data half. Nothing in here may

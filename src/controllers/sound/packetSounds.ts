@@ -1,5 +1,5 @@
 import type { MonsterAttackState } from '../anim/monsterAttackClip';
-import { ServerPlayerActionType as S } from '../../../versions/shared/objects/enum';
+import { ServerPlayerActionType as S } from '@versions/shared/objects/enum';
 import { REFERENCE_FPS } from '../anim/playSpeed';
 import { ENUM_WORLD as W } from '../../core/types';
 import type { SoundBus } from './buses';

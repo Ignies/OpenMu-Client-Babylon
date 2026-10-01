@@ -1,5 +1,5 @@
-import { Animation, AnimationGroup, Quaternion, Vector3 } from '../../../controllers/render/babylon/exports';
-import type { ModelObject } from '../../../controllers/render/modelObject';
+import { Animation, AnimationGroup, Quaternion, Vector3 } from '@/controllers/render/babylon/exports';
+import type { ModelObject } from '@/controllers/render/modelObject';
 
 /**
  * The instrument clips: frames copied out of an existing emote. The rig has

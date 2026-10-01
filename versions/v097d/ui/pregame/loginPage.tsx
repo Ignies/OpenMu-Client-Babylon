@@ -10,14 +10,14 @@
  * action sat on which bed is this client's choice, not a port.
  */
 import { observer } from 'mobx-react-lite';
-import { t } from '../../../../src/i18n';
-import { Store } from '../../../../src/app/store';
+import { t } from '@/i18n';
+import { Store } from '@/app/store';
 import {
   MAX_PASSWORD_LENGTH,
   MAX_USERNAME_LENGTH,
-} from '../../../../src/app/consts';
-import { MuSpriteFrame } from '../../../../src/ui/components/muSprite';
-import { MuButton } from '../../../../src/ui/components/muButton';
+} from '@/app/consts';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
 import './style.less';
 
 const PLATE = { file: 'Data/Logo/0Account.OZT', width: 250, height: 216 };

@@ -14,7 +14,7 @@ import {
 } from '../controllers/actors/deserializeAppearance';
 import { StatType } from '../features/hero/characterStats';
 import { GameOptions } from '../features/options/gameOptions';
-import { ItemsDatabase, itemBaseName } from '../../versions/shared/items/itemsDatabase';
+import { ItemsDatabase, itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '../features/items/itemLevelLook';
 import {
   ItemGroup,
@@ -32,19 +32,19 @@ import {
   isKnownObjectType,
   resolveModelFactory,
 } from '../controllers/actors/modelFactoryPerId';
-import { monsterDisplayName, monsterMaxHealth } from '../../versions/shared/monsters/monstersDatabase';
+import { monsterDisplayName, monsterMaxHealth } from '@versions/shared/monsters/monstersDatabase';
 import { translateServerText } from '../i18n/serverText';
 import { loadNpcNames, onNpcNamesChanged } from '../controllers/assets/mu/npcNameFile';
 import {
   MonsterActionType,
   PlayerAction,
   ServerPlayerActionType,
-} from '../../versions/shared/objects/enum';
+} from '@versions/shared/objects/enum';
 import {
   ConnectionInfoPacket,
   HelloPacket,
   ServerListResponsePacket,
-} from '../../versions/shared/packets/ConnectServerPackets';
+} from '@versions/shared/packets/ConnectServerPackets';
 import {
   AddCharactersToScopePacket,
   AddTransformedCharactersToScopePacket,
@@ -184,7 +184,7 @@ import {
   ServerCommandPacket,
   ShowFireworksPacket,
   ShowChristmasFireworksPacket,
-} from '../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import { ChangeMapServerInfoPacket } from '../controllers/net/packets.ts';
 import { onEscrowResultPacket } from '../features/marketplace/gameBridge';
 import { spawnFireworks } from '../controllers/fx/fireworks';
@@ -197,7 +197,7 @@ import {
   NpcWindowResponsePacket,
   StoreItemListItemWindowEnum,
   StoreItemListPacket,
-} from '../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import {
   ClosePlayerShopDialogPacket,
   ItemCraftingResultPacket,
@@ -219,13 +219,13 @@ import {
   TradeRequestPacket as TradeRequestS2CPacket,
   VaultMoneyUpdatePacket,
   VaultProtectionInformationPacket,
-} from '../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import {
   ClientReadyAfterMapChangePacket,
   CloseNpcRequestPacket,
   GuildInfoRequestPacket,
   PingPacket,
-} from '../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import { Social } from '../features/social/social';
 import { Commands } from '../features/chat/commands';
 import { heroStateMessage } from '../controllers/interface/nameTags';
@@ -265,7 +265,7 @@ import { PlayerObject, isPlayerBody, npcClassOf } from '../controllers/actors/pl
 import { Entity, type Item, World } from '../ecs/world';
 import { createAttributeSystem, type MUAttributeSystem } from '../core/attributeSystem';
 import { classWorldScale } from '../controllers/actors/characterScale';
-import { skillDefinition } from '../../versions/shared/skills/skillsDatabase';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { traceHeroInstantMove } from '../controllers/actors/heroMoveTrace';
 import { advancesSwordCount, chooseSkillAction, isTeleportSkill, TELEPORT } from '../features/skills/skillCasting';
 import { skillClip } from '../controllers/combat/skillClips';
@@ -288,9 +288,9 @@ import {
   playSummonArrival,
   playTargetedSkillVisual,
   setBuffVisual,
-} from '../../versions/shared/skills/skillVisuals';
+} from '@versions/shared/skills/skillVisuals';
 import { monsterModelTypeOf, playerPlaySpeed } from '../controllers/anim/playSpeed';
-import { TRAP_MODEL_TABLE } from '../../versions/shared/npcs/trap_npc';
+import { TRAP_MODEL_TABLE } from '@versions/shared/npcs/trap_npc';
 import {
   KEEP_CLIP,
   isMonsterSwingClip,
@@ -333,7 +333,7 @@ import { experienceForLevel } from '../features/hero/experience';
 import { SessionResume } from '../features/session/sessionResume';
 import { WEATHER_RAIN } from '../controllers/weather/rainState';
 import { combat } from '../controllers/combat';
-import { COMBO_SOUND } from '../../versions/shared/skills/dark_knight/combo/state';
+import { COMBO_SOUND } from '@versions/shared/skills/dark_knight/combo/state';
 import { SHOCK_IMMUNE_CLIPS, SKILL_DEFENSE } from '../controllers/combat/recipes';
 import { mountKind } from '../features/pets/pets';
 import { inChaosCastle } from '../controllers/actors/locomotion';

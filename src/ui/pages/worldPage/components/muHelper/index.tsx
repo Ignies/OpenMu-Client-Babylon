@@ -2,22 +2,22 @@ import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { t } from '../../../../../i18n';
-import { Store } from '../../../../../app/store';
-import { gameVersion } from '../../../../../version';
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { BaseClass, getBaseClass } from '../../../../../features/hero/characterStats';
+import { t } from '@/i18n';
+import { Store } from '@/app/store';
+import { gameVersion } from '@/version';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { BaseClass, getBaseClass } from '@/features/hero/characterStats';
 import {
   skillDefinition,
   type SkillDefinition,
-} from '../../../../../../versions/shared/skills/skillsDatabase';
-import { skillDisplayName } from '../../../../../features/skills/skillNames';
-import { uiClick } from '../../../../../controllers/sound/sfx';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { MuButton } from '../../../../components/muButton';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuItemWindow } from '../../../../components/muWindow';
-import { SkillIcon } from '../../../../components/skillIcon';
+} from '@versions/shared/skills/skillsDatabase';
+import { skillDisplayName } from '@/features/skills/skillNames';
+import { uiClick } from '@/controllers/sound/sfx';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuItemWindow } from '@/ui/components/muWindow';
+import { SkillIcon } from '@/ui/components/skillIcon';
 import {
   MAX_EXTRA_ITEM_CHARS,
   MAX_EXTRA_ITEMS,
@@ -25,14 +25,14 @@ import {
   MAX_OBTAINING_RANGE,
   type DarkRavenMode,
   type MuHelperConfig,
-} from '../../../../../features/mu_helper/config';
+} from '@/features/mu_helper/config';
 import {
   ensureMuHelperWatching,
   MuHelperState,
   resetMuHelperDraft,
   saveMuHelperConfig,
   toggleMuHelperWindow,
-} from '../../../../../features/mu_helper/state';
+} from '@/features/mu_helper/state';
 
 /**
  * `CNewUIMuHelper` (NewUIMuHelper.cpp): the S6 MU Helper settings dialog in

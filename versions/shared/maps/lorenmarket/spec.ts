@@ -1,5 +1,5 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
-import type { LightEmitter } from '../../../../src/controllers/lighting/mapObjectLights';
+import type { Emission } from '@/controllers/fx/effectParticles';
+import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 
 /**
  * Loren Market (`WD_79UNITEDMARKETPLACE`, `World80`/`Object80`), the

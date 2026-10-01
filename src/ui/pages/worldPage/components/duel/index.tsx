@@ -1,9 +1,9 @@
 import './style.less';
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { t } from '../../../../../i18n';
-import { events } from '../../../../../features/events';
-import { Commands } from '../../../../../features/chat/commands';
+import { t } from '@/i18n';
+import { events } from '@/features/events';
+import { Commands } from '@/features/chat/commands';
 import {
   duelBars,
   duelRequest,
@@ -11,17 +11,17 @@ import {
   duelScoreboard,
   duelSpectators,
   duelWatchWindow,
-} from '../../../../../features/events/duel';
-import { DUEL_CHANNELS } from '../../../../../features/events/duelRules';
-import { MuButton } from '../../../../components/muButton';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuItemWindow } from '../../../../components/muWindow';
+} from '@/features/events/duel';
+import { DUEL_CHANNELS } from '@/features/events/duelRules';
+import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuItemWindow } from '@/ui/components/muWindow';
 import {
   useUiStageScale,
   UI_STAGE_HEIGHT,
   UI_STAGE_WIDTH,
-} from '../../../../components/uiStage';
-import { TEXT_COLOR } from '../../../serversPage/layout';
+} from '@/ui/components/uiStage';
+import { TEXT_COLOR } from '@/ui/pages/serversPage/layout';
 import {
   BACK_SPRITE as MSG_BACK_SPRITE,
   BTN_BOTH_CANCEL_X,
@@ -33,7 +33,7 @@ import {
   OK_SPRITE,
   WIN_HEIGHT as MSG_HEIGHT,
   WIN_WIDTH as MSG_WIDTH,
-} from '../../../../components/msgWindow/layout';
+} from '@/ui/components/msgWindow/layout';
 import {
   BAR_BACK,
   BAR_EXIT,

@@ -39,17 +39,17 @@ import {
   SellItemToNpcRequestPacket,
   RepairItemRequestPacket,
   ServerChangeAuthenticationPacket,
-} from '../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import {
   ConnectionInfoRequestPacket,
   ServerListRequestPacket,
   ServerListResponsePacket,
-} from '../../versions/shared/packets/ConnectServerPackets';
+} from '@versions/shared/packets/ConnectServerPackets';
 import {
   CharacterCreationUnlockFlagsEnum,
   CharacterListPacket,
   GuildMemberRoleEnum,
-} from '../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import { classFromAppearance } from '../controllers/actors/deserializeAppearance';
 import { formatMsgWinText, MsgWinCode, type MsgWinArg } from '../controllers/interface/msgWin';
 import { stringToBytes } from '../controllers/assets/download';
@@ -78,8 +78,8 @@ import { InventoryConstants } from '../features/inventory/inventoryConstants';
 import { StatType } from '../features/hero/characterStats';
 import { findFreeSlot, type Footprint } from '../features/inventory/inventoryFit';
 import { jewelTargetError } from '../features/inventory/jewelUpgrade';
-import { ItemGroups } from '../../versions/shared/objects/enum';
-import { ItemsDatabase } from '../../versions/shared/items/itemsDatabase';
+import { ItemGroups } from '@versions/shared/objects/enum';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { prefetchItemIcons } from '../controllers/assets/itemIconPack';
 import { ItemSerializer } from '../features/items/itemSerializer';
 import {
@@ -99,7 +99,7 @@ import {
 } from '../features/items/itemStats';
 import { learnSkillError, learnableSkill } from '../features/skills/skillItems';
 import { isHotbarSkill } from '../features/skills/skillCasting';
-import { skillDefinition } from '../../versions/shared/skills/skillsDatabase';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import {
   StorageKind,
   gridFirstIndex,

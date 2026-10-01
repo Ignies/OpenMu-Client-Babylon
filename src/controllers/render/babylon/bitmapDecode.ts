@@ -2,7 +2,7 @@ import { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
 import type { Engine } from '@babylonjs/core/Engines/engine';
 // Installs `AbstractEngine._FileToolsLoadImage` before it is wrapped below.
 import '@babylonjs/core/Misc/fileTools';
-import { devQuery } from '../../../core/devSeams';
+import { devQuery } from '@/core/devSeams';
 
 /**
  * Image textures decode with `createImageBitmap` on the browser's decoder

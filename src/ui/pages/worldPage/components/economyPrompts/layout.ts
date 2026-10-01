@@ -7,7 +7,7 @@ import {
   MSGBOX_TOP_HEIGHT,
   MSGBOX_WIDTH,
   msgBoxHeight,
-} from '../../../../components/msgBoxFrame';
+} from '@/ui/components/msgBoxFrame';
 
 export const TALL_WIDTH = MSGBOX_WIDTH;
 export const TALL_TOP_HEIGHT = MSGBOX_TOP_HEIGHT;

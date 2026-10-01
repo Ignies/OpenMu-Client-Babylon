@@ -20,16 +20,16 @@
  * Camera: `LoginScene.cpp:61` `WALK_PATHS`, driven by `MoveCamera` (:241)
  * through `MoveCharacterCamera(origin 0,0,0, position, angle)` at FOV 45.
  */
-import type { ArcRotateCamera } from '../../../../src/controllers/render/babylon/exports';
-import { Texture, Vector3 } from '../../../../src/controllers/render/babylon/exports';
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
-import { loadGLTF } from '../../../../src/controllers/assets/modelLoader';
-import { toRadians } from '../../../../src/controllers/assets/download';
-import type { World } from '../../../../src/ecs/world';
+import type { ArcRotateCamera } from '@/controllers/render/babylon/exports';
+import { Texture, Vector3 } from '@/controllers/render/babylon/exports';
+import { ModelObject } from '@/controllers/render/modelObject';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { toRadians } from '@/controllers/assets/download';
+import type { World } from '@/ecs/world';
 import type {
   PregamePhase,
   PregameScene,
-} from '../../../../src/version/uiContract';
+} from '@/version/uiContract';
 
 const MU_SCALE = 100;
 

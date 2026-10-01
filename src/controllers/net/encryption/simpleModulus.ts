@@ -1,4 +1,4 @@
-import { castToByte, ArrayCopy } from "../../../core/binaryUtils";
+import { castToByte, ArrayCopy } from "@/core/binaryUtils";
 import { integerDevision, castToUInt, castToUShort, getPacketHeaderSize, getPacketSize, setPacketSize } from "../wireUtils";
 
 export class SimpleModulusKeys {

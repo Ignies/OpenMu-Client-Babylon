@@ -1,7 +1,7 @@
 import type { Item } from '../../ecs/world';
-import { ItemsDatabase } from '../../../versions/shared/items/itemsDatabase';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { learnableSkillNumber } from '../skills/skillItems';
-import { skillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 
 /**
  * Item stats as the original client computes them for the tooltip and the

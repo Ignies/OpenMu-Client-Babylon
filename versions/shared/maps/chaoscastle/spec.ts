@@ -1,4 +1,4 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
+import type { Emission } from '@/controllers/fx/effectParticles';
 
 /**
  * Chaos Castle (worlds 18-23 + 53, all on `World19` / `Object19`), the

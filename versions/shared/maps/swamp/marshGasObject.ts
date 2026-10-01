@@ -1,7 +1,7 @@
-import { ParticleEmitter, type Emission } from '../../../../src/controllers/fx/effectParticles';
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { cmToTiles } from '../../../../src/controllers/terrain/consts';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { ParticleEmitter, type Emission } from '@/controllers/fx/effectParticles';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { cmToTiles } from '@/controllers/terrain/consts';
+import type { Entity, World } from '@/ecs/world';
 
 /** `Position[2] += 50.0f` (GMSwampOfQuiet.cpp:164). */
 const VENT_HEIGHT = cmToTiles(50);

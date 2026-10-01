@@ -1,16 +1,16 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { Social } from '../../../../../features/social/social';
-import { ENUM_WORLD } from '../../../../../core/types';
-import { guildMarkDataUrl } from '../../../../../features/social/guildMark';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuText } from '../../../../components/muText';
+import { Store } from '@/app/store';
+import { Social } from '@/features/social/social';
+import { ENUM_WORLD } from '@/core/types';
+import { guildMarkDataUrl } from '@/features/social/guildMark';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuText } from '@/ui/components/muText';
 import {
   useUiStageScale,
   UI_STAGE_HEIGHT,
   UI_STAGE_WIDTH,
-} from '../../../../components/uiStage';
+} from '@/ui/components/uiStage';
 
 /**
  * `CNewUIBattleSoccerScore` (NewUIBattleSoccerScore.cpp) - the Battle Soccer

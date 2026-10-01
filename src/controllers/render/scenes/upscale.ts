@@ -11,8 +11,8 @@ import {
   type Observer,
   type Scene,
 } from '../babylon/exports';
-import { GameOptions } from '../../../features/options/gameOptions';
-import { devQueryNumber } from '../../../core/devSeams';
+import { GameOptions } from '@/features/options/gameOptions';
+import { devQueryNumber } from '@/core/devSeams';
 import {
   MSAA_HEAD_ONLY,
   pipelineSamples,

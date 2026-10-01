@@ -4,7 +4,7 @@ import type { ENUM_WORLD } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import {
   MapEventStatePacket,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import { devQueryNumber } from '../../core/devSeams';
 import { effects } from '../../controllers/fx';
 import { FIRE_TRAIL, MODEL, RGBS } from '../../controllers/fx/recipes';

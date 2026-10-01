@@ -1,8 +1,8 @@
-import type { Entity, World } from '../../../src/ecs/world';
+import type { Entity, World } from '@/ecs/world';
 import { PlayerAction } from '../objects/enum';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { PlayerObject } from '../../../src/controllers/actors/playerObject';
-import { CharacterClassNumber } from '../../../src/core/types';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { PlayerObject } from '@/controllers/actors/playerObject';
+import { CharacterClassNumber } from '@/core/types';
 
 export class PlateNpc extends PlayerObject {
   static NpcClass = CharacterClassNumber.DarkKnight;

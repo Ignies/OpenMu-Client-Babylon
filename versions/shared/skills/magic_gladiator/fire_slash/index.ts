@@ -2,7 +2,7 @@ import { defineSkill } from '@/controllers/skills/define';
 import { CAST_HEIGHT, SkillContext, Step, after, cm, currentSkill, forwardOf, ticks } from '@/controllers/skills/visuals';
 import { DEG, WEAPON_LINK_BONE, randInt, whenClipKey } from '../../_shared';
 import { MG_EMBERS, mgGlint, mgSay, mgTurn } from '../_shared';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { boneLocalPos, emitBurst, entityGone, entityPos, entityYaw, type RGB } from '@/controllers/fx/core';
 import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { type StripOptions, type TailStrip, type TickedFx } from '@/controllers/fx/ticked';

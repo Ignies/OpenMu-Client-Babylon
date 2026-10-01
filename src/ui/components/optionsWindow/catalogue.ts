@@ -1,7 +1,7 @@
 import {
   CAMERA_FOV_MAX_DEG,
   CAMERA_FOV_MIN_DEG,
-} from '../../../controllers/camera/recipes';
+} from '@/controllers/camera/recipes';
 import {
   BRIGHTNESS_MAX,
   BRIGHTNESS_MIN,
@@ -9,32 +9,32 @@ import {
   UI_SCALE_MAX,
   uiScaleFactor,
   type GameOptions as GameOptionsType,
-} from '../../../features/options/gameOptions';
+} from '@/features/options/gameOptions';
 import {
   KEY_ACTION_LABEL_KEYS,
   type KeyAction,
-} from '../../../controllers/interface/keyBindings';
+} from '@/controllers/interface/keyBindings';
 import {
   ITEM_EFFECT_MODE_LABEL_KEYS,
   ITEM_EFFECT_MODE_MAX,
-} from '../../../controllers/item_fx/itemEffectMode';
+} from '@/controllers/item_fx/itemEffectMode';
 import {
   COMPARE_TOOLTIP_LABEL_KEYS,
   COMPARE_TOOLTIP_MAX,
-} from '../../../features/items/itemCompare';
+} from '@/features/items/itemCompare';
 import {
   LIGHTING_QUALITY_LABEL_KEYS,
   LIGHTING_QUALITY_MAX,
   MSAA_MAX,
   MSAA_STEPS,
-} from '../../../controllers/lighting/lightingQuality';
+} from '@/controllers/lighting/lightingQuality';
 import {
   ANISOTROPY_MAX,
   ANISOTROPY_STEPS,
   MATERIAL_DETAIL_MAX,
   MATERIAL_QUALITY_LABEL_KEYS,
   MATERIAL_QUALITY_MAX,
-} from '../../../controllers/render/materialQuality';
+} from '@/controllers/render/materialQuality';
 import {
   ANIME_HALFTONE_SCALE_MAX,
   ANIME_HALFTONE_SCALE_MIN,
@@ -53,23 +53,23 @@ import {
   SHADE_STEPS_MIN,
   STYLE_STRENGTH_MAX,
   STYLE_STRENGTH_MIN,
-} from '../../../controllers/render/renderingStyle';
+} from '@/controllers/render/renderingStyle';
 import {
   RENDER_SCALE_STEP_MAX,
   renderScaleForStep,
-} from '../../../controllers/render/renderScale';
-import { LOOT_ZEN_MAX, lootZenThreshold } from '../../../features/drops/lootFilter';
-import { CHAT_EMOJI_SIZE_LABEL_KEYS, CHAT_EMOJI_SIZE_MAX } from '../../../features/chat/chatEmojis';
-import { BUS_VOLUME_MAX } from '../../../controllers/sound/buses';
+} from '@/controllers/render/renderScale';
+import { LOOT_ZEN_MAX, lootZenThreshold } from '@/features/drops/lootFilter';
+import { CHAT_EMOJI_SIZE_LABEL_KEYS, CHAT_EMOJI_SIZE_MAX } from '@/features/chat/chatEmojis';
+import { BUS_VOLUME_MAX } from '@/controllers/sound/buses';
 import {
   LOW_VITAL_MAX_PERCENT,
   LOW_VITAL_MIN_PERCENT,
-} from '../../../features/hero/lowVitals';
+} from '@/features/hero/lowVitals';
 import {
   RENDER_DISTANCE_MAX,
   renderDistanceRanges,
-} from '../../../controllers/render/renderDistance';
-import { t, type TextKey } from '../../../i18n';
+} from '@/controllers/render/renderDistance';
+import { t, type TextKey } from '@/i18n';
 import {
   NEED_POST,
   NEED_TIER,

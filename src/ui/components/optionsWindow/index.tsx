@@ -1,9 +1,9 @@
-import { playUiSound } from '../../../controllers/sound/sfx';
+import { playUiSound } from '@/controllers/sound/sfx';
 import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../app/store';
-import { useEventBus } from '../../../controllers/interface/hooks/useEventBus';
+import { Store } from '@/app/store';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { MuTableFrame } from '../muWindow';
 import { MuResizeGrip, useWindowChrome } from '../muWindow/useWindowChrome';
 import { MuWindows } from '../muWindow/windowState';
@@ -11,10 +11,10 @@ import {
   defaultGameOption,
   setGameOption,
   type GameOptions as GameOptionsType,
-} from '../../../features/options/gameOptions';
-import { invalidateShadowState } from '../../../controllers/render/objectShadow';
-import { installApp } from '../../../app/pwaInstall';
-import { reloadMapObjects } from '../../../controllers/terrain/loadMapIntoScene';
+} from '@/features/options/gameOptions';
+import { invalidateShadowState } from '@/controllers/render/objectShadow';
+import { installApp } from '@/app/pwaInstall';
+import { reloadMapObjects } from '@/controllers/terrain/loadMapIntoScene';
 import {
   KeyBindings,
   isKey,
@@ -24,10 +24,10 @@ import {
   setCapturingKey,
   setKeyBinding,
   type KeyAction,
-} from '../../../controllers/interface/keyBindings';
-import { SessionExit, type ExitKind } from '../../../features/session/sessionExit';
-import { t, type TextKey } from '../../../i18n';
-import { EN_TEXT } from '../../../i18n/recipes';
+} from '@/controllers/interface/keyBindings';
+import { SessionExit, type ExitKind } from '@/features/session/sessionExit';
+import { t, type TextKey } from '@/i18n';
+import { EN_TEXT } from '@/i18n/recipes';
 import { applyTierPreset, type TierPreset } from './presets';
 import {
   ALL_PAGES,

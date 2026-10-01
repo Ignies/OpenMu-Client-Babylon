@@ -1,8 +1,8 @@
-import { OperateBoxObject } from '../../../../src/controllers/actors/operateBoxObject';
-import { toRadians } from '../../../../src/controllers/assets/download';
-import type { World } from '../../../../src/ecs/world';
-import { Vector3 } from '../../../../src/controllers/render/babylon/exports';
-import type { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { OperateBoxObject } from '@/controllers/actors/operateBoxObject';
+import { toRadians } from '@/controllers/assets/download';
+import type { World } from '@/ecs/world';
+import { Vector3 } from '@/controllers/render/babylon/exports';
+import type { ModelObject } from '@/controllers/render/modelObject';
 import {
   NoriaWarpHalo2Object,
   NoriaWarpHalo3Object,

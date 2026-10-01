@@ -1,5 +1,5 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
-import type { LightEmitter } from '../../../../src/controllers/lighting/mapObjectLights';
+import type { Emission } from '@/controllers/fx/effectParticles';
+import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 
 /**
  * Fortress of Imperial Guardian day 4 (`WD_72EMPIREGUARDIAN4`, `World73` /

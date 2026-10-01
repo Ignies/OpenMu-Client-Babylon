@@ -1,4 +1,4 @@
-import type { Entity, World } from '../../../ecs/world';
+import type { Entity, World } from '@/ecs/world';
 import { genderedEmoteAction } from '../../hero/emotes';
 import { instrumentById, type InstrumentId } from '../instruments';
 

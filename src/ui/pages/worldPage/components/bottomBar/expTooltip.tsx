@@ -1,13 +1,13 @@
 import { observer } from 'mobx-react-lite';
-import { SessionStats } from '../../../../../features/session/sessionStats';
+import { SessionStats } from '@/features/session/sessionStats';
 import {
   formatExpPercent,
   formatExpProgress,
   formatTimeToLevel,
-} from '../../../../../controllers/interface/hudFormat';
-import { Store } from '../../../../../app/store';
-import { MuTipList, type TipLine } from '../../../../components/skillTooltip';
-import { t } from '../../../../../i18n';
+} from '@/controllers/interface/hudFormat';
+import { Store } from '@/app/store';
+import { MuTipList, type TipLine } from '@/ui/components/skillTooltip';
+import { t } from '@/i18n';
 
 /**
  * What the experience strip is worth in numbers. The bar itself only draws

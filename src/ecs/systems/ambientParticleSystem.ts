@@ -29,7 +29,7 @@ import {
   DEVIAS_TAVERN,
   DEVIAS_WEST_HEARTH_HOUSE,
   type Room,
-} from '../../../versions/shared/maps/devias/rooms';
+} from '@versions/shared/maps/devias/rooms';
 import { serverNow } from '../../controllers/net/serverTime';
 import { lookDirector } from '../../controllers/lighting/director';
 import { roomMaskActive } from '../../controllers/render/scenes/roomMask';

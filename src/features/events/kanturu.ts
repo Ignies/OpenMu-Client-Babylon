@@ -9,7 +9,7 @@ import { MODEL } from '../../controllers/fx/recipes';
 import {
   KanturuEnterRequestPacket,
   KanturuInfoRequestPacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import {
   KanturuBattleResultPacket,
   KanturuEnterResultPacket,
@@ -22,9 +22,9 @@ import {
   KanturuEnterResultEnterResultEnum as EnterResult,
   KanturuBattleResultBattleResultEnum as BattleResult,
   KanturuMayaWideAreaAttackAttackTypeEnum as MayaAttack,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import type { Sounds } from '../../controllers/sound/recipes';
-import { startGatewayTurn } from '../../../versions/shared/maps/kanturu2/gateway';
+import { startGatewayTurn } from '@versions/shared/maps/kanturu2/gateway';
 import type { EventLayer } from './layer';
 import { EVENT_TEXT, formatText } from './recipes';
 

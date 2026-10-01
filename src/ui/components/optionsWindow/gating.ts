@@ -1,12 +1,12 @@
 import {
   GameOptions,
   type GameOptions as GameOptionsType,
-} from '../../../features/options/gameOptions';
+} from '@/features/options/gameOptions';
 import {
   LIGHTING_QUALITY_LABEL_KEYS,
-} from '../../../controllers/lighting/lightingQuality';
-import { MATERIAL_QUALITY_LABEL_KEYS } from '../../../controllers/render/materialQuality';
-import { ITEM_EFFECT_MODE_LABEL_KEYS } from '../../../controllers/item_fx/itemEffectMode';
+} from '@/controllers/lighting/lightingQuality';
+import { MATERIAL_QUALITY_LABEL_KEYS } from '@/controllers/render/materialQuality';
+import { ITEM_EFFECT_MODE_LABEL_KEYS } from '@/controllers/item_fx/itemEffectMode';
 import {
   OUTLINE_MODE_LABEL_KEYS,
   RENDERING_STYLES,
@@ -15,8 +15,8 @@ import {
   inkLinesActive,
   renderingStyle,
   type RenderingStyle,
-} from '../../../controllers/render/renderingStyle';
-import { i18n, t, type TextKey } from '../../../i18n';
+} from '@/controllers/render/renderingStyle';
+import { i18n, t, type TextKey } from '@/i18n';
 
 type BoolKey = {
   [K in keyof GameOptionsType]: GameOptionsType[K] extends boolean ? K : never;

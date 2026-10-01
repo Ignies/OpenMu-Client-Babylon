@@ -17,7 +17,7 @@
  * - packetSet           which XML variants `packets/` was generated from 
  * - features            what that server version implements (Persistence/Initialization/<ver>/*)
  */
-import { asciiBytes, type GameVersion } from '../../src/version/contract';
+import { asciiBytes, type GameVersion } from '@/version/contract';
 import { templateData } from './data';
 
 // Keep this export: the registry's load() hands the base game the packet

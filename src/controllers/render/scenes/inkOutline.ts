@@ -7,7 +7,7 @@ import {
   type ArcRotateCamera,
   type Scene,
 } from '../babylon/exports';
-import { devQueryNumbers } from '../../../core/devSeams';
+import { devQueryNumbers } from '@/core/devSeams';
 import type { LightingTier } from '../../lighting/lightingQuality';
 import {
   inkDarkness,

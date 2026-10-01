@@ -1,4 +1,4 @@
-import type { World } from '../../../../src/ecs/world';
+import type { World } from '@/ecs/world';
 import { IcarusCloudObject } from './cloudObject';
 import { IcarusSky } from './sky';
 import { ICARUS_EFFECT_ONLY_TYPES } from './spec';

@@ -16,7 +16,7 @@ import {
 } from '../../features/character_select/characterSelect';
 import { prefetchWorldTerrain } from '../../controllers/assets/mu/prefetchWorld';
 import { warmWorldObjects } from '../../controllers/assets/mu/warmWorld';
-import { LOGIN_SCENE_ABSENT_MODELS } from '../../../versions/shared/maps/loginscene/spec';
+import { LOGIN_SCENE_ABSENT_MODELS } from '@versions/shared/maps/loginscene/spec';
 import { pregameLoad } from '../../controllers/loading/pregameLoad';
 import { loadVersionUi, versionUi } from '../../version';
 import type {

@@ -1,6 +1,6 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { Vector3 } from '../../../../src/controllers/render/babylon/exports';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { Vector3 } from '@/controllers/render/babylon/exports';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * `Vector(1.0f, 1.0f, 1.0f, o->Light)` (ZzzObject.cpp:4126). Shared and never

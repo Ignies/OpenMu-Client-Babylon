@@ -3,7 +3,7 @@ import { CAST_HEIGHT, ENHANCED_TIER, IMPACT_HEIGHT, TICK, bolt, cm, seq, ticks }
 import { CRACKLE_FLICKER, PX_FLARE, PX_SHOCKWAVE, PX_SMOKE, PX_THUNDER, atAttackTime, boneCount, groundGlow, handCrackle, humming, jitterCm, kickSparks, spawnCard, sum1Light } from '../_shared';
 import { type Entity } from '@/ecs/world';
 import { type JointOptions } from '@/controllers/fx/joint';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { bonePos, delay, entityGone, entityPos, entityYaw, followEntity, fxNow, type PointSource, type RGB } from '@/controllers/fx/core';
 import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { SKILL_SOUNDS, playCombat } from '@/controllers/sound/combat';

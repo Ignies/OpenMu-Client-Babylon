@@ -1,16 +1,16 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import { effects } from '../../../src/controllers/fx';
-import { bonePos, entityPos, tmpA } from '../../../src/controllers/fx/core';
+import type { Entity, World } from '@/ecs/world';
+import { effects } from '@/controllers/fx';
+import { bonePos, entityPos, tmpA } from '@/controllers/fx/core';
 import {
   EXPLOSION_CELLS,
   MODEL,
   SAND_SMOKE,
   TEX,
-} from '../../../src/controllers/fx/recipes';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { MonsterObject } from '../../../src/controllers/actors/monsterObject';
+} from '@/controllers/fx/recipes';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { MonsterObject } from '@/controllers/actors/monsterObject';
 import { MonsterActionType } from '../objects/enum';
-import { monsterModelFile, monsterScaleOf } from '../../../src/controllers/actors/monsterModelTable';
+import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
 
 // [NpcInfo(349, "Balgass")] - MODEL_BALGASS at Scale 2.0
 // (GMCrywolf1st.cpp:667-677). His voice (MapManager.cpp:224-230, played per

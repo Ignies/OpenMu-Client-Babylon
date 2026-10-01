@@ -1,5 +1,5 @@
 import type { TextKey } from '../../i18n';
-import { PlayerAction, ServerPlayerActionType } from '../../../versions/shared/objects/enum';
+import { PlayerAction, ServerPlayerActionType } from '@versions/shared/objects/enum';
 
 /**
  * The social actions a player can trigger (ZzzInterface.cpp `CheckChatText`).

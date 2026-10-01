@@ -1,4 +1,4 @@
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { ModelObject } from '@/controllers/render/modelObject';
 import { MODEL_CANNON01 } from '../../objects/enum';
 
 export class CannonObject extends ModelObject {

@@ -1,6 +1,6 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { Vector3 } from '../../../../src/controllers/render/babylon/exports';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { Vector3 } from '@/controllers/render/babylon/exports';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * `IntensityTransform[i][j] = 0.5f` over every normal of every mesh, then

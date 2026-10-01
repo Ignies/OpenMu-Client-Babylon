@@ -1,8 +1,8 @@
-import { isKnownObjectType } from '../../../controllers/actors/modelFactoryPerId';
-import { NPC_MODEL_TABLE } from '../../../controllers/actors/npcModelTable';
-import { GEARED_NPC_TABLE, TRANSFORMED_NPC_TABLE } from '../../../controllers/actors/playerNpcTables';
-import { monsterDisplayName } from '../../../../versions/shared/monsters/monstersDatabase';
-import { itemBaseName } from '../../../../versions/shared/items/itemsDatabase';
+import { isKnownObjectType } from '@/controllers/actors/modelFactoryPerId';
+import { NPC_MODEL_TABLE } from '@/controllers/actors/npcModelTable';
+import { GEARED_NPC_TABLE, TRANSFORMED_NPC_TABLE } from '@/controllers/actors/playerNpcTables';
+import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
+import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import {
   buildMonsterCatalogue,
   buildSkinCatalogue,

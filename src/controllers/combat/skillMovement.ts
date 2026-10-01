@@ -23,7 +23,7 @@
  *
  * Readers only. Read by `skillCastSystem`, which owns the hero's path and yaw.
  */
-import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import type { CombatLayer } from './layer';
 
 // ---- 1. tuning -------------------------------------------------------------

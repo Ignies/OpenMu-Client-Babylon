@@ -3,7 +3,7 @@ import { Vector3 } from '../../controllers/render/babylon/exports';
 import { loadGLTF } from '../../controllers/assets/modelLoader';
 import { ModelObject } from '../../controllers/render/modelObject';
 import type { Item } from '../../ecs/world';
-import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import {
   improvedItemEffectsOn,
   legacyItemEffectsOn,

@@ -2,7 +2,7 @@ import { defineSkill } from '@/controllers/skills/define';
 import { CAST_HEIGHT, SkillContext, Step, TICK, atCaster, cm, forwardOf, model, particles, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { MODEL, TEX } from '@/controllers/fx/recipes';
 import { boneLocalPos, bonePos, delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { Vector3 } from '@/controllers/render/babylon/exports';
 import { atFrame, everyTick, muYaw, sfx, ticksLeft } from '../_shared';
 import { effects } from '@/controllers/fx';

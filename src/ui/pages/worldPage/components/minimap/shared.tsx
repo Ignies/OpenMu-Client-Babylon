@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { t } from '../../../../../i18n';
-import { Store } from '../../../../../app/store';
-import { Social } from '../../../../../features/social/social';
-import { loadWorldMinimap, type WorldMinimap } from '../../../../../controllers/terrain/minimap';
-import { MinimapMarkerKind, type MinimapMarker } from '../../../../../controllers/terrain/minimapData';
-import { useMuSprite } from '../../../../components/muSprite';
-import { MuButton } from '../../../../components/muButton';
+import { t } from '@/i18n';
+import { Store } from '@/app/store';
+import { Social } from '@/features/social/social';
+import { loadWorldMinimap, type WorldMinimap } from '@/controllers/terrain/minimap';
+import { MinimapMarkerKind, type MinimapMarker } from '@/controllers/terrain/minimapData';
+import { useMuSprite } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
 
 /**
  * What the sheet and the corner panel share: the art, the marker tables and

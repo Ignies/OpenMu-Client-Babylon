@@ -7,7 +7,7 @@ import { Store } from '../../app/store';
 import {
   BloodCastleEnterRequestPacket,
   MiniGameOpeningStateRequestPacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import {
   BloodCastleEnterResultEnterResultEnum,
   BloodCastleEnterResultPacket,
@@ -15,7 +15,7 @@ import {
   BloodCastleStatePacket,
   BloodCastleStateStatusEnum,
   MiniGameOpeningStatePacket,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
 import { noteOpeningStateRequest, takeOpeningState } from './schedule';
 import {

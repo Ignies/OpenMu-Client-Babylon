@@ -1,22 +1,22 @@
 import './style.less';
-import { t, type TextKey } from '../../../../../i18n';
+import { t, type TextKey } from '@/i18n';
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { Store } from '../../../../../app/store';
-import { Messenger, type MessengerTab } from '../../../../../features/friends/messenger';
-import { ChatRooms } from '../../../../../features/chat/chatRooms';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { Store } from '@/app/store';
+import { Messenger, type MessengerTab } from '@/features/friends/messenger';
+import { ChatRooms } from '@/features/chat/chatRooms';
 import {
   MAX_FRIENDS,
   MAX_LETTER_TEXT,
   MAX_LETTER_TITLE,
   isFriendOnline,
-} from '../../../../../features/friends/friendList';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { uiClick } from '../../../../../controllers/sound/sfx';
-import { MuButton } from '../../../../components/muButton';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
+} from '@/features/friends/friendList';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { uiClick } from '@/controllers/sound/sfx';
+import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuItemWindow, MuTableFrame } from '@/ui/components/muWindow';
 
 /**
  * `CNewUIFriendWindow` (NewUIFriendWindow.cpp) - the friend list and the

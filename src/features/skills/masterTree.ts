@@ -34,12 +34,12 @@ import { EventBus } from '../../core/eventBus';
 import {
   MasterSkillLevelUpdatePacket,
   MasterSkillListPacket,
-} from '../../../versions/shared/packets/ServerToClientPackets';
-import { AddMasterSkillPointPacket } from '../../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
+import { AddMasterSkillPointPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { downloadDataFile } from '../../controllers/assets/mu/dataFolder';
 import { decodeLocalText, downloadLocalDataFile } from '../../controllers/assets/mu/localData';
 import { convertBux } from '../../controllers/terrain/mapFileEncryption';
-import { skillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { Store } from '../../app/store';
 import type { SkillLayer } from './layer';
 import { isWeaponSkill, skillRequirementsMet } from './usability';

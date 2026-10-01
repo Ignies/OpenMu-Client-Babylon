@@ -1,9 +1,9 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import type { Item } from '../../../ecs/world';
-import { ItemsDatabase } from '../../../../versions/shared/items/itemsDatabase';
-import { Store } from '../../../app/store';
+import type { Item } from '@/ecs/world';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
+import { Store } from '@/app/store';
 import { ItemIcon } from '../itemIcon';
 import { ItemTooltip, type TooltipContext } from '../itemTooltip';
 import { MuSpriteFrame } from '../muSprite';

@@ -5,7 +5,7 @@
  * `VITE_DATA_URL`; convert its models / terrain / sounds with the scripts in
  * `tools/` into `public/game-assets-<id>/`.
  */
-import type { VersionData } from '../../../src/version/contract';
+import type { VersionData } from '@/version/contract';
 
 function withTrailingSlash(url: string): string {
   return url.endsWith('/') ? url : `${url}/`;

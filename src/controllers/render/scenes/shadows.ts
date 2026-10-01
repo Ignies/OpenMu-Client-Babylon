@@ -11,8 +11,8 @@ import {
   type Scene,
   type ShaderMaterial,
 } from '../babylon/exports';
-import { GameOptions } from '../../../features/options/gameOptions';
-import { devQueryNumber } from '../../../core/devSeams';
+import { GameOptions } from '@/features/options/gameOptions';
+import { devQueryNumber } from '@/core/devSeams';
 import { toonTerrainDefines } from '../renderingStyle';
 import { sunLightOf } from '../../lighting/keyRig';
 import {

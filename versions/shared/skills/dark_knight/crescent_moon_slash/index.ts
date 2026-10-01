@@ -5,7 +5,7 @@ import { effects, type EffectHandle } from '@/controllers/fx';
 import { JOINT_SPARKS, JOINT_SPARKS_HD, SPARK_CHIPS_HD, muAngles, rand, sayAt, sparkHeading, terrainLevel } from '../_shared';
 import { MODEL, TEX } from '@/controllers/fx/recipes';
 import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource } from '@/controllers/fx/core';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { SkillContext, Step, TICK, baseSkill, cm, currentSkill, forwardOf, perTick, ticks } from '@/controllers/skills/visuals';
 import { lighting } from '@/controllers/lighting';

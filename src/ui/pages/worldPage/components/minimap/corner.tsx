@@ -1,10 +1,10 @@
 import './style.less';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { GameOptions, uiScaleFactor } from '../../../../../features/options/gameOptions';
-import type { MinimapMarker } from '../../../../../controllers/terrain/minimapData';
-import { MuTipText } from '../../../../components/muText';
+import { Store } from '@/app/store';
+import { GameOptions, uiScaleFactor } from '@/features/options/gameOptions';
+import type { MinimapMarker } from '@/controllers/terrain/minimapData';
+import { MuTipText } from '@/ui/components/muText';
 import {
   CenterButton,
   Frame,

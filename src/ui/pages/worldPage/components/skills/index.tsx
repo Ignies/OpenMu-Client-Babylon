@@ -1,22 +1,22 @@
 import './style.less';
-import { t } from '../../../../../i18n';
+import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '../../../../../app/store';
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { playUiSound } from '../../../../../controllers/sound/sfx';
-import { skillDefinition } from '../../../../../../versions/shared/skills/skillsDatabase';
-import { skills } from '../../../../../features/skills';
-import { SkillIcon } from '../../../../components/skillIcon';
+import { Store } from '@/app/store';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { playUiSound } from '@/controllers/sound/sfx';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
+import { skills } from '@/features/skills';
+import { SkillIcon } from '@/ui/components/skillIcon';
 import {
   SKILL_ICON_HEIGHT,
   SKILL_ICON_WIDTH,
-} from '../../../../../features/skills/skillCasting';
-import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
-import { MuButton } from '../../../../components/muButton';
+} from '@/features/skills/skillCasting';
+import { MuItemWindow, MuTableFrame } from '@/ui/components/muWindow';
+import { MuButton } from '@/ui/components/muButton';
 import { toggleMasterSkillsWindow } from '../masterSkills/windowState';
-import { OK_SPRITE, BTN_HEIGHT, BTN_WIDTH } from '../../../../components/msgWindow/layout';
+import { OK_SPRITE, BTN_HEIGHT, BTN_WIDTH } from '@/ui/components/msgWindow/layout';
 
 /**
  * The learned-skill list: every skill the server taught (`Store.skills`),

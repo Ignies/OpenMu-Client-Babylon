@@ -1,53 +1,53 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { events } from '../../../../../features/events';
+import { Store } from '@/app/store';
+import { events } from '@/features/events';
 import {
   bloodCastleImminent,
   bloodCastleScore,
   bloodCastleTimer,
   bloodCastleWindow,
   inBloodCastle,
-} from '../../../../../features/events/bloodCastle';
+} from '@/features/events/bloodCastle';
 import {
   devilSquareResult,
   devilSquareWindow,
-} from '../../../../../features/events/devilSquare';
+} from '@/features/events/devilSquare';
 import {
   chaosCastleImminent,
   chaosCastlePrompt,
   chaosCastleResult,
   chaosCastleTimer,
   inChaosCastle,
-} from '../../../../../features/events/chaosCastle';
-import { doppelgangerWindow } from '../../../../../features/events/doppelganger';
+} from '@/features/events/chaosCastle';
+import { doppelgangerWindow } from '@/features/events/doppelganger';
 import {
   CrywolfState,
   crywolfBarVisible,
   crywolfHud,
   crywolfNoticePage,
   crywolfResult,
-} from '../../../../../features/events/crywolf';
+} from '@/features/events/crywolf';
 import {
   CRYWOLF_NOTICE_KEYS,
   DEVIL_SQUARE_INTRO_KEYS,
   EVENT_TEXT,
   RANK_HEADERS,
   formatText,
-} from '../../../../../features/events/recipes';
+} from '@/features/events/recipes';
 import { GoldenArcherWindow } from './goldenArcherWindow';
 import { KanturuFigure, KanturuResult, KanturuWindow } from './kanturuWindow';
 import { EventTimers } from './eventTimers';
 // Aliased: this file already binds `t` to a timer record in two components.
-import { t as text } from '../../../../../i18n';
-import { MuButton } from '../../../../components/muButton';
-import { ItemIcon } from '../../../../components/itemIcon';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuItemWindow } from '../../../../components/muWindow';
-import { DEFAULT_SCALE } from '../../../../components/muWindow/windowState';
-import { MuText } from '../../../../components/muText';
-import { useUiStageScale, UI_STAGE_HEIGHT, UI_STAGE_WIDTH } from '../../../../components/uiStage';
-import { TEXT_COLOR } from '../../../serversPage/layout';
+import { t as text } from '@/i18n';
+import { MuButton } from '@/ui/components/muButton';
+import { ItemIcon } from '@/ui/components/itemIcon';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuItemWindow } from '@/ui/components/muWindow';
+import { DEFAULT_SCALE } from '@/ui/components/muWindow/windowState';
+import { MuText } from '@/ui/components/muText';
+import { useUiStageScale, UI_STAGE_HEIGHT, UI_STAGE_WIDTH } from '@/ui/components/uiStage';
+import { TEXT_COLOR } from '@/ui/pages/serversPage/layout';
 import {
   BACK_SPRITE as MSG_BACK_SPRITE,
   BTN_BOTH_CANCEL_X,
@@ -62,7 +62,7 @@ import {
   TEXT_TOP as MSG_TEXT_TOP,
   WIN_HEIGHT as MSG_HEIGHT,
   WIN_WIDTH as MSG_WIDTH,
-} from '../../../../components/msgWindow/layout';
+} from '@/ui/components/msgWindow/layout';
 import {
   BLOOD_BUTTON_Y,
   BLOOD_INTRO_STEP,

@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { uiClick } from '../../../controllers/sound/sfx';
-import { t } from '../../../i18n';
-import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../../../app/consts';
+import { uiClick } from '@/controllers/sound/sfx';
+import { t } from '@/i18n';
+import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '@/app/consts';
 import {
   displayAddress,
   effective,
   playableHere,
   ServerConfig,
   type ServerProfile,
-} from '../../../features/servers/serverConfig';
-import { ServerAccounts } from '../../../features/servers/serverAccounts';
-import { ServerProbe } from '../../../features/servers/serverProbe';
+} from '@/features/servers/serverConfig';
+import { ServerAccounts } from '@/features/servers/serverAccounts';
+import { ServerProbe } from '@/features/servers/serverProbe';
 import { Button, Icon, TextField, Toggle } from './controls';
 import { Banner, REACH_TEXT } from './banner';
 

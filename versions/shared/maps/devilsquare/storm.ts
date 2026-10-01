@@ -1,8 +1,8 @@
-import { TILE_CM } from '../../../../src/controllers/terrain/consts';
-import type { Observer, Scene } from '../../../../src/controllers/render/babylon/exports';
-import type { World } from '../../../../src/ecs/world';
-import { lighting } from '../../../../src/controllers/lighting';
-import { PRIORITY_TORCH, type LightRecipe, type LightSource } from '../../../../src/controllers/lighting/lightSource';
+import { TILE_CM } from '@/controllers/terrain/consts';
+import type { Observer, Scene } from '@/controllers/render/babylon/exports';
+import type { World } from '@/ecs/world';
+import { lighting } from '@/controllers/lighting';
+import { PRIORITY_TORCH, type LightRecipe, type LightSource } from '@/controllers/lighting/lightSource';
 
 /**
  * The storm over Devil Square: the one world-level mover the map runs.

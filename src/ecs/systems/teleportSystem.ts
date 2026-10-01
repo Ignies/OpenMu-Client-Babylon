@@ -1,7 +1,7 @@
 import type { Entity, ISystemFactory, World } from '../world';
-import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { applyPlayerActionSpeed } from '../../controllers/anim/playSpeed';
-import { playTeleportFlash } from '../../../versions/shared/skills/skillVisuals';
+import { playTeleportFlash } from '@versions/shared/skills/skillVisuals';
 import { COMBAT_BUS } from '../../controllers/sound/combatSounds';
 import { playSfx } from '../../controllers/sound/sfx';
 import type { Sounds } from '../../controllers/sound/recipes';

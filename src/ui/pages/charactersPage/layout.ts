@@ -1,7 +1,7 @@
-import { textTable, type TextKey } from '../../../i18n';
+import { textTable, type TextKey } from '@/i18n';
 
 import { CharacterClassNumber } from '@/core/types';
-import { CharacterCreationUnlockFlagsEnum } from '../../../../versions/shared/packets/ServerToClientPackets';
+import { CharacterCreationUnlockFlagsEnum } from '@versions/shared/packets/ServerToClientPackets';
 
 export const WIN_WIDTH = 454;
 export const WIN_HEIGHT = 406;

@@ -1,14 +1,14 @@
 import './style.less';
 import { useEffect, useMemo, useRef } from 'react';
 import type { With } from 'miniplex';
-import { Store } from '../../../app/store';
-import { useRenderId } from '../../../controllers/interface/hooks';
-import { onScreenPosition } from '../../../controllers/interface/screenPositionBus';
+import { Store } from '@/app/store';
+import { useRenderId } from '@/controllers/interface/hooks';
+import { onScreenPosition } from '@/controllers/interface/screenPositionBus';
 import {
   BUBBLE_FADE_SECONDS,
   emojiBubbleById,
-} from '../../../features/chat/emojiBubbles';
-import type { Entity } from '../../../ecs/world';
+} from '@/features/chat/emojiBubbles';
+import type { Entity } from '@/ecs/world';
 
 type BubbleEntity = With<Entity, 'emojiBubble' | 'screenPosition'>;
 

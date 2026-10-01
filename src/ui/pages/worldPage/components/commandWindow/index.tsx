@@ -1,18 +1,18 @@
 import './style.less';
-import { t, type TextKey } from '../../../../../i18n';
+import { t, type TextKey } from '@/i18n';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { Commands } from '../../../../../features/chat/commands';
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import type { CommandKind } from '../../../../../features/chat/chatCommands';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { uiClick } from '../../../../../controllers/sound/sfx';
-import { MuButton } from '../../../../components/muButton';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuItemWindow, WINDOW_WIDTH } from '../../../../components/muWindow';
-import { MuText } from '../../../../components/muText';
-import { TEXT_COLOR } from '../../../serversPage/layout';
+import { Store } from '@/app/store';
+import { Commands } from '@/features/chat/commands';
+import { isKey } from '@/controllers/interface/keyBindings';
+import type { CommandKind } from '@/features/chat/chatCommands';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { uiClick } from '@/controllers/sound/sfx';
+import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuItemWindow, WINDOW_WIDTH } from '@/ui/components/muWindow';
+import { MuText } from '@/ui/components/muText';
+import { TEXT_COLOR } from '@/ui/pages/serversPage/layout';
 
 /**
  * `CNewUICommandWindow` (NewUICommandWindow.cpp): the "D" window - eleven

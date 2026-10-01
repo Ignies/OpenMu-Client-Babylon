@@ -1,5 +1,5 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
-import type { LightEmitter } from '../../../../src/controllers/lighting/mapObjectLights';
+import type { Emission } from '@/controllers/fx/effectParticles';
+import type { LightEmitter } from '@/controllers/lighting/mapObjectLights';
 
 /**
  * Icarus (World 10 / `WD_10HEAVEN`, assets `Object11`/`World11`) as plain

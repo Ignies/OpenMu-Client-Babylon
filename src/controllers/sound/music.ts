@@ -13,7 +13,7 @@ import { TW_SAFEZONE } from '../terrain/consts';
 import {
   KanturuStateChangePacket,
   KanturuStateChangeStateTypeEnum as KanturuState,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import type { World } from '../../ecs/world';
 import { EventBus } from '../../core/eventBus';
 import { SoundsManager } from './soundsManager';

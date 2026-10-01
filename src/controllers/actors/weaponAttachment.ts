@@ -7,7 +7,7 @@ import {
   type BmdLink,
 } from '../render/boneLink';
 import { BaseClass, getBaseClass } from '../../features/hero/characterStats';
-import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { RAGEFIGHTER_STOP_SPEED } from '../anim/playSpeed';
 import type { PartPose } from '../render/modelObject';
 import type { PlayerObject } from './playerObject';

@@ -1,6 +1,6 @@
-import type { World } from '../../../src/ecs/world';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { ModelObject } from '../../../src/controllers/render/modelObject';
+import type { World } from '@/ecs/world';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { ModelObject } from '@/controllers/render/modelObject';
 
 export class Trainer extends ModelObject {
   async init(world: World) {

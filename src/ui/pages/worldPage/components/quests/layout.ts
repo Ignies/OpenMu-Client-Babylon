@@ -1,4 +1,4 @@
-import type { TextKey } from '../../../../../i18n';
+import type { TextKey } from '@/i18n';
 /**
  * Coordinates of the four quest windows, on the 190×429 item frame the
  * originals render into (NewUINPCQuest.cpp, NewUIQuestProgress.cpp,

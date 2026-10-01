@@ -12,8 +12,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { uiClick } from '../../../controllers/sound/sfx';
-import { i18n, t } from '../../../i18n';
+import { uiClick } from '@/controllers/sound/sfx';
+import { i18n, t } from '@/i18n';
 import { MuFlag } from '../muFlag';
 
 const ROW_HEIGHT = 18;

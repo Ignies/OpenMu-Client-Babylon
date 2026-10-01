@@ -1,6 +1,6 @@
-import { registerDebugModule, type DebugRow } from '../../../../features/gm/debugMenu';
-import { ENUM_WORLD } from '../../../../core/types';
-import { Store } from '../../../../app/store';
+import { registerDebugModule, type DebugRow } from '@/features/gm/debugMenu';
+import { ENUM_WORLD } from '@/core/types';
+import { Store } from '@/app/store';
 
 /**
  * Info: read-only counters off the live scene and engine - the perfOverlay's

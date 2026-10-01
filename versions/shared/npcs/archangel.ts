@@ -1,11 +1,11 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import { Vector3 } from '../../../src/controllers/render/babylon/exports';
-import { effects } from '../../../src/controllers/fx';
-import { TEX } from '../../../src/controllers/fx/recipes';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { ModelObject } from '../../../src/controllers/render/modelObject';
-import { TerrainDecal } from '../../../src/controllers/fx/moveTargetEffect';
-import { npcModelFile } from '../../../src/controllers/actors/npcModelTable';
+import type { Entity, World } from '@/ecs/world';
+import { Vector3 } from '@/controllers/render/babylon/exports';
+import { effects } from '@/controllers/fx';
+import { TEX } from '@/controllers/fx/recipes';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { ModelObject } from '@/controllers/render/modelObject';
+import { TerrainDecal } from '@/controllers/fx/moveTargetEffect';
+import { npcModelFile } from '@/controllers/actors/npcModelTable';
 
 /**
  * The Blood Castle archangels of Devias: Archangel (232, `BloodCastle01`)

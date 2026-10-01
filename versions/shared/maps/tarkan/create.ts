@@ -1,4 +1,4 @@
-import type { World } from '../../../../src/ecs/world';
+import type { World } from '@/ecs/world';
 import { TarkanBannerObject } from './bannerObject';
 import { TarkanDustBankObject } from './dustBankObject';
 import { TarkanGlowLampObject } from './glowLampObject';

@@ -8,7 +8,7 @@ import {
   GROUP_SWORD,
 } from './weaponClass';
 import { CharacterClassNumber, PlayerClass } from '../../core/types';
-import type { NpcGear } from '../../../versions/shared/npcs/geared_npc';
+import type { NpcGear } from '@versions/shared/npcs/geared_npc';
 
 /** `c->Helper` / `c->Weapon[]` kits, by items.json (group, index). */
 const ARROWS: Item = { group: GROUP_BOW, num: 15 };

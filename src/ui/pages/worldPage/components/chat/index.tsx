@@ -1,5 +1,5 @@
 import './style.less';
-import { t, type TextKey } from '../../../../../i18n';
+import { t, type TextKey } from '@/i18n';
 import {
   useCallback,
   useEffect,
@@ -10,32 +10,32 @@ import {
 } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Social } from '../../../../../features/social/social';
-import { Store } from '../../../../../app/store';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { playUiSound, uiClick } from '../../../../../controllers/sound/sfx';
-import { MuButton } from '../../../../components/muButton';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuWindows } from '../../../../components/muWindow/windowState';
-import { bottomBarScreenHeight } from '../../../../components/muWindow';
-import { useUiViewport } from '../../../../components/uiStage';
-import { useIsMobile } from '../../../../../controllers/interface/mobile';
+import { Social } from '@/features/social/social';
+import { Store } from '@/app/store';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { playUiSound, uiClick } from '@/controllers/sound/sfx';
+import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuWindows } from '@/ui/components/muWindow/windowState';
+import { bottomBarScreenHeight } from '@/ui/components/muWindow';
+import { useUiViewport } from '@/ui/components/uiStage';
+import { useIsMobile } from '@/controllers/interface/mobile';
 import {
   MuResizeGrip,
   useWindowStackEntry,
-} from '../../../../components/muWindow/useWindowChrome';
-import { isTypingInField } from '../../../../../ecs/systems/keyboardInputSystem';
-import { GameOptions } from '../../../../../features/options/gameOptions';
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { EmojiText } from '../../../../components/emojiText';
-import { EMOJI_CATALOG } from '../../../../../features/chat/emojis';
+} from '@/ui/components/muWindow/useWindowChrome';
+import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
+import { GameOptions } from '@/features/options/gameOptions';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { EmojiText } from '@/ui/components/emojiText';
+import { EMOJI_CATALOG } from '@/features/chat/emojis';
 import { EmojiPicker, RecentEmojis } from './emojiPicker';
 import { installItemLinkGesture } from './itemLinkGesture';
 import {
   labelsToWire,
   uniqueLinkLabel,
   wireToLabels,
-} from '../../../../../features/chat/chatItemLinks';
+} from '@/features/chat/chatItemLinks';
 import {
   chatEmojiSize,
   emojiPackLabel,
@@ -43,7 +43,7 @@ import {
   matchEmojiCodes,
   spliceChatText,
   type ChatEmoji,
-} from '../../../../../features/chat/chatEmojis';
+} from '@/features/chat/chatEmojis';
 import {
   chatEndIndex,
   chatInputBudget,
@@ -62,12 +62,12 @@ import {
   layoutChatRows,
   type ChatInputMode,
   type ChatLine,
-} from '../../../../../features/chat/chat';
+} from '@/features/chat/chat';
 import {
   CHAT_COMPLETION_ROWS,
   matchChatCommands,
   type ChatCommand,
-} from '../../../../../features/chat/chatCommands';
+} from '@/features/chat/chatCommands';
 
 /**
  * `CNewUIChatInputBox` + `CNewUIChatLogWindow`, drawn with the original's

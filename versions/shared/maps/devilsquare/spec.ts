@@ -1,4 +1,4 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
+import type { Emission } from '@/controllers/fx/effectParticles';
 
 /**
  * Devil Square (`WD_9DEVILSQUARE` and OpenMU's map 32, `World10`/`Object10`),

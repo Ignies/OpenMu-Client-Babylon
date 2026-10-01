@@ -14,7 +14,7 @@
  * 0.97d keeps its language tables directly under `Local/` (no `Eng/`
  * subfolder yet), so the locale is the empty string.
  */
-import type { VersionData } from '../../../src/version/contract';
+import type { VersionData } from '@/version/contract';
 import { V097D_DATA_FILES } from './inventory';
 
 function withTrailingSlash(url: string): string {

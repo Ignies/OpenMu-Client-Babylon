@@ -1,31 +1,31 @@
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { t } from '../../../../../i18n';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { t } from '@/i18n';
 import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { Social } from '../../../../../features/social/social';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { useWindowStackEntry } from '../../../../components/muWindow/useWindowChrome';
-import { playUiSound } from '../../../../../controllers/sound/sfx';
+import { Store } from '@/app/store';
+import { Social } from '@/features/social/social';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useWindowStackEntry } from '@/ui/components/muWindow/useWindowChrome';
+import { playUiSound } from '@/controllers/sound/sfx';
 import {
   EMOTE_RINGS,
   EMOTES,
   type EmoteDefinition,
-} from '../../../../../features/hero/emotes';
+} from '@/features/hero/emotes';
 import {
   EMOJI_BUBBLES,
   type EmojiBubbleDefinition,
-} from '../../../../../features/chat/emojiBubbles';
+} from '@/features/chat/emojiBubbles';
 import {
   INSTRUMENTS,
   type InstrumentDefinition,
-} from '../../../../../features/band/instruments';
+} from '@/features/band/instruments';
 import {
   Band,
   putAwayInstrument,
   takeOutInstrument,
-} from '../../../../../features/band/music';
+} from '@/features/band/music';
 
 /**
  * Radial emote menu on º/` by default (TAB is the minimap as in the original, E is a

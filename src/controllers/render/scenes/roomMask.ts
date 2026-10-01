@@ -14,7 +14,7 @@ import {
   type Scene,
   type SubMesh,
 } from '../babylon/exports';
-import { devQuery } from '../../../core/devSeams';
+import { devQuery } from '@/core/devSeams';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 import type { LightingTier } from '../../lighting/lightingQuality';
 import type { RoomVolume } from '../../lighting/profiles';

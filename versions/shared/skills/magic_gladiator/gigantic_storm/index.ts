@@ -3,7 +3,7 @@ import { DEG, randInt, stones, whenClipKey } from '../../_shared';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { spawnModel, type ModelHandle } from '@/controllers/fx/model';
 import { emitBurst, entityPos, entityYaw, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { Step, cm, forwardOf, ticks } from '@/controllers/skills/visuals';
 import { type StripOptions, type TailStrip } from '@/controllers/fx/ticked';
 import { Vector3 } from '@/controllers/render/babylon/exports';

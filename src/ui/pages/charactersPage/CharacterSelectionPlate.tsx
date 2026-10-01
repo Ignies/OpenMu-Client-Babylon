@@ -1,11 +1,11 @@
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef, useState } from 'react';
-import { Matrix, Vector3, Viewport } from '../../../controllers/render/babylon/exports';
-import { Store } from '../../../app/store';
-import { classFromAppearance } from '../../../controllers/actors/deserializeAppearance';
-import { getClassName } from '../../../features/hero/characterStats';
-import { characterSelectView } from '../../../features/character_select/characterSelect';
-import { t } from '../../../i18n';
+import { Matrix, Vector3, Viewport } from '@/controllers/render/babylon/exports';
+import { Store } from '@/app/store';
+import { classFromAppearance } from '@/controllers/actors/deserializeAppearance';
+import { getClassName } from '@/features/hero/characterStats';
+import { characterSelectView } from '@/features/character_select/characterSelect';
+import { t } from '@/i18n';
 import { TEXT_COLOR } from '../serversPage/layout';
 
 /** How far above the model's root the plate hangs, in tiles (world units). */

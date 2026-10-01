@@ -1,10 +1,10 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuNumber } from '../../../../components/muNumber';
-import { skills } from '../../../../../features/skills';
-import { MASTER_EXP_SUB_BARS } from '../../../../../features/skills/masterLevel';
-import { formatMasterText, MASTER_TEXT } from '../../../../../features/skills/masterTree';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuNumber } from '@/ui/components/muNumber';
+import { skills } from '@/features/skills';
+import { MASTER_EXP_SUB_BARS } from '@/features/skills/masterLevel';
+import { formatMasterText, MASTER_TEXT } from '@/features/skills/masterTree';
 
 /**
  * `CNewUIMainFrameWindow::RenderExperience`, master branch: once the hero is

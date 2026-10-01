@@ -1,9 +1,9 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import { entityPos, tmpA, type RGB } from '../../../src/controllers/fx/core';
-import { spawnCrystalShards } from '../../../src/controllers/fx/deathVisuals';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { MonsterObject } from '../../../src/controllers/actors/monsterObject';
-import { monsterModelFile, monsterScaleOf } from '../../../src/controllers/actors/monsterModelTable';
+import type { Entity, World } from '@/ecs/world';
+import { entityPos, tmpA, type RGB } from '@/controllers/fx/core';
+import { spawnCrystalShards } from '@/controllers/fx/deathVisuals';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { MonsterObject } from '@/controllers/actors/monsterObject';
+import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
 
 /**
  * The two things in Blood Castle you break instead of kill. OpenMU sends them

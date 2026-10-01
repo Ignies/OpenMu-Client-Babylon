@@ -1,5 +1,5 @@
 import { observable, runInAction } from 'mobx';
-import { PetTypeEnum } from '../../../../../../versions/shared/packets/ClientToServerPackets';
+import { PetTypeEnum } from '@versions/shared/packets/ClientToServerPackets';
 
 /**
  * Open/closed state of the pet info window (`INTERFACE_PET`), shared by the

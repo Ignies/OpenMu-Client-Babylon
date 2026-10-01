@@ -1,5 +1,5 @@
 import { Vector3 } from '../../controllers/render/babylon/exports';
-import { MonsterActionType, PlayerAction } from '../../../versions/shared/objects/enum';
+import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import { isPlayerAttackAction } from '../../controllers/anim/playerActionMapper';
 import { BloodDecals } from '../../controllers/fx/bloodDecals';
 import { shatterDeathFor, spawnBomb } from '../../controllers/fx/deathVisuals';

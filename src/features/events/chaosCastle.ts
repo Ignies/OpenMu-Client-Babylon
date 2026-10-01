@@ -6,7 +6,7 @@ import { Store } from '../../app/store';
 import {
   ChaosCastleEnterRequestPacket,
   MiniGameOpeningStateRequestPacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import {
   BloodCastleStatePacket,
   BloodCastleStateStatusEnum,
@@ -14,14 +14,14 @@ import {
   ChaosCastleEnterResultPacket,
   MiniGameOpeningStatePacket,
   MiniGameScoreTablePacket,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import { playSfx } from '../../controllers/sound/sfx';
 import {
   PILLAR_TYPE,
   nextThunderSeconds,
   thunderSound,
   thunderStrikes,
-} from '../../../versions/shared/maps/chaoscastle/thunder';
+} from '@versions/shared/maps/chaoscastle/thunder';
 import type { EventLayer } from './layer';
 import { noteOpeningStateRequest, takeOpeningState } from './schedule';
 import {

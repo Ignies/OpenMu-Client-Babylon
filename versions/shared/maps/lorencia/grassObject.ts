@@ -1,6 +1,6 @@
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { ModelObject } from '@/controllers/render/modelObject';
 import { MODEL_GRASS01 } from '../../objects/enum';
-import { Vector2 } from '../../../../src/controllers/render/babylon/exports';
+import { Vector2 } from '@/controllers/render/babylon/exports';
 
 const TERRAIN_OFFSET = -10;
 const WIND_UPDATE_INTERVAL = 32;

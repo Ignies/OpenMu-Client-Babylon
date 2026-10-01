@@ -1,7 +1,7 @@
 import monsters from './monsters.json';
 import monsterHealth from './monsterHealth.json';
-import { localisedNpcName } from '../../../src/controllers/assets/mu/npcNameFile';
-import { t } from '../../../src/i18n';
+import { localisedNpcName } from '@/controllers/assets/mu/npcNameFile';
+import { t } from '@/i18n';
 
 export const MonstersDatabase = new (class _MonstersDatabase {
   cache = new Map<number, (typeof monsters)[number]>();

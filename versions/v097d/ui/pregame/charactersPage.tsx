@@ -11,16 +11,16 @@
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
 import { runInAction } from 'mobx';
-import { t } from '../../../../src/i18n';
-import { uiClick } from '../../../../src/controllers/sound/sfx';
-import { Store } from '../../../../src/app/store';
-import { useEventBus } from '../../../../src/controllers/interface/hooks/useEventBus';
+import { t } from '@/i18n';
+import { uiClick } from '@/controllers/sound/sfx';
+import { Store } from '@/app/store';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import {
   CharacterFocusedPacket,
   CharacterListPacket,
-} from '../../../shared/packets/ServerToClientPackets';
-import { MuSpriteFrame } from '../../../../src/ui/components/muSprite';
-import { MuButton } from '../../../../src/ui/components/muButton';
+} from '@versions/shared/packets/ServerToClientPackets';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
 import './style.less';
 
 const PLATE = { file: 'Data/Logo/0New_Account01.OZT', width: 256, height: 256 };

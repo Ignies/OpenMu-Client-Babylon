@@ -27,15 +27,15 @@ import { t, type TextKey } from '../../i18n';
  */
 import { observable, reaction, runInAction } from 'mobx';
 import { getBaseClass, BaseClass } from '../hero/characterStats';
-import { itemBaseName } from '../../../versions/shared/items/itemsDatabase';
+import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { itemLevelName } from '../items/itemLevelLook';
 import { classOf } from '../items/itemStats';
-import { monsterDisplayName } from '../../../versions/shared/monsters/monstersDatabase';
+import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
 import {
   CloseNpcRequestPacket,
   LegacyQuestStateRequestPacket,
   LegacyQuestStateSetRequestPacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import {
   ConditionTypeEnum,
   LegacyQuestRewardPacket,
@@ -43,7 +43,7 @@ import {
   LegacyQuestStateDialogPacket,
   LegacyQuestStateListPacket,
   LegacySetQuestStateResponsePacket,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import type { CharacterClassNumber } from '../../core/types';
 import { EventBus } from '../../core/eventBus';
 import { playUiSound } from '../../controllers/sound/sfx';

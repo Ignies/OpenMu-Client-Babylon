@@ -2,7 +2,7 @@ import { defineSkill } from '@/controllers/skills/define';
 import { DEG } from '../../_shared';
 import { type Entity } from '@/ecs/world';
 import { delay, entityGone, entityPos, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { SkillContext, Step, TICK, baseSkill, cm, currentSkill, ticks } from '@/controllers/skills/visuals';
 import { Vector3 } from '@/controllers/render/babylon/exports';

@@ -8,7 +8,7 @@ import {
 import { MuSpriteFrame } from '../muSprite';
 import { MuButton } from '../muButton';
 import { TEXT_COLOR } from '../../pages/serversPage/layout';
-import { uiClick } from '../../../controllers/sound/sfx';
+import { uiClick } from '@/controllers/sound/sfx';
 
 /**
  * One line of text squeezed sideways until it fits its box. A translated

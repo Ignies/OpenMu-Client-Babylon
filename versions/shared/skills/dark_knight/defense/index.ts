@@ -1,6 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { CAST_HEIGHT, Step, baseSkill, currentSkill } from '@/controllers/skills/visuals';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { bonePos, delay, entityGone, type PointSource } from '@/controllers/fx/core';
 import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { RIGHT_HAND_BONE } from '@/controllers/actors/weaponAttachment';

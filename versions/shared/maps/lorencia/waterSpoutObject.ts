@@ -1,7 +1,7 @@
-import { getMaterial } from '../../../../src/controllers/assets/modelLoader';
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { getMaterial } from '@/controllers/assets/modelLoader';
+import { ModelObject } from '@/controllers/render/modelObject';
 import { BlendState } from '../../objects/enum';
-import type { World } from '../../../../src/ecs/world';
+import type { World } from '@/ecs/world';
 
 export class WaterSpoutObject extends ModelObject {
   static Batchable = true;

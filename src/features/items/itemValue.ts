@@ -1,5 +1,5 @@
 import type { Item } from '../../ecs/world';
-import { ItemsDatabase } from '../../../versions/shared/items/itemsDatabase';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import {
   ItemGroup,
   calcMaxDurability,

@@ -1,13 +1,13 @@
 import './style.less';
-import { t } from '../../../../../i18n';
+import { t } from '@/i18n';
 import { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Social } from '../../../../../features/social/social';
-import { Messenger } from '../../../../../features/friends/messenger';
-import { GuildRelationshipTypeEnum } from '../../../../../../versions/shared/packets/ClientToServerPackets';
-import { MuButton } from '../../../../components/muButton';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { TEXT_COLOR } from '../../../../pages/serversPage/layout';
+import { Social } from '@/features/social/social';
+import { Messenger } from '@/features/friends/messenger';
+import { GuildRelationshipTypeEnum } from '@versions/shared/packets/ClientToServerPackets';
+import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { TEXT_COLOR } from '@/ui/pages/serversPage/layout';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,
@@ -19,7 +19,7 @@ import {
   OK_SPRITE,
   WIN_HEIGHT,
   WIN_WIDTH,
-} from '../../../../components/msgWindow/layout';
+} from '@/ui/components/msgWindow/layout';
 
 /** GlobalText 1295 / 1321 wording, by relationship and join/leave. */
 function relationText(request: {

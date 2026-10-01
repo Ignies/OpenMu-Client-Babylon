@@ -1,5 +1,5 @@
-import { OperateBoxObject } from '../../../../src/controllers/actors/operateBoxObject';
-import type { World } from '../../../../src/ecs/world';
+import { OperateBoxObject } from '@/controllers/actors/operateBoxObject';
+import type { World } from '@/ecs/world';
 import { PlaySpeedObject } from '../shared/objectVariants';
 
 /**

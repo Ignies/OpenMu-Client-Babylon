@@ -1,5 +1,5 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * `CreateKanturu3rdObject` case 0 (GM_Kanturu_3rd.cpp:99-101):

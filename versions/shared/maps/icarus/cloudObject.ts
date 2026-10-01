@@ -1,8 +1,8 @@
-import { TILE_CM } from '../../../../src/controllers/terrain/consts';
-import { Sprite, type Scene } from '../../../../src/controllers/render/babylon/exports';
-import type { Entity, World } from '../../../../src/ecs/world';
-import { HIDDEN_MESH_ALL, ModelObject } from '../../../../src/controllers/render/modelObject';
-import { spriteLevel } from '../../../../src/controllers/fx/core';
+import { TILE_CM } from '@/controllers/terrain/consts';
+import { Sprite, type Scene } from '@/controllers/render/babylon/exports';
+import type { Entity, World } from '@/ecs/world';
+import { HIDDEN_MESH_ALL, ModelObject } from '@/controllers/render/modelObject';
+import { spriteLevel } from '@/controllers/fx/core';
 import {
   CLOUD_LIGHT_TEXTURE,
   CLOUD_TEXTURE,

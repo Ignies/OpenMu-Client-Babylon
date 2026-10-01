@@ -6,7 +6,7 @@ import {
   type ArcRotateCamera,
   type Scene,
 } from '../babylon/exports';
-import { devQueryNumber, devQueryNumbers } from '../../../core/devSeams';
+import { devQueryNumber, devQueryNumbers } from '@/core/devSeams';
 import { toonEffectsActive } from '../renderingStyle';
 import { EFFECT_MASK_SAMPLER, effectMask } from './effectMask';
 import { heightFogLive } from './heightFog';

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { t } from '../../../i18n';
-import { playUiSound, uiClick } from '../../../controllers/sound/sfx';
+import { t } from '@/i18n';
+import { playUiSound, uiClick } from '@/controllers/sound/sfx';
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store, UIState } from '../../../app/store';
-import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '../../../app/consts';
-import { registerApiUrl, registerUrl } from '../../../features/servers/serverServices';
+import { Store, UIState } from '@/app/store';
+import { MAX_PASSWORD_LENGTH, MAX_USERNAME_LENGTH } from '@/app/consts';
+import { registerApiUrl, registerUrl } from '@/features/servers/serverServices';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { MuText } from '../../components/muText';
 import { MuLogo } from '../../components/muLogo';

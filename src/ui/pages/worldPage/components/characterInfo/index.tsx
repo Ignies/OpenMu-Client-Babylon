@@ -1,29 +1,29 @@
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { t } from '../../../../../i18n';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 import { useEffect, useRef, useState } from 'react';
-import { EventBus } from '../../../../../core/eventBus';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { Store } from '../../../../../app/store';
-import { GameOptions } from '../../../../../features/options/gameOptions';
-import { StatAllocation } from '../../../../../features/hero/statAllocation';
-import { clampAmount, needsConfirm } from '../../../../../features/hero/statAmounts';
-import { MsgWinCode } from '../../../../../controllers/interface/msgWin';
-import { devQueryNumber } from '../../../../../core/devSeams';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuButton } from '../../../../components/muButton';
-import { playUiSound } from '../../../../../controllers/sound/sfx';
+import { EventBus } from '@/core/eventBus';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { Store } from '@/app/store';
+import { GameOptions } from '@/features/options/gameOptions';
+import { StatAllocation } from '@/features/hero/statAllocation';
+import { clampAmount, needsConfirm } from '@/features/hero/statAmounts';
+import { MsgWinCode } from '@/controllers/interface/msgWin';
+import { devQueryNumber } from '@/core/devSeams';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
+import { playUiSound } from '@/controllers/sound/sfx';
 import { toggleMasterSkillsWindow } from '../masterSkills/windowState';
 import { togglePetInfoWindow } from '../petInfo/windowState';
 import {
   MuItemWindow,
   MuTableFrame,
   MuTableRule,
-} from '../../../../components/muWindow';
-import { InventoryConstants } from '../../../../../features/inventory/inventoryConstants';
-import { pkTextColour, PVP_NEUTRAL } from '../../../../../controllers/interface/nameTags';
+} from '@/ui/components/muWindow';
+import { InventoryConstants } from '@/features/inventory/inventoryConstants';
+import { pkTextColour, PVP_NEUTRAL } from '@/controllers/interface/nameTags';
 import {
   BaseClass,
   deriveCharacterStats,
@@ -31,7 +31,7 @@ import {
   getClassName,
   getStatName,
   StatType,
-} from '../../../../../features/hero/characterStats';
+} from '@/features/hero/characterStats';
 import {
   AMOUNT_DY,
   AMOUNT_HEIGHT,

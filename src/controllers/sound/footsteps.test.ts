@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MonsterActionType, PlayerAction } from '../../../versions/shared/objects/enum';
+import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import { ENUM_WORLD } from '../../core/types';
 import type { World } from '../../ecs/world';
 import { SoundsManager } from './soundsManager';

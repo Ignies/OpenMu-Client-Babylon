@@ -1,8 +1,8 @@
 import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useState } from 'react';
-import { Store } from '../../../app/store';
-import { isNpcOrTrapType } from '../../../ecs/systems/attackSystem';
+import { Store } from '@/app/store';
+import { isNpcOrTrapType } from '@/ecs/systems/attackSystem';
 
 const STEPS = 20;
 const BORDER_WIDTH = 2;

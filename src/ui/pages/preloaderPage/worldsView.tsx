@@ -1,16 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
-import { uiClick } from '../../../controllers/sound/sfx';
-import { t } from '../../../i18n';
+import { uiClick } from '@/controllers/sound/sfx';
+import { t } from '@/i18n';
 import {
   playableHere,
   ServerConfig,
   type ServerProfile,
-} from '../../../features/servers/serverConfig';
-import { ServerAccounts } from '../../../features/servers/serverAccounts';
-import { refreshServerList, ServerList } from '../../../features/servers/serverList';
-import { ServerProbe } from '../../../features/servers/serverProbe';
-import { versionTags } from '../../../version';
+} from '@/features/servers/serverConfig';
+import { ServerAccounts } from '@/features/servers/serverAccounts';
+import { refreshServerList, ServerList } from '@/features/servers/serverList';
+import { ServerProbe } from '@/features/servers/serverProbe';
+import { versionTags } from '@/version';
 import { Button, Icon } from './controls';
 import { Banner, REACH_TEXT } from './banner';
 import { WorldDetails } from './worldDetails';

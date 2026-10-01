@@ -1,5 +1,5 @@
 import type { AnimationGroup } from '@babylonjs/core/Animations/animationGroup';
-import { MonsterActionType, PlayerAction } from '../../../versions/shared/objects/enum';
+import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import type { ISystemFactory } from '../world';
 import { isPlayerBody, type PlayerObject } from '../../controllers/actors/playerObject';
 import { isOneShotPlayerAction } from '../../controllers/anim/playerActionMapper';

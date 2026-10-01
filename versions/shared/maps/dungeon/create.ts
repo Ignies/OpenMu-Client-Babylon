@@ -1,5 +1,5 @@
-import { LeanBoxObject } from '../../../../src/controllers/actors/operateBoxObject';
-import type { World } from '../../../../src/ecs/world';
+import { LeanBoxObject } from '@/controllers/actors/operateBoxObject';
+import type { World } from '@/ecs/world';
 
 /**
  * Dungeon (World 2 / `Object2`). Almost the whole map is the default

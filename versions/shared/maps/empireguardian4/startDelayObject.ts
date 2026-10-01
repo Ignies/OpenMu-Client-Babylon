@@ -1,5 +1,5 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import type { Entity, World } from '@/ecs/world';
 
 /** `FPS_ANIMATION_FACTOR` normalises per-frame work to 25 Hz (ZzzAI.cpp:729). */
 const TICKS_PER_SECOND = 25;

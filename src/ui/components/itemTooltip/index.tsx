@@ -2,19 +2,19 @@ import './style.less';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { Item } from '../../../ecs/world';
-import { Store } from '../../../app/store';
-import { buildItemTooltip, type TooltipLine } from '../../../controllers/interface/itemTooltip';
+import type { Item } from '@/ecs/world';
+import { Store } from '@/app/store';
+import { buildItemTooltip, type TooltipLine } from '@/controllers/interface/itemTooltip';
 import {
   comparedItem,
   compareTooltipsOn,
   CompareTooltips,
-} from '../../../features/items/itemCompare';
-import { GameOptions } from '../../../features/options/gameOptions';
-import type { HeroStats } from '../../../features/items/itemStats';
-import { PET_GROUP } from '../../../features/pets/pets';
-import { PetTypeEnum } from '../../../../versions/shared/packets/ClientToServerPackets';
-import { t } from '../../../i18n';
+} from '@/features/items/itemCompare';
+import { GameOptions } from '@/features/options/gameOptions';
+import type { HeroStats } from '@/features/items/itemStats';
+import { PET_GROUP } from '@/features/pets/pets';
+import { PetTypeEnum } from '@versions/shared/packets/ClientToServerPackets';
+import { t } from '@/i18n';
 import {
   isRepairBanned,
   isSellingBanned,
@@ -22,10 +22,10 @@ import {
   needsRepair,
   repairCost,
   withTax,
-} from '../../../features/items/itemValue';
+} from '@/features/items/itemValue';
 import { placePair } from './placement';
-import { ItemLinkHover } from '../../../controllers/interface/itemLinkHover';
-import { ItemsDatabase } from '../../../../versions/shared/items/itemsDatabase';
+import { ItemLinkHover } from '@/controllers/interface/itemLinkHover';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { ItemIcon } from '../itemIcon';
 
 /** One inventory square of the picture, as the grids draw it. */

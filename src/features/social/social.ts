@@ -73,8 +73,8 @@ import {
   RemoveAllianceGuildRequestPacket,
   RequestAllianceListPacket,
   WhisperMessagePacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
-import { GuildMemberRoleEnum } from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
+import { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
 import {
   GuildRelation,
   parseSelfDefense,

@@ -1,4 +1,4 @@
-import type { TextKey } from '../../../../../i18n';
+import type { TextKey } from '@/i18n';
 
 export const WIN_WIDTH = 190;
 export const WIN_HEIGHT = 429;

@@ -1,6 +1,6 @@
 import { observable, reaction, runInAction } from 'mobx';
 import { Store } from '../../app/store';
-import { MuHelperSaveDataRequestPacket } from '../../../versions/shared/packets/ClientToServerPackets';
+import { MuHelperSaveDataRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import {
   decodeMuHelperConfig,
   defaultMuHelperConfig,

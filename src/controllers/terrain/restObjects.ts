@@ -3,7 +3,7 @@ import {
   MODEL_FURNITURE01,
   MODEL_POSE_BOX,
   MODEL_TREE01,
-} from '../../../versions/shared/objects/enum';
+} from '@versions/shared/objects/enum';
 
 export type RestKind = 'sit' | 'pose' | 'healing';
 

@@ -1,8 +1,8 @@
 import './style.less';
 import { useState } from 'react';
-import { itemDisplayName } from '../../../controllers/interface/itemTooltip';
-import { t } from '../../../i18n';
-import type { Item } from '../../../ecs/world';
+import { itemDisplayName } from '@/controllers/interface/itemTooltip';
+import { t } from '@/i18n';
+import type { Item } from '@/ecs/world';
 
 /**
  * The find box over an item grid: type a few letters and everything that

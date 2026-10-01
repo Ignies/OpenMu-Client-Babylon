@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SOUND_FILES } from '../../../../src/controllers/sound/recipes';
+import { SOUND_FILES } from '@/controllers/sound/recipes';
 import {
   THUNDER_SOUNDS,
   nextThunderSeconds,

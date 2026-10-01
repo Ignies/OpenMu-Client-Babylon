@@ -7,7 +7,7 @@ import {
 import { ModelObject } from '../render/modelObject';
 import { CharacterClassNumber, PlayerClass } from '../../core/types';
 import { Entity, World, type Item } from '../../ecs/world';
-import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { loadGLTF } from '../assets/modelLoader';
 import { Store } from '../../app/store';
 import {
@@ -22,7 +22,7 @@ import { itemVisualTier, type ItemVisualTier } from '../item_fx/itemVisualTier';
 import { requestGlowProbe } from '../render/scenes/sceneLook';
 import { WingObject } from './wingObject';
 import { WING_BONE, wingSpec } from './wings';
-import { ItemsDatabase } from '../../../versions/shared/items/itemsDatabase';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import { archangelWeapon } from '../../features/drops/dropModelProxy';
 import { IMP_BONE, petSpec, type PetSpec } from '../../features/pets/pets';
 import { angleLinkMatrix } from '../render/boneLink';

@@ -1,8 +1,8 @@
 import type { Controller } from '../controller';
 import type { Item } from '../../ecs/world';
-import type { PlayerAction } from '../../../versions/shared/objects/enum';
-import type { AreaSkillHitPacket } from '../../../versions/shared/packets/ClientToServerPackets';
-import type { SkillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import type { PlayerAction } from '@versions/shared/objects/enum';
+import type { AreaSkillHitPacket } from '@versions/shared/packets/ClientToServerPackets';
+import type { SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import type { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';
 import { COMBAT_LAYERS } from './layers';

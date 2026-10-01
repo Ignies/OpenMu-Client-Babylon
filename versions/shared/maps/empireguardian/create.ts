@@ -1,5 +1,5 @@
-import { ENUM_WORLD } from '../../../../src/core/types';
-import type { World } from '../../../../src/ecs/world';
+import { ENUM_WORLD } from '@/core/types';
+import type { World } from '@/ecs/world';
 import { PlaySpeedObject } from '../shared/objectVariants';
 
 /**

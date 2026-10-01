@@ -41,7 +41,7 @@ import {
 } from '../assets/modelLoader';
 import { NO_BLEND_MESH } from './blendMeshes';
 import { meshAnimationFor, type MeshAnimation } from './meshAnimation';
-import { BlendState } from '../../../versions/shared/objects/enum';
+import { BlendState } from '@versions/shared/objects/enum';
 // Late-bound: a value import of `../store` closed an import cycle back to
 // the monster classes that extend this one (B14, see `storeRef.ts`).
 import { storeRef } from '../../app/storeRef';

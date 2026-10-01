@@ -1,12 +1,12 @@
 import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../app/store';
+import { Store } from '@/app/store';
 import { MuSpriteFrame } from '../muSprite';
 import { MuButton } from '../muButton';
-import { playUiSound } from '../../../controllers/sound/sfx';
+import { playUiSound } from '@/controllers/sound/sfx';
 import { TEXT_COLOR } from '../../pages/serversPage/layout';
-import { MSG_WIN_MESSAGES, MsgWinCode, MsgWinType } from '../../../controllers/interface/msgWin';
+import { MSG_WIN_MESSAGES, MsgWinCode, MsgWinType } from '@/controllers/interface/msgWin';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,

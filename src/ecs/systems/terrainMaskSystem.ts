@@ -6,7 +6,7 @@ import {
   resetTerrainMask,
 } from '../../controllers/terrain/terrainMask';
 import { needsTerrainMask } from '../../controllers/terrain/terrainOverlay';
-import { DEVIAS_ROOMS } from '../../../versions/shared/maps/devias/rooms';
+import { DEVIAS_ROOMS } from '@versions/shared/maps/devias/rooms';
 import type { ISystemFactory } from '../world';
 
 /**

@@ -5,7 +5,7 @@ import { Store } from '../../app/store';
 import {
   CrywolfContractRequestPacket,
   CrywolfInfoRequestPacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
 import {
   CrywolfAltarInfoPacket,
   CrywolfBenefitPacket,
@@ -15,14 +15,14 @@ import {
   CrywolfStateInfoPacket,
   CrywolfStateInfoEventStateEnum as CrywolfState,
   CrywolfStateInfoOccupationStateEnum as Occupation,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
 import { EVENT_TEXT, formatText } from './recipes';
 
 export {
   CrywolfStateInfoEventStateEnum as CrywolfState,
   CrywolfStateInfoOccupationStateEnum as CrywolfOccupation,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 
 /**
  * Crywolf: the fortress event's state (`M34CryWolf1st`, GMCrywolf1st.cpp),

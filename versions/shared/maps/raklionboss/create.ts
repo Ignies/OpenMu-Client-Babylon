@@ -1,4 +1,4 @@
-import type { World } from '../../../../src/ecs/world';
+import type { World } from '@/ecs/world';
 import { RaklionIceScarpObject } from '../raklion/iceScarpObject';
 import { createRaklionWarpGate } from '../raklion/warpGateObject';
 import { PlaySpeedObject, bindAbsentModels } from '../shared/objectVariants';

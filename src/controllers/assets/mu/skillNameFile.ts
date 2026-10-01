@@ -15,7 +15,7 @@
 
 import { observable, runInAction } from 'mobx';
 import { convertBux } from '../../terrain/mapFileEncryption';
-import { i18n, onLanguageChanged } from '../../../i18n';
+import { i18n, onLanguageChanged } from '@/i18n';
 import {
   checkPackText,
   decodeLocalText,

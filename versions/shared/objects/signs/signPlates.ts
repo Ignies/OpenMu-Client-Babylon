@@ -1,7 +1,7 @@
-import { DynamicTexture, Texture } from '../../../../src/controllers/render/babylon/exports';
-import type { Scene } from '../../../../src/controllers/render/babylon/exports';
-import { downloadDataFile } from '../../../../src/controllers/assets/mu/dataFolder';
-import { onLanguageChanged } from '../../../../src/i18n';
+import { DynamicTexture, Texture } from '@/controllers/render/babylon/exports';
+import type { Scene } from '@/controllers/render/babylon/exports';
+import { downloadDataFile } from '@/controllers/assets/mu/dataFolder';
+import { onLanguageChanged } from '@/i18n';
 
 /**
  * The signpost plates — the small wooden notice boards the map objects carry,

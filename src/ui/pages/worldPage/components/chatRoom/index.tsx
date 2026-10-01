@@ -1,14 +1,14 @@
 import './style.less';
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { t } from '../../../../../i18n';
-import { ChatRooms, type ChatRoom } from '../../../../../features/chat/chatRooms';
-import { Messenger } from '../../../../../features/friends/messenger';
-import { isFriendOnline } from '../../../../../features/friends/friendList';
-import { Store } from '../../../../../app/store';
-import { uiClick } from '../../../../../controllers/sound/sfx';
-import { useWindowChrome } from '../../../../components/muWindow/useWindowChrome';
-import { EmojiText } from '../../../../components/emojiText';
+import { t } from '@/i18n';
+import { ChatRooms, type ChatRoom } from '@/features/chat/chatRooms';
+import { Messenger } from '@/features/friends/messenger';
+import { isFriendOnline } from '@/features/friends/friendList';
+import { Store } from '@/app/store';
+import { uiClick } from '@/controllers/sound/sfx';
+import { useWindowChrome } from '@/ui/components/muWindow/useWindowChrome';
+import { EmojiText } from '@/ui/components/emojiText';
 
 /**
  * `CUIChatWindow`, folded into one window with a tab per room the way the

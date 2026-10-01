@@ -1,7 +1,7 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { MonsterObject } from '../../../src/controllers/actors/monsterObject';
-import { monsterModelFile } from '../../../src/controllers/actors/monsterModelTable';
+import type { Entity, World } from '@/ecs/world';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { MonsterObject } from '@/controllers/actors/monsterObject';
+import { monsterModelFile } from '@/controllers/actors/monsterModelTable';
 
 /** `MODEL_BUDGE_DRAGON`'s model index - the one monster model that hovers. */
 export const BUDGE_DRAGON_MODEL = 2;

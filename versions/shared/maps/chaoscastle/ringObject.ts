@@ -1,7 +1,7 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { ParticleEmitter } from '../../../../src/controllers/fx/effectParticles';
-import { Store } from '../../../../src/app/store';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { ParticleEmitter } from '@/controllers/fx/effectParticles';
+import { Store } from '@/app/store';
+import type { Entity, World } from '@/ecs/world';
 import {
   chaosCastleRingDrop,
   chaosCastleRingSmoking,

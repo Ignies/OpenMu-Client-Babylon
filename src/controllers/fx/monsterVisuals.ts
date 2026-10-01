@@ -20,7 +20,7 @@
  */
 import { Vector3, type Scene } from '../render/babylon/exports';
 import { ENUM_WORLD } from '../../core/types';
-import { MonsterActionType as A } from '../../../versions/shared/objects/enum';
+import { MonsterActionType as A } from '@versions/shared/objects/enum';
 import { TILE_CM } from '../terrain/consts';
 import type { Entity } from '../../ecs/world';
 import {

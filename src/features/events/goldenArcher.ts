@@ -6,8 +6,8 @@ import { ItemGroup } from '../items/itemStats';
 import {
   EventChipExitDialogPacket,
   EventChipRegistrationRequestPacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
-import { EventChipRegistrationResultPacket } from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ClientToServerPackets';
+import { EventChipRegistrationResultPacket } from '@versions/shared/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
 
 /**

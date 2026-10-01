@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { playerFrameSpeedScale, playerPlaySpeed } from './playSpeed';
 
 describe('Dark Lord clip speeds', () => {

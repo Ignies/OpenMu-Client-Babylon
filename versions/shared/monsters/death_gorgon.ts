@@ -1,7 +1,7 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { MonsterObject } from '../../../src/controllers/actors/monsterObject';
-import { monsterModelFile, monsterScaleOf } from '../../../src/controllers/actors/monsterModelTable';
+import type { Entity, World } from '@/ecs/world';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { MonsterObject } from '@/controllers/actors/monsterObject';
+import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
 
 /**
  * Death Gorgon is `MODEL_GORGON` with `c->Level == 2`, and that level is the

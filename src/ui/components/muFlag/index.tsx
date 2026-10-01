@@ -11,7 +11,7 @@
  */
 
 import type { CSSProperties, ReactNode } from 'react';
-import type { FlagRegion } from '../../../i18n';
+import type { FlagRegion } from '@/i18n';
 
 /** The 3:2 field every flag is drawn in. */
 const W = 24;

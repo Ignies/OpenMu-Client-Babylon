@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { t } from '../../../i18n';
-import type { TrackedPlayer } from '../../../controllers/net/protocols/adminProtocol';
-import type { ENUM_WORLD } from '../../../core/types';
-import { loadWorldMinimap, type WorldMinimap } from '../../../controllers/terrain/minimap';
-import type { Nearby } from '../../../features/gm/gmWorld';
+import { t } from '@/i18n';
+import type { TrackedPlayer } from '@/controllers/net/protocols/adminProtocol';
+import type { ENUM_WORLD } from '@/core/types';
+import { loadWorldMinimap, type WorldMinimap } from '@/controllers/terrain/minimap';
+import type { Nearby } from '@/features/gm/gmWorld';
 
 /**
  * One world's minimap picture with every tracked player on it.

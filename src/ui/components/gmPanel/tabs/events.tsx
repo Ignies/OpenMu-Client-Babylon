@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite';
-import { t } from '../../../../i18n';
-import type { WorldView } from '../../../../features/gm/gmWorld';
-import { gmCommand } from '../../../../features/gm/gmCommands';
+import { t } from '@/i18n';
+import type { WorldView } from '@/features/gm/gmWorld';
+import { gmCommand } from '@/features/gm/gmCommands';
 import { CommandCard, QuickButton, RunButton } from '../commandForm';
 
 /** Event starts, fireworks and notices. */

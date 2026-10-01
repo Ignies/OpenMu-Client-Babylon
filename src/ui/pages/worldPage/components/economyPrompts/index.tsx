@@ -1,5 +1,5 @@
 import './style.less';
-import { t } from '../../../../../i18n';
+import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import {
   useEffect,
@@ -8,15 +8,15 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from 'react';
-import { Store } from '../../../../../app/store';
-import { Economy, type EconomyPrompt } from '../../../../../features/economy/economy';
-import { itemDisplayName } from '../../../../../controllers/interface/itemTooltip';
-import { itemValue } from '../../../../../features/items/itemValue';
-import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
-import { MAX_BULK_BUY } from '../../../../../features/inventory/quickItemRules';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuButton } from '../../../../components/muButton';
-import { TEXT_COLOR } from '../../../serversPage/layout';
+import { Store } from '@/app/store';
+import { Economy, type EconomyPrompt } from '@/features/economy/economy';
+import { itemDisplayName } from '@/controllers/interface/itemTooltip';
+import { itemValue } from '@/features/items/itemValue';
+import { QuickItemActions } from '@/features/inventory/quickItemActions';
+import { MAX_BULK_BUY } from '@/features/inventory/quickItemRules';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
+import { TEXT_COLOR } from '@/ui/pages/serversPage/layout';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,
@@ -41,7 +41,7 @@ import {
   TEXT_TOP,
   WIN_HEIGHT,
   WIN_WIDTH,
-} from '../../../../components/msgWindow/layout';
+} from '@/ui/components/msgWindow/layout';
 import {
   TALL_BTN_CANCEL_X,
   TALL_BTN_OK_X,
@@ -58,7 +58,7 @@ import {
   TALL_TEXT_LINES,
   TALL_TEXT_TOP,
 } from './layout';
-import { MsgBoxFrame } from '../../../../components/msgBoxFrame';
+import { MsgBoxFrame } from '@/ui/components/msgBoxFrame';
 
 const zen = (gold: number) => `${gold.toLocaleString('en-US')} Zen`;
 

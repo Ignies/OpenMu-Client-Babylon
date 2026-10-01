@@ -1015,7 +1015,7 @@ const files = [
 ];
 
 import { unlinkSync } from "node:fs";
-import { byteToString } from '../../../src/controllers/assets/download';
+import { byteToString } from '@/controllers/assets/download';
 
 const indexFileName = __dirname + '/index.ts';
 

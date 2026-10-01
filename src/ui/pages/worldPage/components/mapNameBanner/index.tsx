@@ -1,10 +1,10 @@
 import './style.less';
 import { useEffect, useRef, useState } from 'react';
-import { i18n } from '../../../../../i18n';
-import { Store } from '../../../../../app/store';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { useMuSprite } from '../../../../components/muSprite';
-import { useUiStageScale } from '../../../../components/uiStage';
+import { i18n } from '@/i18n';
+import { Store } from '@/app/store';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { useMuSprite } from '@/ui/components/muSprite';
+import { useUiStageScale } from '@/ui/components/uiStage';
 
 /**
  * `CUIMapName` (UIMapName.cpp): entering a map fades in that map's name

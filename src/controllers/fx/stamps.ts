@@ -21,7 +21,7 @@ import {
   type Texture,
 } from '../render/babylon/exports';
 import { getMaterial, loadGLTF } from '../assets/modelLoader';
-import { BlendState } from '../../../versions/shared/objects/enum';
+import { BlendState } from '@versions/shared/objects/enum';
 import { Store } from '../../app/store';
 import type { TestScene } from '../render/scenes/testScene';
 import { LiveList, WHITE, type RGB } from './core';

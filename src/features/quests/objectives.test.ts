@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { i18n } from '../../i18n';
-import { ConditionTypeEnum } from '../../../versions/shared/packets/ServerToClientPackets';
+import { ConditionTypeEnum } from '@versions/shared/packets/ServerToClientPackets';
 import {
   objectiveCounted,
   objectiveDone,

@@ -1,8 +1,8 @@
 import './style.less';
 import { useRef, type CSSProperties } from 'react';
 import { observer } from 'mobx-react-lite';
-import { t } from '../../../../../i18n';
-import { Store } from '../../../../../app/store';
+import { t } from '@/i18n';
+import { Store } from '@/app/store';
 import {
   Band,
   instrumentById,
@@ -16,12 +16,12 @@ import {
   setLoop,
   stopPlaying,
   toggleInstrumentWindow,
-} from '../../../../../features/band/music';
-import { PERCUSSION_CHANNEL } from '../../../../../features/band/music/bandState';
-import { uiClick } from '../../../../../controllers/sound/sfx';
-import { MuButton } from '../../../../components/muButton';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
+} from '@/features/band/music';
+import { PERCUSSION_CHANNEL } from '@/features/band/music/bandState';
+import { uiClick } from '@/controllers/sound/sfx';
+import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuItemWindow, MuTableFrame } from '@/ui/components/muWindow';
 
 /**
  * The Instrument window: what the player does with the instrument in hand,

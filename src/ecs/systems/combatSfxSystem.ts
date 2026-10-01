@@ -1,5 +1,5 @@
 import type { ISystemFactory } from '../world';
-import { MonsterActionType, PlayerAction } from '../../../versions/shared/objects/enum';
+import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import {
   isPlayerAttackAction,
   isStandingIdle,

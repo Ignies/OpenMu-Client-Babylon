@@ -1,4 +1,4 @@
-import { ItemsDatabase } from '../../../versions/shared/items/itemsDatabase';
+import { ItemsDatabase } from '@versions/shared/items/itemsDatabase';
 import {
   isArmorPart,
   isJewel,

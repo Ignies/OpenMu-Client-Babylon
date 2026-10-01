@@ -15,7 +15,7 @@ import {
   type MonsterAttackInput,
   type MonsterAttackState,
 } from './monsterAttackClip';
-import { MonsterActionType as A } from '../../../versions/shared/objects/enum';
+import { MonsterActionType as A } from '@versions/shared/objects/enum';
 
 const fresh = (): MonsterAttackState => ({ swordCount: 0, skill: 0, skillClearsAt: Infinity });
 

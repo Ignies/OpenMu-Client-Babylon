@@ -1,6 +1,6 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { CRACKLE_FLICKER, PX_PIN, PX_SHOCKWAVE, PX_SPARK3, PX_THUNDER, SPRITE_TURN, TickPoint, atAttackTime, carrierSprites, fenrirThunder, groundGlow, handCrackle, magicParticle, muTurn, spawnCard, sum1Light, throwSmoke, tickLoop } from '../_shared';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { entityGone, entityPos, entityYaw, fxNow, type PointSource, type RGB } from '@/controllers/fx/core';
 import { RGBS, TEX } from '@/controllers/fx/recipes';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';

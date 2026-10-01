@@ -1,9 +1,9 @@
-import { assetWorldNum } from '../../../../src/controllers/assets/worldAssets';
+import { assetWorldNum } from '@/controllers/assets/worldAssets';
 import { prefetchSignPlates } from '../../objects/signs/signPlates';
 import { SignObject } from '../../objects/signs/signObject';
 import { signTypes } from '../../objects/signs/signLabels';
-import { OperateBoxObject } from '../../../../src/controllers/actors/operateBoxObject';
-import type { World } from '../../../../src/ecs/world';
+import { OperateBoxObject } from '@/controllers/actors/operateBoxObject';
+import type { World } from '@/ecs/world';
 
 /**
  * Valley of Loren (`WD_30BATTLECASTLE`, `World31`/`Object31`) - the Castle

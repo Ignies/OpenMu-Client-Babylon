@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ENUM_WORLD } from '../../../src/core/types';
-import { maps } from '../../../src/controllers/maps/index';
+import { ENUM_WORLD } from '@/core/types';
+import { maps } from '@/controllers/maps/index';
 
 /**
  * A tile slot naming a file its world folder does not have kills the warp:

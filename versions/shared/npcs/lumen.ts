@@ -1,6 +1,6 @@
-import type { World } from '../../../src/ecs/world';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { PlayerObject } from '../../../src/controllers/actors/playerObject';
+import type { World } from '@/ecs/world';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { PlayerObject } from '@/controllers/actors/playerObject';
 
 // [NpcInfo(255, "Lumen the Barmaid")]
 export class Lumen extends PlayerObject {

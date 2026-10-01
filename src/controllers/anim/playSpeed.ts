@@ -1,4 +1,4 @@
-import { MonsterActionType, PlayerAction } from '../../../versions/shared/objects/enum';
+import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import { MONSTER_MODEL_TABLE } from '../actors/monsterModelTable';
 
 /**

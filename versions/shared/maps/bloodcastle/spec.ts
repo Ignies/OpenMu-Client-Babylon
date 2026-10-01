@@ -1,4 +1,4 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
+import type { Emission } from '@/controllers/fx/effectParticles';
 
 /**
  * Blood Castle (worlds 11-17 + 52, all on `World12` / `Object12`), the

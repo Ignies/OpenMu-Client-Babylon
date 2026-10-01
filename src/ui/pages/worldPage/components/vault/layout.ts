@@ -1,5 +1,5 @@
-import type { TextKey } from '../../../../../i18n';
-import { VAULT_COLUMNS, VAULT_ROWS } from '../../../../../features/inventory/itemStorage';
+import type { TextKey } from '@/i18n';
+import { VAULT_COLUMNS, VAULT_ROWS } from '@/features/inventory/itemStorage';
 
 /**
  * `CNewUIStorageInventory` (NewUIStorageInventory.cpp): the 190×429 item

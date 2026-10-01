@@ -2,7 +2,7 @@ import { observable, runInAction } from 'mobx';
 import { GameOptions } from '../options/gameOptions';
 import { devQueryNumbers } from '../../core/devSeams';
 import { serverNow } from '../../controllers/net/serverTime';
-import { MiniGameOpeningStateRequestPacket } from '../../../versions/shared/packets/ClientToServerPackets';
+import { MiniGameOpeningStateRequestPacket } from '@versions/shared/packets/ClientToServerPackets';
 import { Store, UIState } from '../../app/store';
 import type { EventLayer } from './layer';
 import { OPENING_STATE_GAME } from './recipes';

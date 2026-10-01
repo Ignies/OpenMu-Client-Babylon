@@ -25,7 +25,7 @@
  */
 
 import { observable, runInAction } from 'mobx';
-import { i18n, onLanguageChanged } from '../../../i18n';
+import { i18n, onLanguageChanged } from '@/i18n';
 import { resolveDataUrl } from './dataFolder';
 import { decodeLocalText } from './localData';
 

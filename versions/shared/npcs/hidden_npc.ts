@@ -1,5 +1,5 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import { ModelObject } from '../../../src/controllers/render/modelObject';
+import type { Entity, World } from '@/ecs/world';
+import { ModelObject } from '@/controllers/render/modelObject';
 
 /**
  * An NPC the server spawns but the original never draws: the five Crywolf

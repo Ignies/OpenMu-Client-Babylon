@@ -1,6 +1,6 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { REFERENCE_FPS } from '../../../../src/controllers/anim/playSpeed';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { REFERENCE_FPS } from '@/controllers/anim/playSpeed';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * `Models[66].Actions[0].PlaySpeed = Models[66].Actions[1].PlaySpeed = 0.15f`

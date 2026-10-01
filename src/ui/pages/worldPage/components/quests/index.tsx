@@ -1,21 +1,21 @@
 import './style.less';
-import { t } from '../../../../../i18n';
+import { t } from '@/i18n';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { observable, runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { playUiSound, uiClick } from '../../../../../controllers/sound/sfx';
-import { monsterDisplayName } from '../../../../../../versions/shared/monsters/monstersDatabase';
-import { ConditionTypeEnum } from '../../../../../../versions/shared/packets/ServerToClientPackets';
-import { MuButton } from '../../../../components/muButton';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
-import { MsgBoxFrame, msgBoxHeight } from '../../../../components/msgBoxFrame';
-import { quests } from '../../../../../features/quests';
-import { objectiveDone, objectiveProgress } from '../../../../../features/quests/objectives';
-import { questDefinition } from '../../../../../features/quests/questData';
+import { Store } from '@/app/store';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { playUiSound, uiClick } from '@/controllers/sound/sfx';
+import { monsterDisplayName } from '@versions/shared/monsters/monstersDatabase';
+import { ConditionTypeEnum } from '@versions/shared/packets/ServerToClientPackets';
+import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuItemWindow, MuTableFrame } from '@/ui/components/muWindow';
+import { MsgBoxFrame, msgBoxHeight } from '@/ui/components/msgBoxFrame';
+import { quests } from '@/features/quests';
+import { objectiveDone, objectiveProgress } from '@/features/quests/objectives';
+import { questDefinition } from '@/features/quests/questData';
 import {
   LegacyQuestState,
   answerLegacyQuest,
@@ -33,7 +33,7 @@ import {
   legacyQuestWindowOpen,
   legacyQuestWindowTitle,
   wrapDialogText,
-} from '../../../../../features/quests/legacyQuests';
+} from '@/features/quests/legacyQuests';
 import {
   answerNpcDialogue,
   closeNpcDialogue,
@@ -43,7 +43,7 @@ import {
   npcDialogueLines,
   npcDialogueNpcName,
   npcDialogueOpen,
-} from '../../../../../features/quests/npcDialogue';
+} from '@/features/quests/npcDialogue';
 import {
   activeQuests,
   advanceQuestWords,
@@ -76,7 +76,7 @@ import {
   showMyQuestWindow,
   type MyQuestTab,
   type QuestRequirementLine,
-} from '../../../../../features/quests/questLog';
+} from '@/features/quests/questLog';
 import {
   COLOR,
   COMPLETE_BUTTON,

@@ -1,6 +1,6 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { Vector3 } from '../../../../src/controllers/render/babylon/exports';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { Vector3 } from '@/controllers/render/babylon/exports';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * `R = sinf(WorldTime * 0.002f) * 0.2f + 0.5f`, `G` at `0.0015f`, `B` at

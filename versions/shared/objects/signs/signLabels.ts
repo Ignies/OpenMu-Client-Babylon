@@ -1,6 +1,6 @@
-import { ENUM_WORLD } from '../../../../src/core/types';
-import { t } from '../../../../src/i18n';
-import type { TextKey } from '../../../../src/i18n/recipes';
+import { ENUM_WORLD } from '@/core/types';
+import { t } from '@/i18n';
+import type { TextKey } from '@/i18n/recipes';
 
 /**
  * What every signpost in the game says.

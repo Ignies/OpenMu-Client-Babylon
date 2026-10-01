@@ -12,14 +12,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { uiClick } from '../../../controllers/sound/sfx';
-import { t } from '../../../i18n';
+import { uiClick } from '@/controllers/sound/sfx';
+import { t } from '@/i18n';
 import {
   ORIGINAL_PACK,
   loadPackIndex,
   setActivePack,
   texturePacks,
-} from '../../../controllers/assets/texturePacks';
+} from '@/controllers/assets/texturePacks';
 
 const ROW_HEIGHT = 18;
 const PLATE_HEIGHT = 18;

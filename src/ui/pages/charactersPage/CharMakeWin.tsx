@@ -1,9 +1,9 @@
-import { t } from '../../../i18n';
+import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
-import { Store } from '../../../app/store';
-import { isReservedName } from '../../../features/servers/reservedNames';
-import { playUiSound } from '../../../controllers/sound/sfx';
+import { Store } from '@/app/store';
+import { isReservedName } from '@/features/servers/reservedNames';
+import { playUiSound } from '@/controllers/sound/sfx';
 import { MuButton } from '../../components/muButton';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { TEXT_COLOR } from '../serversPage/layout';

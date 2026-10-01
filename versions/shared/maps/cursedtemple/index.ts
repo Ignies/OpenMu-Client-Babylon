@@ -1,5 +1,5 @@
-import { ENUM_WORLD } from '../../../../src/core/types';
-import type { MapLayer } from '../../../../src/controllers/maps/layer';
+import { ENUM_WORLD } from '@/core/types';
+import type { MapLayer } from '@/controllers/maps/layer';
 import {
   CURSED_TEMPLE_BLEND_MESHES,
   CURSED_TEMPLE_EFFECT_ONLY_TYPES,

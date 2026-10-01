@@ -1,11 +1,11 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
 import {
   lightMapObjectWith,
   tarkanGlowLamp,
-} from '../../../../src/controllers/lighting/mapObjectLights';
-import type { LightSource } from '../../../../src/controllers/lighting/lightSource';
-import type { AbstractMesh } from '../../../../src/controllers/render/babylon/exports';
-import type { Entity, World } from '../../../../src/ecs/world';
+} from '@/controllers/lighting/mapObjectLights';
+import type { LightSource } from '@/controllers/lighting/lightSource';
+import type { AbstractMesh } from '@/controllers/render/babylon/exports';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * `sinf((WorldTime + (o->Angle[2] * 100)) * 0.002f) * 0.35f + 0.65f`

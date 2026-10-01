@@ -1,9 +1,9 @@
 import { observable, runInAction } from 'mobx';
-import type { TextKey } from '../../../i18n';
-import type { Entity, NetEntity } from '../../../ecs/world';
-import { EventBus } from '../../../core/eventBus';
-import { Store } from '../../../app/store';
-import { NetStats } from '../../../controllers/net/roundTrip';
+import type { TextKey } from '@/i18n';
+import type { Entity, NetEntity } from '@/ecs/world';
+import { EventBus } from '@/core/eventBus';
+import { Store } from '@/app/store';
+import { NetStats } from '@/controllers/net/roundTrip';
 import {
   instrumentById,
   instrumentIndex,
@@ -20,7 +20,7 @@ import {
   noteOff,
   noteOn,
   setPerformerPosition,
-} from '../../../controllers/sound/instruments';
+} from '@/controllers/sound/instruments';
 import { MidiFileError, parseMidi, type MidiEvent, type ParsedMidi } from './midiFile';
 import { Sequencer, type BatchEvent } from './sequencer';
 import { Receiver, receiverDelay } from './receiver';

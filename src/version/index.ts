@@ -18,7 +18,7 @@ import {
   type VersionEntry,
   type VersionPackets,
   type VersionUi,
-} from '../../versions/registry';
+} from '@versions/registry';
 import type { GameVersion } from './contract';
 
 export let gameVersion: GameVersion;

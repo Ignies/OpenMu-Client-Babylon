@@ -1,18 +1,18 @@
-import { t } from '../../../i18n';
+import { t } from '@/i18n';
 import './style.less';
 import { runInAction } from 'mobx';
 import { observer } from 'mobx-react-lite';
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { Store } from '../../../app/store';
-import { useEventBus } from '../../../controllers/interface/hooks/useEventBus';
-import { playUiSound } from '../../../controllers/sound/sfx';
-import { isTypingInField } from '../../../ecs/systems/keyboardInputSystem';
+import { Store } from '@/app/store';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { playUiSound } from '@/controllers/sound/sfx';
+import { isTypingInField } from '@/ecs/systems/keyboardInputSystem';
 import {
   CharacterFocusedPacket,
   CharacterListPacket,
   GuildMemberRoleEnum,
-} from '../../../../versions/shared/packets/ServerToClientPackets';
-import { MsgWinCode } from '../../../controllers/interface/msgWin';
+} from '@versions/shared/packets/ServerToClientPackets';
+import { MsgWinCode } from '@/controllers/interface/msgWin';
 import { MuButton } from '../../components/muButton';
 import { MuSpriteFrame } from '../../components/muSprite';
 import { MsgWindow } from '../../components/msgWindow';

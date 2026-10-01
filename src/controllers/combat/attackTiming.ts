@@ -18,7 +18,7 @@
  * (`startAttack`); read by `attackSystem`, `combatSfxSystem` and any effect
  * that wants a hit-frame moment (`checkAttackTime`).
  */
-import type { PlayerAction } from '../../../versions/shared/objects/enum';
+import type { PlayerAction } from '@versions/shared/objects/enum';
 import { REFERENCE_FPS } from '../anim/playSpeed';
 import type { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';

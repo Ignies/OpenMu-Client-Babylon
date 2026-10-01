@@ -1,4 +1,4 @@
-import { i18n, onLanguageChanged } from '../../../i18n';
+import { i18n, onLanguageChanged } from '@/i18n';
 import { convertBux } from '../../terrain/mapFileEncryption';
 import { downloadDataFile } from './dataFolder';
 import {

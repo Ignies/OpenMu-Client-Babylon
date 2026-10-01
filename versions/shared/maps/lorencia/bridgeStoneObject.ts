@@ -1,4 +1,4 @@
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
+import { ModelObject } from '@/controllers/render/modelObject';
 
 export class BridgeStoneObject extends ModelObject {
   static Batchable = true;

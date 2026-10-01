@@ -1,4 +1,4 @@
-import type { World } from '../../../../src/ecs/world';
+import type { World } from '@/ecs/world';
 import { RaklionAuroraObject } from './auroraObject';
 import { RaklionIceScarpObject } from './iceScarpObject';
 import { RaklionPenguinBigObject, RaklionPenguinObject } from './penguinObject';

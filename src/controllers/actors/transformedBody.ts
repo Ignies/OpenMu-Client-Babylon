@@ -3,7 +3,7 @@ import type { ModelObject } from '../render/modelObject';
 import type { ItemVisualTier } from '../item_fx/itemVisualTier';
 import { skeletonShatter } from '../fx/deathVisuals';
 import { isKnownObjectType, resolveModelFactory } from './modelFactoryPerId';
-import { MonsterActionType, PlayerAction } from '../../../versions/shared/objects/enum';
+import { MonsterActionType, PlayerAction } from '@versions/shared/objects/enum';
 import {
   isPlayerAttackAction,
   isPlayerSkillAction,

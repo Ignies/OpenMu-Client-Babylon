@@ -3,7 +3,7 @@ import { ENERGY_CHIPS, TEX } from '@/controllers/fx/recipes';
 import { type Entity } from '@/ecs/world';
 import { NOVA_BLUE, NOVA_GRADED, NOVA_MAX_STAGE } from './';
 import { bonePos, delay, emitBurst, entityGone, entityPos, followEntity, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { SkillContext, Step, TICK, cm, perTick, ticks } from '@/controllers/skills/visuals';
 import { combat } from '@/controllers/combat';

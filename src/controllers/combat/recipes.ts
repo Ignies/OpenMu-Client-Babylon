@@ -10,7 +10,7 @@
  * (`_enum.h:300-480`); the strengthened / mastery variants share the base
  * skill's clip exactly as `g_SkillPairs` maps them back.
  */
-import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { ENUM_WORLD } from '../../core/types';
 
 // ---- skill numbers the entries key on --------------------------------------

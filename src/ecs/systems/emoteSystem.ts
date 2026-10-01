@@ -1,4 +1,4 @@
-import { PlayerAction, ServerPlayerActionType } from '../../../versions/shared/objects/enum';
+import { PlayerAction, ServerPlayerActionType } from '@versions/shared/objects/enum';
 import { emoteById, genderedEmoteAction } from '../../features/hero/emotes';
 import { isStandingIdle } from '../../controllers/anim/playerActionMapper';
 import { rotationByteOf } from '../../core/turnAngle';

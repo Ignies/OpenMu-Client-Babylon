@@ -5,7 +5,7 @@
  * the identity every lookup keys on, so this sits beside it rather than in it.
  */
 
-import { skillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import { localisedSkillName } from '../../controllers/assets/mu/skillNameFile';
 
 export function skillDisplayName(number: number): string | undefined {

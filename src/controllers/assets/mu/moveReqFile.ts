@@ -1,5 +1,5 @@
 import { convertBux } from '../../terrain/mapFileEncryption';
-import { onLanguageChanged } from '../../../i18n';
+import { onLanguageChanged } from '@/i18n';
 import { decodeLocalText, downloadLocalDataFile } from './localData';
 
 /**

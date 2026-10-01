@@ -1,4 +1,4 @@
-import { ChangeTerrainAttributesPacket } from '../../../versions/shared/packets/ServerToClientPackets';
+import { ChangeTerrainAttributesPacket } from '@versions/shared/packets/ServerToClientPackets';
 import { EventBus } from '../../core/eventBus';
 import { Store } from '../../app/store';
 

@@ -1,5 +1,5 @@
 import { observable, runInAction } from 'mobx';
-import { gameVersion } from '../../../../../version';
+import { gameVersion } from '@/version';
 
 /**
  * Open/closed state of the master skill tree sheet, shared by the hot key,

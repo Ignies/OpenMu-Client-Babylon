@@ -1,7 +1,7 @@
 import { defineSkill } from '@/controllers/skills/define';
 import { MG_EMBERS } from '../_shared';
 import { MODEL, TEX } from '@/controllers/fx/recipes';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { emitBurst, entityGone, entityPos, type RGB } from '@/controllers/fx/core';
 import { type Ribbon, type RibbonOptions } from '@/controllers/fx/ticked';
 import { Step, ticks } from '@/controllers/skills/visuals';

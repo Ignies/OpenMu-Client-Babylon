@@ -9,8 +9,8 @@ import {
   InstantMoveRequestPacket,
   TargetedSkillPacket,
   TeleportTargetPacket,
-} from '../../../versions/shared/packets/ClientToServerPackets';
-import { skillDefinition, type SkillDefinition } from '../../../versions/shared/skills/skillsDatabase';
+} from '@versions/shared/packets/ClientToServerPackets';
+import { skillDefinition, type SkillDefinition } from '@versions/shared/skills/skillsDatabase';
 import {
   advancesSwordCount,
   chooseSkillAction,
@@ -45,7 +45,7 @@ import { combat } from '../../controllers/combat';
 import { SKILL_DEFENSE, SKILL_NOVA, SKILL_NOVA_BEGIN } from '../../controllers/combat/recipes';
 import { CONSECUTIVE_ATTACK_KEY } from '../../controllers/combat/skillMovement';
 import { castsInPlace, castsOnSelfOnly } from '../../controllers/combat/castTargets';
-import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import type { CastContext } from '../../controllers/combat';
 import { Vector3 } from '../../controllers/render/babylon/exports';
 import { effects } from '../../controllers/fx';

@@ -11,7 +11,7 @@ import { applySceneLook, type SceneLook } from './sceneLook';
 import { initPointLightPool } from '../../lighting/pointLightPool';
 import { createKeyRig } from '../../lighting/keyRig';
 import { createLookDirector, type LookDirector } from '../../lighting/director';
-import { devQuery } from '../../../core/devSeams';
+import { devQuery } from '@/core/devSeams';
 import { cullHighlightMask } from './highlightMask';
 
 /** `?autoPick=1`: Babylon's own scene pick on every pointer down and up. */

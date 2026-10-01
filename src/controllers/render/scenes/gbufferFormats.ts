@@ -1,5 +1,5 @@
 import { Constants, GeometryBufferRenderer } from '../babylon/exports';
-import { devQuery } from '../../../core/devSeams';
+import { devQuery } from '@/core/devSeams';
 
 /**
  * The geometry buffer's colour formats. With none given Babylon makes both

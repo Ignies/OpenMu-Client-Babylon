@@ -1,4 +1,4 @@
-import { castToByte } from "../../../core/binaryUtils";
+import { castToByte } from "@/core/binaryUtils";
 import { getPacketHeaderSize } from "../wireUtils";
 import { DefaultKeys } from "./keys";
 

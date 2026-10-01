@@ -3,7 +3,7 @@ import { DEG, QUAKE_SCROLL, groundAt, lit, whenClipKey } from '../../_shared';
 import { ITEM_LIGHT, itemScale, jointSpark, muAngles, rand, sayAt, sparkHeading, terrainLevel, wieldedWeapon } from '../_shared';
 import { MODEL, RGBS, TEX } from '@/controllers/fx/recipes';
 import { delay, entityGone, entityPos, entityYaw, fxNow, lerp, type ParticleRecipe, type RGB } from '@/controllers/fx/core';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { Vector3, type Scene } from '@/controllers/render/babylon/exports';
 import { SkillContext, Step, TICK, after, baseSkill, cm, currentSkill, explosion, forwardOf, particles, ringOf, seq, sprite, ticks } from '@/controllers/skills/visuals';
 import { TW_NOGROUND, TW_NOMOVE, TW_WATER } from '@/controllers/terrain/consts';

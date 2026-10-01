@@ -1,5 +1,5 @@
 import { downloadBytesBuffer } from '../download';
-import { gameVersion } from '../../../version';
+import { gameVersion } from '@/version';
 
 /**
  * Base URL of the *original* `Data/` tree (sprites, effect textures, Local

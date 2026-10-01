@@ -7,8 +7,8 @@
  * The only writer of that state; the tracker reads it and toggles it.
  */
 import { observable, reaction, runInAction } from 'mobx';
-import { LocalStorage } from '../../../../../core/localStorage';
-import { Store } from '../../../../../app/store';
+import { LocalStorage } from '@/core/localStorage';
+import { Store } from '@/app/store';
 
 const STORAGE_KEY = 'mu_quest_tracker';
 

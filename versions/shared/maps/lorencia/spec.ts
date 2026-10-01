@@ -1,4 +1,4 @@
-import type { Emission } from '../../../../src/controllers/fx/effectParticles';
+import type { Emission } from '@/controllers/fx/effectParticles';
 
 /**
  * Lorencia (`WD_0LORENCIA`, `World1`/`Object1`), the plain-data half: the

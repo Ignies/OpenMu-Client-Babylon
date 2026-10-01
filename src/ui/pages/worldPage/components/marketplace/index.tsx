@@ -1,22 +1,22 @@
 import './style.less';
 import { useEffect, type PointerEvent as ReactPointerEvent } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useWindowChrome } from '../../../../components/muWindow/useWindowChrome';
-import { ItemIcon } from '../../../../components/itemIcon';
-import { ItemTooltip } from '../../../../components/itemTooltip';
-import { t, type TextKey } from '../../../../../i18n';
-import { CATEGORIES, displayName } from '../../../../../features/marketplace/categories';
-import { cancellable, stateLabelKey, statePillKey } from '../../../../../features/marketplace/catalogue';
-import { lookClasses } from '../../../../../features/marketplace/tiers';
+import { useWindowChrome } from '@/ui/components/muWindow/useWindowChrome';
+import { ItemIcon } from '@/ui/components/itemIcon';
+import { ItemTooltip } from '@/ui/components/itemTooltip';
+import { t, type TextKey } from '@/i18n';
+import { CATEGORIES, displayName } from '@/features/marketplace/categories';
+import { cancellable, stateLabelKey, statePillKey } from '@/features/marketplace/catalogue';
+import { lookClasses } from '@/features/marketplace/tiers';
 import {
   Marketplace,
   SORTS,
   formatZen,
   sinceLabel,
   type Tab,
-} from '../../../../../features/marketplace/state';
-import type { Listing } from '../../../../../features/marketplace/mockListings';
-import type { HistoryEntry } from '../../../../../features/marketplace/api';
+} from '@/features/marketplace/state';
+import type { Listing } from '@/features/marketplace/mockListings';
+import type { HistoryEntry } from '@/features/marketplace/api';
 import { CONTENT, FRAME_H, FRAME_SRC, FRAME_W, PLAQUE, RAIL } from './layout';
 
 export const MARKETPLACE_ID = 'marketplace';

@@ -1,29 +1,29 @@
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { t, type TextKey } from '../../../../../i18n';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { t, type TextKey } from '@/i18n';
 import './style.less';
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
-import { Store } from '../../../../../app/store';
+import { Store } from '@/app/store';
 import {
   GUILD_SECURITY_CODE_MAX,
   Social,
   type GuildTab,
-} from '../../../../../features/social/social';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { playUiSound, uiClick } from '../../../../../controllers/sound/sfx';
-import { MuButton } from '../../../../components/muButton';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuItemWindow, MuTableFrame } from '../../../../components/muWindow';
-import { GuildMemberRoleEnum } from '../../../../../../versions/shared/packets/ServerToClientPackets';
-import { GuildRelationshipTypeEnum } from '../../../../../../versions/shared/packets/ClientToServerPackets';
+} from '@/features/social/social';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { playUiSound, uiClick } from '@/controllers/sound/sfx';
+import { MuButton } from '@/ui/components/muButton';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuItemWindow, MuTableFrame } from '@/ui/components/muWindow';
+import { GuildMemberRoleEnum } from '@versions/shared/packets/ServerToClientPackets';
+import { GuildRelationshipTypeEnum } from '@versions/shared/packets/ClientToServerPackets';
 import {
   GUILD_MARK_PALETTE,
   GUILD_MARK_SIZE,
   guildMarkDataUrl,
   packGuildMark,
-} from '../../../../../features/social/guildMark';
-import { TEXT_COLOR } from '../../../../pages/serversPage/layout';
+} from '@/features/social/guildMark';
+import { TEXT_COLOR } from '@/ui/pages/serversPage/layout';
 import {
   BACK_SPRITE,
   BTN_BOTH_CANCEL_X,
@@ -35,7 +35,7 @@ import {
   OK_SPRITE,
   WIN_HEIGHT,
   WIN_WIDTH,
-} from '../../../../components/msgWindow/layout';
+} from '@/ui/components/msgWindow/layout';
 import { useNearbyPlayers } from '../nearbyPlayers';
 
 /**

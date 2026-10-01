@@ -1,8 +1,8 @@
-import { loadGLTF } from '../../../../src/controllers/assets/modelLoader';
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
-import { Rand } from '../../../../src/core/rand';
-import { Vector3 } from '../../../../src/controllers/render/babylon/exports';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { ModelObject } from '@/controllers/render/modelObject';
+import { Rand } from '@/core/rand';
+import { Vector3 } from '@/controllers/render/babylon/exports';
+import type { Entity, World } from '@/ecs/world';
 
 /** 25 Hz, the tick `FPS_ANIMATION_FACTOR` is measured in. */
 const TICKS_PER_SECOND = 25;

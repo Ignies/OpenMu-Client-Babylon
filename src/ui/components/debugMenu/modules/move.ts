@@ -1,8 +1,8 @@
-import { ENUM_WORLD } from '../../../../core/types';
-import { registerDebugModule } from '../../../../features/gm/debugMenu';
-import { maps } from '../../../../controllers/maps';
-import { EventBus } from '../../../../core/eventBus';
-import { Store } from '../../../../app/store';
+import { ENUM_WORLD } from '@/core/types';
+import { registerDebugModule } from '@/features/gm/debugMenu';
+import { maps } from '@/controllers/maps';
+import { EventBus } from '@/core/eventBus';
+import { Store } from '@/app/store';
 
 /**
  * Move: one row per map entry the client stages, current map highlighted.

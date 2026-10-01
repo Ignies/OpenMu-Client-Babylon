@@ -1,6 +1,6 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { ModelObject } from '../../../../src/controllers/render/modelObject';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { ModelObject } from '@/controllers/render/modelObject';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * The two per-object settings the later worlds' `MoveObject` cases write

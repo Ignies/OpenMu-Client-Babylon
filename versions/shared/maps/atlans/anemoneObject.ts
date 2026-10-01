@@ -1,5 +1,5 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * `o->Velocity = 0.05f` (ZzzObject.cpp:4033). `Velocity` *is* the play speed

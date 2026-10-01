@@ -2,7 +2,7 @@ import { defineSkill } from '@/controllers/skills/define';
 import { DEG, whenClipKey } from '../../_shared';
 import { ITEM_LIGHT, JOINT_SPARKS_HD, SPARK_CHIPS_HD, itemScale, jointSpark, muAngles, rand, sayAt, sparkHeading, wieldedWeapon } from '../_shared';
 import { delay, entityGone, entityPos, entityYaw, fxNow, type ParticleRecipe, type PointSource, type RGB } from '@/controllers/fx/core';
-import { PlayerAction } from '../../../objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import { SkillContext, Step, TICK, baseSkill, cm, currentSkill, forwardOf, perTick, ticks } from '@/controllers/skills/visuals';
 import { TEX } from '@/controllers/fx/recipes';
 import { Vector3 } from '@/controllers/render/babylon/exports';

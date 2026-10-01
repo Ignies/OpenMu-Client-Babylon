@@ -1,5 +1,5 @@
 import type { MeshAnimation } from '../render/meshAnimation';
-import { MonsterActionType } from '../../../versions/shared/objects/enum';
+import { MonsterActionType } from '@versions/shared/objects/enum';
 
 /**
  * The additive body mesh some monsters carry and what the original writes

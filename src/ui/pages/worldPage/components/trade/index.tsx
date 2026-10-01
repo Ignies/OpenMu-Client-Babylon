@@ -1,16 +1,16 @@
 import './style.less';
-import { t } from '../../../../../i18n';
+import { t } from '@/i18n';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { Economy } from '../../../../../features/economy/economy';
-import { StorageKind, isTradeBanned } from '../../../../../features/inventory/itemStorage';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuButton } from '../../../../components/muButton';
-import { MuItemWindow } from '../../../../components/muWindow';
-import { ItemGrid } from '../../../../components/itemGrid';
-import { QuickItemActions } from '../../../../../features/inventory/quickItemActions';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
-import { goldColor } from '../../../../../features/items/goldColor';
+import { Store } from '@/app/store';
+import { Economy } from '@/features/economy/economy';
+import { StorageKind, isTradeBanned } from '@/features/inventory/itemStorage';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
+import { MuItemWindow } from '@/ui/components/muWindow';
+import { ItemGrid } from '@/ui/components/itemGrid';
+import { QuickItemActions } from '@/features/inventory/quickItemActions';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
+import { goldColor } from '@/features/items/goldColor';
 import {
   ACCEPT_FRAMES,
   ACCEPT_HEIGHT,

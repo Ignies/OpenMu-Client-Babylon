@@ -1,9 +1,9 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { MonsterObject } from '../../../src/controllers/actors/monsterObject';
+import type { Entity, World } from '@/ecs/world';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { MonsterObject } from '@/controllers/actors/monsterObject';
 import { MonsterActionType } from '../objects/enum';
-import { monsterPlaySpeed } from '../../../src/controllers/anim/playSpeed';
-import { monsterModelFile, monsterScaleOf } from '../../../src/controllers/actors/monsterModelTable';
+import { monsterPlaySpeed } from '@/controllers/anim/playSpeed';
+import { monsterModelFile, monsterScaleOf } from '@/controllers/actors/monsterModelTable';
 
 // [NpcInfo(275, "Kundun")] - MODEL_ILLUSION_OF_KUNDUN at Scale 2.0 with the
 // Staff of Kundun in the off hand (GMHellas.cpp:913-923). The staff waits on

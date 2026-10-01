@@ -3,7 +3,7 @@ import { ENUM_WORLD } from '../../core/types';
 import {
   KanturuStateChangePacket,
   KanturuStateChangeStateTypeEnum as KanturuState,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import { EventBus } from '../../core/eventBus';
 import {
   kanturuMusic,

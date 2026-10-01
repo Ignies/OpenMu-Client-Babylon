@@ -7,17 +7,17 @@ import {
   kanturuHud,
   kanturuResult,
   refreshKanturu,
-} from '../../../../../features/events/kanturu';
-import { EVENT_TEXT, formatText } from '../../../../../features/events/recipes';
-import { MsgBoxFrame } from '../../../../components/msgBoxFrame';
-import { MuButton } from '../../../../components/muButton';
-import { MuNumber } from '../../../../components/muNumber';
-import { MuSpriteFrame } from '../../../../components/muSprite';
+} from '@/features/events/kanturu';
+import { EVENT_TEXT, formatText } from '@/features/events/recipes';
+import { MsgBoxFrame } from '@/ui/components/msgBoxFrame';
+import { MuButton } from '@/ui/components/muButton';
+import { MuNumber } from '@/ui/components/muNumber';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
 import {
   useUiStageScale,
   UI_STAGE_HEIGHT,
   UI_STAGE_WIDTH,
-} from '../../../../components/uiStage';
+} from '@/ui/components/uiStage';
 import {
   DG_BUTTON_SPRITE,
   KT_BODY_COLOR,

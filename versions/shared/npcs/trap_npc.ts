@@ -1,7 +1,7 @@
-import type { Entity, World } from '../../../src/ecs/world';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { ModelObject } from '../../../src/controllers/render/modelObject';
-import { assetWorldNum } from '../../../src/controllers/assets/worldAssets';
+import type { Entity, World } from '@/ecs/world';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { ModelObject } from '@/controllers/render/modelObject';
+import { assetWorldNum } from '@/controllers/assets/worldAssets';
 
 /**
  * Traps (`MONSTER_LANCE_TRAP` .. `MONSTER_LASER_TRAP`, 100-106) are the one

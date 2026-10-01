@@ -15,7 +15,7 @@
  * hero's `skillCastSystem` and the remote `playCastAnimation` both go
  * through, so everyone in scope plays the same clip for the same skill.
  */
-import { PlayerAction } from '../../../versions/shared/objects/enum';
+import { PlayerAction } from '@versions/shared/objects/enum';
 import type { MountKind } from '../../features/pets/pets';
 import type { ENUM_WORLD } from '../../core/types';
 import type { CombatLayer } from './layer';

@@ -1,5 +1,5 @@
 import type { Item } from '../../ecs/world';
-import { ItemsDatabase, itemBaseName } from '../../../versions/shared/items/itemsDatabase';
+import { ItemsDatabase, itemBaseName } from '@versions/shared/items/itemsDatabase';
 import { t, type TextKey } from '../../i18n';
 
 /**

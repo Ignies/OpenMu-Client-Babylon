@@ -1,19 +1,19 @@
-import { uiClick } from '../../../../../controllers/sound/sfx';
-import { t } from '../../../../../i18n';
+import { uiClick } from '@/controllers/sound/sfx';
+import { t } from '@/i18n';
 import './style.less';
 import { observer } from 'mobx-react-lite';
-import { Store } from '../../../../../app/store';
-import { ItemIcon } from '../../../../components/itemIcon';
-import { MuSpriteFrame } from '../../../../components/muSprite';
-import { MuButton } from '../../../../components/muButton';
-import { MuNumber } from '../../../../components/muNumber';
-import { Item } from '../../../../../ecs/world';
+import { Store } from '@/app/store';
+import { ItemIcon } from '@/ui/components/itemIcon';
+import { MuSpriteFrame } from '@/ui/components/muSprite';
+import { MuButton } from '@/ui/components/muButton';
+import { MuNumber } from '@/ui/components/muNumber';
+import { Item } from '@/ecs/world';
 import {
   MuResizeGrip,
   useWindowStackEntry,
-} from '../../../../components/muWindow/useWindowChrome';
-import { MuWindows } from '../../../../components/muWindow/windowState';
-import { SkillIcon } from '../../../../components/skillIcon';
+} from '@/ui/components/muWindow/useWindowChrome';
+import { MuWindows } from '@/ui/components/muWindow/windowState';
+import { SkillIcon } from '@/ui/components/skillIcon';
 import { MasterExpBar } from '../masterSkills/masterExpBar';
 import { PetCommandBar } from './petCommands';
 import {
@@ -22,30 +22,30 @@ import {
   MAIN_FRAME_BUTTON_HEIGHT,
   MAIN_FRAME_BUTTON_WIDTH,
 } from './mainFrameButtons';
-import { isKey } from '../../../../../controllers/interface/keyBindings';
-import { BOTTOM_BAR_ID } from '../../../../components/muWindow';
-import { skillDefinition } from '../../../../../../versions/shared/skills/skillsDatabase';
+import { isKey } from '@/controllers/interface/keyBindings';
+import { BOTTOM_BAR_ID } from '@/ui/components/muWindow';
+import { skillDefinition } from '@versions/shared/skills/skillsDatabase';
 import {
   isHotbarSkill,
   SKILL_ICON_HEIGHT,
   SKILL_ICON_WIDTH,
-} from '../../../../../features/skills/skillCasting';
-import { useEventBus } from '../../../../../controllers/interface/hooks/useEventBus';
+} from '@/features/skills/skillCasting';
+import { useEventBus } from '@/controllers/interface/hooks/useEventBus';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { skills } from '../../../../../features/skills';
-import { onCooldownTick, skillCooldowns } from '../../../../../features/skills/cooldowns';
-import { SkillTooltip } from '../../../../components/skillTooltip';
+import { skills } from '@/features/skills';
+import { onCooldownTick, skillCooldowns } from '@/features/skills/cooldowns';
+import { SkillTooltip } from '@/ui/components/skillTooltip';
 import { ExpTooltip } from './expTooltip';
-import { SessionStats } from '../../../../../features/session/sessionStats';
-import { devQuery } from '../../../../../core/devSeams';
-import { itemBaseName } from '../../../../../../versions/shared/items/itemsDatabase';
+import { SessionStats } from '@/features/session/sessionStats';
+import { devQuery } from '@/core/devSeams';
+import { itemBaseName } from '@versions/shared/items/itemsDatabase';
 import {
   ITEM_HOTKEY_CODES,
   canRegisterItemHotkey,
   countHotkeyItems,
   findHotkeyItem,
-} from '../../../../../features/inventory/itemHotkeys';
+} from '@/features/inventory/itemHotkeys';
 
 const BAR_ID = BOTTOM_BAR_ID;
 /** The skill fan is a window for Escape's purposes, nothing more. */

@@ -1,6 +1,6 @@
-import type { World } from '../../../src/ecs/world';
-import { loadGLTF } from '../../../src/controllers/assets/modelLoader';
-import { ModelObject } from '../../../src/controllers/render/modelObject';
+import type { World } from '@/ecs/world';
+import { loadGLTF } from '@/controllers/assets/modelLoader';
+import { ModelObject } from '@/controllers/render/modelObject';
 
 // [NpcInfo(254, "Pasi the Mage")]
 export class Pasi extends ModelObject {

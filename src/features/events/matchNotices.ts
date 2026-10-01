@@ -7,7 +7,7 @@ import {
   MapEventStatePacket,
   UpdateMiniGameStateMiniGameTypeStateEnum,
   UpdateMiniGameStatePacket,
-} from '../../../versions/shared/packets/ServerToClientPackets';
+} from '@versions/shared/packets/ServerToClientPackets';
 import type { EventLayer } from './layer';
 import { EVENT_TEXT, formatText } from './recipes';
 import { t, type TextKey } from '../../i18n';

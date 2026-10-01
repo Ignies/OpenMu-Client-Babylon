@@ -9,8 +9,8 @@
  * preloading 0.97d files nothing draws yet would be the same waste from the
  * other side. It fills up as those windows get their 0.97d chrome.
  */
-import { CURSOR_SPRITES } from '../../../src/ui/components/gameCursor/cursors';
-import type { VersionPreload } from '../../../src/version/uiContract';
+import { CURSOR_SPRITES } from '@/ui/components/gameCursor/cursors';
+import type { VersionPreload } from '@/version/uiContract';
 
 const PREGAME_SPRITES = [
   ...CURSOR_SPRITES,

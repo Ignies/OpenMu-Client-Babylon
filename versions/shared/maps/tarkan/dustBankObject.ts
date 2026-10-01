@@ -1,7 +1,7 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { spawnParticle } from '../../../../src/controllers/fx/effectParticles';
-import type { Scene } from '../../../../src/controllers/render/babylon/exports';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { spawnParticle } from '@/controllers/fx/effectParticles';
+import type { Scene } from '@/controllers/render/babylon/exports';
+import type { Entity, World } from '@/ecs/world';
 
 /** `for (int i = 0; i < 20; ++i) CreateParticleFpsChecked(...)` (ZzzObject.cpp:2962). */
 const BURST_COUNT = 20;

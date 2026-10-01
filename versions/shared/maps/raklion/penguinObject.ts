@@ -1,6 +1,6 @@
-import { MapTileObject } from '../../../../src/controllers/terrain/mapTileObject';
-import { Rand } from '../../../../src/core/rand';
-import type { Entity, World } from '../../../../src/ecs/world';
+import { MapTileObject } from '@/controllers/terrain/mapTileObject';
+import { Rand } from '@/core/rand';
+import type { Entity, World } from '@/ecs/world';
 
 /**
  * `fSpeed = b->Actions[o->CurrentAction].PlaySpeed` (ZzzObject.cpp:3692):
