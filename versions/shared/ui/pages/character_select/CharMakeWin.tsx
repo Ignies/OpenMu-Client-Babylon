@@ -1,4 +1,5 @@
 import { t } from '@/i18n';
+import { CREATE_MESSAGES } from '@/features/character_select/messages';
 import { observer } from 'mobx-react-lite';
 import { useEffect, useRef } from 'react';
 import { Store } from '@/app/store';
@@ -18,7 +19,6 @@ import {
   COMMAND_LABEL_KEY,
   COMMAND_VALUE,
   CREATABLE_CLASSES,
-  CREATE_MESSAGES,
   CLASS_TYPE,
   DESC_HEIGHT,
   DESC_LINE_MAX,

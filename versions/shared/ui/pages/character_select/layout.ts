@@ -1,4 +1,4 @@
-import { textTable, type TextKey } from '@/i18n';
+import { type TextKey } from '@/i18n';
 
 import { CharacterClassNumber } from '@/core/types';
 import { CharacterCreationUnlockFlagsEnum } from '@versions/shared/packets/ServerToClientPackets';
@@ -217,14 +217,6 @@ export const STAT_LABEL_KEYS: readonly TextKey[] = [
 
 export const COMMAND_LABEL_KEY: TextKey = 'stat.command';
 export const COMMAND_VALUE = '25';
-
-/** Live, so the messages follow the Options → Language selector. */
-export const CREATE_MESSAGES = textTable({
-  minLength: 'characters.create.minLength',
-  specialName: 'characters.create.specialName',
-  reservedName: 'characters.create.reservedName',
-  failed: 'characters.create.failed',
-});
 
 export function hasSpecialCharacters(name: string): boolean {
   return !/^[0-9A-Za-z]*$/.test(name);

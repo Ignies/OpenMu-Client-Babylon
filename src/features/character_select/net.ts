@@ -1,4 +1,4 @@
-import { CREATE_MESSAGES } from '@versions/shared/ui/pages/character_select/layout';
+import { CREATE_MESSAGES } from './messages';
 import { CharacterClassCreationUnlockPacket, CharacterCreationSuccessfulPacket, CharacterDeleteResponseCharacterDeleteResultEnum, CharacterDeleteResponsePacket } from '@versions/shared/packets/ServerToClientPackets';
 import { EventBus } from '@/core/eventBus';
 import { MsgWinCode } from '@/controllers/interface/msgWin';
