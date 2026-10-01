@@ -13,10 +13,10 @@ src/            engine: the same for every game version
   controllers/  one folder per controller; the game starts them from controllers.ts
   features/     one folder per gameplay feature: net.ts (packets in), state, actions
   ecs/          the entity world and its per-frame systems
-  ui/           React shell (windows are moving to versions/shared/ui, see docs/file_tree.md)
   version/      the version seam: which game version is running
 versions/       content, per game version
-  shared/       content any version can load: skills, items, monsters, npcs, maps, objects, packets
+  shared/       content any version can load: skills, ui (windows, hud, pages), items, monsters,
+                npcs, maps, objects, packets
   season6/      Season 6 Episode 3: data paths, packet set, ui overrides
   v097d/        0.97d
   registry.ts   every version the client ships
@@ -50,6 +50,7 @@ How agents work here (workflow, roles, tools, where things are): [docs/agents/](
 | change how all effects / sounds / lights work | the controller folder in `src/controllers/` |
 | handle a new packet | `src/features/<feature>/net.ts` (import order lives in `src/app/logic.ts`) |
 | add a texture pack | build it into `public/packs/<pack>/`, list it in `public/packs/index.json` |
+| redraw a window or panel |  |
 | change one version only | `versions/<id>/` (override), never an `if (version)` in `src/` |
 
 More recipes: [docs/how_to/](docs/how_to/).
@@ -73,7 +74,8 @@ bun install
 bun run tsc          # type check
 bun run test         # vitest (client + tools)
 bun run test:server  # bun test for the marketplace service
-bun run lint         # eslint; CI fails if any rule's count rises (tools/checks)
+bun run check        # dependency direction, readmes, doc names, no em-dash
+bun run check:lint   # eslint; fails if any rule's count rises
 bunx vite build      # production build
 ```
 
