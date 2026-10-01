@@ -15,8 +15,7 @@
 
    ```ts
    import { defineSkill } from '@/controllers/skills/define';
-   import { seq, atCaster } from '@/controllers/skills/visuals';
-   import { fireHit } from '../../_shared';
+   import { fireHit, seq } from '@/controllers/skills/visuals';
 
    export default defineSkill({
      id: 999,
